@@ -1,0 +1,40 @@
+#ifndef CLASS_FRAMETIMER
+#define CLASS_FRAMETIMER
+
+#include "Timer.h"
+
+/// FPS timer and synchronization class
+class FrameTimer: public Timer
+{
+private:
+	/// Frame rendered
+	unsigned long int m_ulNFrames;
+	/// Frames rendered since last print
+	unsigned long int m_ulPrintNFrames;
+	/// Milliseconds elapsed since the previous frame
+	unsigned long int m_uiFrameInterval;
+	/// Number of seconds between two prints
+	unsigned long int m_uiPrintInterval;
+	/// Number of milliseconds since the last average FPS calculation
+	unsigned long int m_uiLastUpdate;
+	/// Number of milliseconds between two average FPS calculation
+	unsigned long int m_uiUpdateInterval;
+	/// Average frame per seconds during the interval
+	float m_fFps;
+public:
+	// Constructor
+	FrameTimer(unsigned int uiPrintInterval, unsigned int uiUpdateInterval = 0);
+	// Add a frame to the counter and calculate elapsed time since the previous one
+	void AddFrame();
+	// Reset timer and counters
+	void Reset();
+	/// Return current frame number
+	inline unsigned long int GetFrame() { return m_ulNFrames; }
+	/// Return the interval between two subsequent calls to AddFrame()
+	inline unsigned long int GetInterval() { return m_uiFrameInterval; };
+	/// Return the average FPS on the update interval
+	inline float GetFPS() { return m_fFps; };
+};
+
+#endif
+
