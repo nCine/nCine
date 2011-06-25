@@ -13,31 +13,31 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-Texture::Texture() : m_uiId(0)
+Texture::Texture() : m_uId(0), m_iWidth(0), m_iHeight(0)
 {
-	glGenTextures(1, &m_uiId);
+	glGenTextures(1, &m_uId);
 }
 
 
-Texture::Texture(const char *pFilename) : m_uiId(0)
+Texture::Texture(const char *pFilename) : m_uId(0), m_iWidth(0), m_iHeight(0)
 {
-	glGenTextures(1, &m_uiId);
+	glGenTextures(1, &m_uId);
 	Bind();
 	Load(pFilename);
 }
 
 
-Texture::Texture(SDL_Surface *pImage) : m_uiId(0)
+Texture::Texture(SDL_Surface *pImage) : m_uId(0)
 {
-	glGenTextures(1, &m_uiId);
+	glGenTextures(1, &m_uId);
 	Bind();
 	Load(pImage);
 }
 
 
-Texture::Texture(TextureFormat format, int iWidth, int iHeight, GLubyte *pPixels) : m_uiId(0)
+Texture::Texture(TextureFormat format, int iWidth, int iHeight, GLubyte *pPixels) : m_uId(0)
 {
-	glGenTextures(1, &m_uiId);
+	glGenTextures(1, &m_uId);
 	Bind();
 	Load(format, iWidth, iHeight, pPixels);
 }
@@ -45,7 +45,7 @@ Texture::Texture(TextureFormat format, int iWidth, int iHeight, GLubyte *pPixels
 
 Texture::~Texture()
 {
-	glDeleteTextures(1, &m_uiId);
+	glDeleteTextures(1, &m_uId);
 }
 
 ///////////////////////////////////////////////////////////
@@ -82,19 +82,19 @@ void Texture::Load(const char *pFilename)
 
 void Texture::Load(SDL_Surface *pSurface)
 {
-	Uint8 uiBpp;
+	Uint8 uBpp;
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	uiBpp = pSurface->format->BitsPerPixel;
+	uBpp = pSurface->format->BitsPerPixel;
 	TextureFormat *pFormat = 0;
-	if (uiBpp == 32)
+	if (uBpp == 32)
 		pFormat = new TextureFormat(GL_RGBA8);
-	else if (uiBpp  == 24)
+	else if (uBpp  == 24)
 		pFormat = new TextureFormat(GL_RGB8);
 	else {
-		ServiceLocator::GetLogger().Write(2, (char *)"Texture::Load - Not a true color image: %d", uiBpp);
+		ServiceLocator::GetLogger().Write(2, (char *)"Texture::Load - Not a true color image: %d", uBpp);
 		exit(-1);
 	}
 
@@ -104,7 +104,9 @@ void Texture::Load(SDL_Surface *pSurface)
 	else
 		eFormat = pFormat->BGRFormat();
 
-	glTexImage2D(GL_TEXTURE_2D, 0, pFormat->Internal(), pSurface->w, pSurface->h, 0, pFormat->Format(), pFormat->Type(), pSurface->pixels);
+	m_iWidth = pSurface->w;
+	m_iHeight = pSurface->h;
+	glTexImage2D(GL_TEXTURE_2D, 0, pFormat->Internal(), m_iWidth, m_iHeight, 0, pFormat->Format(), pFormat->Type(), pSurface->pixels);
 }
 
 
@@ -113,5 +115,7 @@ void Texture::Load(TextureFormat format, int iWidth, int iHeight, GLubyte *pPixe
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, format.Internal(), iWidth, iHeight, 0, format.Format(), format.Type(), pPixels);
+	m_iWidth = iWidth;
+	m_iHeight = iHeight;
+	glTexImage2D(GL_TEXTURE_2D, 0, format.Internal(), m_iWidth, m_iHeight, 0, format.Format(), format.Type(), pPixels);
 }

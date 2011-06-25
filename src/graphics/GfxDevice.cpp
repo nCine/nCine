@@ -19,8 +19,8 @@ GfxDevice::GfxDevice(int iWidth, int iHeight)
 }
 
 /// Constructor taking the resolution as a Size class
-GfxDevice::GfxDevice(Size size)
-	: m_iWidth(size.Width()), m_iHeight(size.Height()), m_bIsWindowed(true), m_mode()
+GfxDevice::GfxDevice(Point size)
+	: m_iWidth(size.x), m_iHeight(size.y), m_bIsWindowed(true), m_mode()
 {
 	InitGraphics();
 	InitDevice();
@@ -37,8 +37,8 @@ GfxDevice::GfxDevice(int iWidth, int iHeight, DisplayMode mode)
 }
 
 /// Constructor taking the resolution as a Size class and a DisplayMode
-GfxDevice::GfxDevice(Size size, DisplayMode mode)
-	: m_iWidth(size.Width()), m_iHeight(size.Height()), m_bIsWindowed(true), m_mode(mode)
+GfxDevice::GfxDevice(Point size, DisplayMode mode)
+	: m_iWidth(size.x), m_iHeight(size.y), m_bIsWindowed(true), m_mode(mode)
 {
 	InitGraphics();
 	InitDevice();
@@ -63,13 +63,13 @@ void GfxDevice::SetResolution(int iWidth, int iHeight)
 }
 
 /// Set screen resolution with the Size class
-void GfxDevice::SetResolution(Size size)
+void GfxDevice::SetResolution(Point size)
 {
 	// change resolution only in the case it really changes
-	if(size.Width() != m_iWidth || size.Height() != m_iHeight)
+	if(size.x != m_iWidth || size.y != m_iHeight)
 	{
-		m_iWidth = size.Width();
-		m_iHeight = size.Height();
+		m_iWidth = size.x;
+		m_iHeight = size.y;
 
 		InitDevice();
 	}
@@ -139,4 +139,9 @@ void GfxDevice::InitGL()
 {
 //	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
+
+	glMatrixMode(GL_PROJECTION);
+	glOrtho(0, m_iWidth, 0, m_iWidth, -1, 1);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 }

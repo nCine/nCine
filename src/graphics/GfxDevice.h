@@ -9,7 +9,7 @@
 #endif
 #include <SDL/SDL.h>
 
-#include "../base/Size.h"
+#include "../base/Point.h"
 #include "DisplayMode.h"
 
 /// This represents a graphics device where everything is rendered.
@@ -37,18 +37,18 @@ public:
 	// Constructor taking the resolution as two integer
 	GfxDevice(int iWidth, int iHeight);
 	// Constructor taking the resolution as a size class
-	GfxDevice(Size size);
+	GfxDevice(Point size);
 	// Constructor taking the resolution as two integer and a DisplayMode
 	GfxDevice(int iWidth, int iHeight, DisplayMode mode);
 	// Constructor taking the resolution as a Size class and a DisplayMode
-	GfxDevice(Size size, DisplayMode mode);
+	GfxDevice(Point size, DisplayMode mode);
 	// Destructor
 	~GfxDevice() { }
 
 	// Set screen resolution with two integers
 	void SetResolution(int iWidth, int iHeight);
 	// Set screen resolution with the Size class
-	void SetResolution(Size size);
+	void SetResolution(Point size);
 
 	// Toggle between fullscreen and windowed mode
 	void ToggleFullScreen();

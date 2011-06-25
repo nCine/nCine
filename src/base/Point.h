@@ -1,41 +1,34 @@
 #ifndef CLASS_POINT
 #define CLASS_POINT
 
+#include <cstdio> // for printf()
+
 /// A point in a two dimensional space
 class Point
 {
-protected:
-	int m_x, m_y;
 public:
+	/// X coordinate as a public property
+	int x;
+	/// Y coordinate as a public property
+	int y;
 	/// Default constructor, all zeros
-	Point() : m_x(0), m_y(0) { }
+	Point() : x(0), y(0) { }
 	/// Construct from elements
-	Point(int const x, int const y) : m_x(x), m_y(y) { }
+	Point(int const iX, int const iY) : x(iX), y(iY) { }
 
-	// Property methods
-	inline int X() const { return m_x; }
-	inline void SetX(int x) { m_x = x; }
-	inline int Y() const  {return m_y; }
-	inline void SetY(int y) { m_y = y; }
-
-	/// Set null every element
-	inline void SetNull() {
-		m_x = 0;
-		m_y = 0;
-	}
 	/// Set point elements
-	inline void Set(int const x, int const y) {
-		m_x = x;
-		m_y = y;
+	inline void Set(int const iX, int const iY) {
+		x = iX;
+		y = iY;
 	}
 
-	// Operators
+	/// Equality operator
 	inline bool operator==(const Point& point) const {
-		return (m_x == point.m_x &&	m_y == point.m_y);
+		return (x == point.x && y == point.y);
 	}
 
 	friend void print(Point& point) {
-		printf("%i %i", point.m_x, point.m_y);
+		printf("%i %i", point.x, point.y);
 	}
 };
 

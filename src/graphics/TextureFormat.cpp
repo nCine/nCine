@@ -18,7 +18,8 @@ TextureFormat::TextureFormat(GLenum eInternalFormat)
 	if (bFound == false)
 		bFound = OESFormat();
 
-	if (bFound == false) {
+	if (bFound == false)
+	{
 		ServiceLocator::GetLogger().Write(2, (char *)"TextureFormat::TextureFormat - Unknown internal format: %d", eInternalFormat);
 		exit(-1);
 	}

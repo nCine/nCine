@@ -12,18 +12,18 @@ private:
 	/// Frames rendered since last print
 	unsigned long int m_ulPrintNFrames;
 	/// Milliseconds elapsed since the previous frame
-	unsigned long int m_uiFrameInterval;
+	unsigned long int m_uFrameInterval;
 	/// Number of seconds between two prints
-	unsigned long int m_uiPrintInterval;
+	unsigned long int m_uPrintInterval;
 	/// Number of milliseconds since the last average FPS calculation
-	unsigned long int m_uiLastUpdate;
+	unsigned long int m_uLastUpdate;
 	/// Number of milliseconds between two average FPS calculation
-	unsigned long int m_uiUpdateInterval;
+	unsigned long int m_uUpdateInterval;
 	/// Average frame per seconds during the interval
 	float m_fFps;
 public:
 	// Constructor
-	FrameTimer(unsigned int uiPrintInterval, unsigned int uiUpdateInterval = 0);
+	FrameTimer(unsigned int uPrintInterval, unsigned int uUpdateInterval = 0);
 	// Add a frame to the counter and calculate elapsed time since the previous one
 	void AddFrame();
 	// Reset timer and counters
@@ -31,7 +31,7 @@ public:
 	/// Return current frame number
 	inline unsigned long int GetFrame() { return m_ulNFrames; }
 	/// Return the interval between two subsequent calls to AddFrame()
-	inline unsigned long int GetInterval() { return m_uiFrameInterval; };
+	inline unsigned long int GetInterval() { return m_uFrameInterval; };
 	/// Return the average FPS on the update interval
 	inline float GetFPS() { return m_fFps; };
 };

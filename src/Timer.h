@@ -8,14 +8,14 @@ protected:
 	/// Is the timer running?
 	bool m_bRunning;
 	/// Start time mark
-	unsigned long int m_uiStartTime;
+	unsigned long int m_uStartTime;
 	/// Stop time mark
-	unsigned long int m_uiStopTime;
+	unsigned long int m_uStopTime;
 	/// Total elapsed time
-	unsigned long int m_uiTotal;
+	unsigned long int m_uTotal;
 public:
 	/// Empty constructor
-	Timer() : m_bRunning(false), m_uiStartTime(0), m_uiStopTime(0), m_uiTotal(0) {};
+	Timer() : m_bRunning(false), m_uStartTime(0), m_uStopTime(0), m_uTotal(0) {};
 	// Reset the timer
 	void Reset();
 	// Start the timer

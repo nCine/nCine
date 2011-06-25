@@ -7,7 +7,6 @@ include_directories(src src/base src/graphics)
 add_definitions(-DNO_GLEW)
 set(SOURCES
 	src/base/Point.h
-	src/base/Size.h
 	src/base/Rect.h
 	src/base/Vector.cpp
 	src/ServiceLocator.cpp
@@ -18,6 +17,7 @@ set(SOURCES
 	src/graphics/GfxDevice.cpp
 	src/graphics/TextureFormat.cpp
 	src/graphics/Texture.cpp
+	src/graphics/SpriteBatch.cpp
 	test.cpp
 )
 link_libraries (

@@ -10,8 +10,8 @@
 void Timer::Reset()
 {
 	m_bRunning = false;
-	m_uiStartTime = m_uiStopTime = 0;
-	m_uiTotal = 0;
+	m_uStartTime = m_uStopTime = 0;
+	m_uTotal = 0;
 }
 
 /// Start the timer
@@ -25,15 +25,15 @@ void Timer::Start()
 void Timer::Stop()
 {
 	m_bRunning = false;
-	m_uiStopTime = GetNow();
-	m_uiTotal += m_uiStopTime - m_uiStartTime;
+	m_uStopTime = GetNow();
+	m_uTotal += m_uStopTime - m_uStartTime;
 }
 
 /// Resume the timer
 void Timer::Continue()
 {
 	m_bRunning = true;
-	m_uiStartTime = GetNow();
+	m_uStartTime = GetNow();
 }
 
 /// Return (stop - start) or (now-start) time interval
@@ -41,17 +41,17 @@ void Timer::Continue()
 unsigned long int Timer::GetInterval()
 {
 	if (m_bRunning) {
-		return GetNow() - m_uiStartTime;
+		return GetNow() - m_uStartTime;
 	}
 	else {
-		return m_uiStopTime - m_uiStartTime;
+		return m_uStopTime - m_uStartTime;
 	}
 }
 
 /// Return total elapsed time
 unsigned long int Timer::GetTotal()
 {
-	return m_uiTotal;
+	return m_uTotal;
 }
 
 /// Return current time in milliseconds from epoch

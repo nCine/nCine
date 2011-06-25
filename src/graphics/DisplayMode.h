@@ -2,7 +2,7 @@
 #define CLASS_DISPLAYMODE
 
 #include <SDL/SDL.h>
-#include "../base/Size.h"
+#include "../base/Point.h"
 
 /// Display properties
 class DisplayMode
