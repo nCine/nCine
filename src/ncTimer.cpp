@@ -1,13 +1,13 @@
 //#include <sys/time.h>
 #include <SDL/SDL_timer.h>
-#include "Timer.h"
+#include "ncTimer.h"
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
 /// Reset the timer
-void Timer::Reset()
+void ncTimer::Reset()
 {
 	m_bRunning = false;
 	m_uStartTime = m_uStopTime = 0;
@@ -15,14 +15,14 @@ void Timer::Reset()
 }
 
 /// Start the timer
-void Timer::Start()
+void ncTimer::Start()
 {
 	Reset();
 	Continue();
 }
 
 /// Stop the timer without resetting it
-void Timer::Stop()
+void ncTimer::Stop()
 {
 	m_bRunning = false;
 	m_uStopTime = GetNow();
@@ -30,7 +30,7 @@ void Timer::Stop()
 }
 
 /// Resume the timer
-void Timer::Continue()
+void ncTimer::Continue()
 {
 	m_bRunning = true;
 	m_uStartTime = GetNow();
@@ -38,7 +38,7 @@ void Timer::Continue()
 
 /// Return (stop - start) or (now-start) time interval
 /// depending on whether the timer is currently running or not
-unsigned long int Timer::GetInterval()
+unsigned long int ncTimer::GetInterval()
 {
 	if (m_bRunning) {
 		return GetNow() - m_uStartTime;
@@ -49,13 +49,13 @@ unsigned long int Timer::GetInterval()
 }
 
 /// Return total elapsed time
-unsigned long int Timer::GetTotal()
+unsigned long int ncTimer::GetTotal()
 {
 	return m_uTotal;
 }
 
 /// Return current time in milliseconds from epoch
-unsigned long int Timer::GetNow()
+unsigned long int ncTimer::GetNow()
 {
 /*
 	timeval tp;

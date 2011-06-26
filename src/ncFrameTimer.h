@@ -1,10 +1,10 @@
-#ifndef CLASS_FRAMETIMER
-#define CLASS_FRAMETIMER
+#ifndef CLASS_NCFRAMETIMER
+#define CLASS_NCFRAMETIMER
 
-#include "Timer.h"
+#include "ncTimer.h"
 
 /// FPS timer and synchronization class
-class FrameTimer: public Timer
+class ncFrameTimer: public ncTimer
 {
 private:
 	/// Frame rendered
@@ -23,7 +23,7 @@ private:
 	float m_fFps;
 public:
 	// Constructor
-	FrameTimer(unsigned int uPrintInterval, unsigned int uUpdateInterval = 0);
+	ncFrameTimer(unsigned int uPrintInterval, unsigned int uUpdateInterval = 0);
 	// Add a frame to the counter and calculate elapsed time since the previous one
 	void AddFrame();
 	// Reset timer and counters

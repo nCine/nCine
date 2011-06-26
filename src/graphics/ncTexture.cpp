@@ -6,20 +6,20 @@
 	#include <GL/glu.h>
 #endif
 
-#include "Texture.h"
-#include "../ServiceLocator.h"
+#include "ncTexture.h"
+#include "../ncServiceLocator.h"
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-Texture::Texture() : m_uId(0), m_iWidth(0), m_iHeight(0)
+ncTexture::ncTexture() : m_uId(0), m_iWidth(0), m_iHeight(0)
 {
 	glGenTextures(1, &m_uId);
 }
 
 
-Texture::Texture(const char *pFilename) : m_uId(0), m_iWidth(0), m_iHeight(0)
+ncTexture::ncTexture(const char *pFilename) : m_uId(0), m_iWidth(0), m_iHeight(0)
 {
 	glGenTextures(1, &m_uId);
 	Bind();
@@ -27,23 +27,29 @@ Texture::Texture(const char *pFilename) : m_uId(0), m_iWidth(0), m_iHeight(0)
 }
 
 
-Texture::Texture(SDL_Surface *pImage) : m_uId(0)
+ncTexture::ncTexture(SDL_Surface *pImage) : m_uId(0)
 {
 	glGenTextures(1, &m_uId);
 	Bind();
 	Load(pImage);
 }
 
+ncTexture::ncTexture(ncTextureFormat format, ncPoint size, GLubyte *pPixels) : m_uId(0)
+{
+	glGenTextures(1, &m_uId);
+	Bind();
+	Load(format, size.x, size.y, pPixels);
+}
 
-Texture::Texture(TextureFormat format, int iWidth, int iHeight, GLubyte *pPixels) : m_uId(0)
+
+ncTexture::ncTexture(ncTextureFormat format, int iWidth, int iHeight, GLubyte *pPixels) : m_uId(0)
 {
 	glGenTextures(1, &m_uId);
 	Bind();
 	Load(format, iWidth, iHeight, pPixels);
 }
 
-
-Texture::~Texture()
+ncTexture::~ncTexture()
 {
 	glDeleteTextures(1, &m_uId);
 }
@@ -53,7 +59,7 @@ Texture::~Texture()
 ///////////////////////////////////////////////////////////
 
 /// Set texture filtering for both magnification and minification
-void Texture::SetFiltering(GLenum eFilter)
+void ncTexture::SetFiltering(GLenum eFilter)
 {
 	Bind();
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, eFilter);
@@ -64,13 +70,13 @@ void Texture::SetFiltering(GLenum eFilter)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void Texture::Load(const char *pFilename)
+void ncTexture::Load(const char *pFilename)
 {
 	SDL_Surface *pImage;
 
-	ServiceLocator::GetLogger().Write(1, (char *)"Texture::Load - Loading \"%s\"", pFilename);
+	ncServiceLocator::GetLogger().Write(1, (char *)"Texture::Load - Loading \"%s\"", pFilename);
 	if (!(pImage = (SDL_Surface *)IMG_Load(pFilename))) {
-		ServiceLocator::GetLogger().Write(2, (char *)"Texture::Load - Cannot load \"%s\"", pFilename);
+		ncServiceLocator::GetLogger().Write(2, (char *)"Texture::Load - Cannot load \"%s\"", pFilename);
 		exit(-1);
 	}
 
@@ -80,7 +86,7 @@ void Texture::Load(const char *pFilename)
 }
 
 
-void Texture::Load(SDL_Surface *pSurface)
+void ncTexture::Load(SDL_Surface *pSurface)
 {
 	Uint8 uBpp;
 
@@ -88,13 +94,13 @@ void Texture::Load(SDL_Surface *pSurface)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	uBpp = pSurface->format->BitsPerPixel;
-	TextureFormat *pFormat = 0;
+	ncTextureFormat *pFormat = 0;
 	if (uBpp == 32)
-		pFormat = new TextureFormat(GL_RGBA8);
+		pFormat = new ncTextureFormat(GL_RGBA8);
 	else if (uBpp  == 24)
-		pFormat = new TextureFormat(GL_RGB8);
+		pFormat = new ncTextureFormat(GL_RGB8);
 	else {
-		ServiceLocator::GetLogger().Write(2, (char *)"Texture::Load - Not a true color image: %d", uBpp);
+		ncServiceLocator::GetLogger().Write(2, (char *)"Texture::Load - Not a true color image: %d", uBpp);
 		exit(-1);
 	}
 
@@ -110,7 +116,7 @@ void Texture::Load(SDL_Surface *pSurface)
 }
 
 
-void Texture::Load(TextureFormat format, int iWidth, int iHeight, GLubyte *pPixels)
+void ncTexture::Load(ncTextureFormat format, int iWidth, int iHeight, GLubyte *pPixels)
 {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

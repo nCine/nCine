@@ -1,13 +1,13 @@
 #include <cstdlib> // for exit()
-#include "TextureFormat.h"
-#include "../ServiceLocator.h"
+#include "ncTextureFormat.h"
+#include "../ncServiceLocator.h"
 
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-TextureFormat::TextureFormat(GLenum eInternalFormat)
+ncTextureFormat::ncTextureFormat(GLenum eInternalFormat)
 	: m_eInternalFormat(eInternalFormat), m_eFormat(-1), m_eType(-1)
 {
 	bool bFound = IntegerFormat();
@@ -20,7 +20,7 @@ TextureFormat::TextureFormat(GLenum eInternalFormat)
 
 	if (bFound == false)
 	{
-		ServiceLocator::GetLogger().Write(2, (char *)"TextureFormat::TextureFormat - Unknown internal format: %d", eInternalFormat);
+		ncServiceLocator::GetLogger().Write(2, (char *)"TextureFormat::TextureFormat - Unknown internal format: %d", eInternalFormat);
 		exit(-1);
 	}
 }
@@ -30,7 +30,7 @@ TextureFormat::TextureFormat(GLenum eInternalFormat)
 ///////////////////////////////////////////////////////////
 
 /// Return the corresponding BGR format
-GLenum TextureFormat::BGRFormat() const
+GLenum ncTextureFormat::BGRFormat() const
 {
 	if (m_eFormat == GL_RGBA)
 		return GL_BGRA;
@@ -45,7 +45,7 @@ GLenum TextureFormat::BGRFormat() const
 ///////////////////////////////////////////////////////////
 
 /// Search a match between an integer internal format and an external one
-bool TextureFormat::IntegerFormat()
+bool ncTextureFormat::IntegerFormat()
 {
 	bool bFound = true;
 
@@ -87,7 +87,7 @@ bool TextureFormat::IntegerFormat()
 }
 
 /// Search a match between a floating point internal format and an external one
-bool TextureFormat::FloatFormat()
+bool ncTextureFormat::FloatFormat()
 {
 	bool bFound = true;
 
@@ -113,7 +113,7 @@ bool TextureFormat::FloatFormat()
 }
 
 /// Search a match between a compressed internal format and an external one
-bool TextureFormat::CompressedFormat()
+bool ncTextureFormat::CompressedFormat()
 {
 	bool bFound = true;
 
@@ -137,7 +137,7 @@ bool TextureFormat::CompressedFormat()
 }
 
 /// Search a match between an OpenGL ES internal format and an external one
-bool TextureFormat::OESFormat()
+bool ncTextureFormat::OESFormat()
 {
 	bool bFound = true;
 /*

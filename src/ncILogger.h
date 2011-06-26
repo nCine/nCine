@@ -1,7 +1,7 @@
-#ifndef CLASS_ILOGGER
-#define CLASS_ILOGGER
+#ifndef CLASS_NCILOGGER
+#define CLASS_NCILOGGER
 
-class ILogger
+class ncILogger
 {
 public:
 	virtual void Write(int iLevel, const char *message, ...) = 0;
@@ -9,10 +9,10 @@ public:
 
 #endif
 
-#ifndef CLASS_NULLLOGGER
-#define CLASS_NULLLOGGER
+#ifndef CLASS_NCNULLLOGGER
+#define CLASS_NCNULLLOGGER
 
-class NullLogger : public ILogger
+class ncNullLogger : public ncILogger
 {
 public:
 	virtual void Write(int iLevel, const char *message, ...) { }

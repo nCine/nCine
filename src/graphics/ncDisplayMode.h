@@ -1,11 +1,11 @@
-#ifndef CLASS_DISPLAYMODE
-#define CLASS_DISPLAYMODE
+#ifndef CLASS_NCDISPLAYMODE
+#define CLASS_NCDISPLAYMODE
 
 #include <SDL/SDL.h>
-#include "../base/Point.h"
+#include "../base/ncPoint.h"
 
 /// Display properties
-class DisplayMode
+class ncDisplayMode
 {
 private:
 	/// Double buffering flag
@@ -18,13 +18,13 @@ private:
 	int m_iStencilBits;
 public:
 	// Constructor with no parameters
-	DisplayMode()
+	ncDisplayMode()
 		: m_bIsDoubleBuffered(true), m_bIsVSynced(false), m_iDepthBits(-1), m_iStencilBits(-1) {}
-	DisplayMode(bool bDoubleBuffered, bool bVSynced, int iDepthBits, int iStencilBits)
+	ncDisplayMode(bool bDoubleBuffered, bool bVSynced, int iDepthBits, int iStencilBits)
 		: m_bIsDoubleBuffered(bDoubleBuffered), m_bIsVSynced(bVSynced),
 		  m_iDepthBits(iDepthBits), m_iStencilBits(iStencilBits) {}
 	// Destructor
-	~DisplayMode() { }
+	~ncDisplayMode() { }
 
 	// Getters
 	bool isDoubleBuffered() const { return m_bIsDoubleBuffered; }

@@ -1,12 +1,12 @@
 #include <cstdarg>
 #include <ctime>
-#include "FileLogger.h"
+#include "ncFileLogger.h"
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-FileLogger::FileLogger(const char *filename, int iConsoleLevel, int iFileLevel)
+ncFileLogger::ncFileLogger(const char *filename, int iConsoleLevel, int iFileLevel)
 	: m_fp(0), m_iConsoleLevel(iConsoleLevel), m_iFileLevel(iFileLevel)
 {
 	if (m_iConsoleLevel > -1)
@@ -18,7 +18,7 @@ FileLogger::FileLogger(const char *filename, int iConsoleLevel, int iFileLevel)
 }
 
 
-FileLogger::~FileLogger()
+ncFileLogger::~ncFileLogger()
 {
 	Write(6, "FileLogger destruction");
 
@@ -30,7 +30,7 @@ FileLogger::~FileLogger()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void FileLogger::Write(int iLevel, const char *fmt, ...)
+void ncFileLogger::Write(int iLevel, const char *fmt, ...)
 {
 	time_t rawtime;
 	time(&rawtime);

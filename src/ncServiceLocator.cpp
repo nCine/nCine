@@ -1,13 +1,13 @@
-#include "ServiceLocator.h"
+#include "ncServiceLocator.h"
 
-NullLogger ServiceLocator::m_nullLogger;
-ILogger* ServiceLocator::m_pLoggerService = &ServiceLocator::m_nullLogger;
+ncNullLogger ncServiceLocator::m_nullLogger;
+ncILogger* ncServiceLocator::m_pLoggerService = &ncServiceLocator::m_nullLogger;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ServiceLocator::RegisterLogger(ILogger* service)
+void ncServiceLocator::RegisterLogger(ncILogger* service)
 {
 	if (service == 0)
 		m_pLoggerService = &m_nullLogger;

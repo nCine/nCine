@@ -1,5 +1,5 @@
-#ifndef CLASS_TEXTURE
-#define CLASS_TEXTURE
+#ifndef CLASS_NCTEXTURE
+#define CLASS_NCTEXTURE
 
 #ifndef NO_GLEW
 	#include <GL/glew.h>
@@ -10,11 +10,11 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 
-#include "TextureFormat.h"
-#include "../base/Point.h"
+#include "ncTextureFormat.h"
+#include "../base/ncPoint.h"
 
 /// Texture class
-class Texture
+class ncTexture
 {
 private:
 	GLuint m_uId;
@@ -23,16 +23,17 @@ private:
 
 	void Load(const char *pFilename);
 	void Load(SDL_Surface *image);
-	void Load(TextureFormat format, int iWidth, int iHeight, GLubyte *pPixels);
+	void Load(ncTextureFormat format, int iWidth, int iHeight, GLubyte *pPixels);
 public:
-	Texture();
-	Texture(const char *pFilename);
-	Texture(SDL_Surface *pSurface);
-	Texture(TextureFormat format, int iWidth, int iHeight, GLubyte *pPixels);
-	~Texture();
+	ncTexture();
+	ncTexture(const char *pFilename);
+	ncTexture(SDL_Surface *pSurface);
+	ncTexture(ncTextureFormat format, ncPoint size, GLubyte *pPixels);
+	ncTexture(ncTextureFormat format, int iWidth, int iHeight, GLubyte *pPixels);
+	~ncTexture();
 
 	/// Return texture size
-	inline Point Size() const { return Point(m_iWidth, m_iHeight); }
+	inline ncPoint Size() const { return ncPoint(m_iWidth, m_iHeight); }
 
 	// Set texture filtering for both magnification and minification
 	void SetFiltering(GLenum eFilter);
@@ -41,7 +42,7 @@ public:
 	/// Disable texture rendering for the current unit
 	static void Unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
 
-	friend class SpriteBatch;
+	friend class ncSpriteBatch;
 };
 
 #endif

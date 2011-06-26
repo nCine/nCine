@@ -1,13 +1,13 @@
-#include <cstdlib> // for exit()
-#include "SpriteBatch.h"
-#include "../ServiceLocator.h"
+#include <cstdio> // for NULL
+#include "ncSpriteBatch.h"
+#include "../ncServiceLocator.h"
 
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-SpriteBatch::SpriteBatch(unsigned int uBufferSize)
+ncSpriteBatch::ncSpriteBatch(unsigned int uBufferSize)
 	: m_uBufferSize(uBufferSize), m_uMaxBufferCounter(0), m_uMaxRenderCallsCounter(0),
 	  m_fVertices(0), m_fTexCoords(0), m_pLastTexture(0)
 {
@@ -18,12 +18,12 @@ SpriteBatch::SpriteBatch(unsigned int uBufferSize)
 	}
 	else
 	{
-		ServiceLocator::GetLogger().Write(2, (char *)"SpriteBatch::SpriteBatch - Invalid value for buffer size: %d", uBufferSize);
+		ncServiceLocator::GetLogger().Write(2, (char *)"SpriteBatch::SpriteBatch - Invalid value for buffer size: %d", uBufferSize);
 		exit(-1);
 	}
 }
 
-SpriteBatch::~SpriteBatch()
+ncSpriteBatch::~ncSpriteBatch()
 {
 	if (m_fVertices)
 		delete[] m_fVertices;
@@ -36,7 +36,7 @@ SpriteBatch::~SpriteBatch()
 ///////////////////////////////////////////////////////////
 
 /// To be called before drawing
-void SpriteBatch::Begin()
+void ncSpriteBatch::Begin()
 {
 	m_uBufferTop = 0;
 	m_pLastTexture = NULL;
@@ -50,11 +50,11 @@ void SpriteBatch::Begin()
 	glTexCoordPointer(2, GL_FLOAT, 0, m_fTexCoords);
 }
 
-void SpriteBatch::Draw(Texture *pTexture, Rect dstRect, Rect srcRect)
+void ncSpriteBatch::Draw(ncTexture *pTexture, ncRect dstRect, ncRect srcRect)
 {
 	if (pTexture == NULL)
 	{
-		ServiceLocator::GetLogger().Write(1, (char *)"SpriteBatch::Draw - Texture pointer is NULL");
+		ncServiceLocator::GetLogger().Write(1, (char *)"SpriteBatch::Draw - Texture pointer is NULL");
 		exit(-1);
 	}
 
@@ -72,36 +72,41 @@ void SpriteBatch::Draw(Texture *pTexture, Rect dstRect, Rect srcRect)
 
 	int iOffset = QUAD_ELEMENTS * m_uBufferTop;
 	SetVertices(m_fVertices + iOffset, dstRect);
-	SetTexCoords(m_fTexCoords + iOffset, srcRect);
+	if (srcRect.w == 0 || srcRect.h == 0) // blitting the whole texture
+		SetTexCoords(m_fTexCoords + iOffset); // optimized function
+	else
+		SetTexCoords(m_fTexCoords + iOffset, srcRect);
 
 	m_uBufferTop++;
 	if (m_uBufferTop > m_uMaxBufferCounter)
 		m_uMaxBufferCounter = m_uBufferTop;
 }
 
-void SpriteBatch::Draw(Texture *pTexture, Rect dstRect)
+void ncSpriteBatch::Draw(ncTexture *pTexture, ncRect dstRect)
 {
-	Rect srcRect(0, 0, pTexture->m_iWidth, pTexture->m_iHeight);
+//	ncRect srcRect(0, 0, pTexture->m_iWidth, pTexture->m_iHeight);
+	ncRect srcRect(0, 0, 0, 0); // to call the optimized SetTexXoords()
 	Draw(pTexture, dstRect, srcRect);
 }
 
-void SpriteBatch::Draw(Texture *pTexture, Point pos)
+void ncSpriteBatch::Draw(ncTexture *pTexture, ncPoint pos)
 {
-	Rect dstRect(pos.x, pos.y, pTexture->m_iWidth, pTexture->m_iHeight);
-	Rect srcRect(0, 0, pTexture->m_iWidth, pTexture->m_iHeight);
+	ncRect dstRect(pos.x, pos.y, pTexture->m_iWidth, pTexture->m_iHeight);
+//	ncRect srcRect(0, 0, pTexture->m_iWidth, pTexture->m_iHeight);
+	ncRect srcRect(0, 0, 0, 0); // to call the optimized SetTexXoords()
 	Draw(pTexture, dstRect, srcRect);
 }
 
 /// To be called after drawing
-void SpriteBatch::End()
+void ncSpriteBatch::End()
 {
 	FlushBuffer();
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-//	ServiceLocator::GetLogger().Write(2, (char *)"SpriteBatch::End - Render calls: %u", m_uMaxRenderCallsCounter);
-//	ServiceLocator::GetLogger().Write(2, (char *)"SpriteBatch::End - Max buffered: %u", m_uMaxBufferCounter);
+//	ncServiceLocator::GetLogger().Write(2, (char *)"SpriteBatch::End - Render calls: %u", m_uMaxRenderCallsCounter);
+//	ncServiceLocator::GetLogger().Write(2, (char *)"SpriteBatch::End - Max buffered: %u", m_uMaxBufferCounter);
 }
 
 ///////////////////////////////////////////////////////////
@@ -110,7 +115,7 @@ void SpriteBatch::End()
 
 
 /// Flush the sprite buffers issuing rendering commands
-void SpriteBatch::FlushBuffer()
+void ncSpriteBatch::FlushBuffer()
 {
 	if (m_uBufferTop)
 	{
@@ -121,7 +126,7 @@ void SpriteBatch::FlushBuffer()
 }
 
 /// Fill the buffer with two triangles vertices
-void SpriteBatch::SetVertices(GLfloat *fVertices, Rect rect)
+void ncSpriteBatch::SetVertices(GLfloat *fVertices, ncRect rect)
 {
 	fVertices[0] = rect.x;
 	fVertices[1] = rect.y;
@@ -139,7 +144,7 @@ void SpriteBatch::SetVertices(GLfloat *fVertices, Rect rect)
 }
 
 /// Fill the buffer with two triangles UVs
-void SpriteBatch::SetTexCoords(GLfloat *fTexCoords, Rect rect)
+void ncSpriteBatch::SetTexCoords(GLfloat *fTexCoords, ncRect rect)
 {
 	float x = float(rect.x)/float(m_pLastTexture->m_iWidth);
 	float y = float(rect.y)/float(m_pLastTexture->m_iHeight);
@@ -162,7 +167,7 @@ void SpriteBatch::SetTexCoords(GLfloat *fTexCoords, Rect rect)
 }
 
 /// Fill the buffer with two triangles UVs that cover the entire texture
-void SpriteBatch::SetTexCoords(GLfloat *fTexCoords)
+void ncSpriteBatch::SetTexCoords(GLfloat *fTexCoords)
 {
 	fTexCoords[0] = 0.0f;
 	fTexCoords[1] = 1.0f;

@@ -1,12 +1,12 @@
-#ifndef CLASS_TEXTUREFORMAT
-#define CLASS_TEXTUREFORMAT
+#ifndef CLASS_NCTEXTUREFORMAT
+#define CLASS_NCTEXTUREFORMAT
 
 #include <GL/gl.h>
 #include <GL/glext.h>
 
 
 /// Texture format class
-class TextureFormat
+class ncTextureFormat
 {
 private:
 	GLenum m_eInternalFormat;
@@ -18,7 +18,7 @@ private:
 	bool CompressedFormat();
 	bool OESFormat();
 public:
-	TextureFormat(GLenum eInternalFormat);
+	ncTextureFormat(GLenum eInternalFormat);
 
 	/// Return the specified internal format
 	inline GLenum Internal() const { return m_eInternalFormat; }

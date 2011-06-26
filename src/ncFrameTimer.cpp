@@ -1,6 +1,6 @@
 #include <cstdio>
-#include "FrameTimer.h"
-#include "ServiceLocator.h"
+#include "ncFrameTimer.h"
+#include "ncServiceLocator.h"
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -12,7 +12,7 @@
 ///
 /// @param uPrintInterval console printing interval in seconds
 /// @param uUpdateInterval fps average calculation interval in milliseconds
-FrameTimer::FrameTimer(unsigned int uPrintInterval, unsigned int uUpdateInterval)
+ncFrameTimer::ncFrameTimer(unsigned int uPrintInterval, unsigned int uUpdateInterval)
 	: m_ulNFrames(0), m_ulPrintNFrames(0), m_fFps(0)
 {
 	Reset();
@@ -25,10 +25,10 @@ FrameTimer::FrameTimer(unsigned int uPrintInterval, unsigned int uUpdateInterval
 ///////////////////////////////////////////////////////////
 
 /// Add a frame to the counter and calculate the interval with the previous one
-void FrameTimer::AddFrame()
+void ncFrameTimer::AddFrame()
 {
 	Stop();
-	m_uFrameInterval = Timer::GetInterval();
+	m_uFrameInterval = ncTimer::GetInterval();
 
 	m_ulNFrames++;
 	m_ulPrintNFrames++;
@@ -45,19 +45,19 @@ void FrameTimer::AddFrame()
 	// Using partial timing of the Timer class (using GetTotal())
 	if (m_uPrintInterval != 0 && m_ulNFrames != 0 && (GetTotal() > m_uPrintInterval * 1000))	{
 		float m_fFps = float(m_ulPrintNFrames)/float(m_uPrintInterval);
-		ServiceLocator::GetLogger().Write(5, (char *)"%lu frames in %u seconds = %f FPS",  m_ulPrintNFrames, m_uPrintInterval, m_fFps);
+		ncServiceLocator::GetLogger().Write(5, (char *)"%lu frames in %u seconds = %f FPS",  m_ulPrintNFrames, m_uPrintInterval, m_fFps);
 
 		m_ulPrintNFrames = 0;
-		Timer::Reset();
+		ncTimer::Reset();
 	}
 
 	Continue();
 }
 
 /// Reset timer and counters
-void FrameTimer::Reset()
+void ncFrameTimer::Reset()
 {
-	Timer::Reset();
+	ncTimer::Reset();
 
 	m_ulNFrames = 0;
 	m_ulPrintNFrames = 0;

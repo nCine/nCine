@@ -1,12 +1,12 @@
-#ifndef CLASS_SPRITEBATCH
-#define CLASS_SPRITEBATCH
+#ifndef CLASS_NCSPRITEBATCH
+#define CLASS_NCSPRITEBATCH
 
 #include <GL/gl.h>
 #include <GL/glext.h>
 
-#include "../base/Point.h"
-#include "../base/Rect.h"
-#include "Texture.h"
+#include "../base/ncPoint.h"
+#include "../base/ncRect.h"
+#include "ncTexture.h"
 
 // 2 triangles forming a rectangle
 // 3 vertices forming a triangle
@@ -14,7 +14,7 @@
 #define QUAD_ELEMENTS 12 // TODO: very dirty
 
 /// A class that sends a batch of sprites to the GPU for drawing
-class SpriteBatch
+class ncSpriteBatch
 {
 private:
 	unsigned int m_uBufferSize;
@@ -25,19 +25,19 @@ private:
 
 	GLfloat *m_fVertices;
 	GLfloat *m_fTexCoords;
-	Texture *m_pLastTexture;
+	ncTexture *m_pLastTexture;
 
 	void FlushBuffer();
-	void SetVertices(GLfloat *fVertices, Rect rect);
-	void SetTexCoords(GLfloat *fTexCoords, Rect rect);
+	void SetVertices(GLfloat *fVertices, ncRect rect);
+	void SetTexCoords(GLfloat *fTexCoords, ncRect rect);
 	void SetTexCoords(GLfloat *fTexCoords);
 public:
-	SpriteBatch(unsigned int uBufferSize = 10);
-	~SpriteBatch();
+	ncSpriteBatch(unsigned int uBufferSize = 10);
+	~ncSpriteBatch();
 	void Begin();
-	void Draw(Texture *pTexture, Rect dstRect, Rect srcRect);
-	void Draw(Texture *pTexture, Rect dstRect);
-	void Draw(Texture *pTexture, Point pos);
+	void Draw(ncTexture *pTexture, ncRect dstRect, ncRect srcRect);
+	void Draw(ncTexture *pTexture, ncRect dstRect);
+	void Draw(ncTexture *pTexture, ncPoint pos);
 	void End();
 
 	/// Return the sprite buffer size

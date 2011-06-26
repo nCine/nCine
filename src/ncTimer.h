@@ -1,8 +1,8 @@
-#ifndef CLASS_TIMER
-#define CLASS_TIMER
+#ifndef CLASS_NCTIMER
+#define CLASS_NCTIMER
 
 /// Basic timer and synchronization class
-class Timer
+class ncTimer
 {
 protected:
 	/// Is the timer running?
@@ -15,7 +15,7 @@ protected:
 	unsigned long int m_uTotal;
 public:
 	/// Empty constructor
-	Timer() : m_bRunning(false), m_uStartTime(0), m_uStopTime(0), m_uTotal(0) {};
+	ncTimer() : m_bRunning(false), m_uStartTime(0), m_uStopTime(0), m_uTotal(0) {};
 	// Reset the timer
 	void Reset();
 	// Start the timer
