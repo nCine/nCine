@@ -5,7 +5,10 @@ find_package(SDL REQUIRED)
 find_package(SDL_image REQUIRED)
 include_directories(src src/base src/graphics)
 add_definitions(-DNO_GLEW)
+
 set(SOURCES
+	src/base/ncArray.h
+	src/base/ncList.h
 	src/base/ncPoint.h
 	src/base/ncRect.h
 	src/base/ncVector2f.cpp
@@ -18,11 +21,14 @@ set(SOURCES
 	src/graphics/ncTextureFormat.cpp
 	src/graphics/ncTexture.cpp
 	src/graphics/ncSpriteBatch.cpp
-	test.cpp
 )
+
 link_libraries (
 	${SDL_LIBRARY}
 	${SDLIMAGE_LIBRARY}
 	${OPENGL_gl_LIBRARY}
 )
-add_executable(test ${SOURCES})
+
+add_executable(test_spritebatch ${SOURCES} tests/test_spritebatch.cpp)
+add_executable(test_array ${SOURCES} tests/test_array.cpp)
+add_executable(test_list ${SOURCES} tests/test_list.cpp)
