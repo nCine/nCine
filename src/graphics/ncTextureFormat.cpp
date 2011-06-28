@@ -1,6 +1,11 @@
-#include <cstdlib> // for exit()
+#ifdef __ANDROID__
+	#include <stdlib.h>
+#else
+	#include <cstdlib> // for exit()
+#endif
+
 #include "ncTextureFormat.h"
-#include "../ncServiceLocator.h"
+#include "ncServiceLocator.h"
 
 
 ///////////////////////////////////////////////////////////
@@ -8,19 +13,28 @@
 ///////////////////////////////////////////////////////////
 
 ncTextureFormat::ncTextureFormat(GLenum eInternalFormat)
-	: m_eInternalFormat(eInternalFormat), m_eFormat(-1), m_eType(-1)
+	: m_eInternalFormat(eInternalFormat), m_eFormat(-1),
+	  m_eType(-1), m_bCompressed(false)
 {
-	bool bFound = IntegerFormat();
+	bool bFound = false;
+
+#ifndef __ANDROID__
+	if (bFound == false)
+		bFound = IntegerFormat();
 	if (bFound == false)
 		bFound = FloatFormat();
 	if (bFound == false)
 		bFound = CompressedFormat();
+#else
 	if (bFound == false)
 		bFound = OESFormat();
+	if (bFound == false)
+		bFound = OESCompressedFormat();
+#endif
 
 	if (bFound == false)
 	{
-		ncServiceLocator::GetLogger().Write(2, (char *)"TextureFormat::TextureFormat - Unknown internal format: %d", eInternalFormat);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureFormat::ncTextureFormat - Unknown internal format: %d", eInternalFormat);
 		exit(-1);
 	}
 }
@@ -32,12 +46,14 @@ ncTextureFormat::ncTextureFormat(GLenum eInternalFormat)
 /// Return the corresponding BGR format
 GLenum ncTextureFormat::BGRFormat() const
 {
+#ifndef __ANDROID__
 	if (m_eFormat == GL_RGBA)
 		return GL_BGRA;
 	if (m_eFormat == GL_RGB)
 		return GL_BGR;
 	else
 		return m_eFormat;
+#endif
 }
 
 ///////////////////////////////////////////////////////////
@@ -47,6 +63,7 @@ GLenum ncTextureFormat::BGRFormat() const
 /// Search a match between an integer internal format and an external one
 bool ncTextureFormat::IntegerFormat()
 {
+#ifndef __ANDROID__
 	bool bFound = true;
 
 	switch(m_eInternalFormat)
@@ -84,11 +101,13 @@ bool ncTextureFormat::IntegerFormat()
 		m_eType = GL_UNSIGNED_BYTE;
 
 	return bFound;
+#endif
 }
 
 /// Search a match between a floating point internal format and an external one
 bool ncTextureFormat::FloatFormat()
 {
+#ifndef __ANDROID__
 	bool bFound = true;
 
 	switch(m_eInternalFormat)
@@ -110,11 +129,13 @@ bool ncTextureFormat::FloatFormat()
 		m_eType = GL_FLOAT;
 
 	return bFound;
+#endif
 }
 
 /// Search a match between a compressed internal format and an external one
 bool ncTextureFormat::CompressedFormat()
 {
+#ifndef __ANDROID__
 	bool bFound = true;
 
 	switch(m_eInternalFormat)
@@ -131,16 +152,21 @@ bool ncTextureFormat::CompressedFormat()
 	}
 
 	if (bFound)
+	{
 		m_eType = GL_UNSIGNED_BYTE;
+		m_bCompressed = true;
+	}
 
 	return bFound;
+#endif
 }
 
 /// Search a match between an OpenGL ES internal format and an external one
 bool ncTextureFormat::OESFormat()
 {
+#ifdef __ANDROID__
 	bool bFound = true;
-/*
+
 	switch(m_eInternalFormat)
 	{
 		case GL_RGBA8_OES:
@@ -158,6 +184,31 @@ bool ncTextureFormat::OESFormat()
 		m_eType = GL_UNSIGNED_BYTE;
 
 	return bFound;
-*/
-	return false;
+#endif
+}
+
+/// Search a match between a OpenGL ES compressed internal format and an external one
+bool ncTextureFormat::OESCompressedFormat()
+{
+#ifdef __ANDROID__
+	bool bFound = true;
+
+	switch(m_eInternalFormat)
+	{
+		case GL_ETC1_RGB8_OES:
+			m_eFormat = GL_RGB;
+			break;
+		default:
+			bFound = false;
+			break;
+	}
+
+	if (bFound)
+	{
+		m_eType = GL_UNSIGNED_BYTE;
+		m_bCompressed = true;
+	}
+
+	return bFound;
+#endif
 }

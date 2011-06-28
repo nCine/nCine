@@ -1,5 +1,8 @@
-//#include <sys/time.h>
-#include <SDL/SDL_timer.h>
+#ifdef __ANDROID__
+	#include <sys/time.h>
+#else
+	#include <SDL/SDL_timer.h>
+#endif
 #include "ncTimer.h"
 
 ///////////////////////////////////////////////////////////
@@ -57,14 +60,14 @@ unsigned long int ncTimer::GetTotal()
 /// Return current time in milliseconds from epoch
 unsigned long int ncTimer::GetNow()
 {
-/*
-	timeval tp;
+#ifdef __ANDROID__
+	struct timeval tv;
 
-	gettimeofday(&tp, 0);
-	unsigned long int now = (unsigned long int)(tp.tv_sec*1000.0 + tp.tv_usec/1000.0);
+	gettimeofday(&tv, NULL);
+	unsigned long int now = (unsigned long int)(tv.tv_sec*1000 + tv.tv_usec/1000.0);
 
 	return now;
-*/
-
+#else
 	return SDL_GetTicks();
+#endif
 }

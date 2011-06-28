@@ -1,26 +1,31 @@
-#include <cstdarg>
-#include <ctime>
+#ifdef __ANDROID__
+	#include <stdarg.h>
+	#include <time.h>
+#else
+	#include <cstdarg>
+	#include <ctime>
+#endif
 #include "ncFileLogger.h"
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncFileLogger::ncFileLogger(const char *filename, int iConsoleLevel, int iFileLevel)
-	: m_fp(0), m_iConsoleLevel(iConsoleLevel), m_iFileLevel(iFileLevel)
+ncFileLogger::ncFileLogger(const char *filename, eLogLevel eConsoleLevel, eLogLevel eFileLevel)
+	: m_fp(0), m_eConsoleLevel(eConsoleLevel), m_eFileLevel(eFileLevel)
 {
-	if (m_iConsoleLevel > -1)
+	if (m_eConsoleLevel < int(LOG_OFF))
 		 setbuf(stdout, NULL);
-	if (m_iFileLevel > -1)
+	if (m_eFileLevel > int(LOG_OFF))
 		m_fp = fopen(filename, "a");
 
-	Write(6, "FileLogger instantiated");
+	Write(LOG_VERBOSE, "FileLogger instantiated");
 }
 
 
 ncFileLogger::~ncFileLogger()
 {
-	Write(6, "FileLogger destruction");
+	Write(LOG_VERBOSE, "FileLogger destruction");
 
 	if (m_fp)
 		fclose(m_fp);
@@ -30,7 +35,7 @@ ncFileLogger::~ncFileLogger()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncFileLogger::Write(int iLevel, const char *fmt, ...)
+void ncFileLogger::Write(eLogLevel eLevel, const char *fmt, ...)
 {
 	time_t rawtime;
 	time(&rawtime);
@@ -45,8 +50,9 @@ void ncFileLogger::Write(int iLevel, const char *fmt, ...)
 //	strftime(szBuffer, sizeof(szBuffer), "%a %Y-%m-%d %H:%M:%S %Z", ts);
 	strftime(szBuffer, sizeof(szBuffer), "%H:%M:%S", ts);
 
-	if (m_iConsoleLevel > -1 && iLevel <= m_iConsoleLevel) {
-		printf("- %s [L%i] -> ", szBuffer, iLevel);
+	if (m_eConsoleLevel < int(LOG_OFF) &&
+			int(eLevel) >= int(m_eConsoleLevel)) {
+		printf("- %s [L%i] -> ", szBuffer, int(eLevel));
 
 		va_list args;
 		va_start(args, fmt);
@@ -56,8 +62,9 @@ void ncFileLogger::Write(int iLevel, const char *fmt, ...)
 		printf("\n");
 	}
 
-	if (m_iFileLevel > -1 && iLevel <= m_iFileLevel) {
-		fprintf(m_fp, "- %s [L%i] -> ", szBuffer, iLevel);
+	if (m_eFileLevel < int(LOG_OFF) &&
+			int(eLevel) >= int(m_eFileLevel)) {
+		fprintf(m_fp, "- %s [L%i] -> ", szBuffer, int(eLevel));
 
 		va_list args;
 		va_start(args, fmt);

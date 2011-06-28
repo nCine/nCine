@@ -45,7 +45,7 @@ void ncFrameTimer::AddFrame()
 	// Using partial timing of the Timer class (using GetTotal())
 	if (m_uPrintInterval != 0 && m_ulNFrames != 0 && (GetTotal() > m_uPrintInterval * 1000))	{
 		float m_fFps = float(m_ulPrintNFrames)/float(m_uPrintInterval);
-		ncServiceLocator::GetLogger().Write(5, (char *)"%lu frames in %u seconds = %f FPS",  m_ulPrintNFrames, m_uPrintInterval, m_fFps);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_VERBOSE, (char *)"ncFrameTimer::AddFrame - %lu frames in %u seconds = %f FPS",  m_ulPrintNFrames, m_uPrintInterval, m_fFps);
 
 		m_ulPrintNFrames = 0;
 		ncTimer::Reset();

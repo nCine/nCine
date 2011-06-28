@@ -1,11 +1,8 @@
 #ifndef CLASS_NCSPRITEBATCH
 #define CLASS_NCSPRITEBATCH
 
-#include <GL/gl.h>
-#include <GL/glext.h>
-
-#include "../base/ncPoint.h"
-#include "../base/ncRect.h"
+#include "ncPoint.h"
+#include "ncRect.h"
 #include "ncTexture.h"
 
 // 2 triangles forming a rectangle
@@ -26,6 +23,7 @@ private:
 	GLfloat *m_fVertices;
 	GLfloat *m_fTexCoords;
 	ncTexture *m_pLastTexture;
+	bool m_bDrawing;
 
 	void FlushBuffer();
 	void SetVertices(GLfloat *fVertices, ncRect rect);
@@ -45,7 +43,9 @@ public:
 	/// Return the biggest number of sprites buffered during the object lifetime
 	inline unsigned int MaxBuffered() const { return m_uMaxBufferCounter; }
 	/// Return the biggest number of render calls during the object lifetime
-	GLenum MaxRenderCalls() const { return m_uMaxRenderCallsCounter; }
+	inline GLenum MaxRenderCalls() const { return m_uMaxRenderCallsCounter; }
+	/// Return true if the class is busy drawing.
+	inline bool isDrawing() const { return m_bDrawing; }
 };
 
 #endif

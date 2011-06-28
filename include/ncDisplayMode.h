@@ -2,7 +2,7 @@
 #define CLASS_NCDISPLAYMODE
 
 #include <SDL/SDL.h>
-#include "../base/ncPoint.h"
+#include "ncPoint.h"
 
 /// Display properties
 class ncDisplayMode

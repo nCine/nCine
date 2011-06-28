@@ -1,17 +1,23 @@
 #ifndef CLASS_NCTEXTURE
 #define CLASS_NCTEXTURE
 
-#ifndef NO_GLEW
+#if defined(__ANDROID__)
+	#include <GLES/gl.h>
+	#include <GLES/glext.h>
+#elif !defined(NO_GLEW)
 	#include <GL/glew.h>
 #else
 	#include <GL/gl.h>
 	#include <GL/glext.h>
 #endif
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
+
+#ifndef __ANDROID__
+	#include <SDL/SDL.h>
+	#include <SDL/SDL_image.h>
+#endif
 
 #include "ncTextureFormat.h"
-#include "../base/ncPoint.h"
+#include "ncPoint.h"
 
 /// Texture class
 class ncTexture
@@ -21,15 +27,19 @@ private:
 	int m_iWidth;
 	int m_iHeight;
 
+#ifndef __ANDROID__
 	void Load(const char *pFilename);
 	void Load(SDL_Surface *image);
-	void Load(ncTextureFormat format, int iWidth, int iHeight, GLubyte *pPixels);
+#endif
+	void Load(ncTextureFormat format, int iWidth, int iHeight, GLubyte *pPixels, GLsizei iBytes);
 public:
 	ncTexture();
+#ifndef __ANDROID__
 	ncTexture(const char *pFilename);
 	ncTexture(SDL_Surface *pSurface);
-	ncTexture(ncTextureFormat format, ncPoint size, GLubyte *pPixels);
-	ncTexture(ncTextureFormat format, int iWidth, int iHeight, GLubyte *pPixels);
+#endif
+	ncTexture(ncTextureFormat format, ncPoint size, GLubyte *pPixels, GLsizei iBytes = 0);
+	ncTexture(ncTextureFormat format, int iWidth, int iHeight, GLubyte *pPixels, GLsizei iBytes = 0);
 	~ncTexture();
 
 	/// Return texture size
@@ -43,6 +53,7 @@ public:
 	static void Unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
 
 	friend class ncSpriteBatch;
+	friend class ncRenderGraph;
 };
 
 #endif

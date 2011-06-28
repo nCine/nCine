@@ -3,7 +3,7 @@
 #endif
 
 #include "ncGfxDevice.h"
-#include "../ncServiceLocator.h"
+#include "ncServiceLocator.h"
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -90,7 +90,7 @@ void ncGfxDevice::ToggleFullScreen()
 void ncGfxDevice::InitGraphics()
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		ncServiceLocator::GetLogger().Write(1, (char *)"GfxDevice::InitGraphics - SDL_Init(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncGfxDevice::InitGraphics - SDL_Init(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
 		exit(-1);
 	}
 
@@ -114,7 +114,7 @@ void ncGfxDevice::InitDevice()
 
 	// setting screen mode, get a screen from SDL
 	if (!SDL_SetVideoMode(m_iWidth, m_iHeight, 0, lFlags)) {
-		ncServiceLocator::GetLogger().Write(1, (char *)"GfxDevice::InitDevice - SDL_SetVideoMode failed: %s", SDL_GetError());
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncGfxDevice::InitDevice - SDL_SetVideoMode failed: %s", SDL_GetError());
 		exit(-1);
 	}
 
@@ -122,12 +122,12 @@ void ncGfxDevice::InitDevice()
 	GLenum err = glewInit();
 
 	if (GLEW_OK != err) {
-		ncServiceLocator::GetLogger().Write(1, (char *)"GfxDevice::InitDevice - GLEW error: %s", glewGetErrorString(err));
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncGfxDevice::InitDevice - GLEW error: %s", glewGetErrorString(err));
 		exit(-1);
 	}
 
 	if (!GLEW_VERSION_2_0) {
-		ncServiceLocator::GetLogger().Write(1, (char *)"GfxDevice::InitDevice - OpenGL 2 is not supported");
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncGfxDevice::InitDevice - OpenGL 2 is not supported");
 		exit(-1);
 	}
 #endif

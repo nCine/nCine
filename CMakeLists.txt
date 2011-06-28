@@ -3,20 +3,20 @@ project(nCine)
 find_package(OpenGL REQUIRED)
 find_package(SDL REQUIRED)
 find_package(SDL_image REQUIRED)
-include_directories(src src/base src/graphics)
+include_directories(include)
 add_definitions(-DNO_GLEW)
 
 set(SOURCES
-	src/base/ncArray.h
-	src/base/ncList.h
-	src/base/ncPoint.h
-	src/base/ncRect.h
+	include/ncArray.h
+	include/ncList.h
+	include/ncPoint.h
+	include/ncRect.h
 	src/base/ncVector2f.cpp
 	src/ncServiceLocator.cpp
 	src/ncFileLogger.cpp
 	src/ncTimer.cpp
 	src/ncFrameTimer.cpp
-	src/graphics/ncDisplayMode.h
+	include/ncDisplayMode.h
 	src/graphics/ncGfxDevice.cpp
 	src/graphics/ncTextureFormat.cpp
 	src/graphics/ncTexture.cpp

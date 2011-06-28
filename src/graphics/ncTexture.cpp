@@ -1,13 +1,8 @@
-#ifndef NO_GLEW
-	#include <GL/glew.h>
-#else
-	#include <GL/gl.h>
-	#include <GL/glext.h>
-	#include <GL/glu.h>
+#ifdef __ANDROID__
+	#include <stdlib.h> // for exit()
 #endif
-
 #include "ncTexture.h"
-#include "../ncServiceLocator.h"
+#include "ncServiceLocator.h"
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -18,35 +13,39 @@ ncTexture::ncTexture() : m_uId(0), m_iWidth(0), m_iHeight(0)
 	glGenTextures(1, &m_uId);
 }
 
-
+#ifndef __ANDROID__
 ncTexture::ncTexture(const char *pFilename) : m_uId(0), m_iWidth(0), m_iHeight(0)
 {
 	glGenTextures(1, &m_uId);
 	Bind();
 	Load(pFilename);
 }
+#endif
 
-
+#ifndef __ANDROID__
 ncTexture::ncTexture(SDL_Surface *pImage) : m_uId(0)
 {
 	glGenTextures(1, &m_uId);
 	Bind();
 	Load(pImage);
 }
+#endif
 
-ncTexture::ncTexture(ncTextureFormat format, ncPoint size, GLubyte *pPixels) : m_uId(0)
+ncTexture::ncTexture(ncTextureFormat format, ncPoint size, GLubyte *pPixels, GLsizei iBytes)
+	: m_uId(0)
 {
 	glGenTextures(1, &m_uId);
 	Bind();
-	Load(format, size.x, size.y, pPixels);
+	Load(format, size.x, size.y, pPixels, iBytes);
 }
 
 
-ncTexture::ncTexture(ncTextureFormat format, int iWidth, int iHeight, GLubyte *pPixels) : m_uId(0)
+ncTexture::ncTexture(ncTextureFormat format, int iWidth, int iHeight, GLubyte *pPixels, GLsizei iBytes)
+	: m_uId(0)
 {
 	glGenTextures(1, &m_uId);
 	Bind();
-	Load(format, iWidth, iHeight, pPixels);
+	Load(format, iWidth, iHeight, pPixels, iBytes);
 }
 
 ncTexture::~ncTexture()
@@ -70,13 +69,14 @@ void ncTexture::SetFiltering(GLenum eFilter)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+#ifndef __ANDROID__
 void ncTexture::Load(const char *pFilename)
 {
 	SDL_Surface *pImage;
 
-	ncServiceLocator::GetLogger().Write(1, (char *)"Texture::Load - Loading \"%s\"", pFilename);
+	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncTexture::Load - Loading \"%s\"", pFilename);
 	if (!(pImage = (SDL_Surface *)IMG_Load(pFilename))) {
-		ncServiceLocator::GetLogger().Write(2, (char *)"Texture::Load - Cannot load \"%s\"", pFilename);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTexture::Load - Cannot load \"%s\"", pFilename);
 		exit(-1);
 	}
 
@@ -84,8 +84,9 @@ void ncTexture::Load(const char *pFilename)
 
 	SDL_FreeSurface(pImage);
 }
+#endif
 
-
+#ifndef __ANDROID__
 void ncTexture::Load(SDL_Surface *pSurface)
 {
 	Uint8 uBpp;
@@ -100,7 +101,7 @@ void ncTexture::Load(SDL_Surface *pSurface)
 	else if (uBpp  == 24)
 		pFormat = new ncTextureFormat(GL_RGB8);
 	else {
-		ncServiceLocator::GetLogger().Write(2, (char *)"Texture::Load - Not a true color image: %d", uBpp);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTexture::Load - Not a true color image: %d", uBpp);
 		exit(-1);
 	}
 
@@ -113,15 +114,26 @@ void ncTexture::Load(SDL_Surface *pSurface)
 	m_iWidth = pSurface->w;
 	m_iHeight = pSurface->h;
 	glTexImage2D(GL_TEXTURE_2D, 0, pFormat->Internal(), m_iWidth, m_iHeight, 0, pFormat->Format(), pFormat->Type(), pSurface->pixels);
+
+	delete pFormat;
 }
+#endif
 
-
-void ncTexture::Load(ncTextureFormat format, int iWidth, int iHeight, GLubyte *pPixels)
+void ncTexture::Load(ncTextureFormat format, int iWidth, int iHeight, GLubyte *pPixels, GLsizei iBytes)
 {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
+	if (iBytes <= 0 && format.isCompressed())
+	{
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTexture::Load - Compressed format and no size in bytes specified");
+		exit(-1);
+	}
+
 	m_iWidth = iWidth;
 	m_iHeight = iHeight;
-	glTexImage2D(GL_TEXTURE_2D, 0, format.Internal(), m_iWidth, m_iHeight, 0, format.Format(), format.Type(), pPixels);
+	if (format.isCompressed())
+		glCompressedTexImage2D(GL_TEXTURE_2D, 0, format.Internal(), m_iWidth, m_iHeight, 0, iBytes, pPixels);
+	else
+		glTexImage2D(GL_TEXTURE_2D, 0, format.Internal(), m_iWidth, m_iHeight, 0, format.Format(), format.Type(), pPixels);
 }

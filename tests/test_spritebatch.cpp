@@ -8,13 +8,13 @@
 
 #include <cmath>
 
-#include "base/ncRect.h"
+#include "ncRect.h"
 #include "ncFrameTimer.h"
 #include "ncServiceLocator.h"
 #include "ncFileLogger.h"
-#include "graphics/ncGfxDevice.h"
-#include "graphics/ncSpriteBatch.h"
-#include "graphics/ncTexture.h"
+#include "ncGfxDevice.h"
+#include "ncSpriteBatch.h"
+#include "ncTexture.h"
 
 int main(int argc, char **argv)
 {
@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 // ----- Init ----------------------
 	float fAngle = 0.0;
 	ncFrameTimer t(5, 0);
-	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", 5, -1));
+	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_WARN));
 	ncGfxDevice gfxDevice(iWidth, iHeight);
 	SDL_WM_SetCaption("Test", NULL);
 
@@ -99,7 +99,6 @@ int main(int argc, char **argv)
 		sb.Draw(&tex4, ncRect(100+fCosine*75, 500+fSinus*25, 60, 70), ncRect(50, 50, 10, 10));
 		sb.Draw(&tex3, ncPoint(iWidth*0.25f + fSinus*10, iHeight*0.25f + fCosine*10));
 		sb.Draw(&tex1, ncRect(550+fSinus*20.0f, 75+fCosine*15.0f, 100, 100), ncRect(50+fCosine+3.0f, 10+fSinus*10.0f, 40, 40*fSinus));
-
 		sb.End();
 
 		gfxDevice.Update();

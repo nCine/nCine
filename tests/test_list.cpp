@@ -1,6 +1,6 @@
 #include "ncServiceLocator.h"
 #include "ncFileLogger.h"
-#include "base/ncList.h"
+#include "ncList.h"
 
 void print_list(const ncList<int> &list)
 {
@@ -18,7 +18,7 @@ void print_list(const ncList<int> &list)
 
 int main(int argc, char **argv)
 {
-	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", 5, -1));
+	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
 
 	ncList<int> list;
 

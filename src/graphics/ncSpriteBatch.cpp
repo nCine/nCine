@@ -1,6 +1,11 @@
-#include <cstdio> // for NULL
+#ifdef __ANDROID__
+	#include <stdlib.h> // for exit()
+#else
+	#include <cstdio> // for NULL
+#endif
+
 #include "ncSpriteBatch.h"
-#include "../ncServiceLocator.h"
+#include "ncServiceLocator.h"
 
 
 ///////////////////////////////////////////////////////////
@@ -9,7 +14,7 @@
 
 ncSpriteBatch::ncSpriteBatch(unsigned int uBufferSize)
 	: m_uBufferSize(uBufferSize), m_uMaxBufferCounter(0), m_uMaxRenderCallsCounter(0),
-	  m_fVertices(0), m_fTexCoords(0), m_pLastTexture(0)
+	  m_fVertices(0), m_fTexCoords(0), m_pLastTexture(0), m_bDrawing(false)
 {
 	if (uBufferSize > 0)
 	{
@@ -18,7 +23,7 @@ ncSpriteBatch::ncSpriteBatch(unsigned int uBufferSize)
 	}
 	else
 	{
-		ncServiceLocator::GetLogger().Write(2, (char *)"SpriteBatch::SpriteBatch - Invalid value for buffer size: %d", uBufferSize);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncSpriteBatch::ncSpriteBatch - Invalid value for buffer size: %d", uBufferSize);
 		exit(-1);
 	}
 }
@@ -38,6 +43,13 @@ ncSpriteBatch::~ncSpriteBatch()
 /// To be called before drawing
 void ncSpriteBatch::Begin()
 {
+	if (m_bDrawing)
+	{
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncSpriteBatch::Begin - Already drawing");
+		exit(-1);
+	}
+
+	m_bDrawing = true;
 	m_uBufferTop = 0;
 	m_pLastTexture = NULL;
 
@@ -50,11 +62,18 @@ void ncSpriteBatch::Begin()
 	glTexCoordPointer(2, GL_FLOAT, 0, m_fTexCoords);
 }
 
+/// Draw the source rectangle from the texture to the destination rectangle on screen
 void ncSpriteBatch::Draw(ncTexture *pTexture, ncRect dstRect, ncRect srcRect)
 {
+	if (!m_bDrawing)
+	{
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncSpriteBatch::Draw - Begin has not been called first");
+		exit(-1);
+	}
+
 	if (pTexture == NULL)
 	{
-		ncServiceLocator::GetLogger().Write(1, (char *)"SpriteBatch::Draw - Texture pointer is NULL");
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncSpriteBatch::Draw - Texture pointer is NULL");
 		exit(-1);
 	}
 
@@ -82,6 +101,7 @@ void ncSpriteBatch::Draw(ncTexture *pTexture, ncRect dstRect, ncRect srcRect)
 		m_uMaxBufferCounter = m_uBufferTop;
 }
 
+/// Draw the entire texture to the destination rectangle on screen
 void ncSpriteBatch::Draw(ncTexture *pTexture, ncRect dstRect)
 {
 //	ncRect srcRect(0, 0, pTexture->m_iWidth, pTexture->m_iHeight);
@@ -89,9 +109,11 @@ void ncSpriteBatch::Draw(ncTexture *pTexture, ncRect dstRect)
 	Draw(pTexture, dstRect, srcRect);
 }
 
+/// Draw the entire texture to the screen, centered at pos parameter
 void ncSpriteBatch::Draw(ncTexture *pTexture, ncPoint pos)
 {
-	ncRect dstRect(pos.x, pos.y, pTexture->m_iWidth, pTexture->m_iHeight);
+	ncRect dstRect(pos.x - pTexture->m_iWidth/2, pos.y - pTexture->m_iHeight/2,
+				   pTexture->m_iWidth/2, pTexture->m_iHeight/2);
 //	ncRect srcRect(0, 0, pTexture->m_iWidth, pTexture->m_iHeight);
 	ncRect srcRect(0, 0, 0, 0); // to call the optimized SetTexXoords()
 	Draw(pTexture, dstRect, srcRect);
@@ -100,13 +122,20 @@ void ncSpriteBatch::Draw(ncTexture *pTexture, ncPoint pos)
 /// To be called after drawing
 void ncSpriteBatch::End()
 {
+	if (!m_bDrawing)
+	{
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncSpriteBatch::End - Begin has not been called first");
+		exit(-1);
+	}
+
+	m_bDrawing = false;
 	FlushBuffer();
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-//	ncServiceLocator::GetLogger().Write(2, (char *)"SpriteBatch::End - Render calls: %u", m_uMaxRenderCallsCounter);
-//	ncServiceLocator::GetLogger().Write(2, (char *)"SpriteBatch::End - Max buffered: %u", m_uMaxBufferCounter);
+//	ncServiceLocator::GetLogger().Write(2, (char *)"ncSpriteBatch::End - Render calls: %u", m_uMaxRenderCallsCounter);
+//	ncServiceLocator::GetLogger().Write(2, (char *)"ncSpriteBatch::End - Max buffered: %u", m_uMaxBufferCounter);
 }
 
 ///////////////////////////////////////////////////////////

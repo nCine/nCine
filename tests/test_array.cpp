@@ -1,6 +1,6 @@
 #include "ncServiceLocator.h"
 #include "ncFileLogger.h"
-#include "base/ncArray.h"
+#include "ncArray.h"
 
 void print_array(const ncArray<int> &array)
 {
@@ -11,7 +11,7 @@ void print_array(const ncArray<int> &array)
 
 int main(int argc, char **argv)
 {
-	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", 5, -1));
+	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
 
 	const int iCap = 10;
 	ncArray<int> array(iCap);

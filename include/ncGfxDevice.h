@@ -9,7 +9,7 @@
 #endif
 #include <SDL/SDL.h>
 
-#include "../base/ncPoint.h"
+#include "ncPoint.h"
 #include "ncDisplayMode.h"
 
 /// This represents a graphics device where everything is rendered.
