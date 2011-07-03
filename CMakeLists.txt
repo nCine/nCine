@@ -19,6 +19,7 @@ set(SOURCES
 	include/ncDisplayMode.h
 	src/graphics/ncGfxDevice.cpp
 	src/graphics/ncTextureFormat.cpp
+	src/graphics/ncTextureLoader.cpp
 	src/graphics/ncTexture.cpp
 	src/graphics/ncSpriteBatch.cpp
 )

@@ -26,14 +26,16 @@ private:
 	bool OESFormat();
 	bool OESCompressedFormat();
 public:
+	ncTextureFormat()
+		: m_eInternalFormat(-1), m_eFormat(-1), m_eType(-1), m_bCompressed(false) { }
 	ncTextureFormat(GLenum eInternalFormat);
 
 	/// Return the specified internal format
 	inline GLenum Internal() const { return m_eInternalFormat; }
 	/// Return the corresponding format
 	inline GLenum Format() const { return m_eFormat; }
-	// Return the corresponding BGR format
-	GLenum BGRFormat() const;
+	// Convert to the corresponding BGR format
+	void BGRFormat();
 	/// Return the corresponding pixel data type
 	inline GLenum Type() const { return m_eType; }
 	/// Specify wheter data is compressed or not

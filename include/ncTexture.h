@@ -11,12 +11,7 @@
 	#include <GL/glext.h>
 #endif
 
-#ifndef __ANDROID__
-	#include <SDL/SDL.h>
-	#include <SDL/SDL_image.h>
-#endif
-
-#include "ncTextureFormat.h"
+#include "ncTextureLoader.h"
 #include "ncPoint.h"
 
 /// Texture class
@@ -27,19 +22,13 @@ private:
 	int m_iWidth;
 	int m_iHeight;
 
-#ifndef __ANDROID__
-	void Load(const char *pFilename);
-	void Load(SDL_Surface *image);
-#endif
-	void Load(ncTextureFormat format, int iWidth, int iHeight, GLubyte *pPixels, GLsizei iBytes);
+	void Load(const ncTextureLoader &texLoader);
+	void Load(const ncTextureLoader &texLoader, int iWidth, int iHeight);
 public:
 	ncTexture();
-#ifndef __ANDROID__
 	ncTexture(const char *pFilename);
-	ncTexture(SDL_Surface *pSurface);
-#endif
-	ncTexture(ncTextureFormat format, ncPoint size, GLubyte *pPixels, GLsizei iBytes = 0);
-	ncTexture(ncTextureFormat format, int iWidth, int iHeight, GLubyte *pPixels, GLsizei iBytes = 0);
+	ncTexture(const char *pFilename, int iWidth, int iHeight);
+	ncTexture(const char *pFilename, ncPoint size);
 	~ncTexture();
 
 	/// Return texture size

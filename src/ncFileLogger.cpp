@@ -16,7 +16,7 @@ ncFileLogger::ncFileLogger(const char *filename, eLogLevel eConsoleLevel, eLogLe
 {
 	if (m_eConsoleLevel < int(LOG_OFF))
 		 setbuf(stdout, NULL);
-	if (m_eFileLevel > int(LOG_OFF))
+	if (m_eFileLevel < int(LOG_OFF))
 		m_fp = fopen(filename, "a");
 
 	Write(LOG_VERBOSE, "FileLogger instantiated");

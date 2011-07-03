@@ -43,16 +43,14 @@ ncTextureFormat::ncTextureFormat(GLenum eInternalFormat)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Return the corresponding BGR format
-GLenum ncTextureFormat::BGRFormat() const
+/// Convert to the corresponding BGR format
+void ncTextureFormat::BGRFormat()
 {
 #ifndef __ANDROID__
 	if (m_eFormat == GL_RGBA)
-		return GL_BGRA;
-	if (m_eFormat == GL_RGB)
-		return GL_BGR;
-	else
-		return m_eFormat;
+		m_eFormat = GL_BGRA;
+	else if (m_eFormat == GL_RGB)
+		m_eFormat = GL_BGR;
 #endif
 }
 
