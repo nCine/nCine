@@ -40,7 +40,7 @@ public:
 	// Multiplication by a constant scalar
 	ncVector2f operator*(float fC) const;
 
-	friend void print(ncVector2f& vec) {
+	void print(ncVector2f& vec) {
 		printf("%f %f", vec.x, vec.y);
 	}
 };

@@ -80,8 +80,7 @@ void ncSpriteBatch::Draw(ncTexture *pTexture, ncRect dstRect, ncRect srcRect)
 	if (m_uBufferTop >= m_uBufferSize)
 		FlushBuffer();
 
-	if (m_pLastTexture == NULL ||
-		m_pLastTexture->m_uId != pTexture->m_uId)
+	if (m_pLastTexture == NULL || m_pLastTexture->Id() != pTexture->Id())
 	{
 		FlushBuffer();
 		pTexture->Bind();
@@ -112,8 +111,8 @@ void ncSpriteBatch::Draw(ncTexture *pTexture, ncRect dstRect)
 /// Draw the entire texture to the screen, centered at pos parameter
 void ncSpriteBatch::Draw(ncTexture *pTexture, ncPoint pos)
 {
-	ncRect dstRect(pos.x - pTexture->m_iWidth/2, pos.y - pTexture->m_iHeight/2,
-				   pTexture->m_iWidth/2, pTexture->m_iHeight/2);
+	ncRect dstRect = ncRect::FromCenterAndSize(pos, pTexture->Size());
+
 //	ncRect srcRect(0, 0, pTexture->m_iWidth, pTexture->m_iHeight);
 	ncRect srcRect(0, 0, 0, 0); // to call the optimized SetTexXoords()
 	Draw(pTexture, dstRect, srcRect);
@@ -175,10 +174,10 @@ void ncSpriteBatch::SetVertices(GLfloat *fVertices, ncRect rect)
 /// Fill the buffer with two triangles UVs
 void ncSpriteBatch::SetTexCoords(GLfloat *fTexCoords, ncRect rect)
 {
-	float x = float(rect.x)/float(m_pLastTexture->m_iWidth);
-	float y = float(rect.y)/float(m_pLastTexture->m_iHeight);
-	float w = float(rect.w)/float(m_pLastTexture->m_iWidth);
-	float h = float(rect.h)/float(m_pLastTexture->m_iHeight);
+	float x = float(rect.x)/float(m_pLastTexture->Width());
+	float y = float(rect.y)/float(m_pLastTexture->Height());
+	float w = float(rect.w)/float(m_pLastTexture->Width());
+	float h = float(rect.h)/float(m_pLastTexture->Height());
 
 	fTexCoords[0] = x;
 	fTexCoords[1] = y + h;

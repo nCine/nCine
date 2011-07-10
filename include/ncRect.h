@@ -25,6 +25,18 @@ class ncRect
 		ncRect(ncPoint const p1, ncPoint const p2)
 			: x(p1.x), y(p1.y), w(p2.x), h(p2.y) { }
 
+		/// Create a rect from center and size
+		static ncRect FromCenterAndSize(ncPoint center, ncPoint size)
+		{
+			return ncRect(center.x - size.x*0.5f, center.y - size.y*0.5f,
+						  size.x, size.y);
+		}
+
+		/// Calculate the center of the rect
+		inline ncPoint Center() const {
+			return ncPoint(x + w*0.5f, y + h*0.5f);
+		}
+
 		/// Set rect elements
 		inline void Set(int const iX, int const iY, int const iW, int const iH) {
 			x = iX;
@@ -33,9 +45,11 @@ class ncRect
 			h = iH;
 		}
 
-		// Calculate the center of the rect
-		inline ncPoint Center() const {
-			return ncPoint(x + w*0.5f, y + h*0.5f);
+		/// Retain size but move to another position
+		inline void setCenter(ncPoint const center)
+		{
+			x = center.x - w*0.5f;
+			y = center.y - h*0.5f;
 		}
 
 		// Operators
@@ -44,7 +58,7 @@ class ncRect
 					w == rect.w && h == rect.h);
 		}
 
-		friend void print(ncRect& rect) {
+		void print(ncRect& rect) {
 			printf("%i %i %i %i", rect.x, rect.y, rect.w, rect.h);
 		}
 };

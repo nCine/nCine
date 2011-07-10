@@ -31,6 +31,12 @@ public:
 	ncTexture(const char *pFilename, ncPoint size);
 	~ncTexture();
 
+	/// Return OpenGL id
+	inline GLuint Id() const { return m_uId; }
+	/// Return texture width
+	inline int Width() const { return m_iWidth; }
+	/// Return texture height
+	inline int Height() const { return m_iHeight; }
 	/// Return texture size
 	inline ncPoint Size() const { return ncPoint(m_iWidth, m_iHeight); }
 
@@ -40,9 +46,6 @@ public:
 	inline void Bind() { glBindTexture(GL_TEXTURE_2D, m_uId); }
 	/// Disable texture rendering for the current unit
 	static void Unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
-
-	friend class ncSpriteBatch;
-	friend class ncRenderGraph;
 };
 
 #endif

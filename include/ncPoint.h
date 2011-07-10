@@ -27,7 +27,7 @@ public:
 		return (x == point.x && y == point.y);
 	}
 
-	friend void print(ncPoint& point) {
+	void print(ncPoint& point) {
 		printf("%i %i", point.x, point.y);
 	}
 };

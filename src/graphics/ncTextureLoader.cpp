@@ -66,9 +66,9 @@ ncTextureLoader::~ncTextureLoader()
 #ifndef __ANDROID__
 void ncTextureLoader::LoadSDL(const char *pFilename)
 {
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncTexture::Load - Loading \"%s\"", pFilename);
+	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncTextureLoader::LoadSDL - Loading \"%s\"", pFilename);
 	if (!(m_pSDLSurface = (SDL_Surface *)IMG_Load(pFilename))) {
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTexture::Load - Cannot load \"%s\"", pFilename);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureLoader::LoadSDL - Cannot load \"%s\"", pFilename);
 		exit(-1);
 	}
 
@@ -95,6 +95,7 @@ void ncTextureLoader::LoadSDL(const char *pFilename)
 
 void ncTextureLoader::LoadCompressed(const char *pFilename, GLenum eInternalFormat)
 {
+	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncTextureLoader::LoadCompressed - Loading \"%s\"", pFilename);
 	m_texFormat = ncTextureFormat(eInternalFormat);
 
 	m_pFile = fopen(pFilename, "r");

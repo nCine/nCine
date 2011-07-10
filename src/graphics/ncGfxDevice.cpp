@@ -141,7 +141,7 @@ void ncGfxDevice::InitGL()
 	glEnable(GL_TEXTURE_2D);
 
 	glMatrixMode(GL_PROJECTION);
-	glOrtho(0, m_iWidth, 0, m_iWidth, -1, 1);
+	glOrtho(0, m_iWidth, 0, m_iHeight, -1, 1);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }

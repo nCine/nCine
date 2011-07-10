@@ -22,6 +22,9 @@ set(SOURCES
 	src/graphics/ncTextureLoader.cpp
 	src/graphics/ncTexture.cpp
 	src/graphics/ncSpriteBatch.cpp
+	src/graphics/ncSceneNode.cpp
+	src/graphics/ncSprite.cpp
+	src/graphics/ncRenderGraph.cpp
 )
 
 link_libraries (
@@ -30,6 +33,7 @@ link_libraries (
 	${OPENGL_gl_LIBRARY}
 )
 
+add_executable(test_scene ${SOURCES} tests/test_scene.cpp)
 add_executable(test_spritebatch ${SOURCES} tests/test_spritebatch.cpp)
 add_executable(test_array ${SOURCES} tests/test_array.cpp)
 add_executable(test_list ${SOURCES} tests/test_list.cpp)

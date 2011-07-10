@@ -19,9 +19,9 @@
 int main(int argc, char **argv)
 {
 	SDL_Event event;
-	int iWidth = 640;
-	int iHeight = 480;
-	bool bQuit = 0;
+	int iWidth = 960;
+	int iHeight = 640;
+	bool bQuit = false;
 
 // ----- Init ----------------------
 	float fAngle = 0.0;
@@ -68,37 +68,19 @@ int main(int argc, char **argv)
 
 		gfxDevice.Clear();
 
-/*
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-
-		glBegin(GL_QUADS);
-			glTexCoord2f(0.0f, 0.0f);
-			glVertex3f(-1.0f, 1.0f, 0.0);
-			glTexCoord2f(0.0f, 1.0f);
-			glVertex3f(-1.0f,-1.0f, 0.0);
-			glTexCoord2f(1.0f, 1.0f);
-			glVertex3f( 1.0f,-1.0f, 0.0);
-			glTexCoord2f(1.0f, 0.0f);
-			glVertex3f( 1.0f, 1.0f, 0.0);
-		glEnd();
-*/
-
 		float fSinus = sinf(fAngle * 0.01f);
 		float fCosine = cosf(fAngle * 0.01f);
 
 		sb.Begin();
-		sb.Draw(&tex2, ncRect(200, 65, 50*fSinus, 50*fCosine));
-		sb.Draw(&tex4, ncRect(100, 500, 60, 70*fSinus));
+		sb.Draw(&tex2, ncRect(700, 365, 50*fSinus, 50*fCosine));
+		sb.Draw(&tex4, ncRect(250, 500, 60, 70*fSinus));
 		sb.Draw(&tex3, ncPoint(iWidth*0.5f + fSinus*100, iHeight*0.5f + fCosine*100));
-		sb.Draw(&tex1, ncRect(500, 500, 100, 100), ncRect(50, 10, 40, 40*fSinus));
+		sb.Draw(&tex1, ncRect(550, 400, 100, 100), ncRect(50, 10, 40, 40*fSinus));
 
-		sb.Draw(&tex2, ncRect(220, 350, 60, 60), ncRect(200, 65, 50*fSinus, 50*fCosine));
-		sb.Draw(&tex4, ncRect(100+fCosine*75, 500+fSinus*25, 60, 70), ncRect(50, 50, 10, 10));
-		sb.Draw(&tex3, ncPoint(iWidth*0.25f + fSinus*10, iHeight*0.25f + fCosine*10));
-		sb.Draw(&tex1, ncRect(550+fSinus*20.0f, 75+fCosine*15.0f, 100, 100), ncRect(50+fCosine+3.0f, 10+fSinus*10.0f, 40, 40*fSinus));
+		sb.Draw(&tex2, ncRect(170, 350, 60, 60), ncRect(200, 65, 50*fSinus, 50*fCosine));
+		sb.Draw(&tex4, ncRect(250+fCosine*75, 400+fSinus*25, 60, 70), ncRect(50, 50, 10, 10));
+		sb.Draw(&tex3, ncPoint(iWidth*0.35f + fSinus*10, iHeight*0.35f + fCosine*10));
+		sb.Draw(&tex1, ncRect(350+fSinus*20.0f, 375+fCosine*15.0f, 100, 100), ncRect(50+fCosine+3.0f, 10+fSinus*10.0f, 40, 40*fSinus));
 		sb.End();
 
 		gfxDevice.Update();
