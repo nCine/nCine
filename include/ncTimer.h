@@ -25,11 +25,11 @@ public:
 	// Resume the timer
 	void Continue();
 	// Return (stop - start) or (now-start) time interval
-	unsigned long int GetInterval();
+	unsigned long int Interval();
 	// Return total elapsed time
-	unsigned long int GetTotal();
+	unsigned long int Total();
 	// Return current time
-	unsigned long int GetNow();
+	unsigned long int Now();
 };
 
 #endif

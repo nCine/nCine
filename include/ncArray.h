@@ -4,7 +4,7 @@
 #include <cstdio> // for NULL
 #include <cstdlib> // for exit()
 #include <cstring> // for memmove() and memcpy()
-#include "ncILogger.h"
+#include "ncServiceLocator.h"
 
 /// An array based on templates
 template <class T>

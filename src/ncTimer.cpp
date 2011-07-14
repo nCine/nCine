@@ -28,7 +28,7 @@ void ncTimer::Start()
 void ncTimer::Stop()
 {
 	m_bRunning = false;
-	m_uStopTime = GetNow();
+	m_uStopTime = Now();
 	m_uTotal += m_uStopTime - m_uStartTime;
 }
 
@@ -36,15 +36,15 @@ void ncTimer::Stop()
 void ncTimer::Continue()
 {
 	m_bRunning = true;
-	m_uStartTime = GetNow();
+	m_uStartTime = Now();
 }
 
 /// Return (stop - start) or (now-start) time interval
 /// depending on whether the timer is currently running or not
-unsigned long int ncTimer::GetInterval()
+unsigned long int ncTimer::Interval()
 {
 	if (m_bRunning) {
-		return GetNow() - m_uStartTime;
+		return Now() - m_uStartTime;
 	}
 	else {
 		return m_uStopTime - m_uStartTime;
@@ -52,13 +52,13 @@ unsigned long int ncTimer::GetInterval()
 }
 
 /// Return total elapsed time
-unsigned long int ncTimer::GetTotal()
+unsigned long int ncTimer::Total()
 {
 	return m_uTotal;
 }
 
 /// Return current time in milliseconds from epoch
-unsigned long int ncTimer::GetNow()
+unsigned long int ncTimer::Now()
 {
 #ifdef __ANDROID__
 	struct timeval tv;

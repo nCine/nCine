@@ -1,7 +1,7 @@
 #ifndef CLASS_NCLIST
 #define CLASS_NCLIST
 
-#include <cstdio> // for NULL and exit()
+#include <cstdio> // for NULL
 
 template <class T> class ncList; // forward declaration
 
@@ -20,9 +20,9 @@ private:
 
 public:
 	/// Read-only deferencing operator
-	const T& operator*() const { return m_data; }
+	inline const T& operator*() const { return m_data; }
 	/// Deferencing operator
-	T& operator*() { return m_data; }
+	inline T& operator*() { return m_data; }
 
 	inline const T& Data() const { return m_data; }
 	inline T& Data() { return m_data; }
@@ -37,7 +37,6 @@ class ncList
 private:
 	ncListNode<T> *m_pHead;
 public:
-	/// Constructs an array with explicit size
 	ncList() : m_pHead(NULL) { }
 	~ncList() { Clear(); }
 

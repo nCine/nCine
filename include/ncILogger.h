@@ -1,6 +1,7 @@
 #ifndef CLASS_NCILOGGER
 #define CLASS_NCILOGGER
 
+/// The interface for every logger
 class ncILogger
 {
 public:
@@ -16,14 +17,18 @@ public:
     	LOG_OFF    
 	};
 
+	virtual ~ncILogger() = 0;
 	virtual void Write(eLogLevel eLevel, const char *message, ...) = 0;
 };
+
+inline ncILogger::~ncILogger() { }
 
 #endif
 
 #ifndef CLASS_NCNULLLOGGER
 #define CLASS_NCNULLLOGGER
 
+/// A fake logger which doesn't log anything
 class ncNullLogger : public ncILogger
 {
 public:

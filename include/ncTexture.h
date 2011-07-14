@@ -11,14 +11,15 @@
 	#include <GL/glext.h>
 #endif
 
+#include "ncObject.h"
 #include "ncTextureLoader.h"
 #include "ncPoint.h"
 
 /// Texture class
-class ncTexture
+class ncTexture : public ncObject
 {
 private:
-	GLuint m_uId;
+	GLuint m_uGLId;
 	int m_iWidth;
 	int m_iHeight;
 
@@ -29,10 +30,10 @@ public:
 	ncTexture(const char *pFilename);
 	ncTexture(const char *pFilename, int iWidth, int iHeight);
 	ncTexture(const char *pFilename, ncPoint size);
-	~ncTexture();
+	virtual ~ncTexture();
 
 	/// Return OpenGL id
-	inline GLuint Id() const { return m_uId; }
+	inline GLuint GLId() const { return m_uGLId; }
 	/// Return texture width
 	inline int Width() const { return m_iWidth; }
 	/// Return texture height
@@ -43,9 +44,12 @@ public:
 	// Set texture filtering for both magnification and minification
 	void SetFiltering(GLenum eFilter);
 	/// Bind the texture to the current unit
-	inline void Bind() { glBindTexture(GL_TEXTURE_2D, m_uId); }
+	inline void Bind() { glBindTexture(GL_TEXTURE_2D, m_uGLId); }
 	/// Disable texture rendering for the current unit
 	static void Unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
+
+	inline static eObjectType sType() { return TEXTURE_TYPE; }
+	static ncTexture* FromId(unsigned int uId);
 };
 
 #endif

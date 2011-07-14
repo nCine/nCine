@@ -1,20 +1,15 @@
 #ifndef CLASS_NCSCENENODE
 #define CLASS_NCSCENENODE
 
+#include "ncObject.h"
 #include "ncList.h"
 #include "ncPoint.h"
 #include "ncRect.h"
 
 /// The base class for the object hierarchy of a game
-class ncSceneNode
+class ncSceneNode : public ncObject
 {
 protected:
-	enum eNodeType {
-		BASE_TYPE = 0,
-		SPRITE_TYPE
-	};
-
-	eNodeType m_eType;
 	ncSceneNode* m_pParent;
 	ncList<ncSceneNode *> m_children;
 
@@ -32,26 +27,35 @@ public:
 	bool bShouldDraw;
 
 	ncSceneNode(ncSceneNode* pParent, int iX, int iY)
-		: m_eType(BASE_TYPE), m_pParent(NULL), x(iX), y(iY), bShouldUpdate(true), bShouldDraw(true)
+		: m_pParent(NULL), x(iX), y(iY), bShouldUpdate(true), bShouldDraw(true)
 	{
+		m_eType = SCENENODE_TYPE;
+
 		if (pParent)
 			pParent->AddChildNode(this);
 	}
 	ncSceneNode(ncSceneNode* pParent)
-		: m_eType(BASE_TYPE), m_pParent(NULL), x(0), y(0), bShouldUpdate(true), bShouldDraw(true)
+		: m_pParent(NULL), x(0), y(0), bShouldUpdate(true), bShouldDraw(true)
 	{
+		m_eType = SCENENODE_TYPE;
+
 		if (pParent)
 			pParent->AddChildNode(this);
 	}
-	ncSceneNode() : m_eType(BASE_TYPE), m_pParent(NULL), x(0), y(0), bShouldUpdate(true), bShouldDraw(true) { }
+	ncSceneNode()
+		: ncObject(), m_pParent(NULL), x(0), y(0), bShouldUpdate(true), bShouldDraw(true) { m_eType = SCENENODE_TYPE; }
 	virtual ~ncSceneNode();
 
-	inline static eNodeType sType() { return BASE_TYPE; }
-	inline eNodeType Type() const { return m_eType; }
+	inline static eObjectType sType() { return SCENENODE_TYPE; }
+	static ncSceneNode* FromId(unsigned int uId);
 
 	ncSceneNode* ParentNode() const { return m_pParent; }
-	void AddChildNode(ncSceneNode *pChildNode);
-	void RemoveChildNode(ncSceneNode *pChildNode);
+	// Add a node as a children of this one
+	bool AddChildNode(ncSceneNode *pChildNode);
+	// Remove a children of this node, without reparenting nephews
+	bool RemoveChildNode(ncSceneNode *pChildNode);
+	// Remove a children of this node reparenting nephews as children.
+	bool UnlinkChildNode(ncSceneNode *pChildNode);
 
 	virtual void Update(unsigned long int ulInterval);
 

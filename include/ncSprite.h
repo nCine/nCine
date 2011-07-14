@@ -36,7 +36,8 @@ public:
 
 	virtual void Update(unsigned long int ulInterval);
 
-	inline static eNodeType sType() { return SPRITE_TYPE; }
+	inline static eObjectType sType() { return SPRITE_TYPE; }
+	static ncSprite* FromId(unsigned int uId);
 
 	friend class ncRenderGraph;
 };

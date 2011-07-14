@@ -8,8 +8,10 @@
 #include "ncSceneNode.h"
 #include "ncSprite.h"
 
-/// This class is responsible for traversing the scenegraph
-/// and issuing draw commands to the sprite batch
+/// Traverse and flatten the scenegraph representation
+/*! This class is responsible for traversing the scenegraph
+ * and issuing draw commands to the sprite batch
+ */
 class ncRenderGraph
 {
 	class ncDrawCommand

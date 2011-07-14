@@ -12,8 +12,8 @@
 #include "ncPoint.h"
 #include "ncDisplayMode.h"
 
-/// This represents a graphics device where everything is rendered.
-/// It uses SDL to create an OpenGL context.
+/// It represents a graphics device where everything is rendered
+/*! At the moment it uses SDL to create an OpenGL context */
 class ncGfxDevice
 {
 private:

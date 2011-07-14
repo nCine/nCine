@@ -14,9 +14,9 @@ set(SOURCES
 	src/base/ncVector2f.cpp
 	src/ncServiceLocator.cpp
 	src/ncFileLogger.cpp
+	src/ncArrayIndexer.cpp
 	src/ncTimer.cpp
 	src/ncFrameTimer.cpp
-	include/ncDisplayMode.h
 	src/graphics/ncGfxDevice.cpp
 	src/graphics/ncTextureFormat.cpp
 	src/graphics/ncTextureLoader.cpp
@@ -25,6 +25,7 @@ set(SOURCES
 	src/graphics/ncSceneNode.cpp
 	src/graphics/ncSprite.cpp
 	src/graphics/ncRenderGraph.cpp
+	src/ncApplication.cpp
 )
 
 link_libraries (
@@ -33,6 +34,7 @@ link_libraries (
 	${OPENGL_gl_LIBRARY}
 )
 
+add_executable(test_sceneapp ${SOURCES} tests/main.cpp tests/test_sceneapp.cpp)
 add_executable(test_scene ${SOURCES} tests/test_scene.cpp)
 add_executable(test_spritebatch ${SOURCES} tests/test_spritebatch.cpp)
 add_executable(test_array ${SOURCES} tests/test_array.cpp)

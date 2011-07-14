@@ -10,16 +10,20 @@
 ///////////////////////////////////////////////////////////
 
 ncTexture::ncTexture()
-	: m_uId(0), m_iWidth(0), m_iHeight(0)
+	: m_uGLId(0), m_iWidth(0), m_iHeight(0)
 {
-	glGenTextures(1, &m_uId);
+	m_eType = TEXTURE_TYPE;
+	glGenTextures(1, &m_uGLId);
 }
 
 
 ncTexture::ncTexture(const char *pFilename)
-	: m_uId(0), m_iWidth(0), m_iHeight(0)
+	: m_uGLId(0), m_iWidth(0), m_iHeight(0)
 {
-	glGenTextures(1, &m_uId);
+	m_eType = TEXTURE_TYPE;
+	SetName(pFilename);
+
+	glGenTextures(1, &m_uGLId);
 	Bind();
 
 	ncTextureLoader texLoader(pFilename);
@@ -27,9 +31,12 @@ ncTexture::ncTexture(const char *pFilename)
 }
 
 ncTexture::ncTexture(const char *pFilename, int iWidth, int iHeight)
-	: m_uId(0), m_iWidth(0), m_iHeight(0)
+	: m_uGLId(0), m_iWidth(0), m_iHeight(0)
 {
-	glGenTextures(1, &m_uId);
+	m_eType = TEXTURE_TYPE;
+	SetName(pFilename);
+
+	glGenTextures(1, &m_uGLId);
 	Bind();
 
 	ncTextureLoader texLoader(pFilename);
@@ -37,9 +44,12 @@ ncTexture::ncTexture(const char *pFilename, int iWidth, int iHeight)
 }
 
 ncTexture::ncTexture(const char *pFilename, ncPoint size)
-	: m_uId(0), m_iWidth(0), m_iHeight(0)
+	: m_uGLId(0), m_iWidth(0), m_iHeight(0)
 {
-	glGenTextures(1, &m_uId);
+	m_eType = TEXTURE_TYPE;
+	SetName(pFilename);
+
+	glGenTextures(1, &m_uGLId);
 	Bind();
 
 	ncTextureLoader texLoader(pFilename);
@@ -48,7 +58,7 @@ ncTexture::ncTexture(const char *pFilename, ncPoint size)
 
 ncTexture::~ncTexture()
 {
-	glDeleteTextures(1, &m_uId);
+	glDeleteTextures(1, &m_uGLId);
 }
 
 ///////////////////////////////////////////////////////////
@@ -61,6 +71,27 @@ void ncTexture::SetFiltering(GLenum eFilter)
 	Bind();
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, eFilter);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, eFilter);
+}
+
+ncTexture* ncTexture::FromId(unsigned int uId)
+{
+	ncObject *pObject = ncServiceLocator::GetIndexer().Object(uId);
+
+	if(pObject)
+	{
+		if (pObject->Type() == sType())
+			return static_cast<ncTexture *>(pObject);
+		else // Cannot cast
+		{
+			ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, "ncTexture::FromId - Object of wrong type");
+	//		exit(-1);
+		}
+	}
+	else // NULL
+	{
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncTexture::FromId - Object not found");
+		return NULL;
+	}
 }
 
 ///////////////////////////////////////////////////////////
