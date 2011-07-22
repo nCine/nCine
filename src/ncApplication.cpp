@@ -12,6 +12,7 @@ ncFrameTimer *ncApplication::m_pFrameTimer = NULL;
 ncGfxDevice *ncApplication::m_pGfxDevice = NULL;
 ncSceneNode *ncApplication::m_pRootNode = NULL;
 ncRenderGraph *ncApplication::m_pRenderGraph = NULL;
+ncLinePlotter *ncApplication::m_pLinePlotter = NULL;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -23,6 +24,15 @@ void ncApplication::Init(void (*pGameCallback)(eCommand cmd))
 	m_pGfxDevice = new ncGfxDevice(960, 640);
 	m_pRootNode = new ncSceneNode();
 	m_pRenderGraph = new ncRenderGraph();
+	m_pLinePlotter = new ncLinePlotter(ncRect(100, 100, 760, 100));
+	m_pLinePlotter->SetBackgroundColor(ncColor(0.5f, 0.5f, 0.5f, 0.5f));
+	m_pLinePlotter->AddVariable(32, 250);
+	m_pLinePlotter->Variable(0).SetGraphColor(ncColor(1.0f, 1.0f, 1.0f));
+	m_pLinePlotter->Variable(0).SetMeanColor(ncColor(0.75f, 0.1f, 0.0f));
+	m_pLinePlotter->Variable(0).SetPlotMean(false);
+	m_pLinePlotter->AddVariable(64, 150);
+	m_pLinePlotter->Variable(1).SetGraphColor(ncColor(0.0f, 1.0f, 1.0f));
+	m_pLinePlotter->Variable(1).SetMeanColor(ncColor(0.75f, 0.1f, 0.0f));
 
 	ncServiceLocator::RegisterIndexer(new ncArrayIndexer());
 	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
@@ -65,9 +75,13 @@ void ncApplication::Run()
 		m_pGfxDevice->Clear();
 		m_pGameCallback(CMD_FRAMESTART);
 
-		m_pRootNode->Update(m_pFrameTimer->GetInterval());
+		m_pRootNode->Update(m_pFrameTimer->Interval());
 		m_pRenderGraph->Traverse(*m_pRootNode);
 		m_pRenderGraph->Draw();
+
+		m_pLinePlotter->AddValue(0, m_pFrameTimer->Interval());
+		m_pLinePlotter->AddValue(1, 1.0f * (rand()%100));
+		m_pLinePlotter->Draw();
 
 		m_pGfxDevice->Update();
 		m_pGameCallback(CMD_FRAMEEND);

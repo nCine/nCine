@@ -29,11 +29,11 @@ public:
 	// Reset timer and counters
 	void Reset();
 	/// Return current frame number
-	inline unsigned long int GetFrame() { return m_ulNFrames; }
+	inline unsigned long int FrameNum() { return m_ulNFrames; }
 	/// Return the interval between two subsequent calls to AddFrame()
-	inline unsigned long int GetInterval() { return m_uFrameInterval; };
+	inline unsigned long int Interval() { return m_uFrameInterval; };
 	/// Return the average FPS on the update interval
-	inline float GetFPS() { return m_fFps; };
+	inline float FPS() { return m_fFps; };
 };
 
 #endif

@@ -58,8 +58,8 @@ class ncRect
 					w == rect.w && h == rect.h);
 		}
 
-		void print(ncRect& rect) {
-			printf("%i %i %i %i", rect.x, rect.y, rect.w, rect.h);
+		inline void Print() const {
+			printf("(%i, %i, %i, %i)", x, y, w, h);
 		}
 };
 

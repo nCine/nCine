@@ -78,8 +78,8 @@ int main(int argc, char **argv)
 
 // ----- Blitting on the screen --------
 		t.AddFrame();
-		fAngle += 0.1f * t.GetInterval();
-		fAngle2 += 0.25f * t.GetInterval();
+		fAngle += 0.1f * t.Interval();
+		fAngle2 += 0.25f * t.Interval();
 
 		gfxDevice.Clear();
 
@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 		pSprite4->x = -fSinus2*100;
 		pSprite4->y = fCosine2*100;
 
-		rootNode.Update(t.GetInterval());
+		rootNode.Update(t.Interval());
 		renderGraph.Traverse(rootNode);
 		renderGraph.Draw();
 

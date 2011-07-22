@@ -39,16 +39,14 @@ void ncTimer::Continue()
 	m_uStartTime = Now();
 }
 
-/// Return (stop - start) or (now-start) time interval
+/// Return (stop-start) or (now-start) time interval
 /// depending on whether the timer is currently running or not
 unsigned long int ncTimer::Interval()
 {
-	if (m_bRunning) {
+	if (m_bRunning)
 		return Now() - m_uStartTime;
-	}
-	else {
+	else
 		return m_uStopTime - m_uStartTime;
-	}
 }
 
 /// Return total elapsed time

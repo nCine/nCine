@@ -27,8 +27,8 @@ public:
 		return (x == point.x && y == point.y);
 	}
 
-	void print(ncPoint& point) {
-		printf("%i %i", point.x, point.y);
+	inline void Print() const {
+		printf("(%i, %i)", x, y);
 	}
 };
 

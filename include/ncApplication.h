@@ -6,6 +6,7 @@
 #include "ncGfxDevice.h"
 #include "ncSceneNode.h"
 #include "ncRenderGraph.h"
+#include "ncLinePlotter.h"
 
 /// Main entry point and handler for nCine applications
 class ncApplication
@@ -26,6 +27,7 @@ private:
 	static ncGfxDevice *m_pGfxDevice;
 	static ncSceneNode *m_pRootNode;
 	static ncRenderGraph *m_pRenderGraph;
+	static ncLinePlotter *m_pLinePlotter;
 
 	ncApplication();
 	~ncApplication();
@@ -37,7 +39,7 @@ public:
 
 	// Wrappaggio pezzotto
 	static inline ncSceneNode& RootNode() { return *m_pRootNode; }
-	static inline unsigned long int Interval() { return m_pFrameTimer->GetInterval(); }
+	static inline unsigned long int Interval() { return m_pFrameTimer->Interval(); }
 	static inline int Width() { return m_pGfxDevice->Width(); }
 	static inline int Height() { return m_pGfxDevice->Height(); }
 };

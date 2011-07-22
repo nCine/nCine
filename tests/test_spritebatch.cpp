@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 
 // ----- Blitting on the screen --------
 		t.AddFrame();
-		fAngle += 0.1f * t.GetInterval();
+		fAngle += 0.1f * t.Interval();
 
 		gfxDevice.Clear();
 
