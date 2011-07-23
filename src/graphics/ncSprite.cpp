@@ -1,6 +1,8 @@
+#ifdef __ANDROID__
+	#include <cstdlib> // for exit()
+#endif
 #include "ncSprite.h"
 #include "ncServiceLocator.h"
-
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR

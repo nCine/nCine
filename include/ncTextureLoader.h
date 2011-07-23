@@ -16,6 +16,7 @@
 	#include <SDL/SDL_image.h>
 #endif
 
+#include <stdint.h> // for ETC1 header
 #include "ncTextureFormat.h"
 #include "ncPoint.h"
 
@@ -23,9 +24,23 @@
 class ncTextureLoader
 {
 private:
+
+	typedef struct ETC1_magic {
+		char cMagicId[6];
+		uint16_t uZero;
+	} ETC1_magic;
+
+	typedef struct ETC1_header {
+		uint16_t uWidth;
+		uint16_t uHeight;
+		uint16_t uWidth2;
+		uint16_t uHeight2;
+	} ETC1_header;
+
 	int m_iWidth;
 	int m_iHeight;
 	int m_iBpp;
+	int m_iHeaderSize;
 	long m_lFileSize;
 	ncTextureFormat m_texFormat;
 	GLubyte* m_uPixels;
@@ -36,6 +51,7 @@ private:
 	void LoadSDL(const char *pFilename);
 #endif
 
+	void ReadETC1Header(const char *pFilename);
 	void LoadCompressed(const char *pFilename, GLenum eInternalFormat);
 public:
 	ncTextureLoader(const char *pFilename);

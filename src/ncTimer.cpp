@@ -1,9 +1,15 @@
-#ifdef __ANDROID__
-	#include <sys/time.h>
-#else
-	#include <SDL/SDL_timer.h>
-#endif
+#include <cstdlib> // for NULL
 #include "ncTimer.h"
+
+///////////////////////////////////////////////////////////
+// CONSTRUCTORS and DESTRUCTOR
+///////////////////////////////////////////////////////////
+
+ncTimer::ncTimer()
+	: m_bRunning(false), m_uStartTime(0), m_uStopTime(0), m_uTotal(0)
+{
+	gettimeofday(&m_initTv, NULL);
+}
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -58,14 +64,11 @@ unsigned long int ncTimer::Total()
 /// Return current time in milliseconds from epoch
 unsigned long int ncTimer::Now()
 {
-#ifdef __ANDROID__
-	struct timeval tv;
+	struct timeval now;
 
-	gettimeofday(&tv, NULL);
-	unsigned long int now = (unsigned long int)(tv.tv_sec*1000 + tv.tv_usec/1000.0);
+	gettimeofday(&now, NULL);
+	unsigned long int ticks = (now.tv_sec - m_initTv.tv_sec) * 1000 +
+		(now.tv_usec - m_initTv.tv_usec)/1000;
 
-	return now;
-#else
-	return SDL_GetTicks();
-#endif
+	return ticks;
 }

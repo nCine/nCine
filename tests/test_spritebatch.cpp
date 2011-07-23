@@ -12,7 +12,7 @@
 #include "ncFrameTimer.h"
 #include "ncServiceLocator.h"
 #include "ncFileLogger.h"
-#include "ncGfxDevice.h"
+#include "ncSDLGfxDevice.h"
 #include "ncSpriteBatch.h"
 #include "ncTexture.h"
 
@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 	float fAngle = 0.0;
 	ncFrameTimer t(5, 0);
 	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_WARN));
-	ncGfxDevice gfxDevice(iWidth, iHeight);
+	ncSDLGfxDevice gfxDevice(iWidth, iHeight);
 	SDL_WM_SetCaption("Test", NULL);
 
 	ncTexture tex1("texture1.png");

@@ -1,8 +1,4 @@
-#ifndef NO_GLEW
-	#include <GL/glew.h>
-#endif
-
-#include "ncGfxDevice.h"
+#include "ncSDLGfxDevice.h"
 #include "ncServiceLocator.h"
 
 ///////////////////////////////////////////////////////////
@@ -10,39 +6,27 @@
 ///////////////////////////////////////////////////////////
 
 /// Constructor taking the resolution as two integer
-ncGfxDevice::ncGfxDevice(int iWidth, int iHeight)
-	: m_iWidth(iWidth), m_iHeight(iHeight), m_bIsWindowed(true), m_mode()
+ncSDLGfxDevice::ncSDLGfxDevice(int iWidth, int iHeight)
 {
-	InitGraphics();
-	InitDevice();
-	InitGL();
+	Init(iWidth, iHeight, ncDisplayMode(), true);
 }
 
 /// Constructor taking the resolution as a Size class
-ncGfxDevice::ncGfxDevice(ncPoint size)
-	: m_iWidth(size.x), m_iHeight(size.y), m_bIsWindowed(true), m_mode()
+ncSDLGfxDevice::ncSDLGfxDevice(ncPoint size)
 {
-	InitGraphics();
-	InitDevice();
-	InitGL();
+	Init(size.x, size.y, ncDisplayMode(), true);
 }
 
 /// Constructor taking the resolution as two integer and a DisplayMode
-ncGfxDevice::ncGfxDevice(int iWidth, int iHeight, ncDisplayMode mode)
-	: m_iWidth(iWidth), m_iHeight(iHeight), m_bIsWindowed(true), m_mode(mode)
+ncSDLGfxDevice::ncSDLGfxDevice(int iWidth, int iHeight, ncDisplayMode mode)
 {
-	InitGraphics();
-	InitDevice();
-	InitGL();
+	Init(iWidth, iHeight, mode, true);
 }
 
 /// Constructor taking the resolution as a Size class and a DisplayMode
-ncGfxDevice::ncGfxDevice(ncPoint size, ncDisplayMode mode)
-	: m_iWidth(size.x), m_iHeight(size.y), m_bIsWindowed(true), m_mode(mode)
+ncSDLGfxDevice::ncSDLGfxDevice(ncPoint size, ncDisplayMode mode)
 {
-	InitGraphics();
-	InitDevice();
-	InitGL();
+	Init(size.x, size.y, mode, true);
 }
 
 ///////////////////////////////////////////////////////////
@@ -50,7 +34,7 @@ ncGfxDevice::ncGfxDevice(ncPoint size, ncDisplayMode mode)
 ///////////////////////////////////////////////////////////
 
 /// Set screen resolution with two integers
-void ncGfxDevice::SetResolution(int iWidth, int iHeight)
+void ncSDLGfxDevice::SetResolution(int iWidth, int iHeight)
 {
 	// change resolution only in the case it really changes
 	if(iWidth != m_iWidth || iHeight != m_iHeight)
@@ -63,7 +47,7 @@ void ncGfxDevice::SetResolution(int iWidth, int iHeight)
 }
 
 /// Set screen resolution with the Size class
-void ncGfxDevice::SetResolution(ncPoint size)
+void ncSDLGfxDevice::SetResolution(ncPoint size)
 {
 	// change resolution only in the case it really changes
 	if(size.x != m_iWidth || size.y != m_iHeight)
@@ -76,7 +60,7 @@ void ncGfxDevice::SetResolution(ncPoint size)
 }
 
 /// Toggle between fullscreen and windowed mode
-void ncGfxDevice::ToggleFullScreen()
+void ncSDLGfxDevice::ToggleFullScreen()
 {
 	m_bIsWindowed = !m_bIsWindowed;
 	InitDevice();
@@ -86,21 +70,45 @@ void ncGfxDevice::ToggleFullScreen()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/// Initialize the class
+void ncSDLGfxDevice::Init(int iWidth, int iHeight, ncDisplayMode mode, bool bIsWindowed)
+{
+	m_iWidth = iWidth;
+	m_iHeight = iHeight;
+	m_mode = mode;
+	m_bIsWindowed = bIsWindowed;
+
+	InitGraphics();
+	InitDevice();
+	InitGL();
+
+	SDL_WM_SetCaption("nCine", NULL);
+}
+
 /// Init the video subsystem (SDL)
-void ncGfxDevice::InitGraphics()
+void ncSDLGfxDevice::InitGraphics()
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncGfxDevice::InitGraphics - SDL_Init(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncSDLGfxDevice::InitGraphics - SDL_Init(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
 		exit(-1);
 	}
-
-	atexit(SDL_Quit);
 }
 
 /// Init the OpenGL graphic context
-void ncGfxDevice::InitDevice()
+void ncSDLGfxDevice::InitDevice()
 {
 	// setting OpenGL attributes
+	if (m_mode.RedBits() > 0)
+		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, m_mode.RedBits());
+	if (m_mode.GreenBits() > 0)
+		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, m_mode.GreenBits());
+	if (m_mode.BlueBits() > 0)
+		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, m_mode.BlueBits());
+	if (m_mode.AlphaBits() > 0)
+		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, m_mode.AlphaBits());
+	if (m_mode.BufferBits() > 0)
+		SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, m_mode.BufferBits());
+
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, m_mode.isDoubleBuffered());
 	SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, m_mode.isVSynced());
 	if (m_mode.DepthBits() > 0)
@@ -114,7 +122,7 @@ void ncGfxDevice::InitDevice()
 
 	// setting screen mode, get a screen from SDL
 	if (!SDL_SetVideoMode(m_iWidth, m_iHeight, 0, lFlags)) {
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncGfxDevice::InitDevice - SDL_SetVideoMode failed: %s", SDL_GetError());
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncSDLGfxDevice::InitDevice - SDL_SetVideoMode failed: %s", SDL_GetError());
 		exit(-1);
 	}
 
@@ -122,12 +130,12 @@ void ncGfxDevice::InitDevice()
 	GLenum err = glewInit();
 
 	if (GLEW_OK != err) {
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncGfxDevice::InitDevice - GLEW error: %s", glewGetErrorString(err));
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncSDLGfxDevice::InitDevice - GLEW error: %s", glewGetErrorString(err));
 		exit(-1);
 	}
 
 	if (!GLEW_VERSION_2_0) {
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncGfxDevice::InitDevice - OpenGL 2 is not supported");
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncSDLGfxDevice::InitDevice - OpenGL 2 is not supported");
 		exit(-1);
 	}
 #endif
@@ -135,7 +143,7 @@ void ncGfxDevice::InitDevice()
 
 
 /// Init starting OpenGL state
-void ncGfxDevice::InitGL()
+void ncSDLGfxDevice::InitGL()
 {
 //	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);

@@ -1,10 +1,7 @@
 #ifdef __ANDROID__
 	#include <stdlib.h> // for exit()
-	#include <string.h>
-#else
-	#include <cstring>
 #endif
-
+#include <cstring>
 #include "ncTextureLoader.h"
 #include "ncServiceLocator.h"
 
@@ -13,8 +10,8 @@
 ///////////////////////////////////////////////////////////
 
 ncTextureLoader::ncTextureLoader(const char *pFilename)
-	: m_iWidth(0), m_iHeight(0), m_iBpp(0), m_lFileSize(0),
-	  m_uPixels(NULL), m_pFile(NULL)
+	: m_iWidth(0), m_iHeight(0), m_iBpp(0), m_iHeaderSize(0),
+	  m_lFileSize(0), m_uPixels(NULL), m_pFile(NULL)
 	#ifndef __ANDROID__
 	,m_pSDLSurface(NULL)
 	#endif
@@ -33,11 +30,14 @@ ncTextureLoader::ncTextureLoader(const char *pFilename)
 		LoadSDL(pFilename);
 	#else
 	if (!strncmp(pDotChar, ".pkm", 4))
+	{
+		ReadETC1Header(pFilename);
 		LoadCompressed(pFilename, GL_ETC1_RGB8_OES);
+	}
 	#endif
 	else
 	{
-			ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureLoader::ncTextureLoader - Extension unknown \"%s\"", pDotChar);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureLoader::ncTextureLoader - Extension unknown \"%s\"", pDotChar);
 		exit(-1);
 	}
 }
@@ -93,21 +93,54 @@ void ncTextureLoader::LoadSDL(const char *pFilename)
 }
 #endif
 
+void ncTextureLoader::ReadETC1Header(const char *pFilename)
+{
+	m_pFile = fopen(pFilename, "rb");
+	if (!m_pFile)
+	{
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureLoader::ReadETC1Header - Cannot open the file \"%s\"", pFilename);
+		exit(-1);
+	}
+
+	// ETC1 header is 16 bytes long
+	// It have been splitted in two structures to avoid compiler-specific alignment pragmas
+	ETC1_magic magic;
+	ETC1_header header;
+	fread(&magic, 8, 1, m_pFile);
+
+	// Checking for the header presence
+	if (strncmp(magic.cMagicId, "PKM 10", 6) == 0)
+	{
+		fread(&header, 8, 1, m_pFile);
+		m_iHeaderSize = 16;
+		uint16_t swappedWidth2 = (header.uWidth2 >> 8) | (header.uWidth2 << 8); // HACK: Big to little endian
+		uint16_t swappedHeight2 = (header.uHeight2 >> 8) | (header.uHeight2 << 8); // HACK: Big to little endian
+		m_iWidth = swappedWidth2;
+		m_iHeight = swappedHeight2;
+
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncTextureLoader::ReadETC1Header - Header found3: w:%d h:%d", m_iWidth, m_iHeight);
+	}
+}
+
 void ncTextureLoader::LoadCompressed(const char *pFilename, GLenum eInternalFormat)
 {
 	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncTextureLoader::LoadCompressed - Loading \"%s\"", pFilename);
 	m_texFormat = ncTextureFormat(eInternalFormat);
 
-	m_pFile = fopen(pFilename, "r");
+	// If the file has not been already opened by a header reader method
 	if (!m_pFile)
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureLoader::LoadCompressed - Cannot open the file \"%s\"", pFilename);
-		exit(-1);
+		m_pFile = fopen(pFilename, "rb");
+		if (!m_pFile)
+		{
+			ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureLoader::LoadCompressed - Cannot open the file \"%s\"", pFilename);
+			exit(-1);
+		}
 	}
 
 	fseek(m_pFile, 0L, SEEK_END);
-	m_lFileSize = ftell(m_pFile);
-	fseek(m_pFile, 0L, SEEK_SET);
+	m_lFileSize = ftell(m_pFile) - m_iHeaderSize;
+	fseek(m_pFile, m_iHeaderSize, SEEK_SET);
 
 	m_uPixels =  new unsigned char[m_lFileSize];
 	fread(m_uPixels, m_lFileSize, 1, m_pFile);

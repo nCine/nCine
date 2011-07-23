@@ -17,10 +17,17 @@ int test_scene(ncApplication::eCommand cmd)
 		{
 			ncSceneNode &rRootNode = ncApplication::RootNode();
 
+#ifdef __ANDROID__
+			pTextures[0] = new ncTexture("/sdcard/texture1.pkm"); // 145x121
+			pTextures[1] = new ncTexture("/sdcard/texture2.pkm"); // 100x100
+			pTextures[2] = new ncTexture("/sdcard/texture3.pkm"); // 96x96
+			pTextures[3] = new ncTexture("/sdcard/texture4.pkm"); // 96x96
+#else
 			pTextures[0] = new ncTexture("texture1.png");
 			pTextures[1] = new ncTexture("texture2.png");
 			pTextures[2] = new ncTexture("texture3.png");
 			pTextures[3] = new ncTexture("texture4.png");
+#endif
 
 			pSprites[0] = new ncSprite(pTextures[0], 0, 0);
 			pSprites[0]->setScale(0.75f);

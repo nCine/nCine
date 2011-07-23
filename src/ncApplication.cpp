@@ -9,7 +9,7 @@
 
 void (*ncApplication::m_pGameCallback)(eCommand cmd) = NULL;
 ncFrameTimer *ncApplication::m_pFrameTimer = NULL;
-ncGfxDevice *ncApplication::m_pGfxDevice = NULL;
+ncIGfxDevice *ncApplication::m_pGfxDevice = NULL;
 ncSceneNode *ncApplication::m_pRootNode = NULL;
 ncRenderGraph *ncApplication::m_pRenderGraph = NULL;
 ncLinePlotter *ncApplication::m_pLinePlotter = NULL;
@@ -18,18 +18,24 @@ ncLinePlotter *ncApplication::m_pLinePlotter = NULL;
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+#ifdef __ANDROID__
+void ncApplication::Init(struct android_app* state, void (*pGameCallback)(eCommand cmd))
+{
+//	m_state = state;
+	m_pGfxDevice = new ncEGLGfxDevice(state, ncDisplayMode(5, 6, 5));
+#else
 void ncApplication::Init(void (*pGameCallback)(eCommand cmd))
 {
+	m_pGfxDevice = new ncSDLGfxDevice(960, 640);
+#endif
 	m_pFrameTimer = new ncFrameTimer(5, 0);
-	m_pGfxDevice = new ncGfxDevice(960, 640);
 	m_pRootNode = new ncSceneNode();
 	m_pRenderGraph = new ncRenderGraph();
-	m_pLinePlotter = new ncLinePlotter(ncRect(100, 100, 760, 100));
+	m_pLinePlotter = new ncLinePlotter(ncRect(Width()*0.1f, Height()*0.1f, Width()*0.8f, Height()*0.15f));
 	m_pLinePlotter->SetBackgroundColor(ncColor(0.5f, 0.5f, 0.5f, 0.5f));
 	m_pLinePlotter->AddVariable(32, 250);
 	m_pLinePlotter->Variable(0).SetGraphColor(ncColor(1.0f, 1.0f, 1.0f));
-	m_pLinePlotter->Variable(0).SetMeanColor(ncColor(0.75f, 0.1f, 0.0f));
-	m_pLinePlotter->Variable(0).SetPlotMean(false);
+	m_pLinePlotter->Variable(0).SetMeanColor(ncColor(0.75f, 0.75f, 0.0f));
 	m_pLinePlotter->AddVariable(64, 150);
 	m_pLinePlotter->Variable(1).SetGraphColor(ncColor(0.0f, 1.0f, 1.0f));
 	m_pLinePlotter->Variable(1).SetMeanColor(ncColor(0.75f, 0.1f, 0.0f));
@@ -45,6 +51,7 @@ void ncApplication::Init(void (*pGameCallback)(eCommand cmd))
 
 void ncApplication::Run()
 {
+#ifndef __ANDROID__
 	bool bQuit = false;
 	SDL_Event event;
 
@@ -71,23 +78,27 @@ void ncApplication::Run()
 			}
 		}
 
-		m_pFrameTimer->AddFrame();
-		m_pGfxDevice->Clear();
-		m_pGameCallback(CMD_FRAMESTART);
-
-		m_pRootNode->Update(m_pFrameTimer->Interval());
-		m_pRenderGraph->Traverse(*m_pRootNode);
-		m_pRenderGraph->Draw();
-
-		m_pLinePlotter->AddValue(0, m_pFrameTimer->Interval());
-		m_pLinePlotter->AddValue(1, 1.0f * (rand()%100));
-		m_pLinePlotter->Draw();
-
-		m_pGfxDevice->Update();
-		m_pGameCallback(CMD_FRAMEEND);
-
-		m_pGfxDevice->Update();
+		Step();
 	}
+#endif
+}
+
+void ncApplication::Step()
+{
+	m_pFrameTimer->AddFrame();
+	m_pGfxDevice->Clear();
+	m_pGameCallback(CMD_FRAMESTART);
+
+	m_pRootNode->Update(m_pFrameTimer->Interval());
+	m_pRenderGraph->Traverse(*m_pRootNode);
+	m_pRenderGraph->Draw();
+
+	m_pLinePlotter->AddValue(0, m_pFrameTimer->Interval());
+	m_pLinePlotter->AddValue(1, 1.0f * (rand()%100));
+	m_pLinePlotter->Draw();
+
+	m_pGfxDevice->Update();
+	m_pGameCallback(CMD_FRAMEEND);
 }
 
 void ncApplication::Shutdown()

@@ -23,7 +23,9 @@ private:
 	int m_iWidth;
 	int m_iHeight;
 
+	// Load a texture based on information from the texture format and loader
 	void Load(const ncTextureLoader &texLoader);
+	// Load a texture overriding the size detected by the texture loader
 	void Load(const ncTextureLoader &texLoader, int iWidth, int iHeight);
 public:
 	ncTexture();

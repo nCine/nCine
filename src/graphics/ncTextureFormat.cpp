@@ -1,9 +1,4 @@
-#ifdef __ANDROID__
-	#include <stdlib.h>
-#else
-	#include <cstdlib> // for exit()
-#endif
-
+#include <cstdlib> // for exit()
 #include "ncTextureFormat.h"
 #include "ncServiceLocator.h"
 

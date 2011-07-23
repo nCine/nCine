@@ -65,9 +65,9 @@ void ncProfileVariable::AddValue(float fValue)
 
 		m_fValues[m_uNextIndex] = fValue;
 		m_fMean = 0.0f;
-		for(int i = 0; i < 3; i++)
+		for(int i = 0; i < m_uNumValues/3; i++)
 			m_fMean += m_fValues[(m_uNextIndex-i)%m_uNumValues];
-		m_fMean /= 3.0f;
+		m_fMean *= 1.0f/(m_uNumValues/3);
 
 		m_uNextIndex = (m_uNextIndex+1)%m_uNumValues;
 	}

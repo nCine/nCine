@@ -1,11 +1,10 @@
 #ifdef __ANDROID__
 	#include <stdarg.h>
-	#include <time.h>
 	#include <android/log.h>
 #else
 	#include <cstdarg>
-	#include <ctime>
 #endif
+#include <ctime>
 #include "ncFileLogger.h"
 
 ///////////////////////////////////////////////////////////

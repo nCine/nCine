@@ -1,5 +1,5 @@
 #ifdef __ANDROID__
-	#include <stdlib.h> // for exit()
+	#include <cstdlib> // for exit()
 #endif
 #include "ncTexture.h"
 #include "ncTextureLoader.h"
@@ -98,20 +98,27 @@ ncTexture* ncTexture::FromId(unsigned int uId)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/// Load a texture based on information from the texture format and loader
 void ncTexture::Load(const ncTextureLoader& texLoader)
 {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	const ncTextureFormat &texFormat = texLoader.TexFormat();
-	glTexImage2D(GL_TEXTURE_2D, 0, texFormat.Internal(),
-				 texLoader.Width(), texLoader.Height(), 0,
-				 texFormat.Format(), texFormat.Type(), texLoader.Pixels());
+	if (texFormat.isCompressed())
+		glCompressedTexImage2D(GL_TEXTURE_2D, 0, texFormat.Internal(),
+							   texLoader.Width(), texLoader.Height(), 0,
+							   texLoader.FileSize(), texLoader.Pixels());
+	else
+		glTexImage2D(GL_TEXTURE_2D, 0, texFormat.Internal(),
+					 texLoader.Width(), texLoader.Height(), 0,
+					 texFormat.Format(), texFormat.Type(), texLoader.Pixels());
 
 	m_iWidth = texLoader.Width();
 	m_iHeight = texLoader.Height();
 }
 
+/// Load a texture overriding the size detected by the texture loader
 void ncTexture::Load(const ncTextureLoader& texLoader, int iWidth, int iHeight)
 {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -124,7 +131,7 @@ void ncTexture::Load(const ncTextureLoader& texLoader, int iWidth, int iHeight)
 							   texLoader.FileSize(), texLoader.Pixels());
 	else
 		glTexImage2D(GL_TEXTURE_2D, 0, texFormat.Internal(),
-					 texLoader.Width(), texLoader.Height(), 0,
+					 iWidth, iHeight, 0,
 					 texFormat.Format(), texFormat.Type(), texLoader.Pixels());
 
 	m_iWidth = iWidth;

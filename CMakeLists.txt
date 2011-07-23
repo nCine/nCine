@@ -18,7 +18,7 @@ set(SOURCES
 	src/ncTimer.cpp
 	src/ncFrameTimer.cpp
 	src/ncProfileVariable.cpp
-	src/graphics/ncGfxDevice.cpp
+	src/graphics/ncSDLGfxDevice.cpp
 	src/graphics/ncTextureFormat.cpp
 	src/graphics/ncTextureLoader.cpp
 	src/graphics/ncTexture.cpp

@@ -1,9 +1,15 @@
 #ifndef CLASS_NCTIMER
 #define CLASS_NCTIMER
 
+#include <sys/time.h>
+
 /// Basic timer and synchronization class
 class ncTimer
 {
+private:
+	/// Init time mark
+	/*! It is needed in order not to overflow when returning milliseconds since epoch */
+	struct timeval m_initTv;
 protected:
 	/// Is the timer running?
 	bool m_bRunning;
@@ -15,7 +21,7 @@ protected:
 	unsigned long int m_uTotal;
 public:
 	/// Empty constructor
-	ncTimer() : m_bRunning(false), m_uStartTime(0), m_uStopTime(0), m_uTotal(0) {};
+	ncTimer();
 	// Reset the timer
 	void Reset();
 	// Start the timer

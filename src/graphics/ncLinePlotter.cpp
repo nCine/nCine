@@ -47,6 +47,7 @@ void ncLinePlotter::Draw()
 {
 	glDisable(GL_TEXTURE_2D);
 
+#ifndef __ANDROID__
 	glEnable (GL_BLEND);
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glColor4ub(m_backgroundColor.r, m_backgroundColor.g, m_backgroundColor.b, m_backgroundColor.a);
@@ -59,6 +60,7 @@ void ncLinePlotter::Draw()
 	glVertex2i(m_iX, m_iY + m_iHeight);
 	glEnd();
 	glDisable(GL_BLEND);
+#endif
 
 	for (int i = 0; i < m_vVariables.Size(); i++)
 	{
@@ -73,6 +75,7 @@ void ncLinePlotter::Draw()
 
 		if (m_vVariables[i]->shouldPlotMean())
 		{
+#ifndef __ANDROID__
 			const ncColor& meanColor = m_vVariables[i]->MeanColor();
 			float fNormalizedMean = m_vVariables[i]->NormMean();
 			glColor4ub(meanColor.r, meanColor.g, meanColor.b, meanColor.a);
@@ -80,6 +83,7 @@ void ncLinePlotter::Draw()
 			glVertex2i(m_iX, m_iY + m_iHeight*fNormalizedMean);
 			glVertex2i(m_iX + m_iWidth, m_iY + m_iHeight*fNormalizedMean);
 			glEnd();
+#endif
 		}
 	}
 
