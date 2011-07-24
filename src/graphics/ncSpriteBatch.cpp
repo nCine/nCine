@@ -104,7 +104,7 @@ void ncSpriteBatch::Draw(ncTexture *pTexture, ncRect dstRect, ncRect srcRect)
 void ncSpriteBatch::Draw(ncTexture *pTexture, ncRect dstRect)
 {
 //	ncRect srcRect(0, 0, pTexture->m_iWidth, pTexture->m_iHeight);
-	ncRect srcRect(0, 0, 0, 0); // to call the optimized SetTexXoords()
+	ncRect srcRect(0, 0, 0, 0); // to call the optimized SetTexCoords()
 	Draw(pTexture, dstRect, srcRect);
 }
 
@@ -114,7 +114,7 @@ void ncSpriteBatch::Draw(ncTexture *pTexture, ncPoint pos)
 	ncRect dstRect = ncRect::FromCenterAndSize(pos, pTexture->Size());
 
 //	ncRect srcRect(0, 0, pTexture->m_iWidth, pTexture->m_iHeight);
-	ncRect srcRect(0, 0, 0, 0); // to call the optimized SetTexXoords()
+	ncRect srcRect(0, 0, 0, 0); // to call the optimized SetTexCoords()
 	Draw(pTexture, dstRect, srcRect);
 }
 

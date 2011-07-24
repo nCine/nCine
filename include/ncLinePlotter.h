@@ -56,12 +56,16 @@ private:
 	int m_iHeight;
 
 	ncColor m_backgroundColor;
+	GLfloat m_fBackgroundVertices[12];
 	ncArray<ncLineVariable *> m_vVariables;
 
-	void SetVertices();
+	void SetBackgroundVertices();
 public:
 	ncLinePlotter(ncRect rect)
-		: m_iX(rect.x), m_iY(rect.y), m_iWidth(rect.w), m_iHeight(rect.h), m_vVariables(2) { }
+		: m_iX(rect.x), m_iY(rect.y), m_iWidth(rect.w), m_iHeight(rect.h), m_vVariables(2)
+	{
+		SetBackgroundVertices();
+	}
 	~ncLinePlotter();
 
 	unsigned int AddVariable(unsigned int uNumValues, unsigned int uRejectDelay);

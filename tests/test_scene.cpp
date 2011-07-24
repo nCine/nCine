@@ -44,10 +44,10 @@ int main(int argc, char **argv)
 	ncSprite *pSprite2 = new ncSprite(pSprite1, &tex2, 50, 70);
 	ncSprite *pSprite3 = new ncSprite(pSprite2, &tex3, 100, 50);
 	ncSprite *pSprite4 = new ncSprite(pSprite3, &tex4, -50, 25);
-	pSprite1->setScale(0.75f);
-	pSprite2->setScale(0.7f);
-	pSprite3->setScale(0.7f);
-	pSprite4->setScale(0.7f);
+	pSprite1->SetScale(0.75f);
+	pSprite2->SetScale(0.7f);
+	pSprite3->SetScale(0.7f);
+	pSprite4->SetScale(0.7f);
 	rootNode.AddChildNode(pSprite1);
 
 	t.Reset();

@@ -9,7 +9,7 @@
 ///////////////////////////////////////////////////////////
 
 ncSprite::ncSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY)
-	: ncSceneNode(pParent, iX, iY), m_pTexture(pTexture)
+	: ncSceneNode(pParent, iX, iY), m_pTexture(pTexture), m_texRect(0, 0, 0, 0), m_fScaleFactor(1.0f)
 {
 	m_eType = SPRITE_TYPE;
 	m_iWidth = pTexture->Width();
@@ -17,7 +17,7 @@ ncSprite::ncSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY)
 }
 
 ncSprite::ncSprite(ncTexture *pTexture, int iX, int iY)
-	: ncSceneNode(NULL, iX, iY), m_pTexture(pTexture)
+	: ncSceneNode(NULL, iX, iY), m_pTexture(pTexture), m_texRect(0, 0, 0, 0), m_fScaleFactor(1.0f)
 {
 	m_eType = SPRITE_TYPE;
 	m_iWidth = pTexture->Width();

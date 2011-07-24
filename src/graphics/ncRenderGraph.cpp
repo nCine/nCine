@@ -74,7 +74,7 @@ void ncRenderGraph::ProcessNode(ncSceneNode& rNode)
 		ncTexture *pTex = sprite.m_pTexture;
 
 		ncRect dstRect = ncRect::FromCenterAndSize(sprite.AbsPosition(), sprite.Size());
-		ncRect srcRect(0, 0, 0, 0); // to call the optimized SetTexXoords()
+		ncRect srcRect = sprite.TexRect();
 
 		m_drawCommands.InsertBack(ncDrawCommand(pTex, dstRect, srcRect));
 	}

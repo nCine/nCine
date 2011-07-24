@@ -30,13 +30,14 @@ int test_scene(ncApplication::eCommand cmd)
 #endif
 
 			pSprites[0] = new ncSprite(pTextures[0], 0, 0);
-			pSprites[0]->setScale(0.75f);
+			pSprites[0]->SetTexRect(ncRect(40, 0, pSprites[0]->Width()-80, pSprites[0]->Height()-30));
+			pSprites[0]->SetScale(0.75f);
 			rRootNode.AddChildNode(pSprites[0]);
 
 			for (int i = 1; i < numSprites; i++)
 			{
 				pSprites[i] = new ncSprite(pSprites[i-1], pTextures[i%numTextures], 0, 0);
-				pSprites[i]->setScale(0.5f);
+				pSprites[i]->SetScale(0.5f);
 			}
 		}
 			break;

@@ -9,8 +9,9 @@ ncLineVariable::ncLineVariable(unsigned int uNumValues, unsigned int uRejectDela
 	: m_variable(uNumValues, uRejectDelay), m_bPlotMean(true),
 	  m_graphColor(1.0f, 1.0f, 1.0f), m_meanColor(1.0f, 0.0f, 0.0f)
 {
-	// Two coordinates for every vertex (X, Y)
-	m_fVertices = new GLfloat[uNumValues*2];
+	// Two vertices for the mean quote plus...
+	// Two coordinates for every recorder value vertex (X, Y)
+	m_fVertices = new GLfloat[4 + uNumValues*2];
 }
 
 ncLineVariable::~ncLineVariable()
@@ -46,47 +47,36 @@ void ncLinePlotter::AddValue(unsigned int uIndex, float fValue)
 void ncLinePlotter::Draw()
 {
 	glDisable(GL_TEXTURE_2D);
+	glEnableClientState(GL_VERTEX_ARRAY);
 
-#ifndef __ANDROID__
+	// Rendering the background
 	glEnable (GL_BLEND);
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glColor4ub(m_backgroundColor.r, m_backgroundColor.g, m_backgroundColor.b, m_backgroundColor.a);
-	glBegin(GL_TRIANGLES);
-	glVertex2i(m_iX, m_iY);
-	glVertex2i(m_iX + m_iWidth, m_iY);
-	glVertex2i(m_iX, m_iY + m_iHeight);
-	glVertex2i(m_iX + m_iWidth, m_iY);
-	glVertex2i(m_iX + m_iWidth, m_iY + m_iHeight);
-	glVertex2i(m_iX, m_iY + m_iHeight);
-	glEnd();
+	glVertexPointer(2, GL_FLOAT, 0, m_fBackgroundVertices);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glDisable(GL_BLEND);
-#endif
 
 	for (int i = 0; i < m_vVariables.Size(); i++)
 	{
 		m_vVariables[i]->UpdateVertices(m_iX, m_iY, m_iWidth, m_iHeight);
-
-		const ncColor& graphColor = m_vVariables[i]->GraphColor();
-		glColor4ub(graphColor.r, graphColor.g, graphColor.b, graphColor.a);
-		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_FLOAT, 0, m_vVariables[i]->Vertices());
-		glDrawArrays(GL_LINE_STRIP, 0, m_vVariables[i]->NumValues());
-		glDisableClientState(GL_VERTEX_ARRAY);
+
+		// Rendering variable values
+		const ncColor& graphColor = m_vVariables[i]->GraphColor();
+		glColor4ub(graphColor.r, graphColor.g, graphColor.b, graphColor.a);	
+		glDrawArrays(GL_LINE_STRIP, 2, m_vVariables[i]->NumValues());
 
 		if (m_vVariables[i]->shouldPlotMean())
 		{
-#ifndef __ANDROID__
+			// Rendering variable mean
 			const ncColor& meanColor = m_vVariables[i]->MeanColor();
-			float fNormalizedMean = m_vVariables[i]->NormMean();
 			glColor4ub(meanColor.r, meanColor.g, meanColor.b, meanColor.a);
-			glBegin(GL_LINES);
-			glVertex2i(m_iX, m_iY + m_iHeight*fNormalizedMean);
-			glVertex2i(m_iX + m_iWidth, m_iY + m_iHeight*fNormalizedMean);
-			glEnd();
-#endif
-		}
+			glDrawArrays(GL_LINES, 0, 2);
+		}	
 	}
 
+	glDisableClientState(GL_VERTEX_ARRAY);
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	glEnable(GL_TEXTURE_2D);
 }
@@ -109,13 +99,31 @@ ncLineVariable& ncLinePlotter::Variable(unsigned int uIndex)
 /// Fill the buffer with vertices
 void ncLineVariable::UpdateVertices(int x, int y, int w, int h)
 {
+	float fNormalizedMean = m_variable.NormMean();
+	// Variable mean vertices
+	m_fVertices[0] = x;			m_fVertices[1] = y + h * fNormalizedMean;
+	m_fVertices[2] = x + w;		m_fVertices[3] = y + h * fNormalizedMean;
+
 	unsigned int uNumValues = m_variable.NumValues();
 	unsigned int uNextIndex = m_variable.NextIndex();
 
+	// Variable value vertices
 	for(int i = 0; i < uNumValues; i++)
 	{	
-		m_fVertices[2*i] = x + (w/uNumValues)*(i+1);
-		m_fVertices[2*i + 1] = y + h*m_variable.NormValue((uNextIndex+i)%uNumValues);
+		m_fVertices[4 + 2*i] = x + (w/uNumValues)*(i+1);
+		m_fVertices[4 + 2*i + 1] = y + h*m_variable.NormValue((uNextIndex+i)%uNumValues);
 	}
+}
+
+/// Fill the background buffer with vertices
+void ncLinePlotter::SetBackgroundVertices()
+{
+	// Graph background vertices
+	m_fBackgroundVertices[0] = m_iX;				m_fBackgroundVertices[1] = m_iY;
+	m_fBackgroundVertices[2] = m_iX + m_iWidth;		m_fBackgroundVertices[3] = m_iY;
+	m_fBackgroundVertices[4] = m_iX;				m_fBackgroundVertices[5] = m_iY + m_iHeight;
+	m_fBackgroundVertices[6] = m_iX + m_iWidth;		m_fBackgroundVertices[7] = m_iY;
+	m_fBackgroundVertices[8] = m_iX + m_iWidth;		m_fBackgroundVertices[9] = m_iY + m_iHeight;
+	m_fBackgroundVertices[10] = m_iX;				m_fBackgroundVertices[11] = m_iY + m_iHeight;
 }
 
