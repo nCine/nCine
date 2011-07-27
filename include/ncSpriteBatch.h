@@ -8,7 +8,8 @@
 // 2 triangles forming a rectangle
 // 3 vertices forming a triangle
 // 2 components forming a vertex coordinate (both XY and UV)
-#define QUAD_ELEMENTS 12 // TODO: very dirty
+// but 8 vertices instead of 12 thanks to GL_TRIANGLE_STRIP
+#define QUAD_ELEMENTS 8 // TODO: very dirty
 
 /// A class that sends a batch of sprites to the GPU for drawing
 class ncSpriteBatch

@@ -2,6 +2,8 @@
 #include "ncServiceLocator.h"
 #include "ncArrayIndexer.h"
 #include "ncFileLogger.h"
+#include "ncLinePlotter.h"
+#include "ncStackedBarPlotter.h"
 
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
@@ -12,7 +14,8 @@ ncFrameTimer *ncApplication::m_pFrameTimer = NULL;
 ncIGfxDevice *ncApplication::m_pGfxDevice = NULL;
 ncSceneNode *ncApplication::m_pRootNode = NULL;
 ncRenderGraph *ncApplication::m_pRenderGraph = NULL;
-ncLinePlotter *ncApplication::m_pLinePlotter = NULL;
+ncTimer *ncApplication::m_pTimer = NULL;
+ncProfilePlotter *ncApplication::m_pProfilePlotter = NULL;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -31,14 +34,19 @@ void ncApplication::Init(void (*pGameCallback)(eCommand cmd))
 	m_pFrameTimer = new ncFrameTimer(5, 0);
 	m_pRootNode = new ncSceneNode();
 	m_pRenderGraph = new ncRenderGraph();
-	m_pLinePlotter = new ncLinePlotter(ncRect(Width()*0.1f, Height()*0.1f, Width()*0.8f, Height()*0.15f));
-	m_pLinePlotter->SetBackgroundColor(ncColor(0.5f, 0.5f, 0.5f, 0.5f));
-	m_pLinePlotter->AddVariable(32, 250);
-	m_pLinePlotter->Variable(0).SetGraphColor(ncColor(1.0f, 1.0f, 1.0f));
-	m_pLinePlotter->Variable(0).SetMeanColor(ncColor(0.75f, 0.75f, 0.0f));
-	m_pLinePlotter->AddVariable(64, 150);
-	m_pLinePlotter->Variable(1).SetGraphColor(ncColor(0.0f, 1.0f, 1.0f));
-	m_pLinePlotter->Variable(1).SetMeanColor(ncColor(0.75f, 0.1f, 0.0f));
+	m_pTimer = new ncTimer();
+
+	m_pProfilePlotter = new ncStackedBarPlotter(ncRect(Width()*0.1f, Height()*0.1f, Width()*0.8f, Height()*0.15f));
+	m_pProfilePlotter->SetBackgroundColor(ncColor(0.35f, 0.35f, 0.45f, 0.5f));
+	m_pProfilePlotter->AddVariable(50, 200);
+	m_pProfilePlotter->Variable(0).SetGraphColor(ncColor(0.8f, 0.0f, 0.0f));
+	m_pProfilePlotter->Variable(0).SetMeanColor(ncColor(1.0f, 0.0f, 0.0f));
+	m_pProfilePlotter->AddVariable(50, 200);
+	m_pProfilePlotter->Variable(1).SetGraphColor(ncColor(0.0f, 0.8f, 0.0f));
+	m_pProfilePlotter->Variable(1).SetMeanColor(ncColor(0.0f, 1.0f, 0.0f));
+	m_pProfilePlotter->AddVariable(50, 200);
+	m_pProfilePlotter->Variable(2).SetGraphColor(ncColor(0.0f, 0.0f, 0.8f));
+	m_pProfilePlotter->Variable(2).SetMeanColor(ncColor(0.0f, 0.0f, 1.0f));
 
 	ncServiceLocator::RegisterIndexer(new ncArrayIndexer());
 	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
@@ -85,17 +93,28 @@ void ncApplication::Run()
 
 void ncApplication::Step()
 {
+	unsigned long int uStartTime = 0L;
+	m_pTimer->Start();
+
+	uStartTime = m_pTimer->Interval();
 	m_pFrameTimer->AddFrame();
 	m_pGfxDevice->Clear();
 	m_pGameCallback(CMD_FRAMESTART);
+//	m_pProfilePlotter->AddValue(0, m_pTimer->Interval() - uStartTime);
+	m_pProfilePlotter->AddValue(0, 1.0f * abs(rand()%34));
 
+	uStartTime = m_pTimer->Interval();
 	m_pRootNode->Update(m_pFrameTimer->Interval());
 	m_pRenderGraph->Traverse(*m_pRootNode);
-	m_pRenderGraph->Draw();
+//	m_pProfilePlotter->AddValue(1, m_pTimer->Interval() - uStartTime);
+	m_pProfilePlotter->AddValue(1, 1.0f * abs(rand()%33));
 
-	m_pLinePlotter->AddValue(0, m_pFrameTimer->Interval());
-	m_pLinePlotter->AddValue(1, 1.0f * (rand()%100));
-	m_pLinePlotter->Draw();
+	uStartTime = m_pTimer->Interval();
+	m_pRenderGraph->Draw();
+//	m_pProfilePlotter->AddValue(2, m_pTimer->Interval() - uStartTime);
+	m_pProfilePlotter->AddValue(2, 1.0f * abs(rand()%33));
+
+	m_pProfilePlotter->Draw();
 
 	m_pGfxDevice->Update();
 	m_pGameCallback(CMD_FRAMEEND);

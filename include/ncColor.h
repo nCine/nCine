@@ -7,38 +7,41 @@
 class ncColor
 {
 public:
-	/// Red component
-	unsigned char r;
-	/// Green component
-	unsigned char g;
-	/// Blue component
-	unsigned char b;
-	/// Alpha component
-	unsigned char a;
+	GLubyte m_color[4];
 
 	/// Default constructor (black color)
-	ncColor() : r(0), g(0), b(0), a(255) { }
+	ncColor() { Set(0, 0, 0, 255); }
 	/// Four components constructor (unsigned char)
 	ncColor(unsigned char ucR, unsigned char ucG, unsigned char ucB, unsigned char ucA)
-		: r(ucR), g(ucG), b(ucB), a(ucA) { }
+		{ Set(ucR, ucG, ucB, ucA); }
 	/// Three components constructor (unsigned char)
 	ncColor(unsigned char ucR, unsigned char ucG, unsigned char ucB)
-		: r(ucR), g(ucG), b(ucB), a(255) { }
+		{ Set(ucR, ucG, ucB); }
 	/// Four components constructor (normalized float)
 	ncColor(float fR, float fG, float fB, float fA)
-		: r(0), g(0), b(0), a(0) { Set(fR, fG, fB, fA); }
+		{ SetF(fR, fG, fB, fA); }
 	/// Three components constructor (normalized float)
 	ncColor(float fR, float fG, float fB)
-		: r(0), g(0), b(0), a(0) { Set(fR, fG, fB); }
+		{ SetF(fR, fG, fB); }
 
+	/// Getter for the red component of the color
+	inline GLubyte R() const { return m_color[0]; }
+	/// Getter for the green component of the color
+	inline GLubyte G() const { return m_color[1]; }
+	/// Getter for the blue component of the color
+	inline GLubyte B() const { return m_color[2]; }
+	/// Getter for the alpha component of the color
+	inline GLubyte A() const { return m_color[3]; }
+	/// Getter for the color vector, useful with glColor4ub
+	inline const GLubyte* Vector() const { return m_color; }
 
 	/// Set four color elements (unsigned char)
 	inline void Set(unsigned char ucR, unsigned char ucG, unsigned char ucB, unsigned char ucA)
 	{
-		r = ucR;
-		g = ucG;
-		b = ucB;
-		a = ucA;
+		m_color[0] = ucR;
+		m_color[1] = ucG;
+		m_color[2] = ucB;
+		m_color[3] = ucA;
 	}
 	/// Set three color elements (unsigned char)
 	inline void Set(unsigned char ucR, unsigned char ucG, unsigned char ucB)
@@ -47,26 +50,27 @@ public:
 	}
 
 	/// Set four color elements (normalized float)
-	inline void Set(float fR, float fG, float fB, float fA)
+	inline void SetF(float fR, float fG, float fB, float fA)
 	{
 
-		r = fR > 1.0f ? 255 : fR * 255;
-		g = fG > 1.0f ? 255 : fG * 255;
-		b = fB > 1.0f ? 255 : fB * 255;
-		a = fA > 1.0f ? 255 : fA * 255;
+		m_color[0] = fR > 1.0f ? 255 : fR * 255;
+		m_color[1] = fG > 1.0f ? 255 : fG * 255;
+		m_color[2] = fB > 1.0f ? 255 : fB * 255;
+		m_color[3] = fA > 1.0f ? 255 : fA * 255;
 	}
 	/// Set three color elements (normalized float)
-	inline void Set(float fR, float fG, float fB) {
-		Set(fR, fG, fB, 1.0f);
+	inline void SetF(float fR, float fG, float fB) {
+		SetF(fR, fG, fB, 1.0f);
 	}
 
 	/// Equality operator
 	inline bool operator==(const ncColor& color) const {
-		return (r == color.r && g == color.g && b == color.b && a == color.a);
+		return (R() == color.R() && G() == color.G() &&
+				B() == color.B() && A() == color.A());
 	}
 
 	inline void Print() const {
-		printf("(%u, %u, %u, %u)", r, g, b, a);
+		printf("(%u, %u, %u, %u)", R(), G(), B(), A());
 	}
 };
 

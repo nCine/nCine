@@ -50,7 +50,7 @@ void ncRenderGraph::Draw()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Process a node for susequent drawing
+/// Process a node for subsequent drawing
 void ncRenderGraph::ProcessNode(ncSceneNode& rNode)
 {
 	// Calculating absolute positions

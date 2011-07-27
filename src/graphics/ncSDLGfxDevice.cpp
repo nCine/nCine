@@ -147,6 +147,7 @@ void ncSDLGfxDevice::InitGL()
 {
 //	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glMatrixMode(GL_PROJECTION);
 	glOrtho(0, m_iWidth, 0, m_iHeight, -1, 1);

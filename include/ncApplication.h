@@ -10,7 +10,7 @@
 #endif
 #include "ncSceneNode.h"
 #include "ncRenderGraph.h"
-#include "ncLinePlotter.h"
+#include "ncProfilePlotter.h"
 
 /// Main entry point and handler for nCine applications
 class ncApplication
@@ -31,7 +31,8 @@ private:
 	static ncIGfxDevice *m_pGfxDevice;
 	static ncSceneNode *m_pRootNode;
 	static ncRenderGraph *m_pRenderGraph;
-	static ncLinePlotter *m_pLinePlotter;
+	static ncTimer *m_pTimer;
+	static ncProfilePlotter *m_pProfilePlotter;
 
 	ncApplication();
 	~ncApplication();

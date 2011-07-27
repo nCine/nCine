@@ -22,7 +22,9 @@ LOCAL_SRC_FILES := main.cpp \
 	$(SRC)/graphics/ncTextureFormat.cpp \
 	$(SRC)/graphics/ncTextureLoader.cpp \
 	$(SRC)/graphics/ncTexture.cpp \
+	$(SRC)/graphics/ncProfilePlotter.cpp \
 	$(SRC)/graphics/ncLinePlotter.cpp \
+	$(SRC)/graphics/ncStackedBarPlotter.cpp \
 	$(SRC)/graphics/ncSpriteBatch.cpp \
 	$(SRC)/graphics/ncSceneNode.cpp \
 	$(SRC)/graphics/ncSprite.cpp \

@@ -23,7 +23,9 @@ set(SOURCES
 	src/graphics/ncTextureLoader.cpp
 	src/graphics/ncTexture.cpp
 	src/graphics/ncSpriteBatch.cpp
+	src/graphics/ncProfilePlotter.cpp
 	src/graphics/ncLinePlotter.cpp
+	src/graphics/ncStackedBarPlotter.cpp
 	src/graphics/ncSceneNode.cpp
 	src/graphics/ncSprite.cpp
 	src/graphics/ncRenderGraph.cpp

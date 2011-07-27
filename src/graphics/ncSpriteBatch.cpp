@@ -147,7 +147,7 @@ void ncSpriteBatch::FlushBuffer()
 {
 	if (m_uBufferTop)
 	{
-		glDrawArrays(GL_TRIANGLES, 0, m_uBufferTop*6); // Six vertices per sprite
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, m_uBufferTop*4); // Four vertices per sprite
 		m_uMaxRenderCallsCounter++;
 		m_uBufferTop = 0;
 	}
@@ -158,17 +158,13 @@ void ncSpriteBatch::SetVertices(GLfloat *fVertices, ncRect rect)
 {
 	fVertices[0] = rect.x;
 	fVertices[1] = rect.y;
-	fVertices[2] = rect.x;
-	fVertices[3] = rect.y + rect.h;
-	fVertices[4] = rect.x + rect.w;
+	fVertices[2] = rect.x + rect.w;
+	fVertices[3] = rect.y;
+	fVertices[4] = rect.x;
 	fVertices[5] = rect.y + rect.h;
 
 	fVertices[6] = rect.x + rect.w;
 	fVertices[7] = rect.y + rect.h;
-	fVertices[8] = rect.x + rect.w;
-	fVertices[9] = rect.y;
-	fVertices[10] = rect.x;
-	fVertices[11] = rect.y;
 }
 
 /// Fill the buffer with two triangles UVs
@@ -181,17 +177,13 @@ void ncSpriteBatch::SetTexCoords(GLfloat *fTexCoords, ncRect rect)
 
 	fTexCoords[0] = x;
 	fTexCoords[1] = y + h;
-	fTexCoords[2] = x;
-	fTexCoords[3] = y;
-	fTexCoords[4] = x + w;
+	fTexCoords[2] = x + w;
+	fTexCoords[3] = y + h;
+	fTexCoords[4] = x;
 	fTexCoords[5] = y;
 
 	fTexCoords[6] = x + w;
 	fTexCoords[7] = y;
-	fTexCoords[8] = x + w;
-	fTexCoords[9] = y + h;
-	fTexCoords[10] = x;
-	fTexCoords[11] = y + h;
 }
 
 /// Fill the buffer with two triangles UVs that cover the entire texture
@@ -199,16 +191,12 @@ void ncSpriteBatch::SetTexCoords(GLfloat *fTexCoords)
 {
 	fTexCoords[0] = 0.0f;
 	fTexCoords[1] = 1.0f;
-	fTexCoords[2] = 0.0f;
-	fTexCoords[3] = 0.0f;
-	fTexCoords[4] = 1.0f;
+	fTexCoords[2] = 1.0f;
+	fTexCoords[3] = 1.0f;
+	fTexCoords[4] = 0.0f;
 	fTexCoords[5] = 0.0f;
 
 	fTexCoords[6] = 1.0f;
 	fTexCoords[7] = 0.0f;
-	fTexCoords[8] = 1.0f;
-	fTexCoords[9] = 1.0f;
-	fTexCoords[10] = 0.0f;
-	fTexCoords[11] = 1.0f;
 }
 

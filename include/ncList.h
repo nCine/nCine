@@ -46,6 +46,7 @@ public:
 	void Clear();
 	void InsertFront(const T& element);
 	void InsertBack(const T& element);
+	void InsertAfter(ncListNode<T> *pNode, const T& element);
 	void Remove(const T& element);
 };
 
@@ -87,6 +88,12 @@ void ncList<T>::InsertBack(const T& element)
 
 		pCurrent->m_pNext = new ncListNode<T>(element, NULL);
 	}
+}
+
+template <class T>
+void ncList<T>::InsertAfter(ncListNode<T> *pNode, const T& element)
+{
+	pNode->m_pNext = new ncListNode<T>(element, pNode->m_pNext);
 }
 
 template <class T>

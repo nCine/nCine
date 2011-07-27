@@ -38,7 +38,8 @@ public:
 	}
 	inline float NormMean() const { return (m_fMean-m_fMin)/(m_fMax-m_fMin); }
 	inline const float* Values() const { return m_fValues; }
-	void SetDelay(unsigned int uRejectDelay) { m_uRejectDelay = uRejectDelay; }
+	inline unsigned int Delay() const { return m_uRejectDelay; }
+	inline void SetDelay(unsigned int uRejectDelay) { m_uRejectDelay = uRejectDelay; }
 };
 
 #endif
