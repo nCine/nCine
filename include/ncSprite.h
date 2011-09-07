@@ -1,12 +1,12 @@
 #ifndef CLASS_NCSPRITE
 #define CLASS_NCSPRITE
 
-#include "ncSceneNode.h"
+#include "ncDrawableNode.h"
 #include "ncTexture.h"
 #include "ncRect.h"
 
 /// A scene node representing a basic sprite
-class ncSprite : public ncSceneNode
+class ncSprite : public ncDrawableNode
 {
 private:
 	/// The sprite texture
@@ -19,6 +19,11 @@ private:
 	int m_iHeight;
 	/// Scale factor for sprite size
 	float m_fScaleFactor;
+
+	float m_fVertices[12];
+	float m_fTexCoords[12];
+	void Init();
+	void SetVertices();
 public:
 	ncSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY);
 	ncSprite(ncTexture *pTexture, int iX, int iY);
@@ -49,7 +54,10 @@ public:
 	inline static eObjectType sType() { return SPRITE_TYPE; }
 	static ncSprite* FromId(unsigned int uId);
 
+	virtual void UpdateRenderCommand();
+
 	friend class ncRenderGraph;
+	friend class ncSpriteSheet;
 };
 
 #endif

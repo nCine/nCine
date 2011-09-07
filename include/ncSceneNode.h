@@ -6,6 +6,8 @@
 #include "ncPoint.h"
 #include "ncRect.h"
 
+class ncRenderCommand;
+
 /// The base class for the object hierarchy of a game
 class ncSceneNode : public ncObject
 {
@@ -49,7 +51,8 @@ public:
 	inline static eObjectType sType() { return SCENENODE_TYPE; }
 	static ncSceneNode* FromId(unsigned int uId);
 
-	ncSceneNode* ParentNode() const { return m_pParent; }
+	const ncSceneNode* ParentNode() const { return m_pParent; }
+	const ncList<ncSceneNode *>& Children() const { return m_children; }
 	// Add a node as a children of this one
 	bool AddChildNode(ncSceneNode *pChildNode);
 	// Remove a children of this node, without reparenting nephews
@@ -65,6 +68,7 @@ public:
 	inline void setPosition(ncPoint pos) { x = pos.x; y = pos.y; }
 
 	friend class ncRenderGraph;
+	friend class ncRenderQueue;
 };
 
 #endif

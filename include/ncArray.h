@@ -14,6 +14,10 @@ private:
 	T* m_pArray;
 	unsigned int m_uSize;
 	unsigned int m_uCapacity;
+
+	// Preventing copy at the moment
+	ncArray(const ncArray&);
+	void operator=(const ncArray&);
 public:
 	/// Constructs an array with explicit size
 	ncArray(unsigned int uCapacity)

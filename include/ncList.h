@@ -36,6 +36,10 @@ class ncList
 {
 private:
 	ncListNode<T> *m_pHead;
+	// Preventing copy at the moment
+	ncList(const ncList&);
+	void operator=(const ncList&);
+
 public:
 	ncList() : m_pHead(NULL) { }
 	~ncList() { Clear(); }
