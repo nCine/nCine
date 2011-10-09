@@ -17,6 +17,9 @@
 #include "ncRenderQueue.h"
 #include "ncSceneNode.h"
 #include "ncSprite.h"
+#include "ncSpriteBatchNode.h"
+
+//#define WITH_BATCH
 
 int main(int argc, char **argv)
 {
@@ -27,6 +30,7 @@ int main(int argc, char **argv)
 
 	const int NUM_TEXTURES = 4;
 	ncTexture *pTextures[NUM_TEXTURES];
+	ncRect texRects[NUM_TEXTURES];
 	const int NUM_SPRITES = 500;
 	ncSprite *pSprites[NUM_SPRITES];
 	int vRadius[NUM_SPRITES];
@@ -42,23 +46,38 @@ int main(int argc, char **argv)
 	SDL_WM_SetCaption("Test", NULL);
 
 	ncRenderQueue renderQueue;
+	glEnable(GL_BLEND); // HACK: for alpha blending
 	ncSceneNode rootNode;
 
+#ifdef WITH_BATCH
+	ncTexture *pMegaTexture = new ncTexture("megatexture.png");
+	texRects[0] = ncRect(0, 0, 145, 121);
+	texRects[1] = ncRect(256-100, 0, 100, 100);
+	texRects[2] = ncRect(0, 256-96, 96, 96);
+	texRects[3] = ncRect(256-96, 256-96, 96, 96);
+	ncSpriteBatchNode spriteBatch(&rootNode, pMegaTexture);
+#else
 	pTextures[0] = new ncTexture("texture1.png");
 	pTextures[1] = new ncTexture("texture2.png");
 	pTextures[2] = new ncTexture("texture3.png");
 	pTextures[3] = new ncTexture("texture4.png");
+#endif
 
 	for (int i = 0; i < NUM_SPRITES; i++)
 	{
-		ncTexture *pTexture = pTextures[rand() % NUM_TEXTURES];
 		vRadius[i] = 20 + rand() % 50;
 		vX[i] = rand() % iWidth;
 		vY[i] = rand() % iHeight;
-		float scale = 0.25f + 0.1f * (rand() % 3);
+		float scale = 0.35f + 0.1f * (rand() % 3);
+#ifdef WITH_BATCH
+		pSprites[i] = new ncSprite(&spriteBatch, pMegaTexture, vX[i], vY[i]);
+		pSprites[i]->SetTexRect(texRects[rand() % NUM_TEXTURES]);
+#else
+		ncTexture *pTexture = pTextures[rand() % NUM_TEXTURES];
 		pSprites[i] = new ncSprite(pTexture, vX[i], vY[i]);
-		pSprites[i]->SetScale(scale);
 		rootNode.AddChildNode(pSprites[i]);
+#endif
+		pSprites[i]->SetScale(scale);
 	}
 
 	t.Reset();
@@ -106,7 +125,7 @@ int main(int argc, char **argv)
 		}
 
 		rootNode.Update(t.Interval());
-		renderQueue.Traverse(rootNode);
+		rootNode.Visit(renderQueue);
 		renderQueue.Draw();
 
 		gfxDevice.Update();
@@ -119,8 +138,12 @@ int main(int argc, char **argv)
 	for (int i = 0; i < NUM_SPRITES; i++)
 		delete pSprites[i];
 
+#ifdef WITH_BATCH
+	delete pMegaTexture;
+#else
 	for (int i = 0; i < NUM_TEXTURES; i++)
 		delete pTextures[i];
+#endif
 
 	return 0;	
 }

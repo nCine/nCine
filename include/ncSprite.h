@@ -5,6 +5,8 @@
 #include "ncTexture.h"
 #include "ncRect.h"
 
+class ncRenderQueue;
+
 /// A scene node representing a basic sprite
 class ncSprite : public ncDrawableNode
 {
@@ -44,12 +46,22 @@ public:
 	/// Scale the sprite size
 	inline void SetScale(float fScaleFactor) { m_fScaleFactor = fScaleFactor; }
 
+	/// Get the texture object
+	inline const ncTexture* Texture() { return m_pTexture; }
+	/// Set the texture object
+	inline void SetTexture(ncTexture *pTexture) { m_pTexture = pTexture; }
+
 	/// Get the texture source rectangle for blitting
 	inline ncRect TexRect() const { return m_texRect; }
 	/// Set the texture source rectangle for blitting
-	inline void SetTexRect(const ncRect& rect) { m_texRect = rect; }
+	inline void SetTexRect(const ncRect& rect)
+	{
+		m_texRect = rect;
+		m_iHeight = rect.h;
+		m_iWidth = rect.w;
+	}
 
-	virtual void Update(unsigned long int ulInterval);
+	virtual void Draw(ncRenderQueue& rRenderQueue);
 
 	inline static eObjectType sType() { return SPRITE_TYPE; }
 	static ncSprite* FromId(unsigned int uId);

@@ -33,6 +33,29 @@ ncSceneNode::~ncSceneNode()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+void ncSceneNode::Visit(ncRenderQueue& rRenderQueue)
+{
+	// early return if a node is invisible
+	if(!bShouldDraw)
+		return;
+
+	Transform();
+	Draw(rRenderQueue);
+
+	if (!m_children.isEmpty())
+	{
+		const ncListNode<ncSceneNode *> *pListNode = m_children.Head();
+
+		while (pListNode)
+		{
+			// List nodes contain pointers, they need deferencing for visiting
+			ncSceneNode& rChildNode = *(pListNode->Data());
+			rChildNode.Visit(rRenderQueue);
+			pListNode = pListNode->Next();
+		}
+	}
+}
+
 void ncSceneNode::Update(unsigned long int ulInterval)
 {
 	if(!m_children.isEmpty())
@@ -140,5 +163,24 @@ ncSceneNode* ncSceneNode::FromId(unsigned int uId)
 	{
 		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncSceneNode::FromId - Object not found");
 		return NULL;
+	}
+}
+
+///////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void ncSceneNode::Transform()
+{
+	// Calculating absolute positions
+	if (m_pParent)
+	{
+		m_absX = m_pParent->m_absX + x;
+		m_absY = m_pParent->m_absY + y;
+	}
+	else
+	{
+		m_absX = x;
+		m_absY = y;
 	}
 }

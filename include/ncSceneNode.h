@@ -6,7 +6,7 @@
 #include "ncPoint.h"
 #include "ncRect.h"
 
-class ncRenderCommand;
+class ncRenderQueue;
 
 /// The base class for the object hierarchy of a game
 class ncSceneNode : public ncObject
@@ -19,6 +19,8 @@ protected:
 	int m_absX;
 	/// Absolute Y coordinate as calculated by the RenderGraph class
 	int m_absY;
+
+	virtual void Transform();
 
 public:
 	/// Relative X coordinate as a public property
@@ -61,6 +63,8 @@ public:
 	bool UnlinkChildNode(ncSceneNode *pChildNode);
 
 	virtual void Update(unsigned long int ulInterval);
+	virtual void Visit(ncRenderQueue& rRenderQueue);
+	virtual void Draw(ncRenderQueue& rRenderQueue) { }
 
 	inline ncPoint Position() { return ncPoint(x, y); }
 	inline ncPoint AbsPosition() { return ncPoint(m_absX, m_absY); }

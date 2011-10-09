@@ -3,6 +3,7 @@
 #endif
 #include "ncSprite.h"
 #include "ncServiceLocator.h"
+#include "ncRenderQueue.h"
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -24,9 +25,10 @@ ncSprite::ncSprite(ncTexture *pTexture, int iX, int iY)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncSprite::Update(unsigned long int ulInterval)
+void ncSprite::Draw(ncRenderQueue& rRenderQueue)
 {
-	ncSceneNode::Update(ulInterval);
+	UpdateRenderCommand();
+	rRenderQueue.AddCommand(&m_renderCmd);
 }
 
 ncSprite* ncSprite::FromId(unsigned int uId)
@@ -70,24 +72,33 @@ void ncSprite::Init()
 	{
 		m_iWidth = m_pTexture->Width();
 		m_iHeight = m_pTexture->Height();
+		m_texRect = ncRect(0, 0, m_pTexture->Width(), m_pTexture->Height());
 	}
 }
 
 void ncSprite::SetVertices()
 {
-	int iHalfWidth = m_iWidth * 0.5f;
-	int iHalfHeight = m_iHeight * 0.5f;
+	float leftPos = m_absX - m_iWidth*m_fScaleFactor*0.5f;
+	float rightPos = m_absX + m_iWidth*m_fScaleFactor*0.5f;
+	float bottomPos = m_absY - m_iHeight*m_fScaleFactor*0.5f;
+	float topPos = m_absY + m_iHeight*m_fScaleFactor*0.5f;
 
-	m_fVertices[0] = m_absX - iHalfWidth;	m_fVertices[1] = m_absY - iHalfHeight;
-	m_fVertices[2] = m_absX - iHalfWidth;	m_fVertices[3] = m_absY + iHalfHeight;
-	m_fVertices[4] = m_absX + iHalfWidth;	m_fVertices[5] = m_absY - iHalfHeight;
+	m_fVertices[0] = leftPos;	m_fVertices[1] = bottomPos;
+	m_fVertices[2] = leftPos;	m_fVertices[3] = topPos;
+	m_fVertices[4] = rightPos;	m_fVertices[5] = bottomPos;
 
-	m_fVertices[6] = m_absX + iHalfWidth;	m_fVertices[7] = m_absY + iHalfHeight;
+	m_fVertices[6] = rightPos;	m_fVertices[7] = topPos;
 
 
-	m_fTexCoords[0] = 0.0f;		m_fTexCoords[1] = 1.0f;
-	m_fTexCoords[2] = 0.0f;		m_fTexCoords[3] = 0.0f;
-	m_fTexCoords[4] = 1.0f;		m_fTexCoords[5] = 1.0f;
+	ncPoint texSize = m_pTexture->Size();
+	float leftCoord = float(m_texRect.x)/float(texSize.x);
+	float rightCoord = float(m_texRect.x+m_texRect.w)/float(texSize.x);
+	float bottomCoord = float(m_texRect.y+m_texRect.h)/float(texSize.y);
+	float topCoord = float(m_texRect.y)/float(texSize.y);
 
-	m_fTexCoords[6] = 1.0f;		m_fTexCoords[7] = 0.0f;
+	m_fTexCoords[0] = leftCoord;	m_fTexCoords[1] = bottomCoord;
+	m_fTexCoords[2] = leftCoord;	m_fTexCoords[3] = topCoord;
+	m_fTexCoords[4] = rightCoord;	m_fTexCoords[5] = bottomCoord;
+
+	m_fTexCoords[6] = rightCoord;	m_fTexCoords[7] = topCoord;
 }

@@ -21,7 +21,8 @@ protected:
 		BASE_TYPE = 0,
 		TEXTURE_TYPE,
 		SCENENODE_TYPE,
-		SPRITE_TYPE
+		SPRITE_TYPE,
+		SPRITEBATCH_TYPE
 	};
 
 	eObjectType m_eType;

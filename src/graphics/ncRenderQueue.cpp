@@ -3,32 +3,11 @@
 #include "ncArray.h"
 #include "ncSprite.h"
 
-//#include <assert.h>
+//#include <assert.h> // for checking sorting correctness
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
-
-void ncRenderQueue::Traverse(ncSceneNode& rNode)
-{
-	if(!rNode.bShouldDraw)
-		return;
-
-	ProcessNode(rNode);
-
-	if(!rNode.Children().isEmpty())
-	{
-		const ncListNode<ncSceneNode *> *pListNode = rNode.Children().Head();
-
-		while (pListNode)
-		{
-			// List nodes contain pointers, they need deferencing for Traverse()
-			ncSceneNode& rChildNode = *(pListNode->Data());
-			Traverse(rChildNode);
-			pListNode = pListNode->Next();
-		}
-	}
-}
 
 void ncRenderQueue::Draw()
 {
@@ -43,33 +22,6 @@ void ncRenderQueue::Draw()
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
-
-/// Process a node for subsequent drawing
-void ncRenderQueue::ProcessNode(ncSceneNode& rNode)
-{
-	// Calculating absolute positions
-	if (rNode.ParentNode())
-	{
-		const ncSceneNode& rParent = *(rNode.ParentNode());
-
-		rNode.m_absX = rParent.m_absX + rNode.x;
-		rNode.m_absY = rParent.m_absY + rNode.y;
-	}
-	else
-	{
-		rNode.m_absX = rNode.x;
-		rNode.m_absY = rNode.y;
-	}
-
-
-	if (rNode.Type() == ncSprite::sType())
-	{
-		ncSprite& sprite = static_cast<ncSprite &>(rNode);
-
-		sprite.UpdateRenderCommand();
-		m_renderCmds.InsertBack(sprite.Command());
-	}
-}
 
 /// Sort render nodes to minimize state changes
 void ncRenderQueue::SortQueue()

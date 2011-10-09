@@ -41,6 +41,9 @@ public:
 	const T& operator[] (const unsigned int uIndex) const;
 	// Subscript operator
 	T& operator[] (const unsigned int uIndex);
+
+	// Useful when holding arrays of OpenGL data
+	inline T* Pointer() const { return m_pArray; }
 };
 
 template <class T>
@@ -119,7 +122,7 @@ T& ncArray<T>::operator[] (const unsigned int uIndex)
 	if (uIndex > m_uCapacity - 1)
 	{
 		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, (char *)"ncArray::operator[] - Element %u out of capacity range!", uIndex);
-//			exit(-1);
+//		exit(-1);
 	}
 
 	// Avoid creating "holes" into the array

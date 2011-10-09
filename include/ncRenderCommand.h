@@ -114,40 +114,14 @@ public:
 		m_fTexCoords = fTexCoords;
 	}
 
+	inline GLenum DrawType() const { return m_eDrawType; }
+	inline GLint FirstVertex() const { return m_iFirstVertex; }
+	inline GLsizei NumVertices() const { return m_iNumVertices; }
+	inline GLfloat* VertexPointer() const { return m_fVertices; }
+	inline GLfloat* TexCoordsPointer() const { return m_fTexCoords; }
+
 	void Draw() const;
 };
-
-/*
-class ncQuadNode : public ncGeometricNode
-{
-private:
-	GLfloat m_fQVertices[12];
-	GLfloat m_fQTexCoords[12];
-
-public:
-	ncQuadNode() : ncGeometricNode(6, m_fQVertices, m_fQTexCoords)
-	{
-		m_fQVertices[0] = 0.0f;		m_fQVertices[1] = 0.0f;
-		m_fQVertices[2] = 0.0f;		m_fQVertices[3] = 100.0f;
-		m_fQVertices[4] = 100.0f;		m_fQVertices[5] = 100.0f;
-
-		m_fQVertices[6] = 100.0f;		m_fQVertices[7] = 100.0f;
-		m_fQVertices[8] = 100.0f;		m_fQVertices[9] = 0.0f;
-		m_fQVertices[10] = 0.0f;	m_fQVertices[11] = 0.0f;
-
-
-		m_fQTexCoords[0] = 0.0f;	m_fQTexCoords[1] = 1.0f;
-		m_fQTexCoords[2] = 0.0f;	m_fQTexCoords[3] = 0.0f;
-		m_fQTexCoords[4] = 1.0f;	m_fQTexCoords[5] = 0.0f;
-
-		m_fQTexCoords[6] = 1.0f;	m_fQTexCoords[7] = 0.0f;
-		m_fQTexCoords[8] = 1.0f;	m_fQTexCoords[9] = 1.0f;
-		m_fQTexCoords[10] = 0.0f;	m_fQTexCoords[11] = 1.0f;
-	}
-
-	virtual void IssueCommand() { ncGeometricNode::IssueCommand(); }
-};
-*/
 
 /// The class wrapping all the information needed for issueing a draw command
 class ncRenderCommand

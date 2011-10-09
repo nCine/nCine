@@ -15,7 +15,6 @@ private:
 	// add the array of sortkey/rendercmd ptrs
 	ncArray<const ncRenderCommand *> m_renderCmds;
 
-	void ProcessNode(ncSceneNode& rNode);
 	void SortQueue();
 
 	void QSort(ncArray<const ncRenderCommand *> &array, int start, int end);
@@ -25,7 +24,7 @@ public:
 	ncRenderQueue() : m_renderCmds(16) { }
 	~ncRenderQueue() { }
 
-	void Traverse(ncSceneNode& rNode);
+	void AddCommand(const ncRenderCommand *pCommand) { m_renderCmds.InsertBack(pCommand); }
 	void Draw();
 };
 

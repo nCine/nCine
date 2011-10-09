@@ -31,6 +31,7 @@ set(SOURCES
 	src/graphics/ncRenderCommand.cpp
 	src/graphics/ncRenderQueue.cpp
 	src/graphics/ncRenderGraph.cpp
+	src/graphics/ncSpriteBatchNode.cpp
 	src/ncApplication.cpp
 )
 
