@@ -25,12 +25,6 @@ ncSprite::ncSprite(ncTexture *pTexture, int iX, int iY)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncSprite::Draw(ncRenderQueue& rRenderQueue)
-{
-	UpdateRenderCommand();
-	rRenderQueue.AddCommand(&m_renderCmd);
-}
-
 ncSprite* ncSprite::FromId(unsigned int uId)
 {
 	ncObject *pObject = ncServiceLocator::GetIndexer().Object(uId);
@@ -58,7 +52,8 @@ void ncSprite::UpdateRenderCommand()
 	m_renderCmd.Material().SetTextureGLId(m_pTexture->GLId());
 	m_renderCmd.Transformation().SetPosition(AbsPosition());
 	SetVertices();
-	m_renderCmd.Geometry().SetData(GL_TRIANGLE_STRIP, 0, 4, m_fVertices, m_fTexCoords);
+	m_renderCmd.Geometry().SetData(GL_TRIANGLE_STRIP, 0, 4, m_fVertices, m_fTexCoords, NULL);
+	m_renderCmd.CalculateSortKey();
 }
 
 ///////////////////////////////////////////////////////////
@@ -69,11 +64,7 @@ void ncSprite::Init()
 {
 	m_eType = SPRITE_TYPE;
 	if (m_pTexture)
-	{
-		m_iWidth = m_pTexture->Width();
-		m_iHeight = m_pTexture->Height();
-		m_texRect = ncRect(0, 0, m_pTexture->Width(), m_pTexture->Height());
-	}
+		SetTexRect(ncRect(0, 0, m_pTexture->Width(), m_pTexture->Height()));
 }
 
 void ncSprite::SetVertices()
@@ -88,8 +79,10 @@ void ncSprite::SetVertices()
 	m_fVertices[4] = rightPos;	m_fVertices[5] = bottomPos;
 
 	m_fVertices[6] = rightPos;	m_fVertices[7] = topPos;
+}
 
-
+void ncSprite::SetTexCoords()
+{
 	ncPoint texSize = m_pTexture->Size();
 	float leftCoord = float(m_texRect.x)/float(texSize.x);
 	float rightCoord = float(m_texRect.x+m_texRect.w)/float(texSize.x);

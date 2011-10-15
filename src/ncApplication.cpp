@@ -13,7 +13,7 @@ void (*ncApplication::m_pGameCallback)(eCommand cmd) = NULL;
 ncFrameTimer *ncApplication::m_pFrameTimer = NULL;
 ncIGfxDevice *ncApplication::m_pGfxDevice = NULL;
 ncSceneNode *ncApplication::m_pRootNode = NULL;
-ncRenderGraph *ncApplication::m_pRenderGraph = NULL;
+ncRenderQueue *ncApplication::m_pRenderQueue = NULL;
 ncTimer *ncApplication::m_pTimer = NULL;
 ncProfilePlotter *ncApplication::m_pProfilePlotter = NULL;
 
@@ -33,7 +33,7 @@ void ncApplication::Init(void (*pGameCallback)(eCommand cmd))
 #endif
 	m_pFrameTimer = new ncFrameTimer(5, 0);
 	m_pRootNode = new ncSceneNode();
-	m_pRenderGraph = new ncRenderGraph();
+	m_pRenderQueue = new ncRenderQueue();
 	m_pTimer = new ncTimer();
 
 	m_pProfilePlotter = new ncStackedBarPlotter(ncRect(Width()*0.1f, Height()*0.1f, Width()*0.8f, Height()*0.15f));
@@ -105,12 +105,12 @@ void ncApplication::Step()
 
 	uStartTime = m_pTimer->Interval();
 	m_pRootNode->Update(m_pFrameTimer->Interval());
-	m_pRenderGraph->Traverse(*m_pRootNode);
+	m_pRootNode->Visit(*m_pRenderQueue);
 //	m_pProfilePlotter->AddValue(1, m_pTimer->Interval() - uStartTime);
 	m_pProfilePlotter->AddValue(1, 1.0f * abs(rand()%33));
 
 	uStartTime = m_pTimer->Interval();
-	m_pRenderGraph->Draw();
+	m_pRenderQueue->Draw();
 //	m_pProfilePlotter->AddValue(2, m_pTimer->Interval() - uStartTime);
 	m_pProfilePlotter->AddValue(2, 1.0f * abs(rand()%33));
 
@@ -125,7 +125,7 @@ void ncApplication::Shutdown()
 	m_pGameCallback(CMD_SHUTDOWN);
 	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncApplication::Shutdown - external app shutted down");
 
-	delete m_pRenderGraph;
+	delete m_pRenderQueue;
 	delete m_pRootNode; // deletes every child too
 	delete m_pGfxDevice;
 	delete m_pFrameTimer;

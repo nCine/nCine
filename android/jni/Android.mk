@@ -25,10 +25,11 @@ LOCAL_SRC_FILES := main.cpp \
 	$(SRC)/graphics/ncProfilePlotter.cpp \
 	$(SRC)/graphics/ncLinePlotter.cpp \
 	$(SRC)/graphics/ncStackedBarPlotter.cpp \
-	$(SRC)/graphics/ncSpriteBatch.cpp \
 	$(SRC)/graphics/ncSceneNode.cpp \
 	$(SRC)/graphics/ncSprite.cpp \
-	$(SRC)/graphics/ncRenderGraph.cpp \
+	$(SRC)/graphics/ncRenderCommand.cpp \
+	$(SRC)/graphics/ncRenderQueue.cpp \
+	$(SRC)/graphics/ncSpriteBatchNode.cpp \
 	$(TST)/test_sceneapp.cpp
 
 LOCAL_LDLIBS    := -lm -llog -landroid -lEGL -lGLESv1_CM

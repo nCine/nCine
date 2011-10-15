@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 	const int NUM_TEXTURES = 4;
 	ncTexture *pTextures[NUM_TEXTURES];
 	ncRect texRects[NUM_TEXTURES];
-	const int NUM_SPRITES = 500;
+	const int NUM_SPRITES = 1000;
 	ncSprite *pSprites[NUM_SPRITES];
 	int vRadius[NUM_SPRITES];
 	int vX[NUM_SPRITES];
@@ -65,16 +65,18 @@ int main(int argc, char **argv)
 
 	for (int i = 0; i < NUM_SPRITES; i++)
 	{
+		int numTex = rand() % NUM_TEXTURES;
 		vRadius[i] = 20 + rand() % 50;
 		vX[i] = rand() % iWidth;
 		vY[i] = rand() % iHeight;
 		float scale = 0.35f + 0.1f * (rand() % 3);
 #ifdef WITH_BATCH
 		pSprites[i] = new ncSprite(&spriteBatch, pMegaTexture, vX[i], vY[i]);
-		pSprites[i]->SetTexRect(texRects[rand() % NUM_TEXTURES]);
+		pSprites[i]->SetTexRect(texRects[numTex]);
 #else
-		ncTexture *pTexture = pTextures[rand() % NUM_TEXTURES];
+		ncTexture *pTexture = pTextures[numTex];
 		pSprites[i] = new ncSprite(pTexture, vX[i], vY[i]);
+		pSprites[i]->SetPriority(numTex);
 		rootNode.AddChildNode(pSprites[i]);
 #endif
 		pSprites[i]->SetScale(scale);

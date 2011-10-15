@@ -9,7 +9,7 @@
 	#include "ncSDLGfxDevice.h"
 #endif
 #include "ncSceneNode.h"
-#include "ncRenderGraph.h"
+#include "ncRenderQueue.h"
 #include "ncProfilePlotter.h"
 
 /// Main entry point and handler for nCine applications
@@ -30,7 +30,7 @@ private:
 	static ncFrameTimer *m_pFrameTimer;
 	static ncIGfxDevice *m_pGfxDevice;
 	static ncSceneNode *m_pRootNode;
-	static ncRenderGraph *m_pRenderGraph;
+	static ncRenderQueue *m_pRenderQueue;
 	static ncTimer *m_pTimer;
 	static ncProfilePlotter *m_pProfilePlotter;
 

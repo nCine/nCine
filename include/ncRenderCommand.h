@@ -90,28 +90,30 @@ protected:
 	GLsizei m_iNumVertices;
 	GLfloat *m_fVertices;
 	GLfloat *m_fTexCoords;
+	GLfloat *m_fColors;
 
 public:
 	ncRenderGeometry(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords)
 		: m_eDrawType(eDrawType),
 		  m_iFirstVertex(iFirstVertex), m_iNumVertices(iNumVertices),
-		  m_fVertices(fVertices), m_fTexCoords(fTexCoords) { }
+		  m_fVertices(fVertices), m_fTexCoords(fTexCoords), m_fColors(NULL) { }
 	ncRenderGeometry(GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords)
 		: m_eDrawType(GL_TRIANGLES),
 		  m_iFirstVertex(0), m_iNumVertices(iNumVertices),
-		  m_fVertices(fVertices), m_fTexCoords(fTexCoords) { }
+		  m_fVertices(fVertices), m_fTexCoords(fTexCoords), m_fColors(NULL) { }
 	ncRenderGeometry()
 		: m_eDrawType(GL_TRIANGLES),
 		  m_iFirstVertex(0), m_iNumVertices(0),
-		  m_fVertices(NULL), m_fTexCoords(NULL) { }
+		  m_fVertices(NULL), m_fTexCoords(NULL), m_fColors(NULL) { }
 
-	void SetData(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords)
+	void SetData(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords, GLfloat *fColors)
 	{
 		m_eDrawType = eDrawType;
 		m_iFirstVertex = iFirstVertex;
 		m_iNumVertices = iNumVertices;
 		m_fVertices = fVertices;
 		m_fTexCoords = fTexCoords;
+		m_fColors = fColors;
 	}
 
 	inline GLenum DrawType() const { return m_eDrawType; }
@@ -119,18 +121,19 @@ public:
 	inline GLsizei NumVertices() const { return m_iNumVertices; }
 	inline GLfloat* VertexPointer() const { return m_fVertices; }
 	inline GLfloat* TexCoordsPointer() const { return m_fTexCoords; }
+	inline GLfloat* ColorPointer() const { return m_fColors; }
 
 	void Draw() const;
 };
 
-/// The class wrapping all the information needed for issueing a draw command
+/// The class wrapping all the information needed for issuing a draw command
 class ncRenderCommand
 {
 private:
 	unsigned long int m_uSortKey;
 //	bool m_bDirtyKey;
 
-	int m_iPriority;
+	unsigned int m_iPriority;
 	ncRenderMaterial m_material;
 	ncRenderTransformation m_transformation;
 	ncRenderGeometry m_geometry;

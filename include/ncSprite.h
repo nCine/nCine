@@ -26,6 +26,7 @@ private:
 	float m_fTexCoords[12];
 	void Init();
 	void SetVertices();
+	void SetTexCoords();
 public:
 	ncSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY);
 	ncSprite(ncTexture *pTexture, int iX, int iY);
@@ -59,9 +60,8 @@ public:
 		m_texRect = rect;
 		m_iHeight = rect.h;
 		m_iWidth = rect.w;
+		SetTexCoords();
 	}
-
-	virtual void Draw(ncRenderQueue& rRenderQueue);
 
 	inline static eObjectType sType() { return SPRITE_TYPE; }
 	static ncSprite* FromId(unsigned int uId);

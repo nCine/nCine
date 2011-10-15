@@ -37,6 +37,7 @@ void ncSpriteBatchNode::Draw(ncRenderQueue& rRenderQueue)
 	m_vVertices.Clear();
 	m_vTexCoords.Clear();
 
+	// TODO: only the first level of children gets accounted
 	if (!m_children.isEmpty())
 	{
 		const ncListNode<ncSceneNode *> *pListNode = m_children.Head();
@@ -57,8 +58,7 @@ void ncSpriteBatchNode::Draw(ncRenderQueue& rRenderQueue)
 		}
 	}
 
-	UpdateRenderCommand();
-	rRenderQueue.AddCommand(&m_renderCmd);
+	ncDrawableNode::Draw(rRenderQueue);
 }
 
 ncSpriteBatchNode* ncSpriteBatchNode::FromId(unsigned int uId)
@@ -86,7 +86,8 @@ void ncSpriteBatchNode::UpdateRenderCommand()
 {
 	m_renderCmd.Material().SetTextureGLId(m_pTexture->GLId());
 	m_renderCmd.Transformation().SetPosition(AbsPosition());
-	m_renderCmd.Geometry().SetData(GL_TRIANGLES, 0, m_vVertices.Size()/2, m_vVertices.Pointer(), m_vTexCoords.Pointer());
+	m_renderCmd.Geometry().SetData(GL_TRIANGLES, 0, m_vVertices.Size()/2, m_vVertices.Pointer(), m_vTexCoords.Pointer(), NULL);
+	m_renderCmd.CalculateSortKey();
 }
 
 ///////////////////////////////////////////////////////////

@@ -14,7 +14,7 @@
 #include "ncFileLogger.h"
 #include "ncSDLGfxDevice.h"
 #include "ncTexture.h"
-#include "ncRenderGraph.h"
+#include "ncRenderQueue.h"
 #include "ncSceneNode.h"
 #include "ncSprite.h"
 
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 	ncTexture tex3("texture3.png");
 	ncTexture tex4("texture4.png");
 
-	ncRenderGraph renderGraph;
+	ncRenderQueue renderQueue;
 	ncSceneNode rootNode;
 	ncSprite *pSprite1 = new ncSprite(&tex1, 150, 170);
 	ncSprite *pSprite2 = new ncSprite(pSprite1, &tex2, 50, 70);
@@ -100,9 +100,10 @@ int main(int argc, char **argv)
 		pSprite4->x = -fSinus2*100;
 		pSprite4->y = fCosine2*100;
 
+
 		rootNode.Update(t.Interval());
-		renderGraph.Traverse(rootNode);
-		renderGraph.Draw();
+		rootNode.Visit(renderQueue);
+		renderQueue.Draw();
 
 		gfxDevice.Update();
 	}
