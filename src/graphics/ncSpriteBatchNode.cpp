@@ -82,14 +82,6 @@ ncSpriteBatchNode* ncSpriteBatchNode::FromId(unsigned int uId)
 	}
 }
 
-void ncSpriteBatchNode::UpdateRenderCommand()
-{
-	m_renderCmd.Material().SetTextureGLId(m_pTexture->GLId());
-	m_renderCmd.Transformation().SetPosition(AbsPosition());
-	m_renderCmd.Geometry().SetData(GL_TRIANGLES, 0, m_vVertices.Size()/2, m_vVertices.Pointer(), m_vTexCoords.Pointer(), NULL);
-	m_renderCmd.CalculateSortKey();
-}
-
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -131,4 +123,12 @@ void ncSpriteBatchNode::ProcessSprite(ncSprite& rSprite)
 	m_vTexCoords.InsertBack(rightCoord);	m_vTexCoords.InsertBack(bottomCoord);
 	m_vTexCoords.InsertBack(rightCoord);	m_vTexCoords.InsertBack(topCoord);
 	m_vTexCoords.InsertBack(leftCoord);		m_vTexCoords.InsertBack(topCoord);
+}
+
+void ncSpriteBatchNode::UpdateRenderCommand()
+{
+	m_renderCmd.Material().SetTextureGLId(m_pTexture->GLId());
+	m_renderCmd.Transformation().SetPosition(AbsPosition());
+	m_renderCmd.Geometry().SetData(GL_TRIANGLES, 0, m_vVertices.Size()/2, m_vVertices.Pointer(), m_vTexCoords.Pointer(), NULL);
+	m_renderCmd.CalculateSortKey();
 }

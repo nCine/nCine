@@ -34,6 +34,14 @@ ncTextureLoader::ncTextureLoader(const char *pFilename)
 		ReadETC1Header(pFilename);
 		LoadCompressed(pFilename, GL_ETC1_RGB8_OES);
 	}
+	// HACK: assuming all DDS textures are ATITC compressed
+	else if (!strncmp(pDotChar, ".dds", 4))
+	{
+		ReadDDSHeader(pFilename);
+		// HACK: assuming all ATITC textures have explicit alpha
+		// There could also be interpolated or no alpha at all
+		LoadCompressed(pFilename, GL_ATC_RGBA_EXPLICIT_ALPHA_AMD);
+	}
 	#endif
 	else
 	{
@@ -118,7 +126,32 @@ void ncTextureLoader::ReadETC1Header(const char *pFilename)
 		m_iWidth = swappedWidth2;
 		m_iHeight = swappedHeight2;
 
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncTextureLoader::ReadETC1Header - Header found3: w:%d h:%d", m_iWidth, m_iHeight);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncTextureLoader::ReadETC1Header - Header found: w:%d h:%d", m_iWidth, m_iHeight);
+	}
+}
+
+void ncTextureLoader::ReadDDSHeader(const char *pFilename)
+{
+	m_pFile = fopen(pFilename, "rb");
+	if (!m_pFile)
+	{
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureLoader::ReadDDSHeader - Cannot open the file \"%s\"", pFilename);
+		exit(-1);
+	}
+
+	// DDS header is 128 bytes long
+	// It have been splitted in two structures to avoid compiler-specific alignment pragmas
+	DDS_header header;
+	fread(&header, 128, 1, m_pFile);
+
+	// Checking for the header presence
+	if (strncmp(header.cMagicId, "DDS ", 4) == 0)
+	{
+		m_iHeaderSize = 128;
+		m_iWidth = header.dwWidth;
+		m_iHeight = header.dwHeight;
+
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncTextureLoader::ReadDDSHeader - Header found: w:%d h:%d", m_iWidth, m_iHeight);
 	}
 }
 

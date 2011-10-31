@@ -4,6 +4,7 @@
 #include "ncDrawableNode.h"
 #include "ncTexture.h"
 #include "ncRect.h"
+#include "ncColor.h"
 
 class ncRenderQueue;
 
@@ -21,13 +22,21 @@ private:
 	int m_iHeight;
 	/// Scale factor for sprite size
 	float m_fScaleFactor;
+	/// Sprite color (transparency, translucency, etc..)
+	ncColor m_color;
 
 	float m_fVertices[12];
 	float m_fTexCoords[12];
 	void Init();
 	void SetVertices();
 	void SetTexCoords();
+
+	virtual void UpdateRenderCommand();
+protected:
+
 public:
+	ncSprite(ncSceneNode* pParent, ncTexture *pTexture);
+	ncSprite(ncTexture *pTexture);
 	ncSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY);
 	ncSprite(ncTexture *pTexture, int iX, int iY);
 	virtual ~ncSprite() { }
@@ -63,13 +72,18 @@ public:
 		SetTexCoords();
 	}
 
+	/// Get the sprite color
+	inline const ncColor Color() { return m_color; }
+	/// Set the sprite color through a ncColor class
+	inline void SetColor(ncColor color) { m_color = color; }
+	/// Set the sprite color through unsigned char components
+	inline void SetColor(unsigned char ucR, unsigned char ucG, unsigned char ucB, unsigned char ucA) { m_color.Set(ucR, ucG, ucB, ucA); }
+	/// Set the sprite color through float components
+	inline void SetColor(float fR, float fG, float fB, float fA) { m_color.SetF(fR, fG, fB, fA); }
+
+
 	inline static eObjectType sType() { return SPRITE_TYPE; }
 	static ncSprite* FromId(unsigned int uId);
-
-	virtual void UpdateRenderCommand();
-
-	friend class ncRenderGraph;
-	friend class ncSpriteSheet;
 };
 
 #endif

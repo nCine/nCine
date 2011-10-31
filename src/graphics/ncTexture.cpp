@@ -94,6 +94,39 @@ ncTexture* ncTexture::FromId(unsigned int uId)
 	}
 }
 
+/// Set the red channel of a second texture as the alpha channel
+void ncTexture::SetAlphaFromRed(ncTexture *pAlphaTex)
+{
+#ifndef __ANDROID__
+	GLubyte	*pPixels = NULL;
+	GLubyte	*pAlphaPixels = NULL;
+
+	int iTextureArea = Width() * Height();
+	if (pAlphaTex->Width() * pAlphaTex->Height() == iTextureArea)
+	{
+
+		pAlphaPixels = new GLubyte[iTextureArea];
+		pPixels = new GLubyte[iTextureArea * 4];
+
+		pAlphaTex->Bind();
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, pAlphaPixels);
+		Bind();
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pPixels);
+
+		// FIXME: It does not work as expected
+		for (int i = 0; i < iTextureArea; i++)
+			pPixels[i*4 + 3] = pAlphaPixels[i];
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width(), Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, pPixels);
+
+		delete[] pAlphaPixels;
+		delete[] pPixels;
+	}
+	else
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncTexture::SetAlphaFromRed - Alpha texture has a different size");
+#endif
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////

@@ -191,6 +191,9 @@ bool ncTextureFormat::OESCompressedFormat()
 		case GL_ETC1_RGB8_OES:
 			m_eFormat = GL_RGB;
 			break;
+		case GL_ATC_RGBA_EXPLICIT_ALPHA_AMD:
+			m_eFormat = GL_RGBA;
+			break;
 		default:
 			bFound = false;
 			break;

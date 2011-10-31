@@ -13,41 +13,33 @@
 
 #include "ncPoint.h"
 #include "ncList.h"
+#include "ncColor.h"
 
 class ncRenderMaterial
 {
 private:
-	GLfloat m_fColor[4];
+	ncColor m_color;
 	GLuint m_uTextureGLId;
 
 public:
-	ncRenderMaterial(GLfloat fColor[4], GLuint uTextureGLId)
+	ncRenderMaterial(GLubyte ubColor[4], GLuint uTextureGLId)
 		: m_uTextureGLId(uTextureGLId)
 	{
-		m_fColor[0] = fColor[0];	m_fColor[1] = fColor[1];
-		m_fColor[2] = fColor[2];	m_fColor[3] = fColor[3];
+		m_color.Setv(ubColor);
 	}
-	ncRenderMaterial(GLuint uTextureGLId) : m_uTextureGLId(uTextureGLId)
-	{
-		m_fColor[0] = 1.0f;		m_fColor[1] = 1.0f;
-		m_fColor[2] = 1.0f;		m_fColor[3] = 1.0f;
-	}
-	ncRenderMaterial() : m_uTextureGLId(0)
-	{
-		m_fColor[0] = 1.0f;		m_fColor[1] = 1.0f;
-		m_fColor[2] = 1.0f;		m_fColor[3] = 1.0f;
-	}
+
+	ncRenderMaterial(GLuint uTextureGLId) : m_uTextureGLId(uTextureGLId) { }
+	ncRenderMaterial() : m_uTextureGLId(0) { }
+
 
 	void SetColor(GLfloat fR, GLfloat fG, GLfloat fB, GLfloat fA)
 	{
-		m_fColor[0] = fR;	m_fColor[1] = fG;
-		m_fColor[2] = fB;	m_fColor[3] = fA;
+		m_color.SetF(fR, fG, fB, fA);
 	}
 
 	void SetColor(GLfloat fColor[4])
 	{
-		m_fColor[0] = fColor[0];	m_fColor[1] = fColor[1];
-		m_fColor[2] = fColor[2];	m_fColor[3] = fColor[3];
+		m_color.SetFv(fColor);
 	}
 
 	inline GLuint TextureGLId() const { return m_uTextureGLId; }

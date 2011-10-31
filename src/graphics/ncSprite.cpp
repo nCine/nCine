@@ -9,6 +9,18 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+ncSprite::ncSprite(ncSceneNode* pParent, ncTexture *pTexture)
+	: ncDrawableNode(pParent), m_pTexture(pTexture), m_texRect(0, 0, 0, 0), m_fScaleFactor(1.0f)
+{
+	Init();
+}
+
+ncSprite::ncSprite(ncTexture *pTexture)
+	: ncDrawableNode(NULL), m_pTexture(pTexture), m_texRect(0, 0, 0, 0), m_fScaleFactor(1.0f)
+{
+	Init();
+}
+
 ncSprite::ncSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY)
 	: ncDrawableNode(pParent, iX, iY), m_pTexture(pTexture), m_texRect(0, 0, 0, 0), m_fScaleFactor(1.0f)
 {
@@ -44,16 +56,6 @@ ncSprite* ncSprite::FromId(unsigned int uId)
 		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncSprite::FromId - Object not found");
 		return NULL;
 	}
-}
-
-
-void ncSprite::UpdateRenderCommand()
-{
-	m_renderCmd.Material().SetTextureGLId(m_pTexture->GLId());
-	m_renderCmd.Transformation().SetPosition(AbsPosition());
-	SetVertices();
-	m_renderCmd.Geometry().SetData(GL_TRIANGLE_STRIP, 0, 4, m_fVertices, m_fTexCoords, NULL);
-	m_renderCmd.CalculateSortKey();
 }
 
 ///////////////////////////////////////////////////////////
@@ -94,4 +96,14 @@ void ncSprite::SetTexCoords()
 	m_fTexCoords[4] = rightCoord;	m_fTexCoords[5] = bottomCoord;
 
 	m_fTexCoords[6] = rightCoord;	m_fTexCoords[7] = topCoord;
+}
+
+void ncSprite::UpdateRenderCommand()
+{
+	m_renderCmd.Material().SetTextureGLId(m_pTexture->GLId());
+	m_renderCmd.Material().SetColor(m_color.fR(), m_color.fG(), m_color.fB(), m_color.fA());
+	m_renderCmd.Transformation().SetPosition(AbsPosition());
+	SetVertices();
+	m_renderCmd.Geometry().SetData(GL_TRIANGLE_STRIP, 0, 4, m_fVertices, m_fTexCoords, NULL);
+	m_renderCmd.CalculateSortKey();
 }

@@ -49,6 +49,8 @@ public:
 	inline void Bind() { glBindTexture(GL_TEXTURE_2D, m_uGLId); }
 	/// Disable texture rendering for the current unit
 	static void Unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
+	// Set the red channel of a second texture as the alpha channel
+	void SetAlphaFromRed(ncTexture *pAlphaTex);
 
 	inline static eObjectType sType() { return TEXTURE_TYPE; }
 	static ncTexture* FromId(unsigned int uId);

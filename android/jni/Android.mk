@@ -7,7 +7,7 @@ SRC=../../src
 TST=../../tests
 
 LOCAL_MODULE    := ncine
-LOCAL_CFLAGS    := -fexceptions -Werror
+LOCAL_CFLAGS    := -Werror
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/$(INC)
 LOCAL_SRC_FILES := main.cpp \
 	$(SRC)/base/ncVector2f.cpp \
@@ -18,6 +18,7 @@ LOCAL_SRC_FILES := main.cpp \
 	$(SRC)/ncArrayIndexer.cpp \
 	$(SRC)/ncProfileVariable.cpp \
 	$(SRC)/ncApplication.cpp \
+	$(SRC)/graphics/ncIGfxDevice.cpp \
 	$(SRC)/graphics/ncEGLGfxDevice.cpp \
 	$(SRC)/graphics/ncTextureFormat.cpp \
 	$(SRC)/graphics/ncTextureLoader.cpp \
@@ -30,7 +31,10 @@ LOCAL_SRC_FILES := main.cpp \
 	$(SRC)/graphics/ncRenderCommand.cpp \
 	$(SRC)/graphics/ncRenderQueue.cpp \
 	$(SRC)/graphics/ncSpriteBatchNode.cpp \
-	$(TST)/test_sceneapp.cpp
+	$(SRC)/graphics/ncParticle.cpp \
+	$(SRC)/graphics/ncParticleAffectors.cpp \
+	$(SRC)/graphics/ncParticleSystem.cpp \
+	$(TST)/test_particlesapp.cpp
 
 LOCAL_LDLIBS    := -lm -llog -landroid -lEGL -lGLESv1_CM
 LOCAL_STATIC_LIBRARIES := android_native_app_glue

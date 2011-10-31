@@ -18,6 +18,7 @@ set(SOURCES
 	src/ncTimer.cpp
 	src/ncFrameTimer.cpp
 	src/ncProfileVariable.cpp
+	src/graphics/ncIGfxDevice.cpp
 	src/graphics/ncSDLGfxDevice.cpp
 	src/graphics/ncTextureFormat.cpp
 	src/graphics/ncTextureLoader.cpp
@@ -31,6 +32,9 @@ set(SOURCES
 	src/graphics/ncRenderQueue.cpp
 	src/graphics/ncSpriteBatchNode.cpp
 	src/ncApplication.cpp
+	src/graphics/ncParticle.cpp
+	src/graphics/ncParticleAffectors.cpp
+	src/graphics/ncParticleSystem.cpp
 )
 
 link_libraries (
@@ -41,6 +45,8 @@ link_libraries (
 
 add_executable(test_radixsort tests/test_radixsort.cpp)
 add_executable(test_renderqueue ${SOURCES} tests/test_renderqueue.cpp)
+add_executable(test_particlesapp ${SOURCES} tests/main.cpp tests/test_particlesapp.cpp)
+add_executable(test_particles ${SOURCES} tests/test_particles.cpp)
 add_executable(test_sceneapp ${SOURCES} tests/main.cpp tests/test_sceneapp.cpp)
 add_executable(test_scene ${SOURCES} tests/test_scene.cpp)
 add_executable(test_array ${SOURCES} tests/test_array.cpp)

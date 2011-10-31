@@ -49,6 +49,7 @@ void ncEGLGfxDevice::InitDevice(struct android_app* state)
 		  EGL_BLUE_SIZE, m_mode.BlueBits(),
 		  EGL_GREEN_SIZE, m_mode.GreenBits(),
 		  EGL_RED_SIZE, m_mode.RedBits(),
+		  EGL_ALPHA_SIZE, m_mode.AlphaBits(),
 		  EGL_NONE
 	};
 

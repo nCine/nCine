@@ -43,6 +43,13 @@ public:
 	inline bool isWindowed() const { return m_bIsWindowed; }
 	/// Return display mode
 	inline const ncDisplayMode& Mode() const { return m_mode; }
+
+	// Log OpenGL device info
+	void LogGLInfo();
+	// Log OpenGL extensions
+	void LogGLExtensions();
+	// Check for an OpenGL extension
+	bool CheckGLExtension(const char *pExtensionName);
 };
 
 inline ncIGfxDevice::~ncIGfxDevice() { }

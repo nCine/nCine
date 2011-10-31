@@ -8,11 +8,11 @@
 
 void ncRenderMaterial::Bind() const
 {
-	if (m_fColor[3] < 1.0f)
-		glEnable(GL_BLEND);
+//	if (m_fColor[3] < 1.0f)
+//		glEnable(GL_BLEND);
 
-	// glColor4fv(m_fColor); // Not availble on GLES
-	glColor4f(m_fColor[0], m_fColor[1], m_fColor[2], m_fColor[3]);
+//	glColor4ubv(m_color.Vector()); // Not available on GLES
+	glColor4ub(m_color.R(), m_color.G(), m_color.B(), m_color.A());
 	glBindTexture(GL_TEXTURE_2D, m_uTextureGLId);
 }
 

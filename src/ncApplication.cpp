@@ -1,3 +1,4 @@
+#include <ctime>
 #include "ncApplication.h"
 #include "ncServiceLocator.h"
 #include "ncArrayIndexer.h"
@@ -55,6 +56,10 @@ void ncApplication::Init(void (*pGameCallback)(eCommand cmd))
 	m_pGameCallback = pGameCallback;
 	(*m_pGameCallback)(CMD_INIT);
 	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncApplication::Init - external app initialized");
+
+	// HACK: Init of the random seed
+	// In the future there could be a random generator service
+	srand(time(NULL));
 }
 
 void ncApplication::Run()
@@ -96,23 +101,23 @@ void ncApplication::Step()
 	unsigned long int uStartTime = 0L;
 	m_pTimer->Start();
 
-	uStartTime = m_pTimer->Interval();
+	uStartTime = m_pTimer->Now();
 	m_pFrameTimer->AddFrame();
 	m_pGfxDevice->Clear();
 	m_pGameCallback(CMD_FRAMESTART);
-//	m_pProfilePlotter->AddValue(0, m_pTimer->Interval() - uStartTime);
-	m_pProfilePlotter->AddValue(0, 1.0f * abs(rand()%34));
+	m_pProfilePlotter->AddValue(0, m_pTimer->Now() - uStartTime);
+//	m_pProfilePlotter->AddValue(0, 1.0f * abs(rand()%34));
 
-	uStartTime = m_pTimer->Interval();
+	uStartTime = m_pTimer->Now();
 	m_pRootNode->Update(m_pFrameTimer->Interval());
 	m_pRootNode->Visit(*m_pRenderQueue);
-//	m_pProfilePlotter->AddValue(1, m_pTimer->Interval() - uStartTime);
-	m_pProfilePlotter->AddValue(1, 1.0f * abs(rand()%33));
+	m_pProfilePlotter->AddValue(1, m_pTimer->Now() - uStartTime);
+//	m_pProfilePlotter->AddValue(1, 1.0f * abs(rand()%33));
 
-	uStartTime = m_pTimer->Interval();
+	uStartTime = m_pTimer->Now();
 	m_pRenderQueue->Draw();
-//	m_pProfilePlotter->AddValue(2, m_pTimer->Interval() - uStartTime);
-	m_pProfilePlotter->AddValue(2, 1.0f * abs(rand()%33));
+	m_pProfilePlotter->AddValue(2, m_pTimer->Now() - uStartTime);
+//	m_pProfilePlotter->AddValue(2, 1.0f * abs(rand()%33));
 
 	m_pProfilePlotter->Draw();
 

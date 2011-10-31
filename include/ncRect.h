@@ -46,7 +46,7 @@ class ncRect
 		}
 
 		/// Retain size but move to another position
-		inline void setCenter(ncPoint const center)
+		inline void SetCenter(ncPoint const center)
 		{
 			x = center.x - w*0.5f;
 			y = center.y - h*0.5f;

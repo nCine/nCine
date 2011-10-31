@@ -34,6 +34,10 @@ public:
 		: m_iRedBits(iRedBits), m_iGreenBits(iGreenBits), m_iBlueBits(iBlueBits),
 		  m_iAlphaBits(-1), m_iBufferBits(-1), m_bIsDoubleBuffered(true), m_bIsVSynced(false),
 		  m_iDepthBits(-1), m_iStencilBits(-1) { }
+	ncDisplayMode(int iRedBits, int iGreenBits, int iBlueBits, int iAlphaBits)
+		: m_iRedBits(iRedBits), m_iGreenBits(iGreenBits), m_iBlueBits(iBlueBits),
+		  m_iAlphaBits(iAlphaBits), m_iBufferBits(-1), m_bIsDoubleBuffered(true), m_bIsVSynced(false),
+		  m_iDepthBits(-1), m_iStencilBits(-1) { }
 	ncDisplayMode(bool bDoubleBuffered, bool bVSynced, int iDepthBits, int iStencilBits)
 		: m_iRedBits(-1), m_iGreenBits(-1), m_iBlueBits(-1), m_iAlphaBits(-1), m_iBufferBits(-1),
 		  m_bIsDoubleBuffered(bDoubleBuffered), m_bIsVSynced(bVSynced),

@@ -9,6 +9,7 @@ class ncDrawableNode : public ncSceneNode
 {
 protected:
 	ncRenderCommand m_renderCmd;
+	virtual void UpdateRenderCommand() = 0;
 
 public:
 	ncDrawableNode(ncSceneNode* pParent, int iX, int iY)
@@ -20,7 +21,6 @@ public:
 	virtual ~ncDrawableNode();
 
 	inline const ncRenderCommand* Command() const { return &m_renderCmd; }
-	virtual void UpdateRenderCommand() = 0;
 	virtual void Draw(ncRenderQueue& rRenderQueue)
 	{
 		UpdateRenderCommand();

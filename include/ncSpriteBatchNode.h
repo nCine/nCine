@@ -20,6 +20,8 @@ private:
 	ncArray<float> m_vTexCoords;
 	/// Fill the batch draw command with data from a sprite
 	void ProcessSprite(ncSprite& rSprite);
+
+	virtual void UpdateRenderCommand();
 public:
 	ncSpriteBatchNode(ncSceneNode* pParent, ncTexture *pTexture);
 	virtual ~ncSpriteBatchNode() { }
@@ -32,8 +34,6 @@ public:
 
 	inline static eObjectType sType() { return SPRITEBATCH_TYPE; }
 	static ncSpriteBatchNode* FromId(unsigned int uId);
-
-	virtual void UpdateRenderCommand();
 };
 
 #endif

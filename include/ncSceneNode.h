@@ -15,18 +15,18 @@ protected:
 	ncSceneNode* m_pParent;
 	ncList<ncSceneNode *> m_children;
 
-	/// Absolute X coordinate as calculated by the RenderGraph class
-	int m_absX;
-	/// Absolute Y coordinate as calculated by the RenderGraph class
-	int m_absY;
+	/// Absolute X coordinate as calculated by the Transform() function
+	float m_absX;
+	/// Absolute Y coordinate as calculated by the Transform() function
+	float m_absY;
 
 	virtual void Transform();
 
 public:
 	/// Relative X coordinate as a public property
-	int x;
+	float x;
 	/// Relative Y coordinate as a public property
-	int y;
+	float y;
 	bool bShouldUpdate;
 	bool bShouldDraw;
 
@@ -68,11 +68,8 @@ public:
 
 	inline ncPoint Position() { return ncPoint(x, y); }
 	inline ncPoint AbsPosition() { return ncPoint(m_absX, m_absY); }
-	inline void setPosition(int iX, int iY) { x = iX; y = iY; }
-	inline void setPosition(ncPoint pos) { x = pos.x; y = pos.y; }
-
-	friend class ncRenderGraph;
-	friend class ncRenderQueue;
+	inline void SetPosition(int iX, int iY) { x = iX; y = iY; }
+	inline void SetPosition(ncPoint pos) { x = pos.x; y = pos.y; }
 };
 
 #endif

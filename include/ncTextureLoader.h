@@ -37,6 +37,24 @@ private:
 		uint16_t uHeight2;
 	} ETC1_header;
 
+	typedef struct DDS_header {
+		char		cMagicId[4];
+		uint32_t	dwSize;
+		uint32_t	dwFlags;
+		uint32_t	dwHeight;
+		uint32_t	dwWidth;
+		uint32_t	dwPitchOrLinearSize;
+		uint32_t	dwDepth;
+		uint32_t	dwMipMapCount;
+		uint32_t	dwReserved1[11];
+		uint32_t	ddspf[8];
+		uint32_t	dwCaps;
+		uint32_t	dwCaps2;
+		uint32_t	dwCaps3;
+		uint32_t	dwCaps4;
+		uint32_t	dwReserved2;
+	} DDS_header;
+
 	int m_iWidth;
 	int m_iHeight;
 	int m_iBpp;
@@ -52,6 +70,7 @@ private:
 #endif
 
 	void ReadETC1Header(const char *pFilename);
+	void ReadDDSHeader(const char *pFilename);
 	void LoadCompressed(const char *pFilename, GLenum eInternalFormat);
 public:
 	ncTextureLoader(const char *pFilename);

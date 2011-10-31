@@ -2,6 +2,7 @@
 #define CLASS_NCVECTOR2F
 
 #include <cstring>
+#include <cmath>
 
 /// A two dimensional vector
 class ncVector2f

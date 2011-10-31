@@ -80,6 +80,8 @@ int main(int argc, char **argv)
 		rootNode.AddChildNode(pSprites[i]);
 #endif
 		pSprites[i]->SetScale(scale);
+		unsigned char ucRandAlpha = rand() % 256;
+		pSprites[i]->SetColor(1.0f, 1.0f, 1.0f, ucRandAlpha/255.0f);
 	}
 
 	t.Reset();
