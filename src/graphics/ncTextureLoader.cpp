@@ -86,8 +86,10 @@ void ncTextureLoader::LoadSDL(const char *pFilename)
 		m_texFormat = ncTextureFormat(GL_RGBA8);
 	else if (m_iBpp  == 24)
 		m_texFormat = ncTextureFormat(GL_RGB8);
+	else if (m_iBpp == 8)
+		m_texFormat = ncTextureFormat(GL_ALPHA8);
 	else {
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureLoader::LoadSDL - Not a true color image: %d", m_iBpp);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureLoader::LoadSDL - Not a true color or alpha image: %d", m_iBpp);
 		exit(-1);
 	}
 

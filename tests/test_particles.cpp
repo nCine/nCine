@@ -36,9 +36,9 @@ int main(int argc, char **argv)
 	glEnable(GL_BLEND); // HACK: for alpha blending
 	ncSceneNode rootNode;
 
-	ncTexture texture("smoke.png");
-//	ncTexture texture("smoke_rgb.png");
-//	ncTexture textureAlpha("smoke_red.png");
+	ncTexture texture("smoke_256.png");
+//	ncTexture texture("smoke_256_rgb.png");
+//	ncTexture textureAlpha("smoke_256_red.png");
 //	texture.SetAlphaFromRed(&textureAlpha);
 
 	ncParticleSystem particleSys(NUM_PARTICLES, &texture, 0.25f);
@@ -94,7 +94,7 @@ int main(int argc, char **argv)
 
 		gfxDevice.Clear();
 
-		if (t.Now() - ulStartTime > 150)
+		if (t.Now() - ulStartTime > 250)
 		{
 			ulStartTime = t.Now();
 			particleSys.Emit(25, 3000, ncVector2f(0.0f, 0.1f));

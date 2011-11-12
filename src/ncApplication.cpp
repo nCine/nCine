@@ -32,7 +32,7 @@ void ncApplication::Init(void (*pGameCallback)(eCommand cmd))
 {
 	m_pGfxDevice = new ncSDLGfxDevice(960, 640);
 #endif
-	m_pFrameTimer = new ncFrameTimer(5, 0);
+	m_pFrameTimer = new ncFrameTimer(5, 100);
 	m_pRootNode = new ncSceneNode();
 	m_pRenderQueue = new ncRenderQueue();
 	m_pTimer = new ncTimer();

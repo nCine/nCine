@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 	ncSceneNode rootNode;
 
 #ifdef WITH_BATCH
-	ncTexture *pMegaTexture = new ncTexture("megatexture.png");
+	ncTexture *pMegaTexture = new ncTexture("megatexture_256.png");
 	texRects[0] = ncRect(0, 0, 145, 121);
 	texRects[1] = ncRect(256-100, 0, 100, 100);
 	texRects[2] = ncRect(0, 256-96, 96, 96);

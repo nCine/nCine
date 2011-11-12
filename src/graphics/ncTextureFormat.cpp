@@ -74,9 +74,13 @@ bool ncTextureFormat::IntegerFormat()
 		case 2:
 			m_eFormat = GL_LUMINANCE_ALPHA;
 			break;
+		case GL_ALPHA8:
+		case GL_ALPHA:
+		case 1:
+			m_eFormat = GL_ALPHA;
+			break;
 		case GL_LUMINANCE8:
 		case GL_LUMINANCE:
-		case 1:
 			m_eFormat = GL_LUMINANCE;
 			break;
 		case GL_DEPTH_COMPONENT:
@@ -167,6 +171,9 @@ bool ncTextureFormat::OESFormat()
 			break;
 		case GL_RGB8_OES:
 			m_eFormat = GL_RGB;
+			break;
+		case GL_ALPHA:
+			m_eFormat = GL_ALPHA;
 			break;
 		default:
 			bFound = false;

@@ -51,6 +51,7 @@ public:
 	static inline ncIGfxDevice& GfxDevice() { return *m_pGfxDevice; }
 	static inline ncSceneNode& RootNode() { return *m_pRootNode; }
 	static inline unsigned long int Interval() { return m_pFrameTimer->Interval(); }
+	static inline float AverageFPS() { return m_pFrameTimer->AverageFPS(); }
 	static inline int Width() { return m_pGfxDevice->Width(); }
 	static inline int Height() { return m_pGfxDevice->Height(); }
 };

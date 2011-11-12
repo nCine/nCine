@@ -61,7 +61,7 @@ unsigned long int ncTimer::Total()
 	return m_uTotal;
 }
 
-/// Return current time in milliseconds from epoch
+/// Return current time in milliseconds from init time
 unsigned long int ncTimer::Now()
 {
 	struct timeval now;

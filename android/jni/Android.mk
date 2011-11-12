@@ -18,6 +18,7 @@ LOCAL_SRC_FILES := main.cpp \
 	$(SRC)/ncArrayIndexer.cpp \
 	$(SRC)/ncProfileVariable.cpp \
 	$(SRC)/ncApplication.cpp \
+	$(SRC)/ncFont.cpp \
 	$(SRC)/graphics/ncIGfxDevice.cpp \
 	$(SRC)/graphics/ncEGLGfxDevice.cpp \
 	$(SRC)/graphics/ncTextureFormat.cpp \
@@ -34,6 +35,7 @@ LOCAL_SRC_FILES := main.cpp \
 	$(SRC)/graphics/ncParticle.cpp \
 	$(SRC)/graphics/ncParticleAffectors.cpp \
 	$(SRC)/graphics/ncParticleSystem.cpp \
+	$(SRC)/graphics/ncTextNode.cpp \
 	$(TST)/test_particlesapp.cpp
 
 LOCAL_LDLIBS    := -lm -llog -landroid -lEGL -lGLESv1_CM

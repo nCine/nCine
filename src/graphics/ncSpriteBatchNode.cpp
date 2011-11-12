@@ -89,7 +89,7 @@ ncSpriteBatchNode* ncSpriteBatchNode::FromId(unsigned int uId)
 void ncSpriteBatchNode::ProcessSprite(ncSprite& rSprite)
 {
 	ncPoint size = rSprite.Size();
-	ncPoint pos = rSprite.Position();
+	ncVector2f pos = rSprite.Position();
 	// Parent transformation
 	pos.x += m_absX;
 	pos.y += m_absY;
@@ -128,7 +128,7 @@ void ncSpriteBatchNode::ProcessSprite(ncSprite& rSprite)
 void ncSpriteBatchNode::UpdateRenderCommand()
 {
 	m_renderCmd.Material().SetTextureGLId(m_pTexture->GLId());
-	m_renderCmd.Transformation().SetPosition(AbsPosition());
+	m_renderCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
 	m_renderCmd.Geometry().SetData(GL_TRIANGLES, 0, m_vVertices.Size()/2, m_vVertices.Pointer(), m_vTexCoords.Pointer(), NULL);
 	m_renderCmd.CalculateSortKey();
 }

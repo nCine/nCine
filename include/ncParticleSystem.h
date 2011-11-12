@@ -13,6 +13,7 @@ class ncParticle;
 
 class ncParticleSystem : public ncDrawableNode
 {
+private:
 	unsigned int m_uPoolSize;
 	unsigned int m_uPoolTop;
 	ncParticle **m_pParticlePool;
@@ -25,7 +26,7 @@ class ncParticleSystem : public ncDrawableNode
 
 	virtual void UpdateRenderCommand() { }
 public:
-	ncParticleSystem(unsigned int count, ncTexture *pTexture, float fSpriteScale);
+	ncParticleSystem(unsigned int uCount, ncTexture *pTexture, float fSpriteScale);
 	~ncParticleSystem();
 
 	void AddAffector(ncParticleAffector* affector) { m_vAffectors.InsertBack(affector); }

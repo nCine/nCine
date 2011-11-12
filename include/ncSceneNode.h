@@ -3,8 +3,7 @@
 
 #include "ncObject.h"
 #include "ncList.h"
-#include "ncPoint.h"
-#include "ncRect.h"
+#include "ncVector2f.h"
 
 class ncRenderQueue;
 
@@ -30,8 +29,8 @@ public:
 	bool bShouldUpdate;
 	bool bShouldDraw;
 
-	ncSceneNode(ncSceneNode* pParent, int iX, int iY)
-		: m_pParent(NULL), x(iX), y(iY), bShouldUpdate(true), bShouldDraw(true)
+	ncSceneNode(ncSceneNode* pParent, float fX, float fY)
+		: m_pParent(NULL), x(fX), y(fY), bShouldUpdate(true), bShouldDraw(true)
 	{
 		m_eType = SCENENODE_TYPE;
 
@@ -39,7 +38,7 @@ public:
 			pParent->AddChildNode(this);
 	}
 	ncSceneNode(ncSceneNode* pParent)
-		: m_pParent(NULL), x(0), y(0), bShouldUpdate(true), bShouldDraw(true)
+		: m_pParent(NULL), x(0.0f), y(0.0f), bShouldUpdate(true), bShouldDraw(true)
 	{
 		m_eType = SCENENODE_TYPE;
 
@@ -47,7 +46,7 @@ public:
 			pParent->AddChildNode(this);
 	}
 	ncSceneNode()
-		: ncObject(), m_pParent(NULL), x(0), y(0), bShouldUpdate(true), bShouldDraw(true) { m_eType = SCENENODE_TYPE; }
+		: ncObject(), m_pParent(NULL), x(0.0f), y(0.0f), bShouldUpdate(true), bShouldDraw(true) { m_eType = SCENENODE_TYPE; }
 	virtual ~ncSceneNode();
 
 	inline static eObjectType sType() { return SCENENODE_TYPE; }
@@ -66,10 +65,10 @@ public:
 	virtual void Visit(ncRenderQueue& rRenderQueue);
 	virtual void Draw(ncRenderQueue& rRenderQueue) { }
 
-	inline ncPoint Position() { return ncPoint(x, y); }
-	inline ncPoint AbsPosition() { return ncPoint(m_absX, m_absY); }
-	inline void SetPosition(int iX, int iY) { x = iX; y = iY; }
-	inline void SetPosition(ncPoint pos) { x = pos.x; y = pos.y; }
+	inline ncVector2f Position() { return ncVector2f(x, y); }
+	inline ncVector2f AbsPosition() { return ncVector2f(m_absX, m_absY); }
+	inline void SetPosition(float fX, float fY) { x = fX; y = fY; }
+	inline void SetPosition(ncVector2f pos) { x = pos.x; y = pos.y; }
 };
 
 #endif

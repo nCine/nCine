@@ -83,6 +83,7 @@ void ncEGLGfxDevice::InitDevice(struct android_app* state)
 /// Init starting OpenGL
 void ncEGLGfxDevice::InitGL()
 {
+	glDisable(GL_DITHER);
 //	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

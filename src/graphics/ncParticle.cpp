@@ -4,10 +4,8 @@
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncParticle::Init(unsigned long int ulLife, ncPoint pos, ncVector2f vel)
+void ncParticle::Init(unsigned long int ulLife, ncVector2f pos, ncVector2f vel)
 {
-	bShouldDraw = true;
-
 	m_ulLife = ulLife;
 	m_ulStartLife = ulLife;
 	SetPosition(pos);
@@ -25,7 +23,7 @@ void ncParticle::Update(unsigned long int ulInterval)
 
 		x += m_Velocity.x * ulInterval;
 		y += m_Velocity.y * ulInterval;
-
-		Transform();
+		m_absX = x;
+		m_absY = y;
 	}
 }

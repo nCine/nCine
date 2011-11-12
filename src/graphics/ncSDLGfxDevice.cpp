@@ -11,7 +11,7 @@ ncSDLGfxDevice::ncSDLGfxDevice(int iWidth, int iHeight)
 	Init(iWidth, iHeight, ncDisplayMode(), true);
 }
 
-/// Constructor taking the resolution as a Size class
+/// Constructor taking the resolution as a ncPoint class
 ncSDLGfxDevice::ncSDLGfxDevice(ncPoint size)
 {
 	Init(size.x, size.y, ncDisplayMode(), true);
@@ -23,7 +23,7 @@ ncSDLGfxDevice::ncSDLGfxDevice(int iWidth, int iHeight, ncDisplayMode mode)
 	Init(iWidth, iHeight, mode, true);
 }
 
-/// Constructor taking the resolution as a Size class and a DisplayMode
+/// Constructor taking the resolution as a ncPoint class and a DisplayMode
 ncSDLGfxDevice::ncSDLGfxDevice(ncPoint size, ncDisplayMode mode)
 {
 	Init(size.x, size.y, mode, true);
@@ -46,7 +46,7 @@ void ncSDLGfxDevice::SetResolution(int iWidth, int iHeight)
 	}
 }
 
-/// Set screen resolution with the Size class
+/// Set screen resolution with the ncPoint class
 void ncSDLGfxDevice::SetResolution(ncPoint size)
 {
 	// change resolution only in the case it really changes
@@ -145,6 +145,7 @@ void ncSDLGfxDevice::InitDevice()
 /// Init starting OpenGL state
 void ncSDLGfxDevice::InitGL()
 {
+	glDisable(GL_DITHER);
 //	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

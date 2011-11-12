@@ -11,7 +11,6 @@
 	#include <GL/glext.h>
 #endif
 
-#include "ncPoint.h"
 #include "ncList.h"
 #include "ncColor.h"
 
@@ -51,24 +50,25 @@ public:
 class ncRenderTransformation
 {
 private:
+	float m_fX;
+	float m_fY;
 	float m_fScaleX;
 	float m_fScaleY;
-	ncPoint m_position;
 
 public:
-	ncRenderTransformation() : m_fScaleX(1.0f), m_fScaleY(1.0f), m_position(0, 0) { }
+	ncRenderTransformation() : m_fX(0.0f), m_fY(0.0f), m_fScaleX(1.0f), m_fScaleY(1.0f) { }
 
-	ncRenderTransformation(const ncPoint& position)
-		: m_fScaleX(1.0f), m_fScaleY(1.0f), m_position(position) { }
+	ncRenderTransformation(float fX, float fY)
+		: m_fX(fX), m_fY(fY), m_fScaleX(1.0f), m_fScaleY(1.0f) { }
+
+	void SetPosition(float fX, float fY)
+	{
+		m_fX = fX;		m_fY = fY;
+	}
 
 	void SetScale(float fScaleX, float fScaleY)
 	{
 		m_fScaleX = fScaleX;	m_fScaleY = fScaleY;
-	}
-
-	void SetPosition(const ncPoint& pos)
-	{
-		m_position = pos;
 	}
 
 	void Apply() const;
