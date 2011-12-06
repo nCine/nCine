@@ -30,9 +30,9 @@ int main(int argc, char **argv)
 	glEnable(GL_BLEND); // HACK: for alpha blending
 	ncSceneNode rootNode;
 
-	ncFont font1("trebuchet32_256.png", "trebuchet32_256.fnt");
-	ncFont font2("arial32_256.png", "arial32_256.fnt");
-	ncFont font3("verdana32_256.png", "verdana32_256.fnt");
+	ncFont font1("fonts/trebuchet32_256.png", "fonts/trebuchet32_256.fnt");
+	ncFont font2("fonts/arial32_256.png", "fonts/arial32_256.fnt");
+	ncFont font3("fonts/verdana32_256.png", "fonts/verdana32_256.fnt");
 
 	char vFPS[16];
 	ncTextNode fpsText(&rootNode, &font1);

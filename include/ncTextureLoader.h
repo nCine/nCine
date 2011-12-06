@@ -16,6 +16,7 @@
 	#include <SDL/SDL_image.h>
 #endif
 
+#include <cstdio> // for FILE struct
 #include <stdint.h> // for ETC1 header
 #include "ncTextureFormat.h"
 #include "ncPoint.h"

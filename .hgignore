@@ -1,4 +1,17 @@
+syntax: glob
+
 CMakeFiles
 cmake_install.cmake
 CMakeCache.txt
 Makefile
+CMakeLists.txt.user
+staging
+textures
+fonts
+android/project.properties
+android/.*
+android/bin
+android/gen
+android/libs
+android/obj
+android/res

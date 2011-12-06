@@ -53,7 +53,7 @@ void ncParticleSystem::Emit(unsigned int amount, unsigned long int ulLife, ncVec
 
 		ulRndLife = ulLife * randBetween(0.85f, 1.0f);
 		// FIXME: arbitrary random position amount
-		RndPosition.x = 25.0f * randBetween(-1.0f, 1.0f);
+		RndPosition.x = 10.0f * randBetween(-1.0f, 1.0f); // 25
 		RndPosition.y = 10.0f * randBetween(-1.0f, 1.0f);
 		RndVelocity.x = vel.x * randBetween(0.8f, 1.0f);
 		RndVelocity.y = vel.y * randBetween(0.8f, 1.0f);

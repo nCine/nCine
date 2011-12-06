@@ -57,10 +57,6 @@ class ncRect
 			return (x == rect.x && y == rect.y &&
 					w == rect.w && h == rect.h);
 		}
-
-		inline void Print() const {
-			printf("(%i, %i, %i, %i)", x, y, w, h);
-		}
 };
 
 #endif

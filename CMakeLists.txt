@@ -19,6 +19,7 @@ set(SOURCES
 	src/ncFrameTimer.cpp
 	src/ncProfileVariable.cpp
 	src/ncFont.cpp
+	src/ncSDLInputManager.cpp
 	src/graphics/ncIGfxDevice.cpp
 	src/graphics/ncSDLGfxDevice.cpp
 	src/graphics/ncTextureFormat.cpp
@@ -45,12 +46,23 @@ link_libraries (
 	${OPENGL_gl_LIBRARY}
 )
 
+add_library(ncine SHARED ${SOURCES})
+
+add_executable(test_font tests/test_font.cpp)
+add_executable(apptest_particles tests/main.cpp tests/apptest_particles.cpp)
+add_executable(test_particles tests/test_particles.cpp)
+add_executable(test_renderqueue tests/test_renderqueue.cpp)
 add_executable(test_radixsort tests/test_radixsort.cpp)
-add_executable(test_font ${SOURCES} tests/test_font.cpp)
-add_executable(test_particlesapp ${SOURCES} tests/main.cpp tests/test_particlesapp.cpp)
-add_executable(test_particles ${SOURCES} tests/test_particles.cpp)
-add_executable(test_renderqueue ${SOURCES} tests/test_renderqueue.cpp)
-add_executable(test_sceneapp ${SOURCES} tests/main.cpp tests/test_sceneapp.cpp)
-add_executable(test_scene ${SOURCES} tests/test_scene.cpp)
-add_executable(test_array ${SOURCES} tests/test_array.cpp)
-add_executable(test_list ${SOURCES} tests/test_list.cpp)
+add_executable(apptest_scene tests/main.cpp tests/apptest_scene.cpp)
+add_executable(test_scene tests/test_scene.cpp)
+add_executable(test_array tests/test_array.cpp)
+add_executable(test_list tests/test_list.cpp)
+
+target_link_libraries(test_font ncine)
+target_link_libraries(apptest_particles ncine)
+target_link_libraries(test_particles ncine)
+target_link_libraries(test_renderqueue ncine)
+target_link_libraries(apptest_scene ncine)
+target_link_libraries(test_scene ncine)
+target_link_libraries(test_array ncine)
+target_link_libraries(test_list ncine)

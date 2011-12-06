@@ -1,8 +1,6 @@
 #ifndef CLASS_NCCOLOR
 #define CLASS_NCCOLOR
 
-#include <cstdio> // for printf()
-
 /// A 32 bit color
 class ncColor
 {
@@ -88,10 +86,6 @@ public:
 	inline bool operator==(const ncColor& color) const {
 		return (R() == color.R() && G() == color.G() &&
 				B() == color.B() && A() == color.A());
-	}
-
-	inline void Print() const {
-		printf("(%u, %u, %u, %u)", R(), G(), B(), A());
 	}
 };
 

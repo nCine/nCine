@@ -1,10 +1,11 @@
 #include "ncApplication.h"
+class ncIAppEventHandler;
 
-void test_scene(ncApplication::eCommand cmd);
+ncIAppEventHandler* create_apphandler();
 
 int main(int argc, char **argv)
 {
-	ncApplication::Init(test_scene);
+	ncApplication::Init(create_apphandler);
 	ncApplication::Run();
 	ncApplication::Shutdown();
 

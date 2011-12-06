@@ -50,17 +50,17 @@ int main(int argc, char **argv)
 	ncSceneNode rootNode;
 
 #ifdef WITH_BATCH
-	ncTexture *pMegaTexture = new ncTexture("megatexture_256.png");
+	ncTexture *pMegaTexture = new ncTexture("textures/megatexture_256.png");
 	texRects[0] = ncRect(0, 0, 145, 121);
 	texRects[1] = ncRect(256-100, 0, 100, 100);
 	texRects[2] = ncRect(0, 256-96, 96, 96);
 	texRects[3] = ncRect(256-96, 256-96, 96, 96);
 	ncSpriteBatchNode spriteBatch(&rootNode, pMegaTexture);
 #else
-	pTextures[0] = new ncTexture("texture1.png");
-	pTextures[1] = new ncTexture("texture2.png");
-	pTextures[2] = new ncTexture("texture3.png");
-	pTextures[3] = new ncTexture("texture4.png");
+	pTextures[0] = new ncTexture("textures/texture1.png");
+	pTextures[1] = new ncTexture("textures/texture2.png");
+	pTextures[2] = new ncTexture("textures/texture3.png");
+	pTextures[3] = new ncTexture("textures/texture4.png");
 #endif
 
 	for (int i = 0; i < NUM_SPRITES; i++)

@@ -1,8 +1,6 @@
 #ifndef CLASS_NCPOINT
 #define CLASS_NCPOINT
 
-#include <cstdio> // for printf()
-
 /// A point in a two dimensional space
 class ncPoint
 {
@@ -25,10 +23,6 @@ public:
 	/// Equality operator
 	inline bool operator==(const ncPoint& point) const {
 		return (x == point.x && y == point.y);
-	}
-
-	inline void Print() const {
-		printf("(%i, %i)", x, y);
 	}
 };
 

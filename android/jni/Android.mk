@@ -6,8 +6,8 @@ INC=../../include
 SRC=../../src
 TST=../../tests
 
-LOCAL_MODULE    := ncine
-LOCAL_CFLAGS    := -Werror
+LOCAL_MODULE := ncine
+LOCAL_CFLAGS := -Werror
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/$(INC)
 LOCAL_SRC_FILES := main.cpp \
 	$(SRC)/base/ncVector2f.cpp \
@@ -19,6 +19,7 @@ LOCAL_SRC_FILES := main.cpp \
 	$(SRC)/ncProfileVariable.cpp \
 	$(SRC)/ncApplication.cpp \
 	$(SRC)/ncFont.cpp \
+	$(SRC)/ncAndroidInputManager.cpp \
 	$(SRC)/graphics/ncIGfxDevice.cpp \
 	$(SRC)/graphics/ncEGLGfxDevice.cpp \
 	$(SRC)/graphics/ncTextureFormat.cpp \
@@ -36,9 +37,9 @@ LOCAL_SRC_FILES := main.cpp \
 	$(SRC)/graphics/ncParticleAffectors.cpp \
 	$(SRC)/graphics/ncParticleSystem.cpp \
 	$(SRC)/graphics/ncTextNode.cpp \
-	$(TST)/test_particlesapp.cpp
+	$(TST)/apptest_particles.cpp
 
-LOCAL_LDLIBS    := -lm -llog -landroid -lEGL -lGLESv1_CM
+LOCAL_LDLIBS := -lm -llog -landroid -lEGL -lGLESv1_CM
 LOCAL_STATIC_LIBRARIES := android_native_app_glue
 
 include $(BUILD_SHARED_LIBRARY)

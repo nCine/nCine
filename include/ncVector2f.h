@@ -40,10 +40,6 @@ public:
 	ncVector2f& operator-=(const ncVector2f& vec);
 	// Multiplication by a constant scalar
 	ncVector2f operator*(float fC) const;
-
-	inline void Print() const {
-		printf("(%f, %f)", x, y);
-	}
 };
 
 #endif

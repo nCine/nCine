@@ -6,31 +6,40 @@
 #include "ncLinePlotter.h"
 #include "ncStackedBarPlotter.h"
 
+#ifdef __ANDROID__
+	#include "ncAndroidInputManager.h"
+#else
+	#include "ncSDLInputManager.h"
+#endif
+
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-void (*ncApplication::m_pGameCallback)(eCommand cmd) = NULL;
+bool ncApplication::m_bShouldQuit = false;
 ncFrameTimer *ncApplication::m_pFrameTimer = NULL;
 ncIGfxDevice *ncApplication::m_pGfxDevice = NULL;
 ncSceneNode *ncApplication::m_pRootNode = NULL;
 ncRenderQueue *ncApplication::m_pRenderQueue = NULL;
 ncTimer *ncApplication::m_pTimer = NULL;
 ncProfilePlotter *ncApplication::m_pProfilePlotter = NULL;
+ncIInputManager *ncApplication::m_pInputManager = NULL;
+ncIAppEventHandler *ncApplication::m_pAppEventHandler = NULL;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
 #ifdef __ANDROID__
-void ncApplication::Init(struct android_app* state, void (*pGameCallback)(eCommand cmd))
+void ncApplication::Init(struct android_app* state, ncIAppEventHandler* (*pCreateAppEventHandler)())
 {
-//	m_state = state;
 	m_pGfxDevice = new ncEGLGfxDevice(state, ncDisplayMode(5, 6, 5));
+	m_pInputManager = new ncAndroidInputManager();
 #else
-void ncApplication::Init(void (*pGameCallback)(eCommand cmd))
+void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 {
 	m_pGfxDevice = new ncSDLGfxDevice(960, 640);
+	m_pInputManager = new ncSDLInputManager();
 #endif
 	m_pFrameTimer = new ncFrameTimer(5, 100);
 	m_pRootNode = new ncSceneNode();
@@ -53,9 +62,9 @@ void ncApplication::Init(void (*pGameCallback)(eCommand cmd))
 	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
 	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncApplication::Init - ncApplication initialized");
 
-	m_pGameCallback = pGameCallback;
-	(*m_pGameCallback)(CMD_INIT);
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncApplication::Init - external app initialized");
+	m_pAppEventHandler = pCreateAppEventHandler();
+	m_pAppEventHandler->OnInit();
+	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncApplication::Init - ncIAppEventHandler::OnInit() invoked");
 
 	// HACK: Init of the random seed
 	// In the future there could be a random generator service
@@ -65,21 +74,28 @@ void ncApplication::Init(void (*pGameCallback)(eCommand cmd))
 void ncApplication::Run()
 {
 #ifndef __ANDROID__
-	bool bQuit = false;
+	bool bPaused = false;
 	SDL_Event event;
 
 	m_pFrameTimer->Reset();
 
-	while (!bQuit) {
+	while (!m_bShouldQuit) {
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 			case SDL_QUIT:
-				bQuit = true;
+				m_bShouldQuit = true;
 				break;
+			case SDL_ACTIVEEVENT:
+				if (event.active.state != SDL_APPMOUSEFOCUS)
+					bPaused = !event.active.gain;
+				break;
+/*
 			case SDL_KEYDOWN:
-				switch( event.key.keysym.sym ){
+				switch(event.key.keysym.sym)
+				{
 				case SDLK_ESCAPE:
 				case SDLK_q:
+					// TODO: add a quit request from the game
 					bQuit = true;
 					break;
 				case SDLK_F1:
@@ -88,10 +104,16 @@ void ncApplication::Run()
 				default:
 					break;
 				}
+				break;
+*/
+			default:
+				m_pInputManager->ParseEvent(event);
+				break;
 			}
 		}
 
-		Step();
+		if (!bPaused)
+			Step();
 	}
 #endif
 }
@@ -104,7 +126,7 @@ void ncApplication::Step()
 	uStartTime = m_pTimer->Now();
 	m_pFrameTimer->AddFrame();
 	m_pGfxDevice->Clear();
-	m_pGameCallback(CMD_FRAMESTART);
+	m_pAppEventHandler->OnFrameStart();
 	m_pProfilePlotter->AddValue(0, m_pTimer->Now() - uStartTime);
 //	m_pProfilePlotter->AddValue(0, 1.0f * abs(rand()%34));
 
@@ -122,13 +144,17 @@ void ncApplication::Step()
 	m_pProfilePlotter->Draw();
 
 	m_pGfxDevice->Update();
-	m_pGameCallback(CMD_FRAMEEND);
+	m_pAppEventHandler->OnFrameEnd();
 }
 
 void ncApplication::Shutdown()
-{	
-	m_pGameCallback(CMD_SHUTDOWN);
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncApplication::Shutdown - external app shutted down");
+{
+	m_pAppEventHandler->OnShutdown();
+	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncApplication::Shutdown - ncIAppEventHandler::OnShutdown() invoked");
+
+	delete m_pInputManager;;
+	if (m_pAppEventHandler)
+		delete m_pAppEventHandler;
 
 	delete m_pRenderQueue;
 	delete m_pRootNode; // deletes every child too

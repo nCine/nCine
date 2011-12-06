@@ -33,10 +33,10 @@ int main(int argc, char **argv)
 	ncSDLGfxDevice gfxDevice(iWidth, iHeight);
 	SDL_WM_SetCaption("Test", NULL);
 
-	ncTexture tex1("texture1.png");
-	ncTexture tex2("texture2.png");
-	ncTexture tex3("texture3.png");
-	ncTexture tex4("texture4.png");
+	ncTexture tex1("textures/texture1.png");
+	ncTexture tex2("textures/texture2.png");
+	ncTexture tex3("textures/texture3.png");
+	ncTexture tex4("textures/texture4.png");
 
 	ncRenderQueue renderQueue;
 	ncSceneNode rootNode;

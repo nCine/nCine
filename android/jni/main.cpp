@@ -1,11 +1,16 @@
 #include <android_native_app_glue.h>
 #include "ncApplication.h"
-void test_scene(ncApplication::eCommand cmd);
+class ncIAppEventHandler;
+
+ncIAppEventHandler* create_apphandler();
 bool bIsPaused = true;
 
 /// Process the next input event.
 static int32_t engine_handle_input(struct android_app* app, AInputEvent* event)
 {
+	ncApplication::ForwardAEvent(event);
+	return 1;
+/*
 	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
 	{
 		bIsPaused = false;
@@ -13,6 +18,7 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event)
 	}
 
 	return 0;
+*/
 }
 
 /// Process the next main command
@@ -25,7 +31,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd)
 		case APP_CMD_INIT_WINDOW:
 			if (app->window != NULL)
 			{
-				ncApplication::Init(app, test_scene);
+				ncApplication::Init(app, create_apphandler);
 				ncApplication::Step();
 			}
 			break;
@@ -50,7 +56,7 @@ void android_main(struct android_app* state)
 	state->onAppCmd = engine_handle_cmd;
 	state->onInputEvent = engine_handle_input;
 
-	while (1)
+	while (ncApplication::ShouldQuit() == false)
 	{
 		int ident;
 		int events;
@@ -71,4 +77,8 @@ void android_main(struct android_app* state)
 		if (bIsPaused == false)
 			ncApplication::Step();
 	}
+
+	ncApplication::Shutdown();
+	ANativeActivity_finish(state->activity);
+	exit(0);
 }

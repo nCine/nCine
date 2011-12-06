@@ -36,9 +36,9 @@ int main(int argc, char **argv)
 	glEnable(GL_BLEND); // HACK: for alpha blending
 	ncSceneNode rootNode;
 
-	ncTexture texture("smoke_256.png");
-//	ncTexture texture("smoke_256_rgb.png");
-//	ncTexture textureAlpha("smoke_256_red.png");
+	ncTexture texture("textures/smoke_256.png");
+//	ncTexture texture("textures/smoke_256_rgb.png");
+//	ncTexture textureAlpha("textures/smoke_256_red.png");
 //	texture.SetAlphaFromRed(&textureAlpha);
 
 	ncParticleSystem particleSys(NUM_PARTICLES, &texture, 0.25f);
