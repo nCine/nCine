@@ -41,7 +41,7 @@ public:
 	/// Float getter for the alpha component of the color
 	inline float fA() const { return m_color[3]/255.0f; }
 
-	/// Set four color elements (unsigned char)
+	/// Sets four color elements (unsigned char)
 	inline void Set(unsigned char ucR, unsigned char ucG, unsigned char ucB, unsigned char ucA)
 	{
 		m_color[0] = ucR;
@@ -50,19 +50,19 @@ public:
 		m_color[3] = ucA;
 	}
 
-	/// Set three color elements (unsigned char)
+	/// Sets three color elements (unsigned char)
 	inline void Set(unsigned char ucR, unsigned char ucG, unsigned char ucB)
 	{
 		Set(ucR, ucG, ucB, 255);
 	}
 
-	/// Set four color elements (unsigned char vector)
+	/// Sets four color elements (unsigned char vector)
 	inline void Setv(unsigned char vColor[4])
 	{
 		Set(vColor[0], vColor[1], vColor[2], vColor[3]);
 	}
 
-	/// Set four color elements (normalized float)
+	/// Sets four color elements (normalized float)
 	inline void SetF(float fR, float fG, float fB, float fA)
 	{
 		m_color[0] = fR > 1.0f ? 255 : fR * 255;
@@ -71,12 +71,12 @@ public:
 		m_color[3] = fA > 1.0f ? 255 : fA * 255;
 	}
 
-	/// Set three color elements (normalized float)
+	/// Sets three color elements (normalized float)
 	inline void SetF(float fR, float fG, float fB) {
 		SetF(fR, fG, fB, 1.0f);
 	}
 
-	/// Set four color elements (float vector)
+	/// Sets four color elements (float vector)
 	inline void SetFv(float fvColor[4])
 	{
 		SetF(fvColor[0], fvColor[1], fvColor[2], fvColor[3]);

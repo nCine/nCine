@@ -17,18 +17,20 @@ public:
 	/// Construct from components
 	ncVector2f(float const fX, float const fY) : x(fX), y(fY) { }
 
-	/// Set vector elements
+	/// Sets vector elements
 	inline void Set(float const fX, float const fY) {
 		x = fX;
 		y = fY;
 	}
 
-	/// Calculate vector length
+	/// Calculates vector length
 	inline float Length() const {
 		return sqrt(x*x + y*y);
 	}
 	// Vector normalization
-	inline ncVector2f& Normalize();
+	ncVector2f& Normalize();
+	// Dot product
+	float Dot(const ncVector2f& vec) const;
 
 	// Operators
 	bool operator==(const ncVector2f& vec) const;
@@ -40,6 +42,7 @@ public:
 	ncVector2f& operator-=(const ncVector2f& vec);
 	// Multiplication by a constant scalar
 	ncVector2f operator*(float fC) const;
+	ncVector2f operator*=(float fC);
 };
 
 #endif

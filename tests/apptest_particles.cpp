@@ -59,8 +59,6 @@ void MyEventHandler::OnInit()
 
 void MyEventHandler::OnFrameStart()
 {
-	glEnable(GL_BLEND); // HACK: for alpha blending
-
 	if (m_pTimer->Now() - m_ulUpdateFpsTime > 100)
 	{
 		m_ulUpdateFpsTime = m_pTimer->Now();
@@ -124,6 +122,8 @@ void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
 {
 	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)
 		ncApplication::Quit();
+	else if (event.sym == NCKEY_SPACE)
+		ncApplication::TogglePause();
 }
 
 void MyEventHandler::OnMouseButtonPressed(const ncMouseEvent &event)

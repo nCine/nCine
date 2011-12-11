@@ -52,14 +52,23 @@ public:
 	~ncDisplayMode() { }
 
 	// Getters
+	/// Returns the number of bits for the red channel
 	inline int RedBits() const { return m_iRedBits; }
+	/// Returns the number of bits for the green channel
 	inline int GreenBits() const { return m_iGreenBits; }
+	/// Returns the number of bits for the blue channel
 	inline int BlueBits() const { return m_iBlueBits; }
+	/// Returns the number of bits for the alpha channel
 	inline int AlphaBits() const { return m_iAlphaBits; }
+	/// Returns the number of bits for the color buffer
 	inline int BufferBits() const { return m_iBufferBits; }
+	/// Returns true if the display is double buffered
 	inline bool isDoubleBuffered() const { return m_bIsDoubleBuffered; }
+	/// Returns true if the dislpay has V-sync enabled
 	inline bool isVSynced() const { return m_bIsVSynced; }
+	/// Returns the number of bits for the depth buffer
 	inline int DepthBits() const { return m_iDepthBits; }
+	/// Returns the number of bits for the stencil buffer
 	inline int StencilBits() const { return m_iStencilBits; }
 };
 

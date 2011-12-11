@@ -33,7 +33,7 @@ ncSDLGfxDevice::ncSDLGfxDevice(ncPoint size, ncDisplayMode mode)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Set screen resolution with two integers
+/// Sets screen resolution with two integers
 void ncSDLGfxDevice::SetResolution(int iWidth, int iHeight)
 {
 	// change resolution only in the case it really changes
@@ -46,7 +46,7 @@ void ncSDLGfxDevice::SetResolution(int iWidth, int iHeight)
 	}
 }
 
-/// Set screen resolution with the ncPoint class
+/// Sets screen resolution with the ncPoint class
 void ncSDLGfxDevice::SetResolution(ncPoint size)
 {
 	// change resolution only in the case it really changes
@@ -59,7 +59,7 @@ void ncSDLGfxDevice::SetResolution(ncPoint size)
 	}
 }
 
-/// Toggle between fullscreen and windowed mode
+/// Toggles between fullscreen and windowed mode
 void ncSDLGfxDevice::ToggleFullScreen()
 {
 	m_bIsWindowed = !m_bIsWindowed;
@@ -70,7 +70,7 @@ void ncSDLGfxDevice::ToggleFullScreen()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Initialize the class
+/// Initializes the class
 void ncSDLGfxDevice::Init(int iWidth, int iHeight, ncDisplayMode mode, bool bIsWindowed)
 {
 	m_iWidth = iWidth;
@@ -85,7 +85,7 @@ void ncSDLGfxDevice::Init(int iWidth, int iHeight, ncDisplayMode mode, bool bIsW
 	SDL_WM_SetCaption("nCine", NULL);
 }
 
-/// Init the video subsystem (SDL)
+/// Initilizes the video subsystem (SDL)
 void ncSDLGfxDevice::InitGraphics()
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -94,7 +94,7 @@ void ncSDLGfxDevice::InitGraphics()
 	}
 }
 
-/// Init the OpenGL graphic context
+/// Initilizes the OpenGL graphic context
 void ncSDLGfxDevice::InitDevice()
 {
 	// setting OpenGL attributes
@@ -142,12 +142,14 @@ void ncSDLGfxDevice::InitDevice()
 }
 
 
-/// Init starting OpenGL state
+/// Initilizes starting OpenGL state
 void ncSDLGfxDevice::InitGL()
 {
 	glDisable(GL_DITHER);
 //	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
+
+	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glMatrixMode(GL_PROJECTION);

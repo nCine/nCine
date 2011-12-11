@@ -9,23 +9,28 @@ class ncVector2f;
 class ncColor;
 template <class T> class ncArray;
 
+/// Base class for particle affectors
 class ncParticleAffector
 {
 public:
 	virtual void Affect(ncParticle* pParticle) = 0;
 };
 
+/// Particle acceleration affector
 class ncAccelerationAffector: public ncParticleAffector
 {
 	ncVector2f m_vAcceleration;
 public:
+	/// X and Y components of the accelerator vector
 	ncAccelerationAffector(float fX, float fY) : m_vAcceleration(fX, fY) { }
+
 	virtual void Affect(ncParticle* pParticle)
 	{
 		pParticle->m_Velocity += m_vAcceleration;
 	}
 };
 
+/// Particle color affector
 class ncColorAffector: public ncParticleAffector
 {
 public:
@@ -49,9 +54,11 @@ private:
 	ncArray<ColorStep *> m_vColorSteps;
 };
 
+/// Particle size affector
 class ncSizeAffector: public ncParticleAffector
 {
 public:
+	/// Constructs a size affector with a base scale factor as a reference
 	ncSizeAffector(float fBaseScale) : m_vSizeSteps(4), m_fBaseScale(fBaseScale) { }
 	~ncSizeAffector()
 	{

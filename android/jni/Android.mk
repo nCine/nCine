@@ -37,7 +37,9 @@ LOCAL_SRC_FILES := main.cpp \
 	$(SRC)/graphics/ncParticleAffectors.cpp \
 	$(SRC)/graphics/ncParticleSystem.cpp \
 	$(SRC)/graphics/ncTextNode.cpp \
-	$(TST)/apptest_particles.cpp
+	$(SRC)/graphics/ncRectAnimation.cpp \
+	$(SRC)/graphics/ncAnimatedSprite.cpp \
+	$(TST)/apptest_animsprites.cpp
 
 LOCAL_LDLIBS := -lm -llog -landroid -lEGL -lGLESv1_CM
 LOCAL_STATIC_LIBRARIES := android_native_app_glue

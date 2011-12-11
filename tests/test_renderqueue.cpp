@@ -46,7 +46,6 @@ int main(int argc, char **argv)
 	SDL_WM_SetCaption("Test", NULL);
 
 	ncRenderQueue renderQueue;
-	glEnable(GL_BLEND); // HACK: for alpha blending
 	ncSceneNode rootNode;
 
 #ifdef WITH_BATCH
@@ -69,7 +68,6 @@ int main(int argc, char **argv)
 		vRadius[i] = 20 + rand() % 50;
 		vX[i] = rand() % iWidth;
 		vY[i] = rand() % iHeight;
-		float scale = 0.35f + 0.1f * (rand() % 3);
 #ifdef WITH_BATCH
 		pSprites[i] = new ncSprite(&spriteBatch, pMegaTexture, vX[i], vY[i]);
 		pSprites[i]->SetTexRect(texRects[numTex]);
@@ -79,9 +77,12 @@ int main(int argc, char **argv)
 		pSprites[i]->SetPriority(numTex);
 		rootNode.AddChildNode(pSprites[i]);
 #endif
+		float scale = 0.35f + 0.1f * (rand() % 3);
 		pSprites[i]->SetScale(scale);
+		float rot = rand() % 360;
+		pSprites[i]->SetRotation(rot);
 		unsigned char ucRandAlpha = rand() % 256;
-		pSprites[i]->SetColor(1.0f, 1.0f, 1.0f, ucRandAlpha/255.0f);
+		pSprites[i]->SetColor(1.0f, 1.0f, 1.0f, ucRandAlpha/255.0f);;
 	}
 
 	t.Reset();

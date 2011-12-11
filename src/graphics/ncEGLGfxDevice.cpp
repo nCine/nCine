@@ -41,7 +41,7 @@ ncEGLGfxDevice::~ncEGLGfxDevice()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Initialize the class
+/// Initializes the OpenGL graphic context
 void ncEGLGfxDevice::InitDevice(struct android_app* state)
 {
 	const EGLint attribs[] = {
@@ -80,12 +80,14 @@ void ncEGLGfxDevice::InitDevice(struct android_app* state)
 	eglQuerySurface(m_display, m_surface, EGL_HEIGHT, &m_iHeight);
 }
 
-/// Init starting OpenGL
+/// Initializes starting OpenGL state
 void ncEGLGfxDevice::InitGL()
 {
 	glDisable(GL_DITHER);
 //	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
+
+	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glMatrixMode(GL_PROJECTION);

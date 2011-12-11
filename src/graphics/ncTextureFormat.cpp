@@ -38,7 +38,7 @@ ncTextureFormat::ncTextureFormat(GLenum eInternalFormat)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Convert to the corresponding BGR format
+/// Converts to the corresponding BGR format
 void ncTextureFormat::BGRFormat()
 {
 #ifndef __ANDROID__
@@ -53,7 +53,7 @@ void ncTextureFormat::BGRFormat()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Search a match between an integer internal format and an external one
+/// Searches a match between an integer internal format and an external one
 bool ncTextureFormat::IntegerFormat()
 {
 #ifndef __ANDROID__
@@ -101,7 +101,7 @@ bool ncTextureFormat::IntegerFormat()
 #endif
 }
 
-/// Search a match between a floating point internal format and an external one
+/// Searches a match between a floating point internal format and an external one
 bool ncTextureFormat::FloatFormat()
 {
 #ifndef __ANDROID__
@@ -129,7 +129,7 @@ bool ncTextureFormat::FloatFormat()
 #endif
 }
 
-/// Search a match between a compressed internal format and an external one
+/// Searches a match between a compressed internal format and an external one
 bool ncTextureFormat::CompressedFormat()
 {
 #ifndef __ANDROID__
@@ -158,7 +158,7 @@ bool ncTextureFormat::CompressedFormat()
 #endif
 }
 
-/// Search a match between an OpenGL ES internal format and an external one
+/// Searches a match between an OpenGL ES internal format and an external one
 bool ncTextureFormat::OESFormat()
 {
 #ifdef __ANDROID__
@@ -187,7 +187,7 @@ bool ncTextureFormat::OESFormat()
 #endif
 }
 
-/// Search a match between a OpenGL ES compressed internal format and an external one
+/// Searches a match between a OpenGL ES compressed internal format and an external one
 bool ncTextureFormat::OESCompressedFormat()
 {
 #ifdef __ANDROID__

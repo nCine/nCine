@@ -4,6 +4,7 @@
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/// Initialized a particle with initial life, position and velocity
 void ncParticle::Init(unsigned long int ulLife, ncVector2f pos, ncVector2f vel)
 {
 	m_ulLife = ulLife;
@@ -12,6 +13,7 @@ void ncParticle::Init(unsigned long int ulLife, ncVector2f pos, ncVector2f vel)
 	m_Velocity = vel;
 }
 
+/// Updates particle data after the specified amount of milliseconds have passed
 void ncParticle::Update(unsigned long int ulInterval)
 {
 	// m_ulLife is unsigned

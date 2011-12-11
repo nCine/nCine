@@ -20,25 +20,30 @@ private:
 	GLenum m_eType;
 	bool m_bCompressed;
 
+	// Searches a match between an integer internal format and an external one
 	bool IntegerFormat();
+	// Searches a match between a floating point internal format and an external one
 	bool FloatFormat();
+	// Searches a match between a compressed internal format and an external one
 	bool CompressedFormat();
+	// Searches a match between an OpenGL ES internal format and an external one
 	bool OESFormat();
+	// Searches a match between a OpenGL ES compressed internal format and an external one
 	bool OESCompressedFormat();
 public:
 	ncTextureFormat()
 		: m_eInternalFormat(-1), m_eFormat(-1), m_eType(-1), m_bCompressed(false) { }
 	ncTextureFormat(GLenum eInternalFormat);
 
-	/// Return the specified internal format
+	/// Returns the specified internal format
 	inline GLenum Internal() const { return m_eInternalFormat; }
-	/// Return the corresponding format
+	/// Returns the corresponding format
 	inline GLenum Format() const { return m_eFormat; }
-	// Convert to the corresponding BGR format
+	// Converts to the corresponding BGR format
 	void BGRFormat();
-	/// Return the corresponding pixel data type
+	/// Returns the corresponding pixel data type
 	inline GLenum Type() const { return m_eType; }
-	/// Specify wheter data is compressed or not
+	/// Specifies wheter data is compressed or not
 	inline bool isCompressed() const { return m_bCompressed; }
 };
 

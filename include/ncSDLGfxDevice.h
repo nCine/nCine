@@ -18,13 +18,13 @@
 class ncSDLGfxDevice : public ncIGfxDevice
 {
 private:
-	// Initialize the class
+	// Initilizes the class
 	void Init(int iWidth, int iHeight, ncDisplayMode mode, bool bIsWindowed);
-	// Init the video subsystem (SDL)
+	// Initilizes the video subsystem (SDL)
 	void InitGraphics();
-	// Init the OpenGL graphic context
+	// Initilizes the OpenGL graphic context
 	void InitDevice();
-	// Init starting OpenGL state
+	// Initilizes starting OpenGL state
 	void InitGL();
 
 public:
@@ -39,17 +39,17 @@ public:
 	// Destructor
 	virtual ~ncSDLGfxDevice() { SDL_Quit(); }
 
-	// Set screen resolution with two integers
+	// Sets screen resolution with two integers
 	virtual void SetResolution(int iWidth, int iHeight);
-	// Set screen resolution with the Size class
+	// Sets screen resolution with the Size class
 	virtual void SetResolution(ncPoint size);
 
-	// Toggle between fullscreen and windowed mode
+	// Toggles between fullscreen and windowed mode
 	virtual void ToggleFullScreen();
 
-	/// Update the screen swapping back and front buffers
+	/// Updates the screen swapping back and front buffers
 	inline virtual void Update() { SDL_GL_SwapBuffers(); }
-	/// Clear the screen
+	/// Clears the screen
 	inline virtual void Clear() { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
 };
 

@@ -26,7 +26,9 @@ public:
 class ncMouseEvent
 {
 public:
+	/// Pointer position on the X axis
 	int x;
+	/// Pointer position on the Y axis
 	int y;
 
 	virtual bool isLeftButton() const = 0;
@@ -47,7 +49,9 @@ public:
 	static const unsigned char WHEELUP_BUTTON = 8;
 	static const unsigned char WHEELDOWN_BUTTON = 16;
 
+	/// Pointer position on the X axis
 	int x;
+	/// Pointer position on the Y axis
 	int y;
 
 	virtual bool isButtonDown(unsigned char uButtonMask) const = 0;
@@ -58,8 +62,11 @@ public:
 class ncKeyboardEvent
 {
 public:
+	/// Key symbol code
 	ncKeySym sym;
+	/// Key modifiers mask
 	int mod;
+	/// Unicode character
 	unsigned short int unicode;
 };
 

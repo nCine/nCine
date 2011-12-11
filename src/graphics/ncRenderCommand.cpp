@@ -6,6 +6,7 @@
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/// Binds the material state
 void ncRenderMaterial::Bind() const
 {
 //	if (m_fColor[3] < 1.0f)
@@ -16,17 +17,19 @@ void ncRenderMaterial::Bind() const
 	glBindTexture(GL_TEXTURE_2D, m_uTextureGLId);
 }
 
+/// Applies the transformation
 void ncRenderTransformation::Apply() const
 {
 
 }
 
+/// Draws the geometry
 void ncRenderGeometry::Draw() const
 {
 	if (m_fColors)
 	{
 		glEnableClientState(GL_COLOR_ARRAY);
-		glColorPointer(4, GL_UNSIGNED_BYTE, 0, m_fColors);
+		glColorPointer(4, GL_FLOAT, 0, m_fColors);
 	}
 
 	if (m_fTexCoords)
@@ -49,6 +52,7 @@ void ncRenderGeometry::Draw() const
 		glDisableClientState(GL_COLOR_ARRAY);
 }
 
+/// Calculates a sort key for the queue
 void ncRenderCommand::CalculateSortKey()
 {
 	unsigned long int upper = m_iPriority << 16;
@@ -57,6 +61,7 @@ void ncRenderCommand::CalculateSortKey()
 //	m_bDirtyKey = false;
 }
 
+/// Issues the render command
 void ncRenderCommand::Issue() const
 {
 	m_material.Bind();

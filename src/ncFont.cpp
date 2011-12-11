@@ -6,7 +6,7 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// Creating a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)
+/// Constructs a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)
 ncFont::ncFont(const char *pTexFilename, const char *pFntFilename)
 	: m_pTexture(NULL)
 {

@@ -3,7 +3,6 @@
 class ncIAppEventHandler;
 
 ncIAppEventHandler* create_apphandler();
-bool bIsPaused = true;
 
 /// Process the next input event.
 static int32_t engine_handle_input(struct android_app* app, AInputEvent* event)
@@ -13,7 +12,7 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event)
 /*
 	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
 	{
-		bIsPaused = false;
+		ncApplication::SetPause(false);
 		return 1;
 	}
 
@@ -39,10 +38,10 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd)
 			ncApplication::Shutdown();
 			break;
 		case APP_CMD_GAINED_FOCUS:
-			bIsPaused = false;
+			ncApplication::SetPause(false);
 			break;
 		case APP_CMD_LOST_FOCUS:
-			bIsPaused = true;
+			ncApplication::SetPause(true);
 			ncApplication::Step();
 			break;
 	}
@@ -62,7 +61,7 @@ void android_main(struct android_app* state)
 		int events;
 		struct android_poll_source* source;
 
-		while ((ident=ALooper_pollAll(!bIsPaused ? 0 : -1, NULL, &events, (void**)&source)) >= 0)
+		while ((ident=ALooper_pollAll(!ncApplication::IsPaused() ? 0 : -1, NULL, &events, (void**)&source)) >= 0)
 		{
 			if (source != NULL)
 				source->process(state, source);
@@ -74,7 +73,7 @@ void android_main(struct android_app* state)
 			}
 		}
 
-		if (bIsPaused == false)
+		if (ncApplication::IsPaused() == false)
 			ncApplication::Step();
 	}
 

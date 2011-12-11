@@ -11,7 +11,7 @@
 ///////////////////////////////////////////////////////////
 
 ncSpriteBatchNode::ncSpriteBatchNode(ncSceneNode* pParent, ncTexture *pTexture)
-	: ncDrawableNode(pParent, 0, 0), m_pTexture(pTexture), m_vVertices(16), m_vTexCoords(16)
+	: ncDrawableNode(pParent, 0, 0), m_pTexture(pTexture), m_vVertices(16), m_vTexCoords(16), m_vColors(16)
 {
 	m_eType = SPRITEBATCH_TYPE;
 }
@@ -36,6 +36,7 @@ void ncSpriteBatchNode::Draw(ncRenderQueue& rRenderQueue)
 	// Clear every previous sprite data before drawing
 	m_vVertices.Clear();
 	m_vTexCoords.Clear();
+	m_vColors.Clear();
 
 	// TODO: only the first level of children gets accounted
 	if (!m_children.isEmpty())
@@ -90,22 +91,40 @@ void ncSpriteBatchNode::ProcessSprite(ncSprite& rSprite)
 {
 	ncPoint size = rSprite.Size();
 	ncVector2f pos = rSprite.Position();
-	// Parent transformation
-	pos.x += m_absX;
-	pos.y += m_absY;
+	float rot = rSprite.Rotation();
 
-	float leftPos = pos.x - size.x*0.5f;
-	float rightPos = pos.x + size.x*0.5f;
-	float bottomPos = pos.y - size.y*0.5f;
-	float topPos = pos.y + size.y*0.5f;
+	// Parent transformation and sprite relative position
+	float X = m_absX + pos.x;
+	float Y = m_absY + pos.y;
 
-	m_vVertices.InsertBack(leftPos);	m_vVertices.InsertBack(bottomPos);
-	m_vVertices.InsertBack(leftPos);	m_vVertices.InsertBack(topPos);
-	m_vVertices.InsertBack(rightPos);	m_vVertices.InsertBack(bottomPos);
+	float leftPos = size.x*0.5f;
+	float rightPos = -size.x*0.5f;
+	float bottomPos = -size.y*0.5f;
+	float topPos = size.y*0.5f;
 
-	m_vVertices.InsertBack(rightPos);	m_vVertices.InsertBack(bottomPos);
-	m_vVertices.InsertBack(rightPos);	m_vVertices.InsertBack(topPos);
-	m_vVertices.InsertBack(leftPos);	m_vVertices.InsertBack(topPos);
+	if (rot > ncSprite::sMinRotation && rot < 360.0f - ncSprite::sMinRotation)
+	{
+		float sine = sinf(-rot * M_PI/180.0f);
+		float cosine = 1 - sine*sine;
+
+		m_vVertices.InsertBack(X + leftPos*cosine - bottomPos*sine);	m_vVertices.InsertBack(Y + bottomPos*cosine + leftPos*sine);
+		m_vVertices.InsertBack(X + leftPos*cosine - topPos*sine);		m_vVertices.InsertBack(Y + topPos*cosine + leftPos*sine);
+		m_vVertices.InsertBack(X + rightPos*cosine - bottomPos*sine);	m_vVertices.InsertBack(Y + bottomPos*cosine + rightPos*sine);
+
+		m_vVertices.InsertBack(X + rightPos*cosine - bottomPos*sine);	m_vVertices.InsertBack(Y + bottomPos*cosine + rightPos*sine);
+		m_vVertices.InsertBack(X + rightPos*cosine - topPos*sine);		m_vVertices.InsertBack(Y + topPos*cosine + rightPos*sine);
+		m_vVertices.InsertBack(X + leftPos*cosine - topPos*sine);		m_vVertices.InsertBack(Y + topPos*cosine + leftPos*sine);
+	}
+	else
+	{
+		m_vVertices.InsertBack(X + leftPos);	m_vVertices.InsertBack(Y + bottomPos);
+		m_vVertices.InsertBack(X + leftPos);	m_vVertices.InsertBack(Y + topPos);
+		m_vVertices.InsertBack(X + rightPos);	m_vVertices.InsertBack(Y + bottomPos);
+
+		m_vVertices.InsertBack(X + rightPos);	m_vVertices.InsertBack(Y + bottomPos);
+		m_vVertices.InsertBack(X + rightPos);	m_vVertices.InsertBack(Y + topPos);
+		m_vVertices.InsertBack(X + leftPos);	m_vVertices.InsertBack(Y + topPos);
+	}
 
 
 	ncPoint texSize = m_pTexture->Size();
@@ -123,12 +142,28 @@ void ncSpriteBatchNode::ProcessSprite(ncSprite& rSprite)
 	m_vTexCoords.InsertBack(rightCoord);	m_vTexCoords.InsertBack(bottomCoord);
 	m_vTexCoords.InsertBack(rightCoord);	m_vTexCoords.InsertBack(topCoord);
 	m_vTexCoords.InsertBack(leftCoord);		m_vTexCoords.InsertBack(topCoord);
+
+
+	ncColor color = rSprite.Color();
+	m_vColors.InsertBack(color.fR());	m_vColors.InsertBack(color.fG());
+	m_vColors.InsertBack(color.fB());	m_vColors.InsertBack(color.fA());
+	m_vColors.InsertBack(color.fR());	m_vColors.InsertBack(color.fG());
+	m_vColors.InsertBack(color.fB());	m_vColors.InsertBack(color.fA());
+	m_vColors.InsertBack(color.fR());	m_vColors.InsertBack(color.fG());
+	m_vColors.InsertBack(color.fB());	m_vColors.InsertBack(color.fA());
+
+	m_vColors.InsertBack(color.fR());	m_vColors.InsertBack(color.fG());
+	m_vColors.InsertBack(color.fB());	m_vColors.InsertBack(color.fA());
+	m_vColors.InsertBack(color.fR());	m_vColors.InsertBack(color.fG());
+	m_vColors.InsertBack(color.fB());	m_vColors.InsertBack(color.fA());
+	m_vColors.InsertBack(color.fR());	m_vColors.InsertBack(color.fG());
+	m_vColors.InsertBack(color.fB());	m_vColors.InsertBack(color.fA());
 }
 
 void ncSpriteBatchNode::UpdateRenderCommand()
 {
 	m_renderCmd.Material().SetTextureGLId(m_pTexture->GLId());
 	m_renderCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
-	m_renderCmd.Geometry().SetData(GL_TRIANGLES, 0, m_vVertices.Size()/2, m_vVertices.Pointer(), m_vTexCoords.Pointer(), NULL);
+	m_renderCmd.Geometry().SetData(GL_TRIANGLES, 0, m_vVertices.Size()/2, m_vVertices.Pointer(), m_vTexCoords.Pointer(), m_vColors.Pointer());
 	m_renderCmd.CalculateSortKey();
 }

@@ -10,6 +10,7 @@
 class ncFontGlyph
 {
 private:
+	/// A structure holding glyph pairs kerning offstes
 	struct ncKerning {
 		int m_iSecondGlyph;
 		int m_iAmount;
@@ -51,9 +52,13 @@ public:
 		m_uXAdvance = uXAdvance;
 	}
 
+	/// Return the size in pixels of a glyph
 	inline ncPoint Size() const { return ncPoint(m_uWidth, m_uHeight); }
+	/// Return the texture rectangle of a glyph
 	inline ncRect TexRect() const { return ncRect(m_uX, m_uY, m_uWidth, m_uHeight); }
+	/// Return the X and Y offset of a glyph
 	inline ncPoint Offset() const { return ncPoint(m_iXOffset, m_iYOffset); }
+	/// Return the X offset to advance in order to start rendering the next glyph
 	inline unsigned short XAdvance() const { return m_uXAdvance; }
 
 	/// Add kerning amount for a subsequent glyph
@@ -89,27 +94,27 @@ private:
 	void ParseFNTFile(FILE *pFile);;
 
 public:
-	// Creating a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)
+	// Constructs a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)
 	ncFont(const char* pTexFilename, const char *pFntFilename);
 	virtual ~ncFont() { delete m_pTexture; }
 
-	/// Get the texture object
+	/// Gets the texture object
 	inline const ncTexture* Texture() { return m_pTexture; }
-	/// Set the texture object
+	/// Sets the texture object
 	inline void SetTexture(ncTexture *pTexture) { m_pTexture = pTexture; }
 
-	/// Return font line height
+	/// Returns font line height
 	inline unsigned short LineHeight() const { return m_uLineHeight; }
-	/// Return font base
+	/// Returns font base
 	inline unsigned short Base() const { return m_uBase; }
-	/// Return texture atlas size
+	/// Returns texture atlas size
 	inline ncPoint TexSize() const
 	{
 		return ncPoint(m_uWidth, m_uHeight);
 	}
-	/// Return number of glyphs
+	/// Returns number of glyphs
 	inline unsigned short NumGlyphs() const { return m_uNumGlyphs; }
-	/// Return a constant pointer to a glyph
+	/// Returns a constant pointer to a glyph
 	inline const ncFontGlyph* Glyph(int iGlyphId) const
 	{
 		if (iGlyphId < MAX_GLYPHS)

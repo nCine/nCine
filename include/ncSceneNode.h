@@ -7,7 +7,7 @@
 
 class ncRenderQueue;
 
-/// The base class for the object hierarchy of a game
+/// The base class for the transformation nodes hierarchy
 class ncSceneNode : public ncObject
 {
 protected:
@@ -50,25 +50,37 @@ public:
 	virtual ~ncSceneNode();
 
 	inline static eObjectType sType() { return SCENENODE_TYPE; }
+	// Returns a pointer to the node with the specified id, if any exists
 	static ncSceneNode* FromId(unsigned int uId);
 
 	const ncSceneNode* ParentNode() const { return m_pParent; }
 	const ncList<ncSceneNode *>& Children() const { return m_children; }
-	// Add a node as a children of this one
+	// Adds a node as a children of this one
 	bool AddChildNode(ncSceneNode *pChildNode);
-	// Remove a children of this node, without reparenting nephews
+	// Removes a children of this node, without reparenting nephews
 	bool RemoveChildNode(ncSceneNode *pChildNode);
-	// Remove a children of this node reparenting nephews as children.
+	// Removes a children of this node reparenting nephews as children.
 	bool UnlinkChildNode(ncSceneNode *pChildNode);
 
+	// Called once every frame to update the node
 	virtual void Update(unsigned long int ulInterval);
+	// Draws the node and visits its children
 	virtual void Visit(ncRenderQueue& rRenderQueue);
+	/// Renders the node
 	virtual void Draw(ncRenderQueue& rRenderQueue) { }
 
-	inline ncVector2f Position() { return ncVector2f(x, y); }
-	inline ncVector2f AbsPosition() { return ncVector2f(m_absX, m_absY); }
+	/// Returns node position relative to its parent
+	inline ncVector2f Position() const { return ncVector2f(x, y); }
+	/// Returns absolute node position
+	inline ncVector2f AbsPosition() const { return ncVector2f(m_absX, m_absY); }
+	/// Moves a node based on two offsets
+	inline void Move(float fX, float fY) { x += fX; y += fY; }
+	/// Add a move vector to the node current position
+	inline void Move(const ncVector2f& pos) { x += pos.x; y += pos.y; }
+	/// Sets the sprite position through two coordinates
 	inline void SetPosition(float fX, float fY) { x = fX; y = fY; }
-	inline void SetPosition(ncVector2f pos) { x = pos.x; y = pos.y; }
+	/// Sets the sprite position through a vector
+	inline void SetPosition(const ncVector2f& pos) { x = pos.x; y = pos.y; }
 };
 
 #endif

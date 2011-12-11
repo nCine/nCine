@@ -9,6 +9,7 @@
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/// Sorts the queue then issues every render command in order
 void ncRenderQueue::Draw()
 {
 	SortQueue();
@@ -23,7 +24,7 @@ void ncRenderQueue::Draw()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Sort render nodes to minimize state changes
+/// Sorts render nodes to minimize state changes
 void ncRenderQueue::SortQueue()
 {
 	QSort(m_renderCmds, 0, m_renderCmds.Size()-1);

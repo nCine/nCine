@@ -22,19 +22,19 @@ protected:
 public:
 	/// Empty constructor
 	ncTimer();
-	// Reset the timer
+	// Resets the timer
 	void Reset();
-	// Start the timer
+	// Starts the timer
 	void Start();
-	// Stop the timer without resetting it
+	// Stops the timer without resetting it
 	void Stop();
-	// Resume the timer
+	// Resumes the timer
 	void Continue();
-	// Return (stop - start) or (now-start) time interval
+	// Returns (stop - start) or (now-start) time interval
 	unsigned long int Interval();
-	// Return total elapsed time
+	// Returns total elapsed time
 	unsigned long int Total();
-	// Return current time
+	// Returns current time
 	unsigned long int Now();
 };
 

@@ -17,7 +17,7 @@ ncTextNode::ncTextNode(ncSceneNode* pParent, ncFont* pFont)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Return the total sum of advances for a string (its width)
+/// Returns the total sum of advances for a string (its width)
 unsigned int ncTextNode::XAdvanceSum() const
 {
 	if (m_bDirty)
@@ -44,7 +44,7 @@ unsigned int ncTextNode::XAdvanceSum() const
 	return m_uXAdvanceSum;
 }
 
-/// Set the string to render
+/// Sets the string to render
 void ncTextNode::SetString(const char *pString)
 {
 	// Setting the dirty flag and updating the string only if different
@@ -122,6 +122,7 @@ ncTextNode* ncTextNode::FromId(unsigned int uId)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/// Fills the batch draw command with data from a glyph
 void ncTextNode::ProcessGlyph(const ncFontGlyph* pGlyph)
 {
 	ncPoint size = pGlyph->Size();

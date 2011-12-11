@@ -32,7 +32,7 @@ private:
 	mutable float m_uXAdvance;
 	/// Total advance on the X-axis for the entire string (its width)
 	mutable unsigned int m_uXAdvanceSum;
-	/// Fill the batch draw command with data from a glyph
+	// Fills the batch draw command with data from a glyph
 	void ProcessGlyph(const ncFontGlyph* pGlyph);
 
 	virtual void UpdateRenderCommand();
@@ -40,24 +40,24 @@ public:
 	ncTextNode(ncSceneNode* pParent, ncFont *pFont);
 	virtual ~ncTextNode() { }
 
-	/// Return the total sum of advances for a string (its width)
+	// Returns the total sum of advances for a string (its width)
 	unsigned int XAdvanceSum() const;
 	/// Is kerning enabled for this node rendering?
 	inline bool withKerning() const { return m_bWithKerning; }
-	/// Set the kerning flag for this node rendering
+	/// Sets the kerning flag for this node rendering
 	inline void EnableKerning(bool bWithKerning) { m_bWithKerning = bWithKerning; }
-	/// Get the glyph scale factor
+	/// Gets the glyph scale factor
 	inline float Scale() const { return m_fScaleFactor; }
-	/// Scale the glyph size
+	/// Scales the glyph size
 	inline void SetScale(float fScaleFactor) {
 		m_fScaleFactor = fScaleFactor;
 		m_bDirty = true;
 	}
-	/// Get the font base scaled by the scale factor
+	/// Gets the font base scaled by the scale factor
 	inline float FontBase() const { return m_pFont->Base() * m_fScaleFactor; }
-	/// Get the font line height scaled by the scale factor
+	/// Gets the font line height scaled by the scale factor
 	inline float FontLineHeight() const { return m_pFont->LineHeight() * m_fScaleFactor; }
-	// Set the string to render
+	// Sets the string to render
 	void SetString(const char *pString);
 
 	virtual void Visit(ncRenderQueue& rRenderQueue);

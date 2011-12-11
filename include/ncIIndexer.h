@@ -11,11 +11,15 @@ class ncIIndexer
 public:
 	virtual ~ncIIndexer() = 0;
 
+	/// Adds an object to the index
 	virtual unsigned int AddObject(ncObject* pObject) = 0;
+	/// Removes an object from the index
 	virtual void RemoveObject(unsigned int uId) = 0;
 
+	/// Returns the object with the specified object id, if any
 	virtual ncObject* Object(unsigned int uId) const = 0;
 
+	/// Returns true if the index is empty
 	virtual bool isEmpty() const = 0;
 };
 

@@ -17,12 +17,21 @@ ncVector2f& ncVector2f::Normalize()
 	return *this;
 }
 
+/// Dot product
+float ncVector2f::Dot(const ncVector2f& vec) const
+{
+	float fResult = 0.0f;
+
+	fResult += x * vec.x;
+	fResult += y * vec.y;
+
+	return fResult;
+}
 
 bool ncVector2f::operator==(const ncVector2f& vec) const
 {
 	return (x == vec.x && y == vec.y);
 }
-
 
 ncVector2f ncVector2f::operator+(const ncVector2f& vec) const
 {
@@ -34,7 +43,6 @@ ncVector2f ncVector2f::operator+(const ncVector2f& vec) const
 	return fResult;
 }
 
-
 ncVector2f& ncVector2f::operator+=(const ncVector2f& vec)
 {
 	x += vec.x;
@@ -42,7 +50,6 @@ ncVector2f& ncVector2f::operator+=(const ncVector2f& vec)
 
 	return *this;
 }
-
 
 ncVector2f ncVector2f::operator-(const ncVector2f& vec) const
 {
@@ -65,7 +72,6 @@ ncVector2f ncVector2f::operator-() const
 	return fResult;
 }
 
-
 ncVector2f& ncVector2f::operator-=(const ncVector2f& vec)
 {
 	x -= vec.x;
@@ -83,4 +89,12 @@ ncVector2f ncVector2f::operator*(float fC) const
 	fResult.y = fC * y;
 
 	return fResult;
+}
+
+ncVector2f ncVector2f::operator*=(float fC)
+{
+	x *= fC;
+	y *= fC;
+
+	return *this;
 }

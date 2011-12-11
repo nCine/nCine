@@ -20,12 +20,12 @@ protected:
 public:
 	virtual ~ncIGfxDevice() = 0;
 
-	// Set screen resolution with two integers
+	/// Set screen resolution with two integers
 	virtual void SetResolution(int iWidth, int iHeight) = 0;
-	// Set screen resolution with the Size class
+	/// Set screen resolution with the Size class
 	virtual void SetResolution(ncPoint size) = 0;
 
-	// Toggle between fullscreen and windowed mode
+	/// Toggle between fullscreen and windowed mode
 	virtual void ToggleFullScreen() { }
 
 	/// Update the screen swapping back and front buffers

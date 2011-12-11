@@ -1,3 +1,4 @@
+#include <cmath>
 #ifdef __ANDROID__
 	#include <cstdlib> // for exit()
 #endif
@@ -10,25 +11,25 @@
 ///////////////////////////////////////////////////////////
 
 ncSprite::ncSprite(ncSceneNode* pParent, ncTexture *pTexture)
-	: ncDrawableNode(pParent), m_pTexture(pTexture), m_texRect(0, 0, 0, 0), m_fScaleFactor(1.0f)
+	: ncDrawableNode(pParent), m_pTexture(pTexture), m_texRect(0, 0, 0, 0), m_fScaleFactor(1.0f), m_fRotation(0.0f)
 {
 	Init();
 }
 
 ncSprite::ncSprite(ncTexture *pTexture)
-	: ncDrawableNode(NULL), m_pTexture(pTexture), m_texRect(0, 0, 0, 0), m_fScaleFactor(1.0f)
+	: ncDrawableNode(NULL), m_pTexture(pTexture), m_texRect(0, 0, 0, 0), m_fScaleFactor(1.0f), m_fRotation(0.0f)
 {
 	Init();
 }
 
 ncSprite::ncSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY)
-	: ncDrawableNode(pParent, iX, iY), m_pTexture(pTexture), m_texRect(0, 0, 0, 0), m_fScaleFactor(1.0f)
+	: ncDrawableNode(pParent, iX, iY), m_pTexture(pTexture), m_texRect(0, 0, 0, 0), m_fScaleFactor(1.0f), m_fRotation(0.0f)
 {
 	Init();
 }
 
 ncSprite::ncSprite(ncTexture *pTexture, int iX, int iY)
-	: ncDrawableNode(NULL, iX, iY), m_pTexture(pTexture), m_texRect(0, 0, 0, 0), m_fScaleFactor(1.0f)
+	: ncDrawableNode(NULL, iX, iY), m_pTexture(pTexture), m_texRect(0, 0, 0, 0), m_fScaleFactor(1.0f), m_fRotation(0.0f)
 {
 	Init();
 }
@@ -71,16 +72,30 @@ void ncSprite::Init()
 
 void ncSprite::SetVertices()
 {
-	float leftPos = m_absX - m_iWidth*m_fScaleFactor*0.5f;
-	float rightPos = m_absX + m_iWidth*m_fScaleFactor*0.5f;
-	float bottomPos = m_absY - m_iHeight*m_fScaleFactor*0.5f;
-	float topPos = m_absY + m_iHeight*m_fScaleFactor*0.5f;
+	float leftPos = m_iWidth*m_fScaleFactor*0.5f;
+	float rightPos = -m_iWidth*m_fScaleFactor*0.5f;
+	float bottomPos = -m_iHeight*m_fScaleFactor*0.5f;
+	float topPos = m_iHeight*m_fScaleFactor*0.5f;
 
-	m_fVertices[0] = leftPos;	m_fVertices[1] = bottomPos;
-	m_fVertices[2] = leftPos;	m_fVertices[3] = topPos;
-	m_fVertices[4] = rightPos;	m_fVertices[5] = bottomPos;
+	if (m_fRotation > sMinRotation && m_fRotation < 360.0f - sMinRotation)
+	{
+		float sine = sinf(-m_fRotation * M_PI/180.0f);
+		float cosine = cosf(-m_fRotation * M_PI/180.0f);
 
-	m_fVertices[6] = rightPos;	m_fVertices[7] = topPos;
+		m_fVertices[0] = m_absX + leftPos*cosine - bottomPos*sine;	m_fVertices[1] = m_absY + bottomPos*cosine + leftPos*sine;
+		m_fVertices[2] = m_absX + leftPos*cosine - topPos*sine;		m_fVertices[3] = m_absY + topPos*cosine + leftPos*sine;
+		m_fVertices[4] = m_absX + rightPos*cosine - bottomPos*sine;	m_fVertices[5] = m_absY + bottomPos*cosine + rightPos*sine;
+
+		m_fVertices[6] = m_absX + rightPos*cosine - topPos*sine;	m_fVertices[7] = m_absY + topPos*cosine + rightPos*sine;
+	}
+	else
+	{
+		m_fVertices[0] = m_absX + leftPos;	m_fVertices[1] = m_absY + bottomPos;
+		m_fVertices[2] = m_absX + leftPos;	m_fVertices[3] = m_absY + topPos;
+		m_fVertices[4] = m_absX + rightPos;	m_fVertices[5] = m_absY + bottomPos;
+
+		m_fVertices[6] = m_absX + rightPos;	m_fVertices[7] = m_absY + topPos;
+	}
 }
 
 void ncSprite::SetTexCoords()

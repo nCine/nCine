@@ -27,7 +27,6 @@ int main(int argc, char **argv)
 	SDL_WM_SetCaption("Test", NULL);
 
 	ncRenderQueue renderQueue;
-	glEnable(GL_BLEND); // HACK: for alpha blending
 	ncSceneNode rootNode;
 
 	ncFont font1("fonts/trebuchet32_256.png", "fonts/trebuchet32_256.fnt");

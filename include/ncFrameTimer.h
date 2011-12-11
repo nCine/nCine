@@ -24,15 +24,15 @@ private:
 public:
 	// Constructor
 	ncFrameTimer(unsigned int uPrintInterval, unsigned int uUpdateInterval = 0);
-	// Add a frame to the counter and calculate elapsed time since the previous one
+	// Adds a frame to the counter and calculate elapsed time since the previous one
 	void AddFrame();
-	// Reset timer and counters
+	// Resets timer and counters
 	void Reset();
-	/// Return current frame number
+	/// Returns current frame number
 	inline unsigned long int FrameNum() { return m_ulNFrames; }
-	/// Return the interval between two subsequent calls to AddFrame()
+	/// Returns the interval between two subsequent calls to AddFrame()
 	inline unsigned long int Interval() { return m_uFrameInterval; }
-	/// Return the average FPS on the update interval
+	/// Returns the average FPS on the update interval
 	inline float AverageFPS() { return m_fFps; }
 };
 

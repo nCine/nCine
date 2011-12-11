@@ -28,6 +28,7 @@ void ncIGfxDevice::LogGLInfo()
 	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, "ncIGfxDevice::LogGLInfo - OpenGL device info ---");
 }
 
+/// Log OpenGL extensions
 void ncIGfxDevice::LogGLExtensions()
 {
 	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, "ncIGfxDevice::LogGLExtensions - OpenGL extensions ---");
@@ -35,6 +36,7 @@ void ncIGfxDevice::LogGLExtensions()
 	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, "ncIGfxDevice::LogGLExtensions - OpenGL extensions ---");
 }
 
+/// Check for an OpenGL extension
 bool ncIGfxDevice::CheckGLExtension(const char *pExtensionName)
 {
 	/*

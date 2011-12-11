@@ -24,8 +24,11 @@ public:
 	/// Deferencing operator
 	inline T& operator*() { return m_data; }
 
+	/// Constant reference to the node data
 	inline const T& Data() const { return m_data; }
+	/// Reference to the node data
 	inline T& Data() { return m_data; }
+	/// Pointer to the next node in the list
 	inline ncListNode<T>* Next() const { return m_pNext; }
 };
 
@@ -44,16 +47,24 @@ public:
 	ncList() : m_pHead(NULL) { }
 	~ncList() { Clear(); }
 
+	/// Returns a pointer to the first node
 	inline ncListNode<T>* Head() const { return m_pHead; }
+	/// Returns true if the list is empty
 	inline bool isEmpty() const { return m_pHead == NULL; }
 
+	// Clears the list
 	void Clear();
+	// Inserts a new element as the first, in constant time
 	void InsertFront(const T& element);
+	// Inserts a new element as the last, in constant time
 	void InsertBack(const T& element);
+	// Inserts a new element after a specified one
 	void InsertAfter(ncListNode<T> *pNode, const T& element);
+	// Removes a specified element in constant time
 	void Remove(const T& element);
 };
 
+/// Clears the list
 template <class T>
 void ncList<T>::Clear()
 {
@@ -67,12 +78,14 @@ void ncList<T>::Clear()
 	}
 }
 
+/// Inserts a new element as the first, in constant time
 template <class T>
 void ncList<T>::InsertFront(const T& element)
 {
 	m_pHead = new ncListNode<T>(element, m_pHead);
 }
 
+/// Inserts a new element as the last, in constant time
 template <class T>
 void ncList<T>::InsertBack(const T& element)
 {
@@ -94,12 +107,14 @@ void ncList<T>::InsertBack(const T& element)
 	}
 }
 
+/// Inserts a new element after a specified one
 template <class T>
 void ncList<T>::InsertAfter(ncListNode<T> *pNode, const T& element)
 {
 	pNode->m_pNext = new ncListNode<T>(element, pNode->m_pNext);
 }
 
+/// Removes a specified element in constant time
 template <class T>
 void ncList<T>::Remove(const T& element)
 {

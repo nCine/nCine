@@ -23,9 +23,9 @@ private:
 	int m_iWidth;
 	int m_iHeight;
 
-	// Load a texture based on information from the texture format and loader
+	// Loads a texture based on information from the texture format and loader
 	void Load(const ncTextureLoader &texLoader);
-	// Load a texture overriding the size detected by the texture loader
+	// Loads a texture overriding the size detected by the texture loader
 	void Load(const ncTextureLoader &texLoader, int iWidth, int iHeight);
 public:
 	ncTexture();
@@ -34,22 +34,22 @@ public:
 	ncTexture(const char *pFilename, ncPoint size);
 	virtual ~ncTexture();
 
-	/// Return OpenGL id
+	/// Returns OpenGL id
 	inline GLuint GLId() const { return m_uGLId; }
-	/// Return texture width
+	/// Returns texture width
 	inline int Width() const { return m_iWidth; }
-	/// Return texture height
+	/// Returns texture height
 	inline int Height() const { return m_iHeight; }
-	/// Return texture size
+	/// Returns texture size
 	inline ncPoint Size() const { return ncPoint(m_iWidth, m_iHeight); }
 
-	// Set texture filtering for both magnification and minification
+	// Sets texture filtering for both magnification and minification
 	void SetFiltering(GLenum eFilter);
-	/// Bind the texture to the current unit
+	/// Binds the texture to the current unit
 	inline void Bind() { glBindTexture(GL_TEXTURE_2D, m_uGLId); }
-	/// Disable texture rendering for the current unit
+	/// Disables texture rendering for the current unit
 	static void Unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
-	// Set the red channel of a second texture as the alpha channel
+	// Sets the red channel of a second texture as the alpha channel
 	void SetAlphaFromRed(ncTexture *pAlphaTex);
 
 	inline static eObjectType sType() { return TEXTURE_TYPE; }

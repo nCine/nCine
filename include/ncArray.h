@@ -27,14 +27,25 @@ public:
 	}
 	~ncArray() { delete[] m_pArray; }
 
+	/// Returns true if the array is empty
 	inline bool isEmpty() const { return m_uSize == 0; }
+	/// Returns the array size
+	/** The array is filled without gaps until the Size()-1 element */
 	inline unsigned int Size() const { return m_uSize; }
+	/// Returns the array size
+	/// The array has memory allocated to store untile the Capacity()-1 element
 	inline unsigned int Capacity() const { return m_uCapacity; }
+	// Set a new capacity for the array (can be bigger or smaller than the current one)
 	void SetCapacity(unsigned int uNewCapacity);
 
+	/// Clears the array
+	/** Size will be zero but capacity remains untouched */
 	inline void Clear() { m_uSize = 0; }
-	void InsertBack(T element) { operator[](m_uSize) = element; }
+	/// Inserts a new element as the last one in constant time
+	inline void InsertBack(T element) { operator[](m_uSize) = element; }
+	// Inserts a new element at a specified position (shifting elements around)
 	void InsertAt(unsigned int uIndex, T element);
+	/// Removes an element at a specified position (shifting elements around)
 	void RemoveAt(unsigned int uIndex);
 
 	// Read-only subscript operator
@@ -42,10 +53,12 @@ public:
 	// Subscript operator
 	T& operator[] (const unsigned int uIndex);
 
-	// Useful when holding arrays of OpenGL data
+	/// Returns a pointer to the allocated memory
+	/** It's useful when holding arrays of OpenGL data */
 	inline T* Pointer() const { return m_pArray; }
 };
 
+/// Sets a new capacity for the array (can be bigger or smaller than the current one)
 template <class T>
 void ncArray<T>::SetCapacity(unsigned int uNewCapacity)
 {
@@ -70,6 +83,7 @@ void ncArray<T>::SetCapacity(unsigned int uNewCapacity)
 	m_uCapacity = uNewCapacity;
 }
 
+/// Inserts a new element at a specified position (shifting elements around)
 template <class T>
 void ncArray<T>::InsertAt(unsigned int uIndex, T element)
 {

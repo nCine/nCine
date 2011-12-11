@@ -6,6 +6,7 @@ class ncILogger
 {
 public:
 
+	/// Log levels, from less to more severe
 	enum eLogLevel {
 		LOG_UNKNOWN = 0,
     	LOG_VERBOSE,
@@ -18,6 +19,8 @@ public:
 	};
 
 	virtual ~ncILogger() = 0;
+
+	/// Logs a message with a specified level of severity
 	virtual void Write(eLogLevel eLevel, const char *message, ...) = 0;
 };
 

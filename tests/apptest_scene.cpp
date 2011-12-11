@@ -14,6 +14,8 @@ ncIAppEventHandler* create_apphandler()
 
 void MyEventHandler::OnInit()
 {
+	ncApplication::SetInputHandler(this);
+
 	m_fAngles = new float[numTextures];
 	for(int i = 0; i < numTextures; i++)
 		m_fAngles[i] = 0.0f;
@@ -78,3 +80,13 @@ void MyEventHandler::OnShutdown()
 	delete[] m_pTextures;
 	delete[] m_fAngles;
 }
+
+#ifndef __ANDROID__
+void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
+{
+	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)
+		ncApplication::Quit();
+	else if (event.sym == NCKEY_SPACE)
+		ncApplication::TogglePause();
+}
+#endif

@@ -15,7 +15,7 @@ ncTimer::ncTimer()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Reset the timer
+/// Resets the timer
 void ncTimer::Reset()
 {
 	m_bRunning = false;
@@ -23,14 +23,14 @@ void ncTimer::Reset()
 	m_uTotal = 0;
 }
 
-/// Start the timer
+/// Starts the timer
 void ncTimer::Start()
 {
 	Reset();
 	Continue();
 }
 
-/// Stop the timer without resetting it
+/// Stops the timer without resetting it
 void ncTimer::Stop()
 {
 	m_bRunning = false;
@@ -38,15 +38,15 @@ void ncTimer::Stop()
 	m_uTotal += m_uStopTime - m_uStartTime;
 }
 
-/// Resume the timer
+/// Resumes the timer
 void ncTimer::Continue()
 {
 	m_bRunning = true;
 	m_uStartTime = Now();
 }
 
-/// Return (stop-start) or (now-start) time interval
-/// depending on whether the timer is currently running or not
+/** Returns (stop-start) or (now-start) time interval
+ depending on whether the timer is currently running or not */
 unsigned long int ncTimer::Interval()
 {
 	if (m_bRunning)
@@ -55,13 +55,13 @@ unsigned long int ncTimer::Interval()
 		return m_uStopTime - m_uStartTime;
 }
 
-/// Return total elapsed time
+/// Returns total elapsed time
 unsigned long int ncTimer::Total()
 {
 	return m_uTotal;
 }
 
-/// Return current time in milliseconds from init time
+/// Returns current time in milliseconds from init time
 unsigned long int ncTimer::Now()
 {
 	struct timeval now;

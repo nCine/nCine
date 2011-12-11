@@ -7,8 +7,10 @@
 #include "ncStackedBarPlotter.h"
 
 #ifdef __ANDROID__
+	#include "ncEGLGfxDevice.h"
 	#include "ncAndroidInputManager.h"
 #else
+	#include "ncSDLGfxDevice.h"
 	#include "ncSDLInputManager.h"
 #endif
 
@@ -16,6 +18,7 @@
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
+bool ncApplication::m_bPaused = false;
 bool ncApplication::m_bShouldQuit = false;
 ncFrameTimer *ncApplication::m_pFrameTimer = NULL;
 ncIGfxDevice *ncApplication::m_pGfxDevice = NULL;
@@ -30,6 +33,7 @@ ncIAppEventHandler *ncApplication::m_pAppEventHandler = NULL;
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/// Must be called at start to init the application
 #ifdef __ANDROID__
 void ncApplication::Init(struct android_app* state, ncIAppEventHandler* (*pCreateAppEventHandler)())
 {
@@ -71,10 +75,10 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 	srand(time(NULL));
 }
 
+/// The main game loop, handling events and rendering
 void ncApplication::Run()
 {
 #ifndef __ANDROID__
-	bool bPaused = false;
 	SDL_Event event;
 
 	m_pFrameTimer->Reset();
@@ -87,7 +91,7 @@ void ncApplication::Run()
 				break;
 			case SDL_ACTIVEEVENT:
 				if (event.active.state != SDL_APPMOUSEFOCUS)
-					bPaused = !event.active.gain;
+					m_bPaused = !event.active.gain;
 				break;
 /*
 			case SDL_KEYDOWN:
@@ -112,12 +116,13 @@ void ncApplication::Run()
 			}
 		}
 
-		if (!bPaused)
+		if (!m_bPaused)
 			Step();
 	}
 #endif
 }
 
+/// A single step of the game loop made to render a frame
 void ncApplication::Step()
 {
 	unsigned long int uStartTime = 0L;
@@ -147,6 +152,7 @@ void ncApplication::Step()
 	m_pAppEventHandler->OnFrameEnd();
 }
 
+/// Must be called before exiting to shut down the application
 void ncApplication::Shutdown()
 {
 	m_pAppEventHandler->OnShutdown();

@@ -103,6 +103,7 @@ void ncTextureLoader::LoadSDL(const char *pFilename)
 }
 #endif
 
+/// Reads an ETC1 header and fills the corresponding structure
 void ncTextureLoader::ReadETC1Header(const char *pFilename)
 {
 	m_pFile = fopen(pFilename, "rb");
@@ -132,6 +133,7 @@ void ncTextureLoader::ReadETC1Header(const char *pFilename)
 	}
 }
 
+/// Reads a DDS header and fills the corresponding structure
 void ncTextureLoader::ReadDDSHeader(const char *pFilename)
 {
 	m_pFile = fopen(pFilename, "rb");
@@ -157,6 +159,7 @@ void ncTextureLoader::ReadDDSHeader(const char *pFilename)
 	}
 }
 
+/// Loads a texture file holding compressed data
 void ncTextureLoader::LoadCompressed(const char *pFilename, GLenum eInternalFormat)
 {
 	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncTextureLoader::LoadCompressed - Loading \"%s\"", pFilename);

@@ -65,7 +65,7 @@ ncTexture::~ncTexture()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Set texture filtering for both magnification and minification
+/// Sets texture filtering for both magnification and minification
 void ncTexture::SetFiltering(GLenum eFilter)
 {
 	Bind();
@@ -73,28 +73,7 @@ void ncTexture::SetFiltering(GLenum eFilter)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, eFilter);
 }
 
-ncTexture* ncTexture::FromId(unsigned int uId)
-{
-	ncObject *pObject = ncServiceLocator::GetIndexer().Object(uId);
-
-	if(pObject)
-	{
-		if (pObject->Type() == sType())
-			return static_cast<ncTexture *>(pObject);
-		else // Cannot cast
-		{
-			ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, "ncTexture::FromId - Object of wrong type");
-	//		exit(-1);
-		}
-	}
-	else // NULL
-	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncTexture::FromId - Object not found");
-		return NULL;
-	}
-}
-
-/// Set the red channel of a second texture as the alpha channel
+/// Sets the red channel of a second texture as the alpha channel
 void ncTexture::SetAlphaFromRed(ncTexture *pAlphaTex)
 {
 #ifndef __ANDROID__
@@ -127,11 +106,32 @@ void ncTexture::SetAlphaFromRed(ncTexture *pAlphaTex)
 #endif
 }
 
+ncTexture* ncTexture::FromId(unsigned int uId)
+{
+	ncObject *pObject = ncServiceLocator::GetIndexer().Object(uId);
+
+	if(pObject)
+	{
+		if (pObject->Type() == sType())
+			return static_cast<ncTexture *>(pObject);
+		else // Cannot cast
+		{
+			ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, "ncTexture::FromId - Object of wrong type");
+	//		exit(-1);
+		}
+	}
+	else // NULL
+	{
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncTexture::FromId - Object not found");
+		return NULL;
+	}
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Load a texture based on information from the texture format and loader
+/// Loads a texture based on information from the texture format and loader
 void ncTexture::Load(const ncTextureLoader& texLoader)
 {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -153,7 +153,7 @@ void ncTexture::Load(const ncTextureLoader& texLoader)
 	m_iHeight = texLoader.Height();
 }
 
-/// Load a texture overriding the size detected by the texture loader
+/// Loads a texture overriding the size detected by the texture loader
 void ncTexture::Load(const ncTextureLoader& texLoader, int iWidth, int iHeight)
 {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

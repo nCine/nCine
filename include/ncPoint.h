@@ -11,10 +11,10 @@ public:
 	int y;
 	/// Default constructor, all zeros
 	ncPoint() : x(0), y(0) { }
-	/// Construct from elements
+	/// Constructs from elements
 	ncPoint(int const iX, int const iY) : x(iX), y(iY) { }
 
-	/// Set point elements
+	/// Sets point elements
 	inline void Set(int const iX, int const iY) {
 		x = iX;
 		y = iY;

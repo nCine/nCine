@@ -4,7 +4,7 @@
 #include "ncRenderCommand.h"
 #include "ncRenderQueue.h"
 
-/// A class of objects that can be drawn through the render queue
+/// A class for objects that can be drawn through the render queue
 class ncDrawableNode : public ncSceneNode
 {
 protected:
@@ -20,6 +20,7 @@ public:
 		: ncSceneNode() { }
 	virtual ~ncDrawableNode();
 
+	/// Returns the draw command class for this node
 	inline const ncRenderCommand* Command() const { return &m_renderCmd; }
 	virtual void Draw(ncRenderQueue& rRenderQueue)
 	{
@@ -27,7 +28,9 @@ public:
 		rRenderQueue.AddCommand(&m_renderCmd);
 	}
 
+	/// Returns the node rendering priority
 	inline int Priority() const { return m_renderCmd.Priority(); }
+	/// Sets the node rendering priority
 	inline void SetPriority(int iPriority) { m_renderCmd.SetPriority(iPriority); }
 };
 

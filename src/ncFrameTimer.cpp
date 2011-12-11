@@ -6,7 +6,7 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// Construct a timer which updates its fps counter every 
+/// Constructs a timer which updates its fps counter every
 /// m_uUpdateInterval milliseconds and prints on console
 /// every m_uPrintInterval seconds
 ///
@@ -24,7 +24,7 @@ ncFrameTimer::ncFrameTimer(unsigned int uPrintInterval, unsigned int uUpdateInte
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Add a frame to the counter and calculate the interval with the previous one
+/// Adds a frame to the counter and calculate the interval with the previous one
 void ncFrameTimer::AddFrame()
 {
 	Stop();
@@ -55,7 +55,7 @@ void ncFrameTimer::AddFrame()
 	Continue();
 }
 
-/// Reset timer and counters
+/// Resets timer and counters
 void ncFrameTimer::Reset()
 {
 	ncTimer::Reset();

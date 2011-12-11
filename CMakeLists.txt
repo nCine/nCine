@@ -5,6 +5,7 @@ find_package(SDL REQUIRED)
 find_package(SDL_image REQUIRED)
 include_directories(include)
 add_definitions(-DNO_GLEW)
+set(CMAKE_BUILD_TYPE Debug)
 
 set(SOURCES
 	include/ncArray.h
@@ -38,6 +39,8 @@ set(SOURCES
 	src/graphics/ncParticleAffectors.cpp
 	src/graphics/ncParticleSystem.cpp
 	src/graphics/ncTextNode.cpp
+	src/graphics/ncRectAnimation.cpp
+	src/graphics/ncAnimatedSprite.cpp
 )
 
 link_libraries (
@@ -48,6 +51,7 @@ link_libraries (
 
 add_library(ncine SHARED ${SOURCES})
 
+add_executable(apptest_animsprites tests/main.cpp tests/apptest_animsprites.cpp)
 add_executable(test_font tests/test_font.cpp)
 add_executable(apptest_particles tests/main.cpp tests/apptest_particles.cpp)
 add_executable(test_particles tests/test_particles.cpp)
@@ -58,6 +62,7 @@ add_executable(test_scene tests/test_scene.cpp)
 add_executable(test_array tests/test_array.cpp)
 add_executable(test_list tests/test_list.cpp)
 
+target_link_libraries(apptest_animsprites ncine)
 target_link_libraries(test_font ncine)
 target_link_libraries(apptest_particles ncine)
 target_link_libraries(test_particles ncine)

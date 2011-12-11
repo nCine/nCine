@@ -63,10 +63,8 @@ void ncProfilePlotter::SetBackgroundVertices()
 /// Draw the background
 void ncProfilePlotter::DrawBackground()
 {
-	glEnable(GL_BLEND);
 	//glColor4ubv(m_backgroundColor.Vector()); // Not available on GLES
 	glColor4ub(m_backgroundColor.R(), m_backgroundColor.G(), m_backgroundColor.B(), m_backgroundColor.A());
 	glVertexPointer(2, GL_FLOAT, 0, m_fBackgroundVertices);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glDisable(GL_BLEND);
 }
