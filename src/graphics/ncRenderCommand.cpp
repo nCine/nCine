@@ -41,7 +41,7 @@ void ncRenderGeometry::Draw() const
 	if (m_fVertices) {
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_FLOAT, 0, m_fVertices);
-		glDrawArrays(m_eDrawType, 0, m_iNumVertices);
+		glDrawArrays(m_eDrawType, m_iFirstVertex, m_iNumVertices);
 	}
 
 	if (m_fVertices)

@@ -14,6 +14,7 @@ ncSpriteBatchNode::ncSpriteBatchNode(ncSceneNode* pParent, ncTexture *pTexture)
 	: ncDrawableNode(pParent, 0, 0), m_pTexture(pTexture), m_vVertices(16), m_vTexCoords(16), m_vColors(16)
 {
 	m_eType = SPRITEBATCH_TYPE;
+	SetPriority(ncDrawableNode::SCENE_PRIORITY);
 }
 
 ///////////////////////////////////////////////////////////

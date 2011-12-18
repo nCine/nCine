@@ -2,10 +2,15 @@
 #define CLASS_NCLINEPLOTTER
 
 #include "ncProfilePlotter.h"
+class ncRenderCommand;
 
 /// A class to plot a variable as a line strip
 class ncLineVariable : public ncPlottingVariable
 {
+private:
+	virtual void UpdateRenderCommand();
+	virtual void UpdateMeanRenderCommand();
+
 public:
 	ncLineVariable(unsigned int uNumValues, unsigned int uRejectDelay);
 
@@ -16,10 +21,10 @@ public:
 class ncLinePlotter : public ncProfilePlotter
 {
 public:
-	ncLinePlotter(ncRect rect) : ncProfilePlotter(rect) { }
+	ncLinePlotter(ncSceneNode* pParent, ncRect rect) : ncProfilePlotter(pParent, rect) { }
 
 	virtual unsigned int AddVariable(unsigned int uNumValues, unsigned int uRejectDelay);
-	virtual void Draw();
+	virtual void Draw(ncRenderQueue& rRenderQueue);
 };
 
 #endif

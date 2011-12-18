@@ -19,12 +19,12 @@ private:
 	int m_iBufferBits;
 	/// Double buffering flag
 	bool m_bIsDoubleBuffered;
+	/// VSync flag
+	bool m_bIsVSynced;
 	/// Depth buffer size in bit
 	int m_iDepthBits;
 	/// Stencil buffer size in bit
 	int m_iStencilBits;
-	/// VSync flag
-	bool m_bIsVSynced;
 public:
 	// Constructor with no parameters
 	ncDisplayMode()

@@ -37,46 +37,46 @@ int main(int argc, char **argv)
 	ncTextNode fpsText(&rootNode, &font1);
 	fpsText.SetScale(0.85f);
 	fpsText.SetString("FPS: ");
-	fpsText.SetPosition((iWidth - fpsText.XAdvanceSum()), iHeight - fpsText.FontBase());
+	fpsText.SetPosition((iWidth - fpsText.Width()), iHeight - fpsText.FontBase());
 
 	char vTestString[] = "WAY.P.ATAV";
 	int iTextHeight = iHeight * 0.7f;
 	ncTextNode text1(&rootNode, &font1);
 	text1.SetScale(2.0f);
 	text1.SetString(vTestString);
-	text1.SetPosition((iWidth - text1.XAdvanceSum())*0.5f, iTextHeight);
+	text1.SetPosition((iWidth - text1.Width())*0.5f, iTextHeight);
 
 	ncTextNode text2(&rootNode, &font1);
 	text2.SetScale(2.0f);
 	text2.SetString(vTestString);
 	iTextHeight -= text2.FontBase();
-	text2.SetPosition((iWidth - text1.XAdvanceSum())*0.5f, iTextHeight);
+	text2.SetPosition((iWidth - text1.Width())*0.5f, iTextHeight);
 	text2.EnableKerning(false);
 
 	ncTextNode text3(&rootNode, &font2);
 	text3.SetScale(2.0f);
 	text3.SetString(vTestString);
 	iTextHeight -= text3.FontBase();
-	text3.SetPosition((iWidth - text3.XAdvanceSum())*0.5f, iTextHeight);
+	text3.SetPosition((iWidth - text3.Width())*0.5f, iTextHeight);
 
 	ncTextNode text4(&rootNode, &font2);
 	text4.SetScale(2.0f);
 	text4.SetString(vTestString);
 	iTextHeight -= text4.FontBase();
-	text4.SetPosition((iWidth - text3.XAdvanceSum())*0.5f, iTextHeight);
+	text4.SetPosition((iWidth - text3.Width())*0.5f, iTextHeight);
 	text4.EnableKerning(false);
 
 	ncTextNode text5(&rootNode, &font3);
 	text5.SetScale(2.0f);
 	text5.SetString(vTestString);
 	iTextHeight -= text5.FontBase();
-	text5.SetPosition((iWidth - text5.XAdvanceSum())*0.5f, iTextHeight);
+	text5.SetPosition((iWidth - text5.Width())*0.5f, iTextHeight);
 
 	ncTextNode text6(&rootNode, &font3);
 	text6.SetScale(2.0f);
 	text6.SetString(vTestString);
 	iTextHeight -= text6.FontBase();
-	text6.SetPosition((iWidth - text5.XAdvanceSum())*0.5f, iTextHeight);
+	text6.SetPosition((iWidth - text5.Width())*0.5f, iTextHeight);
 	text6.EnableKerning(false);
 
 	t.Reset();
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
 			ulUpdateTime = t.Now();
 			sprintf(vFPS, (const char *)"FPS: %.0f", t.AverageFPS());
 			fpsText.SetString(vFPS);
-			fpsText.SetPosition((iWidth - fpsText.XAdvanceSum()), iHeight - fpsText.FontBase());
+			fpsText.SetPosition((iWidth - fpsText.Width()), iHeight - fpsText.FontBase());
 		}
 
 		gfxDevice.Clear();

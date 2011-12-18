@@ -5,7 +5,7 @@
 ///////////////////////////////////////////////////////////
 
 ncArrayIndexer::ncArrayIndexer()
-	: m_vPointers(16), m_uNextId(0)
+	: m_uNextId(0), m_vPointers(16)
 {
 	// First element reserved
 	m_vPointers.InsertBack(NULL);

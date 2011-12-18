@@ -22,14 +22,13 @@ class ncRect
 		ncRect(int const iX, int const iY, int const iW, int const iH)
 			: x(iX), y(iY), w(iW), h(iH) { }
 		/// Constructs from base classes
-		ncRect(ncPoint const p1, ncPoint const p2)
+		ncRect(const ncPoint &p1, const ncPoint &p2)
 			: x(p1.x), y(p1.y), w(p2.x), h(p2.y) { }
 
 		/// Creates a rect from center and size
-		static ncRect FromCenterAndSize(ncPoint center, ncPoint size)
+		static ncRect FromCenterAndSize(const ncPoint &center, const ncPoint &size)
 		{
-			return ncRect(center.x - size.x*0.5f, center.y - size.y*0.5f,
-						  size.x, size.y);
+			return ncRect(center.x - size.x*0.5f, center.y - size.y*0.5f, size.x, size.y);
 		}
 
 		/// Calculates the center of the rect
@@ -38,7 +37,8 @@ class ncRect
 		}
 
 		/// Sets rect elements
-		inline void Set(int const iX, int const iY, int const iW, int const iH) {
+		inline void Set(int const iX, int const iY, int const iW, int const iH)
+		{
 			x = iX;
 			y = iY;
 			w = iW;
@@ -53,7 +53,8 @@ class ncRect
 		}
 
 		/// Equality operators
-		inline bool operator==(const ncRect& rect) const {
+		inline bool operator==(const ncRect& rect) const
+		{
 			return (x == rect.x && y == rect.y &&
 					w == rect.w && h == rect.h);
 		}

@@ -17,7 +17,7 @@ ncFont::ncFont(const char *pTexFilename, const char *pFntFilename)
 	pFile = fopen(pFntFilename, "r");
 	if (!pFile)
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncFont::ncFont - Cannot open the file \"%s\"", pFntFilename);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncFont::ncFont - Cannot open the file \"%s\"", pFntFilename);
 		exit(-1);
 	}
 
@@ -78,7 +78,7 @@ void ncFont::ParseFNTFile(FILE *pFile)
 			sscanf(vBuffer, "common lineHeight=%u base=%u scaleW=%u scaleH=%u", &m_uLineHeight, &m_uBase, &m_uWidth, &m_uHeight);
 			if (m_uWidth != m_pTexture->Width() || m_uHeight != m_pTexture->Height())
 			{
-				ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncFont::ParseFNTFile - FNT texture has a different size: (%u, %u)", m_uWidth, m_uHeight);
+				ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncFont::ParseFNTFile - FNT texture has a different size: (%u, %u)", m_uWidth, m_uHeight);
 				exit(-1);
 			}
 		}
@@ -101,5 +101,5 @@ void ncFont::ParseFNTFile(FILE *pFile)
 		}
 	}
 
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncFont::ParseFNTFile - FNT file parsed: %u glyphs and %u kernings", m_uNumGlyphs, m_uNumKernings);
+	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (const char *)"ncFont::ParseFNTFile - FNT file parsed: %u glyphs and %u kernings", m_uNumGlyphs, m_uNumKernings);
 }

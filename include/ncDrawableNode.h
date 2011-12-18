@@ -8,10 +8,19 @@
 class ncDrawableNode : public ncSceneNode
 {
 protected:
+	/// The render command class associated with this node
 	ncRenderCommand m_renderCmd;
+	/// Updates the render command
 	virtual void UpdateRenderCommand() = 0;
 
 public:
+
+	/// Drawing priorities from back to front
+	enum ePriorityBase {
+		SCENE_PRIORITY = 0,
+		HUD_PRIORITY = 128
+	};
+
 	ncDrawableNode(ncSceneNode* pParent, int iX, int iY)
 		: ncSceneNode(pParent, iX, iY) { }
 	ncDrawableNode(ncSceneNode* pParent)
@@ -22,6 +31,7 @@ public:
 
 	/// Returns the draw command class for this node
 	inline const ncRenderCommand* Command() const { return &m_renderCmd; }
+	/// Updates the draw command and add it to the queue
 	virtual void Draw(ncRenderQueue& rRenderQueue)
 	{
 		UpdateRenderCommand();

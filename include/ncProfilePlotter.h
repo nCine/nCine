@@ -15,6 +15,9 @@
 #include "ncColor.h"
 #include "ncArray.h"
 #include "ncProfileVariable.h"
+#include "ncDrawableNode.h"
+#include "ncRenderCommand.h"
+#include "ncRenderQueue.h"
 
 /// A class to group and wrap all the information needed to plot a variable
 class ncPlottingVariable
@@ -30,6 +33,15 @@ protected:
 	ncProfileVariable m_variable;
 	/// The vertices buffer
 	GLfloat *m_fVertices;
+
+	/// The command used to render variable values
+	ncRenderCommand m_valuesCmd;
+	/// The command used to render the variable mean
+	ncRenderCommand m_meanCmd;
+	/// Updates the values rendering command
+	virtual void UpdateRenderCommand() = 0;
+	/// Updates the mean rendering command
+	virtual void UpdateMeanRenderCommand() = 0;
 
 public:
 	ncPlottingVariable(unsigned int uNumValues, unsigned int uRejectDelay);
@@ -61,17 +73,24 @@ public:
 	/// Sets the mean drawing flag state
 	void SetPlotMean(bool bEnabled) { m_bPlotMean = bEnabled; }
 
+	virtual inline void Draw(ncRenderQueue& rRenderQueue)
+	{
+		UpdateRenderCommand();
+		rRenderQueue.AddCommand(&m_valuesCmd);
+	}
+	virtual inline void DrawMean(ncRenderQueue& rRenderQueue)
+	{
+		UpdateMeanRenderCommand();
+		rRenderQueue.AddCommand(&m_meanCmd);
+	}
+
 	virtual void UpdateVertices(int x, int y, int w, int h) = 0;
 };
 
 /// A class that plots a graphic representation of a time/value function
-class ncProfilePlotter
+class ncProfilePlotter : public ncDrawableNode
 {
 protected:
-	/// Background left coordinate
-	int m_iX;
-	/// Background top coordinate
-	int m_iY;
 	/// Background width
 	int m_iWidth;
 	/// Background height
@@ -85,13 +104,14 @@ protected:
 	ncArray<ncPlottingVariable *> m_vVariables;
 
 	void SetBackgroundVertices();
-	void DrawBackground();
+	virtual void UpdateRenderCommand();
 public:
-	ncProfilePlotter(ncRect rect)
-		: m_iX(rect.x), m_iY(rect.y), m_iWidth(rect.w), m_iHeight(rect.h), m_vVariables(2)
+	ncProfilePlotter(ncSceneNode* pParent, ncRect rect)
+		: ncDrawableNode(pParent, rect.x, rect.y), m_iWidth(rect.w), m_iHeight(rect.h), m_vVariables(2)
 	{
-		SetBackgroundVertices();
+		SetPriority(ncDrawableNode::HUD_PRIORITY);
 	}
+
 	virtual ~ncProfilePlotter();
 
 	/// Returns the variable with the specified index
@@ -103,7 +123,6 @@ public:
 
 	/// Adds a new variable to the plotter
 	virtual unsigned int AddVariable(unsigned int uNumValues, unsigned int uRejectDelay) = 0;
-	virtual void Draw() = 0;
 };
 
 #endif

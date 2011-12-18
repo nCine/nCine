@@ -5,10 +5,7 @@
 #include "ncIInputEventHandler.h"
 #include "ncVector2f.h"
 class ncTexture;
-class ncAnimatedSprite;;
-class ncTimer;
-class ncFont;
-class ncTextNode;
+class ncAnimatedSprite;
 
 /// My nCine application
 class MyEventHandler
@@ -18,13 +15,7 @@ class MyEventHandler
 private:
 	ncTexture *m_pTexture;
 	ncAnimatedSprite *m_pAnimSprite;
-	ncTimer *m_pTimer;
 	ncVector2f m_destVector;
-
-	ncFont *m_pFont;
-	ncTextNode *m_pFpsText;
-	char m_vFPS[16];
-	unsigned long int m_ulUpdateFpsTime;
 
 public:
 	virtual void OnInit();

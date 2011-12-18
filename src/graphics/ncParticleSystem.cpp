@@ -10,6 +10,7 @@ ncParticleSystem::ncParticleSystem(unsigned int uCount, ncTexture *pTexture, flo
 	: m_uPoolSize(uCount), m_uPoolTop(uCount-1), m_fSpriteScale(fSpriteScale), m_vAffectors(4)
 {
 	m_eType = PARTICLESYSTEM_TYPE;
+	SetPriority(ncDrawableNode::SCENE_PRIORITY);
 
 	m_pParticlePool = new ncParticle*[m_uPoolSize];
 	m_pParticleList = new ncParticle*[m_uPoolSize];
@@ -39,7 +40,7 @@ ncParticleSystem::~ncParticleSystem()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncParticleSystem::Emit(unsigned int amount, unsigned long int ulLife, ncVector2f vel)
+void ncParticleSystem::Emit(unsigned int amount, unsigned long int ulLife, const ncVector2f &vel)
 {
 	unsigned long int ulRndLife;
 	ncVector2f RndPosition;

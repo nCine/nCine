@@ -6,10 +6,13 @@
 ///////////////////////////////////////////////////////////
 
 ncPlottingVariable::ncPlottingVariable(unsigned int uNumValues, unsigned int uRejectDelay)
-	: m_variable(uNumValues, uRejectDelay), m_bPlotMean(true),
-	  m_graphColor(1.0f, 1.0f, 1.0f), m_meanColor(1.0f, 0.0f, 0.0f)
+	: m_bPlotMean(true), m_graphColor(1.0f, 1.0f, 1.0f), m_meanColor(1.0f, 0.0f, 0.0f),
+	  m_variable(uNumValues, uRejectDelay), m_fVertices(NULL)
 {
-
+	// One more than the profile plotter background
+	m_valuesCmd.SetPriority(ncDrawableNode::HUD_PRIORITY + 1);
+	// One more than the variable graph
+	m_meanCmd.SetPriority(ncDrawableNode::HUD_PRIORITY + 2);
 }
 
 ncPlottingVariable::~ncPlottingVariable()
@@ -40,7 +43,7 @@ ncPlottingVariable& ncProfilePlotter::Variable(unsigned int uIndex)
 		return *m_vVariables[uIndex];
 	else
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncProfilePlotter::Variable - Index out of range");
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncProfilePlotter::Variable - Index out of range");
 		exit(-1);
 	}
 }
@@ -53,18 +56,19 @@ ncPlottingVariable& ncProfilePlotter::Variable(unsigned int uIndex)
 void ncProfilePlotter::SetBackgroundVertices()
 {
 	// Graph background vertices
-	m_fBackgroundVertices[0] = m_iX;				m_fBackgroundVertices[1] = m_iY;
-	m_fBackgroundVertices[2] = m_iX + m_iWidth;		m_fBackgroundVertices[3] = m_iY;
-	m_fBackgroundVertices[4] = m_iX;				m_fBackgroundVertices[5] = m_iY + m_iHeight;
+	m_fBackgroundVertices[0] = x;				m_fBackgroundVertices[1] = y;
+	m_fBackgroundVertices[2] = x + m_iWidth;	m_fBackgroundVertices[3] = y;
+	m_fBackgroundVertices[4] = x;				m_fBackgroundVertices[5] = y + m_iHeight;
 
-	m_fBackgroundVertices[6] = m_iX + m_iWidth;		m_fBackgroundVertices[7] = m_iY + m_iHeight;
+	m_fBackgroundVertices[6] = x + m_iWidth;	m_fBackgroundVertices[7] = y + m_iHeight;
 }
 
-/// Draw the background
-void ncProfilePlotter::DrawBackground()
+void ncProfilePlotter::UpdateRenderCommand()
 {
-	//glColor4ubv(m_backgroundColor.Vector()); // Not available on GLES
-	glColor4ub(m_backgroundColor.R(), m_backgroundColor.G(), m_backgroundColor.B(), m_backgroundColor.A());
-	glVertexPointer(2, GL_FLOAT, 0, m_fBackgroundVertices);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	m_renderCmd.Material().SetTextureGLId(0);
+	m_renderCmd.Material().SetColor(m_backgroundColor.fR(), m_backgroundColor.fG(), m_backgroundColor.fB(), m_backgroundColor.fA());
+	m_renderCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
+	SetBackgroundVertices();
+	m_renderCmd.Geometry().SetData(GL_TRIANGLE_STRIP, 0, 4, m_fBackgroundVertices, NULL, NULL);
+	m_renderCmd.CalculateSortKey();
 }

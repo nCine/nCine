@@ -19,7 +19,8 @@ ncFileLogger::ncFileLogger(const char *filename, eLogLevel eConsoleLevel, eLogLe
 	if (m_eFileLevel < int(LOG_OFF))
 		m_fp = fopen(filename, "a");
 
-	Write(LOG_VERBOSE, "FileLogger instantiated");
+    // HACK: calling a method from unitialized object
+//	Write(LOG_VERBOSE, "FileLogger instantiated");
 }
 
 

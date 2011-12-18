@@ -6,6 +6,7 @@ find_package(SDL_image REQUIRED)
 include_directories(include)
 add_definitions(-DNO_GLEW)
 set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_CXX_FLAGS "-Wall")
 
 set(SOURCES
 	include/ncArray.h

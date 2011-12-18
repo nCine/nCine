@@ -5,6 +5,8 @@ cmake_install.cmake
 CMakeCache.txt
 Makefile
 CMakeLists.txt.user
+Doxyfile
+docs
 staging
 textures
 fonts

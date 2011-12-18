@@ -33,15 +33,17 @@ private:
 	ncArray<ncKerning> m_vKernings;
 
 public:
-	ncFontGlyph() : m_vKernings(4) { }
+	ncFontGlyph()
+		: m_uX(0), m_uY(0), m_uWidth(0), m_uHeight(0), m_iXOffset(0),
+		  m_iYOffset(0), m_uXAdvance(0), m_vKernings(4) { }
 	ncFontGlyph(unsigned short uX, unsigned short uY, unsigned short uWidth, unsigned short uHeight,
-				short iXOffset, short iYOffset, unsigned short uXAdvance)
+		short iXOffset, short iYOffset, unsigned short uXAdvance)
 		: m_uX(uX), m_uY(uY), m_uWidth(uWidth), m_uHeight(uHeight),
 		  m_iXOffset(iXOffset), m_iYOffset(iYOffset), m_uXAdvance(uXAdvance),
 		  m_vKernings(4) { }
 
 	void Set(unsigned short uX, unsigned short uY, unsigned short uWidth, unsigned short uHeight,
-			 short iXOffset, short iYOffset, unsigned short uXAdvance)
+		short iXOffset, short iYOffset, unsigned short uXAdvance)
 	{
 		m_uX = uX;
 		m_uY = uY;

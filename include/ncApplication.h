@@ -4,10 +4,14 @@
 #include <cstdio> // for NULL
 #include "ncFrameTimer.h"
 #include "ncIGfxDevice.h"
-#include "ncSceneNode.h"
-#include "ncRenderQueue.h"
-#include "ncProfilePlotter.h"
-#include "ncIInputManager.h"
+class FrameTimer;
+class ncSceneNode;
+class ncRenderQueue;
+class ncProfilePlotter;
+class ncFont;
+class ncTextNode;
+class ncIInputManager;
+#include "ncIInputEventHandler.h"
 #include "ncIAppEventHandler.h"
 
 /// Main entry point and handler for nCine applications
@@ -22,6 +26,10 @@ private:
 	static ncRenderQueue *m_pRenderQueue;
 	static ncTimer *m_pTimer;
 	static ncProfilePlotter *m_pProfilePlotter;
+	static ncFont *m_pFont;
+	static ncTextNode *m_pTextLines;
+	static unsigned long int m_ulTextUpdateTime;
+	static char m_vTextChars[256];
 	static ncIInputManager *m_pInputManager;
 	static ncIAppEventHandler *m_pAppEventHandler;
 
@@ -67,18 +75,15 @@ public:
 	static inline int Width() { return m_pGfxDevice->Width(); }
 	/// Returns the screen height
 	static inline int Height() { return m_pGfxDevice->Height(); }
-	/// Sets the pause flag value
-	static inline void SetPause(bool bPaused) { m_bPaused = bPaused; }
-	/// Toggles the pause flag on and off
-	static inline void TogglePause() { m_bPaused = !m_bPaused; }
+	// Sets the pause flag value
+	static void SetPause(bool bPaused);
+	// Toggles the pause flag on and off
+	static void TogglePause();
 	/// Raises the quit flag
 	static inline void Quit() { m_bShouldQuit = true; };
 
-	/// Sets the input handler object
-	static inline void SetInputHandler(ncIInputEventHandler *pInputEventHandler)
-	{
-		m_pInputManager->SetHandler(pInputEventHandler);
-	}
+	// Sets the input handler object
+	static void SetInputHandler(ncIInputEventHandler *pInputEventHandler);
 };
 
 #endif

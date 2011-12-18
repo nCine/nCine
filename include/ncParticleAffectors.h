@@ -13,6 +13,7 @@ template <class T> class ncArray;
 class ncParticleAffector
 {
 public:
+	virtual ~ncParticleAffector() { }
 	virtual void Affect(ncParticle* pParticle) = 0;
 };
 

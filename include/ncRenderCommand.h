@@ -153,6 +153,8 @@ private:
 	ncRenderGeometry m_geometry;
 
 public:
+	ncRenderCommand() : m_uSortKey(0), m_iPriority(0) { }
+
 	/// Returns the rendering priority
 	inline int Priority() const { return m_iPriority; }
 	/// Sets the rendering priority

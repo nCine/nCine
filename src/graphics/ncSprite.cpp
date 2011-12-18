@@ -66,6 +66,8 @@ ncSprite* ncSprite::FromId(unsigned int uId)
 void ncSprite::Init()
 {
 	m_eType = SPRITE_TYPE;
+	SetPriority(ncDrawableNode::SCENE_PRIORITY);
+
 	if (m_pTexture)
 		SetTexRect(ncRect(0, 0, m_pTexture->Width(), m_pTexture->Height()));
 }

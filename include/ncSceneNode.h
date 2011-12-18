@@ -30,7 +30,7 @@ public:
 	bool bShouldDraw;
 
 	ncSceneNode(ncSceneNode* pParent, float fX, float fY)
-		: m_pParent(NULL), x(fX), y(fY), bShouldUpdate(true), bShouldDraw(true)
+		: m_pParent(NULL), m_absX(0.0f), m_absY(0.0f), x(fX), y(fY), bShouldUpdate(true), bShouldDraw(true)
 	{
 		m_eType = SCENENODE_TYPE;
 
@@ -38,7 +38,7 @@ public:
 			pParent->AddChildNode(this);
 	}
 	ncSceneNode(ncSceneNode* pParent)
-		: m_pParent(NULL), x(0.0f), y(0.0f), bShouldUpdate(true), bShouldDraw(true)
+		: m_pParent(NULL), m_absX(0.0f), m_absY(0.0f), x(0.0f), y(0.0f), bShouldUpdate(true), bShouldDraw(true)
 	{
 		m_eType = SCENENODE_TYPE;
 
@@ -46,7 +46,10 @@ public:
 			pParent->AddChildNode(this);
 	}
 	ncSceneNode()
-		: ncObject(), m_pParent(NULL), x(0.0f), y(0.0f), bShouldUpdate(true), bShouldDraw(true) { m_eType = SCENENODE_TYPE; }
+		: ncObject(), m_pParent(NULL), m_absX(0.0f), m_absY(0.0f), x(0.0f), y(0.0f), bShouldUpdate(true), bShouldDraw(true)
+	{
+		m_eType = SCENENODE_TYPE;
+	}
 	virtual ~ncSceneNode();
 
 	inline static eObjectType sType() { return SCENENODE_TYPE; }

@@ -23,12 +23,12 @@ unsigned int ncStackedBarPlotter::AddVariable(unsigned int uNumValues, unsigned 
 	{
 		if (uNumValues != m_vVariables[0]->Variable()->NumValues())
 		{
-			ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, (char *)"ncStackedBarPlotter::AddVariable - Variable not added because number of values is inconsistent");
+			ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, (const char *)"ncStackedBarPlotter::AddVariable - Variable not added because number of values is inconsistent");
 			return 0; // TODO: switch to signed int and return -1?
 		}
 		if (uRejectDelay != m_vVariables[0]->Variable()->Delay())
 		{
-			ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, (char *)"ncStackedBarPlotter::AddVariable - Variable not added because reject delay is inconsistent");
+			ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, (const char *)"ncStackedBarPlotter::AddVariable - Variable not added because reject delay is inconsistent");
 			return 0; // TODO: switch to signed int and return -1?
 		}
 	}
@@ -39,43 +39,19 @@ unsigned int ncStackedBarPlotter::AddVariable(unsigned int uNumValues, unsigned 
 	return m_vVariables.Size()-1;
 }
 
-void ncStackedBarPlotter::Draw()
+void ncStackedBarPlotter::Draw(ncRenderQueue& rRenderQueue)
 {
-	glDisable(GL_TEXTURE_2D);
-	glEnableClientState(GL_VERTEX_ARRAY);
+	// Drawing the background
+	ncDrawableNode::Draw(rRenderQueue);
 
-	// Rendering the background
-	DrawBackground();
-
-	UpdateAllVertices(m_iX, m_iY, m_iWidth, m_iHeight);
-	for (int i = 0; i < m_vVariables.Size(); i++)
-	{
-		glVertexPointer(2, GL_FLOAT, 0, m_vVariables[i]->Vertices());
-
-		// Rendering variable values
-		const ncColor& graphColor = m_vVariables[i]->GraphColor();
-		// glColor4ubv(graphColor.Vector()); // Not availble on GLES
-		glColor4ub(graphColor.R(), graphColor.G(), graphColor.B(), graphColor.A());
-		glDrawArrays(GL_TRIANGLES, 2, m_vVariables[i]->NumValues()*6);
-	}
+	UpdateAllVertices(m_absX, m_absY, m_iWidth, m_iHeight);
 
 	for (int i = 0; i < m_vVariables.Size(); i++)
 	{
+		m_vVariables[i]->Draw(rRenderQueue);
 		if (m_vVariables[i]->shouldPlotMean())
-		{
-			glVertexPointer(2, GL_FLOAT, 0, m_vVariables[i]->Vertices());
-
-			// Rendering variable mean on top of everything else
-			const ncColor& meanColor = m_vVariables[i]->MeanColor();
-			// glColor4ubv(meanColor.Vector()); // Not availble on GLES
-			glColor4ub(meanColor.R(), meanColor.G(), meanColor.B(), meanColor.A());
-			glDrawArrays(GL_LINES, 0, 2);
-		}
+			m_vVariables[i]->DrawMean(rRenderQueue);
 	}
-
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	glEnable(GL_TEXTURE_2D);
 }
 
 ///////////////////////////////////////////////////////////
@@ -142,3 +118,22 @@ void ncStackedBarPlotter::UpdateAllVertices(int x, int y, int w, int h)
 		}
 	}
 }
+
+void ncStackedBarVariable::UpdateRenderCommand()
+{
+    m_valuesCmd.Material().SetTextureGLId(0);
+    m_valuesCmd.Material().SetColor(m_graphColor.fR(), m_graphColor.fG(), m_graphColor.fB(), m_graphColor.fA());
+//	m_valuesCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
+    m_valuesCmd.Geometry().SetData(GL_TRIANGLES, 2, m_variable.NumValues()*6, m_fVertices, NULL, NULL);
+    m_valuesCmd.CalculateSortKey();
+}
+
+void ncStackedBarVariable::UpdateMeanRenderCommand()
+{
+	m_meanCmd.Material().SetTextureGLId(0);
+	m_meanCmd.Material().SetColor(m_meanColor.fR(), m_meanColor.fG(), m_meanColor.fB(), m_meanColor.fA());
+//	m_meanCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
+	m_meanCmd.Geometry().SetData(GL_LINES, 0, 2, m_fVertices, NULL, NULL);
+	m_meanCmd.CalculateSortKey();
+}
+

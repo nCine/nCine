@@ -13,7 +13,7 @@ ncSDLInputManager::ncSDLInputManager()
 {
 	if (SDL_WasInit(SDL_INIT_VIDEO) == 0)
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncSDLInputManager::ncSDLInputManager - SDL video subsystem is not initialized");
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncSDLInputManager::ncSDLInputManager - SDL video subsystem is not initialized");
 		exit(-1);
 	}
 }

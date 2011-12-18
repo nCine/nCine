@@ -19,16 +19,10 @@ void MyEventHandler::OnInit()
 	ncSceneNode &rRootNode = ncApplication::RootNode();
 
 #ifdef __ANDROID__
-	m_pFont = new ncFont("/sdcard/ncine/trebuchet16_128.dds", "/sdcard/ncine/trebuchet16_128.fnt");
 	m_pTexture = new ncTexture("/sdcard/ncine/abta_playertwo.dds");
 #else
-	m_pFont = new ncFont("fonts/trebuchet32_256.png", "fonts/trebuchet32_256.fnt");
 	m_pTexture = new ncTexture("textures/abta_playertwo.png");
 #endif
-
-	m_pFpsText = new ncTextNode(&rRootNode, m_pFont);
-	m_pFpsText->SetString("FPS: ");
-	m_pFpsText->SetPosition((ncApplication::Width() - m_pFpsText->XAdvanceSum()), ncApplication::Height() - m_pFpsText->FontBase());
 
 	m_pAnimSprite = new ncAnimatedSprite(&rRootNode, m_pTexture);
 	// Up
@@ -111,22 +105,10 @@ void MyEventHandler::OnInit()
 	m_pAnimSprite->SetFrame(0);
 	m_pAnimSprite->SetPaused(true);
 	m_destVector = m_pAnimSprite->Position();
-
-	m_pTimer = new ncTimer();
-	m_pTimer->Reset();
-	unsigned long int m_ulStartTime = m_pTimer->Now();
 }
 
 void MyEventHandler::OnFrameStart()
 {
-	if (m_pTimer->Now() - m_ulUpdateFpsTime > 100)
-	{
-		m_ulUpdateFpsTime = m_pTimer->Now();
-		sprintf(m_vFPS, (const char *)"FPS: %.0f", ncApplication::AverageFPS());
-		m_pFpsText->SetString(m_vFPS);
-		m_pFpsText->SetPosition((ncApplication::Width() - m_pFpsText->XAdvanceSum()), ncApplication::Height() - m_pFpsText->FontBase());
-	}
-
 	ncVector2f reachVector = m_destVector - m_pAnimSprite->AbsPosition();
 	if (reachVector.Length() > 1.0f)
 	{
@@ -179,11 +161,8 @@ void MyEventHandler::OnFrameStart()
 
 void MyEventHandler::OnShutdown()
 {
-	delete m_pTimer;
 	delete m_pAnimSprite;
-	delete m_pFpsText;
 	delete m_pTexture;
-	delete m_pFont;
 }
 
 #ifdef __ANDROID__

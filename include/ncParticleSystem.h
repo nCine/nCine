@@ -24,12 +24,14 @@ private:
 	/// The array containing every particle (dead or alive)
 	ncParticle **m_pParticleList;
 
-	ncTexture *m_Texture;
+	/// The common sprite scale factor for particles
 	float m_fSpriteScale;
 
+	/// The array of particle affectors
 	ncArray<ncParticleAffector *> m_vAffectors;
 
 	virtual void UpdateRenderCommand() { }
+
 public:
 	ncParticleSystem(unsigned int uCount, ncTexture *pTexture, float fSpriteScale);
 	~ncParticleSystem();
@@ -37,7 +39,7 @@ public:
 	/// Adds a particle affector
 	void AddAffector(ncParticleAffector* affector) { m_vAffectors.InsertBack(affector); }
 	/// Emits an amount of particles with a specified initial life and velocity
-	void Emit(unsigned int amount, unsigned long int ulLife, const ncVector2f vel);
+	void Emit(unsigned int amount, unsigned long int ulLife, const ncVector2f &vel);
 
 	/// Gets the particle sprite scale factor
 	float SpriteScale() { return m_fSpriteScale; }

@@ -9,6 +9,13 @@
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/// Adds a draw command to the queue
+void ncRenderQueue::AddCommand(const ncRenderCommand *pCommand)
+{
+	m_uNumVertices += pCommand->Geometry().NumVertices();
+	m_renderCmds.InsertBack(pCommand);
+}
+
 /// Sorts the queue then issues every render command in order
 void ncRenderQueue::Draw()
 {
@@ -17,6 +24,9 @@ void ncRenderQueue::Draw()
 	for (int i = 0; i < m_renderCmds.Size(); i++)
 		m_renderCmds[i]->Issue();
 
+	m_uLastNumVertices = m_uNumVertices;
+	m_uLastNumCommands = m_renderCmds.Size();
+	m_uNumVertices = 0;
 	m_renderCmds.Clear();
 }
 
@@ -36,10 +46,8 @@ void ncRenderQueue::SortQueue()
 
 void ncRenderQueue::QSort(ncArray<const ncRenderCommand *> &array, int start, int end)
 {
-	int div;
-
 	if (start < end) {
-		div = QSortPartition(array, start, end);
+		int div = QSortPartition(array, start, end);
 		QSort(array, start, div);
 		QSort(array, div+1, end);
 	}

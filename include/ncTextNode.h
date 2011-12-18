@@ -10,13 +10,22 @@ class ncFontGlyph;
 /// A scene node to draw a text label
 class ncTextNode : public ncDrawableNode
 {
-private:
+public:
 	static const unsigned int MAX_LENGHT = 256;
 
+	enum eAlignment {
+		ALIGN_LEFT,
+		ALIGN_CENTER,
+		ALIGN_RIGHT
+	};
+
+private:
 	/// The string to be rendered
 	char m_vString[MAX_LENGHT];
 	/// Dirty flag for vertices and texture coordinates
-	bool m_bDirty;
+	bool m_bDirtyDraw;
+	/// Dirty flag for boundary rectangle
+	mutable bool m_bDirtyBoundaries;
 	/// Kerning flag for rendering
 	bool m_bWithKerning;
 	/// The font class used to render text
@@ -29,9 +38,22 @@ private:
 	ncArray<float> m_vTexCoords;
 
 	/// Advance on the X-axis for the next processed glyph
-	mutable float m_uXAdvance;
-	/// Total advance on the X-axis for the entire string (its width)
-	mutable unsigned int m_uXAdvanceSum;
+	mutable float m_fXAdvance;
+	/// Total advance on the X-axis for the longest line (horizontal boundary)
+	mutable float m_fXAdvanceSum;
+	/// Advance on the Y-axis for the next processed glyph
+	mutable float m_fYAdvance;
+	/// Total advance on the Y-axis for the entire string (vertical boundary)
+	mutable float m_fYAdvanceSum;
+	/// Text width for each line of text
+	mutable ncArray<float> m_vLineLengths;
+	/// Horizontal text alignment
+	eAlignment m_alignment;
+
+	// Calculates rectangle boundaries for the rendered text
+	void CalculateBoundaries() const;
+	// Calculates align offset for a particular line
+	float CalculateAlignment(unsigned int uLineIndex) const;
 	// Fills the batch draw command with data from a glyph
 	void ProcessGlyph(const ncFontGlyph* pGlyph);
 
@@ -40,18 +62,27 @@ public:
 	ncTextNode(ncSceneNode* pParent, ncFont *pFont);
 	virtual ~ncTextNode() { }
 
-	// Returns the total sum of advances for a string (its width)
-	unsigned int XAdvanceSum() const;
+	// Returns rendered text width
+	float Width() const;
+	// Returns rendered text height
+	float Height() const;
 	/// Is kerning enabled for this node rendering?
 	inline bool withKerning() const { return m_bWithKerning; }
-	/// Sets the kerning flag for this node rendering
-	inline void EnableKerning(bool bWithKerning) { m_bWithKerning = bWithKerning; }
+	// Sets the kerning flag for this node rendering
+	void EnableKerning(bool bWithKerning);
+	/// Gets the horizontal text alignment
+	inline eAlignment Alignment() const { return m_alignment; }
+	// Sets the horizontal text alignment
+	void SetAlignment(eAlignment alignment);
+
 	/// Gets the glyph scale factor
 	inline float Scale() const { return m_fScaleFactor; }
 	/// Scales the glyph size
-	inline void SetScale(float fScaleFactor) {
+	inline void SetScale(float fScaleFactor)
+	{
 		m_fScaleFactor = fScaleFactor;
-		m_bDirty = true;
+		m_bDirtyBoundaries = true;
+		m_bDirtyDraw = true;
 	}
 	/// Gets the font base scaled by the scale factor
 	inline float FontBase() const { return m_pFont->Base() * m_fScaleFactor; }

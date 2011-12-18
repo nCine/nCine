@@ -100,7 +100,7 @@ bool ncSceneNode::UnlinkChildNode(ncSceneNode *pChildNode)
 			pListNode = pListNode->Next();
 		}
 
-		bool bUnlinked = true;
+		bUnlinked = true;
 	}
 
 	return bUnlinked;

@@ -15,11 +15,11 @@ class ncIInputEventHandler;
 class ncTouchEvent
 {
 public:
+	ncTouchEvent() : count(0), id(0), x(0), y(0), id2(1), x2(0), y2(0) { }
+
 	int count;
 	int id, x, y;
 	int id2, x2, y2;
-
-	friend class ncAndroidInputManager;
 };
 #else
 /// Information about a mouse event
@@ -62,6 +62,8 @@ public:
 class ncKeyboardEvent
 {
 public:
+	ncKeyboardEvent() : sym(NCKEY_UNKNOWN), mod(0), unicode(0) { }
+
 	/// Key symbol code
 	ncKeySym sym;
 	/// Key modifiers mask

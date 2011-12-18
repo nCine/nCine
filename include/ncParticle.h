@@ -17,7 +17,7 @@ public:
 	/// Current particle velocity vector
 	ncVector2f m_Velocity;
 
-	ncParticle(ncSceneNode* pParent, ncTexture *pTexture) : ncSprite(pParent, pTexture), m_ulLife(0) { }
+	ncParticle(ncSceneNode* pParent, ncTexture *pTexture) : ncSprite(pParent, pTexture), m_ulLife(0), m_ulStartLife(0) { }
 	// Initialized a particle with initial life, position and velocity
 	void Init(unsigned long int ulLife, ncVector2f pos, ncVector2f vel);
 

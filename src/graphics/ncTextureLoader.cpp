@@ -21,7 +21,7 @@ ncTextureLoader::ncTextureLoader(const char *pFilename)
 	// A dot followed by at least three extension characters
 	if (!pDotChar || strlen(pDotChar) < 4)
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureLoader::ncTextureLoader - No extension for file \"%s\"", pFilename);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoader::ncTextureLoader - No extension for file \"%s\"", pFilename);
 		exit(-1);
 	}
 
@@ -45,7 +45,7 @@ ncTextureLoader::ncTextureLoader(const char *pFilename)
 	#endif
 	else
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureLoader::ncTextureLoader - Extension unknown \"%s\"", pDotChar);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoader::ncTextureLoader - Extension unknown \"%s\"", pDotChar);
 		exit(-1);
 	}
 }
@@ -74,14 +74,13 @@ ncTextureLoader::~ncTextureLoader()
 #ifndef __ANDROID__
 void ncTextureLoader::LoadSDL(const char *pFilename)
 {
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncTextureLoader::LoadSDL - Loading \"%s\"", pFilename);
+	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoader::LoadSDL - Loading \"%s\"", pFilename);
 	if (!(m_pSDLSurface = (SDL_Surface *)IMG_Load(pFilename))) {
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureLoader::LoadSDL - Cannot load \"%s\"", pFilename);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoader::LoadSDL - Cannot load \"%s\"", pFilename);
 		exit(-1);
 	}
 
 	m_iBpp = m_pSDLSurface->format->BitsPerPixel;
-	ncTextureFormat *pFormat = 0;
 	if (m_iBpp == 32)
 		m_texFormat = ncTextureFormat(GL_RGBA8);
 	else if (m_iBpp  == 24)
@@ -89,11 +88,10 @@ void ncTextureLoader::LoadSDL(const char *pFilename)
 	else if (m_iBpp == 8)
 		m_texFormat = ncTextureFormat(GL_ALPHA8);
 	else {
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureLoader::LoadSDL - Not a true color or alpha image: %d", m_iBpp);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoader::LoadSDL - Not a true color or alpha image: %d", m_iBpp);
 		exit(-1);
 	}
 
-	GLenum eFormat;
 	if (m_pSDLSurface->format->Rmask != 0x000000ff)
 		m_texFormat.BGRFormat();
 
@@ -109,7 +107,7 @@ void ncTextureLoader::ReadETC1Header(const char *pFilename)
 	m_pFile = fopen(pFilename, "rb");
 	if (!m_pFile)
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureLoader::ReadETC1Header - Cannot open the file \"%s\"", pFilename);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoader::ReadETC1Header - Cannot open the file \"%s\"", pFilename);
 		exit(-1);
 	}
 
@@ -129,7 +127,7 @@ void ncTextureLoader::ReadETC1Header(const char *pFilename)
 		m_iWidth = swappedWidth2;
 		m_iHeight = swappedHeight2;
 
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncTextureLoader::ReadETC1Header - Header found: w:%d h:%d", m_iWidth, m_iHeight);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoader::ReadETC1Header - Header found: w:%d h:%d", m_iWidth, m_iHeight);
 	}
 }
 
@@ -139,7 +137,7 @@ void ncTextureLoader::ReadDDSHeader(const char *pFilename)
 	m_pFile = fopen(pFilename, "rb");
 	if (!m_pFile)
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureLoader::ReadDDSHeader - Cannot open the file \"%s\"", pFilename);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoader::ReadDDSHeader - Cannot open the file \"%s\"", pFilename);
 		exit(-1);
 	}
 
@@ -155,14 +153,14 @@ void ncTextureLoader::ReadDDSHeader(const char *pFilename)
 		m_iWidth = header.dwWidth;
 		m_iHeight = header.dwHeight;
 
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncTextureLoader::ReadDDSHeader - Header found: w:%d h:%d", m_iWidth, m_iHeight);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoader::ReadDDSHeader - Header found: w:%d h:%d", m_iWidth, m_iHeight);
 	}
 }
 
 /// Loads a texture file holding compressed data
 void ncTextureLoader::LoadCompressed(const char *pFilename, GLenum eInternalFormat)
 {
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (char *)"ncTextureLoader::LoadCompressed - Loading \"%s\"", pFilename);
+	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoader::LoadCompressed - Loading \"%s\"", pFilename);
 	m_texFormat = ncTextureFormat(eInternalFormat);
 
 	// If the file has not been already opened by a header reader method
@@ -171,7 +169,7 @@ void ncTextureLoader::LoadCompressed(const char *pFilename, GLenum eInternalForm
 		m_pFile = fopen(pFilename, "rb");
 		if (!m_pFile)
 		{
-			ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncTextureLoader::LoadCompressed - Cannot open the file \"%s\"", pFilename);
+			ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoader::LoadCompressed - Cannot open the file \"%s\"", pFilename);
 			exit(-1);
 		}
 	}

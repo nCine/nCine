@@ -7,8 +7,6 @@
 class ncTexture;
 class ncParticleSystem;
 class ncTimer;
-class ncFont;
-class ncTextNode;
 
 /// My nCine application
 class MyEventHandler
@@ -20,10 +18,6 @@ private:
 	ncParticleSystem *m_pParticleSys;
 	ncTimer *m_pTimer;
 	unsigned long int m_ulEmitTime;
-	ncFont *m_pFont;
-	ncTextNode *m_pFpsText;
-	char m_vFPS[16];
-	unsigned long int m_ulUpdateFpsTime;
 	ncVector2f m_emitVector;
 
 public:

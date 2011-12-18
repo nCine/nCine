@@ -17,6 +17,8 @@ private:
 
 	unsigned char button;
 public:
+	ncSDLMouseEvent() : button(0) { }
+
 	inline bool isLeftButton() const { return button == LEFT_BUTTON; }
 	inline bool isMiddleButton() const { return button == MIDDLE_BUTTON; }
 	inline bool isRightButton() const { return button == RIGHT_BUTTON; }
@@ -33,6 +35,8 @@ private:
 	unsigned char buttons;
 
 public:
+	ncSDLMouseState() : buttons(0) { }
+
 	inline bool isButtonDown(unsigned char uButtonMask) const
 	{
 		return (buttons & uButtonMask);
