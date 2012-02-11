@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <android_native_app_glue.h>
 #include "ncApplication.h"
 class ncIAppEventHandler;

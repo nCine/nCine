@@ -3,6 +3,7 @@
 #include "ncServiceLocator.h"
 #include "ncArrayIndexer.h"
 #include "ncFileLogger.h"
+#include "ncALAudioDevice.h"
 #include "ncLinePlotter.h"
 #include "ncStackedBarPlotter.h"
 #include "ncFont.h"
@@ -20,7 +21,7 @@
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-bool ncApplication::m_bPaused = false;
+bool ncApplication::m_bPaused = true;
 bool ncApplication::m_bShouldQuit = false;
 ncFrameTimer *ncApplication::m_pFrameTimer = NULL;
 ncIGfxDevice *ncApplication::m_pGfxDevice = NULL;
@@ -78,6 +79,7 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 
 	ncServiceLocator::RegisterIndexer(new ncArrayIndexer());
 	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
+	ncServiceLocator::RegisterAudioDevice(new ncALAudioDevice());
 	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Init - ncApplication initialized");
 
 	m_pAppEventHandler = pCreateAppEventHandler();
@@ -87,6 +89,9 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 	// HACK: Init of the random seed
 	// In the future there could be a random generator service
 	srand(time(NULL));
+
+	// HACK: Using the pause flag as a way to know if initialization is done (Android)
+	m_bPaused = false;
 }
 
 /// The main game loop, handling events and rendering
@@ -143,6 +148,7 @@ void ncApplication::Step()
 	m_pProfilePlotter->AddValue(2, m_pTimer->Now() - uStartTime);
 //	m_pProfilePlotter->AddValue(2, 1.0f * abs(rand()%33));
 
+	ncServiceLocator::GetAudioDevice().UpdateStreams();
 	m_pGfxDevice->Update();
 	m_pAppEventHandler->OnFrameEnd();
 

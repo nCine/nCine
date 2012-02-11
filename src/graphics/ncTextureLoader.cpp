@@ -38,9 +38,21 @@ ncTextureLoader::ncTextureLoader(const char *pFilename)
 	else if (!strncmp(pDotChar, ".dds", 4))
 	{
 		ReadDDSHeader(pFilename);
-		// HACK: assuming all ATITC textures have explicit alpha
-		// There could also be interpolated or no alpha at all
-		LoadCompressed(pFilename, GL_ATC_RGBA_EXPLICIT_ALPHA_AMD);
+		GLenum eInternalFormat;
+
+		if (!strncmp((char *)&m_fourCC, "ATC ", 4))
+			eInternalFormat = GL_ATC_RGB_AMD;
+		else if (!strncmp((char *)&m_fourCC, "ATCA", 4))
+			eInternalFormat = GL_ATC_RGBA_EXPLICIT_ALPHA_AMD;
+		else if (!strncmp((char *)&m_fourCC, "ATCI", 4))
+			eInternalFormat = GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD;
+		else
+		{
+			ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoader::ncTextureLoader - Unsupported DDS compression \"%s\"", m_fourCC);
+			exit(-1);
+		}
+
+		LoadCompressed(pFilename, eInternalFormat);
 	}
 	#endif
 	else
@@ -152,8 +164,10 @@ void ncTextureLoader::ReadDDSHeader(const char *pFilename)
 		m_iHeaderSize = 128;
 		m_iWidth = header.dwWidth;
 		m_iHeight = header.dwHeight;
+		m_fourCC = header.ddspf[2];
 
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoader::ReadDDSHeader - Header found: w:%d h:%d", m_iWidth, m_iHeight);
+		ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoader::ReadDDSHeader - Header found: w:%d h:%d FourCC: %c%c%c%c",
+			m_iWidth, m_iHeight, ((char*)&m_fourCC)[0], ((char*)&m_fourCC)[1], ((char*)&m_fourCC)[2], ((char*)&m_fourCC)[3]);
 	}
 }
 

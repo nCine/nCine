@@ -1,10 +1,29 @@
 LOCAL_PATH := $(call my-dir)
 
+##################################
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := tremolo
+LOCAL_SRC_FILES := tremolo/$(TARGET_ARCH_ABI)/libtremolo.a
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/tremolo/include
+include $(PREBUILT_STATIC_LIBRARY)
+
+##################################
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := openal
+LOCAL_SRC_FILES := openal/$(TARGET_ARCH_ABI)/libopenal.so
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/openal/include
+include $(PREBUILT_SHARED_LIBRARY)
+
+##################################
+
 include $(CLEAR_VARS)
 
-INC=../../include
-SRC=../../src
-TST=../../tests
+NCINE_ROOT=../..
+INC=$(NCINE_ROOT)/include
+SRC=$(NCINE_ROOT)/src
+TST=$(NCINE_ROOT)/tests
 
 LOCAL_MODULE := ncine
 LOCAL_CFLAGS := -Werror
@@ -39,10 +58,17 @@ LOCAL_SRC_FILES := main.cpp \
 	$(SRC)/graphics/ncTextNode.cpp \
 	$(SRC)/graphics/ncRectAnimation.cpp \
 	$(SRC)/graphics/ncAnimatedSprite.cpp \
+	$(SRC)/audio/ncALAudioDevice.cpp \
+	$(SRC)/audio/ncAudioLoader.cpp \
+	$(SRC)/audio/ncAudioBuffer.cpp \
+	$(SRC)/audio/ncAudioStream.cpp \
+	$(SRC)/audio/ncAudioBufferPlayer.cpp \
+	$(SRC)/audio/ncAudioStreamPlayer.cpp \
 	$(TST)/apptest_animsprites.cpp
 
 LOCAL_LDLIBS := -lm -llog -landroid -lEGL -lGLESv1_CM
-LOCAL_STATIC_LIBRARIES := android_native_app_glue
+LOCAL_STATIC_LIBRARIES := android_native_app_glue tremolo
+LOCAL_SHARED_LIBRARIES := openal
 
 include $(BUILD_SHARED_LIBRARY)
 

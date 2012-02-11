@@ -45,6 +45,8 @@ public:
 	inline void InsertBack(T element) { operator[](m_uSize) = element; }
 	// Inserts a new element at a specified position (shifting elements around)
 	void InsertAt(unsigned int uIndex, T element);
+	// Inserts an array of elements at the end in constant time
+	void Append(const T* elements, unsigned int uAmount);
 	/// Removes an element at a specified position (shifting elements around)
 	void RemoveAt(unsigned int uIndex);
 
@@ -55,7 +57,7 @@ public:
 
 	/// Returns a pointer to the allocated memory
 	/** It's useful when holding arrays of OpenGL data */
-	inline T* Pointer() const { return m_pArray; }
+	inline T* const Pointer() const { return m_pArray; }
 };
 
 /// Sets a new capacity for the array (can be bigger or smaller than the current one)
@@ -100,6 +102,17 @@ void ncArray<T>::InsertAt(unsigned int uIndex, T element)
 	memmove(m_pArray + uIndex + 1, m_pArray + uIndex, m_uSize-uIndex);
 	m_pArray[uIndex] = element;
 	m_uSize++;
+}
+
+/// Inserts an array of elements at the end in constant time
+template <class T>
+void ncArray<T>::Append(const T* elements, unsigned int uAmount)
+{
+	if (m_uSize + uAmount > m_uCapacity)
+		SetCapacity(m_uSize + uAmount);
+
+	memcpy(m_pArray + m_uSize, elements, sizeof(T)*uAmount);
+	m_uSize += uAmount;
 }
 
 template <class T>

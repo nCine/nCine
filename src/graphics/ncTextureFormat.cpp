@@ -196,9 +196,11 @@ bool ncTextureFormat::OESCompressedFormat()
 	switch(m_eInternalFormat)
 	{
 		case GL_ETC1_RGB8_OES:
+		case GL_ATC_RGB_AMD:
 			m_eFormat = GL_RGB;
 			break;
 		case GL_ATC_RGBA_EXPLICIT_ALPHA_AMD:
+		case GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD:
 			m_eFormat = GL_RGBA;
 			break;
 		default:

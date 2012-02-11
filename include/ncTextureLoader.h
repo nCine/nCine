@@ -64,6 +64,7 @@ private:
 	int m_iBpp;
 	int m_iHeaderSize;
 	long m_lFileSize;
+	uint32_t m_fourCC;
 	ncTextureFormat m_texFormat;
 	GLubyte* m_uPixels;
 	FILE *m_pFile;

@@ -27,7 +27,8 @@ private:
 	int QSortPartition(ncArray<const ncRenderCommand *> &array, int start, int end);
 
 public:
-	ncRenderQueue() : m_uNumVertices(0), m_renderCmds(16) { }
+	ncRenderQueue()
+		: m_uNumVertices(0), m_uLastNumVertices(0), m_uLastNumCommands(0), m_renderCmds(16) { }
 	~ncRenderQueue() { }
 
 	// Adds a draw command to the queue

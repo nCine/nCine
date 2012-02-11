@@ -3,6 +3,7 @@
 
 #include "ncIIndexer.h"
 #include "ncILogger.h"
+#include "ncIAudioDevice.h"
 
 /// Provides base services to requesting classes
 class ncServiceLocator
@@ -18,12 +19,20 @@ public:
 	/// Registers a logger service provider
 	static void RegisterLogger(ncILogger* service);
 
+	/// Returns a pointer of the current audio device instance
+	static ncIAudioDevice& GetAudioDevice() { return *m_pAudioDevice; }
+	/// Registers an audio device provider
+	static void RegisterAudioDevice(ncIAudioDevice* service);
+
 private:
 	static ncIIndexer* m_pIndexerService;
 	static ncNullIndexer m_nullIndexer;
 
 	static ncILogger* m_pLoggerService;
 	static ncNullLogger m_nullLogger;
+
+	static ncIAudioDevice* m_pAudioDevice;
+	static ncNullAudioDevice m_nullAudioDevice;
 };
 
 #endif

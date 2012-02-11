@@ -4,6 +4,7 @@
 #include "ncIAppEventHandler.h"
 #include "ncIInputEventHandler.h"
 #include "ncVector2f.h"
+class ncAudioStreamPlayer;
 class ncTexture;
 class ncAnimatedSprite;
 
@@ -13,6 +14,7 @@ class MyEventHandler
 	  public ncIInputEventHandler
 {
 private:
+	ncAudioStreamPlayer *m_pAudioPlayer;
 	ncTexture *m_pTexture;
 	ncAnimatedSprite *m_pAnimSprite;
 	ncVector2f m_destVector;

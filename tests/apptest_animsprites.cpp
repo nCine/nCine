@@ -1,5 +1,6 @@
 #include "apptest_animsprites.h"
 #include "ncApplication.h"
+#include "ncAudioStreamPlayer.h"
 #include "ncTexture.h"
 #include "ncAnimatedSprite.h"
 #include "ncFont.h"
@@ -19,11 +20,14 @@ void MyEventHandler::OnInit()
 	ncSceneNode &rRootNode = ncApplication::RootNode();
 
 #ifdef __ANDROID__
+	m_pAudioPlayer = new ncAudioStreamPlayer("sdcard/ncine/music.ogg");
 	m_pTexture = new ncTexture("/sdcard/ncine/abta_playertwo.dds");
 #else
+	m_pAudioPlayer = new ncAudioStreamPlayer("sounds/music.ogg");
 	m_pTexture = new ncTexture("textures/abta_playertwo.png");
 #endif
 
+	m_pAudioPlayer->Play();
 	m_pAnimSprite = new ncAnimatedSprite(&rRootNode, m_pTexture);
 	// Up
 	ncRectAnimation *pAnimation = new ncRectAnimation(60, true, true);
@@ -161,6 +165,7 @@ void MyEventHandler::OnFrameStart()
 
 void MyEventHandler::OnShutdown()
 {
+	delete m_pAudioPlayer;
 	delete m_pAnimSprite;
 	delete m_pTexture;
 }

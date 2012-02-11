@@ -60,7 +60,7 @@ public:
 	void InsertBack(const T& element);
 	// Inserts a new element after a specified one
 	void InsertAfter(ncListNode<T> *pNode, const T& element);
-	// Removes a specified element in constant time
+	// Removes a specified element in linear time
 	void Remove(const T& element);
 };
 
@@ -114,7 +114,7 @@ void ncList<T>::InsertAfter(ncListNode<T> *pNode, const T& element)
 	pNode->m_pNext = new ncListNode<T>(element, pNode->m_pNext);
 }
 
-/// Removes a specified element in constant time
+/// Removes a specified element in linear time
 template <class T>
 void ncList<T>::Remove(const T& element)
 {
