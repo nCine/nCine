@@ -40,7 +40,7 @@ ncSprite::ncSprite(ncTexture *pTexture, int iX, int iY)
 
 ncSprite* ncSprite::FromId(unsigned int uId)
 {
-	ncObject *pObject = ncServiceLocator::GetIndexer().Object(uId);
+	ncObject *pObject = ncServiceLocator::Indexer().Object(uId);
 
 	if(pObject)
 	{
@@ -48,13 +48,13 @@ ncSprite* ncSprite::FromId(unsigned int uId)
 			return static_cast<ncSprite *>(pObject);
 		else // Cannot cast
 		{
-			ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, "ncSprite::FromId - Object of wrong type");
+			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncSprite::FromId - Object of wrong type");
 			exit(-1);
 		}
 	}
 	else // NULL
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncSprite::FromId - Object not found");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncSprite::FromId - Object not found");
 		return NULL;
 	}
 }

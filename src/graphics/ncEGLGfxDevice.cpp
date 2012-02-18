@@ -71,8 +71,9 @@ void ncEGLGfxDevice::InitDevice(struct android_app* state)
 	m_surface = eglCreateWindowSurface(m_display, config, state->window, NULL);
 	m_context = eglCreateContext(m_display, config, NULL, NULL);
 
-	if (eglMakeCurrent(m_display, m_surface, m_surface, m_context) == EGL_FALSE) {
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (char *)"ncEGLGfxDevice::Init - Unable to eglMakeCurrent");
+	if (eglMakeCurrent(m_display, m_surface, m_surface, m_context) == EGL_FALSE)
+	{
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (char *)"ncEGLGfxDevice::Init - Unable to eglMakeCurrent");
 		exit(-1);
 	}
 

@@ -17,23 +17,23 @@
 /// Log OpenGL device info
 void ncIGfxDevice::LogGLInfo()
 {
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, "ncIGfxDevice::LogGLInfo - OpenGL device info ---");
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, "Vendor: %s", glGetString(GL_VENDOR));
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, "Renderer: %s", glGetString(GL_RENDERER));
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, "OpenGL Version: %s", glGetString(GL_VERSION));
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, "ncIGfxDevice::LogGLInfo - OpenGL device info ---");
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, "Vendor: %s", glGetString(GL_VENDOR));
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, "Renderer: %s", glGetString(GL_RENDERER));
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, "OpenGL Version: %s", glGetString(GL_VERSION));
 #ifndef __ANDROID__
 	// Using OpenGL ES 1.1 at the moment
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, "GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, "GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 #endif
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, "ncIGfxDevice::LogGLInfo - OpenGL device info ---");
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, "ncIGfxDevice::LogGLInfo - OpenGL device info ---");
 }
 
 /// Log OpenGL extensions
 void ncIGfxDevice::LogGLExtensions()
 {
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, "ncIGfxDevice::LogGLExtensions - OpenGL extensions ---");
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, "Extensions: %s", glGetString(GL_EXTENSIONS));
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, "ncIGfxDevice::LogGLExtensions - OpenGL extensions ---");
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, "ncIGfxDevice::LogGLExtensions - OpenGL extensions ---");
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, "Extensions: %s", glGetString(GL_EXTENSIONS));
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, "ncIGfxDevice::LogGLExtensions - OpenGL extensions ---");
 }
 
 /// Check for an OpenGL extension

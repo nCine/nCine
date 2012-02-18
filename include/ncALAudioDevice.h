@@ -11,7 +11,7 @@ class ncALAudioDevice : public ncIAudioDevice
 {
 private:
 	/// Max number of OpenAL sources (HACK: should use a query)
-	static const unsigned int s_iMaxSources = 16;
+	static const unsigned int s_uMaxSources = 16;
 
 	/// The OpenAL device
 	ALCdevice *m_pDevice;
@@ -20,7 +20,7 @@ private:
 	/// The listener gain value (master volume)
 	ALfloat m_fGain;
 	/// The sources pool
-	ALuint m_uSources[s_iMaxSources];
+	ALuint m_uSources[s_uMaxSources];
 
 	/// A list of active stream players
 	ncList<ncAudioStreamPlayer *> m_streamPlayers;

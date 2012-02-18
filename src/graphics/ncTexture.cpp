@@ -102,13 +102,13 @@ void ncTexture::SetAlphaFromRed(ncTexture *pAlphaTex)
 		delete[] pPixels;
 	}
 	else
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncTexture::SetAlphaFromRed - Alpha texture has a different size");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncTexture::SetAlphaFromRed - Alpha texture has a different size");
 #endif
 }
 
 ncTexture* ncTexture::FromId(unsigned int uId)
 {
-	ncObject *pObject = ncServiceLocator::GetIndexer().Object(uId);
+	ncObject *pObject = ncServiceLocator::Indexer().Object(uId);
 
 	if(pObject)
 	{
@@ -116,13 +116,13 @@ ncTexture* ncTexture::FromId(unsigned int uId)
 			return static_cast<ncTexture *>(pObject);
 		else // Cannot cast
 		{
-			ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, "ncTexture::FromId - Object of wrong type");
+			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncTexture::FromId - Object of wrong type");
 	//		exit(-1);
 		}
 	}
 	else // NULL
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncTexture::FromId - Object not found");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncTexture::FromId - Object not found");
 		return NULL;
 	}
 }

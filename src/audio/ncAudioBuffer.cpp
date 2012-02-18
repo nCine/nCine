@@ -38,7 +38,7 @@ ncAudioBuffer::~ncAudioBuffer()
 
 ncAudioBuffer* ncAudioBuffer::FromId(unsigned int uId)
 {
-	ncObject *pObject = ncServiceLocator::GetIndexer().Object(uId);
+	ncObject *pObject = ncServiceLocator::Indexer().Object(uId);
 
 	if(pObject)
 	{
@@ -46,13 +46,13 @@ ncAudioBuffer* ncAudioBuffer::FromId(unsigned int uId)
 			return static_cast<ncAudioBuffer *>(pObject);
 		else // Cannot cast
 		{
-			ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, "ncAudioBuffer::FromId - Object of wrong type");
+			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncAudioBuffer::FromId - Object of wrong type");
 	//		exit(-1);
 		}
 	}
 	else // NULL
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncAudioBuffer::FromId - Object not found");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncAudioBuffer::FromId - Object not found");
 		return NULL;
 	}
 }
@@ -75,7 +75,7 @@ void ncAudioBuffer::Load(const ncAudioLoader& audioLoader)
 		eFormat = AL_FORMAT_STEREO16;
 	else
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, "ncAudioBuffer::Load - Unsupported number of channels: %d", m_iChannels);
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncAudioBuffer::Load - Unsupported number of channels: %d", m_iChannels);
 		exit(-1);
 	}
 

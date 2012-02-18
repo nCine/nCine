@@ -89,7 +89,7 @@ void ncSDLGfxDevice::Init(int iWidth, int iHeight, ncDisplayMode mode, bool bIsW
 void ncSDLGfxDevice::InitGraphics()
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncSDLGfxDevice::InitGraphics - SDL_Init(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncSDLGfxDevice::InitGraphics - SDL_Init(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
 		exit(-1);
 	}
 }
@@ -122,7 +122,7 @@ void ncSDLGfxDevice::InitDevice()
 
 	// setting screen mode, get a screen from SDL
 	if (!SDL_SetVideoMode(m_iWidth, m_iHeight, 0, lFlags)) {
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncSDLGfxDevice::InitDevice - SDL_SetVideoMode failed: %s", SDL_GetError());
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncSDLGfxDevice::InitDevice - SDL_SetVideoMode failed: %s", SDL_GetError());
 		exit(-1);
 	}
 
@@ -130,12 +130,12 @@ void ncSDLGfxDevice::InitDevice()
 	GLenum err = glewInit();
 
 	if (GLEW_OK != err) {
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncSDLGfxDevice::InitDevice - GLEW error: %s", glewGetErrorString(err));
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncSDLGfxDevice::InitDevice - GLEW error: %s", glewGetErrorString(err));
 		exit(-1);
 	}
 
 	if (!GLEW_VERSION_2_0) {
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncSDLGfxDevice::InitDevice - OpenGL 2 is not supported");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncSDLGfxDevice::InitDevice - OpenGL 2 is not supported");
 		exit(-1);
 	}
 #endif

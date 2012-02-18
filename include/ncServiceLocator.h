@@ -10,17 +10,17 @@ class ncServiceLocator
 {
 public:
 	/// Returns a pointer of the current indexer provider instance
-	static ncIIndexer& GetIndexer() { return *m_pIndexerService; }
+	static ncIIndexer& Indexer() { return *m_pIndexerService; }
 	/// Registers an indexer service provider
 	static void RegisterIndexer(ncIIndexer* service);
 
 	/// Returns a pointer of the current logger provider instance
-	static ncILogger& GetLogger() { return *m_pLoggerService; }
+	static ncILogger& Logger() { return *m_pLoggerService; }
 	/// Registers a logger service provider
 	static void RegisterLogger(ncILogger* service);
 
 	/// Returns a pointer of the current audio device instance
-	static ncIAudioDevice& GetAudioDevice() { return *m_pAudioDevice; }
+	static ncIAudioDevice& AudioDevice() { return *m_pAudioDevice; }
 	/// Registers an audio device provider
 	static void RegisterAudioDevice(ncIAudioDevice* service);
 

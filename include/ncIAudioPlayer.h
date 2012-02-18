@@ -1,6 +1,7 @@
 #ifndef CLASS_NCIAUDIOPLAYER
 #define CLASS_NCIAUDIOPLAYER
 
+#include <AL/al.h>
 #include "ncObject.h"
 
 /// Audio player interface class
@@ -55,12 +56,22 @@ public:
 	inline float Gain() const { return m_fGain; }
 	/// Sets player gain value
 	/*! It gets applied to the OpenAL source only when playing */
-	inline void SetGain(float fGain) { m_fGain = fGain; }
+	inline void SetGain(float fGain)
+	{
+		m_fGain = fGain;
+		if (m_eState == STATE_PLAYING)
+			alSourcef(m_uSource, AL_GAIN, m_fGain);
+	}
 	/// Returns player pitch value
 	inline float Pitch() const { return m_fPitch; }
 	/// Sets player pitch value
 	/*! It gets applied to the OpenAL source only when playing */
-	inline void SetPitch(float fPitch) { m_fPitch = fPitch; }
+	inline void SetPitch(float fPitch)
+	{
+		m_fPitch = fPitch;
+		if (m_eState == STATE_PLAYING)
+			alSourcef(m_uSource, AL_PITCH, m_fPitch);
+	}
 	/// Returns player position value
 	inline const float* Position() const { return m_fPosition; }
 	/// Sets player position value through vector
@@ -70,6 +81,9 @@ public:
 		m_fPosition[0] = fPosition[0];
 		m_fPosition[1] = fPosition[1];
 		m_fPosition[2] = fPosition[2];
+
+		if (m_eState == STATE_PLAYING)
+			alSourcefv(m_uSource, AL_POSITION, m_fPosition);
 	}
 	/// Sets player position value through components
 	/*! It gets applied to the OpenAL source only when playing */
@@ -78,6 +92,9 @@ public:
 		m_fPosition[0] = fX;
 		m_fPosition[1] = fY;
 		m_fPosition[2] = fZ;
+
+		if (m_eState == STATE_PLAYING)
+			alSourcefv(m_uSource, AL_POSITION, m_fPosition);
 	}
 
 	/// Queries the playing state of the player

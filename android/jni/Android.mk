@@ -38,6 +38,8 @@ LOCAL_SRC_FILES := main.cpp \
 	$(SRC)/ncProfileVariable.cpp \
 	$(SRC)/ncApplication.cpp \
 	$(SRC)/ncFont.cpp \
+	$(SRC)/ncFontGlyph.cpp \
+	$(SRC)/ncFile.cpp \
 	$(SRC)/ncAndroidInputManager.cpp \
 	$(SRC)/graphics/ncIGfxDevice.cpp \
 	$(SRC)/graphics/ncEGLGfxDevice.cpp \

@@ -12,40 +12,40 @@ ncALAudioDevice::ncALAudioDevice()
 {
 	m_pDevice = alcOpenDevice(NULL);
 	if (m_pDevice == NULL) {
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcOpenDevice failed: %x", alGetError());
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcOpenDevice failed: %x", alGetError());
 		exit(-1);
 	}
 
 	m_pContext = alcCreateContext(m_pDevice, NULL);
 	if (m_pContext == NULL) {
 		alcCloseDevice(m_pDevice);
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcCreateContext failed: %x", alGetError());
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcCreateContext failed: %x", alGetError());
 		exit(-1);
 	  }
 
 	if (!alcMakeContextCurrent(m_pContext)) {
 		alcDestroyContext(m_pContext);
 		alcCloseDevice(m_pDevice);
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcMakeContextCurrent failed: %x", alGetError());
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcMakeContextCurrent failed: %x", alGetError());
 		exit(-1);
 	  }
 
-	alGenSources(s_iMaxSources, m_uSources);
+	alGenSources(s_uMaxSources, m_uSources);
 	alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
 	alListenerf(AL_GAIN, m_fGain);
 }
 
 ncALAudioDevice::~ncALAudioDevice()
 {
-	for (int i = 0; i < s_iMaxSources; i++)
+	for (int i = 0; i < s_uMaxSources; i++)
 		alSourcei(m_uSources[i], AL_BUFFER, AL_NONE);
-	alDeleteSources(s_iMaxSources, m_uSources);
+	alDeleteSources(s_uMaxSources, m_uSources);
 
 	alcDestroyContext(m_pContext);
 
 	ALCboolean result = alcCloseDevice(m_pDevice);
 	if (!result) {
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::~ncALAudioDevice - alcCloseDevice failed: %d", alGetError());
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::~ncALAudioDevice - alcCloseDevice failed: %d", alGetError());
 		exit(-1);
 	}
 }
@@ -65,7 +65,7 @@ int ncALAudioDevice::NextAvailableSource()
 {
 	ALint iState;
 
-	for (int i = 0; i < s_iMaxSources; i++)
+	for (int i = 0; i < s_uMaxSources; i++)
 	{
 		alGetSourcei(m_uSources[i], AL_SOURCE_STATE, &iState);
 		if (iState != AL_PLAYING && iState != AL_PAUSED)

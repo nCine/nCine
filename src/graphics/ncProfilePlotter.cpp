@@ -43,7 +43,7 @@ ncPlottingVariable& ncProfilePlotter::Variable(unsigned int uIndex)
 		return *m_vVariables[uIndex];
 	else
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncProfilePlotter::Variable - Index out of range");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncProfilePlotter::Variable - Index out of range");
 		exit(-1);
 	}
 }

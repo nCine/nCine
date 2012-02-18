@@ -8,22 +8,15 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncAudioStream::ncAudioStream()
-	: m_iNextAvailALBuffer(0), m_iChannels(0), m_iFrequency(0)
-{
-	alGenBuffers(s_iNumBuffers, m_uALBuffers);
-	m_pBuffer = new char[s_iBufSize];
-}
-
 /// Constructor creating an audio stream from an audio file
 /*! Private constructor called only by ncAudioStreamPlayer */
 ncAudioStream::ncAudioStream(const char *pFilename)
-	: m_iNextAvailALBuffer(0), m_iChannels(0), m_iFrequency(0)
+	: m_iNextAvailALBuffer(0), m_iChannels(0), m_iFrequency(0),
+	  m_audioLoader(pFilename)
 {
 	alGenBuffers(s_iNumBuffers, m_uALBuffers);
 	m_pBuffer = new char[s_iBufSize];
 
-	m_audioLoader.Load(pFilename);
 	InitLoader();
 }
 
@@ -149,7 +142,7 @@ void ncAudioStream::InitLoader()
 		m_eFormat = AL_FORMAT_STEREO16;
 	else
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, "ncAudioStream::Load - Unsupported number of channels: %d", m_iChannels);
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncAudioStream::Load - Unsupported number of channels: %d", m_iChannels);
 		exit(-1);
 	}
 }

@@ -23,12 +23,12 @@ unsigned int ncStackedBarPlotter::AddVariable(unsigned int uNumValues, unsigned 
 	{
 		if (uNumValues != m_vVariables[0]->Variable()->NumValues())
 		{
-			ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, (const char *)"ncStackedBarPlotter::AddVariable - Variable not added because number of values is inconsistent");
+			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncStackedBarPlotter::AddVariable - Variable not added because number of values is inconsistent");
 			return 0; // TODO: switch to signed int and return -1?
 		}
 		if (uRejectDelay != m_vVariables[0]->Variable()->Delay())
 		{
-			ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, (const char *)"ncStackedBarPlotter::AddVariable - Variable not added because reject delay is inconsistent");
+			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncStackedBarPlotter::AddVariable - Variable not added because reject delay is inconsistent");
 			return 0; // TODO: switch to signed int and return -1?
 		}
 	}

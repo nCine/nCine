@@ -66,7 +66,7 @@ void ncArray<T>::SetCapacity(unsigned int uNewCapacity)
 {
 	if (uNewCapacity <= 0)
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::SetCapacity - Invalid capacity: %u", uNewCapacity);
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::SetCapacity - Invalid capacity: %u", uNewCapacity);
 		exit(-1);
 	}
 
@@ -91,7 +91,7 @@ void ncArray<T>::InsertAt(unsigned int uIndex, T element)
 {
 	if (uIndex < 0)
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::InsertAt - Invalid element index: %u", uIndex);
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::InsertAt - Invalid element index: %u", uIndex);
 		exit(-1);
 	}
 
@@ -120,7 +120,7 @@ void ncArray<T>::RemoveAt(unsigned int uIndex)
 {
 	if (uIndex < 0)
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::RemoveAt - Invalid element index: %u", uIndex);
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::RemoveAt - Invalid element index: %u", uIndex);
 		exit(-1);
 	}
 
@@ -135,7 +135,7 @@ const T& ncArray<T>::operator[] (const unsigned int uIndex) const
 {
 	if (uIndex > m_uSize)
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::operator[] const - Element %u out of size range!", uIndex);
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::operator[] const - Element %u out of size range!", uIndex);
 		exit(-1);
 	}
 
@@ -148,14 +148,14 @@ T& ncArray<T>::operator[] (const unsigned int uIndex)
 {
 	if (uIndex > m_uCapacity - 1)
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, (const char *)"ncArray::operator[] - Element %u out of capacity range!", uIndex);
+		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncArray::operator[] - Element %u out of capacity range!", uIndex);
 //		exit(-1);
 	}
 
 	// Avoid creating "holes" into the array
 	if (uIndex > m_uSize)
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::operator[] - Element %u out of size range!", uIndex);
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::operator[] - Element %u out of size range!", uIndex);
 		exit(-1);
 	}
 	// Adding an element at the back of the array

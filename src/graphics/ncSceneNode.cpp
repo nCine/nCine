@@ -150,7 +150,7 @@ void ncSceneNode::Visit(ncRenderQueue& rRenderQueue)
 /// Returns a pointer to the node with the specified id, if any exists
 ncSceneNode* ncSceneNode::FromId(unsigned int uId)
 {
-	ncObject *pObject = ncServiceLocator::GetIndexer().Object(uId);
+	ncObject *pObject = ncServiceLocator::Indexer().Object(uId);
 
 	if(pObject)
 	{
@@ -158,13 +158,13 @@ ncSceneNode* ncSceneNode::FromId(unsigned int uId)
 			return static_cast<ncSceneNode *>(pObject);
 		else // Cannot cast
 		{
-			ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, "ncSceneNode::FromId - Object of wrong type");
+			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncSceneNode::FromId - Object of wrong type");
 			exit(-1);
 		}
 	}
 	else // NULL
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncSceneNode::FromId - Object not found");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncSceneNode::FromId - Object not found");
 		return NULL;
 	}
 }

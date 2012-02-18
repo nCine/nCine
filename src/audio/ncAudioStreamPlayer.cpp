@@ -32,7 +32,7 @@ void ncAudioStreamPlayer::Play()
 		case STATE_INITIAL:
 		case STATE_STOPPED:
 		{
-			ALuint uSource = ncServiceLocator::GetAudioDevice().NextAvailableSource();
+			ALuint uSource = ncServiceLocator::AudioDevice().NextAvailableSource();
 			// No sources available
 			if (uSource < 0)
 				return;
@@ -45,7 +45,7 @@ void ncAudioStreamPlayer::Play()
 			alSourcePlay(m_uSource);
 			m_eState = STATE_PLAYING;
 
-			ncServiceLocator::GetAudioDevice().RegisterStreamPlayer(this);
+			ncServiceLocator::AudioDevice().RegisterStreamPlayer(this);
 		}
 			break;
 		case STATE_PLAYING:
@@ -55,7 +55,7 @@ void ncAudioStreamPlayer::Play()
 			alSourcePlay(m_uSource);
 			m_eState = STATE_PLAYING;
 
-			ncServiceLocator::GetAudioDevice().RegisterStreamPlayer(this);
+			ncServiceLocator::AudioDevice().RegisterStreamPlayer(this);
 		}
 			break;
 	}
@@ -112,7 +112,7 @@ void ncAudioStreamPlayer::UpdateStream()
 
 ncAudioStreamPlayer* ncAudioStreamPlayer::FromId(unsigned int uId)
 {
-	ncObject *pObject = ncServiceLocator::GetIndexer().Object(uId);
+	ncObject *pObject = ncServiceLocator::Indexer().Object(uId);
 
 	if(pObject)
 	{
@@ -120,13 +120,13 @@ ncAudioStreamPlayer* ncAudioStreamPlayer::FromId(unsigned int uId)
 			return static_cast<ncAudioStreamPlayer *>(pObject);
 		else // Cannot cast
 		{
-			ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, "ncAudioStreamPlayer::FromId - Object of wrong type");
+			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncAudioStreamPlayer::FromId - Object of wrong type");
 	//		exit(-1);
 		}
 	}
 	else // NULL
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncAudioStreamPlayer::FromId - Object not found");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncAudioStreamPlayer::FromId - Object not found");
 		return NULL;
 	}
 }

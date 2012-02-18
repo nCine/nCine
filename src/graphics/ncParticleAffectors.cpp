@@ -11,7 +11,7 @@ void ncColorAffector::AddColorStep(float fTime, ncColor color)
 	if (m_vColorSteps.isEmpty() || fTime > m_vColorSteps[m_vColorSteps.Size()-1]->fTime)
 		m_vColorSteps.InsertBack(new ColorStep(fTime, color));
 	else
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncColorAffector::AddColorStep - Out of order step not added");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncColorAffector::AddColorStep - Out of order step not added");
 }
 
 void ncColorAffector::Affect(ncParticle* pParticle)
@@ -44,7 +44,7 @@ void ncSizeAffector::AddSizeStep(float fTime, float fScale)
 	if (m_vSizeSteps.isEmpty() || fTime > m_vSizeSteps[m_vSizeSteps.Size()-1]->fTime)
 		m_vSizeSteps.InsertBack(new SizeStep(fTime, fScale));
 	else
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncSizeAffector::AddSizeStep - Out of order step not added");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncSizeAffector::AddSizeStep - Out of order step not added");
 }
 
 void ncSizeAffector::Affect(ncParticle* pParticle)

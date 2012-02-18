@@ -32,7 +32,6 @@ private:
 	// Initializes the class with information from the audio loader
 	void InitLoader();
 
-	ncAudioStream();
 	// Constructor creating an audio stream from an audio file
 	ncAudioStream(const char *pFilename);
 public:

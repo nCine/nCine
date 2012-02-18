@@ -1,5 +1,6 @@
 #include <cstring>
 #include "ncFont.h"
+#include "ncFile.h"
 #include "ncServiceLocator.h"
 
 ///////////////////////////////////////////////////////////
@@ -12,39 +13,9 @@ ncFont::ncFont(const char *pTexFilename, const char *pFntFilename)
 {
 	m_pTexture = new ncTexture(pTexFilename);
 
-	FILE *pFile;
-
-	pFile = fopen(pFntFilename, "r");
-	if (!pFile)
-	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncFont::ncFont - Cannot open the file \"%s\"", pFntFilename);
-		exit(-1);
-	}
-
-	ParseFNTFile(pFile);
-
-	fclose(pFile);
-}
-
-///////////////////////////////////////////////////////////
-// PUBLIC FUNCTIONS
-///////////////////////////////////////////////////////////
-
-/// Return the kerning amount for a subsequent glyph
-int ncFontGlyph::Kerning(int iSecondGlyph) const
-{
-	int iKerningAmount = 0;
-
-	for (int i = 0; i < m_vKernings.Size(); i++)
-	{
-		if (iSecondGlyph == m_vKernings[i].m_iSecondGlyph)
-		{
-			iKerningAmount = m_vKernings[i].m_iAmount;
-			break;
-		}
-	}
-
-	return iKerningAmount;
+	ncFile fileHandle(pFntFilename);
+	fileHandle.FOpen("r");
+	ParseFNTFile(fileHandle.Ptr());
 }
 
 ///////////////////////////////////////////////////////////
@@ -78,7 +49,7 @@ void ncFont::ParseFNTFile(FILE *pFile)
 			sscanf(vBuffer, "common lineHeight=%u base=%u scaleW=%u scaleH=%u", &m_uLineHeight, &m_uBase, &m_uWidth, &m_uHeight);
 			if (m_uWidth != m_pTexture->Width() || m_uHeight != m_pTexture->Height())
 			{
-				ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncFont::ParseFNTFile - FNT texture has a different size: (%u, %u)", m_uWidth, m_uHeight);
+				ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncFont::ParseFNTFile - FNT texture has a different size: (%u, %u)", m_uWidth, m_uHeight);
 				exit(-1);
 			}
 		}
@@ -101,5 +72,5 @@ void ncFont::ParseFNTFile(FILE *pFile)
 		}
 	}
 
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (const char *)"ncFont::ParseFNTFile - FNT file parsed: %u glyphs and %u kernings", m_uNumGlyphs, m_uNumKernings);
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncFont::ParseFNTFile - FNT file parsed: %u glyphs and %u kernings", m_uNumGlyphs, m_uNumKernings);
 }

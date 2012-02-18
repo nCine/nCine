@@ -24,6 +24,8 @@ set(SOURCES
 	src/ncFrameTimer.cpp
 	src/ncProfileVariable.cpp
 	src/ncFont.cpp
+	src/ncFontGlyph.cpp
+	src/ncFile.cpp
 	src/ncSDLInputManager.cpp
 	src/graphics/ncIGfxDevice.cpp
 	src/graphics/ncSDLGfxDevice.cpp

@@ -11,13 +11,13 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncFileLogger::ncFileLogger(const char *filename, eLogLevel eConsoleLevel, eLogLevel eFileLevel)
-	: m_fp(0), m_eConsoleLevel(eConsoleLevel), m_eFileLevel(eFileLevel)
+ncFileLogger::ncFileLogger(const char *pFilename, eLogLevel eConsoleLevel, eLogLevel eFileLevel)
+	: m_fileHandle(pFilename), m_eConsoleLevel(eConsoleLevel), m_eFileLevel(eFileLevel)
 {
 	if (m_eConsoleLevel < int(LOG_OFF))
 		 setbuf(stdout, NULL);
 	if (m_eFileLevel < int(LOG_OFF))
-		m_fp = fopen(filename, "a");
+		m_fileHandle.FOpen("a");
 
     // HACK: calling a method from unitialized object
 //	Write(LOG_VERBOSE, "FileLogger instantiated");
@@ -27,9 +27,6 @@ ncFileLogger::ncFileLogger(const char *filename, eLogLevel eConsoleLevel, eLogLe
 ncFileLogger::~ncFileLogger()
 {
 	Write(LOG_VERBOSE, "FileLogger destruction");
-
-	if (m_fp)
-		fclose(m_fp);
 };
 
 ///////////////////////////////////////////////////////////
@@ -62,15 +59,15 @@ void ncFileLogger::Write(eLogLevel eLevel, const char *fmt, ...)
 
 	if (m_eFileLevel < int(LOG_OFF) && int(eLevel) >= int(m_eFileLevel))
 	{
-		fprintf(m_fp, "- %s [L%i] -> ", szBuffer, int(eLevel));
+		fprintf(m_fileHandle.Ptr(), "- %s [L%i] -> ", szBuffer, int(eLevel));
 
 		va_list args;
 		va_start(args, fmt);
-		vfprintf(m_fp, fmt, args);
+		vfprintf(m_fileHandle.Ptr(), fmt, args);
 		va_end(args);
 
-		fprintf(m_fp, "\n");
-		fflush(m_fp);
+		fprintf(m_fileHandle.Ptr(), "\n");
+		fflush(m_fileHandle.Ptr());
 	}
 }
 #else
@@ -122,15 +119,15 @@ void ncFileLogger::Write(eLogLevel eLevel, const char *fmt, ...)
 
 	if (m_eFileLevel < int(LOG_OFF) && int(eLevel) >= int(m_eFileLevel))
 	{
-		fprintf(m_fp, "- %s [L%i] -> ", szBuffer, int(eLevel));
+		fprintf(m_fileHandle.Ptr(), "- %s [L%i] -> ", szBuffer, int(eLevel));
 
 		va_list args;
 		va_start(args, fmt);
-		vfprintf(m_fp, fmt, args);
+		vfprintf(m_fileHandle.Ptr(), fmt, args);
 		va_end(args);
 
-		fprintf(m_fp, "\n");
-		fflush(m_fp);
+		fprintf(m_fileHandle.Ptr(), "\n");
+		fflush(m_fileHandle.Ptr());
 	}
 }
 #endif

@@ -52,7 +52,7 @@ void ncAnimatedSprite::SetAnimation(int iAnimNum)
 
 ncAnimatedSprite* ncAnimatedSprite::FromId(unsigned int uId)
 {
-	ncObject *pObject = ncServiceLocator::GetIndexer().Object(uId);
+	ncObject *pObject = ncServiceLocator::Indexer().Object(uId);
 
 	if(pObject)
 	{
@@ -60,13 +60,13 @@ ncAnimatedSprite* ncAnimatedSprite::FromId(unsigned int uId)
 			return static_cast<ncAnimatedSprite *>(pObject);
 		else // Cannot cast
 		{
-			ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, "ncAnimatedSprite::FromId - Object of wrong type");
+			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncAnimatedSprite::FromId - Object of wrong type");
 			exit(-1);
 		}
 	}
 	else // NULL
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncAnimatedSprite::FromId - Object not found");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncAnimatedSprite::FromId - Object not found");
 		return NULL;
 	}
 }

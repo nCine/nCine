@@ -17,6 +17,14 @@ int main(int argc, char **argv)
 	int iHeight = 640;
 	bool bQuit = false;
 
+	const float fDefaultGain = 1.0f;
+	float fGain = fDefaultGain;
+	const float fDefaultPitch = 1.0f;
+	float fPitch = fDefaultPitch;
+	const float fDefaultXPos = 0.0f;
+	float fXPos = 0.0f;
+	bool bLooping = true;
+
 // ----- Init ----------------------
 	ncFrameTimer t(5, 0);
 	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
@@ -27,7 +35,7 @@ int main(int argc, char **argv)
 //	ncAudioBuffer audioBuffer("sounds/bomb.ogg");
 //	ncAudioBufferPlayer player(&audioBuffer);
 	ncAudioStreamPlayer player("sounds/bomb.ogg");
-//	player.SetLooping(true);
+	player.Play();
 
 	t.Reset();
 
@@ -51,14 +59,53 @@ int main(int argc, char **argv)
 					else if (player.isPlaying())
 						player.Pause();
 					break;
-				case SDLK_p:
+				case SDLK_a:
+					player.Play();
+					break;
+				case SDLK_s:
+					player.Stop();
+					break;
+				case SDLK_d:
 					player.Pause();
 					break;
 				case SDLK_l:
-					player.Play();
+					bLooping = !bLooping;
 					break;
-				case SDLK_RETURN:
-					player.Stop();
+				case SDLK_KP0:
+					fGain = fDefaultGain;
+					fPitch = fDefaultPitch;
+					fXPos = fDefaultXPos;
+					break;
+				case SDLK_KP7:
+					fGain -= 0.1f;
+					if (fGain < 0.0f)
+						fGain = 0.0f;
+					break;
+				case SDLK_KP8:
+					fGain = fDefaultGain;
+					break;
+				case SDLK_KP9:
+					fGain += 0.1f;
+					if (fGain > 1.0f)
+						fGain = 1.0f;
+					break;
+				case SDLK_KP4:
+					fPitch -= 0.1f;
+					break;
+				case SDLK_KP5:
+					fPitch = fDefaultPitch;
+					break;
+				case SDLK_KP6:
+					fPitch += 0.1f;
+					break;
+				case SDLK_KP1:
+					fXPos -= 0.1f;
+					break;
+				case SDLK_KP2:
+					fXPos = fDefaultXPos;
+					break;
+				case SDLK_KP3:
+					fXPos += 0.1f;
 					break;
 				default:
 					break;
@@ -70,7 +117,12 @@ int main(int argc, char **argv)
 // ----- Blitting on the screen --------
 		t.AddFrame();
 
-		ncServiceLocator::GetAudioDevice().UpdateStreams();
+		player.SetGain(fGain);
+		player.SetPitch(fPitch);
+		player.SetPosition(fXPos, 0.0f, 0.0f);
+		player.SetLooping(bLooping);
+
+		ncServiceLocator::AudioDevice().UpdateStreams();
 		gfxDevice.Clear();
 		gfxDevice.Update();
 	}

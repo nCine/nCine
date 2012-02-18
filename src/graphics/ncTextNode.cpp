@@ -125,7 +125,7 @@ void ncTextNode::Draw(ncRenderQueue& rRenderQueue)
 
 ncTextNode* ncTextNode::FromId(unsigned int uId)
 {
-	ncObject *pObject = ncServiceLocator::GetIndexer().Object(uId);
+	ncObject *pObject = ncServiceLocator::Indexer().Object(uId);
 
 	if(pObject)
 	{
@@ -133,13 +133,13 @@ ncTextNode* ncTextNode::FromId(unsigned int uId)
 			return static_cast<ncTextNode *>(pObject);
 		else // Cannot cast
 		{
-			ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, "ncTextNode::FromId - Object of wrong type");
+			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncTextNode::FromId - Object of wrong type");
 			exit(-1);
 		}
 	}
 	else // NULL
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncTextNode::FromId - Object not found");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncTextNode::FromId - Object not found");
 		return NULL;
 	}
 }

@@ -119,7 +119,7 @@ void ncParticleSystem::Draw(ncRenderQueue& rRenderQueue)
 
 ncParticleSystem* ncParticleSystem::FromId(unsigned int uId)
 {
-	ncObject *pObject = ncServiceLocator::GetIndexer().Object(uId);
+	ncObject *pObject = ncServiceLocator::Indexer().Object(uId);
 
 	if(pObject)
 	{
@@ -127,13 +127,13 @@ ncParticleSystem* ncParticleSystem::FromId(unsigned int uId)
 			return static_cast<ncParticleSystem *>(pObject);
 		else // Cannot cast
 		{
-			ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, "ncParticleSystem::FromId - Object of wrong type");
+			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncParticleSystem::FromId - Object of wrong type");
 			exit(-1);
 		}
 	}
 	else // NULL
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, "ncParticleSystem::FromId - Object not found");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncParticleSystem::FromId - Object not found");
 		return NULL;
 	}
 }

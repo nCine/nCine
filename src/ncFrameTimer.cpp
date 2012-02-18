@@ -46,7 +46,7 @@ void ncFrameTimer::AddFrame()
 	if (m_uPrintInterval != 0 && m_ulNFrames != 0 && (Total() > m_uPrintInterval * 1000))	{
 		m_fFps = float(m_ulPrintNFrames)/float(m_uPrintInterval);
 		float fTpf = (m_uPrintInterval*1000.0f)/float(m_ulPrintNFrames);
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_VERBOSE, (const char *)"ncFrameTimer::AddFrame - %lu frames in %u seconds = %f FPS (%fms per frame)",  m_ulPrintNFrames, m_uPrintInterval, m_fFps, fTpf);
+		ncServiceLocator::Logger().Write(ncILogger::LOG_VERBOSE, (const char *)"ncFrameTimer::AddFrame - %lu frames in %u seconds = %f FPS (%fms per frame)",  m_ulPrintNFrames, m_uPrintInterval, m_fFps, fTpf);
 
 		m_ulPrintNFrames = 0;
 		ncTimer::Reset();

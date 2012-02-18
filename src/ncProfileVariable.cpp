@@ -14,7 +14,7 @@ ncProfileVariable::ncProfileVariable(unsigned int uNumValues, unsigned int uReje
 		m_fValues = new float[m_uNumValues];
 	else
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncProfileVariable::ncProfileVariable - Array size should be greater than zero");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncProfileVariable::ncProfileVariable - Array size should be greater than zero");
 		exit(-1);
 	}
 }

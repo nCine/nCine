@@ -42,9 +42,9 @@ public:
 	ncObject() : m_uId(0), m_eType(BASE_TYPE)
 	{
 		memset(m_cName, 0, NC_OBJNAME_LENGTH);
-		m_uId = ncServiceLocator::GetIndexer().AddObject(this);
+		m_uId = ncServiceLocator::Indexer().AddObject(this);
 	}
-	virtual ~ncObject() { ncServiceLocator::GetIndexer().RemoveObject(m_uId); }
+	virtual ~ncObject() { ncServiceLocator::Indexer().RemoveObject(m_uId); }
 
 	/// Returns the object identification number
 	inline unsigned int Id() const { return m_uId; }

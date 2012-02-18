@@ -44,14 +44,21 @@ ncIAppEventHandler *ncApplication::m_pAppEventHandler = NULL;
 #ifdef __ANDROID__
 void ncApplication::Init(struct android_app* state, ncIAppEventHandler* (*pCreateAppEventHandler)())
 {
+	// Registering the logger as early as possible
+	ncServiceLocator::RegisterLogger(new ncFileLogger("/sdcard/ncine/log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_VERBOSE));
 	m_pGfxDevice = new ncEGLGfxDevice(state, ncDisplayMode(5, 6, 5));
 	m_pInputManager = new ncAndroidInputManager();
 #else
 void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 {
+	// Registering the logger as early as possible
+	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
 	m_pGfxDevice = new ncSDLGfxDevice(960, 640);
 	m_pInputManager = new ncSDLInputManager();
 #endif
+	ncServiceLocator::RegisterIndexer(new ncArrayIndexer());
+	ncServiceLocator::RegisterAudioDevice(new ncALAudioDevice());
+
 	m_pFrameTimer = new ncFrameTimer(5, 100);
 	m_pRootNode = new ncSceneNode();
 	m_pRenderQueue = new ncRenderQueue();
@@ -77,14 +84,11 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 	m_pTextLines = new ncTextNode(m_pRootNode, m_pFont);
 	m_pTextLines->SetPosition(0, Height());
 
-	ncServiceLocator::RegisterIndexer(new ncArrayIndexer());
-	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
-	ncServiceLocator::RegisterAudioDevice(new ncALAudioDevice());
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Init - ncApplication initialized");
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Init - ncApplication initialized");
 
 	m_pAppEventHandler = pCreateAppEventHandler();
 	m_pAppEventHandler->OnInit();
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Init - ncIAppEventHandler::OnInit() invoked");
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Init - ncIAppEventHandler::OnInit() invoked");
 
 	// HACK: Init of the random seed
 	// In the future there could be a random generator service
@@ -148,7 +152,7 @@ void ncApplication::Step()
 	m_pProfilePlotter->AddValue(2, m_pTimer->Now() - uStartTime);
 //	m_pProfilePlotter->AddValue(2, 1.0f * abs(rand()%33));
 
-	ncServiceLocator::GetAudioDevice().UpdateStreams();
+	ncServiceLocator::AudioDevice().UpdateStreams();
 	m_pGfxDevice->Update();
 	m_pAppEventHandler->OnFrameEnd();
 
@@ -167,7 +171,7 @@ void ncApplication::Step()
 void ncApplication::Shutdown()
 {
 	m_pAppEventHandler->OnShutdown();
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Shutdown - ncIAppEventHandler::OnShutdown() invoked");
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Shutdown - ncIAppEventHandler::OnShutdown() invoked");
 
 	delete m_pInputManager;
 	if (m_pAppEventHandler)
@@ -181,10 +185,10 @@ void ncApplication::Shutdown()
 	delete m_pGfxDevice;
 	delete m_pFrameTimer;
 
-	if (ncServiceLocator::GetIndexer().isEmpty() == false)
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_WARN, (const char *)"ncApplication::Shutdown - The object indexer is not empty");
+	if (ncServiceLocator::Indexer().isEmpty() == false)
+		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncApplication::Shutdown - The object indexer is not empty");
 
-	ncServiceLocator::GetLogger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Shutdown - ncApplication shutted down");
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Shutdown - ncApplication shutted down");
 }
 
 /// Sets the pause flag value

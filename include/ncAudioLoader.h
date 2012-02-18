@@ -7,10 +7,14 @@
 #include <vorbis/vorbisfile.h>
 #endif
 
+#include "ncFile.h"
+
 /// Audio loader class
 class ncAudioLoader
 {
 private:
+	/// Audio file handle
+	ncFile m_fileHandle;
 	/// Duration in seconds
 	float m_fDuration;
 	/// Number of samples
@@ -23,10 +27,8 @@ private:
 	mutable OggVorbis_File m_oggFile;
 
 	/// Sets up the loader for an Ogg Vorbis file
-	void LoadOgg(const char *pFilename);
+	void LoadOgg();
 public:
-	ncAudioLoader()
-		: m_fDuration(0.0f), m_ulNumSamples(0L), m_iChannels(0), m_iFrequency(0) { }
 	ncAudioLoader(const char *pFilename);
 	~ncAudioLoader();
 

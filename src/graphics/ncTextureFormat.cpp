@@ -29,7 +29,7 @@ ncTextureFormat::ncTextureFormat(GLenum eInternalFormat)
 
 	if (bFound == false)
 	{
-		ncServiceLocator::GetLogger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureFormat::ncTextureFormat - Unknown internal format: %d", eInternalFormat);
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureFormat::ncTextureFormat - Unknown internal format: %d", eInternalFormat);
 		exit(-1);
 	}
 }

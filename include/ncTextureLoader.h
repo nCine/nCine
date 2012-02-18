@@ -20,11 +20,14 @@
 #include <stdint.h> // for ETC1 header
 #include "ncTextureFormat.h"
 #include "ncPoint.h"
+#include "ncFile.h"
 
 /// Texture loader class
 class ncTextureLoader
 {
 private:
+	/// Texture file handle
+	ncFile m_fileHandle;
 
 	/// Structure for ETC1 magic number
 	typedef struct ETC1_magic {
@@ -67,19 +70,18 @@ private:
 	uint32_t m_fourCC;
 	ncTextureFormat m_texFormat;
 	GLubyte* m_uPixels;
-	FILE *m_pFile;
 
 #ifndef __ANDROID__
 	SDL_Surface *m_pSDLSurface;
-	void LoadSDL(const char *pFilename);
+	void LoadSDL();
 #endif
 
 	// Reads an ETC1 header and fills the corresponding structure
-	void ReadETC1Header(const char *pFilename);
+	void ReadETC1Header();
 	// Reads a DDS header and fills the corresponding structure
-	void ReadDDSHeader(const char *pFilename);
+	void ReadDDSHeader();
 	// Loads a texture file holding compressed data
-	void LoadCompressed(const char *pFilename, GLenum eInternalFormat);
+	void LoadCompressed(GLenum eInternalFormat);
 public:
 	ncTextureLoader(const char *pFilename);
 	~ncTextureLoader();
