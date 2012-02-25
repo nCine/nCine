@@ -11,7 +11,8 @@ class ncFontGlyph;
 class ncTextNode : public ncDrawableNode
 {
 public:
-	static const unsigned int MAX_LENGHT = 256;
+	/// Maximum length for a string to be rendered
+	static const unsigned int s_uMaxStringLength = 256;
 
 	enum eAlignment {
 		ALIGN_LEFT,
@@ -21,7 +22,7 @@ public:
 
 private:
 	/// The string to be rendered
-	char m_vString[MAX_LENGHT];
+	char m_vString[s_uMaxStringLength];
 	/// Dirty flag for vertices and texture coordinates
 	bool m_bDirtyDraw;
 	/// Dirty flag for boundary rectangle

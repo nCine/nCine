@@ -9,18 +9,9 @@
 
 ncSceneNode::~ncSceneNode()
 {
-	if(!m_children.isEmpty())
-	{
-		ncListNode<ncSceneNode *> *pCurrentNode = m_children.Head();
-		ncListNode<ncSceneNode *> *pNextNode = m_children.Head();
-
-		while (pCurrentNode)
-		{
-			pNextNode = pCurrentNode->Next();
-			delete pCurrentNode->Data();
-			pCurrentNode = pNextNode;
-		}
-	}
+	for(ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
+		delete(*i);
+	m_children.Clear();
 
 	if (m_pParent)
 	{
@@ -90,14 +81,11 @@ bool ncSceneNode::UnlinkChildNode(ncSceneNode *pChildNode)
 		m_children.Remove(pChildNode);
 
 		// Nephews reparenting
-		ncListNode<ncSceneNode *> *pListNode = pChildNode->m_children.Head();
-
-		while (pListNode)
+		ncList<ncSceneNode *>::Const_Iterator i = pChildNode->m_children.Begin();
+		while(i != pChildNode->m_children.End())
 		{
-			ncSceneNode *pNephew = pListNode->Data();
-			AddChildNode(pNephew);
-
-			pListNode = pListNode->Next();
+			AddChildNode(*i);
+			i++;
 		}
 
 		bUnlinked = true;
@@ -109,17 +97,10 @@ bool ncSceneNode::UnlinkChildNode(ncSceneNode *pChildNode)
 /// Called once every frame to update the node
 void ncSceneNode::Update(unsigned long int ulInterval)
 {
-	if(!m_children.isEmpty())
+	for(ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
 	{
-		ncListNode<ncSceneNode *> *pListNode = m_children.Head();
-
-		while (pListNode)
-		{
-			if ((pListNode->Data())->bShouldUpdate)
-				(pListNode->Data())->Update(ulInterval);
-
-			pListNode = pListNode->Next();
-		}
+		if ((*i)->bShouldUpdate)
+			(*i)->Update(ulInterval);
 	}
 }
 
@@ -133,18 +114,8 @@ void ncSceneNode::Visit(ncRenderQueue& rRenderQueue)
 	Transform();
 	Draw(rRenderQueue);
 
-	if (!m_children.isEmpty())
-	{
-		const ncListNode<ncSceneNode *> *pListNode = m_children.Head();
-
-		while (pListNode)
-		{
-			// List nodes contain pointers, they need deferencing for visiting
-			ncSceneNode& rChildNode = *(pListNode->Data());
-			rChildNode.Visit(rRenderQueue);
-			pListNode = pListNode->Next();
-		}
-	}
+	for(ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
+		(*i)->Visit(rRenderQueue);
 }
 
 /// Returns a pointer to the node with the specified id, if any exists

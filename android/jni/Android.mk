@@ -61,7 +61,9 @@ LOCAL_SRC_FILES := main.cpp \
 	$(SRC)/graphics/ncRectAnimation.cpp \
 	$(SRC)/graphics/ncAnimatedSprite.cpp \
 	$(SRC)/audio/ncALAudioDevice.cpp \
-	$(SRC)/audio/ncAudioLoader.cpp \
+	$(SRC)/audio/ncIAudioLoader.cpp \
+	$(SRC)/audio/ncAudioLoaderWav.cpp \
+	$(SRC)/audio/ncAudioLoaderOgg.cpp \
 	$(SRC)/audio/ncAudioBuffer.cpp \
 	$(SRC)/audio/ncAudioStream.cpp \
 	$(SRC)/audio/ncAudioBufferPlayer.cpp \

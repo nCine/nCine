@@ -1,6 +1,6 @@
 #include <cstdlib> // for exit()
 #include "ncAudioStream.h"
-#include "ncAudioLoader.h"
+#include "ncIAudioLoader.h"
 #include "ncServiceLocator.h"
 #include "ncArray.h"
 
@@ -11,17 +11,29 @@
 /// Constructor creating an audio stream from an audio file
 /*! Private constructor called only by ncAudioStreamPlayer */
 ncAudioStream::ncAudioStream(const char *pFilename)
-	: m_iNextAvailALBuffer(0), m_iChannels(0), m_iFrequency(0),
-	  m_audioLoader(pFilename)
+	: m_iNextAvailALBuffer(0), m_iFrequency(0)
 {
 	alGenBuffers(s_iNumBuffers, m_uALBuffers);
 	m_pBuffer = new char[s_iBufSize];
 
-	InitLoader();
+	m_pAudioLoader = ncIAudioLoader::CreateFromFile(pFilename);
+	m_iFrequency = m_pAudioLoader->Frequency();
+	int iChannels = m_pAudioLoader->Channels();
+
+	if (iChannels == 1)
+		m_eFormat = AL_FORMAT_MONO16;
+	else if (iChannels == 2)
+		m_eFormat = AL_FORMAT_STEREO16;
+	else
+	{
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncAudioStream::ncAudioStream - Unsupported number of channels: %d", iChannels);
+		exit(-1);
+	}
 }
 
 ncAudioStream::~ncAudioStream()
 {
+	delete m_pAudioLoader;
 	delete[] m_pBuffer;
 	alDeleteBuffers(s_iNumBuffers, m_uALBuffers);
 }
@@ -56,15 +68,15 @@ bool ncAudioStream::Enqueue(ALuint uSource, bool bLooping)
 	{
 		ALuint uCurrBuffer = m_uALBuffers[m_iNextAvailALBuffer];
 
-		long lBytes = m_audioLoader.Read(m_pBuffer, s_iBufSize);
+		long lBytes = m_pAudioLoader->Read(m_pBuffer, s_iBufSize);
 
 		// EOF reached
 		if(lBytes < s_iBufSize)
 		{
 			if (bLooping)
 			{
-				m_audioLoader.Rewind();
-				long lMoreBytes = m_audioLoader.Read(m_pBuffer+lBytes, s_iBufSize-lBytes);
+				m_pAudioLoader->Rewind();
+				long lMoreBytes = m_pAudioLoader->Read(m_pBuffer+lBytes, s_iBufSize-lBytes);
 				lBytes += lMoreBytes;
 			}
 		}
@@ -123,26 +135,5 @@ void ncAudioStream::Stop(ALuint uSource)
 		iProcessedBuffers--;
 	}
 
-	m_audioLoader.Rewind();
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-/// Initializes the class with information from the audio loader
-void ncAudioStream::InitLoader()
-{
-	m_iFrequency = m_audioLoader.Frequency();
-	m_iChannels = m_audioLoader.Channels();
-
-	if (m_iChannels == 1)
-		m_eFormat = AL_FORMAT_MONO16;
-	else if (m_iChannels == 2)
-		m_eFormat = AL_FORMAT_STEREO16;
-	else
-	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncAudioStream::Load - Unsupported number of channels: %d", m_iChannels);
-		exit(-1);
-	}
+	m_pAudioLoader->Rewind();
 }

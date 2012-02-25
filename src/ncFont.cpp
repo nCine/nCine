@@ -25,8 +25,8 @@ ncFont::ncFont(const char *pTexFilename, const char *pFntFilename)
 /// Parse an AngelCode's FNT file
 void ncFont::ParseFNTFile(FILE *pFile)
 {
-	const unsigned int MAX_LENGHT = 256;
-	char vBuffer[MAX_LENGHT];
+	const unsigned int uBufferLength = 256;
+	char vBuffer[uBufferLength];
 	int iFileLine = 0;
 
 	int iGlyphId;
@@ -37,7 +37,7 @@ void ncFont::ParseFNTFile(FILE *pFile)
 	int iSecondGlyphId;
 	int iKerningAmount;
 
-	while(fgets(vBuffer, MAX_LENGHT, pFile ) != NULL)
+	while(fgets(vBuffer, uBufferLength, pFile ) != NULL)
 	{
 		iFileLine++;
 

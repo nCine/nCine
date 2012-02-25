@@ -4,7 +4,6 @@
 #include "ncSDLGfxDevice.h"
 
 #include "ncALAudioDevice.h"
-#include "ncAudioLoader.h"
 #include "ncAudioBuffer.h"
 #include "ncAudioBufferPlayer.h"
 #include "ncAudioStream.h"
@@ -32,7 +31,7 @@ int main(int argc, char **argv)
 	SDL_WM_SetCaption("Test", NULL);
 
 	ncServiceLocator::RegisterAudioDevice(new ncALAudioDevice());
-//	ncAudioBuffer audioBuffer("sounds/bomb.ogg");
+//	ncAudioBuffer audioBuffer("sounds/bomb.wav");
 //	ncAudioBufferPlayer player(&audioBuffer);
 	ncAudioStreamPlayer player("sounds/bomb.ogg");
 	player.Play();

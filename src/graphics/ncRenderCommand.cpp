@@ -26,10 +26,10 @@ void ncRenderTransformation::Apply() const
 /// Draws the geometry
 void ncRenderGeometry::Draw() const
 {
-	if (m_fColors)
+	if (m_ubColors)
 	{
 		glEnableClientState(GL_COLOR_ARRAY);
-		glColorPointer(4, GL_FLOAT, 0, m_fColors);
+		glColorPointer(4, GL_UNSIGNED_BYTE, 0, m_ubColors);
 	}
 
 	if (m_fTexCoords)
@@ -48,7 +48,7 @@ void ncRenderGeometry::Draw() const
 		glDisableClientState(GL_VERTEX_ARRAY);
 	if (m_fTexCoords)
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	if (m_fColors)
+	if (m_ubColors)
 		glDisableClientState(GL_COLOR_ARRAY);
 }
 

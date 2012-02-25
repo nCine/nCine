@@ -17,7 +17,7 @@ ncFileLogger::ncFileLogger(const char *pFilename, eLogLevel eConsoleLevel, eLogL
 	if (m_eConsoleLevel < int(LOG_OFF))
 		 setbuf(stdout, NULL);
 	if (m_eFileLevel < int(LOG_OFF))
-		m_fileHandle.FOpen("a");
+		m_fileHandle.FOpen("w");
 
     // HACK: calling a method from unitialized object
 //	Write(LOG_VERBOSE, "FileLogger instantiated");

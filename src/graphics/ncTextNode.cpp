@@ -12,7 +12,7 @@ ncTextNode::ncTextNode(ncSceneNode* pParent, ncFont* pFont)
 {
 	m_eType = TEXT_TYPE;
 	SetPriority(ncDrawableNode::HUD_PRIORITY);
-	memset(m_vString, 0, MAX_LENGHT);
+	memset(m_vString, 0, s_uMaxStringLength);
 }
 
 ///////////////////////////////////////////////////////////
@@ -61,9 +61,11 @@ void ncTextNode::SetAlignment(eAlignment alignment)
 void ncTextNode::SetString(const char *pString)
 {
 	// Setting the dirty flag and updating the string only if different
-	if (strncmp(m_vString, pString, MAX_LENGHT))
+	if (strncmp(m_vString, pString, s_uMaxStringLength))
 	{
-		strncpy(m_vString, pString, MAX_LENGHT);
+		strncpy(m_vString, pString, s_uMaxStringLength);
+		// Preventing unterminated string by forcing termination
+		m_vString[s_uMaxStringLength-1] = '\0';
 		m_bDirtyDraw = true;
 		m_bDirtyBoundaries = true;
 	}
@@ -94,7 +96,7 @@ void ncTextNode::Draw(ncRenderQueue& rRenderQueue)
 		unsigned int uCurrentLine = 0;
 		m_fXAdvance = CalculateAlignment(uCurrentLine);
 		m_fYAdvance = 0.0f;
-		for (int i = 0; i < strnlen(m_vString, MAX_LENGHT); i++)
+		for (int i = 0; i < strlen(m_vString); i++)
 		{	
 			if (m_vString[i] == '\n')
 			{
@@ -111,7 +113,7 @@ void ncTextNode::Draw(ncRenderQueue& rRenderQueue)
 					if (m_bWithKerning)
 					{
 						// font kerning
-						if (i < strnlen(m_vString, MAX_LENGHT) - 1)
+						if (i < strlen(m_vString) - 1)
 							m_fXAdvance += pGlyph->Kerning(int(m_vString[i+1])) * m_fScaleFactor;
 					}
 				}
@@ -157,7 +159,7 @@ void ncTextNode::CalculateBoundaries() const
 		float fXAdvanceMax = 0.0f; // longest line
 		m_fXAdvance = 0.0f;
 		m_fYAdvance = 0.0f;
-		for (int i = 0; i < strnlen(m_vString, MAX_LENGHT); i++)
+		for (int i = 0; i < strlen(m_vString); i++)
 		{
 			if (m_vString[i] == '\n')
 			{
@@ -176,7 +178,7 @@ void ncTextNode::CalculateBoundaries() const
 					if (m_bWithKerning)
 					{
 						// font kerning
-						if (i < strnlen(m_vString, MAX_LENGHT) - 1)
+						if (i < strlen(m_vString) - 1)
 							m_fXAdvance += pGlyph->Kerning(int(m_vString[i+1])) * m_fScaleFactor;
 					}
 				}

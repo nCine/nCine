@@ -40,24 +40,17 @@ void ncSpriteBatchNode::Draw(ncRenderQueue& rRenderQueue)
 	m_vColors.Clear();
 
 	// TODO: only the first level of children gets accounted
-	if (!m_children.isEmpty())
+	ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin();
+	while(i != m_children.End())
 	{
-		const ncListNode<ncSceneNode *> *pListNode = m_children.Head();
-
-		while (pListNode)
+		if ((*i)->Type() == ncSprite::sType())
 		{
-			// List nodes contain pointers, they need deferencing for visiting
-			ncSceneNode& rChildNode = *(pListNode->Data());
+			ncSprite *pSprite = static_cast<ncSprite *>((*i));
 
-			if (rChildNode.Type() == ncSprite::sType())
-			{
-				ncSprite& rSprite = static_cast<ncSprite &>(rChildNode);
-
-				if (rSprite.bShouldDraw && rSprite.Texture()->GLId() == m_pTexture->GLId())
-					ProcessSprite(rSprite);
-			}
-			pListNode = pListNode->Next();
+			if (pSprite->bShouldDraw && pSprite->Texture()->GLId() == m_pTexture->GLId())
+				ProcessSprite(*pSprite);
 		}
+		i++;
 	}
 
 	ncDrawableNode::Draw(rRenderQueue);
@@ -145,20 +138,13 @@ void ncSpriteBatchNode::ProcessSprite(ncSprite& rSprite)
 	m_vTexCoords.InsertBack(leftCoord);		m_vTexCoords.InsertBack(topCoord);
 
 
-	ncColor color = rSprite.Color();
-	m_vColors.InsertBack(color.fR());	m_vColors.InsertBack(color.fG());
-	m_vColors.InsertBack(color.fB());	m_vColors.InsertBack(color.fA());
-	m_vColors.InsertBack(color.fR());	m_vColors.InsertBack(color.fG());
-	m_vColors.InsertBack(color.fB());	m_vColors.InsertBack(color.fA());
-	m_vColors.InsertBack(color.fR());	m_vColors.InsertBack(color.fG());
-	m_vColors.InsertBack(color.fB());	m_vColors.InsertBack(color.fA());
+	m_vColors.Append(rSprite.Color().Vector(), 4);
+	m_vColors.Append(rSprite.Color().Vector(), 4);
+	m_vColors.Append(rSprite.Color().Vector(), 4);
 
-	m_vColors.InsertBack(color.fR());	m_vColors.InsertBack(color.fG());
-	m_vColors.InsertBack(color.fB());	m_vColors.InsertBack(color.fA());
-	m_vColors.InsertBack(color.fR());	m_vColors.InsertBack(color.fG());
-	m_vColors.InsertBack(color.fB());	m_vColors.InsertBack(color.fA());
-	m_vColors.InsertBack(color.fR());	m_vColors.InsertBack(color.fG());
-	m_vColors.InsertBack(color.fB());	m_vColors.InsertBack(color.fA());
+	m_vColors.Append(rSprite.Color().Vector(), 4);
+	m_vColors.Append(rSprite.Color().Vector(), 4);
+	m_vColors.Append(rSprite.Color().Vector(), 4);
 }
 
 void ncSpriteBatchNode::UpdateRenderCommand()

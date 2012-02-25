@@ -119,10 +119,8 @@ void ncTextureLoader::ReadETC1Header()
 	{
 		fread(&header, 8, 1, m_fileHandle.Ptr());
 		m_iHeaderSize = 16;
-		uint16_t swappedWidth2 = (header.uWidth2 >> 8) | (header.uWidth2 << 8); // HACK: Big to little endian
-		uint16_t swappedHeight2 = (header.uHeight2 >> 8) | (header.uHeight2 << 8); // HACK: Big to little endian
-		m_iWidth = swappedWidth2;
-		m_iHeight = swappedHeight2;
+		m_iWidth = ncFile::Int16FromBE(header.uWidth2);
+		m_iHeight = ncFile::Int16FromBE(header.uHeight2);
 
 		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoader::ReadETC1Header - Header found: w:%d h:%d", m_iWidth, m_iHeight);
 	}

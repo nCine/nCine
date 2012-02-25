@@ -66,7 +66,7 @@ void ncProfilePlotter::SetBackgroundVertices()
 void ncProfilePlotter::UpdateRenderCommand()
 {
 	m_renderCmd.Material().SetTextureGLId(0);
-	m_renderCmd.Material().SetColor(m_backgroundColor.fR(), m_backgroundColor.fG(), m_backgroundColor.fB(), m_backgroundColor.fA());
+	m_renderCmd.Material().SetColor(m_backgroundColor);
 	m_renderCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
 	SetBackgroundVertices();
 	m_renderCmd.Geometry().SetData(GL_TRIANGLE_STRIP, 0, 4, m_fBackgroundVertices, NULL, NULL);

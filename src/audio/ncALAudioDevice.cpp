@@ -82,24 +82,15 @@ void ncALAudioDevice::RegisterStreamPlayer(ncAudioStreamPlayer *pStreamPlayer)
 
 void ncALAudioDevice::UpdateStreams()
 {
-	if(!m_streamPlayers.isEmpty())
+	ncList<ncAudioStreamPlayer *>::Const_Iterator i = m_streamPlayers.Begin();
+	while(i != m_streamPlayers.End())
 	{
-		ncListNode<ncAudioStreamPlayer *> *pListNode = m_streamPlayers.Head();
-
-		while (pListNode)
+		if ((*i)->isPlaying())
 		{
-			ncAudioStreamPlayer *pStreamPlayer = pListNode->Data();
-			// Updating next before a potential removal
-			pListNode = pListNode->Next();
-
-			if (pStreamPlayer->isPlaying())
-				pStreamPlayer->UpdateStream();
-			else
-			{
-				// HACK: Linear search, not efficient
-				// TODO: predicate class as ncList::Remove() argument
-				m_streamPlayers.Remove(pStreamPlayer);
-			}
+			(*i)->UpdateStream();
+			i++;
 		}
+		else
+			m_streamPlayers.Remove(i++);
 	}
 }

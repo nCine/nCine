@@ -31,6 +31,24 @@ public:
 	ncRenderMaterial(GLuint uTextureGLId) : m_uTextureGLId(uTextureGLId) { }
 	ncRenderMaterial() : m_uTextureGLId(0) { }
 
+	/// Sets the material color
+	void SetColor(const ncColor &rColor)
+	{
+		m_color = rColor;
+	}
+
+	/// Sets the material color in unsigned bytes components
+	void SetColor(GLubyte ubR, GLubyte ubG, GLubyte ubB, GLubyte ubA)
+	{
+		m_color.Set(ubR, ubG, ubB, ubA);
+	}
+
+	/// Sets the material color through an array
+	void SetColor(GLubyte ubColor[4])
+	{
+		m_color.Setv(ubColor);
+	}
+
 	/// Sets the material color in float components
 	void SetColor(GLfloat fR, GLfloat fG, GLfloat fB, GLfloat fA)
 	{
@@ -96,31 +114,31 @@ protected:
 	GLsizei m_iNumVertices;
 	GLfloat *m_fVertices;
 	GLfloat *m_fTexCoords;
-	GLfloat *m_fColors;
+	GLubyte *m_ubColors;
 
 public:
 	ncRenderGeometry(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords)
 		: m_eDrawType(eDrawType),
 		  m_iFirstVertex(iFirstVertex), m_iNumVertices(iNumVertices),
-		  m_fVertices(fVertices), m_fTexCoords(fTexCoords), m_fColors(NULL) { }
+		  m_fVertices(fVertices), m_fTexCoords(fTexCoords), m_ubColors(NULL) { }
 	ncRenderGeometry(GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords)
 		: m_eDrawType(GL_TRIANGLES),
 		  m_iFirstVertex(0), m_iNumVertices(iNumVertices),
-		  m_fVertices(fVertices), m_fTexCoords(fTexCoords), m_fColors(NULL) { }
+		  m_fVertices(fVertices), m_fTexCoords(fTexCoords), m_ubColors(NULL) { }
 	ncRenderGeometry()
 		: m_eDrawType(GL_TRIANGLES),
 		  m_iFirstVertex(0), m_iNumVertices(0),
-		  m_fVertices(NULL), m_fTexCoords(NULL), m_fColors(NULL) { }
+		  m_fVertices(NULL), m_fTexCoords(NULL), m_ubColors(NULL) { }
 
 	/// Sets the geometric data
-	void SetData(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords, GLfloat *fColors)
+	void SetData(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords, GLubyte *ubColors)
 	{
 		m_eDrawType = eDrawType;
 		m_iFirstVertex = iFirstVertex;
 		m_iNumVertices = iNumVertices;
 		m_fVertices = fVertices;
 		m_fTexCoords = fTexCoords;
-		m_fColors = fColors;
+		m_ubColors = ubColors;
 	}
 
 	/// Returns the drawing type (GL_TRIANGLE, GL_LINES, ...)
@@ -134,7 +152,7 @@ public:
 	/// Returns the pointer to texture coordinates data
 	inline GLfloat* TexCoordsPointer() const { return m_fTexCoords; }
 	/// Return the pointer to colors data
-	inline GLfloat* ColorPointer() const { return m_fColors; }
+	inline GLubyte* ColorPointer() const { return m_ubColors; }
 
 	// Draws the geometry
 	void Draw() const;

@@ -3,7 +3,7 @@
 
 #include <AL/al.h>
 #include "ncObject.h"
-#include "ncAudioLoader.h"
+class ncIAudioLoader;
 
 /// A class representing an OpenAL buffer
 /*! It is a ncObject because a buffer can be shared by more than one ncAudioBufferPlayer  */
@@ -18,7 +18,7 @@ private:
 	int m_iFrequency;
 
 	// Loads audio samples based on information from the audio loader
-	void Load(const ncAudioLoader &audioLoader);
+	void Load(const ncIAudioLoader *pAudioLoader);
 public:
 	ncAudioBuffer();
 	// A constructor creating a buffer from a file

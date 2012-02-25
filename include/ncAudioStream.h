@@ -2,7 +2,7 @@
 #define CLASS_NCAUDIOSTREAM
 
 #include <AL/al.h>
-#include "ncAudioLoader.h"
+#include "ncIAudioLoader.h"
 
 /// Audio stream class
 class ncAudioStream
@@ -20,17 +20,12 @@ private:
 	/// Memory buffer to feed OpenAL ones
 	char *m_pBuffer;
 
-	/// Number of channels
-	int m_iChannels;
 	/// Samples frequency
 	int m_iFrequency;
-	/// OpenAL format enumaration
+	/// OpenAL channel format enumeration
 	ALenum m_eFormat;
 	/// The associated loader to continuosly stream decoded data
-	ncAudioLoader m_audioLoader;
-
-	// Initializes the class with information from the audio loader
-	void InitLoader();
+	ncIAudioLoader *m_pAudioLoader;
 
 	// Constructor creating an audio stream from an audio file
 	ncAudioStream(const char *pFilename);
@@ -42,8 +37,6 @@ public:
 	// Unqueues any left buffer and rewinds the loader
 	void Stop(ALuint uSource);
 
-	/// Returns number of audio channels
-	inline int Channels() const { return m_iChannels; }
 	/// Returns samples frequency
 	inline int Frequency() const { return m_iFrequency; }
 

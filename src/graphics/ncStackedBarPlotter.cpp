@@ -122,7 +122,7 @@ void ncStackedBarPlotter::UpdateAllVertices(int x, int y, int w, int h)
 void ncStackedBarVariable::UpdateRenderCommand()
 {
     m_valuesCmd.Material().SetTextureGLId(0);
-    m_valuesCmd.Material().SetColor(m_graphColor.fR(), m_graphColor.fG(), m_graphColor.fB(), m_graphColor.fA());
+	m_valuesCmd.Material().SetColor(m_graphColor);
 //	m_valuesCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
     m_valuesCmd.Geometry().SetData(GL_TRIANGLES, 2, m_variable.NumValues()*6, m_fVertices, NULL, NULL);
     m_valuesCmd.CalculateSortKey();
@@ -131,7 +131,7 @@ void ncStackedBarVariable::UpdateRenderCommand()
 void ncStackedBarVariable::UpdateMeanRenderCommand()
 {
 	m_meanCmd.Material().SetTextureGLId(0);
-	m_meanCmd.Material().SetColor(m_meanColor.fR(), m_meanColor.fG(), m_meanColor.fB(), m_meanColor.fA());
+	m_meanCmd.Material().SetColor(m_meanColor);
 //	m_meanCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
 	m_meanCmd.Geometry().SetData(GL_LINES, 0, 2, m_fVertices, NULL, NULL);
 	m_meanCmd.CalculateSortKey();

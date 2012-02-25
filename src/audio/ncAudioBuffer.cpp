@@ -1,6 +1,6 @@
 #include <cstdlib> // for exit()
 #include "ncAudioBuffer.h"
-#include "ncAudioLoader.h"
+#include "ncIAudioLoader.h"
 #include "ncServiceLocator.h"
 #include "ncArray.h"
 
@@ -23,8 +23,9 @@ ncAudioBuffer::ncAudioBuffer(const char *pFilename)
 	alGenBuffers(1, &m_uALId);
 	SetName(pFilename);
 
-	ncAudioLoader audioLoader(pFilename);
-	Load(audioLoader);
+	ncIAudioLoader* pAudioLoader = ncIAudioLoader::CreateFromFile(pFilename);
+	Load(pAudioLoader);
+	delete pAudioLoader;
 }
 
 ncAudioBuffer::~ncAudioBuffer()
@@ -62,12 +63,12 @@ ncAudioBuffer* ncAudioBuffer::FromId(unsigned int uId)
 ///////////////////////////////////////////////////////////
 
 /// Loads audio samples based on information from the audio loader
-void ncAudioBuffer::Load(const ncAudioLoader& audioLoader)
+void ncAudioBuffer::Load(const ncIAudioLoader *pAudioLoader)
 {
 	char *pBuffer;
 	ALenum eFormat;
-	m_iFrequency = audioLoader.Frequency();
-	m_iChannels = audioLoader.Channels();
+	m_iFrequency = pAudioLoader->Frequency();
+	m_iChannels = pAudioLoader->Channels();
 
 	if (m_iChannels == 1)
 		eFormat = AL_FORMAT_MONO16;
@@ -80,10 +81,10 @@ void ncAudioBuffer::Load(const ncAudioLoader& audioLoader)
 	}
 
 	// Buffer size calculated as samples * channels * 16bit
-	int iBufSize = audioLoader.NumSamples() * m_iChannels * 2;
+	int iBufSize = pAudioLoader->BufferSize();
 	pBuffer = new char[iBufSize];
 
-	audioLoader.Read(pBuffer, iBufSize);
+	pAudioLoader->Read(pBuffer, iBufSize);
 	// On iOS alBufferDataStatic could be used instead
 	alBufferData(m_uALId, eFormat, pBuffer, iBufSize, m_iFrequency);
 

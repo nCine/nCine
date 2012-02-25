@@ -19,7 +19,7 @@ private:
 	/// The array of texture coordinates for every sprite in the batch
 	ncArray<float> m_vTexCoords;
 	/// The array of colors for every sprite in the batch
-	ncArray<float> m_vColors;
+	ncArray<unsigned char> m_vColors;
 	/// Fill the batch draw command with data from a sprite
 	void ProcessSprite(ncSprite& rSprite);
 

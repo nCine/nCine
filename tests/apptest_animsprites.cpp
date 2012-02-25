@@ -27,6 +27,7 @@ void MyEventHandler::OnInit()
 	m_pTexture = new ncTexture("textures/abta_playertwo.png");
 #endif
 
+	m_pAudioPlayer->SetLooping(true);
 	m_pAudioPlayer->Play();
 	m_pAnimSprite = new ncAnimatedSprite(&rRootNode, m_pTexture);
 	// Up
