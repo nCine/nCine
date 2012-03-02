@@ -3,6 +3,7 @@
 #include "ncAudioLoaderWav.h"
 #include "ncAudioLoaderOgg.h"
 #include "ncServiceLocator.h"
+#include "ncStandardFile.h"
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -11,11 +12,11 @@
 /// Returns the proper audio loader according to the file extension
 ncIAudioLoader* ncIAudioLoader::CreateFromFile(const char *pFilename)
 {
-	ncFile fileHandle(pFilename);
+	ncStandardFile fileHandle(pFilename);
 
-	if (fileHandle.IsExtension("wav"))
+	if (fileHandle.HasExtension("wav"))
 		return new ncAudioLoaderWav(pFilename);
-	else if (fileHandle.IsExtension("ogg"))
+	else if (fileHandle.HasExtension("ogg"))
 		return new ncAudioLoaderOgg(pFilename);
 	else
 	{

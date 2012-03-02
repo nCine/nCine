@@ -1,14 +1,14 @@
 #ifndef CLASS_NCIAUDIOLOADER
 #define CLASS_NCIAUDIOLOADER
 
-#include "ncFile.h"
+#include "ncIFile.h"
 
 /// Audio loader class
 class ncIAudioLoader
 {
 protected:
 	/// Audio file handle
-	ncFile m_fileHandle;
+	ncIFile *m_pFileHandle;
 
 	/// Number of bytes per sample
 	int m_iBytesPerSample;
@@ -23,13 +23,20 @@ protected:
 	float m_fDuration;
 
 	ncIAudioLoader(const char *pFilename)
-		: m_fileHandle(pFilename), m_iBytesPerSample(0), m_iChannels(0), m_iFrequency(0), m_ulNumSamples(0L), m_fDuration(0.0f) { }
+		: m_pFileHandle(NULL), m_iBytesPerSample(0), m_iChannels(0), m_iFrequency(0), m_ulNumSamples(0L), m_fDuration(0.0f)
+	{
+		m_pFileHandle = ncIFile::CreateFileHandle(pFilename);
+	}
 
 	/// Load the audio parameters from file
 	virtual void Init() = 0;
 
 public:
-	virtual ~ncIAudioLoader() { }
+	virtual ~ncIAudioLoader()
+	{
+		if (m_pFileHandle)
+			delete m_pFileHandle;
+	}
 
 	/// Decodes audio data in a specified buffer
 	/*! \param pBuffer Buffer pointer

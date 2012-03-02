@@ -20,14 +20,14 @@
 #include <stdint.h> // for ETC1 header
 #include "ncTextureFormat.h"
 #include "ncPoint.h"
-#include "ncFile.h"
+#include "ncIFile.h"
 
 /// Texture loader class
 class ncTextureLoader
 {
 private:
 	/// Texture file handle
-	ncFile m_fileHandle;
+	ncIFile *m_pFileHandle;
 
 	/// Structure for ETC1 magic number
 	typedef struct ETC1_magic {

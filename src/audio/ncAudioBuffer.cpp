@@ -34,31 +34,6 @@ ncAudioBuffer::~ncAudioBuffer()
 }
 
 ///////////////////////////////////////////////////////////
-// PUBLIC FUNCTIONS
-///////////////////////////////////////////////////////////
-
-ncAudioBuffer* ncAudioBuffer::FromId(unsigned int uId)
-{
-	ncObject *pObject = ncServiceLocator::Indexer().Object(uId);
-
-	if(pObject)
-	{
-		if (pObject->Type() == sType())
-			return static_cast<ncAudioBuffer *>(pObject);
-		else // Cannot cast
-		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncAudioBuffer::FromId - Object of wrong type");
-	//		exit(-1);
-		}
-	}
-	else // NULL
-	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncAudioBuffer::FromId - Object not found");
-		return NULL;
-	}
-}
-
-///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 

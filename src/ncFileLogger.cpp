@@ -12,12 +12,21 @@
 ///////////////////////////////////////////////////////////
 
 ncFileLogger::ncFileLogger(const char *pFilename, eLogLevel eConsoleLevel, eLogLevel eFileLevel)
-	: m_fileHandle(pFilename), m_eConsoleLevel(eConsoleLevel), m_eFileLevel(eFileLevel)
+	: m_pFileHandle(NULL), m_eConsoleLevel(eConsoleLevel), m_eFileLevel(eFileLevel)
 {
+	m_pFileHandle = ncIFile::CreateFileHandle(pFilename);
+
+	if (m_eFileLevel < int(LOG_OFF))
+		m_pFileHandle->Open(ncIFile::MODE_WRITE);
+	if (m_pFileHandle->IsOpened() == false && m_eConsoleLevel < m_eFileLevel)
+	{
+		// Promoting console level logging to file level logging
+		m_eConsoleLevel = m_eFileLevel;
+	}
+
 	if (m_eConsoleLevel < int(LOG_OFF))
 		 setbuf(stdout, NULL);
-	if (m_eFileLevel < int(LOG_OFF))
-		m_fileHandle.FOpen("w");
+
 
     // HACK: calling a method from unitialized object
 //	Write(LOG_VERBOSE, "FileLogger instantiated");
@@ -27,7 +36,9 @@ ncFileLogger::ncFileLogger(const char *pFilename, eLogLevel eConsoleLevel, eLogL
 ncFileLogger::~ncFileLogger()
 {
 	Write(LOG_VERBOSE, "FileLogger destruction");
-};
+	if (m_pFileHandle)
+		delete m_pFileHandle;
+}
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -59,15 +70,15 @@ void ncFileLogger::Write(eLogLevel eLevel, const char *fmt, ...)
 
 	if (m_eFileLevel < int(LOG_OFF) && int(eLevel) >= int(m_eFileLevel))
 	{
-		fprintf(m_fileHandle.Ptr(), "- %s [L%i] -> ", szBuffer, int(eLevel));
+		fprintf(m_pFileHandle->Ptr(), "- %s [L%i] -> ", szBuffer, int(eLevel));
 
 		va_list args;
 		va_start(args, fmt);
-		vfprintf(m_fileHandle.Ptr(), fmt, args);
+		vfprintf(m_pFileHandle->Ptr(), fmt, args);
 		va_end(args);
 
-		fprintf(m_fileHandle.Ptr(), "\n");
-		fflush(m_fileHandle.Ptr());
+		fprintf(m_pFileHandle->Ptr(), "\n");
+		fflush(m_pFileHandle->Ptr());
 	}
 }
 #else
@@ -119,15 +130,15 @@ void ncFileLogger::Write(eLogLevel eLevel, const char *fmt, ...)
 
 	if (m_eFileLevel < int(LOG_OFF) && int(eLevel) >= int(m_eFileLevel))
 	{
-		fprintf(m_fileHandle.Ptr(), "- %s [L%i] -> ", szBuffer, int(eLevel));
+		fprintf(m_pFileHandle->Ptr(), "- %s [L%i] -> ", szBuffer, int(eLevel));
 
 		va_list args;
 		va_start(args, fmt);
-		vfprintf(m_fileHandle.Ptr(), fmt, args);
+		vfprintf(m_pFileHandle->Ptr(), fmt, args);
 		va_end(args);
 
-		fprintf(m_fileHandle.Ptr(), "\n");
-		fflush(m_fileHandle.Ptr());
+		fprintf(m_pFileHandle->Ptr(), "\n");
+		fflush(m_pFileHandle->Ptr());
 	}
 }
 #endif

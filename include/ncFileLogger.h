@@ -3,13 +3,13 @@
 
 #include <cstdio>
 #include "ncILogger.h"
-#include "ncFile.h"
+#include "ncIFile.h"
 
 /// The usual console and file logger
 class ncFileLogger : public ncILogger
 {
 private:
-	ncFile m_fileHandle;
+	ncIFile *m_pFileHandle;
 	eLogLevel m_eConsoleLevel;
 	eLogLevel m_eFileLevel;
 

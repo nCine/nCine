@@ -12,6 +12,7 @@
 #ifdef __ANDROID__
 	#include "ncEGLGfxDevice.h"
 	#include "ncAndroidInputManager.h"
+	#include "ncAssetFile.h"
 #else
 	#include "ncSDLGfxDevice.h"
 	#include "ncSDLInputManager.h"
@@ -48,6 +49,7 @@ void ncApplication::Init(struct android_app* state, ncIAppEventHandler* (*pCreat
 	ncServiceLocator::RegisterLogger(new ncFileLogger("/sdcard/ncine/log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_VERBOSE));
 	m_pGfxDevice = new ncEGLGfxDevice(state, ncDisplayMode(5, 6, 5));
 	m_pInputManager = new ncAndroidInputManager();
+	ncAssetFile::InitAssetManager(state);
 #else
 void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 {

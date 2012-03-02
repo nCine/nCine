@@ -10,7 +10,7 @@
 class ncALAudioDevice : public ncIAudioDevice
 {
 private:
-	/// Max number of OpenAL sources (HACK: should use a query)
+	/// Maximum number of OpenAL sources (HACK: should use a query)
 	static const unsigned int s_uMaxSources = 16;
 
 	/// The OpenAL device

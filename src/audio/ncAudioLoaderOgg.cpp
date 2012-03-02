@@ -3,6 +3,36 @@
 #include "ncAudioLoaderOgg.h"
 #include "ncServiceLocator.h"
 
+#ifdef __ANDROID__
+#include "ncAssetFile.h" // for ncAssetFile::sType()
+
+size_t asset_read(void *ptr, size_t size, size_t nmemb, void *datasource)
+{
+	ncAssetFile *pAssetFile = static_cast<ncAssetFile *>(datasource);
+	return pAssetFile->Read(ptr, size*nmemb);
+}
+
+int asset_seek(void *datasource, ogg_int64_t offset, int whence)
+{
+	ncAssetFile *pAssetFile = static_cast<ncAssetFile *>(datasource);
+	return pAssetFile->Seek(offset, whence);
+}
+
+int asset_close(void *datasource)
+{
+	ncAssetFile *pAssetFile = static_cast<ncAssetFile *>(datasource);
+	pAssetFile->Close();
+}
+
+long asset_tell(void *datasource)
+{
+	ncAssetFile *pAssetFile = static_cast<ncAssetFile *>(datasource);
+	return pAssetFile->Tell();
+}
+
+ov_callbacks oggCallbacks = { asset_read, asset_seek, asset_close, asset_tell };
+#endif
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
@@ -68,24 +98,38 @@ void ncAudioLoaderOgg::Init()
 {
 	vorbis_info *pInfo;
 
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAudioLoaderOgg::Load - Loading \"%s\"", m_fileHandle.Filename());
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAudioLoaderOgg::Init - Loading \"%s\"", m_pFileHandle->Filename());
 
 	// File is closed by ov_clear()
-	m_fileHandle.SetCloseOnExit(false);
+	m_pFileHandle->SetCloseOnExit(false);
 
 #ifdef __ANDROID__
-	m_fileHandle.FOpen("rb");
-
-	if (ov_open(m_fileHandle.Ptr(), &m_oggFile, NULL, 0) != 0)
+	if (m_pFileHandle->Type() == ncAssetFile::sType())
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::Load - Cannot open \"%s\" with ov_open", m_fileHandle.Filename());
-		m_fileHandle.Close();
-		exit(-1);
+		m_pFileHandle->Open(ncIFile::MODE_FD|ncIFile::MODE_READ);
+
+		if (ov_open_callbacks(m_pFileHandle, &m_oggFile, NULL, 0, oggCallbacks) != 0)
+		{
+			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::Init - Cannot open \"%s\" with ov_open_callbacks()", m_pFileHandle->Filename());
+			m_pFileHandle->Close();
+			exit(-1);
+		}
+	}
+	else
+	{
+		m_pFileHandle->Open(ncIFile::MODE_READ|ncIFile::MODE_BINARY);
+
+		if (ov_open(m_pFileHandle->Ptr(), &m_oggFile, NULL, 0) != 0)
+		{
+			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::Init - Cannot open \"%s\" with ov_open()", m_pFileHandle->Filename());
+			m_pFileHandle->Close();
+			exit(-1);
+		}
 	}
 #else
-	if (ov_fopen(m_fileHandle.Filename(), &m_oggFile) != 0)
+	if (ov_fopen(m_pFileHandle->Filename(), &m_oggFile) != 0)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::Load - Cannot open \"%s\" with ov_fopen", m_fileHandle.Filename());
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::Init - Cannot open \"%s\" with ov_fopen()", m_pFileHandle->Filename());
 		exit(-1);
 	}
 #endif
@@ -100,5 +144,5 @@ void ncAudioLoaderOgg::Init()
 	m_ulNumSamples = ov_pcm_total(&m_oggFile, -1);
 	m_fDuration = float(ov_time_total(&m_oggFile, -1));
 
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAudioLoaderOgg::Load - duration: %.2f, channels: %d, frequency: %d", m_fDuration, m_iChannels, m_iFrequency);
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAudioLoaderOgg::Init - duration: %.2f, channels: %d, frequency: %d", m_fDuration, m_iChannels, m_iFrequency);
 }

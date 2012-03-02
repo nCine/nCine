@@ -22,6 +22,8 @@ void MyEventHandler::OnInit()
 #ifdef __ANDROID__
 	m_pAudioPlayer = new ncAudioStreamPlayer("sdcard/ncine/music.ogg");
 	m_pTexture = new ncTexture("/sdcard/ncine/abta_playertwo.dds");
+//	m_pAudioPlayer = new ncAudioStreamPlayer("asset::bomb.ogg");
+//	m_pTexture = new ncTexture("asset::abta_player.dds.mp3");
 #else
 	m_pAudioPlayer = new ncAudioStreamPlayer("sounds/music.ogg");
 	m_pTexture = new ncTexture("textures/abta_playertwo.png");

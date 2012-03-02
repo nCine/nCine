@@ -49,24 +49,3 @@ void ncAnimatedSprite::SetAnimation(int iAnimNum)
 
 	SetTexRect(m_vAnims[m_iCurrentAnim]->Rect());
 }
-
-ncAnimatedSprite* ncAnimatedSprite::FromId(unsigned int uId)
-{
-	ncObject *pObject = ncServiceLocator::Indexer().Object(uId);
-
-	if(pObject)
-	{
-		if (pObject->Type() == sType())
-			return static_cast<ncAnimatedSprite *>(pObject);
-		else // Cannot cast
-		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncAnimatedSprite::FromId - Object of wrong type");
-			exit(-1);
-		}
-	}
-	else // NULL
-	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncAnimatedSprite::FromId - Object not found");
-		return NULL;
-	}
-}

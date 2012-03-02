@@ -17,7 +17,7 @@ private:
 	/// Object name
 	/** This field is currently only useful in debug,
 	as there's still no string hashing based search. */
-	char m_cName[NC_OBJNAME_LENGTH];
+	char m_vName[NC_OBJNAME_LENGTH];
 
 protected:
 	/// The enumeration of object types
@@ -41,7 +41,7 @@ protected:
 public:
 	ncObject() : m_uId(0), m_eType(BASE_TYPE)
 	{
-		memset(m_cName, 0, NC_OBJNAME_LENGTH);
+		memset(m_vName, 0, NC_OBJNAME_LENGTH);
 		m_uId = ncServiceLocator::Indexer().AddObject(this);
 	}
 	virtual ~ncObject() { ncServiceLocator::Indexer().RemoveObject(m_uId); }
@@ -55,9 +55,32 @@ public:
 	inline static eObjectType sType() { return BASE_TYPE; }
 
 	/// Returns object name
-	char const * const Name() const { return m_cName; }
+	char const * const Name() const { return m_vName; }
 	/// Sets the object name
-	void SetName(const char cName[NC_OBJNAME_LENGTH]) { strncpy(m_cName, cName, NC_OBJNAME_LENGTH); }
+	void SetName(const char vName[NC_OBJNAME_LENGTH]) { strncpy(m_vName, vName, NC_OBJNAME_LENGTH); }
+
+	/// Returns a casted pointer to the object with the specified id, if any exists
+	template <class T>
+	static T* FromId(unsigned int uId)
+	{
+		ncObject *pObject = ncServiceLocator::Indexer().Object(uId);
+
+		if(pObject)
+		{
+			if (pObject->m_eType == T::sType())
+				return static_cast<T *>(pObject);
+			else // Cannot cast
+			{
+				ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncObject::FromId - Object \"%s\" (%u) is of type %u instead of %u", pObject->m_vName, uId, pObject->m_eType, T::sType());
+				return NULL;
+			}
+		}
+		else
+		{
+			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncObject::FromId - Object %u not found", uId);
+			return NULL;
+		}
+	}
 };
 
 #endif

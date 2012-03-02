@@ -92,24 +92,3 @@ void ncAudioBufferPlayer::Stop()
 			break;
 	}
 }
-
-ncAudioBufferPlayer* ncAudioBufferPlayer::FromId(unsigned int uId)
-{
-	ncObject *pObject = ncServiceLocator::Indexer().Object(uId);
-
-	if(pObject)
-	{
-		if (pObject->Type() == sType())
-			return static_cast<ncAudioBufferPlayer *>(pObject);
-		else // Cannot cast
-		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncAudioBufferPlayer::FromId - Object of wrong type");
-	//		exit(-1);
-		}
-	}
-	else // NULL
-	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncAudioBufferPlayer::FromId - Object not found");
-		return NULL;
-	}
-}

@@ -10,22 +10,24 @@
 ///////////////////////////////////////////////////////////
 
 ncTextureLoader::ncTextureLoader(const char *pFilename)
-	: m_fileHandle(pFilename), m_iWidth(0), m_iHeight(0),
+	: m_pFileHandle(NULL), m_iWidth(0), m_iHeight(0),
 	  m_iBpp(0), m_iHeaderSize(0), m_lFileSize(0), m_uPixels(NULL)
 	#ifndef __ANDROID__
 	,m_pSDLSurface(NULL)
 	#endif
 {
+	m_pFileHandle = ncIFile::CreateFileHandle(pFilename);
+
 	#ifndef __ANDROID__
-	if (m_fileHandle.IsExtension("png") || m_fileHandle.IsExtension("jpg"))
+	if (m_pFileHandle->HasExtension("png") || m_pFileHandle->HasExtension("jpg"))
 		LoadSDL();
 	#else
-	if (m_fileHandle.IsExtension("pkm"))
+	if (m_pFileHandle->HasExtension("pkm"))
 	{
 		ReadETC1Header();
 		LoadCompressed(GL_ETC1_RGB8_OES);
 	}
-	else if (m_fileHandle.IsExtension("dds"))
+	else if (m_pFileHandle->HasExtension("dds"))
 	{
 		ReadDDSHeader();
 		GLenum eInternalFormat;
@@ -47,7 +49,7 @@ ncTextureLoader::ncTextureLoader(const char *pFilename)
 	#endif
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoader::ncTextureLoader - Extension unknown \"%s\"", m_fileHandle.Extension());
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoader::ncTextureLoader - Extension unknown \"%s\"", m_pFileHandle->Extension());
 		exit(-1);
 	}
 }
@@ -64,6 +66,9 @@ ncTextureLoader::~ncTextureLoader()
 
 	if (m_uPixels)
 		delete[] m_uPixels;
+
+	if (m_pFileHandle)
+		delete m_pFileHandle;
 }
 
 ///////////////////////////////////////////////////////////
@@ -73,11 +78,11 @@ ncTextureLoader::~ncTextureLoader()
 #ifndef __ANDROID__
 void ncTextureLoader::LoadSDL()
 {
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoader::LoadSDL - Loading \"%s\"", m_fileHandle.Filename());
-	m_pSDLSurface = (SDL_Surface *)IMG_Load(m_fileHandle.Filename());
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoader::LoadSDL - Loading \"%s\"", m_pFileHandle->Filename());
+	m_pSDLSurface = (SDL_Surface *)IMG_Load(m_pFileHandle->Filename());
 	if (!m_pSDLSurface)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoader::LoadSDL - Cannot load \"%s\"", m_fileHandle.Filename());
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoader::LoadSDL - Cannot load \"%s\"", m_pFileHandle->Filename());
 		exit(-1);
 	}
 
@@ -106,21 +111,21 @@ void ncTextureLoader::LoadSDL()
 /// Reads an ETC1 header and fills the corresponding structure
 void ncTextureLoader::ReadETC1Header()
 {
-	m_fileHandle.FOpen("rb");
+	m_pFileHandle->Open(ncIFile::MODE_READ|ncIFile::MODE_BINARY);
 
 	// ETC1 header is 16 bytes long
 	// It have been splitted in two structures to avoid compiler-specific alignment pragmas
 	ETC1_magic magic;
 	ETC1_header header;
-	fread(&magic, 8, 1, m_fileHandle.Ptr());
+	m_pFileHandle->Read(&magic, 8);
 
 	// Checking for the header presence
 	if (strncmp(magic.cMagicId, "PKM 10", 6) == 0)
 	{
-		fread(&header, 8, 1, m_fileHandle.Ptr());
+		m_pFileHandle->Read(&header, 8);
 		m_iHeaderSize = 16;
-		m_iWidth = ncFile::Int16FromBE(header.uWidth2);
-		m_iHeight = ncFile::Int16FromBE(header.uHeight2);
+		m_iWidth = ncIFile::Int16FromBE(header.uWidth2);
+		m_iHeight = ncIFile::Int16FromBE(header.uHeight2);
 
 		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoader::ReadETC1Header - Header found: w:%d h:%d", m_iWidth, m_iHeight);
 	}
@@ -129,12 +134,12 @@ void ncTextureLoader::ReadETC1Header()
 /// Reads a DDS header and fills the corresponding structure
 void ncTextureLoader::ReadDDSHeader()
 {
-	m_fileHandle.FOpen("rb");
+	m_pFileHandle->Open(ncIFile::MODE_READ|ncIFile::MODE_BINARY);
 
 	// DDS header is 128 bytes long
 	// It have been splitted in two structures to avoid compiler-specific alignment pragmas
 	DDS_header header;
-	fread(&header, 128, 1, m_fileHandle.Ptr());
+	m_pFileHandle->Read(&header, 128);
 
 	// Checking for the header presence
 	if (strncmp(header.cMagicId, "DDS ", 4) == 0)
@@ -152,17 +157,16 @@ void ncTextureLoader::ReadDDSHeader()
 /// Loads a texture file holding compressed data
 void ncTextureLoader::LoadCompressed(GLenum eInternalFormat)
 {
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoader::LoadCompressed - Loading \"%s\"", m_fileHandle.Filename());
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoader::LoadCompressed - Loading \"%s\"", m_pFileHandle->Filename());
 	m_texFormat = ncTextureFormat(eInternalFormat);
 
 	// If the file has not been already opened by a header reader method
-	if (m_fileHandle.Ptr() == NULL)
-		m_fileHandle.FOpen("rb");
+	if (m_pFileHandle->IsOpened() == false)
+		m_pFileHandle->Open(ncIFile::MODE_READ|ncIFile::MODE_BINARY);
 
-	fseek(m_fileHandle.Ptr(), 0L, SEEK_END);
-	m_lFileSize = ftell(m_fileHandle.Ptr()) - m_iHeaderSize;
-	fseek(m_fileHandle.Ptr(), m_iHeaderSize, SEEK_SET);
+	m_lFileSize = m_pFileHandle->Size() - m_iHeaderSize;
+	m_pFileHandle->Seek(m_iHeaderSize, SEEK_SET);
 
 	m_uPixels =  new unsigned char[m_lFileSize];
-	fread(m_uPixels, m_lFileSize, 1, m_fileHandle.Ptr());
+	m_pFileHandle->Read(m_uPixels, m_lFileSize);
 }

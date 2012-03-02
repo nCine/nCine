@@ -1,6 +1,6 @@
 #include <cstring>
 #include "ncFont.h"
-#include "ncFile.h"
+#include "ncIFile.h"
 #include "ncServiceLocator.h"
 
 ///////////////////////////////////////////////////////////
@@ -13,9 +13,10 @@ ncFont::ncFont(const char *pTexFilename, const char *pFntFilename)
 {
 	m_pTexture = new ncTexture(pTexFilename);
 
-	ncFile fileHandle(pFntFilename);
-	fileHandle.FOpen("r");
-	ParseFNTFile(fileHandle.Ptr());
+	ncIFile *pFileHandle = ncIFile::CreateFileHandle(pFntFilename);
+	pFileHandle->Open(ncIFile::MODE_READ);
+	ParseFNTFile(pFileHandle->Ptr());
+	delete pFileHandle;
 }
 
 ///////////////////////////////////////////////////////////

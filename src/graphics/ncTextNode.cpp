@@ -125,27 +125,6 @@ void ncTextNode::Draw(ncRenderQueue& rRenderQueue)
 	ncDrawableNode::Draw(rRenderQueue);
 }
 
-ncTextNode* ncTextNode::FromId(unsigned int uId)
-{
-	ncObject *pObject = ncServiceLocator::Indexer().Object(uId);
-
-	if(pObject)
-	{
-		if (pObject->Type() == sType())
-			return static_cast<ncTextNode *>(pObject);
-		else // Cannot cast
-		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncTextNode::FromId - Object of wrong type");
-			exit(-1);
-		}
-	}
-	else // NULL
-	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncTextNode::FromId - Object not found");
-		return NULL;
-	}
-}
-
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////

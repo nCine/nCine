@@ -33,9 +33,11 @@ private:
 	ncListNode<T> *m_pHead;
 	/// Pointer to the last node in the list
 	ncListNode<T> *m_pTail;
-	// Preventing copy at the moment
+
+	/// Private copy constructor (preventing copy at the moment)
 	ncList(const ncList&);
-	void operator=(const ncList&);
+	/// Private assignment operator (preventing copy at the moment)
+	ncList& operator=(const ncList&);
 
 	// Inserts a new element after a specified node
 	void InsertAfter(ncListNode<T> *pNode, const T& element);

@@ -38,25 +38,25 @@ ncTextureFormat::ncTextureFormat(GLenum eInternalFormat)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+#ifndef __ANDROID__
 /// Converts to the corresponding BGR format
 void ncTextureFormat::BGRFormat()
 {
-#ifndef __ANDROID__
 	if (m_eFormat == GL_RGBA)
 		m_eFormat = GL_BGRA;
 	else if (m_eFormat == GL_RGB)
 		m_eFormat = GL_BGR;
-#endif
 }
+#endif
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+#ifndef __ANDROID__
 /// Searches a match between an integer internal format and an external one
 bool ncTextureFormat::IntegerFormat()
 {
-#ifndef __ANDROID__
 	bool bFound = true;
 
 	switch(m_eInternalFormat)
@@ -98,13 +98,11 @@ bool ncTextureFormat::IntegerFormat()
 		m_eType = GL_UNSIGNED_BYTE;
 
 	return bFound;
-#endif
 }
 
 /// Searches a match between a floating point internal format and an external one
 bool ncTextureFormat::FloatFormat()
 {
-#ifndef __ANDROID__
 	bool bFound = true;
 
 	switch(m_eInternalFormat)
@@ -126,13 +124,11 @@ bool ncTextureFormat::FloatFormat()
 		m_eType = GL_FLOAT;
 
 	return bFound;
-#endif
 }
 
 /// Searches a match between a compressed internal format and an external one
 bool ncTextureFormat::CompressedFormat()
 {
-#ifndef __ANDROID__
 	bool bFound = true;
 
 	switch(m_eInternalFormat)
@@ -155,13 +151,11 @@ bool ncTextureFormat::CompressedFormat()
 	}
 
 	return bFound;
-#endif
 }
-
+#else
 /// Searches a match between an OpenGL ES internal format and an external one
 bool ncTextureFormat::OESFormat()
 {
-#ifdef __ANDROID__
 	bool bFound = true;
 
 	switch(m_eInternalFormat)
@@ -184,13 +178,11 @@ bool ncTextureFormat::OESFormat()
 		m_eType = GL_UNSIGNED_BYTE;
 
 	return bFound;
-#endif
 }
 
 /// Searches a match between a OpenGL ES compressed internal format and an external one
 bool ncTextureFormat::OESCompressedFormat()
 {
-#ifdef __ANDROID__
 	bool bFound = true;
 
 	switch(m_eInternalFormat)
@@ -215,5 +207,5 @@ bool ncTextureFormat::OESCompressedFormat()
 	}
 
 	return bFound;
-#endif
 }
+#endif

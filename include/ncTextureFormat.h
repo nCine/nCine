@@ -20,16 +20,20 @@ private:
 	GLenum m_eType;
 	bool m_bCompressed;
 
+#ifndef __ANDROID__
 	// Searches a match between an integer internal format and an external one
 	bool IntegerFormat();
 	// Searches a match between a floating point internal format and an external one
 	bool FloatFormat();
 	// Searches a match between a compressed internal format and an external one
 	bool CompressedFormat();
+#else
 	// Searches a match between an OpenGL ES internal format and an external one
 	bool OESFormat();
 	// Searches a match between a OpenGL ES compressed internal format and an external one
 	bool OESCompressedFormat();
+#endif
+
 public:
 	ncTextureFormat()
 		: m_eInternalFormat(-1), m_eFormat(-1), m_eType(-1), m_bCompressed(false) { }
@@ -39,12 +43,15 @@ public:
 	inline GLenum Internal() const { return m_eInternalFormat; }
 	/// Returns the corresponding format
 	inline GLenum Format() const { return m_eFormat; }
-	// Converts to the corresponding BGR format
-	void BGRFormat();
 	/// Returns the corresponding pixel data type
 	inline GLenum Type() const { return m_eType; }
 	/// Specifies wheter data is compressed or not
 	inline bool isCompressed() const { return m_bCompressed; }
+
+#ifndef __ANDROID__
+	// Converts to the corresponding BGR format
+	void BGRFormat();
+#endif
 };
 
 #endif

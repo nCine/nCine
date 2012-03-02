@@ -106,27 +106,6 @@ void ncTexture::SetAlphaFromRed(ncTexture *pAlphaTex)
 #endif
 }
 
-ncTexture* ncTexture::FromId(unsigned int uId)
-{
-	ncObject *pObject = ncServiceLocator::Indexer().Object(uId);
-
-	if(pObject)
-	{
-		if (pObject->Type() == sType())
-			return static_cast<ncTexture *>(pObject);
-		else // Cannot cast
-		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncTexture::FromId - Object of wrong type");
-	//		exit(-1);
-		}
-	}
-	else // NULL
-	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncTexture::FromId - Object not found");
-		return NULL;
-	}
-}
-
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
