@@ -6,8 +6,8 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncParticleSystem::ncParticleSystem(unsigned int uCount, ncTexture *pTexture, float fSpriteScale)
-	: m_uPoolSize(uCount), m_uPoolTop(uCount-1), m_fSpriteScale(fSpriteScale), m_vAffectors(4)
+ncParticleSystem::ncParticleSystem(unsigned int uCount, ncTexture *pTexture)
+	: m_uPoolSize(uCount), m_uPoolTop(uCount-1), m_vAffectors(4)
 {
 	m_eType = PARTICLESYSTEM_TYPE;
 	SetPriority(ncDrawableNode::SCENE_PRIORITY);
@@ -17,13 +17,15 @@ ncParticleSystem::ncParticleSystem(unsigned int uCount, ncTexture *pTexture, flo
 	for (unsigned int i = 0; i < m_uPoolSize; i++)
 	{
 		m_pParticlePool[i] = new ncParticle(NULL, pTexture);
-		m_pParticlePool[i]->SetScale(fSpriteScale);
 		m_pParticleList[i] = m_pParticlePool[i];
 	}
 }
 
 ncParticleSystem::~ncParticleSystem()
 {
+	// Empty the children list before the mass deletion
+	m_children.Clear();
+
 	unsigned int i;
 
 	for (i = 0; i < m_vAffectors.Size(); i++)
@@ -45,6 +47,7 @@ void ncParticleSystem::Emit(unsigned int amount, unsigned long int ulLife, const
 	unsigned long int ulRndLife;
 	ncVector2f RndPosition;
 	ncVector2f RndVelocity;
+	float fRndRotation;
 
 	for(unsigned int i = 0; i < amount; i++)
 	{
@@ -58,9 +61,11 @@ void ncParticleSystem::Emit(unsigned int amount, unsigned long int ulLife, const
 		RndPosition.y = 10.0f * randBetween(-1.0f, 1.0f);
 		RndVelocity.x = vel.x * randBetween(0.8f, 1.0f);
 		RndVelocity.y = vel.y * randBetween(0.8f, 1.0f);
+		fRndRotation = randBetween(-90.0f, 90.0f);
 
 		// acquiring a particle from the pool
-		m_pParticlePool[m_uPoolTop]->Init(ulRndLife, Position() + RndPosition, RndVelocity);
+		m_pParticlePool[m_uPoolTop]->Init(ulRndLife, Position() + RndPosition, RndVelocity, fRndRotation);
+		AddChildNode(m_pParticlePool[m_uPoolTop]);
 		m_uPoolTop--;
 	}
 }
@@ -71,16 +76,14 @@ void ncParticleSystem::Update(unsigned long int ulInterval)
 	if(!bShouldUpdate)
 		return;
 
-	unsigned int i, j;
-
-	for(i = 0; i < m_uPoolSize; i++)
+	for(ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
 	{
-		ncParticle *pParticle = m_pParticleList[i];
+		ncParticle *pParticle = static_cast<ncParticle *>(*i);
 
 		// Update the particle if it's alive
 		if (pParticle->isAlive())
 		{
-			for (j = 0; j < m_vAffectors.Size(); j++)
+			for (int j = 0; j < m_vAffectors.Size(); j++)
 				m_vAffectors[j]->Affect(pParticle);
 
 			pParticle->Update(ulInterval);
@@ -91,28 +94,8 @@ void ncParticleSystem::Update(unsigned long int ulInterval)
 				// releasing a particle
 				m_uPoolTop++;
 				m_pParticlePool[m_uPoolTop] = pParticle;
+				RemoveChildNode(i++);
 			}
 		}
-	}
-}
-
-void ncParticleSystem::Visit(ncRenderQueue& rRenderQueue)
-{
-	// early return if the node is invisible
-	if(!bShouldDraw)
-		return;
-
-	Transform();
-
-	Draw(rRenderQueue);
-}
-
-void ncParticleSystem::Draw(ncRenderQueue& rRenderQueue)
-{
-
-	for(unsigned int i = 0; i < m_uPoolSize; i++)
-	{
-		if (m_pParticleList[i]->isAlive())
-			m_pParticleList[i]->Draw(rRenderQueue);
 	}
 }

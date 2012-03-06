@@ -17,7 +17,7 @@
 #endif
 
 #include <cstdio> // for FILE struct
-#include <stdint.h> // for ETC1 header
+#include <stdint.h> // for headers
 #include "ncTextureFormat.h"
 #include "ncPoint.h"
 #include "ncIFile.h"
@@ -29,6 +29,7 @@ private:
 	/// Texture file handle
 	ncIFile *m_pFileHandle;
 
+#ifdef __ANDROID__
 	/// Structure for ETC1 magic number
 	typedef struct ETC1_magic {
 		char cMagicId[6];
@@ -42,6 +43,7 @@ private:
 		uint16_t uWidth2;
 		uint16_t uHeight2;
 	} ETC1_header;
+#endif
 
 	/// Header for the DDS format
 	typedef struct DDS_header {
@@ -74,10 +76,10 @@ private:
 #ifndef __ANDROID__
 	SDL_Surface *m_pSDLSurface;
 	void LoadSDL();
-#endif
-
+#else
 	// Reads an ETC1 header and fills the corresponding structure
 	void ReadETC1Header();
+#endif
 	// Reads a DDS header and fills the corresponding structure
 	void ReadDDSHeader();
 	// Loads a texture file holding compressed data

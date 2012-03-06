@@ -202,8 +202,8 @@ void ncTextNode::ProcessGlyph(const ncFontGlyph* pGlyph)
 	ncPoint offset = pGlyph->Offset();
 	ncVector2f pos;
 	// Parent transformation (advances are both already scaled)
-	pos.x = m_absX + m_fXAdvance;
-	pos.y = m_absY - m_fYAdvance;
+	pos.x = m_fAbsX + m_fXAdvance;
+	pos.y = m_fAbsY - m_fYAdvance;
 
 	float leftPos = pos.x + offset.x*m_fScaleFactor;
 	float rightPos = leftPos + size.x*m_fScaleFactor;

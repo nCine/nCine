@@ -43,8 +43,8 @@ LOCAL_SRC_FILES := main.cpp \
 	$(SRC)/ncStandardFile.cpp \
 	$(SRC)/ncAssetFile.cpp \
 	$(SRC)/ncAndroidInputManager.cpp \
-	$(SRC)/graphics/ncIGfxDevice.cpp \
 	$(SRC)/graphics/ncEGLGfxDevice.cpp \
+	$(SRC)/graphics/ncGfxCapabilities.cpp \
 	$(SRC)/graphics/ncTextureFormat.cpp \
 	$(SRC)/graphics/ncTextureLoader.cpp \
 	$(SRC)/graphics/ncTexture.cpp \
@@ -70,7 +70,7 @@ LOCAL_SRC_FILES := main.cpp \
 	$(SRC)/audio/ncAudioStream.cpp \
 	$(SRC)/audio/ncAudioBufferPlayer.cpp \
 	$(SRC)/audio/ncAudioStreamPlayer.cpp \
-	$(TST)/apptest_animsprites.cpp
+	$(TST)/apptest_rotozoom.cpp
 
 LOCAL_LDLIBS := -lm -llog -landroid -lEGL -lGLESv1_CM
 LOCAL_STATIC_LIBRARIES := android_native_app_glue tremolo

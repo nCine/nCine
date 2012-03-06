@@ -33,7 +33,6 @@ public:
 	inline int Frequency() const { return m_iFrequency; }
 
 	inline static eObjectType sType() { return AUDIOBUFFER_TYPE; }
-	static ncAudioBuffer* FromId(unsigned int uId);
 };
 
 #endif

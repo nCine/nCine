@@ -3,6 +3,7 @@
 
 #include "ncIAppEventHandler.h"
 #include "ncIInputEventHandler.h"
+class ncSceneNode;
 class ncTexture;
 class ncSprite;
 
@@ -12,8 +13,10 @@ class MyEventHandler
 	  public ncIInputEventHandler
 {
 private:
-	float *m_fAngles;
-	ncTexture **m_pTextures;
+	bool m_bPause;
+	float m_fAngle;
+	ncSceneNode *m_pDummy;
+	ncTexture *m_pMegaTexture;
 	ncSprite **m_pSprites;
 
 public:
@@ -25,8 +28,8 @@ public:
 	virtual void OnKeyPressed(const ncKeyboardEvent &event) { }
 #ifdef __ANDROID__
 	virtual void OnKeyReleased(const ncKeyboardEvent &event) { }
-	virtual void OnTouchDown(const ncTouchEvent &event) { }
-	virtual void OnTouchUp(const ncTouchEvent &event) { }
+	virtual void OnTouchDown(const ncTouchEvent &event);
+	virtual void OnTouchUp(const ncTouchEvent &event);
 	virtual void OnTouchMove(const ncTouchEvent &event) { }
 	virtual void OnSecondaryTouchDown(const ncTouchEvent &event) { }
 	virtual void OnSecondaryTouchUp(const ncTouchEvent &event) { }

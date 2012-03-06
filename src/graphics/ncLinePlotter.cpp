@@ -32,7 +32,7 @@ void ncLinePlotter::Draw(ncRenderQueue& rRenderQueue)
 
 	for (int i = 0; i < m_vVariables.Size(); i++)
 	{
-		m_vVariables[i]->UpdateVertices(m_absX, m_absY, m_iWidth, m_iHeight);
+		m_vVariables[i]->UpdateVertices(m_fAbsX, m_fAbsY, m_iWidth, m_iHeight);
 		m_vVariables[i]->Draw(rRenderQueue);
 		if (m_vVariables[i]->shouldPlotMean())
 			m_vVariables[i]->DrawMean(rRenderQueue);

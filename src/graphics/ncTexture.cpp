@@ -113,6 +113,13 @@ void ncTexture::SetAlphaFromRed(ncTexture *pAlphaTex)
 /// Loads a texture based on information from the texture format and loader
 void ncTexture::Load(const ncTextureLoader& texLoader)
 {
+	const ncGfxCapabilities& gfxCaps = ncServiceLocator::GfxCapabilities();
+	if (texLoader.Width() > gfxCaps.MaxTextureSize() || texLoader.Height() > gfxCaps.MaxTextureSize())
+	{
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncTexture::Load - Texture size is bigger than device maximum");
+		exit(-1);
+	}
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -135,6 +142,13 @@ void ncTexture::Load(const ncTextureLoader& texLoader)
 /// Loads a texture overriding the size detected by the texture loader
 void ncTexture::Load(const ncTextureLoader& texLoader, int iWidth, int iHeight)
 {
+	const ncGfxCapabilities& gfxCaps = ncServiceLocator::GfxCapabilities();
+	if (iWidth > gfxCaps.MaxTextureSize() || iHeight > gfxCaps.MaxTextureSize())
+	{
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncTexture::Load - Texture size is bigger than device maximum");
+		exit(-1);
+	}
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

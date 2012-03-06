@@ -27,6 +27,7 @@ void MyEventHandler::OnInit()
 #else
 	m_pAudioPlayer = new ncAudioStreamPlayer("sounds/music.ogg");
 	m_pTexture = new ncTexture("textures/abta_playertwo.png");
+//	m_pTexture = new ncTexture("textures/abta_playertwo_bc3.dds");
 #endif
 
 	m_pAudioPlayer->SetLooping(true);

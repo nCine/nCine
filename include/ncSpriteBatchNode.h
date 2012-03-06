@@ -35,7 +35,6 @@ public:
 	virtual void Draw(ncRenderQueue& rRenderQueue);
 
 	inline static eObjectType sType() { return SPRITEBATCH_TYPE; }
-	static ncSpriteBatchNode* FromId(unsigned int uId);
 };
 
 #endif

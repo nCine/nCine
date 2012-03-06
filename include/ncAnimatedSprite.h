@@ -35,7 +35,6 @@ public:
 	inline void SetFrame(int iFrameNum) { m_vAnims[m_iCurrentAnim]->SetFrame(iFrameNum); }
 
 	inline static eObjectType sType() { return ANIMATEDSPRITE_TYPE; }
-	static ncAnimatedSprite* FromId(unsigned int uId);
 };
 
 #endif

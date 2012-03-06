@@ -4,6 +4,7 @@
 #include "ncIIndexer.h"
 #include "ncILogger.h"
 #include "ncIAudioDevice.h"
+#include "ncGfxCapabilities.h"
 
 /// Provides base services to requesting classes
 class ncServiceLocator
@@ -24,6 +25,12 @@ public:
 	/// Registers an audio device provider
 	static void RegisterAudioDevice(ncIAudioDevice* service);
 
+	/// Returns a constant reference to the graphics capabilities class
+	/*! There is no registering process for the ncGfxCapabilities class, no
+	 *  interface and no null version: it is unique and no-op before initialization.
+	 */
+	static const ncGfxCapabilities& GfxCapabilities() { return m_gfxCapabilities; }
+
 private:
 	static ncIIndexer* m_pIndexerService;
 	static ncNullIndexer m_nullIndexer;
@@ -33,6 +40,8 @@ private:
 
 	static ncIAudioDevice* m_pAudioDevice;
 	static ncNullAudioDevice m_nullAudioDevice;
+
+	static ncGfxCapabilities m_gfxCapabilities;
 };
 
 #endif

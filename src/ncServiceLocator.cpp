@@ -10,6 +10,8 @@ ncILogger* ncServiceLocator::m_pLoggerService = &ncServiceLocator::m_nullLogger;
 ncNullAudioDevice ncServiceLocator::m_nullAudioDevice;
 ncIAudioDevice* ncServiceLocator::m_pAudioDevice = &ncServiceLocator::m_nullAudioDevice;
 
+ncGfxCapabilities ncServiceLocator::m_gfxCapabilities;
+
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////

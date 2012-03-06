@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 //	ncTexture textureAlpha("textures/smoke_256_red.png");
 //	texture.SetAlphaFromRed(&textureAlpha);
 
-	ncParticleSystem particleSys(NUM_PARTICLES, &texture, 0.25f);
+	ncParticleSystem particleSys(NUM_PARTICLES, &texture);
 	particleSys.SetPosition(iWidth*0.5f, iHeight*0.5f);
 
 //	particleSys.AddAffector(new ncAccelerationAffector(0.000025f, 0.0f));

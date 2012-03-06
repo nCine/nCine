@@ -23,7 +23,6 @@ public:
 	void UpdateStream();
 
 	inline static eObjectType sType() { return AUDIOSTREAMPLAYER_TYPE; }
-	static ncAudioStreamPlayer* FromId(unsigned int uId);
 };
 
 #endif

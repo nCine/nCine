@@ -53,7 +53,6 @@ public:
 	void SetAlphaFromRed(ncTexture *pAlphaTex);
 
 	inline static eObjectType sType() { return TEXTURE_TYPE; }
-	static ncTexture* FromId(unsigned int uId);
 };
 
 #endif

@@ -96,7 +96,6 @@ public:
 	virtual void Draw(ncRenderQueue& rRenderQueue);
 
 	inline static eObjectType sType() { return TEXT_TYPE; }
-	static ncTextNode* FromId(unsigned int uId);
 };
 
 #endif

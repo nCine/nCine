@@ -47,8 +47,8 @@ set(SOURCES
     src/ncIFile.cpp
     src/ncStandardFile.cpp
 	src/ncSDLInputManager.cpp
-	src/graphics/ncIGfxDevice.cpp
 	src/graphics/ncSDLGfxDevice.cpp
+	src/graphics/ncGfxCapabilities.cpp
 	src/graphics/ncTextureFormat.cpp
 	src/graphics/ncTextureLoader.cpp
 	src/graphics/ncTexture.cpp
@@ -102,6 +102,7 @@ endif()
 
 add_library(ncine SHARED ${SOURCES})
 
+add_executable(apptest_rotozoom tests/main.cpp tests/apptest_rotozoom.cpp)
 add_executable(test_audio tests/test_audio.cpp)
 add_executable(apptest_animsprites tests/main.cpp tests/apptest_animsprites.cpp)
 add_executable(test_font tests/test_font.cpp)
@@ -114,6 +115,7 @@ add_executable(test_scene tests/test_scene.cpp)
 add_executable(test_array tests/test_array.cpp)
 add_executable(test_list tests/test_list.cpp)
 
+target_link_libraries(apptest_rotozoom ncine)
 target_link_libraries(test_audio ncine)
 target_link_libraries(apptest_animsprites ncine)
 target_link_libraries(test_font ncine)

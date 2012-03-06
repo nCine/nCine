@@ -12,41 +12,88 @@
 ncTextureLoader::ncTextureLoader(const char *pFilename)
 	: m_pFileHandle(NULL), m_iWidth(0), m_iHeight(0),
 	  m_iBpp(0), m_iHeaderSize(0), m_lFileSize(0), m_uPixels(NULL)
-	#ifndef __ANDROID__
+#ifndef __ANDROID__
 	,m_pSDLSurface(NULL)
-	#endif
+#endif
 {
 	m_pFileHandle = ncIFile::CreateFileHandle(pFilename);
 
-	#ifndef __ANDROID__
+	const ncGfxCapabilities& gfxCaps = ncServiceLocator::GfxCapabilities();
+#ifndef __ANDROID__
 	if (m_pFileHandle->HasExtension("png") || m_pFileHandle->HasExtension("jpg"))
 		LoadSDL();
-	#else
+#else
 	if (m_pFileHandle->HasExtension("pkm"))
 	{
 		ReadETC1Header();
+
+		// Checking for extension availability before loading
+		if (gfxCaps.OESCompressedETC1RGB8Texture() == false)
+		{
+			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncTextureLoader::ncTextureLoader - GL_OES_compressed_ETC1_RGB8_texture not available");
+			exit(-1);
+		}
+
 		LoadCompressed(GL_ETC1_RGB8_OES);
 	}
+#endif
 	else if (m_pFileHandle->HasExtension("dds"))
 	{
 		ReadDDSHeader();
 		GLenum eInternalFormat;
 
-		if (!strncmp((char *)&m_fourCC, "ATC ", 4))
-			eInternalFormat = GL_ATC_RGB_AMD;
-		else if (!strncmp((char *)&m_fourCC, "ATCA", 4))
-			eInternalFormat = GL_ATC_RGBA_EXPLICIT_ALPHA_AMD;
-		else if (!strncmp((char *)&m_fourCC, "ATCI", 4))
-			eInternalFormat = GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD;
+#ifndef __ANDROID__
+		if (!strncmp((char *)&m_fourCC, "DXT1", 4))
+			eInternalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+		else if (!strncmp((char *)&m_fourCC, "DXT3", 4))
+			eInternalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+		else if (!strncmp((char *)&m_fourCC, "DXT5", 4))
+			eInternalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 		else
 		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoader::ncTextureLoader - Unsupported DDS compression \"%s\"", m_fourCC);
 			exit(-1);
 		}
 
+		// Checking for extension availability before loading
+		if (gfxCaps.EXTTextureCompressionS3TC() == false)
+		{
+			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncTextureLoader::ncTextureLoader - GL_EXT_texture_compression_s3tc not available");
+			exit(-1);
+		}
+#else
+		bool bATCFormat = false;
+		if (!strncmp((char *)&m_fourCC, "ATC ", 4))
+		{
+			eInternalFormat = GL_ATC_RGB_AMD;
+			bATCFormat = true;
+		}
+		else if (!strncmp((char *)&m_fourCC, "ATCA", 4))
+		{
+			eInternalFormat = GL_ATC_RGBA_EXPLICIT_ALPHA_AMD;
+			bATCFormat = true;
+		}
+		else if (!strncmp((char *)&m_fourCC, "ATCI", 4))
+		{
+			eInternalFormat = GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD;
+			bATCFormat = true;
+		}
+		else
+		{
+			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoader::ncTextureLoader - Unsupported DDS compression \"%s\"", m_fourCC);
+			exit(-1);
+		}
+
+		// Checking for extension availability before loading
+		if (bATCFormat && gfxCaps.AMDCompressedATCTexture() == false)
+		{
+			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncTextureLoader::ncTextureLoader - GL_AMD_compressed_ATC_texture not available");
+			exit(-1);
+		}
+#endif
+
 		LoadCompressed(eInternalFormat);
 	}
-	#endif
 	else
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoader::ncTextureLoader - Extension unknown \"%s\"", m_pFileHandle->Extension());
@@ -106,8 +153,7 @@ void ncTextureLoader::LoadSDL()
 	m_iHeight = m_pSDLSurface->h;
 	m_uPixels = static_cast<GLubyte*>(m_pSDLSurface->pixels);
 }
-#endif
-
+#else
 /// Reads an ETC1 header and fills the corresponding structure
 void ncTextureLoader::ReadETC1Header()
 {
@@ -130,6 +176,7 @@ void ncTextureLoader::ReadETC1Header()
 		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoader::ReadETC1Header - Header found: w:%d h:%d", m_iWidth, m_iHeight);
 	}
 }
+#endif
 
 /// Reads a DDS header and fills the corresponding structure
 void ncTextureLoader::ReadDDSHeader()

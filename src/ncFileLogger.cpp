@@ -18,7 +18,7 @@ ncFileLogger::ncFileLogger(const char *pFilename, eLogLevel eConsoleLevel, eLogL
 
 	if (m_eFileLevel < int(LOG_OFF))
 		m_pFileHandle->Open(ncIFile::MODE_WRITE);
-	if (m_pFileHandle->IsOpened() == false && m_eConsoleLevel < m_eFileLevel)
+	if (m_pFileHandle->IsOpened() == false && m_eConsoleLevel > m_eFileLevel)
 	{
 		// Promoting console level logging to file level logging
 		m_eConsoleLevel = m_eFileLevel;

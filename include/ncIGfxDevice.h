@@ -20,36 +20,29 @@ protected:
 public:
 	virtual ~ncIGfxDevice() = 0;
 
-	/// Set screen resolution with two integers
+	/// Sets screen resolution with two integers
 	virtual void SetResolution(int iWidth, int iHeight) = 0;
-	/// Set screen resolution with the Size class
+	/// Sets screen resolution with the Size class
 	virtual void SetResolution(ncPoint size) = 0;
 
-	/// Toggle between fullscreen and windowed mode
+	/// Toggles between fullscreen and windowed mode
 	virtual void ToggleFullScreen() { }
 
-	/// Update the screen swapping back and front buffers
+	/// Updates the screen swapping back and front buffers
 	virtual void Update() = 0;
-	/// Clear the screen
+	/// Clears the screen
 	virtual void Clear() = 0;
 
-	/// Return device resolution
+	/// Returns device resolution
 	inline ncPoint Resolution() const { return ncPoint(m_iWidth, m_iHeight); }
-	/// Return device width
+	/// Returns device width
 	inline int Width() const { return m_iWidth; }
-	/// Return device height
+	/// Returns device height
 	inline int Height() const { return m_iHeight; }
-	/// Return true if the device renders inside a window
+	/// Returns true if the device renders inside a window
 	inline bool isWindowed() const { return m_bIsWindowed; }
-	/// Return display mode
+	/// Returns display mode
 	inline const ncDisplayMode& Mode() const { return m_mode; }
-
-	// Log OpenGL device info
-	void LogGLInfo();
-	// Log OpenGL extensions
-	void LogGLExtensions();
-	// Check for an OpenGL extension
-	bool CheckGLExtension(const char *pExtensionName);
 };
 
 inline ncIGfxDevice::~ncIGfxDevice() { }

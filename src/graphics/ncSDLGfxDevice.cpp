@@ -145,6 +145,9 @@ void ncSDLGfxDevice::InitDevice()
 /// Initilizes starting OpenGL state
 void ncSDLGfxDevice::InitGL()
 {
+	ncGfxCapabilities& gfxCaps = const_cast<ncGfxCapabilities&>(ncServiceLocator::GfxCapabilities());
+	gfxCaps.Init();
+
 	glDisable(GL_DITHER);
 //	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);

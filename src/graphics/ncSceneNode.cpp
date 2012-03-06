@@ -24,7 +24,7 @@ ncSceneNode::~ncSceneNode()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Adds a node as a children of this one
+/// Adds a node as a child of this one
 /*!
 	\return True if the node has been added
 */
@@ -45,7 +45,7 @@ bool ncSceneNode::AddChildNode(ncSceneNode *pChildNode)
 	return bAdded;
 }
 
-/// Removes a children of this node, without reparenting nephews
+/// Removes a child of this node, without reparenting nephews
 /*!
 	\return True if the node has been removed
 */
@@ -65,7 +65,28 @@ bool ncSceneNode::RemoveChildNode(ncSceneNode *pChildNode)
 	return bRemoved;
 }
 
-/// Removes a children of this node reparenting nephews as children
+/// Removes a child of this node while iterating on children, without reparenting nephews
+/*!
+	It is faster to remove through an iterator than with a linear search for a specific node
+	\return True if the node has been removed
+*/
+bool ncSceneNode::RemoveChildNode(ncList<ncSceneNode *>::Iterator it)
+{
+	bool bRemoved = false;
+
+	if(*it && // cannot pass a NULL pointer
+		!m_children.isEmpty() && // avoid checking if this node has no children
+		(*it)->m_pParent == this) // avoid checking the child doesn't belong to this one
+	{
+		(*it)->m_pParent = NULL;
+		m_children.Remove(it);
+		bRemoved = true;
+	}
+
+	return bRemoved;
+}
+
+/// Removes a child of this node reparenting nephews as children
 /*!
 	\return True if the node has been unlinked
 */
@@ -124,15 +145,32 @@ void ncSceneNode::Visit(ncRenderQueue& rRenderQueue)
 
 void ncSceneNode::Transform()
 {
-	// Calculating absolute positions
+	// Calculating absolute transformations
 	if (m_pParent)
 	{
-		m_absX = m_pParent->m_absX + x;
-		m_absY = m_pParent->m_absY + y;
+		m_fAbsScaleFactor = m_pParent->m_fAbsScaleFactor * m_fScaleFactor;
+		m_fAbsRotation = m_pParent->m_fAbsRotation + m_fRotation;
+		// New scaled position accounting parent scale factor (allow zooming)
+		float fScaledX = m_pParent->m_fAbsScaleFactor * x;
+		float fScaledY = m_pParent->m_fAbsScaleFactor * y;
+
+		float sine = 0.0f;
+		float cosine = 1.0f;
+		float fParentRot = m_pParent->m_fAbsRotation;
+		if (fParentRot > sMinRotation && fParentRot < 360.0f - sMinRotation)
+		{
+			sine = sinf(-fParentRot * M_PI/180.0f);
+			cosine = cosf(-fParentRot * M_PI/180.0f);
+		}
+
+		m_fAbsX = m_pParent->m_fAbsX + fScaledX*cosine - fScaledY*sine;
+		m_fAbsY = m_pParent->m_fAbsY + fScaledY*cosine + fScaledX*sine;
 	}
 	else
 	{
-		m_absX = x;
-		m_absY = y;
+		m_fAbsX = x;
+		m_fAbsY = y;
+		m_fAbsScaleFactor = m_fScaleFactor;
+		m_fAbsRotation = m_fRotation;
 	}
 }

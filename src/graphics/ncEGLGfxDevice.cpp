@@ -33,11 +33,6 @@ ncEGLGfxDevice::~ncEGLGfxDevice()
 }
 
 ///////////////////////////////////////////////////////////
-// PUBLIC FUNCTIONS
-///////////////////////////////////////////////////////////
-
-
-///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
@@ -84,6 +79,9 @@ void ncEGLGfxDevice::InitDevice(struct android_app* state)
 /// Initializes starting OpenGL state
 void ncEGLGfxDevice::InitGL()
 {
+	ncGfxCapabilities& gfxCaps = const_cast<ncGfxCapabilities&>(ncServiceLocator::GfxCapabilities());
+	gfxCaps.Init();
+
 	glDisable(GL_DITHER);
 //	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);

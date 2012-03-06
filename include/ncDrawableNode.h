@@ -27,7 +27,7 @@ public:
 		: ncSceneNode(pParent) { }
 	ncDrawableNode()
 		: ncSceneNode() { }
-	virtual ~ncDrawableNode();
+	virtual ~ncDrawableNode() { }
 
 	/// Returns the draw command class for this node
 	inline const ncRenderCommand* Command() const { return &m_renderCmd; }
@@ -43,7 +43,5 @@ public:
 	/// Sets the node rendering priority
 	inline void SetPriority(int iPriority) { m_renderCmd.SetPriority(iPriority); }
 };
-
-inline ncDrawableNode::~ncDrawableNode() { }
 
 #endif

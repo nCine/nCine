@@ -44,7 +44,7 @@ void ncStackedBarPlotter::Draw(ncRenderQueue& rRenderQueue)
 	// Drawing the background
 	ncDrawableNode::Draw(rRenderQueue);
 
-	UpdateAllVertices(m_absX, m_absY, m_iWidth, m_iHeight);
+	UpdateAllVertices(m_fAbsX, m_fAbsY, m_iWidth, m_iHeight);
 
 	for (int i = 0; i < m_vVariables.Size(); i++)
 	{

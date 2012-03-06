@@ -25,7 +25,7 @@ void MyEventHandler::OnInit()
 //	m_pTexture->SetAlphaFromRed(&textureAlpha);
 #endif
 
-	m_pParticleSys = new ncParticleSystem(numParticles, m_pTexture, 0.225f);
+	m_pParticleSys = new ncParticleSystem(numParticles, m_pTexture);
 	m_pParticleSys->SetPosition(ncApplication::Width()*0.5f, ncApplication::Height()*0.33f);
 
 //	pParticleSys->AddAffector(new ncAccelerationAffector(0.000025f, 0.0f));

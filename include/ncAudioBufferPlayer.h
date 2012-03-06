@@ -20,7 +20,6 @@ public:
 	virtual void Stop();
 
 	inline static eObjectType sType() { return AUDIOBUFFERPLAYER_TYPE; }
-	static ncAudioBufferPlayer* FromId(unsigned int uId);
 };
 
 #endif

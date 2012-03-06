@@ -5,6 +5,7 @@
 #include "ncTexture.h"
 #include "ncRect.h"
 #include "ncColor.h"
+class ncSpriteBatchNode;
 
 /// A scene node representing a basic sprite
 class ncSprite : public ncDrawableNode
@@ -18,25 +19,19 @@ private:
 	int m_iWidth;
 	/// Sprite height in pixel
 	int m_iHeight;
-	/// Scale factor for sprite size
-	float m_fScaleFactor;
-	/// Degrees for clock-wise sprite rotation
-	float m_fRotation;
 	/// Sprite color (transparency, translucency, etc..)
 	ncColor m_color;
 
-	float m_fVertices[12];
-	float m_fTexCoords[12];
+	float m_fVertices[8];
+	float m_fTexCoords[8];
 	void Init();
 	void SetVertices();
 	void SetTexCoords();
 
 	virtual void UpdateRenderCommand();
 
+	friend class ncSpriteBatchNode;
 public:
-	/// The minimum amount of rotation to trigger the transformation code
-	static const float sMinRotation = 0.5f;
-
 	ncSprite(ncSceneNode* pParent, ncTexture *pTexture);
 	ncSprite(ncTexture *pTexture);
 	ncSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY);
@@ -44,30 +39,23 @@ public:
 	virtual ~ncSprite() { }
 
 	/// Returns sprite width
-	inline int Width() const { return m_iWidth * m_fScaleFactor; }
+	inline int Width() const { return m_iWidth; }
 	/// Returns sprite height
-	inline int Height() const { return m_iHeight * m_fScaleFactor; }
+	inline int Height() const { return m_iHeight; }
 	/// Returns sprite size
 	inline ncPoint Size() const
 	{
-		return ncPoint(m_iWidth*m_fScaleFactor, m_iHeight*m_fScaleFactor);
+		return ncPoint(m_iWidth, m_iHeight);
 	}
 
-	/// Gets the sprite scale factor
-	inline float Scale() const { return m_fScaleFactor; }
-	/// Scales the sprite size
-	inline void SetScale(float fScaleFactor) { m_fScaleFactor = fScaleFactor; }
-
-	/// Gets the sprite rotation degrees
-	inline float Rotation() const { return m_fRotation; }
-	/// Sets the sprite rotation in degrees
-	inline void SetRotation(float fRotation) {
-		while (fRotation > 360.0f)
-			fRotation -= 360.0f;
-		while (fRotation < -360.0f)
-			fRotation += 360.0f;
-
-		m_fRotation = fRotation;
+	/// Returns sprite absolute width
+	inline int AbsWidth() const { return m_iWidth * m_fAbsScaleFactor; }
+	/// Returns sprite absolute height
+	inline int AbsHeight() const { return m_iHeight * m_fAbsScaleFactor; }
+	/// Returns sprite absolute size
+	inline ncPoint AbsSize() const
+	{
+		return ncPoint(m_iWidth*m_fAbsScaleFactor, m_iHeight*m_fAbsScaleFactor);
 	}
 
 	/// Gets the texture object
@@ -110,7 +98,6 @@ public:
 	inline void SetColor(float fR, float fG, float fB, float fA) { m_color.SetF(fR, fG, fB, fA); }
 
 	inline static eObjectType sType() { return SPRITE_TYPE; }
-	static ncSprite* FromId(unsigned int uId);
 };
 
 #endif

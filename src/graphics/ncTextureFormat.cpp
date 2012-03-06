@@ -134,9 +134,13 @@ bool ncTextureFormat::CompressedFormat()
 	switch(m_eInternalFormat)
 	{
 		case GL_COMPRESSED_RGBA:
+		case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+		case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
 			m_eFormat = GL_RGBA;
 			break;
 		case GL_COMPRESSED_RGB:
+		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
 			m_eFormat = GL_RGB;
 			break;
 		default:
