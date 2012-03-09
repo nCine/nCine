@@ -35,8 +35,8 @@ public:
 	virtual void OnSecondaryTouchUp(const ncTouchEvent &event) { }
 #else
 	virtual void OnKeyReleased(const ncKeyboardEvent &event);
-	virtual void OnMouseButtonPressed(const ncMouseEvent &event) { }
-	virtual void OnMouseButtonReleased(const ncMouseEvent &event) { }
+	virtual void OnMouseButtonPressed(const ncMouseEvent &event);
+	virtual void OnMouseButtonReleased(const ncMouseEvent &event);
 	virtual void OnMouseMoved(const ncMouseState &state) { }
 #endif
 };

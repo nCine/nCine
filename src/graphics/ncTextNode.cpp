@@ -7,7 +7,7 @@
 
 ncTextNode::ncTextNode(ncSceneNode* pParent, ncFont* pFont)
 	: ncDrawableNode(pParent, 0, 0), m_bDirtyDraw(true), m_bDirtyBoundaries(true),
-	  m_bWithKerning(true), m_pFont(pFont), m_fScaleFactor(1.0f), m_vVertices(16), m_vTexCoords(16),
+	  m_bWithKerning(true), m_pFont(pFont), m_vVertices(16), m_vTexCoords(16),
 	  m_fXAdvance(0.0f), m_fXAdvanceSum(0.0f), m_fYAdvance(0.0f), m_fYAdvanceSum(0.0f), m_vLineLengths(4), m_alignment(ALIGN_LEFT)
 {
 	m_eType = TEXT_TYPE;
@@ -24,7 +24,7 @@ float ncTextNode::Width() const
 {
 	CalculateBoundaries();
 
-	return m_fXAdvanceSum;
+	return m_fXAdvanceSum*CurrentAbsScale();
 }
 
 /// Returns rendered text height
@@ -32,7 +32,7 @@ float ncTextNode::Height() const
 {
 	CalculateBoundaries();
 
-	return m_fYAdvanceSum;
+	return m_fYAdvanceSum*CurrentAbsScale();
 }
 
 /// Sets the kerning flag for this node renderin
@@ -71,17 +71,6 @@ void ncTextNode::SetString(const char *pString)
 	}
 }
 
-void ncTextNode::Visit(ncRenderQueue& rRenderQueue)
-{
-	// early return if a node is invisible
-	if(!bShouldDraw)
-		return;
-
-	Transform();
-
-	Draw(rRenderQueue);
-}
-
 void ncTextNode::Draw(ncRenderQueue& rRenderQueue)
 {
 	// Precalculate boundaries for horizontal alignment
@@ -102,7 +91,7 @@ void ncTextNode::Draw(ncRenderQueue& rRenderQueue)
 			{
 				uCurrentLine++;
 				m_fXAdvance = CalculateAlignment(uCurrentLine);
-				m_fYAdvance += m_pFont->Base() * m_fScaleFactor;
+				m_fYAdvance += m_pFont->Base();;
 			}
 			else
 			{
@@ -114,15 +103,15 @@ void ncTextNode::Draw(ncRenderQueue& rRenderQueue)
 					{
 						// font kerning
 						if (i < strlen(m_vString) - 1)
-							m_fXAdvance += pGlyph->Kerning(int(m_vString[i+1])) * m_fScaleFactor;
+							m_fXAdvance += pGlyph->Kerning(int(m_vString[i+1]));
 					}
 				}
 			}
 		}
-		m_bDirtyDraw = false;
 	}
 
 	ncDrawableNode::Draw(rRenderQueue);
+	m_bDirtyDraw = false;
 }
 
 ///////////////////////////////////////////////////////////
@@ -146,19 +135,19 @@ void ncTextNode::CalculateBoundaries() const
 				if (m_fXAdvance > fXAdvanceMax)
 					fXAdvanceMax = m_fXAdvance;
 				m_fXAdvance = 0.0f;
-				m_fYAdvance += m_pFont->Base() * m_fScaleFactor;
+				m_fYAdvance += m_pFont->Base();
 			}
 			else
 			{
 				const ncFontGlyph *pGlyph = m_pFont->Glyph(int(m_vString[i]));
 				if (pGlyph)
 				{
-					m_fXAdvance += pGlyph->XAdvance() * m_fScaleFactor;
+					m_fXAdvance += pGlyph->XAdvance();
 					if (m_bWithKerning)
 					{
 						// font kerning
 						if (i < strlen(m_vString) - 1)
-							m_fXAdvance += pGlyph->Kerning(int(m_vString[i+1])) * m_fScaleFactor;
+							m_fXAdvance += pGlyph->Kerning(int(m_vString[i+1]));
 					}
 				}
 			}
@@ -195,20 +184,26 @@ float ncTextNode::CalculateAlignment(unsigned int uLineIndex) const
 	return fAlignOffset;
 }
 
+/// Calculates absolute scale factor on the fly
+float ncTextNode::CurrentAbsScale() const
+{
+	float fAbsScaleFactor = m_fScaleFactor;
+	if (m_pParent)
+		fAbsScaleFactor *= m_pParent->AbsScale();
+
+	return fAbsScaleFactor;
+}
+
 /// Fills the batch draw command with data from a glyph
 void ncTextNode::ProcessGlyph(const ncFontGlyph* pGlyph)
 {
 	ncPoint size = pGlyph->Size();
 	ncPoint offset = pGlyph->Offset();
-	ncVector2f pos;
-	// Parent transformation (advances are both already scaled)
-	pos.x = m_fAbsX + m_fXAdvance;
-	pos.y = m_fAbsY - m_fYAdvance;
 
-	float leftPos = pos.x + offset.x*m_fScaleFactor;
-	float rightPos = leftPos + size.x*m_fScaleFactor;
-	float topPos = pos.y - offset.y*m_fScaleFactor;
-	float bottomPos = topPos - size.y*m_fScaleFactor;
+	float leftPos = m_fXAdvance + offset.x;
+	float rightPos = leftPos + size.x;
+	float topPos = -m_fYAdvance - offset.y;
+	float bottomPos = topPos - size.y;
 
 	m_vVertices.InsertBack(leftPos);	m_vVertices.InsertBack(bottomPos);
 	m_vVertices.InsertBack(leftPos);	m_vVertices.InsertBack(topPos);
@@ -235,7 +230,7 @@ void ncTextNode::ProcessGlyph(const ncFontGlyph* pGlyph)
 	m_vTexCoords.InsertBack(rightCoord);	m_vTexCoords.InsertBack(topCoord);
 	m_vTexCoords.InsertBack(leftCoord);		m_vTexCoords.InsertBack(topCoord);
 
-	m_fXAdvance += pGlyph->XAdvance() * m_fScaleFactor;
+	m_fXAdvance += pGlyph->XAdvance();
 }
 
 void ncTextNode::UpdateRenderCommand()
@@ -244,4 +239,7 @@ void ncTextNode::UpdateRenderCommand()
 	m_renderCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
 	m_renderCmd.Geometry().SetData(GL_TRIANGLES, 0, m_vVertices.Size()/2, m_vVertices.Pointer(), m_vTexCoords.Pointer(), NULL);
 	m_renderCmd.CalculateSortKey();
+
+	if (m_bDirtyDraw)
+		ApplyTransformations();
 }

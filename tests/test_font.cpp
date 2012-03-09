@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 	ncTextNode fpsText(&rootNode, &font1);
 	fpsText.SetScale(0.85f);
 	fpsText.SetString("FPS: ");
-	fpsText.SetPosition((iWidth - fpsText.Width()), iHeight - fpsText.FontBase());
+	fpsText.SetPosition((iWidth - fpsText.Width()), iHeight);
 
 	char vTestString[] = "WAY.P.ATAV";
 	int iTextHeight = iHeight * 0.7f;
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
 			ulUpdateTime = t.Now();
 			sprintf(vFPS, (const char *)"FPS: %.0f", t.AverageFPS());
 			fpsText.SetString(vFPS);
-			fpsText.SetPosition((iWidth - fpsText.Width()), iHeight - fpsText.FontBase());
+			fpsText.SetPosition((iWidth - fpsText.Width()), iHeight);
 		}
 
 		gfxDevice.Clear();

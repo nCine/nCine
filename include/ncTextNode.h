@@ -31,8 +31,6 @@ private:
 	bool m_bWithKerning;
 	/// The font class used to render text
 	ncFont *m_pFont;
-	/// Scale factor for glyph size
-	float m_fScaleFactor;
 	/// The array of vertices for every glyph in the batch
 	ncArray<float> m_vVertices;
 	/// The array of texture coordinates for every glyph in the batch
@@ -55,6 +53,8 @@ private:
 	void CalculateBoundaries() const;
 	// Calculates align offset for a particular line
 	float CalculateAlignment(unsigned int uLineIndex) const;
+	// Calculates absolute scale factor on the fly
+	float CurrentAbsScale() const;
 	// Fills the batch draw command with data from a glyph
 	void ProcessGlyph(const ncFontGlyph* pGlyph);
 
@@ -76,23 +76,13 @@ public:
 	// Sets the horizontal text alignment
 	void SetAlignment(eAlignment alignment);
 
-	/// Gets the glyph scale factor
-	inline float Scale() const { return m_fScaleFactor; }
-	/// Scales the glyph size
-	inline void SetScale(float fScaleFactor)
-	{
-		m_fScaleFactor = fScaleFactor;
-		m_bDirtyBoundaries = true;
-		m_bDirtyDraw = true;
-	}
 	/// Gets the font base scaled by the scale factor
-	inline float FontBase() const { return m_pFont->Base() * m_fScaleFactor; }
+	inline float FontBase() { return m_pFont->Base() * CurrentAbsScale(); }
 	/// Gets the font line height scaled by the scale factor
-	inline float FontLineHeight() const { return m_pFont->LineHeight() * m_fScaleFactor; }
+	inline float FontLineHeight() const { return m_pFont->LineHeight() * CurrentAbsScale(); }
 	// Sets the string to render
 	void SetString(const char *pString);
 
-	virtual void Visit(ncRenderQueue& rRenderQueue);
 	virtual void Draw(ncRenderQueue& rRenderQueue);
 
 	inline static eObjectType sType() { return TEXT_TYPE; }

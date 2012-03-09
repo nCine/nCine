@@ -73,6 +73,9 @@ public:
 	/// Sets the mean drawing flag state
 	void SetPlotMean(bool bEnabled) { m_bPlotMean = bEnabled; }
 
+	// Applies parent transformations to both mean and values vertices
+	void ApplyTransformations(float fAbsX, float fAbsY, float fAbsRotation, float fAbsScaleFactor);
+
 	virtual inline void Draw(ncRenderQueue& rRenderQueue)
 	{
 		UpdateRenderCommand();
@@ -105,6 +108,7 @@ protected:
 
 	void SetBackgroundVertices();
 	virtual void UpdateRenderCommand();
+
 public:
 	ncProfilePlotter(ncSceneNode* pParent, ncRect rect)
 		: ncDrawableNode(pParent, rect.x, rect.y), m_iWidth(rect.w), m_iHeight(rect.h), m_vVariables(2)

@@ -58,14 +58,18 @@ void MyEventHandler::OnFrameStart()
 	float fSinus = sinf(m_fAngle);
 	float fCosine = cosf(m_fAngle);
 
-	m_pDummy->x = ncApplication::Width()*0.5f + fSinus*100;
-	m_pDummy->y = ncApplication::Height()*0.5f + fCosine*150;
+	m_pDummy->x = ncApplication::Width()*0.5f + fSinus*100.0f;
+	m_pDummy->y = ncApplication::Height()*0.5f + fCosine*150.0f;
 	m_pDummy->SetRotation(m_fAngle*8.0f);
 	m_pDummy->SetScale(((fSinus*0.15f)+1.0f)*0.5f);
 
-
 	for (int i = 0; i < numColSprites*numRowSprites; i++)
 		m_pSprites[i]->SetRotation(-m_fAngle*8.0f);
+
+	ncApplication::RootNode().x = (fSinus+1.0f)*50.0f;
+	ncApplication::RootNode().y = (fCosine+1.0f)*50.0f;
+	ncApplication::RootNode().SetRotation(fSinus * 10.0f);
+	ncApplication::RootNode().SetScale(((fCosine*0.1f)+1.0f)*0.75f);
 }
 
 void MyEventHandler::OnShutdown()
@@ -80,11 +84,24 @@ void MyEventHandler::OnTouchDown(const ncTouchEvent &event)
 {
 	m_bPause = true;
 }
+
 void MyEventHandler::OnTouchUp(const ncTouchEvent &event)
 {
 	m_bPause = false;
 }
 #else
+void MyEventHandler::OnMouseButtonPressed(const ncMouseEvent &event)
+{
+	if (event.isLeftButton())
+		m_bPause = true;
+}
+
+void MyEventHandler::OnMouseButtonReleased(const ncMouseEvent &event)
+{
+	if (event.isLeftButton())
+		m_bPause = false;
+}
+
 void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
 {
 	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)

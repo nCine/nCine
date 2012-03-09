@@ -1,10 +1,9 @@
 #include <sys/stat.h> // for open()
 #include <fcntl.h> // for open()
 #include <unistd.h> // for close()
-#include <stdlib.h> // for exit()
+#include <cstdlib> // for exit()
 #include "ncStandardFile.h"
 #include "ncServiceLocator.h"
-
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -56,39 +55,51 @@ void ncStandardFile::Close()
 
 long int ncStandardFile::Seek(long int lOffset, int iWhence) const
 {
+	long int ulSeekValue = -1;
+
 	if (m_iFileDescriptor >= 0)
 	{
-		return lseek(m_iFileDescriptor, lOffset, iWhence);
+		ulSeekValue = lseek(m_iFileDescriptor, lOffset, iWhence);
 	}
 	else if (m_pFilePointer)
 	{
-		return fseek(m_pFilePointer, lOffset, iWhence);
+		ulSeekValue = fseek(m_pFilePointer, lOffset, iWhence);
 	}
+
+	return ulSeekValue;
 }
 
 long int ncStandardFile::Tell() const
 {
+	long int ulTellValue = -1;
+
 	if (m_iFileDescriptor >= 0)
 	{
-		return lseek(m_iFileDescriptor, 0L, SEEK_CUR);
+		ulTellValue = lseek(m_iFileDescriptor, 0L, SEEK_CUR);
 	}
 	else if (m_pFilePointer)
 	{
-		return ftell(m_pFilePointer);
+		ulTellValue = ftell(m_pFilePointer);
 	}
+
+	return ulTellValue;
 }
 
 
 long int ncStandardFile::Read(void *pBuffer, int iBytes) const
 {
+	long int ulBytesRead = -1;
+
 	if (m_iFileDescriptor >= 0)
 	{
-		return read(m_iFileDescriptor, pBuffer, iBytes);
+		ulBytesRead = read(m_iFileDescriptor, pBuffer, iBytes);
 	}
 	else if (m_pFilePointer)
 	{
-		return fread(pBuffer, 1, iBytes, m_pFilePointer);
+		ulBytesRead = fread(pBuffer, 1, iBytes, m_pFilePointer);
 	}
+
+	return ulBytesRead;
 }
 
 

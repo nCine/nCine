@@ -32,7 +32,7 @@ protected:
 
 public:
 	/// The minimum amount of rotation to trigger a sine and cosine calculation
-	static const float sMinRotation = 0.5f;
+	static const float sMinRotation;
 
 	/// Relative X coordinate as a public property
 	float x;
@@ -114,7 +114,8 @@ public:
 	/// Gets the node rotation in degrees
 	inline float Rotation() const { return m_fRotation; }
 	/// Sets the node rotation in degrees
-	inline void SetRotation(float fRotation) {
+	inline void SetRotation(float fRotation)
+	{
 		while (fRotation > 360.0f)
 			fRotation -= 360.0f;
 		while (fRotation < -360.0f)

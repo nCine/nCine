@@ -25,11 +25,13 @@ void ncAudioBufferPlayer::Play()
 		case STATE_INITIAL:
 		case STATE_STOPPED:
 		{
-			ALuint uSource = ncServiceLocator::AudioDevice().NextAvailableSource();
+			// iSource is a signed integer in order to check for unavailble source return value.
+			// It is then converted to an OpenAL unsigned integer to be used as a valid source.
+			int iSource = ncServiceLocator::AudioDevice().NextAvailableSource();
 			// No sources available
-			if (uSource < 0)
+			if (iSource < 0)
 				return;
-			m_uSource = uSource;
+			m_uSource = iSource;
 
 			if (m_pBuffer)
 			{

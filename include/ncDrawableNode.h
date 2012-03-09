@@ -35,7 +35,28 @@ public:
 	virtual void Draw(ncRenderQueue& rRenderQueue)
 	{
 		UpdateRenderCommand();
+//		ApplyTransformations();
 		rRenderQueue.AddCommand(&m_renderCmd);
+	}
+
+	/// Applies node transformations to vertices
+	void ApplyTransformations()
+	{
+		ncRenderGeometry &rGeom = m_renderCmd.Geometry();
+
+		float sine = 0.0f;
+		float cosine = 1.0f;
+		if (abs(m_fAbsRotation) > sMinRotation && abs(m_fAbsRotation) < 360.0f - sMinRotation)
+		{
+			sine = sinf(-m_fAbsRotation * M_PI/180.0f);
+			cosine = cosf(-m_fAbsRotation * M_PI/180.0f);
+		}
+
+		for (int i = rGeom.FirstVertex(); i < rGeom.NumVertices()*2; i=i+2)
+		{
+			float fX = rGeom.VertexPointer()[i]*m_fAbsScaleFactor;			float fY = rGeom.VertexPointer()[i+1]*m_fAbsScaleFactor;
+			rGeom.VertexPointer()[i] = m_fAbsX + fX*cosine - fY*sine;		rGeom.VertexPointer()[i+1] = m_fAbsY + fY*cosine + fX*sine;
+		}
 	}
 
 	/// Returns the node rendering priority

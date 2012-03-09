@@ -44,10 +44,11 @@ void ncStackedBarPlotter::Draw(ncRenderQueue& rRenderQueue)
 	// Drawing the background
 	ncDrawableNode::Draw(rRenderQueue);
 
-	UpdateAllVertices(m_fAbsX, m_fAbsY, m_iWidth, m_iHeight);
+	UpdateAllVertices(0, 0, m_iWidth, m_iHeight);
 
 	for (int i = 0; i < m_vVariables.Size(); i++)
 	{
+		m_vVariables[i]->ApplyTransformations(m_fAbsX, m_fAbsY, m_fAbsRotation, m_fAbsScaleFactor);
 		m_vVariables[i]->Draw(rRenderQueue);
 		if (m_vVariables[i]->shouldPlotMean())
 			m_vVariables[i]->DrawMean(rRenderQueue);

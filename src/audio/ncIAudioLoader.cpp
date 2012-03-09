@@ -1,4 +1,4 @@
-#include <stdlib.h> // for exit()
+#include <cstdlib> // for exit()
 #include "ncIAudioLoader.h"
 #include "ncAudioLoaderWav.h"
 #include "ncAudioLoaderOgg.h"

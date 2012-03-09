@@ -60,6 +60,7 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 #endif
 	ncServiceLocator::RegisterIndexer(new ncArrayIndexer());
 	ncServiceLocator::RegisterAudioDevice(new ncALAudioDevice());
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Init - Data path: %s", ncIFile::DataPath());
 
 	m_pFrameTimer = new ncFrameTimer(5, 100);
 	m_pRootNode = new ncSceneNode();
@@ -166,7 +167,7 @@ void ncApplication::Step()
 		m_pTextLines->SetString(m_vTextChars);
 		m_pTextLines->SetAlignment(ncTextNode::ALIGN_RIGHT);
 		m_pTextLines->SetPosition((Width() - m_pTextLines->Width()), Height());
-    }
+	}
 }
 
 /// Must be called before exiting to shut down the application

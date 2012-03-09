@@ -49,24 +49,11 @@ void ncSprite::Init()
 
 void ncSprite::SetVertices()
 {
-	float leftPos = m_iWidth*m_fAbsScaleFactor*0.5f;
-	float rightPos = -m_iWidth*m_fAbsScaleFactor*0.5f;
-	float bottomPos = -m_iHeight*m_fAbsScaleFactor*0.5f;
-	float topPos = m_iHeight*m_fAbsScaleFactor*0.5f;
+	m_fVertices[0] = m_iWidth*0.5f;		m_fVertices[1] =-m_iHeight*0.5f;
+	m_fVertices[2] = m_iWidth*0.5f;		m_fVertices[3] = m_iHeight*0.5f;
+	m_fVertices[4] =-m_iWidth*0.5f;		m_fVertices[5] =-m_iHeight*0.5f;
 
-	float sine = 0.0f;
-	float cosine = 1.0f;
-	if (m_fAbsRotation > sMinRotation && m_fAbsRotation < 360.0f - sMinRotation)
-	{
-		sine = sinf(-m_fAbsRotation * M_PI/180.0f);
-		cosine = cosf(-m_fAbsRotation * M_PI/180.0f);
-	}
-
-	m_fVertices[0] = m_fAbsX + leftPos*cosine - bottomPos*sine;		m_fVertices[1] = m_fAbsY + bottomPos*cosine + leftPos*sine;
-	m_fVertices[2] = m_fAbsX + leftPos*cosine - topPos*sine;		m_fVertices[3] = m_fAbsY + topPos*cosine + leftPos*sine;
-	m_fVertices[4] = m_fAbsX + rightPos*cosine - bottomPos*sine;	m_fVertices[5] = m_fAbsY + bottomPos*cosine + rightPos*sine;
-
-	m_fVertices[6] = m_fAbsX + rightPos*cosine - topPos*sine;		m_fVertices[7] = m_fAbsY + topPos*cosine + rightPos*sine;
+	m_fVertices[6] =-m_iWidth*0.5f;		m_fVertices[7] = m_iHeight*0.5f;
 }
 
 void ncSprite::SetTexCoords()
@@ -92,4 +79,6 @@ void ncSprite::UpdateRenderCommand()
 	SetVertices();
 	m_renderCmd.Geometry().SetData(GL_TRIANGLE_STRIP, 0, 4, m_fVertices, m_fTexCoords, NULL);
 	m_renderCmd.CalculateSortKey();
+
+	ApplyTransformations();
 }

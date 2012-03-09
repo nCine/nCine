@@ -2,6 +2,11 @@
 #include "ncSceneNode.h"
 #include "ncServiceLocator.h"
 
+///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
+const float ncSceneNode::sMinRotation = 0.5f;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -157,7 +162,7 @@ void ncSceneNode::Transform()
 		float sine = 0.0f;
 		float cosine = 1.0f;
 		float fParentRot = m_pParent->m_fAbsRotation;
-		if (fParentRot > sMinRotation && fParentRot < 360.0f - sMinRotation)
+		if (abs(fParentRot) > sMinRotation && abs(fParentRot) < 360.0f - sMinRotation)
 		{
 			sine = sinf(-fParentRot * M_PI/180.0f);
 			cosine = cosf(-fParentRot * M_PI/180.0f);

@@ -44,15 +44,18 @@ public:
 template <class T>
 const T& ncListIterator<T>::operator*() const
 {
-	if (m_pNode)
-		return m_pNode->m_data;
+	// Cannot simply return only if m_pNode is not NULL or
+	// "control may reach end of non-void function"
+	return m_pNode->m_data;
 }
+
 /// Deferencing operator
 template <class T>
 T& ncListIterator<T>::operator*()
 {
-	if (m_pNode)
-		return m_pNode->m_data;
+	// Cannot simply return only if m_pNode is not NULL or
+	// "control may reach end of non-void function"
+	return m_pNode->m_data;
 }
 
 /// Iterate to the next element (prefix)

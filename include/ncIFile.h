@@ -1,9 +1,9 @@
 #ifndef CLASS_NCIFILE
 #define CLASS_NCIFILE
 
-#include <stdio.h>
+#include <cstdio>
 #include <stdint.h> // for endianness conversions
-#include <string.h> // for strncmp()
+#include <cstring> // for strncmp()
 
 /// The interface dealing with file operations
 class ncIFile
@@ -36,6 +36,9 @@ protected:
 	static const unsigned int s_uMaxExtensionsLength = 4;
 	/// File extension
 	char m_vExtension[s_uMaxExtensionsLength];
+
+	/// The path for the application to write files into
+	static char m_vDataPath[s_uMaxFilenameLength];
 
 	/// File descriptor for open() and close()
 	int m_iFileDescriptor;
@@ -112,6 +115,8 @@ public:
 
 	// Returns the proper file handle according to prepended tags
 	static ncIFile* CreateFileHandle(const char *pFilename);
+	// Returns the writable directory for data storage
+	static char* DataPath();
 };
 
 #endif

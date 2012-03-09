@@ -31,6 +31,30 @@ ncProfilePlotter::~ncProfilePlotter()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/// Applies parent transformations to both mean and values vertices
+void ncPlottingVariable::ApplyTransformations(float fAbsX, float fAbsY, float fAbsRotation, float fAbsScaleFactor)
+{
+	// Variable values geometry
+	ncRenderGeometry &rGeom = m_valuesCmd.Geometry();
+
+	float sine = 0.0f;
+	float cosine = 1.0f;
+	if (abs(fAbsRotation) > ncDrawableNode::sMinRotation && abs(fAbsRotation) < 360.0f - ncDrawableNode::sMinRotation)
+	{
+		sine = sinf(-fAbsRotation * M_PI/180.0f);
+		cosine = cosf(-fAbsRotation * M_PI/180.0f);
+	}
+
+	// Total number of vertices comprises both mean and variable vertices
+	int iNumVertices = rGeom.NumVertices() + m_meanCmd.Geometry().NumVertices();
+	for (int i = 0; i < iNumVertices*2; i=i+2) // First vertex is zero to include mean values
+	{
+		float fX = rGeom.VertexPointer()[i]*fAbsScaleFactor;			float fY = rGeom.VertexPointer()[i+1]*fAbsScaleFactor;
+		rGeom.VertexPointer()[i] = fAbsX + fX*cosine - fY*sine;			rGeom.VertexPointer()[i+1] = fAbsY + fY*cosine + fX*sine;
+	}
+}
+
+
 void ncProfilePlotter::AddValue(unsigned int uIndex, float fValue)
 {
 	if (uIndex < m_vVariables.Size())
@@ -56,11 +80,11 @@ ncPlottingVariable& ncProfilePlotter::Variable(unsigned int uIndex)
 void ncProfilePlotter::SetBackgroundVertices()
 {
 	// Graph background vertices
-	m_fBackgroundVertices[0] = x;				m_fBackgroundVertices[1] = y;
-	m_fBackgroundVertices[2] = x + m_iWidth;	m_fBackgroundVertices[3] = y;
-	m_fBackgroundVertices[4] = x;				m_fBackgroundVertices[5] = y + m_iHeight;
+	m_fBackgroundVertices[0] = 0;				m_fBackgroundVertices[1] = 0;
+	m_fBackgroundVertices[2] = m_iWidth;		m_fBackgroundVertices[3] = 0;
+	m_fBackgroundVertices[4] = 0;				m_fBackgroundVertices[5] = m_iHeight;
 
-	m_fBackgroundVertices[6] = x + m_iWidth;	m_fBackgroundVertices[7] = y + m_iHeight;
+	m_fBackgroundVertices[6] = m_iWidth;		m_fBackgroundVertices[7] = m_iHeight;
 }
 
 void ncProfilePlotter::UpdateRenderCommand()
@@ -71,4 +95,6 @@ void ncProfilePlotter::UpdateRenderCommand()
 	SetBackgroundVertices();
 	m_renderCmd.Geometry().SetData(GL_TRIANGLE_STRIP, 0, 4, m_fBackgroundVertices, NULL, NULL);
 	m_renderCmd.CalculateSortKey();
+
+	ApplyTransformations();
 }

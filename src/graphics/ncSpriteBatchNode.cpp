@@ -72,10 +72,10 @@ void ncSpriteBatchNode::Draw(ncRenderQueue& rRenderQueue)
 
 void ncSpriteBatchNode::ProcessSprite(ncSprite& rSprite)
 {
-	ncPoint size = rSprite.AbsSize();
-	ncVector2f pos = rSprite.AbsPosition();
-	float rot = rSprite.AbsRotation();
-	float scale = rSprite.AbsScale();
+	ncPoint size = rSprite.Size();
+	ncVector2f pos = rSprite.Position();
+	float rot = rSprite.Rotation();
+	float scale = rSprite.Scale();
 
 	float leftPos = size.x*scale*0.5f;
 	float rightPos = -size.x*scale*0.5f;
@@ -84,7 +84,7 @@ void ncSpriteBatchNode::ProcessSprite(ncSprite& rSprite)
 
 	float sine = 0.0f;
 	float cosine = 1.0f;
-	if (rot > ncSprite::sMinRotation && rot < 360.0f - ncSprite::sMinRotation)
+	if (abs(rot) > ncSprite::sMinRotation && abs(rot) < 360.0f - ncSprite::sMinRotation)
 	{
 		sine = sinf(-rot * M_PI/180.0f);
 		cosine = cosf(-rot * M_PI/180.0f);
@@ -131,4 +131,6 @@ void ncSpriteBatchNode::UpdateRenderCommand()
 	m_renderCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
 	m_renderCmd.Geometry().SetData(GL_TRIANGLES, 0, m_vVertices.Size()/2, m_vVertices.Pointer(), m_vTexCoords.Pointer(), m_vColors.Pointer());
 	m_renderCmd.CalculateSortKey();
+
+	ApplyTransformations();
 }

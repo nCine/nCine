@@ -41,6 +41,7 @@ public:
 		  m_iXOffset(iXOffset), m_iYOffset(iYOffset), m_uXAdvance(uXAdvance),
 		  m_vKernings(4) { }
 
+	/// Sets glyph properties
 	void Set(unsigned short uX, unsigned short uY, unsigned short uWidth, unsigned short uHeight,
 		short iXOffset, short iYOffset, unsigned short uXAdvance)
 	{

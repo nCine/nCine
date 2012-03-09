@@ -1,4 +1,4 @@
-#include <stdlib.h> // for exit()
+#include <cstdlib> // for exit()
 #include <cstring>
 #include "ncAudioLoaderOgg.h"
 #include "ncServiceLocator.h"

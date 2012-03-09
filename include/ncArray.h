@@ -89,12 +89,6 @@ void ncArray<T>::SetCapacity(unsigned int uNewCapacity)
 template <class T>
 void ncArray<T>::InsertAt(unsigned int uIndex, T element)
 {
-	if (uIndex < 0)
-	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::InsertAt - Invalid element index: %u", uIndex);
-		exit(-1);
-	}
-
 	if (m_uSize + 1 > m_uCapacity)
 		SetCapacity(m_uSize * 2);
 
@@ -118,12 +112,6 @@ void ncArray<T>::Append(const T* elements, unsigned int uAmount)
 template <class T>
 void ncArray<T>::RemoveAt(unsigned int uIndex)
 {
-	if (uIndex < 0)
-	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::RemoveAt - Invalid element index: %u", uIndex);
-		exit(-1);
-	}
-
 	// memmove() takes care of overlapping regions
 	memmove(m_pArray + uIndex, m_pArray + uIndex + 1, m_uSize-uIndex);
 	m_uSize--;

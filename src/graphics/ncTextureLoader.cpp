@@ -1,5 +1,5 @@
 #ifdef __ANDROID__
-	#include <stdlib.h> // for exit()
+	#include <cstdlib> // for exit()
 #endif
 #include <cstring>
 #include "ncTextureLoader.h"

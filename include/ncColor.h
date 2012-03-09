@@ -5,6 +5,7 @@
 class ncColor
 {
 public:
+	/// The four unsigned byte color components
 	GLubyte m_ubColor[4];
 
 	/// Default constructor (white color)
