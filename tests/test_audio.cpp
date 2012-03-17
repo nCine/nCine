@@ -121,7 +121,7 @@ int main(int argc, char **argv)
 		player.SetPosition(fXPos, 0.0f, 0.0f);
 		player.SetLooping(bLooping);
 
-		ncServiceLocator::AudioDevice().UpdateStreams();
+		ncServiceLocator::AudioDevice().UpdatePlayers();
 		gfxDevice.Clear();
 		gfxDevice.Update();
 	}

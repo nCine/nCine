@@ -15,6 +15,7 @@ ncSpriteBatchNode::ncSpriteBatchNode(ncSceneNode* pParent, ncTexture *pTexture)
 {
 	m_eType = SPRITEBATCH_TYPE;
 	SetPriority(ncDrawableNode::SCENE_PRIORITY);
+	m_renderCmd.SetType(ncRenderCommand::SPRITE_TYPE);
 }
 
 ///////////////////////////////////////////////////////////

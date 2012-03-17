@@ -12,6 +12,7 @@ ncTextNode::ncTextNode(ncSceneNode* pParent, ncFont* pFont)
 {
 	m_eType = TEXT_TYPE;
 	SetPriority(ncDrawableNode::HUD_PRIORITY);
+	m_renderCmd.SetType(ncRenderCommand::TEXT_TYPE);
 	memset(m_vString, 0, s_uMaxStringLength);
 }
 
@@ -236,6 +237,7 @@ void ncTextNode::ProcessGlyph(const ncFontGlyph* pGlyph)
 void ncTextNode::UpdateRenderCommand()
 {
 	m_renderCmd.Material().SetTextureGLId(m_pFont->Texture()->GLId());
+	m_renderCmd.Material().SetColor(m_color);
 	m_renderCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
 	m_renderCmd.Geometry().SetData(GL_TRIANGLES, 0, m_vVertices.Size()/2, m_vVertices.Pointer(), m_vTexCoords.Pointer(), NULL);
 	m_renderCmd.CalculateSortKey();

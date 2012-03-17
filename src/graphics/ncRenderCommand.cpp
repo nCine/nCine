@@ -9,7 +9,7 @@
 /// Binds the material state
 void ncRenderMaterial::Bind() const
 {
-//	if (m_fColor[3] < 1.0f)
+//	if (m_color.B() < 255)
 //		glEnable(GL_BLEND);
 
 //	glColor4ubv(m_color.Vector()); // Not available on GLES

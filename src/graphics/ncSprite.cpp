@@ -42,6 +42,7 @@ void ncSprite::Init()
 {
 	m_eType = SPRITE_TYPE;
 	SetPriority(ncDrawableNode::SCENE_PRIORITY);
+	m_renderCmd.SetType(ncRenderCommand::SPRITE_TYPE);
 
 	if (m_pTexture)
 		SetTexRect(ncRect(0, 0, m_pTexture->Width(), m_pTexture->Height()));

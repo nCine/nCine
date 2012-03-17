@@ -15,7 +15,7 @@ ncFont::ncFont(const char *pTexFilename, const char *pFntFilename)
 
 	ncIFile *pFileHandle = ncIFile::CreateFileHandle(pFntFilename);
 	pFileHandle->Open(ncIFile::MODE_READ);
-	ParseFNTFile(pFileHandle->Ptr());
+	ParseFNTFile(pFileHandle);
 	delete pFileHandle;
 }
 
@@ -23,11 +23,9 @@ ncFont::ncFont(const char *pTexFilename, const char *pFntFilename)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Parse an AngelCode's FNT file
-void ncFont::ParseFNTFile(FILE *pFile)
+/// Loads an AngelCode's FNT file in a RAM buffer then parses it
+void ncFont::ParseFNTFile(ncIFile *pFileHandle)
 {
-	const unsigned int uBufferLength = 256;
-	char vBuffer[uBufferLength];
 	int iFileLine = 0;
 
 	int iGlyphId;
@@ -38,16 +36,20 @@ void ncFont::ParseFNTFile(FILE *pFile)
 	int iSecondGlyphId;
 	int iKerningAmount;
 
-	while(fgets(vBuffer, uBufferLength, pFile ) != NULL)
+	char *pFileBuffer = new char[pFileHandle->Size()];
+	pFileHandle->Read(pFileBuffer, pFileHandle->Size());
+
+	char *pBuffer = pFileBuffer;
+	do
 	{
 		iFileLine++;
 
 		// skipping entirely the "info" line
-		if (strncmp(vBuffer, "info", 4) == 0)
+		if (strncmp(pBuffer, "info", 4) == 0)
 			continue;
-		else if (strncmp(vBuffer, "common", 6) == 0)
+		else if (strncmp(pBuffer, "common", 6) == 0)
 		{
-			sscanf(vBuffer, "common lineHeight=%u base=%u scaleW=%u scaleH=%u", &m_uLineHeight, &m_uBase, &m_uWidth, &m_uHeight);
+			sscanf(pBuffer, "common lineHeight=%u base=%u scaleW=%u scaleH=%u", &m_uLineHeight, &m_uBase, &m_uWidth, &m_uHeight);
 			if (m_uWidth != m_pTexture->Width() || m_uHeight != m_pTexture->Height())
 			{
 				ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncFont::ParseFNTFile - FNT texture has a different size: (%u, %u)", m_uWidth, m_uHeight);
@@ -55,23 +57,24 @@ void ncFont::ParseFNTFile(FILE *pFile)
 			}
 		}
 		// skipping entirely the "page" line
-		else if (strncmp(vBuffer, "page", 4) == 0)
+		else if (strncmp(pBuffer, "page", 4) == 0)
 			continue;
-		else if (strncmp(vBuffer, "chars", 5) == 0)
-			sscanf(vBuffer, "chars count=%u", &m_uNumGlyphs);
-		else if (strncmp(vBuffer, "char", 4) == 0)
+		else if (strncmp(pBuffer, "chars", 5) == 0)
+			sscanf(pBuffer, "chars count=%u", &m_uNumGlyphs);
+		else if (strncmp(pBuffer, "char", 4) == 0)
 		{
-			sscanf(vBuffer, "char id=%d x=%u y=%u width=%u height=%u xoffset=%d yoffset=%d xadvance=%u", &iGlyphId, &uX, &uY, &uWidth, &uHeight, &iXOffset, &iYOffset, &uXAdvance);
+			sscanf(pBuffer, "char id=%d x=%u y=%u width=%u height=%u xoffset=%d yoffset=%d xadvance=%u", &iGlyphId, &uX, &uY, &uWidth, &uHeight, &iXOffset, &iYOffset, &uXAdvance);
 			m_vGlyphs[iGlyphId].Set(uX, uY, uWidth, uHeight, iXOffset, iYOffset, uXAdvance);
 		}
-		else if (strncmp(vBuffer, "kernings", 8) == 0)
-			sscanf(vBuffer, "kernings count=%u", &m_uNumKernings);
-		else if (strncmp(vBuffer, "kerning", 7) == 0)
+		else if (strncmp(pBuffer, "kernings", 8) == 0)
+			sscanf(pBuffer, "kernings count=%u", &m_uNumKernings);
+		else if (strncmp(pBuffer, "kerning", 7) == 0)
 		{
-			sscanf(vBuffer, "kerning first=%d second=%d amount=%d ", &iGlyphId, &iSecondGlyphId, &iKerningAmount);
+			sscanf(pBuffer, "kerning first=%d second=%d amount=%d ", &iGlyphId, &iSecondGlyphId, &iKerningAmount);
 			m_vGlyphs[iGlyphId].AddKerning(iSecondGlyphId, iKerningAmount);
 		}
-	}
+	} while ((pBuffer = strchr(pBuffer, '\n')+1) < pFileBuffer + pFileHandle->Size());
 
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncFont::ParseFNTFile - FNT file parsed: %u glyphs and %u kernings", m_uNumGlyphs, m_uNumKernings);
+	delete[] pFileBuffer;
 }

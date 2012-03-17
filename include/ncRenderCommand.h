@@ -161,6 +161,18 @@ public:
 /// The class wrapping all the information needed for issuing a draw command
 class ncRenderCommand
 {
+public:
+	/// The enumeration of command types
+	/*! Its sole purpose is to allow separated profiling counters in ncRenderQueue */
+	enum eCommandType {
+		GENERIC_TYPE = 0,
+		PLOTTER_TYPE,
+		SPRITE_TYPE,
+		PARTICLE_TYPE,
+		TEXT_TYPE,
+		TYPE_COUNT
+	};
+
 private:
 	unsigned long int m_uSortKey;
 //	bool m_bDirtyKey;
@@ -170,8 +182,10 @@ private:
 	ncRenderTransformation m_transformation;
 	ncRenderGeometry m_geometry;
 
+	/// Command type for profiling counter
+	eCommandType m_eProfilingType;
 public:
-	ncRenderCommand() : m_uSortKey(0), m_iPriority(0) { }
+	ncRenderCommand() : m_uSortKey(0), m_iPriority(0), m_eProfilingType(GENERIC_TYPE) { }
 
 	/// Returns the rendering priority
 	inline int Priority() const { return m_iPriority; }
@@ -196,6 +210,11 @@ public:
 	void CalculateSortKey();
 	// Issues the render command
 	void Issue() const;
+
+	/// Gets the command type (profiling purpose)
+	inline eCommandType Type() const { return m_eProfilingType; }
+	/// Sets the command type (profiling purpose)
+	inline void SetType(eCommandType eType) { m_eProfilingType = eType; }
 };
 
 #endif

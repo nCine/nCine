@@ -23,7 +23,7 @@ private:
 	ALuint m_uSources[s_uMaxSources];
 
 	/// A list of active stream players
-	ncList<ncAudioStreamPlayer *> m_streamPlayers;
+	ncList<ncIAudioPlayer *> m_players;
 public:
 	ncALAudioDevice();
 	virtual ~ncALAudioDevice();
@@ -32,8 +32,8 @@ public:
 	virtual void SetGain(float fGain);
 
 	virtual int NextAvailableSource();
-	virtual void RegisterStreamPlayer(ncAudioStreamPlayer *pStreamPlayer);
-	virtual void UpdateStreams();
+	virtual void RegisterPlayer(ncIAudioPlayer *pPlayer);
+	virtual void UpdatePlayers();
 };
 
 #endif

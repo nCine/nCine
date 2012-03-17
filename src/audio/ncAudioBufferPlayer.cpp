@@ -46,6 +46,8 @@ void ncAudioBufferPlayer::Play()
 
 			alSourcePlay(m_uSource);
 			m_eState = STATE_PLAYING;
+
+			ncServiceLocator::AudioDevice().RegisterPlayer(this);
 		}
 			break;
 		case STATE_PLAYING:
@@ -54,6 +56,8 @@ void ncAudioBufferPlayer::Play()
 		{
 			alSourcePlay(m_uSource);
 			m_eState = STATE_PLAYING;
+
+			ncServiceLocator::AudioDevice().RegisterPlayer(this);
 		}
 			break;
 	}
@@ -92,5 +96,17 @@ void ncAudioBufferPlayer::Stop()
 			break;
 		case STATE_PAUSED:
 			break;
+	}
+}
+
+/// Updates the player state
+void ncAudioBufferPlayer::UpdateState()
+{
+	if (m_eState == STATE_PLAYING)
+	{
+		ALenum eALState;
+		alGetSourcei(m_uSource, AL_SOURCE_STATE, &eALState);
+		if (eALState != AL_PLAYING)
+			m_eState = STATE_STOPPED;
 	}
 }

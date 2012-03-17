@@ -46,7 +46,7 @@ ncIAppEventHandler *ncApplication::m_pAppEventHandler = NULL;
 void ncApplication::Init(struct android_app* state, ncIAppEventHandler* (*pCreateAppEventHandler)())
 {
 	// Registering the logger as early as possible
-	ncServiceLocator::RegisterLogger(new ncFileLogger("/sdcard/ncine/log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_VERBOSE));
+	ncServiceLocator::RegisterLogger(new ncFileLogger("/sdcard/ncine_log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_VERBOSE));
 	m_pGfxDevice = new ncEGLGfxDevice(state, ncDisplayMode(5, 6, 5));
 	m_pInputManager = new ncAndroidInputManager();
 	ncAssetFile::InitAssetManager(state);
@@ -54,7 +54,7 @@ void ncApplication::Init(struct android_app* state, ncIAppEventHandler* (*pCreat
 void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 {
 	// Registering the logger as early as possible
-	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
+	ncServiceLocator::RegisterLogger(new ncFileLogger("ncine_log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
 	m_pGfxDevice = new ncSDLGfxDevice(960, 640);
 	m_pInputManager = new ncSDLInputManager();
 #endif
@@ -80,7 +80,8 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 	m_pProfilePlotter->Variable(2).SetMeanColor(ncColor(0.0f, 0.0f, 1.0f));
 
 #ifdef __ANDROID__
-	m_pFont = new ncFont("/sdcard/ncine/trebuchet16_128.dds", "/sdcard/ncine/trebuchet16_128.fnt");
+	m_pFont = new ncFont("asset::trebuchet16_128.dds.mp3", "asset::trebuchet16_128.fnt");
+//	m_pFont = new ncFont("/sdcard/ncine/trebuchet16_128.dds", "/sdcard/ncine/trebuchet16_128.fnt");
 #else
 	m_pFont = new ncFont("fonts/trebuchet32_256.png", "fonts/trebuchet32_256.fnt");
 #endif
@@ -155,15 +156,21 @@ void ncApplication::Step()
 	m_pProfilePlotter->AddValue(2, m_pTimer->Now() - uStartTime);
 //	m_pProfilePlotter->AddValue(2, 1.0f * abs(rand()%33));
 
-	ncServiceLocator::AudioDevice().UpdateStreams();
+	ncServiceLocator::AudioDevice().UpdatePlayers();
 	m_pGfxDevice->Update();
 	m_pAppEventHandler->OnFrameEnd();
 
 	if (m_pTimer->Now() - m_ulTextUpdateTime > 100)
 	{
 		m_ulTextUpdateTime = m_pTimer->Now();
-		sprintf(m_vTextChars, (const char *)"FPS: %.0f\nInterval: %lums\nDraw calls: %d\nVertices: %d",
-			AverageFPS(), Interval(), m_pRenderQueue->NumCommands(), m_pRenderQueue->NumVertices());
+		sprintf(m_vTextChars, (const char *)"FPS: %.0f (%lums)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC",
+				AverageFPS(), Interval(),
+				m_pRenderQueue->NumVertices(ncRenderCommand::SPRITE_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::SPRITE_TYPE),
+				m_pRenderQueue->NumVertices(ncRenderCommand::PARTICLE_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::PARTICLE_TYPE),
+				m_pRenderQueue->NumVertices(ncRenderCommand::TEXT_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::TEXT_TYPE),
+				m_pRenderQueue->NumVertices(ncRenderCommand::PLOTTER_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::PLOTTER_TYPE),
+				m_pRenderQueue->NumVertices(), m_pRenderQueue->NumCommands());
+
 		m_pTextLines->SetString(m_vTextChars);
 		m_pTextLines->SetAlignment(ncTextNode::ALIGN_RIGHT);
 		m_pTextLines->SetPosition((Width() - m_pTextLines->Width()), Height());
@@ -209,6 +216,18 @@ void ncApplication::TogglePause()
 {
 	bool bPaused = !m_bPaused;
 	SetPause(bPaused);
+}
+
+/// Shows or hides profiling graphs
+void ncApplication::ShowProfileGraphs(bool bShouldDraw)
+{
+	m_pProfilePlotter->bShouldDraw = bShouldDraw;
+}
+
+/// Shows or hides profiling information text
+void ncApplication::ShowProfileInfo(bool bShouldDraw)
+{
+	m_pTextLines->bShouldDraw = bShouldDraw;
 }
 
 /// Sets the input handler object

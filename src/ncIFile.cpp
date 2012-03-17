@@ -58,17 +58,6 @@ bool ncIFile::HasExtension(const char *pExtension) const
 	return !strncmp(m_vExtension, pExtension, s_uMaxExtensionsLength);
 }
 
-/// Checks if a filename matches a particular extension
-bool ncIFile::FileHasExtension(const char *pFilename, const char* pExtension)
-{
-	const char *pDotChar = strrchr(pFilename, '.');
-	// A dot followed by at least three extension characters
-	if (pDotChar && strlen(pDotChar) >= 4)
-		return !strncmp(pDotChar+1, pExtension, s_uMaxExtensionsLength);
-	else
-		return false;
-}
-
 /// Returns the proper file handle according to prepended tags
 ncIFile* ncIFile::CreateFileHandle(const char *pFilename)
 {

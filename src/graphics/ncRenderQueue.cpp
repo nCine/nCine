@@ -12,6 +12,9 @@
 /// Adds a draw command to the queue
 void ncRenderQueue::AddCommand(const ncRenderCommand *pCommand)
 {
+	m_uTypedNumVertices[pCommand->Type()] += pCommand->Geometry().NumVertices();
+	m_uTypedNumCommands[pCommand->Type()]++;
+
 	m_uNumVertices += pCommand->Geometry().NumVertices();
 	m_renderCmds.InsertBack(pCommand);
 }
@@ -27,6 +30,15 @@ void ncRenderQueue::Draw()
 	m_uLastNumVertices = m_uNumVertices;
 	m_uLastNumCommands = m_renderCmds.Size();
 	m_uNumVertices = 0;
+
+	for (int i = 0; i < ncRenderCommand::TYPE_COUNT; i++)
+	{
+		m_uTypedLastNumVertices[i] = m_uTypedNumVertices[i];
+		m_uTypedLastNumCommands[i] = m_uTypedNumCommands[i];
+		m_uTypedNumVertices[i] = 0;
+		m_uTypedNumCommands[i] = 0;
+	}
+
 	m_renderCmds.Clear();
 }
 

@@ -17,6 +17,16 @@ private:
 	unsigned int m_uLastNumVertices;
 	/// The sum of draw commands in the previous frame (it never contains a partial sum)
 	unsigned int m_uLastNumCommands;
+
+	/// The current sum of vertices for a specified command type
+	unsigned int m_uTypedNumVertices[ncRenderCommand::TYPE_COUNT];
+	/// The current sum of draw commands for a specified command type
+	unsigned int m_uTypedNumCommands[ncRenderCommand::TYPE_COUNT];
+	/// The sum of vertices for a specified command type in the previous frame (it never contains a partial sum)
+	unsigned int m_uTypedLastNumVertices[ncRenderCommand::TYPE_COUNT];
+	/// The sum of draw commands for a specified command type in the previous frame (it never contains a partial sum)
+	unsigned int m_uTypedLastNumCommands[ncRenderCommand::TYPE_COUNT];
+
 	/// Array of render command pointers
 	ncArray<const ncRenderCommand *> m_renderCmds;
 
@@ -40,6 +50,11 @@ public:
 	inline unsigned int NumVertices() const { return m_uLastNumVertices; }
 	/// Returns the queue's length
 	inline unsigned int NumCommands() const { return m_uLastNumCommands; }
+
+	/// Returns the total number of vertices to be rendered by the queue for a specified command type
+	inline unsigned int NumVertices(ncRenderCommand::eCommandType eType) const { return m_uTypedLastNumVertices[eType]; }
+	/// Returns the number of commands to render a specified category of commands
+	inline unsigned int NumCommands(ncRenderCommand::eCommandType eType) const { return m_uTypedLastNumCommands[eType]; }
 };
 
 #endif

@@ -47,7 +47,7 @@ void ncAudioStreamPlayer::Play()
 			alSourcePlay(m_uSource);
 			m_eState = STATE_PLAYING;
 
-			ncServiceLocator::AudioDevice().RegisterStreamPlayer(this);
+			ncServiceLocator::AudioDevice().RegisterPlayer(this);
 		}
 			break;
 		case STATE_PLAYING:
@@ -57,7 +57,7 @@ void ncAudioStreamPlayer::Play()
 			alSourcePlay(m_uSource);
 			m_eState = STATE_PLAYING;
 
-			ncServiceLocator::AudioDevice().RegisterStreamPlayer(this);
+			ncServiceLocator::AudioDevice().RegisterPlayer(this);
 		}
 			break;
 	}
@@ -101,8 +101,8 @@ void ncAudioStreamPlayer::Stop()
 	}
 }
 
-/// Updates the stream buffer queue
-void ncAudioStreamPlayer::UpdateStream()
+/// Updates the player state and the stream buffer queue
+void ncAudioStreamPlayer::UpdateState()
 {
 	if (m_eState == STATE_PLAYING)
 	{

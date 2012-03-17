@@ -14,6 +14,7 @@
 #include "ncObject.h"
 #include "ncTextureLoader.h"
 #include "ncPoint.h"
+#include "ncRect.h"
 
 /// Texture class
 class ncTexture : public ncObject
@@ -42,6 +43,8 @@ public:
 	inline int Height() const { return m_iHeight; }
 	/// Returns texture size
 	inline ncPoint Size() const { return ncPoint(m_iWidth, m_iHeight); }
+	/// Returns texture rectangle
+	inline ncRect Rect() const { return ncRect(0, 0, m_iWidth, m_iHeight); }
 
 	// Sets texture filtering for both magnification and minification
 	void SetFiltering(GLenum eFilter);

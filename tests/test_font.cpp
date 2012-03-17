@@ -45,6 +45,7 @@ int main(int argc, char **argv)
 	text1.SetScale(2.0f);
 	text1.SetString(vTestString);
 	text1.SetPosition((iWidth - text1.Width())*0.5f, iTextHeight);
+	text1.SetColor(255, 0, 0, 255);
 
 	ncTextNode text2(&rootNode, &font1);
 	text2.SetScale(2.0f);
@@ -52,12 +53,14 @@ int main(int argc, char **argv)
 	iTextHeight -= text2.FontBase();
 	text2.SetPosition((iWidth - text1.Width())*0.5f, iTextHeight);
 	text2.EnableKerning(false);
+	text2.SetColor(255, 0, 0, 128);
 
 	ncTextNode text3(&rootNode, &font2);
 	text3.SetScale(2.0f);
 	text3.SetString(vTestString);
 	iTextHeight -= text3.FontBase();
 	text3.SetPosition((iWidth - text3.Width())*0.5f, iTextHeight);
+	text3.SetColor(0, 255, 0, 255);
 
 	ncTextNode text4(&rootNode, &font2);
 	text4.SetScale(2.0f);
@@ -65,12 +68,14 @@ int main(int argc, char **argv)
 	iTextHeight -= text4.FontBase();
 	text4.SetPosition((iWidth - text3.Width())*0.5f, iTextHeight);
 	text4.EnableKerning(false);
+	text4.SetColor(0, 255, 0, 128);
 
 	ncTextNode text5(&rootNode, &font3);
 	text5.SetScale(2.0f);
 	text5.SetString(vTestString);
 	iTextHeight -= text5.FontBase();
 	text5.SetPosition((iWidth - text5.Width())*0.5f, iTextHeight);
+	text5.SetColor(0, 0, 255, 255);
 
 	ncTextNode text6(&rootNode, &font3);
 	text6.SetScale(2.0f);
@@ -78,6 +83,7 @@ int main(int argc, char **argv)
 	iTextHeight -= text6.FontBase();
 	text6.SetPosition((iWidth - text5.Width())*0.5f, iTextHeight);
 	text6.EnableKerning(false);
+	text6.SetColor(0, 0, 255, 128);
 
 	t.Reset();
 	unsigned long int ulUpdateTime = t.Now();

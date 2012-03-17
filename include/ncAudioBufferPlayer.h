@@ -19,6 +19,9 @@ public:
 	virtual void Pause();
 	virtual void Stop();
 
+	// Updates the player state
+	virtual void UpdateState();
+
 	inline static eObjectType sType() { return AUDIOBUFFERPLAYER_TYPE; }
 };
 

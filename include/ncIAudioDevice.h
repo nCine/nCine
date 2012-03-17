@@ -1,7 +1,7 @@
 #ifndef CLASS_NCIAUDIODEVICE
 #define CLASS_NCIAUDIODEVICE
 
-class ncAudioStreamPlayer;
+class ncIAudioPlayer;
 
 /// It represents the interface to the audio device
 class ncIAudioDevice
@@ -15,9 +15,9 @@ public:
 	/// Returns the next available source index available for playing
 	virtual int NextAvailableSource() = 0;
 	/// Register a new stream player for buffer update
-	virtual void RegisterStreamPlayer(ncAudioStreamPlayer *pStreamPlayer) = 0;
-	/// Updates the buffers associated to stream players
-	virtual void UpdateStreams() = 0;
+	virtual void RegisterPlayer(ncIAudioPlayer *pPlayer) = 0;
+	/// Updates players state (and buffer queue in the case of stream players)
+	virtual void UpdatePlayers() = 0;
 };
 
 inline ncIAudioDevice::~ncIAudioDevice() { }
@@ -34,8 +34,8 @@ public:
 	virtual float Gain() { return 1.0f; }
 	virtual void SetGain(float fGain) { }
 	virtual int NextAvailableSource() { return -1; }
-	virtual void RegisterStreamPlayer(ncAudioStreamPlayer *pStreamPlayer) { }
-	virtual void UpdateStreams() { }
+	virtual void RegisterPlayer(ncIAudioPlayer *pPlayer) { }
+	virtual void UpdatePlayers() { }
 };
 
 #endif

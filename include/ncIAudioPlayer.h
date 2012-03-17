@@ -49,6 +49,11 @@ public:
 	/// Stop playing and rewind
 	virtual void Stop() = 0;
 
+	/// Updates the state of the player if the source has done playing
+	/*! It is called every frame by the ncIAudioDevice class and it is
+		also responsible for buffer queueing/unqueueing in stream players */
+	virtual void UpdateState() = 0;
+
 	/// Sets player looping property
 	inline void SetLooping(bool bLooping) { m_bLooping = bLooping; }
 

@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 //	ncTexture textureAlpha("textures/smoke_256_red.png");
 //	texture.SetAlphaFromRed(&textureAlpha);
 
-	ncParticleSystem particleSys(NUM_PARTICLES, &texture);
+	ncParticleSystem particleSys(&rootNode, NUM_PARTICLES, &texture, texture.Rect());
 	particleSys.SetPosition(iWidth*0.5f, iHeight*0.5f);
 
 //	particleSys.AddAffector(new ncAccelerationAffector(0.000025f, 0.0f));
@@ -57,8 +57,6 @@ int main(int argc, char **argv)
 	sizeAffector->AddSizeStep(0.7f, 1.6f);
 	sizeAffector->AddSizeStep(1.0f, 0.4f);
 	particleSys.AddAffector(sizeAffector);
-
-	rootNode.AddChildNode(&particleSys);
 
 	srand(time(NULL));
 	t.Reset();

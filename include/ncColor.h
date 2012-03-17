@@ -16,6 +16,12 @@ public:
 	/// Three components constructor (unsigned char)
 	ncColor(unsigned char ubR, unsigned char ubG, unsigned char ubB)
 		{ Set(ubR, ubG, ubB); }
+	/// Four components constructor (unsigned int)
+	ncColor(unsigned int uR, unsigned int uG, unsigned int uB, unsigned int uA)
+		{ Set(uR, uG, uB, uA); }
+	/// Three components constructor (unsigned int)
+	ncColor(unsigned int uR, unsigned int uG, unsigned int uB)
+		{ Set(uR, uG, uB); }
 	/// Four components constructor (normalized float)
 	ncColor(float fR, float fG, float fB, float fA)
 		{ SetF(fR, fG, fB, fA); }

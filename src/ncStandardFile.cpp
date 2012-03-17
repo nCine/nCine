@@ -55,51 +55,52 @@ void ncStandardFile::Close()
 
 long int ncStandardFile::Seek(long int lOffset, int iWhence) const
 {
-	long int ulSeekValue = -1;
+	long int lSeekValue = -1;
 
 	if (m_iFileDescriptor >= 0)
 	{
-		ulSeekValue = lseek(m_iFileDescriptor, lOffset, iWhence);
+		lSeekValue = lseek(m_iFileDescriptor, lOffset, iWhence);
 	}
 	else if (m_pFilePointer)
 	{
-		ulSeekValue = fseek(m_pFilePointer, lOffset, iWhence);
+		lSeekValue = fseek(m_pFilePointer, lOffset, iWhence);
 	}
 
-	return ulSeekValue;
+	return lSeekValue;
 }
 
 long int ncStandardFile::Tell() const
 {
-	long int ulTellValue = -1;
+	long int lTellValue = -1;
 
 	if (m_iFileDescriptor >= 0)
 	{
-		ulTellValue = lseek(m_iFileDescriptor, 0L, SEEK_CUR);
+		lTellValue = lseek(m_iFileDescriptor, 0L, SEEK_CUR);
 	}
 	else if (m_pFilePointer)
 	{
-		ulTellValue = ftell(m_pFilePointer);
+		lTellValue = ftell(m_pFilePointer);
 	}
 
-	return ulTellValue;
+	return lTellValue;
 }
 
 
 long int ncStandardFile::Read(void *pBuffer, int iBytes) const
 {
-	long int ulBytesRead = -1;
+	long int lBytesRead = -1;
 
 	if (m_iFileDescriptor >= 0)
 	{
-		ulBytesRead = read(m_iFileDescriptor, pBuffer, iBytes);
+		lBytesRead = read(m_iFileDescriptor, pBuffer, iBytes);
 	}
 	else if (m_pFilePointer)
 	{
-		ulBytesRead = fread(pBuffer, 1, iBytes, m_pFilePointer);
+		lBytesRead = fread(pBuffer, 1, iBytes, m_pFilePointer);
 	}
 
-	return ulBytesRead;
+//	printf("bytes: %ld\n", lBytesRead);
+	return lBytesRead;
 }
 
 

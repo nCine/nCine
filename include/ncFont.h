@@ -28,8 +28,8 @@ private:
 	/// Array of font glyphs
 	ncFontGlyph m_vGlyphs[s_uMaxGlyphs];
 
-	// Parse an AngelCode's FNT file
-	void ParseFNTFile(FILE *pFile);;
+	// Loads an AngelCode's FNT file in a RAM buffer then parses it
+	void ParseFNTFile(ncIFile *pFileHandle);
 
 public:
 	// Constructs a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)

@@ -26,9 +26,10 @@ SRC=$(NCINE_ROOT)/src
 TST=$(NCINE_ROOT)/tests
 
 LOCAL_MODULE := ncine
-LOCAL_CFLAGS := -Werror
+LOCAL_CFLAGS := -Werror -ffast-math
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/$(INC)
-LOCAL_SRC_FILES := main.cpp \
+LOCAL_SRC_FILES := \
+	main.cpp \
 	$(SRC)/base/ncVector2f.cpp \
 	$(SRC)/ncServiceLocator.cpp \
 	$(SRC)/ncFileLogger.cpp \

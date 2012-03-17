@@ -30,7 +30,8 @@ private:
 	virtual void UpdateRenderCommand() { }
 
 public:
-	ncParticleSystem(unsigned int uCount, ncTexture *pTexture);
+	// Constructs a particle system made of the specified maximum amount of particles
+	ncParticleSystem(ncSceneNode* pParent, unsigned int uCount, ncTexture *pTexture, ncRect texRect);
 	~ncParticleSystem();
 
 	/// Adds a particle affector

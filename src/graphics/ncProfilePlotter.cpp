@@ -13,6 +13,9 @@ ncPlottingVariable::ncPlottingVariable(unsigned int uNumValues, unsigned int uRe
 	m_valuesCmd.SetPriority(ncDrawableNode::HUD_PRIORITY + 1);
 	// One more than the variable graph
 	m_meanCmd.SetPriority(ncDrawableNode::HUD_PRIORITY + 2);
+
+	m_valuesCmd.SetType(ncRenderCommand::PLOTTER_TYPE);
+	m_meanCmd.SetType(ncRenderCommand::PLOTTER_TYPE);
 }
 
 ncPlottingVariable::~ncPlottingVariable()

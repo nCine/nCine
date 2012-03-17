@@ -75,22 +75,22 @@ int ncALAudioDevice::NextAvailableSource()
 	return -1;
 }
 
-void ncALAudioDevice::RegisterStreamPlayer(ncAudioStreamPlayer *pStreamPlayer)
+void ncALAudioDevice::RegisterPlayer(ncIAudioPlayer *pPlayer)
 {
-	m_streamPlayers.InsertBack(pStreamPlayer);
+	m_players.InsertBack(pPlayer);
 }
 
-void ncALAudioDevice::UpdateStreams()
+void ncALAudioDevice::UpdatePlayers()
 {
-	ncList<ncAudioStreamPlayer *>::Const_Iterator i = m_streamPlayers.Begin();
-	while(i != m_streamPlayers.End())
+	ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin();
+	while(i != m_players.End())
 	{
 		if ((*i)->isPlaying())
 		{
-			(*i)->UpdateStream();
+			(*i)->UpdateState();
 			i++;
 		}
 		else
-			m_streamPlayers.Remove(i++);
+			m_players.Remove(i++);
 	}
 }

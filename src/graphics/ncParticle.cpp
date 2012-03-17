@@ -42,7 +42,8 @@ void ncParticle::Transform()
 		m_fAbsScaleFactor = m_fScaleFactor;
 
 	// Always independent movement
+	m_fAbsRotation = m_fRotation;
 	m_fAbsX = x;
-	m_fAbsY = y;;
+	m_fAbsY = y;
 }
 

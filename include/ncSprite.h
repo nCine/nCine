@@ -47,6 +47,24 @@ public:
 	{
 		return ncPoint(m_iWidth, m_iHeight);
 	}
+	/// Returns sprite rectangle
+	inline ncRect Rect() const
+	{
+		float fHalfAbsW = m_iWidth * m_fAbsScaleFactor * 0.5f;
+		float fHalfAbsH = m_iHeight * m_fAbsScaleFactor * 0.5f;
+		return ncRect(x-fHalfAbsW, y-fHalfAbsH, fHalfAbsW*2.0f, fHalfAbsH*2.0f);
+	}
+
+	/// Sets sprite width
+	inline void SetWidth(int iWidth) { m_iWidth = iWidth; }
+	/// Sets sprite height
+	inline void SetHeight(int iHeight) { m_iHeight = iHeight; }
+	/// Sets sprite size
+	inline void SetSize(const ncPoint &rSize)
+	{
+		m_iWidth = rSize.x;
+		m_iHeight = rSize.y;
+	}
 
 	/// Returns sprite absolute width
 	inline int AbsWidth() const { return m_iWidth * m_fAbsScaleFactor; }
@@ -93,9 +111,9 @@ public:
 	/// Sets the sprite color through a ncColor class
 	inline void SetColor(ncColor color) { m_color = color; }
 	/// Sets the sprite color through unsigned char components
-	inline void SetColor(unsigned char ucR, unsigned char ucG, unsigned char ucB, unsigned char ucA) { m_color.Set(ucR, ucG, ucB, ucA); }
+	inline void SetColor(unsigned char ubR, unsigned char ubG, unsigned char ubB, unsigned char ubA) { m_color.Set(ubR, ubG, ubB, ubA); }
 	/// Sets the sprite color through float components
-	inline void SetColor(float fR, float fG, float fB, float fA) { m_color.SetF(fR, fG, fB, fA); }
+	inline void SetColorF(float fR, float fG, float fB, float fA) { m_color.SetF(fR, fG, fB, fA); }
 
 	inline static eObjectType sType() { return SPRITE_TYPE; }
 };

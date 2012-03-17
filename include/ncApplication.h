@@ -82,6 +82,11 @@ public:
 	/// Raises the quit flag
 	static inline void Quit() { m_bShouldQuit = true; };
 
+	// Shows or hides profiling graphs
+	static void ShowProfileGraphs(bool bShouldDraw);
+	// Shows or hides profiling information text
+	static void ShowProfileInfo(bool bShouldDraw);
+
 	// Sets the input handler object
 	static void SetInputHandler(ncIInputEventHandler *pInputEventHandler);
 };

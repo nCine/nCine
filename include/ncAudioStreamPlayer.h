@@ -19,8 +19,8 @@ public:
 	virtual void Pause();
 	virtual void Stop();
 
-	// Updates the stream buffer queue
-	void UpdateStream();
+	// Updates the player state and the stream buffer queue
+	virtual void UpdateState();
 
 	inline static eObjectType sType() { return AUDIOSTREAMPLAYER_TYPE; }
 };

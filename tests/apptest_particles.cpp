@@ -25,7 +25,7 @@ void MyEventHandler::OnInit()
 //	m_pTexture->SetAlphaFromRed(&textureAlpha);
 #endif
 
-	m_pParticleSys = new ncParticleSystem(numParticles, m_pTexture);
+	m_pParticleSys = new ncParticleSystem(&rRootNode, numParticles, m_pTexture, m_pTexture->Rect());
 	m_pParticleSys->SetPosition(ncApplication::Width()*0.5f, ncApplication::Height()*0.33f);
 
 //	pParticleSys->AddAffector(new ncAccelerationAffector(0.000025f, 0.0f));
@@ -41,8 +41,6 @@ void MyEventHandler::OnInit()
 	sizeAffector->AddSizeStep(1.0f, 0.4f);
 	m_pParticleSys->AddAffector(sizeAffector);
 	m_emitVector.Set(0.0f, 0.35f);
-
-	rRootNode.AddChildNode(m_pParticleSys);
 
 	m_pTimer = new ncTimer();
 	m_pTimer->Reset();

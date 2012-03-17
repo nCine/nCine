@@ -88,8 +88,6 @@ public:
 	const char* Extension() const { return m_vExtension; }
 	// Checks if file extension matches
 	bool HasExtension(const char *pExtension) const;
-	// Checks if a filename matches a particular extension
-	static bool FileHasExtension(const char *pFilename, const char* pExtension);
 
 	/// Returns file descriptor
 	inline int Fd() const { return m_iFileDescriptor; }
