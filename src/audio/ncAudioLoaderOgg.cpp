@@ -43,6 +43,12 @@ ncAudioLoaderOgg::ncAudioLoaderOgg(const char *pFilename)
 	Init();
 }
 
+ncAudioLoaderOgg::ncAudioLoaderOgg(ncIFile *pFileHandle)
+	: ncIAudioLoader(pFileHandle)
+{
+	Init();
+}
+
 ncAudioLoaderOgg::~ncAudioLoaderOgg()
 {
 	ov_clear(&m_oggFile);

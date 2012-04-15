@@ -27,8 +27,10 @@ private:
 	} WAV_header;
 
 	void Init();
+
 public:
 	ncAudioLoaderWav(const char *pFilename);
+	ncAudioLoaderWav(ncIFile *pFileHandle);
 	~ncAudioLoaderWav() { }
 
 	long Read(char *pBuffer, int iBufSize) const;

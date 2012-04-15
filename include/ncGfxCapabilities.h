@@ -19,6 +19,7 @@ private:
 #else
 	bool m_bOESCompressedETC1RGB8Texture;
 	bool m_bAMDCompressedATCTexture;
+	bool m_bIMGTextureCompressionPVRTC;
 #endif
 
 	// Queries the device about its capabilities
@@ -64,6 +65,8 @@ public:
 	inline bool OESCompressedETC1RGB8Texture() const { return m_bOESCompressedETC1RGB8Texture; }
 	/// Returns true if the extension GL_AMD_compressed_ATC_texture is available
 	inline bool AMDCompressedATCTexture() const { return m_bAMDCompressedATCTexture; }
+	/// Returns true if the extension GL_IMG_texture_compression_pvrtc is available
+	inline bool IMGTextureCompressionPVRTC() const { return m_bIMGTextureCompressionPVRTC; }
 #endif
 };
 

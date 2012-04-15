@@ -1,7 +1,7 @@
 #ifndef CLASS_NCSDLGFXDEVICE
 #define CLASS_NCSDLGFXDEVICE
 
-#ifndef NO_GLEW
+#ifdef WITH_GLEW
 	#include <GL/glew.h>
 #else
 	#include <GL/gl.h>

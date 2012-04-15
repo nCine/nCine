@@ -1,7 +1,5 @@
 #include <cmath>
-#ifdef __ANDROID__
-	#include <cstdlib> // for exit()
-#endif
+#include <cstdlib> // for exit()
 #include "ncSprite.h"
 #include "ncServiceLocator.h"
 #include "ncRenderQueue.h"

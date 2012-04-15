@@ -1,4 +1,4 @@
-#ifndef NO_GLEW
+#ifdef WITH_GLEW
 	#include <GL/glew.h>
 #else
 	#include <GL/gl.h>

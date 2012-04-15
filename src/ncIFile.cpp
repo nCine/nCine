@@ -36,7 +36,7 @@ ncIFile::ncIFile(const char *pFilename)
 	char *pDotChar = strrchr(m_vFilename, '.');
 	// A dot followed by at least three extension characters
 	if (pDotChar && strlen(pDotChar) >= 4)
-		strncpy(m_vExtension, pDotChar+1, s_uMaxExtensionsLength);
+		strncpy(m_vExtension, pDotChar+1, s_uMaxExtensionsLength-1); // preserves '\0'
 }
 
 ///////////////////////////////////////////////////////////

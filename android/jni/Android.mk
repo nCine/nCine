@@ -3,9 +3,19 @@ LOCAL_PATH := $(call my-dir)
 ##################################
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := webp
+LOCAL_SRC_FILES := webp/$(TARGET_ARCH_ABI)/libwebp.a
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/webp/include
+LOCAL_EXPORT_CFLAGS := -DWITH_WEBP
+include $(PREBUILT_STATIC_LIBRARY)
+
+##################################
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := tremolo
 LOCAL_SRC_FILES := tremolo/$(TARGET_ARCH_ABI)/libtremolo.a
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/tremolo/include
+LOCAL_EXPORT_CFLAGS := -DWITH_VORBIS
 include $(PREBUILT_STATIC_LIBRARY)
 
 ##################################
@@ -47,7 +57,11 @@ LOCAL_SRC_FILES := \
 	$(SRC)/graphics/ncEGLGfxDevice.cpp \
 	$(SRC)/graphics/ncGfxCapabilities.cpp \
 	$(SRC)/graphics/ncTextureFormat.cpp \
-	$(SRC)/graphics/ncTextureLoader.cpp \
+	$(SRC)/graphics/ncITextureLoader.cpp \
+	$(SRC)/graphics/ncTextureLoaderDDS.cpp \
+	$(SRC)/graphics/ncTextureLoaderPVR.cpp \
+	$(SRC)/graphics/ncTextureLoaderWebP.cpp \
+	$(SRC)/graphics/ncTextureLoaderETC.cpp \
 	$(SRC)/graphics/ncTexture.cpp \
 	$(SRC)/graphics/ncProfilePlotter.cpp \
 	$(SRC)/graphics/ncLinePlotter.cpp \
@@ -74,7 +88,7 @@ LOCAL_SRC_FILES := \
 	$(TST)/apptest_rotozoom.cpp
 
 LOCAL_LDLIBS := -lm -llog -landroid -lEGL -lGLESv1_CM
-LOCAL_STATIC_LIBRARIES := android_native_app_glue tremolo
+LOCAL_STATIC_LIBRARIES := android_native_app_glue webp tremolo
 LOCAL_SHARED_LIBRARIES := openal
 
 include $(BUILD_SHARED_LIBRARY)

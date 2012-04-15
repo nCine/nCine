@@ -22,21 +22,14 @@ protected:
 	/// Duration in seconds
 	float m_fDuration;
 
-	ncIAudioLoader(const char *pFilename)
-		: m_pFileHandle(NULL), m_iBytesPerSample(0), m_iChannels(0), m_iFrequency(0), m_ulNumSamples(0L), m_fDuration(0.0f)
-	{
-		m_pFileHandle = ncIFile::CreateFileHandle(pFilename);
-	}
+	ncIAudioLoader(const char *pFilename);
+	ncIAudioLoader(ncIFile *pFileHandle);
 
 	/// Load the audio parameters from file
 	virtual void Init() = 0;
 
 public:
-	virtual ~ncIAudioLoader()
-	{
-		if (m_pFileHandle)
-			delete m_pFileHandle;
-	}
+	virtual ~ncIAudioLoader();
 
 	/// Decodes audio data in a specified buffer
 	/*! \param pBuffer Buffer pointer

@@ -18,9 +18,11 @@ void MyEventHandler::OnInit()
 	ncSceneNode &rRootNode = ncApplication::RootNode();
 
 #ifdef __ANDROID__
-	m_pTexture = new ncTexture("/sdcard/ncine/smoke_128.dds");
+//	m_pTexture = new ncTexture("/sdcard/ncine/smoke_128.dds");
+	m_pTexture = new ncTexture("/sdcard/ncine/smoke_128_4444.pvr");
 #else
-	m_pTexture = new ncTexture("textures/smoke_256.png");
+//	m_pTexture = new ncTexture("textures/smoke_256.webp");
+	m_pTexture = new ncTexture("textures/smoke_256_4444.pvr");
 //	ncTexture textureAlpha("textures/smoke_256_red.png");
 //	m_pTexture->SetAlphaFromRed(&textureAlpha);
 #endif

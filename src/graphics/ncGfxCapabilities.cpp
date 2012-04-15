@@ -1,7 +1,7 @@
 #if defined(__ANDROID__)
 	#include <GLES/gl.h>
 	#include <GLES/glext.h>
-#elif !defined(NO_GLEW)
+#elif defined(WITH_GLEW)
 	#include <GL/glew.h>
 #else
 	#include <GL/gl.h>
@@ -28,7 +28,8 @@ ncGfxCapabilities::ncGfxCapabilities()
 	  m_bEXTTextureCompressionS3TC (false)
 #else
 	  m_bOESCompressedETC1RGB8Texture(false),
-	  m_bAMDCompressedATCTexture(false)
+	  m_bAMDCompressedATCTexture(false),
+	  m_bIMGTextureCompressionPVRTC(false)
 #endif
 {
 
@@ -78,6 +79,7 @@ void ncGfxCapabilities::LogGLCaps() const
 #else
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, "GL_OES_compressed_ETC1_RGB8_texture: %d", m_bOESCompressedETC1RGB8Texture);
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, "GL_AMD_compressed_ATC_texture: %d", m_bAMDCompressedATCTexture);
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, "GL_IMG_texture_compression_pvrtc: %d", m_bIMGTextureCompressionPVRTC);
 #endif
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, "ncGfxCapabilities::LogGLCaps - OpenGL device capabilities ---");
 }
@@ -129,6 +131,7 @@ void ncGfxCapabilities::Init()
 #else
 	m_bOESCompressedETC1RGB8Texture = CheckGLExtension("GL_OES_compressed_ETC1_RGB8_texture");
 	m_bAMDCompressedATCTexture = CheckGLExtension("GL_AMD_compressed_ATC_texture");
+	m_bIMGTextureCompressionPVRTC = CheckGLExtension("GL_IMG_texture_compression_pvrtc");
 #endif
 }
 

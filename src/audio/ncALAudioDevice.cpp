@@ -1,4 +1,4 @@
-#include <cstdlib>
+#include <cstdlib> // for exit()
 #include "ncALAudioDevice.h"
 #include "ncAudioStreamPlayer.h"
 #include "ncServiceLocator.h"

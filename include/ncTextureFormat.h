@@ -4,7 +4,7 @@
 #if defined(__ANDROID__)
 	#include <GLES/gl.h>
 	#include <GLES/glext.h>
-#elif !defined(NO_GLEW)
+#elif defined(WITH_GLEW)
 	#include <GL/glew.h>
 #else
 	#include <GL/gl.h>
@@ -34,10 +34,13 @@ private:
 	bool OESCompressedFormat();
 #endif
 
+	// Tries to find an external format corresponding to the internal one
+	void FindExternalFmt();
 public:
 	ncTextureFormat()
 		: m_eInternalFormat(-1), m_eFormat(-1), m_eType(-1), m_bCompressed(false) { }
 	ncTextureFormat(GLenum eInternalFormat);
+	ncTextureFormat(GLenum eInternalFormat, GLenum eType);
 
 	/// Returns the specified internal format
 	inline GLenum Internal() const { return m_eInternalFormat; }
@@ -47,9 +50,8 @@ public:
 	inline GLenum Type() const { return m_eType; }
 	/// Specifies wheter data is compressed or not
 	inline bool isCompressed() const { return m_bCompressed; }
-
 #ifndef __ANDROID__
-	// Converts to the corresponding BGR format
+	// Converts the external format to the corresponding BGR one
 	void BGRFormat();
 #endif
 };

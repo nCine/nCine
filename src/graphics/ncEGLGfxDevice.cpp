@@ -40,15 +40,15 @@ ncEGLGfxDevice::~ncEGLGfxDevice()
 void ncEGLGfxDevice::InitDevice(struct android_app* state)
 {
 	const EGLint attribs[] = {
-		  EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-		  EGL_BLUE_SIZE, m_mode.BlueBits(),
-		  EGL_GREEN_SIZE, m_mode.GreenBits(),
-		  EGL_RED_SIZE, m_mode.RedBits(),
-		  EGL_ALPHA_SIZE, m_mode.AlphaBits(),
-		  EGL_NONE
+		EGL_SURFACE_TYPE,		EGL_WINDOW_BIT,
+		EGL_BLUE_SIZE,			m_mode.BlueBits(),
+		EGL_GREEN_SIZE,			m_mode.GreenBits(),
+		EGL_RED_SIZE,			m_mode.RedBits(),
+		EGL_ALPHA_SIZE,			m_mode.AlphaBits(),
+		EGL_NONE
 	};
 
-	EGLint w, h, dummy, format;
+	EGLint w, h, format;
 	EGLint numConfigs;
 	EGLConfig config;
 

@@ -2,27 +2,46 @@ cmake_minimum_required(VERSION 2.6)
 project(nCine)
 
 if(NOT CROSS_MINGW32)
-    find_package(OpenGL REQUIRED)
-    find_package(SDL REQUIRED)
-    find_package(SDL_image REQUIRED)
-    find_package(OpenAL REQUIRED)
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
-    find_package(Vorbis REQUIRED)
-    add_definitions(-DNO_GLEW)
+	find_package(OpenGL REQUIRED)
+	find_package(SDL REQUIRED)
+	find_package(SDL_image)
+	find_package(OpenAL REQUIRED)
+	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
+	find_package(WebP)
+	find_package(Vorbis)
 else()
-    SET(CMAKE_SYSTEM_NAME Windows)
-    SET(CMAKE_SHARED_LIBRARY_PREFIX)
-    SET(CMAKE_SHARED_LIBRARY_SUFFIX .dll)
-    SET(CMAKE_EXECUTABLE_SUFFIX .exe)
-    SET(CMAKE_C_COMPILER i486-mingw32-gcc)
-    SET(CMAKE_CXX_COMPILER i486-mingw32-g++)
-    SET(CMAKE_RC_COMPILER i486-mingw32-windres)
-    SET(CMAKE_FIND_ROOT_PATH /usr/i486-mingw32)
-    SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-    SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-    SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-    SET(CMAKE_SHARED_LIBRARY_CXX_FLAGS "") # suppressing '-fpic'
-    SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "") # suppressing '-rdynamic'
+	set(CMAKE_SYSTEM_NAME Windows)
+	set(CMAKE_SHARED_LIBRARY_PREFIX)
+	set(CMAKE_SHARED_LIBRARY_SUFFIX .dll)
+	set(CMAKE_EXECUTABLE_SUFFIX .exe)
+	set(CMAKE_C_COMPILER i486-mingw32-gcc)
+	set(CMAKE_CXX_COMPILER i486-mingw32-g++)
+	set(CMAKE_RC_COMPILER i486-mingw32-windres)
+	set(CMAKE_FIND_ROOT_PATH /usr/i486-mingw32)
+	set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+	set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+	set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+	set(CMAKE_SHARED_LIBRARY_CXX_FLAGS "") # suppressing '-fpic'
+	set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "") # suppressing '-rdynamic'
+	set(SDLIMAGE_FOUND 1)
+	set(VORBIS_FOUND 1)
+	add_definitions(-DWITH_GLEW)
+endif()
+
+if(SDLIMAGE_FOUND)
+	add_definitions(-DWITH_SDLIMAGE)
+else()
+	set(SDLIMAGE_LIBRARY "")
+endif()
+if(WEBP_FOUND)
+	add_definitions(-DWITH_WEBP)
+else()
+	set(WEBP_LIBRARY "")
+endif()
+if(VORBIS_FOUND)
+	add_definitions(-DWITH_VORBIS)
+else()
+	set(VORBISFILE_LIBRARY "")
 endif()
 
 include_directories(include)
@@ -32,7 +51,7 @@ set(CMAKE_BUILD_TYPE Debug)
 set(SOURCES
 	include/ncArray.h
 	include/ncList.h
-    include/ncListIterator.h
+	include/ncListIterator.h
 	include/ncPoint.h
 	include/ncRect.h
 	src/base/ncVector2f.cpp
@@ -44,13 +63,15 @@ set(SOURCES
 	src/ncProfileVariable.cpp
 	src/ncFont.cpp
 	src/ncFontGlyph.cpp
-    src/ncIFile.cpp
-    src/ncStandardFile.cpp
+	src/ncIFile.cpp
+	src/ncStandardFile.cpp
 	src/ncSDLInputManager.cpp
 	src/graphics/ncSDLGfxDevice.cpp
 	src/graphics/ncGfxCapabilities.cpp
 	src/graphics/ncTextureFormat.cpp
-	src/graphics/ncTextureLoader.cpp
+	src/graphics/ncITextureLoader.cpp
+	src/graphics/ncTextureLoaderDDS.cpp
+	src/graphics/ncTextureLoaderPVR.cpp
 	src/graphics/ncTexture.cpp
 	src/graphics/ncProfilePlotter.cpp
 	src/graphics/ncLinePlotter.cpp
@@ -69,35 +90,45 @@ set(SOURCES
 	src/graphics/ncAnimatedSprite.cpp
 	src/audio/ncALAudioDevice.cpp
 	src/audio/ncIAudioLoader.cpp
-    src/audio/ncAudioLoaderWav.cpp
-	src/audio/ncAudioLoaderOgg.cpp
+	src/audio/ncAudioLoaderWav.cpp
 	src/audio/ncAudioBuffer.cpp
 	src/audio/ncAudioStream.cpp
 	src/audio/ncAudioBufferPlayer.cpp
 	src/audio/ncAudioStreamPlayer.cpp
 )
 
+if(SDLIMAGE_FOUND)
+	list(APPEND SOURCES src/graphics/ncTextureLoaderSDL.cpp)
+endif()
+if(WEBP_FOUND)
+	list(APPEND SOURCES src/graphics/ncTextureLoaderWebP.cpp)
+endif()
+if(VORBIS_FOUND)
+	list(APPEND SOURCES src/audio/ncAudioLoaderOgg.cpp)
+endif()
+
 if(NOT CROSS_MINGW32)
-    link_libraries (
-        ${SDL_LIBRARY}
-        ${SDLIMAGE_LIBRARY}
-        ${OPENGL_gl_LIBRARY}
-        ${OPENAL_LIBRARY}
-        ${VORBISFILE_LIBRARY}
-    )
+	link_libraries (
+		${SDL_LIBRARY}
+		${SDLIMAGE_LIBRARY}
+		${WEBP_LIBRARY}
+		${OPENGL_gl_LIBRARY}
+		${OPENAL_LIBRARY}
+		${VORBISFILE_LIBRARY}
+	)
 else()
-    link_libraries (
-        mingw32
-        SDLmain
-        SDL
-        SDL_image
-        glew32
-        opengl32
-        OpenAL32
-        ogg
-        vorbis
-        vorbisfile
-    )
+	link_libraries (
+		mingw32
+		SDLmain
+		SDL
+		SDL_image
+		glew32
+		opengl32
+		OpenAL32
+		ogg
+		vorbis
+		vorbisfile
+	)
 endif()
 
 add_library(ncine SHARED ${SOURCES})

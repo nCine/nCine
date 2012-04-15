@@ -126,7 +126,7 @@ void ncSDLGfxDevice::InitDevice()
 		exit(-1);
 	}
 
-#ifndef NO_GLEW
+#ifdef WITH_GLEW
 	GLenum err = glewInit();
 
 	if (GLEW_OK != err) {

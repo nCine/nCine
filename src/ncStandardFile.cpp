@@ -1,7 +1,7 @@
+#include <cstdlib> // for exit()
 #include <sys/stat.h> // for open()
 #include <fcntl.h> // for open()
 #include <unistd.h> // for close()
-#include <cstdlib> // for exit()
 #include "ncStandardFile.h"
 #include "ncServiceLocator.h"
 

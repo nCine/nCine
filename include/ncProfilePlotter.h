@@ -4,7 +4,7 @@
 #if defined(__ANDROID__)
 	#include <GLES/gl.h>
 	#include <GLES/glext.h>
-#elif !defined(NO_GLEW)
+#elif defined(WITH_GLEW)
 	#include <GL/glew.h>
 #else
 	#include <GL/gl.h>

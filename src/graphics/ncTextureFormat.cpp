@@ -11,6 +11,40 @@ ncTextureFormat::ncTextureFormat(GLenum eInternalFormat)
 	: m_eInternalFormat(eInternalFormat), m_eFormat(-1),
 	  m_eType(-1), m_bCompressed(false)
 {
+	FindExternalFmt();
+}
+
+ncTextureFormat::ncTextureFormat(GLenum eInternalFormat, GLenum eType)
+	: m_eInternalFormat(eInternalFormat), m_eFormat(-1),
+	  m_eType(-1), m_bCompressed(false)
+{
+	FindExternalFmt();
+	// Overriding the type found by FindExternalFmt()
+	m_eType = eType;
+}
+
+///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
+
+#ifndef __ANDROID__
+/// Converts the external format to the corresponding BGR one
+void ncTextureFormat::BGRFormat()
+{
+	if (m_eFormat == GL_RGBA)
+		m_eFormat = GL_BGRA;
+	else if (m_eFormat == GL_RGB)
+		m_eFormat = GL_BGR;
+}
+#endif
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+/// Tries to find an external format corresponding to the internal one
+void ncTextureFormat::FindExternalFmt()
+{
 	bool bFound = false;
 
 #ifndef __ANDROID__
@@ -29,29 +63,10 @@ ncTextureFormat::ncTextureFormat(GLenum eInternalFormat)
 
 	if (bFound == false)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureFormat::ncTextureFormat - Unknown internal format: %d", eInternalFormat);
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureFormat::FindExternalFmt - Unknown internal format: %d", m_eInternalFormat);
 		exit(-1);
 	}
 }
-
-///////////////////////////////////////////////////////////
-// PUBLIC FUNCTIONS
-///////////////////////////////////////////////////////////
-
-#ifndef __ANDROID__
-/// Converts to the corresponding BGR format
-void ncTextureFormat::BGRFormat()
-{
-	if (m_eFormat == GL_RGBA)
-		m_eFormat = GL_BGRA;
-	else if (m_eFormat == GL_RGB)
-		m_eFormat = GL_BGR;
-}
-#endif
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
 
 #ifndef __ANDROID__
 /// Searches a match between an integer internal format and an external one
@@ -61,10 +76,12 @@ bool ncTextureFormat::IntegerFormat()
 
 	switch(m_eInternalFormat)
 	{
+		case GL_RGBA:
 		case GL_RGBA8:
 		case 4:
 			m_eFormat = GL_RGBA;
 			break;
+		case GL_RGB:
 		case GL_RGB8:
 		case 3:
 			m_eFormat = GL_RGB;
@@ -74,13 +91,13 @@ bool ncTextureFormat::IntegerFormat()
 		case 2:
 			m_eFormat = GL_LUMINANCE_ALPHA;
 			break;
-		case GL_ALPHA8:
 		case GL_ALPHA:
+		case GL_ALPHA8:
 		case 1:
 			m_eFormat = GL_ALPHA;
 			break;
-		case GL_LUMINANCE8:
 		case GL_LUMINANCE:
+		case GL_LUMINANCE8:
 			m_eFormat = GL_LUMINANCE;
 			break;
 		case GL_DEPTH_COMPONENT:
@@ -164,11 +181,17 @@ bool ncTextureFormat::OESFormat()
 
 	switch(m_eInternalFormat)
 	{
-		case GL_RGBA8_OES:
+		case GL_RGBA:
 			m_eFormat = GL_RGBA;
 			break;
-		case GL_RGB8_OES:
+		case GL_RGB:
 			m_eFormat = GL_RGB;
+			break;
+		case GL_LUMINANCE_ALPHA:
+			m_eFormat = GL_LUMINANCE_ALPHA;
+			break;
+		case GL_LUMINANCE:
+			m_eFormat = GL_LUMINANCE;
 			break;
 		case GL_ALPHA:
 			m_eFormat = GL_ALPHA;
@@ -191,13 +214,13 @@ bool ncTextureFormat::OESCompressedFormat()
 
 	switch(m_eInternalFormat)
 	{
-		case GL_ETC1_RGB8_OES:
-		case GL_ATC_RGB_AMD:
-			m_eFormat = GL_RGB;
-			break;
 		case GL_ATC_RGBA_EXPLICIT_ALPHA_AMD:
 		case GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD:
 			m_eFormat = GL_RGBA;
+			break;
+		case GL_ETC1_RGB8_OES:
+		case GL_ATC_RGB_AMD:
+			m_eFormat = GL_RGB;
 			break;
 		default:
 			bFound = false;

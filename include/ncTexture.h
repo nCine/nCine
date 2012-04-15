@@ -4,7 +4,7 @@
 #if defined(__ANDROID__)
 	#include <GLES/gl.h>
 	#include <GLES/glext.h>
-#elif !defined(NO_GLEW)
+#elif defined(WITH_GLEW)
 	#include <GL/glew.h>
 #else
 	#include <GL/gl.h>
@@ -12,7 +12,7 @@
 #endif
 
 #include "ncObject.h"
-#include "ncTextureLoader.h"
+#include "ncITextureLoader.h"
 #include "ncPoint.h"
 #include "ncRect.h"
 
@@ -25,9 +25,9 @@ private:
 	int m_iHeight;
 
 	// Loads a texture based on information from the texture format and loader
-	void Load(const ncTextureLoader &texLoader);
+	void Load(const ncITextureLoader& texLoader);
 	// Loads a texture overriding the size detected by the texture loader
-	void Load(const ncTextureLoader &texLoader, int iWidth, int iHeight);
+	void Load(const ncITextureLoader& texLoader, int iWidth, int iHeight);
 public:
 	ncTexture();
 	ncTexture(const char *pFilename);

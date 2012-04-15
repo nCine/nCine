@@ -1,6 +1,4 @@
-#ifdef __ANDROID__
-	#include <cstdlib> // for exit()
-#endif
+#include <cstdlib> // for exit()
 #include "ncSpriteBatchNode.h"
 #include "ncServiceLocator.h"
 #include "ncSprite.h"

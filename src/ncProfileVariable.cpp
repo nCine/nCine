@@ -1,6 +1,6 @@
+#include <cstdlib> // for exit()
 #include "ncProfileVariable.h"
 #include "ncServiceLocator.h"
-#include <cstdlib> // per exit()
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR

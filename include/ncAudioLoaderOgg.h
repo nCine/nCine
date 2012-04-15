@@ -17,8 +17,10 @@ private:
 	mutable OggVorbis_File m_oggFile;
 
 	void Init();
+
 public:
 	ncAudioLoaderOgg(const char *pFilename);
+	ncAudioLoaderOgg(ncIFile *pFileHandle);
 	~ncAudioLoaderOgg();
 
 	long Read(char *pBuffer, int iBufSize) const;
