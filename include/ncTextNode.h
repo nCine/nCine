@@ -32,8 +32,6 @@ private:
 	bool m_bWithKerning;
 	/// The font class used to render text
 	ncFont *m_pFont;
-	/// Text color
-	ncColor m_color;
 	/// The array of vertices for every glyph in the batch
 	ncArray<float> m_vVertices;
 	/// The array of texture coordinates for every glyph in the batch
@@ -85,15 +83,6 @@ public:
 	inline float FontLineHeight() const { return m_pFont->LineHeight() * CurrentAbsScale(); }
 	// Sets the string to render
 	void SetString(const char *pString);
-
-	/// Gets the text color
-	inline const ncColor Color() { return m_color; }
-	/// Sets the text color through a ncColor class
-	inline void SetColor(ncColor color) { m_color = color; }
-	/// Sets the text color through unsigned char components
-	inline void SetColor(unsigned char ubR, unsigned char ubG, unsigned char ubB, unsigned char ubA) { m_color.Set(ubR, ubG, ubB, ubA); }
-	/// Sets the text color through float components
-	inline void SetColorF(float fR, float fG, float fB, float fA) { m_color.SetF(fR, fG, fB, fA); }
 
 	virtual void Draw(ncRenderQueue& rRenderQueue);
 

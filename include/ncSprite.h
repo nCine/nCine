@@ -19,8 +19,6 @@ private:
 	int m_iWidth;
 	/// Sprite height in pixel
 	int m_iHeight;
-	/// Sprite color (transparency, translucency, etc..)
-	ncColor m_color;
 
 	float m_fVertices[8];
 	float m_fTexCoords[8];
@@ -105,15 +103,6 @@ public:
 		m_texRect.h *= -1;
 		SetTexCoords();
 	}
-
-	/// Gets the sprite color
-	inline const ncColor Color() { return m_color; }
-	/// Sets the sprite color through a ncColor class
-	inline void SetColor(ncColor color) { m_color = color; }
-	/// Sets the sprite color through unsigned char components
-	inline void SetColor(unsigned char ubR, unsigned char ubG, unsigned char ubB, unsigned char ubA) { m_color.Set(ubR, ubG, ubB, ubA); }
-	/// Sets the sprite color through float components
-	inline void SetColorF(float fR, float fG, float fB, float fA) { m_color.SetF(fR, fG, fB, fA); }
 
 	inline static eObjectType sType() { return SPRITE_TYPE; }
 };

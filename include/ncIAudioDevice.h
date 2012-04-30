@@ -12,6 +12,20 @@ public:
 	virtual float Gain() = 0;
 	/// Sets the listener gain value
 	virtual void SetGain(float fGain) = 0;
+
+	/// Stops every player currently playing
+	virtual void StopPlayers() = 0;
+	/// Pauses every player currently playing
+	virtual void PausePlayers() = 0;
+	/// Stops every buffer player currently playing
+	virtual void StopBufferPlayers() = 0;
+	/// Pauses every buffer player currently playing
+	virtual void PauseBufferPlayers() = 0;
+	/// Stops every stream player currently playing
+	virtual void StopStreamPlayers() = 0;
+	/// Pauses every stream player currently playing
+	virtual void PauseStreamPlayers() = 0;
+
 	/// Returns the next available source index available for playing
 	virtual int NextAvailableSource() = 0;
 	/// Register a new stream player for buffer update
@@ -33,6 +47,14 @@ class ncNullAudioDevice : public ncIAudioDevice
 public:
 	virtual float Gain() { return 1.0f; }
 	virtual void SetGain(float fGain) { }
+
+	virtual void StopPlayers() { }
+	virtual void PausePlayers() { }
+	virtual void StopBufferPlayers() { }
+	virtual void PauseBufferPlayers() { }
+	virtual void StopStreamPlayers() { }
+	virtual void PauseStreamPlayers() { }
+
 	virtual int NextAvailableSource() { return -1; }
 	virtual void RegisterPlayer(ncIAudioPlayer *pPlayer) { }
 	virtual void UpdatePlayers() { }

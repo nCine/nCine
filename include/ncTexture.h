@@ -23,6 +23,8 @@ private:
 	GLuint m_uGLId;
 	int m_iWidth;
 	int m_iHeight;
+	bool m_bCompressed;
+	bool m_bAlphaChannel;
 
 	// Loads a texture based on information from the texture format and loader
 	void Load(const ncITextureLoader& texLoader);
@@ -46,14 +48,17 @@ public:
 	/// Returns texture rectangle
 	inline ncRect Rect() const { return ncRect(0, 0, m_iWidth, m_iHeight); }
 
+	/// Returns true if the texture holds compressed data
+	inline bool isCompressed() const { return m_bCompressed; }
+	/// Returns true if the texture provides an alpha channel
+	inline bool hasAlpha() const { return m_bAlphaChannel; }
+
 	// Sets texture filtering for both magnification and minification
 	void SetFiltering(GLenum eFilter);
 	/// Binds the texture to the current unit
 	inline void Bind() { glBindTexture(GL_TEXTURE_2D, m_uGLId); }
 	/// Disables texture rendering for the current unit
 	static void Unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
-	// Sets the red channel of a second texture as the alpha channel
-	void SetAlphaFromRed(ncTexture *pAlphaTex);
 
 	inline static eObjectType sType() { return TEXTURE_TYPE; }
 };

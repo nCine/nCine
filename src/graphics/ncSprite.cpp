@@ -73,7 +73,7 @@ void ncSprite::SetTexCoords()
 void ncSprite::UpdateRenderCommand()
 {
 	m_renderCmd.Material().SetTextureGLId(m_pTexture->GLId());
-	m_renderCmd.Material().SetColor(m_color);
+	m_renderCmd.Material().SetColor(m_absColor);
 	m_renderCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
 	SetVertices();
 	m_renderCmd.Geometry().SetData(GL_TRIANGLE_STRIP, 0, 4, m_fVertices, m_fTexCoords, NULL);

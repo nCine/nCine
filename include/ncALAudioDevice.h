@@ -22,14 +22,27 @@ private:
 	/// The sources pool
 	ALuint m_uSources[s_uMaxSources];
 
-	/// A list of active stream players
+	/// A list of active audio players
 	ncList<ncIAudioPlayer *> m_players;
+
+	/// Stops or pauses all buffer players
+	void StopOrPauseBufferPlayers(bool bStop);
+	/// Stops or pauses all stream players
+	void StopOrPauseStreamPlayers(bool bStop);
+
 public:
 	ncALAudioDevice();
 	virtual ~ncALAudioDevice();
 
 	virtual float Gain() { return m_fGain; }
 	virtual void SetGain(float fGain);
+
+	virtual void StopPlayers();
+	virtual void PausePlayers();
+	virtual inline void StopBufferPlayers() { StopOrPauseBufferPlayers(true); }
+	virtual inline void PauseBufferPlayers() { StopOrPauseBufferPlayers(false); }
+	virtual inline void StopStreamPlayers() { StopOrPauseStreamPlayers(true); }
+	virtual inline void PauseStreamPlayers() { StopOrPauseStreamPlayers(false); }
 
 	virtual int NextAvailableSource();
 	virtual void RegisterPlayer(ncIAudioPlayer *pPlayer);

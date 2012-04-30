@@ -4,6 +4,7 @@
 #include "ncObject.h"
 #include "ncList.h"
 #include "ncVector2f.h"
+#include "ncColor.h"
 
 class ncRenderQueue;
 
@@ -19,6 +20,11 @@ protected:
 	/// Degrees for clock-wise node rotation
 	float m_fRotation;
 
+	/// Node color for transparency, translucency, etc...
+	/** Even if the base scene node is not always drawable, it carries
+		color information to easily pass that information to its children */
+	ncColor m_color;
+
 	/// Absolute X coordinate as calculated by the Transform() function
 	float m_fAbsX;
 	/// Absolute Y coordinate as calculated by the Transform() function
@@ -27,6 +33,9 @@ protected:
 	float m_fAbsScaleFactor;
 	/// Absolute node rotation as calculated by the Transform() function
 	float m_fAbsRotation;
+
+	/// Absolute node color as calculated by the Transform() function
+	ncColor m_absColor;
 
 	virtual void Transform();
 
@@ -95,24 +104,26 @@ public:
 	inline ncVector2f Position() const { return ncVector2f(x, y); }
 	/// Returns absolute node position
 	inline ncVector2f AbsPosition() const { return ncVector2f(m_fAbsX, m_fAbsY); }
-	/// Moves a node based on two offsets
-	inline void Move(float fX, float fY) { x += fX; y += fY; }
-	/// Add a move vector to the node current position
-	inline void Move(const ncVector2f& pos) { x += pos.x; y += pos.y; }
 	/// Sets the sprite position through two coordinates
 	inline void SetPosition(float fX, float fY) { x = fX; y = fY; }
 	/// Sets the sprite position through a vector
 	inline void SetPosition(const ncVector2f& pos) { x = pos.x; y = pos.y; }
+	/// Moves a node based on two offsets
+	inline void Move(float fX, float fY) { x += fX; y += fY; }
+	/// Add a move vector to the node current position
+	inline void Move(const ncVector2f& pos) { x += pos.x; y += pos.y; }
 
 	/// Gets the node scale factor
 	inline float Scale() const { return m_fScaleFactor; }
-	/// Scales the node size
-	inline void SetScale(float fScaleFactor) { m_fScaleFactor = fScaleFactor; }
 	/// Gets the node absolute scale factor
 	inline float AbsScale() const { return m_fAbsScaleFactor; }
+	/// Scales the node size
+	inline void SetScale(float fScaleFactor) { m_fScaleFactor = fScaleFactor; }
 
 	/// Gets the node rotation in degrees
 	inline float Rotation() const { return m_fRotation; }
+	/// Gets the node absolute rotation in degrees
+	inline float AbsRotation() const { return m_fAbsRotation; }
 	/// Sets the node rotation in degrees
 	inline void SetRotation(float fRotation)
 	{
@@ -123,8 +134,21 @@ public:
 
 		m_fRotation = fRotation;
 	}
-	/// Gets the node absolute rotation in degrees
-	inline float AbsRotation() const { return m_fAbsRotation; }
+
+	/// Gets the node color
+	inline ncColor Color() const { return m_color; }
+	/// Gets the node absolute color
+	inline ncColor AbsColor() const { return m_absColor; }
+	/// Sets the node color through a ncColor class
+	inline void SetColor(ncColor color) { m_color = color; }
+	/// Sets the node color through unsigned char components
+	inline void SetColor(unsigned char ubR, unsigned char ubG, unsigned char ubB, unsigned char ubA) { m_color.Set(ubR, ubG, ubB, ubA); }
+	/// Sets the node color through float components
+	inline void SetColorF(float fR, float fG, float fB, float fA) { m_color.SetF(fR, fG, fB, fA); }
+	/// Sets the node alpha through an unsigned char component
+	inline void SetAlpha(unsigned char ubA) { m_color.SetAlpha(ubA); }
+	/// Sets the node alpha through a float component
+	inline void SetAlphaF(float fA) { m_color.SetAlphaF(fA); }
 };
 
 #endif

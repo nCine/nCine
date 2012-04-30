@@ -9,9 +9,6 @@
 /// Binds the material state
 void ncRenderMaterial::Bind() const
 {
-//	if (m_color.B() < 255)
-//		glEnable(GL_BLEND);
-
 //	glColor4ubv(m_color.Vector()); // Not available on GLES
 	glColor4ub(m_color.R(), m_color.G(), m_color.B(), m_color.A());
 	glBindTexture(GL_TEXTURE_2D, m_uTextureGLId);
@@ -64,6 +61,10 @@ void ncRenderCommand::CalculateSortKey()
 /// Issues the render command
 void ncRenderCommand::Issue() const
 {
+#ifdef WITH_DEPTH_TEST
+	glPolygonOffset(0.0f, -1.0f*m_iPriority);
+#endif
+
 	m_material.Bind();
 	m_transformation.Apply();
 	m_geometry.Draw();

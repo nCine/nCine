@@ -3,6 +3,18 @@
 #include "ncArray.h"
 #include "ncSprite.h"
 
+#ifdef WITH_DEPTH_TEST
+	#if defined(__ANDROID__)
+		#include <GLES/gl.h>
+		#include <GLES/glext.h>
+	#elif defined(WITH_GLEW)
+		#include <GL/glew.h>
+	#else
+		#include <GL/gl.h>
+		#include <GL/glext.h>
+	#endif
+#endif
+
 //#include <assert.h> // for checking sorting correctness
 
 ///////////////////////////////////////////////////////////
@@ -16,19 +28,43 @@ void ncRenderQueue::AddCommand(const ncRenderCommand *pCommand)
 	m_uTypedNumCommands[pCommand->Type()]++;
 
 	m_uNumVertices += pCommand->Geometry().NumVertices();
-	m_renderCmds.InsertBack(pCommand);
+
+#ifdef WITH_DEPTH_TEST
+	if (pCommand->Material().isTransparent() == false)
+		m_opaqueRenderCmds.InsertBack(pCommand);
+	else
+#endif
+		m_transparentRenderCmds.InsertBack(pCommand);
 }
 
 /// Sorts the queue then issues every render command in order
 void ncRenderQueue::Draw()
 {
-	SortQueue();
+	SortQueues();
 
-	for (int i = 0; i < m_renderCmds.Size(); i++)
-		m_renderCmds[i]->Issue();
+#ifdef WITH_DEPTH_TEST
+	glDisable(GL_BLEND);
+	// TODO: Investigate about the heavy performance drop with alpha testing
+	glEnable(GL_ALPHA_TEST);
+	// Rendering opaque nodes front to back
+	for (int i = m_opaqueRenderCmds.Size()-1; i > -1; i--)
+		m_opaqueRenderCmds[i]->Issue();
+
+	glDisable(GL_ALPHA_TEST);
+	glEnable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+#endif
+	// Rendering transparent nodes back to front
+	for (int i = 0; i < m_transparentRenderCmds.Size(); i++)
+		m_transparentRenderCmds[i]->Issue();
+#ifdef WITH_DEPTH_TEST
+	// Has to be enabled again before exiting this method
+	// or glClear(GL_DEPTH_BUFFER_BIT) won't have any effect
+	glDepthMask(GL_TRUE);
+#endif
 
 	m_uLastNumVertices = m_uNumVertices;
-	m_uLastNumCommands = m_renderCmds.Size();
+	m_uLastNumCommands = m_opaqueRenderCmds.Size() + m_transparentRenderCmds.Size();
 	m_uNumVertices = 0;
 
 	for (int i = 0; i < ncRenderCommand::TYPE_COUNT; i++)
@@ -39,21 +75,25 @@ void ncRenderQueue::Draw()
 		m_uTypedNumCommands[i] = 0;
 	}
 
-	m_renderCmds.Clear();
+	m_opaqueRenderCmds.Clear();
+	m_transparentRenderCmds.Clear();
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Sorts render nodes to minimize state changes
-void ncRenderQueue::SortQueue()
+/// Sorts render nodes in both queues to minimize state changes
+void ncRenderQueue::SortQueues()
 {
-	QSort(m_renderCmds, 0, m_renderCmds.Size()-1);
+	QSort(m_opaqueRenderCmds, 0, m_opaqueRenderCmds.Size()-1);
+	QSort(m_transparentRenderCmds, 0, m_transparentRenderCmds.Size()-1);
 
 	// Check sorting correctness
-//	for (int i = 1; i < m_renderCmds.Size(); i++)
-//		assert(m_renderCmds[i-1]->SortKey() <= m_renderCmds[i]->SortKey());
+//	for (int i = 1; i < m_opaqueRenderCmds.Size(); i++)
+//		assert(m_opaqueRenderCmds[i-1]->SortKey() <= m_opaqueRenderCmds[i]->SortKey());
+//	for (int i = 1; i < m_transparentRenderCmds.Size(); i++)
+//		assert(m_transparentRenderCmds[i-1]->SortKey() <= m_transparentRenderCmds[i]->SortKey());
 }
 
 void ncRenderQueue::QSort(ncArray<const ncRenderCommand *> &array, int start, int end)

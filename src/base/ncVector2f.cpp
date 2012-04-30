@@ -35,12 +35,12 @@ bool ncVector2f::operator==(const ncVector2f& vec) const
 
 ncVector2f ncVector2f::operator+(const ncVector2f& vec) const
 {
-	ncVector2f fResult;
+	ncVector2f result;
 
-	fResult.x = x + vec.x;
-	fResult.y = y + vec.y;
+	result.x = x + vec.x;
+	result.y = y + vec.y;
 
-	return fResult;
+	return result;
 }
 
 ncVector2f& ncVector2f::operator+=(const ncVector2f& vec)
@@ -53,23 +53,23 @@ ncVector2f& ncVector2f::operator+=(const ncVector2f& vec)
 
 ncVector2f ncVector2f::operator-(const ncVector2f& vec) const
 {
-	ncVector2f fResult;
+	ncVector2f result;
 
-	fResult.x = x - vec.x;
-	fResult.y = y - vec.y;
+	result.x = x - vec.x;
+	result.y = y - vec.y;
 
-	return fResult;
+	return result;
 }
 
 /// Unary negation
 ncVector2f ncVector2f::operator-() const
 {
-	ncVector2f fResult;
+	ncVector2f result;
 
-	fResult.x = -x;
-	fResult.y = -y;
+	result.x = -x;
+	result.y = -y;
 
-	return fResult;
+	return result;
 }
 
 ncVector2f& ncVector2f::operator-=(const ncVector2f& vec)
@@ -83,12 +83,12 @@ ncVector2f& ncVector2f::operator-=(const ncVector2f& vec)
 /// Multiplication by a constant scalar
 ncVector2f ncVector2f::operator*(float fC) const
 {
-	ncVector2f fResult;
+	ncVector2f result;
 
-	fResult.x = fC * x;
-	fResult.y = fC * y;
+	result.x = fC * x;
+	result.y = fC * y;
 
-	return fResult;
+	return result;
 }
 
 ncVector2f ncVector2f::operator*=(float fC)

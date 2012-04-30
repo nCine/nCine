@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 	ncFrameTimer t(5, 0);
 	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
 	ncSDLGfxDevice gfxDevice(iWidth, iHeight);
-	SDL_WM_SetCaption("Test", NULL);
+	gfxDevice.SetWindowTitle("Test");
 
 	ncRenderQueue renderQueue;
 	ncSceneNode rootNode;
@@ -82,21 +82,21 @@ int main(int argc, char **argv)
 		float rot = rand() % 360;
 		pSprites[i]->SetRotation(rot);
 		unsigned char ucRandAlpha = rand() % 256;
-		pSprites[i]->SetColor(1.0f, 1.0f, 1.0f, ucRandAlpha/255.0f);;
+		pSprites[i]->SetColorF(1.0f, 1.0f, 1.0f, ucRandAlpha/255.0f);
 	}
 
 	t.Reset();
 
 
 // ----- Event cycle --------------------
-	while (!bQuit) {
-		while (SDL_PollEvent(&event)) {
-			switch (event.type) {
+	while(!bQuit) {
+		while(SDL_PollEvent(&event)) {
+			switch(event.type) {
 			case SDL_QUIT:
 				bQuit = true;
 				break;
 			case SDL_KEYDOWN:
-				switch( event.key.keysym.sym ){
+				switch(event.key.keysym.sym) {
 				case SDLK_ESCAPE:
 				case SDLK_q:
 					bQuit = true;
@@ -138,8 +138,6 @@ int main(int argc, char **argv)
 
 
 // ----- Quitting ----------------------
-//	SDL_Quit(); // GfxDevice should call this
-
 	for (int i = 0; i < NUM_SPRITES; i++)
 		delete pSprites[i];
 

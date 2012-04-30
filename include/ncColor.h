@@ -4,12 +4,14 @@
 /// A 32 bit color
 class ncColor
 {
-public:
+private:
 	/// The four unsigned byte color components
-	GLubyte m_ubColor[4];
+	unsigned char m_ubColor[4];
 
+public:
 	/// Default constructor (white color)
-	ncColor() { Set(255, 255, 255, 255); }
+	ncColor()
+		{ Set(255, 255, 255, 255); }
 	/// Four components constructor (unsigned char)
 	ncColor(unsigned char ubR, unsigned char ubG, unsigned char ubB, unsigned char ubA)
 		{ Set(ubR, ubG, ubB, ubA); }
@@ -30,16 +32,16 @@ public:
 		{ SetF(fR, fG, fB); }
 
 	/// Getter for the red component of the color
-	inline GLubyte R() const { return m_ubColor[0]; }
+	inline unsigned char R() const { return m_ubColor[0]; }
 	/// Getter for the green component of the color
-	inline GLubyte G() const { return m_ubColor[1]; }
+	inline unsigned char G() const { return m_ubColor[1]; }
 	/// Getter for the blue component of the color
-	inline GLubyte B() const { return m_ubColor[2]; }
+	inline unsigned char B() const { return m_ubColor[2]; }
 	/// Getter for the alpha component of the color
-	inline GLubyte A() const { return m_ubColor[3]; }
+	inline unsigned char A() const { return m_ubColor[3]; }
 	/// Getter for the color vector
 	/*! Note: It is useful with glColor4ub */
-	inline const GLubyte* Vector() const { return m_ubColor; }
+	inline const unsigned char* Vector() const { return m_ubColor; }
 	/// Flaot getter for the red component of the color
 	inline float fR() const { return m_ubColor[0]/255.0f; }
 	/// Float getter for the green component of the color
@@ -49,7 +51,7 @@ public:
 	/// Float getter for the alpha component of the color
 	inline float fA() const { return m_ubColor[3]/255.0f; }
 
-	/// Sets four color elements (unsigned char)
+	/// Sets four color components (unsigned char)
 	inline void Set(unsigned char ubR, unsigned char ubG, unsigned char ubB, unsigned char ubA)
 	{
 		m_ubColor[0] = ubR;
@@ -58,42 +60,96 @@ public:
 		m_ubColor[3] = ubA;
 	}
 
-	/// Sets three color elements (unsigned char)
-	inline void Set(unsigned char ucR, unsigned char ucG, unsigned char ucB)
+	/// Sets three color components (unsigned char)
+	inline void Set(unsigned char ubR, unsigned char ubG, unsigned char ubB)
 	{
-		Set(ucR, ucG, ucB, 255);
+		Set(ubR, ubG, ubB, 255);
 	}
 
-	/// Sets four color elements (unsigned char vector)
+	/// Sets four color components (unsigned char vector)
 	inline void Setv(unsigned char vColor[4])
 	{
 		Set(vColor[0], vColor[1], vColor[2], vColor[3]);
 	}
 
-	/// Sets four color elements (normalized float)
+	/// Sets four color components (normalized float)
 	inline void SetF(float fR, float fG, float fB, float fA)
 	{
+		// TODO: Clamp negative values too
 		m_ubColor[0] = fR > 1.0f ? 255 : fR * 255;
 		m_ubColor[1] = fG > 1.0f ? 255 : fG * 255;
 		m_ubColor[2] = fB > 1.0f ? 255 : fB * 255;
 		m_ubColor[3] = fA > 1.0f ? 255 : fA * 255;
 	}
 
-	/// Sets three color elements (normalized float)
-	inline void SetF(float fR, float fG, float fB) {
+	/// Sets three color components (normalized float)
+	inline void SetF(float fR, float fG, float fB)
+	{
 		SetF(fR, fG, fB, 1.0f);
 	}
 
-	/// Sets four color elements (float vector)
+	/// Sets four color components (float vector)
 	inline void SetFv(float fvColor[4])
 	{
 		SetF(fvColor[0], fvColor[1], fvColor[2], fvColor[3]);
+	}
+
+	/// Sets the alpha component (unsigned char)
+	inline void SetAlpha(unsigned char ubA)
+	{
+		m_ubColor[3] = ubA;
+	}
+
+	/// Sets the alpha component (normalized float)
+	inline void SetAlphaF(float fA)
+	{
+		// TODO: Clamp negative values too
+		m_ubColor[3] = fA > 1.0f ? 255 : fA * 255;
 	}
 
 	/// Equality operator
 	inline bool operator==(const ncColor& color) const {
 		return (R() == color.R() && G() == color.G() &&
 				B() == color.B() && A() == color.A());
+	}
+
+	ncColor operator*(const ncColor& col) const
+	{
+		ncColor result;
+
+		for (int i = 0; i < 4; i++)
+		{
+			float fMul = (col.m_ubColor[i] / 255.0f) * m_ubColor[i];
+			// clamping
+			if (fMul > 255.0f)
+				fMul = 255.0f;
+			else if (fMul < 0.0f)
+				fMul = 0.0f;
+
+			result.m_ubColor[i] = fMul;
+		}
+
+		return result;
+	}
+
+	/// Multiplication by a constant scalar
+	ncColor operator*(float fC) const
+	{
+		ncColor result;
+
+		for (int i = 0; i < 4; i++)
+		{
+			float fMul = fC * m_ubColor[i];
+			// clamping
+			if (fMul > 255.0f)
+				fMul = 255.0f;
+			else if (fMul < 0.0f)
+				fMul = 0.0f;
+
+			result.m_ubColor[i] = fMul;
+		}
+
+		return result;
 	}
 };
 

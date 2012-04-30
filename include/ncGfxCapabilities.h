@@ -25,8 +25,7 @@ private:
 	// Queries the device about its capabilities
 	void Init();
 
-	friend class ncSDLGfxDevice;
-	friend class ncEGLGfxDevice;
+	friend class ncIGfxDevice;
 
 public:
 	/// Default constructor

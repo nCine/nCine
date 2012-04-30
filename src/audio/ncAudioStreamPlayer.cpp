@@ -16,10 +16,9 @@ ncAudioStreamPlayer::ncAudioStreamPlayer(const char *pFilename)
 
 ncAudioStreamPlayer::~ncAudioStreamPlayer()
 {
-	if (m_eState == STATE_PLAYING)
+	if (m_eState != STATE_STOPPED)
 		m_stream.Stop(m_uSource);
 }
-
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS

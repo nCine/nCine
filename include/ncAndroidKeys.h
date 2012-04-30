@@ -2,6 +2,7 @@
 #define NCKEYS
 
 #include <android/keycodes.h>
+#include <android/input.h>
 
 typedef enum {
 	NCKEY_UNKNOWN         = AKEYCODE_UNKNOWN,

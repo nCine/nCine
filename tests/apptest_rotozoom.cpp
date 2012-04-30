@@ -16,7 +16,7 @@ ncIAppEventHandler* create_apphandler()
 
 void MyEventHandler::OnInit()
 {
-	ncApplication::SetInputHandler(this);
+	ncIInputManager::SetHandler(this);
 
 	m_bPause = false;
 	m_fAngle = 0.0f;

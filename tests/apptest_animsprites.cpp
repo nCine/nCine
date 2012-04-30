@@ -16,7 +16,7 @@ ncIAppEventHandler* create_apphandler()
 
 void MyEventHandler::OnInit()
 {
-	ncApplication::SetInputHandler(this);
+	ncIInputManager::SetHandler(this);
 	ncSceneNode &rRootNode = ncApplication::RootNode();
 
 #ifdef __ANDROID__
@@ -206,7 +206,7 @@ void MyEventHandler::OnMouseButtonPressed(const ncMouseEvent &event)
 
 void MyEventHandler::OnMouseMoved(const ncMouseState &state)
 {
-	if (state.isButtonDown(ncMouseState::LEFT_BUTTON))
+	if (state.isLeftButtonDown())
 	{
 		m_destVector.x = state.x;
 		m_destVector.y = state.y;

@@ -9,13 +9,16 @@
 #include "ncFont.h"
 #include "ncTextNode.h"
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__)
 	#include "ncEGLGfxDevice.h"
 	#include "ncAndroidInputManager.h"
 	#include "ncAssetFile.h"
-#else
+#elif defined(WITH_SDL)
 	#include "ncSDLGfxDevice.h"
 	#include "ncSDLInputManager.h"
+#elif defined(WITH_GLFW)
+	#include "ncGLFWGfxDevice.h"
+	#include "ncGLFWInputManager.h"
 #endif
 
 ///////////////////////////////////////////////////////////
@@ -55,8 +58,15 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 {
 	// Registering the logger as early as possible
 	ncServiceLocator::RegisterLogger(new ncFileLogger("ncine_log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
+	// Graphics device should always be created before the input manager!
+#if defined(WITH_SDL)
 	m_pGfxDevice = new ncSDLGfxDevice(960, 640);
 	m_pInputManager = new ncSDLInputManager();
+#elif defined(WITH_GLFW)
+	m_pGfxDevice = new ncGLFWGfxDevice(960, 640);
+	m_pInputManager = new ncGLFWInputManager();
+#endif
+	m_pGfxDevice->SetWindowTitle("nCine");
 #endif
 	ncServiceLocator::RegisterIndexer(new ncArrayIndexer());
 	ncServiceLocator::RegisterAudioDevice(new ncALAudioDevice());
@@ -79,11 +89,13 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 	m_pProfilePlotter->Variable(2).SetGraphColor(ncColor(0.0f, 0.0f, 0.8f));
 	m_pProfilePlotter->Variable(2).SetMeanColor(ncColor(0.0f, 0.0f, 1.0f));
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__)
 	m_pFont = new ncFont("asset::trebuchet16_128.dds.mp3", "asset::trebuchet16_128.fnt");
 //	m_pFont = new ncFont("/sdcard/ncine/trebuchet16_128.dds", "/sdcard/ncine/trebuchet16_128.fnt");
-#else
+#elif defined(WITH_SDL)
 	m_pFont = new ncFont("fonts/trebuchet32_256.png", "fonts/trebuchet32_256.fnt");
+#elif defined(WITH_GLFW)
+	m_pFont = new ncFont("fonts/trebuchet32_256.webp", "fonts/trebuchet32_256.fnt");
 #endif
 	m_pTextLines = new ncTextNode(m_pRootNode, m_pFont);
 	m_pTextLines->SetPosition(0, Height());
@@ -106,11 +118,12 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 void ncApplication::Run()
 {
 #ifndef __ANDROID__
-	SDL_Event event;
-
 	m_pFrameTimer->Reset();
 
 	while (!m_bShouldQuit) {
+#if defined(WITH_SDL)
+		SDL_Event event;
+
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 			case SDL_QUIT:
@@ -121,10 +134,14 @@ void ncApplication::Run()
 					m_bPaused = !event.active.gain;
 				break;
 			default:
-				m_pInputManager->ParseEvent(event);
+				ncSDLInputManager::ParseEvent(event);
 				break;
 			}
 		}
+#elif defined(WITH_GLFW)
+		glfwPollEvents();
+		m_bPaused = (glfwGetWindowParam(GLFW_ACTIVE) == GL_FALSE);
+#endif
 
 		if (!m_bPaused)
 			Step();
@@ -228,10 +245,4 @@ void ncApplication::ShowProfileGraphs(bool bShouldDraw)
 void ncApplication::ShowProfileInfo(bool bShouldDraw)
 {
 	m_pTextLines->bShouldDraw = bShouldDraw;
-}
-
-/// Sets the input handler object
-void ncApplication::SetInputHandler(ncIInputEventHandler *pInputEventHandler)
-{
-	m_pInputManager->SetHandler(pInputEventHandler);
 }

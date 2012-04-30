@@ -1,5 +1,6 @@
 #include <cstdlib> // for exit()
 #include "ncALAudioDevice.h"
+#include "ncAudioBufferPlayer.h"
 #include "ncAudioStreamPlayer.h"
 #include "ncServiceLocator.h"
 
@@ -61,6 +62,22 @@ void ncALAudioDevice::SetGain(ALfloat fGain)
 	alListenerf(AL_GAIN, m_fGain);
 }
 
+void ncALAudioDevice::StopPlayers()
+{
+	for(ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin(); i != m_players.End(); i++)
+		(*i)->Stop();
+
+	m_players.Clear();
+}
+
+void ncALAudioDevice::PausePlayers()
+{
+	for(ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin(); i != m_players.End(); i++)
+		(*i)->Pause();
+
+	m_players.Clear();
+}
+
 int ncALAudioDevice::NextAvailableSource()
 {
 	ALint iState;
@@ -92,5 +109,45 @@ void ncALAudioDevice::UpdatePlayers()
 		}
 		else
 			m_players.Remove(i++);
+	}
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void ncALAudioDevice::StopOrPauseBufferPlayers(bool bStop)
+{
+	ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin();
+	while(i != m_players.End())
+	{
+		if ((*i)->Type() == ncAudioBufferPlayer::sType())
+		{
+			if (bStop)
+				(*i)->Stop();
+			else
+				(*i)->Pause();
+			m_players.Remove(i++);
+		}
+		else
+			i++;
+	}
+}
+
+void ncALAudioDevice::StopOrPauseStreamPlayers(bool bStop)
+{
+	ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin();
+	while(i != m_players.End())
+	{
+		if ((*i)->Type() == ncAudioStreamPlayer::sType())
+		{
+			if (bStop)
+				(*i)->Stop();
+			else
+				(*i)->Pause();
+			m_players.Remove(i++);
+		}
+		else
+			i++;
 	}
 }

@@ -13,7 +13,7 @@ private:
 public:
 	// A constructor creating a player from a shared buffer
 	ncAudioBufferPlayer(ncAudioBuffer *pBuffer);
-	virtual ~ncAudioBufferPlayer() { }
+	virtual ~ncAudioBufferPlayer() { Stop(); }
 
 	virtual void Play();
 	virtual void Pause();

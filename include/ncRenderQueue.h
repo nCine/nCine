@@ -27,18 +27,21 @@ private:
 	/// The sum of draw commands for a specified command type in the previous frame (it never contains a partial sum)
 	unsigned int m_uTypedLastNumCommands[ncRenderCommand::TYPE_COUNT];
 
-	/// Array of render command pointers
-	ncArray<const ncRenderCommand *> m_renderCmds;
+	/// Array of opaque render command pointers
+	ncArray<const ncRenderCommand *> m_opaqueRenderCmds;
+	/// Array of transparent render command pointers
+	ncArray<const ncRenderCommand *> m_transparentRenderCmds;
 
-	// Sorts render nodes to minimize state changes
-	void SortQueue();
+	// Sorts render nodes in both queues to minimize state changes
+	void SortQueues();
 
 	void QSort(ncArray<const ncRenderCommand *> &array, int start, int end);
 	int QSortPartition(ncArray<const ncRenderCommand *> &array, int start, int end);
 
 public:
 	ncRenderQueue()
-		: m_uNumVertices(0), m_uLastNumVertices(0), m_uLastNumCommands(0), m_renderCmds(16) { }
+		: m_uNumVertices(0), m_uLastNumVertices(0), m_uLastNumCommands(0),
+		  m_opaqueRenderCmds(16), m_transparentRenderCmds(16) { }
 	~ncRenderQueue() { }
 
 	// Adds a draw command to the queue

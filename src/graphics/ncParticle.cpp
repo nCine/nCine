@@ -37,9 +37,15 @@ void ncParticle::Update(unsigned long int ulInterval)
 void ncParticle::Transform()
 {
 	if (m_pParent)
+	{
 		m_fAbsScaleFactor = m_pParent->AbsScale() * m_fScaleFactor;
+		m_absColor = m_pParent->AbsColor() * m_color;
+	}
 	else
+	{
 		m_fAbsScaleFactor = m_fScaleFactor;
+		m_absColor = m_color;
+	}
 
 	// Always independent movement
 	m_fAbsRotation = m_fRotation;

@@ -7,22 +7,26 @@
 class ncIInputEventHandler
 {
 public:
-// TODO: virtual layer for events, something like ncEvent, common on all platforms
+	/// Pure virtual destructor in order to make the class abstract
+	virtual ~ncIInputEventHandler() = 0;
 #ifdef __ANDROID__
-	virtual void OnKeyPressed(const ncKeyboardEvent &event) = 0;
-	virtual void OnKeyReleased(const ncKeyboardEvent &event) = 0;
-	virtual void OnTouchDown(const ncTouchEvent &event) = 0;
-	virtual void OnTouchUp(const ncTouchEvent &event) = 0;
-	virtual void OnTouchMove(const ncTouchEvent &event) = 0;
-	virtual void OnSecondaryTouchDown(const ncTouchEvent &event) = 0;
-	virtual void OnSecondaryTouchUp(const ncTouchEvent &event) = 0;
+	virtual inline void OnKeyPressed(const ncKeyboardEvent &event) { }
+	virtual inline void OnKeyReleased(const ncKeyboardEvent &event) { }
+	virtual inline void OnTouchDown(const ncTouchEvent &event) { }
+	virtual inline void OnTouchUp(const ncTouchEvent &event) { }
+	virtual inline void OnTouchMove(const ncTouchEvent &event) { }
+	virtual inline void OnSecondaryTouchDown(const ncTouchEvent &event) { }
+	virtual inline void OnSecondaryTouchUp(const ncTouchEvent &event) { }
+	virtual inline void OnAcceleration(const ncAccelerometerEvent &event) { }
 #else
-	virtual void OnKeyPressed(const ncKeyboardEvent &event) = 0;
-	virtual void OnKeyReleased(const ncKeyboardEvent &event) = 0;
-	virtual void OnMouseButtonPressed(const ncMouseEvent &event) = 0;
-	virtual void OnMouseButtonReleased(const ncMouseEvent &event) = 0;
-	virtual void OnMouseMoved(const ncMouseState &state) = 0;
+	virtual inline void OnKeyPressed(const ncKeyboardEvent &event) { }
+	virtual inline void OnKeyReleased(const ncKeyboardEvent &event) { }
+	virtual inline void OnMouseButtonPressed(const ncMouseEvent &event) { }
+	virtual inline void OnMouseButtonReleased(const ncMouseEvent &event) { }
+	virtual inline void OnMouseMoved(const ncMouseState &state) { }
 #endif
 };
+
+inline ncIInputEventHandler::~ncIInputEventHandler() { }
 
 #endif

@@ -75,22 +75,3 @@ void ncEGLGfxDevice::InitDevice(struct android_app* state)
 	eglQuerySurface(m_display, m_surface, EGL_WIDTH, &m_iWidth);
 	eglQuerySurface(m_display, m_surface, EGL_HEIGHT, &m_iHeight);
 }
-
-/// Initializes starting OpenGL state
-void ncEGLGfxDevice::InitGL()
-{
-	ncGfxCapabilities& gfxCaps = const_cast<ncGfxCapabilities&>(ncServiceLocator::GfxCapabilities());
-	gfxCaps.Init();
-
-	glDisable(GL_DITHER);
-//	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_TEXTURE_2D);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glMatrixMode(GL_PROJECTION);
-	glOrthof(0, m_iWidth, 0, m_iHeight, -1, 1);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-}

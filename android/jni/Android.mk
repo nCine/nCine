@@ -54,6 +54,7 @@ LOCAL_SRC_FILES := \
 	$(SRC)/ncStandardFile.cpp \
 	$(SRC)/ncAssetFile.cpp \
 	$(SRC)/ncAndroidInputManager.cpp \
+	$(SRC)/graphics/ncIGfxDevice.cpp \
 	$(SRC)/graphics/ncEGLGfxDevice.cpp \
 	$(SRC)/graphics/ncGfxCapabilities.cpp \
 	$(SRC)/graphics/ncTextureFormat.cpp \

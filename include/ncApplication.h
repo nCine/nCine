@@ -40,8 +40,6 @@ public:
 #ifdef __ANDROID__
 	// Must be called at start to init the application
 	static void Init(struct android_app* state, ncIAppEventHandler* (*pCreateAppEventHandler)());
-	/// Called in the Android input event handler to forward events to the application
-	static void ForwardAEvent(const struct AInputEvent* event) { m_pInputManager->ParseEvent(event); }
 	/// Return the quit flag value
 	static bool ShouldQuit() { return m_bShouldQuit; }
 #else
@@ -71,10 +69,12 @@ public:
 	static inline unsigned long int Interval() { return m_pFrameTimer->Interval(); }
 	/// Returns the average FPS
 	static inline float AverageFPS() { return m_pFrameTimer->AverageFPS(); }
+
 	/// Returns the screen width
 	static inline int Width() { return m_pGfxDevice->Width(); }
 	/// Returns the screen height
 	static inline int Height() { return m_pGfxDevice->Height(); }
+
 	// Sets the pause flag value
 	static void SetPause(bool bPaused);
 	// Toggles the pause flag on and off
@@ -86,9 +86,6 @@ public:
 	static void ShowProfileGraphs(bool bShouldDraw);
 	// Shows or hides profiling information text
 	static void ShowProfileInfo(bool bShouldDraw);
-
-	// Sets the input handler object
-	static void SetInputHandler(ncIInputEventHandler *pInputEventHandler);
 };
 
 #endif

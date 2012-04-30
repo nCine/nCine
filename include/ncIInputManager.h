@@ -1,12 +1,12 @@
 #ifndef CLASS_NCIINPUTMANAGER
 #define CLASS_NCIINPUTMANAGER
 
-#ifdef __ANDROID__
-	#include <android/input.h>
+#if defined(__ANDROID__)
 	#include "ncAndroidKeys.h"
-#else
-	#include <SDL/SDL_events.h>
+#elif defined(WITH_SDL)
 	#include "ncSDLKeys.h"
+#elif defined(WITH_GLFW)
+	#include "ncGLFWKeys.h"
 #endif
 
 class ncIInputEventHandler;
@@ -21,7 +21,31 @@ public:
 	int id, x, y;
 	int id2, x2, y2;
 };
+
+class ncAccelerometerEvent
+{
+public:
+	ncAccelerometerEvent(): x(0.0f), y(0.0f), z(0.0f) { }
+
+	float x, y, z;
+};
 #else
+/// Information about mouse state
+class ncMouseState
+{
+public:
+	/// Pointer position on the X axis
+	int x;
+	/// Pointer position on the Y axis
+	int y;
+
+	virtual bool isLeftButtonDown() const = 0;
+	virtual bool isMiddleButtonDown() const = 0;
+	virtual bool isRightButtonDown() const = 0;
+	virtual bool isWheelUpButtonDown() const = 0;
+	virtual bool isWheelDownButtonDown() const = 0;
+};
+
 /// Information about a mouse event
 class ncMouseEvent
 {
@@ -38,23 +62,13 @@ public:
 	virtual bool isWheelDownButton() const = 0;
 };
 
-/// Information about mouse state
-class ncMouseState
+/// Information about keyboard state
+class ncKeyboardState
 {
 public:
-	// Mouse button bitmasks
-	static const unsigned char LEFT_BUTTON   = 1;
-	static const unsigned char MIDDLE_BUTTON = 2;
-	static const unsigned char RIGHT_BUTTON  = 4;
-	static const unsigned char WHEELUP_BUTTON = 8;
-	static const unsigned char WHEELDOWN_BUTTON = 16;
+	ncKeyboardState() { }
 
-	/// Pointer position on the X axis
-	int x;
-	/// Pointer position on the Y axis
-	int y;
-
-	virtual bool isButtonDown(unsigned char uButtonMask) const = 0;
+	virtual bool isKeyDown(ncKeySym key) const = 0;
 };
 #endif
 
@@ -76,24 +90,20 @@ public:
 class ncIInputManager
 {
 protected:
-	ncIInputEventHandler *m_pInputEventHandler;
-
-	ncIInputManager() : m_pInputEventHandler(NULL) { }
+	static ncIInputEventHandler *s_pInputEventHandler;
+	ncIInputManager() { }
 
 public:
 	virtual ~ncIInputManager() { }
 
-	inline void SetHandler(ncIInputEventHandler *pInputEventHandler)
+	static inline void SetHandler(ncIInputEventHandler *pInputEventHandler)
 	{
-		m_pInputEventHandler = pInputEventHandler;
+		s_pInputEventHandler = pInputEventHandler;
 	}
 
-#ifdef __ANDROID__
-	virtual void ParseEvent(const AInputEvent* event) = 0;
-#else
-	virtual void ParseEvent(const SDL_Event &event) = 0;
-	virtual unsigned char* KeyboardState() const = 0;
+#ifndef __ANDROID__
 	virtual const ncMouseState& MouseState() = 0;
+	virtual const ncKeyboardState& KeyboardState() const = 0;
 #endif
 };
 

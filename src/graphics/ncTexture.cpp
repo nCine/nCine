@@ -8,7 +8,7 @@
 ///////////////////////////////////////////////////////////
 
 ncTexture::ncTexture()
-	: m_uGLId(0), m_iWidth(0), m_iHeight(0)
+	: m_uGLId(0), m_iWidth(0), m_iHeight(0), m_bCompressed(false), m_bAlphaChannel(false)
 {
 	m_eType = TEXTURE_TYPE;
 	glGenTextures(1, &m_uGLId);
@@ -16,7 +16,7 @@ ncTexture::ncTexture()
 
 
 ncTexture::ncTexture(const char *pFilename)
-	: m_uGLId(0), m_iWidth(0), m_iHeight(0)
+	: m_uGLId(0), m_iWidth(0), m_iHeight(0), m_bCompressed(false), m_bAlphaChannel(false)
 {
 	m_eType = TEXTURE_TYPE;
 	SetName(pFilename);
@@ -30,7 +30,7 @@ ncTexture::ncTexture(const char *pFilename)
 }
 
 ncTexture::ncTexture(const char *pFilename, int iWidth, int iHeight)
-	: m_uGLId(0), m_iWidth(0), m_iHeight(0)
+	: m_uGLId(0), m_iWidth(0), m_iHeight(0), m_bCompressed(false), m_bAlphaChannel(false)
 {
 	m_eType = TEXTURE_TYPE;
 	SetName(pFilename);
@@ -44,7 +44,7 @@ ncTexture::ncTexture(const char *pFilename, int iWidth, int iHeight)
 }
 
 ncTexture::ncTexture(const char *pFilename, ncPoint size)
-	: m_uGLId(0), m_iWidth(0), m_iHeight(0)
+	: m_uGLId(0), m_iWidth(0), m_iHeight(0), m_bCompressed(false), m_bAlphaChannel(false)
 {
 	m_eType = TEXTURE_TYPE;
 	SetName(pFilename);
@@ -74,39 +74,6 @@ void ncTexture::SetFiltering(GLenum eFilter)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, eFilter);
 }
 
-/// Sets the red channel of a second texture as the alpha channel
-void ncTexture::SetAlphaFromRed(ncTexture *pAlphaTex)
-{
-#ifndef __ANDROID__
-	GLubyte	*pPixels = NULL;
-	GLubyte	*pAlphaPixels = NULL;
-
-	int iTextureArea = Width() * Height();
-	if (pAlphaTex->Width() * pAlphaTex->Height() == iTextureArea)
-	{
-
-		pAlphaPixels = new GLubyte[iTextureArea];
-		pPixels = new GLubyte[iTextureArea * 4];
-
-		pAlphaTex->Bind();
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_BYTE, pAlphaPixels);
-		Bind();
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pPixels);
-
-		// FIXME: It does not work as expected
-		for (int i = 0; i < iTextureArea; i++)
-			pPixels[i*4 + 3] = pAlphaPixels[i];
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width(), Height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, pPixels);
-
-		delete[] pAlphaPixels;
-		delete[] pPixels;
-	}
-	else
-		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncTexture::SetAlphaFromRed - Alpha texture has a different size");
-#endif
-}
-
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -134,14 +101,14 @@ void ncTexture::Load(const ncITextureLoader& texLoader, int iWidth, int iHeight)
 
 	const ncTextureFormat &texFormat = texLoader.TexFormat();
 	if (texFormat.isCompressed())
-		glCompressedTexImage2D(GL_TEXTURE_2D, 0, texFormat.Internal(),
-							   iWidth, iHeight, 0,
-							   texLoader.FileSize(), texLoader.Pixels());
+		glCompressedTexImage2D(GL_TEXTURE_2D, 0, texFormat.Internal(), iWidth, iHeight, 0,
+			texLoader.FileSize(), texLoader.Pixels());
 	else
-		glTexImage2D(GL_TEXTURE_2D, 0, texFormat.Internal(),
-					 iWidth, iHeight, 0,
-					 texFormat.Format(), texFormat.Type(), texLoader.Pixels());
+		glTexImage2D(GL_TEXTURE_2D, 0, texFormat.Internal(), iWidth, iHeight, 0,
+			texFormat.Format(), texFormat.Type(), texLoader.Pixels());
 
 	m_iWidth = iWidth;
 	m_iHeight = iHeight;
+	m_bCompressed = texFormat.isCompressed();
+	m_bAlphaChannel = texFormat.hasAlpha();
 }

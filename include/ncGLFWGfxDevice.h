@@ -1,42 +1,45 @@
-#ifndef CLASS_NCSDLGFXDEVICE
-#define CLASS_NCSDLGFXDEVICE
+#ifndef CLASS_NCGLFWGFXDEVICE
+#define CLASS_NCGLFWGFXDEVICE
 
-#include <SDL/SDL.h>
+#ifdef WITH_GLEW
+	#include <GL/glew.h>
+#endif
+#include <GL/glfw.h>
 
 #include "ncIGfxDevice.h"
 #include "ncPoint.h"
 #include "ncDisplayMode.h"
 
-/// The SDL based graphics device
-class ncSDLGfxDevice : public ncIGfxDevice
+/// The GLFW based graphics device
+class ncGLFWGfxDevice : public ncIGfxDevice
 {
 private:
 	// Initilizes the class
 	void Init(int iWidth, int iHeight, ncDisplayMode mode, bool bIsWindowed);
-	// Initilizes the video subsystem (SDL)
+	// Initilizes the video subsystem (GLFW)
 	void InitGraphics();
 	// Initilizes the OpenGL graphic context
 	void InitDevice();
 
 public:
 	// Constructor taking the resolution as two integer
-	ncSDLGfxDevice(int iWidth, int iHeight);
+	ncGLFWGfxDevice(int iWidth, int iHeight);
 	// Constructor taking the resolution as a size class
-	ncSDLGfxDevice(ncPoint size);
+	ncGLFWGfxDevice(ncPoint size);
 	// Constructor taking the resolution as two integer and a DisplayMode
-	ncSDLGfxDevice(int iWidth, int iHeight, ncDisplayMode mode);
+	ncGLFWGfxDevice(int iWidth, int iHeight, ncDisplayMode mode);
 	// Constructor taking the resolution as a Size class and a DisplayMode
-	ncSDLGfxDevice(ncPoint size, ncDisplayMode mode);
-	~ncSDLGfxDevice() { SDL_Quit(); }
+	ncGLFWGfxDevice(ncPoint size, ncDisplayMode mode);
+	~ncGLFWGfxDevice() { glfwTerminate(); }
 
 	void SetResolution(int iWidth, int iHeight);
 	void SetResolution(ncPoint size);
 
 	void ToggleFullScreen();
 
-	inline void Update() { SDL_GL_SwapBuffers(); }
+	inline void Update() { glfwSwapBuffers(); }
 
-	inline void SetWindowTitle(const char *pWindowTitle) { SDL_WM_SetCaption(pWindowTitle, NULL); }
+	inline void SetWindowTitle(const char *pWindowTitle) { glfwSetWindowTitle(pWindowTitle); }
 };
 
 #endif

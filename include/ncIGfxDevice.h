@@ -17,6 +17,9 @@ protected:
 	/// Device rendering occurs inside a window
 	bool m_bIsWindowed;
 
+	// Initilizes starting OpenGL state
+	virtual void InitGL();
+
 public:
 	virtual ~ncIGfxDevice() = 0;
 
@@ -31,7 +34,10 @@ public:
 	/// Updates the screen swapping back and front buffers
 	virtual void Update() = 0;
 	/// Clears the screen
-	virtual void Clear() = 0;
+	virtual void Clear();
+
+	/// Sets the application window title
+	virtual void SetWindowTitle(const char *pWindowTitle) = 0;
 
 	/// Returns device resolution
 	inline ncPoint Resolution() const { return ncPoint(m_iWidth, m_iHeight); }

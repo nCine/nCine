@@ -20,43 +20,46 @@ class ncRenderMaterial
 private:
 	ncColor m_color;
 	GLuint m_uTextureGLId;
+	/// Flag to skip opaque check based on material color
+	/** This is useful when using color arrays, like for sprite batches */
+	bool m_bAlwaysTransparent;
 
 public:
 	ncRenderMaterial(GLubyte ubColor[4], GLuint uTextureGLId)
-		: m_uTextureGLId(uTextureGLId)
+		: m_uTextureGLId(uTextureGLId), m_bAlwaysTransparent(false)
 	{
 		m_color.Setv(ubColor);
 	}
 
-	ncRenderMaterial(GLuint uTextureGLId) : m_uTextureGLId(uTextureGLId) { }
-	ncRenderMaterial() : m_uTextureGLId(0) { }
+	ncRenderMaterial(GLuint uTextureGLId) : m_uTextureGLId(uTextureGLId), m_bAlwaysTransparent(false) { }
+	ncRenderMaterial() : m_uTextureGLId(0), m_bAlwaysTransparent(false) { }
 
 	/// Sets the material color
-	void SetColor(const ncColor &rColor)
+	inline void SetColor(const ncColor &rColor)
 	{
 		m_color = rColor;
 	}
 
 	/// Sets the material color in unsigned bytes components
-	void SetColor(GLubyte ubR, GLubyte ubG, GLubyte ubB, GLubyte ubA)
+	inline void SetColor(GLubyte ubR, GLubyte ubG, GLubyte ubB, GLubyte ubA)
 	{
 		m_color.Set(ubR, ubG, ubB, ubA);
 	}
 
 	/// Sets the material color through an array
-	void SetColor(GLubyte ubColor[4])
+	inline void SetColor(GLubyte ubColor[4])
 	{
 		m_color.Setv(ubColor);
 	}
 
 	/// Sets the material color in float components
-	void SetColor(GLfloat fR, GLfloat fG, GLfloat fB, GLfloat fA)
+	inline void SetColorF(GLfloat fR, GLfloat fG, GLfloat fB, GLfloat fA)
 	{
 		m_color.SetF(fR, fG, fB, fA);
 	}
 
 	/// Sets the material color through an array
-	void SetColor(GLfloat fColor[4])
+	inline void SetColorF(GLfloat fColor[4])
 	{
 		m_color.SetFv(fColor);
 	}
@@ -65,6 +68,11 @@ public:
 	inline GLuint TextureGLId() const { return m_uTextureGLId; }
 	/// Sets the material texture id
 	inline void SetTextureGLId(GLuint uTextureGLId) { m_uTextureGLId = uTextureGLId; }
+
+	/// Returns true if the render commands has to go into the transparent queue
+	inline bool isTransparent() const { return (m_bAlwaysTransparent || m_color.A() < 255); }
+	/// Sets the always transparent flag
+	inline void SetAlwaysTransparent(bool bAlwaysTransparent) { m_bAlwaysTransparent = bAlwaysTransparent; }
 
 	// Binds the material state
 	void Bind() const;

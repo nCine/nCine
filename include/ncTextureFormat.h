@@ -48,8 +48,19 @@ public:
 	inline GLenum Format() const { return m_eFormat; }
 	/// Returns the corresponding pixel data type
 	inline GLenum Type() const { return m_eType; }
-	/// Specifies wheter data is compressed or not
+	/// Returns true if the format holds compressed data
 	inline bool isCompressed() const { return m_bCompressed; }
+	/// Returns true if the format provides an alpha channel
+	inline bool hasAlpha() const
+	{
+		return (m_eFormat == GL_RGBA ||
+		#ifndef __ANDROID__
+				m_eFormat == GL_BGRA ||
+		#endif
+				m_eFormat == GL_LUMINANCE_ALPHA ||
+				m_eFormat == GL_ALPHA);
+	}
+
 #ifndef __ANDROID__
 	// Converts the external format to the corresponding BGR one
 	void BGRFormat();

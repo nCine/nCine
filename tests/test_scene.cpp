@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 	ncFrameTimer t(5, 0);
 	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
 	ncSDLGfxDevice gfxDevice(iWidth, iHeight);
-	SDL_WM_SetCaption("Test", NULL);
+	gfxDevice.SetWindowTitle("Test");
 
 	ncTexture tex1("textures/texture1.png");
 	ncTexture tex2("textures/texture2.png");
@@ -54,14 +54,14 @@ int main(int argc, char **argv)
 
 
 // ----- Event cycle --------------------
-	while (!bQuit) {
-		while (SDL_PollEvent(&event)) {
-			switch (event.type) {
+	while(!bQuit) {
+		while(SDL_PollEvent(&event)) {
+			switch(event.type) {
 			case SDL_QUIT:
 				bQuit = true;
 				break;
 			case SDL_KEYDOWN:
-				switch( event.key.keysym.sym ){
+				switch(event.key.keysym.sym) {
 				case SDLK_ESCAPE:
 				case SDLK_q:
 					bQuit = true;
@@ -110,8 +110,6 @@ int main(int argc, char **argv)
 
 
 // ----- Quitting ----------------------
-//	SDL_Quit(); // GfxDevice should call this
-
 	delete pSprite4;
 	delete pSprite3;
 	delete pSprite2;

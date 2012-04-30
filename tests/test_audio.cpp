@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 	ncFrameTimer t(5, 0);
 	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
 	ncSDLGfxDevice gfxDevice(iWidth, iHeight);
-	SDL_WM_SetCaption("Test", NULL);
+	gfxDevice.SetWindowTitle("Test");
 
 	ncServiceLocator::RegisterAudioDevice(new ncALAudioDevice());
 //	ncAudioBuffer audioBuffer("sounds/bomb.wav");
@@ -40,14 +40,14 @@ int main(int argc, char **argv)
 
 
 // ----- Event cycle --------------------
-	while (!bQuit) {
-		while (SDL_PollEvent(&event)) {
+	while(!bQuit) {
+		while(SDL_PollEvent(&event)) {
 			switch (event.type) {
 			case SDL_QUIT:
 				bQuit = true;
 				break;
 			case SDL_KEYDOWN:
-				switch( event.key.keysym.sym ){
+				switch(event.key.keysym.sym) {
 				case SDLK_ESCAPE:
 				case SDLK_q:
 					bQuit = true;

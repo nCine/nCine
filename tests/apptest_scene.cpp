@@ -14,7 +14,7 @@ ncIAppEventHandler* create_apphandler()
 
 void MyEventHandler::OnInit()
 {
-	ncApplication::SetInputHandler(this);
+	ncIInputManager::SetHandler(this);
 
 	m_fAngles = new float[numTextures];
 	for(int i = 0; i < numTextures; i++)

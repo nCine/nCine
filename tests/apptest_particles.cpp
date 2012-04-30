@@ -4,6 +4,9 @@
 #include "ncTexture.h"
 #include "ncParticleSystem.h"
 #include "ncIInputManager.h"
+#ifdef __ANDROID__
+	#include "ncAndroidInputManager.h"
+#endif
 
 static const int numParticles = 50;
 
@@ -14,17 +17,16 @@ ncIAppEventHandler* create_apphandler()
 
 void MyEventHandler::OnInit()
 {
-	ncApplication::SetInputHandler(this);
+	ncIInputManager::SetHandler(this);
 	ncSceneNode &rRootNode = ncApplication::RootNode();
 
 #ifdef __ANDROID__
+	ncAndroidInputManager::EnableAccelerometer(true);
 //	m_pTexture = new ncTexture("/sdcard/ncine/smoke_128.dds");
 	m_pTexture = new ncTexture("/sdcard/ncine/smoke_128_4444.pvr");
 #else
 //	m_pTexture = new ncTexture("textures/smoke_256.webp");
 	m_pTexture = new ncTexture("textures/smoke_256_4444.pvr");
-//	ncTexture textureAlpha("textures/smoke_256_red.png");
-//	m_pTexture->SetAlphaFromRed(&textureAlpha);
 #endif
 
 	m_pParticleSys = new ncParticleSystem(&rRootNode, numParticles, m_pTexture, m_pTexture->Rect());
@@ -61,15 +63,15 @@ void MyEventHandler::OnFrameStart()
 void MyEventHandler::OnFrameEnd()
 {
 #ifndef __ANDROID__
-	unsigned char *keyState = ncApplication::InputManager().KeyboardState();
+	const ncKeyboardState &keyState = ncApplication::InputManager().KeyboardState();
 
-	if (keyState[SDLK_RIGHT])
+	if (keyState.isKeyDown(NCKEY_RIGHT))
 		m_pParticleSys->x += 0.1f * ncApplication::Interval();
-	else if (keyState[SDLK_LEFT])
+	else if (keyState.isKeyDown(NCKEY_LEFT))
 		m_pParticleSys->x -= 0.1f * ncApplication::Interval();
-	else if (keyState[SDLK_UP])
+	else if (keyState.isKeyDown(NCKEY_UP))
 		m_pParticleSys->y += 0.1f * ncApplication::Interval();
-	else if (keyState[SDLK_DOWN])
+	else if (keyState.isKeyDown(NCKEY_DOWN))
 		m_pParticleSys->y -= 0.1f * ncApplication::Interval();
 #endif
 }
@@ -99,6 +101,11 @@ void MyEventHandler::OnTouchMove(const ncTouchEvent &event)
 		m_emitVector.y = (event.y2 - m_pParticleSys->y) * 0.0025f;
 	}
 }
+void MyEventHandler::OnAcceleration(const ncAccelerometerEvent &event)
+{
+	m_pParticleSys->x += event.y*0.75f;
+	m_pParticleSys->y += -event.x*0.75f;
+}
 #else
 void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
 {
@@ -119,12 +126,12 @@ void MyEventHandler::OnMouseButtonPressed(const ncMouseEvent &event)
 
 void MyEventHandler::OnMouseMoved(const ncMouseState &state)
 {
-	if (state.isButtonDown(ncMouseState::LEFT_BUTTON))
+	if (state.isLeftButtonDown())
 	{
 		m_pParticleSys->x = state.x;
 		m_pParticleSys->y = state.y;
 	}
-	else if (state.isButtonDown(ncMouseState::RIGHT_BUTTON))
+	else if (state.isRightButtonDown())
 	{
 		m_emitVector.x = (state.x - m_pParticleSys->x) * 0.0025f;
 		m_emitVector.y = (state.y - m_pParticleSys->y) * 0.0025f;

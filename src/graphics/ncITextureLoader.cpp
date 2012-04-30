@@ -50,6 +50,7 @@ ncITextureLoader* ncITextureLoader::CreateFromFile(const char *pFilename)
 {
 	// Creating a handle from ncIFile static method to detect assets file
 	ncIFile *pFileHandle = ncIFile::CreateFileHandle(pFilename);
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncITextureLoader::CreateFromFile - Loading file: \"%s\"", pFileHandle->Filename());
 
 	if (pFileHandle->HasExtension("dds"))
 		return new ncTextureLoaderDDS(pFileHandle);
@@ -69,7 +70,7 @@ ncITextureLoader* ncITextureLoader::CreateFromFile(const char *pFilename)
 #endif
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncITextureLoader::CreateFromFile - Extension unknown \"%s\"", pFileHandle->Extension());
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncITextureLoader::CreateFromFile - Extension unknown: \"%s\"", pFileHandle->Extension());
 		delete pFileHandle;
 		exit(-1);
 	}

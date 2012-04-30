@@ -1,3 +1,7 @@
+#ifdef WITH_GLEW
+	#include <GL/glew.h>
+#endif
+
 #include "ncSDLGfxDevice.h"
 #include "ncServiceLocator.h"
 
@@ -33,7 +37,6 @@ ncSDLGfxDevice::ncSDLGfxDevice(ncPoint size, ncDisplayMode mode)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Sets screen resolution with two integers
 void ncSDLGfxDevice::SetResolution(int iWidth, int iHeight)
 {
 	// change resolution only in the case it really changes
@@ -46,7 +49,6 @@ void ncSDLGfxDevice::SetResolution(int iWidth, int iHeight)
 	}
 }
 
-/// Sets screen resolution with the ncPoint class
 void ncSDLGfxDevice::SetResolution(ncPoint size)
 {
 	// change resolution only in the case it really changes
@@ -59,7 +61,6 @@ void ncSDLGfxDevice::SetResolution(ncPoint size)
 	}
 }
 
-/// Toggles between fullscreen and windowed mode
 void ncSDLGfxDevice::ToggleFullScreen()
 {
 	m_bIsWindowed = !m_bIsWindowed;
@@ -81,8 +82,6 @@ void ncSDLGfxDevice::Init(int iWidth, int iHeight, ncDisplayMode mode, bool bIsW
 	InitGraphics();
 	InitDevice();
 	InitGL();
-
-	SDL_WM_SetCaption("nCine", NULL);
 }
 
 /// Initilizes the video subsystem (SDL)
@@ -139,24 +138,4 @@ void ncSDLGfxDevice::InitDevice()
 		exit(-1);
 	}
 #endif
-}
-
-
-/// Initilizes starting OpenGL state
-void ncSDLGfxDevice::InitGL()
-{
-	ncGfxCapabilities& gfxCaps = const_cast<ncGfxCapabilities&>(ncServiceLocator::GfxCapabilities());
-	gfxCaps.Init();
-
-	glDisable(GL_DITHER);
-//	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_TEXTURE_2D);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glMatrixMode(GL_PROJECTION);
-	glOrtho(0, m_iWidth, 0, m_iHeight, -1, 1);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
 }

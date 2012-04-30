@@ -170,6 +170,8 @@ void ncSceneNode::Transform()
 
 		m_fAbsX = m_pParent->m_fAbsX + fScaledX*cosine - fScaledY*sine;
 		m_fAbsY = m_pParent->m_fAbsY + fScaledY*cosine + fScaledX*sine;
+
+		m_absColor = m_pParent->m_absColor * m_color;
 	}
 	else
 	{
@@ -177,5 +179,6 @@ void ncSceneNode::Transform()
 		m_fAbsY = y;
 		m_fAbsScaleFactor = m_fScaleFactor;
 		m_fAbsRotation = m_fRotation;
+		m_absColor = m_color;
 	}
 }
