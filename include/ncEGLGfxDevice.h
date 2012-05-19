@@ -36,6 +36,9 @@ public:
 	inline void Update() { eglSwapBuffers(m_display, m_surface); }
 
 	void SetWindowTitle(const char *pWindowTitle) { }
+
+	// Checks if the desired pixel format is supported
+	static bool isModeSupported(struct android_app* state, ncDisplayMode mode);
 };
 
 #endif

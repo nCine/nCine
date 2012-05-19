@@ -3,8 +3,10 @@
 #include "ncITextureLoader.h"
 #include "ncTextureLoaderDDS.h"
 #include "ncTextureLoaderPVR.h"
-#ifdef WITH_SDLIMAGE
-#include "ncTextureLoaderSDL.h"
+#if defined(WITH_SDLIMAGE)
+	#include "ncTextureLoaderSDL.h"
+#elif defined(WITH_PNG)
+	#include "ncTextureLoaderPNG.h"
 #endif
 #ifdef WITH_WEBP
 	#include "ncTextureLoaderWebP.h"
@@ -56,9 +58,12 @@ ncITextureLoader* ncITextureLoader::CreateFromFile(const char *pFilename)
 		return new ncTextureLoaderDDS(pFileHandle);
 	if (pFileHandle->HasExtension("pvr"))
 		return new ncTextureLoaderPVR(pFileHandle);
-#ifdef WITH_SDLIMAGE
+#if defined(WITH_SDLIMAGE)
 	else if (pFileHandle->HasExtension("png") || pFileHandle->HasExtension("jpg"))
 		return new ncTextureLoaderSDL(pFileHandle);
+#elif defined(WITH_PNG)
+	else if (pFileHandle->HasExtension("png"))
+		return new ncTextureLoaderPNG(pFileHandle);
 #endif
 #ifdef WITH_WEBP
 	else if (pFileHandle->HasExtension("webp"))

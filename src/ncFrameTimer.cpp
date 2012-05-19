@@ -6,63 +6,51 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// Constructs a timer which updates its fps counter every
-/// m_uUpdateInterval milliseconds and prints on console
-/// every m_uPrintInterval seconds
-///
-/// @param uPrintInterval console printing interval in seconds
-/// @param uUpdateInterval fps average calculation interval in milliseconds
-ncFrameTimer::ncFrameTimer(unsigned int uPrintInterval, unsigned int uUpdateInterval)
-	: m_ulNFrames(0), m_ulPrintNFrames(0), m_fFps(0)
+/*! Constructs a timer which calculates average FPS every uAvgInterval
+	milliseconds and prints in the log every uLogInterval seconds
+*/
+ncFrameTimer::ncFrameTimer(unsigned int uLogInterval, unsigned int uAvgInterval)
+	: m_uLogInterval(uLogInterval), m_uAvgInterval(uAvgInterval),
+	  m_ulFrameInterval(0L), m_ulAvgNFrames(0L), m_ulLogNFrames(0L),
+	  m_ulLastAvgUpdate(0L), m_ulLastLogUpdate(0L), m_fFps(0.0f)
 {
-	Reset();
-	m_uPrintInterval = uPrintInterval;
-	m_uUpdateInterval = uUpdateInterval;
+
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Adds a frame to the counter and calculate the interval with the previous one
+/// Adds a frame to the counter and calculates the interval since the previous one
 void ncFrameTimer::AddFrame()
 {
-	Stop();
-	m_uFrameInterval = ncTimer::Interval();
+	m_ulFrameInterval = ncTimer::Interval();
 
-	m_ulNFrames++;
-	m_ulPrintNFrames++;
+	m_ulAvgNFrames++;
+	m_ulLogNFrames++;
 
-	// Self-implementation of partial timing
-	if (m_uUpdateInterval != 0 && (Now() - m_uLastUpdate > m_uUpdateInterval)) {
-		m_fFps = float(m_ulNFrames)/(float(Now() - m_uLastUpdate) / 1000.0f);
+	// Update the FPS average calculation every m_uAvgInterval milliseconds
+	if (m_uAvgInterval != 0 && (Now() - m_ulLastAvgUpdate > m_uAvgInterval))
+	{
+		m_fFps = float(m_ulAvgNFrames) / (float(Now() - m_ulLastAvgUpdate)/1000.0f);
 
-		m_ulNFrames = 0;
-		m_uLastUpdate = Now();
+		m_ulAvgNFrames = 0L;
+		m_ulLastAvgUpdate = Now();
 	}
 
 
-	// Using partial timing of the Timer class (using GetTotal())
-	if (m_uPrintInterval != 0 && m_ulNFrames != 0 && (Total() > m_uPrintInterval * 1000))	{
-		m_fFps = float(m_ulPrintNFrames)/float(m_uPrintInterval);
-		float fTpf = (m_uPrintInterval*1000.0f)/float(m_ulPrintNFrames);
-		ncServiceLocator::Logger().Write(ncILogger::LOG_VERBOSE, (const char *)"ncFrameTimer::AddFrame - %lu frames in %u seconds = %f FPS (%fms per frame)",  m_ulPrintNFrames, m_uPrintInterval, m_fFps, fTpf);
+	// Log number of frames and FPS every m_uLogInterval seconds
+	if (m_uLogInterval != 0 && m_ulAvgNFrames != 0 && (Now() - m_ulLastLogUpdate > m_uLogInterval * 1000))
+	{
+		m_fFps = float(m_ulLogNFrames) / float(m_uLogInterval);
+		// Milliseconds per frame
+		float fMSPF = (m_uLogInterval * 1000.0f) / float(m_ulLogNFrames);
+		ncServiceLocator::Logger().Write(ncILogger::LOG_VERBOSE, (const char *)"ncFrameTimer::AddFrame - %lu frames in %u seconds = %f FPS (%fms per frame)",  m_ulLogNFrames, m_uLogInterval, m_fFps, fMSPF);
 
-		m_ulPrintNFrames = 0;
-		ncTimer::Reset();
+		m_ulLogNFrames = 0L;
+		m_ulLastLogUpdate = Now();
 	}
 
-	Continue();
-}
-
-/// Resets timer and counters
-void ncFrameTimer::Reset()
-{
-	ncTimer::Reset();
-
-	m_ulNFrames = 0;
-	m_ulPrintNFrames = 0;
-	m_fFps = 0;
-
-	m_uLastUpdate = 0;
+	// Start counting for the next frame interval
+	Start();
 }

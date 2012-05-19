@@ -16,8 +16,7 @@ class MyEventHandler
 private:
 	ncTexture *m_pTexture;
 	ncParticleSystem *m_pParticleSys;
-	ncTimer *m_pTimer;
-	unsigned long int m_ulEmitTime;
+	ncTimer *m_pEmitTimer;
 	ncVector2f m_emitVector;
 
 public:

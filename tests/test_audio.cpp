@@ -36,8 +36,6 @@ int main(int argc, char **argv)
 	ncAudioStreamPlayer player("sounds/bomb.ogg");
 	player.Play();
 
-	t.Reset();
-
 
 // ----- Event cycle --------------------
 	while(!bQuit) {

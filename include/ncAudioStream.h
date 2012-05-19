@@ -1,7 +1,11 @@
 #ifndef CLASS_NCAUDIOSTREAM
 #define CLASS_NCAUDIOSTREAM
 
-#include <AL/al.h>
+#ifdef __APPLE__
+	#include <OpenAL/al.h>
+#else
+	#include <AL/al.h>
+#endif
 #include "ncIAudioLoader.h"
 
 /// Audio stream class

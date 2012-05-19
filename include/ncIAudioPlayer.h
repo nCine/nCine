@@ -1,7 +1,11 @@
 #ifndef CLASS_NCIAUDIOPLAYER
 #define CLASS_NCIAUDIOPLAYER
 
-#include <AL/al.h>
+#ifdef __APPLE__
+	#include <OpenAL/al.h>
+#else
+	#include <AL/al.h>
+#endif
 #include "ncObject.h"
 
 /// Audio player interface class

@@ -1,15 +1,17 @@
 #include "ncIGfxDevice.h"
 #include "ncServiceLocator.h"
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__)
 	#include <GLES/gl.h>
+	#include <GLES/glext.h>
+#elif defined(WITH_GLEW)
+	#include <GL/glew.h>
+#elif defined(__APPLE__)
+	#include <OpenGL/gl.h>
+	#include <OpenGL/glext.h>
 #else
-	#ifdef WITH_GLEW
-		#include <GL/glew.h>
-	#else
-		#include <GL/gl.h>
-		#include <GL/glext.h>
-	#endif
+	#include <GL/gl.h>
+	#include <GL/glext.h>
 #endif
 
 ///////////////////////////////////////////////////////////

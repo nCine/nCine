@@ -1,16 +1,6 @@
 #ifndef CLASS_NCPROFILEPLOTTER
 #define CLASS_NCPROFILEPLOTTER
 
-#if defined(__ANDROID__)
-	#include <GLES/gl.h>
-	#include <GLES/glext.h>
-#elif defined(WITH_GLEW)
-	#include <GL/glew.h>
-#else
-	#include <GL/gl.h>
-	#include <GL/glext.h>
-#endif
-
 #include "ncRect.h"
 #include "ncColor.h"
 #include "ncArray.h"
@@ -32,7 +22,7 @@ protected:
 	/// The variable to be plotted
 	ncProfileVariable m_variable;
 	/// The vertices buffer
-	GLfloat *m_fVertices;
+	float *m_fVertices;
 
 	/// The command used to render variable values
 	ncRenderCommand m_valuesCmd;
@@ -56,9 +46,9 @@ public:
 	/// Returns the mean line color
 	inline const ncColor& MeanColor() const { return m_meanColor; }
 	/// Returns the constant pointer to the vertices buffer
-	inline const GLfloat* Vertices() const { return m_fVertices; }
+	inline const float* Vertices() const { return m_fVertices; }
 	/// Returns the constant pointer to the vertices buffer
-	inline GLfloat* Vertices() { return m_fVertices; }
+	inline float* Vertices() { return m_fVertices; }
 	/// Returns the pointer to the variable
 	inline const ncProfileVariable* Variable() const { return &m_variable; }
 	/// Returns the state of the mean drawing flag
@@ -102,7 +92,7 @@ protected:
 	/// Background color
 	ncColor m_backgroundColor;
 	/// The vertices for the background
-	GLfloat m_fBackgroundVertices[8]; // Quad with a triangle strip
+	float m_fBackgroundVertices[8]; // Quad with a triangle strip
 	/// The array of variables
 	ncArray<ncPlottingVariable *> m_vVariables;
 

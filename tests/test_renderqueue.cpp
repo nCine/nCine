@@ -85,8 +85,6 @@ int main(int argc, char **argv)
 		pSprites[i]->SetColorF(1.0f, 1.0f, 1.0f, ucRandAlpha/255.0f);
 	}
 
-	t.Reset();
-
 
 // ----- Event cycle --------------------
 	while(!bQuit) {

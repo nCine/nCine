@@ -50,8 +50,6 @@ int main(int argc, char **argv)
 	pSprite4->SetScale(0.7f);
 	rootNode.AddChildNode(pSprite1);
 
-	t.Reset();
-
 
 // ----- Event cycle --------------------
 	while(!bQuit) {

@@ -6,6 +6,9 @@
 	#include <GLES/glext.h>
 #elif defined(WITH_GLEW)
 	#include <GL/glew.h>
+#elif defined(__APPLE__)
+	#include <OpenGL/gl.h>
+	#include <OpenGL/glext.h>
 #else
 	#include <GL/gl.h>
 	#include <GL/glext.h>

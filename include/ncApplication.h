@@ -24,7 +24,7 @@ private:
 	static ncIGfxDevice *m_pGfxDevice;
 	static ncSceneNode *m_pRootNode;
 	static ncRenderQueue *m_pRenderQueue;
-	static ncTimer *m_pTimer;
+	static ncTimer *m_pProfileTimer;
 	static ncProfilePlotter *m_pProfilePlotter;
 	static ncFont *m_pFont;
 	static ncTextNode *m_pTextLines;

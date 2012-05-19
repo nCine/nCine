@@ -24,6 +24,9 @@ public:
 	virtual inline void OnMouseButtonPressed(const ncMouseEvent &event) { }
 	virtual inline void OnMouseButtonReleased(const ncMouseEvent &event) { }
 	virtual inline void OnMouseMoved(const ncMouseState &state) { }
+	virtual inline void OnJoyButtonPressed(const ncJoyButtonEvent &event) { }
+	virtual inline void OnJoyButtonReleased(const ncJoyButtonEvent &event) { }
+	virtual inline void OnJoyAxisMoved(const ncJoyAxisEvent &event) { }
 #endif
 };
 

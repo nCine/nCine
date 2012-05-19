@@ -3,37 +3,39 @@
 
 #include "ncTimer.h"
 
-/// FPS timer and synchronization class
+/// Frame interval and average FPS calculator class
 class ncFrameTimer: public ncTimer
 {
 private:
-	/// Frame rendered
-	unsigned long int m_ulNFrames;
-	/// Frames rendered since last print
-	unsigned long int m_ulPrintNFrames;
+	/// Number of seconds between two log events (user defined)
+	unsigned int m_uLogInterval;
+	/// Number of milliseconds between two average FPS calculations (user defined)
+	unsigned int m_uAvgInterval;
+
 	/// Milliseconds elapsed since the previous frame
-	unsigned long int m_uFrameInterval;
-	/// Number of seconds between two prints
-	unsigned long int m_uPrintInterval;
+	unsigned long int m_ulFrameInterval;
+
+	/// Frame counter for average FPS calculation
+	unsigned long int m_ulAvgNFrames;
+	/// Frame counter for logging
+	unsigned long int m_ulLogNFrames;
+
 	/// Number of milliseconds since the last average FPS calculation
-	unsigned long int m_uLastUpdate;
-	/// Number of milliseconds between two average FPS calculation
-	unsigned long int m_uUpdateInterval;
-	/// Average frame per seconds during the interval
+	unsigned long int m_ulLastAvgUpdate;
+	/// Number of milliseconds since the last log event
+	unsigned long int m_ulLastLogUpdate;
+
+	/// Average FPS calulated during the specified interval
 	float m_fFps;
 public:
 	// Constructor
-	ncFrameTimer(unsigned int uPrintInterval, unsigned int uUpdateInterval = 0);
-	// Adds a frame to the counter and calculate elapsed time since the previous one
+	ncFrameTimer(unsigned int uPrintInterval, unsigned int uUpdateInterval);
+	// Adds a frame to the counter and calculates the interval since the previous one
 	void AddFrame();
-	// Resets timer and counters
-	void Reset();
-	/// Returns current frame number
-	inline unsigned long int FrameNum() { return m_ulNFrames; }
 	/// Returns the interval between two subsequent calls to AddFrame()
-	inline unsigned long int Interval() { return m_uFrameInterval; }
+	inline float Interval() const { return m_ulFrameInterval; }
 	/// Returns the average FPS on the update interval
-	inline float AverageFPS() { return m_fFps; }
+	inline float AverageFPS() const { return m_fFps; }
 };
 
 #endif

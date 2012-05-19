@@ -1,8 +1,13 @@
 #ifndef CLASS_NCALAUDIODEVICE
 #define CLASS_NCALAUDIODEVICE
 
-#include <AL/alc.h>
-#include <AL/al.h>
+#ifdef __APPLE__
+	#include <OpenAL/alc.h>
+	#include <OpenAL/al.h>
+#else
+	#include <AL/alc.h>
+	#include <AL/al.h>
+#endif
 #include "ncIAudioDevice.h"
 #include "ncList.h"
 

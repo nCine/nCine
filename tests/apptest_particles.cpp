@@ -22,11 +22,12 @@ void MyEventHandler::OnInit()
 
 #ifdef __ANDROID__
 	ncAndroidInputManager::EnableAccelerometer(true);
-//	m_pTexture = new ncTexture("/sdcard/ncine/smoke_128.dds");
-	m_pTexture = new ncTexture("/sdcard/ncine/smoke_128_4444.pvr");
+//	m_pTexture = new ncTexture("/sdcard/ncine/smoke_128.dds"); // Adreno SD
+	m_pTexture = new ncTexture("/sdcard/ncine/smoke2_256_8888.pvr"); // Mali HD
 #else
 //	m_pTexture = new ncTexture("textures/smoke_256.webp");
-	m_pTexture = new ncTexture("textures/smoke_256_4444.pvr");
+//	m_pTexture = new ncTexture("textures/smoke_256_4444.pvr");
+	m_pTexture = new ncTexture("textures/smoke_256.png");
 #endif
 
 	m_pParticleSys = new ncParticleSystem(&rRootNode, numParticles, m_pTexture, m_pTexture->Rect());
@@ -46,16 +47,15 @@ void MyEventHandler::OnInit()
 	m_pParticleSys->AddAffector(sizeAffector);
 	m_emitVector.Set(0.0f, 0.35f);
 
-	m_pTimer = new ncTimer();
-	m_pTimer->Reset();
-	m_ulEmitTime = m_pTimer->Now();
+	m_pEmitTimer = new ncTimer();
+	m_pEmitTimer->Start();
 }
 
 void MyEventHandler::OnFrameStart()
 {
-	if (m_pTimer->Now() - m_ulEmitTime > 85) // 150
+	if (m_pEmitTimer->Interval() > 85) // 150
 	{
-		m_ulEmitTime = m_pTimer->Now();
+		m_pEmitTimer->Start();
 		m_pParticleSys->Emit(3, 1000, m_emitVector); // (25, 3000, ncVector2f(0.0, 0.1))
 	}
 }
@@ -78,7 +78,7 @@ void MyEventHandler::OnFrameEnd()
 
 void MyEventHandler::OnShutdown()
 {
-	delete m_pTimer;
+	delete m_pEmitTimer;
 	delete m_pParticleSys;
 	delete m_pTexture;
 }

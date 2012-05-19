@@ -56,8 +56,7 @@ int main(int argc, char **argv)
 	particleSys.AddAffector(sizeAffector);
 
 	srand(time(NULL));
-	t.Reset();
-	unsigned long int ulStartTime = t.Now();
+	unsigned long int ulStartTime = ncTimer::Now();
 
 
 // ----- Event cycle --------------------
@@ -88,9 +87,9 @@ int main(int argc, char **argv)
 
 		gfxDevice.Clear();
 
-		if (t.Now() - ulStartTime > 250)
+		if (ncTimer::Now() - ulStartTime > 250)
 		{
-			ulStartTime = t.Now();
+			ulStartTime = ncTimer::Now();
 			particleSys.Emit(25, 3000, ncVector2f(0.0f, 0.1f));
 		}
 

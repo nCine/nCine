@@ -1,7 +1,12 @@
 #ifndef CLASS_NCAUDIOBUFFER
 #define CLASS_NCAUDIOBUFFER
 
-#include <AL/al.h>
+#ifdef __APPLE__
+	#include <OpenAL/al.h>
+#else
+	#include <AL/al.h>
+#endif
+
 #include "ncObject.h"
 class ncIAudioLoader;
 

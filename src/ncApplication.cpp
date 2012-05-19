@@ -31,7 +31,7 @@ ncFrameTimer *ncApplication::m_pFrameTimer = NULL;
 ncIGfxDevice *ncApplication::m_pGfxDevice = NULL;
 ncSceneNode *ncApplication::m_pRootNode = NULL;
 ncRenderQueue *ncApplication::m_pRenderQueue = NULL;
-ncTimer *ncApplication::m_pTimer = NULL;
+ncTimer *ncApplication::m_pProfileTimer = NULL;
 ncProfilePlotter *ncApplication::m_pProfilePlotter = NULL;
 ncFont *ncApplication::m_pFont = NULL;
 ncTextNode *ncApplication::m_pTextLines = NULL;
@@ -50,7 +50,10 @@ void ncApplication::Init(struct android_app* state, ncIAppEventHandler* (*pCreat
 {
 	// Registering the logger as early as possible
 	ncServiceLocator::RegisterLogger(new ncFileLogger("/sdcard/ncine_log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_VERBOSE));
-	m_pGfxDevice = new ncEGLGfxDevice(state, ncDisplayMode(5, 6, 5));
+	if (ncEGLGfxDevice::isModeSupported(state, ncDisplayMode(8, 8, 8)))
+		m_pGfxDevice = new ncEGLGfxDevice(state, ncDisplayMode(8, 8, 8));
+	else
+		m_pGfxDevice = new ncEGLGfxDevice(state, ncDisplayMode(5, 6, 5));
 	m_pInputManager = new ncAndroidInputManager();
 	ncAssetFile::InitAssetManager(state);
 #else
@@ -68,6 +71,7 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 #endif
 	m_pGfxDevice->SetWindowTitle("nCine");
 #endif
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Init - nCine compiled on " __DATE__ " at " __TIME__);
 	ncServiceLocator::RegisterIndexer(new ncArrayIndexer());
 	ncServiceLocator::RegisterAudioDevice(new ncALAudioDevice());
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Init - Data path: %s", ncIFile::DataPath());
@@ -75,7 +79,7 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 	m_pFrameTimer = new ncFrameTimer(5, 100);
 	m_pRootNode = new ncSceneNode();
 	m_pRenderQueue = new ncRenderQueue();
-	m_pTimer = new ncTimer();
+	m_pProfileTimer = new ncTimer();
 
 	m_pProfilePlotter = new ncStackedBarPlotter(m_pRootNode, ncRect(Width()*0.1f, Height()*0.1f, Width()*0.8f, Height()*0.15f));
 	m_pProfilePlotter->SetBackgroundColor(ncColor(0.35f, 0.35f, 0.45f, 0.5f));
@@ -90,12 +94,11 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 	m_pProfilePlotter->Variable(2).SetMeanColor(ncColor(0.0f, 0.0f, 1.0f));
 
 #if defined(__ANDROID__)
-	m_pFont = new ncFont("asset::trebuchet16_128.dds.mp3", "asset::trebuchet16_128.fnt");
+//	m_pFont = new ncFont("asset::trebuchet16_128.dds.mp3", "asset::trebuchet16_128.fnt");
+	m_pFont = new ncFont("/sdcard/ncine/trebuchet32_256_4444.pvr", "/sdcard/ncine/trebuchet32_256.fnt");
 //	m_pFont = new ncFont("/sdcard/ncine/trebuchet16_128.dds", "/sdcard/ncine/trebuchet16_128.fnt");
-#elif defined(WITH_SDL)
+#else
 	m_pFont = new ncFont("fonts/trebuchet32_256.png", "fonts/trebuchet32_256.fnt");
-#elif defined(WITH_GLFW)
-	m_pFont = new ncFont("fonts/trebuchet32_256.webp", "fonts/trebuchet32_256.fnt");
 #endif
 	m_pTextLines = new ncTextNode(m_pRootNode, m_pFont);
 	m_pTextLines->SetPosition(0, Height());
@@ -118,8 +121,6 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 void ncApplication::Run()
 {
 #ifndef __ANDROID__
-	m_pFrameTimer->Reset();
-
 	while (!m_bShouldQuit) {
 #if defined(WITH_SDL)
 		SDL_Event event;
@@ -139,8 +140,9 @@ void ncApplication::Run()
 			}
 		}
 #elif defined(WITH_GLFW)
+		m_bPaused = !ncGLFWInputManager::hasFocus();
 		glfwPollEvents();
-		m_bPaused = (glfwGetWindowParam(GLFW_ACTIVE) == GL_FALSE);
+		ncGLFWInputManager::UpdateJoystickStates();
 #endif
 
 		if (!m_bPaused)
@@ -152,36 +154,34 @@ void ncApplication::Run()
 /// A single step of the game loop made to render a frame
 void ncApplication::Step()
 {
-	unsigned long int uStartTime = 0L;
-	m_pTimer->Start();
-
-	uStartTime = m_pTimer->Now();
+	m_pProfileTimer->Start();
 	m_pFrameTimer->AddFrame();
 	m_pGfxDevice->Clear();
 	m_pAppEventHandler->OnFrameStart();
-	m_pProfilePlotter->AddValue(0, m_pTimer->Now() - uStartTime);
+	m_pProfilePlotter->AddValue(0, m_pProfileTimer->Interval());
 //	m_pProfilePlotter->AddValue(0, 1.0f * abs(rand()%34));
 
-	uStartTime = m_pTimer->Now();
+	m_pProfileTimer->Start();
 	m_pRootNode->Update(m_pFrameTimer->Interval());
 	m_pRootNode->Visit(*m_pRenderQueue);
-	m_pProfilePlotter->AddValue(1, m_pTimer->Now() - uStartTime);
+	m_pProfilePlotter->AddValue(1, m_pProfileTimer->Interval());
 //	m_pProfilePlotter->AddValue(1, 1.0f * abs(rand()%33));
 
-	uStartTime = m_pTimer->Now();
+	m_pProfileTimer->Start();
 	m_pRenderQueue->Draw();
-	m_pProfilePlotter->AddValue(2, m_pTimer->Now() - uStartTime);
+	m_pProfilePlotter->AddValue(2, m_pProfileTimer->Interval());
 //	m_pProfilePlotter->AddValue(2, 1.0f * abs(rand()%33));
 
 	ncServiceLocator::AudioDevice().UpdatePlayers();
 	m_pGfxDevice->Update();
 	m_pAppEventHandler->OnFrameEnd();
 
-	if (m_pTimer->Now() - m_ulTextUpdateTime > 100)
+	// TODO: hard-coded 100ms update time
+	if (ncTimer::Now() - m_ulTextUpdateTime > 100)
 	{
-		m_ulTextUpdateTime = m_pTimer->Now();
-		sprintf(m_vTextChars, (const char *)"FPS: %.0f (%lums)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC",
-				AverageFPS(), Interval(),
+		m_ulTextUpdateTime = ncTimer::Now();
+		sprintf(m_vTextChars, (const char *)"FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC",
+				m_pFrameTimer->AverageFPS(), m_pFrameTimer->HPInterval(),
 				m_pRenderQueue->NumVertices(ncRenderCommand::SPRITE_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::SPRITE_TYPE),
 				m_pRenderQueue->NumVertices(ncRenderCommand::PARTICLE_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::PARTICLE_TYPE),
 				m_pRenderQueue->NumVertices(ncRenderCommand::TEXT_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::TEXT_TYPE),
@@ -223,9 +223,7 @@ void ncApplication::SetPause(bool bPaused)
 {
 	m_bPaused = bPaused;
 	if (m_bPaused == false)
-		m_pFrameTimer->Continue();
-	else
-		m_pFrameTimer->Stop();
+		m_pFrameTimer->Start();
 }
 
 /// Toggles the pause flag on and off

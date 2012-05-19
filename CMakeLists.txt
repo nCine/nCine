@@ -5,12 +5,14 @@ if(NOT CROSS_MINGW32)
 	find_package(OpenGL REQUIRED)
 	find_package(SDL)
 	find_package(SDL_image)
+	find_package(PNG)
 	find_package(OpenAL REQUIRED)
 	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
 	find_package(GLFW)
 	find_package(WebP)
 	find_package(Vorbis)
 else()
+	set(WIN32 1)
 	set(CMAKE_SYSTEM_NAME Windows)
 	set(CMAKE_SHARED_LIBRARY_PREFIX)
 	set(CMAKE_SHARED_LIBRARY_SUFFIX .dll)
@@ -19,13 +21,19 @@ else()
 	set(CMAKE_CXX_COMPILER i486-mingw32-g++)
 	set(CMAKE_RC_COMPILER i486-mingw32-windres)
 	set(CMAKE_FIND_ROOT_PATH /usr/i486-mingw32)
+	set(CMAKE_FIND_INCLUDE_PATH /usr/i486-mingw32)
 	set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 	set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 	set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 	set(CMAKE_SHARED_LIBRARY_CXX_FLAGS "") # suppressing '-fpic'
 	set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "") # suppressing '-rdynamic'
+	set(OPENGL_gl_LIBRARY opengl32 glew32)
+	set(SDL_LIBRARY mingw32 SDLmain SDL)
 	set(SDL_FOUND 1)
+	set(SDLIMAGE_LIBRARY SDL_image)
 	set(SDLIMAGE_FOUND 1)
+	set(OPENAL_LIBRARY OpenAL32)
+	set(VORBISFILE_LIBRARY ogg vorbis vorbisfile)
 	set(VORBIS_FOUND 1)
 	add_definitions(-DWITH_GLEW)
 endif()
@@ -34,7 +42,7 @@ endif()
 #add_definitions(-DWITH_DEPTH_TEST)
 
 # Forcing the use of SDL
-SET(GLFW_FOUND 0)
+set(GLFW_FOUND 0)
 
 if(NOT SDL_FOUND AND NOT GLFW_FOUND)
 	message(FATAL_ERROR "Neither SDL nor GLFW have been found!")
@@ -56,8 +64,14 @@ if(SDL_FOUND AND NOT GLFW_FOUND)
 	endif()
 else()
 	set(SDL_LIBRARY "")
+	set(SDLIMAGE_LIBRARY "")
 endif()
 
+if(PNG_FOUND AND GLFW_FOUND)
+	add_definitions(-DWITH_PNG)
+else()
+	set(PNG_LIBRARY "")
+endif()
 if(WEBP_FOUND)
 	add_definitions(-DWITH_WEBP)
 else()
@@ -134,6 +148,9 @@ if(SDL_FOUND AND NOT GLFW_FOUND)
 	endif()
 endif()
 
+if(PNG_FOUND AND GLFW_FOUND)
+	list(APPEND SOURCES src/graphics/ncTextureLoaderPNG.cpp)
+endif()
 if(WEBP_FOUND)
 	list(APPEND SOURCES src/graphics/ncTextureLoaderWebP.cpp)
 endif()
@@ -141,33 +158,20 @@ if(VORBIS_FOUND)
 	list(APPEND SOURCES src/audio/ncAudioLoaderOgg.cpp)
 endif()
 
-if(NOT CROSS_MINGW32)
-	link_libraries(
-		${OPENGL_gl_LIBRARY}
-		${GLFW_LIBRARY}
-		${SDL_LIBRARY}
-		${SDLIMAGE_LIBRARY}
-		${WEBP_LIBRARY}
-		${OPENAL_LIBRARY}
-		${VORBISFILE_LIBRARY}
-	)
-else()
-	link_libraries(
-		mingw32
-		SDLmain
-		opengl32
-		glew32
-		SDL
-		SDL_image
-		OpenAL32
-		ogg
-		vorbis
-		vorbisfile
-	)
-endif()
+link_libraries(
+	${OPENGL_gl_LIBRARY}
+	${GLFW_LIBRARY}
+	${SDL_LIBRARY}
+	${SDLIMAGE_LIBRARY}
+	${PNG_LIBRARY}
+	${WEBP_LIBRARY}
+	${OPENAL_LIBRARY}
+	${VORBISFILE_LIBRARY}
+)
 
 add_library(ncine SHARED ${SOURCES})
 
+add_executable(apptest_joystick tests/main.cpp tests/apptest_joystick.cpp)
 add_executable(apptest_overdraw tests/main.cpp tests/apptest_overdraw.cpp)
 add_executable(apptest_rotozoom tests/main.cpp tests/apptest_rotozoom.cpp)
 add_executable(apptest_animsprites tests/main.cpp tests/apptest_animsprites.cpp)
@@ -177,6 +181,7 @@ add_executable(apptest_scene tests/main.cpp tests/apptest_scene.cpp)
 add_executable(test_array tests/test_array.cpp)
 add_executable(test_list tests/test_list.cpp)
 
+target_link_libraries(apptest_joystick ncine)
 target_link_libraries(apptest_overdraw ncine)
 target_link_libraries(apptest_rotozoom ncine)
 target_link_libraries(apptest_animsprites ncine)

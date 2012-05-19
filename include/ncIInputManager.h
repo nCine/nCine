@@ -70,6 +70,24 @@ public:
 
 	virtual bool isKeyDown(ncKeySym key) const = 0;
 };
+
+/// Information about a joystick axis event
+class ncJoyAxisEvent
+{
+public:
+	int joyId;
+	int axisId;
+	short int value;
+};
+
+/// Information about a joystick button event
+class ncJoyButtonEvent
+{
+public:
+	int joyId;
+	int buttonId;
+};
+
 #endif
 
 /// Information about a keyboard event
@@ -104,6 +122,13 @@ public:
 #ifndef __ANDROID__
 	virtual const ncMouseState& MouseState() = 0;
 	virtual const ncKeyboardState& KeyboardState() const = 0;
+
+	static short int s_iMaxAxisValue;
+	virtual bool isJoyPresent(int iJoyId) const = 0;
+	virtual int JoyNumButtons(int iJoyId) const = 0;
+	virtual int JoyNumAxes(int iJoyId) const = 0;
+	virtual bool isJoyButtonPressed(int iJoyId, int iButtonId) const = 0;
+	virtual short int JoyAxisValue(int iJoyId, int iAxisId) const = 0;
 #endif
 };
 
