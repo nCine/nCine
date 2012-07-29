@@ -6,6 +6,7 @@
 #endif
 #include <SDL/SDL.h>
 
+#define _USE_MATH_DEFINES // for M_PI in MSVC
 #include <cmath>
 
 #include "ncRect.h"
@@ -29,8 +30,6 @@ int main(int argc, char **argv)
 	bool bQuit = false;
 
 	const int NUM_TEXTURES = 4;
-	ncTexture *pTextures[NUM_TEXTURES];
-	ncRect texRects[NUM_TEXTURES];
 	const int NUM_SPRITES = 1000;
 	ncSprite *pSprites[NUM_SPRITES];
 	int vRadius[NUM_SPRITES];
@@ -39,7 +38,6 @@ int main(int argc, char **argv)
 
 // ----- Init ----------------------
 	float fAngle = 0.0f;
-	float fAngle2 = 0.0f;
 	ncFrameTimer t(5, 0);
 	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
 	ncSDLGfxDevice gfxDevice(iWidth, iHeight);
@@ -50,12 +48,14 @@ int main(int argc, char **argv)
 
 #ifdef WITH_BATCH
 	ncTexture *pMegaTexture = new ncTexture("textures/megatexture_256.png");
+	ncRect texRects[NUM_TEXTURES];
 	texRects[0] = ncRect(0, 0, 145, 121);
 	texRects[1] = ncRect(256-100, 0, 100, 100);
 	texRects[2] = ncRect(0, 256-96, 96, 96);
 	texRects[3] = ncRect(256-96, 256-96, 96, 96);
 	ncSpriteBatchNode spriteBatch(&rootNode, pMegaTexture);
 #else
+	ncTexture *pTextures[NUM_TEXTURES];
 	pTextures[0] = new ncTexture("textures/texture1.png");
 	pTextures[1] = new ncTexture("textures/texture2.png");
 	pTextures[2] = new ncTexture("textures/texture3.png");
@@ -111,20 +111,17 @@ int main(int argc, char **argv)
 
 // ----- Blitting on the screen --------
 		t.AddFrame();
-		fAngle += 0.1f * t.Interval();
-		fAngle2 += 0.25f * t.Interval();
+		fAngle += 0.25f * t.Interval();
 
 		gfxDevice.Clear();
 
 		float fSinus = sinf(fAngle * 0.01f);
 		float fCosine = cosf(fAngle * 0.01f);
-		float fSinus2 = sinf(fAngle2 * 0.01f);
-		float fCosine2 = cosf(fAngle2 * 0.01f);
 
 		for (int i = 0; i < NUM_SPRITES; i++)
 		{
-			pSprites[i]->x = vX[i] + fSinus2*vRadius[i];
-			pSprites[i]->y = vY[i] + fCosine2*vRadius[i];
+			pSprites[i]->x = vX[i] + fSinus*vRadius[i];
+			pSprites[i]->y = vY[i] + fCosine*vRadius[i];
 		}
 
 		rootNode.Update(t.Interval());

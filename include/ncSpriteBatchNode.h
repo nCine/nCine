@@ -32,7 +32,6 @@ public:
 	inline void SetTexture(ncTexture* pTexture) { m_pTexture = pTexture; }
 
 	virtual void Visit(ncRenderQueue& rRenderQueue);
-	virtual void Draw(ncRenderQueue& rRenderQueue);
 
 	inline static eObjectType sType() { return SPRITEBATCH_TYPE; }
 };

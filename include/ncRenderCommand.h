@@ -14,6 +14,8 @@
 	#include <GL/glext.h>
 #endif
 
+#include <cstdio> // for NULL
+
 #include "ncList.h"
 #include "ncColor.h"
 

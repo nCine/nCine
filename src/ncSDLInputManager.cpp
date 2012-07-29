@@ -61,7 +61,7 @@ ncSDLInputManager::ncSDLInputManager()
 ncSDLInputManager::~ncSDLInputManager()
 {
 	// Close a joystick if opened
-	for(int i = 0; i < s_uMaxNumJoysticks; i++)
+	for(unsigned int i = 0; i < s_uMaxNumJoysticks; i++)
 	{
 		if (isJoyPresent(i))
 		{
@@ -168,14 +168,22 @@ bool ncSDLInputManager::isJoyPresent(int iJoyId) const
 
 int ncSDLInputManager::JoyNumButtons(int iJoyId) const
 {
+	int iNumButtons = -1;
+
 	if (isJoyPresent(iJoyId))
-		return SDL_JoystickNumButtons(s_pJoysticks[iJoyId]);
+		iNumButtons = SDL_JoystickNumButtons(s_pJoysticks[iJoyId]);
+
+	return iNumButtons;
 }
 
 int ncSDLInputManager::JoyNumAxes(int iJoyId) const
 {
+	int iNumAxes = -1;
+
 	if (isJoyPresent(iJoyId))
-		return SDL_JoystickNumAxes(s_pJoysticks[iJoyId]) + (SDL_JoystickNumHats(s_pJoysticks[iJoyId]) * 2);
+		iNumAxes = SDL_JoystickNumAxes(s_pJoysticks[iJoyId]) + (SDL_JoystickNumHats(s_pJoysticks[iJoyId]) * 2);
+
+	return iNumAxes;
 }
 
 bool ncSDLInputManager::isJoyButtonPressed(int iJoyId, int iButtonId) const

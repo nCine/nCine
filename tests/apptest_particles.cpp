@@ -1,4 +1,3 @@
-#include <cmath>
 #include "apptest_particles.h"
 #include "ncApplication.h"
 #include "ncTexture.h"

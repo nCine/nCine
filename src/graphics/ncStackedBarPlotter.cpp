@@ -46,7 +46,7 @@ void ncStackedBarPlotter::Draw(ncRenderQueue& rRenderQueue)
 
 	UpdateAllVertices(0, 0, m_iWidth, m_iHeight);
 
-	for (int i = 0; i < m_vVariables.Size(); i++)
+	for (unsigned int i = 0; i < m_vVariables.Size(); i++)
 	{
 		m_vVariables[i]->ApplyTransformations(m_fAbsX, m_fAbsY, m_fAbsRotation, m_fAbsScaleFactor);
 		m_vVariables[i]->Draw(rRenderQueue);
@@ -67,7 +67,7 @@ void ncStackedBarPlotter::UpdateAllVertices(int x, int y, int w, int h)
 	float fScaledH = h / uNumVariables;
 
 	float fMeanVerticalOffset = 0.0f;
-	for (int i = 0; i < m_vVariables.Size(); i++)
+	for (unsigned int i = 0; i < m_vVariables.Size(); i++)
 	{
 		const ncProfileVariable* profVariable = m_vVariables[i]->Variable();
 		GLfloat* fVertices = m_vVariables[i]->Vertices();
@@ -88,13 +88,13 @@ void ncStackedBarPlotter::UpdateAllVertices(int x, int y, int w, int h)
 		uNumValues = m_vVariables[0]->Variable()->NumValues();
 		uNextIndex = m_vVariables[0]->Variable()->NextIndex();
 	}
-	for (int i = 0; i < uNumValues; i++)
+	for (unsigned int i = 0; i < uNumValues; i++)
 	{
 		float fVerticalOffset = 0.0f;
 		float fStep = (float(w)/float(uNumValues)) * 0.5f;
 		float fCenter = 2.0f*fStep*(i+1) - fStep;
 
-		for (int j = 0; j < m_vVariables.Size(); j++)
+		for (unsigned int j = 0; j < m_vVariables.Size(); j++)
 		{
 			const ncProfileVariable* profVariable = m_vVariables[j]->Variable();
 			GLfloat* fVertices = m_vVariables[j]->Vertices();

@@ -38,7 +38,7 @@ public:
 	ncColorAffector() : m_vColorSteps(4) { }
 	~ncColorAffector()
 	{
-		for (int i = 0; i < m_vColorSteps.Size(); i++)
+		for (unsigned int i = 0; i < m_vColorSteps.Size(); i++)
 			delete m_vColorSteps[i];
 	}
 
@@ -63,7 +63,7 @@ public:
 	ncSizeAffector(float fBaseScale) : m_vSizeSteps(4), m_fBaseScale(fBaseScale) { }
 	~ncSizeAffector()
 	{
-		for (int i = 0; i < m_vSizeSteps.Size(); i++)
+		for (unsigned int i = 0; i < m_vSizeSteps.Size(); i++)
 			delete m_vSizeSteps[i];
 	}
 

@@ -6,6 +6,7 @@
 #endif
 #include <SDL/SDL.h>
 
+#define _USE_MATH_DEFINES // for M_PI in MSVC
 #include <cmath>
 
 #include "ncFrameTimer.h"

@@ -1,4 +1,3 @@
-#include <cmath>
 #include <cstdio>
 #include "ncVector2f.h"
 

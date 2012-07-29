@@ -87,7 +87,7 @@ void ncTextNode::Draw(ncRenderQueue& rRenderQueue)
 		unsigned int uCurrentLine = 0;
 		m_fXAdvance = CalculateAlignment(uCurrentLine);
 		m_fYAdvance = 0.0f;
-		for (int i = 0; i < strlen(m_vString); i++)
+		for (size_t i = 0; i < strlen(m_vString); i++)
 		{	
 			if (m_vString[i] == '\n')
 			{
@@ -129,7 +129,7 @@ void ncTextNode::CalculateBoundaries() const
 		float fXAdvanceMax = 0.0f; // longest line
 		m_fXAdvance = 0.0f;
 		m_fYAdvance = 0.0f;
-		for (int i = 0; i < strlen(m_vString); i++)
+		for (size_t i = 0; i < strlen(m_vString); i++)
 		{
 			if (m_vString[i] == '\n')
 			{

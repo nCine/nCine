@@ -88,14 +88,12 @@ void ncEGLGfxDevice::InitDevice(struct android_app* state)
 		EGL_NONE
 	};
 
-	EGLint w, h, format;
-	EGLint numConfigs;
+	EGLint format, numConfigs;
 	EGLConfig config;
 
 	m_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
 	eglInitialize(m_display, 0, 0);
-
 	eglChooseConfig(m_display, attribs, &config, 1, &numConfigs);
 	eglGetConfigAttrib(m_display, config, EGL_NATIVE_VISUAL_ID, &format);
 

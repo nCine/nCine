@@ -58,7 +58,7 @@ void ncRenderQueue::Draw()
 	glDepthMask(GL_FALSE);
 #endif
 	// Rendering transparent nodes back to front
-	for (int i = 0; i < m_transparentRenderCmds.Size(); i++)
+	for (unsigned int i = 0; i < m_transparentRenderCmds.Size(); i++)
 		m_transparentRenderCmds[i]->Issue();
 #ifdef WITH_DEPTH_TEST
 	// Has to be enabled again before exiting this method

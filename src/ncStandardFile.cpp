@@ -1,7 +1,10 @@
 #include <cstdlib> // for exit()
-#include <sys/stat.h> // for open()
-#include <fcntl.h> // for open()
-#include <unistd.h> // for close()
+#if !(defined(_WIN32) && !defined(__MINGW32__))
+	// All but MSVC: Linux, Android and MinGW.
+	#include <sys/stat.h> // for open()
+	#include <fcntl.h> // for open()
+	#include <unistd.h> // for close()
+#endif
 #include "ncStandardFile.h"
 #include "ncServiceLocator.h"
 
@@ -17,11 +20,13 @@ void ncStandardFile::Open(unsigned char uMode)
 		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncStandardFile::Open - File \"%s\" is already opened", m_vFilename);
 	else
 	{
+#if !(defined(_WIN32) && !defined(__MINGW32__))
 		// Opening with a file descriptor
 		if (uMode & MODE_FD)
 			OpenFD(uMode);
 		// Opening with a file stream
 		else
+#endif
 			OpenStream(uMode);
 	}
 }
@@ -31,6 +36,7 @@ void ncStandardFile::Close()
 {
 	if (m_iFileDescriptor >= 0)
 	{
+#if !(defined(_WIN32) && !defined(__MINGW32__))
 		int iRetValue = close(m_iFileDescriptor);
 		if (iRetValue < 0)
 			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncStandardFile::Close - Cannot close the file \"%s\"", m_vFilename);
@@ -39,6 +45,7 @@ void ncStandardFile::Close()
 			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::Close - File \"%s\" closed", m_vFilename);
 			m_iFileDescriptor = -1;
 		}
+#endif
 	}
 	else if (m_pFilePointer)
 	{
@@ -59,7 +66,9 @@ long int ncStandardFile::Seek(long int lOffset, int iWhence) const
 
 	if (m_iFileDescriptor >= 0)
 	{
+#if !(defined(_WIN32) && !defined(__MINGW32__))
 		lSeekValue = lseek(m_iFileDescriptor, lOffset, iWhence);
+#endif
 	}
 	else if (m_pFilePointer)
 	{
@@ -75,7 +84,9 @@ long int ncStandardFile::Tell() const
 
 	if (m_iFileDescriptor >= 0)
 	{
+#if !(defined(_WIN32) && !defined(__MINGW32__))
 		lTellValue = lseek(m_iFileDescriptor, 0L, SEEK_CUR);
+#endif
 	}
 	else if (m_pFilePointer)
 	{
@@ -92,14 +103,15 @@ long int ncStandardFile::Read(void *pBuffer, int iBytes) const
 
 	if (m_iFileDescriptor >= 0)
 	{
+#if !(defined(_WIN32) && !defined(__MINGW32__))
 		lBytesRead = read(m_iFileDescriptor, pBuffer, iBytes);
+#endif
 	}
 	else if (m_pFilePointer)
 	{
 		lBytesRead = fread(pBuffer, 1, iBytes, m_pFilePointer);
 	}
 
-//	printf("bytes: %ld\n", lBytesRead);
 	return lBytesRead;
 }
 
@@ -111,6 +123,7 @@ long int ncStandardFile::Read(void *pBuffer, int iBytes) const
 /// Opens the file with open()
 void ncStandardFile::OpenFD(unsigned char uMode)
 {
+#if !(defined(_WIN32) && !defined(__MINGW32__))
 	int iOFlag = -1;
 
 	switch(uMode)
@@ -145,6 +158,7 @@ void ncStandardFile::OpenFD(unsigned char uMode)
 		m_lFileSize = lseek(m_iFileDescriptor, 0L, SEEK_END);
 		lseek(m_iFileDescriptor, 0L, SEEK_SET);
 	}
+#endif
 }
 
 /// Opens the file with fopen()

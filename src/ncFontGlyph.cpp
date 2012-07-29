@@ -11,7 +11,7 @@ int ncFontGlyph::Kerning(int iSecondGlyph) const
 {
 	int iKerningAmount = 0;
 
-	for (int i = 0; i < m_vKernings.Size(); i++)
+	for (unsigned int i = 0; i < m_vKernings.Size(); i++)
 	{
 		if (iSecondGlyph == m_vKernings[i].m_iSecondGlyph)
 		{

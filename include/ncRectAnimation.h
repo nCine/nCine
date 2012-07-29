@@ -11,7 +11,7 @@ private:
 	/// The rectangles array
 	ncArray<ncRect> m_vRects;
 	/// Current frame
-	int m_iCurrentFrame;
+	unsigned int m_uCurrentFrame;
 	/// The time until the next frame change
 	unsigned int m_uFrameTime;
 	/// Elapsed time since the last frame change
@@ -27,14 +27,14 @@ private:
 
 public:
 	ncRectAnimation(unsigned int uFrameTime, bool bLooping, bool bBackward)
-		: m_vRects(4), m_iCurrentFrame(0), m_uFrameTime(uFrameTime), m_ulElapsedFrameTime(0),
+		: m_vRects(4), m_uCurrentFrame(0), m_uFrameTime(uFrameTime), m_ulElapsedFrameTime(0),
 		  m_bGoingForward(true), m_bLooping(bLooping), m_bBackward(bBackward), m_bPaused(false)
 	{ }
 
 	/// Returns current frame
-	inline int Frame() const { return m_iCurrentFrame; }
+	inline unsigned int Frame() const { return m_uCurrentFrame; }
 	// Sets current frame
-	void SetFrame(int iFrameNum);
+	void SetFrame(unsigned int uFrameNum);
 	/// Returns frame time
 	inline unsigned int FrameTime() const { return m_uFrameTime; }
 	/// Sets frame time
@@ -45,7 +45,7 @@ public:
 	/// Creates a rectangles from origin and size and then adds it to the array
 	inline void AddRect(int iX, int iY, int iW, int iH) { m_vRects.InsertBack(ncRect(iX, iY, iW, iH)); }
 	/// Returns the current rectangle
-	inline const ncRect& Rect() const { return m_vRects[m_iCurrentFrame]; }
+	inline const ncRect& Rect() const { return m_vRects[m_uCurrentFrame]; }
 
 	// Returns true if a frame rect has changed
 	void UpdateFrame(unsigned long ulInterval);
@@ -55,7 +55,7 @@ public:
 	/// Sets the animation flag
 	inline void SetPaused(bool bPaused) { m_bPaused = bPaused; }
 	// Pause on a specified frame
-	void Pause(int iFrameNum);
+	void Pause(unsigned int uFrameNum);
 };
 
 #endif

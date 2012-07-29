@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES // for M_PI in MSVC
 #include <cmath>
 #include "apptest_overdraw.h"
 #include "ncSceneNode.h"

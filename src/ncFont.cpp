@@ -9,7 +9,7 @@
 
 /// Constructs a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)
 ncFont::ncFont(const char *pTexFilename, const char *pFntFilename)
-	: m_pTexture(NULL)
+	: m_pTexture(NULL), m_uLineHeight(0), m_uBase(0), m_uWidth(0), m_uHeight(0), m_uNumGlyphs (0), m_uNumKernings(0)
 {
 	m_pTexture = new ncTexture(pTexFilename);
 
@@ -50,7 +50,7 @@ void ncFont::ParseFNTFile(ncIFile *pFileHandle)
 		else if (strncmp(pBuffer, "common", 6) == 0)
 		{
 			sscanf(pBuffer, "common lineHeight=%u base=%u scaleW=%u scaleH=%u", &m_uLineHeight, &m_uBase, &m_uWidth, &m_uHeight);
-			if (m_uWidth != m_pTexture->Width() || m_uHeight != m_pTexture->Height())
+			if ((int)m_uWidth != m_pTexture->Width() || (int)m_uHeight != m_pTexture->Height())
 			{
 				ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncFont::ParseFNTFile - FNT texture has a different size: (%u, %u)", m_uWidth, m_uHeight);
 				exit(-1);
@@ -73,7 +73,7 @@ void ncFont::ParseFNTFile(ncIFile *pFileHandle)
 			sscanf(pBuffer, "kerning first=%d second=%d amount=%d ", &iGlyphId, &iSecondGlyphId, &iKerningAmount);
 			m_vGlyphs[iGlyphId].AddKerning(iSecondGlyphId, iKerningAmount);
 		}
-	} while ((pBuffer = strchr(pBuffer, '\n')+1) < pFileBuffer + pFileHandle->Size());
+	} while (strchr(pBuffer, '\n') && (pBuffer = strchr(pBuffer, '\n')+1) < pFileBuffer + pFileHandle->Size());
 
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncFont::ParseFNTFile - FNT file parsed: %u glyphs and %u kernings", m_uNumGlyphs, m_uNumKernings);
 	delete[] pFileBuffer;

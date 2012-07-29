@@ -29,24 +29,7 @@ void ncSpriteBatchNode::Visit(ncRenderQueue& rRenderQueue)
 
 	Transform();
 
-	// TODO: only the first level of children gets accounted
-	for(ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
-	{
-		if ((*i)->Type() == ncSprite::sType())
-		{
-			ncSprite *pSprite = static_cast<ncSprite *>((*i));
-
-			if (pSprite->bShouldDraw && pSprite->Texture()->GLId() == m_pTexture->GLId())
-				pSprite->Transform();
-		}
-	}
-
-	Draw(rRenderQueue);
-}
-
-void ncSpriteBatchNode::Draw(ncRenderQueue& rRenderQueue)
-{
-	// Clear every previous sprite data before drawing
+	// Clear any previous data before processing sprites
 	m_vVertices.Clear();
 	m_vTexCoords.Clear();
 	m_vColors.Clear();
@@ -59,11 +42,14 @@ void ncSpriteBatchNode::Draw(ncRenderQueue& rRenderQueue)
 			ncSprite *pSprite = static_cast<ncSprite *>((*i));
 
 			if (pSprite->bShouldDraw && pSprite->Texture()->GLId() == m_pTexture->GLId())
+			{
+				pSprite->Transform();
 				ProcessSprite(*pSprite);
+			}
 		}
 	}
 
-	ncDrawableNode::Draw(rRenderQueue);
+	Draw(rRenderQueue);
 }
 
 ///////////////////////////////////////////////////////////
@@ -90,13 +76,14 @@ void ncSpriteBatchNode::ProcessSprite(ncSprite& rSprite)
 		cosine = cosf(-rot * M_PI/180.0f);
 	}
 
-	m_vVertices.InsertBack(pos.x + leftPos*cosine - bottomPos*sine);	m_vVertices.InsertBack(pos.y + bottomPos*cosine + leftPos*sine);
-	m_vVertices.InsertBack(pos.x + leftPos*cosine - topPos*sine);		m_vVertices.InsertBack(pos.y + topPos*cosine + leftPos*sine);
-	m_vVertices.InsertBack(pos.x + rightPos*cosine - bottomPos*sine);	m_vVertices.InsertBack(pos.y + bottomPos*cosine + rightPos*sine);
+	float *pVertices = m_vVertices.MapBuffer(12);
+	pVertices[0] = pos.x + leftPos*cosine - bottomPos*sine;				pVertices[1] = pos.y + bottomPos*cosine + leftPos*sine;
+	pVertices[2] = pos.x + leftPos*cosine - topPos*sine;				pVertices[3] = pos.y + topPos*cosine + leftPos*sine;
+	pVertices[4] = pos.x + rightPos*cosine - bottomPos*sine;			pVertices[5] = pos.y + bottomPos*cosine + rightPos*sine;
 
-	m_vVertices.InsertBack(pos.x + rightPos*cosine - bottomPos*sine);	m_vVertices.InsertBack(pos.y + bottomPos*cosine + rightPos*sine);
-	m_vVertices.InsertBack(pos.x + rightPos*cosine - topPos*sine);		m_vVertices.InsertBack(pos.y + topPos*cosine + rightPos*sine);
-	m_vVertices.InsertBack(pos.x + leftPos*cosine - topPos*sine);		m_vVertices.InsertBack(pos.y + topPos*cosine + leftPos*sine);
+	pVertices[6] = pos.x + rightPos*cosine - bottomPos*sine;			pVertices[7] = pos.y + bottomPos*cosine + rightPos*sine;
+	pVertices[8] = pos.x + rightPos*cosine - topPos*sine;				pVertices[9] = pos.y + topPos*cosine + rightPos*sine;
+	pVertices[10]= pos.x + leftPos*cosine - topPos*sine;				pVertices[11]= pos.y + topPos*cosine + leftPos*sine;
 
 
 	ncPoint texSize = m_pTexture->Size();
@@ -107,13 +94,14 @@ void ncSpriteBatchNode::ProcessSprite(ncSprite& rSprite)
 	float bottomCoord = float(texRect.y+texRect.h)/float(texSize.y);
 	float topCoord = float(texRect.y)/float(texSize.y);
 
-	m_vTexCoords.InsertBack(leftCoord);		m_vTexCoords.InsertBack(bottomCoord);
-	m_vTexCoords.InsertBack(leftCoord);		m_vTexCoords.InsertBack(topCoord);
-	m_vTexCoords.InsertBack(rightCoord);	m_vTexCoords.InsertBack(bottomCoord);
+	float *pTexCoords = m_vTexCoords.MapBuffer(12);
+	pTexCoords[0] = leftCoord;				pTexCoords[1] = bottomCoord;
+	pTexCoords[2] = leftCoord;				pTexCoords[3] = topCoord;
+	pTexCoords[4] = rightCoord;				pTexCoords[5] = bottomCoord;
 
-	m_vTexCoords.InsertBack(rightCoord);	m_vTexCoords.InsertBack(bottomCoord);
-	m_vTexCoords.InsertBack(rightCoord);	m_vTexCoords.InsertBack(topCoord);
-	m_vTexCoords.InsertBack(leftCoord);		m_vTexCoords.InsertBack(topCoord);
+	pTexCoords[6] = rightCoord;				pTexCoords[7] = bottomCoord;
+	pTexCoords[8] = rightCoord;				pTexCoords[9] = topCoord;
+	pTexCoords[10]= leftCoord;				pTexCoords[11]= topCoord;
 
 
 	m_vColors.Append(rSprite.Color().Vector(), 4);

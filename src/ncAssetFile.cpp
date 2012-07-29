@@ -77,9 +77,10 @@ void ncAssetFile::Close()
 
 long int ncAssetFile::Seek(long int lOffset, int iWhence) const
 {
+	long int lSeekValue = -1;
+
 	if (m_iFileDescriptor >= 0)
 	{
-		long int lSeekValue;
 		switch(iWhence)
 		{
 			case SEEK_SET:
@@ -92,26 +93,33 @@ long int ncAssetFile::Seek(long int lOffset, int iWhence) const
 				lSeekValue = lseek(m_iFileDescriptor, m_lStartOffset+m_lFileSize+lOffset, SEEK_END);
 				break;
 		}
-		return (lSeekValue-m_lStartOffset);
+		lSeekValue -= m_lStartOffset;
 	}
 	else if (m_pAsset)
-		return AAsset_seek(m_pAsset, lOffset, iWhence);
+		lSeekValue = AAsset_seek(m_pAsset, lOffset, iWhence);
+
+	return lSeekValue;
 }
 
 long int ncAssetFile::Tell() const
 {
+	long int lTellValue = -1;
+
 	if (m_iFileDescriptor >= 0)
 	{
-		long int lSeekValue = lseek(m_iFileDescriptor, 0L, SEEK_CUR);
-		return (lSeekValue-m_lStartOffset);
+		lTellValue = lseek(m_iFileDescriptor, 0L, SEEK_CUR) - m_lStartOffset;
 	}
 	else if (m_pAsset)
-		return AAsset_seek(m_pAsset, 0L, SEEK_CUR);
+		lTellValue = AAsset_seek(m_pAsset, 0L, SEEK_CUR);
+
+	return lTellValue;
 }
 
 
 long int ncAssetFile::Read(void *pBuffer, int iBytes) const
 {
+	long int lBytesRead = -1;
+
 	if (m_iFileDescriptor >= 0)
 	{
 		int iBytesToRead = iBytes;
@@ -123,10 +131,12 @@ long int ncAssetFile::Read(void *pBuffer, int iBytes) const
 		else if (lSeekValue + iBytes > m_lStartOffset + m_lFileSize)
 			iBytesToRead = (m_lStartOffset + m_lFileSize) - lSeekValue;
 
-		return read(m_iFileDescriptor, pBuffer, iBytesToRead);
+		lBytesRead = read(m_iFileDescriptor, pBuffer, iBytesToRead);
 	}
 	else if (m_pAsset)
-		return AAsset_read(m_pAsset, pBuffer, iBytes);
+		lBytesRead = AAsset_read(m_pAsset, pBuffer, iBytes);
+
+	return lBytesRead;
 }
 
 bool ncAssetFile::IsOpened() const

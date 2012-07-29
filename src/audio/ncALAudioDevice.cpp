@@ -38,7 +38,7 @@ ncALAudioDevice::ncALAudioDevice()
 
 ncALAudioDevice::~ncALAudioDevice()
 {
-	for (int i = 0; i < s_uMaxSources; i++)
+	for (unsigned int i = 0; i < s_uMaxSources; i++)
 		alSourcei(m_uSources[i], AL_BUFFER, AL_NONE);
 	alDeleteSources(s_uMaxSources, m_uSources);
 
@@ -82,7 +82,7 @@ int ncALAudioDevice::NextAvailableSource()
 {
 	ALint iState;
 
-	for (int i = 0; i < s_uMaxSources; i++)
+	for (unsigned int i = 0; i < s_uMaxSources; i++)
 	{
 		alGetSourcei(m_uSources[i], AL_SOURCE_STATE, &iState);
 		if (iState != AL_PLAYING && iState != AL_PAUSED)

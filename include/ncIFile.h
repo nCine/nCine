@@ -11,7 +11,9 @@ class ncIFile
 public:
 	/// The enumeration for the open mode bitmask
 	enum eOpenMode {
+#if !(defined(_WIN32) && !defined(__MINGW32__))
 		MODE_FD = 1,
+#endif
 		MODE_READ = 2,
 		MODE_WRITE = 4,
 		MODE_BINARY = 8

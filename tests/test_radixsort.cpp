@@ -46,7 +46,7 @@ void radix_sort(uint32_t *array, uint32_t *aux, int length)
 	uint32_t offsetTables[256*4];
 	uint32_t *offsetTable[4] = {&offsetTables[0], &offsetTables[256], &offsetTables[256*2], &offsetTables[256*3]};
 
-	for(uint32_t currentItem=0; currentItem < length; ++currentItem)
+	for(int currentItem=0; currentItem < length; ++currentItem)
 	{
 		const uint32_t value = array[currentItem];
 		const uint32_t value0 = value & 0xff;
@@ -81,7 +81,7 @@ void radix_sort(uint32_t *array, uint32_t *aux, int length)
 		arrayPointers[0] = arrayPointers[1];
 		arrayPointers[1] = arrayPointers[2];
 
-		for(uint32_t currentValue=0; currentValue < length; ++currentValue)
+		for(int currentValue=0; currentValue < length; ++currentValue)
 		{
 			const uint32_t value = arrayPointers[0][currentValue];
 			const uint32_t offsetTableIndex = (value >> 8*nPass) & 0xff;

@@ -36,7 +36,7 @@ SRC=$(NCINE_ROOT)/src
 TST=$(NCINE_ROOT)/tests
 
 LOCAL_MODULE := ncine
-LOCAL_CFLAGS := -Werror -ffast-math
+LOCAL_CFLAGS := -Wall -ffast-math
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/$(INC)
 LOCAL_SRC_FILES := \
 	main.cpp \
@@ -65,6 +65,7 @@ LOCAL_SRC_FILES := \
 	$(SRC)/graphics/ncTextureLoaderETC.cpp \
 	$(SRC)/graphics/ncTexture.cpp \
 	$(SRC)/graphics/ncProfilePlotter.cpp \
+	$(SRC)/graphics/ncPlottingVariable.cpp \
 	$(SRC)/graphics/ncLinePlotter.cpp \
 	$(SRC)/graphics/ncStackedBarPlotter.cpp \
 	$(SRC)/graphics/ncSceneNode.cpp \

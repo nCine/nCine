@@ -31,7 +31,7 @@ void ncLinePlotter::Draw(ncRenderQueue& rRenderQueue)
 	ncDrawableNode::ApplyTransformations();
 	ncDrawableNode::Draw(rRenderQueue);
 
-	for (int i = 0; i < m_vVariables.Size(); i++)
+	for (unsigned int i = 0; i < m_vVariables.Size(); i++)
 	{
 		m_vVariables[i]->UpdateVertices(0, 0, m_iWidth, m_iHeight);
 		m_vVariables[i]->ApplyTransformations(m_fAbsX, m_fAbsY, m_fAbsRotation, m_fAbsScaleFactor);
@@ -57,7 +57,7 @@ void ncLineVariable::UpdateVertices(int x, int y, int w, int h)
 	unsigned int uNextIndex = m_variable.NextIndex();
 
 	// Variable value vertices
-	for(int i = 0; i < uNumValues; i++)
+	for(unsigned int i = 0; i < uNumValues; i++)
 	{	
 		m_fVertices[4 + 2*i] = x + (w/uNumValues)*(i+1);
 		m_fVertices[4 + 2*i + 1] = y + h*m_variable.NormValue((uNextIndex+i)%uNumValues);

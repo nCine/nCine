@@ -1,41 +1,61 @@
 cmake_minimum_required(VERSION 2.6)
 project(nCine)
 
-if(NOT CROSS_MINGW32)
-	find_package(OpenGL REQUIRED)
-	find_package(SDL)
-	find_package(SDL_image)
-	find_package(PNG)
-	find_package(OpenAL REQUIRED)
-	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
-	find_package(GLFW)
-	find_package(WebP)
-	find_package(Vorbis)
-else()
-	set(WIN32 1)
-	set(CMAKE_SYSTEM_NAME Windows)
-	set(CMAKE_SHARED_LIBRARY_PREFIX)
-	set(CMAKE_SHARED_LIBRARY_SUFFIX .dll)
-	set(CMAKE_EXECUTABLE_SUFFIX .exe)
-	set(CMAKE_C_COMPILER i486-mingw32-gcc)
-	set(CMAKE_CXX_COMPILER i486-mingw32-g++)
-	set(CMAKE_RC_COMPILER i486-mingw32-windres)
-	set(CMAKE_FIND_ROOT_PATH /usr/i486-mingw32)
-	set(CMAKE_FIND_INCLUDE_PATH /usr/i486-mingw32)
-	set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-	set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-	set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-	set(CMAKE_SHARED_LIBRARY_CXX_FLAGS "") # suppressing '-fpic'
-	set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "") # suppressing '-rdynamic'
-	set(OPENGL_gl_LIBRARY opengl32 glew32)
-	set(SDL_LIBRARY mingw32 SDLmain SDL)
+if(MSVC)
+	include_directories("${CMAKE_BINARY_DIR}/win32/include")
+	set(LIBDIR "${CMAKE_BINARY_DIR}/win32/lib")
+	set(OPENGL_gl_LIBRARY opengl32.lib ${LIBDIR}/glew32.lib)
+	#set(GLFW_LIBRARY ${LIBDIR}/GLFW.lib)
+	#set(GLFW_FOUND 1)
+	#set(PNG_LIBRARY ${LIBDIR}/libpng.lib)
+	#set(PNG_FOUND 1)
+	set(SDL_LIBRARY ${LIBDIR}/SDLmain.lib ${LIBDIR}/SDL.lib)
 	set(SDL_FOUND 1)
-	set(SDLIMAGE_LIBRARY SDL_image)
+	set(SDLIMAGE_LIBRARY ${LIBDIR}/SDL_image.lib)
 	set(SDLIMAGE_FOUND 1)
-	set(OPENAL_LIBRARY OpenAL32)
-	set(VORBISFILE_LIBRARY ogg vorbis vorbisfile)
+	set(OPENAL_LIBRARY ${LIBDIR}/OpenAL32.lib)
+	set(VORBISFILE_LIBRARY ${LIBDIR}/libogg.lib ${LIBDIR}/libvorbis.lib ${LIBDIR}/libvorbisfile.lib)
 	set(VORBIS_FOUND 1)
 	add_definitions(-DWITH_GLEW)
+	add_definitions(/W0) # Turn-off warnings
+else() # GCC and LLVM
+	set(CMAKE_CXX_FLAGS "-Wall")
+	if(NOT CROSS_MINGW32) # Linux
+		find_package(OpenGL REQUIRED)
+		find_package(SDL)
+		find_package(SDL_image)
+		find_package(PNG)
+		find_package(OpenAL REQUIRED)
+		set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
+		find_package(GLFW)
+		find_package(WebP)
+		find_package(Vorbis)
+	else() # MinGW32 cross-compiler
+		set(WIN32 1)
+		set(CMAKE_SYSTEM_NAME Windows)
+		set(CMAKE_SHARED_LIBRARY_PREFIX)
+		set(CMAKE_SHARED_LIBRARY_SUFFIX .dll)
+		set(CMAKE_EXECUTABLE_SUFFIX .exe)
+		set(CMAKE_C_COMPILER i486-mingw32-gcc)
+		set(CMAKE_CXX_COMPILER i486-mingw32-g++)
+		set(CMAKE_RC_COMPILER i486-mingw32-windres)
+		set(CMAKE_FIND_ROOT_PATH /usr/i486-mingw32)
+		set(CMAKE_FIND_INCLUDE_PATH /usr/i486-mingw32)
+		set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+		set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+		set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+		set(CMAKE_SHARED_LIBRARY_CXX_FLAGS "") # suppressing '-fpic'
+		set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "") # suppressing '-rdynamic'
+		set(OPENGL_gl_LIBRARY opengl32 glew32)
+		set(SDL_LIBRARY mingw32 SDLmain SDL)
+		set(SDL_FOUND 1)
+		set(SDLIMAGE_LIBRARY SDL_image)
+		set(SDLIMAGE_FOUND 1)
+		set(OPENAL_LIBRARY OpenAL32)
+		set(VORBISFILE_LIBRARY ogg vorbis vorbisfile)
+		set(VORBIS_FOUND 1)
+		add_definitions(-DWITH_GLEW)
+	endif()
 endif()
 
 # Experimental depth test/alpha test renderer
@@ -85,7 +105,6 @@ endif()
 
 include_directories(include)
 set(CMAKE_BUILD_TYPE Debug)
-#set(CMAKE_CXX_FLAGS "-Wall")
 
 set(SOURCES
 	include/ncArray.h
@@ -112,6 +131,7 @@ set(SOURCES
 	src/graphics/ncTextureLoaderPVR.cpp
 	src/graphics/ncTexture.cpp
 	src/graphics/ncProfilePlotter.cpp
+	src/graphics/ncPlottingVariable.cpp
 	src/graphics/ncLinePlotter.cpp
 	src/graphics/ncStackedBarPlotter.cpp
 	src/graphics/ncSceneNode.cpp
@@ -169,7 +189,14 @@ link_libraries(
 	${VORBISFILE_LIBRARY}
 )
 
-add_library(ncine SHARED ${SOURCES})
+if(MSVC)
+	add_Library(ncine STATIC ${SOURCES})
+else()
+	add_library(ncine SHARED ${SOURCES})
+	if(CROSS_MINGW32)
+		set_target_properties(ncine PROPERTIES LINK_FLAGS "-Wl,--output-def,${CMAKE_CURRENT_BINARY_DIR}/ncine.def")
+	endif()
+endif()
 
 add_executable(apptest_joystick tests/main.cpp tests/apptest_joystick.cpp)
 add_executable(apptest_overdraw tests/main.cpp tests/apptest_overdraw.cpp)

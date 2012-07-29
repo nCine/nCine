@@ -31,7 +31,7 @@ public:
 
 	/// Returns the draw command class for this node
 	inline const ncRenderCommand* Command() const { return &m_renderCmd; }
-	/// Updates the draw command and add it to the queue
+	/// Updates the draw command and adds it to the queue
 	virtual void Draw(ncRenderQueue& rRenderQueue)
 	{
 		UpdateRenderCommand();

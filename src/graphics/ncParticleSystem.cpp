@@ -88,7 +88,7 @@ void ncParticleSystem::Update(unsigned long int ulInterval)
 		// Update the particle if it's alive
 		if (pParticle->isAlive())
 		{
-			for (int j = 0; j < m_vAffectors.Size(); j++)
+			for (unsigned int j = 0; j < m_vAffectors.Size(); j++)
 				m_vAffectors[j]->Affect(pParticle);
 
 			pParticle->Update(ulInterval);

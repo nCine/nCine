@@ -41,7 +41,7 @@ public:
 	{
 		bool bEmpty = true;
 
-		for (int i = 0; i < m_vPointers.Size(); i++)
+		for (unsigned int i = 0; i < m_vPointers.Size(); i++)
 		{
 			if (m_vPointers[i])
 			{

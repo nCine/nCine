@@ -53,10 +53,10 @@ public:
 	/// Returns number of glyphs
 	inline unsigned short NumGlyphs() const { return m_uNumGlyphs; }
 	/// Returns a constant pointer to a glyph
-	inline const ncFontGlyph* Glyph(int iGlyphId) const
+	inline const ncFontGlyph* Glyph(unsigned int uGlyphId) const
 	{
-		if (iGlyphId < s_uMaxGlyphs)
-			return &m_vGlyphs[iGlyphId];
+		if (uGlyphId < s_uMaxGlyphs)
+			return &m_vGlyphs[uGlyphId];
 		else
 			return NULL;
 	}

@@ -22,6 +22,7 @@ int asset_close(void *datasource)
 {
 	ncAssetFile *pAssetFile = static_cast<ncAssetFile *>(datasource);
 	pAssetFile->Close();
+	return 0;
 }
 
 long asset_tell(void *datasource)

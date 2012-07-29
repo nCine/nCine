@@ -123,8 +123,8 @@ void ncTextureLoaderPNG::ReadFromFileHandle(png_structp png_ptr, png_bytep outBy
 {
 	ncIFile *pFileHandle = reinterpret_cast<ncIFile *>(png_get_io_ptr(png_ptr));
 
-	long int lBytesRead = pFileHandle->Read(outBytes, byteCountToRead);
-	if (lBytesRead != byteCountToRead)
+	unsigned long int ulBytesRead = pFileHandle->Read(outBytes, byteCountToRead);
+	if (ulBytesRead != byteCountToRead)
 		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncTextureLoaderPNG::ReadFromFileHandle - Read %l bytes instead of %u: %d",
-			lBytesRead, byteCountToRead);
+			ulBytesRead, byteCountToRead);
 }

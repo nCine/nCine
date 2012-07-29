@@ -1,3 +1,4 @@
+#define _USE_MATH_DEFINES // for M_PI in MSVC
 #include <cmath>
 #include <cstdlib> // for exit()
 #include "ncSprite.h"

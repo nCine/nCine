@@ -34,9 +34,9 @@ ncGLFWInputManager::ncGLFWInputManager()
 
 ncGLFWJoystickState::ncGLFWJoystickState()
 {
-	for (int i = 0; i < s_uMaxNumButtons; i++)
+	for (unsigned int i = 0; i < s_uMaxNumButtons; i++)
 		m_ubButtons[i] = 0;
-	for (int i = 0; i < s_uMaxNumAxes; i++)
+	for (unsigned int i = 0; i < s_uMaxNumAxes; i++)
 		m_fAxisValues[i] = 0.0f;
 }
 
@@ -106,7 +106,7 @@ bool ncGLFWInputManager::hasFocus()
 void ncGLFWInputManager::UpdateJoystickStates()
 {
 	// TODO: support joystick events when GLFW 3.0 comes out
-	for(int i = 0; i < s_uMaxNumJoysticks; i++)
+	for(unsigned int i = 0; i < s_uMaxNumJoysticks; i++)
 	{
 		if (glfwGetJoystickParam(GLFW_JOYSTICK_1 + i, GLFW_PRESENT))
 		{
@@ -115,7 +115,7 @@ void ncGLFWInputManager::UpdateJoystickStates()
 		}
 
 		// Odd axes are inverted to maintain consistency with the SDL implementation
-		for (int j = 1; j<ncGLFWJoystickState::s_uMaxNumAxes; j=j+2)
+		for (unsigned int j = 1; j<ncGLFWJoystickState::s_uMaxNumAxes; j=j+2)
 			s_joystickStates[i].m_fAxisValues[j] *= -1.0f;
 	}
 }
@@ -130,14 +130,22 @@ bool ncGLFWInputManager::isJoyPresent(int iJoyId) const
 
 int ncGLFWInputManager::JoyNumButtons(int iJoyId) const
 {
+	int iNumButtons = -1;
+
 	if (isJoyPresent(iJoyId))
-		return glfwGetJoystickParam(GLFW_JOYSTICK_1 + iJoyId, GLFW_BUTTONS);
+		iNumButtons = glfwGetJoystickParam(GLFW_JOYSTICK_1 + iJoyId, GLFW_BUTTONS);
+
+	return iNumButtons;
 }
 
 int ncGLFWInputManager::JoyNumAxes(int iJoyId) const
 {
+	int iNumAxes = -1;
+
 	if (isJoyPresent(iJoyId))
-		return glfwGetJoystickParam(GLFW_JOYSTICK_1 + iJoyId, GLFW_AXES);
+		iNumAxes = glfwGetJoystickParam(GLFW_JOYSTICK_1 + iJoyId, GLFW_AXES);
+
+	return iNumAxes;
 }
 
 bool ncGLFWInputManager::isJoyButtonPressed(int iJoyId, int iButtonId) const

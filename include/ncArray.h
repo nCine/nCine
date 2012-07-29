@@ -58,6 +58,8 @@ public:
 	/// Returns a pointer to the allocated memory
 	/** It's useful when holding arrays of OpenGL data */
 	inline T* const Pointer() const { return m_pArray; }
+	// Allows for direct but unchecked access to the array memory
+	T* MapBuffer(unsigned int uReserved);
 };
 
 /// Sets a new capacity for the array (can be bigger or smaller than the current one)
@@ -157,6 +159,19 @@ T& ncArray<T>::operator[] (const unsigned int uIndex)
 	}
 
 	return m_pArray[uIndex];
+}
+
+/// Allows for direct but unchecked access to the array memory
+template <class T>
+T* ncArray<T>::MapBuffer(unsigned int uReserved)
+{
+	if (m_uSize + uReserved > m_uCapacity)
+		SetCapacity(m_uSize + uReserved);
+
+	T* pArray = &m_pArray[m_uSize];
+	m_uSize += uReserved;
+
+	return pArray;
 }
 
 #endif

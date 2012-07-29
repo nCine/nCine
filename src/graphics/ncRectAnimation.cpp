@@ -5,14 +5,12 @@
 ///////////////////////////////////////////////////////////
 
 /// Sets current frame
-void ncRectAnimation::SetFrame(int iFrameNum)
+void ncRectAnimation::SetFrame(unsigned int uFrameNum)
 {
-	if (iFrameNum >= m_vRects.Size())
-		m_iCurrentFrame = m_vRects.Size() - 1;
-	else if (iFrameNum < 0)
-		m_iCurrentFrame = 0;
+	if (uFrameNum >= m_vRects.Size())
+		m_uCurrentFrame = m_vRects.Size() - 1;
 	else
-		m_iCurrentFrame = iFrameNum;
+		m_uCurrentFrame = uFrameNum;
 }
 
 /// Returns true if a frame rect has changed
@@ -29,54 +27,52 @@ void ncRectAnimation::UpdateFrame(unsigned long ulInterval)
 		m_ulElapsedFrameTime = 0;
 
 		if (m_bGoingForward)
-			m_iCurrentFrame++;
+			m_uCurrentFrame++;
 		else
-			m_iCurrentFrame--;
+			m_uCurrentFrame--;
 
 		// First testing for < 0, otherwise the comparison with unsigned ncArray size could fail
-		if (m_iCurrentFrame < 0)
+		if (m_uCurrentFrame < 0)
 		{
 			if (m_bLooping == false)
 			{
-				m_iCurrentFrame = 0;
+				m_uCurrentFrame = 0;
 				m_bPaused = true;
 			}
 			else
 			{
 				m_bGoingForward = true;
-				m_iCurrentFrame += 2;
+				m_uCurrentFrame += 2;
 			}
 		}
-		else if (m_iCurrentFrame >= m_vRects.Size())
+		else if (m_uCurrentFrame >= m_vRects.Size())
 		{
 			if (m_bBackward)
 			{
 				m_bGoingForward = false;
-				m_iCurrentFrame -= 2;
+				m_uCurrentFrame -= 2;
 			}
 			else
 			{
 				if (m_bLooping == false)
 				{
-					m_iCurrentFrame = m_vRects.Size() - 1;
+					m_uCurrentFrame = m_vRects.Size() - 1;
 					m_bPaused = true;
 				}
 				else
-					m_iCurrentFrame = 0;
+					m_uCurrentFrame = 0;
 			}
 		}
 	}
 }
 
 /// Pause on a specified frame
-void ncRectAnimation::Pause(int iFrameNum)
+void ncRectAnimation::Pause(unsigned int uFrameNum)
 {
-	if (iFrameNum >= m_vRects.Size())
-		m_iCurrentFrame = m_vRects.Size() - 1;
-	else if (iFrameNum < 0)
-		m_iCurrentFrame = 0;
+	if (uFrameNum >= m_vRects.Size())
+		m_uCurrentFrame = m_vRects.Size() - 1;
 	else
-		m_iCurrentFrame = iFrameNum;
+		m_uCurrentFrame = uFrameNum;
 
 	m_bPaused = true;
 }
