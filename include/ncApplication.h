@@ -11,8 +11,7 @@ class ncProfilePlotter;
 class ncFont;
 class ncTextNode;
 class ncIInputManager;
-#include "ncIInputEventHandler.h"
-#include "ncIAppEventHandler.h"
+class ncIAppEventHandler;
 
 /// Main entry point and handler for nCine applications
 class ncApplication
@@ -80,7 +79,7 @@ public:
 	// Toggles the pause flag on and off
 	static void TogglePause();
 	/// Raises the quit flag
-	static inline void Quit() { m_bShouldQuit = true; };
+	static inline void Quit() { m_bShouldQuit = true; }
 
 	// Shows or hides profiling graphs
 	static void ShowProfileGraphs(bool bShouldDraw);

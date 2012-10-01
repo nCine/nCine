@@ -36,7 +36,7 @@ SRC=$(NCINE_ROOT)/src
 TST=$(NCINE_ROOT)/tests
 
 LOCAL_MODULE := ncine
-LOCAL_CFLAGS := -Wall -ffast-math
+LOCAL_CFLAGS := -Wall -ffast-math -DWITH_THREADS
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/$(INC)
 LOCAL_SRC_FILES := \
 	main.cpp \
@@ -87,7 +87,10 @@ LOCAL_SRC_FILES := \
 	$(SRC)/audio/ncAudioStream.cpp \
 	$(SRC)/audio/ncAudioBufferPlayer.cpp \
 	$(SRC)/audio/ncAudioStreamPlayer.cpp \
-	$(TST)/apptest_rotozoom.cpp
+	$(SRC)/threading/ncPOSIXThread.cpp \
+	$(SRC)/threading/ncPOSIXThreadSync.cpp \
+	$(SRC)/threading/ncThreadPool.cpp \
+	$(TST)/apptest_threadpool.cpp
 
 LOCAL_LDLIBS := -lm -llog -landroid -lEGL -lGLESv1_CM
 LOCAL_STATIC_LIBRARIES := android_native_app_glue webp tremolo

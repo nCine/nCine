@@ -110,6 +110,8 @@ void ncGLFWGfxDevice::InitDevice()
 
 	if (m_mode.isVSynced())
 		glfwSwapInterval(1);
+	else
+		glfwSwapInterval(0);
 
 #ifdef WITH_GLEW
 	GLenum err = glewInit();

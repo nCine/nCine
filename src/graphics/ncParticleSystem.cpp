@@ -8,7 +8,7 @@
 
 /// Constructs a particle system made of the specified maximum amount of particles
 ncParticleSystem::ncParticleSystem(ncSceneNode* pParent, unsigned int uCount, ncTexture *pTexture, ncRect texRect)
-	: ncDrawableNode(pParent, 0, 0), m_uPoolSize(uCount), m_uPoolTop(uCount-1), m_vAffectors(4)
+	: ncDrawableNode(pParent, 0, 0), m_uPoolSize(uCount), m_uPoolTop(uCount-1), m_vAffectors(4), m_bLocalSpace(false)
 {
 	m_eType = PARTICLESYSTEM_TYPE;
 	SetPriority(ncDrawableNode::SCENE_PRIORITY);
@@ -68,8 +68,11 @@ void ncParticleSystem::Emit(unsigned int amount, unsigned long int ulLife, const
 		RndVelocity.x = vel.x * randBetween(0.8f, 1.0f);
 		RndVelocity.y = vel.y * randBetween(0.8f, 1.0f);
 
+		if (m_bLocalSpace == false)
+			RndPosition += AbsPosition();
+
 		// acquiring a particle from the pool
-		m_pParticlePool[m_uPoolTop]->Init(ulRndLife, AbsPosition() + RndPosition, RndVelocity, fRotation);
+		m_pParticlePool[m_uPoolTop]->Init(ulRndLife, RndPosition, RndVelocity, fRotation, m_bLocalSpace);
 		AddChildNode(m_pParticlePool[m_uPoolTop]);
 		m_uPoolTop--;
 	}

@@ -27,41 +27,39 @@ void ncRectAnimation::UpdateFrame(unsigned long ulInterval)
 		m_ulElapsedFrameTime = 0;
 
 		if (m_bGoingForward)
-			m_uCurrentFrame++;
-		else
-			m_uCurrentFrame--;
-
-		// First testing for < 0, otherwise the comparison with unsigned ncArray size could fail
-		if (m_uCurrentFrame < 0)
 		{
-			if (m_bLooping == false)
+			if (m_uCurrentFrame == m_vRects.Size() - 1)
 			{
-				m_uCurrentFrame = 0;
-				m_bPaused = true;
-			}
-			else
-			{
-				m_bGoingForward = true;
-				m_uCurrentFrame += 2;
-			}
-		}
-		else if (m_uCurrentFrame >= m_vRects.Size())
-		{
-			if (m_bBackward)
-			{
-				m_bGoingForward = false;
-				m_uCurrentFrame -= 2;
-			}
-			else
-			{
-				if (m_bLooping == false)
+				if (m_bBackward)
 				{
-					m_uCurrentFrame = m_vRects.Size() - 1;
-					m_bPaused = true;
+					m_bGoingForward = false;
+					m_uCurrentFrame--;
 				}
 				else
-					m_uCurrentFrame = 0;
+				{
+					if (m_bLooping == false)
+						m_bPaused = true;
+					else
+						m_uCurrentFrame = 0;
+				}
 			}
+			else
+				m_uCurrentFrame++;
+		}
+		else
+		{
+			if (m_uCurrentFrame == 0)
+			{
+				if (m_bLooping == false)
+					m_bPaused = true;
+				else
+				{
+					m_bGoingForward = true;
+					m_uCurrentFrame++;
+				}
+			}
+			else
+				m_uCurrentFrame--;
 		}
 	}
 }

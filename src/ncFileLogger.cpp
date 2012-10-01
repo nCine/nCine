@@ -26,16 +26,12 @@ ncFileLogger::ncFileLogger(const char *pFilename, eLogLevel eConsoleLevel, eLogL
 
 	if (m_eConsoleLevel < int(LOG_OFF))
 		 setbuf(stdout, NULL);
-
-
-    // HACK: calling a method from unitialized object
-//	Write(LOG_VERBOSE, "FileLogger instantiated");
 }
 
 
 ncFileLogger::~ncFileLogger()
 {
-	Write(LOG_VERBOSE, "FileLogger destruction");
+	Write(LOG_VERBOSE, "ncFileLogger::~ncFileLogger - End of the log");
 	if (m_pFileHandle)
 		delete m_pFileHandle;
 }

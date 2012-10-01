@@ -1,5 +1,6 @@
 #include <ctime>
 #include "ncApplication.h"
+#include "ncIAppEventHandler.h"
 #include "ncServiceLocator.h"
 #include "ncArrayIndexer.h"
 #include "ncFileLogger.h"
@@ -8,6 +9,7 @@
 #include "ncStackedBarPlotter.h"
 #include "ncFont.h"
 #include "ncTextNode.h"
+#include "ncThreadPool.h"
 
 #if defined(__ANDROID__)
 	#include "ncEGLGfxDevice.h"
@@ -71,9 +73,13 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 #endif
 	m_pGfxDevice->SetWindowTitle("nCine");
 #endif
+
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Init - nCine compiled on " __DATE__ " at " __TIME__);
 	ncServiceLocator::RegisterIndexer(new ncArrayIndexer());
 	ncServiceLocator::RegisterAudioDevice(new ncALAudioDevice());
+#ifdef WITH_THREADS
+	ncServiceLocator::RegisterThreadPool(new ncThreadPool());
+#endif
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Init - Data path: %s", ncIFile::DataPath());
 
 	m_pFrameTimer = new ncFrameTimer(5, 100);
@@ -181,7 +187,7 @@ void ncApplication::Step()
 	{
 		m_ulTextUpdateTime = ncTimer::Now();
 		sprintf(m_vTextChars, (const char *)"FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC",
-				m_pFrameTimer->AverageFPS(), m_pFrameTimer->HPInterval(),
+				m_pFrameTimer->AverageFPS(), m_pFrameTimer->PreciseInterval(),
 				m_pRenderQueue->NumVertices(ncRenderCommand::SPRITE_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::SPRITE_TYPE),
 				m_pRenderQueue->NumVertices(ncRenderCommand::PARTICLE_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::PARTICLE_TYPE),
 				m_pRenderQueue->NumVertices(ncRenderCommand::TEXT_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::TEXT_TYPE),
@@ -216,6 +222,8 @@ void ncApplication::Shutdown()
 		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncApplication::Shutdown - The object indexer is not empty");
 
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Shutdown - ncApplication shutted down");
+
+	ncServiceLocator::UnregisterAll();
 }
 
 /// Sets the pause flag value

@@ -143,5 +143,6 @@ int main(int argc, char **argv)
 		delete pTextures[i];
 #endif
 
+	ncServiceLocator::UnregisterAll();
 	return 0;	
 }

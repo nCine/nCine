@@ -1,6 +1,7 @@
 #ifndef CLASS_NCLIST
 #define CLASS_NCLIST
 
+#include <cstdio> // for NULL
 #include <ncListIterator.h>
 
 template <class T> class ncList; // forward declaration
@@ -87,6 +88,10 @@ public:
 	void Remove(Iterator it);
 	// Removes a specified element in linear time
 	void Remove(const T& element);
+	// Removes the first element in constant time
+	T RemoveFront();
+	// Removes the last element in constant time
+	T RemoveBack();
 };
 
 /// Clears the list
@@ -172,6 +177,54 @@ void ncList<T>::Remove(const T& element)
 
 		pCurrent = pCurrent->m_pNext;
 	}
+}
+
+/// Removes the first element in constant time
+template <class T>
+T ncList<T>::RemoveFront()
+{
+	T first;
+
+	if (m_pHead)
+	{
+		// Saving the old head pointer to delete it
+		ncListNode<T> *pOldHead = m_pHead;
+
+		first = m_pHead->m_data;
+		if (m_pHead->m_pNext)
+			m_pHead->m_pNext->m_pPrevious = NULL;
+		else
+			m_pTail = NULL;
+		m_pHead = m_pHead->m_pNext;
+
+		delete pOldHead;
+	}
+
+	return first;
+}
+
+/// Removes the last element in constant time
+template <class T>
+T ncList<T>::RemoveBack()
+{
+	T last;
+
+	if (m_pTail)
+	{
+		// Saving the old tail pointer to delete it
+		ncListNode<T> *pOldTail = m_pTail;
+
+		last = m_pTail->m_data;
+		if (m_pTail->m_pPrevious)
+			m_pTail->m_pPrevious->m_pNext = NULL;
+		else
+			m_pHead = NULL;
+		m_pTail = m_pTail->m_pPrevious;
+
+		delete pOldTail;
+	}
+
+	return last;
 }
 
 ///////////////////////////////////////////////////////////

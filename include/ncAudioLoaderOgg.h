@@ -9,7 +9,7 @@
 
 #include "ncIAudioLoader.h"
 
-/// Audio loader class
+/// Ogg Vorbis audio loader
 class ncAudioLoaderOgg : public ncIAudioLoader
 {
 private:

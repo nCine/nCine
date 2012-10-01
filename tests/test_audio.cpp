@@ -126,5 +126,7 @@ int main(int argc, char **argv)
 
 
 // ----- Quitting ----------------------
+	// Unregistering all services to close the audio device
+	ncServiceLocator::UnregisterAll();
 	return 0;	
 }

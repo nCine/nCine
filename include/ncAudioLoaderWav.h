@@ -3,7 +3,7 @@
 
 #include "ncIAudioLoader.h"
 
-/// Audio loader class
+/// WAVE audio loader
 class ncAudioLoaderWav : public ncIAudioLoader
 {
 private:

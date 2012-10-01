@@ -114,5 +114,6 @@ int main(int argc, char **argv)
 	delete pSprite2;
 	delete pSprite1;
 
+	ncServiceLocator::UnregisterAll();
 	return 0;	
 }

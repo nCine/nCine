@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(nCine)
 
+find_package(Threads)
 if(MSVC)
 	include_directories("${CMAKE_BINARY_DIR}/win32/include")
 	set(LIBDIR "${CMAKE_BINARY_DIR}/win32/lib")
@@ -71,36 +72,34 @@ endif()
 if(GLFW_FOUND)
 	add_definitions(-DWITH_GLFW)
 	add_definitions(-DGLFW_NO_GLU)
-else()
-	set(GLFW_LIBRARY "")
+	list(APPEND LINK_LIBS ${GLFW_LIBRARY})
 endif()
 
 if(SDL_FOUND AND NOT GLFW_FOUND)
 	add_definitions(-DWITH_SDL)
+	list(APPEND LINK_LIBS ${SDL_LIBRARY})
 	if(SDLIMAGE_FOUND)
 		add_definitions(-DWITH_SDLIMAGE)
-	else()
-		set(SDLIMAGE_LIBRARY "")
+		list(APPEND LINK_LIBS ${SDLIMAGE_LIBRARY})
 	endif()
-else()
-	set(SDL_LIBRARY "")
-	set(SDLIMAGE_LIBRARY "")
 endif()
 
 if(PNG_FOUND AND GLFW_FOUND)
 	add_definitions(-DWITH_PNG)
-else()
-	set(PNG_LIBRARY "")
+	include_directories(${PNG_INCLUDE_DIR})
+	list(APPEND LINK_LIBS ${PNG_LIBRARY})
 endif()
 if(WEBP_FOUND)
 	add_definitions(-DWITH_WEBP)
-else()
-	set(WEBP_LIBRARY "")
+	list(APPEND LINK_LIBS ${WEBP_LIBRARY})
 endif()
 if(VORBIS_FOUND)
 	add_definitions(-DWITH_VORBIS)
-else()
-	set(VORBISFILE_LIBRARY "")
+	list(APPEND LINK_LIBS ${VORBISFILE_LIBRARY})
+endif()
+if(Threads_FOUND)
+	add_definitions(-DWITH_THREADS)
+	list(APPEND LINK_LIBS ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 include_directories(include)
@@ -178,15 +177,23 @@ if(VORBIS_FOUND)
 	list(APPEND SOURCES src/audio/ncAudioLoaderOgg.cpp)
 endif()
 
+if(Threads_FOUND)
+	if(MSVC OR CROSS_MINGW32)
+		list(APPEND SOURCES src/threading/ncWindowsThread.cpp)
+		list(APPEND SOURCES src/threading/ncWindowsThreadSync.cpp)
+	else()
+		list(APPEND SOURCES src/threading/ncPOSIXThread.cpp)
+		list(APPEND SOURCES src/threading/ncPOSIXThreadSync.cpp)
+	endif()
+	list(APPEND SOURCES src/threading/ncThreadPool.cpp)
+endif()
+
+list(APPEND LINK_LIBS ${OPENGL_gl_LIBRARY})
+
 link_libraries(
 	${OPENGL_gl_LIBRARY}
-	${GLFW_LIBRARY}
-	${SDL_LIBRARY}
-	${SDLIMAGE_LIBRARY}
-	${PNG_LIBRARY}
-	${WEBP_LIBRARY}
 	${OPENAL_LIBRARY}
-	${VORBISFILE_LIBRARY}
+	${LINK_LIBS}
 )
 
 if(MSVC)
@@ -203,7 +210,7 @@ add_executable(apptest_overdraw tests/main.cpp tests/apptest_overdraw.cpp)
 add_executable(apptest_rotozoom tests/main.cpp tests/apptest_rotozoom.cpp)
 add_executable(apptest_animsprites tests/main.cpp tests/apptest_animsprites.cpp)
 add_executable(apptest_particles tests/main.cpp tests/apptest_particles.cpp)
-add_executable(test_radixsort tests/test_radixsort.cpp)
+#add_executable(test_radixsort tests/test_radixsort.cpp)
 add_executable(apptest_scene tests/main.cpp tests/apptest_scene.cpp)
 add_executable(test_array tests/test_array.cpp)
 add_executable(test_list tests/test_list.cpp)
@@ -229,4 +236,12 @@ if(SDL_FOUND AND NOT GLFW_FOUND)
 	target_link_libraries(test_particles ncine)
 	target_link_libraries(test_renderqueue ncine)
 	target_link_libraries(test_scene ncine)
+endif()
+
+if(Threads_FOUND)
+	add_executable(apptest_threads tests/main.cpp tests/apptest_threads.cpp)
+	add_executable(apptest_threadpool tests/main.cpp tests/apptest_threadpool.cpp)
+
+	target_link_libraries(apptest_threads ncine)
+	target_link_libraries(apptest_threadpool ncine)
 endif()

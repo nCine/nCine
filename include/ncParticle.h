@@ -20,15 +20,17 @@ public:
 	unsigned long int m_ulStartLife; // for affectors
 	/// Current particle velocity vector
 	ncVector2f m_Velocity;
+	/// Should the particle transformations be in local space?
+	bool m_bLocalSpace;
 
 	ncParticle(ncSceneNode* pParent, ncTexture *pTexture)
-		: ncSprite(pParent, pTexture), m_ulLife(0), m_ulStartLife(0)
+		: ncSprite(pParent, pTexture), m_ulLife(0), m_ulStartLife(0), m_bLocalSpace(false)
 	{
 		m_renderCmd.SetType(ncRenderCommand::PARTICLE_TYPE);
 	}
 
 	// Initializes a particle with initial life, position, velocity and rotation
-	void Init(unsigned long int ulLife, ncVector2f pos, ncVector2f vel, float fRot);
+	void Init(unsigned long int ulLife, ncVector2f pos, ncVector2f vel, float fRot, bool bLocalSpace);
 
 	/// Returns true if the particle is still alive
 	inline bool isAlive() { return m_ulLife > 0; }

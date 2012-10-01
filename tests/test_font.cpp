@@ -134,5 +134,6 @@ int main(int argc, char **argv)
 
 
 // ----- Quitting ----------------------
+	ncServiceLocator::UnregisterAll();
 	return 0;	
 }
