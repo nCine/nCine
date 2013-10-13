@@ -4,8 +4,12 @@
 #ifdef WITH_GLEW
 	#include <GL/glew.h>
 #endif
-#include <GL/glfw.h>
-
+#if defined(__APPLE__)
+	#include <GLFW/glfw.h>
+#else
+	#include <GL/glfw.h>
+#endif
+	
 #include "ncIGfxDevice.h"
 #include "ncPoint.h"
 #include "ncDisplayMode.h"

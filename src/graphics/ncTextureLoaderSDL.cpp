@@ -50,6 +50,7 @@ void ncTextureLoaderSDL::Init()
 
 	m_iWidth = m_pSDLSurface->w;
 	m_iHeight = m_pSDLSurface->h;
+	m_iMipMapCount = 1; // No MIP Mapping
 	m_uPixels = static_cast<GLubyte*>(m_pSDLSurface->pixels);
 }
 

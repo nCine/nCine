@@ -4,7 +4,11 @@
 #if defined(WITH_SDL)
 	#include <SDL/SDL_timer.h>
 #elif defined(WITH_GLFW)
-	#include <GL/glfw.h>
+	#if defined(__APPLE__)
+		#include <GLFW/glfw.h>
+	#else
+		#include <GL/glfw.h>
+	#endif
 #endif
 
 ///////////////////////////////////////////////////////////
@@ -39,7 +43,7 @@ ncTimer::ncTimer()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Returns elapsed time in milliseconds since base time
+/// Returns elapsed time in milliseconds since base time (high-precision)
 double ncTimer::PreciseNow()
 {
 #if defined(WITH_SDL)
@@ -63,7 +67,7 @@ double ncTimer::PreciseNow()
 #endif
 }
 
-/// Put the current thread to sleep for the specified number of milliseconds
+/// Puts the current thread to sleep for the specified number of milliseconds
 void ncTimer::Sleep(unsigned int uMs)
 {
 #if defined(WITH_SDL)

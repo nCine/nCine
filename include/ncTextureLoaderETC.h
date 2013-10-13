@@ -15,11 +15,14 @@ private:
 	} ETC1_magic;
 
 	/// Header for the ETC1 header
+	/*! The extended width and height are the dimensions rounded up to a multiple of 4.
+	 *  The total data size in bytes is (uExtendedWidth/4)*(uExtendedHeight/4)*8
+	 */
 	typedef struct ETC1_header {
+		uint16_t uExtendedWidth;
+		uint16_t uExtendedHeight;
 		uint16_t uWidth;
 		uint16_t uHeight;
-		uint16_t uWidth2;
-		uint16_t uHeight2;
 	} ETC1_header;
 
 	void Init();

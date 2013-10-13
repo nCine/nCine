@@ -68,6 +68,9 @@ public:
 	// Converts the external format to the corresponding BGR one
 	void BGRFormat();
 #endif
+
+	// Calculates the pixel data size for each MIP map level
+	static long int CalculateMipSizes(GLenum eInternalFormat, int iWidth, int iHeight, int iMipMapCount, long int *pMipDataOffsets, long int *pMipDataSizes);
 };
 
 #endif

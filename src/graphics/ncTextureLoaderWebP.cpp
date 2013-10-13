@@ -42,6 +42,7 @@ void ncTextureLoaderWebP::Init()
 
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderWebP::Init - Header found: w:%d h:%d", m_iWidth, m_iHeight);
 
+	m_iMipMapCount = 1; // No MIP Mapping
 	// HACK: assuming WebP always decodes to RGBA
 	m_texFormat = ncTextureFormat(GL_RGBA);
 	long int lDecodedSize = m_iWidth * m_iHeight * 4;

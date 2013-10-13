@@ -31,6 +31,8 @@ private:
 	// Loads an AngelCode's FNT file in a RAM buffer then parses it
 	void ParseFNTFile(ncIFile *pFileHandle);
 
+	/// Preventing construction by copy
+	ncFont(const ncFont& rOther);
 public:
 	// Constructs a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)
 	ncFont(const char* pTexFilename, const char *pFntFilename);

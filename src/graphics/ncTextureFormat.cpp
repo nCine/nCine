@@ -236,3 +236,110 @@ bool ncTextureFormat::OESCompressedFormat()
 	return bFound;
 }
 #endif
+
+/// Calculates the pixel data size for each MIP map level
+long int ncTextureFormat::CalculateMipSizes(GLenum eInternalFormat, int iWidth, int iHeight, int iMipMapCount, long int *pMipDataOffsets, long int *pMipDataSizes)
+{
+	unsigned int uBlockWidth = 1; // Compression block width in pixels
+	unsigned int uBlockHeight = 1; // Compression block height in pixels
+	unsigned int uBPP = 1; // Bits per pixel
+	unsigned int uMinDataSize = 1; // Minimum data size in bytes
+
+	switch(eInternalFormat)
+	{
+		case GL_RGBA:
+			uBPP = 32;
+			break;
+		case GL_RGB:
+			uBPP = 24;
+			break;
+		case GL_LUMINANCE_ALPHA:
+		case GL_UNSIGNED_SHORT_5_6_5:
+		case GL_UNSIGNED_SHORT_5_5_5_1:
+		case GL_UNSIGNED_SHORT_4_4_4_4:
+			uBPP = 16;
+			break;
+		case GL_LUMINANCE:
+		case GL_ALPHA:
+			uBPP = 8;
+			break;
+#ifndef __ANDROID__
+		case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+			// max(1, width / 4) x max(1, height / 4) x 8(DXT1)
+			uBlockWidth = 4;
+			uBlockHeight = 4;
+			uBPP = 4;
+			uMinDataSize = 8;
+			break;
+		case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+			// max(1, width / 4) x max(1, height / 4) x 16(DXT2-5)
+			uBlockWidth = 4;
+			uBlockHeight = 4;
+			uBPP = 8;
+			uMinDataSize = 16;
+			break;
+#else
+		case GL_ETC1_RGB8_OES:
+			uBlockWidth = 4;
+			uBlockHeight = 4;
+			uBPP = 4;
+			uMinDataSize = 8;
+			break;
+
+		case GL_ATC_RGBA_EXPLICIT_ALPHA_AMD:
+		case GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD:
+			// ((width_in_texels+3)/4) * ((height_in_texels+3)/4) * 16
+			uBlockWidth = 4;
+			uBlockHeight = 4;
+			uBPP = 8;
+			uMinDataSize = 16;
+			break;
+		case GL_ATC_RGB_AMD:
+			// ((width_in_texels+3)/4) * ((height_in_texels+3)/4) * 8
+			uBlockWidth = 4;
+			uBlockHeight = 4;
+			uBPP = 4;
+			uMinDataSize = 8;
+			break;
+
+		case GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG:
+		case GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG:
+			uBlockWidth = 8;
+			uBlockHeight = 4;
+			uBPP = 2;
+			uMinDataSize = 2 * 2 * ((uBlockWidth * uBlockHeight * uBPP) / 8);
+			break;
+		case GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG:
+		case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
+			uBlockWidth = 4;
+			uBlockHeight = 4;
+			uBPP = 4;
+			uMinDataSize = 2 * 2 * ((uBlockWidth * uBlockHeight * uBPP) / 8);
+			break;
+#endif
+		default:
+			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureFormat::CalculateMipSizes - MIP maps not supported for internal format: %d", eInternalFormat);
+			exit(-1);
+			break;
+	}
+
+	int iLevelWidth = iWidth;
+	int iLevelHeight = iHeight;
+	long int lDataSizesSum = 0;
+	for (int i = 0; i < iMipMapCount; i++)
+	{
+		pMipDataOffsets[i] = lDataSizesSum;
+		pMipDataSizes[i] = (iLevelWidth/uBlockWidth) * (iLevelHeight/uBlockHeight) * ((uBlockWidth * uBlockHeight  * uBPP) / 8);
+		// Clamping to the minimum valid size
+		if (pMipDataSizes[i] < int(uMinDataSize))
+			pMipDataSizes[i] = uMinDataSize;
+
+		iLevelWidth /= 2;
+		iLevelHeight /= 2;
+		lDataSizesSum += pMipDataSizes[i];
+	}
+
+	return lDataSizesSum;
+}

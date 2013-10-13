@@ -40,8 +40,8 @@ void ncTextureLoaderETC::Init()
 	{
 		m_pFileHandle->Read(&header, 8);
 		m_iHeaderSize = 16;
-		m_iWidth = ncIFile::Int16FromBE(header.uWidth2);
-		m_iHeight = ncIFile::Int16FromBE(header.uHeight2);
+		m_iWidth = ncIFile::Int16FromBE(header.uWidth);
+		m_iHeight = ncIFile::Int16FromBE(header.uHeight);
 
 		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderETC::ncTextureLoaderETC - Header found: w:%d h:%d", m_iWidth, m_iHeight);
 	}

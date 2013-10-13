@@ -26,6 +26,7 @@ private:
 	GLuint m_uGLId;
 	int m_iWidth;
 	int m_iHeight;
+	int m_iMipMapLevels;
 	bool m_bCompressed;
 	bool m_bAlphaChannel;
 
@@ -46,6 +47,8 @@ public:
 	inline int Width() const { return m_iWidth; }
 	/// Returns texture height
 	inline int Height() const { return m_iHeight; }
+	/// Returns texture MIP map levels
+	inline int MipMapLevels() const { return m_iMipMapLevels; }
 	/// Returns texture size
 	inline ncPoint Size() const { return ncPoint(m_iWidth, m_iHeight); }
 	/// Returns texture rectangle

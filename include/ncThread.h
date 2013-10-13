@@ -56,7 +56,7 @@ public:
 	void *Join();
 
 	// Returns the calling thread id
-	static unsigned int Self();
+	static long int Self();
 	// Terminates the calling thread
 	static void Exit(void *pRetVal);
 	// Yields the calling thread in favour of another one with the same priority

@@ -164,18 +164,18 @@ void ncApplication::Step()
 	m_pFrameTimer->AddFrame();
 	m_pGfxDevice->Clear();
 	m_pAppEventHandler->OnFrameStart();
-	m_pProfilePlotter->AddValue(0, m_pProfileTimer->Interval());
+	m_pProfilePlotter->AddValue(0, m_pProfileTimer->PreciseInterval());
 //	m_pProfilePlotter->AddValue(0, 1.0f * abs(rand()%34));
 
 	m_pProfileTimer->Start();
 	m_pRootNode->Update(m_pFrameTimer->Interval());
 	m_pRootNode->Visit(*m_pRenderQueue);
-	m_pProfilePlotter->AddValue(1, m_pProfileTimer->Interval());
+	m_pProfilePlotter->AddValue(1, m_pProfileTimer->PreciseInterval());
 //	m_pProfilePlotter->AddValue(1, 1.0f * abs(rand()%33));
 
 	m_pProfileTimer->Start();
 	m_pRenderQueue->Draw();
-	m_pProfilePlotter->AddValue(2, m_pProfileTimer->Interval());
+	m_pProfilePlotter->AddValue(2, m_pProfileTimer->PreciseInterval());
 //	m_pProfilePlotter->AddValue(2, 1.0f * abs(rand()%33));
 
 	ncServiceLocator::AudioDevice().UpdatePlayers();

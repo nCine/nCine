@@ -43,6 +43,10 @@ void ncTextureLoaderPVR::ReadHeader(PVR3_header &header)
 		m_iHeaderSize = 52 + ncIFile::Int32FromLE(header.metaDataSize);
 		m_iWidth = ncIFile::Int32FromLE(header.width);
 		m_iHeight = ncIFile::Int32FromLE(header.height);
+		m_iMipMapCount = header.numMipmaps;
+
+		if (m_iMipMapCount == 0)
+			m_iMipMapCount = 1;
 	}
 	else
 	{
@@ -54,7 +58,7 @@ void ncTextureLoaderPVR::ReadHeader(PVR3_header &header)
 /// Parses the PVR3 header to determine its format
 void ncTextureLoaderPVR::ParseFormat(const PVR3_header& header)
 {
-	GLenum eInternalFormat;
+	GLenum eInternalFormat = GL_RGB; // to suppress uninitialized variable warning
 	const ncGfxCapabilities& gfxCaps = ncServiceLocator::GfxCapabilities();
 
 	uint64_t u64PixelFormat = ncIFile::Int64FromLE(header.pixelFormat);
@@ -170,5 +174,15 @@ void ncTextureLoaderPVR::ParseFormat(const PVR3_header& header)
 		}
 
 		LoadPixels(eInternalFormat, eType);
+	}
+
+	if (m_iMipMapCount > 1)
+	{
+		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderPVR::ParseFormat - MIP Maps: %d", m_iMipMapCount);
+		m_lMipDataOffsets = new long[m_iMipMapCount];
+		m_lMipDataSizes = new long[m_iMipMapCount];
+		long int lDataSizesSum = ncTextureFormat::CalculateMipSizes(eInternalFormat, m_iWidth, m_iHeight, m_iMipMapCount, m_lMipDataOffsets, m_lMipDataSizes);
+		if (lDataSizesSum != m_lDataSize)
+			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncTextureLoaderPVR::ParseFormat - The sum of MIP maps size (%ld) is different than texture total data (%ld)", lDataSizesSum, m_lDataSize);
 	}
 }

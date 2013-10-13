@@ -22,14 +22,14 @@ public:
 	// Deferencing operator
 	inline T& operator*();
 
-	// Iterate to the next element (prefix)
+	// Iterates to the next element (prefix)
 	ncListIterator<T> operator++() const;
-	// Iterate to the next element (postfix)
+	// Iterates to the next element (postfix)
 	ncListIterator<T> operator++(int) const;
 
-	// Iterate to the previous element (prefix)
+	// Iterates to the previous element (prefix)
 	ncListIterator<T> operator--() const;
-	// Iterate to the previous element (postfix)
+	// Iterates to the previous element (postfix)
 	ncListIterator<T> operator--(int) const;
 
 	/// Equality operator
@@ -58,7 +58,7 @@ T& ncListIterator<T>::operator*()
 	return m_pNode->m_data;
 }
 
-/// Iterate to the next element (prefix)
+/// Iterates to the next element (prefix)
 template <class T>
 ncListIterator<T> ncListIterator<T>::operator++() const
 {
@@ -68,7 +68,7 @@ ncListIterator<T> ncListIterator<T>::operator++() const
 	return *this;
 }
 
-/// Iterate to the next element (postfix)
+/// Iterates to the next element (postfix)
 template <class T>
 ncListIterator<T> ncListIterator<T>::operator++(int) const
 {
@@ -81,7 +81,7 @@ ncListIterator<T> ncListIterator<T>::operator++(int) const
 	return iterator;
 }
 
-/// Iterate to the previous element (prefix)
+/// Iterates to the previous element (prefix)
 template <class T>
 ncListIterator<T> ncListIterator<T>::operator--() const
 {
@@ -91,7 +91,7 @@ ncListIterator<T> ncListIterator<T>::operator--() const
 	return *this;
 }
 
-/// Iterate to the previous element (postfix)
+/// Iterates to the previous element (postfix)
 template <class T>
 ncListIterator<T> ncListIterator<T>::operator--(int) const
 {

@@ -33,6 +33,9 @@ private:
 
 	// Constructor creating an audio stream from an audio file
 	ncAudioStream(const char *pFilename);
+
+	/// Preventing construction by copy
+	ncAudioStream(const ncAudioStream& rOther);
 public:
 	virtual ~ncAudioStream();
 

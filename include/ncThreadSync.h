@@ -29,7 +29,8 @@ public:
 };
 
 /// Condition variable class (threads synchronization)
-/*! Based on the TinyThread++ library implementation */
+/*! Windows version based on the TinyThread++ library implementation 
+ * More info at http://www.cs.wustl.edu/~schmidt/win32-cv-1.html */
 class ncCondVariable
 {
 private:
@@ -69,7 +70,7 @@ public:
 	void Unlock() { pthread_rwlock_unlock(&m_rwlock); }
 };
 
-#ifndef __ANDROID__
+#if !defined (__ANDROID__) && !defined(__APPLE__)
 
 /// Barrier class (threads synchronization)
 class ncBarrier

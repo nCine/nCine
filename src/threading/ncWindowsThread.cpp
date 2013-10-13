@@ -61,7 +61,7 @@ void* ncThread::Join()
 }
 
 /// Returns the calling thread id
-unsigned int ncThread::Self()
+long int ncThread::Self()
 {
 	return GetCurrentThreadId();
 }

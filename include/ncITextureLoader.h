@@ -29,7 +29,10 @@ protected:
 	int m_iHeight;
 	int m_iBpp;
 	int m_iHeaderSize;
-	long m_lFileSize;
+	long m_lDataSize;
+	int m_iMipMapCount;
+	long *m_lMipDataOffsets;
+	long *m_lMipDataSizes;
 	ncTextureFormat m_texFormat;
 	GLubyte* m_uPixels;
 
@@ -55,12 +58,18 @@ public:
 	inline ncPoint Size() const { return ncPoint(m_iWidth, m_iHeight); }
 	/// Returns texture bytes per pixel
 	inline int Bpp() const { return m_iBpp; }
-	/// Returns file size in bytes
-	inline long FileSize() const { return m_lFileSize; }
+	/// Returns the number of MIP maps stored in the texture file
+	inline int MipMapCount() const { return m_iMipMapCount; }
+	/// Returns texture data size in bytes
+	inline long DataSize() const { return m_lDataSize; }
+	// Returns the texture data size in bytes for the specified MIP map level
+	long DataSize(unsigned int uMipMapLevel) const;
 	/// Returns the texture format class
 	inline const ncTextureFormat& TexFormat() const { return m_texFormat; }
 	/// Returns the pointer to pixel data
 	inline const GLubyte* Pixels() const { return m_uPixels; }
+	// Returns the pointer to pixel data for the specified MIP map level
+	const GLubyte* Pixels(unsigned int uMipMapLevel) const;
 
 	// Returns the proper texture loader according to the file extension
 	static ncITextureLoader* CreateFromFile(const char *pFilename);

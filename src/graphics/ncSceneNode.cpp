@@ -14,9 +14,9 @@ const float ncSceneNode::sMinRotation = 0.5f;
 
 ncSceneNode::~ncSceneNode()
 {
-	for(ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
-		delete(*i);
-	m_children.Clear();
+	ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin();
+	while(i != m_children.End())
+		delete(*i++);
 
 	if (m_pParent)
 	{
@@ -159,17 +159,17 @@ void ncSceneNode::Transform()
 		float fScaledX = m_pParent->m_fAbsScaleFactor * x;
 		float fScaledY = m_pParent->m_fAbsScaleFactor * y;
 
-		float sine = 0.0f;
-		float cosine = 1.0f;
+		float fSine = 0.0f;
+		float fCosine = 1.0f;
 		float fParentRot = m_pParent->m_fAbsRotation;
 		if (abs(fParentRot) > sMinRotation && abs(fParentRot) < 360.0f - sMinRotation)
 		{
-			sine = sinf(-fParentRot * M_PI/180.0f);
-			cosine = cosf(-fParentRot * M_PI/180.0f);
+			fSine = sinf(-fParentRot * M_PI/180.0f);
+			fCosine = cosf(-fParentRot * M_PI/180.0f);
 		}
 
-		m_fAbsX = m_pParent->m_fAbsX + fScaledX*cosine - fScaledY*sine;
-		m_fAbsY = m_pParent->m_fAbsY + fScaledY*cosine + fScaledX*sine;
+		m_fAbsX = m_pParent->m_fAbsX + fScaledX*fCosine - fScaledY*fSine;
+		m_fAbsY = m_pParent->m_fAbsY + fScaledY*fCosine + fScaledX*fSine;
 
 		m_absColor = m_pParent->m_absColor * m_color;
 	}

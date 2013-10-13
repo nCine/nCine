@@ -8,7 +8,8 @@
 ///////////////////////////////////////////////////////////
 
 ncTexture::ncTexture()
-	: m_uGLId(0), m_iWidth(0), m_iHeight(0), m_bCompressed(false), m_bAlphaChannel(false)
+	: m_uGLId(0), m_iWidth(0), m_iHeight(0),
+	  m_iMipMapLevels(1), m_bCompressed(false), m_bAlphaChannel(false)
 {
 	m_eType = TEXTURE_TYPE;
 	glGenTextures(1, &m_uGLId);
@@ -16,7 +17,8 @@ ncTexture::ncTexture()
 
 
 ncTexture::ncTexture(const char *pFilename)
-	: m_uGLId(0), m_iWidth(0), m_iHeight(0), m_bCompressed(false), m_bAlphaChannel(false)
+	: m_uGLId(0), m_iWidth(0), m_iHeight(0),
+	  m_iMipMapLevels(1), m_bCompressed(false), m_bAlphaChannel(false)
 {
 	m_eType = TEXTURE_TYPE;
 	SetName(pFilename);
@@ -94,21 +96,48 @@ void ncTexture::Load(const ncITextureLoader& texLoader, int iWidth, int iHeight)
 		exit(-1);
 	}
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	const ncTextureFormat &texFormat = texLoader.TexFormat();
-	if (texFormat.isCompressed())
-		glCompressedTexImage2D(GL_TEXTURE_2D, 0, texFormat.Internal(), iWidth, iHeight, 0,
-			texLoader.FileSize(), texLoader.Pixels());
+	if (texLoader.MipMapCount() > 1)
+	{
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+#ifndef __ANDROID__
+		// To prevent artifacts if the MIP map chain is not complete
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texLoader.MipMapCount());
+#endif
+	}
 	else
-		glTexImage2D(GL_TEXTURE_2D, 0, texFormat.Internal(), iWidth, iHeight, 0,
-			texFormat.Format(), texFormat.Type(), texLoader.Pixels());
+	{
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	}
+
+	const ncTextureFormat &texFormat = texLoader.TexFormat();
+
+	int iLevelWidth = iWidth;
+	int iLevelHeight = iHeight;
+	for (int i = 0; i < texLoader.MipMapCount(); i++)
+	{
+		if (texFormat.isCompressed())
+		{
+			glCompressedTexImage2D(GL_TEXTURE_2D, i, texFormat.Internal(), iLevelWidth, iLevelHeight, 0,
+				texLoader.DataSize(i), texLoader.Pixels(i));
+		}
+		else
+		{
+			glTexImage2D(GL_TEXTURE_2D, i, texFormat.Internal(), iLevelWidth, iLevelHeight, 0,
+				texFormat.Format(), texFormat.Type(), texLoader.Pixels(i));
+		}
+
+		iLevelWidth /= 2;
+		iLevelHeight /= 2;
+	}
 
 	m_iWidth = iWidth;
 	m_iHeight = iHeight;
+	m_iMipMapLevels = texLoader.MipMapCount();
 	m_bCompressed = texFormat.isCompressed();
 	m_bAlphaChannel = texFormat.hasAlpha();
 }

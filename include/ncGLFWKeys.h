@@ -1,7 +1,11 @@
 #ifndef NCKEYS
 #define NCKEYS
 
-#include <GL/glfw.h>
+#if defined(__APPLE__)
+	#include <GLFW/glfw.h>
+#else
+	#include <GL/glfw.h>
+#endif
 
 typedef enum {
 	NCKEY_UNKNOWN		= GLFW_KEY_UNKNOWN,

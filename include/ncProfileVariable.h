@@ -18,6 +18,9 @@ private:
 
 	float *m_fValues;
 	ncTimer m_timer;
+
+	/// Preventing construction by copy
+	ncProfileVariable(const ncProfileVariable& rOther);
 public:
 	ncProfileVariable(unsigned int uNumValues, unsigned int uRejectDelay);
 	~ncProfileVariable();

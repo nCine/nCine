@@ -280,5 +280,4 @@ void ncList<T>::Remove(ncListNode<T> *pNode)
 	delete pNode;
 }
 
-
 #endif

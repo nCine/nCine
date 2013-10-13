@@ -70,9 +70,13 @@ void* ncThread::Join()
 }
 
 /// Returns the calling thread id
-unsigned int ncThread::Self()
+long int ncThread::Self()
 {
-	return pthread_self();
+#if defined(__APPLE__)
+	return reinterpret_cast<long int>(pthread_self());
+#else
+	return static_cast<long int>(pthread_self());
+#endif
 }
 
 /// Terminates the calling thread

@@ -31,7 +31,7 @@ ncProfileVariable::~ncProfileVariable()
 
 /// Adds a new value for the variable
 void ncProfileVariable::AddValue(float fValue)
-{	
+{
 	if (m_bFirstValue)
 	{
 		m_fMin = fValue;

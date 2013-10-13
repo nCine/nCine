@@ -43,6 +43,10 @@ void ncTextureLoaderDDS::ReadHeader(DDS_header& header)
 		m_iHeaderSize = 128;
 		m_iWidth = ncIFile::Int32FromLE(header.dwWidth);
 		m_iHeight = ncIFile::Int32FromLE(header.dwHeight);
+		m_iMipMapCount = ncIFile::Int32FromLE(header.dwMipMapCount);
+
+		if (m_iMipMapCount == 0)
+			m_iMipMapCount = 1;
 	}
 	else
 	{
@@ -54,7 +58,7 @@ void ncTextureLoaderDDS::ReadHeader(DDS_header& header)
 /// Parses the DDS header to determine its format
 void ncTextureLoaderDDS::ParseFormat(const DDS_header& header)
 {
-	GLenum eInternalFormat;
+	GLenum eInternalFormat = GL_RGB; // to suppress uninitialized variable warning
 	const ncGfxCapabilities& gfxCaps = ncServiceLocator::GfxCapabilities();
 
 	uint32_t uFlags = ncIFile::Int32FromLE(header.ddspf.dwFlags);
@@ -179,5 +183,15 @@ void ncTextureLoaderDDS::ParseFormat(const DDS_header& header)
 		if (uRedMask > uBlueMask && uBitCount > 16)
 			m_texFormat.BGRFormat();
 #endif
+	}
+
+	if (m_iMipMapCount > 1)
+	{
+		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderDDS::ParseFormat - MIP Maps: %d", m_iMipMapCount);
+		m_lMipDataOffsets = new long[m_iMipMapCount];
+		m_lMipDataSizes = new long[m_iMipMapCount];
+		long int lDataSizesSum = ncTextureFormat::CalculateMipSizes(eInternalFormat, m_iWidth, m_iHeight, m_iMipMapCount, m_lMipDataOffsets, m_lMipDataSizes);
+		if (lDataSizesSum != m_lDataSize)
+			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncTextureLoaderDDS::ParseFormat - The sum of MIP maps size (%ld) is different than texture total data (%ld)", lDataSizesSum, m_lDataSize);
 	}
 }

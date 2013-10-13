@@ -2,7 +2,11 @@
 #define CLASS_NCGLFWINPUTMANAGER
 
 #include "ncIInputManager.h"
-#include <GL/glfw.h>
+#if defined(__APPLE__)
+	#include <GLFW/glfw.h>
+#else
+	#include <GL/glfw.h>
+#endif
 
 /// Information about GLFW mouse state
 class ncGLFWMouseState : public ncMouseState

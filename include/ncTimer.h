@@ -28,15 +28,15 @@ public:
 	ncTimer();
 	/// Starts the timer
 	inline void Start() { m_dStartTime = Now(); }
-	/// Returns now-start time interval
+	/// Returns now-start time interval in milliseconds
 	inline unsigned long int Interval() const { return static_cast<unsigned long int>(PreciseInterval()); }
-	/// Returns now-start time interval (high precision)
-	inline float PreciseInterval() const { return Now() - m_dStartTime; }
+	/// Returns now-start time interval in milliseconds (high precision)
+	inline float PreciseInterval() const { return PreciseNow() - m_dStartTime; }
 	/// Returns elapsed time in milliseconds since base time
 	static inline unsigned long int Now() { return static_cast<unsigned long int>(PreciseNow()); }
 	// Returns elapsed time in milliseconds since base time (high precision)
 	static double PreciseNow();
-	// Put the current thread to sleep for the specified number of milliseconds
+	// Puts the current thread to sleep for the specified number of milliseconds
 	static void Sleep(unsigned int uMs);
 };
 

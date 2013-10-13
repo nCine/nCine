@@ -3,8 +3,14 @@ project(nCine)
 
 find_package(Threads)
 if(MSVC)
-	include_directories("${CMAKE_BINARY_DIR}/win32/include")
-	set(LIBDIR "${CMAKE_BINARY_DIR}/win32/lib")
+	set(EXTERNAL_MSVC_DIR "${CMAKE_SOURCE_DIR}/external")
+	include_directories("${EXTERNAL_MSVC_DIR}/include")
+	if(MSVC_C_ARCHITECTURE_ID MATCHES 64 OR MSVC_CXX_ARCHITECTURE_ID MATCHES 64)
+		set(LIBDIR "${EXTERNAL_MSVC_DIR}/lib/x64")
+	else()
+		set(LIBDIR "${EXTERNAL_MSVC_DIR}/lib/x86")
+	endif()
+	
 	set(OPENGL_gl_LIBRARY opengl32.lib ${LIBDIR}/glew32.lib)
 	#set(GLFW_LIBRARY ${LIBDIR}/GLFW.lib)
 	#set(GLFW_FOUND 1)
@@ -15,12 +21,20 @@ if(MSVC)
 	set(SDLIMAGE_LIBRARY ${LIBDIR}/SDL_image.lib)
 	set(SDLIMAGE_FOUND 1)
 	set(OPENAL_LIBRARY ${LIBDIR}/OpenAL32.lib)
+	set(WEBP_LIBRARY ${LIBDIR}/libwebp.lib)
+	set(WEBP_FOUND 1)
 	set(VORBISFILE_LIBRARY ${LIBDIR}/libogg.lib ${LIBDIR}/libvorbis.lib ${LIBDIR}/libvorbisfile.lib)
 	set(VORBIS_FOUND 1)
+	
+	string(REGEX REPLACE "/Zm[0-9]*" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 	add_definitions(-DWITH_GLEW)
-	add_definitions(/W0) # Turn-off warnings
+	#add_definitions(/W0) # Turn off warnings
 else() # GCC and LLVM
-	set(CMAKE_CXX_FLAGS "-Wall")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") # GCC only, no Clang
+		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1 -ggdb -fsanitize=address -fno-omit-frame-pointer -rdynamic")
+		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+	endif()
 	if(NOT CROSS_MINGW32) # Linux
 		find_package(OpenGL REQUIRED)
 		find_package(SDL)
@@ -77,6 +91,9 @@ endif()
 
 if(SDL_FOUND AND NOT GLFW_FOUND)
 	add_definitions(-DWITH_SDL)
+	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # SDLmain on OS X
+		list(APPEND LINK_LIBS ${SDLMAIN_LIBRARY})
+	endif()
 	list(APPEND LINK_LIBS ${SDL_LIBRARY})
 	if(SDLIMAGE_FOUND)
 		add_definitions(-DWITH_SDLIMAGE)
@@ -128,6 +145,7 @@ set(SOURCES
 	src/graphics/ncITextureLoader.cpp
 	src/graphics/ncTextureLoaderDDS.cpp
 	src/graphics/ncTextureLoaderPVR.cpp
+	src/graphics/ncTextureLoaderKTX.cpp
 	src/graphics/ncTexture.cpp
 	src/graphics/ncProfilePlotter.cpp
 	src/graphics/ncPlottingVariable.cpp
@@ -205,6 +223,7 @@ else()
 	endif()
 endif()
 
+add_executable(apptest_mipmapping tests/main.cpp tests/apptest_mipmapping.cpp)
 add_executable(apptest_joystick tests/main.cpp tests/apptest_joystick.cpp)
 add_executable(apptest_overdraw tests/main.cpp tests/apptest_overdraw.cpp)
 add_executable(apptest_rotozoom tests/main.cpp tests/apptest_rotozoom.cpp)
@@ -215,6 +234,7 @@ add_executable(apptest_scene tests/main.cpp tests/apptest_scene.cpp)
 add_executable(test_array tests/test_array.cpp)
 add_executable(test_list tests/test_list.cpp)
 
+target_link_libraries(apptest_mipmapping ncine)
 target_link_libraries(apptest_joystick ncine)
 target_link_libraries(apptest_overdraw ncine)
 target_link_libraries(apptest_rotozoom ncine)
