@@ -107,13 +107,13 @@ public:
 	}
 
 	/// Queries the playing state of the player
-	inline bool isPlaying() { return m_eState == STATE_PLAYING; }
+	inline bool isPlaying() const { return m_eState == STATE_PLAYING; }
 	/// Queries the paused state of the player
-	inline bool isPaused() { return m_eState == STATE_PAUSED; }
+	inline bool isPaused() const { return m_eState == STATE_PAUSED; }
 	/// Queries the stopped state of the player
-	inline bool isStopped() { return m_eState == STATE_STOPPED; }
+	inline bool isStopped() const { return m_eState == STATE_STOPPED; }
 	/// Queries the looping property of the player
-	inline bool isLooping() { return m_bLooping; }
+	inline bool isLooping() const { return m_bLooping; }
 };
 
 #endif

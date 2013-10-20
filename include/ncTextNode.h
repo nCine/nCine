@@ -78,7 +78,7 @@ public:
 	void SetAlignment(eAlignment alignment);
 
 	/// Gets the font base scaled by the scale factor
-	inline float FontBase() { return m_pFont->Base() * CurrentAbsScale(); }
+	inline float FontBase() const { return m_pFont->Base() * CurrentAbsScale(); }
 	/// Gets the font line height scaled by the scale factor
 	inline float FontLineHeight() const { return m_pFont->LineHeight() * CurrentAbsScale(); }
 	// Sets the string to render

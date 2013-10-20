@@ -44,7 +44,7 @@ public:
 
 
 	/// Gets the local space flag of the system
-	inline bool LocalSpace(void) { return m_bLocalSpace; }
+	inline bool LocalSpace(void) const { return m_bLocalSpace; }
 	/// Sets the local space flag of the system
 	inline void SetLocalSpace(bool bLocalSpace) { m_bLocalSpace = bLocalSpace; }
 

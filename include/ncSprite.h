@@ -75,7 +75,7 @@ public:
 	}
 
 	/// Gets the texture object
-	inline const ncTexture* Texture() { return m_pTexture; }
+	inline const ncTexture* Texture() const { return m_pTexture; }
 	/// Sets the texture object
 	inline void SetTexture(ncTexture *pTexture) { m_pTexture = pTexture; }
 

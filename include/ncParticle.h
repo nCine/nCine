@@ -33,7 +33,7 @@ public:
 	void Init(unsigned long int ulLife, ncVector2f pos, ncVector2f vel, float fRot, bool bLocalSpace);
 
 	/// Returns true if the particle is still alive
-	inline bool isAlive() { return m_ulLife > 0; }
+	inline bool isAlive() const { return m_ulLife > 0; }
 
 	// Updates particle data after the specified amount of milliseconds has passed
 	virtual void Update(unsigned long int ulInterval);

@@ -1,0 +1,13 @@
+*.user
+docs
+Doxyfile
+staging
+android/.*
+android/assets
+android/bin
+android/gen
+android/jni
+android/libs
+android/obj
+android/project.properties
+android/res

@@ -10,6 +10,9 @@ if(MSVC)
 	else()
 		set(LIBDIR "${EXTERNAL_MSVC_DIR}/lib/x86")
 	endif()
+	if(NOT (MSVC_VERSION LESS 1800)) # If Visual Studio 2013 or greater
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FS")
+	endif()
 	
 	set(OPENGL_gl_LIBRARY opengl32.lib ${LIBDIR}/glew32.lib)
 	#set(GLFW_LIBRARY ${LIBDIR}/GLFW.lib)

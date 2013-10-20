@@ -66,9 +66,9 @@ public:
 template <class T>
 void ncArray<T>::SetCapacity(unsigned int uNewCapacity)
 {
-	if (uNewCapacity <= 0)
+	if (uNewCapacity == 0)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::SetCapacity - Invalid capacity: %u", uNewCapacity);
+		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::SetCapacity - Zero is not valid capacity");
 		exit(-1);
 	}
 
