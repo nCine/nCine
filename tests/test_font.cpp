@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 	bool bQuit = false;
 
 // ----- Init ----------------------
-	ncFrameTimer t(5, 100);
+	ncFrameTimer t(5.0f, 0.1f);
 	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
 	ncSDLGfxDevice gfxDevice(iWidth, iHeight);
 	gfxDevice.SetWindowTitle("Test");
@@ -85,7 +85,7 @@ int main(int argc, char **argv)
 	text6.EnableKerning(false);
 	text6.SetColor(0, 0, 255, 128);
 
-	unsigned long int ulUpdateTime = ncTimer::Now();
+	float fUpdateTime = ncTimer::Now();
 
 
 // ----- Event cycle --------------------
@@ -115,9 +115,9 @@ int main(int argc, char **argv)
 		t.AddFrame();
 
 		// Updating string every 100ms
-		if (ncTimer::Now() - ulUpdateTime > 100)
+		if (ncTimer::Now() - fUpdateTime > 0.1f)
 		{
-			ulUpdateTime = ncTimer::Now();
+			fUpdateTime = ncTimer::Now();
 			sprintf(vFPS, (const char *)"FPS: %.0f", t.AverageFPS());
 			fpsText.SetString(vFPS);
 			fpsText.SetPosition((iWidth - fpsText.Width()), iHeight);

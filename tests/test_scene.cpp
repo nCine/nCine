@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 // ----- Init ----------------------
 	float fAngle = 0.0f;
 	float fAngle2 = 0.0f;
-	ncFrameTimer t(5, 0);
+	ncFrameTimer t(5.0f, 0.0f);
 	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
 	ncSDLGfxDevice gfxDevice(iWidth, iHeight);
 	gfxDevice.SetWindowTitle("Test");
@@ -77,8 +77,8 @@ int main(int argc, char **argv)
 
 // ----- Blitting on the screen --------
 		t.AddFrame();
-		fAngle += 0.1f * t.Interval();
-		fAngle2 += 0.25f * t.Interval();
+		fAngle += 100.0f * t.Interval();
+		fAngle2 += 250.0f * t.Interval();
 
 		gfxDevice.Clear();
 

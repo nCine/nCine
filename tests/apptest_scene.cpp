@@ -56,7 +56,7 @@ void MyEventHandler::OnFrameStart()
 
 	for (int i = 0; i < numTextures; i++)
 	{
-		m_fAngles[i] += (0.25f + 0.025f*i) * ncApplication::Interval();
+		m_fAngles[i] += (250 + 25*i) * ncApplication::Interval();
 		fSinus[i] = sinf(m_fAngles[i] * 0.01f);
 		fCosine[i] = cosf(2*m_fAngles[i] * 0.01f);
 	}

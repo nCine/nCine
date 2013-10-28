@@ -13,18 +13,18 @@ void ncRectAnimation::SetFrame(unsigned int uFrameNum)
 		m_uCurrentFrame = uFrameNum;
 }
 
-/// Returns true if a frame rect has changed
-void ncRectAnimation::UpdateFrame(unsigned long ulInterval)
+/// Updates current frame based on time passed
+void ncRectAnimation::UpdateFrame(float fInterval)
 {
 	// No frame calculation if the animation is paused or has only one rect
 	if (m_bPaused == true || m_vRects.Size() < 2)
 		return;
 
-	m_ulElapsedFrameTime += ulInterval;
+	m_fElapsedFrameTime += fInterval;
 	// A NEXT frame rectangle should be determined
-	if (m_ulElapsedFrameTime >= m_uFrameTime)
+	if (m_fElapsedFrameTime >= m_fFrameTime)
 	{
-		m_ulElapsedFrameTime = 0;
+		m_fElapsedFrameTime = 0.0f;
 
 		if (m_bGoingForward)
 		{

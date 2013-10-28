@@ -121,12 +121,12 @@ bool ncSceneNode::UnlinkChildNode(ncSceneNode *pChildNode)
 }
 
 /// Called once every frame to update the node
-void ncSceneNode::Update(unsigned long int ulInterval)
+void ncSceneNode::Update(float fInterval)
 {
 	for(ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
 	{
 		if ((*i)->bShouldUpdate)
-			(*i)->Update(ulInterval);
+			(*i)->Update(fInterval);
 	}
 }
 

@@ -55,7 +55,7 @@ void MyEventHandler::OnInit()
 void MyEventHandler::OnFrameStart()
 {
 	if (m_bPause == false)
-		m_fAngle += 0.0025f * ncApplication::Interval();
+		m_fAngle += 2.5f * ncApplication::Interval();
 	float fSinus = sinf(m_fAngle);
 	float fCosine = cosf(m_fAngle);
 

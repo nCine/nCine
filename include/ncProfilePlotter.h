@@ -38,7 +38,7 @@ public:
 	void SetBackgroundColor(ncColor backgroundColor) { m_backgroundColor = backgroundColor; }
 
 	/// Adds a new variable to the plotter
-	virtual unsigned int AddVariable(unsigned int uNumValues, unsigned int uRejectDelay) = 0;
+	virtual unsigned int AddVariable(unsigned int uNumValues, float fRejectDelay) = 0;
 };
 
 #endif

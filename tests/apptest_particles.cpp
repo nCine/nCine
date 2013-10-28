@@ -44,7 +44,7 @@ void MyEventHandler::OnInit()
 	sizeAffector->AddSizeStep(0.7f, 1.6f);
 	sizeAffector->AddSizeStep(1.0f, 0.4f);
 	m_pParticleSys->AddAffector(sizeAffector);
-	m_emitVector.Set(0.0f, 0.35f);
+	m_emitVector.Set(0.0f, 350.0f);
 
 	m_pEmitTimer = new ncTimer();
 	m_pEmitTimer->Start();
@@ -52,10 +52,10 @@ void MyEventHandler::OnInit()
 
 void MyEventHandler::OnFrameStart()
 {
-	if (m_pEmitTimer->Interval() > 85) // 150
+	if (m_pEmitTimer->Interval() > 0.085f) // 0.150f
 	{
 		m_pEmitTimer->Start();
-		m_pParticleSys->Emit(3, 1000, m_emitVector); // (25, 3000, ncVector2f(0.0, 0.1))
+		m_pParticleSys->Emit(3, 1.0f, m_emitVector); // (25, 3.0f, ncVector2f(0.0f, 100.0f))
 	}
 }
 

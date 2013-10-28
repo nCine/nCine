@@ -40,7 +40,7 @@ public:
 	/// Adds a particle affector
 	void AddAffector(ncParticleAffector* affector) { m_vAffectors.InsertBack(affector); }
 	/// Emits an amount of particles with a specified initial life and velocity
-	void Emit(unsigned int amount, unsigned long int ulLife, const ncVector2f &vel);
+	void Emit(unsigned int amount, float fLife, const ncVector2f &vel);
 
 
 	/// Gets the local space flag of the system
@@ -48,7 +48,7 @@ public:
 	/// Sets the local space flag of the system
 	inline void SetLocalSpace(bool bLocalSpace) { m_bLocalSpace = bLocalSpace; }
 
-	virtual void Update(unsigned long int ulInterval);
+	virtual void Update(float fInterval);
 
 	inline static eObjectType sType() { return PARTICLESYSTEM_TYPE; }
 };

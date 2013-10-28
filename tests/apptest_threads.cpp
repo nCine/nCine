@@ -46,7 +46,7 @@ void MyEventHandler::OnInit()
 
 	pArray = new float[NUM_FLOATS];
 
-	unsigned long lStartTime = ncTimer::Now();
+	float fStartTime = ncTimer::Now();
 	for (int i = 0; i < NUM_THREADS; i++)
 	{
 		iThreadNum[i] = i;
@@ -55,9 +55,9 @@ void MyEventHandler::OnInit()
 
 	for (int i = 0; i < NUM_THREADS; i++)
 		threads[i].Join();
-	unsigned long lEndTime = ncTimer::Now();
+	float fEndTime = ncTimer::Now();
 
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"APPTEST_THREADS: total time %lums", lEndTime-lStartTime);
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"APPTEST_THREADS: total time %fms", (fEndTime-fStartTime)*1000.0f);
 
 	delete[] pArray;
 }

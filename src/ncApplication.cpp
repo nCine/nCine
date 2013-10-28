@@ -37,7 +37,7 @@ ncTimer *ncApplication::m_pProfileTimer = NULL;
 ncProfilePlotter *ncApplication::m_pProfilePlotter = NULL;
 ncFont *ncApplication::m_pFont = NULL;
 ncTextNode *ncApplication::m_pTextLines = NULL;
-unsigned long int ncApplication::m_ulTextUpdateTime = 0;
+float ncApplication::m_fTextUpdateTime = 0.0f;
 char ncApplication::m_vTextChars[256] = "";
 ncIInputManager *ncApplication::m_pInputManager = NULL;
 ncIAppEventHandler *ncApplication::m_pAppEventHandler = NULL;
@@ -82,20 +82,20 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 #endif
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Init - Data path: %s", ncIFile::DataPath());
 
-	m_pFrameTimer = new ncFrameTimer(5, 100);
+	m_pFrameTimer = new ncFrameTimer(5.0f, 0.1f);
 	m_pRootNode = new ncSceneNode();
 	m_pRenderQueue = new ncRenderQueue();
 	m_pProfileTimer = new ncTimer();
 
 	m_pProfilePlotter = new ncStackedBarPlotter(m_pRootNode, ncRect(Width()*0.1f, Height()*0.1f, Width()*0.8f, Height()*0.15f));
 	m_pProfilePlotter->SetBackgroundColor(ncColor(0.35f, 0.35f, 0.45f, 0.5f));
-	m_pProfilePlotter->AddVariable(50, 200);
+	m_pProfilePlotter->AddVariable(50, 0.2f);
 	m_pProfilePlotter->Variable(0).SetGraphColor(ncColor(0.8f, 0.0f, 0.0f));
 	m_pProfilePlotter->Variable(0).SetMeanColor(ncColor(1.0f, 0.0f, 0.0f));
-	m_pProfilePlotter->AddVariable(50, 200);
+	m_pProfilePlotter->AddVariable(50, 0.2f);
 	m_pProfilePlotter->Variable(1).SetGraphColor(ncColor(0.0f, 0.8f, 0.0f));
 	m_pProfilePlotter->Variable(1).SetMeanColor(ncColor(0.0f, 1.0f, 0.0f));
-	m_pProfilePlotter->AddVariable(50, 200);
+	m_pProfilePlotter->AddVariable(50, 0.2f);
 	m_pProfilePlotter->Variable(2).SetGraphColor(ncColor(0.0f, 0.0f, 0.8f));
 	m_pProfilePlotter->Variable(2).SetMeanColor(ncColor(0.0f, 0.0f, 1.0f));
 
@@ -164,18 +164,18 @@ void ncApplication::Step()
 	m_pFrameTimer->AddFrame();
 	m_pGfxDevice->Clear();
 	m_pAppEventHandler->OnFrameStart();
-	m_pProfilePlotter->AddValue(0, m_pProfileTimer->PreciseInterval());
+	m_pProfilePlotter->AddValue(0, m_pProfileTimer->Interval());
 //	m_pProfilePlotter->AddValue(0, 1.0f * abs(rand()%34));
 
 	m_pProfileTimer->Start();
 	m_pRootNode->Update(m_pFrameTimer->Interval());
 	m_pRootNode->Visit(*m_pRenderQueue);
-	m_pProfilePlotter->AddValue(1, m_pProfileTimer->PreciseInterval());
+	m_pProfilePlotter->AddValue(1, m_pProfileTimer->Interval());
 //	m_pProfilePlotter->AddValue(1, 1.0f * abs(rand()%33));
 
 	m_pProfileTimer->Start();
 	m_pRenderQueue->Draw();
-	m_pProfilePlotter->AddValue(2, m_pProfileTimer->PreciseInterval());
+	m_pProfilePlotter->AddValue(2, m_pProfileTimer->Interval());
 //	m_pProfilePlotter->AddValue(2, 1.0f * abs(rand()%33));
 
 	ncServiceLocator::AudioDevice().UpdatePlayers();
@@ -183,11 +183,11 @@ void ncApplication::Step()
 	m_pAppEventHandler->OnFrameEnd();
 
 	// TODO: hard-coded 100ms update time
-	if (ncTimer::Now() - m_ulTextUpdateTime > 100)
+	if (ncTimer::Now() - m_fTextUpdateTime > 0.1f)
 	{
-		m_ulTextUpdateTime = ncTimer::Now();
+		m_fTextUpdateTime = ncTimer::Now();
 		sprintf(m_vTextChars, (const char *)"FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC",
-				m_pFrameTimer->AverageFPS(), m_pFrameTimer->PreciseInterval(),
+				m_pFrameTimer->AverageFPS(), m_pFrameTimer->Interval()*1000.0f,
 				m_pRenderQueue->NumVertices(ncRenderCommand::SPRITE_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::SPRITE_TYPE),
 				m_pRenderQueue->NumVertices(ncRenderCommand::PARTICLE_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::PARTICLE_TYPE),
 				m_pRenderQueue->NumVertices(ncRenderCommand::TEXT_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::TEXT_TYPE),

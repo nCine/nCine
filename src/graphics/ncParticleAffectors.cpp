@@ -17,7 +17,7 @@ void ncColorAffector::AddColorStep(float fTime, ncColor color)
 void ncColorAffector::Affect(ncParticle* pParticle)
 {
 	unsigned int uIdx;
-	float fNormalizedLife = float(pParticle->m_ulLife) / float(pParticle->m_ulStartLife);
+	float fNormalizedLife = pParticle->m_fLife / pParticle->m_fStartLife;
 
 	for (uIdx = 0; uIdx < m_vColorSteps.Size()-1; uIdx++)
 		if (m_vColorSteps[uIdx]->fTime > fNormalizedLife)
@@ -50,7 +50,7 @@ void ncSizeAffector::AddSizeStep(float fTime, float fScale)
 void ncSizeAffector::Affect(ncParticle* pParticle)
 {
 	unsigned int uIdx;
-	float fNormalizedLife = float(pParticle->m_ulLife) / float(pParticle->m_ulStartLife);
+	float fNormalizedLife = pParticle->m_fLife / pParticle->m_fStartLife;
 
 	for (uIdx = 0; uIdx < m_vSizeSteps.Size()-1; uIdx++)
 		if (m_vSizeSteps[uIdx]->fTime > fNormalizedLife)

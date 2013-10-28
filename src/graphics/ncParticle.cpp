@@ -5,28 +5,28 @@
 ///////////////////////////////////////////////////////////
 
 /// Initializes a particle with initial life, position, velocity and rotation
-void ncParticle::Init(unsigned long int ulLife, ncVector2f pos, ncVector2f vel, float fRot, bool bLocalSpace)
+void ncParticle::Init(float fLife, ncVector2f pos, ncVector2f vel, float fRot, bool bLocalSpace)
 {
-	m_ulLife = ulLife;
-	m_ulStartLife = ulLife;
+	m_fLife = fLife;
+	m_fStartLife = fLife;
 	SetPosition(pos);
 	m_Velocity = vel;
 	SetRotation(fRot);
 	m_bLocalSpace = bLocalSpace;
 }
 
-/// Updates particle data after the specified amount of milliseconds has passed
-void ncParticle::Update(unsigned long int ulInterval)
+/// Updates particle data after the specified amount of seconds has passed
+void ncParticle::Update(float fInterval)
 {
 	// m_ulLife is unsigned
-	if (ulInterval > m_ulLife)
-		m_ulLife = 0; // dead particle
+	if (fInterval > m_fLife)
+		m_fLife = 0.0; // dead particle
 	else
 	{
-		m_ulLife -= ulInterval;
+		m_fLife -= fInterval;
 
-		x += m_Velocity.x * ulInterval;
-		y += m_Velocity.y * ulInterval;
+		x += m_Velocity.x * fInterval;
+		y += m_Velocity.y * fInterval;
 	}
 }
 

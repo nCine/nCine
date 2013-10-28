@@ -14,29 +14,29 @@ private:
 	void Transform();
 
 public:
-	/// Current particle life
-	unsigned long int m_ulLife;
+	/// Current particle life in seconds
+	float m_fLife;
 	/// Initial particle life
-	unsigned long int m_ulStartLife; // for affectors
+	float m_fStartLife; // for affectors
 	/// Current particle velocity vector
 	ncVector2f m_Velocity;
 	/// Should the particle transformations be in local space?
 	bool m_bLocalSpace;
 
 	ncParticle(ncSceneNode* pParent, ncTexture *pTexture)
-		: ncSprite(pParent, pTexture), m_ulLife(0), m_ulStartLife(0), m_bLocalSpace(false)
+		: ncSprite(pParent, pTexture), m_fLife(0.0f), m_fStartLife(0.0f), m_bLocalSpace(false)
 	{
 		m_renderCmd.SetType(ncRenderCommand::PARTICLE_TYPE);
 	}
 
 	// Initializes a particle with initial life, position, velocity and rotation
-	void Init(unsigned long int ulLife, ncVector2f pos, ncVector2f vel, float fRot, bool bLocalSpace);
+	void Init(float fLife, ncVector2f pos, ncVector2f vel, float fRot, bool bLocalSpace);
 
 	/// Returns true if the particle is still alive
-	inline bool isAlive() const { return m_ulLife > 0; }
+	inline bool isAlive() const { return m_fLife > 0.0; }
 
-	// Updates particle data after the specified amount of milliseconds has passed
-	virtual void Update(unsigned long int ulInterval);
+	// Updates particle data after the specified amount of seconds has passed
+	virtual void Update(float fInterval);
 };
 
 #endif

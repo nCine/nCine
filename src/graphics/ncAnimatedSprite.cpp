@@ -14,16 +14,16 @@ ncAnimatedSprite::~ncAnimatedSprite()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncAnimatedSprite::Update(unsigned long int ulInterval)
+void ncAnimatedSprite::Update(float fInterval)
 {
 	unsigned int uPreviousFrame = m_vAnims[m_iCurrentAnim]->Frame();
-	m_vAnims[m_iCurrentAnim]->UpdateFrame(ulInterval);
+	m_vAnims[m_iCurrentAnim]->UpdateFrame(fInterval);
 
 	// Updating sprite texture rectangle only on change
 	if (uPreviousFrame != m_vAnims[m_iCurrentAnim]->Frame())
 		SetTexRect(m_vAnims[m_iCurrentAnim]->Rect());
 
-	ncSprite::Update(ulInterval);
+	ncSprite::Update(fInterval);
 }
 
 /// Adds a new animation

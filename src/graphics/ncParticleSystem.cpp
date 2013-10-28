@@ -44,9 +44,9 @@ ncParticleSystem::~ncParticleSystem()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncParticleSystem::Emit(unsigned int amount, unsigned long int ulLife, const ncVector2f &vel)
+void ncParticleSystem::Emit(unsigned int amount, float fLife, const ncVector2f &vel)
 {
-	unsigned long int ulRndLife;
+	float fRndLife;
 	ncVector2f RndPosition;
 	ncVector2f RndVelocity;
 
@@ -61,7 +61,7 @@ void ncParticleSystem::Emit(unsigned int amount, unsigned long int ulLife, const
 		if (m_uPoolTop == 0)
 			break;
 
-		ulRndLife = ulLife * randBetween(0.85f, 1.0f);
+		fRndLife = fLife * randBetween(0.85f, 1.0f);
 		// FIXME: arbitrary random position amount
 		RndPosition.x = 10.0f * randBetween(-1.0f, 1.0f); // 25
 		RndPosition.y = 10.0f * randBetween(-1.0f, 1.0f);
@@ -72,13 +72,13 @@ void ncParticleSystem::Emit(unsigned int amount, unsigned long int ulLife, const
 			RndPosition += AbsPosition();
 
 		// acquiring a particle from the pool
-		m_pParticlePool[m_uPoolTop]->Init(ulRndLife, RndPosition, RndVelocity, fRotation, m_bLocalSpace);
+		m_pParticlePool[m_uPoolTop]->Init(fRndLife, RndPosition, RndVelocity, fRotation, m_bLocalSpace);
 		AddChildNode(m_pParticlePool[m_uPoolTop]);
 		m_uPoolTop--;
 	}
 }
 
-void ncParticleSystem::Update(unsigned long int ulInterval)
+void ncParticleSystem::Update(float fInterval)
 {
 	// early return if the node has not to be updated
 	if(!bShouldUpdate)
@@ -94,7 +94,7 @@ void ncParticleSystem::Update(unsigned long int ulInterval)
 			for (unsigned int j = 0; j < m_vAffectors.Size(); j++)
 				m_vAffectors[j]->Affect(pParticle);
 
-			pParticle->Update(ulInterval);
+			pParticle->Update(fInterval);
 
 			// Releasing the particle if it has just died
 			if (pParticle->isAlive() == false)

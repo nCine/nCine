@@ -27,7 +27,7 @@ private:
 	static ncProfilePlotter *m_pProfilePlotter;
 	static ncFont *m_pFont;
 	static ncTextNode *m_pTextLines;
-	static unsigned long int m_ulTextUpdateTime;
+	static float m_fTextUpdateTime;
 	static char m_vTextChars[256];
 	static ncIInputManager *m_pInputManager;
 	static ncIAppEventHandler *m_pAppEventHandler;
@@ -65,7 +65,7 @@ public:
 	static inline ncIInputManager& InputManager() { return *m_pInputManager; }
 
 	/// Returns the elapsed time since the end of the previous frame in milliseconds
-	static inline unsigned long int Interval() { return m_pFrameTimer->Interval(); }
+	static inline float Interval() { return m_pFrameTimer->Interval(); }
 	/// Returns the average FPS
 	static inline float AverageFPS() { return m_pFrameTimer->AverageFPS(); }
 

@@ -5,9 +5,9 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncPlottingVariable::ncPlottingVariable(unsigned int uNumValues, unsigned int uRejectDelay)
+ncPlottingVariable::ncPlottingVariable(unsigned int uNumValues, float fRejectDelay)
 	: m_bPlotMean(true), m_graphColor(1.0f, 1.0f, 1.0f), m_meanColor(1.0f, 0.0f, 0.0f),
-	  m_variable(uNumValues, uRejectDelay), m_fVertices(NULL)
+	  m_variable(uNumValues, fRejectDelay), m_fVertices(NULL)
 {
 	// One more than the profile plotter background
 	m_valuesCmd.SetPriority(ncDrawableNode::HUD_PRIORITY + 1);

@@ -94,7 +94,7 @@ public:
 	bool UnlinkChildNode(ncSceneNode *pChildNode);
 
 	// Called once every frame to update the node
-	virtual void Update(unsigned long int ulInterval);
+	virtual void Update(float fInterval);
 	// Draws the node and visits its children
 	virtual void Visit(ncRenderQueue& rRenderQueue);
 	/// Renders the node

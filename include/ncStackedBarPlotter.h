@@ -7,7 +7,7 @@
 class ncStackedBarVariable : public ncPlottingVariable
 {
 public:
-	ncStackedBarVariable(unsigned int uNumValues, unsigned int uRejectDelay);
+	ncStackedBarVariable(unsigned int uNumValues, float fRejectDelay);
 
 	virtual void UpdateVertices(int x, int y, int w, int h) { }
 	virtual void UpdateRenderCommand();
@@ -20,7 +20,7 @@ class ncStackedBarPlotter : public ncProfilePlotter
 public:
 	ncStackedBarPlotter(ncSceneNode* pParent, ncRect rect) : ncProfilePlotter(pParent, rect) { }
 
-	virtual unsigned int AddVariable(unsigned int uNumValues, unsigned int uRejectDelay);
+	virtual unsigned int AddVariable(unsigned int uNumValues, float fRejectDelay);
 	void UpdateAllVertices(int x, int y, int w, int h);
 	virtual void Draw(ncRenderQueue& rRenderQueue);
 };

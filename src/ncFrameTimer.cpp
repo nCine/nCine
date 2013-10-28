@@ -6,13 +6,13 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/*! Constructs a timer which calculates average FPS every uAvgInterval
-	milliseconds and prints in the log every uLogInterval seconds
+/*! Constructs a timer which calculates average FPS every dAvgInterval
+	seconds and prints in the log every dLogInterval seconds
 */
-ncFrameTimer::ncFrameTimer(unsigned int uLogInterval, unsigned int uAvgInterval)
-	: m_uLogInterval(uLogInterval), m_uAvgInterval(uAvgInterval),
-	  m_ulFrameInterval(0L), m_ulAvgNFrames(0L), m_ulLogNFrames(0L),
-	  m_ulLastAvgUpdate(0L), m_ulLastLogUpdate(0L), m_fFps(0.0f)
+ncFrameTimer::ncFrameTimer(float fLogInterval, float fAvgInterval)
+	: m_fLogInterval(fLogInterval), m_fAvgInterval(fAvgInterval),
+	  m_fFrameInterval(0.0f), m_ulAvgNFrames(0L), m_ulLogNFrames(0L),
+	  m_fLastAvgUpdate(0.0f), m_fLastLogUpdate(0.0f), m_fFps(0.0f)
 {
 
 }
@@ -24,31 +24,31 @@ ncFrameTimer::ncFrameTimer(unsigned int uLogInterval, unsigned int uAvgInterval)
 /// Adds a frame to the counter and calculates the interval since the previous one
 void ncFrameTimer::AddFrame()
 {
-	m_ulFrameInterval = ncTimer::Interval();
+	m_fFrameInterval = ncTimer::Interval();
 
 	m_ulAvgNFrames++;
 	m_ulLogNFrames++;
 
-	// Update the FPS average calculation every m_uAvgInterval milliseconds
-	if (m_uAvgInterval != 0 && (Now() - m_ulLastAvgUpdate > m_uAvgInterval))
+	// Update the FPS average calculation every m_fAvgInterval seconds
+	if (m_fAvgInterval > 0.0f && (Now() - m_fLastAvgUpdate > m_fAvgInterval))
 	{
-		m_fFps = float(m_ulAvgNFrames) / (float(Now() - m_ulLastAvgUpdate)/1000.0f);
+		m_fFps = float(m_ulAvgNFrames) / (Now() - m_fLastAvgUpdate);
 
 		m_ulAvgNFrames = 0L;
-		m_ulLastAvgUpdate = Now();
+		m_fLastAvgUpdate = Now();
 	}
 
 
-	// Log number of frames and FPS every m_uLogInterval seconds
-	if (m_uLogInterval != 0 && m_ulAvgNFrames != 0 && (Now() - m_ulLastLogUpdate > m_uLogInterval * 1000))
+	// Log number of frames and FPS every m_fLogInterval seconds
+	if (m_fLogInterval > 0.0f && m_ulAvgNFrames != 0 && (Now() - m_fLastLogUpdate > m_fLogInterval))
 	{
-		m_fFps = float(m_ulLogNFrames) / float(m_uLogInterval);
+		m_fFps = float(m_ulLogNFrames) / m_fLogInterval;
 		// Milliseconds per frame
-		float fMSPF = (m_uLogInterval * 1000.0f) / float(m_ulLogNFrames);
-		ncServiceLocator::Logger().Write(ncILogger::LOG_VERBOSE, (const char *)"ncFrameTimer::AddFrame - %lu frames in %u seconds = %f FPS (%fms per frame)",  m_ulLogNFrames, m_uLogInterval, m_fFps, fMSPF);
+		float fMSPF = (m_fLogInterval * 1000.0f) / float(m_ulLogNFrames);
+		ncServiceLocator::Logger().Write(ncILogger::LOG_VERBOSE, (const char *)"ncFrameTimer::AddFrame - %lu frames in %.0f seconds = %f FPS (%.3fms per frame)",  m_ulLogNFrames, m_fLogInterval, m_fFps, fMSPF);
 
 		m_ulLogNFrames = 0L;
-		m_ulLastLogUpdate = Now();
+		m_fLastLogUpdate = Now();
 	}
 
 	// Start counting for the next frame interval

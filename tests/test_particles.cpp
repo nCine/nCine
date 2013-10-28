@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 	bool bQuit = false;
 
 // ----- Init ----------------------
-	ncFrameTimer t(5, 0);
+	ncFrameTimer t(5.0f, 0.0f);
 	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
 	ncSDLGfxDevice gfxDevice(iWidth, iHeight);
 	gfxDevice.SetWindowTitle("Test");
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 	particleSys.AddAffector(sizeAffector);
 
 	srand(time(NULL));
-	unsigned long int ulStartTime = ncTimer::Now();
+	float fStartTime = ncTimer::Now();
 
 
 // ----- Event cycle --------------------
@@ -88,10 +88,10 @@ int main(int argc, char **argv)
 
 		gfxDevice.Clear();
 
-		if (ncTimer::Now() - ulStartTime > 250)
+		if (ncTimer::Now() - fStartTime > 0.25f)
 		{
-			ulStartTime = ncTimer::Now();
-			particleSys.Emit(25, 3000, ncVector2f(0.0f, 0.1f));
+			fStartTime = ncTimer::Now();
+			particleSys.Emit(25, 3.0f, ncVector2f(0.0f, 100.0f));
 		}
 
 		rootNode.Update(t.Interval());

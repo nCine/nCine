@@ -25,7 +25,7 @@ public:
 	/// Sets the pause state for the animation
 	inline void SetPaused(bool bPaused) { m_vAnims[m_iCurrentAnim]->SetPaused(bPaused); }
 
-	virtual void Update(unsigned long int ulInterval);
+	virtual void Update(float fInterval);
 
 	// Adds a new animation
 	void AddAnimation(ncRectAnimation* pAnim);

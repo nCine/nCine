@@ -34,7 +34,7 @@ void MyEventHandler::OnInit()
 	m_pAudioPlayer->Play();
 	m_pAnimSprite = new ncAnimatedSprite(&rRootNode, m_pTexture);
 	// Up
-	ncRectAnimation *pAnimation = new ncRectAnimation(60, true, true);
+	ncRectAnimation *pAnimation = new ncRectAnimation(0.06f, true, true);
 	pAnimation->AddRect(0, 0, 32, 32);
 	pAnimation->AddRect(32, 0, 32, 32);
 	pAnimation->AddRect(64, 0, 32, 32);
@@ -43,7 +43,7 @@ void MyEventHandler::OnInit()
 	m_pAnimSprite->AddAnimation(pAnimation);
 #ifdef WITH_8DIRECTIONS
 	// Up-right
-	pAnimation = new ncRectAnimation(60, true, true);
+	pAnimation = new ncRectAnimation(0.06f, true, true);
 	pAnimation->AddRect(160, 0, 32, 32);
 	pAnimation->AddRect(192, 0, 32, 32);
 	pAnimation->AddRect(224, 0, 32, 32);
@@ -51,7 +51,7 @@ void MyEventHandler::OnInit()
 	pAnimation->AddRect(288, 0, 32, 32);
 	m_pAnimSprite->AddAnimation(pAnimation);
 	// Right
-	pAnimation = new ncRectAnimation(60, true, true);
+	pAnimation = new ncRectAnimation(0.06f, true, true);
 	pAnimation->AddRect(320, 0, 32, 32);
 	pAnimation->AddRect(352, 0, 32, 32);
 	pAnimation->AddRect(384, 0, 32, 32);
@@ -59,7 +59,7 @@ void MyEventHandler::OnInit()
 	pAnimation->AddRect(448, 0, 32, 32);
 	m_pAnimSprite->AddAnimation(pAnimation);
 	// Down-right
-	pAnimation = new ncRectAnimation(60, true, true);
+	pAnimation = new ncRectAnimation(0.06f, true, true);
 	pAnimation->AddRect(480, 0, 32, 32);
 	pAnimation->AddRect(512, 0, 32, 32);
 	pAnimation->AddRect(544, 0, 32, 32);
@@ -67,7 +67,7 @@ void MyEventHandler::OnInit()
 	pAnimation->AddRect(608, 0, 32, 32);
 	m_pAnimSprite->AddAnimation(pAnimation);
 	// Down
-	pAnimation = new ncRectAnimation(60, true, true);
+	pAnimation = new ncRectAnimation(0.06f, true, true);
 	pAnimation->AddRect(640, 0, 32, 32);
 	pAnimation->AddRect(0, 32, 32, 32);
 	pAnimation->AddRect(32, 32, 32, 32);
@@ -75,7 +75,7 @@ void MyEventHandler::OnInit()
 	pAnimation->AddRect(96, 32, 32, 32);
 	m_pAnimSprite->AddAnimation(pAnimation);
 	// Down-left
-	pAnimation = new ncRectAnimation(60, true, true);
+	pAnimation = new ncRectAnimation(0.06f, true, true);
 	pAnimation->AddRect(128, 32, 32, 32);
 	pAnimation->AddRect(160, 32, 32, 32);
 	pAnimation->AddRect(192, 32, 32, 32);
@@ -83,7 +83,7 @@ void MyEventHandler::OnInit()
 	pAnimation->AddRect(256, 32, 32, 32);
 	m_pAnimSprite->AddAnimation(pAnimation);
 	// Left
-	pAnimation = new ncRectAnimation(60, true, true);
+	pAnimation = new ncRectAnimation(0.06f, true, true);
 	pAnimation->AddRect(288, 32, 32, 32);
 	pAnimation->AddRect(320, 32, 32, 32);
 	pAnimation->AddRect(352, 32, 32, 32);
@@ -91,7 +91,7 @@ void MyEventHandler::OnInit()
 	pAnimation->AddRect(416, 32, 32, 32);
 	m_pAnimSprite->AddAnimation(pAnimation);
 	// Up-left
-	pAnimation = new ncRectAnimation(60, true, true);
+	pAnimation = new ncRectAnimation(0.06f, true, true);
 	pAnimation->AddRect(448, 32, 32, 32);
 	pAnimation->AddRect(480, 32, 32, 32);
 	pAnimation->AddRect(512, 32, 32, 32);
@@ -99,7 +99,7 @@ void MyEventHandler::OnInit()
 	pAnimation->AddRect(576, 32, 32, 32);
 	m_pAnimSprite->AddAnimation(pAnimation);
 	// Special
-	pAnimation = new ncRectAnimation(60, true, true);
+	pAnimation = new ncRectAnimation(0.06f, true, true);
 	pAnimation->AddRect(608, 32, 32, 32);
 	pAnimation->AddRect(640, 32, 32, 32);
 	pAnimation->AddRect(0, 64, 32, 32);
@@ -153,11 +153,11 @@ void MyEventHandler::OnFrameStart()
 #else
 		float fAngle = -(atan2(reachVector.y, reachVector.x) - atan2(1.0f, 0.0f)) * 180.0f/M_PI;
 		if (fAngle < 0.0f)
-			fAngle += 360;
+			fAngle += 360.0f;
 		m_pAnimSprite->SetRotation(fAngle);
 #endif
 
-		reachVector *= ncApplication::Interval() * 0.1f;
+		reachVector *= ncApplication::Interval() * 100.0f;
 		m_pAnimSprite->Move(reachVector);
 	}
 	else

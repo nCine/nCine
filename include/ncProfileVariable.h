@@ -8,7 +8,7 @@ class ncProfileVariable
 {
 private:
 	unsigned int m_uNumValues;
-	unsigned int m_uRejectDelay;
+	float m_fRejectDelay;
 	unsigned int m_uNextIndex;
 
 	float m_fMin;
@@ -22,7 +22,7 @@ private:
 	/// Preventing construction by copy
 	ncProfileVariable(const ncProfileVariable& rOther);
 public:
-	ncProfileVariable(unsigned int uNumValues, unsigned int uRejectDelay);
+	ncProfileVariable(unsigned int uNumValues, float fRejectDelay);
 	~ncProfileVariable();
 
 	// Adds a new value for the variable
@@ -51,11 +51,11 @@ public:
 	inline float NormMean() const { return (m_fMean-m_fMin)/(m_fMax-m_fMin); }
 	/// Returns the pointer to values
 	inline const float* Values() const { return m_fValues; }
-	/// Returns the delay in milliseconds for value rejection
-	inline unsigned int Delay() const { return m_uRejectDelay; }
-	/// Set the delay in millieconds for value rejection
+	/// Returns the delay in seconds for value rejection
+	inline float Delay() const { return m_fRejectDelay; }
+	/// Set the delay in seconds for value rejection
 	/** If you try to add a value before the delay, it gets discarded. */
-	inline void SetDelay(unsigned int uRejectDelay) { m_uRejectDelay = uRejectDelay; }
+	inline void SetDelay(float fRejectDelay) { m_fRejectDelay = fRejectDelay; }
 };
 
 #endif

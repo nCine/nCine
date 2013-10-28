@@ -5,8 +5,8 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncLineVariable::ncLineVariable(unsigned int uNumValues, unsigned int uRejectDelay)
-	: ncPlottingVariable(uNumValues, uRejectDelay)
+ncLineVariable::ncLineVariable(unsigned int uNumValues, float fRejectDelay)
+	: ncPlottingVariable(uNumValues, fRejectDelay)
 {
 	// Two vertices for the mean quote plus...
 	// One vertex (2 coordinates each) for every recorded value
@@ -17,9 +17,9 @@ ncLineVariable::ncLineVariable(unsigned int uNumValues, unsigned int uRejectDela
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-unsigned int ncLinePlotter::AddVariable(unsigned int uNumValues, unsigned int uRejectDelay)
+unsigned int ncLinePlotter::AddVariable(unsigned int uNumValues, float fRejectDelay)
 {
-	ncLineVariable* pVariable = new ncLineVariable(uNumValues, uRejectDelay);
+	ncLineVariable* pVariable = new ncLineVariable(uNumValues, fRejectDelay);
 	m_vVariables.InsertBack(pVariable);
 
 	return m_vVariables.Size()-1;

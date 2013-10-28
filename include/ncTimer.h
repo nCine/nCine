@@ -1,8 +1,9 @@
 #ifndef CLASS_NCTIMER
 #define CLASS_NCTIMER
 
-#ifdef __ANDROID__
-	#include <time.h>
+#if !defined(_WIN32) && !defined(__APPLE__)
+	#include <time.h> // for clock_gettime()
+	#include <sys/time.h> // for gettimeofday()
 	#include <unistd.h>
 #endif
 
@@ -10,34 +11,38 @@
 class ncTimer
 {
 private:
-#if defined(__ANDROID__)
-	/// Base time mark structure
-	/*! It is needed in order not to overflow when returning running time since epoch */
-	#ifdef CLOCK_MONOTONIC
-	static struct timespec m_initTs;
-	#else
-	static struct timeval m_initTv;
-	#endif
+#if !defined(_WIN32) && !defined(__APPLE__)
+	/// Base time mark structures
+	/*! They are needed to prevent overflowing when returning running time since epoch */
+	static struct timespec s_initTs;
+	static struct timeval s_initTv;
+
+	static bool s_bIsMonotonic;
 #endif
+
+	/// Have the static fields been initialized?
+	static bool s_bIsInitialized;
+	/// Timer frequency in counts per second
+	static unsigned long int s_ulFrequency;
+
+	/// Initializes the static fields
+	static void Init();
 
 protected:
 	/// Start time mark
-	double m_dStartTime;
+	float m_fStartTime;
+
 public:
 	/// Empty constructor
-	ncTimer();
+	ncTimer() : m_fStartTime(0.0f) { }
 	/// Starts the timer
-	inline void Start() { m_dStartTime = Now(); }
-	/// Returns now-start time interval in milliseconds
-	inline unsigned long int Interval() const { return static_cast<unsigned long int>(PreciseInterval()); }
-	/// Returns now-start time interval in milliseconds (high precision)
-	inline float PreciseInterval() const { return PreciseNow() - m_dStartTime; }
-	/// Returns elapsed time in milliseconds since base time
-	static inline unsigned long int Now() { return static_cast<unsigned long int>(PreciseNow()); }
-	// Returns elapsed time in milliseconds since base time (high precision)
-	static double PreciseNow();
-	// Puts the current thread to sleep for the specified number of milliseconds
-	static void Sleep(unsigned int uMs);
+	inline void Start() { m_fStartTime = Now(); }
+	/// Returns now-start time interval in seconds
+	inline float Interval() const { return Now() - m_fStartTime; }
+	// Returns elapsed time in seconds since base time
+	static float Now();
+	// Puts the current thread to sleep for the specified number of seconds
+	static void Sleep(float fS);
 };
 
 #endif

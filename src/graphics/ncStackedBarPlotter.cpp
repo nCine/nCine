@@ -5,8 +5,8 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncStackedBarVariable::ncStackedBarVariable(unsigned int uNumValues, unsigned int uRejectDelay)
-	: ncPlottingVariable(uNumValues, uRejectDelay)
+ncStackedBarVariable::ncStackedBarVariable(unsigned int uNumValues, float fRejectDelay)
+	: ncPlottingVariable(uNumValues, fRejectDelay)
 {
 	// Two vertices for the mean quote plus...
 	// Six vertices (two coordinates each) for every recorded value
@@ -17,7 +17,7 @@ ncStackedBarVariable::ncStackedBarVariable(unsigned int uNumValues, unsigned int
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-unsigned int ncStackedBarPlotter::AddVariable(unsigned int uNumValues, unsigned int uRejectDelay)
+unsigned int ncStackedBarPlotter::AddVariable(unsigned int uNumValues, float fRejectDelay)
 {
 	if (!m_vVariables.isEmpty())
 	{
@@ -26,14 +26,15 @@ unsigned int ncStackedBarPlotter::AddVariable(unsigned int uNumValues, unsigned 
 			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncStackedBarPlotter::AddVariable - Variable not added because number of values is inconsistent");
 			return 0; // TODO: switch to signed int and return -1?
 		}
-		if (uRejectDelay != m_vVariables[0]->Variable()->Delay())
+		float fDiff = fRejectDelay - m_vVariables[0]->Variable()->Delay();
+		if (fDiff < -0.001f || fDiff > 0.001f) // HACK: one millisecond fixed tolerance
 		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncStackedBarPlotter::AddVariable - Variable not added because reject delay is inconsistent");
 			return 0; // TODO: switch to signed int and return -1?
 		}
 	}
 
-	ncStackedBarVariable* pVariable = new ncStackedBarVariable(uNumValues, uRejectDelay);
+	ncStackedBarVariable* pVariable = new ncStackedBarVariable(uNumValues, fRejectDelay);
 	m_vVariables.InsertBack(pVariable);
 
 	return m_vVariables.Size()-1;

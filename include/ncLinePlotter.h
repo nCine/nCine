@@ -12,7 +12,7 @@ private:
 	virtual void UpdateMeanRenderCommand();
 
 public:
-	ncLineVariable(unsigned int uNumValues, unsigned int uRejectDelay);
+	ncLineVariable(unsigned int uNumValues, float fRejectDelay);
 
 	virtual void UpdateVertices(int x, int y, int w, int h);
 };
@@ -23,7 +23,7 @@ class ncLinePlotter : public ncProfilePlotter
 public:
 	ncLinePlotter(ncSceneNode* pParent, ncRect rect) : ncProfilePlotter(pParent, rect) { }
 
-	virtual unsigned int AddVariable(unsigned int uNumValues, unsigned int uRejectDelay);
+	virtual unsigned int AddVariable(unsigned int uNumValues, float fRejectDelay);
 	virtual void Draw(ncRenderQueue& rRenderQueue);
 };
 

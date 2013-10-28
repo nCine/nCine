@@ -6,8 +6,8 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncProfileVariable::ncProfileVariable(unsigned int uNumValues, unsigned int uRejectDelay)
-	: m_uNumValues(uNumValues), m_uRejectDelay(uRejectDelay), m_uNextIndex(0),
+ncProfileVariable::ncProfileVariable(unsigned int uNumValues, float fRejectDelay)
+	: m_uNumValues(uNumValues), m_fRejectDelay(fRejectDelay), m_uNextIndex(0),
 	  m_fMin(0.0f), m_fMax(0.0f), m_fMean(0.0f), m_bFirstValue(true)
 {
 	if (m_uNumValues > 0)
@@ -38,16 +38,16 @@ void ncProfileVariable::AddValue(float fValue)
 		m_fMax = fValue;
 		m_bFirstValue = false;
 
-		if (m_uRejectDelay)
+		if (m_fRejectDelay > 0.0f)
 			m_timer.Start();
 	}
 
 
 	bool bRegisterValue = false;
-	if (m_uRejectDelay)
+	if (m_fRejectDelay > 0.0f)
 	{
 		// Timer expired
-		if (m_timer.Interval() > m_uRejectDelay)
+		if (m_timer.Interval() > m_fRejectDelay)
 		{
 			bRegisterValue = true;
 			m_timer.Start();

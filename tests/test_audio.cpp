@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 	bool bLooping = true;
 
 // ----- Init ----------------------
-	ncFrameTimer t(5, 0);
+	ncFrameTimer t(5.0f, 0.0f);
 	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
 	ncSDLGfxDevice gfxDevice(iWidth, iHeight);
 	gfxDevice.SetWindowTitle("Test");

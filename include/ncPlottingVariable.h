@@ -32,7 +32,7 @@ protected:
 	virtual void UpdateMeanRenderCommand() = 0;
 
 public:
-	ncPlottingVariable(unsigned int uNumValues, unsigned int uRejectDelay);
+	ncPlottingVariable(unsigned int uNumValues, float fRejectDelay);
 	virtual ~ncPlottingVariable();
 
 	/// Returns the number of value for the variable
