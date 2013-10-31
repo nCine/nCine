@@ -62,11 +62,6 @@ void MyEventHandler::OnInit()
 	delete[] pArray;
 }
 
-void MyEventHandler::OnShutdown()
-{
-
-}
-
 #ifndef __ANDROID__
 void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
 {

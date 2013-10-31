@@ -1,46 +1,43 @@
 #ifndef CLASS_NCTIMER
 #define CLASS_NCTIMER
 
-#if !defined(_WIN32) && !defined(__APPLE__)
-	#include <time.h> // for clock_gettime()
-	#include <sys/time.h> // for gettimeofday()
-	#include <unistd.h>
-#endif
-
 /// Basic timer and synchronization class
 class ncTimer
 {
 private:
-#if !defined(_WIN32) && !defined(__APPLE__)
-	/// Base time mark structures
-	/*! They are needed to prevent overflowing when returning running time since epoch */
-	static struct timespec s_initTs;
-	static struct timeval s_initTv;
-
-	static bool s_bIsMonotonic;
+#ifdef _WIN32
+	static bool s_bHasPerfCounter;
+#elif !defined(__APPLE__)
+	static bool s_bHasMonotonicClock;
 #endif
 
 	/// Have the static fields been initialized?
 	static bool s_bIsInitialized;
-	/// Timer frequency in counts per second
+	/// Counter frequency in counts per second
 	static unsigned long int s_ulFrequency;
+	/// Counter value at initialization time
+	static unsigned long long int s_ullBaseCount;
 
-	/// Initializes the static fields
+	// Initializes the static fields
 	static void Init();
+
+
+	// Returns current value of the counter
+	static unsigned long long int Counter();
 
 protected:
 	/// Start time mark
-	float m_fStartTime;
+	unsigned long long int m_ullStartTime;
 
 public:
 	/// Empty constructor
-	ncTimer() : m_fStartTime(0.0f) { }
+	ncTimer() : m_ullStartTime(0LL) { }
 	/// Starts the timer
-	inline void Start() { m_fStartTime = Now(); }
+	inline void Start() { m_ullStartTime = Counter(); }
 	/// Returns now-start time interval in seconds
-	inline float Interval() const { return Now() - m_fStartTime; }
-	// Returns elapsed time in seconds since base time
-	static float Now();
+	inline float Interval() const { return float(Counter() - m_ullStartTime) / s_ulFrequency; }
+	/// Returns elapsed time in seconds since base time
+	static float Now() { return float(Counter() - s_ullBaseCount) / s_ulFrequency; }
 	// Puts the current thread to sleep for the specified number of seconds
 	static void Sleep(float fS);
 };

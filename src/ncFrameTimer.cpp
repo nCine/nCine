@@ -14,7 +14,8 @@ ncFrameTimer::ncFrameTimer(float fLogInterval, float fAvgInterval)
 	  m_fFrameInterval(0.0f), m_ulAvgNFrames(0L), m_ulLogNFrames(0L),
 	  m_fLastAvgUpdate(0.0f), m_fLastLogUpdate(0.0f), m_fFps(0.0f)
 {
-
+	// To prevent the overflow of Interval() on the very first call of AddFrame()
+	Start();
 }
 
 ///////////////////////////////////////////////////////////

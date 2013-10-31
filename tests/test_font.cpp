@@ -85,7 +85,8 @@ int main(int argc, char **argv)
 	text6.EnableKerning(false);
 	text6.SetColor(0, 0, 255, 128);
 
-	float fUpdateTime = ncTimer::Now();
+	ncTimer updateTimer;
+	updateTimer.Start();
 
 
 // ----- Event cycle --------------------
@@ -115,9 +116,9 @@ int main(int argc, char **argv)
 		t.AddFrame();
 
 		// Updating string every 100ms
-		if (ncTimer::Now() - fUpdateTime > 0.1f)
+		if (updateTimer.Interval() > 0.1f)
 		{
-			fUpdateTime = ncTimer::Now();
+			updateTimer.Start();
 			sprintf(vFPS, (const char *)"FPS: %.0f", t.AverageFPS());
 			fpsText.SetString(vFPS);
 			fpsText.SetPosition((iWidth - fpsText.Width()), iHeight);

@@ -96,8 +96,8 @@ void MyEventHandler::OnTouchMove(const ncTouchEvent &event)
 
 	if (event.count > 1)
 	{
-		m_emitVector.x = (event.x2 - m_pParticleSys->x) * 0.0025f;
-		m_emitVector.y = (event.y2 - m_pParticleSys->y) * 0.0025f;
+		m_emitVector.x = (event.x2 - m_pParticleSys->x) * 2.5f;
+		m_emitVector.y = (event.y2 - m_pParticleSys->y) * 2.5f;
 	}
 }
 void MyEventHandler::OnAcceleration(const ncAccelerometerEvent &event)
@@ -132,8 +132,8 @@ void MyEventHandler::OnMouseMoved(const ncMouseState &state)
 	}
 	else if (state.isRightButtonDown())
 	{
-		m_emitVector.x = (state.x - m_pParticleSys->x) * 0.0025f;
-		m_emitVector.y = (state.y - m_pParticleSys->y) * 0.0025f;
+		m_emitVector.x = (state.x - m_pParticleSys->x) * 2.5f;
+		m_emitVector.y = (state.y - m_pParticleSys->y) * 2.5f;
 	}
 }
 #endif

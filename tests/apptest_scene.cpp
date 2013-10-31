@@ -61,8 +61,8 @@ void MyEventHandler::OnFrameStart()
 		fCosine[i] = cosf(2*m_fAngles[i] * 0.01f);
 	}
 
-	m_pSprites[0]->x = ncApplication::Width()*0.5f + fSinus[0]*100;
-	m_pSprites[0]->y = ncApplication::Height()*0.5f + fCosine[0]*50;
+	m_pSprites[0]->x = ncApplication::Width()*0.5f + fSinus[0]*100.0f;
+	m_pSprites[0]->y = ncApplication::Height()*0.5f + fCosine[0]*50.0f;
 
 	for (int i = 1; i < numSprites; i++)
 	{

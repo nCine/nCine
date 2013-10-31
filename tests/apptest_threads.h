@@ -13,7 +13,7 @@ public:
 	virtual void OnInit();
 	virtual void OnFrameStart() { }
 	virtual void OnFrameEnd() { }
-	virtual void OnShutdown();
+	virtual void OnShutdown() { }
 
 #ifndef __ANDROID__
 	virtual void OnKeyReleased(const ncKeyboardEvent &event);

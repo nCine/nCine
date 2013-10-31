@@ -1,76 +1,43 @@
 #include <cstdlib> // for NULL
 #include "ncTimer.h"
 
-#if defined(_WIN32) || defined(__APPLE__)
-	#if defined(WITH_SDL)
-		#include <SDL/SDL_timer.h>
-	#elif defined(WITH_GLFW)
-		#if defined(__APPLE__)
-			#include <GLFW/glfw.h>
-		#else
-			#include <GL/glfw.h>
-		#endif
-	#endif
+#ifdef _WIN32
+	#include <winsync.h>
+	#include <profileapi.h>
+#elif __APPLE__
+	#include <mach/mach_time.h>
+#else
+	#include <time.h> // for clock_gettime()
+	#include <sys/time.h> // for gettimeofday()
+	#include <unistd.h>
 #endif
 
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-#if !defined(_WIN32) && !defined(__APPLE__)
-	struct timespec ncTimer::s_initTs;
-	struct timeval ncTimer::s_initTv;
-	bool ncTimer::s_bIsMonotonic = false;
+#ifdef _WIN32
+	bool ncTimer::s_bHasPerfCounter = false;
+#elif !defined(__APPLE__)
+	bool ncTimer::s_bHasMonotonicClock = false;
 #endif
 
 	bool ncTimer::s_bIsInitialized = false;
 	unsigned long int ncTimer::s_ulFrequency = 0L;
+	unsigned long long int ncTimer::s_ullBaseCount = 0LL;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Returns elapsed time in seconds since base time
-float ncTimer::Now()
-{
-#if defined(_WIN32) || defined(__APPLE__)
-	#if defined(WITH_SDL)
-		return SDL_GetTicks() / 1000.0f;
-	#elif defined(WITH_GLFW)
-		return glfwGetTime();
-	#endif
-#else
-	if (s_bIsInitialized == false)
-		Init();
-
-	unsigned long long int counter = 0L;
-	if (s_bIsMonotonic)
-	{
-		struct timespec now;
-		clock_gettime(CLOCK_MONOTONIC, &now);
-		counter = (now.tv_sec - s_initTs.tv_sec) * s_ulFrequency + (now.tv_nsec - s_initTs.tv_nsec);
-	}
-	else
-	{
-		struct timeval now;
-		gettimeofday(&now, NULL);
-		counter = (now.tv_sec - s_initTv.tv_sec) * s_ulFrequency + (now.tv_usec - s_initTv.tv_usec);
-	}
-	return float(counter) / s_ulFrequency;
-#endif
-}
-
 /// Puts the current thread to sleep for the specified number of seconds
 void ncTimer::Sleep(float fS)
 {
+	// From seconds to milliseconds
 	unsigned int uMs = fS * 1000;
 
-#if defined(_WIN32) || defined(__APPLE__)
-	#if defined(WITH_SDL)
-		SDL_Delay(uMs);
-	#elif defined(WITH_GLFW)
-		glfwSleep(dF);
-	#endif
+#if defined(_WIN32)
+	SleepEx(uMs, FALSE);
 #else
 	usleep(uMs);
 #endif
@@ -80,20 +47,64 @@ void ncTimer::Sleep(float fS)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/// Initializes the static fields
 void ncTimer::Init()
 {
-#if !defined(_WIN32) && !defined(__APPLE__)
-	if (clock_gettime(CLOCK_MONOTONIC, &s_initTs) == 0)
+#ifdef _WIN32
+	if (QueryPerformanceFrequency((LARGE_INTEGER*) &s_ulFrequency))
+		s_bHasPerfCounter = true;
+	else
+		s_ulFrequency = 1000L;
+#elif __APPLE__
+	mach_timebase_info_data_t info;
+	mach_timebase_info(&info);
+
+	s_ulFrequency = (info.denom * 1.0e9L) / info.numer;
+#else
+	struct timespec resolution;
+	if (clock_getres(CLOCK_MONOTONIC, &resolution) == 0)
 	{
-		s_ulFrequency = 1000000000L;
-		s_bIsMonotonic = true;
+		s_ulFrequency = 1.0e9L;
+		s_bHasMonotonicClock = true;
+	}
+	else
+		s_ulFrequency = 1.0e6L;
+#endif
+
+	// Counter() must be called after setting the flag
+	s_bIsInitialized = true;
+	s_ullBaseCount = Counter();
+}
+
+/// Returns current value of the counter
+unsigned long long int ncTimer::Counter()
+{
+	if (s_bIsInitialized == false)
+		Init();
+
+	unsigned long long int ullCounter = 0LL;
+
+#ifdef _WIN32
+	if (s_bHasPerfCounter)
+		QueryPerformanceCounter((LARGE_INTEGER*) &ullCounter);
+	else
+		ullCounter = GetTickCount();
+#elif __APPLE__
+	ullCounter = mach_absolute_time();
+#else
+	if (s_bHasMonotonicClock)
+	{
+		struct timespec now;
+		clock_gettime(CLOCK_MONOTONIC, &now);
+		ullCounter = now.tv_sec * s_ulFrequency + now.tv_nsec;
 	}
 	else
 	{
-		gettimeofday(&s_initTv, NULL);
-		s_ulFrequency = 1000000L;
+		struct timeval now;
+		gettimeofday(&now, NULL);
+		ullCounter = now.tv_sec * s_ulFrequency + now.tv_usec;
 	}
 #endif
 
-	s_bIsInitialized = true;
+	return ullCounter;
 }
