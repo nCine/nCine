@@ -23,34 +23,22 @@ ncGLFWJoystickState ncGLFWInputManager::s_joystickStates[s_uMaxNumJoysticks];
 
 ncGLFWInputManager::ncGLFWInputManager()
 {
-	// Polling GLFW events in ncApplication::Run() to allow pausing
-	glfwDisable(GLFW_AUTO_POLL_EVENTS);
-
-	glfwSetWindowCloseCallback(WindowCloseCallback);
-	glfwSetKeyCallback(KeyCallback);
-	glfwSetMousePosCallback(MousePosCallback);
-	glfwSetMouseButtonCallback(MouseButtonCallback);
-}
-
-ncGLFWJoystickState::ncGLFWJoystickState()
-{
-	for (unsigned int i = 0; i < s_uMaxNumButtons; i++)
-		m_ubButtons[i] = 0;
-	for (unsigned int i = 0; i < s_uMaxNumAxes; i++)
-		m_fAxisValues[i] = 0.0f;
+	glfwSetWindowCloseCallback(ncGLFWGfxDevice::WindowHandle(), WindowCloseCallback);
+	glfwSetKeyCallback(ncGLFWGfxDevice::WindowHandle(), KeyCallback);
+	glfwSetCursorPosCallback(ncGLFWGfxDevice::WindowHandle(), CursorPosCallback);
+	glfwSetMouseButtonCallback(ncGLFWGfxDevice::WindowHandle(), MouseButtonCallback);
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-int GLFWCALL ncGLFWInputManager::WindowCloseCallback()
+void ncGLFWInputManager::WindowCloseCallback(GLFWwindow *window)
 {
 	ncApplication::Quit();
-	return GL_TRUE;
 }
 
-void ncGLFWInputManager::KeyCallback(int key, int action)
+void ncGLFWInputManager::KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
 	if (s_pInputEventHandler == NULL)
 		return;
@@ -63,22 +51,24 @@ void ncGLFWInputManager::KeyCallback(int key, int action)
 		s_pInputEventHandler->OnKeyReleased(s_keyboardEvent);
 }
 
-void ncGLFWInputManager::MousePosCallback(int x, int y)
+void ncGLFWInputManager::CursorPosCallback(GLFWwindow *window, double x, double y)
 {
 	if (s_pInputEventHandler == NULL)
 		return;
 
-	s_mouseState.x = x;
-	s_mouseState.y = ncApplication::Height()-y;
+	s_mouseState.x = int(x);
+	s_mouseState.y = ncApplication::Height()-int(y);
 	s_pInputEventHandler->OnMouseMoved(s_mouseState);
 }
 
-void ncGLFWInputManager::MouseButtonCallback(int button, int action)
+void ncGLFWInputManager::MouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
 	if (s_pInputEventHandler == NULL)
 		return;
 
-	glfwGetMousePos(&s_mouseEvent.x, &s_mouseEvent.y);
+	double dCursorX, dCursory;
+	glfwGetCursorPos(window, &dCursorX, &dCursory);
+	s_mouseEvent.x = int(dCursorX); s_mouseEvent.y = int(dCursory);
 	s_mouseEvent.y = ncApplication::Height()-s_mouseEvent.y;
 	s_mouseEvent.m_iButton = button;
 
@@ -96,8 +86,8 @@ void ncGLFWInputManager::MouseButtonCallback(int button, int action)
 bool ncGLFWInputManager::hasFocus()
 {
 	// A focus event has occurred (either gain or loss)
-	if (m_bWindowHasFocus != glfwGetWindowParam(GLFW_ACTIVE))
-		m_bWindowHasFocus = glfwGetWindowParam(GLFW_ACTIVE);
+	if (m_bWindowHasFocus != glfwGetWindowAttrib(ncGLFWGfxDevice::WindowHandle(), GLFW_FOCUSED))
+		m_bWindowHasFocus = glfwGetWindowAttrib(ncGLFWGfxDevice::WindowHandle(), GLFW_FOCUSED);
 
 	return m_bWindowHasFocus;
 }
@@ -105,25 +95,20 @@ bool ncGLFWInputManager::hasFocus()
 /// Updates joystick state structures
 void ncGLFWInputManager::UpdateJoystickStates()
 {
-	// TODO: support joystick events when GLFW 3.0 comes out
 	for(unsigned int i = 0; i < s_uMaxNumJoysticks; i++)
 	{
-		if (glfwGetJoystickParam(GLFW_JOYSTICK_1 + i, GLFW_PRESENT))
+		if (glfwJoystickPresent(GLFW_JOYSTICK_1 + i))
 		{
-			glfwGetJoystickButtons(i, s_joystickStates[i].m_ubButtons, ncGLFWJoystickState::s_uMaxNumButtons);
-			glfwGetJoystickPos(i, s_joystickStates[i].m_fAxisValues, ncGLFWJoystickState::s_uMaxNumAxes);
+			s_joystickStates[i].m_ubButtons = glfwGetJoystickButtons(i, &s_joystickStates[i].m_iNumButtons);
+			s_joystickStates[i].m_fAxisValues = glfwGetJoystickAxes(i, &s_joystickStates[i].m_iNumAxes);
 		}
-
-		// Odd axes are inverted to maintain consistency with the SDL implementation
-		for (unsigned int j = 1; j<ncGLFWJoystickState::s_uMaxNumAxes; j=j+2)
-			s_joystickStates[i].m_fAxisValues[j] *= -1.0f;
 	}
 }
 
 bool ncGLFWInputManager::isJoyPresent(int iJoyId) const
 {
 	if (GLFW_JOYSTICK_1 + iJoyId <= GLFW_JOYSTICK_LAST)
-		return glfwGetJoystickParam(GLFW_JOYSTICK_1 + iJoyId, GLFW_PRESENT) == GL_TRUE;
+		return glfwJoystickPresent(GLFW_JOYSTICK_1 + iJoyId);
 	else
 		return false;
 }
@@ -133,7 +118,7 @@ int ncGLFWInputManager::JoyNumButtons(int iJoyId) const
 	int iNumButtons = -1;
 
 	if (isJoyPresent(iJoyId))
-		iNumButtons = glfwGetJoystickParam(GLFW_JOYSTICK_1 + iJoyId, GLFW_BUTTONS);
+		glfwGetJoystickButtons(GLFW_JOYSTICK_1 + iJoyId, &iNumButtons);
 
 	return iNumButtons;
 }
@@ -143,14 +128,14 @@ int ncGLFWInputManager::JoyNumAxes(int iJoyId) const
 	int iNumAxes = -1;
 
 	if (isJoyPresent(iJoyId))
-		iNumAxes = glfwGetJoystickParam(GLFW_JOYSTICK_1 + iJoyId, GLFW_AXES);
+		glfwGetJoystickAxes(GLFW_JOYSTICK_1 + iJoyId, &iNumAxes);
 
 	return iNumAxes;
 }
 
 bool ncGLFWInputManager::isJoyButtonPressed(int iJoyId, int iButtonId) const
 {
-	if (isJoyPresent(iJoyId))
+	if (isJoyPresent(iJoyId) && iButtonId < JoyNumButtons(iJoyId))
 		return s_joystickStates[iJoyId].m_ubButtons[iButtonId];
 	else
 		return false;
@@ -158,8 +143,16 @@ bool ncGLFWInputManager::isJoyButtonPressed(int iJoyId, int iButtonId) const
 
 short int ncGLFWInputManager::JoyAxisValue(int iJoyId, int iAxisId) const
 {
-	if (isJoyPresent(iJoyId))
-		return s_joystickStates[iJoyId].m_fAxisValues[iAxisId] * s_iMaxAxisValue;
+	if (isJoyPresent(iJoyId) && iAxisId < JoyNumAxes(iJoyId))
+	{
+		float fAxisValue = s_joystickStates[iJoyId].m_fAxisValues[iAxisId];
+
+		// Odd axes are inverted to maintain consistency with the SDL implementation
+		if (iAxisId % 2)
+			fAxisValue *= -1.0f;
+
+		return fAxisValue * s_iMaxAxisValue;
+	}
 	else
 		return 0;
 }

@@ -1,12 +1,11 @@
 #ifndef CLASS_NCGLFWINPUTMANAGER
 #define CLASS_NCGLFWINPUTMANAGER
 
+#include <cstdio>
 #include "ncIInputManager.h"
-#if defined(__APPLE__)
-	#include <GLFW/glfw.h>
-#else
-	#include <GL/glfw.h>
-#endif
+#include "ncGLFWGfxDevice.h" // for WindowHandle()
+
+class ncGLFWInputManager;
 
 /// Information about GLFW mouse state
 class ncGLFWMouseState : public ncMouseState
@@ -14,11 +13,11 @@ class ncGLFWMouseState : public ncMouseState
 public:
 	ncGLFWMouseState() { }
 
-	inline bool isLeftButtonDown() const { return (glfwGetMouseButton(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS); }
-	inline bool isMiddleButtonDown() const { return (glfwGetMouseButton(GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS); }
-	inline bool isRightButtonDown() const { return (glfwGetMouseButton(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS); }
-	inline bool isWheelUpButtonDown() const { return (glfwGetMouseButton(GLFW_MOUSE_BUTTON_4) == GLFW_PRESS); }
-	inline bool isWheelDownButtonDown() const { return (glfwGetMouseButton(GLFW_MOUSE_BUTTON_5) == GLFW_PRESS); }
+	inline bool isLeftButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::WindowHandle(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS); }
+	inline bool isMiddleButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::WindowHandle(), GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS); }
+	inline bool isRightButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::WindowHandle(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS); }
+	inline bool isWheelUpButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::WindowHandle(), GLFW_MOUSE_BUTTON_4) == GLFW_PRESS); }
+	inline bool isWheelDownButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::WindowHandle(), GLFW_MOUSE_BUTTON_5) == GLFW_PRESS); }
 };
 
 /// Information about a GLFW mouse event
@@ -43,20 +42,22 @@ class ncGLFWKeyboardState : public ncKeyboardState
 {
 public:
 	ncGLFWKeyboardState() { }
-	inline bool isKeyDown(ncKeySym key) const { return glfwGetKey(key) == GLFW_PRESS; }
+	inline bool isKeyDown(ncKeySym key) const { return glfwGetKey(ncGLFWGfxDevice::WindowHandle(), key) == GLFW_PRESS; }
 };
 
 /// Information about GLFW joystick state
 class ncGLFWJoystickState
 {
 private:
-	static const unsigned int s_uMaxNumButtons = 16;
-	static const unsigned int s_uMaxNumAxes = 16;
+	int m_iNumButtons;
+	int m_iNumAxes;
 
-	unsigned char m_ubButtons[s_uMaxNumButtons];
-	float m_fAxisValues[s_uMaxNumAxes];
+	const unsigned char *m_ubButtons;
+	const float *m_fAxisValues;
 public:
-	ncGLFWJoystickState();
+	ncGLFWJoystickState()
+		: m_iNumButtons(0), m_iNumAxes(0), m_ubButtons(NULL), m_fAxisValues(NULL) { }
+
 	friend class ncGLFWInputManager;
 };
 
@@ -73,10 +74,10 @@ private:
 	static ncKeyboardEvent	s_keyboardEvent;
 	static ncGLFWJoystickState s_joystickStates[s_uMaxNumJoysticks];
 
-	static int GLFWCALL WindowCloseCallback();
-	static void GLFWCALL KeyCallback(int key, int action);
-	static void GLFWCALL MousePosCallback(int x, int y);
-	static void GLFWCALL MouseButtonCallback(int button, int action);
+	static void WindowCloseCallback(GLFWwindow *window);
+	static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+	static void CursorPosCallback(GLFWwindow *window, double x, double y);
+	static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
 public:
 	ncGLFWInputManager();
 
@@ -87,7 +88,9 @@ public:
 
 	inline const ncMouseState& MouseState()
 	{
-		glfwGetMousePos(&s_mouseState.x, &s_mouseState.y);
+		double dCursorX, dCursorY;
+		glfwGetCursorPos(ncGLFWGfxDevice::WindowHandle(), &dCursorX, &dCursorY);
+		s_mouseState.x = int(dCursorX); s_mouseState.y = int(dCursorY);
 		return s_mouseState;
 	}
 
