@@ -86,6 +86,7 @@ void ncAndroidInputManager::ParseEvent(const AInputEvent* event)
 
 	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
 	{
+		s_keyboardEvent.scancode = AKeyEvent_getScanCode(event);
 		s_keyboardEvent.sym = ncKeySym(AKeyEvent_getKeyCode(event));
 		s_keyboardEvent.mod = AKeyEvent_getMetaState(event);
 

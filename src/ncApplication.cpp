@@ -28,6 +28,7 @@
 ///////////////////////////////////////////////////////////
 
 bool ncApplication::m_bPaused = true;
+bool ncApplication::m_bHasFocus = true;
 bool ncApplication::m_bShouldQuit = false;
 ncFrameTimer *ncApplication::m_pFrameTimer = NULL;
 ncIGfxDevice *ncApplication::m_pGfxDevice = NULL;
@@ -138,7 +139,7 @@ void ncApplication::Run()
 				break;
 			case SDL_ACTIVEEVENT:
 				if (event.active.state != SDL_APPMOUSEFOCUS)
-					m_bPaused = !event.active.gain;
+					m_bHasFocus = event.active.gain;
 				break;
 			default:
 				ncSDLInputManager::ParseEvent(event);
@@ -146,12 +147,12 @@ void ncApplication::Run()
 			}
 		}
 #elif defined(WITH_GLFW)
-		m_bPaused = !ncGLFWInputManager::hasFocus();
+		m_bHasFocus = ncGLFWInputManager::hasFocus();
 		glfwPollEvents();
 		ncGLFWInputManager::UpdateJoystickStates();
 #endif
 
-		if (!m_bPaused)
+		if (m_bHasFocus && !m_bPaused)
 			Step();
 	}
 #endif

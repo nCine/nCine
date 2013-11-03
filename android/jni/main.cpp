@@ -32,11 +32,11 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd)
 			break;
 		case APP_CMD_GAINED_FOCUS:
 			ncAndroidInputManager::EnableAccelerometerSensor();
-			ncApplication::SetPause(false);
+			ncApplication::SetFocus(true);
 			break;
 		case APP_CMD_LOST_FOCUS:
 			ncAndroidInputManager::DisableAccelerometerSensor();
-			ncApplication::SetPause(true);
+			ncApplication::SetFocus(false);
 			ncApplication::Step();
 			break;
 	}
@@ -70,7 +70,7 @@ void android_main(struct android_app* state)
 				ncApplication::Quit();
 		}
 
-		if (ncApplication::IsPaused() == false)
+		if (ncApplication::HasFocus() && !ncApplication::IsPaused())
 			ncApplication::Step();
 	}
 

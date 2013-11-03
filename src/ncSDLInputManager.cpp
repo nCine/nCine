@@ -85,9 +85,10 @@ void ncSDLInputManager::ParseEvent(const SDL_Event &event)
 	switch (event.type) {
 		case SDL_KEYDOWN:
 		case SDL_KEYUP:
+			s_keyboardEvent.scancode = event.key.keysym.scancode;
 			s_keyboardEvent.sym = ncKeySym(event.key.keysym.sym);
 			s_keyboardEvent.mod = event.key.keysym.mod;
-			s_keyboardEvent.unicode = ncKeyMod(event.key.keysym.unicode);
+			s_keyboardEvent.unicode = event.key.keysym.unicode;
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:

@@ -43,7 +43,9 @@ void ncGLFWInputManager::KeyCallback(GLFWwindow *window, int key, int scancode, 
 	if (s_pInputEventHandler == NULL)
 		return;
 
+	s_keyboardEvent.scancode = scancode;
 	s_keyboardEvent.sym = ncKeySym(key);
+	s_keyboardEvent.mod = mods;
 
 	if (action == GLFW_PRESS)
 		s_pInputEventHandler->OnKeyPressed(s_keyboardEvent);

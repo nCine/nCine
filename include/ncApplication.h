@@ -18,6 +18,7 @@ class ncApplication
 {
 private:
 	static bool m_bPaused;
+	static bool m_bHasFocus;
 	static bool m_bShouldQuit;
 	static ncFrameTimer *m_pFrameTimer;
 	static ncIGfxDevice *m_pGfxDevice;
@@ -41,6 +42,10 @@ public:
 	static void Init(struct android_app* state, ncIAppEventHandler* (*pCreateAppEventHandler)());
 	/// Return the quit flag value
 	static bool ShouldQuit() { return m_bShouldQuit; }
+	/// Return the focus flag value
+	static bool HasFocus() { return m_bHasFocus; }
+	/// Set the focus flag
+	static void SetFocus(bool bHasFocus) { m_bHasFocus = bHasFocus; }
 #else
 	// Must be called at start to init the application
 	static void Init(ncIAppEventHandler* (*pCreateAppEventHandler)());

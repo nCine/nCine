@@ -94,8 +94,10 @@ public:
 class ncKeyboardEvent
 {
 public:
-	ncKeyboardEvent() : sym(NCKEY_UNKNOWN), mod(0), unicode(0) { }
+	ncKeyboardEvent() : scancode(0), sym(NCKEY_UNKNOWN), mod(0), unicode(0) { }
 
+	/// Key scan code
+	int scancode;
 	/// Key symbol code
 	ncKeySym sym;
 	/// Key modifiers mask
