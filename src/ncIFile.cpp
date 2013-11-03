@@ -69,6 +69,17 @@ ncIFile* ncIFile::CreateFileHandle(const char *pFilename)
 		return new ncStandardFile(pFilename);
 }
 
+/// Checks if a file can be accessed with specified mode
+bool ncIFile::Access(const char *pFilename, unsigned char uMode)
+{
+#ifdef __ANDROID__
+	if (strncmp(pFilename, (const char *)"asset::", 7) == 0)
+		return ncAssetFile::Access(pFilename+7, uMode);
+	else
+#endif
+		return ncStandardFile::Access(pFilename, uMode);
+}
+
 /// Returns the writable directory for data storage
 char* ncIFile::DataPath()
 {

@@ -12,6 +12,11 @@ private:
 	// Opens the file with fopen()
 	void OpenStream(unsigned char uMode);
 
+	// Checks if a file can be accessed with specified mode
+	static bool Access(const char *pFilename, unsigned char uMode);
+
+	friend bool ncIFile::Access(const char *pFilename, unsigned char uMode);
+
 public:
 	/// Constructs a standard file object
 	/*! \param pFilename File name including its path */

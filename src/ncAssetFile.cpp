@@ -202,3 +202,26 @@ void ncAssetFile::OpenAsset(unsigned char uMode)
 	else
 		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAssetFile::OpenAsset - Cannot open the file \"%s\", wrong open mode", m_vFilename);
 }
+
+/// Checks if a file can be accessed with specified mode
+/*! It is called by ncIFile::Access() */
+bool ncAssetFile::Access(const char *pFilename, unsigned char uMode)
+{
+	bool bAccessible = false;
+
+	if (uMode == ncIFile::MODE_EXISTS || uMode == ncIFile::MODE_CAN_READ)
+	{
+		AAsset *pAsset = AAssetManager_open(m_pAssetManager, pFilename, AASSET_MODE_UNKNOWN);
+		if (pAsset)
+		{
+			bAccessible = true;
+			AAsset_close(pAsset);
+		}
+	}
+	else if (uMode & MODE_CAN_WRITE)
+		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::Access - Cannot access the file \"%s\", an asset can only be read", pFilename);
+	else
+		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::Access - Cannot access the file \"%s\", wrong access mode", pFilename);
+
+	return bAccessible;
+}

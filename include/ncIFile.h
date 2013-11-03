@@ -19,6 +19,13 @@ public:
 		MODE_BINARY = 8
 	};
 
+	/// The enumeration for the access mode bitmask
+	enum eAccessMode {
+		MODE_EXISTS = 0,
+		MODE_CAN_READ = 2,
+		MODE_CAN_WRITE = 4
+	};
+
 protected:
 	/// The enumeration of file types
 	enum eFileType {
@@ -124,6 +131,8 @@ public:
 
 	// Returns the proper file handle according to prepended tags
 	static ncIFile* CreateFileHandle(const char *pFilename);
+	// Checks if a file can be accessed with specified mode
+	static bool Access(const char *pFilename, unsigned char uMode);
 	// Returns the writable directory for data storage
 	static char* DataPath();
 };

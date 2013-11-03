@@ -4,6 +4,8 @@
 	#include <sys/stat.h> // for open()
 	#include <fcntl.h> // for open()
 	#include <unistd.h> // for close()
+#else
+	#include <io.h> // for _access()
 #endif
 #include "ncStandardFile.h"
 #include "ncServiceLocator.h"
@@ -190,6 +192,7 @@ void ncStandardFile::OpenStream(unsigned char uMode)
 			pMode[0] = 'r';
 			pMode[1] = '+';
 			pMode[2] = 'b';
+			break;
 		default:
 			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::OpenStream - Cannot open the file \"%s\", wrong open mode", m_vFilename);
 			break;
@@ -212,4 +215,60 @@ void ncStandardFile::OpenStream(unsigned char uMode)
 		m_lFileSize = ftell(m_pFilePointer);
 		fseek(m_pFilePointer, 0L, SEEK_SET);
 	}
+}
+
+/// Checks if a file can be accessed with specified mode
+/*! It is called by ncIFile::Access() */
+bool ncStandardFile::Access(const char *pFilename, unsigned char uMode)
+{
+	bool bAccessible = false;
+	int iAMode = -1;
+
+#if !(defined(_WIN32) && !defined(__MINGW32__))
+	switch(uMode)
+	{
+		case (ncIFile::MODE_EXISTS):
+			iAMode = F_OK;
+			break;
+		case (ncIFile::MODE_CAN_READ):
+			iAMode = R_OK;
+			break;
+		case (ncIFile::MODE_CAN_WRITE):
+			iAMode = W_OK;
+			break;
+		case (ncIFile::MODE_CAN_READ|ncIFile::MODE_CAN_WRITE):
+			iAMode = R_OK|W_OK;
+			break;
+		default:
+			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::Access - Cannot access the file \"%s\", wrong access mode", pFilename);
+			break;
+	}
+
+	if (iAMode != -1)
+		bAccessible = (access(pFilename, iAMode) == 0);
+#else
+	switch(uMode)
+	{
+		case (ncIFile::MODE_EXISTS):
+			iAMode = 0;
+			break;
+		case (ncIFile::MODE_CAN_READ):
+			iAMode = 2;
+			break;
+		case (ncIFile::MODE_CAN_WRITE):
+			iAMode = 4;
+			break;
+		case (ncIFile::MODE_CAN_READ|ncIFile::MODE_CAN_WRITE):
+			iAMode = 6;
+			break;
+		default:
+			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::Access - Cannot access the file \"%s\", wrong access mode", pFilename);
+			break;
+	}
+
+	if (iAMode != -1)
+		bAccessible = (_access(pFilename, iAMode) == 0);
+#endif
+
+	return bAccessible;
 }

@@ -18,6 +18,11 @@ private:
 	// Opens the file with AAssetManager_open() only
 	void OpenAsset(unsigned char uMode);
 
+	// Checks if a file can be accessed with specified mode
+	static bool Access(const char *pFilename, unsigned char uMode);
+
+	friend bool ncIFile::Access(const char *pFilename, unsigned char uMode);
+
 public:
 	/// Constructs an asset file object
 	/*! \param pFilename File name including path relative to the assets directory */
