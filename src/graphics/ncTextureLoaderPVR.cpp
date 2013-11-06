@@ -51,7 +51,7 @@ void ncTextureLoaderPVR::ReadHeader(PVR3_header &header)
 	else
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::ReadHeader - Not a PVR3 file");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -78,7 +78,7 @@ void ncTextureLoaderPVR::ParseFormat(const PVR3_header& header)
 				if (gfxCaps.EXTTextureCompressionS3TC() == false)
 				{
 					ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::ParseFormat - GL_EXT_texture_compression_s3tc not available");
-					exit(-1);
+					exit(EXIT_FAILURE);
 				}
 				break;
 #else
@@ -89,18 +89,18 @@ void ncTextureLoaderPVR::ParseFormat(const PVR3_header& header)
 				if (gfxCaps.IMGTextureCompressionPVRTC() == false)
 				{
 					ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::ParseFormat - GL_IMG_texture_compression_pvrtc not available");
-					exit(-1);
+					exit(EXIT_FAILURE);
 				}
 				break;
 			case FMT_PVRTCII_2BPP:
 			case FMT_PVRTCII_4BPP:
 				ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::ParseFormat - No support for PVRTC-II compression");
-				exit(-1);
+				exit(EXIT_FAILURE);
 				break;
 #endif
 			default:
 				ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::ParseFormat - Unsupported PVR3 compressed format: %u", u64PixelFormat);
-				exit(-1);
+				exit(EXIT_FAILURE);
 				break;
 		}
 
@@ -169,7 +169,7 @@ void ncTextureLoaderPVR::ParseFormat(const PVR3_header& header)
 				break;
 			default:
 				ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::ParseFormat - Unsupported PVR3 uncompressed format: %llx", u64PixelFormat);
-				exit(-1);
+				exit(EXIT_FAILURE);
 				break;
 		}
 

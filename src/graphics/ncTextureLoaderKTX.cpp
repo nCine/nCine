@@ -58,7 +58,7 @@ void ncTextureLoaderKTX::ReadHeader(KTX_header &header)
 		if (header.endianess == 0x01020304)
 		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderKTX::ReadHeader - File endianess doesn't match machine one");
-			exit(-1);
+			exit(EXIT_FAILURE);
 		}
 
 		m_iHeaderSize = 64 + ncIFile::Int32FromLE(header.bytesOfKeyValueData);
@@ -69,7 +69,7 @@ void ncTextureLoaderKTX::ReadHeader(KTX_header &header)
 	else
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderKTX::ReadHeader - Not a KTX file");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -90,7 +90,7 @@ void ncTextureLoaderKTX::ParseFormat(const KTX_header& header)
 			if (gfxCaps.EXTTextureCompressionS3TC() == false)
 			{
 				ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderKTR::ParseFormat - GL_EXT_texture_compression_s3tc not available");
-				exit(-1);
+				exit(EXIT_FAILURE);
 			}
 			break;
 #else
@@ -98,7 +98,7 @@ void ncTextureLoaderKTX::ParseFormat(const KTX_header& header)
 			if (gfxCaps.OESCompressedETC1RGB8Texture() == false)
 			{
 				ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderKTX::ParseFormat - GL_OES_compressed_ETC1_RGB8_texture not available");
-				exit(-1);
+				exit(EXIT_FAILURE);
 			}
 			break;
 
@@ -109,7 +109,7 @@ void ncTextureLoaderKTX::ParseFormat(const KTX_header& header)
 			if (gfxCaps.IMGTextureCompressionPVRTC() == false)
 			{
 				ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderKTX::ParseFormat - GL_IMG_texture_compression_pvrtc not available");
-				exit(-1);
+				exit(EXIT_FAILURE);
 			}
 			break;
 #endif

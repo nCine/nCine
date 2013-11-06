@@ -151,7 +151,7 @@ void ncStandardFile::OpenFD(unsigned char uMode)
 		if (m_iFileDescriptor < 0)
 		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncStandardFile::OpenFD - Cannot open the file \"%s\"", m_vFilename);
-			exit(-1);
+			exit(EXIT_FAILURE);
 		}
 		else
 			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::OpenFD - File \"%s\" opened", m_vFilename);
@@ -205,7 +205,7 @@ void ncStandardFile::OpenStream(unsigned char uMode)
 		if (m_pFilePointer == NULL)
 		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncStandardFile::OpenStream - Cannot open the file \"%s\"", m_vFilename);
-			exit(-1);
+			exit(EXIT_FAILURE);
 		}
 		else
 			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::OpenStream - File \"%s\" opened", m_vFilename);

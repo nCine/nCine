@@ -78,7 +78,7 @@ long ncAudioLoaderOgg::Read(char *pBuffer, int iBufSize) const
 		{
 			ov_clear(&m_oggFile);
 			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::Read - Error decoding at bitstream %d", iBitStream);
-			exit(-1);
+			exit(EXIT_FAILURE);
 		}
 
 		// Reset the static variable at the end of a decoding process
@@ -119,7 +119,7 @@ void ncAudioLoaderOgg::Init()
 		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::Init - Cannot open \"%s\" with ov_open_callbacks()", m_pFileHandle->Filename());
 			m_pFileHandle->Close();
-			exit(-1);
+			exit(EXIT_FAILURE);
 		}
 	}
 	else
@@ -130,14 +130,14 @@ void ncAudioLoaderOgg::Init()
 		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::Init - Cannot open \"%s\" with ov_open()", m_pFileHandle->Filename());
 			m_pFileHandle->Close();
-			exit(-1);
+			exit(EXIT_FAILURE);
 		}
 	}
 #else
 	if (ov_fopen(m_pFileHandle->Filename(), &m_oggFile) != 0)
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::Init - Cannot open \"%s\" with ov_fopen()", m_pFileHandle->Filename());
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 #endif
 

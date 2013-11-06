@@ -52,7 +52,7 @@ void ncAudioBuffer::Load(const ncIAudioLoader *pAudioLoader)
 	else
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncAudioBuffer::Load - Unsupported number of channels: %d", m_iChannels);
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	// Buffer size calculated as samples * channels * 16bit

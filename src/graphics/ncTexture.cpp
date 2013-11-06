@@ -93,7 +93,7 @@ void ncTexture::Load(const ncITextureLoader& texLoader, int iWidth, int iHeight)
 	if (iWidth > gfxCaps.MaxTextureSize() || iHeight > gfxCaps.MaxTextureSize())
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncTexture::Load - Texture size is bigger than device maximum");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

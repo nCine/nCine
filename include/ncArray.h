@@ -69,7 +69,7 @@ void ncArray<T>::SetCapacity(unsigned int uNewCapacity)
 	if (uNewCapacity == 0)
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::SetCapacity - Zero is not valid capacity");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	T* pNewArray = new T[uNewCapacity];
@@ -126,7 +126,7 @@ const T& ncArray<T>::operator[] (const unsigned int uIndex) const
 	if (uIndex > m_uSize)
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::operator[] const - Element %u out of size range!", uIndex);
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	return m_pArray[uIndex];
@@ -139,14 +139,14 @@ T& ncArray<T>::operator[] (const unsigned int uIndex)
 	if (uIndex > m_uCapacity - 1)
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncArray::operator[] - Element %u out of capacity range!", uIndex);
-//		exit(-1);
+//		exit(EXIT_FAILURE);
 	}
 
 	// Avoid creating "holes" into the array
 	if (uIndex > m_uSize)
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::operator[] - Element %u out of size range!", uIndex);
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 	// Adding an element at the back of the array
 	else if (uIndex == m_uSize)

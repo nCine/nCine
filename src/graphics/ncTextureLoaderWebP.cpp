@@ -37,7 +37,7 @@ void ncTextureLoaderWebP::Init()
 	{
 		delete[] pFileBuffer;
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderWebP::Init - Cannot read WebP header");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderWebP::Init - Header found: w:%d h:%d", m_iWidth, m_iHeight);
@@ -53,7 +53,7 @@ void ncTextureLoaderWebP::Init()
 		delete[] pFileBuffer;
 		delete[] m_uPixels;
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderWebP::Init - Cannot decode WebP image");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	delete[] pFileBuffer;

@@ -53,7 +53,7 @@ void ncFont::ParseFNTFile(ncIFile *pFileHandle)
 			if ((int)m_uWidth != m_pTexture->Width() || (int)m_uHeight != m_pTexture->Height())
 			{
 				ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncFont::ParseFNTFile - FNT texture has a different size: (%u, %u)", m_uWidth, m_uHeight);
-				exit(-1);
+				exit(EXIT_FAILURE);
 			}
 		}
 		// skipping entirely the "page" line

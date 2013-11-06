@@ -27,7 +27,7 @@ ncAudioStream::ncAudioStream(const char *pFilename)
 	else
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncAudioStream::ncAudioStream - Unsupported number of channels: %d", iChannels);
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 }
 

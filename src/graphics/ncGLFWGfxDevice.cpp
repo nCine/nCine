@@ -108,7 +108,7 @@ void ncGLFWGfxDevice::InitGraphics()
 
 	if (glfwInit() != GL_TRUE) {
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncGLFWGfxDevice::InitGraphics - glfwInit() failed");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -133,7 +133,7 @@ void ncGLFWGfxDevice::InitDevice()
 	if (s_pWindowHandle == NULL)
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncGLFWGfxDevice::InitDevice - glfwCreateWindow failed");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	glfwMakeContextCurrent(s_pWindowHandle);
@@ -148,12 +148,12 @@ void ncGLFWGfxDevice::InitDevice()
 
 	if (GLEW_OK != err) {
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncGLFWGfxDevice::InitDevice - GLEW error: %s", glewGetErrorString(err));
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	if (!GLEW_VERSION_2_0) {
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncGLFWGfxDevice::InitDevice - OpenGL 2 is not supported");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 #endif
 }

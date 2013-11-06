@@ -118,7 +118,7 @@ ncITextureLoader* ncITextureLoader::CreateFromFile(const char *pFilename)
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncITextureLoader::CreateFromFile - Extension unknown: \"%s\"", pFileHandle->Extension());
 		delete pFileHandle;
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 }
 

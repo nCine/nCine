@@ -36,7 +36,7 @@ long ncAudioLoaderWav::Read(char *pBuffer, int iBufSize) const
 		if (lBytes == 0 && ferror(m_pFileHandle->Ptr()))
 		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderWav::Read - Error reading the file");
-			exit(-1);
+			exit(EXIT_FAILURE);
 		}
 
 		lBufSeek += lBytes;
@@ -67,23 +67,23 @@ void ncAudioLoaderWav::Init()
 	if (strncmp(header.cChunkID, "RIFF", 4) != 0)
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderWav::Init - \"%s\" is not a WAV file", m_pFileHandle->Filename());
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 	if (strncmp(header.cFormat, "WAVE", 4) != 0)
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderWav::Init - \"%s\" is not a WAV file", m_pFileHandle->Filename());
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 	if (strncmp(header.cSubchunk1Id, "fmt ", 4) != 0)
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderWav::Init - \"%s\" is an invalid WAV file", m_pFileHandle->Filename());
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	if (ncIFile::Int16FromLE(header.uAudioFormat) != 1)
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderWav::Init - Data in \"%s\" is not in PCM format", m_pFileHandle->Filename());
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	m_iBytesPerSample = ncIFile::Int16FromLE(header.uBitsPerSample) / 8;

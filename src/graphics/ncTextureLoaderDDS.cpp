@@ -51,7 +51,7 @@ void ncTextureLoaderDDS::ReadHeader(DDS_header& header)
 	else
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::ReadHeader - Not a DDS file");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -81,7 +81,7 @@ void ncTextureLoaderDDS::ParseFormat(const DDS_header& header)
 				if (gfxCaps.EXTTextureCompressionS3TC() == false)
 				{
 					ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::ParseFormat - GL_EXT_texture_compression_s3tc not available");
-					exit(-1);
+					exit(EXIT_FAILURE);
 				}
 				break;
 #else
@@ -91,13 +91,13 @@ void ncTextureLoaderDDS::ParseFormat(const DDS_header& header)
 				if (gfxCaps.AMDCompressedATCTexture() == false)
 				{
 					ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::ParseFormat - GL_AMD_compressed_ATC_texture not available");
-					exit(-1);
+					exit(EXIT_FAILURE);
 				}
 				break;
 #endif
 			default:
 				ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::ParseFormat - Unsupported DDS compression \"%s\"", uFourCC);
-				exit(-1);
+				exit(EXIT_FAILURE);
 				break;
 		}
 
@@ -175,7 +175,7 @@ void ncTextureLoaderDDS::ParseFormat(const DDS_header& header)
 		else
 		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::ParseFormat - Unsupported DDS pixel format");
-			exit(-1);
+			exit(EXIT_FAILURE);
 		}
 
 		LoadPixels(eInternalFormat, eType);

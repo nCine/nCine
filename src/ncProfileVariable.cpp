@@ -15,7 +15,7 @@ ncProfileVariable::ncProfileVariable(unsigned int uNumValues, float fRejectDelay
 	else
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncProfileVariable::ncProfileVariable - Array size should be greater than zero");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 }
 

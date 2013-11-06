@@ -36,7 +36,7 @@ void ncTextureLoaderPNG::Init()
 	if(!png_check_sig(ubSignature, iSignatureLength))
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPNG::Init - PNG signature check failed");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	// Get PNG file info struct (memory is allocated by libpng)
@@ -46,7 +46,7 @@ void ncTextureLoaderPNG::Init()
 	if(png_ptr == NULL)
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPNG::Init - Cannot create png read structure");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	// Get PNG image data info struct (memory is allocated by libpng)
@@ -57,7 +57,7 @@ void ncTextureLoaderPNG::Init()
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPNG::Init - Cannot create png info structure");
 		png_destroy_read_struct(&png_ptr, NULL, NULL);
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	// Setting custom read function that uses an ncIFile as input
@@ -77,7 +77,7 @@ void ncTextureLoaderPNG::Init()
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPNG::Init - Cannot create png info structure");
 		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	m_iWidth = uWidth;
@@ -98,7 +98,7 @@ void ncTextureLoaderPNG::Init()
 		default:
 			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPNG::Init - Color type not supported: %d", iColorType);
 			png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
-			exit(-1);
+			exit(EXIT_FAILURE);
 			break;
 	}
 
