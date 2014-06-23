@@ -47,6 +47,13 @@ void ncStackedBarPlotter::Draw(ncRenderQueue& rRenderQueue)
 
 	UpdateAllVertices(0, 0, m_iWidth, m_iHeight);
 
+	// Drawing the reference value line
+	if (shouldPlotRefValue())
+	{
+		ApplyTransformations(m_fAbsX, m_fAbsY, m_fAbsRotation, m_fAbsScaleFactor);
+		DrawRefValue(rRenderQueue);
+	}
+
 	for (unsigned int i = 0; i < m_vVariables.Size(); i++)
 	{
 		m_vVariables[i]->ApplyTransformations(m_fAbsX, m_fAbsY, m_fAbsRotation, m_fAbsScaleFactor);
@@ -67,13 +74,30 @@ void ncStackedBarPlotter::UpdateAllVertices(int x, int y, int w, int h)
 	unsigned int uNumVariables = m_vVariables.Size();
 	float fScaledH = h / uNumVariables;
 
+	// In a stacked plot every variable should be scaled in relationship with the sum
+	float fMinSum = 0.0f;
+	float fMaxSum = 0.0f;
+	for (unsigned int i = 0; i < m_vVariables.Size(); i++)
+	{
+		fMinSum += m_vVariables[i]->Variable()->Min();
+		fMaxSum += m_vVariables[i]->Variable()->Max();	
+	}
+
+	float fNormalizedRefValue = NormBetweenRefValue(fMinSum, fMaxSum);
+	m_fRefValueVertices[0] = x;		m_fRefValueVertices[1] = y + h * fNormalizedRefValue;
+	m_fRefValueVertices[2] = x + w;	m_fRefValueVertices[3] = y + h * fNormalizedRefValue;
+
+	// Each variable should be normalized against its "slice" of the sum
+	fMinSum /= uNumVariables;
+	fMaxSum /= uNumVariables;
+
 	float fMeanVerticalOffset = 0.0f;
 	for (unsigned int i = 0; i < m_vVariables.Size(); i++)
 	{
 		const ncProfileVariable* profVariable = m_vVariables[i]->Variable();
 		GLfloat* fVertices = m_vVariables[i]->Vertices();
 
-		float fNormalizedMean = profVariable->NormMean();
+		float fNormalizedMean = profVariable->NormBetweenMean(fMinSum, fMaxSum);
 		// Variable mean vertices
 		fVertices[0] = x;			fVertices[1] = y + fScaledH * (fMeanVerticalOffset + fNormalizedMean);
 		fVertices[2] = x + w;		fVertices[3] = y + fScaledH * (fMeanVerticalOffset + fNormalizedMean);
@@ -100,7 +124,7 @@ void ncStackedBarPlotter::UpdateAllVertices(int x, int y, int w, int h)
 			const ncProfileVariable* profVariable = m_vVariables[j]->Variable();
 			GLfloat* fVertices = m_vVariables[j]->Vertices();
 
-			float fNormValue = profVariable->NormValue((uNextIndex+i)%uNumValues);
+			float fNormValue = profVariable->NormBetweenValue((uNextIndex+i)%uNumValues, fMinSum, fMaxSum);
 
 			fVertices[4 + 12*i + 0] = x + fCenter - fStep;
 			fVertices[4 + 12*i + 1] = y + fScaledH * fVerticalOffset;
@@ -126,7 +150,7 @@ void ncStackedBarVariable::UpdateRenderCommand()
     m_valuesCmd.Material().SetTextureGLId(0);
 	m_valuesCmd.Material().SetColor(m_graphColor);
 //	m_valuesCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
-    m_valuesCmd.Geometry().SetData(GL_TRIANGLES, 2, m_variable.NumValues()*6, m_fVertices, NULL, NULL);
+	m_valuesCmd.Geometry().SetData(GL_TRIANGLES, 2, m_variable.NumValues()*6, m_fVertices, NULL, NULL);
     m_valuesCmd.CalculateSortKey();
 }
 

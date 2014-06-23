@@ -9,7 +9,10 @@
 #include "ncStackedBarPlotter.h"
 #include "ncFont.h"
 #include "ncTextNode.h"
-#include "ncThreadPool.h"
+
+#ifdef WITH_THREADS
+	#include "ncThreadPool.h"
+#endif
 
 #if defined(__ANDROID__)
 	#include "ncEGLGfxDevice.h"
@@ -83,7 +86,7 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 #endif
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Init - Data path: %s", ncIFile::DataPath());
 
-	m_pFrameTimer = new ncFrameTimer(5.0f, 0.1f);
+	m_pFrameTimer = new ncFrameTimer(5.0f, 0.2f);
 	m_pRootNode = new ncSceneNode();
 	m_pRenderQueue = new ncRenderQueue();
 	m_pProfileTimer = new ncTimer();
@@ -100,15 +103,32 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 	m_pProfilePlotter->Variable(2).SetGraphColor(ncColor(0.0f, 0.0f, 0.8f));
 	m_pProfilePlotter->Variable(2).SetMeanColor(ncColor(0.0f, 0.0f, 1.0f));
 
+	m_pProfilePlotter->Variable(0).SetPlotMean(false);
+	m_pProfilePlotter->Variable(1).SetPlotMean(false);
+	m_pProfilePlotter->Variable(2).SetPlotMean(false);
+	m_pProfilePlotter->SetPlotRefValue(true);
+	m_pProfilePlotter->SetRefValue(1.0f/60.0f); // 60 FPS
+
 #if defined(__ANDROID__)
-//	m_pFont = new ncFont("asset::trebuchet16_128.dds.mp3", "asset::trebuchet16_128.fnt");
-	m_pFont = new ncFont("/sdcard/ncine/trebuchet32_256_4444.pvr", "/sdcard/ncine/trebuchet32_256.fnt");
-//	m_pFont = new ncFont("/sdcard/ncine/trebuchet16_128.dds", "/sdcard/ncine/trebuchet16_128.fnt");
+//	const char *pFontTexFilename = "asset::trebuchet16_128.dds.mp3";
+//	const char *pFontFntFilename = "asset::trebuchet16_128.fnt";
+	const char *pFontTexFilename = "/sdcard/ncine/trebuchet32_256_4444.pvr";
+	const char *pFontFntFilename = "/sdcard/ncine/trebuchet32_256.fnt";
+//	const char *pFontTexFilename = "/sdcard/ncine/trebuchet16_128.dds";
+//	const char *pFontFntFilename = "/sdcard/ncine/trebuchet16_128.fnt";
 #else
-	m_pFont = new ncFont("fonts/trebuchet32_256.png", "fonts/trebuchet32_256.fnt");
+	const char *pFontTexFilename = "fonts/trebuchet32_256.png";
+	const char *pFontFntFilename = "fonts/trebuchet32_256.fnt";
 #endif
-	m_pTextLines = new ncTextNode(m_pRootNode, m_pFont);
-	m_pTextLines->SetPosition(0, Height());
+	if (ncIFile::Access(pFontTexFilename, ncIFile::MODE_EXISTS) &&
+		ncIFile::Access(pFontFntFilename, ncIFile::MODE_EXISTS))
+	{
+		m_pFont = new ncFont(pFontTexFilename, pFontFntFilename);
+		m_pTextLines = new ncTextNode(m_pRootNode, m_pFont);
+		m_pTextLines->SetPosition(0.0f, Height());
+	}
+	else
+		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncApplication::Init - Cannot access font files for profiling text");
 
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Init - ncApplication initialized");
 
@@ -139,7 +159,7 @@ void ncApplication::Run()
 				break;
 			case SDL_ACTIVEEVENT:
 				if (event.active.state != SDL_APPMOUSEFOCUS)
-					m_bHasFocus = event.active.gain;
+					SetFocus(event.active.gain);
 				break;
 			default:
 				ncSDLInputManager::ParseEvent(event);
@@ -147,7 +167,7 @@ void ncApplication::Run()
 			}
 		}
 #elif defined(WITH_GLFW)
-		m_bHasFocus = ncGLFWInputManager::hasFocus();
+		SetFocus(ncGLFWInputManager::hasFocus());
 		glfwPollEvents();
 		ncGLFWInputManager::UpdateJoystickStates();
 #endif
@@ -161,30 +181,19 @@ void ncApplication::Run()
 /// A single step of the game loop made to render a frame
 void ncApplication::Step()
 {
-	m_pProfileTimer->Start();
 	m_pFrameTimer->AddFrame();
 	m_pGfxDevice->Clear();
 	m_pAppEventHandler->OnFrameStart();
+	// Measuring OnFrameStart() + OnFrameEnd() time
 	m_pProfilePlotter->AddValue(0, m_pProfileTimer->Interval());
-//	m_pProfilePlotter->AddValue(0, 1.0f * abs(rand()%34));
 
 	m_pProfileTimer->Start();
 	m_pRootNode->Update(m_pFrameTimer->Interval());
 	m_pRootNode->Visit(*m_pRenderQueue);
-	m_pProfilePlotter->AddValue(1, m_pProfileTimer->Interval());
-//	m_pProfilePlotter->AddValue(1, 1.0f * abs(rand()%33));
-
-	m_pProfileTimer->Start();
 	m_pRenderQueue->Draw();
-	m_pProfilePlotter->AddValue(2, m_pProfileTimer->Interval());
-//	m_pProfilePlotter->AddValue(2, 1.0f * abs(rand()%33));
 
-	ncServiceLocator::AudioDevice().UpdatePlayers();
-	m_pGfxDevice->Update();
-	m_pAppEventHandler->OnFrameEnd();
-
-	// TODO: hard-coded 100ms update time
-	if (ncTimer::Now() - m_fTextUpdateTime > 0.1f)
+	// TODO: hard-coded 200ms update time
+	if (m_pTextLines && ncTimer::Now() - m_fTextUpdateTime > 0.2f)
 	{
 		m_fTextUpdateTime = ncTimer::Now();
 		sprintf(m_vTextChars, (const char *)"FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC",
@@ -199,6 +208,18 @@ void ncApplication::Step()
 		m_pTextLines->SetAlignment(ncTextNode::ALIGN_RIGHT);
 		m_pTextLines->SetPosition((Width() - m_pTextLines->Width()), Height());
 	}
+
+	ncServiceLocator::AudioDevice().UpdatePlayers();
+	// Measuring scenegraph update and visit + draw + audio update
+	m_pProfilePlotter->AddValue(1, m_pProfileTimer->Interval());
+
+	m_pProfileTimer->Start();
+	m_pGfxDevice->Update();
+	// Measuring swap buffers time
+	m_pProfilePlotter->AddValue(2, m_pProfileTimer->Interval());
+
+	m_pProfileTimer->Start();
+	m_pAppEventHandler->OnFrameEnd();
 }
 
 /// Must be called before exiting to shut down the application
@@ -232,7 +253,10 @@ void ncApplication::SetPause(bool bPaused)
 {
 	m_bPaused = bPaused;
 	if (m_bPaused == false)
+	{
 		m_pFrameTimer->Start();
+		m_pProfileTimer->Start();
+	}
 }
 
 /// Toggles the pause flag on and off
@@ -240,6 +264,22 @@ void ncApplication::TogglePause()
 {
 	bool bPaused = !m_bPaused;
 	SetPause(bPaused);
+}
+
+/// Sets the focus flag
+void ncApplication::SetFocus(bool bHasFocus)
+{
+	// Check if a focus event has occurred
+	if (m_bHasFocus != bHasFocus)
+	{
+		m_bHasFocus = bHasFocus;
+		// Check if focus has been gained
+		if (bHasFocus == true)
+		{
+			m_pFrameTimer->Start();
+			m_pProfileTimer->Start();
+		}
+	}
 }
 
 /// Shows or hides profiling graphs

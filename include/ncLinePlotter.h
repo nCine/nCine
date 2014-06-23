@@ -13,8 +13,6 @@ private:
 
 public:
 	ncLineVariable(unsigned int uNumValues, float fRejectDelay);
-
-	virtual void UpdateVertices(int x, int y, int w, int h);
 };
 
 /// A class that plots line strip variables
@@ -24,6 +22,8 @@ public:
 	ncLinePlotter(ncSceneNode* pParent, ncRect rect) : ncProfilePlotter(pParent, rect) { }
 
 	virtual unsigned int AddVariable(unsigned int uNumValues, float fRejectDelay);
+	// Fill the buffer of every line variable with vertices
+	void UpdateAllVertices(int x, int y, int w, int h);
 	virtual void Draw(ncRenderQueue& rRenderQueue);
 };
 

@@ -44,9 +44,11 @@ void ncPlottingVariable::ApplyTransformations(float fAbsX, float fAbsY, float fA
 
 	// Total number of vertices comprises both mean and variable vertices
 	int iNumVertices = rGeom.NumVertices() + m_meanCmd.Geometry().NumVertices();
-	for (int i = 0; i < iNumVertices*2; i=i+2) // First vertex is zero to include mean values
+	// iStartingVertex is used to transform all the values if the mean is not rendered
+	int iStartingVertex = rGeom.FirstVertex() - m_meanCmd.Geometry().NumVertices();
+	for (int i = iStartingVertex; i < iStartingVertex + iNumVertices; i++)
 	{
-		float fX = rGeom.VertexPointer()[i]*fAbsScaleFactor;			float fY = rGeom.VertexPointer()[i+1]*fAbsScaleFactor;
-		rGeom.VertexPointer()[i] = fAbsX + fX*cosine - fY*sine;			rGeom.VertexPointer()[i+1] = fAbsY + fY*cosine + fX*sine;
+		float fX = rGeom.VertexPointer()[2*i]*fAbsScaleFactor;			float fY = rGeom.VertexPointer()[2*i + 1]*fAbsScaleFactor;
+		rGeom.VertexPointer()[2*i] = fAbsX + fX*cosine - fY*sine;		rGeom.VertexPointer()[2*i + 1] = fAbsY + fY*cosine + fX*sine;
 	}
 }

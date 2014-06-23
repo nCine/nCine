@@ -43,9 +43,9 @@ public:
 	inline const ncColor& GraphColor() const { return m_graphColor; }
 	/// Returns the mean line color
 	inline const ncColor& MeanColor() const { return m_meanColor; }
-	/// Returns the constant pointer to the vertices buffer
+	/// Returns a constant pointer to the vertices buffer
 	inline const float* Vertices() const { return m_fVertices; }
-	/// Returns the constant pointer to the vertices buffer
+	/// Returns the pointer to the vertices buffer
 	inline float* Vertices() { return m_fVertices; }
 	/// Returns the pointer to the variable
 	inline const ncProfileVariable* Variable() const { return &m_variable; }
@@ -53,13 +53,13 @@ public:
 	inline bool shouldPlotMean() const { return m_bPlotMean; }
 
 	/// Adds a value to the variable
-	void AddValue(float fValue) { m_variable.AddValue(fValue); }
+	bool AddValue(float fValue) { return m_variable.AddValue(fValue); }
 	/// Sets the graph color
-	void SetGraphColor(ncColor graphColor) { m_graphColor = graphColor; }
+	inline void SetGraphColor(ncColor graphColor) { m_graphColor = graphColor; }
 	/// Sets the mean line color
-	void SetMeanColor(ncColor meanColor) { m_meanColor = meanColor; }
+	inline void SetMeanColor(ncColor meanColor) { m_meanColor = meanColor; }
 	/// Sets the mean drawing flag state
-	void SetPlotMean(bool bEnabled) { m_bPlotMean = bEnabled; }
+	inline void SetPlotMean(bool bEnabled) { m_bPlotMean = bEnabled; }
 
 	// Applies parent transformations to both mean and values vertices
 	void ApplyTransformations(float fAbsX, float fAbsY, float fAbsRotation, float fAbsScaleFactor);
@@ -74,8 +74,6 @@ public:
 		UpdateMeanRenderCommand();
 		rRenderQueue.AddCommand(&m_meanCmd);
 	}
-
-	virtual void UpdateVertices(int x, int y, int w, int h) = 0;
 };
 
 #endif

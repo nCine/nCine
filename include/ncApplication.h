@@ -40,12 +40,6 @@ public:
 #ifdef __ANDROID__
 	// Must be called at start to init the application
 	static void Init(struct android_app* state, ncIAppEventHandler* (*pCreateAppEventHandler)());
-	/// Return the quit flag value
-	static bool ShouldQuit() { return m_bShouldQuit; }
-	/// Return the focus flag value
-	static bool HasFocus() { return m_bHasFocus; }
-	/// Set the focus flag
-	static void SetFocus(bool bHasFocus) { m_bHasFocus = bHasFocus; }
 #else
 	// Must be called at start to init the application
 	static void Init(ncIAppEventHandler* (*pCreateAppEventHandler)());
@@ -57,9 +51,6 @@ public:
 	static void Step();
 	// Must be called before exiting to shut down the application
 	static void Shutdown();
-
-	/// Return the value of the pause flag
-	static inline bool IsPaused() { return m_bPaused; }
 
 	// HACK: wrapping a lot of getters
 	/// Returns the graphics device instance
@@ -79,12 +70,22 @@ public:
 	/// Returns the screen height
 	static inline int Height() { return m_pGfxDevice->Height(); }
 
+	/// Returns the value of the pause flag
+	static inline bool IsPaused() { return m_bPaused; }
 	// Sets the pause flag value
 	static void SetPause(bool bPaused);
 	// Toggles the pause flag on and off
 	static void TogglePause();
+
 	/// Raises the quit flag
 	static inline void Quit() { m_bShouldQuit = true; }
+	/// Returns the quit flag value
+	static bool ShouldQuit() { return m_bShouldQuit; }
+
+	/// Returns the focus flag value
+	static bool HasFocus() { return m_bHasFocus; }
+	// Sets the focus flag
+	static void SetFocus(bool bHasFocus);
 
 	// Shows or hides profiling graphs
 	static void ShowProfileGraphs(bool bShouldDraw);
