@@ -104,6 +104,7 @@ public:
 	int JoyNumAxes(int iJoyId) const;
 	bool isJoyButtonPressed(int iJoyId, int iButtonId) const;
 	short int JoyAxisValue(int iJoyId, int iAxisId) const;
+	float JoyAxisNormValue(int iJoyId, int iAxisId) const;
 };
 
 #endif

@@ -109,7 +109,7 @@ void ncGLFWInputManager::UpdateJoystickStates()
 
 bool ncGLFWInputManager::isJoyPresent(int iJoyId) const
 {
-	if (GLFW_JOYSTICK_1 + iJoyId <= GLFW_JOYSTICK_LAST)
+	if (iJoyId >= 0 && GLFW_JOYSTICK_1 + iJoyId <= GLFW_JOYSTICK_LAST)
 		return glfwJoystickPresent(GLFW_JOYSTICK_1 + iJoyId);
 	else
 		return false;
@@ -137,7 +137,7 @@ int ncGLFWInputManager::JoyNumAxes(int iJoyId) const
 
 bool ncGLFWInputManager::isJoyButtonPressed(int iJoyId, int iButtonId) const
 {
-	if (isJoyPresent(iJoyId) && iButtonId < JoyNumButtons(iJoyId))
+	if (isJoyPresent(iJoyId) && iButtonId >= 0 && iButtonId < JoyNumButtons(iJoyId))
 		return s_joystickStates[iJoyId].m_ubButtons[iButtonId];
 	else
 		return false;
@@ -145,16 +145,24 @@ bool ncGLFWInputManager::isJoyButtonPressed(int iJoyId, int iButtonId) const
 
 short int ncGLFWInputManager::JoyAxisValue(int iJoyId, int iAxisId) const
 {
-	if (isJoyPresent(iJoyId) && iAxisId < JoyNumAxes(iJoyId))
+	// If the joystick is not present the returned value is zero
+	short int iAxisValue = JoyAxisNormValue(iJoyId, iAxisId) * s_iMaxAxisValue;
+
+	return iAxisValue;
+}
+
+float ncGLFWInputManager::JoyAxisNormValue(int iJoyId, int iAxisId) const
+{
+	short int fAxisValue = 0.0f;
+
+	if (isJoyPresent(iJoyId) && iAxisId >= 0 && iAxisId < JoyNumAxes(iJoyId))
 	{
-		float fAxisValue = s_joystickStates[iJoyId].m_fAxisValues[iAxisId];
+		fAxisValue = s_joystickStates[iJoyId].m_fAxisValues[iAxisId];
 
 		// Odd axes are inverted to maintain consistency with the SDL implementation
 		if (iAxisId % 2)
 			fAxisValue *= -1.0f;
-
-		return fAxisValue * s_iMaxAxisValue;
 	}
-	else
-		return 0;
+
+	return fAxisValue;
 }

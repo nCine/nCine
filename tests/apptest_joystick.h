@@ -20,7 +20,7 @@ private:
 	ncTextNode *m_pTextNode;
 
 	static const int numAxes = 8;
-	short int m_iAxisValues[numAxes];
+	float m_fAxisValues[numAxes];
 	static const int numButtons = 12;
 	unsigned char m_ubButtonStates[numButtons];
 	static const int numChars = 256;

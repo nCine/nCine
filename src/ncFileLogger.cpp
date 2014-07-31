@@ -54,7 +54,7 @@ void ncFileLogger::Write(eLogLevel eLevel, const char *fmt, ...)
 
 	if (m_eConsoleLevel < int(LOG_OFF) && int(eLevel) >= int(m_eConsoleLevel))
 	{
-		printf("- %s [L%i] -> ", szBuffer, int(eLevel));
+		printf("- %s [L%d] -> ", szBuffer, int(eLevel));
 
 		va_list args;
 		va_start(args, fmt);
@@ -66,7 +66,7 @@ void ncFileLogger::Write(eLogLevel eLevel, const char *fmt, ...)
 
 	if (m_eFileLevel < int(LOG_OFF) && int(eLevel) >= int(m_eFileLevel))
 	{
-		fprintf(m_pFileHandle->Ptr(), "- %s [L%i] -> ", szBuffer, int(eLevel));
+		fprintf(m_pFileHandle->Ptr(), "- %s [L%d] -> ", szBuffer, int(eLevel));
 
 		va_list args;
 		va_start(args, fmt);
@@ -126,7 +126,7 @@ void ncFileLogger::Write(eLogLevel eLevel, const char *fmt, ...)
 
 	if (m_eFileLevel < int(LOG_OFF) && int(eLevel) >= int(m_eFileLevel))
 	{
-		fprintf(m_pFileHandle->Ptr(), "- %s [L%i] -> ", szBuffer, int(eLevel));
+		fprintf(m_pFileHandle->Ptr(), "- %s [L%d] -> ", szBuffer, int(eLevel));
 
 		va_list args;
 		va_start(args, fmt);

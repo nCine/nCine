@@ -217,6 +217,14 @@ short int ncSDLInputManager::JoyAxisValue(int iJoyId, int iAxisId) const
 	return iRetValue;
 }
 
+float ncSDLInputManager::JoyAxisNormValue(int iJoyId, int iAxisId) const
+{
+	// If the joystick is not present the returned value is zero
+	float fAxisValue = JoyAxisValue(iJoyId, iAxisId) / float(s_iMaxAxisValue);
+
+	return fAxisValue;
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 //////////////////////////////////////////////////////////

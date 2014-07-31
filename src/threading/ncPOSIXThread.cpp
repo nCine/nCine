@@ -53,7 +53,7 @@ void ncThread::Run(ncThreadFunctionPtr_t pStartFunction, void *pArg)
 		m_threadInfo.m_pThreadArg = pArg;
 		if (int iError = pthread_create(&m_tid, NULL, WrapperFunction, &m_threadInfo))
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncThread::ncThread - pthread_create error: %i", iError);
+			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncThread::ncThread - pthread_create error: %d", iError);
 			exit(EXIT_FAILURE);
 		}
 	}

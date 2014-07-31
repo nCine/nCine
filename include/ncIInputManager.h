@@ -70,24 +70,6 @@ public:
 
 	virtual bool isKeyDown(ncKeySym key) const = 0;
 };
-
-/// Information about a joystick axis event
-class ncJoyAxisEvent
-{
-public:
-	int joyId;
-	int axisId;
-	short int value;
-};
-
-/// Information about a joystick button event
-class ncJoyButtonEvent
-{
-public:
-	int joyId;
-	int buttonId;
-};
-
 #endif
 
 /// Information about a keyboard event
@@ -104,6 +86,23 @@ public:
 	int mod;
 	/// Unicode character
 	unsigned short int unicode;
+};
+
+/// Information about a joystick axis event
+class ncJoyAxisEvent
+{
+public:
+	int joyId;
+	int axisId;
+	short int value;
+};
+
+/// Information about a joystick button event
+class ncJoyButtonEvent
+{
+public:
+	int joyId;
+	int buttonId;
 };
 
 /// The interface class for parsing and dispatching input events
@@ -124,14 +123,21 @@ public:
 #ifndef __ANDROID__
 	virtual const ncMouseState& MouseState() = 0;
 	virtual const ncKeyboardState& KeyboardState() const = 0;
+#endif
 
 	static short int s_iMaxAxisValue;
+	/// Returns true if the specified joystick is connected
 	virtual bool isJoyPresent(int iJoyId) const = 0;
+	/// Returns the number of available buttons for the specified joystick
 	virtual int JoyNumButtons(int iJoyId) const = 0;
+	/// Returns the number of available axes for the specified joystick
 	virtual int JoyNumAxes(int iJoyId) const = 0;
+	/// Returns the state of a joystick button
 	virtual bool isJoyButtonPressed(int iJoyId, int iButtonId) const = 0;
+	/// Returns a value between -32768 and 32767 for a joystick axis
 	virtual short int JoyAxisValue(int iJoyId, int iAxisId) const = 0;
-#endif
+	/// Returns a normalized value between -1 and 1 for a joystick axis
+	virtual float JoyAxisNormValue(int iJoyId, int iAxisId) const = 0;
 };
 
 #endif
