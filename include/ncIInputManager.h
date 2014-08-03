@@ -15,11 +15,11 @@ class ncIInputEventHandler;
 class ncTouchEvent
 {
 public:
-	ncTouchEvent() : count(0), id(0), x(0), y(0), id2(1), x2(0), y2(0) { }
+	ncTouchEvent() : count(0), id(0), id2(1), x(0.0f), y(0.0f), x2(0.0f), y2(0.0f) { }
 
 	int count;
-	int id, x, y;
-	int id2, x2, y2;
+	int id, id2;
+	float x, y, x2, y2;
 };
 
 class ncAccelerometerEvent
@@ -128,6 +128,8 @@ public:
 	static short int s_iMaxAxisValue;
 	/// Returns true if the specified joystick is connected
 	virtual bool isJoyPresent(int iJoyId) const = 0;
+	/// Returns the name of the specified joystick
+	virtual const char* JoyName(int iJoyId) const = 0;
 	/// Returns the number of available buttons for the specified joystick
 	virtual int JoyNumButtons(int iJoyId) const = 0;
 	/// Returns the number of available axes for the specified joystick

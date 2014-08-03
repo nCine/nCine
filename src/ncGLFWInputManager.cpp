@@ -115,6 +115,14 @@ bool ncGLFWInputManager::isJoyPresent(int iJoyId) const
 		return false;
 }
 
+const char* ncGLFWInputManager::JoyName(int iJoyId) const
+{
+	if (isJoyPresent(iJoyId))
+		return glfwGetJoystickName(iJoyId);
+	else
+		return '\0';
+}
+
 int ncGLFWInputManager::JoyNumButtons(int iJoyId) const
 {
 	int iNumButtons = -1;

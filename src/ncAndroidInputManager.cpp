@@ -1,7 +1,7 @@
 #include "ncAndroidInputManager.h"
 #include "ncIInputEventHandler.h"
 #include "ncApplication.h"
-#include "ncServiceLocator.h" // For debug logging only, REMOVE
+#include "ncServiceLocator.h"
 
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
@@ -19,8 +19,9 @@ short int ncIInputManager::s_iMaxAxisValue = 32767;
 ncAndroidJoystickState ncAndroidInputManager::s_joystickStates[s_uMaxNumJoysticks];
 JavaVM *ncAndroidInputManager::s_pJVM = NULL;
 JNIEnv *ncAndroidInputManager::s_pEnv = NULL;
-jclass ncAndroidInputManager::s_inputDeviceClass;
-jmethodID ncAndroidInputManager::s_getDeviceMethod;
+jclass ncAndroidInputManager::s_clsInputDevice;
+jmethodID ncAndroidInputManager::s_midGetDevice;
+jmethodID ncAndroidInputManager::s_midGetName;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -91,45 +92,18 @@ void ncAndroidInputManager::ParseEvent(const AInputEvent* event)
 	if (s_pInputEventHandler == NULL)
 		return;
 
-	if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
+#if (__ANDROID_API__ >= 13)
+	if ((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD ||
+		(AInputEvent_getSource(event) & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK ||
+		(AInputEvent_getSource(event) & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::ParseEvent - Button event for source %d", AInputEvent_getSource(event));
-		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::ParseEvent - Button event for keycode %d", AKeyEvent_getKeyCode(event));
+		int iDeviceId = AInputEvent_getDeviceId(event);
+		int iJoyId = FindJoyId(iDeviceId);
 
-		if ((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD)
+		// If the index is valid then the structure can be updated
+		if (iJoyId > -1)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::ParseEvent - KEYBOARD");
-
-
-			s_keyboardEvent.scancode = AKeyEvent_getScanCode(event);
-			s_keyboardEvent.sym = ncKeySym(AKeyEvent_getKeyCode(event));
-			s_keyboardEvent.mod = AKeyEvent_getMetaState(event);
-
-			switch(AKeyEvent_getAction(event))
-			{
-				case AKEY_EVENT_ACTION_DOWN:
-					s_pInputEventHandler->OnKeyPressed(s_keyboardEvent);
-					break;
-				case AKEY_EVENT_ACTION_UP:
-					s_pInputEventHandler->OnKeyReleased(s_keyboardEvent);
-					break;
-				case AKEY_EVENT_ACTION_MULTIPLE:
-					break;
-			}
-		}
-#if __ANDROID_API__ >= 13
-		else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD ||
-				 (AInputEvent_getSource(event) & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK ||
-				 (AInputEvent_getSource(event) & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD)
-		{
-			// TODO: Add DPAD support and mouse
-			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::ParseEvent - PAD");
-
-			int iDeviceId = AInputEvent_getDeviceId(event);
-			int iJoyId = FindJoyId(iDeviceId);
-
-			// If the index is valid the structure can be updated
-			if (iJoyId > -1)
+			if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
 			{
 				int iBtnIndex = -1;
 				s_joystickStates[iJoyId].m_iDeviceId = iDeviceId;
@@ -180,51 +154,7 @@ void ncAndroidInputManager::ParseEvent(const AInputEvent* event)
 						break;
 				}
 			}
-			else
-				ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncAndroidInputManager::ParseEvent - No available joystick id for device %d, dropping button event", iDeviceId);
-		}	
-#endif
-	}
-	else if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
-	{
-		if ((AInputEvent_getSource(event) & AINPUT_SOURCE_TOUCHSCREEN) == AINPUT_SOURCE_TOUCHSCREEN)
-		{
-			s_touchEvent.count = AMotionEvent_getPointerCount(event);
-			s_touchEvent.id = AMotionEvent_getPointerId(event, 0);
-			s_touchEvent.x = AMotionEvent_getX(event, 0);
-			s_touchEvent.y = ncApplication::Height() - AMotionEvent_getY(event, 0);
-			s_touchEvent.id2 = AMotionEvent_getPointerId(event, 1);
-			s_touchEvent.x2 = AMotionEvent_getX(event, 1);
-			s_touchEvent.y2 = ncApplication::Height() - AMotionEvent_getY(event, 1);
-
-			switch(AMotionEvent_getAction(event))
-			{
-				case AMOTION_EVENT_ACTION_DOWN:
-					s_pInputEventHandler->OnTouchDown(s_touchEvent);
-					break;
-				case AMOTION_EVENT_ACTION_UP:
-					s_pInputEventHandler->OnTouchUp(s_touchEvent);
-					break;
-				case AMOTION_EVENT_ACTION_MOVE:
-					s_pInputEventHandler->OnTouchMove(s_touchEvent);
-					break;
-				case AMOTION_EVENT_ACTION_POINTER_DOWN:
-					s_pInputEventHandler->OnSecondaryTouchDown(s_touchEvent);
-					break;
-				case AMOTION_EVENT_ACTION_POINTER_UP:
-					s_pInputEventHandler->OnSecondaryTouchUp(s_touchEvent);
-					break;
-			}
-		}
-#if __ANDROID_API__ >= 13
-		else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD ||
-				 (AInputEvent_getSource(event) & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK)
-		{
-			int iDeviceId = AInputEvent_getDeviceId(event);
-			int iJoyId = FindJoyId(iDeviceId);
-
-			// If the index is valid the structure can be updated
-			if (iJoyId > -1)
+			else if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
 			{
 				s_joystickStates[iJoyId].m_iDeviceId = iDeviceId;
 				s_joystickStates[iJoyId].m_fAxisValues[0] = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_X, 0);
@@ -236,14 +166,64 @@ void ncAndroidInputManager::ParseEvent(const AInputEvent* event)
 				s_joystickStates[iJoyId].m_fAxisValues[6] = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_RX, 0);
 				s_joystickStates[iJoyId].m_fAxisValues[7] = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_RY, 0);
 			}
-			else
-				ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncAndroidInputManager::ParseEvent - No available joystick id for device %d, dropping motion event", iDeviceId);
 		}
+		else
+			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncAndroidInputManager::ParseEvent - No available joystick id for device %d, dropping button event", iDeviceId);
+	}
+	else
 #endif
+		if ((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD &&
+			  AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
+	{
+		s_keyboardEvent.scancode = AKeyEvent_getScanCode(event);
+		s_keyboardEvent.sym = ncKeySym(AKeyEvent_getKeyCode(event));
+		s_keyboardEvent.mod = AKeyEvent_getMetaState(event);
+
+		switch(AKeyEvent_getAction(event))
+		{
+			case AKEY_EVENT_ACTION_DOWN:
+				s_pInputEventHandler->OnKeyPressed(s_keyboardEvent);
+				break;
+			case AKEY_EVENT_ACTION_UP:
+				s_pInputEventHandler->OnKeyReleased(s_keyboardEvent);
+				break;
+			case AKEY_EVENT_ACTION_MULTIPLE:
+				break;
+		}
+	}
+	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_TOUCHSCREEN) == AINPUT_SOURCE_TOUCHSCREEN &&
+			  AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
+	{
+		s_touchEvent.count = AMotionEvent_getPointerCount(event);
+		s_touchEvent.id = AMotionEvent_getPointerId(event, 0);
+		s_touchEvent.x = AMotionEvent_getX(event, 0);
+		s_touchEvent.y = ncApplication::Height() - AMotionEvent_getY(event, 0);
+		s_touchEvent.id2 = AMotionEvent_getPointerId(event, 1);
+		s_touchEvent.x2 = AMotionEvent_getX(event, 1);
+		s_touchEvent.y2 = ncApplication::Height() - AMotionEvent_getY(event, 1);
+
+		switch(AMotionEvent_getAction(event))
+		{
+			case AMOTION_EVENT_ACTION_DOWN:
+				s_pInputEventHandler->OnTouchDown(s_touchEvent);
+				break;
+			case AMOTION_EVENT_ACTION_UP:
+				s_pInputEventHandler->OnTouchUp(s_touchEvent);
+				break;
+			case AMOTION_EVENT_ACTION_MOVE:
+				s_pInputEventHandler->OnTouchMove(s_touchEvent);
+				break;
+			case AMOTION_EVENT_ACTION_POINTER_DOWN:
+				s_pInputEventHandler->OnSecondaryTouchDown(s_touchEvent);
+				break;
+			case AMOTION_EVENT_ACTION_POINTER_UP:
+				s_pInputEventHandler->OnSecondaryTouchUp(s_touchEvent);
+				break;
+		}
 	}
 }
 
-#if __ANDROID_API__ >= 13
+#if (__ANDROID_API__ >= 13)
 bool ncAndroidInputManager::isJoyPresent(int iJoyId) const
 {
 	bool bIsPresent = false;
@@ -251,17 +231,19 @@ bool ncAndroidInputManager::isJoyPresent(int iJoyId) const
 	if (iJoyId >= 0 && iJoyId < int(s_uMaxNumJoysticks))
 	{
 		int iDeviceId = s_joystickStates[iJoyId].m_iDeviceId;
-		if (iDeviceId > -1 && isDeviceConnected(iDeviceId))
+		if (iDeviceId > -1)
 			bIsPresent = true;
-		else
-		{
-			// if device id was valid but device was not connected
-			s_joystickStates[iJoyId].m_iDeviceId = -1;
-			// TODO: handle disconession event
-		}
 	}
 
 	return bIsPresent;
+}
+
+const char* ncAndroidInputManager::JoyName(int iJoyId) const
+{
+	if (isJoyPresent(iJoyId))
+		return s_joystickStates[iJoyId].m_vName;
+	else
+		return '\0';
 }
 
 int ncAndroidInputManager::JoyNumButtons(int iJoyId) const
@@ -269,7 +251,7 @@ int ncAndroidInputManager::JoyNumButtons(int iJoyId) const
 	int iNumButtons = -1;
 
 	if (isJoyPresent(iJoyId))
-		return 8; // HACK: Hard-coded
+		return ncAndroidJoystickState::s_uNumButtons; // TODO: Query available buttons
 
 	return iNumButtons;
 }
@@ -279,7 +261,7 @@ int ncAndroidInputManager::JoyNumAxes(int iJoyId) const
 	int iNumAxes = -1;
 
 	if (isJoyPresent(iJoyId))
-		return 8; // HACK: Hard-coded
+		return ncAndroidJoystickState::s_uNumAxes; // TODO: Query available axes
 
 	return iNumAxes;
 }
@@ -321,14 +303,17 @@ void ncAndroidInputManager::AttachJVM(JavaVM *pJVM)
 	if (s_pJVM == NULL)
 		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - JNIEnv pointer is null");
 
-	s_inputDeviceClass = s_pEnv->FindClass("android/view/InputDevice");
-	if (s_inputDeviceClass == NULL)
+	s_clsInputDevice = s_pEnv->FindClass("android/view/InputDevice");
+	if (s_clsInputDevice == NULL)
 		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - jclass pointer is null");
 
-	s_getDeviceMethod = s_pEnv->GetStaticMethodID(s_inputDeviceClass, "getDevice", "(I)Landroid/view/InputDevice;");
-	if (s_getDeviceMethod == NULL)
-		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - jmethod pointer is null");
+	s_midGetDevice = s_pEnv->GetStaticMethodID(s_clsInputDevice, "getDevice", "(I)Landroid/view/InputDevice;");
+	if (s_midGetDevice == NULL)
+		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - jmethod1 pointer is null");
 
+	s_midGetName = s_pEnv->GetMethodID(s_clsInputDevice, "getName", "()Ljava/lang/String;");
+	if (s_midGetName == NULL)
+		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - jmethod2 pointer is null");
 }
 
 void ncAndroidInputManager::DetachJVM()
@@ -342,21 +327,19 @@ void ncAndroidInputManager::DetachJVM()
 	}
 }
 
-bool ncAndroidInputManager::isDeviceConnected(int iDeviceId)
+/// Updates joystick state structures and raises disconnection events
+void ncAndroidInputManager::UpdateJoystickStates()
 {
-	bool bIsConnected = false;
-
-	jobject inputDeviceObject = s_pEnv->CallStaticObjectMethod(s_inputDeviceClass, s_getDeviceMethod, iDeviceId);
-	if (inputDeviceObject == NULL)
-		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::isDeviceConnected - Device %d is not connected", iDeviceId);
-	else
+	for(unsigned int i = 0; i < s_uMaxNumJoysticks; i++)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::isDeviceConnected - Device %d is connected", iDeviceId);
-		s_pEnv->DeleteLocalRef(inputDeviceObject);
-		bIsConnected = true;
+		int iDeviceId = s_joystickStates[i].m_iDeviceId;
+		if(iDeviceId > -1 && isDeviceConnected(iDeviceId) == false)
+		{
+			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::isJoyPresent - Joystick %d (device %d) \"%s\" has been disconnected",
+				i, iDeviceId, s_joystickStates[i].m_vName);
+			s_joystickStates[i].m_iDeviceId = -1;
+		}
 	}
-
-	return bIsConnected;
 }
 #endif
 
@@ -364,7 +347,7 @@ bool ncAndroidInputManager::isDeviceConnected(int iDeviceId)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-#if __ANDROID_API__ >= 13
+#if (__ANDROID_API__ >= 13)
 int ncAndroidInputManager::FindJoyId(int iDeviceId)
 {
 	int iJoyId = -1;
@@ -376,8 +359,6 @@ int ncAndroidInputManager::FindJoyId(int iDeviceId)
 		if (s_joystickStates[i].m_iDeviceId < 0 && iJoyId == -1)
 		{
 			iJoyId = i;
-
-			// TODO: Disconnection
 		}
 		// If the joystick is already known then the loop ends
 		else if (s_joystickStates[i].m_iDeviceId == iDeviceId)
@@ -387,6 +368,50 @@ int ncAndroidInputManager::FindJoyId(int iDeviceId)
 		}
 	}
 
+	if (iJoyId >= -1 && s_joystickStates[iJoyId].m_iDeviceId != iDeviceId)
+	{
+		DeviceName(iDeviceId, iJoyId);
+		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::FindJoyId - Joystick %d (device %d) \"%s\" has been connected",
+			iJoyId, iDeviceId, s_joystickStates[iJoyId].m_vName);
+
+		// TODO: handle connection as en event
+	}
+
 	return iJoyId;
+}
+
+bool ncAndroidInputManager::isDeviceConnected(int iDeviceId)
+{
+	bool bIsConnected = false;
+
+	jobject objInputDevice = s_pEnv->CallStaticObjectMethod(s_clsInputDevice, s_midGetDevice, iDeviceId);
+	if (objInputDevice)
+	{
+		s_pEnv->DeleteLocalRef(objInputDevice);
+		bIsConnected = true;
+	}
+
+	return bIsConnected;
+}
+
+void ncAndroidInputManager::DeviceName(int iDeviceId, int iJoyId)
+{
+	jobject objInputDevice = s_pEnv->CallStaticObjectMethod(s_clsInputDevice, s_midGetDevice, iDeviceId);
+	if (objInputDevice)
+	{
+		jstring jDeviceName = (jstring)s_pEnv->CallObjectMethod(objInputDevice, s_midGetName);
+		if (jDeviceName)
+		{
+			const char *vDeviceName = s_pEnv->GetStringUTFChars(jDeviceName, 0);
+			strncpy(s_joystickStates[iJoyId].m_vName, vDeviceName, ncAndroidJoystickState::s_uMaxNameLength);
+			s_joystickStates[iJoyId].m_vName[ncAndroidJoystickState::s_uMaxNameLength-1] = '\0';
+			s_pEnv->ReleaseStringUTFChars(jDeviceName, vDeviceName);
+			s_pEnv->DeleteLocalRef(jDeviceName);
+		}
+		else
+			strncpy(s_joystickStates[iJoyId].m_vName, (const char *)"Unknown", ncAndroidJoystickState::s_uMaxNameLength);
+
+		s_pEnv->DeleteLocalRef(objInputDevice);
+	}
 }
 #endif

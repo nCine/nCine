@@ -12,10 +12,12 @@
 class ncAndroidJoystickState
 {
 private:
+	static const unsigned int s_uMaxNameLength = 256;
 	static const unsigned int s_uNumButtons = 10;
 	static const unsigned int s_uNumAxes = 8;
 
 	int m_iDeviceId;
+	char m_vName[s_uMaxNameLength];
 
 	bool m_bButtons[s_uNumButtons];
 	float m_fAxisValues[s_uNumAxes];
@@ -23,6 +25,7 @@ public:
 	ncAndroidJoystickState()
 		: m_iDeviceId(-1)
 	{
+		m_vName[0] = '\0';
 		for (unsigned int i = 0; i < s_uNumButtons; i++)
 			m_bButtons[i] = false;
 		for (unsigned int i = 0; i < s_uNumAxes; i++)
@@ -48,12 +51,16 @@ private:
 	static ncKeyboardEvent s_keyboardEvent;
 	static ncAndroidJoystickState s_joystickStates[s_uMaxNumJoysticks];
 
-#if __ANDROID_API__ >= 13
+#if (__ANDROID_API__ >= 13)
 	static int FindJoyId(int iDeviceId);
 	static JavaVM *s_pJVM;
 	static JNIEnv *s_pEnv;
-	static jclass s_inputDeviceClass;
-	static jmethodID s_getDeviceMethod;
+	static jclass s_clsInputDevice;
+	static jmethodID s_midGetDevice;
+	static jmethodID s_midGetName;
+
+	static bool isDeviceConnected(int iDeviceId);
+	static void DeviceName(int iDeviceId, int iJoyId);
 #endif
 public:
 	// Initializes the accelerometer sensor
@@ -71,8 +78,9 @@ public:
 	// Parses an Android input event
 	static void ParseEvent(const AInputEvent* event);
 
-#if __ANDROID_API__ >= 13
+#if (__ANDROID_API__ >= 13)
 	bool isJoyPresent(int iJoyId) const;
+	const char* JoyName(int iJoyId) const;
 	int JoyNumButtons(int iJoyId) const;
 	int JoyNumAxes(int iJoyId) const;
 	bool isJoyButtonPressed(int iJoyId, int iButtonId) const;
@@ -80,7 +88,9 @@ public:
 	float JoyAxisNormValue(int iJoyId, int iAxisId) const;
 	static void AttachJVM(JavaVM *pJVM);
 	static void DetachJVM();
-	static bool isDeviceConnected(int iDeviceId);
+
+	// Updates joystick state structures and raises disconnection events
+	static void UpdateJoystickStates();
 #endif
 };
 
