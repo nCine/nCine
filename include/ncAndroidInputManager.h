@@ -13,23 +13,33 @@ class ncAndroidJoystickState
 {
 private:
 	static const unsigned int s_uMaxNameLength = 256;
-	static const unsigned int s_uNumButtons = 10;
-	static const unsigned int s_uNumAxes = 8;
+	static const int s_iMaxButtons = 10;
+	static const int s_iMaxAxes = 8;
 
 	int m_iDeviceId;
 	char m_vName[s_uMaxNameLength];
 
-	bool m_bButtons[s_uNumButtons];
-	float m_fAxisValues[s_uNumAxes];
+	int m_iNumButtons;
+	int m_iNumAxes;
+	short int m_vButtonsMapping[s_iMaxButtons];
+	short int m_vAxesMapping[s_iMaxAxes];
+	bool m_bButtons[s_iMaxButtons];
+	float m_fAxisValues[s_iMaxAxes];
 public:
 	ncAndroidJoystickState()
-		: m_iDeviceId(-1)
+		: m_iDeviceId(-1), m_iNumButtons(0), m_iNumAxes(0)
 	{
 		m_vName[0] = '\0';
-		for (unsigned int i = 0; i < s_uNumButtons; i++)
+		for (int i = 0; i < s_iMaxButtons; i++)
+		{
+			m_vButtonsMapping[i] = 0;
 			m_bButtons[i] = false;
-		for (unsigned int i = 0; i < s_uNumAxes; i++)
+		}
+		for (int i = 0; i < s_iMaxAxes; i++)
+		{
+			m_vAxesMapping[i] = 0;
 			m_fAxisValues[i] = 0.0f;
+		}
 	}
 
 	friend class ncAndroidInputManager;
@@ -58,9 +68,12 @@ private:
 	static jclass s_clsInputDevice;
 	static jmethodID s_midGetDevice;
 	static jmethodID s_midGetName;
+	static jmethodID s_midGetMotionRange;
+	static jclass s_clsKeyCharacterMap;
+	static jmethodID s_midDeviceHasKey;
 
 	static bool isDeviceConnected(int iDeviceId);
-	static void DeviceName(int iDeviceId, int iJoyId);
+	static void DeviceInfo(int iDeviceId, int iJoyId);
 #endif
 public:
 	// Initializes the accelerometer sensor
@@ -86,7 +99,7 @@ public:
 	bool isJoyButtonPressed(int iJoyId, int iButtonId) const;
 	short int JoyAxisValue(int iJoyId, int iAxisId) const;
 	float JoyAxisNormValue(int iJoyId, int iAxisId) const;
-	static void AttachJVM(JavaVM *pJVM);
+	static void AttachJVM(struct android_app* state);
 	static void DetachJVM();
 
 	// Updates joystick state structures and raises disconnection events

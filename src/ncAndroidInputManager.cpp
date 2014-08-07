@@ -19,9 +19,12 @@ short int ncIInputManager::s_iMaxAxisValue = 32767;
 ncAndroidJoystickState ncAndroidInputManager::s_joystickStates[s_uMaxNumJoysticks];
 JavaVM *ncAndroidInputManager::s_pJVM = NULL;
 JNIEnv *ncAndroidInputManager::s_pEnv = NULL;
-jclass ncAndroidInputManager::s_clsInputDevice;
-jmethodID ncAndroidInputManager::s_midGetDevice;
-jmethodID ncAndroidInputManager::s_midGetName;
+jclass ncAndroidInputManager::s_clsInputDevice = NULL;
+jmethodID ncAndroidInputManager::s_midGetDevice = NULL;
+jmethodID ncAndroidInputManager::s_midGetName = NULL;
+jmethodID ncAndroidInputManager::s_midGetMotionRange = NULL;
+jclass ncAndroidInputManager::s_clsKeyCharacterMap = NULL;
+jmethodID ncAndroidInputManager::s_midDeviceHasKey = NULL;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -251,7 +254,7 @@ int ncAndroidInputManager::JoyNumButtons(int iJoyId) const
 	int iNumButtons = -1;
 
 	if (isJoyPresent(iJoyId))
-		return ncAndroidJoystickState::s_uNumButtons; // TODO: Query available buttons
+		iNumButtons = s_joystickStates[iJoyId].m_iNumButtons;
 
 	return iNumButtons;
 }
@@ -261,7 +264,7 @@ int ncAndroidInputManager::JoyNumAxes(int iJoyId) const
 	int iNumAxes = -1;
 
 	if (isJoyPresent(iJoyId))
-		return ncAndroidJoystickState::s_uNumAxes; // TODO: Query available axes
+		iNumAxes = s_joystickStates[iJoyId].m_iNumAxes;
 
 	return iNumAxes;
 }
@@ -292,28 +295,55 @@ float ncAndroidInputManager::JoyAxisNormValue(int iJoyId, int iAxisId) const
 	return fAxisValue;
 }
 
-void ncAndroidInputManager::AttachJVM(JavaVM *pJVM)
+void ncAndroidInputManager::AttachJVM(struct android_app* state)
 {
-	s_pJVM = pJVM;
+	s_pJVM = state->activity->vm;
 
 	if (s_pJVM == NULL)
 		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - JavaVM pointer is null");
 
-	s_pJVM->AttachCurrentThread(&s_pEnv, NULL);
+	int iGetEnvStatus = s_pJVM->GetEnv((void **)&s_pEnv, JNI_VERSION_1_6);
+	if (iGetEnvStatus == JNI_EDETACHED)
+	{
+		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncAndroidInputManager::AttachJVM - GetEnv() cannot attach the JVM");
+		if (s_pJVM->AttachCurrentThread(&s_pEnv, NULL) != 0)
+			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncAndroidInputManager::AttachJVM - AttachCurrentThread() cannot attach the JVM");
+		else
+			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::AttachJVM - AttachCurrentThread() successful");
+	}
+	else if (iGetEnvStatus == JNI_EVERSION)
+		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncAndroidInputManager::AttachJVM - GetEnv() with unsupported version");
+	else if (iGetEnvStatus == JNI_OK)
+		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::AttachJVM - GetEnv() successful");
+
 	if (s_pJVM == NULL)
 		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - JNIEnv pointer is null");
 
+
 	s_clsInputDevice = s_pEnv->FindClass("android/view/InputDevice");
 	if (s_clsInputDevice == NULL)
-		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - jclass pointer is null");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - InputDevice class pointer is null");
 
 	s_midGetDevice = s_pEnv->GetStaticMethodID(s_clsInputDevice, "getDevice", "(I)Landroid/view/InputDevice;");
 	if (s_midGetDevice == NULL)
-		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - jmethod1 pointer is null");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - getDevice() pointer is null");
 
 	s_midGetName = s_pEnv->GetMethodID(s_clsInputDevice, "getName", "()Ljava/lang/String;");
 	if (s_midGetName == NULL)
-		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - jmethod2 pointer is null");
+		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - getName() pointer is null");
+
+	s_midGetMotionRange = s_pEnv->GetMethodID(s_clsInputDevice, "getMotionRange", "(I)Landroid/view/InputDevice$MotionRange;");
+	if (s_midGetMotionRange == NULL)
+		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - getMotionRange() pointer is null");
+
+
+	s_clsKeyCharacterMap = s_pEnv->FindClass("android/view/KeyCharacterMap");
+	if (s_clsKeyCharacterMap == NULL)
+		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - KeyCharacterMap class pointer is null");
+
+	s_midDeviceHasKey = s_pEnv->GetStaticMethodID(s_clsKeyCharacterMap, "deviceHasKey", "(I)Z");
+	if (s_midDeviceHasKey == NULL)
+		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - deviceHasKey() pointer is null");
 }
 
 void ncAndroidInputManager::DetachJVM()
@@ -370,9 +400,9 @@ int ncAndroidInputManager::FindJoyId(int iDeviceId)
 
 	if (iJoyId >= -1 && s_joystickStates[iJoyId].m_iDeviceId != iDeviceId)
 	{
-		DeviceName(iDeviceId, iJoyId);
-		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::FindJoyId - Joystick %d (device %d) \"%s\" has been connected",
-			iJoyId, iDeviceId, s_joystickStates[iJoyId].m_vName);
+		DeviceInfo(iDeviceId, iJoyId);
+		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::FindJoyId - Joystick %d (device %d) \"%s\" has been connected - %d axes, %d buttons",
+			iJoyId, iDeviceId, s_joystickStates[iJoyId].m_vName, s_joystickStates[iJoyId].m_iNumAxes, s_joystickStates[iJoyId].m_iNumButtons);
 
 		// TODO: handle connection as en event
 	}
@@ -386,19 +416,20 @@ bool ncAndroidInputManager::isDeviceConnected(int iDeviceId)
 
 	jobject objInputDevice = s_pEnv->CallStaticObjectMethod(s_clsInputDevice, s_midGetDevice, iDeviceId);
 	if (objInputDevice)
-	{
-		s_pEnv->DeleteLocalRef(objInputDevice);
+	{	
 		bIsConnected = true;
+		s_pEnv->DeleteLocalRef(objInputDevice);
 	}
 
 	return bIsConnected;
 }
 
-void ncAndroidInputManager::DeviceName(int iDeviceId, int iJoyId)
+void ncAndroidInputManager::DeviceInfo(int iDeviceId, int iJoyId)
 {
 	jobject objInputDevice = s_pEnv->CallStaticObjectMethod(s_clsInputDevice, s_midGetDevice, iDeviceId);
 	if (objInputDevice)
 	{
+		// InputDevice.getName()
 		jstring jDeviceName = (jstring)s_pEnv->CallObjectMethod(objInputDevice, s_midGetName);
 		if (jDeviceName)
 		{
@@ -410,6 +441,39 @@ void ncAndroidInputManager::DeviceName(int iDeviceId, int iJoyId)
 		}
 		else
 			strncpy(s_joystickStates[iJoyId].m_vName, (const char *)"Unknown", ncAndroidJoystickState::s_uMaxNameLength);
+
+		// KeyCharacterMap.deviceHasKey()
+		int iNumButtons = 0;
+		for(int iButton = AKEYCODE_BUTTON_A; iButton < AKEYCODE_ESCAPE; iButton++)
+		{
+			jboolean hasKey = s_pEnv->CallStaticBooleanMethod(s_clsKeyCharacterMap, s_midDeviceHasKey, iButton);
+			if (hasKey == JNI_TRUE)
+			{
+				s_joystickStates[iJoyId].m_vButtonsMapping[iNumButtons] = iButton;
+				iNumButtons++;
+			}
+
+			if(iNumButtons >= ncAndroidJoystickState::s_iMaxButtons)
+				break;
+		}
+		s_joystickStates[iJoyId].m_iNumButtons = iNumButtons;
+
+		// InputDevice.getMotionRange()
+		int iNumAxes = 0;
+		for(unsigned int iAxis = AMOTION_EVENT_AXIS_X; iAxis < AMOTION_EVENT_AXIS_GENERIC_1; iAxis++)
+		{
+			jobject objMotionRange = s_pEnv->CallObjectMethod(objInputDevice, s_midGetMotionRange, iAxis);
+			if(objMotionRange)
+			{
+				s_joystickStates[iJoyId].m_vAxesMapping[iNumAxes] = iAxis;
+				iNumAxes++;
+				s_pEnv->DeleteLocalRef(objMotionRange);
+			}
+
+			if(iNumAxes >= ncAndroidJoystickState::s_iMaxAxes)
+				break;
+		}
+		s_joystickStates[iJoyId].m_iNumAxes = iNumAxes;
 
 		s_pEnv->DeleteLocalRef(objInputDevice);
 	}

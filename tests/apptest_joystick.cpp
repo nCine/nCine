@@ -40,10 +40,9 @@ void MyEventHandler::OnInit()
 	m_pTextNode->SetScale(0.85f);
 	m_pTextNode->SetPosition(ncApplication::Width()*0.1f, ncApplication::Height()*0.35f);
 
-#ifndef __ANDROID__
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"Joystick 0 (%s) - %d axes, %d buttons",
-		ncApplication::InputManager().JoyName(0), ncApplication::InputManager().JoyNumAxes(0), ncApplication::InputManager().JoyNumButtons(0));
-#endif
+	if(ncApplication::InputManager().isJoyPresent(0))
+		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"Joystick 0 (%s) - %d axes, %d buttons",
+			ncApplication::InputManager().JoyName(0), ncApplication::InputManager().JoyNumAxes(0), ncApplication::InputManager().JoyNumButtons(0));
 }
 
 void MyEventHandler::OnFrameStart()

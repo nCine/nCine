@@ -86,9 +86,6 @@ void android_main(struct android_app* state)
 	state->onAppCmd = engine_handle_cmd;
 	state->onInputEvent = engine_handle_input;
 
-	ncAndroidInputManager::AttachJVM(state->activity->vm);
-	ncAndroidInputManager::InitAccelerometerSensor(state);
-
 	while (ncApplication::ShouldQuit() == false)
 	{
 		int ident;
@@ -115,7 +112,6 @@ void android_main(struct android_app* state)
 			ncApplication::Step();
 	}
 
-	ncAndroidInputManager::DetachJVM();
 	ncApplication::Shutdown();
 	ANativeActivity_finish(state->activity);
 }
