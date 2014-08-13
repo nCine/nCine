@@ -15,8 +15,14 @@ bool ncAndroidInputManager::s_bAccelerometerEnabled = false;
 ncAccelerometerEvent ncAndroidInputManager::s_accelerometerEvent;
 ncTouchEvent ncAndroidInputManager::s_touchEvent;
 ncKeyboardEvent ncAndroidInputManager::s_keyboardEvent;
+#if (__ANDROID_API__ >= 13)
 short int ncIInputManager::s_iMaxAxisValue = 32767;
 ncAndroidJoystickState ncAndroidInputManager::s_joystickStates[s_uMaxNumJoysticks];
+const int ncAndroidJoystickState::s_vAxesToMap[ncAndroidJoystickState::s_iNumAxesToMap] =
+{ AMOTION_EVENT_AXIS_X, AMOTION_EVENT_AXIS_Y,
+  AMOTION_EVENT_AXIS_LTRIGGER, AMOTION_EVENT_AXIS_Z,
+  AMOTION_EVENT_AXIS_RZ, AMOTION_EVENT_AXIS_RTRIGGER,
+  AMOTION_EVENT_AXIS_RX, AMOTION_EVENT_AXIS_RY };
 JavaVM *ncAndroidInputManager::s_pJVM = NULL;
 JNIEnv *ncAndroidInputManager::s_pEnv = NULL;
 jclass ncAndroidInputManager::s_clsInputDevice = NULL;
@@ -25,6 +31,7 @@ jmethodID ncAndroidInputManager::s_midGetName = NULL;
 jmethodID ncAndroidInputManager::s_midGetMotionRange = NULL;
 jclass ncAndroidInputManager::s_clsKeyCharacterMap = NULL;
 jmethodID ncAndroidInputManager::s_midDeviceHasKey = NULL;
+#endif
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -106,68 +113,71 @@ void ncAndroidInputManager::ParseEvent(const AInputEvent* event)
 		// If the index is valid then the structure can be updated
 		if (iJoyId > -1)
 		{
+			s_joystickStates[iJoyId].m_iDeviceId = iDeviceId;
+
 			if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
 			{
+				int iKeyCode = AKeyEvent_getKeyCode(event);
 				int iBtnIndex = -1;
-				s_joystickStates[iJoyId].m_iDeviceId = iDeviceId;
+				if (iKeyCode >= AKEYCODE_BUTTON_A && iKeyCode < AKEYCODE_ESCAPE)
+					iBtnIndex = s_joystickStates[iJoyId].m_vButtonsMapping[iKeyCode - AKEYCODE_BUTTON_A];
 
-				switch(AKeyEvent_getKeyCode(event))
+				if (iBtnIndex > -1)
 				{
-					case AKEYCODE_BACK:
-						iBtnIndex = 0;
-						break;
-					case AKEYCODE_BUTTON_SELECT:
-						iBtnIndex = 1;
-						break;
-					case AKEYCODE_BUTTON_X:
-						iBtnIndex = 2;
-						break;
-					case AKEYCODE_BUTTON_A:
-						iBtnIndex = 3;
-						break;
-					case AKEYCODE_BUTTON_Y:
-						iBtnIndex = 4;
-						break;
-					case AKEYCODE_BUTTON_B:
-						iBtnIndex = 5;
-						break;
-					case AKEYCODE_BUTTON_R1:
-						iBtnIndex = 6;
-						break;
-					case AKEYCODE_BUTTON_L1:
-						iBtnIndex = 7;
-						break;
-					case AKEYCODE_BUTTON_THUMBR:
-						iBtnIndex = 8;
-						break;
-					case AKEYCODE_BUTTON_THUMBL:
-						iBtnIndex = 9;
-						break;
+					switch(AKeyEvent_getAction(event))
+					{
+						case AKEY_EVENT_ACTION_DOWN:
+							s_joystickStates[iJoyId].m_bButtons[iBtnIndex] = true;
+							break;
+						case AKEY_EVENT_ACTION_UP:
+							s_joystickStates[iJoyId].m_bButtons[iBtnIndex] = false;
+							break;
+						case AKEY_EVENT_ACTION_MULTIPLE:
+							break;
+					}
 				}
 
-				switch(AKeyEvent_getAction(event))
+				// Handling a D-Pad button event as an axis value
+				if (iKeyCode >= AKEYCODE_DPAD_UP && iKeyCode < AKEYCODE_DPAD_CENTER)
 				{
-					case AKEY_EVENT_ACTION_DOWN:
-						s_joystickStates[iJoyId].m_bButtons[iBtnIndex] = true;
-						break;
-					case AKEY_EVENT_ACTION_UP:
-						s_joystickStates[iJoyId].m_bButtons[iBtnIndex] = false;
-						break;
-					case AKEY_EVENT_ACTION_MULTIPLE:
-						break;
+					int iAxisIdx = -1;
+					float fAxisValue = 1.0f;
+					switch(iKeyCode)
+					{
+						case AKEYCODE_DPAD_UP:
+							iAxisIdx = s_joystickStates[iJoyId].m_iNumAxes-1;
+							fAxisValue = 1.0f;
+							break;
+						case AKEYCODE_DPAD_DOWN:
+							iAxisIdx = s_joystickStates[iJoyId].m_iNumAxes-1;
+							fAxisValue = -1.0f;
+							break;
+						case AKEYCODE_DPAD_LEFT:
+							iAxisIdx = s_joystickStates[iJoyId].m_iNumAxes-2;
+							fAxisValue = -1.0f;
+							break;
+						case AKEYCODE_DPAD_RIGHT:
+							iAxisIdx = s_joystickStates[iJoyId].m_iNumAxes-2;
+							fAxisValue = 1.0f;
+							break;
+					}
+
+					if (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN)
+						s_joystickStates[iJoyId].m_fAxisValues[iAxisIdx] = fAxisValue;
+					else
+						s_joystickStates[iJoyId].m_fAxisValues[iAxisIdx] = 0.0f;
 				}
 			}
 			else if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
 			{
-				s_joystickStates[iJoyId].m_iDeviceId = iDeviceId;
-				s_joystickStates[iJoyId].m_fAxisValues[0] = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_X, 0);
-				s_joystickStates[iJoyId].m_fAxisValues[1] = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_Y, 0);
-				s_joystickStates[iJoyId].m_fAxisValues[2] = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_LTRIGGER, 0);
-				s_joystickStates[iJoyId].m_fAxisValues[3] = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_Z, 0);
-				s_joystickStates[iJoyId].m_fAxisValues[4] = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_RZ, 0);
-				s_joystickStates[iJoyId].m_fAxisValues[5] = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_RTRIGGER, 0);
-				s_joystickStates[iJoyId].m_fAxisValues[6] = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_RX, 0);
-				s_joystickStates[iJoyId].m_fAxisValues[7] = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_RY, 0);
+				int iNumAxesNoDPad = s_joystickStates[iJoyId].m_iNumAxes;
+				if (s_joystickStates[iJoyId].m_bHasDPad)
+					iNumAxesNoDPad -= 2;
+				for(int i = 0; i < iNumAxesNoDPad; i++)
+				{
+					int iAxis = s_joystickStates[iJoyId].m_vAxesMapping[i];
+					s_joystickStates[iJoyId].m_fAxisValues[i] = AMotionEvent_getAxisValue(event, iAxis, 0);
+				}
 			}
 		}
 		else
@@ -176,7 +186,7 @@ void ncAndroidInputManager::ParseEvent(const AInputEvent* event)
 	else
 #endif
 		if ((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD &&
-			  AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
+			 AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
 	{
 		s_keyboardEvent.scancode = AKeyEvent_getScanCode(event);
 		s_keyboardEvent.sym = ncKeySym(AKeyEvent_getKeyCode(event));
@@ -449,31 +459,49 @@ void ncAndroidInputManager::DeviceInfo(int iDeviceId, int iJoyId)
 			jboolean hasKey = s_pEnv->CallStaticBooleanMethod(s_clsKeyCharacterMap, s_midDeviceHasKey, iButton);
 			if (hasKey == JNI_TRUE)
 			{
-				s_joystickStates[iJoyId].m_vButtonsMapping[iNumButtons] = iButton;
-				iNumButtons++;
+				s_joystickStates[iJoyId].m_vButtonsMapping[iButton - AKEYCODE_BUTTON_A] = iNumButtons;
+				ncServiceLocator::Logger().Write(ncILogger::LOG_VERBOSE, (const char *)"ncAndroidInputManager::DeviceInfo (%d, %d) - Button %d : %d", iDeviceId, iJoyId, iNumButtons, iButton);
+				iNumButtons++;			
 			}
+			else
+				s_joystickStates[iJoyId].m_vButtonsMapping[iButton - AKEYCODE_BUTTON_A] = -1;
 
 			if(iNumButtons >= ncAndroidJoystickState::s_iMaxButtons)
 				break;
 		}
 		s_joystickStates[iJoyId].m_iNumButtons = iNumButtons;
 
+		s_joystickStates[iJoyId].m_bHasDPad = true;
+		for(int iButton = AKEYCODE_DPAD_UP; iButton < AKEYCODE_DPAD_CENTER; iButton++)
+		{
+			jboolean hasKey = s_pEnv->CallStaticBooleanMethod(s_clsKeyCharacterMap, s_midDeviceHasKey, iButton);
+			if (hasKey == JNI_FALSE)
+			{
+				s_joystickStates[iJoyId].m_bHasDPad = false;
+				ncServiceLocator::Logger().Write(ncILogger::LOG_VERBOSE, (const char *)"ncAndroidInputManager::DeviceInfo (%d, %d) - D-Pad not detected", iDeviceId, iJoyId);
+				break;
+			}
+		}
+
 		// InputDevice.getMotionRange()
 		int iNumAxes = 0;
-		for(unsigned int iAxis = AMOTION_EVENT_AXIS_X; iAxis < AMOTION_EVENT_AXIS_GENERIC_1; iAxis++)
+		for(int i = 0; i < ncAndroidJoystickState::s_iNumAxesToMap; i++)
 		{
+			int iAxis = ncAndroidJoystickState::s_vAxesToMap[i];
 			jobject objMotionRange = s_pEnv->CallObjectMethod(objInputDevice, s_midGetMotionRange, iAxis);
+
 			if(objMotionRange)
 			{
 				s_joystickStates[iJoyId].m_vAxesMapping[iNumAxes] = iAxis;
+				ncServiceLocator::Logger().Write(ncILogger::LOG_VERBOSE, (const char *)"ncAndroidInputManager::DeviceInfo (%d, %d) - Axis %d: %d", iDeviceId, iJoyId, iNumAxes, iAxis);
 				iNumAxes++;
 				s_pEnv->DeleteLocalRef(objMotionRange);
 			}
-
-			if(iNumAxes >= ncAndroidJoystickState::s_iMaxAxes)
-				break;
 		}
 		s_joystickStates[iJoyId].m_iNumAxes = iNumAxes;
+		// Taking into account the D-Pad
+		if (s_joystickStates[iJoyId].m_bHasDPad)
+			s_joystickStates[iJoyId].m_iNumAxes += 2;
 
 		s_pEnv->DeleteLocalRef(objInputDevice);
 	}

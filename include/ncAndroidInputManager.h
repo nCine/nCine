@@ -8,26 +8,30 @@
 #include <android/api-level.h>
 #include "ncIInputManager.h"
 
+#if (__ANDROID_API__ >= 13)
 /// Information about Android joystick state
 class ncAndroidJoystickState
 {
 private:
 	static const unsigned int s_uMaxNameLength = 256;
 	static const int s_iMaxButtons = 10;
-	static const int s_iMaxAxes = 8;
+	static const int s_iMaxAxes = 10;
+	static const int s_iNumAxesToMap = 8;
+	static const int s_vAxesToMap[s_iNumAxesToMap];
 
 	int m_iDeviceId;
 	char m_vName[s_uMaxNameLength];
 
 	int m_iNumButtons;
 	int m_iNumAxes;
-	short int m_vButtonsMapping[s_iMaxButtons];
+	bool m_bHasDPad;
+	short int m_vButtonsMapping[AKEYCODE_ESCAPE - AKEYCODE_BUTTON_A];
 	short int m_vAxesMapping[s_iMaxAxes];
 	bool m_bButtons[s_iMaxButtons];
 	float m_fAxisValues[s_iMaxAxes];
 public:
 	ncAndroidJoystickState()
-		: m_iDeviceId(-1), m_iNumButtons(0), m_iNumAxes(0)
+		: m_iDeviceId(-1), m_iNumButtons(0), m_iNumAxes(0), m_bHasDPad(false)
 	{
 		m_vName[0] = '\0';
 		for (int i = 0; i < s_iMaxButtons; i++)
@@ -44,6 +48,7 @@ public:
 
 	friend class ncAndroidInputManager;
 };
+#endif
 
 /// The class for parsing and dispatching Android input events
 class ncAndroidInputManager : public ncIInputManager
