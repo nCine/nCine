@@ -65,6 +65,8 @@ private:
 	static ncTouchEvent s_touchEvent;
 	static ncKeyboardEvent s_keyboardEvent;
 	static ncAndroidJoystickState s_joystickStates[s_uMaxNumJoysticks];
+	static ncJoyButtonEvent s_joyButtonEvent;
+	static ncJoyAxisEvent s_joyAxisEvent;
 
 #if (__ANDROID_API__ >= 13)
 	static int FindJoyId(int iDeviceId);
@@ -107,7 +109,7 @@ public:
 	static void AttachJVM(struct android_app* state);
 	static void DetachJVM();
 
-	// Updates joystick state structures and raises disconnection events
+	// Updates joystick state structures
 	static void UpdateJoystickStates();
 #endif
 };

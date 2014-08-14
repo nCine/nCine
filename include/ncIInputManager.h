@@ -95,6 +95,7 @@ public:
 	int joyId;
 	int axisId;
 	short int value;
+	float normValue;
 };
 
 /// Information about a joystick button event

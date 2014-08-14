@@ -110,6 +110,7 @@ void ncSDLInputManager::ParseEvent(const SDL_Event &event)
 			s_joyAxisEvent.joyId = event.jaxis.which;
 			s_joyAxisEvent.axisId = event.jaxis.axis;
 			s_joyAxisEvent.value = event.jaxis.value;
+			s_joyAxisEvent.normValue = s_joyAxisEvent.value / float(s_iMaxAxisValue);
 			break;
 		case SDL_JOYHATMOTION:
 			s_joyAxisEvent.joyId = event.jhat.which;
@@ -149,9 +150,11 @@ void ncSDLInputManager::ParseEvent(const SDL_Event &event)
 			// HACK: Always splitting a hat event into two axis ones,
 			// even if the value of one of the two axes doesn't change
 			s_joyAxisEvent.value = HatEnumToAxisValue(event.jhat.value, false);
+			s_joyAxisEvent.normValue = s_joyAxisEvent.value / float(s_iMaxAxisValue);
 			s_pInputEventHandler->OnJoyAxisMoved(s_joyAxisEvent);
 			s_joyAxisEvent.axisId++;
 			s_joyAxisEvent.value = HatEnumToAxisValue(event.jhat.value, true);
+			s_joyAxisEvent.normValue = s_joyAxisEvent.value / float(s_iMaxAxisValue);
 			s_pInputEventHandler->OnJoyAxisMoved(s_joyAxisEvent);
 			break;
 		default:

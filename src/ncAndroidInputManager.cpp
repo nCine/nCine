@@ -18,11 +18,13 @@ ncKeyboardEvent ncAndroidInputManager::s_keyboardEvent;
 #if (__ANDROID_API__ >= 13)
 short int ncIInputManager::s_iMaxAxisValue = 32767;
 ncAndroidJoystickState ncAndroidInputManager::s_joystickStates[s_uMaxNumJoysticks];
+ncJoyButtonEvent ncAndroidInputManager::s_joyButtonEvent;
+ncJoyAxisEvent ncAndroidInputManager::s_joyAxisEvent;
 const int ncAndroidJoystickState::s_vAxesToMap[ncAndroidJoystickState::s_iNumAxesToMap] =
-{ AMOTION_EVENT_AXIS_X, AMOTION_EVENT_AXIS_Y,
-  AMOTION_EVENT_AXIS_LTRIGGER, AMOTION_EVENT_AXIS_Z,
-  AMOTION_EVENT_AXIS_RZ, AMOTION_EVENT_AXIS_RTRIGGER,
-  AMOTION_EVENT_AXIS_RX, AMOTION_EVENT_AXIS_RY };
+{ AMOTION_EVENT_AXIS_X,			AMOTION_EVENT_AXIS_Y,
+  AMOTION_EVENT_AXIS_LTRIGGER,	AMOTION_EVENT_AXIS_Z,
+  AMOTION_EVENT_AXIS_RZ,		AMOTION_EVENT_AXIS_RTRIGGER,
+  AMOTION_EVENT_AXIS_RX,		AMOTION_EVENT_AXIS_RY };
 JavaVM *ncAndroidInputManager::s_pJVM = NULL;
 JNIEnv *ncAndroidInputManager::s_pEnv = NULL;
 jclass ncAndroidInputManager::s_clsInputDevice = NULL;
@@ -124,13 +126,17 @@ void ncAndroidInputManager::ParseEvent(const AInputEvent* event)
 
 				if (iBtnIndex > -1)
 				{
+					s_joyButtonEvent.joyId = iJoyId;
+					s_joyButtonEvent.buttonId = iBtnIndex;
 					switch(AKeyEvent_getAction(event))
 					{
 						case AKEY_EVENT_ACTION_DOWN:
 							s_joystickStates[iJoyId].m_bButtons[iBtnIndex] = true;
+							s_pInputEventHandler->OnJoyButtonPressed(s_joyButtonEvent);
 							break;
 						case AKEY_EVENT_ACTION_UP:
 							s_joystickStates[iJoyId].m_bButtons[iBtnIndex] = false;
+							s_pInputEventHandler->OnJoyButtonReleased(s_joyButtonEvent);
 							break;
 						case AKEY_EVENT_ACTION_MULTIPLE:
 							break;
@@ -166,17 +172,31 @@ void ncAndroidInputManager::ParseEvent(const AInputEvent* event)
 						s_joystickStates[iJoyId].m_fAxisValues[iAxisIdx] = fAxisValue;
 					else
 						s_joystickStates[iJoyId].m_fAxisValues[iAxisIdx] = 0.0f;
+
+					s_joyAxisEvent.joyId = iJoyId;
+					s_joyAxisEvent.axisId = iAxisIdx;
+					s_joyAxisEvent.value = fAxisValue * s_iMaxAxisValue;
+					s_joyAxisEvent.normValue = fAxisValue;
+					s_pInputEventHandler->OnJoyAxisMoved(s_joyAxisEvent);
 				}
 			}
 			else if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
 			{
+				s_joyAxisEvent.joyId = iJoyId;
+
 				int iNumAxesNoDPad = s_joystickStates[iJoyId].m_iNumAxes;
 				if (s_joystickStates[iJoyId].m_bHasDPad)
 					iNumAxesNoDPad -= 2;
 				for(int i = 0; i < iNumAxesNoDPad; i++)
 				{
 					int iAxis = s_joystickStates[iJoyId].m_vAxesMapping[i];
-					s_joystickStates[iJoyId].m_fAxisValues[i] = AMotionEvent_getAxisValue(event, iAxis, 0);
+					float fAxisValue = AMotionEvent_getAxisValue(event, iAxis, 0);
+					s_joystickStates[iJoyId].m_fAxisValues[i] = fAxisValue;
+
+					s_joyAxisEvent.axisId = iAxis;
+					s_joyAxisEvent.value = fAxisValue * s_iMaxAxisValue;
+					s_joyAxisEvent.normValue = fAxisValue;
+					s_pInputEventHandler->OnJoyAxisMoved(s_joyAxisEvent);
 				}
 			}
 		}
@@ -326,7 +346,7 @@ void ncAndroidInputManager::AttachJVM(struct android_app* state)
 	else if (iGetEnvStatus == JNI_OK)
 		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::AttachJVM - GetEnv() successful");
 
-	if (s_pJVM == NULL)
+	if (s_pEnv == NULL)
 		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidInputManager::AttachJVM - JNIEnv pointer is null");
 
 
@@ -367,7 +387,7 @@ void ncAndroidInputManager::DetachJVM()
 	}
 }
 
-/// Updates joystick state structures and raises disconnection events
+/// Updates joystick state structures
 void ncAndroidInputManager::UpdateJoystickStates()
 {
 	for(unsigned int i = 0; i < s_uMaxNumJoysticks; i++)

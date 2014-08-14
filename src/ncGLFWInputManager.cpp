@@ -1,7 +1,5 @@
 #include "ncGLFWInputManager.h"
 #include "ncIInputEventHandler.h"
-#include "ncServiceLocator.h"
-#include "ncFileLogger.h"
 #include "ncApplication.h"
 
 ///////////////////////////////////////////////////////////
