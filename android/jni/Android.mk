@@ -53,6 +53,7 @@ LOCAL_SRC_FILES := \
 	$(SRC)/ncIFile.cpp \
 	$(SRC)/ncStandardFile.cpp \
 	$(SRC)/ncAssetFile.cpp \
+	$(SRC)/ncAndroidJNIHelper.cpp \
 	$(SRC)/ncAndroidInputManager.cpp \
 	$(SRC)/graphics/ncIGfxDevice.cpp \
 	$(SRC)/graphics/ncEGLGfxDevice.cpp \

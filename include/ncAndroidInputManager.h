@@ -1,14 +1,12 @@
 #ifndef CLASS_NCANDROIDINPUTMANAGER
 #define CLASS_NCANDROIDINPUTMANAGER
 
-#include <jni.h>
 #include <android_native_app_glue.h>
 #include <android/input.h>
 #include <android/sensor.h>
-#include <android/api-level.h>
 #include "ncIInputManager.h"
+#include "ncAndroidJNIHelper.h"
 
-#if (__ANDROID_API__ >= 13)
 /// Information about Android joystick state
 class ncAndroidJoystickState
 {
@@ -48,7 +46,6 @@ public:
 
 	friend class ncAndroidInputManager;
 };
-#endif
 
 /// The class for parsing and dispatching Android input events
 class ncAndroidInputManager : public ncIInputManager
@@ -64,24 +61,20 @@ private:
 	static ncAccelerometerEvent s_accelerometerEvent;
 	static ncTouchEvent s_touchEvent;
 	static ncKeyboardEvent s_keyboardEvent;
+
 	static ncAndroidJoystickState s_joystickStates[s_uMaxNumJoysticks];
 	static ncJoyButtonEvent s_joyButtonEvent;
 	static ncJoyAxisEvent s_joyAxisEvent;
 
-#if (__ANDROID_API__ >= 13)
 	static int FindJoyId(int iDeviceId);
-	static JavaVM *s_pJVM;
-	static JNIEnv *s_pEnv;
-	static jclass s_clsInputDevice;
-	static jmethodID s_midGetDevice;
-	static jmethodID s_midGetName;
-	static jmethodID s_midGetMotionRange;
-	static jclass s_clsKeyCharacterMap;
-	static jmethodID s_midDeviceHasKey;
-
 	static bool isDeviceConnected(int iDeviceId);
 	static void DeviceInfo(int iDeviceId, int iJoyId);
-#endif
+
+	// Updates joystick state structures
+	static void UpdateJoystickStates();
+
+	friend void android_main(struct android_app* state);
+
 public:
 	// Initializes the accelerometer sensor
 	static void InitAccelerometerSensor(struct android_app* state);
@@ -98,7 +91,6 @@ public:
 	// Parses an Android input event
 	static void ParseEvent(const AInputEvent* event);
 
-#if (__ANDROID_API__ >= 13)
 	bool isJoyPresent(int iJoyId) const;
 	const char* JoyName(int iJoyId) const;
 	int JoyNumButtons(int iJoyId) const;
@@ -106,12 +98,6 @@ public:
 	bool isJoyButtonPressed(int iJoyId, int iButtonId) const;
 	short int JoyAxisValue(int iJoyId, int iAxisId) const;
 	float JoyAxisNormValue(int iJoyId, int iAxisId) const;
-	static void AttachJVM(struct android_app* state);
-	static void DetachJVM();
-
-	// Updates joystick state structures
-	static void UpdateJoystickStates();
-#endif
 };
 
 #endif
