@@ -164,7 +164,7 @@ void ncSDLInputManager::ParseEvent(const SDL_Event &event)
 
 bool ncSDLInputManager::isJoyPresent(int iJoyId) const
 {
-	if(iJoyId >= 0 && iJoyId < s_uMaxNumJoysticks && SDL_JoystickOpened(iJoyId) && s_pJoysticks[iJoyId])
+	if(iJoyId >= 0 && iJoyId < int(s_uMaxNumJoysticks) && SDL_JoystickOpened(iJoyId) && s_pJoysticks[iJoyId])
 		return true;
 	else
 		return false;

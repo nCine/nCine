@@ -96,7 +96,7 @@ unsigned long long int ncTimer::Counter()
 	{
 		struct timespec now;
 		clock_gettime(CLOCK_MONOTONIC, &now);
-		ullCounter = now.tv_sec * s_ulFrequency + now.tv_nsec;
+		ullCounter = (unsigned long long int)now.tv_sec * s_ulFrequency + (unsigned long long int)now.tv_nsec;
 	}
 	else
 	{

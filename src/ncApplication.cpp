@@ -61,8 +61,7 @@ void ncApplication::Init(struct android_app* state, ncIAppEventHandler* (*pCreat
 	else
 		m_pGfxDevice = new ncEGLGfxDevice(state, ncDisplayMode(5, 6, 5));
 	ncAndroidJNIHelper::AttachJVM(state);
-	m_pInputManager = new ncAndroidInputManager();
-	ncAndroidInputManager::InitAccelerometerSensor(state);
+	m_pInputManager = new ncAndroidInputManager(state);
 	ncAssetFile::InitAssetManager(state);
 #else
 void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())

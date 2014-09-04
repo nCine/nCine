@@ -27,19 +27,18 @@ const int ncAndroidJoystickState::s_vAxesToMap[ncAndroidJoystickState::s_iNumAxe
   AMOTION_EVENT_AXIS_RX,		AMOTION_EVENT_AXIS_RY };
 
 ///////////////////////////////////////////////////////////
-// PUBLIC FUNCTIONS
+// CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// Initializes the accelerometer sensor
-void ncAndroidInputManager::InitAccelerometerSensor(android_app *state)
+ncAndroidInputManager::ncAndroidInputManager(struct android_app* state)
 {
-	// Prepare to monitor accelerometer
-	s_pSensorManager = ASensorManager_getInstance();
-	s_pAccelerometerSensor = ASensorManager_getDefaultSensor(s_pSensorManager,
-			ASENSOR_TYPE_ACCELEROMETER);
-	s_pSensorEventQueue = ASensorManager_createEventQueue(s_pSensorManager,
-			state->looper, LOOPER_ID_USER, NULL, NULL);
+	InitAccelerometerSensor(state);
+	InitJoyIds();
 }
+
+///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
 
 /// Enables the accelerometer sensor
 /*! It is called by EnableAccelerometer() and when the application gains focus */
@@ -313,6 +312,23 @@ float ncAndroidInputManager::JoyAxisNormValue(int iJoyId, int iAxisId) const
 	return fAxisValue;
 }
 
+
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+/// Initializes the accelerometer sensor
+void ncAndroidInputManager::InitAccelerometerSensor(android_app *state)
+{
+	// Prepare to monitor accelerometer
+	s_pSensorManager = ASensorManager_getInstance();
+	s_pAccelerometerSensor = ASensorManager_getDefaultSensor(s_pSensorManager,
+			ASENSOR_TYPE_ACCELEROMETER);
+	s_pSensorEventQueue = ASensorManager_createEventQueue(s_pSensorManager,
+			state->looper, LOOPER_ID_USER, NULL, NULL);
+}
+
 /// Updates joystick state structures
 void ncAndroidInputManager::UpdateJoystickStates()
 {
@@ -321,16 +337,38 @@ void ncAndroidInputManager::UpdateJoystickStates()
 		int iDeviceId = s_joystickStates[i].m_iDeviceId;
 		if(iDeviceId > -1 && isDeviceConnected(iDeviceId) == false)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::isJoyPresent - Joystick %d (device %d) \"%s\" has been disconnected",
+			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::UpdateJoystickStates - Joystick %d (device %d) \"%s\" has been disconnected",
 				i, iDeviceId, s_joystickStates[i].m_vName);
 			s_joystickStates[i].m_iDeviceId = -1;
 		}
 	}
 }
 
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
+void ncAndroidInputManager::InitJoyIds()
+{
+	const int iMaxDevs = s_uMaxNumJoysticks * 2;
+	int iDevIds[iMaxDevs];
+
+	int iConnectedJoys = 0;
+	int iConnectedDevs = ncAndroidJNIClass_InputDevice::getDeviceIds(iDevIds, iMaxDevs);
+	for (int i = 0; i < iMaxDevs && i < iConnectedDevs; i++)
+	{
+		ncAndroidJNIClass_InputDevice inputDevice = ncAndroidJNIClass_InputDevice::getDevice(iDevIds[i]);
+		int sources = inputDevice.getSources();
+
+		if (((sources & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD) ||
+			((sources & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK))
+		{
+			int iJoyId = FindJoyId(iDevIds[i]);
+			if (iJoyId > -1)
+				s_joystickStates[iJoyId].m_iDeviceId = iDevIds[i];
+
+			iConnectedJoys++;
+			if (iConnectedJoys >= int(s_uMaxNumJoysticks))
+				break;
+		}
+	}
+}
 
 int ncAndroidInputManager::FindJoyId(int iDeviceId)
 {

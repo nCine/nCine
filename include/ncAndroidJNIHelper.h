@@ -63,16 +63,20 @@ class ncAndroidJNIClass_InputDevice : public ncAndroidJNIClass
 private:
 	static jclass s_javaClass;
 	static jmethodID s_midGetDevice;
+	static jmethodID s_midGetDeviceIds;
 	static jmethodID s_midGetName;
 	static jmethodID s_midGetMotionRange;
+	static jmethodID s_midGetSources;
 
 public:
 	static void Init();
 	ncAndroidJNIClass_InputDevice(jobject javaObject)
 		: ncAndroidJNIClass(javaObject) { }
 	static ncAndroidJNIClass_InputDevice getDevice(int iDeviceId);
-	void getName(char *vDestination, unsigned int uMaxStringSize);
+	static int getDeviceIds(int *vDestination, int iMaxSize);
+	void getName(char *vDestination, int iMaxStringSize);
 	ncAndroidJNIClass_MotionRange getMotionRange(int iAxis);
+	int getSources();
 };
 
 class ncAndroidJNIClass_KeyCharacterMap : public ncAndroidJNIClass

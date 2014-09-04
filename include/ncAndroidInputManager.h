@@ -66,18 +66,21 @@ private:
 	static ncJoyButtonEvent s_joyButtonEvent;
 	static ncJoyAxisEvent s_joyAxisEvent;
 
+	// Initializes the accelerometer sensor
+	static void InitAccelerometerSensor(struct android_app* state);
+	// Updates joystick state structures
+	static void UpdateJoystickStates();
+
+	static void InitJoyIds();
 	static int FindJoyId(int iDeviceId);
 	static bool isDeviceConnected(int iDeviceId);
 	static void DeviceInfo(int iDeviceId, int iJoyId);
 
-	// Updates joystick state structures
-	static void UpdateJoystickStates();
-
 	friend void android_main(struct android_app* state);
 
 public:
-	// Initializes the accelerometer sensor
-	static void InitAccelerometerSensor(struct android_app* state);
+	ncAndroidInputManager(struct android_app* state);
+
 	// Enables the accelerometer sensor
 	static void EnableAccelerometerSensor();
 	// Disables the accelerometer sensor
