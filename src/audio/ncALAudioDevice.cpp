@@ -12,24 +12,27 @@ ncALAudioDevice::ncALAudioDevice()
 	: m_pDevice(NULL), m_pContext(NULL), m_fGain(1.0f)
 {
 	m_pDevice = alcOpenDevice(NULL);
-	if (m_pDevice == NULL) {
+	if (m_pDevice == NULL)
+	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcOpenDevice failed: %x", alGetError());
 		exit(EXIT_FAILURE);
 	}
 
 	m_pContext = alcCreateContext(m_pDevice, NULL);
-	if (m_pContext == NULL) {
+	if (m_pContext == NULL)
+	{
 		alcCloseDevice(m_pDevice);
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcCreateContext failed: %x", alGetError());
 		exit(EXIT_FAILURE);
-	  }
+	}
 
-	if (!alcMakeContextCurrent(m_pContext)) {
+	if (!alcMakeContextCurrent(m_pContext))
+	{
 		alcDestroyContext(m_pContext);
 		alcCloseDevice(m_pDevice);
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcMakeContextCurrent failed: %x", alGetError());
 		exit(EXIT_FAILURE);
-	  }
+	}
 
 	alGenSources(s_uMaxSources, m_uSources);
 	alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
@@ -45,7 +48,8 @@ ncALAudioDevice::~ncALAudioDevice()
 	alcDestroyContext(m_pContext);
 
 	ALCboolean result = alcCloseDevice(m_pDevice);
-	if (!result) {
+	if (!result)
+	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::~ncALAudioDevice - alcCloseDevice failed: %d", alGetError());
 		exit(EXIT_FAILURE);
 	}

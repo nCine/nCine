@@ -159,16 +159,10 @@ short int ncGLFWInputManager::JoyAxisValue(int iJoyId, int iAxisId) const
 
 float ncGLFWInputManager::JoyAxisNormValue(int iJoyId, int iAxisId) const
 {
-	short int fAxisValue = 0.0f;
+	float fAxisValue = 0.0f;
 
 	if (isJoyPresent(iJoyId) && iAxisId >= 0 && iAxisId < JoyNumAxes(iJoyId))
-	{
 		fAxisValue = s_joystickStates[iJoyId].m_fAxisValues[iAxisId];
-
-		// Odd axes are inverted to maintain consistency with the SDL implementation
-		if (iAxisId % 2)
-			fAxisValue *= -1.0f;
-	}
 
 	return fAxisValue;
 }

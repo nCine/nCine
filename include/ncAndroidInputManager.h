@@ -7,6 +7,8 @@
 #include "ncIInputManager.h"
 #include "ncAndroidJNIHelper.h"
 
+class ncTimer;
+
 /// Information about Android joystick state
 class ncAndroidJoystickState
 {
@@ -65,11 +67,14 @@ private:
 	static ncAndroidJoystickState s_joystickStates[s_uMaxNumJoysticks];
 	static ncJoyButtonEvent s_joyButtonEvent;
 	static ncJoyAxisEvent s_joyAxisEvent;
+	/// Update rate of CheckJoystickDisconnections() in seconds
+	static const float s_joyCheckDisconnectionsRate = 0.25f;
+	static ncTimer s_joyCheckDisconnectionsTimer;
 
 	// Initializes the accelerometer sensor
 	static void InitAccelerometerSensor(struct android_app* state);
-	// Updates joystick state structures
-	static void UpdateJoystickStates();
+	// Checks if a previously connected joystick has been disconnected
+	static void CheckJoystickDisconnections();
 
 	static void InitJoyIds();
 	static int FindJoyId(int iDeviceId);

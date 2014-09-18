@@ -2,6 +2,7 @@
 #include "ncIInputEventHandler.h"
 #include "ncApplication.h"
 #include "ncServiceLocator.h"
+#include "ncTimer.h"
 
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
@@ -20,6 +21,7 @@ short int ncIInputManager::s_iMaxAxisValue = 32767;
 ncAndroidJoystickState ncAndroidInputManager::s_joystickStates[s_uMaxNumJoysticks];
 ncJoyButtonEvent ncAndroidInputManager::s_joyButtonEvent;
 ncJoyAxisEvent ncAndroidInputManager::s_joyAxisEvent;
+ncTimer ncAndroidInputManager::s_joyCheckDisconnectionsTimer;
 const int ncAndroidJoystickState::s_vAxesToMap[ncAndroidJoystickState::s_iNumAxesToMap] =
 { AMOTION_EVENT_AXIS_X,			AMOTION_EVENT_AXIS_Y,
   AMOTION_EVENT_AXIS_LTRIGGER,	AMOTION_EVENT_AXIS_Z,
@@ -329,18 +331,23 @@ void ncAndroidInputManager::InitAccelerometerSensor(android_app *state)
 			state->looper, LOOPER_ID_USER, NULL, NULL);
 }
 
-/// Updates joystick state structures
-void ncAndroidInputManager::UpdateJoystickStates()
+/// Checks if a previously connected joystick has been disconnected
+void ncAndroidInputManager::CheckJoystickDisconnections()
 {
-	for(unsigned int i = 0; i < s_uMaxNumJoysticks; i++)
+	if(s_joyCheckDisconnectionsTimer.Interval() >= s_joyCheckDisconnectionsRate)
 	{
-		int iDeviceId = s_joystickStates[i].m_iDeviceId;
-		if(iDeviceId > -1 && isDeviceConnected(iDeviceId) == false)
+		for(unsigned int i = 0; i < s_uMaxNumJoysticks; i++)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::UpdateJoystickStates - Joystick %d (device %d) \"%s\" has been disconnected",
-				i, iDeviceId, s_joystickStates[i].m_vName);
-			s_joystickStates[i].m_iDeviceId = -1;
+			int iDeviceId = s_joystickStates[i].m_iDeviceId;
+			if(iDeviceId > -1 && isDeviceConnected(iDeviceId) == false)
+			{
+				ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::CheckJoystickDisconnections - Joystick %d (device %d) \"%s\" has been disconnected",
+					i, iDeviceId, s_joystickStates[i].m_vName);
+				s_joystickStates[i].m_iDeviceId = -1;
+			}
 		}
+
+		s_joyCheckDisconnectionsTimer.Start();
 	}
 }
 
@@ -395,8 +402,6 @@ int ncAndroidInputManager::FindJoyId(int iDeviceId)
 		DeviceInfo(iDeviceId, iJoyId);
 		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::FindJoyId - Joystick %d (device %d) \"%s\" has been connected - %d axes, %d buttons",
 			iJoyId, iDeviceId, s_joystickStates[iJoyId].m_vName, s_joystickStates[iJoyId].m_iNumAxes, s_joystickStates[iJoyId].m_iNumButtons);
-
-		// TODO: handle connection as en event
 	}
 
 	return iJoyId;

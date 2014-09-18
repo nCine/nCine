@@ -92,7 +92,7 @@ void android_main(struct android_app* state)
 		int events;
 		struct android_poll_source* source;
 
-		ncAndroidInputManager::UpdateJoystickStates();
+		ncAndroidInputManager::CheckJoystickDisconnections();
 
 		while ((ident = ALooper_pollAll(!ncApplication::IsPaused() ? 0 : -1, NULL, &events, (void**)&source)) >= 0)
 		{
