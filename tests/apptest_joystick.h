@@ -19,7 +19,8 @@ private:
 	ncFont *m_pFont;
 	ncTextNode *m_pTextNode;
 
-	static const int numAxes = 8;
+	static const int numJoysticks = 4;
+	static const int numAxes = 10;
 	float m_fAxisValues[numAxes];
 	static const int numButtons = 12;
 	unsigned char m_ubButtonStates[numButtons];

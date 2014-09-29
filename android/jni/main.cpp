@@ -92,8 +92,6 @@ void android_main(struct android_app* state)
 		int events;
 		struct android_poll_source* source;
 
-		ncAndroidInputManager::CheckJoystickDisconnections();
-
 		while ((ident = ALooper_pollAll(!ncApplication::IsPaused() ? 0 : -1, NULL, &events, (void**)&source)) >= 0)
 		{
 			if (source != NULL)
@@ -107,7 +105,10 @@ void android_main(struct android_app* state)
 		}
 
 		if (ncApplication::HasFocus() && !ncApplication::IsPaused())
+		{
+			ncAndroidInputManager::UpdateJoystickConnections();
 			ncApplication::Step();
+		}
 	}
 
 	ncApplication::Shutdown();

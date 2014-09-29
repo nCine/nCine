@@ -16,7 +16,7 @@ private:
 	static const unsigned int s_uMaxNameLength = 256;
 	static const int s_iMaxButtons = 10;
 	static const int s_iMaxAxes = 10;
-	static const int s_iNumAxesToMap = 8;
+	static const int s_iNumAxesToMap = 10;
 	static const int s_vAxesToMap[s_iNumAxesToMap];
 
 	int m_iDeviceId;
@@ -68,15 +68,19 @@ private:
 	static ncJoyButtonEvent s_joyButtonEvent;
 	static ncJoyAxisEvent s_joyAxisEvent;
 	/// Update rate of CheckJoystickDisconnections() in seconds
-	static const float s_joyCheckDisconnectionsRate = 0.25f;
-	static ncTimer s_joyCheckDisconnectionsTimer;
+	static const float s_joyCheckRate = 0.25f;
+	static ncTimer s_joyCheckTimer;
 
 	// Initializes the accelerometer sensor
 	static void InitAccelerometerSensor(struct android_app* state);
-	// Checks if a previously connected joystick has been disconnected
-	static void CheckJoystickDisconnections();
 
-	static void InitJoyIds();
+	// Updates joystick states after connections and disconnections
+	static void UpdateJoystickConnections();
+	// Checks if a previously connected joystick has been disconnected
+	static void CheckDisconnectedJoysticks();
+	// Checks if a new joystick has been connected
+	static void CheckConnectedJoysticks();
+
 	static int FindJoyId(int iDeviceId);
 	static bool isDeviceConnected(int iDeviceId);
 	static void DeviceInfo(int iDeviceId, int iJoyId);

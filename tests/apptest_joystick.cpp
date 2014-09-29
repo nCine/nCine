@@ -40,24 +40,47 @@ void MyEventHandler::OnInit()
 	m_pTextNode->SetScale(0.85f);
 	m_pTextNode->SetPosition(ncApplication::Width()*0.1f, ncApplication::Height()*0.35f);
 
-	if(ncApplication::InputManager().isJoyPresent(0))
-		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"Joystick 0 (%s) - %d axes, %d buttons",
-			ncApplication::InputManager().JoyName(0), ncApplication::InputManager().JoyNumAxes(0), ncApplication::InputManager().JoyNumButtons(0));
+	for (int i = 0; i < numJoysticks; i++)
+	{
+		if(ncApplication::InputManager().isJoyPresent(i))
+		{
+			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"Joystick %d (%s) - %d axes, %d buttons", i,
+				ncApplication::InputManager().JoyName(i), ncApplication::InputManager().JoyNumAxes(i), ncApplication::InputManager().JoyNumButtons(i));
+		}
+	}
 }
 
 void MyEventHandler::OnFrameStart()
 {
+	int iFirstJoy = 0;
+	for (int i = 0; i < numJoysticks; i++)
+	{
+		if (ncApplication::InputManager().isJoyPresent(i))
+		{
+			iFirstJoy = i;
+			break;
+		}
+	}
+
 	memset(m_vJoyString, 0, numChars);
+	for (int i = 0; i < numJoysticks; i++)
+	{
+		if(ncApplication::InputManager().isJoyPresent(i))
+		{
+			sprintf(&m_vJoyString[strlen(m_vJoyString)], "Joystick %d: %s (%d axes, %d buttons)\n", i,
+				ncApplication::InputManager().JoyName(i), ncApplication::InputManager().JoyNumAxes(i), ncApplication::InputManager().JoyNumButtons(i));
+		}
+	}
 	strncat(m_vJoyString, "Axes:", 5);
 	for (int i = 0; i < numAxes; i++)
 	{
-		m_fAxisValues[i] = ncApplication::InputManager().JoyAxisNormValue(0, i);
-		sprintf(&m_vJoyString[strlen(m_vJoyString)], " %f", m_fAxisValues[i]);
+		m_fAxisValues[i] = ncApplication::InputManager().JoyAxisNormValue(iFirstJoy, i);
+		sprintf(&m_vJoyString[strlen(m_vJoyString)], " %.2f", m_fAxisValues[i]);
 	}
 	strncat(m_vJoyString, "\nButtons:", 9);
 	for (int i = 0; i < numButtons; i++)
 	{
-		m_ubButtonStates[i] = ncApplication::InputManager().isJoyButtonPressed(0, i);
+		m_ubButtonStates[i] = ncApplication::InputManager().isJoyButtonPressed(iFirstJoy, i);
 		sprintf(&m_vJoyString[strlen(m_vJoyString)], " %u", m_ubButtonStates[i]);
 	}
 	m_pTextNode->SetString(m_vJoyString);
