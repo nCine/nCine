@@ -138,7 +138,7 @@ T& ncArray<T>::operator[] (const unsigned int uIndex)
 {
 	if (uIndex > m_uCapacity - 1)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncArray::operator[] - Element %u out of capacity range!", uIndex);
+//		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncArray::operator[] - Element %u out of capacity range!", uIndex);
 //		exit(EXIT_FAILURE);
 	}
 

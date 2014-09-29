@@ -110,6 +110,7 @@ void ncSDLInputManager::ParseEvent(const SDL_Event &event)
 			s_joyAxisEvent.joyId = event.jaxis.which;
 			s_joyAxisEvent.axisId = event.jaxis.axis;
 			s_joyAxisEvent.value = event.jaxis.value;
+			s_joyAxisEvent.normValue = s_joyAxisEvent.value / float(s_iMaxAxisValue);
 			break;
 		case SDL_JOYHATMOTION:
 			s_joyAxisEvent.joyId = event.jhat.which;
@@ -149,9 +150,11 @@ void ncSDLInputManager::ParseEvent(const SDL_Event &event)
 			// HACK: Always splitting a hat event into two axis ones,
 			// even if the value of one of the two axes doesn't change
 			s_joyAxisEvent.value = HatEnumToAxisValue(event.jhat.value, false);
+			s_joyAxisEvent.normValue = s_joyAxisEvent.value / float(s_iMaxAxisValue);
 			s_pInputEventHandler->OnJoyAxisMoved(s_joyAxisEvent);
 			s_joyAxisEvent.axisId++;
 			s_joyAxisEvent.value = HatEnumToAxisValue(event.jhat.value, true);
+			s_joyAxisEvent.normValue = s_joyAxisEvent.value / float(s_iMaxAxisValue);
 			s_pInputEventHandler->OnJoyAxisMoved(s_joyAxisEvent);
 			break;
 		default:
@@ -161,10 +164,18 @@ void ncSDLInputManager::ParseEvent(const SDL_Event &event)
 
 bool ncSDLInputManager::isJoyPresent(int iJoyId) const
 {
-	if(SDL_JoystickOpened(iJoyId) && s_pJoysticks[iJoyId])
+	if(iJoyId >= 0 && iJoyId < int(s_uMaxNumJoysticks) && SDL_JoystickOpened(iJoyId) && s_pJoysticks[iJoyId])
 		return true;
 	else
 		return false;
+}
+
+const char *ncSDLInputManager::JoyName(int iJoyId) const
+{
+	if (isJoyPresent(iJoyId))
+		return SDL_JoystickName(iJoyId);
+	else
+		return '\0';
 }
 
 int ncSDLInputManager::JoyNumButtons(int iJoyId) const
@@ -215,6 +226,14 @@ short int ncSDLInputManager::JoyAxisValue(int iJoyId, int iAxisId) const
 	}
 
 	return iRetValue;
+}
+
+float ncSDLInputManager::JoyAxisNormValue(int iJoyId, int iAxisId) const
+{
+	// If the joystick is not present the returned value is zero
+	float fAxisValue = JoyAxisValue(iJoyId, iAxisId) / float(s_iMaxAxisValue);
+
+	return fAxisValue;
 }
 
 ///////////////////////////////////////////////////////////

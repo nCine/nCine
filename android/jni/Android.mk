@@ -53,6 +53,7 @@ LOCAL_SRC_FILES := \
 	$(SRC)/ncIFile.cpp \
 	$(SRC)/ncStandardFile.cpp \
 	$(SRC)/ncAssetFile.cpp \
+	$(SRC)/ncAndroidJNIHelper.cpp \
 	$(SRC)/ncAndroidInputManager.cpp \
 	$(SRC)/graphics/ncIGfxDevice.cpp \
 	$(SRC)/graphics/ncEGLGfxDevice.cpp \
@@ -91,7 +92,7 @@ LOCAL_SRC_FILES := \
 	$(SRC)/threading/ncPOSIXThread.cpp \
 	$(SRC)/threading/ncPOSIXThreadSync.cpp \
 	$(SRC)/threading/ncThreadPool.cpp \
-	$(TST)/apptest_mipmapping.cpp
+	$(TST)/apptest_joystick.cpp
 
 LOCAL_LDLIBS := -lm -llog -landroid -lEGL -lGLESv1_CM
 LOCAL_STATIC_LIBRARIES := android_native_app_glue webp tremolo

@@ -60,7 +60,8 @@ void ncApplication::Init(struct android_app* state, ncIAppEventHandler* (*pCreat
 		m_pGfxDevice = new ncEGLGfxDevice(state, ncDisplayMode(8, 8, 8));
 	else
 		m_pGfxDevice = new ncEGLGfxDevice(state, ncDisplayMode(5, 6, 5));
-	m_pInputManager = new ncAndroidInputManager();
+	ncAndroidJNIHelper::AttachJVM(state);
+	m_pInputManager = new ncAndroidInputManager(state);
 	ncAssetFile::InitAssetManager(state);
 #else
 void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
@@ -229,6 +230,9 @@ void ncApplication::Shutdown()
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Shutdown - ncIAppEventHandler::OnShutdown() invoked");
 
 	delete m_pInputManager;
+#ifdef __ANDROID__
+	ncAndroidJNIHelper::DetachJVM();
+#endif
 	if (m_pAppEventHandler)
 		delete m_pAppEventHandler;
 

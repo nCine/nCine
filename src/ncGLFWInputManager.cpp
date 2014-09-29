@@ -1,7 +1,5 @@
 #include "ncGLFWInputManager.h"
 #include "ncIInputEventHandler.h"
-#include "ncServiceLocator.h"
-#include "ncFileLogger.h"
 #include "ncApplication.h"
 
 ///////////////////////////////////////////////////////////
@@ -109,10 +107,18 @@ void ncGLFWInputManager::UpdateJoystickStates()
 
 bool ncGLFWInputManager::isJoyPresent(int iJoyId) const
 {
-	if (GLFW_JOYSTICK_1 + iJoyId <= GLFW_JOYSTICK_LAST)
+	if (iJoyId >= 0 && GLFW_JOYSTICK_1 + iJoyId <= GLFW_JOYSTICK_LAST)
 		return glfwJoystickPresent(GLFW_JOYSTICK_1 + iJoyId);
 	else
 		return false;
+}
+
+const char* ncGLFWInputManager::JoyName(int iJoyId) const
+{
+	if (isJoyPresent(iJoyId))
+		return glfwGetJoystickName(iJoyId);
+	else
+		return '\0';
 }
 
 int ncGLFWInputManager::JoyNumButtons(int iJoyId) const
@@ -137,7 +143,7 @@ int ncGLFWInputManager::JoyNumAxes(int iJoyId) const
 
 bool ncGLFWInputManager::isJoyButtonPressed(int iJoyId, int iButtonId) const
 {
-	if (isJoyPresent(iJoyId) && iButtonId < JoyNumButtons(iJoyId))
+	if (isJoyPresent(iJoyId) && iButtonId >= 0 && iButtonId < JoyNumButtons(iJoyId))
 		return s_joystickStates[iJoyId].m_ubButtons[iButtonId];
 	else
 		return false;
@@ -145,16 +151,18 @@ bool ncGLFWInputManager::isJoyButtonPressed(int iJoyId, int iButtonId) const
 
 short int ncGLFWInputManager::JoyAxisValue(int iJoyId, int iAxisId) const
 {
-	if (isJoyPresent(iJoyId) && iAxisId < JoyNumAxes(iJoyId))
-	{
-		float fAxisValue = s_joystickStates[iJoyId].m_fAxisValues[iAxisId];
+	// If the joystick is not present the returned value is zero
+	short int iAxisValue = JoyAxisNormValue(iJoyId, iAxisId) * s_iMaxAxisValue;
 
-		// Odd axes are inverted to maintain consistency with the SDL implementation
-		if (iAxisId % 2)
-			fAxisValue *= -1.0f;
+	return iAxisValue;
+}
 
-		return fAxisValue * s_iMaxAxisValue;
-	}
-	else
-		return 0;
+float ncGLFWInputManager::JoyAxisNormValue(int iJoyId, int iAxisId) const
+{
+	float fAxisValue = 0.0f;
+
+	if (isJoyPresent(iJoyId) && iAxisId >= 0 && iAxisId < JoyNumAxes(iJoyId))
+		fAxisValue = s_joystickStates[iJoyId].m_fAxisValues[iAxisId];
+
+	return fAxisValue;
 }
