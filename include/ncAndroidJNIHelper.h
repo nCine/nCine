@@ -8,6 +8,9 @@
 /// The class for calling the Java Android API via JNI
 class ncAndroidJNIHelper
 {
+public:
+	inline static unsigned int SDKVersion() { return s_uSDKVersion; }
+
 private:
 	static JavaVM *s_pJVM;
 	static JNIEnv *s_pEnv;
@@ -15,6 +18,8 @@ private:
 	static void AttachJVM(struct android_app* state);
 	static void DetachJVM();
 	static void InitClasses();
+
+	static unsigned int s_uSDKVersion;
 
 	friend class ncApplication;
 };
@@ -67,6 +72,7 @@ private:
 	static jmethodID s_midGetName;
 	static jmethodID s_midGetMotionRange;
 	static jmethodID s_midGetSources;
+	static jmethodID s_midHasKeys;
 
 public:
 	static void Init();
@@ -77,6 +83,7 @@ public:
 	void getName(char *vDestination, int iMaxStringSize);
 	ncAndroidJNIClass_MotionRange getMotionRange(int iAxis);
 	int getSources();
+	void hasKeys(int *vButtons, const int iLength, bool *vBools);
 };
 
 class ncAndroidJNIClass_KeyCharacterMap : public ncAndroidJNIClass

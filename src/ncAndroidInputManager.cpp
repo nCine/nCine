@@ -353,6 +353,7 @@ void ncAndroidInputManager::CheckJoystickDisconnections()
 
 void ncAndroidInputManager::InitJoyIds()
 {
+	// InputDevice.getDeviceIds() will not fill an array longer than iMaxDevs
 	const int iMaxDevs = s_uMaxNumJoysticks * 2;
 	int iDevIds[iMaxDevs];
 
@@ -426,19 +427,37 @@ void ncAndroidInputManager::DeviceInfo(int iDeviceId, int iJoyId)
 		// InputDevice.getName()
 		inputDevice.getName(s_joystickStates[iJoyId].m_vName, ncAndroidJoystickState::s_uMaxNameLength);
 
-		// KeyCharacterMap.deviceHasKey()
+		const int iFirstButton = AKEYCODE_BUTTON_A;
+		const int iLastButton = AKEYCODE_ESCAPE;
+		bool vCheckedButtons[iLastButton-iFirstButton];
 		int iNumButtons = 0;
-		for(int iButton = AKEYCODE_BUTTON_A; iButton < AKEYCODE_ESCAPE; iButton++)
+		if (ncAndroidJNIHelper::SDKVersion() >= 19 && __ANDROID_API__ >= 19)
 		{
-			bool bHasKey = ncAndroidJNIClass_KeyCharacterMap::deviceHasKey(iButton);
+			int vButtonsToCheck[iLastButton-iFirstButton];
+			for(int i = 0; i < iLastButton-iFirstButton; i++)
+				vButtonsToCheck[i] = iFirstButton + i;
+
+			// InoutDevice.hasKeys()
+			inputDevice.hasKeys(vButtonsToCheck, iLastButton-iFirstButton, vCheckedButtons);
+		}
+
+		for(int iButton = iFirstButton; iButton < iLastButton; iButton++)
+		{
+			bool bHasKey;
+
+			if (ncAndroidJNIHelper::SDKVersion() >= 19 && __ANDROID_API__ >= 19)
+				bHasKey = vCheckedButtons[iButton - iFirstButton];
+			else // KeyCharacterMap.deviceHasKey()
+				bHasKey = ncAndroidJNIClass_KeyCharacterMap::deviceHasKey(iButton);
+
 			if (bHasKey)
 			{
-				s_joystickStates[iJoyId].m_vButtonsMapping[iButton - AKEYCODE_BUTTON_A] = iNumButtons;
+				s_joystickStates[iJoyId].m_vButtonsMapping[iButton - iFirstButton] = iNumButtons;
 				ncServiceLocator::Logger().Write(ncILogger::LOG_VERBOSE, (const char *)"ncAndroidInputManager::DeviceInfo (%d, %d) - Button %d : %d", iDeviceId, iJoyId, iNumButtons, iButton);
-				iNumButtons++;			
+				iNumButtons++;
 			}
 			else
-				s_joystickStates[iJoyId].m_vButtonsMapping[iButton - AKEYCODE_BUTTON_A] = -1;
+				s_joystickStates[iJoyId].m_vButtonsMapping[iButton - iFirstButton] = -1;
 
 			if(iNumButtons >= ncAndroidJoystickState::s_iMaxButtons)
 				break;
