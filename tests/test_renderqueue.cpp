@@ -50,9 +50,9 @@ int main(int argc, char **argv)
 	ncTexture *pMegaTexture = new ncTexture("textures/megatexture_256.png");
 	ncRect texRects[NUM_TEXTURES];
 	texRects[0] = ncRect(0, 0, 145, 121);
-	texRects[1] = ncRect(256-100, 0, 100, 100);
-	texRects[2] = ncRect(0, 256-96, 96, 96);
-	texRects[3] = ncRect(256-96, 256-96, 96, 96);
+	texRects[1] = ncRect(256 - 100, 0, 100, 100);
+	texRects[2] = ncRect(0, 256 - 96, 96, 96);
+	texRects[3] = ncRect(256 - 96, 256 - 96, 96, 96);
 	ncSpriteBatchNode spriteBatch(&rootNode, pMegaTexture);
 #else
 	ncTexture *pTextures[NUM_TEXTURES];
@@ -82,29 +82,34 @@ int main(int argc, char **argv)
 		float rot = rand() % 360;
 		pSprites[i]->SetRotation(rot);
 		unsigned char ucRandAlpha = rand() % 256;
-		pSprites[i]->SetColorF(1.0f, 1.0f, 1.0f, ucRandAlpha/255.0f);
+		pSprites[i]->SetColorF(1.0f, 1.0f, 1.0f, ucRandAlpha / 255.0f);
 	}
 
 
 // ----- Event cycle --------------------
-	while(!bQuit) {
-		while(SDL_PollEvent(&event)) {
-			switch(event.type) {
-			case SDL_QUIT:
-				bQuit = true;
-				break;
-			case SDL_KEYDOWN:
-				switch(event.key.keysym.sym) {
-				case SDLK_ESCAPE:
-				case SDLK_q:
+	while (!bQuit)
+	{
+		while (SDL_PollEvent(&event))
+		{
+			switch (event.type)
+			{
+				case SDL_QUIT:
 					bQuit = true;
 					break;
-				case SDLK_F1:
-					gfxDevice.ToggleFullScreen();
+				case SDL_KEYDOWN:
+					switch (event.key.keysym.sym)
+					{
+						case SDLK_ESCAPE:
+						case SDLK_q:
+							bQuit = true;
+							break;
+						case SDLK_F1:
+							gfxDevice.ToggleFullScreen();
+							break;
+						default:
+							break;
+					}
 					break;
-				default:
-					break;
-				}
 			}
 		}
 
@@ -120,8 +125,8 @@ int main(int argc, char **argv)
 
 		for (int i = 0; i < NUM_SPRITES; i++)
 		{
-			pSprites[i]->x = vX[i] + fSinus*vRadius[i];
-			pSprites[i]->y = vY[i] + fCosine*vRadius[i];
+			pSprites[i]->x = vX[i] + fSinus * vRadius[i];
+			pSprites[i]->y = vY[i] + fCosine * vRadius[i];
 		}
 
 		rootNode.Update(t.Interval());
@@ -134,15 +139,19 @@ int main(int argc, char **argv)
 
 // ----- Quitting ----------------------
 	for (int i = 0; i < NUM_SPRITES; i++)
+	{
 		delete pSprites[i];
+	}
 
 #ifdef WITH_BATCH
 	delete pMegaTexture;
 #else
 	for (int i = 0; i < NUM_TEXTURES; i++)
+	{
 		delete pTextures[i];
+	}
 #endif
 
 	ncServiceLocator::UnregisterAll();
-	return 0;	
+	return 0;
 }

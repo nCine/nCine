@@ -13,7 +13,7 @@ ncThread::ncThread()
 }
 
 /// Creates a thread around a function and runs it
-ncThread::ncThread(ncThreadFunctionPtr_t pStartFunction, void * pArg)
+ncThread::ncThread(ncThreadFunctionPtr_t pStartFunction, void* pArg)
 	: m_handle(0)
 {
 	Run(pStartFunction, pArg);
@@ -36,7 +36,7 @@ unsigned int ncThread::NumProcessors()
 }
 
 /// Spawns a new thread if the class hasn't one already associated
-void ncThread::Run(ncThreadFunctionPtr_t pStartFunction, void *pArg)
+void ncThread::Run(ncThreadFunctionPtr_t pStartFunction, void* pArg)
 {
 	if (m_handle == 0)
 	{
@@ -50,7 +50,9 @@ void ncThread::Run(ncThreadFunctionPtr_t pStartFunction, void *pArg)
 		}
 	}
 	else
+	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncThread::ncThread - thread %u is already running", m_handle);
+	}
 }
 
 /// Joins the thread
@@ -90,7 +92,7 @@ void ncThread::Cancel()
 ///////////////////////////////////////////////////////////
 
 /// The wrapper start function for thread creation
-unsigned int ncThread::WrapperFunction(void *pArg)
+unsigned int ncThread::WrapperFunction(void* pArg)
 {
 	ncThreadInfo* pThreadInfo = static_cast<ncThreadInfo*>(pArg);
 	pThreadInfo->m_pStartFunction(pThreadInfo->m_pThreadArg);

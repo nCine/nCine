@@ -30,7 +30,7 @@ void MyEventHandler::OnInit()
 #endif
 
 	m_pParticleSys = new ncParticleSystem(&rRootNode, numParticles, m_pTexture, m_pTexture->Rect());
-	m_pParticleSys->SetPosition(ncApplication::Width()*0.5f, ncApplication::Height()*0.33f);
+	m_pParticleSys->SetPosition(ncApplication::Width() * 0.5f, ncApplication::Height() * 0.33f);
 
 //	pParticleSys->AddAffector(new ncAccelerationAffector(0.000025f, 0.0f));
 	ncColorAffector *colAffector = new ncColorAffector();
@@ -65,13 +65,21 @@ void MyEventHandler::OnFrameEnd()
 	const ncKeyboardState &keyState = ncApplication::InputManager().KeyboardState();
 
 	if (keyState.isKeyDown(NCKEY_RIGHT))
+	{
 		m_pParticleSys->x += 0.1f * ncApplication::Interval();
+	}
 	else if (keyState.isKeyDown(NCKEY_LEFT))
+	{
 		m_pParticleSys->x -= 0.1f * ncApplication::Interval();
+	}
 	else if (keyState.isKeyDown(NCKEY_UP))
+	{
 		m_pParticleSys->y += 0.1f * ncApplication::Interval();
+	}
 	else if (keyState.isKeyDown(NCKEY_DOWN))
+	{
 		m_pParticleSys->y -= 0.1f * ncApplication::Interval();
+	}
 #endif
 }
 
@@ -102,16 +110,20 @@ void MyEventHandler::OnTouchMove(const ncTouchEvent &event)
 }
 void MyEventHandler::OnAcceleration(const ncAccelerometerEvent &event)
 {
-	m_pParticleSys->x += event.y*0.75f;
-	m_pParticleSys->y += -event.x*0.75f;
+	m_pParticleSys->x += event.y * 0.75f;
+	m_pParticleSys->y += -event.x * 0.75f;
 }
 #else
 void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
 {
 	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)
+	{
 		ncApplication::Quit();
+	}
 	else if (event.sym == NCKEY_SPACE)
+	{
 		ncApplication::TogglePause();
+	}
 }
 
 void MyEventHandler::OnMouseButtonPressed(const ncMouseEvent &event)

@@ -18,7 +18,7 @@ class ncVector2f
 	void Set(float const fX, float const fY);
 
 	/// Calculates vector length
-	inline float Length() const { return sqrt(x*x + y*y); }
+	inline float Length() const { return sqrt(x * x + y * y); }
 	// Vector normalization
 	ncVector2f& Normalize();
 	// Dot product

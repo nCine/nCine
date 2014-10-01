@@ -38,10 +38,12 @@ unsigned int ncThread::NumProcessors()
 	lConfRet = sysconf(_SC_NPROC_ONLN);
 #endif
 
-  if (lConfRet > 0)
-	  uNumProcs = static_cast<unsigned int>(lConfRet);
+	if (lConfRet > 0)
+	{
+		uNumProcs = static_cast<unsigned int>(lConfRet);
+	}
 
-  return uNumProcs;
+	return uNumProcs;
 }
 
 /// Spawns a new thread if the class hasn't one already associated
@@ -58,7 +60,9 @@ void ncThread::Run(ncThreadFunctionPtr_t pStartFunction, void *pArg)
 		}
 	}
 	else
+	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncThread::ncThread - thread %u is already running", m_tid);
+	}
 }
 
 /// Joins the thread

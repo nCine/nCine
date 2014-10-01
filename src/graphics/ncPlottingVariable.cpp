@@ -21,7 +21,9 @@ ncPlottingVariable::ncPlottingVariable(unsigned int uNumValues, float fRejectDel
 ncPlottingVariable::~ncPlottingVariable()
 {
 	if (m_fVertices)
+	{
 		delete[] m_fVertices;
+	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -38,8 +40,8 @@ void ncPlottingVariable::ApplyTransformations(float fAbsX, float fAbsY, float fA
 	float cosine = 1.0f;
 	if (abs(fAbsRotation) > ncDrawableNode::sMinRotation && abs(fAbsRotation) < 360.0f - ncDrawableNode::sMinRotation)
 	{
-		sine = sinf(-fAbsRotation * M_PI/180.0f);
-		cosine = cosf(-fAbsRotation * M_PI/180.0f);
+		sine = sinf(-fAbsRotation * M_PI / 180.0f);
+		cosine = cosf(-fAbsRotation * M_PI / 180.0f);
 	}
 
 	// Total number of vertices comprises both mean and variable vertices
@@ -48,7 +50,7 @@ void ncPlottingVariable::ApplyTransformations(float fAbsX, float fAbsY, float fA
 	int iStartingVertex = rGeom.FirstVertex() - m_meanCmd.Geometry().NumVertices();
 	for (int i = iStartingVertex; i < iStartingVertex + iNumVertices; i++)
 	{
-		float fX = rGeom.VertexPointer()[2*i]*fAbsScaleFactor;			float fY = rGeom.VertexPointer()[2*i + 1]*fAbsScaleFactor;
-		rGeom.VertexPointer()[2*i] = fAbsX + fX*cosine - fY*sine;		rGeom.VertexPointer()[2*i + 1] = fAbsY + fY*cosine + fX*sine;
+		float fX = rGeom.VertexPointer()[2 * i] * fAbsScaleFactor;			float fY = rGeom.VertexPointer()[2 * i + 1] * fAbsScaleFactor;
+		rGeom.VertexPointer()[2 * i] = fAbsX + fX * cosine - fY * sine;		rGeom.VertexPointer()[2 * i + 1] = fAbsY + fY * cosine + fX * sine;
 	}
 }

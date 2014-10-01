@@ -6,15 +6,16 @@ class ncILogger
 {
  public:
 	/// Log levels, from less to more severe
-	enum eLogLevel {
+	enum eLogLevel
+	{
 		LOG_UNKNOWN = 0,
-    	LOG_VERBOSE,
-    	LOG_DEBUG,
-    	LOG_INFO,
-    	LOG_WARN,
-    	LOG_ERROR,
-    	LOG_FATAL,
-    	LOG_OFF    
+		LOG_VERBOSE,
+		LOG_DEBUG,
+		LOG_INFO,
+		LOG_WARN,
+		LOG_ERROR,
+		LOG_FATAL,
+		LOG_OFF
 	};
 
 	virtual ~ncILogger() = 0;

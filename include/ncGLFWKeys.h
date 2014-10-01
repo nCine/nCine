@@ -4,7 +4,8 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-typedef enum {
+typedef enum
+{
 	NCKEY_UNKNOWN		= GLFW_KEY_UNKNOWN,
 	NCKEY_FIRST			= GLFW_KEY_UNKNOWN,
 	NCKEY_BACKSPACE		= GLFW_KEY_BACKSPACE,
@@ -152,7 +153,8 @@ typedef enum {
 	NCKEY_LAST
 } ncKeySym;
 
-typedef enum {
+typedef enum
+{
 	NCKEYMOD_NONE		= 0x0000,
 	NCKEYMOD_SHIFT		= GLFW_MOD_SHIFT,
 	NCKEYMOD_LSHIFT		= GLFW_MOD_SHIFT,

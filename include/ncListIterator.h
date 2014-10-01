@@ -63,7 +63,9 @@ template <class T>
 ncListIterator<T> ncListIterator<T>::operator++() const
 {
 	if (m_pNode)
+	{
 		m_pNode = m_pNode->m_pNext;
+	}
 
 	return *this;
 }
@@ -76,7 +78,9 @@ ncListIterator<T> ncListIterator<T>::operator++(int) const
 	ncListIterator<T> iterator = *this;
 
 	if (m_pNode)
+	{
 		m_pNode = m_pNode->m_pNext;
+	}
 
 	return iterator;
 }
@@ -86,7 +90,9 @@ template <class T>
 ncListIterator<T> ncListIterator<T>::operator--() const
 {
 	if (m_pNode)
+	{
 		m_pNode = m_pNode->m_pPrevious;
+	}
 
 	return *this;
 }
@@ -99,7 +105,9 @@ ncListIterator<T> ncListIterator<T>::operator--(int) const
 	ncListIterator<T> iterator = *this;
 
 	if (m_pNode)
+	{
 		m_pNode = m_pNode->m_pPrevious;
+	}
 
 	return iterator;
 }

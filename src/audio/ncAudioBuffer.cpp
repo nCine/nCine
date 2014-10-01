@@ -46,9 +46,13 @@ void ncAudioBuffer::Load(const ncIAudioLoader *pAudioLoader)
 	m_iChannels = pAudioLoader->Channels();
 
 	if (m_iChannels == 1)
+	{
 		eFormat = AL_FORMAT_MONO16;
+	}
 	else if (m_iChannels == 2)
+	{
 		eFormat = AL_FORMAT_STEREO16;
+	}
 	else
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncAudioBuffer::Load - Unsupported number of channels: %d", m_iChannels);

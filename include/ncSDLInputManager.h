@@ -18,7 +18,8 @@ class ncSDLMouseState : public ncMouseState
 
  private:
 	// Extracted from SDL/SDL_mouse.h
-	enum eMouseButtonMask {
+	enum eMouseButtonMask
+	{
 		LEFT_BUTTON   = 1,
 		MIDDLE_BUTTON = 2,
 		RIGHT_BUTTON  = 4,
@@ -45,7 +46,8 @@ class ncSDLMouseEvent : public ncMouseEvent
 
  private:
 	// Extracted from SDL/SDL_mouse.h
-	enum eMouseButtonIndex {
+	enum eMouseButtonIndex
+	{
 		LEFT_BUTTON = 1,
 		MIDDLE_BUTTON = 2,
 		RIGHT_BUTTON = 3,

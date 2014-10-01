@@ -40,7 +40,7 @@ ncSDLGfxDevice::ncSDLGfxDevice(ncPoint size, ncDisplayMode mode)
 void ncSDLGfxDevice::SetResolution(int iWidth, int iHeight)
 {
 	// change resolution only in the case it really changes
-	if(iWidth != m_iWidth || iHeight != m_iHeight)
+	if (iWidth != m_iWidth || iHeight != m_iHeight)
 	{
 		m_iWidth = iWidth;
 		m_iHeight = iHeight;
@@ -52,7 +52,7 @@ void ncSDLGfxDevice::SetResolution(int iWidth, int iHeight)
 void ncSDLGfxDevice::SetResolution(ncPoint size)
 {
 	// change resolution only in the case it really changes
-	if(size.x != m_iWidth || size.y != m_iHeight)
+	if (size.x != m_iWidth || size.y != m_iHeight)
 	{
 		m_iWidth = size.x;
 		m_iHeight = size.y;
@@ -87,7 +87,8 @@ void ncSDLGfxDevice::Init(int iWidth, int iHeight, ncDisplayMode mode, bool bIsW
 /// Initilizes the video subsystem (SDL)
 void ncSDLGfxDevice::InitGraphics()
 {
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncSDLGfxDevice::InitGraphics - SDL_Init(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
 		exit(-1);
 	}
@@ -98,29 +99,46 @@ void ncSDLGfxDevice::InitDevice()
 {
 	// setting OpenGL attributes
 	if (m_mode.RedBits() > 0)
+	{
 		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, m_mode.RedBits());
+	}
 	if (m_mode.GreenBits() > 0)
+	{
 		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, m_mode.GreenBits());
+	}
 	if (m_mode.BlueBits() > 0)
+	{
 		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, m_mode.BlueBits());
+	}
 	if (m_mode.AlphaBits() > 0)
+	{
 		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, m_mode.AlphaBits());
+	}
 	if (m_mode.BufferBits() > 0)
+	{
 		SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, m_mode.BufferBits());
+	}
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, m_mode.isDoubleBuffered());
 	SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, m_mode.isVSynced());
 	if (m_mode.DepthBits() > 0)
+	{
 		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, m_mode.DepthBits());
+	}
 	if (m_mode.StencilBits() > 0)
+	{
 		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, m_mode.StencilBits());
+	}
 
 	Uint32 lFlags = SDL_OPENGL;
 	if (m_bIsWindowed == false)
+	{
 		lFlags |= SDL_FULLSCREEN;
+	}
 
 	// setting screen mode, get a screen from SDL
-	if (!SDL_SetVideoMode(m_iWidth, m_iHeight, 0, lFlags)) {
+	if (!SDL_SetVideoMode(m_iWidth, m_iHeight, 0, lFlags))
+	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncSDLGfxDevice::InitDevice - SDL_SetVideoMode failed: %s", SDL_GetError());
 		exit(-1);
 	}
@@ -128,12 +146,14 @@ void ncSDLGfxDevice::InitDevice()
 #ifdef WITH_GLEW
 	GLenum err = glewInit();
 
-	if (GLEW_OK != err) {
+	if (GLEW_OK != err)
+	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncSDLGfxDevice::InitDevice - GLEW error: %s", glewGetErrorString(err));
 		exit(-1);
 	}
 
-	if (!GLEW_VERSION_2_0) {
+	if (!GLEW_VERSION_2_0)
+	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncSDLGfxDevice::InitDevice - OpenGL 2 is not supported");
 		exit(-1);
 	}

@@ -14,7 +14,7 @@ void MyEventHandler::OnInit()
 {
 	ncIInputManager::SetHandler(this);
 
-	for(unsigned int i = 0; i < 4; i++)
+	for (unsigned int i = 0; i < 4; i++)
 	{
 		ncServiceLocator::ThreadPool().EnqueueCommand(new ncDummyCommand(i));
 		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"APPTEST_THREADPOOL: enqueued %u", i);
@@ -26,6 +26,8 @@ void MyEventHandler::OnInit()
 void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
 {
 	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)
+	{
 		ncApplication::Quit();
+	}
 }
 #endif

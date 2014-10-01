@@ -9,12 +9,12 @@ float *pArray = NULL;
 
 void pThreadFunction(void *arg)
 {
-	int iThreadNum = *(static_cast<int*>(arg));
-	int iStartIndex = iThreadNum * (NUM_FLOATS/NUM_THREADS);
-	int iEndIndex = (iThreadNum+1) * (NUM_FLOATS/NUM_THREADS);
+	int iThreadNum = *(static_cast<int *>(arg));
+	int iStartIndex = iThreadNum * (NUM_FLOATS / NUM_THREADS);
+	int iEndIndex = (iThreadNum + 1) * (NUM_FLOATS / NUM_THREADS);
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"THREAD #%d: %d-%d", iThreadNum, iStartIndex, iEndIndex);
 
-	for(int i = iStartIndex; i < iEndIndex; i++)
+	for (int i = iStartIndex; i < iEndIndex; i++)
 	{
 		pArray[i] = 0.0f;
 
@@ -54,10 +54,12 @@ void MyEventHandler::OnInit()
 	}
 
 	for (int i = 0; i < NUM_THREADS; i++)
+	{
 		threads[i].Join();
+	}
 	float fEndTime = ncTimer::Now();
 
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"APPTEST_THREADS: total time %fms", (fEndTime-fStartTime)*1000.0f);
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"APPTEST_THREADS: total time %fms", (fEndTime - fStartTime) * 1000.0f);
 
 	delete[] pArray;
 }
@@ -66,6 +68,8 @@ void MyEventHandler::OnInit()
 void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
 {
 	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)
+	{
 		ncApplication::Quit();
+	}
 }
 #endif

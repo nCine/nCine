@@ -10,14 +10,16 @@ class ncIFile
 {
  public:
 	/// The enumeration of file types
-	enum eFileType {
+	enum eFileType
+	{
 		BASE_TYPE = 0,
 		STANDARD_TYPE,
 		ASSET_TYPE
 	};
 
 	/// The enumeration for the open mode bitmask
-	enum eOpenMode {
+	enum eOpenMode
+	{
 #if !(defined(_WIN32) && !defined(__MINGW32__))
 		MODE_FD = 1,
 #endif
@@ -27,7 +29,8 @@ class ncIFile
 	};
 
 	/// The enumeration for the access mode bitmask
-	enum eAccessMode {
+	enum eAccessMode
+	{
 		MODE_EXISTS = 0,
 		MODE_CAN_READ = 2,
 		MODE_CAN_WRITE = 4
@@ -81,19 +84,19 @@ class ncIFile
 	/// Reads a big endian 16 bit unsigned integer
 	inline static uint16_t Int16FromBE(uint16_t uNumber)
 	{
-		return (uNumber>>8) | (uNumber<<8);
+		return (uNumber >> 8) | (uNumber << 8);
 	}
 	/// Reads a big endian 32 bit unsigned integer
 	inline static uint32_t Int32FromBE(uint32_t uNumber)
 	{
-		return (uNumber>>24) | ((uNumber<<8) & 0x00FF0000) | ((uNumber>>8) & 0x0000FF00) | (uNumber<<24);
+		return (uNumber >> 24) | ((uNumber << 8) & 0x00FF0000) | ((uNumber >> 8) & 0x0000FF00) | (uNumber << 24);
 	}
 	/// Reads a big endian 64 bit unsigned integer
 	inline static uint64_t Int64FromBE(uint64_t uNumber)
 	{
-		return (uNumber >> 56) | ((uNumber<<40) & 0x00FF000000000000ULL) | ((uNumber<<24) & 0x0000FF0000000000ULL) |
-			  ((uNumber<<8) & 0x000000FF00000000ULL) | ((uNumber>>8) & 0x00000000FF000000ULL) |
-			  ((uNumber>>24) & 0x0000000000FF0000ULL) | ((uNumber>>40) & 0x000000000000FF00ULL) | (uNumber<<56);
+		return (uNumber >> 56) | ((uNumber << 40) & 0x00FF000000000000ULL) | ((uNumber << 24) & 0x0000FF0000000000ULL) |
+		       ((uNumber << 8) & 0x000000FF00000000ULL) | ((uNumber >> 8) & 0x00000000FF000000ULL) |
+		       ((uNumber >> 24) & 0x0000000000FF0000ULL) | ((uNumber >> 40) & 0x000000000000FF00ULL) | (uNumber << 56);
 	}
 
 	// Returns the proper file handle according to prepended tags
@@ -106,8 +109,6 @@ class ncIFile
  protected:
 	/// Maximum number of characters for a file name (path included)
 	static const unsigned int s_uMaxFilenameLength = 256;
-	/// File name with path
-	char m_vFilename[s_uMaxFilenameLength];
 	/// Maximum number of characters for a file extension, plus '\0'
 	static const unsigned int s_uMaxExtensionsLength = 5;
 
@@ -115,6 +116,9 @@ class ncIFile
 	ncIFile(const ncIFile&);
 	/// Private assignment operator (preventing copy at the moment)
 	ncIFile& operator=(const ncIFile&);
+
+	/// File name with path
+	char m_vFilename[s_uMaxFilenameLength];
 
 	/// File type
 	eFileType m_eType;

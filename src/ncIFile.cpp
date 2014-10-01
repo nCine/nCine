@@ -36,7 +36,9 @@ ncIFile::ncIFile(const char *pFilename)
 	char *pDotChar = strrchr(m_vFilename, '.');
 	// A dot followed by at least three extension characters
 	if (pDotChar && strlen(pDotChar) >= 4)
-		strncpy(m_vExtension, pDotChar+1, s_uMaxExtensionsLength-1); // preserves '\0'
+	{
+		strncpy(m_vExtension, pDotChar + 1, s_uMaxExtensionsLength - 1);    // preserves '\0'
+	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -47,9 +49,13 @@ ncIFile::ncIFile(const char *pFilename)
 bool ncIFile::IsOpened() const
 {
 	if (m_iFileDescriptor >= 0 || m_pFilePointer != NULL)
+	{
 		return true;
+	}
 	else
+	{
 		return false;
+	}
 }
 
 /// Checks if file extension matches
@@ -63,7 +69,9 @@ ncIFile* ncIFile::CreateFileHandle(const char *pFilename)
 {
 #ifdef __ANDROID__
 	if (strncmp(pFilename, (const char *)"asset::", 7) == 0)
-		return new ncAssetFile(pFilename+7);
+	{
+		return new ncAssetFile(pFilename + 7);
+	}
 	else
 #endif
 		return new ncStandardFile(pFilename);
@@ -74,7 +82,9 @@ bool ncIFile::Access(const char *pFilename, unsigned char uMode)
 {
 #ifdef __ANDROID__
 	if (strncmp(pFilename, (const char *)"asset::", 7) == 0)
-		return ncAssetFile::Access(pFilename+7, uMode);
+	{
+		return ncAssetFile::Access(pFilename + 7, uMode);
+	}
 	else
 #endif
 		return ncStandardFile::Access(pFilename, uMode);
@@ -85,7 +95,9 @@ char* ncIFile::DataPath()
 {
 	// Searching for path only on first invokation
 	if (strlen(m_vDataPath))
+	{
 		return m_vDataPath;
+	}
 
 	memset(m_vDataPath, 0, s_uMaxFilenameLength);
 
@@ -99,7 +111,7 @@ char* ncIFile::DataPath()
 	{
 		// Creating the path "/data/data/PACKAGE_NAME/files/"
 		strncpy(m_vDataPath, "/data/data/", 11);
-		fread((char *)m_vDataPath+11, s_uMaxFilenameLength-11, 1, pProcFile);
+		fread((char *)m_vDataPath + 11, s_uMaxFilenameLength - 11, 1, pProcFile);
 		strncat(m_vDataPath, "/files/", 7);
 		fclose(pProcFile);
 
@@ -122,26 +134,36 @@ char* ncIFile::DataPath()
 		{
 			char *pHomeEnv = getenv("HOME");
 			if (pHomeEnv && strlen(pHomeEnv))
+			{
 				strncpy(m_vDataPath, pHomeEnv, s_uMaxFilenameLength);
+			}
 		}
 		else
 		{
 			strncpy(m_vDataPath, pHomeDriveEnv, s_uMaxFilenameLength);
-			strncat(m_vDataPath, pHomePathEnv, s_uMaxFilenameLength-strlen(pHomeDriveEnv));
+			strncat(m_vDataPath, pHomePathEnv, s_uMaxFilenameLength - strlen(pHomeDriveEnv));
 		}
 	}
 	else
+	{
 		strncpy(m_vDataPath, pUserProfileEnv, s_uMaxFilenameLength);
+	}
 
 	if (strlen(m_vDataPath))
+	{
 		strncat(m_vDataPath, "\\", 1);
+	}
 #else
 	char *pHomeEnv = getenv("HOME");
 
 	if (pHomeEnv == NULL || strlen(pHomeEnv) == 0)
+	{
 		strncpy(m_vDataPath, getpwuid(getuid())->pw_dir, s_uMaxFilenameLength);
+	}
 	else
+	{
 		strncpy(m_vDataPath, pHomeEnv, s_uMaxFilenameLength);
+	}
 
 	strncat(m_vDataPath, "/.config/", s_uMaxFilenameLength - strlen(m_vDataPath));
 #endif

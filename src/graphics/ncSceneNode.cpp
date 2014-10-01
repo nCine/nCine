@@ -19,7 +19,9 @@ ncSceneNode::ncSceneNode(ncSceneNode* pParent, float fX, float fY)
 	m_eType = SCENENODE_TYPE;
 
 	if (pParent)
+	{
 		pParent->AddChildNode(this);
+	}
 }
 
 ncSceneNode::ncSceneNode(ncSceneNode* pParent)
@@ -29,7 +31,9 @@ ncSceneNode::ncSceneNode(ncSceneNode* pParent)
 	m_eType = SCENENODE_TYPE;
 
 	if (pParent)
+	{
 		pParent->AddChildNode(this);
+	}
 }
 
 ncSceneNode::ncSceneNode()
@@ -42,8 +46,10 @@ ncSceneNode::ncSceneNode()
 ncSceneNode::~ncSceneNode()
 {
 	ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin();
-	while(i != m_children.End())
+	while (i != m_children.End())
+	{
 		delete(*i++);
+	}
 
 	if (m_pParent)
 	{
@@ -64,10 +70,12 @@ bool ncSceneNode::AddChildNode(ncSceneNode *pChildNode)
 {
 	bool bAdded = false;
 
-	if(pChildNode)
+	if (pChildNode)
 	{
-		if(pChildNode->m_pParent)
+		if (pChildNode->m_pParent)
+		{
 			pChildNode->m_pParent->RemoveChildNode(pChildNode);
+		}
 
 		pChildNode->m_pParent = this;
 		m_children.InsertBack(pChildNode);
@@ -85,7 +93,7 @@ bool ncSceneNode::RemoveChildNode(ncSceneNode *pChildNode)
 {
 	bool bRemoved = false;
 
-	if(pChildNode && // cannot pass a NULL pointer
+	if (pChildNode && // cannot pass a NULL pointer
 		!m_children.isEmpty() && // avoid checking if this node has no children
 		pChildNode->m_pParent == this) // avoid checking the child doesn't belong to this one
 	{
@@ -106,7 +114,7 @@ bool ncSceneNode::RemoveChildNode(ncList<ncSceneNode *>::Iterator it)
 {
 	bool bRemoved = false;
 
-	if(*it && // cannot pass a NULL pointer
+	if (*it && // cannot pass a NULL pointer
 		!m_children.isEmpty() && // avoid checking if this node has no children
 		(*it)->m_pParent == this) // avoid checking the child doesn't belong to this one
 	{
@@ -126,7 +134,7 @@ bool ncSceneNode::UnlinkChildNode(ncSceneNode *pChildNode)
 {
 	bool bUnlinked = false;
 
-	if(pChildNode && // cannot pass a NULL pointer
+	if (pChildNode && // cannot pass a NULL pointer
 		!m_children.isEmpty() && // avoid checking if this node has no children
 		pChildNode->m_pParent == this) // avoid checking the child doesn't belong to this one
 	{
@@ -135,7 +143,7 @@ bool ncSceneNode::UnlinkChildNode(ncSceneNode *pChildNode)
 
 		// Nephews reparenting
 		ncList<ncSceneNode *>::Const_Iterator i = pChildNode->m_children.Begin();
-		while(i != pChildNode->m_children.End())
+		while (i != pChildNode->m_children.End())
 		{
 			AddChildNode(*i);
 			i++;
@@ -150,25 +158,31 @@ bool ncSceneNode::UnlinkChildNode(ncSceneNode *pChildNode)
 /// Called once every frame to update the node
 void ncSceneNode::Update(float fInterval)
 {
-	for(ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
+	for (ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
 	{
 		if ((*i)->bShouldUpdate)
+		{
 			(*i)->Update(fInterval);
+		}
 	}
 }
 
 /// Draws the node and visits its children
-void ncSceneNode::Visit(ncRenderQueue& rRenderQueue)
+void ncSceneNode::Visit(ncRenderQueue &rRenderQueue)
 {
 	// early return if a node is invisible
-	if(!bShouldDraw)
+	if (!bShouldDraw)
+	{
 		return;
+	}
 
 	Transform();
 	Draw(rRenderQueue);
 
-	for(ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
+	for (ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
+	{
 		(*i)->Visit(rRenderQueue);
+	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -191,12 +205,12 @@ void ncSceneNode::Transform()
 		float fParentRot = m_pParent->m_fAbsRotation;
 		if (abs(fParentRot) > sMinRotation && abs(fParentRot) < 360.0f - sMinRotation)
 		{
-			fSine = sinf(-fParentRot * M_PI/180.0f);
-			fCosine = cosf(-fParentRot * M_PI/180.0f);
+			fSine = sinf(-fParentRot * M_PI / 180.0f);
+			fCosine = cosf(-fParentRot * M_PI / 180.0f);
 		}
 
-		m_fAbsX = m_pParent->m_fAbsX + fScaledX*fCosine - fScaledY*fSine;
-		m_fAbsY = m_pParent->m_fAbsY + fScaledY*fCosine + fScaledX*fSine;
+		m_fAbsX = m_pParent->m_fAbsX + fScaledX * fCosine - fScaledY * fSine;
+		m_fAbsY = m_pParent->m_fAbsY + fScaledY * fCosine + fScaledX * fSine;
 
 		m_absColor = m_pParent->m_absColor * m_color;
 	}

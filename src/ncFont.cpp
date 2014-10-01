@@ -46,7 +46,9 @@ void ncFont::ParseFNTFile(ncIFile *pFileHandle)
 
 		// skipping entirely the "info" line
 		if (strncmp(pBuffer, "info", 4) == 0)
+		{
 			continue;
+		}
 		else if (strncmp(pBuffer, "common", 6) == 0)
 		{
 			sscanf(pBuffer, "common lineHeight=%u base=%u scaleW=%u scaleH=%u", &m_uLineHeight, &m_uBase, &m_uWidth, &m_uHeight);
@@ -58,16 +60,22 @@ void ncFont::ParseFNTFile(ncIFile *pFileHandle)
 		}
 		// skipping entirely the "page" line
 		else if (strncmp(pBuffer, "page", 4) == 0)
+		{
 			continue;
+		}
 		else if (strncmp(pBuffer, "chars", 5) == 0)
+		{
 			sscanf(pBuffer, "chars count=%u", &m_uNumGlyphs);
+		}
 		else if (strncmp(pBuffer, "char", 4) == 0)
 		{
 			sscanf(pBuffer, "char id=%d x=%u y=%u width=%u height=%u xoffset=%d yoffset=%d xadvance=%u", &iGlyphId, &uX, &uY, &uWidth, &uHeight, &iXOffset, &iYOffset, &uXAdvance);
 			m_vGlyphs[iGlyphId].Set(uX, uY, uWidth, uHeight, iXOffset, iYOffset, uXAdvance);
 		}
 		else if (strncmp(pBuffer, "kernings", 8) == 0)
+		{
 			sscanf(pBuffer, "kernings count=%u", &m_uNumKernings);
+		}
 		else if (strncmp(pBuffer, "kerning", 7) == 0)
 		{
 			sscanf(pBuffer, "kerning first=%d second=%d amount=%d ", &iGlyphId, &iSecondGlyphId, &iKerningAmount);

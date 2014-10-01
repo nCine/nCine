@@ -29,21 +29,27 @@ inline unsigned int ncArrayIndexer::AddObject(ncObject* pObject)
 	m_vPointers[m_uNextId] = pObject;
 	m_uNextId++;
 
-	return m_uNextId-1;
+	return m_uNextId - 1;
 }
 inline void ncArrayIndexer::RemoveObject(unsigned int uId)
 {
 	// setting to NULL instead of physically removing
 	if (uId < m_vPointers.Size())
+	{
 		m_vPointers[uId] = NULL;
+	}
 }
 
-inline ncObject* ncArrayIndexer::Object(unsigned int uId) const
+inline ncObject *ncArrayIndexer::Object(unsigned int uId) const
 {
 	if (uId < m_vPointers.Size())
+	{
 		return m_vPointers[uId];
+	}
 	else
+	{
 		return NULL;
+	}
 }
 
 inline bool ncArrayIndexer::isEmpty() const

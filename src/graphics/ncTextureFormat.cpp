@@ -32,9 +32,13 @@ ncTextureFormat::ncTextureFormat(GLenum eInternalFormat, GLenum eType)
 void ncTextureFormat::BGRFormat()
 {
 	if (m_eFormat == GL_RGBA)
+	{
 		m_eFormat = GL_BGRA;
+	}
 	else if (m_eFormat == GL_RGB)
+	{
 		m_eFormat = GL_BGR;
+	}
 }
 #endif
 
@@ -49,16 +53,26 @@ void ncTextureFormat::FindExternalFmt()
 
 #ifndef __ANDROID__
 	if (bFound == false)
+	{
 		bFound = IntegerFormat();
+	}
 	if (bFound == false)
+	{
 		bFound = FloatFormat();
+	}
 	if (bFound == false)
+	{
 		bFound = CompressedFormat();
+	}
 #else
 	if (bFound == false)
+	{
 		bFound = OESFormat();
+	}
 	if (bFound == false)
+	{
 		bFound = OESCompressedFormat();
+	}
 #endif
 
 	if (bFound == false)
@@ -74,7 +88,7 @@ bool ncTextureFormat::IntegerFormat()
 {
 	bool bFound = true;
 
-	switch(m_eInternalFormat)
+	switch (m_eInternalFormat)
 	{
 		case GL_RGBA:
 		case GL_RGBA8:
@@ -112,7 +126,9 @@ bool ncTextureFormat::IntegerFormat()
 	}
 
 	if (bFound)
+	{
 		m_eType = GL_UNSIGNED_BYTE;
+	}
 
 	return bFound;
 }
@@ -122,7 +138,7 @@ bool ncTextureFormat::FloatFormat()
 {
 	bool bFound = true;
 
-	switch(m_eInternalFormat)
+	switch (m_eInternalFormat)
 	{
 		case GL_RGBA16F_ARB:
 		case GL_RGBA32F_ARB:
@@ -138,7 +154,9 @@ bool ncTextureFormat::FloatFormat()
 	}
 
 	if (bFound)
+	{
 		m_eType = GL_FLOAT;
+	}
 
 	return bFound;
 }
@@ -148,7 +166,7 @@ bool ncTextureFormat::CompressedFormat()
 {
 	bool bFound = true;
 
-	switch(m_eInternalFormat)
+	switch (m_eInternalFormat)
 	{
 		case GL_COMPRESSED_RGBA:
 		case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
@@ -179,7 +197,7 @@ bool ncTextureFormat::OESFormat()
 {
 	bool bFound = true;
 
-	switch(m_eInternalFormat)
+	switch (m_eInternalFormat)
 	{
 		case GL_RGBA:
 			m_eFormat = GL_RGBA;
@@ -202,7 +220,9 @@ bool ncTextureFormat::OESFormat()
 	}
 
 	if (bFound)
+	{
 		m_eType = GL_UNSIGNED_BYTE;
+	}
 
 	return bFound;
 }
@@ -212,7 +232,7 @@ bool ncTextureFormat::OESCompressedFormat()
 {
 	bool bFound = true;
 
-	switch(m_eInternalFormat)
+	switch (m_eInternalFormat)
 	{
 		case GL_ATC_RGBA_EXPLICIT_ALPHA_AMD:
 		case GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD:
@@ -245,7 +265,7 @@ long int ncTextureFormat::CalculateMipSizes(GLenum eInternalFormat, int iWidth, 
 	unsigned int uBPP = 1; // Bits per pixel
 	unsigned int uMinDataSize = 1; // Minimum data size in bytes
 
-	switch(eInternalFormat)
+	switch (eInternalFormat)
 	{
 		case GL_RGBA:
 			uBPP = 32;
@@ -331,10 +351,12 @@ long int ncTextureFormat::CalculateMipSizes(GLenum eInternalFormat, int iWidth, 
 	for (int i = 0; i < iMipMapCount; i++)
 	{
 		pMipDataOffsets[i] = lDataSizesSum;
-		pMipDataSizes[i] = (iLevelWidth/uBlockWidth) * (iLevelHeight/uBlockHeight) * ((uBlockWidth * uBlockHeight  * uBPP) / 8);
+		pMipDataSizes[i] = (iLevelWidth / uBlockWidth) * (iLevelHeight / uBlockHeight) * ((uBlockWidth * uBlockHeight  * uBPP) / 8);
 		// Clamping to the minimum valid size
 		if (pMipDataSizes[i] < int(uMinDataSize))
+		{
 			pMipDataSizes[i] = uMinDataSize;
+		}
 
 		iLevelWidth /= 2;
 		iLevelHeight /= 2;

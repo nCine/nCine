@@ -50,7 +50,7 @@ ncGLFWGfxDevice::~ncGLFWGfxDevice()
 void ncGLFWGfxDevice::SetResolution(int iWidth, int iHeight)
 {
 	// change resolution only in the case it really changes
-	if(iWidth != m_iWidth || iHeight != m_iHeight)
+	if (iWidth != m_iWidth || iHeight != m_iHeight)
 	{
 		m_iWidth = iWidth;
 		m_iHeight = iHeight;
@@ -64,7 +64,7 @@ void ncGLFWGfxDevice::SetResolution(int iWidth, int iHeight)
 void ncGLFWGfxDevice::SetResolution(ncPoint size)
 {
 	// change resolution only in the case it really changes
-	if(size.x != m_iWidth || size.y != m_iHeight)
+	if (size.x != m_iWidth || size.y != m_iHeight)
 	{
 		m_iWidth = size.x;
 		m_iHeight = size.y;
@@ -106,7 +106,8 @@ void ncGLFWGfxDevice::InitGraphics()
 {
 	glfwSetErrorCallback(ErrorCallback);
 
-	if (glfwInit() != GL_TRUE) {
+	if (glfwInit() != GL_TRUE)
+	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncGLFWGfxDevice::InitGraphics - glfwInit() failed");
 		exit(EXIT_FAILURE);
 	}
@@ -117,7 +118,9 @@ void ncGLFWGfxDevice::InitDevice()
 {
 	GLFWmonitor* monitor = NULL;
 	if (m_bIsWindowed == false)
+	{
 		monitor = glfwGetPrimaryMonitor();
+	}
 
 	// setting window hints and creating a window with GLFW
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
@@ -139,19 +142,25 @@ void ncGLFWGfxDevice::InitDevice()
 	glfwMakeContextCurrent(s_pWindowHandle);
 
 	if (m_mode.isVSynced())
+	{
 		glfwSwapInterval(1);
+	}
 	else
+	{
 		glfwSwapInterval(0);
+	}
 
 #ifdef WITH_GLEW
 	GLenum err = glewInit();
 
-	if (GLEW_OK != err) {
+	if (GLEW_OK != err)
+	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncGLFWGfxDevice::InitDevice - GLEW error: %s", glewGetErrorString(err));
 		exit(EXIT_FAILURE);
 	}
 
-	if (!GLEW_VERSION_2_0) {
+	if (!GLEW_VERSION_2_0)
+	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncGLFWGfxDevice::InitDevice - OpenGL 2 is not supported");
 		exit(EXIT_FAILURE);
 	}

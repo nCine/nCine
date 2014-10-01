@@ -3,7 +3,8 @@
 
 #include <SDL/SDL_keysym.h>
 
-typedef enum {
+typedef enum
+{
 	NCKEY_UNKNOWN		= SDLK_UNKNOWN,
 	NCKEY_FIRST			= SDLK_FIRST,
 	NCKEY_BACKSPACE		= SDLK_BACKSPACE,
@@ -151,7 +152,8 @@ typedef enum {
 	NCKEY_LAST
 } ncKeySym;
 
-typedef enum {
+typedef enum
+{
 	NCKEYMOD_NONE		= KMOD_NONE,
 	NCKEYMOD_LSHIFT		= KMOD_LSHIFT,
 	NCKEYMOD_RSHIFT		= KMOD_RSHIFT,

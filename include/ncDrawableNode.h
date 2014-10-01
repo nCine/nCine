@@ -9,7 +9,8 @@ class ncDrawableNode : public ncSceneNode
 {
  public:
 	/// Drawing priorities from back to front
-	enum ePriorityBase {
+	enum ePriorityBase
+	{
 		SCENE_PRIORITY = 0,
 		HUD_PRIORITY = 128
 	};
@@ -57,14 +58,14 @@ inline void ncDrawableNode::ApplyTransformations()
 	float cosine = 1.0f;
 	if (abs(m_fAbsRotation) > sMinRotation && abs(m_fAbsRotation) < 360.0f - sMinRotation)
 	{
-		sine = sinf(-m_fAbsRotation * M_PI/180.0f);
-		cosine = cosf(-m_fAbsRotation * M_PI/180.0f);
+		sine = sinf(-m_fAbsRotation * M_PI / 180.0f);
+		cosine = cosf(-m_fAbsRotation * M_PI / 180.0f);
 	}
 
-	for (int i = rGeom.FirstVertex(); i < rGeom.NumVertices()*2; i=i+2)
+	for (int i = rGeom.FirstVertex(); i < rGeom.NumVertices() * 2; i = i + 2)
 	{
-		float fX = rGeom.VertexPointer()[i]*m_fAbsScaleFactor;			float fY = rGeom.VertexPointer()[i+1]*m_fAbsScaleFactor;
-		rGeom.VertexPointer()[i] = m_fAbsX + fX*cosine - fY*sine;		rGeom.VertexPointer()[i+1] = m_fAbsY + fY*cosine + fX*sine;
+		float fX = rGeom.VertexPointer()[i] * m_fAbsScaleFactor;			float fY = rGeom.VertexPointer()[i + 1] * m_fAbsScaleFactor;
+		rGeom.VertexPointer()[i] = m_fAbsX + fX * cosine - fY * sine;		rGeom.VertexPointer()[i + 1] = m_fAbsY + fY * cosine + fX * sine;
 	}
 }
 

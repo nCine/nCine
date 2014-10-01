@@ -91,7 +91,7 @@ inline ncRect ncSprite::Rect() const
 {
 	float fHalfAbsW = m_iWidth * m_fAbsScaleFactor * 0.5f;
 	float fHalfAbsH = m_iHeight * m_fAbsScaleFactor * 0.5f;
-	return ncRect(x-fHalfAbsW, y-fHalfAbsH, fHalfAbsW*2.0f, fHalfAbsH*2.0f);
+	return ncRect(x - fHalfAbsW, y - fHalfAbsH, fHalfAbsW * 2.0f, fHalfAbsH * 2.0f);
 }
 
 /// Sets the texture source rectangle for blitting

@@ -108,7 +108,7 @@ void MyEventHandler::OnInit()
 	m_pAnimSprite->AddAnimation(pAnimation);
 #endif
 
-	m_pAnimSprite->SetPosition(ncApplication::Width()*0.5f, ncApplication::Height()*0.5f);
+	m_pAnimSprite->SetPosition(ncApplication::Width() * 0.5f, ncApplication::Height() * 0.5f);
 	m_pAnimSprite->SetAnimation(0);
 	m_pAnimSprite->SetFrame(0);
 	m_pAnimSprite->SetPaused(true);
@@ -128,32 +128,50 @@ void MyEventHandler::OnFrameStart()
 		if (reachVector.x < -dirTolerance) // Right
 		{
 			if (reachVector.y > dirTolerance)
-				m_pAnimSprite->SetAnimation(1); // Up-right
+			{
+				m_pAnimSprite->SetAnimation(1);    // Up-right
+			}
 			else if (reachVector.y < -dirTolerance)
-				m_pAnimSprite->SetAnimation(3); // Down-right
+			{
+				m_pAnimSprite->SetAnimation(3);    // Down-right
+			}
 			else
-				m_pAnimSprite->SetAnimation(2); // Right
+			{
+				m_pAnimSprite->SetAnimation(2);    // Right
+			}
 		}
 		else if (reachVector.x > dirTolerance) // Left
 		{
 			if (reachVector.y > dirTolerance)
-				m_pAnimSprite->SetAnimation(7); // Up-left
+			{
+				m_pAnimSprite->SetAnimation(7);    // Up-left
+			}
 			else if (reachVector.y < -dirTolerance)
-				m_pAnimSprite->SetAnimation(5); // Down-left
+			{
+				m_pAnimSprite->SetAnimation(5);    // Down-left
+			}
 			else
-				m_pAnimSprite->SetAnimation(6); // Left
+			{
+				m_pAnimSprite->SetAnimation(6);    // Left
+			}
 		}
 		else // Pure up or down
 		{
 			if (reachVector.y > 0.0f)
-				m_pAnimSprite->SetAnimation(0); // Up
+			{
+				m_pAnimSprite->SetAnimation(0);    // Up
+			}
 			else
-				m_pAnimSprite->SetAnimation(4); // Down
-		}	
+			{
+				m_pAnimSprite->SetAnimation(4);    // Down
+			}
+		}
 #else
-		float fAngle = -(atan2(reachVector.y, reachVector.x) - atan2(1.0f, 0.0f)) * 180.0f/M_PI;
+		float fAngle = -(atan2(reachVector.y, reachVector.x) - atan2(1.0f, 0.0f)) * 180.0f / M_PI;
 		if (fAngle < 0.0f)
+		{
 			fAngle += 360.0f;
+		}
 		m_pAnimSprite->SetRotation(fAngle);
 #endif
 
@@ -190,9 +208,13 @@ void MyEventHandler::OnTouchMove(const ncTouchEvent &event)
 void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
 {
 	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)
+	{
 		ncApplication::Quit();
+	}
 	else if (event.sym == NCKEY_SPACE)
+	{
 		ncApplication::TogglePause();
+	}
 }
 
 void MyEventHandler::OnMouseButtonPressed(const ncMouseEvent &event)

@@ -32,7 +32,9 @@ class ncAndroidJNIClass
 	virtual ~ncAndroidJNIClass()
 	{
 		if (m_javaObject)
+		{
 			s_pEnv->DeleteLocalRef(m_javaObject);
+		}
 	}
 	bool isNull() const { return m_javaObject == NULL; }
 
@@ -56,10 +58,10 @@ class ncAndroidJNIClass_Version : public ncAndroidJNIClass
 
 class ncAndroidJNIClass_MotionRange : public ncAndroidJNIClass
 {
-private:
+ private:
 	static jclass s_javaClass;
 
-public:
+ public:
 	ncAndroidJNIClass_MotionRange(jobject javaObject);
 };
 

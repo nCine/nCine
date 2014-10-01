@@ -28,7 +28,9 @@ ncIAudioLoader::ncIAudioLoader(ncIFile *pFileHandle)
 ncIAudioLoader::~ncIAudioLoader()
 {
 	if (m_pFileHandle)
+	{
 		delete m_pFileHandle;
+	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -42,10 +44,14 @@ ncIAudioLoader* ncIAudioLoader::CreateFromFile(const char *pFilename)
 	ncIFile *pFileHandle = ncIFile::CreateFileHandle(pFilename);
 
 	if (pFileHandle->HasExtension("wav"))
+	{
 		return new ncAudioLoaderWav(pFileHandle);
+	}
 #ifdef WITH_VORBIS
 	else if (pFileHandle->HasExtension("ogg"))
+	{
 		return new ncAudioLoaderOgg(pFileHandle);
+	}
 #endif
 	else
 	{

@@ -24,8 +24,10 @@ ncSpriteBatchNode::ncSpriteBatchNode(ncSceneNode* pParent, ncTexture *pTexture)
 void ncSpriteBatchNode::Visit(ncRenderQueue& rRenderQueue)
 {
 	// early return if a node is invisible
-	if(!bShouldDraw)
+	if (!bShouldDraw)
+	{
 		return;
+	}
 
 	Transform();
 
@@ -35,7 +37,7 @@ void ncSpriteBatchNode::Visit(ncRenderQueue& rRenderQueue)
 	m_vColors.Clear();
 
 	// TODO: only the first level of children gets accounted
-	for(ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
+	for (ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
 	{
 		if ((*i)->Type() == ncSprite::sType())
 		{
@@ -63,36 +65,36 @@ void ncSpriteBatchNode::ProcessSprite(ncSprite& rSprite)
 	float rot = rSprite.Rotation();
 	float scale = rSprite.Scale();
 
-	float leftPos = size.x*scale*0.5f;
-	float rightPos = -size.x*scale*0.5f;
-	float bottomPos = -size.y*scale*0.5f;
-	float topPos = size.y*scale*0.5f;
+	float leftPos = size.x * scale * 0.5f;
+	float rightPos = -size.x * scale * 0.5f;
+	float bottomPos = -size.y * scale * 0.5f;
+	float topPos = size.y * scale * 0.5f;
 
 	float sine = 0.0f;
 	float cosine = 1.0f;
 	if (abs(rot) > ncSprite::sMinRotation && abs(rot) < 360.0f - ncSprite::sMinRotation)
 	{
-		sine = sinf(-rot * M_PI/180.0f);
-		cosine = cosf(-rot * M_PI/180.0f);
+		sine = sinf(-rot * M_PI / 180.0f);
+		cosine = cosf(-rot * M_PI / 180.0f);
 	}
 
 	float *pVertices = m_vVertices.MapBuffer(12);
-	pVertices[0] = pos.x + leftPos*cosine - bottomPos*sine;				pVertices[1] = pos.y + bottomPos*cosine + leftPos*sine;
-	pVertices[2] = pos.x + leftPos*cosine - topPos*sine;				pVertices[3] = pos.y + topPos*cosine + leftPos*sine;
-	pVertices[4] = pos.x + rightPos*cosine - bottomPos*sine;			pVertices[5] = pos.y + bottomPos*cosine + rightPos*sine;
+	pVertices[0] = pos.x + leftPos * cosine - bottomPos * sine;			pVertices[1] = pos.y + bottomPos * cosine + leftPos * sine;
+	pVertices[2] = pos.x + leftPos * cosine - topPos * sine;			pVertices[3] = pos.y + topPos * cosine + leftPos * sine;
+	pVertices[4] = pos.x + rightPos * cosine - bottomPos * sine;		pVertices[5] = pos.y + bottomPos * cosine + rightPos * sine;
 
-	pVertices[6] = pos.x + rightPos*cosine - bottomPos*sine;			pVertices[7] = pos.y + bottomPos*cosine + rightPos*sine;
-	pVertices[8] = pos.x + rightPos*cosine - topPos*sine;				pVertices[9] = pos.y + topPos*cosine + rightPos*sine;
-	pVertices[10]= pos.x + leftPos*cosine - topPos*sine;				pVertices[11]= pos.y + topPos*cosine + leftPos*sine;
+	pVertices[6] = pos.x + rightPos * cosine - bottomPos * sine;		pVertices[7] = pos.y + bottomPos * cosine + rightPos * sine;
+	pVertices[8] = pos.x + rightPos * cosine - topPos * sine;			pVertices[9] = pos.y + topPos * cosine + rightPos * sine;
+	pVertices[10] = pos.x + leftPos * cosine - topPos * sine;			pVertices[11] = pos.y + topPos * cosine + leftPos * sine;
 
 
 	ncPoint texSize = m_pTexture->Size();
 	ncRect texRect = rSprite.TexRect();
 
-	float leftCoord = float(texRect.x)/float(texSize.x);
-	float rightCoord = float(texRect.x+texRect.w)/float(texSize.x);
-	float bottomCoord = float(texRect.y+texRect.h)/float(texSize.y);
-	float topCoord = float(texRect.y)/float(texSize.y);
+	float leftCoord = float(texRect.x) / float(texSize.x);
+	float rightCoord = float(texRect.x + texRect.w) / float(texSize.x);
+	float bottomCoord = float(texRect.y + texRect.h) / float(texSize.y);
+	float topCoord = float(texRect.y) / float(texSize.y);
 
 	float *pTexCoords = m_vTexCoords.MapBuffer(12);
 	pTexCoords[0] = leftCoord;				pTexCoords[1] = bottomCoord;
@@ -101,7 +103,7 @@ void ncSpriteBatchNode::ProcessSprite(ncSprite& rSprite)
 
 	pTexCoords[6] = rightCoord;				pTexCoords[7] = bottomCoord;
 	pTexCoords[8] = rightCoord;				pTexCoords[9] = topCoord;
-	pTexCoords[10]= leftCoord;				pTexCoords[11]= topCoord;
+	pTexCoords[10] = leftCoord;				pTexCoords[11] = topCoord;
 
 
 	m_vColors.Append(rSprite.Color().Vector(), 4);
@@ -117,7 +119,7 @@ void ncSpriteBatchNode::UpdateRenderCommand()
 {
 	m_renderCmd.Material().SetTextureGLId(m_pTexture->GLId());
 	m_renderCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
-	m_renderCmd.Geometry().SetData(GL_TRIANGLES, 0, m_vVertices.Size()/2, m_vVertices.Pointer(), m_vTexCoords.Pointer(), m_vColors.Pointer());
+	m_renderCmd.Geometry().SetData(GL_TRIANGLES, 0, m_vVertices.Size() / 2, m_vVertices.Pointer(), m_vTexCoords.Pointer(), m_vColors.Pointer());
 	m_renderCmd.CalculateSortKey();
 
 	ApplyTransformations();

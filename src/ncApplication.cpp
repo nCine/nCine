@@ -57,9 +57,13 @@ void ncApplication::Init(struct android_app* state, ncIAppEventHandler* (*pCreat
 	// Registering the logger as early as possible
 	ncServiceLocator::RegisterLogger(new ncFileLogger("/sdcard/ncine_log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_VERBOSE));
 	if (ncEGLGfxDevice::isModeSupported(state, ncDisplayMode(8, 8, 8)))
+	{
 		m_pGfxDevice = new ncEGLGfxDevice(state, ncDisplayMode(8, 8, 8));
+	}
 	else
+	{
 		m_pGfxDevice = new ncEGLGfxDevice(state, ncDisplayMode(5, 6, 5));
+	}
 	ncAndroidJNIHelper::AttachJVM(state);
 	m_pInputManager = new ncAndroidInputManager(state);
 	ncAssetFile::InitAssetManager(state);
@@ -92,7 +96,7 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 	m_pRenderQueue = new ncRenderQueue();
 	m_pProfileTimer = new ncTimer();
 
-	m_pProfilePlotter = new ncStackedBarPlotter(m_pRootNode, ncRect(Width()*0.1f, Height()*0.1f, Width()*0.8f, Height()*0.15f));
+	m_pProfilePlotter = new ncStackedBarPlotter(m_pRootNode, ncRect(Width() * 0.1f, Height() * 0.1f, Width() * 0.8f, Height() * 0.15f));
 	m_pProfilePlotter->SetBackgroundColor(ncColor(0.35f, 0.35f, 0.45f, 0.5f));
 	m_pProfilePlotter->AddVariable(50, 0.2f);
 	m_pProfilePlotter->Variable(0).SetGraphColor(ncColor(0.8f, 0.0f, 0.0f));
@@ -108,7 +112,7 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 	m_pProfilePlotter->Variable(1).SetPlotMean(false);
 	m_pProfilePlotter->Variable(2).SetPlotMean(false);
 	m_pProfilePlotter->SetPlotRefValue(true);
-	m_pProfilePlotter->SetRefValue(1.0f/60.0f); // 60 FPS
+	m_pProfilePlotter->SetRefValue(1.0f / 60.0f); // 60 FPS
 
 #if defined(__ANDROID__)
 //	const char *pFontTexFilename = "asset::trebuchet16_128.dds.mp3";
@@ -129,7 +133,9 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 		m_pTextLines->SetPosition(0.0f, Height());
 	}
 	else
+	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncApplication::Init - Cannot access font files for profiling text");
+	}
 
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Init - ncApplication initialized");
 
@@ -149,18 +155,23 @@ void ncApplication::Init(ncIAppEventHandler* (*pCreateAppEventHandler)())
 void ncApplication::Run()
 {
 #ifndef __ANDROID__
-	while (!m_bShouldQuit) {
+	while (!m_bShouldQuit)
+	{
 #if defined(WITH_SDL)
 		SDL_Event event;
 
-		while (SDL_PollEvent(&event)) {
-			switch (event.type) {
+		while (SDL_PollEvent(&event))
+		{
+			switch (event.type)
+			{
 			case SDL_QUIT:
 				m_bShouldQuit = true;
 				break;
 			case SDL_ACTIVEEVENT:
 				if (event.active.state != SDL_APPMOUSEFOCUS)
+				{
 					SetFocus(event.active.gain);
+				}
 				break;
 			default:
 				ncSDLInputManager::ParseEvent(event);
@@ -174,7 +185,9 @@ void ncApplication::Run()
 #endif
 
 		if (m_bHasFocus && !m_bPaused)
+		{
 			Step();
+		}
 	}
 #endif
 }
@@ -198,12 +211,12 @@ void ncApplication::Step()
 	{
 		m_fTextUpdateTime = ncTimer::Now();
 		sprintf(m_vTextChars, (const char *)"FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC",
-				m_pFrameTimer->AverageFPS(), m_pFrameTimer->Interval()*1000.0f,
-				m_pRenderQueue->NumVertices(ncRenderCommand::SPRITE_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::SPRITE_TYPE),
-				m_pRenderQueue->NumVertices(ncRenderCommand::PARTICLE_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::PARTICLE_TYPE),
-				m_pRenderQueue->NumVertices(ncRenderCommand::TEXT_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::TEXT_TYPE),
-				m_pRenderQueue->NumVertices(ncRenderCommand::PLOTTER_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::PLOTTER_TYPE),
-				m_pRenderQueue->NumVertices(), m_pRenderQueue->NumCommands());
+		        m_pFrameTimer->AverageFPS(), m_pFrameTimer->Interval() * 1000.0f,
+		        m_pRenderQueue->NumVertices(ncRenderCommand::SPRITE_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::SPRITE_TYPE),
+		        m_pRenderQueue->NumVertices(ncRenderCommand::PARTICLE_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::PARTICLE_TYPE),
+		        m_pRenderQueue->NumVertices(ncRenderCommand::TEXT_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::TEXT_TYPE),
+		        m_pRenderQueue->NumVertices(ncRenderCommand::PLOTTER_TYPE), m_pRenderQueue->NumCommands(ncRenderCommand::PLOTTER_TYPE),
+		        m_pRenderQueue->NumVertices(), m_pRenderQueue->NumCommands());
 
 		m_pTextLines->SetString(m_vTextChars);
 		m_pTextLines->SetAlignment(ncTextNode::ALIGN_RIGHT);
@@ -234,7 +247,9 @@ void ncApplication::Shutdown()
 	ncAndroidJNIHelper::DetachJVM();
 #endif
 	if (m_pAppEventHandler)
+	{
 		delete m_pAppEventHandler;
+	}
 
 	delete m_pTextLines;
 	delete m_pProfilePlotter;
@@ -245,7 +260,9 @@ void ncApplication::Shutdown()
 	delete m_pFrameTimer;
 
 	if (ncServiceLocator::Indexer().isEmpty() == false)
+	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncApplication::Shutdown - The object indexer is not empty");
+	}
 
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncApplication::Shutdown - ncApplication shutted down");
 

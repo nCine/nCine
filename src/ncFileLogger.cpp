@@ -17,7 +17,9 @@ ncFileLogger::ncFileLogger(const char *pFilename, eLogLevel eConsoleLevel, eLogL
 	m_pFileHandle = ncIFile::CreateFileHandle(pFilename);
 
 	if (m_eFileLevel < int(LOG_OFF))
+	{
 		m_pFileHandle->Open(ncIFile::MODE_WRITE);
+	}
 	if (m_pFileHandle->IsOpened() == false && m_eConsoleLevel > m_eFileLevel)
 	{
 		// Promoting console level logging to file level logging
@@ -25,7 +27,9 @@ ncFileLogger::ncFileLogger(const char *pFilename, eLogLevel eConsoleLevel, eLogL
 	}
 
 	if (m_eConsoleLevel < int(LOG_OFF))
-		 setbuf(stdout, NULL);
+	{
+		setbuf(stdout, NULL);
+	}
 }
 
 
@@ -33,7 +37,9 @@ ncFileLogger::~ncFileLogger()
 {
 	Write(LOG_VERBOSE, "ncFileLogger::~ncFileLogger - End of the log");
 	if (m_pFileHandle)
+	{
 		delete m_pFileHandle;
+	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -92,7 +98,7 @@ void ncFileLogger::Write(eLogLevel eLevel, const char *fmt, ...)
 
 	if (m_eConsoleLevel < int(LOG_OFF) && int(eLevel) >= int(m_eConsoleLevel))
 	{
-		switch(m_eConsoleLevel)
+		switch (m_eConsoleLevel)
 		{
 			case LOG_FATAL:
 				priority = ANDROID_LOG_FATAL;

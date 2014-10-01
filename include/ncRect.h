@@ -42,13 +42,13 @@ class ncRect
 /// Creates a rect from center and size
 inline ncRect ncRect::FromCenterAndSize(const ncPoint &center, const ncPoint &size)
 {
-	return ncRect(center.x - size.x*0.5f, center.y - size.y*0.5f, size.x, size.y);
+	return ncRect(center.x - size.x * 0.5f, center.y - size.y * 0.5f, size.x, size.y);
 }
 
 /// Calculates the center of the rect
 inline ncPoint ncRect::Center() const
 {
-	return ncPoint(x + w*0.5f, y + h*0.5f);
+	return ncPoint(x + w * 0.5f, y + h * 0.5f);
 }
 
 /// Sets rect elements
@@ -61,17 +61,17 @@ inline void ncRect::Set(int const iX, int const iY, int const iW, int const iH)
 }
 
 /// Retains size but move to another position
-inline void ncRect::SetCenter(const ncPoint& center)
+inline void ncRect::SetCenter(const ncPoint &center)
 {
-	x = center.x - w*0.5f;
-	y = center.y - h*0.5f;
+	x = center.x - w * 0.5f;
+	y = center.y - h * 0.5f;
 }
 
 /// Equality operators
-inline bool ncRect::operator==(const ncRect& rect) const
+inline bool ncRect::operator==(const ncRect &rect) const
 {
 	return (x == rect.x && y == rect.y &&
-			w == rect.w && h == rect.h);
+	        w == rect.w && h == rect.h);
 }
 
 #endif

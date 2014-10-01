@@ -27,7 +27,7 @@ void ncTextureLoaderETC::Init()
 {
 	const ncGfxCapabilities& gfxCaps = ncServiceLocator::GfxCapabilities();
 
-	m_pFileHandle->Open(ncIFile::MODE_READ|ncIFile::MODE_BINARY);
+	m_pFileHandle->Open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
 
 	// ETC1 header is 16 bytes long
 	// It have been splitted in two structures to avoid compiler-specific alignment pragmas

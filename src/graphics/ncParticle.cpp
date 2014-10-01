@@ -30,7 +30,9 @@ void ncParticle::Update(float fInterval)
 {
 	// m_ulLife is unsigned
 	if (fInterval > m_fLife)
-		m_fLife = 0.0; // dead particle
+	{
+		m_fLife = 0.0;    // dead particle
+	}
 	else
 	{
 		m_fLife -= fInterval;
@@ -49,7 +51,9 @@ void ncParticle::Transform()
 {
 	// If in local space transform as any other scene node
 	if (m_bLocalSpace)
+	{
 		ncSceneNode::Transform();
+	}
 	else
 	{
 		if (m_pParent)

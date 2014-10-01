@@ -9,5 +9,5 @@ int main(int argc, char **argv)
 	ncApplication::Run();
 	ncApplication::Shutdown();
 
-	return 0;	
+	return 0;
 }

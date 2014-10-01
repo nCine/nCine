@@ -16,7 +16,8 @@ class ncAudioLoaderWav : public ncIAudioLoader
 
  private:
 	/// Header for the RIFF WAVE format
-	typedef struct WAV_header {
+	typedef struct WAV_header
+	{
 		char		cChunkID[4];
 		uint32_t	uChunkSize;
 		char		cFormat[4];

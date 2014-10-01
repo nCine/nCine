@@ -22,9 +22,9 @@
 	bool ncTimer::s_bHasMonotonicClock = false;
 #endif
 
-	bool ncTimer::s_bIsInitialized = false;
-	unsigned long int ncTimer::s_ulFrequency = 0L;
-	unsigned long long int ncTimer::s_ullBaseCount = 0LL;
+bool ncTimer::s_bIsInitialized = false;
+unsigned long int ncTimer::s_ulFrequency = 0L;
+unsigned long long int ncTimer::s_ullBaseCount = 0LL;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -68,10 +68,14 @@ void ncTimer::Sleep(float fS)
 void ncTimer::Init()
 {
 #ifdef _WIN32
-	if (QueryPerformanceFrequency((LARGE_INTEGER*) &s_ulFrequency))
+	if (QueryPerformanceFrequency((LARGE_INTEGER *) &s_ulFrequency))
+	{
 		s_bHasPerfCounter = true;
+	}
 	else
+	{
 		s_ulFrequency = 1000L;
+	}
 #elif __APPLE__
 	mach_timebase_info_data_t info;
 	mach_timebase_info(&info);
@@ -85,7 +89,9 @@ void ncTimer::Init()
 		s_bHasMonotonicClock = true;
 	}
 	else
+	{
 		s_ulFrequency = 1.0e6L;
+	}
 #endif
 
 	// Counter() must be called after setting the flag
@@ -97,15 +103,21 @@ void ncTimer::Init()
 unsigned long long int ncTimer::Counter()
 {
 	if (s_bIsInitialized == false)
+	{
 		Init();
+	}
 
 	unsigned long long int ullCounter = 0LL;
 
 #ifdef _WIN32
 	if (s_bHasPerfCounter)
-		QueryPerformanceCounter((LARGE_INTEGER*) &ullCounter);
+	{
+		QueryPerformanceCounter((LARGE_INTEGER *) &ullCounter);
+	}
 	else
+	{
 		ullCounter = GetTickCount();
+	}
 #elif __APPLE__
 	ullCounter = mach_absolute_time();
 #else

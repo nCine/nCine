@@ -38,75 +38,88 @@ int main(int argc, char **argv)
 
 
 // ----- Event cycle --------------------
-	while(!bQuit) {
-		while(SDL_PollEvent(&event)) {
-			switch (event.type) {
-			case SDL_QUIT:
-				bQuit = true;
-				break;
-			case SDL_KEYDOWN:
-				switch(event.key.keysym.sym) {
-				case SDLK_ESCAPE:
-				case SDLK_q:
+	while (!bQuit)
+	{
+		while (SDL_PollEvent(&event))
+		{
+			switch (event.type)
+			{
+				case SDL_QUIT:
 					bQuit = true;
 					break;
-				case SDLK_SPACE:
-					if (player.isPaused() || player.isStopped())
-						player.Play();
-					else if (player.isPlaying())
-						player.Pause();
+				case SDL_KEYDOWN:
+					switch (event.key.keysym.sym)
+					{
+						case SDLK_ESCAPE:
+						case SDLK_q:
+							bQuit = true;
+							break;
+						case SDLK_SPACE:
+							if (player.isPaused() || player.isStopped())
+							{
+								player.Play();
+							}
+							else if (player.isPlaying())
+							{
+								player.Pause();
+							}
+							break;
+						case SDLK_a:
+							player.Play();
+							break;
+						case SDLK_s:
+							player.Stop();
+							break;
+						case SDLK_d:
+							player.Pause();
+							break;
+						case SDLK_l:
+							bLooping = !bLooping;
+							break;
+						case SDLK_KP0:
+							fGain = fDefaultGain;
+							fPitch = fDefaultPitch;
+							fXPos = fDefaultXPos;
+							break;
+						case SDLK_KP7:
+							fGain -= 0.1f;
+							if (fGain < 0.0f)
+							{
+								fGain = 0.0f;
+							}
+							break;
+						case SDLK_KP8:
+							fGain = fDefaultGain;
+							break;
+						case SDLK_KP9:
+							fGain += 0.1f;
+							if (fGain > 1.0f)
+							{
+								fGain = 1.0f;
+							}
+							break;
+						case SDLK_KP4:
+							fPitch -= 0.1f;
+							break;
+						case SDLK_KP5:
+							fPitch = fDefaultPitch;
+							break;
+						case SDLK_KP6:
+							fPitch += 0.1f;
+							break;
+						case SDLK_KP1:
+							fXPos -= 0.1f;
+							break;
+						case SDLK_KP2:
+							fXPos = fDefaultXPos;
+							break;
+						case SDLK_KP3:
+							fXPos += 0.1f;
+							break;
+						default:
+							break;
+					}
 					break;
-				case SDLK_a:
-					player.Play();
-					break;
-				case SDLK_s:
-					player.Stop();
-					break;
-				case SDLK_d:
-					player.Pause();
-					break;
-				case SDLK_l:
-					bLooping = !bLooping;
-					break;
-				case SDLK_KP0:
-					fGain = fDefaultGain;
-					fPitch = fDefaultPitch;
-					fXPos = fDefaultXPos;
-					break;
-				case SDLK_KP7:
-					fGain -= 0.1f;
-					if (fGain < 0.0f)
-						fGain = 0.0f;
-					break;
-				case SDLK_KP8:
-					fGain = fDefaultGain;
-					break;
-				case SDLK_KP9:
-					fGain += 0.1f;
-					if (fGain > 1.0f)
-						fGain = 1.0f;
-					break;
-				case SDLK_KP4:
-					fPitch -= 0.1f;
-					break;
-				case SDLK_KP5:
-					fPitch = fDefaultPitch;
-					break;
-				case SDLK_KP6:
-					fPitch += 0.1f;
-					break;
-				case SDLK_KP1:
-					fXPos -= 0.1f;
-					break;
-				case SDLK_KP2:
-					fXPos = fDefaultXPos;
-					break;
-				case SDLK_KP3:
-					fXPos += 0.1f;
-					break;
-				default:
-					break;
-				}
 			}
 		}
 
@@ -128,5 +141,5 @@ int main(int argc, char **argv)
 // ----- Quitting ----------------------
 	// Unregistering all services to close the audio device
 	ncServiceLocator::UnregisterAll();
-	return 0;	
+	return 0;
 }

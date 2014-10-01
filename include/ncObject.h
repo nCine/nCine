@@ -8,23 +8,24 @@
 class ncObject
 {
  public:
-   /// The enumeration of object types
-   enum eObjectType {
-	   BASE_TYPE = 0,
-	   TEXTURE_TYPE,
-	   SCENENODE_TYPE,
-	   SPRITE_TYPE,
-	   SPRITEBATCH_TYPE,
-	   PARTICLESYSTEM_TYPE,
-	   TEXT_TYPE,
-	   ANIMATEDSPRITE_TYPE,
-	   AUDIOBUFFER_TYPE,
-	   AUDIOBUFFERPLAYER_TYPE,
-	   AUDIOSTREAMPLAYER_TYPE
-   };
+	/// The enumeration of object types
+	enum eObjectType
+	{
+		BASE_TYPE = 0,
+		TEXTURE_TYPE,
+		SCENENODE_TYPE,
+		SPRITE_TYPE,
+		SPRITEBATCH_TYPE,
+		PARTICLESYSTEM_TYPE,
+		TEXT_TYPE,
+		ANIMATEDSPRITE_TYPE,
+		AUDIOBUFFER_TYPE,
+		AUDIOBUFFERPLAYER_TYPE,
+		AUDIOSTREAMPLAYER_TYPE
+	};
 
-   /// Maximum length for an object name
-   static const int s_iNameLength = 128;
+	/// Maximum length for an object name
+	static const int s_iNameLength = 128;
 
 	ncObject() : m_eType(BASE_TYPE), m_uId(0)
 	{
@@ -50,10 +51,10 @@ class ncObject
 	template <class T> static T* FromId(unsigned int uId);
 
  protected:
-  /// Object type
-  eObjectType m_eType;
+	/// Object type
+	eObjectType m_eType;
 
- private:
+  private:
 	/// Object identification in the indexer
 	unsigned int m_uId;
 
@@ -69,10 +70,12 @@ T* ncObject::FromId(unsigned int uId)
 {
 	ncObject *pObject = ncServiceLocator::Indexer().Object(uId);
 
-	if(pObject)
+	if (pObject)
 	{
 		if (pObject->m_eType == T::sType())
+		{
 			return static_cast<T *>(pObject);
+		}
 		else // Cannot cast
 		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncObject::FromId - Object \"%s\" (%u) is of type %u instead of %u", pObject->m_vName, uId, pObject->m_eType, T::sType());

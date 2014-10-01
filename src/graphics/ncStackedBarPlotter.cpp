@@ -10,7 +10,7 @@ ncStackedBarVariable::ncStackedBarVariable(unsigned int uNumValues, float fRejec
 {
 	// Two vertices for the mean quote plus...
 	// Six vertices (two coordinates each) for every recorded value
-	m_fVertices = new GLfloat[4 + uNumValues * 2*6];
+	m_fVertices = new GLfloat[4 + uNumValues * 2 * 6];
 }
 
 ///////////////////////////////////////////////////////////
@@ -37,7 +37,7 @@ unsigned int ncStackedBarPlotter::AddVariable(unsigned int uNumValues, float fRe
 	ncStackedBarVariable* pVariable = new ncStackedBarVariable(uNumValues, fRejectDelay);
 	m_vVariables.InsertBack(pVariable);
 
-	return m_vVariables.Size()-1;
+	return m_vVariables.Size() - 1;
 }
 
 void ncStackedBarPlotter::Draw(ncRenderQueue& rRenderQueue)
@@ -59,7 +59,9 @@ void ncStackedBarPlotter::Draw(ncRenderQueue& rRenderQueue)
 		m_vVariables[i]->ApplyTransformations(m_fAbsX, m_fAbsY, m_fAbsRotation, m_fAbsScaleFactor);
 		m_vVariables[i]->Draw(rRenderQueue);
 		if (m_vVariables[i]->shouldPlotMean())
+		{
 			m_vVariables[i]->DrawMean(rRenderQueue);
+		}
 	}
 }
 
@@ -80,7 +82,7 @@ void ncStackedBarPlotter::UpdateAllVertices(int x, int y, int w, int h)
 	for (unsigned int i = 0; i < m_vVariables.Size(); i++)
 	{
 		fMinSum += m_vVariables[i]->Variable()->Min();
-		fMaxSum += m_vVariables[i]->Variable()->Max();	
+		fMaxSum += m_vVariables[i]->Variable()->Max();
 	}
 
 	float fNormalizedRefValue = NormBetweenRefValue(fMinSum, fMaxSum);
@@ -116,29 +118,29 @@ void ncStackedBarPlotter::UpdateAllVertices(int x, int y, int w, int h)
 	for (unsigned int i = 0; i < uNumValues; i++)
 	{
 		float fVerticalOffset = 0.0f;
-		float fStep = (float(w)/float(uNumValues)) * 0.5f;
-		float fCenter = 2.0f*fStep*(i+1) - fStep;
+		float fStep = (float(w) / float(uNumValues)) * 0.5f;
+		float fCenter = 2.0f * fStep * (i + 1) - fStep;
 
 		for (unsigned int j = 0; j < m_vVariables.Size(); j++)
 		{
 			const ncProfileVariable* profVariable = m_vVariables[j]->Variable();
 			GLfloat* fVertices = m_vVariables[j]->Vertices();
 
-			float fNormValue = profVariable->NormBetweenValue((uNextIndex+i)%uNumValues, fMinSum, fMaxSum);
+			float fNormValue = profVariable->NormBetweenValue((uNextIndex + i) % uNumValues, fMinSum, fMaxSum);
 
-			fVertices[4 + 12*i + 0] = x + fCenter - fStep;
-			fVertices[4 + 12*i + 1] = y + fScaledH * fVerticalOffset;
-			fVertices[4 + 12*i + 2] = x + fCenter + fStep;
-			fVertices[4 + 12*i + 3] = y + fScaledH * fVerticalOffset;
-			fVertices[4 + 12*i + 4] = x + fCenter - fStep;
-			fVertices[4 + 12*i + 5] = y + fScaledH * (fVerticalOffset + fNormValue);
+			fVertices[4 + 12 * i + 0] = x + fCenter - fStep;
+			fVertices[4 + 12 * i + 1] = y + fScaledH * fVerticalOffset;
+			fVertices[4 + 12 * i + 2] = x + fCenter + fStep;
+			fVertices[4 + 12 * i + 3] = y + fScaledH * fVerticalOffset;
+			fVertices[4 + 12 * i + 4] = x + fCenter - fStep;
+			fVertices[4 + 12 * i + 5] = y + fScaledH * (fVerticalOffset + fNormValue);
 
-			fVertices[4 + 12*i + 6] = x + fCenter + fStep;
-			fVertices[4 + 12*i + 7] = y + fScaledH * fVerticalOffset;
-			fVertices[4 + 12*i + 8] = x + fCenter + fStep;
-			fVertices[4 + 12*i + 9] = y + fScaledH * (fVerticalOffset + fNormValue);
-			fVertices[4 + 12*i +10] = x + fCenter - fStep;
-			fVertices[4 + 12*i +11] = y + fScaledH * (fVerticalOffset + fNormValue);
+			fVertices[4 + 12 * i + 6] = x + fCenter + fStep;
+			fVertices[4 + 12 * i + 7] = y + fScaledH * fVerticalOffset;
+			fVertices[4 + 12 * i + 8] = x + fCenter + fStep;
+			fVertices[4 + 12 * i + 9] = y + fScaledH * (fVerticalOffset + fNormValue);
+			fVertices[4 + 12 * i + 10] = x + fCenter - fStep;
+			fVertices[4 + 12 * i + 11] = y + fScaledH * (fVerticalOffset + fNormValue);
 
 			fVerticalOffset += fNormValue;
 		}
@@ -147,11 +149,11 @@ void ncStackedBarPlotter::UpdateAllVertices(int x, int y, int w, int h)
 
 void ncStackedBarVariable::UpdateRenderCommand()
 {
-    m_valuesCmd.Material().SetTextureGLId(0);
+	m_valuesCmd.Material().SetTextureGLId(0);
 	m_valuesCmd.Material().SetColor(m_graphColor);
 //	m_valuesCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
-	m_valuesCmd.Geometry().SetData(GL_TRIANGLES, 2, m_variable.NumValues()*6, m_fVertices, NULL, NULL);
-    m_valuesCmd.CalculateSortKey();
+	m_valuesCmd.Geometry().SetData(GL_TRIANGLES, 2, m_variable.NumValues() * 6, m_fVertices, NULL, NULL);
+	m_valuesCmd.CalculateSortKey();
 }
 
 void ncStackedBarVariable::UpdateMeanRenderCommand()

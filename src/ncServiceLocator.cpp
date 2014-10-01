@@ -22,33 +22,49 @@ ncGfxCapabilities ncServiceLocator::m_gfxCapabilities;
 void ncServiceLocator::RegisterIndexer(ncIIndexer* pService)
 {
 	if (pService == NULL)
+	{
 		m_pIndexerService = &m_nullIndexer;
+	}
 	else
+	{
 		m_pIndexerService = pService;
+	}
 }
 
 void ncServiceLocator::RegisterLogger(ncILogger* pService)
 {
 	if (pService == NULL)
+	{
 		m_pLoggerService = &m_nullLogger;
+	}
 	else
+	{
 		m_pLoggerService = pService;
+	}
 }
 
 void ncServiceLocator::RegisterAudioDevice(ncIAudioDevice* pService)
 {
 	if (pService == NULL)
+	{
 		m_pAudioDevice = &m_nullAudioDevice;
+	}
 	else
+	{
 		m_pAudioDevice = pService;
+	}
 }
 
 void ncServiceLocator::RegisterThreadPool(ncIThreadPool* pService)
 {
 	if (pService == NULL)
+	{
 		m_pThreadPool = &m_nullThreadPool;
+	}
 	else
+	{
 		m_pThreadPool = pService;
+	}
 }
 
 /// Deletes every registered service reestablishing null ones

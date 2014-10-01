@@ -53,24 +53,29 @@ int main(int argc, char **argv)
 
 
 // ----- Event cycle --------------------
-	while(!bQuit) {
-		while(SDL_PollEvent(&event)) {
-			switch(event.type) {
-			case SDL_QUIT:
-				bQuit = true;
-				break;
-			case SDL_KEYDOWN:
-				switch(event.key.keysym.sym) {
-				case SDLK_ESCAPE:
-				case SDLK_q:
+	while (!bQuit)
+	{
+		while (SDL_PollEvent(&event))
+		{
+			switch (event.type)
+			{
+				case SDL_QUIT:
 					bQuit = true;
 					break;
-				case SDLK_F1:
-					gfxDevice.ToggleFullScreen();
+				case SDL_KEYDOWN:
+					switch (event.key.keysym.sym)
+					{
+						case SDLK_ESCAPE:
+						case SDLK_q:
+							bQuit = true;
+							break;
+						case SDLK_F1:
+							gfxDevice.ToggleFullScreen();
+							break;
+						default:
+							break;
+					}
 					break;
-				default:
-					break;
-				}
 			}
 		}
 
@@ -87,17 +92,17 @@ int main(int argc, char **argv)
 		float fSinus2 = sinf(fAngle2 * 0.01f);
 		float fCosine2 = cosf(fAngle2 * 0.01f);
 
-		pSprite1->x = iWidth*0.5f + fSinus*100;
-		pSprite1->y = iHeight*0.5f + fCosine*100;
+		pSprite1->x = iWidth * 0.5f + fSinus * 100;
+		pSprite1->y = iHeight * 0.5f + fCosine * 100;
 
-		pSprite2->x = fSinus*150;
-		pSprite2->y = fCosine*150;
+		pSprite2->x = fSinus * 150;
+		pSprite2->y = fCosine * 150;
 
-		pSprite3->x = -fSinus2*100;
-		pSprite3->y = fCosine2*100;
+		pSprite3->x = -fSinus2 * 100;
+		pSprite3->y = fCosine2 * 100;
 
-		pSprite4->x = -fSinus2*100;
-		pSprite4->y = fCosine2*100;
+		pSprite4->x = -fSinus2 * 100;
+		pSprite4->y = fCosine2 * 100;
 
 
 		rootNode.Update(t.Interval());
@@ -115,5 +120,5 @@ int main(int argc, char **argv)
 	delete pSprite1;
 
 	ncServiceLocator::UnregisterAll();
-	return 0;	
+	return 0;
 }

@@ -61,9 +61,13 @@ class ncFont
 inline const ncFontGlyph* ncFont::Glyph(unsigned int uGlyphId) const
 {
 	if (uGlyphId < s_uMaxGlyphs)
+	{
 		return &m_vGlyphs[uGlyphId];
+	}
 	else
+	{
 		return NULL;
+	}
 }
 
 #endif

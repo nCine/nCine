@@ -10,7 +10,7 @@ ncLineVariable::ncLineVariable(unsigned int uNumValues, float fRejectDelay)
 {
 	// Two vertices for the mean quote plus...
 	// One vertex (2 coordinates each) for every recorded value
-	m_fVertices = new GLfloat[4 + uNumValues*2];
+	m_fVertices = new GLfloat[4 + uNumValues * 2];
 }
 
 ///////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@ unsigned int ncLinePlotter::AddVariable(unsigned int uNumValues, float fRejectDe
 	ncLineVariable* pVariable = new ncLineVariable(uNumValues, fRejectDelay);
 	m_vVariables.InsertBack(pVariable);
 
-	return m_vVariables.Size()-1;
+	return m_vVariables.Size() - 1;
 }
 
 /// Fill the buffer of every line variable with vertices
@@ -38,9 +38,13 @@ void ncLinePlotter::UpdateAllVertices(int x, int y, int w, int h)
 	for (unsigned int i = 1; i < m_vVariables.Size(); i++)
 	{
 		if (m_vVariables[i]->Variable()->Min() < fCommonMin)
+		{
 			fCommonMin = m_vVariables[i]->Variable()->Min();
+		}
 		else if (m_vVariables[i]->Variable()->Max() > fCommonMax)
+		{
 			fCommonMax = m_vVariables[i]->Variable()->Max();
+		}
 	}
 
 	float fNormalizedRefValue = NormBetweenRefValue(fCommonMin, fCommonMax);
@@ -61,10 +65,10 @@ void ncLinePlotter::UpdateAllVertices(int x, int y, int w, int h)
 		unsigned int uNextIndex = profVariable->NextIndex();
 
 		// Variable value vertices
-		for(unsigned int i = 0; i < uNumValues; i++)
+		for (unsigned int i = 0; i < uNumValues; i++)
 		{
-			fVertices[4 + 2*i] = x + i * w/(uNumValues-1);
-			fVertices[4 + 2*i + 1] = y + h*profVariable->NormBetweenValue((uNextIndex+i)%uNumValues, fCommonMin, fCommonMax);
+			fVertices[4 + 2 * i] = x + i * w / (uNumValues - 1);
+			fVertices[4 + 2 * i + 1] = y + h * profVariable->NormBetweenValue((uNextIndex + i) % uNumValues, fCommonMin, fCommonMax);
 		}
 	}
 }
@@ -88,7 +92,9 @@ void ncLinePlotter::Draw(ncRenderQueue& rRenderQueue)
 		m_vVariables[i]->ApplyTransformations(m_fAbsX, m_fAbsY, m_fAbsRotation, m_fAbsScaleFactor);
 		m_vVariables[i]->Draw(rRenderQueue);
 		if (m_vVariables[i]->shouldPlotMean())
+		{
 			m_vVariables[i]->DrawMean(rRenderQueue);
+		}
 	}
 }
 
@@ -98,11 +104,11 @@ void ncLinePlotter::Draw(ncRenderQueue& rRenderQueue)
 
 void ncLineVariable::UpdateRenderCommand()
 {
-    m_valuesCmd.Material().SetTextureGLId(0);
+	m_valuesCmd.Material().SetTextureGLId(0);
 	m_valuesCmd.Material().SetColor(m_graphColor);
 //	m_valuesCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
 	m_valuesCmd.Geometry().SetData(GL_LINE_STRIP, 2, m_variable.NumValues(), m_fVertices, NULL, NULL);
-    m_valuesCmd.CalculateSortKey();
+	m_valuesCmd.CalculateSortKey();
 }
 
 void ncLineVariable::UpdateMeanRenderCommand()

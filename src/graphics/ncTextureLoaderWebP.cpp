@@ -28,7 +28,7 @@ void ncTextureLoaderWebP::Init()
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderWebP::Init - Loading \"%s\"", m_pFileHandle->Filename());
 
 	// Loading the whole file in memory
-	m_pFileHandle->Open(ncIFile::MODE_READ|ncIFile::MODE_BINARY);
+	m_pFileHandle->Open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
 	long int lFileSize = m_pFileHandle->Size();
 	unsigned char *pFileBuffer = new unsigned char[lFileSize];
 	m_pFileHandle->Read(pFileBuffer, lFileSize);

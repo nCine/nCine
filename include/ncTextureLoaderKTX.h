@@ -16,7 +16,8 @@ class ncTextureLoaderKTX : public ncITextureLoader
 	static const int KTX_IDENTIFIER_LENGTH = 12;
 
 	/// Header for the KTX format
-	typedef struct KTX_header {
+	typedef struct KTX_header
+	{
 		uint8_t		identifier[KTX_IDENTIFIER_LENGTH];
 		uint32_t    endianess;
 		uint32_t    glType;

@@ -39,32 +39,42 @@ void ncGLFWInputManager::WindowCloseCallback(GLFWwindow *window)
 void ncGLFWInputManager::KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
 	if (s_pInputEventHandler == NULL)
+	{
 		return;
+	}
 
 	s_keyboardEvent.scancode = scancode;
 	s_keyboardEvent.sym = ncKeySym(key);
 	s_keyboardEvent.mod = mods;
 
 	if (action == GLFW_PRESS)
+	{
 		s_pInputEventHandler->OnKeyPressed(s_keyboardEvent);
+	}
 	else if (action == GLFW_RELEASE)
+	{
 		s_pInputEventHandler->OnKeyReleased(s_keyboardEvent);
+	}
 }
 
 void ncGLFWInputManager::CursorPosCallback(GLFWwindow *window, double x, double y)
 {
 	if (s_pInputEventHandler == NULL)
+	{
 		return;
+	}
 
 	s_mouseState.x = int(x);
-	s_mouseState.y = ncApplication::Height()-int(y);
+	s_mouseState.y = ncApplication::Height() - int(y);
 	s_pInputEventHandler->OnMouseMoved(s_mouseState);
 }
 
 void ncGLFWInputManager::MouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
 	if (s_pInputEventHandler == NULL)
+	{
 		return;
+	}
 
 	double dCursorX, dCursory;
 	glfwGetCursorPos(window, &dCursorX, &dCursory);
@@ -73,9 +83,13 @@ void ncGLFWInputManager::MouseButtonCallback(GLFWwindow *window, int button, int
 	s_mouseEvent.m_iButton = button;
 
 	if (action == GLFW_PRESS)
+	{
 		s_pInputEventHandler->OnMouseButtonPressed(s_mouseEvent);
+	}
 	else if (action == GLFW_RELEASE)
+	{
 		s_pInputEventHandler->OnMouseButtonReleased(s_mouseEvent);
+	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -87,7 +101,9 @@ bool ncGLFWInputManager::hasFocus()
 {
 	// A focus event has occurred (either gain or loss)
 	if (m_bWindowHasFocus != glfwGetWindowAttrib(ncGLFWGfxDevice::WindowHandle(), GLFW_FOCUSED))
+	{
 		m_bWindowHasFocus = glfwGetWindowAttrib(ncGLFWGfxDevice::WindowHandle(), GLFW_FOCUSED);
+	}
 
 	return m_bWindowHasFocus;
 }
@@ -95,7 +111,7 @@ bool ncGLFWInputManager::hasFocus()
 /// Updates joystick state structures
 void ncGLFWInputManager::UpdateJoystickStates()
 {
-	for(unsigned int i = 0; i < s_uMaxNumJoysticks; i++)
+	for (unsigned int i = 0; i < s_uMaxNumJoysticks; i++)
 	{
 		if (glfwJoystickPresent(GLFW_JOYSTICK_1 + i))
 		{
@@ -108,17 +124,25 @@ void ncGLFWInputManager::UpdateJoystickStates()
 bool ncGLFWInputManager::isJoyPresent(int iJoyId) const
 {
 	if (iJoyId >= 0 && GLFW_JOYSTICK_1 + iJoyId <= GLFW_JOYSTICK_LAST)
+	{
 		return glfwJoystickPresent(GLFW_JOYSTICK_1 + iJoyId);
+	}
 	else
+	{
 		return false;
+	}
 }
 
-const char* ncGLFWInputManager::JoyName(int iJoyId) const
+const char *ncGLFWInputManager::JoyName(int iJoyId) const
 {
 	if (isJoyPresent(iJoyId))
+	{
 		return glfwGetJoystickName(iJoyId);
+	}
 	else
+	{
 		return '\0';
+	}
 }
 
 int ncGLFWInputManager::JoyNumButtons(int iJoyId) const
@@ -126,7 +150,9 @@ int ncGLFWInputManager::JoyNumButtons(int iJoyId) const
 	int iNumButtons = -1;
 
 	if (isJoyPresent(iJoyId))
+	{
 		glfwGetJoystickButtons(GLFW_JOYSTICK_1 + iJoyId, &iNumButtons);
+	}
 
 	return iNumButtons;
 }
@@ -136,7 +162,9 @@ int ncGLFWInputManager::JoyNumAxes(int iJoyId) const
 	int iNumAxes = -1;
 
 	if (isJoyPresent(iJoyId))
+	{
 		glfwGetJoystickAxes(GLFW_JOYSTICK_1 + iJoyId, &iNumAxes);
+	}
 
 	return iNumAxes;
 }
@@ -144,9 +172,13 @@ int ncGLFWInputManager::JoyNumAxes(int iJoyId) const
 bool ncGLFWInputManager::isJoyButtonPressed(int iJoyId, int iButtonId) const
 {
 	if (isJoyPresent(iJoyId) && iButtonId >= 0 && iButtonId < JoyNumButtons(iJoyId))
+	{
 		return s_joystickStates[iJoyId].m_ubButtons[iButtonId];
+	}
 	else
+	{
 		return false;
+	}
 }
 
 short int ncGLFWInputManager::JoyAxisValue(int iJoyId, int iAxisId) const
@@ -162,7 +194,9 @@ float ncGLFWInputManager::JoyAxisNormValue(int iJoyId, int iAxisId) const
 	float fAxisValue = 0.0f;
 
 	if (isJoyPresent(iJoyId) && iAxisId >= 0 && iAxisId < JoyNumAxes(iJoyId))
+	{
 		fAxisValue = s_joystickStates[iJoyId].m_fAxisValues[iAxisId];
+	}
 
 	return fAxisValue;
 }

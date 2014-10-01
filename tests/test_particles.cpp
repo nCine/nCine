@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 	ncTexture texture("textures/smoke_256.png");
 
 	ncParticleSystem particleSys(&rootNode, NUM_PARTICLES, &texture, texture.Rect());
-	particleSys.SetPosition(iWidth*0.5f, iHeight*0.5f);
+	particleSys.SetPosition(iWidth * 0.5f, iHeight * 0.5f);
 
 //	particleSys.AddAffector(new ncAccelerationAffector(0.000025f, 0.0f));
 	ncColorAffector *colAffector = new ncColorAffector();
@@ -62,24 +62,29 @@ int main(int argc, char **argv)
 
 
 // ----- Event cycle --------------------
-	while(!bQuit) {
-		while(SDL_PollEvent(&event)) {
-			switch(event.type) {
-			case SDL_QUIT:
-				bQuit = true;
-				break;
-			case SDL_KEYDOWN:
-				switch(event.key.keysym.sym) {
-				case SDLK_ESCAPE:
-				case SDLK_q:
+	while (!bQuit)
+	{
+		while (SDL_PollEvent(&event))
+		{
+			switch (event.type)
+			{
+				case SDL_QUIT:
 					bQuit = true;
 					break;
-				case SDLK_F1:
-					gfxDevice.ToggleFullScreen();
+				case SDL_KEYDOWN:
+					switch (event.key.keysym.sym)
+					{
+						case SDLK_ESCAPE:
+						case SDLK_q:
+							bQuit = true;
+							break;
+						case SDLK_F1:
+							gfxDevice.ToggleFullScreen();
+							break;
+						default:
+							break;
+					}
 					break;
-				default:
-					break;
-				}
 			}
 		}
 
@@ -105,5 +110,5 @@ int main(int argc, char **argv)
 
 // ----- Quitting ----------------------
 	ncServiceLocator::UnregisterAll();
-	return 0;	
+	return 0;
 }

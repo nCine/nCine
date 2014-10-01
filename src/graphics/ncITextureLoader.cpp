@@ -38,16 +38,24 @@ ncITextureLoader::ncITextureLoader(ncIFile *pFileHandle)
 ncITextureLoader::~ncITextureLoader()
 {
 	if (m_uPixels)
+	{
 		delete[] m_uPixels;
+	}
 
 	if (m_lMipDataSizes)
+	{
 		delete[] m_lMipDataSizes;
+	}
 
 	if (m_lMipDataOffsets)
+	{
 		delete[] m_lMipDataOffsets;
+	}
 
 	if (m_pFileHandle)
+	{
 		delete m_pFileHandle;
+	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -62,10 +70,14 @@ long ncITextureLoader::DataSize(unsigned int uMipMapLevel) const
 	if (m_iMipMapCount > 1)
 	{
 		if (int(uMipMapLevel) < m_iMipMapCount)
+		{
 			lDataSize = m_lMipDataSizes[uMipMapLevel];
+		}
 	}
 	else if (uMipMapLevel == 0)
+	{
 		lDataSize = m_lDataSize;
+	}
 
 	return lDataSize;
 }
@@ -78,10 +90,14 @@ const GLubyte* ncITextureLoader::Pixels(unsigned int uMipMapLevel) const
 	if (m_iMipMapCount > 1)
 	{
 		if (int(uMipMapLevel) < m_iMipMapCount)
+		{
 			pPixels = m_uPixels + m_lMipDataOffsets[uMipMapLevel];
+		}
 	}
 	else if (uMipMapLevel == 0)
+	{
 		pPixels = m_uPixels;
+	}
 
 	return pPixels;
 }
@@ -94,25 +110,39 @@ ncITextureLoader* ncITextureLoader::CreateFromFile(const char *pFilename)
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncITextureLoader::CreateFromFile - Loading file: \"%s\"", pFileHandle->Filename());
 
 	if (pFileHandle->HasExtension("dds"))
+	{
 		return new ncTextureLoaderDDS(pFileHandle);
+	}
 	else if (pFileHandle->HasExtension("pvr"))
+	{
 		return new ncTextureLoaderPVR(pFileHandle);
+	}
 	else if (pFileHandle->HasExtension("ktx"))
+	{
 		return new ncTextureLoaderKTX(pFileHandle);
+	}
 #if defined(WITH_SDLIMAGE)
 	else if (pFileHandle->HasExtension("png") || pFileHandle->HasExtension("jpg"))
+	{
 		return new ncTextureLoaderSDL(pFileHandle);
+	}
 #elif defined(WITH_PNG)
 	else if (pFileHandle->HasExtension("png"))
+	{
 		return new ncTextureLoaderPNG(pFileHandle);
+	}
 #endif
 #ifdef WITH_WEBP
 	else if (pFileHandle->HasExtension("webp"))
+	{
 		return new ncTextureLoaderWebP(pFileHandle);
+	}
 #endif
 #ifdef __ANDROID__
 	else if (pFileHandle->HasExtension("pkm"))
+	{
 		return new ncTextureLoaderETC(pFileHandle);
+	}
 #endif
 	else
 	{
@@ -137,13 +167,19 @@ void ncITextureLoader::LoadPixels(GLenum eInternalFormat, GLenum eType)
 {
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncITextureLoader::LoadPixels - Loading \"%s\"", m_pFileHandle->Filename());
 	if (eType) // overriding pixel type
+	{
 		m_texFormat = ncTextureFormat(eInternalFormat, eType);
+	}
 	else
+	{
 		m_texFormat = ncTextureFormat(eInternalFormat);
+	}
 
 	// If the file has not been already opened by a header reader method
 	if (m_pFileHandle->IsOpened() == false)
-		m_pFileHandle->Open(ncIFile::MODE_READ|ncIFile::MODE_BINARY);
+	{
+		m_pFileHandle->Open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
+	}
 
 	m_lDataSize = m_pFileHandle->Size() - m_iHeaderSize;
 	m_pFileHandle->Seek(m_iHeaderSize, SEEK_SET);

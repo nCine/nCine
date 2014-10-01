@@ -13,7 +13,8 @@ class ncIAudioPlayer : public ncObject
 {
  public:
 	/// Player state
-	enum ePlayerState {
+	enum ePlayerState
+	{
 		STATE_INITIAL = 0,
 		STATE_PLAYING,
 		STATE_PAUSED,
@@ -90,7 +91,9 @@ inline void ncIAudioPlayer::SetGain(float fGain)
 {
 	m_fGain = fGain;
 	if (m_eState == STATE_PLAYING)
+	{
 		alSourcef(m_uSource, AL_GAIN, m_fGain);
+	}
 }
 
 /// Sets player pitch value
@@ -99,7 +102,9 @@ inline void ncIAudioPlayer::SetPitch(float fPitch)
 {
 	m_fPitch = fPitch;
 	if (m_eState == STATE_PLAYING)
+	{
 		alSourcef(m_uSource, AL_PITCH, m_fPitch);
+	}
 }
 
 /// Sets player position value through vector
@@ -111,7 +116,9 @@ inline void ncIAudioPlayer::SetPosition(float fPosition[3])
 	m_fPosition[2] = fPosition[2];
 
 	if (m_eState == STATE_PLAYING)
+	{
 		alSourcefv(m_uSource, AL_POSITION, m_fPosition);
+	}
 }
 
 /// Sets player position value through components
@@ -123,7 +130,9 @@ inline void ncIAudioPlayer::SetPosition(float fX, float fY, float fZ)
 	m_fPosition[2] = fZ;
 
 	if (m_eState == STATE_PLAYING)
+	{
 		alSourcefv(m_uSource, AL_POSITION, m_fPosition);
+	}
 }
 
 #endif

@@ -26,7 +26,7 @@ void ncTextureLoaderPVR::Init()
 {
 	PVR3_header header;
 
-	m_pFileHandle->Open(ncIFile::MODE_READ|ncIFile::MODE_BINARY);
+	m_pFileHandle->Open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
 	ReadHeader(header);
 	ParseFormat(header);
 }
@@ -46,7 +46,9 @@ void ncTextureLoaderPVR::ReadHeader(PVR3_header &header)
 		m_iMipMapCount = header.numMipmaps;
 
 		if (m_iMipMapCount == 0)
+		{
 			m_iMipMapCount = 1;
+		}
 	}
 	else
 	{
@@ -69,7 +71,7 @@ void ncTextureLoaderPVR::ParseFormat(const PVR3_header& header)
 		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderPVR::ParseFormat - Compressed format: %u", u64PixelFormat);
 
 		// Check for OpenGL extension support
-		switch(u64PixelFormat)
+		switch (u64PixelFormat)
 		{
 #ifndef __ANDROID__
 			case FMT_DXT1:
@@ -105,7 +107,7 @@ void ncTextureLoaderPVR::ParseFormat(const PVR3_header& header)
 		}
 
 		// Parsing the pixel format
-		switch(u64PixelFormat)
+		switch (u64PixelFormat)
 		{
 #ifndef __ANDROID__
 			case FMT_DXT1:
@@ -147,7 +149,7 @@ void ncTextureLoaderPVR::ParseFormat(const PVR3_header& header)
 			((char*)&u64PixelFormat)[0], ((char*)&u64PixelFormat)[1], ((char*)&u64PixelFormat)[2], ((char*)&u64PixelFormat)[3],
 			((unsigned char*)&u64PixelFormat)[4], ((unsigned char*)&u64PixelFormat)[5], ((unsigned char*)&u64PixelFormat)[6], ((unsigned char*)&u64PixelFormat)[7]);
 
-		switch(u64PixelFormat)
+		switch (u64PixelFormat)
 		{
 			case FMT_RGB_888:
 				eInternalFormat = GL_RGB;
@@ -183,6 +185,8 @@ void ncTextureLoaderPVR::ParseFormat(const PVR3_header& header)
 		m_lMipDataSizes = new long[m_iMipMapCount];
 		long int lDataSizesSum = ncTextureFormat::CalculateMipSizes(eInternalFormat, m_iWidth, m_iHeight, m_iMipMapCount, m_lMipDataOffsets, m_lMipDataSizes);
 		if (lDataSizesSum != m_lDataSize)
+		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncTextureLoaderPVR::ParseFormat - The sum of MIP maps size (%ld) is different than texture total data (%ld)", lDataSizesSum, m_lDataSize);
+		}
 	}
 }

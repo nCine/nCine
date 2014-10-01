@@ -78,7 +78,9 @@ void ncArray<T>::SetCapacity(unsigned int uNewCapacity)
 	if (m_uSize > 0)
 	{
 		if (uNewCapacity < m_uSize) // shrinking
-			m_uSize = uNewCapacity; // cropping last elements
+		{
+			m_uSize = uNewCapacity;    // cropping last elements
+		}
 
 		memcpy(pNewArray, m_pArray, sizeof(T)*m_uSize);
 	}
@@ -93,10 +95,12 @@ template <class T>
 void ncArray<T>::InsertAt(unsigned int uIndex, T element)
 {
 	if (m_uSize + 1 > m_uCapacity)
+	{
 		SetCapacity(m_uSize * 2);
+	}
 
 	// memmove() takes care of overlapping regions
-	memmove(m_pArray + uIndex + 1, m_pArray + uIndex, m_uSize-uIndex);
+	memmove(m_pArray + uIndex + 1, m_pArray + uIndex, m_uSize - uIndex);
 	m_pArray[uIndex] = element;
 	m_uSize++;
 }
@@ -106,7 +110,9 @@ template <class T>
 void ncArray<T>::Append(const T* elements, unsigned int uAmount)
 {
 	if (m_uSize + uAmount > m_uCapacity)
+	{
 		SetCapacity(m_uSize + uAmount);
+	}
 
 	memcpy(m_pArray + m_uSize, elements, sizeof(T)*uAmount);
 	m_uSize += uAmount;
@@ -116,7 +122,7 @@ template <class T>
 void ncArray<T>::RemoveAt(unsigned int uIndex)
 {
 	// memmove() takes care of overlapping regions
-	memmove(m_pArray + uIndex, m_pArray + uIndex + 1, m_uSize-uIndex);
+	memmove(m_pArray + uIndex, m_pArray + uIndex + 1, m_uSize - uIndex);
 	m_uSize--;
 }
 
@@ -154,7 +160,9 @@ T& ncArray<T>::operator[] (const unsigned int uIndex)
 	{
 		// Need growing
 		if (m_uSize == m_uCapacity)
+		{
 			SetCapacity(m_uCapacity * 2);
+		}
 
 		m_uSize++;
 	}
@@ -167,7 +175,9 @@ template <class T>
 T* ncArray<T>::MapBuffer(unsigned int uReserved)
 {
 	if (m_uSize + uReserved > m_uCapacity)
+	{
 		SetCapacity(m_uSize + uReserved);
+	}
 
 	T* pArray = &m_pArray[m_uSize];
 	m_uSize += uReserved;

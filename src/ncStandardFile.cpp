@@ -19,13 +19,17 @@ void ncStandardFile::Open(unsigned char uMode)
 {
 	// Checking if the file is already opened
 	if (m_iFileDescriptor >= 0 || m_pFilePointer != NULL)
+	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncStandardFile::Open - File \"%s\" is already opened", m_vFilename);
+	}
 	else
 	{
 #if !(defined(_WIN32) && !defined(__MINGW32__))
 		// Opening with a file descriptor
 		if (uMode & MODE_FD)
+		{
 			OpenFD(uMode);
+		}
 		// Opening with a file stream
 		else
 #endif
@@ -41,7 +45,9 @@ void ncStandardFile::Close()
 #if !(defined(_WIN32) && !defined(__MINGW32__))
 		int iRetValue = close(m_iFileDescriptor);
 		if (iRetValue < 0)
+		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncStandardFile::Close - Cannot close the file \"%s\"", m_vFilename);
+		}
 		else
 		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::Close - File \"%s\" closed", m_vFilename);
@@ -53,7 +59,9 @@ void ncStandardFile::Close()
 	{
 		int iRetValue = fclose(m_pFilePointer);
 		if (iRetValue == EOF)
+		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncStandardFile::Close - Cannot close the file \"%s\"", m_vFilename);
+		}
 		else
 		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::Close - File \"%s\" closed", m_vFilename);
@@ -128,7 +136,7 @@ void ncStandardFile::OpenFD(unsigned char uMode)
 #if !(defined(_WIN32) && !defined(__MINGW32__))
 	int iOFlag = -1;
 
-	switch(uMode)
+	switch (uMode)
 	{
 		case (MODE_FD|MODE_READ):
 			iOFlag = O_RDONLY;
@@ -154,7 +162,9 @@ void ncStandardFile::OpenFD(unsigned char uMode)
 			exit(EXIT_FAILURE);
 		}
 		else
+		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::OpenFD - File \"%s\" opened", m_vFilename);
+		}
 
 		// Calculating file size
 		m_lFileSize = lseek(m_iFileDescriptor, 0L, SEEK_END);
@@ -168,7 +178,7 @@ void ncStandardFile::OpenStream(unsigned char uMode)
 {
 	char pMode[3] = {'\0', '\0', '\0'};
 
-	switch(uMode)
+	switch (uMode)
 	{
 		case (MODE_READ):
 			pMode[0] = 'r';
@@ -208,7 +218,9 @@ void ncStandardFile::OpenStream(unsigned char uMode)
 			exit(EXIT_FAILURE);
 		}
 		else
+		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::OpenStream - File \"%s\" opened", m_vFilename);
+		}
 
 		// Calculating file size
 		fseek(m_pFilePointer, 0L, SEEK_END);
@@ -225,7 +237,7 @@ bool ncStandardFile::Access(const char *pFilename, unsigned char uMode)
 	int iAMode = -1;
 
 #if !(defined(_WIN32) && !defined(__MINGW32__))
-	switch(uMode)
+	switch (uMode)
 	{
 		case (ncIFile::MODE_EXISTS):
 			iAMode = F_OK;
@@ -245,9 +257,11 @@ bool ncStandardFile::Access(const char *pFilename, unsigned char uMode)
 	}
 
 	if (iAMode != -1)
+	{
 		bAccessible = (access(pFilename, iAMode) == 0);
+	}
 #else
-	switch(uMode)
+	switch (uMode)
 	{
 		case (ncIFile::MODE_EXISTS):
 			iAMode = 0;
@@ -267,7 +281,9 @@ bool ncStandardFile::Access(const char *pFilename, unsigned char uMode)
 	}
 
 	if (iAMode != -1)
+	{
 		bAccessible = (_access(pFilename, iAMode) == 0);
+	}
 #endif
 
 	return bAccessible;

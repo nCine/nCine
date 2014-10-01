@@ -83,8 +83,10 @@ void ncCondVariable::Signal()
 	bool bHaveWaiters = (m_uWaitersCount > 0);
 	LeaveCriticalSection(&m_WaitersCountLock);
 
-	if(bHaveWaiters)
-		SetEvent(m_events[0]); // Signal
+	if (bHaveWaiters)
+	{
+		SetEvent(m_events[0]);    // Signal
+	}
 }
 
 void ncCondVariable::Broadcast()
@@ -93,8 +95,10 @@ void ncCondVariable::Broadcast()
 	bool bHaveWaiters = (m_uWaitersCount > 0);
 	LeaveCriticalSection(&m_WaitersCountLock);
 
-	if(bHaveWaiters)
-		SetEvent(m_events[1]); // Broadcast
+	if (bHaveWaiters)
+	{
+		SetEvent(m_events[1]);    // Broadcast
+	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -110,6 +114,8 @@ void ncCondVariable::WaitEvents()
 	bool bLastWaiter = (iResult == (WAIT_OBJECT_0 + 1)) && (m_uWaitersCount == 0);
 	LeaveCriticalSection(&m_WaitersCountLock);
 
-	if(bLastWaiter)
-		ResetEvent(m_events[1]); // Broadcast
+	if (bLastWaiter)
+	{
+		ResetEvent(m_events[1]);    // Broadcast
+	}
 }

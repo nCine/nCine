@@ -102,9 +102,11 @@ bool ncGfxCapabilities::CheckGLExtension(const char *pExtensionName) const
 	int iNameLength = strlen(pExtensionName);
 	pEnd = pExtensions + strlen(pExtensions);
 
-	while (pExtensions < pEnd) {
+	while (pExtensions < pEnd)
+	{
 		int n = strcspn(pExtensions, " ");
-		if ((iNameLength == n) && (strncmp(pExtensionName, pExtensions, n) == 0)) {
+		if ((iNameLength == n) && (strncmp(pExtensionName, pExtensions, n) == 0))
+		{
 			return true;
 		}
 		pExtensions += (n + 1);

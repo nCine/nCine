@@ -4,7 +4,8 @@
 #include <android/keycodes.h>
 #include <android/input.h>
 
-typedef enum {
+typedef enum
+{
 	NCKEY_UNKNOWN         = AKEYCODE_UNKNOWN,
 	NCKEY_SOFT_LEFT       = AKEYCODE_SOFT_LEFT,
 	NCKEY_SOFT_RIGHT      = AKEYCODE_SOFT_RIGHT,
@@ -120,7 +121,8 @@ typedef enum {
 	NCKEY_LAST
 } ncKeySym;
 
-typedef enum {
+typedef enum
+{
 	NCKEYMOD_NONE		= AMETA_NONE,
 	NCKEYMOD_ALT		= AMETA_ALT_ON,
 	NCKEYMOD_LALT		= AMETA_ALT_LEFT_ON,

@@ -42,7 +42,9 @@ ncALAudioDevice::ncALAudioDevice()
 ncALAudioDevice::~ncALAudioDevice()
 {
 	for (unsigned int i = 0; i < s_uMaxSources; i++)
+	{
 		alSourcei(m_uSources[i], AL_BUFFER, AL_NONE);
+	}
 	alDeleteSources(s_uMaxSources, m_uSources);
 
 	alcDestroyContext(m_pContext);
@@ -68,16 +70,20 @@ void ncALAudioDevice::SetGain(ALfloat fGain)
 
 void ncALAudioDevice::StopPlayers()
 {
-	for(ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin(); i != m_players.End(); i++)
+	for (ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin(); i != m_players.End(); i++)
+	{
 		(*i)->Stop();
+	}
 
 	m_players.Clear();
 }
 
 void ncALAudioDevice::PausePlayers()
 {
-	for(ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin(); i != m_players.End(); i++)
+	for (ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin(); i != m_players.End(); i++)
+	{
 		(*i)->Pause();
+	}
 
 	m_players.Clear();
 }
@@ -90,7 +96,9 @@ int ncALAudioDevice::NextAvailableSource()
 	{
 		alGetSourcei(m_uSources[i], AL_SOURCE_STATE, &iState);
 		if (iState != AL_PLAYING && iState != AL_PAUSED)
+		{
 			return m_uSources[i];
+		}
 	}
 
 	return -1;
@@ -104,7 +112,7 @@ void ncALAudioDevice::RegisterPlayer(ncIAudioPlayer *pPlayer)
 void ncALAudioDevice::UpdatePlayers()
 {
 	ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin();
-	while(i != m_players.End())
+	while (i != m_players.End())
 	{
 		if ((*i)->isPlaying())
 		{
@@ -112,7 +120,9 @@ void ncALAudioDevice::UpdatePlayers()
 			i++;
 		}
 		else
+		{
 			m_players.Remove(i++);
+		}
 	}
 }
 
@@ -124,18 +134,24 @@ void ncALAudioDevice::UpdatePlayers()
 void ncALAudioDevice::StopOrPauseBufferPlayers(bool bStop)
 {
 	ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin();
-	while(i != m_players.End())
+	while (i != m_players.End())
 	{
 		if ((*i)->Type() == ncAudioBufferPlayer::sType())
 		{
 			if (bStop)
+			{
 				(*i)->Stop();
+			}
 			else
+			{
 				(*i)->Pause();
+			}
 			m_players.Remove(i++);
 		}
 		else
+		{
 			i++;
+		}
 	}
 }
 
@@ -143,17 +159,23 @@ void ncALAudioDevice::StopOrPauseBufferPlayers(bool bStop)
 void ncALAudioDevice::StopOrPauseStreamPlayers(bool bStop)
 {
 	ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin();
-	while(i != m_players.End())
+	while (i != m_players.End())
 	{
 		if ((*i)->Type() == ncAudioStreamPlayer::sType())
 		{
 			if (bStop)
+			{
 				(*i)->Stop();
+			}
 			else
+			{
 				(*i)->Pause();
+			}
 			m_players.Remove(i++);
 		}
 		else
+		{
 			i++;
+		}
 	}
 }

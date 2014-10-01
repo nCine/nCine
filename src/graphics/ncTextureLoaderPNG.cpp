@@ -29,11 +29,11 @@ void ncTextureLoaderPNG::Init()
 
 	const int iSignatureLength = 8;
 	unsigned char ubSignature[iSignatureLength];
-	m_pFileHandle->Open(ncIFile::MODE_READ|ncIFile::MODE_BINARY);
+	m_pFileHandle->Open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
 	m_pFileHandle->Read(ubSignature, iSignatureLength);
 
 	// Checking PNG signature
-	if(!png_check_sig(ubSignature, iSignatureLength))
+	if (!png_check_sig(ubSignature, iSignatureLength))
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPNG::Init - PNG signature check failed");
 		exit(EXIT_FAILURE);
@@ -43,7 +43,7 @@ void ncTextureLoaderPNG::Init()
 	png_structp png_ptr = NULL;
 	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
-	if(png_ptr == NULL)
+	if (png_ptr == NULL)
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPNG::Init - Cannot create png read structure");
 		exit(EXIT_FAILURE);
@@ -53,7 +53,7 @@ void ncTextureLoaderPNG::Init()
 	png_infop info_ptr = NULL;
 	info_ptr = png_create_info_struct(png_ptr);
 
-	if(info_ptr == NULL)
+	if (info_ptr == NULL)
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPNG::Init - Cannot create png info structure");
 		png_destroy_read_struct(&png_ptr, NULL, NULL);
@@ -73,7 +73,7 @@ void ncTextureLoaderPNG::Init()
 	int iColorType = -1;
 	png_uint_32 retval = png_get_IHDR(png_ptr, info_ptr, &uWidth, &uHeight, &iBitDepth, &iColorType, NULL, NULL, NULL);
 
-	if(retval != 1)
+	if (retval != 1)
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPNG::Init - Cannot create png info structure");
 		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
@@ -84,7 +84,7 @@ void ncTextureLoaderPNG::Init()
 	m_iHeight = uHeight;
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderPNG::Init - Header found: w:%d h:%d", m_iWidth, m_iHeight);
 
-	switch(iColorType)
+	switch (iColorType)
 	{
 		case PNG_COLOR_TYPE_RGB_ALPHA:
 			m_texFormat = ncTextureFormat(GL_RGBA);
@@ -109,7 +109,9 @@ void ncTextureLoaderPNG::Init()
 
 	png_bytep *pRowPointers = new png_bytep[m_iHeight];
 	for (int i = 0; i < m_iHeight; i++)
+	{
 		pRowPointers[i] = m_uPixels + i * uBytesPerRow;
+	}
 
 	// Decoding png data through row pointers
 	png_read_image(png_ptr, pRowPointers);

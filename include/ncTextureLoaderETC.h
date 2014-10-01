@@ -14,7 +14,8 @@ class ncTextureLoaderETC : public ncITextureLoader
 
  private:
 	/// Structure for ETC1 magic number
-	typedef struct ETC1_magic {
+	typedef struct ETC1_magic
+	{
 		char cMagicId[6];
 		uint16_t uZero;
 	} ETC1_magic;
@@ -23,7 +24,8 @@ class ncTextureLoaderETC : public ncITextureLoader
 	/*! The extended width and height are the dimensions rounded up to a multiple of 4.
 	 *  The total data size in bytes is (uExtendedWidth/4)*(uExtendedHeight/4)*8
 	 */
-	typedef struct ETC1_header {
+	typedef struct ETC1_header
+	{
 		uint16_t uExtendedWidth;
 		uint16_t uExtendedHeight;
 		uint16_t uWidth;

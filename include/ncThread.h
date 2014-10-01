@@ -17,14 +17,14 @@ class ncThread
 	// A default constructor for a class without the associated function
 	ncThread();
 	// Creates a thread around a function and runs it
-	ncThread(ncThreadFunctionPtr_t pStartFunction, void *pArg);
+	ncThread(ncThreadFunctionPtr_t pStartFunction, void* pArg);
 	~ncThread() { }
 
 	// Gets the number of processors in the machine
 	static unsigned int NumProcessors();
 
 	// Spawns a new thread if the class hasn't one already associated
-	void Run(ncThreadFunctionPtr_t pStartFunction, void *pArg);
+	void Run(ncThreadFunctionPtr_t pStartFunction, void* pArg);
 	// Joins the thread
 	void *Join();
 
@@ -52,12 +52,12 @@ class ncThread
 	// The wrapper start function for thread creation
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
 	#ifdef __GNUC__ // MinGW
-		static unsigned int (__attribute__((__stdcall__)) WrapperFunction)(void *pArg);
+		static unsigned int (__attribute__((__stdcall__)) WrapperFunction)(void* pArg);
 	#else // MSVC
-		static unsigned int __stdcall WrapperFunction(void *pArg);
+		static unsigned int __stdcall WrapperFunction(void* pArg);
 	#endif
 #else
-	static void *WrapperFunction(void *pArg);
+	static void *WrapperFunction(void* pArg);
 #endif
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)

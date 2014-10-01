@@ -33,7 +33,7 @@ void ncTextureLoaderKTX::Init()
 {
 	KTX_header header;
 
-	m_pFileHandle->Open(ncIFile::MODE_READ|ncIFile::MODE_BINARY);
+	m_pFileHandle->Open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
 	ReadHeader(header);
 	ParseFormat(header);
 }
@@ -49,7 +49,9 @@ void ncTextureLoaderKTX::ReadHeader(KTX_header &header)
 	for (int i = 0; i < KTX_IDENTIFIER_LENGTH; i++)
 	{
 		if (header.identifier[i] != m_uFileIdentifier[i])
+		{
 			bCheckPassed = false;
+		}
 	}
 
 	// Checking for the header identifier
@@ -81,7 +83,7 @@ void ncTextureLoaderKTX::ParseFormat(const KTX_header& header)
 	GLenum eInternalFormat = ncIFile::Int32FromLE(header.glInternalFormat);
 	GLenum eType = ncIFile::Int32FromLE(header.glType);
 
-	switch(eInternalFormat)
+	switch (eInternalFormat)
 	{
 #ifndef __ANDROID__
 		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
@@ -126,10 +128,14 @@ void ncTextureLoaderKTX::ParseFormat(const KTX_header& header)
 
 		// HACK: accounting for "UInt32 imageSize;" on top of each MIP level
 		for (int i = 0; i < m_iMipMapCount; i++)
-			m_lMipDataOffsets[i] += 4 * (i+1);
+		{
+			m_lMipDataOffsets[i] += 4 * (i + 1);
+		}
 		lDataSizesSum += 4 * m_iMipMapCount;
 
 		if (lDataSizesSum != m_lDataSize)
+		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncTextureLoaderKTX::ParseFormat - The sum of MIP maps size (%ld) is different than texture total data (%ld)", lDataSizesSum, m_lDataSize);
+		}
 	}
 }

@@ -42,9 +42,9 @@ ncSDLInputManager::ncSDLInputManager()
 
 	// Opening attached joysticks
 	int iNumJoysticks = SDL_NumJoysticks();
-	if(iNumJoysticks > 0)
+	if (iNumJoysticks > 0)
 	{
-		for(int i = 0; i < iNumJoysticks; i++)
+		for (int i = 0; i < iNumJoysticks; i++)
 		{
 			s_pJoysticks[i] = SDL_JoystickOpen(i);
 			if (s_pJoysticks[i])
@@ -61,7 +61,7 @@ ncSDLInputManager::ncSDLInputManager()
 ncSDLInputManager::~ncSDLInputManager()
 {
 	// Close a joystick if opened
-	for(unsigned int i = 0; i < s_uMaxNumJoysticks; i++)
+	for (unsigned int i = 0; i < s_uMaxNumJoysticks; i++)
 	{
 		if (isJoyPresent(i))
 		{
@@ -79,10 +79,13 @@ ncSDLInputManager::~ncSDLInputManager()
 void ncSDLInputManager::ParseEvent(const SDL_Event &event)
 {
 	if (s_pInputEventHandler == NULL)
+	{
 		return;
+	}
 
 	// Filling static event structures
-	switch (event.type) {
+	switch (event.type)
+	{
 		case SDL_KEYDOWN:
 		case SDL_KEYUP:
 			s_keyboardEvent.scancode = event.key.keysym.scancode;
@@ -121,7 +124,8 @@ void ncSDLInputManager::ParseEvent(const SDL_Event &event)
 	}
 
 	// Calling the event handler method
-	switch (event.type) {
+	switch (event.type)
+	{
 		case SDL_KEYDOWN:
 			s_pInputEventHandler->OnKeyPressed(s_keyboardEvent);
 			break;
@@ -164,18 +168,26 @@ void ncSDLInputManager::ParseEvent(const SDL_Event &event)
 
 bool ncSDLInputManager::isJoyPresent(int iJoyId) const
 {
-	if(iJoyId >= 0 && iJoyId < int(s_uMaxNumJoysticks) && SDL_JoystickOpened(iJoyId) && s_pJoysticks[iJoyId])
+	if (iJoyId >= 0 && iJoyId < int(s_uMaxNumJoysticks) && SDL_JoystickOpened(iJoyId) && s_pJoysticks[iJoyId])
+	{
 		return true;
+	}
 	else
+	{
 		return false;
+	}
 }
 
 const char *ncSDLInputManager::JoyName(int iJoyId) const
 {
 	if (isJoyPresent(iJoyId))
+	{
 		return SDL_JoystickName(iJoyId);
+	}
 	else
+	{
 		return '\0';
+	}
 }
 
 int ncSDLInputManager::JoyNumButtons(int iJoyId) const
@@ -183,7 +195,9 @@ int ncSDLInputManager::JoyNumButtons(int iJoyId) const
 	int iNumButtons = -1;
 
 	if (isJoyPresent(iJoyId))
+	{
 		iNumButtons = SDL_JoystickNumButtons(s_pJoysticks[iJoyId]);
+	}
 
 	return iNumButtons;
 }
@@ -193,7 +207,9 @@ int ncSDLInputManager::JoyNumAxes(int iJoyId) const
 	int iNumAxes = -1;
 
 	if (isJoyPresent(iJoyId))
+	{
 		iNumAxes = SDL_JoystickNumAxes(s_pJoysticks[iJoyId]) + (SDL_JoystickNumHats(s_pJoysticks[iJoyId]) * 2);
+	}
 
 	return iNumAxes;
 }
@@ -201,9 +217,13 @@ int ncSDLInputManager::JoyNumAxes(int iJoyId) const
 bool ncSDLInputManager::isJoyButtonPressed(int iJoyId, int iButtonId) const
 {
 	if (isJoyPresent(iJoyId))
+	{
 		return SDL_JoystickGetButton(s_pJoysticks[iJoyId], iButtonId);
+	}
 	else
+	{
 		return false;
+	}
 }
 
 short int ncSDLInputManager::JoyAxisValue(int iJoyId, int iAxisId) const
@@ -214,12 +234,14 @@ short int ncSDLInputManager::JoyAxisValue(int iJoyId, int iAxisId) const
 	{
 		int iNumAxes = SDL_JoystickNumAxes(s_pJoysticks[iJoyId]);
 		if (iAxisId < iNumAxes) // iAxisId is an analog axis
+		{
 			iRetValue = SDL_JoystickGetAxis(s_pJoysticks[iJoyId], iAxisId);
+		}
 		else // iAxisId is a digital d-pad
 		{
-			int iHatId = (iAxisId-iNumAxes) / 2;
+			int iHatId = (iAxisId - iNumAxes) / 2;
 			unsigned char ubHatState = SDL_JoystickGetHat(s_pJoysticks[iJoyId], iHatId);
-			bool bUpDownAxis = ((iAxisId-iNumAxes) % 2); // odd axis is left-right, even axis is down-up
+			bool bUpDownAxis = ((iAxisId - iNumAxes) % 2); // odd axis is left-right, even axis is down-up
 
 			iRetValue = HatEnumToAxisValue(ubHatState, bUpDownAxis);
 		}
@@ -247,16 +269,24 @@ short int ncSDLInputManager::HatEnumToAxisValue(unsigned char ubHatState, bool b
 	if (bUpDownAxis == false) // odd axis is left-right
 	{
 		if (ubHatState == SDL_HAT_LEFT || ubHatState == SDL_HAT_LEFTUP || ubHatState == SDL_HAT_LEFTDOWN)
+		{
 			iRetValue = -s_iMaxAxisValue;
+		}
 		else if (ubHatState == SDL_HAT_RIGHT || ubHatState == SDL_HAT_RIGHTDOWN || ubHatState == SDL_HAT_RIGHTUP)
+		{
 			iRetValue = s_iMaxAxisValue;
+		}
 	}
 	else // even axis is down-up
 	{
 		if (ubHatState == SDL_HAT_DOWN || ubHatState == SDL_HAT_RIGHTDOWN || ubHatState == SDL_HAT_LEFTDOWN)
+		{
 			iRetValue = -s_iMaxAxisValue;
+		}
 		else if (ubHatState == SDL_HAT_UP || ubHatState == SDL_HAT_RIGHTUP || ubHatState == SDL_HAT_LEFTUP)
+		{
 			iRetValue = s_iMaxAxisValue;
+		}
 	}
 
 	return iRetValue;

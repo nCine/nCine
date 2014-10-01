@@ -9,7 +9,7 @@
 size_t asset_read(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
 	ncAssetFile *pAssetFile = static_cast<ncAssetFile *>(datasource);
-	return pAssetFile->Read(ptr, size*nmemb);
+	return pAssetFile->Read(ptr, size * nmemb);
 }
 
 int asset_seek(void *datasource, ogg_int64_t offset, int whence)
@@ -65,13 +65,14 @@ long ncAudioLoaderOgg::Read(char *pBuffer, int iBufSize) const
 	long lBytes;
 	long int lBufSeek = 0;
 
-	do {
+	do
+	{
 		// Read up to a buffer's worth of decoded sound data
 #ifdef __ANDROID__
-		lBytes = ov_read(&m_oggFile, pBuffer+lBufSeek, iBufSize-lBufSeek, &iBitStream);
+		lBytes = ov_read(&m_oggFile, pBuffer + lBufSeek, iBufSize - lBufSeek, &iBitStream);
 #else
 		// 0 - little endian, 2 - 16bit, 1 - signed
-		lBytes = ov_read(&m_oggFile, pBuffer+lBufSeek, iBufSize-lBufSeek, 0, 2, 1, &iBitStream);
+		lBytes = ov_read(&m_oggFile, pBuffer + lBufSeek, iBufSize - lBufSeek, 0, 2, 1, &iBitStream);
 #endif
 
 		if (lBytes < 0)
@@ -83,11 +84,13 @@ long ncAudioLoaderOgg::Read(char *pBuffer, int iBufSize) const
 
 		// Reset the static variable at the end of a decoding process
 		if (lBytes <= 0)
+		{
 			iBitStream = 0;
+		}
 
 		lBufSeek += lBytes;
 	}
-	while (lBytes > 0 && iBufSize-lBufSeek > 0);
+	while (lBytes > 0 && iBufSize - lBufSeek > 0);
 
 	return lBufSeek;
 }
@@ -113,7 +116,7 @@ void ncAudioLoaderOgg::Init()
 #ifdef __ANDROID__
 	if (m_pFileHandle->Type() == ncAssetFile::sType())
 	{
-		m_pFileHandle->Open(ncIFile::MODE_FD|ncIFile::MODE_READ);
+		m_pFileHandle->Open(ncIFile::MODE_FD | ncIFile::MODE_READ);
 
 		if (ov_open_callbacks(m_pFileHandle, &m_oggFile, NULL, 0, oggCallbacks) != 0)
 		{
@@ -124,7 +127,7 @@ void ncAudioLoaderOgg::Init()
 	}
 	else
 	{
-		m_pFileHandle->Open(ncIFile::MODE_READ|ncIFile::MODE_BINARY);
+		m_pFileHandle->Open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
 
 		if (ov_open(m_pFileHandle->Ptr(), &m_oggFile, NULL, 0) != 0)
 		{

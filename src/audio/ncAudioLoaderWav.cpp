@@ -29,7 +29,8 @@ long ncAudioLoaderWav::Read(char *pBuffer, int iBufSize) const
 	long lBytes;
 	long int lBufSeek = 0;
 
-	do {
+	do
+	{
 		// Read up to a buffer's worth of decoded sound data
 		lBytes = m_pFileHandle->Read(pBuffer, iBufSize);
 
@@ -41,7 +42,7 @@ long ncAudioLoaderWav::Read(char *pBuffer, int iBufSize) const
 
 		lBufSeek += lBytes;
 	}
-	while (lBytes > 0 && iBufSize-lBufSeek > 0);
+	while (lBytes > 0 && iBufSize - lBufSeek > 0);
 
 	return lBufSeek;
 }
@@ -59,7 +60,7 @@ void ncAudioLoaderWav::Rewind() const
 void ncAudioLoaderWav::Init()
 {
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAudioLoaderWav::Init - Loading \"%s\"", m_pFileHandle->Filename());
-	m_pFileHandle->Open(ncIFile::MODE_READ|ncIFile::MODE_BINARY);
+	m_pFileHandle->Open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
 
 	WAV_header header;
 	m_pFileHandle->Read(&header, sizeof(WAV_header));

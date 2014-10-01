@@ -21,9 +21,13 @@ ncEGLGfxDevice::~ncEGLGfxDevice()
 	{
 		eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 		if (m_context != EGL_NO_CONTEXT)
+		{
 			eglDestroyContext(m_display, m_context);
+		}
 		if (m_surface != EGL_NO_SURFACE)
+		{
 			eglDestroySurface(m_display, m_surface);
+		}
 		eglTerminate(m_display);
 	}
 
@@ -37,9 +41,10 @@ ncEGLGfxDevice::~ncEGLGfxDevice()
 ///////////////////////////////////////////////////////////
 
 /// Checks if the desired pixel format is supported
-bool ncEGLGfxDevice::isModeSupported(struct android_app* state, ncDisplayMode mode)
+bool ncEGLGfxDevice::isModeSupported(struct android_app *state, ncDisplayMode mode)
 {
-	const EGLint attribs[] = {
+	const EGLint attribs[] =
+	{
 		EGL_SURFACE_TYPE,		EGL_WINDOW_BIT,
 		EGL_BLUE_SIZE,			mode.BlueBits(),
 		EGL_GREEN_SIZE,			mode.GreenBits(),
@@ -66,7 +71,9 @@ bool ncEGLGfxDevice::isModeSupported(struct android_app* state, ncDisplayMode mo
 	bool bSupportedMode = (surface != EGL_NO_SURFACE);
 
 	if (surface != EGL_NO_SURFACE)
+	{
 		eglDestroySurface(display, surface);
+	}
 	eglTerminate(display);
 
 	return bSupportedMode;
@@ -79,7 +86,8 @@ bool ncEGLGfxDevice::isModeSupported(struct android_app* state, ncDisplayMode mo
 /// Initializes the OpenGL graphic context
 void ncEGLGfxDevice::InitDevice(struct android_app* state)
 {
-	const EGLint attribs[] = {
+	const EGLint attribs[] =
+	{
 		EGL_SURFACE_TYPE,		EGL_WINDOW_BIT,
 		EGL_BLUE_SIZE,			m_mode.BlueBits(),
 		EGL_GREEN_SIZE,			m_mode.GreenBits(),

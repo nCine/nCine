@@ -63,18 +63,25 @@ void ncRenderGeometry::Draw() const
 		glTexCoordPointer(2, GL_FLOAT, 0, m_fTexCoords);
 	}
 
-	if (m_fVertices) {
+	if (m_fVertices)
+	{
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glVertexPointer(2, GL_FLOAT, 0, m_fVertices);
 		glDrawArrays(m_eDrawType, m_iFirstVertex, m_iNumVertices);
 	}
 
 	if (m_fVertices)
+	{
 		glDisableClientState(GL_VERTEX_ARRAY);
+	}
 	if (m_fTexCoords)
+	{
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	}
 	if (m_ubColors)
+	{
 		glDisableClientState(GL_COLOR_ARRAY);
+	}
 }
 
 /// Calculates a sort key for the queue
@@ -90,7 +97,7 @@ void ncRenderCommand::CalculateSortKey()
 void ncRenderCommand::Issue() const
 {
 #ifdef WITH_DEPTH_TEST
-	glPolygonOffset(0.0f, -1.0f*m_iPriority);
+	glPolygonOffset(0.0f, -1.0f * m_iPriority);
 #endif
 
 	m_material.Bind();

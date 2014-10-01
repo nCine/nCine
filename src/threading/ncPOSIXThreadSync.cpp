@@ -68,7 +68,7 @@ void ncCondVariable::Wait(ncMutex &rMutex)
 
 void ncCondVariable::Signal()
 {
-	 pthread_cond_signal(&m_cond);
+	pthread_cond_signal(&m_cond);
 }
 
 void ncCondVariable::Broadcast()
@@ -85,14 +85,20 @@ void ncCondVariable::Broadcast()
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+
+#if !defined(_WIN32) && !defined(__WIN32__) && !defined(__WINDOWS__)
+
 ncRWLock::ncRWLock()
 {
 	pthread_rwlock_init(&m_rwlock, NULL);
 }
+
 ncRWLock::~ncRWLock()
 {
 	pthread_rwlock_destroy(&m_rwlock);
 }
+
+#endif
 
 ///////////////////////////////////////////////////////////
 // ncBarrier CLASS
@@ -102,12 +108,17 @@ ncRWLock::~ncRWLock()
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+#if !defined (__ANDROID__) && !defined(__APPLE__)
+
 /// Creates a barrier for the specified amount of waiting threads
 ncBarrier::ncBarrier(unsigned int uCount)
 {
 	pthread_barrier_init(&m_barrier, NULL, uCount);
 }
+
 ncBarrier::~ncBarrier()
 {
 	pthread_barrier_destroy(&m_barrier);
 }
+
+#endif

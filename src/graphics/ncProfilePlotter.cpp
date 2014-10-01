@@ -19,7 +19,9 @@ ncProfilePlotter::ncProfilePlotter(ncSceneNode* pParent, ncRect rect)
 ncProfilePlotter::~ncProfilePlotter()
 {
 	for (unsigned int i = 0; i < m_vVariables.Size(); i++)
+	{
 		delete m_vVariables[i];
+	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -32,7 +34,9 @@ bool ncProfilePlotter::AddValue(unsigned int uIndex, float fValue)
 	bool bValueRegistered = false;
 
 	if (uIndex < m_vVariables.Size())
+	{
 		bValueRegistered = m_vVariables[uIndex]->AddValue(fValue);
+	}
 
 	return bValueRegistered;
 }
@@ -41,7 +45,9 @@ bool ncProfilePlotter::AddValue(unsigned int uIndex, float fValue)
 ncPlottingVariable& ncProfilePlotter::Variable(unsigned int uIndex)
 {
 	if (uIndex < m_vVariables.Size())
+	{
 		return *m_vVariables[uIndex];
+	}
 	else
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncProfilePlotter::Variable - Index out of range");
@@ -54,14 +60,20 @@ float ncProfilePlotter::NormBetweenRefValue(float fMin, float fMax) const
 {
 	float fValue = 0.0f;
 
-	if (fMax-fMin > 0.0f)
+	if (fMax - fMin > 0.0f)
 	{
 		if (m_fRefValue < fMin)
+		{
 			fValue = 0.0f;
+		}
 		else if (m_fRefValue > fMax)
+		{
 			fValue = 1.0f;
+		}
 		else
-			fValue = (m_fRefValue-fMin)/(fMax-fMin);
+		{
+			fValue = (m_fRefValue - fMin) / (fMax - fMin);
+		}
 	}
 
 	return fValue;
@@ -77,14 +89,14 @@ void ncProfilePlotter::ApplyTransformations(float fAbsX, float fAbsY, float fAbs
 	float cosine = 1.0f;
 	if (abs(fAbsRotation) > ncDrawableNode::sMinRotation && abs(fAbsRotation) < 360.0f - ncDrawableNode::sMinRotation)
 	{
-		sine = sinf(-fAbsRotation * M_PI/180.0f);
-		cosine = cosf(-fAbsRotation * M_PI/180.0f);
+		sine = sinf(-fAbsRotation * M_PI / 180.0f);
+		cosine = cosf(-fAbsRotation * M_PI / 180.0f);
 	}
 
 	for (int i = rGeom.FirstVertex(); i < rGeom.NumVertices(); i++)
 	{
-		float fX = rGeom.VertexPointer()[2*i]*fAbsScaleFactor;			float fY = rGeom.VertexPointer()[2*i + 1]*fAbsScaleFactor;
-		rGeom.VertexPointer()[2*i] = fAbsX + fX*cosine - fY*sine;		rGeom.VertexPointer()[2*i + 1] = fAbsY + fY*cosine + fX*sine;
+		float fX = rGeom.VertexPointer()[2 * i] * fAbsScaleFactor;			float fY = rGeom.VertexPointer()[2 * i + 1] * fAbsScaleFactor;
+		rGeom.VertexPointer()[2 * i] = fAbsX + fX * cosine - fY * sine;		rGeom.VertexPointer()[2 * i + 1] = fAbsY + fY * cosine + fX * sine;
 	}
 }
 

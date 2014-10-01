@@ -14,7 +14,8 @@ class ncTextureLoaderPVR : public ncITextureLoader
 
  private:
 	/// Header for the PVR3 format
-	typedef struct PVR3_header {
+	typedef struct PVR3_header
+	{
 		uint32_t    version;
 		uint32_t    flags;
 		uint64_t    pixelFormat;

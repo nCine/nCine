@@ -34,7 +34,9 @@ void ncRenderQueue::AddCommand(const ncRenderCommand *pCommand)
 
 #ifdef WITH_DEPTH_TEST
 	if (pCommand->Material().isTransparent() == false)
+	{
 		m_opaqueRenderCmds.InsertBack(pCommand);
+	}
 	else
 #endif
 		m_transparentRenderCmds.InsertBack(pCommand);
@@ -50,8 +52,10 @@ void ncRenderQueue::Draw()
 	// TODO: Investigate about the heavy performance drop with alpha testing
 	glEnable(GL_ALPHA_TEST);
 	// Rendering opaque nodes front to back
-	for (int i = m_opaqueRenderCmds.Size()-1; i > -1; i--)
+	for (int i = m_opaqueRenderCmds.Size() - 1; i > -1; i--)
+	{
 		m_opaqueRenderCmds[i]->Issue();
+	}
 
 	glDisable(GL_ALPHA_TEST);
 	glEnable(GL_BLEND);
@@ -59,7 +63,9 @@ void ncRenderQueue::Draw()
 #endif
 	// Rendering transparent nodes back to front
 	for (unsigned int i = 0; i < m_transparentRenderCmds.Size(); i++)
+	{
 		m_transparentRenderCmds[i]->Issue();
+	}
 #ifdef WITH_DEPTH_TEST
 	// Has to be enabled again before exiting this method
 	// or glClear(GL_DEPTH_BUFFER_BIT) won't have any effect
@@ -89,8 +95,8 @@ void ncRenderQueue::Draw()
 /// Sorts render nodes in both queues to minimize state changes
 void ncRenderQueue::SortQueues()
 {
-	QSort(m_opaqueRenderCmds, 0, m_opaqueRenderCmds.Size()-1);
-	QSort(m_transparentRenderCmds, 0, m_transparentRenderCmds.Size()-1);
+	QSort(m_opaqueRenderCmds, 0, m_opaqueRenderCmds.Size() - 1);
+	QSort(m_transparentRenderCmds, 0, m_transparentRenderCmds.Size() - 1);
 
 	// Check sorting correctness
 //	for (int i = 1; i < m_opaqueRenderCmds.Size(); i++)
@@ -101,10 +107,11 @@ void ncRenderQueue::SortQueues()
 
 void ncRenderQueue::QSort(ncArray<const ncRenderCommand *> &array, int start, int end)
 {
-	if (start < end) {
+	if (start < end)
+	{
 		int div = QSortPartition(array, start, end);
 		QSort(array, start, div);
-		QSort(array, div+1, end);
+		QSort(array, div + 1, end);
 	}
 }
 
@@ -120,23 +127,29 @@ int ncRenderQueue::QSortPartition(ncArray<const ncRenderCommand *> &array, int s
 
 	bShouldQuit = false;
 
-	do {
-		do {
+	do
+	{
+		do
+		{
 			j--;
-		} while(array[j]->SortKey() > pivot);
+		} while (array[j]->SortKey() > pivot);
 
-		do {
+		do
+		{
 			i++;
-		} while(array[i]->SortKey() < pivot);
+		} while (array[i]->SortKey() < pivot);
 
-		if (i < j) {
+		if (i < j)
+		{
 			const ncRenderCommand *pTemp = array[i];
 			array[i] = array[j];
 			array[j] = pTemp;
 		}
 		else
+		{
 			bShouldQuit = true;
-	} while(!bShouldQuit);
+		}
+	} while (!bShouldQuit);
 
 	return j;
 }

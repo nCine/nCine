@@ -26,7 +26,7 @@ void MyEventHandler::OnInit()
 	m_pAlphaTexture = new ncTexture("textures/transparent_128.png");
 #endif
 
-	m_pDummy = new ncSceneNode(&rRootNode, ncApplication::Width()*0.5f, ncApplication::Height()*0.5f);
+	m_pDummy = new ncSceneNode(&rRootNode, ncApplication::Width() * 0.5f, ncApplication::Height() * 0.5f);
 
 	m_pSprites = new ncSprite*[numSprites];
 	for (int i = 0; i < numSprites; i++)
@@ -58,6 +58,8 @@ void MyEventHandler::OnShutdown()
 void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
 {
 	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)
+	{
 		ncApplication::Quit();
+	}
 }
 #endif

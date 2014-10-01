@@ -41,7 +41,9 @@ class ncColorAffector: public ncParticleAffector
 	~ncColorAffector()
 	{
 		for (unsigned int i = 0; i < m_vColorSteps.Size(); i++)
+		{
 			delete m_vColorSteps[i];
+		}
 	}
 
 	virtual void Affect(ncParticle* pParticle);
@@ -68,7 +70,9 @@ class ncSizeAffector: public ncParticleAffector
 	~ncSizeAffector()
 	{
 		for (unsigned int i = 0; i < m_vSizeSteps.Size(); i++)
+		{
 			delete m_vSizeSteps[i];
+		}
 	}
 
 	virtual void Affect(ncParticle* pParticle);

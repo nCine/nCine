@@ -150,9 +150,13 @@ inline ncColor ncColor::operator*(const ncColor& col) const
 		float fMul = (col.m_ubColor[i] / 255.0f) * m_ubColor[i];
 		// clamping
 		if (fMul > 255.0f)
+		{
 			fMul = 255.0f;
+		}
 		else if (fMul < 0.0f)
+		{
 			fMul = 0.0f;
+		}
 
 		result.m_ubColor[i] = fMul;
 	}
@@ -170,9 +174,13 @@ inline ncColor ncColor::operator*(float fC) const
 		float fMul = fC * m_ubColor[i];
 		// clamping
 		if (fMul > 255.0f)
+		{
 			fMul = 255.0f;
+		}
 		else if (fMul < 0.0f)
+		{
 			fMul = 0.0f;
+		}
 
 		result.m_ubColor[i] = fMul;
 	}

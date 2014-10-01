@@ -123,9 +123,13 @@ protected:
 inline void ncSceneNode::SetRotation(float fRotation)
 {
 	while (fRotation > 360.0f)
+	{
 		fRotation -= 360.0f;
+	}
 	while (fRotation < -360.0f)
+	{
 		fRotation += 360.0f;
+	}
 
 	m_fRotation = fRotation;
 }

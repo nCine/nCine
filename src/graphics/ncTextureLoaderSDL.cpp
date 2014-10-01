@@ -34,11 +34,17 @@ void ncTextureLoaderSDL::Init()
 
 	m_iBpp = m_pSDLSurface->format->BitsPerPixel;
 	if (m_iBpp == 32)
+	{
 		m_texFormat = ncTextureFormat(GL_RGBA8);
+	}
 	else if (m_iBpp  == 24)
+	{
 		m_texFormat = ncTextureFormat(GL_RGB8);
+	}
 	else if (m_iBpp == 8)
+	{
 		m_texFormat = ncTextureFormat(GL_ALPHA8);
+	}
 	else
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderSDL::Init - Not a true color or alpha image: %d", m_iBpp);
@@ -46,7 +52,9 @@ void ncTextureLoaderSDL::Init()
 	}
 
 	if (m_pSDLSurface->format->Rmask != 0x000000ff)
+	{
 		m_texFormat.BGRFormat();
+	}
 
 	m_iWidth = m_pSDLSurface->w;
 	m_iHeight = m_pSDLSurface->h;

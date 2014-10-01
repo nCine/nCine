@@ -14,7 +14,8 @@ class ncTextureLoaderDDS : public ncITextureLoader
 
  private:
 	/// Header for the DDS pixel format
-	typedef struct DDS_pixelformat {
+	typedef struct DDS_pixelformat
+	{
 		uint32_t dwSize;
 		uint32_t dwFlags;
 		uint32_t dwFourCC;
@@ -26,7 +27,8 @@ class ncTextureLoaderDDS : public ncITextureLoader
 	} DDS_pixelformat;
 
 	/// Header for the DDS format
-	typedef struct DDS_header {
+	typedef struct DDS_header
+	{
 		uint32_t	dwMagic;
 		uint32_t	dwSize;
 		uint32_t	dwFlags;

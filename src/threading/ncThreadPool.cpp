@@ -27,8 +27,10 @@ ncThreadPool::~ncThreadPool()
 	m_threadStruct.bShouldQuit = true;
 	m_queueCV.Broadcast();
 
-	for(unsigned int i=0; i < m_uNumThreads; i++)
+	for (unsigned int i = 0; i < m_uNumThreads; i++)
+	{
 		m_pThreads[i].Join();
+	}
 
 	delete[] m_pThreads;
 }
@@ -62,22 +64,26 @@ void ncThreadPool::Init()
 
 	m_quitMutex.Lock();
 
-	for(unsigned int i=0; i < m_uNumThreads; i++)
+	for (unsigned int i = 0; i < m_uNumThreads; i++)
+	{
 		m_pThreads[i].Run(WorkerFunction, &m_threadStruct);
+	}
 }
 
 void ncThreadPool::WorkerFunction(void *pArg)
 {
 	ncIThreadCommand *pThreadCommand = NULL;
-	ncThreadStruct *pThreadStruct = static_cast<ncThreadStruct*>(pArg);
+	ncThreadStruct *pThreadStruct = static_cast<ncThreadStruct *>(pArg);
 
 	ncServiceLocator::Logger().Write(ncILogger::LOG_DEBUG, (const char *)"ncThreadPool::WorkerFunction - worker thread %u is starting", ncThread::Self());
 
-	while(1)
+	while (true)
 	{
 		pThreadStruct->pQueueMutex->Lock();
-		while(pThreadStruct->pQueue->isEmpty() && pThreadStruct->bShouldQuit == false)
+		while (pThreadStruct->pQueue->isEmpty() && pThreadStruct->bShouldQuit == false)
+		{
 			pThreadStruct->pQueueCV->Wait(*(pThreadStruct->pQueueMutex));
+		}
 
 		if (pThreadStruct->bShouldQuit)
 		{

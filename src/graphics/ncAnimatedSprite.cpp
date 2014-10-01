@@ -31,7 +31,9 @@ ncAnimatedSprite::ncAnimatedSprite(ncTexture *pTexture, int iX, int iY)
 ncAnimatedSprite::~ncAnimatedSprite()
 {
 	for (unsigned int i = 0; i < m_vAnims.Size(); i++)
+	{
 		delete m_vAnims[i];
+	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -45,7 +47,9 @@ void ncAnimatedSprite::Update(float fInterval)
 
 	// Updating sprite texture rectangle only on change
 	if (uPreviousFrame != m_vAnims[m_iCurrentAnim]->Frame())
+	{
 		SetTexRect(m_vAnims[m_iCurrentAnim]->Rect());
+	}
 
 	ncSprite::Update(fInterval);
 }
@@ -65,11 +69,17 @@ void ncAnimatedSprite::AddAnimation(ncRectAnimation* pAnim)
 void ncAnimatedSprite::SetAnimation(int iAnimNum)
 {
 	if ((unsigned int)iAnimNum >= m_vAnims.Size())
-		m_iCurrentAnim = m_vAnims.Size() -1;
+	{
+		m_iCurrentAnim = m_vAnims.Size() - 1;
+	}
 	else if (iAnimNum < 0)
+	{
 		m_iCurrentAnim = 0;
+	}
 	else
+	{
 		m_iCurrentAnim = iAnimNum;
+	}
 
 	SetTexRect(m_vAnims[m_iCurrentAnim]->Rect());
 }

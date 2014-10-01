@@ -12,7 +12,8 @@ class ncFontGlyph;
 class ncTextNode : public ncDrawableNode
 {
  public:
-	enum eAlignment {
+	enum eAlignment
+	{
 		ALIGN_LEFT,
 		ALIGN_CENTER,
 		ALIGN_RIGHT

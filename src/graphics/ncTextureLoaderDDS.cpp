@@ -26,7 +26,7 @@ void ncTextureLoaderDDS::Init()
 {
 	DDS_header header;
 
-	m_pFileHandle->Open(ncIFile::MODE_READ|ncIFile::MODE_BINARY);
+	m_pFileHandle->Open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
 	ReadHeader(header);
 	ParseFormat(header);
 }
@@ -46,7 +46,9 @@ void ncTextureLoaderDDS::ReadHeader(DDS_header& header)
 		m_iMipMapCount = ncIFile::Int32FromLE(header.dwMipMapCount);
 
 		if (m_iMipMapCount == 0)
+		{
 			m_iMipMapCount = 1;
+		}
 	}
 	else
 	{
@@ -56,10 +58,10 @@ void ncTextureLoaderDDS::ReadHeader(DDS_header& header)
 }
 
 /// Parses the DDS header to determine its format
-void ncTextureLoaderDDS::ParseFormat(const DDS_header& header)
+void ncTextureLoaderDDS::ParseFormat(const DDS_header &header)
 {
 	GLenum eInternalFormat = GL_RGB; // to suppress uninitialized variable warning
-	const ncGfxCapabilities& gfxCaps = ncServiceLocator::GfxCapabilities();
+	const ncGfxCapabilities &gfxCaps = ncServiceLocator::GfxCapabilities();
 
 	uint32_t uFlags = ncIFile::Int32FromLE(header.ddspf.dwFlags);
 
@@ -72,7 +74,7 @@ void ncTextureLoaderDDS::ParseFormat(const DDS_header& header)
 			((char*)&uFourCC)[0], ((char*)&uFourCC)[1], ((char*)&uFourCC)[2], ((char*)&uFourCC)[3], uFourCC);
 
 		// Check for OpenGL extension support
-		switch(uFourCC)
+		switch (uFourCC)
 		{
 #ifndef __ANDROID__
 			case DDS_DXT1:
@@ -102,7 +104,7 @@ void ncTextureLoaderDDS::ParseFormat(const DDS_header& header)
 		}
 
 		// Parsing the FourCC format
-		switch(uFourCC)
+		switch (uFourCC)
 		{
 #ifndef __ANDROID__
 			case DDS_DXT1:
@@ -181,7 +183,9 @@ void ncTextureLoaderDDS::ParseFormat(const DDS_header& header)
 		LoadPixels(eInternalFormat, eType);
 #ifndef __ANDROID__
 		if (uRedMask > uBlueMask && uBitCount > 16)
+		{
 			m_texFormat.BGRFormat();
+		}
 #endif
 	}
 
@@ -192,6 +196,8 @@ void ncTextureLoaderDDS::ParseFormat(const DDS_header& header)
 		m_lMipDataSizes = new long[m_iMipMapCount];
 		long int lDataSizesSum = ncTextureFormat::CalculateMipSizes(eInternalFormat, m_iWidth, m_iHeight, m_iMipMapCount, m_lMipDataOffsets, m_lMipDataSizes);
 		if (lDataSizesSum != m_lDataSize)
+		{
 			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncTextureLoaderDDS::ParseFormat - The sum of MIP maps size (%ld) is different than texture total data (%ld)", lDataSizesSum, m_lDataSize);
+		}
 	}
 }

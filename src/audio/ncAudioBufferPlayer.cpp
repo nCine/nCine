@@ -20,7 +20,7 @@ ncAudioBufferPlayer::ncAudioBufferPlayer(ncAudioBuffer *pBuffer)
 
 void ncAudioBufferPlayer::Play()
 {
-	switch(m_eState)
+	switch (m_eState)
 	{
 		case STATE_INITIAL:
 		case STATE_STOPPED:
@@ -30,7 +30,9 @@ void ncAudioBufferPlayer::Play()
 			int iSource = ncServiceLocator::AudioDevice().NextAvailableSource();
 			// No sources available
 			if (iSource < 0)
+			{
 				return;
+			}
 			m_uSource = iSource;
 
 			if (m_pBuffer)
@@ -48,8 +50,8 @@ void ncAudioBufferPlayer::Play()
 			m_eState = STATE_PLAYING;
 
 			ncServiceLocator::AudioDevice().RegisterPlayer(this);
-		}
 			break;
+		}
 		case STATE_PLAYING:
 			break;
 		case STATE_PAUSED:
@@ -58,14 +60,14 @@ void ncAudioBufferPlayer::Play()
 			m_eState = STATE_PLAYING;
 
 			ncServiceLocator::AudioDevice().RegisterPlayer(this);
-		}
 			break;
+		}
 	}
 }
 
 void ncAudioBufferPlayer::Pause()
 {
-	switch(m_eState)
+	switch (m_eState)
 	{
 		case STATE_INITIAL:
 		case STATE_STOPPED:
@@ -74,8 +76,8 @@ void ncAudioBufferPlayer::Pause()
 		{
 			alSourcePause(m_uSource);
 			m_eState = STATE_PAUSED;
-		}
 			break;
+		}
 		case STATE_PAUSED:
 			break;
 	}
@@ -83,7 +85,7 @@ void ncAudioBufferPlayer::Pause()
 
 void ncAudioBufferPlayer::Stop()
 {
-	switch(m_eState)
+	switch (m_eState)
 	{
 		case STATE_INITIAL:
 		case STATE_STOPPED:
@@ -92,8 +94,8 @@ void ncAudioBufferPlayer::Stop()
 		{
 			alSourceStop(m_uSource);
 			m_eState = STATE_STOPPED;
-		}
 			break;
+		}
 		case STATE_PAUSED:
 			break;
 	}
@@ -107,6 +109,8 @@ void ncAudioBufferPlayer::UpdateState()
 		ALenum eALState;
 		alGetSourcei(m_uSource, AL_SOURCE_STATE, &eALState);
 		if (eALState != AL_PLAYING)
+		{
 			m_eState = STATE_STOPPED;
+		}
 	}
 }

@@ -21,8 +21,10 @@ int main(int argc, char **argv)
 	ncList<int> list;
 
 	printf("Inserting some elements to the back\n");
-	for(int i = 0; i < 11; i++)
+	for (int i = 0; i < 11; i++)
+	{
 		list.InsertBack(i);
+	}
 	print_list(list);
 
 	printf("Inserting one element at front\n");
@@ -48,19 +50,23 @@ int main(int argc, char **argv)
 	printf("\n--- List traversals (for cycles) ---\n");
 	printf("Iterating through nodes:");
 	for (ncList<int>::Iterator i = list.Begin(); i != list.End(); ++i)
+	{
 		printf(" %d", *i);
+	}
 	printf("\n");
 
 	printf("Iterating through nodes (reverse):");
 	for (ncList<int>::Iterator i = list.RBegin(); i != list.End(); --i)
+	{
 		printf(" %d", *i);
+	}
 	printf("\n");
 
 
 	printf("\n--- List traversals (while cycles) ---\n");
 	printf("Iterating through nodes:");
 	ncList<int>::Iterator i = list.Begin();
-	while(i != list.End())
+	while (i != list.End())
 	{
 		printf(" %d", *i);
 		++i;
@@ -69,7 +75,7 @@ int main(int argc, char **argv)
 
 	printf("Iterating through nodes (reverse):");
 	i = list.RBegin();
-	while(i != list.End())
+	while (i != list.End())
 	{
 		printf(" %d", *i);
 		--i;
@@ -78,12 +84,14 @@ int main(int argc, char **argv)
 
 	printf("\nClearing the whole list\n");
 	if (!list.isEmpty())
+	{
 		list.Clear();
+	}
 	printf("Removing first node on empty\n");
 	list.Remove(list.Begin());
 	printf("Removing last node on empty\n");
 	list.Remove(list.RBegin());
 	print_list(list);
 
-	return 0;	
+	return 0;
 }

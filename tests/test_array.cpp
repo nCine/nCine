@@ -5,7 +5,9 @@
 void print_array(const ncArray<int> &array)
 {
 	for (unsigned int i = 0; i < array.Size(); i++)
+	{
 		printf("[%u]=%d ", i, array[i]);
+	}
 	printf("\n");
 }
 
@@ -20,8 +22,10 @@ int main(int argc, char **argv)
 //	array[1] = 1;
 
 	printf("Filling the whole array\n");
-	for(int i = 0; i < iCap; i++)
+	for (int i = 0; i < iCap; i++)
+	{
 		array[i] = i;
+	}
 	print_array(array);
 
 	printf("Writing beyond capacity\n");
@@ -29,7 +33,7 @@ int main(int argc, char **argv)
 	print_array(array);
 
 	printf("Inserting at the back\n");
-	array.InsertBack(iCap+1);
+	array.InsertBack(iCap + 1);
 	print_array(array);
 
 	printf("Overwriting at the middle\n");
@@ -47,8 +51,10 @@ int main(int argc, char **argv)
 
 	printf("Clearing the whole array\n");
 	if (!array.isEmpty())
+	{
 		array.Clear();
+	}
 	print_array(array);
 
-	return 0;	
+	return 0;
 }

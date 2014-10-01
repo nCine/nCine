@@ -165,7 +165,8 @@ class ncRenderCommand
 public:
 	/// The enumeration of command types
 	/*! Its sole purpose is to allow separated profiling counters in ncRenderQueue */
-	enum eCommandType {
+	enum eCommandType
+	{
 		GENERIC_TYPE = 0,
 		PLOTTER_TYPE,
 		SPRITE_TYPE,

@@ -14,7 +14,9 @@ ncProfileVariable::ncProfileVariable(unsigned int uNumValues, float fRejectDelay
 	{
 		m_fValues = new float[m_uNumValues];
 		for (unsigned int i = 0; i < m_uNumValues; i++)
+		{
 			m_fValues[i] = 0.0f;
+		}
 	}
 	else
 	{
@@ -26,7 +28,9 @@ ncProfileVariable::ncProfileVariable(unsigned int uNumValues, float fRejectDelay
 ncProfileVariable::~ncProfileVariable()
 {
 	if (m_fValues)
+	{
 		delete[] m_fValues;
+	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -44,7 +48,9 @@ bool ncProfileVariable::AddValue(float fValue)
 		m_bFirstValue = false;
 
 		if (m_fRejectDelay > 0.0f)
+		{
 			m_timer.Start();
+		}
 	}
 
 	bool bRegisterValue = false;
@@ -58,35 +64,47 @@ bool ncProfileVariable::AddValue(float fValue)
 		}
 	}
 	else
+	{
 		bRegisterValue = true;
+	}
 
 	// A new value has to be registered in the array
 	if (bRegisterValue)
 	{
 		if (fValue > m_fMax)
+		{
 			m_fMax = fValue;
+		}
 		else if (fValue < m_fMin)
+		{
 			m_fMin = fValue;
+		}
 
 		m_fValues[m_uNextIndex] = fValue;
 		m_fMean = 0.0f;
-		for(unsigned int i = 0; i < m_uNumValues; i++)
-			m_fMean += m_fValues[(m_uNextIndex-i)%m_uNumValues];
-		m_fMean *= 1.0f/m_uNumValues;
+		for (unsigned int i = 0; i < m_uNumValues; i++)
+		{
+			m_fMean += m_fValues[(m_uNextIndex - i) % m_uNumValues];
+		}
+		m_fMean *= 1.0f / m_uNumValues;
 
-		m_uNextIndex = (m_uNextIndex+1)%m_uNumValues;
+		m_uNextIndex = (m_uNextIndex + 1) % m_uNumValues;
 	}
 
 	// HACK: Looking for max and min across all the values, to prevent random spikes
 	m_fMax = 0.0f;
 	m_fMin = 0.0f;
 
-	for(unsigned int i = 0; i < m_uNumValues; i++)
+	for (unsigned int i = 0; i < m_uNumValues; i++)
 	{
 		if (m_fValues[i] > m_fMax)
+		{
 			m_fMax = m_fValues[i];
+		}
 		else if (m_fValues[i] < m_fMin)
+		{
 			m_fMin = m_fValues[i];
+		}
 	}
 
 	return bRegisterValue;
@@ -97,8 +115,10 @@ float ncProfileVariable::NormBetweenValue(unsigned int uIndex, float fMin, float
 {
 	float fValue = 0.0f;
 
-	if (uIndex < m_uNumValues && (fMax-fMin > 0.0f))
-		fValue = (m_fValues[uIndex]-fMin)/(fMax-fMin);
+	if (uIndex < m_uNumValues && (fMax - fMin > 0.0f))
+	{
+		fValue = (m_fValues[uIndex] - fMin) / (fMax - fMin);
+	}
 
 	return fValue;
 }
@@ -108,8 +128,10 @@ float ncProfileVariable::NormBetweenMean(float fMin, float fMax) const
 {
 	float fValue = 0.0f;
 
-	if (fMax-fMin > 0.0f)
-		fValue = (m_fMean-fMin)/(fMax-fMin);
+	if (fMax - fMin > 0.0f)
+	{
+		fValue = (m_fMean - fMin) / (fMax - fMin);
+	}
 
 	return fValue;
 }

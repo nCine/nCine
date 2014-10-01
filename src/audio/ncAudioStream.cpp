@@ -21,9 +21,13 @@ ncAudioStream::ncAudioStream(const char *pFilename)
 	int iChannels = m_pAudioLoader->Channels();
 
 	if (iChannels == 1)
+	{
 		m_eFormat = AL_FORMAT_MONO16;
+	}
 	else if (iChannels == 2)
+	{
 		m_eFormat = AL_FORMAT_STEREO16;
+	}
 	else
 	{
 		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncAudioStream::ncAudioStream - Unsupported number of channels: %d", iChannels);
@@ -71,12 +75,12 @@ bool ncAudioStream::Enqueue(ALuint uSource, bool bLooping)
 		long lBytes = m_pAudioLoader->Read(m_pBuffer, s_iBufSize);
 
 		// EOF reached
-		if(lBytes < s_iBufSize)
+		if (lBytes < s_iBufSize)
 		{
 			if (bLooping)
 			{
 				m_pAudioLoader->Rewind();
-				long lMoreBytes = m_pAudioLoader->Read(m_pBuffer+lBytes, s_iBufSize-lBytes);
+				long lMoreBytes = m_pAudioLoader->Read(m_pBuffer + lBytes, s_iBufSize - lBytes);
 				lBytes += lMoreBytes;
 			}
 		}
@@ -102,11 +106,11 @@ bool ncAudioStream::Enqueue(ALuint uSource, bool bLooping)
 	alGetSourcei(uSource, AL_SOURCE_STATE, &eState);
 
 	// Handle buffer underrun case
-	if(eState != AL_PLAYING)
+	if (eState != AL_PLAYING)
 	{
 		ALint iQueuedBuffers = 0;
 		alGetSourcei(uSource, AL_BUFFERS_QUEUED, &iQueuedBuffers);
-		if(iQueuedBuffers > 0)
+		if (iQueuedBuffers > 0)
 		{
 			// Need to restart play
 			alSourcePlay(uSource);

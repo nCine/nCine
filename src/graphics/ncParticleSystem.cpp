@@ -8,7 +8,7 @@
 
 /// Constructs a particle system made of the specified maximum amount of particles
 ncParticleSystem::ncParticleSystem(ncSceneNode* pParent, unsigned int uCount, ncTexture *pTexture, ncRect texRect)
-	: ncDrawableNode(pParent, 0, 0), m_uPoolSize(uCount), m_uPoolTop(uCount-1), m_vAffectors(4), m_bLocalSpace(false)
+	: ncDrawableNode(pParent, 0, 0), m_uPoolSize(uCount), m_uPoolTop(uCount - 1), m_vAffectors(4), m_bLocalSpace(false)
 {
 	m_eType = PARTICLESYSTEM_TYPE;
 	SetPriority(ncDrawableNode::SCENE_PRIORITY);
@@ -31,10 +31,14 @@ ncParticleSystem::~ncParticleSystem()
 	unsigned int i;
 
 	for (i = 0; i < m_vAffectors.Size(); i++)
+	{
 		delete m_vAffectors[i];
+	}
 
 	for (i = 0; i < m_uPoolSize; i++)
+	{
 		delete m_pParticleList[i];
+	}
 
 	delete[] m_pParticlePool;
 	delete[] m_pParticleList;
@@ -51,15 +55,19 @@ void ncParticleSystem::Emit(unsigned int amount, float fLife, const ncVector2f &
 	ncVector2f RndVelocity;
 
 	// Particles are rotated towards the emission vector
-	float fRotation = -(atan2(vel.y, vel.x) - atan2(1.0f, 0.0f)) * 180.0f/M_PI;
+	float fRotation = -(atan2(vel.y, vel.x) - atan2(1.0f, 0.0f)) * 180.0f / M_PI;
 	if (fRotation < 0.0f)
+	{
 		fRotation += 360;
+	}
 
-	for(unsigned int i = 0; i < amount; i++)
+	for (unsigned int i = 0; i < amount; i++)
 	{
 		// No more unused particles in the pool
 		if (m_uPoolTop == 0)
+		{
 			break;
+		}
 
 		fRndLife = fLife * randBetween(0.85f, 1.0f);
 		// FIXME: arbitrary random position amount
@@ -69,7 +77,9 @@ void ncParticleSystem::Emit(unsigned int amount, float fLife, const ncVector2f &
 		RndVelocity.y = vel.y * randBetween(0.8f, 1.0f);
 
 		if (m_bLocalSpace == false)
+		{
 			RndPosition += AbsPosition();
+		}
 
 		// acquiring a particle from the pool
 		m_pParticlePool[m_uPoolTop]->Init(fRndLife, RndPosition, RndVelocity, fRotation, m_bLocalSpace);
@@ -81,10 +91,12 @@ void ncParticleSystem::Emit(unsigned int amount, float fLife, const ncVector2f &
 void ncParticleSystem::Update(float fInterval)
 {
 	// early return if the node has not to be updated
-	if(!bShouldUpdate)
+	if (!bShouldUpdate)
+	{
 		return;
+	}
 
-	for(ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
+	for (ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
 	{
 		ncParticle *pParticle = static_cast<ncParticle *>(*i);
 
@@ -92,7 +104,9 @@ void ncParticleSystem::Update(float fInterval)
 		if (pParticle->isAlive())
 		{
 			for (unsigned int j = 0; j < m_vAffectors.Size(); j++)
+			{
 				m_vAffectors[j]->Affect(pParticle);
+			}
 
 			pParticle->Update(fInterval);
 
