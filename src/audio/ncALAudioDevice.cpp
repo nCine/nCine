@@ -120,6 +120,7 @@ void ncALAudioDevice::UpdatePlayers()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/// Stops or pauses all buffer players
 void ncALAudioDevice::StopOrPauseBufferPlayers(bool bStop)
 {
 	ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin();
@@ -138,6 +139,7 @@ void ncALAudioDevice::StopOrPauseBufferPlayers(bool bStop)
 	}
 }
 
+/// Stops or pauses all stream players
 void ncALAudioDevice::StopOrPauseStreamPlayers(bool bStop)
 {
 	ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin();

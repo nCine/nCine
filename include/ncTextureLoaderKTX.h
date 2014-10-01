@@ -14,7 +14,6 @@ class ncTextureLoaderKTX : public ncITextureLoader
 
  private:
 	static const int KTX_IDENTIFIER_LENGTH = 12;
-	static uint8_t m_uFileIdentifier[KTX_IDENTIFIER_LENGTH];
 
 	/// Header for the KTX format
 	typedef struct KTX_header {
@@ -40,6 +39,8 @@ class ncTextureLoaderKTX : public ncITextureLoader
 	void ReadHeader(KTX_header& header);
 	// Parses the KTX header to determine its format
 	void ParseFormat(const KTX_header& header);
+
+	static uint8_t m_uFileIdentifier[KTX_IDENTIFIER_LENGTH];
 };
 
 #endif

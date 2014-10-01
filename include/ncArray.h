@@ -54,13 +54,13 @@ class ncArray
 	T* MapBuffer(unsigned int uReserved);
 
  private:
-	T* m_pArray;
-	unsigned int m_uSize;
-	unsigned int m_uCapacity;
-
 	// Preventing copy at the moment
 	ncArray(const ncArray&);
 	void operator=(const ncArray&);
+
+	T* m_pArray;
+	unsigned int m_uSize;
+	unsigned int m_uCapacity;
 };
 
 /// Sets a new capacity for the array (can be bigger or smaller than the current one)

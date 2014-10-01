@@ -23,10 +23,10 @@ class ncALAudioDevice : public ncIAudioDevice
 
 	virtual void StopPlayers();
 	virtual void PausePlayers();
-	virtual inline void StopBufferPlayers() { StopOrPauseBufferPlayers(true); }
-	virtual inline void PauseBufferPlayers() { StopOrPauseBufferPlayers(false); }
-	virtual inline void StopStreamPlayers() { StopOrPauseStreamPlayers(true); }
-	virtual inline void PauseStreamPlayers() { StopOrPauseStreamPlayers(false); }
+	inline virtual void StopBufferPlayers() { StopOrPauseBufferPlayers(true); }
+	inline virtual void PauseBufferPlayers() { StopOrPauseBufferPlayers(false); }
+	inline virtual void StopStreamPlayers() { StopOrPauseStreamPlayers(true); }
+	inline virtual void PauseStreamPlayers() { StopOrPauseStreamPlayers(false); }
 
 	virtual int NextAvailableSource();
 	virtual void RegisterPlayer(ncIAudioPlayer *pPlayer);
@@ -35,6 +35,11 @@ class ncALAudioDevice : public ncIAudioDevice
  private:
 	/// Maximum number of OpenAL sources (HACK: should use a query)
 	static const unsigned int s_uMaxSources = 16;
+
+	// Stops or pauses all buffer players
+	void StopOrPauseBufferPlayers(bool bStop);
+	// Stops or pauses all stream players
+	void StopOrPauseStreamPlayers(bool bStop);
 
 	/// The OpenAL device
 	ALCdevice *m_pDevice;
@@ -47,11 +52,6 @@ class ncALAudioDevice : public ncIAudioDevice
 
 	/// A list of active audio players
 	ncList<ncIAudioPlayer *> m_players;
-
-	/// Stops or pauses all buffer players
-	void StopOrPauseBufferPlayers(bool bStop);
-	/// Stops or pauses all stream players
-	void StopOrPauseStreamPlayers(bool bStop);
 };
 
 #endif

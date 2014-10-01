@@ -10,27 +10,27 @@ class ncIInputEventHandler
 	/// Pure virtual destructor in order to make the class abstract
 	virtual ~ncIInputEventHandler() = 0;
 
-	virtual inline void OnKeyPressed(const ncKeyboardEvent &event) { }
-	virtual inline void OnKeyReleased(const ncKeyboardEvent &event) { }
+	inline virtual void OnKeyPressed(const ncKeyboardEvent &event) { }
+	inline virtual void OnKeyReleased(const ncKeyboardEvent &event) { }
 #ifdef __ANDROID__
-	virtual inline void OnTouchDown(const ncTouchEvent &event) { }
-	virtual inline void OnTouchUp(const ncTouchEvent &event) { }
-	virtual inline void OnTouchMove(const ncTouchEvent &event) { }
-	virtual inline void OnSecondaryTouchDown(const ncTouchEvent &event) { }
-	virtual inline void OnSecondaryTouchUp(const ncTouchEvent &event) { }
-	virtual inline void OnAcceleration(const ncAccelerometerEvent &event) { }
+	inline virtual void OnTouchDown(const ncTouchEvent &event) { }
+	inline virtual void OnTouchUp(const ncTouchEvent &event) { }
+	inline virtual void OnTouchMove(const ncTouchEvent &event) { }
+	inline virtual void OnSecondaryTouchDown(const ncTouchEvent &event) { }
+	inline virtual void OnSecondaryTouchUp(const ncTouchEvent &event) { }
+	inline virtual void OnAcceleration(const ncAccelerometerEvent &event) { }
 	#if (__ANDROID_API__ >= 13)
-	virtual inline void OnJoyButtonPressed(const ncJoyButtonEvent &event) { }
-	virtual inline void OnJoyButtonReleased(const ncJoyButtonEvent &event) { }
-	virtual inline void OnJoyAxisMoved(const ncJoyAxisEvent &event) { }
+	inline virtual void OnJoyButtonPressed(const ncJoyButtonEvent &event) { }
+	inline virtual void OnJoyButtonReleased(const ncJoyButtonEvent &event) { }
+	inline virtual void OnJoyAxisMoved(const ncJoyAxisEvent &event) { }
 	#endif
 #else
-	virtual inline void OnMouseButtonPressed(const ncMouseEvent &event) { }
-	virtual inline void OnMouseButtonReleased(const ncMouseEvent &event) { }
-	virtual inline void OnMouseMoved(const ncMouseState &state) { }
-	virtual inline void OnJoyButtonPressed(const ncJoyButtonEvent &event) { }
-	virtual inline void OnJoyButtonReleased(const ncJoyButtonEvent &event) { }
-	virtual inline void OnJoyAxisMoved(const ncJoyAxisEvent &event) { }
+	inline virtual void OnMouseButtonPressed(const ncMouseEvent &event) { }
+	inline virtual void OnMouseButtonReleased(const ncMouseEvent &event) { }
+	inline virtual void OnMouseMoved(const ncMouseState &state) { }
+	inline virtual void OnJoyButtonPressed(const ncJoyButtonEvent &event) { }
+	inline virtual void OnJoyButtonReleased(const ncJoyButtonEvent &event) { }
+	inline virtual void OnJoyAxisMoved(const ncJoyAxisEvent &event) { }
 #endif
 };
 

@@ -21,10 +21,10 @@ class ncAudioLoaderOgg : public ncIAudioLoader
 	void Rewind() const;
 
  private:
+	void Init();
+
 	/// Vorbisfile handle
 	mutable OggVorbis_File m_oggFile;
-
-	void Init();
 };
 
 #endif

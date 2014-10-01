@@ -34,32 +34,32 @@ class ncAccelerometerEvent
 class ncMouseState
 {
  public:
-	/// Pointer position on the X axis
-	int x;
-	/// Pointer position on the Y axis
-	int y;
-
 	virtual bool isLeftButtonDown() const = 0;
 	virtual bool isMiddleButtonDown() const = 0;
 	virtual bool isRightButtonDown() const = 0;
 	virtual bool isWheelUpButtonDown() const = 0;
 	virtual bool isWheelDownButtonDown() const = 0;
+
+	/// Pointer position on the X axis
+	int x;
+	/// Pointer position on the Y axis
+	int y;
 };
 
 /// Information about a mouse event
 class ncMouseEvent
 {
  public:
-	/// Pointer position on the X axis
-	int x;
-	/// Pointer position on the Y axis
-	int y;
-
 	virtual bool isLeftButton() const = 0;
 	virtual bool isMiddleButton() const = 0;
 	virtual bool isRightButton() const = 0;
 	virtual bool isWheelUpButton() const = 0;
 	virtual bool isWheelDownButton() const = 0;
+
+	/// Pointer position on the X axis
+	int x;
+	/// Pointer position on the Y axis
+	int y;
 };
 
 /// Information about keyboard state
@@ -112,7 +112,7 @@ class ncIInputManager
  public:
 	virtual ~ncIInputManager() { }
 
-	static inline void SetHandler(ncIInputEventHandler *pInputEventHandler)
+	inline static void SetHandler(ncIInputEventHandler *pInputEventHandler)
 	{
 		s_pInputEventHandler = pInputEventHandler;
 	}
@@ -139,8 +139,8 @@ class ncIInputManager
 	virtual float JoyAxisNormValue(int iJoyId, int iAxisId) const = 0;
 
  protected:
-	static ncIInputEventHandler *s_pInputEventHandler;
 	ncIInputManager() { }
+	static ncIInputEventHandler *s_pInputEventHandler;
 };
 
 #endif

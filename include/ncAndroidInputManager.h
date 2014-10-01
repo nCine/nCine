@@ -65,22 +65,8 @@ class ncAndroidInputManager : public ncIInputManager
 
  private:
 	static const unsigned int s_uMaxNumJoysticks = 4;
-
-	static ASensorManager* s_pSensorManager;
-	static const ASensor* s_pAccelerometerSensor;
-	static ASensorEventQueue* s_pSensorEventQueue;
-	static bool s_bAccelerometerEnabled;
-
-	static ncAccelerometerEvent s_accelerometerEvent;
-	static ncTouchEvent s_touchEvent;
-	static ncKeyboardEvent s_keyboardEvent;
-
-	static ncAndroidJoystickState s_joystickStates[s_uMaxNumJoysticks];
-	static ncJoyButtonEvent s_joyButtonEvent;
-	static ncJoyAxisEvent s_joyAxisEvent;
 	/// Update rate of CheckJoystickDisconnections() in seconds
 	static const float s_joyCheckRate = 0.25f;
-	static ncTimer s_joyCheckTimer;
 
 	// Initializes the accelerometer sensor
 	static void InitAccelerometerSensor(struct android_app* state);
@@ -95,6 +81,21 @@ class ncAndroidInputManager : public ncIInputManager
 	static int FindJoyId(int iDeviceId);
 	static bool isDeviceConnected(int iDeviceId);
 	static void DeviceInfo(int iDeviceId, int iJoyId);
+
+	static ASensorManager* s_pSensorManager;
+	static const ASensor* s_pAccelerometerSensor;
+	static ASensorEventQueue* s_pSensorEventQueue;
+	static bool s_bAccelerometerEnabled;
+
+	static ncAccelerometerEvent s_accelerometerEvent;
+	static ncTouchEvent s_touchEvent;
+	static ncKeyboardEvent s_keyboardEvent;
+
+	static ncAndroidJoystickState s_joystickStates[s_uMaxNumJoysticks];
+	static ncJoyButtonEvent s_joyButtonEvent;
+	static ncJoyAxisEvent s_joyAxisEvent;
+
+	static ncTimer s_joyCheckTimer;
 
 	friend void android_main(struct android_app* state);
 };

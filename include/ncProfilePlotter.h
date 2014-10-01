@@ -40,7 +40,7 @@ class ncProfilePlotter : public ncDrawableNode
 	// Applies parent transformations to reference value vertices
 	void ApplyTransformations(float fAbsX, float fAbsY, float fAbsRotation, float fAbsScaleFactor);
 
-	virtual inline void DrawRefValue(ncRenderQueue& rRenderQueue)
+	inline virtual void DrawRefValue(ncRenderQueue& rRenderQueue)
 	{
 		UpdateRefValueRenderCommand();
 		rRenderQueue.AddCommand(&m_refValueCmd);
@@ -50,6 +50,11 @@ class ncProfilePlotter : public ncDrawableNode
 	virtual unsigned int AddVariable(unsigned int uNumValues, float fRejectDelay) = 0;
 
  protected:
+	void SetBackgroundVertices();
+	virtual void UpdateRenderCommand();
+	// Updates the reference value rendering command
+	void UpdateRefValueRenderCommand();
+
 	/// Background width
 	int m_iWidth;
 	/// Background height
@@ -72,11 +77,6 @@ class ncProfilePlotter : public ncDrawableNode
 	float m_fRefValue;
 	/// The command used to render the reference value
 	ncRenderCommand m_refValueCmd;
-
-	void SetBackgroundVertices();
-	virtual void UpdateRenderCommand();
-	// Updates the reference value rendering command
-	void UpdateRefValueRenderCommand();
 };
 
 #endif

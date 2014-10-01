@@ -15,7 +15,6 @@ class ncTextureLoaderPNG : public ncITextureLoader
  private:
 	void Init();
 	static void ReadFromFileHandle(png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToRead);
-
 };
 
 #endif

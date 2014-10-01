@@ -44,11 +44,11 @@ class ncCondVariable
 
  private:
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+	void WaitEvents();
+
 	HANDLE m_events[2];
 	unsigned int m_uWaitersCount;
 	CRITICAL_SECTION m_WaitersCountLock;
-
-	void WaitEvents();
 #else
 	pthread_cond_t m_cond;
 #endif

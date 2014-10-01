@@ -32,6 +32,12 @@ class ncRenderQueue
 	inline unsigned int NumCommands(ncRenderCommand::eCommandType eType) const { return m_uTypedLastNumCommands[eType]; }
 
  private:
+	// Sorts render nodes in both queues to minimize state changes
+	void SortQueues();
+
+	void QSort(ncArray<const ncRenderCommand *> &array, int start, int end);
+	int QSortPartition(ncArray<const ncRenderCommand *> &array, int start, int end);
+
 	/// The current sum of vertices for every command in the queue
 	unsigned int m_uNumVertices;
 	/// The sum of vertices in the previous frame (it never contains a partial sum)
@@ -52,12 +58,6 @@ class ncRenderQueue
 	ncArray<const ncRenderCommand *> m_opaqueRenderCmds;
 	/// Array of transparent render command pointers
 	ncArray<const ncRenderCommand *> m_transparentRenderCmds;
-
-	// Sorts render nodes in both queues to minimize state changes
-	void SortQueues();
-
-	void QSort(ncArray<const ncRenderCommand *> &array, int start, int end);
-	int QSortPartition(ncArray<const ncRenderCommand *> &array, int start, int end);
 };
 
 #endif

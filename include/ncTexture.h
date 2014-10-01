@@ -57,6 +57,11 @@ class ncTexture : public ncObject
 	inline static eObjectType sType() { return TEXTURE_TYPE; }
 
  private:
+	// Loads a texture based on information from the texture format and loader
+	void Load(const ncITextureLoader& texLoader);
+	// Loads a texture overriding the size detected by the texture loader
+	void Load(const ncITextureLoader& texLoader, int iWidth, int iHeight);
+
 	GLuint m_uGLId;
 	int m_iWidth;
 	int m_iHeight;
@@ -64,10 +69,6 @@ class ncTexture : public ncObject
 	bool m_bCompressed;
 	bool m_bAlphaChannel;
 
-	// Loads a texture based on information from the texture format and loader
-	void Load(const ncITextureLoader& texLoader);
-	// Loads a texture overriding the size detected by the texture loader
-	void Load(const ncITextureLoader& texLoader, int iWidth, int iHeight);
 };
 
 #endif

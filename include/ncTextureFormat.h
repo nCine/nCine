@@ -43,11 +43,6 @@ class ncTextureFormat
 	static long int CalculateMipSizes(GLenum eInternalFormat, int iWidth, int iHeight, int iMipMapCount, long int *pMipDataOffsets, long int *pMipDataSizes);
 
  private:
-	GLenum m_eInternalFormat;
-	GLenum m_eFormat;
-	GLenum m_eType;
-	bool m_bCompressed;
-
 #ifndef __ANDROID__
 	// Searches a match between an integer internal format and an external one
 	bool IntegerFormat();
@@ -64,6 +59,11 @@ class ncTextureFormat
 
 	// Tries to find an external format corresponding to the internal one
 	void FindExternalFmt();
+
+	GLenum m_eInternalFormat;
+	GLenum m_eFormat;
+	GLenum m_eType;
+	bool m_bCompressed;
 };
 
 /// Returns true if the format provides an alpha channel

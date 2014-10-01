@@ -15,14 +15,6 @@ class ncSceneNode : public ncObject
 	/// The minimum amount of rotation to trigger a sine and cosine calculation
 	static const float sMinRotation;
 
-	/// Relative X coordinate as a public property
-	float x;
-	/// Relative Y coordinate as a public property
-	float y;
-
-	bool bShouldUpdate;
-	bool bShouldDraw;
-
 	ncSceneNode(ncSceneNode* pParent, float fX, float fY);
 	ncSceneNode(ncSceneNode* pParent);
 	ncSceneNode();
@@ -90,7 +82,17 @@ class ncSceneNode : public ncObject
 	/// Sets the node alpha through a float component
 	inline void SetAlphaF(float fA) { m_color.SetAlphaF(fA); }
 
+	/// Relative X coordinate as a public property
+	float x;
+	/// Relative Y coordinate as a public property
+	float y;
+
+	bool bShouldUpdate;
+	bool bShouldDraw;
+
 protected:
+	virtual void Transform();
+
 	ncSceneNode* m_pParent;
 	ncList<ncSceneNode *> m_children;
 
@@ -115,8 +117,6 @@ protected:
 
 	/// Absolute node color as calculated by the Transform() function
 	ncColor m_absColor;
-
-	virtual void Transform();
 };
 
 /// Sets the node rotation in degrees

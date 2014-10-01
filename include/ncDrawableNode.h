@@ -41,10 +41,11 @@ class ncDrawableNode : public ncSceneNode
 	inline void SetPriority(int iPriority) { m_renderCmd.SetPriority(iPriority); }
 
  protected:
-	/// The render command class associated with this node
-	ncRenderCommand m_renderCmd;
 	/// Updates the render command
 	virtual void UpdateRenderCommand() = 0;
+
+	/// The render command class associated with this node
+	ncRenderCommand m_renderCmd;
 };
 
 /// Applies node transformations to vertices

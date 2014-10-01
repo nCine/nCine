@@ -37,9 +37,6 @@ class ncGLFWGfxDevice : public ncIGfxDevice
 	static GLFWwindow* WindowHandle() { return s_pWindowHandle; }
 
  private:
-	/// GLFW3 window handle
-	static GLFWwindow *s_pWindowHandle;
-
 	// Initilizes the class
 	void Init(int iWidth, int iHeight, ncDisplayMode mode, bool bIsWindowed);
 	// Initilizes the video subsystem (GLFW)
@@ -49,6 +46,9 @@ class ncGLFWGfxDevice : public ncIGfxDevice
 
 	// Callback for glfwSetErrorCallback()
 	static void ErrorCallback(int error, const char* description);
+
+	/// GLFW3 window handle
+	static GLFWwindow *s_pWindowHandle;
 };
 
 #endif

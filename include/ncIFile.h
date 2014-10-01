@@ -73,23 +73,23 @@ class ncIFile
 	inline long int Size() const { return m_lFileSize; }
 
 	/// Reads a little endian 16 bit unsigned integer
-	static inline uint16_t Int16FromLE(uint16_t uNumber) { return uNumber; }
+	inline static uint16_t Int16FromLE(uint16_t uNumber) { return uNumber; }
 	/// Reads a little endian 32 bit unsigned integer
-	static inline uint32_t Int32FromLE(uint32_t uNumber) { return uNumber; }
+	inline static uint32_t Int32FromLE(uint32_t uNumber) { return uNumber; }
 	/// Reads a little endian 64 bit unsigned integer
-	static inline uint64_t Int64FromLE(uint64_t uNumber) { return uNumber; }
+	inline static uint64_t Int64FromLE(uint64_t uNumber) { return uNumber; }
 	/// Reads a big endian 16 bit unsigned integer
-	static inline uint16_t Int16FromBE(uint16_t uNumber)
+	inline static uint16_t Int16FromBE(uint16_t uNumber)
 	{
 		return (uNumber>>8) | (uNumber<<8);
 	}
 	/// Reads a big endian 32 bit unsigned integer
-	static inline uint32_t Int32FromBE(uint32_t uNumber)
+	inline static uint32_t Int32FromBE(uint32_t uNumber)
 	{
 		return (uNumber>>24) | ((uNumber<<8) & 0x00FF0000) | ((uNumber>>8) & 0x0000FF00) | (uNumber<<24);
 	}
 	/// Reads a big endian 64 bit unsigned integer
-	static inline uint64_t Int64FromBE(uint64_t uNumber)
+	inline static uint64_t Int64FromBE(uint64_t uNumber)
 	{
 		return (uNumber >> 56) | ((uNumber<<40) & 0x00FF000000000000ULL) | ((uNumber<<24) & 0x0000FF0000000000ULL) |
 			  ((uNumber<<8) & 0x000000FF00000000ULL) | ((uNumber>>8) & 0x00000000FF000000ULL) |
@@ -104,15 +104,20 @@ class ncIFile
 	static char* DataPath();
 
  protected:
-	/// File type
-	eFileType m_eType;
-
 	/// Maximum number of characters for a file name (path included)
 	static const unsigned int s_uMaxFilenameLength = 256;
 	/// File name with path
 	char m_vFilename[s_uMaxFilenameLength];
 	/// Maximum number of characters for a file extension, plus '\0'
 	static const unsigned int s_uMaxExtensionsLength = 5;
+
+	/// Private copy constructor (preventing copy at the moment)
+	ncIFile(const ncIFile&);
+	/// Private assignment operator (preventing copy at the moment)
+	ncIFile& operator=(const ncIFile&);
+
+	/// File type
+	eFileType m_eType;
 	/// File extension
 	char m_vExtension[s_uMaxExtensionsLength];
 
@@ -129,11 +134,6 @@ class ncIFile
 
 	/// File size in bytes
 	long int m_lFileSize;
-
-	/// Private copy constructor (preventing copy at the moment)
-	ncIFile(const ncIFile&);
-	/// Private assignment operator (preventing copy at the moment)
-	ncIFile& operator=(const ncIFile&);
 };
 
 #endif

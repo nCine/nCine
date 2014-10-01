@@ -10,15 +10,6 @@ class ncTexture;
 class ncParticle : public ncSprite
 {
  public:
-	/// Current particle life in seconds
-	float m_fLife;
-	/// Initial particle life
-	float m_fStartLife; // for affectors
-	/// Current particle velocity vector
-	ncVector2f m_Velocity;
-	/// Should the particle transformations be in local space?
-	bool m_bLocalSpace;
-
 	ncParticle(ncSceneNode* pParent, ncTexture *pTexture);
 
 	// Initializes a particle with initial life, position, velocity and rotation
@@ -29,6 +20,15 @@ class ncParticle : public ncSprite
 
 	// Updates particle data after the specified amount of seconds has passed
 	virtual void Update(float fInterval);
+
+	/// Current particle life in seconds
+	float m_fLife;
+	/// Initial particle life
+	float m_fStartLife; // for affectors
+	/// Current particle velocity vector
+	ncVector2f m_Velocity;
+	/// Should the particle transformations be in local space?
+	bool m_bLocalSpace;
 
  private:
 	// Custom transform method to allow independent position from parent

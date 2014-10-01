@@ -43,18 +43,28 @@ public:
 	// Applies parent transformations to both mean and values vertices
 	void ApplyTransformations(float fAbsX, float fAbsY, float fAbsRotation, float fAbsScaleFactor);
 
-	virtual inline void Draw(ncRenderQueue& rRenderQueue)
+	inline virtual void Draw(ncRenderQueue& rRenderQueue)
 	{
 		UpdateRenderCommand();
 		rRenderQueue.AddCommand(&m_valuesCmd);
 	}
-	virtual inline void DrawMean(ncRenderQueue& rRenderQueue)
+	inline virtual void DrawMean(ncRenderQueue& rRenderQueue)
 	{
 		UpdateMeanRenderCommand();
 		rRenderQueue.AddCommand(&m_meanCmd);
 	}
 
  protected:
+	/// Updates the values rendering command
+	virtual void UpdateRenderCommand() = 0;
+	/// Updates the mean rendering command
+	virtual void UpdateMeanRenderCommand() = 0;
+
+	/// The command used to render variable values
+	ncRenderCommand m_valuesCmd;
+	/// The command used to render the variable mean
+	ncRenderCommand m_meanCmd;
+
 	/// Mean drawing flag
 	bool m_bPlotMean;
 	/// Graph color
@@ -65,15 +75,6 @@ public:
 	ncProfileVariable m_variable;
 	/// The vertices buffer
 	float *m_fVertices;
-
-	/// The command used to render variable values
-	ncRenderCommand m_valuesCmd;
-	/// The command used to render the variable mean
-	ncRenderCommand m_meanCmd;
-	/// Updates the values rendering command
-	virtual void UpdateRenderCommand() = 0;
-	/// Updates the mean rendering command
-	virtual void UpdateMeanRenderCommand() = 0;
 };
 
 #endif

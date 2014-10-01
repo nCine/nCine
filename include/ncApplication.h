@@ -34,31 +34,31 @@ class ncApplication
 
 	// HACK: wrapping a lot of getters
 	/// Returns the graphics device instance
-	static inline ncIGfxDevice& GfxDevice() { return *m_pGfxDevice; }
+	inline static ncIGfxDevice& GfxDevice() { return *m_pGfxDevice; }
 	/// Returns the root of the transformation graph
-	static inline ncSceneNode& RootNode() { return *m_pRootNode; }
+	inline static ncSceneNode& RootNode() { return *m_pRootNode; }
 	/// Returns the input manager instance
-	static inline ncIInputManager& InputManager() { return *m_pInputManager; }
+	inline static ncIInputManager& InputManager() { return *m_pInputManager; }
 
 	/// Returns the elapsed time since the end of the previous frame in milliseconds
-	static inline float Interval() { return m_pFrameTimer->Interval(); }
+	inline static float Interval() { return m_pFrameTimer->Interval(); }
 	/// Returns the average FPS
-	static inline float AverageFPS() { return m_pFrameTimer->AverageFPS(); }
+	inline static float AverageFPS() { return m_pFrameTimer->AverageFPS(); }
 
 	/// Returns the screen width
-	static inline int Width() { return m_pGfxDevice->Width(); }
+	inline static int Width() { return m_pGfxDevice->Width(); }
 	/// Returns the screen height
-	static inline int Height() { return m_pGfxDevice->Height(); }
+	inline static int Height() { return m_pGfxDevice->Height(); }
 
 	/// Returns the value of the pause flag
-	static inline bool IsPaused() { return m_bPaused; }
+	inline static bool IsPaused() { return m_bPaused; }
 	// Sets the pause flag value
 	static void SetPause(bool bPaused);
 	// Toggles the pause flag on and off
 	static void TogglePause();
 
 	/// Raises the quit flag
-	static inline void Quit() { m_bShouldQuit = true; }
+	inline static void Quit() { m_bShouldQuit = true; }
 	/// Returns the quit flag value
 	static bool ShouldQuit() { return m_bShouldQuit; }
 
@@ -73,6 +73,9 @@ class ncApplication
 	static void ShowProfileInfo(bool bShouldDraw);
 
  private:
+	ncApplication();
+	~ncApplication();
+
 	static bool m_bPaused;
 	static bool m_bHasFocus;
 	static bool m_bShouldQuit;
@@ -88,9 +91,6 @@ class ncApplication
 	static char m_vTextChars[256];
 	static ncIInputManager *m_pInputManager;
 	static ncIAppEventHandler *m_pAppEventHandler;
-
-	ncApplication();
-	~ncApplication();
 };
 
 #endif

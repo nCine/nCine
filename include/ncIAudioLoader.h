@@ -36,6 +36,12 @@ class ncIAudioLoader
 	static ncIAudioLoader* CreateFromFile(const char *pFilename);
 
  protected:
+	ncIAudioLoader(const char *pFilename);
+	ncIAudioLoader(ncIFile *pFileHandle);
+
+	/// Load the audio parameters from file
+	virtual void Init() = 0;
+
 	/// Audio file handle
 	ncIFile *m_pFileHandle;
 
@@ -50,12 +56,6 @@ class ncIAudioLoader
 	unsigned long int m_ulNumSamples;
 	/// Duration in seconds
 	float m_fDuration;
-
-	ncIAudioLoader(const char *pFilename);
-	ncIAudioLoader(ncIFile *pFileHandle);
-
-	/// Load the audio parameters from file
-	virtual void Init() = 0;
 };
 
 #endif

@@ -29,6 +29,15 @@ class ncFont
 	const ncFontGlyph* Glyph(unsigned int uGlyphId) const;
 
  private:
+	/// Maximum number of glyphs in a font
+	static const unsigned int s_uMaxGlyphs = 256;
+
+	// Loads an AngelCode's FNT file in a RAM buffer then parses it
+	void ParseFNTFile(ncIFile *pFileHandle);
+
+	/// Preventing construction by copy
+	ncFont(const ncFont& rOther);
+
 	/// The font texture
 	ncTexture *m_pTexture;
 	/// Font line height
@@ -44,16 +53,8 @@ class ncFont
 	/// Number of kernings for this font
 	unsigned int m_uNumKernings;
 
-	/// Maximum number of glyphs in a font
-	static const unsigned int s_uMaxGlyphs = 256;
 	/// Array of font glyphs
 	ncFontGlyph m_vGlyphs[s_uMaxGlyphs];
-
-	// Loads an AngelCode's FNT file in a RAM buffer then parses it
-	void ParseFNTFile(ncIFile *pFileHandle);
-
-	/// Preventing construction by copy
-	ncFont(const ncFont& rOther);
 };
 
 /// Returns a constant pointer to a glyph

@@ -18,9 +18,9 @@ class ncTextureLoaderSDL : public ncITextureLoader
 	~ncTextureLoaderSDL();
 
  private:
-	SDL_Surface *m_pSDLSurface;
-
 	void Init();
+
+	SDL_Surface *m_pSDLSurface;
 };
 
 #endif

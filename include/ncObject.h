@@ -4,9 +4,6 @@
 #include <cstring>
 #include "ncServiceLocator.h"
 
-/// Maximum length for an object name
-static const int NC_OBJNAME_LENGTH = 128;
-
 /// Static RRTI and identification index
 class ncObject
 {
@@ -26,9 +23,12 @@ class ncObject
 	   AUDIOSTREAMPLAYER_TYPE
    };
 
+   /// Maximum length for an object name
+   static const int s_iNameLength = 128;
+
 	ncObject() : m_eType(BASE_TYPE), m_uId(0)
 	{
-		memset(m_vName, 0, NC_OBJNAME_LENGTH);
+		memset(m_vName, 0, s_iNameLength);
 		m_uId = ncServiceLocator::Indexer().AddObject(this);
 	}
 	virtual ~ncObject() { ncServiceLocator::Indexer().RemoveObject(m_uId); }
@@ -44,7 +44,7 @@ class ncObject
 	/// Returns object name
 	char const * const Name() const { return m_vName; }
 	/// Sets the object name
-	void SetName(const char vName[NC_OBJNAME_LENGTH]) { strncpy(m_vName, vName, NC_OBJNAME_LENGTH); }
+	inline void SetName(const char vName[s_iNameLength]) { strncpy(m_vName, vName, s_iNameLength); }
 
 	// Returns a casted pointer to the object with the specified id, if any exists
 	template <class T> static T* FromId(unsigned int uId);
@@ -60,7 +60,7 @@ class ncObject
 	/// Object name
 	/** This field is currently only useful in debug,
 	as there's still no string hashing based search. */
-	char m_vName[NC_OBJNAME_LENGTH];
+	char m_vName[s_iNameLength];
 };
 
 /// Returns a casted pointer to the object with the specified id, if any exists

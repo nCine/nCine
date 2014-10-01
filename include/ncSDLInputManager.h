@@ -100,17 +100,18 @@ class ncSDLInputManager : public ncIInputManager
 	float JoyAxisNormValue(int iJoyId, int iAxisId) const;
 
  private:
+	static const unsigned int s_uMaxNumJoysticks = 16;
+
+	static short int HatEnumToAxisValue(unsigned char ubHatState, bool bUpDownAxis);
+
 	static ncSDLMouseState s_mouseState;
 	static ncSDLMouseEvent s_mouseEvent;
 	static ncSDLKeyboardState s_keyboardState;
 	static ncKeyboardEvent	s_keyboardEvent;
 
-	static const unsigned int s_uMaxNumJoysticks = 16;
 	static SDL_Joystick* s_pJoysticks[s_uMaxNumJoysticks];
 	static ncJoyButtonEvent s_joyButtonEvent;
 	static ncJoyAxisEvent s_joyAxisEvent;
-
-	static short int HatEnumToAxisValue(unsigned char ubHatState, bool bUpDownAxis);
 };
 
 #endif

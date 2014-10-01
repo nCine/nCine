@@ -98,17 +98,17 @@ class ncGLFWInputManager : public ncIInputManager
  private:
 	static const unsigned int s_uMaxNumJoysticks = GLFW_JOYSTICK_LAST - GLFW_JOYSTICK_1 + 1;
 
+	static void WindowCloseCallback(GLFWwindow *window);
+	static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+	static void CursorPosCallback(GLFWwindow *window, double x, double y);
+	static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
+
 	static bool m_bWindowHasFocus;
 	static ncGLFWMouseState s_mouseState;
 	static ncGLFWMouseEvent s_mouseEvent;
 	static ncGLFWKeyboardState s_keyboardState;
 	static ncKeyboardEvent	s_keyboardEvent;
 	static ncGLFWJoystickState s_joystickStates[s_uMaxNumJoysticks];
-
-	static void WindowCloseCallback(GLFWwindow *window);
-	static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
-	static void CursorPosCallback(GLFWwindow *window, double x, double y);
-	static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
 };
 
 #endif

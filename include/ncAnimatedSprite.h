@@ -31,10 +31,10 @@ class ncAnimatedSprite : public ncSprite
 	inline static eObjectType sType() { return ANIMATEDSPRITE_TYPE; }
 
 private:
+	void Init();
+
 	ncArray<ncRectAnimation *> m_vAnims;
 	int m_iCurrentAnim;
-
-	void Init();
 };
 
 #endif

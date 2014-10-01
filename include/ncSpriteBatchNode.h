@@ -23,6 +23,11 @@ class ncSpriteBatchNode : public ncDrawableNode
 	inline static eObjectType sType() { return SPRITEBATCH_TYPE; }
 
  private:
+	/// Fill the batch draw command with data from a sprite
+	void ProcessSprite(ncSprite& rSprite);
+
+	virtual void UpdateRenderCommand();
+
 	/// The spritesheet texture shared by every sprite in the batch
 	ncTexture *m_pTexture;
 	/// The array of vertices for every sprite in the batch
@@ -31,10 +36,6 @@ class ncSpriteBatchNode : public ncDrawableNode
 	ncArray<float> m_vTexCoords;
 	/// The array of colors for every sprite in the batch
 	ncArray<unsigned char> m_vColors;
-	/// Fill the batch draw command with data from a sprite
-	void ProcessSprite(ncSprite& rSprite);
-
-	virtual void UpdateRenderCommand();
 };
 
 #endif

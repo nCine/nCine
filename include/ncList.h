@@ -31,13 +31,13 @@ template <class T>
 class ncList
 {
  public:
-	ncList() : m_pHead(NULL), m_pTail(NULL) { }
-	~ncList() { Clear(); }
-
 	/// Iterator type
 	typedef ncListIterator<T> Iterator;
 	/// Constant iterator type
 	typedef const ncListIterator<T> Const_Iterator;
+
+	ncList() : m_pHead(NULL), m_pTail(NULL) { }
+	~ncList() { Clear(); }
 
 	/// Returns true if the list is empty
 	inline bool isEmpty() const { return m_pHead == NULL; }
@@ -76,11 +76,6 @@ class ncList
 	T RemoveBack();
 
  private:
-	/// Pointer to the first node in the list
-	ncListNode<T> *m_pHead;
-	/// Pointer to the last node in the list
-	ncListNode<T> *m_pTail;
-
 	/// Private copy constructor (preventing copy at the moment)
 	ncList(const ncList&);
 	/// Private assignment operator (preventing copy at the moment)
@@ -92,6 +87,11 @@ class ncList
 	void InsertBefore(ncListNode<T> *pNode, const T& element);
 	// Removes a specified node in constant time
 	void Remove(ncListNode<T> *pNode);
+
+	/// Pointer to the first node in the list
+	ncListNode<T> *m_pHead;
+	/// Pointer to the last node in the list
+	ncListNode<T> *m_pTail;
 
 	friend class ncListIterator<T>;
 };

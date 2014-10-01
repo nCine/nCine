@@ -7,15 +7,6 @@
 class ncRect
 {
  public:
-	/// Top-left X coordinate of as a public property
-	int x;
-	/// Top-left Y coordinate as a public property
-	int y;
-	/// Width as a public property
-	int w;
-	/// Height as a public property
-	int h;
-
 	/// Default constructor, all zeros
 	ncRect() : x(0), y(0), w(0), h(0) { }
 	/// Constructs from elements
@@ -37,6 +28,15 @@ class ncRect
 
 	/// Eqality operators
 	bool operator==(const ncRect& rect) const;
+
+	/// Top-left X coordinate of as a public property
+	int x;
+	/// Top-left Y coordinate as a public property
+	int y;
+	/// Width as a public property
+	int w;
+	/// Height as a public property
+	int h;
 };
 
 /// Creates a rect from center and size

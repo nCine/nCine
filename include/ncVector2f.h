@@ -9,10 +9,6 @@
 class ncVector2f
 {
  public:
-	/// X coordinate as a public property
-	float x;
-	/// Y coordinate as a public property
-	float y;
 	/// Default constructor, all zeros
 	ncVector2f() : x(0.0f), y(0.0f) { }
 	/// Construct from components
@@ -39,6 +35,11 @@ class ncVector2f
 	// Multiplication by a constant scalar
 	ncVector2f operator*(float fC) const;
 	ncVector2f operator*=(float fC);
+
+	/// X coordinate as a public property
+	float x;
+	/// Y coordinate as a public property
+	float y;
 };
 
 /// Sets vector elements

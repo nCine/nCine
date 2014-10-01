@@ -30,15 +30,15 @@ class ncAudioBuffer : public ncObject
 	inline static eObjectType sType() { return AUDIOBUFFER_TYPE; }
 
  private:
+	// Loads audio samples based on information from the audio loader
+	void Load(const ncIAudioLoader *pAudioLoader);
+
 	/// The OpenAL buffer id
 	ALuint m_uALId;
 	/// Number of channels
 	int m_iChannels;
 	/// Samples frequency
 	int m_iFrequency;
-
-	// Loads audio samples based on information from the audio loader
-	void Load(const ncIAudioLoader *pAudioLoader);
 };
 
 #endif
