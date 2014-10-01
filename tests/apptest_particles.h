@@ -13,13 +13,7 @@ class MyEventHandler
 	: public ncIAppEventHandler,
 	  public ncIInputEventHandler
 {
-private:
-	ncTexture *m_pTexture;
-	ncParticleSystem *m_pParticleSys;
-	ncTimer *m_pEmitTimer;
-	ncVector2f m_emitVector;
-
-public:
+ public:
 	virtual void OnInit();
 	virtual void OnFrameStart();
 	virtual void OnFrameEnd();
@@ -34,6 +28,12 @@ public:
 	virtual void OnMouseButtonPressed(const ncMouseEvent &event);
 	virtual void OnMouseMoved(const ncMouseState &state);
 #endif
+
+ private:
+	ncTexture *m_pTexture;
+	ncParticleSystem *m_pParticleSys;
+	ncTimer *m_pEmitTimer;
+	ncVector2f m_emitVector;
 };
 
 #endif

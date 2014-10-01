@@ -12,14 +12,7 @@ class MyEventHandler
 	: public ncIAppEventHandler,
 	  public ncIInputEventHandler
 {
-private:
-	bool m_bPause;
-	float m_fAngle;
-	ncSceneNode *m_pDummy;
-	ncTexture *m_pMegaTexture;
-	ncSprite **m_pSprites;
-
-public:
+ public:
 	virtual void OnInit();
 	virtual void OnFrameStart();
 	virtual void OnFrameEnd() { }
@@ -33,6 +26,13 @@ public:
 	virtual void OnMouseButtonPressed(const ncMouseEvent &event);
 	virtual void OnMouseButtonReleased(const ncMouseEvent &event);
 #endif
+
+ private:
+	bool m_bPause;
+	float m_fAngle;
+	ncSceneNode *m_pDummy;
+	ncTexture *m_pMegaTexture;
+	ncSprite **m_pSprites;
 };
 
 #endif

@@ -13,13 +13,7 @@ class MyEventHandler
 	: public ncIAppEventHandler,
 	  public ncIInputEventHandler
 {
-private:
-	ncAudioStreamPlayer *m_pAudioPlayer;
-	ncTexture *m_pTexture;
-	ncAnimatedSprite *m_pAnimSprite;
-	ncVector2f m_destVector;
-
-public:
+ public:
 	virtual void OnInit();
 	virtual void OnFrameStart();
 	virtual void OnFrameEnd() { }
@@ -33,6 +27,12 @@ public:
 	virtual void OnMouseButtonPressed(const ncMouseEvent &event);
 	virtual void OnMouseMoved(const ncMouseState &state);
 #endif
+
+ private:
+	ncAudioStreamPlayer *m_pAudioPlayer;
+	ncTexture *m_pTexture;
+	ncAnimatedSprite *m_pAnimSprite;
+	ncVector2f m_destVector;
 };
 
 #endif

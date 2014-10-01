@@ -11,12 +11,7 @@ class MyEventHandler
 	: public ncIAppEventHandler,
 	  public ncIInputEventHandler
 {
-private:
-	float *m_fAngles;
-	ncTexture **m_pTextures;
-	ncSprite **m_pSprites;
-
-public:
+ public:
 	virtual void OnInit();
 	virtual void OnFrameStart();
 	virtual void OnFrameEnd() { }
@@ -25,6 +20,11 @@ public:
 #ifndef __ANDROID__
 	virtual void OnKeyReleased(const ncKeyboardEvent &event);
 #endif
+
+ private:
+	float *m_fAngles;
+	ncTexture **m_pTextures;
+	ncSprite **m_pSprites;
 };
 
 #endif

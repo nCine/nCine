@@ -13,7 +13,17 @@ class MyEventHandler
 	: public ncIAppEventHandler,
 	  public ncIInputEventHandler
 {
-private:
+ public:
+	virtual void OnInit();
+	virtual void OnFrameStart();
+	virtual void OnFrameEnd() { }
+	virtual void OnShutdown();
+
+#ifndef __ANDROID__
+	virtual void OnKeyReleased(const ncKeyboardEvent &event);
+#endif
+
+ private:
 	ncTexture *m_pTexture;
 	ncSprite *m_pSprites[2];
 	ncFont *m_pFont;
@@ -26,15 +36,6 @@ private:
 	unsigned char m_ubButtonStates[numButtons];
 	static const int numChars = 256;
 	char m_vJoyString[numChars];
-public:
-	virtual void OnInit();
-	virtual void OnFrameStart();
-	virtual void OnFrameEnd() { }
-	virtual void OnShutdown();
-
-#ifndef __ANDROID__
-	virtual void OnKeyReleased(const ncKeyboardEvent &event);
-#endif
 };
 
 #endif

@@ -12,16 +12,7 @@ class MyEventHandler
 	: public ncIAppEventHandler,
 	  public ncIInputEventHandler
 {
-private:
-	ncSceneNode *m_pDummy;
-	ncTexture *m_pMegaTexture;
-	ncSprite **m_pSprites;
-
-	ncTexture *m_pAlphaTexture;
-	ncSprite *m_pAlphaSpriteBottom;
-	ncSprite *m_pAlphaSpriteTop;
-
-public:
+ public:
 	virtual void OnInit();
 	virtual void OnFrameStart() { }
 	virtual void OnFrameEnd() { }
@@ -30,6 +21,15 @@ public:
 #ifndef __ANDROID__
 	virtual void OnKeyReleased(const ncKeyboardEvent &event);
 #endif
+
+ private:
+	ncSceneNode *m_pDummy;
+	ncTexture *m_pMegaTexture;
+	ncSprite **m_pSprites;
+
+	ncTexture *m_pAlphaTexture;
+	ncSprite *m_pAlphaSpriteBottom;
+	ncSprite *m_pAlphaSpriteTop;
 };
 
 #endif
