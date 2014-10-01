@@ -6,7 +6,15 @@
 /// WAVE audio loader
 class ncAudioLoaderWav : public ncIAudioLoader
 {
-private:
+ public:
+	ncAudioLoaderWav(const char *pFilename);
+	ncAudioLoaderWav(ncIFile *pFileHandle);
+	~ncAudioLoaderWav() { }
+
+	long Read(char *pBuffer, int iBufSize) const;
+	void Rewind() const;
+
+ private:
 	/// Header for the RIFF WAVE format
 	typedef struct WAV_header {
 		char		cChunkID[4];
@@ -27,14 +35,6 @@ private:
 	} WAV_header;
 
 	void Init();
-
-public:
-	ncAudioLoaderWav(const char *pFilename);
-	ncAudioLoaderWav(ncIFile *pFileHandle);
-	~ncAudioLoaderWav() { }
-
-	long Read(char *pBuffer, int iBufSize) const;
-	void Rewind() const;
 };
 
 #endif

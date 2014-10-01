@@ -12,6 +12,33 @@ const float ncSceneNode::sMinRotation = 0.5f;
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+ncSceneNode::ncSceneNode(ncSceneNode* pParent, float fX, float fY)
+	: x(fX), y(fY), bShouldUpdate(true), bShouldDraw(true), m_pParent(NULL),
+	  m_fScaleFactor(1.0f), m_fRotation(0.0f), m_fAbsX(0.0f), m_fAbsY(0.0f), m_fAbsScaleFactor(1.0f), m_fAbsRotation(0.0f)
+{
+	m_eType = SCENENODE_TYPE;
+
+	if (pParent)
+		pParent->AddChildNode(this);
+}
+
+ncSceneNode::ncSceneNode(ncSceneNode* pParent)
+	: x(0.0f), y(0.0f), bShouldUpdate(true), bShouldDraw(true), m_pParent(NULL),
+	  m_fScaleFactor(1.0f), m_fRotation(0.0f), m_fAbsX(0.0f), m_fAbsY(0.0f), m_fAbsScaleFactor(1.0f), m_fAbsRotation(0.0f)
+{
+	m_eType = SCENENODE_TYPE;
+
+	if (pParent)
+		pParent->AddChildNode(this);
+}
+
+ncSceneNode::ncSceneNode()
+	: ncObject(), x(0.0f), y(0.0f), bShouldUpdate(true), bShouldDraw(true), m_pParent(NULL),
+	  m_fScaleFactor(1.0f), m_fRotation(0.0f), m_fAbsX(0.0f), m_fAbsY(0.0f), m_fAbsScaleFactor(1.0f), m_fAbsRotation(0.0f)
+{
+	m_eType = SCENENODE_TYPE;
+}
+
 ncSceneNode::~ncSceneNode()
 {
 	ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin();

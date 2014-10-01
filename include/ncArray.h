@@ -10,15 +10,7 @@
 template <class T>
 class ncArray
 {
-private:
-	T* m_pArray;
-	unsigned int m_uSize;
-	unsigned int m_uCapacity;
-
-	// Preventing copy at the moment
-	ncArray(const ncArray&);
-	void operator=(const ncArray&);
-public:
+ public:
 	/// Constructs an array with explicit size
 	ncArray(unsigned int uCapacity)
 		: m_pArray(NULL), m_uSize(0), m_uCapacity(0)
@@ -60,6 +52,15 @@ public:
 	inline T* const Pointer() const { return m_pArray; }
 	// Allows for direct but unchecked access to the array memory
 	T* MapBuffer(unsigned int uReserved);
+
+ private:
+	T* m_pArray;
+	unsigned int m_uSize;
+	unsigned int m_uCapacity;
+
+	// Preventing copy at the moment
+	ncArray(const ncArray&);
+	void operator=(const ncArray&);
 };
 
 /// Sets a new capacity for the array (can be bigger or smaller than the current one)

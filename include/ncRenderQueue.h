@@ -10,7 +10,28 @@ class ncSceneNode;
 and creating a tree of render commands */
 class ncRenderQueue
 {
-private:
+ public:
+	ncRenderQueue()
+		: m_uNumVertices(0), m_uLastNumVertices(0), m_uLastNumCommands(0),
+		  m_opaqueRenderCmds(16), m_transparentRenderCmds(16) { }
+	~ncRenderQueue() { }
+
+	// Adds a draw command to the queue
+	void AddCommand(const ncRenderCommand *pCommand);
+	// Sorts the queue then issues every render command in order
+	void Draw();
+
+	/// Returns the total number of vertices to be rendered by the queue
+	inline unsigned int NumVertices() const { return m_uLastNumVertices; }
+	/// Returns the queue's length
+	inline unsigned int NumCommands() const { return m_uLastNumCommands; }
+
+	/// Returns the total number of vertices to be rendered by the queue for a specified command type
+	inline unsigned int NumVertices(ncRenderCommand::eCommandType eType) const { return m_uTypedLastNumVertices[eType]; }
+	/// Returns the number of commands to render a specified category of commands
+	inline unsigned int NumCommands(ncRenderCommand::eCommandType eType) const { return m_uTypedLastNumCommands[eType]; }
+
+ private:
 	/// The current sum of vertices for every command in the queue
 	unsigned int m_uNumVertices;
 	/// The sum of vertices in the previous frame (it never contains a partial sum)
@@ -37,27 +58,6 @@ private:
 
 	void QSort(ncArray<const ncRenderCommand *> &array, int start, int end);
 	int QSortPartition(ncArray<const ncRenderCommand *> &array, int start, int end);
-
-public:
-	ncRenderQueue()
-		: m_uNumVertices(0), m_uLastNumVertices(0), m_uLastNumCommands(0),
-		  m_opaqueRenderCmds(16), m_transparentRenderCmds(16) { }
-	~ncRenderQueue() { }
-
-	// Adds a draw command to the queue
-	void AddCommand(const ncRenderCommand *pCommand);
-	// Sorts the queue then issues every render command in order
-	void Draw();
-
-	/// Returns the total number of vertices to be rendered by the queue
-	inline unsigned int NumVertices() const { return m_uLastNumVertices; }
-	/// Returns the queue's length
-	inline unsigned int NumCommands() const { return m_uLastNumCommands; }
-
-	/// Returns the total number of vertices to be rendered by the queue for a specified command type
-	inline unsigned int NumVertices(ncRenderCommand::eCommandType eType) const { return m_uTypedLastNumVertices[eType]; }
-	/// Returns the number of commands to render a specified category of commands
-	inline unsigned int NumCommands(ncRenderCommand::eCommandType eType) const { return m_uTypedLastNumCommands[eType]; }
 };
 
 #endif

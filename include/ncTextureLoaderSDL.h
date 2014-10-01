@@ -12,15 +12,15 @@
 /// SDL_image texture loader
 class ncTextureLoaderSDL : public ncITextureLoader
 {
-private:
-	SDL_Surface *m_pSDLSurface;
-
-	void Init();
-
-public:
+ public:
 	ncTextureLoaderSDL(const char *pFilename);
 	ncTextureLoaderSDL(ncIFile *pFileHandle);
 	~ncTextureLoaderSDL();
+
+ private:
+	SDL_Surface *m_pSDLSurface;
+
+	void Init();
 };
 
 #endif

@@ -14,7 +14,25 @@
 /// It represents the interface to the OpenAL audio device
 class ncALAudioDevice : public ncIAudioDevice
 {
-private:
+ public:
+	ncALAudioDevice();
+	virtual ~ncALAudioDevice();
+
+	virtual float Gain() { return m_fGain; }
+	virtual void SetGain(float fGain);
+
+	virtual void StopPlayers();
+	virtual void PausePlayers();
+	virtual inline void StopBufferPlayers() { StopOrPauseBufferPlayers(true); }
+	virtual inline void PauseBufferPlayers() { StopOrPauseBufferPlayers(false); }
+	virtual inline void StopStreamPlayers() { StopOrPauseStreamPlayers(true); }
+	virtual inline void PauseStreamPlayers() { StopOrPauseStreamPlayers(false); }
+
+	virtual int NextAvailableSource();
+	virtual void RegisterPlayer(ncIAudioPlayer *pPlayer);
+	virtual void UpdatePlayers();
+
+ private:
 	/// Maximum number of OpenAL sources (HACK: should use a query)
 	static const unsigned int s_uMaxSources = 16;
 
@@ -34,24 +52,6 @@ private:
 	void StopOrPauseBufferPlayers(bool bStop);
 	/// Stops or pauses all stream players
 	void StopOrPauseStreamPlayers(bool bStop);
-
-public:
-	ncALAudioDevice();
-	virtual ~ncALAudioDevice();
-
-	virtual float Gain() { return m_fGain; }
-	virtual void SetGain(float fGain);
-
-	virtual void StopPlayers();
-	virtual void PausePlayers();
-	virtual inline void StopBufferPlayers() { StopOrPauseBufferPlayers(true); }
-	virtual inline void PauseBufferPlayers() { StopOrPauseBufferPlayers(false); }
-	virtual inline void StopStreamPlayers() { StopOrPauseStreamPlayers(true); }
-	virtual inline void PauseStreamPlayers() { StopOrPauseStreamPlayers(false); }
-
-	virtual int NextAvailableSource();
-	virtual void RegisterPlayer(ncIAudioPlayer *pPlayer);
-	virtual void UpdatePlayers();
 };
 
 #endif

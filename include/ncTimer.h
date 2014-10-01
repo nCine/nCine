@@ -4,7 +4,23 @@
 /// Basic timer and synchronization class
 class ncTimer
 {
-private:
+ public:
+	// Empty constructor
+	ncTimer();
+	/// Starts the timer
+	inline void Start() { m_ullStartTime = Counter(); }
+	// Returns now-start time interval in seconds
+	float Interval() const;
+	// Returns elapsed time in seconds since base time
+	static float Now();
+	// Puts the current thread to sleep for the specified number of seconds
+	static void Sleep(float fS);
+
+ protected:
+	/// Start time mark
+	unsigned long long int m_ullStartTime;
+
+ private:
 #ifdef _WIN32
 	static bool s_bHasPerfCounter;
 #elif !defined(__APPLE__)
@@ -21,25 +37,14 @@ private:
 	// Initializes the static fields
 	static void Init();
 
-
 	// Returns current value of the counter
 	static unsigned long long int Counter();
-
-protected:
-	/// Start time mark
-	unsigned long long int m_ullStartTime;
-
-public:
-	/// Empty constructor
-	ncTimer() : m_ullStartTime(0LL) { }
-	/// Starts the timer
-	inline void Start() { m_ullStartTime = Counter(); }
-	/// Returns now-start time interval in seconds
-	inline float Interval() const { return float(Counter() - m_ullStartTime) / s_ulFrequency; }
-	/// Returns elapsed time in seconds since base time
-	static float Now() { return float(Counter() - s_ullBaseCount) / s_ulFrequency; }
-	// Puts the current thread to sleep for the specified number of seconds
-	static void Sleep(float fS);
 };
+
+/// Returns now-start time interval in seconds
+inline float ncTimer::Interval() const
+{
+	return float(Counter() - m_ullStartTime) / s_ulFrequency;
+}
 
 #endif

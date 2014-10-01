@@ -33,6 +33,22 @@ const int ncAndroidJoystickState::s_vAxesToMap[ncAndroidJoystickState::s_iNumAxe
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+ncAndroidJoystickState::ncAndroidJoystickState()
+	: m_iDeviceId(-1), m_iNumButtons(0), m_iNumAxes(0), m_bHasDPad(false)
+{
+	m_vName[0] = '\0';
+	for (int i = 0; i < s_iMaxButtons; i++)
+	{
+		m_vButtonsMapping[i] = 0;
+		m_bButtons[i] = false;
+	}
+	for (int i = 0; i < s_iMaxAxes; i++)
+	{
+		m_vAxesMapping[i] = 0;
+		m_fAxisValues[i] = 0.0f;
+	}
+}
+
 ncAndroidInputManager::ncAndroidInputManager(struct android_app* state)
 {
 	InitAccelerometerSensor(state);

@@ -8,7 +8,7 @@
 /// A two dimensional vector
 class ncVector2f
 {
-public:
+ public:
 	/// X coordinate as a public property
 	float x;
 	/// Y coordinate as a public property
@@ -18,16 +18,11 @@ public:
 	/// Construct from components
 	ncVector2f(float const fX, float const fY) : x(fX), y(fY) { }
 
-	/// Sets vector elements
-	inline void Set(float const fX, float const fY) {
-		x = fX;
-		y = fY;
-	}
+	// Sets vector elements
+	void Set(float const fX, float const fY);
 
 	/// Calculates vector length
-	inline float Length() const {
-		return sqrt(x*x + y*y);
-	}
+	inline float Length() const { return sqrt(x*x + y*y); }
 	// Vector normalization
 	ncVector2f& Normalize();
 	// Dot product
@@ -45,5 +40,12 @@ public:
 	ncVector2f operator*(float fC) const;
 	ncVector2f operator*=(float fC);
 };
+
+/// Sets vector elements
+inline void ncVector2f::Set(float const fX, float const fY)
+{
+	x = fX;
+	y = fY;
+}
 
 #endif

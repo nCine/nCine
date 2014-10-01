@@ -10,36 +10,7 @@
 /// A class that plots a graphic representation of a time/value function
 class ncProfilePlotter : public ncDrawableNode
 {
-protected:
-	/// Background width
-	int m_iWidth;
-	/// Background height
-	int m_iHeight;
-
-	/// Background color
-	ncColor m_backgroundColor;
-	/// The vertices for the background
-	float m_fBackgroundVertices[8]; // Quad with a triangle strip
-	/// The array of variables
-	ncArray<ncPlottingVariable *> m_vVariables;
-
-	/// Reference value drawing flag
-	bool m_bPlotRefValue;
-	/// Reference value line color
-	ncColor m_refValueColor;
-	/// The vertices for the reference value line
-	float m_fRefValueVertices[4];
-	/// The reference value
-	float m_fRefValue;
-	/// The command used to render the reference value
-	ncRenderCommand m_refValueCmd;
-
-	void SetBackgroundVertices();
-	virtual void UpdateRenderCommand();
-	// Updates the reference value rendering command
-	void UpdateRefValueRenderCommand();
-
-public:
+ public:
 	ncProfilePlotter(ncSceneNode* pParent, ncRect rect);
 	virtual ~ncProfilePlotter();
 
@@ -77,6 +48,35 @@ public:
 
 	/// Adds a new variable to the plotter
 	virtual unsigned int AddVariable(unsigned int uNumValues, float fRejectDelay) = 0;
+
+ protected:
+	/// Background width
+	int m_iWidth;
+	/// Background height
+	int m_iHeight;
+
+	/// Background color
+	ncColor m_backgroundColor;
+	/// The vertices for the background
+	float m_fBackgroundVertices[8]; // Quad with a triangle strip
+	/// The array of variables
+	ncArray<ncPlottingVariable *> m_vVariables;
+
+	/// Reference value drawing flag
+	bool m_bPlotRefValue;
+	/// Reference value line color
+	ncColor m_refValueColor;
+	/// The vertices for the reference value line
+	float m_fRefValueVertices[4];
+	/// The reference value
+	float m_fRefValue;
+	/// The command used to render the reference value
+	ncRenderCommand m_refValueCmd;
+
+	void SetBackgroundVertices();
+	virtual void UpdateRenderCommand();
+	// Updates the reference value rendering command
+	void UpdateRefValueRenderCommand();
 };
 
 #endif

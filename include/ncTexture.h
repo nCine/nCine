@@ -22,19 +22,7 @@
 /// Texture class
 class ncTexture : public ncObject
 {
-private:
-	GLuint m_uGLId;
-	int m_iWidth;
-	int m_iHeight;
-	int m_iMipMapLevels;
-	bool m_bCompressed;
-	bool m_bAlphaChannel;
-
-	// Loads a texture based on information from the texture format and loader
-	void Load(const ncITextureLoader& texLoader);
-	// Loads a texture overriding the size detected by the texture loader
-	void Load(const ncITextureLoader& texLoader, int iWidth, int iHeight);
-public:
+ public:
 	ncTexture();
 	ncTexture(const char *pFilename);
 	ncTexture(const char *pFilename, int iWidth, int iHeight);
@@ -67,6 +55,19 @@ public:
 	static void Unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
 
 	inline static eObjectType sType() { return TEXTURE_TYPE; }
+
+ private:
+	GLuint m_uGLId;
+	int m_iWidth;
+	int m_iHeight;
+	int m_iMipMapLevels;
+	bool m_bCompressed;
+	bool m_bAlphaChannel;
+
+	// Loads a texture based on information from the texture format and loader
+	void Load(const ncITextureLoader& texLoader);
+	// Loads a texture overriding the size detected by the texture loader
+	void Load(const ncITextureLoader& texLoader, int iWidth, int iHeight);
 };
 
 #endif

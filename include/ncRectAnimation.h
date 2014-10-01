@@ -7,29 +7,8 @@
 /// The class containing data for a rectangles based animation
 class ncRectAnimation
 {
-private:
-	/// The rectangles array
-	ncArray<ncRect> m_vRects;
-	/// Current frame
-	unsigned int m_uCurrentFrame;
-	/// The time until the next frame change
-	float m_fFrameTime;
-	/// Elapsed time since the last frame change
-	float m_fElapsedFrameTime;
-	/// The flag about the frame advance direction
-	bool m_bGoingForward;
-	/// The looping flag
-	bool m_bLooping;
-	/// The ping-pong loop flag
-	bool m_bBackward;
-	/// The pause flag
-	bool m_bPaused;
-
-public:
-	ncRectAnimation(float fFrameTime, bool bLooping, bool bBackward)
-		: m_vRects(4), m_uCurrentFrame(0), m_fFrameTime(fFrameTime), m_fElapsedFrameTime(0.0f),
-		  m_bGoingForward(true), m_bLooping(bLooping), m_bBackward(bBackward), m_bPaused(false)
-	{ }
+ public:
+	ncRectAnimation(float fFrameTime, bool bLooping, bool bBackward);
 
 	/// Returns current frame
 	inline unsigned int Frame() const { return m_uCurrentFrame; }
@@ -56,6 +35,24 @@ public:
 	inline void SetPaused(bool bPaused) { m_bPaused = bPaused; }
 	// Pause on a specified frame
 	void Pause(unsigned int uFrameNum);
+
+ private:
+	/// The rectangles array
+	ncArray<ncRect> m_vRects;
+	/// Current frame
+	unsigned int m_uCurrentFrame;
+	/// The time until the next frame change
+	float m_fFrameTime;
+	/// Elapsed time since the last frame change
+	float m_fElapsedFrameTime;
+	/// The flag about the frame advance direction
+	bool m_bGoingForward;
+	/// The looping flag
+	bool m_bLooping;
+	/// The ping-pong loop flag
+	bool m_bBackward;
+	/// The pause flag
+	bool m_bPaused;
 };
 
 #endif

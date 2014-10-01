@@ -11,36 +11,9 @@
 /// Thread class
 class ncThread
 {
-private:
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
-	HANDLE	m_handle;
-#else
-	pthread_t m_tid;
-#endif
-
+ public:
 	typedef void (*ncThreadFunctionPtr_t)(void *);
 
-	/// The structure wrapping the information for thread creation
-	struct ncThreadInfo
-	{
-		ncThreadInfo() : m_pStartFunction(NULL), m_pThreadArg(NULL) { }
-		ncThreadFunctionPtr_t m_pStartFunction;
-		void *m_pThreadArg;
-	};
-
-	ncThreadInfo m_threadInfo;
-	// The wrapper start function for thread creation
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
-	#ifdef __GNUC__ // MinGW
-		static unsigned int (__attribute__((__stdcall__)) WrapperFunction)(void *pArg);
-	#else // MSVC
-		static unsigned int __stdcall WrapperFunction(void *pArg);
-	#endif
-#else
-	static void *WrapperFunction(void *pArg);
-#endif
-
-public:
 	// A default constructor for a class without the associated function
 	ncThread();
 	// Creates a thread around a function and runs it
@@ -65,6 +38,33 @@ public:
 #ifndef __ANDROID__
 	// Asks the thread for termination
 	void Cancel();
+#endif
+
+ private:
+#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+	HANDLE	m_handle;
+#else
+	pthread_t m_tid;
+#endif
+
+	/// The structure wrapping the information for thread creation
+	struct ncThreadInfo
+	{
+		ncThreadInfo() : m_pStartFunction(NULL), m_pThreadArg(NULL) { }
+		ncThreadFunctionPtr_t m_pStartFunction;
+		void *m_pThreadArg;
+	};
+
+	ncThreadInfo m_threadInfo;
+	// The wrapper start function for thread creation
+#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+	#ifdef __GNUC__ // MinGW
+		static unsigned int (__attribute__((__stdcall__)) WrapperFunction)(void *pArg);
+	#else // MSVC
+		static unsigned int __stdcall WrapperFunction(void *pArg);
+	#endif
+#else
+	static void *WrapperFunction(void *pArg);
 #endif
 };
 

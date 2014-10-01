@@ -7,7 +7,16 @@
 /// Information about SDL mouse state
 class ncSDLMouseState : public ncMouseState
 {
-private:
+ public:
+	ncSDLMouseState() : m_ubButtons(0) { }
+
+	inline bool isLeftButtonDown() const { return (m_ubButtons & LEFT_BUTTON); }
+	inline bool isMiddleButtonDown() const { return (m_ubButtons & MIDDLE_BUTTON); }
+	inline bool isRightButtonDown() const { return (m_ubButtons & RIGHT_BUTTON); }
+	inline bool isWheelUpButtonDown() const { return (m_ubButtons & WHEELUP_BUTTON); }
+	inline bool isWheelDownButtonDown() const { return (m_ubButtons & WHEELDOWN_BUTTON); }
+
+ private:
 	// Extracted from SDL/SDL_mouse.h
 	enum eMouseButtonMask {
 		LEFT_BUTTON   = 1,
@@ -18,14 +27,6 @@ private:
 	};
 
 	unsigned char m_ubButtons;
-public:
-	ncSDLMouseState() : m_ubButtons(0) { }
-
-	inline bool isLeftButtonDown() const { return (m_ubButtons & LEFT_BUTTON); }
-	inline bool isMiddleButtonDown() const { return (m_ubButtons & MIDDLE_BUTTON); }
-	inline bool isRightButtonDown() const { return (m_ubButtons & RIGHT_BUTTON); }
-	inline bool isWheelUpButtonDown() const { return (m_ubButtons & WHEELUP_BUTTON); }
-	inline bool isWheelDownButtonDown() const { return (m_ubButtons & WHEELDOWN_BUTTON); }
 
 	friend class ncSDLInputManager;
 };
@@ -33,7 +34,16 @@ public:
 /// Information about an SDL mouse event
 class ncSDLMouseEvent : public ncMouseEvent
 {
-private:
+ public:
+	ncSDLMouseEvent() : m_ubButton(0) { }
+
+	inline bool isLeftButton() const { return m_ubButton == LEFT_BUTTON; }
+	inline bool isMiddleButton() const { return m_ubButton == MIDDLE_BUTTON; }
+	inline bool isRightButton() const { return m_ubButton == RIGHT_BUTTON; }
+	inline bool isWheelUpButton() const { return m_ubButton == WHEELUP_BUTTON; }
+	inline bool isWheelDownButton() const { return m_ubButton == WHEELDOWN_BUTTON; }
+
+ private:
 	// Extracted from SDL/SDL_mouse.h
 	enum eMouseButtonIndex {
 		LEFT_BUTTON = 1,
@@ -44,14 +54,6 @@ private:
 	};
 
 	unsigned char m_ubButton;
-public:
-	ncSDLMouseEvent() : m_ubButton(0) { }
-
-	inline bool isLeftButton() const { return m_ubButton == LEFT_BUTTON; }
-	inline bool isMiddleButton() const { return m_ubButton == MIDDLE_BUTTON; }
-	inline bool isRightButton() const { return m_ubButton == RIGHT_BUTTON; }
-	inline bool isWheelUpButton() const { return m_ubButton == WHEELUP_BUTTON; }
-	inline bool isWheelDownButton() const { return m_ubButton == WHEELDOWN_BUTTON; }
 
 	friend class ncSDLInputManager;
 };
@@ -59,32 +61,21 @@ public:
 /// Information about SDL keyboard state
 class ncSDLKeyboardState : public ncKeyboardState
 {
-private:
-	unsigned char* m_ubKeyState;
-public:
+ public:
 	ncSDLKeyboardState() { m_ubKeyState = SDL_GetKeyState(NULL); }
 
 	inline bool isKeyDown(ncKeySym key) const { return m_ubKeyState[key]; }
 
 	friend class ncSDLInputManager;
+
+ private:
+	unsigned char* m_ubKeyState;
 };
 
 /// The class for parsing and dispatching SDL input events
 class ncSDLInputManager : public ncIInputManager
 {
-private:
-	static ncSDLMouseState s_mouseState;
-	static ncSDLMouseEvent s_mouseEvent;
-	static ncSDLKeyboardState s_keyboardState;
-	static ncKeyboardEvent	s_keyboardEvent;
-
-	static const unsigned int s_uMaxNumJoysticks = 16;
-	static SDL_Joystick* s_pJoysticks[s_uMaxNumJoysticks];
-	static ncJoyButtonEvent s_joyButtonEvent;
-	static ncJoyAxisEvent s_joyAxisEvent;
-
-	static short int HatEnumToAxisValue(unsigned char ubHatState, bool bUpDownAxis);
-public:
+ public:
 	// The constructor takes care of opening available joysticks
 	ncSDLInputManager();
 	// The destructor releases every opened joystick
@@ -98,10 +89,7 @@ public:
 		return s_mouseState;
 	}
 
-	inline const ncKeyboardState& KeyboardState() const
-	{
-		return s_keyboardState;
-	}
+	inline const ncKeyboardState& KeyboardState() const	{ return s_keyboardState; }
 
 	bool isJoyPresent(int iJoyId) const;
 	const char* JoyName(int iJoyId) const;
@@ -110,6 +98,19 @@ public:
 	bool isJoyButtonPressed(int iJoyId, int iButtonId) const;
 	short int JoyAxisValue(int iJoyId, int iAxisId) const;
 	float JoyAxisNormValue(int iJoyId, int iAxisId) const;
+
+ private:
+	static ncSDLMouseState s_mouseState;
+	static ncSDLMouseEvent s_mouseEvent;
+	static ncSDLKeyboardState s_keyboardState;
+	static ncKeyboardEvent	s_keyboardEvent;
+
+	static const unsigned int s_uMaxNumJoysticks = 16;
+	static SDL_Joystick* s_pJoysticks[s_uMaxNumJoysticks];
+	static ncJoyButtonEvent s_joyButtonEvent;
+	static ncJoyAxisEvent s_joyAxisEvent;
+
+	static short int HatEnumToAxisValue(unsigned char ubHatState, bool bUpDownAxis);
 };
 
 #endif

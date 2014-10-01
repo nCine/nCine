@@ -13,21 +13,7 @@
 /// The GLFW based graphics device
 class ncGLFWGfxDevice : public ncIGfxDevice
 {
-private:
-	/// GLFW3 window handle
-	static GLFWwindow *s_pWindowHandle;
-
-	// Initilizes the class
-	void Init(int iWidth, int iHeight, ncDisplayMode mode, bool bIsWindowed);
-	// Initilizes the video subsystem (GLFW)
-	void InitGraphics();
-	// Initilizes the OpenGL graphic context
-	void InitDevice();
-
-	// Callback for glfwSetErrorCallback()
-	static void ErrorCallback(int error, const char* description);
-
-public:
+ public:
 	// Constructor taking the resolution as two integer
 	ncGLFWGfxDevice(int iWidth, int iHeight);
 	// Constructor taking the resolution as a size class
@@ -49,6 +35,20 @@ public:
 
 	/// Returns the window handle used by GLFW3
 	static GLFWwindow* WindowHandle() { return s_pWindowHandle; }
+
+ private:
+	/// GLFW3 window handle
+	static GLFWwindow *s_pWindowHandle;
+
+	// Initilizes the class
+	void Init(int iWidth, int iHeight, ncDisplayMode mode, bool bIsWindowed);
+	// Initilizes the video subsystem (GLFW)
+	void InitGraphics();
+	// Initilizes the OpenGL graphic context
+	void InitDevice();
+
+	// Callback for glfwSetErrorCallback()
+	static void ErrorCallback(int error, const char* description);
 };
 
 #endif

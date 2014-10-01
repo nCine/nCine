@@ -6,26 +6,7 @@
 /// Display properties
 class ncDisplayMode
 {
-private:
-	/// Red component bits
-	unsigned int m_uRedBits;
-	/// Green component bits
-	unsigned int m_uGreenBits;
-	/// Blue component bits
-	unsigned int m_uBlueBits;
-	/// Alpha component bits
-	unsigned int m_uAlphaBits;
-	/// Frame buffer bits
-	unsigned int m_uBufferBits;
-	/// Depth buffer size in bit
-	unsigned int m_uDepthBits;
-	/// Stencil buffer size in bit
-	unsigned int m_uStencilBits;
-	/// Double buffering flag
-	bool m_bIsDoubleBuffered;
-	/// VSync flag
-	bool m_bIsVSynced;
-public:
+ public:
 	// Constructor with no parameters
 	ncDisplayMode()
 		: m_uRedBits(0), m_uGreenBits(0), m_uBlueBits(0), m_uAlphaBits(0), m_uBufferBits(0),
@@ -70,6 +51,26 @@ public:
 	inline bool isDoubleBuffered() const { return m_bIsDoubleBuffered; }
 	/// Returns true if the dislpay has V-sync enabled
 	inline bool isVSynced() const { return m_bIsVSynced; }
+
+ private:
+	/// Red component bits
+	unsigned int m_uRedBits;
+	/// Green component bits
+	unsigned int m_uGreenBits;
+	/// Blue component bits
+	unsigned int m_uBlueBits;
+	/// Alpha component bits
+	unsigned int m_uAlphaBits;
+	/// Frame buffer bits
+	unsigned int m_uBufferBits;
+	/// Depth buffer size in bit
+	unsigned int m_uDepthBits;
+	/// Stencil buffer size in bit
+	unsigned int m_uStencilBits;
+	/// Double buffering flag
+	bool m_bIsDoubleBuffered;
+	/// VSync flag
+	bool m_bIsVSynced;
 };
 
 #endif

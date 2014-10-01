@@ -12,19 +12,19 @@
 /// Ogg Vorbis audio loader
 class ncAudioLoaderOgg : public ncIAudioLoader
 {
-private:
-	/// Vorbisfile handle
-	mutable OggVorbis_File m_oggFile;
-
-	void Init();
-
-public:
+ public:
 	ncAudioLoaderOgg(const char *pFilename);
 	ncAudioLoaderOgg(ncIFile *pFileHandle);
 	~ncAudioLoaderOgg();
 
 	long Read(char *pBuffer, int iBufSize) const;
 	void Rewind() const;
+
+ private:
+	/// Vorbisfile handle
+	mutable OggVorbis_File m_oggFile;
+
+	void Init();
 };
 
 #endif

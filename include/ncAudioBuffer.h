@@ -14,17 +14,7 @@ class ncIAudioLoader;
 /*! It is a ncObject because a buffer can be shared by more than one ncAudioBufferPlayer  */
 class ncAudioBuffer : public ncObject
 {
-private:
-	/// The OpenAL buffer id
-	ALuint m_uALId;
-	/// Number of channels
-	int m_iChannels;
-	/// Samples frequency
-	int m_iFrequency;
-
-	// Loads audio samples based on information from the audio loader
-	void Load(const ncIAudioLoader *pAudioLoader);
-public:
+ public:
 	ncAudioBuffer();
 	// A constructor creating a buffer from a file
 	ncAudioBuffer(const char *pFilename);
@@ -38,6 +28,17 @@ public:
 	inline int Frequency() const { return m_iFrequency; }
 
 	inline static eObjectType sType() { return AUDIOBUFFER_TYPE; }
+
+ private:
+	/// The OpenAL buffer id
+	ALuint m_uALId;
+	/// Number of channels
+	int m_iChannels;
+	/// Samples frequency
+	int m_iFrequency;
+
+	// Loads audio samples based on information from the audio loader
+	void Load(const ncIAudioLoader *pAudioLoader);
 };
 
 #endif

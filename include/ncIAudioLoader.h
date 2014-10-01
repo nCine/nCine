@@ -6,29 +6,7 @@
 /// Audio loader class
 class ncIAudioLoader
 {
-protected:
-	/// Audio file handle
-	ncIFile *m_pFileHandle;
-
-	/// Number of bytes per sample
-	int m_iBytesPerSample;
-	/// Number of channels
-	int m_iChannels;
-	/// Samples frequency
-	int m_iFrequency;
-
-	/// Number of samples
-	unsigned long int m_ulNumSamples;
-	/// Duration in seconds
-	float m_fDuration;
-
-	ncIAudioLoader(const char *pFilename);
-	ncIAudioLoader(ncIFile *pFileHandle);
-
-	/// Load the audio parameters from file
-	virtual void Init() = 0;
-
-public:
+ public:
 	virtual ~ncIAudioLoader();
 
 	/// Decodes audio data in a specified buffer
@@ -56,6 +34,28 @@ public:
 
 	// Returns the proper audio loader according to the file extension
 	static ncIAudioLoader* CreateFromFile(const char *pFilename);
+
+ protected:
+	/// Audio file handle
+	ncIFile *m_pFileHandle;
+
+	/// Number of bytes per sample
+	int m_iBytesPerSample;
+	/// Number of channels
+	int m_iChannels;
+	/// Samples frequency
+	int m_iFrequency;
+
+	/// Number of samples
+	unsigned long int m_ulNumSamples;
+	/// Duration in seconds
+	float m_fDuration;
+
+	ncIAudioLoader(const char *pFilename);
+	ncIAudioLoader(ncIFile *pFileHandle);
+
+	/// Load the audio parameters from file
+	virtual void Init() = 0;
 };
 
 #endif

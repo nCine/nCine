@@ -10,7 +10,7 @@ class ncGLFWInputManager;
 /// Information about GLFW mouse state
 class ncGLFWMouseState : public ncMouseState
 {
-public:
+ public:
 	ncGLFWMouseState() { }
 
 	inline bool isLeftButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::WindowHandle(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS); }
@@ -23,9 +23,7 @@ public:
 /// Information about a GLFW mouse event
 class ncGLFWMouseEvent : public ncMouseEvent
 {
-private:
-	int m_iButton;
-public:
+ public:
 	ncGLFWMouseEvent() : m_iButton(0) { }
 
 	inline bool isLeftButton() const { return m_iButton == GLFW_MOUSE_BUTTON_LEFT; }
@@ -34,13 +32,16 @@ public:
 	inline bool isWheelUpButton() const { return m_iButton == GLFW_MOUSE_BUTTON_4; }
 	inline bool isWheelDownButton() const { return m_iButton == GLFW_MOUSE_BUTTON_5; }
 
+ private:
+	int m_iButton;
+
 	friend class ncGLFWInputManager;
 };
 
 /// Information about GLFW keyboard state
 class ncGLFWKeyboardState : public ncKeyboardState
 {
-public:
+ public:
 	ncGLFWKeyboardState() { }
 	inline bool isKeyDown(ncKeySym key) const { return glfwGetKey(ncGLFWGfxDevice::WindowHandle(), key) == GLFW_PRESS; }
 };
@@ -48,15 +49,16 @@ public:
 /// Information about GLFW joystick state
 class ncGLFWJoystickState
 {
-private:
+ public:
+	ncGLFWJoystickState()
+		: m_iNumButtons(0), m_iNumAxes(0), m_ubButtons(NULL), m_fAxisValues(NULL) { }
+
+ private:
 	int m_iNumButtons;
 	int m_iNumAxes;
 
 	const unsigned char *m_ubButtons;
 	const float *m_fAxisValues;
-public:
-	ncGLFWJoystickState()
-		: m_iNumButtons(0), m_iNumAxes(0), m_ubButtons(NULL), m_fAxisValues(NULL) { }
 
 	friend class ncGLFWInputManager;
 };
@@ -64,21 +66,7 @@ public:
 /// The class for parsing and dispatching GLFW input events
 class ncGLFWInputManager : public ncIInputManager
 {
-private:
-	static const unsigned int s_uMaxNumJoysticks = GLFW_JOYSTICK_LAST - GLFW_JOYSTICK_1 + 1;
-
-	static bool m_bWindowHasFocus;
-	static ncGLFWMouseState s_mouseState;
-	static ncGLFWMouseEvent s_mouseEvent;
-	static ncGLFWKeyboardState s_keyboardState;
-	static ncKeyboardEvent	s_keyboardEvent;
-	static ncGLFWJoystickState s_joystickStates[s_uMaxNumJoysticks];
-
-	static void WindowCloseCallback(GLFWwindow *window);
-	static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
-	static void CursorPosCallback(GLFWwindow *window, double x, double y);
-	static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
-public:
+ public:
 	ncGLFWInputManager();
 
 	// Detects window focus gain/loss events
@@ -106,6 +94,21 @@ public:
 	bool isJoyButtonPressed(int iJoyId, int iButtonId) const;
 	short int JoyAxisValue(int iJoyId, int iAxisId) const;
 	float JoyAxisNormValue(int iJoyId, int iAxisId) const;
+
+ private:
+	static const unsigned int s_uMaxNumJoysticks = GLFW_JOYSTICK_LAST - GLFW_JOYSTICK_1 + 1;
+
+	static bool m_bWindowHasFocus;
+	static ncGLFWMouseState s_mouseState;
+	static ncGLFWMouseEvent s_mouseEvent;
+	static ncGLFWKeyboardState s_keyboardState;
+	static ncKeyboardEvent	s_keyboardEvent;
+	static ncGLFWJoystickState s_joystickStates[s_uMaxNumJoysticks];
+
+	static void WindowCloseCallback(GLFWwindow *window);
+	static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+	static void CursorPosCallback(GLFWwindow *window, double x, double y);
+	static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
 };
 
 #endif

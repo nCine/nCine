@@ -1,6 +1,17 @@
 #include "ncRectAnimation.h"
 
 ///////////////////////////////////////////////////////////
+// CONSTRUCTORS and DESTRUCTOR
+///////////////////////////////////////////////////////////
+
+ncRectAnimation::ncRectAnimation(float fFrameTime, bool bLooping, bool bBackward)
+	: m_vRects(4), m_uCurrentFrame(0), m_fFrameTime(fFrameTime), m_fElapsedFrameTime(0.0f),
+	  m_bGoingForward(true), m_bLooping(bLooping), m_bBackward(bBackward), m_bPaused(false)
+{
+
+}
+
+///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 

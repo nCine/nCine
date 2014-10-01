@@ -11,7 +11,18 @@
 /// Audio stream class
 class ncAudioStream
 {
-private:
+ public:
+	virtual ~ncAudioStream();
+
+	// Enqueues new buffers and unqueues processed ones
+	bool Enqueue(ALuint uSource, bool bLooping);
+	// Unqueues any left buffer and rewinds the loader
+	void Stop(ALuint uSource);
+
+	/// Returns samples frequency
+	inline int Frequency() const { return m_iFrequency; }
+
+ private:
 	/// Number of buffers for streaming
 	static const int s_iNumBuffers = 3;
 	/// OpenAL buffer queue for streaming
@@ -36,16 +47,6 @@ private:
 
 	/// Preventing construction by copy
 	ncAudioStream(const ncAudioStream& rOther);
-public:
-	virtual ~ncAudioStream();
-
-	// Enqueues new buffers and unqueues processed ones
-	bool Enqueue(ALuint uSource, bool bLooping);
-	// Unqueues any left buffer and rewinds the loader
-	void Stop(ALuint uSource);
-
-	/// Returns samples frequency
-	inline int Frequency() const { return m_iFrequency; }
 
 	friend class ncAudioStreamPlayer;
 };

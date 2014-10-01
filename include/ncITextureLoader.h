@@ -21,33 +21,7 @@
 /// Texture loader interface
 class ncITextureLoader
 {
-protected:
-	/// Texture file handle
-	ncIFile *m_pFileHandle;
-
-	int m_iWidth;
-	int m_iHeight;
-	int m_iBpp;
-	int m_iHeaderSize;
-	long m_lDataSize;
-	int m_iMipMapCount;
-	long *m_lMipDataOffsets;
-	long *m_lMipDataSizes;
-	ncTextureFormat m_texFormat;
-	GLubyte* m_uPixels;
-
-	ncITextureLoader(const char *pFilename);
-	ncITextureLoader(ncIFile *pFileHandle);
-
-	// Loads pixel data from a texture file holding either compressed or uncompressed data
-	void LoadPixels(GLenum eInternalFormat);
-	// Loads pixel data from a texture file holding either compressed or uncompressed data, overriding pixel type
-	void LoadPixels(GLenum eInternalFormat, GLenum eType);
-
-	/// Load the texture data from file
-	virtual void Init() = 0;
-
-public:
+ public:
 	virtual ~ncITextureLoader();
 
 	/// Returns texture width
@@ -73,6 +47,32 @@ public:
 
 	// Returns the proper texture loader according to the file extension
 	static ncITextureLoader* CreateFromFile(const char *pFilename);
+
+ protected:
+	/// Texture file handle
+	ncIFile *m_pFileHandle;
+
+	int m_iWidth;
+	int m_iHeight;
+	int m_iBpp;
+	int m_iHeaderSize;
+	long m_lDataSize;
+	int m_iMipMapCount;
+	long *m_lMipDataOffsets;
+	long *m_lMipDataSizes;
+	ncTextureFormat m_texFormat;
+	GLubyte* m_uPixels;
+
+	ncITextureLoader(const char *pFilename);
+	ncITextureLoader(ncIFile *pFileHandle);
+
+	// Loads pixel data from a texture file holding either compressed or uncompressed data
+	void LoadPixels(GLenum eInternalFormat);
+	// Loads pixel data from a texture file holding either compressed or uncompressed data, overriding pixel type
+	void LoadPixels(GLenum eInternalFormat, GLenum eType);
+
+	/// Load the texture data from file
+	virtual void Init() = 0;
 };
 
 #endif

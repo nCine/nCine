@@ -11,7 +11,7 @@ class ncFontGlyph;
 /// A scene node to draw a text label
 class ncTextNode : public ncDrawableNode
 {
-public:
+ public:
 	/// Maximum length for a string to be rendered
 	static const unsigned int s_uMaxStringLength = 256;
 
@@ -21,7 +21,34 @@ public:
 		ALIGN_RIGHT
 	};
 
-private:
+	ncTextNode(ncSceneNode* pParent, ncFont *pFont);
+	virtual ~ncTextNode() { }
+
+	// Returns rendered text width
+	float Width() const;
+	// Returns rendered text height
+	float Height() const;
+	/// Is kerning enabled for this node rendering?
+	inline bool withKerning() const { return m_bWithKerning; }
+	// Sets the kerning flag for this node rendering
+	void EnableKerning(bool bWithKerning);
+	/// Gets the horizontal text alignment
+	inline eAlignment Alignment() const { return m_alignment; }
+	// Sets the horizontal text alignment
+	void SetAlignment(eAlignment alignment);
+
+	/// Gets the font base scaled by the scale factor
+	inline float FontBase() const { return m_pFont->Base() * CurrentAbsScale(); }
+	/// Gets the font line height scaled by the scale factor
+	inline float FontLineHeight() const { return m_pFont->LineHeight() * CurrentAbsScale(); }
+	// Sets the string to render
+	void SetString(const char *pString);
+
+	virtual void Draw(ncRenderQueue& rRenderQueue);
+
+	inline static eObjectType sType() { return TEXT_TYPE; }
+
+ private:
 	/// The string to be rendered
 	char m_vString[s_uMaxStringLength];
 	/// Dirty flag for vertices and texture coordinates
@@ -60,33 +87,6 @@ private:
 	void ProcessGlyph(const ncFontGlyph* pGlyph);
 
 	virtual void UpdateRenderCommand();
-public:
-	ncTextNode(ncSceneNode* pParent, ncFont *pFont);
-	virtual ~ncTextNode() { }
-
-	// Returns rendered text width
-	float Width() const;
-	// Returns rendered text height
-	float Height() const;
-	/// Is kerning enabled for this node rendering?
-	inline bool withKerning() const { return m_bWithKerning; }
-	// Sets the kerning flag for this node rendering
-	void EnableKerning(bool bWithKerning);
-	/// Gets the horizontal text alignment
-	inline eAlignment Alignment() const { return m_alignment; }
-	// Sets the horizontal text alignment
-	void SetAlignment(eAlignment alignment);
-
-	/// Gets the font base scaled by the scale factor
-	inline float FontBase() const { return m_pFont->Base() * CurrentAbsScale(); }
-	/// Gets the font line height scaled by the scale factor
-	inline float FontLineHeight() const { return m_pFont->LineHeight() * CurrentAbsScale(); }
-	// Sets the string to render
-	void SetString(const char *pString);
-
-	virtual void Draw(ncRenderQueue& rRenderQueue);
-
-	inline static eObjectType sType() { return TEXT_TYPE; }
 };
 
 #endif

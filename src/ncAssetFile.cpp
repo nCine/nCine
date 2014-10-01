@@ -31,6 +31,12 @@ ncAssetFile::ncAssetFile(const char *pFilename)
 	}
 }
 
+ncAssetFile::~ncAssetFile()
+{
+	if (m_bShouldCloseOnExit)
+		Close();
+}
+
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////

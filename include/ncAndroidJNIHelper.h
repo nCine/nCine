@@ -8,10 +8,10 @@
 /// The class for calling the Java Android API via JNI
 class ncAndroidJNIHelper
 {
-public:
+ public:
 	inline static unsigned int SDKVersion() { return s_uSDKVersion; }
 
-private:
+ private:
 	static JavaVM *s_pJVM;
 	static JNIEnv *s_pEnv;
 
@@ -26,11 +26,7 @@ private:
 
 class ncAndroidJNIClass
 {
-protected:
-	static JNIEnv *s_pEnv;
-	jobject m_javaObject;
-
-public:
+ public:
 	ncAndroidJNIClass() :  m_javaObject(NULL) { }
 	ncAndroidJNIClass(jobject javaObject) : m_javaObject(javaObject) { }
 	virtual ~ncAndroidJNIClass()
@@ -40,18 +36,22 @@ public:
 	}
 	bool isNull() const { return m_javaObject == NULL; }
 
+ protected:
+	static JNIEnv *s_pEnv;
+	jobject m_javaObject;
+
 	friend class ncAndroidJNIHelper;
 };
 
 class ncAndroidJNIClass_Version : public ncAndroidJNIClass
 {
-private:
-	static jclass s_javaClass;
-	static jfieldID s_fidSDKINT;
-
-public:
+ public:
 	static void Init();
 	static int SDK_INT();
+
+ private:
+	static jclass s_javaClass;
+	static jfieldID s_fidSDKINT;
 };
 
 class ncAndroidJNIClass_MotionRange : public ncAndroidJNIClass
@@ -65,16 +65,7 @@ public:
 
 class ncAndroidJNIClass_InputDevice : public ncAndroidJNIClass
 {
-private:
-	static jclass s_javaClass;
-	static jmethodID s_midGetDevice;
-	static jmethodID s_midGetDeviceIds;
-	static jmethodID s_midGetName;
-	static jmethodID s_midGetMotionRange;
-	static jmethodID s_midGetSources;
-	static jmethodID s_midHasKeys;
-
-public:
+ public:
 	static void Init();
 	ncAndroidJNIClass_InputDevice(jobject javaObject)
 		: ncAndroidJNIClass(javaObject) { }
@@ -84,19 +75,28 @@ public:
 	ncAndroidJNIClass_MotionRange getMotionRange(int iAxis);
 	int getSources();
 	void hasKeys(int *vButtons, const int iLength, bool *vBools);
+
+ private:
+	static jclass s_javaClass;
+	static jmethodID s_midGetDevice;
+	static jmethodID s_midGetDeviceIds;
+	static jmethodID s_midGetName;
+	static jmethodID s_midGetMotionRange;
+	static jmethodID s_midGetSources;
+	static jmethodID s_midHasKeys;
 };
 
 class ncAndroidJNIClass_KeyCharacterMap : public ncAndroidJNIClass
 {
-private:
-	static jclass s_javaClass;
-	static jmethodID s_midDeviceHasKey;
-
-public:
+ public:
 	static void Init();
 	ncAndroidJNIClass_KeyCharacterMap(jobject javaObject)
 		: ncAndroidJNIClass(javaObject) { }
 	static bool deviceHasKey(int iButton);
+
+ private:
+	static jclass s_javaClass;
+	static jmethodID s_midDeviceHasKey;
 };
 
 #endif

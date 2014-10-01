@@ -6,18 +6,18 @@
 /// A class to plot a variable as a histogram
 class ncStackedBarVariable : public ncPlottingVariable
 {
-private:
+ public:
+	ncStackedBarVariable(unsigned int uNumValues, float fRejectDelay);
+
+ private:
 	virtual void UpdateRenderCommand();
 	virtual void UpdateMeanRenderCommand();
-
-public:
-	ncStackedBarVariable(unsigned int uNumValues, float fRejectDelay);
 };
 
 /// A class that plots variables as stacked histograms
 class ncStackedBarPlotter : public ncProfilePlotter
 {
-public:
+ public:
 	ncStackedBarPlotter(ncSceneNode* pParent, ncRect rect) : ncProfilePlotter(pParent, rect) { }
 
 	virtual unsigned int AddVariable(unsigned int uNumValues, float fRejectDelay);

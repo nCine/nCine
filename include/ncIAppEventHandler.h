@@ -4,7 +4,7 @@
 /// The interface class for handling application events (i.e. the game)
 class ncIAppEventHandler
 {
-public:
+ public:
 	virtual ~ncIAppEventHandler() { }
 
 	/// Called once on application init

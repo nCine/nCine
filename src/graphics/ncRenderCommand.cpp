@@ -3,6 +3,34 @@
 #include "ncServiceLocator.h"
 
 ///////////////////////////////////////////////////////////
+// CONSTRUCTORS and DESTRUCTOR
+///////////////////////////////////////////////////////////
+
+ncRenderGeometry::ncRenderGeometry(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords)
+	: m_eDrawType(eDrawType),
+	  m_iFirstVertex(iFirstVertex), m_iNumVertices(iNumVertices),
+	  m_fVertices(fVertices), m_fTexCoords(fTexCoords), m_ubColors(NULL)
+{
+
+}
+
+ncRenderGeometry::ncRenderGeometry(GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords)
+	: m_eDrawType(GL_TRIANGLES),
+	  m_iFirstVertex(0), m_iNumVertices(iNumVertices),
+	  m_fVertices(fVertices), m_fTexCoords(fTexCoords), m_ubColors(NULL)
+{
+
+}
+
+ncRenderGeometry::ncRenderGeometry()
+	: m_eDrawType(GL_TRIANGLES),
+	  m_iFirstVertex(0), m_iNumVertices(0),
+	  m_fVertices(NULL), m_fTexCoords(NULL), m_ubColors(NULL)
+{
+
+}
+
+///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 

@@ -7,20 +7,7 @@
 /// It represents the interface to the graphics device where everything is rendered
 class ncIGfxDevice
 {
-protected:
-	/// Device width
-	int m_iWidth;
-	/// Device height
-	int m_iHeight;
-	/// Display properties
-	ncDisplayMode m_mode;
-	/// Device rendering occurs inside a window
-	bool m_bIsWindowed;
-
-	// Initilizes starting OpenGL state
-	virtual void InitGL();
-
-public:
+ public:
 	virtual ~ncIGfxDevice() = 0;
 
 	/// Sets screen resolution with two integers
@@ -49,6 +36,19 @@ public:
 	inline bool isWindowed() const { return m_bIsWindowed; }
 	/// Returns display mode
 	inline const ncDisplayMode& Mode() const { return m_mode; }
+
+ protected:
+	/// Device width
+	int m_iWidth;
+	/// Device height
+	int m_iHeight;
+	/// Display properties
+	ncDisplayMode m_mode;
+	/// Device rendering occurs inside a window
+	bool m_bIsWindowed;
+
+	// Initilizes starting OpenGL state
+	virtual void InitGL();
 };
 
 inline ncIGfxDevice::~ncIGfxDevice() { }

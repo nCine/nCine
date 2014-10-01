@@ -10,18 +10,19 @@ template <class T> class ncList; // forward declaration
 template <class T>
 class ncListNode
 {
-private:
-	 ncListNode(const T& data, ncListNode *pPrevious, ncListNode *pNext)
-		 : m_data(data), m_pPrevious(pPrevious), m_pNext(pNext) { }
-
-	 friend class ncList<T>;
-public:
+ public:
 	/// Data payload for the node
 	T m_data;
 	/// A pointer to the previous node in the list
 	ncListNode *m_pPrevious;
 	/// A pointer to the next node in the list
 	ncListNode *m_pNext;
+
+ private:
+	 ncListNode(const T& data, ncListNode *pPrevious, ncListNode *pNext)
+		 : m_data(data), m_pPrevious(pPrevious), m_pNext(pNext) { }
+
+	 friend class ncList<T>;
 };
 
 
@@ -29,26 +30,7 @@ public:
 template <class T>
 class ncList
 {
-private:
-	/// Pointer to the first node in the list
-	ncListNode<T> *m_pHead;
-	/// Pointer to the last node in the list
-	ncListNode<T> *m_pTail;
-
-	/// Private copy constructor (preventing copy at the moment)
-	ncList(const ncList&);
-	/// Private assignment operator (preventing copy at the moment)
-	ncList& operator=(const ncList&);
-
-	// Inserts a new element after a specified node
-	void InsertAfter(ncListNode<T> *pNode, const T& element);
-	// Inserts a new element before a specified node
-	void InsertBefore(ncListNode<T> *pNode, const T& element);
-	// Removes a specified node in constant time
-	void Remove(ncListNode<T> *pNode);
-
-	friend class ncListIterator<T>;
-public:
+ public:
 	ncList() : m_pHead(NULL), m_pTail(NULL) { }
 	~ncList() { Clear(); }
 
@@ -92,6 +74,26 @@ public:
 	T RemoveFront();
 	// Removes the last element in constant time
 	T RemoveBack();
+
+ private:
+	/// Pointer to the first node in the list
+	ncListNode<T> *m_pHead;
+	/// Pointer to the last node in the list
+	ncListNode<T> *m_pTail;
+
+	/// Private copy constructor (preventing copy at the moment)
+	ncList(const ncList&);
+	/// Private assignment operator (preventing copy at the moment)
+	ncList& operator=(const ncList&);
+
+	// Inserts a new element after a specified node
+	void InsertAfter(ncListNode<T> *pNode, const T& element);
+	// Inserts a new element before a specified node
+	void InsertBefore(ncListNode<T> *pNode, const T& element);
+	// Removes a specified node in constant time
+	void Remove(ncListNode<T> *pNode);
+
+	friend class ncListIterator<T>;
 };
 
 /// Clears the list

@@ -7,7 +7,12 @@
 /// ETC1 texture loader
 class ncTextureLoaderETC : public ncITextureLoader
 {
-private:
+ public:
+	ncTextureLoaderETC(const char *pFilename);
+	ncTextureLoaderETC(ncIFile *pFileHandle);
+	~ncTextureLoaderETC() { }
+
+ private:
 	/// Structure for ETC1 magic number
 	typedef struct ETC1_magic {
 		char cMagicId[6];
@@ -26,11 +31,6 @@ private:
 	} ETC1_header;
 
 	void Init();
-
-public:
-	ncTextureLoaderETC(const char *pFilename);
-	ncTextureLoaderETC(ncIFile *pFileHandle);
-	~ncTextureLoaderETC() { }
 };
 
 #endif

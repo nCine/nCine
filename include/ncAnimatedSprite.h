@@ -7,17 +7,11 @@
 /// A class for an animated sprite
 class ncAnimatedSprite : public ncSprite
 {
-private:
-	ncArray<ncRectAnimation *> m_vAnims;
-	int m_iCurrentAnim;
-
-	void Init();
-
-public:
-	ncAnimatedSprite(ncSceneNode* pParent, ncTexture *pTexture) : ncSprite(pParent, pTexture), m_vAnims(4), m_iCurrentAnim(-1) { }
-	ncAnimatedSprite(ncTexture *pTexture) : ncSprite(pTexture), m_vAnims(4), m_iCurrentAnim(-1) { }
-	ncAnimatedSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY) : ncSprite(pParent, pTexture, iX, iY), m_vAnims(4), m_iCurrentAnim(-1) { }
-	ncAnimatedSprite(ncTexture *pTexture, int iX, int iY) : ncSprite(pTexture, iX, iY), m_vAnims(4), m_iCurrentAnim(-1) { }
+ public:
+	ncAnimatedSprite(ncSceneNode* pParent, ncTexture *pTexture);
+	ncAnimatedSprite(ncTexture *pTexture);
+	ncAnimatedSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY);
+	ncAnimatedSprite(ncTexture *pTexture, int iX, int iY);
 	virtual ~ncAnimatedSprite();
 
 	/// Returns true if the current animation is paused
@@ -35,6 +29,12 @@ public:
 	inline void SetFrame(int iFrameNum) { m_vAnims[m_iCurrentAnim]->SetFrame(iFrameNum); }
 
 	inline static eObjectType sType() { return ANIMATEDSPRITE_TYPE; }
+
+private:
+	ncArray<ncRectAnimation *> m_vAnims;
+	int m_iCurrentAnim;
+
+	void Init();
 };
 
 #endif

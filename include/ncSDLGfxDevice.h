@@ -10,15 +10,7 @@
 /// The SDL based graphics device
 class ncSDLGfxDevice : public ncIGfxDevice
 {
-private:
-	// Initilizes the class
-	void Init(int iWidth, int iHeight, ncDisplayMode mode, bool bIsWindowed);
-	// Initilizes the video subsystem (SDL)
-	void InitGraphics();
-	// Initilizes the OpenGL graphic context
-	void InitDevice();
-
-public:
+ public:
 	// Constructor taking the resolution as two integer
 	ncSDLGfxDevice(int iWidth, int iHeight);
 	// Constructor taking the resolution as a size class
@@ -37,6 +29,14 @@ public:
 	inline void Update() { SDL_GL_SwapBuffers(); }
 
 	inline void SetWindowTitle(const char *pWindowTitle) { SDL_WM_SetCaption(pWindowTitle, NULL); }
+
+ private:
+	// Initilizes the class
+	void Init(int iWidth, int iHeight, ncDisplayMode mode, bool bIsWindowed);
+	// Initilizes the video subsystem (SDL)
+	void InitGraphics();
+	// Initilizes the OpenGL graphic context
+	void InitDevice();
 };
 
 #endif

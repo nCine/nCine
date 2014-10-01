@@ -4,30 +4,7 @@
 /// A class to query and store OpenGL device runtime capabilities
 class ncGfxCapabilities
 {
-private:
-	int m_iGLMajor;
-	int m_iGLMinor;
-#ifndef __ANDROID__
-	int m_iGLRelease;
-#endif
-
-	int m_iMaxTextureSize;
-	int m_iMaxTextureUnits;
-
-#ifndef __ANDROID__
-	bool m_bEXTTextureCompressionS3TC;
-#else
-	bool m_bOESCompressedETC1RGB8Texture;
-	bool m_bAMDCompressedATCTexture;
-	bool m_bIMGTextureCompressionPVRTC;
-#endif
-
-	// Queries the device about its capabilities
-	void Init();
-
-	friend class ncIGfxDevice;
-
-public:
+ public:
 	/// Default constructor
 	ncGfxCapabilities();
 	~ncGfxCapabilities() { }
@@ -67,6 +44,29 @@ public:
 	/// Returns true if the extension GL_IMG_texture_compression_pvrtc is available
 	inline bool IMGTextureCompressionPVRTC() const { return m_bIMGTextureCompressionPVRTC; }
 #endif
+
+ private:
+	int m_iGLMajor;
+	int m_iGLMinor;
+#ifndef __ANDROID__
+	int m_iGLRelease;
+#endif
+
+	int m_iMaxTextureSize;
+	int m_iMaxTextureUnits;
+
+#ifndef __ANDROID__
+	bool m_bEXTTextureCompressionS3TC;
+#else
+	bool m_bOESCompressedETC1RGB8Texture;
+	bool m_bAMDCompressedATCTexture;
+	bool m_bIMGTextureCompressionPVRTC;
+#endif
+
+	// Queries the device about its capabilities
+	void Init();
+
+	friend class ncIGfxDevice;
 };
 
 #endif

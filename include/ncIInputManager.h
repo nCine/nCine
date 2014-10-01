@@ -14,7 +14,7 @@ class ncIInputEventHandler;
 #ifdef __ANDROID__
 class ncTouchEvent
 {
-public:
+ public:
 	ncTouchEvent() : count(0), id(0), id2(1), x(0.0f), y(0.0f), x2(0.0f), y2(0.0f) { }
 
 	int count;
@@ -24,7 +24,7 @@ public:
 
 class ncAccelerometerEvent
 {
-public:
+ public:
 	ncAccelerometerEvent(): x(0.0f), y(0.0f), z(0.0f) { }
 
 	float x, y, z;
@@ -33,7 +33,7 @@ public:
 /// Information about mouse state
 class ncMouseState
 {
-public:
+ public:
 	/// Pointer position on the X axis
 	int x;
 	/// Pointer position on the Y axis
@@ -49,7 +49,7 @@ public:
 /// Information about a mouse event
 class ncMouseEvent
 {
-public:
+ public:
 	/// Pointer position on the X axis
 	int x;
 	/// Pointer position on the Y axis
@@ -65,7 +65,7 @@ public:
 /// Information about keyboard state
 class ncKeyboardState
 {
-public:
+ public:
 	ncKeyboardState() { }
 
 	virtual bool isKeyDown(ncKeySym key) const = 0;
@@ -75,7 +75,7 @@ public:
 /// Information about a keyboard event
 class ncKeyboardEvent
 {
-public:
+ public:
 	ncKeyboardEvent() : scancode(0), sym(NCKEY_UNKNOWN), mod(0), unicode(0) { }
 
 	/// Key scan code
@@ -91,7 +91,7 @@ public:
 /// Information about a joystick axis event
 class ncJoyAxisEvent
 {
-public:
+ public:
 	int joyId;
 	int axisId;
 	short int value;
@@ -101,7 +101,7 @@ public:
 /// Information about a joystick button event
 class ncJoyButtonEvent
 {
-public:
+ public:
 	int joyId;
 	int buttonId;
 };
@@ -109,11 +109,7 @@ public:
 /// The interface class for parsing and dispatching input events
 class ncIInputManager
 {
-protected:
-	static ncIInputEventHandler *s_pInputEventHandler;
-	ncIInputManager() { }
-
-public:
+ public:
 	virtual ~ncIInputManager() { }
 
 	static inline void SetHandler(ncIInputEventHandler *pInputEventHandler)
@@ -141,6 +137,10 @@ public:
 	virtual short int JoyAxisValue(int iJoyId, int iAxisId) const = 0;
 	/// Returns a normalized value between -1 and 1 for a joystick axis
 	virtual float JoyAxisNormValue(int iJoyId, int iAxisId) const = 0;
+
+ protected:
+	static ncIInputEventHandler *s_pInputEventHandler;
+	ncIInputManager() { }
 };
 
 #endif

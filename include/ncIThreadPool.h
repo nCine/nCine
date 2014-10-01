@@ -6,7 +6,7 @@ class ncIThreadCommand;
 /// It represents the interface to a thread pool
 class ncIThreadPool
 {
-public:
+ public:
 	virtual ~ncIThreadPool() = 0;
 
 	/// Enqueues a command request for a worker thread
@@ -23,7 +23,7 @@ inline ncIThreadPool::~ncIThreadPool() { }
 /// A fake thread pool which doesn't create any thread
 class ncNullThreadPool : public ncIThreadPool
 {
-public:
+ public:
 	virtual void EnqueueCommand(ncIThreadCommand *pThreadCommand) { }
 };
 

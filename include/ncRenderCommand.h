@@ -22,14 +22,7 @@
 /// The class wrapping rendering material data
 class ncRenderMaterial
 {
-private:
-	ncColor m_color;
-	GLuint m_uTextureGLId;
-	/// Flag to skip opaque check based on material color
-	/** This is useful when using color arrays, like for sprite batches */
-	bool m_bAlwaysTransparent;
-
-public:
+ public:
 	ncRenderMaterial(GLubyte ubColor[4], GLuint uTextureGLId)
 		: m_uTextureGLId(uTextureGLId), m_bAlwaysTransparent(false)
 	{
@@ -40,17 +33,12 @@ public:
 	ncRenderMaterial() : m_uTextureGLId(0), m_bAlwaysTransparent(false) { }
 
 	/// Sets the material color
-	inline void SetColor(const ncColor &rColor)
-	{
-		m_color = rColor;
-	}
-
+	inline void SetColor(const ncColor &rColor)	{ m_color = rColor;	}
 	/// Sets the material color in unsigned bytes components
 	inline void SetColor(GLubyte ubR, GLubyte ubG, GLubyte ubB, GLubyte ubA)
 	{
 		m_color.Set(ubR, ubG, ubB, ubA);
 	}
-
 	/// Sets the material color through an array
 	inline void SetColor(GLubyte ubColor[4])
 	{
@@ -62,7 +50,6 @@ public:
 	{
 		m_color.SetF(fR, fG, fB, fA);
 	}
-
 	/// Sets the material color through an array
 	inline void SetColorF(GLfloat fColor[4])
 	{
@@ -81,19 +68,19 @@ public:
 
 	// Binds the material state
 	void Bind() const;
+
+ private:
+	ncColor m_color;
+	GLuint m_uTextureGLId;
+	/// Flag to skip opaque check based on material color
+	/** This is useful when using color arrays, like for sprite batches */
+	bool m_bAlwaysTransparent;
 };
 
 /// The class wrapping geometric transformation
 class ncRenderTransformation
 {
-private:
-	float m_fX;
-	float m_fY;
-	float m_fScaleX;
-	float m_fScaleY;
-	float m_fRotation;
-
-public:
+ public:
 	ncRenderTransformation() : m_fX(0.0f), m_fY(0.0f), m_fScaleX(1.0f), m_fScaleY(1.0f), m_fRotation(0.0f) { }
 
 	ncRenderTransformation(float fX, float fY)
@@ -116,43 +103,25 @@ public:
 
 	// Applies the transformation
 	void Apply() const;
+
+ private:
+	float m_fX;
+	float m_fY;
+	float m_fScaleX;
+	float m_fScaleY;
+	float m_fRotation;
 };
 
 /// The class wrapping vertices data
 class ncRenderGeometry
 {
-protected:
-	GLenum m_eDrawType;
-	GLint m_iFirstVertex;
-	GLsizei m_iNumVertices;
-	GLfloat *m_fVertices;
-	GLfloat *m_fTexCoords;
-	GLubyte *m_ubColors;
+ public:
+	ncRenderGeometry(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords);
+	ncRenderGeometry(GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords);
+	ncRenderGeometry();
 
-public:
-	ncRenderGeometry(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords)
-		: m_eDrawType(eDrawType),
-		  m_iFirstVertex(iFirstVertex), m_iNumVertices(iNumVertices),
-		  m_fVertices(fVertices), m_fTexCoords(fTexCoords), m_ubColors(NULL) { }
-	ncRenderGeometry(GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords)
-		: m_eDrawType(GL_TRIANGLES),
-		  m_iFirstVertex(0), m_iNumVertices(iNumVertices),
-		  m_fVertices(fVertices), m_fTexCoords(fTexCoords), m_ubColors(NULL) { }
-	ncRenderGeometry()
-		: m_eDrawType(GL_TRIANGLES),
-		  m_iFirstVertex(0), m_iNumVertices(0),
-		  m_fVertices(NULL), m_fTexCoords(NULL), m_ubColors(NULL) { }
-
-	/// Sets the geometric data
-	void SetData(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords, GLubyte *ubColors)
-	{
-		m_eDrawType = eDrawType;
-		m_iFirstVertex = iFirstVertex;
-		m_iNumVertices = iNumVertices;
-		m_fVertices = fVertices;
-		m_fTexCoords = fTexCoords;
-		m_ubColors = ubColors;
-	}
+	// Sets the geometric data
+	void SetData(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords, GLubyte *ubColors);
 
 	/// Returns the drawing type (GL_TRIANGLE, GL_LINES, ...)
 	inline GLenum DrawType() const { return m_eDrawType; }
@@ -169,7 +138,26 @@ public:
 
 	// Draws the geometry
 	void Draw() const;
+
+ protected:
+	GLenum m_eDrawType;
+	GLint m_iFirstVertex;
+	GLsizei m_iNumVertices;
+	GLfloat *m_fVertices;
+	GLfloat *m_fTexCoords;
+	GLubyte *m_ubColors;
 };
+
+/// Sets the geometric data
+inline void ncRenderGeometry::SetData(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords, GLubyte *ubColors)
+{
+	m_eDrawType = eDrawType;
+	m_iFirstVertex = iFirstVertex;
+	m_iNumVertices = iNumVertices;
+	m_fVertices = fVertices;
+	m_fTexCoords = fTexCoords;
+	m_ubColors = ubColors;
+}
 
 /// The class wrapping all the information needed for issuing a draw command
 class ncRenderCommand
@@ -186,18 +174,6 @@ public:
 		TYPE_COUNT
 	};
 
-private:
-	unsigned long int m_uSortKey;
-//	bool m_bDirtyKey;
-
-	unsigned int m_iPriority;
-	ncRenderMaterial m_material;
-	ncRenderTransformation m_transformation;
-	ncRenderGeometry m_geometry;
-
-	/// Command type for profiling counter
-	eCommandType m_eProfilingType;
-public:
 	ncRenderCommand() : m_uSortKey(0), m_iPriority(0), m_eProfilingType(GENERIC_TYPE) { }
 
 	/// Returns the rendering priority
@@ -228,6 +204,18 @@ public:
 	inline eCommandType Type() const { return m_eProfilingType; }
 	/// Sets the command type (profiling purpose)
 	inline void SetType(eCommandType eType) { m_eProfilingType = eType; }
+
+ private:
+	unsigned long int m_uSortKey;
+//	bool m_bDirtyKey;
+
+	unsigned int m_iPriority;
+	ncRenderMaterial m_material;
+	ncRenderTransformation m_transformation;
+	ncRenderGeometry m_geometry;
+
+	/// Command type for profiling counter
+	eCommandType m_eProfilingType;
 };
 
 #endif

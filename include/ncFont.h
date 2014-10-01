@@ -7,7 +7,28 @@
 /// A class holding every information needed to correctly render text
 class ncFont
 {
-private:
+ public:
+	// Constructs a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)
+	ncFont(const char* pTexFilename, const char *pFntFilename);
+	virtual ~ncFont() { delete m_pTexture; }
+
+	/// Gets the texture object
+	inline const ncTexture* Texture() const { return m_pTexture; }
+	/// Sets the texture object
+	inline void SetTexture(ncTexture *pTexture) { m_pTexture = pTexture; }
+
+	/// Returns font line height
+	inline unsigned short LineHeight() const { return m_uLineHeight; }
+	/// Returns font base
+	inline unsigned short Base() const { return m_uBase; }
+	/// Returns texture atlas size
+	inline ncPoint TexSize() const { return ncPoint(m_uWidth, m_uHeight); }
+	/// Returns number of glyphs
+	inline unsigned short NumGlyphs() const { return m_uNumGlyphs; }
+	/// Reurns a constant pointer to a glyph
+	const ncFontGlyph* Glyph(unsigned int uGlyphId) const;
+
+ private:
 	/// The font texture
 	ncTexture *m_pTexture;
 	/// Font line height
@@ -33,35 +54,15 @@ private:
 
 	/// Preventing construction by copy
 	ncFont(const ncFont& rOther);
-public:
-	// Constructs a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)
-	ncFont(const char* pTexFilename, const char *pFntFilename);
-	virtual ~ncFont() { delete m_pTexture; }
-
-	/// Gets the texture object
-	inline const ncTexture* Texture() const { return m_pTexture; }
-	/// Sets the texture object
-	inline void SetTexture(ncTexture *pTexture) { m_pTexture = pTexture; }
-
-	/// Returns font line height
-	inline unsigned short LineHeight() const { return m_uLineHeight; }
-	/// Returns font base
-	inline unsigned short Base() const { return m_uBase; }
-	/// Returns texture atlas size
-	inline ncPoint TexSize() const
-	{
-		return ncPoint(m_uWidth, m_uHeight);
-	}
-	/// Returns number of glyphs
-	inline unsigned short NumGlyphs() const { return m_uNumGlyphs; }
-	/// Returns a constant pointer to a glyph
-	inline const ncFontGlyph* Glyph(unsigned int uGlyphId) const
-	{
-		if (uGlyphId < s_uMaxGlyphs)
-			return &m_vGlyphs[uGlyphId];
-		else
-			return NULL;
-	}
 };
+
+/// Returns a constant pointer to a glyph
+inline const ncFontGlyph* ncFont::Glyph(unsigned int uGlyphId) const
+{
+	if (uGlyphId < s_uMaxGlyphs)
+		return &m_vGlyphs[uGlyphId];
+	else
+		return NULL;
+}
 
 #endif

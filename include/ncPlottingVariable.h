@@ -10,27 +10,6 @@
 /// A class to group and wrap all the information needed to plot a variable
 class ncPlottingVariable
 {
-protected:
-	/// Mean drawing flag
-	bool m_bPlotMean;
-	/// Graph color
-	ncColor m_graphColor;
-	/// Mean line color
-	ncColor m_meanColor;
-	/// The variable to be plotted
-	ncProfileVariable m_variable;
-	/// The vertices buffer
-	float *m_fVertices;
-
-	/// The command used to render variable values
-	ncRenderCommand m_valuesCmd;
-	/// The command used to render the variable mean
-	ncRenderCommand m_meanCmd;
-	/// Updates the values rendering command
-	virtual void UpdateRenderCommand() = 0;
-	/// Updates the mean rendering command
-	virtual void UpdateMeanRenderCommand() = 0;
-
 public:
 	ncPlottingVariable(unsigned int uNumValues, float fRejectDelay);
 	virtual ~ncPlottingVariable();
@@ -74,6 +53,27 @@ public:
 		UpdateMeanRenderCommand();
 		rRenderQueue.AddCommand(&m_meanCmd);
 	}
+
+ protected:
+	/// Mean drawing flag
+	bool m_bPlotMean;
+	/// Graph color
+	ncColor m_graphColor;
+	/// Mean line color
+	ncColor m_meanColor;
+	/// The variable to be plotted
+	ncProfileVariable m_variable;
+	/// The vertices buffer
+	float *m_fVertices;
+
+	/// The command used to render variable values
+	ncRenderCommand m_valuesCmd;
+	/// The command used to render the variable mean
+	ncRenderCommand m_meanCmd;
+	/// Updates the values rendering command
+	virtual void UpdateRenderCommand() = 0;
+	/// Updates the mean rendering command
+	virtual void UpdateMeanRenderCommand() = 0;
 };
 
 #endif

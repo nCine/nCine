@@ -27,8 +27,25 @@
 	unsigned long long int ncTimer::s_ullBaseCount = 0LL;
 
 ///////////////////////////////////////////////////////////
+// CONSTRUCTORS and DESTRUCTOR
+///////////////////////////////////////////////////////////
+
+/// Empty constructor
+ncTimer::ncTimer()
+	: m_ullStartTime(0LL)
+{
+
+}
+
+///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+/// Returns elapsed time in seconds since base time
+float ncTimer::Now()
+{
+	return float(Counter() - s_ullBaseCount) / s_ulFrequency;
+}
 
 /// Puts the current thread to sleep for the specified number of seconds
 void ncTimer::Sleep(float fS)

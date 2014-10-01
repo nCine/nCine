@@ -4,6 +4,30 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+ncAnimatedSprite::ncAnimatedSprite(ncSceneNode* pParent, ncTexture *pTexture)
+	: ncSprite(pParent, pTexture), m_vAnims(4), m_iCurrentAnim(-1)
+{
+
+}
+
+ncAnimatedSprite::ncAnimatedSprite(ncTexture *pTexture)
+	: ncSprite(pTexture), m_vAnims(4), m_iCurrentAnim(-1)
+{
+
+}
+
+ncAnimatedSprite::ncAnimatedSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY)
+	: ncSprite(pParent, pTexture, iX, iY), m_vAnims(4), m_iCurrentAnim(-1)
+{
+
+}
+
+ncAnimatedSprite::ncAnimatedSprite(ncTexture *pTexture, int iX, int iY)
+	: ncSprite(pTexture, iX, iY), m_vAnims(4), m_iCurrentAnim(-1)
+{
+
+}
+
 ncAnimatedSprite::~ncAnimatedSprite()
 {
 	for (unsigned int i = 0; i < m_vAnims.Size(); i++)

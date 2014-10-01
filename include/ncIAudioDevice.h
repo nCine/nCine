@@ -6,7 +6,7 @@ class ncIAudioPlayer;
 /// It represents the interface to the audio device
 class ncIAudioDevice
 {
-public:
+ public:
 	virtual ~ncIAudioDevice() = 0;
 	/// Returns the listener gain value
 	virtual float Gain() = 0;
@@ -44,7 +44,7 @@ inline ncIAudioDevice::~ncIAudioDevice() { }
 /// A fake audio device which doesn't play anything
 class ncNullAudioDevice : public ncIAudioDevice
 {
-public:
+ public:
 	virtual float Gain() { return 1.0f; }
 	virtual void SetGain(float fGain) { }
 

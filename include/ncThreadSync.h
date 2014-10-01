@@ -11,19 +11,20 @@
 /// Mutex class (threads synchronization)
 class ncMutex
 {
-private:
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
-	CRITICAL_SECTION m_handle;
-#else
-	pthread_mutex_t m_mutex;
-#endif
-public:
+ public:
 	ncMutex();
 	~ncMutex();
 
 	void Lock();
 	void Unlock();
 	int TryLock();
+
+ private:
+#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+	CRITICAL_SECTION m_handle;
+#else
+	pthread_mutex_t m_mutex;
+#endif
 
 	friend class ncCondVariable;
 };
@@ -33,7 +34,15 @@ public:
  * More info at http://www.cs.wustl.edu/~schmidt/win32-cv-1.html */
 class ncCondVariable
 {
-private:
+ public:
+	ncCondVariable();
+	~ncCondVariable();
+
+	void Wait(ncMutex &rMutex);
+	void Signal();
+	void Broadcast();
+
+ private:
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
 	HANDLE m_events[2];
 	unsigned int m_uWaitersCount;
@@ -43,13 +52,6 @@ private:
 #else
 	pthread_cond_t m_cond;
 #endif
-public:
-	ncCondVariable();
-	~ncCondVariable();
-
-	void Wait(ncMutex &rMutex);
-	void Signal();
-	void Broadcast();
 };
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(__WINDOWS__)
@@ -57,17 +59,18 @@ public:
 /// Read/write lock class (threads synchronization)
 class ncRWLock
 {
-private:
-	pthread_rwlock_t m_rwlock;
-public:
-	ncRWLock() { pthread_rwlock_init(&m_rwlock, NULL); }
-	~ncRWLock() { pthread_rwlock_destroy(&m_rwlock); }
+ public:
+	ncRWLock();
+	~ncRWLock();
 
-	void ReadLock() { pthread_rwlock_rdlock(&m_rwlock); }
-	void WriteLock() { pthread_rwlock_wrlock(&m_rwlock); }
-	int TryReadLock() { return pthread_rwlock_tryrdlock(&m_rwlock); }
-	int TryWriteLock() { return pthread_rwlock_trywrlock(&m_rwlock); }
-	void Unlock() { pthread_rwlock_unlock(&m_rwlock); }
+	inline void ReadLock() { pthread_rwlock_rdlock(&m_rwlock); }
+	inline void WriteLock() { pthread_rwlock_wrlock(&m_rwlock); }
+	inline int TryReadLock() { return pthread_rwlock_tryrdlock(&m_rwlock); }
+	inline int TryWriteLock() { return pthread_rwlock_trywrlock(&m_rwlock); }
+	inline void Unlock() { pthread_rwlock_unlock(&m_rwlock); }
+
+ private:
+	pthread_rwlock_t m_rwlock;
 };
 
 #if !defined (__ANDROID__) && !defined(__APPLE__)
@@ -75,16 +78,17 @@ public:
 /// Barrier class (threads synchronization)
 class ncBarrier
 {
-private:
-
-	pthread_barrier_t m_barrier;
-public:
-	/// Creates a barrier for the specified amount of waiting threads
-	ncBarrier(unsigned int uCount) { pthread_barrier_init(&m_barrier, NULL, uCount); }
-	~ncBarrier() { pthread_barrier_destroy(&m_barrier); }
+ public:
+	// Creates a barrier for the specified amount of waiting threads
+	ncBarrier(unsigned int uCount);
+	~ncBarrier();
 
 	/// The calling thread waits at the barrier
-	int Wait() { return pthread_barrier_wait(&m_barrier); }
+	inline int Wait() { return pthread_barrier_wait(&m_barrier); }
+
+ private:
+	pthread_barrier_t m_barrier;
+
 };
 
 #endif

@@ -11,7 +11,7 @@
 /*! It has memory ownership on service classes */
 class ncServiceLocator
 {
-public:
+ public:
 	/// Returns a pointer to the current indexer provider instance
 	static ncIIndexer& Indexer() { return *m_pIndexerService; }
 	/// Registers an indexer service provider
@@ -41,7 +41,7 @@ public:
 	// Deletes every registered service reestablishing null ones
 	static void UnregisterAll();
 
-private:
+ private:
 	static ncIIndexer* m_pIndexerService;
 	static ncNullIndexer m_nullIndexer;
 

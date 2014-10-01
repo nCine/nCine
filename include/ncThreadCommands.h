@@ -7,7 +7,7 @@
 /// Thread pool command interface
 class ncIThreadCommand
 {
-public:
+ public:
 	virtual ~ncIThreadCommand() { }
 
 	virtual void Execute() = 0;
@@ -16,17 +16,19 @@ public:
 /// A dummy thread command for testing
 class ncDummyCommand : public ncIThreadCommand
 {
-private:
-	unsigned int m_uRequestCode;
-
-public:
+ public:
 	ncDummyCommand(unsigned int uRequestCode) : m_uRequestCode(uRequestCode) { }
 
-	inline void Execute()
-	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncDummyCommand::Execute - worker thread %u got request code %u",
-			ncThread::Self(), m_uRequestCode);
-	}
+	void Execute();
+
+ private:
+	unsigned int m_uRequestCode;
 };
+
+inline void ncDummyCommand::Execute()
+{
+	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncDummyCommand::Execute - worker thread %u got request code %u",
+		ncThread::Self(), m_uRequestCode);
+}
 
 #endif

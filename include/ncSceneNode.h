@@ -11,35 +11,7 @@ class ncRenderQueue;
 /// The base class for the transformation nodes hierarchy
 class ncSceneNode : public ncObject
 {
-protected:
-	ncSceneNode* m_pParent;
-	ncList<ncSceneNode *> m_children;
-
-	/// Scale factor for node size
-	float m_fScaleFactor;
-	/// Degrees for clock-wise node rotation
-	float m_fRotation;
-
-	/// Node color for transparency, translucency, etc...
-	/** Even if the base scene node is not always drawable, it carries
-		color information to easily pass that information to its children */
-	ncColor m_color;
-
-	/// Absolute X coordinate as calculated by the Transform() function
-	float m_fAbsX;
-	/// Absolute Y coordinate as calculated by the Transform() function
-	float m_fAbsY;
-	/// Absolute scale factor as calculated by the Transform() function
-	float m_fAbsScaleFactor;
-	/// Absolute node rotation as calculated by the Transform() function
-	float m_fAbsRotation;
-
-	/// Absolute node color as calculated by the Transform() function
-	ncColor m_absColor;
-
-	virtual void Transform();
-
-public:
+ public:
 	/// The minimum amount of rotation to trigger a sine and cosine calculation
 	static const float sMinRotation;
 
@@ -51,33 +23,9 @@ public:
 	bool bShouldUpdate;
 	bool bShouldDraw;
 
-	ncSceneNode(ncSceneNode* pParent, float fX, float fY)
-		: m_pParent(NULL),
-		  m_fScaleFactor(1.0f), m_fRotation(0.0f), m_fAbsX(0.0f), m_fAbsY(0.0f), m_fAbsScaleFactor(1.0f), m_fAbsRotation(0.0f),
-		  x(fX), y(fY), bShouldUpdate(true), bShouldDraw(true)
-	{
-		m_eType = SCENENODE_TYPE;
-
-		if (pParent)
-			pParent->AddChildNode(this);
-	}
-	ncSceneNode(ncSceneNode* pParent)
-		: m_pParent(NULL),
-		  m_fScaleFactor(1.0f), m_fRotation(0.0f), m_fAbsX(0.0f), m_fAbsY(0.0f), m_fAbsScaleFactor(1.0f), m_fAbsRotation(0.0f),
-		  x(0.0f), y(0.0f), bShouldUpdate(true), bShouldDraw(true)
-	{
-		m_eType = SCENENODE_TYPE;
-
-		if (pParent)
-			pParent->AddChildNode(this);
-	}
-	ncSceneNode()
-		: ncObject(), m_pParent(NULL),
-		  m_fScaleFactor(1.0f), m_fRotation(0.0f), m_fAbsX(0.0f), m_fAbsY(0.0f), m_fAbsScaleFactor(1.0f), m_fAbsRotation(0.0f),
-		  x(0.0f), y(0.0f), bShouldUpdate(true), bShouldDraw(true)
-	{
-		m_eType = SCENENODE_TYPE;
-	}
+	ncSceneNode(ncSceneNode* pParent, float fX, float fY);
+	ncSceneNode(ncSceneNode* pParent);
+	ncSceneNode();
 	virtual ~ncSceneNode();
 
 	inline static eObjectType sType() { return SCENENODE_TYPE; }
@@ -124,16 +72,8 @@ public:
 	inline float Rotation() const { return m_fRotation; }
 	/// Gets the node absolute rotation in degrees
 	inline float AbsRotation() const { return m_fAbsRotation; }
-	/// Sets the node rotation in degrees
-	inline void SetRotation(float fRotation)
-	{
-		while (fRotation > 360.0f)
-			fRotation -= 360.0f;
-		while (fRotation < -360.0f)
-			fRotation += 360.0f;
-
-		m_fRotation = fRotation;
-	}
+	// Sets the node rotation in degrees
+	void SetRotation(float fRotation);
 
 	/// Gets the node color
 	inline ncColor Color() const { return m_color; }
@@ -149,6 +89,45 @@ public:
 	inline void SetAlpha(unsigned char ubA) { m_color.SetAlpha(ubA); }
 	/// Sets the node alpha through a float component
 	inline void SetAlphaF(float fA) { m_color.SetAlphaF(fA); }
+
+protected:
+	ncSceneNode* m_pParent;
+	ncList<ncSceneNode *> m_children;
+
+	/// Scale factor for node size
+	float m_fScaleFactor;
+	/// Degrees for clock-wise node rotation
+	float m_fRotation;
+
+	/// Node color for transparency, translucency, etc...
+	/** Even if the base scene node is not always drawable, it carries
+		color information to easily pass that information to its children */
+	ncColor m_color;
+
+	/// Absolute X coordinate as calculated by the Transform() function
+	float m_fAbsX;
+	/// Absolute Y coordinate as calculated by the Transform() function
+	float m_fAbsY;
+	/// Absolute scale factor as calculated by the Transform() function
+	float m_fAbsScaleFactor;
+	/// Absolute node rotation as calculated by the Transform() function
+	float m_fAbsRotation;
+
+	/// Absolute node color as calculated by the Transform() function
+	ncColor m_absColor;
+
+	virtual void Transform();
 };
+
+/// Sets the node rotation in degrees
+inline void ncSceneNode::SetRotation(float fRotation)
+{
+	while (fRotation > 360.0f)
+		fRotation -= 360.0f;
+	while (fRotation < -360.0f)
+		fRotation += 360.0f;
+
+	m_fRotation = fRotation;
+}
 
 #endif

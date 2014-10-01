@@ -8,10 +8,7 @@ template <class T> class ncListNode; // forward declaration
 template <class T>
 class ncListIterator
 {
-private:
-	mutable ncListNode<T> *m_pNode;
-
-public:
+ public:
 	ncListIterator(ncListNode<T> *pNode)
 		: m_pNode(pNode) { }
 	ncListIterator(const ncListIterator& iterator)
@@ -36,6 +33,9 @@ public:
 	inline bool operator==(const ncListIterator<T>& iterator) const { return m_pNode == iterator.m_pNode; }
 	/// Inequality operator
 	inline bool operator!=(const ncListIterator<T>& iterator) const { return m_pNode != iterator.m_pNode; }
+
+ private:
+	mutable ncListNode<T> *m_pNode;
 
 	friend class ncList<T>;
 };

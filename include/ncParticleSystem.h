@@ -14,25 +14,7 @@ class ncParticle;
 /// The class representing a particle system
 class ncParticleSystem : public ncDrawableNode
 {
-private:
-	/// The particle pool size
-	unsigned int m_uPoolSize;
-	/// The index of the next free particle in the pool
-	unsigned int m_uPoolTop;
-	/// The pool containing available particles (only dead ones)
-	ncParticle **m_pParticlePool;
-	/// The array containing every particle (dead or alive)
-	ncParticle **m_pParticleList;
-
-	/// The array of particle affectors
-	ncArray<ncParticleAffector *> m_vAffectors;
-
-	/// Should the system simulate in local space?
-	bool m_bLocalSpace;
-
-	virtual void UpdateRenderCommand() { }
-
-public:
+ public:
 	// Constructs a particle system made of the specified maximum amount of particles
 	ncParticleSystem(ncSceneNode* pParent, unsigned int uCount, ncTexture *pTexture, ncRect texRect);
 	~ncParticleSystem();
@@ -51,6 +33,24 @@ public:
 	virtual void Update(float fInterval);
 
 	inline static eObjectType sType() { return PARTICLESYSTEM_TYPE; }
+
+ private:
+	/// The particle pool size
+	unsigned int m_uPoolSize;
+	/// The index of the next free particle in the pool
+	unsigned int m_uPoolTop;
+	/// The pool containing available particles (only dead ones)
+	ncParticle **m_pParticlePool;
+	/// The array containing every particle (dead or alive)
+	ncParticle **m_pParticleList;
+
+	/// The array of particle affectors
+	ncArray<ncParticleAffector *> m_vAffectors;
+
+	/// Should the system simulate in local space?
+	bool m_bLocalSpace;
+
+	virtual void UpdateRenderCommand() { }
 };
 
 /// Returns a random float between x0 and x1

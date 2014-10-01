@@ -7,13 +7,13 @@
 /// WebP texture loader
 class ncTextureLoaderWebP : public ncITextureLoader
 {
-private:
-	void Init();
-
-public:
+ public:
 	ncTextureLoaderWebP(const char *pFilename);
 	ncTextureLoaderWebP(ncIFile *pFileHandle);
 	~ncTextureLoaderWebP() { }
+
+ private:
+	void Init();
 };
 
 #endif

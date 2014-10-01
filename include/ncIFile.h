@@ -8,7 +8,14 @@
 /// The interface dealing with file operations
 class ncIFile
 {
-public:
+ public:
+	/// The enumeration of file types
+	enum eFileType {
+		BASE_TYPE = 0,
+		STANDARD_TYPE,
+		ASSET_TYPE
+	};
+
 	/// The enumeration for the open mode bitmask
 	enum eOpenMode {
 #if !(defined(_WIN32) && !defined(__MINGW32__))
@@ -26,46 +33,6 @@ public:
 		MODE_CAN_WRITE = 4
 	};
 
-protected:
-	/// The enumeration of file types
-	enum eFileType {
-		BASE_TYPE = 0,
-		STANDARD_TYPE,
-		ASSET_TYPE
-	};
-
-	/// File type
-	eFileType m_eType;
-
-	/// Maximum number of characters for a file name (path included)
-	static const unsigned int s_uMaxFilenameLength = 256;
-	/// File name with path
-	char m_vFilename[s_uMaxFilenameLength];
-	/// Maximum number of characters for a file extension, plus '\0'
-	static const unsigned int s_uMaxExtensionsLength = 5;
-	/// File extension
-	char m_vExtension[s_uMaxExtensionsLength];
-
-	/// The path for the application to write files into
-	static char m_vDataPath[s_uMaxFilenameLength];
-
-	/// File descriptor for open() and close()
-	int m_iFileDescriptor;
-	/// File pointer for fopen() and fclose()
-	FILE *m_pFilePointer;
-	/// Should destructor close the file on exit?
-	/*! Useful for ov_open()/ov_fopen() and ov_clear() */
-	bool m_bShouldCloseOnExit;
-
-	/// File size in bytes
-	long int m_lFileSize;
-
-	/// Private copy constructor (preventing copy at the moment)
-	ncIFile(const ncIFile&);
-	/// Private assignment operator (preventing copy at the moment)
-	ncIFile& operator=(const ncIFile&);
-
-public:
 	/// Constructs a base file object
 	/*! \param pFilename File name including its path */
 	ncIFile(const char *pFilename);
@@ -135,6 +102,38 @@ public:
 	static bool Access(const char *pFilename, unsigned char uMode);
 	// Returns the writable directory for data storage
 	static char* DataPath();
+
+ protected:
+	/// File type
+	eFileType m_eType;
+
+	/// Maximum number of characters for a file name (path included)
+	static const unsigned int s_uMaxFilenameLength = 256;
+	/// File name with path
+	char m_vFilename[s_uMaxFilenameLength];
+	/// Maximum number of characters for a file extension, plus '\0'
+	static const unsigned int s_uMaxExtensionsLength = 5;
+	/// File extension
+	char m_vExtension[s_uMaxExtensionsLength];
+
+	/// The path for the application to write files into
+	static char m_vDataPath[s_uMaxFilenameLength];
+
+	/// File descriptor for open() and close()
+	int m_iFileDescriptor;
+	/// File pointer for fopen() and fclose()
+	FILE *m_pFilePointer;
+	/// Should destructor close the file on exit?
+	/*! Useful for ov_open()/ov_fopen() and ov_clear() */
+	bool m_bShouldCloseOnExit;
+
+	/// File size in bytes
+	long int m_lFileSize;
+
+	/// Private copy constructor (preventing copy at the moment)
+	ncIFile(const ncIFile&);
+	/// Private assignment operator (preventing copy at the moment)
+	ncIFile& operator=(const ncIFile&);
 };
 
 #endif

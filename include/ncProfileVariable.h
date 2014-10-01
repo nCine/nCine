@@ -6,22 +6,7 @@
 /// A class to store profiling values to be plotted or saved
 class ncProfileVariable
 {
-private:
-	unsigned int m_uNumValues;
-	float m_fRejectDelay;
-	unsigned int m_uNextIndex;
-
-	float m_fMin;
-	float m_fMax;
-	float m_fMean;
-	bool m_bFirstValue;
-
-	float *m_fValues;
-	ncTimer m_timer;
-
-	/// Preventing construction by copy
-	ncProfileVariable(const ncProfileVariable& rOther);
-public:
+ public:
 	ncProfileVariable(unsigned int uNumValues, float fRejectDelay);
 	~ncProfileVariable();
 
@@ -55,6 +40,22 @@ public:
 	/// Set the delay in seconds for value rejection
 	/** If you try to add a value before the delay, it gets discarded. */
 	inline void SetDelay(float fRejectDelay) { m_fRejectDelay = fRejectDelay; }
+
+ private:
+	unsigned int m_uNumValues;
+	float m_fRejectDelay;
+	unsigned int m_uNextIndex;
+
+	float m_fMin;
+	float m_fMax;
+	float m_fMean;
+	bool m_bFirstValue;
+
+	float *m_fValues;
+	ncTimer m_timer;
+
+	/// Preventing construction by copy
+	ncProfileVariable(const ncProfileVariable& rOther);
 };
 
 #endif
