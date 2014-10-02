@@ -146,7 +146,7 @@ bool ncSceneNode::UnlinkChildNode(ncSceneNode *pChildNode)
 		while (i != pChildNode->m_children.End())
 		{
 			AddChildNode(*i);
-			i++;
+			++i;
 		}
 
 		bUnlinked = true;
@@ -158,7 +158,7 @@ bool ncSceneNode::UnlinkChildNode(ncSceneNode *pChildNode)
 /// Called once every frame to update the node
 void ncSceneNode::Update(float fInterval)
 {
-	for (ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
+	for (ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); ++i)
 	{
 		if ((*i)->bShouldUpdate)
 		{
@@ -179,7 +179,7 @@ void ncSceneNode::Visit(ncRenderQueue &rRenderQueue)
 	Transform();
 	Draw(rRenderQueue);
 
-	for (ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
+	for (ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); ++i)
 	{
 		(*i)->Visit(rRenderQueue);
 	}

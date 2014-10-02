@@ -37,7 +37,7 @@ void ncSpriteBatchNode::Visit(ncRenderQueue& rRenderQueue)
 	m_vColors.Clear();
 
 	// TODO: only the first level of children gets accounted
-	for (ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
+	for (ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); ++i)
 	{
 		if ((*i)->Type() == ncSprite::sType())
 		{

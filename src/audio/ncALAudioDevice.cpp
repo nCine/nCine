@@ -70,7 +70,7 @@ void ncALAudioDevice::SetGain(ALfloat fGain)
 
 void ncALAudioDevice::StopPlayers()
 {
-	for (ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin(); i != m_players.End(); i++)
+	for (ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin(); i != m_players.End(); ++i)
 	{
 		(*i)->Stop();
 	}
@@ -80,7 +80,7 @@ void ncALAudioDevice::StopPlayers()
 
 void ncALAudioDevice::PausePlayers()
 {
-	for (ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin(); i != m_players.End(); i++)
+	for (ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin(); i != m_players.End(); ++i)
 	{
 		(*i)->Pause();
 	}
@@ -117,7 +117,7 @@ void ncALAudioDevice::UpdatePlayers()
 		if ((*i)->isPlaying())
 		{
 			(*i)->UpdateState();
-			i++;
+			++i;
 		}
 		else
 		{
@@ -150,7 +150,7 @@ void ncALAudioDevice::StopOrPauseBufferPlayers(bool bStop)
 		}
 		else
 		{
-			i++;
+			++i;
 		}
 	}
 }

@@ -96,7 +96,7 @@ void ncParticleSystem::Update(float fInterval)
 		return;
 	}
 
-	for (ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); i++)
+	for (ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); ++i)
 	{
 		ncParticle *pParticle = static_cast<ncParticle *>(*i);
 
