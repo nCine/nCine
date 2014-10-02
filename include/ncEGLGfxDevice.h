@@ -30,15 +30,15 @@ class ncEGLGfxDevice : public ncIGfxDevice
 	static bool isModeSupported(struct android_app* state, ncDisplayMode mode);
 
  private:
-	// Initializes the OpenGL graphic context
-	void InitDevice(struct android_app* state);
-
 	/// The EGL display connection
 	EGLDisplay m_display;
 	/// The EGL drawing surface
 	EGLSurface m_surface;
 	/// The EGL context
 	EGLContext m_context;
+
+	// Initializes the OpenGL graphic context
+	void InitDevice(struct android_app* state);
 };
 
 #endif

@@ -5,6 +5,11 @@
 class ncPoint
 {
  public:
+	/// X coordinate as a public property
+	int x;
+	/// Y coordinate as a public property
+	int y;
+
 	/// Default constructor, all zeros
 	ncPoint() : x(0), y(0) { }
 	/// Constructs from elements
@@ -15,11 +20,6 @@ class ncPoint
 
 	// Equality operator
 	bool operator==(const ncPoint& point) const;
-
-	/// X coordinate as a public property
-	int x;
-	/// Y coordinate as a public property
-	int y;
 };
 
 /// Sets point elements

@@ -42,9 +42,6 @@ class ncProfileVariable
 	inline void SetDelay(float fRejectDelay) { m_fRejectDelay = fRejectDelay; }
 
  private:
-	/// Preventing construction by copy
-	ncProfileVariable(const ncProfileVariable& rOther);
-
 	unsigned int m_uNumValues;
 	float m_fRejectDelay;
 	unsigned int m_uNextIndex;
@@ -56,6 +53,9 @@ class ncProfileVariable
 
 	float *m_fValues;
 	ncTimer m_timer;
+
+	/// Preventing construction by copy
+	ncProfileVariable(const ncProfileVariable& rOther);
 };
 
 #endif

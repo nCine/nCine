@@ -25,13 +25,8 @@ class ncDrawableNode : public ncSceneNode
 
 	/// Returns the draw command class for this node
 	inline const ncRenderCommand* Command() const { return &m_renderCmd; }
-	/// Updates the draw command and adds it to the queue
-	virtual void Draw(ncRenderQueue& rRenderQueue)
-	{
-		UpdateRenderCommand();
-//		ApplyTransformations();
-		rRenderQueue.AddCommand(&m_renderCmd);
-	}
+	// Updates the draw command and adds it to the queue
+	virtual void Draw(ncRenderQueue& rRenderQueue);
 
 	// Applies node transformations to vertices
 	void ApplyTransformations();
@@ -42,12 +37,20 @@ class ncDrawableNode : public ncSceneNode
 	inline void SetPriority(int iPriority) { m_renderCmd.SetPriority(iPriority); }
 
  protected:
-	/// Updates the render command
-	virtual void UpdateRenderCommand() = 0;
-
 	/// The render command class associated with this node
 	ncRenderCommand m_renderCmd;
+
+	/// Updates the render command
+	virtual void UpdateRenderCommand() = 0;
 };
+
+/// Updates the draw command and adds it to the queue
+inline void ncDrawableNode::Draw(ncRenderQueue& rRenderQueue)
+{
+	UpdateRenderCommand();
+//		ApplyTransformations();
+	rRenderQueue.AddCommand(&m_renderCmd);
+}
 
 /// Applies node transformations to vertices
 inline void ncDrawableNode::ApplyTransformations()

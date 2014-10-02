@@ -9,6 +9,7 @@ class ncFrameTimer: public ncTimer
  public:
 	// Constructor
 	ncFrameTimer(float fLogInterval, float fAvgInterval);
+
 	// Adds a frame to the counter and calculates the interval since the previous one
 	void AddFrame();
 	/// Returns the interval between two subsequent calls to AddFrame()

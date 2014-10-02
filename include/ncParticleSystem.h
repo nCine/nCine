@@ -34,8 +34,6 @@ class ncParticleSystem : public ncDrawableNode
 	inline static eObjectType sType() { return PARTICLESYSTEM_TYPE; }
 
  private:
-	virtual void UpdateRenderCommand() { }
-
 	/// The particle pool size
 	unsigned int m_uPoolSize;
 	/// The index of the next free particle in the pool
@@ -50,6 +48,8 @@ class ncParticleSystem : public ncDrawableNode
 
 	/// Should the system simulate in local space?
 	bool m_bLocalSpace;
+
+	virtual void UpdateRenderCommand() { }
 };
 
 /// Returns a random float between x0 and x1

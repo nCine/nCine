@@ -69,11 +69,13 @@ nCine is a multi-platform 2d game engine
   - check both GLFW 3 and SDL 1.2 support
 
 ### Coding conventions
+- Indent with tabs (4 spaces wide)
 - Allman brackets
   - Brackets around one line conditional statements
 - Padding space after parenthesis headers (`if`, `do`, `while`, `for`, `switch`)
 - `inline` keyword always before `virtual` and `static`
 - Access specifiers order: `public`, `protected`, `private`
   - Indent access specifiers with one space
-- Declarations order: typedefs and enums, static const data members, constructors, destructors, methods, data members
+- Declarations order: typedefs and enums, data members, constructors, destructors, methods
+  - Friend defined in the private section of a class, after everything else
 - One space padding around operators

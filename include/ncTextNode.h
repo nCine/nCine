@@ -50,17 +50,6 @@ class ncTextNode : public ncDrawableNode
 	inline static eObjectType sType() { return TEXT_TYPE; }
 
  private:
-	// Calculates rectangle boundaries for the rendered text
-	void CalculateBoundaries() const;
-	// Calculates align offset for a particular line
-	float CalculateAlignment(unsigned int uLineIndex) const;
-	// Calculates absolute scale factor on the fly
-	float CurrentAbsScale() const;
-	// Fills the batch draw command with data from a glyph
-	void ProcessGlyph(const ncFontGlyph* pGlyph);
-
-	virtual void UpdateRenderCommand();
-
 	/// The string to be rendered
 	char m_vString[s_uMaxStringLength];
 	/// Dirty flag for vertices and texture coordinates
@@ -88,6 +77,17 @@ class ncTextNode : public ncDrawableNode
 	mutable ncArray<float> m_vLineLengths;
 	/// Horizontal text alignment
 	eAlignment m_alignment;
+
+	// Calculates rectangle boundaries for the rendered text
+	void CalculateBoundaries() const;
+	// Calculates align offset for a particular line
+	float CalculateAlignment(unsigned int uLineIndex) const;
+	// Calculates absolute scale factor on the fly
+	float CurrentAbsScale() const;
+	// Fills the batch draw command with data from a glyph
+	void ProcessGlyph(const ncFontGlyph* pGlyph);
+
+	virtual void UpdateRenderCommand();
 };
 
 #endif

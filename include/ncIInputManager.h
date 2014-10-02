@@ -34,32 +34,32 @@ class ncAccelerometerEvent
 class ncMouseState
 {
  public:
+	/// Pointer position on the X axis
+	int x;
+	/// Pointer position on the Y axis
+	int y;
+
 	virtual bool isLeftButtonDown() const = 0;
 	virtual bool isMiddleButtonDown() const = 0;
 	virtual bool isRightButtonDown() const = 0;
 	virtual bool isWheelUpButtonDown() const = 0;
 	virtual bool isWheelDownButtonDown() const = 0;
-
-	/// Pointer position on the X axis
-	int x;
-	/// Pointer position on the Y axis
-	int y;
 };
 
 /// Information about a mouse event
 class ncMouseEvent
 {
  public:
+	/// Pointer position on the X axis
+	int x;
+	/// Pointer position on the Y axis
+	int y;
+
 	virtual bool isLeftButton() const = 0;
 	virtual bool isMiddleButton() const = 0;
 	virtual bool isRightButton() const = 0;
 	virtual bool isWheelUpButton() const = 0;
 	virtual bool isWheelDownButton() const = 0;
-
-	/// Pointer position on the X axis
-	int x;
-	/// Pointer position on the Y axis
-	int y;
 };
 
 /// Information about keyboard state
@@ -76,8 +76,6 @@ class ncKeyboardState
 class ncKeyboardEvent
 {
  public:
-	ncKeyboardEvent() : scancode(0), sym(NCKEY_UNKNOWN), mod(0), unicode(0) { }
-
 	/// Key scan code
 	int scancode;
 	/// Key symbol code
@@ -86,6 +84,8 @@ class ncKeyboardEvent
 	int mod;
 	/// Unicode character
 	unsigned short int unicode;
+
+	ncKeyboardEvent() : scancode(0), sym(NCKEY_UNKNOWN), mod(0), unicode(0) { }
 };
 
 /// Information about a joystick axis event

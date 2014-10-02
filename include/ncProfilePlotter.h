@@ -50,11 +50,6 @@ class ncProfilePlotter : public ncDrawableNode
 	virtual unsigned int AddVariable(unsigned int uNumValues, float fRejectDelay) = 0;
 
  protected:
-	void SetBackgroundVertices();
-	virtual void UpdateRenderCommand();
-	// Updates the reference value rendering command
-	void UpdateRefValueRenderCommand();
-
 	/// Background width
 	int m_iWidth;
 	/// Background height
@@ -77,6 +72,11 @@ class ncProfilePlotter : public ncDrawableNode
 	float m_fRefValue;
 	/// The command used to render the reference value
 	ncRenderCommand m_refValueCmd;
+
+	void SetBackgroundVertices();
+	virtual void UpdateRenderCommand();
+	// Updates the reference value rendering command
+	void UpdateRefValueRenderCommand();
 };
 
 #endif

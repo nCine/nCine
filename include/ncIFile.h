@@ -107,21 +107,16 @@ class ncIFile
 	static char* DataPath();
 
  protected:
+	/// File type
+	eFileType m_eType;
+
 	/// Maximum number of characters for a file name (path included)
 	static const unsigned int s_uMaxFilenameLength = 256;
-	/// Maximum number of characters for a file extension, plus '\0'
-	static const unsigned int s_uMaxExtensionsLength = 5;
-
-	/// Private copy constructor (preventing copy at the moment)
-	ncIFile(const ncIFile&);
-	/// Private assignment operator (preventing copy at the moment)
-	ncIFile& operator=(const ncIFile&);
-
 	/// File name with path
 	char m_vFilename[s_uMaxFilenameLength];
 
-	/// File type
-	eFileType m_eType;
+	/// Maximum number of characters for a file extension, plus '\0'
+	static const unsigned int s_uMaxExtensionsLength = 5;
 	/// File extension
 	char m_vExtension[s_uMaxExtensionsLength];
 
@@ -138,6 +133,11 @@ class ncIFile
 
 	/// File size in bytes
 	long int m_lFileSize;
+
+	/// Private copy constructor (preventing copy at the moment)
+	ncIFile(const ncIFile&);
+	/// Private assignment operator (preventing copy at the moment)
+	ncIFile& operator=(const ncIFile&);
 };
 
 #endif

@@ -36,11 +36,6 @@ class ncALAudioDevice : public ncIAudioDevice
 	/// Maximum number of OpenAL sources (HACK: should use a query)
 	static const unsigned int s_uMaxSources = 16;
 
-	// Stops or pauses all buffer players
-	void StopOrPauseBufferPlayers(bool bStop);
-	// Stops or pauses all stream players
-	void StopOrPauseStreamPlayers(bool bStop);
-
 	/// The OpenAL device
 	ALCdevice *m_pDevice;
 	/// The OpenAL context for the device
@@ -52,6 +47,11 @@ class ncALAudioDevice : public ncIAudioDevice
 
 	/// A list of active audio players
 	ncList<ncIAudioPlayer *> m_players;
+
+	// Stops or pauses all buffer players
+	void StopOrPauseBufferPlayers(bool bStop);
+	// Stops or pauses all stream players
+	void StopOrPauseStreamPlayers(bool bStop);
 };
 
 #endif

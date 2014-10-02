@@ -49,6 +49,13 @@ class ncThread
 		void *m_pThreadArg;
 	};
 
+#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+	HANDLE	m_handle;
+#else
+	pthread_t m_tid;
+#endif
+
+	ncThreadInfo m_threadInfo;
 	// The wrapper start function for thread creation
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
 	#ifdef __GNUC__ // MinGW
@@ -59,14 +66,6 @@ class ncThread
 #else
 	static void *WrapperFunction(void* pArg);
 #endif
-
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
-	HANDLE	m_handle;
-#else
-	pthread_t m_tid;
-#endif
-
-	ncThreadInfo m_threadInfo;
 };
 
 #endif

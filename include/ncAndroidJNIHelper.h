@@ -12,14 +12,14 @@ class ncAndroidJNIHelper
 	inline static unsigned int SDKVersion() { return s_uSDKVersion; }
 
  private:
-	static void AttachJVM(struct android_app* state);
-	static void DetachJVM();
-	static void InitClasses();
-
 	static JavaVM *s_pJVM;
 	static JNIEnv *s_pEnv;
 
 	static unsigned int s_uSDKVersion;
+
+	static void AttachJVM(struct android_app* state);
+	static void DetachJVM();
+	static void InitClasses();
 
 	friend class ncApplication;
 };

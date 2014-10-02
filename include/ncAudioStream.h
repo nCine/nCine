@@ -25,20 +25,13 @@ class ncAudioStream
  private:
 	/// Number of buffers for streaming
 	static const int s_iNumBuffers = 3;
-	/// Size in bytes of each streaming buffer
-	static const int s_iBufSize = 16 * 1024;
-
-	// Constructor creating an audio stream from an audio file
-	ncAudioStream(const char *pFilename);
-
-	/// Preventing construction by copy
-	ncAudioStream(const ncAudioStream& rOther);
-
 	/// OpenAL buffer queue for streaming
 	ALuint m_uALBuffers[s_iNumBuffers];
 	/// Index of the next available OpenAL buffer
 	int m_iNextAvailALBuffer;
 
+	/// Size in bytes of each streaming buffer
+	static const int s_iBufSize = 16 * 1024;
 	/// Memory buffer to feed OpenAL ones
 	char *m_pBuffer;
 
@@ -48,6 +41,11 @@ class ncAudioStream
 	ALenum m_eFormat;
 	/// The associated loader to continuosly stream decoded data
 	ncIAudioLoader *m_pAudioLoader;
+
+	// Constructor creating an audio stream from an audio file
+	ncAudioStream(const char *pFilename);
+	/// Preventing construction by copy
+	ncAudioStream(const ncAudioStream& rOther);
 
 	friend class ncAudioStreamPlayer;
 };

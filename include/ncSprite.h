@@ -65,12 +65,6 @@ class ncSprite : public ncDrawableNode
 	inline static eObjectType sType() { return SPRITE_TYPE; }
 
  private:
-	void Init();
-	void SetVertices();
-	void SetTexCoords();
-
-	virtual void UpdateRenderCommand();
-
 	/// The sprite texture
 	ncTexture *m_pTexture;
 	/// Used as source rectangle by the sprite batch class
@@ -82,6 +76,12 @@ class ncSprite : public ncDrawableNode
 
 	float m_fVertices[8];
 	float m_fTexCoords[8];
+
+	void Init();
+	void SetVertices();
+	void SetTexCoords();
+
+	virtual void UpdateRenderCommand();
 
 	friend class ncSpriteBatchNode;
 };

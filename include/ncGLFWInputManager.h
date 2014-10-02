@@ -74,18 +74,8 @@ class ncGLFWInputManager : public ncIInputManager
 	// Updates joystick state structures
 	static void UpdateJoystickStates();
 
-	inline const ncMouseState& MouseState()
-	{
-		double dCursorX, dCursorY;
-		glfwGetCursorPos(ncGLFWGfxDevice::WindowHandle(), &dCursorX, &dCursorY);
-		s_mouseState.x = int(dCursorX); s_mouseState.y = int(dCursorY);
-		return s_mouseState;
-	}
-
-	inline const ncKeyboardState& KeyboardState() const
-	{
-		return s_keyboardState;
-	}
+	const ncMouseState& MouseState();
+	inline const ncKeyboardState& KeyboardState() const	{ return s_keyboardState; }
 
 	bool isJoyPresent(int iJoyId) const;
 	const char* JoyName(int iJoyId) const;
@@ -110,5 +100,15 @@ class ncGLFWInputManager : public ncIInputManager
 	static ncKeyboardEvent	s_keyboardEvent;
 	static ncGLFWJoystickState s_joystickStates[s_uMaxNumJoysticks];
 };
+
+inline const ncMouseState& ncGLFWInputManager::MouseState()
+{
+	double dCursorX, dCursorY;
+
+	glfwGetCursorPos(ncGLFWGfxDevice::WindowHandle(), &dCursorX, &dCursorY);
+	s_mouseState.x = int(dCursorX); s_mouseState.y = int(dCursorY);
+
+	return s_mouseState;
+}
 
 #endif

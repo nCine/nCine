@@ -46,9 +46,6 @@ class ncGfxCapabilities
 #endif
 
  private:
-	// Queries the device about its capabilities
-	void Init();
-
 	int m_iGLMajor;
 	int m_iGLMinor;
 #ifndef __ANDROID__
@@ -65,6 +62,9 @@ class ncGfxCapabilities
 	bool m_bAMDCompressedATCTexture;
 	bool m_bIMGTextureCompressionPVRTC;
 #endif
+
+	// Queries the device about its capabilities
+	void Init();
 
 	friend class ncIGfxDevice;
 };

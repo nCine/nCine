@@ -29,9 +29,6 @@ class ncThreadPool : public ncIThreadPool
 		bool bShouldQuit;
 	};
 
-	static void WorkerFunction(void *pArg);
-	void Init();
-
 	ncList<ncIThreadCommand *> m_queue;
 	ncThread *m_pThreads;
 	ncMutex m_queueMutex;
@@ -40,6 +37,9 @@ class ncThreadPool : public ncIThreadPool
 	unsigned int m_uNumThreads;
 
 	ncThreadStruct m_threadStruct;
+	static void WorkerFunction(void *pArg);
+
+	void Init();
 };
 
 #endif

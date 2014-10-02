@@ -21,12 +21,6 @@ class ncTimer
 	unsigned long long int m_ullStartTime;
 
  private:
-	// Initializes the static fields
-	static void Init();
-
-	// Returns current value of the counter
-	static unsigned long long int Counter();
-
 #ifdef _WIN32
 	static bool s_bHasPerfCounter;
 #elif !defined(__APPLE__)
@@ -39,6 +33,12 @@ class ncTimer
 	static unsigned long int s_ulFrequency;
 	/// Counter value at initialization time
 	static unsigned long long int s_ullBaseCount;
+
+	// Initializes the static fields
+	static void Init();
+
+	// Returns current value of the counter
+	static unsigned long long int Counter();
 };
 
 /// Returns now-start time interval in seconds

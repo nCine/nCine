@@ -73,9 +73,6 @@ class ncApplication
 	static void ShowProfileInfo(bool bShouldDraw);
 
  private:
-	ncApplication();
-	~ncApplication();
-
 	static bool m_bPaused;
 	static bool m_bHasFocus;
 	static bool m_bShouldQuit;
@@ -91,6 +88,9 @@ class ncApplication
 	static char m_vTextChars[256];
 	static ncIInputManager *m_pInputManager;
 	static ncIAppEventHandler *m_pAppEventHandler;
+
+	ncApplication();
+	~ncApplication();
 };
 
 #endif

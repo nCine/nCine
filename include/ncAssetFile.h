@@ -29,6 +29,10 @@ class ncAssetFile: public ncIFile
 	static void InitAssetManager(struct android_app* state) { m_pAssetManager = state->activity->assetManager; }
 
  private:
+	static AAssetManager* m_pAssetManager;
+	AAsset *m_pAsset;
+	long int m_lStartOffset;
+
 	// Opens the file with AAsset_openFileDescriptor()
 	void OpenFD(unsigned char uMode);
 	// Opens the file with AAssetManager_open() only
@@ -36,10 +40,6 @@ class ncAssetFile: public ncIFile
 
 	// Checks if a file can be accessed with specified mode
 	static bool Access(const char *pFilename, unsigned char uMode);
-
-	static AAssetManager* m_pAssetManager;
-	AAsset *m_pAsset;
-	long int m_lStartOffset;
 
 	friend bool ncIFile::Access(const char *pFilename, unsigned char uMode);
 };

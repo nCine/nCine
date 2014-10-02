@@ -38,9 +38,6 @@ class ncIGfxDevice
 	inline const ncDisplayMode& Mode() const { return m_mode; }
 
  protected:
-	// Initilizes starting OpenGL state
-	virtual void InitGL();
-
 	/// Device width
 	int m_iWidth;
 	/// Device height
@@ -49,6 +46,9 @@ class ncIGfxDevice
 	ncDisplayMode m_mode;
 	/// Device rendering occurs inside a window
 	bool m_bIsWindowed;
+
+	// Initilizes starting OpenGL state
+	virtual void InitGL();
 };
 
 inline ncIGfxDevice::~ncIGfxDevice() { }
