@@ -9,7 +9,7 @@ class MyEventHandler
 	: public ncIAppEventHandler,
 	  public ncIInputEventHandler
 {
- public:
+  public:
 	virtual void OnInit();
 	virtual void OnFrameStart() { }
 	virtual void OnFrameEnd() { }

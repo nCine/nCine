@@ -5,7 +5,7 @@
 	#include <GL/glew.h>
 #endif
 #include <GLFW/glfw3.h>
-	
+
 #include "ncIGfxDevice.h"
 #include "ncPoint.h"
 #include "ncDisplayMode.h"
@@ -13,7 +13,7 @@
 /// The GLFW based graphics device
 class ncGLFWGfxDevice : public ncIGfxDevice
 {
- public:
+  public:
 	// Constructor taking the resolution as two integer
 	ncGLFWGfxDevice(int iWidth, int iHeight);
 	// Constructor taking the resolution as a size class
@@ -36,7 +36,7 @@ class ncGLFWGfxDevice : public ncIGfxDevice
 	/// Returns the window handle used by GLFW3
 	static GLFWwindow* WindowHandle() { return s_pWindowHandle; }
 
- private:
+  private:
 	/// GLFW3 window handle
 	static GLFWwindow *s_pWindowHandle;
 

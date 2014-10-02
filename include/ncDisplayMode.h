@@ -6,7 +6,7 @@
 /// Display properties
 class ncDisplayMode
 {
- public:
+  public:
 	// Constructor with no parameters
 	ncDisplayMode()
 		: m_uRedBits(0), m_uGreenBits(0), m_uBlueBits(0), m_uAlphaBits(0), m_uBufferBits(0),
@@ -24,7 +24,7 @@ class ncDisplayMode
 		  m_uDepthBits(iDepthBits), m_uStencilBits(iStencilBits),
 		  m_bIsDoubleBuffered(bDoubleBuffered), m_bIsVSynced(bVSynced) { }
 	ncDisplayMode(int iRedBits, int iGreenBits, int iBlueBits, int iAlphaBits, int iBufferBits,
-				  bool bDoubleBuffered, bool bVSynced, int iDepthBits, int iStencilBits)
+	              bool bDoubleBuffered, bool bVSynced, int iDepthBits, int iStencilBits)
 		: m_uRedBits(iRedBits), m_uGreenBits(iGreenBits), m_uBlueBits(iBlueBits),
 		  m_uAlphaBits(iAlphaBits), m_uBufferBits(iBufferBits),
 		  m_uDepthBits(iDepthBits), m_uStencilBits(iStencilBits),
@@ -52,7 +52,7 @@ class ncDisplayMode
 	/// Returns true if the dislpay has V-sync enabled
 	inline bool isVSynced() const { return m_bIsVSynced; }
 
- private:
+  private:
 	/// Red component bits
 	unsigned int m_uRedBits;
 	/// Green component bits

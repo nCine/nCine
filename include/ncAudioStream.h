@@ -11,7 +11,7 @@
 /// Audio stream class
 class ncAudioStream
 {
- public:
+  public:
 	virtual ~ncAudioStream();
 
 	// Enqueues new buffers and unqueues processed ones
@@ -22,7 +22,7 @@ class ncAudioStream
 	/// Returns samples frequency
 	inline int Frequency() const { return m_iFrequency; }
 
- private:
+  private:
 	/// Number of buffers for streaming
 	static const int s_iNumBuffers = 3;
 	/// OpenAL buffer queue for streaming

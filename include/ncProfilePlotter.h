@@ -10,7 +10,7 @@
 /// A class that plots a graphic representation of a time/value function
 class ncProfilePlotter : public ncDrawableNode
 {
- public:
+  public:
 	ncProfilePlotter(ncSceneNode* pParent, ncRect rect);
 	virtual ~ncProfilePlotter();
 
@@ -49,7 +49,7 @@ class ncProfilePlotter : public ncDrawableNode
 	/// Adds a new variable to the plotter
 	virtual unsigned int AddVariable(unsigned int uNumValues, float fRejectDelay) = 0;
 
- protected:
+  protected:
 	/// Background width
 	int m_iWidth;
 	/// Background height

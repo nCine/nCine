@@ -79,7 +79,7 @@ void ncGLFWInputManager::MouseButtonCallback(GLFWwindow *window, int button, int
 	double dCursorX, dCursory;
 	glfwGetCursorPos(window, &dCursorX, &dCursory);
 	s_mouseEvent.x = int(dCursorX); s_mouseEvent.y = int(dCursory);
-	s_mouseEvent.y = ncApplication::Height()-s_mouseEvent.y;
+	s_mouseEvent.y = ncApplication::Height() - s_mouseEvent.y;
 	s_mouseEvent.m_iButton = button;
 
 	if (action == GLFW_PRESS)

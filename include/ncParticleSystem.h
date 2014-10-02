@@ -14,7 +14,7 @@ class ncParticle;
 /// The class representing a particle system
 class ncParticleSystem : public ncDrawableNode
 {
- public:
+  public:
 	// Constructs a particle system made of the specified maximum amount of particles
 	ncParticleSystem(ncSceneNode* pParent, unsigned int uCount, ncTexture *pTexture, ncRect texRect);
 	~ncParticleSystem();
@@ -33,7 +33,7 @@ class ncParticleSystem : public ncDrawableNode
 
 	inline static eObjectType sType() { return PARTICLESYSTEM_TYPE; }
 
- private:
+  private:
 	/// The particle pool size
 	unsigned int m_uPoolSize;
 	/// The index of the next free particle in the pool

@@ -14,7 +14,7 @@ class ncIAudioLoader;
 /*! It is a ncObject because a buffer can be shared by more than one ncAudioBufferPlayer  */
 class ncAudioBuffer : public ncObject
 {
- public:
+  public:
 	ncAudioBuffer();
 	// A constructor creating a buffer from a file
 	ncAudioBuffer(const char *pFilename);
@@ -29,7 +29,7 @@ class ncAudioBuffer : public ncObject
 
 	inline static eObjectType sType() { return AUDIOBUFFER_TYPE; }
 
- private:
+  private:
 	/// The OpenAL buffer id
 	ALuint m_uALId;
 	/// Number of channels

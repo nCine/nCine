@@ -7,12 +7,12 @@
 /// PVR texture loader
 class ncTextureLoaderPVR : public ncITextureLoader
 {
- public:
+  public:
 	ncTextureLoaderPVR(const char *pFilename);
 	ncTextureLoaderPVR(ncIFile *pFileHandle);
 	~ncTextureLoaderPVR() { }
 
- private:
+  private:
 	/// Header for the PVR3 format
 	typedef struct PVR3_header
 	{

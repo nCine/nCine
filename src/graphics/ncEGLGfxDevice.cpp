@@ -132,5 +132,5 @@ void ncEGLGfxDevice::InitDevice(struct android_app* state)
 	eglGetConfigAttrib(m_display, config, EGL_SAMPLES, &samples);
 
 	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (char *)"ncEGLGfxDevice::Init - Surface configuration is RGBA:%d%d%d%d, depth:%d, stencil:%d, samples:%d",
-									 red, green, blue, alpha, depth, stencil, samples);
+	                                 red, green, blue, alpha, depth, stencil, samples);
 }

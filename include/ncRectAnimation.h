@@ -7,7 +7,7 @@
 /// The class containing data for a rectangles based animation
 class ncRectAnimation
 {
- public:
+  public:
 	ncRectAnimation(float fFrameTime, bool bLooping, bool bBackward);
 
 	/// Returns current frame
@@ -36,7 +36,7 @@ class ncRectAnimation
 	// Pause on a specified frame
 	void Pause(unsigned int uFrameNum);
 
- private:
+  private:
 	/// The rectangles array
 	ncArray<ncRect> m_vRects;
 	/// Current frame

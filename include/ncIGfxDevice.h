@@ -7,7 +7,7 @@
 /// It represents the interface to the graphics device where everything is rendered
 class ncIGfxDevice
 {
- public:
+  public:
 	virtual ~ncIGfxDevice() = 0;
 
 	/// Sets screen resolution with two integers
@@ -37,7 +37,7 @@ class ncIGfxDevice
 	/// Returns display mode
 	inline const ncDisplayMode& Mode() const { return m_mode; }
 
- protected:
+  protected:
 	/// Device width
 	int m_iWidth;
 	/// Device height

@@ -11,7 +11,7 @@
 /// Audio player interface class
 class ncIAudioPlayer : public ncObject
 {
- public:
+  public:
 	/// Player state
 	enum ePlayerState
 	{
@@ -70,7 +70,7 @@ class ncIAudioPlayer : public ncObject
 	/// Queries the looping property of the player
 	inline bool isLooping() const { return m_bLooping; }
 
- protected:
+  protected:
 	/// The OpenAL source id
 	unsigned int m_uSource;
 	/// Current player state

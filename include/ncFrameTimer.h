@@ -6,7 +6,7 @@
 /// Frame interval and average FPS calculator class
 class ncFrameTimer: public ncTimer
 {
- public:
+  public:
 	// Constructor
 	ncFrameTimer(float fLogInterval, float fAvgInterval);
 
@@ -17,7 +17,7 @@ class ncFrameTimer: public ncTimer
 	/// Returns the average FPS on the update interval
 	inline float AverageFPS() const { return m_fFps; }
 
- private:
+  private:
 	/// Number of seconds between two log events (user defined)
 	float m_fLogInterval;
 	/// Number of seconds between two average FPS calculations (user defined)

@@ -8,7 +8,7 @@
 /// The class dealing with file open/close, its path and extension
 class ncAssetFile: public ncIFile
 {
- public:
+  public:
 	/// Constructs an asset file object
 	/*! \param pFilename File name including path relative to the assets directory */
 	ncAssetFile(const char *pFilename);
@@ -28,7 +28,7 @@ class ncAssetFile: public ncIFile
 	/// Sets the global pointer to the AAssetManager
 	static void InitAssetManager(struct android_app* state) { m_pAssetManager = state->activity->assetManager; }
 
- private:
+  private:
 	static AAssetManager* m_pAssetManager;
 	AAsset *m_pAsset;
 	long int m_lStartOffset;

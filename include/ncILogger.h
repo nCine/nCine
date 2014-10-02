@@ -4,7 +4,7 @@
 /// The interface for every logger
 class ncILogger
 {
- public:
+  public:
 	/// Log levels, from less to more severe
 	enum eLogLevel
 	{
@@ -34,7 +34,7 @@ inline ncILogger::~ncILogger() { }
 /// A fake logger which doesn't log anything
 class ncNullLogger : public ncILogger
 {
- public:
+  public:
 	virtual void Write(eLogLevel eLevel, const char *message, ...) { }
 };
 

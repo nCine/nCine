@@ -6,7 +6,7 @@
 /// The class dealing with file open/close, its path and extension
 class ncStandardFile: public ncIFile
 {
- public:
+  public:
 	/// Constructs a standard file object
 	/*! \param pFilename File name including its path */
 	ncStandardFile(const char *pFilename) : ncIFile(pFilename) { m_eType = STANDARD_TYPE; }
@@ -28,7 +28,7 @@ class ncStandardFile: public ncIFile
 	long int Tell() const;
 	long int Read(void *pBuffer, int iBytes) const;
 
- private:
+  private:
 	// Opens the file with open()
 	void OpenFD(unsigned char uMode);
 	// Opens the file with fopen()

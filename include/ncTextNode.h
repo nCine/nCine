@@ -11,7 +11,7 @@ class ncFontGlyph;
 /// A scene node to draw a text label
 class ncTextNode : public ncDrawableNode
 {
- public:
+  public:
 	enum eAlignment
 	{
 		ALIGN_LEFT,
@@ -49,7 +49,7 @@ class ncTextNode : public ncDrawableNode
 
 	inline static eObjectType sType() { return TEXT_TYPE; }
 
- private:
+  private:
 	/// The string to be rendered
 	char m_vString[s_uMaxStringLength];
 	/// Dirty flag for vertices and texture coordinates

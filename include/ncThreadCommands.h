@@ -7,7 +7,7 @@
 /// Thread pool command interface
 class ncIThreadCommand
 {
- public:
+  public:
 	virtual ~ncIThreadCommand() { }
 
 	virtual void Execute() = 0;
@@ -16,12 +16,12 @@ class ncIThreadCommand
 /// A dummy thread command for testing
 class ncDummyCommand : public ncIThreadCommand
 {
- public:
+  public:
 	ncDummyCommand(unsigned int uRequestCode) : m_uRequestCode(uRequestCode) { }
 
 	void Execute();
 
- private:
+  private:
 	unsigned int m_uRequestCode;
 };
 

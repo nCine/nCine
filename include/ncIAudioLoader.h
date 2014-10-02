@@ -6,7 +6,7 @@
 /// Audio loader class
 class ncIAudioLoader
 {
- public:
+  public:
 	virtual ~ncIAudioLoader();
 
 	/// Decodes audio data in a specified buffer
@@ -35,7 +35,7 @@ class ncIAudioLoader
 	// Returns the proper audio loader according to the file extension
 	static ncIAudioLoader* CreateFromFile(const char *pFilename);
 
- protected:
+  protected:
 	/// Audio file handle
 	ncIFile *m_pFileHandle;
 

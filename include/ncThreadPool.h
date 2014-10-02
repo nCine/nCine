@@ -10,7 +10,7 @@ class ncIThreadCommand;
 /// Thread pool class
 class ncThreadPool : public ncIThreadPool
 {
- public:
+  public:
 	// Creates a thread pool with as many threads as available processors
 	ncThreadPool();
 	// Creates a thread pool with a specified number of threads
@@ -20,7 +20,7 @@ class ncThreadPool : public ncIThreadPool
 	// Enqueues a command request for a worker thread
 	void EnqueueCommand(ncIThreadCommand *pThreadCommand);
 
- private:
+  private:
 	struct ncThreadStruct
 	{
 		ncList<ncIThreadCommand *> *pQueue;

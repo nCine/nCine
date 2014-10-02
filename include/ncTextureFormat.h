@@ -17,7 +17,7 @@
 /// Texture format class
 class ncTextureFormat
 {
- public:
+  public:
 	ncTextureFormat()
 		: m_eInternalFormat(-1), m_eFormat(-1), m_eType(-1), m_bCompressed(false) { }
 	ncTextureFormat(GLenum eInternalFormat);
@@ -42,7 +42,7 @@ class ncTextureFormat
 	// Calculates the pixel data size for each MIP map level
 	static long int CalculateMipSizes(GLenum eInternalFormat, int iWidth, int iHeight, int iMipMapCount, long int *pMipDataOffsets, long int *pMipDataSizes);
 
- private:
+  private:
 	GLenum m_eInternalFormat;
 	GLenum m_eFormat;
 	GLenum m_eType;
@@ -70,11 +70,11 @@ class ncTextureFormat
 inline bool ncTextureFormat::hasAlpha() const
 {
 	return (m_eFormat == GL_RGBA ||
-	#ifndef __ANDROID__
-			m_eFormat == GL_BGRA ||
-	#endif
-			m_eFormat == GL_LUMINANCE_ALPHA ||
-			m_eFormat == GL_ALPHA);
+#ifndef __ANDROID__
+	        m_eFormat == GL_BGRA ||
+#endif
+	        m_eFormat == GL_LUMINANCE_ALPHA ||
+	        m_eFormat == GL_ALPHA);
 }
 
 #endif

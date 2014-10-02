@@ -8,13 +8,13 @@
 /// The usual console and file logger
 class ncFileLogger : public ncILogger
 {
- public:
+  public:
 	ncFileLogger(const char *pFilename, eLogLevel eConsoleLevel, eLogLevel eFileLevel);
 	~ncFileLogger();
 
 	virtual void Write(eLogLevel eLevel, const char* fmt, ...);
 
- private:
+  private:
 	ncIFile *m_pFileHandle;
 	eLogLevel m_eConsoleLevel;
 	eLogLevel m_eFileLevel;

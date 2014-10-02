@@ -12,7 +12,7 @@ class MyEventHandler
 	: public ncIAppEventHandler,
 	  public ncIInputEventHandler
 {
- public:
+  public:
 	virtual void OnInit();
 	virtual void OnFrameStart();
 	virtual void OnFrameEnd() { }
@@ -25,7 +25,7 @@ class MyEventHandler
 	virtual void OnMouseButtonReleased(const ncMouseEvent &event);
 #endif
 
- private:
+  private:
 	bool m_bPause;
 	ncSceneNode *m_pDummy;
 	ncTexture *m_pTexture;

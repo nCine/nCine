@@ -96,12 +96,12 @@ void ncSDLInputManager::ParseEvent(const SDL_Event &event)
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
 			s_mouseEvent.x = event.button.x;
-			s_mouseEvent.y = ncApplication::Height()-event.button.y;
+			s_mouseEvent.y = ncApplication::Height() - event.button.y;
 			s_mouseEvent.m_ubButton = event.button.button;
 			break;
 		case SDL_MOUSEMOTION:
 			s_mouseState.x = event.motion.x;
-			s_mouseState.y = ncApplication::Height()-event.motion.y;
+			s_mouseState.y = ncApplication::Height() - event.motion.y;
 			s_mouseState.m_ubButtons = event.motion.state;
 			break;
 		case SDL_JOYBUTTONDOWN:

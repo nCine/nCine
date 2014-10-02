@@ -7,7 +7,7 @@
 /// A class for an animated sprite
 class ncAnimatedSprite : public ncSprite
 {
- public:
+  public:
 	ncAnimatedSprite(ncSceneNode* pParent, ncTexture *pTexture);
 	ncAnimatedSprite(ncTexture *pTexture);
 	ncAnimatedSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY);
@@ -30,7 +30,7 @@ class ncAnimatedSprite : public ncSprite
 
 	inline static eObjectType sType() { return ANIMATEDSPRITE_TYPE; }
 
-private:
+  private:
 	ncArray<ncRectAnimation *> m_vAnims;
 	int m_iCurrentAnim;
 

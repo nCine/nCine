@@ -6,7 +6,7 @@
 /// The interface class for handling input events (i.e. mouse, keyboard, touch, sensors)
 class ncIInputEventHandler
 {
- public:
+  public:
 	/// Pure virtual destructor in order to make the class abstract
 	virtual ~ncIInputEventHandler() = 0;
 

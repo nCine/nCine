@@ -11,7 +11,7 @@
 /// Mutex class (threads synchronization)
 class ncMutex
 {
- public:
+  public:
 	ncMutex();
 	~ncMutex();
 
@@ -19,7 +19,7 @@ class ncMutex
 	void Unlock();
 	int TryLock();
 
- private:
+  private:
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
 	CRITICAL_SECTION m_handle;
 #else
@@ -30,11 +30,11 @@ class ncMutex
 };
 
 /// Condition variable class (threads synchronization)
-/*! Windows version based on the TinyThread++ library implementation 
+/*! Windows version based on the TinyThread++ library implementation
  * More info at http://www.cs.wustl.edu/~schmidt/win32-cv-1.html */
 class ncCondVariable
 {
- public:
+  public:
 	ncCondVariable();
 	~ncCondVariable();
 
@@ -42,7 +42,7 @@ class ncCondVariable
 	void Signal();
 	void Broadcast();
 
- private:
+  private:
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
 	HANDLE m_events[2];
 	unsigned int m_uWaitersCount;
@@ -59,7 +59,7 @@ class ncCondVariable
 /// Read/write lock class (threads synchronization)
 class ncRWLock
 {
- public:
+  public:
 	ncRWLock();
 	~ncRWLock();
 
@@ -69,7 +69,7 @@ class ncRWLock
 	inline int TryWriteLock() { return pthread_rwlock_trywrlock(&m_rwlock); }
 	inline void Unlock() { pthread_rwlock_unlock(&m_rwlock); }
 
- private:
+  private:
 	pthread_rwlock_t m_rwlock;
 };
 
@@ -78,7 +78,7 @@ class ncRWLock
 /// Barrier class (threads synchronization)
 class ncBarrier
 {
- public:
+  public:
 	// Creates a barrier for the specified amount of waiting threads
 	ncBarrier(unsigned int uCount);
 	~ncBarrier();
@@ -86,7 +86,7 @@ class ncBarrier
 	/// The calling thread waits at the barrier
 	inline int Wait() { return pthread_barrier_wait(&m_barrier); }
 
- private:
+  private:
 	pthread_barrier_t m_barrier;
 };
 

@@ -10,7 +10,7 @@
 template <class T>
 class ncArray
 {
- public:
+  public:
 	/// Constructs an array with explicit size
 	ncArray(unsigned int uCapacity)
 		: m_pArray(NULL), m_uSize(0), m_uCapacity(0)
@@ -53,7 +53,7 @@ class ncArray
 	// Allows for direct but unchecked access to the array memory
 	T* MapBuffer(unsigned int uReserved);
 
- private:
+  private:
 	T* m_pArray;
 	unsigned int m_uSize;
 	unsigned int m_uCapacity;

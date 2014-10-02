@@ -11,7 +11,7 @@
 /// Thread class
 class ncThread
 {
- public:
+  public:
 	typedef void (*ncThreadFunctionPtr_t)(void *);
 
 	// A default constructor for a class without the associated function
@@ -40,7 +40,7 @@ class ncThread
 	void Cancel();
 #endif
 
- private:
+  private:
 	/// The structure wrapping the information for thread creation
 	struct ncThreadInfo
 	{

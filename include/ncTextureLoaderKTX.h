@@ -7,12 +7,12 @@
 /// KTX texture loader
 class ncTextureLoaderKTX : public ncITextureLoader
 {
- public:
+  public:
 	ncTextureLoaderKTX(const char *pFilename);
 	ncTextureLoaderKTX(ncIFile *pFileHandle);
 	~ncTextureLoaderKTX() { }
 
- private:
+  private:
 	static const int KTX_IDENTIFIER_LENGTH = 12;
 	static uint8_t m_uFileIdentifier[KTX_IDENTIFIER_LENGTH];
 

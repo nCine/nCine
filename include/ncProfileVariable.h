@@ -6,7 +6,7 @@
 /// A class to store profiling values to be plotted or saved
 class ncProfileVariable
 {
- public:
+  public:
 	ncProfileVariable(unsigned int uNumValues, float fRejectDelay);
 	~ncProfileVariable();
 
@@ -41,7 +41,7 @@ class ncProfileVariable
 	/** If you try to add a value before the delay, it gets discarded. */
 	inline void SetDelay(float fRejectDelay) { m_fRejectDelay = fRejectDelay; }
 
- private:
+  private:
 	unsigned int m_uNumValues;
 	float m_fRejectDelay;
 	unsigned int m_uNextIndex;

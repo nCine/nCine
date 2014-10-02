@@ -172,19 +172,19 @@ void ncAndroidInputManager::ParseEvent(const AInputEvent *event)
 					switch (iKeyCode)
 					{
 						case AKEYCODE_DPAD_UP:
-							iAxisIdx = s_joystickStates[iJoyId].m_iNumAxes-1;
+							iAxisIdx = s_joystickStates[iJoyId].m_iNumAxes - 1;
 							fAxisValue = -1.0f;
 							break;
 						case AKEYCODE_DPAD_DOWN:
-							iAxisIdx = s_joystickStates[iJoyId].m_iNumAxes-1;
+							iAxisIdx = s_joystickStates[iJoyId].m_iNumAxes - 1;
 							fAxisValue = 1.0f;
 							break;
 						case AKEYCODE_DPAD_LEFT:
-							iAxisIdx = s_joystickStates[iJoyId].m_iNumAxes-2;
+							iAxisIdx = s_joystickStates[iJoyId].m_iNumAxes - 2;
 							fAxisValue = -1.0f;
 							break;
 						case AKEYCODE_DPAD_RIGHT:
-							iAxisIdx = s_joystickStates[iJoyId].m_iNumAxes-2;
+							iAxisIdx = s_joystickStates[iJoyId].m_iNumAxes - 2;
 							fAxisValue = 1.0f;
 							break;
 					}
@@ -233,7 +233,7 @@ void ncAndroidInputManager::ParseEvent(const AInputEvent *event)
 		}
 	}
 	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD &&
-	         AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
+			  AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
 	{
 		s_keyboardEvent.scancode = AKeyEvent_getScanCode(event);
 		s_keyboardEvent.sym = ncKeySym(AKeyEvent_getKeyCode(event));
@@ -252,7 +252,7 @@ void ncAndroidInputManager::ParseEvent(const AInputEvent *event)
 		}
 	}
 	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_TOUCHSCREEN) == AINPUT_SOURCE_TOUCHSCREEN &&
-	         AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
+			  AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
 	{
 		s_touchEvent.count = AMotionEvent_getPointerCount(event);
 		s_touchEvent.id = AMotionEvent_getPointerId(event, 0);
@@ -379,9 +379,9 @@ void ncAndroidInputManager::InitAccelerometerSensor(android_app *state)
 	// Prepare to monitor accelerometer
 	s_pSensorManager = ASensorManager_getInstance();
 	s_pAccelerometerSensor = ASensorManager_getDefaultSensor(s_pSensorManager,
-			ASENSOR_TYPE_ACCELEROMETER);
+		ASENSOR_TYPE_ACCELEROMETER);
 	s_pSensorEventQueue = ASensorManager_createEventQueue(s_pSensorManager,
-			state->looper, LOOPER_ID_USER, NULL, NULL);
+		state->looper, LOOPER_ID_USER, NULL, NULL);
 }
 
 /// Updates joystick states after connections and disconnections

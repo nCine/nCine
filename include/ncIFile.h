@@ -8,7 +8,7 @@
 /// The interface dealing with file operations
 class ncIFile
 {
- public:
+  public:
 	/// The enumeration of file types
 	enum eFileType
 	{
@@ -106,7 +106,7 @@ class ncIFile
 	// Returns the writable directory for data storage
 	static char* DataPath();
 
- protected:
+  protected:
 	/// File type
 	eFileType m_eType;
 

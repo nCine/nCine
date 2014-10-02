@@ -4,28 +4,28 @@
 /// A 32 bit color
 class ncColor
 {
- public:
+  public:
 	/// Default constructor (white color)
 	ncColor()
-		{ Set(255, 255, 255, 255); }
+	{ Set(255, 255, 255, 255); }
 	/// Four components constructor (unsigned char)
 	ncColor(unsigned char ubR, unsigned char ubG, unsigned char ubB, unsigned char ubA)
-		{ Set(ubR, ubG, ubB, ubA); }
+	{ Set(ubR, ubG, ubB, ubA); }
 	/// Three components constructor (unsigned char)
 	ncColor(unsigned char ubR, unsigned char ubG, unsigned char ubB)
-		{ Set(ubR, ubG, ubB); }
+	{ Set(ubR, ubG, ubB); }
 	/// Four components constructor (unsigned int)
 	ncColor(unsigned int uR, unsigned int uG, unsigned int uB, unsigned int uA)
-		{ Set(uR, uG, uB, uA); }
+	{ Set(uR, uG, uB, uA); }
 	/// Three components constructor (unsigned int)
 	ncColor(unsigned int uR, unsigned int uG, unsigned int uB)
-		{ Set(uR, uG, uB); }
+	{ Set(uR, uG, uB); }
 	/// Four components constructor (normalized float)
 	ncColor(float fR, float fG, float fB, float fA)
-		{ SetF(fR, fG, fB, fA); }
+	{ SetF(fR, fG, fB, fA); }
 	/// Three components constructor (normalized float)
 	ncColor(float fR, float fG, float fB)
-		{ SetF(fR, fG, fB); }
+	{ SetF(fR, fG, fB); }
 
 	/// Getter for the red component of the color
 	inline unsigned char R() const { return m_ubColor[0]; }
@@ -39,13 +39,13 @@ class ncColor
 	/*! Note: It is useful with glColor4ub */
 	inline const unsigned char* Vector() const { return m_ubColor; }
 	/// Flaot getter for the red component of the color
-	inline float fR() const { return m_ubColor[0]/255.0f; }
+	inline float fR() const { return m_ubColor[0] / 255.0f; }
 	/// Float getter for the green component of the color
-	inline float fG() const { return m_ubColor[1]/255.0f; }
+	inline float fG() const { return m_ubColor[1] / 255.0f; }
 	/// Float getter for the blue component of the color
-	inline float fB() const { return m_ubColor[2]/255.0f; }
+	inline float fB() const { return m_ubColor[2] / 255.0f; }
 	/// Float getter for the alpha component of the color
-	inline float fA() const { return m_ubColor[3]/255.0f; }
+	inline float fA() const { return m_ubColor[3] / 255.0f; }
 
 	/// Ses four color components (unsigned char)
 	void Set(unsigned char ubR, unsigned char ubG, unsigned char ubB, unsigned char ubA);
@@ -72,7 +72,7 @@ class ncColor
 	// Multiplication by a constant scalar
 	ncColor operator*(float fC) const;
 
- private:
+  private:
 	/// The four unsigned byte color components
 	unsigned char m_ubColor[4];
 };
@@ -138,7 +138,7 @@ inline void ncColor::SetAlphaF(float fA)
 inline bool ncColor::operator==(const ncColor& color) const
 {
 	return (R() == color.R() && G() == color.G() &&
-			B() == color.B() && A() == color.A());
+	        B() == color.B() && A() == color.A());
 }
 
 inline ncColor ncColor::operator*(const ncColor& col) const

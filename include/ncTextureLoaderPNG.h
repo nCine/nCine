@@ -7,12 +7,12 @@
 /// PNG texture loader
 class ncTextureLoaderPNG : public ncITextureLoader
 {
- public:
+  public:
 	ncTextureLoaderPNG(const char *pFilename);
 	ncTextureLoaderPNG(ncIFile *pFileHandle);
 	~ncTextureLoaderPNG() { }
 
- private:
+  private:
 	void Init();
 	static void ReadFromFileHandle(png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToRead);
 };

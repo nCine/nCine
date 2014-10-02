@@ -249,7 +249,7 @@ bool ncStandardFile::Access(const char *pFilename, unsigned char uMode)
 			iAMode = W_OK;
 			break;
 		case (ncIFile::MODE_CAN_READ|ncIFile::MODE_CAN_WRITE):
-			iAMode = R_OK|W_OK;
+			iAMode = R_OK | W_OK;
 			break;
 		default:
 			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::Access - Cannot access the file \"%s\", wrong access mode", pFilename);

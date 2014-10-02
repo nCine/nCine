@@ -11,7 +11,7 @@ class ncRenderQueue;
 /// The base class for the transformation nodes hierarchy
 class ncSceneNode : public ncObject
 {
- public:
+  public:
 	/// The minimum amount of rotation to trigger a sine and cosine calculation
 	static const float sMinRotation;
 
@@ -90,7 +90,7 @@ class ncSceneNode : public ncObject
 	/// Sets the node alpha through a float component
 	inline void SetAlphaF(float fA) { m_color.SetAlphaF(fA); }
 
-protected:
+  protected:
 	ncSceneNode* m_pParent;
 	ncList<ncSceneNode *> m_children;
 

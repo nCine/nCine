@@ -102,15 +102,15 @@ int main(int argc, char **argv)
 				case SDL_KEYDOWN:
 					switch (event.key.keysym.sym)
 					{
-					case SDLK_ESCAPE:
-					case SDLK_q:
-						bQuit = true;
-						break;
-					case SDLK_F1:
-						gfxDevice.ToggleFullScreen();
-						break;
-					default:
-						break;
+						case SDLK_ESCAPE:
+						case SDLK_q:
+							bQuit = true;
+							break;
+						case SDLK_F1:
+							gfxDevice.ToggleFullScreen();
+							break;
+						default:
+							break;
 					}
 					break;
 			}

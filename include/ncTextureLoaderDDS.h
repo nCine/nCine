@@ -7,12 +7,12 @@
 /// DDS texture loader
 class ncTextureLoaderDDS : public ncITextureLoader
 {
- public:
+  public:
 	ncTextureLoaderDDS(const char *pFilename);
 	ncTextureLoaderDDS(ncIFile *pFileHandle);
 	~ncTextureLoaderDDS() { }
 
- private:
+  private:
 	/// Header for the DDS pixel format
 	typedef struct DDS_pixelformat
 	{

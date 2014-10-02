@@ -7,7 +7,7 @@
 /// A class holding every information needed to correctly render text
 class ncFont
 {
- public:
+  public:
 	// Constructs a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)
 	ncFont(const char* pTexFilename, const char *pFntFilename);
 	virtual ~ncFont() { delete m_pTexture; }
@@ -28,7 +28,7 @@ class ncFont
 	/// Reurns a constant pointer to a glyph
 	const ncFontGlyph* Glyph(unsigned int uGlyphId) const;
 
- private:
+  private:
 	/// The font texture
 	ncTexture *m_pTexture;
 	/// Font line height

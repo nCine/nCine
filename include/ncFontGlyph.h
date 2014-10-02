@@ -8,14 +8,14 @@
 /// A class holding information about a single glyph (character)
 class ncFontGlyph
 {
- public:
+  public:
 	ncFontGlyph();
 	ncFontGlyph(unsigned short uX, unsigned short uY, unsigned short uWidth, unsigned short uHeight,
-		short iXOffset, short iYOffset, unsigned short uXAdvance);
+	            short iXOffset, short iYOffset, unsigned short uXAdvance);
 
 	/// Sets glyph properties
 	void Set(unsigned short uX, unsigned short uY, unsigned short uWidth, unsigned short uHeight,
-		short iXOffset, short iYOffset, unsigned short uXAdvance);
+	         short iXOffset, short iYOffset, unsigned short uXAdvance);
 
 	/// Return the size in pixels of a glyph
 	inline ncPoint Size() const { return ncPoint(m_uWidth, m_uHeight); }
@@ -31,7 +31,7 @@ class ncFontGlyph
 	// Return the kerning amount for a subsequent glyph
 	int Kerning(int iSecondGlyph) const;
 
- private:
+  private:
 	/// A structure holding glyph pairs kerning offstes
 	struct ncKerning
 	{

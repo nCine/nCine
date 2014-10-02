@@ -21,7 +21,7 @@
 /// Texture loader interface
 class ncITextureLoader
 {
- public:
+  public:
 	virtual ~ncITextureLoader();
 
 	/// Returns texture width
@@ -48,7 +48,7 @@ class ncITextureLoader
 	// Returns the proper texture loader according to the file extension
 	static ncITextureLoader* CreateFromFile(const char *pFilename);
 
- protected:
+  protected:
 	/// Texture file handle
 	ncIFile *m_pFileHandle;
 

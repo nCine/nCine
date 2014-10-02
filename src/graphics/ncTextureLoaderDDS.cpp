@@ -152,7 +152,7 @@ void ncTextureLoaderDDS::ParseFormat(const DDS_header &header)
 			eInternalFormat = GL_RGB;
 		}
 		else if ((uAlphaMask == 0xFF000000 && uRedMask == 0x00FF0000 && uGreenMask == 0x0000FF00 && uBlueMask == 0x000000FF) ||
-				 (uAlphaMask == 0xFF000000 && uBlueMask == 0x00FF0000 && uGreenMask == 0x0000FF00 && uRedMask == 0x000000FF)) // 8888
+		         (uAlphaMask == 0xFF000000 && uBlueMask == 0x00FF0000 && uGreenMask == 0x0000FF00 && uRedMask == 0x000000FF)) // 8888
 		{
 			eInternalFormat = GL_RGBA;
 		}

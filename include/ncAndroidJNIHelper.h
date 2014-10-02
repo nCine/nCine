@@ -8,10 +8,10 @@
 /// The class for calling the Java Android API via JNI
 class ncAndroidJNIHelper
 {
- public:
+  public:
 	inline static unsigned int SDKVersion() { return s_uSDKVersion; }
 
- private:
+  private:
 	static JavaVM *s_pJVM;
 	static JNIEnv *s_pEnv;
 
@@ -26,7 +26,7 @@ class ncAndroidJNIHelper
 
 class ncAndroidJNIClass
 {
- public:
+  public:
 	ncAndroidJNIClass() :  m_javaObject(NULL) { }
 	ncAndroidJNIClass(jobject javaObject) : m_javaObject(javaObject) { }
 	virtual ~ncAndroidJNIClass()
@@ -38,7 +38,7 @@ class ncAndroidJNIClass
 	}
 	bool isNull() const { return m_javaObject == NULL; }
 
- protected:
+  protected:
 	static JNIEnv *s_pEnv;
 	jobject m_javaObject;
 
@@ -47,27 +47,27 @@ class ncAndroidJNIClass
 
 class ncAndroidJNIClass_Version : public ncAndroidJNIClass
 {
- public:
+  public:
 	static void Init();
 	static int SDK_INT();
 
- private:
+  private:
 	static jclass s_javaClass;
 	static jfieldID s_fidSDKINT;
 };
 
 class ncAndroidJNIClass_MotionRange : public ncAndroidJNIClass
 {
- private:
+  private:
 	static jclass s_javaClass;
 
- public:
+  public:
 	ncAndroidJNIClass_MotionRange(jobject javaObject);
 };
 
 class ncAndroidJNIClass_InputDevice : public ncAndroidJNIClass
 {
- public:
+  public:
 	static void Init();
 	ncAndroidJNIClass_InputDevice(jobject javaObject)
 		: ncAndroidJNIClass(javaObject) { }
@@ -78,7 +78,7 @@ class ncAndroidJNIClass_InputDevice : public ncAndroidJNIClass
 	int getSources();
 	void hasKeys(int *vButtons, const int iLength, bool *vBools);
 
- private:
+  private:
 	static jclass s_javaClass;
 	static jmethodID s_midGetDevice;
 	static jmethodID s_midGetDeviceIds;
@@ -90,13 +90,13 @@ class ncAndroidJNIClass_InputDevice : public ncAndroidJNIClass
 
 class ncAndroidJNIClass_KeyCharacterMap : public ncAndroidJNIClass
 {
- public:
+  public:
 	static void Init();
 	ncAndroidJNIClass_KeyCharacterMap(jobject javaObject)
 		: ncAndroidJNIClass(javaObject) { }
 	static bool deviceHasKey(int iButton);
 
- private:
+  private:
 	static jclass s_javaClass;
 	static jmethodID s_midDeviceHasKey;
 };

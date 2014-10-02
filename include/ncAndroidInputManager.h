@@ -12,10 +12,10 @@ class ncTimer;
 /// Information about Android joystick state
 class ncAndroidJoystickState
 {
- public:
+  public:
 	ncAndroidJoystickState();
 
- private:
+  private:
 	static const unsigned int s_uMaxNameLength = 256;
 	static const int s_iMaxButtons = 10;
 	static const int s_iMaxAxes = 10;
@@ -39,7 +39,7 @@ class ncAndroidJoystickState
 /// The class for parsing and dispatching Android input events
 class ncAndroidInputManager : public ncIInputManager
 {
- public:
+  public:
 	ncAndroidInputManager(struct android_app* state);
 
 	// Enables the accelerometer sensor
@@ -63,7 +63,7 @@ class ncAndroidInputManager : public ncIInputManager
 	short int JoyAxisValue(int iJoyId, int iAxisId) const;
 	float JoyAxisNormValue(int iJoyId, int iAxisId) const;
 
- private:
+  private:
 	static const unsigned int s_uMaxNumJoysticks = 4;
 
 	static ASensorManager* s_pSensorManager;

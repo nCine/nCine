@@ -9,7 +9,7 @@ class ncTexture;
 /// The class for a single particle data
 class ncParticle : public ncSprite
 {
- public:
+  public:
 	/// Current particle life in seconds
 	float m_fLife;
 	/// Initial particle life
@@ -30,7 +30,7 @@ class ncParticle : public ncSprite
 	// Updates particle data after the specified amount of seconds has passed
 	virtual void Update(float fInterval);
 
- private:
+  private:
 	// Custom transform method to allow independent position from parent
 	void Transform();
 };

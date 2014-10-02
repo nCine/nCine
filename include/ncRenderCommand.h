@@ -22,7 +22,7 @@
 /// The class wrapping rendering material data
 class ncRenderMaterial
 {
- public:
+  public:
 	ncRenderMaterial(GLubyte ubColor[4], GLuint uTextureGLId)
 		: m_uTextureGLId(uTextureGLId), m_bAlwaysTransparent(false)
 	{
@@ -69,7 +69,7 @@ class ncRenderMaterial
 	// Binds the material state
 	void Bind() const;
 
- private:
+  private:
 	ncColor m_color;
 	GLuint m_uTextureGLId;
 	/// Flag to skip opaque check based on material color
@@ -80,7 +80,7 @@ class ncRenderMaterial
 /// The class wrapping geometric transformation
 class ncRenderTransformation
 {
- public:
+  public:
 	ncRenderTransformation() : m_fX(0.0f), m_fY(0.0f), m_fScaleX(1.0f), m_fScaleY(1.0f), m_fRotation(0.0f) { }
 
 	ncRenderTransformation(float fX, float fY)
@@ -104,7 +104,7 @@ class ncRenderTransformation
 	// Applies the transformation
 	void Apply() const;
 
- private:
+  private:
 	float m_fX;
 	float m_fY;
 	float m_fScaleX;
@@ -115,7 +115,7 @@ class ncRenderTransformation
 /// The class wrapping vertices data
 class ncRenderGeometry
 {
- public:
+  public:
 	ncRenderGeometry(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords);
 	ncRenderGeometry(GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords);
 	ncRenderGeometry();
@@ -139,7 +139,7 @@ class ncRenderGeometry
 	// Draws the geometry
 	void Draw() const;
 
- protected:
+  protected:
 	GLenum m_eDrawType;
 	GLint m_iFirstVertex;
 	GLsizei m_iNumVertices;
@@ -162,7 +162,7 @@ inline void ncRenderGeometry::SetData(GLenum eDrawType, GLint iFirstVertex, GLsi
 /// The class wrapping all the information needed for issuing a draw command
 class ncRenderCommand
 {
-public:
+  public:
 	/// The enumeration of command types
 	/*! Its sole purpose is to allow separated profiling counters in ncRenderQueue */
 	enum eCommandType
@@ -206,7 +206,7 @@ public:
 	/// Sets the command type (profiling purpose)
 	inline void SetType(eCommandType eType) { m_eProfilingType = eType; }
 
- private:
+  private:
 	unsigned long int m_uSortKey;
 //	bool m_bDirtyKey;
 

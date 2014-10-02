@@ -14,7 +14,7 @@ class ncIInputEventHandler;
 #ifdef __ANDROID__
 class ncTouchEvent
 {
- public:
+  public:
 	ncTouchEvent() : count(0), id(0), id2(1), x(0.0f), y(0.0f), x2(0.0f), y2(0.0f) { }
 
 	int count;
@@ -24,7 +24,7 @@ class ncTouchEvent
 
 class ncAccelerometerEvent
 {
- public:
+  public:
 	ncAccelerometerEvent(): x(0.0f), y(0.0f), z(0.0f) { }
 
 	float x, y, z;
@@ -33,7 +33,7 @@ class ncAccelerometerEvent
 /// Information about mouse state
 class ncMouseState
 {
- public:
+  public:
 	/// Pointer position on the X axis
 	int x;
 	/// Pointer position on the Y axis
@@ -49,7 +49,7 @@ class ncMouseState
 /// Information about a mouse event
 class ncMouseEvent
 {
- public:
+  public:
 	/// Pointer position on the X axis
 	int x;
 	/// Pointer position on the Y axis
@@ -65,7 +65,7 @@ class ncMouseEvent
 /// Information about keyboard state
 class ncKeyboardState
 {
- public:
+  public:
 	ncKeyboardState() { }
 
 	virtual bool isKeyDown(ncKeySym key) const = 0;
@@ -75,7 +75,7 @@ class ncKeyboardState
 /// Information about a keyboard event
 class ncKeyboardEvent
 {
- public:
+  public:
 	/// Key scan code
 	int scancode;
 	/// Key symbol code
@@ -91,7 +91,7 @@ class ncKeyboardEvent
 /// Information about a joystick axis event
 class ncJoyAxisEvent
 {
- public:
+  public:
 	int joyId;
 	int axisId;
 	short int value;
@@ -101,7 +101,7 @@ class ncJoyAxisEvent
 /// Information about a joystick button event
 class ncJoyButtonEvent
 {
- public:
+  public:
 	int joyId;
 	int buttonId;
 };
@@ -109,7 +109,7 @@ class ncJoyButtonEvent
 /// The interface class for parsing and dispatching input events
 class ncIInputManager
 {
- public:
+  public:
 	virtual ~ncIInputManager() { }
 
 	inline static void SetHandler(ncIInputEventHandler *pInputEventHandler)
@@ -138,7 +138,7 @@ class ncIInputManager
 	/// Returns a normalized value between -1 and 1 for a joystick axis
 	virtual float JoyAxisNormValue(int iJoyId, int iAxisId) const = 0;
 
- protected:
+  protected:
 	ncIInputManager() { }
 	static ncIInputEventHandler *s_pInputEventHandler;
 };

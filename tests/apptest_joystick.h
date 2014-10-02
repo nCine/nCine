@@ -13,7 +13,7 @@ class MyEventHandler
 	: public ncIAppEventHandler,
 	  public ncIInputEventHandler
 {
- public:
+  public:
 	virtual void OnInit();
 	virtual void OnFrameStart();
 	virtual void OnFrameEnd() { }
@@ -23,7 +23,7 @@ class MyEventHandler
 	virtual void OnKeyReleased(const ncKeyboardEvent &event);
 #endif
 
- private:
+  private:
 	ncTexture *m_pTexture;
 	ncSprite *m_pSprites[2];
 	ncFont *m_pFont;

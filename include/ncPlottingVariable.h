@@ -10,7 +10,7 @@
 /// A class to group and wrap all the information needed to plot a variable
 class ncPlottingVariable
 {
-public:
+  public:
 	ncPlottingVariable(unsigned int uNumValues, float fRejectDelay);
 	virtual ~ncPlottingVariable();
 
@@ -54,7 +54,7 @@ public:
 		rRenderQueue.AddCommand(&m_meanCmd);
 	}
 
- protected:
+  protected:
 	/// Mean drawing flag
 	bool m_bPlotMean;
 	/// Graph color

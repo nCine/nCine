@@ -7,7 +7,7 @@
 /// A class for objects that can be drawn through the render queue
 class ncDrawableNode : public ncSceneNode
 {
- public:
+  public:
 	/// Drawing priorities from back to front
 	enum ePriorityBase
 	{
@@ -36,7 +36,7 @@ class ncDrawableNode : public ncSceneNode
 	/// Sets the node rendering priority
 	inline void SetPriority(int iPriority) { m_renderCmd.SetPriority(iPriority); }
 
- protected:
+  protected:
 	/// The render command class associated with this node
 	ncRenderCommand m_renderCmd;
 

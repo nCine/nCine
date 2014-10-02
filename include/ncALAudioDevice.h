@@ -14,7 +14,7 @@
 /// It represents the interface to the OpenAL audio device
 class ncALAudioDevice : public ncIAudioDevice
 {
- public:
+  public:
 	ncALAudioDevice();
 	virtual ~ncALAudioDevice();
 
@@ -32,7 +32,7 @@ class ncALAudioDevice : public ncIAudioDevice
 	virtual void RegisterPlayer(ncIAudioPlayer *pPlayer);
 	virtual void UpdatePlayers();
 
- private:
+  private:
 	/// Maximum number of OpenAL sources (HACK: should use a query)
 	static const unsigned int s_uMaxSources = 16;
 

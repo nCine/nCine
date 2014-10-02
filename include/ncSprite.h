@@ -10,7 +10,7 @@ class ncSpriteBatchNode;
 /// A scene node representing a basic sprite
 class ncSprite : public ncDrawableNode
 {
- public:
+  public:
 	ncSprite(ncSceneNode* pParent, ncTexture *pTexture);
 	ncSprite(ncTexture *pTexture);
 	ncSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY);
@@ -44,7 +44,7 @@ class ncSprite : public ncDrawableNode
 	/// Returns sprite absolute size
 	inline ncPoint AbsSize() const
 	{
-		return ncPoint(m_iWidth*m_fAbsScaleFactor, m_iHeight*m_fAbsScaleFactor);
+		return ncPoint(m_iWidth * m_fAbsScaleFactor, m_iHeight * m_fAbsScaleFactor);
 	}
 
 	/// Gets the texture object
@@ -64,7 +64,7 @@ class ncSprite : public ncDrawableNode
 
 	inline static eObjectType sType() { return SPRITE_TYPE; }
 
- private:
+  private:
 	/// The sprite texture
 	ncTexture *m_pTexture;
 	/// Used as source rectangle by the sprite batch class

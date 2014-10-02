@@ -10,7 +10,7 @@ template <class T> class ncList; // forward declaration
 template <class T>
 class ncListNode
 {
- public:
+  public:
 	/// Data payload for the node
 	T m_data;
 	/// A pointer to the previous node in the list
@@ -18,9 +18,9 @@ class ncListNode
 	/// A pointer to the next node in the list
 	ncListNode *m_pNext;
 
- private:
-	 ncListNode(const T& data, ncListNode *pPrevious, ncListNode *pNext)
-		 : m_data(data), m_pPrevious(pPrevious), m_pNext(pNext) { }
+  private:
+	ncListNode(const T& data, ncListNode *pPrevious, ncListNode *pNext)
+		: m_data(data), m_pPrevious(pPrevious), m_pNext(pNext) { }
 
 	friend class ncList<T>;
 };
@@ -30,7 +30,7 @@ class ncListNode
 template <class T>
 class ncList
 {
- public:
+  public:
 	/// Iterator type
 	typedef ncListIterator<T> Iterator;
 	/// Constant iterator type
@@ -75,7 +75,7 @@ class ncList
 	// Removes the last element in constant time
 	T RemoveBack();
 
- private:
+  private:
 	/// Pointer to the first node in the list
 	ncListNode<T> *m_pHead;
 	/// Pointer to the last node in the list

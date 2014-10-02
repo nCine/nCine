@@ -75,7 +75,7 @@ nCine is a multi-platform 2d game engine
 - Padding space after parenthesis headers (`if`, `do`, `while`, `for`, `switch`)
 - `inline` keyword always before `virtual` and `static`
 - Access specifiers order: `public`, `protected`, `private`
-  - Indent access specifiers with one space
+  - One half indent for access specifiers (2 spaces)
 - Declarations order: typedefs and enums, data members, constructors, destructors, methods
   - Friend defined in the private section of a class, after everything else
 - One space padding around operators

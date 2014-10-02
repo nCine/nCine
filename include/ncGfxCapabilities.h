@@ -4,7 +4,7 @@
 /// A class to query and store OpenGL device runtime capabilities
 class ncGfxCapabilities
 {
- public:
+  public:
 	/// Default constructor
 	ncGfxCapabilities();
 	~ncGfxCapabilities() { }
@@ -45,7 +45,7 @@ class ncGfxCapabilities
 	inline bool IMGTextureCompressionPVRTC() const { return m_bIMGTextureCompressionPVRTC; }
 #endif
 
- private:
+  private:
 	int m_iGLMajor;
 	int m_iGLMinor;
 #ifndef __ANDROID__

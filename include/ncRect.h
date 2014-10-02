@@ -6,7 +6,7 @@
 /// A rectangle in a two dimensional space
 class ncRect
 {
- public:
+  public:
 	/// Top-left X coordinate of as a public property
 	int x;
 	/// Top-left Y coordinate as a public property

@@ -164,18 +164,18 @@ void ncApplication::Run()
 		{
 			switch (event.type)
 			{
-			case SDL_QUIT:
-				m_bShouldQuit = true;
-				break;
-			case SDL_ACTIVEEVENT:
-				if (event.active.state != SDL_APPMOUSEFOCUS)
-				{
-					SetFocus(event.active.gain);
-				}
-				break;
-			default:
-				ncSDLInputManager::ParseEvent(event);
-				break;
+				case SDL_QUIT:
+					m_bShouldQuit = true;
+					break;
+				case SDL_ACTIVEEVENT:
+					if (event.active.state != SDL_APPMOUSEFOCUS)
+					{
+						SetFocus(event.active.gain);
+					}
+					break;
+				default:
+					ncSDLInputManager::ParseEvent(event);
+					break;
 			}
 		}
 #elif defined(WITH_GLFW)

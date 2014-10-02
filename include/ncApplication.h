@@ -16,7 +16,7 @@ class ncIAppEventHandler;
 /// Main entry point and handler for nCine applications
 class ncApplication
 {
- public:
+  public:
 #ifdef __ANDROID__
 	// Must be called at start to init the application
 	static void Init(struct android_app* state, ncIAppEventHandler* (*pCreateAppEventHandler)());
@@ -72,7 +72,7 @@ class ncApplication
 	// Shows or hides profiling information text
 	static void ShowProfileInfo(bool bShouldDraw);
 
- private:
+  private:
 	static bool m_bPaused;
 	static bool m_bHasFocus;
 	static bool m_bShouldQuit;

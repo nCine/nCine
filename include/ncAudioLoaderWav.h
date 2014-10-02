@@ -6,7 +6,7 @@
 /// WAVE audio loader
 class ncAudioLoaderWav : public ncIAudioLoader
 {
- public:
+  public:
 	ncAudioLoaderWav(const char *pFilename);
 	ncAudioLoaderWav(ncIFile *pFileHandle);
 	~ncAudioLoaderWav() { }
@@ -14,7 +14,7 @@ class ncAudioLoaderWav : public ncIAudioLoader
 	long Read(char *pBuffer, int iBufSize) const;
 	void Rewind() const;
 
- private:
+  private:
 	/// Header for the RIFF WAVE format
 	typedef struct WAV_header
 	{

@@ -100,13 +100,13 @@ long int ncAssetFile::Seek(long int lOffset, int iWhence) const
 		switch (iWhence)
 		{
 			case SEEK_SET:
-				lSeekValue = lseek(m_iFileDescriptor, m_lStartOffset+lOffset, SEEK_SET);
+				lSeekValue = lseek(m_iFileDescriptor, m_lStartOffset + lOffset, SEEK_SET);
 				break;
 			case SEEK_CUR:
 				lSeekValue = lseek(m_iFileDescriptor, lOffset, SEEK_CUR);
 				break;
 			case SEEK_END:
-				lSeekValue = lseek(m_iFileDescriptor, m_lStartOffset+m_lFileSize+lOffset, SEEK_END);
+				lSeekValue = lseek(m_iFileDescriptor, m_lStartOffset + m_lFileSize + lOffset, SEEK_END);
 				break;
 		}
 		lSeekValue -= m_lStartOffset;

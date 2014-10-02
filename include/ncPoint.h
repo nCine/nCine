@@ -4,7 +4,7 @@
 /// A point in a two dimensional space
 class ncPoint
 {
- public:
+  public:
 	/// X coordinate as a public property
 	int x;
 	/// Y coordinate as a public property

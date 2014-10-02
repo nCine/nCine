@@ -10,7 +10,7 @@
 /// The SDL based graphics device
 class ncSDLGfxDevice : public ncIGfxDevice
 {
- public:
+  public:
 	// Constructor taking the resolution as two integer
 	ncSDLGfxDevice(int iWidth, int iHeight);
 	// Constructor taking the resolution as a size class
@@ -30,7 +30,7 @@ class ncSDLGfxDevice : public ncIGfxDevice
 
 	inline void SetWindowTitle(const char *pWindowTitle) { SDL_WM_SetCaption(pWindowTitle, NULL); }
 
- private:
+  private:
 	// Initilizes the class
 	void Init(int iWidth, int iHeight, ncDisplayMode mode, bool bIsWindowed);
 	// Initilizes the video subsystem (SDL)

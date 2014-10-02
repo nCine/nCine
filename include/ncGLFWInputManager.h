@@ -10,7 +10,7 @@ class ncGLFWInputManager;
 /// Information about GLFW mouse state
 class ncGLFWMouseState : public ncMouseState
 {
- public:
+  public:
 	ncGLFWMouseState() { }
 
 	inline bool isLeftButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::WindowHandle(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS); }
@@ -23,7 +23,7 @@ class ncGLFWMouseState : public ncMouseState
 /// Information about a GLFW mouse event
 class ncGLFWMouseEvent : public ncMouseEvent
 {
- public:
+  public:
 	ncGLFWMouseEvent() : m_iButton(0) { }
 
 	inline bool isLeftButton() const { return m_iButton == GLFW_MOUSE_BUTTON_LEFT; }
@@ -32,7 +32,7 @@ class ncGLFWMouseEvent : public ncMouseEvent
 	inline bool isWheelUpButton() const { return m_iButton == GLFW_MOUSE_BUTTON_4; }
 	inline bool isWheelDownButton() const { return m_iButton == GLFW_MOUSE_BUTTON_5; }
 
- private:
+  private:
 	int m_iButton;
 
 	friend class ncGLFWInputManager;
@@ -41,7 +41,7 @@ class ncGLFWMouseEvent : public ncMouseEvent
 /// Information about GLFW keyboard state
 class ncGLFWKeyboardState : public ncKeyboardState
 {
- public:
+  public:
 	ncGLFWKeyboardState() { }
 	inline bool isKeyDown(ncKeySym key) const { return glfwGetKey(ncGLFWGfxDevice::WindowHandle(), key) == GLFW_PRESS; }
 };
@@ -49,11 +49,11 @@ class ncGLFWKeyboardState : public ncKeyboardState
 /// Information about GLFW joystick state
 class ncGLFWJoystickState
 {
- public:
+  public:
 	ncGLFWJoystickState()
 		: m_iNumButtons(0), m_iNumAxes(0), m_ubButtons(NULL), m_fAxisValues(NULL) { }
 
- private:
+  private:
 	int m_iNumButtons;
 	int m_iNumAxes;
 
@@ -66,7 +66,7 @@ class ncGLFWJoystickState
 /// The class for parsing and dispatching GLFW input events
 class ncGLFWInputManager : public ncIInputManager
 {
- public:
+  public:
 	ncGLFWInputManager();
 
 	// Detects window focus gain/loss events
@@ -85,7 +85,7 @@ class ncGLFWInputManager : public ncIInputManager
 	short int JoyAxisValue(int iJoyId, int iAxisId) const;
 	float JoyAxisNormValue(int iJoyId, int iAxisId) const;
 
- private:
+  private:
 	static const unsigned int s_uMaxNumJoysticks = GLFW_JOYSTICK_LAST - GLFW_JOYSTICK_1 + 1;
 
 	static void WindowCloseCallback(GLFWwindow *window);

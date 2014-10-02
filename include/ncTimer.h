@@ -4,7 +4,7 @@
 /// Basic timer and synchronization class
 class ncTimer
 {
- public:
+  public:
 	// Empty constructor
 	ncTimer();
 	/// Starts the timer
@@ -16,11 +16,11 @@ class ncTimer
 	// Puts the current thread to sleep for the specified number of seconds
 	static void Sleep(float fS);
 
- protected:
+  protected:
 	/// Start time mark
 	unsigned long long int m_ullStartTime;
 
- private:
+  private:
 #ifdef _WIN32
 	static bool s_bHasPerfCounter;
 #elif !defined(__APPLE__)

@@ -8,7 +8,7 @@
 /// A two dimensional vector
 class ncVector2f
 {
- public:
+  public:
 	/// X coordinate as a public property
 	float x;
 	/// Y coordinate as a public property

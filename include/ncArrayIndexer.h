@@ -8,7 +8,7 @@
 /// Keeps track of allocated ncObjects in a growing only array
 class ncArrayIndexer : public ncIIndexer
 {
- public:
+  public:
 	ncArrayIndexer();
 	~ncArrayIndexer();
 
@@ -19,7 +19,7 @@ class ncArrayIndexer : public ncIIndexer
 
 	virtual bool isEmpty() const;
 
- private:
+  private:
 	unsigned int m_uNextId;
 	ncArray<ncObject*> m_vPointers;
 };

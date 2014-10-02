@@ -12,7 +12,7 @@ struct android_app;
 /// The EGL based graphics device
 class ncEGLGfxDevice : public ncIGfxDevice
 {
- public:
+  public:
 	// Constructor taking a DisplayMode
 	ncEGLGfxDevice(struct android_app* state, ncDisplayMode mode);
 	~ncEGLGfxDevice();
@@ -29,7 +29,7 @@ class ncEGLGfxDevice : public ncIGfxDevice
 	// Checks if the desired pixel format is supported
 	static bool isModeSupported(struct android_app* state, ncDisplayMode mode);
 
- private:
+  private:
 	/// The EGL display connection
 	EGLDisplay m_display;
 	/// The EGL drawing surface

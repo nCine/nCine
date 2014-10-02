@@ -12,7 +12,7 @@ template <class T> class ncArray;
 /// Base class for particle affectors
 class ncParticleAffector
 {
- public:
+  public:
 	virtual ~ncParticleAffector() { }
 	virtual void Affect(ncParticle* pParticle) = 0;
 };
@@ -20,7 +20,7 @@ class ncParticleAffector
 /// Particle acceleration affector
 class ncAccelerationAffector: public ncParticleAffector
 {
- public:
+  public:
 	/// X and Y components of the accelerator vector
 	ncAccelerationAffector(float fX, float fY) : m_vAcceleration(fX, fY) { }
 
@@ -29,14 +29,14 @@ class ncAccelerationAffector: public ncParticleAffector
 		pParticle->m_Velocity += m_vAcceleration;
 	}
 
- private:
+  private:
 	ncVector2f m_vAcceleration;
 };
 
 /// Particle color affector
 class ncColorAffector: public ncParticleAffector
 {
- public:
+  public:
 	ncColorAffector() : m_vColorSteps(4) { }
 	~ncColorAffector()
 	{
@@ -49,7 +49,7 @@ class ncColorAffector: public ncParticleAffector
 	virtual void Affect(ncParticle* pParticle);
 	void AddColorStep(float fTime, ncColor color);
 
- private:
+  private:
 	struct ColorStep
 	{
 		float fTime;
@@ -64,7 +64,7 @@ class ncColorAffector: public ncParticleAffector
 /// Particle size affector
 class ncSizeAffector: public ncParticleAffector
 {
- public:
+  public:
 	/// Constructs a size affector with a base scale factor as a reference
 	ncSizeAffector(float fBaseScale) : m_vSizeSteps(4), m_fBaseScale(fBaseScale) { }
 	~ncSizeAffector()
@@ -78,7 +78,7 @@ class ncSizeAffector: public ncParticleAffector
 	virtual void Affect(ncParticle* pParticle);
 	void AddSizeStep(float fTime, float fScale);
 
- private:
+  private:
 	struct SizeStep
 	{
 		float fTime;

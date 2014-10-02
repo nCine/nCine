@@ -13,7 +13,7 @@ class MyEventHandler
 	: public ncIAppEventHandler,
 	  public ncIInputEventHandler
 {
- public:
+  public:
 	virtual void OnInit();
 	virtual void OnFrameStart();
 	virtual void OnFrameEnd() { }
@@ -28,7 +28,7 @@ class MyEventHandler
 	virtual void OnMouseMoved(const ncMouseState &state);
 #endif
 
- private:
+  private:
 	ncAudioStreamPlayer *m_pAudioPlayer;
 	ncTexture *m_pTexture;
 	ncAnimatedSprite *m_pAnimSprite;

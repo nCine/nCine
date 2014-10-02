@@ -7,7 +7,7 @@
 /// Static RRTI and identification index
 class ncObject
 {
- public:
+  public:
 	/// The enumeration of object types
 	enum eObjectType
 	{
@@ -50,7 +50,7 @@ class ncObject
 	// Returns a casted pointer to the object with the specified id, if any exists
 	template <class T> static T* FromId(unsigned int uId);
 
- protected:
+  protected:
 	/// Object type
 	eObjectType m_eType;
 

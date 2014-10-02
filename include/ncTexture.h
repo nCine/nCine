@@ -22,7 +22,7 @@
 /// Texture class
 class ncTexture : public ncObject
 {
- public:
+  public:
 	ncTexture();
 	ncTexture(const char *pFilename);
 	ncTexture(const char *pFilename, int iWidth, int iHeight);
@@ -56,7 +56,7 @@ class ncTexture : public ncObject
 
 	inline static eObjectType sType() { return TEXTURE_TYPE; }
 
- private:
+  private:
 	GLuint m_uGLId;
 	int m_iWidth;
 	int m_iHeight;

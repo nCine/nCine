@@ -10,7 +10,7 @@ class ncSceneNode;
 and creating a tree of render commands */
 class ncRenderQueue
 {
- public:
+  public:
 	ncRenderQueue()
 		: m_uNumVertices(0), m_uLastNumVertices(0), m_uLastNumCommands(0),
 		  m_opaqueRenderCmds(16), m_transparentRenderCmds(16) { }
@@ -31,7 +31,7 @@ class ncRenderQueue
 	/// Returns the number of commands to render a specified category of commands
 	inline unsigned int NumCommands(ncRenderCommand::eCommandType eType) const { return m_uTypedLastNumCommands[eType]; }
 
- private:
+  private:
 	/// The current sum of vertices for every command in the queue
 	unsigned int m_uNumVertices;
 	/// The sum of vertices in the previous frame (it never contains a partial sum)

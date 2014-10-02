@@ -7,7 +7,7 @@
 /// Information about SDL mouse state
 class ncSDLMouseState : public ncMouseState
 {
- public:
+  public:
 	ncSDLMouseState() : m_ubButtons(0) { }
 
 	inline bool isLeftButtonDown() const { return (m_ubButtons & LEFT_BUTTON); }
@@ -16,7 +16,7 @@ class ncSDLMouseState : public ncMouseState
 	inline bool isWheelUpButtonDown() const { return (m_ubButtons & WHEELUP_BUTTON); }
 	inline bool isWheelDownButtonDown() const { return (m_ubButtons & WHEELDOWN_BUTTON); }
 
- private:
+  private:
 	// Extracted from SDL/SDL_mouse.h
 	enum eMouseButtonMask
 	{
@@ -35,7 +35,7 @@ class ncSDLMouseState : public ncMouseState
 /// Information about an SDL mouse event
 class ncSDLMouseEvent : public ncMouseEvent
 {
- public:
+  public:
 	ncSDLMouseEvent() : m_ubButton(0) { }
 
 	inline bool isLeftButton() const { return m_ubButton == LEFT_BUTTON; }
@@ -44,7 +44,7 @@ class ncSDLMouseEvent : public ncMouseEvent
 	inline bool isWheelUpButton() const { return m_ubButton == WHEELUP_BUTTON; }
 	inline bool isWheelDownButton() const { return m_ubButton == WHEELDOWN_BUTTON; }
 
- private:
+  private:
 	// Extracted from SDL/SDL_mouse.h
 	enum eMouseButtonIndex
 	{
@@ -63,21 +63,21 @@ class ncSDLMouseEvent : public ncMouseEvent
 /// Information about SDL keyboard state
 class ncSDLKeyboardState : public ncKeyboardState
 {
- public:
+  public:
 	ncSDLKeyboardState() { m_ubKeyState = SDL_GetKeyState(NULL); }
 
 	inline bool isKeyDown(ncKeySym key) const { return m_ubKeyState[key]; }
 
 	friend class ncSDLInputManager;
 
- private:
+  private:
 	unsigned char* m_ubKeyState;
 };
 
 /// The class for parsing and dispatching SDL input events
 class ncSDLInputManager : public ncIInputManager
 {
- public:
+  public:
 	// The constructor takes care of opening available joysticks
 	ncSDLInputManager();
 	// The destructor releases every opened joystick
@@ -101,7 +101,7 @@ class ncSDLInputManager : public ncIInputManager
 	short int JoyAxisValue(int iJoyId, int iAxisId) const;
 	float JoyAxisNormValue(int iJoyId, int iAxisId) const;
 
- private:
+  private:
 	static const unsigned int s_uMaxNumJoysticks = 16;
 
 	static ncSDLMouseState s_mouseState;
