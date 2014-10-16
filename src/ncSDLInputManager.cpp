@@ -10,15 +10,15 @@
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-ncIInputEventHandler* ncIInputManager::s_pInputEventHandler = NULL;
-ncSDLMouseState ncSDLInputManager::s_mouseState;
-ncSDLMouseEvent ncSDLInputManager::s_mouseEvent;
-ncSDLKeyboardState ncSDLInputManager::s_keyboardState;
-ncKeyboardEvent	ncSDLInputManager::s_keyboardEvent;
-short int ncIInputManager::s_iMaxAxisValue = 32767;
-SDL_Joystick* ncSDLInputManager::s_pJoysticks[s_uMaxNumJoysticks];
-ncJoyButtonEvent ncSDLInputManager::s_joyButtonEvent;
-ncJoyAxisEvent ncSDLInputManager::s_joyAxisEvent;
+ncIInputEventHandler* ncIInputManager::inputEventHandler_ = NULL;
+ncSDLMouseState ncSDLInputManager::mouseState_;
+ncSDLMouseEvent ncSDLInputManager::mouseEvent_;
+ncSDLKeyboardState ncSDLInputManager::keyboardState_;
+ncKeyboardEvent	ncSDLInputManager::keyboardEvent_;
+short int ncIInputManager::MaxAxisValue = 32767;
+SDL_Joystick* ncSDLInputManager::sdlJoysticks_[MaxNumJoysticks];
+ncJoyButtonEvent ncSDLInputManager::joyButtonEvent_;
+ncJoyAxisEvent ncSDLInputManager::joyAxisEvent_;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -29,7 +29,7 @@ ncSDLInputManager::ncSDLInputManager()
 {
 	if (SDL_WasInit(SDL_INIT_VIDEO) == 0)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncSDLInputManager::ncSDLInputManager - SDL video subsystem is not initialized");
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncSDLInputManager::ncSDLInputManager - SDL video subsystem is not initialized");
 		exit(-1);
 	}
 
@@ -38,20 +38,20 @@ ncSDLInputManager::ncSDLInputManager()
 	// Enabling joystick event processing
 	SDL_JoystickEventState(SDL_ENABLE);
 
-	memset(s_pJoysticks, 0, sizeof(SDL_Joystick *) * s_uMaxNumJoysticks);
+	memset(sdlJoysticks_, 0, sizeof(SDL_Joystick *) * MaxNumJoysticks);
 
 	// Opening attached joysticks
-	int iNumJoysticks = SDL_NumJoysticks();
-	if (iNumJoysticks > 0)
+	int numJoysticks = SDL_NumJoysticks();
+	if (numJoysticks > 0)
 	{
-		for (int i = 0; i < iNumJoysticks; i++)
+		for (int i = 0; i < numJoysticks; i++)
 		{
-			s_pJoysticks[i] = SDL_JoystickOpen(i);
-			if (s_pJoysticks[i])
+			sdlJoysticks_[i] = SDL_JoystickOpen(i);
+			if (sdlJoysticks_[i])
 			{
-				SDL_Joystick *pJoy = s_pJoysticks[i];
-				ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncSDLInputManager::ncSDLInputManager - Joystick %d: %s - %d hats, %d axes, %d buttons, %d balls",
-					 i, SDL_JoystickName(i), SDL_JoystickNumHats(pJoy), SDL_JoystickNumAxes(pJoy), SDL_JoystickNumButtons(pJoy), SDL_JoystickNumBalls(pJoy));
+				SDL_Joystick *sdlJoy = sdlJoysticks_[i];
+				ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncSDLInputManager::ncSDLInputManager - Joystick %d: %s - %d hats, %d axes, %d buttons, %d balls",
+					 i, SDL_JoystickName(i), SDL_JoystickNumHats(sdlJoy), SDL_JoystickNumAxes(sdlJoy), SDL_JoystickNumButtons(sdlJoy), SDL_JoystickNumBalls(sdlJoy));
 			}
 		}
 	}
@@ -61,12 +61,12 @@ ncSDLInputManager::ncSDLInputManager()
 ncSDLInputManager::~ncSDLInputManager()
 {
 	// Close a joystick if opened
-	for (unsigned int i = 0; i < s_uMaxNumJoysticks; i++)
+	for (unsigned int i = 0; i < MaxNumJoysticks; i++)
 	{
 		if (isJoyPresent(i))
 		{
-			SDL_JoystickClose(s_pJoysticks[i]);
-			s_pJoysticks[i] = NULL;
+			SDL_JoystickClose(sdlJoysticks_[i]);
+			sdlJoysticks_[i] = NULL;
 		}
 
 	}
@@ -76,9 +76,9 @@ ncSDLInputManager::~ncSDLInputManager()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncSDLInputManager::ParseEvent(const SDL_Event &event)
+void ncSDLInputManager::parseEvent(const SDL_Event &event)
 {
-	if (s_pInputEventHandler == NULL)
+	if (inputEventHandler_ == NULL)
 	{
 		return;
 	}
@@ -88,36 +88,36 @@ void ncSDLInputManager::ParseEvent(const SDL_Event &event)
 	{
 		case SDL_KEYDOWN:
 		case SDL_KEYUP:
-			s_keyboardEvent.scancode = event.key.keysym.scancode;
-			s_keyboardEvent.sym = ncKeySym(event.key.keysym.sym);
-			s_keyboardEvent.mod = event.key.keysym.mod;
-			s_keyboardEvent.unicode = event.key.keysym.unicode;
+			keyboardEvent_.scancode = event.key.keysym.scancode;
+			keyboardEvent_.sym = ncKeySym(event.key.keysym.sym);
+			keyboardEvent_.mod = event.key.keysym.mod;
+			keyboardEvent_.unicode = event.key.keysym.unicode;
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
-			s_mouseEvent.x = event.button.x;
-			s_mouseEvent.y = ncApplication::Height() - event.button.y;
-			s_mouseEvent.m_ubButton = event.button.button;
+			mouseEvent_.x = event.button.x;
+			mouseEvent_.y = ncApplication::height() - event.button.y;
+			mouseEvent_.button_ = event.button.button;
 			break;
 		case SDL_MOUSEMOTION:
-			s_mouseState.x = event.motion.x;
-			s_mouseState.y = ncApplication::Height() - event.motion.y;
-			s_mouseState.m_ubButtons = event.motion.state;
+			mouseState_.x = event.motion.x;
+			mouseState_.y = ncApplication::height() - event.motion.y;
+			mouseState_.buttons_ = event.motion.state;
 			break;
 		case SDL_JOYBUTTONDOWN:
 		case SDL_JOYBUTTONUP:
-			s_joyButtonEvent.joyId = event.jbutton.which;
-			s_joyButtonEvent.buttonId = event.jbutton.button;
+			joyButtonEvent_.joyId = event.jbutton.which;
+			joyButtonEvent_.buttonId = event.jbutton.button;
 			break;
 		case SDL_JOYAXISMOTION:
-			s_joyAxisEvent.joyId = event.jaxis.which;
-			s_joyAxisEvent.axisId = event.jaxis.axis;
-			s_joyAxisEvent.value = event.jaxis.value;
-			s_joyAxisEvent.normValue = s_joyAxisEvent.value / float(s_iMaxAxisValue);
+			joyAxisEvent_.joyId = event.jaxis.which;
+			joyAxisEvent_.axisId = event.jaxis.axis;
+			joyAxisEvent_.value = event.jaxis.value;
+			joyAxisEvent_.normValue = joyAxisEvent_.value / float(MaxAxisValue);
 			break;
 		case SDL_JOYHATMOTION:
-			s_joyAxisEvent.joyId = event.jhat.which;
-			s_joyAxisEvent.axisId = SDL_JoystickNumAxes(s_pJoysticks[event.jhat.which]) + event.jhat.hat;
+			joyAxisEvent_.joyId = event.jhat.which;
+			joyAxisEvent_.axisId = SDL_JoystickNumAxes(sdlJoysticks_[event.jhat.which]) + event.jhat.hat;
 			break;
 		default:
 			break;
@@ -127,48 +127,48 @@ void ncSDLInputManager::ParseEvent(const SDL_Event &event)
 	switch (event.type)
 	{
 		case SDL_KEYDOWN:
-			s_pInputEventHandler->OnKeyPressed(s_keyboardEvent);
+			inputEventHandler_->onKeyPressed(keyboardEvent_);
 			break;
 		case SDL_KEYUP:
-			s_pInputEventHandler->OnKeyReleased(s_keyboardEvent);
+			inputEventHandler_->onKeyReleased(keyboardEvent_);
 			break;
 		case SDL_MOUSEBUTTONDOWN:
-			s_pInputEventHandler->OnMouseButtonPressed(s_mouseEvent);
+			inputEventHandler_->onMouseButtonPressed(mouseEvent_);
 			break;
 		case SDL_MOUSEBUTTONUP:
-			s_pInputEventHandler->OnMouseButtonReleased(s_mouseEvent);
+			inputEventHandler_->onMouseButtonReleased(mouseEvent_);
 			break;
 		case SDL_MOUSEMOTION:
-			s_pInputEventHandler->OnMouseMoved(s_mouseState);
+			inputEventHandler_->onMouseMoved(mouseState_);
 			break;
 		case SDL_JOYBUTTONDOWN:
-			s_pInputEventHandler->OnJoyButtonPressed(s_joyButtonEvent);
+			inputEventHandler_->onJoyButtonPressed(joyButtonEvent_);
 			break;
 		case SDL_JOYBUTTONUP:
-			s_pInputEventHandler->OnJoyButtonReleased(s_joyButtonEvent);
+			inputEventHandler_->onJoyButtonReleased(joyButtonEvent_);
 			break;
 		case SDL_JOYAXISMOTION:
-			s_pInputEventHandler->OnJoyAxisMoved(s_joyAxisEvent);
+			inputEventHandler_->onJoyAxisMoved(joyAxisEvent_);
 			break;
 		case SDL_JOYHATMOTION:
 			// HACK: Always splitting a hat event into two axis ones,
 			// even if the value of one of the two axes doesn't change
-			s_joyAxisEvent.value = HatEnumToAxisValue(event.jhat.value, false);
-			s_joyAxisEvent.normValue = s_joyAxisEvent.value / float(s_iMaxAxisValue);
-			s_pInputEventHandler->OnJoyAxisMoved(s_joyAxisEvent);
-			s_joyAxisEvent.axisId++;
-			s_joyAxisEvent.value = HatEnumToAxisValue(event.jhat.value, true);
-			s_joyAxisEvent.normValue = s_joyAxisEvent.value / float(s_iMaxAxisValue);
-			s_pInputEventHandler->OnJoyAxisMoved(s_joyAxisEvent);
+			joyAxisEvent_.value = hatEnumToAxisValue(event.jhat.value, false);
+			joyAxisEvent_.normValue = joyAxisEvent_.value / float(MaxAxisValue);
+			inputEventHandler_->onJoyAxisMoved(joyAxisEvent_);
+			joyAxisEvent_.axisId++;
+			joyAxisEvent_.value = hatEnumToAxisValue(event.jhat.value, true);
+			joyAxisEvent_.normValue = joyAxisEvent_.value / float(MaxAxisValue);
+			inputEventHandler_->onJoyAxisMoved(joyAxisEvent_);
 			break;
 		default:
 			break;
 	}
 }
 
-bool ncSDLInputManager::isJoyPresent(int iJoyId) const
+bool ncSDLInputManager::isJoyPresent(int joyId) const
 {
-	if (iJoyId >= 0 && iJoyId < int(s_uMaxNumJoysticks) && SDL_JoystickOpened(iJoyId) && s_pJoysticks[iJoyId])
+	if (joyId >= 0 && joyId < int(MaxNumJoysticks) && SDL_JoystickOpened(joyId) && sdlJoysticks_[joyId])
 	{
 		return true;
 	}
@@ -178,11 +178,11 @@ bool ncSDLInputManager::isJoyPresent(int iJoyId) const
 	}
 }
 
-const char *ncSDLInputManager::JoyName(int iJoyId) const
+const char *ncSDLInputManager::joyName(int joyId) const
 {
-	if (isJoyPresent(iJoyId))
+	if (isJoyPresent(joyId))
 	{
-		return SDL_JoystickName(iJoyId);
+		return SDL_JoystickName(joyId);
 	}
 	else
 	{
@@ -190,35 +190,35 @@ const char *ncSDLInputManager::JoyName(int iJoyId) const
 	}
 }
 
-int ncSDLInputManager::JoyNumButtons(int iJoyId) const
+int ncSDLInputManager::joyNumButtons(int joyId) const
 {
-	int iNumButtons = -1;
+	int numButtons = -1;
 
-	if (isJoyPresent(iJoyId))
+	if (isJoyPresent(joyId))
 	{
-		iNumButtons = SDL_JoystickNumButtons(s_pJoysticks[iJoyId]);
+		numButtons = SDL_JoystickNumButtons(sdlJoysticks_[joyId]);
 	}
 
-	return iNumButtons;
+	return numButtons;
 }
 
-int ncSDLInputManager::JoyNumAxes(int iJoyId) const
+int ncSDLInputManager::joyNumAxes(int joyId) const
 {
-	int iNumAxes = -1;
+	int numAxes = -1;
 
-	if (isJoyPresent(iJoyId))
+	if (isJoyPresent(joyId))
 	{
-		iNumAxes = SDL_JoystickNumAxes(s_pJoysticks[iJoyId]) + (SDL_JoystickNumHats(s_pJoysticks[iJoyId]) * 2);
+		numAxes = SDL_JoystickNumAxes(sdlJoysticks_[joyId]) + (SDL_JoystickNumHats(sdlJoysticks_[joyId]) * 2);
 	}
 
-	return iNumAxes;
+	return numAxes;
 }
 
-bool ncSDLInputManager::isJoyButtonPressed(int iJoyId, int iButtonId) const
+bool ncSDLInputManager::isJoyButtonPressed(int joyId, int buttonId) const
 {
-	if (isJoyPresent(iJoyId))
+	if (isJoyPresent(joyId))
 	{
-		return SDL_JoystickGetButton(s_pJoysticks[iJoyId], iButtonId);
+		return SDL_JoystickGetButton(sdlJoysticks_[joyId], buttonId);
 	}
 	else
 	{
@@ -226,68 +226,68 @@ bool ncSDLInputManager::isJoyButtonPressed(int iJoyId, int iButtonId) const
 	}
 }
 
-short int ncSDLInputManager::JoyAxisValue(int iJoyId, int iAxisId) const
+short int ncSDLInputManager::joyAxisValue(int joyId, int axisId) const
 {
-	short int iRetValue = 0;
+	short int axisValue = 0;
 
-	if (isJoyPresent(iJoyId))
+	if (isJoyPresent(joyId))
 	{
-		int iNumAxes = SDL_JoystickNumAxes(s_pJoysticks[iJoyId]);
-		if (iAxisId < iNumAxes) // iAxisId is an analog axis
+		int numAxes = SDL_JoystickNumAxes(sdlJoysticks_[joyId]);
+		if (axisId < numAxes) // axisId is an analog axis
 		{
-			iRetValue = SDL_JoystickGetAxis(s_pJoysticks[iJoyId], iAxisId);
+			axisValue = SDL_JoystickGetAxis(sdlJoysticks_[joyId], axisId);
 		}
-		else // iAxisId is a digital d-pad
+		else // axisId is a digital d-pad
 		{
-			int iHatId = (iAxisId - iNumAxes) / 2;
-			unsigned char ubHatState = SDL_JoystickGetHat(s_pJoysticks[iJoyId], iHatId);
-			bool bUpDownAxis = ((iAxisId - iNumAxes) % 2); // odd axis is left-right, even axis is down-up
+			int hatId = (axisId - numAxes) / 2;
+			unsigned char hatState = SDL_JoystickGetHat(sdlJoysticks_[joyId], hatId);
+			bool upDownAxis = ((axisId - numAxes) % 2); // odd axis is left-right, even axis is down-up
 
-			iRetValue = HatEnumToAxisValue(ubHatState, bUpDownAxis);
+			axisValue = hatEnumToAxisValue(hatState, upDownAxis);
 		}
 	}
 
-	return iRetValue;
+	return axisValue;
 }
 
-float ncSDLInputManager::JoyAxisNormValue(int iJoyId, int iAxisId) const
+float ncSDLInputManager::joyAxisNormValue(int joyId, int axisId) const
 {
 	// If the joystick is not present the returned value is zero
-	float fAxisValue = JoyAxisValue(iJoyId, iAxisId) / float(s_iMaxAxisValue);
+	float axisValue = joyAxisValue(joyId, axisId) / float(MaxAxisValue);
 
-	return fAxisValue;
+	return axisValue;
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 //////////////////////////////////////////////////////////
 
-short int ncSDLInputManager::HatEnumToAxisValue(unsigned char ubHatState, bool bUpDownAxis)
+short int ncSDLInputManager::hatEnumToAxisValue(unsigned char hatState, bool upDownAxis)
 {
-	short int iRetValue = 0;
+	short int axisValue = 0;
 
-	if (bUpDownAxis == false) // odd axis is left-right
+	if (upDownAxis == false) // odd axis is left-right
 	{
-		if (ubHatState == SDL_HAT_LEFT || ubHatState == SDL_HAT_LEFTUP || ubHatState == SDL_HAT_LEFTDOWN)
+		if (hatState == SDL_HAT_LEFT || hatState == SDL_HAT_LEFTUP || hatState == SDL_HAT_LEFTDOWN)
 		{
-			iRetValue = -s_iMaxAxisValue;
+			axisValue = -MaxAxisValue;
 		}
-		else if (ubHatState == SDL_HAT_RIGHT || ubHatState == SDL_HAT_RIGHTDOWN || ubHatState == SDL_HAT_RIGHTUP)
+		else if (hatState == SDL_HAT_RIGHT || hatState == SDL_HAT_RIGHTDOWN || hatState == SDL_HAT_RIGHTUP)
 		{
-			iRetValue = s_iMaxAxisValue;
+			axisValue = MaxAxisValue;
 		}
 	}
 	else // even axis is down-up
 	{
-		if (ubHatState == SDL_HAT_DOWN || ubHatState == SDL_HAT_RIGHTDOWN || ubHatState == SDL_HAT_LEFTDOWN)
+		if (hatState == SDL_HAT_DOWN || hatState == SDL_HAT_RIGHTDOWN || hatState == SDL_HAT_LEFTDOWN)
 		{
-			iRetValue = -s_iMaxAxisValue;
+			axisValue = -MaxAxisValue;
 		}
-		else if (ubHatState == SDL_HAT_UP || ubHatState == SDL_HAT_RIGHTUP || ubHatState == SDL_HAT_LEFTUP)
+		else if (hatState == SDL_HAT_UP || hatState == SDL_HAT_RIGHTUP || hatState == SDL_HAT_LEFTUP)
 		{
-			iRetValue = s_iMaxAxisValue;
+			axisValue = MaxAxisValue;
 		}
 	}
 
-	return iRetValue;
+	return axisValue;
 }

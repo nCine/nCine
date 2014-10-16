@@ -9,20 +9,20 @@ class ncAudioStreamPlayer : public ncIAudioPlayer
 {
   public:
 	// A constructor creating a player from a file
-	ncAudioStreamPlayer(const char *pFilename);
+	ncAudioStreamPlayer(const char *filename);
 	virtual ~ncAudioStreamPlayer();
 
-	virtual void Play();
-	virtual void Pause();
-	virtual void Stop();
+	virtual void play();
+	virtual void pause();
+	virtual void stop();
 
 	// Updates the player state and the stream buffer queue
-	virtual void UpdateState();
+	virtual void updateState();
 
-	inline static eObjectType sType() { return AUDIOSTREAMPLAYER_TYPE; }
+	inline static ObjectType sType() { return AUDIOSTREAMPLAYER_TYPE; }
 
   private:
-	ncAudioStream m_stream;
+	ncAudioStream audioStream_;
 };
 
 #endif

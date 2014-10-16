@@ -79,3 +79,8 @@ nCine is a multi-platform 2d game engine
 - Declarations order: typedefs and enums, data members, constructors, destructors, methods
   - Friend defined in the private section of a class, after everything else
 - One space padding around operators
+
+#### Naming conventions
+- Pascal case for classes, enumerations, typedefs and constants
+- Camel case for variables, functions and parameters
+- All upper case for enumerators in an enumeration

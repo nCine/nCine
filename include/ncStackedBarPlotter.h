@@ -7,23 +7,23 @@
 class ncStackedBarVariable : public ncPlottingVariable
 {
   public:
-	ncStackedBarVariable(unsigned int uNumValues, float fRejectDelay);
+	ncStackedBarVariable(unsigned int numValues, float rejectDelay);
 
   private:
-	virtual void UpdateRenderCommand();
-	virtual void UpdateMeanRenderCommand();
+	virtual void updateRenderCommand();
+	virtual void updateMeanRenderCommand();
 };
 
 /// A class that plots variables as stacked histograms
 class ncStackedBarPlotter : public ncProfilePlotter
 {
   public:
-	ncStackedBarPlotter(ncSceneNode* pParent, ncRect rect) : ncProfilePlotter(pParent, rect) { }
+	ncStackedBarPlotter(ncSceneNode* parent, ncRect rect) : ncProfilePlotter(parent, rect) { }
 
-	virtual unsigned int AddVariable(unsigned int uNumValues, float fRejectDelay);
+	virtual unsigned int addVariable(unsigned int numValues, float rejectDelay);
 	// Fill the buffer of every stacked variable with vertices
-	void UpdateAllVertices(int x, int y, int w, int h);
-	virtual void Draw(ncRenderQueue& rRenderQueue);
+	void updateAllVertices(int x, int y, int w, int h);
+	virtual void draw(ncRenderQueue& renderQueue);
 };
 
 #endif

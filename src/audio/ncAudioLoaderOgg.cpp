@@ -8,27 +8,27 @@
 
 size_t asset_read(void *ptr, size_t size, size_t nmemb, void *datasource)
 {
-	ncAssetFile *pAssetFile = static_cast<ncAssetFile *>(datasource);
-	return pAssetFile->Read(ptr, size * nmemb);
+	ncAssetFile *assetFile = static_cast<ncAssetFile *>(datasource);
+	return assetFile->read(ptr, size * nmemb);
 }
 
 int asset_seek(void *datasource, ogg_int64_t offset, int whence)
 {
-	ncAssetFile *pAssetFile = static_cast<ncAssetFile *>(datasource);
-	return pAssetFile->Seek(offset, whence);
+	ncAssetFile *assetFile = static_cast<ncAssetFile *>(datasource);
+	return assetFile->seek(offset, whence);
 }
 
 int asset_close(void *datasource)
 {
-	ncAssetFile *pAssetFile = static_cast<ncAssetFile *>(datasource);
-	pAssetFile->Close();
+	ncAssetFile *assetFile = static_cast<ncAssetFile *>(datasource);
+	assetFile->close();
 	return 0;
 }
 
 long asset_tell(void *datasource)
 {
-	ncAssetFile *pAssetFile = static_cast<ncAssetFile *>(datasource);
-	return pAssetFile->Tell();
+	ncAssetFile *assetFile = static_cast<ncAssetFile *>(datasource);
+	return assetFile->tell();
 }
 
 ov_callbacks oggCallbacks = { asset_read, asset_seek, asset_close, asset_tell };
@@ -38,121 +38,120 @@ ov_callbacks oggCallbacks = { asset_read, asset_seek, asset_close, asset_tell };
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncAudioLoaderOgg::ncAudioLoaderOgg(const char *pFilename)
-	: ncIAudioLoader(pFilename)
+ncAudioLoaderOgg::ncAudioLoaderOgg(const char *filename)
+	: ncIAudioLoader(filename)
 {
-	Init();
+	init();
 }
 
-ncAudioLoaderOgg::ncAudioLoaderOgg(ncIFile *pFileHandle)
-	: ncIAudioLoader(pFileHandle)
+ncAudioLoaderOgg::ncAudioLoaderOgg(ncIFile *fileHandle)
+	: ncIAudioLoader(fileHandle)
 {
-	Init();
+	init();
 }
 
 ncAudioLoaderOgg::~ncAudioLoaderOgg()
 {
-	ov_clear(&m_oggFile);
+	ov_clear(&oggFile_);
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-long ncAudioLoaderOgg::Read(char *pBuffer, int iBufSize) const
+long ncAudioLoaderOgg::read(char *buffer, int bufferSize) const
 {
-	static int iBitStream = 0;
-	long lBytes;
-	long int lBufSeek = 0;
+	static int bitStream = 0;
+	long bytes;
+	long int bufferSeek = 0;
 
 	do
 	{
 		// Read up to a buffer's worth of decoded sound data
 #ifdef __ANDROID__
-		lBytes = ov_read(&m_oggFile, pBuffer + lBufSeek, iBufSize - lBufSeek, &iBitStream);
+		bytes = ov_read(&oggFile_, buffer + bufferSeek, bufferSize - bufferSeek, &bitStream);
 #else
 		// 0 - little endian, 2 - 16bit, 1 - signed
-		lBytes = ov_read(&m_oggFile, pBuffer + lBufSeek, iBufSize - lBufSeek, 0, 2, 1, &iBitStream);
+		bytes = ov_read(&oggFile_, buffer + bufferSeek, bufferSize - bufferSeek, 0, 2, 1, &bitStream);
 #endif
 
-		if (lBytes < 0)
+		if (bytes < 0)
 		{
-			ov_clear(&m_oggFile);
-			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::Read - Error decoding at bitstream %d", iBitStream);
+			ov_clear(&oggFile_);
+			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::read - Error decoding at bitstream %d", bitStream);
 			exit(EXIT_FAILURE);
 		}
 
 		// Reset the static variable at the end of a decoding process
-		if (lBytes <= 0)
+		if (bytes <= 0)
 		{
-			iBitStream = 0;
+			bitStream = 0;
 		}
 
-		lBufSeek += lBytes;
-	}
-	while (lBytes > 0 && iBufSize - lBufSeek > 0);
+		bufferSeek += bytes;
+	} while (bytes > 0 && bufferSize - bufferSeek > 0);
 
-	return lBufSeek;
+	return bufferSeek;
 }
 
-void ncAudioLoaderOgg::Rewind() const
+void ncAudioLoaderOgg::rewind() const
 {
-	ov_raw_seek(&m_oggFile, 0);
+	ov_raw_seek(&oggFile_, 0);
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncAudioLoaderOgg::Init()
+void ncAudioLoaderOgg::init()
 {
-	vorbis_info *pInfo;
+	vorbis_info *info;
 
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAudioLoaderOgg::Init - Loading \"%s\"", m_pFileHandle->Filename());
+	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAudioLoaderOgg::init - Loading \"%s\"", fileHandle_->filename());
 
 	// File is closed by ov_clear()
-	m_pFileHandle->SetCloseOnExit(false);
+	fileHandle_->setCloseOnExit(false);
 
 #ifdef __ANDROID__
-	if (m_pFileHandle->Type() == ncAssetFile::sType())
+	if (fileHandle_->type() == ncAssetFile::sType())
 	{
-		m_pFileHandle->Open(ncIFile::MODE_FD | ncIFile::MODE_READ);
+		fileHandle_->open(ncIFile::MODE_FD | ncIFile::MODE_READ);
 
-		if (ov_open_callbacks(m_pFileHandle, &m_oggFile, NULL, 0, oggCallbacks) != 0)
+		if (ov_open_callbacks(fileHandle_, &oggFile_, NULL, 0, oggCallbacks) != 0)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::Init - Cannot open \"%s\" with ov_open_callbacks()", m_pFileHandle->Filename());
-			m_pFileHandle->Close();
+			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::init - Cannot open \"%s\" with ov_open_callbacks()", fileHandle_->filename());
+			fileHandle_->close();
 			exit(EXIT_FAILURE);
 		}
 	}
 	else
 	{
-		m_pFileHandle->Open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
+		fileHandle_->open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
 
-		if (ov_open(m_pFileHandle->Ptr(), &m_oggFile, NULL, 0) != 0)
+		if (ov_open(fileHandle_->ptr(), &oggFile_, NULL, 0) != 0)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::Init - Cannot open \"%s\" with ov_open()", m_pFileHandle->Filename());
-			m_pFileHandle->Close();
+			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::init - Cannot open \"%s\" with ov_open()", fileHandle_->filename());
+			fileHandle_->close();
 			exit(EXIT_FAILURE);
 		}
 	}
 #else
-	if (ov_fopen(m_pFileHandle->Filename(), &m_oggFile) != 0)
+	if (ov_fopen(fileHandle_->filename(), &oggFile_) != 0)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::Init - Cannot open \"%s\" with ov_fopen()", m_pFileHandle->Filename());
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::init - Cannot open \"%s\" with ov_fopen()", fileHandle_->filename());
 		exit(EXIT_FAILURE);
 	}
 #endif
 
 	// Get some information about the OGG file
-	pInfo = ov_info(&m_oggFile, -1);
+	info = ov_info(&oggFile_, -1);
 
-	m_iBytesPerSample = 2; // Ogg is always 16 bits
-	m_iChannels = pInfo->channels;
-	m_iFrequency = pInfo->rate;
+	bytesPerSample_ = 2; // Ogg is always 16 bits
+	numChannels_ = info->channels;
+	frequency_ = info->rate;
 
-	m_ulNumSamples = ov_pcm_total(&m_oggFile, -1);
-	m_fDuration = float(ov_time_total(&m_oggFile, -1));
+	numSamples_ = ov_pcm_total(&oggFile_, -1);
+	duration_ = float(ov_time_total(&oggFile_, -1));
 
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAudioLoaderOgg::Init - duration: %.2f, channels: %d, frequency: %d", m_fDuration, m_iChannels, m_iFrequency);
+	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAudioLoaderOgg::init - duration: %.2f, channels: %d, frequency: %d", duration_, numChannels_, frequency_);
 }

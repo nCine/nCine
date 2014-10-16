@@ -5,21 +5,21 @@
 ///////////////////////////////////////////////////////////
 
 ncArrayIndexer::ncArrayIndexer()
-	: m_uNextId(0), m_vPointers(16)
+	: nextId_(0), pointers_(16)
 {
 	// First element reserved
-	m_vPointers.InsertBack(NULL);
-	m_uNextId++;
+	pointers_.insertBack(NULL);
+	nextId_++;
 }
 
 ncArrayIndexer::~ncArrayIndexer()
 {
-	for (unsigned int i = 0; i < m_vPointers.Size(); i++)
+	for (unsigned int i = 0; i < pointers_.size(); i++)
 	{
-		if (m_vPointers[i])
+		if (pointers_[i])
 		{
-			delete m_vPointers[i];
-			m_vPointers[i] = NULL;
+			delete pointers_[i];
+			pointers_[i] = NULL;
 		}
 	}
 

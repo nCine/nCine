@@ -10,25 +10,25 @@ class ncIThreadCommand
   public:
 	virtual ~ncIThreadCommand() { }
 
-	virtual void Execute() = 0;
+	virtual void execute() = 0;
 };
 
 /// A dummy thread command for testing
 class ncDummyCommand : public ncIThreadCommand
 {
   public:
-	ncDummyCommand(unsigned int uRequestCode) : m_uRequestCode(uRequestCode) { }
+	ncDummyCommand(unsigned int requestCode) : requestCode_(requestCode) { }
 
-	void Execute();
+	void execute();
 
   private:
-	unsigned int m_uRequestCode;
+	unsigned int requestCode_;
 };
 
-inline void ncDummyCommand::Execute()
+inline void ncDummyCommand::execute()
 {
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncDummyCommand::Execute - worker thread %u got request code %u",
-		ncThread::Self(), m_uRequestCode);
+	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncDummyCommand::execute - worker thread %u got request code %u",
+		ncThread::self(), requestCode_);
 }
 
 #endif

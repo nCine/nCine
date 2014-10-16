@@ -9,30 +9,30 @@
 
 /// Creates a thread pool with as many threads as available processors
 ncThreadPool::ncThreadPool()
-	: m_pThreads(NULL)
+	: threads_(NULL)
 {
-	m_uNumThreads = ncThread::NumProcessors();
-	Init();
+	numThreads_ = ncThread::numProcessors();
+	init();
 }
 
 /// Creates a thread pool with a specified number of threads
-ncThreadPool::ncThreadPool(unsigned int uNumThreads)
-	: m_pThreads(NULL), m_uNumThreads(uNumThreads)
+ncThreadPool::ncThreadPool(unsigned int numThreads)
+	: threads_(NULL), numThreads_(numThreads)
 {
-	Init();
+	init();
 }
 
 ncThreadPool::~ncThreadPool()
 {
-	m_threadStruct.bShouldQuit = true;
-	m_queueCV.Broadcast();
+	threadStruct_.shouldQuit = true;
+	queueCV_.broadcast();
 
-	for (unsigned int i = 0; i < m_uNumThreads; i++)
+	for (unsigned int i = 0; i < numThreads_; i++)
 	{
-		m_pThreads[i].Join();
+		threads_[i].join();
 	}
 
-	delete[] m_pThreads;
+	delete[] threads_;
 }
 
 ///////////////////////////////////////////////////////////
@@ -41,62 +41,62 @@ ncThreadPool::~ncThreadPool()
 
 /// Enqueues a command request for a worker thread
 /*! The command should be allocated on the heap for the worker thread to release it after its execution */
-void ncThreadPool::EnqueueCommand(ncIThreadCommand *pThreadCommand)
+void ncThreadPool::enqueueCommand(ncIThreadCommand *pThreadCommand)
 {
-	m_queueMutex.Lock();
-	m_queue.InsertBack(pThreadCommand);
-	m_queueCV.Broadcast();
-	m_queueMutex.Unlock();
+	queueMutex_.lock();
+	queue_.insertBack(pThreadCommand);
+	queueCV_.broadcast();
+	queueMutex_.unlock();
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncThreadPool::Init()
+void ncThreadPool::init()
 {
-	m_pThreads = new ncThread[m_uNumThreads];
+	threads_ = new ncThread[numThreads_];
 
-	m_threadStruct.pQueue = &m_queue;
-	m_threadStruct.pQueueMutex = &m_queueMutex;
-	m_threadStruct.pQueueCV = &m_queueCV;
-	m_threadStruct.bShouldQuit = false;
+	threadStruct_.queue = &queue_;
+	threadStruct_.queueMutex = &queueMutex_;
+	threadStruct_.queueCV = &queueCV_;
+	threadStruct_.shouldQuit = false;
 
-	m_quitMutex.Lock();
+	quitMutex_.lock();
 
-	for (unsigned int i = 0; i < m_uNumThreads; i++)
+	for (unsigned int i = 0; i < numThreads_; i++)
 	{
-		m_pThreads[i].Run(WorkerFunction, &m_threadStruct);
+		threads_[i].run(workerFunction, &threadStruct_);
 	}
 }
 
-void ncThreadPool::WorkerFunction(void *pArg)
+void ncThreadPool::workerFunction(void *arg)
 {
-	ncIThreadCommand *pThreadCommand = NULL;
-	ncThreadStruct *pThreadStruct = static_cast<ncThreadStruct *>(pArg);
+	ncIThreadCommand *threadCommand = NULL;
+	ncThreadStruct *threadStruct = static_cast<ncThreadStruct *>(arg);
 
-	ncServiceLocator::Logger().Write(ncILogger::LOG_DEBUG, (const char *)"ncThreadPool::WorkerFunction - worker thread %u is starting", ncThread::Self());
+	ncServiceLocator::logger().write(ncILogger::LOG_DEBUG, (const char *)"ncThreadPool::workerFunction - worker thread %u is starting", ncThread::self());
 
 	while (true)
 	{
-		pThreadStruct->pQueueMutex->Lock();
-		while (pThreadStruct->pQueue->isEmpty() && pThreadStruct->bShouldQuit == false)
+		threadStruct->queueMutex->lock();
+		while (threadStruct->queue->isEmpty() && threadStruct->shouldQuit == false)
 		{
-			pThreadStruct->pQueueCV->Wait(*(pThreadStruct->pQueueMutex));
+			threadStruct->queueCV->wait(*(threadStruct->queueMutex));
 		}
 
-		if (pThreadStruct->bShouldQuit)
+		if (threadStruct->shouldQuit)
 		{
-			pThreadStruct->pQueueMutex->Unlock();
+			threadStruct->queueMutex->unlock();
 			break;
 		}
 
-		pThreadCommand = pThreadStruct->pQueue->RemoveFront();
-		pThreadStruct->pQueueMutex->Unlock();
+		threadCommand = threadStruct->queue->removeFront();
+		threadStruct->queueMutex->unlock();
 
-		pThreadCommand->Execute();
-		delete pThreadCommand;
+		threadCommand->execute();
+		delete threadCommand;
 	}
 
-	ncServiceLocator::Logger().Write(ncILogger::LOG_DEBUG, (const char *)"ncThreadPool::WorkerFunction - worker thread %u is exiting", ncThread::Self());
+	ncServiceLocator::logger().write(ncILogger::LOG_DEBUG, (const char *)"ncThreadPool::workerFunction - worker thread %u is exiting", ncThread::self());
 }

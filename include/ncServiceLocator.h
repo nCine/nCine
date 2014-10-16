@@ -13,48 +13,48 @@ class ncServiceLocator
 {
   public:
 	/// Returns a pointer to the current indexer provider instance
-	static ncIIndexer& Indexer() { return *m_pIndexerService; }
+	static ncIIndexer& indexer() { return *indexerService_; }
 	/// Registers an indexer service provider
-	static void RegisterIndexer(ncIIndexer* pService);
+	static void registerIndexer(ncIIndexer* service);
 
 	/// Returns a pointer to the current logger provider instance
-	static ncILogger& Logger() { return *m_pLoggerService; }
+	static ncILogger& logger() { return *loggerService_; }
 	/// Registers a logger service provider
-	static void RegisterLogger(ncILogger* pService);
+	static void registerLogger(ncILogger* service);
 
 	/// Returns a pointer to the current audio device instance
-	static ncIAudioDevice& AudioDevice() { return *m_pAudioDevice; }
+	static ncIAudioDevice& audioDevice() { return *audioDevice_; }
 	/// Registers an audio device provider
-	static void RegisterAudioDevice(ncIAudioDevice* pService);
+	static void registerAudioDevice(ncIAudioDevice* service);
 
 	/// Returns a pointer to the current thread pool instance
-	static ncIThreadPool& ThreadPool() { return *m_pThreadPool; }
+	static ncIThreadPool& threadPool() { return *threadPool_; }
 	/// Registers an audio device provider
-	static void RegisterThreadPool(ncIThreadPool* pService);
+	static void registerThreadPool(ncIThreadPool* service);
 
 	/// Returns a constant reference to the graphics capabilities class
 	/*! There is no registering process for the ncGfxCapabilities class, no
 	 *  interface and no null version: it is unique and no-op before initialization.
 	 */
-	static const ncGfxCapabilities& GfxCapabilities() { return m_gfxCapabilities; }
+	static const ncGfxCapabilities& gfxCapabilities() { return gfxCapabilities_; }
 
 	// Deletes every registered service reestablishing null ones
-	static void UnregisterAll();
+	static void unregisterAll();
 
   private:
-	static ncIIndexer* m_pIndexerService;
-	static ncNullIndexer m_nullIndexer;
+	static ncIIndexer* indexerService_;
+	static ncNullIndexer nullIndexer_;
 
-	static ncILogger* m_pLoggerService;
-	static ncNullLogger m_nullLogger;
+	static ncILogger* loggerService_;
+	static ncNullLogger nullLogger_;
 
-	static ncIAudioDevice* m_pAudioDevice;
-	static ncNullAudioDevice m_nullAudioDevice;
+	static ncIAudioDevice* audioDevice_;
+	static ncNullAudioDevice nullAudioDevice_;
 
-	static ncIThreadPool* m_pThreadPool;
-	static ncNullThreadPool m_nullThreadPool;
+	static ncIThreadPool* threadPool_;
+	static ncNullThreadPool nullThreadPool_;
 
-	static ncGfxCapabilities m_gfxCapabilities;
+	static ncGfxCapabilities gfxCapabilities_;
 };
 
 #endif

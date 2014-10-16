@@ -11,44 +11,44 @@ class ncIGfxDevice
 	virtual ~ncIGfxDevice() = 0;
 
 	/// Sets screen resolution with two integers
-	virtual void SetResolution(int iWidth, int iHeight) = 0;
+	virtual void setResolution(int width, int height) = 0;
 	/// Sets screen resolution with the Size class
-	virtual void SetResolution(ncPoint size) = 0;
+	virtual void setResolution(ncPoint size) = 0;
 
 	/// Toggles between fullscreen and windowed mode
-	virtual void ToggleFullScreen() { }
+	virtual void toggleFullScreen() { }
 
 	/// Updates the screen swapping back and front buffers
-	virtual void Update() = 0;
+	virtual void update() = 0;
 	/// Clears the screen
-	virtual void Clear();
+	virtual void clear();
 
 	/// Sets the application window title
-	virtual void SetWindowTitle(const char *pWindowTitle) = 0;
+	virtual void setWindowTitle(const char *windowTitle) = 0;
 
 	/// Returns device resolution
-	inline ncPoint Resolution() const { return ncPoint(m_iWidth, m_iHeight); }
+	inline ncPoint resolution() const { return ncPoint(width_, height_); }
 	/// Returns device width
-	inline int Width() const { return m_iWidth; }
+	inline int width() const { return width_; }
 	/// Returns device height
-	inline int Height() const { return m_iHeight; }
+	inline int height() const { return height_; }
 	/// Returns true if the device renders inside a window
-	inline bool isWindowed() const { return m_bIsWindowed; }
+	inline bool isWindowed() const { return isWindowed_; }
 	/// Returns display mode
-	inline const ncDisplayMode& Mode() const { return m_mode; }
+	inline const ncDisplayMode& mode() const { return mode_; }
 
   protected:
 	/// Device width
-	int m_iWidth;
+	int width_;
 	/// Device height
-	int m_iHeight;
+	int height_;
 	/// Display properties
-	ncDisplayMode m_mode;
+	ncDisplayMode mode_;
 	/// Device rendering occurs inside a window
-	bool m_bIsWindowed;
+	bool isWindowed_;
 
 	// Initilizes starting OpenGL state
-	virtual void InitGL();
+	virtual void initGL();
 };
 
 inline ncIGfxDevice::~ncIGfxDevice() { }

@@ -11,112 +11,112 @@ class ncSpriteBatchNode;
 class ncSprite : public ncDrawableNode
 {
   public:
-	ncSprite(ncSceneNode* pParent, ncTexture *pTexture);
-	ncSprite(ncTexture *pTexture);
-	ncSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY);
-	ncSprite(ncTexture *pTexture, int iX, int iY);
+	ncSprite(ncSceneNode* parent, ncTexture *texture);
+	ncSprite(ncTexture *texture);
+	ncSprite(ncSceneNode* parent, ncTexture *texture, int x, int y);
+	ncSprite(ncTexture *texture, int x, int y);
 	virtual ~ncSprite() { }
 
 	/// Returns sprite width
-	inline int Width() const { return m_iWidth; }
+	inline int width() const { return width_; }
 	/// Returns sprite height
-	inline int Height() const { return m_iHeight; }
+	inline int height() const { return height_; }
 	/// Returns sprite size
-	inline ncPoint Size() const	{ return ncPoint(m_iWidth, m_iHeight); }
+	inline ncPoint size() const	{ return ncPoint(width_, height_); }
 	// Returns sprite rectangle
-	ncRect Rect() const;
+	ncRect rect() const;
 
 	/// Sets sprite width
-	inline void SetWidth(int iWidth) { m_iWidth = iWidth; }
+	inline void setWidth(int width) { width_ = width; }
 	/// Sets sprite height
-	inline void SetHeight(int iHeight) { m_iHeight = iHeight; }
+	inline void setHeight(int height) { height_ = height; }
 	/// Sets sprite size
-	inline void SetSize(const ncPoint &rSize)
+	inline void setSize(const ncPoint &size)
 	{
-		m_iWidth = rSize.x;
-		m_iHeight = rSize.y;
+		width_ = size.x;
+		height_ = size.y;
 	}
 
 	/// Returns sprite absolute width
-	inline int AbsWidth() const { return m_iWidth * m_fAbsScaleFactor; }
+	inline int absWidth() const { return width_ * absScaleFactor_; }
 	/// Returns sprite absolute height
-	inline int AbsHeight() const { return m_iHeight * m_fAbsScaleFactor; }
+	inline int absHeight() const { return height_ * absScaleFactor_; }
 	/// Returns sprite absolute size
-	inline ncPoint AbsSize() const
+	inline ncPoint absSize() const
 	{
-		return ncPoint(m_iWidth * m_fAbsScaleFactor, m_iHeight * m_fAbsScaleFactor);
+		return ncPoint(width_ * absScaleFactor_, height_ * absScaleFactor_);
 	}
 
 	/// Gets the texture object
-	inline const ncTexture* Texture() const { return m_pTexture; }
+	inline const ncTexture* texture() const { return texture_; }
 	/// Sets the texture object
-	inline void SetTexture(ncTexture *pTexture) { m_pTexture = pTexture; }
+	inline void setTexture(ncTexture *texture) { texture_ = texture; }
 
 	/// Gets the texture source rectangle for blitting
-	inline ncRect TexRect() const { return m_texRect; }
+	inline ncRect texRect() const { return texRect_; }
 	// Ses the texture source rectangle for blitting
-	void SetTexRect(const ncRect& rect);
+	void setTexRect(const ncRect& rect);
 
 	// Flips the texture rect along the X coordinate
-	void FlipX();
+	void flipX();
 	// Flips the texture rect along the Y coordinate
-	void FlipY();
+	void flipY();
 
-	inline static eObjectType sType() { return SPRITE_TYPE; }
+	inline static ObjectType sType() { return SPRITE_TYPE; }
 
   private:
 	/// The sprite texture
-	ncTexture *m_pTexture;
+	ncTexture *texture_;
 	/// Used as source rectangle by the sprite batch class
-	ncRect m_texRect;
+	ncRect texRect_;
 	/// Sprite width in pixel
-	int m_iWidth;
+	int width_;
 	/// Sprite height in pixel
-	int m_iHeight;
+	int height_;
 
-	float m_fVertices[8];
-	float m_fTexCoords[8];
+	float vertices_[8];
+	float texCoords_[8];
 
-	void Init();
-	void SetVertices();
-	void SetTexCoords();
+	void init();
+	void setVertices();
+	void setTexCoords();
 
-	virtual void UpdateRenderCommand();
+	virtual void updateRenderCommand();
 
 	friend class ncSpriteBatchNode;
 };
 
 /// Returns sprite rectangle
-inline ncRect ncSprite::Rect() const
+inline ncRect ncSprite::rect() const
 {
-	float fHalfAbsW = m_iWidth * m_fAbsScaleFactor * 0.5f;
-	float fHalfAbsH = m_iHeight * m_fAbsScaleFactor * 0.5f;
-	return ncRect(x - fHalfAbsW, y - fHalfAbsH, fHalfAbsW * 2.0f, fHalfAbsH * 2.0f);
+	float halfAbsW = width_ * absScaleFactor_ * 0.5f;
+	float halfAbsH = height_ * absScaleFactor_ * 0.5f;
+	return ncRect(x - halfAbsW, y - halfAbsH, halfAbsW * 2.0f, halfAbsH * 2.0f);
 }
 
 /// Sets the texture source rectangle for blitting
-inline void ncSprite::SetTexRect(const ncRect& rect)
+inline void ncSprite::setTexRect(const ncRect& rect)
 {
-	m_texRect = rect;
-	m_iHeight = rect.h;
-	m_iWidth = rect.w;
-	SetTexCoords();
+	texRect_ = rect;
+	height_ = rect.h;
+	width_ = rect.w;
+	setTexCoords();
 }
 
 /// Flips the texture rect along the X coordinate
-inline void ncSprite::FlipX()
+inline void ncSprite::flipX()
 {
-	m_texRect.x += m_texRect.w;
-	m_texRect.w *= -1;
-	SetTexCoords();
+	texRect_.x += texRect_.w;
+	texRect_.w *= -1;
+	setTexCoords();
 }
 
 /// Flips the texture rect along the Y coordinate
-inline void ncSprite::FlipY()
+inline void ncSprite::flipY()
 {
-	m_texRect.y += m_texRect.h;
-	m_texRect.h *= -1;
-	SetTexCoords();
+	texRect_.y += texRect_.h;
+	texRect_.h *= -1;
+	setTexCoords();
 }
 
 #endif

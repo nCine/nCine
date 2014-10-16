@@ -15,40 +15,40 @@ class ncGLFWGfxDevice : public ncIGfxDevice
 {
   public:
 	// Constructor taking the resolution as two integer
-	ncGLFWGfxDevice(int iWidth, int iHeight);
+	ncGLFWGfxDevice(int width, int height);
 	// Constructor taking the resolution as a size class
 	ncGLFWGfxDevice(ncPoint size);
 	// Constructor taking the resolution as two integer and a DisplayMode
-	ncGLFWGfxDevice(int iWidth, int iHeight, ncDisplayMode mode);
+	ncGLFWGfxDevice(int width, int height, ncDisplayMode mode);
 	// Constructor taking the resolution as a Size class and a DisplayMode
 	ncGLFWGfxDevice(ncPoint size, ncDisplayMode mode);
 	~ncGLFWGfxDevice();
 
-	void SetResolution(int iWidth, int iHeight);
-	void SetResolution(ncPoint size);
+	void setResolution(int width, int height);
+	void setResolution(ncPoint size);
 
-	void ToggleFullScreen();
+	void toggleFullScreen();
 
-	inline void Update() { glfwSwapBuffers(s_pWindowHandle); }
+	inline void update() { glfwSwapBuffers(windowHandle_); }
 
-	inline void SetWindowTitle(const char *pWindowTitle) { glfwSetWindowTitle(s_pWindowHandle, pWindowTitle); }
+	inline void setWindowTitle(const char *windowTitle) { glfwSetWindowTitle(windowHandle_, windowTitle); }
 
 	/// Returns the window handle used by GLFW3
-	static GLFWwindow* WindowHandle() { return s_pWindowHandle; }
+	static GLFWwindow* windowHandle() { return windowHandle_; }
 
   private:
 	/// GLFW3 window handle
-	static GLFWwindow *s_pWindowHandle;
+	static GLFWwindow *windowHandle_;
 
 	// Initilizes the class
-	void Init(int iWidth, int iHeight, ncDisplayMode mode, bool bIsWindowed);
+	void init(int width, int height, ncDisplayMode mode, bool isWindowed);
 	// Initilizes the video subsystem (GLFW)
-	void InitGraphics();
+	void initGraphics();
 	// Initilizes the OpenGL graphic context
-	void InitDevice();
+	void initDevice();
 
 	// Callback for glfwSetErrorCallback()
-	static void ErrorCallback(int error, const char* description);
+	static void errorCallback(int error, const char* description);
 };
 
 #endif

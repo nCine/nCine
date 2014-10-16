@@ -7,18 +7,18 @@
 ///////////////////////////////////////////////////////////
 
 /// A constructor creating a player from a file
-ncAudioStreamPlayer::ncAudioStreamPlayer(const char *pFilename)
-	: m_stream(pFilename)
+ncAudioStreamPlayer::ncAudioStreamPlayer(const char *filename)
+	: audioStream_(filename)
 {
-	m_eType = AUDIOSTREAMPLAYER_TYPE;
-	SetName(pFilename);
+	type_ = AUDIOSTREAMPLAYER_TYPE;
+	setName(filename);
 }
 
 ncAudioStreamPlayer::~ncAudioStreamPlayer()
 {
-	if (m_eState != STATE_STOPPED)
+	if (state_ != STATE_STOPPED)
 	{
-		m_stream.Stop(m_uSource);
+		audioStream_.stop(sourceId_);
 	}
 }
 
@@ -26,57 +26,57 @@ ncAudioStreamPlayer::~ncAudioStreamPlayer()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncAudioStreamPlayer::Play()
+void ncAudioStreamPlayer::play()
 {
-	switch (m_eState)
+	switch (state_)
 	{
 		case STATE_INITIAL:
 		case STATE_STOPPED:
 		{
-			// iSource is a signed integer in order to check for unavailble source return value.
+			// source is a signed integer in order to check for unavailble source return value.
 			// It is then converted to an OpenAL unsigned integer to be used as a valid source.
-			int iSource = ncServiceLocator::AudioDevice().NextAvailableSource();
+			int source = ncServiceLocator::audioDevice().nextAvailableSource();
 			// No sources available
-			if (iSource < 0)
+			if (source < 0)
 			{
 				return;
 			}
-			m_uSource = iSource;
+			sourceId_ = source;
 
-			alSourcef(m_uSource, AL_GAIN, m_fGain);
-			alSourcef(m_uSource, AL_PITCH, m_fPitch);
-			alSourcefv(m_uSource, AL_POSITION, m_fPosition);
+			alSourcef(sourceId_, AL_GAIN, gain_);
+			alSourcef(sourceId_, AL_PITCH, pitch_);
+			alSourcefv(sourceId_, AL_POSITION, position_);
 
-			alSourcePlay(m_uSource);
-			m_eState = STATE_PLAYING;
+			alSourcePlay(sourceId_);
+			state_ = STATE_PLAYING;
 
-			ncServiceLocator::AudioDevice().RegisterPlayer(this);
+			ncServiceLocator::audioDevice().registerPlayer(this);
 			break;
 		}
 		case STATE_PLAYING:
 			break;
 		case STATE_PAUSED:
 		{
-			alSourcePlay(m_uSource);
-			m_eState = STATE_PLAYING;
+			alSourcePlay(sourceId_);
+			state_ = STATE_PLAYING;
 
-			ncServiceLocator::AudioDevice().RegisterPlayer(this);
+			ncServiceLocator::audioDevice().registerPlayer(this);
 			break;
 		}
 	}
 }
 
-void ncAudioStreamPlayer::Pause()
+void ncAudioStreamPlayer::pause()
 {
-	switch (m_eState)
+	switch (state_)
 	{
 		case STATE_INITIAL:
 		case STATE_STOPPED:
 			break;
 		case STATE_PLAYING:
 		{
-			alSourcePause(m_uSource);
-			m_eState = STATE_PAUSED;
+			alSourcePause(sourceId_);
+			state_ = STATE_PAUSED;
 			break;
 		}
 		case STATE_PAUSED:
@@ -84,9 +84,9 @@ void ncAudioStreamPlayer::Pause()
 	}
 }
 
-void ncAudioStreamPlayer::Stop()
+void ncAudioStreamPlayer::stop()
 {
-	switch (m_eState)
+	switch (state_)
 	{
 		case STATE_INITIAL:
 		case STATE_STOPPED:
@@ -94,9 +94,9 @@ void ncAudioStreamPlayer::Stop()
 		case STATE_PLAYING:
 		{
 			// Stop the source then unqueue every buffer
-			m_stream.Stop(m_uSource);
+			audioStream_.stop(sourceId_);
 
-			m_eState = STATE_STOPPED;
+			state_ = STATE_STOPPED;
 			break;
 		}
 		case STATE_PAUSED:
@@ -105,14 +105,14 @@ void ncAudioStreamPlayer::Stop()
 }
 
 /// Updates the player state and the stream buffer queue
-void ncAudioStreamPlayer::UpdateState()
+void ncAudioStreamPlayer::updateState()
 {
-	if (m_eState == STATE_PLAYING)
+	if (state_ == STATE_PLAYING)
 	{
-		bool bShouldStillPlay = m_stream.Enqueue(m_uSource, m_bLooping);
-		if (bShouldStillPlay == false)
+		bool shouldStillPlay = audioStream_.enqueue(sourceId_, isLooping_);
+		if (shouldStillPlay == false)
 		{
-			m_eState = STATE_STOPPED;
+			state_ = STATE_STOPPED;
 		}
 	}
 }

@@ -8,33 +8,33 @@
 class ncAnimatedSprite : public ncSprite
 {
   public:
-	ncAnimatedSprite(ncSceneNode* pParent, ncTexture *pTexture);
-	ncAnimatedSprite(ncTexture *pTexture);
-	ncAnimatedSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY);
-	ncAnimatedSprite(ncTexture *pTexture, int iX, int iY);
+	ncAnimatedSprite(ncSceneNode* parent, ncTexture *texture);
+	ncAnimatedSprite(ncTexture *texture);
+	ncAnimatedSprite(ncSceneNode* parent, ncTexture *texture, int x, int y);
+	ncAnimatedSprite(ncTexture *texture, int x, int y);
 	virtual ~ncAnimatedSprite();
 
 	/// Returns true if the current animation is paused
-	inline bool IsPaused() const { return m_vAnims[m_iCurrentAnim]->IsPaused(); }
+	inline bool isPaused() const { return anims_[currentAnim]->isPaused(); }
 	/// Sets the pause state for the animation
-	inline void SetPaused(bool bPaused) { m_vAnims[m_iCurrentAnim]->SetPaused(bPaused); }
+	inline void setPaused(bool isPaused) { anims_[currentAnim]->setPaused(isPaused); }
 
-	virtual void Update(float fInterval);
+	virtual void update(float interval);
 
 	// Adds a new animation
-	void AddAnimation(ncRectAnimation* pAnim);
+	void addAnimation(ncRectAnimation* anim);
 	// Sets the current animation and its frame number
-	void SetAnimation(int iAnimNum);
+	void setAnimation(int animNum);
 	/// Sets the current animation to a specified frame number
-	inline void SetFrame(int iFrameNum) { m_vAnims[m_iCurrentAnim]->SetFrame(iFrameNum); }
+	inline void setFrame(int frameNum) { anims_[currentAnim]->SetFrame(frameNum); }
 
-	inline static eObjectType sType() { return ANIMATEDSPRITE_TYPE; }
+	inline static ObjectType sType() { return ANIMATEDSPRITE_TYPE; }
 
   private:
-	ncArray<ncRectAnimation *> m_vAnims;
-	int m_iCurrentAnim;
+	ncArray<ncRectAnimation *> anims_;
+	int currentAnim;
 
-	void Init();
+	void init();
 };
 
 #endif

@@ -7,17 +7,17 @@
 ///////////////////////////////////////////////////////////
 
 ncFontGlyph::ncFontGlyph()
-	: m_uX(0), m_uY(0), m_uWidth(0), m_uHeight(0), m_iXOffset(0),
-	  m_iYOffset(0), m_uXAdvance(0), m_vKernings(4)
+	: x_(0), y_(0), width_(0), height_(0), xOffset_(0),
+	  yOffset_(0), xAdvance_(0), kernings_(4)
 {
 
 }
 
-ncFontGlyph::ncFontGlyph(unsigned short uX, unsigned short uY, unsigned short uWidth, unsigned short uHeight,
-	short iXOffset, short iYOffset, unsigned short uXAdvance)
-	: m_uX(uX), m_uY(uY), m_uWidth(uWidth), m_uHeight(uHeight),
-	  m_iXOffset(iXOffset), m_iYOffset(iYOffset), m_uXAdvance(uXAdvance),
-	  m_vKernings(4)
+ncFontGlyph::ncFontGlyph(unsigned short x, unsigned short y, unsigned short width, unsigned short height,
+	short xOffset, short yOffset, unsigned short xAdvance)
+	: x_(x), y_(y), width_(width), height_(height),
+	  xOffset_(xOffset), yOffset_(yOffset), xAdvance_(xAdvance),
+	  kernings_(4)
 {
 
 }
@@ -27,18 +27,18 @@ ncFontGlyph::ncFontGlyph(unsigned short uX, unsigned short uY, unsigned short uW
 ///////////////////////////////////////////////////////////
 
 /// Return the kerning amount for a subsequent glyph
-int ncFontGlyph::Kerning(int iSecondGlyph) const
+int ncFontGlyph::kerning(int secondGlyph) const
 {
-	int iKerningAmount = 0;
+	int kerningAmount = 0;
 
-	for (unsigned int i = 0; i < m_vKernings.Size(); i++)
+	for (unsigned int i = 0; i < kernings_.size(); i++)
 	{
-		if (iSecondGlyph == m_vKernings[i].m_iSecondGlyph)
+		if (secondGlyph == kernings_[i].secondGlyph_)
 		{
-			iKerningAmount = m_vKernings[i].m_iAmount;
+			kerningAmount = kernings_[i].amount_;
 			break;
 		}
 	}
 
-	return iKerningAmount;
+	return kerningAmount;
 }

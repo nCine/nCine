@@ -9,15 +9,15 @@
 class ncFileLogger : public ncILogger
 {
   public:
-	ncFileLogger(const char *pFilename, eLogLevel eConsoleLevel, eLogLevel eFileLevel);
+	ncFileLogger(const char *filename, LogLevel consoleLevel, LogLevel fileLevel);
 	~ncFileLogger();
 
-	virtual void Write(eLogLevel eLevel, const char* fmt, ...);
+	virtual void write(LogLevel level, const char* fmt, ...);
 
   private:
-	ncIFile *m_pFileHandle;
-	eLogLevel m_eConsoleLevel;
-	eLogLevel m_eFileLevel;
+	ncIFile *fileHandle_;
+	LogLevel consoleLevel_;
+	LogLevel fileLevel_;
 };
 
 #endif

@@ -11,22 +11,22 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncFileLogger::ncFileLogger(const char *pFilename, eLogLevel eConsoleLevel, eLogLevel eFileLevel)
-	: m_pFileHandle(NULL), m_eConsoleLevel(eConsoleLevel), m_eFileLevel(eFileLevel)
+ncFileLogger::ncFileLogger(const char *filename, LogLevel consoleLevel, LogLevel fileLevel)
+	: fileHandle_(NULL), consoleLevel_(consoleLevel), fileLevel_(fileLevel)
 {
-	m_pFileHandle = ncIFile::CreateFileHandle(pFilename);
+	fileHandle_ = ncIFile::createFileHandle(filename);
 
-	if (m_eFileLevel < int(LOG_OFF))
+	if (fileLevel_ < int(LOG_OFF))
 	{
-		m_pFileHandle->Open(ncIFile::MODE_WRITE);
+		fileHandle_->open(ncIFile::MODE_WRITE);
 	}
-	if (m_pFileHandle->IsOpened() == false && m_eConsoleLevel > m_eFileLevel)
+	if (fileHandle_->isOpened() == false && consoleLevel_ > fileLevel_)
 	{
 		// Promoting console level logging to file level logging
-		m_eConsoleLevel = m_eFileLevel;
+		consoleLevel_ = fileLevel_;
 	}
 
-	if (m_eConsoleLevel < int(LOG_OFF))
+	if (consoleLevel_ < int(LOG_OFF))
 	{
 		setbuf(stdout, NULL);
 	}
@@ -35,10 +35,10 @@ ncFileLogger::ncFileLogger(const char *pFilename, eLogLevel eConsoleLevel, eLogL
 
 ncFileLogger::~ncFileLogger()
 {
-	Write(LOG_VERBOSE, "ncFileLogger::~ncFileLogger - End of the log");
-	if (m_pFileHandle)
+	write(LOG_VERBOSE, "ncFileLogger::~ncFileLogger - End of the log");
+	if (fileHandle_)
 	{
-		delete m_pFileHandle;
+		delete fileHandle_;
 	}
 }
 
@@ -47,20 +47,20 @@ ncFileLogger::~ncFileLogger()
 ///////////////////////////////////////////////////////////
 
 #ifndef __ANDROID__
-void ncFileLogger::Write(eLogLevel eLevel, const char *fmt, ...)
+void ncFileLogger::write(LogLevel level, const char *fmt, ...)
 {
 	time_t     now;
 	struct tm  *ts;
-	char       szBuffer[80];
+	char       buffer[80];
 
 	now = time(0);
 	ts = localtime(&now);
-//	strftime(szBuffer, sizeof(szBuffer), "%a %Y-%m-%d %H:%M:%S %Z", ts);
-	strftime(szBuffer, sizeof(szBuffer), "%H:%M:%S", ts);
+//	strftime(buffer, sizeof(buffer), "%a %Y-%m-%d %H:%M:%S %Z", ts);
+	strftime(buffer, sizeof(buffer), "%H:%M:%S", ts);
 
-	if (m_eConsoleLevel < int(LOG_OFF) && int(eLevel) >= int(m_eConsoleLevel))
+	if (consoleLevel_ < int(LOG_OFF) && int(level) >= int(consoleLevel_))
 	{
-		printf("- %s [L%d] -> ", szBuffer, int(eLevel));
+		printf("- %s [L%d] -> ", buffer, int(level));
 
 		va_list args;
 		va_start(args, fmt);
@@ -70,35 +70,35 @@ void ncFileLogger::Write(eLogLevel eLevel, const char *fmt, ...)
 		printf("\n");
 	}
 
-	if (m_eFileLevel < int(LOG_OFF) && int(eLevel) >= int(m_eFileLevel))
+	if (fileLevel_ < int(LOG_OFF) && int(level) >= int(fileLevel_))
 	{
-		fprintf(m_pFileHandle->Ptr(), "- %s [L%d] -> ", szBuffer, int(eLevel));
+		fprintf(fileHandle_->ptr(), "- %s [L%d] -> ", buffer, int(level));
 
 		va_list args;
 		va_start(args, fmt);
-		vfprintf(m_pFileHandle->Ptr(), fmt, args);
+		vfprintf(fileHandle_->ptr(), fmt, args);
 		va_end(args);
 
-		fprintf(m_pFileHandle->Ptr(), "\n");
-		fflush(m_pFileHandle->Ptr());
+		fprintf(fileHandle_->ptr(), "\n");
+		fflush(fileHandle_->ptr());
 	}
 }
 #else
-void ncFileLogger::Write(eLogLevel eLevel, const char *fmt, ...)
+void ncFileLogger::write(LogLevel level, const char *fmt, ...)
 {
 	time_t     now;
 	struct tm  *ts;
-	char       szBuffer[80];
+	char       buffer[80];
 
 	now = time(0);
 	ts = localtime(&now);
-	strftime(szBuffer, sizeof(szBuffer), "%H:%M:%S", ts);
+	strftime(buffer, sizeof(buffer), "%H:%M:%S", ts);
 
 	android_LogPriority priority;
 
-	if (m_eConsoleLevel < int(LOG_OFF) && int(eLevel) >= int(m_eConsoleLevel))
+	if (consoleLevel_ < int(LOG_OFF) && int(level) >= int(consoleLevel_))
 	{
-		switch (m_eConsoleLevel)
+		switch (consoleLevel_)
 		{
 			case LOG_FATAL:
 				priority = ANDROID_LOG_FATAL;
@@ -130,17 +130,17 @@ void ncFileLogger::Write(eLogLevel eLevel, const char *fmt, ...)
 		va_end(args);
 	}
 
-	if (m_eFileLevel < int(LOG_OFF) && int(eLevel) >= int(m_eFileLevel))
+	if (fileLevel_ < int(LOG_OFF) && int(level) >= int(fileLevel_))
 	{
-		fprintf(m_pFileHandle->Ptr(), "- %s [L%d] -> ", szBuffer, int(eLevel));
+		fprintf(fileHandle_->ptr(), "- %s [L%d] -> ", buffer, int(level));
 
 		va_list args;
 		va_start(args, fmt);
-		vfprintf(m_pFileHandle->Ptr(), fmt, args);
+		vfprintf(fileHandle_->ptr(), fmt, args);
 		va_end(args);
 
-		fprintf(m_pFileHandle->Ptr(), "\n");
-		fflush(m_pFileHandle->Ptr());
+		fprintf(fileHandle_->ptr(), "\n");
+		fflush(fileHandle_->ptr());
 	}
 }
 #endif

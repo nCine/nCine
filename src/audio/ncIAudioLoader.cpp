@@ -11,25 +11,25 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncIAudioLoader::ncIAudioLoader(const char *pFilename)
-	: m_pFileHandle(NULL), m_iBytesPerSample(0), m_iChannels(0), m_iFrequency(0), m_ulNumSamples(0L), m_fDuration(0.0f)
+ncIAudioLoader::ncIAudioLoader(const char *filename)
+	: fileHandle_(NULL), bytesPerSample_(0), numChannels_(0), frequency_(0), numSamples_(0L), duration_(0.0f)
 {
-	m_pFileHandle = ncIFile::CreateFileHandle(pFilename);
+	fileHandle_ = ncIFile::createFileHandle(filename);
 
-	// Warning: Cannot call a virtual Init() here, in the base constructor
+	// Warning: Cannot call a virtual init() here, in the base constructor
 }
 
-ncIAudioLoader::ncIAudioLoader(ncIFile *pFileHandle)
-	: m_pFileHandle(pFileHandle), m_iBytesPerSample(0), m_iChannels(0), m_iFrequency(0), m_ulNumSamples(0L), m_fDuration(0.0f)
+ncIAudioLoader::ncIAudioLoader(ncIFile *fileHandle)
+	: fileHandle_(fileHandle), bytesPerSample_(0), numChannels_(0), frequency_(0), numSamples_(0L), duration_(0.0f)
 {
-	// Warning: Cannot call a virtual Init() here, in the base constructor
+	// Warning: Cannot call a virtual init() here, in the base constructor
 }
 
 ncIAudioLoader::~ncIAudioLoader()
 {
-	if (m_pFileHandle)
+	if (fileHandle_)
 	{
-		delete m_pFileHandle;
+		delete fileHandle_;
 	}
 }
 
@@ -38,25 +38,25 @@ ncIAudioLoader::~ncIAudioLoader()
 ///////////////////////////////////////////////////////////
 
 /// Returns the proper audio loader according to the file extension
-ncIAudioLoader* ncIAudioLoader::CreateFromFile(const char *pFilename)
+ncIAudioLoader* ncIAudioLoader::createFromFile(const char *filename)
 {
 	// Creating a handle from ncIFile static method to detect assets file
-	ncIFile *pFileHandle = ncIFile::CreateFileHandle(pFilename);
+	ncIFile *fileHandle = ncIFile::createFileHandle(filename);
 
-	if (pFileHandle->HasExtension("wav"))
+	if (fileHandle->hasExtension("wav"))
 	{
-		return new ncAudioLoaderWav(pFileHandle);
+		return new ncAudioLoaderWav(fileHandle);
 	}
 #ifdef WITH_VORBIS
-	else if (pFileHandle->HasExtension("ogg"))
+	else if (fileHandle->hasExtension("ogg"))
 	{
-		return new ncAudioLoaderOgg(pFileHandle);
+		return new ncAudioLoaderOgg(fileHandle);
 	}
 #endif
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncIAudioLoader::CreateFromFile - Extension unknown \"%s\"", pFileHandle->Extension());
-		delete pFileHandle;
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncIAudioLoader::createFromFile - Extension unknown \"%s\"", fileHandle->extension());
+		delete fileHandle;
 		exit(EXIT_FAILURE);
 	}
 }

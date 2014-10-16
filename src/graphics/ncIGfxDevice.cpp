@@ -19,7 +19,7 @@
 ///////////////////////////////////////////////////////////
 
 /// Clears the screen
-void ncIGfxDevice::Clear()
+void ncIGfxDevice::clear()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -29,10 +29,10 @@ void ncIGfxDevice::Clear()
 ///////////////////////////////////////////////////////////
 
 /// Initilizes starting OpenGL state
-void ncIGfxDevice::InitGL()
+void ncIGfxDevice::initGL()
 {
-	ncGfxCapabilities& gfxCaps = const_cast<ncGfxCapabilities&>(ncServiceLocator::GfxCapabilities());
-	gfxCaps.Init();
+	ncGfxCapabilities& gfxCaps = const_cast<ncGfxCapabilities&>(ncServiceLocator::gfxCapabilities());
+	gfxCaps.init();
 
 	glDisable(GL_DITHER);
 	glEnable(GL_TEXTURE_2D);
@@ -48,9 +48,9 @@ void ncIGfxDevice::InitGL()
 
 	glMatrixMode(GL_PROJECTION);
 #ifndef __ANDROID__
-	glOrtho(0, m_iWidth, 0, m_iHeight, -1, 1);
+	glOrtho(0, width_, 0, height_, -1, 1);
 #else
-	glOrthof(0, m_iWidth, 0, m_iHeight, -1, 1);
+	glOrthof(0, width_, 0, height_, -1, 1);
 #endif
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();

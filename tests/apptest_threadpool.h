@@ -10,13 +10,13 @@ class MyEventHandler
 	  public ncIInputEventHandler
 {
   public:
-	virtual void OnInit();
-	virtual void OnFrameStart() { }
-	virtual void OnFrameEnd() { }
-	virtual void OnShutdown() { }
+	virtual void onInit();
+	virtual void onFrameStart() { }
+	virtual void onFrameEnd() { }
+	virtual void onShutdown() { }
 
 #ifndef __ANDROID__
-	virtual void OnKeyReleased(const ncKeyboardEvent &event);
+	virtual void onKeyReleased(const ncKeyboardEvent &event);
 #endif
 };
 

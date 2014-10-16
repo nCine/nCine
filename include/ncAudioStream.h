@@ -15,37 +15,37 @@ class ncAudioStream
 	virtual ~ncAudioStream();
 
 	// Enqueues new buffers and unqueues processed ones
-	bool Enqueue(ALuint uSource, bool bLooping);
+	bool enqueue(ALuint source, bool looping);
 	// Unqueues any left buffer and rewinds the loader
-	void Stop(ALuint uSource);
+	void stop(ALuint source);
 
 	/// Returns samples frequency
-	inline int Frequency() const { return m_iFrequency; }
+	inline int frequency() const { return frequency_; }
 
   private:
 	/// Number of buffers for streaming
-	static const int s_iNumBuffers = 3;
+	static const int NumBuffers = 3;
 	/// OpenAL buffer queue for streaming
-	ALuint m_uALBuffers[s_iNumBuffers];
+	ALuint alBuffers_[NumBuffers];
 	/// Index of the next available OpenAL buffer
-	int m_iNextAvailALBuffer;
+	int nextAvailAlBuffer_;
 
 	/// Size in bytes of each streaming buffer
-	static const int s_iBufSize = 16 * 1024;
+	static const int BufferSize = 16 * 1024;
 	/// Memory buffer to feed OpenAL ones
-	char *m_pBuffer;
+	char *memBuffer_;
 
 	/// Samples frequency
-	int m_iFrequency;
+	int frequency_;
 	/// OpenAL channel format enumeration
-	ALenum m_eFormat;
+	ALenum format_;
 	/// The associated loader to continuosly stream decoded data
-	ncIAudioLoader *m_pAudioLoader;
+	ncIAudioLoader *audioLoader_;
 
 	// Constructor creating an audio stream from an audio file
-	ncAudioStream(const char *pFilename);
+	ncAudioStream(const char *filename);
 	/// Preventing construction by copy
-	ncAudioStream(const ncAudioStream& rOther);
+	ncAudioStream(const ncAudioStream& other);
 
 	friend class ncAudioStreamPlayer;
 };

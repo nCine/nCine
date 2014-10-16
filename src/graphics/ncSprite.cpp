@@ -9,78 +9,78 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncSprite::ncSprite(ncSceneNode* pParent, ncTexture *pTexture)
-	: ncDrawableNode(pParent), m_pTexture(pTexture), m_texRect(0, 0, 0, 0)
+ncSprite::ncSprite(ncSceneNode* parent, ncTexture *texture)
+	: ncDrawableNode(parent), texture_(texture), texRect_(0, 0, 0, 0)
 {
-	Init();
+	init();
 }
 
-ncSprite::ncSprite(ncTexture *pTexture)
-	: ncDrawableNode(NULL), m_pTexture(pTexture), m_texRect(0, 0, 0, 0)
+ncSprite::ncSprite(ncTexture *texture)
+	: ncDrawableNode(NULL), texture_(texture), texRect_(0, 0, 0, 0)
 {
-	Init();
+	init();
 }
 
-ncSprite::ncSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY)
-	: ncDrawableNode(pParent, iX, iY), m_pTexture(pTexture), m_texRect(0, 0, 0, 0)
+ncSprite::ncSprite(ncSceneNode* parent, ncTexture *texture, int x, int y)
+	: ncDrawableNode(parent, x, y), texture_(texture), texRect_(0, 0, 0, 0)
 {
-	Init();
+	init();
 }
 
-ncSprite::ncSprite(ncTexture *pTexture, int iX, int iY)
-	: ncDrawableNode(NULL, iX, iY), m_pTexture(pTexture), m_texRect(0, 0, 0, 0)
+ncSprite::ncSprite(ncTexture *texture, int x, int y)
+	: ncDrawableNode(NULL, x, y), texture_(texture), texRect_(0, 0, 0, 0)
 {
-	Init();
+	init();
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncSprite::Init()
+void ncSprite::init()
 {
-	m_eType = SPRITE_TYPE;
-	SetPriority(ncDrawableNode::SCENE_PRIORITY);
-	m_renderCmd.SetType(ncRenderCommand::SPRITE_TYPE);
+	type_ = SPRITE_TYPE;
+	setPriority(ncDrawableNode::SCENE_PRIORITY);
+	renderCommand_.setType(ncRenderCommand::SPRITE_TYPE);
 
-	if (m_pTexture)
+	if (texture_)
 	{
-		SetTexRect(ncRect(0, 0, m_pTexture->Width(), m_pTexture->Height()));
+		setTexRect(ncRect(0, 0, texture_->width(), texture_->height()));
 	}
 }
 
-void ncSprite::SetVertices()
+void ncSprite::setVertices()
 {
-	m_fVertices[0] = m_iWidth * 0.5f;		m_fVertices[1] = -m_iHeight * 0.5f;
-	m_fVertices[2] = m_iWidth * 0.5f;		m_fVertices[3] = m_iHeight * 0.5f;
-	m_fVertices[4] = -m_iWidth * 0.5f;		m_fVertices[5] = -m_iHeight * 0.5f;
+	vertices_[0] = width_ * 0.5f;		vertices_[1] = -height_ * 0.5f;
+	vertices_[2] = width_ * 0.5f;		vertices_[3] = height_ * 0.5f;
+	vertices_[4] = -width_ * 0.5f;		vertices_[5] = -height_ * 0.5f;
 
-	m_fVertices[6] = -m_iWidth * 0.5f;		m_fVertices[7] = m_iHeight * 0.5f;
+	vertices_[6] = -width_ * 0.5f;		vertices_[7] = height_ * 0.5f;
 }
 
-void ncSprite::SetTexCoords()
+void ncSprite::setTexCoords()
 {
-	ncPoint texSize = m_pTexture->Size();
-	float leftCoord = float(m_texRect.x) / float(texSize.x);
-	float rightCoord = float(m_texRect.x + m_texRect.w) / float(texSize.x);
-	float bottomCoord = float(m_texRect.y + m_texRect.h) / float(texSize.y);
-	float topCoord = float(m_texRect.y) / float(texSize.y);
+	ncPoint texSize = texture_->size();
+	float leftCoord = float(texRect_.x) / float(texSize.x);
+	float rightCoord = float(texRect_.x + texRect_.w) / float(texSize.x);
+	float bottomCoord = float(texRect_.y + texRect_.h) / float(texSize.y);
+	float topCoord = float(texRect_.y) / float(texSize.y);
 
-	m_fTexCoords[0] = leftCoord;		m_fTexCoords[1] = bottomCoord;
-	m_fTexCoords[2] = leftCoord;		m_fTexCoords[3] = topCoord;
-	m_fTexCoords[4] = rightCoord;		m_fTexCoords[5] = bottomCoord;
+	texCoords_[0] = leftCoord;		texCoords_[1] = bottomCoord;
+	texCoords_[2] = leftCoord;		texCoords_[3] = topCoord;
+	texCoords_[4] = rightCoord;		texCoords_[5] = bottomCoord;
 
-	m_fTexCoords[6] = rightCoord;		m_fTexCoords[7] = topCoord;
+	texCoords_[6] = rightCoord;		texCoords_[7] = topCoord;
 }
 
-void ncSprite::UpdateRenderCommand()
+void ncSprite::updateRenderCommand()
 {
-	m_renderCmd.Material().SetTextureGLId(m_pTexture->GLId());
-	m_renderCmd.Material().SetColor(m_absColor);
-	m_renderCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
-	SetVertices();
-	m_renderCmd.Geometry().SetData(GL_TRIANGLE_STRIP, 0, 4, m_fVertices, m_fTexCoords, NULL);
-	m_renderCmd.CalculateSortKey();
+	renderCommand_.material().setTextureGLId(texture_->gLId());
+	renderCommand_.material().setColor(absColor_);
+	renderCommand_.transformation().setPosition(absPosition().x, absPosition().y);
+	setVertices();
+	renderCommand_.geometry().setData(GL_TRIANGLE_STRIP, 0, 4, vertices_, texCoords_, NULL);
+	renderCommand_.calculateSortKey();
 
-	ApplyTransformations();
+	applyTransformations();
 }

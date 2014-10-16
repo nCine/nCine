@@ -24,50 +24,50 @@ class ncTexture : public ncObject
 {
   public:
 	ncTexture();
-	ncTexture(const char *pFilename);
-	ncTexture(const char *pFilename, int iWidth, int iHeight);
-	ncTexture(const char *pFilename, ncPoint size);
+	ncTexture(const char *filename);
+	ncTexture(const char *filename, int width, int height);
+	ncTexture(const char *filename, ncPoint size);
 	virtual ~ncTexture();
 
 	/// Returns OpenGL id
-	inline GLuint GLId() const { return m_uGLId; }
+	inline GLuint gLId() const { return gLId_; }
 	/// Returns texture width
-	inline int Width() const { return m_iWidth; }
+	inline int width() const { return width_; }
 	/// Returns texture height
-	inline int Height() const { return m_iHeight; }
+	inline int height() const { return height_; }
 	/// Returns texture MIP map levels
-	inline int MipMapLevels() const { return m_iMipMapLevels; }
+	inline int mipMapLevels() const { return mipMapLevels_; }
 	/// Returns texture size
-	inline ncPoint Size() const { return ncPoint(m_iWidth, m_iHeight); }
+	inline ncPoint size() const { return ncPoint(width_, height_); }
 	/// Returns texture rectangle
-	inline ncRect Rect() const { return ncRect(0, 0, m_iWidth, m_iHeight); }
+	inline ncRect rect() const { return ncRect(0, 0, width_, height_); }
 
 	/// Returns true if the texture holds compressed data
-	inline bool isCompressed() const { return m_bCompressed; }
+	inline bool isCompressed() const { return isCompressed_; }
 	/// Returns true if the texture provides an alpha channel
-	inline bool hasAlpha() const { return m_bAlphaChannel; }
+	inline bool hasAlpha() const { return hasAlphaChannel_; }
 
 	// Sets texture filtering for both magnification and minification
-	void SetFiltering(GLenum eFilter);
+	void setFiltering(GLenum filter);
 	/// Binds the texture to the current unit
-	inline void Bind() { glBindTexture(GL_TEXTURE_2D, m_uGLId); }
+	inline void bind() { glBindTexture(GL_TEXTURE_2D, gLId_); }
 	/// Disables texture rendering for the current unit
-	static void Unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
+	static void unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
 
-	inline static eObjectType sType() { return TEXTURE_TYPE; }
+	inline static ObjectType sType() { return TEXTURE_TYPE; }
 
   private:
-	GLuint m_uGLId;
-	int m_iWidth;
-	int m_iHeight;
-	int m_iMipMapLevels;
-	bool m_bCompressed;
-	bool m_bAlphaChannel;
+	GLuint gLId_;
+	int width_;
+	int height_;
+	int mipMapLevels_;
+	bool isCompressed_;
+	bool hasAlphaChannel_;
 
 	// Loads a texture based on information from the texture format and loader
-	void Load(const ncITextureLoader& texLoader);
+	void load(const ncITextureLoader& texLoader);
 	// Loads a texture overriding the size detected by the texture loader
-	void Load(const ncITextureLoader& texLoader, int iWidth, int iHeight);
+	void load(const ncITextureLoader& texLoader, int width, int height);
 };
 
 #endif

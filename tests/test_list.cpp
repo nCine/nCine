@@ -2,61 +2,61 @@
 #include "ncFileLogger.h"
 #include "ncList.h"
 
-void print_list(const ncList<int> &list)
+void printList(const ncList<int> &list)
 {
-	unsigned int uIndex = 0;
+	unsigned int index = 0;
 
-	for (ncList<int>::Const_Iterator i = list.Begin(); i != list.End(); ++i)
+	for (ncList<int>::Const_Iterator i = list.begin(); i != list.end(); ++i)
 	{
-		printf("[%u]=%d ", uIndex, *i);
-		uIndex++;
+		printf("[%u]=%d ", index, *i);
+		index++;
 	}
 	printf("\n");
 }
 
 int main(int argc, char **argv)
 {
-	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
+	ncServiceLocator::registerLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
 
 	ncList<int> list;
 
 	printf("Inserting some elements to the back\n");
 	for (int i = 0; i < 11; i++)
 	{
-		list.InsertBack(i);
+		list.insertBack(i);
 	}
-	print_list(list);
+	printList(list);
 
 	printf("Inserting one element at front\n");
-	list.InsertFront(-1);
-	print_list(list);
+	list.insertFront(-1);
+	printList(list);
 
 	printf("Removing first node\n");
-	list.Remove(list.Begin());
+	list.remove(list.begin());
 	printf("Removing last node\n");
-	list.Remove(list.RBegin());
-	print_list(list);
+	list.remove(list.revBegin());
+	printList(list);
 
 	printf("Removing a couple of elements\n");
-	list.Remove(3);
-	list.Remove(5);
-	print_list(list);
+	list.remove(3);
+	list.remove(5);
+	printList(list);
 
 	printf("Removing a non-existant element\n");
-	list.Remove(100);
-	print_list(list);
+	list.remove(100);
+	printList(list);
 
 
 	printf("\n--- List traversals (for cycles) ---\n");
 	printf("Iterating through nodes:");
-	for (ncList<int>::Iterator i = list.Begin(); i != list.End(); ++i)
+	for (ncList<int>::Iterator i = list.begin(); i != list.end(); ++i)
 	{
 		printf(" %d", *i);
 	}
 	printf("\n");
 
 	printf("Iterating through nodes (reverse):");
-	for (ncList<int>::Iterator i = list.RBegin(); i != list.End(); --i)
+	for (ncList<int>::Iterator i = list.revBegin(); i != list.end(); --i)
 	{
 		printf(" %d", *i);
 	}
@@ -65,8 +65,8 @@ int main(int argc, char **argv)
 
 	printf("\n--- List traversals (while cycles) ---\n");
 	printf("Iterating through nodes:");
-	ncList<int>::Iterator i = list.Begin();
-	while (i != list.End())
+	ncList<int>::Iterator i = list.begin();
+	while (i != list.end())
 	{
 		printf(" %d", *i);
 		++i;
@@ -74,8 +74,8 @@ int main(int argc, char **argv)
 	printf("\n");
 
 	printf("Iterating through nodes (reverse):");
-	i = list.RBegin();
-	while (i != list.End())
+	i = list.revBegin();
+	while (i != list.end())
 	{
 		printf(" %d", *i);
 		--i;
@@ -85,13 +85,13 @@ int main(int argc, char **argv)
 	printf("\nClearing the whole list\n");
 	if (!list.isEmpty())
 	{
-		list.Clear();
+		list.clear();
 	}
 	printf("Removing first node on empty\n");
-	list.Remove(list.Begin());
+	list.remove(list.begin());
 	printf("Removing last node on empty\n");
-	list.Remove(list.RBegin());
-	print_list(list);
+	list.remove(list.revBegin());
+	printList(list);
 
 	return 0;
 }

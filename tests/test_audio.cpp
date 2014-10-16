@@ -12,109 +12,109 @@
 int main(int argc, char **argv)
 {
 	SDL_Event event;
-	int iWidth = 960;
-	int iHeight = 640;
-	bool bQuit = false;
+	const int Width = 960;
+	const int Height = 640;
+	bool shouldQuit = false;
 
-	const float fDefaultGain = 1.0f;
-	float fGain = fDefaultGain;
-	const float fDefaultPitch = 1.0f;
-	float fPitch = fDefaultPitch;
-	const float fDefaultXPos = 0.0f;
-	float fXPos = 0.0f;
-	bool bLooping = true;
+	const float DefaultGain = 1.0f;
+	float gain = DefaultGain;
+	const float DefaultPitch = 1.0f;
+	float pitch = DefaultPitch;
+	const float DefaultXPos = 0.0f;
+	float xPos = 0.0f;
+	bool isLooping = true;
 
 // ----- Init ----------------------
 	ncFrameTimer t(5.0f, 0.0f);
-	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
-	ncSDLGfxDevice gfxDevice(iWidth, iHeight);
-	gfxDevice.SetWindowTitle("Test");
+	ncServiceLocator::registerLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
+	ncSDLGfxDevice gfxDevice(Width, Height);
+	gfxDevice.setWindowTitle("Test");
 
-	ncServiceLocator::RegisterAudioDevice(new ncALAudioDevice());
+	ncServiceLocator::registerAudioDevice(new ncALAudioDevice());
 //	ncAudioBuffer audioBuffer("sounds/bomb.wav");
 //	ncAudioBufferPlayer player(&audioBuffer);
 	ncAudioStreamPlayer player("sounds/bomb.ogg");
-	player.Play();
+	player.play();
 
 
 // ----- Event cycle --------------------
-	while (!bQuit)
+	while (!shouldQuit)
 	{
 		while (SDL_PollEvent(&event))
 		{
 			switch (event.type)
 			{
 				case SDL_QUIT:
-					bQuit = true;
+					shouldQuit = true;
 					break;
 				case SDL_KEYDOWN:
 					switch (event.key.keysym.sym)
 					{
 						case SDLK_ESCAPE:
 						case SDLK_q:
-							bQuit = true;
+							shouldQuit = true;
 							break;
 						case SDLK_SPACE:
 							if (player.isPaused() || player.isStopped())
 							{
-								player.Play();
+								player.play();
 							}
 							else if (player.isPlaying())
 							{
-								player.Pause();
+								player.pause();
 							}
 							break;
 						case SDLK_a:
-							player.Play();
+							player.play();
 							break;
 						case SDLK_s:
-							player.Stop();
+							player.stop();
 							break;
 						case SDLK_d:
-							player.Pause();
+							player.pause();
 							break;
 						case SDLK_l:
-							bLooping = !bLooping;
+							isLooping = !isLooping;
 							break;
 						case SDLK_KP0:
-							fGain = fDefaultGain;
-							fPitch = fDefaultPitch;
-							fXPos = fDefaultXPos;
+							gain = DefaultGain;
+							pitch = DefaultPitch;
+							xPos = DefaultXPos;
 							break;
 						case SDLK_KP7:
-							fGain -= 0.1f;
-							if (fGain < 0.0f)
+							gain -= 0.1f;
+							if (gain < 0.0f)
 							{
-								fGain = 0.0f;
+								gain = 0.0f;
 							}
 							break;
 						case SDLK_KP8:
-							fGain = fDefaultGain;
+							gain = DefaultGain;
 							break;
 						case SDLK_KP9:
-							fGain += 0.1f;
-							if (fGain > 1.0f)
+							gain += 0.1f;
+							if (gain > 1.0f)
 							{
-								fGain = 1.0f;
+								gain = 1.0f;
 							}
 							break;
 						case SDLK_KP4:
-							fPitch -= 0.1f;
+							pitch -= 0.1f;
 							break;
 						case SDLK_KP5:
-							fPitch = fDefaultPitch;
+							pitch = DefaultPitch;
 							break;
 						case SDLK_KP6:
-							fPitch += 0.1f;
+							pitch += 0.1f;
 							break;
 						case SDLK_KP1:
-							fXPos -= 0.1f;
+							xPos -= 0.1f;
 							break;
 						case SDLK_KP2:
-							fXPos = fDefaultXPos;
+							xPos = DefaultXPos;
 							break;
 						case SDLK_KP3:
-							fXPos += 0.1f;
+							xPos += 0.1f;
 							break;
 						default:
 							break;
@@ -125,21 +125,21 @@ int main(int argc, char **argv)
 
 
 // ----- Blitting on the screen --------
-		t.AddFrame();
+		t.addFrame();
 
-		player.SetGain(fGain);
-		player.SetPitch(fPitch);
-		player.SetPosition(fXPos, 0.0f, 0.0f);
-		player.SetLooping(bLooping);
+		player.setGain(gain);
+		player.setPitch(pitch);
+		player.setPosition(xPos, 0.0f, 0.0f);
+		player.setLooping(isLooping);
 
-		ncServiceLocator::AudioDevice().UpdatePlayers();
-		gfxDevice.Clear();
-		gfxDevice.Update();
+		ncServiceLocator::audioDevice().updatePlayers();
+		gfxDevice.clear();
+		gfxDevice.update();
 	}
 
 
 // ----- Quitting ----------------------
 	// Unregistering all services to close the audio device
-	ncServiceLocator::UnregisterAll();
+	ncServiceLocator::unregisterAll();
 	return 0;
 }

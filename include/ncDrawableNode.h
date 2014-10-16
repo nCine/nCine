@@ -9,66 +9,66 @@ class ncDrawableNode : public ncSceneNode
 {
   public:
 	/// Drawing priorities from back to front
-	enum ePriorityBase
+	enum PriorityBase
 	{
 		SCENE_PRIORITY = 0,
 		HUD_PRIORITY = 128
 	};
 
-	ncDrawableNode(ncSceneNode* pParent, int iX, int iY)
-		: ncSceneNode(pParent, iX, iY) { }
-	ncDrawableNode(ncSceneNode* pParent)
-		: ncSceneNode(pParent) { }
+	ncDrawableNode(ncSceneNode* parent, int x, int y)
+		: ncSceneNode(parent, x, y) { }
+	ncDrawableNode(ncSceneNode* parent)
+		: ncSceneNode(parent) { }
 	ncDrawableNode()
 		: ncSceneNode() { }
 	virtual ~ncDrawableNode() { }
 
 	/// Returns the draw command class for this node
-	inline const ncRenderCommand* Command() const { return &m_renderCmd; }
+	inline const ncRenderCommand* renderCommand() const { return &renderCommand_; }
 	// Updates the draw command and adds it to the queue
-	virtual void Draw(ncRenderQueue& rRenderQueue);
+	virtual void draw(ncRenderQueue& renderQueue);
 
 	// Applies node transformations to vertices
-	void ApplyTransformations();
+	void applyTransformations();
 
 	/// Returns the node rendering priority
-	inline int Priority() const { return m_renderCmd.Priority(); }
+	inline int priority() const { return renderCommand_.priority(); }
 	/// Sets the node rendering priority
-	inline void SetPriority(int iPriority) { m_renderCmd.SetPriority(iPriority); }
+	inline void setPriority(int priority) { renderCommand_.setPriority(priority); }
 
   protected:
 	/// The render command class associated with this node
-	ncRenderCommand m_renderCmd;
+	ncRenderCommand renderCommand_;
 
 	/// Updates the render command
-	virtual void UpdateRenderCommand() = 0;
+	virtual void updateRenderCommand() = 0;
 };
 
 /// Updates the draw command and adds it to the queue
-inline void ncDrawableNode::Draw(ncRenderQueue& rRenderQueue)
+inline void ncDrawableNode::draw(ncRenderQueue& renderQueue)
 {
-	UpdateRenderCommand();
-//		ApplyTransformations();
-	rRenderQueue.AddCommand(&m_renderCmd);
+	updateRenderCommand();
+//	ApplyTransformations();
+	renderQueue.addCommand(&renderCommand_);
 }
 
 /// Applies node transformations to vertices
-inline void ncDrawableNode::ApplyTransformations()
+inline void ncDrawableNode::applyTransformations()
 {
-	ncRenderGeometry &rGeom = m_renderCmd.Geometry();
+	ncRenderGeometry &geometry = renderCommand_.geometry();
 
 	float sine = 0.0f;
 	float cosine = 1.0f;
-	if (abs(m_fAbsRotation) > sMinRotation && abs(m_fAbsRotation) < 360.0f - sMinRotation)
+	if (abs(absRotation_) > MinRotation && abs(absRotation_) < 360.0f - MinRotation)
 	{
-		sine = sinf(-m_fAbsRotation * M_PI / 180.0f);
-		cosine = cosf(-m_fAbsRotation * M_PI / 180.0f);
+		sine = sinf(-absRotation_ * M_PI / 180.0f);
+		cosine = cosf(-absRotation_ * M_PI / 180.0f);
 	}
 
-	for (int i = rGeom.FirstVertex(); i < rGeom.NumVertices() * 2; i = i + 2)
+	for (int i = geometry.firstVertex(); i < geometry.numVertices() * 2; i = i + 2)
 	{
-		float fX = rGeom.VertexPointer()[i] * m_fAbsScaleFactor;			float fY = rGeom.VertexPointer()[i + 1] * m_fAbsScaleFactor;
-		rGeom.VertexPointer()[i] = m_fAbsX + fX * cosine - fY * sine;		rGeom.VertexPointer()[i + 1] = m_fAbsY + fY * cosine + fX * sine;
+		float x = geometry.vertexPointer()[i] * absScaleFactor_;			float y = geometry.vertexPointer()[i + 1] * absScaleFactor_;
+		geometry.vertexPointer()[i] = absX_ + x * cosine - y * sine;		geometry.vertexPointer()[i + 1] = absY_ + y * cosine + x * sine;
 	}
 }
 

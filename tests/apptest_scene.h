@@ -12,19 +12,22 @@ class MyEventHandler
 	  public ncIInputEventHandler
 {
   public:
-	virtual void OnInit();
-	virtual void OnFrameStart();
-	virtual void OnFrameEnd() { }
-	virtual void OnShutdown();
+	virtual void onInit();
+	virtual void onFrameStart();
+	virtual void onFrameEnd() { }
+	virtual void onShutdown();
 
 #ifndef __ANDROID__
-	virtual void OnKeyReleased(const ncKeyboardEvent &event);
+	virtual void onKeyReleased(const ncKeyboardEvent &event);
 #endif
 
   private:
-	float *m_fAngles;
-	ncTexture **m_pTextures;
-	ncSprite **m_pSprites;
+	static const int NumTextures = 4;
+	static const int NumSprites = 8;
+
+	float *angles_;
+	ncTexture **textures_;
+	ncSprite **sprites_;
 };
 
 #endif

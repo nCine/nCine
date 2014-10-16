@@ -14,28 +14,28 @@ class MyEventHandler
 	  public ncIInputEventHandler
 {
   public:
-	virtual void OnInit();
-	virtual void OnFrameStart();
-	virtual void OnFrameEnd() { }
-	virtual void OnShutdown();
+	virtual void onInit();
+	virtual void onFrameStart();
+	virtual void onFrameEnd() { }
+	virtual void onShutdown();
 
 #ifndef __ANDROID__
-	virtual void OnKeyReleased(const ncKeyboardEvent &event);
+	virtual void onKeyReleased(const ncKeyboardEvent &event);
 #endif
 
   private:
-	ncTexture *m_pTexture;
-	ncSprite *m_pSprites[2];
-	ncFont *m_pFont;
-	ncTextNode *m_pTextNode;
+	static const int NumJoysticks = 4;
+	static const int NumAxes = 10;
+	float axisValues_[NumAxes];
+	static const int NumButtons = 12;
+	unsigned char buttonStates_[NumButtons];
+	static const int NumChars = 256;
+	char joyString_[NumChars];
 
-	static const int numJoysticks = 4;
-	static const int numAxes = 10;
-	float m_fAxisValues[numAxes];
-	static const int numButtons = 12;
-	unsigned char m_ubButtonStates[numButtons];
-	static const int numChars = 256;
-	char m_vJoyString[numChars];
+	ncTexture *texture_;
+	ncSprite *sprites_[2];
+	ncFont *font_;
+	ncTextNode *textNode_;
 };
 
 #endif

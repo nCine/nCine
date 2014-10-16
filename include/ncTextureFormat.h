@@ -19,62 +19,62 @@ class ncTextureFormat
 {
   public:
 	ncTextureFormat()
-		: m_eInternalFormat(-1), m_eFormat(-1), m_eType(-1), m_bCompressed(false) { }
-	ncTextureFormat(GLenum eInternalFormat);
-	ncTextureFormat(GLenum eInternalFormat, GLenum eType);
+		: internalFormat_(-1), format_(-1), type_(-1), isCompressed_(false) { }
+	ncTextureFormat(GLenum internalFormat);
+	ncTextureFormat(GLenum internalFormat, GLenum type);
 
 	/// Returns the specified internal format
-	inline GLenum Internal() const { return m_eInternalFormat; }
+	inline GLenum internalFormat() const { return internalFormat_; }
 	/// Returns the corresponding format
-	inline GLenum Format() const { return m_eFormat; }
+	inline GLenum format() const { return format_; }
 	/// Returns the corresponding pixel data type
-	inline GLenum Type() const { return m_eType; }
+	inline GLenum type() const { return type_; }
 	/// Returns true if the format holds compressed data
-	inline bool isCompressed() const { return m_bCompressed; }
+	inline bool isCompressed() const { return isCompressed_; }
 	// Returns true if the format provides an alpha channel
 	bool hasAlpha() const;
 
 #ifndef __ANDROID__
 	// Converts the external format to the corresponding BGR one
-	void BGRFormat();
+	void bgrFormat();
 #endif
 
 	// Calculates the pixel data size for each MIP map level
-	static long int CalculateMipSizes(GLenum eInternalFormat, int iWidth, int iHeight, int iMipMapCount, long int *pMipDataOffsets, long int *pMipDataSizes);
+	static long int calculateMipSizes(GLenum internalFormat, int width, int height, int mipMapCount, long int *mipDataOffsets, long int *mipDataSizes);
 
   private:
-	GLenum m_eInternalFormat;
-	GLenum m_eFormat;
-	GLenum m_eType;
-	bool m_bCompressed;
+	GLenum internalFormat_;
+	GLenum format_;
+	GLenum type_;
+	bool isCompressed_;
 
 #ifndef __ANDROID__
 	// Searches a match between an integer internal format and an external one
-	bool IntegerFormat();
+	bool integerFormat();
 	// Searches a match between a floating point internal format and an external one
-	bool FloatFormat();
+	bool floatFormat();
 	// Searches a match between a compressed internal format and an external one
-	bool CompressedFormat();
+	bool compressedFormat();
 #else
 	// Searches a match between an OpenGL ES internal format and an external one
-	bool OESFormat();
+	bool oesFormat();
 	// Searches a match between a OpenGL ES compressed internal format and an external one
-	bool OESCompressedFormat();
+	bool oesCompressedFormat();
 #endif
 
 	// Tries to find an external format corresponding to the internal one
-	void FindExternalFmt();
+	void findExternalFmt();
 };
 
 /// Returns true if the format provides an alpha channel
 inline bool ncTextureFormat::hasAlpha() const
 {
-	return (m_eFormat == GL_RGBA ||
+	return (format_ == GL_RGBA ||
 #ifndef __ANDROID__
-	        m_eFormat == GL_BGRA ||
+			format_ == GL_BGRA ||
 #endif
-	        m_eFormat == GL_LUMINANCE_ALPHA ||
-	        m_eFormat == GL_ALPHA);
+			format_ == GL_LUMINANCE_ALPHA ||
+			format_ == GL_ALPHA);
 }
 
 #endif

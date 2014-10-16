@@ -17,28 +17,28 @@ class ncAudioBuffer : public ncObject
   public:
 	ncAudioBuffer();
 	// A constructor creating a buffer from a file
-	ncAudioBuffer(const char *pFilename);
+	ncAudioBuffer(const char *filename);
 	virtual ~ncAudioBuffer();
 
 	/// Returns the OpenAL buffer id
-	inline ALuint ALId() const { return m_uALId; }
+	inline ALuint bufferId() const { return bufferId_; }
 	/// Returns number of audio channels
-	inline int Channels() const { return m_iChannels; }
+	inline int numChannels() const { return numChannels_; }
 	/// Returns samples frequency
-	inline int Frequency() const { return m_iFrequency; }
+	inline int frequency() const { return frequency_; }
 
-	inline static eObjectType sType() { return AUDIOBUFFER_TYPE; }
+	inline static ObjectType sType() { return AUDIOBUFFER_TYPE; }
 
   private:
 	/// The OpenAL buffer id
-	ALuint m_uALId;
+	ALuint bufferId_;
 	/// Number of channels
-	int m_iChannels;
+	int numChannels_;
 	/// Samples frequency
-	int m_iFrequency;
+	int frequency_;
 
 	// Loads audio samples based on information from the audio loader
-	void Load(const ncIAudioLoader *pAudioLoader);
+	void load(const ncIAudioLoader *audioLoader);
 };
 
 #endif

@@ -13,18 +13,18 @@
 class ncAudioLoaderOgg : public ncIAudioLoader
 {
   public:
-	ncAudioLoaderOgg(const char *pFilename);
-	ncAudioLoaderOgg(ncIFile *pFileHandle);
+	ncAudioLoaderOgg(const char *filename);
+	ncAudioLoaderOgg(ncIFile *fileHandle);
 	~ncAudioLoaderOgg();
 
-	long Read(char *pBuffer, int iBufSize) const;
-	void Rewind() const;
+	long read(char *buffer, int bufferSize) const;
+	void rewind() const;
 
   private:
 	/// Vorbisfile handle
-	mutable OggVorbis_File m_oggFile;
+	mutable OggVorbis_File oggFile_;
 
-	void Init();
+	void init();
 };
 
 #endif

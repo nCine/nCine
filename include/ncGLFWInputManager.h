@@ -13,27 +13,27 @@ class ncGLFWMouseState : public ncMouseState
   public:
 	ncGLFWMouseState() { }
 
-	inline bool isLeftButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::WindowHandle(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS); }
-	inline bool isMiddleButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::WindowHandle(), GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS); }
-	inline bool isRightButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::WindowHandle(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS); }
-	inline bool isWheelUpButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::WindowHandle(), GLFW_MOUSE_BUTTON_4) == GLFW_PRESS); }
-	inline bool isWheelDownButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::WindowHandle(), GLFW_MOUSE_BUTTON_5) == GLFW_PRESS); }
+	inline bool isLeftButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS); }
+	inline bool isMiddleButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS); }
+	inline bool isRightButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS); }
+	inline bool isWheelUpButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_4) == GLFW_PRESS); }
+	inline bool isWheelDownButtonDown() const { return (glfwGetMouseButton(ncGLFWGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_5) == GLFW_PRESS); }
 };
 
 /// Information about a GLFW mouse event
 class ncGLFWMouseEvent : public ncMouseEvent
 {
   public:
-	ncGLFWMouseEvent() : m_iButton(0) { }
+	ncGLFWMouseEvent() : button_(0) { }
 
-	inline bool isLeftButton() const { return m_iButton == GLFW_MOUSE_BUTTON_LEFT; }
-	inline bool isMiddleButton() const { return m_iButton == GLFW_MOUSE_BUTTON_MIDDLE; }
-	inline bool isRightButton() const { return m_iButton == GLFW_MOUSE_BUTTON_RIGHT; }
-	inline bool isWheelUpButton() const { return m_iButton == GLFW_MOUSE_BUTTON_4; }
-	inline bool isWheelDownButton() const { return m_iButton == GLFW_MOUSE_BUTTON_5; }
+	inline bool isLeftButton() const { return button_ == GLFW_MOUSE_BUTTON_LEFT; }
+	inline bool isMiddleButton() const { return button_ == GLFW_MOUSE_BUTTON_MIDDLE; }
+	inline bool isRightButton() const { return button_ == GLFW_MOUSE_BUTTON_RIGHT; }
+	inline bool isWheelUpButton() const { return button_ == GLFW_MOUSE_BUTTON_4; }
+	inline bool isWheelDownButton() const { return button_ == GLFW_MOUSE_BUTTON_5; }
 
   private:
-	int m_iButton;
+	int button_;
 
 	friend class ncGLFWInputManager;
 };
@@ -43,7 +43,7 @@ class ncGLFWKeyboardState : public ncKeyboardState
 {
   public:
 	ncGLFWKeyboardState() { }
-	inline bool isKeyDown(ncKeySym key) const { return glfwGetKey(ncGLFWGfxDevice::WindowHandle(), key) == GLFW_PRESS; }
+	inline bool isKeyDown(ncKeySym key) const { return glfwGetKey(ncGLFWGfxDevice::windowHandle(), key) == GLFW_PRESS; }
 };
 
 /// Information about GLFW joystick state
@@ -51,14 +51,14 @@ class ncGLFWJoystickState
 {
   public:
 	ncGLFWJoystickState()
-		: m_iNumButtons(0), m_iNumAxes(0), m_ubButtons(NULL), m_fAxisValues(NULL) { }
+		: numButtons_(0), numAxes_(0), buttons_(NULL), axisValues_(NULL) { }
 
   private:
-	int m_iNumButtons;
-	int m_iNumAxes;
+	int numButtons_;
+	int numAxes_;
 
-	const unsigned char *m_ubButtons;
-	const float *m_fAxisValues;
+	const unsigned char *buttons_;
+	const float *axisValues_;
 
 	friend class ncGLFWInputManager;
 };
@@ -72,43 +72,43 @@ class ncGLFWInputManager : public ncIInputManager
 	// Detects window focus gain/loss events
 	static bool hasFocus();
 	// Updates joystick state structures
-	static void UpdateJoystickStates();
+	static void updateJoystickStates();
 
-	const ncMouseState& MouseState();
-	inline const ncKeyboardState& KeyboardState() const	{ return s_keyboardState; }
+	const ncMouseState& mouseState();
+	inline const ncKeyboardState& keyboardState() const	{ return keyboardState_; }
 
-	bool isJoyPresent(int iJoyId) const;
-	const char* JoyName(int iJoyId) const;
-	int JoyNumButtons(int iJoyId) const;
-	int JoyNumAxes(int iJoyId) const;
-	bool isJoyButtonPressed(int iJoyId, int iButtonId) const;
-	short int JoyAxisValue(int iJoyId, int iAxisId) const;
-	float JoyAxisNormValue(int iJoyId, int iAxisId) const;
+	bool isJoyPresent(int joyId) const;
+	const char* joyName(int joyId) const;
+	int joyNumButtons(int joyId) const;
+	int joyNumAxes(int joyId) const;
+	bool isJoyButtonPressed(int joyId, int buttonId) const;
+	short int joyAxisValue(int joyId, int axisId) const;
+	float joyAxisNormValue(int joyId, int axisId) const;
 
   private:
-	static const unsigned int s_uMaxNumJoysticks = GLFW_JOYSTICK_LAST - GLFW_JOYSTICK_1 + 1;
+	static const unsigned int MaxNumJoysticks = GLFW_JOYSTICK_LAST - GLFW_JOYSTICK_1 + 1;
 
-	static void WindowCloseCallback(GLFWwindow *window);
-	static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
-	static void CursorPosCallback(GLFWwindow *window, double x, double y);
-	static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
+	static void windowCloseCallback(GLFWwindow *window);
+	static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+	static void cursorPosCallback(GLFWwindow *window, double x, double y);
+	static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
 
-	static bool m_bWindowHasFocus;
-	static ncGLFWMouseState s_mouseState;
-	static ncGLFWMouseEvent s_mouseEvent;
-	static ncGLFWKeyboardState s_keyboardState;
-	static ncKeyboardEvent	s_keyboardEvent;
-	static ncGLFWJoystickState s_joystickStates[s_uMaxNumJoysticks];
+	static bool windowHasFocus_;
+	static ncGLFWMouseState mouseState_;
+	static ncGLFWMouseEvent mouseEvent_;
+	static ncGLFWKeyboardState keyboardState_;
+	static ncKeyboardEvent	keyboardEvent_;
+	static ncGLFWJoystickState joystickStates_[MaxNumJoysticks];
 };
 
-inline const ncMouseState& ncGLFWInputManager::MouseState()
+inline const ncMouseState& ncGLFWInputManager::mouseState()
 {
-	double dCursorX, dCursorY;
+	double xCursor, yCursor;
 
-	glfwGetCursorPos(ncGLFWGfxDevice::WindowHandle(), &dCursorX, &dCursorY);
-	s_mouseState.x = int(dCursorX); s_mouseState.y = int(dCursorY);
+	glfwGetCursorPos(ncGLFWGfxDevice::windowHandle(), &xCursor, &yCursor);
+	mouseState_.x = int(xCursor); mouseState_.y = int(yCursor);
 
-	return s_mouseState;
+	return mouseState_;
 }
 
 #endif

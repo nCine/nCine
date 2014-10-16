@@ -8,12 +8,12 @@
 class ncTextureLoaderWebP : public ncITextureLoader
 {
   public:
-	ncTextureLoaderWebP(const char *pFilename);
-	ncTextureLoaderWebP(ncIFile *pFileHandle);
+	ncTextureLoaderWebP(const char *filename);
+	ncTextureLoaderWebP(ncIFile *fileHandle);
 	~ncTextureLoaderWebP() { }
 
   private:
-	void Init();
+	void init();
 };
 
 #endif

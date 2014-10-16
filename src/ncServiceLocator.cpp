@@ -1,99 +1,99 @@
 #include <cstdio> // for NULL
 #include "ncServiceLocator.h"
 
-ncNullIndexer ncServiceLocator::m_nullIndexer;
-ncIIndexer* ncServiceLocator::m_pIndexerService = &ncServiceLocator::m_nullIndexer;
+ncNullIndexer ncServiceLocator::nullIndexer_;
+ncIIndexer* ncServiceLocator::indexerService_ = &ncServiceLocator::nullIndexer_;
 
-ncNullLogger ncServiceLocator::m_nullLogger;
-ncILogger* ncServiceLocator::m_pLoggerService = &ncServiceLocator::m_nullLogger;
+ncNullLogger ncServiceLocator::nullLogger_;
+ncILogger* ncServiceLocator::loggerService_ = &ncServiceLocator::nullLogger_;
 
-ncNullAudioDevice ncServiceLocator::m_nullAudioDevice;
-ncIAudioDevice* ncServiceLocator::m_pAudioDevice = &ncServiceLocator::m_nullAudioDevice;
+ncNullAudioDevice ncServiceLocator::nullAudioDevice_;
+ncIAudioDevice* ncServiceLocator::audioDevice_ = &ncServiceLocator::nullAudioDevice_;
 
-ncNullThreadPool ncServiceLocator::m_nullThreadPool;
-ncIThreadPool* ncServiceLocator::m_pThreadPool = &ncServiceLocator::m_nullThreadPool;
+ncNullThreadPool ncServiceLocator::nullThreadPool_;
+ncIThreadPool* ncServiceLocator::threadPool_ = &ncServiceLocator::nullThreadPool_;
 
-ncGfxCapabilities ncServiceLocator::m_gfxCapabilities;
+ncGfxCapabilities ncServiceLocator::gfxCapabilities_;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncServiceLocator::RegisterIndexer(ncIIndexer* pService)
+void ncServiceLocator::registerIndexer(ncIIndexer* service)
 {
-	if (pService == NULL)
+	if (service == NULL)
 	{
-		m_pIndexerService = &m_nullIndexer;
+		indexerService_ = &nullIndexer_;
 	}
 	else
 	{
-		m_pIndexerService = pService;
+		indexerService_ = service;
 	}
 }
 
-void ncServiceLocator::RegisterLogger(ncILogger* pService)
+void ncServiceLocator::registerLogger(ncILogger* service)
 {
-	if (pService == NULL)
+	if (service == NULL)
 	{
-		m_pLoggerService = &m_nullLogger;
+		loggerService_ = &nullLogger_;
 	}
 	else
 	{
-		m_pLoggerService = pService;
+		loggerService_ = service;
 	}
 }
 
-void ncServiceLocator::RegisterAudioDevice(ncIAudioDevice* pService)
+void ncServiceLocator::registerAudioDevice(ncIAudioDevice* service)
 {
-	if (pService == NULL)
+	if (service == NULL)
 	{
-		m_pAudioDevice = &m_nullAudioDevice;
+		audioDevice_ = &nullAudioDevice_;
 	}
 	else
 	{
-		m_pAudioDevice = pService;
+		audioDevice_ = service;
 	}
 }
 
-void ncServiceLocator::RegisterThreadPool(ncIThreadPool* pService)
+void ncServiceLocator::registerThreadPool(ncIThreadPool* service)
 {
-	if (pService == NULL)
+	if (service == NULL)
 	{
-		m_pThreadPool = &m_nullThreadPool;
+		threadPool_ = &nullThreadPool_;
 	}
 	else
 	{
-		m_pThreadPool = pService;
+		threadPool_ = service;
 	}
 }
 
 /// Deletes every registered service reestablishing null ones
-void ncServiceLocator::UnregisterAll()
+void ncServiceLocator::unregisterAll()
 {
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncServiceLocator::UnregisterAll - Unregistering all services");
+	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncServiceLocator::unregisterAll - Unregistering all services");
 
-	if (m_pIndexerService != &m_nullIndexer)
+	if (indexerService_ != &nullIndexer_)
 	{
-		delete m_pIndexerService;
-		m_pIndexerService = &m_nullIndexer;
+		delete indexerService_;
+		indexerService_ = &nullIndexer_;
 	}
 
-	if (m_pAudioDevice != &m_nullAudioDevice)
+	if (audioDevice_ != &nullAudioDevice_)
 	{
-		delete m_pAudioDevice;
-		m_pAudioDevice = &m_nullAudioDevice;
+		delete audioDevice_;
+		audioDevice_ = &nullAudioDevice_;
 	}
 
-	if (m_pThreadPool != &m_nullThreadPool)
+	if (threadPool_ != &nullThreadPool_)
 	{
-		delete m_pThreadPool;
-		m_pThreadPool = &m_nullThreadPool;
+		delete threadPool_;
+		threadPool_ = &nullThreadPool_;
 	}
 
 	// Logger unregistered at the end to give a last chance for logging
-	if (m_pLoggerService != &m_nullLogger)
+	if (loggerService_ != &nullLogger_)
 	{
-		delete m_pLoggerService;
-		m_pLoggerService = &m_nullLogger;
+		delete loggerService_;
+		loggerService_ = &nullLogger_;
 	}
 }

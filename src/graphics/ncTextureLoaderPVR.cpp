@@ -6,80 +6,80 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncTextureLoaderPVR::ncTextureLoaderPVR(const char *pFilename)
-	: ncITextureLoader(pFilename)
+ncTextureLoaderPVR::ncTextureLoaderPVR(const char *filename)
+	: ncITextureLoader(filename)
 {
-	Init();
+	init();
 }
 
-ncTextureLoaderPVR::ncTextureLoaderPVR(ncIFile *pFileHandle)
-	: ncITextureLoader(pFileHandle)
+ncTextureLoaderPVR::ncTextureLoaderPVR(ncIFile *fileHandle)
+	: ncITextureLoader(fileHandle)
 {
-	Init();
+	init();
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncTextureLoaderPVR::Init()
+void ncTextureLoaderPVR::init()
 {
-	PVR3_header header;
+	Pvr3Header header;
 
-	m_pFileHandle->Open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
-	ReadHeader(header);
-	ParseFormat(header);
+	fileHandle_->open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
+	readHeader(header);
+	parseFormat(header);
 }
 
 /// Reads the PVR3 header and fills the corresponding structure
-void ncTextureLoaderPVR::ReadHeader(PVR3_header &header)
+void ncTextureLoaderPVR::readHeader(Pvr3Header &header)
 {
 	// PVR3 header is 52 bytes long
-	m_pFileHandle->Read(&header, 52);
+	fileHandle_->read(&header, 52);
 
 	// Checking for the header presence
-	if (ncIFile::Int32FromLE(header.version) == 0x03525650) // "PVR"03
+	if (ncIFile::int32FromLE(header.version) == 0x03525650) // "PVR"03
 	{
-		m_iHeaderSize = 52 + ncIFile::Int32FromLE(header.metaDataSize);
-		m_iWidth = ncIFile::Int32FromLE(header.width);
-		m_iHeight = ncIFile::Int32FromLE(header.height);
-		m_iMipMapCount = header.numMipmaps;
+		headerSize_ = 52 + ncIFile::int32FromLE(header.metaDataSize);
+		width_ = ncIFile::int32FromLE(header.width);
+		height_ = ncIFile::int32FromLE(header.height);
+		mipMapCount_ = header.numMipmaps;
 
-		if (m_iMipMapCount == 0)
+		if (mipMapCount_ == 0)
 		{
-			m_iMipMapCount = 1;
+			mipMapCount_ = 1;
 		}
 	}
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::ReadHeader - Not a PVR3 file");
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::readHeader - Not a PVR3 file");
 		exit(EXIT_FAILURE);
 	}
 }
 
 /// Parses the PVR3 header to determine its format
-void ncTextureLoaderPVR::ParseFormat(const PVR3_header& header)
+void ncTextureLoaderPVR::parseFormat(const Pvr3Header& header)
 {
-	GLenum eInternalFormat = GL_RGB; // to suppress uninitialized variable warning
-	const ncGfxCapabilities& gfxCaps = ncServiceLocator::GfxCapabilities();
+	GLenum internalFormat = GL_RGB; // to suppress uninitialized variable warning
+	const ncGfxCapabilities& gfxCaps = ncServiceLocator::gfxCapabilities();
 
-	uint64_t u64PixelFormat = ncIFile::Int64FromLE(header.pixelFormat);
+	uint64_t pixelFormat = ncIFile::int64FromLE(header.pixelFormat);
 
 	// Texture contains compressed data, most significant 4 bytes have been set to zero
-	if (u64PixelFormat < 0x0000000100000000ULL)
+	if (pixelFormat < 0x0000000100000000ULL)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderPVR::ParseFormat - Compressed format: %u", u64PixelFormat);
+		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderPVR::parseFormat - Compressed format: %u", pixelFormat);
 
 		// Check for OpenGL extension support
-		switch (u64PixelFormat)
+		switch (pixelFormat)
 		{
 #ifndef __ANDROID__
 			case FMT_DXT1:
 			case FMT_DXT3:
 			case FMT_DXT5:
-				if (gfxCaps.EXTTextureCompressionS3TC() == false)
+				if (gfxCaps.extTextureCompressionS3TC() == false)
 				{
-					ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::ParseFormat - GL_EXT_texture_compression_s3tc not available");
+					ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::parseFormat - GL_EXT_texture_compression_s3tc not available");
 					exit(EXIT_FAILURE);
 				}
 				break;
@@ -88,105 +88,105 @@ void ncTextureLoaderPVR::ParseFormat(const PVR3_header& header)
 			case FMT_PVRTC_2BPP_RGBA:
 			case FMT_PVRTC_4BPP_RGB:
 			case FMT_PVRTC_4BPP_RGBA:
-				if (gfxCaps.IMGTextureCompressionPVRTC() == false)
+				if (gfxCaps.imgTextureCompressionPVRTC() == false)
 				{
-					ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::ParseFormat - GL_IMG_texture_compression_pvrtc not available");
+					ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::parseFormat - GL_IMG_texture_compression_pvrtc not available");
 					exit(EXIT_FAILURE);
 				}
 				break;
 			case FMT_PVRTCII_2BPP:
 			case FMT_PVRTCII_4BPP:
-				ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::ParseFormat - No support for PVRTC-II compression");
+				ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::parseFormat - No support for PVRTC-II compression");
 				exit(EXIT_FAILURE);
 				break;
 #endif
 			default:
-				ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::ParseFormat - Unsupported PVR3 compressed format: %u", u64PixelFormat);
+				ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::parseFormat - Unsupported PVR3 compressed format: %u", pixelFormat);
 				exit(EXIT_FAILURE);
 				break;
 		}
 
 		// Parsing the pixel format
-		switch (u64PixelFormat)
+		switch (pixelFormat)
 		{
 #ifndef __ANDROID__
 			case FMT_DXT1:
-				eInternalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+				internalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
 				break;
 			case FMT_DXT3:
-				eInternalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
 				break;
 			case FMT_DXT5:
-				eInternalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 				break;
 #else
 			case FMT_ETC1:
-				eInternalFormat = GL_ETC1_RGB8_OES;
+				internalFormat = GL_ETC1_RGB8_OES;
 				break;
 			case FMT_PVRTC_2BPP_RGB:
-				eInternalFormat = GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
+				internalFormat = GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
 				break;
 			case FMT_PVRTC_2BPP_RGBA:
-				eInternalFormat = GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
+				internalFormat = GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
 				break;
 			case FMT_PVRTC_4BPP_RGB:
-				eInternalFormat = GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
+				internalFormat = GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG;
 				break;
 			case FMT_PVRTC_4BPP_RGBA:
-				eInternalFormat = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
+				internalFormat = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
 				break;
 #endif
 		}
 
-		LoadPixels(eInternalFormat);
+		loadPixels(internalFormat);
 	}
 	// Texture contains uncompressed RGB data
 	else
 	{
-		GLenum eType = GL_UNSIGNED_BYTE;
+		GLenum type = GL_UNSIGNED_BYTE;
 
-		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderPVR::ParseFormat - Uncompressed format: %c%c%c%c (%u, %u, %u, %u)",
-			((char*)&u64PixelFormat)[0], ((char*)&u64PixelFormat)[1], ((char*)&u64PixelFormat)[2], ((char*)&u64PixelFormat)[3],
-			((unsigned char*)&u64PixelFormat)[4], ((unsigned char*)&u64PixelFormat)[5], ((unsigned char*)&u64PixelFormat)[6], ((unsigned char*)&u64PixelFormat)[7]);
+		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderPVR::parseFormat - Uncompressed format: %c%c%c%c (%u, %u, %u, %u)",
+			((char*)&pixelFormat)[0], ((char*)&pixelFormat)[1], ((char*)&pixelFormat)[2], ((char*)&pixelFormat)[3],
+			((unsigned char*)&pixelFormat)[4], ((unsigned char*)&pixelFormat)[5], ((unsigned char*)&pixelFormat)[6], ((unsigned char*)&pixelFormat)[7]);
 
-		switch (u64PixelFormat)
+		switch (pixelFormat)
 		{
 			case FMT_RGB_888:
-				eInternalFormat = GL_RGB;
+				internalFormat = GL_RGB;
 				break;
 			case FMT_RGBA_8888:
-				eInternalFormat = GL_RGBA;
+				internalFormat = GL_RGBA;
 				break;
 			case FMT_RGB_565:
-				eInternalFormat = GL_RGB;
-				eType = GL_UNSIGNED_SHORT_5_6_5;
+				internalFormat = GL_RGB;
+				type = GL_UNSIGNED_SHORT_5_6_5;
 				break;
 			case FMT_RGBA_5551:
-				eInternalFormat = GL_RGBA;
-				eType = GL_UNSIGNED_SHORT_5_5_5_1;
+				internalFormat = GL_RGBA;
+				type = GL_UNSIGNED_SHORT_5_5_5_1;
 				break;
 			case FMT_RGBA_4444:
-				eInternalFormat = GL_RGBA;
-				eType = GL_UNSIGNED_SHORT_4_4_4_4;
+				internalFormat = GL_RGBA;
+				type = GL_UNSIGNED_SHORT_4_4_4_4;
 				break;
 			default:
-				ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::ParseFormat - Unsupported PVR3 uncompressed format: %llx", u64PixelFormat);
+				ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::parseFormat - Unsupported PVR3 uncompressed format: %llx", pixelFormat);
 				exit(EXIT_FAILURE);
 				break;
 		}
 
-		LoadPixels(eInternalFormat, eType);
+		loadPixels(internalFormat, type);
 	}
 
-	if (m_iMipMapCount > 1)
+	if (mipMapCount_ > 1)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderPVR::ParseFormat - MIP Maps: %d", m_iMipMapCount);
-		m_lMipDataOffsets = new long[m_iMipMapCount];
-		m_lMipDataSizes = new long[m_iMipMapCount];
-		long int lDataSizesSum = ncTextureFormat::CalculateMipSizes(eInternalFormat, m_iWidth, m_iHeight, m_iMipMapCount, m_lMipDataOffsets, m_lMipDataSizes);
-		if (lDataSizesSum != m_lDataSize)
+		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderPVR::parseFormat - MIP Maps: %d", mipMapCount_);
+		mipDataOffsets_ = new long[mipMapCount_];
+		mipDataSizes_ = new long[mipMapCount_];
+		long int dataSizesSum = ncTextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_, mipDataSizes_);
+		if (dataSizesSum != dataSize_)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncTextureLoaderPVR::ParseFormat - The sum of MIP maps size (%ld) is different than texture total data (%ld)", lDataSizesSum, m_lDataSize);
+			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncTextureLoaderPVR::parseFormat - The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
 		}
 	}
 }

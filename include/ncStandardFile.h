@@ -9,35 +9,28 @@ class ncStandardFile: public ncIFile
   public:
 	/// Constructs a standard file object
 	/*! \param pFilename File name including its path */
-	ncStandardFile(const char *pFilename) : ncIFile(pFilename) { m_eType = STANDARD_TYPE; }
-
-	~ncStandardFile()
-	{
-		if (m_bShouldCloseOnExit)
-		{
-			Close();
-		}
-	}
+	ncStandardFile(const char *filename) : ncIFile(filename) { type_ = STANDARD_TYPE; }
+	~ncStandardFile();
 
 	/// Static method to return class type
-	inline static eFileType sType() { return STANDARD_TYPE; }
+	inline static FileType sType() { return STANDARD_TYPE; }
 
-	void Open(unsigned char uMode);
-	void Close();
-	long int Seek(long int lOffset, int iWhence) const;
-	long int Tell() const;
-	long int Read(void *pBuffer, int iBytes) const;
+	void open(unsigned char mode);
+	void close();
+	long int seek(long int offset, int whence) const;
+	long int tell() const;
+	long int read(void *buffer, int bytes) const;
 
   private:
 	// Opens the file with open()
-	void OpenFD(unsigned char uMode);
+	void openFd(unsigned char mode);
 	// Opens the file with fopen()
-	void OpenStream(unsigned char uMode);
+	void openStream(unsigned char mode);
 
 	// Checks if a file can be accessed with specified mode
-	static bool Access(const char *pFilename, unsigned char uMode);
+	static bool access(const char *filename, unsigned char mode);
 
-	friend bool ncIFile::Access(const char *pFilename, unsigned char uMode);
+	friend bool ncIFile::access(const char *filename, unsigned char mode);
 };
 
 #endif

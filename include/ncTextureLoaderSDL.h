@@ -13,14 +13,14 @@
 class ncTextureLoaderSDL : public ncITextureLoader
 {
   public:
-	ncTextureLoaderSDL(const char *pFilename);
-	ncTextureLoaderSDL(ncIFile *pFileHandle);
+	ncTextureLoaderSDL(const char *filename);
+	ncTextureLoaderSDL(ncIFile *fileHandle);
 	~ncTextureLoaderSDL();
 
   private:
-	SDL_Surface *m_pSDLSurface;
+	SDL_Surface *sdlSurface_;
 
-	void Init();
+	void init();
 };
 
 #endif

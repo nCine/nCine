@@ -9,17 +9,17 @@
 class ncAndroidJNIHelper
 {
   public:
-	inline static unsigned int SDKVersion() { return s_uSDKVersion; }
+	inline static unsigned int sdkVersion() { return sdkVersion_; }
 
   private:
-	static JavaVM *s_pJVM;
-	static JNIEnv *s_pEnv;
+	static JavaVM *javaVM_;
+	static JNIEnv *jniEnv_;
 
-	static unsigned int s_uSDKVersion;
+	static unsigned int sdkVersion_;
 
-	static void AttachJVM(struct android_app* state);
-	static void DetachJVM();
-	static void InitClasses();
+	static void attachJVM(struct android_app* state);
+	static void detachJVM();
+	static void initClasses();
 
 	friend class ncApplication;
 };
@@ -27,20 +27,20 @@ class ncAndroidJNIHelper
 class ncAndroidJNIClass
 {
   public:
-	ncAndroidJNIClass() :  m_javaObject(NULL) { }
-	ncAndroidJNIClass(jobject javaObject) : m_javaObject(javaObject) { }
+	ncAndroidJNIClass() :  javaObject_(NULL) { }
+	ncAndroidJNIClass(jobject javaObject) : javaObject_(javaObject) { }
 	virtual ~ncAndroidJNIClass()
 	{
-		if (m_javaObject)
+		if (javaObject_)
 		{
-			s_pEnv->DeleteLocalRef(m_javaObject);
+			jniEnv_->DeleteLocalRef(javaObject_);
 		}
 	}
-	bool isNull() const { return m_javaObject == NULL; }
+	bool isNull() const { return javaObject_ == NULL; }
 
   protected:
-	static JNIEnv *s_pEnv;
-	jobject m_javaObject;
+	static JNIEnv *jniEnv_;
+	jobject javaObject_;
 
 	friend class ncAndroidJNIHelper;
 };
@@ -48,18 +48,18 @@ class ncAndroidJNIClass
 class ncAndroidJNIClass_Version : public ncAndroidJNIClass
 {
   public:
-	static void Init();
-	static int SDK_INT();
+	static void init();
+	static int sdkInt();
 
   private:
-	static jclass s_javaClass;
-	static jfieldID s_fidSDKINT;
+	static jclass javaClass_;
+	static jfieldID fidSdkInt_;
 };
 
 class ncAndroidJNIClass_MotionRange : public ncAndroidJNIClass
 {
   private:
-	static jclass s_javaClass;
+	static jclass javaClass_;
 
   public:
 	ncAndroidJNIClass_MotionRange(jobject javaObject);
@@ -68,37 +68,37 @@ class ncAndroidJNIClass_MotionRange : public ncAndroidJNIClass
 class ncAndroidJNIClass_InputDevice : public ncAndroidJNIClass
 {
   public:
-	static void Init();
+	static void init();
 	ncAndroidJNIClass_InputDevice(jobject javaObject)
 		: ncAndroidJNIClass(javaObject) { }
-	static ncAndroidJNIClass_InputDevice getDevice(int iDeviceId);
-	static int getDeviceIds(int *vDestination, int iMaxSize);
-	void getName(char *vDestination, int iMaxStringSize);
-	ncAndroidJNIClass_MotionRange getMotionRange(int iAxis);
+	static ncAndroidJNIClass_InputDevice getDevice(int deviceId);
+	static int getDeviceIds(int *destination, int maxSize);
+	void getName(char *destination, int maxStringSize);
+	ncAndroidJNIClass_MotionRange getMotionRange(int axis);
 	int getSources();
-	void hasKeys(int *vButtons, const int iLength, bool *vBools);
+	void hasKeys(int *buttons, const int length, bool *bools);
 
   private:
-	static jclass s_javaClass;
-	static jmethodID s_midGetDevice;
-	static jmethodID s_midGetDeviceIds;
-	static jmethodID s_midGetName;
-	static jmethodID s_midGetMotionRange;
-	static jmethodID s_midGetSources;
-	static jmethodID s_midHasKeys;
+	static jclass javaClass_;
+	static jmethodID midGetDevice_;
+	static jmethodID midGetDeviceIds_;
+	static jmethodID midGetName_;
+	static jmethodID midGetMotionRange_;
+	static jmethodID midGetSources_;
+	static jmethodID midHasKeys_;
 };
 
 class ncAndroidJNIClass_KeyCharacterMap : public ncAndroidJNIClass
 {
   public:
-	static void Init();
+	static void init();
 	ncAndroidJNIClass_KeyCharacterMap(jobject javaObject)
 		: ncAndroidJNIClass(javaObject) { }
-	static bool deviceHasKey(int iButton);
+	static bool deviceHasKey(int button);
 
   private:
-	static jclass s_javaClass;
-	static jmethodID s_midDeviceHasKey;
+	static jclass javaClass_;
+	static jmethodID midDeviceHasKey_;
 };
 
 #endif

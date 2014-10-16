@@ -16,22 +16,22 @@ class ncAndroidJoystickState
 	ncAndroidJoystickState();
 
   private:
-	static const unsigned int s_uMaxNameLength = 256;
-	static const int s_iMaxButtons = 10;
-	static const int s_iMaxAxes = 10;
-	static const int s_iNumAxesToMap = 10;
-	static const int s_vAxesToMap[s_iNumAxesToMap];
+	static const unsigned int MaxNameLength = 256;
+	static const int MaxButtons = 10;
+	static const int MaxAxes = 10;
+	static const int NumAxesToMap = 10;
+	static const int AxesToMap[NumAxesToMap];
 
-	int m_iDeviceId;
-	char m_vName[s_uMaxNameLength];
+	int deviceId_;
+	char name_[MaxNameLength];
 
-	int m_iNumButtons;
-	int m_iNumAxes;
-	bool m_bHasDPad;
-	short int m_vButtonsMapping[AKEYCODE_ESCAPE - AKEYCODE_BUTTON_A];
-	short int m_vAxesMapping[s_iMaxAxes];
-	bool m_bButtons[s_iMaxButtons];
-	float m_fAxisValues[s_iMaxAxes];
+	int numButtons_;
+	int numAxes_;
+	bool hasDPad_;
+	short int buttonsMapping_[AKEYCODE_ESCAPE - AKEYCODE_BUTTON_A];
+	short int axesMapping_[MaxAxes];
+	bool buttons_[MaxButtons];
+	float axisValues_[MaxAxes];
 
 	friend class ncAndroidInputManager;
 };
@@ -43,58 +43,58 @@ class ncAndroidInputManager : public ncIInputManager
 	ncAndroidInputManager(struct android_app* state);
 
 	// Enables the accelerometer sensor
-	static void EnableAccelerometerSensor();
+	static void enableAccelerometerSensor();
 	// Disables the accelerometer sensor
-	static void DisableAccelerometerSensor();
+	static void disableAccelerometerSensor();
 
 	// Allows the application to make use of the accelerometer
-	static void EnableAccelerometer(bool bEnabled);
+	static void enableAccelerometer(bool enabled);
 
 	// Parses and Android sensor event related to the accelerometer
-	static void ParseAccelerometerEvent();
+	static void parseAccelerometerEvent();
 	// Parses an Android input event
-	static void ParseEvent(const AInputEvent* event);
+	static void parseEvent(const AInputEvent* event);
 
-	bool isJoyPresent(int iJoyId) const;
-	const char* JoyName(int iJoyId) const;
-	int JoyNumButtons(int iJoyId) const;
-	int JoyNumAxes(int iJoyId) const;
-	bool isJoyButtonPressed(int iJoyId, int iButtonId) const;
-	short int JoyAxisValue(int iJoyId, int iAxisId) const;
-	float JoyAxisNormValue(int iJoyId, int iAxisId) const;
+	bool isJoyPresent(int joyId) const;
+	const char* joyName(int joyId) const;
+	int joyNumButtons(int joyId) const;
+	int joyNumAxes(int joyId) const;
+	bool isJoyButtonPressed(int joyId, int buttonId) const;
+	short int joyAxisValue(int joyId, int axisId) const;
+	float joyAxisNormValue(int joyId, int axisId) const;
 
   private:
-	static const unsigned int s_uMaxNumJoysticks = 4;
+	static const unsigned int MaxNumJoysticks = 4;
 
-	static ASensorManager* s_pSensorManager;
-	static const ASensor* s_pAccelerometerSensor;
-	static ASensorEventQueue* s_pSensorEventQueue;
-	static bool s_bAccelerometerEnabled;
+	static ASensorManager* sensorManager_;
+	static const ASensor* accelerometerSensor_;
+	static ASensorEventQueue* sensorEventQueue_;
+	static bool accelerometerEnabled_;
 
-	static ncAccelerometerEvent s_accelerometerEvent;
-	static ncTouchEvent s_touchEvent;
-	static ncKeyboardEvent s_keyboardEvent;
+	static ncAccelerometerEvent accelerometerEvent_;
+	static ncTouchEvent touchEvent_;
+	static ncKeyboardEvent keyboardEvent_;
 
-	static ncAndroidJoystickState s_joystickStates[s_uMaxNumJoysticks];
-	static ncJoyButtonEvent s_joyButtonEvent;
-	static ncJoyAxisEvent s_joyAxisEvent;
+	static ncAndroidJoystickState joystickStates_[MaxNumJoysticks];
+	static ncJoyButtonEvent joyButtonEvent_;
+	static ncJoyAxisEvent joyAxisEvent_;
 	/// Update rate of CheckJoystickDisconnections() in seconds
-	static const float s_joyCheckRate = 0.25f;
-	static ncTimer s_joyCheckTimer;
+	static const float JoyCheckRate = 0.25f;
+	static ncTimer joyCheckTimer_;
 
 	// Initializes the accelerometer sensor
-	static void InitAccelerometerSensor(struct android_app* state);
+	static void initAccelerometerSensor(struct android_app* state);
 
 	// Updates joystick states after connections and disconnections
-	static void UpdateJoystickConnections();
+	static void updateJoystickConnections();
 	// Checks if a previously connected joystick has been disconnected
-	static void CheckDisconnectedJoysticks();
+	static void checkDisconnectedJoysticks();
 	// Checks if a new joystick has been connected
-	static void CheckConnectedJoysticks();
+	static void checkConnectedJoysticks();
 
-	static int FindJoyId(int iDeviceId);
-	static bool isDeviceConnected(int iDeviceId);
-	static void DeviceInfo(int iDeviceId, int iJoyId);
+	static int findJoyId(int deviceId);
+	static bool isDeviceConnected(int deviceId);
+	static void deviceInfo(int deviceId, int joyId);
 
 	friend void android_main(struct android_app* state);
 };

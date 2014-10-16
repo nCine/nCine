@@ -5,22 +5,22 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncProfilePlotter::ncProfilePlotter(ncSceneNode* pParent, ncRect rect)
-	: ncDrawableNode(pParent, rect.x, rect.y), m_iWidth(rect.w), m_iHeight(rect.h), m_vVariables(2),
-	  m_bPlotRefValue(false), m_refValueColor(1.0f, 1.0f, 1.0f), m_fRefValue(0.0f)
+ncProfilePlotter::ncProfilePlotter(ncSceneNode* parent, ncRect rect)
+	: ncDrawableNode(parent, rect.x, rect.y), width_(rect.w), height_(rect.h), variables_(2),
+	  shouldPlotRefValue_(false), refValueColor_(1.0f, 1.0f, 1.0f), refValue_(0.0f)
 {
-	SetPriority(ncDrawableNode::HUD_PRIORITY);
+	setPriority(ncDrawableNode::HUD_PRIORITY);
 
 	// One more than variable mean lines
-	m_refValueCmd.SetPriority(ncDrawableNode::HUD_PRIORITY + 3);
-	m_refValueCmd.SetType(ncRenderCommand::PLOTTER_TYPE);
+	refValueCmd_.setPriority(ncDrawableNode::HUD_PRIORITY + 3);
+	refValueCmd_.setType(ncRenderCommand::PLOTTER_TYPE);
 }
 
 ncProfilePlotter::~ncProfilePlotter()
 {
-	for (unsigned int i = 0; i < m_vVariables.Size(); i++)
+	for (unsigned int i = 0; i < variables_.size(); i++)
 	{
-		delete m_vVariables[i];
+		delete variables_[i];
 	}
 }
 
@@ -29,74 +29,74 @@ ncProfilePlotter::~ncProfilePlotter()
 ///////////////////////////////////////////////////////////
 
 /// Adds a value to the specified variable
-bool ncProfilePlotter::AddValue(unsigned int uIndex, float fValue)
+bool ncProfilePlotter::addValue(unsigned int varIndex, float value)
 {
-	bool bValueRegistered = false;
+	bool valueRegistered = false;
 
-	if (uIndex < m_vVariables.Size())
+	if (varIndex < variables_.size())
 	{
-		bValueRegistered = m_vVariables[uIndex]->AddValue(fValue);
+		valueRegistered = variables_[varIndex]->addValue(value);
 	}
 
-	return bValueRegistered;
+	return valueRegistered;
 }
 
 /// Returns the variable with the specified index
-ncPlottingVariable& ncProfilePlotter::Variable(unsigned int uIndex)
+ncPlottingVariable& ncProfilePlotter::variable(unsigned int index)
 {
-	if (uIndex < m_vVariables.Size())
+	if (index < variables_.size())
 	{
-		return *m_vVariables[uIndex];
+		return *variables_[index];
 	}
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncProfilePlotter::Variable - Index out of range");
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncProfilePlotter::variable - Index out of range");
 		exit(EXIT_FAILURE);
 	}
 }
 
 /// Returns the reference value normalized and clamped between the two numbers provided
-float ncProfilePlotter::NormBetweenRefValue(float fMin, float fMax) const
+float ncProfilePlotter::normBetweenRefValue(float min, float max) const
 {
-	float fValue = 0.0f;
+	float value = 0.0f;
 
-	if (fMax - fMin > 0.0f)
+	if (max - min > 0.0f)
 	{
-		if (m_fRefValue < fMin)
+		if (refValue_ < min)
 		{
-			fValue = 0.0f;
+			value = 0.0f;
 		}
-		else if (m_fRefValue > fMax)
+		else if (refValue_ > max)
 		{
-			fValue = 1.0f;
+			value = 1.0f;
 		}
 		else
 		{
-			fValue = (m_fRefValue - fMin) / (fMax - fMin);
+			value = (refValue_ - min) / (max - min);
 		}
 	}
 
-	return fValue;
+	return value;
 }
 
 /// Applies parent transformations to reference value vertices
-void ncProfilePlotter::ApplyTransformations(float fAbsX, float fAbsY, float fAbsRotation, float fAbsScaleFactor)
+void ncProfilePlotter::applyTransformations(float absX, float absY, float absRotation, float absScaleFactor)
 {
 	// Variable values geometry
-	ncRenderGeometry &rGeom = m_refValueCmd.Geometry();
+	ncRenderGeometry &geometry = refValueCmd_.geometry();
 
 	float sine = 0.0f;
 	float cosine = 1.0f;
-	if (abs(fAbsRotation) > ncDrawableNode::sMinRotation && abs(fAbsRotation) < 360.0f - ncDrawableNode::sMinRotation)
+	if (abs(absRotation) > ncDrawableNode::MinRotation && abs(absRotation) < 360.0f - ncDrawableNode::MinRotation)
 	{
-		sine = sinf(-fAbsRotation * M_PI / 180.0f);
-		cosine = cosf(-fAbsRotation * M_PI / 180.0f);
+		sine = sinf(-absRotation * M_PI / 180.0f);
+		cosine = cosf(-absRotation * M_PI / 180.0f);
 	}
 
-	for (int i = rGeom.FirstVertex(); i < rGeom.NumVertices(); i++)
+	for (int i = geometry.firstVertex(); i < geometry.numVertices(); i++)
 	{
-		float fX = rGeom.VertexPointer()[2 * i] * fAbsScaleFactor;			float fY = rGeom.VertexPointer()[2 * i + 1] * fAbsScaleFactor;
-		rGeom.VertexPointer()[2 * i] = fAbsX + fX * cosine - fY * sine;		rGeom.VertexPointer()[2 * i + 1] = fAbsY + fY * cosine + fX * sine;
+		float x = geometry.vertexPointer()[2 * i] * absScaleFactor;			float y = geometry.vertexPointer()[2 * i + 1] * absScaleFactor;
+		geometry.vertexPointer()[2 * i] = absX + x * cosine - y * sine;		geometry.vertexPointer()[2 * i + 1] = absY + y * cosine + x * sine;
 	}
 }
 
@@ -105,34 +105,34 @@ void ncProfilePlotter::ApplyTransformations(float fAbsX, float fAbsY, float fAbs
 ///////////////////////////////////////////////////////////
 
 /// Fill the background buffer with vertices
-void ncProfilePlotter::SetBackgroundVertices()
+void ncProfilePlotter::setBackgroundVertices()
 {
 	// Graph background vertices
-	m_fBackgroundVertices[0] = 0;				m_fBackgroundVertices[1] = 0;
-	m_fBackgroundVertices[2] = m_iWidth;		m_fBackgroundVertices[3] = 0;
-	m_fBackgroundVertices[4] = 0;				m_fBackgroundVertices[5] = m_iHeight;
+	backgroundVertices_[0] = 0;				backgroundVertices_[1] = 0;
+	backgroundVertices_[2] = width_;		backgroundVertices_[3] = 0;
+	backgroundVertices_[4] = 0;				backgroundVertices_[5] = height_;
 
-	m_fBackgroundVertices[6] = m_iWidth;		m_fBackgroundVertices[7] = m_iHeight;
+	backgroundVertices_[6] = width_;		backgroundVertices_[7] = height_;
 }
 
-void ncProfilePlotter::UpdateRenderCommand()
+void ncProfilePlotter::updateRenderCommand()
 {
-	m_renderCmd.Material().SetTextureGLId(0);
-	m_renderCmd.Material().SetColor(m_backgroundColor);
-	m_renderCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
-	SetBackgroundVertices();
-	m_renderCmd.Geometry().SetData(GL_TRIANGLE_STRIP, 0, 4, m_fBackgroundVertices, NULL, NULL);
-	m_renderCmd.CalculateSortKey();
+	renderCommand_.material().setTextureGLId(0);
+	renderCommand_.material().setColor(backgroundColor_);
+	renderCommand_.transformation().setPosition(absPosition().x, absPosition().y);
+	setBackgroundVertices();
+	renderCommand_.geometry().setData(GL_TRIANGLE_STRIP, 0, 4, backgroundVertices_, NULL, NULL);
+	renderCommand_.calculateSortKey();
 
-	ncDrawableNode::ApplyTransformations();
+	ncDrawableNode::applyTransformations();
 }
 
 /// Updates the reference value rendering command
 void ncProfilePlotter::UpdateRefValueRenderCommand()
 {
-	m_refValueCmd.Material().SetTextureGLId(0);
-	m_refValueCmd.Material().SetColor(m_refValueColor);
-	//m_refValueCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
-	m_refValueCmd.Geometry().SetData(GL_LINES, 0, 2, m_fRefValueVertices, NULL, NULL);
-	m_refValueCmd.CalculateSortKey();
+	refValueCmd_.material().setTextureGLId(0);
+	refValueCmd_.material().setColor(refValueColor_);
+//	refValueCmd_.transformation().setPosition(absPosition().x, absPosition().y);
+	refValueCmd_.geometry().setData(GL_LINES, 0, 2, refValueVertices_, NULL, NULL);
+	refValueCmd_.calculateSortKey();
 }

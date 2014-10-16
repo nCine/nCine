@@ -11,31 +11,31 @@
 
 ncMutex::ncMutex()
 {
-	InitializeCriticalSection(&m_handle);
+	InitializeCriticalSection(&handle_);
 }
 
 ncMutex::~ncMutex()
 {
-	DeleteCriticalSection(&m_handle);
+	DeleteCriticalSection(&handle_);
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncMutex::Lock()
+void ncMutex::lock()
 {
-	EnterCriticalSection(&m_handle);
+	EnterCriticalSection(&handle_);
 }
 
-void ncMutex::Unlock()
+void ncMutex::unlock()
 {
-	LeaveCriticalSection(&m_handle);
+	LeaveCriticalSection(&handle_);
 }
 
-int ncMutex::TryLock()
+int ncMutex::tryLock()
 {
-	return TryEnterCriticalSection(&m_handle);
+	return TryEnterCriticalSection(&handle_);
 }
 
 
@@ -48,56 +48,56 @@ int ncMutex::TryLock()
 ///////////////////////////////////////////////////////////
 
 ncCondVariable::ncCondVariable()
-	: m_uWaitersCount(0)
+	: waitersCount_(0)
 {
-	m_events[0] = CreateEvent(NULL, FALSE, FALSE, NULL); // Signal
-	m_events[1] = CreateEvent(NULL, TRUE, FALSE, NULL); // Broadcast
-	InitializeCriticalSection(&m_WaitersCountLock);
+	events_[0] = CreateEvent(NULL, FALSE, FALSE, NULL); // Signal
+	events_[1] = CreateEvent(NULL, TRUE, FALSE, NULL); // Broadcast
+	InitializeCriticalSection(&waitersCountLock_);
 }
 
 ncCondVariable::~ncCondVariable()
 {
-	CloseHandle(m_events[0]); // Signal
-	CloseHandle(m_events[1]); // Broadcast
-	DeleteCriticalSection(&m_WaitersCountLock);
+	CloseHandle(events_[0]); // Signal
+	CloseHandle(events_[1]); // Broadcast
+	DeleteCriticalSection(&waitersCountLock_);
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncCondVariable::Wait(ncMutex &rMutex)
+void ncCondVariable::wait(ncMutex &mutex)
 {
-	EnterCriticalSection(&m_WaitersCountLock);
-	m_uWaitersCount++;
-	LeaveCriticalSection(&m_WaitersCountLock);
+	EnterCriticalSection(&waitersCountLock_);
+	waitersCount_++;
+	LeaveCriticalSection(&waitersCountLock_);
 
-	rMutex.Unlock();
-	WaitEvents();
-	rMutex.Lock();
+	mutex.unlock();
+	waitEvents();
+	mutex.lock();
 }
 
-void ncCondVariable::Signal()
+void ncCondVariable::signal()
 {
-	EnterCriticalSection(&m_WaitersCountLock);
-	bool bHaveWaiters = (m_uWaitersCount > 0);
-	LeaveCriticalSection(&m_WaitersCountLock);
+	EnterCriticalSection(&waitersCountLock_);
+	bool haveWaiters = (waitersCount_ > 0);
+	LeaveCriticalSection(&waitersCountLock_);
 
-	if (bHaveWaiters)
+	if (haveWaiters)
 	{
-		SetEvent(m_events[0]);    // Signal
+		SetEvent(events_[0]);    // Signal
 	}
 }
 
-void ncCondVariable::Broadcast()
+void ncCondVariable::broadcast()
 {
-	EnterCriticalSection(&m_WaitersCountLock);
-	bool bHaveWaiters = (m_uWaitersCount > 0);
-	LeaveCriticalSection(&m_WaitersCountLock);
+	EnterCriticalSection(&waitersCountLock_);
+	bool haveWaiters = (waitersCount_ > 0);
+	LeaveCriticalSection(&waitersCountLock_);
 
-	if (bHaveWaiters)
+	if (haveWaiters)
 	{
-		SetEvent(m_events[1]);    // Broadcast
+		SetEvent(events_[1]);    // Broadcast
 	}
 }
 
@@ -105,17 +105,17 @@ void ncCondVariable::Broadcast()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncCondVariable::WaitEvents()
+void ncCondVariable::waitEvents()
 {
-	int iResult = WaitForMultipleObjects(2, m_events, FALSE, INFINITE);
+	int result = WaitForMultipleObjects(2, events_, FALSE, INFINITE);
 
-	EnterCriticalSection(&m_WaitersCountLock);
-	m_uWaitersCount--;
-	bool bLastWaiter = (iResult == (WAIT_OBJECT_0 + 1)) && (m_uWaitersCount == 0);
-	LeaveCriticalSection(&m_WaitersCountLock);
+	EnterCriticalSection(&waitersCountLock_);
+	waitersCount_--;
+	bool isLastWaiter = (result == (WAIT_OBJECT_0 + 1)) && (waitersCount_ == 0);
+	LeaveCriticalSection(&waitersCountLock_);
 
-	if (bLastWaiter)
+	if (isLastWaiter)
 	{
-		ResetEvent(m_events[1]);    // Broadcast
+		ResetEvent(events_[1]);    // Broadcast
 	}
 }

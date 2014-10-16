@@ -14,32 +14,32 @@ class ncThreadPool : public ncIThreadPool
 	// Creates a thread pool with as many threads as available processors
 	ncThreadPool();
 	// Creates a thread pool with a specified number of threads
-	ncThreadPool(unsigned int uNumThreads);
+	ncThreadPool(unsigned int numThreads);
 	~ncThreadPool();
 
 	// Enqueues a command request for a worker thread
-	void EnqueueCommand(ncIThreadCommand *pThreadCommand);
+	void enqueueCommand(ncIThreadCommand *threadCommand);
 
   private:
 	struct ncThreadStruct
 	{
-		ncList<ncIThreadCommand *> *pQueue;
-		ncMutex *pQueueMutex;
-		ncCondVariable *pQueueCV;
-		bool bShouldQuit;
+		ncList<ncIThreadCommand *> *queue;
+		ncMutex *queueMutex;
+		ncCondVariable *queueCV;
+		bool shouldQuit;
 	};
 
-	ncList<ncIThreadCommand *> m_queue;
-	ncThread *m_pThreads;
-	ncMutex m_queueMutex;
-	ncCondVariable m_queueCV;
-	ncMutex m_quitMutex;
-	unsigned int m_uNumThreads;
+	ncList<ncIThreadCommand *> queue_;
+	ncThread *threads_;
+	ncMutex queueMutex_;
+	ncCondVariable queueCV_;
+	ncMutex quitMutex_;
+	unsigned int numThreads_;
 
-	ncThreadStruct m_threadStruct;
-	static void WorkerFunction(void *pArg);
+	ncThreadStruct threadStruct_;
+	static void workerFunction(void *arg);
 
-	void Init();
+	void init();
 };
 
 #endif

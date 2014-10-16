@@ -6,40 +6,40 @@
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-GLFWwindow* ncGLFWGfxDevice::s_pWindowHandle = NULL;
+GLFWwindow* ncGLFWGfxDevice::windowHandle_ = NULL;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 /// Constructor taking the resolution as two integer
-ncGLFWGfxDevice::ncGLFWGfxDevice(int iWidth, int iHeight)
+ncGLFWGfxDevice::ncGLFWGfxDevice(int width, int height)
 {
-	Init(iWidth, iHeight, ncDisplayMode(), true);
+	init(width, height, ncDisplayMode(), true);
 }
 
 /// Constructor taking the resolution as a ncPoint class
 ncGLFWGfxDevice::ncGLFWGfxDevice(ncPoint size)
 {
-	Init(size.x, size.y, ncDisplayMode(), true);
+	init(size.x, size.y, ncDisplayMode(), true);
 }
 
 /// Constructor taking the resolution as two integer and a DisplayMode
-ncGLFWGfxDevice::ncGLFWGfxDevice(int iWidth, int iHeight, ncDisplayMode mode)
+ncGLFWGfxDevice::ncGLFWGfxDevice(int width, int height, ncDisplayMode mode)
 {
-	Init(iWidth, iHeight, mode, true);
+	init(width, height, mode, true);
 }
 
 /// Constructor taking the resolution as a ncPoint class and a DisplayMode
 ncGLFWGfxDevice::ncGLFWGfxDevice(ncPoint size, ncDisplayMode mode)
 {
-	Init(size.x, size.y, mode, true);
+	init(size.x, size.y, mode, true);
 }
 
 ncGLFWGfxDevice::~ncGLFWGfxDevice()
 {
-	glfwDestroyWindow(s_pWindowHandle);
-	s_pWindowHandle = NULL;
+	glfwDestroyWindow(windowHandle_);
+	windowHandle_ = NULL;
 	glfwTerminate();
 }
 
@@ -47,41 +47,41 @@ ncGLFWGfxDevice::~ncGLFWGfxDevice()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncGLFWGfxDevice::SetResolution(int iWidth, int iHeight)
+void ncGLFWGfxDevice::setResolution(int width, int height)
 {
 	// change resolution only in the case it really changes
-	if (iWidth != m_iWidth || iHeight != m_iHeight)
+	if (width != width_ || height != height_)
 	{
-		m_iWidth = iWidth;
-		m_iHeight = iHeight;
+		width_ = width;
+		height_ = height;
 
-		glfwDestroyWindow(s_pWindowHandle);
-		s_pWindowHandle = NULL;
-		InitDevice();
+		glfwDestroyWindow(windowHandle_);
+		windowHandle_ = NULL;
+		initDevice();
 	}
 }
 
-void ncGLFWGfxDevice::SetResolution(ncPoint size)
+void ncGLFWGfxDevice::setResolution(ncPoint size)
 {
 	// change resolution only in the case it really changes
-	if (size.x != m_iWidth || size.y != m_iHeight)
+	if (size.x != width_ || size.y != height_)
 	{
-		m_iWidth = size.x;
-		m_iHeight = size.y;
+		width_ = size.x;
+		height_ = size.y;
 
-		glfwDestroyWindow(s_pWindowHandle);
-		s_pWindowHandle = NULL;
-		InitDevice();
+		glfwDestroyWindow(windowHandle_);
+		windowHandle_ = NULL;
+		initDevice();
 	}
 }
 
-void ncGLFWGfxDevice::ToggleFullScreen()
+void ncGLFWGfxDevice::toggleFullScreen()
 {
-	m_bIsWindowed = !m_bIsWindowed;
+	isWindowed_ = !isWindowed_;
 
-	glfwDestroyWindow(s_pWindowHandle);
-	s_pWindowHandle = NULL;
-	InitDevice();
+	glfwDestroyWindow(windowHandle_);
+	windowHandle_ = NULL;
+	initDevice();
 }
 
 ///////////////////////////////////////////////////////////
@@ -89,35 +89,35 @@ void ncGLFWGfxDevice::ToggleFullScreen()
 ///////////////////////////////////////////////////////////
 
 /// Initializes the class
-void ncGLFWGfxDevice::Init(int iWidth, int iHeight, ncDisplayMode mode, bool bIsWindowed)
+void ncGLFWGfxDevice::init(int width, int height, ncDisplayMode mode, bool isWindowed)
 {
-	m_iWidth = iWidth;
-	m_iHeight = iHeight;
-	m_mode = mode;
-	m_bIsWindowed = bIsWindowed;
+	width_ = width;
+	height_ = height;
+	mode_ = mode;
+	isWindowed_ = isWindowed;
 
-	InitGraphics();
-	InitDevice();
-	InitGL();
+	initGraphics();
+	initDevice();
+	initGL();
 }
 
 /// Initilizes the video subsystem (SDL)
-void ncGLFWGfxDevice::InitGraphics()
+void ncGLFWGfxDevice::initGraphics()
 {
-	glfwSetErrorCallback(ErrorCallback);
+	glfwSetErrorCallback(errorCallback);
 
 	if (glfwInit() != GL_TRUE)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncGLFWGfxDevice::InitGraphics - glfwInit() failed");
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncGLFWGfxDevice::initGraphics - glfwInit() failed");
 		exit(EXIT_FAILURE);
 	}
 }
 
 /// Initilizes the OpenGL graphic context
-void ncGLFWGfxDevice::InitDevice()
+void ncGLFWGfxDevice::initDevice()
 {
 	GLFWmonitor* monitor = NULL;
-	if (m_bIsWindowed == false)
+	if (isWindowed_ == false)
 	{
 		monitor = glfwGetPrimaryMonitor();
 	}
@@ -125,23 +125,23 @@ void ncGLFWGfxDevice::InitDevice()
 	// setting window hints and creating a window with GLFW
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-	glfwWindowHint(GLFW_RED_BITS, m_mode.RedBits());
-	glfwWindowHint(GLFW_GREEN_BITS, m_mode.GreenBits());
-	glfwWindowHint(GLFW_BLUE_BITS, m_mode.BlueBits());
-	glfwWindowHint(GLFW_ALPHA_BITS, m_mode.AlphaBits());
-	glfwWindowHint(GLFW_DEPTH_BITS, m_mode.DepthBits());
-	glfwWindowHint(GLFW_STENCIL_BITS, m_mode.StencilBits());
+	glfwWindowHint(GLFW_RED_BITS, mode_.redBits());
+	glfwWindowHint(GLFW_GREEN_BITS, mode_.greenBits());
+	glfwWindowHint(GLFW_BLUE_BITS, mode_.blueBits());
+	glfwWindowHint(GLFW_ALPHA_BITS, mode_.alphaBits());
+	glfwWindowHint(GLFW_DEPTH_BITS, mode_.depthBits());
+	glfwWindowHint(GLFW_STENCIL_BITS, mode_.stencilBits());
 
-	s_pWindowHandle = glfwCreateWindow(m_iWidth, m_iHeight, "", monitor, NULL);
-	if (s_pWindowHandle == NULL)
+	windowHandle_ = glfwCreateWindow(width_, height_, "", monitor, NULL);
+	if (windowHandle_ == NULL)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncGLFWGfxDevice::InitDevice - glfwCreateWindow failed");
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncGLFWGfxDevice::initDevice - glfwCreateWindow failed");
 		exit(EXIT_FAILURE);
 	}
 
-	glfwMakeContextCurrent(s_pWindowHandle);
+	glfwMakeContextCurrent(windowHandle_);
 
-	if (m_mode.isVSynced())
+	if (mode_.hasVSync())
 	{
 		glfwSwapInterval(1);
 	}
@@ -155,20 +155,20 @@ void ncGLFWGfxDevice::InitDevice()
 
 	if (GLEW_OK != err)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncGLFWGfxDevice::InitDevice - GLEW error: %s", glewGetErrorString(err));
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncGLFWGfxDevice::initDevice - GLEW error: %s", glewGetErrorString(err));
 		exit(EXIT_FAILURE);
 	}
 
 	if (!GLEW_VERSION_2_0)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncGLFWGfxDevice::InitDevice - OpenGL 2 is not supported");
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncGLFWGfxDevice::initDevice - OpenGL 2 is not supported");
 		exit(EXIT_FAILURE);
 	}
 #endif
 }
 
 /// Callback for glfwSetErrorCallback()
-void ncGLFWGfxDevice::ErrorCallback(int error, const char* description)
+void ncGLFWGfxDevice::errorCallback(int error, const char* description)
 {
-	ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncGLFWGfxDevice::ErrorCallback - (%d) %s", error, description);
+	ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncGLFWGfxDevice::errorCallback - (%d) %s", error, description);
 }

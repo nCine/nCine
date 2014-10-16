@@ -7,16 +7,16 @@
 
 /// A default constructor for a class without the associated function
 ncThread::ncThread()
-	: m_handle(0)
+	: handle_(0)
 {
 
 }
 
 /// Creates a thread around a function and runs it
-ncThread::ncThread(ncThreadFunctionPtr_t pStartFunction, void* pArg)
-	: m_handle(0)
+ncThread::ncThread(ncThreadFunctionPtr startFunction, void* arg)
+	: handle_(0)
 {
-	Run(pStartFunction, pArg);
+	run(startFunction, arg);
 }
 
 ///////////////////////////////////////////////////////////
@@ -24,67 +24,67 @@ ncThread::ncThread(ncThreadFunctionPtr_t pStartFunction, void* pArg)
 ///////////////////////////////////////////////////////////
 
 // Gets the number of processors in the machine
-unsigned int ncThread::NumProcessors()
+unsigned int ncThread::numProcessors()
 {
-	unsigned int uNumProcs = 0;
+	unsigned int numProcs = 0;
 
 	SYSTEM_INFO si;
 	GetSystemInfo(&si);
-	uNumProcs = si.dwNumberOfProcessors;
+	numProcs = si.dwNumberOfProcessors;
 
-	return uNumProcs;
+	return numProcs;
 }
 
 /// Spawns a new thread if the class hasn't one already associated
-void ncThread::Run(ncThreadFunctionPtr_t pStartFunction, void* pArg)
+void ncThread::run(ncThreadFunctionPtr startFunction, void* arg)
 {
-	if (m_handle == 0)
+	if (handle_ == 0)
 	{
-		m_threadInfo.m_pStartFunction = pStartFunction;
-		m_threadInfo.m_pThreadArg = pArg;
-		m_handle = (HANDLE)_beginthreadex(NULL, 0, WrapperFunction, &m_threadInfo, 0, NULL);
-		if (m_handle <= 0)
+		threadInfo_.startFunction = startFunction;
+		threadInfo_.threadArg = arg;
+		handle_ = (HANDLE)_beginthreadex(NULL, 0, wrapperFunction, &threadInfo_, 0, NULL);
+		if (handle_ <= 0)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncThread::ncThread - _beginthreadex error");
-			exit(-1);
+			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncThread::run - _beginthreadex error");
+			::exit(EXIT_FAILURE);
 		}
 	}
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncThread::ncThread - thread %u is already running", m_handle);
+		ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncThread::run - thread %u is already running", handle_);
 	}
 }
 
 /// Joins the thread
-void* ncThread::Join()
+void* ncThread::join()
 {
-	WaitForSingleObject(m_handle, INFINITE);
+	WaitForSingleObject(handle_, INFINITE);
 	return NULL;
 }
 
 /// Returns the calling thread id
-long int ncThread::Self()
+long int ncThread::self()
 {
 	return GetCurrentThreadId();
 }
 
 /// Terminates the calling thread
-void ncThread::Exit(void *pRetVal)
+void ncThread::exit(void *retVal)
 {
 	_endthreadex(0);
-	*static_cast<unsigned int *>(pRetVal) = 0;
+	*static_cast<unsigned int *>(retVal) = 0;
 }
 
 /// Yields the calling thread in favour of another one with the same priority
-void ncThread::YieldExecution()
+void ncThread::yieldExecution()
 {
 	Sleep(0);
 }
 
 /// Asks the thread for termination
-void ncThread::Cancel()
+void ncThread::cancel()
 {
-	TerminateThread(m_handle, 0);
+	TerminateThread(handle_, 0);
 }
 
 ///////////////////////////////////////////////////////////
@@ -92,10 +92,10 @@ void ncThread::Cancel()
 ///////////////////////////////////////////////////////////
 
 /// The wrapper start function for thread creation
-unsigned int ncThread::WrapperFunction(void* pArg)
+unsigned int ncThread::wrapperFunction(void* arg)
 {
-	ncThreadInfo* pThreadInfo = static_cast<ncThreadInfo*>(pArg);
-	pThreadInfo->m_pStartFunction(pThreadInfo->m_pThreadArg);
+	ncThreadInfo* threadInfo = static_cast<ncThreadInfo*>(arg);
+	threadInfo->startFunction(threadInfo->threadArg);
 
 	return 0;
 }

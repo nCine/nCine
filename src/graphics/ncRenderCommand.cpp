@@ -6,26 +6,26 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncRenderGeometry::ncRenderGeometry(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords)
-	: m_eDrawType(eDrawType),
-	  m_iFirstVertex(iFirstVertex), m_iNumVertices(iNumVertices),
-	  m_fVertices(fVertices), m_fTexCoords(fTexCoords), m_ubColors(NULL)
+ncRenderGeometry::ncRenderGeometry(GLenum drawType, GLint firstVertex, GLsizei numVertices, GLfloat *vertices, GLfloat *texCoords)
+	: drawType_(drawType),
+	  firstVertex_(firstVertex), numVertices_(numVertices),
+	  vertices_(vertices), texCoords_(texCoords), colors_(NULL)
 {
 
 }
 
-ncRenderGeometry::ncRenderGeometry(GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords)
-	: m_eDrawType(GL_TRIANGLES),
-	  m_iFirstVertex(0), m_iNumVertices(iNumVertices),
-	  m_fVertices(fVertices), m_fTexCoords(fTexCoords), m_ubColors(NULL)
+ncRenderGeometry::ncRenderGeometry(GLsizei numVertices, GLfloat *vertices, GLfloat *texCoords)
+	: drawType_(GL_TRIANGLES),
+	  firstVertex_(0), numVertices_(numVertices),
+	  vertices_(vertices), texCoords_(texCoords), colors_(NULL)
 {
 
 }
 
 ncRenderGeometry::ncRenderGeometry()
-	: m_eDrawType(GL_TRIANGLES),
-	  m_iFirstVertex(0), m_iNumVertices(0),
-	  m_fVertices(NULL), m_fTexCoords(NULL), m_ubColors(NULL)
+	: drawType_(GL_TRIANGLES),
+	  firstVertex_(0), numVertices_(0),
+	  vertices_(NULL), texCoords_(NULL), colors_(NULL)
 {
 
 }
@@ -35,72 +35,71 @@ ncRenderGeometry::ncRenderGeometry()
 ///////////////////////////////////////////////////////////
 
 /// Binds the material state
-void ncRenderMaterial::Bind() const
+void ncRenderMaterial::bind() const
 {
-//	glColor4ubv(m_color.Vector()); // Not available on GLES
-	glColor4ub(m_color.R(), m_color.G(), m_color.B(), m_color.A());
-	glBindTexture(GL_TEXTURE_2D, m_uTextureGLId);
+//	glColor4ubv(color.vector()); // Not available on GLES
+	glColor4ub(color_.r(), color_.g(), color_.b(), color_.a());
+	glBindTexture(GL_TEXTURE_2D, textureGLId_);
 }
 
 /// Applies the transformation
-void ncRenderTransformation::Apply() const
+void ncRenderTransformation::apply() const
 {
 
 }
 
 /// Draws the geometry
-void ncRenderGeometry::Draw() const
+void ncRenderGeometry::draw() const
 {
-	if (m_ubColors)
+	if (colors_)
 	{
 		glEnableClientState(GL_COLOR_ARRAY);
-		glColorPointer(4, GL_UNSIGNED_BYTE, 0, m_ubColors);
+		glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors_);
 	}
 
-	if (m_fTexCoords)
+	if (texCoords_)
 	{
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, 0, m_fTexCoords);
+		glTexCoordPointer(2, GL_FLOAT, 0, texCoords_);
 	}
 
-	if (m_fVertices)
+	if (vertices_)
 	{
 		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(2, GL_FLOAT, 0, m_fVertices);
-		glDrawArrays(m_eDrawType, m_iFirstVertex, m_iNumVertices);
+		glVertexPointer(2, GL_FLOAT, 0, vertices_);
+		glDrawArrays(drawType_, firstVertex_, numVertices_);
 	}
 
-	if (m_fVertices)
+	if (vertices_)
 	{
 		glDisableClientState(GL_VERTEX_ARRAY);
 	}
-	if (m_fTexCoords)
+	if (texCoords_)
 	{
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	}
-	if (m_ubColors)
+	if (colors_)
 	{
 		glDisableClientState(GL_COLOR_ARRAY);
 	}
 }
 
 /// Calculates a sort key for the queue
-void ncRenderCommand::CalculateSortKey()
+void ncRenderCommand::calculateSortKey()
 {
-	unsigned long int upper = m_iPriority << 16;
-	unsigned int lower = m_material.TextureGLId();
-	m_uSortKey = upper + lower;
-//	m_bDirtyKey = false;
+	unsigned long int upper = priority_ << 16;
+	unsigned int lower = material_.textureGLId();
+	sortKey_ = upper + lower;
 }
 
 /// Issues the render command
-void ncRenderCommand::Issue() const
+void ncRenderCommand::issue() const
 {
 #ifdef WITH_DEPTH_TEST
-	glPolygonOffset(0.0f, -1.0f * m_iPriority);
+	glPolygonOffset(0.0f, -1.0f * priority_);
 #endif
 
-	m_material.Bind();
-	m_transformation.Apply();
-	m_geometry.Draw();
+	material_.bind();
+	transformation_.apply();
+	geometry_.draw();
 }

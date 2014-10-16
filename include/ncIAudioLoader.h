@@ -10,52 +10,52 @@ class ncIAudioLoader
 	virtual ~ncIAudioLoader();
 
 	/// Decodes audio data in a specified buffer
-	/*! \param pBuffer Buffer pointer
-	 *  \param iBufSize Buffer size
+	/*! \param buffer Buffer pointer
+	 *  \param bufferSize Buffer size in bytes
 	 *  \return Number of bytes read.
 	 */
-	virtual long Read(char *pBuffer, int iBufSize) const = 0;
+	virtual long read(char *buffer, int bufferSize) const = 0;
 	/// Resets the audio file seek value
-	virtual void Rewind() const = 0;
+	virtual void rewind() const = 0;
 
 	/// Returns the duration in seconds
-	inline float Duration() const { return m_fDuration; }
+	inline float duration() const { return duration_; }
 	/// Returns number of samples
-	inline unsigned long int NumSamples() const { return m_ulNumSamples; }
+	inline unsigned long int numSamples() const { return numSamples_; }
 	/// Returns number of bytes per sample
-	inline int BytesPerSample() const { return m_iBytesPerSample; }
+	inline int bytesPerSample() const { return bytesPerSample_; }
 	/// Returns number of channels
-	inline int Channels() const { return m_iChannels; }
+	inline int numChannels() const { return numChannels_; }
 	/// Returns samples frequency
-	inline int Frequency() const { return m_iFrequency; }
+	inline int frequency() const { return frequency_; }
 
 	/// Returns the decoded buffer size in bytes
-	inline int BufferSize() const { return m_ulNumSamples * m_iChannels * m_iBytesPerSample; }
+	inline int bufferSize() const { return numSamples_ * numChannels_ * bytesPerSample_; }
 
 	// Returns the proper audio loader according to the file extension
-	static ncIAudioLoader* CreateFromFile(const char *pFilename);
+	static ncIAudioLoader* createFromFile(const char *filename);
 
   protected:
 	/// Audio file handle
-	ncIFile *m_pFileHandle;
+	ncIFile *fileHandle_;
 
 	/// Number of bytes per sample
-	int m_iBytesPerSample;
+	int bytesPerSample_;
 	/// Number of channels
-	int m_iChannels;
+	int numChannels_;
 	/// Samples frequency
-	int m_iFrequency;
+	int frequency_;
 
 	/// Number of samples
-	unsigned long int m_ulNumSamples;
+	unsigned long int numSamples_;
 	/// Duration in seconds
-	float m_fDuration;
+	float duration_;
 
-	ncIAudioLoader(const char *pFilename);
-	ncIAudioLoader(ncIFile *pFileHandle);
+	ncIAudioLoader(const char *filename);
+	ncIAudioLoader(ncIFile *fileHandle);
 
 	/// Load the audio parameters from file
-	virtual void Init() = 0;
+	virtual void init() = 0;
 };
 
 #endif

@@ -5,16 +5,16 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncTextNode::ncTextNode(ncSceneNode* pParent, ncFont* pFont)
-	: ncDrawableNode(pParent, 0, 0), m_bDirtyDraw(true), m_bDirtyBoundaries(true),
-	  m_bWithKerning(true), m_pFont(pFont), m_vVertices(16), m_vTexCoords(16),
-	  m_fXAdvance(0.0f), m_fXAdvanceSum(0.0f), m_fYAdvance(0.0f), m_fYAdvanceSum(0.0f), m_vLineLengths(4), m_alignment(ALIGN_LEFT)
+ncTextNode::ncTextNode(ncSceneNode* parent, ncFont* font)
+	: ncDrawableNode(parent, 0, 0), dirtyDraw_(true), dirtyBoundaries_(true),
+	  withKerning_(true), font_(font), vertices_(16), texCoords_(16),
+	  xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f), lineLengths_(4), alignment_(ALIGN_LEFT)
 {
-	m_eType = TEXT_TYPE;
-	SetPriority(ncDrawableNode::HUD_PRIORITY);
-	m_renderCmd.SetType(ncRenderCommand::TEXT_TYPE);
-	m_renderCmd.Material().SetAlwaysTransparent(true);
-	memset(m_vString, 0, s_uMaxStringLength);
+	type_ = TEXT_TYPE;
+	setPriority(ncDrawableNode::HUD_PRIORITY);
+	renderCommand_.setType(ncRenderCommand::TEXT_TYPE);
+	renderCommand_.material().setAlwaysTransparent(true);
+	memset(string_, 0, MaxStringLength);
 }
 
 ///////////////////////////////////////////////////////////
@@ -22,91 +22,91 @@ ncTextNode::ncTextNode(ncSceneNode* pParent, ncFont* pFont)
 ///////////////////////////////////////////////////////////
 
 /// Returns rendered text width
-float ncTextNode::Width() const
+float ncTextNode::width() const
 {
-	CalculateBoundaries();
+	calculateBoundaries();
 
-	return m_fXAdvanceSum * CurrentAbsScale();
+	return xAdvanceSum_ * currentAbsScale();
 }
 
 /// Returns rendered text height
-float ncTextNode::Height() const
+float ncTextNode::height() const
 {
-	CalculateBoundaries();
+	calculateBoundaries();
 
-	return m_fYAdvanceSum * CurrentAbsScale();
+	return yAdvanceSum_ * currentAbsScale();
 }
 
 /// Sets the kerning flag for this node renderin
-void ncTextNode::EnableKerning(bool bWithKerning)
+void ncTextNode::enableKerning(bool withKerning)
 {
-	if (bWithKerning != m_bWithKerning)
+	if (withKerning != withKerning_)
 	{
-		m_bWithKerning = bWithKerning;
-		m_bDirtyDraw = true;
-		m_bDirtyBoundaries = true;
+		withKerning_ = withKerning;
+		dirtyDraw_ = true;
+		dirtyBoundaries_ = true;
 	}
 }
 
 // Sets the horizontal text alignment
-void ncTextNode::SetAlignment(eAlignment alignment)
+void ncTextNode::setAlignment(Alignment alignment)
 {
-	if (alignment != m_alignment)
+	if (alignment != alignment_)
 	{
-		m_alignment = alignment;
-		m_bDirtyDraw = true;
-		m_bDirtyBoundaries = true;
+		alignment_ = alignment;
+		dirtyDraw_ = true;
+		dirtyBoundaries_ = true;
 	}
 }
 
 /// Sets the string to render
-void ncTextNode::SetString(const char *pString)
+void ncTextNode::setString(const char *string)
 {
 	// Setting the dirty flag and updating the string only if different
-	if (strncmp(m_vString, pString, s_uMaxStringLength))
+	if (strncmp(string_, string, MaxStringLength))
 	{
-		strncpy(m_vString, pString, s_uMaxStringLength);
+		strncpy(string_, string, MaxStringLength);
 		// Preventing unterminated string by forcing termination
-		m_vString[s_uMaxStringLength - 1] = '\0';
-		m_bDirtyDraw = true;
-		m_bDirtyBoundaries = true;
+		string_[MaxStringLength - 1] = '\0';
+		dirtyDraw_ = true;
+		dirtyBoundaries_ = true;
 	}
 }
 
-void ncTextNode::Draw(ncRenderQueue& rRenderQueue)
+void ncTextNode::draw(ncRenderQueue& renderQueue)
 {
 	// Precalculate boundaries for horizontal alignment
-	CalculateBoundaries();
+	calculateBoundaries();
 
-	if (m_bDirtyDraw)
+	if (dirtyDraw_)
 	{
 		// Clear every previous quad before drawing again
-		m_vVertices.Clear();
-		m_vTexCoords.Clear();
+		vertices_.clear();
+		texCoords_.clear();
 
-		unsigned int uCurrentLine = 0;
-		m_fXAdvance = CalculateAlignment(uCurrentLine);
-		m_fYAdvance = 0.0f;
-		for (size_t i = 0; i < strlen(m_vString); i++)
+		unsigned int currentLine = 0;
+		xAdvance_ = calculateAlignment(currentLine);
+		yAdvance_ = 0.0f;
+		for (size_t i = 0; i < strlen(string_); i++)
 		{
-			if (m_vString[i] == '\n')
+			if (string_[i] == '\n')
 			{
-				uCurrentLine++;
-				m_fXAdvance = CalculateAlignment(uCurrentLine);
-				m_fYAdvance += m_pFont->Base();;
+				currentLine++;
+				xAdvance_ = calculateAlignment(currentLine);
+				yAdvance_ += font_->base();;
 			}
 			else
 			{
-				const ncFontGlyph *pGlyph = m_pFont->Glyph(int(m_vString[i]));
-				if (pGlyph)
+				const ncFontGlyph *glyph = font_->glyph(int(string_[i]));
+				if (glyph)
 				{
-					ProcessGlyph(pGlyph);
-					if (m_bWithKerning)
+					processGlyph(glyph);
+					if (withKerning_)
 					{
 						// font kerning
-						if (i < strlen(m_vString) - 1)
+						if (i < strlen(string_) - 1)
 						{
-							m_fXAdvance += pGlyph->Kerning(int(m_vString[i + 1]));
+							xAdvance_ += glyph->kerning(int(string_[i + 1]));
 						}
 					}
 				}
@@ -114,8 +114,8 @@ void ncTextNode::Draw(ncRenderQueue& rRenderQueue)
 		}
 	}
 
-	ncDrawableNode::Draw(rRenderQueue);
-	m_bDirtyDraw = false;
+	ncDrawableNode::draw(renderQueue);
+	dirtyDraw_ = false;
 }
 
 ///////////////////////////////////////////////////////////
@@ -123,138 +123,138 @@ void ncTextNode::Draw(ncRenderQueue& rRenderQueue)
 ///////////////////////////////////////////////////////////
 
 /// Calculates rectangle boundaries for the rendered text
-void ncTextNode::CalculateBoundaries() const
+void ncTextNode::calculateBoundaries() const
 {
-	if (m_bDirtyBoundaries)
+	if (dirtyBoundaries_)
 	{
-		m_vLineLengths.Clear();
-		float fXAdvanceMax = 0.0f; // longest line
-		m_fXAdvance = 0.0f;
-		m_fYAdvance = 0.0f;
-		for (size_t i = 0; i < strlen(m_vString); i++)
+		lineLengths_.clear();
+		float xAdvanceMax = 0.0f; // longest line
+		xAdvance_ = 0.0f;
+		yAdvance_ = 0.0f;
+		for (size_t i = 0; i < strlen(string_); i++)
 		{
-			if (m_vString[i] == '\n')
+			if (string_[i] == '\n')
 			{
-				m_vLineLengths.InsertBack(m_fXAdvance);
-				if (m_fXAdvance > fXAdvanceMax)
+				lineLengths_.insertBack(xAdvance_);
+				if (xAdvance_ > xAdvanceMax)
 				{
-					fXAdvanceMax = m_fXAdvance;
+					xAdvanceMax = xAdvance_;
 				}
-				m_fXAdvance = 0.0f;
-				m_fYAdvance += m_pFont->Base();
+				xAdvance_ = 0.0f;
+				yAdvance_ += font_->base();
 			}
 			else
 			{
-				const ncFontGlyph *pGlyph = m_pFont->Glyph(int(m_vString[i]));
-				if (pGlyph)
+				const ncFontGlyph *glyph = font_->glyph(int(string_[i]));
+				if (glyph)
 				{
-					m_fXAdvance += pGlyph->XAdvance();
-					if (m_bWithKerning)
+					xAdvance_ += glyph->xAdvance();
+					if (withKerning_)
 					{
 						// font kerning
-						if (i < strlen(m_vString) - 1)
+						if (i < strlen(string_) - 1)
 						{
-							m_fXAdvance += pGlyph->Kerning(int(m_vString[i + 1]));
+							xAdvance_ += glyph->kerning(int(string_[i + 1]));
 						}
 					}
 				}
 			}
 		}
-		m_vLineLengths.InsertBack(m_fXAdvance);
-		if (m_fXAdvance > fXAdvanceMax)
+		lineLengths_.insertBack(xAdvance_);
+		if (xAdvance_ > xAdvanceMax)
 		{
-			fXAdvanceMax = m_fXAdvance;
+			xAdvanceMax = xAdvance_;
 		}
 
-		m_fXAdvanceSum = fXAdvanceMax;
-		m_fYAdvanceSum = m_fYAdvance;
+		xAdvanceSum_ = xAdvanceMax;
+		yAdvanceSum_ = yAdvance_;
 
-		m_bDirtyBoundaries = false;
+		dirtyBoundaries_ = false;
 	}
 }
 
 /// Calculates align offset for a particular line
-float ncTextNode::CalculateAlignment(unsigned int uLineIndex) const
+float ncTextNode::calculateAlignment(unsigned int lineIndex) const
 {
-	float fAlignOffset = 0.0f;
+	float alignOffset = 0.0f;
 
-	switch (m_alignment)
+	switch (alignment_)
 	{
 		case ALIGN_LEFT:
-			fAlignOffset = 0.0f;
+			alignOffset = 0.0f;
 			break;
 		case ALIGN_CENTER:
-			fAlignOffset = (m_fXAdvanceSum - m_vLineLengths[uLineIndex]) * 0.5f;
+			alignOffset = (xAdvanceSum_ - lineLengths_[lineIndex]) * 0.5f;
 			break;
 		case ALIGN_RIGHT:
-			fAlignOffset = m_fXAdvanceSum - m_vLineLengths[uLineIndex];
+			alignOffset = xAdvanceSum_ - lineLengths_[lineIndex];
 			break;
 	}
 
-	return fAlignOffset;
+	return alignOffset;
 }
 
 /// Calculates absolute scale factor on the fly
-float ncTextNode::CurrentAbsScale() const
+float ncTextNode::currentAbsScale() const
 {
-	float fAbsScaleFactor = m_fScaleFactor;
-	if (m_pParent)
+	float absScaleFactor = scaleFactor_;
+	if (parent_)
 	{
-		fAbsScaleFactor *= m_pParent->AbsScale();
+		absScaleFactor *= parent_->absScale();
 	}
 
-	return fAbsScaleFactor;
+	return absScaleFactor;
 }
 
 /// Fills the batch draw command with data from a glyph
-void ncTextNode::ProcessGlyph(const ncFontGlyph* pGlyph)
+void ncTextNode::processGlyph(const ncFontGlyph* glyph)
 {
-	ncPoint size = pGlyph->Size();
-	ncPoint offset = pGlyph->Offset();
+	ncPoint size = glyph->size();
+	ncPoint offset = glyph->offset();
 
-	float leftPos = m_fXAdvance + offset.x;
+	float leftPos = xAdvance_ + offset.x;
 	float rightPos = leftPos + size.x;
-	float topPos = -m_fYAdvance - offset.y;
+	float topPos = -yAdvance_ - offset.y;
 	float bottomPos = topPos - size.y;
 
-	m_vVertices.InsertBack(leftPos);	m_vVertices.InsertBack(bottomPos);
-	m_vVertices.InsertBack(leftPos);	m_vVertices.InsertBack(topPos);
-	m_vVertices.InsertBack(rightPos);	m_vVertices.InsertBack(bottomPos);
+	vertices_.insertBack(leftPos);	vertices_.insertBack(bottomPos);
+	vertices_.insertBack(leftPos);	vertices_.insertBack(topPos);
+	vertices_.insertBack(rightPos);	vertices_.insertBack(bottomPos);
 
-	m_vVertices.InsertBack(rightPos);	m_vVertices.InsertBack(bottomPos);
-	m_vVertices.InsertBack(rightPos);	m_vVertices.InsertBack(topPos);
-	m_vVertices.InsertBack(leftPos);	m_vVertices.InsertBack(topPos);
+	vertices_.insertBack(rightPos);	vertices_.insertBack(bottomPos);
+	vertices_.insertBack(rightPos);	vertices_.insertBack(topPos);
+	vertices_.insertBack(leftPos);	vertices_.insertBack(topPos);
 
 
-	ncPoint texSize = m_pFont->Texture()->Size();
-	ncRect texRect = pGlyph->TexRect();
+	ncPoint texSize = font_->texture()->size();
+	ncRect texRect = glyph->texRect();
 
 	float leftCoord = float(texRect.x) / float(texSize.x);
 	float rightCoord = float(texRect.x + texRect.w) / float(texSize.x);
 	float bottomCoord = float(texRect.y + texRect.h) / float(texSize.y);
 	float topCoord = float(texRect.y) / float(texSize.y);
 
-	m_vTexCoords.InsertBack(leftCoord);		m_vTexCoords.InsertBack(bottomCoord);
-	m_vTexCoords.InsertBack(leftCoord);		m_vTexCoords.InsertBack(topCoord);
-	m_vTexCoords.InsertBack(rightCoord);	m_vTexCoords.InsertBack(bottomCoord);
+	texCoords_.insertBack(leftCoord);		texCoords_.insertBack(bottomCoord);
+	texCoords_.insertBack(leftCoord);		texCoords_.insertBack(topCoord);
+	texCoords_.insertBack(rightCoord);	texCoords_.insertBack(bottomCoord);
 
-	m_vTexCoords.InsertBack(rightCoord);	m_vTexCoords.InsertBack(bottomCoord);
-	m_vTexCoords.InsertBack(rightCoord);	m_vTexCoords.InsertBack(topCoord);
-	m_vTexCoords.InsertBack(leftCoord);		m_vTexCoords.InsertBack(topCoord);
+	texCoords_.insertBack(rightCoord);	texCoords_.insertBack(bottomCoord);
+	texCoords_.insertBack(rightCoord);	texCoords_.insertBack(topCoord);
+	texCoords_.insertBack(leftCoord);		texCoords_.insertBack(topCoord);
 
-	m_fXAdvance += pGlyph->XAdvance();
+	xAdvance_ += glyph->xAdvance();
 }
 
-void ncTextNode::UpdateRenderCommand()
+void ncTextNode::updateRenderCommand()
 {
-	m_renderCmd.Material().SetTextureGLId(m_pFont->Texture()->GLId());
-	m_renderCmd.Material().SetColor(m_absColor);
-	m_renderCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
-	m_renderCmd.Geometry().SetData(GL_TRIANGLES, 0, m_vVertices.Size() / 2, m_vVertices.Pointer(), m_vTexCoords.Pointer(), NULL);
-	m_renderCmd.CalculateSortKey();
+	renderCommand_.material().setTextureGLId(font_->texture()->gLId());
+	renderCommand_.material().setColor(absColor_);
+	renderCommand_.transformation().setPosition(absPosition().x, absPosition().y);
+	renderCommand_.geometry().setData(GL_TRIANGLES, 0, vertices_.size() / 2, vertices_.pointer(), texCoords_.pointer(), NULL);
+	renderCommand_.calculateSortKey();
 
-	if (m_bDirtyDraw)
+	if (dirtyDraw_)
 	{
-		ApplyTransformations();
+		applyTransformations();
 	}
 }

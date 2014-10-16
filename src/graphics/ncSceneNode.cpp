@@ -6,55 +6,55 @@
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-const float ncSceneNode::sMinRotation = 0.5f;
+const float ncSceneNode::MinRotation = 0.5f;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncSceneNode::ncSceneNode(ncSceneNode* pParent, float fX, float fY)
-	: x(fX), y(fY), bShouldUpdate(true), bShouldDraw(true), m_pParent(NULL),
-	  m_fScaleFactor(1.0f), m_fRotation(0.0f), m_fAbsX(0.0f), m_fAbsY(0.0f), m_fAbsScaleFactor(1.0f), m_fAbsRotation(0.0f)
+ncSceneNode::ncSceneNode(ncSceneNode* parent, float x, float y)
+	: x(x), y(y), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
+	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f)
 {
-	m_eType = SCENENODE_TYPE;
+	type_ = SCENENODE_TYPE;
 
-	if (pParent)
+	if (parent)
 	{
-		pParent->AddChildNode(this);
+		parent->addChildNode(this);
 	}
 }
 
-ncSceneNode::ncSceneNode(ncSceneNode* pParent)
-	: x(0.0f), y(0.0f), bShouldUpdate(true), bShouldDraw(true), m_pParent(NULL),
-	  m_fScaleFactor(1.0f), m_fRotation(0.0f), m_fAbsX(0.0f), m_fAbsY(0.0f), m_fAbsScaleFactor(1.0f), m_fAbsRotation(0.0f)
+ncSceneNode::ncSceneNode(ncSceneNode* parent)
+	: x(0.0f), y(0.0f), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
+	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f)
 {
-	m_eType = SCENENODE_TYPE;
+	type_ = SCENENODE_TYPE;
 
-	if (pParent)
+	if (parent)
 	{
-		pParent->AddChildNode(this);
+		parent->addChildNode(this);
 	}
 }
 
 ncSceneNode::ncSceneNode()
-	: ncObject(), x(0.0f), y(0.0f), bShouldUpdate(true), bShouldDraw(true), m_pParent(NULL),
-	  m_fScaleFactor(1.0f), m_fRotation(0.0f), m_fAbsX(0.0f), m_fAbsY(0.0f), m_fAbsScaleFactor(1.0f), m_fAbsRotation(0.0f)
+	: ncObject(), x(0.0f), y(0.0f), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
+	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f)
 {
-	m_eType = SCENENODE_TYPE;
+	type_ = SCENENODE_TYPE;
 }
 
 ncSceneNode::~ncSceneNode()
 {
-	ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin();
-	while (i != m_children.End())
+	ncList<ncSceneNode *>::Const_Iterator i = children_.begin();
+	while (i != children_.end())
 	{
 		delete(*i++);
 	}
 
-	if (m_pParent)
+	if (parent_)
 	{
-		m_pParent->RemoveChildNode(this);
-		m_pParent = NULL;
+		parent_->removeChildNode(this);
+		parent_ = NULL;
 	}
 }
 
@@ -66,43 +66,43 @@ ncSceneNode::~ncSceneNode()
 /*!
 	\return True if the node has been added
 */
-bool ncSceneNode::AddChildNode(ncSceneNode *pChildNode)
+bool ncSceneNode::addChildNode(ncSceneNode *childNode)
 {
-	bool bAdded = false;
+	bool hasBeenAdded = false;
 
-	if (pChildNode)
+	if (childNode)
 	{
-		if (pChildNode->m_pParent)
+		if (childNode->parent_)
 		{
-			pChildNode->m_pParent->RemoveChildNode(pChildNode);
+			childNode->parent_->removeChildNode(childNode);
 		}
 
-		pChildNode->m_pParent = this;
-		m_children.InsertBack(pChildNode);
-		bAdded = true;
+		childNode->parent_ = this;
+		children_.insertBack(childNode);
+		hasBeenAdded = true;
 	}
 
-	return bAdded;
+	return hasBeenAdded;
 }
 
 /// Removes a child of this node, without reparenting nephews
 /*!
 	\return True if the node has been removed
 */
-bool ncSceneNode::RemoveChildNode(ncSceneNode *pChildNode)
+bool ncSceneNode::removeChildNode(ncSceneNode *childNode)
 {
-	bool bRemoved = false;
+	bool hasBeenRemoved = false;
 
-	if (pChildNode && // cannot pass a NULL pointer
-		!m_children.isEmpty() && // avoid checking if this node has no children
-		pChildNode->m_pParent == this) // avoid checking the child doesn't belong to this one
+	if (childNode && // cannot pass a NULL pointer
+		!children_.isEmpty() && // avoid checking if this node has no children
+		childNode->parent_ == this) // avoid checking the child doesn't belong to this one
 	{
-		pChildNode->m_pParent = NULL;
-		m_children.Remove(pChildNode);
-		bRemoved = true;
+		childNode->parent_ = NULL;
+		children_.remove(childNode);
+		hasBeenRemoved = true;
 	}
 
-	return bRemoved;
+	return hasBeenRemoved;
 }
 
 /// Removes a child of this node while iterating on children, without reparenting nephews
@@ -110,78 +110,78 @@ bool ncSceneNode::RemoveChildNode(ncSceneNode *pChildNode)
 	It is faster to remove through an iterator than with a linear search for a specific node
 	\return True if the node has been removed
 */
-bool ncSceneNode::RemoveChildNode(ncList<ncSceneNode *>::Iterator it)
+bool ncSceneNode::removeChildNode(ncList<ncSceneNode *>::Iterator it)
 {
-	bool bRemoved = false;
+	bool hasBeenRemoved = false;
 
 	if (*it && // cannot pass a NULL pointer
-		!m_children.isEmpty() && // avoid checking if this node has no children
-		(*it)->m_pParent == this) // avoid checking the child doesn't belong to this one
+		!children_.isEmpty() && // avoid checking if this node has no children
+		(*it)->parent_ == this) // avoid checking the child doesn't belong to this one
 	{
-		(*it)->m_pParent = NULL;
-		m_children.Remove(it);
-		bRemoved = true;
+		(*it)->parent_ = NULL;
+		children_.remove(it);
+		hasBeenRemoved = true;
 	}
 
-	return bRemoved;
+	return hasBeenRemoved;
 }
 
 /// Removes a child of this node reparenting nephews as children
 /*!
 	\return True if the node has been unlinked
 */
-bool ncSceneNode::UnlinkChildNode(ncSceneNode *pChildNode)
+bool ncSceneNode::unlinkChildNode(ncSceneNode *childNode)
 {
-	bool bUnlinked = false;
+	bool hasBeenUnlinked = false;
 
-	if (pChildNode && // cannot pass a NULL pointer
-		!m_children.isEmpty() && // avoid checking if this node has no children
-		pChildNode->m_pParent == this) // avoid checking the child doesn't belong to this one
+	if (childNode && // cannot pass a NULL pointer
+		!children_.isEmpty() && // avoid checking if this node has no children
+		childNode->parent_ == this) // avoid checking the child doesn't belong to this one
 	{
-		pChildNode->m_pParent = NULL;
-		m_children.Remove(pChildNode);
+		childNode->parent_ = NULL;
+		children_.remove(childNode);
 
 		// Nephews reparenting
-		ncList<ncSceneNode *>::Const_Iterator i = pChildNode->m_children.Begin();
-		while (i != pChildNode->m_children.End())
+		ncList<ncSceneNode *>::Const_Iterator i = childNode->children_.begin();
+		while (i != childNode->children_.end())
 		{
-			AddChildNode(*i);
+			addChildNode(*i);
 			++i;
 		}
 
-		bUnlinked = true;
+		hasBeenUnlinked = true;
 	}
 
-	return bUnlinked;
+	return hasBeenUnlinked;
 }
 
 /// Called once every frame to update the node
-void ncSceneNode::Update(float fInterval)
+void ncSceneNode::update(float interval)
 {
-	for (ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); ++i)
+	for (ncList<ncSceneNode *>::Const_Iterator i = children_.begin(); i != children_.end(); ++i)
 	{
-		if ((*i)->bShouldUpdate)
+		if ((*i)->shouldUpdate_)
 		{
-			(*i)->Update(fInterval);
+			(*i)->update(interval);
 		}
 	}
 }
 
 /// Draws the node and visits its children
-void ncSceneNode::Visit(ncRenderQueue &rRenderQueue)
+void ncSceneNode::visit(ncRenderQueue &renderQueue)
 {
 	// early return if a node is invisible
-	if (!bShouldDraw)
+	if (!shouldDraw_)
 	{
 		return;
 	}
 
-	Transform();
-	Draw(rRenderQueue);
+	transform();
+	draw(renderQueue);
 
-	for (ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); ++i)
+	for (ncList<ncSceneNode *>::Const_Iterator i = children_.begin(); i != children_.end(); ++i)
 	{
-		(*i)->Visit(rRenderQueue);
+		(*i)->visit(renderQueue);
 	}
 }
 
@@ -189,37 +189,37 @@ void ncSceneNode::Visit(ncRenderQueue &rRenderQueue)
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncSceneNode::Transform()
+void ncSceneNode::transform()
 {
 	// Calculating absolute transformations
-	if (m_pParent)
+	if (parent_)
 	{
-		m_fAbsScaleFactor = m_pParent->m_fAbsScaleFactor * m_fScaleFactor;
-		m_fAbsRotation = m_pParent->m_fAbsRotation + m_fRotation;
+		absScaleFactor_ = parent_->absScaleFactor_ * scaleFactor_;
+		absRotation_ = parent_->absRotation_ + rotation_;
 		// New scaled position accounting parent scale factor (allow zooming)
-		float fScaledX = m_pParent->m_fAbsScaleFactor * x;
-		float fScaledY = m_pParent->m_fAbsScaleFactor * y;
+		float scaledX = parent_->absScaleFactor_ * x;
+		float scaledY = parent_->absScaleFactor_ * y;
 
-		float fSine = 0.0f;
-		float fCosine = 1.0f;
-		float fParentRot = m_pParent->m_fAbsRotation;
-		if (abs(fParentRot) > sMinRotation && abs(fParentRot) < 360.0f - sMinRotation)
+		float sine = 0.0f;
+		float cosine = 1.0f;
+		float parentRot = parent_->absRotation_;
+		if (abs(parentRot) > MinRotation && abs(parentRot) < 360.0f - MinRotation)
 		{
-			fSine = sinf(-fParentRot * M_PI / 180.0f);
-			fCosine = cosf(-fParentRot * M_PI / 180.0f);
+			sine = sinf(-parentRot * M_PI / 180.0f);
+			cosine = cosf(-parentRot * M_PI / 180.0f);
 		}
 
-		m_fAbsX = m_pParent->m_fAbsX + fScaledX * fCosine - fScaledY * fSine;
-		m_fAbsY = m_pParent->m_fAbsY + fScaledY * fCosine + fScaledX * fSine;
+		absX_ = parent_->absX_ + scaledX * cosine - scaledY * sine;
+		absY_ = parent_->absY_ + scaledY * cosine + scaledX * sine;
 
-		m_absColor = m_pParent->m_absColor * m_color;
+		absColor_ = parent_->absColor_ * color_;
 	}
 	else
 	{
-		m_fAbsX = x;
-		m_fAbsY = y;
-		m_fAbsScaleFactor = m_fScaleFactor;
-		m_fAbsRotation = m_fRotation;
-		m_absColor = m_color;
+		absX_ = x;
+		absY_ = y;
+		absScaleFactor_ = scaleFactor_;
+		absRotation_ = rotation_;
+		absColor_ = color_;
 	}
 }

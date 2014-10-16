@@ -17,28 +17,28 @@ class ncEGLGfxDevice : public ncIGfxDevice
 	ncEGLGfxDevice(struct android_app* state, ncDisplayMode mode);
 	~ncEGLGfxDevice();
 
-	void SetResolution(int iWidth, int iHeight) { }
-	void SetResolution(ncPoint size) { }
+	void setResolution(int width, int height) { }
+	void setResolution(ncPoint size) { }
 
-	void ToggleFullScreen() { }
+	void toggleFullScreen() { }
 
-	inline void Update() { eglSwapBuffers(m_display, m_surface); }
+	inline void update() { eglSwapBuffers(display_, surface_); }
 
-	void SetWindowTitle(const char *pWindowTitle) { }
+	void setWindowTitle(const char *windowTitle) { }
 
 	// Checks if the desired pixel format is supported
 	static bool isModeSupported(struct android_app* state, ncDisplayMode mode);
 
   private:
 	/// The EGL display connection
-	EGLDisplay m_display;
+	EGLDisplay display_;
 	/// The EGL drawing surface
-	EGLSurface m_surface;
+	EGLSurface surface_;
 	/// The EGL context
-	EGLContext m_context;
+	EGLContext context_;
 
 	// Initializes the OpenGL graphic context
-	void InitDevice(struct android_app* state);
+	void initDevice(struct android_app* state);
 };
 
 #endif

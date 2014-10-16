@@ -8,74 +8,74 @@
 ///////////////////////////////////////////////////////////
 
 /// A constructor creating a player from a shared buffer
-ncAudioBufferPlayer::ncAudioBufferPlayer(ncAudioBuffer *pBuffer)
-	: m_pBuffer(pBuffer)
+ncAudioBufferPlayer::ncAudioBufferPlayer(ncAudioBuffer *audioBuffer)
+	: audioBuffer_(audioBuffer)
 {
-	m_eType = AUDIOBUFFERPLAYER_TYPE;
+	type_ = AUDIOBUFFERPLAYER_TYPE;
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncAudioBufferPlayer::Play()
+void ncAudioBufferPlayer::play()
 {
-	switch (m_eState)
+	switch (state_)
 	{
 		case STATE_INITIAL:
 		case STATE_STOPPED:
 		{
-			// iSource is a signed integer in order to check for unavailble source return value.
+			// source is a signed integer in order to check for unavailble source return value.
 			// It is then converted to an OpenAL unsigned integer to be used as a valid source.
-			int iSource = ncServiceLocator::AudioDevice().NextAvailableSource();
+			int source = ncServiceLocator::audioDevice().nextAvailableSource();
 			// No sources available
-			if (iSource < 0)
+			if (source < 0)
 			{
 				return;
 			}
-			m_uSource = iSource;
+			sourceId_ = source;
 
-			if (m_pBuffer)
+			if (audioBuffer_)
 			{
-				alSourcei(m_uSource, AL_BUFFER, m_pBuffer->ALId());
+				alSourcei(sourceId_, AL_BUFFER, audioBuffer_->bufferId());
 				// Setting OpenAL source looping only if not streaming
-				alSourcei(m_uSource, AL_LOOPING, m_bLooping);
+				alSourcei(sourceId_, AL_LOOPING, isLooping_);
 			}
 
-			alSourcef(m_uSource, AL_GAIN, m_fGain);
-			alSourcef(m_uSource, AL_PITCH, m_fPitch);
-			alSourcefv(m_uSource, AL_POSITION, m_fPosition);
+			alSourcef(sourceId_, AL_GAIN, gain_);
+			alSourcef(sourceId_, AL_PITCH, pitch_);
+			alSourcefv(sourceId_, AL_POSITION, position_);
 
-			alSourcePlay(m_uSource);
-			m_eState = STATE_PLAYING;
+			alSourcePlay(sourceId_);
+			state_ = STATE_PLAYING;
 
-			ncServiceLocator::AudioDevice().RegisterPlayer(this);
+			ncServiceLocator::audioDevice().registerPlayer(this);
 			break;
 		}
 		case STATE_PLAYING:
 			break;
 		case STATE_PAUSED:
 		{
-			alSourcePlay(m_uSource);
-			m_eState = STATE_PLAYING;
+			alSourcePlay(sourceId_);
+			state_ = STATE_PLAYING;
 
-			ncServiceLocator::AudioDevice().RegisterPlayer(this);
+			ncServiceLocator::audioDevice().registerPlayer(this);
 			break;
 		}
 	}
 }
 
-void ncAudioBufferPlayer::Pause()
+void ncAudioBufferPlayer::pause()
 {
-	switch (m_eState)
+	switch (state_)
 	{
 		case STATE_INITIAL:
 		case STATE_STOPPED:
 			break;
 		case STATE_PLAYING:
 		{
-			alSourcePause(m_uSource);
-			m_eState = STATE_PAUSED;
+			alSourcePause(sourceId_);
+			state_ = STATE_PAUSED;
 			break;
 		}
 		case STATE_PAUSED:
@@ -83,17 +83,17 @@ void ncAudioBufferPlayer::Pause()
 	}
 }
 
-void ncAudioBufferPlayer::Stop()
+void ncAudioBufferPlayer::stop()
 {
-	switch (m_eState)
+	switch (state_)
 	{
 		case STATE_INITIAL:
 		case STATE_STOPPED:
 			break;
 		case STATE_PLAYING:
 		{
-			alSourceStop(m_uSource);
-			m_eState = STATE_STOPPED;
+			alSourceStop(sourceId_);
+			state_ = STATE_STOPPED;
 			break;
 		}
 		case STATE_PAUSED:
@@ -102,15 +102,15 @@ void ncAudioBufferPlayer::Stop()
 }
 
 /// Updates the player state
-void ncAudioBufferPlayer::UpdateState()
+void ncAudioBufferPlayer::updateState()
 {
-	if (m_eState == STATE_PLAYING)
+	if (state_ == STATE_PLAYING)
 	{
 		ALenum eALState;
-		alGetSourcei(m_uSource, AL_SOURCE_STATE, &eALState);
+		alGetSourcei(sourceId_, AL_SOURCE_STATE, &eALState);
 		if (eALState != AL_PLAYING)
 		{
-			m_eState = STATE_STOPPED;
+			state_ = STATE_STOPPED;
 		}
 	}
 }

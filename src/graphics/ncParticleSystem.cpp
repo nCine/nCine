@@ -7,116 +7,116 @@
 ///////////////////////////////////////////////////////////
 
 /// Constructs a particle system made of the specified maximum amount of particles
-ncParticleSystem::ncParticleSystem(ncSceneNode* pParent, unsigned int uCount, ncTexture *pTexture, ncRect texRect)
-	: ncDrawableNode(pParent, 0, 0), m_uPoolSize(uCount), m_uPoolTop(uCount - 1), m_vAffectors(4), m_bLocalSpace(false)
+ncParticleSystem::ncParticleSystem(ncSceneNode* parent, unsigned int count, ncTexture *texture, ncRect texRect)
+	: ncDrawableNode(parent, 0, 0), poolSize_(count), poolTop_(count - 1), affectors_(4), inLocalSpace_(false)
 {
-	m_eType = PARTICLESYSTEM_TYPE;
-	SetPriority(ncDrawableNode::SCENE_PRIORITY);
+	type_ = PARTICLESYSTEM_TYPE;
+	setPriority(ncDrawableNode::SCENE_PRIORITY);
 
-	m_pParticlePool = new ncParticle*[m_uPoolSize];
-	m_pParticleList = new ncParticle*[m_uPoolSize];
-	for (unsigned int i = 0; i < m_uPoolSize; i++)
+	particlePool_ = new ncParticle*[poolSize_];
+	particleList_ = new ncParticle*[poolSize_];
+	for (unsigned int i = 0; i < poolSize_; i++)
 	{
-		m_pParticlePool[i] = new ncParticle(NULL, pTexture);
-		m_pParticlePool[i]->SetTexRect(texRect);
-		m_pParticleList[i] = m_pParticlePool[i];
+		particlePool_[i] = new ncParticle(NULL, texture);
+		particlePool_[i]->setTexRect(texRect);
+		particleList_[i] = particlePool_[i];
 	}
 }
 
 ncParticleSystem::~ncParticleSystem()
 {
 	// Empty the children list before the mass deletion
-	m_children.Clear();
+	children_.clear();
 
 	unsigned int i;
 
-	for (i = 0; i < m_vAffectors.Size(); i++)
+	for (i = 0; i < affectors_.size(); i++)
 	{
-		delete m_vAffectors[i];
+		delete affectors_[i];
 	}
 
-	for (i = 0; i < m_uPoolSize; i++)
+	for (i = 0; i < poolSize_; i++)
 	{
-		delete m_pParticleList[i];
+		delete particleList_[i];
 	}
 
-	delete[] m_pParticlePool;
-	delete[] m_pParticleList;
+	delete[] particlePool_;
+	delete[] particleList_;
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncParticleSystem::Emit(unsigned int amount, float fLife, const ncVector2f &vel)
+void ncParticleSystem::emitParticles(unsigned int amount, float life, const ncVector2f &vel)
 {
-	float fRndLife;
-	ncVector2f RndPosition;
-	ncVector2f RndVelocity;
+	float rndLife;
+	ncVector2f rndPosition;
+	ncVector2f rndVelocity;
 
 	// Particles are rotated towards the emission vector
-	float fRotation = -(atan2(vel.y, vel.x) - atan2(1.0f, 0.0f)) * 180.0f / M_PI;
-	if (fRotation < 0.0f)
+	float rotation = -(atan2(vel.y, vel.x) - atan2(1.0f, 0.0f)) * 180.0f / M_PI;
+	if (rotation < 0.0f)
 	{
-		fRotation += 360;
+		rotation += 360;
 	}
 
 	for (unsigned int i = 0; i < amount; i++)
 	{
 		// No more unused particles in the pool
-		if (m_uPoolTop == 0)
+		if (poolTop_ == 0)
 		{
 			break;
 		}
 
-		fRndLife = fLife * randBetween(0.85f, 1.0f);
+		rndLife = life * randBetween(0.85f, 1.0f);
 		// FIXME: arbitrary random position amount
-		RndPosition.x = 10.0f * randBetween(-1.0f, 1.0f); // 25
-		RndPosition.y = 10.0f * randBetween(-1.0f, 1.0f);
-		RndVelocity.x = vel.x * randBetween(0.8f, 1.0f);
-		RndVelocity.y = vel.y * randBetween(0.8f, 1.0f);
+		rndPosition.x = 10.0f * randBetween(-1.0f, 1.0f); // 25
+		rndPosition.y = 10.0f * randBetween(-1.0f, 1.0f);
+		rndVelocity.x = vel.x * randBetween(0.8f, 1.0f);
+		rndVelocity.y = vel.y * randBetween(0.8f, 1.0f);
 
-		if (m_bLocalSpace == false)
+		if (inLocalSpace_ == false)
 		{
-			RndPosition += AbsPosition();
+			rndPosition += absPosition();
 		}
 
 		// acquiring a particle from the pool
-		m_pParticlePool[m_uPoolTop]->Init(fRndLife, RndPosition, RndVelocity, fRotation, m_bLocalSpace);
-		AddChildNode(m_pParticlePool[m_uPoolTop]);
-		m_uPoolTop--;
+		particlePool_[poolTop_]->init(rndLife, rndPosition, rndVelocity, rotation, inLocalSpace_);
+		addChildNode(particlePool_[poolTop_]);
+		poolTop_--;
 	}
 }
 
-void ncParticleSystem::Update(float fInterval)
+void ncParticleSystem::update(float interval)
 {
 	// early return if the node has not to be updated
-	if (!bShouldUpdate)
+	if (!shouldUpdate_)
 	{
 		return;
 	}
 
-	for (ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); ++i)
+	for (ncList<ncSceneNode *>::Const_Iterator i = children_.begin(); i != children_.end(); ++i)
 	{
-		ncParticle *pParticle = static_cast<ncParticle *>(*i);
+		ncParticle *particle = static_cast<ncParticle *>(*i);
 
 		// Update the particle if it's alive
-		if (pParticle->isAlive())
+		if (particle->isAlive())
 		{
-			for (unsigned int j = 0; j < m_vAffectors.Size(); j++)
+			for (unsigned int j = 0; j < affectors_.size(); j++)
 			{
-				m_vAffectors[j]->Affect(pParticle);
+				affectors_[j]->affect(particle);
 			}
 
-			pParticle->Update(fInterval);
+			particle->update(interval);
 
 			// Releasing the particle if it has just died
-			if (pParticle->isAlive() == false)
+			if (particle->isAlive() == false)
 			{
 				// releasing a particle
-				m_uPoolTop++;
-				m_pParticlePool[m_uPoolTop] = pParticle;
-				RemoveChildNode(i++);
+				poolTop_++;
+				particlePool_[poolTop_] = particle;
+				removeChildNode(i++);
 			}
 		}
 	}

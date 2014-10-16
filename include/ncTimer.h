@@ -8,43 +8,43 @@ class ncTimer
 	// Empty constructor
 	ncTimer();
 	/// Starts the timer
-	inline void Start() { m_ullStartTime = Counter(); }
+	inline void start() { startTime_ = counter(); }
 	// Returns now-start time interval in seconds
-	float Interval() const;
+	float interval() const;
 	// Returns elapsed time in seconds since base time
-	static float Now();
+	static float now();
 	// Puts the current thread to sleep for the specified number of seconds
-	static void Sleep(float fS);
+	static void sleep(float seconds);
 
   protected:
 	/// Start time mark
-	unsigned long long int m_ullStartTime;
+	unsigned long long int startTime_;
 
   private:
 #ifdef _WIN32
-	static bool s_bHasPerfCounter;
+	static bool hasPerfCounter_;
 #elif !defined(__APPLE__)
-	static bool s_bHasMonotonicClock;
+	static bool hasMonotonicClock_;
 #endif
 
 	/// Have the static fields been initialized?
-	static bool s_bIsInitialized;
+	static bool isInitialized_;
 	/// Counter frequency in counts per second
-	static unsigned long int s_ulFrequency;
+	static unsigned long int frequency_;
 	/// Counter value at initialization time
-	static unsigned long long int s_ullBaseCount;
+	static unsigned long long int baseCount_;
 
 	// Initializes the static fields
-	static void Init();
+	static void init();
 
 	// Returns current value of the counter
-	static unsigned long long int Counter();
+	static unsigned long long int counter();
 };
 
 /// Returns now-start time interval in seconds
-inline float ncTimer::Interval() const
+inline float ncTimer::interval() const
 {
-	return float(Counter() - m_ullStartTime) / s_ulFrequency;
+	return float(counter() - startTime_) / frequency_;
 }
 
 #endif

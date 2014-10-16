@@ -10,7 +10,7 @@ class ncIThreadPool
 	virtual ~ncIThreadPool() = 0;
 
 	/// Enqueues a command request for a worker thread
-	virtual void EnqueueCommand(ncIThreadCommand *pThreadCommand) = 0;
+	virtual void enqueueCommand(ncIThreadCommand *threadCommand) = 0;
 };
 
 inline ncIThreadPool::~ncIThreadPool() { }
@@ -24,7 +24,7 @@ inline ncIThreadPool::~ncIThreadPool() { }
 class ncNullThreadPool : public ncIThreadPool
 {
   public:
-	virtual void EnqueueCommand(ncIThreadCommand *pThreadCommand) { }
+	virtual void enqueueCommand(ncIThreadCommand *threadCommand) { }
 };
 
 #endif

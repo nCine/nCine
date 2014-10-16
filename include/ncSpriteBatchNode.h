@@ -12,30 +12,30 @@ class ncSprite;
 class ncSpriteBatchNode : public ncDrawableNode
 {
   public:
-	ncSpriteBatchNode(ncSceneNode* pParent, ncTexture *pTexture);
+	ncSpriteBatchNode(ncSceneNode* parent, ncTexture *texture);
 	virtual ~ncSpriteBatchNode() { }
 
-	inline ncTexture* Texture() { return m_pTexture; }
-	inline void SetTexture(ncTexture* pTexture) { m_pTexture = pTexture; }
+	inline ncTexture* texture() { return texture_; }
+	inline void setTexture(ncTexture* texture) { texture_ = texture; }
 
-	virtual void Visit(ncRenderQueue& rRenderQueue);
+	virtual void visit(ncRenderQueue& renderQueue);
 
-	inline static eObjectType sType() { return SPRITEBATCH_TYPE; }
+	inline static ObjectType sType() { return SPRITEBATCH_TYPE; }
 
   private:
 	/// The spritesheet texture shared by every sprite in the batch
-	ncTexture *m_pTexture;
+	ncTexture *texture_;
 	/// The array of vertices for every sprite in the batch
-	ncArray<float> m_vVertices;
+	ncArray<float> vertices_;
 	/// The array of texture coordinates for every sprite in the batch
-	ncArray<float> m_vTexCoords;
+	ncArray<float> texCoords_;
 	/// The array of colors for every sprite in the batch
-	ncArray<unsigned char> m_vColors;
+	ncArray<unsigned char> colors_;
 
 	/// Fill the batch draw command with data from a sprite
-	void ProcessSprite(ncSprite& rSprite);
+	void processSprite(ncSprite& sprite);
 
-	virtual void UpdateRenderCommand();
+	virtual void updateRenderCommand();
 };
 
 #endif

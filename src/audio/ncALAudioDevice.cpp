@@ -9,50 +9,50 @@
 ///////////////////////////////////////////////////////////
 
 ncALAudioDevice::ncALAudioDevice()
-	: m_pDevice(NULL), m_pContext(NULL), m_fGain(1.0f)
+	: device_(NULL), context_(NULL), gain_(1.0f)
 {
-	m_pDevice = alcOpenDevice(NULL);
-	if (m_pDevice == NULL)
+	device_ = alcOpenDevice(NULL);
+	if (device_ == NULL)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcOpenDevice failed: %x", alGetError());
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcOpenDevice failed: %x", alGetError());
 		exit(EXIT_FAILURE);
 	}
 
-	m_pContext = alcCreateContext(m_pDevice, NULL);
-	if (m_pContext == NULL)
+	context_ = alcCreateContext(device_, NULL);
+	if (context_ == NULL)
 	{
-		alcCloseDevice(m_pDevice);
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcCreateContext failed: %x", alGetError());
+		alcCloseDevice(device_);
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcCreateContext failed: %x", alGetError());
 		exit(EXIT_FAILURE);
 	}
 
-	if (!alcMakeContextCurrent(m_pContext))
+	if (!alcMakeContextCurrent(context_))
 	{
-		alcDestroyContext(m_pContext);
-		alcCloseDevice(m_pDevice);
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcMakeContextCurrent failed: %x", alGetError());
+		alcDestroyContext(context_);
+		alcCloseDevice(device_);
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcMakeContextCurrent failed: %x", alGetError());
 		exit(EXIT_FAILURE);
 	}
 
-	alGenSources(s_uMaxSources, m_uSources);
+	alGenSources(MaxSources, sources_);
 	alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
-	alListenerf(AL_GAIN, m_fGain);
+	alListenerf(AL_GAIN, gain_);
 }
 
 ncALAudioDevice::~ncALAudioDevice()
 {
-	for (unsigned int i = 0; i < s_uMaxSources; i++)
+	for (unsigned int i = 0; i < MaxSources; i++)
 	{
-		alSourcei(m_uSources[i], AL_BUFFER, AL_NONE);
+		alSourcei(sources_[i], AL_BUFFER, AL_NONE);
 	}
-	alDeleteSources(s_uMaxSources, m_uSources);
+	alDeleteSources(MaxSources, sources_);
 
-	alcDestroyContext(m_pContext);
+	alcDestroyContext(context_);
 
-	ALCboolean result = alcCloseDevice(m_pDevice);
+	ALCboolean result = alcCloseDevice(device_);
 	if (!result)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::~ncALAudioDevice - alcCloseDevice failed: %d", alGetError());
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::~ncALAudioDevice - alcCloseDevice failed: %d", alGetError());
 		exit(EXIT_FAILURE);
 	}
 }
@@ -62,66 +62,66 @@ ncALAudioDevice::~ncALAudioDevice()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncALAudioDevice::SetGain(ALfloat fGain)
+void ncALAudioDevice::setGain(ALfloat gain)
 {
-	m_fGain = fGain;
-	alListenerf(AL_GAIN, m_fGain);
+	gain_ = gain;
+	alListenerf(AL_GAIN, gain_);
 }
 
-void ncALAudioDevice::StopPlayers()
+void ncALAudioDevice::stopPlayers()
 {
-	for (ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin(); i != m_players.End(); ++i)
+	for (ncList<ncIAudioPlayer *>::Const_Iterator i = players_.begin(); i != players_.end(); ++i)
 	{
-		(*i)->Stop();
+		(*i)->stop();
 	}
 
-	m_players.Clear();
+	players_.clear();
 }
 
-void ncALAudioDevice::PausePlayers()
+void ncALAudioDevice::pausePlayers()
 {
-	for (ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin(); i != m_players.End(); ++i)
+	for (ncList<ncIAudioPlayer *>::Const_Iterator i = players_.begin(); i != players_.end(); ++i)
 	{
-		(*i)->Pause();
+		(*i)->pause();
 	}
 
-	m_players.Clear();
+	players_.clear();
 }
 
-int ncALAudioDevice::NextAvailableSource()
+int ncALAudioDevice::nextAvailableSource()
 {
-	ALint iState;
+	ALint sourceState;
 
-	for (unsigned int i = 0; i < s_uMaxSources; i++)
+	for (unsigned int i = 0; i < MaxSources; i++)
 	{
-		alGetSourcei(m_uSources[i], AL_SOURCE_STATE, &iState);
-		if (iState != AL_PLAYING && iState != AL_PAUSED)
+		alGetSourcei(sources_[i], AL_SOURCE_STATE, &sourceState);
+		if (sourceState != AL_PLAYING && sourceState != AL_PAUSED)
 		{
-			return m_uSources[i];
+			return sources_[i];
 		}
 	}
 
 	return -1;
 }
 
-void ncALAudioDevice::RegisterPlayer(ncIAudioPlayer *pPlayer)
+void ncALAudioDevice::registerPlayer(ncIAudioPlayer *player)
 {
-	m_players.InsertBack(pPlayer);
+	players_.insertBack(player);
 }
 
-void ncALAudioDevice::UpdatePlayers()
+void ncALAudioDevice::updatePlayers()
 {
-	ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin();
-	while (i != m_players.End())
+	ncList<ncIAudioPlayer *>::Const_Iterator i = players_.begin();
+	while (i != players_.end())
 	{
 		if ((*i)->isPlaying())
 		{
-			(*i)->UpdateState();
+			(*i)->updateState();
 			++i;
 		}
 		else
 		{
-			m_players.Remove(i++);
+			players_.remove(i++);
 		}
 	}
 }
@@ -131,22 +131,22 @@ void ncALAudioDevice::UpdatePlayers()
 ///////////////////////////////////////////////////////////
 
 /// Stops or pauses all buffer players
-void ncALAudioDevice::StopOrPauseBufferPlayers(bool bStop)
+void ncALAudioDevice::stopOrPauseBufferPlayers(bool shouldStop)
 {
-	ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin();
-	while (i != m_players.End())
+	ncList<ncIAudioPlayer *>::Const_Iterator i = players_.begin();
+	while (i != players_.end())
 	{
-		if ((*i)->Type() == ncAudioBufferPlayer::sType())
+		if ((*i)->type() == ncAudioBufferPlayer::sType())
 		{
-			if (bStop)
+			if (shouldStop)
 			{
-				(*i)->Stop();
+				(*i)->stop();
 			}
 			else
 			{
-				(*i)->Pause();
+				(*i)->pause();
 			}
-			m_players.Remove(i++);
+			players_.remove(i++);
 		}
 		else
 		{
@@ -156,22 +156,22 @@ void ncALAudioDevice::StopOrPauseBufferPlayers(bool bStop)
 }
 
 /// Stops or pauses all stream players
-void ncALAudioDevice::StopOrPauseStreamPlayers(bool bStop)
+void ncALAudioDevice::stopOrPauseStreamPlayers(bool shouldStop)
 {
-	ncList<ncIAudioPlayer *>::Const_Iterator i = m_players.Begin();
-	while (i != m_players.End())
+	ncList<ncIAudioPlayer *>::Const_Iterator i = players_.begin();
+	while (i != players_.end())
 	{
-		if ((*i)->Type() == ncAudioStreamPlayer::sType())
+		if ((*i)->type() == ncAudioStreamPlayer::sType())
 		{
-			if (bStop)
+			if (shouldStop)
 			{
-				(*i)->Stop();
+				(*i)->stop();
 			}
 			else
 			{
-				(*i)->Pause();
+				(*i)->pause();
 			}
-			m_players.Remove(i++);
+			players_.remove(i++);
 		}
 		else
 		{

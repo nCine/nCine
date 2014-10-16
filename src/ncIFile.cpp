@@ -20,24 +20,24 @@
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-char ncIFile::m_vDataPath[s_uMaxFilenameLength] = {'\0'};
+char ncIFile::dataPath_[MaxFilenameLength] = {'\0'};
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncIFile::ncIFile(const char *pFilename)
-	: m_eType(BASE_TYPE), m_iFileDescriptor(-1), m_pFilePointer(NULL), m_bShouldCloseOnExit(true), m_lFileSize(0)
+ncIFile::ncIFile(const char *filename)
+	: type_(BASE_TYPE), fileDescriptor_(-1), filePointer_(NULL), shouldCloseOnExit_(true), fileSize_(0)
 {
-	memset(m_vFilename, 0, s_uMaxFilenameLength);
-	strncpy(m_vFilename, pFilename, s_uMaxFilenameLength);
+	memset(filename_, 0, MaxFilenameLength);
+	strncpy(filename_, filename, MaxFilenameLength);
 
-	memset(m_vExtension, 0, s_uMaxExtensionsLength);
-	char *pDotChar = strrchr(m_vFilename, '.');
+	memset(extension_, 0, MaxExtensionsLength);
+	char *dotChar = strrchr(filename_, '.');
 	// A dot followed by at least three extension characters
-	if (pDotChar && strlen(pDotChar) >= 4)
+	if (dotChar && strlen(dotChar) >= 4)
 	{
-		strncpy(m_vExtension, pDotChar + 1, s_uMaxExtensionsLength - 1);    // preserves '\0'
+		strncpy(extension_, dotChar + 1, MaxExtensionsLength - 1);    // preserves '\0'
 	}
 }
 
@@ -46,9 +46,9 @@ ncIFile::ncIFile(const char *pFilename)
 ///////////////////////////////////////////////////////////
 
 /// Returns true if the file is already opened
-bool ncIFile::IsOpened() const
+bool ncIFile::isOpened() const
 {
-	if (m_iFileDescriptor >= 0 || m_pFilePointer != NULL)
+	if (fileDescriptor_ >= 0 || filePointer_ != NULL)
 	{
 		return true;
 	}
@@ -59,114 +59,114 @@ bool ncIFile::IsOpened() const
 }
 
 /// Checks if file extension matches
-bool ncIFile::HasExtension(const char *pExtension) const
+bool ncIFile::hasExtension(const char *extension) const
 {
-	return !strncmp(m_vExtension, pExtension, s_uMaxExtensionsLength);
+	return !strncmp(extension_, extension, MaxExtensionsLength);
 }
 
 /// Returns the proper file handle according to prepended tags
-ncIFile* ncIFile::CreateFileHandle(const char *pFilename)
+ncIFile* ncIFile::createFileHandle(const char *filename)
 {
 #ifdef __ANDROID__
-	if (strncmp(pFilename, (const char *)"asset::", 7) == 0)
+	if (strncmp(filename, (const char *)"asset::", 7) == 0)
 	{
-		return new ncAssetFile(pFilename + 7);
+		return new ncAssetFile(filename + 7);
 	}
 	else
 #endif
-		return new ncStandardFile(pFilename);
+		return new ncStandardFile(filename);
 }
 
 /// Checks if a file can be accessed with specified mode
-bool ncIFile::Access(const char *pFilename, unsigned char uMode)
+bool ncIFile::access(const char *filename, unsigned char mode)
 {
 #ifdef __ANDROID__
-	if (strncmp(pFilename, (const char *)"asset::", 7) == 0)
+	if (strncmp(filename, (const char *)"asset::", 7) == 0)
 	{
-		return ncAssetFile::Access(pFilename + 7, uMode);
+		return ncAssetFile::access(filename + 7, mode);
 	}
 	else
 #endif
-		return ncStandardFile::Access(pFilename, uMode);
+		return ncStandardFile::access(filename, mode);
 }
 
 /// Returns the writable directory for data storage
-char* ncIFile::DataPath()
+char* ncIFile::dataPath()
 {
 	// Searching for path only on first invokation
-	if (strlen(m_vDataPath))
+	if (strlen(dataPath_))
 	{
-		return m_vDataPath;
+		return dataPath_;
 	}
 
-	memset(m_vDataPath, 0, s_uMaxFilenameLength);
+	memset(dataPath_, 0, MaxFilenameLength);
 
 #ifdef __ANDROID__
-	int iPid = getpid();
-	char vProcFileName[s_uMaxFilenameLength];
-	snprintf(vProcFileName, s_uMaxFilenameLength, "/proc/%d/cmdline", iPid);
+	int pid = getpid();
+	char procFileName[MaxFilenameLength];
+	snprintf(procFileName, MaxFilenameLength, "/proc/%d/cmdline", pid);
 
-	FILE *pProcFile = fopen(vProcFileName, "r");
-	if (pProcFile)
+	FILE *procFile = fopen(procFileName, "r");
+	if (procFile)
 	{
 		// Creating the path "/data/data/PACKAGE_NAME/files/"
-		strncpy(m_vDataPath, "/data/data/", 11);
-		fread((char *)m_vDataPath + 11, s_uMaxFilenameLength - 11, 1, pProcFile);
-		strncat(m_vDataPath, "/files/", 7);
-		fclose(pProcFile);
+		strncpy(dataPath_, "/data/data/", 11);
+		fread((char *)dataPath_ + 11, MaxFilenameLength - 11, 1, procFile);
+		strncat(dataPath_, "/files/", 7);
+		fclose(procFile);
 
 		// Trying to create the data directory
-		if (mkdir(m_vDataPath, 0770) && errno != EEXIST)
+		if (mkdir(dataPath_, 0770) && errno != EEXIST)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncIFile::DataPath - Cannot create directory: %s", m_vDataPath);
-			memset(m_vDataPath, 0, s_uMaxFilenameLength);
+			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncIFile::dataPath - Cannot create directory: %s", dataPath_);
+			memset(dataPath_, 0, MaxFilenameLength);
 		}
 	}
 #elif _WIN32
-	char *pUserProfileEnv = getenv("USERPROFILE");
-	if (pUserProfileEnv == NULL || strlen(pUserProfileEnv) == 0)
+	char *userProfileEnv = getenv("USERPROFILE");
+	if (userProfileEnv == NULL || strlen(userProfileEnv) == 0)
 	{
-		char *pHomeDriveEnv = getenv("HOMEDRIVE");
-		char *pHomePathEnv = getenv("HOMEPATH");
+		char *homeDriveEnv = getenv("HOMEDRIVE");
+		char *homePathEnv = getenv("HOMEPATH");
 
-		if ((pHomeDriveEnv == NULL || strlen(pHomeDriveEnv) == 0) &&
-			(pHomePathEnv == NULL || strlen(pHomePathEnv) == 0))
+		if ((homeDriveEnv == NULL || strlen(homeDriveEnv) == 0) &&
+			(homePathEnv == NULL || strlen(homePathEnv) == 0))
 		{
-			char *pHomeEnv = getenv("HOME");
-			if (pHomeEnv && strlen(pHomeEnv))
+			char *homeEnv = getenv("HOME");
+			if (homeEnv && strlen(homeEnv))
 			{
-				strncpy(m_vDataPath, pHomeEnv, s_uMaxFilenameLength);
+				strncpy(dataPath_, homeEnv, MaxFilenameLength);
 			}
 		}
 		else
 		{
-			strncpy(m_vDataPath, pHomeDriveEnv, s_uMaxFilenameLength);
-			strncat(m_vDataPath, pHomePathEnv, s_uMaxFilenameLength - strlen(pHomeDriveEnv));
+			strncpy(dataPath_, homeDriveEnv, MaxFilenameLength);
+			strncat(dataPath_, homePathEnv, MaxFilenameLength - strlen(homeDriveEnv));
 		}
 	}
 	else
 	{
-		strncpy(m_vDataPath, pUserProfileEnv, s_uMaxFilenameLength);
+		strncpy(dataPath_, userProfileEnv, MaxFilenameLength);
 	}
 
-	if (strlen(m_vDataPath))
+	if (strlen(dataPath_))
 	{
-		strncat(m_vDataPath, "\\", 1);
+		strncat(dataPath_, "\\", 1);
 	}
 #else
-	char *pHomeEnv = getenv("HOME");
+	char *homeEnv = getenv("HOME");
 
-	if (pHomeEnv == NULL || strlen(pHomeEnv) == 0)
+	if (homeEnv == NULL || strlen(homeEnv) == 0)
 	{
-		strncpy(m_vDataPath, getpwuid(getuid())->pw_dir, s_uMaxFilenameLength);
+		strncpy(dataPath_, getpwuid(getuid())->pw_dir, MaxFilenameLength);
 	}
 	else
 	{
-		strncpy(m_vDataPath, pHomeEnv, s_uMaxFilenameLength);
+		strncpy(dataPath_, homeEnv, MaxFilenameLength);
 	}
 
-	strncat(m_vDataPath, "/.config/", s_uMaxFilenameLength - strlen(m_vDataPath));
+	strncat(dataPath_, "/.config/", MaxFilenameLength - strlen(dataPath_));
 #endif
 
-	return m_vDataPath;
+	return dataPath_;
 }

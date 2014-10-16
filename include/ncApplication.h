@@ -19,75 +19,75 @@ class ncApplication
   public:
 #ifdef __ANDROID__
 	// Must be called at start to init the application
-	static void Init(struct android_app* state, ncIAppEventHandler* (*pCreateAppEventHandler)());
+	static void init(struct android_app* state, ncIAppEventHandler* (*createAppEventHandler)());
 #else
 	// Must be called at start to init the application
-	static void Init(ncIAppEventHandler* (*pCreateAppEventHandler)());
+	static void init(ncIAppEventHandler* (*createAppEventHandler)());
 #endif
 
 	// The main game loop, handling events and rendering
-	static void Run();
+	static void run();
 	// A single step of the game loop made to render a frame
-	static void Step();
+	static void step();
 	// Must be called before exiting to shut down the application
-	static void Shutdown();
+	static void shutdown();
 
 	// HACK: wrapping a lot of getters
 	/// Returns the graphics device instance
-	inline static ncIGfxDevice& GfxDevice() { return *m_pGfxDevice; }
+	inline static ncIGfxDevice& gfxDevice() { return *gfxDevice_; }
 	/// Returns the root of the transformation graph
-	inline static ncSceneNode& RootNode() { return *m_pRootNode; }
+	inline static ncSceneNode& rootNode() { return *rootNode_; }
 	/// Returns the input manager instance
-	inline static ncIInputManager& InputManager() { return *m_pInputManager; }
+	inline static ncIInputManager& inputManager() { return *inputManager_; }
 
 	/// Returns the elapsed time since the end of the previous frame in milliseconds
-	inline static float Interval() { return m_pFrameTimer->Interval(); }
+	inline static float interval() { return frameTimer_->interval(); }
 	/// Returns the average FPS
-	inline static float AverageFPS() { return m_pFrameTimer->AverageFPS(); }
+	inline static float averageFps() { return frameTimer_->averageFps(); }
 
 	/// Returns the screen width
-	inline static int Width() { return m_pGfxDevice->Width(); }
+	inline static int width() { return gfxDevice_->width(); }
 	/// Returns the screen height
-	inline static int Height() { return m_pGfxDevice->Height(); }
+	inline static int height() { return gfxDevice_->height(); }
 
 	/// Returns the value of the pause flag
-	inline static bool IsPaused() { return m_bPaused; }
+	inline static bool isPaused() { return isPaused_; }
 	// Sets the pause flag value
-	static void SetPause(bool bPaused);
+	static void setPause(bool paused);
 	// Toggles the pause flag on and off
-	static void TogglePause();
+	static void togglePause();
 
 	/// Raises the quit flag
-	inline static void Quit() { m_bShouldQuit = true; }
+	inline static void quit() { shouldQuit_ = true; }
 	/// Returns the quit flag value
-	static bool ShouldQuit() { return m_bShouldQuit; }
+	static bool shouldQuit() { return shouldQuit_; }
 
 	/// Returns the focus flag value
-	static bool HasFocus() { return m_bHasFocus; }
+	static bool hasFocus() { return hasFocus_; }
 	// Sets the focus flag
-	static void SetFocus(bool bHasFocus);
+	static void setFocus(bool hasFocus);
 
 	// Shows or hides profiling graphs
-	static void ShowProfileGraphs(bool bShouldDraw);
+	static void showProfileGraphs(bool shouldDraw);
 	// Shows or hides profiling information text
-	static void ShowProfileInfo(bool bShouldDraw);
+	static void showProfileInfo(bool shouldDraw);
 
   private:
-	static bool m_bPaused;
-	static bool m_bHasFocus;
-	static bool m_bShouldQuit;
-	static ncFrameTimer *m_pFrameTimer;
-	static ncIGfxDevice *m_pGfxDevice;
-	static ncSceneNode *m_pRootNode;
-	static ncRenderQueue *m_pRenderQueue;
-	static ncTimer *m_pProfileTimer;
-	static ncProfilePlotter *m_pProfilePlotter;
-	static ncFont *m_pFont;
-	static ncTextNode *m_pTextLines;
-	static float m_fTextUpdateTime;
-	static char m_vTextChars[256];
-	static ncIInputManager *m_pInputManager;
-	static ncIAppEventHandler *m_pAppEventHandler;
+	static bool isPaused_;
+	static bool hasFocus_;
+	static bool shouldQuit_;
+	static ncFrameTimer *frameTimer_;
+	static ncIGfxDevice *gfxDevice_;
+	static ncSceneNode *rootNode_;
+	static ncRenderQueue *renderQueue_;
+	static ncTimer *profileTimer_;
+	static ncProfilePlotter *profilePlotter_;
+	static ncFont *font_;
+	static ncTextNode *textLines_;
+	static float textUpdateTime;
+	static char textChars_[256];
+	static ncIInputManager *inputManager_;
+	static ncIAppEventHandler *appEventHandler_;
 
 	ncApplication();
 	~ncApplication();

@@ -12,51 +12,51 @@ class ncArray
 {
   public:
 	/// Constructs an array with explicit size
-	ncArray(unsigned int uCapacity)
-		: m_pArray(NULL), m_uSize(0), m_uCapacity(0)
+	ncArray(unsigned int capacity)
+		: array_(NULL), size_(0), capacity_(0)
 	{
-		SetCapacity(uCapacity);
+		setCapacity(capacity);
 	}
-	~ncArray() { delete[] m_pArray; }
+	~ncArray() { delete[] array_; }
 
 	/// Returns true if the array is empty
-	inline bool isEmpty() const { return m_uSize == 0; }
+	inline bool isEmpty() const { return size_ == 0; }
 	/// Returns the array size
 	/** The array is filled without gaps until the Size()-1 element */
-	inline unsigned int Size() const { return m_uSize; }
+	inline unsigned int size() const { return size_; }
 	/// Returns the array size
 	/// The array has memory allocated to store untile the Capacity()-1 element
-	inline unsigned int Capacity() const { return m_uCapacity; }
+	inline unsigned int capacity() const { return capacity_; }
 	// Set a new capacity for the array (can be bigger or smaller than the current one)
-	void SetCapacity(unsigned int uNewCapacity);
+	void setCapacity(unsigned int newCapacity);
 
 	/// Clears the array
 	/** Size will be zero but capacity remains untouched */
-	inline void Clear() { m_uSize = 0; }
+	inline void clear() { size_ = 0; }
 	/// Inserts a new element as the last one in constant time
-	inline void InsertBack(T element) { operator[](m_uSize) = element; }
+	inline void insertBack(T element) { operator[](size_) = element; }
 	// Inserts a new element at a specified position (shifting elements around)
-	void InsertAt(unsigned int uIndex, T element);
+	void insertAt(unsigned int index, T element);
 	// Inserts an array of elements at the end in constant time
-	void Append(const T* elements, unsigned int uAmount);
+	void append(const T* elements, unsigned int amount);
 	/// Removes an element at a specified position (shifting elements around)
-	void RemoveAt(unsigned int uIndex);
+	void removeAt(unsigned int index);
 
 	// Read-only subscript operator
-	const T& operator[] (const unsigned int uIndex) const;
+	const T& operator[] (const unsigned int index) const;
 	// Subscript operator
-	T& operator[] (const unsigned int uIndex);
+	T& operator[] (const unsigned int index);
 
 	/// Returns a pointer to the allocated memory
 	/** It's useful when holding arrays of OpenGL data */
-	inline T* const Pointer() const { return m_pArray; }
+	inline T* const pointer() const { return array_; }
 	// Allows for direct but unchecked access to the array memory
-	T* MapBuffer(unsigned int uReserved);
+	T* mapBuffer(unsigned int reserved);
 
   private:
-	T* m_pArray;
-	unsigned int m_uSize;
-	unsigned int m_uCapacity;
+	T* array_;
+	unsigned int size_;
+	unsigned int capacity_;
 
 	// Preventing copy at the moment
 	ncArray(const ncArray&);
@@ -65,124 +65,124 @@ class ncArray
 
 /// Sets a new capacity for the array (can be bigger or smaller than the current one)
 template <class T>
-void ncArray<T>::SetCapacity(unsigned int uNewCapacity)
+void ncArray<T>::setCapacity(unsigned int newCapacity)
 {
-	if (uNewCapacity == 0)
+	if (newCapacity == 0)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::SetCapacity - Zero is not valid capacity");
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncArray::setCapacity - Zero is not valid capacity");
 		exit(EXIT_FAILURE);
 	}
 
-	T* pNewArray = new T[uNewCapacity];
+	T* newArray = new T[newCapacity];
 
-	if (m_uSize > 0)
+	if (size_ > 0)
 	{
-		if (uNewCapacity < m_uSize) // shrinking
+		if (newCapacity < size_) // shrinking
 		{
-			m_uSize = uNewCapacity;    // cropping last elements
+			size_ = newCapacity;    // cropping last elements
 		}
 
-		memcpy(pNewArray, m_pArray, sizeof(T)*m_uSize);
+		memcpy(newArray, array_, sizeof(T)*size_);
 	}
 
-	delete[] m_pArray;
-	m_pArray = pNewArray;
-	m_uCapacity = uNewCapacity;
+	delete[] array_;
+	array_ = newArray;
+	capacity_ = newCapacity;
 }
 
 /// Inserts a new element at a specified position (shifting elements around)
 template <class T>
-void ncArray<T>::InsertAt(unsigned int uIndex, T element)
+void ncArray<T>::insertAt(unsigned int index, T element)
 {
-	if (m_uSize + 1 > m_uCapacity)
+	if (size_ + 1 > capacity_)
 	{
-		SetCapacity(m_uSize * 2);
+		setCapacity(size_ * 2);
 	}
 
 	// memmove() takes care of overlapping regions
-	memmove(m_pArray + uIndex + 1, m_pArray + uIndex, m_uSize - uIndex);
-	m_pArray[uIndex] = element;
-	m_uSize++;
+	memmove(array_ + index + 1, array_ + index, size_ - index);
+	array_[index] = element;
+	size_++;
 }
 
 /// Inserts an array of elements at the end in constant time
 template <class T>
-void ncArray<T>::Append(const T* elements, unsigned int uAmount)
+void ncArray<T>::append(const T* elements, unsigned int amount)
 {
-	if (m_uSize + uAmount > m_uCapacity)
+	if (size_ + amount > capacity_)
 	{
-		SetCapacity(m_uSize + uAmount);
+		setCapacity(size_ + amount);
 	}
 
-	memcpy(m_pArray + m_uSize, elements, sizeof(T)*uAmount);
-	m_uSize += uAmount;
+	memcpy(array_ + size_, elements, sizeof(T)*amount);
+	size_ += amount;
 }
 
 template <class T>
-void ncArray<T>::RemoveAt(unsigned int uIndex)
+void ncArray<T>::removeAt(unsigned int index)
 {
 	// memmove() takes care of overlapping regions
-	memmove(m_pArray + uIndex, m_pArray + uIndex + 1, m_uSize - uIndex);
-	m_uSize--;
+	memmove(array_ + index, array_ + index + 1, size_ - index);
+	size_--;
 }
 
 /// Read-only subscript operator
 template <class T>
-const T& ncArray<T>::operator[] (const unsigned int uIndex) const
+const T& ncArray<T>::operator[] (const unsigned int index) const
 {
-	if (uIndex > m_uSize)
+	if (index > size_)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::operator[] const - Element %u out of size range!", uIndex);
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncArray::operator[] const - Element %u out of size range!", index);
 		exit(EXIT_FAILURE);
 	}
 
-	return m_pArray[uIndex];
+	return array_[index];
 }
 
 /// Subscript operator
 template <class T>
-T& ncArray<T>::operator[] (const unsigned int uIndex)
+T& ncArray<T>::operator[] (const unsigned int index)
 {
-	if (uIndex > m_uCapacity - 1)
+	if (index > capacity_ - 1)
 	{
-//		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncArray::operator[] - Element %u out of capacity range!", uIndex);
+//		ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncArray::operator[] - Element %u out of capacity range!", index);
 //		exit(EXIT_FAILURE);
 	}
 
 	// Avoid creating "holes" into the array
-	if (uIndex > m_uSize)
+	if (index > size_)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncArray::operator[] - Element %u out of size range!", uIndex);
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncArray::operator[] - Element %u out of size range!", index);
 		exit(EXIT_FAILURE);
 	}
 	// Adding an element at the back of the array
-	else if (uIndex == m_uSize)
+	else if (index == size_)
 	{
 		// Need growing
-		if (m_uSize == m_uCapacity)
+		if (size_ == capacity_)
 		{
-			SetCapacity(m_uCapacity * 2);
+			setCapacity(capacity_ * 2);
 		}
 
-		m_uSize++;
+		size_++;
 	}
 
-	return m_pArray[uIndex];
+	return array_[index];
 }
 
 /// Allows for direct but unchecked access to the array memory
 template <class T>
-T* ncArray<T>::MapBuffer(unsigned int uReserved)
+T* ncArray<T>::mapBuffer(unsigned int reserved)
 {
-	if (m_uSize + uReserved > m_uCapacity)
+	if (size_ + reserved > capacity_)
 	{
-		SetCapacity(m_uSize + uReserved);
+		setCapacity(size_ + reserved);
 	}
 
-	T* pArray = &m_pArray[m_uSize];
-	m_uSize += uReserved;
+	T* array = &array_[size_];
+	size_ += reserved;
 
-	return pArray;
+	return array;
 }
 
 #endif

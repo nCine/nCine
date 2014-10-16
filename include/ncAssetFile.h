@@ -10,38 +10,38 @@ class ncAssetFile: public ncIFile
 {
   public:
 	/// Constructs an asset file object
-	/*! \param pFilename File name including path relative to the assets directory */
-	ncAssetFile(const char *pFilename);
+	/*! \param filename File name including path relative to the assets directory */
+	ncAssetFile(const char *filename);
 	~ncAssetFile();
 
 	/// Static method to return class type
-	inline static eFileType sType() { return ASSET_TYPE; }
+	inline static FileType sType() { return ASSET_TYPE; }
 
-	void Open(unsigned char uMode);
-	void Close();
-	long int Seek(long int lOffset, int iWhence) const;
-	long int Tell() const;
-	long int Read(void *pBuffer, int iBytes) const;
+	void open(unsigned char mode);
+	void close();
+	long int seek(long int offset, int whence) const;
+	long int tell() const;
+	long int read(void *buffer, int bytes) const;
 
-	bool IsOpened() const;
+	bool isOpened() const;
 
 	/// Sets the global pointer to the AAssetManager
-	static void InitAssetManager(struct android_app* state) { m_pAssetManager = state->activity->assetManager; }
+	static void initAssetManager(struct android_app* state) { assetManager_ = state->activity->assetManager; }
 
   private:
-	static AAssetManager* m_pAssetManager;
-	AAsset *m_pAsset;
-	long int m_lStartOffset;
+	static AAssetManager* assetManager_;
+	AAsset *asset_;
+	long int startOffset_;
 
 	// Opens the file with AAsset_openFileDescriptor()
-	void OpenFD(unsigned char uMode);
+	void openFd(unsigned char mode);
 	// Opens the file with AAssetManager_open() only
-	void OpenAsset(unsigned char uMode);
+	void openAsset(unsigned char mode);
 
 	// Checks if a file can be accessed with specified mode
-	static bool Access(const char *pFilename, unsigned char uMode);
+	static bool access(const char *filename, unsigned char mode);
 
-	friend bool ncIFile::Access(const char *pFilename, unsigned char uMode);
+	friend bool ncIFile::access(const char *filename, unsigned char mode);
 };
 
 #endif

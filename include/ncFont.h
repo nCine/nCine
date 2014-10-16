@@ -9,59 +9,59 @@ class ncFont
 {
   public:
 	// Constructs a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)
-	ncFont(const char* pTexFilename, const char *pFntFilename);
-	virtual ~ncFont() { delete m_pTexture; }
+	ncFont(const char* texFilename, const char *fntFilename);
+	virtual ~ncFont() { delete texture_; }
 
 	/// Gets the texture object
-	inline const ncTexture* Texture() const { return m_pTexture; }
+	inline const ncTexture* texture() const { return texture_; }
 	/// Sets the texture object
-	inline void SetTexture(ncTexture *pTexture) { m_pTexture = pTexture; }
+	inline void setTexture(ncTexture *texture) { texture_ = texture; }
 
 	/// Returns font line height
-	inline unsigned short LineHeight() const { return m_uLineHeight; }
+	inline unsigned short lineHeight() const { return lineHeight_; }
 	/// Returns font base
-	inline unsigned short Base() const { return m_uBase; }
+	inline unsigned short base() const { return base_; }
 	/// Returns texture atlas size
-	inline ncPoint TexSize() const { return ncPoint(m_uWidth, m_uHeight); }
+	inline ncPoint textureSize() const { return ncPoint(width_, height_); }
 	/// Returns number of glyphs
-	inline unsigned short NumGlyphs() const { return m_uNumGlyphs; }
+	inline unsigned short numGlyphs() const { return numGlyphs_; }
 	/// Reurns a constant pointer to a glyph
-	const ncFontGlyph* Glyph(unsigned int uGlyphId) const;
+	const ncFontGlyph* glyph(unsigned int glyphId) const;
 
   private:
 	/// The font texture
-	ncTexture *m_pTexture;
+	ncTexture *texture_;
 	/// Font line height
-	unsigned int m_uLineHeight;
+	unsigned int lineHeight_;
 	/// Font base
-	unsigned int m_uBase;
+	unsigned int base_;
 	/// Texture atlas width
-	unsigned int m_uWidth;
+	unsigned int width_;
 	/// Texture atlas height
-	unsigned int m_uHeight;
+	unsigned int height_;
 	/// Number of glyphs for this font
-	unsigned int m_uNumGlyphs;
+	unsigned int numGlyphs_;
 	/// Number of kernings for this font
-	unsigned int m_uNumKernings;
+	unsigned int numKernings_;
 
 	/// Maximum number of glyphs in a font
-	static const unsigned int s_uMaxGlyphs = 256;
+	static const unsigned int MaxGlyphs = 256;
 	/// Array of font glyphs
-	ncFontGlyph m_vGlyphs[s_uMaxGlyphs];
+	ncFontGlyph glyphs_[MaxGlyphs];
 
 	/// Preventing construction by copy
-	ncFont(const ncFont& rOther);
+	ncFont(const ncFont& other);
 
 	// Loads an AngelCode's FNT file in a RAM buffer then parses it
-	void ParseFNTFile(ncIFile *pFileHandle);
+	void parseFntFile(ncIFile *fileHandle);
 };
 
 /// Returns a constant pointer to a glyph
-inline const ncFontGlyph* ncFont::Glyph(unsigned int uGlyphId) const
+inline const ncFontGlyph* ncFont::glyph(unsigned int glyphId) const
 {
-	if (uGlyphId < s_uMaxGlyphs)
+	if (glyphId < MaxGlyphs)
 	{
-		return &m_vGlyphs[uGlyphId];
+		return &glyphs_[glyphId];
 	}
 	else
 	{

@@ -6,81 +6,81 @@
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncColorAffector::AddColorStep(float fTime, ncColor color)
+void ncColorAffector::addColorStep(float time, ncColor color)
 {
-	if (m_vColorSteps.isEmpty() || fTime > m_vColorSteps[m_vColorSteps.Size() - 1]->fTime)
+	if (colorSteps_.isEmpty() || time > colorSteps_[colorSteps_.size() - 1]->time)
 	{
-		m_vColorSteps.InsertBack(new ColorStep(fTime, color));
+		colorSteps_.insertBack(new ColorStep(time, color));
 	}
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncColorAffector::AddColorStep - Out of order step not added");
+		ncServiceLocator::logger().write(ncILogger::LOG_WARN, "ncColorAffector::addColorStep - Out of order step not added");
 	}
 }
 
-void ncColorAffector::Affect(ncParticle* pParticle)
+void ncColorAffector::affect(ncParticle* particle)
 {
-	unsigned int uIdx;
-	float fNormalizedLife = pParticle->m_fLife / pParticle->m_fStartLife;
+	unsigned int index;
+	float normalizedLife = particle->life_ / particle->startingLife;
 
-	for (uIdx = 0; uIdx < m_vColorSteps.Size() - 1; uIdx++)
+	for (index = 0; index < colorSteps_.size() - 1; index++)
 	{
-		if (m_vColorSteps[uIdx]->fTime > fNormalizedLife)
+		if (colorSteps_[index]->time > normalizedLife)
 		{
 			break;
 		}
 	}
 
-//	assert(m_vColorSteps[uIdx-1]->fTime <= fNormalizedLife);
+//	assert(colorSteps_[index - 1]->time <= normalizedLife);
 
-	float fPrevTime = m_vColorSteps[uIdx - 1]->fTime;
-	float fThisTime = m_vColorSteps[uIdx]->fTime;
-	ncColor &prevColor = m_vColorSteps[uIdx - 1]->color;
-	ncColor &thisColor = m_vColorSteps[uIdx]->color;
+	float prevTime = colorSteps_[index - 1]->time;
+	float thisTime = colorSteps_[index]->time;
+	ncColor &prevColor = colorSteps_[index - 1]->color;
+	ncColor &thisColor = colorSteps_[index]->color;
 
-	float fFactor = (fNormalizedLife - fPrevTime) / (fThisTime - fPrevTime);
-	GLubyte red = prevColor.R() + (thisColor.R() - prevColor.R()) * fFactor;
-	GLubyte green = prevColor.G() + (thisColor.G() - prevColor.G()) * fFactor;
-	GLubyte blue = prevColor.B() + (thisColor.B() - prevColor.B()) * fFactor;
-	GLubyte alpha = prevColor.A() + (thisColor.A() - prevColor.A()) * fFactor;
+	float factor = (normalizedLife - prevTime) / (thisTime - prevTime);
+	GLubyte red = prevColor.r() + (thisColor.r() - prevColor.r()) * factor;
+	GLubyte green = prevColor.g() + (thisColor.g() - prevColor.g()) * factor;
+	GLubyte blue = prevColor.b() + (thisColor.b() - prevColor.b()) * factor;
+	GLubyte alpha = prevColor.a() + (thisColor.a() - prevColor.a()) * factor;
 
-	pParticle->SetColor(red, green, blue, alpha);
+	particle->setColor(red, green, blue, alpha);
 }
 
-void ncSizeAffector::AddSizeStep(float fTime, float fScale)
+void ncSizeAffector::addSizeStep(float time, float scale)
 {
-	if (m_vSizeSteps.isEmpty() || fTime > m_vSizeSteps[m_vSizeSteps.Size() - 1]->fTime)
+	if (sizeSteps_.isEmpty() || time > sizeSteps_[sizeSteps_.size() - 1]->time)
 	{
-		m_vSizeSteps.InsertBack(new SizeStep(fTime, fScale));
+		sizeSteps_.insertBack(new SizeStep(time, scale));
 	}
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncSizeAffector::AddSizeStep - Out of order step not added");
+		ncServiceLocator::logger().write(ncILogger::LOG_WARN, "ncSizeAffector::addSizeStep - Out of order step not added");
 	}
 }
 
-void ncSizeAffector::Affect(ncParticle* pParticle)
+void ncSizeAffector::affect(ncParticle* particle)
 {
-	unsigned int uIdx;
-	float fNormalizedLife = pParticle->m_fLife / pParticle->m_fStartLife;
+	unsigned int index;
+	float normalizedLife = particle->life_ / particle->startingLife;
 
-	for (uIdx = 0; uIdx < m_vSizeSteps.Size() - 1; uIdx++)
+	for (index = 0; index < sizeSteps_.size() - 1; index++)
 	{
-		if (m_vSizeSteps[uIdx]->fTime > fNormalizedLife)
+		if (sizeSteps_[index]->time > normalizedLife)
 		{
 			break;
 		}
 	}
 
-//	assert(m_vSizeSteps[uIdx-1]->fTime <= fNormalizedLife);
+//	assert(sizeSteps[index - 1]->time <= normalizedLife);
 
-	float fPrevTime = m_vSizeSteps[uIdx - 1]->fTime;
-	float fThisTime = m_vSizeSteps[uIdx]->fTime;
-	float fPrevScale = m_vSizeSteps[uIdx - 1]->fScale;
-	float fThisScale = m_vSizeSteps[uIdx]->fScale;
+	float prevTime = sizeSteps_[index - 1]->time;
+	float thisTime = sizeSteps_[index]->time;
+	float prevScale = sizeSteps_[index - 1]->scale;
+	float thisScale = sizeSteps_[index]->scale;
 
-	float fFactor = (fNormalizedLife - fPrevTime) / (fThisTime - fPrevTime);
-	float fNewScale = fPrevScale + (fThisScale - fPrevScale) * fFactor;
+	float factor = (normalizedLife - prevTime) / (thisTime - prevTime);
+	float newScale = prevScale + (thisScale - prevScale) * factor;
 
-	pParticle->SetScale(m_fBaseScale * fNewScale);
+	particle->setScale(baseScale_ * newScale);
 }

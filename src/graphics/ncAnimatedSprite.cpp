@@ -4,35 +4,35 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncAnimatedSprite::ncAnimatedSprite(ncSceneNode* pParent, ncTexture *pTexture)
-	: ncSprite(pParent, pTexture), m_vAnims(4), m_iCurrentAnim(-1)
+ncAnimatedSprite::ncAnimatedSprite(ncSceneNode* parent, ncTexture *texture)
+	: ncSprite(parent, texture), anims_(4), currentAnim(-1)
 {
 
 }
 
-ncAnimatedSprite::ncAnimatedSprite(ncTexture *pTexture)
-	: ncSprite(pTexture), m_vAnims(4), m_iCurrentAnim(-1)
+ncAnimatedSprite::ncAnimatedSprite(ncTexture *texture)
+	: ncSprite(texture), anims_(4), currentAnim(-1)
 {
 
 }
 
-ncAnimatedSprite::ncAnimatedSprite(ncSceneNode* pParent, ncTexture *pTexture, int iX, int iY)
-	: ncSprite(pParent, pTexture, iX, iY), m_vAnims(4), m_iCurrentAnim(-1)
+ncAnimatedSprite::ncAnimatedSprite(ncSceneNode* parent, ncTexture *texture, int x, int y)
+	: ncSprite(parent, texture, x, y), anims_(4), currentAnim(-1)
 {
 
 }
 
-ncAnimatedSprite::ncAnimatedSprite(ncTexture *pTexture, int iX, int iY)
-	: ncSprite(pTexture, iX, iY), m_vAnims(4), m_iCurrentAnim(-1)
+ncAnimatedSprite::ncAnimatedSprite(ncTexture *texture, int x, int y)
+	: ncSprite(texture, x, y), anims_(4), currentAnim(-1)
 {
 
 }
 
 ncAnimatedSprite::~ncAnimatedSprite()
 {
-	for (unsigned int i = 0; i < m_vAnims.Size(); i++)
+	for (unsigned int i = 0; i < anims_.size(); i++)
 	{
-		delete m_vAnims[i];
+		delete anims_[i];
 	}
 }
 
@@ -40,46 +40,46 @@ ncAnimatedSprite::~ncAnimatedSprite()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncAnimatedSprite::Update(float fInterval)
+void ncAnimatedSprite::update(float interval)
 {
-	unsigned int uPreviousFrame = m_vAnims[m_iCurrentAnim]->Frame();
-	m_vAnims[m_iCurrentAnim]->UpdateFrame(fInterval);
+	unsigned int previousFrame = anims_[currentAnim]->frame();
+	anims_[currentAnim]->updateFrame(interval);
 
 	// Updating sprite texture rectangle only on change
-	if (uPreviousFrame != m_vAnims[m_iCurrentAnim]->Frame())
+	if (previousFrame != anims_[currentAnim]->frame())
 	{
-		SetTexRect(m_vAnims[m_iCurrentAnim]->Rect());
+		setTexRect(anims_[currentAnim]->rect());
 	}
 
-	ncSprite::Update(fInterval);
+	ncSprite::update(interval);
 }
 
 /// Adds a new animation
-void ncAnimatedSprite::AddAnimation(ncRectAnimation* pAnim)
+void ncAnimatedSprite::addAnimation(ncRectAnimation* anim)
 {
-	if (pAnim)
+	if (anim)
 	{
-		m_vAnims.InsertBack(pAnim);
-		m_iCurrentAnim = m_vAnims.Size() - 1;
-		SetTexRect(m_vAnims[m_iCurrentAnim]->Rect());
+		anims_.insertBack(anim);
+		currentAnim = anims_.size() - 1;
+		setTexRect(anims_[currentAnim]->rect());
 	}
 }
 
 /// Sets the current animation and its frame number
-void ncAnimatedSprite::SetAnimation(int iAnimNum)
+void ncAnimatedSprite::setAnimation(int animNum)
 {
-	if ((unsigned int)iAnimNum >= m_vAnims.Size())
+	if ((unsigned int)animNum >= anims_.size())
 	{
-		m_iCurrentAnim = m_vAnims.Size() - 1;
+		currentAnim = anims_.size() - 1;
 	}
-	else if (iAnimNum < 0)
+	else if (animNum < 0)
 	{
-		m_iCurrentAnim = 0;
+		currentAnim = 0;
 	}
 	else
 	{
-		m_iCurrentAnim = iAnimNum;
+		currentAnim = animNum;
 	}
 
-	SetTexRect(m_vAnims[m_iCurrentAnim]->Rect());
+	setTexRect(anims_[currentAnim]->rect());
 }

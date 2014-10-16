@@ -9,10 +9,10 @@ template <class T>
 class ncListIterator
 {
   public:
-	ncListIterator(ncListNode<T> *pNode)
-		: m_pNode(pNode) { }
+	ncListIterator(ncListNode<T> *node)
+		: node_(node) { }
 	ncListIterator(const ncListIterator& iterator)
-		: m_pNode(iterator.m_pNode) { }
+		: node_(iterator.node_) { }
 
 	// Read-only deferencing operator
 	inline const T& operator*() const;
@@ -30,12 +30,12 @@ class ncListIterator
 	ncListIterator<T> operator--(int) const;
 
 	/// Equality operator
-	inline bool operator==(const ncListIterator<T>& iterator) const { return m_pNode == iterator.m_pNode; }
+	inline bool operator==(const ncListIterator<T>& iterator) const { return node_ == iterator.node_; }
 	/// Inequality operator
-	inline bool operator!=(const ncListIterator<T>& iterator) const { return m_pNode != iterator.m_pNode; }
+	inline bool operator!=(const ncListIterator<T>& iterator) const { return node_ != iterator.node_; }
 
   private:
-	mutable ncListNode<T> *m_pNode;
+	mutable ncListNode<T> *node_;
 
 	friend class ncList<T>;
 };
@@ -44,27 +44,27 @@ class ncListIterator
 template <class T>
 const T& ncListIterator<T>::operator*() const
 {
-	// Cannot simply return only if m_pNode is not NULL or
+	// Cannot simply return only if node_ is not NULL or
 	// "control may reach end of non-void function"
-	return m_pNode->m_data;
+	return node_->data_;
 }
 
 /// Deferencing operator
 template <class T>
 T& ncListIterator<T>::operator*()
 {
-	// Cannot simply return only if m_pNode is not NULL or
+	// Cannot simply return only if node_ is not NULL or
 	// "control may reach end of non-void function"
-	return m_pNode->m_data;
+	return node_->data_;
 }
 
 /// Iterates to the next element (prefix)
 template <class T>
 ncListIterator<T> ncListIterator<T>::operator++() const
 {
-	if (m_pNode)
+	if (node_)
 	{
-		m_pNode = m_pNode->m_pNext;
+		node_ = node_->next_;
 	}
 
 	return *this;
@@ -77,9 +77,9 @@ ncListIterator<T> ncListIterator<T>::operator++(int) const
 	// Create an unmodified copy to return
 	ncListIterator<T> iterator = *this;
 
-	if (m_pNode)
+	if (node_)
 	{
-		m_pNode = m_pNode->m_pNext;
+		node_ = node_->next_;
 	}
 
 	return iterator;
@@ -89,9 +89,9 @@ ncListIterator<T> ncListIterator<T>::operator++(int) const
 template <class T>
 ncListIterator<T> ncListIterator<T>::operator--() const
 {
-	if (m_pNode)
+	if (node_)
 	{
-		m_pNode = m_pNode->m_pPrevious;
+		node_ = node_->previous_;
 	}
 
 	return *this;
@@ -104,9 +104,9 @@ ncListIterator<T> ncListIterator<T>::operator--(int) const
 	// Create an unmodified copy to return
 	ncListIterator<T> iterator = *this;
 
-	if (m_pNode)
+	if (node_)
 	{
-		m_pNode = m_pNode->m_pPrevious;
+		node_ = node_->previous_;
 	}
 
 	return iterator;

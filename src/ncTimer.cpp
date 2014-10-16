@@ -17,14 +17,14 @@
 ///////////////////////////////////////////////////////////
 
 #ifdef _WIN32
-	bool ncTimer::s_bHasPerfCounter = false;
+	bool ncTimer::hasPerfCounter_ = false;
 #elif !defined(__APPLE__)
-	bool ncTimer::s_bHasMonotonicClock = false;
+	bool ncTimer::hasMonotonicClock_ = false;
 #endif
 
-bool ncTimer::s_bIsInitialized = false;
-unsigned long int ncTimer::s_ulFrequency = 0L;
-unsigned long long int ncTimer::s_ullBaseCount = 0LL;
+bool ncTimer::isInitialized_ = false;
+unsigned long int ncTimer::frequency_ = 0L;
+unsigned long long int ncTimer::baseCount_ = 0LL;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -32,7 +32,7 @@ unsigned long long int ncTimer::s_ullBaseCount = 0LL;
 
 /// Empty constructor
 ncTimer::ncTimer()
-	: m_ullStartTime(0LL)
+	: startTime_(0LL)
 {
 
 }
@@ -42,21 +42,21 @@ ncTimer::ncTimer()
 ///////////////////////////////////////////////////////////
 
 /// Returns elapsed time in seconds since base time
-float ncTimer::Now()
+float ncTimer::now()
 {
-	return float(Counter() - s_ullBaseCount) / s_ulFrequency;
+	return float(counter() - baseCount_) / frequency_;
 }
 
 /// Puts the current thread to sleep for the specified number of seconds
-void ncTimer::Sleep(float fS)
+void ncTimer::sleep(float seconds)
 {
 	// From seconds to milliseconds
-	unsigned int uMs = fS * 1000;
+	unsigned int milliseconds = seconds * 1000;
 
 #if defined(_WIN32)
-	SleepEx(uMs, FALSE);
+	SleepEx(milliseconds, FALSE);
 #else
-	usleep(uMs);
+	usleep(milliseconds);
 #endif
 }
 
@@ -65,75 +65,75 @@ void ncTimer::Sleep(float fS)
 ///////////////////////////////////////////////////////////
 
 /// Initializes the static fields
-void ncTimer::Init()
+void ncTimer::init()
 {
 #ifdef _WIN32
-	if (QueryPerformanceFrequency((LARGE_INTEGER *) &s_ulFrequency))
+	if (QueryPerformanceFrequency((LARGE_INTEGER *) &frequency_))
 	{
-		s_bHasPerfCounter = true;
+		hasPerfCounter_ = true;
 	}
 	else
 	{
-		s_ulFrequency = 1000L;
+		frequency_ = 1000L;
 	}
 #elif __APPLE__
 	mach_timebase_info_data_t info;
 	mach_timebase_info(&info);
 
-	s_ulFrequency = (info.denom * 1.0e9L) / info.numer;
+	frequency_ = (info.denom * 1.0e9L) / info.numer;
 #else
 	struct timespec resolution;
 	if (clock_getres(CLOCK_MONOTONIC, &resolution) == 0)
 	{
-		s_ulFrequency = 1.0e9L;
-		s_bHasMonotonicClock = true;
+		frequency_ = 1.0e9L;
+		hasMonotonicClock_ = true;
 	}
 	else
 	{
-		s_ulFrequency = 1.0e6L;
+		frequency_ = 1.0e6L;
 	}
 #endif
 
 	// Counter() must be called after setting the flag
-	s_bIsInitialized = true;
-	s_ullBaseCount = Counter();
+	isInitialized_ = true;
+	baseCount_ = counter();
 }
 
 /// Returns current value of the counter
-unsigned long long int ncTimer::Counter()
+unsigned long long int ncTimer::counter()
 {
-	if (s_bIsInitialized == false)
+	if (isInitialized_ == false)
 	{
-		Init();
+		init();
 	}
 
-	unsigned long long int ullCounter = 0LL;
+	unsigned long long int counter = 0LL;
 
 #ifdef _WIN32
-	if (s_bHasPerfCounter)
+	if (hasPerfCounter_)
 	{
-		QueryPerformanceCounter((LARGE_INTEGER *) &ullCounter);
+		QueryPerformanceCounter((LARGE_INTEGER *) &counter);
 	}
 	else
 	{
-		ullCounter = GetTickCount();
+		counter = GetTickCount();
 	}
 #elif __APPLE__
-	ullCounter = mach_absolute_time();
+	counter = mach_absolute_time();
 #else
-	if (s_bHasMonotonicClock)
+	if (hasMonotonicClock_)
 	{
 		struct timespec now;
 		clock_gettime(CLOCK_MONOTONIC, &now);
-		ullCounter = (unsigned long long int)now.tv_sec * s_ulFrequency + (unsigned long long int)now.tv_nsec;
+		counter = (unsigned long long int)now.tv_sec * frequency_ + (unsigned long long int)now.tv_nsec;
 	}
 	else
 	{
 		struct timeval now;
 		gettimeofday(&now, NULL);
-		ullCounter = now.tv_sec * s_ulFrequency + now.tv_usec;
+		counter = now.tv_sec * frequency_ + now.tv_usec;
 	}
 #endif
 
-	return ullCounter;
+	return counter;
 }

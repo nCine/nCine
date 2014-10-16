@@ -8,21 +8,21 @@
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-ncIInputEventHandler* ncIInputManager::s_pInputEventHandler = NULL;
-ASensorManager* ncAndroidInputManager::s_pSensorManager = NULL;
-const ASensor* ncAndroidInputManager::s_pAccelerometerSensor = NULL;
-ASensorEventQueue* ncAndroidInputManager::s_pSensorEventQueue = NULL;
-bool ncAndroidInputManager::s_bAccelerometerEnabled = false;
-ncAccelerometerEvent ncAndroidInputManager::s_accelerometerEvent;
-ncTouchEvent ncAndroidInputManager::s_touchEvent;
-ncKeyboardEvent ncAndroidInputManager::s_keyboardEvent;
+ncIInputEventHandler* ncIInputManager::inputEventHandler_ = NULL;
+ASensorManager* ncAndroidInputManager::sensorManager_ = NULL;
+const ASensor* ncAndroidInputManager::accelerometerSensor_ = NULL;
+ASensorEventQueue* ncAndroidInputManager::sensorEventQueue_ = NULL;
+bool ncAndroidInputManager::accelerometerEnabled_ = false;
+ncAccelerometerEvent ncAndroidInputManager::accelerometerEvent_;
+ncTouchEvent ncAndroidInputManager::touchEvent_;
+ncKeyboardEvent ncAndroidInputManager::keyboardEvent_;
 
-short int ncIInputManager::s_iMaxAxisValue = 32767;
-ncAndroidJoystickState ncAndroidInputManager::s_joystickStates[s_uMaxNumJoysticks];
-ncJoyButtonEvent ncAndroidInputManager::s_joyButtonEvent;
-ncJoyAxisEvent ncAndroidInputManager::s_joyAxisEvent;
-ncTimer ncAndroidInputManager::s_joyCheckTimer;
-const int ncAndroidJoystickState::s_vAxesToMap[ncAndroidJoystickState::s_iNumAxesToMap] =
+short int ncIInputManager::MaxAxisValue = 32767;
+ncAndroidJoystickState ncAndroidInputManager::joystickStates_[MaxNumJoysticks];
+ncJoyButtonEvent ncAndroidInputManager::joyButtonEvent_;
+ncJoyAxisEvent ncAndroidInputManager::joyAxisEvent_;
+ncTimer ncAndroidInputManager::joyCheckTimer_;
+const int ncAndroidJoystickState::AxesToMap[ncAndroidJoystickState::NumAxesToMap] =
 {
 	AMOTION_EVENT_AXIS_X,			AMOTION_EVENT_AXIS_Y,
 	AMOTION_EVENT_AXIS_LTRIGGER,	AMOTION_EVENT_AXIS_Z,
@@ -36,25 +36,25 @@ const int ncAndroidJoystickState::s_vAxesToMap[ncAndroidJoystickState::s_iNumAxe
 ///////////////////////////////////////////////////////////
 
 ncAndroidJoystickState::ncAndroidJoystickState()
-	: m_iDeviceId(-1), m_iNumButtons(0), m_iNumAxes(0), m_bHasDPad(false)
+	: deviceId_(-1), numButtons_(0), numAxes_(0), hasDPad_(false)
 {
-	m_vName[0] = '\0';
-	for (int i = 0; i < s_iMaxButtons; i++)
+	name_[0] = '\0';
+	for (int i = 0; i < MaxButtons; i++)
 	{
-		m_vButtonsMapping[i] = 0;
-		m_bButtons[i] = false;
+		buttonsMapping_[i] = 0;
+		buttons_[i] = false;
 	}
-	for (int i = 0; i < s_iMaxAxes; i++)
+	for (int i = 0; i < MaxAxes; i++)
 	{
-		m_vAxesMapping[i] = 0;
-		m_fAxisValues[i] = 0.0f;
+		axesMapping_[i] = 0;
+		axisValues_[i] = 0.0f;
 	}
 }
 
 ncAndroidInputManager::ncAndroidInputManager(struct android_app* state)
 {
-	InitAccelerometerSensor(state);
-	CheckConnectedJoysticks();
+	initAccelerometerSensor(state);
+	checkConnectedJoysticks();
 }
 
 ///////////////////////////////////////////////////////////
@@ -63,62 +63,62 @@ ncAndroidInputManager::ncAndroidInputManager(struct android_app* state)
 
 /// Enables the accelerometer sensor
 /*! It is called by EnableAccelerometer() and when the application gains focus */
-void ncAndroidInputManager::EnableAccelerometerSensor()
+void ncAndroidInputManager::enableAccelerometerSensor()
 {
-	if (s_bAccelerometerEnabled && s_pAccelerometerSensor != NULL)
+	if (accelerometerEnabled_ && accelerometerSensor_ != NULL)
 	{
-		ASensorEventQueue_enableSensor(s_pSensorEventQueue, s_pAccelerometerSensor);
+		ASensorEventQueue_enableSensor(sensorEventQueue_, accelerometerSensor_);
 		// 60 events per second
-		ASensorEventQueue_setEventRate(s_pSensorEventQueue, s_pAccelerometerSensor, (1000L / 60) * 1000);
+		ASensorEventQueue_setEventRate(sensorEventQueue_, accelerometerSensor_, (1000L / 60) * 1000);
 	}
 }
 
 /// Disables the accelerometer sensor
 /*! It is called by EnableAccelerometer() and when the application loses focus */
-void ncAndroidInputManager::DisableAccelerometerSensor()
+void ncAndroidInputManager::disableAccelerometerSensor()
 {
-	if (s_bAccelerometerEnabled && s_pAccelerometerSensor != NULL)
+	if (accelerometerEnabled_ && accelerometerSensor_ != NULL)
 	{
-		ASensorEventQueue_disableSensor(s_pSensorEventQueue, s_pAccelerometerSensor);
+		ASensorEventQueue_disableSensor(sensorEventQueue_, accelerometerSensor_);
 	}
 }
 
 /// Allows the application to make use of the accelerometer
 /*! Activates the sensor and raises the flag needed for application focus handling */
-void ncAndroidInputManager::EnableAccelerometer(bool bEnabled)
+void ncAndroidInputManager::enableAccelerometer(bool enabled)
 {
-	if (bEnabled)
+	if (enabled)
 	{
-		EnableAccelerometerSensor();
+		enableAccelerometerSensor();
 	}
 	else
 	{
-		DisableAccelerometerSensor();
+		disableAccelerometerSensor();
 	}
 
-	s_bAccelerometerEnabled = bEnabled;
+	accelerometerEnabled_ = enabled;
 }
 
 /// Parses and Android sensor event related to the accelerometer
-void ncAndroidInputManager::ParseAccelerometerEvent()
+void ncAndroidInputManager::parseAccelerometerEvent()
 {
-	if (s_bAccelerometerEnabled && s_pAccelerometerSensor != NULL)
+	if (accelerometerEnabled_ && accelerometerSensor_ != NULL)
 	{
 		ASensorEvent event;
-		while (ASensorEventQueue_getEvents(s_pSensorEventQueue, &event, 1) > 0)
+		while (ASensorEventQueue_getEvents(sensorEventQueue_, &event, 1) > 0)
 		{
-			s_accelerometerEvent.x = event.acceleration.x;
-			s_accelerometerEvent.y = event.acceleration.y;
-			s_accelerometerEvent.z = event.acceleration.z;
-			s_pInputEventHandler->OnAcceleration(s_accelerometerEvent);
+			accelerometerEvent_.x = event.acceleration.x;
+			accelerometerEvent_.y = event.acceleration.y;
+			accelerometerEvent_.z = event.acceleration.z;
+			inputEventHandler_->onAcceleration(accelerometerEvent_);
 		}
 	}
 }
 
 /// Parses an Android input event
-void ncAndroidInputManager::ParseEvent(const AInputEvent *event)
+void ncAndroidInputManager::parseEvent(const AInputEvent *event)
 {
-	if (s_pInputEventHandler == NULL)
+	if (inputEventHandler_ == NULL)
 	{
 		return;
 	}
@@ -128,36 +128,36 @@ void ncAndroidInputManager::ParseEvent(const AInputEvent *event)
 		(AInputEvent_getSource(event) & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK ||
 		(AInputEvent_getSource(event) & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD)
 	{
-		int iDeviceId = AInputEvent_getDeviceId(event);
-		int iJoyId = FindJoyId(iDeviceId);
+		int deviceId = AInputEvent_getDeviceId(event);
+		int joyId = findJoyId(deviceId);
 
 		// If the index is valid then the structure can be updated
-		if (iJoyId > -1)
+		if (joyId > -1)
 		{
-			s_joystickStates[iJoyId].m_iDeviceId = iDeviceId;
+			joystickStates_[joyId].deviceId_ = deviceId;
 
 			if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
 			{
-				int iKeyCode = AKeyEvent_getKeyCode(event);
-				int iBtnIndex = -1;
-				if (iKeyCode >= AKEYCODE_BUTTON_A && iKeyCode < AKEYCODE_ESCAPE)
+				int keyCode = AKeyEvent_getKeyCode(event);
+				int buttonIndex = -1;
+				if (keyCode >= AKEYCODE_BUTTON_A && keyCode < AKEYCODE_ESCAPE)
 				{
-					iBtnIndex = s_joystickStates[iJoyId].m_vButtonsMapping[iKeyCode - AKEYCODE_BUTTON_A];
+					buttonIndex = joystickStates_[joyId].buttonsMapping_[keyCode - AKEYCODE_BUTTON_A];
 				}
 
-				if (iBtnIndex > -1)
+				if (buttonIndex > -1)
 				{
-					s_joyButtonEvent.joyId = iJoyId;
-					s_joyButtonEvent.buttonId = iBtnIndex;
+					joyButtonEvent_.joyId = joyId;
+					joyButtonEvent_.buttonId = buttonIndex;
 					switch (AKeyEvent_getAction(event))
 					{
 						case AKEY_EVENT_ACTION_DOWN:
-							s_joystickStates[iJoyId].m_bButtons[iBtnIndex] = true;
-							s_pInputEventHandler->OnJoyButtonPressed(s_joyButtonEvent);
+							joystickStates_[joyId].buttons_[buttonIndex] = true;
+							inputEventHandler_->onJoyButtonPressed(joyButtonEvent_);
 							break;
 						case AKEY_EVENT_ACTION_UP:
-							s_joystickStates[iJoyId].m_bButtons[iBtnIndex] = false;
-							s_pInputEventHandler->OnJoyButtonReleased(s_joyButtonEvent);
+							joystickStates_[joyId].buttons_[buttonIndex] = false;
+							inputEventHandler_->onJoyButtonReleased(joyButtonEvent_);
 							break;
 						case AKEY_EVENT_ACTION_MULTIPLE:
 							break;
@@ -165,87 +165,87 @@ void ncAndroidInputManager::ParseEvent(const AInputEvent *event)
 				}
 
 				// Handling a D-Pad button event as an axis value
-				if (iKeyCode >= AKEYCODE_DPAD_UP && iKeyCode < AKEYCODE_DPAD_CENTER)
+				if (keyCode >= AKEYCODE_DPAD_UP && keyCode < AKEYCODE_DPAD_CENTER)
 				{
-					int iAxisIdx = -1;
-					float fAxisValue = 1.0f;
-					switch (iKeyCode)
+					int axisIndex = -1;
+					float axisValue = 1.0f;
+					switch (keyCode)
 					{
 						case AKEYCODE_DPAD_UP:
-							iAxisIdx = s_joystickStates[iJoyId].m_iNumAxes - 1;
-							fAxisValue = -1.0f;
+							axisIndex = joystickStates_[joyId].numAxes_ - 1;
+							axisValue = -1.0f;
 							break;
 						case AKEYCODE_DPAD_DOWN:
-							iAxisIdx = s_joystickStates[iJoyId].m_iNumAxes - 1;
-							fAxisValue = 1.0f;
+							axisIndex = joystickStates_[joyId].numAxes_ - 1;
+							axisValue = 1.0f;
 							break;
 						case AKEYCODE_DPAD_LEFT:
-							iAxisIdx = s_joystickStates[iJoyId].m_iNumAxes - 2;
-							fAxisValue = -1.0f;
+							axisIndex = joystickStates_[joyId].numAxes_ - 2;
+							axisValue = -1.0f;
 							break;
 						case AKEYCODE_DPAD_RIGHT:
-							iAxisIdx = s_joystickStates[iJoyId].m_iNumAxes - 2;
-							fAxisValue = 1.0f;
+							axisIndex = joystickStates_[joyId].numAxes_ - 2;
+							axisValue = 1.0f;
 							break;
 					}
 
 					if (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN)
 					{
-						s_joystickStates[iJoyId].m_fAxisValues[iAxisIdx] = fAxisValue;
+						joystickStates_[joyId].axisValues_[axisIndex] = axisValue;
 					}
 					else
 					{
-						s_joystickStates[iJoyId].m_fAxisValues[iAxisIdx] = 0.0f;
+						joystickStates_[joyId].axisValues_[axisIndex] = 0.0f;
 					}
 
-					s_joyAxisEvent.joyId = iJoyId;
-					s_joyAxisEvent.axisId = iAxisIdx;
-					s_joyAxisEvent.value = fAxisValue * s_iMaxAxisValue;
-					s_joyAxisEvent.normValue = fAxisValue;
-					s_pInputEventHandler->OnJoyAxisMoved(s_joyAxisEvent);
+					joyAxisEvent_.joyId = joyId;
+					joyAxisEvent_.axisId = axisIndex;
+					joyAxisEvent_.value = axisValue * MaxAxisValue;
+					joyAxisEvent_.normValue = axisValue;
+					inputEventHandler_->onJoyAxisMoved(joyAxisEvent_);
 				}
 			}
 			else if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
 			{
-				s_joyAxisEvent.joyId = iJoyId;
+				joyAxisEvent_.joyId = joyId;
 
-				int iNumAxesNoDPad = s_joystickStates[iJoyId].m_iNumAxes;
-				if (s_joystickStates[iJoyId].m_bHasDPad)
+				int numAxesNoDPad = joystickStates_[joyId].numAxes_;
+				if (joystickStates_[joyId].hasDPad_)
 				{
-					iNumAxesNoDPad -= 2;
+					numAxesNoDPad -= 2;
 				}
-				for (int i = 0; i < iNumAxesNoDPad; i++)
+				for (int i = 0; i < numAxesNoDPad; i++)
 				{
-					int iAxis = s_joystickStates[iJoyId].m_vAxesMapping[i];
-					float fAxisValue = AMotionEvent_getAxisValue(event, iAxis, 0);
-					s_joystickStates[iJoyId].m_fAxisValues[i] = fAxisValue;
+					int axis = joystickStates_[joyId].axesMapping_[i];
+					float axisValue = AMotionEvent_getAxisValue(event, axis, 0);
+					joystickStates_[joyId].axisValues_[i] = axisValue;
 
-					s_joyAxisEvent.axisId = iAxis;
-					s_joyAxisEvent.value = fAxisValue * s_iMaxAxisValue;
-					s_joyAxisEvent.normValue = fAxisValue;
-					s_pInputEventHandler->OnJoyAxisMoved(s_joyAxisEvent);
+					joyAxisEvent_.axisId = axis;
+					joyAxisEvent_.value = axisValue * MaxAxisValue;
+					joyAxisEvent_.normValue = axisValue;
+					inputEventHandler_->onJoyAxisMoved(joyAxisEvent_);
 				}
 			}
 		}
 		else
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncAndroidInputManager::ParseEvent - No available joystick id for device %d, dropping button event", iDeviceId);
+			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncAndroidInputManager::parseEvent - No available joystick id for device %d, dropping button event", deviceId);
 		}
 	}
 	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD &&
 			  AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
 	{
-		s_keyboardEvent.scancode = AKeyEvent_getScanCode(event);
-		s_keyboardEvent.sym = ncKeySym(AKeyEvent_getKeyCode(event));
-		s_keyboardEvent.mod = AKeyEvent_getMetaState(event);
+		keyboardEvent_.scancode = AKeyEvent_getScanCode(event);
+		keyboardEvent_.sym = ncKeySym(AKeyEvent_getKeyCode(event));
+		keyboardEvent_.mod = AKeyEvent_getMetaState(event);
 
 		switch (AKeyEvent_getAction(event))
 		{
 			case AKEY_EVENT_ACTION_DOWN:
-				s_pInputEventHandler->OnKeyPressed(s_keyboardEvent);
+				inputEventHandler_->onKeyPressed(keyboardEvent_);
 				break;
 			case AKEY_EVENT_ACTION_UP:
-				s_pInputEventHandler->OnKeyReleased(s_keyboardEvent);
+				inputEventHandler_->onKeyReleased(keyboardEvent_);
 				break;
 			case AKEY_EVENT_ACTION_MULTIPLE:
 				break;
@@ -254,56 +254,56 @@ void ncAndroidInputManager::ParseEvent(const AInputEvent *event)
 	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_TOUCHSCREEN) == AINPUT_SOURCE_TOUCHSCREEN &&
 			  AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
 	{
-		s_touchEvent.count = AMotionEvent_getPointerCount(event);
-		s_touchEvent.id = AMotionEvent_getPointerId(event, 0);
-		s_touchEvent.x = AMotionEvent_getX(event, 0);
-		s_touchEvent.y = ncApplication::Height() - AMotionEvent_getY(event, 0);
-		s_touchEvent.id2 = AMotionEvent_getPointerId(event, 1);
-		s_touchEvent.x2 = AMotionEvent_getX(event, 1);
-		s_touchEvent.y2 = ncApplication::Height() - AMotionEvent_getY(event, 1);
+		touchEvent_.count = AMotionEvent_getPointerCount(event);
+		touchEvent_.id = AMotionEvent_getPointerId(event, 0);
+		touchEvent_.x = AMotionEvent_getX(event, 0);
+		touchEvent_.y = ncApplication::height() - AMotionEvent_getY(event, 0);
+		touchEvent_.id2 = AMotionEvent_getPointerId(event, 1);
+		touchEvent_.x2 = AMotionEvent_getX(event, 1);
+		touchEvent_.y2 = ncApplication::height() - AMotionEvent_getY(event, 1);
 
 		switch (AMotionEvent_getAction(event))
 		{
 			case AMOTION_EVENT_ACTION_DOWN:
-				s_pInputEventHandler->OnTouchDown(s_touchEvent);
+				inputEventHandler_->onTouchDown(touchEvent_);
 				break;
 			case AMOTION_EVENT_ACTION_UP:
-				s_pInputEventHandler->OnTouchUp(s_touchEvent);
+				inputEventHandler_->onTouchUp(touchEvent_);
 				break;
 			case AMOTION_EVENT_ACTION_MOVE:
-				s_pInputEventHandler->OnTouchMove(s_touchEvent);
+				inputEventHandler_->onTouchMove(touchEvent_);
 				break;
 			case AMOTION_EVENT_ACTION_POINTER_DOWN:
-				s_pInputEventHandler->OnSecondaryTouchDown(s_touchEvent);
+				inputEventHandler_->onSecondaryTouchDown(touchEvent_);
 				break;
 			case AMOTION_EVENT_ACTION_POINTER_UP:
-				s_pInputEventHandler->OnSecondaryTouchUp(s_touchEvent);
+				inputEventHandler_->onSecondaryTouchUp(touchEvent_);
 				break;
 		}
 	}
 }
 
-bool ncAndroidInputManager::isJoyPresent(int iJoyId) const
+bool ncAndroidInputManager::isJoyPresent(int joyId) const
 {
-	bool bIsPresent = false;
+	bool isPresent = false;
 
-	if (iJoyId >= 0 && iJoyId < int(s_uMaxNumJoysticks))
+	if (joyId >= 0 && joyId < int(MaxNumJoysticks))
 	{
-		int iDeviceId = s_joystickStates[iJoyId].m_iDeviceId;
-		if (iDeviceId > -1)
+		int deviceId = joystickStates_[joyId].deviceId_;
+		if (deviceId > -1)
 		{
-			bIsPresent = true;
+			isPresent = true;
 		}
 	}
 
-	return bIsPresent;
+	return isPresent;
 }
 
-const char *ncAndroidInputManager::JoyName(int iJoyId) const
+const char *ncAndroidInputManager::joyName(int joyId) const
 {
-	if (isJoyPresent(iJoyId))
+	if (isJoyPresent(joyId))
 	{
-		return s_joystickStates[iJoyId].m_vName;
+		return joystickStates_[joyId].name_;
 	}
 	else
 	{
@@ -311,35 +311,35 @@ const char *ncAndroidInputManager::JoyName(int iJoyId) const
 	}
 }
 
-int ncAndroidInputManager::JoyNumButtons(int iJoyId) const
+int ncAndroidInputManager::joyNumButtons(int joyId) const
 {
-	int iNumButtons = -1;
+	int numButtons = -1;
 
-	if (isJoyPresent(iJoyId))
+	if (isJoyPresent(joyId))
 	{
-		iNumButtons = s_joystickStates[iJoyId].m_iNumButtons;
+		numButtons = joystickStates_[joyId].numButtons_;
 	}
 
-	return iNumButtons;
+	return numButtons;
 }
 
-int ncAndroidInputManager::JoyNumAxes(int iJoyId) const
+int ncAndroidInputManager::joyNumAxes(int joyId) const
 {
-	int iNumAxes = -1;
+	int numAxes = -1;
 
-	if (isJoyPresent(iJoyId))
+	if (isJoyPresent(joyId))
 	{
-		iNumAxes = s_joystickStates[iJoyId].m_iNumAxes;
+		numAxes = joystickStates_[joyId].numAxes_;
 	}
 
-	return iNumAxes;
+	return numAxes;
 }
 
-bool ncAndroidInputManager::isJoyButtonPressed(int iJoyId, int iButtonId) const
+bool ncAndroidInputManager::isJoyButtonPressed(int joyId, int buttonId) const
 {
-	if (isJoyPresent(iJoyId) && iButtonId >= 0 && iButtonId < JoyNumButtons(iJoyId))
+	if (isJoyPresent(joyId) && buttonId >= 0 && buttonId < joyNumButtons(joyId))
 	{
-		return s_joystickStates[iJoyId].m_bButtons[iButtonId];
+		return joystickStates_[joyId].buttons_[buttonId];
 	}
 	else
 	{
@@ -347,24 +347,24 @@ bool ncAndroidInputManager::isJoyButtonPressed(int iJoyId, int iButtonId) const
 	}
 }
 
-short int ncAndroidInputManager::JoyAxisValue(int iJoyId, int iAxisId) const
+short int ncAndroidInputManager::joyAxisValue(int joyId, int axisId) const
 {
 	// If the joystick is not present the returned value is zero
-	short int iAxisValue = JoyAxisNormValue(iJoyId, iAxisId) * s_iMaxAxisValue;
+	short int axisValue = joyAxisNormValue(joyId, axisId) * MaxAxisValue;
 
-	return iAxisValue;
+	return axisValue;
 }
 
-float ncAndroidInputManager::JoyAxisNormValue(int iJoyId, int iAxisId) const
+float ncAndroidInputManager::joyAxisNormValue(int joyId, int axisId) const
 {
-	float fAxisValue = 0.0f;
+	float axisValue = 0.0f;
 
-	if (isJoyPresent(iJoyId) && iAxisId >= 0 && iAxisId < JoyNumAxes(iJoyId))
+	if (isJoyPresent(joyId) && axisId >= 0 && axisId < joyNumAxes(joyId))
 	{
-		fAxisValue = s_joystickStates[iJoyId].m_fAxisValues[iAxisId];
+		axisValue = joystickStates_[joyId].axisValues_[axisId];
 	}
 
-	return fAxisValue;
+	return axisValue;
 }
 
 
@@ -374,76 +374,76 @@ float ncAndroidInputManager::JoyAxisNormValue(int iJoyId, int iAxisId) const
 ///////////////////////////////////////////////////////////
 
 /// Initializes the accelerometer sensor
-void ncAndroidInputManager::InitAccelerometerSensor(android_app *state)
+void ncAndroidInputManager::initAccelerometerSensor(android_app *state)
 {
 	// Prepare to monitor accelerometer
-	s_pSensorManager = ASensorManager_getInstance();
-	s_pAccelerometerSensor = ASensorManager_getDefaultSensor(s_pSensorManager,
+	sensorManager_ = ASensorManager_getInstance();
+	accelerometerSensor_ = ASensorManager_getDefaultSensor(sensorManager_,
 		ASENSOR_TYPE_ACCELEROMETER);
-	s_pSensorEventQueue = ASensorManager_createEventQueue(s_pSensorManager,
+	sensorEventQueue_ = ASensorManager_createEventQueue(sensorManager_,
 		state->looper, LOOPER_ID_USER, NULL, NULL);
 }
 
 /// Updates joystick states after connections and disconnections
-void ncAndroidInputManager::UpdateJoystickConnections()
+void ncAndroidInputManager::updateJoystickConnections()
 {
-	if (s_joyCheckTimer.Interval() >= s_joyCheckRate)
+	if (joyCheckTimer_.interval() >= JoyCheckRate)
 	{
-		CheckDisconnectedJoysticks();
-		CheckConnectedJoysticks();
+		checkDisconnectedJoysticks();
+		checkConnectedJoysticks();
 
-		s_joyCheckTimer.Start();
+		joyCheckTimer_.start();
 	}
 }
 
 /// Checks if a previously connected joystick has been disconnected
-void ncAndroidInputManager::CheckDisconnectedJoysticks()
+void ncAndroidInputManager::checkDisconnectedJoysticks()
 {
-	for (unsigned int i = 0; i < s_uMaxNumJoysticks; i++)
+	for (unsigned int i = 0; i < MaxNumJoysticks; i++)
 	{
-		int iDeviceId = s_joystickStates[i].m_iDeviceId;
-		if (iDeviceId > -1 && isDeviceConnected(iDeviceId) == false)
+		int deviceId = joystickStates_[i].deviceId_;
+		if (deviceId > -1 && isDeviceConnected(deviceId) == false)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::CheckDisconnectedJoysticks - Joystick %d (device %d) \"%s\" has been disconnected",
-				i, iDeviceId, s_joystickStates[i].m_vName);
-			s_joystickStates[i].m_iDeviceId = -1;
+			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::checkDisconnectedJoysticks - Joystick %d (device %d) \"%s\" has been disconnected",
+				i, deviceId, joystickStates_[i].name_);
+			joystickStates_[i].deviceId_ = -1;
 		}
 	}
 }
 
 /// Checks if a new joystick has been connected
-void ncAndroidInputManager::CheckConnectedJoysticks()
+void ncAndroidInputManager::checkConnectedJoysticks()
 {
-	// InputDevice.getDeviceIds() will not fill an array longer than iMaxDevs
-	const int iMaxDevs = s_uMaxNumJoysticks * 2;
-	int iDevIds[iMaxDevs];
+	// InputDevice.getDeviceIds() will not fill an array longer than MaxDevices
+	const int MaxDevices = MaxNumJoysticks * 2;
+	int deviceIds[MaxDevices];
 
-	int iConnectedJoys = 0;
-	for (unsigned int i = 0; i < s_uMaxNumJoysticks; i++)
+	int connectedJoys = 0;
+	for (unsigned int i = 0; i < MaxNumJoysticks; i++)
 	{
-		if (s_joystickStates[i].m_iDeviceId > -1)
+		if (joystickStates_[i].deviceId_ > -1)
 		{
-			iConnectedJoys++;
+			connectedJoys++;
 		}
 	}
 
-	int iConnectedDevs = ncAndroidJNIClass_InputDevice::getDeviceIds(iDevIds, iMaxDevs);
-	for (int i = 0; i < iMaxDevs && i < iConnectedDevs; i++)
+	int connectedDevices = ncAndroidJNIClass_InputDevice::getDeviceIds(deviceIds, MaxDevices);
+	for (int i = 0; i < MaxDevices && i < connectedDevices; i++)
 	{
-		ncAndroidJNIClass_InputDevice inputDevice = ncAndroidJNIClass_InputDevice::getDevice(iDevIds[i]);
+		ncAndroidJNIClass_InputDevice inputDevice = ncAndroidJNIClass_InputDevice::getDevice(deviceIds[i]);
 		int sources = inputDevice.getSources();
 
 		if (((sources & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD) ||
 			((sources & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK))
 		{
-			int iJoyId = FindJoyId(iDevIds[i]);
-			if (iJoyId > -1)
+			int joyId = findJoyId(deviceIds[i]);
+			if (joyId > -1)
 			{
-				s_joystickStates[iJoyId].m_iDeviceId = iDevIds[i];
+				joystickStates_[joyId].deviceId_ = deviceIds[i];
 			}
 
-			iConnectedJoys++;
-			if (iConnectedJoys >= int(s_uMaxNumJoysticks))
+			connectedJoys++;
+			if (connectedJoys >= int(MaxNumJoysticks))
 			{
 				break;
 			}
@@ -451,143 +451,143 @@ void ncAndroidInputManager::CheckConnectedJoysticks()
 	}
 }
 
-int ncAndroidInputManager::FindJoyId(int iDeviceId)
+int ncAndroidInputManager::findJoyId(int deviceId)
 {
-	int iJoyId = -1;
+	int joyId = -1;
 
-	for (unsigned int i = 0; i < s_uMaxNumJoysticks; i++)
+	for (unsigned int i = 0; i < MaxNumJoysticks; i++)
 	{
 		// Keeping track of the first unused joystick id, in
 		// case this is the first event from a new joystick
-		if (s_joystickStates[i].m_iDeviceId < 0 && iJoyId == -1)
+		if (joystickStates_[i].deviceId_ < 0 && joyId == -1)
 		{
-			iJoyId = i;
+			joyId = i;
 		}
 		// If the joystick is already known then the loop ends
-		else if (s_joystickStates[i].m_iDeviceId == iDeviceId)
+		else if (joystickStates_[i].deviceId_ == deviceId)
 		{
-			iJoyId = i;
+			joyId = i;
 			break;
 		}
 	}
 
-	if (iJoyId >= -1 && s_joystickStates[iJoyId].m_iDeviceId != iDeviceId)
+	if (joyId >= -1 && joystickStates_[joyId].deviceId_ != deviceId)
 	{
-		DeviceInfo(iDeviceId, iJoyId);
-		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::FindJoyId - Joystick %d (device %d) \"%s\" has been connected - %d axes, %d buttons",
-			iJoyId, iDeviceId, s_joystickStates[iJoyId].m_vName, s_joystickStates[iJoyId].m_iNumAxes, s_joystickStates[iJoyId].m_iNumButtons);
+		deviceInfo(deviceId, joyId);
+		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::findJoyId - Joystick %d (device %d) \"%s\" has been connected - %d axes, %d buttons",
+			joyId, deviceId, joystickStates_[joyId].name_, joystickStates_[joyId].numAxes_, joystickStates_[joyId].numButtons_);
 	}
 
-	return iJoyId;
+	return joyId;
 }
 
-bool ncAndroidInputManager::isDeviceConnected(int iDeviceId)
+bool ncAndroidInputManager::isDeviceConnected(int deviceId)
 {
-	bool bIsConnected = false;
+	bool isConnected = false;
 
-	ncAndroidJNIClass_InputDevice inputDevice = ncAndroidJNIClass_InputDevice::getDevice(iDeviceId);
+	ncAndroidJNIClass_InputDevice inputDevice = ncAndroidJNIClass_InputDevice::getDevice(deviceId);
 	if (inputDevice.isNull() == false)
 	{
-		bIsConnected = true;
+		isConnected = true;
 	}
 
-	return bIsConnected;
+	return isConnected;
 }
 
-void ncAndroidInputManager::DeviceInfo(int iDeviceId, int iJoyId)
+void ncAndroidInputManager::deviceInfo(int deviceId, int joyId)
 {
-	const int iMaxStrLength = 256;
-	char vDevInfoString[iMaxStrLength];
+	const int MaxStringLength = 256;
+	char deviceInfoString[MaxStringLength];
 
-	ncAndroidJNIClass_InputDevice inputDevice = ncAndroidJNIClass_InputDevice::getDevice(iDeviceId);
+	ncAndroidJNIClass_InputDevice inputDevice = ncAndroidJNIClass_InputDevice::getDevice(deviceId);
 	if (inputDevice.isNull() == false)
 	{
 		// InputDevice.getName()
-		inputDevice.getName(s_joystickStates[iJoyId].m_vName, ncAndroidJoystickState::s_uMaxNameLength);
+		inputDevice.getName(joystickStates_[joyId].name_, ncAndroidJoystickState::MaxNameLength);
 
-		const int iFirstButton = AKEYCODE_BUTTON_A;
-		const int iLastButton = AKEYCODE_ESCAPE;
-		bool vCheckedButtons[iLastButton - iFirstButton];
-		int iNumButtons = 0;
-		if (ncAndroidJNIHelper::SDKVersion() >= 19 && __ANDROID_API__ >= 19)
+		const int FirstButton = AKEYCODE_BUTTON_A;
+		const int LastButton = AKEYCODE_ESCAPE;
+		bool checkedButtons[LastButton - FirstButton];
+		int numButtons = 0;
+		if (ncAndroidJNIHelper::sdkVersion() >= 19 && __ANDROID_API__ >= 19)
 		{
-			int vButtonsToCheck[iLastButton - iFirstButton];
-			for (int i = 0; i < iLastButton - iFirstButton; i++)
+			int buttonsToCheck[LastButton - FirstButton];
+			for (int i = 0; i < LastButton - FirstButton; i++)
 			{
-				vButtonsToCheck[i] = iFirstButton + i;
+				buttonsToCheck[i] = FirstButton + i;
 			}
 
 			// InoutDevice.hasKeys()
-			inputDevice.hasKeys(vButtonsToCheck, iLastButton - iFirstButton, vCheckedButtons);
+			inputDevice.hasKeys(buttonsToCheck, LastButton - FirstButton, checkedButtons);
 		}
 
-		memset(vDevInfoString, 0, iMaxStrLength);
-		for (int iButton = iFirstButton; iButton < iLastButton; iButton++)
+		memset(deviceInfoString, 0, MaxStringLength);
+		for (int button = FirstButton; button < LastButton; button++)
 		{
-			bool bHasKey;
+			bool hasKey;
 
-			if (ncAndroidJNIHelper::SDKVersion() >= 19 && __ANDROID_API__ >= 19)
+			if (ncAndroidJNIHelper::sdkVersion() >= 19 && __ANDROID_API__ >= 19)
 			{
-				bHasKey = vCheckedButtons[iButton - iFirstButton];
+				hasKey = checkedButtons[button - FirstButton];
 			}
 			else // KeyCharacterMap.deviceHasKey()
 			{
-				bHasKey = ncAndroidJNIClass_KeyCharacterMap::deviceHasKey(iButton);
+				hasKey = ncAndroidJNIClass_KeyCharacterMap::deviceHasKey(button);
 			}
 
-			if (bHasKey)
+			if (hasKey)
 			{
-				s_joystickStates[iJoyId].m_vButtonsMapping[iButton - iFirstButton] = iNumButtons;
-				sprintf(&vDevInfoString[strlen(vDevInfoString)], "%d:%d ", iNumButtons, iButton);
-				iNumButtons++;
+				joystickStates_[joyId].buttonsMapping_[button - FirstButton] = numButtons;
+				sprintf(&deviceInfoString[strlen(deviceInfoString)], "%d:%d ", numButtons, button);
+				numButtons++;
 			}
 			else
 			{
-				s_joystickStates[iJoyId].m_vButtonsMapping[iButton - iFirstButton] = -1;
+				joystickStates_[joyId].buttonsMapping_[button - FirstButton] = -1;
 			}
 
-			if (iNumButtons >= ncAndroidJoystickState::s_iMaxButtons)
+			if (numButtons >= ncAndroidJoystickState::MaxButtons)
 			{
 				break;
 			}
 		}
-		s_joystickStates[iJoyId].m_iNumButtons = iNumButtons;
-		ncServiceLocator::Logger().Write(ncILogger::LOG_VERBOSE, (const char *)"ncAndroidInputManager::DeviceInfo (%d, %d) - Buttons %s", iDeviceId, iJoyId, vDevInfoString);
+		joystickStates_[joyId].numButtons_ = numButtons;
+		ncServiceLocator::logger().write(ncILogger::LOG_VERBOSE, (const char *)"ncAndroidInputManager::deviceInfo (%d, %d) - Buttons %s", deviceId, joyId, deviceInfoString);
 
-		s_joystickStates[iJoyId].m_bHasDPad = true;
-		for (int iButton = AKEYCODE_DPAD_UP; iButton < AKEYCODE_DPAD_CENTER; iButton++)
+		joystickStates_[joyId].hasDPad_ = true;
+		for (int button = AKEYCODE_DPAD_UP; button < AKEYCODE_DPAD_CENTER; button++)
 		{
-			bool bHasKey = ncAndroidJNIClass_KeyCharacterMap::deviceHasKey(iButton);
-			if (bHasKey == false)
+			bool hasKey = ncAndroidJNIClass_KeyCharacterMap::deviceHasKey(button);
+			if (hasKey == false)
 			{
-				s_joystickStates[iJoyId].m_bHasDPad = false;
-				ncServiceLocator::Logger().Write(ncILogger::LOG_VERBOSE, (const char *)"ncAndroidInputManager::DeviceInfo (%d, %d) - D-Pad not detected", iDeviceId, iJoyId);
+				joystickStates_[joyId].hasDPad_ = false;
+				ncServiceLocator::logger().write(ncILogger::LOG_VERBOSE, (const char *)"ncAndroidInputManager::deviceInfo (%d, %d) - D-Pad not detected", deviceId, joyId);
 				break;
 			}
 		}
 
-		memset(vDevInfoString, 0, iMaxStrLength);
+		memset(deviceInfoString, 0, MaxStringLength);
 		// InputDevice.getMotionRange()
-		int iNumAxes = 0;
-		for (int i = 0; i < ncAndroidJoystickState::s_iNumAxesToMap; i++)
+		int numAxes = 0;
+		for (int i = 0; i < ncAndroidJoystickState::NumAxesToMap; i++)
 		{
-			int iAxis = ncAndroidJoystickState::s_vAxesToMap[i];
-			ncAndroidJNIClass_MotionRange motionRange = inputDevice.getMotionRange(iAxis);
+			int axis = ncAndroidJoystickState::AxesToMap[i];
+			ncAndroidJNIClass_MotionRange motionRange = inputDevice.getMotionRange(axis);
 
 			if (motionRange.isNull() == false)
 			{
-				s_joystickStates[iJoyId].m_vAxesMapping[iNumAxes] = iAxis;
-				sprintf(&vDevInfoString[strlen(vDevInfoString)], "%d:%d ", iNumAxes, iAxis);
-				iNumAxes++;
+				joystickStates_[joyId].axesMapping_[numAxes] = axis;
+				sprintf(&deviceInfoString[strlen(deviceInfoString)], "%d:%d ", numAxes, axis);
+				numAxes++;
 			}
 		}
-		ncServiceLocator::Logger().Write(ncILogger::LOG_VERBOSE, (const char *)"ncAndroidInputManager::DeviceInfo (%d, %d) - Axes %s", iDeviceId, iJoyId, vDevInfoString);
+		ncServiceLocator::logger().write(ncILogger::LOG_VERBOSE, (const char *)"ncAndroidInputManager::deviceInfo (%d, %d) - Axes %s", deviceId, joyId, deviceInfoString);
 
-		s_joystickStates[iJoyId].m_iNumAxes = iNumAxes;
+		joystickStates_[joyId].numAxes_ = numAxes;
 		// Taking into account the D-Pad
-		if (s_joystickStates[iJoyId].m_bHasDPad)
+		if (joystickStates_[joyId].hasDPad_)
 		{
-			s_joystickStates[iJoyId].m_iNumAxes += 2;
+			joystickStates_[joyId].numAxes_ += 2;
 		}
 	}
 }

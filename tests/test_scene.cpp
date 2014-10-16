@@ -22,17 +22,17 @@
 int main(int argc, char **argv)
 {
 	SDL_Event event;
-	int iWidth = 960;
-	int iHeight = 640;
-	bool bQuit = false;
+	const int Width = 960;
+	const int Height = 640;
+	bool shouldQuit = false;
 
 // ----- Init ----------------------
-	float fAngle = 0.0f;
-	float fAngle2 = 0.0f;
+	float angle = 0.0f;
+	float angle2 = 0.0f;
 	ncFrameTimer t(5.0f, 0.0f);
-	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
-	ncSDLGfxDevice gfxDevice(iWidth, iHeight);
-	gfxDevice.SetWindowTitle("Test");
+	ncServiceLocator::registerLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
+	ncSDLGfxDevice gfxDevice(Width, Height);
+	gfxDevice.setWindowTitle("Test");
 
 	ncTexture tex1("textures/texture1.png");
 	ncTexture tex2("textures/texture2.png");
@@ -41,36 +41,36 @@ int main(int argc, char **argv)
 
 	ncRenderQueue renderQueue;
 	ncSceneNode rootNode;
-	ncSprite *pSprite1 = new ncSprite(&tex1, 150, 170);
-	ncSprite *pSprite2 = new ncSprite(pSprite1, &tex2, 50, 70);
-	ncSprite *pSprite3 = new ncSprite(pSprite2, &tex3, 100, 50);
-	ncSprite *pSprite4 = new ncSprite(pSprite3, &tex4, -50, 25);
-	pSprite1->SetScale(0.75f);
-	pSprite2->SetScale(0.7f);
-	pSprite3->SetScale(0.7f);
-	pSprite4->SetScale(0.7f);
-	rootNode.AddChildNode(pSprite1);
+	ncSprite *sprite1 = new ncSprite(&tex1, 150, 170);
+	ncSprite *sprite2 = new ncSprite(sprite1, &tex2, 50, 70);
+	ncSprite *sprite3 = new ncSprite(sprite2, &tex3, 100, 50);
+	ncSprite *sprite4 = new ncSprite(sprite3, &tex4, -50, 25);
+	sprite1->setScale(0.75f);
+	sprite2->setScale(0.7f);
+	sprite3->setScale(0.7f);
+	sprite4->setScale(0.7f);
+	rootNode.addChildNode(sprite1);
 
 
 // ----- Event cycle --------------------
-	while (!bQuit)
+	while (!shouldQuit)
 	{
 		while (SDL_PollEvent(&event))
 		{
 			switch (event.type)
 			{
 				case SDL_QUIT:
-					bQuit = true;
+					shouldQuit = true;
 					break;
 				case SDL_KEYDOWN:
 					switch (event.key.keysym.sym)
 					{
 						case SDLK_ESCAPE:
 						case SDLK_q:
-							bQuit = true;
+							shouldQuit = true;
 							break;
 						case SDLK_F1:
-							gfxDevice.ToggleFullScreen();
+							gfxDevice.toggleFullScreen();
 							break;
 						default:
 							break;
@@ -81,44 +81,44 @@ int main(int argc, char **argv)
 
 
 // ----- Blitting on the screen --------
-		t.AddFrame();
-		fAngle += 100.0f * t.Interval();
-		fAngle2 += 250.0f * t.Interval();
+		t.addFrame();
+		angle += 100.0f * t.interval();
+		angle2 += 250.0f * t.interval();
 
-		gfxDevice.Clear();
+		gfxDevice.clear();
 
-		float fSinus = sinf(fAngle * 0.01f);
-		float fCosine = cosf(fAngle * 0.01f);
-		float fSinus2 = sinf(fAngle2 * 0.01f);
-		float fCosine2 = cosf(fAngle2 * 0.01f);
+		float sine = sinf(angle * 0.01f);
+		float cosine = cosf(angle * 0.01f);
+		float sine2 = sinf(angle2 * 0.01f);
+		float cosine2 = cosf(angle2 * 0.01f);
 
-		pSprite1->x = iWidth * 0.5f + fSinus * 100;
-		pSprite1->y = iHeight * 0.5f + fCosine * 100;
+		sprite1->x = Width * 0.5f + sine * 100;
+		sprite1->y = Height * 0.5f + cosine * 100;
 
-		pSprite2->x = fSinus * 150;
-		pSprite2->y = fCosine * 150;
+		sprite2->x = sine * 150;
+		sprite2->y = cosine * 150;
 
-		pSprite3->x = -fSinus2 * 100;
-		pSprite3->y = fCosine2 * 100;
+		sprite3->x = -sine2 * 100;
+		sprite3->y = cosine2 * 100;
 
-		pSprite4->x = -fSinus2 * 100;
-		pSprite4->y = fCosine2 * 100;
+		sprite4->x = -sine2 * 100;
+		sprite4->y = cosine2 * 100;
 
 
-		rootNode.Update(t.Interval());
-		rootNode.Visit(renderQueue);
-		renderQueue.Draw();
+		rootNode.update(t.interval());
+		rootNode.visit(renderQueue);
+		renderQueue.draw();
 
-		gfxDevice.Update();
+		gfxDevice.update();
 	}
 
 
 // ----- Quitting ----------------------
-	delete pSprite4;
-	delete pSprite3;
-	delete pSprite2;
-	delete pSprite1;
+	delete sprite4;
+	delete sprite3;
+	delete sprite2;
+	delete sprite1;
 
-	ncServiceLocator::UnregisterAll();
+	ncServiceLocator::unregisterAll();
 	return 0;
 }

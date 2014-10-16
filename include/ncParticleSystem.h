@@ -16,40 +16,40 @@ class ncParticleSystem : public ncDrawableNode
 {
   public:
 	// Constructs a particle system made of the specified maximum amount of particles
-	ncParticleSystem(ncSceneNode* pParent, unsigned int uCount, ncTexture *pTexture, ncRect texRect);
+	ncParticleSystem(ncSceneNode* parent, unsigned int count, ncTexture *texture, ncRect texRect);
 	~ncParticleSystem();
 
 	/// Adds a particle affector
-	void AddAffector(ncParticleAffector* affector) { m_vAffectors.InsertBack(affector); }
+	void addAffector(ncParticleAffector* affector) { affectors_.insertBack(affector); }
 	/// Emits an amount of particles with a specified initial life and velocity
-	void Emit(unsigned int amount, float fLife, const ncVector2f &vel);
+	void emitParticles(unsigned int amount, float life, const ncVector2f &vel);
 
 	/// Gets the local space flag of the system
-	inline bool LocalSpace(void) const { return m_bLocalSpace; }
+	inline bool inLocalSpace(void) const { return inLocalSpace_; }
 	/// Sets the local space flag of the system
-	inline void SetLocalSpace(bool bLocalSpace) { m_bLocalSpace = bLocalSpace; }
+	inline void setInLocalSpace(bool inLocalSpace) { inLocalSpace_ = inLocalSpace; }
 
-	virtual void Update(float fInterval);
+	virtual void update(float interval);
 
-	inline static eObjectType sType() { return PARTICLESYSTEM_TYPE; }
+	inline static ObjectType sType() { return PARTICLESYSTEM_TYPE; }
 
   private:
 	/// The particle pool size
-	unsigned int m_uPoolSize;
+	unsigned int poolSize_;
 	/// The index of the next free particle in the pool
-	unsigned int m_uPoolTop;
+	unsigned int poolTop_;
 	/// The pool containing available particles (only dead ones)
-	ncParticle **m_pParticlePool;
+	ncParticle **particlePool_;
 	/// The array containing every particle (dead or alive)
-	ncParticle **m_pParticleList;
+	ncParticle **particleList_;
 
 	/// The array of particle affectors
-	ncArray<ncParticleAffector *> m_vAffectors;
+	ncArray<ncParticleAffector *> affectors_;
 
 	/// Should the system simulate in local space?
-	bool m_bLocalSpace;
+	bool inLocalSpace_;
 
-	virtual void UpdateRenderCommand() { }
+	virtual void updateRenderCommand() { }
 };
 
 /// Returns a random float between x0 and x1

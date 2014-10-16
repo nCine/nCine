@@ -4,10 +4,10 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncParticle::ncParticle(ncSceneNode* pParent, ncTexture *pTexture)
-	: ncSprite(pParent, pTexture), m_fLife(0.0f), m_fStartLife(0.0f), m_bLocalSpace(false)
+ncParticle::ncParticle(ncSceneNode* parent, ncTexture *texture)
+	: ncSprite(parent, texture), life_(0.0f), startingLife(0.0f), inLocalSpace_(false)
 {
-	m_renderCmd.SetType(ncRenderCommand::PARTICLE_TYPE);
+	renderCommand_.setType(ncRenderCommand::PARTICLE_TYPE);
 }
 
 ///////////////////////////////////////////////////////////
@@ -15,30 +15,29 @@ ncParticle::ncParticle(ncSceneNode* pParent, ncTexture *pTexture)
 ///////////////////////////////////////////////////////////
 
 /// Initializes a particle with initial life, position, velocity and rotation
-void ncParticle::Init(float fLife, ncVector2f pos, ncVector2f vel, float fRot, bool bLocalSpace)
+void ncParticle::init(float life, ncVector2f pos, ncVector2f vel, float rot, bool inLocalSpace)
 {
-	m_fLife = fLife;
-	m_fStartLife = fLife;
-	SetPosition(pos);
-	m_Velocity = vel;
-	SetRotation(fRot);
-	m_bLocalSpace = bLocalSpace;
+	life_ = life;
+	startingLife = life;
+	setPosition(pos);
+	velocity_ = vel;
+	setRotation(rot);
+	inLocalSpace_ = inLocalSpace;
 }
 
 /// Updates particle data after the specified amount of seconds has passed
-void ncParticle::Update(float fInterval)
+void ncParticle::update(float interval)
 {
-	// m_ulLife is unsigned
-	if (fInterval > m_fLife)
+	if (interval > life_)
 	{
-		m_fLife = 0.0;    // dead particle
+		life_ = 0.0f;    // dead particle
 	}
 	else
 	{
-		m_fLife -= fInterval;
+		life_ -= interval;
 
-		x += m_Velocity.x * fInterval;
-		y += m_Velocity.y * fInterval;
+		x += velocity_.x * interval;
+		y += velocity_.y * interval;
 	}
 }
 
@@ -47,30 +46,30 @@ void ncParticle::Update(float fInterval)
 ///////////////////////////////////////////////////////////
 
 /// Custom transform method to allow independent position from parent
-void ncParticle::Transform()
+void ncParticle::transform()
 {
 	// If in local space transform as any other scene node
-	if (m_bLocalSpace)
+	if (inLocalSpace_)
 	{
-		ncSceneNode::Transform();
+		ncSceneNode::transform();
 	}
 	else
 	{
-		if (m_pParent)
+		if (parent_)
 		{
-			m_fAbsScaleFactor = m_pParent->AbsScale() * m_fScaleFactor;
-			m_absColor = m_pParent->AbsColor() * m_color;
+			absScaleFactor_ = parent_->absScale() * scaleFactor_;
+			absColor_ = parent_->absColor() * color_;
 		}
 		else
 		{
-			m_fAbsScaleFactor = m_fScaleFactor;
-			m_absColor = m_color;
+			absScaleFactor_ = scaleFactor_;
+			absColor_ = color_;
 		}
 
 		// Always independent movement
-		m_fAbsRotation = m_fRotation;
-		m_fAbsX = x;
-		m_fAbsY = y;
+		absRotation_ = rotation_;
+		absX_ = x;
+		absY_ = y;
 	}
 }
 

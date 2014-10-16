@@ -7,55 +7,55 @@
 class ncProfileVariable
 {
   public:
-	ncProfileVariable(unsigned int uNumValues, float fRejectDelay);
+	ncProfileVariable(unsigned int numValues, float rejectDelay);
 	~ncProfileVariable();
 
 	// Adds a new value for the variable
-	bool AddValue(float fValue);
+	bool addValue(float value);
 	/// Returns the number of values that can be stored
-	inline unsigned int NumValues() const { return m_uNumValues; }
+	inline unsigned int numValues() const { return numValues_; }
 	/// Returns the next index in the circular array of values
-	inline unsigned int NextIndex() const { return m_uNextIndex; }
+	inline unsigned int nextIndex() const { return nextIndex_; }
 	/// Returns a recorded value with the specified index
-	inline float Value(unsigned int uIndex) const { return m_fValues[uIndex]; }
+	inline float value(unsigned int index) const { return values_[index]; }
 	/// Returns the minimum value ever recorded
-	inline float Min() const { return m_fMin; }
+	inline float min() const { return min_; }
 	/// Returns the maximum value ever recorded
-	inline float Max() const { return m_fMax; }
+	inline float max() const { return max_; }
 	/// Returns the mathematical mean of the values
-	inline float Mean() const { return m_fMean; }
+	inline float mean() const { return mean_; }
 	// Returns the value at the specified index normalized between the two numbers provided
-	float NormBetweenValue(unsigned int uIndex, float fMin, float fMax) const;
+	float normBetweenValue(unsigned int index, float min, float max) const;
 	// Returns the mathematical mean normalized between the two numbers provided
-	float NormBetweenMean(float fMin, float fMax) const;
+	float normBetweenMean(float min, float max) const;
 
 	/// Returns a normalized version of the value with the specified index
-	float NormValue(unsigned int uIndex) const { return NormBetweenValue(uIndex, m_fMin, m_fMax); }
+	float normValue(unsigned int index) const { return normBetweenValue(index, min_, max_); }
 	/// Returns a normalized mathematical mean
-	float NormMean() const { return NormBetweenMean(m_fMin, m_fMax); }
+	float normMean() const { return normBetweenMean(min_, max_); }
 	/// Returns the pointer to values
-	inline const float* Values() const { return m_fValues; }
+	inline const float* values() const { return values_; }
 	/// Returns the delay in seconds for value rejection
-	inline float Delay() const { return m_fRejectDelay; }
+	inline float delay() const { return rejectDelay_; }
 	/// Set the delay in seconds for value rejection
 	/** If you try to add a value before the delay, it gets discarded. */
-	inline void SetDelay(float fRejectDelay) { m_fRejectDelay = fRejectDelay; }
+	inline void setDelay(float rejectDelay) { rejectDelay_ = rejectDelay; }
 
   private:
-	unsigned int m_uNumValues;
-	float m_fRejectDelay;
-	unsigned int m_uNextIndex;
+	unsigned int numValues_;
+	float rejectDelay_;
+	unsigned int nextIndex_;
 
-	float m_fMin;
-	float m_fMax;
-	float m_fMean;
-	bool m_bFirstValue;
+	float min_;
+	float max_;
+	float mean_;
+	bool isFirstValue_;
 
-	float *m_fValues;
-	ncTimer m_timer;
+	float *values_;
+	ncTimer timer_;
 
 	/// Preventing construction by copy
-	ncProfileVariable(const ncProfileVariable& rOther);
+	ncProfileVariable(const ncProfileVariable& other);
 };
 
 #endif

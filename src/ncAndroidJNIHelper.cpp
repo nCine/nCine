@@ -5,284 +5,283 @@
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-JavaVM *ncAndroidJNIHelper::s_pJVM = NULL;
-JNIEnv *ncAndroidJNIHelper::s_pEnv = NULL;
-JNIEnv *ncAndroidJNIClass::s_pEnv = NULL;
-unsigned int ncAndroidJNIHelper::s_uSDKVersion = 0;
+JavaVM *ncAndroidJNIHelper::javaVM_ = NULL;
+JNIEnv *ncAndroidJNIHelper::jniEnv_ = NULL;
+JNIEnv *ncAndroidJNIClass::jniEnv_ = NULL;
+unsigned int ncAndroidJNIHelper::sdkVersion_ = 0;
 
-jclass ncAndroidJNIClass_Version::s_javaClass = NULL;
-jfieldID ncAndroidJNIClass_Version::s_fidSDKINT = NULL;
-jclass ncAndroidJNIClass_InputDevice::s_javaClass = NULL;
-jmethodID ncAndroidJNIClass_InputDevice::s_midGetDevice = NULL;
-jmethodID ncAndroidJNIClass_InputDevice::s_midGetDeviceIds = NULL;
-jmethodID ncAndroidJNIClass_InputDevice::s_midGetName = NULL;
-jmethodID ncAndroidJNIClass_InputDevice::s_midGetMotionRange = NULL;
-jmethodID ncAndroidJNIClass_InputDevice::s_midGetSources = NULL;
-jmethodID ncAndroidJNIClass_InputDevice::s_midHasKeys = NULL;
-jclass ncAndroidJNIClass_KeyCharacterMap::s_javaClass = NULL;
-jmethodID ncAndroidJNIClass_KeyCharacterMap::s_midDeviceHasKey = NULL;
-jclass ncAndroidJNIClass_MotionRange::s_javaClass = NULL;
+jclass ncAndroidJNIClass_Version::javaClass_ = NULL;
+jfieldID ncAndroidJNIClass_Version::fidSdkInt_ = NULL;
+jclass ncAndroidJNIClass_InputDevice::javaClass_ = NULL;
+jmethodID ncAndroidJNIClass_InputDevice::midGetDevice_ = NULL;
+jmethodID ncAndroidJNIClass_InputDevice::midGetDeviceIds_ = NULL;
+jmethodID ncAndroidJNIClass_InputDevice::midGetName_ = NULL;
+jmethodID ncAndroidJNIClass_InputDevice::midGetMotionRange_ = NULL;
+jmethodID ncAndroidJNIClass_InputDevice::midGetSources_ = NULL;
+jmethodID ncAndroidJNIClass_InputDevice::midHasKeys_ = NULL;
+jclass ncAndroidJNIClass_KeyCharacterMap::javaClass_ = NULL;
+jmethodID ncAndroidJNIClass_KeyCharacterMap::midDeviceHasKey_ = NULL;
+jclass ncAndroidJNIClass_MotionRange::javaClass_ = NULL;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncAndroidJNIHelper::AttachJVM(struct android_app* state)
+void ncAndroidJNIHelper::attachJVM(struct android_app* state)
 {
-	s_pJVM = state->activity->vm;
+	javaVM_ = state->activity->vm;
 
-	if (s_pJVM == NULL)
+	if (javaVM_ == NULL)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIHelper::AttachJVM - JavaVM pointer is null");
+		ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIHelper::attachJVM - JavaVM pointer is null");
 	}
 	else
 	{
-		int iGetEnvStatus = s_pJVM->GetEnv((void **)&s_pEnv, JNI_VERSION_1_6);
-		if (iGetEnvStatus == JNI_EDETACHED)
+		int getEnvStatus = javaVM_->GetEnv((void **)&jniEnv_, JNI_VERSION_1_6);
+		if (getEnvStatus == JNI_EDETACHED)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncAndroidJNIHelper::AttachJVM - GetEnv() cannot attach the JVM");
-			if (s_pJVM->AttachCurrentThread(&s_pEnv, NULL) != 0)
+			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncAndroidJNIHelper::attachJVM - GetEnv() cannot attach the JVM");
+			if (javaVM_->AttachCurrentThread(&jniEnv_, NULL) != 0)
 			{
-				ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncAndroidJNIHelper::AttachJVM - AttachCurrentThread() cannot attach the JVM");
+				ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncAndroidJNIHelper::attachJVM - AttachCurrentThread() cannot attach the JVM");
 			}
 			else
 			{
-				ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidJNIHelper::AttachJVM - AttachCurrentThread() successful");
+				ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAndroidJNIHelper::attachJVM - AttachCurrentThread() successful");
 			}
 		}
-		else if (iGetEnvStatus == JNI_EVERSION)
+		else if (getEnvStatus == JNI_EVERSION)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncAndroidJNIHelper::AttachJVM - GetEnv() with unsupported version");
+			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncAndroidJNIHelper::attachJVM - GetEnv() with unsupported version");
 		}
-		else if (iGetEnvStatus == JNI_OK)
+		else if (getEnvStatus == JNI_OK)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidJNIHelper::AttachJVM - GetEnv() successful");
+			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAndroidJNIHelper::attachJVM - GetEnv() successful");
 		}
 
-		if (s_pEnv == NULL)
+		if (jniEnv_ == NULL)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIHelper::AttachJVM - JNIEnv pointer is null");
+			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIHelper::attachJVM - JNIEnv pointer is null");
 		}
 		else
 		{
 			// Every JNI class will access the Java environment through this static pointer
-			ncAndroidJNIClass::s_pEnv = s_pEnv;
-			InitClasses();
+			ncAndroidJNIClass::jniEnv_ = jniEnv_;
+			initClasses();
 
 			// Cache the value of SDK version to avoid going through JNI in the future
-			s_uSDKVersion = ncAndroidJNIClass_Version::SDK_INT();
-			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAndroidJNIHelper::AttachJVM - Android API version - NDK: %d, JNI: %d", __ANDROID_API__, s_uSDKVersion);
+			sdkVersion_ = ncAndroidJNIClass_Version::sdkInt();
+			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAndroidJNIHelper::attachJVM - Android API version - NDK: %d, JNI: %d", __ANDROID_API__, sdkVersion_);
 		}
 	}
 }
 
-void ncAndroidJNIHelper::DetachJVM()
+void ncAndroidJNIHelper::detachJVM()
 {
-	if (s_pJVM)
+	if (javaVM_)
 	{
-		s_pJVM->DetachCurrentThread();
-		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIHelper::DetachJVM - Thread detached");
-		s_pJVM = NULL;
-		s_pEnv = NULL;
+		javaVM_->DetachCurrentThread();
+		ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIHelper::detachJVM - Thread detached");
+		javaVM_ = NULL;
+		jniEnv_ = NULL;
 	}
 }
 
-void ncAndroidJNIHelper::InitClasses()
+void ncAndroidJNIHelper::initClasses()
 {
-	ncAndroidJNIClass_Version::Init();
-	ncAndroidJNIClass_InputDevice::Init();
-	ncAndroidJNIClass_KeyCharacterMap::Init();
+	ncAndroidJNIClass_Version::init();
+	ncAndroidJNIClass_InputDevice::init();
+	ncAndroidJNIClass_KeyCharacterMap::init();
 }
 
-void ncAndroidJNIClass_Version::Init()
+void ncAndroidJNIClass_Version::init()
 {
-	if (s_javaClass == NULL)
+	if (javaClass_ == NULL)
 	{
-		s_javaClass = s_pEnv->FindClass("android/os/Build$VERSION");
-		if (s_javaClass == NULL)
+		javaClass_ = jniEnv_->FindClass("android/os/Build$VERSION");
+		if (javaClass_ == NULL)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_Version::Init - Cannot find class");
+			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_Version::init - Cannot find class");
 		}
 		else
 		{
-			s_fidSDKINT = s_pEnv->GetStaticFieldID(s_javaClass, "SDK_INT", "I");
-			if (s_fidSDKINT == NULL)
+			fidSdkInt_ = jniEnv_->GetStaticFieldID(javaClass_, "SDK_INT", "I");
+			if (fidSdkInt_ == NULL)
 			{
-				ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_Version::Init - Cannot find static field SDK_INT");
+				ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_Version::init - Cannot find static field SDK_INT");
 			}
 		}
 	}
 }
 
-int ncAndroidJNIClass_Version::SDK_INT()
+int ncAndroidJNIClass_Version::sdkInt()
 {
-	jint sdk_int = s_pEnv->GetStaticIntField(s_javaClass, s_fidSDKINT);
-	return sdk_int;
+	jint sdkInt = jniEnv_->GetStaticIntField(javaClass_, fidSdkInt_);
+	return sdkInt;
 }
 
-void ncAndroidJNIClass_InputDevice::Init()
+void ncAndroidJNIClass_InputDevice::init()
 {
-	if (s_javaClass == NULL)
+	if (javaClass_ == NULL)
 	{
-		s_javaClass = s_pEnv->FindClass("android/view/InputDevice");
-		if (s_javaClass == NULL)
+		javaClass_ = jniEnv_->FindClass("android/view/InputDevice");
+		if (javaClass_ == NULL)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_InputDevice::Init - Cannot find class");
+			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_InputDevice::init - Cannot find class");
 		}
 		else
 		{
-			s_midGetDevice = s_pEnv->GetStaticMethodID(s_javaClass, "getDevice", "(I)Landroid/view/InputDevice;");
-			if (s_midGetDevice == NULL)
+			midGetDevice_ = jniEnv_->GetStaticMethodID(javaClass_, "getDevice", "(I)Landroid/view/InputDevice;");
+			if (midGetDevice_ == NULL)
 			{
-				ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_InputDevice::Init - Cannot find static method getDevice()");
+				ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_InputDevice::init - Cannot find static method getDevice()");
 			}
 
-			s_midGetDeviceIds = s_pEnv->GetStaticMethodID(s_javaClass, "getDeviceIds", "()[I");
-			if (s_midGetDeviceIds == NULL)
+			midGetDeviceIds_ = jniEnv_->GetStaticMethodID(javaClass_, "getDeviceIds", "()[I");
+			if (midGetDeviceIds_ == NULL)
 			{
-				ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_InputDevice::Init - Cannot find static method getDeviceIds()");
+				ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_InputDevice::init - Cannot find static method getDeviceIds()");
 			}
 
-			s_midGetName = s_pEnv->GetMethodID(s_javaClass, "getName", "()Ljava/lang/String;");
-			if (s_midGetName == NULL)
+			midGetName_ = jniEnv_->GetMethodID(javaClass_, "getName", "()Ljava/lang/String;");
+			if (midGetName_ == NULL)
 			{
-				ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_InputDevice::Init - Cannot find method getName()");
+				ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_InputDevice::init - Cannot find method getName()");
 			}
 
-			s_midGetMotionRange = s_pEnv->GetMethodID(s_javaClass, "getMotionRange", "(I)Landroid/view/InputDevice$MotionRange;");
-			if (s_midGetMotionRange == NULL)
+			midGetMotionRange_ = jniEnv_->GetMethodID(javaClass_, "getMotionRange", "(I)Landroid/view/InputDevice$MotionRange;");
+			if (midGetMotionRange_ == NULL)
 			{
-				ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_InputDevice::Init - Cannot find method getMotionRange()");
+				ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_InputDevice::init - Cannot find method getMotionRange()");
 			}
 
-			s_midGetSources = s_pEnv->GetMethodID(s_javaClass, "getSources", "()I");
-			if (s_midGetSources == NULL)
+			midGetSources_ = jniEnv_->GetMethodID(javaClass_, "getSources", "()I");
+			if (midGetSources_ == NULL)
 			{
-				ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_InputDevice::Init - Cannot find method getSources()");
+				ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_InputDevice::init - Cannot find method getSources()");
 			}
 
-			s_midHasKeys = s_pEnv->GetMethodID(s_javaClass, "hasKeys", "([I)[Z");
-			if (s_midHasKeys == NULL)
+			midHasKeys_ = jniEnv_->GetMethodID(javaClass_, "hasKeys", "([I)[Z");
+			if (midHasKeys_ == NULL)
 			{
-				ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_InputDevice::Init - Cannot find method hasKeys()");
+				ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_InputDevice::init - Cannot find method hasKeys()");
 			}
 		}
 	}
 }
 
-ncAndroidJNIClass_InputDevice ncAndroidJNIClass_InputDevice::getDevice(int iDeviceId)
+ncAndroidJNIClass_InputDevice ncAndroidJNIClass_InputDevice::getDevice(int deviceId)
 {
-	jobject objInputDevice = s_pEnv->CallStaticObjectMethod(s_javaClass, s_midGetDevice, iDeviceId);
+	jobject objInputDevice = jniEnv_->CallStaticObjectMethod(javaClass_, midGetDevice_, deviceId);
 	return ncAndroidJNIClass_InputDevice(objInputDevice);
 }
 
-int ncAndroidJNIClass_InputDevice::getDeviceIds(int *vDestination, int iMaxSize)
+int ncAndroidJNIClass_InputDevice::getDeviceIds(int *destination, int maxSize)
 {
-	jintArray arrDeviceIds = (jintArray)s_pEnv->CallStaticObjectMethod(s_javaClass, s_midGetDeviceIds);
-	jint length = s_pEnv->GetArrayLength(arrDeviceIds);
+	jintArray arrDeviceIds = (jintArray)jniEnv_->CallStaticObjectMethod(javaClass_, midGetDeviceIds_);
+	jint length = jniEnv_->GetArrayLength(arrDeviceIds);
 
-	jint *intsDeviceIds = s_pEnv->GetIntArrayElements(arrDeviceIds, NULL);
-	for (int i = 0; i < length && i < iMaxSize; i++)
+	jint *intsDeviceIds = jniEnv_->GetIntArrayElements(arrDeviceIds, NULL);
+	for (int i = 0; i < length && i < maxSize; i++)
 	{
-		vDestination[i] = int(intsDeviceIds[i]);
+		destination[i] = int(intsDeviceIds[i]);
 	}
-	s_pEnv->ReleaseIntArrayElements(arrDeviceIds, intsDeviceIds, 0);
+	jniEnv_->ReleaseIntArrayElements(arrDeviceIds, intsDeviceIds, 0);
 
 	return int(length);
 }
 
-void ncAndroidJNIClass_InputDevice::getName(char *vDestination, int iMaxStringSize)
+void ncAndroidJNIClass_InputDevice::getName(char *destination, int maxStringSize)
 {
-	jstring strDeviceName = (jstring)s_pEnv->CallObjectMethod(m_javaObject, s_midGetName);
+	jstring strDeviceName = (jstring)jniEnv_->CallObjectMethod(javaObject_, midGetName_);
 	if (strDeviceName)
 	{
-		const char *vDeviceName = s_pEnv->GetStringUTFChars(strDeviceName, 0);
-		strncpy(vDestination, vDeviceName, iMaxStringSize);
-		vDestination[iMaxStringSize - 1] = '\0';
-		s_pEnv->ReleaseStringUTFChars(strDeviceName, vDeviceName);
-		s_pEnv->DeleteLocalRef(strDeviceName);
+		const char *deviceName = jniEnv_->GetStringUTFChars(strDeviceName, 0);
+		strncpy(destination, deviceName, maxStringSize);
+		destination[maxStringSize - 1] = '\0';
+		jniEnv_->ReleaseStringUTFChars(strDeviceName, deviceName);
+		jniEnv_->DeleteLocalRef(strDeviceName);
 	}
 	else
 	{
-		strncpy(vDestination, (const char *)"Unknown", iMaxStringSize);
+		strncpy(destination, (const char *)"Unknown", maxStringSize);
 	}
 }
 
-ncAndroidJNIClass_MotionRange ncAndroidJNIClass_InputDevice::getMotionRange(int iAxis)
+ncAndroidJNIClass_MotionRange ncAndroidJNIClass_InputDevice::getMotionRange(int axis)
 {
-	jobject objMotionRange = s_pEnv->CallObjectMethod(m_javaObject, s_midGetMotionRange, iAxis);
+	jobject objMotionRange = jniEnv_->CallObjectMethod(javaObject_, midGetMotionRange_, axis);
 	return ncAndroidJNIClass_MotionRange(objMotionRange);
 }
 
 int ncAndroidJNIClass_InputDevice::getSources()
 {
-	jint sources = s_pEnv->CallIntMethod(m_javaObject, s_midGetSources);
+	jint sources = jniEnv_->CallIntMethod(javaObject_, midGetSources_);
 	return int(sources);
 }
 
-void ncAndroidJNIClass_InputDevice::hasKeys(int *vButtons, const int iLength, bool *vBools)
+void ncAndroidJNIClass_InputDevice::hasKeys(int *buttons, const int length, bool *bools)
 {
 	// Early-out if SDK version requirements are not met
-	if (ncAndroidJNIHelper::SDKVersion() < 19 || __ANDROID_API__ < 19)
+	if (ncAndroidJNIHelper::sdkVersion() < 19 || __ANDROID_API__ < 19)
 	{
 		return;
 	}
 
-	jintArray arrButtons = s_pEnv->NewIntArray(iLength);
+	jintArray arrButtons = jniEnv_->NewIntArray(length);
 
-	jint *intsButtons = s_pEnv->GetIntArrayElements(arrButtons, NULL);
-	for (int i = 0; i < iLength; i++)
-	{
-		intsButtons[i] = vButtons[i];
-	}
-	s_pEnv->ReleaseIntArrayElements(arrButtons, intsButtons, 0);
-
-	jbooleanArray arrBooleans = (jbooleanArray)s_pEnv->CallObjectMethod(m_javaObject, s_midHasKeys, arrButtons);
-	int length = s_pEnv->GetArrayLength(arrBooleans);
-
-	jboolean *booleans = s_pEnv->GetBooleanArrayElements(arrBooleans, NULL);
+	jint *intsButtons = jniEnv_->GetIntArrayElements(arrButtons, NULL);
 	for (int i = 0; i < length; i++)
 	{
-		vBools[i] = bool(booleans[i]);
+		intsButtons[i] = buttons[i];
 	}
-	s_pEnv->ReleaseBooleanArrayElements(arrBooleans, booleans, 0);
+	jniEnv_->ReleaseIntArrayElements(arrButtons, intsButtons, 0);
+
+	jbooleanArray arrBooleans = (jbooleanArray)jniEnv_->CallObjectMethod(javaObject_, midHasKeys_, arrButtons);
+
+	jboolean *booleans = jniEnv_->GetBooleanArrayElements(arrBooleans, NULL);
+	for (int i = 0; i < length; i++)
+	{
+		bools[i] = bool(booleans[i]);
+	}
+	jniEnv_->ReleaseBooleanArrayElements(arrBooleans, booleans, 0);
 }
 
-void ncAndroidJNIClass_KeyCharacterMap::Init()
+void ncAndroidJNIClass_KeyCharacterMap::init()
 {
-	if (s_javaClass == NULL)
+	if (javaClass_ == NULL)
 	{
-		s_javaClass = s_pEnv->FindClass("android/view/KeyCharacterMap");
-		if (s_javaClass == NULL)
+		javaClass_ = jniEnv_->FindClass("android/view/KeyCharacterMap");
+		if (javaClass_ == NULL)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_KeyCharacterMap::Init - Cannot find class");
+			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_KeyCharacterMap::init - Cannot find class");
 		}
 		else
 		{
-			s_midDeviceHasKey = s_pEnv->GetStaticMethodID(s_javaClass, "deviceHasKey", "(I)Z");
-			if (s_midDeviceHasKey == NULL)
+			midDeviceHasKey_ = jniEnv_->GetStaticMethodID(javaClass_, "deviceHasKey", "(I)Z");
+			if (midDeviceHasKey_ == NULL)
 			{
-				ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_KeyCharacterMap::Init - Cannot find static method deviceHasKey()");
+				ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_KeyCharacterMap::init - Cannot find static method deviceHasKey()");
 			}
 		}
 	}
 }
 
-bool ncAndroidJNIClass_KeyCharacterMap::deviceHasKey(int iButton)
+bool ncAndroidJNIClass_KeyCharacterMap::deviceHasKey(int button)
 {
-	jboolean hasKey = s_pEnv->CallStaticBooleanMethod(s_javaClass, s_midDeviceHasKey, iButton);
+	jboolean hasKey = jniEnv_->CallStaticBooleanMethod(javaClass_, midDeviceHasKey_, button);
 	return (hasKey == JNI_TRUE);
 }
 
 ncAndroidJNIClass_MotionRange::ncAndroidJNIClass_MotionRange(jobject javaObject)
 	: ncAndroidJNIClass(javaObject)
 {
-	if (s_javaClass == NULL)
+	if (javaClass_ == NULL)
 	{
-		s_javaClass = s_pEnv->FindClass("android/view/InputDevice$MotionRange");
-		if (s_javaClass == NULL)
+		javaClass_ = jniEnv_->FindClass("android/view/InputDevice$MotionRange");
+		if (javaClass_ == NULL)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_MotionRange::ncAndroidJNIClass_MotionRange - Cannot find class");
+			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAndroidJNIClass_MotionRange::ncAndroidJNIClass_MotionRange - Cannot find class");
 		}
 	}
 }

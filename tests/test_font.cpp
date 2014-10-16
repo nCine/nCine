@@ -16,15 +16,15 @@
 int main(int argc, char **argv)
 {
 	SDL_Event event;
-	int iWidth = 960;
-	int iHeight = 640;
-	bool bQuit = false;
+	const int Width = 960;
+	const int Height = 640;
+	bool shouldQuit = false;
 
 // ----- Init ----------------------
 	ncFrameTimer t(5.0f, 0.1f);
-	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
-	ncSDLGfxDevice gfxDevice(iWidth, iHeight);
-	gfxDevice.SetWindowTitle("Test");
+	ncServiceLocator::registerLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
+	ncSDLGfxDevice gfxDevice(Width, Height);
+	gfxDevice.setWindowTitle("Test");
 
 	ncRenderQueue renderQueue;
 	ncSceneNode rootNode;
@@ -33,81 +33,81 @@ int main(int argc, char **argv)
 	ncFont font2("fonts/arial32_256.png", "fonts/arial32_256.fnt");
 	ncFont font3("fonts/verdana32_256.png", "fonts/verdana32_256.fnt");
 
-	char vFPS[16];
+	char fpsString[16];
 	ncTextNode fpsText(&rootNode, &font1);
-	fpsText.SetScale(0.85f);
-	fpsText.SetString("FPS: ");
-	fpsText.SetPosition((iWidth - fpsText.Width()), iHeight);
+	fpsText.setScale(0.85f);
+	fpsText.setString("FPS: ");
+	fpsText.setPosition((Width - fpsText.width()), Height);
 
-	char vTestString[] = "WAY.P.ATAV";
-	int iTextHeight = iHeight * 0.7f;
+	char testString[] = "WAY.P.ATAV";
+	int textHeight = Height * 0.7f;
 	ncTextNode text1(&rootNode, &font1);
-	text1.SetScale(2.0f);
-	text1.SetString(vTestString);
-	text1.SetPosition((iWidth - text1.Width()) * 0.5f, iTextHeight);
-	text1.SetColor(255, 0, 0, 255);
+	text1.setScale(2.0f);
+	text1.setString(testString);
+	text1.setPosition((Width - text1.width()) * 0.5f, textHeight);
+	text1.setColor(255, 0, 0, 255);
 
 	ncTextNode text2(&rootNode, &font1);
-	text2.SetScale(2.0f);
-	text2.SetString(vTestString);
-	iTextHeight -= text2.FontBase();
-	text2.SetPosition((iWidth - text1.Width()) * 0.5f, iTextHeight);
-	text2.EnableKerning(false);
-	text2.SetColor(255, 0, 0, 128);
+	text2.setScale(2.0f);
+	text2.setString(testString);
+	textHeight -= text2.fontBase();
+	text2.setPosition((Width - text1.width()) * 0.5f, textHeight);
+	text2.enableKerning(false);
+	text2.setColor(255, 0, 0, 128);
 
 	ncTextNode text3(&rootNode, &font2);
-	text3.SetScale(2.0f);
-	text3.SetString(vTestString);
-	iTextHeight -= text3.FontBase();
-	text3.SetPosition((iWidth - text3.Width()) * 0.5f, iTextHeight);
-	text3.SetColor(0, 255, 0, 255);
+	text3.setScale(2.0f);
+	text3.setString(testString);
+	textHeight -= text3.fontBase();
+	text3.setPosition((Width - text3.width()) * 0.5f, textHeight);
+	text3.setColor(0, 255, 0, 255);
 
 	ncTextNode text4(&rootNode, &font2);
-	text4.SetScale(2.0f);
-	text4.SetString(vTestString);
-	iTextHeight -= text4.FontBase();
-	text4.SetPosition((iWidth - text3.Width()) * 0.5f, iTextHeight);
-	text4.EnableKerning(false);
-	text4.SetColor(0, 255, 0, 128);
+	text4.setScale(2.0f);
+	text4.setString(testString);
+	textHeight -= text4.fontBase();
+	text4.setPosition((Width - text3.width()) * 0.5f, textHeight);
+	text4.enableKerning(false);
+	text4.setColor(0, 255, 0, 128);
 
 	ncTextNode text5(&rootNode, &font3);
-	text5.SetScale(2.0f);
-	text5.SetString(vTestString);
-	iTextHeight -= text5.FontBase();
-	text5.SetPosition((iWidth - text5.Width()) * 0.5f, iTextHeight);
-	text5.SetColor(0, 0, 255, 255);
+	text5.setScale(2.0f);
+	text5.setString(testString);
+	textHeight -= text5.fontBase();
+	text5.setPosition((Width - text5.width()) * 0.5f, textHeight);
+	text5.setColor(0, 0, 255, 255);
 
 	ncTextNode text6(&rootNode, &font3);
-	text6.SetScale(2.0f);
-	text6.SetString(vTestString);
-	iTextHeight -= text6.FontBase();
-	text6.SetPosition((iWidth - text5.Width()) * 0.5f, iTextHeight);
-	text6.EnableKerning(false);
-	text6.SetColor(0, 0, 255, 128);
+	text6.setScale(2.0f);
+	text6.setString(testString);
+	textHeight -= text6.fontBase();
+	text6.setPosition((Width - text5.width()) * 0.5f, textHeight);
+	text6.enableKerning(false);
+	text6.setColor(0, 0, 255, 128);
 
 	ncTimer updateTimer;
-	updateTimer.Start();
+	updateTimer.start();
 
 
 // ----- Event cycle --------------------
-	while (!bQuit)
+	while (!shouldQuit)
 	{
 		while (SDL_PollEvent(&event))
 		{
 			switch (event.type)
 			{
 				case SDL_QUIT:
-					bQuit = true;
+					shouldQuit = true;
 					break;
 				case SDL_KEYDOWN:
 					switch (event.key.keysym.sym)
 					{
 						case SDLK_ESCAPE:
 						case SDLK_q:
-							bQuit = true;
+							shouldQuit = true;
 							break;
 						case SDLK_F1:
-							gfxDevice.ToggleFullScreen();
+							gfxDevice.toggleFullScreen();
 							break;
 						default:
 							break;
@@ -118,28 +118,28 @@ int main(int argc, char **argv)
 
 
 // ----- Blitting on the screen --------
-		t.AddFrame();
+		t.addFrame();
 
 		// Updating string every 100ms
-		if (updateTimer.Interval() > 0.1f)
+		if (updateTimer.interval() > 0.1f)
 		{
-			updateTimer.Start();
-			sprintf(vFPS, (const char *)"FPS: %.0f", t.AverageFPS());
-			fpsText.SetString(vFPS);
-			fpsText.SetPosition((iWidth - fpsText.Width()), iHeight);
+			updateTimer.start();
+			sprintf(fpsString, (const char *)"FPS: %.0f", t.averageFps());
+			fpsText.setString(fpsString);
+			fpsText.setPosition((Width - fpsText.width()), Height);
 		}
 
-		gfxDevice.Clear();
+		gfxDevice.clear();
 
-		rootNode.Update(t.Interval());
-		rootNode.Visit(renderQueue);
-		renderQueue.Draw();
+		rootNode.update(t.interval());
+		rootNode.visit(renderQueue);
+		renderQueue.draw();
 
-		gfxDevice.Update();
+		gfxDevice.update();
 	}
 
 
 // ----- Quitting ----------------------
-	ncServiceLocator::UnregisterAll();
+	ncServiceLocator::unregisterAll();
 	return 0;
 }

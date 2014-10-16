@@ -9,28 +9,28 @@
 ///////////////////////////////////////////////////////////
 
 ncAudioBuffer::ncAudioBuffer()
-	: m_iChannels(0), m_iFrequency(0)
+	: numChannels_(0), frequency_(0)
 {
-	m_eType = AUDIOBUFFER_TYPE;
-	alGenBuffers(1, &m_uALId);
+	type_ = AUDIOBUFFER_TYPE;
+	alGenBuffers(1, &bufferId_);
 }
 
 /// A constructor creating a buffer from a file
-ncAudioBuffer::ncAudioBuffer(const char *pFilename)
-	: m_iChannels(0), m_iFrequency(0)
+ncAudioBuffer::ncAudioBuffer(const char *filename)
+	: numChannels_(0), frequency_(0)
 {
-	m_eType = AUDIOBUFFER_TYPE;
-	alGenBuffers(1, &m_uALId);
-	SetName(pFilename);
+	type_ = AUDIOBUFFER_TYPE;
+	alGenBuffers(1, &bufferId_);
+	setName(filename);
 
-	ncIAudioLoader* pAudioLoader = ncIAudioLoader::CreateFromFile(pFilename);
-	Load(pAudioLoader);
-	delete pAudioLoader;
+	ncIAudioLoader* audioLoader = ncIAudioLoader::createFromFile(filename);
+	load(audioLoader);
+	delete audioLoader;
 }
 
 ncAudioBuffer::~ncAudioBuffer()
 {
-	alDeleteBuffers(1, &m_uALId);
+	alDeleteBuffers(1, &bufferId_);
 }
 
 ///////////////////////////////////////////////////////////
@@ -38,34 +38,34 @@ ncAudioBuffer::~ncAudioBuffer()
 ///////////////////////////////////////////////////////////
 
 /// Loads audio samples based on information from the audio loader
-void ncAudioBuffer::Load(const ncIAudioLoader *pAudioLoader)
+void ncAudioBuffer::load(const ncIAudioLoader *audioLoader)
 {
-	char *pBuffer;
-	ALenum eFormat;
-	m_iFrequency = pAudioLoader->Frequency();
-	m_iChannels = pAudioLoader->Channels();
+	char *buffer;
+	ALenum format;
+	frequency_ = audioLoader->frequency();
+	numChannels_ = audioLoader->numChannels();
 
-	if (m_iChannels == 1)
+	if (numChannels_ == 1)
 	{
-		eFormat = AL_FORMAT_MONO16;
+		format = AL_FORMAT_MONO16;
 	}
-	else if (m_iChannels == 2)
+	else if (numChannels_ == 2)
 	{
-		eFormat = AL_FORMAT_STEREO16;
+		format = AL_FORMAT_STEREO16;
 	}
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncAudioBuffer::Load - Unsupported number of channels: %d", m_iChannels);
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, "ncAudioBuffer::load - Unsupported number of channels: %d", numChannels_);
 		exit(EXIT_FAILURE);
 	}
 
 	// Buffer size calculated as samples * channels * 16bit
-	int iBufSize = pAudioLoader->BufferSize();
-	pBuffer = new char[iBufSize];
+	int bufferSize = audioLoader->bufferSize();
+	buffer = new char[bufferSize];
 
-	pAudioLoader->Read(pBuffer, iBufSize);
+	audioLoader->read(buffer, bufferSize);
 	// On iOS alBufferDataStatic could be used instead
-	alBufferData(m_uALId, eFormat, pBuffer, iBufSize, m_iFrequency);
+	alBufferData(bufferId_, format, buffer, bufferSize, frequency_);
 
-	delete[] pBuffer;
+	delete[] buffer;
 }

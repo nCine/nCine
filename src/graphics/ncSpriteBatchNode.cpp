@@ -8,62 +8,62 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncSpriteBatchNode::ncSpriteBatchNode(ncSceneNode* pParent, ncTexture *pTexture)
-	: ncDrawableNode(pParent, 0, 0), m_pTexture(pTexture), m_vVertices(16), m_vTexCoords(16), m_vColors(16)
+ncSpriteBatchNode::ncSpriteBatchNode(ncSceneNode* parent, ncTexture *texture)
+	: ncDrawableNode(parent, 0, 0), texture_(texture), vertices_(16), texCoords_(16), colors_(16)
 {
-	m_eType = SPRITEBATCH_TYPE;
-	SetPriority(ncDrawableNode::SCENE_PRIORITY);
-	m_renderCmd.SetType(ncRenderCommand::SPRITE_TYPE);
-	m_renderCmd.Material().SetAlwaysTransparent(true);
+	type_ = SPRITEBATCH_TYPE;
+	setPriority(ncDrawableNode::SCENE_PRIORITY);
+	renderCommand_.setType(ncRenderCommand::SPRITE_TYPE);
+	renderCommand_.material().setAlwaysTransparent(true);
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncSpriteBatchNode::Visit(ncRenderQueue& rRenderQueue)
+void ncSpriteBatchNode::visit(ncRenderQueue& renderQueue)
 {
 	// early return if a node is invisible
-	if (!bShouldDraw)
+	if (!shouldDraw_)
 	{
 		return;
 	}
 
-	Transform();
+	transform();
 
 	// Clear any previous data before processing sprites
-	m_vVertices.Clear();
-	m_vTexCoords.Clear();
-	m_vColors.Clear();
+	vertices_.clear();
+	texCoords_.clear();
+	colors_.clear();
 
 	// TODO: only the first level of children gets accounted
-	for (ncList<ncSceneNode *>::Const_Iterator i = m_children.Begin(); i != m_children.End(); ++i)
+	for (ncList<ncSceneNode *>::Const_Iterator i = children_.begin(); i != children_.end(); ++i)
 	{
-		if ((*i)->Type() == ncSprite::sType())
+		if ((*i)->type() == ncSprite::sType())
 		{
-			ncSprite *pSprite = static_cast<ncSprite *>((*i));
+			ncSprite *sprite = static_cast<ncSprite *>((*i));
 
-			if (pSprite->bShouldDraw && pSprite->Texture()->GLId() == m_pTexture->GLId())
+			if (sprite->shouldDraw_ && sprite->texture()->gLId() == texture_->gLId())
 			{
-				pSprite->Transform();
-				ProcessSprite(*pSprite);
+				sprite->transform();
+				processSprite(*sprite);
 			}
 		}
 	}
 
-	Draw(rRenderQueue);
+	draw(renderQueue);
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncSpriteBatchNode::ProcessSprite(ncSprite& rSprite)
+void ncSpriteBatchNode::processSprite(ncSprite& sprite)
 {
-	ncPoint size = rSprite.Size();
-	ncVector2f pos = rSprite.Position();
-	float rot = rSprite.Rotation();
-	float scale = rSprite.Scale();
+	ncPoint size = sprite.size();
+	ncVector2f pos = sprite.position();
+	float rot = sprite.rotation();
+	float scale = sprite.scale();
 
 	float leftPos = size.x * scale * 0.5f;
 	float rightPos = -size.x * scale * 0.5f;
@@ -72,55 +72,55 @@ void ncSpriteBatchNode::ProcessSprite(ncSprite& rSprite)
 
 	float sine = 0.0f;
 	float cosine = 1.0f;
-	if (abs(rot) > ncSprite::sMinRotation && abs(rot) < 360.0f - ncSprite::sMinRotation)
+	if (abs(rot) > ncSprite::MinRotation && abs(rot) < 360.0f - ncSprite::MinRotation)
 	{
 		sine = sinf(-rot * M_PI / 180.0f);
 		cosine = cosf(-rot * M_PI / 180.0f);
 	}
 
-	float *pVertices = m_vVertices.MapBuffer(12);
-	pVertices[0] = pos.x + leftPos * cosine - bottomPos * sine;			pVertices[1] = pos.y + bottomPos * cosine + leftPos * sine;
-	pVertices[2] = pos.x + leftPos * cosine - topPos * sine;			pVertices[3] = pos.y + topPos * cosine + leftPos * sine;
-	pVertices[4] = pos.x + rightPos * cosine - bottomPos * sine;		pVertices[5] = pos.y + bottomPos * cosine + rightPos * sine;
+	float *vertices = vertices_.mapBuffer(12);
+	vertices[0] = pos.x + leftPos * cosine - bottomPos * sine;			vertices[1] = pos.y + bottomPos * cosine + leftPos * sine;
+	vertices[2] = pos.x + leftPos * cosine - topPos * sine;				vertices[3] = pos.y + topPos * cosine + leftPos * sine;
+	vertices[4] = pos.x + rightPos * cosine - bottomPos * sine;			vertices[5] = pos.y + bottomPos * cosine + rightPos * sine;
 
-	pVertices[6] = pos.x + rightPos * cosine - bottomPos * sine;		pVertices[7] = pos.y + bottomPos * cosine + rightPos * sine;
-	pVertices[8] = pos.x + rightPos * cosine - topPos * sine;			pVertices[9] = pos.y + topPos * cosine + rightPos * sine;
-	pVertices[10] = pos.x + leftPos * cosine - topPos * sine;			pVertices[11] = pos.y + topPos * cosine + leftPos * sine;
+	vertices[6] = pos.x + rightPos * cosine - bottomPos * sine;			vertices[7] = pos.y + bottomPos * cosine + rightPos * sine;
+	vertices[8] = pos.x + rightPos * cosine - topPos * sine;			vertices[9] = pos.y + topPos * cosine + rightPos * sine;
+	vertices[10] = pos.x + leftPos * cosine - topPos * sine;			vertices[11] = pos.y + topPos * cosine + leftPos * sine;
 
 
-	ncPoint texSize = m_pTexture->Size();
-	ncRect texRect = rSprite.TexRect();
+	ncPoint texSize = texture_->size();
+	ncRect texRect = sprite.texRect();
 
 	float leftCoord = float(texRect.x) / float(texSize.x);
 	float rightCoord = float(texRect.x + texRect.w) / float(texSize.x);
 	float bottomCoord = float(texRect.y + texRect.h) / float(texSize.y);
 	float topCoord = float(texRect.y) / float(texSize.y);
 
-	float *pTexCoords = m_vTexCoords.MapBuffer(12);
-	pTexCoords[0] = leftCoord;				pTexCoords[1] = bottomCoord;
-	pTexCoords[2] = leftCoord;				pTexCoords[3] = topCoord;
-	pTexCoords[4] = rightCoord;				pTexCoords[5] = bottomCoord;
+	float *texCoords = texCoords_.mapBuffer(12);
+	texCoords[0] = leftCoord;				texCoords[1] = bottomCoord;
+	texCoords[2] = leftCoord;				texCoords[3] = topCoord;
+	texCoords[4] = rightCoord;				texCoords[5] = bottomCoord;
 
-	pTexCoords[6] = rightCoord;				pTexCoords[7] = bottomCoord;
-	pTexCoords[8] = rightCoord;				pTexCoords[9] = topCoord;
-	pTexCoords[10] = leftCoord;				pTexCoords[11] = topCoord;
+	texCoords[6] = rightCoord;				texCoords[7] = bottomCoord;
+	texCoords[8] = rightCoord;				texCoords[9] = topCoord;
+	texCoords[10] = leftCoord;				texCoords[11] = topCoord;
 
 
-	m_vColors.Append(rSprite.Color().Vector(), 4);
-	m_vColors.Append(rSprite.Color().Vector(), 4);
-	m_vColors.Append(rSprite.Color().Vector(), 4);
+	colors_.append(sprite.color().vector(), 4);
+	colors_.append(sprite.color().vector(), 4);
+	colors_.append(sprite.color().vector(), 4);
 
-	m_vColors.Append(rSprite.Color().Vector(), 4);
-	m_vColors.Append(rSprite.Color().Vector(), 4);
-	m_vColors.Append(rSprite.Color().Vector(), 4);
+	colors_.append(sprite.color().vector(), 4);
+	colors_.append(sprite.color().vector(), 4);
+	colors_.append(sprite.color().vector(), 4);
 }
 
-void ncSpriteBatchNode::UpdateRenderCommand()
+void ncSpriteBatchNode::updateRenderCommand()
 {
-	m_renderCmd.Material().SetTextureGLId(m_pTexture->GLId());
-	m_renderCmd.Transformation().SetPosition(AbsPosition().x, AbsPosition().y);
-	m_renderCmd.Geometry().SetData(GL_TRIANGLES, 0, m_vVertices.Size() / 2, m_vVertices.Pointer(), m_vTexCoords.Pointer(), m_vColors.Pointer());
-	m_renderCmd.CalculateSortKey();
+	renderCommand_.material().setTextureGLId(texture_->gLId());
+	renderCommand_.transformation().setPosition(absPosition().x, absPosition().y);
+	renderCommand_.geometry().setData(GL_TRIANGLES, 0, vertices_.size() / 2, vertices_.pointer(), texCoords_.pointer(), colors_.pointer());
+	renderCommand_.calculateSortKey();
 
-	ApplyTransformations();
+	applyTransformations();
 }

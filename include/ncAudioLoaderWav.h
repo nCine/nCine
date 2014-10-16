@@ -7,35 +7,35 @@
 class ncAudioLoaderWav : public ncIAudioLoader
 {
   public:
-	ncAudioLoaderWav(const char *pFilename);
-	ncAudioLoaderWav(ncIFile *pFileHandle);
+	ncAudioLoaderWav(const char *filename);
+	ncAudioLoaderWav(ncIFile *fileHandle);
 	~ncAudioLoaderWav() { }
 
-	long Read(char *pBuffer, int iBufSize) const;
-	void Rewind() const;
+	long read(char *buffer, int bufferSize) const;
+	void rewind() const;
 
   private:
 	/// Header for the RIFF WAVE format
-	typedef struct WAV_header
+	typedef struct WavHeader
 	{
-		char		cChunkID[4];
-		uint32_t	uChunkSize;
-		char		cFormat[4];
+		char		chunkId[4];
+		uint32_t	chunkSize;
+		char		format[4];
 
-		char		cSubchunk1Id[4];
-		uint32_t	uSubchunk1Size;
-		uint16_t	uAudioFormat;
-		uint16_t	uNumChannels;
-		uint32_t	uSampleRate;
-		uint32_t	uByteRate;
-		uint16_t	uBlockAlign;
-		uint16_t	uBitsPerSample;
+		char		subchunk1Id[4];
+		uint32_t	subchunk1Size;
+		uint16_t	audioFormat;
+		uint16_t	numChannels;
+		uint32_t	sampleRate;
+		uint32_t	byteRate;
+		uint16_t	blockAlign;
+		uint16_t	bitsPerSample;
 
-		char		cSubchunk2Id[4];
-		uint32_t	uSubchunk2Size;
-	} WAV_header;
+		char		subchunk2Id[4];
+		uint32_t	subchunk2Size;
+	} WavHeader;
 
-	void Init();
+	void init();
 };
 
 #endif

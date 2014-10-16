@@ -8,51 +8,51 @@
 class ncRectAnimation
 {
   public:
-	ncRectAnimation(float fFrameTime, bool bLooping, bool bBackward);
+	ncRectAnimation(float frameTime, bool isLooping, bool backward);
 
 	/// Returns current frame
-	inline unsigned int Frame() const { return m_uCurrentFrame; }
+	inline unsigned int frame() const { return currentFrame_; }
 	// Sets current frame
-	void SetFrame(unsigned int uFrameNum);
+	void SetFrame(unsigned int frameNum);
 	/// Returns frame time
-	float FrameTime() const { return m_fFrameTime; }
+	float frameTime() const { return frameTime_; }
 	/// Sets frame time
-	inline void SetFrameTime(float fFrameTime) { m_fFrameTime = fFrameTime; }
+	inline void setFrameTime(float frameTime) { frameTime_ = frameTime; }
 
 	/// Adds a rectangles to the array
-	inline void AddRect(const ncRect& rRect) { m_vRects.InsertBack(rRect); }
+	inline void addRect(const ncRect& rect) { rects_.insertBack(rect); }
 	/// Creates a rectangles from origin and size and then adds it to the array
-	inline void AddRect(int iX, int iY, int iW, int iH) { m_vRects.InsertBack(ncRect(iX, iY, iW, iH)); }
+	inline void addRect(int x, int y, int w, int h) { rects_.insertBack(ncRect(x, y, w, h)); }
 	/// Returns the current rectangle
-	inline const ncRect& Rect() const { return m_vRects[m_uCurrentFrame]; }
+	inline const ncRect& rect() const { return rects_[currentFrame_]; }
 
 	// Updates current frame based on time passed
-	void UpdateFrame(float fInterval);
+	void updateFrame(float interval);
 
 	/// Is the animation paused?
-	inline bool IsPaused() const { return m_bPaused; }
+	inline bool isPaused() const { return isPaused_; }
 	/// Sets the animation flag
-	inline void SetPaused(bool bPaused) { m_bPaused = bPaused; }
+	inline void setPaused(bool isPaused) { isPaused_ = isPaused; }
 	// Pause on a specified frame
-	void Pause(unsigned int uFrameNum);
+	void pause(unsigned int frameNum);
 
   private:
 	/// The rectangles array
-	ncArray<ncRect> m_vRects;
+	ncArray<ncRect> rects_;
 	/// Current frame
-	unsigned int m_uCurrentFrame;
+	unsigned int currentFrame_;
 	/// The time until the next frame change
-	float m_fFrameTime;
+	float frameTime_;
 	/// Elapsed time since the last frame change
-	float m_fElapsedFrameTime;
+	float elapsedFrameTime_;
 	/// The flag about the frame advance direction
-	bool m_bGoingForward;
+	bool goingForward_;
 	/// The looping flag
-	bool m_bLooping;
+	bool isLooping_;
 	/// The ping-pong loop flag
-	bool m_bBackward;
+	bool backward_;
 	/// The pause flag
-	bool m_bPaused;
+	bool isPaused_;
 };
 
 #endif

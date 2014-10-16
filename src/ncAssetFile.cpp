@@ -9,33 +9,33 @@
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-AAssetManager* ncAssetFile::m_pAssetManager = NULL;
+AAssetManager* ncAssetFile::assetManager_ = NULL;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncAssetFile::ncAssetFile(const char *pFilename)
-	: ncIFile(pFilename), m_pAsset(NULL), m_lStartOffset(0L)
+ncAssetFile::ncAssetFile(const char *filename)
+	: ncIFile(filename), asset_(NULL), startOffset_(0L)
 {
-	m_eType = ASSET_TYPE;
+	type_ = ASSET_TYPE;
 
 	// Detect fake second extension added to prevent compression
-	char *pFirstDotChar = strchr(m_vFilename, '.');
-	char *pLastDotChar = strrchr(m_vFilename, '.');
-	int iExtLEngth = pLastDotChar - pFirstDotChar - 1;
-	if (iExtLEngth >= 3 && iExtLEngth <= 4)
+	char *firstDotChar = strchr(filename_, '.');
+	char *lastDotChar = strrchr(filename_, '.');
+	int extLEngth = lastDotChar - firstDotChar - 1;
+	if (extLEngth >= 3 && extLEngth <= 4)
 	{
-		memset(m_vExtension, 0, s_uMaxExtensionsLength);
-		strncpy(m_vExtension, pFirstDotChar + 1, iExtLEngth);
+		memset(extension_, 0, MaxExtensionsLength);
+		strncpy(extension_, firstDotChar + 1, extLEngth);
 	}
 }
 
 ncAssetFile::~ncAssetFile()
 {
-	if (m_bShouldCloseOnExit)
+	if (shouldCloseOnExit_)
 	{
-		Close();
+		close();
 	}
 }
 
@@ -44,130 +44,130 @@ ncAssetFile::~ncAssetFile()
 ///////////////////////////////////////////////////////////
 
 /// Tries to open the file
-void ncAssetFile::Open(unsigned char uMode)
+void ncAssetFile::open(unsigned char mode)
 {
 	// Checking if the file is already opened
-	if (m_iFileDescriptor >= 0 || m_pAsset != NULL)
+	if (fileDescriptor_ >= 0 || asset_ != NULL)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncAssetFile::Open - File \"%s\" is already opened", m_vFilename);
+		ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncAssetFile::open - File \"%s\" is already opened", filename_);
 	}
 	else
 	{
 		// Opening with a file descriptor
-		if (uMode & MODE_FD)
+		if (mode & MODE_FD)
 		{
-			OpenFD(uMode);
+			openFd(mode);
 		}
 		// Opening as an asset only
 		else
 		{
-			OpenAsset(uMode);
+			openAsset(mode);
 		}
 	}
 }
 
 
 /// Closes the file (both opened or fopened)
-void ncAssetFile::Close()
+void ncAssetFile::close()
 {
-	if (m_iFileDescriptor >= 0)
+	if (fileDescriptor_ >= 0)
 	{
-		int iRetValue = close(m_iFileDescriptor);
-		if (iRetValue < 0)
+		int retValue = ::close(fileDescriptor_);
+		if (retValue < 0)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncAssetFile::Close - Cannot close the file \"%s\"", m_vFilename);
+			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncAssetFile::close - Cannot close the file \"%s\"", filename_);
 		}
 		else
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAssetFile::Close - File \"%s\" closed", m_vFilename);
-			m_iFileDescriptor = -1;
+			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAssetFile::close - File \"%s\" closed", filename_);
+			fileDescriptor_ = -1;
 		}
 	}
-	else if (m_pAsset)
+	else if (asset_)
 	{
-		AAsset_close(m_pAsset);
-		m_pAsset = NULL;
-		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAssetFile::Close - File \"%s\" closed", m_vFilename);
+		AAsset_close(asset_);
+		asset_ = NULL;
+		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAssetFile::close - File \"%s\" closed", filename_);
 	}
 }
 
-long int ncAssetFile::Seek(long int lOffset, int iWhence) const
+long int ncAssetFile::seek(long int offset, int whence) const
 {
-	long int lSeekValue = -1;
+	long int seekValue = -1;
 
-	if (m_iFileDescriptor >= 0)
+	if (fileDescriptor_ >= 0)
 	{
-		switch (iWhence)
+		switch (whence)
 		{
 			case SEEK_SET:
-				lSeekValue = lseek(m_iFileDescriptor, m_lStartOffset + lOffset, SEEK_SET);
+				seekValue = lseek(fileDescriptor_, startOffset_ + offset, SEEK_SET);
 				break;
 			case SEEK_CUR:
-				lSeekValue = lseek(m_iFileDescriptor, lOffset, SEEK_CUR);
+				seekValue = lseek(fileDescriptor_, offset, SEEK_CUR);
 				break;
 			case SEEK_END:
-				lSeekValue = lseek(m_iFileDescriptor, m_lStartOffset + m_lFileSize + lOffset, SEEK_END);
+				seekValue = lseek(fileDescriptor_, startOffset_ + fileSize_ + offset, SEEK_END);
 				break;
 		}
-		lSeekValue -= m_lStartOffset;
+		seekValue -= startOffset_;
 	}
-	else if (m_pAsset)
+	else if (asset_)
 	{
-		lSeekValue = AAsset_seek(m_pAsset, lOffset, iWhence);
+		seekValue = AAsset_seek(asset_, offset, whence);
 	}
 
-	return lSeekValue;
+	return seekValue;
 }
 
-long int ncAssetFile::Tell() const
+long int ncAssetFile::tell() const
 {
-	long int lTellValue = -1;
+	long int tellValue = -1;
 
-	if (m_iFileDescriptor >= 0)
+	if (fileDescriptor_ >= 0)
 	{
-		lTellValue = lseek(m_iFileDescriptor, 0L, SEEK_CUR) - m_lStartOffset;
+		tellValue = lseek(fileDescriptor_, 0L, SEEK_CUR) - startOffset_;
 	}
-	else if (m_pAsset)
+	else if (asset_)
 	{
-		lTellValue = AAsset_seek(m_pAsset, 0L, SEEK_CUR);
+		tellValue = AAsset_seek(asset_, 0L, SEEK_CUR);
 	}
 
-	return lTellValue;
+	return tellValue;
 }
 
 
-long int ncAssetFile::Read(void *pBuffer, int iBytes) const
+long int ncAssetFile::read(void *buffer, int bytes) const
 {
-	long int lBytesRead = -1;
+	long int bytesRead = -1;
 
-	if (m_iFileDescriptor >= 0)
+	if (fileDescriptor_ >= 0)
 	{
-		int iBytesToRead = iBytes;
+		int bytesToRead = bytes;
 
-		long int lSeekValue = lseek(m_iFileDescriptor, 0L, SEEK_CUR);
+		long int seekValue = lseek(fileDescriptor_, 0L, SEEK_CUR);
 
-		if (lSeekValue >=  m_lStartOffset + m_lFileSize)
+		if (seekValue >=  startOffset_ + fileSize_)
 		{
-			iBytesToRead = 0;    // simulating EOF
+			bytesToRead = 0;    // simulating EOF
 		}
-		else if (lSeekValue + iBytes > m_lStartOffset + m_lFileSize)
+		else if (seekValue + bytes > startOffset_ + fileSize_)
 		{
-			iBytesToRead = (m_lStartOffset + m_lFileSize) - lSeekValue;
+			bytesToRead = (startOffset_ + fileSize_) - seekValue;
 		}
 
-		lBytesRead = read(m_iFileDescriptor, pBuffer, iBytesToRead);
+		bytesRead = ::read(fileDescriptor_, buffer, bytesToRead);
 	}
-	else if (m_pAsset)
+	else if (asset_)
 	{
-		lBytesRead = AAsset_read(m_pAsset, pBuffer, iBytes);
+		bytesRead = AAsset_read(asset_, buffer, bytes);
 	}
 
-	return lBytesRead;
+	return bytesRead;
 }
 
-bool ncAssetFile::IsOpened() const
+bool ncAssetFile::isOpened() const
 {
-	if (m_iFileDescriptor >= 0 || m_pAsset != NULL)
+	if (fileDescriptor_ >= 0 || asset_ != NULL)
 	{
 		return true;
 	}
@@ -182,88 +182,88 @@ bool ncAssetFile::IsOpened() const
 ///////////////////////////////////////////////////////////
 
 /// Opens the file with AAsset_openFileDescriptor()
-void ncAssetFile::OpenFD(unsigned char uMode)
+void ncAssetFile::openFd(unsigned char mode)
 {
 	// An asset file can only be read
-	if (uMode == (MODE_FD | MODE_READ))
+	if (mode == (MODE_FD | MODE_READ))
 	{
-		m_pAsset = AAssetManager_open(m_pAssetManager, m_vFilename, AASSET_MODE_UNKNOWN);
-		if (m_pAsset == NULL)
+		asset_ = AAssetManager_open(assetManager_, filename_, AASSET_MODE_UNKNOWN);
+		if (asset_ == NULL)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAssetFile::OpenFD - Cannot open the file \"%s\"", m_vFilename);
+			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAssetFile::openFd - Cannot open the file \"%s\"", filename_);
 			exit(-1);
 		}
 
-		m_iFileDescriptor = AAsset_openFileDescriptor(m_pAsset, &m_lStartOffset, &m_lFileSize);
-		lseek(m_iFileDescriptor, m_lStartOffset, SEEK_SET);
-		AAsset_close(m_pAsset);
-		m_pAsset = NULL;
+		fileDescriptor_ = AAsset_openFileDescriptor(asset_, &startOffset_, &fileSize_);
+		lseek(fileDescriptor_, startOffset_, SEEK_SET);
+		AAsset_close(asset_);
+		asset_ = NULL;
 
-		if (m_iFileDescriptor < 0)
+		if (fileDescriptor_ < 0)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAssetFile::OpenFD - Cannot open the file \"%s\"", m_vFilename);
+			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAssetFile::openFd - Cannot open the file \"%s\"", filename_);
 			exit(-1);
 		}
 		else
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAssetFile::OpenFD - File \"%s\" opened", m_vFilename);
+			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAssetFile::openFd - File \"%s\" opened", filename_);
 		}
 	}
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAssetFile::OpenFD - Cannot open the file \"%s\", wrong open mode", m_vFilename);
+		ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAssetFile::openFd - Cannot open the file \"%s\", wrong open mode", filename_);
 	}
 }
 
 /// Opens the file with AAssetManager_open() only
-void ncAssetFile::OpenAsset(unsigned char uMode)
+void ncAssetFile::openAsset(unsigned char mode)
 {
 	// An asset file can only be read
-	if (uMode == MODE_READ || uMode == (MODE_READ | MODE_BINARY))
+	if (mode == MODE_READ || mode == (MODE_READ | MODE_BINARY))
 	{
-		m_pAsset = AAssetManager_open(m_pAssetManager, m_vFilename, AASSET_MODE_UNKNOWN);
-		if (m_pAsset == NULL)
+		asset_ = AAssetManager_open(assetManager_, filename_, AASSET_MODE_UNKNOWN);
+		if (asset_ == NULL)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncAssetFile::OpenAsset - Cannot open the file \"%s\"", m_vFilename);
+			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAssetFile::openAsset - Cannot open the file \"%s\"", filename_);
 			exit(-1);
 		}
 		else
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncAssetFile::OpenAsset - File \"%s\" opened", m_vFilename);
+			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAssetFile::openAsset - File \"%s\" opened", filename_);
 		}
 
 		// Calculating file size
-		m_lFileSize = AAsset_getLength(m_pAsset);
+		fileSize_ = AAsset_getLength(asset_);
 	}
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncAssetFile::OpenAsset - Cannot open the file \"%s\", wrong open mode", m_vFilename);
+		ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAssetFile::openAsset - Cannot open the file \"%s\", wrong open mode", filename_);
 	}
 }
 
 /// Checks if a file can be accessed with specified mode
-/*! It is called by ncIFile::Access() */
-bool ncAssetFile::Access(const char *pFilename, unsigned char uMode)
+/*! It is called by ncIFile::access() */
+bool ncAssetFile::access(const char *filename, unsigned char mode)
 {
-	bool bAccessible = false;
+	bool isAccessible = false;
 
-	if (uMode == ncIFile::MODE_EXISTS || uMode == ncIFile::MODE_CAN_READ)
+	if (mode == ncIFile::MODE_EXISTS || mode == ncIFile::MODE_CAN_READ)
 	{
-		AAsset *pAsset = AAssetManager_open(m_pAssetManager, pFilename, AASSET_MODE_UNKNOWN);
-		if (pAsset)
+		AAsset *asset = AAssetManager_open(assetManager_, filename, AASSET_MODE_UNKNOWN);
+		if (asset)
 		{
-			bAccessible = true;
-			AAsset_close(pAsset);
+			isAccessible = true;
+			AAsset_close(asset);
 		}
 	}
-	else if (uMode & MODE_CAN_WRITE)
+	else if (mode & MODE_CAN_WRITE)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::Access - Cannot access the file \"%s\", an asset can only be read", pFilename);
+		ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::access - Cannot access the file \"%s\", an asset can only be read", filename);
 	}
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::Access - Cannot access the file \"%s\", wrong access mode", pFilename);
+		ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::access - Cannot access the file \"%s\", wrong access mode", filename);
 	}
 
-	return bAccessible;
+	return isAccessible;
 }

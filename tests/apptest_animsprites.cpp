@@ -9,119 +9,119 @@
 
 //#define WITH_8DIRECTIONS
 
-ncIAppEventHandler* create_apphandler()
+ncIAppEventHandler* createApphandler()
 {
 	return new MyEventHandler;
 }
 
-void MyEventHandler::OnInit()
+void MyEventHandler::onInit()
 {
-	ncIInputManager::SetHandler(this);
-	ncSceneNode &rRootNode = ncApplication::RootNode();
+	ncIInputManager::setHandler(this);
+	ncSceneNode &rootNode = ncApplication::rootNode();
 
 #ifdef __ANDROID__
-	m_pAudioPlayer = new ncAudioStreamPlayer("sdcard/ncine/music.ogg");
-	m_pTexture = new ncTexture("/sdcard/ncine/abta_playertwo.dds");
-//	m_pAudioPlayer = new ncAudioStreamPlayer("asset::bomb.ogg");
-//	m_pTexture = new ncTexture("asset::abta_player.dds.mp3");
+	audioPlayer_ = new ncAudioStreamPlayer("sdcard/ncine/music.ogg");
+	texture_ = new ncTexture("/sdcard/ncine/abta_playertwo.dds");
+//	audioPlayer_ = new ncAudioStreamPlayer("asset::bomb.ogg");
+//	texture_ = new ncTexture("asset::abta_player.dds.mp3");
 #else
-	m_pAudioPlayer = new ncAudioStreamPlayer("sounds/music.ogg");
-	m_pTexture = new ncTexture("textures/abta_playertwo.png");
-//	m_pTexture = new ncTexture("textures/abta_playertwo_bc3.dds");
+	audioPlayer_ = new ncAudioStreamPlayer("sounds/music.ogg");
+	texture_ = new ncTexture("textures/abta_playertwo.png");
+//	texture_ = new ncTexture("textures/abta_playertwo_bc3.dds");
 #endif
 
-	m_pAudioPlayer->SetLooping(true);
-	m_pAudioPlayer->Play();
-	m_pAnimSprite = new ncAnimatedSprite(&rRootNode, m_pTexture);
+	audioPlayer_->setLooping(true);
+	audioPlayer_->play();
+	animSprite_ = new ncAnimatedSprite(&rootNode, texture_);
 	// Up
-	ncRectAnimation *pAnimation = new ncRectAnimation(0.06f, true, true);
-	pAnimation->AddRect(0, 0, 32, 32);
-	pAnimation->AddRect(32, 0, 32, 32);
-	pAnimation->AddRect(64, 0, 32, 32);
-	pAnimation->AddRect(96, 0, 32, 32);
-	pAnimation->AddRect(128, 0, 32, 32);
-	m_pAnimSprite->AddAnimation(pAnimation);
+	ncRectAnimation *animation = new ncRectAnimation(0.06f, true, true);
+	animation->addRect(0, 0, 32, 32);
+	animation->addRect(32, 0, 32, 32);
+	animation->addRect(64, 0, 32, 32);
+	animation->addRect(96, 0, 32, 32);
+	animation->addRect(128, 0, 32, 32);
+	animSprite_->addAnimation(animation);
 #ifdef WITH_8DIRECTIONS
 	// Up-right
-	pAnimation = new ncRectAnimation(0.06f, true, true);
-	pAnimation->AddRect(160, 0, 32, 32);
-	pAnimation->AddRect(192, 0, 32, 32);
-	pAnimation->AddRect(224, 0, 32, 32);
-	pAnimation->AddRect(256, 0, 32, 32);
-	pAnimation->AddRect(288, 0, 32, 32);
-	m_pAnimSprite->AddAnimation(pAnimation);
+	animation = new ncRectAnimation(0.06f, true, true);
+	animation->addRect(160, 0, 32, 32);
+	animation->addRect(192, 0, 32, 32);
+	animation->addRect(224, 0, 32, 32);
+	animation->addRect(256, 0, 32, 32);
+	animation->addRect(288, 0, 32, 32);
+	animSprite_->addAnimation(animation);
 	// Right
-	pAnimation = new ncRectAnimation(0.06f, true, true);
-	pAnimation->AddRect(320, 0, 32, 32);
-	pAnimation->AddRect(352, 0, 32, 32);
-	pAnimation->AddRect(384, 0, 32, 32);
-	pAnimation->AddRect(416, 0, 32, 32);
-	pAnimation->AddRect(448, 0, 32, 32);
-	m_pAnimSprite->AddAnimation(pAnimation);
+	animation = new ncRectAnimation(0.06f, true, true);
+	animation->addRect(320, 0, 32, 32);
+	animation->addRect(352, 0, 32, 32);
+	animation->addRect(384, 0, 32, 32);
+	animation->addRect(416, 0, 32, 32);
+	animation->addRect(448, 0, 32, 32);
+	animSprite_->addAnimation(animation);
 	// Down-right
-	pAnimation = new ncRectAnimation(0.06f, true, true);
-	pAnimation->AddRect(480, 0, 32, 32);
-	pAnimation->AddRect(512, 0, 32, 32);
-	pAnimation->AddRect(544, 0, 32, 32);
-	pAnimation->AddRect(576, 0, 32, 32);
-	pAnimation->AddRect(608, 0, 32, 32);
-	m_pAnimSprite->AddAnimation(pAnimation);
+	animation = new ncRectAnimation(0.06f, true, true);
+	animation->addRect(480, 0, 32, 32);
+	animation->addRect(512, 0, 32, 32);
+	animation->addRect(544, 0, 32, 32);
+	animation->addRect(576, 0, 32, 32);
+	animation->addRect(608, 0, 32, 32);
+	animSprite_->addAnimation(animation);
 	// Down
-	pAnimation = new ncRectAnimation(0.06f, true, true);
-	pAnimation->AddRect(640, 0, 32, 32);
-	pAnimation->AddRect(0, 32, 32, 32);
-	pAnimation->AddRect(32, 32, 32, 32);
-	pAnimation->AddRect(64, 32, 32, 32);
-	pAnimation->AddRect(96, 32, 32, 32);
-	m_pAnimSprite->AddAnimation(pAnimation);
+	animation = new ncRectAnimation(0.06f, true, true);
+	animation->addRect(640, 0, 32, 32);
+	animation->addRect(0, 32, 32, 32);
+	animation->addRect(32, 32, 32, 32);
+	animation->addRect(64, 32, 32, 32);
+	animation->addRect(96, 32, 32, 32);
+	animSprite_->addAnimation(animation);
 	// Down-left
-	pAnimation = new ncRectAnimation(0.06f, true, true);
-	pAnimation->AddRect(128, 32, 32, 32);
-	pAnimation->AddRect(160, 32, 32, 32);
-	pAnimation->AddRect(192, 32, 32, 32);
-	pAnimation->AddRect(224, 32, 32, 32);
-	pAnimation->AddRect(256, 32, 32, 32);
-	m_pAnimSprite->AddAnimation(pAnimation);
+	animation = new ncRectAnimation(0.06f, true, true);
+	animation->addRect(128, 32, 32, 32);
+	animation->addRect(160, 32, 32, 32);
+	animation->addRect(192, 32, 32, 32);
+	animation->addRect(224, 32, 32, 32);
+	animation->addRect(256, 32, 32, 32);
+	animSprite_->addAnimation(animation);
 	// Left
-	pAnimation = new ncRectAnimation(0.06f, true, true);
-	pAnimation->AddRect(288, 32, 32, 32);
-	pAnimation->AddRect(320, 32, 32, 32);
-	pAnimation->AddRect(352, 32, 32, 32);
-	pAnimation->AddRect(384, 32, 32, 32);
-	pAnimation->AddRect(416, 32, 32, 32);
-	m_pAnimSprite->AddAnimation(pAnimation);
+	animation = new ncRectAnimation(0.06f, true, true);
+	animation->addRect(288, 32, 32, 32);
+	animation->addRect(320, 32, 32, 32);
+	animation->addRect(352, 32, 32, 32);
+	animation->addRect(384, 32, 32, 32);
+	animation->addRect(416, 32, 32, 32);
+	animSprite_->addAnimation(animation);
 	// Up-left
-	pAnimation = new ncRectAnimation(0.06f, true, true);
-	pAnimation->AddRect(448, 32, 32, 32);
-	pAnimation->AddRect(480, 32, 32, 32);
-	pAnimation->AddRect(512, 32, 32, 32);
-	pAnimation->AddRect(544, 32, 32, 32);
-	pAnimation->AddRect(576, 32, 32, 32);
-	m_pAnimSprite->AddAnimation(pAnimation);
+	animation = new ncRectAnimation(0.06f, true, true);
+	animation->addRect(448, 32, 32, 32);
+	animation->addRect(480, 32, 32, 32);
+	animation->addRect(512, 32, 32, 32);
+	animation->addRect(544, 32, 32, 32);
+	animation->addRect(576, 32, 32, 32);
+	animSprite_->addAnimation(animation);
 	// Special
-	pAnimation = new ncRectAnimation(0.06f, true, true);
-	pAnimation->AddRect(608, 32, 32, 32);
-	pAnimation->AddRect(640, 32, 32, 32);
-	pAnimation->AddRect(0, 64, 32, 32);
-	pAnimation->AddRect(32, 64, 32, 32);
-	pAnimation->AddRect(64, 64, 32, 32);
-	m_pAnimSprite->AddAnimation(pAnimation);
+	animation = new ncRectAnimation(0.06f, true, true);
+	animation->addRect(608, 32, 32, 32);
+	animation->addRect(640, 32, 32, 32);
+	animation->addRect(0, 64, 32, 32);
+	animation->addRect(32, 64, 32, 32);
+	animation->addRect(64, 64, 32, 32);
+	animSprite_->addAnimation(animation);
 #endif
 
-	m_pAnimSprite->SetPosition(ncApplication::Width() * 0.5f, ncApplication::Height() * 0.5f);
-	m_pAnimSprite->SetAnimation(0);
-	m_pAnimSprite->SetFrame(0);
-	m_pAnimSprite->SetPaused(true);
-	m_destVector = m_pAnimSprite->Position();
+	animSprite_->setPosition(ncApplication::width() * 0.5f, ncApplication::height() * 0.5f);
+	animSprite_->setAnimation(0);
+	animSprite_->setFrame(0);
+	animSprite_->setPaused(true);
+	destVector_ = animSprite_->position();
 }
 
-void MyEventHandler::OnFrameStart()
+void MyEventHandler::onFrameStart()
 {
-	ncVector2f reachVector = m_destVector - m_pAnimSprite->AbsPosition();
-	if (reachVector.Length() > 1.0f)
+	ncVector2f reachVector = destVector_ - animSprite_->absPosition();
+	if (reachVector.length() > 1.0f)
 	{
-		reachVector.Normalize();
-		m_pAnimSprite->SetPaused(false);
+		reachVector.normalize();
+		animSprite_->setPaused(false);
 
 #ifdef WITH_8DIRECTIONS
 		const float dirTolerance = 0.3f;
@@ -129,109 +129,109 @@ void MyEventHandler::OnFrameStart()
 		{
 			if (reachVector.y > dirTolerance)
 			{
-				m_pAnimSprite->SetAnimation(1);    // Up-right
+				animSprite_->setAnimation(1);    // Up-right
 			}
 			else if (reachVector.y < -dirTolerance)
 			{
-				m_pAnimSprite->SetAnimation(3);    // Down-right
+				animSprite_->setAnimation(3);    // Down-right
 			}
 			else
 			{
-				m_pAnimSprite->SetAnimation(2);    // Right
+				animSprite_->setAnimation(2);    // Right
 			}
 		}
 		else if (reachVector.x > dirTolerance) // Left
 		{
 			if (reachVector.y > dirTolerance)
 			{
-				m_pAnimSprite->SetAnimation(7);    // Up-left
+				animSprite_->setAnimation(7);    // Up-left
 			}
 			else if (reachVector.y < -dirTolerance)
 			{
-				m_pAnimSprite->SetAnimation(5);    // Down-left
+				animSprite_->setAnimation(5);    // Down-left
 			}
 			else
 			{
-				m_pAnimSprite->SetAnimation(6);    // Left
+				animSprite_->setAnimation(6);    // Left
 			}
 		}
 		else // Pure up or down
 		{
 			if (reachVector.y > 0.0f)
 			{
-				m_pAnimSprite->SetAnimation(0);    // Up
+				animSprite_->setAnimation(0);    // Up
 			}
 			else
 			{
-				m_pAnimSprite->SetAnimation(4);    // Down
+				animSprite_->setAnimation(4);    // Down
 			}
 		}
 #else
-		float fAngle = -(atan2(reachVector.y, reachVector.x) - atan2(1.0f, 0.0f)) * 180.0f / M_PI;
-		if (fAngle < 0.0f)
+		float angle = -(atan2(reachVector.y, reachVector.x) - atan2(1.0f, 0.0f)) * 180.0f / M_PI;
+		if (angle < 0.0f)
 		{
-			fAngle += 360.0f;
+			angle += 360.0f;
 		}
-		m_pAnimSprite->SetRotation(fAngle);
+		animSprite_->setRotation(angle);
 #endif
 
-		reachVector *= ncApplication::Interval() * 100.0f;
-		m_pAnimSprite->Move(reachVector);
+		reachVector *= ncApplication::interval() * 100.0f;
+		animSprite_->move(reachVector);
 	}
 	else
 	{
-		m_pAnimSprite->SetFrame(0);
-		m_pAnimSprite->SetPaused(true);
+		animSprite_->setFrame(0);
+		animSprite_->setPaused(true);
 	}
 }
 
-void MyEventHandler::OnShutdown()
+void MyEventHandler::onShutdown()
 {
-	delete m_pAudioPlayer;
-	delete m_pAnimSprite;
-	delete m_pTexture;
+	delete audioPlayer_;
+	delete animSprite_;
+	delete texture_;
 }
 
 #ifdef __ANDROID__
-void MyEventHandler::OnTouchDown(const ncTouchEvent &event)
+void MyEventHandler::onTouchDown(const ncTouchEvent &event)
 {
-	m_destVector.x = event.x;
-	m_destVector.y = event.y;
+	destVector_.x = event.x;
+	destVector_.y = event.y;
 }
 
-void MyEventHandler::OnTouchMove(const ncTouchEvent &event)
+void MyEventHandler::onTouchMove(const ncTouchEvent &event)
 {
-	m_destVector.x = event.x;
-	m_destVector.y = event.y;
+	destVector_.x = event.x;
+	destVector_.y = event.y;
 }
 #else
-void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
+void MyEventHandler::onKeyReleased(const ncKeyboardEvent &event)
 {
 	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)
 	{
-		ncApplication::Quit();
+		ncApplication::quit();
 	}
 	else if (event.sym == NCKEY_SPACE)
 	{
-		ncApplication::TogglePause();
+		ncApplication::togglePause();
 	}
 }
 
-void MyEventHandler::OnMouseButtonPressed(const ncMouseEvent &event)
+void MyEventHandler::onMouseButtonPressed(const ncMouseEvent &event)
 {
 	if (event.isLeftButton())
 	{
-		m_destVector.x = event.x;
-		m_destVector.y = event.y;
+		destVector_.x = event.x;
+		destVector_.y = event.y;
 	}
 }
 
-void MyEventHandler::OnMouseMoved(const ncMouseState &state)
+void MyEventHandler::onMouseMoved(const ncMouseState &state)
 {
 	if (state.isLeftButtonDown())
 	{
-		m_destVector.x = state.x;
-		m_destVector.y = state.y;
+		destVector_.x = state.x;
+		destVector_.y = state.y;
 	}
 }
 #endif

@@ -9,7 +9,7 @@ class ncObject
 {
   public:
 	/// The enumeration of object types
-	enum eObjectType
+	enum ObjectType
 	{
 		BASE_TYPE = 0,
 		TEXTURE_TYPE,
@@ -25,66 +25,66 @@ class ncObject
 	};
 
 	/// Maximum length for an object name
-	static const int s_iNameLength = 128;
+	static const int MaxNameLength = 128;
 
-	ncObject() : m_eType(BASE_TYPE), m_uId(0)
+	ncObject() : type_(BASE_TYPE), id_(0)
 	{
-		memset(m_vName, 0, s_iNameLength);
-		m_uId = ncServiceLocator::Indexer().AddObject(this);
+		memset(name_, 0, MaxNameLength);
+		id_ = ncServiceLocator::indexer().addObject(this);
 	}
-	virtual ~ncObject() { ncServiceLocator::Indexer().RemoveObject(m_uId); }
+	virtual ~ncObject() { ncServiceLocator::indexer().removeObject(id_); }
 
 	/// Returns the object identification number
-	inline unsigned int Id() const { return m_uId; }
+	inline unsigned int id() const { return id_; }
 
 	/// Returns the object type (RTTI)
-	eObjectType Type() const { return m_eType; }
+	ObjectType type() const { return type_; }
 	/// Static method to return class type
-	inline static eObjectType sType() { return BASE_TYPE; }
+	inline static ObjectType sType() { return BASE_TYPE; }
 
 	/// Returns object name
-	char const * const Name() const { return m_vName; }
+	char const * const name() const { return name_; }
 	/// Sets the object name
-	inline void SetName(const char vName[s_iNameLength]) { strncpy(m_vName, vName, s_iNameLength); }
+	inline void setName(const char name[MaxNameLength]) { strncpy(name_, name, MaxNameLength); }
 
 	// Returns a casted pointer to the object with the specified id, if any exists
-	template <class T> static T* FromId(unsigned int uId);
+	template <class T> static T* fromId(unsigned int id);
 
   protected:
 	/// Object type
-	eObjectType m_eType;
+	ObjectType type_;
 
   private:
 	/// Object identification in the indexer
-	unsigned int m_uId;
+	unsigned int id_;
 
 	/// Object name
 	/** This field is currently only useful in debug,
 	as there's still no string hashing based search. */
-	char m_vName[s_iNameLength];
+	char name_[MaxNameLength];
 };
 
 /// Returns a casted pointer to the object with the specified id, if any exists
 template <class T>
-T* ncObject::FromId(unsigned int uId)
+T* ncObject::fromId(unsigned int id)
 {
-	ncObject *pObject = ncServiceLocator::Indexer().Object(uId);
+	ncObject *object = ncServiceLocator::indexer().object(id);
 
-	if (pObject)
+	if (object)
 	{
-		if (pObject->m_eType == T::sType())
+		if (object->type_ == T::sType())
 		{
-			return static_cast<T *>(pObject);
+			return static_cast<T *>(object);
 		}
 		else // Cannot cast
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncObject::FromId - Object \"%s\" (%u) is of type %u instead of %u", pObject->m_vName, uId, pObject->m_eType, T::sType());
+			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, "ncObject::fromId - Object \"%s\" (%u) is of type %u instead of %u", object->name_, id, object->type_, T::sType());
 			return NULL;
 		}
 	}
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, "ncObject::FromId - Object %u not found", uId);
+		ncServiceLocator::logger().write(ncILogger::LOG_WARN, "ncObject::fromId - Object %u not found", id);
 		return NULL;
 	}
 }

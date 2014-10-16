@@ -17,17 +17,17 @@ class ncVector2f
 	/// Default constructor, all zeros
 	ncVector2f() : x(0.0f), y(0.0f) { }
 	/// Construct from components
-	ncVector2f(float const fX, float const fY) : x(fX), y(fY) { }
+	ncVector2f(float const xx, float const yy) : x(xx), y(yy) { }
 
 	// Sets vector elements
-	void Set(float const fX, float const fY);
+	void set(float const xx, float const yy);
 
 	/// Calculates vector length
-	inline float Length() const { return sqrt(x * x + y * y); }
+	inline float length() const { return sqrt(x * x + y * y); }
 	// Vector normalization
-	ncVector2f& Normalize();
+	ncVector2f& normalize();
 	// Dot product
-	float Dot(const ncVector2f& vec) const;
+	float dot(const ncVector2f& vec) const;
 
 	// Operators
 	bool operator==(const ncVector2f& vec) const;
@@ -38,15 +38,15 @@ class ncVector2f
 	ncVector2f operator-() const;
 	ncVector2f& operator-=(const ncVector2f& vec);
 	// Multiplication by a constant scalar
-	ncVector2f operator*(float fC) const;
-	ncVector2f operator*=(float fC);
+	ncVector2f operator*(float scalar) const;
+	ncVector2f operator*=(float scalar);
 };
 
 /// Sets vector elements
-inline void ncVector2f::Set(float const fX, float const fY)
+inline void ncVector2f::set(float const xx, float const yy)
 {
-	x = fX;
-	y = fY;
+	x = xx;
+	y = yy;
 }
 
 #endif

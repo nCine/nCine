@@ -18,68 +18,68 @@
 #include "ncSceneNode.h"
 #include "ncParticleSystem.h"
 
-const int NUM_PARTICLES = 400;
+const int NumParticles = 400;
 
 int main(int argc, char **argv)
 {
 	SDL_Event event;
-	int iWidth = 960;
-	int iHeight = 640;
-	bool bQuit = false;
+	const int Width = 960;
+	const int Height = 640;
+	bool shouldQuit = false;
 
 // ----- Init ----------------------
 	ncFrameTimer t(5.0f, 0.0f);
-	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
-	ncSDLGfxDevice gfxDevice(iWidth, iHeight);
-	gfxDevice.SetWindowTitle("Test");
+	ncServiceLocator::registerLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
+	ncSDLGfxDevice gfxDevice(Width, Height);
+	gfxDevice.setWindowTitle("Test");
 
 	ncRenderQueue renderQueue;
 	ncSceneNode rootNode;
 
 	ncTexture texture("textures/smoke_256.png");
 
-	ncParticleSystem particleSys(&rootNode, NUM_PARTICLES, &texture, texture.Rect());
-	particleSys.SetPosition(iWidth * 0.5f, iHeight * 0.5f);
+	ncParticleSystem particleSystem(&rootNode, NumParticles, &texture, texture.rect());
+	particleSystem.setPosition(Width * 0.5f, Height * 0.5f);
 
-//	particleSys.AddAffector(new ncAccelerationAffector(0.000025f, 0.0f));
+//	particleSystem.addAffector(new ncAccelerationAffector(0.000025f, 0.0f));
 	ncColorAffector *colAffector = new ncColorAffector();
-//	colAffector->AddColorStep(0.0f, ncColor(1.0f, 1.0f, 1.0f, 0.0f)); // GRAY
-//	colAffector->AddColorStep(1.0f, ncColor(1.0f, 1.0f, 1.0f, 1.0f)); // SMOKE
-	colAffector->AddColorStep(0.0f, ncColor(0.86f, 0.39f, 0.0f, 0.05f));
-	colAffector->AddColorStep(0.65f, ncColor(0.86f, 0.59f, 0.0f, 0.55f));
-	colAffector->AddColorStep(0.7f, ncColor(0.86f, 0.7f, 0.0f, 0.295));
-	colAffector->AddColorStep(1.0f, ncColor(0.0f, 0.0f, 1.0f, 0.59));
-	particleSys.AddAffector(colAffector);
+//	colAffector->addColorStep(0.0f, ncColor(1.0f, 1.0f, 1.0f, 0.0f)); // GRAY
+//	colAffector->addColorStep(1.0f, ncColor(1.0f, 1.0f, 1.0f, 1.0f)); // SMOKE
+	colAffector->addColorStep(0.0f, ncColor(0.86f, 0.39f, 0.0f, 0.05f));
+	colAffector->addColorStep(0.65f, ncColor(0.86f, 0.59f, 0.0f, 0.55f));
+	colAffector->addColorStep(0.7f, ncColor(0.86f, 0.7f, 0.0f, 0.295));
+	colAffector->addColorStep(1.0f, ncColor(0.0f, 0.0f, 1.0f, 0.59));
+	particleSystem.addAffector(colAffector);
 	ncSizeAffector *sizeAffector = new ncSizeAffector(0.25f);
-	sizeAffector->AddSizeStep(0.0f, 0.01f);
-	sizeAffector->AddSizeStep(0.7f, 1.6f);
-	sizeAffector->AddSizeStep(1.0f, 0.4f);
-	particleSys.AddAffector(sizeAffector);
+	sizeAffector->addSizeStep(0.0f, 0.01f);
+	sizeAffector->addSizeStep(0.7f, 1.6f);
+	sizeAffector->addSizeStep(1.0f, 0.4f);
+	particleSystem.addAffector(sizeAffector);
 
 	srand(time(NULL));
 	ncTimer emitTimer;
-	emitTimer.Start();
+	emitTimer.start();
 
 
 // ----- Event cycle --------------------
-	while (!bQuit)
+	while (!shouldQuit)
 	{
 		while (SDL_PollEvent(&event))
 		{
 			switch (event.type)
 			{
 				case SDL_QUIT:
-					bQuit = true;
+					shouldQuit = true;
 					break;
 				case SDL_KEYDOWN:
 					switch (event.key.keysym.sym)
 					{
 						case SDLK_ESCAPE:
 						case SDLK_q:
-							bQuit = true;
+							shouldQuit = true;
 							break;
 						case SDLK_F1:
-							gfxDevice.ToggleFullScreen();
+							gfxDevice.toggleFullScreen();
 							break;
 						default:
 							break;
@@ -90,25 +90,25 @@ int main(int argc, char **argv)
 
 
 // ----- Blitting on the screen --------
-		t.AddFrame();
+		t.addFrame();
 
-		gfxDevice.Clear();
+		gfxDevice.clear();
 
-		if (emitTimer.Interval() > 0.25f)
+		if (emitTimer.interval() > 0.25f)
 		{
-			emitTimer.Start();
-			particleSys.Emit(25, 3.0f, ncVector2f(0.0f, 100.0f));
+			emitTimer.start();
+			particleSystem.emitParticles(25, 3.0f, ncVector2f(0.0f, 100.0f));
 		}
 
-		rootNode.Update(t.Interval());
-		rootNode.Visit(renderQueue);
-		renderQueue.Draw();
+		rootNode.update(t.interval());
+		rootNode.visit(renderQueue);
+		renderQueue.draw();
 
-		gfxDevice.Update();
+		gfxDevice.update();
 	}
 
 
 // ----- Quitting ----------------------
-	ncServiceLocator::UnregisterAll();
+	ncServiceLocator::unregisterAll();
 	return 0;
 }

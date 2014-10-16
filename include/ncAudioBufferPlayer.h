@@ -9,20 +9,20 @@ class ncAudioBufferPlayer : public ncIAudioPlayer
 {
   public:
 	// A constructor creating a player from a shared buffer
-	ncAudioBufferPlayer(ncAudioBuffer *pBuffer);
-	virtual ~ncAudioBufferPlayer() { Stop(); }
+	ncAudioBufferPlayer(ncAudioBuffer *audioBuffer);
+	virtual ~ncAudioBufferPlayer() { stop(); }
 
-	virtual void Play();
-	virtual void Pause();
-	virtual void Stop();
+	virtual void play();
+	virtual void pause();
+	virtual void stop();
 
 	// Updates the player state
-	virtual void UpdateState();
+	virtual void updateState();
 
-	inline static eObjectType sType() { return AUDIOBUFFERPLAYER_TYPE; }
+	inline static ObjectType sType() { return AUDIOBUFFERPLAYER_TYPE; }
 
   private:
-	ncAudioBuffer *m_pBuffer;
+	ncAudioBuffer *audioBuffer_;
 };
 
 #endif

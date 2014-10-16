@@ -21,40 +21,40 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncITextureLoader::ncITextureLoader(const char *pFilename)
-	: m_pFileHandle(NULL), m_iWidth(0), m_iHeight(0), m_iBpp(0), m_iHeaderSize(0), m_lDataSize(0),
-	  m_iMipMapCount(1), m_lMipDataOffsets(NULL), m_lMipDataSizes(NULL), m_uPixels(NULL)
+ncITextureLoader::ncITextureLoader(const char *filename)
+	: fileHandle_(NULL), width_(0), height_(0), bpp_(0), headerSize_(0), dataSize_(0),
+	  mipMapCount_(1), mipDataOffsets_(NULL), mipDataSizes_(NULL), pixels_(NULL)
 {
-	m_pFileHandle = ncIFile::CreateFileHandle(pFilename);
+	fileHandle_ = ncIFile::createFileHandle(filename);
 }
 
-ncITextureLoader::ncITextureLoader(ncIFile *pFileHandle)
-	: m_pFileHandle(pFileHandle), m_iWidth(0), m_iHeight(0), m_iBpp(0), m_iHeaderSize(0), m_lDataSize(0),
-	  m_iMipMapCount(1), m_lMipDataOffsets(NULL), m_lMipDataSizes(NULL), m_uPixels(NULL)
+ncITextureLoader::ncITextureLoader(ncIFile *fileHandle)
+	: fileHandle_(fileHandle), width_(0), height_(0), bpp_(0), headerSize_(0), dataSize_(0),
+	  mipMapCount_(1), mipDataOffsets_(NULL), mipDataSizes_(NULL), pixels_(NULL)
 {
 
 }
 
 ncITextureLoader::~ncITextureLoader()
 {
-	if (m_uPixels)
+	if (pixels_)
 	{
-		delete[] m_uPixels;
+		delete[] pixels_;
 	}
 
-	if (m_lMipDataSizes)
+	if (mipDataSizes_)
 	{
-		delete[] m_lMipDataSizes;
+		delete[] mipDataSizes_;
 	}
 
-	if (m_lMipDataOffsets)
+	if (mipDataOffsets_)
 	{
-		delete[] m_lMipDataOffsets;
+		delete[] mipDataOffsets_;
 	}
 
-	if (m_pFileHandle)
+	if (fileHandle_)
 	{
-		delete m_pFileHandle;
+		delete fileHandle_;
 	}
 }
 
@@ -63,91 +63,91 @@ ncITextureLoader::~ncITextureLoader()
 ///////////////////////////////////////////////////////////
 
 /// Returns the texture data size in bytes for the specified MIP map level
-long ncITextureLoader::DataSize(unsigned int uMipMapLevel) const
+long ncITextureLoader::dataSize(unsigned int mipMapLevel) const
 {
-	long int lDataSize = 0;
+	long int dataSize = 0;
 
-	if (m_iMipMapCount > 1)
+	if (mipMapCount_ > 1)
 	{
-		if (int(uMipMapLevel) < m_iMipMapCount)
+		if (int(mipMapLevel) < mipMapCount_)
 		{
-			lDataSize = m_lMipDataSizes[uMipMapLevel];
+			dataSize = mipDataSizes_[mipMapLevel];
 		}
 	}
-	else if (uMipMapLevel == 0)
+	else if (mipMapLevel == 0)
 	{
-		lDataSize = m_lDataSize;
+		dataSize = dataSize_;
 	}
 
-	return lDataSize;
+	return dataSize;
 }
 
 /// Returns the pointer to pixel data for the specified MIP map level
-const GLubyte* ncITextureLoader::Pixels(unsigned int uMipMapLevel) const
+const GLubyte* ncITextureLoader::pixels(unsigned int mipMapLevel) const
 {
-	GLubyte *pPixels = NULL;
+	GLubyte *pixels = NULL;
 
-	if (m_iMipMapCount > 1)
+	if (mipMapCount_ > 1)
 	{
-		if (int(uMipMapLevel) < m_iMipMapCount)
+		if (int(mipMapLevel) < mipMapCount_)
 		{
-			pPixels = m_uPixels + m_lMipDataOffsets[uMipMapLevel];
+			pixels = pixels_ + mipDataOffsets_[mipMapLevel];
 		}
 	}
-	else if (uMipMapLevel == 0)
+	else if (mipMapLevel == 0)
 	{
-		pPixels = m_uPixels;
+		pixels = pixels_;
 	}
 
-	return pPixels;
+	return pixels;
 }
 
 /// Returns the proper texture loader according to the file extension
-ncITextureLoader* ncITextureLoader::CreateFromFile(const char *pFilename)
+ncITextureLoader* ncITextureLoader::createFromFile(const char *filename)
 {
 	// Creating a handle from ncIFile static method to detect assets file
-	ncIFile *pFileHandle = ncIFile::CreateFileHandle(pFilename);
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncITextureLoader::CreateFromFile - Loading file: \"%s\"", pFileHandle->Filename());
+	ncIFile *fileHandle = ncIFile::createFileHandle(filename);
+	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncITextureLoader::createFromFile - Loading file: \"%s\"", fileHandle->filename());
 
-	if (pFileHandle->HasExtension("dds"))
+	if (fileHandle->hasExtension("dds"))
 	{
-		return new ncTextureLoaderDDS(pFileHandle);
+		return new ncTextureLoaderDDS(fileHandle);
 	}
-	else if (pFileHandle->HasExtension("pvr"))
+	else if (fileHandle->hasExtension("pvr"))
 	{
-		return new ncTextureLoaderPVR(pFileHandle);
+		return new ncTextureLoaderPVR(fileHandle);
 	}
-	else if (pFileHandle->HasExtension("ktx"))
+	else if (fileHandle->hasExtension("ktx"))
 	{
-		return new ncTextureLoaderKTX(pFileHandle);
+		return new ncTextureLoaderKTX(fileHandle);
 	}
 #if defined(WITH_SDLIMAGE)
-	else if (pFileHandle->HasExtension("png") || pFileHandle->HasExtension("jpg"))
+	else if (fileHandle->hasExtension("png") || fileHandle->hasExtension("jpg"))
 	{
-		return new ncTextureLoaderSDL(pFileHandle);
+		return new ncTextureLoaderSDL(fileHandle);
 	}
 #elif defined(WITH_PNG)
-	else if (pFileHandle->HasExtension("png"))
+	else if (fileHandle->hasExtension("png"))
 	{
-		return new ncTextureLoaderPNG(pFileHandle);
+		return new ncTextureLoaderPNG(fileHandle);
 	}
 #endif
 #ifdef WITH_WEBP
-	else if (pFileHandle->HasExtension("webp"))
+	else if (fileHandle->hasExtension("webp"))
 	{
-		return new ncTextureLoaderWebP(pFileHandle);
+		return new ncTextureLoaderWebP(fileHandle);
 	}
 #endif
 #ifdef __ANDROID__
-	else if (pFileHandle->HasExtension("pkm"))
+	else if (fileHandle->hasExtension("pkm"))
 	{
-		return new ncTextureLoaderETC(pFileHandle);
+		return new ncTextureLoaderETC(fileHandle);
 	}
 #endif
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncITextureLoader::CreateFromFile - Extension unknown: \"%s\"", pFileHandle->Extension());
-		delete pFileHandle;
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncITextureLoader::createFromFile - Extension unknown: \"%s\"", fileHandle->extension());
+		delete fileHandle;
 		exit(EXIT_FAILURE);
 	}
 }
@@ -157,33 +157,33 @@ ncITextureLoader* ncITextureLoader::CreateFromFile(const char *pFilename)
 ///////////////////////////////////////////////////////////
 
 /// Loads pixel data from a texture file holding either compressed or uncompressed data
-void ncITextureLoader::LoadPixels(GLenum eInternalFormat)
+void ncITextureLoader::loadPixels(GLenum internalFormat)
 {
-	LoadPixels(eInternalFormat, 0);
+	loadPixels(internalFormat, 0);
 }
 
 /// Loads pixel data from a texture file holding either compressed or uncompressed data, overriding pixel type
-void ncITextureLoader::LoadPixels(GLenum eInternalFormat, GLenum eType)
+void ncITextureLoader::loadPixels(GLenum internalFormat, GLenum type)
 {
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncITextureLoader::LoadPixels - Loading \"%s\"", m_pFileHandle->Filename());
-	if (eType) // overriding pixel type
+	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncITextureLoader::loadPixels - Loading \"%s\"", fileHandle_->filename());
+	if (type) // overriding pixel type
 	{
-		m_texFormat = ncTextureFormat(eInternalFormat, eType);
+		texFormat_ = ncTextureFormat(internalFormat, type);
 	}
 	else
 	{
-		m_texFormat = ncTextureFormat(eInternalFormat);
+		texFormat_ = ncTextureFormat(internalFormat);
 	}
 
 	// If the file has not been already opened by a header reader method
-	if (m_pFileHandle->IsOpened() == false)
+	if (fileHandle_->isOpened() == false)
 	{
-		m_pFileHandle->Open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
+		fileHandle_->open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
 	}
 
-	m_lDataSize = m_pFileHandle->Size() - m_iHeaderSize;
-	m_pFileHandle->Seek(m_iHeaderSize, SEEK_SET);
+	dataSize_ = fileHandle_->size() - headerSize_;
+	fileHandle_->seek(headerSize_, SEEK_SET);
 
-	m_uPixels =  new unsigned char[m_lDataSize];
-	m_pFileHandle->Read(m_uPixels, m_lDataSize);
+	pixels_ =  new unsigned char[dataSize_];
+	fileHandle_->read(pixels_, dataSize_);
 }

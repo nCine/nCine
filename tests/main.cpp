@@ -1,13 +1,13 @@
 #include "ncApplication.h"
 class ncIAppEventHandler;
 
-ncIAppEventHandler* create_apphandler();
+ncIAppEventHandler* createApphandler();
 
 int main(int argc, char **argv)
 {
-	ncApplication::Init(create_apphandler);
-	ncApplication::Run();
-	ncApplication::Shutdown();
+	ncApplication::init(createApphandler);
+	ncApplication::run();
+	ncApplication::shutdown();
 
 	return 0;
 }

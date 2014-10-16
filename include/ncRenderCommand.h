@@ -23,140 +23,140 @@
 class ncRenderMaterial
 {
   public:
-	ncRenderMaterial(GLubyte ubColor[4], GLuint uTextureGLId)
-		: m_uTextureGLId(uTextureGLId), m_bAlwaysTransparent(false)
+	ncRenderMaterial(GLubyte color[4], GLuint textureGLId)
+		: textureGLId_(textureGLId), alwaysTransparent_(false)
 	{
-		m_color.Setv(ubColor);
+		color_.setVec(color);
 	}
 
-	ncRenderMaterial(GLuint uTextureGLId) : m_uTextureGLId(uTextureGLId), m_bAlwaysTransparent(false) { }
-	ncRenderMaterial() : m_uTextureGLId(0), m_bAlwaysTransparent(false) { }
+	ncRenderMaterial(GLuint textureGLId) : textureGLId_(textureGLId), alwaysTransparent_(false) { }
+	ncRenderMaterial() : textureGLId_(0), alwaysTransparent_(false) { }
 
 	/// Sets the material color
-	inline void SetColor(const ncColor &rColor)	{ m_color = rColor;	}
+	inline void setColor(const ncColor &color)	{ color_ = color;	}
 	/// Sets the material color in unsigned bytes components
-	inline void SetColor(GLubyte ubR, GLubyte ubG, GLubyte ubB, GLubyte ubA)
+	inline void setColor(GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha)
 	{
-		m_color.Set(ubR, ubG, ubB, ubA);
+		color_.set(red, green, blue, alpha);
 	}
 	/// Sets the material color through an array
-	inline void SetColor(GLubyte ubColor[4])
+	inline void setColor(GLubyte color[4])
 	{
-		m_color.Setv(ubColor);
+		color_.setVec(color);
 	}
 
 	/// Sets the material color in float components
-	inline void SetColorF(GLfloat fR, GLfloat fG, GLfloat fB, GLfloat fA)
+	inline void setColorF(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
 	{
-		m_color.SetF(fR, fG, fB, fA);
+		color_.setF(red, green, blue, alpha);
 	}
 	/// Sets the material color through an array
-	inline void SetColorF(GLfloat fColor[4])
+	inline void setColorF(GLfloat color[4])
 	{
-		m_color.SetFv(fColor);
+		color_.setFVec(color);
 	}
 
 	/// Returns the material texture id
-	inline GLuint TextureGLId() const { return m_uTextureGLId; }
+	inline GLuint textureGLId() const { return textureGLId_; }
 	/// Sets the material texture id
-	inline void SetTextureGLId(GLuint uTextureGLId) { m_uTextureGLId = uTextureGLId; }
+	inline void setTextureGLId(GLuint textureGLId) { textureGLId_ = textureGLId; }
 
 	/// Returns true if the render commands has to go into the transparent queue
-	inline bool isTransparent() const { return (m_bAlwaysTransparent || m_color.A() < 255); }
+	inline bool isTransparent() const { return (alwaysTransparent_ || color_.a() < 255); }
 	/// Sets the always transparent flag
-	inline void SetAlwaysTransparent(bool bAlwaysTransparent) { m_bAlwaysTransparent = bAlwaysTransparent; }
+	inline void setAlwaysTransparent(bool alwaysTransparent) { alwaysTransparent_ = alwaysTransparent; }
 
 	// Binds the material state
-	void Bind() const;
+	void bind() const;
 
   private:
-	ncColor m_color;
-	GLuint m_uTextureGLId;
+	ncColor color_;
+	GLuint textureGLId_;
 	/// Flag to skip opaque check based on material color
 	/** This is useful when using color arrays, like for sprite batches */
-	bool m_bAlwaysTransparent;
+	bool alwaysTransparent_;
 };
 
 /// The class wrapping geometric transformation
 class ncRenderTransformation
 {
   public:
-	ncRenderTransformation() : m_fX(0.0f), m_fY(0.0f), m_fScaleX(1.0f), m_fScaleY(1.0f), m_fRotation(0.0f) { }
+	ncRenderTransformation() : x_(0.0f), y_(0.0f), xScale_(1.0f), yScale_(1.0f), rotation_(0.0f) { }
 
-	ncRenderTransformation(float fX, float fY)
-		: m_fX(fX), m_fY(fY), m_fScaleX(1.0f), m_fScaleY(1.0f), m_fRotation(0.0f) { }
+	ncRenderTransformation(float x, float y)
+		: x_(x), y_(y), xScale_(1.0f), yScale_(1.0f), rotation_(0.0f) { }
 
 	/// Sets the position
-	void SetPosition(float fX, float fY)
+	void setPosition(float x, float y)
 	{
-		m_fX = fX;		m_fY = fY;
+		x_ = x;		y_ = y;
 	}
 
 	/// Sets the scale factors
-	void SetScale(float fScaleX, float fScaleY)
+	void setScale(float xScale, float yScale)
 	{
-		m_fScaleX = fScaleX;	m_fScaleY = fScaleY;
+		xScale_ = xScale;	yScale_ = yScale;
 	}
 
 	/// Sets the rotation in radians
-	void SetRotation(float fRotation) { m_fRotation = fRotation; }
+	void setRotation(float rotation) { rotation_ = rotation; }
 
 	// Applies the transformation
-	void Apply() const;
+	void apply() const;
 
   private:
-	float m_fX;
-	float m_fY;
-	float m_fScaleX;
-	float m_fScaleY;
-	float m_fRotation;
+	float x_;
+	float y_;
+	float xScale_;
+	float yScale_;
+	float rotation_;
 };
 
 /// The class wrapping vertices data
 class ncRenderGeometry
 {
   public:
-	ncRenderGeometry(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords);
-	ncRenderGeometry(GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords);
+	ncRenderGeometry(GLenum drawType, GLint firstVertex, GLsizei numVertices, GLfloat *vertices, GLfloat *texCoords);
+	ncRenderGeometry(GLsizei numVertices, GLfloat *vertices, GLfloat *texCoords);
 	ncRenderGeometry();
 
 	// Sets the geometric data
-	void SetData(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords, GLubyte *ubColors);
+	void setData(GLenum drawType, GLint firstVertex, GLsizei numVertices, GLfloat *vertices, GLfloat *texCoords, GLubyte *colors);
 
 	/// Returns the drawing type (GL_TRIANGLE, GL_LINES, ...)
-	inline GLenum DrawType() const { return m_eDrawType; }
+	inline GLenum drawType() const { return drawType_; }
 	/// Returns the first vertex to draw from the arrays
-	inline GLint FirstVertex() const { return m_iFirstVertex; }
+	inline GLint firstVertex() const { return firstVertex_; }
 	/// Returns the number of vertices
-	inline GLsizei NumVertices() const { return m_iNumVertices; }
+	inline GLsizei numVertices() const { return numVertices_; }
 	/// Returns the pointer to vertices data
-	inline GLfloat* VertexPointer() const { return m_fVertices; }
+	inline GLfloat* vertexPointer() const { return vertices_; }
 	/// Returns the pointer to texture coordinates data
-	inline GLfloat* TexCoordsPointer() const { return m_fTexCoords; }
+	inline GLfloat* texCoordsPointer() const { return texCoords_; }
 	/// Return the pointer to colors data
-	inline GLubyte* ColorPointer() const { return m_ubColors; }
+	inline GLubyte* colorPointer() const { return colors_; }
 
 	// Draws the geometry
-	void Draw() const;
+	void draw() const;
 
   protected:
-	GLenum m_eDrawType;
-	GLint m_iFirstVertex;
-	GLsizei m_iNumVertices;
-	GLfloat *m_fVertices;
-	GLfloat *m_fTexCoords;
-	GLubyte *m_ubColors;
+	GLenum drawType_;
+	GLint firstVertex_;
+	GLsizei numVertices_;
+	GLfloat *vertices_;
+	GLfloat *texCoords_;
+	GLubyte *colors_;
 };
 
 /// Sets the geometric data
-inline void ncRenderGeometry::SetData(GLenum eDrawType, GLint iFirstVertex, GLsizei iNumVertices, GLfloat *fVertices, GLfloat *fTexCoords, GLubyte *ubColors)
+inline void ncRenderGeometry::setData(GLenum drawType, GLint firstVertex, GLsizei numVertices, GLfloat *vertices, GLfloat *texCoords, GLubyte *colors)
 {
-	m_eDrawType = eDrawType;
-	m_iFirstVertex = iFirstVertex;
-	m_iNumVertices = iNumVertices;
-	m_fVertices = fVertices;
-	m_fTexCoords = fTexCoords;
-	m_ubColors = ubColors;
+	drawType_ = drawType;
+	firstVertex_ = firstVertex;
+	numVertices_ = numVertices;
+	vertices_ = vertices;
+	texCoords_ = texCoords;
+	colors_ = colors;
 }
 
 /// The class wrapping all the information needed for issuing a draw command
@@ -165,7 +165,7 @@ class ncRenderCommand
   public:
 	/// The enumeration of command types
 	/*! Its sole purpose is to allow separated profiling counters in ncRenderQueue */
-	enum eCommandType
+	enum CommandType
 	{
 		GENERIC_TYPE = 0,
 		PLOTTER_TYPE,
@@ -175,48 +175,47 @@ class ncRenderCommand
 		TYPE_COUNT
 	};
 
-	ncRenderCommand() : m_uSortKey(0), m_iPriority(0), m_eProfilingType(GENERIC_TYPE) { }
+	ncRenderCommand() : sortKey_(0), priority_(0), profilingType_(GENERIC_TYPE) { }
 
 	/// Returns the rendering priority
-	inline int Priority() const { return m_iPriority; }
+	inline int priority() const { return priority_; }
 	/// Sets the rendering priority
-	inline void SetPriority(int iPriority) { m_iPriority = iPriority; }
+	inline void setPriority(int priority) { priority_ = priority; }
 	/// Returns the rendering material
-	inline const ncRenderMaterial& Material() const { return m_material; }
+	inline const ncRenderMaterial& material() const { return material_; }
 	/// Sets the rendering material
-	inline ncRenderMaterial& Material() { return m_material; }
+	inline ncRenderMaterial& material() { return material_; }
 	/// Returns the geometric transformation
-	inline const ncRenderTransformation& Transformation() const { return m_transformation; }
+	inline const ncRenderTransformation& transformation() const { return transformation_; }
 	/// Sets the geometric transformation
-	inline ncRenderTransformation& Transformation() { return m_transformation; }
+	inline ncRenderTransformation& transformation() { return transformation_; }
 	/// Returns the vertices data
-	inline const ncRenderGeometry& Geometry() const { return m_geometry; }
+	inline const ncRenderGeometry& geometry() const { return geometry_; }
 	/// Sets the vertices data
-	inline ncRenderGeometry& Geometry() { return m_geometry; }
+	inline ncRenderGeometry& geometry() { return geometry_; }
 
 	/// Returns the queue sort key
-	inline unsigned long int SortKey() const { return m_uSortKey; }
+	inline unsigned long int sortKey() const { return sortKey_; }
 	// Calculates a sort key for the queue
-	void CalculateSortKey();
+	void calculateSortKey();
 	// Issues the render command
-	void Issue() const;
+	void issue() const;
 
 	/// Gets the command type (profiling purpose)
-	inline eCommandType Type() const { return m_eProfilingType; }
+	inline CommandType type() const { return profilingType_; }
 	/// Sets the command type (profiling purpose)
-	inline void SetType(eCommandType eType) { m_eProfilingType = eType; }
+	inline void setType(CommandType eType) { profilingType_ = eType; }
 
   private:
-	unsigned long int m_uSortKey;
-//	bool m_bDirtyKey;
+	unsigned long int sortKey_;
 
-	unsigned int m_iPriority;
-	ncRenderMaterial m_material;
-	ncRenderTransformation m_transformation;
-	ncRenderGeometry m_geometry;
+	unsigned int priority_;
+	ncRenderMaterial material_;
+	ncRenderTransformation transformation_;
+	ncRenderGeometry geometry_;
 
 	/// Command type for profiling counter
-	eCommandType m_eProfilingType;
+	CommandType profilingType_;
 };
 
 #endif

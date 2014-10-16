@@ -8,23 +8,23 @@ class ncRenderCommand;
 class ncLineVariable : public ncPlottingVariable
 {
   public:
-	ncLineVariable(unsigned int uNumValues, float fRejectDelay);
+	ncLineVariable(unsigned int numValues, float rejectDelay);
 
   private:
-	virtual void UpdateRenderCommand();
-	virtual void UpdateMeanRenderCommand();
+	virtual void updateRenderCommand();
+	virtual void updateMeanRenderCommand();
 };
 
 /// A class that plots line strip variables
 class ncLinePlotter : public ncProfilePlotter
 {
   public:
-	ncLinePlotter(ncSceneNode* pParent, ncRect rect) : ncProfilePlotter(pParent, rect) { }
+	ncLinePlotter(ncSceneNode* parent, ncRect rect) : ncProfilePlotter(parent, rect) { }
 
-	virtual unsigned int AddVariable(unsigned int uNumValues, float fRejectDelay);
+	virtual unsigned int addVariable(unsigned int numValues, float rejectDelay);
 	// Fill the buffer of every line variable with vertices
-	void UpdateAllVertices(int x, int y, int w, int h);
-	virtual void Draw(ncRenderQueue& rRenderQueue);
+	void updateAllVertices(int x, int y, int w, int h);
+	virtual void draw(ncRenderQueue& renderQueue);
 };
 
 #endif

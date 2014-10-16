@@ -11,113 +11,113 @@
 #define XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE 8689
 #define XINPUT_GAMEPAD_TRIGGER_THRESHOLD    30
 
-ncIAppEventHandler* create_apphandler()
+ncIAppEventHandler* createApphandler()
 {
 	return new MyEventHandler;
 }
 
-void MyEventHandler::OnInit()
+void MyEventHandler::onInit()
 {
-	ncIInputManager::SetHandler(this);
-	ncSceneNode &rRootNode = ncApplication::RootNode();
+	ncIInputManager::setHandler(this);
+	ncSceneNode &rootNode = ncApplication::rootNode();
 
 #ifdef __ANDROID__
-	m_pTexture = new ncTexture("/sdcard/ncine/checker_256_ETC1_MIP.ktx");
+	texture_ = new ncTexture("/sdcard/ncine/checker_256_ETC1_MIP.ktx");
 #else
-	m_pTexture = new ncTexture("textures/texture3.png");
+	texture_ = new ncTexture("textures/texture3.png");
 #endif
-	m_pSprites[0] = new ncSprite(&rRootNode, m_pTexture, ncApplication::Width() * 0.25f, ncApplication::Height() * 0.5f);
-	m_pSprites[1] = new ncSprite(&rRootNode, m_pTexture, ncApplication::Width() * 0.75f, ncApplication::Height() * 0.5f);
-	m_pSprites[0]->SetScale(0.5f);
-	m_pSprites[1]->SetScale(0.5f);
+	sprites_[0] = new ncSprite(&rootNode, texture_, ncApplication::width() * 0.25f, ncApplication::height() * 0.5f);
+	sprites_[1] = new ncSprite(&rootNode, texture_, ncApplication::width() * 0.75f, ncApplication::height() * 0.5f);
+	sprites_[0]->setScale(0.5f);
+	sprites_[1]->setScale(0.5f);
 
 #ifdef __ANDROID__
-	m_pFont = new ncFont("/sdcard/ncine/trebuchet32_256_4444.pvr", "/sdcard/ncine/trebuchet32_256.fnt");
+	font_ = new ncFont("/sdcard/ncine/trebuchet32_256_4444.pvr", "/sdcard/ncine/trebuchet32_256.fnt");
 #else
-	m_pFont = new ncFont("fonts/trebuchet32_256.png", "fonts/trebuchet32_256.fnt");
+	font_ = new ncFont("fonts/trebuchet32_256.png", "fonts/trebuchet32_256.fnt");
 #endif
-	m_pTextNode = new ncTextNode(&rRootNode, m_pFont);
-	m_pTextNode->SetScale(0.85f);
-	m_pTextNode->SetPosition(ncApplication::Width() * 0.1f, ncApplication::Height() * 0.35f);
+	textNode_ = new ncTextNode(&rootNode, font_);
+	textNode_->setScale(0.85f);
+	textNode_->setPosition(ncApplication::width() * 0.1f, ncApplication::height() * 0.35f);
 
-	for (int i = 0; i < numJoysticks; i++)
+	for (int i = 0; i < NumJoysticks; i++)
 	{
-		if (ncApplication::InputManager().isJoyPresent(i))
+		if (ncApplication::inputManager().isJoyPresent(i))
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"Joystick %d (%s) - %d axes, %d buttons", i,
-				ncApplication::InputManager().JoyName(i), ncApplication::InputManager().JoyNumAxes(i), ncApplication::InputManager().JoyNumButtons(i));
+			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"Joystick %d (%s) - %d axes, %d buttons", i,
+				ncApplication::inputManager().joyName(i), ncApplication::inputManager().joyNumAxes(i), ncApplication::inputManager().joyNumButtons(i));
 		}
 	}
 }
 
-void MyEventHandler::OnFrameStart()
+void MyEventHandler::onFrameStart()
 {
-	int iFirstJoy = 0;
-	for (int i = 0; i < numJoysticks; i++)
+	int firstJoy = 0;
+	for (int i = 0; i < NumJoysticks; i++)
 	{
-		if (ncApplication::InputManager().isJoyPresent(i))
+		if (ncApplication::inputManager().isJoyPresent(i))
 		{
-			iFirstJoy = i;
+			firstJoy = i;
 			break;
 		}
 	}
 
-	memset(m_vJoyString, 0, numChars);
-	for (int i = 0; i < numJoysticks; i++)
+	memset(joyString_, 0, NumChars);
+	for (int i = 0; i < NumJoysticks; i++)
 	{
-		if (ncApplication::InputManager().isJoyPresent(i))
+		if (ncApplication::inputManager().isJoyPresent(i))
 		{
-			sprintf(&m_vJoyString[strlen(m_vJoyString)], "Joystick %d: %s (%d axes, %d buttons)\n", i,
-				ncApplication::InputManager().JoyName(i), ncApplication::InputManager().JoyNumAxes(i), ncApplication::InputManager().JoyNumButtons(i));
+			sprintf(&joyString_[strlen(joyString_)], "Joystick %d: %s (%d axes, %d buttons)\n", i,
+				ncApplication::inputManager().joyName(i), ncApplication::inputManager().joyNumAxes(i), ncApplication::inputManager().joyNumButtons(i));
 		}
 	}
-	strncat(m_vJoyString, "Axes:", 5);
-	for (int i = 0; i < numAxes; i++)
+	strncat(joyString_, "Axes:", 5);
+	for (int i = 0; i < NumAxes; i++)
 	{
-		m_fAxisValues[i] = ncApplication::InputManager().JoyAxisNormValue(iFirstJoy, i);
-		sprintf(&m_vJoyString[strlen(m_vJoyString)], " %.2f", m_fAxisValues[i]);
+		axisValues_[i] = ncApplication::inputManager().joyAxisNormValue(firstJoy, i);
+		sprintf(&joyString_[strlen(joyString_)], " %.2f", axisValues_[i]);
 	}
-	strncat(m_vJoyString, "\nButtons:", 9);
-	for (int i = 0; i < numButtons; i++)
+	strncat(joyString_, "\nButtons:", 9);
+	for (int i = 0; i < NumButtons; i++)
 	{
-		m_ubButtonStates[i] = ncApplication::InputManager().isJoyButtonPressed(iFirstJoy, i);
-		sprintf(&m_vJoyString[strlen(m_vJoyString)], " %u", m_ubButtonStates[i]);
+		buttonStates_[i] = ncApplication::inputManager().isJoyButtonPressed(firstJoy, i);
+		sprintf(&joyString_[strlen(joyString_)], " %u", buttonStates_[i]);
 	}
-	m_pTextNode->SetString(m_vJoyString);
+	textNode_->setString(joyString_);
 
 
-	float fXOffset1 = m_fAxisValues[0] * 0.1f;
-	float fYOffset1 = -m_fAxisValues[1] * 0.1f;
-	float fScale1 = 1.0f + 0.5f * m_fAxisValues[2];
-	m_pSprites[0]->SetPosition(ncApplication::Width() * (0.25f + fXOffset1), ncApplication::Height() * (0.5f + fYOffset1));
-	m_pSprites[0]->SetScale(fScale1);
+	float xOffset1 = axisValues_[0] * 0.1f;
+	float yOffset1 = -axisValues_[1] * 0.1f;
+	float scale1 = 1.0f + 0.5f * axisValues_[2];
+	sprites_[0]->setPosition(ncApplication::width() * (0.25f + xOffset1), ncApplication::height() * (0.5f + yOffset1));
+	sprites_[0]->setScale(scale1);
 
-	float fXOffset2 = m_fAxisValues[3] * 0.1f;
-	float fYOffset2 = -m_fAxisValues[4] * 0.1f;
-	float fScale2 = 1.0f + 0.5f * m_fAxisValues[5];
-	m_pSprites[1]->SetPosition(ncApplication::Width() * (0.75f + fXOffset2), ncApplication::Height() * (0.5f + fYOffset2));
-	m_pSprites[1]->SetScale(fScale2);
+	float xOffset2 = axisValues_[3] * 0.1f;
+	float yOffset2 = -axisValues_[4] * 0.1f;
+	float scale2 = 1.0f + 0.5f * axisValues_[5];
+	sprites_[1]->setPosition(ncApplication::width() * (0.75f + xOffset2), ncApplication::height() * (0.5f + yOffset2));
+	sprites_[1]->setScale(scale2);
 }
 
-void MyEventHandler::OnShutdown()
+void MyEventHandler::onShutdown()
 {
-	delete m_pTextNode;
-	delete m_pFont;
-	delete m_pSprites[0];
-	delete m_pSprites[1];
-	delete m_pTexture;
+	delete textNode_;
+	delete font_;
+	delete sprites_[0];
+	delete sprites_[1];
+	delete texture_;
 }
 
 #ifndef __ANDROID__
-void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
+void MyEventHandler::onKeyReleased(const ncKeyboardEvent &event)
 {
 	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)
 	{
-		ncApplication::Quit();
+		ncApplication::quit();
 	}
 	else if (event.sym == NCKEY_SPACE)
 	{
-		ncApplication::TogglePause();
+		ncApplication::togglePause();
 	}
 }
 #endif

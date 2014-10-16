@@ -25,36 +25,36 @@
 ///////////////////////////////////////////////////////////
 
 /// Adds a draw command to the queue
-void ncRenderQueue::AddCommand(const ncRenderCommand *pCommand)
+void ncRenderQueue::addCommand(const ncRenderCommand *command)
 {
-	m_uTypedNumVertices[pCommand->Type()] += pCommand->Geometry().NumVertices();
-	m_uTypedNumCommands[pCommand->Type()]++;
+	typedNumVertices_[command->type()] += command->geometry().numVertices();
+	typedNumCommands_[command->type()]++;
 
-	m_uNumVertices += pCommand->Geometry().NumVertices();
+	numVertices_ += command->geometry().numVertices();
 
 #ifdef WITH_DEPTH_TEST
-	if (pCommand->Material().isTransparent() == false)
+	if (command->material().isTransparent() == false)
 	{
-		m_opaqueRenderCmds.InsertBack(pCommand);
+		opaqueRenderCommands_.insertBack(command);
 	}
 	else
 #endif
-		m_transparentRenderCmds.InsertBack(pCommand);
+		transparentRenderCommands_.insertBack(command);
 }
 
 /// Sorts the queue then issues every render command in order
-void ncRenderQueue::Draw()
+void ncRenderQueue::draw()
 {
-	SortQueues();
+	sortQueues();
 
 #ifdef WITH_DEPTH_TEST
 	glDisable(GL_BLEND);
 	// TODO: Investigate about the heavy performance drop with alpha testing
 	glEnable(GL_ALPHA_TEST);
 	// Rendering opaque nodes front to back
-	for (int i = m_opaqueRenderCmds.Size() - 1; i > -1; i--)
+	for (int i = opaqueRenderCommands_.size() - 1; i > -1; i--)
 	{
-		m_opaqueRenderCmds[i]->Issue();
+		opaqueRenderCommands_[i]->issue();
 	}
 
 	glDisable(GL_ALPHA_TEST);
@@ -62,9 +62,9 @@ void ncRenderQueue::Draw()
 	glDepthMask(GL_FALSE);
 #endif
 	// Rendering transparent nodes back to front
-	for (unsigned int i = 0; i < m_transparentRenderCmds.Size(); i++)
+	for (unsigned int i = 0; i < transparentRenderCommands_.size(); i++)
 	{
-		m_transparentRenderCmds[i]->Issue();
+		transparentRenderCommands_[i]->issue();
 	}
 #ifdef WITH_DEPTH_TEST
 	// Has to be enabled again before exiting this method
@@ -72,20 +72,20 @@ void ncRenderQueue::Draw()
 	glDepthMask(GL_TRUE);
 #endif
 
-	m_uLastNumVertices = m_uNumVertices;
-	m_uLastNumCommands = m_opaqueRenderCmds.Size() + m_transparentRenderCmds.Size();
-	m_uNumVertices = 0;
+	lastNumVertices_ = numVertices_;
+	lastNumCommands_ = opaqueRenderCommands_.size() + transparentRenderCommands_.size();
+	numVertices_ = 0;
 
 	for (int i = 0; i < ncRenderCommand::TYPE_COUNT; i++)
 	{
-		m_uTypedLastNumVertices[i] = m_uTypedNumVertices[i];
-		m_uTypedLastNumCommands[i] = m_uTypedNumCommands[i];
-		m_uTypedNumVertices[i] = 0;
-		m_uTypedNumCommands[i] = 0;
+		typedLastNumVertices_[i] = typedNumVertices_[i];
+		typedLastNumCommands_[i] = typedNumCommands_[i];
+		typedNumVertices_[i] = 0;
+		typedNumCommands_[i] = 0;
 	}
 
-	m_opaqueRenderCmds.Clear();
-	m_transparentRenderCmds.Clear();
+	opaqueRenderCommands_.clear();
+	transparentRenderCommands_.clear();
 }
 
 ///////////////////////////////////////////////////////////
@@ -93,63 +93,63 @@ void ncRenderQueue::Draw()
 ///////////////////////////////////////////////////////////
 
 /// Sorts render nodes in both queues to minimize state changes
-void ncRenderQueue::SortQueues()
+void ncRenderQueue::sortQueues()
 {
-	QSort(m_opaqueRenderCmds, 0, m_opaqueRenderCmds.Size() - 1);
-	QSort(m_transparentRenderCmds, 0, m_transparentRenderCmds.Size() - 1);
+	qSort(opaqueRenderCommands_, 0, opaqueRenderCommands_.size() - 1);
+	qSort(transparentRenderCommands_, 0, transparentRenderCommands_.size() - 1);
 
 	// Check sorting correctness
-//	for (int i = 1; i < m_opaqueRenderCmds.Size(); i++)
-//		assert(m_opaqueRenderCmds[i-1]->SortKey() <= m_opaqueRenderCmds[i]->SortKey());
-//	for (int i = 1; i < m_transparentRenderCmds.Size(); i++)
-//		assert(m_transparentRenderCmds[i-1]->SortKey() <= m_transparentRenderCmds[i]->SortKey());
+//	for (int i = 1; i < opaqueRenderCommands_.Size(); i++)
+//		assert(opaqueRenderCommands_[i-1]->sortKey() <= opaqueRenderCommands_[i]->sortKey());
+//	for (int i = 1; i < transparentRenderCommands_.Size(); i++)
+//		assert(transparentRenderCommands_[i-1]->sortKey() <= transparentRenderCommands_[i]->sortKey());
 }
 
-void ncRenderQueue::QSort(ncArray<const ncRenderCommand *> &array, int start, int end)
+void ncRenderQueue::qSort(ncArray<const ncRenderCommand *> &array, int start, int end)
 {
 	if (start < end)
 	{
-		int div = QSortPartition(array, start, end);
-		QSort(array, start, div);
-		QSort(array, div + 1, end);
+		int div = qSortPartition(array, start, end);
+		qSort(array, start, div);
+		qSort(array, div + 1, end);
 	}
 }
 
-int ncRenderQueue::QSortPartition(ncArray<const ncRenderCommand *> &array, int start, int end)
+int ncRenderQueue::qSortPartition(ncArray<const ncRenderCommand *> &array, int start, int end)
 {
-	bool bShouldQuit;
+	bool shouldQuit;
 	int i, j;
 	unsigned long int pivot;
 
-	pivot = array[start]->SortKey();
+	pivot = array[start]->sortKey();
 	i = start - 1;
 	j = end + 1;
 
-	bShouldQuit = false;
+	shouldQuit = false;
 
 	do
 	{
 		do
 		{
 			j--;
-		} while (array[j]->SortKey() > pivot);
+		} while (array[j]->sortKey() > pivot);
 
 		do
 		{
 			i++;
-		} while (array[i]->SortKey() < pivot);
+		} while (array[i]->sortKey() < pivot);
 
 		if (i < j)
 		{
-			const ncRenderCommand *pTemp = array[i];
+			const ncRenderCommand *temp = array[i];
 			array[i] = array[j];
-			array[j] = pTemp;
+			array[j] = temp;
 		}
 		else
 		{
-			bShouldQuit = true;
+			shouldQuit = true;
 		}
-	} while (!bShouldQuit);
+	} while (!shouldQuit);
 
 	return j;
 }

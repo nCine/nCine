@@ -13,20 +13,20 @@ class ncPoint
 	/// Default constructor, all zeros
 	ncPoint() : x(0), y(0) { }
 	/// Constructs from elements
-	ncPoint(int const iX, int const iY) : x(iX), y(iY) { }
+	ncPoint(int const xx, int const yy) : x(xx), y(yy) { }
 
 	// Sets point elements
-	void Set(int const iX, int const iY);
+	void set(int const xx, int const yy);
 
 	// Equality operator
 	bool operator==(const ncPoint& point) const;
 };
 
 /// Sets point elements
-inline void ncPoint::Set(int const iX, int const iY)
+inline void ncPoint::set(int const xx, int const yy)
 {
-	x = iX;
-	y = iY;
+	x = xx;
+	y = yy;
 }
 
 /// Equality operator

@@ -8,18 +8,18 @@
 class ncTextureLoaderKTX : public ncITextureLoader
 {
   public:
-	ncTextureLoaderKTX(const char *pFilename);
-	ncTextureLoaderKTX(ncIFile *pFileHandle);
+	ncTextureLoaderKTX(const char *filename);
+	ncTextureLoaderKTX(ncIFile *fileHandle);
 	~ncTextureLoaderKTX() { }
 
   private:
-	static const int KTX_IDENTIFIER_LENGTH = 12;
-	static uint8_t m_uFileIdentifier[KTX_IDENTIFIER_LENGTH];
+	static const int KtxIdentifierLength = 12;
+	static uint8_t fileIdentifier_[KtxIdentifierLength];
 
 	/// Header for the KTX format
-	typedef struct KTX_header
+	typedef struct KtxHeader
 	{
-		uint8_t		identifier[KTX_IDENTIFIER_LENGTH];
+		uint8_t		identifier[KtxIdentifierLength];
 		uint32_t    endianess;
 		uint32_t    glType;
 		uint32_t    glTypeSize;
@@ -33,14 +33,14 @@ class ncTextureLoaderKTX : public ncITextureLoader
 		uint32_t    numberOfFaces;
 		uint32_t    numberOfMipmapLevels;
 		uint32_t	bytesOfKeyValueData;
-	} KTX_header;
+	} KtxHeader;
 
-	void Init();
+	void init();
 
 	// Reads the KTX header and fills the corresponding structure
-	void ReadHeader(KTX_header& header);
+	void readHeader(KtxHeader& header);
 	// Parses the KTX header to determine its format
-	void ParseFormat(const KTX_header& header);
+	void parseFormat(const KtxHeader& header);
 };
 
 #endif

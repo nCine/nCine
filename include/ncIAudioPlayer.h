@@ -13,7 +13,7 @@ class ncIAudioPlayer : public ncObject
 {
   public:
 	/// Player state
-	enum ePlayerState
+	enum PlayerState
 	{
 		STATE_INITIAL = 0,
 		STATE_PLAYING,
@@ -22,116 +22,116 @@ class ncIAudioPlayer : public ncObject
 	};
 
 	ncIAudioPlayer()
-		: m_uSource(-1), m_eState(STATE_STOPPED),
-		  m_bLooping(false), m_fGain(1.0f), m_fPitch(1.0f)
+		: sourceId_(-1), state_(STATE_STOPPED),
+		  isLooping_(false), gain_(1.0f), pitch_(1.0f)
 	{
-		m_fPosition[0] = 0.0f;
-		m_fPosition[1] = 0.0f;
-		m_fPosition[2] = 0.0f;
+		position_[0] = 0.0f;
+		position_[1] = 0.0f;
+		position_[2] = 0.0f;
 	}
 	virtual ~ncIAudioPlayer() { }
 
 	/// Starts playing
-	virtual void Play() = 0;
+	virtual void play() = 0;
 	/// Pauses playing
-	virtual void Pause() = 0;
+	virtual void pause() = 0;
 	/// Stop playing and rewind
-	virtual void Stop() = 0;
+	virtual void stop() = 0;
 
 	/// Updates the state of the player if the source has done playing
 	/*! It is called every frame by the ncIAudioDevice class and it is
 		also responsible for buffer queueing/unqueueing in stream players */
-	virtual void UpdateState() = 0;
+	virtual void updateState() = 0;
 
 	/// Sets player looping property
-	inline void SetLooping(bool bLooping) { m_bLooping = bLooping; }
+	inline void setLooping(bool isLooping) { isLooping_ = isLooping; }
 
 	/// Returns player gain value
-	inline float Gain() const { return m_fGain; }
+	inline float gain() const { return gain_; }
 	// Sets player gain value
-	void SetGain(float fGain);
+	void setGain(float gain);
 	/// Returns player pitch value
-	inline float Pitch() const { return m_fPitch; }
+	inline float pitch() const { return pitch_; }
 	// Sets player pitch value
-	void SetPitch(float fPitch);
+	void setPitch(float pitch);
 	/// Returns player position value
-	inline const float* Position() const { return m_fPosition; }
+	inline const float* Position() const { return position_; }
 	// Sets player position value through vector
-	void SetPosition(float fPosition[3]);
+	void setPosition(float position[3]);
 	// Sets player position value through components
-	void SetPosition(float fX, float fY, float fZ);
+	void setPosition(float x, float y, float z);
 
 	/// Queries the playing state of the player
-	inline bool isPlaying() const { return m_eState == STATE_PLAYING; }
+	inline bool isPlaying() const { return state_ == STATE_PLAYING; }
 	/// Queries the paused state of the player
-	inline bool isPaused() const { return m_eState == STATE_PAUSED; }
+	inline bool isPaused() const { return state_ == STATE_PAUSED; }
 	/// Queries the stopped state of the player
-	inline bool isStopped() const { return m_eState == STATE_STOPPED; }
+	inline bool isStopped() const { return state_ == STATE_STOPPED; }
 	/// Queries the looping property of the player
-	inline bool isLooping() const { return m_bLooping; }
+	inline bool isLooping() const { return isLooping_; }
 
   protected:
 	/// The OpenAL source id
-	unsigned int m_uSource;
+	unsigned int sourceId_;
 	/// Current player state
-	ePlayerState m_eState;
+	PlayerState state_;
 	/// Looping status flag
-	bool m_bLooping;
+	bool isLooping_;
 	/// Player gain value
-	float m_fGain;
+	float gain_;
 	/// Player pitch value
-	float m_fPitch;
+	float pitch_;
 	/// Player position in space
-	float m_fPosition[3];
+	float position_[3];
 };
 
 /// Sets player gain value
 /*! It gets applied to the OpenAL source only when playing */
-inline void ncIAudioPlayer::SetGain(float fGain)
+inline void ncIAudioPlayer::setGain(float gain)
 {
-	m_fGain = fGain;
-	if (m_eState == STATE_PLAYING)
+	gain_ = gain;
+	if (state_ == STATE_PLAYING)
 	{
-		alSourcef(m_uSource, AL_GAIN, m_fGain);
+		alSourcef(sourceId_, AL_GAIN, gain_);
 	}
 }
 
 /// Sets player pitch value
 /*! It gets applied to the OpenAL source only when playing */
-inline void ncIAudioPlayer::SetPitch(float fPitch)
+inline void ncIAudioPlayer::setPitch(float pitch)
 {
-	m_fPitch = fPitch;
-	if (m_eState == STATE_PLAYING)
+	pitch_ = pitch;
+	if (state_ == STATE_PLAYING)
 	{
-		alSourcef(m_uSource, AL_PITCH, m_fPitch);
+		alSourcef(sourceId_, AL_PITCH, pitch_);
 	}
 }
 
 /// Sets player position value through vector
 /*! It gets applied to the OpenAL source only when playing */
-inline void ncIAudioPlayer::SetPosition(float fPosition[3])
+inline void ncIAudioPlayer::setPosition(float position[3])
 {
-	m_fPosition[0] = fPosition[0];
-	m_fPosition[1] = fPosition[1];
-	m_fPosition[2] = fPosition[2];
+	position_[0] = position[0];
+	position_[1] = position[1];
+	position_[2] = position[2];
 
-	if (m_eState == STATE_PLAYING)
+	if (state_ == STATE_PLAYING)
 	{
-		alSourcefv(m_uSource, AL_POSITION, m_fPosition);
+		alSourcefv(sourceId_, AL_POSITION, position_);
 	}
 }
 
 /// Sets player position value through components
 /*! It gets applied to the OpenAL source only when playing */
-inline void ncIAudioPlayer::SetPosition(float fX, float fY, float fZ)
+inline void ncIAudioPlayer::setPosition(float x, float y, float z)
 {
-	m_fPosition[0] = fX;
-	m_fPosition[1] = fY;
-	m_fPosition[2] = fZ;
+	position_[0] = x;
+	position_[1] = y;
+	position_[2] = z;
 
-	if (m_eState == STATE_PLAYING)
+	if (state_ == STATE_PLAYING)
 	{
-		alSourcefv(m_uSource, AL_POSITION, m_fPosition);
+		alSourcefv(sourceId_, AL_POSITION, position_);
 	}
 }
 

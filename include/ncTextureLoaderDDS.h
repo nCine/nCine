@@ -8,13 +8,13 @@
 class ncTextureLoaderDDS : public ncITextureLoader
 {
   public:
-	ncTextureLoaderDDS(const char *pFilename);
-	ncTextureLoaderDDS(ncIFile *pFileHandle);
+	ncTextureLoaderDDS(const char *filename);
+	ncTextureLoaderDDS(ncIFile *fileHandle);
 	~ncTextureLoaderDDS() { }
 
   private:
 	/// Header for the DDS pixel format
-	typedef struct DDS_pixelformat
+	typedef struct DdsPixelformat
 	{
 		uint32_t dwSize;
 		uint32_t dwFlags;
@@ -24,10 +24,10 @@ class ncTextureLoaderDDS : public ncITextureLoader
 		uint32_t dwGBitMask;
 		uint32_t dwBBitMask;
 		uint32_t dwABitMask;
-	} DDS_pixelformat;
+	} DdsPixelformat;
 
 	/// Header for the DDS format
-	typedef struct DDS_header
+	typedef struct DdsHeader
 	{
 		uint32_t	dwMagic;
 		uint32_t	dwSize;
@@ -38,13 +38,13 @@ class ncTextureLoaderDDS : public ncITextureLoader
 		uint32_t	dwDepth;
 		uint32_t	dwMipMapCount;
 		uint32_t	dwReserved1[11];
-		DDS_pixelformat ddspf;
+		DdsPixelformat ddspf;
 		uint32_t	dwCaps;
 		uint32_t	dwCaps2;
 		uint32_t	dwCaps3;
 		uint32_t	dwCaps4;
 		uint32_t	dwReserved2;
-	} DDS_header;
+	} DdsHeader;
 
 	static const uint32_t DDPF_ALPHAPIXELS = 0x1;
 	static const uint32_t DDPF_ALPHA = 0x2;
@@ -65,12 +65,12 @@ class ncTextureLoaderDDS : public ncITextureLoader
 	static const uint32_t DDS_ATCA = 0x41435441; // "ATCA"
 	static const uint32_t DDS_ATCI = 0x49435441; // "ATCI"
 
-	void Init();
+	void init();
 
 	// Reads the DDS header and fills the corresponding structure
-	void ReadHeader(DDS_header& header);
+	void readHeader(DdsHeader& header);
 	// Parses the DDS header to determine its format
-	void ParseFormat(const DDS_header& header);
+	void parseFormat(const DdsHeader& header);
 };
 
 #endif

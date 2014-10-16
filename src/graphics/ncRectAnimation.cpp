@@ -4,9 +4,9 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncRectAnimation::ncRectAnimation(float fFrameTime, bool bLooping, bool bBackward)
-	: m_vRects(4), m_uCurrentFrame(0), m_fFrameTime(fFrameTime), m_fElapsedFrameTime(0.0f),
-	  m_bGoingForward(true), m_bLooping(bLooping), m_bBackward(bBackward), m_bPaused(false)
+ncRectAnimation::ncRectAnimation(float frameTime, bool isLooping, bool backward)
+	: rects_(4), currentFrame_(0), frameTime_(frameTime), elapsedFrameTime_(0.0f),
+	  goingForward_(true), isLooping_(isLooping), backward_(backward), isPaused_(false)
 {
 
 }
@@ -16,92 +16,92 @@ ncRectAnimation::ncRectAnimation(float fFrameTime, bool bLooping, bool bBackward
 ///////////////////////////////////////////////////////////
 
 /// Sets current frame
-void ncRectAnimation::SetFrame(unsigned int uFrameNum)
+void ncRectAnimation::SetFrame(unsigned int frameNum)
 {
-	if (uFrameNum >= m_vRects.Size())
+	if (frameNum >= rects_.size())
 	{
-		m_uCurrentFrame = m_vRects.Size() - 1;
+		currentFrame_ = rects_.size() - 1;
 	}
 	else
 	{
-		m_uCurrentFrame = uFrameNum;
+		currentFrame_ = frameNum;
 	}
 }
 
 /// Updates current frame based on time passed
-void ncRectAnimation::UpdateFrame(float fInterval)
+void ncRectAnimation::updateFrame(float interval)
 {
 	// No frame calculation if the animation is paused or has only one rect
-	if (m_bPaused == true || m_vRects.Size() < 2)
+	if (isPaused_ == true || rects_.size() < 2)
 	{
 		return;
 	}
 
-	m_fElapsedFrameTime += fInterval;
+	elapsedFrameTime_ += interval;
 	// A NEXT frame rectangle should be determined
-	if (m_fElapsedFrameTime >= m_fFrameTime)
+	if (elapsedFrameTime_ >= frameTime_)
 	{
-		m_fElapsedFrameTime = 0.0f;
+		elapsedFrameTime_ = 0.0f;
 
-		if (m_bGoingForward)
+		if (goingForward_)
 		{
-			if (m_uCurrentFrame == m_vRects.Size() - 1)
+			if (currentFrame_ == rects_.size() - 1)
 			{
-				if (m_bBackward)
+				if (backward_)
 				{
-					m_bGoingForward = false;
-					m_uCurrentFrame--;
+					goingForward_ = false;
+					currentFrame_--;
 				}
 				else
 				{
-					if (m_bLooping == false)
+					if (isLooping_ == false)
 					{
-						m_bPaused = true;
+						isPaused_ = true;
 					}
 					else
 					{
-						m_uCurrentFrame = 0;
+						currentFrame_ = 0;
 					}
 				}
 			}
 			else
 			{
-				m_uCurrentFrame++;
+				currentFrame_++;
 			}
 		}
 		else
 		{
-			if (m_uCurrentFrame == 0)
+			if (currentFrame_ == 0)
 			{
-				if (m_bLooping == false)
+				if (isLooping_ == false)
 				{
-					m_bPaused = true;
+					isPaused_ = true;
 				}
 				else
 				{
-					m_bGoingForward = true;
-					m_uCurrentFrame++;
+					goingForward_ = true;
+					currentFrame_++;
 				}
 			}
 			else
 			{
-				m_uCurrentFrame--;
+				currentFrame_--;
 			}
 		}
 	}
 }
 
 /// Pause on a specified frame
-void ncRectAnimation::Pause(unsigned int uFrameNum)
+void ncRectAnimation::pause(unsigned int frameNum)
 {
-	if (uFrameNum >= m_vRects.Size())
+	if (frameNum >= rects_.size())
 	{
-		m_uCurrentFrame = m_vRects.Size() - 1;
+		currentFrame_ = rects_.size() - 1;
 	}
 	else
 	{
-		m_uCurrentFrame = uFrameNum;
+		currentFrame_ = frameNum;
 	}
 
-	m_bPaused = true;
+	isPaused_ = true;
 }

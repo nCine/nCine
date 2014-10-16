@@ -6,83 +6,83 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncTextureLoaderDDS::ncTextureLoaderDDS(const char *pFilename)
-	: ncITextureLoader(pFilename)
+ncTextureLoaderDDS::ncTextureLoaderDDS(const char *filename)
+	: ncITextureLoader(filename)
 {
-	Init();
+	init();
 }
 
-ncTextureLoaderDDS::ncTextureLoaderDDS(ncIFile *pFileHandle)
-	: ncITextureLoader(pFileHandle)
+ncTextureLoaderDDS::ncTextureLoaderDDS(ncIFile *fileHandle)
+	: ncITextureLoader(fileHandle)
 {
-	Init();
+	init();
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncTextureLoaderDDS::Init()
+void ncTextureLoaderDDS::init()
 {
-	DDS_header header;
+	DdsHeader header;
 
-	m_pFileHandle->Open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
-	ReadHeader(header);
-	ParseFormat(header);
+	fileHandle_->open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
+	readHeader(header);
+	parseFormat(header);
 }
 
 /// Reads the DDS header and fills the corresponding structure
-void ncTextureLoaderDDS::ReadHeader(DDS_header& header)
+void ncTextureLoaderDDS::readHeader(DdsHeader& header)
 {
 	// DDS header is 128 bytes long
-	m_pFileHandle->Read(&header, 128);
+	fileHandle_->read(&header, 128);
 
 	// Checking for the header presence
-	if (ncIFile::Int32FromLE(header.dwMagic) == 0x20534444) // "DDS "
+	if (ncIFile::int32FromLE(header.dwMagic) == 0x20534444) // "DDS "
 	{
-		m_iHeaderSize = 128;
-		m_iWidth = ncIFile::Int32FromLE(header.dwWidth);
-		m_iHeight = ncIFile::Int32FromLE(header.dwHeight);
-		m_iMipMapCount = ncIFile::Int32FromLE(header.dwMipMapCount);
+		headerSize_ = 128;
+		width_ = ncIFile::int32FromLE(header.dwWidth);
+		height_ = ncIFile::int32FromLE(header.dwHeight);
+		mipMapCount_ = ncIFile::int32FromLE(header.dwMipMapCount);
 
-		if (m_iMipMapCount == 0)
+		if (mipMapCount_ == 0)
 		{
-			m_iMipMapCount = 1;
+			mipMapCount_ = 1;
 		}
 	}
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::ReadHeader - Not a DDS file");
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::readHeader - Not a DDS file");
 		exit(EXIT_FAILURE);
 	}
 }
 
 /// Parses the DDS header to determine its format
-void ncTextureLoaderDDS::ParseFormat(const DDS_header &header)
+void ncTextureLoaderDDS::parseFormat(const DdsHeader &header)
 {
-	GLenum eInternalFormat = GL_RGB; // to suppress uninitialized variable warning
-	const ncGfxCapabilities &gfxCaps = ncServiceLocator::GfxCapabilities();
+	GLenum internalFormat = GL_RGB; // to suppress uninitialized variable warning
+	const ncGfxCapabilities &gfxCaps = ncServiceLocator::gfxCapabilities();
 
-	uint32_t uFlags = ncIFile::Int32FromLE(header.ddspf.dwFlags);
+	uint32_t flags = ncIFile::int32FromLE(header.ddspf.dwFlags);
 
 	// Texture contains compressed RGB data, dwFourCC contains valid data
-	if (uFlags & DDPF_FOURCC)
+	if (flags & DDPF_FOURCC)
 	{
-		uint32_t uFourCC = ncIFile::Int32FromLE(header.ddspf.dwFourCC);
+		uint32_t fourCC = ncIFile::int32FromLE(header.ddspf.dwFourCC);
 
-		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderDDS::ParseFormat - FourCC: \"%c%c%c%c\" (0x%x)",
-			((char*)&uFourCC)[0], ((char*)&uFourCC)[1], ((char*)&uFourCC)[2], ((char*)&uFourCC)[3], uFourCC);
+		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderDDS::parseFormat - FourCC: \"%c%c%c%c\" (0x%x)",
+			((char*)&fourCC)[0], ((char*)&fourCC)[1], ((char*)&fourCC)[2], ((char*)&fourCC)[3], fourCC);
 
 		// Check for OpenGL extension support
-		switch (uFourCC)
+		switch (fourCC)
 		{
 #ifndef __ANDROID__
 			case DDS_DXT1:
 			case DDS_DXT3:
 			case DDS_DXT5:
-				if (gfxCaps.EXTTextureCompressionS3TC() == false)
+				if (gfxCaps.extTextureCompressionS3TC() == false)
 				{
-					ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::ParseFormat - GL_EXT_texture_compression_s3tc not available");
+					ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::parseFormat - GL_EXT_texture_compression_s3tc not available");
 					exit(EXIT_FAILURE);
 				}
 				break;
@@ -90,114 +90,114 @@ void ncTextureLoaderDDS::ParseFormat(const DDS_header &header)
 			case DDS_ATC:
 			case DDS_ATCA:
 			case DDS_ATCI:
-				if (gfxCaps.AMDCompressedATCTexture() == false)
+				if (gfxCaps.amdCompressedATCTexture() == false)
 				{
-					ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::ParseFormat - GL_AMD_compressed_ATC_texture not available");
+					ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::parseFormat - GL_AMD_compressed_ATC_texture not available");
 					exit(EXIT_FAILURE);
 				}
 				break;
 #endif
 			default:
-				ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::ParseFormat - Unsupported DDS compression \"%s\"", uFourCC);
+				ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::parseFormat - Unsupported DDS compression \"%s\"", fourCC);
 				exit(EXIT_FAILURE);
 				break;
 		}
 
 		// Parsing the FourCC format
-		switch (uFourCC)
+		switch (fourCC)
 		{
 #ifndef __ANDROID__
 			case DDS_DXT1:
-				eInternalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+				internalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
 				break;
 			case DDS_DXT3:
-				eInternalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
 				break;
 			case DDS_DXT5:
-				eInternalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 				break;
 #else
 			case DDS_ATC:
-				eInternalFormat = GL_ATC_RGB_AMD;
+				internalFormat = GL_ATC_RGB_AMD;
 				break;
 			case DDS_ATCA:
-				eInternalFormat = GL_ATC_RGBA_EXPLICIT_ALPHA_AMD;
+				internalFormat = GL_ATC_RGBA_EXPLICIT_ALPHA_AMD;
 				break;
 			case DDS_ATCI:
-				eInternalFormat = GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD;
+				internalFormat = GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD;
 				break;
 #endif
 		}
 
-		LoadPixels(eInternalFormat);
+		loadPixels(internalFormat);
 	}
 	// Texture contains uncompressed RGB data
 	// dwRGBBitCount and the RGB masks (dwRBitMask, dwRBitMask, dwRBitMask) contain valid data
-	else if (uFlags & DDPF_RGB)
+	else if (flags & DDPF_RGB)
 	{
-		GLenum eType = GL_UNSIGNED_BYTE;
+		GLenum type = GL_UNSIGNED_BYTE;
 
-		uint32_t uBitCount = ncIFile::Int32FromLE(header.ddspf.dwRGBBitCount);
-		uint32_t uRedMask = ncIFile::Int32FromLE(header.ddspf.dwRBitMask);
-		uint32_t uGreenMask = ncIFile::Int32FromLE(header.ddspf.dwGBitMask);
-		uint32_t uBlueMask = ncIFile::Int32FromLE(header.ddspf.dwBBitMask);
-		uint32_t uAlphaMask = ncIFile::Int32FromLE(header.ddspf.dwABitMask);
+		uint32_t bitCount = ncIFile::int32FromLE(header.ddspf.dwRGBBitCount);
+		uint32_t redMask = ncIFile::int32FromLE(header.ddspf.dwRBitMask);
+		uint32_t greenMask = ncIFile::int32FromLE(header.ddspf.dwGBitMask);
+		uint32_t blueMask = ncIFile::int32FromLE(header.ddspf.dwBBitMask);
+		uint32_t alphaMask = ncIFile::int32FromLE(header.ddspf.dwABitMask);
 
-		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderDDS::ParseFormat - Pixel masks (%ubit): R:0x%x G:0x%x B:0x%x A:0x%x",
-			uBitCount, uRedMask, uGreenMask, uBlueMask, uAlphaMask);
+		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderDDS::parseFormat - Pixel masks (%ubit): R:0x%x G:0x%x B:0x%x A:0x%x",
+			bitCount, redMask, greenMask, blueMask, alphaMask);
 
-		if ((uRedMask == 0x00FF0000 && uGreenMask == 0x0000FF00 && uBlueMask == 0x000000FF && uAlphaMask == 0x0) ||
-			(uBlueMask == 0x00FF0000 && uGreenMask == 0x0000FF00 && uRedMask == 0x000000FF && uAlphaMask == 0x0)) // 888
+		if ((redMask == 0x00FF0000 && greenMask == 0x0000FF00 && blueMask == 0x000000FF && alphaMask == 0x0) ||
+			(blueMask == 0x00FF0000 && greenMask == 0x0000FF00 && redMask == 0x000000FF && alphaMask == 0x0)) // 888
 		{
-			eInternalFormat = GL_RGB;
+			internalFormat = GL_RGB;
 		}
-		else if ((uAlphaMask == 0xFF000000 && uRedMask == 0x00FF0000 && uGreenMask == 0x0000FF00 && uBlueMask == 0x000000FF) ||
-		         (uAlphaMask == 0xFF000000 && uBlueMask == 0x00FF0000 && uGreenMask == 0x0000FF00 && uRedMask == 0x000000FF)) // 8888
+		else if ((alphaMask == 0xFF000000 && redMask == 0x00FF0000 && greenMask == 0x0000FF00 && blueMask == 0x000000FF) ||
+				 (alphaMask == 0xFF000000 && blueMask == 0x00FF0000 && greenMask == 0x0000FF00 && redMask == 0x000000FF)) // 8888
 		{
-			eInternalFormat = GL_RGBA;
+			internalFormat = GL_RGBA;
 		}
 // 16 bits uncompressed DDS data is not compatbile with OpenGL color channels order
 /*
-		else if (uRedMask == 0xF800 && uGreenMask == 0x07E0 && uBlueMask == 0x001F) // 565
+		else if (redMask == 0xF800 && greenMask == 0x07E0 && blueMask == 0x001F) // 565
 		{
-			eInternalFormat = GL_RGB;
-			eType = GL_UNSIGNED_SHORT_5_6_5;
+			internalFormat = GL_RGB;
+			type = GL_UNSIGNED_SHORT_5_6_5;
 		}
-		else if (uAlphaMask == 0x8000 && uRedMask == 0x7C00 && uGreenMask == 0x03E0 && uBlueMask == 0x001F) // 5551
+		else if (alphaMask == 0x8000 && redMask == 0x7C00 && greenMask == 0x03E0 && blueMask == 0x001F) // 5551
 		{
-			eInternalFormat = GL_RGBA;
-			eType = GL_UNSIGNED_SHORT_5_5_5_1;
+			internalFormat = GL_RGBA;
+			type = GL_UNSIGNED_SHORT_5_5_5_1;
 		}
-		else if (uAlphaMask == 0xF000 && uRedMask == 0x0F00 && uGreenMask == 0x00F0 && uBlueMask == 0x000F) // 4444
+		else if (alphaMask == 0xF000 && redMask == 0x0F00 && greenMask == 0x00F0 && blueMask == 0x000F) // 4444
 		{
-			eInternalFormat = GL_RGBA;
-			eType = GL_UNSIGNED_SHORT_4_4_4_4;
+			internalFormat = GL_RGBA;
+			type = GL_UNSIGNED_SHORT_4_4_4_4;
 		}
 */
 		else
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::ParseFormat - Unsupported DDS pixel format");
+			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::parseFormat - Unsupported DDS pixel format");
 			exit(EXIT_FAILURE);
 		}
 
-		LoadPixels(eInternalFormat, eType);
+		loadPixels(internalFormat, type);
 #ifndef __ANDROID__
-		if (uRedMask > uBlueMask && uBitCount > 16)
+		if (redMask > blueMask && bitCount > 16)
 		{
-			m_texFormat.BGRFormat();
+			texFormat_.bgrFormat();
 		}
 #endif
 	}
 
-	if (m_iMipMapCount > 1)
+	if (mipMapCount_ > 1)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderDDS::ParseFormat - MIP Maps: %d", m_iMipMapCount);
-		m_lMipDataOffsets = new long[m_iMipMapCount];
-		m_lMipDataSizes = new long[m_iMipMapCount];
-		long int lDataSizesSum = ncTextureFormat::CalculateMipSizes(eInternalFormat, m_iWidth, m_iHeight, m_iMipMapCount, m_lMipDataOffsets, m_lMipDataSizes);
-		if (lDataSizesSum != m_lDataSize)
+		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderDDS::parseFormat - MIP Maps: %d", mipMapCount_);
+		mipDataOffsets_ = new long[mipMapCount_];
+		mipDataSizes_ = new long[mipMapCount_];
+		long int dataSizesSum = ncTextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_, mipDataSizes_);
+		if (dataSizesSum != dataSize_)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncTextureLoaderDDS::ParseFormat - The sum of MIP maps size (%ld) is different than texture total data (%ld)", lDataSizesSum, m_lDataSize);
+			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncTextureLoaderDDS::parseFormat - The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
 		}
 	}
 }

@@ -11,118 +11,130 @@
 #include "ncServiceLocator.h"
 
 ///////////////////////////////////////////////////////////
+// CONSTRUCTORS and DESTRUCTOR
+///////////////////////////////////////////////////////////
+
+ncStandardFile::~ncStandardFile()
+{
+	if (shouldCloseOnExit_)
+	{
+		close();
+	}
+}
+
+///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
 /// Tries to open the file
-void ncStandardFile::Open(unsigned char uMode)
+void ncStandardFile::open(unsigned char mode)
 {
 	// Checking if the file is already opened
-	if (m_iFileDescriptor >= 0 || m_pFilePointer != NULL)
+	if (fileDescriptor_ >= 0 || filePointer_ != NULL)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncStandardFile::Open - File \"%s\" is already opened", m_vFilename);
+		ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncStandardFile::open - File \"%s\" is already opened", filename_);
 	}
 	else
 	{
 #if !(defined(_WIN32) && !defined(__MINGW32__))
 		// Opening with a file descriptor
-		if (uMode & MODE_FD)
+		if (mode & MODE_FD)
 		{
-			OpenFD(uMode);
+			openFd(mode);
 		}
 		// Opening with a file stream
 		else
 #endif
-			OpenStream(uMode);
+			openStream(mode);
 	}
 }
 
 /// Closes the file (both opened or fopened)
-void ncStandardFile::Close()
+void ncStandardFile::close()
 {
-	if (m_iFileDescriptor >= 0)
+	if (fileDescriptor_ >= 0)
 	{
 #if !(defined(_WIN32) && !defined(__MINGW32__))
-		int iRetValue = close(m_iFileDescriptor);
-		if (iRetValue < 0)
+		int retValue = ::close(fileDescriptor_);
+		if (retValue < 0)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncStandardFile::Close - Cannot close the file \"%s\"", m_vFilename);
+			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncStandardFile::close - Cannot close the file \"%s\"", filename_);
 		}
 		else
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::Close - File \"%s\" closed", m_vFilename);
-			m_iFileDescriptor = -1;
+			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::close - File \"%s\" closed", filename_);
+			fileDescriptor_ = -1;
 		}
 #endif
 	}
-	else if (m_pFilePointer)
+	else if (filePointer_)
 	{
-		int iRetValue = fclose(m_pFilePointer);
-		if (iRetValue == EOF)
+		int retValue = fclose(filePointer_);
+		if (retValue == EOF)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_WARN, (const char *)"ncStandardFile::Close - Cannot close the file \"%s\"", m_vFilename);
+			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncStandardFile::close - Cannot close the file \"%s\"", filename_);
 		}
 		else
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::Close - File \"%s\" closed", m_vFilename);
-			m_pFilePointer = NULL;
+			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::close - File \"%s\" closed", filename_);
+			filePointer_ = NULL;
 		}
 	}
 }
 
-long int ncStandardFile::Seek(long int lOffset, int iWhence) const
+long int ncStandardFile::seek(long int offset, int whence) const
 {
-	long int lSeekValue = -1;
+	long int seekValue = -1;
 
-	if (m_iFileDescriptor >= 0)
+	if (fileDescriptor_ >= 0)
 	{
 #if !(defined(_WIN32) && !defined(__MINGW32__))
-		lSeekValue = lseek(m_iFileDescriptor, lOffset, iWhence);
+		seekValue = lseek(fileDescriptor_, offset, whence);
 #endif
 	}
-	else if (m_pFilePointer)
+	else if (filePointer_)
 	{
-		lSeekValue = fseek(m_pFilePointer, lOffset, iWhence);
+		seekValue = fseek(filePointer_, offset, whence);
 	}
 
-	return lSeekValue;
+	return seekValue;
 }
 
-long int ncStandardFile::Tell() const
+long int ncStandardFile::tell() const
 {
-	long int lTellValue = -1;
+	long int tellValue = -1;
 
-	if (m_iFileDescriptor >= 0)
+	if (fileDescriptor_ >= 0)
 	{
 #if !(defined(_WIN32) && !defined(__MINGW32__))
-		lTellValue = lseek(m_iFileDescriptor, 0L, SEEK_CUR);
+		tellValue = lseek(fileDescriptor_, 0L, SEEK_CUR);
 #endif
 	}
-	else if (m_pFilePointer)
+	else if (filePointer_)
 	{
-		lTellValue = ftell(m_pFilePointer);
+		tellValue = ftell(filePointer_);
 	}
 
-	return lTellValue;
+	return tellValue;
 }
 
 
-long int ncStandardFile::Read(void *pBuffer, int iBytes) const
+long int ncStandardFile::read(void *buffer, int bytes) const
 {
-	long int lBytesRead = -1;
+	long int bytesRead = -1;
 
-	if (m_iFileDescriptor >= 0)
+	if (fileDescriptor_ >= 0)
 	{
 #if !(defined(_WIN32) && !defined(__MINGW32__))
-		lBytesRead = read(m_iFileDescriptor, pBuffer, iBytes);
+		bytesRead = ::read(fileDescriptor_, buffer, bytes);
 #endif
 	}
-	else if (m_pFilePointer)
+	else if (filePointer_)
 	{
-		lBytesRead = fread(pBuffer, 1, iBytes, m_pFilePointer);
+		bytesRead = fread(buffer, 1, bytes, filePointer_);
 	}
 
-	return lBytesRead;
+	return bytesRead;
 }
 
 
@@ -131,160 +143,160 @@ long int ncStandardFile::Read(void *pBuffer, int iBytes) const
 ///////////////////////////////////////////////////////////
 
 /// Opens the file with open()
-void ncStandardFile::OpenFD(unsigned char uMode)
+void ncStandardFile::openFd(unsigned char mode)
 {
 #if !(defined(_WIN32) && !defined(__MINGW32__))
-	int iOFlag = -1;
+	int openFlag = -1;
 
-	switch (uMode)
+	switch (mode)
 	{
 		case (MODE_FD|MODE_READ):
-			iOFlag = O_RDONLY;
+			openFlag = O_RDONLY;
 			break;
 		case (MODE_FD|MODE_WRITE):
-			iOFlag = O_WRONLY;
+			openFlag = O_WRONLY;
 			break;
 		case (MODE_FD|MODE_READ|MODE_WRITE):
-			iOFlag = O_RDWR;
+			openFlag = O_RDWR;
 			break;
 		default:
-			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::OpenFD - Cannot open the file \"%s\", wrong open mode", m_vFilename);
+			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::openFd - Cannot open the file \"%s\", wrong open mode", filename_);
 			break;
 	}
 
-	if (iOFlag >= 0)
+	if (openFlag >= 0)
 	{
-		m_iFileDescriptor = open(m_vFilename, iOFlag);
+		fileDescriptor_ = ::open(filename_, openFlag);
 
-		if (m_iFileDescriptor < 0)
+		if (fileDescriptor_ < 0)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncStandardFile::OpenFD - Cannot open the file \"%s\"", m_vFilename);
+			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncStandardFile::openFd - Cannot open the file \"%s\"", filename_);
 			exit(EXIT_FAILURE);
 		}
 		else
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::OpenFD - File \"%s\" opened", m_vFilename);
+			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::openFd - File \"%s\" opened", filename_);
 		}
 
 		// Calculating file size
-		m_lFileSize = lseek(m_iFileDescriptor, 0L, SEEK_END);
-		lseek(m_iFileDescriptor, 0L, SEEK_SET);
+		fileSize_ = lseek(fileDescriptor_, 0L, SEEK_END);
+		lseek(fileDescriptor_, 0L, SEEK_SET);
 	}
 #endif
 }
 
 /// Opens the file with fopen()
-void ncStandardFile::OpenStream(unsigned char uMode)
+void ncStandardFile::openStream(unsigned char mode)
 {
-	char pMode[3] = {'\0', '\0', '\0'};
+	char modeChars[3] = {'\0', '\0', '\0'};
 
-	switch (uMode)
+	switch (mode)
 	{
 		case (MODE_READ):
-			pMode[0] = 'r';
+			modeChars[0] = 'r';
 			break;
 		case (MODE_WRITE):
-			pMode[0] = 'w';
+			modeChars[0] = 'w';
 			break;
 		case (MODE_READ|MODE_WRITE):
-			pMode[0] = 'r';
-			pMode[1] = '+';
+			modeChars[0] = 'r';
+			modeChars[1] = '+';
 			break;
 		case (MODE_READ|MODE_BINARY):
-			pMode[0] = 'r';
-			pMode[1] = 'b';
+			modeChars[0] = 'r';
+			modeChars[1] = 'b';
 			break;
 		case (MODE_WRITE|MODE_BINARY):
-			pMode[0] = 'w';
-			pMode[1] = 'b';
+			modeChars[0] = 'w';
+			modeChars[1] = 'b';
 			break;
 		case (MODE_READ|MODE_WRITE|MODE_BINARY):
-			pMode[0] = 'r';
-			pMode[1] = '+';
-			pMode[2] = 'b';
+			modeChars[0] = 'r';
+			modeChars[1] = '+';
+			modeChars[2] = 'b';
 			break;
 		default:
-			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::OpenStream - Cannot open the file \"%s\", wrong open mode", m_vFilename);
+			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::openStream - Cannot open the file \"%s\", wrong open mode", filename_);
 			break;
 	}
 
-	if (pMode[0] != '\0')
+	if (modeChars[0] != '\0')
 	{
-		m_pFilePointer = fopen(m_vFilename, pMode);
+		filePointer_ = fopen(filename_, modeChars);
 
-		if (m_pFilePointer == NULL)
+		if (filePointer_ == NULL)
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncStandardFile::OpenStream - Cannot open the file \"%s\"", m_vFilename);
+			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncStandardFile::openStream - Cannot open the file \"%s\"", filename_);
 			exit(EXIT_FAILURE);
 		}
 		else
 		{
-			ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::OpenStream - File \"%s\" opened", m_vFilename);
+			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::openStream - File \"%s\" opened", filename_);
 		}
 
 		// Calculating file size
-		fseek(m_pFilePointer, 0L, SEEK_END);
-		m_lFileSize = ftell(m_pFilePointer);
-		fseek(m_pFilePointer, 0L, SEEK_SET);
+		fseek(filePointer_, 0L, SEEK_END);
+		fileSize_ = ftell(filePointer_);
+		fseek(filePointer_, 0L, SEEK_SET);
 	}
 }
 
 /// Checks if a file can be accessed with specified mode
-/*! It is called by ncIFile::Access() */
-bool ncStandardFile::Access(const char *pFilename, unsigned char uMode)
+/*! It is called by ncIFile::access() */
+bool ncStandardFile::access(const char *filename, unsigned char mode)
 {
-	bool bAccessible = false;
-	int iAMode = -1;
+	bool isAccessible = false;
+	int accessMode = -1;
 
 #if !(defined(_WIN32) && !defined(__MINGW32__))
-	switch (uMode)
+	switch (mode)
 	{
 		case (ncIFile::MODE_EXISTS):
-			iAMode = F_OK;
+			accessMode = F_OK;
 			break;
 		case (ncIFile::MODE_CAN_READ):
-			iAMode = R_OK;
+			accessMode = R_OK;
 			break;
 		case (ncIFile::MODE_CAN_WRITE):
-			iAMode = W_OK;
+			accessMode = W_OK;
 			break;
 		case (ncIFile::MODE_CAN_READ|ncIFile::MODE_CAN_WRITE):
-			iAMode = R_OK | W_OK;
+			accessMode = R_OK | W_OK;
 			break;
 		default:
-			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::Access - Cannot access the file \"%s\", wrong access mode", pFilename);
+			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::access - Cannot access the file \"%s\", wrong access mode", filename);
 			break;
 	}
 
-	if (iAMode != -1)
+	if (accessMode != -1)
 	{
-		bAccessible = (access(pFilename, iAMode) == 0);
+		isAccessible = (::access(filename, accessMode) == 0);
 	}
 #else
-	switch (uMode)
+	switch (mode)
 	{
 		case (ncIFile::MODE_EXISTS):
-			iAMode = 0;
+			accessMode = 0;
 			break;
 		case (ncIFile::MODE_CAN_READ):
-			iAMode = 2;
+			accessMode = 2;
 			break;
 		case (ncIFile::MODE_CAN_WRITE):
-			iAMode = 4;
+			accessMode = 4;
 			break;
 		case (ncIFile::MODE_CAN_READ|ncIFile::MODE_CAN_WRITE):
-			iAMode = 6;
+			accessMode = 6;
 			break;
 		default:
-			ncServiceLocator::Logger().Write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::Access - Cannot access the file \"%s\", wrong access mode", pFilename);
+			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::access - Cannot access the file \"%s\", wrong access mode", filename);
 			break;
 	}
 
-	if (iAMode != -1)
+	if (accessMode != -1)
 	{
-		bAccessible = (_access(pFilename, iAMode) == 0);
+		isAccessible = (::_access(filename, accessMode) == 0);
 	}
 #endif
 
-	return bAccessible;
+	return isAccessible;
 }

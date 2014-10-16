@@ -5,97 +5,94 @@
 #include "ncSprite.h"
 #include "ncApplication.h"
 
-static const int numTextures = 4;
-static const int numSprites = 8;
-
-ncIAppEventHandler* create_apphandler()
+ncIAppEventHandler* createApphandler()
 {
 	return new MyEventHandler;
 }
 
-void MyEventHandler::OnInit()
+void MyEventHandler::onInit()
 {
-	ncIInputManager::SetHandler(this);
+	ncIInputManager::setHandler(this);
 
-	m_fAngles = new float[numTextures];
-	for (int i = 0; i < numTextures; i++)
+	angles_ = new float[NumTextures];
+	for (int i = 0; i < NumTextures; i++)
 	{
-		m_fAngles[i] = 0.0f;
+		angles_[i] = 0.0f;
 	}
-	m_pTextures = new ncTexture*[numTextures];
-	m_pSprites = new ncSprite*[numSprites];
+	textures_ = new ncTexture*[NumTextures];
+	sprites_ = new ncSprite*[NumSprites];
 
-	ncSceneNode &rRootNode = ncApplication::RootNode();
+	ncSceneNode &rootNode = ncApplication::rootNode();
 
 #ifdef __ANDROID__
-	m_pTextures[0] = new ncTexture("/sdcard/ncine/texture1.pkm"); // 145x121
-	m_pTextures[1] = new ncTexture("/sdcard/ncine/texture2.pkm"); // 100x100
-	m_pTextures[2] = new ncTexture("/sdcard/ncine/texture3.pkm"); // 96x96
-	m_pTextures[3] = new ncTexture("/sdcard/ncine/texture4.pkm"); // 96x96
+	textures_[0] = new ncTexture("/sdcard/ncine/texture1.pkm"); // 145x121
+	textures_[1] = new ncTexture("/sdcard/ncine/texture2.pkm"); // 100x100
+	textures_[2] = new ncTexture("/sdcard/ncine/texture3.pkm"); // 96x96
+	textures_[3] = new ncTexture("/sdcard/ncine/texture4.pkm"); // 96x96
 #else
-	m_pTextures[0] = new ncTexture("textures/texture1.png");
-	m_pTextures[1] = new ncTexture("textures/texture2.png");
-	m_pTextures[2] = new ncTexture("textures/texture3.png");
-	m_pTextures[3] = new ncTexture("textures/texture4.png");
+	textures_[0] = new ncTexture("textures/texture1.png");
+	textures_[1] = new ncTexture("textures/texture2.png");
+	textures_[2] = new ncTexture("textures/texture3.png");
+	textures_[3] = new ncTexture("textures/texture4.png");
 #endif
 
-	m_pSprites[0] = new ncSprite(m_pTextures[0], 0, 0);
-	m_pSprites[0]->SetTexRect(ncRect(40, 0, m_pSprites[0]->Width() - 80, m_pSprites[0]->Height() - 30));
-	m_pSprites[0]->SetScale(0.75f);
-	rRootNode.AddChildNode(m_pSprites[0]);
+	sprites_[0] = new ncSprite(textures_[0], 0, 0);
+	sprites_[0]->setTexRect(ncRect(40, 0, sprites_[0]->width() - 80, sprites_[0]->height() - 30));
+	sprites_[0]->setScale(0.75f);
+	rootNode.addChildNode(sprites_[0]);
 
-	for (int i = 1; i < numSprites; i++)
+	for (int i = 1; i < NumSprites; i++)
 	{
-		m_pSprites[i] = new ncSprite(m_pSprites[i - 1], m_pTextures[i % numTextures], 0, 0);
-		m_pSprites[i]->SetScale(0.5f);
+		sprites_[i] = new ncSprite(sprites_[i - 1], textures_[i % NumTextures], 0, 0);
+		sprites_[i]->setScale(0.5f);
 	}
 }
 
-void MyEventHandler::OnFrameStart()
+void MyEventHandler::onFrameStart()
 {
-	float fSinus[numTextures];
-	float fCosine[numTextures];
+	float sine[NumTextures];
+	float cosine[NumTextures];
 
-	for (int i = 0; i < numTextures; i++)
+	for (int i = 0; i < NumTextures; i++)
 	{
-		m_fAngles[i] += (250 + 25 * i) * ncApplication::Interval();
-		fSinus[i] = sinf(m_fAngles[i] * 0.01f);
-		fCosine[i] = cosf(2 * m_fAngles[i] * 0.01f);
+		angles_[i] += (250 + 25 * i) * ncApplication::interval();
+		sine[i] = sinf(angles_[i] * 0.01f);
+		cosine[i] = cosf(2 * angles_[i] * 0.01f);
 	}
 
-	m_pSprites[0]->x = ncApplication::Width() * 0.5f + fSinus[0] * 100.0f;
-	m_pSprites[0]->y = ncApplication::Height() * 0.5f + fCosine[0] * 50.0f;
+	sprites_[0]->x = ncApplication::width() * 0.5f + sine[0] * 100.0f;
+	sprites_[0]->y = ncApplication::height() * 0.5f + cosine[0] * 50.0f;
 
-	for (int i = 1; i < numSprites; i++)
+	for (int i = 1; i < NumSprites; i++)
 	{
-		m_pSprites[i]->x = fSinus[i % numTextures] * 50;
-		m_pSprites[i]->y = fCosine[i % numTextures] * 50;
+		sprites_[i]->x = sine[i % NumTextures] * 50;
+		sprites_[i]->y = cosine[i % NumTextures] * 50;
 	}
 }
 
-void MyEventHandler::OnShutdown()
+void MyEventHandler::onShutdown()
 {
-	delete m_pSprites[0]; // and all its children
-	for (int i = 0; i < numTextures; i++)
+	delete sprites_[0]; // and all its children
+	for (int i = 0; i < NumTextures; i++)
 	{
-		delete m_pTextures[i];
+		delete textures_[i];
 	}
 
-	delete[] m_pSprites;
-	delete[] m_pTextures;
-	delete[] m_fAngles;
+	delete[] sprites_;
+	delete[] textures_;
+	delete[] angles_;
 }
 
 #ifndef __ANDROID__
-void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
+void MyEventHandler::onKeyReleased(const ncKeyboardEvent &event)
 {
 	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)
 	{
-		ncApplication::Quit();
+		ncApplication::quit();
 	}
 	else if (event.sym == NCKEY_SPACE)
 	{
-		ncApplication::TogglePause();
+		ncApplication::togglePause();
 	}
 }
 #endif

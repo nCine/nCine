@@ -5,8 +5,8 @@
 #include <sys/time.h>
 #define SIZE 10000000
 
-void radix_sort(uint32_t *array, uint32_t *aux, int length);
-void quick_sort(uint32_t *array, int start, int end);
+void radixSort(uint32_t *array, uint32_t *aux, int length);
+void quickSort(uint32_t *array, int start, int end);
 
 int main()
 {
@@ -19,13 +19,13 @@ int main()
 	for (int i = 0; i < 10; i++)
 	{
 		gettimeofday(&startTime, NULL);
-//	radix_sort(array, auxiliary, SIZE);
-		quick_sort(array, 0, SIZE);
+//		radixSort(array, auxiliary, SIZE);
+		quickSort(array, 0, SIZE);
 		gettimeofday(&endTime, NULL);
 
 		unsigned long int ticks = (endTime.tv_sec - startTime.tv_sec) * 1000 +
 		                          (endTime.tv_usec - startTime.tv_usec) / 1000;
-//	printf("Sorted %d numbers in %lums \n", SIZE, ticks);
+//		printf("Sorted %d numbers in %lums \n", SIZE, ticks);
 		printf("%lu ", ticks);
 	}
 
@@ -39,7 +39,7 @@ int main()
 	delete[] auxiliary;
 }
 
-void radix_sort(uint32_t *array, uint32_t *aux, int length)
+void radixSort(uint32_t *array, uint32_t *aux, int length)
 {
 	uint32_t histograms[256 * 4];
 	memset(histograms, 0, 256 * 4 * sizeof(uint32_t));
@@ -133,15 +133,15 @@ int partition(uint32_t *array, int start, int end)
 }
 
 
-/* Implementazione del quick sorting sull'array di estremi start e end */
-void quick_sort(uint32_t *array, int start, int end)
+/* Quick sort implementation from start to end of array */
+void quickSort(uint32_t *array, int start, int end)
 {
 	int div;
 
 	if (start < end)
 	{
 		div = partition(array, start, end);
-		quick_sort(array, start, div);
-		quick_sort(array, div + 1, end);
+		quickSort(array, start, div);
+		quickSort(array, div + 1, end);
 	}
 }

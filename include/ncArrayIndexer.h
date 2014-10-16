@@ -12,39 +12,39 @@ class ncArrayIndexer : public ncIIndexer
 	ncArrayIndexer();
 	~ncArrayIndexer();
 
-	virtual unsigned int AddObject(ncObject* pObject);
-	virtual void RemoveObject(unsigned int uId);
+	virtual unsigned int addObject(ncObject* object);
+	virtual void removeObject(unsigned int id);
 
-	virtual ncObject* Object(unsigned int uId) const;
+	virtual ncObject* object(unsigned int id) const;
 
 	virtual bool isEmpty() const;
 
   private:
-	unsigned int m_uNextId;
-	ncArray<ncObject*> m_vPointers;
+	unsigned int nextId_;
+	ncArray<ncObject*> pointers_;
 };
 
-inline unsigned int ncArrayIndexer::AddObject(ncObject* pObject)
+inline unsigned int ncArrayIndexer::addObject(ncObject* object)
 {
-	m_vPointers[m_uNextId] = pObject;
-	m_uNextId++;
+	pointers_[nextId_] = object;
+	nextId_++;
 
-	return m_uNextId - 1;
+	return nextId_ - 1;
 }
-inline void ncArrayIndexer::RemoveObject(unsigned int uId)
+inline void ncArrayIndexer::removeObject(unsigned int id)
 {
 	// setting to NULL instead of physically removing
-	if (uId < m_vPointers.Size())
+	if (id < pointers_.size())
 	{
-		m_vPointers[uId] = NULL;
+		pointers_[id] = NULL;
 	}
 }
 
-inline ncObject *ncArrayIndexer::Object(unsigned int uId) const
+inline ncObject *ncArrayIndexer::object(unsigned int id) const
 {
-	if (uId < m_vPointers.Size())
+	if (id < pointers_.size())
 	{
-		return m_vPointers[uId];
+		return pointers_[id];
 	}
 	else
 	{
@@ -54,19 +54,19 @@ inline ncObject *ncArrayIndexer::Object(unsigned int uId) const
 
 inline bool ncArrayIndexer::isEmpty() const
 {
-	bool bEmpty = true;
+	bool isEmpty = true;
 
-	for (unsigned int i = 0; i < m_vPointers.Size(); i++)
+	for (unsigned int i = 0; i < pointers_.size(); i++)
 	{
-		if (m_vPointers[i])
+		if (pointers_[i])
 		{
 			// There is at least one pointer stored
-			bEmpty = false;
+			isEmpty = false;
 			break;
 		}
 	}
 
-	return bEmpty;
+	return isEmpty;
 }
 
 #endif

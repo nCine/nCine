@@ -25,86 +25,86 @@
 int main(int argc, char **argv)
 {
 	SDL_Event event;
-	int iWidth = 960;
-	int iHeight = 640;
-	bool bQuit = false;
+	const int Width = 960;
+	const int Height = 640;
+	bool shouldQuit = false;
 
-	const int NUM_TEXTURES = 4;
-	const int NUM_SPRITES = 1000;
-	ncSprite *pSprites[NUM_SPRITES];
-	int vRadius[NUM_SPRITES];
-	int vX[NUM_SPRITES];
-	int vY[NUM_SPRITES];
+	const int NumTextures = 4;
+	const int NumSprites = 1000;
+	ncSprite *sprites[NumSprites];
+	int radii[NumSprites];
+	int xCoords[NumSprites];
+	int yCoords[NumSprites];
 
 // ----- Init ----------------------
-	float fAngle = 0.0f;
+	float angle = 0.0f;
 	ncFrameTimer t(5, 0);
-	ncServiceLocator::RegisterLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
-	ncSDLGfxDevice gfxDevice(iWidth, iHeight);
-	gfxDevice.SetWindowTitle("Test");
+	ncServiceLocator::registerLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
+	ncSDLGfxDevice gfxDevice(Width, Height);
+	gfxDevice.setWindowTitle("Test");
 
 	ncRenderQueue renderQueue;
 	ncSceneNode rootNode;
 
 #ifdef WITH_BATCH
-	ncTexture *pMegaTexture = new ncTexture("textures/megatexture_256.png");
+	ncTexture *megaTexture = new ncTexture("textures/megatexture_256.png");
 	ncRect texRects[NUM_TEXTURES];
 	texRects[0] = ncRect(0, 0, 145, 121);
 	texRects[1] = ncRect(256 - 100, 0, 100, 100);
 	texRects[2] = ncRect(0, 256 - 96, 96, 96);
 	texRects[3] = ncRect(256 - 96, 256 - 96, 96, 96);
-	ncSpriteBatchNode spriteBatch(&rootNode, pMegaTexture);
+	ncSpriteBatchNode spriteBatch(&rootNode, megaTexture);
 #else
-	ncTexture *pTextures[NUM_TEXTURES];
-	pTextures[0] = new ncTexture("textures/texture1.png");
-	pTextures[1] = new ncTexture("textures/texture2.png");
-	pTextures[2] = new ncTexture("textures/texture3.png");
-	pTextures[3] = new ncTexture("textures/texture4.png");
+	ncTexture *textures[NumTextures];
+	textures[0] = new ncTexture("textures/texture1.png");
+	textures[1] = new ncTexture("textures/texture2.png");
+	textures[2] = new ncTexture("textures/texture3.png");
+	textures[3] = new ncTexture("textures/texture4.png");
 #endif
 
-	for (int i = 0; i < NUM_SPRITES; i++)
+	for (int i = 0; i < NumSprites; i++)
 	{
-		int numTex = rand() % NUM_TEXTURES;
-		vRadius[i] = 20 + rand() % 50;
-		vX[i] = rand() % iWidth;
-		vY[i] = rand() % iHeight;
+		int numTex = rand() % NumTextures;
+		radii[i] = 20 + rand() % 50;
+		xCoords[i] = rand() % Width;
+		yCoords[i] = rand() % Height;
 #ifdef WITH_BATCH
-		pSprites[i] = new ncSprite(&spriteBatch, pMegaTexture, vX[i], vY[i]);
-		pSprites[i]->SetTexRect(texRects[numTex]);
+		sprites[i] = new ncSprite(&spriteBatch, megaTexture, xCoords[i], yCoords[i]);
+		sprites[i]->setTexRect(texRects[numTex]);
 #else
-		ncTexture *pTexture = pTextures[numTex];
-		pSprites[i] = new ncSprite(pTexture, vX[i], vY[i]);
-		pSprites[i]->SetPriority(numTex);
-		rootNode.AddChildNode(pSprites[i]);
+		ncTexture *texture = textures[numTex];
+		sprites[i] = new ncSprite(texture, xCoords[i], yCoords[i]);
+		sprites[i]->setPriority(numTex);
+		rootNode.addChildNode(sprites[i]);
 #endif
 		float scale = 0.35f + 0.1f * (rand() % 3);
-		pSprites[i]->SetScale(scale);
+		sprites[i]->setScale(scale);
 		float rot = rand() % 360;
-		pSprites[i]->SetRotation(rot);
+		sprites[i]->setRotation(rot);
 		unsigned char ucRandAlpha = rand() % 256;
-		pSprites[i]->SetColorF(1.0f, 1.0f, 1.0f, ucRandAlpha / 255.0f);
+		sprites[i]->setColorF(1.0f, 1.0f, 1.0f, ucRandAlpha / 255.0f);
 	}
 
 
 // ----- Event cycle --------------------
-	while (!bQuit)
+	while (!shouldQuit)
 	{
 		while (SDL_PollEvent(&event))
 		{
 			switch (event.type)
 			{
 				case SDL_QUIT:
-					bQuit = true;
+					shouldQuit = true;
 					break;
 				case SDL_KEYDOWN:
 					switch (event.key.keysym.sym)
 					{
 						case SDLK_ESCAPE:
 						case SDLK_q:
-							bQuit = true;
+							shouldQuit = true;
 							break;
 						case SDLK_F1:
-							gfxDevice.ToggleFullScreen();
+							gfxDevice.toggleFullScreen();
 							break;
 						default:
 							break;
@@ -115,43 +115,43 @@ int main(int argc, char **argv)
 
 
 // ----- Blitting on the screen --------
-		t.AddFrame();
-		fAngle += 250.0f * t.Interval();
+		t.addFrame();
+		angle += 250.0f * t.interval();
 
-		gfxDevice.Clear();
+		gfxDevice.clear();
 
-		float fSinus = sinf(fAngle * 0.01f);
-		float fCosine = cosf(fAngle * 0.01f);
+		float sine = sinf(angle * 0.01f);
+		float cosine = cosf(angle * 0.01f);
 
-		for (int i = 0; i < NUM_SPRITES; i++)
+		for (int i = 0; i < NumSprites; i++)
 		{
-			pSprites[i]->x = vX[i] + fSinus * vRadius[i];
-			pSprites[i]->y = vY[i] + fCosine * vRadius[i];
+			sprites[i]->x = xCoords[i] + sine * radii[i];
+			sprites[i]->y = yCoords[i] + cosine * radii[i];
 		}
 
-		rootNode.Update(t.Interval());
-		rootNode.Visit(renderQueue);
-		renderQueue.Draw();
+		rootNode.update(t.interval());
+		rootNode.visit(renderQueue);
+		renderQueue.draw();
 
-		gfxDevice.Update();
+		gfxDevice.update();
 	}
 
 
 // ----- Quitting ----------------------
-	for (int i = 0; i < NUM_SPRITES; i++)
+	for (int i = 0; i < NumSprites; i++)
 	{
-		delete pSprites[i];
+		delete sprites[i];
 	}
 
 #ifdef WITH_BATCH
-	delete pMegaTexture;
+	delete megaTexture;
 #else
-	for (int i = 0; i < NUM_TEXTURES; i++)
+	for (int i = 0; i < NumTextures; i++)
 	{
-		delete pTextures[i];
+		delete textures[i];
 	}
 #endif
 
-	ncServiceLocator::UnregisterAll();
+	ncServiceLocator::unregisterAll();
 	return 0;
 }

@@ -112,35 +112,35 @@ class ncIInputManager
   public:
 	virtual ~ncIInputManager() { }
 
-	inline static void SetHandler(ncIInputEventHandler *pInputEventHandler)
+	inline static void setHandler(ncIInputEventHandler *inputEventHandler)
 	{
-		s_pInputEventHandler = pInputEventHandler;
+		inputEventHandler_ = inputEventHandler;
 	}
 
 #ifndef __ANDROID__
-	virtual const ncMouseState& MouseState() = 0;
-	virtual const ncKeyboardState& KeyboardState() const = 0;
+	virtual const ncMouseState& mouseState() = 0;
+	virtual const ncKeyboardState& keyboardState() const = 0;
 #endif
 
-	static short int s_iMaxAxisValue;
+	static short int MaxAxisValue;
 	/// Returns true if the specified joystick is connected
-	virtual bool isJoyPresent(int iJoyId) const = 0;
+	virtual bool isJoyPresent(int joyId) const = 0;
 	/// Returns the name of the specified joystick
-	virtual const char* JoyName(int iJoyId) const = 0;
+	virtual const char* joyName(int joyId) const = 0;
 	/// Returns the number of available buttons for the specified joystick
-	virtual int JoyNumButtons(int iJoyId) const = 0;
+	virtual int joyNumButtons(int joyId) const = 0;
 	/// Returns the number of available axes for the specified joystick
-	virtual int JoyNumAxes(int iJoyId) const = 0;
+	virtual int joyNumAxes(int joyId) const = 0;
 	/// Returns the state of a joystick button
-	virtual bool isJoyButtonPressed(int iJoyId, int iButtonId) const = 0;
+	virtual bool isJoyButtonPressed(int joyId, int buttonId) const = 0;
 	/// Returns a value between -32768 and 32767 for a joystick axis
-	virtual short int JoyAxisValue(int iJoyId, int iAxisId) const = 0;
+	virtual short int joyAxisValue(int joyId, int axisId) const = 0;
 	/// Returns a normalized value between -1 and 1 for a joystick axis
-	virtual float JoyAxisNormValue(int iJoyId, int iAxisId) const = 0;
+	virtual float joyAxisNormValue(int joyId, int axisId) const = 0;
 
   protected:
 	ncIInputManager() { }
-	static ncIInputEventHandler *s_pInputEventHandler;
+	static ncIInputEventHandler *inputEventHandler_;
 };
 
 #endif

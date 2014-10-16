@@ -15,15 +15,15 @@ class ncMutex
 	ncMutex();
 	~ncMutex();
 
-	void Lock();
-	void Unlock();
-	int TryLock();
+	void lock();
+	void unlock();
+	int tryLock();
 
   private:
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
-	CRITICAL_SECTION m_handle;
+	CRITICAL_SECTION handle_;
 #else
-	pthread_mutex_t m_mutex;
+	pthread_mutex_t mutex_;
 #endif
 
 	friend class ncCondVariable;
@@ -38,19 +38,19 @@ class ncCondVariable
 	ncCondVariable();
 	~ncCondVariable();
 
-	void Wait(ncMutex &rMutex);
-	void Signal();
-	void Broadcast();
+	void wait(ncMutex &mutex);
+	void signal();
+	void broadcast();
 
   private:
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
-	HANDLE m_events[2];
-	unsigned int m_uWaitersCount;
-	CRITICAL_SECTION m_WaitersCountLock;
+	HANDLE events_[2];
+	unsigned int waitersCount_;
+	CRITICAL_SECTION waitersCountLock_;
 
-	void WaitEvents();
+	void waitEvents();
 #else
-	pthread_cond_t m_cond;
+	pthread_cond_t cond_;
 #endif
 };
 
@@ -63,14 +63,14 @@ class ncRWLock
 	ncRWLock();
 	~ncRWLock();
 
-	inline void ReadLock() { pthread_rwlock_rdlock(&m_rwlock); }
-	inline void WriteLock() { pthread_rwlock_wrlock(&m_rwlock); }
-	inline int TryReadLock() { return pthread_rwlock_tryrdlock(&m_rwlock); }
-	inline int TryWriteLock() { return pthread_rwlock_trywrlock(&m_rwlock); }
-	inline void Unlock() { pthread_rwlock_unlock(&m_rwlock); }
+	inline void readLock() { pthread_rwlock_rdlock(&rwlock_); }
+	inline void writeLock() { pthread_rwlock_wrlock(&rwlock_); }
+	inline int tryReadLock() { return pthread_rwlock_tryrdlock(&rwlock_); }
+	inline int tryWriteLock() { return pthread_rwlock_trywrlock(&rwlock_); }
+	inline void unlock() { pthread_rwlock_unlock(&rwlock_); }
 
   private:
-	pthread_rwlock_t m_rwlock;
+	pthread_rwlock_t rwlock_;
 };
 
 #if !defined (__ANDROID__) && !defined(__APPLE__)
@@ -80,14 +80,14 @@ class ncBarrier
 {
   public:
 	// Creates a barrier for the specified amount of waiting threads
-	ncBarrier(unsigned int uCount);
+	ncBarrier(unsigned int count);
 	~ncBarrier();
 
 	/// The calling thread waits at the barrier
-	inline int Wait() { return pthread_barrier_wait(&m_barrier); }
+	inline int wait() { return pthread_barrier_wait(&barrier_); }
 
   private:
-	pthread_barrier_t m_barrier;
+	pthread_barrier_t barrier_;
 };
 
 #endif

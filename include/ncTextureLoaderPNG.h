@@ -8,13 +8,13 @@
 class ncTextureLoaderPNG : public ncITextureLoader
 {
   public:
-	ncTextureLoaderPNG(const char *pFilename);
-	ncTextureLoaderPNG(ncIFile *pFileHandle);
+	ncTextureLoaderPNG(const char *filename);
+	ncTextureLoaderPNG(ncIFile *fileHandle);
 	~ncTextureLoaderPNG() { }
 
   private:
-	void Init();
-	static void ReadFromFileHandle(png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToRead);
+	void init();
+	static void readFromFileHandle(png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToRead);
 };
 
 #endif

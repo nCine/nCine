@@ -12,7 +12,7 @@ class ncFontGlyph;
 class ncTextNode : public ncDrawableNode
 {
   public:
-	enum eAlignment
+	enum Alignment
 	{
 		ALIGN_LEFT,
 		ALIGN_CENTER,
@@ -20,74 +20,74 @@ class ncTextNode : public ncDrawableNode
 	};
 
 	/// Maximum length for a string to be rendered
-	static const unsigned int s_uMaxStringLength = 256;
+	static const unsigned int MaxStringLength = 256;
 
-	ncTextNode(ncSceneNode* pParent, ncFont *pFont);
+	ncTextNode(ncSceneNode* parent, ncFont *font);
 	virtual ~ncTextNode() { }
 
 	// Returns rendered text width
-	float Width() const;
+	float width() const;
 	// Returns rendered text height
-	float Height() const;
+	float height() const;
 	/// Is kerning enabled for this node rendering?
-	inline bool withKerning() const { return m_bWithKerning; }
+	inline bool withKerning() const { return withKerning_; }
 	// Sets the kerning flag for this node rendering
-	void EnableKerning(bool bWithKerning);
+	void enableKerning(bool withKerning);
 	/// Gets the horizontal text alignment
-	inline eAlignment Alignment() const { return m_alignment; }
+	inline Alignment alignment() const { return alignment_; }
 	// Sets the horizontal text alignment
-	void SetAlignment(eAlignment alignment);
+	void setAlignment(Alignment alignment);
 
 	/// Gets the font base scaled by the scale factor
-	inline float FontBase() const { return m_pFont->Base() * CurrentAbsScale(); }
+	inline float fontBase() const { return font_->base() * currentAbsScale(); }
 	/// Gets the font line height scaled by the scale factor
-	inline float FontLineHeight() const { return m_pFont->LineHeight() * CurrentAbsScale(); }
+	inline float fontLineHeight() const { return font_->lineHeight() * currentAbsScale(); }
 	// Sets the string to render
-	void SetString(const char *pString);
+	void setString(const char *string);
 
-	virtual void Draw(ncRenderQueue& rRenderQueue);
+	virtual void draw(ncRenderQueue& renderQueue);
 
-	inline static eObjectType sType() { return TEXT_TYPE; }
+	inline static ObjectType sType() { return TEXT_TYPE; }
 
   private:
 	/// The string to be rendered
-	char m_vString[s_uMaxStringLength];
+	char string_[MaxStringLength];
 	/// Dirty flag for vertices and texture coordinates
-	bool m_bDirtyDraw;
+	bool dirtyDraw_;
 	/// Dirty flag for boundary rectangle
-	mutable bool m_bDirtyBoundaries;
+	mutable bool dirtyBoundaries_;
 	/// Kerning flag for rendering
-	bool m_bWithKerning;
+	bool withKerning_;
 	/// The font class used to render text
-	ncFont *m_pFont;
+	ncFont *font_;
 	/// The array of vertices for every glyph in the batch
-	ncArray<float> m_vVertices;
+	ncArray<float> vertices_;
 	/// The array of texture coordinates for every glyph in the batch
-	ncArray<float> m_vTexCoords;
+	ncArray<float> texCoords_;
 
 	/// Advance on the X-axis for the next processed glyph
-	mutable float m_fXAdvance;
+	mutable float xAdvance_;
 	/// Total advance on the X-axis for the longest line (horizontal boundary)
-	mutable float m_fXAdvanceSum;
+	mutable float xAdvanceSum_;
 	/// Advance on the Y-axis for the next processed glyph
-	mutable float m_fYAdvance;
+	mutable float yAdvance_;
 	/// Total advance on the Y-axis for the entire string (vertical boundary)
-	mutable float m_fYAdvanceSum;
+	mutable float yAdvanceSum_;
 	/// Text width for each line of text
-	mutable ncArray<float> m_vLineLengths;
+	mutable ncArray<float> lineLengths_;
 	/// Horizontal text alignment
-	eAlignment m_alignment;
+	Alignment alignment_;
 
 	// Calculates rectangle boundaries for the rendered text
-	void CalculateBoundaries() const;
+	void calculateBoundaries() const;
 	// Calculates align offset for a particular line
-	float CalculateAlignment(unsigned int uLineIndex) const;
+	float calculateAlignment(unsigned int lineIndex) const;
 	// Calculates absolute scale factor on the fly
-	float CurrentAbsScale() const;
+	float currentAbsScale() const;
 	// Fills the batch draw command with data from a glyph
-	void ProcessGlyph(const ncFontGlyph* pGlyph);
+	void processGlyph(const ncFontGlyph* glyph);
 
-	virtual void UpdateRenderCommand();
+	virtual void updateRenderCommand();
 };
 
 #endif

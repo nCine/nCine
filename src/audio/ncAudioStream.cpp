@@ -10,36 +10,36 @@
 
 /// Constructor creating an audio stream from an audio file
 /*! Private constructor called only by ncAudioStreamPlayer */
-ncAudioStream::ncAudioStream(const char *pFilename)
-	: m_iNextAvailALBuffer(0), m_iFrequency(0)
+ncAudioStream::ncAudioStream(const char *filename)
+	: nextAvailAlBuffer_(0), frequency_(0)
 {
-	alGenBuffers(s_iNumBuffers, m_uALBuffers);
-	m_pBuffer = new char[s_iBufSize];
+	alGenBuffers(NumBuffers, alBuffers_);
+	memBuffer_ = new char[BufferSize];
 
-	m_pAudioLoader = ncIAudioLoader::CreateFromFile(pFilename);
-	m_iFrequency = m_pAudioLoader->Frequency();
-	int iChannels = m_pAudioLoader->Channels();
+	audioLoader_ = ncIAudioLoader::createFromFile(filename);
+	frequency_ = audioLoader_->frequency();
+	int numhannels = audioLoader_->numChannels();
 
-	if (iChannels == 1)
+	if (numhannels == 1)
 	{
-		m_eFormat = AL_FORMAT_MONO16;
+		format_ = AL_FORMAT_MONO16;
 	}
-	else if (iChannels == 2)
+	else if (numhannels == 2)
 	{
-		m_eFormat = AL_FORMAT_STEREO16;
+		format_ = AL_FORMAT_STEREO16;
 	}
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, "ncAudioStream::ncAudioStream - Unsupported number of channels: %d", iChannels);
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, "ncAudioStream::ncAudioStream - Unsupported number of channels: %d", numhannels);
 		exit(EXIT_FAILURE);
 	}
 }
 
 ncAudioStream::~ncAudioStream()
 {
-	delete m_pAudioLoader;
-	delete[] m_pBuffer;
-	alDeleteBuffers(s_iNumBuffers, m_uALBuffers);
+	delete audioLoader_;
+	delete[] memBuffer_;
+	alDeleteBuffers(NumBuffers, alBuffers_);
 }
 
 ///////////////////////////////////////////////////////////
@@ -48,96 +48,96 @@ ncAudioStream::~ncAudioStream()
 
 /// Enqueues new buffers and unqueues processed ones
 /*! /return A flag indicating whether the stream has been entirely decoded and played or not */
-bool ncAudioStream::Enqueue(ALuint uSource, bool bLooping)
+bool ncAudioStream::enqueue(ALuint source, bool looping)
 {
 	// Set to false when the queue is empty and there is no more data to decode
-	bool bShouldKeepPlaying = true;
+	bool shouldKeepPlaying = true;
 
-	ALint iProcessedBuffers;
-	alGetSourcei(uSource, AL_BUFFERS_PROCESSED, &iProcessedBuffers);
+	ALint numProcessedBuffers;
+	alGetSourcei(source, AL_BUFFERS_PROCESSED, &numProcessedBuffers);
 
 	// Unqueueing
-	while (iProcessedBuffers > 0)
+	while (numProcessedBuffers > 0)
 	{
-		ALuint uUnqueuedALBuffer;
-		alSourceUnqueueBuffers(uSource, 1, &uUnqueuedALBuffer);
-		m_iNextAvailALBuffer--;
-		m_uALBuffers[m_iNextAvailALBuffer] = uUnqueuedALBuffer;
-		iProcessedBuffers--;
+		ALuint unqueuedAlBuffer;
+		alSourceUnqueueBuffers(source, 1, &unqueuedAlBuffer);
+		nextAvailAlBuffer_--;
+		alBuffers_[nextAvailAlBuffer_] = unqueuedAlBuffer;
+		numProcessedBuffers--;
 	}
 
 
 	// Queueing
-	if (m_iNextAvailALBuffer < s_iNumBuffers)
+	if (nextAvailAlBuffer_ < NumBuffers)
 	{
-		ALuint uCurrBuffer = m_uALBuffers[m_iNextAvailALBuffer];
+		ALuint currentBuffer = alBuffers_[nextAvailAlBuffer_];
 
-		long lBytes = m_pAudioLoader->Read(m_pBuffer, s_iBufSize);
+		long bytes = audioLoader_->read(memBuffer_, BufferSize);
 
 		// EOF reached
-		if (lBytes < s_iBufSize)
+		if (bytes < BufferSize)
 		{
-			if (bLooping)
+			if (looping)
 			{
-				m_pAudioLoader->Rewind();
-				long lMoreBytes = m_pAudioLoader->Read(m_pBuffer + lBytes, s_iBufSize - lBytes);
-				lBytes += lMoreBytes;
+				audioLoader_->rewind();
+				long moreBytes = audioLoader_->read(memBuffer_ + bytes, BufferSize - bytes);
+				bytes += moreBytes;
 			}
 		}
 
 		// If still decoding data then enqueue
-		if (lBytes > 0)
+		if (bytes > 0)
 		{
 			// On iOS alBufferDataStatic could be used instead
-			alBufferData(uCurrBuffer, m_eFormat, m_pBuffer, lBytes, m_iFrequency);
-			alSourceQueueBuffers(uSource, 1, &uCurrBuffer);
-			m_iNextAvailALBuffer++;
+			alBufferData(currentBuffer, format_, memBuffer_, bytes, frequency_);
+			alSourceQueueBuffers(source, 1, &currentBuffer);
+			nextAvailAlBuffer_++;
 		}
 		// If it has no more data to decode and the queue is empty
-		else if (m_iNextAvailALBuffer == 0)
+		else if (nextAvailAlBuffer_ == 0)
 		{
-			bShouldKeepPlaying = false;
-			Stop(uSource);
+			shouldKeepPlaying = false;
+			stop(source);
 		}
 	}
 
 
-	ALenum eState;
-	alGetSourcei(uSource, AL_SOURCE_STATE, &eState);
+	ALenum state;
+	alGetSourcei(source, AL_SOURCE_STATE, &state);
 
 	// Handle buffer underrun case
-	if (eState != AL_PLAYING)
+	if (state != AL_PLAYING)
 	{
-		ALint iQueuedBuffers = 0;
-		alGetSourcei(uSource, AL_BUFFERS_QUEUED, &iQueuedBuffers);
-		if (iQueuedBuffers > 0)
+		ALint numQueuedBuffers = 0;
+		alGetSourcei(source, AL_BUFFERS_QUEUED, &numQueuedBuffers);
+		if (numQueuedBuffers > 0)
 		{
 			// Need to restart play
-			alSourcePlay(uSource);
+			alSourcePlay(source);
 		}
 	}
 
-	return bShouldKeepPlaying;
+	return shouldKeepPlaying;
 }
 
 /// Unqueues any left buffer and rewinds the loader
-void ncAudioStream::Stop(ALuint uSource)
+void ncAudioStream::stop(ALuint source)
 {
 	// In order to unqueue all the buffers, the source must be stopped first
-	alSourceStop(uSource);
+	alSourceStop(source);
 
-	ALint iProcessedBuffers;
-	alGetSourcei(uSource, AL_BUFFERS_PROCESSED, &iProcessedBuffers);
+	ALint numProcessedBuffers;
+	alGetSourcei(source, AL_BUFFERS_PROCESSED, &numProcessedBuffers);
 
 	// Unqueueing
-	while (iProcessedBuffers > 0)
+	while (numProcessedBuffers > 0)
 	{
-		ALuint uUnqueuedALBuffer;
-		alSourceUnqueueBuffers(uSource, 1, &uUnqueuedALBuffer);
-		m_iNextAvailALBuffer--;
-		m_uALBuffers[m_iNextAvailALBuffer] = uUnqueuedALBuffer;
-		iProcessedBuffers--;
+		ALuint uuqueuedAlBuffer;
+		alSourceUnqueueBuffers(source, 1, &uuqueuedAlBuffer);
+		nextAvailAlBuffer_--;
+		alBuffers_[nextAvailAlBuffer_] = uuqueuedAlBuffer;
+		numProcessedBuffers--;
 	}
 
-	m_pAudioLoader->Rewind();
+	audioLoader_->rewind();
 }

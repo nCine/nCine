@@ -13,24 +13,24 @@ class MyEventHandler
 	  public ncIInputEventHandler
 {
   public:
-	virtual void OnInit();
-	virtual void OnFrameStart();
-	virtual void OnFrameEnd() { }
-	virtual void OnShutdown();
+	virtual void onInit();
+	virtual void onFrameStart();
+	virtual void onFrameEnd() { }
+	virtual void onShutdown();
 
 #ifdef __ANDROID__
-	virtual void OnTouchUp(const ncTouchEvent &event);
+	virtual void onTouchUp(const ncTouchEvent &event);
 #else
-	virtual void OnKeyReleased(const ncKeyboardEvent &event);
-	virtual void OnMouseButtonReleased(const ncMouseEvent &event);
+	virtual void onKeyReleased(const ncKeyboardEvent &event);
+	virtual void onMouseButtonReleased(const ncMouseEvent &event);
 #endif
 
   private:
-	bool m_bPause;
-	ncSceneNode *m_pDummy;
-	ncTexture *m_pTexture;
-	ncSprite *m_pSprite;
-	unsigned int m_uDivider;
+	bool pause_;
+	ncSceneNode *dummy_;
+	ncTexture *texture_;
+	ncSprite *sprite_;
+	unsigned int divider_;
 };
 
 #endif

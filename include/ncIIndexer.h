@@ -12,12 +12,12 @@ class ncIIndexer
 	virtual ~ncIIndexer() = 0;
 
 	/// Adds an object to the index
-	virtual unsigned int AddObject(ncObject* pObject) = 0;
+	virtual unsigned int addObject(ncObject* object) = 0;
 	/// Removes an object from the index
-	virtual void RemoveObject(unsigned int uId) = 0;
+	virtual void removeObject(unsigned int id) = 0;
 
 	/// Returns the object with the specified object id, if any
-	virtual ncObject* Object(unsigned int uId) const = 0;
+	virtual ncObject* object(unsigned int id) const = 0;
 
 	/// Returns true if the index is empty
 	virtual bool isEmpty() const = 0;
@@ -34,10 +34,10 @@ inline ncIIndexer::~ncIIndexer() { }
 class ncNullIndexer : public ncIIndexer
 {
   public:
-	virtual unsigned int AddObject(ncObject* pObject) { return 0; }
-	virtual void RemoveObject(unsigned int uId) { }
+	virtual unsigned int addObject(ncObject* object) { return 0; }
+	virtual void removeObject(unsigned int id) { }
 
-	virtual ncObject* Object(unsigned int uId) const { return NULL; }
+	virtual ncObject* object(unsigned int id) const { return NULL; }
 
 	virtual bool isEmpty() const { return true; }
 };

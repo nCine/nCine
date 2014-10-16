@@ -6,67 +6,67 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncTextureLoaderSDL::ncTextureLoaderSDL(const char *pFilename)
-	: ncITextureLoader(pFilename), m_pSDLSurface(NULL)
+ncTextureLoaderSDL::ncTextureLoaderSDL(const char *filename)
+	: ncITextureLoader(filename), sdlSurface_(NULL)
 {
-	Init();
+	init();
 }
 
-ncTextureLoaderSDL::ncTextureLoaderSDL(ncIFile *pFileHandle)
-	: ncITextureLoader(pFileHandle), m_pSDLSurface(NULL)
+ncTextureLoaderSDL::ncTextureLoaderSDL(ncIFile *fileHandle)
+	: ncITextureLoader(fileHandle), sdlSurface_(NULL)
 {
-	Init();
+	init();
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncTextureLoaderSDL::Init()
+void ncTextureLoaderSDL::init()
 {
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderSDL::Init - Loading \"%s\"", m_pFileHandle->Filename());
-	m_pSDLSurface = (SDL_Surface *)IMG_Load(m_pFileHandle->Filename());
-	if (!m_pSDLSurface)
+	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderSDL::init - Loading \"%s\"", fileHandle_->filename());
+	sdlSurface_ = (SDL_Surface *)IMG_Load(fileHandle_->filename());
+	if (!sdlSurface_)
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderSDL::Init - Cannot load \"%s\"", m_pFileHandle->Filename());
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderSDL::init - Cannot load \"%s\"", fileHandle_->filename());
 		exit(-1);
 	}
 
-	m_iBpp = m_pSDLSurface->format->BitsPerPixel;
-	if (m_iBpp == 32)
+	bpp_ = sdlSurface_->format->BitsPerPixel;
+	if (bpp_ == 32)
 	{
-		m_texFormat = ncTextureFormat(GL_RGBA8);
+		texFormat_ = ncTextureFormat(GL_RGBA8);
 	}
-	else if (m_iBpp  == 24)
+	else if (bpp_  == 24)
 	{
-		m_texFormat = ncTextureFormat(GL_RGB8);
+		texFormat_ = ncTextureFormat(GL_RGB8);
 	}
-	else if (m_iBpp == 8)
+	else if (bpp_ == 8)
 	{
-		m_texFormat = ncTextureFormat(GL_ALPHA8);
+		texFormat_ = ncTextureFormat(GL_ALPHA8);
 	}
 	else
 	{
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderSDL::Init - Not a true color or alpha image: %d", m_iBpp);
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderSDL::init - Not a true color or alpha image: %d", bpp_);
 		exit(-1);
 	}
 
-	if (m_pSDLSurface->format->Rmask != 0x000000ff)
+	if (sdlSurface_->format->Rmask != 0x000000ff)
 	{
-		m_texFormat.BGRFormat();
+		texFormat_.bgrFormat();
 	}
 
-	m_iWidth = m_pSDLSurface->w;
-	m_iHeight = m_pSDLSurface->h;
-	m_iMipMapCount = 1; // No MIP Mapping
-	m_uPixels = static_cast<GLubyte*>(m_pSDLSurface->pixels);
+	width_ = sdlSurface_->w;
+	height_ = sdlSurface_->h;
+	mipMapCount_ = 1; // No MIP Mapping
+	pixels_ = static_cast<GLubyte*>(sdlSurface_->pixels);
 }
 
 ncTextureLoaderSDL::~ncTextureLoaderSDL()
 {
-	if (m_pSDLSurface)
+	if (sdlSurface_)
 	{
-		SDL_FreeSurface(m_pSDLSurface);
-		m_uPixels = NULL;
+		SDL_FreeSurface(sdlSurface_);
+		pixels_ = NULL;
 	}
 }

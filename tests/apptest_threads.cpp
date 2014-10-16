@@ -3,73 +3,73 @@
 #include "ncApplication.h"
 #include "ncServiceLocator.h"
 
-const int NUM_THREADS = 2;
-const int NUM_FLOATS = 100000000;
-float *pArray = NULL;
+const int NumThreads = 2;
+const int NumFloats = 100000000;
+float *globalArray = NULL;
 
-void pThreadFunction(void *arg)
+void threadFunction(void *arg)
 {
-	int iThreadNum = *(static_cast<int *>(arg));
-	int iStartIndex = iThreadNum * (NUM_FLOATS / NUM_THREADS);
-	int iEndIndex = (iThreadNum + 1) * (NUM_FLOATS / NUM_THREADS);
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"THREAD #%d: %d-%d", iThreadNum, iStartIndex, iEndIndex);
+	int threadNum = *(static_cast<int *>(arg));
+	int startIndex = threadNum * (NumFloats / NumThreads);
+	int endIndex = (threadNum + 1) * (NumFloats / NumThreads);
+	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"THREAD #%d: %d-%d", threadNum, startIndex, endIndex);
 
-	for (int i = iStartIndex; i < iEndIndex; i++)
+	for (int i = startIndex; i < endIndex; i++)
 	{
-		pArray[i] = 0.0f;
+		globalArray[i] = 0.0f;
 
-		pArray[i] += 100.0f;
-		pArray[i] /= 2.0f;
-		pArray[i] *= 2.0f;
-		pArray[i] -= 100.0f;
+		globalArray[i] += 100.0f;
+		globalArray[i] /= 2.0f;
+		globalArray[i] *= 2.0f;
+		globalArray[i] -= 100.0f;
 
-		pArray[i] += 100.0f;
-		pArray[i] /= 2.0f;
-		pArray[i] *= 2.0f;
-		pArray[i] -= 100.0f;
+		globalArray[i] += 100.0f;
+		globalArray[i] /= 2.0f;
+		globalArray[i] *= 2.0f;
+		globalArray[i] -= 100.0f;
 	}
 }
 
-ncIAppEventHandler* create_apphandler()
+ncIAppEventHandler* createApphandler()
 {
 	return new MyEventHandler;
 }
 
-void MyEventHandler::OnInit()
+void MyEventHandler::onInit()
 {
-	ncIInputManager::SetHandler(this);
+	ncIInputManager::setHandler(this);
 
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"APPTEST_THREADS: %d threads for %d numbers on %u processor(s)", NUM_THREADS, NUM_FLOATS, ncThread::NumProcessors());
+	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"APPTEST_THREADS: %d threads for %d numbers on %u processor(s)", NumThreads, NumFloats, ncThread::numProcessors());
 
-	ncThread threads[NUM_THREADS];
-	int iThreadNum[NUM_THREADS];
+	ncThread threads[NumThreads];
+	int threadNums[NumThreads];
 
-	pArray = new float[NUM_FLOATS];
+	globalArray = new float[NumFloats];
 
-	float fStartTime = ncTimer::Now();
-	for (int i = 0; i < NUM_THREADS; i++)
+	float startTime = ncTimer::now();
+	for (int i = 0; i < NumThreads; i++)
 	{
-		iThreadNum[i] = i;
-		threads[i].Run(pThreadFunction, &iThreadNum[i]);
+		threadNums[i] = i;
+		threads[i].run(threadFunction, &threadNums[i]);
 	}
 
-	for (int i = 0; i < NUM_THREADS; i++)
+	for (int i = 0; i < NumThreads; i++)
 	{
-		threads[i].Join();
+		threads[i].join();
 	}
-	float fEndTime = ncTimer::Now();
+	float endTime = ncTimer::now();
 
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"APPTEST_THREADS: total time %fms", (fEndTime - fStartTime) * 1000.0f);
+	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"APPTEST_THREADS: total time %fms", (endTime - startTime) * 1000.0f);
 
-	delete[] pArray;
+	delete[] globalArray;
 }
 
 #ifndef __ANDROID__
-void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
+void MyEventHandler::onKeyReleased(const ncKeyboardEvent &event)
 {
 	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)
 	{
-		ncApplication::Quit();
+		ncApplication::quit();
 	}
 }
 #endif

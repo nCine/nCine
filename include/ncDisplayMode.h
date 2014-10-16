@@ -9,68 +9,68 @@ class ncDisplayMode
   public:
 	// Constructor with no parameters
 	ncDisplayMode()
-		: m_uRedBits(0), m_uGreenBits(0), m_uBlueBits(0), m_uAlphaBits(0), m_uBufferBits(0),
-		  m_uDepthBits(0), m_uStencilBits(0), m_bIsDoubleBuffered(true), m_bIsVSynced(false) { }
-	ncDisplayMode(int iRedBits, int iGreenBits, int iBlueBits)
-		: m_uRedBits(iRedBits), m_uGreenBits(iGreenBits), m_uBlueBits(iBlueBits),
-		  m_uAlphaBits(0), m_uBufferBits(0), m_uDepthBits(0), m_uStencilBits(0),
-		  m_bIsDoubleBuffered(true), m_bIsVSynced(false) { }
-	ncDisplayMode(int iRedBits, int iGreenBits, int iBlueBits, int iAlphaBits)
-		: m_uRedBits(iRedBits), m_uGreenBits(iGreenBits), m_uBlueBits(iBlueBits),
-		  m_uAlphaBits(iAlphaBits), m_uBufferBits(0), m_uDepthBits(0), m_uStencilBits(0),
-		  m_bIsDoubleBuffered(true), m_bIsVSynced(false) { }
-	ncDisplayMode(bool bDoubleBuffered, bool bVSynced, int iDepthBits, int iStencilBits)
-		: m_uRedBits(0), m_uGreenBits(0), m_uBlueBits(0), m_uAlphaBits(0), m_uBufferBits(0),
-		  m_uDepthBits(iDepthBits), m_uStencilBits(iStencilBits),
-		  m_bIsDoubleBuffered(bDoubleBuffered), m_bIsVSynced(bVSynced) { }
-	ncDisplayMode(int iRedBits, int iGreenBits, int iBlueBits, int iAlphaBits, int iBufferBits,
-	              bool bDoubleBuffered, bool bVSynced, int iDepthBits, int iStencilBits)
-		: m_uRedBits(iRedBits), m_uGreenBits(iGreenBits), m_uBlueBits(iBlueBits),
-		  m_uAlphaBits(iAlphaBits), m_uBufferBits(iBufferBits),
-		  m_uDepthBits(iDepthBits), m_uStencilBits(iStencilBits),
-		  m_bIsDoubleBuffered(bDoubleBuffered), m_bIsVSynced(bVSynced) { }
+		: redBits_(0), greenBits_(0), blueBits_(0), alphaBits_(0), bufferBits_(0),
+		  depthBits_(0), stencilBits_(0), isDoubleBuffered_(true), hasVSync_(false) { }
+	ncDisplayMode(int redBits, int greenBits, int blueBits)
+		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits),
+		  alphaBits_(0), bufferBits_(0), depthBits_(0), stencilBits_(0),
+		  isDoubleBuffered_(true), hasVSync_(false) { }
+	ncDisplayMode(int redBits, int greenBits, int blueBits, int alphaBits)
+		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits),
+		  alphaBits_(alphaBits), bufferBits_(0), depthBits_(0), stencilBits_(0),
+		  isDoubleBuffered_(true), hasVSync_(false) { }
+	ncDisplayMode(bool doubleBuffered, bool withVSync, int depthBits, int stencilBits)
+		: redBits_(0), greenBits_(0), blueBits_(0), alphaBits_(0), bufferBits_(0),
+		  depthBits_(depthBits), stencilBits_(stencilBits),
+		  isDoubleBuffered_(doubleBuffered), hasVSync_(withVSync) { }
+	ncDisplayMode(int redBits, int greenBits, int blueBits, int alphaBits, int bufferBits,
+				  bool doubleBuffered, bool withVSync, int depthBits, int stencilBits)
+		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits),
+		  alphaBits_(alphaBits), bufferBits_(bufferBits),
+		  depthBits_(depthBits), stencilBits_(stencilBits),
+		  isDoubleBuffered_(doubleBuffered), hasVSync_(withVSync) { }
 	// Destructor
 	~ncDisplayMode() { }
 
 	// Getters
 	/// Returns the number of bits for the red channel
-	inline unsigned int RedBits() const { return m_uRedBits; }
+	inline unsigned int redBits() const { return redBits_; }
 	/// Returns the number of bits for the green channel
-	inline unsigned int GreenBits() const { return m_uGreenBits; }
+	inline unsigned int greenBits() const { return greenBits_; }
 	/// Returns the number of bits for the blue channel
-	inline unsigned int BlueBits() const { return m_uBlueBits; }
+	inline unsigned int blueBits() const { return blueBits_; }
 	/// Returns the number of bits for the alpha channel
-	inline unsigned int AlphaBits() const { return m_uAlphaBits; }
+	inline unsigned int alphaBits() const { return alphaBits_; }
 	/// Returns the number of bits for the color buffer
-	inline unsigned int BufferBits() const { return m_uBufferBits; }
+	inline unsigned int bufferBits() const { return bufferBits_; }
 	/// Returns the number of bits for the depth buffer
-	inline unsigned int DepthBits() const { return m_uDepthBits; }
+	inline unsigned int depthBits() const { return depthBits_; }
 	/// Returns the number of bits for the stencil buffer
-	inline unsigned int StencilBits() const { return m_uStencilBits; }
+	inline unsigned int stencilBits() const { return stencilBits_; }
 	/// Returns true if the display is double buffered
-	inline bool isDoubleBuffered() const { return m_bIsDoubleBuffered; }
+	inline bool isDoubleBuffered() const { return isDoubleBuffered_; }
 	/// Returns true if the dislpay has V-sync enabled
-	inline bool isVSynced() const { return m_bIsVSynced; }
+	inline bool hasVSync() const { return hasVSync_; }
 
   private:
 	/// Red component bits
-	unsigned int m_uRedBits;
+	unsigned int redBits_;
 	/// Green component bits
-	unsigned int m_uGreenBits;
+	unsigned int greenBits_;
 	/// Blue component bits
-	unsigned int m_uBlueBits;
+	unsigned int blueBits_;
 	/// Alpha component bits
-	unsigned int m_uAlphaBits;
+	unsigned int alphaBits_;
 	/// Frame buffer bits
-	unsigned int m_uBufferBits;
+	unsigned int bufferBits_;
 	/// Depth buffer size in bit
-	unsigned int m_uDepthBits;
+	unsigned int depthBits_;
 	/// Stencil buffer size in bit
-	unsigned int m_uStencilBits;
+	unsigned int stencilBits_;
 	/// Double buffering flag
-	bool m_bIsDoubleBuffered;
+	bool isDoubleBuffered_;
 	/// VSync flag
-	bool m_bIsVSynced;
+	bool hasVSync_;
 };
 
 #endif

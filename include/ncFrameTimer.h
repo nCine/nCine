@@ -8,36 +8,36 @@ class ncFrameTimer: public ncTimer
 {
   public:
 	// Constructor
-	ncFrameTimer(float fLogInterval, float fAvgInterval);
+	ncFrameTimer(float logInterval, float avgInterval);
 
 	// Adds a frame to the counter and calculates the interval since the previous one
-	void AddFrame();
+	void addFrame();
 	/// Returns the interval between two subsequent calls to AddFrame()
-	inline float Interval() const { return m_fFrameInterval; }
+	inline float interval() const { return frameInterval_; }
 	/// Returns the average FPS on the update interval
-	inline float AverageFPS() const { return m_fFps; }
+	inline float averageFps() const { return fps_; }
 
   private:
 	/// Number of seconds between two log events (user defined)
-	float m_fLogInterval;
+	float logInterval_;
 	/// Number of seconds between two average FPS calculations (user defined)
-	float m_fAvgInterval;
+	float avgInterval_;
 
 	/// Seconds elapsed since previous frame
-	float m_fFrameInterval;
+	float frameInterval_;
 
 	/// Frame counter for average FPS calculation
-	unsigned long int m_ulAvgNFrames;
+	unsigned long int avgNumFrames_;
 	/// Frame counter for logging
-	unsigned long int m_ulLogNFrames;
+	unsigned long int logNumFrames_;
 
 	/// Number of seconds since last average FPS calculation
-	float m_fLastAvgUpdate;
+	float lastAvgUpdate_;
 	/// Number of seconds since last log event
-	float m_fLastLogUpdate;
+	float lastLogUpdate_;
 
 	/// Average FPS calulated during the specified interval
-	float m_fFps;
+	float fps_;
 };
 
 #endif

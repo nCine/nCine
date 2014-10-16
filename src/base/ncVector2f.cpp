@@ -6,9 +6,9 @@
 ///////////////////////////////////////////////////////////
 
 /// Vector normalization
-ncVector2f& ncVector2f::Normalize()
+ncVector2f& ncVector2f::normalize()
 {
-	float len = Length();
+	float len = length();
 
 	x /= len;
 	y /= len;
@@ -17,14 +17,14 @@ ncVector2f& ncVector2f::Normalize()
 }
 
 /// Dot product
-float ncVector2f::Dot(const ncVector2f& vec) const
+float ncVector2f::dot(const ncVector2f& vec) const
 {
-	float fResult = 0.0f;
+	float result = 0.0f;
 
-	fResult += x * vec.x;
-	fResult += y * vec.y;
+	result += x * vec.x;
+	result += y * vec.y;
 
-	return fResult;
+	return result;
 }
 
 bool ncVector2f::operator==(const ncVector2f& vec) const
@@ -80,20 +80,20 @@ ncVector2f& ncVector2f::operator-=(const ncVector2f& vec)
 }
 
 /// Multiplication by a constant scalar
-ncVector2f ncVector2f::operator*(float fC) const
+ncVector2f ncVector2f::operator*(float scalar) const
 {
 	ncVector2f result;
 
-	result.x = fC * x;
-	result.y = fC * y;
+	result.x = scalar * x;
+	result.y = scalar * y;
 
 	return result;
 }
 
-ncVector2f ncVector2f::operator*=(float fC)
+ncVector2f ncVector2f::operator*=(float scalar)
 {
-	x *= fC;
-	y *= fC;
+	x *= scalar;
+	y *= scalar;
 
 	return *this;
 }

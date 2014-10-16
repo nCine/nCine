@@ -7,54 +7,54 @@
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ncTextureLoaderWebP::ncTextureLoaderWebP(const char *pFilename)
-	: ncITextureLoader(pFilename)
+ncTextureLoaderWebP::ncTextureLoaderWebP(const char *filename)
+	: ncITextureLoader(filename)
 {
-	Init();
+	init();
 }
 
-ncTextureLoaderWebP::ncTextureLoaderWebP(ncIFile *pFileHandle)
-	: ncITextureLoader(pFileHandle)
+ncTextureLoaderWebP::ncTextureLoaderWebP(ncIFile *fileHandle)
+	: ncITextureLoader(fileHandle)
 {
-	Init();
+	init();
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncTextureLoaderWebP::Init()
+void ncTextureLoaderWebP::init()
 {
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderWebP::Init - Loading \"%s\"", m_pFileHandle->Filename());
+	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderWebP::init - Loading \"%s\"", fileHandle_->filename());
 
 	// Loading the whole file in memory
-	m_pFileHandle->Open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
-	long int lFileSize = m_pFileHandle->Size();
-	unsigned char *pFileBuffer = new unsigned char[lFileSize];
-	m_pFileHandle->Read(pFileBuffer, lFileSize);
+	fileHandle_->open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
+	long int fileSize = fileHandle_->size();
+	unsigned char *fileBuffer = new unsigned char[fileSize];
+	fileHandle_->read(fileBuffer, fileSize);
 
-	if (WebPGetInfo(pFileBuffer, lFileSize, &m_iWidth, &m_iHeight) == 0)
+	if (WebPGetInfo(fileBuffer, fileSize, &width_, &height_) == 0)
 	{
-		delete[] pFileBuffer;
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderWebP::Init - Cannot read WebP header");
+		delete[] fileBuffer;
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderWebP::init - Cannot read WebP header");
 		exit(EXIT_FAILURE);
 	}
 
-	ncServiceLocator::Logger().Write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderWebP::Init - Header found: w:%d h:%d", m_iWidth, m_iHeight);
+	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderWebP::init - Header found: w:%d h:%d", width_, height_);
 
-	m_iMipMapCount = 1; // No MIP Mapping
+	mipMapCount_ = 1; // No MIP Mapping
 	// HACK: assuming WebP always decodes to RGBA
-	m_texFormat = ncTextureFormat(GL_RGBA);
-	long int lDecodedSize = m_iWidth * m_iHeight * 4;
-	m_uPixels =  new unsigned char[lDecodedSize];
+	texFormat_ = ncTextureFormat(GL_RGBA);
+	long int lDecodedSize = width_ * height_ * 4;
+	pixels_ =  new unsigned char[lDecodedSize];
 
-	if (WebPDecodeRGBAInto(pFileBuffer, lFileSize, m_uPixels, lDecodedSize, m_iWidth * 4) == NULL)
+	if (WebPDecodeRGBAInto(fileBuffer, fileSize, pixels_, lDecodedSize, width_ * 4) == NULL)
 	{
-		delete[] pFileBuffer;
-		delete[] m_uPixels;
-		ncServiceLocator::Logger().Write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderWebP::Init - Cannot decode WebP image");
+		delete[] fileBuffer;
+		delete[] pixels_;
+		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderWebP::init - Cannot decode WebP image");
 		exit(EXIT_FAILURE);
 	}
 
-	delete[] pFileBuffer;
+	delete[] fileBuffer;
 }

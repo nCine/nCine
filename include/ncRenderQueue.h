@@ -12,52 +12,52 @@ class ncRenderQueue
 {
   public:
 	ncRenderQueue()
-		: m_uNumVertices(0), m_uLastNumVertices(0), m_uLastNumCommands(0),
-		  m_opaqueRenderCmds(16), m_transparentRenderCmds(16) { }
+		: numVertices_(0), lastNumVertices_(0), lastNumCommands_(0),
+		  opaqueRenderCommands_(16), transparentRenderCommands_(16) { }
 	~ncRenderQueue() { }
 
 	// Adds a draw command to the queue
-	void AddCommand(const ncRenderCommand *pCommand);
+	void addCommand(const ncRenderCommand *command);
 	// Sorts the queue then issues every render command in order
-	void Draw();
+	void draw();
 
 	/// Returns the total number of vertices to be rendered by the queue
-	inline unsigned int NumVertices() const { return m_uLastNumVertices; }
+	inline unsigned int numVertices() const { return lastNumVertices_; }
 	/// Returns the queue's length
-	inline unsigned int NumCommands() const { return m_uLastNumCommands; }
+	inline unsigned int numCommands() const { return lastNumCommands_; }
 
 	/// Returns the total number of vertices to be rendered by the queue for a specified command type
-	inline unsigned int NumVertices(ncRenderCommand::eCommandType eType) const { return m_uTypedLastNumVertices[eType]; }
+	inline unsigned int numVertices(ncRenderCommand::CommandType type) const { return typedLastNumVertices_[type]; }
 	/// Returns the number of commands to render a specified category of commands
-	inline unsigned int NumCommands(ncRenderCommand::eCommandType eType) const { return m_uTypedLastNumCommands[eType]; }
+	inline unsigned int numCommands(ncRenderCommand::CommandType type) const { return typedLastNumCommands_[type]; }
 
   private:
 	/// The current sum of vertices for every command in the queue
-	unsigned int m_uNumVertices;
+	unsigned int numVertices_;
 	/// The sum of vertices in the previous frame (it never contains a partial sum)
-	unsigned int m_uLastNumVertices;
+	unsigned int lastNumVertices_;
 	/// The sum of draw commands in the previous frame (it never contains a partial sum)
-	unsigned int m_uLastNumCommands;
+	unsigned int lastNumCommands_;
 
 	/// The current sum of vertices for a specified command type
-	unsigned int m_uTypedNumVertices[ncRenderCommand::TYPE_COUNT];
+	unsigned int typedNumVertices_[ncRenderCommand::TYPE_COUNT];
 	/// The current sum of draw commands for a specified command type
-	unsigned int m_uTypedNumCommands[ncRenderCommand::TYPE_COUNT];
+	unsigned int typedNumCommands_[ncRenderCommand::TYPE_COUNT];
 	/// The sum of vertices for a specified command type in the previous frame (it never contains a partial sum)
-	unsigned int m_uTypedLastNumVertices[ncRenderCommand::TYPE_COUNT];
+	unsigned int typedLastNumVertices_[ncRenderCommand::TYPE_COUNT];
 	/// The sum of draw commands for a specified command type in the previous frame (it never contains a partial sum)
-	unsigned int m_uTypedLastNumCommands[ncRenderCommand::TYPE_COUNT];
+	unsigned int typedLastNumCommands_[ncRenderCommand::TYPE_COUNT];
 
 	/// Array of opaque render command pointers
-	ncArray<const ncRenderCommand *> m_opaqueRenderCmds;
+	ncArray<const ncRenderCommand *> opaqueRenderCommands_;
 	/// Array of transparent render command pointers
-	ncArray<const ncRenderCommand *> m_transparentRenderCmds;
+	ncArray<const ncRenderCommand *> transparentRenderCommands_;
 
 	// Sorts render nodes in both queues to minimize state changes
-	void SortQueues();
+	void sortQueues();
 
-	void QSort(ncArray<const ncRenderCommand *> &array, int start, int end);
-	int QSortPartition(ncArray<const ncRenderCommand *> &array, int start, int end);
+	void qSort(ncArray<const ncRenderCommand *> &array, int start, int end);
+	int qSortPartition(ncArray<const ncRenderCommand *> &array, int start, int end);
 };
 
 #endif

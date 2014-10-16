@@ -12,15 +12,15 @@ class ncListNode
 {
   public:
 	/// Data payload for the node
-	T m_data;
+	T data_;
 	/// A pointer to the previous node in the list
-	ncListNode *m_pPrevious;
+	ncListNode *previous_;
 	/// A pointer to the next node in the list
-	ncListNode *m_pNext;
+	ncListNode *next_;
 
   private:
-	ncListNode(const T& data, ncListNode *pPrevious, ncListNode *pNext)
-		: m_data(data), m_pPrevious(pPrevious), m_pNext(pNext) { }
+	ncListNode(const T& data, ncListNode *previous, ncListNode *next)
+		: data_(data), previous_(previous), next_(next) { }
 
 	friend class ncList<T>;
 };
@@ -36,50 +36,50 @@ class ncList
 	/// Constant iterator type
 	typedef const ncListIterator<T> Const_Iterator;
 
-	ncList() : m_pHead(NULL), m_pTail(NULL) { }
-	~ncList() { Clear(); }
+	ncList() : head_(NULL), tail_(NULL) { }
+	~ncList() { clear(); }
 
 	/// Returns true if the list is empty
-	inline bool isEmpty() const { return m_pHead == NULL; }
+	inline bool isEmpty() const { return head_ == NULL; }
 
 	/// Returns an iterator to the first element
-	inline Iterator Begin() { return Iterator(m_pHead); }
+	inline Iterator begin() { return Iterator(head_); }
 	/// Returns an iterator to the last element
-	inline Iterator RBegin() { return Iterator(m_pTail); }
+	inline Iterator revBegin() { return Iterator(tail_); }
 	/// Returns an iterator to the end of the list sentinel (reverse traversal too)
-	inline Iterator End() { return Iterator(NULL); }
+	inline Iterator end() { return Iterator(NULL); }
 
 	/// Returns a constant iterator to the first element
-	inline Const_Iterator Begin() const { return Iterator(m_pHead); }
+	inline Const_Iterator begin() const { return Iterator(head_); }
 	/// Returns a constant iterator to the last element
-	inline Const_Iterator RBegin() const { return Iterator(m_pTail); }
+	inline Const_Iterator revBegin() const { return Iterator(tail_); }
 	/// Returns a constant iterator to the end of the list sentinel (reverse traversal too)
-	inline Const_Iterator End() const { return Iterator(NULL); }
+	inline Const_Iterator end() const { return Iterator(NULL); }
 
 	// Clears the list
-	void Clear();
+	void clear();
 	// Inserts a new element as the first, in constant time
-	void InsertFront(const T& element);
+	void insertFront(const T& element);
 	// Inserts a new element as the last, in constant time
-	void InsertBack(const T& element);
+	void insertBack(const T& element);
 	// Inserts a new element after the node pointed by the iterator
-	inline void InsertAfter(Iterator it, const T& element);
+	inline void insertAfter(Iterator it, const T& element);
 	// Inserts a new element before the node pointed by the iterator
-	inline void InsertBefore(Iterator it, const T& element);
+	inline void insertBefore(Iterator it, const T& element);
 	// Removes the node pointed by the iterator in constant time
-	void Remove(Iterator it);
+	void remove(Iterator it);
 	// Removes a specified element in linear time
-	void Remove(const T& element);
+	void remove(const T& element);
 	// Removes the first element in constant time
-	T RemoveFront();
+	T removeFront();
 	// Removes the last element in constant time
-	T RemoveBack();
+	T removeBack();
 
   private:
 	/// Pointer to the first node in the list
-	ncListNode<T> *m_pHead;
+	ncListNode<T> *head_;
 	/// Pointer to the last node in the list
-	ncListNode<T> *m_pTail;
+	ncListNode<T> *tail_;
 
 	/// Private copy constructor (preventing copy at the moment)
 	ncList(const ncList&);
@@ -87,131 +87,131 @@ class ncList
 	ncList& operator=(const ncList&);
 
 	// Inserts a new element after a specified node
-	void InsertAfter(ncListNode<T> *pNode, const T& element);
+	void insertAfter(ncListNode<T> *node, const T& element);
 	// Inserts a new element before a specified node
-	void InsertBefore(ncListNode<T> *pNode, const T& element);
+	void insertBefore(ncListNode<T> *node, const T& element);
 	// Removes a specified node in constant time
-	void Remove(ncListNode<T> *pNode);
+	void remove(ncListNode<T> *node);
 
 	friend class ncListIterator<T>;
 };
 
 /// Clears the list
 template <class T>
-void ncList<T>::Clear()
+void ncList<T>::clear()
 {
-	ncListNode<T> *pNext = NULL;
+	ncListNode<T> *next = NULL;
 
-	while (m_pHead)
+	while (head_)
 	{
-		pNext = m_pHead->m_pNext;
-		delete m_pHead;
-		m_pHead = pNext;
+		next = head_->next_;
+		delete head_;
+		head_ = next;
 	}
 
-	m_pTail = NULL;
+	tail_ = NULL;
 }
 
 /// Inserts a new element as the first, in constant time
 template <class T>
-void ncList<T>::InsertFront(const T& element)
+void ncList<T>::insertFront(const T& element)
 {
-	ncListNode<T> *pNode = new ncListNode<T>(element, NULL, m_pHead);
-	if (m_pHead)
+	ncListNode<T> *node = new ncListNode<T>(element, NULL, head_);
+	if (head_)
 	{
-		m_pHead->m_pPrevious = pNode;
+		head_->previous_ = node;
 	}
-	m_pHead = pNode;
+	head_ = node;
 
 	// The list is empty
-	if (m_pTail == NULL)
+	if (tail_ == NULL)
 	{
-		m_pTail = pNode;
+		tail_ = node;
 	}
 }
 
 /// Inserts a new element as the last, in constant time
 template <class T>
-void ncList<T>::InsertBack(const T &element)
+void ncList<T>::insertBack(const T &element)
 {
-	ncListNode<T> *pNode = new ncListNode<T>(element, m_pTail, NULL);
-	if (m_pTail)
+	ncListNode<T> *node = new ncListNode<T>(element, tail_, NULL);
+	if (tail_)
 	{
-		m_pTail->m_pNext = pNode;
+		tail_->next_ = node;
 	}
-	m_pTail = pNode;
+	tail_ = node;
 
 	// The list is empty
-	if (m_pHead == NULL)
+	if (head_ == NULL)
 	{
-		m_pHead = pNode;
+		head_ = node;
 	}
 }
 
 /// Inserts a new element after the node pointed by the iterator
 template <class T>
-void ncList<T>::InsertAfter(Iterator it, const T& element)
+void ncList<T>::insertAfter(Iterator it, const T& element)
 {
-	InsertAfter(it.m_pNode);
+	insertAfter(it.node_);
 }
 
 /// Inserts a new element before the node pointed by the iterator
 template <class T>
-void ncList<T>::InsertBefore(Iterator it, const T& element)
+void ncList<T>::insertBefore(Iterator it, const T& element)
 {
-	InsertBefore(it.m_pNode);
+	insertBefore(it.node_);
 }
 
 /// Removes the node pointed by the iterator in constant time
 /*! Note: The iterator cannot be used after on */
 template <class T>
-void ncList<T>::Remove(Iterator it)
+void ncList<T>::remove(Iterator it)
 {
-	Remove(it.m_pNode);
-	it.m_pNode = NULL;
+	remove(it.node_);
+	it.node_ = NULL;
 }
 
 /// Removes a specified element in linear time
 template <class T>
-void ncList<T>::Remove(const T& element)
+void ncList<T>::remove(const T& element)
 {
-	ncListNode<T> *pCurrent = m_pHead;
+	ncListNode<T> *current = head_;
 
-	while (pCurrent)
+	while (current)
 	{
-		if (pCurrent->m_data == element)
+		if (current->data_ == element)
 		{
-			Remove(pCurrent);
+			remove(current);
 			break;
 		}
 
-		pCurrent = pCurrent->m_pNext;
+		current = current->next_;
 	}
 }
 
 /// Removes the first element in constant time
 template <class T>
-T ncList<T>::RemoveFront()
+T ncList<T>::removeFront()
 {
 	T first;
 
-	if (m_pHead)
+	if (head_)
 	{
 		// Saving the old head pointer to delete it
-		ncListNode<T> *pOldHead = m_pHead;
+		ncListNode<T> *oldHead = head_;
 
-		first = m_pHead->m_data;
-		if (m_pHead->m_pNext)
+		first = head_->data_;
+		if (head_->next_)
 		{
-			m_pHead->m_pNext->m_pPrevious = NULL;
+			head_->next_->previous_ = NULL;
 		}
 		else
 		{
-			m_pTail = NULL;
+			tail_ = NULL;
 		}
-		m_pHead = m_pHead->m_pNext;
+		head_ = head_->next_;
 
-		delete pOldHead;
+		delete oldHead;
 	}
 
 	return first;
@@ -219,27 +219,27 @@ T ncList<T>::RemoveFront()
 
 /// Removes the last element in constant time
 template <class T>
-T ncList<T>::RemoveBack()
+T ncList<T>::removeBack()
 {
 	T last;
 
-	if (m_pTail)
+	if (tail_)
 	{
 		// Saving the old tail pointer to delete it
-		ncListNode<T> *pOldTail = m_pTail;
+		ncListNode<T> *oldTail = tail_;
 
-		last = m_pTail->m_data;
-		if (m_pTail->m_pPrevious)
+		last = tail_->data_;
+		if (tail_->previous_)
 		{
-			m_pTail->m_pPrevious->m_pNext = NULL;
+			tail_->previous_->next_ = NULL;
 		}
 		else
 		{
-			m_pHead = NULL;
+			head_ = NULL;
 		}
-		m_pTail = m_pTail->m_pPrevious;
+		tail_ = tail_->previous_;
 
-		delete pOldTail;
+		delete oldTail;
 	}
 
 	return last;
@@ -251,69 +251,69 @@ T ncList<T>::RemoveBack()
 
 /// Inserts a new element after a specified node
 template <class T>
-void ncList<T>::InsertAfter(ncListNode<T> *pNode, const T& element)
+void ncList<T>::insertAfter(ncListNode<T> *node, const T& element)
 {
-	ncListNode<T> *pNewNode = new ncListNode<T>(element, pNode, pNode->m_pNext);
+	ncListNode<T> *newNode = new ncListNode<T>(element, node, node->next_);
 
-	if (pNode->m_pNext == NULL)
+	if (node->next_ == NULL)
 	{
-		m_pTail = pNewNode;
+		tail_ = newNode;
 	}
 	else
 	{
-		pNode->m_pNext->m_pPrevious = pNewNode;
+		node->next_->previous_ = newNode;
 	}
 
-	pNode->m_pNext = pNewNode;
+	node->next_ = newNode;
 }
 
 /// Inserts a new element before a specified node
 template <class T>
-void ncList<T>::InsertBefore(ncListNode<T> *pNode, const T& element)
+void ncList<T>::insertBefore(ncListNode<T> *node, const T& element)
 {
-	ncListNode<T> *pNewNode = new ncListNode<T>(element, pNode->m_pPrevious, pNode);
+	ncListNode<T> *newNode = new ncListNode<T>(element, node->previous_, node);
 
-	if (pNode->m_pPrevious == NULL)
+	if (node->previous_ == NULL)
 	{
-		m_pHead = pNewNode;
+		head_ = newNode;
 	}
 	else
 	{
-		pNode->m_pPrevious->m_pNext = pNewNode;
+		node->previous_->next_ = newNode;
 	}
 
-	pNode->m_pPrevious = pNewNode;
+	node->previous_ = newNode;
 }
 
 /// Removes a specified node in constant time
 template <class T>
-void ncList<T>::Remove(ncListNode<T> *pNode)
+void ncList<T>::remove(ncListNode<T> *node)
 {
 	// Preventing NULL deletion
-	if (pNode == NULL)
+	if (node == NULL)
 	{
 		return;
 	}
 
-	if (pNode->m_pPrevious)
+	if (node->previous_)
 	{
-		pNode->m_pPrevious->m_pNext = pNode->m_pNext;
+		node->previous_->next_ = node->next_;
 	}
 	else // removing the head
 	{
-		m_pHead = pNode->m_pNext;
+		head_ = node->next_;
 	}
 
-	if (pNode->m_pNext)
+	if (node->next_)
 	{
-		pNode->m_pNext->m_pPrevious = pNode->m_pPrevious;
+		node->next_->previous_ = node->previous_;
 	}
 	else // removing the tail
 	{
-		m_pTail = pNode->m_pPrevious;
+		tail_ = node->previous_;
 	}
 
-	delete pNode;
+	delete node;
 }
 
 #endif

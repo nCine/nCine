@@ -10,61 +10,61 @@ class ncGfxCapabilities
 	~ncGfxCapabilities() { }
 
 	// Logs OpenGL device info
-	void LogGLInfo();
+	void logGLInfo();
 	// Logs OpenGL extensions
-	void LogGLExtensions();
+	void logGLExtensions();
 	// Logs OpenGL device capabilites
-	void LogGLCaps() const;
+	void logGLCaps() const;
 
 	// Check for an OpenGL extension
-	bool CheckGLExtension(const char *pExtensionName) const;
+	bool checkGLExtension(const char *extensionName) const;
 
 	/// Returns OpenGL major version number
-	inline int GLMajor() const { return m_iGLMajor; }
+	inline int majorGL() const { return majorGL_; }
 	/// Returns OpenGL minor version number
-	inline int GLMinor() const { return m_iGLMinor; }
+	inline int minorGL() const { return minorGL_; }
 #ifndef __ANDROID__
 	/// Returns OpenGL release version number
-	inline int GLRelease() const { return m_iGLRelease; }
+	inline int releaseGL() const { return releaseGL_; }
 #endif
 
 	/// Returns a rough estimate of the largest texture that the device can handle
-	inline int MaxTextureSize() const { return m_iMaxTextureSize; }
+	inline int maxTextureSize() const { return maxTextureSize_; }
 	/// Returns the number of texture units supported
-	inline int MaxTextureUnits() const { return m_iMaxTextureUnits; }
+	inline int maxTextureUnits() const { return maxTextureUnits_; }
 
 #ifndef __ANDROID__
 	/// Returns true if the extension GL_EXT_texture_compression_s3tc is available
-	inline bool EXTTextureCompressionS3TC() const { return m_bEXTTextureCompressionS3TC; }
+	inline bool extTextureCompressionS3TC() const { return extTextureCompressionS3TC_; }
 #else
 	/// Returns true if the extension GL_OES_compressed_ETC1_RGB8_texture is available
-	inline bool OESCompressedETC1RGB8Texture() const { return m_bOESCompressedETC1RGB8Texture; }
+	inline bool oesCompressedETC1RGB8Texture() const { return oesCompressedETC1RGB8Texture_; }
 	/// Returns true if the extension GL_AMD_compressed_ATC_texture is available
-	inline bool AMDCompressedATCTexture() const { return m_bAMDCompressedATCTexture; }
+	inline bool amdCompressedATCTexture() const { return amdCompressedATCTexture_; }
 	/// Returns true if the extension GL_IMG_texture_compression_pvrtc is available
-	inline bool IMGTextureCompressionPVRTC() const { return m_bIMGTextureCompressionPVRTC; }
+	inline bool imgTextureCompressionPVRTC() const { return imgTextureCompressionPVRTC_; }
 #endif
 
   private:
-	int m_iGLMajor;
-	int m_iGLMinor;
+	int majorGL_;
+	int minorGL_;
 #ifndef __ANDROID__
-	int m_iGLRelease;
+	int releaseGL_;
 #endif
 
-	int m_iMaxTextureSize;
-	int m_iMaxTextureUnits;
+	int maxTextureSize_;
+	int maxTextureUnits_;
 
 #ifndef __ANDROID__
-	bool m_bEXTTextureCompressionS3TC;
+	bool extTextureCompressionS3TC_;
 #else
-	bool m_bOESCompressedETC1RGB8Texture;
-	bool m_bAMDCompressedATCTexture;
-	bool m_bIMGTextureCompressionPVRTC;
+	bool oesCompressedETC1RGB8Texture_;
+	bool amdCompressedATCTexture_;
+	bool imgTextureCompressionPVRTC_;
 #endif
 
 	// Queries the device about its capabilities
-	void Init();
+	void init();
 
 	friend class ncIGfxDevice;
 };

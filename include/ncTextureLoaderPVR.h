@@ -8,13 +8,13 @@
 class ncTextureLoaderPVR : public ncITextureLoader
 {
   public:
-	ncTextureLoaderPVR(const char *pFilename);
-	ncTextureLoaderPVR(ncIFile *pFileHandle);
+	ncTextureLoaderPVR(const char *filename);
+	ncTextureLoaderPVR(ncIFile *fileHandle);
 	~ncTextureLoaderPVR() { }
 
   private:
 	/// Header for the PVR3 format
-	typedef struct PVR3_header
+	typedef struct Pvr3Header
 	{
 		uint32_t    version;
 		uint32_t    flags;
@@ -28,7 +28,7 @@ class ncTextureLoaderPVR : public ncITextureLoader
 		uint32_t    numFaces;
 		uint32_t    numMipmaps;
 		uint32_t    metaDataSize;
-	} PVR3_header;
+	} Pvr3Header;
 
 	static const uint64_t FMT_PVRTC_2BPP_RGB = 0;
 	static const uint64_t FMT_PVRTC_2BPP_RGBA = 1;
@@ -46,12 +46,12 @@ class ncTextureLoaderPVR : public ncITextureLoader
 	static const uint64_t FMT_RGBA_5551 = 0x0105050561626772ULL; // rgba5551
 	static const uint64_t FMT_RGBA_4444 = 0x0404040461626772ULL; // rgba4444
 
-	void Init();
+	void init();
 
 	// Reads the PVR3 header and fills the corresponding structure
-	void ReadHeader(PVR3_header& header);
+	void readHeader(Pvr3Header& header);
 	// Parses the PVR3 header to determine its format
-	void ParseFormat(const PVR3_header& header);
+	void parseFormat(const Pvr3Header& header);
 };
 
 #endif

@@ -11,70 +11,70 @@
 class ncProfilePlotter : public ncDrawableNode
 {
   public:
-	ncProfilePlotter(ncSceneNode* pParent, ncRect rect);
+	ncProfilePlotter(ncSceneNode* parent, ncRect rect);
 	virtual ~ncProfilePlotter();
 
 	// Adds a value to the specified variable
-	bool AddValue(unsigned int iVariable, float fValue);
+	bool addValue(unsigned int varIndex, float value);
 	// Returns the variable with the specified index
-	ncPlottingVariable& Variable(unsigned int uIndex);
+	ncPlottingVariable& variable(unsigned int index);
 	/// Sets the backgound color for the graphs
-	void SetBackgroundColor(ncColor backgroundColor) { m_backgroundColor = backgroundColor; }
+	void setBackgroundColor(ncColor backgroundColor) { backgroundColor_ = backgroundColor; }
 
 	/// Returns the reference value line color
-	inline const ncColor& RefValueColor() const { return m_refValueColor; }
+	inline const ncColor& refValueColor() const { return refValueColor_; }
 	/// Returns the state of the reference value drawing flag
-	inline bool shouldPlotRefValue() const { return m_bPlotRefValue; }
+	inline bool shouldPlotRefValue() const { return shouldPlotRefValue_; }
 	/// Returns the reference value
-	inline float refValue() const { return m_fRefValue; }
+	inline float refValue() const { return refValue_; }
 
 	/// Sets the reference value line color
-	inline void SetRefValueColor(ncColor refValueColor) { m_refValueColor = refValueColor; }
+	inline void setRefValueColor(ncColor refValueColor) { refValueColor_ = refValueColor; }
 	/// Sets the reference value drawing flag state
-	inline void SetPlotRefValue(bool bEnabled) { m_bPlotRefValue = bEnabled; }
+	inline void setPlotRefValue(bool enabled) { shouldPlotRefValue_ = enabled; }
 	/// Sets the reference value
-	inline void SetRefValue(float fValue) { m_fRefValue = fValue; }
+	inline void setRefValue(float value) { refValue_ = value; }
 	// Returns the reference value normalized and clamped between the two numbers provided
-	float NormBetweenRefValue(float fMin, float fMax) const;
+	float normBetweenRefValue(float min, float max) const;
 
 	// Applies parent transformations to reference value vertices
-	void ApplyTransformations(float fAbsX, float fAbsY, float fAbsRotation, float fAbsScaleFactor);
+	void applyTransformations(float absX, float absY, float absRotation, float absScaleFactor);
 
-	inline virtual void DrawRefValue(ncRenderQueue& rRenderQueue)
+	inline virtual void drawRefValue(ncRenderQueue& renderQueue)
 	{
 		UpdateRefValueRenderCommand();
-		rRenderQueue.AddCommand(&m_refValueCmd);
+		renderQueue.addCommand(&refValueCmd_);
 	}
 
 	/// Adds a new variable to the plotter
-	virtual unsigned int AddVariable(unsigned int uNumValues, float fRejectDelay) = 0;
+	virtual unsigned int addVariable(unsigned int numValues, float rejectDelay) = 0;
 
   protected:
 	/// Background width
-	int m_iWidth;
+	int width_;
 	/// Background height
-	int m_iHeight;
+	int height_;
 
 	/// Background color
-	ncColor m_backgroundColor;
+	ncColor backgroundColor_;
 	/// The vertices for the background
-	float m_fBackgroundVertices[8]; // Quad with a triangle strip
+	float backgroundVertices_[8]; // Quad with a triangle strip
 	/// The array of variables
-	ncArray<ncPlottingVariable *> m_vVariables;
+	ncArray<ncPlottingVariable *> variables_;
 
 	/// Reference value drawing flag
-	bool m_bPlotRefValue;
+	bool shouldPlotRefValue_;
 	/// Reference value line color
-	ncColor m_refValueColor;
+	ncColor refValueColor_;
 	/// The vertices for the reference value line
-	float m_fRefValueVertices[4];
+	float refValueVertices_[4];
 	/// The reference value
-	float m_fRefValue;
+	float refValue_;
 	/// The command used to render the reference value
-	ncRenderCommand m_refValueCmd;
+	ncRenderCommand refValueCmd_;
 
-	void SetBackgroundVertices();
-	virtual void UpdateRenderCommand();
+	void setBackgroundVertices();
+	virtual void updateRenderCommand();
 	// Updates the reference value rendering command
 	void UpdateRefValueRenderCommand();
 };

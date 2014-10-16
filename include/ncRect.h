@@ -19,49 +19,49 @@ class ncRect
 	/// Default constructor, all zeros
 	ncRect() : x(0), y(0), w(0), h(0) { }
 	/// Constructs from elements
-	ncRect(int const iX, int const iY, int const iW, int const iH)
-		: x(iX), y(iY), w(iW), h(iH) { }
+	ncRect(int const xx, int const yy, int const ww, int const hh)
+		: x(xx), y(yy), w(ww), h(hh) { }
 	/// Constructs from base classes
 	ncRect(const ncPoint &p1, const ncPoint &p2)
 		: x(p1.x), y(p1.y), w(p2.x), h(p2.y) { }
 
 	// Creates a rect from center and size
-	static ncRect FromCenterAndSize(const ncPoint &center, const ncPoint &size);
+	static ncRect fromCenterAndSize(const ncPoint &center, const ncPoint &size);
 
 	// Calculates the center of the rect
-	ncPoint Center() const;
+	ncPoint center() const;
 	// Sets rect elements
-	void Set(int const iX, int const iY, int const iW, int const iH);
+	void set(int const xx, int const yy, int const ww, int const hh);
 	// Retains size but move to another position
-	void SetCenter(const ncPoint& center);
+	void setCenter(const ncPoint& center);
 
 	/// Eqality operators
 	bool operator==(const ncRect& rect) const;
 };
 
 /// Creates a rect from center and size
-inline ncRect ncRect::FromCenterAndSize(const ncPoint &center, const ncPoint &size)
+inline ncRect ncRect::fromCenterAndSize(const ncPoint &center, const ncPoint &size)
 {
 	return ncRect(center.x - size.x * 0.5f, center.y - size.y * 0.5f, size.x, size.y);
 }
 
 /// Calculates the center of the rect
-inline ncPoint ncRect::Center() const
+inline ncPoint ncRect::center() const
 {
 	return ncPoint(x + w * 0.5f, y + h * 0.5f);
 }
 
 /// Sets rect elements
-inline void ncRect::Set(int const iX, int const iY, int const iW, int const iH)
+inline void ncRect::set(int const xx, int const yy, int const ww, int const hh)
 {
-	x = iX;
-	y = iY;
-	w = iW;
-	h = iH;
+	x = xx;
+	y = yy;
+	w = ww;
+	h = hh;
 }
 
 /// Retains size but move to another position
-inline void ncRect::SetCenter(const ncPoint &center)
+inline void ncRect::setCenter(const ncPoint &center)
 {
 	x = center.x - w * 0.5f;
 	y = center.y - h * 0.5f;
@@ -70,7 +70,8 @@ inline void ncRect::SetCenter(const ncPoint &center)
 /// Equality operators
 inline bool ncRect::operator==(const ncRect &rect) const
 {
-	return (x == rect.x && y == rect.y && w == rect.w && h == rect.h);
+	return (x == rect.x && y == rect.y &&
+			w == rect.w && h == rect.h);
 }
 
 #endif

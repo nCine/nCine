@@ -6,14 +6,14 @@
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-ncIInputEventHandler* ncIInputManager::s_pInputEventHandler = NULL;
-bool ncGLFWInputManager::m_bWindowHasFocus = true;
-ncGLFWMouseState ncGLFWInputManager::s_mouseState;
-ncGLFWMouseEvent ncGLFWInputManager::s_mouseEvent;
-ncGLFWKeyboardState ncGLFWInputManager::s_keyboardState;
-ncKeyboardEvent	ncGLFWInputManager::s_keyboardEvent;
-short int ncIInputManager::s_iMaxAxisValue = 32767;
-ncGLFWJoystickState ncGLFWInputManager::s_joystickStates[s_uMaxNumJoysticks];
+ncIInputEventHandler* ncIInputManager::inputEventHandler_ = NULL;
+bool ncGLFWInputManager::windowHasFocus_ = true;
+ncGLFWMouseState ncGLFWInputManager::mouseState_;
+ncGLFWMouseEvent ncGLFWInputManager::mouseEvent_;
+ncGLFWKeyboardState ncGLFWInputManager::keyboardState_;
+ncKeyboardEvent	ncGLFWInputManager::keyboardEvent_;
+short int ncIInputManager::MaxAxisValue = 32767;
+ncGLFWJoystickState ncGLFWInputManager::joystickStates_[MaxNumJoysticks];
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -21,74 +21,74 @@ ncGLFWJoystickState ncGLFWInputManager::s_joystickStates[s_uMaxNumJoysticks];
 
 ncGLFWInputManager::ncGLFWInputManager()
 {
-	glfwSetWindowCloseCallback(ncGLFWGfxDevice::WindowHandle(), WindowCloseCallback);
-	glfwSetKeyCallback(ncGLFWGfxDevice::WindowHandle(), KeyCallback);
-	glfwSetCursorPosCallback(ncGLFWGfxDevice::WindowHandle(), CursorPosCallback);
-	glfwSetMouseButtonCallback(ncGLFWGfxDevice::WindowHandle(), MouseButtonCallback);
+	glfwSetWindowCloseCallback(ncGLFWGfxDevice::windowHandle(), windowCloseCallback);
+	glfwSetKeyCallback(ncGLFWGfxDevice::windowHandle(), keyCallback);
+	glfwSetCursorPosCallback(ncGLFWGfxDevice::windowHandle(), cursorPosCallback);
+	glfwSetMouseButtonCallback(ncGLFWGfxDevice::windowHandle(), mouseButtonCallback);
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncGLFWInputManager::WindowCloseCallback(GLFWwindow *window)
+void ncGLFWInputManager::windowCloseCallback(GLFWwindow *window)
 {
-	ncApplication::Quit();
+	ncApplication::quit();
 }
 
-void ncGLFWInputManager::KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+void ncGLFWInputManager::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-	if (s_pInputEventHandler == NULL)
+	if (inputEventHandler_ == NULL)
 	{
 		return;
 	}
 
-	s_keyboardEvent.scancode = scancode;
-	s_keyboardEvent.sym = ncKeySym(key);
-	s_keyboardEvent.mod = mods;
+	keyboardEvent_.scancode = scancode;
+	keyboardEvent_.sym = ncKeySym(key);
+	keyboardEvent_.mod = mods;
 
 	if (action == GLFW_PRESS)
 	{
-		s_pInputEventHandler->OnKeyPressed(s_keyboardEvent);
+		inputEventHandler_->onKeyPressed(keyboardEvent_);
 	}
 	else if (action == GLFW_RELEASE)
 	{
-		s_pInputEventHandler->OnKeyReleased(s_keyboardEvent);
+		inputEventHandler_->onKeyReleased(keyboardEvent_);
 	}
 }
 
-void ncGLFWInputManager::CursorPosCallback(GLFWwindow *window, double x, double y)
+void ncGLFWInputManager::cursorPosCallback(GLFWwindow *window, double x, double y)
 {
-	if (s_pInputEventHandler == NULL)
+	if (inputEventHandler_ == NULL)
 	{
 		return;
 	}
 
-	s_mouseState.x = int(x);
-	s_mouseState.y = ncApplication::Height() - int(y);
-	s_pInputEventHandler->OnMouseMoved(s_mouseState);
+	mouseState_.x = int(x);
+	mouseState_.y = ncApplication::height() - int(y);
+	inputEventHandler_->onMouseMoved(mouseState_);
 }
 
-void ncGLFWInputManager::MouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
+void ncGLFWInputManager::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
-	if (s_pInputEventHandler == NULL)
+	if (inputEventHandler_ == NULL)
 	{
 		return;
 	}
 
-	double dCursorX, dCursory;
-	glfwGetCursorPos(window, &dCursorX, &dCursory);
-	s_mouseEvent.x = int(dCursorX); s_mouseEvent.y = int(dCursory);
-	s_mouseEvent.y = ncApplication::Height() - s_mouseEvent.y;
-	s_mouseEvent.m_iButton = button;
+	double xCursor, yCursor;
+	glfwGetCursorPos(window, &xCursor, &yCursor);
+	mouseEvent_.x = int(xCursor); mouseEvent_.y = int(yCursor);
+	mouseEvent_.y = ncApplication::height() - mouseEvent_.y;
+	mouseEvent_.button_ = button;
 
 	if (action == GLFW_PRESS)
 	{
-		s_pInputEventHandler->OnMouseButtonPressed(s_mouseEvent);
+		inputEventHandler_->onMouseButtonPressed(mouseEvent_);
 	}
 	else if (action == GLFW_RELEASE)
 	{
-		s_pInputEventHandler->OnMouseButtonReleased(s_mouseEvent);
+		inputEventHandler_->onMouseButtonReleased(mouseEvent_);
 	}
 }
 
@@ -100,32 +100,32 @@ void ncGLFWInputManager::MouseButtonCallback(GLFWwindow *window, int button, int
 bool ncGLFWInputManager::hasFocus()
 {
 	// A focus event has occurred (either gain or loss)
-	if (m_bWindowHasFocus != glfwGetWindowAttrib(ncGLFWGfxDevice::WindowHandle(), GLFW_FOCUSED))
+	if (windowHasFocus_ != glfwGetWindowAttrib(ncGLFWGfxDevice::windowHandle(), GLFW_FOCUSED))
 	{
-		m_bWindowHasFocus = glfwGetWindowAttrib(ncGLFWGfxDevice::WindowHandle(), GLFW_FOCUSED);
+		windowHasFocus_ = glfwGetWindowAttrib(ncGLFWGfxDevice::windowHandle(), GLFW_FOCUSED);
 	}
 
-	return m_bWindowHasFocus;
+	return windowHasFocus_;
 }
 
 /// Updates joystick state structures
-void ncGLFWInputManager::UpdateJoystickStates()
+void ncGLFWInputManager::updateJoystickStates()
 {
-	for (unsigned int i = 0; i < s_uMaxNumJoysticks; i++)
+	for (unsigned int i = 0; i < MaxNumJoysticks; i++)
 	{
 		if (glfwJoystickPresent(GLFW_JOYSTICK_1 + i))
 		{
-			s_joystickStates[i].m_ubButtons = glfwGetJoystickButtons(i, &s_joystickStates[i].m_iNumButtons);
-			s_joystickStates[i].m_fAxisValues = glfwGetJoystickAxes(i, &s_joystickStates[i].m_iNumAxes);
+			joystickStates_[i].buttons_ = glfwGetJoystickButtons(i, &joystickStates_[i].numButtons_);
+			joystickStates_[i].axisValues_ = glfwGetJoystickAxes(i, &joystickStates_[i].numAxes_);
 		}
 	}
 }
 
-bool ncGLFWInputManager::isJoyPresent(int iJoyId) const
+bool ncGLFWInputManager::isJoyPresent(int joyId) const
 {
-	if (iJoyId >= 0 && GLFW_JOYSTICK_1 + iJoyId <= GLFW_JOYSTICK_LAST)
+	if (joyId >= 0 && GLFW_JOYSTICK_1 + joyId <= GLFW_JOYSTICK_LAST)
 	{
-		return glfwJoystickPresent(GLFW_JOYSTICK_1 + iJoyId);
+		return glfwJoystickPresent(GLFW_JOYSTICK_1 + joyId);
 	}
 	else
 	{
@@ -133,11 +133,11 @@ bool ncGLFWInputManager::isJoyPresent(int iJoyId) const
 	}
 }
 
-const char *ncGLFWInputManager::JoyName(int iJoyId) const
+const char *ncGLFWInputManager::joyName(int joyId) const
 {
-	if (isJoyPresent(iJoyId))
+	if (isJoyPresent(joyId))
 	{
-		return glfwGetJoystickName(iJoyId);
+		return glfwGetJoystickName(joyId);
 	}
 	else
 	{
@@ -145,35 +145,35 @@ const char *ncGLFWInputManager::JoyName(int iJoyId) const
 	}
 }
 
-int ncGLFWInputManager::JoyNumButtons(int iJoyId) const
+int ncGLFWInputManager::joyNumButtons(int joyId) const
 {
-	int iNumButtons = -1;
+	int numButtons = -1;
 
-	if (isJoyPresent(iJoyId))
+	if (isJoyPresent(joyId))
 	{
-		glfwGetJoystickButtons(GLFW_JOYSTICK_1 + iJoyId, &iNumButtons);
+		glfwGetJoystickButtons(GLFW_JOYSTICK_1 + joyId, &numButtons);
 	}
 
-	return iNumButtons;
+	return numButtons;
 }
 
-int ncGLFWInputManager::JoyNumAxes(int iJoyId) const
+int ncGLFWInputManager::joyNumAxes(int joyId) const
 {
-	int iNumAxes = -1;
+	int numAxes = -1;
 
-	if (isJoyPresent(iJoyId))
+	if (isJoyPresent(joyId))
 	{
-		glfwGetJoystickAxes(GLFW_JOYSTICK_1 + iJoyId, &iNumAxes);
+		glfwGetJoystickAxes(GLFW_JOYSTICK_1 + joyId, &numAxes);
 	}
 
-	return iNumAxes;
+	return numAxes;
 }
 
-bool ncGLFWInputManager::isJoyButtonPressed(int iJoyId, int iButtonId) const
+bool ncGLFWInputManager::isJoyButtonPressed(int joyId, int buttonId) const
 {
-	if (isJoyPresent(iJoyId) && iButtonId >= 0 && iButtonId < JoyNumButtons(iJoyId))
+	if (isJoyPresent(joyId) && buttonId >= 0 && buttonId < joyNumButtons(joyId))
 	{
-		return s_joystickStates[iJoyId].m_ubButtons[iButtonId];
+		return joystickStates_[joyId].buttons_[buttonId];
 	}
 	else
 	{
@@ -181,22 +181,22 @@ bool ncGLFWInputManager::isJoyButtonPressed(int iJoyId, int iButtonId) const
 	}
 }
 
-short int ncGLFWInputManager::JoyAxisValue(int iJoyId, int iAxisId) const
+short int ncGLFWInputManager::joyAxisValue(int joyId, int axisId) const
 {
 	// If the joystick is not present the returned value is zero
-	short int iAxisValue = JoyAxisNormValue(iJoyId, iAxisId) * s_iMaxAxisValue;
+	short int axisValue = joyAxisNormValue(joyId, axisId) * MaxAxisValue;
 
-	return iAxisValue;
+	return axisValue;
 }
 
-float ncGLFWInputManager::JoyAxisNormValue(int iJoyId, int iAxisId) const
+float ncGLFWInputManager::joyAxisNormValue(int joyId, int axisId) const
 {
-	float fAxisValue = 0.0f;
+	float axisValue = 0.0f;
 
-	if (isJoyPresent(iJoyId) && iAxisId >= 0 && iAxisId < JoyNumAxes(iJoyId))
+	if (isJoyPresent(joyId) && axisId >= 0 && axisId < joyNumAxes(joyId))
 	{
-		fAxisValue = s_joystickStates[iJoyId].m_fAxisValues[iAxisId];
+		axisValue = joystickStates_[joyId].axisValues_[axisId];
 	}
 
-	return fAxisValue;
+	return axisValue;
 }

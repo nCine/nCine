@@ -11,31 +11,31 @@
 
 ncMutex::ncMutex()
 {
-	pthread_mutex_init(&m_mutex, NULL);
+	pthread_mutex_init(&mutex_, NULL);
 }
 
 ncMutex::~ncMutex()
 {
-	pthread_mutex_destroy(&m_mutex);
+	pthread_mutex_destroy(&mutex_);
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncMutex::Lock()
+void ncMutex::lock()
 {
-	pthread_mutex_lock(&m_mutex);
+	pthread_mutex_lock(&mutex_);
 }
 
-void ncMutex::Unlock()
+void ncMutex::unlock()
 {
-	pthread_mutex_unlock(&m_mutex);
+	pthread_mutex_unlock(&mutex_);
 }
 
-int ncMutex::TryLock()
+int ncMutex::tryLock()
 {
-	return pthread_mutex_trylock(&m_mutex);
+	return pthread_mutex_trylock(&mutex_);
 }
 
 
@@ -49,31 +49,31 @@ int ncMutex::TryLock()
 
 ncCondVariable::ncCondVariable()
 {
-	pthread_cond_init(&m_cond, NULL);
+	pthread_cond_init(&cond_, NULL);
 }
 
 ncCondVariable::~ncCondVariable()
 {
-	pthread_cond_destroy(&m_cond);
+	pthread_cond_destroy(&cond_);
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ncCondVariable::Wait(ncMutex &rMutex)
+void ncCondVariable::wait(ncMutex &mutex)
 {
-	pthread_cond_wait(&m_cond, &(rMutex.m_mutex));
+	pthread_cond_wait(&cond_, &(mutex.mutex_));
 }
 
-void ncCondVariable::Signal()
+void ncCondVariable::signal()
 {
-	pthread_cond_signal(&m_cond);
+	pthread_cond_signal(&cond_);
 }
 
-void ncCondVariable::Broadcast()
+void ncCondVariable::broadcast()
 {
-	pthread_cond_broadcast(&m_cond);
+	pthread_cond_broadcast(&cond_);
 }
 
 
@@ -90,12 +90,12 @@ void ncCondVariable::Broadcast()
 
 ncRWLock::ncRWLock()
 {
-	pthread_rwlock_init(&m_rwlock, NULL);
+	pthread_rwlock_init(&rwlock_, NULL);
 }
 
 ncRWLock::~ncRWLock()
 {
-	pthread_rwlock_destroy(&m_rwlock);
+	pthread_rwlock_destroy(&rwlock_);
 }
 
 #endif
@@ -111,14 +111,14 @@ ncRWLock::~ncRWLock()
 #if !defined (__ANDROID__) && !defined(__APPLE__)
 
 /// Creates a barrier for the specified amount of waiting threads
-ncBarrier::ncBarrier(unsigned int uCount)
+ncBarrier::ncBarrier(unsigned int count)
 {
-	pthread_barrier_init(&m_barrier, NULL, uCount);
+	pthread_barrier_init(&barrier_, NULL, count);
 }
 
 ncBarrier::~ncBarrier()
 {
-	pthread_barrier_destroy(&m_barrier);
+	pthread_barrier_destroy(&barrier_);
 }
 
 #endif
