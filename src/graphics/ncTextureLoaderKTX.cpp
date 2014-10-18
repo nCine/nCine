@@ -59,7 +59,7 @@ void ncTextureLoaderKTX::readHeader(KtxHeader &header)
 	{
 		if (header.endianess == 0x01020304)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderKTX::readHeader - File endianess doesn't match machine one");
+			LOGF("File endianess doesn't match machine one");
 			exit(EXIT_FAILURE);
 		}
 
@@ -70,7 +70,7 @@ void ncTextureLoaderKTX::readHeader(KtxHeader &header)
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderKTX::readHeader - Not a KTX file");
+		LOGF("Not a KTX file");
 		exit(EXIT_FAILURE);
 	}
 }
@@ -91,7 +91,7 @@ void ncTextureLoaderKTX::parseFormat(const KtxHeader& header)
 		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
 			if (gfxCaps.extTextureCompressionS3TC() == false)
 			{
-				ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderKTR::parseFormat - GL_EXT_texture_compression_s3tc not available");
+				LOGF("GL_EXT_texture_compression_s3tc not available");
 				exit(EXIT_FAILURE);
 			}
 			break;
@@ -99,7 +99,7 @@ void ncTextureLoaderKTX::parseFormat(const KtxHeader& header)
 		case GL_ETC1_RGB8_OES:
 			if (gfxCaps.oesCompressedETC1RGB8Texture() == false)
 			{
-				ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderKTX::parseFormat - GL_OES_compressed_ETC1_RGB8_texture not available");
+				LOGF("GL_OES_compressed_ETC1_RGB8_texture not available");
 				exit(EXIT_FAILURE);
 			}
 			break;
@@ -110,7 +110,7 @@ void ncTextureLoaderKTX::parseFormat(const KtxHeader& header)
 		case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
 			if (gfxCaps.imgTextureCompressionPVRTC() == false)
 			{
-				ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderKTX::parseFormat - GL_IMG_texture_compression_pvrtc not available");
+				LOGF("GL_IMG_texture_compression_pvrtc not available");
 				exit(EXIT_FAILURE);
 			}
 			break;
@@ -121,7 +121,7 @@ void ncTextureLoaderKTX::parseFormat(const KtxHeader& header)
 
 	if (mipMapCount_ > 1)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderKTX::parseFormat - MIP Maps: %d", mipMapCount_);
+		LOGI_X("MIP Maps: %d", mipMapCount_);
 		mipDataOffsets_ = new long[mipMapCount_];
 		mipDataSizes_ = new long[mipMapCount_];
 		long int dataSizesSum = ncTextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_, mipDataSizes_);
@@ -135,7 +135,7 @@ void ncTextureLoaderKTX::parseFormat(const KtxHeader& header)
 
 		if (dataSizesSum != dataSize_)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncTextureLoaderKTX::parseFormat - The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
+			LOGW_X("The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
 		}
 	}
 }

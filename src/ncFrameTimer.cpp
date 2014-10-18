@@ -45,7 +45,7 @@ void ncFrameTimer::addFrame()
 	{
 		fps_ = float(logNumFrames_) / logInterval_;
 		float msPerFrame = (logInterval_ * 1000.0f) / float(logNumFrames_);
-		ncServiceLocator::logger().write(ncILogger::LOG_VERBOSE, (const char *)"ncFrameTimer::addFrame - %lu frames in %.0f seconds = %f FPS (%.3fms per frame)",  logNumFrames_, logInterval_, fps_, msPerFrame);
+		LOGV_X("%lu frames in %.0f seconds = %f FPS (%.3fms per frame)",  logNumFrames_, logInterval_, fps_, msPerFrame);
 
 		logNumFrames_ = 0L;
 		lastLogUpdate_ = now();

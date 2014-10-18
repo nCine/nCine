@@ -35,7 +35,7 @@ ncFileLogger::ncFileLogger(const char *filename, LogLevel consoleLevel, LogLevel
 
 ncFileLogger::~ncFileLogger()
 {
-	write(LOG_VERBOSE, "ncFileLogger::~ncFileLogger - End of the log");
+	write(LOG_VERBOSE, "ncFileLogger::~ncFileLogger -> End of the log");
 	if (fileHandle_)
 	{
 		delete fileHandle_;
@@ -60,7 +60,7 @@ void ncFileLogger::write(LogLevel level, const char *fmt, ...)
 
 	if (consoleLevel_ < int(LOG_OFF) && int(level) >= int(consoleLevel_))
 	{
-		printf("- %s [L%d] -> ", buffer, int(level));
+		printf("- %s [L%d] - ", buffer, int(level));
 
 		va_list args;
 		va_start(args, fmt);
@@ -72,7 +72,7 @@ void ncFileLogger::write(LogLevel level, const char *fmt, ...)
 
 	if (fileLevel_ < int(LOG_OFF) && int(level) >= int(fileLevel_))
 	{
-		fprintf(fileHandle_->ptr(), "- %s [L%d] -> ", buffer, int(level));
+		fprintf(fileHandle_->ptr(), "- %s [L%d] - ", buffer, int(level));
 
 		va_list args;
 		va_start(args, fmt);

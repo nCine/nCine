@@ -24,11 +24,11 @@ ncTextureLoaderSDL::ncTextureLoaderSDL(ncIFile *fileHandle)
 
 void ncTextureLoaderSDL::init()
 {
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderSDL::init - Loading \"%s\"", fileHandle_->filename());
+	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 	sdlSurface_ = (SDL_Surface *)IMG_Load(fileHandle_->filename());
 	if (!sdlSurface_)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderSDL::init - Cannot load \"%s\"", fileHandle_->filename());
+		LOGF_X("Cannot load \"%s\"", fileHandle_->filename());
 		exit(-1);
 	}
 
@@ -47,7 +47,7 @@ void ncTextureLoaderSDL::init()
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderSDL::init - Not a true color or alpha image: %d", bpp_);
+		LOGF_X("Not a true color or alpha image: %d", bpp_);
 		exit(-1);
 	}
 

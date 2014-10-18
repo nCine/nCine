@@ -77,7 +77,7 @@ void ncTextureFormat::findExternalFmt()
 
 	if (found == false)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureFormat::findExternalFmt - Unknown internal format: %d", internalFormat_);
+		LOGF_X("Unknown internal format: %d", internalFormat_);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -340,7 +340,7 @@ long int ncTextureFormat::calculateMipSizes(GLenum internalFormat, int width, in
 			break;
 #endif
 		default:
-			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureFormat::calculateMipSizes - MIP maps not supported for internal format: %d", internalFormat);
+			LOGF_X("MIP maps not supported for internal format: %d", internalFormat);
 			exit(EXIT_FAILURE);
 			break;
 	}

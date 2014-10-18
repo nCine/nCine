@@ -30,7 +30,7 @@ ncAudioStream::ncAudioStream(const char *filename)
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, "ncAudioStream::ncAudioStream - Unsupported number of channels: %d", numhannels);
+		LOGF_X("Unsupported number of channels: %d", numhannels);
 		exit(EXIT_FAILURE);
 	}
 }

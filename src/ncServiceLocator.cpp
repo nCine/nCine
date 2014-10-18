@@ -70,7 +70,7 @@ void ncServiceLocator::registerThreadPool(ncIThreadPool* service)
 /// Deletes every registered service reestablishing null ones
 void ncServiceLocator::unregisterAll()
 {
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncServiceLocator::unregisterAll - Unregistering all services");
+	LOGI("Unregistering all services");
 
 	if (indexerService_ != &nullIndexer_)
 	{

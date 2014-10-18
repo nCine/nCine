@@ -23,13 +23,13 @@ unsigned int ncStackedBarPlotter::addVariable(unsigned int numValues, float reje
 	{
 		if (numValues != variables_[0]->variable()->numValues())
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncStackedBarPlotter::addVariable - Variable not added because number of values is inconsistent");
+			LOGW("Variable not added because number of values is inconsistent");
 			return 0; // TODO: switch to signed int and return -1?
 		}
 		float diff = rejectDelay - variables_[0]->variable()->delay();
 		if (diff < -0.001f || diff > 0.001f) // HACK: one millisecond fixed tolerance
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncStackedBarPlotter::addVariable - Variable not added because reject delay is inconsistent");
+			LOGW("Variable not added because reject delay is inconsistent");
 			return 0; // TODO: switch to signed int and return -1?
 		}
 	}

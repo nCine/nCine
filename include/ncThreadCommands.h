@@ -27,8 +27,7 @@ class ncDummyCommand : public ncIThreadCommand
 
 inline void ncDummyCommand::execute()
 {
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncDummyCommand::execute - worker thread %u got request code %u",
-		ncThread::self(), requestCode_);
+	LOGI_X("worker thread %u got request code %u", ncThread::self(), requestCode_);
 }
 
 #endif

@@ -78,13 +78,13 @@ T* ncObject::fromId(unsigned int id)
 		}
 		else // Cannot cast
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, "ncObject::fromId - Object \"%s\" (%u) is of type %u instead of %u", object->name_, id, object->type_, T::sType());
+			LOGF_X("Object \"%s\" (%u) is of type %u instead of %u", object->name_, id, object->type_, T::sType());
 			return NULL;
 		}
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_WARN, "ncObject::fromId - Object %u not found", id);
+		LOGW_X("Object %u not found", id);
 		return NULL;
 	}
 }

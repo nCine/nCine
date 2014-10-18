@@ -1,6 +1,13 @@
 #ifndef CLASS_NCSERVICELOCATOR
 #define CLASS_NCSERVICELOCATOR
 
+#ifdef __ANDROID__
+	#include <stdarg.h>
+	#include <android/log.h>
+#else
+	#include <cstdarg>
+#endif
+
 #include "ncIIndexer.h"
 #include "ncILogger.h"
 #include "ncIAudioDevice.h"
@@ -56,5 +63,27 @@ class ncServiceLocator
 
 	static ncGfxCapabilities gfxCapabilities_;
 };
+
+#ifdef __GNUC__
+	#define FUNCTION __PRETTY_FUNCTION__
+#elif _MSC_VER
+		#define FUNCTION __FUNCTION__
+#else
+		#define FUNCTION __func__
+#endif
+
+#define LOGV_X(fmt, ...) ncServiceLocator::logger().write(ncILogger::LOG_VERBOSE, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
+#define LOGD_X(fmt, ...) ncServiceLocator::logger().write(ncILogger::LOG_DEBUG, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
+#define LOGI_X(fmt, ...) ncServiceLocator::logger().write(ncILogger::LOG_INFO, static_cast<const char *>("%s, -> " fmt), FUNCTION, ## __VA_ARGS__)
+#define LOGW_X(fmt, ...) ncServiceLocator::logger().write(ncILogger::LOG_WARN, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
+#define LOGE_X(fmt, ...) ncServiceLocator::logger().write(ncILogger::LOG_ERROR, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
+#define LOGF_X(fmt, ...) ncServiceLocator::logger().write(ncILogger::LOG_FATAL, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
+
+#define LOGV(fmt) ncServiceLocator::logger().write(ncILogger::LOG_VERBOSE, static_cast<const char *>("%s -> " fmt), FUNCTION)
+#define LOGD(fmt) ncServiceLocator::logger().write(ncILogger::LOG_DEBUG, static_cast<const char *>("%s -> " fmt), FUNCTION)
+#define LOGI(fmt) ncServiceLocator::logger().write(ncILogger::LOG_INFO, static_cast<const char *>("%s, -> " fmt), FUNCTION)
+#define LOGW(fmt) ncServiceLocator::logger().write(ncILogger::LOG_WARN, static_cast<const char *>("%s -> " fmt), FUNCTION)
+#define LOGE(fmt) ncServiceLocator::logger().write(ncILogger::LOG_ERROR, static_cast<const char *>("%s -> " fmt), FUNCTION)
+#define LOGF(fmt) ncServiceLocator::logger().write(ncILogger::LOG_FATAL, static_cast<const char *>("%s -> " fmt), FUNCTION)
 
 #endif

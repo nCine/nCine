@@ -75,7 +75,7 @@ void ncThreadPool::workerFunction(void *arg)
 	ncIThreadCommand *threadCommand = NULL;
 	ncThreadStruct *threadStruct = static_cast<ncThreadStruct *>(arg);
 
-	ncServiceLocator::logger().write(ncILogger::LOG_DEBUG, (const char *)"ncThreadPool::workerFunction - worker thread %u is starting", ncThread::self());
+	LOGD_X("worker thread %u is starting", ncThread::self());
 
 	while (true)
 	{
@@ -98,5 +98,5 @@ void ncThreadPool::workerFunction(void *arg)
 		delete threadCommand;
 	}
 
-	ncServiceLocator::logger().write(ncILogger::LOG_DEBUG, (const char *)"ncThreadPool::workerFunction - worker thread %u is exiting", ncThread::self());
+	LOGD_X("worker thread %u is exiting", ncThread::self());
 }

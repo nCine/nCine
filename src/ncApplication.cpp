@@ -83,13 +83,13 @@ void ncApplication::init(ncIAppEventHandler* (*createAppEventHandler)())
 	gfxDevice_->setWindowTitle("nCine");
 #endif
 
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncApplication::init - nCine compiled on " __DATE__ " at " __TIME__);
+	LOGI("nCine compiled on " __DATE__ " at " __TIME__);
 	ncServiceLocator::registerIndexer(new ncArrayIndexer());
 	ncServiceLocator::registerAudioDevice(new ncALAudioDevice());
 #ifdef WITH_THREADS
 	ncServiceLocator::registerThreadPool(new ncThreadPool());
 #endif
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncApplication::init - Data path: %s", ncIFile::dataPath());
+	LOGI_X("Data path: %s", ncIFile::dataPath());
 
 	frameTimer_ = new ncFrameTimer(5.0f, 0.2f);
 	rootNode_ = new ncSceneNode();
@@ -134,14 +134,14 @@ void ncApplication::init(ncIAppEventHandler* (*createAppEventHandler)())
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncApplication::init - Cannot access font files for profiling text");
+		LOGW("Cannot access font files for profiling text");
 	}
 
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncApplication::init - ncApplication initialized");
+	LOGI("ncApplication initialized");
 
 	appEventHandler_ = createAppEventHandler();
 	appEventHandler_->onInit();
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncApplication::init - ncIAppEventHandler::OnInit() invoked");
+	LOGI("ncIAppEventHandler::OnInit() invoked");
 
 	// HACK: Init of the random seed
 	// In the future there could be a random generator service
@@ -240,7 +240,7 @@ void ncApplication::step()
 void ncApplication::shutdown()
 {
 	appEventHandler_->onShutdown();
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncApplication::shutdown - ncIAppEventHandler::OnShutdown() invoked");
+	LOGI("ncIAppEventHandler::OnShutdown() invoked");
 
 	delete inputManager_;
 #ifdef __ANDROID__
@@ -261,10 +261,10 @@ void ncApplication::shutdown()
 
 	if (ncServiceLocator::indexer().isEmpty() == false)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncApplication::shutdown - The object indexer is not empty");
+		LOGW("The object indexer is not empty");
 	}
 
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncApplication::shutdown - ncApplication shutted down");
+	LOGI("ncApplication shutted down");
 
 	ncServiceLocator::unregisterAll();
 }

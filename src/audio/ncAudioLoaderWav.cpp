@@ -36,7 +36,7 @@ long ncAudioLoaderWav::read(char *buffer, int bufferSize) const
 
 		if (bytes_ == 0 && ferror(fileHandle_->ptr()))
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderWav::read - Error reading the file");
+			LOGF("Error reading the file");
 			exit(EXIT_FAILURE);
 		}
 
@@ -59,7 +59,7 @@ void ncAudioLoaderWav::rewind() const
 
 void ncAudioLoaderWav::init()
 {
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAudioLoaderWav::init - Loading \"%s\"", fileHandle_->filename());
+	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 	fileHandle_->open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
 
 	WavHeader header;
@@ -67,23 +67,23 @@ void ncAudioLoaderWav::init()
 
 	if (strncmp(header.chunkId, "RIFF", 4) != 0)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderWav::init - \"%s\" is not a WAV file", fileHandle_->filename());
+		LOGF_X("\"%s\" is not a WAV file", fileHandle_->filename());
 		exit(EXIT_FAILURE);
 	}
 	if (strncmp(header.format, "WAVE", 4) != 0)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderWav::init - \"%s\" is not a WAV file", fileHandle_->filename());
+		LOGF_X("\"%s\" is not a WAV file", fileHandle_->filename());
 		exit(EXIT_FAILURE);
 	}
 	if (strncmp(header.subchunk1Id, "fmt ", 4) != 0)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderWav::init - \"%s\" is an invalid WAV file", fileHandle_->filename());
+		LOGF_X("\"%s\" is an invalid WAV file", fileHandle_->filename());
 		exit(EXIT_FAILURE);
 	}
 
 	if (ncIFile::int16FromLE(header.audioFormat) != 1)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderWav::init - Data in \"%s\" is not in PCM format", fileHandle_->filename());
+		LOGF_X("Data in \"%s\" is not in PCM format", fileHandle_->filename());
 		exit(EXIT_FAILURE);
 	}
 
@@ -94,5 +94,5 @@ void ncAudioLoaderWav::init()
 	numSamples_ = ncIFile::int32FromLE(header.subchunk2Size) / (numChannels_ * bytesPerSample_);
 	duration_ = float(numSamples_) / frequency_;
 
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAudioLoaderWav::init - duration: %.2f, channels: %d, frequency: %d", duration_, numChannels_, frequency_);
+	LOGI_X("duration: %.2f, channels: %d, frequency: %d", duration_, numChannels_, frequency_);
 }

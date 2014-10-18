@@ -43,9 +43,9 @@ class ncArray
 	void removeAt(unsigned int index);
 
 	// Read-only subscript operator
-	const T& operator[] (const unsigned int index) const;
+	const T& operator[](const unsigned int index) const;
 	// Subscript operator
-	T& operator[] (const unsigned int index);
+	T& operator[](const unsigned int index);
 
 	/// Returns a pointer to the allocated memory
 	/** It's useful when holding arrays of OpenGL data */
@@ -69,7 +69,7 @@ void ncArray<T>::setCapacity(unsigned int newCapacity)
 {
 	if (newCapacity == 0)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncArray::setCapacity - Zero is not valid capacity");
+		LOGF("Zero is not valid capacity");
 		exit(EXIT_FAILURE);
 	}
 
@@ -128,11 +128,11 @@ void ncArray<T>::removeAt(unsigned int index)
 
 /// Read-only subscript operator
 template <class T>
-const T& ncArray<T>::operator[] (const unsigned int index) const
+const T& ncArray<T>::operator[](const unsigned int index) const
 {
 	if (index > size_)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncArray::operator[] const - Element %u out of size range!", index);
+		LOGF_X("Element %u out of size range!", index);
 		exit(EXIT_FAILURE);
 	}
 
@@ -141,18 +141,18 @@ const T& ncArray<T>::operator[] (const unsigned int index) const
 
 /// Subscript operator
 template <class T>
-T& ncArray<T>::operator[] (const unsigned int index)
+T& ncArray<T>::operator[](const unsigned int index)
 {
 	if (index > capacity_ - 1)
 	{
-//		ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncArray::operator[] - Element %u out of capacity range!", index);
+//		LOGW("Element %u out of capacity range!", index);
 //		exit(EXIT_FAILURE);
 	}
 
 	// Avoid creating "holes" into the array
 	if (index > size_)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncArray::operator[] - Element %u out of size range!", index);
+		LOGF_X("Element %u out of size range!", index);
 		exit(EXIT_FAILURE);
 	}
 	// Adding an element at the back of the array

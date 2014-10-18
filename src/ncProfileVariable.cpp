@@ -20,7 +20,7 @@ ncProfileVariable::ncProfileVariable(unsigned int numValues, float rejectDelay)
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncProfileVariable::ncProfileVariable - Array size should be greater than zero");
+		LOGF("Array size should be greater than zero");
 		exit(EXIT_FAILURE);
 	}
 }

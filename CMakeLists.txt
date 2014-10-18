@@ -34,7 +34,7 @@ if(MSVC)
 	#add_definitions(/W0) # Turn off warnings
 else() # GCC and LLVM
 	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic -Wextra -Wno-unused-parameter -Wno-ignored-qualifiers")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic -Wextra -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-variadic-macros")
 		if(CMAKE_BUILD_TYPE MATCHES Debug)
 			set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1 -ggdb -fsanitize=address -fno-omit-frame-pointer -rdynamic")
 			set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -fsanitize=address")
@@ -137,12 +137,58 @@ endif()
 include_directories(include)
 set(CMAKE_BUILD_TYPE Debug)
 
-set(SOURCES
+set(HEADERS
 	include/ncArray.h
 	include/ncList.h
 	include/ncListIterator.h
 	include/ncPoint.h
 	include/ncRect.h
+	include/ncColor.h
+	include/ncDrawableNode.h
+	include/ncVector2f.h
+	include/ncServiceLocator.h
+	include/ncFileLogger.h
+	include/ncArrayIndexer.h
+	include/ncTimer.h
+	include/ncFrameTimer.h
+	include/ncProfileVariable.h
+	include/ncFont.h
+	include/ncFontGlyph.h
+	include/ncIFile.h
+	include/ncStandardFile.h
+	include/ncIGfxDevice.h
+	include/ncGfxCapabilities.h
+	include/ncTextureFormat.h
+	include/ncITextureLoader.h
+	include/ncTextureLoaderDDS.h
+	include/ncTextureLoaderPVR.h
+	include/ncTextureLoaderKTX.h
+	include/ncTexture.h
+	include/ncProfilePlotter.h
+	include/ncPlottingVariable.h
+	include/ncLinePlotter.h
+	include/ncStackedBarPlotter.h
+	include/ncSceneNode.h
+	include/ncSprite.h
+	include/ncRenderCommand.h
+	include/ncRenderQueue.h
+	include/ncSpriteBatchNode.h
+	include/ncApplication.h
+	include/ncParticle.h
+	include/ncParticleAffectors.h
+	include/ncParticleSystem.h
+	include/ncTextNode.h
+	include/ncRectAnimation.h
+	include/ncAnimatedSprite.h
+	include/ncALAudioDevice.h
+	include/ncIAudioLoader.h
+	include/ncAudioLoaderWav.h
+	include/ncAudioBuffer.h
+	include/ncAudioStream.h
+	include/ncAudioBufferPlayer.h
+	include/ncAudioStreamPlayer.h
+)
+set(SOURCES
 	src/base/ncVector2f.cpp
 	src/ncServiceLocator.cpp
 	src/ncFileLogger.cpp
@@ -188,29 +234,39 @@ set(SOURCES
 )
 
 if(GLFW_FOUND)
+	list(APPEND HEADERS include/ncGLFWInputManager.h)
+	list(APPEND HEADERS include/ncGLFWGfxDevice.h)
 	list(APPEND SOURCES src/ncGLFWInputManager.cpp)
 	list(APPEND SOURCES src/graphics/ncGLFWGfxDevice.cpp)
 endif()
 
 if(SDL_FOUND AND NOT GLFW_FOUND)
+	list(APPEND HEADERS include/ncSDLInputManager.h)
+	list(APPEND HEADERS include/ncSDLGfxDevice.h)
 	list(APPEND SOURCES src/ncSDLInputManager.cpp)
 	list(APPEND SOURCES src/graphics/ncSDLGfxDevice.cpp)
 	if(SDLIMAGE_FOUND)
+		list(APPEND HEADERS include/ncTextureLoaderSDL.h)
 		list(APPEND SOURCES src/graphics/ncTextureLoaderSDL.cpp)
 	endif()
 endif()
 
 if(PNG_FOUND AND GLFW_FOUND)
+	list(APPEND HEADERS include/ncTextureLoaderPNG.h)
 	list(APPEND SOURCES src/graphics/ncTextureLoaderPNG.cpp)
 endif()
 if(WEBP_FOUND)
+	list(APPEND HEADERS include/ncTextureLoaderWebP.h)
 	list(APPEND SOURCES src/graphics/ncTextureLoaderWebP.cpp)
 endif()
 if(VORBIS_FOUND)
+	list(APPEND HEADERS include/ncAudioLoaderOgg.h)
 	list(APPEND SOURCES src/audio/ncAudioLoaderOgg.cpp)
 endif()
 
 if(Threads_FOUND)
+	list(APPEND HEADERS include/ncThread.h)
+	list(APPEND HEADERS include/ncThreadSync.h)
 	if(MSVC OR CROSS_MINGW32)
 		list(APPEND SOURCES src/threading/ncWindowsThread.cpp)
 		list(APPEND SOURCES src/threading/ncWindowsThreadSync.cpp)
@@ -218,10 +274,10 @@ if(Threads_FOUND)
 		list(APPEND SOURCES src/threading/ncPOSIXThread.cpp)
 		list(APPEND SOURCES src/threading/ncPOSIXThreadSync.cpp)
 	endif()
+	list(APPEND HEADERS include/ncThreadPool.h)
 	list(APPEND SOURCES src/threading/ncThreadPool.cpp)
+	list(APPEND HEADERS include/ncThreadCommands.h)
 endif()
-
-list(APPEND LINK_LIBS ${OPENGL_gl_LIBRARY})
 
 link_libraries(
 	${OPENGL_gl_LIBRARY}
@@ -230,9 +286,9 @@ link_libraries(
 )
 
 if(MSVC)
-	add_Library(ncine STATIC ${SOURCES})
+	add_Library(ncine STATIC ${SOURCES} ${HEADERS})
 else()
-	add_library(ncine SHARED ${SOURCES})
+	add_library(ncine SHARED ${SOURCES} ${HEADERS})
 	if(CROSS_MINGW32)
 		set_target_properties(ncine PROPERTIES LINK_FLAGS "-Wl,--output-def,${CMAKE_CURRENT_BINARY_DIR}/ncine.def")
 	endif()

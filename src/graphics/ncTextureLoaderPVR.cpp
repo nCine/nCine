@@ -52,7 +52,7 @@ void ncTextureLoaderPVR::readHeader(Pvr3Header &header)
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::readHeader - Not a PVR3 file");
+		LOGF("Not a PVR3 file");
 		exit(EXIT_FAILURE);
 	}
 }
@@ -68,7 +68,7 @@ void ncTextureLoaderPVR::parseFormat(const Pvr3Header& header)
 	// Texture contains compressed data, most significant 4 bytes have been set to zero
 	if (pixelFormat < 0x0000000100000000ULL)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderPVR::parseFormat - Compressed format: %u", pixelFormat);
+		LOGI_X("Compressed format: %u", pixelFormat);
 
 		// Check for OpenGL extension support
 		switch (pixelFormat)
@@ -79,7 +79,7 @@ void ncTextureLoaderPVR::parseFormat(const Pvr3Header& header)
 			case FMT_DXT5:
 				if (gfxCaps.extTextureCompressionS3TC() == false)
 				{
-					ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::parseFormat - GL_EXT_texture_compression_s3tc not available");
+					LOGF("GL_EXT_texture_compression_s3tc not available");
 					exit(EXIT_FAILURE);
 				}
 				break;
@@ -90,18 +90,18 @@ void ncTextureLoaderPVR::parseFormat(const Pvr3Header& header)
 			case FMT_PVRTC_4BPP_RGBA:
 				if (gfxCaps.imgTextureCompressionPVRTC() == false)
 				{
-					ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::parseFormat - GL_IMG_texture_compression_pvrtc not available");
+					LOGF("GL_IMG_texture_compression_pvrtc not available");
 					exit(EXIT_FAILURE);
 				}
 				break;
 			case FMT_PVRTCII_2BPP:
 			case FMT_PVRTCII_4BPP:
-				ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::parseFormat - No support for PVRTC-II compression");
+				LOGF("No support for PVRTC-II compression");
 				exit(EXIT_FAILURE);
 				break;
 #endif
 			default:
-				ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::parseFormat - Unsupported PVR3 compressed format: %u", pixelFormat);
+				LOGF_X("Unsupported PVR3 compressed format: %u", pixelFormat);
 				exit(EXIT_FAILURE);
 				break;
 		}
@@ -145,7 +145,7 @@ void ncTextureLoaderPVR::parseFormat(const Pvr3Header& header)
 	{
 		GLenum type = GL_UNSIGNED_BYTE;
 
-		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderPVR::parseFormat - Uncompressed format: %c%c%c%c (%u, %u, %u, %u)",
+		LOGI_X("Uncompressed format: %c%c%c%c (%u, %u, %u, %u)",
 			((char*)&pixelFormat)[0], ((char*)&pixelFormat)[1], ((char*)&pixelFormat)[2], ((char*)&pixelFormat)[3],
 			((unsigned char*)&pixelFormat)[4], ((unsigned char*)&pixelFormat)[5], ((unsigned char*)&pixelFormat)[6], ((unsigned char*)&pixelFormat)[7]);
 
@@ -170,7 +170,7 @@ void ncTextureLoaderPVR::parseFormat(const Pvr3Header& header)
 				type = GL_UNSIGNED_SHORT_4_4_4_4;
 				break;
 			default:
-				ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPVR::parseFormat - Unsupported PVR3 uncompressed format: %llx", pixelFormat);
+				LOGF_X("Unsupported PVR3 uncompressed format: %llx", pixelFormat);
 				exit(EXIT_FAILURE);
 				break;
 		}
@@ -180,13 +180,13 @@ void ncTextureLoaderPVR::parseFormat(const Pvr3Header& header)
 
 	if (mipMapCount_ > 1)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderPVR::parseFormat - MIP Maps: %d", mipMapCount_);
+		LOGI_X("MIP Maps: %d", mipMapCount_);
 		mipDataOffsets_ = new long[mipMapCount_];
 		mipDataSizes_ = new long[mipMapCount_];
 		long int dataSizesSum = ncTextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_, mipDataSizes_);
 		if (dataSizesSum != dataSize_)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncTextureLoaderPVR::parseFormat - The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
+			LOGW_X("The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
 		}
 	}
 }

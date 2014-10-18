@@ -49,7 +49,7 @@ void ncAssetFile::open(unsigned char mode)
 	// Checking if the file is already opened
 	if (fileDescriptor_ >= 0 || asset_ != NULL)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncAssetFile::open - File \"%s\" is already opened", filename_);
+		LOGW_X("File \"%s\" is already opened", filename_);
 	}
 	else
 	{
@@ -75,11 +75,11 @@ void ncAssetFile::close()
 		int retValue = ::close(fileDescriptor_);
 		if (retValue < 0)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncAssetFile::close - Cannot close the file \"%s\"", filename_);
+			LOGW_X("Cannot close the file \"%s\"", filename_);
 		}
 		else
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAssetFile::close - File \"%s\" closed", filename_);
+			LOGI_X("File \"%s\" closed", filename_);
 			fileDescriptor_ = -1;
 		}
 	}
@@ -87,7 +87,7 @@ void ncAssetFile::close()
 	{
 		AAsset_close(asset_);
 		asset_ = NULL;
-		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAssetFile::close - File \"%s\" closed", filename_);
+		LOGI_X("File \"%s\" closed", filename_);
 	}
 }
 
@@ -190,7 +190,7 @@ void ncAssetFile::openFd(unsigned char mode)
 		asset_ = AAssetManager_open(assetManager_, filename_, AASSET_MODE_UNKNOWN);
 		if (asset_ == NULL)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAssetFile::openFd - Cannot open the file \"%s\"", filename_);
+			LOGF_X("Cannot open the file \"%s\"", filename_);
 			exit(-1);
 		}
 
@@ -201,17 +201,17 @@ void ncAssetFile::openFd(unsigned char mode)
 
 		if (fileDescriptor_ < 0)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAssetFile::openFd - Cannot open the file \"%s\"", filename_);
+			LOGF_X("Cannot open the file \"%s\"", filename_);
 			exit(-1);
 		}
 		else
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAssetFile::openFd - File \"%s\" opened", filename_);
+			LOGI_X("File \"%s\" opened", filename_);
 		}
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAssetFile::openFd - Cannot open the file \"%s\", wrong open mode", filename_);
+		LOGE_X("Cannot open the file \"%s\", wrong open mode", filename_);
 	}
 }
 
@@ -224,12 +224,12 @@ void ncAssetFile::openAsset(unsigned char mode)
 		asset_ = AAssetManager_open(assetManager_, filename_, AASSET_MODE_UNKNOWN);
 		if (asset_ == NULL)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAssetFile::openAsset - Cannot open the file \"%s\"", filename_);
+			LOGF_X("Cannot open the file \"%s\"", filename_);
 			exit(-1);
 		}
 		else
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAssetFile::openAsset - File \"%s\" opened", filename_);
+			LOGI_X("File \"%s\" opened", filename_);
 		}
 
 		// Calculating file size
@@ -237,7 +237,7 @@ void ncAssetFile::openAsset(unsigned char mode)
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncAssetFile::openAsset - Cannot open the file \"%s\", wrong open mode", filename_);
+		LOGE_X("Cannot open the file \"%s\", wrong open mode", filename_);
 	}
 }
 
@@ -258,11 +258,11 @@ bool ncAssetFile::access(const char *filename, unsigned char mode)
 	}
 	else if (mode & MODE_CAN_WRITE)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::access - Cannot access the file \"%s\", an asset can only be read", filename);
+		LOGE_X("Cannot access the file \"%s\", an asset can only be read", filename);
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::access - Cannot access the file \"%s\", wrong access mode", filename);
+		LOGE_X("Cannot access the file \"%s\", wrong access mode", filename);
 	}
 
 	return isAccessible;

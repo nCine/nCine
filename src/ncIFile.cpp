@@ -118,7 +118,7 @@ char* ncIFile::dataPath()
 		// Trying to create the data directory
 		if (mkdir(dataPath_, 0770) && errno != EEXIST)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncIFile::dataPath - Cannot create directory: %s", dataPath_);
+			LOGE_X("Cannot create directory: %s", dataPath_);
 			memset(dataPath_, 0, MaxFilenameLength);
 		}
 	}

@@ -14,7 +14,7 @@ void ncColorAffector::addColorStep(float time, ncColor color)
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_WARN, "ncColorAffector::addColorStep - Out of order step not added");
+		LOGW("Out of order step not added");
 	}
 }
 
@@ -55,7 +55,7 @@ void ncSizeAffector::addSizeStep(float time, float scale)
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_WARN, "ncSizeAffector::addSizeStep - Out of order step not added");
+		LOGW("Out of order step not added");
 	}
 }
 

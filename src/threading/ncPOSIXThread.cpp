@@ -55,13 +55,13 @@ void ncThread::run(ncThreadFunctionPtr startFunction, void *arg)
 		threadInfo_.threadArg = arg;
 		if (int error = pthread_create(&tid_, NULL, wrapperFunction, &threadInfo_))
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncThread::run - pthread_create error: %d", error);
+			LOGE_X("pthread_create error: %d", error);
 			::exit(EXIT_FAILURE);
 		}
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncThread::run - thread %u is already running", tid_);
+		LOGW_X("thread %u is already running", tid_);
 	}
 }
 

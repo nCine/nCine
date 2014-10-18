@@ -43,13 +43,13 @@ void ncTextureLoaderETC::init()
 		width_ = ncIFile::int16FromBE(header.width);
 		height_ = ncIFile::int16FromBE(header.height);
 
-		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderETC::init - Header found: w:%d h:%d", width_, height_);
+		LOGI_X("Header found: w:%d h:%d", width_, height_);
 	}
 
 	// Checking for extension availability before loading
 	if (gfxCaps.oesCompressedETC1RGB8Texture() == false)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderETC::init - GL_OES_compressed_ETC1_RGB8_texture not available");
+		LOGF("GL_OES_compressed_ETC1_RGB8_texture not available");
 		exit(-1);
 	}
 

@@ -52,7 +52,7 @@ void ncTextureLoaderDDS::readHeader(DdsHeader& header)
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::readHeader - Not a DDS file");
+		LOGF("Not a DDS file");
 		exit(EXIT_FAILURE);
 	}
 }
@@ -70,8 +70,7 @@ void ncTextureLoaderDDS::parseFormat(const DdsHeader &header)
 	{
 		uint32_t fourCC = ncIFile::int32FromLE(header.ddspf.dwFourCC);
 
-		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderDDS::parseFormat - FourCC: \"%c%c%c%c\" (0x%x)",
-			((char*)&fourCC)[0], ((char*)&fourCC)[1], ((char*)&fourCC)[2], ((char*)&fourCC)[3], fourCC);
+		LOGI_X("FourCC: \"%c%c%c%c\" (0x%x)", ((char*)&fourCC)[0], ((char*)&fourCC)[1], ((char*)&fourCC)[2], ((char*)&fourCC)[3], fourCC);
 
 		// Check for OpenGL extension support
 		switch (fourCC)
@@ -82,7 +81,7 @@ void ncTextureLoaderDDS::parseFormat(const DdsHeader &header)
 			case DDS_DXT5:
 				if (gfxCaps.extTextureCompressionS3TC() == false)
 				{
-					ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::parseFormat - GL_EXT_texture_compression_s3tc not available");
+					LOGF("GL_EXT_texture_compression_s3tc not available");
 					exit(EXIT_FAILURE);
 				}
 				break;
@@ -92,13 +91,13 @@ void ncTextureLoaderDDS::parseFormat(const DdsHeader &header)
 			case DDS_ATCI:
 				if (gfxCaps.amdCompressedATCTexture() == false)
 				{
-					ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::parseFormat - GL_AMD_compressed_ATC_texture not available");
+					LOGF("GL_AMD_compressed_ATC_texture not available");
 					exit(EXIT_FAILURE);
 				}
 				break;
 #endif
 			default:
-				ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::parseFormat - Unsupported DDS compression \"%s\"", fourCC);
+				LOGF_X("Unsupported DDS compression \"%s\"", fourCC);
 				exit(EXIT_FAILURE);
 				break;
 		}
@@ -143,8 +142,7 @@ void ncTextureLoaderDDS::parseFormat(const DdsHeader &header)
 		uint32_t blueMask = ncIFile::int32FromLE(header.ddspf.dwBBitMask);
 		uint32_t alphaMask = ncIFile::int32FromLE(header.ddspf.dwABitMask);
 
-		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderDDS::parseFormat - Pixel masks (%ubit): R:0x%x G:0x%x B:0x%x A:0x%x",
-			bitCount, redMask, greenMask, blueMask, alphaMask);
+		LOGI_X("Pixel masks (%ubit): R:0x%x G:0x%x B:0x%x A:0x%x", bitCount, redMask, greenMask, blueMask, alphaMask);
 
 		if ((redMask == 0x00FF0000 && greenMask == 0x0000FF00 && blueMask == 0x000000FF && alphaMask == 0x0) ||
 			(blueMask == 0x00FF0000 && greenMask == 0x0000FF00 && redMask == 0x000000FF && alphaMask == 0x0)) // 888
@@ -176,7 +174,7 @@ void ncTextureLoaderDDS::parseFormat(const DdsHeader &header)
 */
 		else
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderDDS::parseFormat - Unsupported DDS pixel format");
+			LOGF("Unsupported DDS pixel format");
 			exit(EXIT_FAILURE);
 		}
 
@@ -191,13 +189,13 @@ void ncTextureLoaderDDS::parseFormat(const DdsHeader &header)
 
 	if (mipMapCount_ > 1)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderDDS::parseFormat - MIP Maps: %d", mipMapCount_);
+		LOGI_X("MIP Maps: %d", mipMapCount_);
 		mipDataOffsets_ = new long[mipMapCount_];
 		mipDataSizes_ = new long[mipMapCount_];
 		long int dataSizesSum = ncTextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_, mipDataSizes_);
 		if (dataSizesSum != dataSize_)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncTextureLoaderDDS::parseFormat - The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
+			LOGW_X("The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
 		}
 	}
 }

@@ -55,7 +55,7 @@ ncIAudioLoader* ncIAudioLoader::createFromFile(const char *filename)
 #endif
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncIAudioLoader::createFromFile - Extension unknown \"%s\"", fileHandle->extension());
+		LOGF_X("Extension unknown \"%s\"", fileHandle->extension());
 		delete fileHandle;
 		exit(EXIT_FAILURE);
 	}

@@ -25,7 +25,7 @@ ncTextureLoaderPNG::ncTextureLoaderPNG(ncIFile *fileHandle)
 
 void ncTextureLoaderPNG::init()
 {
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderPNG::init - Loading \"%s\"", fileHandle_->filename());
+	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 
 	const int SignatureLength = 8;
 	unsigned char signature[SignatureLength];
@@ -35,7 +35,7 @@ void ncTextureLoaderPNG::init()
 	// Checking PNG signature
 	if (!png_check_sig(signature, SignatureLength))
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPNG::init - PNG signature check failed");
+		LOGF("PNG signature check failed");
 		exit(EXIT_FAILURE);
 	}
 
@@ -45,7 +45,7 @@ void ncTextureLoaderPNG::init()
 
 	if (pngPtr == NULL)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPNG::init - Cannot create png read structure");
+		LOGF("Cannot create png read structure");
 		exit(EXIT_FAILURE);
 	}
 
@@ -55,7 +55,7 @@ void ncTextureLoaderPNG::init()
 
 	if (infoPtr == NULL)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPNG::init - Cannot create png info structure");
+		LOGF("Cannot create png info structure");
 		png_destroy_read_struct(&pngPtr, NULL, NULL);
 		exit(EXIT_FAILURE);
 	}
@@ -75,14 +75,14 @@ void ncTextureLoaderPNG::init()
 
 	if (retVal != 1)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPNG::init - Cannot create png info structure");
+		LOGF("Cannot create png info structure");
 		png_destroy_read_struct(&pngPtr, &infoPtr, NULL);
 		exit(EXIT_FAILURE);
 	}
 
 	width_ = width;
 	height_ = height;
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderPNG::init - Header found: w:%d h:%d", width_, height_);
+	LOGI_X("Header found: w:%d h:%d", width_, height_);
 
 	switch (colorType)
 	{
@@ -96,7 +96,7 @@ void ncTextureLoaderPNG::init()
 			texFormat_ = ncTextureFormat(GL_ALPHA);;
 			break;
 		default:
-			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderPNG::init - Color type not supported: %d", colorType);
+			LOGF_X("Color type not supported: %d", colorType);
 			png_destroy_read_struct(&pngPtr, &infoPtr, NULL);
 			exit(EXIT_FAILURE);
 			break;
@@ -128,7 +128,6 @@ void ncTextureLoaderPNG::readFromFileHandle(png_structp pngPtr, png_bytep outByt
 	unsigned long int bytesRead = fileHandle->read(outBytes, byteCountToRead);
 	if (bytesRead != byteCountToRead)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncTextureLoaderPNG::readFromFileHandle - Read %l bytes instead of %u: %d",
-			bytesRead, byteCountToRead);
+		LOGW_X("Read %l bytes instead of %u: %d", bytesRead, byteCountToRead);
 	}
 }

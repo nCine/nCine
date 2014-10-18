@@ -25,7 +25,7 @@ ncTextureLoaderWebP::ncTextureLoaderWebP(ncIFile *fileHandle)
 
 void ncTextureLoaderWebP::init()
 {
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderWebP::init - Loading \"%s\"", fileHandle_->filename());
+	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 
 	// Loading the whole file in memory
 	fileHandle_->open(ncIFile::MODE_READ | ncIFile::MODE_BINARY);
@@ -36,11 +36,11 @@ void ncTextureLoaderWebP::init()
 	if (WebPGetInfo(fileBuffer, fileSize, &width_, &height_) == 0)
 	{
 		delete[] fileBuffer;
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderWebP::init - Cannot read WebP header");
+		LOGF("Cannot read WebP header");
 		exit(EXIT_FAILURE);
 	}
 
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncTextureLoaderWebP::init - Header found: w:%d h:%d", width_, height_);
+	LOGI_X("Header found: w:%d h:%d", width_, height_);
 
 	mipMapCount_ = 1; // No MIP Mapping
 	// HACK: assuming WebP always decodes to RGBA
@@ -52,7 +52,7 @@ void ncTextureLoaderWebP::init()
 	{
 		delete[] fileBuffer;
 		delete[] pixels_;
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncTextureLoaderWebP::init - Cannot decode WebP image");
+		LOGF("Cannot decode WebP image");
 		exit(EXIT_FAILURE);
 	}
 

@@ -229,7 +229,7 @@ void ncAndroidInputManager::parseEvent(const AInputEvent *event)
 		}
 		else
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncAndroidInputManager::parseEvent - No available joystick id for device %d, dropping button event", deviceId);
+			LOGW_X("No available joystick id for device %d, dropping button event", deviceId);
 		}
 	}
 	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD &&
@@ -404,8 +404,7 @@ void ncAndroidInputManager::checkDisconnectedJoysticks()
 		int deviceId = joystickStates_[i].deviceId_;
 		if (deviceId > -1 && isDeviceConnected(deviceId) == false)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::checkDisconnectedJoysticks - Joystick %d (device %d) \"%s\" has been disconnected",
-				i, deviceId, joystickStates_[i].name_);
+			LOGI_X("Joystick %d (device %d) \"%s\" has been disconnected", i, deviceId, joystickStates_[i].name_);
 			joystickStates_[i].deviceId_ = -1;
 		}
 	}
@@ -474,7 +473,7 @@ int ncAndroidInputManager::findJoyId(int deviceId)
 	if (joyId >= -1 && joystickStates_[joyId].deviceId_ != deviceId)
 	{
 		deviceInfo(deviceId, joyId);
-		ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAndroidInputManager::findJoyId - Joystick %d (device %d) \"%s\" has been connected - %d axes, %d buttons",
+		LOGI_X("Joystick %d (device %d) \"%s\" has been connected - %d axes, %d buttons",
 			joyId, deviceId, joystickStates_[joyId].name_, joystickStates_[joyId].numAxes_, joystickStates_[joyId].numButtons_);
 	}
 
@@ -552,7 +551,7 @@ void ncAndroidInputManager::deviceInfo(int deviceId, int joyId)
 			}
 		}
 		joystickStates_[joyId].numButtons_ = numButtons;
-		ncServiceLocator::logger().write(ncILogger::LOG_VERBOSE, (const char *)"ncAndroidInputManager::deviceInfo (%d, %d) - Buttons %s", deviceId, joyId, deviceInfoString);
+		LOGV_X("device (%d, %d) - Buttons %s", deviceId, joyId, deviceInfoString);
 
 		joystickStates_[joyId].hasDPad_ = true;
 		for (int button = AKEYCODE_DPAD_UP; button < AKEYCODE_DPAD_CENTER; button++)
@@ -561,7 +560,7 @@ void ncAndroidInputManager::deviceInfo(int deviceId, int joyId)
 			if (hasKey == false)
 			{
 				joystickStates_[joyId].hasDPad_ = false;
-				ncServiceLocator::logger().write(ncILogger::LOG_VERBOSE, (const char *)"ncAndroidInputManager::deviceInfo (%d, %d) - D-Pad not detected", deviceId, joyId);
+				LOGV_X("device (%d, %d) - D-Pad not detected", deviceId, joyId);
 				break;
 			}
 		}
@@ -581,7 +580,7 @@ void ncAndroidInputManager::deviceInfo(int deviceId, int joyId)
 				numAxes++;
 			}
 		}
-		ncServiceLocator::logger().write(ncILogger::LOG_VERBOSE, (const char *)"ncAndroidInputManager::deviceInfo (%d, %d) - Axes %s", deviceId, joyId, deviceInfoString);
+		LOGV_X("device (%d, %d) - Axes %s", deviceId, joyId, deviceInfoString);
 
 		joystickStates_[joyId].numAxes_ = numAxes;
 		// Taking into account the D-Pad

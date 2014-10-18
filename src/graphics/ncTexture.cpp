@@ -92,7 +92,7 @@ void ncTexture::load(const ncITextureLoader& texLoader, int width, int height)
 	const ncGfxCapabilities& gfxCaps = ncServiceLocator::gfxCapabilities();
 	if (width > gfxCaps.maxTextureSize() || height > gfxCaps.maxTextureSize())
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, "ncTexture::load - Texture size is bigger than device maximum");
+		LOGF("Texture size is bigger than device maximum");
 		exit(EXIT_FAILURE);
 	}
 

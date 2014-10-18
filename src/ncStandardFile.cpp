@@ -32,7 +32,7 @@ void ncStandardFile::open(unsigned char mode)
 	// Checking if the file is already opened
 	if (fileDescriptor_ >= 0 || filePointer_ != NULL)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncStandardFile::open - File \"%s\" is already opened", filename_);
+		LOGW_X("File \"%s\" is already opened", filename_);
 	}
 	else
 	{
@@ -58,11 +58,11 @@ void ncStandardFile::close()
 		int retValue = ::close(fileDescriptor_);
 		if (retValue < 0)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncStandardFile::close - Cannot close the file \"%s\"", filename_);
+			LOGW_X("Cannot close the file \"%s\"", filename_);
 		}
 		else
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::close - File \"%s\" closed", filename_);
+			LOGI_X("File \"%s\" closed", filename_);
 			fileDescriptor_ = -1;
 		}
 #endif
@@ -72,11 +72,11 @@ void ncStandardFile::close()
 		int retValue = fclose(filePointer_);
 		if (retValue == EOF)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncStandardFile::close - Cannot close the file \"%s\"", filename_);
+			LOGW_X("Cannot close the file \"%s\"", filename_);
 		}
 		else
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::close - File \"%s\" closed", filename_);
+			LOGI_X("ncStandardFile::close - File \"%s\" closed", filename_);
 			filePointer_ = NULL;
 		}
 	}
@@ -160,7 +160,7 @@ void ncStandardFile::openFd(unsigned char mode)
 			openFlag = O_RDWR;
 			break;
 		default:
-			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::openFd - Cannot open the file \"%s\", wrong open mode", filename_);
+			LOGE_X("Cannot open the file \"%s\", wrong open mode", filename_);
 			break;
 	}
 
@@ -170,12 +170,12 @@ void ncStandardFile::openFd(unsigned char mode)
 
 		if (fileDescriptor_ < 0)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncStandardFile::openFd - Cannot open the file \"%s\"", filename_);
+			LOGF_X("Cannot open the file \"%s\"", filename_);
 			exit(EXIT_FAILURE);
 		}
 		else
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::openFd - File \"%s\" opened", filename_);
+			LOGI_X("File \"%s\" opened", filename_);
 		}
 
 		// Calculating file size
@@ -216,7 +216,7 @@ void ncStandardFile::openStream(unsigned char mode)
 			modeChars[2] = 'b';
 			break;
 		default:
-			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::openStream - Cannot open the file \"%s\", wrong open mode", filename_);
+			LOGE_X("Cannot open the file \"%s\", wrong open mode", filename_);
 			break;
 	}
 
@@ -226,12 +226,12 @@ void ncStandardFile::openStream(unsigned char mode)
 
 		if (filePointer_ == NULL)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncStandardFile::openStream - Cannot open the file \"%s\"", filename_);
+			LOGF_X("Cannot open the file \"%s\"", filename_);
 			exit(EXIT_FAILURE);
 		}
 		else
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncStandardFile::openStream - File \"%s\" opened", filename_);
+			LOGI_X("File \"%s\" opened", filename_);
 		}
 
 		// Calculating file size
@@ -264,7 +264,7 @@ bool ncStandardFile::access(const char *filename, unsigned char mode)
 			accessMode = R_OK | W_OK;
 			break;
 		default:
-			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::access - Cannot access the file \"%s\", wrong access mode", filename);
+			LOGE_X("Cannot access the file \"%s\", wrong access mode", filename);
 			break;
 	}
 
@@ -288,7 +288,7 @@ bool ncStandardFile::access(const char *filename, unsigned char mode)
 			accessMode = 6;
 			break;
 		default:
-			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncStandardFile::access - Cannot access the file \"%s\", wrong access mode", filename);
+			LOGE("Cannot access the file \"%s\", wrong access mode", filename);
 			break;
 	}
 

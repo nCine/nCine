@@ -12,7 +12,7 @@ void threadFunction(void *arg)
 	int threadNum = *(static_cast<int *>(arg));
 	int startIndex = threadNum * (NumFloats / NumThreads);
 	int endIndex = (threadNum + 1) * (NumFloats / NumThreads);
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"THREAD #%d: %d-%d", threadNum, startIndex, endIndex);
+	LOGI_X("THREAD #%d: %d-%d", threadNum, startIndex, endIndex);
 
 	for (int i = startIndex; i < endIndex; i++)
 	{
@@ -39,7 +39,7 @@ void MyEventHandler::onInit()
 {
 	ncIInputManager::setHandler(this);
 
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"APPTEST_THREADS: %d threads for %d numbers on %u processor(s)", NumThreads, NumFloats, ncThread::numProcessors());
+	LOGI_X("APPTEST_THREADS: %d threads for %d numbers on %u processor(s)", NumThreads, NumFloats, ncThread::numProcessors());
 
 	ncThread threads[NumThreads];
 	int threadNums[NumThreads];
@@ -59,7 +59,7 @@ void MyEventHandler::onInit()
 	}
 	float endTime = ncTimer::now();
 
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"APPTEST_THREADS: total time %fms", (endTime - startTime) * 1000.0f);
+	LOGI_X("APPTEST_THREADS: total time %fms", (endTime - startTime) * 1000.0f);
 
 	delete[] globalArray;
 }

@@ -45,46 +45,46 @@ ncGfxCapabilities::ncGfxCapabilities()
 /// Logs OpenGL device info
 void ncGfxCapabilities::logGLInfo()
 {
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "ncGfxCapabilities::logGLInfo - OpenGL device info ---");
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "Vendor: %s", glGetString(GL_VENDOR));
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "Renderer: %s", glGetString(GL_RENDERER));
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "OpenGL Version: %s", glGetString(GL_VERSION));
+	LOGI("OpenGL device info ---");
+	LOGI_X("Vendor: %s", glGetString(GL_VENDOR));
+	LOGI_X("Renderer: %s", glGetString(GL_RENDERER));
+	LOGI_X("OpenGL Version: %s", glGetString(GL_VERSION));
 #ifndef __ANDROID__
 	// Using OpenGL ES 1.1 at the moment
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	LOGI_X("GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 #endif
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "ncGfxCapabilities::logGLInfo - OpenGL device info ---");
+	LOGI("OpenGL device info ---");
 }
 
 /// Logs OpenGL extensions
 void ncGfxCapabilities::logGLExtensions()
 {
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "ncGfxCapabilities::logGLExtensions - OpenGL extensions ---");
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "Extensions: %s", glGetString(GL_EXTENSIONS));
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "ncGfxCapabilities::logGLExtensions - OpenGL extensions ---");
+	LOGI("OpenGL extensions ---");
+	LOGI_X("Extensions: %s", glGetString(GL_EXTENSIONS));
+	LOGI("OpenGL extensions ---");
 }
 
 /// Logs OpenGL device capabilites
 void ncGfxCapabilities::logGLCaps() const
 {
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "ncGfxCapabilities::logGLCaps - OpenGL device capabilities ---");
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "OpenGL Major: %d", majorGL_);
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "OpenGL Minor: %d", minorGL_);
+	LOGI("OpenGL device capabilities ---");
+	LOGI_X("OpenGL Major: %d", majorGL_);
+	LOGI_X("OpenGL Minor: %d", minorGL_);
 #ifndef __ANDROID__
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "OpenGL Release: %d", releaseGL_);
+	LOGI_X("OpenGL Release: %d", releaseGL_);
 #endif
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "ncGfxCapabilities::logGLCaps - ---");
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "GL_MAX_TEXTURE_SIZE: %d", maxTextureSize_);
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "GL_MAX_TEXTURE_UNITS: %d", maxTextureUnits_);
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "ncGfxCapabilities::logGLCaps - ---");
+	LOGI("---");
+	LOGI_X("GL_MAX_TEXTURE_SIZE: %d", maxTextureSize_);
+	LOGI_X("GL_MAX_TEXTURE_UNITS: %d", maxTextureUnits_);
+	LOGI("---");
 #ifndef __ANDROID__
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "GL_EXT_texture_compression_s3tc: %d", extTextureCompressionS3TC_);
+	LOGI_X("GL_EXT_texture_compression_s3tc: %d", extTextureCompressionS3TC_);
 #else
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "GL_OES_compressed_ETC1_RGB8_texture: %d", oesCompressedETC1RGB8Texture_);
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "GL_AMD_compressed_ATC_texture: %d", amdCompressedATCTexture_);
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "GL_IMG_texture_compression_pvrtc: %d", imgTextureCompressionPVRTC_);
+	LOGI_X("GL_OES_compressed_ETC1_RGB8_texture: %d", oesCompressedETC1RGB8Texture_);
+	LOGI_X("GL_AMD_compressed_ATC_texture: %d", amdCompressedATCTexture_);
+	LOGI_X("GL_IMG_texture_compression_pvrtc: %d", imgTextureCompressionPVRTC_);
 #endif
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, "ncGfxCapabilities::logGLCaps - OpenGL device capabilities ---");
+	LOGI("OpenGL device capabilities ---");
 }
 
 /// Check for an OpenGL extension

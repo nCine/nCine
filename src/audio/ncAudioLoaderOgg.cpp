@@ -78,7 +78,7 @@ long ncAudioLoaderOgg::read(char *buffer, int bufferSize) const
 		if (bytes < 0)
 		{
 			ov_clear(&oggFile_);
-			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::read - Error decoding at bitstream %d", bitStream);
+			LOGF_X("Error decoding at bitstream %d", bitStream);
 			exit(EXIT_FAILURE);
 		}
 
@@ -107,7 +107,7 @@ void ncAudioLoaderOgg::init()
 {
 	vorbis_info *info;
 
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAudioLoaderOgg::init - Loading \"%s\"", fileHandle_->filename());
+	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 
 	// File is closed by ov_clear()
 	fileHandle_->setCloseOnExit(false);
@@ -119,7 +119,7 @@ void ncAudioLoaderOgg::init()
 
 		if (ov_open_callbacks(fileHandle_, &oggFile_, NULL, 0, oggCallbacks) != 0)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::init - Cannot open \"%s\" with ov_open_callbacks()", fileHandle_->filename());
+			LOGF_X("Cannot open \"%s\" with ov_open_callbacks()", fileHandle_->filename());
 			fileHandle_->close();
 			exit(EXIT_FAILURE);
 		}
@@ -130,7 +130,7 @@ void ncAudioLoaderOgg::init()
 
 		if (ov_open(fileHandle_->ptr(), &oggFile_, NULL, 0) != 0)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::init - Cannot open \"%s\" with ov_open()", fileHandle_->filename());
+			LOGF_X("Cannot open \"%s\" with ov_open()", fileHandle_->filename());
 			fileHandle_->close();
 			exit(EXIT_FAILURE);
 		}
@@ -138,7 +138,7 @@ void ncAudioLoaderOgg::init()
 #else
 	if (ov_fopen(fileHandle_->filename(), &oggFile_) != 0)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncAudioLoaderOgg::init - Cannot open \"%s\" with ov_fopen()", fileHandle_->filename());
+		LOGF_X("Cannot open \"%s\" with ov_fopen()", fileHandle_->filename());
 		exit(EXIT_FAILURE);
 	}
 #endif
@@ -153,5 +153,5 @@ void ncAudioLoaderOgg::init()
 	numSamples_ = ov_pcm_total(&oggFile_, -1);
 	duration_ = float(ov_time_total(&oggFile_, -1));
 
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncAudioLoaderOgg::init - duration: %.2f, channels: %d, frequency: %d", duration_, numChannels_, frequency_);
+	LOGI_X("duration: %.2f, channels: %d, frequency: %d", duration_, numChannels_, frequency_);
 }

@@ -29,7 +29,7 @@ ncSDLInputManager::ncSDLInputManager()
 {
 	if (SDL_WasInit(SDL_INIT_VIDEO) == 0)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncSDLInputManager::ncSDLInputManager - SDL video subsystem is not initialized");
+		LOGF("SDL video subsystem is not initialized");
 		exit(-1);
 	}
 
@@ -50,7 +50,7 @@ ncSDLInputManager::ncSDLInputManager()
 			if (sdlJoysticks_[i])
 			{
 				SDL_Joystick *sdlJoy = sdlJoysticks_[i];
-				ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncSDLInputManager::ncSDLInputManager - Joystick %d: %s - %d hats, %d axes, %d buttons, %d balls",
+				LOGI_X("Joystick %d: %s - %d hats, %d axes, %d buttons, %d balls",
 					 i, SDL_JoystickName(i), SDL_JoystickNumHats(sdlJoy), SDL_JoystickNumAxes(sdlJoy), SDL_JoystickNumButtons(sdlJoy), SDL_JoystickNumBalls(sdlJoy));
 			}
 		}

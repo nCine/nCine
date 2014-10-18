@@ -50,7 +50,7 @@ ncPlottingVariable& ncProfilePlotter::variable(unsigned int index)
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncProfilePlotter::variable - Index out of range");
+		LOGF("Index out of range");
 		exit(EXIT_FAILURE);
 	}
 }

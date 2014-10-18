@@ -44,7 +44,7 @@ void MyEventHandler::onInit()
 	{
 		if (ncApplication::inputManager().isJoyPresent(i))
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"Joystick %d (%s) - %d axes, %d buttons", i,
+			LOGI_X("Joystick %d (%s) - %d axes, %d buttons", i,
 				ncApplication::inputManager().joyName(i), ncApplication::inputManager().joyNumAxes(i), ncApplication::inputManager().joyNumButtons(i));
 		}
 	}

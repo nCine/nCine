@@ -107,7 +107,7 @@ ncITextureLoader* ncITextureLoader::createFromFile(const char *filename)
 {
 	// Creating a handle from ncIFile static method to detect assets file
 	ncIFile *fileHandle = ncIFile::createFileHandle(filename);
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncITextureLoader::createFromFile - Loading file: \"%s\"", fileHandle->filename());
+	LOGI_X("Loading file: \"%s\"", fileHandle->filename());
 
 	if (fileHandle->hasExtension("dds"))
 	{
@@ -146,7 +146,7 @@ ncITextureLoader* ncITextureLoader::createFromFile(const char *filename)
 #endif
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncITextureLoader::createFromFile - Extension unknown: \"%s\"", fileHandle->extension());
+		LOGF_X("Extension unknown: \"%s\"", fileHandle->extension());
 		delete fileHandle;
 		exit(EXIT_FAILURE);
 	}
@@ -165,7 +165,7 @@ void ncITextureLoader::loadPixels(GLenum internalFormat)
 /// Loads pixel data from a texture file holding either compressed or uncompressed data, overriding pixel type
 void ncITextureLoader::loadPixels(GLenum internalFormat, GLenum type)
 {
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncITextureLoader::loadPixels - Loading \"%s\"", fileHandle_->filename());
+	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 	if (type) // overriding pixel type
 	{
 		texFormat_ = ncTextureFormat(internalFormat, type);

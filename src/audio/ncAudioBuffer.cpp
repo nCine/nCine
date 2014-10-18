@@ -55,7 +55,7 @@ void ncAudioBuffer::load(const ncIAudioLoader *audioLoader)
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, "ncAudioBuffer::load - Unsupported number of channels: %d", numChannels_);
+		LOGF_X("Unsupported number of channels: %d", numChannels_);
 		exit(EXIT_FAILURE);
 	}
 

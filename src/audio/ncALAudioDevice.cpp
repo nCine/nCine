@@ -14,7 +14,7 @@ ncALAudioDevice::ncALAudioDevice()
 	device_ = alcOpenDevice(NULL);
 	if (device_ == NULL)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcOpenDevice failed: %x", alGetError());
+		LOGF_X("alcOpenDevice failed: %x", alGetError());
 		exit(EXIT_FAILURE);
 	}
 
@@ -22,7 +22,7 @@ ncALAudioDevice::ncALAudioDevice()
 	if (context_ == NULL)
 	{
 		alcCloseDevice(device_);
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcCreateContext failed: %x", alGetError());
+		LOGF_X("alcCreateContext failed: %x", alGetError());
 		exit(EXIT_FAILURE);
 	}
 
@@ -30,7 +30,7 @@ ncALAudioDevice::ncALAudioDevice()
 	{
 		alcDestroyContext(context_);
 		alcCloseDevice(device_);
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::ncALAudioDevice - alcMakeContextCurrent failed: %x", alGetError());
+		LOGF_X("alcMakeContextCurrent failed: %x", alGetError());
 		exit(EXIT_FAILURE);
 	}
 
@@ -52,7 +52,7 @@ ncALAudioDevice::~ncALAudioDevice()
 	ALCboolean result = alcCloseDevice(device_);
 	if (!result)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncALAudioDevice::~ncALAudioDevice - alcCloseDevice failed: %d", alGetError());
+		LOGF_X("alcCloseDevice failed: %d", alGetError());
 		exit(EXIT_FAILURE);
 	}
 }

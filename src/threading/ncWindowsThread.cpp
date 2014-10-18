@@ -45,13 +45,13 @@ void ncThread::run(ncThreadFunctionPtr startFunction, void* arg)
 		handle_ = (HANDLE)_beginthreadex(NULL, 0, wrapperFunction, &threadInfo_, 0, NULL);
 		if (handle_ <= 0)
 		{
-			ncServiceLocator::logger().write(ncILogger::LOG_ERROR, (const char *)"ncThread::run - _beginthreadex error");
+			LOGE("_beginthreadex error");
 			::exit(EXIT_FAILURE);
 		}
 	}
 	else
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_WARN, (const char *)"ncThread::run - thread %u is already running", handle_);
+		LOGW_X("thread %u is already running", handle_);
 	}
 }
 

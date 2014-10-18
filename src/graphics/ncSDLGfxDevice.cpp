@@ -89,7 +89,7 @@ void ncSDLGfxDevice::initGraphics()
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncSDLGfxDevice::initGraphics - SDL_Init(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
+		LOGF_X("SDL_Init(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
 		exit(-1);
 	}
 }
@@ -139,7 +139,7 @@ void ncSDLGfxDevice::initDevice()
 	// setting screen mode, get a screen from SDL
 	if (!SDL_SetVideoMode(width_, height_, 0, flags))
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncSDLGfxDevice::initDevice - SDL_SetVideoMode failed: %s", SDL_GetError());
+		LOGF_X("SDL_SetVideoMode failed: %s", SDL_GetError());
 		exit(-1);
 	}
 

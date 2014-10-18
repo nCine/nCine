@@ -53,7 +53,7 @@ void ncFont::parseFntFile(ncIFile *fileHandle)
 			sscanf(buffer, "common lineHeight=%u base=%u scaleW=%u scaleH=%u", &lineHeight_, &base_, &width_, &height_);
 			if ((int)width_ != texture_->width() || (int)height_ != texture_->height())
 			{
-				ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (const char *)"ncFont::parseFntFile - FNT texture has a different size: (%u, %u)", width_, height_);
+				LOGF_X("FNT texture has a different size: (%u, %u)", width_, height_);
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -82,6 +82,6 @@ void ncFont::parseFntFile(ncIFile *fileHandle)
 		}
 	} while (strchr(buffer, '\n') && (buffer = strchr(buffer, '\n')+1) < fileBuffer + fileHandle->size());
 
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (const char *)"ncFont::parseFntFile - FNT file parsed: %u glyphs and %u kernings", numGlyphs_, numKernings_);
+	LOGI_X("FNT file parsed: %u glyphs and %u kernings", numGlyphs_, numKernings_);
 	delete[] fileBuffer;
 }

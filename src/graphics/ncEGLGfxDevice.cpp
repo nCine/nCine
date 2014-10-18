@@ -114,7 +114,7 @@ void ncEGLGfxDevice::initDevice(struct android_app* state)
 
 	if (eglMakeCurrent(display_, surface_, surface_, context_) == EGL_FALSE)
 	{
-		ncServiceLocator::logger().write(ncILogger::LOG_FATAL, (char *)"ncEGLGfxDevice::initDevice - Unable to eglMakeCurrent");
+		LOGF("Unable to eglMakeCurrent");
 		exit(-1);
 	}
 
@@ -131,6 +131,5 @@ void ncEGLGfxDevice::initDevice(struct android_app* state)
 	eglGetConfigAttrib(display_, config, EGL_STENCIL_SIZE, &stencil);
 	eglGetConfigAttrib(display_, config, EGL_SAMPLES, &samples);
 
-	ncServiceLocator::logger().write(ncILogger::LOG_INFO, (char *)"ncEGLGfxDevice::initDevice - Surface configuration is RGBA:%d%d%d%d, depth:%d, stencil:%d, samples:%d",
-	                                 red, green, blue, alpha, depth, stencil, samples);
+	LOGI_X("Surface configuration is RGBA:%d%d%d%d, depth:%d, stencil:%d, samples:%d", red, green, blue, alpha, depth, stencil, samples);
 }
