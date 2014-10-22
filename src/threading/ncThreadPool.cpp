@@ -72,7 +72,6 @@ void ncThreadPool::init()
 
 void ncThreadPool::workerFunction(void *arg)
 {
-	ncIThreadCommand *threadCommand = NULL;
 	ncThreadStruct *threadStruct = static_cast<ncThreadStruct *>(arg);
 
 	LOGD_X("worker thread %u is starting", ncThread::self());
@@ -91,7 +90,7 @@ void ncThreadPool::workerFunction(void *arg)
 			break;
 		}
 
-		threadCommand = threadStruct->queue->removeFront();
+		ncIThreadCommand *threadCommand = threadStruct->queue->removeFront();
 		threadStruct->queueMutex->unlock();
 
 		threadCommand->execute();

@@ -9,7 +9,7 @@ class ncAnimatedSprite : public ncSprite
 {
   public:
 	ncAnimatedSprite(ncSceneNode* parent, ncTexture *texture);
-	ncAnimatedSprite(ncTexture *texture);
+	explicit ncAnimatedSprite(ncTexture *texture);
 	ncAnimatedSprite(ncSceneNode* parent, ncTexture *texture, int x, int y);
 	ncAnimatedSprite(ncTexture *texture, int x, int y);
 	virtual ~ncAnimatedSprite();

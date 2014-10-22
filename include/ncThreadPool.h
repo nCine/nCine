@@ -14,7 +14,7 @@ class ncThreadPool : public ncIThreadPool
 	// Creates a thread pool with as many threads as available processors
 	ncThreadPool();
 	// Creates a thread pool with a specified number of threads
-	ncThreadPool(unsigned int numThreads);
+	explicit ncThreadPool(unsigned int numThreads);
 	~ncThreadPool();
 
 	// Enqueues a command request for a worker thread

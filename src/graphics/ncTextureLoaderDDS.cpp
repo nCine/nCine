@@ -70,7 +70,8 @@ void ncTextureLoaderDDS::parseFormat(const DdsHeader &header)
 	{
 		uint32_t fourCC = ncIFile::int32FromLE(header.ddspf.dwFourCC);
 
-		LOGI_X("FourCC: \"%c%c%c%c\" (0x%x)", ((char*)&fourCC)[0], ((char*)&fourCC)[1], ((char*)&fourCC)[2], ((char*)&fourCC)[3], fourCC);
+		LOGI_X("FourCC: \"%c%c%c%c\" (0x%x)", (reinterpret_cast<char*>(&fourCC))[0], (reinterpret_cast<char*>(&fourCC))[1],
+			(reinterpret_cast<char*>(&fourCC))[2], (reinterpret_cast<char*>(&fourCC))[3], fourCC);
 
 		// Check for OpenGL extension support
 		switch (fourCC)

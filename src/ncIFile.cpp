@@ -168,5 +168,7 @@ char* ncIFile::dataPath()
 	strncat(dataPath_, "/.config/", MaxFilenameLength - strlen(dataPath_));
 #endif
 
+	dataPath_[MaxFilenameLength - 1] = '\0';
+
 	return dataPath_;
 }

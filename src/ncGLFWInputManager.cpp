@@ -184,7 +184,7 @@ bool ncGLFWInputManager::isJoyButtonPressed(int joyId, int buttonId) const
 short int ncGLFWInputManager::joyAxisValue(int joyId, int axisId) const
 {
 	// If the joystick is not present the returned value is zero
-	short int axisValue = joyAxisNormValue(joyId, axisId) * MaxAxisValue;
+	short int axisValue = static_cast<short int>(joyAxisNormValue(joyId, axisId) * MaxAxisValue);
 
 	return axisValue;
 }

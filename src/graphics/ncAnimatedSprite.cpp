@@ -68,7 +68,7 @@ void ncAnimatedSprite::addAnimation(ncRectAnimation* anim)
 /// Sets the current animation and its frame number
 void ncAnimatedSprite::setAnimation(int animNum)
 {
-	if ((unsigned int)animNum >= anims_.size())
+	if (static_cast<unsigned int>(animNum) >= anims_.size())
 	{
 		currentAnim = anims_.size() - 1;
 	}

@@ -11,7 +11,7 @@
 /// Constructor creating an audio stream from an audio file
 /*! Private constructor called only by ncAudioStreamPlayer */
 ncAudioStream::ncAudioStream(const char *filename)
-	: nextAvailAlBuffer_(0), frequency_(0)
+	: nextAvailALBuffer_(0), frequency_(0)
 {
 	alGenBuffers(NumBuffers, alBuffers_);
 	memBuffer_ = new char[BufferSize];
@@ -61,16 +61,16 @@ bool ncAudioStream::enqueue(ALuint source, bool looping)
 	{
 		ALuint unqueuedAlBuffer;
 		alSourceUnqueueBuffers(source, 1, &unqueuedAlBuffer);
-		nextAvailAlBuffer_--;
-		alBuffers_[nextAvailAlBuffer_] = unqueuedAlBuffer;
+		nextAvailALBuffer_--;
+		alBuffers_[nextAvailALBuffer_] = unqueuedAlBuffer;
 		numProcessedBuffers--;
 	}
 
 
 	// Queueing
-	if (nextAvailAlBuffer_ < NumBuffers)
+	if (nextAvailALBuffer_ < NumBuffers)
 	{
-		ALuint currentBuffer = alBuffers_[nextAvailAlBuffer_];
+		ALuint currentBuffer = alBuffers_[nextAvailALBuffer_];
 
 		long bytes = audioLoader_->read(memBuffer_, BufferSize);
 
@@ -91,10 +91,10 @@ bool ncAudioStream::enqueue(ALuint source, bool looping)
 			// On iOS alBufferDataStatic could be used instead
 			alBufferData(currentBuffer, format_, memBuffer_, bytes, frequency_);
 			alSourceQueueBuffers(source, 1, &currentBuffer);
-			nextAvailAlBuffer_++;
+			nextAvailALBuffer_++;
 		}
 		// If it has no more data to decode and the queue is empty
-		else if (nextAvailAlBuffer_ == 0)
+		else if (nextAvailALBuffer_ == 0)
 		{
 			shouldKeepPlaying = false;
 			stop(source);
@@ -134,8 +134,8 @@ void ncAudioStream::stop(ALuint source)
 	{
 		ALuint uuqueuedAlBuffer;
 		alSourceUnqueueBuffers(source, 1, &uuqueuedAlBuffer);
-		nextAvailAlBuffer_--;
-		alBuffers_[nextAvailAlBuffer_] = uuqueuedAlBuffer;
+		nextAvailALBuffer_--;
+		alBuffers_[nextAvailALBuffer_] = uuqueuedAlBuffer;
 		numProcessedBuffers--;
 	}
 

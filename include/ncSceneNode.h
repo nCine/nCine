@@ -24,7 +24,7 @@ class ncSceneNode : public ncObject
 	bool shouldDraw_;
 
 	ncSceneNode(ncSceneNode* parent, float x, float y);
-	ncSceneNode(ncSceneNode* parent);
+	explicit ncSceneNode(ncSceneNode* parent);
 	ncSceneNode();
 	virtual ~ncSceneNode();
 

@@ -15,7 +15,7 @@ class ncDrawableNode : public ncSceneNode
 		HUD_PRIORITY = 128
 	};
 
-	ncDrawableNode(ncSceneNode* parent, int x, int y)
+	ncDrawableNode(ncSceneNode* parent, float x, float y)
 		: ncSceneNode(parent, x, y) { }
 	ncDrawableNode(ncSceneNode* parent)
 		: ncSceneNode(parent) { }
@@ -59,7 +59,7 @@ inline void ncDrawableNode::applyTransformations()
 
 	float sine = 0.0f;
 	float cosine = 1.0f;
-	if (abs(absRotation_) > MinRotation && abs(absRotation_) < 360.0f - MinRotation)
+	if (fabs(absRotation_) > MinRotation && fabs(absRotation_) < 360.0f - MinRotation)
 	{
 		sine = sinf(-absRotation_ * M_PI / 180.0f);
 		cosine = cosf(-absRotation_ * M_PI / 180.0f);

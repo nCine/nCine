@@ -28,7 +28,7 @@ ncFileLogger::ncFileLogger(const char *filename, LogLevel consoleLevel, LogLevel
 
 	if (consoleLevel_ < int(LOG_OFF))
 	{
-		setbuf(stdout, NULL);
+		setvbuf(stdout, NULL, _IONBF, 0);
 	}
 }
 

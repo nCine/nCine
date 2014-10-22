@@ -12,7 +12,7 @@ class ncArray
 {
   public:
 	/// Constructs an array with explicit size
-	ncArray(unsigned int capacity)
+	explicit ncArray(unsigned int capacity)
 		: array_(NULL), size_(0), capacity_(0)
 	{
 		setCapacity(capacity);

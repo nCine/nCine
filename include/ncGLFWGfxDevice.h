@@ -17,7 +17,7 @@ class ncGLFWGfxDevice : public ncIGfxDevice
 	// Constructor taking the resolution as two integer
 	ncGLFWGfxDevice(int width, int height);
 	// Constructor taking the resolution as a size class
-	ncGLFWGfxDevice(ncPoint size);
+	explicit ncGLFWGfxDevice(ncPoint size);
 	// Constructor taking the resolution as two integer and a DisplayMode
 	ncGLFWGfxDevice(int width, int height, ncDisplayMode mode);
 	// Constructor taking the resolution as a Size class and a DisplayMode

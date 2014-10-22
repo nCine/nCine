@@ -51,7 +51,7 @@ void ncFont::parseFntFile(ncIFile *fileHandle)
 		else if (strncmp(buffer, "common", 6) == 0)
 		{
 			sscanf(buffer, "common lineHeight=%u base=%u scaleW=%u scaleH=%u", &lineHeight_, &base_, &width_, &height_);
-			if ((int)width_ != texture_->width() || (int)height_ != texture_->height())
+			if (static_cast<int>(width_) != texture_->width() || static_cast<int>(height_) != texture_->height())
 			{
 				LOGF_X("FNT texture has a different size: (%u, %u)", width_, height_);
 				exit(EXIT_FAILURE);

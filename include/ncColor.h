@@ -103,10 +103,10 @@ inline void ncColor::setVec(unsigned char channels[4])
 inline void ncColor::setF(float red, float green, float blue, float alpha)
 {
 	// TODO: Clamp negative values too
-	channels_[0] = red > 1.0f ? 255 : red * 255;
-	channels_[1] = green > 1.0f ? 255 : green * 255;
-	channels_[2] = blue > 1.0f ? 255 : blue * 255;
-	channels_[3] = alpha > 1.0f ? 255 : alpha * 255;
+	channels_[0] = red > 1.0f ? 255 : static_cast<unsigned char>(red * 255);
+	channels_[1] = green > 1.0f ? 255 : static_cast<unsigned char>(green * 255);
+	channels_[2] = blue > 1.0f ? 255 : static_cast<unsigned char>(blue * 255);
+	channels_[3] = alpha > 1.0f ? 255 : static_cast<unsigned char>(alpha * 255);
 }
 
 /// Sets three color channels (normalized float)
@@ -131,7 +131,7 @@ inline void ncColor::setAlpha(unsigned char alpha)
 inline void ncColor::setAlphaF(float alpha)
 {
 	// TODO: Clamp negative values too
-	channels_[3] = alpha > 1.0f ? 255 : alpha * 255;
+	channels_[3] = alpha > 1.0f ? 255 : static_cast<unsigned char>(alpha * 255);
 }
 
 /// Equality operator
@@ -158,7 +158,7 @@ inline ncColor ncColor::operator*(const ncColor& color) const
 			channelValue = 0.0f;
 		}
 
-		result.channels_[i] = channelValue;
+		result.channels_[i] = static_cast<unsigned char>(channelValue);
 	}
 
 	return result;
@@ -182,7 +182,7 @@ inline ncColor ncColor::operator*(float scalar) const
 			channelValue = 0.0f;
 		}
 
-		result.channels_[i] = channelValue;
+		result.channels_[i] = static_cast<unsigned char>(channelValue);
 	}
 
 	return result;

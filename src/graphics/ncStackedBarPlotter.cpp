@@ -74,7 +74,7 @@ void ncStackedBarPlotter::draw(ncRenderQueue& renderQueue)
 void ncStackedBarPlotter::updateAllVertices(int x, int y, int w, int h)
 {
 	unsigned int numVariables = variables_.size();
-	float scaledH = h / numVariables;
+	float scaledH = h / static_cast<float>(numVariables);
 
 	// In a stacked plot every variable should be scaled in relationship with the sum
 	float minSum = 0.0f;

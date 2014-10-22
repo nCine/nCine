@@ -146,8 +146,10 @@ void ncTextureLoaderPVR::parseFormat(const Pvr3Header& header)
 		GLenum type = GL_UNSIGNED_BYTE;
 
 		LOGI_X("Uncompressed format: %c%c%c%c (%u, %u, %u, %u)",
-			((char*)&pixelFormat)[0], ((char*)&pixelFormat)[1], ((char*)&pixelFormat)[2], ((char*)&pixelFormat)[3],
-			((unsigned char*)&pixelFormat)[4], ((unsigned char*)&pixelFormat)[5], ((unsigned char*)&pixelFormat)[6], ((unsigned char*)&pixelFormat)[7]);
+			reinterpret_cast<char*>(&pixelFormat)[0], reinterpret_cast<char*>(&pixelFormat)[1],
+			reinterpret_cast<char*>(&pixelFormat)[2], reinterpret_cast<char*>(&pixelFormat)[3],
+			reinterpret_cast<unsigned char*>(&pixelFormat)[4], reinterpret_cast<unsigned char*>(&pixelFormat)[5],
+			reinterpret_cast<unsigned char*>(&pixelFormat)[6], reinterpret_cast<unsigned char*>(&pixelFormat)[7]);
 
 		switch (pixelFormat)
 		{

@@ -124,7 +124,7 @@ int main(int argc, char **argv)
 		if (updateTimer.interval() > 0.1f)
 		{
 			updateTimer.start();
-			sprintf(fpsString, (const char *)"FPS: %.0f", t.averageFps());
+			sprintf(fpsString, static_cast<const char *>("FPS: %.0f"), t.averageFps());
 			fpsText.setString(fpsString);
 			fpsText.setPosition((Width - fpsText.width()), Height);
 		}

@@ -193,7 +193,7 @@ void ncList<T>::remove(const T& element)
 template <class T>
 T ncList<T>::removeFront()
 {
-	T first;
+	T first = T();
 
 	if (head_)
 	{
@@ -221,7 +221,7 @@ T ncList<T>::removeFront()
 template <class T>
 T ncList<T>::removeBack()
 {
-	T last;
+	T last = T();
 
 	if (tail_)
 	{

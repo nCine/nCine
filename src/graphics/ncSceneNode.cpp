@@ -1,6 +1,10 @@
 #include <cstdlib> // for exit()
 #include "ncSceneNode.h"
 #include "ncServiceLocator.h"
+#ifdef WITH_MULTITHREADING
+	#include "ncThreadPool.h"
+	#include "ncThreadCommands.h"
+#endif
 
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
@@ -162,7 +166,11 @@ void ncSceneNode::update(float interval)
 	{
 		if ((*i)->shouldUpdate_)
 		{
+#ifndef WITH_MULTITHREADING
 			(*i)->update(interval);
+#else
+			ncServiceLocator::threadPool().enqueueCommand(new ncUpdateNodeCommand(*i, interval));
+#endif
 		}
 	}
 }
@@ -203,7 +211,7 @@ void ncSceneNode::transform()
 		float sine = 0.0f;
 		float cosine = 1.0f;
 		float parentRot = parent_->absRotation_;
-		if (abs(parentRot) > MinRotation && abs(parentRot) < 360.0f - MinRotation)
+		if (fabs(parentRot) > MinRotation && fabs(parentRot) < 360.0f - MinRotation)
 		{
 			sine = sinf(-parentRot * M_PI / 180.0f);
 			cosine = cosf(-parentRot * M_PI / 180.0f);

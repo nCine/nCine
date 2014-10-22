@@ -96,11 +96,9 @@ bool ncGfxCapabilities::checkGLExtension(const char *extensionName) const
 	 ** other extension names.  Could use strtok() but the constant
 	 ** string returned by glGetString can be in read-only memory.
 	 */
-	char *extensions = (char *)glGetString(GL_EXTENSIONS);
-	char *end;
-
+	const char *extensions = reinterpret_cast<const char *>(glGetString(GL_EXTENSIONS));
 	int nameLength = strlen(extensionName);
-	end = extensions + strlen(extensions);
+	const char *end = extensions + nameLength;
 
 	while (extensions < end)
 	{
@@ -121,7 +119,7 @@ bool ncGfxCapabilities::checkGLExtension(const char *extensionName) const
 /// Queries the device about its capabilities
 void ncGfxCapabilities::init()
 {
-	char *pVersion = (char *)glGetString(GL_VERSION);
+	const char *pVersion = reinterpret_cast<const char *>(glGetString(GL_VERSION));
 #ifndef __ANDROID__
 	sscanf(pVersion, "%2d.%2d.%2d", &majorGL_, &minorGL_, &releaseGL_);
 #else

@@ -87,7 +87,7 @@ void ncProfilePlotter::applyTransformations(float absX, float absY, float absRot
 
 	float sine = 0.0f;
 	float cosine = 1.0f;
-	if (abs(absRotation) > ncDrawableNode::MinRotation && abs(absRotation) < 360.0f - ncDrawableNode::MinRotation)
+	if (fabs(absRotation) > ncDrawableNode::MinRotation && fabs(absRotation) < 360.0f - ncDrawableNode::MinRotation)
 	{
 		sine = sinf(-absRotation * M_PI / 180.0f);
 		cosine = cosf(-absRotation * M_PI / 180.0f);
@@ -108,9 +108,9 @@ void ncProfilePlotter::applyTransformations(float absX, float absY, float absRot
 void ncProfilePlotter::setBackgroundVertices()
 {
 	// Graph background vertices
-	backgroundVertices_[0] = 0;				backgroundVertices_[1] = 0;
-	backgroundVertices_[2] = width_;		backgroundVertices_[3] = 0;
-	backgroundVertices_[4] = 0;				backgroundVertices_[5] = height_;
+	backgroundVertices_[0] = 0.0f;			backgroundVertices_[1] = 0.0f;
+	backgroundVertices_[2] = width_;		backgroundVertices_[3] = 0.0f;
+	backgroundVertices_[4] = 0.0f;			backgroundVertices_[5] = height_;
 
 	backgroundVertices_[6] = width_;		backgroundVertices_[7] = height_;
 }

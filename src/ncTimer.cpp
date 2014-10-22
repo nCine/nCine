@@ -125,7 +125,7 @@ unsigned long long int ncTimer::counter()
 	{
 		struct timespec now;
 		clock_gettime(CLOCK_MONOTONIC, &now);
-		counter = (unsigned long long int)now.tv_sec * frequency_ + (unsigned long long int)now.tv_nsec;
+		counter = static_cast<unsigned long long int>(now.tv_sec) * frequency_ + static_cast<unsigned long long int>(now.tv_nsec);
 	}
 	else
 	{

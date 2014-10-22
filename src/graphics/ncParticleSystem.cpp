@@ -50,7 +50,6 @@ ncParticleSystem::~ncParticleSystem()
 
 void ncParticleSystem::emitParticles(unsigned int amount, float life, const ncVector2f &vel)
 {
-	float rndLife;
 	ncVector2f rndPosition;
 	ncVector2f rndVelocity;
 
@@ -58,7 +57,7 @@ void ncParticleSystem::emitParticles(unsigned int amount, float life, const ncVe
 	float rotation = -(atan2(vel.y, vel.x) - atan2(1.0f, 0.0f)) * 180.0f / M_PI;
 	if (rotation < 0.0f)
 	{
-		rotation += 360;
+		rotation += 360.0f;
 	}
 
 	for (unsigned int i = 0; i < amount; i++)
@@ -69,7 +68,7 @@ void ncParticleSystem::emitParticles(unsigned int amount, float life, const ncVe
 			break;
 		}
 
-		rndLife = life * randBetween(0.85f, 1.0f);
+		float rndLife = life * randBetween(0.85f, 1.0f);
 		// FIXME: arbitrary random position amount
 		rndPosition.x = 10.0f * randBetween(-1.0f, 1.0f); // 25
 		rndPosition.y = 10.0f * randBetween(-1.0f, 1.0f);

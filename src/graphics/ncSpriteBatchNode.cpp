@@ -72,7 +72,7 @@ void ncSpriteBatchNode::processSprite(ncSprite& sprite)
 
 	float sine = 0.0f;
 	float cosine = 1.0f;
-	if (abs(rot) > ncSprite::MinRotation && abs(rot) < 360.0f - ncSprite::MinRotation)
+	if (fabs(rot) > ncSprite::MinRotation && fabs(rot) < 360.0f - ncSprite::MinRotation)
 	{
 		sine = sinf(-rot * M_PI / 180.0f);
 		cosine = cosf(-rot * M_PI / 180.0f);

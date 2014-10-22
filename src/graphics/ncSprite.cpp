@@ -21,13 +21,13 @@ ncSprite::ncSprite(ncTexture *texture)
 	init();
 }
 
-ncSprite::ncSprite(ncSceneNode* parent, ncTexture *texture, int x, int y)
+ncSprite::ncSprite(ncSceneNode* parent, ncTexture *texture, float x, float y)
 	: ncDrawableNode(parent, x, y), texture_(texture), texRect_(0, 0, 0, 0)
 {
 	init();
 }
 
-ncSprite::ncSprite(ncTexture *texture, int x, int y)
+ncSprite::ncSprite(ncTexture *texture, float x, float y)
 	: ncDrawableNode(NULL, x, y), texture_(texture), texRect_(0, 0, 0, 0)
 {
 	init();

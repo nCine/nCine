@@ -28,7 +28,7 @@ class ncAudioStream
 	/// OpenAL buffer queue for streaming
 	ALuint alBuffers_[NumBuffers];
 	/// Index of the next available OpenAL buffer
-	int nextAvailAlBuffer_;
+	int nextAvailALBuffer_;
 
 	/// Size in bytes of each streaming buffer
 	static const int BufferSize = 16 * 1024;

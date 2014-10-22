@@ -40,7 +40,7 @@ void MyEventHandler::onInit()
 	{
 		for (int j = -NumColSprites * 0.5f; j < NumColSprites * 0.5f; j++)
 		{
-			sprites_[index] = new ncSprite(dummy_, megaTexture_, i * 100, j * 100);
+			sprites_[index] = new ncSprite(dummy_, megaTexture_, i * 100.0f, j * 100.0f);
 			sprites_[index]->setTexRect(texRects[index % NumTextures]);
 			sprites_[index]->setScale(0.75f);
 			index++;

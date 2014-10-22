@@ -9,7 +9,7 @@ class ncAudioBufferPlayer : public ncIAudioPlayer
 {
   public:
 	// A constructor creating a player from a shared buffer
-	ncAudioBufferPlayer(ncAudioBuffer *audioBuffer);
+	explicit ncAudioBufferPlayer(ncAudioBuffer *audioBuffer);
 	virtual ~ncAudioBufferPlayer() { stop(); }
 
 	virtual void play();

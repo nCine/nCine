@@ -30,14 +30,15 @@ if(MSVC)
 	set(VORBIS_FOUND 1)
 	
 	string(REGEX REPLACE "/Zm[0-9]*" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+	add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
 	add_definitions(-DWITH_GLEW)
 	#add_definitions(/W0) # Turn off warnings
 else() # GCC and LLVM
 	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic -Wextra -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-variadic-macros")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra -Wold-style-cast -Wno-long-long -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-variadic-macros")
 		if(CMAKE_BUILD_TYPE MATCHES Debug)
-			set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1 -ggdb -fsanitize=address -fno-omit-frame-pointer -rdynamic")
-			set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -fsanitize=address")
+			#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1 -ggdb -fsanitize=address -fno-omit-frame-pointer -rdynamic")
+			#set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -fsanitize=address")
 		endif()
 		if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9.0 OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.9.0)
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=auto")
@@ -48,7 +49,7 @@ else() # GCC and LLVM
 			endif()
 		endif()
 	elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Weverything")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Weverything -Wno-gnu-zero-variadic-macro-arguments")
 	endif()
 	if(NOT CROSS_MINGW32) # Linux
 		find_package(OpenGL REQUIRED)
@@ -132,11 +133,11 @@ endif()
 if(Threads_FOUND)
 	add_definitions(-DWITH_THREADS)
 	list(APPEND LINK_LIBS ${CMAKE_THREAD_LIBS_INIT})
+	# Experimental multi-threading scene update
+	#add_definitions(-DWITH_MULTITHREADING)
 endif()
 
 include_directories(include)
-set(CMAKE_BUILD_TYPE Debug)
-
 set(HEADERS
 	include/ncArray.h
 	include/ncList.h

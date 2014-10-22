@@ -12,9 +12,9 @@ class ncSprite : public ncDrawableNode
 {
   public:
 	ncSprite(ncSceneNode* parent, ncTexture *texture);
-	ncSprite(ncTexture *texture);
-	ncSprite(ncSceneNode* parent, ncTexture *texture, int x, int y);
-	ncSprite(ncTexture *texture, int x, int y);
+	explicit ncSprite(ncTexture *texture);
+	ncSprite(ncSceneNode* parent, ncTexture *texture, float x, float y);
+	ncSprite(ncTexture *texture, float x, float y);
 	virtual ~ncSprite() { }
 
 	/// Returns sprite width

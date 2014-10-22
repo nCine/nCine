@@ -210,7 +210,7 @@ void ncApplication::step()
 	if (textLines_ && ncTimer::now() - textUpdateTime > 0.2f)
 	{
 		textUpdateTime = ncTimer::now();
-		sprintf(textChars_, (const char *)"FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC",
+		sprintf(textChars_, static_cast<const char *>("FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC"),
 				frameTimer_->averageFps(), frameTimer_->interval() * 1000.0f,
 				renderQueue_->numVertices(ncRenderCommand::SPRITE_TYPE), renderQueue_->numCommands(ncRenderCommand::SPRITE_TYPE),
 				renderQueue_->numVertices(ncRenderCommand::PARTICLE_TYPE), renderQueue_->numCommands(ncRenderCommand::PARTICLE_TYPE),

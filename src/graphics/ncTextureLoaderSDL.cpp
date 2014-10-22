@@ -25,7 +25,7 @@ ncTextureLoaderSDL::ncTextureLoaderSDL(ncIFile *fileHandle)
 void ncTextureLoaderSDL::init()
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
-	sdlSurface_ = (SDL_Surface *)IMG_Load(fileHandle_->filename());
+	sdlSurface_ = IMG_Load(fileHandle_->filename());
 	if (!sdlSurface_)
 	{
 		LOGF_X("Cannot load \"%s\"", fileHandle_->filename());

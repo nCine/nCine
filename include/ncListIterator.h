@@ -9,7 +9,7 @@ template <class T>
 class ncListIterator
 {
   public:
-	ncListIterator(ncListNode<T> *node)
+	explicit ncListIterator(ncListNode<T> *node)
 		: node_(node) { }
 	ncListIterator(const ncListIterator& iterator)
 		: node_(iterator.node_) { }

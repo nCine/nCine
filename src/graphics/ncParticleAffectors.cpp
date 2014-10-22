@@ -39,10 +39,10 @@ void ncColorAffector::affect(ncParticle* particle)
 	ncColor &thisColor = colorSteps_[index]->color;
 
 	float factor = (normalizedLife - prevTime) / (thisTime - prevTime);
-	GLubyte red = prevColor.r() + (thisColor.r() - prevColor.r()) * factor;
-	GLubyte green = prevColor.g() + (thisColor.g() - prevColor.g()) * factor;
-	GLubyte blue = prevColor.b() + (thisColor.b() - prevColor.b()) * factor;
-	GLubyte alpha = prevColor.a() + (thisColor.a() - prevColor.a()) * factor;
+	GLubyte red = static_cast<GLubyte>(prevColor.r() + (thisColor.r() - prevColor.r()) * factor);
+	GLubyte green = static_cast<GLubyte>(prevColor.g() + (thisColor.g() - prevColor.g()) * factor);
+	GLubyte blue = static_cast<GLubyte>(prevColor.b() + (thisColor.b() - prevColor.b()) * factor);
+	GLubyte alpha = static_cast<GLubyte>(prevColor.a() + (thisColor.a() - prevColor.a()) * factor);
 
 	particle->setColor(red, green, blue, alpha);
 }

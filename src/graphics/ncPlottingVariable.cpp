@@ -38,7 +38,7 @@ void ncPlottingVariable::applyTransformations(float absX, float absY, float absR
 
 	float sine = 0.0f;
 	float cosine = 1.0f;
-	if (abs(absRotation) > ncDrawableNode::MinRotation && abs(absRotation) < 360.0f - ncDrawableNode::MinRotation)
+	if (fabs(absRotation) > ncDrawableNode::MinRotation && fabs(absRotation) < 360.0f - ncDrawableNode::MinRotation)
 	{
 		sine = sinf(-absRotation * M_PI / 180.0f);
 		cosine = cosf(-absRotation * M_PI / 180.0f);
