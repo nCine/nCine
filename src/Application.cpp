@@ -4,11 +4,14 @@
 #include "ServiceLocator.h"
 #include "ArrayIndexer.h"
 #include "FileLogger.h"
-#include "ALAudioDevice.h"
 #include "LinePlotter.h"
 #include "StackedBarPlotter.h"
 #include "Font.h"
 #include "TextNode.h"
+
+#ifdef WITH_AUDIO
+	#include "ALAudioDevice.h"
+#endif
 
 #ifdef WITH_THREADS
 	#include "ThreadPool.h"
@@ -87,7 +90,9 @@ void Application::init(IAppEventHandler* (*createAppEventHandler)())
 
 	LOGI("nCine compiled on " __DATE__ " at " __TIME__);
 	ServiceLocator::registerIndexer(new ArrayIndexer());
+#ifdef WITH_AUDIO
 	ServiceLocator::registerAudioDevice(new ALAudioDevice());
+#endif
 #ifdef WITH_THREADS
 	ServiceLocator::registerThreadPool(new ThreadPool());
 #endif

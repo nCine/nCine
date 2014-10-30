@@ -52,18 +52,18 @@ LOCAL_SRC_FILES := \
 	$(SRC)/FontGlyph.cpp \
 	$(SRC)/IFile.cpp \
 	$(SRC)/StandardFile.cpp \
-	$(SRC)/AssetFile.cpp \
-	$(SRC)/AndroidJniHelper.cpp \
-	$(SRC)/AndroidInputManager.cpp \
+	$(SRC)/android/AssetFile.cpp \
+	$(SRC)/android/AndroidJniHelper.cpp \
+	$(SRC)/android/AndroidInputManager.cpp \
 	$(SRC)/graphics/IGfxDevice.cpp \
-	$(SRC)/graphics/EglGfxDevice.cpp \
+	$(SRC)/android/EglGfxDevice.cpp \
 	$(SRC)/graphics/GfxCapabilities.cpp \
 	$(SRC)/graphics/TextureFormat.cpp \
 	$(SRC)/graphics/ITextureLoader.cpp \
 	$(SRC)/graphics/TextureLoaderDds.cpp \
 	$(SRC)/graphics/TextureLoaderPvr.cpp \
 	$(SRC)/graphics/TextureLoaderWebP.cpp \
-	$(SRC)/graphics/TextureLoaderEtc.cpp \
+	$(SRC)/android/TextureLoaderEtc.cpp \
 	$(SRC)/graphics/TextureLoaderKtx.cpp \
 	$(SRC)/graphics/Texture.cpp \
 	$(SRC)/graphics/ProfilePlotter.cpp \
