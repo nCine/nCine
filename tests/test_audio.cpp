@@ -1,13 +1,15 @@
-#include "ncFrameTimer.h"
-#include "ncServiceLocator.h"
-#include "ncFileLogger.h"
-#include "ncSDLGfxDevice.h"
+#include "FrameTimer.h"
+#include "ServiceLocator.h"
+#include "FileLogger.h"
+#include "SdlGfxDevice.h"
 
-#include "ncALAudioDevice.h"
-#include "ncAudioBuffer.h"
-#include "ncAudioBufferPlayer.h"
-#include "ncAudioStream.h"
-#include "ncAudioStreamPlayer.h"
+#include "ALAudioDevice.h"
+#include "AudioBuffer.h"
+#include "AudioBufferPlayer.h"
+#include "AudioStream.h"
+#include "AudioStreamPlayer.h"
+
+namespace nc = ncine;
 
 int main(int argc, char **argv)
 {
@@ -25,15 +27,15 @@ int main(int argc, char **argv)
 	bool isLooping = true;
 
 // ----- Init ----------------------
-	ncFrameTimer t(5.0f, 0.0f);
-	ncServiceLocator::registerLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
-	ncSDLGfxDevice gfxDevice(Width, Height);
+	nc::FrameTimer t(5.0f, 0.0f);
+	nc::ServiceLocator::registerLogger(new nc::FileLogger("log.txt", nc::ILogger::LOG_VERBOSE, nc::ILogger::LOG_OFF));
+	nc::SdlGfxDevice gfxDevice(Width, Height);
 	gfxDevice.setWindowTitle("Test");
 
-	ncServiceLocator::registerAudioDevice(new ncALAudioDevice());
-//	ncAudioBuffer audioBuffer("sounds/bomb.wav");
-//	ncAudioBufferPlayer player(&audioBuffer);
-	ncAudioStreamPlayer player("sounds/bomb.ogg");
+	nc::ServiceLocator::registerAudioDevice(new nc::ALAudioDevice());
+//	nc::AudioBuffer audioBuffer("sounds/bomb.wav");
+//	nc::AudioBufferPlayer player(&audioBuffer);
+	nc::AudioStreamPlayer player("sounds/bomb.ogg");
 	player.play();
 
 
@@ -132,7 +134,7 @@ int main(int argc, char **argv)
 		player.setPosition(xPos, 0.0f, 0.0f);
 		player.setLooping(isLooping);
 
-		ncServiceLocator::audioDevice().updatePlayers();
+		nc::ServiceLocator::audioDevice().updatePlayers();
 		gfxDevice.clear();
 		gfxDevice.update();
 	}
@@ -140,6 +142,6 @@ int main(int argc, char **argv)
 
 // ----- Quitting ----------------------
 	// Unregistering all services to close the audio device
-	ncServiceLocator::unregisterAll();
+	nc::ServiceLocator::unregisterAll();
 	return 0;
 }

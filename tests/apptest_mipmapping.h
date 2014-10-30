@@ -1,16 +1,23 @@
 #ifndef CLASS_MYEVENTHANDLER
 #define CLASS_MYEVENTHANDLER
 
-#include "ncIAppEventHandler.h"
-#include "ncIInputEventHandler.h"
-class ncSceneNode;
-class ncTexture;
-class ncSprite;
+#include "IAppEventHandler.h"
+#include "IInputEventHandler.h"
+
+namespace ncine {
+
+class SceneNode;
+class Texture;
+class Sprite;
+
+}
+
+namespace nc = ncine;
 
 /// My nCine event handler
 class MyEventHandler
-	: public ncIAppEventHandler,
-	  public ncIInputEventHandler
+	: public nc::IAppEventHandler,
+	  public nc::IInputEventHandler
 {
   public:
 	virtual void onInit();
@@ -19,17 +26,17 @@ class MyEventHandler
 	virtual void onShutdown();
 
 #ifdef __ANDROID__
-	virtual void onTouchUp(const ncTouchEvent &event);
+	virtual void onTouchUp(const nc::TouchEvent &event);
 #else
-	virtual void onKeyReleased(const ncKeyboardEvent &event);
-	virtual void onMouseButtonReleased(const ncMouseEvent &event);
+	virtual void onKeyReleased(const nc::KeyboardEvent &event);
+	virtual void onMouseButtonReleased(const nc::MouseEvent &event);
 #endif
 
   private:
 	bool pause_;
-	ncSceneNode *dummy_;
-	ncTexture *texture_;
-	ncSprite *sprite_;
+	nc::SceneNode *dummy_;
+	nc::Texture *texture_;
+	nc::Sprite *sprite_;
 	unsigned int divider_;
 };
 

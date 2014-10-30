@@ -1,8 +1,10 @@
-#include "ncServiceLocator.h"
-#include "ncFileLogger.h"
-#include "ncArray.h"
+#include "ServiceLocator.h"
+#include "FileLogger.h"
+#include "Array.h"
 
-void printArray(const ncArray<int> &array)
+namespace nc = ncine;
+
+void printArray(const nc::Array<int> &array)
 {
 	for (unsigned int i = 0; i < array.size(); i++)
 	{
@@ -13,10 +15,10 @@ void printArray(const ncArray<int> &array)
 
 int main(int argc, char **argv)
 {
-	ncServiceLocator::registerLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
+	nc::ServiceLocator::registerLogger(new nc::FileLogger("log.txt", nc::ILogger::LOG_VERBOSE, nc::ILogger::LOG_OFF));
 
 	const int Capacity = 10;
-	ncArray<int> array(Capacity);
+	nc::Array<int> array(Capacity);
 
 //	printf("Trying to create a hole\n");
 //	array[1] = 1;

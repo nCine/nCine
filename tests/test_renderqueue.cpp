@@ -9,16 +9,18 @@
 #define _USE_MATH_DEFINES // for M_PI in MSVC
 #include <cmath>
 
-#include "ncRect.h"
-#include "ncFrameTimer.h"
-#include "ncServiceLocator.h"
-#include "ncFileLogger.h"
-#include "ncSDLGfxDevice.h"
-#include "ncTexture.h"
-#include "ncRenderQueue.h"
-#include "ncSceneNode.h"
-#include "ncSprite.h"
-#include "ncSpriteBatchNode.h"
+#include "Rect.h"
+#include "FrameTimer.h"
+#include "ServiceLocator.h"
+#include "FileLogger.h"
+#include "SdlGfxDevice.h"
+#include "Texture.h"
+#include "RenderQueue.h"
+#include "SceneNode.h"
+#include "Sprite.h"
+#include "SpriteBatchNode.h"
+
+namespace nc = ncine;
 
 //#define WITH_BATCH
 
@@ -31,35 +33,35 @@ int main(int argc, char **argv)
 
 	const int NumTextures = 4;
 	const int NumSprites = 1000;
-	ncSprite *sprites[NumSprites];
+	nc::Sprite *sprites[NumSprites];
 	int radii[NumSprites];
 	int xCoords[NumSprites];
 	int yCoords[NumSprites];
 
 // ----- Init ----------------------
 	float angle = 0.0f;
-	ncFrameTimer t(5, 0);
-	ncServiceLocator::registerLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
-	ncSDLGfxDevice gfxDevice(Width, Height);
+	nc::FrameTimer t(5, 0);
+	nc::ServiceLocator::registerLogger(new nc::FileLogger("log.txt", nc::ILogger::LOG_VERBOSE, nc::ILogger::LOG_OFF));
+	nc::SdlGfxDevice gfxDevice(Width, Height);
 	gfxDevice.setWindowTitle("Test");
 
-	ncRenderQueue renderQueue;
-	ncSceneNode rootNode;
+	nc::RenderQueue renderQueue;
+	nc::SceneNode rootNode;
 
 #ifdef WITH_BATCH
-	ncTexture *megaTexture = new ncTexture("textures/megatexture_256.png");
-	ncRect texRects[NUM_TEXTURES];
-	texRects[0] = ncRect(0, 0, 145, 121);
-	texRects[1] = ncRect(256 - 100, 0, 100, 100);
-	texRects[2] = ncRect(0, 256 - 96, 96, 96);
-	texRects[3] = ncRect(256 - 96, 256 - 96, 96, 96);
-	ncSpriteBatchNode spriteBatch(&rootNode, megaTexture);
+	nc::Texture *megaTexture = new nc::Texture("textures/megatexture_256.png");
+	nc::Rect texRects[NUM_TEXTURES];
+	texRects[0] = nc::Rect(0, 0, 145, 121);
+	texRects[1] = nc::Rect(256 - 100, 0, 100, 100);
+	texRects[2] = nc::Rect(0, 256 - 96, 96, 96);
+	texRects[3] = nc::Rect(256 - 96, 256 - 96, 96, 96);
+	nc::SpriteBatchNode spriteBatch(&rootNode, megaTexture);
 #else
-	ncTexture *textures[NumTextures];
-	textures[0] = new ncTexture("textures/texture1.png");
-	textures[1] = new ncTexture("textures/texture2.png");
-	textures[2] = new ncTexture("textures/texture3.png");
-	textures[3] = new ncTexture("textures/texture4.png");
+	nc::Texture *textures[NumTextures];
+	textures[0] = new nc::Texture("textures/texture1.png");
+	textures[1] = new nc::Texture("textures/texture2.png");
+	textures[2] = new nc::Texture("textures/texture3.png");
+	textures[3] = new nc::Texture("textures/texture4.png");
 #endif
 
 	for (int i = 0; i < NumSprites; i++)
@@ -69,11 +71,11 @@ int main(int argc, char **argv)
 		xCoords[i] = rand() % Width;
 		yCoords[i] = rand() % Height;
 #ifdef WITH_BATCH
-		sprites[i] = new ncSprite(&spriteBatch, megaTexture, xCoords[i], yCoords[i]);
+		sprites[i] = new nc::Sprite(&spriteBatch, megaTexture, xCoords[i], yCoords[i]);
 		sprites[i]->setTexRect(texRects[numTex]);
 #else
-		ncTexture *texture = textures[numTex];
-		sprites[i] = new ncSprite(texture, xCoords[i], yCoords[i]);
+		nc::Texture *texture = textures[numTex];
+		sprites[i] = new nc::Sprite(texture, xCoords[i], yCoords[i]);
 		sprites[i]->setPriority(numTex);
 		rootNode.addChildNode(sprites[i]);
 #endif
@@ -152,6 +154,6 @@ int main(int argc, char **argv)
 	}
 #endif
 
-	ncServiceLocator::unregisterAll();
+	nc::ServiceLocator::unregisterAll();
 	return 0;
 }

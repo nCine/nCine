@@ -9,15 +9,17 @@
 #define _USE_MATH_DEFINES // for M_PI in MSVC
 #include <cmath>
 
-#include "ncRect.h"
-#include "ncFrameTimer.h"
-#include "ncServiceLocator.h"
-#include "ncFileLogger.h"
-#include "ncSDLGfxDevice.h"
-#include "ncTexture.h"
-#include "ncRenderQueue.h"
-#include "ncSceneNode.h"
-#include "ncSprite.h"
+#include "Rect.h"
+#include "FrameTimer.h"
+#include "ServiceLocator.h"
+#include "FileLogger.h"
+#include "SdlGfxDevice.h"
+#include "Texture.h"
+#include "RenderQueue.h"
+#include "SceneNode.h"
+#include "Sprite.h"
+
+namespace nc = ncine;
 
 int main(int argc, char **argv)
 {
@@ -29,22 +31,22 @@ int main(int argc, char **argv)
 // ----- Init ----------------------
 	float angle = 0.0f;
 	float angle2 = 0.0f;
-	ncFrameTimer t(5.0f, 0.0f);
-	ncServiceLocator::registerLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
-	ncSDLGfxDevice gfxDevice(Width, Height);
+	nc::FrameTimer t(5.0f, 0.0f);
+	nc::ServiceLocator::registerLogger(new nc::FileLogger("log.txt", nc::ILogger::LOG_VERBOSE, nc::ILogger::LOG_OFF));
+	nc::SdlGfxDevice gfxDevice(Width, Height);
 	gfxDevice.setWindowTitle("Test");
 
-	ncTexture tex1("textures/texture1.png");
-	ncTexture tex2("textures/texture2.png");
-	ncTexture tex3("textures/texture3.png");
-	ncTexture tex4("textures/texture4.png");
+	nc::Texture tex1("textures/texture1.png");
+	nc::Texture tex2("textures/texture2.png");
+	nc::Texture tex3("textures/texture3.png");
+	nc::Texture tex4("textures/texture4.png");
 
-	ncRenderQueue renderQueue;
-	ncSceneNode rootNode;
-	ncSprite *sprite1 = new ncSprite(&tex1, 150, 170);
-	ncSprite *sprite2 = new ncSprite(sprite1, &tex2, 50, 70);
-	ncSprite *sprite3 = new ncSprite(sprite2, &tex3, 100, 50);
-	ncSprite *sprite4 = new ncSprite(sprite3, &tex4, -50, 25);
+	nc::RenderQueue renderQueue;
+	nc::SceneNode rootNode;
+	nc::Sprite *sprite1 = new nc::Sprite(&tex1, 150, 170);
+	nc::Sprite *sprite2 = new nc::Sprite(sprite1, &tex2, 50, 70);
+	nc::Sprite *sprite3 = new nc::Sprite(sprite2, &tex3, 100, 50);
+	nc::Sprite *sprite4 = new nc::Sprite(sprite3, &tex4, -50, 25);
 	sprite1->setScale(0.75f);
 	sprite2->setScale(0.7f);
 	sprite3->setScale(0.7f);
@@ -119,6 +121,6 @@ int main(int argc, char **argv)
 	delete sprite2;
 	delete sprite1;
 
-	ncServiceLocator::unregisterAll();
+	nc::ServiceLocator::unregisterAll();
 	return 0;
 }

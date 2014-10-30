@@ -139,145 +139,151 @@ endif()
 
 include_directories(include)
 set(HEADERS
-	include/ncArray.h
-	include/ncList.h
-	include/ncListIterator.h
-	include/ncPoint.h
-	include/ncRect.h
-	include/ncColor.h
-	include/ncDrawableNode.h
-	include/ncVector2f.h
-	include/ncServiceLocator.h
-	include/ncFileLogger.h
-	include/ncArrayIndexer.h
-	include/ncTimer.h
-	include/ncFrameTimer.h
-	include/ncProfileVariable.h
-	include/ncFont.h
-	include/ncFontGlyph.h
-	include/ncIFile.h
-	include/ncStandardFile.h
-	include/ncIGfxDevice.h
-	include/ncGfxCapabilities.h
-	include/ncTextureFormat.h
-	include/ncITextureLoader.h
-	include/ncTextureLoaderDDS.h
-	include/ncTextureLoaderPVR.h
-	include/ncTextureLoaderKTX.h
-	include/ncTexture.h
-	include/ncProfilePlotter.h
-	include/ncPlottingVariable.h
-	include/ncLinePlotter.h
-	include/ncStackedBarPlotter.h
-	include/ncSceneNode.h
-	include/ncSprite.h
-	include/ncRenderCommand.h
-	include/ncRenderQueue.h
-	include/ncSpriteBatchNode.h
-	include/ncApplication.h
-	include/ncParticle.h
-	include/ncParticleAffectors.h
-	include/ncParticleSystem.h
-	include/ncTextNode.h
-	include/ncRectAnimation.h
-	include/ncAnimatedSprite.h
-	include/ncALAudioDevice.h
-	include/ncIAudioLoader.h
-	include/ncAudioLoaderWav.h
-	include/ncAudioBuffer.h
-	include/ncAudioStream.h
-	include/ncAudioBufferPlayer.h
-	include/ncAudioStreamPlayer.h
+	include/Array.h
+	include/List.h
+	include/ListIterator.h
+	include/Point.h
+	include/Rect.h
+	include/Color.h
+	include/Object.h
+	include/IAppEventHandler.h
+	include/IInputEventHandler.h
+	include/DrawableNode.h
+	include/Vector2f.h
+	include/ServiceLocator.h
+	include/FileLogger.h
+	include/ArrayIndexer.h
+	include/Timer.h
+	include/FrameTimer.h
+	include/ProfileVariable.h
+	include/Font.h
+	include/FontGlyph.h
+	include/IFile.h
+	include/StandardFile.h
+	include/DisplayMode.h
+	include/IGfxDevice.h
+	include/GfxCapabilities.h
+	include/TextureFormat.h
+	include/ITextureLoader.h
+	include/TextureLoaderDds.h
+	include/TextureLoaderPvr.h
+	include/TextureLoaderKtx.h
+	include/Texture.h
+	include/ProfilePlotter.h
+	include/PlottingVariable.h
+	include/LinePlotter.h
+	include/StackedBarPlotter.h
+	include/SceneNode.h
+	include/Sprite.h
+	include/RenderCommand.h
+	include/RenderQueue.h
+	include/SpriteBatchNode.h
+	include/Application.h
+	include/Particle.h
+	include/ParticleAffectors.h
+	include/ParticleSystem.h
+	include/TextNode.h
+	include/RectAnimation.h
+	include/AnimatedSprite.h
+	include/IAudioDevice.h
+	include/ALAudioDevice.h
+	include/IAudioLoader.h
+	include/AudioLoaderWav.h
+	include/AudioBuffer.h
+	include/AudioStream.h
+	include/IAudioPlayer.h
+	include/AudioBufferPlayer.h
+	include/AudioStreamPlayer.h
 )
 set(SOURCES
-	src/base/ncVector2f.cpp
-	src/ncServiceLocator.cpp
-	src/ncFileLogger.cpp
-	src/ncArrayIndexer.cpp
-	src/ncTimer.cpp
-	src/ncFrameTimer.cpp
-	src/ncProfileVariable.cpp
-	src/ncFont.cpp
-	src/ncFontGlyph.cpp
-	src/ncIFile.cpp
-	src/ncStandardFile.cpp
-	src/graphics/ncIGfxDevice.cpp
-	src/graphics/ncGfxCapabilities.cpp
-	src/graphics/ncTextureFormat.cpp
-	src/graphics/ncITextureLoader.cpp
-	src/graphics/ncTextureLoaderDDS.cpp
-	src/graphics/ncTextureLoaderPVR.cpp
-	src/graphics/ncTextureLoaderKTX.cpp
-	src/graphics/ncTexture.cpp
-	src/graphics/ncProfilePlotter.cpp
-	src/graphics/ncPlottingVariable.cpp
-	src/graphics/ncLinePlotter.cpp
-	src/graphics/ncStackedBarPlotter.cpp
-	src/graphics/ncSceneNode.cpp
-	src/graphics/ncSprite.cpp
-	src/graphics/ncRenderCommand.cpp
-	src/graphics/ncRenderQueue.cpp
-	src/graphics/ncSpriteBatchNode.cpp
-	src/ncApplication.cpp
-	src/graphics/ncParticle.cpp
-	src/graphics/ncParticleAffectors.cpp
-	src/graphics/ncParticleSystem.cpp
-	src/graphics/ncTextNode.cpp
-	src/graphics/ncRectAnimation.cpp
-	src/graphics/ncAnimatedSprite.cpp
-	src/audio/ncALAudioDevice.cpp
-	src/audio/ncIAudioLoader.cpp
-	src/audio/ncAudioLoaderWav.cpp
-	src/audio/ncAudioBuffer.cpp
-	src/audio/ncAudioStream.cpp
-	src/audio/ncAudioBufferPlayer.cpp
-	src/audio/ncAudioStreamPlayer.cpp
+	src/base/Vector2f.cpp
+	src/ServiceLocator.cpp
+	src/FileLogger.cpp
+	src/ArrayIndexer.cpp
+	src/Timer.cpp
+	src/FrameTimer.cpp
+	src/ProfileVariable.cpp
+	src/Font.cpp
+	src/FontGlyph.cpp
+	src/IFile.cpp
+	src/StandardFile.cpp
+	src/graphics/IGfxDevice.cpp
+	src/graphics/GfxCapabilities.cpp
+	src/graphics/TextureFormat.cpp
+	src/graphics/ITextureLoader.cpp
+    src/graphics/TextureLoaderDds.cpp
+    src/graphics/TextureLoaderPvr.cpp
+    src/graphics/TextureLoaderKtx.cpp
+	src/graphics/Texture.cpp
+	src/graphics/ProfilePlotter.cpp
+	src/graphics/PlottingVariable.cpp
+	src/graphics/LinePlotter.cpp
+	src/graphics/StackedBarPlotter.cpp
+	src/graphics/SceneNode.cpp
+	src/graphics/Sprite.cpp
+	src/graphics/RenderCommand.cpp
+	src/graphics/RenderQueue.cpp
+	src/graphics/SpriteBatchNode.cpp
+	src/Application.cpp
+	src/graphics/Particle.cpp
+	src/graphics/ParticleAffectors.cpp
+	src/graphics/ParticleSystem.cpp
+	src/graphics/TextNode.cpp
+	src/graphics/RectAnimation.cpp
+	src/graphics/AnimatedSprite.cpp
+	src/audio/ALAudioDevice.cpp
+	src/audio/IAudioLoader.cpp
+	src/audio/AudioLoaderWav.cpp
+	src/audio/AudioBuffer.cpp
+	src/audio/AudioStream.cpp
+	src/audio/AudioBufferPlayer.cpp
+	src/audio/AudioStreamPlayer.cpp
 )
 
 if(GLFW_FOUND)
-	list(APPEND HEADERS include/ncGLFWInputManager.h)
-	list(APPEND HEADERS include/ncGLFWGfxDevice.h)
-	list(APPEND SOURCES src/ncGLFWInputManager.cpp)
-	list(APPEND SOURCES src/graphics/ncGLFWGfxDevice.cpp)
+	list(APPEND HEADERS include/GlfwInputManager.h)
+	list(APPEND HEADERS include/GlfwGfxDevice.h)
+    list(APPEND SOURCES src/GlfwInputManager.cpp)
+    list(APPEND SOURCES src/graphics/GlfwGfxDevice.cpp)
 endif()
 
 if(SDL_FOUND AND NOT GLFW_FOUND)
-	list(APPEND HEADERS include/ncSDLInputManager.h)
-	list(APPEND HEADERS include/ncSDLGfxDevice.h)
-	list(APPEND SOURCES src/ncSDLInputManager.cpp)
-	list(APPEND SOURCES src/graphics/ncSDLGfxDevice.cpp)
+	list(APPEND HEADERS include/SdlInputManager.h)
+	list(APPEND HEADERS include/SdlGfxDevice.h)
+    list(APPEND SOURCES src/SdlInputManager.cpp)
+    list(APPEND SOURCES src/graphics/SdlGfxDevice.cpp)
 	if(SDLIMAGE_FOUND)
-		list(APPEND HEADERS include/ncTextureLoaderSDL.h)
-		list(APPEND SOURCES src/graphics/ncTextureLoaderSDL.cpp)
+		list(APPEND HEADERS include/TextureLoaderSdl.h)
+        list(APPEND SOURCES src/graphics/TextureLoaderSdl.cpp)
 	endif()
 endif()
 
 if(PNG_FOUND AND GLFW_FOUND)
-	list(APPEND HEADERS include/ncTextureLoaderPNG.h)
-	list(APPEND SOURCES src/graphics/ncTextureLoaderPNG.cpp)
+	list(APPEND HEADERS include/TextureLoaderPng.h)
+    list(APPEND SOURCES src/graphics/TextureLoaderPng.cpp)
 endif()
 if(WEBP_FOUND)
-	list(APPEND HEADERS include/ncTextureLoaderWebP.h)
-	list(APPEND SOURCES src/graphics/ncTextureLoaderWebP.cpp)
+	list(APPEND HEADERS include/TextureLoaderWebP.h)
+	list(APPEND SOURCES src/graphics/TextureLoaderWebP.cpp)
 endif()
 if(VORBIS_FOUND)
-	list(APPEND HEADERS include/ncAudioLoaderOgg.h)
-	list(APPEND SOURCES src/audio/ncAudioLoaderOgg.cpp)
+	list(APPEND HEADERS include/AudioLoaderOgg.h)
+	list(APPEND SOURCES src/audio/AudioLoaderOgg.cpp)
 endif()
 
 if(Threads_FOUND)
-	list(APPEND HEADERS include/ncThread.h)
-	list(APPEND HEADERS include/ncThreadSync.h)
+	list(APPEND HEADERS include/Thread.h)
+	list(APPEND HEADERS include/ThreadSync.h)
 	if(MSVC OR CROSS_MINGW32)
-		list(APPEND SOURCES src/threading/ncWindowsThread.cpp)
-		list(APPEND SOURCES src/threading/ncWindowsThreadSync.cpp)
+		list(APPEND SOURCES src/threading/WindowsThread.cpp)
+		list(APPEND SOURCES src/threading/WindowsThreadSync.cpp)
 	else()
-		list(APPEND SOURCES src/threading/ncPOSIXThread.cpp)
-		list(APPEND SOURCES src/threading/ncPOSIXThreadSync.cpp)
+		list(APPEND SOURCES src/threading/PosixThread.cpp)
+		list(APPEND SOURCES src/threading/PosixThreadSync.cpp)
 	endif()
-	list(APPEND HEADERS include/ncThreadPool.h)
-	list(APPEND SOURCES src/threading/ncThreadPool.cpp)
-	list(APPEND HEADERS include/ncThreadCommands.h)
+	list(APPEND HEADERS include/ThreadPool.h)
+	list(APPEND SOURCES src/threading/ThreadPool.cpp)
+	list(APPEND HEADERS include/ThreadCommands.h)
 endif()
 
 link_libraries(

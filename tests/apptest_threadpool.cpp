@@ -1,33 +1,33 @@
 #include "apptest_threadpool.h"
-#include "ncThreadPool.h"
-#include "ncThreadCommands.h"
-#include "ncApplication.h"
-#include "ncServiceLocator.h"
-#include "ncTimer.h"
+#include "ThreadPool.h"
+#include "ThreadCommands.h"
+#include "Application.h"
+#include "ServiceLocator.h"
+#include "Timer.h"
 
-ncIAppEventHandler* createApphandler()
+nc::IAppEventHandler* createApphandler()
 {
 	return new MyEventHandler;
 }
 
 void MyEventHandler::onInit()
 {
-	ncIInputManager::setHandler(this);
+	nc::IInputManager::setHandler(this);
 
 	for (unsigned int i = 0; i < 4; i++)
 	{
-		ncServiceLocator::threadPool().enqueueCommand(new ncDummyCommand(i));
+		nc::ServiceLocator::threadPool().enqueueCommand(new nc::DummyCommand(i));
 		LOGI_X("APPTEST_THREADPOOL: enqueued %u", i);
-		ncTimer::sleep(1000);
+		nc::Timer::sleep(1000);
 	}
 }
 
 #ifndef __ANDROID__
-void MyEventHandler::onKeyReleased(const ncKeyboardEvent &event)
+void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)
+	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
 	{
-		ncApplication::quit();
+		nc::Application::quit();
 	}
 }
 #endif

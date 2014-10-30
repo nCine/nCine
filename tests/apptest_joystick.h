@@ -1,17 +1,24 @@
 #ifndef CLASS_MYEVENTHANDLER
 #define CLASS_MYEVENTHANDLER
 
-#include "ncIAppEventHandler.h"
-#include "ncIInputEventHandler.h"
-class ncTexture;
-class ncSprite;
-class ncFont;
-class ncTextNode;
+#include "IAppEventHandler.h"
+#include "IInputEventHandler.h"
+
+namespace ncine {
+
+class Texture;
+class Sprite;
+class Font;
+class TextNode;
+
+}
+
+namespace nc = ncine;
 
 /// My nCine event handler
 class MyEventHandler
-	: public ncIAppEventHandler,
-	  public ncIInputEventHandler
+	: public nc::IAppEventHandler,
+	  public nc::IInputEventHandler
 {
   public:
 	virtual void onInit();
@@ -20,7 +27,7 @@ class MyEventHandler
 	virtual void onShutdown();
 
 #ifndef __ANDROID__
-	virtual void onKeyReleased(const ncKeyboardEvent &event);
+	virtual void onKeyReleased(const nc::KeyboardEvent &event);
 #endif
 
   private:
@@ -32,10 +39,10 @@ class MyEventHandler
 	static const int NumChars = 256;
 	char joyString_[NumChars];
 
-	ncTexture *texture_;
-	ncSprite *sprites_[2];
-	ncFont *font_;
-	ncTextNode *textNode_;
+	nc::Texture *texture_;
+	nc::Sprite *sprites_[2];
+	nc::Font *font_;
+	nc::TextNode *textNode_;
 };
 
 #endif

@@ -1,12 +1,14 @@
-#include "ncServiceLocator.h"
-#include "ncFileLogger.h"
-#include "ncList.h"
+#include "ServiceLocator.h"
+#include "FileLogger.h"
+#include "List.h"
 
-void printList(const ncList<int> &list)
+namespace nc = ncine;
+
+void printList(const nc::List<int> &list)
 {
 	unsigned int index = 0;
 
-	for (ncList<int>::Const_Iterator i = list.begin(); i != list.end(); ++i)
+	for (nc::List<int>::Const_Iterator i = list.begin(); i != list.end(); ++i)
 	{
 		printf("[%u]=%d ", index, *i);
 		index++;
@@ -16,9 +18,9 @@ void printList(const ncList<int> &list)
 
 int main(int argc, char **argv)
 {
-	ncServiceLocator::registerLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
+	nc::ServiceLocator::registerLogger(new nc::FileLogger("log.txt", nc::ILogger::LOG_VERBOSE, nc::ILogger::LOG_OFF));
 
-	ncList<int> list;
+	nc::List<int> list;
 
 	printf("Inserting some elements to the back\n");
 	for (int i = 0; i < 11; i++)
@@ -49,14 +51,14 @@ int main(int argc, char **argv)
 
 	printf("\n--- List traversals (for cycles) ---\n");
 	printf("Iterating through nodes:");
-	for (ncList<int>::Iterator i = list.begin(); i != list.end(); ++i)
+	for (nc::List<int>::Iterator i = list.begin(); i != list.end(); ++i)
 	{
 		printf(" %d", *i);
 	}
 	printf("\n");
 
 	printf("Iterating through nodes (reverse):");
-	for (ncList<int>::Iterator i = list.revBegin(); i != list.end(); --i)
+	for (nc::List<int>::Iterator i = list.revBegin(); i != list.end(); --i)
 	{
 		printf(" %d", *i);
 	}
@@ -65,7 +67,7 @@ int main(int argc, char **argv)
 
 	printf("\n--- List traversals (while cycles) ---\n");
 	printf("Iterating through nodes:");
-	ncList<int>::Iterator i = list.begin();
+	nc::List<int>::Iterator i = list.begin();
 	while (i != list.end())
 	{
 		printf(" %d", *i);

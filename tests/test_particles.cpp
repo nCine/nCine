@@ -9,14 +9,16 @@
 #define _USE_MATH_DEFINES // for M_PI in MSVC
 #include <cmath>
 
-#include "ncFrameTimer.h"
-#include "ncServiceLocator.h"
-#include "ncFileLogger.h"
-#include "ncSDLGfxDevice.h"
-#include "ncTexture.h"
-#include "ncRenderQueue.h"
-#include "ncSceneNode.h"
-#include "ncParticleSystem.h"
+#include "FrameTimer.h"
+#include "ServiceLocator.h"
+#include "FileLogger.h"
+#include "SdlGfxDevice.h"
+#include "Texture.h"
+#include "RenderQueue.h"
+#include "SceneNode.h"
+#include "ParticleSystem.h"
+
+namespace nc = ncine;
 
 const int NumParticles = 400;
 
@@ -28,36 +30,36 @@ int main(int argc, char **argv)
 	bool shouldQuit = false;
 
 // ----- Init ----------------------
-	ncFrameTimer t(5.0f, 0.0f);
-	ncServiceLocator::registerLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
-	ncSDLGfxDevice gfxDevice(Width, Height);
+	nc::FrameTimer t(5.0f, 0.0f);
+	nc::ServiceLocator::registerLogger(new nc::FileLogger("log.txt", nc::ILogger::LOG_VERBOSE, nc::ILogger::LOG_OFF));
+	nc::SdlGfxDevice gfxDevice(Width, Height);
 	gfxDevice.setWindowTitle("Test");
 
-	ncRenderQueue renderQueue;
-	ncSceneNode rootNode;
+	nc::RenderQueue renderQueue;
+	nc::SceneNode rootNode;
 
-	ncTexture texture("textures/smoke_256.png");
+	nc::Texture texture("textures/smoke_256.png");
 
-	ncParticleSystem particleSystem(&rootNode, NumParticles, &texture, texture.rect());
+	nc::ParticleSystem particleSystem(&rootNode, NumParticles, &texture, texture.rect());
 	particleSystem.setPosition(Width * 0.5f, Height * 0.5f);
 
-//	particleSystem.addAffector(new ncAccelerationAffector(0.000025f, 0.0f));
-	ncColorAffector *colAffector = new ncColorAffector();
-//	colAffector->addColorStep(0.0f, ncColor(1.0f, 1.0f, 1.0f, 0.0f)); // GRAY
-//	colAffector->addColorStep(1.0f, ncColor(1.0f, 1.0f, 1.0f, 1.0f)); // SMOKE
-	colAffector->addColorStep(0.0f, ncColor(0.86f, 0.39f, 0.0f, 0.05f));
-	colAffector->addColorStep(0.65f, ncColor(0.86f, 0.59f, 0.0f, 0.55f));
-	colAffector->addColorStep(0.7f, ncColor(0.86f, 0.7f, 0.0f, 0.295));
-	colAffector->addColorStep(1.0f, ncColor(0.0f, 0.0f, 1.0f, 0.59));
+//	particleSystem.addAffector(new nc::AccelerationAffector(0.000025f, 0.0f));
+	nc::ColorAffector *colAffector = new nc::ColorAffector();
+//	colAffector->addColorStep(0.0f, nc::Color(1.0f, 1.0f, 1.0f, 0.0f)); // GRAY
+//	colAffector->addColorStep(1.0f, nc::Color(1.0f, 1.0f, 1.0f, 1.0f)); // SMOKE
+	colAffector->addColorStep(0.0f, nc::Color(0.86f, 0.39f, 0.0f, 0.05f));
+	colAffector->addColorStep(0.65f, nc::Color(0.86f, 0.59f, 0.0f, 0.55f));
+	colAffector->addColorStep(0.7f, nc::Color(0.86f, 0.7f, 0.0f, 0.295));
+	colAffector->addColorStep(1.0f, nc::Color(0.0f, 0.0f, 1.0f, 0.59));
 	particleSystem.addAffector(colAffector);
-	ncSizeAffector *sizeAffector = new ncSizeAffector(0.25f);
+	nc::SizeAffector *sizeAffector = new nc::SizeAffector(0.25f);
 	sizeAffector->addSizeStep(0.0f, 0.01f);
 	sizeAffector->addSizeStep(0.7f, 1.6f);
 	sizeAffector->addSizeStep(1.0f, 0.4f);
 	particleSystem.addAffector(sizeAffector);
 
 	srand(time(NULL));
-	ncTimer emitTimer;
+	nc::Timer emitTimer;
 	emitTimer.start();
 
 
@@ -97,7 +99,7 @@ int main(int argc, char **argv)
 		if (emitTimer.interval() > 0.25f)
 		{
 			emitTimer.start();
-			particleSystem.emitParticles(25, 3.0f, ncVector2f(0.0f, 100.0f));
+			particleSystem.emitParticles(25, 3.0f, nc::Vector2f(0.0f, 100.0f));
 		}
 
 		rootNode.update(t.interval());
@@ -109,6 +111,6 @@ int main(int argc, char **argv)
 
 
 // ----- Quitting ----------------------
-	ncServiceLocator::unregisterAll();
+	nc::ServiceLocator::unregisterAll();
 	return 0;
 }

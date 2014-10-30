@@ -1,17 +1,24 @@
 #ifndef CLASS_MYEVENTHANDLER
 #define CLASS_MYEVENTHANDLER
 
-#include "ncIAppEventHandler.h"
-#include "ncIInputEventHandler.h"
-#include "ncVector2f.h"
-class ncTexture;
-class ncParticleSystem;
-class ncTimer;
+#include "IAppEventHandler.h"
+#include "IInputEventHandler.h"
+#include "Vector2f.h"
+
+namespace ncine {
+
+class Texture;
+class ParticleSystem;
+class Timer;
+
+}
+
+namespace nc = ncine;
 
 /// My nCine application
 class MyEventHandler
-	: public ncIAppEventHandler,
-	  public ncIInputEventHandler
+	: public nc::IAppEventHandler,
+	  public nc::IInputEventHandler
 {
   public:
 	virtual void onInit();
@@ -20,22 +27,22 @@ class MyEventHandler
 	virtual void onShutdown();
 
 #ifdef __ANDROID__
-	virtual void onTouchDown(const ncTouchEvent &event);
-	virtual void onTouchMove(const ncTouchEvent &event);
-	virtual void onAcceleration(const ncAccelerometerEvent &event);
+	virtual void onTouchDown(const nc::TouchEvent &event);
+	virtual void onTouchMove(const nc::TouchEvent &event);
+	virtual void onAcceleration(const nc::AccelerometerEvent &event);
 #else
-	virtual void onKeyReleased(const ncKeyboardEvent &event);
-	virtual void onMouseButtonPressed(const ncMouseEvent &event);
-	virtual void onMouseMoved(const ncMouseState &state);
+	virtual void onKeyReleased(const nc::KeyboardEvent &event);
+	virtual void onMouseButtonPressed(const nc::MouseEvent &event);
+	virtual void onMouseMoved(const nc::MouseState &state);
 #endif
 
   private:
 	static const int NumParticles = 50;
 
-	ncTexture *texture_;
-	ncParticleSystem *particleSystem_;
-	ncTimer *emitTimer_;
-	ncVector2f emitVector_;
+	nc::Texture *texture_;
+	nc::ParticleSystem *particleSystem_;
+	nc::Timer *emitTimer_;
+	nc::Vector2f emitVector_;
 };
 
 #endif

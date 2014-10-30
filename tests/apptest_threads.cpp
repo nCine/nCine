@@ -1,7 +1,7 @@
 #include "apptest_threads.h"
-#include "ncThread.h"
-#include "ncApplication.h"
-#include "ncServiceLocator.h"
+#include "Thread.h"
+#include "Application.h"
+#include "ServiceLocator.h"
 
 const int NumThreads = 2;
 const int NumFloats = 100000000;
@@ -30,23 +30,23 @@ void threadFunction(void *arg)
 	}
 }
 
-ncIAppEventHandler* createApphandler()
+nc::IAppEventHandler* createApphandler()
 {
 	return new MyEventHandler;
 }
 
 void MyEventHandler::onInit()
 {
-	ncIInputManager::setHandler(this);
+	nc::IInputManager::setHandler(this);
 
-	LOGI_X("APPTEST_THREADS: %d threads for %d numbers on %u processor(s)", NumThreads, NumFloats, ncThread::numProcessors());
+	LOGI_X("APPTEST_THREADS: %d threads for %d numbers on %u processor(s)", NumThreads, NumFloats, nc::Thread::numProcessors());
 
-	ncThread threads[NumThreads];
+	nc::Thread threads[NumThreads];
 	int threadNums[NumThreads];
 
 	globalArray = new float[NumFloats];
 
-	float startTime = ncTimer::now();
+	float startTime = nc::Timer::now();
 	for (int i = 0; i < NumThreads; i++)
 	{
 		threadNums[i] = i;
@@ -57,7 +57,7 @@ void MyEventHandler::onInit()
 	{
 		threads[i].join();
 	}
-	float endTime = ncTimer::now();
+	float endTime = nc::Timer::now();
 
 	LOGI_X("APPTEST_THREADS: total time %fms", (endTime - startTime) * 1000.0f);
 
@@ -65,11 +65,11 @@ void MyEventHandler::onInit()
 }
 
 #ifndef __ANDROID__
-void MyEventHandler::onKeyReleased(const ncKeyboardEvent &event)
+void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)
+	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
 	{
-		ncApplication::quit();
+		nc::Application::quit();
 	}
 }
 #endif

@@ -6,12 +6,14 @@
 #endif
 #include <SDL/SDL.h>
 
-#include "ncFrameTimer.h"
-#include "ncServiceLocator.h"
-#include "ncFileLogger.h"
-#include "ncSDLGfxDevice.h"
-#include "ncFont.h"
-#include "ncTextNode.h"
+#include "FrameTimer.h"
+#include "ServiceLocator.h"
+#include "FileLogger.h"
+#include "SdlGfxDevice.h"
+#include "Font.h"
+#include "TextNode.h"
+
+namespace nc = ncine;
 
 int main(int argc, char **argv)
 {
@@ -21,33 +23,33 @@ int main(int argc, char **argv)
 	bool shouldQuit = false;
 
 // ----- Init ----------------------
-	ncFrameTimer t(5.0f, 0.1f);
-	ncServiceLocator::registerLogger(new ncFileLogger("log.txt", ncILogger::LOG_VERBOSE, ncILogger::LOG_OFF));
-	ncSDLGfxDevice gfxDevice(Width, Height);
+	nc::FrameTimer t(5.0f, 0.1f);
+	nc::ServiceLocator::registerLogger(new nc::FileLogger("log.txt", nc::ILogger::LOG_VERBOSE, nc::ILogger::LOG_OFF));
+	nc::SdlGfxDevice gfxDevice(Width, Height);
 	gfxDevice.setWindowTitle("Test");
 
-	ncRenderQueue renderQueue;
-	ncSceneNode rootNode;
+	nc::RenderQueue renderQueue;
+	nc::SceneNode rootNode;
 
-	ncFont font1("fonts/trebuchet32_256.png", "fonts/trebuchet32_256.fnt");
-	ncFont font2("fonts/arial32_256.png", "fonts/arial32_256.fnt");
-	ncFont font3("fonts/verdana32_256.png", "fonts/verdana32_256.fnt");
+	nc::Font font1("fonts/trebuchet32_256.png", "fonts/trebuchet32_256.fnt");
+	nc::Font font2("fonts/arial32_256.png", "fonts/arial32_256.fnt");
+	nc::Font font3("fonts/verdana32_256.png", "fonts/verdana32_256.fnt");
 
 	char fpsString[16];
-	ncTextNode fpsText(&rootNode, &font1);
+	nc::TextNode fpsText(&rootNode, &font1);
 	fpsText.setScale(0.85f);
 	fpsText.setString("FPS: ");
 	fpsText.setPosition((Width - fpsText.width()), Height);
 
 	char testString[] = "WAY.P.ATAV";
 	int textHeight = Height * 0.7f;
-	ncTextNode text1(&rootNode, &font1);
+	nc::TextNode text1(&rootNode, &font1);
 	text1.setScale(2.0f);
 	text1.setString(testString);
 	text1.setPosition((Width - text1.width()) * 0.5f, textHeight);
 	text1.setColor(255, 0, 0, 255);
 
-	ncTextNode text2(&rootNode, &font1);
+	nc::TextNode text2(&rootNode, &font1);
 	text2.setScale(2.0f);
 	text2.setString(testString);
 	textHeight -= text2.fontBase();
@@ -55,14 +57,14 @@ int main(int argc, char **argv)
 	text2.enableKerning(false);
 	text2.setColor(255, 0, 0, 128);
 
-	ncTextNode text3(&rootNode, &font2);
+	nc::TextNode text3(&rootNode, &font2);
 	text3.setScale(2.0f);
 	text3.setString(testString);
 	textHeight -= text3.fontBase();
 	text3.setPosition((Width - text3.width()) * 0.5f, textHeight);
 	text3.setColor(0, 255, 0, 255);
 
-	ncTextNode text4(&rootNode, &font2);
+	nc::TextNode text4(&rootNode, &font2);
 	text4.setScale(2.0f);
 	text4.setString(testString);
 	textHeight -= text4.fontBase();
@@ -70,14 +72,14 @@ int main(int argc, char **argv)
 	text4.enableKerning(false);
 	text4.setColor(0, 255, 0, 128);
 
-	ncTextNode text5(&rootNode, &font3);
+	nc::TextNode text5(&rootNode, &font3);
 	text5.setScale(2.0f);
 	text5.setString(testString);
 	textHeight -= text5.fontBase();
 	text5.setPosition((Width - text5.width()) * 0.5f, textHeight);
 	text5.setColor(0, 0, 255, 255);
 
-	ncTextNode text6(&rootNode, &font3);
+	nc::TextNode text6(&rootNode, &font3);
 	text6.setScale(2.0f);
 	text6.setString(testString);
 	textHeight -= text6.fontBase();
@@ -85,7 +87,7 @@ int main(int argc, char **argv)
 	text6.enableKerning(false);
 	text6.setColor(0, 0, 255, 128);
 
-	ncTimer updateTimer;
+	nc::Timer updateTimer;
 	updateTimer.start();
 
 
@@ -140,6 +142,6 @@ int main(int argc, char **argv)
 
 
 // ----- Quitting ----------------------
-	ncServiceLocator::unregisterAll();
+	nc::ServiceLocator::unregisterAll();
 	return 0;
 }
