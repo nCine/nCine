@@ -15,8 +15,8 @@ SpriteBatchNode::SpriteBatchNode(SceneNode* parent, Texture *texture)
 {
 	type_ = SPRITEBATCH_TYPE;
 	setPriority(DrawableNode::SCENE_PRIORITY);
-	renderCommand_.setType(RenderCommand::SPRITE_TYPE);
-	renderCommand_.material().setAlwaysTransparent(true);
+	renderCommand_->setType(RenderCommand::SPRITE_TYPE);
+	renderCommand_->material().setAlwaysTransparent(true);
 }
 
 ///////////////////////////////////////////////////////////
@@ -119,10 +119,10 @@ void SpriteBatchNode::processSprite(Sprite& sprite)
 
 void SpriteBatchNode::updateRenderCommand()
 {
-	renderCommand_.material().setTextureGLId(texture_->gLId());
-	renderCommand_.transformation().setPosition(absPosition().x, absPosition().y);
-	renderCommand_.geometry().setData(GL_TRIANGLES, 0, vertices_.size() / 2, vertices_.pointer(), texCoords_.pointer(), colors_.pointer());
-	renderCommand_.calculateSortKey();
+	renderCommand_->material().setTextureGLId(texture_->gLId());
+	renderCommand_->transformation().setPosition(absPosition().x, absPosition().y);
+	renderCommand_->geometry().setData(GL_TRIANGLES, 0, vertices_.size() / 2, vertices_.pointer(), texCoords_.pointer(), colors_.pointer());
+	renderCommand_->calculateSortKey();
 
 	applyTransformations();
 }

@@ -1,7 +1,9 @@
 #include <cstring>
 #include "Font.h"
+#include "FontGlyph.h"
 #include "IFile.h"
 #include "ServiceLocator.h"
+#include "Texture.h"
 
 namespace ncine {
 
@@ -11,14 +13,38 @@ namespace ncine {
 
 /// Constructs a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)
 Font::Font(const char *texFilename, const char *fntFilename)
-	: texture_(NULL), lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_ (0), numKernings_(0)
+	: texture_(NULL), lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_ (0), numKernings_(0), glyphs_(NULL)
 {
 	texture_ = new Texture(texFilename);
+	glyphs_ = new FontGlyph[MaxGlyphs];
 
 	IFile *fileHandle = IFile::createFileHandle(fntFilename);
 	fileHandle->open(IFile::MODE_READ);
 	parseFntFile(fileHandle);
 	delete fileHandle;
+}
+
+Font::~Font()
+{
+	delete[] glyphs_;
+	delete texture_;
+}
+
+///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
+
+/// Returns a constant pointer to a glyph
+const FontGlyph* Font::glyph(unsigned int glyphId) const
+{
+	if (glyphId < MaxGlyphs)
+	{
+		return &glyphs_[glyphId];
+	}
+	else
+	{
+		return NULL;
+	}
 }
 
 ///////////////////////////////////////////////////////////

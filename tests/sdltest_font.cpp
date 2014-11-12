@@ -9,6 +9,7 @@
 #include "FrameTimer.h"
 #include "ServiceLocator.h"
 #include "FileLogger.h"
+#include "RenderQueue.h"
 #include "SdlGfxDevice.h"
 #include "Font.h"
 #include "TextNode.h"

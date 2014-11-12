@@ -3,6 +3,7 @@
 #include "Texture.h"
 #include "ParticleSystem.h"
 #include "IInputManager.h"
+#include "Timer.h"
 #ifdef __ANDROID__
 	#include "AndroidInputManager.h"
 #endif

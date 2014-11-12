@@ -1,6 +1,7 @@
 #include <cstdlib> // for exit()
 #include "Texture.h"
 #include "ITextureLoader.h"
+#include "GfxCapabilities.h"
 #include "ServiceLocator.h"
 
 namespace ncine {

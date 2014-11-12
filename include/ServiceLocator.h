@@ -12,31 +12,32 @@
 #include "ILogger.h"
 #include "IAudioDevice.h"
 #include "IThreadPool.h"
-#include "GfxCapabilities.h"
 
 namespace ncine {
+
+class GfxCapabilities;
 
 /// Provides base services to requesting classes
 /*! It has memory ownership on service classes */
 class ServiceLocator
 {
   public:
-	/// Returns a pointer to the current indexer provider instance
+	/// Returns a reference to the current indexer provider instance
 	static IIndexer& indexer() { return *indexerService_; }
 	/// Registers an indexer service provider
 	static void registerIndexer(IIndexer* service);
 
-	/// Returns a pointer to the current logger provider instance
+	/// Returns a reference to the current logger provider instance
 	static ILogger& logger() { return *loggerService_; }
 	/// Registers a logger service provider
 	static void registerLogger(ILogger* service);
 
-	/// Returns a pointer to the current audio device instance
+	/// Returns a reference to the current audio device instance
 	static IAudioDevice& audioDevice() { return *audioDevice_; }
 	/// Registers an audio device provider
 	static void registerAudioDevice(IAudioDevice* service);
 
-	/// Returns a pointer to the current thread pool instance
+	/// Returns a reference to the current thread pool instance
 	static IThreadPool& threadPool() { return *threadPool_; }
 	/// Registers an audio device provider
 	static void registerThreadPool(IThreadPool* service);

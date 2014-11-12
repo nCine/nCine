@@ -13,6 +13,7 @@ namespace ncine {
 class Texture;
 class Vector2f;
 class Particle;
+class Rect;
 
 /// The class representing a particle system
 class ParticleSystem : public DrawableNode

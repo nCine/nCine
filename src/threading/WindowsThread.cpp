@@ -1,6 +1,8 @@
 #include "Thread.h"
 #include "ServiceLocator.h"
 
+namespace ncine {
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
@@ -98,4 +100,6 @@ unsigned int Thread::wrapperFunction(void* arg)
 	threadInfo->startFunction(threadInfo->threadArg);
 
 	return 0;
+}
+
 }

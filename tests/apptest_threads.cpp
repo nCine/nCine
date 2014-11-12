@@ -1,6 +1,7 @@
 #include "apptest_threads.h"
 #include "Thread.h"
 #include "Application.h"
+#include "Timer.h"
 #include "ServiceLocator.h"
 
 const int NumThreads = 2;

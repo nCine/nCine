@@ -37,7 +37,9 @@ TST=$(NCINE_ROOT)/tests
 
 LOCAL_MODULE := ncine
 LOCAL_CFLAGS := -Wall -ffast-math -DWITH_THREADS
-LOCAL_C_INCLUDES += $(LOCAL_PATH)/$(INC)
+LOCAL_C_INCLUDES += \
+	$(LOCAL_PATH)/$(INC) \
+	$(LOCAL_PATH)/$(SRC)/include
 LOCAL_SRC_FILES := \
 	main.cpp \
 	$(SRC)/base/Vector2f.cpp \
@@ -70,6 +72,7 @@ LOCAL_SRC_FILES := \
 	$(SRC)/graphics/PlottingVariable.cpp \
 	$(SRC)/graphics/LinePlotter.cpp \
 	$(SRC)/graphics/StackedBarPlotter.cpp \
+	$(SRC)/graphics/DrawableNode.cpp \
 	$(SRC)/graphics/SceneNode.cpp \
 	$(SRC)/graphics/Sprite.cpp \
 	$(SRC)/graphics/RenderCommand.cpp \

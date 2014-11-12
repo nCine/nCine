@@ -1,10 +1,13 @@
 #ifndef CLASS_NCINE_FONT
 #define CLASS_NCINE_FONT
 
-#include "Texture.h"
-#include "FontGlyph.h"
+#include "IFile.h"
+#include "Point.h"
 
 namespace ncine {
+
+class FontGlyph;
+class Texture;
 
 /// A class holding every information needed to correctly render text
 class Font
@@ -12,7 +15,7 @@ class Font
   public:
 	// Constructs a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)
 	Font(const char* texFilename, const char *fntFilename);
-	virtual ~Font() { delete texture_; }
+	virtual ~Font();
 
 	/// Gets the texture object
 	inline const Texture* texture() const { return texture_; }
@@ -49,7 +52,7 @@ class Font
 	/// Maximum number of glyphs in a font
 	static const unsigned int MaxGlyphs = 256;
 	/// Array of font glyphs
-	FontGlyph glyphs_[MaxGlyphs];
+	FontGlyph *glyphs_;
 
 	/// Preventing construction by copy
 	Font(const Font& other);
@@ -57,19 +60,6 @@ class Font
 	// Loads an AngelCode's FNT file in a RAM buffer then parses it
 	void parseFntFile(IFile *fileHandle);
 };
-
-/// Returns a constant pointer to a glyph
-inline const FontGlyph* Font::glyph(unsigned int glyphId) const
-{
-	if (glyphId < MaxGlyphs)
-	{
-		return &glyphs_[glyphId];
-	}
-	else
-	{
-		return NULL;
-	}
-}
 
 }
 

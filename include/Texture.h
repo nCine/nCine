@@ -15,11 +15,12 @@
 #endif
 
 #include "Object.h"
-#include "ITextureLoader.h"
 #include "Point.h"
 #include "Rect.h"
 
 namespace ncine {
+
+class ITextureLoader;
 
 /// Texture class
 class Texture : public Object

@@ -3,6 +3,7 @@
 #include "IAppEventHandler.h"
 #include "ServiceLocator.h"
 #include "ArrayIndexer.h"
+#include "FrameTimer.h"
 #include "FileLogger.h"
 #include "LinePlotter.h"
 #include "StackedBarPlotter.h"
@@ -274,6 +275,12 @@ void Application::shutdown()
 	LOGI("Application shutted down");
 
 	ServiceLocator::unregisterAll();
+}
+
+/// Returns the elapsed time since the end of the previous frame in milliseconds
+float Application::interval()
+{
+	return frameTimer_->interval();
 }
 
 /// Sets the pause flag value

@@ -1,6 +1,8 @@
 #include "ThreadSync.h"
 #include "ServiceLocator.h"
 
+namespace ncine {
+
 ///////////////////////////////////////////////////////////
 // Mutex CLASS
 ///////////////////////////////////////////////////////////
@@ -118,4 +120,6 @@ void CondVariable::waitEvents()
 	{
 		ResetEvent(events_[1]);    // Broadcast
 	}
+}
+
 }

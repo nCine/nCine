@@ -43,7 +43,7 @@ void Sprite::init()
 {
 	type_ = SPRITE_TYPE;
 	setPriority(DrawableNode::SCENE_PRIORITY);
-	renderCommand_.setType(RenderCommand::SPRITE_TYPE);
+	renderCommand_->setType(RenderCommand::SPRITE_TYPE);
 
 	if (texture_)
 	{
@@ -77,12 +77,12 @@ void Sprite::setTexCoords()
 
 void Sprite::updateRenderCommand()
 {
-	renderCommand_.material().setTextureGLId(texture_->gLId());
-	renderCommand_.material().setColor(absColor_);
-	renderCommand_.transformation().setPosition(absPosition().x, absPosition().y);
+	renderCommand_->material().setTextureGLId(texture_->gLId());
+	renderCommand_->material().setColor(absColor_);
+	renderCommand_->transformation().setPosition(absPosition().x, absPosition().y);
 	setVertices();
-	renderCommand_.geometry().setData(GL_TRIANGLE_STRIP, 0, 4, vertices_, texCoords_, NULL);
-	renderCommand_.calculateSortKey();
+	renderCommand_->geometry().setData(GL_TRIANGLE_STRIP, 0, 4, vertices_, texCoords_, NULL);
+	renderCommand_->calculateSortKey();
 
 	applyTransformations();
 }

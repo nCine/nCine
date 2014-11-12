@@ -1,4 +1,7 @@
 #include "TextNode.h"
+#include "FontGlyph.h"
+#include "Texture.h"
+#include "RenderCommand.h"
 #include "ServiceLocator.h"
 
 namespace ncine {
@@ -14,8 +17,8 @@ TextNode::TextNode(SceneNode* parent, Font* font)
 {
 	type_ = TEXT_TYPE;
 	setPriority(DrawableNode::HUD_PRIORITY);
-	renderCommand_.setType(RenderCommand::TEXT_TYPE);
-	renderCommand_.material().setAlwaysTransparent(true);
+	renderCommand_->setType(RenderCommand::TEXT_TYPE);
+	renderCommand_->material().setAlwaysTransparent(true);
 	memset(string_, 0, MaxStringLength);
 }
 
@@ -249,11 +252,11 @@ void TextNode::processGlyph(const FontGlyph* glyph)
 
 void TextNode::updateRenderCommand()
 {
-	renderCommand_.material().setTextureGLId(font_->texture()->gLId());
-	renderCommand_.material().setColor(absColor_);
-	renderCommand_.transformation().setPosition(absPosition().x, absPosition().y);
-	renderCommand_.geometry().setData(GL_TRIANGLES, 0, vertices_.size() / 2, vertices_.pointer(), texCoords_.pointer(), NULL);
-	renderCommand_.calculateSortKey();
+	renderCommand_->material().setTextureGLId(font_->texture()->gLId());
+	renderCommand_->material().setColor(absColor_);
+	renderCommand_->transformation().setPosition(absPosition().x, absPosition().y);
+	renderCommand_->geometry().setData(GL_TRIANGLES, 0, vertices_.size() / 2, vertices_.pointer(), texCoords_.pointer(), NULL);
+	renderCommand_->calculateSortKey();
 
 	if (dirtyDraw_)
 	{

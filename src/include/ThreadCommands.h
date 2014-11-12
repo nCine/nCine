@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_THREADCOMMANDS
 #define CLASS_NCINE_THREADCOMMANDS
 
-#include "Thread.h"
+#include "IThreadCommand.h"
 #include "ServiceLocator.h"
 #ifdef WITH_MULTITHREADING
 	#include "SceneNode.h"
@@ -9,22 +9,13 @@
 
 namespace ncine {
 
-/// Thread pool command interface
-class IThreadCommand
-{
-  public:
-	virtual ~IThreadCommand() { }
-
-	virtual void execute() = 0;
-};
-
 /// A dummy thread command for testing
 class DummyCommand : public IThreadCommand
 {
   public:
 	DummyCommand(unsigned int requestCode) : requestCode_(requestCode) { }
 
-	inline void execute() { LOGI_X("worker thread %u got request code %u", Thread::self(), requestCode_); }
+	inline void execute() { LOGI_X("worker thread got request code %u", requestCode_); }
 
   private:
 	unsigned int requestCode_;

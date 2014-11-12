@@ -1,5 +1,5 @@
-#ifndef CLASS_NCITHREADPOOL
-#define CLASS_NCITHREADPOOL
+#ifndef CLASS_NCINE_ITHREADPOOL
+#define CLASS_NCINE_ITHREADPOOL
 
 namespace ncine {
 
@@ -19,8 +19,8 @@ inline IThreadPool::~IThreadPool() { }
 
 #endif
 
-#ifndef CLASS_NCNULLTHREADPOOL
-#define CLASS_NCNULLTHREADPOOL
+#ifndef CLASS_NCINE_NULLTHREADPOOL
+#define CLASS_NCINE_NULLTHREADPOOL
 
 /// A fake thread pool which doesn't create any thread
 class NullThreadPool : public IThreadPool

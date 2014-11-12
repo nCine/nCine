@@ -1,5 +1,6 @@
 #include "ParticleAffectors.h"
 #include "Color.h"
+#include "Particle.h"
 #include "Array.h"
 
 namespace ncine {
@@ -7,6 +8,11 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+void AccelerationAffector::affect(Particle *particle)
+{
+	particle->velocity_ += acceleration_;
+}
 
 void ColorAffector::addColorStep(float time, Color color)
 {

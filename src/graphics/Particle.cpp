@@ -1,4 +1,5 @@
 #include "Particle.h"
+#include "RenderCommand.h"
 
 namespace ncine {
 
@@ -9,7 +10,7 @@ namespace ncine {
 Particle::Particle(SceneNode* parent, Texture *texture)
 	: Sprite(parent, texture), life_(0.0f), startingLife(0.0f), inLocalSpace_(false)
 {
-	renderCommand_.setType(RenderCommand::PARTICLE_TYPE);
+	renderCommand_->setType(RenderCommand::PARTICLE_TYPE);
 }
 
 ///////////////////////////////////////////////////////////

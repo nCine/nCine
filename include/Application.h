@@ -2,7 +2,6 @@
 #define CLASS_NCINE_APPLICATION
 
 #include <cstdio> // for NULL
-#include "FrameTimer.h"
 #include "IGfxDevice.h"
 
 struct android_app;
@@ -10,6 +9,7 @@ struct android_app;
 namespace ncine {
 
 class FrameTimer;
+class Timer;
 class SceneNode;
 class RenderQueue;
 class ProfilePlotter;
@@ -45,10 +45,8 @@ class Application
 	/// Returns the input manager instance
 	inline static IInputManager& inputManager() { return *inputManager_; }
 
-	/// Returns the elapsed time since the end of the previous frame in milliseconds
-	inline static float interval() { return frameTimer_->interval(); }
-	/// Returns the average FPS
-	inline static float averageFps() { return frameTimer_->averageFps(); }
+	// Returns the elapsed time since the end of the previous frame in milliseconds
+	static float interval();
 
 	/// Returns the screen width
 	inline static int width() { return gfxDevice_->width(); }

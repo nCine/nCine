@@ -1,5 +1,6 @@
 #include <cstdio> // for NULL
 #include "ServiceLocator.h"
+#include "GfxCapabilities.h"
 
 namespace ncine {
 

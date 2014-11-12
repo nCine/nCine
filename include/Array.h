@@ -60,9 +60,10 @@ class Array
 	unsigned int size_;
 	unsigned int capacity_;
 
-	// Preventing copy at the moment
+	/// Private copy constructor (preventing copy at the moment)
 	Array(const Array&);
-	void operator=(const Array&);
+	/// Private assignment operator (preventing copy at the moment)
+	Array& operator=(const Array&);
 };
 
 /// Sets a new capacity for the array (can be bigger or smaller than the current one)

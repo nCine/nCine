@@ -1,5 +1,5 @@
 #include "apptest_threadpool.h"
-#include "ThreadPool.h"
+#include "IThreadPool.h"
 #include "ThreadCommands.h"
 #include "Application.h"
 #include "ServiceLocator.h"

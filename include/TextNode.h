@@ -2,9 +2,9 @@
 #define CLASS_NCINE_TEXTNODE
 
 #include "DrawableNode.h"
-#include "RenderCommand.h"
 #include "Font.h"
 #include "Color.h"
+#include "Array.h"
 
 namespace ncine {
 

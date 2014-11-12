@@ -1,6 +1,7 @@
 #include <cstdlib> // for exit()
 #include "ThreadPool.h"
-#include "ThreadCommands.h"
+#include "Thread.h"
+#include "IThreadCommand.h"
 #include "ServiceLocator.h"
 
 namespace ncine {
@@ -95,6 +96,7 @@ void ThreadPool::workerFunction(void *arg)
 		IThreadCommand *threadCommand = threadStruct->queue->removeFront();
 		threadStruct->queueMutex->unlock();
 
+		LOGD_X("worker thread %u is executing its command", Thread::self());
 		threadCommand->execute();
 		delete threadCommand;
 	}

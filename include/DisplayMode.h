@@ -1,8 +1,6 @@
 #ifndef CLASS_NCDISPLAYMODE
 #define CLASS_NCDISPLAYMODE
 
-#include "Point.h"
-
 /// Display properties
 class DisplayMode
 {

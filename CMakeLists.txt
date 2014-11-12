@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 project(nCine)
 
+option(NCINE_BUILD_TESTS "Build the nCine test programs" ON)
+
 find_package(Threads)
 if(MSVC)
 	set(EXTERNAL_MSVC_DIR "${CMAKE_SOURCE_DIR}/external")
@@ -154,45 +156,48 @@ set(HEADERS
 	include/Rect.h
 	include/Color.h
 	include/Object.h
+	include/DrawableNode.h
 	include/IAppEventHandler.h
 	include/IInputEventHandler.h
-	include/DrawableNode.h
 	include/Vector2f.h
 	include/ServiceLocator.h
-	include/FileLogger.h
-	include/ArrayIndexer.h
-	include/Timer.h
-	include/FrameTimer.h
-	include/ProfileVariable.h
-	include/Font.h
-	include/FontGlyph.h
-	include/IFile.h
-	include/StandardFile.h
 	include/DisplayMode.h
+	include/Timer.h
+	include/Font.h
+	include/IFile.h
 	include/IGfxDevice.h
-	include/GfxCapabilities.h
-	include/TextureFormat.h
-	include/ITextureLoader.h
-	include/TextureLoaderDds.h
-	include/TextureLoaderPvr.h
-	include/TextureLoaderKtx.h
 	include/Texture.h
-	include/ProfilePlotter.h
-	include/PlottingVariable.h
-	include/LinePlotter.h
-	include/StackedBarPlotter.h
 	include/SceneNode.h
 	include/Sprite.h
-	include/RenderCommand.h
-	include/RenderQueue.h
 	include/SpriteBatchNode.h
 	include/Application.h
-	include/Particle.h
 	include/ParticleAffectors.h
 	include/ParticleSystem.h
 	include/TextNode.h
 	include/RectAnimation.h
 	include/AnimatedSprite.h
+)
+include_directories(src/include)
+set(PRIVATE_HEADERS
+	src/include/ArrayIndexer.h
+	src/include/FrameTimer.h
+	src/include/StandardFile.h
+	src/include/FileLogger.h
+	src/include/FontGlyph.h
+	src/include/ProfileVariable.h
+	src/include/PlottingVariable.h
+	src/include/ProfilePlotter.h
+	src/include/LinePlotter.h
+	src/include/StackedBarPlotter.h
+	src/include/RenderCommand.h
+	src/include/RenderQueue.h
+	src/include/Particle.h
+	src/include/GfxCapabilities.h
+	src/include/TextureFormat.h
+	src/include/ITextureLoader.h
+	src/include/TextureLoaderDds.h
+	src/include/TextureLoaderPvr.h
+	src/include/TextureLoaderKtx.h
 )
 set(SOURCES
 	src/base/Vector2f.cpp
@@ -218,6 +223,7 @@ set(SOURCES
 	src/graphics/PlottingVariable.cpp
 	src/graphics/LinePlotter.cpp
 	src/graphics/StackedBarPlotter.cpp
+	src/graphics/DrawableNode.cpp
 	src/graphics/SceneNode.cpp
 	src/graphics/Sprite.cpp
 	src/graphics/RenderCommand.cpp
@@ -233,19 +239,21 @@ set(SOURCES
 )
 
 if(GLFW_FOUND)
-	list(APPEND HEADERS include/GlfwInputManager.h)
-	list(APPEND HEADERS include/GlfwGfxDevice.h)
+	list(APPEND HEADERS include/GlfwKeys.h)
+	list(APPEND PRIVATE_HEADERS src/include/GlfwInputManager.h)
+	list(APPEND PRIVATE_HEADERS src/include/GlfwGfxDevice.h)
     list(APPEND SOURCES src/GlfwInputManager.cpp)
     list(APPEND SOURCES src/graphics/GlfwGfxDevice.cpp)
 endif()
 
 if(SDL_FOUND AND NOT GLFW_FOUND)
-	list(APPEND HEADERS include/SdlInputManager.h)
-	list(APPEND HEADERS include/SdlGfxDevice.h)
+	list(APPEND HEADERS include/SdlKeys.h)
+	list(APPEND PRIVATE_HEADERS src/include/SdlInputManager.h)
+	list(APPEND PRIVATE_HEADERS src/include/SdlGfxDevice.h)
     list(APPEND SOURCES src/SdlInputManager.cpp)
     list(APPEND SOURCES src/graphics/SdlGfxDevice.cpp)
 	if(SDLIMAGE_FOUND)
-		list(APPEND HEADERS include/TextureLoaderSdl.h)
+		list(APPEND PRIVATE_HEADERS src/include/TextureLoaderSdl.h)
         list(APPEND SOURCES src/graphics/TextureLoaderSdl.cpp)
 	endif()
 endif()
@@ -253,14 +261,17 @@ endif()
 if(OPENAL_FOUND)
 	list(APPEND HEADERS
 		include/IAudioDevice.h
-		include/ALAudioDevice.h
 		include/IAudioLoader.h
-		include/AudioLoaderWav.h
 		include/AudioBuffer.h
 		include/AudioStream.h
 		include/IAudioPlayer.h
 		include/AudioBufferPlayer.h
 		include/AudioStreamPlayer.h
+	)
+
+	list(APPEND PRIVATE_HEADERS
+		src/include/ALAudioDevice.h
+		src/include/AudioLoaderWav.h
 	)
 
 	list(APPEND SOURCES
@@ -274,23 +285,26 @@ if(OPENAL_FOUND)
 	)
 
 	if(VORBIS_FOUND)
-		list(APPEND HEADERS include/AudioLoaderOgg.h)
+		list(APPEND PRIVATE_HEADERS src/include/AudioLoaderOgg.h)
 		list(APPEND SOURCES src/audio/AudioLoaderOgg.cpp)
 	endif()
 endif()
 
 if(PNG_FOUND AND GLFW_FOUND)
-	list(APPEND HEADERS include/TextureLoaderPng.h)
+	list(APPEND PRIVATE_HEADERS src/include/TextureLoaderPng.h)
     list(APPEND SOURCES src/graphics/TextureLoaderPng.cpp)
 endif()
 if(WEBP_FOUND)
-	list(APPEND HEADERS include/TextureLoaderWebP.h)
+	list(APPEND PRIVATE_HEADERS src/include/TextureLoaderWebP.h)
 	list(APPEND SOURCES src/graphics/TextureLoaderWebP.cpp)
 endif()
 
 if(Threads_FOUND)
-	list(APPEND HEADERS include/Thread.h)
-	list(APPEND HEADERS include/ThreadSync.h)
+	list(APPEND HEADERS include/IThreadPool.h)
+	list(APPEND HEADERS include/IThreadCommand.h)
+	list(APPEND PRIVATE_HEADERS src/include/Thread.h)
+	list(APPEND PRIVATE_HEADERS src/include/ThreadSync.h)
+
 	if(MSVC OR CROSS_MINGW32)
 		list(APPEND SOURCES src/threading/WindowsThread.cpp)
 		list(APPEND SOURCES src/threading/WindowsThreadSync.cpp)
@@ -298,9 +312,10 @@ if(Threads_FOUND)
 		list(APPEND SOURCES src/threading/PosixThread.cpp)
 		list(APPEND SOURCES src/threading/PosixThreadSync.cpp)
 	endif()
-	list(APPEND HEADERS include/ThreadPool.h)
+
+	list(APPEND PRIVATE_HEADERS src/include/ThreadPool.h)
 	list(APPEND SOURCES src/threading/ThreadPool.cpp)
-	list(APPEND HEADERS include/ThreadCommands.h)
+	list(APPEND PRIVATE_HEADERS src/include/ThreadCommands.h)
 endif()
 
 link_libraries(
@@ -309,55 +324,14 @@ link_libraries(
 )
 
 if(MSVC)
-	add_Library(ncine STATIC ${SOURCES} ${HEADERS})
+	add_Library(ncine STATIC ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
 else()
-	add_library(ncine SHARED ${SOURCES} ${HEADERS})
+	add_library(ncine SHARED ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
 	if(CROSS_MINGW32)
 		set_target_properties(ncine PROPERTIES LINK_FLAGS "-Wl,--output-def,${CMAKE_CURRENT_BINARY_DIR}/ncine.def")
 	endif()
 endif()
 
-add_executable(apptest_mipmapping tests/main.cpp tests/apptest_mipmapping.cpp)
-target_link_libraries(apptest_mipmapping ncine)
-add_executable(apptest_joystick tests/main.cpp tests/apptest_joystick.cpp)
-target_link_libraries(apptest_joystick ncine)
-add_executable(apptest_overdraw tests/main.cpp tests/apptest_overdraw.cpp)
-target_link_libraries(apptest_overdraw ncine)
-add_executable(apptest_rotozoom tests/main.cpp tests/apptest_rotozoom.cpp)
-target_link_libraries(apptest_rotozoom ncine)
-if(OPENAL_FOUND)
-	add_executable(apptest_animsprites tests/main.cpp tests/apptest_animsprites.cpp)
-	target_link_libraries(apptest_animsprites ncine)
-endif()
-add_executable(apptest_particles tests/main.cpp tests/apptest_particles.cpp)
-target_link_libraries(apptest_particles ncine)
-#add_executable(test_radixsort tests/test_radixsort.cpp)
-#target_link_libraries(test_radixsort ncine)
-add_executable(apptest_scene tests/main.cpp tests/apptest_scene.cpp)
-target_link_libraries(apptest_scene ncine)
-add_executable(test_array tests/test_array.cpp)
-target_link_libraries(test_array ncine)
-add_executable(test_list tests/test_list.cpp)
-target_link_libraries(test_list ncine)
-
-if(SDL_FOUND AND NOT GLFW_FOUND)
-	if(OPENAL_FOUND)
-		add_executable(test_audio tests/test_audio.cpp)
-		target_link_libraries(test_audio ncine)
-	endif()
-	add_executable(test_font tests/test_font.cpp)
-	target_link_libraries(test_font ncine)
-	add_executable(test_particles tests/test_particles.cpp)
-	target_link_libraries(test_particles ncine)
-	add_executable(test_renderqueue tests/test_renderqueue.cpp)
-	target_link_libraries(test_renderqueue ncine)
-	add_executable(test_scene tests/test_scene.cpp)
-	target_link_libraries(test_scene ncine)
-endif()
-
-if(Threads_FOUND)
-	add_executable(apptest_threads tests/main.cpp tests/apptest_threads.cpp)
-	target_link_libraries(apptest_threads ncine)
-	add_executable(apptest_threadpool tests/main.cpp tests/apptest_threadpool.cpp)
-	target_link_libraries(apptest_threadpool ncine)
+if(NCINE_BUILD_TESTS)
+	add_subdirectory(tests)
 endif()

@@ -1,16 +1,13 @@
 #ifndef CLASS_NCINE_PARTICLEAFFECTORS
 #define CLASS_NCINE_PARTICLEAFFECTORS
 
-#include <ctime>
-#include <cstdlib>
-
-#include "Particle.h"
+#include "Vector2f.h"
+#include "Color.h"
+#include "Array.h"
 
 namespace ncine {
 
-class Vector2f;
-class Color;
-template <class T> class Array;
+class Particle;
 
 /// Base class for particle affectors
 class ParticleAffector
@@ -27,10 +24,7 @@ class AccelerationAffector: public ParticleAffector
 	/// X and Y components of the accelerator vector
 	AccelerationAffector(float x, float y) : acceleration_(x, y) { }
 
-	virtual void affect(Particle* particle)
-	{
-		particle->velocity_ += acceleration_;
-	}
+	virtual void affect(Particle* particle);
 
   private:
 	Vector2f acceleration_;

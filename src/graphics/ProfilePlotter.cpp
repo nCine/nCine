@@ -119,12 +119,12 @@ void ProfilePlotter::setBackgroundVertices()
 
 void ProfilePlotter::updateRenderCommand()
 {
-	renderCommand_.material().setTextureGLId(0);
-	renderCommand_.material().setColor(backgroundColor_);
-	renderCommand_.transformation().setPosition(absPosition().x, absPosition().y);
+	renderCommand_->material().setTextureGLId(0);
+	renderCommand_->material().setColor(backgroundColor_);
+	renderCommand_->transformation().setPosition(absPosition().x, absPosition().y);
 	setBackgroundVertices();
-	renderCommand_.geometry().setData(GL_TRIANGLE_STRIP, 0, 4, backgroundVertices_, NULL, NULL);
-	renderCommand_.calculateSortKey();
+	renderCommand_->geometry().setData(GL_TRIANGLE_STRIP, 0, 4, backgroundVertices_, NULL, NULL);
+	renderCommand_->calculateSortKey();
 
 	DrawableNode::applyTransformations();
 }

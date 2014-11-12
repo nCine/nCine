@@ -1,4 +1,5 @@
 #include "IGfxDevice.h"
+#include "GfxCapabilities.h"
 #include "ServiceLocator.h"
 
 #if defined(__ANDROID__)
