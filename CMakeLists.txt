@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.11)
 project(nCine)
 
 option(NCINE_BUILD_TESTS "Build the nCine test programs" ON)
@@ -6,7 +6,6 @@ option(NCINE_BUILD_TESTS "Build the nCine test programs" ON)
 find_package(Threads)
 if(MSVC)
 	set(EXTERNAL_MSVC_DIR "${CMAKE_SOURCE_DIR}/external")
-	include_directories("${EXTERNAL_MSVC_DIR}/include")
 	if(MSVC_C_ARCHITECTURE_ID MATCHES 64 OR MSVC_CXX_ARCHITECTURE_ID MATCHES 64)
 		set(LIBDIR "${EXTERNAL_MSVC_DIR}/lib/x64")
 	else()
@@ -132,7 +131,6 @@ endif()
 
 if(PNG_FOUND AND GLFW_FOUND)
 	add_definitions(-DWITH_PNG)
-	include_directories(${PNG_INCLUDE_DIR})
 	list(APPEND LINK_LIBS ${PNG_LIBRARY})
 endif()
 if(WEBP_FOUND)
@@ -147,7 +145,6 @@ if(Threads_FOUND)
 	#add_definitions(-DWITH_MULTITHREADING)
 endif()
 
-include_directories(include)
 set(HEADERS
 	include/Array.h
 	include/List.h
@@ -177,7 +174,7 @@ set(HEADERS
 	include/RectAnimation.h
 	include/AnimatedSprite.h
 )
-include_directories(src/include)
+
 set(PRIVATE_HEADERS
 	src/include/ArrayIndexer.h
 	src/include/FrameTimer.h
@@ -325,8 +322,15 @@ link_libraries(
 
 if(MSVC)
 	add_Library(ncine STATIC ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
+	target_include_directories(ncine PRIVATE "${EXTERNAL_MSVC_DIR}/include")
 else()
 	add_library(ncine SHARED ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
+
+	if(PNG_FOUND AND GLFW_FOUND)
+		target_include_directories(ncine PRIVATE ${PNG_INCLUDE_DIR})
+	endif()
+	target_include_directories(ncine PUBLIC include PRIVATE src/include)
+
 	if(CROSS_MINGW32)
 		set_target_properties(ncine PROPERTIES LINK_FLAGS "-Wl,--output-def,${CMAKE_CURRENT_BINARY_DIR}/ncine.def")
 	endif()
@@ -334,4 +338,5 @@ endif()
 
 if(NCINE_BUILD_TESTS)
 	add_subdirectory(tests)
+	add_subdirectory(src/tests)
 endif()
