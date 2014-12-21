@@ -53,6 +53,11 @@ class ParticleSystem : public DrawableNode
 	/// Should the system simulate in local space?
 	bool inLocalSpace_;
 
+	/// Private copy constructor
+	ParticleSystem(const ParticleSystem&);
+	/// Private assignment operator
+	ParticleSystem& operator=(const ParticleSystem&);
+
 	virtual void updateRenderCommand() { }
 };
 

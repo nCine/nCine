@@ -11,7 +11,6 @@ class AudioLoaderWav : public IAudioLoader
   public:
 	AudioLoaderWav(const char *filename);
 	AudioLoaderWav(IFile *fileHandle);
-	~AudioLoaderWav() { }
 
 	long read(char *buffer, int bufferSize) const;
 	void rewind() const;

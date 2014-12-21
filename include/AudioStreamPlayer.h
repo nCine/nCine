@@ -25,6 +25,11 @@ class AudioStreamPlayer : public IAudioPlayer
 
   private:
 	AudioStream audioStream_;
+
+	/// Private copy constructor
+	AudioStreamPlayer(const AudioStreamPlayer&);
+	/// Private assignment operator
+	AudioStreamPlayer& operator=(const AudioStreamPlayer&);
 };
 
 }

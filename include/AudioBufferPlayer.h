@@ -26,6 +26,11 @@ class AudioBufferPlayer : public IAudioPlayer
 
   private:
 	AudioBuffer *audioBuffer_;
+
+	/// Private copy constructor
+	AudioBufferPlayer(const AudioBufferPlayer&);
+	/// Private assignment operator
+	AudioBufferPlayer& operator=(const AudioBufferPlayer&);
 };
 
 }

@@ -33,6 +33,11 @@ class SdlGfxDevice : public IGfxDevice
 	inline void setWindowTitle(const char *windowTitle) { SDL_WM_SetCaption(windowTitle, NULL); }
 
   private:
+	/// Private copy constructor
+	SdlGfxDevice(const SdlGfxDevice&);
+	/// Private assignment operator
+	SdlGfxDevice& operator=(const SdlGfxDevice&);
+
 	// Initilizes the class
 	void init(int width, int height, DisplayMode mode, bool isWindowed);
 	// Initilizes the video subsystem (SDL)

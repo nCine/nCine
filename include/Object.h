@@ -64,6 +64,11 @@ class Object
 	/** This field is currently only useful in debug,
 	as there's still no string hashing based search. */
 	char name_[MaxNameLength];
+
+	/// Private copy constructor
+	Object(const Object&);
+	/// Private assignment operator
+	Object& operator=(const Object&);
 };
 
 /// Sets the object name

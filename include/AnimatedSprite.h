@@ -36,6 +36,11 @@ class AnimatedSprite : public Sprite
 	Array<RectAnimation *> anims_;
 	int currentAnim;
 
+	/// Private copy constructor
+	AnimatedSprite(const AnimatedSprite&);
+	/// Private assignment operator
+	AnimatedSprite& operator=(const AnimatedSprite&);
+
 	void init();
 };
 

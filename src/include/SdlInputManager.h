@@ -115,6 +115,11 @@ class SdlInputManager : public IInputManager
 	static JoyButtonEvent joyButtonEvent_;
 	static JoyAxisEvent joyAxisEvent_;
 
+	/// Private copy constructor
+	SdlInputManager(const SdlInputManager&);
+	/// Private assignment operator
+	SdlInputManager& operator=(const SdlInputManager&);
+
 	static short int hatEnumToAxisValue(unsigned char hatState, bool upDownAxis);
 };
 

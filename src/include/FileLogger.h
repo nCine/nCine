@@ -20,6 +20,11 @@ class FileLogger : public ILogger
 	IFile *fileHandle_;
 	LogLevel consoleLevel_;
 	LogLevel fileLevel_;
+
+	/// Private copy constructor
+	FileLogger(const FileLogger&);
+	/// Private assignment operator
+	FileLogger& operator=(const FileLogger&);
 };
 
 }

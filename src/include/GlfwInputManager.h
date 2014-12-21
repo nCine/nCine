@@ -13,8 +13,6 @@ class GlfwInputManager;
 class GlfwMouseState : public MouseState
 {
   public:
-	GlfwMouseState() { }
-
 	inline bool isLeftButtonDown() const { return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS); }
 	inline bool isMiddleButtonDown() const { return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS); }
 	inline bool isRightButtonDown() const { return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS); }
@@ -44,7 +42,6 @@ class GlfwMouseEvent : public MouseEvent
 class GlfwKeyboardState : public KeyboardState
 {
   public:
-	GlfwKeyboardState() { }
 	inline bool isKeyDown(KeySym key) const { return glfwGetKey(GlfwGfxDevice::windowHandle(), key) == GLFW_PRESS; }
 };
 

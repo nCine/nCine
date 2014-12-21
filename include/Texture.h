@@ -67,6 +67,11 @@ class Texture : public Object
 	bool isCompressed_;
 	bool hasAlphaChannel_;
 
+	/// Private copy constructor
+	Texture(const Texture&);
+	/// Private assignment operator
+	Texture& operator=(const Texture&);
+
 	// Loads a texture based on information from the texture format and loader
 	void load(const ITextureLoader& texLoader);
 	// Loads a texture overriding the size detected by the texture loader

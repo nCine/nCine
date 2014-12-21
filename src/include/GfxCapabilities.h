@@ -9,7 +9,6 @@ class GfxCapabilities
   public:
 	/// Default constructor
 	GfxCapabilities();
-	~GfxCapabilities() { }
 
 	// Logs OpenGL device info
 	void logGLInfo();

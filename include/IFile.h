@@ -135,11 +135,6 @@ class IFile
 
 	/// File size in bytes
 	long int fileSize_;
-
-	/// Private copy constructor (preventing copy at the moment)
-	IFile(const IFile&);
-	/// Private assignment operator (preventing copy at the moment)
-	IFile& operator=(const IFile&);
 };
 
 }

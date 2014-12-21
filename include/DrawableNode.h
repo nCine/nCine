@@ -41,6 +41,12 @@ class DrawableNode : public SceneNode
 
 	/// Updates the render command
 	virtual void updateRenderCommand() = 0;
+
+  private:
+	/// Private copy constructor
+	DrawableNode(const DrawableNode&);
+	/// Private assignment operator
+	DrawableNode& operator=(const DrawableNode&);
 };
 
 }

@@ -24,6 +24,11 @@ class StandardFile: public IFile
 	long int read(void *buffer, int bytes) const;
 
   private:
+	/// Private copy constructor
+	StandardFile(const StandardFile&);
+	/// Private assignment operator
+	StandardFile& operator=(const StandardFile&);
+
 	// Opens the file with open()
 	void openFD(unsigned char mode);
 	// Opens the file with fopen()

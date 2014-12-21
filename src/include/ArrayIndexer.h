@@ -24,6 +24,11 @@ class ArrayIndexer : public IIndexer
   private:
 	unsigned int nextId_;
 	Array<Object*> pointers_;
+
+	/// Private copy constructor
+	ArrayIndexer(const ArrayIndexer&);
+	/// Private assignment operator
+	ArrayIndexer& operator=(const ArrayIndexer&);
 };
 
 inline unsigned int ArrayIndexer::addObject(Object* object)

@@ -94,6 +94,10 @@ class Application
 
 	Application();
 	~Application();
+	/// Private copy constructor
+	Application(const Application&);
+	/// Private assignment operator
+	Application& operator=(const Application&);
 };
 
 }

@@ -77,6 +77,12 @@ class PlottingVariable
 	virtual void updateRenderCommand() = 0;
 	/// Updates the mean rendering command
 	virtual void updateMeanRenderCommand() = 0;
+
+  private:
+	/// Private copy constructor
+	PlottingVariable(const PlottingVariable&);
+	/// Private assignment operator
+	PlottingVariable& operator=(const PlottingVariable&);
 };
 
 }

@@ -79,6 +79,12 @@ class ProfilePlotter : public DrawableNode
 	virtual void updateRenderCommand();
 	// Updates the reference value rendering command
 	void UpdateRefValueRenderCommand();
+
+  private:
+	/// Private copy constructor
+	ProfilePlotter(const ProfilePlotter&);
+	/// Private assignment operator
+	ProfilePlotter& operator=(const ProfilePlotter&);
 };
 
 }

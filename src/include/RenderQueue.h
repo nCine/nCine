@@ -17,7 +17,6 @@ class RenderQueue
 	RenderQueue()
 		: numVertices_(0), lastNumVertices_(0), lastNumCommands_(0),
 		  opaqueRenderCommands_(16), transparentRenderCommands_(16) { }
-	~RenderQueue() { }
 
 	// Adds a draw command to the queue
 	void addCommand(const RenderCommand *command);

@@ -20,7 +20,6 @@ class Thread
 	Thread();
 	// Creates a thread around a function and runs it
 	Thread(ThreadFunctionPtr startFunction, void* arg);
-	~Thread() { }
 
 	// Gets the number of processors in the machine
 	static unsigned int numProcessors();

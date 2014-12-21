@@ -56,6 +56,11 @@ class ColorAffector: public ParticleAffector
 	};
 
 	Array<ColorStep *> colorSteps_;
+
+	/// Private copy constructor
+	ColorAffector(const ColorAffector&);
+	/// Private assignment operator
+	ColorAffector& operator=(const ColorAffector&);
 };
 
 /// Particle size affector
@@ -86,6 +91,11 @@ class SizeAffector: public ParticleAffector
 
 	Array<SizeStep *> sizeSteps_;
 	float baseScale_;
+
+	/// Private copy constructor
+	SizeAffector(const SizeAffector&);
+	/// Private assignment operator
+	SizeAffector& operator=(const SizeAffector&);
 };
 
 }

@@ -18,7 +18,6 @@ class Sprite : public DrawableNode
 	explicit Sprite(Texture *texture);
 	Sprite(SceneNode* parent, Texture *texture, float x, float y);
 	Sprite(Texture *texture, float x, float y);
-	virtual ~Sprite() { }
 
 	/// Returns sprite width
 	inline int width() const { return width_; }

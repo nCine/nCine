@@ -56,8 +56,10 @@ class ProfileVariable
 	float *values_;
 	Timer timer_;
 
-	/// Preventing construction by copy
-	ProfileVariable(const ProfileVariable& other);
+	/// Private copy constructor
+	ProfileVariable(const ProfileVariable&);
+	/// Private assignment operator
+	ProfileVariable& operator=(const ProfileVariable&);
 };
 
 }

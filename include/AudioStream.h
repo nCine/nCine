@@ -46,8 +46,10 @@ class AudioStream
 
 	// Constructor creating an audio stream from an audio file
 	AudioStream(const char *filename);
-	/// Preventing construction by copy
-	AudioStream(const AudioStream& other);
+	/// Private copy constructor
+	AudioStream(const AudioStream&);
+	/// Private assignment operator
+	AudioStream& operator=(const AudioStream&);
 
 	friend class AudioStreamPlayer;
 };

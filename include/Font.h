@@ -54,8 +54,10 @@ class Font
 	/// Array of font glyphs
 	FontGlyph *glyphs_;
 
-	/// Preventing construction by copy
-	Font(const Font& other);
+	/// Private copy constructor
+	Font(const Font&);
+	/// Private assignment operator
+	Font& operator=(const Font&);
 
 	// Loads an AngelCode's FNT file in a RAM buffer then parses it
 	void parseFntFile(IFile *fileHandle);

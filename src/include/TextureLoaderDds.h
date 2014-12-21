@@ -12,7 +12,6 @@ class TextureLoaderDds : public ITextureLoader
   public:
 	TextureLoaderDds(const char *filename);
 	TextureLoaderDds(IFile *fileHandle);
-	~TextureLoaderDds() { }
 
   private:
 	/// Header for the DDS pixel format

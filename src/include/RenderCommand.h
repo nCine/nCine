@@ -84,7 +84,6 @@ class RenderTransformation
 {
   public:
 	RenderTransformation() : x_(0.0f), y_(0.0f), xScale_(1.0f), yScale_(1.0f), rotation_(0.0f) { }
-
 	RenderTransformation(float x, float y)
 		: x_(x), y_(y), xScale_(1.0f), yScale_(1.0f), rotation_(0.0f) { }
 

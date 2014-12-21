@@ -29,8 +29,6 @@ class DisplayMode
 		  alphaBits_(alphaBits), bufferBits_(bufferBits),
 		  depthBits_(depthBits), stencilBits_(stencilBits),
 		  isDoubleBuffered_(doubleBuffered), hasVSync_(withVSync) { }
-	// Destructor
-	~DisplayMode() { }
 
 	// Getters
 	/// Returns the number of bits for the red channel

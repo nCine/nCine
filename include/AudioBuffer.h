@@ -40,6 +40,11 @@ class AudioBuffer : public Object
 	/// Samples frequency
 	int frequency_;
 
+	/// Private copy constructor
+	AudioBuffer(const AudioBuffer&);
+	/// Private assignment operator
+	AudioBuffer& operator=(const AudioBuffer&);
+
 	// Loads audio samples based on information from the audio loader
 	void load(const IAudioLoader *audioLoader);
 };

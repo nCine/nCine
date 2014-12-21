@@ -12,7 +12,6 @@ class TextureLoaderWebP : public ITextureLoader
   public:
 	TextureLoaderWebP(const char *filename);
 	TextureLoaderWebP(IFile *fileHandle);
-	~TextureLoaderWebP() { }
 
   private:
 	void init();

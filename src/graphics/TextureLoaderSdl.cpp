@@ -20,6 +20,15 @@ TextureLoaderSdl::TextureLoaderSdl(IFile *fileHandle)
 	init();
 }
 
+TextureLoaderSdl::~TextureLoaderSdl()
+{
+	if (sdlSurface_)
+	{
+		SDL_FreeSurface(sdlSurface_);
+		pixels_ = NULL;
+	}
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -62,15 +71,6 @@ void TextureLoaderSdl::init()
 	height_ = sdlSurface_->h;
 	mipMapCount_ = 1; // No MIP Mapping
 	pixels_ = static_cast<GLubyte*>(sdlSurface_->pixels);
-}
-
-TextureLoaderSdl::~TextureLoaderSdl()
-{
-	if (sdlSurface_)
-	{
-		SDL_FreeSurface(sdlSurface_);
-		pixels_ = NULL;
-	}
 }
 
 }

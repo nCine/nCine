@@ -15,7 +15,6 @@ class SpriteBatchNode : public DrawableNode
 {
   public:
 	SpriteBatchNode(SceneNode* parent, Texture *texture);
-	virtual ~SpriteBatchNode() { }
 
 	inline Texture* texture() { return texture_; }
 	inline void setTexture(Texture* texture) { texture_ = texture; }

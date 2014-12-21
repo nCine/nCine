@@ -12,7 +12,6 @@ class TextureLoaderPvr : public ITextureLoader
   public:
 	TextureLoaderPvr(const char *filename);
 	TextureLoaderPvr(IFile *fileHandle);
-	~TextureLoaderPvr() { }
 
   private:
 	/// Header for the PVR3 format

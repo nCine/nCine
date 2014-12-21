@@ -50,6 +50,11 @@ class ALAudioDevice : public IAudioDevice
 	/// A list of active audio players
 	List<IAudioPlayer *> players_;
 
+	/// Private copy constructor
+	ALAudioDevice(const ALAudioDevice&);
+	/// Private assignment operator
+	ALAudioDevice& operator=(const ALAudioDevice&);
+
 	// Stops or pauses all buffer players
 	void stopOrPauseBufferPlayers(bool shouldStop);
 	// Stops or pauses all stream players

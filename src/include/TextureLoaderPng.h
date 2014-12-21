@@ -12,7 +12,6 @@ class TextureLoaderPng : public ITextureLoader
   public:
 	TextureLoaderPng(const char *filename);
 	TextureLoaderPng(IFile *fileHandle);
-	~TextureLoaderPng() { }
 
   private:
 	void init();

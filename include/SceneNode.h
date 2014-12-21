@@ -118,6 +118,11 @@ class SceneNode : public Object
 	/// Absolute node color as calculated by the Transform() function
 	Color absColor_;
 
+	/// Private copy constructor
+	SceneNode(const SceneNode&);
+	/// Private assignment operator
+	SceneNode& operator=(const SceneNode&);
+
 	virtual void transform();
 };
 

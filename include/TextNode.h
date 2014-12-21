@@ -25,7 +25,6 @@ class TextNode : public DrawableNode
 	static const unsigned int MaxStringLength = 256;
 
 	TextNode(SceneNode* parent, Font *font);
-	virtual ~TextNode() { }
 
 	// Returns rendered text width
 	float width() const;

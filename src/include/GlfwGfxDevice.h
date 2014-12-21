@@ -42,6 +42,11 @@ class GlfwGfxDevice : public IGfxDevice
 	/// GLFW3 window handle
 	static GLFWwindow *windowHandle_;
 
+	/// Private copy constructor
+	GlfwGfxDevice(const GlfwGfxDevice&);
+	/// Private assignment operator
+	GlfwGfxDevice& operator=(const GlfwGfxDevice&);
+
 	// Initilizes the class
 	void init(int width, int height, DisplayMode mode, bool isWindowed);
 	// Initilizes the video subsystem (GLFW)
