@@ -1,5 +1,3 @@
-#include "ServiceLocator.h"
-#include "FileLogger.h"
 #include "Array.h"
 
 namespace nc = ncine;
@@ -15,8 +13,6 @@ void printArray(const nc::Array<int> &array)
 
 int main(int argc, char **argv)
 {
-	nc::ServiceLocator::registerLogger(new nc::FileLogger("log.txt", nc::ILogger::LOG_VERBOSE, nc::ILogger::LOG_OFF));
-
 	const int Capacity = 10;
 	nc::Array<int> array(Capacity);
 
@@ -51,12 +47,24 @@ int main(int argc, char **argv)
 	array.removeAt(2);
 	printArray(array);
 
-	printf("Clearing the whole array\n");
+	printf("\nCreating a second array with copy construction\n");
+	nc::Array<int> array2(array);
+
+	printf("Creating a third array with the assignment operator\n");
+	nc::Array<int> array3 = array;
+
+	printf("Clearing the first array\n");
 	if (!array.isEmpty())
 	{
 		array.clear();
 	}
 	printArray(array);
+
+	printf("Contents of second array\n");
+	printArray(array2);
+
+	printf("Contents of third array\n");
+	printArray(array3);
 
 	return 0;
 }

@@ -41,6 +41,24 @@ class List
 	List() : head_(NULL), tail_(NULL) { }
 	~List() { clear(); }
 
+	// Copy constructor
+	List(const List& other);
+	// Copy-and-swap assignment operator
+	List& operator=(List other);
+
+	/// Swaps two lists without copying their data
+	void swap(List& first, List& second)
+	{
+		ListNode<T>* tempHead = first.head_;
+		ListNode<T>* tempTail = first.tail_;
+
+		first.head_ = second.head_;
+		first.tail_ = second.tail_;
+
+		second.head_ = tempHead;
+		second.tail_ = tempTail;
+	}
+
 	/// Returns true if the list is empty
 	inline bool isEmpty() const { return head_ == NULL; }
 
@@ -83,11 +101,6 @@ class List
 	/// Pointer to the last node in the list
 	ListNode<T> *tail_;
 
-	/// Private copy constructor (preventing copy at the moment)
-	List(const List&);
-	/// Private assignment operator (preventing copy at the moment)
-	List& operator=(const List&);
-
 	// Inserts a new element after a specified node
 	void insertAfter(ListNode<T> *node, const T& element);
 	// Inserts a new element before a specified node
@@ -97,6 +110,27 @@ class List
 
 	friend class ListIterator<T>;
 };
+
+/// Copy constructor
+template <class T>
+List<T>::List(const List<T>& other)
+	: head_(NULL), tail_(NULL)
+{
+	for (List<T>::Const_Iterator i = other.begin(); i != other.end(); ++i)
+	{
+		T element(*i);
+		insertBack(element);
+	}
+}
+
+/// Copy-and-swap assignment operator
+/** The parameter should be passed by value for the idiom to work */
+template <class T>
+List<T>& List<T>::operator=(List<T> other)
+{
+	swap(*this, other);
+	return *this;
+}
 
 /// Clears the list
 template <class T>

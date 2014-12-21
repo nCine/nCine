@@ -17,3 +17,8 @@ add_executable(apptest_particles main.cpp apptest_particles.cpp)
 target_link_libraries(apptest_particles ncine)
 add_executable(apptest_scene main.cpp apptest_scene.cpp)
 target_link_libraries(apptest_scene ncine)
+
+add_executable(test_array test_array.cpp)
+target_link_libraries(test_array ncine)
+add_executable(test_list test_list.cpp)
+target_link_libraries(test_list ncine)

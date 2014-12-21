@@ -21,13 +21,34 @@ class Array
 	}
 	~Array() { delete[] array_; }
 
+	// Copy constructor
+	Array(const Array& other);
+	// Copy-and-swap assignment operator
+	Array& operator=(Array other);
+
+	/// Swaps two arrays without copying their data
+	void swap(Array& first, Array& second)
+	{
+		T* tempArray = first.array_;
+		unsigned int tempSize = first.size_;
+		unsigned int tempCapacity = first.capacity_;
+
+		first.array_ = second.array_;
+		first.size_ = second.size_;
+		first.capacity_ = second.capacity_;
+
+		second.array_ = tempArray;
+		second.size_ = tempSize;
+		second.capacity_ = tempCapacity;
+	}
+
 	/// Returns true if the array is empty
 	inline bool isEmpty() const { return size_ == 0; }
 	/// Returns the array size
 	/** The array is filled without gaps until the Size()-1 element */
 	inline unsigned int size() const { return size_; }
-	/// Returns the array size
-	/// The array has memory allocated to store untile the Capacity()-1 element
+	/// Returns the array capacity
+	/// The array has memory allocated to store until the Capacity()-1 element
 	inline unsigned int capacity() const { return capacity_; }
 	// Set a new capacity for the array (can be bigger or smaller than the current one)
 	void setCapacity(unsigned int newCapacity);
@@ -59,12 +80,25 @@ class Array
 	T* array_;
 	unsigned int size_;
 	unsigned int capacity_;
-
-	/// Private copy constructor (preventing copy at the moment)
-	Array(const Array&);
-	/// Private assignment operator (preventing copy at the moment)
-	Array& operator=(const Array&);
 };
+
+/// Copy constructor
+template <class T>
+Array<T>::Array(const Array<T>& other)
+	: array_(NULL), size_(other.size_), capacity_(other.capacity_)
+{
+	array_ = new T[capacity_];
+	memcpy(array_, other.array_, sizeof(T) * size_);
+}
+
+/// Copy-and-swap assignment operator
+/** The parameter should be passed by value for the idiom to work */
+template <class T>
+Array<T>& Array<T>::operator=(Array<T> other)
+{
+	swap(*this, other);
+	return *this;
+}
 
 /// Sets a new capacity for the array (can be bigger or smaller than the current one)
 template <class T>
@@ -72,7 +106,7 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 {
 	if (newCapacity == 0)
 	{
-		LOGF("Zero is not valid capacity");
+		LOGF("Zero is not a valid capacity");
 		exit(EXIT_FAILURE);
 	}
 

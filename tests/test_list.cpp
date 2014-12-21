@@ -1,5 +1,3 @@
-#include "ServiceLocator.h"
-#include "FileLogger.h"
 #include "List.h"
 
 namespace nc = ncine;
@@ -18,8 +16,6 @@ void printList(const nc::List<int> &list)
 
 int main(int argc, char **argv)
 {
-	nc::ServiceLocator::registerLogger(new nc::FileLogger("log.txt", nc::ILogger::LOG_VERBOSE, nc::ILogger::LOG_OFF));
-
 	nc::List<int> list;
 
 	printf("Inserting some elements to the back\n");
@@ -84,7 +80,14 @@ int main(int argc, char **argv)
 	}
 	printf("\n");
 
-	printf("\nClearing the whole list\n");
+
+	printf("\nCreating a second list with copy construction\n");
+	nc::List<int> list2(list);
+
+	printf("Creating a third list with the assignment operator\n");
+	nc::List<int> list3 = list;
+
+	printf("Clearing the first list\n");
 	if (!list.isEmpty())
 	{
 		list.clear();
@@ -94,6 +97,12 @@ int main(int argc, char **argv)
 	printf("Removing last node on empty\n");
 	list.remove(list.revBegin());
 	printList(list);
+
+	printf("Contents of second list\n");
+	printList(list2);
+
+	printf("Contents of third list\n");
+	printList(list3);
 
 	return 0;
 }

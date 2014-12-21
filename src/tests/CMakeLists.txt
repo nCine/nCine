@@ -14,13 +14,6 @@ endif()
 #target_link_libraries(test_radixsort ncine)
 #target_include_directories(test_radixsort PRIVATE ../include)
 
-add_executable(test_array test_array.cpp)
-target_link_libraries(test_array ncine)
-target_include_directories(test_array PRIVATE ../include)
-add_executable(test_list test_list.cpp)
-target_link_libraries(test_list ncine)
-target_include_directories(test_list PRIVATE ../include)
-
 if(SDL_FOUND AND NOT GLFW_FOUND)
 	if(OPENAL_FOUND)
 		add_executable(sdltest_audio sdltest_audio.cpp)
