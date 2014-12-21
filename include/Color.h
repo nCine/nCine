@@ -16,12 +16,6 @@ class Color
 	/// Three channels constructor (unsigned char)
 	Color(unsigned char red, unsigned char green, unsigned char blue)
 	{ set(red, green, blue); }
-	/// Four channels constructor (unsigned int)
-	Color(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha)
-	{ set(red, green, blue, alpha); }
-	/// Three channels constructor (unsigned int)
-	Color(unsigned int red, unsigned int green, unsigned int blue)
-	{ set(red, green, blue); }
 	/// Four channels constructor (normalized float)
 	Color(float red, float green, float blue, float alpha)
 	{ setF(red, green, blue, alpha); }

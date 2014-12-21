@@ -48,7 +48,7 @@ ProfilePlotter *Application::profilePlotter_ = NULL;
 Font *Application::font_ = NULL;
 TextNode *Application::textLines_ = NULL;
 float Application::textUpdateTime = 0.0f;
-char Application::textChars_[256] = "";
+char Application::textChars_[];
 IInputManager *Application::inputManager_ = NULL;
 IAppEventHandler *Application::appEventHandler_ = NULL;
 

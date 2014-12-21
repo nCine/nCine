@@ -45,9 +45,9 @@ class Object
 	inline static ObjectType sType() { return BASE_TYPE; }
 
 	/// Returns object name
-	char const * const name() const { return name_; }
-	/// Sets the object name
-	inline void setName(const char name[MaxNameLength]) { strncpy(name_, name, MaxNameLength); }
+	const char* name() const { return name_; }
+	// Sets the object name
+	void setName(const char name[MaxNameLength]);
 
 	// Returns a casted pointer to the object with the specified id, if any exists
 	template <class T> static T* fromId(unsigned int id);
@@ -65,6 +65,13 @@ class Object
 	as there's still no string hashing based search. */
 	char name_[MaxNameLength];
 };
+
+/// Sets the object name
+inline void Object::setName(const char name[MaxNameLength])
+{
+	strncpy(name_, name, MaxNameLength);
+	name_[MaxNameLength - 1] = '\0';
+}
 
 /// Returns a casted pointer to the object with the specified id, if any exists
 template <class T>

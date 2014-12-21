@@ -12,12 +12,12 @@ class FontGlyph
 {
   public:
 	FontGlyph();
-	FontGlyph(unsigned short x, unsigned short y, unsigned short width, unsigned short height,
-				short xOffset, short yOffset, unsigned short xAdvance);
+	FontGlyph(unsigned int x, unsigned int y, unsigned int width, unsigned int height,
+				int xOffset, int yOffset, unsigned int xAdvance);
 
 	/// Sets glyph properties
-	void set(unsigned short x, unsigned short y, unsigned short width, unsigned short height,
-			 short xOffset, short yOffset, unsigned short xAdvance);
+	void set(unsigned int x, unsigned int y, unsigned int width, unsigned int height,
+			 int xOffset, int yOffset, unsigned int xAdvance);
 
 	/// Return the size in pixels of a glyph
 	inline Point size() const { return Point(width_, height_); }
@@ -26,7 +26,7 @@ class FontGlyph
 	/// Return the X and Y offset of a glyph
 	inline Point offset() const { return Point(xOffset_, yOffset_); }
 	/// Return the X offset to advance in order to start rendering the next glyph
-	inline unsigned short xAdvance() const { return xAdvance_; }
+	inline unsigned int xAdvance() const { return xAdvance_; }
 
 	/// Add kerning amount for a subsequent glyph
 	inline void addKerning(int secondGlyph, int amount) { kernings_.insertBack(Kerning(secondGlyph, amount)); }
@@ -48,19 +48,19 @@ class FontGlyph
 		}
 	};
 
-	unsigned short x_;
-	unsigned short y_;
-	unsigned short width_;
-	unsigned short height_;
-	short xOffset_;
-	short yOffset_;
-	unsigned short xAdvance_;
+	unsigned int x_;
+	unsigned int y_;
+	unsigned int width_;
+	unsigned int height_;
+	int xOffset_;
+	int yOffset_;
+	unsigned int xAdvance_;
 	Array<Kerning> kernings_;
 };
 
 /// Sets glyph properties
-inline void FontGlyph::set(unsigned short x, unsigned short y, unsigned short width, unsigned short height,
-	short xOffset, short yOffset, unsigned short xAdvance)
+inline void FontGlyph::set(unsigned int x, unsigned int y, unsigned int width, unsigned int height,
+	int xOffset, int yOffset, unsigned int xAdvance)
 {
 	x_ = x;
 	y_ = y;

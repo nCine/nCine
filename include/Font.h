@@ -23,13 +23,13 @@ class Font
 	inline void setTexture(Texture *texture) { texture_ = texture; }
 
 	/// Returns font line height
-	inline unsigned short lineHeight() const { return lineHeight_; }
+	inline unsigned int lineHeight() const { return lineHeight_; }
 	/// Returns font base
-	inline unsigned short base() const { return base_; }
+	inline unsigned int base() const { return base_; }
 	/// Returns texture atlas size
 	inline Point textureSize() const { return Point(width_, height_); }
 	/// Returns number of glyphs
-	inline unsigned short numGlyphs() const { return numGlyphs_; }
+	inline unsigned int numGlyphs() const { return numGlyphs_; }
 	/// Reurns a constant pointer to a glyph
 	const FontGlyph* glyph(unsigned int glyphId) const;
 

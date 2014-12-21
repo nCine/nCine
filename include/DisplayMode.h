@@ -1,6 +1,8 @@
 #ifndef CLASS_NCDISPLAYMODE
 #define CLASS_NCDISPLAYMODE
 
+namespace ncine {
+
 /// Display properties
 class DisplayMode
 {
@@ -70,5 +72,7 @@ class DisplayMode
 	/// VSync flag
 	bool hasVSync_;
 };
+
+}
 
 #endif

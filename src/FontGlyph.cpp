@@ -15,8 +15,8 @@ FontGlyph::FontGlyph()
 
 }
 
-FontGlyph::FontGlyph(unsigned short x, unsigned short y, unsigned short width, unsigned short height,
-	short xOffset, short yOffset, unsigned short xAdvance)
+FontGlyph::FontGlyph(unsigned int x, unsigned int y, unsigned int width, unsigned int height,
+	int xOffset, int yOffset, unsigned int xAdvance)
 	: x_(x), y_(y), width_(width), height_(height),
 	  xOffset_(xOffset), yOffset_(yOffset), xAdvance_(xAdvance),
 	  kernings_(4)

@@ -25,7 +25,7 @@ class Vector2f
 	void set(float const xx, float const yy);
 
 	/// Calculates vector length
-	inline float length() const { return sqrt(x * x + y * y); }
+	inline float length() const { return sqrtf(x * x + y * y); }
 	// Vector normalization
 	Vector2f& normalize();
 	// Dot product
