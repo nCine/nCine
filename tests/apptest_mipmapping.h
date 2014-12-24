@@ -1,36 +1,43 @@
 #ifndef CLASS_MYEVENTHANDLER
 #define CLASS_MYEVENTHANDLER
 
-#include "ncIAppEventHandler.h"
-#include "ncIInputEventHandler.h"
-class ncSceneNode;
-class ncTexture;
-class ncSprite;
+#include "IAppEventHandler.h"
+#include "IInputEventHandler.h"
+
+namespace ncine {
+
+class SceneNode;
+class Texture;
+class Sprite;
+
+}
+
+namespace nc = ncine;
 
 /// My nCine event handler
 class MyEventHandler
-	: public ncIAppEventHandler,
-	  public ncIInputEventHandler
+	: public nc::IAppEventHandler,
+	  public nc::IInputEventHandler
 {
-private:
-	bool m_bPause;
-	ncSceneNode *m_pDummy;
-	ncTexture *m_pTexture;
-	ncSprite *m_pSprite;
-	unsigned int m_uDivider;
-
-public:
-	virtual void OnInit();
-	virtual void OnFrameStart();
-	virtual void OnFrameEnd() { }
-	virtual void OnShutdown();
+  public:
+	virtual void onInit();
+	virtual void onFrameStart();
+	virtual void onFrameEnd() { }
+	virtual void onShutdown();
 
 #ifdef __ANDROID__
-	virtual void OnTouchUp(const ncTouchEvent &event);
+	virtual void onTouchUp(const nc::TouchEvent &event);
 #else
-	virtual void OnKeyReleased(const ncKeyboardEvent &event);
-	virtual void OnMouseButtonReleased(const ncMouseEvent &event);
+	virtual void onKeyReleased(const nc::KeyboardEvent &event);
+	virtual void onMouseButtonReleased(const nc::MouseEvent &event);
 #endif
+
+  private:
+	bool pause_;
+	nc::SceneNode *dummy_;
+	nc::Texture *texture_;
+	nc::Sprite *sprite_;
+	unsigned int divider_;
 };
 
 #endif

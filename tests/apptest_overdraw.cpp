@@ -1,63 +1,63 @@
 #define _USE_MATH_DEFINES // for M_PI in MSVC
 #include <cmath>
 #include "apptest_overdraw.h"
-#include "ncSceneNode.h"
-#include "ncTexture.h"
-#include "ncSprite.h"
-#include "ncApplication.h"
+#include "SceneNode.h"
+#include "Texture.h"
+#include "Sprite.h"
+#include "Application.h"
 
-static const int numSprites = 100;
-
-ncIAppEventHandler* create_apphandler()
+nc::IAppEventHandler* createApphandler()
 {
 	return new MyEventHandler;
 }
 
-void MyEventHandler::OnInit()
+void MyEventHandler::onInit()
 {
-	ncIInputManager::SetHandler(this);
-	ncSceneNode &rRootNode = ncApplication::RootNode();
+	nc::IInputManager::setHandler(this);
+	nc::SceneNode &rRootNode = nc::Application::rootNode();
 
 #ifdef __ANDROID__
-	m_pMegaTexture = new ncTexture("/sdcard/ncine/megatexture_256.dds");
-	m_pAlphaTexture = new ncTexture("/sdcard/ncine/transparent_128.png");
+	megaTexture_ = new nc::Texture("/sdcard/ncine/megatexture_256.dds");
+	alphaTexture_ = new nc::Texture("/sdcard/ncine/transparent_128.png");
 #else
-	m_pMegaTexture = new ncTexture("textures/megatexture_256.png");
-	m_pAlphaTexture = new ncTexture("textures/transparent_128.png");
+	megaTexture_ = new nc::Texture("textures/megatexture_256.png");
+	alphaTexture_ = new nc::Texture("textures/transparent_128.png");
 #endif
 
-	m_pDummy = new ncSceneNode(&rRootNode, ncApplication::Width()*0.5f, ncApplication::Height()*0.5f);
+	dummy_ = new nc::SceneNode(&rRootNode, nc::Application::width() * 0.5f, nc::Application::height() * 0.5f);
 
-	m_pSprites = new ncSprite*[numSprites];
-	for (int i = 0; i < numSprites; i++)
+	sprites_ = new nc::Sprite*[NumSprites];
+	for (int i = 0; i < NumSprites; i++)
 	{
-		m_pSprites[i] = new ncSprite(m_pDummy, m_pMegaTexture, 0, 0);
-		m_pSprites[i]->SetScale(1.35f);
-		m_pSprites[i]->SetPriority(ncDrawableNode::SCENE_PRIORITY + 5);
+		sprites_[i] = new nc::Sprite(dummy_, megaTexture_, 0, 0);
+		sprites_[i]->setScale(1.35f);
+		sprites_[i]->setPriority(nc::DrawableNode::SCENE_PRIORITY + 5);
 	}
 
-	m_pAlphaSpriteBottom = new ncSprite(m_pDummy, m_pAlphaTexture, 0, 150);
-	m_pAlphaSpriteBottom->SetScale(2.0f);
-	m_pAlphaSpriteBottom->SetPriority(ncDrawableNode::SCENE_PRIORITY + 1);
-	m_pAlphaSpriteBottom->SetColor(0, 0, 255, 255);
-	m_pAlphaSpriteTop = new ncSprite(m_pDummy, m_pAlphaTexture, -0, -150);
-	m_pAlphaSpriteTop->SetScale(2.0f);
-	m_pAlphaSpriteTop->SetPriority(ncDrawableNode::SCENE_PRIORITY + 10);
-	m_pAlphaSpriteTop->SetColor(255, 0, 0, 255);
+	alphaSpriteBottom_ = new nc::Sprite(dummy_, alphaTexture_, 0, 150);
+	alphaSpriteBottom_->setScale(2.0f);
+	alphaSpriteBottom_->setPriority(nc::DrawableNode::SCENE_PRIORITY + 1);
+	alphaSpriteBottom_->setColor(0, 0, 255, 255);
+	alphaSpriteTop_ = new nc::Sprite(dummy_, alphaTexture_, -0, -150);
+	alphaSpriteTop_->setScale(2.0f);
+	alphaSpriteTop_->setPriority(nc::DrawableNode::SCENE_PRIORITY + 10);
+	alphaSpriteTop_->setColor(255, 0, 0, 255);
 }
 
-void MyEventHandler::OnShutdown()
+void MyEventHandler::onShutdown()
 {
-	delete m_pDummy; // and all its children
-	delete[] m_pSprites;
-	delete m_pMegaTexture;
-	delete m_pAlphaTexture;
+	delete dummy_; // and all its children
+	delete[] sprites_;
+	delete megaTexture_;
+	delete alphaTexture_;
 }
 
 #ifndef __ANDROID__
-void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
+void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)
-		ncApplication::Quit();
+	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
+	{
+		nc::Application::quit();
+	}
 }
 #endif

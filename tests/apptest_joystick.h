@@ -1,40 +1,48 @@
 #ifndef CLASS_MYEVENTHANDLER
 #define CLASS_MYEVENTHANDLER
 
-#include "ncIAppEventHandler.h"
-#include "ncIInputEventHandler.h"
-class ncTexture;
-class ncSprite;
-class ncFont;
-class ncTextNode;
+#include "IAppEventHandler.h"
+#include "IInputEventHandler.h"
+
+namespace ncine {
+
+class Texture;
+class Sprite;
+class Font;
+class TextNode;
+
+}
+
+namespace nc = ncine;
 
 /// My nCine event handler
 class MyEventHandler
-	: public ncIAppEventHandler,
-	  public ncIInputEventHandler
+	: public nc::IAppEventHandler,
+	  public nc::IInputEventHandler
 {
-private:
-	ncTexture *m_pTexture;
-	ncSprite *m_pSprites[2];
-	ncFont *m_pFont;
-	ncTextNode *m_pTextNode;
-
-	static const int numJoysticks = 4;
-	static const int numAxes = 10;
-	float m_fAxisValues[numAxes];
-	static const int numButtons = 12;
-	unsigned char m_ubButtonStates[numButtons];
-	static const int numChars = 256;
-	char m_vJoyString[numChars];
-public:
-	virtual void OnInit();
-	virtual void OnFrameStart();
-	virtual void OnFrameEnd() { }
-	virtual void OnShutdown();
+  public:
+	virtual void onInit();
+	virtual void onFrameStart();
+	virtual void onFrameEnd() { }
+	virtual void onShutdown();
 
 #ifndef __ANDROID__
-	virtual void OnKeyReleased(const ncKeyboardEvent &event);
+	virtual void onKeyReleased(const nc::KeyboardEvent &event);
 #endif
+
+  private:
+	static const int NumJoysticks = 4;
+	static const int NumAxes = 10;
+	float axisValues_[NumAxes];
+	static const int NumButtons = 12;
+	unsigned char buttonStates_[NumButtons];
+	static const int NumChars = 256;
+	char joyString_[NumChars];
+
+	nc::Texture *texture_;
+	nc::Sprite *sprites_[2];
+	nc::Font *font_;
+	nc::TextNode *textNode_;
 };
 
 #endif

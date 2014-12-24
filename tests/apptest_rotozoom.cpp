@@ -1,113 +1,121 @@
 #define _USE_MATH_DEFINES // for M_PI in MSVC
 #include <cmath>
 #include "apptest_rotozoom.h"
-#include "ncSceneNode.h"
-#include "ncTexture.h"
-#include "ncSprite.h"
-#include "ncApplication.h"
+#include "SceneNode.h"
+#include "Texture.h"
+#include "Sprite.h"
+#include "Application.h"
 
-static const int numTextures = 4;
-static const int numRowSprites = 8;
-static const int numColSprites = 8;
-
-ncIAppEventHandler* create_apphandler()
+nc::IAppEventHandler* createApphandler()
 {
 	return new MyEventHandler;
 }
 
-void MyEventHandler::OnInit()
+void MyEventHandler::onInit()
 {
-	ncIInputManager::SetHandler(this);
+	nc::IInputManager::setHandler(this);
 
-	m_bPause = false;
-	m_fAngle = 0.0f;
-	ncRect texRects[numTextures];
-	m_pSprites = new ncSprite*[numRowSprites*numColSprites];
+	pause_ = false;
+	angle_ = 0.0f;
+	nc::Rect texRects[NumTextures];
+	sprites_ = new nc::Sprite*[NumRowSprites * NumColSprites];
 
-	ncSceneNode &rRootNode = ncApplication::RootNode();
+	nc::SceneNode &rootNode = nc::Application::rootNode();
 
 #ifdef __ANDROID__
-	m_pMegaTexture = new ncTexture("/sdcard/ncine/megatexture_256.dds");
+	megaTexture_ = new nc::Texture("/sdcard/ncine/megatexture_256.dds");
 #else
-	m_pMegaTexture = new ncTexture("textures/megatexture_256.png");
+	megaTexture_ = new nc::Texture("textures/megatexture_256.png");
 #endif
-	texRects[0] = ncRect(0, 0, 145, 121);
-	texRects[1] = ncRect(256-100, 0, 100, 100);
-	texRects[2] = ncRect(0, 256-96, 96, 96);
-	texRects[3] = ncRect(256-96, 256-96, 96, 96);
+	texRects[0] = nc::Rect(0, 0, 145, 121);
+	texRects[1] = nc::Rect(256 - 100, 0, 100, 100);
+	texRects[2] = nc::Rect(0, 256 - 96, 96, 96);
+	texRects[3] = nc::Rect(256 - 96, 256 - 96, 96, 96);
 
-	m_pDummy = new ncSceneNode(&rRootNode, ncApplication::Width()*0.5f, ncApplication::Height()*0.5f);
-	m_pDummy->SetScale(0.75f);
+	dummy_ = new nc::SceneNode(&rootNode, nc::Application::width() * 0.5f, nc::Application::height() * 0.5f);
+	dummy_->setScale(0.75f);
 
-	int iIdx = 0;
-	for (int i = -numRowSprites*0.5f; i < numRowSprites*0.5f; i++)
+	int index = 0;
+	for (int i = -NumRowSprites * 0.5f; i < NumRowSprites * 0.5f; i++)
 	{
-		for (int j = -numColSprites*0.5f; j < numColSprites*0.5f; j++)
+		for (int j = -NumColSprites * 0.5f; j < NumColSprites * 0.5f; j++)
 		{
-			m_pSprites[iIdx] = new ncSprite(m_pDummy, m_pMegaTexture, i*100, j*100);
-			m_pSprites[iIdx]->SetTexRect(texRects[iIdx%numTextures]);
-			m_pSprites[iIdx]->SetScale(0.75f);
-			iIdx++;
+			sprites_[index] = new nc::Sprite(dummy_, megaTexture_, i * 100.0f, j * 100.0f);
+			sprites_[index]->setTexRect(texRects[index % NumTextures]);
+			sprites_[index]->setScale(0.75f);
+			index++;
 		}
 	}
 }
 
-void MyEventHandler::OnFrameStart()
+void MyEventHandler::onFrameStart()
 {
-	if (m_bPause == false)
-		m_fAngle += 2.5f * ncApplication::Interval();
-	float fSinus = sinf(m_fAngle);
-	float fCosine = cosf(m_fAngle);
+	if (pause_ == false)
+	{
+		angle_ += 2.5f * nc::Application::interval();
+	}
+	float sine = sinf(angle_);
+	float cosine = cosf(angle_);
 
-	m_pDummy->x = ncApplication::Width()*0.5f + fSinus*100.0f;
-	m_pDummy->y = ncApplication::Height()*0.5f + fCosine*150.0f;
-	m_pDummy->SetRotation(m_fAngle*8.0f);
-	m_pDummy->SetScale(((fSinus*0.15f)+1.0f)*0.5f);
+	dummy_->x = nc::Application::width() * 0.5f + sine * 100.0f;
+	dummy_->y = nc::Application::height() * 0.5f + cosine * 150.0f;
+	dummy_->setRotation(angle_ * 8.0f);
+	dummy_->setScale(((sine * 0.15f) + 1.0f) * 0.5f);
 
-	for (int i = 0; i < numColSprites*numRowSprites; i++)
-		m_pSprites[i]->SetRotation(-m_fAngle*8.0f);
+	for (int i = 0; i < NumColSprites * NumRowSprites; i++)
+	{
+		sprites_[i]->setRotation(-angle_ * 8.0f);
+	}
 
-	ncApplication::RootNode().x = (fSinus+1.0f)*50.0f;
-	ncApplication::RootNode().y = (fCosine+1.0f)*50.0f;
-	ncApplication::RootNode().SetRotation(fSinus * 10.0f);
-	ncApplication::RootNode().SetScale(((fCosine*0.1f)+1.0f)*0.75f);
+	nc::Application::rootNode().x = (sine + 1.0f) * 50.0f;
+	nc::Application::rootNode().y = (cosine + 1.0f) * 50.0f;
+	nc::Application::rootNode().setRotation(sine * 10.0f);
+	nc::Application::rootNode().setScale(((cosine * 0.1f) + 1.0f) * 0.75f);
 }
 
-void MyEventHandler::OnShutdown()
+void MyEventHandler::onShutdown()
 {
-	delete m_pDummy; // and all its children
-	delete[] m_pSprites;
-	delete m_pMegaTexture;
+	delete dummy_; // and all its children
+	delete[] sprites_;
+	delete megaTexture_;
 }
 
 #ifdef __ANDROID__
-void MyEventHandler::OnTouchDown(const ncTouchEvent &event)
+void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 {
-	m_bPause = true;
+	pause_ = true;
 }
 
-void MyEventHandler::OnTouchUp(const ncTouchEvent &event)
+void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 {
-	m_bPause = false;
+	pause_ = false;
 }
 #else
-void MyEventHandler::OnMouseButtonPressed(const ncMouseEvent &event)
+void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
-		m_bPause = true;
+	{
+		pause_ = true;
+	}
 }
 
-void MyEventHandler::OnMouseButtonReleased(const ncMouseEvent &event)
+void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent& event)
 {
 	if (event.isLeftButton())
-		m_bPause = false;
+	{
+		pause_ = false;
+	}
 }
 
-void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
+void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)
-		ncApplication::Quit();
-	else if (event.sym == NCKEY_SPACE)
-		ncApplication::TogglePause();
+	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
+	{
+		nc::Application::quit();
+	}
+	else if (event.sym == nc::KEY_SPACE)
+	{
+		nc::Application::togglePause();
+	}
 }
 #endif

@@ -1,35 +1,44 @@
 #ifndef CLASS_MYEVENTHANDLER
 #define CLASS_MYEVENTHANDLER
 
-#include "ncIAppEventHandler.h"
-#include "ncIInputEventHandler.h"
-class ncSceneNode;
-class ncTexture;
-class ncSprite;
+#include "IAppEventHandler.h"
+#include "IInputEventHandler.h"
+
+namespace ncine {
+
+class SceneNode;
+class Texture;
+class Sprite;
+
+}
+
+namespace nc = ncine;
 
 /// My nCine event handler
 class MyEventHandler
-	: public ncIAppEventHandler,
-	  public ncIInputEventHandler
+	: public nc::IAppEventHandler,
+	  public nc::IInputEventHandler
 {
-private:
-	ncSceneNode *m_pDummy;
-	ncTexture *m_pMegaTexture;
-	ncSprite **m_pSprites;
-
-	ncTexture *m_pAlphaTexture;
-	ncSprite *m_pAlphaSpriteBottom;
-	ncSprite *m_pAlphaSpriteTop;
-
-public:
-	virtual void OnInit();
-	virtual void OnFrameStart() { }
-	virtual void OnFrameEnd() { }
-	virtual void OnShutdown();
+  public:
+	virtual void onInit();
+	virtual void onFrameStart() { }
+	virtual void onFrameEnd() { }
+	virtual void onShutdown();
 
 #ifndef __ANDROID__
-	virtual void OnKeyReleased(const ncKeyboardEvent &event);
+	virtual void onKeyReleased(const nc::KeyboardEvent &event);
 #endif
+
+  private:
+	static const int NumSprites = 100;
+
+	nc::SceneNode *dummy_;
+	nc::Texture *megaTexture_;
+	nc::Sprite **sprites_;
+
+	nc::Texture *alphaTexture_;
+	nc::Sprite *alphaSpriteBottom_;
+	nc::Sprite *alphaSpriteTop_;
 };
 
 #endif

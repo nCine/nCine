@@ -1,39 +1,48 @@
 #ifndef CLASS_MYEVENTHANDLER
 #define CLASS_MYEVENTHANDLER
 
-#include "ncIAppEventHandler.h"
-#include "ncIInputEventHandler.h"
-#include "ncVector2f.h"
-class ncTexture;
-class ncParticleSystem;
-class ncTimer;
+#include "IAppEventHandler.h"
+#include "IInputEventHandler.h"
+#include "Vector2f.h"
+
+namespace ncine {
+
+class Texture;
+class ParticleSystem;
+class Timer;
+
+}
+
+namespace nc = ncine;
 
 /// My nCine application
 class MyEventHandler
-	: public ncIAppEventHandler,
-	  public ncIInputEventHandler
+	: public nc::IAppEventHandler,
+	  public nc::IInputEventHandler
 {
-private:
-	ncTexture *m_pTexture;
-	ncParticleSystem *m_pParticleSys;
-	ncTimer *m_pEmitTimer;
-	ncVector2f m_emitVector;
-
-public:
-	virtual void OnInit();
-	virtual void OnFrameStart();
-	virtual void OnFrameEnd();
-	virtual void OnShutdown();
+  public:
+	virtual void onInit();
+	virtual void onFrameStart();
+	virtual void onFrameEnd();
+	virtual void onShutdown();
 
 #ifdef __ANDROID__
-	virtual void OnTouchDown(const ncTouchEvent &event);
-	virtual void OnTouchMove(const ncTouchEvent &event);
-	virtual void OnAcceleration(const ncAccelerometerEvent &event);
+	virtual void onTouchDown(const nc::TouchEvent &event);
+	virtual void onTouchMove(const nc::TouchEvent &event);
+	virtual void onAcceleration(const nc::AccelerometerEvent &event);
 #else
-	virtual void OnKeyReleased(const ncKeyboardEvent &event);
-	virtual void OnMouseButtonPressed(const ncMouseEvent &event);
-	virtual void OnMouseMoved(const ncMouseState &state);
+	virtual void onKeyReleased(const nc::KeyboardEvent &event);
+	virtual void onMouseButtonPressed(const nc::MouseEvent &event);
+	virtual void onMouseMoved(const nc::MouseState &state);
 #endif
+
+  private:
+	static const int NumParticles = 50;
+
+	nc::Texture *texture_;
+	nc::ParticleSystem *particleSystem_;
+	nc::Timer *emitTimer_;
+	nc::Vector2f emitVector_;
 };
 
 #endif

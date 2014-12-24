@@ -1,13 +1,18 @@
-#include "ncApplication.h"
-class ncIAppEventHandler;
+#include "Application.h"
 
-ncIAppEventHandler* create_apphandler();
+namespace ncine{
+
+class IAppEventHandler;
+
+}
+
+ncine::IAppEventHandler* createApphandler();
 
 int main(int argc, char **argv)
 {
-	ncApplication::Init(create_apphandler);
-	ncApplication::Run();
-	ncApplication::Shutdown();
+	ncine::Application::init(createApphandler);
+	ncine::Application::run();
+	ncine::Application::shutdown();
 
-	return 0;	
+	return 0;
 }

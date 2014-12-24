@@ -1,86 +1,96 @@
 #define _USE_MATH_DEFINES // for M_PI in MSVC
 #include <cmath>
 #include "apptest_mipmapping.h"
-#include "ncSceneNode.h"
-#include "ncTexture.h"
-#include "ncSprite.h"
-#include "ncApplication.h"
+#include "SceneNode.h"
+#include "Texture.h"
+#include "Sprite.h"
+#include "Application.h"
 
 static const unsigned int maxDivider = 16;
 
-ncIAppEventHandler* create_apphandler()
+nc::IAppEventHandler* createApphandler()
 {
 	return new MyEventHandler;
 }
 
-void MyEventHandler::OnInit()
+void MyEventHandler::onInit()
 {
-	ncIInputManager::SetHandler(this);
+	nc::IInputManager::setHandler(this);
 
-	m_bPause = false;
+	pause_ = false;
 
-	ncSceneNode &rRootNode = ncApplication::RootNode();
+	nc::SceneNode &rRootNode = nc::Application::rootNode();
 
 #ifdef __ANDROID__
-	m_pTexture = new ncTexture("/sdcard/ncine/checker_256_ETC1_MIP.ktx");
-	//m_pTexture = new ncTexture("/sdcard/ncine/megatexture_256.dds");
+	texture_ = new nc::Texture("/sdcard/ncine/checker_256_ETC1_MIP.ktx");
+//	texture_ = new nc::Texture("/sdcard/ncine/megatexture_256.dds");
 #else
-	//m_pTexture = new ncTexture("textures/checker_256_MIP.pvr");
-	//m_pTexture = new ncTexture("textures/compressed/checker_256_MIP.dds");
-	m_pTexture = new ncTexture("textures/compressed/checker_256_DXT1_MIP.ktx");
-	//m_pTexture = new ncTexture("textures/checker_256.png");
+//	texture_ = new nc::Texture("textures/checker_256_MIP.pvr");
+//	texture_ = new nc::Texture("textures/compressed/checker_256_MIP.dds");
+	texture_ = new nc::Texture("textures/compressed/checker_256_DXT1_MIP.ktx");
+//	texture_ = new nc::Texture("textures/checker_256.png");
 #endif
 
-	m_pDummy = new ncSceneNode(&rRootNode, ncApplication::Width()*0.5f, ncApplication::Height()*0.5f);
-	m_uDivider = 1;
+	dummy_ = new nc::SceneNode(&rRootNode, nc::Application::width() * 0.5f, nc::Application::height() * 0.5f);
+	divider_ = 1;
 
-	m_pSprite = new ncSprite(m_pDummy, m_pTexture);
+	sprite_ = new nc::Sprite(dummy_, texture_);
 }
 
-void MyEventHandler::OnFrameStart()
+void MyEventHandler::onFrameStart()
 {
 
 }
 
-void MyEventHandler::OnShutdown()
+void MyEventHandler::onShutdown()
 {
-	delete m_pDummy; // and all its children
-	delete m_pTexture;
+	delete dummy_; // and all its children
+	delete texture_;
 }
 
 #ifdef __ANDROID__
-void MyEventHandler::OnTouchUp(const ncTouchEvent &event)
+void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 {
-	m_uDivider *= 2;
-	if (m_uDivider > maxDivider)
-		m_uDivider = 1;
+	divider_ *= 2;
+	if (divider_ > maxDivider)
+	{
+		divider_ = 1;
+	}
 
-	m_pSprite->SetScale(1.0f / m_uDivider);
+	sprite_->setScale(1.0f / divider_);
 }
 #else
-void MyEventHandler::OnMouseButtonReleased(const ncMouseEvent &event)
+void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
 	{
-		m_uDivider *= 2;
-		if (m_uDivider > maxDivider)
-			m_uDivider = 1;
+		divider_ *= 2;
+		if (divider_ > maxDivider)
+		{
+			divider_ = 1;
+		}
 	}
 	else if (event.isRightButton())
 	{
-		m_uDivider /= 2;
-		if (m_uDivider < 1)
-			m_uDivider = maxDivider;
+		divider_ /= 2;
+		if (divider_ < 1)
+		{
+			divider_ = maxDivider;
+		}
 	}
 
-	m_pSprite->SetScale(1.0f / m_uDivider);
+	sprite_->setScale(1.0f / divider_);
 }
 
-void MyEventHandler::OnKeyReleased(const ncKeyboardEvent &event)
+void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == NCKEY_ESCAPE || event.sym == NCKEY_Q)
-		ncApplication::Quit();
-	else if (event.sym == NCKEY_SPACE)
-		ncApplication::TogglePause();
+	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
+	{
+		nc::Application::quit();
+	}
+	else if (event.sym == nc::KEY_SPACE)
+	{
+		nc::Application::togglePause();
+	}
 }
 #endif
