@@ -149,6 +149,8 @@ set(HEADERS
 	include/Array.h
 	include/List.h
 	include/ListIterator.h
+	include/ncString.h
+	include/StringIterator.h
 	include/Point.h
 	include/Rect.h
 	include/Color.h
@@ -198,6 +200,7 @@ set(PRIVATE_HEADERS
 )
 set(SOURCES
 	src/base/Vector2f.cpp
+	src/base/String.cpp
 	src/ServiceLocator.cpp
 	src/FileLogger.cpp
 	src/ArrayIndexer.cpp
@@ -321,7 +324,7 @@ link_libraries(
 )
 
 if(MSVC)
-	add_Library(ncine STATIC ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
+	add_library(ncine STATIC ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
 	target_include_directories(ncine PRIVATE "${EXTERNAL_MSVC_DIR}/include")
 else()
 	add_library(ncine SHARED ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
@@ -329,12 +332,13 @@ else()
 	if(PNG_FOUND AND GLFW_FOUND)
 		target_include_directories(ncine PRIVATE ${PNG_INCLUDE_DIR})
 	endif()
-	target_include_directories(ncine PUBLIC include PRIVATE src/include)
 
 	if(CROSS_MINGW32)
 		set_target_properties(ncine PROPERTIES LINK_FLAGS "-Wl,--output-def,${CMAKE_CURRENT_BINARY_DIR}/ncine.def")
 	endif()
 endif()
+target_include_directories(ncine PUBLIC include PRIVATE src/include)
+
 
 if(NCINE_BUILD_TESTS)
 	add_subdirectory(tests)

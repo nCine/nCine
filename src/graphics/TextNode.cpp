@@ -11,7 +11,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 TextNode::TextNode(SceneNode* parent, Font* font)
-	: DrawableNode(parent, 0, 0), dirtyDraw_(true), dirtyBoundaries_(true),
+	: DrawableNode(parent, 0, 0), string_(MaxStringLength), dirtyDraw_(true), dirtyBoundaries_(true),
 	  withKerning_(true), font_(font), vertices_(16), texCoords_(16),
 	  xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f), lineLengths_(4), alignment_(ALIGN_LEFT)
 {
@@ -19,7 +19,6 @@ TextNode::TextNode(SceneNode* parent, Font* font)
 	setPriority(DrawableNode::HUD_PRIORITY);
 	renderCommand_->setType(RenderCommand::TEXT_TYPE);
 	renderCommand_->material().setAlwaysTransparent(true);
-	memset(string_, 0, MaxStringLength);
 }
 
 ///////////////////////////////////////////////////////////
@@ -65,14 +64,11 @@ void TextNode::setAlignment(Alignment alignment)
 }
 
 /// Sets the string to render
-void TextNode::setString(const char *string)
+void TextNode::setString(const String &string)
 {
-	// Setting the dirty flag and updating the string only if different
-	if (strncmp(string_, string, MaxStringLength))
+	if (string_ != string)
 	{
-		strncpy(string_, string, MaxStringLength);
-		// Preventing unterminated string by forcing termination
-		string_[MaxStringLength - 1] = '\0';
+		string_ = string;
 		dirtyDraw_ = true;
 		dirtyBoundaries_ = true;
 	}
@@ -92,7 +88,7 @@ void TextNode::draw(RenderQueue& renderQueue)
 		unsigned int currentLine = 0;
 		xAdvance_ = calculateAlignment(currentLine);
 		yAdvance_ = 0.0f;
-		for (size_t i = 0; i < strlen(string_); i++)
+		for (unsigned int i = 0; i < string_.length(); i++)
 		{
 			if (string_[i] == '\n')
 			{
@@ -109,7 +105,7 @@ void TextNode::draw(RenderQueue& renderQueue)
 					if (withKerning_)
 					{
 						// font kerning
-						if (i < strlen(string_) - 1)
+						if (i < string_.length() - 1)
 						{
 							xAdvance_ += glyph->kerning(int(string_[i + 1]));
 						}
@@ -136,7 +132,7 @@ void TextNode::calculateBoundaries() const
 		float xAdvanceMax = 0.0f; // longest line
 		xAdvance_ = 0.0f;
 		yAdvance_ = 0.0f;
-		for (size_t i = 0; i < strlen(string_); i++)
+		for (unsigned int i = 0; i < string_.length(); i++)
 		{
 			if (string_[i] == '\n')
 			{
@@ -157,7 +153,7 @@ void TextNode::calculateBoundaries() const
 					if (withKerning_)
 					{
 						// font kerning
-						if (i < strlen(string_) - 1)
+						if (i < string_.length() - 1)
 						{
 							xAdvance_ += glyph->kerning(int(string_[i + 1]));
 						}

@@ -1,5 +1,4 @@
 #include <cstdlib> // for exit()
-#include <cstring>
 #include "TextureLoaderPng.h"
 #include "ServiceLocator.h"
 
@@ -127,8 +126,8 @@ void TextureLoaderPng::readFromFileHandle(png_structp pngPtr, png_bytep outBytes
 {
 	IFile *fileHandle = reinterpret_cast<IFile *>(png_get_io_ptr(pngPtr));
 
-	unsigned long int bytesRead = fileHandle->read(outBytes, byteCountToRead);
-	if (bytesRead != byteCountToRead)
+	long int bytesRead = fileHandle->read(outBytes, byteCountToRead);
+	if (bytesRead > 0 && static_cast<unsigned long int>(bytesRead) != byteCountToRead)
 	{
 		LOGW_X("Read %l bytes instead of %u: %d", bytesRead, byteCountToRead);
 	}

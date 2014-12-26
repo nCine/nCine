@@ -1,4 +1,3 @@
-#include <cstring>
 #include "FontGlyph.h"
 #include "ServiceLocator.h"
 

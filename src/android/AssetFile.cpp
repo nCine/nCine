@@ -23,13 +23,12 @@ AssetFile::AssetFile(const char *filename)
 	type_ = ASSET_TYPE;
 
 	// Detect fake second extension added to prevent compression
-	char *firstDotChar = strchr(filename_, '.');
-	char *lastDotChar = strrchr(filename_, '.');
-	int extLEngth = lastDotChar - firstDotChar - 1;
-	if (extLEngth >= 3 && extLEngth <= 4)
+	int firstDotChar = filename_.findFirstChar('.');
+	int lastDotChar = filename_.findLastChar('.');
+	int extLength = lastDotChar - firstDotChar - 1;
+	if (extLength >= 3 && extLength <= 4)
 	{
-		memset(extension_, 0, MaxExtensionsLength);
-		strncpy(extension_, firstDotChar + 1, extLEngth);
+		extension_.copyFrom(filename_, firstDotChar + 1, extLength);
 	}
 }
 
@@ -51,7 +50,7 @@ void AssetFile::open(unsigned char mode)
 	// Checking if the file is already opened
 	if (fileDescriptor_ >= 0 || asset_ != NULL)
 	{
-		LOGW_X("File \"%s\" is already opened", filename_);
+		LOGW_X("File \"%s\" is already opened", filename_.data());
 	}
 	else
 	{
@@ -77,11 +76,11 @@ void AssetFile::close()
 		int retValue = ::close(fileDescriptor_);
 		if (retValue < 0)
 		{
-			LOGW_X("Cannot close the file \"%s\"", filename_);
+			LOGW_X("Cannot close the file \"%s\"", filename_.data());
 		}
 		else
 		{
-			LOGI_X("File \"%s\" closed", filename_);
+			LOGI_X("File \"%s\" closed", filename_.data());
 			fileDescriptor_ = -1;
 		}
 	}
@@ -89,7 +88,7 @@ void AssetFile::close()
 	{
 		AAsset_close(asset_);
 		asset_ = NULL;
-		LOGI_X("File \"%s\" closed", filename_);
+		LOGI_X("File \"%s\" closed", filename_.data());
 	}
 }
 
@@ -189,10 +188,10 @@ void AssetFile::openFD(unsigned char mode)
 	// An asset file can only be read
 	if (mode == (MODE_FD | MODE_READ))
 	{
-		asset_ = AAssetManager_open(assetManager_, filename_, AASSET_MODE_UNKNOWN);
+		asset_ = AAssetManager_open(assetManager_, filename_.data(), AASSET_MODE_UNKNOWN);
 		if (asset_ == NULL)
 		{
-			LOGF_X("Cannot open the file \"%s\"", filename_);
+			LOGF_X("Cannot open the file \"%s\"", filename_.data());
 			exit(-1);
 		}
 
@@ -203,17 +202,17 @@ void AssetFile::openFD(unsigned char mode)
 
 		if (fileDescriptor_ < 0)
 		{
-			LOGF_X("Cannot open the file \"%s\"", filename_);
+			LOGF_X("Cannot open the file \"%s\"", filename_.data());
 			exit(-1);
 		}
 		else
 		{
-			LOGI_X("File \"%s\" opened", filename_);
+			LOGI_X("File \"%s\" opened", filename_.data());
 		}
 	}
 	else
 	{
-		LOGE_X("Cannot open the file \"%s\", wrong open mode", filename_);
+		LOGE_X("Cannot open the file \"%s\", wrong open mode", filename_.data());
 	}
 }
 
@@ -223,15 +222,15 @@ void AssetFile::openAsset(unsigned char mode)
 	// An asset file can only be read
 	if (mode == MODE_READ || mode == (MODE_READ | MODE_BINARY))
 	{
-		asset_ = AAssetManager_open(assetManager_, filename_, AASSET_MODE_UNKNOWN);
+		asset_ = AAssetManager_open(assetManager_, filename_.data(), AASSET_MODE_UNKNOWN);
 		if (asset_ == NULL)
 		{
-			LOGF_X("Cannot open the file \"%s\"", filename_);
+			LOGF_X("Cannot open the file \"%s\"", filename_.data());
 			exit(-1);
 		}
 		else
 		{
-			LOGI_X("File \"%s\" opened", filename_);
+			LOGI_X("File \"%s\" opened", filename_.data());
 		}
 
 		// Calculating file size
@@ -239,7 +238,7 @@ void AssetFile::openAsset(unsigned char mode)
 	}
 	else
 	{
-		LOGE_X("Cannot open the file \"%s\", wrong open mode", filename_);
+		LOGE_X("Cannot open the file \"%s\", wrong open mode", filename_.data());
 	}
 }
 

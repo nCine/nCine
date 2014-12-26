@@ -1,9 +1,9 @@
 #ifndef CLASS_NCINE_IFILE
 #define CLASS_NCINE_IFILE
 
-#include <cstdio>
+#include <cstdio> // for FILE
 #include <stdint.h> // for endianness conversions
-#include <cstring> // for strncmp()
+#include "ncString.h"
 
 namespace ncine {
 
@@ -64,9 +64,9 @@ class IFile
 	virtual bool isOpened() const;
 
 	/// Returns file name with path
-	const char* filename() const { return filename_; }
+	const char* filename() const { return filename_.data(); }
 	/// Returns file extension
-	const char* extension() const { return extension_; }
+	const char* extension() const { return extension_.data(); }
 	// Checks if file extension matches
 	bool hasExtension(const char *extension) const;
 
@@ -106,7 +106,7 @@ class IFile
 	// Checks if a file can be accessed with specified mode
 	static bool access(const char *filename, unsigned char mode);
 	// Returns the writable directory for data storage
-	static char* dataPath();
+	static const char* dataPath();
 
   protected:
 	/// File type
@@ -115,15 +115,15 @@ class IFile
 	/// Maximum number of characters for a file name (path included)
 	static const unsigned int MaxFilenameLength = 256;
 	/// File name with path
-	char filename_[MaxFilenameLength];
+	String filename_;
 
 	/// Maximum number of characters for a file extension, plus '\0'
-	static const unsigned int MaxExtensionsLength = 5;
+	static const unsigned int MaxExtensionLength = 5;
 	/// File extension
-	char extension_[MaxExtensionsLength];
+	String extension_;
 
 	/// The path for the application to write files into
-	static char dataPath_[MaxFilenameLength];
+	static String dataPath_;
 
 	/// File descriptor for open() and close()
 	int fileDescriptor_;

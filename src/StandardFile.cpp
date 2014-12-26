@@ -34,7 +34,7 @@ void StandardFile::open(unsigned char mode)
 	// Checking if the file is already opened
 	if (fileDescriptor_ >= 0 || filePointer_ != NULL)
 	{
-		LOGW_X("File \"%s\" is already opened", filename_);
+		LOGW_X("File \"%s\" is already opened", filename_.data());
 	}
 	else
 	{
@@ -60,11 +60,11 @@ void StandardFile::close()
 		int retValue = ::close(fileDescriptor_);
 		if (retValue < 0)
 		{
-			LOGW_X("Cannot close the file \"%s\"", filename_);
+			LOGW_X("Cannot close the file \"%s\"", filename_.data());
 		}
 		else
 		{
-			LOGI_X("File \"%s\" closed", filename_);
+			LOGI_X("File \"%s\" closed", filename_.data());
 			fileDescriptor_ = -1;
 		}
 #endif
@@ -74,11 +74,11 @@ void StandardFile::close()
 		int retValue = fclose(filePointer_);
 		if (retValue == EOF)
 		{
-			LOGW_X("Cannot close the file \"%s\"", filename_);
+			LOGW_X("Cannot close the file \"%s\"", filename_.data());
 		}
 		else
 		{
-			LOGI_X("File \"%s\" closed", filename_);
+			LOGI_X("File \"%s\" closed", filename_.data());
 			filePointer_ = NULL;
 		}
 	}
@@ -162,22 +162,22 @@ void StandardFile::openFD(unsigned char mode)
 			openFlag = O_RDWR;
 			break;
 		default:
-			LOGE_X("Cannot open the file \"%s\", wrong open mode", filename_);
+			LOGE_X("Cannot open the file \"%s\", wrong open mode", filename_.data());
 			break;
 	}
 
 	if (openFlag >= 0)
 	{
-		fileDescriptor_ = ::open(filename_, openFlag);
+		fileDescriptor_ = ::open(filename_.data(), openFlag);
 
 		if (fileDescriptor_ < 0)
 		{
-			LOGF_X("Cannot open the file \"%s\"", filename_);
+			LOGF_X("Cannot open the file \"%s\"", filename_.data());
 			exit(EXIT_FAILURE);
 		}
 		else
 		{
-			LOGI_X("File \"%s\" opened", filename_);
+			LOGI_X("File \"%s\" opened", filename_.data());
 		}
 
 		// Calculating file size
@@ -218,22 +218,22 @@ void StandardFile::openStream(unsigned char mode)
 			modeChars[2] = 'b';
 			break;
 		default:
-			LOGE_X("Cannot open the file \"%s\", wrong open mode", filename_);
+			LOGE_X("Cannot open the file \"%s\", wrong open mode", filename_.data());
 			break;
 	}
 
 	if (modeChars[0] != '\0')
 	{
-		filePointer_ = fopen(filename_, modeChars);
+		filePointer_ = fopen(filename_.data(), modeChars);
 
 		if (filePointer_ == NULL)
 		{
-			LOGF_X("Cannot open the file \"%s\"", filename_);
+			LOGF_X("Cannot open the file \"%s\"", filename_.data());
 			exit(EXIT_FAILURE);
 		}
 		else
 		{
-			LOGI_X("File \"%s\" opened", filename_);
+			LOGI_X("File \"%s\" opened", filename_.data());
 		}
 
 		// Calculating file size

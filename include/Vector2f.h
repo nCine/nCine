@@ -3,7 +3,6 @@
 
 #define _USE_MATH_DEFINES // for M_PI in MSVC
 #include <cmath>
-#include <cstring>
 
 namespace ncine {
 

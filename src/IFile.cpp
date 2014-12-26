@@ -1,4 +1,5 @@
 #include <cstdlib> // for exit() and getenv()
+#include <cstring> // for strlen()
 #include "IFile.h"
 #include "StandardFile.h"
 
@@ -22,24 +23,21 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-char IFile::dataPath_[MaxFilenameLength] = {'\0'};
+String IFile::dataPath_(MaxFilenameLength);
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 IFile::IFile(const char *filename)
-	: type_(BASE_TYPE), fileDescriptor_(-1), filePointer_(NULL), shouldCloseOnExit_(true), fileSize_(0)
+	: type_(BASE_TYPE), filename_(filename), extension_(MaxExtensionLength),
+	  fileDescriptor_(-1), filePointer_(NULL), shouldCloseOnExit_(true), fileSize_(0)
 {
-	memset(filename_, 0, MaxFilenameLength);
-	strncpy(filename_, filename, MaxFilenameLength);
-
-	memset(extension_, 0, MaxExtensionsLength);
-	char *dotChar = strrchr(filename_, '.');
+	int dotChar = filename_.findLastChar('.');
 	// A dot followed by at least three extension characters
-	if (dotChar && strlen(dotChar) >= 4)
+	if (dotChar && (filename_.length() - dotChar) >= 4)
 	{
-		strncpy(extension_, dotChar + 1, MaxExtensionsLength - 1);    // preserves '\0'
+		extension_.copyFrom(filename_, dotChar + 1, filename_.length() - dotChar - 1);
 	}
 }
 
@@ -63,7 +61,7 @@ bool IFile::isOpened() const
 /// Checks if file extension matches
 bool IFile::hasExtension(const char *extension) const
 {
-	return !strncmp(extension_, extension, MaxExtensionsLength);
+	return extension_ == extension;
 }
 
 /// Returns the proper file handle according to prepended tags
@@ -93,35 +91,33 @@ bool IFile::access(const char *filename, unsigned char mode)
 }
 
 /// Returns the writable directory for data storage
-char* IFile::dataPath()
+const char* IFile::dataPath()
 {
-	// Searching for path only on first invokation
-	if (strlen(dataPath_))
+	if (dataPath_.isEmpty() == false)
 	{
-		return dataPath_;
+		return dataPath_.data();
 	}
-
-	memset(dataPath_, 0, MaxFilenameLength);
 
 #ifdef __ANDROID__
 	int pid = getpid();
-	char procFileName[MaxFilenameLength];
-	snprintf(procFileName, MaxFilenameLength, "/proc/%d/cmdline", pid);
+	String procFileName(MaxFilenameLength);
+	procFileName.format("/proc/%d/cmdline", pid);
 
-	FILE *procFile = fopen(procFileName, "r");
+	FILE *procFile = fopen(procFileName.data(), "r");
 	if (procFile)
 	{
+		const int processNameLength = 64;
+		char processName[processNameLength];
 		// Creating the path "/data/data/PACKAGE_NAME/files/"
-		strncpy(dataPath_, "/data/data/", 11);
-		fread((char *)dataPath_ + 11, MaxFilenameLength - 11, 1, procFile);
-		strncat(dataPath_, "/files/", 7);
+		fread(processName, processNameLength, 1, procFile);
+		dataPath_.format("/data/data/%s/files/", processName);
 		fclose(procFile);
 
 		// Trying to create the data directory
-		if (mkdir(dataPath_, 0770) && errno != EEXIST)
+		if (mkdir(dataPath_.data(), 0770) && errno != EEXIST)
 		{
-			LOGE_X("Cannot create directory: %s", dataPath_);
-			memset(dataPath_, 0, MaxFilenameLength);
+			LOGE_X("Cannot create directory: %s", dataPath_.data());
+			dataPath_.clear();
 		}
 	}
 #elif _WIN32
@@ -137,42 +133,40 @@ char* IFile::dataPath()
 			char *homeEnv = getenv("HOME");
 			if (homeEnv && strlen(homeEnv))
 			{
-				strncpy(dataPath_, homeEnv, MaxFilenameLength);
+				dataPath_ = homeEnv;
 			}
 		}
 		else
 		{
-			strncpy(dataPath_, homeDriveEnv, MaxFilenameLength);
-			strncat(dataPath_, homePathEnv, MaxFilenameLength - strlen(homeDriveEnv));
+			dataPath_ = homeDriveEnv;
+			dataPath_ += homePathEnv;
 		}
 	}
 	else
 	{
-		strncpy(dataPath_, userProfileEnv, MaxFilenameLength);
+		dataPath_ = userProfileEnv;
 	}
 
-	if (strlen(dataPath_))
+	if (dataPath_.isEmpty() == false)
 	{
-		strncat(dataPath_, "\\", 1);
+		dataPath_ += "\\";
 	}
 #else
 	char *homeEnv = getenv("HOME");
 
 	if (homeEnv == NULL || strlen(homeEnv) == 0)
 	{
-		strncpy(dataPath_, getpwuid(getuid())->pw_dir, MaxFilenameLength);
+		dataPath_ = getpwuid(getuid())->pw_dir;
 	}
 	else
 	{
-		strncpy(dataPath_, homeEnv, MaxFilenameLength);
+		dataPath_ = homeEnv;
 	}
 
-	strncat(dataPath_, "/.config/", MaxFilenameLength - strlen(dataPath_));
+	dataPath_ += "/.config/";
 #endif
 
-	dataPath_[MaxFilenameLength - 1] = '\0';
-
-	return dataPath_;
+	return dataPath_.data(); // RETURN A STRING
 }
 
 }

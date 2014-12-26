@@ -1,5 +1,4 @@
 #include <cstdlib> // for exit()
-#include <cstring>
 #include "TextureLoaderWebP.h"
 #include "ServiceLocator.h"
 

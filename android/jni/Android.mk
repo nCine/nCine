@@ -43,6 +43,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES := \
 	main.cpp \
 	$(SRC)/base/Vector2f.cpp \
+	$(SRC)/base/String.cpp \
 	$(SRC)/ServiceLocator.cpp \
 	$(SRC)/FileLogger.cpp \
 	$(SRC)/Timer.cpp \

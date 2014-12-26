@@ -9,6 +9,7 @@
 #include "StackedBarPlotter.h"
 #include "Font.h"
 #include "TextNode.h"
+#include "ncString.h"
 
 #ifdef WITH_AUDIO
 	#include "ALAudioDevice.h"
@@ -48,7 +49,7 @@ ProfilePlotter *Application::profilePlotter_ = NULL;
 Font *Application::font_ = NULL;
 TextNode *Application::textLines_ = NULL;
 float Application::textUpdateTime = 0.0f;
-char Application::textChars_[];
+String Application::textString_(MaxTextLength);
 IInputManager *Application::inputManager_ = NULL;
 IAppEventHandler *Application::appEventHandler_ = NULL;
 
@@ -218,7 +219,7 @@ void Application::step()
 	if (textLines_ && Timer::now() - textUpdateTime > 0.2f)
 	{
 		textUpdateTime = Timer::now();
-		sprintf(textChars_, static_cast<const char *>("FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC"),
+		textString_.format(static_cast<const char *>("FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC"),
 				frameTimer_->averageFps(), frameTimer_->interval() * 1000.0f,
 				renderQueue_->numVertices(RenderCommand::SPRITE_TYPE), renderQueue_->numCommands(RenderCommand::SPRITE_TYPE),
 				renderQueue_->numVertices(RenderCommand::PARTICLE_TYPE), renderQueue_->numCommands(RenderCommand::PARTICLE_TYPE),
@@ -226,7 +227,7 @@ void Application::step()
 				renderQueue_->numVertices(RenderCommand::PLOTTER_TYPE), renderQueue_->numCommands(RenderCommand::PLOTTER_TYPE),
 				renderQueue_->numVertices(), renderQueue_->numCommands());
 
-		textLines_->setString(textChars_);
+		textLines_->setString(textString_);
 		textLines_->setAlignment(TextNode::ALIGN_RIGHT);
 		textLines_->setPosition((width() - textLines_->width()), height());
 	}
@@ -250,22 +251,23 @@ void Application::shutdown()
 	appEventHandler_->onShutdown();
 	LOGI("IAppEventHandler::OnShutdown() invoked");
 
-	delete inputManager_;
-#ifdef __ANDROID__
-	AndroidJniHelper::detachJVM();
-#endif
 	if (appEventHandler_)
 	{
 		delete appEventHandler_;
 	}
 
 	delete textLines_;
-	delete profilePlotter_;
-	delete rootNode_; // deletes every child too
-	delete renderQueue_;
 	delete font_;
-	delete gfxDevice_;
+	delete profilePlotter_;
+	delete profileTimer_;
+	delete renderQueue_;
+	delete rootNode_; // deletes every child too
 	delete frameTimer_;
+	delete inputManager_;
+#ifdef __ANDROID__
+	AndroidJniHelper::detachJVM();
+#endif
+	delete gfxDevice_;
 
 	if (ServiceLocator::indexer().isEmpty() == false)
 	{

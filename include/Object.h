@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_OBJECT
 #define CLASS_NCINE_OBJECT
 
-#include <cstring>
+#include "ncString.h"
 #include "ServiceLocator.h"
 
 namespace ncine {
@@ -29,9 +29,8 @@ class Object
 	/// Maximum length for an object name
 	static const int MaxNameLength = 128;
 
-	Object() : type_(BASE_TYPE), id_(0)
+	Object() : type_(BASE_TYPE), id_(0), name_(MaxNameLength)
 	{
-		memset(name_, 0, MaxNameLength);
 		id_ = ServiceLocator::indexer().addObject(this);
 	}
 	virtual ~Object() { ServiceLocator::indexer().removeObject(id_); }
@@ -45,9 +44,9 @@ class Object
 	inline static ObjectType sType() { return BASE_TYPE; }
 
 	/// Returns object name
-	const char* name() const { return name_; }
-	// Sets the object name
-	void setName(const char name[MaxNameLength]);
+	const String& name() const { return name_; }
+	/// Sets the object name
+	void setName(const String &name) { name_ = name; }
 
 	// Returns a casted pointer to the object with the specified id, if any exists
 	template <class T> static T* fromId(unsigned int id);
@@ -63,20 +62,13 @@ class Object
 	/// Object name
 	/** This field is currently only useful in debug,
 	as there's still no string hashing based search. */
-	char name_[MaxNameLength];
+	String name_;
 
 	/// Private copy constructor
 	Object(const Object&);
 	/// Private assignment operator
 	Object& operator=(const Object&);
 };
-
-/// Sets the object name
-inline void Object::setName(const char name[MaxNameLength])
-{
-	strncpy(name_, name, MaxNameLength);
-	name_[MaxNameLength - 1] = '\0';
-}
 
 /// Returns a casted pointer to the object with the specified id, if any exists
 template <class T>

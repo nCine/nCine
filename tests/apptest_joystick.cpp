@@ -1,6 +1,7 @@
 #include "apptest_joystick.h"
 #include "Application.h"
 #include "ServiceLocator.h"
+#include "ncString.h"
 #include "Texture.h"
 #include "Sprite.h"
 #include "Font.h"
@@ -21,6 +22,7 @@ void MyEventHandler::onInit()
 	nc::IInputManager::setHandler(this);
 	nc::SceneNode &rootNode = nc::Application::rootNode();
 
+	joyString_ = new nc::String(NumChars);
 #ifdef __ANDROID__
 	texture_ = new nc::Texture("/sdcard/ncine/checker_256_ETC1_MIP.ktx");
 #else
@@ -64,30 +66,30 @@ void MyEventHandler::onFrameStart()
 		}
 	}
 
-	memset(joyString_, 0, NumChars);
+	joyString_->clear();
 	for (int i = 0; i < NumJoysticks; i++)
 	{
 		if (nc::Application::inputManager().isJoyPresent(i))
 		{
-			sprintf(&joyString_[strlen(joyString_)], "Joystick %d: %s (%d axes, %d buttons)\n", i,
+			joyString_->format("Joystick %d: %s (%d axes, %d buttons)\n", i,
 				nc::Application::inputManager().joyName(i),
 				nc::Application::inputManager().joyNumAxes(i),
 				nc::Application::inputManager().joyNumButtons(i));
 		}
 	}
-	strncat(joyString_, "Axes:", 5);
+	*joyString_ += "Axes:";
 	for (int i = 0; i < NumAxes; i++)
 	{
 		axisValues_[i] = nc::Application::inputManager().joyAxisNormValue(firstJoy, i);
-		sprintf(&joyString_[strlen(joyString_)], " %.2f", axisValues_[i]);
+		joyString_->formatAppend(" %.2f", axisValues_[i]);
 	}
-	strncat(joyString_, "\nButtons:", 9);
+	*joyString_ += "\nButtons:";
 	for (int i = 0; i < NumButtons; i++)
 	{
 		buttonStates_[i] = nc::Application::inputManager().isJoyButtonPressed(firstJoy, i);
-		sprintf(&joyString_[strlen(joyString_)], " %u", buttonStates_[i]);
+		joyString_->formatAppend(" %u", buttonStates_[i]);
 	}
-	textNode_->setString(joyString_);
+	textNode_->setString(*joyString_);
 
 
 	float xOffset1 = axisValues_[0] * 0.1f;
@@ -110,6 +112,7 @@ void MyEventHandler::onShutdown()
 	delete sprites_[0];
 	delete sprites_[1];
 	delete texture_;
+	delete joyString_;
 }
 
 #ifndef __ANDROID__

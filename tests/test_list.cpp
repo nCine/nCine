@@ -47,23 +47,23 @@ int main(int argc, char **argv)
 
 	printf("\n--- List traversals (for cycles) ---\n");
 	printf("Iterating through nodes:");
-	for (nc::List<int>::Iterator i = list.begin(); i != list.end(); ++i)
+	for (nc::List<int>::Const_Iterator i = list.begin(); i != list.end(); ++i)
 	{
 		printf(" %d", *i);
 	}
 	printf("\n");
 
 	printf("Iterating through nodes (reverse):");
-	for (nc::List<int>::Iterator i = list.revBegin(); i != list.end(); --i)
+	for (nc::List<int>::Const_Iterator r = list.revBegin(); r != list.end(); --r)
 	{
-		printf(" %d", *i);
+		printf(" %d", *r);
 	}
 	printf("\n");
 
 
 	printf("\n--- List traversals (while cycles) ---\n");
 	printf("Iterating through nodes:");
-	nc::List<int>::Iterator i = list.begin();
+	nc::List<int>::Const_Iterator i = list.begin();
 	while (i != list.end())
 	{
 		printf(" %d", *i);
@@ -72,11 +72,11 @@ int main(int argc, char **argv)
 	printf("\n");
 
 	printf("Iterating through nodes (reverse):");
-	i = list.revBegin();
-	while (i != list.end())
+	nc::List<int>::Const_Iterator r = list.revBegin();
+	while (r != list.end())
 	{
-		printf(" %d", *i);
-		--i;
+		printf(" %d", *r);
+		--r;
 	}
 	printf("\n");
 

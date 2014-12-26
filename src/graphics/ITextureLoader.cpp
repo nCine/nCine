@@ -1,5 +1,4 @@
 #include <cstdlib> // for exit()
-#include <cstring>
 #include "ITextureLoader.h"
 #include "TextureLoaderDds.h"
 #include "TextureLoaderPvr.h"

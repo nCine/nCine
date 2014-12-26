@@ -1,5 +1,4 @@
 #include <cstdlib> // for exit()
-#include <cstring>
 #include "AudioLoaderOgg.h"
 #include "ServiceLocator.h"
 

@@ -48,10 +48,10 @@ bool EglGfxDevice::isModeSupported(struct android_app *state, DisplayMode mode)
 	const EGLint attribs[] =
 	{
 		EGL_SURFACE_TYPE,		EGL_WINDOW_BIT,
-		EGL_BLUE_SIZE,			mode.blueBits(),
-		EGL_GREEN_SIZE,			mode.greenBits(),
-		EGL_RED_SIZE,			mode.redBits(),
-		EGL_ALPHA_SIZE,			mode.alphaBits(),
+		EGL_BLUE_SIZE,			static_cast<int>(mode.blueBits()),
+		EGL_GREEN_SIZE,			static_cast<int>(mode.greenBits()),
+		EGL_RED_SIZE,			static_cast<int>(mode.redBits()),
+		EGL_ALPHA_SIZE,			static_cast<int>(mode.alphaBits()),
 		EGL_NONE
 	};
 
@@ -91,10 +91,10 @@ void EglGfxDevice::initDevice(struct android_app* state)
 	const EGLint attribs[] =
 	{
 		EGL_SURFACE_TYPE,		EGL_WINDOW_BIT,
-		EGL_BLUE_SIZE,			mode_.blueBits(),
-		EGL_GREEN_SIZE,			mode_.greenBits(),
-		EGL_RED_SIZE,			mode_.redBits(),
-		EGL_ALPHA_SIZE,			mode_.alphaBits(),
+		EGL_BLUE_SIZE,			static_cast<int>(mode_.blueBits()),
+		EGL_GREEN_SIZE,			static_cast<int>(mode_.greenBits()),
+		EGL_RED_SIZE,			static_cast<int>(mode_.redBits()),
+		EGL_ALPHA_SIZE,			static_cast<int>(mode_.alphaBits()),
 		EGL_NONE
 	};
 

@@ -6,6 +6,7 @@
 
 namespace ncine {
 
+class String;
 class Texture;
 class Sprite;
 class Font;
@@ -37,7 +38,7 @@ class MyEventHandler
 	static const int NumButtons = 12;
 	unsigned char buttonStates_[NumButtons];
 	static const int NumChars = 256;
-	char joyString_[NumChars];
+	nc::String *joyString_;
 
 	nc::Texture *texture_;
 	nc::Sprite *sprites_[2];

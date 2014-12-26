@@ -66,9 +66,9 @@ class Array
 	void removeAt(unsigned int index);
 
 	// Read-only subscript operator
-	const T& operator[](const unsigned int index) const;
+	const T& operator[](unsigned int index) const;
 	// Subscript operator
-	T& operator[](const unsigned int index);
+	T& operator[](unsigned int index);
 
 	/// Returns a pointer to the allocated memory
 	/** It's useful when holding arrays of OpenGL data */

@@ -15,6 +15,7 @@ class RenderQueue;
 class ProfilePlotter;
 class Font;
 class TextNode;
+class String;
 class IInputManager;
 class IAppEventHandler;
 
@@ -76,6 +77,9 @@ class Application
 	static void showProfileInfo(bool shouldDraw);
 
   private:
+	/// Maximum length for the profile string
+	static const int MaxTextLength = 256;
+
 	static bool isPaused_;
 	static bool hasFocus_;
 	static bool shouldQuit_;
@@ -88,7 +92,7 @@ class Application
 	static Font *font_;
 	static TextNode *textLines_;
 	static float textUpdateTime;
-	static char textChars_[256];
+	static String textString_;
 	static IInputManager *inputManager_;
 	static IAppEventHandler *appEventHandler_;
 

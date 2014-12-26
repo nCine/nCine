@@ -5,6 +5,7 @@
 #include "Font.h"
 #include "Color.h"
 #include "Array.h"
+#include "ncString.h"
 
 namespace ncine {
 
@@ -20,9 +21,6 @@ class TextNode : public DrawableNode
 		ALIGN_CENTER,
 		ALIGN_RIGHT
 	};
-
-	/// Maximum length for a string to be rendered
-	static const unsigned int MaxStringLength = 256;
 
 	TextNode(SceneNode* parent, Font *font);
 
@@ -44,15 +42,18 @@ class TextNode : public DrawableNode
 	/// Gets the font line height scaled by the scale factor
 	inline float fontLineHeight() const { return font_->lineHeight() * currentAbsScale(); }
 	// Sets the string to render
-	void setString(const char *string);
+	void setString(const String &string);
 
 	virtual void draw(RenderQueue& renderQueue);
 
 	inline static ObjectType sType() { return TEXT_TYPE; }
 
   private:
+	/// Maximum length for a string to be rendered
+	static const unsigned int MaxStringLength = 256;
+
 	/// The string to be rendered
-	char string_[MaxStringLength];
+	String string_;
 	/// Dirty flag for vertices and texture coordinates
 	bool dirtyDraw_;
 	/// Dirty flag for boundary rectangle
