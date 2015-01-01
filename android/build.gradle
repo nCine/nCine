@@ -1,0 +1,53 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.0.0'
+    }
+}
+
+apply plugin: 'com.android.application'
+ 
+android {
+
+	def numCores = Runtime.runtime.availableProcessors()
+
+	def ndkCommand = null
+	if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+		ndkCommand = 'ndk-build.cmd'
+	} else {
+		ndkCommand = 'ndk-build'
+	}
+
+	compileSdkVersion 21
+	buildToolsVersion "21.1.2"
+ 
+	defaultConfig {
+		minSdkVersion 13
+		targetSdkVersion 21
+		versionCode 1
+		versionName "0.01"
+	}
+ 
+	sourceSets.main {
+		jniLibs.srcDir 'src/main/libs'
+		jni.srcDirs = [] // disable automatic ndk-build call
+	}
+
+	task ndkBuild(type: Exec) {
+		commandLine ndkCommand, '-C', file('src/main').absolutePath, '-j' + numCores
+	}
+
+	tasks.withType(JavaCompile) {
+		compileTask -> compileTask.dependsOn ndkBuild
+	}
+
+	task ndkClean(type: Exec) {
+		commandLine ndkCommand, '-C', file('src/main').absolutePath, 'clean'
+	}
+
+	clean.dependsOn 'ndkClean'
+}

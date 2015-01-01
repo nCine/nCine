@@ -23,7 +23,7 @@ class AndroidJniHelper
 	static void detachJVM();
 	static void initClasses();
 
-	friend class Application;
+	friend class AndroidApplication;
 };
 
 class AndroidJniClass

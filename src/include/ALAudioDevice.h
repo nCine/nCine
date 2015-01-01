@@ -30,6 +30,9 @@ class ALAudioDevice : public IAudioDevice
 	inline virtual void stopStreamPlayers() { stopOrPauseStreamPlayers(true); }
 	inline virtual void pauseStreamPlayers() { stopOrPauseStreamPlayers(false); }
 
+	virtual void freezePlayers();
+	virtual void unfreezePlayers();
+
 	virtual int nextAvailableSource();
 	virtual void registerPlayer(IAudioPlayer *player);
 	virtual void updatePlayers();

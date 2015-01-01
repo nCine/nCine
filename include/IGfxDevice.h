@@ -10,7 +10,7 @@ namespace ncine {
 class IGfxDevice
 {
   public:
-	virtual ~IGfxDevice() = 0;
+	virtual ~IGfxDevice() { }
 
 	/// Sets screen resolution with two integers
 	virtual void setResolution(int width, int height) = 0;
@@ -52,8 +52,6 @@ class IGfxDevice
 	// Initilizes starting OpenGL state
 	virtual void initGL();
 };
-
-inline IGfxDevice::~IGfxDevice() { }
 
 }
 

@@ -4,8 +4,6 @@
 #include <cstdio> // for NULL
 #include "IGfxDevice.h"
 
-struct android_app;
-
 namespace ncine {
 
 class FrameTimer;
@@ -23,13 +21,8 @@ class IAppEventHandler;
 class Application
 {
   public:
-#ifdef __ANDROID__
-	// Must be called at start to init the application
-	static void init(struct android_app* state, IAppEventHandler* (*createAppEventHandler)());
-#else
 	// Must be called at start to init the application
 	static void init(IAppEventHandler* (*createAppEventHandler)());
-#endif
 
 	// The main game loop, handling events and rendering
 	static void run();
@@ -76,7 +69,7 @@ class Application
 	// Shows or hides profiling information text
 	static void showProfileInfo(bool shouldDraw);
 
-  private:
+  protected:
 	/// Maximum length for the profile string
 	static const int MaxTextLength = 256;
 
@@ -96,6 +89,12 @@ class Application
 	static IInputManager *inputManager_;
 	static IAppEventHandler *appEventHandler_;
 
+	static const char* fontTexFilename_;
+	static const char* fontFntFilename_;
+
+	static void initCommon(IAppEventHandler* (*createAppEventHandler)());
+
+  private:
 	Application();
 	~Application();
 	/// Private copy constructor

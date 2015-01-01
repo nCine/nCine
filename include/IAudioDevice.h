@@ -28,6 +28,11 @@ class IAudioDevice
 	/// Pauses every stream player currently playing
 	virtual void pauseStreamPlayers() = 0;
 
+	/// Pauses every player currently playing without unregistering it
+	virtual void freezePlayers() = 0;
+	/// Resumes every player previoulsy "frozen" to a playing state
+	virtual void unfreezePlayers() = 0;
+
 	/// Returns the next available source index available for playing
 	virtual int nextAvailableSource() = 0;
 	/// Register a new stream player for buffer update
@@ -56,6 +61,9 @@ class NullAudioDevice : public IAudioDevice
 	virtual void pauseBufferPlayers() { }
 	virtual void stopStreamPlayers() { }
 	virtual void pauseStreamPlayers() { }
+
+	virtual void freezePlayers() { }
+	virtual void unfreezePlayers() { }
 
 	virtual int nextAvailableSource() { return -1; }
 	virtual void registerPlayer(IAudioPlayer *player) { }

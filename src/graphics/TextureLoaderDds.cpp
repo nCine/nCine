@@ -93,7 +93,7 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 			case DDS_ATC:
 			case DDS_ATCA:
 			case DDS_ATCI:
-				if (gfxCaps.amdCompressedATCTexture() == false)
+				if (gfxCaps.amdCompressedAtcTexture() == false)
 				{
 					LOGF("GL_AMD_compressed_ATC_texture not available");
 					exit(EXIT_FAILURE);

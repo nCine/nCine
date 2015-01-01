@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.encelo.ncine">
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<supports-gl-texture android:name="GL_OES_compressed_ETC1_RGB8_texture" android:required="true" />
+	<supports-gl-texture android:name="GL_ATI_texture_compression_atitc" android:required="true" />
+	<application android:label="@string/app_name" android:hasCode="true" 
+		android:allowBackup="false" android:icon="@drawable/icon">
+		<activity android:name=".LoadLibraries" android:label="@string/app_name" 
+				android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+				android:screenOrientation="landscape"
+				android:configChanges="orientation|keyboardHidden">
+			<meta-data android:name="android.app.lib_name" android:value="ncine" />
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+	</application>
+</manifest> 

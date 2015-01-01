@@ -19,11 +19,8 @@
 	#include "ThreadPool.h"
 #endif
 
-#if defined(__ANDROID__)
-	#include "EglGfxDevice.h"
-	#include "AndroidInputManager.h"
-	#include "AssetFile.h"
-#elif defined(WITH_SDL)
+#include "IInputManager.h"
+#if defined(WITH_SDL)
 	#include "SdlGfxDevice.h"
 	#include "SdlInputManager.h"
 #elif defined(WITH_GLFW)
@@ -37,7 +34,7 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-bool Application::isPaused_ = true;
+bool Application::isPaused_ = false;
 bool Application::hasFocus_ = true;
 bool Application::shouldQuit_ = false;
 FrameTimer *Application::frameTimer_ = NULL;
@@ -52,29 +49,14 @@ float Application::textUpdateTime = 0.0f;
 String Application::textString_(MaxTextLength);
 IInputManager *Application::inputManager_ = NULL;
 IAppEventHandler *Application::appEventHandler_ = NULL;
+const char* Application::fontTexFilename_ = NULL;
+const char* Application::fontFntFilename_ = NULL;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
 /// Must be called at start to init the application
-#ifdef __ANDROID__
-void Application::init(struct android_app* state, IAppEventHandler* (*createAppEventHandler)())
-{
-	// Registering the logger as early as possible
-	ServiceLocator::registerLogger(new FileLogger("/sdcard/ncine_log.txt", ILogger::LOG_VERBOSE, ILogger::LOG_VERBOSE));
-	if (EglGfxDevice::isModeSupported(state, DisplayMode(8, 8, 8)))
-	{
-		gfxDevice_ = new EglGfxDevice(state, DisplayMode(8, 8, 8));
-	}
-	else
-	{
-		gfxDevice_ = new EglGfxDevice(state, DisplayMode(5, 6, 5));
-	}
-	AndroidJniHelper::attachJVM(state);
-	inputManager_ = new AndroidInputManager(state);
-	AssetFile::initAssetManager(state);
-#else
 void Application::init(IAppEventHandler* (*createAppEventHandler)())
 {
 	// Registering the logger as early as possible
@@ -88,76 +70,11 @@ void Application::init(IAppEventHandler* (*createAppEventHandler)())
 	inputManager_ = new GlfwInputManager();
 #endif
 	gfxDevice_->setWindowTitle("nCine");
-#endif
 
-	LOGI("nCine compiled on " __DATE__ " at " __TIME__);
-	ServiceLocator::registerIndexer(new ArrayIndexer());
-#ifdef WITH_AUDIO
-	ServiceLocator::registerAudioDevice(new ALAudioDevice());
-#endif
-#ifdef WITH_THREADS
-	ServiceLocator::registerThreadPool(new ThreadPool());
-#endif
-	LOGI_X("Data path: %s", IFile::dataPath());
+	fontTexFilename_ = "fonts/trebuchet32_256.png";
+	fontFntFilename_ = "fonts/trebuchet32_256.fnt";
 
-	frameTimer_ = new FrameTimer(5.0f, 0.2f);
-	rootNode_ = new SceneNode();
-	renderQueue_ = new RenderQueue();
-	profileTimer_ = new Timer();
-
-	profilePlotter_ = new StackedBarPlotter(rootNode_, Rect(width() * 0.1f, height() * 0.1f, width() * 0.8f, height() * 0.15f));
-	profilePlotter_->setBackgroundColor(Color(0.35f, 0.35f, 0.45f, 0.5f));
-	profilePlotter_->addVariable(50, 0.2f);
-	profilePlotter_->variable(0).setGraphColor(Color(0.8f, 0.0f, 0.0f));
-	profilePlotter_->variable(0).setMeanColor(Color(1.0f, 0.0f, 0.0f));
-	profilePlotter_->addVariable(50, 0.2f);
-	profilePlotter_->variable(1).setGraphColor(Color(0.0f, 0.8f, 0.0f));
-	profilePlotter_->variable(1).setMeanColor(Color(0.0f, 1.0f, 0.0f));
-	profilePlotter_->addVariable(50, 0.2f);
-	profilePlotter_->variable(2).setGraphColor(Color(0.0f, 0.0f, 0.8f));
-	profilePlotter_->variable(2).setMeanColor(Color(0.0f, 0.0f, 1.0f));
-
-	profilePlotter_->variable(0).setPlotMean(false);
-	profilePlotter_->variable(1).setPlotMean(false);
-	profilePlotter_->variable(2).setPlotMean(false);
-	profilePlotter_->setPlotRefValue(true);
-	profilePlotter_->setRefValue(1.0f / 60.0f); // 60 FPS
-
-#if defined(__ANDROID__)
-//	const char *fontTexFilename = "asset::trebuchet16_128.dds.mp3";
-//	const char *fontFntFilename = "asset::trebuchet16_128.fnt";
-	const char *fontTexFilename = "/sdcard/ncine/trebuchet32_256_4444.pvr";
-	const char *fontFntFilename = "/sdcard/ncine/trebuchet32_256.fnt";
-//	const char *fontTexFilename = "/sdcard/ncine/trebuchet16_128.dds";
-//	const char *fontFntFilename = "/sdcard/ncine/trebuchet16_128.fnt";
-#else
-	const char *fontTexFilename = "fonts/trebuchet32_256.png";
-	const char *fontFntFilename = "fonts/trebuchet32_256.fnt";
-#endif
-	if (IFile::access(fontTexFilename, IFile::MODE_EXISTS) &&
-		IFile::access(fontFntFilename, IFile::MODE_EXISTS))
-	{
-		font_ = new Font(fontTexFilename, fontFntFilename);
-		textLines_ = new TextNode(rootNode_, font_);
-		textLines_->setPosition(0.0f, height());
-	}
-	else
-	{
-		LOGW("Cannot access font files for profiling text");
-	}
-
-	LOGI("Application initialized");
-
-	appEventHandler_ = createAppEventHandler();
-	appEventHandler_->onInit();
-	LOGI("IAppEventHandler::OnInit() invoked");
-
-	// HACK: Init of the random seed
-	// In the future there could be a random generator service
-	srand(time(NULL));
-
-	// HACK: Using the pause flag as a way to know if initialization is done (Android)
-	isPaused_ = false;
+	initCommon(createAppEventHandler);
 }
 
 /// The main game loop, handling events and rendering
@@ -264,9 +181,6 @@ void Application::shutdown()
 	delete rootNode_; // deletes every child too
 	delete frameTimer_;
 	delete inputManager_;
-#ifdef __ANDROID__
-	AndroidJniHelper::detachJVM();
-#endif
 	delete gfxDevice_;
 
 	if (ServiceLocator::indexer().isEmpty() == false)
@@ -329,6 +243,69 @@ void Application::showProfileGraphs(bool shouldDraw)
 void Application::showProfileInfo(bool shouldDraw)
 {
 	textLines_->shouldDraw_ = shouldDraw;
+}
+
+///////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void Application::initCommon(IAppEventHandler* (*createAppEventHandler)())
+{
+	LOGI("nCine compiled on " __DATE__ " at " __TIME__);
+	ServiceLocator::registerIndexer(new ArrayIndexer());
+#ifdef WITH_AUDIO
+	ServiceLocator::registerAudioDevice(new ALAudioDevice());
+#endif
+#ifdef WITH_THREADS
+	ServiceLocator::registerThreadPool(new ThreadPool());
+#endif
+	LOGI_X("Data path: %s", IFile::dataPath());
+
+	frameTimer_ = new FrameTimer(5.0f, 0.2f);
+	rootNode_ = new SceneNode();
+	renderQueue_ = new RenderQueue();
+	profileTimer_ = new Timer();
+
+	profilePlotter_ = new StackedBarPlotter(rootNode_, Rect(width() * 0.1f, height() * 0.1f, width() * 0.8f, height() * 0.15f));
+	profilePlotter_->setBackgroundColor(Color(0.35f, 0.35f, 0.45f, 0.5f));
+	profilePlotter_->addVariable(50, 0.2f);
+	profilePlotter_->variable(0).setGraphColor(Color(0.8f, 0.0f, 0.0f));
+	profilePlotter_->variable(0).setMeanColor(Color(1.0f, 0.0f, 0.0f));
+	profilePlotter_->addVariable(50, 0.2f);
+	profilePlotter_->variable(1).setGraphColor(Color(0.0f, 0.8f, 0.0f));
+	profilePlotter_->variable(1).setMeanColor(Color(0.0f, 1.0f, 0.0f));
+	profilePlotter_->addVariable(50, 0.2f);
+	profilePlotter_->variable(2).setGraphColor(Color(0.0f, 0.0f, 0.8f));
+	profilePlotter_->variable(2).setMeanColor(Color(0.0f, 0.0f, 1.0f));
+
+	profilePlotter_->variable(0).setPlotMean(false);
+	profilePlotter_->variable(1).setPlotMean(false);
+	profilePlotter_->variable(2).setPlotMean(false);
+	profilePlotter_->setPlotRefValue(true);
+	profilePlotter_->setRefValue(1.0f / 60.0f); // 60 FPS
+
+	if (fontTexFilename_ && fontFntFilename_ &&
+		IFile::access(fontTexFilename_, IFile::MODE_EXISTS) &&
+		IFile::access(fontFntFilename_, IFile::MODE_EXISTS))
+	{
+		font_ = new Font(fontTexFilename_, fontFntFilename_);
+		textLines_ = new TextNode(rootNode_, font_);
+		textLines_->setPosition(0.0f, height());
+	}
+	else
+	{
+		LOGW("Cannot access font files for profiling text");
+	}
+
+	LOGI("Application initialized");
+
+	appEventHandler_ = createAppEventHandler();
+	appEventHandler_->onInit();
+	LOGI("IAppEventHandler::OnInit() invoked");
+
+	// HACK: Init of the random seed
+	// In the future there could be a random generator service
+	srand(time(NULL));
 }
 
 }

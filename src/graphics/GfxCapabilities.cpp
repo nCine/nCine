@@ -32,9 +32,9 @@ GfxCapabilities::GfxCapabilities()
 #ifndef __ANDROID__
 	  extTextureCompressionS3TC_(false)
 #else
-	  oesCompressedETC1RGB8Texture_(false),
-	  amdCompressedATCTexture_(false),
-	  imgTextureCompressionPVRTC_(false)
+	  oesCompressedEtc1Rgb8Texture_(false),
+	  amdCompressedAtcTexture_(false),
+	  imgTextureCompressionPvrTC_(false)
 #endif
 {
 
@@ -82,9 +82,9 @@ void GfxCapabilities::logGLCaps() const
 #ifndef __ANDROID__
 	LOGI_X("GL_EXT_texture_compression_s3tc: %d", extTextureCompressionS3TC_);
 #else
-	LOGI_X("GL_OES_compressed_ETC1_RGB8_texture: %d", oesCompressedETC1RGB8Texture_);
-	LOGI_X("GL_AMD_compressed_ATC_texture: %d", amdCompressedATCTexture_);
-	LOGI_X("GL_IMG_texture_compression_pvrtc: %d", imgTextureCompressionPVRTC_);
+	LOGI_X("GL_OES_compressed_ETC1_RGB8_texture: %d", oesCompressedEtc1Rgb8Texture_);
+	LOGI_X("GL_AMD_compressed_ATC_texture: %d", amdCompressedAtcTexture_);
+	LOGI_X("GL_IMG_texture_compression_pvrtc: %d", imgTextureCompressionPvrTC_);
 #endif
 	LOGI("OpenGL device capabilities ---");
 }
@@ -100,7 +100,7 @@ bool GfxCapabilities::checkGLExtension(const char *extensionName) const
 	 */
 	const char *extensions = reinterpret_cast<const char *>(glGetString(GL_EXTENSIONS));
 	int nameLength = strlen(extensionName);
-	const char *end = extensions + nameLength;
+	const char *end = extensions + strlen(extensions);
 
 	while (extensions < end)
 	{
@@ -134,9 +134,9 @@ void GfxCapabilities::init()
 #ifndef __ANDROID__
 	extTextureCompressionS3TC_ = checkGLExtension("GL_EXT_texture_compression_s3tc");
 #else
-	oesCompressedETC1RGB8Texture_ = checkGLExtension("GL_OES_compressed_ETC1_RGB8_texture");
-	amdCompressedATCTexture_ = checkGLExtension("GL_AMD_compressed_ATC_texture");
-	imgTextureCompressionPVRTC_ = checkGLExtension("GL_IMG_texture_compression_pvrtc");
+	oesCompressedEtc1Rgb8Texture_ = checkGLExtension("GL_OES_compressed_ETC1_RGB8_texture");
+	amdCompressedAtcTexture_ = checkGLExtension("GL_AMD_compressed_ATC_texture");
+	imgTextureCompressionPvrTC_ = checkGLExtension("GL_IMG_texture_compression_pvrtc");
 #endif
 }
 

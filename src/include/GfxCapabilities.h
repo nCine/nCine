@@ -39,11 +39,11 @@ class GfxCapabilities
 	inline bool extTextureCompressionS3TC() const { return extTextureCompressionS3TC_; }
 #else
 	/// Returns true if the extension GL_OES_compressed_ETC1_RGB8_texture is available
-	inline bool oesCompressedETC1RGB8Texture() const { return oesCompressedETC1RGB8Texture_; }
+	inline bool oesCompressedEtc1Rgb8Texture() const { return oesCompressedEtc1Rgb8Texture_; }
 	/// Returns true if the extension GL_AMD_compressed_ATC_texture is available
-	inline bool amdCompressedATCTexture() const { return amdCompressedATCTexture_; }
+	inline bool amdCompressedAtcTexture() const { return amdCompressedAtcTexture_; }
 	/// Returns true if the extension GL_IMG_texture_compression_pvrtc is available
-	inline bool imgTextureCompressionPVRTC() const { return imgTextureCompressionPVRTC_; }
+	inline bool imgTextureCompressionPvrTC() const { return imgTextureCompressionPvrTC_; }
 #endif
 
   private:
@@ -59,9 +59,9 @@ class GfxCapabilities
 #ifndef __ANDROID__
 	bool extTextureCompressionS3TC_;
 #else
-	bool oesCompressedETC1RGB8Texture_;
-	bool amdCompressedATCTexture_;
-	bool imgTextureCompressionPVRTC_;
+	bool oesCompressedEtc1Rgb8Texture_;
+	bool amdCompressedAtcTexture_;
+	bool imgTextureCompressionPvrTC_;
 #endif
 
 	// Queries the device about its capabilities

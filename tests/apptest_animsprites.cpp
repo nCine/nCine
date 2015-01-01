@@ -20,7 +20,7 @@ void MyEventHandler::onInit()
 	nc::SceneNode &rootNode = nc::Application::rootNode();
 
 #ifdef __ANDROID__
-	audioPlayer_ = new nc::AudioStreamPlayer("sdcard/ncine/music.ogg");
+	audioPlayer_ = new nc::AudioStreamPlayer("/sdcard/ncine/music.ogg");
 	texture_ = new nc::Texture("/sdcard/ncine/abta_playertwo.dds");
 //	audioPlayer_ = new nc::AudioStreamPlayer("asset::bomb.ogg");
 //	texture_ = new nc::Texture("asset::abta_player.dds.mp3");

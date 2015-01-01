@@ -23,6 +23,7 @@ short int IInputManager::MaxAxisValue = 32767;
 AndroidJoystickState AndroidInputManager::joystickStates_[MaxNumJoysticks];
 JoyButtonEvent AndroidInputManager::joyButtonEvent_;
 JoyAxisEvent AndroidInputManager::joyAxisEvent_;
+const float AndroidInputManager::JoyCheckRate = 0.25f;
 Timer AndroidInputManager::joyCheckTimer_;
 const int AndroidJoystickState::AxesToMap[AndroidJoystickState::NumAxesToMap] =
 {
@@ -118,17 +119,15 @@ void AndroidInputManager::parseAccelerometerEvent()
 }
 
 /// Parses an Android input event
-void AndroidInputManager::parseEvent(const AInputEvent *event)
+bool AndroidInputManager::parseEvent(const AInputEvent *event)
 {
-	if (inputEventHandler_ == NULL)
-	{
-		return;
-	}
+	bool isEventHandled = false;
 
 	// Checking for gamepad events first
-	if ((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD ||
+	if (inputEventHandler_ != NULL &&
+		((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD ||
 		(AInputEvent_getSource(event) & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK ||
-		(AInputEvent_getSource(event) & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD)
+		(AInputEvent_getSource(event) & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD))
 	{
 		int deviceId = AInputEvent_getDeviceId(event);
 		int joyId = findJoyId(deviceId);
@@ -233,9 +232,14 @@ void AndroidInputManager::parseEvent(const AInputEvent *event)
 		{
 			LOGW_X("No available joystick id for device %d, dropping button event", deviceId);
 		}
+
+		isEventHandled = true;
 	}
 	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD &&
-			  AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
+			  AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY &&
+			 // Hardware volume keys are not handled by the engine
+			 AKeyEvent_getKeyCode(event) != AKEYCODE_VOLUME_UP &&
+			 AKeyEvent_getKeyCode(event) != AKEYCODE_VOLUME_DOWN)
 	{
 		keyboardEvent_.scancode = AKeyEvent_getScanCode(event);
 		keyboardEvent_.sym = KeySym(AKeyEvent_getKeyCode(event));
@@ -252,6 +256,8 @@ void AndroidInputManager::parseEvent(const AInputEvent *event)
 			case AKEY_EVENT_ACTION_MULTIPLE:
 				break;
 		}
+
+		isEventHandled = true;
 	}
 	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_TOUCHSCREEN) == AINPUT_SOURCE_TOUCHSCREEN &&
 			  AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
@@ -282,7 +288,11 @@ void AndroidInputManager::parseEvent(const AInputEvent *event)
 				inputEventHandler_->onSecondaryTouchUp(touchEvent_);
 				break;
 		}
+
+		isEventHandled = true;
 	}
+
+	return isEventHandled;
 }
 
 bool AndroidInputManager::isJoyPresent(int joyId) const

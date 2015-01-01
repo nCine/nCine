@@ -42,6 +42,47 @@ EglGfxDevice::~EglGfxDevice()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/// Recreates a surface from a native window
+void EglGfxDevice::createSurface(struct android_app* state)
+{
+	if (state->window != NULL)
+	{
+		surface_ = eglCreateWindowSurface(display_, config_, state->window, NULL);
+		if (surface_ == EGL_NO_SURFACE)
+		{
+			LOGF("eglCreateWindowSurface() returned EGL_NO_SURFACE");
+			exit(-1);
+		}
+	}
+}
+
+/// Binds the current context
+void EglGfxDevice::bindContext()
+{
+	if (eglMakeCurrent(display_, surface_, surface_, context_) == EGL_FALSE)
+	{
+		LOGF("eglMakeCurrent() returned EGL_FALSE");
+		exit(-1);
+	}
+}
+
+/// Unbinds the current context
+void EglGfxDevice::unbindContext()
+{
+	if (eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT) == EGL_FALSE)
+	{
+		LOGF("eglMakeCurrent() returned EGL_FALSE");
+		exit(-1);
+	}
+}
+
+/// Queries the size of the current surface
+void EglGfxDevice::querySurfaceSize()
+{
+	eglQuerySurface(display_, surface_, EGL_WIDTH, &width_);
+	eglQuerySurface(display_, surface_, EGL_HEIGHT, &height_);
+}
+
 /// Checks if the desired pixel format is supported
 bool EglGfxDevice::isModeSupported(struct android_app *state, DisplayMode mode)
 {
@@ -99,39 +140,36 @@ void EglGfxDevice::initDevice(struct android_app* state)
 	};
 
 	EGLint format, numConfigs;
-	EGLConfig config;
 
 	display_ = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
 	eglInitialize(display_, 0, 0);
-	eglChooseConfig(display_, attribs, &config, 1, &numConfigs);
-	eglGetConfigAttrib(display_, config, EGL_NATIVE_VISUAL_ID, &format);
+	eglChooseConfig(display_, attribs, &config_, 1, &numConfigs);
+	eglGetConfigAttrib(display_, config_, EGL_NATIVE_VISUAL_ID, &format);
 
 #ifdef __ANDROID__
 	ANativeWindow_setBuffersGeometry(state->window, 0, 0, format);
 #endif
 
-	surface_ = eglCreateWindowSurface(display_, config, state->window, NULL);
-	context_ = eglCreateContext(display_, config, NULL, NULL);
-
-	if (eglMakeCurrent(display_, surface_, surface_, context_) == EGL_FALSE)
+	createSurface(state);
+	context_ = eglCreateContext(display_, config_, NULL, NULL);
+	if (context_ == EGL_NO_CONTEXT)
 	{
-		LOGF("Unable to eglMakeCurrent");
+		LOGF("eglCreateContext() returned EGL_NO_CONTEXT");
 		exit(-1);
 	}
 
-	eglQuerySurface(display_, surface_, EGL_WIDTH, &width_);
-	eglQuerySurface(display_, surface_, EGL_HEIGHT, &height_);
-
+	bindContext();
+	querySurfaceSize();
 
 	EGLint red, blue, green, alpha, depth, stencil, samples;
-	eglGetConfigAttrib(display_, config, EGL_RED_SIZE, &red);
-	eglGetConfigAttrib(display_, config, EGL_GREEN_SIZE, &green);
-	eglGetConfigAttrib(display_, config, EGL_BLUE_SIZE, &blue);
-	eglGetConfigAttrib(display_, config, EGL_ALPHA_SIZE, &alpha);
-	eglGetConfigAttrib(display_, config, EGL_DEPTH_SIZE, &depth);
-	eglGetConfigAttrib(display_, config, EGL_STENCIL_SIZE, &stencil);
-	eglGetConfigAttrib(display_, config, EGL_SAMPLES, &samples);
+	eglGetConfigAttrib(display_, config_, EGL_RED_SIZE, &red);
+	eglGetConfigAttrib(display_, config_, EGL_GREEN_SIZE, &green);
+	eglGetConfigAttrib(display_, config_, EGL_BLUE_SIZE, &blue);
+	eglGetConfigAttrib(display_, config_, EGL_ALPHA_SIZE, &alpha);
+	eglGetConfigAttrib(display_, config_, EGL_DEPTH_SIZE, &depth);
+	eglGetConfigAttrib(display_, config_, EGL_STENCIL_SIZE, &stencil);
+	eglGetConfigAttrib(display_, config_, EGL_SAMPLES, &samples);
 
 	LOGI_X("Surface configuration is RGBA:%d%d%d%d, depth:%d, stencil:%d, samples:%d", red, green, blue, alpha, depth, stencil, samples);
 }

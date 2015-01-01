@@ -50,7 +50,7 @@ void TextureLoaderEtc::init()
 	}
 
 	// Checking for extension availability before loading
-	if (gfxCaps.oesCompressedETC1RGB8Texture() == false)
+	if (gfxCaps.oesCompressedEtc1Rgb8Texture() == false)
 	{
 		LOGF("GL_OES_compressed_ETC1_RGB8_texture not available");
 		exit(-1);

@@ -30,13 +30,13 @@ include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-NCINE_ROOT=../..
+NCINE_ROOT=../../../..
 INC=$(NCINE_ROOT)/include
 SRC=$(NCINE_ROOT)/src
 TST=$(NCINE_ROOT)/tests
 
 LOCAL_MODULE := ncine
-LOCAL_CFLAGS := -Wall -ffast-math -DWITH_THREADS
+LOCAL_CFLAGS := -Wall -ffast-math -DWITH_AUDIO -DWITH_THREADS
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/$(INC) \
 	$(LOCAL_PATH)/$(SRC)/include
@@ -51,6 +51,7 @@ LOCAL_SRC_FILES := \
 	$(SRC)/ArrayIndexer.cpp \
 	$(SRC)/ProfileVariable.cpp \
 	$(SRC)/Application.cpp \
+	$(SRC)/android/AndroidApplication.cpp \
 	$(SRC)/Font.cpp \
 	$(SRC)/FontGlyph.cpp \
 	$(SRC)/IFile.cpp \

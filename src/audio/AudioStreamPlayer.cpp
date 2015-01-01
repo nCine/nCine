@@ -41,6 +41,7 @@ void AudioStreamPlayer::play()
 			// No sources available
 			if (source < 0)
 			{
+				LOGW("No more available audio sources for playing");
 				return;
 			}
 			sourceId_ = source;

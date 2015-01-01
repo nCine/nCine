@@ -100,7 +100,7 @@ void TextureLoaderKtx::parseFormat(const KtxHeader& header)
 			break;
 #else
 		case GL_ETC1_RGB8_OES:
-			if (gfxCaps.oesCompressedETC1RGB8Texture() == false)
+			if (gfxCaps.oesCompressedEtc1Rgb8Texture() == false)
 			{
 				LOGF("GL_OES_compressed_ETC1_RGB8_texture not available");
 				exit(EXIT_FAILURE);
@@ -111,7 +111,7 @@ void TextureLoaderKtx::parseFormat(const KtxHeader& header)
 		case GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG:
 		case GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG:
 		case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
-			if (gfxCaps.imgTextureCompressionPVRTC() == false)
+			if (gfxCaps.imgTextureCompressionPvrTC() == false)
 			{
 				LOGF("GL_IMG_texture_compression_pvrtc not available");
 				exit(EXIT_FAILURE);

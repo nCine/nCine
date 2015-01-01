@@ -90,6 +90,24 @@ void ALAudioDevice::pausePlayers()
 	players_.clear();
 }
 
+void ALAudioDevice::freezePlayers()
+{
+	for (List<IAudioPlayer *>::Const_Iterator i = players_.begin(); i != players_.end(); ++i)
+	{
+		(*i)->pause();
+	}
+
+	// The player list is not cleared at this point, it is needed as-is by the unfreeze method
+}
+
+void ALAudioDevice::unfreezePlayers()
+{
+	for (List<IAudioPlayer *>::Const_Iterator i = players_.begin(); i != players_.end(); ++i)
+	{
+		(*i)->play();
+	}
+}
+
 int ALAudioDevice::nextAvailableSource()
 {
 	ALint sourceState;

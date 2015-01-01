@@ -18,7 +18,7 @@ FileLogger::FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fil
 {
 	fileHandle_ = IFile::createFileHandle(filename);
 
-	if (fileLevel_ < int(LOG_OFF))
+	if (fileLevel_ != LOG_OFF)
 	{
 		fileHandle_->open(IFile::MODE_WRITE);
 	}
@@ -28,7 +28,7 @@ FileLogger::FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fil
 		consoleLevel_ = fileLevel_;
 	}
 
-	if (consoleLevel_ < int(LOG_OFF))
+	if (consoleLevel_ != LOG_OFF)
 	{
 		setvbuf(stdout, NULL, _IONBF, 0);
 	}
@@ -60,7 +60,7 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 //	strftime(buffer, sizeof(buffer), "%a %Y-%m-%d %H:%M:%S %Z", ts);
 	strftime(buffer, sizeof(buffer), "%H:%M:%S", ts);
 
-	if (consoleLevel_ < int(LOG_OFF) && int(level) >= int(consoleLevel_))
+	if (consoleLevel_ != LOG_OFF && int(level) >= int(consoleLevel_))
 	{
 		printf("- %s [L%d] - ", buffer, int(level));
 
@@ -72,7 +72,7 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 		printf("\n");
 	}
 
-	if (fileLevel_ < int(LOG_OFF) && int(level) >= int(fileLevel_))
+	if (fileLevel_ != LOG_OFF && int(level) >= int(fileLevel_))
 	{
 		fprintf(fileHandle_->ptr(), "- %s [L%d] - ", buffer, int(level));
 
@@ -98,9 +98,9 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 
 	android_LogPriority priority;
 
-	if (consoleLevel_ < int(LOG_OFF) && int(level) >= int(consoleLevel_))
+	if (consoleLevel_ != LOG_OFF && int(level) >= int(consoleLevel_))
 	{
-		switch (consoleLevel_)
+		switch (level)
 		{
 			case LOG_FATAL:
 				priority = ANDROID_LOG_FATAL;
@@ -132,7 +132,7 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 		va_end(args);
 	}
 
-	if (fileLevel_ < int(LOG_OFF) && int(level) >= int(fileLevel_))
+	if (fileLevel_ != LOG_OFF && int(level) >= int(fileLevel_))
 	{
 		fprintf(fileHandle_->ptr(), "- %s [L%d] -> ", buffer, int(level));
 

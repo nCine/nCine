@@ -91,7 +91,7 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
 			case FMT_PVRTC_2BPP_RGBA:
 			case FMT_PVRTC_4BPP_RGB:
 			case FMT_PVRTC_4BPP_RGBA:
-				if (gfxCaps.imgTextureCompressionPVRTC() == false)
+				if (gfxCaps.imgTextureCompressionPvrTC() == false)
 				{
 					LOGF("GL_IMG_texture_compression_pvrtc not available");
 					exit(EXIT_FAILURE);
