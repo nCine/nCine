@@ -103,7 +103,7 @@ void String::copyFrom(const String &source, unsigned int fromChar, unsigned int 
 /// Compares the string with another one in lexicographical order
 int String::compare(const String &other) const
 {
-	unsigned int minCapacity = min(capacity_, other.capacity_);
+	unsigned int minCapacity = nc::min(capacity_, other.capacity_);
 	return strncmp(array_, other.array_, minCapacity);
 }
 
@@ -187,7 +187,7 @@ String& String::format(const char *fmt, ...)
 
 	if (formattedLength > 0)
 	{
-		length_ = min(capacity_, static_cast<unsigned int>(formattedLength));
+		length_ = nc::min(capacity_, static_cast<unsigned int>(formattedLength));
 		array_[length_] = '\0';
 	}
 

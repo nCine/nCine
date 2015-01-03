@@ -121,7 +121,7 @@ void SpriteBatchNode::updateRenderCommand()
 {
 	renderCommand_->material().setTextureGLId(texture_->gLId());
 	renderCommand_->transformation().setPosition(absPosition().x, absPosition().y);
-	renderCommand_->geometry().setData(GL_TRIANGLES, 0, vertices_.size() / 2, vertices_.pointer(), texCoords_.pointer(), colors_.pointer());
+	renderCommand_->geometry().setData(GL_TRIANGLES, 0, vertices_.size() / 2, vertices_.data(), texCoords_.data(), colors_.data());
 	renderCommand_->calculateSortKey();
 
 	applyTransformations();

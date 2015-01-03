@@ -1,3 +1,4 @@
+#include <cstdlib> // for EXIT_SUCCESS
 #include <cstring>
 #include <stdint.h>
 #include <cstdio>
@@ -37,6 +38,8 @@ int main()
 
 	delete[] array;
 	delete[] auxiliary;
+
+	return EXIT_SUCCESS;
 }
 
 void radixSort(uint32_t *array, uint32_t *aux, int length)
@@ -136,11 +139,9 @@ int partition(uint32_t *array, int start, int end)
 /* Quick sort implementation from start to end of array */
 void quickSort(uint32_t *array, int start, int end)
 {
-	int div;
-
 	if (start < end)
 	{
-		div = partition(array, start, end);
+		int div = partition(array, start, end);
 		quickSort(array, start, div);
 		quickSort(array, div + 1, end);
 	}

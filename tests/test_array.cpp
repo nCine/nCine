@@ -13,14 +13,14 @@ void printArray(const nc::Array<int> &array)
 
 int main(int argc, char **argv)
 {
-	const int Capacity = 10;
+	const unsigned int Capacity = 10;
 	nc::Array<int> array(Capacity);
 
 //	printf("Trying to create a hole\n");
 //	array[1] = 1;
 
 	printf("Filling the whole array\n");
-	for (int i = 0; i < Capacity; i++)
+	for (unsigned int i = 0; i < Capacity; i++)
 	{
 		array[i] = i;
 	}
@@ -47,6 +47,43 @@ int main(int argc, char **argv)
 	array.removeAt(2);
 	printArray(array);
 
+
+	printf("\n--- Array traversals (for cycles) ---\n");
+	printf("Iterating through elements:");
+	for (nc::Array<int>::Const_Iterator i = array.begin(); i != array.end(); ++i)
+	{
+		printf(" %d", *i);
+	}
+	printf("\n");
+
+	printf("Iterating through elements (reverse):");
+	for (nc::Array<int>::Const_Iterator r = array.rBegin(); r != array.rEnd(); --r)
+	{
+		printf(" %d", *r);
+	}
+	printf("\n");
+
+
+	printf("\n--- Array traversals (while cycles) ---\n");
+	printf("Iterating through elements:");
+	nc::Array<int>::Const_Iterator i = array.begin();
+	while (i != array.end())
+	{
+		printf(" %d", *i);
+		++i;
+	}
+	printf("\n");
+
+	printf("Iterating through elements (reverse):");
+	nc::Array<int>::Const_Iterator r = array.rBegin();
+	while (r != array.rEnd())
+	{
+		printf(" %d", *r);
+		--r;
+	}
+	printf("\n");
+
+
 	printf("\nCreating a second array with copy construction\n");
 	nc::Array<int> array2(array);
 
@@ -66,5 +103,5 @@ int main(int argc, char **argv)
 	printf("Contents of third array\n");
 	printArray(array3);
 
-	return 0;
+	return EXIT_SUCCESS;
 }

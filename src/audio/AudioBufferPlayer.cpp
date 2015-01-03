@@ -47,7 +47,7 @@ void AudioBufferPlayer::play()
 
 			alSourcef(sourceId_, AL_GAIN, gain_);
 			alSourcef(sourceId_, AL_PITCH, pitch_);
-			alSourcefv(sourceId_, AL_POSITION, position_);
+			alSourcefv(sourceId_, AL_POSITION, position_.data());
 
 			alSourcePlay(sourceId_);
 			state_ = STATE_PLAYING;

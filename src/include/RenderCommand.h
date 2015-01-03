@@ -35,7 +35,7 @@ class RenderMaterial
 	RenderMaterial() : textureGLId_(0), alwaysTransparent_(false) { }
 
 	/// Sets the material color
-	inline void setColor(const Color &color)	{ color_ = color;	}
+	inline void setColor(const Color &color) { color_ = color; }
 	/// Sets the material color in unsigned bytes components
 	inline void setColor(GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha)
 	{

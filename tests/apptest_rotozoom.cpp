@@ -17,8 +17,7 @@ void MyEventHandler::onInit()
 
 	pause_ = false;
 	angle_ = 0.0f;
-	nc::Rect texRects[NumTextures];
-	sprites_ = new nc::Sprite*[NumRowSprites * NumColSprites];
+	nc::StaticArray<nc::Rect, NumTextures> texRects;
 
 	nc::SceneNode &rootNode = nc::Application::rootNode();
 
@@ -75,8 +74,7 @@ void MyEventHandler::onFrameStart()
 
 void MyEventHandler::onShutdown()
 {
-	delete dummy_; // and all its children
-	delete[] sprites_;
+	delete dummy_; // and all its children (the sprites)
 	delete megaTexture_;
 }
 

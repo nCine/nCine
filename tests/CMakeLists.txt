@@ -20,6 +20,8 @@ target_link_libraries(apptest_scene ncine)
 
 add_executable(test_array test_array.cpp)
 target_link_libraries(test_array ncine)
+add_executable(test_staticarray test_staticarray.cpp)
+target_link_libraries(test_staticarray ncine)
 add_executable(test_list test_list.cpp)
 target_link_libraries(test_list ncine)
 add_executable(test_string test_string.cpp)

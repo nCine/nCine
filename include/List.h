@@ -2,6 +2,7 @@
 #define CLASS_NCINE_LIST
 
 #include <cstdio> // for NULL
+#include "common.h"
 #include <ListIterator.h>
 
 namespace ncine {
@@ -49,33 +50,32 @@ class List
 	/// Swaps two lists without copying their data
 	void swap(List& first, List& second)
 	{
-		ListNode<T>* tempHead = first.head_;
-		ListNode<T>* tempTail = first.tail_;
-
-		first.head_ = second.head_;
-		first.tail_ = second.tail_;
-
-		second.head_ = tempHead;
-		second.tail_ = tempTail;
+		nc::swap(first.head_, second.head_);
+		nc::swap(first.tail_, second.tail_);
 	}
-
-	/// Returns true if the list is empty
-	inline bool isEmpty() const { return head_ == NULL; }
 
 	/// Returns an iterator to the first element
 	inline Iterator begin() { return Iterator(head_); }
 	/// Returns an iterator to the last element
-	inline Iterator revBegin() { return Iterator(tail_); }
-	/// Returns an iterator to the end of the list sentinel (reverse traversal too)
+	inline Iterator rBegin() { return Iterator(tail_); }
+	/// Returns an iterator to the end of the list sentinel (valid for reverse traversal too)
 	inline Iterator end() { return Iterator(NULL); }
+	/// Returns an iterator to the end of the list sentinel
+	/** It exists only for coherency with the rest of the containers */
+	inline Iterator rEnd() { return end(); }
 
 	/// Returns a constant iterator to the first element
 	inline Const_Iterator begin() const { return Iterator(head_); }
 	/// Returns a constant iterator to the last element
-	inline Const_Iterator revBegin() const { return Iterator(tail_); }
-	/// Returns a constant iterator to the end of the list sentinel (reverse traversal too)
+	inline Const_Iterator rBegin() const { return Iterator(tail_); }
+	/// Returns a constant iterator to the end of the list sentinel (valid reverse traversal too)
 	inline Const_Iterator end() const { return Iterator(NULL); }
+	/// Returns a constant iterator to the end of the list sentinel
+	/** It exists only for coherency with the rest of the containers */
+	inline Const_Iterator rEnd() const { return end(); }
 
+	/// Returns true if the list is empty
+	inline bool isEmpty() const { return head_ == NULL; }
 	// Clears the list
 	void clear();
 	// Inserts a new element as the first, in constant time

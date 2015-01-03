@@ -1,3 +1,4 @@
+#include <cstdlib> // for EXIT_SUCCESS
 #include <cstdio>
 #include "ncString.h"
 
@@ -60,7 +61,7 @@ int main(int argc, char **argv)
 	printf("\n");
 
 	printf("Iterating through characters of first string (reverse):");
-	for (nc::String::Const_Iterator r = str.revBegin(); r != str.revEnd(); --r)
+	for (nc::String::Const_Iterator r = str.rBegin(); r != str.rEnd(); --r)
 	{
 		printf(" %c", *r);
 	}
@@ -78,13 +79,13 @@ int main(int argc, char **argv)
 	printf("\n");
 
 	printf("Iterating through characters of first string (reverse):");
-	nc::String::Const_Iterator r = str.revBegin();
-	while (r != str.revEnd())
+	nc::String::Const_Iterator r = str.rBegin();
+	while (r != str.rEnd())
 	{
 		printf(" %c", *r);
 		--r;
 	}
 	printf("\n");
 
-	return 0;
+	return EXIT_SUCCESS;
 }

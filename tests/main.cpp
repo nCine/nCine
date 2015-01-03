@@ -1,3 +1,4 @@
+#include <cstdlib> // for EXIT_SUCCESS
 #include "Application.h"
 
 namespace ncine{
@@ -14,5 +15,5 @@ int main(int argc, char **argv)
 	ncine::Application::run();
 	ncine::Application::shutdown();
 
-	return 0;
+	return EXIT_SUCCESS;
 }

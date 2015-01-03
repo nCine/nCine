@@ -1,3 +1,4 @@
+#include <cstdlib> // for EXIT_SUCCESS
 #include "List.h"
 
 namespace nc = ncine;
@@ -32,7 +33,7 @@ int main(int argc, char **argv)
 	printf("Removing first node\n");
 	list.remove(list.begin());
 	printf("Removing last node\n");
-	list.remove(list.revBegin());
+	list.remove(list.rBegin());
 	printList(list);
 
 	printf("Removing a couple of elements\n");
@@ -54,7 +55,7 @@ int main(int argc, char **argv)
 	printf("\n");
 
 	printf("Iterating through nodes (reverse):");
-	for (nc::List<int>::Const_Iterator r = list.revBegin(); r != list.end(); --r)
+	for (nc::List<int>::Const_Iterator r = list.rBegin(); r != list.rEnd(); --r)
 	{
 		printf(" %d", *r);
 	}
@@ -72,8 +73,8 @@ int main(int argc, char **argv)
 	printf("\n");
 
 	printf("Iterating through nodes (reverse):");
-	nc::List<int>::Const_Iterator r = list.revBegin();
-	while (r != list.end())
+	nc::List<int>::Const_Iterator r = list.rBegin();
+	while (r != list.rEnd())
 	{
 		printf(" %d", *r);
 		--r;
@@ -95,7 +96,7 @@ int main(int argc, char **argv)
 	printf("Removing first node on empty\n");
 	list.remove(list.begin());
 	printf("Removing last node on empty\n");
-	list.remove(list.revBegin());
+	list.remove(list.rBegin());
 	printList(list);
 
 	printf("Contents of second list\n");
@@ -104,5 +105,5 @@ int main(int argc, char **argv)
 	printf("Contents of third list\n");
 	printList(list3);
 
-	return 0;
+	return EXIT_SUCCESS;
 }

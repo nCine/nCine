@@ -81,7 +81,7 @@ void Sprite::updateRenderCommand()
 	renderCommand_->material().setColor(absColor_);
 	renderCommand_->transformation().setPosition(absPosition().x, absPosition().y);
 	setVertices();
-	renderCommand_->geometry().setData(GL_TRIANGLE_STRIP, 0, 4, vertices_, texCoords_, NULL);
+	renderCommand_->geometry().setData(GL_TRIANGLE_STRIP, 0, 4, vertices_.data(), texCoords_.data(), NULL);
 	renderCommand_->calculateSortKey();
 
 	applyTransformations();

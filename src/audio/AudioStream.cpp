@@ -15,7 +15,7 @@ namespace ncine {
 AudioStream::AudioStream(const char *filename)
 	: nextAvailALBuffer_(0), frequency_(0)
 {
-	alGenBuffers(NumBuffers, alBuffers_);
+	alGenBuffers(NumBuffers, alBuffers_.data());
 	memBuffer_ = new char[BufferSize];
 
 	audioLoader_ = IAudioLoader::createFromFile(filename);
@@ -41,7 +41,7 @@ AudioStream::~AudioStream()
 {
 	delete audioLoader_;
 	delete[] memBuffer_;
-	alDeleteBuffers(NumBuffers, alBuffers_);
+	alDeleteBuffers(NumBuffers, alBuffers_.data());
 }
 
 ///////////////////////////////////////////////////////////

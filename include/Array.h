@@ -4,21 +4,35 @@
 #include <cstdio> // for NULL
 #include <cstdlib> // for exit()
 #include <cstring> // for memmove() and memcpy()
+#include "common.h"
+#include "ArrayIterator.h"
 #include "ServiceLocator.h"
 
 namespace ncine {
 
-/// An array based on templates
+/// A dynamic array based on templates and stored in the heap
 template <class T>
 class Array
 {
   public:
-	/// Constructs an array with explicit size
+	/// Iterator type
+	typedef ArrayIterator<T> Iterator;
+	/// Constant iterator type
+	typedef const ArrayIterator<T> Const_Iterator;
+
+	/// Constructs an array with explicit capacity
 	explicit Array(unsigned int capacity)
-		: array_(NULL), size_(0), capacity_(0)
+		: array_(NULL), size_(0), capacity_(0), fixedCapacity_(false)
 	{
 		setCapacity(capacity);
 	}
+	/// Constructs an array with explicit capacity and the option for it to be fixed
+	explicit Array(unsigned int capacity, bool fixedCapacity)
+		: array_(NULL), size_(0), capacity_(0), fixedCapacity_(fixedCapacity)
+	{
+		setCapacity(capacity);
+	}
+
 	~Array() { delete[] array_; }
 
 	// Copy constructor
@@ -29,18 +43,28 @@ class Array
 	/// Swaps two arrays without copying their data
 	void swap(Array& first, Array& second)
 	{
-		T* tempArray = first.array_;
-		unsigned int tempSize = first.size_;
-		unsigned int tempCapacity = first.capacity_;
-
-		first.array_ = second.array_;
-		first.size_ = second.size_;
-		first.capacity_ = second.capacity_;
-
-		second.array_ = tempArray;
-		second.size_ = tempSize;
-		second.capacity_ = tempCapacity;
+		nc::swap(first.array_, second.array_);
+		nc::swap(first.size_, second.size_);
+		nc::swap(first.capacity_, second.capacity_);
 	}
+
+	/// Returns an iterator to the first character
+	inline Iterator begin() { return Iterator(array_); }
+	/// Returns an iterator to the last character
+	inline Iterator rBegin() { return Iterator(array_ + size_ - 1); }
+	/// Returns an iterator to the termination character
+	inline Iterator end() { return Iterator(array_ + size_); }
+	/// Returns an iterator to the byte preceding the first character
+	inline Iterator rEnd() { return Iterator(array_ - 1); }
+
+	/// Returns a constant iterator to the first character
+	inline Const_Iterator begin() const { return Iterator(array_); }
+	/// Returns a constant iterator to the last character
+	inline Const_Iterator rBegin() const { return Iterator(array_ + size_ - 1); }
+	/// Returns a constant iterator to the termination character
+	inline Const_Iterator end() const { return Iterator(array_ + size_); }
+	/// Returns a constant iterator to the byte preceding the first character
+	inline Const_Iterator rEnd() const { return Iterator(array_ - 1); }
 
 	/// Returns true if the array is empty
 	inline bool isEmpty() const { return size_ == 0; }
@@ -71,8 +95,11 @@ class Array
 	T& operator[](unsigned int index);
 
 	/// Returns a pointer to the allocated memory
+	/** When adding new elements through a pointer the size field is not updated, like with std::vector */
+	inline T* data() { return array_; }
+	/// Returns a constant pointer to the allocated memory
 	/** It's useful when holding arrays of OpenGL data */
-	inline T* const pointer() const { return array_; }
+	inline const T* data() const { return array_; }
 	// Allows for direct but unchecked access to the array memory
 	T* mapBuffer(unsigned int reserved);
 
@@ -80,6 +107,7 @@ class Array
 	T* array_;
 	unsigned int size_;
 	unsigned int capacity_;
+	bool fixedCapacity_;
 };
 
 /// Copy constructor
@@ -104,10 +132,34 @@ Array<T>& Array<T>::operator=(Array<T> other)
 template <class T>
 void Array<T>::setCapacity(unsigned int newCapacity)
 {
-	if (newCapacity == 0)
+	// If the call does not come from the constructor
+	if (capacity_ != 0)
 	{
-		LOGF("Zero is not a valid capacity");
-		exit(EXIT_FAILURE);
+		// Setting a new capacity is disabled if the array is fixed
+		if (fixedCapacity_)
+		{
+			LOGW_X("Trying to change the capacity of a fixed array, from from %u to %u", capacity_, newCapacity);
+			return;
+		}
+
+		if (newCapacity == 0)
+		{
+			LOGF("Zero is not a valid capacity");
+			exit(EXIT_FAILURE);
+		}
+		else if (newCapacity == capacity_)
+		{
+			LOGW_X("Array capacity already equal to %u", capacity_);
+			return;
+		}
+		else if (newCapacity > capacity_)
+		{
+			//LOGW_X("Array capacity growing from %u to %u", capacity_, newCapacity);
+		}
+		else if (newCapacity < capacity_)
+		{
+			LOGW_X("Array capacity shrinking from %u to %u", capacity_, newCapacity);
+		}
 	}
 
 	T* newArray = new T[newCapacity];
@@ -180,12 +232,6 @@ const T& Array<T>::operator[](const unsigned int index) const
 template <class T>
 T& Array<T>::operator[](const unsigned int index)
 {
-	if (index > capacity_ - 1)
-	{
-//		LOGW("Element %u out of capacity range!", index);
-//		exit(EXIT_FAILURE);
-	}
-
 	// Avoid creating "holes" into the array
 	if (index > size_)
 	{

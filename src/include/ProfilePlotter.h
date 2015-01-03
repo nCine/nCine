@@ -4,6 +4,7 @@
 #include "Rect.h"
 #include "Color.h"
 #include "Array.h"
+#include "StaticArray.h"
 #include "DrawableNode.h"
 #include "PlottingVariable.h"
 
@@ -60,7 +61,7 @@ class ProfilePlotter : public DrawableNode
 	/// Background color
 	Color backgroundColor_;
 	/// The vertices for the background
-	float backgroundVertices_[8]; // Quad with a triangle strip
+	StaticArray<float, 8> backgroundVertices_; // Quad with a triangle strip
 	/// The array of variables
 	Array<PlottingVariable *> variables_;
 
@@ -69,7 +70,7 @@ class ProfilePlotter : public DrawableNode
 	/// Reference value line color
 	Color refValueColor_;
 	/// The vertices for the reference value line
-	float refValueVertices_[4];
+	StaticArray<float, 4> refValueVertices_;
 	/// The reference value
 	float refValue_;
 	/// The command used to render the reference value

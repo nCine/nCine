@@ -5,6 +5,7 @@
 #include "Texture.h"
 #include "Rect.h"
 #include "Color.h"
+#include "StaticArray.h"
 
 namespace ncine {
 
@@ -76,8 +77,8 @@ class Sprite : public DrawableNode
 	/// Sprite height in pixel
 	int height_;
 
-	float vertices_[8];
-	float texCoords_[8];
+	StaticArray<float, 8> vertices_;
+	StaticArray<float, 8> texCoords_;
 
 	void init();
 	void setVertices();

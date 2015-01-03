@@ -146,7 +146,10 @@ if(Threads_FOUND)
 endif()
 
 set(HEADERS
+	include/common.h
 	include/Array.h
+	include/ArrayIterator.h
+	include/StaticArray.h
 	include/List.h
 	include/ListIterator.h
 	include/ncString.h

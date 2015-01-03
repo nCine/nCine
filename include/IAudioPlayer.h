@@ -7,6 +7,7 @@
 	#include <AL/al.h>
 #endif
 #include "Object.h"
+#include "StaticArray.h"
 
 namespace ncine {
 
@@ -57,7 +58,7 @@ class IAudioPlayer : public Object
 	// Sets player pitch value
 	void setPitch(float pitch);
 	/// Returns player position value
-	inline const float* Position() const { return position_; }
+	inline const float* Position() const { return position_.data(); }
 	// Sets player position value through vector
 	void setPosition(float position[3]);
 	// Sets player position value through components
@@ -84,7 +85,7 @@ class IAudioPlayer : public Object
 	/// Player pitch value
 	float pitch_;
 	/// Player position in space
-	float position_[3];
+	StaticArray<float, 3> position_;
 };
 
 /// Sets player gain value
@@ -119,7 +120,7 @@ inline void IAudioPlayer::setPosition(float position[3])
 
 	if (state_ == STATE_PLAYING)
 	{
-		alSourcefv(sourceId_, AL_POSITION, position_);
+		alSourcefv(sourceId_, AL_POSITION, position_.data());
 	}
 }
 
@@ -133,7 +134,7 @@ inline void IAudioPlayer::setPosition(float x, float y, float z)
 
 	if (state_ == STATE_PLAYING)
 	{
-		alSourcefv(sourceId_, AL_POSITION, position_);
+		alSourcefv(sourceId_, AL_POSITION, position_.data());
 	}
 }
 

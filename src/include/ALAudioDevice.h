@@ -10,6 +10,7 @@
 #endif
 #include "IAudioDevice.h"
 #include "List.h"
+#include "StaticArray.h"
 
 namespace ncine {
 
@@ -48,7 +49,7 @@ class ALAudioDevice : public IAudioDevice
 	/// The listener gain value (master volume)
 	ALfloat gain_;
 	/// The sources pool
-	ALuint sources_[MaxSources];
+	StaticArray<ALuint, MaxSources> sources_;
 
 	/// A list of active audio players
 	List<IAudioPlayer *> players_;

@@ -3,6 +3,7 @@
 
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
+#include "StaticArray.h"
 
 namespace ncine {
 
@@ -34,14 +35,14 @@ class MyEventHandler
   private:
 	static const int NumJoysticks = 4;
 	static const int NumAxes = 10;
-	float axisValues_[NumAxes];
+	nc::StaticArray<float, NumAxes> axisValues_;
 	static const int NumButtons = 12;
-	unsigned char buttonStates_[NumButtons];
+	nc::StaticArray<unsigned char, NumButtons> buttonStates_;
 	static const int NumChars = 256;
 	nc::String *joyString_;
 
 	nc::Texture *texture_;
-	nc::Sprite *sprites_[2];
+	nc::StaticArray<nc::Sprite*, 2> sprites_;
 	nc::Font *font_;
 	nc::TextNode *textNode_;
 };

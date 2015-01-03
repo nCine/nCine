@@ -3,6 +3,7 @@
 
 #include "RenderCommand.h"
 #include "Array.h"
+#include "StaticArray.h"
 
 namespace ncine {
 
@@ -42,13 +43,13 @@ class RenderQueue
 	unsigned int lastNumCommands_;
 
 	/// The current sum of vertices for a specified command type
-	unsigned int typedNumVertices_[RenderCommand::TYPE_COUNT];
+	StaticArray<unsigned int, RenderCommand::TYPE_COUNT> typedNumVertices_;
 	/// The current sum of draw commands for a specified command type
-	unsigned int typedNumCommands_[RenderCommand::TYPE_COUNT];
+	StaticArray<unsigned int, RenderCommand::TYPE_COUNT> typedNumCommands_;
 	/// The sum of vertices for a specified command type in the previous frame (it never contains a partial sum)
-	unsigned int typedLastNumVertices_[RenderCommand::TYPE_COUNT];
+	StaticArray<unsigned int, RenderCommand::TYPE_COUNT> typedLastNumVertices_;
 	/// The sum of draw commands for a specified command type in the previous frame (it never contains a partial sum)
-	unsigned int typedLastNumCommands_[RenderCommand::TYPE_COUNT];
+	StaticArray<unsigned int, RenderCommand::TYPE_COUNT> typedLastNumCommands_;
 
 	/// Array of opaque render command pointers
 	Array<const RenderCommand *> opaqueRenderCommands_;

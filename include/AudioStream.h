@@ -7,6 +7,7 @@
 	#include <AL/al.h>
 #endif
 #include "IAudioLoader.h"
+#include "StaticArray.h"
 
 namespace ncine {
 
@@ -28,7 +29,7 @@ class AudioStream
 	/// Number of buffers for streaming
 	static const int NumBuffers = 3;
 	/// OpenAL buffer queue for streaming
-	ALuint alBuffers_[NumBuffers];
+	StaticArray<ALuint, NumBuffers> alBuffers_;
 	/// Index of the next available OpenAL buffer
 	int nextAvailALBuffer_;
 

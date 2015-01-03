@@ -51,14 +51,15 @@ FileLogger::~FileLogger()
 #ifndef __ANDROID__
 void FileLogger::write(LogLevel level, const char *fmt, ...)
 {
-	time_t     now;
-	struct tm  *ts;
-	char       buffer[80];
+	time_t now;
+	struct tm *ts;
+	const unsigned int bufferSize = 80;
+	char buffer[bufferSize];
 
 	now = time(0);
 	ts = localtime(&now);
-//	strftime(buffer, sizeof(buffer), "%a %Y-%m-%d %H:%M:%S %Z", ts);
-	strftime(buffer, sizeof(buffer), "%H:%M:%S", ts);
+//	strftime(buffer, sizeof(char)*bufferSize, "%a %Y-%m-%d %H:%M:%S %Z", ts);
+	strftime(buffer, sizeof(char)*bufferSize, "%H:%M:%S", ts);
 
 	if (consoleLevel_ != LOG_OFF && int(level) >= int(consoleLevel_))
 	{
@@ -88,13 +89,14 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 #else
 void FileLogger::write(LogLevel level, const char *fmt, ...)
 {
-	time_t     now;
-	struct tm  *ts;
-	char       buffer[80];
+	time_t now;
+	struct tm *ts;
+	const unsigned int bufferSize = 80;
+	char buffer[bufferSize];
 
 	now = time(0);
 	ts = localtime(&now);
-	strftime(buffer, sizeof(buffer), "%H:%M:%S", ts);
+	strftime(buffer, sizeof(char)*bufferSize, "%H:%M:%S", ts);
 
 	android_LogPriority priority;
 

@@ -1,6 +1,8 @@
 #ifndef CLASS_NCINE_COLOR
 #define CLASS_NCINE_COLOR
 
+#include "StaticArray.h"
+
 namespace ncine {
 
 /// A 32 bit color
@@ -15,6 +17,12 @@ class Color
 	{ set(red, green, blue, alpha); }
 	/// Three channels constructor (unsigned char)
 	Color(unsigned char red, unsigned char green, unsigned char blue)
+	{ set(red, green, blue); }
+	/// Four channels constructor (unsigned int)
+	Color(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha)
+	{ set(red, green, blue, alpha); }
+	/// Three channels constructor (unsigned int)
+	Color(unsigned int red, unsigned int green, unsigned int blue)
 	{ set(red, green, blue); }
 	/// Four channels constructor (normalized float)
 	Color(float red, float green, float blue, float alpha)
@@ -33,7 +41,7 @@ class Color
 	inline unsigned char a() const { return channels_[3]; }
 	/// Getter for the color vector
 	/*! Note: It is useful with glColor4ub */
-	inline const unsigned char* vector() const { return channels_; }
+	inline const unsigned char* vector() const { return channels_.data(); }
 	/// Flaot getter for the red channel of the color
 	inline float fR() const { return channels_[0] / 255.0f; }
 	/// Float getter for the green channel of the color
@@ -43,7 +51,7 @@ class Color
 	/// Float getter for the alpha channel of the color
 	inline float fA() const { return channels_[3] / 255.0f; }
 
-	/// Ses four color channels (unsigned char)
+	// Sets four color channels (unsigned char)
 	void set(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha);
 	// Sets three color channels (unsigned char)
 	void set(unsigned char red, unsigned char green, unsigned char blue);
@@ -70,7 +78,7 @@ class Color
 
   private:
 	/// The four unsigned byte color channels
-	unsigned char channels_[4];
+	StaticArray<unsigned char, 4> channels_;
 };
 
 

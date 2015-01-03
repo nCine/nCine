@@ -14,13 +14,10 @@ void MyEventHandler::onInit()
 {
 	nc::IInputManager::setHandler(this);
 
-	angles_ = new float[NumTextures];
 	for (int i = 0; i < NumTextures; i++)
 	{
 		angles_[i] = 0.0f;
 	}
-	textures_ = new nc::Texture*[NumTextures];
-	sprites_ = new nc::Sprite*[NumSprites];
 
 	nc::SceneNode &rootNode = nc::Application::rootNode();
 
@@ -72,15 +69,11 @@ void MyEventHandler::onFrameStart()
 
 void MyEventHandler::onShutdown()
 {
-	delete sprites_[0]; // and all its children
+	delete sprites_[0]; // and all its children (the remaining sprites)
 	for (int i = 0; i < NumTextures; i++)
 	{
 		delete textures_[i];
 	}
-
-	delete[] sprites_;
-	delete[] textures_;
-	delete[] angles_;
 }
 
 #ifndef __ANDROID__

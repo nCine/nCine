@@ -36,7 +36,7 @@ ALAudioDevice::ALAudioDevice()
 		exit(EXIT_FAILURE);
 	}
 
-	alGenSources(MaxSources, sources_);
+	alGenSources(MaxSources, sources_.data());
 	alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
 	alListenerf(AL_GAIN, gain_);
 }
@@ -47,7 +47,7 @@ ALAudioDevice::~ALAudioDevice()
 	{
 		alSourcei(sources_[i], AL_BUFFER, AL_NONE);
 	}
-	alDeleteSources(MaxSources, sources_);
+	alDeleteSources(MaxSources, sources_.data());
 
 	alcDestroyContext(context_);
 

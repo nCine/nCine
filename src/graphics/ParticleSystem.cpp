@@ -10,13 +10,12 @@ namespace ncine {
 
 /// Constructs a particle system made of the specified maximum amount of particles
 ParticleSystem::ParticleSystem(SceneNode* parent, unsigned int count, Texture *texture, Rect texRect)
-	: DrawableNode(parent, 0, 0), poolSize_(count), poolTop_(count - 1), affectors_(4), inLocalSpace_(false)
+	: DrawableNode(parent, 0, 0), poolSize_(count), poolTop_(count - 1), particlePool_(poolSize_, true),
+	  particleList_(poolSize_, true), affectors_(4), inLocalSpace_(false)
 {
 	type_ = PARTICLESYSTEM_TYPE;
 	setPriority(DrawableNode::SCENE_PRIORITY);
 
-	particlePool_ = new Particle*[poolSize_];
-	particleList_ = new Particle*[poolSize_];
 	for (unsigned int i = 0; i < poolSize_; i++)
 	{
 		particlePool_[i] = new Particle(NULL, texture);
@@ -41,9 +40,6 @@ ParticleSystem::~ParticleSystem()
 	{
 		delete particleList_[i];
 	}
-
-	delete[] particlePool_;
-	delete[] particleList_;
 }
 
 ///////////////////////////////////////////////////////////

@@ -123,7 +123,7 @@ void ProfilePlotter::updateRenderCommand()
 	renderCommand_->material().setColor(backgroundColor_);
 	renderCommand_->transformation().setPosition(absPosition().x, absPosition().y);
 	setBackgroundVertices();
-	renderCommand_->geometry().setData(GL_TRIANGLE_STRIP, 0, 4, backgroundVertices_, NULL, NULL);
+	renderCommand_->geometry().setData(GL_TRIANGLE_STRIP, 0, 4, backgroundVertices_.data(), NULL, NULL);
 	renderCommand_->calculateSortKey();
 
 	DrawableNode::applyTransformations();
@@ -135,7 +135,7 @@ void ProfilePlotter::UpdateRefValueRenderCommand()
 	refValueCmd_.material().setTextureGLId(0);
 	refValueCmd_.material().setColor(refValueColor_);
 //	refValueCmd_.transformation().setPosition(absPosition().x, absPosition().y);
-	refValueCmd_.geometry().setData(GL_LINES, 0, 2, refValueVertices_, NULL, NULL);
+	refValueCmd_.geometry().setData(GL_LINES, 0, 2, refValueVertices_.data(), NULL, NULL);
 	refValueCmd_.calculateSortKey();
 }
 

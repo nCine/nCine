@@ -26,7 +26,6 @@ void MyEventHandler::onInit()
 
 	dummy_ = new nc::SceneNode(&rRootNode, nc::Application::width() * 0.5f, nc::Application::height() * 0.5f);
 
-	sprites_ = new nc::Sprite*[NumSprites];
 	for (int i = 0; i < NumSprites; i++)
 	{
 		sprites_[i] = new nc::Sprite(dummy_, megaTexture_, 0, 0);
@@ -46,8 +45,7 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onShutdown()
 {
-	delete dummy_; // and all its children
-	delete[] sprites_;
+	delete dummy_; // and all its children (the sprites)
 	delete megaTexture_;
 	delete alphaTexture_;
 }

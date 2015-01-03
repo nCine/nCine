@@ -15,7 +15,7 @@ GlfwMouseEvent GlfwInputManager::mouseEvent_;
 GlfwKeyboardState GlfwInputManager::keyboardState_;
 KeyboardEvent	GlfwInputManager::keyboardEvent_;
 short int IInputManager::MaxAxisValue = 32767;
-GlfwJoystickState GlfwInputManager::joystickStates_[MaxNumJoysticks];
+StaticArray<GlfwJoystickState, GlfwInputManager::MaxNumJoysticks> GlfwInputManager::joystickStates_;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR

@@ -3,8 +3,6 @@
 
 namespace ncine {
 
-class String;
-
 /// A String iterator
 class StringIterator
 {
@@ -36,8 +34,6 @@ class StringIterator
 
   private:
 	mutable char *char_;
-
-	friend class String;
 };
 
 /// Read-only deferencing operator

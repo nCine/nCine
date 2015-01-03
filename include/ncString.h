@@ -1,6 +1,7 @@
 #ifndef CLASS_NCINE_STRING
 #define CLASS_NCINE_STRING
 
+#include "common.h"
 #include "StringIterator.h"
 
 namespace ncine {
@@ -27,8 +28,31 @@ class String
 	// Assigns a constant C string to the string object
 	String& operator=(const char *cString);
 
-	// Swaps two strings without copying their data
-	friend void swap(String& first, String& second);
+	/// Swaps two strings without copying their data
+	void swap(String& first, String& second)
+	{
+		nc::swap(first.array_, second.array_);
+		nc::swap(first.length_, second.length_);
+		nc::swap(first.capacity_, second.capacity_);
+	}
+
+	/// Returns an iterator to the first character
+	inline Iterator begin() { return Iterator(array_); }
+	/// Returns an iterator to the last character
+	inline Iterator rBegin() { return Iterator(array_ + length_ - 1); }
+	/// Returns an iterator to the termination character
+	inline Iterator end() { return Iterator(array_ + length_); }
+	/// Returns an iterator to the byte preceding the first character
+	inline Iterator rEnd() { return Iterator(array_ - 1); }
+
+	/// Returns a constant iterator to the first character
+	inline Const_Iterator begin() const { return Iterator(array_); }
+	/// Returns a constant iterator to the last character
+	inline Const_Iterator rBegin() const { return Iterator(array_ + length_ - 1); }
+	/// Returns a constant iterator to the termination character
+	inline Const_Iterator end() const { return Iterator(array_ + length_); }
+	/// Returns a constant iterator to the byte preceding the first character
+	inline Const_Iterator rEnd() const { return Iterator(array_ - 1); }
 
 	/// Returns true if the string is empty
 	inline bool isEmpty() const { return length_ == 0; }
@@ -36,24 +60,6 @@ class String
 	inline unsigned int length() const { return length_; }
 	/// Returns the string capacity
 	inline unsigned int capacity() const { return capacity_; }
-
-	/// Returns an iterator to the first character
-	inline Iterator begin() { return Iterator(array_); }
-	/// Returns an iterator to the last character
-	inline Iterator revBegin() { return Iterator(array_ + length_ - 1); }
-	/// Returns an iterator to the termination character
-	inline Iterator end() { return Iterator(array_ + length_); }
-	/// Returns an iterator to the byte preceding the first character
-	inline Iterator revEnd() { return Iterator(array_ - 1); }
-
-	/// Returns a constant iterator to the first character
-	inline Const_Iterator begin() const { return Iterator(array_); }
-	/// Returns a constant iterator to the last character
-	inline Const_Iterator revBegin() const { return Iterator(array_ + length_ - 1); }
-	/// Returns a constant iterator to the termination character
-	inline Const_Iterator end() const { return Iterator(array_ + length_); }
-	/// Returns a constant iterator to the byte preceding the first character
-	inline Const_Iterator revEnd() const { return Iterator(array_ - 1); }
 
 	/// Clears the string
 	/** Length will be zero but capacity remains untouched */
@@ -116,22 +122,6 @@ class String
 	unsigned int capacity_;
 };
 
-// Swaps two strings without copying their data
-inline void swap(String& first, String& second)
-{
-	char* tempArray = first.array_;
-	unsigned int tempLength = first.length_;
-	unsigned int tempCapacity = first.capacity_;
-
-	first.array_ = second.array_;
-	first.length_ = second.length_;
-	first.capacity_ = second.capacity_;
-
-	second.array_ = tempArray;
-	second.length_ = tempLength;
-	second.capacity_ = tempCapacity;
-}
-
 inline char String::operator[](unsigned int index) const
 {
 	if (index < length_)
@@ -142,12 +132,6 @@ inline char String::operator[](unsigned int index) const
 	{
 		return '\0';
 	}
-}
-
-template <class T>
-const T& min (const T& a, const T& b)
-{
-	return !(b < a) ? a : b;
 }
 
 }

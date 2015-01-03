@@ -4,6 +4,7 @@
 #include <cstdio>
 #include "IInputManager.h"
 #include "GlfwGfxDevice.h" // for WindowHandle()
+#include "StaticArray.h"
 
 namespace ncine {
 
@@ -96,8 +97,8 @@ class GlfwInputManager : public IInputManager
 	static GlfwMouseState mouseState_;
 	static GlfwMouseEvent mouseEvent_;
 	static GlfwKeyboardState keyboardState_;
-	static KeyboardEvent	keyboardEvent_;
-	static GlfwJoystickState joystickStates_[MaxNumJoysticks];
+	static KeyboardEvent keyboardEvent_;
+	static StaticArray<GlfwJoystickState, MaxNumJoysticks> joystickStates_;
 };
 
 inline const MouseState& GlfwInputManager::mouseState()

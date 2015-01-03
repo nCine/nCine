@@ -7,6 +7,7 @@
 #include "Array.h"
 #include "DrawableNode.h"
 #include "ParticleAffectors.h"
+#include "Array.h"
 
 namespace ncine {
 
@@ -43,9 +44,9 @@ class ParticleSystem : public DrawableNode
 	/// The index of the next free particle in the pool
 	unsigned int poolTop_;
 	/// The pool containing available particles (only dead ones)
-	Particle **particlePool_;
+	Array<Particle*> particlePool_;
 	/// The array containing every particle (dead or alive)
-	Particle **particleList_;
+	Array<Particle*> particleList_;
 
 	/// The array of particle affectors
 	Array<ParticleAffector *> affectors_;
@@ -60,9 +61,6 @@ class ParticleSystem : public DrawableNode
 
 	virtual void updateRenderCommand() { }
 };
-
-/// Returns a random float between x0 and x1
-inline float randBetween(float x0, float x1) { return x0 + (x1 - x0) * (rand() / float(RAND_MAX)); }
 
 }
 
