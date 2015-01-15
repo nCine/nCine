@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(nCine)
 
-option(NCINE_BUILD_TESTS "Build the nCine test programs" ON)
+option(NCINE_BUILD_TESTS "Build the engine test programs" ON)
+option(NCINE_EXTRA_OPTIMIZE "Compile the engine with extra optimizations in release mode" ON)
+option(NCINE_AUTOVECTORIZATION_REPORT "Enable report generation from compiler auto-vectorization" OFF)
 
 find_package(Threads)
 if(MSVC)
@@ -32,15 +34,26 @@ if(MSVC)
 	set(VORBIS_FOUND 1)
 	
 	string(REGEX REPLACE "/Zm[0-9]*" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-	add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
-	add_definitions(-DWITH_GLEW)
-	#add_definitions(/W0) # Turn off warnings
+	if(NCINE_EXTRA_OPTIMIZATION)
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Ox /Qpar")
+	endif()
+	if(NCINE_AUTOVECTORIZATION_REPORT)
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Qvec-report:2 /Qpar-report:2")
+	endif()
+	add_definitions(-DWITH_GLEW -D_CRT_SECURE_NO_DEPRECATE)
 else() # GCC and LLVM
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math")
 	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra -Wold-style-cast -Wno-long-long -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-variadic-macros")
 		if(CMAKE_BUILD_TYPE MATCHES Debug)
 			#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1 -ggdb -fsanitize=address -fno-omit-frame-pointer -rdynamic")
 			#set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -fsanitize=address")
+		endif()
+		if(NCINE_EXTRA_OPTIMIZATION)
+			set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -funsafe-loop-optimizations -ftree-loop-if-convert-stores")
+		endif()
+		if(NCINE_AUTOVECTORIZATION_REPORT)
+			set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fopt-info-vec-optimized")
 		endif()
 		if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9.0 OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.9.0)
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=auto")
@@ -52,7 +65,14 @@ else() # GCC and LLVM
 		endif()
 	elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Weverything -Wno-gnu-zero-variadic-macro-arguments")
+		if(NCINE_EXTRA_OPTIMIZATION)
+			set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -fslp-vectorize-aggressive")
+		endif()
+		if(NCINE_AUTOVECTORIZATION_REPORT)
+			set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize")
+		endif()
 	endif()
+
 	if(NOT CROSS_MINGW32) # Linux
 		find_package(OpenGL REQUIRED)
 		find_package(SDL)
@@ -92,59 +112,6 @@ else() # GCC and LLVM
 	endif()
 endif()
 
-# Experimental depth test/alpha test renderer
-#add_definitions(-DWITH_DEPTH_TEST)
-
-# Forcing the use of SDL
-#set(GLFW_FOUND 0)
-
-if(NOT SDL_FOUND AND NOT GLFW_FOUND)
-	message(FATAL_ERROR "Neither SDL nor GLFW have been found!")
-endif()
-
-if(GLFW_FOUND)
-	add_definitions(-DWITH_GLFW)
-	add_definitions(-DGLFW_NO_GLU)
-	list(APPEND LINK_LIBS ${GLFW_LIBRARY})
-endif()
-
-if(SDL_FOUND AND NOT GLFW_FOUND)
-	add_definitions(-DWITH_SDL)
-	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # SDLmain on OS X
-		list(APPEND LINK_LIBS ${SDLMAIN_LIBRARY})
-	endif()
-	list(APPEND LINK_LIBS ${SDL_LIBRARY})
-	if(SDLIMAGE_FOUND)
-		add_definitions(-DWITH_SDLIMAGE)
-		list(APPEND LINK_LIBS ${SDLIMAGE_LIBRARY})
-	endif()
-endif()
-
-if(OPENAL_FOUND)
-	add_definitions(-DWITH_AUDIO)
-	list(APPEND LINK_LIBS ${OPENAL_LIBRARY})
-	if(VORBIS_FOUND)
-		add_definitions(-DWITH_VORBIS)
-		list(APPEND LINK_LIBS ${VORBISFILE_LIBRARY})
-	endif()
-endif()
-
-if(PNG_FOUND AND GLFW_FOUND)
-	add_definitions(-DWITH_PNG)
-	list(APPEND LINK_LIBS ${PNG_LIBRARY})
-endif()
-if(WEBP_FOUND)
-	add_definitions(-DWITH_WEBP)
-	list(APPEND LINK_LIBS ${WEBP_LIBRARY})
-endif()
-
-if(Threads_FOUND)
-	add_definitions(-DWITH_THREADS)
-	list(APPEND LINK_LIBS ${CMAKE_THREAD_LIBS_INIT})
-	# Experimental multi-threading scene update
-	#add_definitions(-DWITH_MULTITHREADING)
-endif()
-
 set(HEADERS
 	include/common.h
 	include/Array.h
@@ -161,7 +128,11 @@ set(HEADERS
 	include/DrawableNode.h
 	include/IAppEventHandler.h
 	include/IInputEventHandler.h
-	include/Vector2f.h
+	include/Vector2.h
+	include/Vector3.h
+	include/Vector4.h
+	include/Matrix4x4.h
+	include/Quaternion.h
 	include/ServiceLocator.h
 	include/DisplayMode.h
 	include/Timer.h
@@ -202,7 +173,6 @@ set(PRIVATE_HEADERS
 	src/include/TextureLoaderKtx.h
 )
 set(SOURCES
-	src/base/Vector2f.cpp
 	src/base/String.cpp
 	src/ServiceLocator.cpp
 	src/FileLogger.cpp
@@ -241,7 +211,21 @@ set(SOURCES
 	src/graphics/AnimatedSprite.cpp
 )
 
+# Experimental depth test/alpha test renderer
+#add_definitions(-DWITH_DEPTH_TEST)
+
+# Forcing the use of SDL
+#set(GLFW_FOUND 0)
+
+if(NOT SDL_FOUND AND NOT GLFW_FOUND)
+	message(FATAL_ERROR "Neither SDL nor GLFW have been found!")
+endif()
+
 if(GLFW_FOUND)
+	add_definitions(-DWITH_GLFW)
+	add_definitions(-DGLFW_NO_GLU)
+	list(APPEND LINK_LIBS ${GLFW_LIBRARY})
+
 	list(APPEND HEADERS include/GlfwKeys.h)
 	list(APPEND PRIVATE_HEADERS src/include/GlfwInputManager.h)
 	list(APPEND PRIVATE_HEADERS src/include/GlfwGfxDevice.h)
@@ -250,6 +234,16 @@ if(GLFW_FOUND)
 endif()
 
 if(SDL_FOUND AND NOT GLFW_FOUND)
+	add_definitions(-DWITH_SDL)
+	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # SDLmain on OS X
+		list(APPEND LINK_LIBS ${SDLMAIN_LIBRARY})
+	endif()
+	list(APPEND LINK_LIBS ${SDL_LIBRARY})
+	if(SDLIMAGE_FOUND)
+		add_definitions(-DWITH_SDLIMAGE)
+		list(APPEND LINK_LIBS ${SDLIMAGE_LIBRARY})
+	endif()
+
 	list(APPEND HEADERS include/SdlKeys.h)
 	list(APPEND PRIVATE_HEADERS src/include/SdlInputManager.h)
 	list(APPEND PRIVATE_HEADERS src/include/SdlGfxDevice.h)
@@ -262,6 +256,13 @@ if(SDL_FOUND AND NOT GLFW_FOUND)
 endif()
 
 if(OPENAL_FOUND)
+	add_definitions(-DWITH_AUDIO)
+	list(APPEND LINK_LIBS ${OPENAL_LIBRARY})
+	if(VORBIS_FOUND)
+		add_definitions(-DWITH_VORBIS)
+		list(APPEND LINK_LIBS ${VORBISFILE_LIBRARY})
+	endif()
+
 	list(APPEND HEADERS
 		include/IAudioDevice.h
 		include/IAudioLoader.h
@@ -294,15 +295,26 @@ if(OPENAL_FOUND)
 endif()
 
 if(PNG_FOUND AND GLFW_FOUND)
+	add_definitions(-DWITH_PNG)
+	list(APPEND LINK_LIBS ${PNG_LIBRARY})
+
 	list(APPEND PRIVATE_HEADERS src/include/TextureLoaderPng.h)
     list(APPEND SOURCES src/graphics/TextureLoaderPng.cpp)
 endif()
 if(WEBP_FOUND)
+	add_definitions(-DWITH_WEBP)
+	list(APPEND LINK_LIBS ${WEBP_LIBRARY})
+
 	list(APPEND PRIVATE_HEADERS src/include/TextureLoaderWebP.h)
 	list(APPEND SOURCES src/graphics/TextureLoaderWebP.cpp)
 endif()
 
 if(Threads_FOUND)
+	add_definitions(-DWITH_THREADS)
+	list(APPEND LINK_LIBS ${CMAKE_THREAD_LIBS_INIT})
+	# Experimental multi-threading scene update
+	#add_definitions(-DWITH_MULTITHREADING)
+
 	list(APPEND HEADERS include/IThreadPool.h)
 	list(APPEND HEADERS include/IThreadCommand.h)
 	list(APPEND PRIVATE_HEADERS src/include/Thread.h)
@@ -328,7 +340,7 @@ link_libraries(
 
 if(MSVC)
 	add_library(ncine STATIC ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
-	target_include_directories(ncine PRIVATE "${EXTERNAL_MSVC_DIR}/include")
+	target_include_directories(ncine PUBLIC "${EXTERNAL_MSVC_DIR}/include")
 else()
 	add_library(ncine SHARED ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
 

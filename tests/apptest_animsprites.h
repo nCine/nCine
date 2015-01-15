@@ -3,7 +3,7 @@
 
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
-#include "Vector2f.h"
+#include "Vector2.h"
 
 namespace ncine {
 

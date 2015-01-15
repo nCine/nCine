@@ -7,12 +7,10 @@
 #include "Array.h"
 #include "DrawableNode.h"
 #include "ParticleAffectors.h"
-#include "Array.h"
 
 namespace ncine {
 
 class Texture;
-class Vector2f;
 class Particle;
 class Rect;
 

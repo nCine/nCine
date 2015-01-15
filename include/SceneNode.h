@@ -3,7 +3,7 @@
 
 #include "Object.h"
 #include "List.h"
-#include "Vector2f.h"
+#include "Vector2.h"
 #include "Color.h"
 
 namespace ncine {

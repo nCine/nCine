@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_PARTICLEAFFECTORS
 #define CLASS_NCINE_PARTICLEAFFECTORS
 
-#include "Vector2f.h"
+#include "Vector2.h"
 #include "Color.h"
 #include "Array.h"
 

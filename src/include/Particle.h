@@ -2,7 +2,7 @@
 #define CLASS_NCINE_PARTICLE
 
 #include "Sprite.h"
-#include "Vector2f.h"
+#include "Vector2.h"
 #include "Color.h"
 
 namespace ncine {
