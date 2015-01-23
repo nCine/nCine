@@ -11,8 +11,8 @@ namespace ncine {
 class AndroidApplication : public Application
 {
   public:
-	static void preInit();
-	static void init(struct android_app* state, IAppEventHandler* (*createAppEventHandler)());
+	static void preInit(IAppEventHandler* (*createAppEventHandler)());
+	static void init(struct android_app* state);
 	static void shutdown();
 
 	inline static bool isInitialized() { return isInitialized_; }

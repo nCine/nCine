@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 	float angle2 = 0.0f;
 	nc::FrameTimer t(5.0f, 0.0f);
 	nc::ServiceLocator::registerLogger(new nc::FileLogger("log.txt", nc::ILogger::LOG_VERBOSE, nc::ILogger::LOG_OFF));
-	nc::SdlGfxDevice gfxDevice(Width, Height);
+	nc::SdlGfxDevice gfxDevice(Width, Height, false);
 	gfxDevice.setWindowTitle("Test");
 
 	nc::Texture tex1("textures/texture1.png");

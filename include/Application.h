@@ -6,6 +6,7 @@
 
 namespace ncine {
 
+class AppConfiguration;
 class FrameTimer;
 class Timer;
 class SceneNode;
@@ -64,11 +65,6 @@ class Application
 	// Sets the focus flag
 	static void setFocus(bool hasFocus);
 
-	// Shows or hides profiling graphs
-	static void showProfileGraphs(bool shouldDraw);
-	// Shows or hides profiling information text
-	static void showProfileInfo(bool shouldDraw);
-
   protected:
 	/// Maximum length for the profile string
 	static const int MaxTextLength = 256;
@@ -76,6 +72,7 @@ class Application
 	static bool isPaused_;
 	static bool hasFocus_;
 	static bool shouldQuit_;
+	static AppConfiguration appCfg_;
 	static FrameTimer *frameTimer_;
 	static IGfxDevice *gfxDevice_;
 	static SceneNode *rootNode_;
@@ -89,10 +86,7 @@ class Application
 	static IInputManager *inputManager_;
 	static IAppEventHandler *appEventHandler_;
 
-	static const char* fontTexFilename_;
-	static const char* fontFntFilename_;
-
-	static void initCommon(IAppEventHandler* (*createAppEventHandler)());
+	static void initCommon();
 
   private:
 	Application();

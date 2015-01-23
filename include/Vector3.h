@@ -1,6 +1,7 @@
 #ifndef CLASS_NCINE_VECTOR3
 #define CLASS_NCINE_VECTOR3
 
+#define _USE_MATH_DEFINES // for M_PI on MSVC
 #include <cmath>
 
 namespace ncine {
@@ -13,10 +14,13 @@ class Vector3
 	T x, y, z;
 
 	Vector3() { }
-	Vector3(T s) : x(s), y(s), z(s) { }
+	explicit Vector3(T s) : x(s), y(s), z(s) { }
 	Vector3(T xx, T yy, T zz) : x(xx), y(yy), z(zz) { }
 
 	void set(T xx, T yy, T zz);
+
+	T* data();
+	const T* data() const;
 
 	T& operator[](unsigned int index);
 	const T& operator[](unsigned int index) const;
@@ -66,6 +70,18 @@ inline void Vector3<T>::set(T xx, T yy, T zz)
 	x = xx;
 	y = yy;
 	z = zz;
+}
+
+template <class T>
+T* Vector3<T>::data()
+{
+	return &x;
+}
+
+template <class T>
+const T* Vector3<T>::data() const
+{
+	return &x;
 }
 
 template <class T>

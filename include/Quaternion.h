@@ -16,7 +16,7 @@ class Quaternion
 
 	Quaternion() { }
 	Quaternion(T xx, T yy, T zz, T ww) : x(xx), y(yy), z(zz), w(ww) { }
-	Quaternion(const Vector4<T>& v) : x(v.x), y(v.y), z(v.z), w(v.w) { }
+	explicit Quaternion(const Vector4<T>& v) : x(v.x), y(v.y), z(v.z), w(v.w) { }
 
 	void set(T xx, T yy, T zz, T ww);
 

@@ -23,7 +23,6 @@ class MyEventHandler
   public:
 	virtual void onInit();
 	virtual void onFrameStart();
-	virtual void onFrameEnd() { }
 	virtual void onShutdown();
 
 #ifdef __ANDROID__

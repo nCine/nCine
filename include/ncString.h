@@ -65,6 +65,8 @@ class String
 	/** Length will be zero but capacity remains untouched */
 	inline void clear() { length_ = 0; array_[0] = '\0'; }
 
+	/// Returns a pointer to the internal array
+	char* data() { return array_; }
 	/// Returns a constant pointer to the internal array
 	const char* data() const { return array_; }
 

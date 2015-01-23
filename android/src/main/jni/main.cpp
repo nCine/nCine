@@ -35,7 +35,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd)
 			{
 				if (nc::AndroidApplication::isInitialized() == false)
 				{
-					nc::AndroidApplication::init(app, createApphandler);
+					nc::AndroidApplication::init(app);
 					nc::AndroidApplication::step();
 				}
 				else
@@ -81,7 +81,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd)
 		case APP_CMD_START:
 			if (nc::AndroidApplication::isInitialized() == false)
 			{
-				nc::AndroidApplication::preInit();
+				nc::AndroidApplication::preInit(createApphandler);
 				LOGI("engine_handle_cmd - APP_CMD_START event received (first start)");
 			}
 			LOGI("engine_handle_cmd - APP_CMD_START event received");

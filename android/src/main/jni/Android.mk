@@ -51,6 +51,7 @@ LOCAL_SRC_FILES := \
 	$(SRC)/ProfileVariable.cpp \
 	$(SRC)/Application.cpp \
 	$(SRC)/android/AndroidApplication.cpp \
+	$(SRC)/AppConfiguration.cpp \
 	$(SRC)/Font.cpp \
 	$(SRC)/FontGlyph.cpp \
 	$(SRC)/IFile.cpp \

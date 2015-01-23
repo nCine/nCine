@@ -12,6 +12,7 @@ namespace ncine {
 /// Constructor taking a DisplayMode
 EglGfxDevice::EglGfxDevice(struct android_app* state, DisplayMode mode)
 {
+	isFullScreen_ = true;
 	mode_ = mode;
 	initDevice(state);
 	initGL();

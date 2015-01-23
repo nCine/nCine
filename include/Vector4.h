@@ -1,6 +1,7 @@
 #ifndef CLASS_NCINE_VECTOR4
 #define CLASS_NCINE_VECTOR4
 
+#define _USE_MATH_DEFINES // for M_PI on MSVC
 #include <cmath>
 
 namespace ncine {
@@ -13,10 +14,13 @@ class Vector4
 	T x, y, z, w;
 
 	Vector4() { }
-	Vector4(T s) : x(s), y(s), z(s), w(s) { }
+	explicit Vector4(T s) : x(s), y(s), z(s), w(s) { }
 	Vector4(T xx, T yy, T zz, T ww) : x(xx), y(yy), z(zz), w(ww) { }
 
 	void set(T xx, T yy, T zz, T ww);
+
+	T* data();
+	const T* data() const;
 
 	T& operator[](unsigned int index);
 	const T& operator[](unsigned int index) const;
@@ -67,6 +71,18 @@ inline void Vector4<T>::set(T xx, T yy, T zz, T ww)
 	y = yy;
 	z = zz;
 	w = ww;
+}
+
+template <class T>
+T* Vector4<T>::data()
+{
+	return &x;
+}
+
+template <class T>
+const T* Vector4<T>::data() const
+{
+	return &x;
 }
 
 template <class T>

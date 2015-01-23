@@ -1,7 +1,6 @@
 #ifndef CLASS_NCINE_MATRIX4X4
 #define CLASS_NCINE_MATRIX4X4
 
-#define _USE_MATH_DEFINES // for M_PI on MSVC
 #include "Vector3.h"
 #include "Vector4.h"
 
@@ -16,6 +15,9 @@ class Matrix4x4
 	Matrix4x4(const Vector4<T>& v0, const Vector4<T>& v1, const Vector4<T>& v2, const Vector4<T>& v3);
 
 	void set(const Vector4<T>& v0, const Vector4<T>& v1, const Vector4<T>& v2, const Vector4<T>& v3);
+
+	T* data();
+	const T* data() const;
 
 	Vector4<T>& operator[](unsigned int index);
 	const Vector4<T>& operator[](unsigned int index) const;
@@ -83,6 +85,18 @@ inline void Matrix4x4<T>::set(const Vector4<T>& v0, const Vector4<T>& v1, const 
 	vecs_[1] = v1;
 	vecs_[2] = v2;
 	vecs_[3] = v3;
+}
+
+template <class T>
+T* Matrix4x4<T>::data()
+{
+	return &vecs_[0][0];
+}
+
+template <class T>
+const T* Matrix4x4<T>::data() const
+{
+	return &vecs_[0][0];
 }
 
 template <class T>
@@ -389,10 +403,10 @@ Matrix4x4<T> Matrix4x4<T>::inverse() const
 template <class T>
 inline Matrix4x4<T> Matrix4x4<T>::translation(T xx, T yy, T zz)
 {
-	return Matrix4x4<T>(Vector4<T>(1, 0, 0, xx),
-						Vector4<T>(0, 1, 0, yy),
-						Vector4<T>(0, 0, 1, zz),
-						Vector4<T>(0, 0, 0, 1));
+	return Matrix4x4<T>(Vector4<T>(1, 0, 0, 0),
+						Vector4<T>(0, 1, 0, 0),
+						Vector4<T>(0, 0, 1, 0),
+						Vector4<T>(xx, yy, zz, 1));
 }
 
 template <class T>
@@ -407,8 +421,8 @@ inline Matrix4x4<T> Matrix4x4<T>::rotationX(T degrees)
 	T radians = degrees * (M_PI / 180);
 
 	return Matrix4x4<T>(Vector4<T>(1, 0, 0, 0),
-						Vector4<T>(0, cos(radians), -sin(radians), 0),
-						Vector4<T>(0, sin(radians), cos(radians), 0),
+						Vector4<T>(0, cos(radians), sin(radians), 0),
+						Vector4<T>(0, -sin(radians), cos(radians), 0),
 						Vector4<T>(0, 0, 0, 1));
 }
 
@@ -417,9 +431,9 @@ inline Matrix4x4<T> Matrix4x4<T>::rotationY(T degrees)
 {
 	T radians = degrees * (M_PI / 180);
 
-	return Matrix4x4<T>(Vector4<T>(cos(radians), 0, sin(radians), 0),
+	return Matrix4x4<T>(Vector4<T>(cos(radians), 0, -sin(radians), 0),
 						Vector4<T>(0, 1, 0, 0),
-						Vector4<T>(-sin(radians), 0, cos(radians), 0),
+						Vector4<T>(sin(radians), 0, cos(radians), 0),
 						Vector4<T>(0, 0, 0, 1));
 }
 
@@ -428,8 +442,8 @@ inline Matrix4x4<T> Matrix4x4<T>::rotationZ(T degrees)
 {
 	T radians = degrees * (M_PI / 180);
 
-	return Matrix4x4<T>(Vector4<T>(cos(radians), -sin(radians), 0, 0),
-						Vector4<T>(sin(radians), cos(radians), 0, 0),
+	return Matrix4x4<T>(Vector4<T>(cos(radians), sin(radians), 0, 0),
+						Vector4<T>(-sin(radians), cos(radians), 0, 0),
 						Vector4<T>(0, 0, 1, 0),
 						Vector4<T>(0, 0, 0, 1));
 }

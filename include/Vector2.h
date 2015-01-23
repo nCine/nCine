@@ -1,6 +1,7 @@
 #ifndef CLASS_NCINE_VECTOR2
 #define CLASS_NCINE_VECTOR2
 
+#define _USE_MATH_DEFINES // for M_PI on MSVC
 #include <cmath>
 
 namespace ncine {
@@ -13,10 +14,13 @@ class Vector2
 	T x, y;
 
 	Vector2() { }
-	Vector2(T s) : x(s), y(s) { }
+	explicit Vector2(T s) : x(s), y(s) { }
 	Vector2(T xx, T yy) : x(xx), y(yy) { }
 
 	void set(T xx, T yy);
+
+	T* data();
+	const T* data() const;
 
 	T& operator[](unsigned int index);
 	const T& operator[](unsigned int index) const;
@@ -63,6 +67,18 @@ inline void Vector2<T>::set(T xx, T yy)
 {
 	x = xx;
 	y = yy;
+}
+
+template <class T>
+T* Vector2<T>::data()
+{
+	return &x;
+}
+
+template <class T>
+const T* Vector2<T>::data() const
+{
+	return &x;
 }
 
 template <class T>

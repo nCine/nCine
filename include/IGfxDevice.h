@@ -34,8 +34,8 @@ class IGfxDevice
 	inline int width() const { return width_; }
 	/// Returns device height
 	inline int height() const { return height_; }
-	/// Returns true if the device renders inside a window
-	inline bool isWindowed() const { return isWindowed_; }
+	/// Returns true if the device renders in full screen
+	inline bool isFullScreen() const { return isFullScreen_; }
 	/// Returns display mode
 	inline const DisplayMode& mode() const { return mode_; }
 
@@ -46,8 +46,8 @@ class IGfxDevice
 	int height_;
 	/// Display properties
 	DisplayMode mode_;
-	/// Device rendering occurs inside a window
-	bool isWindowed_;
+	/// Device rendering occurs in full screen
+	bool isFullScreen_;
 
 	// Initilizes starting OpenGL state
 	virtual void initGL();
