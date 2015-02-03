@@ -248,7 +248,7 @@ void TextNode::processGlyph(const FontGlyph* glyph)
 
 void TextNode::updateRenderCommand()
 {
-	renderCommand_->material().setTextureGLId(font_->texture()->gLId());
+	renderCommand_->material().setTextureGLId(font_->texture()->glId());
 	renderCommand_->material().setColor(absColor_);
 	renderCommand_->transformation().setPosition(absPosition().x, absPosition().y);
 	renderCommand_->geometry().setData(GL_TRIANGLES, 0, vertices_.size() / 2, vertices_.data(), texCoords_.data(), NULL);

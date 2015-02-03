@@ -1,18 +1,8 @@
 #ifndef CLASS_NCINE_TEXTURE
 #define CLASS_NCINE_TEXTURE
 
-#if defined(__ANDROID__)
-	#include <GLES/gl.h>
-	#include <GLES/glext.h>
-#elif defined(WITH_GLEW)
-	#include <GL/glew.h>
-#elif defined(__APPLE__)
-	#include <OpenGL/gl.h>
-	#include <OpenGL/glext.h>
-#else
-	#include <GL/gl.h>
-	#include <GL/glext.h>
-#endif
+#define NCINE_INCLUDE_OPENGL
+#include "common.h"
 
 #include "Object.h"
 #include "Point.h"
@@ -33,7 +23,7 @@ class Texture : public Object
 	virtual ~Texture();
 
 	/// Returns OpenGL id
-	inline GLuint gLId() const { return gLId_; }
+	inline GLuint glId() const { return glId_; }
 	/// Returns texture width
 	inline int width() const { return width_; }
 	/// Returns texture height
@@ -53,14 +43,14 @@ class Texture : public Object
 	// Sets texture filtering for both magnification and minification
 	void setFiltering(GLenum filter);
 	/// Binds the texture to the current unit
-	inline void bind() { glBindTexture(GL_TEXTURE_2D, gLId_); }
+	inline void bind() { glBindTexture(GL_TEXTURE_2D, glId_); }
 	/// Disables texture rendering for the current unit
 	static void unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
 
 	inline static ObjectType sType() { return TEXTURE_TYPE; }
 
   private:
-	GLuint gLId_;
+	GLuint glId_;
 	int width_;
 	int height_;
 	int mipMapLevels_;

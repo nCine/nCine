@@ -45,7 +45,7 @@ void SpriteBatchNode::visit(RenderQueue& renderQueue)
 		{
 			Sprite *sprite = static_cast<Sprite *>((*i));
 
-			if (sprite->shouldDraw_ && sprite->texture()->gLId() == texture_->gLId())
+			if (sprite->shouldDraw_ && sprite->texture()->glId() == texture_->glId())
 			{
 				sprite->transform();
 				processSprite(*sprite);
@@ -119,7 +119,7 @@ void SpriteBatchNode::processSprite(Sprite& sprite)
 
 void SpriteBatchNode::updateRenderCommand()
 {
-	renderCommand_->material().setTextureGLId(texture_->gLId());
+	renderCommand_->material().setTextureGLId(texture_->glId());
 	renderCommand_->transformation().setPosition(absPosition().x, absPosition().y);
 	renderCommand_->geometry().setData(GL_TRIANGLES, 0, vertices_.size() / 2, vertices_.data(), texCoords_.data(), colors_.data());
 	renderCommand_->calculateSortKey();

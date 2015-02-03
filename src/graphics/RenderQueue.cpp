@@ -1,22 +1,12 @@
+#ifdef WITH_DEPTH_TEST
+	#define NCINE_INCLUDE_OPENGL
+	#include "common.h"
+#endif
+
 #include "RenderQueue.h"
 #include "SceneNode.h"
 #include "Array.h"
 #include "Sprite.h"
-
-#ifdef WITH_DEPTH_TEST
-	#if defined(__ANDROID__)
-		#include <GLES/gl.h>
-		#include <GLES/glext.h>
-	#elif defined(WITH_GLEW)
-		#include <GL/glew.h>
-	#elif defined(__APPLE__)
-		#include <OpenGL/gl.h>
-		#include <OpenGL/glext
-	#else
-		#include <GL/gl.h>
-		#include <GL/glext.h>
-	#endif
-#endif
 
 //#include <assert.h> // for checking sorting correctness
 

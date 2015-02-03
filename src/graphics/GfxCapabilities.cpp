@@ -1,15 +1,5 @@
-#if defined(__ANDROID__)
-	#include <GLES/gl.h>
-	#include <GLES/glext.h>
-#elif defined(WITH_GLEW)
-	#include <GL/glew.h>
-#elif defined(__APPLE__)
-	#include <OpenGL/gl.h>
-	#include <OpenGL/glext.h>
-#else
-	#include <GL/gl.h>
-	#include <GL/glext.h>
-#endif
+#define NCINE_INCLUDE_OPENGL
+#include "common.h"
 
 #include <cstring> // for CheckGLExtension()
 #include "GfxCapabilities.h"

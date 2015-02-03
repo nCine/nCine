@@ -11,22 +11,22 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Texture::Texture()
-	: gLId_(0), width_(0), height_(0),
+	: glId_(0), width_(0), height_(0),
 	  mipMapLevels_(1), isCompressed_(false), hasAlphaChannel_(false)
 {
 	type_ = TEXTURE_TYPE;
-	glGenTextures(1, &gLId_);
+	glGenTextures(1, &glId_);
 }
 
 
 Texture::Texture(const char *filename)
-	: gLId_(0), width_(0), height_(0),
+	: glId_(0), width_(0), height_(0),
 	  mipMapLevels_(1), isCompressed_(false), hasAlphaChannel_(false)
 {
 	type_ = TEXTURE_TYPE;
 	setName(filename);
 
-	glGenTextures(1, &gLId_);
+	glGenTextures(1, &glId_);
 	bind();
 
 	ITextureLoader *pTexLoader = ITextureLoader::createFromFile(filename);
@@ -35,12 +35,12 @@ Texture::Texture(const char *filename)
 }
 
 Texture::Texture(const char *filename, int width, int height)
-	: gLId_(0), width_(0), height_(0), isCompressed_(false), hasAlphaChannel_(false)
+	: glId_(0), width_(0), height_(0), isCompressed_(false), hasAlphaChannel_(false)
 {
 	type_ = TEXTURE_TYPE;
 	setName(filename);
 
-	glGenTextures(1, &gLId_);
+	glGenTextures(1, &glId_);
 	bind();
 
 	ITextureLoader *pTexLoader = ITextureLoader::createFromFile(filename);
@@ -49,12 +49,12 @@ Texture::Texture(const char *filename, int width, int height)
 }
 
 Texture::Texture(const char *filename, Point size)
-	: gLId_(0), width_(0), height_(0), isCompressed_(false), hasAlphaChannel_(false)
+	: glId_(0), width_(0), height_(0), isCompressed_(false), hasAlphaChannel_(false)
 {
 	type_ = TEXTURE_TYPE;
 	setName(filename);
 
-	glGenTextures(1, &gLId_);
+	glGenTextures(1, &glId_);
 	bind();
 
 	ITextureLoader *pTexLoader = ITextureLoader::createFromFile(filename);
@@ -64,7 +64,7 @@ Texture::Texture(const char *filename, Point size)
 
 Texture::~Texture()
 {
-	glDeleteTextures(1, &gLId_);
+	glDeleteTextures(1, &glId_);
 }
 
 ///////////////////////////////////////////////////////////

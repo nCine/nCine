@@ -1,20 +1,10 @@
 #ifndef CLASS_NCINE_RENDERCOMMAND
 #define CLASS_NCINE_RENDERCOMMAND
 
-#if defined(__ANDROID__)
-	#include <GLES/gl.h>
-	#include <GLES/glext.h>
-#elif defined(WITH_GLEW)
-	#include <GL/glew.h>
-#elif defined(__APPLE__)
-	#include <OpenGL/gl.h>
-	#include <OpenGL/glext.h>
-#else
-	#include <GL/gl.h>
-	#include <GL/glext.h>
-#endif
-
 #include <cstdio> // for NULL
+
+#define NCINE_INCLUDE_OPENGL
+#include "common.h"
 
 #include "List.h"
 #include "Color.h"

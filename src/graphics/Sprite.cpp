@@ -77,7 +77,7 @@ void Sprite::setTexCoords()
 
 void Sprite::updateRenderCommand()
 {
-	renderCommand_->material().setTextureGLId(texture_->gLId());
+	renderCommand_->material().setTextureGLId(texture_->glId());
 	renderCommand_->material().setColor(absColor_);
 	renderCommand_->transformation().setPosition(absPosition().x, absPosition().y);
 	setVertices();
