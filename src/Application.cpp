@@ -4,6 +4,7 @@
 #include "IAppEventHandler.h"
 #include "ServiceLocator.h"
 #include "ArrayIndexer.h"
+#include "GfxCapabilities.h"
 #include "FrameTimer.h"
 #include "FileLogger.h"
 #include "LinePlotter.h"
@@ -270,8 +271,12 @@ void Application::initCommon()
 	frameTimer_ = new FrameTimer(5.0f, 0.2f);
 	profileTimer_ = new Timer();
 
+	GfxCapabilities& gfxCaps = const_cast<GfxCapabilities&>(ServiceLocator::gfxCapabilities());
+	gfxCaps.init();
+
 	if (appCfg_.withScenegraph_)
 	{
+		gfxDevice_->setupGL();
 		rootNode_ = new SceneNode();
 		renderQueue_ = new RenderQueue();
 

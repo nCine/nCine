@@ -67,7 +67,7 @@ class GfxCapabilities
 	// Queries the device about its capabilities
 	void init();
 
-	friend class IGfxDevice;
+	friend class Application;
 };
 
 }

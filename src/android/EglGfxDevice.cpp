@@ -15,7 +15,6 @@ EglGfxDevice::EglGfxDevice(struct android_app* state, DisplayMode mode)
 	isFullScreen_ = true;
 	mode_ = mode;
 	initDevice(state);
-	initGL();
 }
 
 EglGfxDevice::~EglGfxDevice()

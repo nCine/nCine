@@ -49,8 +49,11 @@ class IGfxDevice
 	/// Device rendering occurs in full screen
 	bool isFullScreen_;
 
-	// Initilizes starting OpenGL state
-	virtual void initGL();
+  private:
+	// Sets up the initial OpenGL state
+	virtual void setupGL();
+
+	friend class Application;
 };
 
 }

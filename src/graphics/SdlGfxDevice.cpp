@@ -83,7 +83,6 @@ void SdlGfxDevice::init(int width, int height, DisplayMode mode, bool isFullScre
 
 	initGraphics();
 	initDevice();
-	initGL();
 }
 
 /// Initilizes the video subsystem (SDL)

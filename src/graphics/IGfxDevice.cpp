@@ -2,8 +2,6 @@
 #include "common.h"
 
 #include "IGfxDevice.h"
-#include "GfxCapabilities.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -18,15 +16,12 @@ void IGfxDevice::clear()
 }
 
 ///////////////////////////////////////////////////////////
-// PROTECTED FUNCTIONS
+// PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Initilizes starting OpenGL state
-void IGfxDevice::initGL()
+/// Sets up the initial OpenGL state
+void IGfxDevice::setupGL()
 {
-	GfxCapabilities& gfxCaps = const_cast<GfxCapabilities&>(ServiceLocator::gfxCapabilities());
-	gfxCaps.init();
-
 	glDisable(GL_DITHER);
 	glEnable(GL_TEXTURE_2D);
 
