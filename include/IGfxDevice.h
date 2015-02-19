@@ -34,6 +34,8 @@ class IGfxDevice
 	inline int width() const { return width_; }
 	/// Returns device height
 	inline int height() const { return height_; }
+	/// Returns device aspect ratio
+	inline float aspect() const { return width_ / float(height_); }
 	/// Returns true if the device renders in full screen
 	inline bool isFullScreen() const { return isFullScreen_; }
 	/// Returns display mode

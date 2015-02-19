@@ -66,11 +66,12 @@ void Application::init(IAppEventHandler* (*createAppEventHandler)())
 	// Registering the logger as early as possible
 	ServiceLocator::registerLogger(new FileLogger(appCfg_.logFile_.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
 	// Graphics device should always be created before the input manager!
+	DisplayMode displayMode(8, 8, 8, 8, 32, 24, 8, true, false);
 #if defined(WITH_SDL)
-	gfxDevice_ = new SdlGfxDevice(appCfg_.xResolution_, appCfg_.yResolution_, appCfg_.inFullscreen_);
+	gfxDevice_ = new SdlGfxDevice(appCfg_.xResolution_, appCfg_.yResolution_, displayMode, appCfg_.inFullscreen_);
 	inputManager_ = new SdlInputManager();
 #elif defined(WITH_GLFW)
-	gfxDevice_ = new GlfwGfxDevice(appCfg_.xResolution_, appCfg_.yResolution_, appCfg_.inFullscreen_);
+	gfxDevice_ = new GlfwGfxDevice(appCfg_.xResolution_, appCfg_.yResolution_, displayMode, appCfg_.inFullscreen_);
 	inputManager_ = new GlfwInputManager();
 #endif
 	gfxDevice_->setWindowTitle(appCfg_.windowTitle_.data());
@@ -123,7 +124,10 @@ void Application::run()
 void Application::step()
 {
 	frameTimer_->addFrame();
-	gfxDevice_->clear();
+	if (appCfg_.withScenegraph_)
+	{
+		gfxDevice_->clear();
+	}
 	appEventHandler_->onFrameStart();
 	if (profilePlotter_)
 	{

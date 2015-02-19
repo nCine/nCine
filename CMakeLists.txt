@@ -10,8 +10,10 @@ if(MSVC)
 	set(EXTERNAL_MSVC_DIR "${CMAKE_SOURCE_DIR}/external")
 	if(MSVC_C_ARCHITECTURE_ID MATCHES 64 OR MSVC_CXX_ARCHITECTURE_ID MATCHES 64)
 		set(LIBDIR "${EXTERNAL_MSVC_DIR}/lib/x64")
+		set(BINDIR "${EXTERNAL_MSVC_DIR}/bin/x64")
 	else()
 		set(LIBDIR "${EXTERNAL_MSVC_DIR}/lib/x86")
+		set(BINDIR "${EXTERNAL_MSVC_DIR}/bin/x86")
 	endif()
 	if(NOT (MSVC_VERSION LESS 1800)) # If Visual Studio 2013 or greater
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FS")
@@ -172,6 +174,13 @@ set(PRIVATE_HEADERS
 	src/include/TextureLoaderDds.h
 	src/include/TextureLoaderPvr.h
 	src/include/TextureLoaderKtx.h
+	src/include/GLBufferObject.h
+	src/include/GLBufferObject.h
+	src/include/GLFramebufferObject.h
+	src/include/GLRenderbuffer.h
+	src/include/GLShader.h
+	src/include/GLShaderProgram.h
+	src/include/GLTexture.h
 )
 set(SOURCES
 	src/base/String.cpp
@@ -211,6 +220,12 @@ set(SOURCES
 	src/graphics/TextNode.cpp
 	src/graphics/RectAnimation.cpp
 	src/graphics/AnimatedSprite.cpp
+	src/graphics/opengl/GLBufferObject.cpp
+	src/graphics/opengl/GLFramebufferObject.cpp
+	src/graphics/opengl/GLRenderbuffer.cpp
+	src/graphics/opengl/GLShader.cpp
+	src/graphics/opengl/GLShaderProgram.cpp
+	src/graphics/opengl/GLTexture.cpp
 )
 
 # Experimental depth test/alpha test renderer
@@ -340,7 +355,19 @@ link_libraries(
 	${LINK_LIBS}
 )
 
+add_custom_target(copy_shaders ALL
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/tests/shaders
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/src/tests/shaders
+	COMMENT "Copying shaders..."
+)
+
 if(MSVC)
+	add_custom_target(copy_dlls ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/tests
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/src/tests
+		COMMENT "Copying DLLs..."
+	)
+
 	add_library(ncine STATIC ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
 	target_include_directories(ncine PUBLIC "${EXTERNAL_MSVC_DIR}/include")
 else()

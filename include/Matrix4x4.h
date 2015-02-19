@@ -466,19 +466,19 @@ inline Matrix4x4<T> Matrix4x4<T>::scale(const Vector3<T>& v)
 template <class T>
 inline Matrix4x4<T> Matrix4x4<T>::ortho(T left, T right, T bottom, T top, T near, T far)
 {
-	return Matrix4x4<T>(Vector4<T>(2 / (right - left), 0, 0, -(right + left) / (right - left)),
-						Vector4<T>(0, 2 / (top - bottom), 0, -(top + bottom) / (top - bottom)),
-						Vector4<T>(0, 0, -2 / (far - near), (far + near) / (far - near)),
-						Vector4<T>(0, 0, 0, 1));
+	return Matrix4x4<T>(Vector4<T>(2 / (right - left), 0, 0, 0),
+						Vector4<T>(0, 2 / (top - bottom), 0, 0),
+						Vector4<T>(0, 0, -2 / (far - near), 0),
+						Vector4<T>(-(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far + near) / (far - near), 1));
 }
 
 template <class T>
 inline Matrix4x4<T> Matrix4x4<T>::frustum(T left, T right, T bottom, T top, T near, T far)
 {
-	return Matrix4x4<T>(Vector4<T>((2 * near) / (right - left), 0, (right + left) / (right - left), 0),
-						Vector4<T>(0, (2 * near) / (top - bottom), (top + bottom) / (top - bottom), 0),
-						Vector4<T>(0, 0, (far + near) / (far - near), (2 * far * near) / (far - near)),
-						Vector4<T>(0, 0, -1, 0));
+	return Matrix4x4<T>(Vector4<T>((2 * near) / (right - left), 0, 0, 0),
+						Vector4<T>(0, (2 * near) / (top - bottom), 0, 0),
+						Vector4<T>((right + left) / (right - left), (top + bottom) / (top - bottom), -(far + near) / (far - near), -1),
+						Vector4<T>(0, 0, (-2 * far * near) / (far - near), 0));
 }
 
 template <class T>

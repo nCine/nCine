@@ -31,13 +31,16 @@ void AndroidApplication::preInit(IAppEventHandler* (*createAppEventHandler)())
 /// Must be called at start to init the application
 void AndroidApplication::init(struct android_app* state)
 {
-	if (EglGfxDevice::isModeSupported(state, DisplayMode(8, 8, 8)))
+	// Graphics device should always be created before the input manager!
+	DisplayMode displayMode32(8, 8, 8, 8, 32, 24, 8, true, false);
+	if (EglGfxDevice::isModeSupported(state, displayMode32))
 	{
-		gfxDevice_ = new EglGfxDevice(state, DisplayMode(8, 8, 8));
+		gfxDevice_ = new EglGfxDevice(state, displayMode32);
 	}
 	else
 	{
-		gfxDevice_ = new EglGfxDevice(state, DisplayMode(5, 6, 5));
+		DisplayMode displayMode16(5, 6, 5, 0, 16, 16, 0, true, false);
+		gfxDevice_ = new EglGfxDevice(state, displayMode16);
 	}
 	AndroidJniHelper::attachJVM(state);
 	inputManager_ = new AndroidInputManager(state);
