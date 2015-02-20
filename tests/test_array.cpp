@@ -39,12 +39,22 @@ int main(int argc, char **argv)
 	printArray(array);
 
 	printf("Inserting in the middle\n");
-	array.insertAt(3, 33);
+	array.insertAt(3, 2);
 	printArray(array);
 
-	printf("Removing twice from the middle\n");
+	printf("Removing from the middle\n");
 	array.removeAt(2);
-	array.removeAt(2);
+	printArray(array);
+
+	printf("Inserting as first and last\n");
+	array.insertAt(0, -1);
+	array.insertAt(array.size(), 12);
+	printArray(array);
+
+	printf("Removing the first and twice the last\n");
+	array.removeAt(0);
+	array.removeAt(array.size()-1);
+	array.removeAt(array.size()-1);
 	printArray(array);
 
 

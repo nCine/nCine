@@ -235,7 +235,7 @@ set(SOURCES
 #set(GLFW_FOUND 0)
 
 if(NOT SDL_FOUND AND NOT GLFW_FOUND)
-	message(FATAL_ERROR "Neither SDL nor GLFW have been found!")
+	message(FATAL_ERROR "Neither SDL nor GLFW have been found")
 endif()
 
 if(GLFW_FOUND)

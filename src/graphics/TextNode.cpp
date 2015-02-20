@@ -12,7 +12,7 @@ namespace ncine {
 
 TextNode::TextNode(SceneNode* parent, Font* font)
 	: DrawableNode(parent, 0, 0), string_(MaxStringLength), dirtyDraw_(true), dirtyBoundaries_(true),
-	  withKerning_(true), font_(font), vertices_(16), texCoords_(16),
+	  withKerning_(true), font_(font), vertices_(16), transformedVertices_(16), texCoords_(16),
 	  xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f), lineLengths_(4), alignment_(ALIGN_LEFT)
 {
 	type_ = TEXT_TYPE;
@@ -52,7 +52,7 @@ void TextNode::enableKerning(bool withKerning)
 	}
 }
 
-// Sets the horizontal text alignment
+/// Sets the horizontal text alignment
 void TextNode::setAlignment(Alignment alignment)
 {
 	if (alignment != alignment_)
@@ -235,29 +235,28 @@ void TextNode::processGlyph(const FontGlyph* glyph)
 	float bottomCoord = float(texRect.y + texRect.h) / float(texSize.y);
 	float topCoord = float(texRect.y) / float(texSize.y);
 
-	texCoords_.insertBack(leftCoord);		texCoords_.insertBack(bottomCoord);
-	texCoords_.insertBack(leftCoord);		texCoords_.insertBack(topCoord);
+	texCoords_.insertBack(leftCoord);	texCoords_.insertBack(bottomCoord);
+	texCoords_.insertBack(leftCoord);	texCoords_.insertBack(topCoord);
 	texCoords_.insertBack(rightCoord);	texCoords_.insertBack(bottomCoord);
 
 	texCoords_.insertBack(rightCoord);	texCoords_.insertBack(bottomCoord);
 	texCoords_.insertBack(rightCoord);	texCoords_.insertBack(topCoord);
-	texCoords_.insertBack(leftCoord);		texCoords_.insertBack(topCoord);
+	texCoords_.insertBack(leftCoord);	texCoords_.insertBack(topCoord);
 
 	xAdvance_ += glyph->xAdvance();
 }
 
 void TextNode::updateRenderCommand()
 {
+	transformedVertices_ = vertices_;
+
 	renderCommand_->material().setTextureGLId(font_->texture()->glId());
 	renderCommand_->material().setColor(absColor_);
 	renderCommand_->transformation().setPosition(absPosition().x, absPosition().y);
-	renderCommand_->geometry().setData(GL_TRIANGLES, 0, vertices_.size() / 2, vertices_.data(), texCoords_.data(), NULL);
+	renderCommand_->geometry().setData(GL_TRIANGLES, 0, transformedVertices_.size() / 2, transformedVertices_.data(), texCoords_.data(), NULL);
 	renderCommand_->calculateSortKey();
 
-	if (dirtyDraw_)
-	{
-		applyTransformations();
-	}
+	applyTransformations();
 }
 
 }

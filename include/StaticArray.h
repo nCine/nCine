@@ -91,7 +91,7 @@ const T& StaticArray<T, S>::operator[](const unsigned int index) const
 {
 	if (index >= size_)
 	{
-		LOGF_X("Element %u out of size range!", index);
+		LOGF_X("Element %u out of size range", index);
 		exit(EXIT_FAILURE);
 	}
 
@@ -104,7 +104,7 @@ T& StaticArray<T, S>::operator[](const unsigned int index)
 {
 	if (index >= size_)
 	{
-		LOGF_X("Element %u out of size range!", index);
+		LOGF_X("Element %u out of size range", index);
 		exit(EXIT_FAILURE);
 	}
 

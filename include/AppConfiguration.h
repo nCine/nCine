@@ -23,6 +23,12 @@ class AppConfiguration
 	void setResolution(unsigned int x, unsigned int y);
 	// Sets the fullscreen mode
 	void setFullScreen(bool inFullscreen);
+	// Sets the window title
+	void setWindowTitle(const String& windowTitle);
+	// Sets the font texture filename for profiler information text
+	void setFontTexFilename(const String& fontTexFilename);
+	// Sets the font FNT filename for profiler information text
+	void setFontFntFilename_(const String& fontFntFilename);
 	// Enables the profiler graphs
 	void enableProfilerGraphs(bool shouldEnable);
 	// Enables the profiler information text

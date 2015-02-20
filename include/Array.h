@@ -84,10 +84,10 @@ class Array
 	inline void insertBack(T element) { operator[](size_) = element; }
 	// Inserts a new element at a specified position (shifting elements around)
 	void insertAt(unsigned int index, T element);
+	// Removes an element at a specified position (shifting elements around)
+	void removeAt(unsigned int index);
 	// Inserts an array of elements at the end in constant time
 	void append(const T* elements, unsigned int amount);
-	/// Removes an element at a specified position (shifting elements around)
-	void removeAt(unsigned int index);
 
 	// Read-only subscript operator
 	const T& operator[](unsigned int index) const;
@@ -183,15 +183,38 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 template <class T>
 void Array<T>::insertAt(unsigned int index, T element)
 {
+	// Cannot insert at more than one position after the last element
+	if (index > size_)
+	{
+		LOGF_X("Element %u out of size range", index);
+		exit(EXIT_FAILURE);
+	}
+
 	if (size_ + 1 > capacity_)
 	{
 		setCapacity(size_ * 2);
 	}
 
 	// memmove() takes care of overlapping regions
-	memmove(array_ + index + 1, array_ + index, size_ - index);
+	memmove(array_ + index + 1, array_ + index, sizeof(T) * (size_ - index));
 	array_[index] = element;
 	size_++;
+}
+
+/// Removes an element at a specified position (shifting elements around)
+template <class T>
+void Array<T>::removeAt(unsigned int index)
+{
+	// Cannot remove past the last element
+	if (index > size_ - 1)
+	{
+		LOGF_X("Element %u out of size range", index);
+		exit(EXIT_FAILURE);
+	}
+
+	// memmove() takes care of overlapping regions
+	memmove(array_ + index, array_ + index + 1, sizeof(T) * (size_ - index - 1));
+	size_--;
 }
 
 /// Inserts an array of elements at the end in constant time
@@ -207,21 +230,13 @@ void Array<T>::append(const T* elements, unsigned int amount)
 	size_ += amount;
 }
 
-template <class T>
-void Array<T>::removeAt(unsigned int index)
-{
-	// memmove() takes care of overlapping regions
-	memmove(array_ + index, array_ + index + 1, size_ - index);
-	size_--;
-}
-
 /// Read-only subscript operator
 template <class T>
 const T& Array<T>::operator[](const unsigned int index) const
 {
 	if (index > size_)
 	{
-		LOGF_X("Element %u out of size range!", index);
+		LOGF_X("Element %u out of size range", index);
 		exit(EXIT_FAILURE);
 	}
 
@@ -235,7 +250,7 @@ T& Array<T>::operator[](const unsigned int index)
 	// Avoid creating "holes" into the array
 	if (index > size_)
 	{
-		LOGF_X("Element %u out of size range!", index);
+		LOGF_X("Element %u out of size range", index);
 		exit(EXIT_FAILURE);
 	}
 	// Adding an element at the back of the array

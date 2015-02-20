@@ -22,9 +22,6 @@ class SceneNode : public Object
 	/// Relative Y coordinate as a public property
 	float y;
 
-	bool shouldUpdate_;
-	bool shouldDraw_;
-
 	SceneNode(SceneNode* parent, float x, float y);
 	explicit SceneNode(SceneNode* parent);
 	SceneNode();
@@ -50,13 +47,18 @@ class SceneNode : public Object
 	/// Renders the node
 	virtual void draw(RenderQueue& renderQueue) { }
 
+	/// Enables node updating
+	inline void enableUpdate(bool shouldUpdate) { shouldUpdate_ = shouldUpdate; }
+	/// Enables node drawing
+	inline void enableDraw(bool shouldDraw) { shouldDraw_ = shouldDraw; }
+
 	/// Returns node position relative to its parent
 	inline Vector2f position() const { return Vector2f(x, y); }
 	/// Returns absolute node position
 	inline Vector2f absPosition() const { return Vector2f(absX_, absY_); }
-	/// Sets the sprite position through two coordinates
+	/// Sets the node position through two coordinates
 	inline void setPosition(float xx, float yy) { x = xx; y = yy; }
-	/// Sets the sprite position through a vector
+	/// Sets the node position through a vector
 	inline void setPosition(const Vector2f& pos) { x = pos.x; y = pos.y; }
 	/// Moves a node based on two offsets
 	inline void move(float xx, float yy) { x += xx; y += yy; }
@@ -93,6 +95,9 @@ class SceneNode : public Object
 	inline void setAlphaF(float alpha) { color_.setAlphaF(alpha); }
 
   protected:
+	bool shouldUpdate_;
+	bool shouldDraw_;
+
 	SceneNode* parent_;
 	List<SceneNode *> children_;
 

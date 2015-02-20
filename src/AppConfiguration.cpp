@@ -13,7 +13,7 @@ AppConfiguration::AppConfiguration()
 	, fileLogLevel_(ILogger::LOG_OFF)
 	, xResolution_(960), yResolution_(640)
 	, inFullscreen_(false)
-	, windowTitle_("nCine")
+	, windowTitle_(256)
 	, fontTexFilename_(256)
 	, fontFntFilename_(256)
 	, withProfilerGraphs_(true)
@@ -35,6 +35,7 @@ AppConfiguration::AppConfiguration()
 #else
 	logFile_ = "ncine_log.txt";
 
+	windowTitle_ = "nCine";
 	fontTexFilename_ = "fonts/trebuchet32_256.png";
 	fontFntFilename_ = "fonts/trebuchet32_256.fnt";
 #endif
@@ -73,6 +74,24 @@ void AppConfiguration::setResolution(unsigned int x, unsigned int y)
 void AppConfiguration::setFullScreen(bool inFullscreen)
 {
 	inFullscreen_ = inFullscreen;
+}
+
+/// Sets the window title
+void AppConfiguration::setWindowTitle(const String& windowTitle)
+{
+	windowTitle_ = windowTitle;
+}
+
+/// Sets the font texture filename for profiler information text
+void AppConfiguration::setFontTexFilename(const String& fontTexFilename)
+{
+	fontTexFilename_ = fontTexFilename;
+}
+
+/// Sets the font FNT filename for profiler information text
+void AppConfiguration::setFontFntFilename_(const String& fontFntFilename)
+{
+	fontFntFilename_ = fontFntFilename;
 }
 
 /// Enables the profiler graphs

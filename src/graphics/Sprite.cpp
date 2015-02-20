@@ -68,11 +68,11 @@ void Sprite::setTexCoords()
 	float bottomCoord = float(texRect_.y + texRect_.h) / float(texSize.y);
 	float topCoord = float(texRect_.y) / float(texSize.y);
 
-	texCoords_[0] = leftCoord;		texCoords_[1] = bottomCoord;
-	texCoords_[2] = leftCoord;		texCoords_[3] = topCoord;
-	texCoords_[4] = rightCoord;		texCoords_[5] = bottomCoord;
+	texCoords_[0] = rightCoord;		texCoords_[1] = bottomCoord;
+	texCoords_[2] = rightCoord;		texCoords_[3] = topCoord;
+	texCoords_[4] = leftCoord;		texCoords_[5] = bottomCoord;
 
-	texCoords_[6] = rightCoord;		texCoords_[7] = topCoord;
+	texCoords_[6] = leftCoord;		texCoords_[7] = topCoord;
 }
 
 void Sprite::updateRenderCommand()

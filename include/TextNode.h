@@ -64,6 +64,8 @@ class TextNode : public DrawableNode
 	Font *font_;
 	/// The array of vertices for every glyph in the batch
 	Array<float> vertices_;
+	/// The array of glyph vertices to be transformed for drawing
+	Array<float> transformedVertices_;
 	/// The array of texture coordinates for every glyph in the batch
 	Array<float> texCoords_;
 
