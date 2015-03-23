@@ -2,7 +2,7 @@
 #define CLASS_NCINE_GLFRAMEBUFFEROBJECT
 
 #define NCINE_INCLUDE_OPENGL
-#include "common.h"
+#include "common_headers.h"
 #include "Array.h"
 
 namespace ncine

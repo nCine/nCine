@@ -1,10 +1,12 @@
 #ifndef CLASS_NCILOGGER
 #define CLASS_NCILOGGER
 
+#include "common_defines.h"
+
 namespace ncine {
 
 /// The interface for every logger
-class ILogger
+class DLL_PUBLIC ILogger
 {
   public:
 	/// Log levels, from less to more severe
@@ -34,7 +36,7 @@ inline ILogger::~ILogger() { }
 #define CLASS_NCNULLLOGGER
 
 /// A fake logger which doesn't log anything
-class NullLogger : public ILogger
+class DLL_PUBLIC NullLogger : public ILogger
 {
   public:
 	virtual void write(LogLevel level, const char *message, ...) { }

@@ -9,12 +9,14 @@
 	#include "GlfwKeys.h"
 #endif
 
+#include "common_defines.h"
+
 namespace ncine {
 
 class IInputEventHandler;
 
 #ifdef __ANDROID__
-class TouchEvent
+class DLL_PUBLIC TouchEvent
 {
   public:
 	TouchEvent() : count(0), id(0), id2(1), x(0.0f), y(0.0f), x2(0.0f), y2(0.0f) { }
@@ -24,7 +26,7 @@ class TouchEvent
 	float x, y, x2, y2;
 };
 
-class AccelerometerEvent
+class DLL_PUBLIC AccelerometerEvent
 {
   public:
 	AccelerometerEvent(): x(0.0f), y(0.0f), z(0.0f) { }
@@ -33,7 +35,7 @@ class AccelerometerEvent
 };
 #else
 /// Information about mouse state
-class MouseState
+class DLL_PUBLIC MouseState
 {
   public:
 	/// Pointer position on the X axis
@@ -49,7 +51,7 @@ class MouseState
 };
 
 /// Information about a mouse event
-class MouseEvent
+class DLL_PUBLIC MouseEvent
 {
   public:
 	/// Pointer position on the X axis
@@ -65,7 +67,7 @@ class MouseEvent
 };
 
 /// Information about keyboard state
-class KeyboardState
+class DLL_PUBLIC KeyboardState
 {
   public:
 	KeyboardState() { }
@@ -75,7 +77,7 @@ class KeyboardState
 #endif
 
 /// Information about a keyboard event
-class KeyboardEvent
+class DLL_PUBLIC KeyboardEvent
 {
   public:
 	/// Key scan code
@@ -91,7 +93,7 @@ class KeyboardEvent
 };
 
 /// Information about a joystick axis event
-class JoyAxisEvent
+class DLL_PUBLIC JoyAxisEvent
 {
   public:
 	int joyId;
@@ -101,7 +103,7 @@ class JoyAxisEvent
 };
 
 /// Information about a joystick button event
-class JoyButtonEvent
+class DLL_PUBLIC JoyButtonEvent
 {
   public:
 	int joyId;
@@ -109,11 +111,10 @@ class JoyButtonEvent
 };
 
 /// The interface class for parsing and dispatching input events
-class IInputManager
+class DLL_PUBLIC IInputManager
 {
   public:
 	virtual ~IInputManager() { }
-
 	inline static void setHandler(IInputEventHandler *inputEventHandler)
 	{
 		inputEventHandler_ = inputEventHandler;

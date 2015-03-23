@@ -4,7 +4,7 @@
 #include <cstdio> // for NULL
 
 #define NCINE_INCLUDE_OPENGL
-#include "common.h"
+#include "common_headers.h"
 
 #include "List.h"
 #include "Color.h"

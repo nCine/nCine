@@ -6,7 +6,7 @@
 namespace ncine {
 
 /// A rectangle in a two dimensional space
-class Rect
+class DLL_PUBLIC Rect
 {
   public:
 	/// Top-left X coordinate of as a public property

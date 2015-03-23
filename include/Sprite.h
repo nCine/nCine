@@ -12,7 +12,7 @@ namespace ncine {
 class SpriteBatchNode;
 
 /// A scene node representing a basic sprite
-class Sprite : public DrawableNode
+class DLL_PUBLIC Sprite : public DrawableNode
 {
   public:
 	Sprite(SceneNode* parent, Texture *texture);

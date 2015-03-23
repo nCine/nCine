@@ -7,7 +7,7 @@
 namespace ncine {
 
 /// It represents the interface to the graphics device where everything is rendered
-class IGfxDevice
+class DLL_PUBLIC IGfxDevice
 {
   public:
 	virtual ~IGfxDevice() { }
@@ -18,12 +18,7 @@ class IGfxDevice
 	virtual void setResolution(Point size) = 0;
 
 	/// Toggles between fullscreen and windowed mode
-	virtual void toggleFullScreen() { }
-
-	/// Updates the screen swapping back and front buffers
-	virtual void update() = 0;
-	/// Clears the screen
-	virtual void clear();
+	virtual void toggleFullScreen() = 0;
 
 	/// Sets the application window title
 	virtual void setWindowTitle(const char *windowTitle) = 0;
@@ -54,6 +49,12 @@ class IGfxDevice
   private:
 	// Sets up the initial OpenGL state
 	virtual void setupGL();
+
+	/// Updates the screen swapping back and front buffers
+	virtual void update() = 0;
+	// Clears the screen
+	virtual void clear();
+
 
 	friend class Application;
 };

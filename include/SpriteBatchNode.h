@@ -11,7 +11,7 @@ namespace ncine {
 class Sprite;
 
 /// A scene node reuniting more sprites with a common texture under a unique draw call
-class SpriteBatchNode : public DrawableNode
+class DLL_PUBLIC SpriteBatchNode : public DrawableNode
 {
   public:
 	SpriteBatchNode(SceneNode* parent, Texture *texture);

@@ -1,13 +1,13 @@
 #ifndef CLASS_NCINE_STRING
 #define CLASS_NCINE_STRING
 
-#include "common.h"
+#include "common_functions.h"
 #include "StringIterator.h"
 
 namespace ncine {
 
 /// A basic string class made of chars
-class String
+class DLL_PUBLIC String
 {
   public:
 	/// Iterator type

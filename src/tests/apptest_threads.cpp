@@ -1,12 +1,14 @@
 #include "apptest_threads.h"
-#include "Thread.h"
 #include "Application.h"
-#include "Timer.h"
+#include "Thread.h" // after Application.h to compile on MSVC
 #include "ServiceLocator.h"
+#include "Timer.h"
 
-const int NumThreads = 2;
-const int NumFloats = 100000000;
-float *globalArray = NULL;
+namespace {
+	const int NumThreads = 2;
+	const int NumFloats = 100000000;
+	float *globalArray = NULL;
+}
 
 void threadFunction(void *arg)
 {
@@ -70,7 +72,7 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
 	{
-		nc::Application::quit();
+		nc::theApplication().quit();
 	}
 }
 #endif

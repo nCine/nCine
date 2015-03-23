@@ -2,7 +2,7 @@
 #define CLASS_NCINE_TEXTURE
 
 #define NCINE_INCLUDE_OPENGL
-#include "common.h"
+#include "common_headers.h"
 
 #include "Object.h"
 #include "Point.h"
@@ -13,7 +13,7 @@ namespace ncine {
 class ITextureLoader;
 
 /// Texture class
-class Texture : public Object
+class DLL_PUBLIC Texture : public Object
 {
   public:
 	Texture();

@@ -3,7 +3,13 @@
 #include "apptest_scene.h"
 #include "Texture.h"
 #include "Sprite.h"
-#include "Application.h"
+
+#ifdef __ANDROID__
+	#include "AndroidApplication.h"
+#else
+	#include "Application.h"
+#endif
+
 
 nc::IAppEventHandler* createApphandler()
 {
@@ -19,7 +25,7 @@ void MyEventHandler::onInit()
 		angles_[i] = 0.0f;
 	}
 
-	nc::SceneNode &rootNode = nc::Application::rootNode();
+	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 #ifdef __ANDROID__
 	textures_[0] = new nc::Texture("/sdcard/ncine/texture1.pkm"); // 145x121
@@ -52,13 +58,13 @@ void MyEventHandler::onFrameStart()
 
 	for (int i = 0; i < NumTextures; i++)
 	{
-		angles_[i] += (250 + 25 * i) * nc::Application::interval();
+		angles_[i] += (250 + 25 * i) * nc::theApplication().interval();
 		sine[i] = sinf(angles_[i] * 0.01f);
 		cosine[i] = cosf(2 * angles_[i] * 0.01f);
 	}
 
-	sprites_[0]->x = nc::Application::width() * 0.5f + sine[0] * 100.0f;
-	sprites_[0]->y = nc::Application::height() * 0.5f + cosine[0] * 50.0f;
+	sprites_[0]->x = nc::theApplication().width() * 0.5f + sine[0] * 100.0f;
+	sprites_[0]->y = nc::theApplication().height() * 0.5f + cosine[0] * 50.0f;
 
 	for (int i = 1; i < NumSprites; i++)
 	{
@@ -81,11 +87,11 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
 	{
-		nc::Application::quit();
+		nc::theApplication().quit();
 	}
 	else if (event.sym == nc::KEY_SPACE)
 	{
-		nc::Application::togglePause();
+		nc::theApplication().togglePause();
 	}
 }
 #endif

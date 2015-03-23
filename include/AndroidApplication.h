@@ -8,37 +8,36 @@ struct android_app;
 namespace ncine {
 
 /// Main entry point and handler for nCine Android applications
-class AndroidApplication : public Application
+class DLL_PUBLIC AndroidApplication : public Application
 {
   public:
-	static void preInit(IAppEventHandler* (*createAppEventHandler)());
-	static void init(struct android_app* state);
-	static void shutdown();
+	void preInit(IAppEventHandler* (*createAppEventHandler)());
+	void init(struct android_app* state);
+	void shutdown();
 
-	inline static bool isInitialized() { return isInitialized_; }
+	// Wrapper around AndroidJniHelper::sdkVersion()
+	unsigned int sdkVersion();
 
-	// Wrapper around EglGfxDevice::createSurface()
-	static void createEglSurface(struct android_app* state);
-	// Wrapper around EglGfxDevice::bind()
-	static void bindEglContext();
-	// Wrapper around EglGfxDevice::unbind()
-	static void unbindEglContext();
-	// Wrapper around EglGfxDevice::querySurfaceSize()
-	static void queryEglSurfaceSize();
+	inline bool isInitialized() { return isInitialized_; }
 
-	static void setFocus(bool hasFocus);
+	void setFocus(bool hasFocus);
 
   private:
 	/// A flag indicating whether or not the application has already called init()
 	static bool isInitialized_;
 
-	AndroidApplication();
-	~AndroidApplication();
+	AndroidApplication() : Application() { }
+	~AndroidApplication() { }
 	/// Private copy constructor
 	AndroidApplication(const AndroidApplication&);
 	/// Private assignment operator
 	AndroidApplication& operator=(const AndroidApplication&);
+
+	friend AndroidApplication& theApplication();
 };
+
+// Meyers' Singleton
+DLL_PUBLIC AndroidApplication& theApplication();
 
 }
 

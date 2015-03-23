@@ -36,7 +36,7 @@ SRC=$(NCINE_ROOT)/src
 TST=$(NCINE_ROOT)/tests
 
 LOCAL_MODULE := ncine
-LOCAL_CFLAGS := -Wall -ffast-math -DWITH_AUDIO -DWITH_THREADS
+LOCAL_CFLAGS := -Wall -fvisibility=hidden -fvisibility-inlines-hidden -ffast-math -DWITH_AUDIO -DWITH_THREADS
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/$(INC) \
 	$(LOCAL_PATH)/$(SRC)/include

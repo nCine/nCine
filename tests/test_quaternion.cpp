@@ -40,6 +40,12 @@ int main()
 	printf("Divide the first quaternion by a scalar:\n");
 	print_quaternion(q1 /= 2);
 
+	printf("Normalize the first quaternion:\n");
+	print_quaternion(q1.normalize());
+
+	printf("Conjugate the normalized first quaternion (thus inverting it):\n");
+	print_quaternion(q1.conjugate());
+
 	printf("Add all the constant quaternions together:\n");
 	nc::Quaternionf constants = nc::Quaternionf::Zero + nc::Quaternionf::Identity;
 	print_quaternion(constants);

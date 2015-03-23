@@ -8,7 +8,7 @@
 namespace ncine {
 
 /// The interface dealing with file operations
-class IFile
+class DLL_PUBLIC IFile
 {
   public:
 	/// The enumeration of file types

@@ -6,8 +6,16 @@
 #include "EglGfxDevice.h"
 #include "AndroidInputManager.h"
 #include "AssetFile.h"
+#include "AndroidJniHelper.h"
 
 namespace ncine {
+
+/// Meyers' Singleton
+AndroidApplication& theApplication()
+{
+	static AndroidApplication instance;
+	return instance;
+}
 
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
@@ -25,7 +33,7 @@ void AndroidApplication::preInit(IAppEventHandler* (*createAppEventHandler)())
 	appEventHandler_->onPreInit(appCfg_);
 
 	// Registering the logger as early as possible
-	ServiceLocator::registerLogger(new FileLogger(appCfg_.logFile_.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
+	theServiceLocator().registerLogger(new FileLogger(appCfg_.logFile_.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
 }
 
 /// Must be called at start to init the application
@@ -59,44 +67,17 @@ void AndroidApplication::shutdown()
 	isInitialized_ = false;
 }
 
-/// Wrapper around EglGfxDevice::createSurface()
-void AndroidApplication::createEglSurface(struct android_app* state)
+/// Wrapper around AndroidJniHelper::sdkVersion()
+unsigned int AndroidApplication::sdkVersion()
 {
-	if (gfxDevice_)
-	{
-		EglGfxDevice *eglDevice = static_cast<EglGfxDevice *>(gfxDevice_);
-		eglDevice->createSurface(state);
-	}
-}
+	unsigned int sdkVersion = 0;
 
-/// Wrapper around EglGfxDevice::bindContext()
-void AndroidApplication::bindEglContext()
-{
-	if (gfxDevice_)
+	if (isInitialized_)
 	{
-		EglGfxDevice *eglDevice = static_cast<EglGfxDevice *>(gfxDevice_);
-		eglDevice->bindContext();
+		sdkVersion = AndroidJniHelper::sdkVersion();
 	}
-}
 
-/// Wrapper around EglGfxDevice::unbindContext()
-void AndroidApplication::unbindEglContext()
-{
-	if (gfxDevice_)
-	{
-		EglGfxDevice *eglDevice = static_cast<EglGfxDevice *>(gfxDevice_);
-		eglDevice->unbindContext();
-	}
-}
-
-/// Wrapper around EglGfxDevice::querySurfaceSize()
-void AndroidApplication::queryEglSurfaceSize()
-{
-	if (gfxDevice_)
-	{
-		EglGfxDevice *eglDevice = static_cast<EglGfxDevice *>(gfxDevice_);
-		eglDevice->querySurfaceSize();
-	}
+	return sdkVersion;
 }
 
 void AndroidApplication::setFocus(bool hasFocus)
@@ -110,11 +91,11 @@ void AndroidApplication::setFocus(bool hasFocus)
 		// Check if focus has been gained
 		if (hasFocus == true)
 		{
-			ServiceLocator::audioDevice().unfreezePlayers();
+			theServiceLocator().audioDevice().unfreezePlayers();
 		}
 		else
 		{
-			ServiceLocator::audioDevice().freezePlayers();
+			theServiceLocator().audioDevice().freezePlayers();
 		}
 	}
 

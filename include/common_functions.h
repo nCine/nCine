@@ -1,22 +1,5 @@
-#if defined(NCINE_INCLUDE_OPENGL)
-	#if defined(__ANDROID__)
-		#include <GLES/gl.h>
-		#include <GLES/glext.h>
-	#elif defined(WITH_GLEW)
-		#include <GL/glew.h>
-	#elif defined(__APPLE__)
-		#include <OpenGL/gl.h>
-		#include <OpenGL/glext.h>
-	#else
-		#define GL_GLEXT_PROTOTYPES
-		#include <GL/gl.h>
-		#include <GL/glext.h>
-	#endif
-#endif
-
-
-#ifndef NCINE_COMMON
-#define NCINE_COMMON
+#ifndef NCINE_COMMON_FUNCTIONS
+#define NCINE_COMMON_FUNCTIONS
 
 #include <cstdlib> // for rand()
 

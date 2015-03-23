@@ -1,5 +1,5 @@
 #define NCINE_INCLUDE_OPENGL
-#include "common.h"
+#include "common_headers.h"
 
 #include <cstring> // for CheckGLExtension()
 #include "GfxCapabilities.h"

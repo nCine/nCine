@@ -1,13 +1,14 @@
 #ifndef CLASS_NCINE_AUDIOSTREAMPLAYER
 #define CLASS_NCINE_AUDIOSTREAMPLAYER
 
+#include "common_defines.h"
 #include "IAudioPlayer.h"
 #include "AudioStream.h"
 
 namespace ncine {
 
 /// Audio stream player class
-class AudioStreamPlayer : public IAudioPlayer
+class DLL_PUBLIC AudioStreamPlayer : public IAudioPlayer
 {
   public:
 	// A constructor creating a player from a file

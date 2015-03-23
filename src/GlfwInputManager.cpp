@@ -35,7 +35,7 @@ GlfwInputManager::GlfwInputManager()
 
 void GlfwInputManager::windowCloseCallback(GLFWwindow *window)
 {
-	Application::quit();
+	ncine::theApplication().quit();
 }
 
 void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -67,7 +67,7 @@ void GlfwInputManager::cursorPosCallback(GLFWwindow *window, double x, double y)
 	}
 
 	mouseState_.x = int(x);
-	mouseState_.y = Application::height() - int(y);
+	mouseState_.y = theApplication().height() - int(y);
 	inputEventHandler_->onMouseMoved(mouseState_);
 }
 
@@ -81,7 +81,7 @@ void GlfwInputManager::mouseButtonCallback(GLFWwindow *window, int button, int a
 	double xCursor, yCursor;
 	glfwGetCursorPos(window, &xCursor, &yCursor);
 	mouseEvent_.x = int(xCursor); mouseEvent_.y = int(yCursor);
-	mouseEvent_.y = Application::height() - mouseEvent_.y;
+	mouseEvent_.y = theApplication().height() - mouseEvent_.y;
 	mouseEvent_.button_ = button;
 
 	if (action == GLFW_PRESS)

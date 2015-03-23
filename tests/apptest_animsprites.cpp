@@ -1,11 +1,16 @@
 #include "apptest_animsprites.h"
-#include "Application.h"
 #include "AudioStreamPlayer.h"
 #include "Texture.h"
 #include "AnimatedSprite.h"
 #include "Font.h"
 #include "TextNode.h"
 #include "IInputManager.h"
+
+#ifdef __ANDROID__
+	#include "AndroidApplication.h"
+#else
+	#include "Application.h"
+#endif
 
 //#define WITH_8DIRECTIONS
 
@@ -17,7 +22,7 @@ nc::IAppEventHandler* createApphandler()
 void MyEventHandler::onInit()
 {
 	nc::IInputManager::setHandler(this);
-	nc::SceneNode &rootNode = nc::Application::rootNode();
+	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 #ifdef __ANDROID__
 	audioPlayer_ = new nc::AudioStreamPlayer("/sdcard/ncine/music.ogg");
@@ -108,7 +113,7 @@ void MyEventHandler::onInit()
 	animSprite_->addAnimation(animation);
 #endif
 
-	animSprite_->setPosition(nc::Application::width() * 0.5f, nc::Application::height() * 0.5f);
+	animSprite_->setPosition(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	animSprite_->setAnimation(0);
 	animSprite_->setFrame(0);
 	animSprite_->setPaused(true);
@@ -175,7 +180,7 @@ void MyEventHandler::onFrameStart()
 		animSprite_->setRotation(angle);
 #endif
 
-		reachVector *= nc::Application::interval() * 100.0f;
+		reachVector *= nc::theApplication().interval() * 100.0f;
 		animSprite_->move(reachVector);
 	}
 	else
@@ -209,11 +214,11 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
 	{
-		nc::Application::quit();
+		nc::theApplication().quit();
 	}
 	else if (event.sym == nc::KEY_SPACE)
 	{
-		nc::Application::togglePause();
+		nc::theApplication().togglePause();
 	}
 }
 

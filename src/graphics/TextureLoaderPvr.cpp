@@ -64,7 +64,7 @@ void TextureLoaderPvr::readHeader(Pvr3Header &header)
 void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
 {
 	GLenum internalFormat = GL_RGB; // to suppress uninitialized variable warning
-	const GfxCapabilities& gfxCaps = ServiceLocator::gfxCapabilities();
+	const GfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();
 
 	uint64_t pixelFormat = IFile::int64FromLE(header.pixelFormat);
 

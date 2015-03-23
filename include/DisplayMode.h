@@ -1,10 +1,12 @@
 #ifndef CLASS_NCDISPLAYMODE
 #define CLASS_NCDISPLAYMODE
 
+#include "common_defines.h"
+
 namespace ncine {
 
 /// Display properties
-class DisplayMode
+class DLL_PUBLIC DisplayMode
 {
   public:
 	// Constructor with no parameters

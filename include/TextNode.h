@@ -12,7 +12,7 @@ namespace ncine {
 class FontGlyph;
 
 /// A scene node to draw a text label
-class TextNode : public DrawableNode
+class DLL_PUBLIC TextNode : public DrawableNode
 {
   public:
 	enum Alignment

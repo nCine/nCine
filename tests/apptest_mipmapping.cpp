@@ -4,7 +4,12 @@
 #include "SceneNode.h"
 #include "Texture.h"
 #include "Sprite.h"
-#include "Application.h"
+
+#ifdef __ANDROID__
+	#include "AndroidApplication.h"
+#else
+	#include "Application.h"
+#endif
 
 static const unsigned int maxDivider = 16;
 
@@ -19,7 +24,7 @@ void MyEventHandler::onInit()
 
 	pause_ = false;
 
-	nc::SceneNode &rRootNode = nc::Application::rootNode();
+	nc::SceneNode &rRootNode = nc::theApplication().rootNode();
 
 #ifdef __ANDROID__
 	texture_ = new nc::Texture("/sdcard/ncine/checker_256_ETC1_MIP.ktx");
@@ -31,7 +36,7 @@ void MyEventHandler::onInit()
 //	texture_ = new nc::Texture("textures/checker_256.png");
 #endif
 
-	dummy_ = new nc::SceneNode(&rRootNode, nc::Application::width() * 0.5f, nc::Application::height() * 0.5f);
+	dummy_ = new nc::SceneNode(&rRootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	divider_ = 1;
 
 	sprite_ = new nc::Sprite(dummy_, texture_);
@@ -86,11 +91,11 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
 	{
-		nc::Application::quit();
+		nc::theApplication().quit();
 	}
 	else if (event.sym == nc::KEY_SPACE)
 	{
-		nc::Application::togglePause();
+		nc::theApplication().togglePause();
 	}
 }
 #endif

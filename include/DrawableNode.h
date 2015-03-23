@@ -9,7 +9,7 @@ class RenderCommand;
 class RenderQueue;
 
 /// A class for objects that can be drawn through the render queue
-class DrawableNode : public SceneNode
+class DLL_PUBLIC DrawableNode : public SceneNode
 {
   public:
 	/// Drawing priorities from back to front

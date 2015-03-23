@@ -6,7 +6,7 @@
 namespace ncine {
 
 /// Audio loader class
-class IAudioLoader
+class DLL_PUBLIC IAudioLoader
 {
   public:
 	virtual ~IAudioLoader();

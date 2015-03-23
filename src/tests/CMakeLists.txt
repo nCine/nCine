@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(nCine-private_tests)
 
+
+# these tests can only be linked against the engine static library
+add_definitions(-DNCINE_STATIC)
+
 if(SDL_FOUND AND NOT GLFW_FOUND)
 	if(OPENAL_FOUND)
 		add_executable(sdltest_audio sdltest_audio.cpp)

@@ -3,10 +3,11 @@
 
 #include <cstdio> // for NULL
 #include "IGfxDevice.h"
+#include "AppConfiguration.h"
+#include "ncString.h"
 
 namespace ncine {
 
-class AppConfiguration;
 class FrameTimer;
 class Timer;
 class SceneNode;
@@ -14,88 +15,96 @@ class RenderQueue;
 class ProfilePlotter;
 class Font;
 class TextNode;
-class String;
 class IInputManager;
 class IAppEventHandler;
 
 /// Main entry point and handler for nCine applications
-class Application
+class DLL_PUBLIC Application
 {
   public:
 	// Must be called at start to init the application
-	static void init(IAppEventHandler* (*createAppEventHandler)());
+	void init(IAppEventHandler* (*createAppEventHandler)());
 
 	// The main game loop, handling events and rendering
-	static void run();
+	void run();
 	// A single step of the game loop made to render a frame
-	static void step();
+	void step();
 	// Must be called before exiting to shut down the application
-	static void shutdown();
+	void shutdown();
 
 	// HACK: wrapping a lot of getters
 	/// Returns the graphics device instance
-	inline static IGfxDevice& gfxDevice() { return *gfxDevice_; }
+	inline IGfxDevice& gfxDevice() { return *gfxDevice_; }
 	/// Returns the root of the transformation graph
-	inline static SceneNode& rootNode() { return *rootNode_; }
+	inline SceneNode& rootNode() { return *rootNode_; }
 	/// Returns the input manager instance
-	inline static IInputManager& inputManager() { return *inputManager_; }
+	inline IInputManager& inputManager() { return *inputManager_; }
 
 	// Returns the elapsed time since the end of the previous frame in milliseconds
-	static float interval();
+	float interval();
 
 	/// Returns the screen width
-	inline static int width() { return gfxDevice_->width(); }
+	inline int width() { return gfxDevice_->width(); }
 	/// Returns the screen height
-	inline static int height() { return gfxDevice_->height(); }
+	inline int height() { return gfxDevice_->height(); }
 
 	/// Returns the value of the pause flag
-	inline static bool isPaused() { return isPaused_; }
+	inline bool isPaused() { return isPaused_; }
 	// Sets the pause flag value
-	static void setPause(bool paused);
+	void setPause(bool paused);
 	// Toggles the pause flag on and off
-	static void togglePause();
+	void togglePause();
 
 	/// Raises the quit flag
-	inline static void quit() { shouldQuit_ = true; }
+	inline void quit() { shouldQuit_ = true; }
 	/// Returns the quit flag value
-	static bool shouldQuit() { return shouldQuit_; }
+	inline bool shouldQuit() { return shouldQuit_; }
 
 	/// Returns the focus flag value
-	static bool hasFocus() { return hasFocus_; }
+	inline bool hasFocus() { return hasFocus_; }
 	// Sets the focus flag
-	static void setFocus(bool hasFocus);
+	void setFocus(bool hasFocus);
 
   protected:
 	/// Maximum length for the profile string
 	static const int MaxTextLength = 256;
 
-	static bool isPaused_;
-	static bool hasFocus_;
-	static bool shouldQuit_;
-	static AppConfiguration appCfg_;
-	static FrameTimer *frameTimer_;
-	static IGfxDevice *gfxDevice_;
-	static SceneNode *rootNode_;
-	static RenderQueue *renderQueue_;
-	static Timer *profileTimer_;
-	static ProfilePlotter *profilePlotter_;
-	static Font *font_;
-	static TextNode *textLines_;
-	static float textUpdateTime;
-	static String textString_;
-	static IInputManager *inputManager_;
-	static IAppEventHandler *appEventHandler_;
+	bool isPaused_;
+	bool hasFocus_;
+	bool shouldQuit_;
+	AppConfiguration appCfg_;
+	FrameTimer *frameTimer_;
+	IGfxDevice *gfxDevice_;
+	SceneNode *rootNode_;
+	RenderQueue *renderQueue_;
+	Timer *profileTimer_;
+	ProfilePlotter *profilePlotter_;
+	Font *font_;
+	TextNode *textLines_;
+	float textUpdateTime;
+	String textString_;
+	IInputManager *inputManager_;
+	IAppEventHandler *appEventHandler_;
 
-	static void initCommon();
-
-  private:
 	Application();
-	~Application();
+	~Application() { }
+	void initCommon();
+
+  private:	
 	/// Private copy constructor
 	Application(const Application&);
 	/// Private assignment operator
 	Application& operator=(const Application&);
+
+#ifndef __ANDROID__
+	friend DLL_PUBLIC Application& theApplication();
+#endif
 };
+
+#ifndef __ANDROID__
+// Meyers' Singleton
+DLL_PUBLIC Application& theApplication();
+#endif
 
 }
 

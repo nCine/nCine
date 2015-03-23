@@ -4,6 +4,7 @@ project(nCine)
 option(NCINE_BUILD_TESTS "Build the engine test programs" ON)
 option(NCINE_EXTRA_OPTIMIZE "Compile the engine with extra optimizations in release mode" ON)
 option(NCINE_AUTOVECTORIZATION_REPORT "Enable report generation from compiler auto-vectorization" OFF)
+option(NCINE_DYNAMIC_LIBRARY "Compile the engine as a dynamic library" OFF)
 
 find_package(Threads)
 if(MSVC)
@@ -45,6 +46,9 @@ if(MSVC)
 	add_definitions(-DWITH_GLEW -D_CRT_SECURE_NO_DEPRECATE)
 else() # GCC and LLVM
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math")
+	if(NCINE_DYNAMIC_LIBRARY)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
+	endif()
 	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra -Wold-style-cast -Wno-long-long -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-variadic-macros")
 		if(CMAKE_BUILD_TYPE MATCHES Debug)
@@ -115,7 +119,9 @@ else() # GCC and LLVM
 endif()
 
 set(HEADERS
-	include/common.h
+	include/common_headers.h
+	include/common_defines.h
+	include/common_functions.h
 	include/Array.h
 	include/ArrayIterator.h
 	include/StaticArray.h
@@ -130,6 +136,7 @@ set(HEADERS
 	include/DrawableNode.h
 	include/IAppEventHandler.h
 	include/IInputEventHandler.h
+	include/IInputManager.h
 	include/Vector2.h
 	include/Vector3.h
 	include/Vector4.h
@@ -355,24 +362,36 @@ link_libraries(
 	${LINK_LIBS}
 )
 
-add_custom_target(copy_shaders ALL
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/tests/shaders
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/src/tests/shaders
-	COMMENT "Copying shaders..."
-)
+if(NCINE_DYNAMIC_LIBRARY)
+	add_library(ncine SHARED ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
+else()
+	add_library(ncine STATIC ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
+endif()
 
 if(MSVC)
-	add_custom_target(copy_dlls ALL
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/tests
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/src/tests
-		COMMENT "Copying DLLs..."
-	)
+	# Disabling incremental linking and manifest generation
+	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /MANIFEST:NO /INCREMENTAL:NO")
+	set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /MANIFEST:NO /INCREMENTAL:NO")
 
-	add_library(ncine STATIC ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
+	if(NCINE_DYNAMIC_LIBRARY)
+		# Disabling incremental linking and manifest generation
+		set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} /MANIFEST:NO /INCREMENTAL:NO")
+		set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} /MANIFEST:NO /INCREMENTAL:NO")
+
+		# Disable linker warning about teamplates
+		add_definitions("/wd4251")
+
+		add_custom_target(copy_ncine_dll ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/ncine.dll ${CMAKE_BINARY_DIR}/tests
+			DEPENDS ncine
+			COMMENT "Copying nCine DLL..."
+		)
+	else()
+		add_definitions(-DNCINE_STATIC)
+	endif()
+
 	target_include_directories(ncine PUBLIC "${EXTERNAL_MSVC_DIR}/include")
 else()
-	add_library(ncine SHARED ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
-
 	if(PNG_FOUND AND GLFW_FOUND)
 		target_include_directories(ncine PRIVATE ${PNG_INCLUDE_DIR})
 	endif()
@@ -383,8 +402,30 @@ else()
 endif()
 target_include_directories(ncine PUBLIC include PRIVATE src/include)
 
-
 if(NCINE_BUILD_TESTS)
 	add_subdirectory(tests)
-	add_subdirectory(src/tests)
+	add_custom_target(copy_shaders_tests ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/tests/shaders
+		COMMENT "Copying shaders to tests..."
+	)
+	if(MSVC)
+		add_custom_target(copy_dlls_tests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/tests
+			COMMENT "Copying DLLs to tests..."
+		)
+	endif()
+
+	if(NOT NCINE_DYNAMIC_LIBRARY)
+		add_subdirectory(src/tests)
+		add_custom_target(copy_shaders_srctests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/src/tests/shaders
+			COMMENT "Copying shaders to src/tests..."
+		)
+		if(MSVC)
+			add_custom_target(copy_dlls_srctests ALL
+				COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/src/tests
+				COMMENT "Copying DLLs to src/tests..."
+			)
+		endif()
+	endif()
 endif()

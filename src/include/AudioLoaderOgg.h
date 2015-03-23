@@ -2,9 +2,9 @@
 #define CLASS_NCINE_AUDIOLOADEROGG
 
 #ifdef __ANDROID__
-#include "ivorbisfile.h"
+	#include "ivorbisfile.h"
 #else
-#include <vorbis/vorbisfile.h>
+	#include <vorbis/vorbisfile.h>
 #endif
 
 #include "IAudioLoader.h"

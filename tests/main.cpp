@@ -11,9 +11,9 @@ ncine::IAppEventHandler* createApphandler();
 
 int main(int argc, char **argv)
 {
-	ncine::Application::init(createApphandler);
-	ncine::Application::run();
-	ncine::Application::shutdown();
+	ncine::theApplication().init(createApphandler);
+	ncine::theApplication().run();
+	ncine::theApplication().shutdown();
 
 	return EXIT_SUCCESS;
 }

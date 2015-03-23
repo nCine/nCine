@@ -64,7 +64,7 @@ void TextureLoaderDds::readHeader(DdsHeader& header)
 void TextureLoaderDds::parseFormat(const DdsHeader &header)
 {
 	GLenum internalFormat = GL_RGB; // to suppress uninitialized variable warning
-	const GfxCapabilities &gfxCaps = ServiceLocator::gfxCapabilities();
+	const GfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
 
 	uint32_t flags = IFile::int32FromLE(header.ddspf.dwFlags);
 

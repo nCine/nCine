@@ -3,7 +3,6 @@
 
 #include <ctime>
 #include <cstdlib>
-
 #include "Array.h"
 #include "DrawableNode.h"
 #include "ParticleAffectors.h"
@@ -15,7 +14,7 @@ class Particle;
 class Rect;
 
 /// The class representing a particle system
-class ParticleSystem : public DrawableNode
+class DLL_PUBLIC ParticleSystem : public DrawableNode
 {
   public:
 	// Constructs a particle system made of the specified maximum amount of particles

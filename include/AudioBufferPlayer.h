@@ -1,6 +1,7 @@
 #ifndef CLASS_NCINE_AUDIOBUFFERPLAYER
 #define CLASS_NCINE_AUDIOBUFFERPLAYER
 
+#include "common_defines.h"
 #include "IAudioPlayer.h"
 
 namespace ncine {
@@ -8,7 +9,7 @@ namespace ncine {
 class AudioBuffer;
 
 /// Audio buffer player class
-class AudioBufferPlayer : public IAudioPlayer
+class DLL_PUBLIC AudioBufferPlayer : public IAudioPlayer
 {
   public:
 	// A constructor creating a player from a shared buffer

@@ -32,26 +32,28 @@
 
 namespace ncine {
 
+#ifndef __ANDROID__
+/// Meyers' Singleton
+Application& theApplication()
+{
+	static Application instance;
+	return instance;
+}
+#endif
+
 ///////////////////////////////////////////////////////////
-// STATIC DEFINITIONS
+// CONSTRUCTORS AND DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-bool Application::isPaused_ = false;
-bool Application::hasFocus_ = true;
-bool Application::shouldQuit_ = false;
-AppConfiguration Application::appCfg_;
-FrameTimer *Application::frameTimer_ = NULL;
-IGfxDevice *Application::gfxDevice_ = NULL;
-SceneNode *Application::rootNode_ = NULL;
-RenderQueue *Application::renderQueue_ = NULL;
-Timer *Application::profileTimer_ = NULL;
-ProfilePlotter *Application::profilePlotter_ = NULL;
-Font *Application::font_ = NULL;
-TextNode *Application::textLines_ = NULL;
-float Application::textUpdateTime = 0.0f;
-String Application::textString_(MaxTextLength);
-IInputManager *Application::inputManager_ = NULL;
-IAppEventHandler *Application::appEventHandler_ = NULL;
+Application::Application()
+	: isPaused_(false), hasFocus_(true), shouldQuit_(false),
+	frameTimer_(NULL), gfxDevice_(NULL), rootNode_(NULL),
+	renderQueue_(NULL), profileTimer_(NULL), profilePlotter_(NULL),
+	font_(NULL), textLines_(NULL), textUpdateTime(0.0f),
+	textString_(MaxTextLength), inputManager_(NULL), appEventHandler_(NULL)
+{
+
+}
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -64,7 +66,7 @@ void Application::init(IAppEventHandler* (*createAppEventHandler)())
 	appEventHandler_->onPreInit(appCfg_);
 
 	// Registering the logger as early as possible
-	ServiceLocator::registerLogger(new FileLogger(appCfg_.logFile_.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
+	theServiceLocator().registerLogger(new FileLogger(appCfg_.logFile_.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
 	// Graphics device should always be created before the input manager!
 	DisplayMode displayMode(8, 8, 8, 8, 32, 24, 8, true, false);
 #if defined(WITH_SDL)
@@ -160,7 +162,7 @@ void Application::step()
 		textLines_->setPosition((width() - textLines_->width()), height());
 	}
 
-	ServiceLocator::audioDevice().updatePlayers();
+	theServiceLocator().audioDevice().updatePlayers();
 	if (profilePlotter_)
 	{
 		// Measuring scenegraph update and visit + draw + audio update
@@ -200,14 +202,14 @@ void Application::shutdown()
 	delete inputManager_;
 	delete gfxDevice_;
 
-	if (ServiceLocator::indexer().isEmpty() == false)
+	if (theServiceLocator().indexer().isEmpty() == false)
 	{
 		LOGW("The object indexer is not empty");
 	}
 
 	LOGI("Application shutted down");
 
-	ServiceLocator::unregisterAll();
+	theServiceLocator().unregisterAll();
 }
 
 /// Returns the elapsed time since the end of the previous frame in milliseconds
@@ -257,17 +259,17 @@ void Application::setFocus(bool hasFocus)
 void Application::initCommon()
 {
 	LOGI("nCine compiled on " __DATE__ " at " __TIME__);
-	ServiceLocator::registerIndexer(new ArrayIndexer());
+	theServiceLocator().registerIndexer(new ArrayIndexer());
 #ifdef WITH_AUDIO
 	if (appCfg_.withAudio_)
 	{
-		ServiceLocator::registerAudioDevice(new ALAudioDevice());
+		theServiceLocator().registerAudioDevice(new ALAudioDevice());
 	}
 #endif
 #ifdef WITH_THREADS
 	if (appCfg_.withThreads_)
 	{
-		ServiceLocator::registerThreadPool(new ThreadPool());
+		theServiceLocator().registerThreadPool(new ThreadPool());
 	}
 #endif
 	LOGI_X("Data path: %s", IFile::dataPath());
@@ -275,7 +277,7 @@ void Application::initCommon()
 	frameTimer_ = new FrameTimer(5.0f, 0.2f);
 	profileTimer_ = new Timer();
 
-	GfxCapabilities& gfxCaps = const_cast<GfxCapabilities&>(ServiceLocator::gfxCapabilities());
+	GfxCapabilities& gfxCaps = const_cast<GfxCapabilities&>(theServiceLocator().gfxCapabilities());
 	gfxCaps.init();
 
 	if (appCfg_.withScenegraph_)

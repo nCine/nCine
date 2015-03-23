@@ -4,7 +4,12 @@
 #include "SceneNode.h"
 #include "Texture.h"
 #include "Sprite.h"
-#include "Application.h"
+
+#ifdef __ANDROID__
+	#include "AndroidApplication.h"
+#else
+	#include "Application.h"
+#endif
 
 nc::IAppEventHandler* createApphandler()
 {
@@ -14,7 +19,7 @@ nc::IAppEventHandler* createApphandler()
 void MyEventHandler::onInit()
 {
 	nc::IInputManager::setHandler(this);
-	nc::SceneNode &rRootNode = nc::Application::rootNode();
+	nc::SceneNode &rRootNode = nc::theApplication().rootNode();
 
 #ifdef __ANDROID__
 	megaTexture_ = new nc::Texture("/sdcard/ncine/megatexture_256.dds");
@@ -24,7 +29,7 @@ void MyEventHandler::onInit()
 	alphaTexture_ = new nc::Texture("textures/transparent_128.png");
 #endif
 
-	dummy_ = new nc::SceneNode(&rRootNode, nc::Application::width() * 0.5f, nc::Application::height() * 0.5f);
+	dummy_ = new nc::SceneNode(&rRootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 
 	for (int i = 0; i < NumSprites; i++)
 	{
@@ -55,7 +60,7 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
 	{
-		nc::Application::quit();
+		nc::theApplication().quit();
 	}
 }
 #endif

@@ -1,6 +1,7 @@
 #define NCINE_INCLUDE_OPENGL
-#include "common.h"
+#include "common_headers.h"
 
+#include <stddef.h> // for offsetof()
 #include "glapptest_fbo_cube.h"
 #include "Application.h"
 #include "AppConfiguration.h"
@@ -145,8 +146,8 @@ void MyEventHandler::onInit()
 	iboCube_ = new nc::GLBufferObject(GL_ELEMENT_ARRAY_BUFFER);
 	iboCube_->bufferData(sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
 
-	width_ = nc::Application::width();
-	height_ = nc::Application::height();
+	width_ = nc::theApplication().width();
+	height_ = nc::theApplication().height();
 
 	projection_ = nc::Matrix4x4f::perspective(45.0f, width_/static_cast<float>(height_), 1.0f, 20.0f);
 
@@ -194,7 +195,7 @@ void MyEventHandler::onFrameStart()
 	texture_->bind();
 	glDrawElements(GL_TRIANGLES, 12*3, GL_UNSIGNED_SHORT, 0);
 
-	angle_ += 20.0f * nc::Application::interval();
+	angle_ += 20.0f * nc::theApplication().interval();
 }
 
 void MyEventHandler::onShutdown()
@@ -213,11 +214,11 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
 	{
-		nc::Application::quit();
+		nc::theApplication().quit();
 	}
 	else if (event.sym == nc::KEY_SPACE)
 	{
-		nc::Application::togglePause();
+		nc::theApplication().togglePause();
 	}
 }
 #endif

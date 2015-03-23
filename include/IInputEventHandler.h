@@ -6,7 +6,7 @@
 namespace ncine {
 
 /// The interface class for handling input events (i.e. mouse, keyboard, touch, sensors)
-class IInputEventHandler
+class DLL_PUBLIC IInputEventHandler
 {
   public:
 	/// Pure virtual destructor in order to make the class abstract

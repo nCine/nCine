@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(nCine-tests)
 
+if(NOT NCINE_DYNAMIC_LIBRARY)
+	add_definitions(-DNCINE_STATIC)
+endif()
+
 add_executable(apptest_mipmapping main.cpp apptest_mipmapping.cpp)
 target_link_libraries(apptest_mipmapping ncine)
 add_executable(apptest_joystick main.cpp apptest_joystick.cpp)

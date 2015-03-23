@@ -2,7 +2,7 @@
 #define CLASS_NCINE_LIST
 
 #include <cstdio> // for NULL
-#include "common.h"
+#include "common_functions.h"
 #include <ListIterator.h>
 
 namespace ncine {

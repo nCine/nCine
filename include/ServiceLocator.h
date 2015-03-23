@@ -19,76 +19,88 @@ class GfxCapabilities;
 
 /// Provides base services to requesting classes
 /*! It has memory ownership on service classes */
-class ServiceLocator
+class DLL_PUBLIC ServiceLocator
 {
   public:
 	/// Returns a reference to the current indexer provider instance
-	static IIndexer& indexer() { return *indexerService_; }
+	IIndexer& indexer() { return *indexerService_; }
 	/// Registers an indexer service provider
-	static void registerIndexer(IIndexer* service);
+	void registerIndexer(IIndexer* service);
 
 	/// Returns a reference to the current logger provider instance
-	static ILogger& logger() { return *loggerService_; }
+	ILogger& logger() { return *loggerService_; }
 	/// Registers a logger service provider
-	static void registerLogger(ILogger* service);
+	void registerLogger(ILogger* service);
 
 	/// Returns a reference to the current audio device instance
-	static IAudioDevice& audioDevice() { return *audioDevice_; }
+	IAudioDevice& audioDevice() { return *audioDevice_; }
 	/// Registers an audio device provider
-	static void registerAudioDevice(IAudioDevice* service);
+	void registerAudioDevice(IAudioDevice* service);
 
 	/// Returns a reference to the current thread pool instance
-	static IThreadPool& threadPool() { return *threadPool_; }
+	IThreadPool& threadPool() { return *threadPool_; }
 	/// Registers an audio device provider
-	static void registerThreadPool(IThreadPool* service);
+	void registerThreadPool(IThreadPool* service);
 
 	/// Returns a constant reference to the graphics capabilities class
 	/*! There is no registering process for the GfxCapabilities class, no
 	 *  interface and no null version: it is unique and no-op before initialization.
 	 */
-	static const GfxCapabilities& gfxCapabilities() { return gfxCapabilities_; }
+	const GfxCapabilities& gfxCapabilities() { return *gfxCapabilities_; }
 
 	// Deletes every registered service reestablishing null ones
-	static void unregisterAll();
+	void unregisterAll();
 
   private:
-	static IIndexer* indexerService_;
-	static NullIndexer nullIndexer_;
+	IIndexer* indexerService_;
+	NullIndexer nullIndexer_;
 
-	static ILogger* loggerService_;
-	static NullLogger nullLogger_;
+	ILogger* loggerService_;
+	NullLogger nullLogger_;
 
-	static IAudioDevice* audioDevice_;
-	static NullAudioDevice nullAudioDevice_;
+	IAudioDevice* audioDevice_;
+	NullAudioDevice nullAudioDevice_;
 
-	static IThreadPool* threadPool_;
-	static NullThreadPool nullThreadPool_;
+	IThreadPool* threadPool_;
+	NullThreadPool nullThreadPool_;
 
-	static GfxCapabilities gfxCapabilities_;
+	GfxCapabilities* gfxCapabilities_;
+
+	ServiceLocator();
+	~ServiceLocator();
+	/// Private copy constructor
+	ServiceLocator(const ServiceLocator&);
+	/// Private assignment operator
+	ServiceLocator& operator=(const ServiceLocator&);
+
+	friend DLL_PUBLIC ServiceLocator& theServiceLocator();
 };
+
+// Meyers' Singleton
+DLL_PUBLIC ServiceLocator& theServiceLocator();
 
 }
 
 #ifdef __GNUC__
 	#define FUNCTION __PRETTY_FUNCTION__
 #elif _MSC_VER
-		#define FUNCTION __FUNCTION__
+	#define FUNCTION __FUNCTION__
 #else
-		#define FUNCTION __func__
+	#define FUNCTION __func__
 #endif
 
-#define LOGV_X(fmt, ...) ncine::ServiceLocator::logger().write(ncine::ILogger::LOG_VERBOSE, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
-#define LOGD_X(fmt, ...) ncine::ServiceLocator::logger().write(ncine::ILogger::LOG_DEBUG, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
-#define LOGI_X(fmt, ...) ncine::ServiceLocator::logger().write(ncine::ILogger::LOG_INFO, static_cast<const char *>("%s, -> " fmt), FUNCTION, ## __VA_ARGS__)
-#define LOGW_X(fmt, ...) ncine::ServiceLocator::logger().write(ncine::ILogger::LOG_WARN, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
-#define LOGE_X(fmt, ...) ncine::ServiceLocator::logger().write(ncine::ILogger::LOG_ERROR, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
-#define LOGF_X(fmt, ...) ncine::ServiceLocator::logger().write(ncine::ILogger::LOG_FATAL, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
+#define LOGV_X(fmt, ...) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_VERBOSE, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
+#define LOGD_X(fmt, ...) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_DEBUG, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
+#define LOGI_X(fmt, ...) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_INFO, static_cast<const char *>("%s, -> " fmt), FUNCTION, ## __VA_ARGS__)
+#define LOGW_X(fmt, ...) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_WARN, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
+#define LOGE_X(fmt, ...) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_ERROR, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
+#define LOGF_X(fmt, ...) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_FATAL, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
 
-#define LOGV(fmt) ncine::ServiceLocator::logger().write(ncine::ILogger::LOG_VERBOSE, static_cast<const char *>("%s -> " fmt), FUNCTION)
-#define LOGD(fmt) ncine::ServiceLocator::logger().write(ncine::ILogger::LOG_DEBUG, static_cast<const char *>("%s -> " fmt), FUNCTION)
-#define LOGI(fmt) ncine::ServiceLocator::logger().write(ncine::ILogger::LOG_INFO, static_cast<const char *>("%s, -> " fmt), FUNCTION)
-#define LOGW(fmt) ncine::ServiceLocator::logger().write(ncine::ILogger::LOG_WARN, static_cast<const char *>("%s -> " fmt), FUNCTION)
-#define LOGE(fmt) ncine::ServiceLocator::logger().write(ncine::ILogger::LOG_ERROR, static_cast<const char *>("%s -> " fmt), FUNCTION)
-#define LOGF(fmt) ncine::ServiceLocator::logger().write(ncine::ILogger::LOG_FATAL, static_cast<const char *>("%s -> " fmt), FUNCTION)
+#define LOGV(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_VERBOSE, static_cast<const char *>("%s -> " fmt), FUNCTION)
+#define LOGD(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_DEBUG, static_cast<const char *>("%s -> " fmt), FUNCTION)
+#define LOGI(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_INFO, static_cast<const char *>("%s, -> " fmt), FUNCTION)
+#define LOGW(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_WARN, static_cast<const char *>("%s -> " fmt), FUNCTION)
+#define LOGE(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_ERROR, static_cast<const char *>("%s -> " fmt), FUNCTION)
+#define LOGF(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_FATAL, static_cast<const char *>("%s -> " fmt), FUNCTION)
 
 #endif

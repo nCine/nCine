@@ -99,12 +99,12 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
 			mouseEvent_.x = event.button.x;
-			mouseEvent_.y = Application::height() - event.button.y;
+			mouseEvent_.y = theApplication().height() - event.button.y;
 			mouseEvent_.button_ = event.button.button;
 			break;
 		case SDL_MOUSEMOTION:
 			mouseState_.x = event.motion.x;
-			mouseState_.y = Application::height() - event.motion.y;
+			mouseState_.y = theApplication().height() - event.motion.y;
 			mouseState_.buttons_ = event.motion.state;
 			break;
 		case SDL_JOYBUTTONDOWN:

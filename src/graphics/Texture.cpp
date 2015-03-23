@@ -92,7 +92,7 @@ void Texture::load(const ITextureLoader& texLoader)
 /// Loads a texture overriding the size detected by the texture loader
 void Texture::load(const ITextureLoader& texLoader, int width, int height)
 {
-	const GfxCapabilities& gfxCaps = ServiceLocator::gfxCapabilities();
+	const GfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();
 	if (width > gfxCaps.maxTextureSize() || height > gfxCaps.maxTextureSize())
 	{
 		LOGF("Texture size is bigger than device maximum");

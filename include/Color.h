@@ -6,7 +6,7 @@
 namespace ncine {
 
 /// A 32 bit color
-class Color
+class DLL_PUBLIC Color
 {
   public:
 	/// Default constructor (white color)

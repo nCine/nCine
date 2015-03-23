@@ -1,12 +1,14 @@
 #ifndef CLASS_NCINE_IAPPEVENTHANDLER
 #define CLASS_NCINE_IAPPEVENTHANDLER
 
+#include "common_defines.h"
+
 namespace ncine {
 
 class AppConfiguration;
 
 /// The interface class for handling application events (i.e. the game)
-class IAppEventHandler
+class DLL_PUBLIC IAppEventHandler
 {
   public:
 	/// Pure virtual destructor in order to make the class abstract

@@ -11,7 +11,7 @@ namespace ncine {
 class RenderQueue;
 
 /// The base class for the transformation nodes hierarchy
-class SceneNode : public Object
+class DLL_PUBLIC SceneNode : public Object
 {
   public:
 	/// The minimum amount of rotation to trigger a sine and cosine calculation

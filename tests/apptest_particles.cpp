@@ -1,12 +1,16 @@
 #include "apptest_particles.h"
-#include "Application.h"
 #include "Texture.h"
 #include "ParticleSystem.h"
 #include "IInputManager.h"
 #include "Timer.h"
+
 #ifdef __ANDROID__
+	#include "AndroidApplication.h"
 	#include "AndroidInputManager.h"
+#else
+	#include "Application.h"
 #endif
+
 
 nc::IAppEventHandler* createApphandler()
 {
@@ -16,7 +20,7 @@ nc::IAppEventHandler* createApphandler()
 void MyEventHandler::onInit()
 {
 	nc::IInputManager::setHandler(this);
-	nc::SceneNode &rootNode = nc::Application::rootNode();
+	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 #ifdef __ANDROID__
 	nc::AndroidInputManager::enableAccelerometer(true);
@@ -29,7 +33,7 @@ void MyEventHandler::onInit()
 #endif
 
 	particleSystem_ = new nc::ParticleSystem(&rootNode, NumParticles, texture_, texture_->rect());
-	particleSystem_->setPosition(nc::Application::width() * 0.5f, nc::Application::height() * 0.33f);
+	particleSystem_->setPosition(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.33f);
 
 //	particleSystem_->addAffector(new AccelerationAffector(0.000025f, 0.0f));
 	nc::ColorAffector *colAffector = new nc::ColorAffector();
@@ -61,23 +65,23 @@ void MyEventHandler::onFrameStart()
 void MyEventHandler::onFrameEnd()
 {
 #ifndef __ANDROID__
-	const nc::KeyboardState &keyState = nc::Application::inputManager().keyboardState();
+	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
 	if (keyState.isKeyDown(nc::KEY_RIGHT))
 	{
-		particleSystem_->x += 0.1f * nc::Application::interval();
+		particleSystem_->x += 0.1f * nc::theApplication().interval();
 	}
 	else if (keyState.isKeyDown(nc::KEY_LEFT))
 	{
-		particleSystem_->x -= 0.1f * nc::Application::interval();
+		particleSystem_->x -= 0.1f * nc::theApplication().interval();
 	}
 	else if (keyState.isKeyDown(nc::KEY_UP))
 	{
-		particleSystem_->y += 0.1f * nc::Application::interval();
+		particleSystem_->y += 0.1f * nc::theApplication().interval();
 	}
 	else if (keyState.isKeyDown(nc::KEY_DOWN))
 	{
-		particleSystem_->y -= 0.1f * nc::Application::interval();
+		particleSystem_->y -= 0.1f * nc::theApplication().interval();
 	}
 #endif
 }
@@ -117,11 +121,11 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
 	{
-		nc::Application::quit();
+		nc::theApplication().quit();
 	}
 	else if (event.sym == nc::KEY_SPACE)
 	{
-		nc::Application::togglePause();
+		nc::theApplication().togglePause();
 	}
 }
 

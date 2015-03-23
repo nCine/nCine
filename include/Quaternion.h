@@ -44,6 +44,8 @@ class Quaternion
 	T sqrMagnitude() const;
 	Quaternion normalized() const;
 	Quaternion& normalize();
+	Quaternion conjugated() const;
+	Quaternion& conjugate();
 
 	Matrix4x4<T> toMatrix4x4();
 	static Quaternion fromAxisAngle(T xx, T yy, T zz, T degrees);
@@ -216,6 +218,22 @@ inline Quaternion<T>& Quaternion<T>::normalize()
 	y /= mag;
 	z /= mag;
 	w /= mag;
+
+	return *this;
+}
+
+template <class T>
+inline Quaternion<T> Quaternion<T>::conjugated() const
+{
+	return Quaternion(-x, -y , -z, w);
+}
+
+template <class T>
+inline Quaternion<T>& Quaternion<T>::conjugate()
+{
+	x = -x;
+	y = -y;
+	z = -z;
 
 	return *this;
 }

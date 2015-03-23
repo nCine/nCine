@@ -4,7 +4,7 @@
 #include <cstdio> // for NULL
 #include <cstdlib> // for exit()
 #include <cstring> // for memmove() and memcpy()
-#include "common.h"
+#include "common_functions.h"
 #include "ArrayIterator.h"
 #include "ServiceLocator.h"
 

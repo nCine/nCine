@@ -1,9 +1,6 @@
 #ifndef CLASS_NCINE_ITEXTURELOADER
 #define CLASS_NCINE_ITEXTURELOADER
 
-#define NCINE_INCLUDE_OPENGL
-#include "common.h"
-
 #include "TextureFormat.h"
 #include "Point.h"
 #include "IFile.h"

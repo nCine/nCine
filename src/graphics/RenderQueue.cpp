@@ -1,6 +1,6 @@
 #ifdef WITH_DEPTH_TEST
 	#define NCINE_INCLUDE_OPENGL
-	#include "common.h"
+	#include "common_headers.h"
 #endif
 
 #include "RenderQueue.h"

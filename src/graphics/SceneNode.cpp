@@ -171,7 +171,7 @@ void SceneNode::update(float interval)
 #ifndef WITH_MULTITHREADING
 			(*i)->update(interval);
 #else
-			ServiceLocator::threadPool().enqueueCommand(new UpdateNodeCommand(*i, interval));
+			theServiceLocator().threadPool().enqueueCommand(new UpdateNodeCommand(*i, interval));
 #endif
 		}
 	}

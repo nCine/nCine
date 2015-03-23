@@ -7,7 +7,7 @@
 namespace ncine {
 
 /// A class that stores the settings for an nCine application
-class AppConfiguration
+class DLL_PUBLIC AppConfiguration
 {
   public:
 	// Empty constructor setting the defaults
@@ -57,7 +57,9 @@ class AppConfiguration
 	bool withScenegraph_;
 
 	friend class Application;
+#ifdef __ANDROID__
 	friend class AndroidApplication;
+#endif
 };
 
 }
