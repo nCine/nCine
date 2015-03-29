@@ -16,9 +16,9 @@ class DLL_PUBLIC AndroidApplication : public Application
 	void shutdown();
 
 	// Wrapper around AndroidJniHelper::sdkVersion()
-	unsigned int sdkVersion();
+	unsigned int sdkVersion() const;
 
-	inline bool isInitialized() { return isInitialized_; }
+	inline bool isInitialized() const { return isInitialized_; }
 
 	void setFocus(bool hasFocus);
 

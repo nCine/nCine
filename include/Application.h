@@ -44,12 +44,12 @@ class DLL_PUBLIC Application
 	float interval();
 
 	/// Returns the screen width
-	inline int width() { return gfxDevice_->width(); }
+	inline int width() const { return gfxDevice_->width(); }
 	/// Returns the screen height
-	inline int height() { return gfxDevice_->height(); }
+	inline int height() const { return gfxDevice_->height(); }
 
 	/// Returns the value of the pause flag
-	inline bool isPaused() { return isPaused_; }
+	inline bool isPaused() const { return isPaused_; }
 	// Sets the pause flag value
 	void setPause(bool paused);
 	// Toggles the pause flag on and off
@@ -58,10 +58,10 @@ class DLL_PUBLIC Application
 	/// Raises the quit flag
 	inline void quit() { shouldQuit_ = true; }
 	/// Returns the quit flag value
-	inline bool shouldQuit() { return shouldQuit_; }
+	inline bool shouldQuit() const { return shouldQuit_; }
 
 	/// Returns the focus flag value
-	inline bool hasFocus() { return hasFocus_; }
+	inline bool hasFocus() const { return hasFocus_; }
 	// Sets the focus flag
 	void setFocus(bool hasFocus);
 

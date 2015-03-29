@@ -3,6 +3,7 @@
 
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
+#include "GLHashMap.h"
 #include "Array.h"
 
 namespace ncine
@@ -28,16 +29,7 @@ public:
     GLenum target() const;
 
 private:
-	static class BoundBuffers
-	{
-	  public:
-		static const unsigned int Size = 1;
-		BoundBuffers() { for (unsigned int i = 0; i < Size; i++) map[i] = 0; }
-		GLuint& operator[](GLenum target);
-
-	  private:
-		GLuint map[Size];
-	} boundBuffers_;
+	static class GLHashMap<GLFramebufferMappingFunc::Size, GLFramebufferMappingFunc> boundBuffers_;
 
 	Array<GLRenderbuffer *> attachedRenderbuffers_;
 
@@ -49,16 +41,6 @@ private:
 	/// Private assignment operator
 	GLFramebufferObject& operator=(const GLFramebufferObject&);
 };
-
-inline GLuint& GLFramebufferObject::BoundBuffers::operator[](GLenum target)
-{
-	switch(target)
-	{
-		default:
-		case GL_FRAMEBUFFER:
-			return map[0];
-	}
-}
 
 inline GLenum GLFramebufferObject::target() const
 {

@@ -15,7 +15,12 @@ class DLL_PUBLIC String
 	/// Constant iterator type
 	typedef const StringIterator Const_Iterator;
 
-	/// Constructs an empty string with explicit size
+	/// Default capacity for objects created by the default constructor
+	static const unsigned int DefaultCapacity = 128;
+
+	// Default constructor
+	String();
+	// Constructs an empty string with explicit size
 	explicit String(unsigned int capacity);
 	// Constructs a string from a C string
 	String(const char *cString);
@@ -102,8 +107,8 @@ class DLL_PUBLIC String
 	// Concatenates a string with a constant C string to create a third one
 	String operator+(const char *cString);
 
-	inline bool operator==(const String &other) const { return compare(other) == 0; }
-	inline bool operator!=(const String &other) const { return compare(other) != 0; }
+	inline bool operator==(const String &other) const { return (length_ != other.length_) ? false : (compare(other) == 0); }
+	inline bool operator!=(const String &other) const { return (length_ != other.length_) ? true : (compare(other) != 0); }
 	inline bool operator>(const String &other) const { return compare(other) > 0; }
 	inline bool operator<(const String &other) const { return compare(other) < 0; }
 	inline bool operator>=(const String &other) const { return compare(other) >= 0; }

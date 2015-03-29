@@ -3,6 +3,7 @@
 	#include "common_headers.h"
 #endif
 
+#include "common_functions.h"
 #include "RenderQueue.h"
 #include "SceneNode.h"
 #include "Array.h"
@@ -87,63 +88,14 @@ void RenderQueue::draw()
 /// Sorts render nodes in both queues to minimize state changes
 void RenderQueue::sortQueues()
 {
-	qSort(opaqueRenderCommands_, 0, opaqueRenderCommands_.size() - 1);
-	qSort(transparentRenderCommands_, 0, transparentRenderCommands_.size() - 1);
+	nc::qSort(opaqueRenderCommands_, 0, opaqueRenderCommands_.size() - 1);
+	nc::qSort(transparentRenderCommands_, 0, transparentRenderCommands_.size() - 1);
 
 	// Check sorting correctness
-//	for (int i = 1; i < opaqueRenderCommands_.Size(); i++)
+//	for (unsigned int i = 1; i < opaqueRenderCommands_.size(); i++)
 //		assert(opaqueRenderCommands_[i-1]->sortKey() <= opaqueRenderCommands_[i]->sortKey());
-//	for (int i = 1; i < transparentRenderCommands_.Size(); i++)
+//	for (unsigned int i = 1; i < transparentRenderCommands_.size(); i++)
 //		assert(transparentRenderCommands_[i-1]->sortKey() <= transparentRenderCommands_[i]->sortKey());
-}
-
-void RenderQueue::qSort(Array<const RenderCommand *> &array, int start, int end)
-{
-	if (start < end)
-	{
-		int div = qSortPartition(array, start, end);
-		qSort(array, start, div);
-		qSort(array, div + 1, end);
-	}
-}
-
-int RenderQueue::qSortPartition(Array<const RenderCommand *> &array, int start, int end)
-{
-	bool shouldQuit;
-	int i, j;
-	unsigned long int pivot;
-
-	pivot = array[start]->sortKey();
-	i = start - 1;
-	j = end + 1;
-
-	shouldQuit = false;
-
-	do
-	{
-		do
-		{
-			j--;
-		} while (array[j]->sortKey() > pivot);
-
-		do
-		{
-			i++;
-		} while (array[i]->sortKey() < pivot);
-
-		if (i < j)
-		{
-			const RenderCommand *temp = array[i];
-			array[i] = array[j];
-			array[j] = temp;
-		}
-		else
-		{
-			shouldQuit = true;
-		}
-	} while (!shouldQuit);
-
-	return j;
 }
 
 }

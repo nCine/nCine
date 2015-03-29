@@ -57,6 +57,22 @@ int main(int argc, char **argv)
 	array.removeAt(array.size()-1);
 	printArray(array);
 
+	printf("Extending the size by two elements\n");
+	unsigned int oldSize = array.size();
+	array.setSize(oldSize + 2);
+	// No "hole" when setting this element
+	array[oldSize + 1] = 55;
+	array[oldSize] = 44;
+	printArray(array);
+	printf("Restoring previous size\n");
+	array.setSize(oldSize);
+	printArray(array);
+	unsigned int oldCapacity = array.capacity();
+	printf("Current array capacity: %d, size:%d\n", array.capacity(), array.size());
+	array.shrinkToFit();
+	printf("New capacity after shrinkToFit(): %d, size: %d\n", array.capacity(), array.size());
+	array.setCapacity(oldCapacity);
+	printf("Restoring previous capacity: %d, size: %d\n", array.capacity(), array.size());
 
 	printf("\n--- Array traversals (for cycles) ---\n");
 	printf("Iterating through elements:");

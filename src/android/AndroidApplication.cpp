@@ -68,7 +68,7 @@ void AndroidApplication::shutdown()
 }
 
 /// Wrapper around AndroidJniHelper::sdkVersion()
-unsigned int AndroidApplication::sdkVersion()
+unsigned int AndroidApplication::sdkVersion() const
 {
 	unsigned int sdkVersion = 0;
 

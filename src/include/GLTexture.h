@@ -3,6 +3,7 @@
 
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
+#include "GLHashMap.h"
 
 namespace ncine
 {
@@ -31,16 +32,7 @@ public:
 
 private:
     static const int MaxTextureUnits = 4;
-	static class BoundTextures
-	{
-	  public:
-		static const unsigned int Size = 3;
-		BoundTextures() {for (unsigned int i = 0; i < Size; i++) map[i] = 0; }
-		GLuint& operator[](GLenum target);
-
-	  private:
-		GLuint map[Size];
-	} boundTextures_[MaxTextureUnits];
+	static class GLHashMap<GLTextureMappingFunc::Size, GLTextureMappingFunc> boundTextures_[MaxTextureUnits];
     static unsigned int boundUnit_;
 
     GLuint glHandle_;
@@ -55,20 +47,6 @@ private:
 
 	friend class GLFramebufferObject;
 };
-
-inline GLuint& GLTexture::BoundTextures::operator[](GLenum target)
-{
-	switch(target)
-	{
-		default:
-		case GL_TEXTURE_1D:
-			return map[0];
-		case GL_TEXTURE_2D:
-			return map[1];
-		case GL_TEXTURE_3D:
-			return map[2];
-	}
-}
 
 inline GLenum GLTexture::target() const
 {

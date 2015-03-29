@@ -1,4 +1,4 @@
-#ifndef NCiNE_KEYS
+#ifndef NCINE_KEYS
 #define NCINE_KEYS
 
 #include <android/keycodes.h>

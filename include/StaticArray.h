@@ -52,10 +52,10 @@ class StaticArray
 	// Subscript operator
 	T& operator[](unsigned int index);
 
-	/// Returns a pointer to the allocated memory
-	inline T* data() { return array_; }
 	/// Returns a constant pointer to the allocated memory
 	inline const T* data() const { return array_; }
+	/// Returns a pointer to the allocated memory
+	inline T* data() { return array_; }
 
   private:
 	T array_[S];
@@ -69,6 +69,7 @@ StaticArray<T, S>::StaticArray(const StaticArray<T, S>& other)
 {
 	for (unsigned int i = 0; i < other.size_; i++)
 	{
+		// copying all elements invoking their copy constructor
 		array_[i] = other.array_[i];
 	}
 }
@@ -79,6 +80,7 @@ StaticArray<T, S>& StaticArray<T, S>::operator=(const StaticArray<T, S>& other)
 {
 	for (unsigned int i = 0; i < other.size_; i++)
 	{
+		// copying all elements invoking their assignment operator
 		array_[i] = other.array_[i];
 	}
 

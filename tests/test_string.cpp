@@ -19,15 +19,9 @@ int main(int argc, char **argv)
 	nc::String str3(str);
 	printf("Creating a third string as a copy of the first: \"%s\"\n", str3.data());
 
-	if (str == str3)
-	{
-		printf("The first and the third string are equal\n");
-	}
-
-	if (str2 > str)
-	{
-		printf("The second string is lexicographically bigger than the first\n");
-	}
+	printf("The first and the third string are equal: %d\n", str == str3);
+	printf("The first and the second string are not equal: %d\n", str != str2);
+	printf("The second string is lexicographically bigger than the first: %d\n", str2 > str);
 
 	str += "Append";
 	printf("Appending a C string to the first one: \"%s\"\n", str.data());

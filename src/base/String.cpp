@@ -9,17 +9,25 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+/// Default constructor
+String::String()
+	: array_(NULL), length_(0), capacity_(DefaultCapacity)
+{
+	array_ = new char[capacity_];
+	array_[0] = '\0';
+}
+
 /// Constructs an empty string with explicit size
 String::String(unsigned int capacity)
 	: array_(NULL), length_(0), capacity_(capacity)
 {
-	if (capacity == 0)
+	if (capacity_ == 0)
 	{
 		LOGF("Zero is not a valid capacity");
 		exit(EXIT_FAILURE);
 	}
 
-	array_ = new char[capacity];
+	array_ = new char[capacity_];
 	array_[0] = '\0';
 }
 

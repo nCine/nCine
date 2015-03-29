@@ -2,7 +2,7 @@
 
 namespace ncine {
 
-GLBufferObject::BoundBuffers GLBufferObject::boundBuffers_;
+GLHashMap<GLBufferObjectMappingFunc::Size, GLBufferObjectMappingFunc> GLBufferObject::boundBuffers_;
 
 GLBufferObject::GLBufferObject(GLenum target)
     : glHandle_(0)

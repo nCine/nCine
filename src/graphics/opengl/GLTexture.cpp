@@ -2,7 +2,7 @@
 
 namespace ncine {
 
-GLTexture::BoundTextures GLTexture::boundTextures_[MaxTextureUnits];
+GLHashMap<GLTextureMappingFunc::Size, GLTextureMappingFunc> GLTexture::boundTextures_[MaxTextureUnits];
 unsigned int GLTexture::boundUnit_ = 0;
 
 GLTexture::GLTexture(GLenum target)
@@ -58,10 +58,10 @@ void GLTexture::unbind()
         boundUnit_ = textureUnit_;
     }
 
-    if (boundTextures_[textureUnit_][target_] != 0)
+	if (boundTextures_[textureUnit_][target_] != 0)
     {
         glBindTexture(target_, 0);
-        boundTextures_[textureUnit_][target_] = 0;
+		boundTextures_[textureUnit_][target_] = 0;
     }
 }
 

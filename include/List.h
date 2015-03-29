@@ -325,7 +325,7 @@ void List<T>::insertBefore(ListNode<T> *node, const T& element)
 template <class T>
 void List<T>::remove(ListNode<T> *node)
 {
-	// Preventing NULL deletion
+	// Early-out to prevent NULL pointer dereferencing
 	if (node == NULL)
 	{
 		return;

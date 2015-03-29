@@ -5,7 +5,7 @@
 
 namespace ncine {
 
-GLFramebufferObject::BoundBuffers GLFramebufferObject::boundBuffers_;
+GLHashMap<GLFramebufferMappingFunc::Size, GLFramebufferMappingFunc> GLFramebufferObject::boundBuffers_;
 
 GLFramebufferObject::GLFramebufferObject()
 	: attachedRenderbuffers_(4), glHandle_(0), target_(GL_FRAMEBUFFER)

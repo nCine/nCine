@@ -319,7 +319,7 @@ const char *AndroidInputManager::joyName(int joyId) const
 	}
 	else
 	{
-		return '\0';
+		return NULL;
 	}
 }
 

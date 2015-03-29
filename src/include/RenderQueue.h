@@ -58,9 +58,6 @@ class RenderQueue
 
 	// Sorts render nodes in both queues to minimize state changes
 	void sortQueues();
-
-	void qSort(Array<const RenderCommand *> &array, int start, int end);
-	int qSortPartition(Array<const RenderCommand *> &array, int start, int end);
 };
 
 }

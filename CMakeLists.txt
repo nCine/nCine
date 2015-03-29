@@ -129,6 +129,9 @@ set(HEADERS
 	include/ListIterator.h
 	include/ncString.h
 	include/StringIterator.h
+	include/HashMap.h
+	include/HashFunctions.h
+	include/HashMapIterator.h
 	include/Point.h
 	include/Rect.h
 	include/Color.h
@@ -181,6 +184,7 @@ set(PRIVATE_HEADERS
 	src/include/TextureLoaderDds.h
 	src/include/TextureLoaderPvr.h
 	src/include/TextureLoaderKtx.h
+	src/include/GLHashMap.h
 	src/include/GLBufferObject.h
 	src/include/GLBufferObject.h
 	src/include/GLFramebufferObject.h

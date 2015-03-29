@@ -46,6 +46,7 @@ class Array
 		nc::swap(first.array_, second.array_);
 		nc::swap(first.size_, second.size_);
 		nc::swap(first.capacity_, second.capacity_);
+		nc::swap(first.fixedCapacity_, second.fixedCapacity_);
 	}
 
 	/// Returns an iterator to the first character
@@ -74,8 +75,12 @@ class Array
 	/// Returns the array capacity
 	/// The array has memory allocated to store until the Capacity()-1 element
 	inline unsigned int capacity() const { return capacity_; }
-	// Set a new capacity for the array (can be bigger or smaller than the current one)
+	// Sets a new capacity for the array (can be bigger or smaller than the current one)
 	void setCapacity(unsigned int newCapacity);
+	// Sets a new size for the array (allowing for "holes")
+	void setSize(unsigned int newSize);
+	// Decreases the capacity to match the current size of the array
+	void shrinkToFit();
 
 	/// Clears the array
 	/** Size will be zero but capacity remains untouched */
@@ -94,14 +99,12 @@ class Array
 	// Subscript operator
 	T& operator[](unsigned int index);
 
-	/// Returns a pointer to the allocated memory
-	/** When adding new elements through a pointer the size field is not updated, like with std::vector */
-	inline T* data() { return array_; }
 	/// Returns a constant pointer to the allocated memory
 	/** It's useful when holding arrays of OpenGL data */
 	inline const T* data() const { return array_; }
-	// Allows for direct but unchecked access to the array memory
-	T* mapBuffer(unsigned int reserved);
+	/// Returns a pointer to the allocated memory
+	/** When adding new elements through a pointer the size field is not updated, like with std::vector */
+	inline T* data() { return array_; }
 
   private:
 	T* array_;
@@ -113,10 +116,14 @@ class Array
 /// Copy constructor
 template <class T>
 Array<T>::Array(const Array<T>& other)
-	: array_(NULL), size_(other.size_), capacity_(other.capacity_)
+	: array_(NULL), size_(other.size_), capacity_(other.capacity_), fixedCapacity_(other.fixedCapacity_)
 {
 	array_ = new T[capacity_];
-	memcpy(array_, other.array_, sizeof(T) * size_);
+	for(unsigned int i = 0; i < size_; i++)
+	{
+		// copying all elements invoking their copy constructor
+		array_[i] = other.array_[i];
+	}
 }
 
 /// Copy-and-swap assignment operator
@@ -177,6 +184,24 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 	delete[] array_;
 	array_ = newArray;
 	capacity_ = newCapacity;
+}
+
+/// Sets a new size for the array (allowing for "holes")
+template <class T>
+void Array<T>::setSize(unsigned int newSize)
+{
+	if (newSize > capacity_)
+	{
+		setCapacity(newSize);
+	}
+	size_ = newSize;
+}
+
+/// Decreases the capacity to match the current size of the array
+template <class T>
+void Array<T>::shrinkToFit()
+{
+	setCapacity(size_);
 }
 
 /// Inserts a new element at a specified position (shifting elements around)
@@ -266,21 +291,6 @@ T& Array<T>::operator[](const unsigned int index)
 	}
 
 	return array_[index];
-}
-
-/// Allows for direct but unchecked access to the array memory
-template <class T>
-T* Array<T>::mapBuffer(unsigned int reserved)
-{
-	if (size_ + reserved > capacity_)
-	{
-		setCapacity(size_ + reserved);
-	}
-
-	T* array = &array_[size_];
-	size_ += reserved;
-
-	return array;
 }
 
 }
