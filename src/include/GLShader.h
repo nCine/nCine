@@ -4,17 +4,18 @@
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
 
-namespace ncine
-{
+namespace ncine {
 
 class GLShader
 {
-public:
+  public:
+	inline GLuint glHandle() const { return glHandle_; }
+
 	void loadFromFile(const char *filename);
 	bool compile();
 
-private:  
-    GLuint glHandle_;
+  private:
+	GLuint glHandle_;
 
 	explicit GLShader(GLenum type);
 	GLShader(GLenum type, const char *filename);

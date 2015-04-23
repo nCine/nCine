@@ -492,8 +492,8 @@ inline Matrix4x4<T> Matrix4x4<T>::perspective(T fovY, T aspect, T near, T far)
 	return frustum(xMin, xMax, yMin, yMax, near, far);
 }
 
-template <class T> const Matrix4x4<T> Matrix4x4<T>::Zero(Vector4<T>::Zero, Vector4<T>::Zero, Vector4<T>::Zero, Vector4<T>::Zero);
-template <class T> const Matrix4x4<T> Matrix4x4<T>::Identity(Vector4<T>::XAxis, Vector4<T>::YAxis, Vector4<T>::ZAxis, Vector4<T>::WAxis);
+template <class T> const Matrix4x4<T> Matrix4x4<T>::Zero(Vector4<T>(0, 0, 0, 0), Vector4<T>(0, 0, 0, 0), Vector4<T>(0, 0, 0, 0), Vector4<T>(0, 0, 0, 0));
+template <class T> const Matrix4x4<T> Matrix4x4<T>::Identity(Vector4<T>(1, 0, 0, 0), Vector4<T>(0, 1, 0, 0), Vector4<T>(0, 0, 1, 0), Vector4<T>(0, 0, 0, 1));
 
 }
 

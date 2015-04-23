@@ -1,6 +1,9 @@
 #ifndef CLASS_NCINE_GLHASHMAP
 #define CLASS_NCINE_GLHASHMAP
 
+#include <cstdlib> // for exit()
+#include "ServiceLocator.h"
+
 namespace ncine {
 
 typedef GLenum key_t;
@@ -35,32 +38,24 @@ inline value_t& GLHashMap<S, MappingFunc>::operator[](key_t key)
 	return buckets_[mappingFunc(key)];
 }
 
-class GLHashMapMappingFunc
-{
-  public:
-	static const unsigned int Size = 1;
-	inline unsigned int operator()(key_t key) const
-	{
-		switch(key)
-		{
-			default:
-			case GL_ARRAY_BUFFER:
-				return 0;
-		}
-	}
-};
-
 class GLBufferObjectMappingFunc
 {
   public:
-	static const unsigned int Size = 1;
+	static const unsigned int Size = 2;
 	inline unsigned int operator()(key_t key) const
 	{
 		switch(key)
 		{
-			default:
 			case GL_ARRAY_BUFFER:
 				return 0;
+				break;
+			case GL_ELEMENT_ARRAY_BUFFER:
+				return 1;
+				break;
+			default:
+				LOGE_X("No available case to handle key: %u", key);
+				exit(EXIT_FAILURE);
+				break;
 		}
 	}
 };
@@ -73,9 +68,13 @@ class GLFramebufferMappingFunc
 	{
 		switch(key)
 		{
-			default:
 			case GL_FRAMEBUFFER:
 				return 0;
+				break;
+			default:
+				LOGE_X("No available case to handle key: %u", key);
+				exit(EXIT_FAILURE);
+				break;
 		}
 	}
 };
@@ -88,13 +87,23 @@ class GLTextureMappingFunc
 	{
 		switch(key)
 		{
-			default:
+#ifndef __ANDROID__ // not available in OpenGL ES
 			case GL_TEXTURE_1D:
 				return 0;
+				break;
+#endif
 			case GL_TEXTURE_2D:
 				return 1;
+				break;
+#ifndef __ANDROID__ // available in OpenGL ES 3.0
 			case GL_TEXTURE_3D:
 				return 2;
+				break;
+#endif
+			default:
+				LOGE_X("No available case to handle key: %u", key);
+				exit(EXIT_FAILURE);
+				break;
 		}
 	}
 };

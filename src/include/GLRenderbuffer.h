@@ -4,19 +4,20 @@
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
 
-namespace ncine
-{
+namespace ncine {
 
 class GLRenderbuffer
 {
-public:
-    void bind();
-    void unbind();
+  public:
+	inline GLuint glHandle() const { return glHandle_; }
 
-private:
-    static GLuint boundBuffer_;
+	void bind() const;
+	void unbind() const;
 
-    GLuint glHandle_;
+  private:
+	static GLuint boundBuffer_;
+
+	GLuint glHandle_;
 
 	GLRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height);
 	~GLRenderbuffer();
@@ -26,7 +27,7 @@ private:
 	/// Private assignment operator
 	GLRenderbuffer& operator=(const GLRenderbuffer&);
 
-    void storage(GLenum internalFormat, GLsizei width, GLsizei height);
+	void storage(GLenum internalFormat, GLsizei width, GLsizei height);
 
 	friend class GLFramebufferObject;
 };

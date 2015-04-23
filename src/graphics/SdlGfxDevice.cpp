@@ -153,9 +153,9 @@ void SdlGfxDevice::initDevice()
 		exit(-1);
 	}
 
-	if (!GLEW_VERSION_2_0)
+	if (!GLEW_VERSION_2_1)
 	{
-		LOGF("OpenGL 2 is not supported");
+		LOGF("OpenGL 2.1 is not supported");
 		exit(-1);
 	}
 #endif

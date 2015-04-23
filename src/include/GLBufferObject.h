@@ -5,36 +5,43 @@
 #include "common_headers.h"
 #include "GLHashMap.h"
 
-namespace ncine
-{
+namespace ncine {
 
 class GLBufferObject
 {
-public:
+  public:
 	explicit GLBufferObject(GLenum type);
 	~GLBufferObject();
 
-	void bind();
-	void unbind();
+	inline GLuint glHandle() const { return glHandle_; }
+	inline GLenum target() const { return target_; }
+
+	void bind() const;
+	void unbind() const;
 
 	void bufferData(GLsizeiptr size, const GLvoid *data, GLenum usage);
+	void bufferSubData(GLintptr offset, GLsizeiptr size, const GLvoid *data);
+
+#ifndef __ANDROID__
+	void *map(GLenum access);
+	GLboolean unmap();
+
+#ifndef __APPLE__
 	void bufferStorage(GLsizeiptr size, const GLvoid *data, GLbitfield flags);
 
-    void bindBufferBase(GLenum target, GLuint index);
-    void unbindBufferBase(GLenum target, GLuint index);
+	void bindBufferBase(GLenum target, GLuint index);
+	void unbindBufferBase(GLenum target, GLuint index);
 
-    void *map(GLenum access);
-    GLboolean unmap();
-    void *mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access);
+	void *mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access);
 
-    void bindVertexBuffer(GLuint bindingIndex, GLintptr offset, GLintptr stride);
+	void bindVertexBuffer(GLuint bindingIndex, GLintptr offset, GLintptr stride);
+#endif
 
-	GLenum target() const;
-
-private:
+#endif
+  private:
 	static class GLHashMap<GLBufferObjectMappingFunc::Size, GLBufferObjectMappingFunc> boundBuffers_;
 
-    GLuint glHandle_;
+	GLuint glHandle_;
 	GLenum target_;
 
 	/// Private copy constructor
@@ -42,11 +49,6 @@ private:
 	/// Private assignment operator
 	GLBufferObject& operator=(const GLBufferObject&);
 };
-
-inline GLenum GLBufferObject::target() const
-{
-	return target_;
-}
 
 }
 

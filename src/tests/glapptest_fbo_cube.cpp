@@ -6,6 +6,8 @@
 #include "Application.h"
 #include "AppConfiguration.h"
 #include "GLShaderProgram.h"
+#include "GLShaderUniforms.h"
+#include "GLShaderAttributes.h"
 #include "GLTexture.h"
 #include "GLFramebufferObject.h"
 #include "GLBufferObject.h"
@@ -27,7 +29,7 @@ enum
 	ATTRIB_POSITION,
 	ATTRIB_COLOR,
 	ATTRIB_TEXCOORDS,
-	NUM_ATTRIBUTES
+	ATTRIB_COUNT
 };
 
 const VertexFormatCol triVertices[] =
@@ -107,6 +109,8 @@ void MyEventHandler::onInit()
 	colorProgram_->bindAttribLocation(ATTRIB_COLOR, "aColor");
 	colorProgram_->link();
 	colorProgram_->use();
+	colorUniforms_ = new nc::GLShaderUniforms(colorProgram_);
+	colorAttributes_ = new nc::GLShaderAttributes(colorProgram_);
 
 	texProgram_ = new nc::GLShaderProgram();
 	texProgram_->attachShader(GL_VERTEX_SHADER, "shaders/texture_vs.glsl");
@@ -115,7 +119,10 @@ void MyEventHandler::onInit()
 	texProgram_->bindAttribLocation(ATTRIB_TEXCOORDS, "aTexCoords");
 	texProgram_->link();
 	texProgram_->use();
-	glUniform1i(texProgram_->getUniformLocation("texture"), 0); // GL_TEXTURE0
+	texUniforms_ = new nc::GLShaderUniforms(texProgram_);
+	texUniforms_->uniform("texture")->setIntValue(0);
+	texAttributes_ = new nc::GLShaderAttributes(texProgram_);
+
 
 	texture_ = new nc::GLTexture(GL_TEXTURE_2D);
 	texture_->texImage2D(0, GL_RGB, FboSize, FboSize, GL_RGB, GL_UNSIGNED_BYTE, NULL);
@@ -131,17 +138,15 @@ void MyEventHandler::onInit()
 
 	vboTri_ = new nc::GLBufferObject(GL_ARRAY_BUFFER);
 	vboTri_->bufferData(sizeof(triVertices), triVertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormatCol), (void*)offsetof(VertexFormatCol, position));
-	glEnableVertexAttribArray(ATTRIB_POSITION);
-	glVertexAttribPointer(ATTRIB_COLOR, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormatCol), (void*)offsetof(VertexFormatCol, color));
-	glEnableVertexAttribArray(ATTRIB_COLOR);
+	colorAttributes_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatCol), (void*)offsetof(VertexFormatCol, position));
+	colorAttributes_->attribute("aColor")->setVboParameters(sizeof(VertexFormatCol), (void*)offsetof(VertexFormatCol, color));
+	colorAttributes_->defineVertexPointers(vboTri_->glHandle());
 
 	vboCube_ = new nc::GLBufferObject(GL_ARRAY_BUFFER);
 	vboCube_->bufferData(sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormatTex), (void*)offsetof(VertexFormatTex, position));
-	glEnableVertexAttribArray(ATTRIB_POSITION);
-	glVertexAttribPointer(ATTRIB_TEXCOORDS, 2, GL_FLOAT, GL_FALSE, sizeof(VertexFormatTex), (void*)offsetof(VertexFormatTex, texcoords));
-	glEnableVertexAttribArray(ATTRIB_TEXCOORDS);
+	texAttributes_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatTex), (void*)offsetof(VertexFormatTex, position));
+	texAttributes_->attribute("aTexCoords")->setVboParameters(sizeof(VertexFormatTex), (void*)offsetof(VertexFormatTex, texcoords));
+	texAttributes_->defineVertexPointers(vboCube_->glHandle());
 
 	iboCube_ = new nc::GLBufferObject(GL_ELEMENT_ARRAY_BUFFER);
 	iboCube_->bufferData(sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
@@ -149,7 +154,7 @@ void MyEventHandler::onInit()
 	width_ = nc::theApplication().width();
 	height_ = nc::theApplication().height();
 
-	projection_ = nc::Matrix4x4f::perspective(45.0f, width_/static_cast<float>(height_), 1.0f, 20.0f);
+	projection_ = nc::Matrix4x4f::perspective(45.0f, width_ / static_cast<float>(height_), 1.0f, 20.0f);
 
 	glViewport(0, 0, width_, height_);
 	glEnable(GL_DEPTH_TEST);
@@ -164,9 +169,10 @@ void MyEventHandler::onFrameStart()
 	colorProgram_->use();
 
 	projection_ = nc::Matrix4x4f::ortho(-1.5f, 1.5f, -1.5f, 1.5f, 1.0f, 4.0f);
-	glUniformMatrix4fv(colorProgram_->getUniformLocation("projection"), 1, GL_FALSE, projection_.data());
+	colorUniforms_->uniform("projection")->setFloatVector(projection_.data());
 	modelView_ = nc::Matrix4x4f::rotationZ(angle_);
-	glUniformMatrix4fv(colorProgram_->getUniformLocation("modelview"), 1, GL_FALSE, modelView_.data());
+	colorUniforms_->uniform("modelView")->setFloatVector(modelView_.data());
+	colorUniforms_->commitUniforms();
 
 	fbo_->bind(GL_FRAMEBUFFER);
 	glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
@@ -180,12 +186,13 @@ void MyEventHandler::onFrameStart()
 	glViewport(0, 0, width_, height_);
 	texProgram_->use();
 
-	projection_ = nc::Matrix4x4f::perspective(60.0f, width_/static_cast<float>(height_), 1.0f, 20.0f);
-	glUniformMatrix4fv(texProgram_->getUniformLocation("projection"), 1, GL_FALSE, projection_.data());
+	projection_ = nc::Matrix4x4f::perspective(60.0f, width_ / static_cast<float>(height_), 1.0f, 20.0f);
+	texUniforms_->uniform("projection")->setFloatVector(projection_.data());
 	modelView_ = nc::Matrix4x4f::translation(0.0f, 0.0f, -5.0f);
 	modelView_ *= nc::Matrix4x4f::rotationY(angle_);
 	modelView_ *= nc::Matrix4x4f::rotationZ(angle_);
-	glUniformMatrix4fv(texProgram_->getUniformLocation("modelview"), 1, GL_FALSE, modelView_.data());
+	texUniforms_->uniform("modelView")->setFloatVector(modelView_.data());
+	texUniforms_->commitUniforms();
 
 	fbo_->unbind();
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -193,7 +200,7 @@ void MyEventHandler::onFrameStart()
 	vboCube_->bind();
 	iboCube_->bind();
 	texture_->bind();
-	glDrawElements(GL_TRIANGLES, 12*3, GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, 12 * 3, GL_UNSIGNED_SHORT, 0);
 
 	angle_ += 20.0f * nc::theApplication().interval();
 }
@@ -205,7 +212,11 @@ void MyEventHandler::onShutdown()
 	delete vboTri_;
 	delete fbo_;
 	delete texture_;
+	delete texAttributes_;
+	delete texUniforms_;
 	delete texProgram_;
+	delete colorAttributes_;
+	delete colorUniforms_;
 	delete colorProgram_;
 }
 

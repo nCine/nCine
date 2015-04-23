@@ -35,7 +35,11 @@ String::String(unsigned int capacity)
 String::String(const char *cString)
 	: array_(NULL), length_(0), capacity_(0)
 {
-	capacity_ = static_cast<unsigned int>(strlen(cString)) + 1;
+#ifdef _WIN32
+	capacity_ = static_cast<unsigned int>(strnlen_s(cString, MaxCStringLength)) + 1;
+#else
+	capacity_ = static_cast<unsigned int>(strnlen(cString, MaxCStringLength)) + 1;
+#endif
 	length_ = capacity_ - 1;
 	array_ = new char[capacity_];
 

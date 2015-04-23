@@ -5,6 +5,35 @@ if(NOT NCINE_DYNAMIC_LIBRARY)
 	add_definitions(-DNCINE_STATIC)
 endif()
 
+add_custom_target(copy_shaders_tests ALL
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/tests/shaders
+	COMMENT "Copying shaders to tests..."
+)
+if(WIN32)
+	add_custom_target(copy_dlls_tests ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/tests
+		COMMENT "Copying DLLs to tests..."
+	)
+endif()
+
+if(EXISTS ${NCINE_DATADIR} AND IS_DIRECTORY ${NCINE_DATADIR})
+	if(UNIX)
+		add_custom_target(link_data_tests ALL
+			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATADIR}/fonts ${CMAKE_BINARY_DIR}/tests/fonts
+			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATADIR}/sounds ${CMAKE_BINARY_DIR}/tests/sounds
+			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATADIR}/textures ${CMAKE_BINARY_DIR}/tests/textures
+			COMMENT "Symlinking data to tests..."
+		)
+	elseif(WIN32)
+		add_custom_target(copy_data_tests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATADIR}/fonts ${CMAKE_BINARY_DIR}/tests/fonts
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATADIR}/sounds ${CMAKE_BINARY_DIR}/tests/sounds
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATADIR}/textures ${CMAKE_BINARY_DIR}/tests/textures
+			COMMENT "Copying data to tests..."
+		)
+	endif()
+endif()
+
 add_executable(apptest_mipmapping main.cpp apptest_mipmapping.cpp)
 target_link_libraries(apptest_mipmapping ncine)
 add_executable(apptest_joystick main.cpp apptest_joystick.cpp)

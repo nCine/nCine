@@ -153,7 +153,7 @@ HashMapIterator<K ,T, HashFunc> HashMapIterator<K ,T, HashFunc>::begin(const Has
 template <class K, class T, class HashFunc>
 HashMapIterator<K ,T, HashFunc> HashMapIterator<K ,T, HashFunc>::end(const HashMap<K, T, HashFunc>& hashMap)
 {
-	unsigned int lastIndex = hashMap.size_ - 1;
+	unsigned int lastIndex = hashMap.buckets_.size() - 1;
 	return HashMapIterator(hashMap, lastIndex, hashMap.buckets_[lastIndex].collisionList_.end(), hashMap.buckets_[lastIndex].firstNode_, false);
 }
 
@@ -192,7 +192,8 @@ void HashMapIterator<K ,T, HashFunc>::next() const
 		listIterator_++;
 	}
 
-	if (listIterator_ == bucket->collisionList_.end())
+	// The list iterator condition also applies when it points to the beginning of an empty list
+	if (listIterator_ == bucket->collisionList_.end() && bucketIndex_ < hashMap_.buckets_.size()-1)
 	{
 		do
 		{
@@ -213,7 +214,7 @@ void HashMapIterator<K ,T, HashFunc>::previous() const
 {
 	const typename HashMap<K, T, HashFunc>::HashBucket* bucket = &(hashMap_.buckets_[bucketIndex_]);
 
-	if (atFirstNode_)
+	if (atFirstNode_ && bucketIndex_ > 0)
 	{
 		do
 		{

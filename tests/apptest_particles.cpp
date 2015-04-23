@@ -35,7 +35,7 @@ void MyEventHandler::onInit()
 	particleSystem_ = new nc::ParticleSystem(&rootNode, NumParticles, texture_, texture_->rect());
 	particleSystem_->setPosition(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.33f);
 
-//	particleSystem_->addAffector(new AccelerationAffector(0.000025f, 0.0f));
+//	particleSystem_->addAffector(new nc::AccelerationAffector(0.000025f, 0.0f));
 	nc::ColorAffector *colAffector = new nc::ColorAffector();
 	colAffector->addColorStep(0.0f, nc::Color(0.86f, 0.39f, 0.0f, 0.7f)); // 0.05
 	colAffector->addColorStep(0.65f, nc::Color(0.86f, 0.59f, 0.0f, 0.75f)); // 0.55

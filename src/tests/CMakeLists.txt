@@ -1,9 +1,37 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(nCine-private_tests)
 
-
 # these tests can only be linked against the engine static library
 add_definitions(-DNCINE_STATIC)
+
+add_custom_target(copy_shaders_srctests ALL
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/src/tests/shaders
+	COMMENT "Copying shaders to src/tests..."
+)
+if(WIN32)
+	add_custom_target(copy_dlls_srctests ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/src/tests
+		COMMENT "Copying DLLs to src/tests..."
+	)
+endif()
+
+if(EXISTS ${NCINE_DATADIR} AND IS_DIRECTORY ${NCINE_DATADIR})
+	if(UNIX)
+		add_custom_target(link_data_srctests ALL
+			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATADIR}/fonts ${CMAKE_BINARY_DIR}/src/tests/fonts
+			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATADIR}/sounds ${CMAKE_BINARY_DIR}/src/tests/sounds
+			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATADIR}/textures ${CMAKE_BINARY_DIR}/src/tests/textures
+			COMMENT "Symlinking data to src/tests..."
+		)
+	elseif(WIN32)
+		add_custom_target(copy_data_srctests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATADIR}/fonts ${CMAKE_BINARY_DIR}/src/tests/fonts
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATADIR}/sounds ${CMAKE_BINARY_DIR}/src/tests/sounds
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATADIR}/textures ${CMAKE_BINARY_DIR}/src/tests/textures
+			COMMENT "Copying data to src/tests..."
+		)
+	endif()
+endif()
 
 if(SDL_FOUND AND NOT GLFW_FOUND)
 	if(OPENAL_FOUND)

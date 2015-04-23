@@ -6,46 +6,43 @@
 #include "GLHashMap.h"
 #include "Array.h"
 
-namespace ncine
-{
+namespace ncine {
 
 class GLRenderbuffer;
 class GLTexture;
 
 class GLFramebufferObject
 {
-public:
+  public:
 	explicit GLFramebufferObject();
 	~GLFramebufferObject();
 
-    void bind(GLenum target);
-	void unbind();
+	inline GLuint glHandle() const { return glHandle_; }
+	inline GLenum target() const { return target_; }
 
-    void attachRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height, GLenum attachment);
+	void bind(GLenum target) const;
+	void unbind() const;
+
+	void attachRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height, GLenum attachment);
 	void attachTexture(GLTexture &texture, GLenum attachment);
 
-    bool isStatusComplete();
+	bool isStatusComplete();
 
-    GLenum target() const;
-
-private:
+  private:
 	static class GLHashMap<GLFramebufferMappingFunc::Size, GLFramebufferMappingFunc> boundBuffers_;
 
 	Array<GLRenderbuffer *> attachedRenderbuffers_;
 
-    GLuint glHandle_;
-    GLenum target_;
+	GLuint glHandle_;
+	/// The target is mutable in order for constant FBO objects to be bound
+	/*! The FBO binding can change to become the target for read, write or both operations */
+	mutable GLenum target_;
 
 	/// Private copy constructor
 	GLFramebufferObject(const GLFramebufferObject&);
 	/// Private assignment operator
 	GLFramebufferObject& operator=(const GLFramebufferObject&);
 };
-
-inline GLenum GLFramebufferObject::target() const
-{
-    return target_;
-}
 
 }
 

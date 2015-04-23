@@ -17,6 +17,8 @@ class DLL_PUBLIC String
 
 	/// Default capacity for objects created by the default constructor
 	static const unsigned int DefaultCapacity = 128;
+	/// Maximum length when creating an object from C-style strings
+	static const unsigned int MaxCStringLength = DefaultCapacity - 1;
 
 	// Default constructor
 	String();

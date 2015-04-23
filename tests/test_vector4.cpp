@@ -56,7 +56,7 @@ int main()
 	printf("%.2f\n", v2.sqrLength());
 
 	printf("Add all the constant vectors together: ");
-	nc::Vector4f constants = nc::Vector4f::Zero + nc::Vector4f::XAxis + nc::Vector4f::YAxis + nc::Vector4f::ZAxis;
+	nc::Vector4f constants = nc::Vector4f::Zero + nc::Vector4f::XAxis + nc::Vector4f::YAxis + nc::Vector4f::ZAxis + nc::Vector4f::WAxis;
 	print_vector4f(constants);
 
 	return EXIT_SUCCESS;

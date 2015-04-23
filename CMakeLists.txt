@@ -191,6 +191,12 @@ set(PRIVATE_HEADERS
 	src/include/GLRenderbuffer.h
 	src/include/GLShader.h
 	src/include/GLShaderProgram.h
+	src/include/GLShaderUniforms.h
+	src/include/GLUniform.h
+	src/include/GLUniformCache.h
+	src/include/GLShaderAttributes.h
+	src/include/GLAttribute.h
+	src/include/GLVertexAttribute.h
 	src/include/GLTexture.h
 )
 set(SOURCES
@@ -236,6 +242,12 @@ set(SOURCES
 	src/graphics/opengl/GLRenderbuffer.cpp
 	src/graphics/opengl/GLShader.cpp
 	src/graphics/opengl/GLShaderProgram.cpp
+	src/graphics/opengl/GLShaderUniforms.cpp
+	src/graphics/opengl/GLUniform.cpp
+	src/graphics/opengl/GLUniformCache.cpp
+	src/graphics/opengl/GLShaderAttributes.cpp
+	src/graphics/opengl/GLAttribute.cpp
+	src/graphics/opengl/GLVertexAttribute.cpp
 	src/graphics/opengl/GLTexture.cpp
 )
 
@@ -407,29 +419,10 @@ endif()
 target_include_directories(ncine PUBLIC include PRIVATE src/include)
 
 if(NCINE_BUILD_TESTS)
-	add_subdirectory(tests)
-	add_custom_target(copy_shaders_tests ALL
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/tests/shaders
-		COMMENT "Copying shaders to tests..."
-	)
-	if(MSVC)
-		add_custom_target(copy_dlls_tests ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/tests
-			COMMENT "Copying DLLs to tests..."
-		)
-	endif()
+	set(NCINE_DATADIR ${CMAKE_SOURCE_DIR}/../nCine-data)
 
+	add_subdirectory(tests)
 	if(NOT NCINE_DYNAMIC_LIBRARY)
 		add_subdirectory(src/tests)
-		add_custom_target(copy_shaders_srctests ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/src/tests/shaders
-			COMMENT "Copying shaders to src/tests..."
-		)
-		if(MSVC)
-			add_custom_target(copy_dlls_srctests ALL
-				COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/src/tests
-				COMMENT "Copying DLLs to src/tests..."
-			)
-		endif()
 	endif()
 endif()

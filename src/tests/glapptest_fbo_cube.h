@@ -9,6 +9,8 @@ namespace ncine {
 
 class AppConfiguration;
 class GLShaderProgram;
+class GLShaderUniforms;
+class GLShaderAttributes;
 class GLTexture;
 class GLFramebufferObject;
 class GLBufferObject;
@@ -38,7 +40,11 @@ class MyEventHandler
 	float angle_;
 	int width_, height_;
 	nc::GLShaderProgram *colorProgram_;
+	nc::GLShaderUniforms *colorUniforms_;
+	nc::GLShaderAttributes *colorAttributes_;
 	nc::GLShaderProgram *texProgram_;
+	nc::GLShaderUniforms *texUniforms_;
+	nc::GLShaderAttributes *texAttributes_;
 	nc::GLTexture *texture_;
 	nc::GLFramebufferObject *fbo_;
 	nc::GLBufferObject *vboTri_;

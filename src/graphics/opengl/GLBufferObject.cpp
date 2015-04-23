@@ -2,13 +2,21 @@
 
 namespace ncine {
 
+///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
 GLHashMap<GLBufferObjectMappingFunc::Size, GLBufferObjectMappingFunc> GLBufferObject::boundBuffers_;
 
+///////////////////////////////////////////////////////////
+// CONSTRUCTORS and DESTRUCTOR
+///////////////////////////////////////////////////////////
+
 GLBufferObject::GLBufferObject(GLenum target)
-    : glHandle_(0)
+	: glHandle_(0)
 	, target_(target)
 {
-    glGenBuffers(1, &glHandle_);
+	glGenBuffers(1, &glHandle_);
 }
 
 GLBufferObject::~GLBufferObject()
@@ -18,33 +26,57 @@ GLBufferObject::~GLBufferObject()
 		unbind();
 	}
 
-    glDeleteBuffers(1, &glHandle_);
+	glDeleteBuffers(1, &glHandle_);
 }
 
-void GLBufferObject::bind()
+///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void GLBufferObject::bind() const
 {
-    if (boundBuffers_[target_] != glHandle_)
+	if (boundBuffers_[target_] != glHandle_)
 	{
-        glBindBuffer(target_, glHandle_);
-        boundBuffers_[target_] = glHandle_;
+		glBindBuffer(target_, glHandle_);
+		boundBuffers_[target_] = glHandle_;
 	}
 }
 
-void GLBufferObject::unbind()
+void GLBufferObject::unbind() const
 {
-    if (boundBuffers_[target_] != 0)
+	if (boundBuffers_[target_] != 0)
 	{
 		glBindBuffer(target_, 0);
-        boundBuffers_[target_] = 0;
+		boundBuffers_[target_] = 0;
 	}
 }
 
 void GLBufferObject::bufferData(GLsizeiptr size, const GLvoid *data, GLenum usage)
 {
-    bind();
+	bind();
 	glBufferData(target_, size, data, usage);
 }
 
+void GLBufferObject::bufferSubData(GLintptr offset, GLsizeiptr size, const GLvoid *data)
+{
+	bind();
+	glBufferSubData(target_, offset, size, data);
+}
+
+#ifndef __ANDROID__
+void *GLBufferObject::map(GLenum access)
+{
+	bind();
+	return glMapBuffer(target_, access);
+}
+
+GLboolean GLBufferObject::unmap()
+{
+	bind();
+	return glUnmapBuffer(target_);
+}
+
+#ifndef __APPLE__
 void GLBufferObject::bufferStorage(GLsizeiptr size, const GLvoid *data, GLbitfield flags)
 {
 	bind();
@@ -53,36 +85,27 @@ void GLBufferObject::bufferStorage(GLsizeiptr size, const GLvoid *data, GLbitfie
 
 void GLBufferObject::bindBufferBase(GLenum target, GLuint index)
 {
-    glBindBufferBase(target, index, glHandle_);
+	glBindBufferBase(target, index, glHandle_);
 }
 
 void GLBufferObject::unbindBufferBase(GLenum target, GLuint index)
 {
-    glBindBufferBase(target, index, 0);
-}
-
-void *GLBufferObject::map(GLenum access)
-{
-   bind();
-   return glMapBuffer(target_, access);
-}
-
-GLboolean GLBufferObject::unmap()
-{
-    bind();
-    return glUnmapBuffer(target_);
+	glBindBufferBase(target, index, 0);
 }
 
 void *GLBufferObject::mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access)
 {
-    bind();
-    return glMapBufferRange(target_, offset, length, access);
+	bind();
+	return glMapBufferRange(target_, offset, length, access);
 }
 
- void GLBufferObject::bindVertexBuffer(GLuint bindingIndex, GLintptr offset, GLintptr stride)
- {
-     bind();
-     glBindVertexBuffer(bindingIndex, glHandle_, offset, stride);
- }
+void GLBufferObject::bindVertexBuffer(GLuint bindingIndex, GLintptr offset, GLintptr stride)
+{
+	bind();
+	glBindVertexBuffer(bindingIndex, glHandle_, offset, stride);
+}
+#endif
+
+#endif
 
 }

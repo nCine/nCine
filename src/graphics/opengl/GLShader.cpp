@@ -4,23 +4,32 @@
 
 namespace ncine {
 
+///////////////////////////////////////////////////////////
+// CONSTRUCTORS and DESTRUCTOR
+///////////////////////////////////////////////////////////
+
 GLShader::GLShader(GLenum type)
-    : glHandle_(0)
+	: glHandle_(0)
 {
-    glHandle_ = glCreateShader(type);
+	glHandle_ = glCreateShader(type);
 }
 
 GLShader::GLShader(GLenum type, const char *filename)
 	: glHandle_(0)
 {
 	glHandle_ = glCreateShader(type);
-    loadFromFile(filename);
+	loadFromFile(filename);
 }
 
 GLShader::~GLShader()
 {
-    glDeleteShader(glHandle_);
+	glDeleteShader(glHandle_);
 }
+
+///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
+
 
 void GLShader::loadFromFile(const char *filename)
 {
@@ -39,23 +48,26 @@ void GLShader::loadFromFile(const char *filename)
 
 bool GLShader::compile()
 {
-    glCompileShader(glHandle_);
+	glCompileShader(glHandle_);
 
-    GLint status = 0;
-    glGetShaderiv(glHandle_, GL_COMPILE_STATUS, &status);
-    if(status == GL_FALSE)
-    {
-        GLint length = 0;
-        glGetShaderiv(glHandle_, GL_INFO_LOG_LENGTH, &length);
+	GLint status = 0;
+	glGetShaderiv(glHandle_, GL_COMPILE_STATUS, &status);
+	if (status == GL_FALSE)
+	{
+		GLint length = 0;
+		glGetShaderiv(glHandle_, GL_INFO_LOG_LENGTH, &length);
 
-		String infoLog(length);
-		glGetShaderInfoLog(glHandle_, length, &length, infoLog.data());
-		LOGW_X("%s", infoLog.data());
+		if (length > 0)
+		{
+			String infoLog(length);
+			glGetShaderInfoLog(glHandle_, length, &length, infoLog.data());
+			LOGW_X("%s", infoLog.data());
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    return true;
+	return true;
 }
 
 }
