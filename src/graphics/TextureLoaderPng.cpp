@@ -94,7 +94,7 @@ void TextureLoaderPng::init()
 			texFormat_ = TextureFormat(GL_RGB);
 			break;
 		case PNG_COLOR_TYPE_GRAY:
-			texFormat_ = TextureFormat(GL_ALPHA);;
+			texFormat_ = TextureFormat(GL_LUMINANCE);
 			break;
 		default:
 			LOGF_X("Color type not supported: %d", colorType);

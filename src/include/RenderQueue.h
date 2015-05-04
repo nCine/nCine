@@ -15,12 +15,10 @@ and creating a tree of render commands */
 class RenderQueue
 {
   public:
-	RenderQueue()
-		: numVertices_(0), lastNumVertices_(0), lastNumCommands_(0),
-		  opaqueRenderCommands_(16), transparentRenderCommands_(16) { }
+	RenderQueue();
 
 	// Adds a draw command to the queue
-	void addCommand(const RenderCommand *command);
+	void addCommand(RenderCommand *command);
 	// Sorts the queue then issues every render command in order
 	void draw();
 
@@ -52,9 +50,9 @@ class RenderQueue
 	StaticArray<unsigned int, RenderCommand::TYPE_COUNT> typedLastNumCommands_;
 
 	/// Array of opaque render command pointers
-	Array<const RenderCommand *> opaqueRenderCommands_;
+	Array<RenderCommand *> opaqueRenderCommands_;
 	/// Array of transparent render command pointers
-	Array<const RenderCommand *> transparentRenderCommands_;
+	Array<RenderCommand *> transparentRenderCommands_;
 
 	// Sorts render nodes in both queues to minimize state changes
 	void sortQueues();

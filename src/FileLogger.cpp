@@ -21,11 +21,18 @@ FileLogger::FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fil
 	if (fileLevel_ != LOG_OFF)
 	{
 		fileHandle_->open(IFile::MODE_WRITE);
-	}
-	if (fileHandle_->isOpened() == false && consoleLevel_ > fileLevel_)
-	{
-		// Promoting console level logging to file level logging
-		consoleLevel_ = fileLevel_;
+
+		if (fileHandle_->isOpened() == false)
+		{
+			if (consoleLevel_ > fileLevel_)
+			{
+				// Promoting console level logging to file level logging
+				consoleLevel_ = fileLevel_;
+			}
+
+			// Disabling file logging if the log file cannot be opened
+			fileLevel_ = LOG_OFF;
+		}
 	}
 
 	if (consoleLevel_ != LOG_OFF)
@@ -33,7 +40,6 @@ FileLogger::FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fil
 		setvbuf(stdout, NULL, _IONBF, 0);
 	}
 }
-
 
 FileLogger::~FileLogger()
 {

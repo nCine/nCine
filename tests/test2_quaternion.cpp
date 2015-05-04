@@ -12,7 +12,7 @@ inline void print_quaternion(const nc::Quaternionf& quat)
 inline void print_matrix4x4f(const nc::Matrix4x4f& mat)
 {
 	printf("[");
-	for(unsigned int i = 0; i < 4; i++)
+	for (unsigned int i = 0; i < 4; i++)
 	{
 		if (i > 0)
 		{

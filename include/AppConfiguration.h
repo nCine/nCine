@@ -13,12 +13,16 @@ class DLL_PUBLIC AppConfiguration
 	// Empty constructor setting the defaults
 	AppConfiguration();
 
+	// Sets the path for the application to load data from
+	void setDataPath(const String& dataPath);
 	// Sets the name of the log file
 	void setLogFile(const String& logFile);
 	// Sets the logging level for messages printed on the console
 	void setConsoleLogLevel(ILogger::LogLevel logLevel);
 	// Sets the logging level for messages written in the log file
 	void setFileLogLevel(ILogger::LogLevel logLevel);
+	// Sets the interval for frame timer accumulation average and log
+	void setFrameTimerLogInterval(float logInterval);
 	// Sets the screen resolution
 	void setResolution(unsigned int x, unsigned int y);
 	// Sets the fullscreen mode
@@ -41,9 +45,14 @@ class DLL_PUBLIC AppConfiguration
 	void enableScenegraph(bool shouldEnable);
 
   private:
+	// Pre-configured compile-time variables
+	const float profileTextUpdateTime_;
+
+	// User configurable compile-time variables
 	String logFile_;
 	ILogger::LogLevel consoleLogLevel_;
 	ILogger::LogLevel fileLogLevel_;
+	float frameTimerLogInterval_;
 	unsigned int xResolution_;
 	unsigned int yResolution_;
 	bool inFullscreen_;

@@ -15,19 +15,19 @@ if(WIN32)
 	)
 endif()
 
-if(EXISTS ${NCINE_DATADIR} AND IS_DIRECTORY ${NCINE_DATADIR})
+if(EXISTS ${NCINE_DATA_DIR} AND IS_DIRECTORY ${NCINE_DATA_DIR})
 	if(UNIX)
 		add_custom_target(link_data_srctests ALL
-			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATADIR}/fonts ${CMAKE_BINARY_DIR}/src/tests/fonts
-			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATADIR}/sounds ${CMAKE_BINARY_DIR}/src/tests/sounds
-			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATADIR}/textures ${CMAKE_BINARY_DIR}/src/tests/textures
+			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATA_DIR}/fonts ${CMAKE_BINARY_DIR}/src/tests/fonts
+			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATA_DIR}/sounds ${CMAKE_BINARY_DIR}/src/tests/sounds
+			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATA_DIR}/textures ${CMAKE_BINARY_DIR}/src/tests/textures
 			COMMENT "Symlinking data to src/tests..."
 		)
 	elseif(WIN32)
 		add_custom_target(copy_data_srctests ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATADIR}/fonts ${CMAKE_BINARY_DIR}/src/tests/fonts
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATADIR}/sounds ${CMAKE_BINARY_DIR}/src/tests/sounds
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATADIR}/textures ${CMAKE_BINARY_DIR}/src/tests/textures
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/fonts ${CMAKE_BINARY_DIR}/src/tests/fonts
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/sounds ${CMAKE_BINARY_DIR}/src/tests/sounds
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/textures ${CMAKE_BINARY_DIR}/src/tests/textures
 			COMMENT "Copying data to src/tests..."
 		)
 	endif()

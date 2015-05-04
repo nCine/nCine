@@ -5,11 +5,8 @@
 #include "Texture.h"
 #include "Rect.h"
 #include "Color.h"
-#include "StaticArray.h"
 
 namespace ncine {
-
-class SpriteBatchNode;
 
 /// A scene node representing a basic sprite
 class DLL_PUBLIC Sprite : public DrawableNode
@@ -77,13 +74,7 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	/// Sprite height in pixel
 	int height_;
 
-	StaticArray<float, 8> vertices_;
-	StaticArray<float, 8> texCoords_;
-
 	void init();
-	void setVertices();
-	void setTexCoords();
-
 	virtual void updateRenderCommand();
 
 	friend class SpriteBatchNode;
@@ -103,7 +94,6 @@ inline void Sprite::setTexRect(const Rect& rect)
 	texRect_ = rect;
 	height_ = rect.h;
 	width_ = rect.w;
-	setTexCoords();
 }
 
 /// Flips the texture rect along the X coordinate
@@ -111,7 +101,6 @@ inline void Sprite::flipX()
 {
 	texRect_.x += texRect_.w;
 	texRect_.w *= -1;
-	setTexCoords();
 }
 
 /// Flips the texture rect along the Y coordinate
@@ -119,7 +108,6 @@ inline void Sprite::flipY()
 {
 	texRect_.y += texRect_.h;
 	texRect_.h *= -1;
-	setTexCoords();
 }
 
 }

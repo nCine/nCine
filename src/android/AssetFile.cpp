@@ -28,7 +28,7 @@ AssetFile::AssetFile(const char *filename)
 	int extLength = lastDotChar - firstDotChar - 1;
 	if (extLength >= 3 && extLength <= 4)
 	{
-		extension_.copyFrom(filename_, firstDotChar + 1, extLength);
+		extension_.copy(filename_, firstDotChar + 1, extLength, 0);
 	}
 }
 

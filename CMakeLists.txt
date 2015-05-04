@@ -4,7 +4,7 @@ project(nCine)
 option(NCINE_BUILD_TESTS "Build the engine test programs" ON)
 option(NCINE_EXTRA_OPTIMIZE "Compile the engine with extra optimizations in release mode" ON)
 option(NCINE_AUTOVECTORIZATION_REPORT "Enable report generation from compiler auto-vectorization" OFF)
-option(NCINE_DYNAMIC_LIBRARY "Compile the engine as a dynamic library" OFF)
+option(NCINE_DYNAMIC_LIBRARY "Compile the engine as a dynamic library" ON)
 
 find_package(Threads)
 if(MSVC)
@@ -175,10 +175,13 @@ set(PRIVATE_HEADERS
 	src/include/ProfilePlotter.h
 	src/include/LinePlotter.h
 	src/include/StackedBarPlotter.h
+	src/include/GfxCapabilities.h
+	src/include/RenderResources.h
 	src/include/RenderCommand.h
 	src/include/RenderQueue.h
+	src/include/Material.h
+	src/include/Geometry.h
 	src/include/Particle.h
-	src/include/GfxCapabilities.h
 	src/include/TextureFormat.h
 	src/include/ITextureLoader.h
 	src/include/TextureLoaderDds.h
@@ -213,6 +216,11 @@ set(SOURCES
 	src/StandardFile.cpp
 	src/graphics/IGfxDevice.cpp
 	src/graphics/GfxCapabilities.cpp
+	src/graphics/RenderResources.cpp
+	src/graphics/RenderCommand.cpp
+	src/graphics/RenderQueue.cpp
+	src/graphics/Material.cpp
+	src/graphics/Geometry.cpp
 	src/graphics/TextureFormat.cpp
 	src/graphics/ITextureLoader.cpp
     src/graphics/TextureLoaderDds.cpp
@@ -226,8 +234,6 @@ set(SOURCES
 	src/graphics/DrawableNode.cpp
 	src/graphics/SceneNode.cpp
 	src/graphics/Sprite.cpp
-	src/graphics/RenderCommand.cpp
-	src/graphics/RenderQueue.cpp
 	src/graphics/SpriteBatchNode.cpp
 	src/Application.cpp
 	src/AppConfiguration.cpp
@@ -250,9 +256,6 @@ set(SOURCES
 	src/graphics/opengl/GLVertexAttribute.cpp
 	src/graphics/opengl/GLTexture.cpp
 )
-
-# Experimental depth test/alpha test renderer
-#add_definitions(-DWITH_DEPTH_TEST)
 
 # Forcing the use of SDL
 #set(GLFW_FOUND 0)
@@ -419,7 +422,7 @@ endif()
 target_include_directories(ncine PUBLIC include PRIVATE src/include)
 
 if(NCINE_BUILD_TESTS)
-	set(NCINE_DATADIR ${CMAKE_SOURCE_DIR}/../nCine-data)
+	set(NCINE_DATA_DIR ${CMAKE_SOURCE_DIR}/../nCine-data)
 
 	add_subdirectory(tests)
 	if(NOT NCINE_DYNAMIC_LIBRARY)

@@ -41,7 +41,7 @@ class DLL_PUBLIC Application
 	inline IInputManager& inputManager() { return *inputManager_; }
 
 	// Returns the elapsed time since the end of the previous frame in milliseconds
-	float interval();
+	float interval() const;
 
 	/// Returns the screen width
 	inline int width() const { return gfxDevice_->width(); }
@@ -75,13 +75,13 @@ class DLL_PUBLIC Application
 	AppConfiguration appCfg_;
 	FrameTimer *frameTimer_;
 	IGfxDevice *gfxDevice_;
-	SceneNode *rootNode_;
 	RenderQueue *renderQueue_;
+	SceneNode *rootNode_;
 	Timer *profileTimer_;
 	ProfilePlotter *profilePlotter_;
 	Font *font_;
 	TextNode *textLines_;
-	float textUpdateTime;
+	float textUpdateTime_;
 	String textString_;
 	IInputManager *inputManager_;
 	IAppEventHandler *appEventHandler_;

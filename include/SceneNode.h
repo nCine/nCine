@@ -4,6 +4,7 @@
 #include "Object.h"
 #include "List.h"
 #include "Vector2.h"
+#include "Matrix4x4.h"
 #include "Color.h"
 
 namespace ncine {
@@ -94,6 +95,11 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Sets the node alpha through a float component
 	inline void setAlphaF(float alpha) { color_.setAlphaF(alpha); }
 
+	/// Gets the node world matrix
+	inline const Matrix4x4f& worldMatrix() const { return worldMatrix_; }
+	/// Gets the node local matrix
+	inline const Matrix4x4f& localMatrix() const { return localMatrix_; }
+
   protected:
 	bool shouldUpdate_;
 	bool shouldDraw_;
@@ -103,7 +109,7 @@ class DLL_PUBLIC SceneNode : public Object
 
 	/// Scale factor for node size
 	float scaleFactor_;
-	/// Degrees for clock-wise node rotation
+	/// Degrees for clock-wise node rotation in degrees
 	float rotation_;
 
 	/// Node color for transparency, translucency, etc...
@@ -123,9 +129,14 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Absolute node color as calculated by the Transform() function
 	Color absColor_;
 
-	/// Private copy constructor
+	/// World transformation matrix (calculated from local and parent's world)
+	Matrix4x4f worldMatrix_;
+	/// Local transformation matrix
+	Matrix4x4f localMatrix_;
+
+	/// Protected copy constructor
 	SceneNode(const SceneNode&);
-	/// Private assignment operator
+	/// Protected assignment operator
 	SceneNode& operator=(const SceneNode&);
 
 	virtual void transform();

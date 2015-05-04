@@ -5,6 +5,7 @@
 #include "ServiceLocator.h"
 #include "ArrayIndexer.h"
 #include "GfxCapabilities.h"
+#include "RenderResources.h"
 #include "FrameTimer.h"
 #include "FileLogger.h"
 #include "LinePlotter.h"
@@ -47,9 +48,10 @@ Application& theApplication()
 
 Application::Application()
 	: isPaused_(false), hasFocus_(true), shouldQuit_(false),
-	frameTimer_(NULL), gfxDevice_(NULL), rootNode_(NULL),
-	renderQueue_(NULL), profileTimer_(NULL), profilePlotter_(NULL),
-	font_(NULL), textLines_(NULL), textUpdateTime(0.0f),
+	frameTimer_(NULL), gfxDevice_(NULL),
+	renderQueue_(NULL), rootNode_(NULL),
+	profileTimer_(NULL), profilePlotter_(NULL),
+	font_(NULL), textLines_(NULL), textUpdateTime_(0.0f),
 	textString_(MaxTextLength), inputManager_(NULL), appEventHandler_(NULL)
 {
 
@@ -66,9 +68,10 @@ void Application::init(IAppEventHandler* (*createAppEventHandler)())
 	appEventHandler_->onPreInit(appCfg_);
 
 	// Registering the logger as early as possible
-	theServiceLocator().registerLogger(new FileLogger(appCfg_.logFile_.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
+	String logFilePath = IFile::dataPath() + appCfg_.logFile_;
+	theServiceLocator().registerLogger(new FileLogger(logFilePath.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
 	// Graphics device should always be created before the input manager!
-	DisplayMode displayMode(8, 8, 8, 8, 32, 24, 8, true, false);
+	DisplayMode displayMode(8, 8, 8, 8, 24, 8, true, false);
 #if defined(WITH_SDL)
 	gfxDevice_ = new SdlGfxDevice(appCfg_.xResolution_, appCfg_.yResolution_, displayMode, appCfg_.inFullscreen_);
 	inputManager_ = new SdlInputManager();
@@ -145,10 +148,9 @@ void Application::step()
 		renderQueue_->draw();
 	}
 
-	// TODO: hard-coded 200ms update time
-	if (textLines_ && Timer::now() - textUpdateTime > 0.2f)
+	if (textLines_ && Timer::now() - textUpdateTime_ > appCfg_.profileTextUpdateTime_)
 	{
-		textUpdateTime = Timer::now();
+		textUpdateTime_ = Timer::now();
 		textString_.format(static_cast<const char *>("FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC"),
 				frameTimer_->averageFps(), frameTimer_->interval() * 1000.0f,
 				renderQueue_->numVertices(RenderCommand::SPRITE_TYPE), renderQueue_->numCommands(RenderCommand::SPRITE_TYPE),
@@ -196,8 +198,9 @@ void Application::shutdown()
 	delete font_;
 	delete profilePlotter_;
 	delete profileTimer_;
-	delete renderQueue_;
 	delete rootNode_; // deletes every child too
+	delete renderQueue_;
+	RenderResources::dispose();
 	delete frameTimer_;
 	delete inputManager_;
 	delete gfxDevice_;
@@ -213,7 +216,7 @@ void Application::shutdown()
 }
 
 /// Returns the elapsed time since the end of the previous frame in milliseconds
-float Application::interval()
+float Application::interval() const
 {
 	return frameTimer_->interval();
 }
@@ -272,9 +275,10 @@ void Application::initCommon()
 		theServiceLocator().registerThreadPool(new ThreadPool());
 	}
 #endif
-	LOGI_X("Data path: %s", IFile::dataPath());
+	LOGI_X("Data path: %s", IFile::dataPath().data());
+	LOGI_X("Save path: %s", IFile::savePath().data());
 
-	frameTimer_ = new FrameTimer(5.0f, 0.2f);
+	frameTimer_ = new FrameTimer(appCfg_.frameTimerLogInterval_, appCfg_.profileTextUpdateTime_);
 	profileTimer_ = new Timer();
 
 	GfxCapabilities& gfxCaps = const_cast<GfxCapabilities&>(theServiceLocator().gfxCapabilities());
@@ -283,8 +287,9 @@ void Application::initCommon()
 	if (appCfg_.withScenegraph_)
 	{
 		gfxDevice_->setupGL();
-		rootNode_ = new SceneNode();
+		RenderResources::create();
 		renderQueue_ = new RenderQueue();
+		rootNode_ = new SceneNode();
 
 		if (appCfg_.withProfilerGraphs_)
 		{
@@ -309,10 +314,11 @@ void Application::initCommon()
 
 		if (appCfg_.withProfilerText_)
 		{
-			if (IFile::access(appCfg_.fontTexFilename_.data(), IFile::MODE_EXISTS) &&
-				IFile::access(appCfg_.fontFntFilename_.data(), IFile::MODE_EXISTS))
+			String fontTexFilePath = IFile::dataPath() + appCfg_.fontTexFilename_;
+			String fontFntFilePath = IFile::dataPath() + appCfg_.fontFntFilename_;
+			if (IFile::access(fontTexFilePath.data(), IFile::MODE_EXISTS) && IFile::access(fontFntFilePath.data(), IFile::MODE_EXISTS))
 			{
-				font_ = new Font(appCfg_.fontTexFilename_.data(), appCfg_.fontFntFilename_.data());
+				font_ = new Font(fontTexFilePath.data(), fontFntFilePath.data());
 				textLines_ = new TextNode(rootNode_, font_);
 				textLines_->setPosition(0.0f, height());
 			}

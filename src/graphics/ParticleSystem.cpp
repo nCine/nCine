@@ -10,11 +10,10 @@ namespace ncine {
 
 /// Constructs a particle system made of the specified maximum amount of particles
 ParticleSystem::ParticleSystem(SceneNode* parent, unsigned int count, Texture *texture, Rect texRect)
-	: DrawableNode(parent, 0, 0), poolSize_(count), poolTop_(count - 1), particlePool_(poolSize_, true),
+	: SceneNode(parent, 0, 0), poolSize_(count), poolTop_(count - 1), particlePool_(poolSize_, true),
 	  particleList_(poolSize_, true), affectors_(4), inLocalSpace_(false)
 {
 	type_ = PARTICLESYSTEM_TYPE;
-	setPriority(DrawableNode::SCENE_PRIORITY);
 
 	for (unsigned int i = 0; i < poolSize_; i++)
 	{
@@ -67,7 +66,7 @@ void ParticleSystem::emitParticles(unsigned int amount, float life, const Vector
 		}
 
 		float rndLife = life * randBetween(0.85f, 1.0f);
-		// FIXME: arbitrary random position amount
+		// HACK: hard-coded random position amount
 		rndPosition.x = 10.0f * randBetween(-1.0f, 1.0f); // 25
 		rndPosition.y = 10.0f * randBetween(-1.0f, 1.0f);
 		rndVelocity.x = vel.x * randBetween(0.8f, 1.0f);
@@ -78,7 +77,7 @@ void ParticleSystem::emitParticles(unsigned int amount, float life, const Vector
 			rndPosition += absPosition();
 		}
 
-		// acquiring a particle from the pool
+		// Acquiring a particle from the pool
 		particlePool_[poolTop_]->init(rndLife, rndPosition, rndVelocity, rotation, inLocalSpace_);
 		addChildNode(particlePool_[poolTop_]);
 		poolTop_--;
@@ -87,12 +86,6 @@ void ParticleSystem::emitParticles(unsigned int amount, float life, const Vector
 
 void ParticleSystem::update(float interval)
 {
-	// early return if the node has not to be updated
-	if (!shouldUpdate_)
-	{
-		return;
-	}
-
 	for (List<SceneNode *>::Const_Iterator i = children_.begin(); i != children_.end(); ++i)
 	{
 		Particle *particle = static_cast<Particle *>(*i);
@@ -106,11 +99,11 @@ void ParticleSystem::update(float interval)
 			}
 
 			particle->update(interval);
+			particle->transform();
 
 			// Releasing the particle if it has just died
 			if (particle->isAlive() == false)
 			{
-				// releasing a particle
 				poolTop_++;
 				particlePool_[poolTop_] = particle;
 				removeChildNode(i++);

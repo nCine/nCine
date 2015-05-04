@@ -1,7 +1,7 @@
 #if defined(NCINE_INCLUDE_OPENGL)
 	#if defined(__ANDROID__)
-		#include <GLES/gl.h>
-		#include <GLES/glext.h>
+		#include <GLES2/gl2.h>
+		#include <GLES2/gl2ext.h>
 	#elif defined(WITH_GLEW)
 		#include <GL/glew.h>
 	#elif defined(__APPLE__)

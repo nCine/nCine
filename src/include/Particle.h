@@ -22,20 +22,21 @@ class Particle : public Sprite
 	/// Should the particle transformations be in local space?
 	bool inLocalSpace_;
 
+	/// Returns true if the particle is still alive
+	inline bool isAlive() const { return life_ > 0.0; }
+
+  private:
+	// Private constructor accessible only by `ParticleSystem`
 	Particle(SceneNode* parent, Texture *texture);
 
 	// Initializes a particle with initial life, position, velocity and rotation
 	void init(float life, Vector2f pos, Vector2f vel, float rot, bool inLocalSpace);
-
-	/// Returns true if the particle is still alive
-	inline bool isAlive() const { return life_ > 0.0; }
-
 	// Updates particle data after the specified amount of seconds has passed
 	virtual void update(float interval);
-
-  private:
 	// Custom transform method to allow independent position from parent
 	void transform();
+
+	friend class ParticleSystem;
 };
 
 }

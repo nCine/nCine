@@ -103,8 +103,8 @@ void MyEventHandler::onInit()
 	nc::IInputManager::setHandler(this);
 
 	colorProgram_ = new nc::GLShaderProgram();
-	colorProgram_->attachShader(GL_VERTEX_SHADER, "shaders/color_vs.glsl");
-	colorProgram_->attachShader(GL_FRAGMENT_SHADER, "shaders/color_fs.glsl");
+	colorProgram_->attachShader(GL_VERTEX_SHADER, "shaders/vcolor_vs.glsl");
+	colorProgram_->attachShader(GL_FRAGMENT_SHADER, "shaders/vcolor_fs.glsl");
 	colorProgram_->bindAttribLocation(ATTRIB_POSITION, "aPosition");
 	colorProgram_->bindAttribLocation(ATTRIB_COLOR, "aColor");
 	colorProgram_->link();
@@ -121,6 +121,7 @@ void MyEventHandler::onInit()
 	texProgram_->use();
 	texUniforms_ = new nc::GLShaderUniforms(texProgram_);
 	texUniforms_->uniform("texture")->setIntValue(0);
+	texUniforms_->uniform("color")->setFloatValue(1.0f, 1.0f, 1.0f, 1.0f);
 	texAttributes_ = new nc::GLShaderAttributes(texProgram_);
 
 

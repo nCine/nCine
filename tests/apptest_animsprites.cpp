@@ -5,6 +5,7 @@
 #include "Font.h"
 #include "TextNode.h"
 #include "IInputManager.h"
+#include "IFile.h" // for dataPath()
 
 #ifdef __ANDROID__
 	#include "AndroidApplication.h"
@@ -25,14 +26,14 @@ void MyEventHandler::onInit()
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 #ifdef __ANDROID__
-	audioPlayer_ = new nc::AudioStreamPlayer("/sdcard/ncine/music.ogg");
-	texture_ = new nc::Texture("/sdcard/ncine/abta_playertwo.dds");
+	audioPlayer_ = new nc::AudioStreamPlayer((nc::IFile::dataPath() + "music.ogg").data());
+	texture_ = new nc::Texture((nc::IFile::dataPath() + "abta_playertwo.dds").data());
 //	audioPlayer_ = new nc::AudioStreamPlayer("asset::bomb.ogg");
 //	texture_ = new nc::Texture("asset::abta_player.dds.mp3");
 #else
-	audioPlayer_ = new nc::AudioStreamPlayer("sounds/music.ogg");
-	texture_ = new nc::Texture("textures/abta_playertwo.png");
-//	texture_ = new nc::Texture("textures/abta_playertwo_bc3.dds");
+	audioPlayer_ = new nc::AudioStreamPlayer((nc::IFile::dataPath() + "sounds/music.ogg").data());
+	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/abta_playertwo.png").data());
+//	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/abta_playertwo_bc3.dds").data());
 #endif
 
 	audioPlayer_->setLooping(true);
@@ -130,7 +131,7 @@ void MyEventHandler::onFrameStart()
 
 #ifdef WITH_8DIRECTIONS
 		const float dirTolerance = 0.3f;
-		if (reachVector.x < -dirTolerance) // Right
+		if (reachVector.x > dirTolerance) // Right
 		{
 			if (reachVector.y > dirTolerance)
 			{
@@ -145,7 +146,7 @@ void MyEventHandler::onFrameStart()
 				animSprite_->setAnimation(2);    // Right
 			}
 		}
-		else if (reachVector.x > dirTolerance) // Left
+		else if (reachVector.x < -dirTolerance) // Left
 		{
 			if (reachVector.y > dirTolerance)
 			{
@@ -172,7 +173,7 @@ void MyEventHandler::onFrameStart()
 			}
 		}
 #else
-		float angle = -(atan2(reachVector.y, reachVector.x) - atan2(1.0f, 0.0f)) * 180.0f / M_PI;
+		float angle = (atan2(reachVector.y, reachVector.x) - atan2(1.0f, 0.0f)) * 180.0f / M_PI;
 		if (angle < 0.0f)
 		{
 			angle += 360.0f;

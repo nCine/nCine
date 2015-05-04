@@ -1,38 +1,54 @@
-#ifdef WITH_DEPTH_TEST
-	#define NCINE_INCLUDE_OPENGL
-	#include "common_headers.h"
-#endif
-
 #include "common_functions.h"
 #include "RenderQueue.h"
 #include "SceneNode.h"
 #include "Array.h"
 #include "Sprite.h"
 
+// TODO: Implement a custom assert macro
 //#include <assert.h> // for checking sorting correctness
 
 namespace ncine {
+
+///////////////////////////////////////////////////////////
+// CONSTRUCTORS and DESTRUCTOR
+///////////////////////////////////////////////////////////
+
+RenderQueue::RenderQueue()
+	: numVertices_(0), lastNumVertices_(0), lastNumCommands_(0),
+	  opaqueRenderCommands_(16), transparentRenderCommands_(16)
+{
+	for (int i = 0; i < RenderCommand::TYPE_COUNT; i++)
+	{
+		typedLastNumVertices_[i] = typedNumVertices_[i];
+		typedLastNumCommands_[i] = typedNumCommands_[i];
+		typedNumVertices_[i] = 0;
+		typedNumCommands_[i] = 0;
+	}
+}
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
 /// Adds a draw command to the queue
-void RenderQueue::addCommand(const RenderCommand *command)
+void RenderQueue::addCommand(RenderCommand *command)
 {
+	// Calculating a sorting key before adding the command to the queue
+	command->calculateSortKey();
+
 	typedNumVertices_[command->type()] += command->geometry().numVertices();
 	typedNumCommands_[command->type()]++;
 
 	numVertices_ += command->geometry().numVertices();
 
-#ifdef WITH_DEPTH_TEST
 	if (command->material().isTransparent() == false)
 	{
 		opaqueRenderCommands_.insertBack(command);
 	}
 	else
-#endif
+	{
 		transparentRenderCommands_.insertBack(command);
+	}
 }
 
 /// Sorts the queue then issues every render command in order
@@ -40,30 +56,23 @@ void RenderQueue::draw()
 {
 	sortQueues();
 
-#ifdef WITH_DEPTH_TEST
-	glDisable(GL_BLEND);
-	// TODO: Investigate about the heavy performance drop with alpha testing
-	glEnable(GL_ALPHA_TEST);
 	// Rendering opaque nodes front to back
 	for (int i = opaqueRenderCommands_.size() - 1; i > -1; i--)
 	{
 		opaqueRenderCommands_[i]->issue();
 	}
 
-	glDisable(GL_ALPHA_TEST);
 	glEnable(GL_BLEND);
 	glDepthMask(GL_FALSE);
-#endif
 	// Rendering transparent nodes back to front
 	for (unsigned int i = 0; i < transparentRenderCommands_.size(); i++)
 	{
 		transparentRenderCommands_[i]->issue();
 	}
-#ifdef WITH_DEPTH_TEST
 	// Has to be enabled again before exiting this method
 	// or glClear(GL_DEPTH_BUFFER_BIT) won't have any effect
 	glDepthMask(GL_TRUE);
-#endif
+	glDisable(GL_BLEND);
 
 	lastNumVertices_ = numVertices_;
 	lastNumCommands_ = opaqueRenderCommands_.size() + transparentRenderCommands_.size();

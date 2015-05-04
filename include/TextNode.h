@@ -50,6 +50,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 
   private:
 	/// Maximum length for a string to be rendered
+	/*! This number affects both the string container and VBO size */
 	static const unsigned int MaxStringLength = 256;
 
 	/// The string to be rendered
@@ -62,12 +63,8 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	bool withKerning_;
 	/// The font class used to render text
 	Font *font_;
-	/// The array of vertices for every glyph in the batch
-	Array<float> vertices_;
-	/// The array of glyph vertices to be transformed for drawing
-	Array<float> transformedVertices_;
-	/// The array of texture coordinates for every glyph in the batch
-	Array<float> texCoords_;
+	/// The array of vertex positions interleaved with texture coordinates for every glyph in the batch
+	Array<float> interleavedVertices_;
 
 	/// Advance on the X-axis for the next processed glyph
 	mutable float xAdvance_;

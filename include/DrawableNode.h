@@ -27,9 +27,6 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	// Updates the draw command and adds it to the queue
 	virtual void draw(RenderQueue& renderQueue);
 
-	// Applies node transformations to vertices
-	void applyTransformations();
-
 	// Returns the node rendering priority
 	int priority() const;
 	// Sets the node rendering priority

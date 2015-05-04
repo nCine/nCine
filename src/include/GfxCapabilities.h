@@ -33,8 +33,8 @@ class DLL_PUBLIC GfxCapabilities
 
 	/// Returns a rough estimate of the largest texture that the device can handle
 	inline int maxTextureSize() const { return maxTextureSize_; }
-	/// Returns the number of texture units supported
-	inline int maxTextureUnits() const { return maxTextureUnits_; }
+	/// Returns the number of texture image units supported
+	inline int maxTextureImageUnits() const { return maxTextureImageUnits_; }
 
 #ifndef __ANDROID__
 	/// Returns true if the extension GL_EXT_texture_compression_s3tc is available
@@ -56,7 +56,7 @@ class DLL_PUBLIC GfxCapabilities
 #endif
 
 	int maxTextureSize_;
-	int maxTextureUnits_;
+	int maxTextureImageUnits_;
 
 #ifndef __ANDROID__
 	bool extTextureCompressionS3TC_;

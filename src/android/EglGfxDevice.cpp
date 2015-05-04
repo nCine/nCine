@@ -89,10 +89,13 @@ bool EglGfxDevice::isModeSupported(struct android_app *state, DisplayMode mode)
 	const EGLint attribs[] =
 	{
 		EGL_SURFACE_TYPE,		EGL_WINDOW_BIT,
+		EGL_RENDERABLE_TYPE,	EGL_OPENGL_ES2_BIT,
 		EGL_BLUE_SIZE,			static_cast<int>(mode.blueBits()),
 		EGL_GREEN_SIZE,			static_cast<int>(mode.greenBits()),
 		EGL_RED_SIZE,			static_cast<int>(mode.redBits()),
 		EGL_ALPHA_SIZE,			static_cast<int>(mode.alphaBits()),
+		EGL_DEPTH_SIZE,			static_cast<int>(mode.depthBits()),
+		EGL_STENCIL_SIZE,		static_cast<int>(mode.stencilBits()),
 		EGL_NONE
 	};
 
@@ -132,10 +135,19 @@ void EglGfxDevice::initDevice(struct android_app* state)
 	const EGLint attribs[] =
 	{
 		EGL_SURFACE_TYPE,		EGL_WINDOW_BIT,
+		EGL_RENDERABLE_TYPE,	EGL_OPENGL_ES2_BIT,
 		EGL_BLUE_SIZE,			static_cast<int>(mode_.blueBits()),
 		EGL_GREEN_SIZE,			static_cast<int>(mode_.greenBits()),
 		EGL_RED_SIZE,			static_cast<int>(mode_.redBits()),
 		EGL_ALPHA_SIZE,			static_cast<int>(mode_.alphaBits()),
+		EGL_DEPTH_SIZE,			static_cast<int>(mode_.depthBits()),
+		EGL_STENCIL_SIZE,		static_cast<int>(mode_.stencilBits()),
+		EGL_NONE
+	};
+
+	const EGLint attribList[] =
+	{
+		EGL_CONTEXT_CLIENT_VERSION, 2,
 		EGL_NONE
 	};
 
@@ -152,7 +164,7 @@ void EglGfxDevice::initDevice(struct android_app* state)
 #endif
 
 	createSurface(state);
-	context_ = eglCreateContext(display_, config_, NULL, NULL);
+	context_ = eglCreateContext(display_, config_, NULL, attribList);
 	if (context_ == EGL_NO_CONTEXT)
 	{
 		LOGF("eglCreateContext() returned EGL_NO_CONTEXT");

@@ -12,10 +12,18 @@ ProfilePlotter::ProfilePlotter(SceneNode* parent, Rect rect)
 	  shouldPlotRefValue_(false), refValueColor_(1.0f, 1.0f, 1.0f), refValue_(0.0f)
 {
 	setPriority(DrawableNode::HUD_PRIORITY);
+	renderCommand_->material().setShaderProgram(Material::COLOR_PROGRAM);
+	renderCommand_->geometry().createCustomVbo(8, GL_STATIC_DRAW);
+	renderCommand_->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, 4);
+	setBackgroundVertices();
+	renderCommand_->geometry().updateVboData(0, 8, backgroundVertices_.data());
 
-	// One more than variable mean lines
+	// Priority is one more than variable mean lines
 	refValueCmd_.setPriority(DrawableNode::HUD_PRIORITY + 3);
 	refValueCmd_.setType(RenderCommand::PLOTTER_TYPE);
+	refValueCmd_.material().setShaderProgram(Material::COLOR_PROGRAM);
+	refValueCmd_.geometry().createCustomVbo(4, GL_DYNAMIC_DRAW);
+	refValueCmd_.geometry().setDrawParameters(GL_LINES, 0, 2);	
 }
 
 ProfilePlotter::~ProfilePlotter()
@@ -81,27 +89,6 @@ float ProfilePlotter::normBetweenRefValue(float min, float max) const
 	return value;
 }
 
-/// Applies parent transformations to reference value vertices
-void ProfilePlotter::applyTransformations(float absX, float absY, float absRotation, float absScaleFactor)
-{
-	// Variable values geometry
-	RenderGeometry &geometry = refValueCmd_.geometry();
-
-	float sine = 0.0f;
-	float cosine = 1.0f;
-	if (fabs(absRotation) > DrawableNode::MinRotation && fabs(absRotation) < 360.0f - DrawableNode::MinRotation)
-	{
-		sine = sinf(-absRotation * M_PI / 180.0f);
-		cosine = cosf(-absRotation * M_PI / 180.0f);
-	}
-
-	for (int i = geometry.firstVertex(); i < geometry.numVertices(); i++)
-	{
-		float x = geometry.vertexPointer()[2 * i] * absScaleFactor;			float y = geometry.vertexPointer()[2 * i + 1] * absScaleFactor;
-		geometry.vertexPointer()[2 * i] = absX + x * cosine - y * sine;		geometry.vertexPointer()[2 * i + 1] = absY + y * cosine + x * sine;
-	}
-}
-
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -119,24 +106,22 @@ void ProfilePlotter::setBackgroundVertices()
 
 void ProfilePlotter::updateRenderCommand()
 {
-	renderCommand_->material().setTextureGLId(0);
-	renderCommand_->material().setColor(backgroundColor_);
-	renderCommand_->transformation().setPosition(absPosition().x, absPosition().y);
-	setBackgroundVertices();
-	renderCommand_->geometry().setData(GL_TRIANGLE_STRIP, 0, 4, backgroundVertices_.data(), NULL, NULL);
-	renderCommand_->calculateSortKey();
+	renderCommand_->transformation() = worldMatrix_;
 
-	DrawableNode::applyTransformations();
+	renderCommand_->material().setTexture(NULL);
+	renderCommand_->material().uniform("color")->setFloatValue(backgroundColor_.fR(), backgroundColor_.fG(), backgroundColor_.fB(), backgroundColor_.fA());
+	bool isTransparent = backgroundColor_.a() < 255;
+	renderCommand_->material().setTransparent(isTransparent);
 }
 
 /// Updates the reference value rendering command
 void ProfilePlotter::UpdateRefValueRenderCommand()
 {
-	refValueCmd_.material().setTextureGLId(0);
-	refValueCmd_.material().setColor(refValueColor_);
-//	refValueCmd_.transformation().setPosition(absPosition().x, absPosition().y);
-	refValueCmd_.geometry().setData(GL_LINES, 0, 2, refValueVertices_.data(), NULL, NULL);
-	refValueCmd_.calculateSortKey();
+	refValueCmd_.transformation() = worldMatrix_;
+
+	refValueCmd_.material().setTexture(NULL);
+	refValueCmd_.material().uniform("color")->setFloatValue(refValueColor_.fR(), refValueColor_.fG(), refValueColor_.fB(), refValueColor_.fA());
+	refValueCmd_.geometry().updateVboData(0, 4, refValueVertices_.data());
 }
 
 }

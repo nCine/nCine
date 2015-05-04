@@ -3,6 +3,7 @@
 #include "apptest_scene.h"
 #include "Texture.h"
 #include "Sprite.h"
+#include "IFile.h" // for dataPath()
 
 #ifdef __ANDROID__
 	#include "AndroidApplication.h"
@@ -28,15 +29,15 @@ void MyEventHandler::onInit()
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 #ifdef __ANDROID__
-	textures_[0] = new nc::Texture("/sdcard/ncine/texture1.pkm"); // 145x121
-	textures_[1] = new nc::Texture("/sdcard/ncine/texture2.pkm"); // 100x100
-	textures_[2] = new nc::Texture("/sdcard/ncine/texture3.pkm"); // 96x96
-	textures_[3] = new nc::Texture("/sdcard/ncine/texture4.pkm"); // 96x96
+	textures_[0] = new nc::Texture((nc::IFile::dataPath() + "texture1.pkm").data()); // 145x121
+	textures_[1] = new nc::Texture((nc::IFile::dataPath() + "texture2.pkm").data()); // 100x100
+	textures_[2] = new nc::Texture((nc::IFile::dataPath() + "texture3.pkm").data()); // 96x96
+	textures_[3] = new nc::Texture((nc::IFile::dataPath() + "texture4.pkm").data()); // 96x96
 #else
-	textures_[0] = new nc::Texture("textures/texture1.png");
-	textures_[1] = new nc::Texture("textures/texture2.png");
-	textures_[2] = new nc::Texture("textures/texture3.png");
-	textures_[3] = new nc::Texture("textures/texture4.png");
+	textures_[0] = new nc::Texture((nc::IFile::dataPath() + "textures/texture1.png").data());
+	textures_[1] = new nc::Texture((nc::IFile::dataPath() + "textures/texture2.png").data());
+	textures_[2] = new nc::Texture((nc::IFile::dataPath() + "textures/texture3.png").data());
+	textures_[3] = new nc::Texture((nc::IFile::dataPath() + "textures/texture4.png").data());
 #endif
 
 	sprites_[0] = new nc::Sprite(textures_[0], 0, 0);

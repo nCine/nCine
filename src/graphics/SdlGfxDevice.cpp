@@ -115,10 +115,6 @@ void SdlGfxDevice::initDevice()
 	{
 		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, mode_.alphaBits());
 	}
-	if (mode_.bufferBits() > 0)
-	{
-		SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, mode_.bufferBits());
-	}
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, mode_.isDoubleBuffered());
 	SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, mode_.hasVSync());

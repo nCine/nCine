@@ -5,6 +5,7 @@
 #include "Sprite.h"
 #include "Font.h"
 #include "TextNode.h"
+#include "IFile.h" // for dataPath()
 
 #ifdef __ANDROID__
 	#include "AndroidApplication.h"
@@ -29,9 +30,9 @@ void MyEventHandler::onInit()
 
 	joyString_ = new nc::String(NumChars);
 #ifdef __ANDROID__
-	texture_ = new nc::Texture("/sdcard/ncine/checker_256_ETC1_MIP.ktx");
+	texture_ = new nc::Texture((nc::IFile::dataPath() + "checker_256_ETC1_MIP.ktx").data());
 #else
-	texture_ = new nc::Texture("textures/texture3.png");
+	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/texture3.png").data());
 #endif
 	sprites_[0] = new nc::Sprite(&rootNode, texture_, nc::theApplication().width() * 0.25f, nc::theApplication().height() * 0.5f);
 	sprites_[1] = new nc::Sprite(&rootNode, texture_, nc::theApplication().width() * 0.75f, nc::theApplication().height() * 0.5f);
@@ -39,13 +40,15 @@ void MyEventHandler::onInit()
 	sprites_[1]->setScale(0.5f);
 
 #ifdef __ANDROID__
-	font_ = new nc::Font("/sdcard/ncine/trebuchet32_256_4444.pvr", "/sdcard/ncine/trebuchet32_256.fnt");
+	font_ = new nc::Font((nc::IFile::dataPath() + "trebuchet32_256_4444.pvr").data(),
+						 (nc::IFile::dataPath() + "trebuchet32_256.fnt").data());
 #else
-	font_ = new nc::Font("fonts/trebuchet32_256.png", "fonts/trebuchet32_256.fnt");
+	font_ = new nc::Font((nc::IFile::dataPath() + "fonts/trebuchet32_256_gray.png").data(),
+						 (nc::IFile::dataPath() + "fonts/trebuchet32_256.fnt").data());
 #endif
 	textNode_ = new nc::TextNode(&rootNode, font_);
 	textNode_->setScale(0.85f);
-	textNode_->setPosition(nc::theApplication().width() * 0.1f, nc::theApplication().height() * 0.35f);
+	textNode_->setPosition(nc::theApplication().width() * 0.1f, nc::theApplication().height() * 0.4f);
 
 	for (int i = 0; i < NumJoysticks; i++)
 	{

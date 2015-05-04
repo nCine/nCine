@@ -33,22 +33,28 @@ void AndroidApplication::preInit(IAppEventHandler* (*createAppEventHandler)())
 	appEventHandler_->onPreInit(appCfg_);
 
 	// Registering the logger as early as possible
-	theServiceLocator().registerLogger(new FileLogger(appCfg_.logFile_.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
+	String logFilePath = IFile::dataPath() + appCfg_.logFile_;
+	theServiceLocator().registerLogger(new FileLogger(logFilePath.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
 }
 
 /// Must be called at start to init the application
 void AndroidApplication::init(struct android_app* state)
 {
 	// Graphics device should always be created before the input manager!
-	DisplayMode displayMode32(8, 8, 8, 8, 32, 24, 8, true, false);
+	DisplayMode displayMode32(8, 8, 8, 8, 24, 8, true, false);
+	DisplayMode displayMode16(5, 6, 5, 0, 16, 0, true, false);
 	if (EglGfxDevice::isModeSupported(state, displayMode32))
 	{
 		gfxDevice_ = new EglGfxDevice(state, displayMode32);
 	}
+	else if (EglGfxDevice::isModeSupported(state, displayMode16))
+	{
+		gfxDevice_ = new EglGfxDevice(state, displayMode16);
+	}
 	else
 	{
-		DisplayMode displayMode16(5, 6, 5, 0, 16, 16, 0, true, false);
-		gfxDevice_ = new EglGfxDevice(state, displayMode16);
+		LOGF("Cannot find a suitable EGL configuration, graphics device not created");
+		exit(EXIT_FAILURE);
 	}
 	AndroidJniHelper::attachJVM(state);
 	inputManager_ = new AndroidInputManager(state);

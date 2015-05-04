@@ -40,9 +40,6 @@ class ProfilePlotter : public DrawableNode
 	// Returns the reference value normalized and clamped between the two numbers provided
 	float normBetweenRefValue(float min, float max) const;
 
-	// Applies parent transformations to reference value vertices
-	void applyTransformations(float absX, float absY, float absRotation, float absScaleFactor);
-
 	inline virtual void drawRefValue(RenderQueue& renderQueue)
 	{
 		UpdateRefValueRenderCommand();

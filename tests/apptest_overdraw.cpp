@@ -4,6 +4,7 @@
 #include "SceneNode.h"
 #include "Texture.h"
 #include "Sprite.h"
+#include "IFile.h" // for dataPath()
 
 #ifdef __ANDROID__
 	#include "AndroidApplication.h"
@@ -19,23 +20,33 @@ nc::IAppEventHandler* createApphandler()
 void MyEventHandler::onInit()
 {
 	nc::IInputManager::setHandler(this);
-	nc::SceneNode &rRootNode = nc::theApplication().rootNode();
+	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 #ifdef __ANDROID__
-	megaTexture_ = new nc::Texture("/sdcard/ncine/megatexture_256.dds");
-	alphaTexture_ = new nc::Texture("/sdcard/ncine/transparent_128.png");
+	opaqueTexture_ = new nc::Texture((nc::IFile::dataPath() + "texture3_explicit.dds").data());
+	alphaTestedTexture_ = new nc::Texture((nc::IFile::dataPath() + "texture1_explicit.dds").data());
+	transparentTexture_ = new nc::Texture((nc::IFile::dataPath() + "smoke_128_explicit.dds").data());
+	alphaTexture_ = new nc::Texture((nc::IFile::dataPath() + "transparent_128_8888.pvr").data());
 #else
-	megaTexture_ = new nc::Texture("textures/megatexture_256.png");
-	alphaTexture_ = new nc::Texture("textures/transparent_128.png");
+	opaqueTexture_ = new nc::Texture((nc::IFile::dataPath() + "textures/texture3.png").data());
+	alphaTestedTexture_ = new nc::Texture((nc::IFile::dataPath() + "textures/texture1.png").data());
+	transparentTexture_ = new nc::Texture((nc::IFile::dataPath() + "textures/smoke_128.png").data());
+	alphaTexture_ = new nc::Texture((nc::IFile::dataPath() + "textures/transparent_128.png").data());
 #endif
 
-	dummy_ = new nc::SceneNode(&rRootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
+	dummy_ = new nc::SceneNode(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 
 	for (int i = 0; i < NumSprites; i++)
 	{
-		sprites_[i] = new nc::Sprite(dummy_, megaTexture_, 0, 0);
-		sprites_[i]->setScale(1.35f);
-		sprites_[i]->setPriority(nc::DrawableNode::SCENE_PRIORITY + 5);
+		opaqueSprites_[i] = new nc::Sprite(dummy_, opaqueTexture_, -50, 200);
+		opaqueSprites_[i]->setScale(1.25f);
+		opaqueSprites_[i]->setPriority(nc::DrawableNode::SCENE_PRIORITY + 5);
+		alphaTestedSprites_[i] = new nc::Sprite(dummy_, alphaTestedTexture_, 50, -200);
+		alphaTestedSprites_[i]->setScale(1.25f);
+		alphaTestedSprites_[i]->setPriority(nc::DrawableNode::SCENE_PRIORITY + 5);
+		transparentSprites_[i] = new nc::Sprite(dummy_, transparentTexture_, 0, 0);
+		transparentSprites_[i]->setScale(1.25f);
+		transparentSprites_[i]->setPriority(nc::DrawableNode::SCENE_PRIORITY + 5);
 	}
 
 	alphaSpriteBottom_ = new nc::Sprite(dummy_, alphaTexture_, 0, 150);
@@ -51,7 +62,9 @@ void MyEventHandler::onInit()
 void MyEventHandler::onShutdown()
 {
 	delete dummy_; // and all its children (the sprites)
-	delete megaTexture_;
+	delete opaqueTexture_;
+	delete alphaTestedTexture_;
+	delete transparentTexture_;
 	delete alphaTexture_;
 }
 

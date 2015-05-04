@@ -4,6 +4,7 @@
 #include "SceneNode.h"
 #include "Texture.h"
 #include "Sprite.h"
+#include "IFile.h" // for dataPath()
 
 #ifdef __ANDROID__
 	#include "AndroidApplication.h"
@@ -28,9 +29,9 @@ void MyEventHandler::onInit()
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 #ifdef __ANDROID__
-	megaTexture_ = new nc::Texture("/sdcard/ncine/megatexture_256.dds");
+	megaTexture_ = new nc::Texture((nc::IFile::dataPath() + "megatexture_256.dds").data());
 #else
-	megaTexture_ = new nc::Texture("textures/megatexture_256.png");
+	megaTexture_ = new nc::Texture((nc::IFile::dataPath() + "textures/megatexture_256.png").data());
 #endif
 	texRects[0] = nc::Rect(0, 0, 145, 121);
 	texRects[1] = nc::Rect(256 - 100, 0, 100, 100);

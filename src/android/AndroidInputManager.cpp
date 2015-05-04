@@ -394,6 +394,11 @@ void AndroidInputManager::initAccelerometerSensor(android_app *state)
 		ASENSOR_TYPE_ACCELEROMETER);
 	sensorEventQueue_ = ASensorManager_createEventQueue(sensorManager_,
 		state->looper, LOOPER_ID_USER, NULL, NULL);
+
+	if (accelerometerSensor_ == NULL)
+	{
+		LOGW("No accelerometer sensor available");
+	}
 }
 
 /// Updates joystick states after connections and disconnections

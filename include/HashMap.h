@@ -20,7 +20,7 @@ class HashMapNode
 
 	HashMapNode() : hash(0) { }
 	HashMapNode(hash_t hh, const K& kk)
-	  : hash(hh), key(kk) { }
+		: hash(hh), key(kk) { }
 };
 
 /// A template based hashmap implementation with separate chaining and list head cell
@@ -121,7 +121,7 @@ bool HashMap<K, T, HashFunc>::HashBucket::contains(hash_t hash, const K& key, T&
 	{
 		for (typename List<HashMapNode<K, T> >::Iterator i = collisionList_.begin(); i != collisionList_.end(); ++i)
 		{
-			if((*i).hash == hash && (*i).key == key)
+			if ((*i).hash == hash && (*i).key == key)
 			{
 				// The item has been found in the list
 				found = true;
@@ -151,7 +151,7 @@ T* HashMap<K, T, HashFunc>::HashBucket::find(hash_t hash, const K& key)
 	{
 		for (typename List<HashMapNode<K, T> >::Iterator i = collisionList_.begin(); i != collisionList_.end(); ++i)
 		{
-			if((*i).hash == hash && (*i).key == key)
+			if ((*i).hash == hash && (*i).key == key)
 			{
 				// The item has been found in the list
 				return &(*i).value;
@@ -183,7 +183,7 @@ T& HashMap<K, T, HashFunc>::HashBucket::findOrAdd(hash_t hash, const K& key)
 	{
 		for (typename List<HashMapNode<K, T> >::Iterator i = collisionList_.begin(); i != collisionList_.end(); ++i)
 		{
-			if((*i).hash == hash && (*i).key == key)
+			if ((*i).hash == hash && (*i).key == key)
 			{
 				// The item has been found in the list
 				return (*i).value;
@@ -226,7 +226,7 @@ bool HashMap<K, T, HashFunc>::HashBucket::remove(hash_t hash, const K& key)
 	{
 		for (typename List<HashMapNode<K, T> >::Iterator i = collisionList_.begin(); i != collisionList_.end(); ++i)
 		{
-			if((*i).hash == hash && (*i).key == key)
+			if ((*i).hash == hash && (*i).key == key)
 			{
 				// The item has been found in the list
 				found = true;

@@ -1,4 +1,7 @@
 #include <cstdlib> // for exit()
+#ifdef __ANDROID__
+	#include <android/api-level.h>
+#endif
 #include "TextureFormat.h"
 #include "ServiceLocator.h"
 
@@ -34,12 +37,18 @@ void TextureFormat::bgrFormat()
 {
 	if (format_ == GL_RGBA)
 	{
+#ifndef __ANDROID__
 		format_ = GL_BGRA;
+#else
+		format_ = GL_BGRA_EXT;
+#endif
 	}
+#ifndef __ANDROID__
 	else if (format_ == GL_RGB)
 	{
 		format_ = GL_BGR;
 	}
+#endif
 }
 #endif
 
@@ -72,13 +81,17 @@ void TextureFormat::findExternalFmt()
 	}
 	if (found == false)
 	{
+		found = oesFormatApi21();
+	}
+	if (found == false)
+	{
 		found = oesCompressedFormat();
 	}
 #endif
 
 	if (found == false)
 	{
-		LOGF_X("Unknown internal format: %d", internalFormat_);
+		LOGF_X("Unknown internal format: 0x%x", internalFormat_);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -106,14 +119,18 @@ bool TextureFormat::integerFormat()
 		case 2:
 			format_ = GL_LUMINANCE_ALPHA;
 			break;
+		case GL_LUMINANCE:
+		case GL_LUMINANCE8:
+			format_ = GL_LUMINANCE;
+			break;
 		case GL_ALPHA:
 		case GL_ALPHA8:
 		case 1:
 			format_ = GL_ALPHA;
 			break;
-		case GL_LUMINANCE:
-		case GL_LUMINANCE8:
-			format_ = GL_LUMINANCE;
+		case GL_INTENSITY:
+		case GL_INTENSITY8:
+			format_ = GL_INTENSITY;
 			break;
 		case GL_DEPTH_COMPONENT:
 		case GL_DEPTH_COMPONENT16_ARB:
@@ -200,9 +217,11 @@ bool TextureFormat::oesFormat()
 
 	switch (internalFormat_)
 	{
+		case GL_RGBA8_OES:
 		case GL_RGBA:
 			format_ = GL_RGBA;
 			break;
+		case GL_RGB8_OES:
 		case GL_RGB:
 			format_ = GL_RGB;
 			break;
@@ -215,6 +234,7 @@ bool TextureFormat::oesFormat()
 		case GL_ALPHA:
 			format_ = GL_ALPHA;
 			break;
+		// No GL_INTENSITY on OpenGL ES 2
 		default:
 			found = false;
 			break;
@@ -225,6 +245,61 @@ bool TextureFormat::oesFormat()
 		type_ = GL_UNSIGNED_BYTE;
 	}
 
+	return found;
+}
+
+/// Searches a match between an OpenGL ES internal format and an external one
+bool TextureFormat::oesFormatApi21()
+{
+#if __ANDROID_API < 21
+	bool found = false;
+#else
+	bool found = true;
+
+	switch (internalFormat_)
+	{
+		case GL_RGBA4_OES:
+		case GL_RGB5_A1_OES:
+			format_ = GL_RGBA;
+			break;
+		case GL_RGB565_OES:
+			format_ = GL_RGB;
+			break;
+		case GL_LUMINANCE8_ALPHA8_OES:
+			format_ = GL_LUMINANCE_ALPHA;
+			break;
+		case GL_LUMINANCE8_OES:
+			format_ = GL_LUMINANCE;
+			break;
+		case GL_ALPHA8_OES:
+			format_ = GL_ALPHA;
+			break;
+		default:
+			found = false;
+			break;
+	}
+
+	switch (internalFormat_)
+	{
+		case GL_RGBA4_OES:
+			type_ = GL_UNSIGNED_SHORT_4_4_4_4;
+			break;
+		case GL_RGB5_A1_OES:
+			type_ = GL_UNSIGNED_SHORT_5_5_5_1;
+			break;
+		case GL_RGB565_OES:
+			type_ = GL_UNSIGNED_SHORT_5_6_5;
+			break;
+		case GL_LUMINANCE8_ALPHA8_OES:
+		case GL_LUMINANCE8_OES:
+		case GL_ALPHA8_OES:
+			type_ = GL_UNSIGNED_BYTE;
+			break;
+		default:
+			found = false;
+			break;
+	}
+#endif
 	return found;
 }
 

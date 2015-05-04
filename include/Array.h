@@ -119,7 +119,7 @@ Array<T>::Array(const Array<T>& other)
 	: array_(NULL), size_(other.size_), capacity_(other.capacity_), fixedCapacity_(other.fixedCapacity_)
 {
 	array_ = new T[capacity_];
-	for(unsigned int i = 0; i < size_; i++)
+	for (unsigned int i = 0; i < size_; i++)
 	{
 		// copying all elements invoking their copy constructor
 		array_[i] = other.array_[i];

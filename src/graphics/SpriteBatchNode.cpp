@@ -16,7 +16,7 @@ SpriteBatchNode::SpriteBatchNode(SceneNode* parent, Texture *texture)
 	type_ = SPRITEBATCH_TYPE;
 	setPriority(DrawableNode::SCENE_PRIORITY);
 	renderCommand_->setType(RenderCommand::SPRITE_TYPE);
-	renderCommand_->material().setAlwaysTransparent(true);
+	renderCommand_->material().setTransparent(true);
 }
 
 ///////////////////////////////////////////////////////////
@@ -43,6 +43,7 @@ void SpriteBatchNode::visit(RenderQueue& renderQueue)
 	{
 		if ((*i)->type() == Sprite::sType())
 		{
+/*
 			Sprite *sprite = static_cast<Sprite *>((*i));
 
 			if (sprite->shouldDraw_ && sprite->texture()->glId() == texture_->glId())
@@ -50,6 +51,7 @@ void SpriteBatchNode::visit(RenderQueue& renderQueue)
 				sprite->transform();
 				processSprite(*sprite);
 			}
+*/
 		}
 	}
 
@@ -123,12 +125,13 @@ void SpriteBatchNode::processSprite(Sprite& sprite)
 
 void SpriteBatchNode::updateRenderCommand()
 {
+/*
 	renderCommand_->material().setTextureGLId(texture_->glId());
 	renderCommand_->transformation().setPosition(absPosition().x, absPosition().y);
 	renderCommand_->geometry().setData(GL_TRIANGLES, 0, vertices_.size() / 2, vertices_.data(), texCoords_.data(), colors_.data());
-	renderCommand_->calculateSortKey();
 
 	applyTransformations();
+*/
 }
 
 }

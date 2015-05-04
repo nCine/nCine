@@ -1,4 +1,5 @@
 #include "AppConfiguration.h"
+#include "IFile.h"
 
 namespace ncine {
 
@@ -8,35 +9,36 @@ namespace ncine {
 
 /// Empty constructor setting the defaults
 AppConfiguration::AppConfiguration()
-	: logFile_(256)
+	: profileTextUpdateTime_(0.2f)
+	, logFile_(128)
 	, consoleLogLevel_(ILogger::LOG_VERBOSE)
 	, fileLogLevel_(ILogger::LOG_OFF)
+	, frameTimerLogInterval_(5.0f)
 	, xResolution_(960), yResolution_(640)
 	, inFullscreen_(false)
-	, windowTitle_(256)
-	, fontTexFilename_(256)
-	, fontFntFilename_(256)
+	, windowTitle_(128)
+	, fontTexFilename_(128)
+	, fontFntFilename_(128)
 	, withProfilerGraphs_(true)
 	, withProfilerText_(true)
 	, withAudio_(true)
 	, withThreads_(true)
 	, withScenegraph_(true)
 {
+	logFile_ = "ncine_log.txt";
 #ifdef __ANDROID__
-	logFile_ = "/sdcard/ncine_log.txt";
+	IFile::dataPath_ = "/sdcard/ncine/";
 	fileLogLevel_ = ILogger::LOG_VERBOSE;
 
-//	fontTexFilename_ = "asset::trebuchet16_128.dds.mp3";
+//	fontTexFilename_ = "asset::trebuchet16_128_L8.dds.mp3";
 //	fontFntFilename_ = "asset::trebuchet16_128.fnt";
-	fontTexFilename_ = "/sdcard/ncine/trebuchet32_256_4444.pvr";
-	fontFntFilename_ = "/sdcard/ncine/trebuchet32_256.fnt";
-//	fontTexFilename_ = "/sdcard/ncine/trebuchet16_128.dds";
-//	fontFntFilename_ = "/sdcard/ncine/trebuchet16_128.fnt";
+	fontTexFilename_ = "trebuchet32_256_L8.dds";
+	fontFntFilename_ = "trebuchet32_256.fnt";
+//	fontTexFilename_ = "trebuchet16_128_L8.dds";
+//	fontFntFilename_ = "trebuchet16_128.fnt";
 #else
-	logFile_ = "ncine_log.txt";
-
 	windowTitle_ = "nCine";
-	fontTexFilename_ = "fonts/trebuchet32_256.png";
+	fontTexFilename_ = "fonts/trebuchet32_256_gray.png";
 	fontFntFilename_ = "fonts/trebuchet32_256.fnt";
 #endif
 }
@@ -45,7 +47,15 @@ AppConfiguration::AppConfiguration()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/// Sets the path for the application to load data from
+/*! Directly sets the value of the static field 'IFile::dataPath_' */
+void AppConfiguration::setDataPath(const String& dataPath)
+{
+	IFile::dataPath_ = dataPath;
+}
+
 /// Sets the name of the log file
+/*! The data path will be prefixed automatically before loading */
 void AppConfiguration::setLogFile(const String& logFile)
 {
 	logFile_ = logFile;
@@ -61,6 +71,13 @@ void AppConfiguration::setConsoleLogLevel(ILogger::LogLevel logLevel)
 void AppConfiguration::setFileLogLevel(ILogger::LogLevel logLevel)
 {
 	fileLogLevel_ = logLevel;
+}
+
+/// Sets the interval for frame timer accumulation average and log
+/*! A value of 0 disables frame timer logging */
+void AppConfiguration::setFrameTimerLogInterval(float logInterval)
+{
+	frameTimerLogInterval_ = logInterval;
 }
 
 /// Sets the screen resolution
@@ -83,12 +100,14 @@ void AppConfiguration::setWindowTitle(const String& windowTitle)
 }
 
 /// Sets the font texture filename for profiler information text
+/*! The data path will be prefixed automatically before loading */
 void AppConfiguration::setFontTexFilename(const String& fontTexFilename)
 {
 	fontTexFilename_ = fontTexFilename;
 }
 
 /// Sets the font FNT filename for profiler information text
+/*! The data path will be prefixed automatically before loading */
 void AppConfiguration::setFontFntFilename_(const String& fontFntFilename)
 {
 	fontFntFilename_ = fontFntFilename;

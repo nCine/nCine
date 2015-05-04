@@ -11,6 +11,7 @@
 namespace ncine {
 
 class ITextureLoader;
+class GLTexture;
 
 /// Texture class
 class DLL_PUBLIC Texture : public Object
@@ -22,8 +23,6 @@ class DLL_PUBLIC Texture : public Object
 	Texture(const char *filename, Point size);
 	virtual ~Texture();
 
-	/// Returns OpenGL id
-	inline GLuint glId() const { return glId_; }
 	/// Returns texture width
 	inline int width() const { return width_; }
 	/// Returns texture height
@@ -42,15 +41,11 @@ class DLL_PUBLIC Texture : public Object
 
 	// Sets texture filtering for both magnification and minification
 	void setFiltering(GLenum filter);
-	/// Binds the texture to the current unit
-	inline void bind() { glBindTexture(GL_TEXTURE_2D, glId_); }
-	/// Disables texture rendering for the current unit
-	static void unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
 
 	inline static ObjectType sType() { return TEXTURE_TYPE; }
 
   private:
-	GLuint glId_;
+	GLTexture *glTexture_;
 	int width_;
 	int height_;
 	int mipMapLevels_;
@@ -66,6 +61,8 @@ class DLL_PUBLIC Texture : public Object
 	void load(const ITextureLoader& texLoader);
 	// Loads a texture overriding the size detected by the texture loader
 	void load(const ITextureLoader& texLoader, int width, int height);
+
+	friend class Material;
 };
 
 }

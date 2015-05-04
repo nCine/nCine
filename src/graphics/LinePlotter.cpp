@@ -7,12 +7,20 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-LineVariable::LineVariable(unsigned int numValues, float rejectDelay)
-	: PlottingVariable(numValues, rejectDelay)
+LineVariable::LineVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f& worldMatrix)
+	: PlottingVariable(numValues, rejectDelay, worldMatrix)
 {
 	// Two vertices for the mean quote plus...
 	// One vertex (2 coordinates each) for every recorded value
 	vertices_ = new GLfloat[4 + numValues * 2];
+
+	valuesCmd_.material().setShaderProgram(Material::COLOR_PROGRAM);
+	valuesCmd_.geometry().createCustomVbo(4 + numValues * 2, GL_DYNAMIC_DRAW);
+	valuesCmd_.geometry().setDrawParameters(GL_LINE_STRIP, 2, variable_.numValues());
+
+	meanCmd_.material().setShaderProgram(Material::COLOR_PROGRAM);
+	meanCmd_.geometry().shareVbo(valuesCmd_.geometry());
+	meanCmd_.geometry().setDrawParameters(GL_LINES, 0, 2);
 }
 
 ///////////////////////////////////////////////////////////
@@ -21,11 +29,38 @@ LineVariable::LineVariable(unsigned int numValues, float rejectDelay)
 
 unsigned int LinePlotter::addVariable(unsigned int numValues, float rejectDelay)
 {
-	LineVariable* variable = new LineVariable(numValues, rejectDelay);
+	LineVariable* variable = new LineVariable(numValues, rejectDelay, worldMatrix_);
 	variables_.insertBack(variable);
 
 	return variables_.size() - 1;
 }
+
+void LinePlotter::draw(RenderQueue& renderQueue)
+{
+	// Drawing the background
+	DrawableNode::draw(renderQueue);
+
+	updateAllVertices(0, 0, width_, height_);
+
+	// Drawing the reference value line
+	if (shouldPlotRefValue())
+	{
+		drawRefValue(renderQueue);
+	}
+
+	for (unsigned int i = 0; i < variables_.size(); i++)
+	{
+		variables_[i]->draw(renderQueue);
+		if (variables_[i]->shouldPlotMean())
+		{
+			variables_[i]->drawMean(renderQueue);
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
 
 /// Fill the buffer of every line variable with vertices
 void LinePlotter::updateAllVertices(int x, int y, int w, int h)
@@ -75,51 +110,22 @@ void LinePlotter::updateAllVertices(int x, int y, int w, int h)
 	}
 }
 
-void LinePlotter::draw(RenderQueue& renderQueue)
-{
-	// Drawing the background
-	DrawableNode::draw(renderQueue);
-
-	updateAllVertices(0, 0, width_, height_);
-
-	// Drawing the reference value line
-	if (shouldPlotRefValue())
-	{
-		applyTransformations(absX_, absY_, absRotation_, absScaleFactor_);
-		drawRefValue(renderQueue);
-	}
-
-	for (unsigned int i = 0; i < variables_.size(); i++)
-	{
-		variables_[i]->applyTransformations(absX_, absY_, absRotation_, absScaleFactor_);
-		variables_[i]->draw(renderQueue);
-		if (variables_[i]->shouldPlotMean())
-		{
-			variables_[i]->drawMean(renderQueue);
-		}
-	}
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
 void LineVariable::updateRenderCommand()
 {
-	valuesCmd_.material().setTextureGLId(0);
-	valuesCmd_.material().setColor(graphColor_);
-//	valuesCmd_.transformation().setPosition(absPosition().x, absPosition().y);
-	valuesCmd_.geometry().setData(GL_LINE_STRIP, 2, variable_.numValues(), vertices_, NULL, NULL);
-	valuesCmd_.calculateSortKey();
+	valuesCmd_.transformation() = worldMatrix_;
+
+	valuesCmd_.material().setTexture(NULL);
+	valuesCmd_.material().uniform("color")->setFloatValue(graphColor_.fR(), graphColor_.fG(), graphColor_.fB(), graphColor_.fA());
+	valuesCmd_.geometry().updateVboData(4, variable_.numValues() * 2, vertices_ + 4);
 }
 
 void LineVariable::updateMeanRenderCommand()
 {
-	meanCmd_.material().setTextureGLId(0);
-	meanCmd_.material().setColor(meanColor_);
-//	meanCmd_.transformation().setPosition(absPosition().x, absPosition().y);
-	meanCmd_.geometry().setData(GL_LINES, 0, 2, vertices_, NULL, NULL);
-	meanCmd_.calculateSortKey();
+	meanCmd_.transformation() = worldMatrix_;
+
+	meanCmd_.material().setTexture(NULL);
+	meanCmd_.material().uniform("color")->setFloatValue(meanColor_.fR(), meanColor_.fG(), meanColor_.fB(), meanColor_.fA());
+	meanCmd_.geometry().updateVboData(0, 4, vertices_);
 }
 
 }

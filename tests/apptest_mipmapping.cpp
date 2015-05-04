@@ -4,6 +4,7 @@
 #include "SceneNode.h"
 #include "Texture.h"
 #include "Sprite.h"
+#include "IFile.h" // for dataPath()
 
 #ifdef __ANDROID__
 	#include "AndroidApplication.h"
@@ -24,19 +25,19 @@ void MyEventHandler::onInit()
 
 	pause_ = false;
 
-	nc::SceneNode &rRootNode = nc::theApplication().rootNode();
+	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 #ifdef __ANDROID__
-	texture_ = new nc::Texture("/sdcard/ncine/checker_256_ETC1_MIP.ktx");
-//	texture_ = new nc::Texture("/sdcard/ncine/megatexture_256.dds");
+	texture_ = new nc::Texture((nc::IFile::dataPath() + "checker_256_ETC1_MIP.ktx").data());
+//	texture_ = new nc::Texture((nc::IFile::dataPath() + "megatexture_256.dds").data());
 #else
-//	texture_ = new nc::Texture("textures/checker_256_MIP.pvr");
-//	texture_ = new nc::Texture("textures/compressed/checker_256_MIP.dds");
-	texture_ = new nc::Texture("textures/compressed/checker_256_DXT1_MIP.ktx");
-//	texture_ = new nc::Texture("textures/checker_256.png");
+//	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/checker_256_MIP.pvr").data());
+//	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/compressed/checker_256_MIP.dds").data());
+	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/compressed/checker_256_DXT1_MIP.ktx").data());
+//	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/checker_256.png").data());
 #endif
 
-	dummy_ = new nc::SceneNode(&rRootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
+	dummy_ = new nc::SceneNode(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	divider_ = 1;
 
 	sprite_ = new nc::Sprite(dummy_, texture_);

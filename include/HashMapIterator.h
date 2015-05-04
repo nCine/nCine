@@ -25,19 +25,19 @@ class HashMapIterator
 	HashMapNode<K, T>& operator*();
 
 	// Iterates to the next element (prefix)
-	HashMapIterator<K ,T, HashFunc> operator++() const;
+	HashMapIterator<K, T, HashFunc> operator++() const;
 	// Iterates to the next element (postfix)
-	HashMapIterator<K ,T, HashFunc> operator++(int) const;
+	HashMapIterator<K, T, HashFunc> operator++(int) const;
 
 	// Iterates to the previous element (prefix)
-	HashMapIterator<K ,T, HashFunc> operator--() const;
+	HashMapIterator<K, T, HashFunc> operator--() const;
 	// Iterates to the previous element (postfix)
-	HashMapIterator<K ,T, HashFunc> operator--(int) const;
+	HashMapIterator<K, T, HashFunc> operator--(int) const;
 
 	/// Equality operator
-	bool operator==(const HashMapIterator<K ,T, HashFunc>& iterator) const;
+	bool operator==(const HashMapIterator<K, T, HashFunc>& iterator) const;
 	/// Inequality operator
-	bool operator!=(const HashMapIterator<K ,T, HashFunc>& iterator) const;
+	bool operator!=(const HashMapIterator<K, T, HashFunc>& iterator) const;
 
 	HashMapIterator begin(const HashMap<K, T, HashFunc>& hashMap);
 	HashMapIterator end(const HashMap<K, T, HashFunc>& hashMap);
@@ -60,7 +60,7 @@ class HashMapIterator
 
 /// Read-only deferencing operator
 template <class K, class T, class HashFunc>
-inline const HashMapNode<K, T>& HashMapIterator<K ,T, HashFunc>::operator*() const
+inline const HashMapNode<K, T>& HashMapIterator<K, T, HashFunc>::operator*() const
 {
 	if (atFirstNode_)
 	{
@@ -74,7 +74,7 @@ inline const HashMapNode<K, T>& HashMapIterator<K ,T, HashFunc>::operator*() con
 
 /// Deferencing operator
 template <class K, class T, class HashFunc>
-inline HashMapNode<K, T>& HashMapIterator<K ,T, HashFunc>::operator*()
+inline HashMapNode<K, T>& HashMapIterator<K, T, HashFunc>::operator*()
 {
 	if (atFirstNode_)
 	{
@@ -88,7 +88,7 @@ inline HashMapNode<K, T>& HashMapIterator<K ,T, HashFunc>::operator*()
 
 /// Iterates to the next element (prefix)
 template <class K, class T, class HashFunc>
-HashMapIterator<K ,T, HashFunc> HashMapIterator<K ,T, HashFunc>::operator++() const
+HashMapIterator<K, T, HashFunc> HashMapIterator<K, T, HashFunc>::operator++() const
 {
 	next();
 	return *this;
@@ -96,17 +96,17 @@ HashMapIterator<K ,T, HashFunc> HashMapIterator<K ,T, HashFunc>::operator++() co
 
 /// Iterates to the next element (postfix)
 template <class K, class T, class HashFunc>
-HashMapIterator<K ,T, HashFunc> HashMapIterator<K ,T, HashFunc>::operator++(int) const
+HashMapIterator<K, T, HashFunc> HashMapIterator<K, T, HashFunc>::operator++(int) const
 {
 	// Create an unmodified copy to return
-	HashMapIterator<K ,T, HashFunc> iterator = *this;
+	HashMapIterator<K, T, HashFunc> iterator = *this;
 	next();
 	return iterator;
 }
 
 /// Iterates to the previous element (prefix)
 template <class K, class T, class HashFunc>
-HashMapIterator<K ,T, HashFunc> HashMapIterator<K ,T, HashFunc>::operator--() const
+HashMapIterator<K, T, HashFunc> HashMapIterator<K, T, HashFunc>::operator--() const
 {
 	previous();
 	return *this;
@@ -114,17 +114,17 @@ HashMapIterator<K ,T, HashFunc> HashMapIterator<K ,T, HashFunc>::operator--() co
 
 /// Iterates to the previous element (postfix)
 template <class K, class T, class HashFunc>
-HashMapIterator<K ,T, HashFunc> HashMapIterator<K ,T, HashFunc>::operator--(int) const
+HashMapIterator<K, T, HashFunc> HashMapIterator<K, T, HashFunc>::operator--(int) const
 {
 	// Create an unmodified copy to return
-	HashMapIterator<K ,T, HashFunc> iterator = *this;
+	HashMapIterator<K, T, HashFunc> iterator = *this;
 	previous();
 	return iterator;
 }
 
 /// Equality operator
 template <class K, class T, class HashFunc>
-inline bool HashMapIterator<K ,T, HashFunc>::operator==(const HashMapIterator<K ,T, HashFunc>& iterator) const
+inline bool HashMapIterator<K, T, HashFunc>::operator==(const HashMapIterator<K, T, HashFunc>& iterator) const
 {
 	return (&hashMap_ == &iterator.hashMap_ && bucketIndex_ == iterator.bucketIndex_ &&
 			listIterator_ == iterator.listIterator_ && atFirstNode_ == iterator.atFirstNode_);
@@ -132,16 +132,16 @@ inline bool HashMapIterator<K ,T, HashFunc>::operator==(const HashMapIterator<K 
 
 /// Inequality operator
 template <class K, class T, class HashFunc>
-inline bool HashMapIterator<K ,T, HashFunc>::operator!=(const HashMapIterator<K ,T, HashFunc>& iterator) const
+inline bool HashMapIterator<K, T, HashFunc>::operator!=(const HashMapIterator<K, T, HashFunc>& iterator) const
 {
 	return (&hashMap_ != &iterator.hashMap_ || bucketIndex_ != iterator.bucketIndex_ ||
 			listIterator_ != iterator.listIterator_ || atFirstNode_ != iterator.atFirstNode_);
 }
 
 template <class K, class T, class HashFunc>
-HashMapIterator<K ,T, HashFunc> HashMapIterator<K ,T, HashFunc>::begin(const HashMap<K, T, HashFunc>& hashMap)
+HashMapIterator<K, T, HashFunc> HashMapIterator<K, T, HashFunc>::begin(const HashMap<K, T, HashFunc>& hashMap)
 {
-	HashMapIterator<K ,T, HashFunc> iterator = HashMapIterator(hashMap, 0, hashMap.buckets_[0].collisionList_.begin(), hashMap.buckets_[0].firstNode_, true);
+	HashMapIterator<K, T, HashFunc> iterator = HashMapIterator(hashMap, 0, hashMap.buckets_[0].collisionList_.begin(), hashMap.buckets_[0].firstNode_, true);
 	if (hashMap.buckets_[0].size_ == 0)
 	{
 		iterator.next();
@@ -151,16 +151,16 @@ HashMapIterator<K ,T, HashFunc> HashMapIterator<K ,T, HashFunc>::begin(const Has
 }
 
 template <class K, class T, class HashFunc>
-HashMapIterator<K ,T, HashFunc> HashMapIterator<K ,T, HashFunc>::end(const HashMap<K, T, HashFunc>& hashMap)
+HashMapIterator<K, T, HashFunc> HashMapIterator<K, T, HashFunc>::end(const HashMap<K, T, HashFunc>& hashMap)
 {
 	unsigned int lastIndex = hashMap.buckets_.size() - 1;
 	return HashMapIterator(hashMap, lastIndex, hashMap.buckets_[lastIndex].collisionList_.end(), hashMap.buckets_[lastIndex].firstNode_, false);
 }
 
 template <class K, class T, class HashFunc>
-const HashMapIterator<K ,T, HashFunc> HashMapIterator<K ,T, HashFunc>::begin(const HashMap<K, T, HashFunc>& hashMap) const
+const HashMapIterator<K, T, HashFunc> HashMapIterator<K, T, HashFunc>::begin(const HashMap<K, T, HashFunc>& hashMap) const
 {
-	HashMapIterator<K ,T, HashFunc> iterator = HashMapIterator(hashMap, 0, hashMap.buckets_[0].collisionList_.begin(), hashMap.buckets_[0].firstNode_, true);
+	HashMapIterator<K, T, HashFunc> iterator = HashMapIterator(hashMap, 0, hashMap.buckets_[0].collisionList_.begin(), hashMap.buckets_[0].firstNode_, true);
 	if (hashMap.buckets_[0].size_ == 0)
 	{
 		iterator.next();
@@ -170,7 +170,7 @@ const HashMapIterator<K ,T, HashFunc> HashMapIterator<K ,T, HashFunc>::begin(con
 }
 
 template <class K, class T, class HashFunc>
-const HashMapIterator<K ,T, HashFunc> HashMapIterator<K ,T, HashFunc>::end(const HashMap<K, T, HashFunc>& hashMap) const
+const HashMapIterator<K, T, HashFunc> HashMapIterator<K, T, HashFunc>::end(const HashMap<K, T, HashFunc>& hashMap) const
 {
 	unsigned int lastIndex = hashMap.buckets_.size() - 1;
 	return HashMapIterator(hashMap, lastIndex, hashMap.buckets_[lastIndex].collisionList_.end(), hashMap.buckets_[lastIndex].firstNode_, false);
@@ -178,7 +178,7 @@ const HashMapIterator<K ,T, HashFunc> HashMapIterator<K ,T, HashFunc>::end(const
 
 /// Makes the iterator point to the next element in the hashmap
 template <class K, class T, class HashFunc>
-void HashMapIterator<K ,T, HashFunc>::next() const
+void HashMapIterator<K, T, HashFunc>::next() const
 {
 	const typename HashMap<K, T, HashFunc>::HashBucket* bucket = &(hashMap_.buckets_[bucketIndex_]);
 
@@ -210,7 +210,7 @@ void HashMapIterator<K ,T, HashFunc>::next() const
 
 /// Makes the iterator point to the previous element in the hashmap
 template <class K, class T, class HashFunc>
-void HashMapIterator<K ,T, HashFunc>::previous() const
+void HashMapIterator<K, T, HashFunc>::previous() const
 {
 	const typename HashMap<K, T, HashFunc>::HashBucket* bucket = &(hashMap_.buckets_[bucketIndex_]);
 

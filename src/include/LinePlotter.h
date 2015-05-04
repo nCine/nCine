@@ -11,7 +11,7 @@ class RenderCommand;
 class LineVariable : public PlottingVariable
 {
   public:
-	LineVariable(unsigned int numValues, float rejectDelay);
+	LineVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f& worldMatrix);
 
   private:
 	virtual void updateRenderCommand();
@@ -25,9 +25,12 @@ class LinePlotter : public ProfilePlotter
 	LinePlotter(SceneNode* parent, Rect rect) : ProfilePlotter(parent, rect) { }
 
 	virtual unsigned int addVariable(unsigned int numValues, float rejectDelay);
+
+	virtual void draw(RenderQueue& renderQueue);
+
+  private:
 	// Fill the buffer of every line variable with vertices
 	void updateAllVertices(int x, int y, int w, int h);
-	virtual void draw(RenderQueue& renderQueue);
 };
 
 }

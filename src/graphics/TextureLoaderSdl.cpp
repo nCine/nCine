@@ -48,13 +48,13 @@ void TextureLoaderSdl::init()
 	{
 		texFormat_ = TextureFormat(GL_RGBA8);
 	}
-	else if (bpp_  == 24)
+	else if (bpp_ == 24)
 	{
 		texFormat_ = TextureFormat(GL_RGB8);
 	}
 	else if (bpp_ == 8)
 	{
-		texFormat_ = TextureFormat(GL_ALPHA8);
+		texFormat_ = TextureFormat(GL_LUMINANCE8);
 	}
 	else
 	{

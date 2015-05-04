@@ -62,6 +62,11 @@ LOCAL_SRC_FILES := \
 	$(SRC)/graphics/IGfxDevice.cpp \
 	$(SRC)/android/EglGfxDevice.cpp \
 	$(SRC)/graphics/GfxCapabilities.cpp \
+	$(SRC)/graphics/RenderResources.cpp \
+	$(SRC)/graphics/RenderCommand.cpp \
+	$(SRC)/graphics/RenderQueue.cpp \
+	$(SRC)/graphics/Material.cpp \
+	$(SRC)/graphics/Geometry.cpp \
 	$(SRC)/graphics/TextureFormat.cpp \
 	$(SRC)/graphics/ITextureLoader.cpp \
 	$(SRC)/graphics/TextureLoaderDds.cpp \
@@ -77,8 +82,6 @@ LOCAL_SRC_FILES := \
 	$(SRC)/graphics/DrawableNode.cpp \
 	$(SRC)/graphics/SceneNode.cpp \
 	$(SRC)/graphics/Sprite.cpp \
-	$(SRC)/graphics/RenderCommand.cpp \
-	$(SRC)/graphics/RenderQueue.cpp \
 	$(SRC)/graphics/SpriteBatchNode.cpp \
 	$(SRC)/graphics/Particle.cpp \
 	$(SRC)/graphics/ParticleAffectors.cpp \
@@ -86,6 +89,18 @@ LOCAL_SRC_FILES := \
 	$(SRC)/graphics/TextNode.cpp \
 	$(SRC)/graphics/RectAnimation.cpp \
 	$(SRC)/graphics/AnimatedSprite.cpp \
+	$(SRC)/graphics/opengl/GLBufferObject.cpp \
+	$(SRC)/graphics/opengl/GLFramebufferObject.cpp \
+	$(SRC)/graphics/opengl/GLRenderbuffer.cpp \
+	$(SRC)/graphics/opengl/GLShader.cpp \
+	$(SRC)/graphics/opengl/GLShaderProgram.cpp \
+	$(SRC)/graphics/opengl/GLShaderUniforms.cpp \
+	$(SRC)/graphics/opengl/GLUniform.cpp \
+	$(SRC)/graphics/opengl/GLUniformCache.cpp \
+	$(SRC)/graphics/opengl/GLShaderAttributes.cpp \
+	$(SRC)/graphics/opengl/GLAttribute.cpp \
+	$(SRC)/graphics/opengl/GLVertexAttribute.cpp \
+	$(SRC)/graphics/opengl/GLTexture.cpp \
 	$(SRC)/audio/ALAudioDevice.cpp \
 	$(SRC)/audio/IAudioLoader.cpp \
 	$(SRC)/audio/AudioLoaderWav.cpp \
@@ -99,7 +114,7 @@ LOCAL_SRC_FILES := \
 	$(SRC)/threading/ThreadPool.cpp \
 	$(TST)/apptest_joystick.cpp
 
-LOCAL_LDLIBS := -lm -llog -landroid -lEGL -lGLESv1_CM
+LOCAL_LDLIBS := -lm -llog -landroid -lEGL -lGLESv2
 LOCAL_STATIC_LIBRARIES := android_native_app_glue webp tremolo
 LOCAL_SHARED_LIBRARIES := openal
 

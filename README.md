@@ -4,11 +4,11 @@ nCine is a multi-platform 2d game engine
 ## Information
 
 ### Features
-- OpenGL / OpenGL ES renderer
+- OpenGL 2 / OpenGL ES 2 renderer
 - Custom containers with iterators
 - Thread pool
 - Streaming of OGG Vorbis audio
-- Android assets
+- Android assets support
 - Joystick support
 - SDL 1.2 / GLFW 3 support
 - Font rendering (AngelCode's BMFont format)
@@ -26,7 +26,7 @@ nCine is a multi-platform 2d game engine
 - Doxygen with GraphViz
 - Valgrind
 - Cppcheck
-- Mercurial first, then git
+- git (originally Mercurial)
 
 ### Libraries
 - GLEW

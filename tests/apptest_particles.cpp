@@ -3,6 +3,7 @@
 #include "ParticleSystem.h"
 #include "IInputManager.h"
 #include "Timer.h"
+#include "IFile.h" // for dataPath()
 
 #ifdef __ANDROID__
 	#include "AndroidApplication.h"
@@ -24,12 +25,12 @@ void MyEventHandler::onInit()
 
 #ifdef __ANDROID__
 	nc::AndroidInputManager::enableAccelerometer(true);
-//	texture_ = new nc::Texture("/sdcard/ncine/smoke_128.dds"); // Adreno SD
-	texture_ = new nc::Texture("/sdcard/ncine/smoke2_256_8888.pvr"); // Mali HD
+//	texture_ = new nc::Texture((nc::IFile::dataPath() + "smoke_128.dds").data()); // Adreno SD
+	texture_ = new nc::Texture((nc::IFile::dataPath() + "smoke2_256_8888.pvr").data()); // Mali HD
 #else
-//	texture_ = new nc::Texture("textures/smoke_256.webp");
-//	texture_ = new nc::Texture("textures/smoke_256_4444.pvr");
-	texture_ = new nc::Texture("textures/smoke_256.png");
+//	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/smoke_256.webp").data());
+//	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/smoke_256_4444.pvr").data());
+	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/smoke_256.png").data());
 #endif
 
 	particleSystem_ = new nc::ParticleSystem(&rootNode, NumParticles, texture_, texture_->rect());
