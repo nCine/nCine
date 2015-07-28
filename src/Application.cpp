@@ -316,15 +316,19 @@ void Application::initCommon()
 		{
 			String fontTexFilePath = IFile::dataPath() + appCfg_.fontTexFilename_;
 			String fontFntFilePath = IFile::dataPath() + appCfg_.fontFntFilename_;
-			if (IFile::access(fontTexFilePath.data(), IFile::MODE_EXISTS) && IFile::access(fontFntFilePath.data(), IFile::MODE_EXISTS))
+			if (IFile::access(fontTexFilePath.data(), IFile::MODE_EXISTS) == false)
+			{
+				LOGW_X("Cannot access font texture file \"%s\" to enable profiling text", fontTexFilePath.data());
+			}
+			else if (IFile::access(fontFntFilePath.data(), IFile::MODE_EXISTS) == false)
+			{
+				LOGW_X("Cannot access font FNT file \"%s\" to enable profiling text", fontFntFilePath.data());
+			}
+			else
 			{
 				font_ = new Font(fontTexFilePath.data(), fontFntFilePath.data());
 				textLines_ = new TextNode(rootNode_, font_);
 				textLines_->setPosition(0.0f, height());
-			}
-			else
-			{
-				LOGW("Cannot access font files for profiling text");
 			}
 		}
 	}

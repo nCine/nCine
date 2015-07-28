@@ -73,7 +73,7 @@ class Array
 	/** The array is filled without gaps until the Size()-1 element */
 	inline unsigned int size() const { return size_; }
 	/// Returns the array capacity
-	/// The array has memory allocated to store until the Capacity()-1 element
+	/** The array has memory allocated to store until the Capacity()-1 element */
 	inline unsigned int capacity() const { return capacity_; }
 	// Sets a new capacity for the array (can be bigger or smaller than the current one)
 	void setCapacity(unsigned int newCapacity);
@@ -83,7 +83,7 @@ class Array
 	void shrinkToFit();
 
 	/// Clears the array
-	/** Size will be zero but capacity remains untouched */
+	/** Size will be set to zero but capacity remains untouched */
 	inline void clear() { size_ = 0; }
 	/// Inserts a new element as the last one in constant time
 	inline void insertBack(T element) { operator[](size_) = element; }
@@ -257,7 +257,7 @@ void Array<T>::append(const T* elements, unsigned int amount)
 
 /// Read-only subscript operator
 template <class T>
-const T& Array<T>::operator[](const unsigned int index) const
+const T& Array<T>::operator[](unsigned int index) const
 {
 	if (index > size_)
 	{
@@ -270,7 +270,7 @@ const T& Array<T>::operator[](const unsigned int index) const
 
 /// Subscript operator
 template <class T>
-T& Array<T>::operator[](const unsigned int index)
+T& Array<T>::operator[](unsigned int index)
 {
 	// Avoid creating "holes" into the array
 	if (index > size_)

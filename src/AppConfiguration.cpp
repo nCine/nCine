@@ -30,11 +30,11 @@ AppConfiguration::AppConfiguration()
 	IFile::dataPath_ = "/sdcard/ncine/";
 	fileLogLevel_ = ILogger::LOG_VERBOSE;
 
-//	fontTexFilename_ = "asset::trebuchet16_128_L8.dds.mp3";
+//	fontTexFilename_ = "asset::trebuchet16_128_L8.pvr.mp3";
 //	fontFntFilename_ = "asset::trebuchet16_128.fnt";
-	fontTexFilename_ = "trebuchet32_256_L8.dds";
+	fontTexFilename_ = "trebuchet32_256_L8.pvr";
 	fontFntFilename_ = "trebuchet32_256.fnt";
-//	fontTexFilename_ = "trebuchet16_128_L8.dds";
+//	fontTexFilename_ = "trebuchet16_128_L8.pvr";
 //	fontFntFilename_ = "trebuchet16_128.fnt";
 #else
 	windowTitle_ = "nCine";

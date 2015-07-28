@@ -31,7 +31,6 @@ TextureFormat::TextureFormat(GLenum internalFormat, GLenum type)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-#ifndef __ANDROID__
 /// Converts the external format to the corresponding BGR one
 void TextureFormat::bgrFormat()
 {
@@ -50,7 +49,6 @@ void TextureFormat::bgrFormat()
 	}
 #endif
 }
-#endif
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS

@@ -2,9 +2,9 @@
 
 namespace nc = ncine;
 
-const unsigned int Size = 10;
+const unsigned int Capacity = 10;
 
-void printArray(const nc::StaticArray<int, Size> &array)
+void printArray(const nc::StaticArray<int, Capacity> &array)
 {
 	for (unsigned int i = 0; i < array.size(); i++)
 	{
@@ -15,10 +15,10 @@ void printArray(const nc::StaticArray<int, Size> &array)
 
 int main(int argc, char **argv)
 {
-	nc::StaticArray<int, Size> array;
+	nc::StaticArray<int, Capacity> array;
 
 	printf("Initializing the whole array\n");
-	for (unsigned int i = 0; i < Size; i++)
+	for (unsigned int i = 0; i < Capacity; i++)
 	{
 		array[i] = i;
 	}
@@ -31,14 +31,14 @@ int main(int argc, char **argv)
 
 	printf("\n--- Array traversals (for cycles) ---\n");
 	printf("Iterating through elements:");
-	for (nc::StaticArray<int, Size>::Const_Iterator i = array.begin(); i != array.end(); ++i)
+	for (nc::StaticArray<int, Capacity>::Const_Iterator i = array.begin(); i != array.end(); ++i)
 	{
 		printf(" %d", *i);
 	}
 	printf("\n");
 
 	printf("Iterating through elements (reverse):");
-	for (nc::StaticArray<int, Size>::Const_Iterator r = array.rBegin(); r != array.rEnd(); --r)
+	for (nc::StaticArray<int, Capacity>::Const_Iterator r = array.rBegin(); r != array.rEnd(); --r)
 	{
 		printf(" %d", *r);
 	}
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 
 	printf("\n--- Array traversals (while cycles) ---\n");
 	printf("Iterating through elements:");
-	nc::StaticArray<int, Size>::Const_Iterator i = array.begin();
+	nc::StaticArray<int, Capacity>::Const_Iterator i = array.begin();
 	while (i != array.end())
 	{
 		printf(" %d", *i);
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 	printf("\n");
 
 	printf("Iterating through elements (reverse):");
-	nc::StaticArray<int, Size>::Const_Iterator r = array.rBegin();
+	nc::StaticArray<int, Capacity>::Const_Iterator r = array.rBegin();
 	while (r != array.rEnd())
 	{
 		printf(" %d", *r);
@@ -66,12 +66,24 @@ int main(int argc, char **argv)
 
 
 	printf("\nCreating a second array with copy construction\n");
-	nc::StaticArray<int, Size> array2(array);
+	nc::StaticArray<int, Capacity> array2(array);
 	printArray(array2);
 
 	printf("Creating a third array with the assignment operator\n");
-	nc::StaticArray<int, Size> array3 = array;
+	nc::StaticArray<int, Capacity> array3 = array;
 	printArray(array3);
+
+	printf("Clearing the first array\n");
+	if (!array.isEmpty())
+	{
+		array.clear();
+	}
+	printArray(array);
+
+	printf("Inserting twice at the back\n");
+	array.insertBack(1);
+	array.insertBack(2);
+	printArray(array);
 
 	return EXIT_SUCCESS;
 }
