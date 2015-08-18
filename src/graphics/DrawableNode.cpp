@@ -56,4 +56,13 @@ void DrawableNode::setPriority(int priority)
 	renderCommand_->setPriority(priority);
 }
 
+/// Increases or decreases the node rendering priority by adding a certain amount
+int DrawableNode::addPriority(int amount)
+{
+	int priority = renderCommand_->priority() + amount;
+	renderCommand_->setPriority(priority);
+
+	return priority;
+}
+
 }

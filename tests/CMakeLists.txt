@@ -5,32 +5,54 @@ if(NOT NCINE_DYNAMIC_LIBRARY)
 	add_definitions(-DNCINE_STATIC)
 endif()
 
-add_custom_target(copy_shaders_tests ALL
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/tests/shaders
-	COMMENT "Copying shaders to tests..."
-)
-if(WIN32)
-	add_custom_target(copy_dlls_tests ALL
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/tests
-		COMMENT "Copying DLLs to tests..."
+if(UNIX)
+	add_custom_target(link_shaders_tests ALL
+		COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/tests/shaders
+		COMMENT "Symlinking shaders to tests..."
 	)
-endif()
-
-if(EXISTS ${NCINE_DATA_DIR} AND IS_DIRECTORY ${NCINE_DATA_DIR})
-	if(UNIX)
+	if(EXISTS ${NCINE_DATA_DIR} AND IS_DIRECTORY ${NCINE_DATA_DIR})
 		add_custom_target(link_data_tests ALL
 			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATA_DIR}/fonts ${CMAKE_BINARY_DIR}/tests/fonts
 			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATA_DIR}/sounds ${CMAKE_BINARY_DIR}/tests/sounds
 			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATA_DIR}/textures ${CMAKE_BINARY_DIR}/tests/textures
 			COMMENT "Symlinking data to tests..."
 		)
-	elseif(WIN32)
-		add_custom_target(copy_data_tests ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/fonts ${CMAKE_BINARY_DIR}/tests/fonts
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/sounds ${CMAKE_BINARY_DIR}/tests/sounds
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/textures ${CMAKE_BINARY_DIR}/tests/textures
-			COMMENT "Copying data to tests..."
+	endif()
+elseif(WIN32)
+	if(MSVC_IDE)
+		add_custom_target(copy_shaders_tests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/tests/$<CONFIGURATION>/shaders
+			COMMENT "Copying shaders to tests..."
 		)
+		add_custom_target(copy_dlls_tests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/tests/$<CONFIGURATION>
+			COMMENT "Copying DLLs to tests..."
+		)
+		if(EXISTS ${NCINE_DATA_DIR} AND IS_DIRECTORY ${NCINE_DATA_DIR})
+			add_custom_target(copy_data_tests ALL
+				COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/fonts ${CMAKE_BINARY_DIR}/tests/$<CONFIGURATION>/fonts
+				COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/sounds ${CMAKE_BINARY_DIR}/tests/$<CONFIGURATION>/sounds
+				COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/textures ${CMAKE_BINARY_DIR}/tests/$<CONFIGURATION>/textures
+				COMMENT "Copying data to tests..."
+			)
+		endif()
+	else()
+		add_custom_target(copy_shaders_tests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/tests/shaders
+			COMMENT "Copying shaders to tests..."
+		)
+		add_custom_target(copy_dlls_tests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/tests
+			COMMENT "Copying DLLs to tests..."
+		)
+		if(EXISTS ${NCINE_DATA_DIR} AND IS_DIRECTORY ${NCINE_DATA_DIR})
+			add_custom_target(copy_data_tests ALL
+				COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/fonts ${CMAKE_BINARY_DIR}/tests/fonts
+				COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/sounds ${CMAKE_BINARY_DIR}/tests/sounds
+				COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/textures ${CMAKE_BINARY_DIR}/tests/textures
+				COMMENT "Copying data to tests..."
+			)
+		endif()
 	endif()
 endif()
 

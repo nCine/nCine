@@ -42,15 +42,40 @@ AnimatedSprite::~AnimatedSprite()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/// Returns true if the current animation is paused
+bool AnimatedSprite::isPaused() const
+{
+	bool isPaused = true;
+
+	if (anims_.isEmpty() == false)
+	{
+		isPaused = anims_[currentAnim]->isPaused();
+	}
+
+	return isPaused;
+}
+
+/// Sets the pause state for the animation
+void AnimatedSprite::setPaused(bool isPaused)
+{
+	if (anims_.isEmpty() == false)
+	{
+		anims_[currentAnim]->setPaused(isPaused);
+	}
+}
+
 void AnimatedSprite::update(float interval)
 {
-	unsigned int previousFrame = anims_[currentAnim]->frame();
-	anims_[currentAnim]->updateFrame(interval);
-
-	// Updating sprite texture rectangle only on change
-	if (previousFrame != anims_[currentAnim]->frame())
+	if (anims_.isEmpty() == false)
 	{
-		setTexRect(anims_[currentAnim]->rect());
+		unsigned int previousFrame = anims_[currentAnim]->frame();
+		anims_[currentAnim]->updateFrame(interval);
+
+		// Updating sprite texture rectangle only on change
+		if (previousFrame != anims_[currentAnim]->frame())
+		{
+			setTexRect(anims_[currentAnim]->rect());
+		}
 	}
 
 	Sprite::update(interval);
@@ -70,6 +95,13 @@ void AnimatedSprite::addAnimation(RectAnimation* anim)
 /// Sets the current animation and its frame number
 void AnimatedSprite::setAnimation(int animNum)
 {
+	// early-out if no animations available
+	if (anims_.isEmpty())
+	{
+		return;
+	}
+
+
 	if (static_cast<unsigned int>(animNum) >= anims_.size())
 	{
 		currentAnim = anims_.size() - 1;
@@ -84,6 +116,15 @@ void AnimatedSprite::setAnimation(int animNum)
 	}
 
 	setTexRect(anims_[currentAnim]->rect());
+}
+
+/// Sets the current animation to a specified frame number
+void AnimatedSprite::setFrame(int frameNum)
+{
+	if (anims_.isEmpty() == false)
+	{
+		anims_[currentAnim]->SetFrame(frameNum);
+	}
 }
 
 }

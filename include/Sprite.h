@@ -18,11 +18,11 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	Sprite(Texture *texture, float x, float y);
 
 	/// Returns sprite width
-	inline int width() const { return width_; }
+	inline int width() const { return width_ * scaleFactor_; }
 	/// Returns sprite height
-	inline int height() const { return height_; }
+	inline int height() const { return height_ * scaleFactor_; }
 	/// Returns sprite size
-	inline Point size() const	{ return Point(width_, height_); }
+	inline Point size() const	{ return Point(width_ * scaleFactor_, height_ * scaleFactor_); }
 	// Returns sprite rectangle
 	Rect rect() const;
 

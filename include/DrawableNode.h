@@ -31,6 +31,8 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	int priority() const;
 	// Sets the node rendering priority
 	void setPriority(int priority);
+	// Increases or decreases the node rendering priority by adding a certain amount
+	int addPriority(int amount);
 
   protected:
 	/// The render command class associated with this node

@@ -6,6 +6,8 @@ option(NCINE_EXTRA_OPTIMIZE "Compile the engine with extra optimizations in rele
 option(NCINE_AUTOVECTORIZATION_REPORT "Enable report generation from compiler auto-vectorization" OFF)
 option(NCINE_DYNAMIC_LIBRARY "Compile the engine as a dynamic library" ON)
 
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
 find_package(Threads)
 if(MSVC)
 	set(EXTERNAL_MSVC_DIR "${CMAKE_SOURCE_DIR}/external")
@@ -79,43 +81,15 @@ else() # GCC and LLVM
 		endif()
 	endif()
 
-	if(NOT CROSS_MINGW32) # Linux
-		find_package(OpenGL REQUIRED)
-		find_package(SDL)
-		find_package(SDL_image)
-		find_package(PNG)
-		find_package(OpenAL REQUIRED)
-		set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
-		find_package(GLFW)
-		find_package(WebP)
-		find_package(Vorbis)
-	else() # MinGW32 cross-compiler
-		set(WIN32 1)
-		set(CMAKE_SYSTEM_NAME Windows)
-		set(CMAKE_SHARED_LIBRARY_PREFIX)
-		set(CMAKE_SHARED_LIBRARY_SUFFIX .dll)
-		set(CMAKE_EXECUTABLE_SUFFIX .exe)
-		set(CMAKE_C_COMPILER i486-mingw32-gcc)
-		set(CMAKE_CXX_COMPILER i486-mingw32-g++)
-		set(CMAKE_RC_COMPILER i486-mingw32-windres)
-		set(CMAKE_FIND_ROOT_PATH /usr/i486-mingw32)
-		set(CMAKE_FIND_INCLUDE_PATH /usr/i486-mingw32)
-		set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-		set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-		set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-		set(CMAKE_SHARED_LIBRARY_CXX_FLAGS "") # suppressing '-fpic'
-		set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "") # suppressing '-rdynamic'
-		set(OPENGL_gl_LIBRARY opengl32 glew32)
-		set(SDL_LIBRARY mingw32 SDLmain SDL)
-		set(SDL_FOUND 1)
-		set(SDLIMAGE_LIBRARY SDL_image)
-		set(SDLIMAGE_FOUND 1)
-		set(OPENAL_LIBRARY OpenAL32)
-		set(OPENAL_FOUND 1)
-		set(VORBISFILE_LIBRARY ogg vorbis vorbisfile)
-		set(VORBIS_FOUND 1)
-		add_definitions(-DWITH_GLEW)
-	endif()
+	find_package(OpenGL REQUIRED)
+	find_package(SDL)
+	find_package(SDL_image)
+	find_package(PNG)
+	find_package(OpenAL REQUIRED)
+	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
+	find_package(GLFW)
+	find_package(WebP)
+	find_package(Vorbis)
 endif()
 
 set(HEADERS
@@ -363,7 +337,7 @@ if(Threads_FOUND)
 	list(APPEND PRIVATE_HEADERS src/include/Thread.h)
 	list(APPEND PRIVATE_HEADERS src/include/ThreadSync.h)
 
-	if(MSVC OR CROSS_MINGW32)
+	if(WIN32)
 		list(APPEND SOURCES src/threading/WindowsThread.cpp)
 		list(APPEND SOURCES src/threading/WindowsThreadSync.cpp)
 	else()
@@ -376,16 +350,13 @@ if(Threads_FOUND)
 	list(APPEND PRIVATE_HEADERS src/include/ThreadCommands.h)
 endif()
 
-link_libraries(
-	${OPENGL_gl_LIBRARY}
-	${LINK_LIBS}
-)
-
 if(NCINE_DYNAMIC_LIBRARY)
 	add_library(ncine SHARED ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
 else()
 	add_library(ncine STATIC ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
 endif()
+
+target_link_libraries(ncine ${OPENGL_gl_LIBRARY} ${LINK_LIBS})
 
 if(MSVC)
 	# Disabling incremental linking and manifest generation
@@ -397,29 +368,35 @@ if(MSVC)
 		set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} /MANIFEST:NO /INCREMENTAL:NO")
 		set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} /MANIFEST:NO /INCREMENTAL:NO")
 
-		# Disable linker warning about teamplates
+		# Disable linker warning about templates
 		add_definitions("/wd4251")
-
-		add_custom_target(copy_ncine_dll ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/ncine.dll ${CMAKE_BINARY_DIR}/tests
-			DEPENDS ncine
-			COMMENT "Copying nCine DLL..."
-		)
 	else()
 		add_definitions(-DNCINE_STATIC)
 	endif()
-
+	
 	target_include_directories(ncine PUBLIC "${EXTERNAL_MSVC_DIR}/include")
 else()
 	if(PNG_FOUND AND GLFW_FOUND)
 		target_include_directories(ncine PRIVATE ${PNG_INCLUDE_DIR})
 	endif()
-
-	if(CROSS_MINGW32)
-		set_target_properties(ncine PROPERTIES LINK_FLAGS "-Wl,--output-def,${CMAKE_CURRENT_BINARY_DIR}/ncine.def")
-	endif()
 endif()
 target_include_directories(ncine PUBLIC include PRIVATE src/include)
+
+if(WIN32 AND NCINE_DYNAMIC_LIBRARY)
+	if(MSVC_IDE)
+		add_custom_target(copy_ncine_dll ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/$<CONFIGURATION>/ncine.dll ${CMAKE_BINARY_DIR}/tests/$<CONFIGURATION>
+			DEPENDS ncine
+			COMMENT "Copying nCine DLL..."
+		)
+	else()
+		add_custom_target(copy_ncine_dll ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/ncine.dll ${CMAKE_BINARY_DIR}/tests
+			DEPENDS ncine
+			COMMENT "Copying nCine DLL..."
+		)
+	endif()
+endif()
 
 if(NCINE_BUILD_TESTS)
 	set(NCINE_DATA_DIR ${CMAKE_SOURCE_DIR}/../nCine-data)

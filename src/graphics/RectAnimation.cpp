@@ -8,7 +8,7 @@ namespace ncine {
 
 RectAnimation::RectAnimation(float frameTime, bool isLooping, bool backward)
 	: rects_(4), currentFrame_(0), frameTime_(frameTime), elapsedFrameTime_(0.0f),
-	  goingForward_(true), isLooping_(isLooping), backward_(backward), isPaused_(false)
+	  goingForward_(true), isLooping_(isLooping), backward_(backward), isPaused_(true)
 {
 
 }
