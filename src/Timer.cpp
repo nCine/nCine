@@ -6,6 +6,7 @@
 	#include <profileapi.h>
 #elif __APPLE__
 	#include <mach/mach_time.h>
+	#include <unistd.h>
 #else
 	#include <time.h> // for clock_gettime()
 	#include <sys/time.h> // for gettimeofday()
@@ -53,7 +54,7 @@ float Timer::now()
 void Timer::sleep(float seconds)
 {
 	// From seconds to milliseconds
-	unsigned int milliseconds = seconds * 1000;
+	unsigned int milliseconds = static_cast<unsigned int>(seconds) * 1000;
 
 #if defined(_WIN32)
 	SleepEx(milliseconds, FALSE);

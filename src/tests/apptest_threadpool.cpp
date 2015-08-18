@@ -16,7 +16,7 @@ void MyEventHandler::onInit()
 
 	for (unsigned int i = 0; i < 4; i++)
 	{
-		nc::ServiceLocator::threadPool().enqueueCommand(new nc::DummyCommand(i));
+		nc::theServiceLocator().threadPool().enqueueCommand(new nc::DummyCommand(i));
 		LOGI_X("APPTEST_THREADPOOL: enqueued %u", i);
 		nc::Timer::sleep(1000);
 	}
@@ -27,7 +27,7 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
 	{
-		nc::Application::quit();
+		nc::theApplication().quit();
 	}
 }
 #endif

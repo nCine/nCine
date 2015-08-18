@@ -1,12 +1,13 @@
 #ifndef CLASS_NCINE_COLOR
 #define CLASS_NCINE_COLOR
 
+#include "common_functions.h"
 #include "StaticArray.h"
 
 namespace ncine {
 
 /// A 32 bit color
-class Color
+class DLL_PUBLIC Color
 {
   public:
 	/// Default constructor (white color)
@@ -72,6 +73,11 @@ class Color
 
 	// Equality operator
 	bool operator==(const Color& color) const;
+
+	Color& operator*=(const Color& color);
+	// Multiplication by a constant scalar
+	Color& operator*=(float scalar);
+
 	Color operator*(const Color& color) const;
 	// Multiplication by a constant scalar
 	Color operator*(float scalar) const;
@@ -106,11 +112,10 @@ inline void Color::setVec(unsigned char channels[4])
 /// Sets four color channels (normalized float)
 inline void Color::setF(float red, float green, float blue, float alpha)
 {
-	// TODO: Clamp negative values too
-	channels_[0] = red > 1.0f ? 255 : static_cast<unsigned char>(red * 255);
-	channels_[1] = green > 1.0f ? 255 : static_cast<unsigned char>(green * 255);
-	channels_[2] = blue > 1.0f ? 255 : static_cast<unsigned char>(blue * 255);
-	channels_[3] = alpha > 1.0f ? 255 : static_cast<unsigned char>(alpha * 255);
+	channels_[0] = static_cast<unsigned char>(nc::clamp(red, 0.0f, 1.0f) * 255);
+	channels_[1] = static_cast<unsigned char>(nc::clamp(green, 0.0f, 1.0f) * 255);
+	channels_[2] = static_cast<unsigned char>(nc::clamp(blue, 0.0f, 1.0f) * 255);
+	channels_[3] = static_cast<unsigned char>(nc::clamp(alpha, 0.0f, 1.0f) * 255);
 }
 
 /// Sets three color channels (normalized float)
@@ -134,8 +139,7 @@ inline void Color::setAlpha(unsigned char alpha)
 /// Sets the alpha channel (normalized float)
 inline void Color::setAlphaF(float alpha)
 {
-	// TODO: Clamp negative values too
-	channels_[3] = alpha > 1.0f ? 255 : static_cast<unsigned char>(alpha * 255);
+	channels_[3] = static_cast<unsigned char>(nc::clamp(alpha, 0.0f, 1.0f) * 255);
 }
 
 /// Equality operator
@@ -145,6 +149,31 @@ inline bool Color::operator==(const Color& color) const
 			b() == color.b() && a() == color.a());
 }
 
+inline Color& Color::operator*=(const Color& color)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		float channelValue = (color.channels_[i] / 255.0f) * channels_[i];
+		channelValue = nc::clamp(channelValue, 0.0f, 255.0f);
+		channels_[i] = static_cast<unsigned char>(channelValue);
+	}
+
+	return *this;
+}
+
+/// Multiplication by a constant scalar
+inline Color& Color::operator*=(float scalar)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		float channelValue = scalar * channels_[i];
+		channelValue = nc::clamp(channelValue, 0.0f, 255.0f);
+		channels_[i] = static_cast<unsigned char>(channelValue);
+	}
+
+	return *this;
+}
+
 inline Color Color::operator*(const Color& color) const
 {
 	Color result;
@@ -152,16 +181,7 @@ inline Color Color::operator*(const Color& color) const
 	for (int i = 0; i < 4; i++)
 	{
 		float channelValue = (color.channels_[i] / 255.0f) * channels_[i];
-		// clamping
-		if (channelValue > 255.0f)
-		{
-			channelValue = 255.0f;
-		}
-		else if (channelValue < 0.0f)
-		{
-			channelValue = 0.0f;
-		}
-
+		channelValue = nc::clamp(channelValue, 0.0f, 255.0f);
 		result.channels_[i] = static_cast<unsigned char>(channelValue);
 	}
 
@@ -176,16 +196,7 @@ inline Color Color::operator*(float scalar) const
 	for (int i = 0; i < 4; i++)
 	{
 		float channelValue = scalar * channels_[i];
-		// clamping
-		if (channelValue > 255.0f)
-		{
-			channelValue = 255.0f;
-		}
-		else if (channelValue < 0.0f)
-		{
-			channelValue = 0.0f;
-		}
-
+		channelValue = nc::clamp(channelValue, 0.0f, 255.0f);
 		result.channels_[i] = static_cast<unsigned char>(channelValue);
 	}
 

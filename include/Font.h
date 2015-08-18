@@ -10,7 +10,7 @@ class FontGlyph;
 class Texture;
 
 /// A class holding every information needed to correctly render text
-class Font
+class DLL_PUBLIC Font
 {
   public:
 	// Constructs a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)

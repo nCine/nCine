@@ -81,7 +81,7 @@ void TextureLoaderKtx::readHeader(KtxHeader &header)
 /// Parses the PVR3 header to determine its format
 void TextureLoaderKtx::parseFormat(const KtxHeader& header)
 {
-	const GfxCapabilities& gfxCaps = ServiceLocator::gfxCapabilities();
+	const GfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();
 
 	GLenum internalFormat = IFile::int32FromLE(header.glInternalFormat);
 	GLenum type = IFile::int32FromLE(header.glType);

@@ -14,13 +14,13 @@ class SdlGfxDevice : public IGfxDevice
 {
   public:
 	// Constructor taking the resolution as two integer
-	SdlGfxDevice(int width, int height);
+	SdlGfxDevice(int width, int height, bool isFullScreen);
 	// Constructor taking the resolution as a Point class
-	SdlGfxDevice(Point size);
+	SdlGfxDevice(Point size, bool isFullScreen);
 	// Constructor taking the resolution as two integer and a DisplayMode
-	SdlGfxDevice(int width, int height, DisplayMode mode);
+	SdlGfxDevice(int width, int height, DisplayMode mode, bool isFullScreen);
 	// Constructor taking the resolution as a Point class and a DisplayMode
-	SdlGfxDevice(Point size, DisplayMode mode);
+	SdlGfxDevice(Point size, DisplayMode mode, bool isFullScreen);
 	~SdlGfxDevice() { SDL_Quit(); }
 
 	void setResolution(int width, int height);
@@ -39,7 +39,7 @@ class SdlGfxDevice : public IGfxDevice
 	SdlGfxDevice& operator=(const SdlGfxDevice&);
 
 	// Initilizes the class
-	void init(int width, int height, DisplayMode mode, bool isWindowed);
+	void init(int width, int height, DisplayMode mode, bool isFullScreen_);
 	// Initilizes the video subsystem (SDL)
 	void initGraphics();
 	// Initilizes the OpenGL graphic context

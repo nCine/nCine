@@ -7,7 +7,7 @@
 namespace ncine {
 
 /// A class for an animated sprite
-class AnimatedSprite : public Sprite
+class DLL_PUBLIC AnimatedSprite : public Sprite
 {
   public:
 	AnimatedSprite(SceneNode* parent, Texture *texture);

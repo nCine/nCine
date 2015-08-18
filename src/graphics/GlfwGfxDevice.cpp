@@ -15,27 +15,27 @@ GLFWwindow* GlfwGfxDevice::windowHandle_ = NULL;
 ///////////////////////////////////////////////////////////
 
 /// Constructor taking the resolution as two integer
-GlfwGfxDevice::GlfwGfxDevice(int width, int height)
+GlfwGfxDevice::GlfwGfxDevice(int width, int height, bool isFullScreen)
 {
-	init(width, height, DisplayMode(), true);
+	init(width, height, DisplayMode(), isFullScreen);
 }
 
 /// Constructor taking the resolution as a Point class
-GlfwGfxDevice::GlfwGfxDevice(Point size)
+GlfwGfxDevice::GlfwGfxDevice(Point size, bool isFullScreen)
 {
-	init(size.x, size.y, DisplayMode(), true);
+	init(size.x, size.y, DisplayMode(), isFullScreen);
 }
 
 /// Constructor taking the resolution as two integer and a DisplayMode
-GlfwGfxDevice::GlfwGfxDevice(int width, int height, DisplayMode mode)
+GlfwGfxDevice::GlfwGfxDevice(int width, int height, DisplayMode mode, bool isFullScreen)
 {
-	init(width, height, mode, true);
+	init(width, height, mode, isFullScreen);
 }
 
 /// Constructor taking the resolution as a Point class and a DisplayMode
-GlfwGfxDevice::GlfwGfxDevice(Point size, DisplayMode mode)
+GlfwGfxDevice::GlfwGfxDevice(Point size, DisplayMode mode, bool isFullScreen)
 {
-	init(size.x, size.y, mode, true);
+	init(size.x, size.y, mode, isFullScreen);
 }
 
 GlfwGfxDevice::~GlfwGfxDevice()
@@ -65,21 +65,12 @@ void GlfwGfxDevice::setResolution(int width, int height)
 
 void GlfwGfxDevice::setResolution(Point size)
 {
-	// change resolution only in the case it really changes
-	if (size.x != width_ || size.y != height_)
-	{
-		width_ = size.x;
-		height_ = size.y;
-
-		glfwDestroyWindow(windowHandle_);
-		windowHandle_ = NULL;
-		initDevice();
-	}
+	setResolution(size.x, size.y);
 }
 
 void GlfwGfxDevice::toggleFullScreen()
 {
-	isWindowed_ = !isWindowed_;
+	isFullScreen_ = !isFullScreen_;
 
 	glfwDestroyWindow(windowHandle_);
 	windowHandle_ = NULL;
@@ -91,16 +82,15 @@ void GlfwGfxDevice::toggleFullScreen()
 ///////////////////////////////////////////////////////////
 
 /// Initializes the class
-void GlfwGfxDevice::init(int width, int height, DisplayMode mode, bool isWindowed)
+void GlfwGfxDevice::init(int width, int height, DisplayMode mode, bool isFullScreen)
 {
 	width_ = width;
 	height_ = height;
 	mode_ = mode;
-	isWindowed_ = isWindowed;
+	isFullScreen_ = isFullScreen;
 
 	initGraphics();
 	initDevice();
-	initGL();
 }
 
 /// Initilizes the video subsystem (SDL)
@@ -119,7 +109,7 @@ void GlfwGfxDevice::initGraphics()
 void GlfwGfxDevice::initDevice()
 {
 	GLFWmonitor* monitor = NULL;
-	if (isWindowed_ == false)
+	if (isFullScreen_)
 	{
 		monitor = glfwGetPrimaryMonitor();
 	}
@@ -127,6 +117,7 @@ void GlfwGfxDevice::initDevice()
 	// setting window hints and creating a window with GLFW
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_RED_BITS, mode_.redBits());
 	glfwWindowHint(GLFW_GREEN_BITS, mode_.greenBits());
 	glfwWindowHint(GLFW_BLUE_BITS, mode_.blueBits());
@@ -161,9 +152,9 @@ void GlfwGfxDevice::initDevice()
 		exit(EXIT_FAILURE);
 	}
 
-	if (!GLEW_VERSION_2_0)
+	if (!GLEW_VERSION_2_1)
 	{
-		LOGF("OpenGL 2 is not supported");
+		LOGF("OpenGL 2.1 is not supported");
 		exit(EXIT_FAILURE);
 	}
 #endif

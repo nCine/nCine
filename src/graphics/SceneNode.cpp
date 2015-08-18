@@ -20,7 +20,8 @@ const float SceneNode::MinRotation = 0.5f;
 
 SceneNode::SceneNode(SceneNode* parent, float x, float y)
 	: x(x), y(y), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
-	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f)
+	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
+	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {
 	type_ = SCENENODE_TYPE;
 
@@ -32,7 +33,8 @@ SceneNode::SceneNode(SceneNode* parent, float x, float y)
 
 SceneNode::SceneNode(SceneNode* parent)
 	: x(0.0f), y(0.0f), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
-	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f)
+	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
+	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {
 	type_ = SCENENODE_TYPE;
 
@@ -44,7 +46,8 @@ SceneNode::SceneNode(SceneNode* parent)
 
 SceneNode::SceneNode()
 	: Object(), x(0.0f), y(0.0f), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
-	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f)
+	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
+	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {
 	type_ = SCENENODE_TYPE;
 }
@@ -164,6 +167,8 @@ bool SceneNode::unlinkChildNode(SceneNode *childNode)
 /// Called once every frame to update the node
 void SceneNode::update(float interval)
 {
+	// Early return not needed, the first call to this method is on the root node
+
 	for (List<SceneNode *>::Const_Iterator i = children_.begin(); i != children_.end(); ++i)
 	{
 		if ((*i)->shouldUpdate_)
@@ -171,8 +176,9 @@ void SceneNode::update(float interval)
 #ifndef WITH_MULTITHREADING
 			(*i)->update(interval);
 #else
-			ServiceLocator::threadPool().enqueueCommand(new UpdateNodeCommand(*i, interval));
+			theServiceLocator().threadPool().enqueueCommand(new UpdateNodeCommand(*i, interval));
 #endif
+			(*i)->transform();
 		}
 	}
 }
@@ -180,18 +186,15 @@ void SceneNode::update(float interval)
 /// Draws the node and visits its children
 void SceneNode::visit(RenderQueue &renderQueue)
 {
-	// early return if a node is invisible
-	if (!shouldDraw_)
-	{
-		return;
-	}
-
-	transform();
-	draw(renderQueue);
+	// Early return not needed, the first call to this method is on the root node
 
 	for (List<SceneNode *>::Const_Iterator i = children_.begin(); i != children_.end(); ++i)
 	{
-		(*i)->visit(renderQueue);
+		if ((*i)->shouldDraw_)
+		{
+			(*i)->draw(renderQueue);
+			(*i)->visit(renderQueue);
+		}
 	}
 }
 
@@ -201,37 +204,31 @@ void SceneNode::visit(RenderQueue &renderQueue)
 
 void SceneNode::transform()
 {
-	// Calculating absolute transformations
+	// Calculating world and local matrices
+	localMatrix_ = Matrix4x4f::Identity;
+	localMatrix_ *= Matrix4x4f::translation(x, y, 0.0f);
+	localMatrix_ *= Matrix4x4f::rotationZ(rotation_);
+	localMatrix_ *= Matrix4x4f::scale(scaleFactor_, scaleFactor_, 1.0f);
+
+	absScaleFactor_ = scaleFactor_;
+	absRotation_ = rotation_;
+	absColor_ = color_;
+
 	if (parent_)
 	{
-		absScaleFactor_ = parent_->absScaleFactor_ * scaleFactor_;
-		absRotation_ = parent_->absRotation_ + rotation_;
-		// New scaled position accounting parent scale factor (allow zooming)
-		float scaledX = parent_->absScaleFactor_ * x;
-		float scaledY = parent_->absScaleFactor_ * y;
+		worldMatrix_ = parent_->worldMatrix_ * localMatrix_;
 
-		float sine = 0.0f;
-		float cosine = 1.0f;
-		float parentRot = parent_->absRotation_;
-		if (fabs(parentRot) > MinRotation && fabs(parentRot) < 360.0f - MinRotation)
-		{
-			sine = sinf(-parentRot * M_PI / 180.0f);
-			cosine = cosf(-parentRot * M_PI / 180.0f);
-		}
-
-		absX_ = parent_->absX_ + scaledX * cosine - scaledY * sine;
-		absY_ = parent_->absY_ + scaledY * cosine + scaledX * sine;
-
-		absColor_ = parent_->absColor_ * color_;
+		absScaleFactor_ *= parent_->absScaleFactor_;
+		absRotation_ += parent_->absRotation_ ;
+		absColor_ *= parent_->absColor_;
 	}
 	else
 	{
-		absX_ = x;
-		absY_ = y;
-		absScaleFactor_ = scaleFactor_;
-		absRotation_ = rotation_;
-		absColor_ = color_;
+		worldMatrix_ = localMatrix_;
 	}
+
+	absX_ = worldMatrix_[3][0];
+	absY_ = worldMatrix_[3][1];
 }
 
 }

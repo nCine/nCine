@@ -17,13 +17,13 @@ class GlfwGfxDevice : public IGfxDevice
 {
   public:
 	// Constructor taking the resolution as two integer
-	GlfwGfxDevice(int width, int height);
+	GlfwGfxDevice(int width, int height, bool isFullScreen_);
 	// Constructor taking the resolution as a Point class
-	explicit GlfwGfxDevice(Point size);
+	explicit GlfwGfxDevice(Point size, bool isFullScreen_);
 	// Constructor taking the resolution as two integer and a DisplayMode
-	GlfwGfxDevice(int width, int height, DisplayMode mode);
+	GlfwGfxDevice(int width, int height, DisplayMode mode, bool isFullScreen_);
 	// Constructor taking the resolution as a Point class and a DisplayMode
-	GlfwGfxDevice(Point size, DisplayMode mode);
+	GlfwGfxDevice(Point size, DisplayMode mode, bool isFullScreen_);
 	~GlfwGfxDevice();
 
 	void setResolution(int width, int height);
@@ -35,9 +35,6 @@ class GlfwGfxDevice : public IGfxDevice
 
 	inline void setWindowTitle(const char *windowTitle) { glfwSetWindowTitle(windowHandle_, windowTitle); }
 
-	/// Returns the window handle used by GLFW3
-	static GLFWwindow* windowHandle() { return windowHandle_; }
-
   private:
 	/// GLFW3 window handle
 	static GLFWwindow *windowHandle_;
@@ -48,14 +45,21 @@ class GlfwGfxDevice : public IGfxDevice
 	GlfwGfxDevice& operator=(const GlfwGfxDevice&);
 
 	// Initilizes the class
-	void init(int width, int height, DisplayMode mode, bool isWindowed);
+	void init(int width, int height, DisplayMode mode, bool isFullScreen_);
 	// Initilizes the video subsystem (GLFW)
 	void initGraphics();
 	// Initilizes the OpenGL graphic context
 	void initDevice();
 
+	/// Returns the window handle used by GLFW3
+	static GLFWwindow* windowHandle() { return windowHandle_; }
+
 	// Callback for glfwSetErrorCallback()
 	static void errorCallback(int error, const char* description);
+
+	friend class GlfwInputManager;
+	friend class GlfwMouseState;
+	friend class GlfwKeyboardState;
 };
 
 }

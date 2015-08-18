@@ -7,12 +7,20 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-StackedBarVariable::StackedBarVariable(unsigned int numValues, float rejectDelay)
-	: PlottingVariable(numValues, rejectDelay)
+StackedBarVariable::StackedBarVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f& worldMatrix)
+	: PlottingVariable(numValues, rejectDelay, worldMatrix)
 {
 	// Two vertices for the mean quote plus...
 	// Six vertices (two coordinates each) for every recorded value
 	vertices_ = new GLfloat[4 + numValues * 2 * 6];
+
+	valuesCmd_.material().setShaderProgram(Material::COLOR_PROGRAM);
+	valuesCmd_.geometry().createCustomVbo(4 + numValues * 2 * 6, GL_DYNAMIC_DRAW);
+	valuesCmd_.geometry().setDrawParameters(GL_TRIANGLES, 2, variable_.numValues() * 6);
+
+	meanCmd_.material().setShaderProgram(Material::COLOR_PROGRAM);
+	meanCmd_.geometry().shareVbo(valuesCmd_.geometry());
+	meanCmd_.geometry().setDrawParameters(GL_LINES, 0, 2);
 }
 
 ///////////////////////////////////////////////////////////
@@ -36,7 +44,7 @@ unsigned int StackedBarPlotter::addVariable(unsigned int numValues, float reject
 		}
 	}
 
-	StackedBarVariable* variable = new StackedBarVariable(numValues, rejectDelay);
+	StackedBarVariable* variable = new StackedBarVariable(numValues, rejectDelay, worldMatrix_);
 	variables_.insertBack(variable);
 
 	return variables_.size() - 1;
@@ -52,13 +60,11 @@ void StackedBarPlotter::draw(RenderQueue& renderQueue)
 	// Drawing the reference value line
 	if (shouldPlotRefValue())
 	{
-		applyTransformations(absX_, absY_, absRotation_, absScaleFactor_);
 		drawRefValue(renderQueue);
 	}
 
 	for (unsigned int i = 0; i < variables_.size(); i++)
 	{
-		variables_[i]->applyTransformations(absX_, absY_, absRotation_, absScaleFactor_);
 		variables_[i]->draw(renderQueue);
 		if (variables_[i]->shouldPlotMean())
 		{
@@ -151,20 +157,20 @@ void StackedBarPlotter::updateAllVertices(int x, int y, int w, int h)
 
 void StackedBarVariable::updateRenderCommand()
 {
-	valuesCmd_.material().setTextureGLId(0);
-	valuesCmd_.material().setColor(graphColor_);
-//	valuesCmd_.transformation().setPosition(absPosition().x, absPosition().y);
-	valuesCmd_.geometry().setData(GL_TRIANGLES, 2, variable_.numValues() * 6, vertices_, NULL, NULL);
-	valuesCmd_.calculateSortKey();
+	valuesCmd_.transformation() = worldMatrix_;
+
+	valuesCmd_.material().setTexture(NULL);
+	valuesCmd_.material().uniform("color")->setFloatValue(graphColor_.fR(), graphColor_.fG(), graphColor_.fB(), graphColor_.fA());
+	valuesCmd_.geometry().updateVboData(4, variable_.numValues() * 6 * 2, vertices_ + 4);
 }
 
 void StackedBarVariable::updateMeanRenderCommand()
 {
-	meanCmd_.material().setTextureGLId(0);
-	meanCmd_.material().setColor(meanColor_);
-//	meanCmd_.transformation().setPosition(absPosition().x, absPosition().y);
-	meanCmd_.geometry().setData(GL_LINES, 0, 2, vertices_, NULL, NULL);
-	meanCmd_.calculateSortKey();
+	meanCmd_.transformation() = worldMatrix_;
+
+	meanCmd_.material().setTexture(NULL);
+	meanCmd_.material().uniform("color")->setFloatValue(meanColor_.fR(), meanColor_.fG(), meanColor_.fB(), meanColor_.fA());
+	meanCmd_.geometry().updateVboData(0, 4, vertices_);
 }
 
 }

@@ -2,7 +2,7 @@
 #define CLASS_NCINE_LIST
 
 #include <cstdio> // for NULL
-#include "common.h"
+#include "common_functions.h"
 #include <ListIterator.h>
 
 namespace ncine {
@@ -325,7 +325,7 @@ void List<T>::insertBefore(ListNode<T> *node, const T& element)
 template <class T>
 void List<T>::remove(ListNode<T> *node)
 {
-	// Preventing NULL deletion
+	// Early-out to prevent NULL pointer dereferencing
 	if (node == NULL)
 	{
 		return;

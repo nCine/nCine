@@ -1,11 +1,17 @@
 #include "apptest_animsprites.h"
-#include "Application.h"
 #include "AudioStreamPlayer.h"
 #include "Texture.h"
 #include "AnimatedSprite.h"
 #include "Font.h"
 #include "TextNode.h"
 #include "IInputManager.h"
+#include "IFile.h" // for dataPath()
+
+#ifdef __ANDROID__
+	#include "AndroidApplication.h"
+#else
+	#include "Application.h"
+#endif
 
 //#define WITH_8DIRECTIONS
 
@@ -17,17 +23,17 @@ nc::IAppEventHandler* createApphandler()
 void MyEventHandler::onInit()
 {
 	nc::IInputManager::setHandler(this);
-	nc::SceneNode &rootNode = nc::Application::rootNode();
+	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 #ifdef __ANDROID__
-	audioPlayer_ = new nc::AudioStreamPlayer("/sdcard/ncine/music.ogg");
-	texture_ = new nc::Texture("/sdcard/ncine/abta_playertwo.dds");
+	audioPlayer_ = new nc::AudioStreamPlayer((nc::IFile::dataPath() + "music.ogg").data());
+	texture_ = new nc::Texture((nc::IFile::dataPath() + "abta_playertwo.dds").data());
 //	audioPlayer_ = new nc::AudioStreamPlayer("asset::bomb.ogg");
 //	texture_ = new nc::Texture("asset::abta_player.dds.mp3");
 #else
-	audioPlayer_ = new nc::AudioStreamPlayer("sounds/music.ogg");
-	texture_ = new nc::Texture("textures/abta_playertwo.png");
-//	texture_ = new nc::Texture("textures/abta_playertwo_bc3.dds");
+	audioPlayer_ = new nc::AudioStreamPlayer((nc::IFile::dataPath() + "sounds/music.ogg").data());
+	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/abta_playertwo.png").data());
+//	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/abta_playertwo_bc3.dds").data());
 #endif
 
 	audioPlayer_->setLooping(true);
@@ -108,7 +114,7 @@ void MyEventHandler::onInit()
 	animSprite_->addAnimation(animation);
 #endif
 
-	animSprite_->setPosition(nc::Application::width() * 0.5f, nc::Application::height() * 0.5f);
+	animSprite_->setPosition(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	animSprite_->setAnimation(0);
 	animSprite_->setFrame(0);
 	animSprite_->setPaused(true);
@@ -125,7 +131,7 @@ void MyEventHandler::onFrameStart()
 
 #ifdef WITH_8DIRECTIONS
 		const float dirTolerance = 0.3f;
-		if (reachVector.x < -dirTolerance) // Right
+		if (reachVector.x > dirTolerance) // Right
 		{
 			if (reachVector.y > dirTolerance)
 			{
@@ -140,7 +146,7 @@ void MyEventHandler::onFrameStart()
 				animSprite_->setAnimation(2);    // Right
 			}
 		}
-		else if (reachVector.x > dirTolerance) // Left
+		else if (reachVector.x < -dirTolerance) // Left
 		{
 			if (reachVector.y > dirTolerance)
 			{
@@ -167,7 +173,7 @@ void MyEventHandler::onFrameStart()
 			}
 		}
 #else
-		float angle = -(atan2(reachVector.y, reachVector.x) - atan2(1.0f, 0.0f)) * 180.0f / M_PI;
+		float angle = (atan2(reachVector.y, reachVector.x) - atan2(1.0f, 0.0f)) * 180.0f / M_PI;
 		if (angle < 0.0f)
 		{
 			angle += 360.0f;
@@ -175,7 +181,7 @@ void MyEventHandler::onFrameStart()
 		animSprite_->setRotation(angle);
 #endif
 
-		reachVector *= nc::Application::interval() * 100.0f;
+		reachVector *= nc::theApplication().interval() * 100.0f;
 		animSprite_->move(reachVector);
 	}
 	else
@@ -209,11 +215,11 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
 	{
-		nc::Application::quit();
+		nc::theApplication().quit();
 	}
 	else if (event.sym == nc::KEY_SPACE)
 	{
-		nc::Application::togglePause();
+		nc::theApplication().togglePause();
 	}
 }
 

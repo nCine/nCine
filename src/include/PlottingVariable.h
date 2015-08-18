@@ -13,7 +13,7 @@ namespace ncine {
 class PlottingVariable
 {
   public:
-	PlottingVariable(unsigned int numValues, float rejectDelay);
+	PlottingVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f& worldMatrix);
 	virtual ~PlottingVariable();
 
 	/// Returns the number of value for the variable
@@ -42,9 +42,6 @@ class PlottingVariable
 	/// Sets the mean drawing flag state
 	inline void setPlotMean(bool enabled) { shouldPlotMean_ = enabled; }
 
-	// Applies parent transformations to both mean and values vertices
-	void applyTransformations(float absX, float absY, float absRotation, float absScaleFactor);
-
 	inline virtual void draw(RenderQueue& renderQueue)
 	{
 		updateRenderCommand();
@@ -67,6 +64,8 @@ class PlottingVariable
 	ProfileVariable variable_;
 	/// The vertices buffer
 	float *vertices_;
+	/// A reference to the world matrix of the profile plotter
+	const Matrix4x4f& worldMatrix_;
 
 	/// The command used to render variable values
 	RenderCommand valuesCmd_;

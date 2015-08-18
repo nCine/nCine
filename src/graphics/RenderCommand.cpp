@@ -1,6 +1,11 @@
 #include "RenderCommand.h"
-#include "Texture.h"
-#include "ServiceLocator.h"
+#include "GLShaderProgram.h"
+#include "Matrix4x4.h" // TODO: Remove dependency
+#ifdef __ANDROID__
+	#include "AndroidApplication.h" // TODO: Remove dependency
+#else
+	#include "Application.h" // TODO: Remove dependency
+#endif
 
 namespace ncine {
 
@@ -8,26 +13,9 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-RenderGeometry::RenderGeometry(GLenum drawType, GLint firstVertex, GLsizei numVertices, GLfloat *vertices, GLfloat *texCoords)
-	: drawType_(drawType),
-	  firstVertex_(firstVertex), numVertices_(numVertices),
-	  vertices_(vertices), texCoords_(texCoords), colors_(NULL)
-{
-
-}
-
-RenderGeometry::RenderGeometry(GLsizei numVertices, GLfloat *vertices, GLfloat *texCoords)
-	: drawType_(GL_TRIANGLES),
-	  firstVertex_(0), numVertices_(numVertices),
-	  vertices_(vertices), texCoords_(texCoords), colors_(NULL)
-{
-
-}
-
-RenderGeometry::RenderGeometry()
-	: drawType_(GL_TRIANGLES),
-	  firstVertex_(0), numVertices_(0),
-	  vertices_(NULL), texCoords_(NULL), colors_(NULL)
+RenderCommand::RenderCommand()
+	: sortKey_(0), priority_(0), profilingType_(GENERIC_TYPE),
+	  modelView_(Matrix4x4f::Identity)
 {
 
 }
@@ -36,74 +24,64 @@ RenderGeometry::RenderGeometry()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Binds the material state
-void RenderMaterial::bind() const
-{
-//	glColor4ubv(color.vector()); // Not available on GLES
-	glColor4ub(color_.r(), color_.g(), color_.b(), color_.a());
-	glBindTexture(GL_TEXTURE_2D, textureGLId_);
-}
-
-/// Applies the transformation
-void RenderTransformation::apply() const
-{
-
-}
-
-/// Draws the geometry
-void RenderGeometry::draw() const
-{
-	if (colors_)
-	{
-		glEnableClientState(GL_COLOR_ARRAY);
-		glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors_);
-	}
-
-	if (texCoords_)
-	{
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, 0, texCoords_);
-	}
-
-	if (vertices_)
-	{
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glVertexPointer(2, GL_FLOAT, 0, vertices_);
-		glDrawArrays(drawType_, firstVertex_, numVertices_);
-	}
-
-	if (vertices_)
-	{
-		glDisableClientState(GL_VERTEX_ARRAY);
-	}
-	if (texCoords_)
-	{
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
-	if (colors_)
-	{
-		glDisableClientState(GL_COLOR_ARRAY);
-	}
-}
-
 /// Calculates a sort key for the queue
 void RenderCommand::calculateSortKey()
 {
 	unsigned long int upper = priority_ << 16;
-	unsigned int lower = material_.textureGLId();
+	unsigned int lower = material_.sortKey();
 	sortKey_ = upper + lower;
 }
 
 /// Issues the render command
-void RenderCommand::issue() const
+void RenderCommand::issue()
 {
-#ifdef WITH_DEPTH_TEST
-	glPolygonOffset(0.0f, -1.0f * priority_);
-#endif
+	geometry_.bind();
 
 	material_.bind();
-	transformation_.apply();
-	geometry_.draw();
+	setTransformation();
+	material_.commitUniforms();
+	material_.defineVertexPointers(geometry_.vboHandle());
+
+	draw();
+}
+
+void RenderCommand::setVertexAttribute(const char* name, GLsizei vboStride, const GLvoid *vboPointer)
+{
+	GLVertexAttribute* vertexAttribute = material_.attribute(name);
+	vertexAttribute->setVboParameters(vboStride, vboPointer);
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void RenderCommand::setTransformation()
+{
+	int width = theApplication().width();
+	float height = static_cast<float>(theApplication().height());
+
+	// TODO: Projection is hard-coded, should go in a camera class (Y-axis points downward)
+	Matrix4x4f projection = Matrix4x4f::ortho(0.0f, width, 0.0f, height, -1.0f, 1.0f);
+	// Priority becomes depth
+	modelView_[3][2] = priority_ / 1000.0f; // TODO: Check that is always inside the frustum
+
+	if (material_.shaderProgram_)
+	{
+		material_.uniform("modelView")->setFloatVector(modelView_.data());
+		material_.uniform("projection")->setFloatVector(projection.data());
+	}
+}
+
+void RenderCommand::draw()
+{
+	if (geometry_.ibo_)
+	{
+		glDrawElements(geometry_.drawType_, geometry_.numVertices_, GL_UNSIGNED_SHORT, 0);
+	}
+	else
+	{
+		glDrawArrays(geometry_.drawType_, geometry_.firstVertex_, geometry_.numVertices_);
+	}
 }
 
 }

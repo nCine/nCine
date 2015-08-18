@@ -7,7 +7,7 @@
 namespace ncine {
 
 /// The class containing data for a rectangles based animation
-class RectAnimation
+class DLL_PUBLIC RectAnimation
 {
   public:
 	RectAnimation(float frameTime, bool isLooping, bool backward);

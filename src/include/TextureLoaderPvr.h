@@ -41,11 +41,16 @@ class TextureLoaderPvr : public ITextureLoader
 	static const uint64_t FMT_DXT1 = 7;
 	static const uint64_t FMT_DXT3 = 9;
 	static const uint64_t FMT_DXT5 = 11;
+
+	static const uint64_t FMT_BGRA_8888 = 0x0808080861726762ULL;
 	static const uint64_t FMT_RGB_888 = 0x0008080800626772ULL; // rgb08880
 	static const uint64_t FMT_RGBA_8888 = 0x0808080861626772ULL; // rgba8888
 	static const uint64_t FMT_RGB_565 = 0x0005060500626772ULL; // rgb05650
 	static const uint64_t FMT_RGBA_5551 = 0x0105050561626772ULL; // rgba5551
 	static const uint64_t FMT_RGBA_4444 = 0x0404040461626772ULL; // rgba4444
+	static const uint64_t FMT_LA_88 = 0x000008080000616cULL;
+	static const uint64_t FMT_L_8 = 0x000000080000006cULL;
+	static const uint64_t FMT_A_8 = 0x0000000800000061ULL;
 
 	void init();
 

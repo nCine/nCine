@@ -24,6 +24,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 String IFile::dataPath_(MaxFilenameLength);
+String IFile::savePath_(MaxFilenameLength);
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -37,7 +38,7 @@ IFile::IFile(const char *filename)
 	// A dot followed by at least three extension characters
 	if (dotChar && (filename_.length() - dotChar) >= 4)
 	{
-		extension_.copyFrom(filename_, dotChar + 1, filename_.length() - dotChar - 1);
+		extension_.copy(filename_, dotChar + 1, filename_.length() - dotChar - 1, 0);
 	}
 }
 
@@ -90,14 +91,23 @@ bool IFile::access(const char *filename, unsigned char mode)
 		return StandardFile::access(filename, mode);
 }
 
-/// Returns the writable directory for data storage
-const char* IFile::dataPath()
+/// Returns the writable directory for saving data
+const String& IFile::savePath()
 {
-	if (dataPath_.isEmpty() == false)
+	if (savePath_.isEmpty())
 	{
-		return dataPath_.data();
+		initSavePath();
 	}
 
+	return savePath_;
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void IFile::initSavePath()
+{
 #ifdef __ANDROID__
 	int pid = getpid();
 	String procFileName(MaxFilenameLength);
@@ -110,14 +120,14 @@ const char* IFile::dataPath()
 		char processName[processNameLength];
 		// Creating the path "/data/data/PACKAGE_NAME/files/"
 		fread(processName, processNameLength, 1, procFile);
-		dataPath_.format("/data/data/%s/files/", processName);
+		savePath_.format("/data/data/%s/files/", processName);
 		fclose(procFile);
 
 		// Trying to create the data directory
-		if (mkdir(dataPath_.data(), 0770) && errno != EEXIST)
+		if (mkdir(savePath_.data(), 0770) && errno != EEXIST)
 		{
-			LOGE_X("Cannot create directory: %s", dataPath_.data());
-			dataPath_.clear();
+			LOGE_X("Cannot create directory: %s", savePath_.data());
+			savePath_.clear();
 		}
 	}
 #elif _WIN32
@@ -133,40 +143,38 @@ const char* IFile::dataPath()
 			char *homeEnv = getenv("HOME");
 			if (homeEnv && strlen(homeEnv))
 			{
-				dataPath_ = homeEnv;
+				savePath_ = homeEnv;
 			}
 		}
 		else
 		{
-			dataPath_ = homeDriveEnv;
-			dataPath_ += homePathEnv;
+			savePath_ = homeDriveEnv;
+			savePath_ += homePathEnv;
 		}
 	}
 	else
 	{
-		dataPath_ = userProfileEnv;
+		savePath_ = userProfileEnv;
 	}
 
-	if (dataPath_.isEmpty() == false)
+	if (savePath_.isEmpty() == false)
 	{
-		dataPath_ += "\\";
+		savePath_ += "\\";
 	}
 #else
 	char *homeEnv = getenv("HOME");
 
 	if (homeEnv == NULL || strlen(homeEnv) == 0)
 	{
-		dataPath_ = getpwuid(getuid())->pw_dir;
+		savePath_ = getpwuid(getuid())->pw_dir;
 	}
 	else
 	{
-		dataPath_ = homeEnv;
+		savePath_ = homeEnv;
 	}
 
-	dataPath_ += "/.config/";
+	savePath_ += "/.config/";
 #endif
-
-	return dataPath_.data(); // RETURN A STRING
 }
 
 }

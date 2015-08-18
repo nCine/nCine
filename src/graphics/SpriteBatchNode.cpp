@@ -16,7 +16,7 @@ SpriteBatchNode::SpriteBatchNode(SceneNode* parent, Texture *texture)
 	type_ = SPRITEBATCH_TYPE;
 	setPriority(DrawableNode::SCENE_PRIORITY);
 	renderCommand_->setType(RenderCommand::SPRITE_TYPE);
-	renderCommand_->material().setAlwaysTransparent(true);
+	renderCommand_->material().setTransparent(true);
 }
 
 ///////////////////////////////////////////////////////////
@@ -43,13 +43,15 @@ void SpriteBatchNode::visit(RenderQueue& renderQueue)
 	{
 		if ((*i)->type() == Sprite::sType())
 		{
+/*
 			Sprite *sprite = static_cast<Sprite *>((*i));
 
-			if (sprite->shouldDraw_ && sprite->texture()->gLId() == texture_->gLId())
+			if (sprite->shouldDraw_ && sprite->texture()->glId() == texture_->glId())
 			{
 				sprite->transform();
 				processSprite(*sprite);
 			}
+*/
 		}
 	}
 
@@ -80,7 +82,9 @@ void SpriteBatchNode::processSprite(Sprite& sprite)
 		cosine = cosf(-rot * M_PI / 180.0f);
 	}
 
-	float *vertices = vertices_.mapBuffer(12);
+	unsigned int oldSize = vertices_.size();
+	vertices_.setSize(oldSize + 12);
+	float *vertices = vertices_.data() + oldSize;
 	vertices[0] = pos.x + leftPos * cosine - bottomPos * sine;			vertices[1] = pos.y + bottomPos * cosine + leftPos * sine;
 	vertices[2] = pos.x + leftPos * cosine - topPos * sine;				vertices[3] = pos.y + topPos * cosine + leftPos * sine;
 	vertices[4] = pos.x + rightPos * cosine - bottomPos * sine;			vertices[5] = pos.y + bottomPos * cosine + rightPos * sine;
@@ -98,7 +102,9 @@ void SpriteBatchNode::processSprite(Sprite& sprite)
 	float bottomCoord = float(texRect.y + texRect.h) / float(texSize.y);
 	float topCoord = float(texRect.y) / float(texSize.y);
 
-	float *texCoords = texCoords_.mapBuffer(12);
+	oldSize = texCoords_.size();
+	texCoords_.setSize(oldSize + 12);
+	float *texCoords = texCoords_.data() + oldSize;
 	texCoords[0] = leftCoord;				texCoords[1] = bottomCoord;
 	texCoords[2] = leftCoord;				texCoords[3] = topCoord;
 	texCoords[4] = rightCoord;				texCoords[5] = bottomCoord;
@@ -119,12 +125,13 @@ void SpriteBatchNode::processSprite(Sprite& sprite)
 
 void SpriteBatchNode::updateRenderCommand()
 {
-	renderCommand_->material().setTextureGLId(texture_->gLId());
+/*
+	renderCommand_->material().setTextureGLId(texture_->glId());
 	renderCommand_->transformation().setPosition(absPosition().x, absPosition().y);
 	renderCommand_->geometry().setData(GL_TRIANGLES, 0, vertices_.size() / 2, vertices_.data(), texCoords_.data(), colors_.data());
-	renderCommand_->calculateSortKey();
 
 	applyTransformations();
+*/
 }
 
 }

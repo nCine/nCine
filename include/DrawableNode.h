@@ -9,7 +9,7 @@ class RenderCommand;
 class RenderQueue;
 
 /// A class for objects that can be drawn through the render queue
-class DrawableNode : public SceneNode
+class DLL_PUBLIC DrawableNode : public SceneNode
 {
   public:
 	/// Drawing priorities from back to front
@@ -26,9 +26,6 @@ class DrawableNode : public SceneNode
 
 	// Updates the draw command and adds it to the queue
 	virtual void draw(RenderQueue& renderQueue);
-
-	// Applies node transformations to vertices
-	void applyTransformations();
 
 	// Returns the node rendering priority
 	int priority() const;

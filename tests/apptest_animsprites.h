@@ -3,7 +3,7 @@
 
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
-#include "Vector2f.h"
+#include "Vector2.h"
 
 namespace ncine {
 
@@ -23,7 +23,6 @@ class MyEventHandler
   public:
 	virtual void onInit();
 	virtual void onFrameStart();
-	virtual void onFrameEnd() { }
 	virtual void onShutdown();
 
 #ifdef __ANDROID__

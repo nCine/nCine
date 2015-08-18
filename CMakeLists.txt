@@ -1,15 +1,20 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(nCine)
 
-option(NCINE_BUILD_TESTS "Build the nCine test programs" ON)
+option(NCINE_BUILD_TESTS "Build the engine test programs" ON)
+option(NCINE_EXTRA_OPTIMIZE "Compile the engine with extra optimizations in release mode" ON)
+option(NCINE_AUTOVECTORIZATION_REPORT "Enable report generation from compiler auto-vectorization" OFF)
+option(NCINE_DYNAMIC_LIBRARY "Compile the engine as a dynamic library" ON)
 
 find_package(Threads)
 if(MSVC)
 	set(EXTERNAL_MSVC_DIR "${CMAKE_SOURCE_DIR}/external")
 	if(MSVC_C_ARCHITECTURE_ID MATCHES 64 OR MSVC_CXX_ARCHITECTURE_ID MATCHES 64)
 		set(LIBDIR "${EXTERNAL_MSVC_DIR}/lib/x64")
+		set(BINDIR "${EXTERNAL_MSVC_DIR}/bin/x64")
 	else()
 		set(LIBDIR "${EXTERNAL_MSVC_DIR}/lib/x86")
+		set(BINDIR "${EXTERNAL_MSVC_DIR}/bin/x86")
 	endif()
 	if(NOT (MSVC_VERSION LESS 1800)) # If Visual Studio 2013 or greater
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FS")
@@ -32,15 +37,29 @@ if(MSVC)
 	set(VORBIS_FOUND 1)
 	
 	string(REGEX REPLACE "/Zm[0-9]*" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-	add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
-	add_definitions(-DWITH_GLEW)
-	#add_definitions(/W0) # Turn off warnings
+	if(NCINE_EXTRA_OPTIMIZATION)
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Ox /Qpar")
+	endif()
+	if(NCINE_AUTOVECTORIZATION_REPORT)
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Qvec-report:2 /Qpar-report:2")
+	endif()
+	add_definitions(-DWITH_GLEW -D_CRT_SECURE_NO_DEPRECATE)
 else() # GCC and LLVM
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math")
+	if(NCINE_DYNAMIC_LIBRARY)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
+	endif()
 	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra -Wold-style-cast -Wno-long-long -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-variadic-macros")
 		if(CMAKE_BUILD_TYPE MATCHES Debug)
 			#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1 -ggdb -fsanitize=address -fno-omit-frame-pointer -rdynamic")
 			#set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -fsanitize=address")
+		endif()
+		if(NCINE_EXTRA_OPTIMIZATION)
+			set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -funsafe-loop-optimizations -ftree-loop-if-convert-stores")
+		endif()
+		if(NCINE_AUTOVECTORIZATION_REPORT)
+			set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fopt-info-vec-optimized")
 		endif()
 		if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9.0 OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.9.0)
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=auto")
@@ -52,7 +71,14 @@ else() # GCC and LLVM
 		endif()
 	elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Weverything -Wno-gnu-zero-variadic-macro-arguments")
+		if(NCINE_EXTRA_OPTIMIZATION)
+			set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -fslp-vectorize-aggressive")
+		endif()
+		if(NCINE_AUTOVECTORIZATION_REPORT)
+			set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize")
+		endif()
 	endif()
+
 	if(NOT CROSS_MINGW32) # Linux
 		find_package(OpenGL REQUIRED)
 		find_package(SDL)
@@ -92,61 +118,10 @@ else() # GCC and LLVM
 	endif()
 endif()
 
-# Experimental depth test/alpha test renderer
-#add_definitions(-DWITH_DEPTH_TEST)
-
-# Forcing the use of SDL
-#set(GLFW_FOUND 0)
-
-if(NOT SDL_FOUND AND NOT GLFW_FOUND)
-	message(FATAL_ERROR "Neither SDL nor GLFW have been found!")
-endif()
-
-if(GLFW_FOUND)
-	add_definitions(-DWITH_GLFW)
-	add_definitions(-DGLFW_NO_GLU)
-	list(APPEND LINK_LIBS ${GLFW_LIBRARY})
-endif()
-
-if(SDL_FOUND AND NOT GLFW_FOUND)
-	add_definitions(-DWITH_SDL)
-	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # SDLmain on OS X
-		list(APPEND LINK_LIBS ${SDLMAIN_LIBRARY})
-	endif()
-	list(APPEND LINK_LIBS ${SDL_LIBRARY})
-	if(SDLIMAGE_FOUND)
-		add_definitions(-DWITH_SDLIMAGE)
-		list(APPEND LINK_LIBS ${SDLIMAGE_LIBRARY})
-	endif()
-endif()
-
-if(OPENAL_FOUND)
-	add_definitions(-DWITH_AUDIO)
-	list(APPEND LINK_LIBS ${OPENAL_LIBRARY})
-	if(VORBIS_FOUND)
-		add_definitions(-DWITH_VORBIS)
-		list(APPEND LINK_LIBS ${VORBISFILE_LIBRARY})
-	endif()
-endif()
-
-if(PNG_FOUND AND GLFW_FOUND)
-	add_definitions(-DWITH_PNG)
-	list(APPEND LINK_LIBS ${PNG_LIBRARY})
-endif()
-if(WEBP_FOUND)
-	add_definitions(-DWITH_WEBP)
-	list(APPEND LINK_LIBS ${WEBP_LIBRARY})
-endif()
-
-if(Threads_FOUND)
-	add_definitions(-DWITH_THREADS)
-	list(APPEND LINK_LIBS ${CMAKE_THREAD_LIBS_INIT})
-	# Experimental multi-threading scene update
-	#add_definitions(-DWITH_MULTITHREADING)
-endif()
-
 set(HEADERS
-	include/common.h
+	include/common_headers.h
+	include/common_defines.h
+	include/common_functions.h
 	include/Array.h
 	include/ArrayIterator.h
 	include/StaticArray.h
@@ -154,6 +129,9 @@ set(HEADERS
 	include/ListIterator.h
 	include/ncString.h
 	include/StringIterator.h
+	include/HashMap.h
+	include/HashFunctions.h
+	include/HashMapIterator.h
 	include/Point.h
 	include/Rect.h
 	include/Color.h
@@ -161,7 +139,12 @@ set(HEADERS
 	include/DrawableNode.h
 	include/IAppEventHandler.h
 	include/IInputEventHandler.h
-	include/Vector2f.h
+	include/IInputManager.h
+	include/Vector2.h
+	include/Vector3.h
+	include/Vector4.h
+	include/Matrix4x4.h
+	include/Quaternion.h
 	include/ServiceLocator.h
 	include/DisplayMode.h
 	include/Timer.h
@@ -173,6 +156,7 @@ set(HEADERS
 	include/Sprite.h
 	include/SpriteBatchNode.h
 	include/Application.h
+	include/AppConfiguration.h
 	include/ParticleAffectors.h
 	include/ParticleSystem.h
 	include/TextNode.h
@@ -191,18 +175,34 @@ set(PRIVATE_HEADERS
 	src/include/ProfilePlotter.h
 	src/include/LinePlotter.h
 	src/include/StackedBarPlotter.h
+	src/include/GfxCapabilities.h
+	src/include/RenderResources.h
 	src/include/RenderCommand.h
 	src/include/RenderQueue.h
+	src/include/Material.h
+	src/include/Geometry.h
 	src/include/Particle.h
-	src/include/GfxCapabilities.h
 	src/include/TextureFormat.h
 	src/include/ITextureLoader.h
 	src/include/TextureLoaderDds.h
 	src/include/TextureLoaderPvr.h
 	src/include/TextureLoaderKtx.h
+	src/include/GLHashMap.h
+	src/include/GLBufferObject.h
+	src/include/GLBufferObject.h
+	src/include/GLFramebufferObject.h
+	src/include/GLRenderbuffer.h
+	src/include/GLShader.h
+	src/include/GLShaderProgram.h
+	src/include/GLShaderUniforms.h
+	src/include/GLUniform.h
+	src/include/GLUniformCache.h
+	src/include/GLShaderAttributes.h
+	src/include/GLAttribute.h
+	src/include/GLVertexAttribute.h
+	src/include/GLTexture.h
 )
 set(SOURCES
-	src/base/Vector2f.cpp
 	src/base/String.cpp
 	src/ServiceLocator.cpp
 	src/FileLogger.cpp
@@ -216,6 +216,11 @@ set(SOURCES
 	src/StandardFile.cpp
 	src/graphics/IGfxDevice.cpp
 	src/graphics/GfxCapabilities.cpp
+	src/graphics/RenderResources.cpp
+	src/graphics/RenderCommand.cpp
+	src/graphics/RenderQueue.cpp
+	src/graphics/Material.cpp
+	src/graphics/Geometry.cpp
 	src/graphics/TextureFormat.cpp
 	src/graphics/ITextureLoader.cpp
     src/graphics/TextureLoaderDds.cpp
@@ -229,19 +234,41 @@ set(SOURCES
 	src/graphics/DrawableNode.cpp
 	src/graphics/SceneNode.cpp
 	src/graphics/Sprite.cpp
-	src/graphics/RenderCommand.cpp
-	src/graphics/RenderQueue.cpp
 	src/graphics/SpriteBatchNode.cpp
 	src/Application.cpp
+	src/AppConfiguration.cpp
 	src/graphics/Particle.cpp
 	src/graphics/ParticleAffectors.cpp
 	src/graphics/ParticleSystem.cpp
 	src/graphics/TextNode.cpp
 	src/graphics/RectAnimation.cpp
 	src/graphics/AnimatedSprite.cpp
+	src/graphics/opengl/GLBufferObject.cpp
+	src/graphics/opengl/GLFramebufferObject.cpp
+	src/graphics/opengl/GLRenderbuffer.cpp
+	src/graphics/opengl/GLShader.cpp
+	src/graphics/opengl/GLShaderProgram.cpp
+	src/graphics/opengl/GLShaderUniforms.cpp
+	src/graphics/opengl/GLUniform.cpp
+	src/graphics/opengl/GLUniformCache.cpp
+	src/graphics/opengl/GLShaderAttributes.cpp
+	src/graphics/opengl/GLAttribute.cpp
+	src/graphics/opengl/GLVertexAttribute.cpp
+	src/graphics/opengl/GLTexture.cpp
 )
 
+# Forcing the use of SDL
+#set(GLFW_FOUND 0)
+
+if(NOT SDL_FOUND AND NOT GLFW_FOUND)
+	message(FATAL_ERROR "Neither SDL nor GLFW have been found")
+endif()
+
 if(GLFW_FOUND)
+	add_definitions(-DWITH_GLFW)
+	add_definitions(-DGLFW_NO_GLU)
+	list(APPEND LINK_LIBS ${GLFW_LIBRARY})
+
 	list(APPEND HEADERS include/GlfwKeys.h)
 	list(APPEND PRIVATE_HEADERS src/include/GlfwInputManager.h)
 	list(APPEND PRIVATE_HEADERS src/include/GlfwGfxDevice.h)
@@ -250,6 +277,16 @@ if(GLFW_FOUND)
 endif()
 
 if(SDL_FOUND AND NOT GLFW_FOUND)
+	add_definitions(-DWITH_SDL)
+	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # SDLmain on OS X
+		list(APPEND LINK_LIBS ${SDLMAIN_LIBRARY})
+	endif()
+	list(APPEND LINK_LIBS ${SDL_LIBRARY})
+	if(SDLIMAGE_FOUND)
+		add_definitions(-DWITH_SDLIMAGE)
+		list(APPEND LINK_LIBS ${SDLIMAGE_LIBRARY})
+	endif()
+
 	list(APPEND HEADERS include/SdlKeys.h)
 	list(APPEND PRIVATE_HEADERS src/include/SdlInputManager.h)
 	list(APPEND PRIVATE_HEADERS src/include/SdlGfxDevice.h)
@@ -262,6 +299,13 @@ if(SDL_FOUND AND NOT GLFW_FOUND)
 endif()
 
 if(OPENAL_FOUND)
+	add_definitions(-DWITH_AUDIO)
+	list(APPEND LINK_LIBS ${OPENAL_LIBRARY})
+	if(VORBIS_FOUND)
+		add_definitions(-DWITH_VORBIS)
+		list(APPEND LINK_LIBS ${VORBISFILE_LIBRARY})
+	endif()
+
 	list(APPEND HEADERS
 		include/IAudioDevice.h
 		include/IAudioLoader.h
@@ -294,15 +338,26 @@ if(OPENAL_FOUND)
 endif()
 
 if(PNG_FOUND AND GLFW_FOUND)
+	add_definitions(-DWITH_PNG)
+	list(APPEND LINK_LIBS ${PNG_LIBRARY})
+
 	list(APPEND PRIVATE_HEADERS src/include/TextureLoaderPng.h)
     list(APPEND SOURCES src/graphics/TextureLoaderPng.cpp)
 endif()
 if(WEBP_FOUND)
+	add_definitions(-DWITH_WEBP)
+	list(APPEND LINK_LIBS ${WEBP_LIBRARY})
+
 	list(APPEND PRIVATE_HEADERS src/include/TextureLoaderWebP.h)
 	list(APPEND SOURCES src/graphics/TextureLoaderWebP.cpp)
 endif()
 
 if(Threads_FOUND)
+	add_definitions(-DWITH_THREADS)
+	list(APPEND LINK_LIBS ${CMAKE_THREAD_LIBS_INIT})
+	# Experimental multi-threading scene update
+	#add_definitions(-DWITH_MULTITHREADING)
+
 	list(APPEND HEADERS include/IThreadPool.h)
 	list(APPEND HEADERS include/IThreadCommand.h)
 	list(APPEND PRIVATE_HEADERS src/include/Thread.h)
@@ -326,12 +381,36 @@ link_libraries(
 	${LINK_LIBS}
 )
 
-if(MSVC)
-	add_library(ncine STATIC ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
-	target_include_directories(ncine PRIVATE "${EXTERNAL_MSVC_DIR}/include")
-else()
+if(NCINE_DYNAMIC_LIBRARY)
 	add_library(ncine SHARED ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
+else()
+	add_library(ncine STATIC ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS})
+endif()
 
+if(MSVC)
+	# Disabling incremental linking and manifest generation
+	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /MANIFEST:NO /INCREMENTAL:NO")
+	set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /MANIFEST:NO /INCREMENTAL:NO")
+
+	if(NCINE_DYNAMIC_LIBRARY)
+		# Disabling incremental linking and manifest generation
+		set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} /MANIFEST:NO /INCREMENTAL:NO")
+		set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} /MANIFEST:NO /INCREMENTAL:NO")
+
+		# Disable linker warning about teamplates
+		add_definitions("/wd4251")
+
+		add_custom_target(copy_ncine_dll ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/ncine.dll ${CMAKE_BINARY_DIR}/tests
+			DEPENDS ncine
+			COMMENT "Copying nCine DLL..."
+		)
+	else()
+		add_definitions(-DNCINE_STATIC)
+	endif()
+
+	target_include_directories(ncine PUBLIC "${EXTERNAL_MSVC_DIR}/include")
+else()
 	if(PNG_FOUND AND GLFW_FOUND)
 		target_include_directories(ncine PRIVATE ${PNG_INCLUDE_DIR})
 	endif()
@@ -342,8 +421,11 @@ else()
 endif()
 target_include_directories(ncine PUBLIC include PRIVATE src/include)
 
-
 if(NCINE_BUILD_TESTS)
+	set(NCINE_DATA_DIR ${CMAKE_SOURCE_DIR}/../nCine-data)
+
 	add_subdirectory(tests)
-	add_subdirectory(src/tests)
+	if(NOT NCINE_DYNAMIC_LIBRARY)
+		add_subdirectory(src/tests)
+	endif()
 endif()

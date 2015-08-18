@@ -1,8 +1,11 @@
 #include <ctime>
 #include "Application.h"
+#include "AppConfiguration.h"
 #include "IAppEventHandler.h"
 #include "ServiceLocator.h"
 #include "ArrayIndexer.h"
+#include "GfxCapabilities.h"
+#include "RenderResources.h"
 #include "FrameTimer.h"
 #include "FileLogger.h"
 #include "LinePlotter.h"
@@ -30,27 +33,29 @@
 
 namespace ncine {
 
+#ifndef __ANDROID__
+/// Meyers' Singleton
+Application& theApplication()
+{
+	static Application instance;
+	return instance;
+}
+#endif
+
 ///////////////////////////////////////////////////////////
-// STATIC DEFINITIONS
+// CONSTRUCTORS AND DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-bool Application::isPaused_ = false;
-bool Application::hasFocus_ = true;
-bool Application::shouldQuit_ = false;
-FrameTimer *Application::frameTimer_ = NULL;
-IGfxDevice *Application::gfxDevice_ = NULL;
-SceneNode *Application::rootNode_ = NULL;
-RenderQueue *Application::renderQueue_ = NULL;
-Timer *Application::profileTimer_ = NULL;
-ProfilePlotter *Application::profilePlotter_ = NULL;
-Font *Application::font_ = NULL;
-TextNode *Application::textLines_ = NULL;
-float Application::textUpdateTime = 0.0f;
-String Application::textString_(MaxTextLength);
-IInputManager *Application::inputManager_ = NULL;
-IAppEventHandler *Application::appEventHandler_ = NULL;
-const char* Application::fontTexFilename_ = NULL;
-const char* Application::fontFntFilename_ = NULL;
+Application::Application()
+	: isPaused_(false), hasFocus_(true), shouldQuit_(false),
+	frameTimer_(NULL), gfxDevice_(NULL),
+	renderQueue_(NULL), rootNode_(NULL),
+	profileTimer_(NULL), profilePlotter_(NULL),
+	font_(NULL), textLines_(NULL), textUpdateTime_(0.0f),
+	textString_(MaxTextLength), inputManager_(NULL), appEventHandler_(NULL)
+{
+
+}
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -59,22 +64,24 @@ const char* Application::fontFntFilename_ = NULL;
 /// Must be called at start to init the application
 void Application::init(IAppEventHandler* (*createAppEventHandler)())
 {
+	appEventHandler_ = createAppEventHandler();
+	appEventHandler_->onPreInit(appCfg_);
+
 	// Registering the logger as early as possible
-	ServiceLocator::registerLogger(new FileLogger("ncine_log.txt", ILogger::LOG_VERBOSE, ILogger::LOG_OFF));
+	String logFilePath = IFile::dataPath() + appCfg_.logFile_;
+	theServiceLocator().registerLogger(new FileLogger(logFilePath.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
 	// Graphics device should always be created before the input manager!
+	DisplayMode displayMode(8, 8, 8, 8, 24, 8, true, false);
 #if defined(WITH_SDL)
-	gfxDevice_ = new SdlGfxDevice(960, 640);
+	gfxDevice_ = new SdlGfxDevice(appCfg_.xResolution_, appCfg_.yResolution_, displayMode, appCfg_.inFullscreen_);
 	inputManager_ = new SdlInputManager();
 #elif defined(WITH_GLFW)
-	gfxDevice_ = new GlfwGfxDevice(960, 640);
+	gfxDevice_ = new GlfwGfxDevice(appCfg_.xResolution_, appCfg_.yResolution_, displayMode, appCfg_.inFullscreen_);
 	inputManager_ = new GlfwInputManager();
 #endif
-	gfxDevice_->setWindowTitle("nCine");
+	gfxDevice_->setWindowTitle(appCfg_.windowTitle_.data());
 
-	fontTexFilename_ = "fonts/trebuchet32_256.png";
-	fontFntFilename_ = "fonts/trebuchet32_256.fnt";
-
-	initCommon(createAppEventHandler);
+	initCommon();
 }
 
 /// The main game loop, handling events and rendering
@@ -122,20 +129,28 @@ void Application::run()
 void Application::step()
 {
 	frameTimer_->addFrame();
-	gfxDevice_->clear();
+	if (appCfg_.withScenegraph_)
+	{
+		gfxDevice_->clear();
+	}
 	appEventHandler_->onFrameStart();
-	// Measuring OnFrameStart() + OnFrameEnd() time
-	profilePlotter_->addValue(0, profileTimer_->interval());
+	if (profilePlotter_)
+	{
+		// Measuring OnFrameEnd() + OnFrameStart() time
+		profilePlotter_->addValue(0, profileTimer_->interval());
+	}
 
 	profileTimer_->start();
-	rootNode_->update(frameTimer_->interval());
-	rootNode_->visit(*renderQueue_);
-	renderQueue_->draw();
-
-	// TODO: hard-coded 200ms update time
-	if (textLines_ && Timer::now() - textUpdateTime > 0.2f)
+	if (rootNode_ != NULL && renderQueue_ != NULL)
 	{
-		textUpdateTime = Timer::now();
+		rootNode_->update(frameTimer_->interval());
+		rootNode_->visit(*renderQueue_);
+		renderQueue_->draw();
+	}
+
+	if (textLines_ && Timer::now() - textUpdateTime_ > appCfg_.profileTextUpdateTime_)
+	{
+		textUpdateTime_ = Timer::now();
 		textString_.format(static_cast<const char *>("FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC"),
 				frameTimer_->averageFps(), frameTimer_->interval() * 1000.0f,
 				renderQueue_->numVertices(RenderCommand::SPRITE_TYPE), renderQueue_->numCommands(RenderCommand::SPRITE_TYPE),
@@ -149,14 +164,20 @@ void Application::step()
 		textLines_->setPosition((width() - textLines_->width()), height());
 	}
 
-	ServiceLocator::audioDevice().updatePlayers();
-	// Measuring scenegraph update and visit + draw + audio update
-	profilePlotter_->addValue(1, profileTimer_->interval());
+	theServiceLocator().audioDevice().updatePlayers();
+	if (profilePlotter_)
+	{
+		// Measuring scenegraph update and visit + draw + audio update
+		profilePlotter_->addValue(1, profileTimer_->interval());
+	}
 
 	profileTimer_->start();
 	gfxDevice_->update();
-	// Measuring swap buffers time
-	profilePlotter_->addValue(2, profileTimer_->interval());
+	if (profilePlotter_)
+	{
+		// Measuring swap buffers time
+		profilePlotter_->addValue(2, profileTimer_->interval());
+	}
 
 	profileTimer_->start();
 	appEventHandler_->onFrameEnd();
@@ -177,24 +198,25 @@ void Application::shutdown()
 	delete font_;
 	delete profilePlotter_;
 	delete profileTimer_;
-	delete renderQueue_;
 	delete rootNode_; // deletes every child too
+	delete renderQueue_;
+	RenderResources::dispose();
 	delete frameTimer_;
 	delete inputManager_;
 	delete gfxDevice_;
 
-	if (ServiceLocator::indexer().isEmpty() == false)
+	if (theServiceLocator().indexer().isEmpty() == false)
 	{
 		LOGW("The object indexer is not empty");
 	}
 
 	LOGI("Application shutted down");
 
-	ServiceLocator::unregisterAll();
+	theServiceLocator().unregisterAll();
 }
 
 /// Returns the elapsed time since the end of the previous frame in milliseconds
-float Application::interval()
+float Application::interval() const
 {
 	return frameTimer_->interval();
 }
@@ -233,73 +255,82 @@ void Application::setFocus(bool hasFocus)
 	}
 }
 
-/// Shows or hides profiling graphs
-void Application::showProfileGraphs(bool shouldDraw)
-{
-	profilePlotter_->shouldDraw_ = shouldDraw;
-}
-
-/// Shows or hides profiling information text
-void Application::showProfileInfo(bool shouldDraw)
-{
-	textLines_->shouldDraw_ = shouldDraw;
-}
-
 ///////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void Application::initCommon(IAppEventHandler* (*createAppEventHandler)())
+void Application::initCommon()
 {
 	LOGI("nCine compiled on " __DATE__ " at " __TIME__);
-	ServiceLocator::registerIndexer(new ArrayIndexer());
+	theServiceLocator().registerIndexer(new ArrayIndexer());
 #ifdef WITH_AUDIO
-	ServiceLocator::registerAudioDevice(new ALAudioDevice());
+	if (appCfg_.withAudio_)
+	{
+		theServiceLocator().registerAudioDevice(new ALAudioDevice());
+	}
 #endif
 #ifdef WITH_THREADS
-	ServiceLocator::registerThreadPool(new ThreadPool());
+	if (appCfg_.withThreads_)
+	{
+		theServiceLocator().registerThreadPool(new ThreadPool());
+	}
 #endif
-	LOGI_X("Data path: %s", IFile::dataPath());
+	LOGI_X("Data path: %s", IFile::dataPath().data());
+	LOGI_X("Save path: %s", IFile::savePath().data());
 
-	frameTimer_ = new FrameTimer(5.0f, 0.2f);
-	rootNode_ = new SceneNode();
-	renderQueue_ = new RenderQueue();
+	frameTimer_ = new FrameTimer(appCfg_.frameTimerLogInterval_, appCfg_.profileTextUpdateTime_);
 	profileTimer_ = new Timer();
 
-	profilePlotter_ = new StackedBarPlotter(rootNode_, Rect(width() * 0.1f, height() * 0.1f, width() * 0.8f, height() * 0.15f));
-	profilePlotter_->setBackgroundColor(Color(0.35f, 0.35f, 0.45f, 0.5f));
-	profilePlotter_->addVariable(50, 0.2f);
-	profilePlotter_->variable(0).setGraphColor(Color(0.8f, 0.0f, 0.0f));
-	profilePlotter_->variable(0).setMeanColor(Color(1.0f, 0.0f, 0.0f));
-	profilePlotter_->addVariable(50, 0.2f);
-	profilePlotter_->variable(1).setGraphColor(Color(0.0f, 0.8f, 0.0f));
-	profilePlotter_->variable(1).setMeanColor(Color(0.0f, 1.0f, 0.0f));
-	profilePlotter_->addVariable(50, 0.2f);
-	profilePlotter_->variable(2).setGraphColor(Color(0.0f, 0.0f, 0.8f));
-	profilePlotter_->variable(2).setMeanColor(Color(0.0f, 0.0f, 1.0f));
+	GfxCapabilities& gfxCaps = const_cast<GfxCapabilities&>(theServiceLocator().gfxCapabilities());
+	gfxCaps.init();
 
-	profilePlotter_->variable(0).setPlotMean(false);
-	profilePlotter_->variable(1).setPlotMean(false);
-	profilePlotter_->variable(2).setPlotMean(false);
-	profilePlotter_->setPlotRefValue(true);
-	profilePlotter_->setRefValue(1.0f / 60.0f); // 60 FPS
+	if (appCfg_.withScenegraph_)
+	{
+		gfxDevice_->setupGL();
+		RenderResources::create();
+		renderQueue_ = new RenderQueue();
+		rootNode_ = new SceneNode();
 
-	if (fontTexFilename_ && fontFntFilename_ &&
-		IFile::access(fontTexFilename_, IFile::MODE_EXISTS) &&
-		IFile::access(fontFntFilename_, IFile::MODE_EXISTS))
-	{
-		font_ = new Font(fontTexFilename_, fontFntFilename_);
-		textLines_ = new TextNode(rootNode_, font_);
-		textLines_->setPosition(0.0f, height());
-	}
-	else
-	{
-		LOGW("Cannot access font files for profiling text");
+		if (appCfg_.withProfilerGraphs_)
+		{
+			profilePlotter_ = new StackedBarPlotter(rootNode_, Rect(width() * 0.1f, height() * 0.1f, width() * 0.8f, height() * 0.15f));
+			profilePlotter_->setBackgroundColor(Color(0.35f, 0.35f, 0.45f, 0.5f));
+			profilePlotter_->addVariable(50, 0.2f);
+			profilePlotter_->variable(0).setGraphColor(Color(0.8f, 0.0f, 0.0f));
+			profilePlotter_->variable(0).setMeanColor(Color(1.0f, 0.0f, 0.0f));
+			profilePlotter_->addVariable(50, 0.2f);
+			profilePlotter_->variable(1).setGraphColor(Color(0.0f, 0.8f, 0.0f));
+			profilePlotter_->variable(1).setMeanColor(Color(0.0f, 1.0f, 0.0f));
+			profilePlotter_->addVariable(50, 0.2f);
+			profilePlotter_->variable(2).setGraphColor(Color(0.0f, 0.0f, 0.8f));
+			profilePlotter_->variable(2).setMeanColor(Color(0.0f, 0.0f, 1.0f));
+
+			profilePlotter_->variable(0).setPlotMean(false);
+			profilePlotter_->variable(1).setPlotMean(false);
+			profilePlotter_->variable(2).setPlotMean(false);
+			profilePlotter_->setPlotRefValue(true);
+			profilePlotter_->setRefValue(1.0f / 60.0f); // 60 FPS
+		}
+
+		if (appCfg_.withProfilerText_)
+		{
+			String fontTexFilePath = IFile::dataPath() + appCfg_.fontTexFilename_;
+			String fontFntFilePath = IFile::dataPath() + appCfg_.fontFntFilename_;
+			if (IFile::access(fontTexFilePath.data(), IFile::MODE_EXISTS) && IFile::access(fontFntFilePath.data(), IFile::MODE_EXISTS))
+			{
+				font_ = new Font(fontTexFilePath.data(), fontFntFilePath.data());
+				textLines_ = new TextNode(rootNode_, font_);
+				textLines_->setPosition(0.0f, height());
+			}
+			else
+			{
+				LOGW("Cannot access font files for profiling text");
+			}
+		}
 	}
 
 	LOGI("Application initialized");
 
-	appEventHandler_ = createAppEventHandler();
 	appEventHandler_->onInit();
 	LOGI("IAppEventHandler::OnInit() invoked");
 

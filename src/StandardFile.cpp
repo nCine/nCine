@@ -290,7 +290,7 @@ bool StandardFile::access(const char *filename, unsigned char mode)
 			accessMode = 6;
 			break;
 		default:
-			LOGE("Cannot access the file \"%s\", wrong access mode", filename);
+			LOGE_X("Cannot access the file \"%s\", wrong access mode", filename);
 			break;
 	}
 

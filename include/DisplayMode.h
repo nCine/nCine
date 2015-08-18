@@ -1,34 +1,30 @@
-#ifndef CLASS_NCDISPLAYMODE
-#define CLASS_NCDISPLAYMODE
+#ifndef CLASS_NCINE_DISPLAYMODE
+#define CLASS_NCINE_DISPLAYMODE
+
+#include "common_defines.h"
 
 namespace ncine {
 
 /// Display properties
-class DisplayMode
+class DLL_PUBLIC DisplayMode
 {
   public:
 	// Constructor with no parameters
 	DisplayMode()
-		: redBits_(0), greenBits_(0), blueBits_(0), alphaBits_(0), bufferBits_(0),
+		: redBits_(0), greenBits_(0), blueBits_(0), alphaBits_(0),
 		  depthBits_(0), stencilBits_(0), isDoubleBuffered_(true), hasVSync_(false) { }
 	DisplayMode(int redBits, int greenBits, int blueBits)
-		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits),
-		  alphaBits_(0), bufferBits_(0), depthBits_(0), stencilBits_(0),
-		  isDoubleBuffered_(true), hasVSync_(false) { }
+		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits), alphaBits_(0),
+		  depthBits_(0), stencilBits_(0), isDoubleBuffered_(true), hasVSync_(false) { }
 	DisplayMode(int redBits, int greenBits, int blueBits, int alphaBits)
-		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits),
-		  alphaBits_(alphaBits), bufferBits_(0), depthBits_(0), stencilBits_(0),
-		  isDoubleBuffered_(true), hasVSync_(false) { }
+		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits), alphaBits_(alphaBits),
+		  depthBits_(0), stencilBits_(0), isDoubleBuffered_(true), hasVSync_(false) { }
 	DisplayMode(bool doubleBuffered, bool withVSync, int depthBits, int stencilBits)
-		: redBits_(0), greenBits_(0), blueBits_(0), alphaBits_(0), bufferBits_(0),
-		  depthBits_(depthBits), stencilBits_(stencilBits),
-		  isDoubleBuffered_(doubleBuffered), hasVSync_(withVSync) { }
-	DisplayMode(int redBits, int greenBits, int blueBits, int alphaBits, int bufferBits,
-				  bool doubleBuffered, bool withVSync, int depthBits, int stencilBits)
-		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits),
-		  alphaBits_(alphaBits), bufferBits_(bufferBits),
-		  depthBits_(depthBits), stencilBits_(stencilBits),
-		  isDoubleBuffered_(doubleBuffered), hasVSync_(withVSync) { }
+		: redBits_(0), greenBits_(0), blueBits_(0), alphaBits_(0),
+		  depthBits_(depthBits), stencilBits_(stencilBits), isDoubleBuffered_(doubleBuffered), hasVSync_(withVSync) { }
+	DisplayMode(int redBits, int greenBits, int blueBits, int alphaBits, bool doubleBuffered, bool withVSync, int depthBits, int stencilBits)
+		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits), alphaBits_(alphaBits),
+		  depthBits_(depthBits), stencilBits_(stencilBits), isDoubleBuffered_(doubleBuffered), hasVSync_(withVSync) { }
 
 	// Getters
 	/// Returns the number of bits for the red channel
@@ -39,8 +35,6 @@ class DisplayMode
 	inline unsigned int blueBits() const { return blueBits_; }
 	/// Returns the number of bits for the alpha channel
 	inline unsigned int alphaBits() const { return alphaBits_; }
-	/// Returns the number of bits for the color buffer
-	inline unsigned int bufferBits() const { return bufferBits_; }
 	/// Returns the number of bits for the depth buffer
 	inline unsigned int depthBits() const { return depthBits_; }
 	/// Returns the number of bits for the stencil buffer
@@ -59,8 +53,6 @@ class DisplayMode
 	unsigned int blueBits_;
 	/// Alpha component bits
 	unsigned int alphaBits_;
-	/// Frame buffer bits
-	unsigned int bufferBits_;
 	/// Depth buffer size in bit
 	unsigned int depthBits_;
 	/// Stencil buffer size in bit

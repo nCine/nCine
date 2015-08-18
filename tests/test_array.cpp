@@ -39,14 +39,40 @@ int main(int argc, char **argv)
 	printArray(array);
 
 	printf("Inserting in the middle\n");
-	array.insertAt(3, 33);
+	array.insertAt(3, 2);
 	printArray(array);
 
-	printf("Removing twice from the middle\n");
-	array.removeAt(2);
+	printf("Removing from the middle\n");
 	array.removeAt(2);
 	printArray(array);
 
+	printf("Inserting as first and last\n");
+	array.insertAt(0, -1);
+	array.insertAt(array.size(), 12);
+	printArray(array);
+
+	printf("Removing the first and twice the last\n");
+	array.removeAt(0);
+	array.removeAt(array.size()-1);
+	array.removeAt(array.size()-1);
+	printArray(array);
+
+	printf("Extending the size by two elements\n");
+	unsigned int oldSize = array.size();
+	array.setSize(oldSize + 2);
+	// No "hole" when setting this element
+	array[oldSize + 1] = 55;
+	array[oldSize] = 44;
+	printArray(array);
+	printf("Restoring previous size\n");
+	array.setSize(oldSize);
+	printArray(array);
+	unsigned int oldCapacity = array.capacity();
+	printf("Current array capacity: %d, size:%d\n", array.capacity(), array.size());
+	array.shrinkToFit();
+	printf("New capacity after shrinkToFit(): %d, size: %d\n", array.capacity(), array.size());
+	array.setCapacity(oldCapacity);
+	printf("Restoring previous capacity: %d, size: %d\n", array.capacity(), array.size());
 
 	printf("\n--- Array traversals (for cycles) ---\n");
 	printf("Iterating through elements:");

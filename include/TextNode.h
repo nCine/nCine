@@ -12,7 +12,7 @@ namespace ncine {
 class FontGlyph;
 
 /// A scene node to draw a text label
-class TextNode : public DrawableNode
+class DLL_PUBLIC TextNode : public DrawableNode
 {
   public:
 	enum Alignment
@@ -50,6 +50,7 @@ class TextNode : public DrawableNode
 
   private:
 	/// Maximum length for a string to be rendered
+	/*! This number affects both the string container and VBO size */
 	static const unsigned int MaxStringLength = 256;
 
 	/// The string to be rendered
@@ -62,10 +63,8 @@ class TextNode : public DrawableNode
 	bool withKerning_;
 	/// The font class used to render text
 	Font *font_;
-	/// The array of vertices for every glyph in the batch
-	Array<float> vertices_;
-	/// The array of texture coordinates for every glyph in the batch
-	Array<float> texCoords_;
+	/// The array of vertex positions interleaved with texture coordinates for every glyph in the batch
+	Array<float> interleavedVertices_;
 
 	/// Advance on the X-axis for the next processed glyph
 	mutable float xAdvance_;

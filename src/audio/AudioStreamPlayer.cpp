@@ -37,7 +37,7 @@ void AudioStreamPlayer::play()
 		{
 			// source is a signed integer in order to check for unavailble source return value.
 			// It is then converted to an OpenAL unsigned integer to be used as a valid source.
-			int source = ServiceLocator::audioDevice().nextAvailableSource();
+			int source = theServiceLocator().audioDevice().nextAvailableSource();
 			// No sources available
 			if (source < 0)
 			{
@@ -53,7 +53,7 @@ void AudioStreamPlayer::play()
 			alSourcePlay(sourceId_);
 			state_ = STATE_PLAYING;
 
-			ServiceLocator::audioDevice().registerPlayer(this);
+			theServiceLocator().audioDevice().registerPlayer(this);
 			break;
 		}
 		case STATE_PLAYING:
@@ -63,7 +63,7 @@ void AudioStreamPlayer::play()
 			alSourcePlay(sourceId_);
 			state_ = STATE_PLAYING;
 
-			ServiceLocator::audioDevice().registerPlayer(this);
+			theServiceLocator().audioDevice().registerPlayer(this);
 			break;
 		}
 	}

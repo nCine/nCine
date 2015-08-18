@@ -28,7 +28,7 @@ TextureLoaderEtc::TextureLoaderEtc(IFile* fileHandle)
 
 void TextureLoaderEtc::init()
 {
-	const GfxCapabilities& gfxCaps = ServiceLocator::gfxCapabilities();
+	const GfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();
 
 	fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
 

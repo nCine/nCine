@@ -8,7 +8,7 @@
 namespace ncine {
 
 /// The interface dealing with file operations
-class IFile
+class DLL_PUBLIC IFile
 {
   public:
 	/// The enumeration of file types
@@ -105,8 +105,11 @@ class IFile
 	static IFile* createFileHandle(const char *filename);
 	// Checks if a file can be accessed with specified mode
 	static bool access(const char *filename, unsigned char mode);
-	// Returns the writable directory for data storage
-	static const char* dataPath();
+
+	/// Returns the base directory for data loading
+	static const String& dataPath() { return dataPath_; }
+	// Returns the writable directory for saving data
+	static const String& savePath();
 
   protected:
 	/// File type
@@ -122,9 +125,6 @@ class IFile
 	/// File extension
 	String extension_;
 
-	/// The path for the application to write files into
-	static String dataPath_;
-
 	/// File descriptor for open() and close()
 	int fileDescriptor_;
 	/// File pointer for fopen() and fclose()
@@ -135,6 +135,16 @@ class IFile
 
 	/// File size in bytes
 	long int fileSize_;
+
+  private:
+	/// The path for the application to load files from
+	static String dataPath_;
+	/// The path for the application to write files into
+	static String savePath_;
+
+	static void initSavePath();
+
+	friend class AppConfiguration; // needs to call IFile::setDataPath()
 };
 
 }

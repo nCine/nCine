@@ -17,9 +17,9 @@ class ListIterator
 		: node_(iterator.node_) { }
 
 	// Read-only deferencing operator
-	inline const T& operator*() const;
+	const T& operator*() const;
 	// Deferencing operator
-	inline T& operator*();
+	T& operator*();
 
 	// Iterates to the next element (prefix)
 	ListIterator<T> operator++() const;
@@ -44,7 +44,7 @@ class ListIterator
 
 /// Read-only deferencing operator
 template <class T>
-const T& ListIterator<T>::operator*() const
+inline const T& ListIterator<T>::operator*() const
 {
 	// Cannot simply return only if node_ is not NULL or
 	// "control may reach end of non-void function"
@@ -53,7 +53,7 @@ const T& ListIterator<T>::operator*() const
 
 /// Deferencing operator
 template <class T>
-T& ListIterator<T>::operator*()
+inline T& ListIterator<T>::operator*()
 {
 	// Cannot simply return only if node_ is not NULL or
 	// "control may reach end of non-void function"

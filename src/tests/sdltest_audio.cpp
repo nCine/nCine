@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 // ----- Init ----------------------
 	nc::FrameTimer t(5.0f, 0.0f);
 	nc::ServiceLocator::registerLogger(new nc::FileLogger("log.txt", nc::ILogger::LOG_VERBOSE, nc::ILogger::LOG_OFF));
-	nc::SdlGfxDevice gfxDevice(Width, Height);
+	nc::SdlGfxDevice gfxDevice(Width, Height, false);
 	gfxDevice.setWindowTitle("Test");
 
 	nc::ServiceLocator::registerAudioDevice(new nc::ALAudioDevice());

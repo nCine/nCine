@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_PARTICLEAFFECTORS
 #define CLASS_NCINE_PARTICLEAFFECTORS
 
-#include "Vector2f.h"
+#include "Vector2.h"
 #include "Color.h"
 #include "Array.h"
 
@@ -10,7 +10,7 @@ namespace ncine {
 class Particle;
 
 /// Base class for particle affectors
-class ParticleAffector
+class DLL_PUBLIC ParticleAffector
 {
   public:
 	virtual ~ParticleAffector() { }
@@ -18,7 +18,7 @@ class ParticleAffector
 };
 
 /// Particle acceleration affector
-class AccelerationAffector: public ParticleAffector
+class DLL_PUBLIC AccelerationAffector: public ParticleAffector
 {
   public:
 	/// X and Y components of the accelerator vector
@@ -31,7 +31,7 @@ class AccelerationAffector: public ParticleAffector
 };
 
 /// Particle color affector
-class ColorAffector: public ParticleAffector
+class DLL_PUBLIC ColorAffector: public ParticleAffector
 {
   public:
 	ColorAffector() : colorSteps_(4) { }
@@ -64,7 +64,7 @@ class ColorAffector: public ParticleAffector
 };
 
 /// Particle size affector
-class SizeAffector: public ParticleAffector
+class DLL_PUBLIC SizeAffector: public ParticleAffector
 {
   public:
 	/// Constructs a size affector with a base scale factor as a reference

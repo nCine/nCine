@@ -1,18 +1,15 @@
 #ifndef CLASS_NCINE_IAUDIOPLAYER
 #define CLASS_NCINE_IAUDIOPLAYER
 
-#ifdef __APPLE__
-	#include <OpenAL/al.h>
-#else
-	#include <AL/al.h>
-#endif
+#define NCINE_INCLUDE_OPENAL
+#include "common_headers.h"
 #include "Object.h"
 #include "StaticArray.h"
 
 namespace ncine {
 
 /// Audio player interface class
-class IAudioPlayer : public Object
+class DLL_PUBLIC IAudioPlayer : public Object
 {
   public:
 	/// Player state

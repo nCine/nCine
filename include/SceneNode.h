@@ -3,7 +3,8 @@
 
 #include "Object.h"
 #include "List.h"
-#include "Vector2f.h"
+#include "Vector2.h"
+#include "Matrix4x4.h"
 #include "Color.h"
 
 namespace ncine {
@@ -11,7 +12,7 @@ namespace ncine {
 class RenderQueue;
 
 /// The base class for the transformation nodes hierarchy
-class SceneNode : public Object
+class DLL_PUBLIC SceneNode : public Object
 {
   public:
 	/// The minimum amount of rotation to trigger a sine and cosine calculation
@@ -21,9 +22,6 @@ class SceneNode : public Object
 	float x;
 	/// Relative Y coordinate as a public property
 	float y;
-
-	bool shouldUpdate_;
-	bool shouldDraw_;
 
 	SceneNode(SceneNode* parent, float x, float y);
 	explicit SceneNode(SceneNode* parent);
@@ -50,13 +48,18 @@ class SceneNode : public Object
 	/// Renders the node
 	virtual void draw(RenderQueue& renderQueue) { }
 
+	/// Enables node updating
+	inline void enableUpdate(bool shouldUpdate) { shouldUpdate_ = shouldUpdate; }
+	/// Enables node drawing
+	inline void enableDraw(bool shouldDraw) { shouldDraw_ = shouldDraw; }
+
 	/// Returns node position relative to its parent
 	inline Vector2f position() const { return Vector2f(x, y); }
 	/// Returns absolute node position
 	inline Vector2f absPosition() const { return Vector2f(absX_, absY_); }
-	/// Sets the sprite position through two coordinates
+	/// Sets the node position through two coordinates
 	inline void setPosition(float xx, float yy) { x = xx; y = yy; }
-	/// Sets the sprite position through a vector
+	/// Sets the node position through a vector
 	inline void setPosition(const Vector2f& pos) { x = pos.x; y = pos.y; }
 	/// Moves a node based on two offsets
 	inline void move(float xx, float yy) { x += xx; y += yy; }
@@ -92,13 +95,21 @@ class SceneNode : public Object
 	/// Sets the node alpha through a float component
 	inline void setAlphaF(float alpha) { color_.setAlphaF(alpha); }
 
+	/// Gets the node world matrix
+	inline const Matrix4x4f& worldMatrix() const { return worldMatrix_; }
+	/// Gets the node local matrix
+	inline const Matrix4x4f& localMatrix() const { return localMatrix_; }
+
   protected:
+	bool shouldUpdate_;
+	bool shouldDraw_;
+
 	SceneNode* parent_;
 	List<SceneNode *> children_;
 
 	/// Scale factor for node size
 	float scaleFactor_;
-	/// Degrees for clock-wise node rotation
+	/// Degrees for clock-wise node rotation in degrees
 	float rotation_;
 
 	/// Node color for transparency, translucency, etc...
@@ -118,9 +129,14 @@ class SceneNode : public Object
 	/// Absolute node color as calculated by the Transform() function
 	Color absColor_;
 
-	/// Private copy constructor
+	/// World transformation matrix (calculated from local and parent's world)
+	Matrix4x4f worldMatrix_;
+	/// Local transformation matrix
+	Matrix4x4f localMatrix_;
+
+	/// Protected copy constructor
 	SceneNode(const SceneNode&);
-	/// Private assignment operator
+	/// Protected assignment operator
 	SceneNode& operator=(const SceneNode&);
 
 	virtual void transform();

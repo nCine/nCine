@@ -1,13 +1,13 @@
 #ifndef CLASS_NCINE_STRING
 #define CLASS_NCINE_STRING
 
-#include "common.h"
+#include "common_functions.h"
 #include "StringIterator.h"
 
 namespace ncine {
 
 /// A basic string class made of chars
-class String
+class DLL_PUBLIC String
 {
   public:
 	/// Iterator type
@@ -15,7 +15,14 @@ class String
 	/// Constant iterator type
 	typedef const StringIterator Const_Iterator;
 
-	/// Constructs an empty string with explicit size
+	/// Default capacity for objects created by the default constructor
+	static const unsigned int DefaultCapacity = 128;
+	/// Maximum length when creating an object from C-style strings
+	static const unsigned int MaxCStringLength = DefaultCapacity - 1;
+
+	// Default constructor
+	String();
+	// Constructs an empty string with explicit size
 	explicit String(unsigned int capacity);
 	// Constructs a string from a C string
 	String(const char *cString);
@@ -23,8 +30,8 @@ class String
 
 	// Copy constructor
 	String(const String& other);
-	// Copy-and-swap assignment operator
-	String& operator=(String other);
+	// Assignment operator that preserves the original string capacity
+	String& operator=(const String& other);
 	// Assigns a constant C string to the string object
 	String& operator=(const char *cString);
 
@@ -65,14 +72,20 @@ class String
 	/** Length will be zero but capacity remains untouched */
 	inline void clear() { length_ = 0; array_[0] = '\0'; }
 
+	/// Returns a pointer to the internal array
+	char* data() { return array_; }
 	/// Returns a constant pointer to the internal array
 	const char* data() const { return array_; }
 
-	// Copies characters from another string
-	void copyFrom(const String &source, unsigned int fromChar, unsigned int charNum);
+	// Copies characters from somewhere in the source to somewhere in the destnation
+	unsigned int copy(const String& source, unsigned int srcChar, unsigned int numChar, unsigned int destChar);
+	// Copies all the characters from the source at the beginning of the destination
+	unsigned int copy(const String& source);
+	// Appends all the characters from the source at the end of the destination
+	unsigned int append(const String& source);
 
 	// Compares the string with another one in lexicographical order
-	int compare(const String &other) const;
+	int compare(const String& other) const;
 	// Compares the string with a constant C string in lexicographical order
 	int compare(const char *cString) const;
 
@@ -82,7 +95,7 @@ class String
 	int findLastChar(char c) const;
 
 	// Finds the first occurrence of the given string
-	int find(const String &other) const;
+	int find(const String& other) const;
 	// Finds the first occurrence of the given constant C string
 	int find(const char *cString) const;
 
@@ -92,20 +105,20 @@ class String
 	String& formatAppend(const char *fmt, ...);
 
 	// Appends another string to this one
-	String& operator+=(const String &other);
+	String& operator+=(const String& other);
 	// Appends a constant C string to the string object
 	String& operator+=(const char *cString);
 	// Concatenate two strings together to create a third one
-	String operator+(const String &other);
+	String operator+(const String& other) const;
 	// Concatenates a string with a constant C string to create a third one
-	String operator+(const char *cString);
+	String operator+(const char *cString) const;
 
-	inline bool operator==(const String &other) const { return compare(other) == 0; }
-	inline bool operator!=(const String &other) const { return compare(other) != 0; }
-	inline bool operator>(const String &other) const { return compare(other) > 0; }
-	inline bool operator<(const String &other) const { return compare(other) < 0; }
-	inline bool operator>=(const String &other) const { return compare(other) >= 0; }
-	inline bool operator<=(const String &other) const { return compare(other) <= 0; }
+	inline bool operator==(const String& other) const { return (length_ != other.length_) ? false : (compare(other) == 0); }
+	inline bool operator!=(const String& other) const { return (length_ != other.length_) ? true : (compare(other) != 0); }
+	inline bool operator>(const String& other) const { return compare(other) > 0; }
+	inline bool operator<(const String& other) const { return compare(other) < 0; }
+	inline bool operator>=(const String& other) const { return compare(other) >= 0; }
+	inline bool operator<=(const String& other) const { return compare(other) <= 0; }
 
 	inline bool operator==(const char *cString) const { return compare(cString) == 0; }
 	inline bool operator!=(const char *cString) const { return compare(cString) != 0; }

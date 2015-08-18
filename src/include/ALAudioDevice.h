@@ -1,13 +1,9 @@
 #ifndef CLASS_NCINE_ALAUDIODEVICE
 #define CLASS_NCINE_ALAUDIODEVICE
 
-#ifdef __APPLE__
-	#include <OpenAL/alc.h>
-	#include <OpenAL/al.h>
-#else
-	#include <AL/alc.h>
-	#include <AL/al.h>
-#endif
+#define NCINE_INCLUDE_OPENALC
+#include "common_headers.h"
+
 #include "IAudioDevice.h"
 #include "List.h"
 #include "StaticArray.h"

@@ -7,6 +7,7 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+/// Private constructor accessible only by `ParticleSystem`
 Particle::Particle(SceneNode* parent, Texture *texture)
 	: Sprite(parent, texture), life_(0.0f), startingLife(0.0f), inLocalSpace_(false)
 {
@@ -14,7 +15,7 @@ Particle::Particle(SceneNode* parent, Texture *texture)
 }
 
 ///////////////////////////////////////////////////////////
-// PUBLIC FUNCTIONS
+// PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
 /// Initializes a particle with initial life, position, velocity and rotation
@@ -33,7 +34,7 @@ void Particle::update(float interval)
 {
 	if (interval > life_)
 	{
-		life_ = 0.0f;    // dead particle
+		life_ = 0.0f; // dead particle
 	}
 	else
 	{
@@ -44,32 +45,17 @@ void Particle::update(float interval)
 	}
 }
 
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
 /// Custom transform method to allow independent position from parent
 void Particle::transform()
 {
-	// If in local space transform as any other scene node
-	if (inLocalSpace_)
+	SceneNode::transform();
+
+	if (inLocalSpace_ == false)
 	{
-		SceneNode::transform();
-	}
-	else
-	{
-		if (parent_)
-		{
-			absScaleFactor_ = parent_->absScale() * scaleFactor_;
-			absColor_ = parent_->absColor() * color_;
-		}
-		else
-		{
-			absScaleFactor_ = scaleFactor_;
-			absColor_ = color_;
-		}
+		worldMatrix_ = localMatrix_;
 
 		// Always independent movement
+		absScaleFactor_ = scaleFactor_;
 		absRotation_ = rotation_;
 		absX_ = x;
 		absY_ = y;

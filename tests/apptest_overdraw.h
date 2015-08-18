@@ -22,8 +22,6 @@ class MyEventHandler
 {
   public:
 	virtual void onInit();
-	virtual void onFrameStart() { }
-	virtual void onFrameEnd() { }
 	virtual void onShutdown();
 
 #ifndef __ANDROID__
@@ -31,11 +29,16 @@ class MyEventHandler
 #endif
 
   private:
-	static const int NumSprites = 100;
+	static const int NumSprites = 50;
 
 	nc::SceneNode *dummy_;
-	nc::Texture *megaTexture_;
-	nc::StaticArray<nc::Sprite*, NumSprites> sprites_;
+	nc::Texture *opaqueTexture_;
+	nc::Texture *alphaTestedTexture_;
+	nc::Texture *transparentTexture_;
+
+	nc::StaticArray<nc::Sprite*, NumSprites> opaqueSprites_;
+	nc::StaticArray<nc::Sprite*, NumSprites> alphaTestedSprites_;
+	nc::StaticArray<nc::Sprite*, NumSprites> transparentSprites_;
 
 	nc::Texture *alphaTexture_;
 	nc::Sprite *alphaSpriteBottom_;

@@ -3,21 +3,18 @@
 
 #include <ctime>
 #include <cstdlib>
-
 #include "Array.h"
-#include "DrawableNode.h"
+#include "SceneNode.h"
 #include "ParticleAffectors.h"
-#include "Array.h"
 
 namespace ncine {
 
 class Texture;
-class Vector2f;
 class Particle;
 class Rect;
 
 /// The class representing a particle system
-class ParticleSystem : public DrawableNode
+class DLL_PUBLIC ParticleSystem : public SceneNode
 {
   public:
 	// Constructs a particle system made of the specified maximum amount of particles
@@ -58,8 +55,6 @@ class ParticleSystem : public DrawableNode
 	ParticleSystem(const ParticleSystem&);
 	/// Private assignment operator
 	ParticleSystem& operator=(const ParticleSystem&);
-
-	virtual void updateRenderCommand() { }
 };
 
 }

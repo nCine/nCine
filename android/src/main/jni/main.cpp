@@ -2,6 +2,7 @@
 #include <android_native_app_glue.h>
 #include "AndroidApplication.h"
 #include "AndroidInputManager.h"
+#include "EglGfxDevice.h"
 #include "ServiceLocator.h"
 
 namespace ncine {
@@ -23,6 +24,8 @@ static int32_t engine_handle_input(struct android_app* app, AInputEvent* event)
 /// Process the next main command
 static void engine_handle_cmd(struct android_app* app, int32_t cmd)
 {
+	static nc::EglGfxDevice *eglGfxDevice = NULL;
+
 	switch (cmd)
 	{
 		case APP_CMD_INPUT_CHANGED:
@@ -33,41 +36,42 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd)
 			LOGI("engine_handle_cmd - APP_CMD_INIT_WINDOW event received");
 			if (app->window != NULL)
 			{
-				if (nc::AndroidApplication::isInitialized() == false)
+				if (nc::theApplication().isInitialized() == false)
 				{
-					nc::AndroidApplication::init(app, createApphandler);
-					nc::AndroidApplication::step();
+					nc::theApplication().init(app);
+					eglGfxDevice = &static_cast<nc::EglGfxDevice &>(nc::theApplication().gfxDevice());
+					nc::theApplication().step();
 				}
 				else
 				{
-					nc::AndroidApplication::createEglSurface(app);
-					nc::AndroidApplication::bindEglContext();
+					eglGfxDevice->createSurface(app);
+					eglGfxDevice->bindContext();
 				}
 			}
 			break;
 		case APP_CMD_TERM_WINDOW:
 			LOGI("engine_handle_cmd - APP_CMD_TERM_WINDOW event received");
-			nc::AndroidApplication::unbindEglContext();
+			eglGfxDevice->unbindContext();
 			break;
 		case APP_CMD_WINDOW_RESIZED:
 			LOGI("engine_handle_cmd - APP_CMD_WINDOW_RESIZED event received");
-			nc::AndroidApplication::queryEglSurfaceSize();
+			eglGfxDevice->querySurfaceSize();
 			break;
 		case APP_CMD_WINDOW_REDRAW_NEEDED:
 			LOGI("engine_handle_cmd - APP_CMD_WINDOW_REDRAW_NEEDED event received");
-			nc::AndroidApplication::step();
+			nc::theApplication().step();
 			break;
 
 		case APP_CMD_GAINED_FOCUS:
 			LOGI("engine_handle_cmd - APP_CMD_GAINED_FOCUS event received");
 			nc::AndroidInputManager::enableAccelerometerSensor();
-			nc::AndroidApplication::setFocus(true);
+			nc::theApplication().setFocus(true);
 			break;
 		case APP_CMD_LOST_FOCUS:
 			LOGI("engine_handle_cmd - APP_CMD_LOST_FOCUS event received");
 			nc::AndroidInputManager::disableAccelerometerSensor();
-			nc::AndroidApplication::setFocus(false);
-			nc::AndroidApplication::step();
+			nc::theApplication().setFocus(false);
+			nc::theApplication().step();
 			break;
 
 		case APP_CMD_CONFIG_CHANGED:
@@ -79,9 +83,9 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd)
 			break;
 
 		case APP_CMD_START:
-			if (nc::AndroidApplication::isInitialized() == false)
+			if (nc::theApplication().isInitialized() == false)
 			{
-				nc::AndroidApplication::preInit();
+				nc::theApplication().preInit(createApphandler);
 				LOGI("engine_handle_cmd - APP_CMD_START event received (first start)");
 			}
 			LOGI("engine_handle_cmd - APP_CMD_START event received");
@@ -101,7 +105,7 @@ static void engine_handle_cmd(struct android_app* app, int32_t cmd)
 
 		case APP_CMD_DESTROY:
 			LOGI("engine_handle_cmd - APP_CMD_DESTROY event received");
-			nc::AndroidApplication::quit();
+			nc::theApplication().quit();
 			break;
 	}
 }
@@ -114,13 +118,13 @@ void android_main(struct android_app* state)
 	state->onAppCmd = engine_handle_cmd;
 	state->onInputEvent = engine_handle_input;
 
-	while (nc::AndroidApplication::shouldQuit() == false)
+	while (nc::theApplication().shouldQuit() == false)
 	{
 		int ident;
 		int events;
 		struct android_poll_source* source;
 
-		while ((ident = ALooper_pollAll(!nc::AndroidApplication::isPaused() ? 0 : -1, NULL, &events, (void**)&source)) >= 0)
+		while ((ident = ALooper_pollAll(!nc::theApplication().isPaused() ? 0 : -1, NULL, &events, (void**)&source)) >= 0)
 		{
 			if (source != NULL)
 			{
@@ -135,19 +139,19 @@ void android_main(struct android_app* state)
 			if (state->destroyRequested)
 			{
 				LOGI("android_main - android_app->destroyRequested not equal to zero");
-				nc::AndroidApplication::quit();
+				nc::theApplication().quit();
 			}
 		}
 
-		if (nc::AndroidApplication::isInitialized() &&
-			nc::AndroidApplication::hasFocus() &&
-			!nc::AndroidApplication::isPaused())
+		if (nc::theApplication().isInitialized() &&
+			nc::theApplication().hasFocus() &&
+			!nc::theApplication().isPaused())
 		{
 			nc::AndroidInputManager::updateJoystickConnections();
-			nc::AndroidApplication::step();
+			nc::theApplication().step();
 		}
 	}
 
-	nc::AndroidApplication::shutdown();
+	nc::theApplication().shutdown();
 	ANativeActivity_finish(state->activity);
 }

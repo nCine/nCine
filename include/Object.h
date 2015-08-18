@@ -7,7 +7,7 @@
 namespace ncine {
 
 /// Static RRTI and identification index
-class Object
+class DLL_PUBLIC Object
 {
   public:
 	/// The enumeration of object types
@@ -31,9 +31,9 @@ class Object
 
 	Object() : type_(BASE_TYPE), id_(0), name_(MaxNameLength)
 	{
-		id_ = ServiceLocator::indexer().addObject(this);
+		id_ = theServiceLocator().indexer().addObject(this);
 	}
-	virtual ~Object() { ServiceLocator::indexer().removeObject(id_); }
+	virtual ~Object() { theServiceLocator().indexer().removeObject(id_); }
 
 	/// Returns the object identification number
 	inline unsigned int id() const { return id_; }
@@ -74,7 +74,7 @@ class Object
 template <class T>
 T* Object::fromId(unsigned int id)
 {
-	Object *object = ServiceLocator::indexer().object(id);
+	Object *object = theServiceLocator().indexer().object(id);
 
 	if (object)
 	{

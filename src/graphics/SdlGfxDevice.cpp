@@ -12,27 +12,27 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 /// Constructor taking the resolution as two integer
-SdlGfxDevice::SdlGfxDevice(int width, int height)
+SdlGfxDevice::SdlGfxDevice(int width, int height, bool isFullScreen)
 {
-	init(width, height, DisplayMode(), true);
+	init(width, height, DisplayMode(), isFullScreen);
 }
 
 /// Constructor taking the resolution as a Point class
-SdlGfxDevice::SdlGfxDevice(Point size)
+SdlGfxDevice::SdlGfxDevice(Point size, bool isFullScreen_)
 {
-	init(size.x, size.y, DisplayMode(), true);
+	init(size.x, size.y, DisplayMode(), isFullScreen_);
 }
 
 /// Constructor taking the resolution as two integer and a DisplayMode
-SdlGfxDevice::SdlGfxDevice(int width, int height, DisplayMode mode)
+SdlGfxDevice::SdlGfxDevice(int width, int height, DisplayMode mode, bool isFullScreen)
 {
-	init(width, height, mode, true);
+	init(width, height, mode, isFullScreen);
 }
 
 /// Constructor taking the resolution as a Point class and a DisplayMode
-SdlGfxDevice::SdlGfxDevice(Point size, DisplayMode mode)
+SdlGfxDevice::SdlGfxDevice(Point size, DisplayMode mode, bool isFullScreen)
 {
-	init(size.x, size.y, mode, true);
+	init(size.x, size.y, mode, isFullScreen);
 }
 
 ///////////////////////////////////////////////////////////
@@ -65,7 +65,7 @@ void SdlGfxDevice::setResolution(Point size)
 
 void SdlGfxDevice::toggleFullScreen()
 {
-	isWindowed_ = !isWindowed_;
+	isFullScreen_ = !isFullScreen_;
 	initDevice();
 }
 
@@ -74,16 +74,15 @@ void SdlGfxDevice::toggleFullScreen()
 ///////////////////////////////////////////////////////////
 
 /// Initializes the class
-void SdlGfxDevice::init(int width, int height, DisplayMode mode, bool isWindowed)
+void SdlGfxDevice::init(int width, int height, DisplayMode mode, bool isFullScreen)
 {
 	width_ = width;
 	height_ = height;
 	mode_ = mode;
-	isWindowed_ = isWindowed;
+	isFullScreen_ = isFullScreen;
 
 	initGraphics();
 	initDevice();
-	initGL();
 }
 
 /// Initilizes the video subsystem (SDL)
@@ -116,10 +115,6 @@ void SdlGfxDevice::initDevice()
 	{
 		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, mode_.alphaBits());
 	}
-	if (mode_.bufferBits() > 0)
-	{
-		SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, mode_.bufferBits());
-	}
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, mode_.isDoubleBuffered());
 	SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, mode_.hasVSync());
@@ -133,7 +128,7 @@ void SdlGfxDevice::initDevice()
 	}
 
 	Uint32 flags = SDL_OPENGL;
-	if (isWindowed_ == false)
+	if (isFullScreen_)
 	{
 		flags |= SDL_FULLSCREEN;
 	}
@@ -154,9 +149,9 @@ void SdlGfxDevice::initDevice()
 		exit(-1);
 	}
 
-	if (!GLEW_VERSION_2_0)
+	if (!GLEW_VERSION_2_1)
 	{
-		LOGF_X("OpenGL 2 is not supported");
+		LOGF("OpenGL 2.1 is not supported");
 		exit(-1);
 	}
 #endif

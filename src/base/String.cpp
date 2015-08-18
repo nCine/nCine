@@ -9,17 +9,25 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+/// Default constructor
+String::String()
+	: array_(NULL), length_(0), capacity_(DefaultCapacity)
+{
+	array_ = new char[capacity_];
+	array_[0] = '\0';
+}
+
 /// Constructs an empty string with explicit size
 String::String(unsigned int capacity)
 	: array_(NULL), length_(0), capacity_(capacity)
 {
-	if (capacity == 0)
+	if (capacity_ == 0)
 	{
 		LOGF("Zero is not a valid capacity");
 		exit(EXIT_FAILURE);
 	}
 
-	array_ = new char[capacity];
+	array_ = new char[capacity_];
 	array_[0] = '\0';
 }
 
@@ -27,7 +35,11 @@ String::String(unsigned int capacity)
 String::String(const char *cString)
 	: array_(NULL), length_(0), capacity_(0)
 {
-	capacity_ = static_cast<unsigned int>(strlen(cString)) + 1;
+#ifdef _WIN32
+	capacity_ = static_cast<unsigned int>(strnlen_s(cString, MaxCStringLength)) + 1;
+#else
+	capacity_ = static_cast<unsigned int>(strnlen(cString, MaxCStringLength)) + 1;
+#endif
 	length_ = capacity_ - 1;
 	array_ = new char[capacity_];
 
@@ -62,11 +74,18 @@ String::String(const String& other)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Copy-and-swap assignment operator
-/** The parameter should be passed by value for the idiom to work */
-String& String::operator=(String other)
+/// Assignment operator that preserves the original string capacity
+/*! Not implemented with the copy-and-swap idiom because it has to copy data */
+String& String::operator=(const String& other)
 {
-	swap(*this, other);
+	if (this != &other)
+	{
+		// copy and truncate
+		unsigned int copiedChars = copy(other);
+		length_ = copiedChars;
+		array_[length_] = '\0';
+	}
+
 	return *this;
 }
 
@@ -85,23 +104,50 @@ String& String::operator=(const char *cString)
 	return *this;
 }
 
-/// Copies characters from another string
-void String::copyFrom(const String &source, unsigned int fromChar, unsigned int charNum)
+/// Copies characters from somewhere in the source to somewhere in the destnation
+/*! The method returns the number of characters copied, to allow truncation */
+unsigned int String::copy(const String& source, unsigned int srcChar, unsigned int numChar, unsigned int destChar)
 {
-	if (source.length_ >= fromChar + charNum && charNum <= (capacity_ - length_))
+	// Clamping parameters to string lengths and capacities
+
+	// Cannot copy from beyond the end of the source string
+	unsigned int clampedSrcChar = min(srcChar, source.length_);
+	char *srcStart = source.array_ + clampedSrcChar;
+	// It is possible to write beyond the end of the destination string, but without creating holes
+	unsigned int clampedDestChar = min(destChar, length_);
+	char *destStart = array_ + clampedDestChar;
+	// Cannot copy more characters than the source has left until its length or more than the destination has until its capacity
+	unsigned int charsToCopy = min(min(numChar, source.length_ - clampedSrcChar), capacity_ - clampedDestChar);
+
+	if (charsToCopy > 0)
 	{
 #ifdef _WIN32
-		strncpy_s(array_, capacity_, source.array_ + fromChar, charNum);
+		strncpy_s(destStart, capacity_ - clampedDestChar, srcStart, charsToCopy);
 #else
-		strncpy(array_, source.array_ + fromChar, charNum);
+		strncpy(destStart, srcStart, charsToCopy);
 #endif
-		length_ += charNum;
+		// Source string length can only grow, truncation has to be performed by the calling function using the return value
+		length_ = max(length_, static_cast<unsigned int>(destStart - array_) + charsToCopy);
 		array_[length_] = '\0';
 	}
+
+	return charsToCopy;
+}
+
+/// Copies all the characters from the source at the beginning of the destination
+unsigned int String::copy(const String& source)
+{
+	return copy(source, 0, source.length_, 0);
+}
+
+/// Appends all the characters from the source at the end of the destination
+unsigned int String::append(const String& source)
+{
+	return copy(source, 0, source.length_, length_);
 }
 
 /// Compares the string with another one in lexicographical order
-int String::compare(const String &other) const
+int String::compare(const String& other) const
 {
 	unsigned int minCapacity = nc::min(capacity_, other.capacity_);
 	return strncmp(array_, other.array_, minCapacity);
@@ -144,7 +190,7 @@ int String::findLastChar(char c) const
 }
 
 /// Finds the first occurrence of the given string
-int String::find(const String &other) const
+int String::find(const String& other) const
 {
 	const char *foundPtr = strstr(array_, other.array_);
 
@@ -216,7 +262,7 @@ String& String::formatAppend(const char *fmt, ...)
 }
 
 /// Appends another string to this one
-String& String::operator+=(const String &other)
+String& String::operator+=(const String& other)
 {
 	unsigned int availCapacity = capacity_ - length_;
 	unsigned int minLength = min(other.length_, availCapacity);
@@ -251,7 +297,7 @@ String& String::operator+=(const char *cString)
 }
 
 /// Concatenates two strings together to create a third one
-String String::operator+(const String &other)
+String String::operator+(const String& other) const
 {
 	unsigned int sumLength = length_ + other.length_ + 1;
 	String result(sumLength);
@@ -263,7 +309,7 @@ String String::operator+(const String &other)
 }
 
 /// Concatenates a string with a constant C string to create a third one
-String String::operator+(const char *cString)
+String String::operator+(const char *cString) const
 {
 	unsigned int sumLength = length_ + static_cast<unsigned int>(strlen(cString)) + 1;
 	String result(sumLength);

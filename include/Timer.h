@@ -1,10 +1,12 @@
 #ifndef CLASS_NCINE_TIMER
 #define CLASS_NCINE_TIMER
 
+#include "common_defines.h"
+
 namespace ncine {
 
 /// Basic timer and synchronization class
-class Timer
+class DLL_PUBLIC Timer
 {
   public:
 	// Empty constructor

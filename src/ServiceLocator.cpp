@@ -4,23 +4,28 @@
 
 namespace ncine {
 
+/// Meyers' Singleton
+ServiceLocator& theServiceLocator()
+{
+	static ServiceLocator instance;
+	return instance;
+}
+
 ///////////////////////////////////////////////////////////
-// STATIC DEFINITIONS
+// CONSTRUCTORS AND DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-NullIndexer ServiceLocator::nullIndexer_;
-IIndexer* ServiceLocator::indexerService_ = &ServiceLocator::nullIndexer_;
+ServiceLocator::ServiceLocator()
+	: indexerService_(&nullIndexer_), loggerService_(&nullLogger_)
+	, audioDevice_(&nullAudioDevice_), threadPool_(&nullThreadPool_)
+{
+	gfxCapabilities_ = new GfxCapabilities();
+}
 
-NullLogger ServiceLocator::nullLogger_;
-ILogger* ServiceLocator::loggerService_ = &ServiceLocator::nullLogger_;
-
-NullAudioDevice ServiceLocator::nullAudioDevice_;
-IAudioDevice* ServiceLocator::audioDevice_ = &ServiceLocator::nullAudioDevice_;
-
-NullThreadPool ServiceLocator::nullThreadPool_;
-IThreadPool* ServiceLocator::threadPool_ = &ServiceLocator::nullThreadPool_;
-
-GfxCapabilities ServiceLocator::gfxCapabilities_;
+ServiceLocator::~ServiceLocator()
+{
+	delete gfxCapabilities_;
+}
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS

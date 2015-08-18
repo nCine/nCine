@@ -1,6 +1,6 @@
 #include "AndroidInputManager.h"
 #include "IInputEventHandler.h"
-#include "Application.h"
+#include "AndroidApplication.h"
 #include "ServiceLocator.h"
 #include "Timer.h"
 
@@ -265,10 +265,10 @@ bool AndroidInputManager::parseEvent(const AInputEvent *event)
 		touchEvent_.count = AMotionEvent_getPointerCount(event);
 		touchEvent_.id = AMotionEvent_getPointerId(event, 0);
 		touchEvent_.x = AMotionEvent_getX(event, 0);
-		touchEvent_.y = Application::height() - AMotionEvent_getY(event, 0);
+		touchEvent_.y = theApplication().height() - AMotionEvent_getY(event, 0);
 		touchEvent_.id2 = AMotionEvent_getPointerId(event, 1);
 		touchEvent_.x2 = AMotionEvent_getX(event, 1);
-		touchEvent_.y2 = Application::height() - AMotionEvent_getY(event, 1);
+		touchEvent_.y2 = theApplication().height() - AMotionEvent_getY(event, 1);
 
 		switch (AMotionEvent_getAction(event))
 		{
@@ -319,7 +319,7 @@ const char *AndroidInputManager::joyName(int joyId) const
 	}
 	else
 	{
-		return '\0';
+		return NULL;
 	}
 }
 
@@ -394,6 +394,11 @@ void AndroidInputManager::initAccelerometerSensor(android_app *state)
 		ASENSOR_TYPE_ACCELEROMETER);
 	sensorEventQueue_ = ASensorManager_createEventQueue(sensorManager_,
 		state->looper, LOOPER_ID_USER, NULL, NULL);
+
+	if (accelerometerSensor_ == NULL)
+	{
+		LOGW("No accelerometer sensor available");
+	}
 }
 
 /// Updates joystick states after connections and disconnections

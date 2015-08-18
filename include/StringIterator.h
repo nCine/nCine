@@ -1,10 +1,12 @@
 #ifndef CLASS_NCINE_STRINGITERATOR
 #define CLASS_NCINE_STRINGITERATOR
 
+#include "common_defines.h"
+
 namespace ncine {
 
 /// A String iterator
-class StringIterator
+class DLL_PUBLIC StringIterator
 {
   public:
 	explicit StringIterator(char *c)

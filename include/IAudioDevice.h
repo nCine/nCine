@@ -1,12 +1,14 @@
 #ifndef CLASS_NCINE_IAUDIODEVICE
 #define CLASS_NCINE_IAUDIODEVICE
 
+#include "common_defines.h"
+
 namespace ncine {
 
 class IAudioPlayer;
 
 /// It represents the interface to the audio device
-class IAudioDevice
+class DLL_PUBLIC IAudioDevice
 {
   public:
 	virtual ~IAudioDevice() = 0;
@@ -49,7 +51,7 @@ inline IAudioDevice::~IAudioDevice() { }
 #define CLASS_NCINE_NULLAUDIODEVICE
 
 /// A fake audio device which doesn't play anything
-class NullAudioDevice : public IAudioDevice
+class DLL_PUBLIC NullAudioDevice : public IAudioDevice
 {
   public:
 	virtual float gain() { return 1.0f; }

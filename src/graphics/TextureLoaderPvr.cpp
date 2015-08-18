@@ -64,7 +64,7 @@ void TextureLoaderPvr::readHeader(Pvr3Header &header)
 void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
 {
 	GLenum internalFormat = GL_RGB; // to suppress uninitialized variable warning
-	const GfxCapabilities& gfxCaps = ServiceLocator::gfxCapabilities();
+	const GfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();
 
 	uint64_t pixelFormat = IFile::int64FromLE(header.pixelFormat);
 
@@ -143,7 +143,7 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
 
 		loadPixels(internalFormat);
 	}
-	// Texture contains uncompressed RGB data
+	// Texture contains uncompressed data
 	else
 	{
 		GLenum type = GL_UNSIGNED_BYTE;
@@ -156,11 +156,18 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
 
 		switch (pixelFormat)
 		{
-			case FMT_RGB_888:
-				internalFormat = GL_RGB;
+			case FMT_BGRA_8888:
+#ifndef __ANDROID__
+				internalFormat = GL_BGRA;
+#else
+				internalFormat = GL_BGRA_EXT;
+#endif
 				break;
 			case FMT_RGBA_8888:
 				internalFormat = GL_RGBA;
+				break;
+			case FMT_RGB_888:
+				internalFormat = GL_RGB;
 				break;
 			case FMT_RGB_565:
 				internalFormat = GL_RGB;
@@ -174,8 +181,17 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
 				internalFormat = GL_RGBA;
 				type = GL_UNSIGNED_SHORT_4_4_4_4;
 				break;
+			case FMT_LA_88:
+				internalFormat = GL_LUMINANCE_ALPHA;
+				break;
+			case FMT_L_8:
+				internalFormat = GL_LUMINANCE;
+				break;
+			case FMT_A_8:
+				internalFormat = GL_ALPHA;
+				break;
 			default:
-				LOGF_X("Unsupported PVR3 uncompressed format: %llx", pixelFormat);
+				LOGF_X("Unsupported PVR3 uncompressed format: 0x%llx", pixelFormat);
 				exit(EXIT_FAILURE);
 				break;
 		}

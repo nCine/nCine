@@ -1,18 +1,15 @@
 #ifndef CLASS_NCINE_AUDIOSTREAM
 #define CLASS_NCINE_AUDIOSTREAM
 
-#ifdef __APPLE__
-	#include <OpenAL/al.h>
-#else
-	#include <AL/al.h>
-#endif
+#define NCINE_INCLUDE_OPENAL
+#include "common_headers.h"
 #include "IAudioLoader.h"
 #include "StaticArray.h"
 
 namespace ncine {
 
 /// Audio stream class
-class AudioStream
+class DLL_PUBLIC AudioStream
 {
   public:
 	virtual ~AudioStream();

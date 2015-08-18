@@ -1,12 +1,8 @@
 #ifndef CLASS_NCINE_AUDIOBUFFER
 #define CLASS_NCINE_AUDIOBUFFER
 
-#ifdef __APPLE__
-	#include <OpenAL/al.h>
-#else
-	#include <AL/al.h>
-#endif
-
+#define NCINE_INCLUDE_OPENAL
+#include "common_headers.h"
 #include "Object.h"
 
 namespace ncine {
@@ -15,7 +11,7 @@ class IAudioLoader;
 
 /// A class representing an OpenAL buffer
 /*! It inherits from Object because a buffer can be shared by more than one AudioBufferPlayer object */
-class AudioBuffer : public Object
+class DLL_PUBLIC AudioBuffer : public Object
 {
   public:
 	AudioBuffer();

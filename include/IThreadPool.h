@@ -1,12 +1,14 @@
 #ifndef CLASS_NCINE_ITHREADPOOL
 #define CLASS_NCINE_ITHREADPOOL
 
+#include "common_defines.h"
+
 namespace ncine {
 
 class IThreadCommand;
 
 /// It represents the interface to a thread pool
-class IThreadPool
+class DLL_PUBLIC IThreadPool
 {
   public:
 	virtual ~IThreadPool() = 0;
@@ -23,7 +25,7 @@ inline IThreadPool::~IThreadPool() { }
 #define CLASS_NCINE_NULLTHREADPOOL
 
 /// A fake thread pool which doesn't create any thread
-class NullThreadPool : public IThreadPool
+class DLL_PUBLIC NullThreadPool : public IThreadPool
 {
   public:
 	virtual void enqueueCommand(IThreadCommand *threadCommand) { }

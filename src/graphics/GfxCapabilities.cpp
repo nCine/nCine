@@ -1,15 +1,5 @@
-#if defined(__ANDROID__)
-	#include <GLES/gl.h>
-	#include <GLES/glext.h>
-#elif defined(WITH_GLEW)
-	#include <GL/glew.h>
-#elif defined(__APPLE__)
-	#include <OpenGL/gl.h>
-	#include <OpenGL/glext.h>
-#else
-	#include <GL/gl.h>
-	#include <GL/glext.h>
-#endif
+#define NCINE_INCLUDE_OPENGL
+#include "common_headers.h"
 
 #include <cstring> // for CheckGLExtension()
 #include "GfxCapabilities.h"
@@ -28,7 +18,7 @@ GfxCapabilities::GfxCapabilities()
 	  releaseGL_(-1),
 #endif
 	  maxTextureSize_(-1),
-	  maxTextureUnits_(-1),
+	  maxTextureImageUnits_(-1),
 #ifndef __ANDROID__
 	  extTextureCompressionS3TC_(false)
 #else
@@ -51,10 +41,7 @@ void GfxCapabilities::logGLInfo()
 	LOGI_X("Vendor: %s", glGetString(GL_VENDOR));
 	LOGI_X("Renderer: %s", glGetString(GL_RENDERER));
 	LOGI_X("OpenGL Version: %s", glGetString(GL_VERSION));
-#ifndef __ANDROID__
-	// Using OpenGL ES 1.1 at the moment
 	LOGI_X("GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
-#endif
 	LOGI("OpenGL device info ---");
 }
 
@@ -77,7 +64,7 @@ void GfxCapabilities::logGLCaps() const
 #endif
 	LOGI("---");
 	LOGI_X("GL_MAX_TEXTURE_SIZE: %d", maxTextureSize_);
-	LOGI_X("GL_MAX_TEXTURE_UNITS: %d", maxTextureUnits_);
+	LOGI_X("GL_MAX_TEXTURE_IMAGE_UNITS: %d", maxTextureImageUnits_);
 	LOGI("---");
 #ifndef __ANDROID__
 	LOGI_X("GL_EXT_texture_compression_s3tc: %d", extTextureCompressionS3TC_);
@@ -129,7 +116,7 @@ void GfxCapabilities::init()
 #endif
 
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize_);
-	glGetIntegerv(GL_MAX_TEXTURE_UNITS, &maxTextureUnits_);
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureImageUnits_);
 
 #ifndef __ANDROID__
 	extTextureCompressionS3TC_ = checkGLExtension("GL_EXT_texture_compression_s3tc");

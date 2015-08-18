@@ -1,10 +1,12 @@
 #ifndef CLASS_NCINE_GFXCAPABILITIES
 #define CLASS_NCINE_GFXCAPABILITIES
 
+#include "common_defines.h"
+
 namespace ncine {
 
 /// A class to query and store OpenGL device runtime capabilities
-class GfxCapabilities
+class DLL_PUBLIC GfxCapabilities
 {
   public:
 	/// Default constructor
@@ -31,8 +33,8 @@ class GfxCapabilities
 
 	/// Returns a rough estimate of the largest texture that the device can handle
 	inline int maxTextureSize() const { return maxTextureSize_; }
-	/// Returns the number of texture units supported
-	inline int maxTextureUnits() const { return maxTextureUnits_; }
+	/// Returns the number of texture image units supported
+	inline int maxTextureImageUnits() const { return maxTextureImageUnits_; }
 
 #ifndef __ANDROID__
 	/// Returns true if the extension GL_EXT_texture_compression_s3tc is available
@@ -54,7 +56,7 @@ class GfxCapabilities
 #endif
 
 	int maxTextureSize_;
-	int maxTextureUnits_;
+	int maxTextureImageUnits_;
 
 #ifndef __ANDROID__
 	bool extTextureCompressionS3TC_;
@@ -67,7 +69,7 @@ class GfxCapabilities
 	// Queries the device about its capabilities
 	void init();
 
-	friend class IGfxDevice;
+	friend class Application;
 };
 
 }

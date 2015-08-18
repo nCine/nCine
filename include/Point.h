@@ -1,10 +1,12 @@
 #ifndef CLASS_NCINE_POINT
 #define CLASS_NCINE_POINT
 
+#include "common_defines.h"
+
 namespace ncine {
 
 /// A point in a two dimensional space
-class Point
+class DLL_PUBLIC Point
 {
   public:
 	/// X coordinate as a public property

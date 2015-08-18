@@ -1,18 +1,8 @@
 #ifndef CLASS_NCINE_TEXTUREFORMAT
 #define CLASS_NCINE_TEXTUREFORMAT
 
-#if defined(__ANDROID__)
-	#include <GLES/gl.h>
-	#include <GLES/glext.h>
-#elif defined(WITH_GLEW)
-	#include <GL/glew.h>
-#elif defined(__APPLE__)
-	#include <OpenGL/gl.h>
-	#include <OpenGL/glext.h>
-#else
-	#include <GL/gl.h>
-	#include <GL/glext.h>
-#endif
+#define NCINE_INCLUDE_OPENGL
+#include "common_headers.h"
 
 namespace ncine {
 
@@ -36,10 +26,8 @@ class TextureFormat
 	// Returns true if the format provides an alpha channel
 	bool hasAlpha() const;
 
-#ifndef __ANDROID__
 	// Converts the external format to the corresponding BGR one
 	void bgrFormat();
-#endif
 
 	// Calculates the pixel data size for each MIP map level
 	static long int calculateMipSizes(GLenum internalFormat, int width, int height, int mipMapCount, long int *mipDataOffsets, long int *mipDataSizes);
@@ -61,6 +49,8 @@ class TextureFormat
 	// Searches a match between an OpenGL ES internal format and an external one
 	bool oesFormat();
 	// Searches a match between a OpenGL ES compressed internal format and an external one
+	bool oesFormatApi21();
+	// Searches a match between a OpenGL ES compressed internal format and an external one
 	bool oesCompressedFormat();
 #endif
 
@@ -74,6 +64,8 @@ inline bool TextureFormat::hasAlpha() const
 	return (format_ == GL_RGBA ||
 #ifndef __ANDROID__
 			format_ == GL_BGRA ||
+#else
+			format_ == GL_BGRA_EXT ||
 #endif
 			format_ == GL_LUMINANCE_ALPHA ||
 			format_ == GL_ALPHA);
