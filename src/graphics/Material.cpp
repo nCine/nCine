@@ -5,7 +5,6 @@
 #include "GLUniform.h"
 #include "GLTexture.h"
 #include "Texture.h"
-#include "HashMapIterator.h"
 
 namespace ncine {
 

@@ -7,7 +7,8 @@
 
 namespace ncine {
 
-template <class K, class T, class HashFunc> class HashMapIterator;
+template <class K, class T, class HashFunc, bool IsConst> class HashMapIterator;
+template <class K, class T, class HashFunc, bool IsConst> class HelperTraits;
 class String;
 
 template <class K, class T>
@@ -28,6 +29,11 @@ template <class K, class T, class HashFunc>
 class HashMap
 {
   public:
+	/// Iterator type
+	typedef HashMapIterator<K, T, HashFunc, false> Iterator;
+	/// Constant iterator type
+	typedef HashMapIterator<K, T, HashFunc, true> ConstIterator;
+
 	explicit HashMap(unsigned int size);
 	~HashMap() { clear(); }
 
@@ -42,6 +48,16 @@ class HashMap
 		nc::swap(first.buckets_, second.buckets_);
 		nc::swap(first.hashFunc_, second.hashFunc_);
 	}
+
+	// Returns an iterator to the first element
+	Iterator begin();
+	// Returns an iterator to past the last element
+	Iterator end();
+
+	// Returns a constant iterator to the first element
+	ConstIterator begin() const;
+	// Returns a constant iterator to past the last lement
+	ConstIterator end() const;
 
 	/// Subscript operator
 	inline T& operator[](const K& key) { return retrieveBucket(key).findOrAdd(hashFunc_(key), key); }
@@ -83,7 +99,9 @@ class HashMap
 		/// Separate chaining with a linked list
 		List<HashMapNode<K, T> > collisionList_;
 
-		friend class HashMapIterator<K, T, HashFunc>;
+		friend class HashMapIterator<K, T, HashFunc, false>;
+		friend class HashMapIterator<K, T, HashFunc, true>;
+		friend class HashMap<K, T, HashFunc>;
 	};
 
 	const HashBucket& retrieveBucket(const K& key) const;
@@ -92,8 +110,49 @@ class HashMap
 	Array<HashBucket> buckets_;
 	HashFunc hashFunc_;
 
-	friend class HashMapIterator<K, T, HashFunc>;
+	friend class HashMapIterator<K, T, HashFunc, false>;
+	friend class HashMapIterator<K, T, HashFunc, true>;
+	friend class HelperTraits<K, T, HashFunc, false>;
+	friend class HelperTraits<K, T, HashFunc, true>;
 };
+
+template <class K, class T, class HashFunc>
+inline typename HashMap<K, T, HashFunc>::Iterator HashMap<K, T, HashFunc>::begin()
+{
+	Iterator iterator(this, 0, buckets_[0].collisionList_.begin(), true);
+	if (buckets_[0].size_ == 0)
+	{
+		++iterator;
+	}
+
+	return iterator;
+}
+
+template <class K, class T, class HashFunc>
+inline typename HashMap<K, T, HashFunc>::Iterator HashMap<K, T, HashFunc>::end()
+{
+	unsigned int lastIndex = buckets_.size() - 1;
+	return Iterator(this, lastIndex, buckets_[lastIndex].collisionList_.end(), false);
+}
+
+template <class K, class T, class HashFunc>
+inline typename HashMap<K, T, HashFunc>::ConstIterator HashMap<K, T, HashFunc>::begin() const
+{
+	ConstIterator iterator(this, 0, buckets_[0].collisionList_.begin(), true);
+	if (buckets_[0].size_ == 0)
+	{
+		++iterator;
+	}
+
+	return iterator;
+}
+
+template <class K, class T, class HashFunc>
+inline typename HashMap<K, T, HashFunc>::ConstIterator HashMap<K, T, HashFunc>::end() const
+{
+	unsigned int lastIndex = buckets_.size() - 1;
+	return ConstIterator(this, lastIndex, buckets_[lastIndex].collisionList_.end(), false);
+}
 
 template <class K, class T, class HashFunc>
 void HashMap<K, T, HashFunc>::HashBucket::clear()
@@ -119,7 +178,7 @@ bool HashMap<K, T, HashFunc>::HashBucket::contains(hash_t hash, const K& key, T&
 	}
 	else
 	{
-		for (typename List<HashMapNode<K, T> >::Iterator i = collisionList_.begin(); i != collisionList_.end(); ++i)
+		for (typename List<HashMapNode<K, T> >::ConstIterator i = collisionList_.begin(); i != collisionList_.end(); ++i)
 		{
 			if ((*i).hash == hash && (*i).key == key)
 			{
@@ -193,7 +252,7 @@ T& HashMap<K, T, HashFunc>::HashBucket::findOrAdd(hash_t hash, const K& key)
 
 	// The item has not been found, a new entry is created at the end of the list
 	size_++;
-	collisionList_.insertBack(HashMapNode<K, T>(hash, key));
+	collisionList_.pushBack(HashMapNode<K, T>(hash, key));
 	return (*collisionList_.rBegin()).value;
 }
 
@@ -218,19 +277,20 @@ bool HashMap<K, T, HashFunc>::HashBucket::remove(hash_t hash, const K& key)
 		// Bring the first element of the list, if any, as direct access node
 		if (collisionList_.isEmpty() == false)
 		{
-			firstNode_ = collisionList_.removeFront();
+			firstNode_ = collisionList_.front();
+			collisionList_.popFront();
 		}
 		size_--;
 	}
 	else
 	{
-		for (typename List<HashMapNode<K, T> >::Iterator i = collisionList_.begin(); i != collisionList_.end(); ++i)
+		for (typename List<HashMapNode<K, T> >::ConstIterator i = collisionList_.begin(); i != collisionList_.end(); ++i)
 		{
 			if ((*i).hash == hash && (*i).key == key)
 			{
 				// The item has been found in the list
 				found = true;
-				collisionList_.remove(i++);
+				i = collisionList_.erase(i);
 				size_--;
 
 				// The item has been removed and the iterator is no longer valid
@@ -299,7 +359,9 @@ inline typename HashMap<K, T, HashFunc>::HashBucket& HashMap<K, T, HashFunc>::re
 template <class T>
 struct StringHashMap
 {
-	typedef HashMap<String, T, SaxHashFunc<nc::String> > type;
+	typedef HashMap<String, T, SaxHashFunc<String> > Type;
+	typedef typename Type::Iterator Iterator;
+	typedef typename Type::ConstIterator ConstIterator;
 };
 
 }

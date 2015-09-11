@@ -2,6 +2,8 @@
 
 namespace nc = ncine;
 
+namespace {
+
 const unsigned int Capacity = 10;
 
 void printArray(const nc::StaticArray<int, Capacity> &array)
@@ -11,6 +13,8 @@ void printArray(const nc::StaticArray<int, Capacity> &array)
 		printf("[%u]=%d ", i, array[i]);
 	}
 	printf("\n");
+}
+
 }
 
 int main(int argc, char **argv)
@@ -31,14 +35,14 @@ int main(int argc, char **argv)
 
 	printf("\n--- Array traversals (for cycles) ---\n");
 	printf("Iterating through elements:");
-	for (nc::StaticArray<int, Capacity>::Const_Iterator i = array.begin(); i != array.end(); ++i)
+	for (nc::StaticArray<int, Capacity>::ConstIterator i = array.begin(); i != array.end(); ++i)
 	{
 		printf(" %d", *i);
 	}
 	printf("\n");
 
 	printf("Iterating through elements (reverse):");
-	for (nc::StaticArray<int, Capacity>::Const_Iterator r = array.rBegin(); r != array.rEnd(); --r)
+	for (nc::StaticArray<int, Capacity>::ConstIterator r = array.rBegin(); r != array.rEnd(); --r)
 	{
 		printf(" %d", *r);
 	}
@@ -47,7 +51,7 @@ int main(int argc, char **argv)
 
 	printf("\n--- Array traversals (while cycles) ---\n");
 	printf("Iterating through elements:");
-	nc::StaticArray<int, Capacity>::Const_Iterator i = array.begin();
+	nc::StaticArray<int, Capacity>::ConstIterator i = array.begin();
 	while (i != array.end())
 	{
 		printf(" %d", *i);
@@ -56,7 +60,7 @@ int main(int argc, char **argv)
 	printf("\n");
 
 	printf("Iterating through elements (reverse):");
-	nc::StaticArray<int, Capacity>::Const_Iterator r = array.rBegin();
+	nc::StaticArray<int, Capacity>::ConstIterator r = array.rBegin();
 	while (r != array.rEnd())
 	{
 		printf(" %d", *r);

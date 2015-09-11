@@ -61,19 +61,19 @@ void GLShaderAttributes::defineVertexPointers(GLuint buondVboHandle)
 {
 	if (shaderProgram_)
 	{
-		for (StringHashMapIterator<GLVertexAttribute>::type i = i.begin(vertexAttributes_); i != i.end(vertexAttributes_); ++i)
+		for (StringHashMap<GLVertexAttribute>::Iterator i = vertexAttributes_.begin(); i != vertexAttributes_.end(); ++i)
 		{
-			GLVertexAttribute& attribute = (*i).value;
+			GLVertexAttribute& attribute = *i;
 			int location = attribute.shaderAttribute()->location();
 			if (definedPointers_[location] != attribute || definedPointers_[location].boundVbo() != buondVboHandle)
 			{
-				(*i).value.vertexAttribPointer();
+				(*i).vertexAttribPointer();
 				definedPointers_[location] = attribute;
 				definedPointers_[location].setBoundVbo(buondVboHandle);
 			}
 			if (definedPointers_[location].isEnabled() == false)
 			{
-				(*i).value.enable();
+				(*i).enable();
 				definedPointers_[location].setEnabled(true);
 			}
 		}

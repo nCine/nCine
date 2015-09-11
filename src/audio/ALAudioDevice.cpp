@@ -6,6 +6,14 @@
 
 namespace ncine {
 
+namespace {
+
+void playPlayer(IAudioPlayer *player) { player->play(); }
+void pausePlayer(IAudioPlayer *player) { player->pause(); }
+void stopPlayer(IAudioPlayer *player) { player->stop(); }
+
+}
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
@@ -72,40 +80,25 @@ void ALAudioDevice::setGain(ALfloat gain)
 
 void ALAudioDevice::stopPlayers()
 {
-	for (List<IAudioPlayer *>::Const_Iterator i = players_.begin(); i != players_.end(); ++i)
-	{
-		(*i)->stop();
-	}
-
+	forEach(players_.begin(), players_.end(), stopPlayer);
 	players_.clear();
 }
 
 void ALAudioDevice::pausePlayers()
 {
-	for (List<IAudioPlayer *>::Const_Iterator i = players_.begin(); i != players_.end(); ++i)
-	{
-		(*i)->pause();
-	}
-
+	forEach(players_.begin(), players_.end(), pausePlayer);
 	players_.clear();
 }
 
 void ALAudioDevice::freezePlayers()
 {
-	for (List<IAudioPlayer *>::Const_Iterator i = players_.begin(); i != players_.end(); ++i)
-	{
-		(*i)->pause();
-	}
-
+	forEach(players_.begin(), players_.end(), pausePlayer);
 	// The player list is not cleared at this point, it is needed as-is by the unfreeze method
 }
 
 void ALAudioDevice::unfreezePlayers()
 {
-	for (List<IAudioPlayer *>::Const_Iterator i = players_.begin(); i != players_.end(); ++i)
-	{
-		(*i)->play();
-	}
+	forEach(players_.begin(), players_.end(), playPlayer);
 }
 
 int ALAudioDevice::nextAvailableSource()
@@ -126,12 +119,12 @@ int ALAudioDevice::nextAvailableSource()
 
 void ALAudioDevice::registerPlayer(IAudioPlayer *player)
 {
-	players_.insertBack(player);
+	players_.pushBack(player);
 }
 
 void ALAudioDevice::updatePlayers()
 {
-	List<IAudioPlayer *>::Const_Iterator i = players_.begin();
+	List<IAudioPlayer *>::ConstIterator i = players_.begin();
 	while (i != players_.end())
 	{
 		if ((*i)->isPlaying())
@@ -141,7 +134,7 @@ void ALAudioDevice::updatePlayers()
 		}
 		else
 		{
-			players_.remove(i++);
+			i = players_.erase(i);
 		}
 	}
 }
@@ -153,7 +146,7 @@ void ALAudioDevice::updatePlayers()
 /// Stops or pauses all buffer players
 void ALAudioDevice::stopOrPauseBufferPlayers(bool shouldStop)
 {
-	List<IAudioPlayer *>::Const_Iterator i = players_.begin();
+	List<IAudioPlayer *>::ConstIterator i = players_.begin();
 	while (i != players_.end())
 	{
 		if ((*i)->type() == AudioBufferPlayer::sType())
@@ -166,7 +159,7 @@ void ALAudioDevice::stopOrPauseBufferPlayers(bool shouldStop)
 			{
 				(*i)->pause();
 			}
-			players_.remove(i++);
+			i = players_.erase(i);
 		}
 		else
 		{
@@ -178,7 +171,7 @@ void ALAudioDevice::stopOrPauseBufferPlayers(bool shouldStop)
 /// Stops or pauses all stream players
 void ALAudioDevice::stopOrPauseStreamPlayers(bool shouldStop)
 {
-	List<IAudioPlayer *>::Const_Iterator i = players_.begin();
+	List<IAudioPlayer *>::ConstIterator i = players_.begin();
 	while (i != players_.end())
 	{
 		if ((*i)->type() == AudioStreamPlayer::sType())
@@ -191,7 +184,7 @@ void ALAudioDevice::stopOrPauseStreamPlayers(bool shouldStop)
 			{
 				(*i)->pause();
 			}
-			players_.remove(i++);
+			i = players_.erase(i);
 		}
 		else
 		{

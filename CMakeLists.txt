@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.11)
 project(nCine)
 
 option(NCINE_BUILD_TESTS "Build the engine test programs" ON)
-option(NCINE_EXTRA_OPTIMIZE "Compile the engine with extra optimizations in release mode" ON)
+option(NCINE_EXTRA_OPTIMIZATION "Compile the engine with extra optimizations in release mode" ON)
 option(NCINE_AUTOVECTORIZATION_REPORT "Enable report generation from compiler auto-vectorization" OFF)
 option(NCINE_DYNAMIC_LIBRARY "Compile the engine as a dynamic library" ON)
 
@@ -95,7 +95,8 @@ endif()
 set(HEADERS
 	include/common_headers.h
 	include/common_defines.h
-	include/common_functions.h
+	include/algorithms.h
+	include/iterator_traits.h
 	include/Array.h
 	include/ArrayIterator.h
 	include/StaticArray.h

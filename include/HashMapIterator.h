@@ -2,185 +2,217 @@
 #define CLASS_NCINE_HASHMAPITERATOR
 
 #include "HashMap.h"
-#include "ListIterator.h"
+#include "List.h"
+#include "iterator_traits.h"
 
 namespace ncine {
 
-/// A hashmap iterator
+template <class K, class T, class HashFunc, bool IsConst>
+struct HelperTraits { };
+
 template <class K, class T, class HashFunc>
+struct HelperTraits<K, T, HashFunc, false>
+{
+	typedef HashMap<K, T, HashFunc>* HashMapPtr;
+	typedef typename HashMap<K, T, HashFunc>::HashBucket* BucketPtr;
+	typedef typename List<HashMapNode<K, T> >::Iterator ListIteratorType;
+	typedef HashMapNode<K, T>& NodeReference;
+};
+
+template <class K, class T, class HashFunc>
+struct HelperTraits<K, T, HashFunc, true>
+{
+	typedef const HashMap<K, T, HashFunc>* HashMapPtr;
+	typedef const typename HashMap<K, T, HashFunc>::HashBucket* BucketPtr;
+	typedef typename List<HashMapNode<K, T> >::ConstIterator ListIteratorType;
+	typedef const HashMapNode<K, T>& NodeReference;
+};
+
+/// A hashmap iterator
+template <class K, class T, class HashFunc, bool IsConst>
 class HashMapIterator
 {
   public:
-	HashMapIterator(const HashMap<K, T, HashFunc>& hashMap, int bucketIndex,
-					const ListIterator<HashMapNode<K, T> >& listIterator, const HashMapNode<K, T>& firstNode, bool atFirstNode)
-		: hashMap_(hashMap), bucketIndex_(bucketIndex), listIterator_(listIterator),
-		  firstNode_(firstNode), atFirstNode_(atFirstNode) { }
-	HashMapIterator(const HashMapIterator& it)
-		: hashMap_(it.hashMap_), bucketIndex_(it.bucketIndex_), listIterator_(it.listIterator_),
-		  firstNode_(it.firstNode_), atFirstNode_(it.atFirstNode_) { }
+	/// Reference type which respects iterator constness
+	typedef typename IteratorTraits<HashMapIterator>::Reference Reference;
 
-	// Read-only deferencing operator
-	const HashMapNode<K, T>& operator*() const;
+	HashMapIterator(typename HelperTraits<K, T, HashFunc, IsConst>::HashMapPtr hashMap, int bucketIndex,
+					typename HelperTraits<K, T, HashFunc, IsConst>::ListIteratorType listIterator, bool atFirstNode)
+		: hashMap_(hashMap), bucketIndex_(bucketIndex), listIterator_(listIterator), atFirstNode_(atFirstNode) { }
+
+	/// Copy constructor to implicitly convert a non constant iterator to a constant one
+	HashMapIterator(const HashMapIterator<K, T, HashFunc, false>& it)
+		: hashMap_(it.hashMap_), bucketIndex_(it.bucketIndex_), listIterator_(it.listIterator_), atFirstNode_(it.atFirstNode_) { }
+
 	// Deferencing operator
-	HashMapNode<K, T>& operator*();
+	Reference operator*() const;
 
 	// Iterates to the next element (prefix)
-	HashMapIterator<K, T, HashFunc> operator++() const;
+	HashMapIterator& operator++();
 	// Iterates to the next element (postfix)
-	HashMapIterator<K, T, HashFunc> operator++(int) const;
+	HashMapIterator operator++(int);
 
 	// Iterates to the previous element (prefix)
-	HashMapIterator<K, T, HashFunc> operator--() const;
+	HashMapIterator& operator--();
 	// Iterates to the previous element (postfix)
-	HashMapIterator<K, T, HashFunc> operator--(int) const;
+	HashMapIterator operator--(int);
 
 	/// Equality operator
-	bool operator==(const HashMapIterator<K, T, HashFunc>& iterator) const;
+	bool operator==(const HashMapIterator& iterator) const;
 	/// Inequality operator
-	bool operator!=(const HashMapIterator<K, T, HashFunc>& iterator) const;
+	bool operator!=(const HashMapIterator& iterator) const;
 
-	HashMapIterator begin(const HashMap<K, T, HashFunc>& hashMap);
-	HashMapIterator end(const HashMap<K, T, HashFunc>& hashMap);
-
-	const HashMapIterator begin(const HashMap<K, T, HashFunc>& hashMap) const;
-	const HashMapIterator end(const HashMap<K, T, HashFunc>& hashMap) const;
+	// Returns the hashmap node currently pointed by the iterator
+	typename HelperTraits<K, T, HashFunc, IsConst>::NodeReference node() const;
+	// Returns the value associated to the currently pointed node
+	const T& value() const;
+	// Returns the key associated to the currently pointed node
+	const K& key() const;
+	// Returns the hash associated to the currently pointed node
+	hash_t hash() const;
 
   private:
-	const HashMap<K, T, HashFunc>& hashMap_;
-	mutable unsigned int bucketIndex_;
-	mutable ListIterator<HashMapNode<K, T> > listIterator_;
-	mutable HashMapNode<K, T> firstNode_;
-	mutable bool atFirstNode_;
+	typename HelperTraits<K, T, HashFunc, IsConst>::HashMapPtr hashMap_;
+	unsigned int bucketIndex_;
+	typename HelperTraits<K, T, HashFunc, IsConst>::ListIteratorType listIterator_;
+	bool atFirstNode_;
 
 	// Makes the iterator point to the next element in the hashmap
-	void next() const;
+	void next();
 	// Makes the iterator point to the previous element in the hashmap
-	void previous() const;
+	void previous();
+
+	// For non constant to constant iterator implicit conversion
+	friend class HashMapIterator<K, T, HashFunc, true>;
 };
 
-/// Read-only deferencing operator
+/// Iterator traits structure specialization
 template <class K, class T, class HashFunc>
-inline const HashMapNode<K, T>& HashMapIterator<K, T, HashFunc>::operator*() const
+struct IteratorTraits<HashMapIterator<K, T, HashFunc, false> >
 {
-	if (atFirstNode_)
-	{
-		return firstNode_;
-	}
-	else
-	{
-		return *listIterator_;
-	}
-}
+	/// Type of the values deferenced by the iterator
+	typedef T ValueType;
+	/// Pointer to the type of the values deferenced by the iterator
+	typedef T* Pointer;
+	/// Reference to the type of the values deferenced by the iterator
+	typedef T& Reference;
+	/// Type trait for iterator category
+	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
+};
+
+/// Constant iterator traits structure specialization
+template <class K, class T, class HashFunc>
+struct IteratorTraits<HashMapIterator<K, T, HashFunc, true> >
+{
+	/// Type of the values deferenced by the iterator (never const)
+	typedef T ValueType;
+	/// Pointer to the type of the values deferenced by the iterator
+	typedef const T* Pointer;
+	/// Reference to the type of the values deferenced by the iterator
+	typedef const T& Reference;
+	/// Type trait for iterator category
+	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
+};
 
 /// Deferencing operator
-template <class K, class T, class HashFunc>
-inline HashMapNode<K, T>& HashMapIterator<K, T, HashFunc>::operator*()
+template <class K, class T, class HashFunc, bool IsConst>
+inline typename HashMapIterator<K, T, HashFunc, IsConst>::Reference HashMapIterator<K, T, HashFunc, IsConst>::operator*() const
 {
-	if (atFirstNode_)
-	{
-		return firstNode_;
-	}
-	else
-	{
-		return *listIterator_;
-	}
+	return node().value;
 }
 
 /// Iterates to the next element (prefix)
-template <class K, class T, class HashFunc>
-HashMapIterator<K, T, HashFunc> HashMapIterator<K, T, HashFunc>::operator++() const
+template <class K, class T, class HashFunc, bool IsConst>
+HashMapIterator<K, T, HashFunc, IsConst>& HashMapIterator<K, T, HashFunc, IsConst>::operator++()
 {
 	next();
 	return *this;
 }
 
 /// Iterates to the next element (postfix)
-template <class K, class T, class HashFunc>
-HashMapIterator<K, T, HashFunc> HashMapIterator<K, T, HashFunc>::operator++(int) const
+template <class K, class T, class HashFunc, bool IsConst>
+HashMapIterator<K, T, HashFunc, IsConst> HashMapIterator<K, T, HashFunc, IsConst>::operator++(int)
 {
 	// Create an unmodified copy to return
-	HashMapIterator<K, T, HashFunc> iterator = *this;
+	HashMapIterator<K, T, HashFunc, IsConst> iterator = *this;
 	next();
 	return iterator;
 }
 
 /// Iterates to the previous element (prefix)
-template <class K, class T, class HashFunc>
-HashMapIterator<K, T, HashFunc> HashMapIterator<K, T, HashFunc>::operator--() const
+template <class K, class T, class HashFunc, bool IsConst>
+HashMapIterator<K, T, HashFunc, IsConst>& HashMapIterator<K, T, HashFunc, IsConst>::operator--()
 {
 	previous();
 	return *this;
 }
 
 /// Iterates to the previous element (postfix)
-template <class K, class T, class HashFunc>
-HashMapIterator<K, T, HashFunc> HashMapIterator<K, T, HashFunc>::operator--(int) const
+template <class K, class T, class HashFunc, bool IsConst>
+HashMapIterator<K, T, HashFunc, IsConst> HashMapIterator<K, T, HashFunc, IsConst>::operator--(int)
 {
 	// Create an unmodified copy to return
-	HashMapIterator<K, T, HashFunc> iterator = *this;
+	HashMapIterator<K, T, HashFunc, IsConst> iterator = *this;
 	previous();
 	return iterator;
 }
 
 /// Equality operator
-template <class K, class T, class HashFunc>
-inline bool HashMapIterator<K, T, HashFunc>::operator==(const HashMapIterator<K, T, HashFunc>& iterator) const
+template <class K, class T, class HashFunc, bool IsConst>
+inline bool HashMapIterator<K, T, HashFunc, IsConst>::operator==(const HashMapIterator<K, T, HashFunc, IsConst>& iterator) const
 {
-	return (&hashMap_ == &iterator.hashMap_ && bucketIndex_ == iterator.bucketIndex_ &&
+	return (hashMap_ == iterator.hashMap_ && bucketIndex_ == iterator.bucketIndex_ &&
 			listIterator_ == iterator.listIterator_ && atFirstNode_ == iterator.atFirstNode_);
 }
 
 /// Inequality operator
-template <class K, class T, class HashFunc>
-inline bool HashMapIterator<K, T, HashFunc>::operator!=(const HashMapIterator<K, T, HashFunc>& iterator) const
+template <class K, class T, class HashFunc, bool IsConst>
+inline bool HashMapIterator<K, T, HashFunc, IsConst>::operator!=(const HashMapIterator<K, T, HashFunc, IsConst>& iterator) const
 {
-	return (&hashMap_ != &iterator.hashMap_ || bucketIndex_ != iterator.bucketIndex_ ||
+	return (hashMap_ != iterator.hashMap_ || bucketIndex_ != iterator.bucketIndex_ ||
 			listIterator_ != iterator.listIterator_ || atFirstNode_ != iterator.atFirstNode_);
 }
 
-template <class K, class T, class HashFunc>
-HashMapIterator<K, T, HashFunc> HashMapIterator<K, T, HashFunc>::begin(const HashMap<K, T, HashFunc>& hashMap)
+/// Returns the hashmap node currently pointed by the iterator
+template <class K, class T, class HashFunc, bool IsConst>
+typename HelperTraits<K, T, HashFunc, IsConst>::NodeReference HashMapIterator<K, T, HashFunc, IsConst>::node() const
 {
-	HashMapIterator<K, T, HashFunc> iterator = HashMapIterator(hashMap, 0, hashMap.buckets_[0].collisionList_.begin(), hashMap.buckets_[0].firstNode_, true);
-	if (hashMap.buckets_[0].size_ == 0)
+	if (atFirstNode_)
 	{
-		iterator.next();
+		return hashMap_->buckets_[bucketIndex_].firstNode_;
 	}
-
-	return iterator;
-}
-
-template <class K, class T, class HashFunc>
-HashMapIterator<K, T, HashFunc> HashMapIterator<K, T, HashFunc>::end(const HashMap<K, T, HashFunc>& hashMap)
-{
-	unsigned int lastIndex = hashMap.buckets_.size() - 1;
-	return HashMapIterator(hashMap, lastIndex, hashMap.buckets_[lastIndex].collisionList_.end(), hashMap.buckets_[lastIndex].firstNode_, false);
-}
-
-template <class K, class T, class HashFunc>
-const HashMapIterator<K, T, HashFunc> HashMapIterator<K, T, HashFunc>::begin(const HashMap<K, T, HashFunc>& hashMap) const
-{
-	HashMapIterator<K, T, HashFunc> iterator = HashMapIterator(hashMap, 0, hashMap.buckets_[0].collisionList_.begin(), hashMap.buckets_[0].firstNode_, true);
-	if (hashMap.buckets_[0].size_ == 0)
+	else
 	{
-		iterator.next();
+		return *listIterator_;
 	}
-
-	return iterator;
 }
 
-template <class K, class T, class HashFunc>
-const HashMapIterator<K, T, HashFunc> HashMapIterator<K, T, HashFunc>::end(const HashMap<K, T, HashFunc>& hashMap) const
+/// Returns the value associated to the currently pointed node
+template <class K, class T, class HashFunc, bool IsConst>
+inline const T& HashMapIterator<K, T, HashFunc, IsConst>::value() const
 {
-	unsigned int lastIndex = hashMap.buckets_.size() - 1;
-	return HashMapIterator(hashMap, lastIndex, hashMap.buckets_[lastIndex].collisionList_.end(), hashMap.buckets_[lastIndex].firstNode_, false);
+	return node().value;
+}
+
+/// Returns the key associated to the currently pointed node
+template <class K, class T, class HashFunc, bool IsConst>
+inline const K& HashMapIterator<K, T, HashFunc, IsConst>::key() const
+{
+	return node().key;
+}
+
+/// Returns the hash associated to the currently pointed node
+template <class K, class T, class HashFunc, bool IsConst>
+inline hash_t HashMapIterator<K, T, HashFunc, IsConst>::hash() const
+{
+	return node().hash;
 }
 
 /// Makes the iterator point to the next element in the hashmap
-template <class K, class T, class HashFunc>
-void HashMapIterator<K, T, HashFunc>::next() const
+template <class K, class T, class HashFunc, bool IsConst>
+void HashMapIterator<K, T, HashFunc, IsConst>::next()
 {
-	const typename HashMap<K, T, HashFunc>::HashBucket* bucket = &(hashMap_.buckets_[bucketIndex_]);
+	typename HelperTraits<K, T, HashFunc, IsConst>::BucketPtr bucket = &(hashMap_->buckets_[bucketIndex_]);
 
 	if (atFirstNode_)
 	{
@@ -193,32 +225,31 @@ void HashMapIterator<K, T, HashFunc>::next() const
 	}
 
 	// The list iterator condition also applies when it points to the beginning of an empty list
-	if (listIterator_ == bucket->collisionList_.end() && bucketIndex_ < hashMap_.buckets_.size()-1)
+	if (listIterator_ == bucket->collisionList_.end() && bucketIndex_ < hashMap_->buckets_.size()-1)
 	{
 		do
 		{
-			bucket = &(hashMap_.buckets_[++bucketIndex_]);
-		} while(bucketIndex_ < hashMap_.buckets_.size()-1 && bucket->size() == 0);
+			bucket = &(hashMap_->buckets_[++bucketIndex_]);
+		} while(bucketIndex_ < hashMap_->buckets_.size()-1 && bucket->size() == 0);
 
 		if (bucket->size() > 0)
 		{
-			firstNode_ = bucket->firstNode_;
 			atFirstNode_ = true;
 		}
 	}
 }
 
 /// Makes the iterator point to the previous element in the hashmap
-template <class K, class T, class HashFunc>
-void HashMapIterator<K, T, HashFunc>::previous() const
+template <class K, class T, class HashFunc, bool IsConst>
+void HashMapIterator<K, T, HashFunc, IsConst>::previous()
 {
-	const typename HashMap<K, T, HashFunc>::HashBucket* bucket = &(hashMap_.buckets_[bucketIndex_]);
+	typename HelperTraits<K, T, HashFunc, IsConst>::BucketPtr bucket = &(hashMap_->buckets_[bucketIndex_]);
 
 	if (atFirstNode_ && bucketIndex_ > 0)
 	{
 		do
 		{
-			bucket = &(hashMap_.buckets_[--bucketIndex_]);
+			bucket = &(hashMap_->buckets_[--bucketIndex_]);
 		} while(bucketIndex_ > 0 && bucket->size() == 0);
 
 		if (bucket->size() > 0)
@@ -234,17 +265,9 @@ void HashMapIterator<K, T, HashFunc>::previous() const
 
 	if (listIterator_ == bucket->collisionList_.begin())
 	{
-		firstNode_ = bucket->firstNode_;
 		atFirstNode_ = true;
 	}
 }
-
-/// A way to simulate C++11 alias templates
-template <class T>
-struct StringHashMapIterator
-{
-	typedef HashMapIterator<String, T, SaxHashFunc<nc::String> > type;
-};
 
 }
 

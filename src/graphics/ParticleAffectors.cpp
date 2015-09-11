@@ -18,7 +18,7 @@ void ColorAffector::addColorStep(float time, Color color)
 {
 	if (colorSteps_.isEmpty() || time > colorSteps_[colorSteps_.size() - 1]->time)
 	{
-		colorSteps_.insertBack(new ColorStep(time, color));
+		colorSteps_.pushBack(new ColorStep(time, color));
 	}
 	else
 	{
@@ -59,7 +59,7 @@ void SizeAffector::addSizeStep(float time, float scale)
 {
 	if (sizeSteps_.isEmpty() || time > sizeSteps_[sizeSteps_.size() - 1]->time)
 	{
-		sizeSteps_.insertBack(new SizeStep(time, scale));
+		sizeSteps_.pushBack(new SizeStep(time, scale));
 	}
 	else
 	{

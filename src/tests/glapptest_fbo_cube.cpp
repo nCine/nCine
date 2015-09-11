@@ -12,6 +12,8 @@
 #include "GLFramebufferObject.h"
 #include "GLBufferObject.h"
 
+namespace {
+
 typedef struct
 {
 	GLfloat position[3];
@@ -85,6 +87,8 @@ const GLushort cubeIndices[] =
 	16, 11, 13,
 	9, 20, 10
 };
+
+}
 
 nc::IAppEventHandler* createApphandler()
 {

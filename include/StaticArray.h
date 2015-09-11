@@ -14,9 +14,9 @@ class StaticArray
 {
   public:
 	/// Iterator type
-	typedef ArrayIterator<T> Iterator;
+	typedef ArrayIterator<T, false> Iterator;
 	/// Constant iterator type
-	typedef const ArrayIterator<T> Const_Iterator;
+	typedef ArrayIterator<T, true> ConstIterator;
 
 	/// Constructs an empty array with fixed capacity
 	explicit StaticArray() : size_(0), capacity_(C) { }
@@ -35,23 +35,23 @@ class StaticArray
 	// Assignment operator
 	StaticArray& operator=(const StaticArray& other);
 
-	/// Returns an iterator to the first character
+	/// Returns an iterator to the first element
 	inline Iterator begin() { return Iterator(array_); }
-	/// Returns an iterator to the last character
+	/// Returns an iterator to the last element
 	inline Iterator rBegin() { return Iterator(array_ + size_ - 1); }
-	/// Returns an iterator to the termination character
+	/// Returns an iterator to past the last element
 	inline Iterator end() { return Iterator(array_ + size_); }
-	/// Returns an iterator to the byte preceding the first character
+	/// Returns an iterator to prior the first element
 	inline Iterator rEnd() { return Iterator(array_ - 1); }
 
-	/// Returns a constant iterator to the first character
-	inline Const_Iterator begin() const { return Iterator(array_); }
-	/// Returns a constant iterator to the last character
-	inline Const_Iterator rBegin() const { return Iterator(array_ + size_ - 1); }
-	/// Returns a constant iterator to the termination character
-	inline Const_Iterator end() const { return Iterator(array_ + size_); }
-	/// Returns a constant iterator to the byte preceding the first character
-	inline Const_Iterator rEnd() const { return Iterator(array_ - 1); }
+	/// Returns a constant iterator to the first element
+	inline ConstIterator begin() const { return ConstIterator(array_); }
+	/// Returns a constant iterator to the last element
+	inline ConstIterator rBegin() const { return ConstIterator(array_ + size_ - 1); }
+	/// Returns a constant iterator to past the last lement
+	inline ConstIterator end() const { return ConstIterator(array_ + size_); }
+	/// Returns a constant iterator to prior the first element
+	inline ConstIterator rEnd() const { return ConstIterator(array_ - 1); }
 
 	/// Returns true if the array is empty
 	inline bool isEmpty() const { return size_ == 0; }

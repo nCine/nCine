@@ -143,7 +143,7 @@ void TextNode::calculateBoundaries() const
 		{
 			if (string_[i] == '\n')
 			{
-				lineLengths_.insertBack(xAdvance_);
+				lineLengths_.pushBack(xAdvance_);
 				if (xAdvance_ > xAdvanceMax)
 				{
 					xAdvanceMax = xAdvance_;
@@ -168,7 +168,7 @@ void TextNode::calculateBoundaries() const
 				}
 			}
 		}
-		lineLengths_.insertBack(xAdvance_);
+		lineLengths_.pushBack(xAdvance_);
 		if (xAdvance_ > xAdvanceMax)
 		{
 			xAdvanceMax = xAdvance_;
@@ -235,19 +235,19 @@ void TextNode::processGlyph(const FontGlyph* glyph)
 	float topCoord = float(texRect.y) / float(texSize.y);
 
 
-	interleavedVertices_.insertBack(leftPos);	interleavedVertices_.insertBack(bottomPos);
-	interleavedVertices_.insertBack(leftCoord);	interleavedVertices_.insertBack(bottomCoord);
-	interleavedVertices_.insertBack(leftPos);	interleavedVertices_.insertBack(topPos);
-	interleavedVertices_.insertBack(leftCoord);	interleavedVertices_.insertBack(topCoord);
-	interleavedVertices_.insertBack(rightPos);	interleavedVertices_.insertBack(bottomPos);
-	interleavedVertices_.insertBack(rightCoord);interleavedVertices_.insertBack(bottomCoord);
+	interleavedVertices_.pushBack(leftPos);	interleavedVertices_.pushBack(bottomPos);
+	interleavedVertices_.pushBack(leftCoord);	interleavedVertices_.pushBack(bottomCoord);
+	interleavedVertices_.pushBack(leftPos);	interleavedVertices_.pushBack(topPos);
+	interleavedVertices_.pushBack(leftCoord);	interleavedVertices_.pushBack(topCoord);
+	interleavedVertices_.pushBack(rightPos);	interleavedVertices_.pushBack(bottomPos);
+	interleavedVertices_.pushBack(rightCoord);interleavedVertices_.pushBack(bottomCoord);
 
-	interleavedVertices_.insertBack(rightPos);	interleavedVertices_.insertBack(bottomPos);
-	interleavedVertices_.insertBack(rightCoord);interleavedVertices_.insertBack(bottomCoord);
-	interleavedVertices_.insertBack(rightPos);	interleavedVertices_.insertBack(topPos);
-	interleavedVertices_.insertBack(rightCoord);interleavedVertices_.insertBack(topCoord);
-	interleavedVertices_.insertBack(leftPos);	interleavedVertices_.insertBack(topPos);
-	interleavedVertices_.insertBack(leftCoord);	interleavedVertices_.insertBack(topCoord);
+	interleavedVertices_.pushBack(rightPos);	interleavedVertices_.pushBack(bottomPos);
+	interleavedVertices_.pushBack(rightCoord);interleavedVertices_.pushBack(bottomCoord);
+	interleavedVertices_.pushBack(rightPos);	interleavedVertices_.pushBack(topPos);
+	interleavedVertices_.pushBack(rightCoord);interleavedVertices_.pushBack(topCoord);
+	interleavedVertices_.pushBack(leftPos);	interleavedVertices_.pushBack(topPos);
+	interleavedVertices_.pushBack(leftCoord);	interleavedVertices_.pushBack(topCoord);
 
 	xAdvance_ += glyph->xAdvance();
 }

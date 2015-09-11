@@ -45,7 +45,7 @@ unsigned int StackedBarPlotter::addVariable(unsigned int numValues, float reject
 	}
 
 	StackedBarVariable* variable = new StackedBarVariable(numValues, rejectDelay, worldMatrix_);
-	variables_.insertBack(variable);
+	variables_.pushBack(variable);
 
 	return variables_.size() - 1;
 }

@@ -29,7 +29,7 @@ class FontGlyph
 	inline unsigned int xAdvance() const { return xAdvance_; }
 
 	/// Add kerning amount for a subsequent glyph
-	inline void addKerning(int secondGlyph, int amount) { kernings_.insertBack(Kerning(secondGlyph, amount)); }
+	inline void addKerning(int secondGlyph, int amount) { kernings_.pushBack(Kerning(secondGlyph, amount)); }
 	// Return the kerning amount for a subsequent glyph
 	int kerning(int secondGlyph) const;
 

@@ -22,9 +22,9 @@ class DLL_PUBLIC RectAnimation
 	inline void setFrameTime(float frameTime) { frameTime_ = frameTime; }
 
 	/// Adds a rectangles to the array
-	inline void addRect(const Rect& rect) { rects_.insertBack(rect); }
+	inline void addRect(const Rect& rect) { rects_.pushBack(rect); }
 	/// Creates a rectangles from origin and size and then adds it to the array
-	inline void addRect(int x, int y, int w, int h) { rects_.insertBack(Rect(x, y, w, h)); }
+	inline void addRect(int x, int y, int w, int h) { rects_.pushBack(Rect(x, y, w, h)); }
 	/// Returns the current rectangle
 	inline const Rect& rect() const { return rects_[currentFrame_]; }
 

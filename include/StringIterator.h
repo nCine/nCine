@@ -2,90 +2,204 @@
 #define CLASS_NCINE_STRINGITERATOR
 
 #include "common_defines.h"
+#include "iterator_traits.h"
 
 namespace ncine {
 
-/// A String iterator
-class DLL_PUBLIC StringIterator
+template <bool IsConst> class StringIterator;
+
+/// Iterator traits structure specialization
+template < >
+struct IteratorTraits<StringIterator<false> >
 {
-  public:
-	explicit StringIterator(char *c)
-		: char_(c) { }
-	StringIterator(const StringIterator& iterator)
-		: char_(iterator.char_) { }
-
-	// Read-only deferencing operator
-	inline const char& operator*() const;
-	// Deferencing operator
-	inline char& operator*();
-
-	// Iterates to the next element (prefix)
-	StringIterator operator++() const;
-	// Iterates to the next element (postfix)
-	StringIterator operator++(int) const;
-
-	// Iterates to the previous element (prefix)
-	StringIterator operator--() const;
-	// Iterates to the previous element (postfix)
-	StringIterator operator--(int) const;
-
-	/// Equality operator
-	inline bool operator==(const StringIterator& iterator) const { return char_ == iterator.char_; }
-	/// Inequality operator
-	inline bool operator!=(const StringIterator& iterator) const { return char_ != iterator.char_; }
-
-  private:
-	mutable char *char_;
+	/// Type of the values deferenced by the iterator
+	typedef char ValueType;
+	/// Pointer to the type of the values deferenced by the iterator
+	typedef char* Pointer;
+	/// Reference to the type of the values deferenced by the iterator
+	typedef char& Reference;
+	/// Type trait for iterator category
+	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
 };
 
-/// Read-only deferencing operator
-const char& StringIterator::operator*() const
+/// Constant iterator traits structure specialization
+template < >
+struct IteratorTraits<StringIterator<true> >
 {
-	return *char_;
-}
+	/// Type of the values deferenced by the iterator (never const)
+	typedef char ValueType;
+	/// Pointer to the type of the values deferenced by the iterator
+	typedef const char* Pointer;
+	/// Reference to the type of the values deferenced by the iterator
+	typedef const char& Reference;
+	/// Type trait for iterator category
+	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
+};
+
+/// A String iterator
+template <bool IsConst>
+class StringIterator
+{
+  public:
+	/// Pointer type which respects iterator constness
+	typedef typename IteratorTraits<StringIterator>::Pointer Pointer;
+	/// Reference type which respects iterator constness
+	typedef typename IteratorTraits<StringIterator>::Reference Reference;
+
+	explicit StringIterator(char *c)
+		: charPtr_(c) { }
+
+	/// Copy constructor to implicitly convert a non constant iterator to a constant one
+	StringIterator(const StringIterator<false>& it)
+		: charPtr_(it.charPtr_) { }
+
+	// Deferencing operator
+	Reference operator*() const;
+
+	// Iterates to the next element (prefix)
+	StringIterator& operator++();
+	// Iterates to the next element (postfix)
+	StringIterator operator++(int);
+
+	// Iterates to the previous element (prefix)
+	StringIterator& operator--();
+	// Iterates to the previous element (postfix)
+	StringIterator operator--(int);
+
+	// Compound addition operator
+	StringIterator& operator+=(int n);
+	// Compound subtraction operator
+	StringIterator& operator-=(int n);
+	// Addition operator
+	StringIterator operator+(int n) const;
+	// Subtraction operator
+	StringIterator operator-(int n) const;
+	// Pointer subtraction operator
+	int operator-(const StringIterator& iterator) const;
+
+	// Subscript operator
+	Reference operator[](int n) const;
+
+	/// Equality operator
+	inline bool operator==(const StringIterator& iterator) const { return charPtr_ == iterator.charPtr_; }
+	/// Inequality operator
+	inline bool operator!=(const StringIterator& iterator) const { return charPtr_ != iterator.charPtr_; }
+
+	/// Greater than operator
+	inline bool operator>(const StringIterator& iterator) const { return charPtr_ > iterator.charPtr_; }
+	/// Less than operator
+	inline bool operator<(const StringIterator& iterator) const { return charPtr_ < iterator.charPtr_; }
+	/// Greater than or equal to operator
+	inline bool operator>=(const StringIterator& iterator) const { return charPtr_ >= iterator.charPtr_; }
+	/// Less than or equal to operator
+	inline bool operator<=(const StringIterator& iterator) const { return charPtr_ <= iterator.charPtr_; }
+
+  private:
+	Pointer charPtr_;
+
+	// For non constant to constant iterator implicit conversion
+	friend class StringIterator<true>;
+};
 
 /// Deferencing operator
-char& StringIterator::operator*()
+template <bool IsConst>
+inline typename StringIterator<IsConst>::Reference StringIterator<IsConst>::operator*() const
 {
-	return *char_;
+	return *charPtr_;
 }
 
 /// Iterates to the next element (prefix)
-inline StringIterator StringIterator::operator++() const
+template <bool IsConst>
+inline StringIterator<IsConst>& StringIterator<IsConst>::operator++()
 {
-	char_++;
+	++charPtr_;
 
 	return *this;
 }
 
 /// Iterates to the next element (postfix)
-inline StringIterator StringIterator::operator++(int) const
+template <bool IsConst>
+inline StringIterator<IsConst> StringIterator<IsConst>::operator++(int)
 {
 	// Create an unmodified copy to return
 	StringIterator iterator = *this;
 
-	char_++;
+	++charPtr_;
 
 	return iterator;
 }
 
 /// Iterates to the previous element (prefix)
-inline StringIterator StringIterator::operator--() const
+template <bool IsConst>
+inline StringIterator<IsConst>& StringIterator<IsConst>::operator--()
 {
-	char_--;
+	--charPtr_;
 
 	return *this;
 }
 
 /// Iterates to the previous element (postfix)
-inline StringIterator StringIterator::operator--(int) const
+template <bool IsConst>
+inline StringIterator<IsConst> StringIterator<IsConst>::operator--(int)
 {
 	// Create an unmodified copy to return
 	StringIterator iterator = *this;
 
-	char_--;
+	--charPtr_;
 
 	return iterator;
+}
+
+/// Compound addition operator
+template <bool IsConst>
+inline StringIterator<IsConst>& StringIterator<IsConst>::operator+=(int n)
+{
+	charPtr_ += n;
+
+	return *this;
+}
+
+/// Compound subtraction operator
+template <bool IsConst>
+inline StringIterator<IsConst>& StringIterator<IsConst>::operator-=(int n)
+{
+	charPtr_ -= n;
+
+	return *this;
+}
+
+/// Addition operator
+template <bool IsConst>
+inline StringIterator<IsConst> StringIterator<IsConst>::operator+(int n) const
+{
+	StringIterator iterator = *this;
+	iterator.charPtr_ += n;
+
+	return iterator;
+}
+
+/// Subtraction operator
+template <bool IsConst>
+inline StringIterator<IsConst> StringIterator<IsConst>::operator-(int n) const
+{
+	StringIterator iterator = *this;
+	iterator.charPtr_ -= n;
+
+	return iterator;
+}
+
+/// Pointer subtraction operator
+template <bool IsConst>
+inline int StringIterator<IsConst>::operator-(const StringIterator& iterator) const
+{
+	return (charPtr_ - iterator.charPtr_);
+}
+
+/// Subscript operator
+template <bool IsConst>
+inline typename StringIterator<IsConst>::Reference StringIterator<IsConst>::operator[](int n) const
+{
+	return *(charPtr_ + n);
 }
 
 }

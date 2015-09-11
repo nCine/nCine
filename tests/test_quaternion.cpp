@@ -4,9 +4,13 @@
 
 namespace nc = ncine;
 
-inline void print_quaternion(const nc::Quaternionf& quat)
+namespace {
+
+inline void printQuaternion(const nc::Quaternionf& quat)
 {
 	printf("<%.2f, %.2f, %.2f, %.2f>\n", quat.x, quat.y, quat.z, quat.w);
+}
+
 }
 
 int main()
@@ -15,40 +19,40 @@ int main()
 	nc::Quaternionf q2(nc::Quaternionf(1.0f, 1.5f, 1.0f, 2.0));
 
 	printf("First quaternion:\n");
-	print_quaternion(q1);
+	printQuaternion(q1);
 	printf("Second quaternion:\n");
-	print_quaternion(q2);
+	printQuaternion(q2);
 
 	printf("Quaternion addition:\n");
-	print_quaternion(q1 + q2);
+	printQuaternion(q1 + q2);
 
 	printf("Quaternion difference:\n");
-	print_quaternion(q1 - q2);
+	printQuaternion(q1 - q2);
 
 	printf("Quaternion multiplication:\n");
-	print_quaternion(q1 * q2);
+	printQuaternion(q1 * q2);
 
 	printf("Add the second quaternion to the first:\n");
-	print_quaternion(q1 += q2);
+	printQuaternion(q1 += q2);
 
 	printf("Subtract the second quaternion from the first:\n");
-	print_quaternion(q1 -= q2);
+	printQuaternion(q1 -= q2);
 
 	printf("Multiply the first quaternion by the second:\n");
-	print_quaternion(q1 *= q2);
+	printQuaternion(q1 *= q2);
 
 	printf("Divide the first quaternion by a scalar:\n");
-	print_quaternion(q1 /= 2);
+	printQuaternion(q1 /= 2);
 
 	printf("Normalize the first quaternion:\n");
-	print_quaternion(q1.normalize());
+	printQuaternion(q1.normalize());
 
 	printf("Conjugate the normalized first quaternion (thus inverting it):\n");
-	print_quaternion(q1.conjugate());
+	printQuaternion(q1.conjugate());
 
 	printf("Add all the constant quaternions together:\n");
 	nc::Quaternionf constants = nc::Quaternionf::Zero + nc::Quaternionf::Identity;
-	print_quaternion(constants);
+	printQuaternion(constants);
 
 	return EXIT_SUCCESS;
 }

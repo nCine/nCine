@@ -86,7 +86,7 @@ void ParticleSystem::emitParticles(unsigned int amount, float life, const Vector
 
 void ParticleSystem::update(float interval)
 {
-	for (List<SceneNode *>::Const_Iterator i = children_.begin(); i != children_.end(); ++i)
+	for (List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
 	{
 		Particle *particle = static_cast<Particle *>(*i);
 

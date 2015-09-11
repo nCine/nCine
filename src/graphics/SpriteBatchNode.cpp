@@ -39,7 +39,7 @@ void SpriteBatchNode::visit(RenderQueue& renderQueue)
 	colors_.clear();
 
 	// TODO: only the first level of children gets accounted
-	for (List<SceneNode *>::Const_Iterator i = children_.begin(); i != children_.end(); ++i)
+	for (List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
 	{
 		if ((*i)->type() == Sprite::sType())
 		{

@@ -1,15 +1,6 @@
-#include "Array.h"
+#include "test_functions.h"
 
 namespace nc = ncine;
-
-void printArray(const nc::Array<int> &array)
-{
-	for (unsigned int i = 0; i < array.size(); i++)
-	{
-		printf("[%u]=%d ", i, array[i]);
-	}
-	printf("\n");
-}
 
 int main(int argc, char **argv)
 {
@@ -31,7 +22,7 @@ int main(int argc, char **argv)
 	printArray(array);
 
 	printf("Inserting at the back\n");
-	array.insertBack(Capacity + 1);
+	array.pushBack(Capacity + 1);
 	printArray(array);
 
 	printf("Overwriting at the middle\n");
@@ -76,14 +67,14 @@ int main(int argc, char **argv)
 
 	printf("\n--- Array traversals (for cycles) ---\n");
 	printf("Iterating through elements:");
-	for (nc::Array<int>::Const_Iterator i = array.begin(); i != array.end(); ++i)
+	for (nc::Array<int>::ConstIterator i = array.begin(); i != array.end(); ++i)
 	{
 		printf(" %d", *i);
 	}
 	printf("\n");
 
 	printf("Iterating through elements (reverse):");
-	for (nc::Array<int>::Const_Iterator r = array.rBegin(); r != array.rEnd(); --r)
+	for (nc::Array<int>::ConstIterator r = array.rBegin(); r != array.rEnd(); --r)
 	{
 		printf(" %d", *r);
 	}
@@ -92,7 +83,7 @@ int main(int argc, char **argv)
 
 	printf("\n--- Array traversals (while cycles) ---\n");
 	printf("Iterating through elements:");
-	nc::Array<int>::Const_Iterator i = array.begin();
+	nc::Array<int>::ConstIterator i = array.begin();
 	while (i != array.end())
 	{
 		printf(" %d", *i);
@@ -101,7 +92,7 @@ int main(int argc, char **argv)
 	printf("\n");
 
 	printf("Iterating through elements (reverse):");
-	nc::Array<int>::Const_Iterator r = array.rBegin();
+	nc::Array<int>::ConstIterator r = array.rBegin();
 	while (r != array.rEnd())
 	{
 		printf(" %d", *r);
@@ -127,6 +118,31 @@ int main(int argc, char **argv)
 	printArray(array2);
 
 	printf("Contents of third array\n");
+	printArray(array3);
+
+
+	printf("\nRemove the first element from the second array with an iterator\n");
+	array2.erase(array2.begin());
+	printArray(array2);
+
+	printf("Remove the last element from the third array with an iterator\n");
+	array3.erase(array3.end() - 1);
+	printArray(array3);
+
+	printf("Remove the first half of the second array\n");
+	array2.erase(array2.begin(), array2.begin() + array2.size() / 2);
+	printArray(array2);
+
+	printf("Remove the second half of the third array\n");
+	array3.erase(array3.begin() + array3.size() / 2, array3.end());
+	printArray(array3);
+
+	printf("Insert the third array at the beginning of the second\n");
+	array2.insert(array2.begin(), array3.begin(), array3.end());
+	printArray(array2);
+
+	printf("Insert the second half of the second array at the end of the third\n");
+	array3.insert(array3.end(), array2.begin() + array2.size() / 2, array2.end());
 	printArray(array3);
 
 	return EXIT_SUCCESS;

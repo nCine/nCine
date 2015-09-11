@@ -54,7 +54,7 @@ SceneNode::SceneNode()
 
 SceneNode::~SceneNode()
 {
-	List<SceneNode *>::Const_Iterator i = children_.begin();
+	List<SceneNode *>::ConstIterator i = children_.begin();
 	while (i != children_.end())
 	{
 		delete(*i++);
@@ -87,7 +87,7 @@ bool SceneNode::addChildNode(SceneNode *childNode)
 		}
 
 		childNode->parent_ = this;
-		children_.insertBack(childNode);
+		children_.pushBack(childNode);
 		hasBeenAdded = true;
 	}
 
@@ -119,7 +119,7 @@ bool SceneNode::removeChildNode(SceneNode *childNode)
 	It is faster to remove through an iterator than with a linear search for a specific node
 	\return True if the node has been removed
 */
-bool SceneNode::removeChildNode(List<SceneNode *>::Iterator it)
+bool SceneNode::removeChildNode(List<SceneNode *>::ConstIterator it)
 {
 	bool hasBeenRemoved = false;
 
@@ -128,7 +128,7 @@ bool SceneNode::removeChildNode(List<SceneNode *>::Iterator it)
 		(*it)->parent_ == this) // avoid checking the child doesn't belong to this one
 	{
 		(*it)->parent_ = NULL;
-		children_.remove(it);
+		children_.erase(it);
 		hasBeenRemoved = true;
 	}
 
@@ -151,7 +151,7 @@ bool SceneNode::unlinkChildNode(SceneNode *childNode)
 		children_.remove(childNode);
 
 		// Nephews reparenting
-		List<SceneNode *>::Const_Iterator i = childNode->children_.begin();
+		List<SceneNode *>::ConstIterator i = childNode->children_.begin();
 		while (i != childNode->children_.end())
 		{
 			addChildNode(*i);
@@ -169,7 +169,7 @@ void SceneNode::update(float interval)
 {
 	// Early return not needed, the first call to this method is on the root node
 
-	for (List<SceneNode *>::Const_Iterator i = children_.begin(); i != children_.end(); ++i)
+	for (List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
 	{
 		if ((*i)->shouldUpdate_)
 		{
@@ -188,7 +188,7 @@ void SceneNode::visit(RenderQueue &renderQueue)
 {
 	// Early return not needed, the first call to this method is on the root node
 
-	for (List<SceneNode *>::Const_Iterator i = children_.begin(); i != children_.end(); ++i)
+	for (List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
 	{
 		if ((*i)->shouldDraw_)
 		{

@@ -5,6 +5,12 @@
 
 namespace ncine {
 
+namespace {
+
+void commitValue(GLUniformCache &uniformCache) { uniformCache.commitValue(); }
+
+}
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
@@ -57,10 +63,7 @@ void GLShaderUniforms::commitUniforms()
 	if (shaderProgram_)
 	{
 		shaderProgram_->use();
-		for (StringHashMapIterator<GLUniformCache>::type i = i.begin(uniformCaches_); i != i.end(uniformCaches_); ++i)
-		{
-			(*i).value.commitValue();
-		}
+		forEach(uniformCaches_.begin(), uniformCaches_.end(), commitValue);
 	}
 	else
 	{

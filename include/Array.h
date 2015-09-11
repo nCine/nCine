@@ -4,7 +4,7 @@
 #include <cstdio> // for NULL
 #include <cstdlib> // for exit()
 #include <cstring> // for memmove() and memcpy()
-#include "common_functions.h"
+#include "algorithms.h"
 #include "ArrayIterator.h"
 #include "ServiceLocator.h"
 
@@ -16,9 +16,9 @@ class Array
 {
   public:
 	/// Iterator type
-	typedef ArrayIterator<T> Iterator;
+	typedef ArrayIterator<T, false> Iterator;
 	/// Constant iterator type
-	typedef const ArrayIterator<T> Const_Iterator;
+	typedef ArrayIterator<T, true> ConstIterator;
 
 	/// Constructs an array with explicit capacity
 	explicit Array(unsigned int capacity)
@@ -49,23 +49,23 @@ class Array
 		nc::swap(first.fixedCapacity_, second.fixedCapacity_);
 	}
 
-	/// Returns an iterator to the first character
+	/// Returns an iterator to the first element
 	inline Iterator begin() { return Iterator(array_); }
-	/// Returns an iterator to the last character
+	/// Returns an iterator to the last element
 	inline Iterator rBegin() { return Iterator(array_ + size_ - 1); }
-	/// Returns an iterator to the termination character
+	/// Returns an iterator to past the last element
 	inline Iterator end() { return Iterator(array_ + size_); }
-	/// Returns an iterator to the byte preceding the first character
+	/// Returns an iterator to prior the first element
 	inline Iterator rEnd() { return Iterator(array_ - 1); }
 
-	/// Returns a constant iterator to the first character
-	inline Const_Iterator begin() const { return Iterator(array_); }
-	/// Returns a constant iterator to the last character
-	inline Const_Iterator rBegin() const { return Iterator(array_ + size_ - 1); }
-	/// Returns a constant iterator to the termination character
-	inline Const_Iterator end() const { return Iterator(array_ + size_); }
-	/// Returns a constant iterator to the byte preceding the first character
-	inline Const_Iterator rEnd() const { return Iterator(array_ - 1); }
+	/// Returns a constant iterator to the first element
+	inline ConstIterator begin() const { return ConstIterator(array_); }
+	/// Returns a constant iterator to the last element
+	inline ConstIterator rBegin() const { return ConstIterator(array_ + size_ - 1); }
+	/// Returns a constant iterator to past the last lement
+	inline ConstIterator end() const { return ConstIterator(array_ + size_); }
+	/// Returns a constant iterator to prior the first element
+	inline ConstIterator rEnd() const { return ConstIterator(array_ - 1); }
 
 	/// Returns true if the array is empty
 	inline bool isEmpty() const { return size_ == 0; }
@@ -85,12 +85,34 @@ class Array
 	/// Clears the array
 	/** Size will be set to zero but capacity remains untouched */
 	inline void clear() { size_ = 0; }
+	/// Returns a constant reference to the first element in constant time
+	inline const T& front() const { return array_[0]; }
+	/// Returns a reference to the first element in constant time
+	inline T& front() { return array_[0]; }
+	/// Returns a constant reference to the last element in constant time
+	inline const T& back() const { return array_[size_ - 1]; }
+	/// Returns a reference to the last element in constant time
+	inline T& back() { return array_[size_ - 1]; }
 	/// Inserts a new element as the last one in constant time
-	inline void insertBack(T element) { operator[](size_) = element; }
+	inline void pushBack(T element) { operator[](size_) = element; }
+	/// Removes the last element in constant time
+	inline void popBack() { if (size_ > 0) size_--; }
+	// Inserts new elements at the specified position from a source range, last not included (shifting elements around)
+	void insertRange(unsigned int index, const T* firstPtr, const T* lastPtr);
 	// Inserts a new element at a specified position (shifting elements around)
 	void insertAt(unsigned int index, T element);
-	// Removes an element at a specified position (shifting elements around)
-	void removeAt(unsigned int index);
+	// Inserts a new element at the position specified by the iterator (shifting elements around)
+	Iterator insert(Iterator position, const T& value);
+	// Inserts new elements from a source at the position specified by the iterator (shifting elements around)
+	Iterator insert(Iterator position, Iterator first, Iterator last);
+	// Removes the specified range of elements, last not included (shifting elements around)
+	void removeRange(unsigned int firstIndex, unsigned int lastIndex);
+	/// Removes an element at a specified position (shifting elements around)
+	inline void removeAt(unsigned int index) { removeRange(index, index+1); }
+	// Removes the element pointed by the iterator (shifting elements around)
+	Iterator erase(Iterator position);
+	// Removes the elements in the range, last not included (shifting elements around)
+	Iterator erase(Iterator first, const Iterator last);
 	// Inserts an array of elements at the end in constant time
 	void append(const T* elements, unsigned int amount);
 
@@ -204,6 +226,38 @@ void Array<T>::shrinkToFit()
 	setCapacity(size_);
 }
 
+/// Inserts new elements at the specified position from a source range, last not included (shifting elements around)
+template <class T>
+void Array<T>::insertRange(unsigned int index, const T* firstPtr, const T* lastPtr)
+{
+	// Cannot insert at more than one position after the last element
+	if (index > size_)
+	{
+		LOGF_X("Element %u out of size range", index);
+		exit(EXIT_FAILURE);
+	}
+
+	if (firstPtr == lastPtr)
+	{
+		// Graceful exit from the method
+		return;
+	}
+	else if (firstPtr > lastPtr)
+	{
+		LOGF_X("First pointer %p should precede the last one %p", firstPtr, lastPtr);
+		exit(EXIT_FAILURE);
+	}
+
+	if (size_ + 1 > capacity_)
+	{
+		setCapacity(size_ * 2);
+	}
+
+	// memmove() takes care of overlapping regions
+	memmove(array_ + index, firstPtr, sizeof(T) * (lastPtr - firstPtr));
+	size_ += (lastPtr - firstPtr);
+}
+
 /// Inserts a new element at a specified position (shifting elements around)
 template <class T>
 void Array<T>::insertAt(unsigned int index, T element)
@@ -226,20 +280,74 @@ void Array<T>::insertAt(unsigned int index, T element)
 	size_++;
 }
 
-/// Removes an element at a specified position (shifting elements around)
+/// Inserts a new element at the position specified by the iterator (shifting elements around)
 template <class T>
-void Array<T>::removeAt(unsigned int index)
+typename Array<T>::Iterator Array<T>::insert(Iterator position, const T& value)
+{
+	unsigned int index = &(*position) - array_;
+	insertAt(index);
+
+	return ++position;
+}
+
+/// Inserts new elements from a source at the position specified by the iterator (shifting elements around)
+template <class T>
+typename Array<T>::Iterator Array<T>::insert(Iterator position, Iterator first, Iterator last)
+{
+	unsigned int index = &(*position) - array_;
+	T* firstPtr = &(*first);
+	T* lastPtr = &(*last);
+	insertRange(index, firstPtr, lastPtr);
+
+	return position + (lastPtr - firstPtr);
+}
+
+/// Removes the specified range of elements, last not included (shifting elements around)
+template <class T>
+void Array<T>::removeRange(unsigned int firstIndex, unsigned int lastIndex)
 {
 	// Cannot remove past the last element
-	if (index > size_ - 1)
+	if (firstIndex > size_ - 1 || lastIndex > size_)
 	{
-		LOGF_X("Element %u out of size range", index);
+		LOGF_X("Element %u and/or element %u out of size range", firstIndex, lastIndex);
+		exit(EXIT_FAILURE);
+	}
+
+	if (firstIndex == lastIndex)
+	{
+		// Graceful exit from the method
+		return;
+	}
+	else if (firstIndex > lastIndex)
+	{
+		LOGF_X("First index %u should be less than last index %u", firstIndex, lastIndex);
 		exit(EXIT_FAILURE);
 	}
 
 	// memmove() takes care of overlapping regions
-	memmove(array_ + index, array_ + index + 1, sizeof(T) * (size_ - index - 1));
-	size_--;
+	memmove(array_ + firstIndex, array_ + lastIndex, sizeof(T) * (size_ - lastIndex));
+	size_ -= (lastIndex - firstIndex);
+}
+
+/// Removes the element pointed by the iterator (shifting elements around)
+template <class T>
+typename Array<T>::Iterator Array<T>::erase(Iterator position)
+{
+	unsigned int index = &(*position) - array_;
+	removeAt(index);
+
+	return ++position;
+}
+
+/// Removes the elements in the range, last not included (shifting elements around)
+template <class T>
+typename Array<T>::Iterator Array<T>::erase(Iterator first, const Iterator last)
+{
+	unsigned int firstIndex = &(*first) - array_;
+	unsigned int lastIndex = &(*last) - array_;
+	removeRange(firstIndex, lastIndex);
+
+	return ++first;
 }
 
 /// Inserts an array of elements at the end in constant time

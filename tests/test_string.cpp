@@ -60,14 +60,14 @@ int main(int argc, char **argv)
 
 	printf("\n--- String traversals (for cycles) ---\n");
 	printf("Iterating through characters of first string:");
-	for (nc::String::Const_Iterator i = str.begin(); i != str.end(); ++i)
+	for (nc::String::ConstIterator i = str.begin(); i != str.end(); ++i)
 	{
 		printf(" %c", *i);
 	}
 	printf("\n");
 
 	printf("Iterating through characters of first string (reverse):");
-	for (nc::String::Const_Iterator r = str.rBegin(); r != str.rEnd(); --r)
+	for (nc::String::ConstIterator r = str.rBegin(); r != str.rEnd(); --r)
 	{
 		printf(" %c", *r);
 	}
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 
 	printf("\n--- String traversals (while cycles) ---\n");
 	printf("Iterating through characters of first string:");
-	nc::String::Const_Iterator i = str.begin();
+	nc::String::ConstIterator i = str.begin();
 	while (i != str.end())
 	{
 		printf(" %c", *i);
@@ -85,7 +85,7 @@ int main(int argc, char **argv)
 	printf("\n");
 
 	printf("Iterating through characters of first string (reverse):");
-	nc::String::Const_Iterator r = str.rBegin();
+	nc::String::ConstIterator r = str.rBegin();
 	while (r != str.rEnd())
 	{
 		printf(" %c", *r);

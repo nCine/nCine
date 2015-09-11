@@ -1,11 +1,8 @@
-#include "common_functions.h"
+#include "algorithms.h"
 #include "RenderQueue.h"
 #include "SceneNode.h"
 #include "Array.h"
 #include "Sprite.h"
-
-// TODO: Implement a custom assert macro
-//#include <assert.h> // for checking sorting correctness
 
 namespace ncine {
 
@@ -43,11 +40,11 @@ void RenderQueue::addCommand(RenderCommand *command)
 
 	if (command->material().isTransparent() == false)
 	{
-		opaqueRenderCommands_.insertBack(command);
+		opaqueRenderCommands_.pushBack(command);
 	}
 	else
 	{
-		transparentRenderCommands_.insertBack(command);
+		transparentRenderCommands_.pushBack(command);
 	}
 }
 
@@ -97,14 +94,21 @@ void RenderQueue::draw()
 /// Sorts render nodes in both queues to minimize state changes
 void RenderQueue::sortQueues()
 {
-	nc::qSort(opaqueRenderCommands_, 0, opaqueRenderCommands_.size() - 1);
-	nc::qSort(transparentRenderCommands_, 0, transparentRenderCommands_.size() - 1);
+	nc::quicksortDesc(opaqueRenderCommands_.begin(), opaqueRenderCommands_.end());
+	nc::quicksortDesc(transparentRenderCommands_.begin(), transparentRenderCommands_.end());
 
 	// Check sorting correctness
-//	for (unsigned int i = 1; i < opaqueRenderCommands_.size(); i++)
-//		assert(opaqueRenderCommands_[i-1]->sortKey() <= opaqueRenderCommands_[i]->sortKey());
-//	for (unsigned int i = 1; i < transparentRenderCommands_.size(); i++)
-//		assert(transparentRenderCommands_[i-1]->sortKey() <= transparentRenderCommands_[i]->sortKey());
+/*
+	if (nc::isSorted(opaqueRenderCommands_.begin(), opaqueRenderCommands_.end(), nc::IsGreater<RenderCommand *>) == false)
+	{
+		printf("Opaque not sorted1\n");
+	}
+
+	if (nc::isSorted(transparentRenderCommands_.begin(), transparentRenderCommands_.end(), nc::IsGreater<RenderCommand *>) == false)
+	{
+		printf("Transparent not sorted1\n");
+	}
+*/
 }
 
 }

@@ -22,7 +22,7 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	~ParticleSystem();
 
 	/// Adds a particle affector
-	void addAffector(ParticleAffector* affector) { affectors_.insertBack(affector); }
+	void addAffector(ParticleAffector* affector) { affectors_.pushBack(affector); }
 	/// Emits an amount of particles with a specified initial life and velocity
 	void emitParticles(unsigned int amount, float life, const Vector2f &vel);
 

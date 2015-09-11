@@ -86,7 +86,7 @@ void AnimatedSprite::addAnimation(RectAnimation* anim)
 {
 	if (anim)
 	{
-		anims_.insertBack(anim);
+		anims_.pushBack(anim);
 		currentAnim = anims_.size() - 1;
 		setTexRect(anims_[currentAnim]->rect());
 	}

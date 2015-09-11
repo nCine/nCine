@@ -5,10 +5,10 @@
 #include "Timer.h"
 
 namespace {
-	const int NumThreads = 2;
-	const int NumFloats = 100000000;
-	float *globalArray = NULL;
-}
+
+const int NumThreads = 2;
+const int NumFloats = 100000000;
+float *globalArray = NULL;
 
 void threadFunction(void *arg)
 {
@@ -31,6 +31,8 @@ void threadFunction(void *arg)
 		globalArray[i] *= 2.0f;
 		globalArray[i] -= 100.0f;
 	}
+}
+
 }
 
 nc::IAppEventHandler* createApphandler()

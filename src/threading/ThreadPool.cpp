@@ -47,7 +47,7 @@ ThreadPool::~ThreadPool()
 void ThreadPool::enqueueCommand(IThreadCommand *pThreadCommand)
 {
 	queueMutex_.lock();
-	queue_.insertBack(pThreadCommand);
+	queue_.pushBack(pThreadCommand);
 	queueCV_.broadcast();
 	queueMutex_.unlock();
 }
@@ -93,7 +93,8 @@ void ThreadPool::workerFunction(void *arg)
 			break;
 		}
 
-		IThreadCommand *threadCommand = threadStruct->queue->removeFront();
+		IThreadCommand *threadCommand = threadStruct->queue->front();
+		threadStruct->queue->popFront();
 		threadStruct->queueMutex->unlock();
 
 		LOGD_X("worker thread %u is executing its command", Thread::self());

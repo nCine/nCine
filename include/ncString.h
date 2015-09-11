@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_STRING
 #define CLASS_NCINE_STRING
 
-#include "common_functions.h"
+#include "algorithms.h"
 #include "StringIterator.h"
 
 namespace ncine {
@@ -11,9 +11,9 @@ class DLL_PUBLIC String
 {
   public:
 	/// Iterator type
-	typedef StringIterator Iterator;
+	typedef StringIterator<false> Iterator;
 	/// Constant iterator type
-	typedef const StringIterator Const_Iterator;
+	typedef StringIterator<true> ConstIterator;
 
 	/// Default capacity for objects created by the default constructor
 	static const unsigned int DefaultCapacity = 128;
@@ -53,13 +53,13 @@ class DLL_PUBLIC String
 	inline Iterator rEnd() { return Iterator(array_ - 1); }
 
 	/// Returns a constant iterator to the first character
-	inline Const_Iterator begin() const { return Iterator(array_); }
+	inline ConstIterator begin() const { return ConstIterator(array_); }
 	/// Returns a constant iterator to the last character
-	inline Const_Iterator rBegin() const { return Iterator(array_ + length_ - 1); }
+	inline ConstIterator rBegin() const { return ConstIterator(array_ + length_ - 1); }
 	/// Returns a constant iterator to the termination character
-	inline Const_Iterator end() const { return Iterator(array_ + length_); }
+	inline ConstIterator end() const { return ConstIterator(array_ + length_); }
 	/// Returns a constant iterator to the byte preceding the first character
-	inline Const_Iterator rEnd() const { return Iterator(array_ - 1); }
+	inline ConstIterator rEnd() const { return ConstIterator(array_ - 1); }
 
 	/// Returns true if the string is empty
 	inline bool isEmpty() const { return length_ == 0; }

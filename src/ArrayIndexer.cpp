@@ -10,7 +10,7 @@ ArrayIndexer::ArrayIndexer()
 	: nextId_(0), pointers_(16)
 {
 	// First element reserved
-	pointers_.insertBack(NULL);
+	pointers_.pushBack(NULL);
 	nextId_++;
 }
 

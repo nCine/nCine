@@ -25,7 +25,7 @@ class GLShaderUniforms
 	GLShaderProgram* shaderProgram_;
 
 	static const int UniformCachesHashSize = 16;
-	StringHashMap<GLUniformCache>::type uniformCaches_;
+	StringHashMap<GLUniformCache>::Type uniformCaches_;
 
 	static const unsigned int UniformFloatBufferSize = 128;
 	GLfloat uniformsFloatBuffer_[UniformFloatBufferSize];

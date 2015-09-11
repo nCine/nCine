@@ -30,7 +30,7 @@ LineVariable::LineVariable(unsigned int numValues, float rejectDelay, const Matr
 unsigned int LinePlotter::addVariable(unsigned int numValues, float rejectDelay)
 {
 	LineVariable* variable = new LineVariable(numValues, rejectDelay, worldMatrix_);
-	variables_.insertBack(variable);
+	variables_.pushBack(variable);
 
 	return variables_.size() - 1;
 }

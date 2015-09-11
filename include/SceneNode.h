@@ -37,7 +37,7 @@ class DLL_PUBLIC SceneNode : public Object
 	// Removes a child of this node, without reparenting nephews
 	bool removeChildNode(SceneNode *childNode);
 	// Removes a child of this node while iterating on children, without reparenting nephews
-	bool removeChildNode(List<SceneNode *>::Iterator it);
+	bool removeChildNode(List<SceneNode *>::ConstIterator it);
 	// Removes a child of this node reparenting nephews as children
 	bool unlinkChildNode(SceneNode *childNode);
 

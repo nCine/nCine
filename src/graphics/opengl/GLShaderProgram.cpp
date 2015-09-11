@@ -1,7 +1,6 @@
 #include "GLShaderProgram.h"
 #include "GLShader.h"
 #include "ncString.h"
-#include "HashMapIterator.h"
 
 namespace ncine {
 
@@ -54,7 +53,7 @@ void GLShaderProgram::attachShader(GLenum type, const char *filename)
 	glAttachShader(glHandle_, shader->glHandle_);
 	shader->compile();
 
-	attachedShaders_.insertBack(shader);
+	attachedShaders_.pushBack(shader);
 }
 
 bool GLShaderProgram::link()
@@ -147,7 +146,7 @@ void GLShaderProgram::discoverUniforms()
 	for (int i = 0; i < count; i++)
 	{
 		GLUniform uniform(glHandle_, i);
-		uniforms_.insertBack(uniform);
+		uniforms_.pushBack(uniform);
 
 		LOGD_X("Shader %u - uniform %d : \"%s\"", glHandle_, uniform.location(), uniform.name());
 	}
@@ -161,7 +160,7 @@ void GLShaderProgram::discoverAttributes()
 	for (int i = 0; i < count; i++)
 	{
 		GLAttribute attribute(glHandle_, i);
-		attributes_.insertBack(attribute);
+		attributes_.pushBack(attribute);
 
 		LOGD_X("Shader %u - attribute %d : \"%s\"", glHandle_, attribute.location(), attribute.name());
 	}

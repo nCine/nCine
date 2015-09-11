@@ -62,7 +62,7 @@ void GLFramebufferObject::unbind() const
 void GLFramebufferObject::attachRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height, GLenum attachment)
 {
 	GLRenderbuffer *renderBuffer = new GLRenderbuffer(internalFormat, width, height);
-	attachedRenderbuffers_.insertBack(renderBuffer);
+	attachedRenderbuffers_.pushBack(renderBuffer);
 	renderBuffer->bind();
 
 	bind(GL_FRAMEBUFFER);

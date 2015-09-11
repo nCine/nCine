@@ -29,6 +29,9 @@ class RenderCommand
 
 	RenderCommand();
 
+	/// Relational operator to allow sorting based on the key
+	inline bool operator<(const RenderCommand &other) const { return sortKey_ < other.sortKey_; }
+
 	/// Returns the rendering priority
 	inline int priority() const { return priority_; }
 	/// Sets the rendering priority

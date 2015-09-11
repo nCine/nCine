@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 		hashmap[i] = i + 10;
 	}
 
-	printf("Retrieving the elements:\n");
+	printf("Retrieving the elements\n");
 	for (int i = 0; i < 10; i++)
 	{
 		printf("key: %d, value: %d\n", i, hashmap[i]);
@@ -44,18 +44,18 @@ int main(int argc, char **argv)
 
 
 	printf("\n--- HashMap traversals (for cycles) ---\n");
-	printf("Iterating through the elements of second hashmap (copy constructed):\n");
-	for (const nc::HashMapIterator<int, int, nc::FixedHashFunc<int> > i = i.begin(hashmap2); i != i.end(hashmap2); ++i)
+	printf("Iterating through the elements of second hashmap (copy constructed)\n");
+	for (nc::HashMap<int, int, nc::FixedHashFunc<int> >::ConstIterator i = hashmap2.begin(); i != hashmap2.end(); ++i)
 	{
-		printf("hash: %lu, key: %d, value: %d\n", (*i).hash, (*i).key, (*i).value);
+		printf("hash: %lu, key: %d, value: %d\n", i.hash(), i.key(), i.value());
 	}
 
 	printf("\n--- HashMap traversals (while cycles) ---\n");
-	printf("Iterating through the elements of the third hashmap (created and then assigned):\n");
-	const nc::HashMapIterator<int, int, nc::FixedHashFunc<int> > i1 = i1.begin(hashmap3);
-	while (i1 != i1.end(hashmap3))
+	printf("Iterating through the elements of the third hashmap (created and then assigned)\n");
+	nc::HashMap<int, int, nc::FixedHashFunc<int> >::ConstIterator i1 = hashmap3.begin();
+	while (i1 != hashmap3.end())
 	{
-		printf("hash: %lu, key: %d, value: %d\n", (*i1).hash, (*i1).key, (*i1).value);
+		printf("hash: %lu, key: %d, value: %d\n", i1.hash(), i1.key(), i1.value());
 		++i1;
 	}
 
