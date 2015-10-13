@@ -67,7 +67,7 @@ class DLL_PUBLIC Application
 
   protected:
 	/// Maximum length for the profile string
-	static const int MaxTextLength = 256;
+	static const unsigned int MaxTextLength = 256;
 
 	bool isPaused_;
 	bool hasFocus_;

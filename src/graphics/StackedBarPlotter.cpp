@@ -55,7 +55,7 @@ void StackedBarPlotter::draw(RenderQueue& renderQueue)
 	// Drawing the background
 	DrawableNode::draw(renderQueue);
 
-	updateAllVertices(0, 0, width_, height_);
+	updateAllVertices(0.0f, 0.0f, width_, height_);
 
 	// Drawing the reference value line
 	if (shouldPlotRefValue())
@@ -79,7 +79,7 @@ void StackedBarPlotter::draw(RenderQueue& renderQueue)
 
 
 /// Fill the buffer of every stacked variable with vertices
-void StackedBarPlotter::updateAllVertices(int x, int y, int w, int h)
+void StackedBarPlotter::updateAllVertices(float x, float y, float w, float h)
 {
 	unsigned int numVariables = variables_.size();
 	float scaledH = h / static_cast<float>(numVariables);

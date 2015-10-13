@@ -21,10 +21,11 @@ class DLL_PUBLIC Color
 	{ set(red, green, blue); }
 	/// Four channels constructor (unsigned int)
 	Color(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha)
-	{ set(red, green, blue, alpha); }
+	{ set(static_cast<unsigned char>(red), static_cast<unsigned char>(green),
+		  static_cast<unsigned char>(blue), static_cast<unsigned char>(alpha)); }
 	/// Three channels constructor (unsigned int)
 	Color(unsigned int red, unsigned int green, unsigned int blue)
-	{ set(red, green, blue); }
+	{ set(static_cast<unsigned char>(red), static_cast<unsigned char>(green), static_cast<unsigned char>(blue)); }
 	/// Four channels constructor (normalized float)
 	Color(float red, float green, float blue, float alpha)
 	{ setF(red, green, blue, alpha); }
@@ -151,7 +152,7 @@ inline bool Color::operator==(const Color& color) const
 
 inline Color& Color::operator*=(const Color& color)
 {
-	for (int i = 0; i < 4; i++)
+	for (unsigned int i = 0; i < 4; i++)
 	{
 		float channelValue = (color.channels_[i] / 255.0f) * channels_[i];
 		channelValue = nc::clamp(channelValue, 0.0f, 255.0f);
@@ -164,7 +165,7 @@ inline Color& Color::operator*=(const Color& color)
 /// Multiplication by a constant scalar
 inline Color& Color::operator*=(float scalar)
 {
-	for (int i = 0; i < 4; i++)
+	for (unsigned int i = 0; i < 4; i++)
 	{
 		float channelValue = scalar * channels_[i];
 		channelValue = nc::clamp(channelValue, 0.0f, 255.0f);
@@ -178,7 +179,7 @@ inline Color Color::operator*(const Color& color) const
 {
 	Color result;
 
-	for (int i = 0; i < 4; i++)
+	for (unsigned int i = 0; i < 4; i++)
 	{
 		float channelValue = (color.channels_[i] / 255.0f) * channels_[i];
 		channelValue = nc::clamp(channelValue, 0.0f, 255.0f);
@@ -193,7 +194,7 @@ inline Color Color::operator*(float scalar) const
 {
 	Color result;
 
-	for (int i = 0; i < 4; i++)
+	for (unsigned int i = 0; i < 4; i++)
 	{
 		float channelValue = scalar * channels_[i];
 		channelValue = nc::clamp(channelValue, 0.0f, 255.0f);

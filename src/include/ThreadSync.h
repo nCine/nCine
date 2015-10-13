@@ -97,7 +97,7 @@ class Barrier
 {
   public:
 	// Creates a barrier for the specified amount of waiting threads
-	Barrier(unsigned int count);
+	explicit Barrier(unsigned int count);
 	~Barrier();
 
 	/// The calling thread waits at the barrier

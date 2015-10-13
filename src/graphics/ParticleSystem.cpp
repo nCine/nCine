@@ -9,7 +9,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 /// Constructs a particle system made of the specified maximum amount of particles
-ParticleSystem::ParticleSystem(SceneNode* parent, unsigned int count, Texture *texture, Rect texRect)
+ParticleSystem::ParticleSystem(SceneNode* parent, unsigned int count, Texture *texture, Recti texRect)
 	: SceneNode(parent, 0, 0), poolSize_(count), poolTop_(count - 1), particlePool_(poolSize_, true),
 	  particleList_(poolSize_, true), affectors_(4), inLocalSpace_(false)
 {
@@ -51,7 +51,7 @@ void ParticleSystem::emitParticles(unsigned int amount, float life, const Vector
 	Vector2f rndVelocity;
 
 	// Particles are rotated towards the emission vector
-	float rotation = -(atan2(vel.y, vel.x) - atan2(1.0f, 0.0f)) * 180.0f / M_PI;
+	float rotation = -(atan2(vel.y, vel.x) - atan2(1.0f, 0.0f)) * 180.0f / static_cast<float>(M_PI);
 	if (rotation < 0.0f)
 	{
 		rotation += 360.0f;

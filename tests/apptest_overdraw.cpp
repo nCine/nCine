@@ -36,7 +36,7 @@ void MyEventHandler::onInit()
 
 	dummy_ = new nc::SceneNode(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 
-	for (int i = 0; i < NumSprites; i++)
+	for (unsigned int i = 0; i < NumSprites; i++)
 	{
 		opaqueSprites_[i] = new nc::Sprite(dummy_, opaqueTexture_, -50, 200);
 		opaqueSprites_[i]->setScale(1.25f);

@@ -107,7 +107,6 @@ set(HEADERS
 	include/HashMap.h
 	include/HashFunctions.h
 	include/HashMapIterator.h
-	include/Point.h
 	include/Rect.h
 	include/Color.h
 	include/Object.h

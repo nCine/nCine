@@ -18,8 +18,8 @@ const float SceneNode::MinRotation = 0.5f;
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-SceneNode::SceneNode(SceneNode* parent, float x, float y)
-	: x(x), y(y), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
+SceneNode::SceneNode(SceneNode* parent, float xx, float yy)
+	: x(xx), y(yy), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
 	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
 	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {

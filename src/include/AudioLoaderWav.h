@@ -9,10 +9,10 @@ namespace ncine {
 class AudioLoaderWav : public IAudioLoader
 {
   public:
-	AudioLoaderWav(const char *filename);
-	AudioLoaderWav(IFile *fileHandle);
+	explicit AudioLoaderWav(const char *filename);
+	explicit AudioLoaderWav(IFile *fileHandle);
 
-	long read(char *buffer, int bufferSize) const;
+	unsigned long int read(char *buffer, unsigned long int bufferSize) const;
 	void rewind() const;
 
   private:

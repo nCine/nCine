@@ -90,13 +90,13 @@ void GLShaderAttributes::defineVertexPointers(GLuint buondVboHandle)
 
 void GLShaderAttributes::importAttributes()
 {
-	int count = shaderProgram_->attributes_.size();
+	unsigned int count = shaderProgram_->attributes_.size();
 	if (count > VertexAttributesHashSize)
 	{
 		LOGW_X("More active attributes (%d) than hashmap buckets (%d)", count, VertexAttributesHashSize);
 	}
 
-	for (int i = 0; i < count; i++)
+	for (unsigned int i = 0; i < count; i++)
 	{
 		const GLAttribute& attribute = shaderProgram_->attributes_[i];
 		GLVertexAttribute vertexAttribute(&attribute);

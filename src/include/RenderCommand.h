@@ -33,9 +33,9 @@ class RenderCommand
 	inline bool operator<(const RenderCommand &other) const { return sortKey_ < other.sortKey_; }
 
 	/// Returns the rendering priority
-	inline int priority() const { return priority_; }
+	inline unsigned int priority() const { return priority_; }
 	/// Sets the rendering priority
-	inline void setPriority(int priority) { priority_ = priority; }
+	inline void setPriority(unsigned int priority) { priority_ = priority; }
 
 	/// Returns the queue sort key
 	inline unsigned long int sortKey() const { return sortKey_; }

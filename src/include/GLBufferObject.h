@@ -34,7 +34,7 @@ class GLBufferObject
 
 	void *mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access);
 
-	void bindVertexBuffer(GLuint bindingIndex, GLintptr offset, GLintptr stride);
+	void bindVertexBuffer(GLuint bindingIndex, GLintptr offset, GLsizei stride);
 #endif
 
 #endif

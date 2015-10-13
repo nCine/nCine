@@ -13,7 +13,7 @@ class GLVertexAttribute
 {
   public:
 	GLVertexAttribute();
-	GLVertexAttribute(const GLAttribute *shaderAttribute);
+	explicit GLVertexAttribute(const GLAttribute *shaderAttribute);
 
 	inline const GLAttribute* shaderAttribute() const { return attribute_; }
 	inline GLsizei vboStride() const { return vboStride_; }

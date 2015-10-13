@@ -13,16 +13,17 @@ class DLL_PUBLIC DisplayMode
 	DisplayMode()
 		: redBits_(0), greenBits_(0), blueBits_(0), alphaBits_(0),
 		  depthBits_(0), stencilBits_(0), isDoubleBuffered_(true), hasVSync_(false) { }
-	DisplayMode(int redBits, int greenBits, int blueBits)
+	DisplayMode(unsigned int redBits, unsigned int greenBits, unsigned int blueBits)
 		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits), alphaBits_(0),
 		  depthBits_(0), stencilBits_(0), isDoubleBuffered_(true), hasVSync_(false) { }
-	DisplayMode(int redBits, int greenBits, int blueBits, int alphaBits)
+	DisplayMode(unsigned int redBits, unsigned int greenBits, unsigned int blueBits, unsigned int alphaBits)
 		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits), alphaBits_(alphaBits),
 		  depthBits_(0), stencilBits_(0), isDoubleBuffered_(true), hasVSync_(false) { }
-	DisplayMode(bool doubleBuffered, bool withVSync, int depthBits, int stencilBits)
+	DisplayMode(unsigned int depthBits, unsigned int stencilBits, bool doubleBuffered, bool withVSync)
 		: redBits_(0), greenBits_(0), blueBits_(0), alphaBits_(0),
 		  depthBits_(depthBits), stencilBits_(stencilBits), isDoubleBuffered_(doubleBuffered), hasVSync_(withVSync) { }
-	DisplayMode(int redBits, int greenBits, int blueBits, int alphaBits, bool doubleBuffered, bool withVSync, int depthBits, int stencilBits)
+	DisplayMode(unsigned int redBits, unsigned int greenBits, unsigned int blueBits, unsigned int alphaBits,
+				unsigned int depthBits, unsigned int stencilBits, bool doubleBuffered, bool withVSync)
 		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits), alphaBits_(alphaBits),
 		  depthBits_(depthBits), stencilBits_(stencilBits), isDoubleBuffered_(doubleBuffered), hasVSync_(withVSync) { }
 

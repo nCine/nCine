@@ -64,7 +64,7 @@ void SpriteBatchNode::visit(RenderQueue& renderQueue)
 
 void SpriteBatchNode::processSprite(Sprite& sprite)
 {
-	Point size = sprite.size();
+	Vector2f size = sprite.size();
 	Vector2f pos = sprite.position();
 	float rot = sprite.rotation();
 	float scale = sprite.scale();
@@ -78,8 +78,8 @@ void SpriteBatchNode::processSprite(Sprite& sprite)
 	float cosine = 1.0f;
 	if (fabs(rot) > Sprite::MinRotation && fabs(rot) < 360.0f - Sprite::MinRotation)
 	{
-		sine = sinf(-rot * M_PI / 180.0f);
-		cosine = cosf(-rot * M_PI / 180.0f);
+		sine = sinf(-rot * static_cast<float>(M_PI) / 180.0f);
+		cosine = cosf(-rot * static_cast<float>(M_PI) / 180.0f);
 	}
 
 	unsigned int oldSize = vertices_.size();
@@ -94,8 +94,8 @@ void SpriteBatchNode::processSprite(Sprite& sprite)
 	vertices[10] = pos.x + leftPos * cosine - topPos * sine;			vertices[11] = pos.y + topPos * cosine + leftPos * sine;
 
 
-	Point texSize = texture_->size();
-	Rect texRect = sprite.texRect();
+	Vector2i texSize = texture_->size();
+	Recti texRect = sprite.texRect();
 
 	float leftCoord = float(texRect.x) / float(texSize.x);
 	float rightCoord = float(texRect.x + texRect.w) / float(texSize.x);

@@ -27,7 +27,7 @@ inline const T& max(const T& a, const T& b)
 /// Returns a random float between x0 and x1
 inline float randBetween(float x0, float x1)
 {
-	return x0 + (x1 - x0) * (rand() / float(RAND_MAX));
+	return x0 + (x1 - x0) * (rand() / static_cast<float>(RAND_MAX));
 }
 
 ///////////////////////////////////////////////////////////
@@ -58,7 +58,7 @@ template <class T>
 class IsEqualTo
 {
   public:
-	IsEqualTo(T refValue) : refValue_(refValue) { }
+	explicit IsEqualTo(T refValue) : refValue_(refValue) { }
 	inline bool operator()(T value) const { return value == refValue_; }
 
   private:
@@ -69,7 +69,7 @@ template <class T>
 class IsNotEqualTo
 {
   public:
-	IsNotEqualTo(T refValue) : refValue_(refValue) { }
+	explicit IsNotEqualTo(T refValue) : refValue_(refValue) { }
 	inline bool operator()(T value) const { return !(value == refValue_); }
 
   private:
@@ -80,7 +80,7 @@ template <class T>
 class IsGreaterThan
 {
   public:
-	IsGreaterThan(T refValue) : refValue_(refValue) { }
+	explicit IsGreaterThan(T refValue) : refValue_(refValue) { }
 	inline bool operator()(T value) const { return value > refValue_; }
 
   private:
@@ -91,7 +91,7 @@ template <class T>
 class IsNotGreaterThan
 {
   public:
-	IsNotGreaterThan(T refValue) : refValue_(refValue) { }
+	explicit IsNotGreaterThan(T refValue) : refValue_(refValue) { }
 	inline bool operator()(T value) const { return !(value > refValue_); }
 
   private:
@@ -102,7 +102,7 @@ template <class T>
 class IsLessThan
 {
   public:
-	IsLessThan(T refValue) : refValue_(refValue) { }
+	explicit IsLessThan(T refValue) : refValue_(refValue) { }
 	inline bool operator()(T value) const { return value < refValue_; }
 
   private:
@@ -113,7 +113,7 @@ template <class T>
 class IsNotLessThan
 {
   public:
-	IsNotLessThan(T refValue) : refValue_(refValue) { }
+	explicit IsNotLessThan(T refValue) : refValue_(refValue) { }
 	inline bool operator()(T value) const { return !(value < refValue_); }
 
   private:
@@ -755,7 +755,7 @@ namespace {
 template <class Iterator>
 void quicksort(Iterator first, Iterator last, RandomAccessIteratorTag)
 {
-	unsigned int size = distance(first, last);
+	int size = distance(first, last);
 	if (size > 1)
 	{
 		Iterator p = prev(last);
@@ -771,7 +771,7 @@ void quicksort(Iterator first, Iterator last, RandomAccessIteratorTag)
 template <class Iterator>
 void quicksortDesc(Iterator first, Iterator last, RandomAccessIteratorTag)
 {
-	unsigned int size = distance(first, last);
+	int size = distance(first, last);
 	if (size > 1)
 	{
 		Iterator p = prev(last);

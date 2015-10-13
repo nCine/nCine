@@ -16,7 +16,7 @@ class DLL_PUBLIC IAudioLoader
 	 *  \param bufferSize Buffer size in bytes
 	 *  \return Number of bytes read.
 	 */
-	virtual long read(char *buffer, int bufferSize) const = 0;
+	virtual unsigned long int read(char *buffer, unsigned long int bufferSize) const = 0;
 	/// Resets the audio file seek value
 	virtual void rewind() const = 0;
 
@@ -29,10 +29,10 @@ class DLL_PUBLIC IAudioLoader
 	/// Returns number of channels
 	inline int numChannels() const { return numChannels_; }
 	/// Returns samples frequency
-	inline int frequency() const { return frequency_; }
+	inline unsigned long int frequency() const { return frequency_; }
 
 	/// Returns the decoded buffer size in bytes
-	inline int bufferSize() const { return numSamples_ * numChannels_ * bytesPerSample_; }
+	inline unsigned long int bufferSize() const { return numSamples_ * numChannels_ * bytesPerSample_; }
 
 	// Returns the proper audio loader according to the file extension
 	static IAudioLoader* createFromFile(const char *filename);
@@ -53,8 +53,8 @@ class DLL_PUBLIC IAudioLoader
 	/// Duration in seconds
 	float duration_;
 
-	IAudioLoader(const char *filename);
-	IAudioLoader(IFile *fileHandle);
+	explicit IAudioLoader(const char *filename);
+	explicit IAudioLoader(IFile *fileHandle);
 
 	/// Load the audio parameters from file
 	virtual void init() = 0;

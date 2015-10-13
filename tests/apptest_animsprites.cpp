@@ -173,7 +173,7 @@ void MyEventHandler::onFrameStart()
 			}
 		}
 #else
-		float angle = (atan2(reachVector.y, reachVector.x) - atan2(1.0f, 0.0f)) * 180.0f / M_PI;
+		float angle = (atan2(reachVector.y, reachVector.x) - atan2(1.0f, 0.0f)) * 180.0f / static_cast<float>(M_PI);
 		if (angle < 0.0f)
 		{
 			angle += 360.0f;
@@ -227,8 +227,8 @@ void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
 	{
-		destVector_.x = event.x;
-		destVector_.y = event.y;
+		destVector_.x = static_cast<float>(event.x);
+		destVector_.y = static_cast<float>(event.y);
 	}
 }
 
@@ -236,8 +236,8 @@ void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 {
 	if (state.isLeftButtonDown())
 	{
-		destVector_.x = state.x;
-		destVector_.y = state.y;
+		destVector_.x = static_cast<float>(state.x);
+		destVector_.y = static_cast<float>(state.y);
 	}
 }
 #endif

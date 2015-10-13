@@ -99,7 +99,7 @@ void *GLBufferObject::mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfi
 	return glMapBufferRange(target_, offset, length, access);
 }
 
-void GLBufferObject::bindVertexBuffer(GLuint bindingIndex, GLintptr offset, GLintptr stride)
+void GLBufferObject::bindVertexBuffer(GLuint bindingIndex, GLintptr offset, GLsizei stride)
 {
 	bind();
 	glBindVertexBuffer(bindingIndex, glHandle_, offset, stride);

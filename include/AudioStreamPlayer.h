@@ -12,7 +12,7 @@ class DLL_PUBLIC AudioStreamPlayer : public IAudioPlayer
 {
   public:
 	// A constructor creating a player from a file
-	AudioStreamPlayer(const char *filename);
+	explicit AudioStreamPlayer(const char *filename);
 	virtual ~AudioStreamPlayer();
 
 	virtual void play();

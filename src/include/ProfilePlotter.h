@@ -14,7 +14,7 @@ namespace ncine {
 class ProfilePlotter : public DrawableNode
 {
   public:
-	ProfilePlotter(SceneNode* parent, Rect rect);
+	ProfilePlotter(SceneNode* parent, Rectf rect);
 	virtual ~ProfilePlotter();
 
 	// Adds a value to the specified variable
@@ -51,9 +51,9 @@ class ProfilePlotter : public DrawableNode
 
   protected:
 	/// Background width
-	int width_;
+	float width_;
 	/// Background height
-	int height_;
+	float height_;
 
 	/// Background color
 	Color backgroundColor_;

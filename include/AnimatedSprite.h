@@ -12,8 +12,8 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
   public:
 	AnimatedSprite(SceneNode* parent, Texture *texture);
 	explicit AnimatedSprite(Texture *texture);
-	AnimatedSprite(SceneNode* parent, Texture *texture, int x, int y);
-	AnimatedSprite(Texture *texture, int x, int y);
+	AnimatedSprite(SceneNode* parent, Texture *texture, float x, float y);
+	AnimatedSprite(Texture *texture, float x, float y);
 	virtual ~AnimatedSprite();
 
 	// Returns true if the current animation is paused
@@ -28,13 +28,13 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	// Sets the current animation and its frame number
 	void setAnimation(int animNum);
 	// Sets the current animation to a specified frame number
-	void setFrame(int frameNum);
+	void setFrame(unsigned int frameNum);
 
 	inline static ObjectType sType() { return ANIMATEDSPRITE_TYPE; }
 
   private:
 	Array<RectAnimation *> anims_;
-	int currentAnim;
+	int currentAnim_;
 
 	/// Private copy constructor
 	AnimatedSprite(const AnimatedSprite&);

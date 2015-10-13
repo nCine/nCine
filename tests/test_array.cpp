@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 	printf("Filling the whole array\n");
 	for (unsigned int i = 0; i < Capacity; i++)
 	{
-		array[i] = i;
+		array[i] = static_cast<int>(i);
 	}
 	printArray(array);
 

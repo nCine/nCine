@@ -62,7 +62,7 @@ void AudioBuffer::load(const IAudioLoader *audioLoader)
 	}
 
 	// Buffer size calculated as samples * channels * 16bit
-	int bufferSize = audioLoader->bufferSize();
+	unsigned long int bufferSize = audioLoader->bufferSize();
 	buffer = new char[bufferSize];
 
 	audioLoader->read(buffer, bufferSize);

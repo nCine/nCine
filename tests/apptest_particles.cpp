@@ -40,8 +40,8 @@ void MyEventHandler::onInit()
 	nc::ColorAffector *colAffector = new nc::ColorAffector();
 	colAffector->addColorStep(0.0f, nc::Color(0.86f, 0.39f, 0.0f, 0.7f)); // 0.05
 	colAffector->addColorStep(0.65f, nc::Color(0.86f, 0.59f, 0.0f, 0.75f)); // 0.55
-	colAffector->addColorStep(0.7f, nc::Color(0.86f, 0.7f, 0.0f, 0.6)); // 0.295
-	colAffector->addColorStep(1.0f, nc::Color(0.0f, 0.0f, 1.0f, 0.85)); // 0.59
+	colAffector->addColorStep(0.7f, nc::Color(0.86f, 0.7f, 0.0f, 0.6f)); // 0.295
+	colAffector->addColorStep(1.0f, nc::Color(0.0f, 0.0f, 1.0f, 0.85f)); // 0.59
 	particleSystem_->addAffector(colAffector);
 	nc::SizeAffector *sizeAffector = new nc::SizeAffector(0.45f); // 0.25
 	sizeAffector->addSizeStep(0.0f, 0.01f);
@@ -134,8 +134,8 @@ void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
 	{
-		particleSystem_->x = event.x;
-		particleSystem_->y = event.y;
+		particleSystem_->x = static_cast<float>(event.x);
+		particleSystem_->y = static_cast<float>(event.y);
 	}
 }
 
@@ -143,8 +143,8 @@ void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 {
 	if (state.isLeftButtonDown())
 	{
-		particleSystem_->x = state.x;
-		particleSystem_->y = state.y;
+		particleSystem_->x = static_cast<float>(state.x);
+		particleSystem_->y = static_cast<float>(state.y);
 	}
 	else if (state.isRightButtonDown())
 	{

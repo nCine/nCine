@@ -23,7 +23,7 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Relative Y coordinate as a public property
 	float y;
 
-	SceneNode(SceneNode* parent, float x, float y);
+	SceneNode(SceneNode* parent, float xx, float yy);
 	explicit SceneNode(SceneNode* parent);
 	SceneNode();
 	virtual ~SceneNode();

@@ -16,7 +16,7 @@ class GLShaderAttributes
 {
   public:
 	GLShaderAttributes();
-	GLShaderAttributes(GLShaderProgram *shaderProgram);
+	explicit GLShaderAttributes(GLShaderProgram *shaderProgram);
 	void setProgram(GLShaderProgram *shaderProgram);
 
 	GLVertexAttribute* attribute(const char *name);
@@ -45,13 +45,13 @@ class GLShaderAttributes
 		GLVertexAttribPointerState& operator=(const GLVertexAttribute& attribute);
 	};
 
-	static const int MaxDefinedVertexAttribPointers = 16;
+	static const unsigned int MaxDefinedVertexAttribPointers = 16;
 	/// An array to cache the state of `glVertexAttribPointer()` calls
 	static StaticArray<GLVertexAttribPointerState, MaxDefinedVertexAttribPointers> definedPointers_;
 
 	GLShaderProgram* shaderProgram_;
 
-	static const int VertexAttributesHashSize = 8;
+	static const unsigned int VertexAttributesHashSize = 8;
 	StringHashMap<GLVertexAttribute>::Type vertexAttributes_;
 
 	void importAttributes();

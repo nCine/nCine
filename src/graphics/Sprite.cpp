@@ -49,7 +49,7 @@ void Sprite::init()
 
 	if (texture_)
 	{
-		setTexRect(Rect(0, 0, texture_->width(), texture_->height()));
+		setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
 	}
 }
 
@@ -64,7 +64,7 @@ void Sprite::updateRenderCommand()
 	bool isTransparent = absColor().a() < 255 || texture()->hasAlpha();
 	renderCommand_->material().setTransparent(isTransparent);
 
-	Point texSize = texture_->size();
+	Vector2i texSize = texture_->size();
 	float texScaleX = texRect_.w / float(texSize.x);
 	float texBiasX = texRect_.x / float(texSize.x);
 	float texScaleY = texRect_.h / float(texSize.y);

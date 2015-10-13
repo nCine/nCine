@@ -121,9 +121,9 @@ long int StandardFile::tell() const
 }
 
 
-long int StandardFile::read(void *buffer, int bytes) const
+unsigned long int StandardFile::read(void *buffer, unsigned long int bytes) const
 {
-	long int bytesRead = -1;
+	unsigned long int bytesRead = 0;
 
 	if (fileDescriptor_ >= 0)
 	{
@@ -133,7 +133,7 @@ long int StandardFile::read(void *buffer, int bytes) const
 	}
 	else if (filePointer_)
 	{
-		bytesRead = fread(buffer, 1, bytes, filePointer_);
+		bytesRead = static_cast<unsigned long int>(fread(buffer, 1, bytes, filePointer_));
 	}
 
 	return bytesRead;

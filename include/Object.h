@@ -27,7 +27,7 @@ class DLL_PUBLIC Object
 	};
 
 	/// Maximum length for an object name
-	static const int MaxNameLength = 128;
+	static const unsigned int MaxNameLength = 128;
 
 	Object() : type_(BASE_TYPE), id_(0), name_(MaxNameLength)
 	{

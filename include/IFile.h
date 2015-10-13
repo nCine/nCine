@@ -40,7 +40,7 @@ class DLL_PUBLIC IFile
 
 	/// Constructs a base file object
 	/*! \param filename File name including its path */
-	IFile(const char *filename);
+	explicit IFile(const char *filename);
 	virtual ~IFile() { }
 
 	/// Returns the file type (RTTI)
@@ -56,7 +56,7 @@ class DLL_PUBLIC IFile
 	virtual long int tell() const = 0;
 	/// Read a certain amount of bytes from the file to a buffer
 	/*! \return Number of bytes read */
-	virtual long int read(void *buffer, int bytes) const = 0;
+	virtual unsigned long int read(void *buffer, unsigned long int bytes) const = 0;
 
 	/// Sets the close on exit flag
 	inline void setCloseOnExit(bool shouldCloseOnExit) { shouldCloseOnExit_ = shouldCloseOnExit; }

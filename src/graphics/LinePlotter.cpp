@@ -40,7 +40,7 @@ void LinePlotter::draw(RenderQueue& renderQueue)
 	// Drawing the background
 	DrawableNode::draw(renderQueue);
 
-	updateAllVertices(0, 0, width_, height_);
+	updateAllVertices(0.0f, 0.0f, width_, height_);
 
 	// Drawing the reference value line
 	if (shouldPlotRefValue())
@@ -63,7 +63,7 @@ void LinePlotter::draw(RenderQueue& renderQueue)
 ///////////////////////////////////////////////////////////
 
 /// Fill the buffer of every line variable with vertices
-void LinePlotter::updateAllVertices(int x, int y, int w, int h)
+void LinePlotter::updateAllVertices(float x, float y, float w, float h)
 {
 	float commonMin = 0.0f;
 	float commonMax = 0.0f;
@@ -102,10 +102,10 @@ void LinePlotter::updateAllVertices(int x, int y, int w, int h)
 		unsigned int nextIndex = profVariable->nextIndex();
 
 		// Variable value vertices
-		for (unsigned int i = 0; i < numValues; i++)
+		for (unsigned int j = 0; j < numValues; j++)
 		{
-			vertices[4 + 2 * i] = x + i * w / (numValues - 1);
-			vertices[4 + 2 * i + 1] = y + h * profVariable->normBetweenValue((nextIndex + i) % numValues, commonMin, commonMax);
+			vertices[4 + 2 * j] = x + j * w / (numValues - 1);
+			vertices[4 + 2 * j + 1] = y + h * profVariable->normBetweenValue((nextIndex + j) % numValues, commonMin, commonMax);
 		}
 	}
 }

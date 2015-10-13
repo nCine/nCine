@@ -36,17 +36,17 @@ void Material::setShaderProgram(ShaderProgramPresets preset)
 	{
 		case SPRITE_PROGRAM:
 			setShaderProgram(const_cast<GLShaderProgram *>(RenderResources::spriteShaderProgram()));
-			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), (void*)offsetof(RenderResources::VertexFormatPos2Tex2, position));
-			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), (void*)offsetof(RenderResources::VertexFormatPos2Tex2, texcoords));
+			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
+			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
 			break;
 		case TEXTNODE_PROGRAM:
 			setShaderProgram(const_cast<GLShaderProgram *>(RenderResources::textnodeShaderProgram()));
-			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), (void*)offsetof(RenderResources::VertexFormatPos2Tex2, position));
-			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), (void*)offsetof(RenderResources::VertexFormatPos2Tex2, texcoords));
+			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
+			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
 			break;
 		case COLOR_PROGRAM:
 			setShaderProgram(const_cast<GLShaderProgram *>(RenderResources::colorShaderProgram()));
-			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2), (void*)offsetof(RenderResources::VertexFormatPos2, position));
+			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2, position)));
 			break;
 	}
 }
@@ -87,7 +87,7 @@ unsigned int Material::sortKey()
 
 	if (texture_)
 	{
-		lower = texture_->glHandle();
+		lower = static_cast<unsigned char>(texture_->glHandle());
 	}
 
 	if (shaderProgram_)

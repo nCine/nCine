@@ -20,8 +20,8 @@ GlfwGfxDevice::GlfwGfxDevice(int width, int height, bool isFullScreen)
 	init(width, height, DisplayMode(), isFullScreen);
 }
 
-/// Constructor taking the resolution as a Point class
-GlfwGfxDevice::GlfwGfxDevice(Point size, bool isFullScreen)
+/// Constructor taking the resolution as a Vector2i class
+GlfwGfxDevice::GlfwGfxDevice(Vector2i size, bool isFullScreen)
 {
 	init(size.x, size.y, DisplayMode(), isFullScreen);
 }
@@ -32,8 +32,8 @@ GlfwGfxDevice::GlfwGfxDevice(int width, int height, DisplayMode mode, bool isFul
 	init(width, height, mode, isFullScreen);
 }
 
-/// Constructor taking the resolution as a Point class and a DisplayMode
-GlfwGfxDevice::GlfwGfxDevice(Point size, DisplayMode mode, bool isFullScreen)
+/// Constructor taking the resolution as a Vector2i class and a DisplayMode
+GlfwGfxDevice::GlfwGfxDevice(Vector2i size, DisplayMode mode, bool isFullScreen)
 {
 	init(size.x, size.y, mode, isFullScreen);
 }
@@ -63,7 +63,7 @@ void GlfwGfxDevice::setResolution(int width, int height)
 	}
 }
 
-void GlfwGfxDevice::setResolution(Point size)
+void GlfwGfxDevice::setResolution(Vector2i size)
 {
 	setResolution(size.x, size.y);
 }

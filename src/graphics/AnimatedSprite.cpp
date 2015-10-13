@@ -7,25 +7,25 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AnimatedSprite::AnimatedSprite(SceneNode* parent, Texture *texture)
-	: Sprite(parent, texture), anims_(4), currentAnim(-1)
+	: Sprite(parent, texture), anims_(4), currentAnim_(-1)
 {
 
 }
 
 AnimatedSprite::AnimatedSprite(Texture *texture)
-	: Sprite(texture), anims_(4), currentAnim(-1)
+	: Sprite(texture), anims_(4), currentAnim_(-1)
 {
 
 }
 
-AnimatedSprite::AnimatedSprite(SceneNode* parent, Texture *texture, int x, int y)
-	: Sprite(parent, texture, x, y), anims_(4), currentAnim(-1)
+AnimatedSprite::AnimatedSprite(SceneNode* parent, Texture *texture, float x, float y)
+	: Sprite(parent, texture, x, y), anims_(4), currentAnim_(-1)
 {
 
 }
 
-AnimatedSprite::AnimatedSprite(Texture *texture, int x, int y)
-	: Sprite(texture, x, y), anims_(4), currentAnim(-1)
+AnimatedSprite::AnimatedSprite(Texture *texture, float x, float y)
+	: Sprite(texture, x, y), anims_(4), currentAnim_(-1)
 {
 
 }
@@ -49,7 +49,7 @@ bool AnimatedSprite::isPaused() const
 
 	if (anims_.isEmpty() == false)
 	{
-		isPaused = anims_[currentAnim]->isPaused();
+		isPaused = anims_[currentAnim_]->isPaused();
 	}
 
 	return isPaused;
@@ -60,7 +60,7 @@ void AnimatedSprite::setPaused(bool isPaused)
 {
 	if (anims_.isEmpty() == false)
 	{
-		anims_[currentAnim]->setPaused(isPaused);
+		anims_[currentAnim_]->setPaused(isPaused);
 	}
 }
 
@@ -68,13 +68,13 @@ void AnimatedSprite::update(float interval)
 {
 	if (anims_.isEmpty() == false)
 	{
-		unsigned int previousFrame = anims_[currentAnim]->frame();
-		anims_[currentAnim]->updateFrame(interval);
+		unsigned int previousFrame = anims_[currentAnim_]->frame();
+		anims_[currentAnim_]->updateFrame(interval);
 
 		// Updating sprite texture rectangle only on change
-		if (previousFrame != anims_[currentAnim]->frame())
+		if (previousFrame != anims_[currentAnim_]->frame())
 		{
-			setTexRect(anims_[currentAnim]->rect());
+			setTexRect(anims_[currentAnim_]->rect());
 		}
 	}
 
@@ -87,8 +87,8 @@ void AnimatedSprite::addAnimation(RectAnimation* anim)
 	if (anim)
 	{
 		anims_.pushBack(anim);
-		currentAnim = anims_.size() - 1;
-		setTexRect(anims_[currentAnim]->rect());
+		currentAnim_ = anims_.size() - 1;
+		setTexRect(anims_[currentAnim_]->rect());
 	}
 }
 
@@ -104,26 +104,26 @@ void AnimatedSprite::setAnimation(int animNum)
 
 	if (static_cast<unsigned int>(animNum) >= anims_.size())
 	{
-		currentAnim = anims_.size() - 1;
+		currentAnim_ = anims_.size() - 1;
 	}
 	else if (animNum < 0)
 	{
-		currentAnim = 0;
+		currentAnim_ = 0;
 	}
 	else
 	{
-		currentAnim = animNum;
+		currentAnim_ = animNum;
 	}
 
-	setTexRect(anims_[currentAnim]->rect());
+	setTexRect(anims_[currentAnim_]->rect());
 }
 
 /// Sets the current animation to a specified frame number
-void AnimatedSprite::setFrame(int frameNum)
+void AnimatedSprite::setFrame(unsigned int frameNum)
 {
 	if (anims_.isEmpty() == false)
 	{
-		anims_[currentAnim]->SetFrame(frameNum);
+		anims_[currentAnim_]->SetFrame(frameNum);
 	}
 }
 

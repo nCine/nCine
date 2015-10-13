@@ -263,7 +263,7 @@ inline Matrix4x4<T> Quaternion<T>::toMatrix4x4()
 template <class T>
 inline Quaternion<T> Quaternion<T>::fromAxisAngle(T xx, T yy, T zz, T degrees)
 {
-	T radians = degrees * (M_PI / 180);
+	T radians = degrees * (static_cast<T>(M_PI) / 180);
 	T sinus = sin(radians / 2);
 
 	return Quaternion<T>(xx * sinus,

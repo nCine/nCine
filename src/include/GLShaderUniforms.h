@@ -15,7 +15,7 @@ class GLShaderUniforms
 {
   public:
 	GLShaderUniforms();
-	GLShaderUniforms(GLShaderProgram *shaderProgram);
+	explicit GLShaderUniforms(GLShaderProgram *shaderProgram);
 	void setProgram(GLShaderProgram *shaderProgram);
 
 	GLUniformCache* uniform(const char *name);

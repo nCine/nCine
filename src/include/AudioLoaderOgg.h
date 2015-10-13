@@ -15,11 +15,11 @@ namespace ncine {
 class AudioLoaderOgg : public IAudioLoader
 {
   public:
-	AudioLoaderOgg(const char *filename);
-	AudioLoaderOgg(IFile *fileHandle);
+	explicit AudioLoaderOgg(const char *filename);
+	explicit AudioLoaderOgg(IFile *fileHandle);
 	~AudioLoaderOgg();
 
-	long read(char *buffer, int bufferSize) const;
+	unsigned long int read(char *buffer, unsigned long int bufferSize) const;
 	void rewind() const;
 
   private:

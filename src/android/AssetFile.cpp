@@ -137,9 +137,9 @@ long int AssetFile::tell() const
 }
 
 
-long int AssetFile::read(void *buffer, int bytes) const
+unsigned long int AssetFile::read(void *buffer, unsigned long int bytes) const
 {
-	long int bytesRead = -1;
+	unsigned long int bytesRead = 0;
 
 	if (fileDescriptor_ >= 0)
 	{
@@ -151,7 +151,7 @@ long int AssetFile::read(void *buffer, int bytes) const
 		{
 			bytesToRead = 0;    // simulating EOF
 		}
-		else if (seekValue + bytes > startOffset_ + fileSize_)
+		else if (seekValue + static_cast<long int>(bytes) > startOffset_ + fileSize_)
 		{
 			bytesToRead = (startOffset_ + fileSize_) - seekValue;
 		}

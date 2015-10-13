@@ -10,7 +10,7 @@ namespace ncine {
 class GLTexture
 {
   public:
-	GLTexture(GLenum target_);
+	explicit GLTexture(GLenum target_);
 	~GLTexture();
 
 	inline GLuint glHandle() const { return glHandle_; }
@@ -34,7 +34,7 @@ class GLTexture
 	void texParameteri(GLenum pname, GLint param);
 
   private:
-	static const int MaxTextureUnits = 4;
+	static const unsigned int MaxTextureUnits = 4;
 	static class GLHashMap<GLTextureMappingFunc::Size, GLTextureMappingFunc> boundTextures_[MaxTextureUnits];
 	static unsigned int boundUnit_;
 

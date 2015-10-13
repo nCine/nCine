@@ -4,7 +4,7 @@
 #include <EGL/egl.h>
 
 #include "IGfxDevice.h"
-#include "Point.h"
+#include "Vector2.h"
 #include "DisplayMode.h"
 
 struct android_app;
@@ -20,7 +20,7 @@ class EglGfxDevice : public IGfxDevice
 	~EglGfxDevice();
 
 	void setResolution(int width, int height) { }
-	void setResolution(Point size) { }
+	void setResolution(Vector2i size) { }
 
 	void toggleFullScreen() { }
 

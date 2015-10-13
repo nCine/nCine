@@ -29,8 +29,8 @@ class MyEventHandler
 #endif
 
   private:
-	static const int NumTextures = 4;
-	static const int NumSprites = 8;
+	static const unsigned int NumTextures = 4;
+	static const unsigned int NumSprites = 8;
 
 	nc::StaticArray<float, NumTextures> angles_;
 	nc::StaticArray<nc::Texture*, NumTextures> textures_;

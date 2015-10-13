@@ -24,7 +24,7 @@ void MyEventHandler::onInit()
 
 	pause_ = false;
 	angle_ = 0.0f;
-	nc::StaticArray<nc::Rect, NumTextures> texRects;
+	nc::StaticArray<nc::Recti, NumTextures> texRects;
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
@@ -33,18 +33,18 @@ void MyEventHandler::onInit()
 #else
 	megaTexture_ = new nc::Texture((nc::IFile::dataPath() + "textures/megatexture_256.png").data());
 #endif
-	texRects[0] = nc::Rect(0, 0, 145, 121);
-	texRects[1] = nc::Rect(256 - 100, 0, 100, 100);
-	texRects[2] = nc::Rect(0, 256 - 96, 96, 96);
-	texRects[3] = nc::Rect(256 - 96, 256 - 96, 96, 96);
+	texRects[0] = nc::Recti(0, 0, 145, 121);
+	texRects[1] = nc::Recti(256 - 100, 0, 100, 100);
+	texRects[2] = nc::Recti(0, 256 - 96, 96, 96);
+	texRects[3] = nc::Recti(256 - 96, 256 - 96, 96, 96);
 
 	dummy_ = new nc::SceneNode(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	dummy_->setScale(0.75f);
 
-	int index = 0;
-	for (int i = -NumRowSprites * 0.5f; i < NumRowSprites * 0.5f; i++)
+	unsigned int index = 0;
+	for (int i = static_cast<int>(-NumRowSprites * 0.5f); i < static_cast<int>(NumRowSprites * 0.5f); i++)
 	{
-		for (int j = -NumColSprites * 0.5f; j < NumColSprites * 0.5f; j++)
+		for (int j = static_cast<int>(-NumColSprites * 0.5f); j < static_cast<int>(NumColSprites * 0.5f); j++)
 		{
 			sprites_[index] = new nc::Sprite(dummy_, megaTexture_, i * 100.0f, j * 100.0f);
 			sprites_[index]->setTexRect(texRects[index % NumTextures]);
@@ -68,7 +68,7 @@ void MyEventHandler::onFrameStart()
 	dummy_->setRotation(angle_ * 8.0f);
 	dummy_->setScale(((sine * 0.15f) + 1.0f) * 0.5f);
 
-	for (int i = 0; i < NumColSprites * NumRowSprites; i++)
+	for (unsigned int i = 0; i < NumColSprites * NumRowSprites; i++)
 	{
 		sprites_[i]->setRotation(-angle_ * 8.0f);
 	}

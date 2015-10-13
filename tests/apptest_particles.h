@@ -37,7 +37,7 @@ class MyEventHandler
 #endif
 
   private:
-	static const int NumParticles = 50;
+	static const unsigned int NumParticles = 50;
 
 	nc::Texture *texture_;
 	nc::ParticleSystem *particleSystem_;

@@ -8,7 +8,7 @@
 namespace ncine {
 
 template <class K, class T, class HashFunc, bool IsConst> class HashMapIterator;
-template <class K, class T, class HashFunc, bool IsConst> class HelperTraits;
+template <class K, class T, class HashFunc, bool IsConst> struct HelperTraits;
 class String;
 
 template <class K, class T>
@@ -112,8 +112,8 @@ class HashMap
 
 	friend class HashMapIterator<K, T, HashFunc, false>;
 	friend class HashMapIterator<K, T, HashFunc, true>;
-	friend class HelperTraits<K, T, HashFunc, false>;
-	friend class HelperTraits<K, T, HashFunc, true>;
+	friend struct HelperTraits<K, T, HashFunc, false>;
+	friend struct HelperTraits<K, T, HashFunc, true>;
 };
 
 template <class K, class T, class HashFunc>

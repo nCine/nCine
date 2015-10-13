@@ -13,7 +13,7 @@ class GLUniformCache
 {
   public:
 	GLUniformCache();
-	GLUniformCache(const GLUniform *uniform);
+	explicit GLUniformCache(const GLUniform *uniform);
 
 	inline void setDataPointer(GLvoid *dataPointer) { dataPointer_ = dataPointer; }
 	void setFloatVector(const GLfloat *vec);

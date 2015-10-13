@@ -16,7 +16,7 @@ class DLL_PUBLIC AudioBuffer : public Object
   public:
 	AudioBuffer();
 	// A constructor creating a buffer from a file
-	AudioBuffer(const char *filename);
+	explicit AudioBuffer(const char *filename);
 	virtual ~AudioBuffer();
 
 	/// Returns the OpenAL buffer id

@@ -20,8 +20,8 @@ class StaticArray
 
 	/// Constructs an empty array with fixed capacity
 	explicit StaticArray() : size_(0), capacity_(C) { }
-	/// Constructs an array the option for it to have the size as its capacity
-	StaticArray(bool extend)
+	/// Constructs an array with the option for it to have the size as its capacity
+	explicit StaticArray(bool extend)
 		: size_(0), capacity_(C)
 	{
 		if (extend)

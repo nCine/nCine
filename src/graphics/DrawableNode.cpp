@@ -44,22 +44,22 @@ void DrawableNode::draw(RenderQueue& renderQueue)
 }
 
 /// Returns the node rendering priority
-int DrawableNode::priority() const
+unsigned int DrawableNode::priority() const
 {
 	return renderCommand_->priority();
 }
 
 
 /// Sets the node rendering priority
-void DrawableNode::setPriority(int priority)
+void DrawableNode::setPriority(unsigned int priority)
 {
 	renderCommand_->setPriority(priority);
 }
 
 /// Increases or decreases the node rendering priority by adding a certain amount
-int DrawableNode::addPriority(int amount)
+unsigned int DrawableNode::addPriority(int amount)
 {
-	int priority = renderCommand_->priority() + amount;
+	unsigned int priority = renderCommand_->priority() + amount;
 	renderCommand_->setPriority(priority);
 
 	return priority;

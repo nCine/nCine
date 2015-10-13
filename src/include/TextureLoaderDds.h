@@ -10,8 +10,8 @@ namespace ncine {
 class TextureLoaderDds : public ITextureLoader
 {
   public:
-	TextureLoaderDds(const char *filename);
-	TextureLoaderDds(IFile *fileHandle);
+	explicit TextureLoaderDds(const char *filename);
+	explicit TextureLoaderDds(IFile *fileHandle);
 
   private:
 	/// Header for the DDS pixel format

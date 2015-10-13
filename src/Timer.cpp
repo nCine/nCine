@@ -71,7 +71,7 @@ void Timer::sleep(float seconds)
 void Timer::init()
 {
 #ifdef _WIN32
-	if (QueryPerformanceFrequency((LARGE_INTEGER *) &frequency_))
+	if (QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER *>(&frequency_)))
 	{
 		hasPerfCounter_ = true;
 	}
@@ -115,7 +115,7 @@ unsigned long long int Timer::counter()
 #ifdef _WIN32
 	if (hasPerfCounter_)
 	{
-		QueryPerformanceCounter((LARGE_INTEGER *) &counter);
+		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER *>(&counter));
 	}
 	else
 	{

@@ -161,7 +161,7 @@ void Application::step()
 
 		textLines_->setString(textString_);
 		textLines_->setAlignment(TextNode::ALIGN_RIGHT);
-		textLines_->setPosition((width() - textLines_->width()), height());
+		textLines_->setPosition((static_cast<float>(width()) - textLines_->width()), static_cast<float>(height()));
 	}
 
 	theServiceLocator().audioDevice().updatePlayers();
@@ -293,7 +293,7 @@ void Application::initCommon()
 
 		if (appCfg_.withProfilerGraphs_)
 		{
-			profilePlotter_ = new StackedBarPlotter(rootNode_, Rect(width() * 0.1f, height() * 0.1f, width() * 0.8f, height() * 0.15f));
+			profilePlotter_ = new StackedBarPlotter(rootNode_, Rectf(width() * 0.1f, height() * 0.1f, width() * 0.8f, height() * 0.15f));
 			profilePlotter_->setBackgroundColor(Color(0.35f, 0.35f, 0.45f, 0.5f));
 			profilePlotter_->addVariable(50, 0.2f);
 			profilePlotter_->variable(0).setGraphColor(Color(0.8f, 0.0f, 0.0f));
@@ -328,7 +328,7 @@ void Application::initCommon()
 			{
 				font_ = new Font(fontTexFilePath.data(), fontFntFilePath.data());
 				textLines_ = new TextNode(rootNode_, font_);
-				textLines_->setPosition(0.0f, height());
+				textLines_->setPosition(0.0f, static_cast<float>(height()));
 			}
 		}
 	}
@@ -340,7 +340,7 @@ void Application::initCommon()
 
 	// HACK: Init of the random seed
 	// In the future there could be a random generator service
-	srand(time(NULL));
+	srand(static_cast<unsigned int>(time(NULL)));
 }
 
 }

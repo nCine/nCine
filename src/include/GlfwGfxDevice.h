@@ -7,7 +7,7 @@
 #include <GLFW/glfw3.h>
 
 #include "IGfxDevice.h"
-#include "Point.h"
+#include "Vector2.h"
 #include "DisplayMode.h"
 
 namespace ncine {
@@ -18,16 +18,16 @@ class GlfwGfxDevice : public IGfxDevice
   public:
 	// Constructor taking the resolution as two integer
 	GlfwGfxDevice(int width, int height, bool isFullScreen_);
-	// Constructor taking the resolution as a Point class
-	explicit GlfwGfxDevice(Point size, bool isFullScreen_);
+	// Constructor taking the resolution as a Vector2i class
+	explicit GlfwGfxDevice(Vector2i size, bool isFullScreen_);
 	// Constructor taking the resolution as two integer and a DisplayMode
 	GlfwGfxDevice(int width, int height, DisplayMode mode, bool isFullScreen_);
-	// Constructor taking the resolution as a Point class and a DisplayMode
-	GlfwGfxDevice(Point size, DisplayMode mode, bool isFullScreen_);
+	// Constructor taking the resolution as a Vector2i class and a DisplayMode
+	GlfwGfxDevice(Vector2i size, DisplayMode mode, bool isFullScreen_);
 	~GlfwGfxDevice();
 
 	void setResolution(int width, int height);
-	void setResolution(Point size);
+	void setResolution(Vector2i size);
 
 	void toggleFullScreen();
 

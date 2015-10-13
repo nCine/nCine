@@ -20,7 +20,7 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	};
 
 	DrawableNode(SceneNode* parent, float x, float y);
-	DrawableNode(SceneNode* parent);
+	explicit DrawableNode(SceneNode* parent);
 	DrawableNode();
 	virtual ~DrawableNode();
 
@@ -28,11 +28,11 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	virtual void draw(RenderQueue& renderQueue);
 
 	// Returns the node rendering priority
-	int priority() const;
+	unsigned int priority() const;
 	// Sets the node rendering priority
-	void setPriority(int priority);
+	void setPriority(unsigned int priority);
 	// Increases or decreases the node rendering priority by adding a certain amount
-	int addPriority(int amount);
+	unsigned int addPriority(int amount);
 
   protected:
 	/// The render command class associated with this node

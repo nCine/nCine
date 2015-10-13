@@ -43,7 +43,7 @@ class DLL_PUBLIC AudioStream
 	IAudioLoader *audioLoader_;
 
 	// Constructor creating an audio stream from an audio file
-	AudioStream(const char *filename);
+	explicit AudioStream(const char *filename);
 	/// Private copy constructor
 	AudioStream(const AudioStream&);
 	/// Private assignment operator

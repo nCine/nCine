@@ -18,34 +18,31 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	Sprite(Texture *texture, float x, float y);
 
 	/// Returns sprite width
-	inline int width() const { return width_ * scaleFactor_; }
+	inline float width() const { return width_ * scaleFactor_; }
 	/// Returns sprite height
-	inline int height() const { return height_ * scaleFactor_; }
+	inline float height() const { return height_ * scaleFactor_; }
 	/// Returns sprite size
-	inline Point size() const	{ return Point(width_ * scaleFactor_, height_ * scaleFactor_); }
+	inline Vector2f size() const { return Vector2f(width(), height()); }
 	// Returns sprite rectangle
-	Rect rect() const;
+	Rectf rect() const;
 
 	/// Sets sprite width
-	inline void setWidth(int width) { width_ = width; }
+	inline void setWidth(float width) { width_ = width; }
 	/// Sets sprite height
-	inline void setHeight(int height) { height_ = height; }
+	inline void setHeight(float height) { height_ = height; }
 	/// Sets sprite size
-	inline void setSize(const Point &size)
+	inline void setSize(const Vector2f &size)
 	{
 		width_ = size.x;
 		height_ = size.y;
 	}
 
 	/// Returns sprite absolute width
-	inline int absWidth() const { return width_ * absScaleFactor_; }
+	inline float absWidth() const { return width_ * absScaleFactor_; }
 	/// Returns sprite absolute height
-	inline int absHeight() const { return height_ * absScaleFactor_; }
+	inline float absHeight() const { return height_ * absScaleFactor_; }
 	/// Returns sprite absolute size
-	inline Point absSize() const
-	{
-		return Point(width_ * absScaleFactor_, height_ * absScaleFactor_);
-	}
+	inline Vector2f absSize() const { return Vector2f(absWidth(), absHeight()); }
 
 	/// Gets the texture object
 	inline const Texture* texture() const { return texture_; }
@@ -53,9 +50,9 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	inline void setTexture(Texture *texture) { texture_ = texture; }
 
 	/// Gets the texture source rectangle for blitting
-	inline Rect texRect() const { return texRect_; }
+	inline Recti texRect() const { return texRect_; }
 	// Ses the texture source rectangle for blitting
-	void setTexRect(const Rect& rect);
+	void setTexRect(const Recti& rect);
 
 	// Flips the texture rect along the X coordinate
 	void flipX();
@@ -68,11 +65,11 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	/// The sprite texture
 	Texture *texture_;
 	/// Used as source rectangle by the sprite batch class
-	Rect texRect_;
+	Recti texRect_;
 	/// Sprite width in pixel
-	int width_;
+	float width_;
 	/// Sprite height in pixel
-	int height_;
+	float height_;
 
 	void init();
 	virtual void updateRenderCommand();
@@ -81,19 +78,19 @@ class DLL_PUBLIC Sprite : public DrawableNode
 };
 
 /// Returns sprite rectangle
-inline Rect Sprite::rect() const
+inline Rectf Sprite::rect() const
 {
 	float halfAbsW = width_ * absScaleFactor_ * 0.5f;
 	float halfAbsH = height_ * absScaleFactor_ * 0.5f;
-	return Rect(x - halfAbsW, y - halfAbsH, halfAbsW * 2.0f, halfAbsH * 2.0f);
+	return Rectf(x - halfAbsW, y - halfAbsH, halfAbsW * 2.0f, halfAbsH * 2.0f);
 }
 
 /// Sets the texture source rectangle for blitting
-inline void Sprite::setTexRect(const Rect& rect)
+inline void Sprite::setTexRect(const Recti& rect)
 {
 	texRect_ = rect;
-	height_ = rect.h;
-	width_ = rect.w;
+	height_ = static_cast<float>(rect.h);
+	width_ = static_cast<float>(rect.w);
 }
 
 /// Flips the texture rect along the X coordinate

@@ -22,7 +22,7 @@ class LineVariable : public PlottingVariable
 class LinePlotter : public ProfilePlotter
 {
   public:
-	LinePlotter(SceneNode* parent, Rect rect) : ProfilePlotter(parent, rect) { }
+	LinePlotter(SceneNode* parent, Rectf rect) : ProfilePlotter(parent, rect) { }
 
 	virtual unsigned int addVariable(unsigned int numValues, float rejectDelay);
 
@@ -30,7 +30,7 @@ class LinePlotter : public ProfilePlotter
 
   private:
 	// Fill the buffer of every line variable with vertices
-	void updateAllVertices(int x, int y, int w, int h);
+	void updateAllVertices(float x, float y, float w, float h);
 };
 
 }

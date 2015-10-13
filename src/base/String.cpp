@@ -35,7 +35,7 @@ String::String(unsigned int capacity)
 String::String(const char *cString)
 	: array_(NULL), length_(0), capacity_(0)
 {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 	capacity_ = static_cast<unsigned int>(strnlen_s(cString, MaxCStringLength)) + 1;
 #else
 	capacity_ = static_cast<unsigned int>(strnlen(cString, MaxCStringLength)) + 1;
@@ -43,7 +43,7 @@ String::String(const char *cString)
 	length_ = capacity_ - 1;
 	array_ = new char[capacity_];
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 	strncpy_s(array_, capacity_, cString, length_);
 #else
 	strncpy(array_, cString, length_);
@@ -62,7 +62,7 @@ String::String(const String& other)
 {
 	array_ = new char[capacity_];
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 	strncpy_s(array_, capacity_, other.array_, length_);
 #else
 	strncpy(array_, other.array_, length_);
@@ -92,7 +92,7 @@ String& String::operator=(const String& other)
 /// Assigns a constant C string to the string object
 String& String::operator=(const char *cString)
 {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 	length_ = static_cast<unsigned int>(strnlen_s(cString, capacity_));
 	strncpy_s(array_, capacity_, cString, length_);
 #else
@@ -121,7 +121,7 @@ unsigned int String::copy(const String& source, unsigned int srcChar, unsigned i
 
 	if (charsToCopy > 0)
 	{
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 		strncpy_s(destStart, capacity_ - clampedDestChar, srcStart, charsToCopy);
 #else
 		strncpy(destStart, srcStart, charsToCopy);
@@ -224,7 +224,7 @@ String& String::format(const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 	int formattedLength = vsnprintf_s(array_, capacity_, capacity_, fmt, args);
 #else
 	int formattedLength = vsnprintf(array_, capacity_, fmt, args);
@@ -245,7 +245,7 @@ String& String::formatAppend(const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 	int formattedLength = vsnprintf_s(array_ + length_, capacity_ - length_, capacity_ - length_, fmt, args);
 #else
 	int formattedLength = vsnprintf(array_ + length_, capacity_ - length_, fmt, args);
@@ -267,7 +267,7 @@ String& String::operator+=(const String& other)
 	unsigned int availCapacity = capacity_ - length_;
 	unsigned int minLength = min(other.length_, availCapacity);
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 	strncpy_s(array_ + length_, capacity_ - length_, other.array_, minLength);
 #else
 	strncpy(array_ + length_, other.array_, minLength);
@@ -283,7 +283,7 @@ String& String::operator+=(const char *cString)
 {
 	unsigned int availCapacity = capacity_ - length_;
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 	unsigned int cLength = static_cast<unsigned int>(strnlen_s(cString, availCapacity));
 	strncpy_s(array_ + length_, capacity_ - length_, cString, cLength);
 #else

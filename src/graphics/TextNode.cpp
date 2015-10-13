@@ -217,8 +217,8 @@ float TextNode::currentAbsScale() const
 /// Fills the batch draw command with data from a glyph
 void TextNode::processGlyph(const FontGlyph* glyph)
 {
-	Point size = glyph->size();
-	Point offset = glyph->offset();
+	Vector2i size = glyph->size();
+	Vector2i offset = glyph->offset();
 
 	float leftPos = xAdvance_ + offset.x;
 	float rightPos = leftPos + size.x;
@@ -226,8 +226,8 @@ void TextNode::processGlyph(const FontGlyph* glyph)
 	float bottomPos = topPos - size.y;
 
 
-	Point texSize = font_->texture()->size();
-	Rect texRect = glyph->texRect();
+	Vector2i texSize = font_->texture()->size();
+	Recti texRect = glyph->texRect();
 
 	float leftCoord = float(texRect.x) / float(texSize.x);
 	float rightCoord = float(texRect.x + texRect.w) / float(texSize.x);

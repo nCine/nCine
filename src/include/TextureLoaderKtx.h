@@ -10,8 +10,8 @@ namespace ncine {
 class TextureLoaderKtx : public ITextureLoader
 {
   public:
-	TextureLoaderKtx(const char *filename);
-	TextureLoaderKtx(IFile *fileHandle);
+	explicit TextureLoaderKtx(const char *filename);
+	explicit TextureLoaderKtx(IFile *fileHandle);
 
   private:
 	static const int KtxIdentifierLength = 12;

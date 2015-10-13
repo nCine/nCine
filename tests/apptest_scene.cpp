@@ -21,7 +21,7 @@ void MyEventHandler::onInit()
 {
 	nc::IInputManager::setHandler(this);
 
-	for (int i = 0; i < NumTextures; i++)
+	for (unsigned int i = 0; i < NumTextures; i++)
 	{
 		angles_[i] = 0.0f;
 	}
@@ -41,11 +41,11 @@ void MyEventHandler::onInit()
 #endif
 
 	sprites_[0] = new nc::Sprite(textures_[0], 0, 0);
-	sprites_[0]->setTexRect(nc::Rect(40, 0, sprites_[0]->width() - 80, sprites_[0]->height() - 30));
+	sprites_[0]->setTexRect(nc::Recti(40, 0, static_cast<int>(sprites_[0]->width()) - 80, static_cast<int>(sprites_[0]->height()) - 30));
 	sprites_[0]->setScale(0.75f);
 	rootNode.addChildNode(sprites_[0]);
 
-	for (int i = 1; i < NumSprites; i++)
+	for (unsigned int i = 1; i < NumSprites; i++)
 	{
 		sprites_[i] = new nc::Sprite(sprites_[i - 1], textures_[i % NumTextures], 0, 0);
 		sprites_[i]->setScale(0.5f);
@@ -57,7 +57,7 @@ void MyEventHandler::onFrameStart()
 	float sine[NumTextures];
 	float cosine[NumTextures];
 
-	for (int i = 0; i < NumTextures; i++)
+	for (unsigned int i = 0; i < NumTextures; i++)
 	{
 		angles_[i] += (250 + 25 * i) * nc::theApplication().interval();
 		sine[i] = sinf(angles_[i] * 0.01f);
@@ -67,7 +67,7 @@ void MyEventHandler::onFrameStart()
 	sprites_[0]->x = nc::theApplication().width() * 0.5f + sine[0] * 100.0f;
 	sprites_[0]->y = nc::theApplication().height() * 0.5f + cosine[0] * 50.0f;
 
-	for (int i = 1; i < NumSprites; i++)
+	for (unsigned int i = 1; i < NumSprites; i++)
 	{
 		sprites_[i]->x = sine[i % NumTextures] * 50;
 		sprites_[i]->y = cosine[i % NumTextures] * 50;
@@ -77,7 +77,7 @@ void MyEventHandler::onFrameStart()
 void MyEventHandler::onShutdown()
 {
 	delete sprites_[0]; // and all its children (the remaining sprites)
-	for (int i = 0; i < NumTextures; i++)
+	for (unsigned int i = 0; i < NumTextures; i++)
 	{
 		delete textures_[i];
 	}

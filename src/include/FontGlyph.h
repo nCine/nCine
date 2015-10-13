@@ -2,7 +2,6 @@
 #define CLASS_NCINE_FONTGLYPH
 
 #include "Array.h"
-#include "Point.h"
 #include "Rect.h"
 
 namespace ncine {
@@ -20,11 +19,11 @@ class FontGlyph
 			 int xOffset, int yOffset, unsigned int xAdvance);
 
 	/// Return the size in pixels of a glyph
-	inline Point size() const { return Point(width_, height_); }
+	inline Vector2i size() const { return Vector2i(width_, height_); }
 	/// Return the texture rectangle of a glyph
-	inline Rect texRect() const { return Rect(x_, y_, width_, height_); }
+	inline Recti texRect() const { return Recti(x_, y_, width_, height_); }
 	/// Return the X and Y offset of a glyph
-	inline Point offset() const { return Point(xOffset_, yOffset_); }
+	inline Vector2i offset() const { return Vector2i(xOffset_, yOffset_); }
 	/// Return the X offset to advance in order to start rendering the next glyph
 	inline unsigned int xAdvance() const { return xAdvance_; }
 

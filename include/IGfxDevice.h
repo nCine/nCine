@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_IGFXDEVICE
 #define CLASS_NCINE_IGFXDEVICE
 
-#include "Point.h"
+#include "Vector2.h"
 #include "DisplayMode.h"
 
 namespace ncine {
@@ -15,7 +15,7 @@ class DLL_PUBLIC IGfxDevice
 	/// Sets screen resolution with two integers
 	virtual void setResolution(int width, int height) = 0;
 	/// Sets screen resolution with the Size class
-	virtual void setResolution(Point size) = 0;
+	virtual void setResolution(Vector2i size) = 0;
 
 	/// Toggles between fullscreen and windowed mode
 	virtual void toggleFullScreen() = 0;
@@ -24,7 +24,7 @@ class DLL_PUBLIC IGfxDevice
 	virtual void setWindowTitle(const char *windowTitle) = 0;
 
 	/// Returns device resolution
-	inline Point resolution() const { return Point(width_, height_); }
+	inline Vector2i resolution() const { return Vector2i(width_, height_); }
 	/// Returns device width
 	inline int width() const { return width_; }
 	/// Returns device height

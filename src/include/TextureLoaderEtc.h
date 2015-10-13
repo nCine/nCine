@@ -10,8 +10,8 @@ namespace ncine {
 class TextureLoaderEtc : public ITextureLoader
 {
   public:
-	TextureLoaderEtc(const char *filename);
-	TextureLoaderEtc(IFile *fileHandle);
+	explicit TextureLoaderEtc(const char *filename);
+	explicit TextureLoaderEtc(IFile *fileHandle);
 	~TextureLoaderEtc() { }
 
   private:

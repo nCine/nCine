@@ -29,7 +29,7 @@ class MyEventHandler
 #endif
 
   private:
-	static const int NumSprites = 50;
+	static const unsigned int NumSprites = 50;
 
 	nc::SceneNode *dummy_;
 	nc::Texture *opaqueTexture_;

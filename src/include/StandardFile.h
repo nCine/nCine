@@ -10,8 +10,8 @@ class StandardFile: public IFile
 {
   public:
 	/// Constructs a standard file object
-	/*! \param pFilename File name including its path */
-	StandardFile(const char *filename) : IFile(filename) { type_ = STANDARD_TYPE; }
+	/*! \param filename File name including its path */
+	explicit StandardFile(const char *filename) : IFile(filename) { type_ = STANDARD_TYPE; }
 	~StandardFile();
 
 	/// Static method to return class type
@@ -21,7 +21,7 @@ class StandardFile: public IFile
 	void close();
 	long int seek(long int offset, int whence) const;
 	long int tell() const;
-	long int read(void *buffer, int bytes) const;
+	unsigned long int read(void *buffer, unsigned long int bytes) const;
 
   private:
 	/// Private copy constructor

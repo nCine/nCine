@@ -487,7 +487,7 @@ int AndroidInputManager::findJoyId(int deviceId)
 		}
 	}
 
-	if (joyId >= -1 && joystickStates_[joyId].deviceId_ != deviceId)
+	if (joyId > -1 && joystickStates_[joyId].deviceId_ != deviceId)
 	{
 		deviceInfo(deviceId, joyId);
 		LOGI_X("Joystick %d (device %d) \"%s\" has been connected - %d axes, %d buttons",

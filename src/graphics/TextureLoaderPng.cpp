@@ -104,7 +104,7 @@ void TextureLoaderPng::init()
 	}
 
 	// Row size in bytes
-	const png_uint_32 bytesPerRow = png_get_rowbytes(pngPtr, infoPtr);
+	const png_size_t bytesPerRow = png_get_rowbytes(pngPtr, infoPtr);
 
 	pixels_ = new unsigned char[bytesPerRow * height_];
 
@@ -126,10 +126,10 @@ void TextureLoaderPng::readFromFileHandle(png_structp pngPtr, png_bytep outBytes
 {
 	IFile *fileHandle = reinterpret_cast<IFile *>(png_get_io_ptr(pngPtr));
 
-	long int bytesRead = fileHandle->read(outBytes, byteCountToRead);
-	if (bytesRead > 0 && static_cast<unsigned long int>(bytesRead) != byteCountToRead)
+	unsigned long int bytesRead = fileHandle->read(outBytes, static_cast<unsigned long int>(byteCountToRead));
+	if (bytesRead > 0 && bytesRead != byteCountToRead)
 	{
-		LOGW_X("Read %l bytes instead of %u: %d", bytesRead, byteCountToRead);
+		LOGW_X("Read %ul bytes instead of %ul", bytesRead, byteCountToRead);
 	}
 }
 

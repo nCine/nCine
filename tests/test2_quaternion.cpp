@@ -5,15 +5,6 @@
 
 namespace nc = ncine;
 
-namespace {
-
-inline void printQuaternion(const nc::Quaternionf& quat)
-{
-	printf("<%.2f, %.2f, %.2f, %.2f>\n", quat.x, quat.y, quat.z, quat.w);
-}
-
-}
-
 int main()
 {
 	nc::Quaternionf q1(nc::Quaternionf::fromAxisAngle(nc::Vector3f::XAxis, 60));

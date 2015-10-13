@@ -12,15 +12,15 @@ int main(int argc, char **argv)
 
 	printf("Number of buckets: %d\n", hashmap.bucketAmount());
 	printf("Inserting some elements\n");
-	for (int i = 0; i < 10; i++)
+	for (unsigned int i = 0; i < 10; i++)
 	{
 		hashmap[i] = i + 10;
 	}
 
 	printf("Retrieving the elements\n");
-	for (int i = 0; i < 10; i++)
+	for (unsigned int i = 0; i < 10; i++)
 	{
-		printf("key: %d, value: %d\n", i, hashmap[i]);
+		printf("key: %u, value: %d\n", i, hashmap[i]);
 	}
 
 	printf("Removing a couple elements\n");

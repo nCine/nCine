@@ -63,6 +63,7 @@ class Vector3
 };
 
 typedef Vector3<float> Vector3f;
+typedef Vector3<int> Vector3i;
 
 template <class T>
 inline void Vector3<T>::set(T xx, T yy, T zz)

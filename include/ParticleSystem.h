@@ -4,6 +4,7 @@
 #include <ctime>
 #include <cstdlib>
 #include "Array.h"
+#include "Rect.h"
 #include "SceneNode.h"
 #include "ParticleAffectors.h"
 
@@ -11,14 +12,13 @@ namespace ncine {
 
 class Texture;
 class Particle;
-class Rect;
 
 /// The class representing a particle system
 class DLL_PUBLIC ParticleSystem : public SceneNode
 {
   public:
 	// Constructs a particle system made of the specified maximum amount of particles
-	ParticleSystem(SceneNode* parent, unsigned int count, Texture *texture, Rect texRect);
+	ParticleSystem(SceneNode* parent, unsigned int count, Texture *texture, Recti texRect);
 	~ParticleSystem();
 
 	/// Adds a particle affector

@@ -17,8 +17,8 @@ SdlGfxDevice::SdlGfxDevice(int width, int height, bool isFullScreen)
 	init(width, height, DisplayMode(), isFullScreen);
 }
 
-/// Constructor taking the resolution as a Point class
-SdlGfxDevice::SdlGfxDevice(Point size, bool isFullScreen_)
+/// Constructor taking the resolution as a Vector2i class
+SdlGfxDevice::SdlGfxDevice(Vector2i size, bool isFullScreen_)
 {
 	init(size.x, size.y, DisplayMode(), isFullScreen_);
 }
@@ -29,8 +29,8 @@ SdlGfxDevice::SdlGfxDevice(int width, int height, DisplayMode mode, bool isFullS
 	init(width, height, mode, isFullScreen);
 }
 
-/// Constructor taking the resolution as a Point class and a DisplayMode
-SdlGfxDevice::SdlGfxDevice(Point size, DisplayMode mode, bool isFullScreen)
+/// Constructor taking the resolution as a Vector2i class and a DisplayMode
+SdlGfxDevice::SdlGfxDevice(Vector2i size, DisplayMode mode, bool isFullScreen)
 {
 	init(size.x, size.y, mode, isFullScreen);
 }
@@ -51,7 +51,7 @@ void SdlGfxDevice::setResolution(int width, int height)
 	}
 }
 
-void SdlGfxDevice::setResolution(Point size)
+void SdlGfxDevice::setResolution(Vector2i size)
 {
 	// change resolution only in the case it really changes
 	if (size.x != width_ || size.y != height_)

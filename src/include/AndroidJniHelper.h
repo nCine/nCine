@@ -37,7 +37,7 @@ class AndroidJniClass
 {
   public:
 	AndroidJniClass() :  javaObject_(NULL) { }
-	AndroidJniClass(jobject javaObject) : javaObject_(javaObject) { }
+	explicit AndroidJniClass(jobject javaObject) : javaObject_(javaObject) { }
 	virtual ~AndroidJniClass()
 	{
 		if (javaObject_)
@@ -71,14 +71,14 @@ class AndroidJniClass_MotionRange : public AndroidJniClass
 	static jclass javaClass_;
 
   public:
-	AndroidJniClass_MotionRange(jobject javaObject);
+	explicit AndroidJniClass_MotionRange(jobject javaObject);
 };
 
 class AndroidJniClass_InputDevice : public AndroidJniClass
 {
   public:
 	static void init();
-	AndroidJniClass_InputDevice(jobject javaObject)
+	explicit AndroidJniClass_InputDevice(jobject javaObject)
 		: AndroidJniClass(javaObject) { }
 	static AndroidJniClass_InputDevice getDevice(int deviceId);
 	static int getDeviceIds(int *destination, int maxSize);
@@ -101,7 +101,7 @@ class AndroidJniClass_KeyCharacterMap : public AndroidJniClass
 {
   public:
 	static void init();
-	AndroidJniClass_KeyCharacterMap(jobject javaObject)
+	explicit AndroidJniClass_KeyCharacterMap(jobject javaObject)
 		: AndroidJniClass(javaObject) { }
 	static bool deviceHasKey(int button);
 

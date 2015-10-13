@@ -1,62 +1,69 @@
 #ifndef CLASS_NCINE_RECT
 #define CLASS_NCINE_RECT
 
-#include "Point.h"
+#include "Vector2.h"
 
 namespace ncine {
 
 /// A rectangle in a two dimensional space
-class DLL_PUBLIC Rect
+template <class T>
+class Rect
 {
   public:
 	/// Top-left X coordinate of as a public property
-	int x;
+	T x;
 	/// Top-left Y coordinate as a public property
-	int y;
+	T y;
 	/// Width as a public property
-	int w;
+	T w;
 	/// Height as a public property
-	int h;
+	T h;
 
 	/// Default constructor, all zeros
 	Rect() : x(0), y(0), w(0), h(0) { }
 	/// Constructs from elements
-	Rect(int const xx, int const yy, int const ww, int const hh)
+	Rect(T xx, T yy, T ww, T hh)
 		: x(xx), y(yy), w(ww), h(hh) { }
 	/// Constructs from base classes
-	Rect(const Point &p1, const Point &p2)
+	Rect(const Vector2<T>& p1, const Vector2<T>& p2)
 		: x(p1.x), y(p1.y), w(p2.x), h(p2.y) { }
 
 	// Creates a rect from center and size
-	static Rect fromCenterAndSize(const Point &center, const Point &size);
+	static Rect fromCenterAndSize(const Vector2<T>& center, const Vector2<T>& size);
 
 	// Calculates the center of the rect
-	Point center() const;
+	Vector2<T> center() const;
 	// Sets rect elements
-	void set(int const xx, int const yy, int const ww, int const hh);
+	void set(T xx, T yy, T ww, T hh);
 	// Retains size but move to another position
-	void setCenter(const Point& center);
+	void setCenter(const Vector2<T>& center);
 
 	/// Eqality operators
 	bool operator==(const Rect& rect) const;
 };
 
+typedef Rect<float> Rectf;
+typedef Rect<int> Recti;
+
 /// Creates a rect from center and size
-inline Rect Rect::fromCenterAndSize(const Point &center, const Point &size)
+template <class T>
+inline Rect<T> Rect<T>::fromCenterAndSize(const Vector2<T>& center, const Vector2<T>& size)
 {
-	return Rect(center.x - static_cast<int>(size.x * 0.5f),
-				  center.y - static_cast<int>(size.y * 0.5f),
-				  size.x, size.y);
+	return Rect(center.x - static_cast<T>(size.x * 0.5f),
+				center.y - static_cast<T>(size.y * 0.5f),
+				size.x, size.y);
 }
 
 /// Calculates the center of the rect
-inline Point Rect::center() const
+template <class T>
+inline Vector2<T> Rect<T>::center() const
 {
-	return Point(x + static_cast<int>(w * 0.5f), y + static_cast<int>(h * 0.5f));
+	return Vector2<T>(x + static_cast<T>(w * 0.5f), y + static_cast<T>(h * 0.5f));
 }
 
 /// Sets rect elements
-inline void Rect::set(int const xx, int const yy, int const ww, int const hh)
+template <class T>
+inline void Rect<T>::set(T xx, T yy, T ww, T hh)
 {
 	x = xx;
 	y = yy;
@@ -65,14 +72,16 @@ inline void Rect::set(int const xx, int const yy, int const ww, int const hh)
 }
 
 /// Retains size but move to another position
-inline void Rect::setCenter(const Point &center)
+template <class T>
+inline void Rect<T>::setCenter(const Vector2<T>& center)
 {
-	x = center.x - static_cast<int>(w * 0.5f);
-	y = center.y - static_cast<int>(h * 0.5f);
+	x = center.x - static_cast<T>(w * 0.5f);
+	y = center.y - static_cast<T>(h * 0.5f);
 }
 
 /// Equality operators
-inline bool Rect::operator==(const Rect &rect) const
+template <class T>
+inline bool Rect<T>::operator==(const Rect &rect) const
 {
 	return (x == rect.x && y == rect.y &&
 			w == rect.w && h == rect.h);

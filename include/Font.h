@@ -2,7 +2,7 @@
 #define CLASS_NCINE_FONT
 
 #include "IFile.h"
-#include "Point.h"
+#include "Vector2.h"
 
 namespace ncine {
 
@@ -27,7 +27,7 @@ class DLL_PUBLIC Font
 	/// Returns font base
 	inline unsigned int base() const { return base_; }
 	/// Returns texture atlas size
-	inline Point textureSize() const { return Point(width_, height_); }
+	inline Vector2i textureSize() const { return Vector2i(width_, height_); }
 	/// Returns number of glyphs
 	inline unsigned int numGlyphs() const { return numGlyphs_; }
 	/// Reurns a constant pointer to a glyph

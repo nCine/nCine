@@ -101,10 +101,12 @@ void GlfwInputManager::mouseButtonCallback(GLFWwindow *window, int button, int a
 /// Detects window focus gain/loss events
 bool GlfwInputManager::hasFocus()
 {
+	bool glfwFocused = (glfwGetWindowAttrib(GlfwGfxDevice::windowHandle(), GLFW_FOCUSED) != 0);
+
 	// A focus event has occurred (either gain or loss)
-	if (windowHasFocus_ != glfwGetWindowAttrib(GlfwGfxDevice::windowHandle(), GLFW_FOCUSED))
+	if (windowHasFocus_ != glfwFocused)
 	{
-		windowHasFocus_ = glfwGetWindowAttrib(GlfwGfxDevice::windowHandle(), GLFW_FOCUSED);
+		windowHasFocus_ = glfwFocused;
 	}
 
 	return windowHasFocus_;
@@ -127,7 +129,7 @@ bool GlfwInputManager::isJoyPresent(int joyId) const
 {
 	if (joyId >= 0 && GLFW_JOYSTICK_1 + joyId <= GLFW_JOYSTICK_LAST)
 	{
-		return glfwJoystickPresent(GLFW_JOYSTICK_1 + joyId);
+		return (glfwJoystickPresent(GLFW_JOYSTICK_1 + joyId) != 0);
 	}
 	else
 	{
@@ -143,7 +145,7 @@ const char *GlfwInputManager::joyName(int joyId) const
 	}
 	else
 	{
-		return '\0';
+		return NULL;
 	}
 }
 
@@ -175,7 +177,7 @@ bool GlfwInputManager::isJoyButtonPressed(int joyId, int buttonId) const
 {
 	if (isJoyPresent(joyId) && buttonId >= 0 && buttonId < joyNumButtons(joyId))
 	{
-		return joystickStates_[joyId].buttons_[buttonId];
+		return (joystickStates_[joyId].buttons_[buttonId] != 0);
 	}
 	else
 	{

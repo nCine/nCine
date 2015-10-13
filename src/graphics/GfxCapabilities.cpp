@@ -86,12 +86,12 @@ bool GfxCapabilities::checkGLExtension(const char *extensionName) const
 	 ** string returned by glGetString can be in read-only memory.
 	 */
 	const char *extensions = reinterpret_cast<const char *>(glGetString(GL_EXTENSIONS));
-	int nameLength = strlen(extensionName);
+	size_t nameLength = strlen(extensionName);
 	const char *end = extensions + strlen(extensions);
 
 	while (extensions < end)
 	{
-		int n = strcspn(extensions, " ");
+		size_t n = strcspn(extensions, " ");
 		if ((nameLength == n) && (strncmp(extensionName, extensions, n) == 0))
 		{
 			return true;

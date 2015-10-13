@@ -2,7 +2,7 @@
 #define CLASS_NCINE_ITEXTURELOADER
 
 #include "TextureFormat.h"
-#include "Point.h"
+#include "Vector2.h"
 #include "IFile.h"
 
 namespace ncine {
@@ -17,8 +17,8 @@ class ITextureLoader
 	inline int width() const { return width_; }
 	/// Returns texture height
 	inline int height() const { return height_; }
-	/// Returns texture size as a Point class
-	inline Point size() const { return Point(width_, height_); }
+	/// Returns texture size as a Vector2i class
+	inline Vector2i size() const { return Vector2i(width_, height_); }
 	/// Returns texture bytes per pixel
 	inline int bpp() const { return bpp_; }
 	/// Returns the number of MIP maps stored in the texture file
@@ -52,8 +52,8 @@ class ITextureLoader
 	TextureFormat texFormat_;
 	GLubyte* pixels_;
 
-	ITextureLoader(const char *filename);
-	ITextureLoader(IFile *fileHandle);
+	explicit ITextureLoader(const char *filename);
+	explicit ITextureLoader(IFile *fileHandle);
 
 	// Loads pixel data from a texture file holding either compressed or uncompressed data
 	void loadPixels(GLenum internalFormat);

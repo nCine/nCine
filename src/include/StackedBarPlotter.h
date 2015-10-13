@@ -20,14 +20,14 @@ class StackedBarVariable : public PlottingVariable
 class StackedBarPlotter : public ProfilePlotter
 {
   public:
-	StackedBarPlotter(SceneNode* parent, Rect rect) : ProfilePlotter(parent, rect) { }
+	StackedBarPlotter(SceneNode* parent, Rectf rect) : ProfilePlotter(parent, rect) { }
 
 	virtual unsigned int addVariable(unsigned int numValues, float rejectDelay);
 	virtual void draw(RenderQueue& renderQueue);
 
   private:
 	// Fill the buffer of every stacked variable with vertices
-	void updateAllVertices(int x, int y, int w, int h);
+	void updateAllVertices(float x, float y, float w, float h);
 };
 
 }

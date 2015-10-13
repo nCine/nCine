@@ -77,7 +77,7 @@ void GLShaderUniforms::commitUniforms()
 
 void GLShaderUniforms::importUniforms()
 {
-	int count = shaderProgram_->uniforms_.size();
+	unsigned int count = shaderProgram_->uniforms_.size();
 	if (count > UniformCachesHashSize)
 	{
 		LOGW_X("More active uniforms (%d) than hashmap buckets (%d)", count, UniformCachesHashSize);
@@ -85,7 +85,7 @@ void GLShaderUniforms::importUniforms()
 
 	unsigned int nextFreeFloat = 0;
 	unsigned int nextFreeInt = 0;
-	for (int i = 0; i < count; i++)
+	for (unsigned int i = 0; i < count; i++)
 	{
 		const GLUniform& uniform = shaderProgram_->uniforms_[i];
 		GLUniformCache uniformCache(&uniform);

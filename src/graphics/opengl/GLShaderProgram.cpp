@@ -140,7 +140,7 @@ void GLShaderProgram::uniformBlockBinding(GLuint uniformBlockIndex, GLuint unifo
 
 void GLShaderProgram::discoverUniforms()
 {
-	int count;
+	GLint count;
 	glGetProgramiv(glHandle_, GL_ACTIVE_UNIFORMS, &count);
 
 	for (int i = 0; i < count; i++)

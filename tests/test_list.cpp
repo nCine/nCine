@@ -3,8 +3,8 @@
 
 namespace {
 
-bool isOdd(int n) { return (n % 2); }
-bool isEven(int n) { return !(n % 2); }
+bool isOdd(int n) { return (n % 2 != 0); }
+bool isEven(int n) { return (n % 2 == 0); }
 
 }
 
@@ -128,9 +128,9 @@ int main(int argc, char **argv)
 
 	printf("Recreating the first list\n");
 	list.clear();
-	for (int i = 0; i < 11; i++)
+	for (int j = 0; j < 11; j++)
 	{
-		list.pushBack(i);
+		list.pushBack(j);
 	}
 	printList(list);
 	printf("\n");

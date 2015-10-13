@@ -57,7 +57,7 @@ void RenderCommand::setVertexAttribute(const char* name, GLsizei vboStride, cons
 
 void RenderCommand::setTransformation()
 {
-	int width = theApplication().width();
+	float width = static_cast<float>(theApplication().width());
 	float height = static_cast<float>(theApplication().height());
 
 	// TODO: Projection is hard-coded, should go in a camera class (Y-axis points downward)

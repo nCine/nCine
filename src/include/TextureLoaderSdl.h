@@ -15,8 +15,8 @@ namespace ncine {
 class TextureLoaderSdl : public ITextureLoader
 {
   public:
-	TextureLoaderSdl(const char *filename);
-	TextureLoaderSdl(IFile *fileHandle);
+	explicit TextureLoaderSdl(const char *filename);
+	explicit TextureLoaderSdl(IFile *fileHandle);
 	~TextureLoaderSdl();
 
   private:

@@ -5,7 +5,6 @@
 #include "common_headers.h"
 
 #include "Object.h"
-#include "Point.h"
 #include "Rect.h"
 
 namespace ncine {
@@ -18,9 +17,9 @@ class DLL_PUBLIC Texture : public Object
 {
   public:
 	Texture();
-	Texture(const char *filename);
+	explicit Texture(const char *filename);
 	Texture(const char *filename, int width, int height);
-	Texture(const char *filename, Point size);
+	Texture(const char *filename, Vector2i size);
 	virtual ~Texture();
 
 	/// Returns texture width
@@ -30,9 +29,9 @@ class DLL_PUBLIC Texture : public Object
 	/// Returns texture MIP map levels
 	inline int mipMapLevels() const { return mipMapLevels_; }
 	/// Returns texture size
-	inline Point size() const { return Point(width_, height_); }
+	inline Vector2i size() const { return Vector2i(width_, height_); }
 	/// Returns texture rectangle
-	inline Rect rect() const { return Rect(0, 0, width_, height_); }
+	inline Recti rect() const { return Recti(0, 0, width_, height_); }
 
 	/// Returns true if the texture holds compressed data
 	inline bool isCompressed() const { return isCompressed_; }

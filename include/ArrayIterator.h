@@ -189,7 +189,7 @@ ArrayIterator<T, IsConst> ArrayIterator<T, IsConst>::operator-(int n) const
 template <class T, bool IsConst>
 inline int ArrayIterator<T, IsConst>::operator-(const ArrayIterator& iterator) const
 {
-	return (elementPtr_ - iterator.elementPtr_);
+	return static_cast<int>(elementPtr_ - iterator.elementPtr_);
 }
 
 /// Subscript operator

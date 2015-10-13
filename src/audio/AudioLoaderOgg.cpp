@@ -62,7 +62,7 @@ AudioLoaderOgg::~AudioLoaderOgg()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-long AudioLoaderOgg::read(char *buffer, int bufferSize) const
+unsigned long int AudioLoaderOgg::read(char *buffer, unsigned long int bufferSize) const
 {
 	static int bitStream = 0;
 	long bytes;
@@ -153,7 +153,7 @@ void AudioLoaderOgg::init()
 	numChannels_ = info->channels;
 	frequency_ = info->rate;
 
-	numSamples_ = ov_pcm_total(&oggFile_, -1);
+	numSamples_ = static_cast<unsigned long int>(ov_pcm_total(&oggFile_, -1));
 	duration_ = float(ov_time_total(&oggFile_, -1));
 
 	LOGI_X("duration: %.2f, channels: %d, frequency: %d", duration_, numChannels_, frequency_);

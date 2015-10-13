@@ -46,7 +46,7 @@ Texture::Texture(const char *filename, int width, int height)
 	delete pTexLoader;
 }
 
-Texture::Texture(const char *filename, Point size)
+Texture::Texture(const char *filename, Vector2i size)
 	: glTexture_(new GLTexture(GL_TEXTURE_2D)), width_(0), height_(0), isCompressed_(false), hasAlphaChannel_(false)
 {
 	type_ = TEXTURE_TYPE;

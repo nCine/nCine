@@ -68,7 +68,7 @@ class DLL_PUBLIC SizeAffector: public ParticleAffector
 {
   public:
 	/// Constructs a size affector with a base scale factor as a reference
-	SizeAffector(float baseScale) : sizeSteps_(4), baseScale_(baseScale) { }
+	explicit SizeAffector(float baseScale) : sizeSteps_(4), baseScale_(baseScale) { }
 	~SizeAffector()
 	{
 		for (unsigned int i = 0; i < sizeSteps_.size(); i++)

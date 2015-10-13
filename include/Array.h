@@ -255,7 +255,7 @@ void Array<T>::insertRange(unsigned int index, const T* firstPtr, const T* lastP
 
 	// memmove() takes care of overlapping regions
 	memmove(array_ + index, firstPtr, sizeof(T) * (lastPtr - firstPtr));
-	size_ += (lastPtr - firstPtr);
+	size_ += static_cast<unsigned int>(lastPtr - firstPtr);
 }
 
 /// Inserts a new element at a specified position (shifting elements around)
@@ -294,12 +294,12 @@ typename Array<T>::Iterator Array<T>::insert(Iterator position, const T& value)
 template <class T>
 typename Array<T>::Iterator Array<T>::insert(Iterator position, Iterator first, Iterator last)
 {
-	unsigned int index = &(*position) - array_;
+	unsigned int index = static_cast<unsigned int>(&(*position) - array_);
 	T* firstPtr = &(*first);
 	T* lastPtr = &(*last);
 	insertRange(index, firstPtr, lastPtr);
 
-	return position + (lastPtr - firstPtr);
+	return position + static_cast<unsigned int>(lastPtr - firstPtr);
 }
 
 /// Removes the specified range of elements, last not included (shifting elements around)
@@ -333,7 +333,7 @@ void Array<T>::removeRange(unsigned int firstIndex, unsigned int lastIndex)
 template <class T>
 typename Array<T>::Iterator Array<T>::erase(Iterator position)
 {
-	unsigned int index = &(*position) - array_;
+	unsigned int index = static_cast<unsigned int>(&(*position) - array_);
 	removeAt(index);
 
 	return ++position;
@@ -343,8 +343,8 @@ typename Array<T>::Iterator Array<T>::erase(Iterator position)
 template <class T>
 typename Array<T>::Iterator Array<T>::erase(Iterator first, const Iterator last)
 {
-	unsigned int firstIndex = &(*first) - array_;
-	unsigned int lastIndex = &(*last) - array_;
+	unsigned int firstIndex = static_cast<unsigned int>(&(*first) - array_);
+	unsigned int lastIndex = static_cast<unsigned int>(&(*last) - array_);
 	removeRange(firstIndex, lastIndex);
 
 	return ++first;

@@ -13,7 +13,7 @@ class AssetFile: public IFile
   public:
 	/// Constructs an asset file object
 	/*! \param filename File name including path relative to the assets directory */
-	AssetFile(const char *filename);
+	explicit AssetFile(const char *filename);
 	~AssetFile();
 
 	/// Static method to return class type
@@ -23,7 +23,7 @@ class AssetFile: public IFile
 	void close();
 	long int seek(long int offset, int whence) const;
 	long int tell() const;
-	long int read(void *buffer, int bytes) const;
+	unsigned long int read(void *buffer, unsigned long int bytes) const;
 
 	bool isOpened() const;
 

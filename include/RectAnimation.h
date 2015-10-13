@@ -22,11 +22,11 @@ class DLL_PUBLIC RectAnimation
 	inline void setFrameTime(float frameTime) { frameTime_ = frameTime; }
 
 	/// Adds a rectangles to the array
-	inline void addRect(const Rect& rect) { rects_.pushBack(rect); }
+	inline void addRect(const Recti& rect) { rects_.pushBack(rect); }
 	/// Creates a rectangles from origin and size and then adds it to the array
-	inline void addRect(int x, int y, int w, int h) { rects_.pushBack(Rect(x, y, w, h)); }
+	inline void addRect(int x, int y, int w, int h) { rects_.pushBack(Recti(x, y, w, h)); }
 	/// Returns the current rectangle
-	inline const Rect& rect() const { return rects_[currentFrame_]; }
+	inline const Recti& rect() const { return rects_[currentFrame_]; }
 
 	// Updates current frame based on time passed
 	void updateFrame(float interval);
@@ -40,7 +40,7 @@ class DLL_PUBLIC RectAnimation
 
   private:
 	/// The rectangles array
-	Array<Rect> rects_;
+	Array<Recti> rects_;
 	/// Current frame
 	unsigned int currentFrame_;
 	/// The time until the next frame change

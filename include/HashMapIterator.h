@@ -36,7 +36,7 @@ class HashMapIterator
 	/// Reference type which respects iterator constness
 	typedef typename IteratorTraits<HashMapIterator>::Reference Reference;
 
-	HashMapIterator(typename HelperTraits<K, T, HashFunc, IsConst>::HashMapPtr hashMap, int bucketIndex,
+	HashMapIterator(typename HelperTraits<K, T, HashFunc, IsConst>::HashMapPtr hashMap, unsigned int bucketIndex,
 					typename HelperTraits<K, T, HashFunc, IsConst>::ListIteratorType listIterator, bool atFirstNode)
 		: hashMap_(hashMap), bucketIndex_(bucketIndex), listIterator_(listIterator), atFirstNode_(atFirstNode) { }
 

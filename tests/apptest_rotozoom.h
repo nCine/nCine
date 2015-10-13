@@ -35,7 +35,7 @@ class MyEventHandler
 #endif
 
   private:
-	static const int NumTextures = 4;
+	static const unsigned int NumTextures = 4;
 	static const int NumRowSprites = 8;
 	static const int NumColSprites = 8;
 

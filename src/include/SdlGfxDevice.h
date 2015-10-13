@@ -4,7 +4,7 @@
 #include <SDL/SDL.h>
 
 #include "IGfxDevice.h"
-#include "Point.h"
+#include "Vector2.h"
 #include "DisplayMode.h"
 
 namespace ncine {
@@ -15,16 +15,16 @@ class SdlGfxDevice : public IGfxDevice
   public:
 	// Constructor taking the resolution as two integer
 	SdlGfxDevice(int width, int height, bool isFullScreen);
-	// Constructor taking the resolution as a Point class
-	SdlGfxDevice(Point size, bool isFullScreen);
+	// Constructor taking the resolution as a Vector2i class
+	SdlGfxDevice(Vector2i size, bool isFullScreen);
 	// Constructor taking the resolution as two integer and a DisplayMode
 	SdlGfxDevice(int width, int height, DisplayMode mode, bool isFullScreen);
-	// Constructor taking the resolution as a Point class and a DisplayMode
-	SdlGfxDevice(Point size, DisplayMode mode, bool isFullScreen);
+	// Constructor taking the resolution as a Vector2i class and a DisplayMode
+	SdlGfxDevice(Vector2i size, DisplayMode mode, bool isFullScreen);
 	~SdlGfxDevice() { SDL_Quit(); }
 
 	void setResolution(int width, int height);
-	void setResolution(Point size);
+	void setResolution(Vector2i size);
 
 	void toggleFullScreen();
 

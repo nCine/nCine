@@ -61,6 +61,7 @@ class Vector2
 };
 
 typedef Vector2<float> Vector2f;
+typedef Vector2<int> Vector2i;
 
 template <class T>
 inline void Vector2<T>::set(T xx, T yy)

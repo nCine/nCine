@@ -7,7 +7,7 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ProfilePlotter::ProfilePlotter(SceneNode* parent, Rect rect)
+ProfilePlotter::ProfilePlotter(SceneNode* parent, Rectf rect)
 	: DrawableNode(parent, rect.x, rect.y), width_(rect.w), height_(rect.h), variables_(2),
 	  shouldPlotRefValue_(false), refValueColor_(1.0f, 1.0f, 1.0f), refValue_(0.0f)
 {

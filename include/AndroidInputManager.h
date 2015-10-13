@@ -42,7 +42,7 @@ class AndroidJoystickState
 class AndroidInputManager : public IInputManager
 {
   public:
-	AndroidInputManager(struct android_app* state);
+	explicit AndroidInputManager(struct android_app* state);
 
 	// Enables the accelerometer sensor
 	static void enableAccelerometerSensor();

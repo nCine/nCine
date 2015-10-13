@@ -44,8 +44,8 @@ void Thread::run(ThreadFunctionPtr startFunction, void* arg)
 	{
 		threadInfo_.startFunction = startFunction;
 		threadInfo_.threadArg = arg;
-		handle_ = (HANDLE)_beginthreadex(NULL, 0, wrapperFunction, &threadInfo_, 0, NULL);
-		if (handle_ <= 0)
+		handle_ = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, wrapperFunction, &threadInfo_, 0, NULL));
+		if (handle_ == 0)
 		{
 			LOGE("_beginthreadex error");
 			::exit(EXIT_FAILURE);
