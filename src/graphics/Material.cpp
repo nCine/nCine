@@ -36,11 +36,13 @@ void Material::setShaderProgram(ShaderProgramPresets preset)
 	{
 		case SPRITE_PROGRAM:
 			setShaderProgram(const_cast<GLShaderProgram *>(RenderResources::spriteShaderProgram()));
+			uniform("texture")->setIntValue(0); // GL_TEXTURE0
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
 			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
 			break;
 		case TEXTNODE_PROGRAM:
 			setShaderProgram(const_cast<GLShaderProgram *>(RenderResources::textnodeShaderProgram()));
+			uniform("texture")->setIntValue(0); // GL_TEXTURE0
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
 			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
 			break;

@@ -39,14 +39,12 @@ void RenderResources::create()
 	spriteShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/sprite_fs.glsl").data());
 	spriteShaderProgram_->link();
 	spriteShaderProgram_->use();
-	glUniform1i(spriteShaderProgram_->getUniformLocation("texture"), 0); // GL_TEXTURE0
 
 	textnodeShaderProgram_ = new GLShaderProgram();
 	textnodeShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/textnode_vs.glsl").data());
 	textnodeShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/textnode_fs.glsl").data());
 	textnodeShaderProgram_->link();
 	textnodeShaderProgram_->use();
-	glUniform1i(textnodeShaderProgram_->getUniformLocation("texture"), 0); // GL_TEXTURE0
 
 	colorShaderProgram_ = new GLShaderProgram();
 	colorShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/color_vs.glsl").data());

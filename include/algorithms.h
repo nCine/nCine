@@ -143,6 +143,41 @@ template <class T>
 inline bool IsNotLess(const T& a, const T& b) { return !(a < b); }
 
 ///////////////////////////////////////////////////////////
+// ARITHMETIC OPERATIONS
+///////////////////////////////////////////////////////////
+
+template <class T>
+inline T Plus(const T& a, const T& b) { return a + b; }
+
+template <class T>
+inline T Minus(const T& a, const T& b) { return a - b; }
+
+template <class T>
+inline T Multiplies(const T& a, const T& b) { return a * b; }
+
+template <class T>
+inline T Divides(const T& a, const T& b) { return a / b; }
+
+template <class T>
+inline T Modulus(const T& a, const T& b) { return a % b; }
+
+template <class T>
+inline T Negate(const T& a) { return -a; }
+
+///////////////////////////////////////////////////////////
+// LOGICAL OPERATIONS
+///////////////////////////////////////////////////////////
+
+template <class T>
+inline T LogicalAnd(const T& a, const T& b) { return a && b; }
+
+template <class T>
+inline T LogicalOr(const T& a, const T& b) { return a || b; }
+
+template <class T>
+inline T LogicalNot(const T& a) { return !a; }
+
+///////////////////////////////////////////////////////////
 // TEMPLATE FUNCTIONS WITH ITERATORS (non-modifying)
 ///////////////////////////////////////////////////////////
 

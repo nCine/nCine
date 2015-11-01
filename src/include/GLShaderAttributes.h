@@ -20,7 +20,7 @@ class GLShaderAttributes
 	void setProgram(GLShaderProgram *shaderProgram);
 
 	GLVertexAttribute* attribute(const char *name);
-	void defineVertexPointers(GLuint buondVboHandle);
+	void defineVertexPointers(GLuint boundVboHandle);
 
   private:
 	/// This class stores the OpenGL state regarding a defined vertex attribute pointer

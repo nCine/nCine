@@ -57,7 +57,7 @@ GLVertexAttribute* GLShaderAttributes::attribute(const char *name)
 	return vertexAttribute;
 }
 
-void GLShaderAttributes::defineVertexPointers(GLuint buondVboHandle)
+void GLShaderAttributes::defineVertexPointers(GLuint boundVboHandle)
 {
 	if (shaderProgram_)
 	{
@@ -65,11 +65,11 @@ void GLShaderAttributes::defineVertexPointers(GLuint buondVboHandle)
 		{
 			GLVertexAttribute& attribute = *i;
 			int location = attribute.shaderAttribute()->location();
-			if (definedPointers_[location] != attribute || definedPointers_[location].boundVbo() != buondVboHandle)
+			if (definedPointers_[location] != attribute || definedPointers_[location].boundVbo() != boundVboHandle)
 			{
 				(*i).vertexAttribPointer();
 				definedPointers_[location] = attribute;
-				definedPointers_[location].setBoundVbo(buondVboHandle);
+				definedPointers_[location].setBoundVbo(boundVboHandle);
 			}
 			if (definedPointers_[location].isEnabled() == false)
 			{
