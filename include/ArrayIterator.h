@@ -43,25 +43,26 @@ class ArrayIterator
 	ArrayIterator operator+(int n) const;
 	// Subtraction operator
 	ArrayIterator operator-(int n) const;
-	// Pointer subtraction operator
-	int operator-(const ArrayIterator& iterator) const;
+	/// Pointer subtraction operator
+	friend inline int operator-(const ArrayIterator& lhs, const ArrayIterator& rhs)	{ return static_cast<int>(lhs.elementPtr_ - rhs.elementPtr_); }
 
 	// Subscript operator
 	Reference operator[](int n) const;
 
 	/// Equality operator
-	inline bool operator==(const ArrayIterator& iterator) const { return elementPtr_ == iterator.elementPtr_; }
+	friend inline bool operator==(const ArrayIterator& lhs, const ArrayIterator& rhs) { return lhs.elementPtr_ == rhs.elementPtr_; }
+
 	/// Inequality operator
-	inline bool operator!=(const ArrayIterator& iterator) const { return elementPtr_ != iterator.elementPtr_; }
+	friend inline bool operator!=(const ArrayIterator& lhs, const ArrayIterator& rhs) { return lhs.elementPtr_ != rhs.elementPtr_; }
 
 	/// Greater than operator
-	inline bool operator>(const ArrayIterator& iterator) const { return elementPtr_ > iterator.elementPtr_; }
+	friend inline bool operator>(const ArrayIterator& lhs, const ArrayIterator& rhs) { return lhs.elementPtr_ > rhs.elementPtr_; }
 	/// Less than operator
-	inline bool operator<(const ArrayIterator& iterator) const { return elementPtr_ < iterator.elementPtr_; }
+	friend inline bool operator<(const ArrayIterator& lhs, const ArrayIterator& rhs) { return lhs.elementPtr_ < rhs.elementPtr_; }
 	/// Greater than or equal to operator
-	inline bool operator>=(const ArrayIterator& iterator) const { return elementPtr_ >= iterator.elementPtr_; }
+	friend inline bool operator>=(const ArrayIterator& lhs, const ArrayIterator& rhs) { return lhs.elementPtr_ >= rhs.elementPtr_; }
 	/// Less than or equal to operator
-	inline bool operator<=(const ArrayIterator& iterator) const { return elementPtr_ <= iterator.elementPtr_; }
+	friend inline bool operator<=(const ArrayIterator& lhs, const ArrayIterator& rhs) { return lhs.elementPtr_ <= rhs.elementPtr_; }
 
   private:
 	Pointer elementPtr_;
@@ -183,13 +184,6 @@ ArrayIterator<T, IsConst> ArrayIterator<T, IsConst>::operator-(int n) const
 	iterator.elementPtr_ -= n;
 
 	return iterator;
-}
-
-/// Pointer subtraction operator
-template <class T, bool IsConst>
-inline int ArrayIterator<T, IsConst>::operator-(const ArrayIterator& iterator) const
-{
-	return static_cast<int>(elementPtr_ - iterator.elementPtr_);
 }
 
 /// Subscript operator

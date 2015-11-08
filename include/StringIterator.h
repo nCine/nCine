@@ -74,25 +74,25 @@ class StringIterator
 	StringIterator operator+(int n) const;
 	// Subtraction operator
 	StringIterator operator-(int n) const;
-	// Pointer subtraction operator
-	int operator-(const StringIterator& iterator) const;
+	/// Pointer subtraction operator
+	friend inline int operator-(const StringIterator& lhs, const StringIterator& rhs)	{ return (lhs.charPtr_ - rhs.charPtr_); }
 
 	// Subscript operator
 	Reference operator[](int n) const;
 
 	/// Equality operator
-	inline bool operator==(const StringIterator& iterator) const { return charPtr_ == iterator.charPtr_; }
+	friend inline bool operator==(const StringIterator& lhs, const StringIterator& rhs) { return lhs.charPtr_ == rhs.charPtr_; }
 	/// Inequality operator
-	inline bool operator!=(const StringIterator& iterator) const { return charPtr_ != iterator.charPtr_; }
+	friend inline bool operator!=(const StringIterator& lhs, const StringIterator& rhs) { return lhs.charPtr_ != rhs.charPtr_; }
 
 	/// Greater than operator
-	inline bool operator>(const StringIterator& iterator) const { return charPtr_ > iterator.charPtr_; }
+	friend inline bool operator>(const StringIterator& lhs, const StringIterator& rhs) { return lhs.charPtr_ > rhs.charPtr_; }
 	/// Less than operator
-	inline bool operator<(const StringIterator& iterator) const { return charPtr_ < iterator.charPtr_; }
+	friend inline bool operator<(const StringIterator& lhs, const StringIterator& rhs) { return lhs.charPtr_ < rhs.charPtr_; }
 	/// Greater than or equal to operator
-	inline bool operator>=(const StringIterator& iterator) const { return charPtr_ >= iterator.charPtr_; }
+	friend inline bool operator>=(const StringIterator& lhs, const StringIterator& rhs) { return lhs.charPtr_ >= rhs.charPtr_; }
 	/// Less than or equal to operator
-	inline bool operator<=(const StringIterator& iterator) const { return charPtr_ <= iterator.charPtr_; }
+	friend inline bool operator<=(const StringIterator& lhs, const StringIterator& rhs) { return lhs.charPtr_ <= rhs.charPtr_; }
 
   private:
 	Pointer charPtr_;
@@ -186,13 +186,6 @@ inline StringIterator<IsConst> StringIterator<IsConst>::operator-(int n) const
 	iterator.charPtr_ -= n;
 
 	return iterator;
-}
-
-/// Pointer subtraction operator
-template <bool IsConst>
-inline int StringIterator<IsConst>::operator-(const StringIterator& iterator) const
-{
-	return (charPtr_ - iterator.charPtr_);
 }
 
 /// Subscript operator

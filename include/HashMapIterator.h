@@ -58,9 +58,18 @@ class HashMapIterator
 	HashMapIterator operator--(int);
 
 	/// Equality operator
-	bool operator==(const HashMapIterator& iterator) const;
+	friend inline bool operator==(const HashMapIterator& lhs, const HashMapIterator& rhs)
+	{
+		return (lhs.hashMap_ == rhs.hashMap_ && lhs.bucketIndex_ == rhs.bucketIndex_ &&
+				lhs.listIterator_ == rhs.listIterator_ && lhs.atFirstNode_ == rhs.atFirstNode_);
+	}
+
 	/// Inequality operator
-	bool operator!=(const HashMapIterator& iterator) const;
+	friend inline bool operator!=(const HashMapIterator& lhs, const HashMapIterator& rhs)
+	{
+		return (lhs.hashMap_ != rhs.hashMap_ || lhs.bucketIndex_ != rhs.bucketIndex_ ||
+				lhs.listIterator_ != rhs.listIterator_ || lhs.atFirstNode_ != rhs.atFirstNode_);
+	}
 
 	// Returns the hashmap node currently pointed by the iterator
 	typename HelperTraits<K, T, HashFunc, IsConst>::NodeReference node() const;
@@ -155,22 +164,6 @@ HashMapIterator<K, T, HashFunc, IsConst> HashMapIterator<K, T, HashFunc, IsConst
 	HashMapIterator<K, T, HashFunc, IsConst> iterator = *this;
 	previous();
 	return iterator;
-}
-
-/// Equality operator
-template <class K, class T, class HashFunc, bool IsConst>
-inline bool HashMapIterator<K, T, HashFunc, IsConst>::operator==(const HashMapIterator<K, T, HashFunc, IsConst>& iterator) const
-{
-	return (hashMap_ == iterator.hashMap_ && bucketIndex_ == iterator.bucketIndex_ &&
-			listIterator_ == iterator.listIterator_ && atFirstNode_ == iterator.atFirstNode_);
-}
-
-/// Inequality operator
-template <class K, class T, class HashFunc, bool IsConst>
-inline bool HashMapIterator<K, T, HashFunc, IsConst>::operator!=(const HashMapIterator<K, T, HashFunc, IsConst>& iterator) const
-{
-	return (hashMap_ != iterator.hashMap_ || bucketIndex_ != iterator.bucketIndex_ ||
-			listIterator_ != iterator.listIterator_ || atFirstNode_ != iterator.atFirstNode_);
 }
 
 /// Returns the hashmap node currently pointed by the iterator

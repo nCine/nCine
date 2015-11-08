@@ -35,9 +35,9 @@ class AssetFile: public IFile
 	AAsset *asset_;
 	long int startOffset_;
 
-	// Opens the file with AAsset_openFileDescriptor()
+	// Opens the file with `AAsset_openFileDescriptor()`
 	void openFD(unsigned char mode);
-	// Opens the file with AAssetManager_open() only
+	// Opens the file with `AAssetManager_open()` only
 	void openAsset(unsigned char mode);
 
 	// Checks if a file can be accessed with specified mode

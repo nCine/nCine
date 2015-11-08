@@ -53,7 +53,7 @@ void TextureLoaderEtc::init()
 	if (gfxCaps.oesCompressedEtc1Rgb8Texture() == false)
 	{
 		LOGF("GL_OES_compressed_ETC1_RGB8_texture not available");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	loadPixels(GL_ETC1_RGB8_OES);

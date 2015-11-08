@@ -125,12 +125,12 @@ class DLL_PUBLIC IFile
 	/// File extension
 	String extension_;
 
-	/// File descriptor for open() and close()
+	/// File descriptor for `open()` and `close()`
 	int fileDescriptor_;
-	/// File pointer for fopen() and fclose()
+	/// File pointer for `fopen()` and `fclose()`
 	FILE *filePointer_;
 	/// Should destructor close the file on exit?
-	/*! Useful for ov_open()/ov_fopen() and ov_clear() */
+	/*! Useful for `ov_open()`/`ov_fopen()` and `ov_clear()` */
 	bool shouldCloseOnExit_;
 
 	/// File size in bytes

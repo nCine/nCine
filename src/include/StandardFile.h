@@ -29,9 +29,9 @@ class StandardFile: public IFile
 	/// Private assignment operator
 	StandardFile& operator=(const StandardFile&);
 
-	// Opens the file with open()
+	// Opens the file with `open()`
 	void openFD(unsigned char mode);
-	// Opens the file with fopen()
+	// Opens the file with `fopen()`
 	void openStream(unsigned char mode);
 
 	// Checks if a file can be accessed with specified mode

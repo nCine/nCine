@@ -182,7 +182,7 @@ bool AssetFile::isOpened() const
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Opens the file with AAsset_openFileDescriptor()
+/// Opens the file with `AAsset_openFileDescriptor()`
 void AssetFile::openFD(unsigned char mode)
 {
 	// An asset file can only be read
@@ -192,7 +192,7 @@ void AssetFile::openFD(unsigned char mode)
 		if (asset_ == NULL)
 		{
 			LOGF_X("Cannot open the file \"%s\"", filename_.data());
-			exit(-1);
+			exit(EXIT_FAILURE);
 		}
 
 		fileDescriptor_ = AAsset_openFileDescriptor(asset_, &startOffset_, &fileSize_);
@@ -203,7 +203,7 @@ void AssetFile::openFD(unsigned char mode)
 		if (fileDescriptor_ < 0)
 		{
 			LOGF_X("Cannot open the file \"%s\"", filename_.data());
-			exit(-1);
+			exit(EXIT_FAILURE);
 		}
 		else
 		{
@@ -216,7 +216,7 @@ void AssetFile::openFD(unsigned char mode)
 	}
 }
 
-/// Opens the file with AAssetManager_open() only
+/// Opens the file with `AAssetManager_open()` only
 void AssetFile::openAsset(unsigned char mode)
 {
 	// An asset file can only be read
@@ -226,7 +226,7 @@ void AssetFile::openAsset(unsigned char mode)
 		if (asset_ == NULL)
 		{
 			LOGF_X("Cannot open the file \"%s\"", filename_.data());
-			exit(-1);
+			exit(EXIT_FAILURE);
 		}
 		else
 		{
@@ -243,7 +243,7 @@ void AssetFile::openAsset(unsigned char mode)
 }
 
 /// Checks if a file can be accessed with specified mode
-/*! It is called by IFile::access() */
+/*! It is called by `IFile::access()` */
 bool AssetFile::access(const char *filename, unsigned char mode)
 {
 	bool isAccessible = false;

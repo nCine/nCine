@@ -51,7 +51,7 @@ void EglGfxDevice::createSurface(struct android_app* state)
 		if (surface_ == EGL_NO_SURFACE)
 		{
 			LOGF("eglCreateWindowSurface() returned EGL_NO_SURFACE");
-			exit(-1);
+			exit(EXIT_FAILURE);
 		}
 	}
 }
@@ -62,7 +62,7 @@ void EglGfxDevice::bindContext()
 	if (eglMakeCurrent(display_, surface_, surface_, context_) == EGL_FALSE)
 	{
 		LOGF("eglMakeCurrent() returned EGL_FALSE");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -72,7 +72,7 @@ void EglGfxDevice::unbindContext()
 	if (eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT) == EGL_FALSE)
 	{
 		LOGF("eglMakeCurrent() returned EGL_FALSE");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -168,7 +168,7 @@ void EglGfxDevice::initDevice(struct android_app* state)
 	if (context_ == EGL_NO_CONTEXT)
 	{
 		LOGF("eglCreateContext() returned EGL_NO_CONTEXT");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	bindContext();

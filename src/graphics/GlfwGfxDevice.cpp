@@ -93,7 +93,7 @@ void GlfwGfxDevice::init(int width, int height, DisplayMode mode, bool isFullScr
 	initDevice();
 }
 
-/// Initilizes the video subsystem (SDL)
+/// Initilizes the video subsystem (GLFW)
 void GlfwGfxDevice::initGraphics()
 {
 	glfwSetErrorCallback(errorCallback);

@@ -37,9 +37,9 @@ class ListIterator
 	ListIterator operator--(int);
 
 	/// Equality operator
-	inline bool operator==(const ListIterator& iterator) const { return node_ == iterator.node_; }
+	friend inline bool operator==(const ListIterator& lhs, const ListIterator& rhs) { return lhs.node_ == rhs.node_; }
 	/// Inequality operator
-	inline bool operator!=(const ListIterator& iterator) const { return node_ != iterator.node_; }
+	friend inline bool operator!=(const ListIterator& lhs, const ListIterator& rhs) { return lhs.node_ != rhs.node_; }
 
   private:
 	ListNode<T> *node_;
