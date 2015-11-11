@@ -10,7 +10,7 @@ if(UNIX)
 		COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/tests/shaders
 		COMMENT "Symlinking shaders to tests..."
 	)
-	if(EXISTS ${NCINE_DATA_DIR} AND IS_DIRECTORY ${NCINE_DATA_DIR})
+	if(IS_DIRECTORY ${NCINE_DATA_DIR})
 		add_custom_target(link_data_tests ALL
 			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATA_DIR}/fonts ${CMAKE_BINARY_DIR}/tests/fonts
 			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATA_DIR}/sounds ${CMAKE_BINARY_DIR}/tests/sounds
@@ -27,11 +27,9 @@ elseif(WIN32)
 		COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/tests
 		COMMENT "Copying DLLs to tests..."
 	)
-	if(EXISTS ${NCINE_DATA_DIR} AND IS_DIRECTORY ${NCINE_DATA_DIR})
+	if(IS_DIRECTORY ${NCINE_DATA_DIR})
 		add_custom_target(copy_data_tests ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/fonts ${CMAKE_BINARY_DIR}/tests/fonts
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/sounds ${CMAKE_BINARY_DIR}/tests/sounds
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/textures ${CMAKE_BINARY_DIR}/tests/textures
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/ ${CMAKE_BINARY_DIR}/tests
 			COMMENT "Copying data to tests..."
 		)
 	endif()
@@ -48,11 +46,13 @@ target_link_libraries(apptest_rotozoom ncine)
 if(OPENAL_FOUND)
 	add_executable(apptest_animsprites main.cpp apptest_animsprites.cpp)
 	target_link_libraries(apptest_animsprites ncine)
+	install(TARGETS apptest_animsprites RUNTIME DESTINATION bin)
 endif()
 add_executable(apptest_particles main.cpp apptest_particles.cpp)
 target_link_libraries(apptest_particles ncine)
 add_executable(apptest_scene main.cpp apptest_scene.cpp)
 target_link_libraries(apptest_scene ncine)
+install(TARGETS apptest_mipmapping apptest_joystick apptest_overdraw apptest_rotozoom apptest_particles apptest_scene RUNTIME DESTINATION bin)
 
 add_executable(test_array test_array.cpp test_functions.h)
 target_link_libraries(test_array ncine)
@@ -66,6 +66,7 @@ add_executable(test_hashmap test_hashmap.cpp)
 target_link_libraries(test_hashmap ncine)
 add_executable(test2_hashmap test2_hashmap.cpp)
 target_link_libraries(test2_hashmap ncine)
+install(TARGETS test_array test_staticarray test_list test_string test_hashmap test2_hashmap test2_hashmap RUNTIME DESTINATION bin)
 
 add_executable(test_algorithms_array test_algorithms_array.cpp test_functions.h)
 target_link_libraries(test_algorithms_array ncine)
@@ -73,6 +74,7 @@ add_executable(test_algorithms_list test_algorithms_list.cpp test_functions.h)
 target_link_libraries(test_algorithms_list ncine)
 add_executable(test_algorithms_hashmap test_algorithms_hashmap.cpp test_functions.h)
 target_link_libraries(test_algorithms_hashmap ncine)
+install(TARGETS test_algorithms_array test_algorithms_list test_algorithms_hashmap RUNTIME DESTINATION bin)
 
 add_executable(test_vector2 test_vector2.cpp)
 target_link_libraries(test_vector2 ncine)
@@ -88,3 +90,4 @@ add_executable(test_quaternion test_quaternion.cpp)
 target_link_libraries(test_quaternion ncine)
 add_executable(test2_quaternion test2_quaternion.cpp test_functions.h)
 target_link_libraries(test2_quaternion ncine)
+install(TARGETS test_vector2 test_vector3 test_vector4 test_matrix4x4 test2_matrix4x4 test_quaternion test2_quaternion RUNTIME DESTINATION bin)

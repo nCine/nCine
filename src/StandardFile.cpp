@@ -18,7 +18,7 @@ namespace ncine {
 
 StandardFile::~StandardFile()
 {
-	if (shouldCloseOnExit_)
+	if (shouldCloseOnDestruction_)
 	{
 		close();
 	}
@@ -172,8 +172,16 @@ void StandardFile::openFD(unsigned char mode)
 
 		if (fileDescriptor_ < 0)
 		{
-			LOGF_X("Cannot open the file \"%s\"", filename_.data());
-			exit(EXIT_FAILURE);
+			if (shouldExitOnFailToOpen_)
+			{
+				LOGF_X("Cannot open the file \"%s\"", filename_.data());
+				exit(EXIT_FAILURE);
+			}
+			else
+			{
+				LOGE_X("Cannot open the file \"%s\"", filename_.data());
+				return;
+			}
 		}
 		else
 		{
@@ -228,8 +236,16 @@ void StandardFile::openStream(unsigned char mode)
 
 		if (filePointer_ == NULL)
 		{
-			LOGF_X("Cannot open the file \"%s\"", filename_.data());
-			exit(EXIT_FAILURE);
+			if (shouldExitOnFailToOpen_)
+			{
+				LOGF_X("Cannot open the file \"%s\"", filename_.data());
+				exit(EXIT_FAILURE);
+			}
+			else
+			{
+				LOGE_X("Cannot open the file \"%s\"", filename_.data());
+				return;
+			}
 		}
 		else
 		{

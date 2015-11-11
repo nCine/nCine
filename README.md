@@ -5,7 +5,7 @@ nCine is a multi-platform 2d game engine
 
 ### Features
 - OpenGL 2 / OpenGL ES 2 renderer
-- Custom containers with iterators
+- Custom containers with iterators and algorithms
 - Thread pool
 - Streaming of OGG Vorbis audio
 - Android assets support
@@ -38,23 +38,13 @@ nCine is a multi-platform 2d game engine
 - OpenAL
 - libogg, libvorbis, libvorbisfile
 
-## Notes
+## Tool Notes
 
 ### Cppcheck
 `cppcheck --quiet --enable=all --inconclusive --std=c++03 -I include -I src/include src 2> cppcheck.log`
 
 ### Artistic Style
 `./astyle --style=allman --indent=tab --pad-oper --pad-header --indent-modifiers --indent-switches --add-brackets --keep-one-line-blocks --keep-one-line-statements --suffix=none --recursive "src/*" "include/*" "tests/*"`
-
-### ADB
-`adb push libs/armeabi/libncine.so /data/data/com.encelo.ncine/lib/`
-`adb pull /sdcard/ncine_log.txt`
-
-### MinGW32
-`cmake -DCROSS_MINGW32=1 nCine-git`
-
-### bitbucket.org
-`git push https://bitbucket.org/encelo/ncine`
 
 ## Developing
 

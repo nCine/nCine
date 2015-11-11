@@ -32,7 +32,8 @@ String IFile::savePath_(MaxFilenameLength);
 
 IFile::IFile(const char *filename)
 	: type_(BASE_TYPE), filename_(filename), extension_(MaxExtensionLength),
-	  fileDescriptor_(-1), filePointer_(NULL), shouldCloseOnExit_(true), fileSize_(0)
+	  fileDescriptor_(-1), filePointer_(NULL), shouldCloseOnDestruction_(true),
+	  shouldExitOnFailToOpen_(true), fileSize_(0)
 {
 	int dotChar = filename_.findLastChar('.');
 	// A dot followed by at least three extension characters

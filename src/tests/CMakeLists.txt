@@ -28,9 +28,7 @@ elseif(WIN32)
 	)
 	if(EXISTS ${NCINE_DATA_DIR} AND IS_DIRECTORY ${NCINE_DATA_DIR})
 		add_custom_target(copy_data_srctests ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/fonts ${CMAKE_BINARY_DIR}/src/tests/fonts
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/sounds ${CMAKE_BINARY_DIR}/src/tests/sounds
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/textures ${CMAKE_BINARY_DIR}/src/tests/textures
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/ ${CMAKE_BINARY_DIR}/src/tests
 			COMMENT "Copying data to src/tests..."
 		)
 	endif()
@@ -41,6 +39,7 @@ if(SDL_FOUND AND NOT GLFW_FOUND)
 		add_executable(sdltest_audio sdltest_audio.cpp)
 		target_link_libraries(sdltest_audio ncine)
 		target_include_directories(sdltest_audio PRIVATE ../include)
+		install(TARGETS sdltest_audio RUNTIME DESTINATION bin)
 	endif()
 	add_executable(sdltest_font sdltest_font.cpp)
 	target_link_libraries(sdltest_font ncine)
@@ -54,11 +53,13 @@ if(SDL_FOUND AND NOT GLFW_FOUND)
 	add_executable(sdltest_scene sdltest_scene.cpp)
 	target_link_libraries(sdltest_scene ncine)
 	target_include_directories(sdltest_scene PRIVATE ../include)
+	install(TARGETS sdltest_font sdltest_particles sdltest_renderqueue sdltest_scene RUNTIME DESTINATION bin)
 endif()
 
 #add_executable(test_radixsort test_radixsort.cpp)
 #target_link_libraries(test_radixsort ncine)
 #target_include_directories(test_radixsort PRIVATE ../include)
+#install(TARGETS test_radixsort RUNTIME DESTINATION bin)
 
 if(Threads_FOUND)
 	add_executable(apptest_threads ../../tests/main.cpp apptest_threads.cpp)
@@ -67,8 +68,10 @@ if(Threads_FOUND)
 	add_executable(apptest_threadpool ../../tests/main.cpp apptest_threadpool.cpp)
 	target_link_libraries(apptest_threadpool ncine)
 	target_include_directories(apptest_threadpool PRIVATE ../include)
+	install(TARGETS apptest_threads apptest_threadpool RUNTIME DESTINATION bin)
 endif()
 
 add_executable(glapptest_fbo_cube ../../tests/main.cpp glapptest_fbo_cube.cpp)
 target_link_libraries(glapptest_fbo_cube ncine)
 target_include_directories(glapptest_fbo_cube PRIVATE ../include)
+install(TARGETS glapptest_fbo_cube RUNTIME DESTINATION bin)

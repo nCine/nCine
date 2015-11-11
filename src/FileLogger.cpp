@@ -20,6 +20,7 @@ FileLogger::FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fil
 
 	if (fileLevel_ != LOG_OFF)
 	{
+		fileHandle_->setExitOnFailToOpen(false);
 		fileHandle_->open(IFile::MODE_WRITE);
 
 		if (fileHandle_->isOpened() == false)

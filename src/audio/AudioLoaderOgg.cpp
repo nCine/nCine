@@ -113,7 +113,7 @@ void AudioLoaderOgg::init()
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 
 	// File is closed by ov_clear()
-	fileHandle_->setCloseOnExit(false);
+	fileHandle_->setCloseOnDestruction(false);
 
 #ifdef __ANDROID__
 	if (fileHandle_->type() == AssetFile::sType())

@@ -58,8 +58,10 @@ class DLL_PUBLIC IFile
 	/*! \return Number of bytes read */
 	virtual unsigned long int read(void *buffer, unsigned long int bytes) const = 0;
 
-	/// Sets the close on exit flag
-	inline void setCloseOnExit(bool shouldCloseOnExit) { shouldCloseOnExit_ = shouldCloseOnExit; }
+	/// Sets the close on destruction flag
+	inline void setCloseOnDestruction(bool shouldCloseOnDestruction) { shouldCloseOnDestruction_ = shouldCloseOnDestruction; }
+	/// Sets the exit on open fail
+	inline void setExitOnFailToOpen(bool shouldExitOnFailToOpen) { shouldExitOnFailToOpen_ = shouldExitOnFailToOpen; }
 	// Returns true if the file is already opened
 	virtual bool isOpened() const;
 
@@ -129,9 +131,12 @@ class DLL_PUBLIC IFile
 	int fileDescriptor_;
 	/// File pointer for `fopen()` and `fclose()`
 	FILE *filePointer_;
-	/// Should destructor close the file on exit?
+	/// Should the destructor close the file?
 	/*! Useful for `ov_open()`/`ov_fopen()` and `ov_clear()` */
-	bool shouldCloseOnExit_;
+	bool shouldCloseOnDestruction_;
+	/// Should the application exit if the file cannot be opened?
+	/*! Useful for the log file creation */
+	bool shouldExitOnFailToOpen_;
 
 	/// File size in bytes
 	long int fileSize_;

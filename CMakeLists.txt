@@ -1,12 +1,18 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(nCine)
 
+string(TIMESTAMP NCINE_MAJOR_VERSION "%Y")
+string(TIMESTAMP NCINE_MINOR_VERSION "%m")
+set(NCINE_VERSION ${NCINE_MAJOR_VERSION}.${NCINE_MINOR_VERSION})
+mark_as_advanced(NCINE_MAJOR_VERSION NCINE_MINOR_VERSION NCINE_VERSION)
+
 option(NCINE_BUILD_TESTS "Build the engine test programs" ON)
 option(NCINE_EXTRA_OPTIMIZATION "Compile the engine with extra optimizations in release mode" ON)
 option(NCINE_AUTOVECTORIZATION_REPORT "Enable report generation from compiler auto-vectorization" OFF)
 option(NCINE_DYNAMIC_LIBRARY "Compile the engine as a dynamic library" ON)
+option(NCINE_BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 get_filename_component(PARENT_SOURCE_DIR ${CMAKE_SOURCE_DIR} DIRECTORY)
 
 find_package(Threads)
@@ -98,7 +104,6 @@ else() # GCC and LLVM
 	find_package(SDL_image)
 	find_package(PNG)
 	find_package(OpenAL)
-	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
 	find_package(GLFW)
 	find_package(WebP)
 	find_package(Vorbis)
@@ -264,7 +269,7 @@ endif()
 
 if(SDL_FOUND AND NOT GLFW_FOUND)
 	add_definitions(-DWITH_SDL)
-	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # SDLmain on OS X
+	if(${CMAKE_SYSTEM_NAME} MATCHES Darwin) # SDLmain on OS X
 		list(APPEND LINK_LIBS ${SDLMAIN_LIBRARY})
 	endif()
 	list(APPEND LINK_LIBS ${SDL_LIBRARY})
@@ -370,6 +375,63 @@ endif()
 
 target_link_libraries(ncine ${OPENGL_gl_LIBRARY} ${LINK_LIBS})
 
+set(CPACK_PACKAGE_NAME "nCine")
+set(CPACK_PACKAGE_VENDOR "Encelo")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A multi-platform 2d game engine")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.md")
+#set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
+set(CPACK_PACKAGE_CONTACT "encelo@gmail.com")
+set(CPACK_PACKAGE_VERSION ${NCINE_VERSION})
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "nCine")
+include(CPack)
+
+find_package(Doxygen)
+if(NCINE_BUILD_DOCUMENTATION)
+	if(NOT DOXYGEN_FOUND)
+		message(FATAL_ERROR "Doxygen is needed to build the documentation")
+	endif()
+
+	set(DOXYGEN_OUTPUT_DIR ${CMAKE_BINARY_DIR}/docs)
+	set(DOXYFILE_IN ${CMAKE_SOURCE_DIR}/Doxyfile.in)
+	set(DOXYFILE ${CMAKE_BINARY_DIR}/Doxyfile)
+
+	configure_file(${DOXYFILE_IN} ${DOXYFILE} @ONLY)
+
+	add_custom_target(documentation ALL DEPENDS ${DOXYGEN_OUTPUT_DIR})
+
+	add_custom_command(OUTPUT ${DOXYGEN_OUTPUT_DIR}
+		COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE}
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+		COMMENT "Generating API documentation with Doxygen")
+
+	if(WIN32)
+		install(DIRECTORY ${DOXYGEN_OUTPUT_DIR}/html/ DESTINATION docs)
+	else()
+		install(DIRECTORY ${DOXYGEN_OUTPUT_DIR}/html/ DESTINATION share/doc/ncine)
+	endif()
+endif()
+
+if(WIN32)
+	install(TARGETS ncine RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+	install(DIRECTORY include/ DESTINATION include/ncine FILES_MATCHING PATTERN "*.h")
+	install(DIRECTORY src/shaders DESTINATION data)
+
+	install(DIRECTORY ${BINDIR}/ DESTINATION bin)
+	install(DIRECTORY ${LIBDIR}/ DESTINATION lib)
+	install(DIRECTORY ${EXTERNAL_MSVC_DIR}/include/ DESTINATION include)
+
+	# Install a previously created documentation, if available
+	if(NOT NCINE_BUILD_DOCUMENTATION AND IS_DIRECTORY ${CMAKE_SOURCE_DIR}/docs/html)
+		install(DIRECTORY docs/html/ DESTINATION docs)
+	endif()
+else()
+	install(TARGETS ncine LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+	install(DIRECTORY include/ DESTINATION include/ncine FILES_MATCHING PATTERN "*.h")
+	install(DIRECTORY src/shaders DESTINATION share/ncine)
+	install(FILES ${CMAKE_MODULE_PATH}/FindnCine.cmake DESTINATION lib/cmake/nCine/ RENAME nCineConfig.cmake)
+endif()
+
 if(MSVC)
 	# Disabling incremental linking and manifest generation
 	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /MANIFEST:NO /INCREMENTAL:NO")
@@ -394,28 +456,34 @@ else()
 endif()
 target_include_directories(ncine PUBLIC include PRIVATE src/include)
 
-if(WIN32 AND NCINE_DYNAMIC_LIBRARY)
-	if(MSVC_IDE)
-		add_custom_target(copy_ncine_dll ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/$<CONFIGURATION>/ncine.dll ${CMAKE_BINARY_DIR}/tests
-			DEPENDS ncine
-			COMMENT "Copying nCine DLL..."
-		)
-	else()
-		add_custom_target(copy_ncine_dll ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/ncine.dll ${CMAKE_BINARY_DIR}/tests
-			DEPENDS ncine
-			COMMENT "Copying nCine DLL..."
-		)
-	endif()
-endif()
-
 if(NCINE_BUILD_TESTS)
 	set(NCINE_DATA_DIR ${PARENT_SOURCE_DIR}/nCine-data)
 	if(NOT IS_DIRECTORY ${NCINE_DATA_DIR})
 		message(WARNING "nCine data directory not found at: ${NCINE_DATA_DIR}")
+	else()
+		if(WIN32)
+			install(DIRECTORY ${NCINE_DATA_DIR}/ DESTINATION data)
+		else()
+			install(DIRECTORY ${NCINE_DATA_DIR}/ DESTINATION share/ncine)
+		endif()
 	endif()
 
+	if(WIN32 AND NCINE_DYNAMIC_LIBRARY)
+		if(MSVC_IDE)
+			add_custom_target(copy_ncine_dll ALL
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/$<CONFIGURATION>/ncine.dll ${CMAKE_BINARY_DIR}/tests
+				DEPENDS ncine
+				COMMENT "Copying nCine DLL..."
+			)
+		else()
+			add_custom_target(copy_ncine_dll ALL
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/ncine.dll ${CMAKE_BINARY_DIR}/tests
+				DEPENDS ncine
+				COMMENT "Copying nCine DLL..."
+			)
+		endif()
+	endif()
+	
 	add_subdirectory(tests)
 	if(NOT NCINE_DYNAMIC_LIBRARY)
 		add_subdirectory(src/tests)
