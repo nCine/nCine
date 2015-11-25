@@ -1,5 +1,5 @@
 #include <cstdlib> // for EXIT_SUCCESS
-#include "Application.h"
+#include "PCApplication.h"
 
 #if defined(_WIN32) && defined(NO_INTEGRATED_GPU)
 extern "C"
@@ -19,9 +19,6 @@ ncine::IAppEventHandler* createApphandler();
 
 int main(int argc, char **argv)
 {
-	ncine::theApplication().init(createApphandler);
-	ncine::theApplication().run();
-	ncine::theApplication().shutdown();
-
+	ncine::PCApplication::main(createApphandler);
 	return EXIT_SUCCESS;
 }

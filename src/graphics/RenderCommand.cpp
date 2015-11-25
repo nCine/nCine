@@ -1,11 +1,7 @@
 #include "RenderCommand.h"
 #include "GLShaderProgram.h"
 #include "Matrix4x4.h" // TODO: Remove dependency
-#ifdef __ANDROID__
-	#include "AndroidApplication.h" // TODO: Remove dependency
-#else
-	#include "Application.h" // TODO: Remove dependency
-#endif
+#include "Application.h" // TODO: Remove dependency
 
 namespace ncine {
 

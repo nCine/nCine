@@ -1,4 +1,5 @@
 #include "apptest_particles.h"
+#include "Application.h"
 #include "Texture.h"
 #include "ParticleSystem.h"
 #include "IInputManager.h"
@@ -6,10 +7,7 @@
 #include "IFile.h" // for dataPath()
 
 #ifdef __ANDROID__
-	#include "AndroidApplication.h"
 	#include "AndroidInputManager.h"
-#else
-	#include "Application.h"
 #endif
 
 

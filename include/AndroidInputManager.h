@@ -1,14 +1,16 @@
 #ifndef CLASS_NCINE_ANDROIDINPUTMANAGER
 #define CLASS_NCINE_ANDROIDINPUTMANAGER
 
-#include <android_native_app_glue.h>
-#include <android/input.h>
-#include <android/sensor.h>
 #include "IInputManager.h"
-#include "AndroidJniHelper.h"
+
+struct AInputEvent;
+struct ASensorManager;
+struct ASensor;
+struct ASensorEventQueue;
 
 namespace ncine {
 
+class AndroidApplication;
 class Timer;
 
 /// Information about Android joystick state
@@ -39,7 +41,7 @@ class AndroidJoystickState
 };
 
 /// The class for parsing and dispatching Android input events
-class AndroidInputManager : public IInputManager
+class DLL_PUBLIC AndroidInputManager : public IInputManager
 {
   public:
 	explicit AndroidInputManager(struct android_app* state);
@@ -98,7 +100,8 @@ class AndroidInputManager : public IInputManager
 	static bool isDeviceConnected(int deviceId);
 	static void deviceInfo(int deviceId, int joyId);
 
-	friend void ::android_main(struct android_app* state);
+	// To update joystick connections in `AndroidApplication::androidMain()`
+	friend class AndroidApplication;
 };
 
 }

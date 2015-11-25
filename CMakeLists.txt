@@ -147,6 +147,7 @@ set(HEADERS
 	include/Sprite.h
 	include/SpriteBatchNode.h
 	include/Application.h
+	include/PCApplication.h
 	include/AppConfiguration.h
 	include/ParticleAffectors.h
 	include/ParticleSystem.h
@@ -227,6 +228,7 @@ set(SOURCES
 	src/graphics/Sprite.cpp
 	src/graphics/SpriteBatchNode.cpp
 	src/Application.cpp
+	src/PCApplication.cpp
 	src/AppConfiguration.cpp
 	src/graphics/Particle.cpp
 	src/graphics/ParticleAffectors.cpp

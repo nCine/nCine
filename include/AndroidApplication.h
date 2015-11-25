@@ -4,6 +4,7 @@
 #include "Application.h"
 
 struct android_app;
+struct AInputEvent;
 
 namespace ncine {
 
@@ -11,33 +12,44 @@ namespace ncine {
 class DLL_PUBLIC AndroidApplication : public Application
 {
   public:
-	void preInit(IAppEventHandler* (*createAppEventHandler)());
-	void init(struct android_app* state);
-	void shutdown();
+	static void main(struct android_app* state, IAppEventHandler* (*createAppEventHandler)());
+
+	// Processes an Android application command
+	static void processCommand(struct android_app* state, int32_t cmd);
 
 	// Wrapper around AndroidJniHelper::sdkVersion()
 	unsigned int sdkVersion() const;
 
 	inline bool isInitialized() const { return isInitialized_; }
 
-	void setFocus(bool hasFocus);
-
   private:
 	/// A flag indicating whether or not the application has already called init()
-	static bool isInitialized_;
+	bool isInitialized_;
 
-	AndroidApplication() : Application() { }
+	struct android_app* state_;
+	IAppEventHandler* (*createAppEventHandler_)();
+	void preInit();
+	void init();
+	void shutdown();
+
+	void setFocus(bool hasFocus);
+
+	/// Private constructor
+	AndroidApplication() : Application(),  isInitialized_(false), state_(NULL), createAppEventHandler_(NULL) { }
+	/// Private destructor
 	~AndroidApplication() { }
 	/// Private copy constructor
 	AndroidApplication(const AndroidApplication&);
 	/// Private assignment operator
 	AndroidApplication& operator=(const AndroidApplication&);
 
-	friend AndroidApplication& theApplication();
+	static AndroidApplication& theAndroidApplication() { return static_cast<AndroidApplication &>(theApplication()); }
+
+	friend DLL_PUBLIC Application& theApplication();
 };
 
 // Meyers' Singleton
-DLL_PUBLIC AndroidApplication& theApplication();
+DLL_PUBLIC Application& theApplication();
 
 }
 

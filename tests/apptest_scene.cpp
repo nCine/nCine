@@ -1,16 +1,10 @@
 #define _USE_MATH_DEFINES // for M_PI in MSVC
 #include <cmath>
 #include "apptest_scene.h"
+#include "Application.h"
 #include "Texture.h"
 #include "Sprite.h"
 #include "IFile.h" // for dataPath()
-
-#ifdef __ANDROID__
-	#include "AndroidApplication.h"
-#else
-	#include "Application.h"
-#endif
-
 
 nc::IAppEventHandler* createApphandler()
 {

@@ -56,6 +56,7 @@ public class LoadLibraries extends NativeActivity {
 
 	static {
 		System.loadLibrary("openal");
+		System.loadLibrary("ncine");
 	}
 
 } 

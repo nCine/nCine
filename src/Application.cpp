@@ -1,18 +1,17 @@
 #include <ctime>
 #include "Application.h"
-#include "AppConfiguration.h"
 #include "IAppEventHandler.h"
 #include "ServiceLocator.h"
 #include "ArrayIndexer.h"
 #include "GfxCapabilities.h"
 #include "RenderResources.h"
 #include "FrameTimer.h"
-#include "FileLogger.h"
 #include "LinePlotter.h"
 #include "StackedBarPlotter.h"
 #include "Font.h"
 #include "TextNode.h"
 #include "ncString.h"
+#include "IInputManager.h"
 
 #ifdef WITH_AUDIO
 	#include "ALAudioDevice.h"
@@ -22,25 +21,7 @@
 	#include "ThreadPool.h"
 #endif
 
-#include "IInputManager.h"
-#if defined(WITH_SDL)
-	#include "SdlGfxDevice.h"
-	#include "SdlInputManager.h"
-#elif defined(WITH_GLFW)
-	#include "GlfwGfxDevice.h"
-	#include "GlfwInputManager.h"
-#endif
-
 namespace ncine {
-
-#ifndef __ANDROID__
-/// Meyers' Singleton
-Application& theApplication()
-{
-	static Application instance;
-	return instance;
-}
-#endif
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS AND DESTRUCTOR
@@ -60,160 +41,6 @@ Application::Application()
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
-
-/// Must be called at start to init the application
-void Application::init(IAppEventHandler* (*createAppEventHandler)())
-{
-	appEventHandler_ = createAppEventHandler();
-	appEventHandler_->onPreInit(appCfg_);
-
-	// Registering the logger as early as possible
-	String logFilePath = IFile::dataPath() + appCfg_.logFile_;
-	theServiceLocator().registerLogger(new FileLogger(logFilePath.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
-	// Graphics device should always be created before the input manager!
-	DisplayMode displayMode(8, 8, 8, 8, 24, 8, true, false);
-#if defined(WITH_SDL)
-	gfxDevice_ = new SdlGfxDevice(appCfg_.xResolution_, appCfg_.yResolution_, displayMode, appCfg_.inFullscreen_);
-	inputManager_ = new SdlInputManager();
-#elif defined(WITH_GLFW)
-	gfxDevice_ = new GlfwGfxDevice(appCfg_.xResolution_, appCfg_.yResolution_, displayMode, appCfg_.inFullscreen_);
-	inputManager_ = new GlfwInputManager();
-#endif
-	gfxDevice_->setWindowTitle(appCfg_.windowTitle_.data());
-
-	initCommon();
-}
-
-/// The main game loop, handling events and rendering
-void Application::run()
-{
-#ifndef __ANDROID__
-	while (!shouldQuit_)
-	{
-#if defined(WITH_SDL)
-		SDL_Event event;
-
-		while (SDL_PollEvent(&event))
-		{
-			switch (event.type)
-			{
-				case SDL_QUIT:
-					shouldQuit_ = true;
-					break;
-				case SDL_ACTIVEEVENT:
-					if (event.active.state != SDL_APPMOUSEFOCUS)
-					{
-						setFocus(event.active.gain);
-					}
-					break;
-				default:
-					SdlInputManager::parseEvent(event);
-					break;
-			}
-		}
-#elif defined(WITH_GLFW)
-		setFocus(GlfwInputManager::hasFocus());
-		glfwPollEvents();
-		GlfwInputManager::updateJoystickStates();
-#endif
-
-		if (hasFocus_ && !isPaused_)
-		{
-			step();
-		}
-	}
-#endif
-}
-
-/// A single step of the game loop made to render a frame
-void Application::step()
-{
-	frameTimer_->addFrame();
-	if (appCfg_.withScenegraph_)
-	{
-		gfxDevice_->clear();
-	}
-	appEventHandler_->onFrameStart();
-	if (profilePlotter_)
-	{
-		// Measuring OnFrameEnd() + OnFrameStart() time
-		profilePlotter_->addValue(0, profileTimer_->interval());
-	}
-
-	profileTimer_->start();
-	if (rootNode_ != NULL && renderQueue_ != NULL)
-	{
-		rootNode_->update(frameTimer_->interval());
-		rootNode_->visit(*renderQueue_);
-		renderQueue_->draw();
-	}
-
-	if (textLines_ && Timer::now() - textUpdateTime_ > appCfg_.profileTextUpdateTime_)
-	{
-		textUpdateTime_ = Timer::now();
-		textString_.format(static_cast<const char *>("FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC"),
-				frameTimer_->averageFps(), frameTimer_->interval() * 1000.0f,
-				renderQueue_->numVertices(RenderCommand::SPRITE_TYPE), renderQueue_->numCommands(RenderCommand::SPRITE_TYPE),
-				renderQueue_->numVertices(RenderCommand::PARTICLE_TYPE), renderQueue_->numCommands(RenderCommand::PARTICLE_TYPE),
-				renderQueue_->numVertices(RenderCommand::TEXT_TYPE), renderQueue_->numCommands(RenderCommand::TEXT_TYPE),
-				renderQueue_->numVertices(RenderCommand::PLOTTER_TYPE), renderQueue_->numCommands(RenderCommand::PLOTTER_TYPE),
-				renderQueue_->numVertices(), renderQueue_->numCommands());
-
-		textLines_->setString(textString_);
-		textLines_->setAlignment(TextNode::ALIGN_RIGHT);
-		textLines_->setPosition((static_cast<float>(width()) - textLines_->width()), static_cast<float>(height()));
-	}
-
-	theServiceLocator().audioDevice().updatePlayers();
-	if (profilePlotter_)
-	{
-		// Measuring scenegraph update and visit + draw + audio update
-		profilePlotter_->addValue(1, profileTimer_->interval());
-	}
-
-	profileTimer_->start();
-	gfxDevice_->update();
-	if (profilePlotter_)
-	{
-		// Measuring swap buffers time
-		profilePlotter_->addValue(2, profileTimer_->interval());
-	}
-
-	profileTimer_->start();
-	appEventHandler_->onFrameEnd();
-}
-
-/// Must be called before exiting to shut down the application
-void Application::shutdown()
-{
-	appEventHandler_->onShutdown();
-	LOGI("IAppEventHandler::OnShutdown() invoked");
-
-	if (appEventHandler_)
-	{
-		delete appEventHandler_;
-	}
-
-	delete textLines_;
-	delete font_;
-	delete profilePlotter_;
-	delete profileTimer_;
-	delete rootNode_; // deletes every child too
-	delete renderQueue_;
-	RenderResources::dispose();
-	delete frameTimer_;
-	delete inputManager_;
-	delete gfxDevice_;
-
-	if (theServiceLocator().indexer().isEmpty() == false)
-	{
-		LOGW("The object indexer is not empty");
-	}
-
-	LOGI("Application shutted down");
-
-	theServiceLocator().unregisterAll();
-}
 
 /// Returns the elapsed time since the end of the previous frame in milliseconds
 float Application::interval() const
@@ -239,26 +66,11 @@ void Application::togglePause()
 	setPause(paused);
 }
 
-/// Sets the focus flag
-void Application::setFocus(bool hasFocus)
-{
-	// Check if a focus event has occurred
-	if (hasFocus_ != hasFocus)
-	{
-		hasFocus_ = hasFocus;
-		// Check if focus has been gained
-		if (hasFocus == true)
-		{
-			frameTimer_->start();
-			profileTimer_->start();
-		}
-	}
-}
-
 ///////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/// Must be called before giving control to the application
 void Application::initCommon()
 {
 	LOGI("nCine compiled on " __DATE__ " at " __TIME__);
@@ -341,6 +153,112 @@ void Application::initCommon()
 	// HACK: Init of the random seed
 	// In the future there could be a random generator service
 	srand(static_cast<unsigned int>(time(NULL)));
+}
+
+/// A single step of the game loop made to render a frame
+void Application::step()
+{
+	frameTimer_->addFrame();
+	if (appCfg_.withScenegraph_)
+	{
+		gfxDevice_->clear();
+	}
+	appEventHandler_->onFrameStart();
+	if (profilePlotter_)
+	{
+		// Measuring OnFrameEnd() + OnFrameStart() time
+		profilePlotter_->addValue(0, profileTimer_->interval());
+	}
+
+	profileTimer_->start();
+	if (rootNode_ != NULL && renderQueue_ != NULL)
+	{
+		rootNode_->update(frameTimer_->interval());
+		rootNode_->visit(*renderQueue_);
+		renderQueue_->draw();
+	}
+
+	if (textLines_ && Timer::now() - textUpdateTime_ > appCfg_.profileTextUpdateTime_)
+	{
+		textUpdateTime_ = Timer::now();
+		textString_.format(static_cast<const char *>("FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC"),
+				frameTimer_->averageFps(), frameTimer_->interval() * 1000.0f,
+				renderQueue_->numVertices(RenderCommand::SPRITE_TYPE), renderQueue_->numCommands(RenderCommand::SPRITE_TYPE),
+				renderQueue_->numVertices(RenderCommand::PARTICLE_TYPE), renderQueue_->numCommands(RenderCommand::PARTICLE_TYPE),
+				renderQueue_->numVertices(RenderCommand::TEXT_TYPE), renderQueue_->numCommands(RenderCommand::TEXT_TYPE),
+				renderQueue_->numVertices(RenderCommand::PLOTTER_TYPE), renderQueue_->numCommands(RenderCommand::PLOTTER_TYPE),
+				renderQueue_->numVertices(), renderQueue_->numCommands());
+
+		textLines_->setString(textString_);
+		textLines_->setAlignment(TextNode::ALIGN_RIGHT);
+		textLines_->setPosition((static_cast<float>(width()) - textLines_->width()), static_cast<float>(height()));
+	}
+
+	theServiceLocator().audioDevice().updatePlayers();
+	if (profilePlotter_)
+	{
+		// Measuring scenegraph update and visit + draw + audio update
+		profilePlotter_->addValue(1, profileTimer_->interval());
+	}
+
+	profileTimer_->start();
+	gfxDevice_->update();
+	if (profilePlotter_)
+	{
+		// Measuring swap buffers time
+		profilePlotter_->addValue(2, profileTimer_->interval());
+	}
+
+	profileTimer_->start();
+	appEventHandler_->onFrameEnd();
+}
+
+/// Must be called before exiting to shut down the application
+void Application::shutdownCommon()
+{
+	appEventHandler_->onShutdown();
+	LOGI("IAppEventHandler::OnShutdown() invoked");
+
+	if (appEventHandler_)
+	{
+		delete appEventHandler_;
+	}
+
+	delete textLines_;
+	delete font_;
+	delete profilePlotter_;
+	delete profileTimer_;
+	delete rootNode_; // deletes every child too
+	delete renderQueue_;
+	RenderResources::dispose();
+	delete frameTimer_;
+	delete inputManager_;
+	delete gfxDevice_;
+
+	if (theServiceLocator().indexer().isEmpty() == false)
+	{
+		LOGW("The object indexer is not empty");
+	}
+
+	LOGI("Application shutted down");
+
+	theServiceLocator().unregisterAll();
+}
+
+/// Sets the focus flag
+void Application::setFocus(bool hasFocus)
+{
+	// Check if a focus event has occurred
+	if (hasFocus_ != hasFocus)
+	{
+		hasFocus_ = hasFocus;
+		// Check if focus has been gained
+		if (hasFocus == true)
+		{
+			frameTimer_->start();
+			profileTimer_->start();
+		}
+	}
 }
 
 }

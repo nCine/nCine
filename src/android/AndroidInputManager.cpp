@@ -1,5 +1,10 @@
+#include <android_native_app_glue.h>
+#include <android/input.h>
+#include <android/sensor.h>
+
 #include "AndroidInputManager.h"
 #include "IInputEventHandler.h"
+#include "AndroidJniHelper.h"
 #include "AndroidApplication.h"
 #include "ServiceLocator.h"
 #include "Timer.h"

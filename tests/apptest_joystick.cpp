@@ -1,4 +1,5 @@
 #include "apptest_joystick.h"
+#include "Application.h"
 #include "ServiceLocator.h"
 #include "ncString.h"
 #include "Texture.h"
@@ -6,12 +7,6 @@
 #include "Font.h"
 #include "TextNode.h"
 #include "IFile.h" // for dataPath()
-
-#ifdef __ANDROID__
-	#include "AndroidApplication.h"
-#else
-	#include "Application.h"
-#endif
 
 // Xbox 360 controller defines from XInput includes
 #define XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE  7849

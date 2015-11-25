@@ -1,4 +1,5 @@
 #include "apptest_animsprites.h"
+#include "Application.h"
 #include "AudioStreamPlayer.h"
 #include "Texture.h"
 #include "AnimatedSprite.h"
@@ -6,12 +7,6 @@
 #include "TextNode.h"
 #include "IInputManager.h"
 #include "IFile.h" // for dataPath()
-
-#ifdef __ANDROID__
-	#include "AndroidApplication.h"
-#else
-	#include "Application.h"
-#endif
 
 //#define WITH_8DIRECTIONS
 

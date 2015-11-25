@@ -33,7 +33,6 @@ include $(CLEAR_VARS)
 NCINE_ROOT=../../../..
 INC=$(NCINE_ROOT)/include
 SRC=$(NCINE_ROOT)/src
-TST=$(NCINE_ROOT)/tests
 
 LOCAL_MODULE := ncine
 LOCAL_CFLAGS := -Wall -fvisibility=hidden -fvisibility-inlines-hidden -ffast-math -DWITH_AUDIO -DWITH_THREADS
@@ -41,7 +40,6 @@ LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/$(INC) \
 	$(LOCAL_PATH)/$(SRC)/include
 LOCAL_SRC_FILES := \
-	main.cpp \
 	$(SRC)/base/String.cpp \
 	$(SRC)/ServiceLocator.cpp \
 	$(SRC)/FileLogger.cpp \
@@ -111,12 +109,30 @@ LOCAL_SRC_FILES := \
 	$(SRC)/audio/AudioStreamPlayer.cpp \
 	$(SRC)/threading/PosixThread.cpp \
 	$(SRC)/threading/PosixThreadSync.cpp \
-	$(SRC)/threading/ThreadPool.cpp \
-	$(TST)/apptest_joystick.cpp
+	$(SRC)/threading/ThreadPool.cpp
 
 LOCAL_LDLIBS := -lm -llog -landroid -lEGL -lGLESv2
 LOCAL_STATIC_LIBRARIES := android_native_app_glue webp tremolo
 LOCAL_SHARED_LIBRARIES := openal
+
+include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+
+NCINE_ROOT=../../../..
+INC=$(NCINE_ROOT)/include
+TST=$(NCINE_ROOT)/tests
+
+LOCAL_MODULE := game
+LOCAL_CFLAGS := -Wall -ffast-math
+
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/$(INC)
+LOCAL_SRC_FILES := main.cpp \
+	$(TST)/apptest_mipmapping.cpp
+
+LOCAL_LDLIBS := -landroid
+LOCAL_STATIC_LIBRARIES := android_native_app_glue
+LOCAL_SHARED_LIBRARIES := ncine
 
 include $(BUILD_SHARED_LIBRARY)
 

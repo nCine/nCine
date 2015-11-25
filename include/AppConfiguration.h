@@ -66,9 +66,8 @@ class DLL_PUBLIC AppConfiguration
 	bool withScenegraph_;
 
 	friend class Application;
-#ifdef __ANDROID__
+	friend class PCApplication;
 	friend class AndroidApplication;
-#endif
 };
 
 }

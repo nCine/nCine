@@ -1,10 +1,8 @@
 #ifndef CLASS_NCINE_APPLICATION
 #define CLASS_NCINE_APPLICATION
 
-#include <cstdio> // for NULL
 #include "IGfxDevice.h"
 #include "AppConfiguration.h"
-#include "ncString.h"
 
 namespace ncine {
 
@@ -22,17 +20,6 @@ class IAppEventHandler;
 class DLL_PUBLIC Application
 {
   public:
-	// Must be called at start to init the application
-	void init(IAppEventHandler* (*createAppEventHandler)());
-
-	// The main game loop, handling events and rendering
-	void run();
-	// A single step of the game loop made to render a frame
-	void step();
-	// Must be called before exiting to shut down the application
-	void shutdown();
-
-	// HACK: wrapping a lot of getters
 	/// Returns the graphics device instance
 	inline IGfxDevice& gfxDevice() { return *gfxDevice_; }
 	/// Returns the root of the transformation graph
@@ -62,8 +49,6 @@ class DLL_PUBLIC Application
 
 	/// Returns the focus flag value
 	inline bool hasFocus() const { return hasFocus_; }
-	// Sets the focus flag
-	void setFocus(bool hasFocus);
 
   protected:
 	/// Maximum length for the profile string
@@ -88,7 +73,16 @@ class DLL_PUBLIC Application
 
 	Application();
 	~Application() { }
+
+	// Must be called before giving control to the application
 	void initCommon();
+	// A single step of the game loop made to render a frame
+	void step();
+	// Must be called before exiting to shut down the application
+	void shutdownCommon();
+
+	// Sets the focus flag
+	virtual void setFocus(bool hasFocus);
 
   private:	
 	/// Private copy constructor
@@ -96,15 +90,12 @@ class DLL_PUBLIC Application
 	/// Private assignment operator
 	Application& operator=(const Application&);
 
-#ifndef __ANDROID__
-	friend DLL_PUBLIC Application& theApplication();
-#endif
+	friend class PCApplication;
+	friend class AndroidApplication;
 };
 
-#ifndef __ANDROID__
 // Meyers' Singleton
-DLL_PUBLIC Application& theApplication();
-#endif
+extern DLL_PUBLIC Application& theApplication();
 
 }
 

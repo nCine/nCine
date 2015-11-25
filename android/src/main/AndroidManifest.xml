@@ -9,7 +9,7 @@
 				android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
 				android:screenOrientation="landscape"
 				android:configChanges="keyboardHidden|orientation|screenSize">
-			<meta-data android:name="android.app.lib_name" android:value="ncine" />
+			<meta-data android:name="android.app.lib_name" android:value="game" />
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
