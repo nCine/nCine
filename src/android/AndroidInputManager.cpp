@@ -247,8 +247,8 @@ bool AndroidInputManager::parseEvent(const AInputEvent *event)
 			 AKeyEvent_getKeyCode(event) != AKEYCODE_VOLUME_DOWN)
 	{
 		keyboardEvent_.scancode = AKeyEvent_getScanCode(event);
-		keyboardEvent_.sym = KeySym(AKeyEvent_getKeyCode(event));
-		keyboardEvent_.mod = AKeyEvent_getMetaState(event);
+		keyboardEvent_.sym = keySymValueToEnum(AKeyEvent_getKeyCode(event));
+		keyboardEvent_.mod = keyModValueToEnum(AKeyEvent_getMetaState(event));
 
 		switch (AKeyEvent_getAction(event))
 		{

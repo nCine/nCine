@@ -1,15 +1,8 @@
 #ifndef CLASS_NCIINPUTMANAGER
 #define CLASS_NCIINPUTMANAGER
 
-#if defined(__ANDROID__)
-	#include "AndroidKeys.h"
-#elif defined(WITH_SDL)
-	#include "SdlKeys.h"
-#elif defined(WITH_GLFW)
-	#include "GlfwKeys.h"
-#endif
-
 #include "common_defines.h"
+#include "Keys.h"
 
 namespace ncine {
 

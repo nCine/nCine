@@ -121,6 +121,8 @@ class SdlInputManager : public IInputManager
 	SdlInputManager& operator=(const SdlInputManager&);
 
 	static short int hatEnumToAxisValue(unsigned char hatState, bool upDownAxis);
+	static KeySym keySymValueToEnum(int keysym);
+	static KeyMod keyModValueToEnum(int keymod);
 };
 
 }

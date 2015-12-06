@@ -57,6 +57,7 @@ LOCAL_SRC_FILES := \
 	$(SRC)/android/AssetFile.cpp \
 	$(SRC)/android/AndroidJniHelper.cpp \
 	$(SRC)/android/AndroidInputManager.cpp \
+	$(SRC)/android/AndroidKeys.cpp \
 	$(SRC)/graphics/IGfxDevice.cpp \
 	$(SRC)/android/EglGfxDevice.cpp \
 	$(SRC)/graphics/GfxCapabilities.cpp \

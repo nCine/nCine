@@ -1,6 +1,7 @@
 #ifndef CLASS_NCINE_ANDROIDINPUTMANAGER
 #define CLASS_NCINE_ANDROIDINPUTMANAGER
 
+#include <android/keycodes.h>
 #include "IInputManager.h"
 
 struct AInputEvent;
@@ -41,7 +42,7 @@ class AndroidJoystickState
 };
 
 /// The class for parsing and dispatching Android input events
-class DLL_PUBLIC AndroidInputManager : public IInputManager
+class AndroidInputManager : public IInputManager
 {
   public:
 	explicit AndroidInputManager(struct android_app* state);
@@ -99,6 +100,9 @@ class DLL_PUBLIC AndroidInputManager : public IInputManager
 	static int findJoyId(int deviceId);
 	static bool isDeviceConnected(int deviceId);
 	static void deviceInfo(int deviceId, int joyId);
+
+	static KeySym keySymValueToEnum(int keysym);
+	static KeyMod keyModValueToEnum(int keymod);
 
 	// To update joystick connections in `AndroidApplication::androidMain()`
 	friend class AndroidApplication;

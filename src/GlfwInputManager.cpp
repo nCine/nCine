@@ -46,8 +46,8 @@ void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, in
 	}
 
 	keyboardEvent_.scancode = scancode;
-	keyboardEvent_.sym = KeySym(key);
-	keyboardEvent_.mod = mods;
+	keyboardEvent_.sym = keySymValueToEnum(key);
+	keyboardEvent_.mod = keyModValueToEnum(mods);
 
 	if (action == GLFW_PRESS)
 	{

@@ -131,6 +131,7 @@ set(HEADERS
 	include/IAppEventHandler.h
 	include/IInputEventHandler.h
 	include/IInputManager.h
+	include/Keys.h
 	include/Vector2.h
 	include/Vector3.h
 	include/Vector4.h
@@ -215,9 +216,9 @@ set(SOURCES
 	src/graphics/Geometry.cpp
 	src/graphics/TextureFormat.cpp
 	src/graphics/ITextureLoader.cpp
-    src/graphics/TextureLoaderDds.cpp
-    src/graphics/TextureLoaderPvr.cpp
-    src/graphics/TextureLoaderKtx.cpp
+	src/graphics/TextureLoaderDds.cpp
+	src/graphics/TextureLoaderPvr.cpp
+	src/graphics/TextureLoaderKtx.cpp
 	src/graphics/Texture.cpp
 	src/graphics/ProfilePlotter.cpp
 	src/graphics/PlottingVariable.cpp
@@ -262,11 +263,11 @@ if(GLFW_FOUND)
 	add_definitions(-DGLFW_NO_GLU)
 	list(APPEND LINK_LIBS ${GLFW_LIBRARY})
 
-	list(APPEND HEADERS include/GlfwKeys.h)
 	list(APPEND PRIVATE_HEADERS src/include/GlfwInputManager.h)
 	list(APPEND PRIVATE_HEADERS src/include/GlfwGfxDevice.h)
-    list(APPEND SOURCES src/GlfwInputManager.cpp)
-    list(APPEND SOURCES src/graphics/GlfwGfxDevice.cpp)
+	list(APPEND SOURCES src/GlfwInputManager.cpp)
+	list(APPEND SOURCES src/GlfwKeys.cpp)
+	list(APPEND SOURCES src/graphics/GlfwGfxDevice.cpp)
 endif()
 
 if(SDL_FOUND AND NOT GLFW_FOUND)
@@ -280,14 +281,14 @@ if(SDL_FOUND AND NOT GLFW_FOUND)
 		list(APPEND LINK_LIBS ${SDLIMAGE_LIBRARY})
 	endif()
 
-	list(APPEND HEADERS include/SdlKeys.h)
 	list(APPEND PRIVATE_HEADERS src/include/SdlInputManager.h)
 	list(APPEND PRIVATE_HEADERS src/include/SdlGfxDevice.h)
-    list(APPEND SOURCES src/SdlInputManager.cpp)
-    list(APPEND SOURCES src/graphics/SdlGfxDevice.cpp)
+	list(APPEND SOURCES src/SdlInputManager.cpp)
+	list(APPEND SOURCES src/SdlKeys.cpp)
+	list(APPEND SOURCES src/graphics/SdlGfxDevice.cpp)
 	if(SDLIMAGE_FOUND)
 		list(APPEND PRIVATE_HEADERS src/include/TextureLoaderSdl.h)
-        list(APPEND SOURCES src/graphics/TextureLoaderSdl.cpp)
+		list(APPEND SOURCES src/graphics/TextureLoaderSdl.cpp)
 	endif()
 endif()
 
@@ -335,7 +336,7 @@ if(PNG_FOUND AND GLFW_FOUND)
 	list(APPEND LINK_LIBS ${PNG_LIBRARY})
 
 	list(APPEND PRIVATE_HEADERS src/include/TextureLoaderPng.h)
-    list(APPEND SOURCES src/graphics/TextureLoaderPng.cpp)
+	list(APPEND SOURCES src/graphics/TextureLoaderPng.cpp)
 endif()
 if(WEBP_FOUND)
 	add_definitions(-DWITH_WEBP)
@@ -449,7 +450,7 @@ if(MSVC)
 	else()
 		add_definitions(-DNCINE_STATIC)
 	endif()
-	
+
 	target_include_directories(ncine PUBLIC "${EXTERNAL_MSVC_DIR}/include")
 else()
 	if(PNG_FOUND AND GLFW_FOUND)

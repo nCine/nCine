@@ -88,17 +88,20 @@ class GlfwInputManager : public IInputManager
   private:
 	static const unsigned int MaxNumJoysticks = GLFW_JOYSTICK_LAST - GLFW_JOYSTICK_1 + 1;
 
-	static void windowCloseCallback(GLFWwindow *window);
-	static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
-	static void cursorPosCallback(GLFWwindow *window, double x, double y);
-	static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
-
 	static bool windowHasFocus_;
 	static GlfwMouseState mouseState_;
 	static GlfwMouseEvent mouseEvent_;
 	static GlfwKeyboardState keyboardState_;
 	static KeyboardEvent keyboardEvent_;
 	static StaticArray<GlfwJoystickState, MaxNumJoysticks> joystickStates_;
+
+	static void windowCloseCallback(GLFWwindow *window);
+	static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+	static void cursorPosCallback(GLFWwindow *window, double x, double y);
+	static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
+
+	static KeySym keySymValueToEnum(int keysym);
+	static KeyMod keyModValueToEnum(int keymod);
 };
 
 inline const MouseState& GlfwInputManager::mouseState()

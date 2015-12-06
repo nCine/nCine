@@ -92,8 +92,8 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 		case SDL_KEYDOWN:
 		case SDL_KEYUP:
 			keyboardEvent_.scancode = event.key.keysym.scancode;
-			keyboardEvent_.sym = KeySym(event.key.keysym.sym);
-			keyboardEvent_.mod = event.key.keysym.mod;
+			keyboardEvent_.sym = keySymValueToEnum(event.key.keysym.sym);
+			keyboardEvent_.mod = keyModValueToEnum(event.key.keysym.mod);
 			keyboardEvent_.unicode = event.key.keysym.unicode;
 			break;
 		case SDL_MOUSEBUTTONDOWN:
