@@ -1,4 +1,7 @@
 #include <cstdlib> // for exit()
+#define NCINE_INCLUDE_OPENAL
+#include "common_headers.h"
+
 #include "AudioStream.h"
 #include "IAudioLoader.h"
 #include "ServiceLocator.h"
@@ -50,7 +53,7 @@ AudioStream::~AudioStream()
 
 /// Enqueues new buffers and unqueues processed ones
 /*! /return A flag indicating whether the stream has been entirely decoded and played or not */
-bool AudioStream::enqueue(ALuint source, bool looping)
+bool AudioStream::enqueue(unsigned int source, bool looping)
 {
 	// Set to false when the queue is empty and there is no more data to decode
 	bool shouldKeepPlaying = true;
@@ -123,7 +126,7 @@ bool AudioStream::enqueue(ALuint source, bool looping)
 }
 
 /// Unqueues any left buffer and rewinds the loader
-void AudioStream::stop(ALuint source)
+void AudioStream::stop(unsigned int source)
 {
 	// In order to unqueue all the buffers, the source must be stopped first
 	alSourceStop(source);

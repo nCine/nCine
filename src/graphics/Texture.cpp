@@ -1,4 +1,7 @@
 #include <cstdlib> // for exit()
+#define NCINE_INCLUDE_OPENGL
+#include "common_headers.h"
+
 #include "Texture.h"
 #include "ITextureLoader.h"
 #include "GLTexture.h"
@@ -69,11 +72,40 @@ Texture::~Texture()
 ///////////////////////////////////////////////////////////
 
 /// Sets texture filtering for both magnification and minification
-void Texture::setFiltering(GLenum filter)
+void Texture::setFiltering(TextureFiltering filter)
 {
+	GLenum glFilter = GL_NEAREST;
+	switch(filter)
+	{
+		case NEAREST: glFilter = GL_NEAREST; break;
+		case LINEAR: glFilter = GL_LINEAR; break;
+		case NEAREST_MIPMAP_NEAREST: glFilter = GL_NEAREST_MIPMAP_NEAREST; break;
+		case LINEAR_MIPMAP_NEAREST: glFilter = GL_LINEAR_MIPMAP_NEAREST; break;
+		case NEAREST_MIPMAP_LINEAR: glFilter = GL_NEAREST_MIPMAP_LINEAR; break;
+		case LINEAR_MIPMAP_LINEAR: glFilter = GL_LINEAR_MIPMAP_LINEAR; break;
+		default: glFilter = GL_NEAREST; break;
+	}
+
 	glTexture_->bind();
-	glTexture_->texParameteri(GL_TEXTURE_MAG_FILTER, filter);
-	glTexture_->texParameteri(GL_TEXTURE_MIN_FILTER, filter);
+	glTexture_->texParameteri(GL_TEXTURE_MAG_FILTER, glFilter);
+	glTexture_->texParameteri(GL_TEXTURE_MIN_FILTER, glFilter);
+}
+
+/// Sets texture wrap for both `s` and `t` coordinate
+void Texture::setWrap(TextureWrap wrap)
+{
+	GLenum glWrap = GL_CLAMP_TO_EDGE;
+	switch(wrap)
+	{
+		case CLAMP_TO_EDGE: glWrap = GL_CLAMP_TO_EDGE; break;
+		case MIRRORED_REPEAT: glWrap = GL_MIRRORED_REPEAT; break;
+		case REPEAT: glWrap = GL_REPEAT; break;
+		default: glWrap = GL_CLAMP_TO_EDGE; break;
+	}
+
+	glTexture_->bind();
+	glTexture_->texParameteri(GL_TEXTURE_WRAP_S, glWrap);
+	glTexture_->texParameteri(GL_TEXTURE_WRAP_T, glWrap);
 }
 
 ///////////////////////////////////////////////////////////

@@ -110,7 +110,6 @@ else() # GCC and LLVM
 endif()
 
 set(HEADERS
-	include/common_headers.h
 	include/common_defines.h
 	include/algorithms.h
 	include/iterator_traits.h
@@ -158,6 +157,7 @@ set(HEADERS
 )
 
 set(PRIVATE_HEADERS
+	src/include/common_headers.h
 	src/include/ArrayIndexer.h
 	src/include/FrameTimer.h
 	src/include/StandardFile.h
@@ -321,6 +321,7 @@ if(OPENAL_FOUND)
 		src/audio/AudioLoaderWav.cpp
 		src/audio/AudioBuffer.cpp
 		src/audio/AudioStream.cpp
+		src/audio/IAudioPlayer.cpp
 		src/audio/AudioBufferPlayer.cpp
 		src/audio/AudioStreamPlayer.cpp
 	)
@@ -451,7 +452,7 @@ if(MSVC)
 		add_definitions(-DNCINE_STATIC)
 	endif()
 
-	target_include_directories(ncine PUBLIC "${EXTERNAL_MSVC_DIR}/include")
+	target_include_directories(ncine PRIVATE "${EXTERNAL_MSVC_DIR}/include")
 else()
 	if(PNG_FOUND AND GLFW_FOUND)
 		target_include_directories(ncine PRIVATE ${PNG_INCLUDE_DIR})

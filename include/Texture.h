@@ -1,9 +1,6 @@
 #ifndef CLASS_NCINE_TEXTURE
 #define CLASS_NCINE_TEXTURE
 
-#define NCINE_INCLUDE_OPENGL
-#include "common_headers.h"
-
 #include "Object.h"
 #include "Rect.h"
 
@@ -16,6 +13,25 @@ class GLTexture;
 class DLL_PUBLIC Texture : public Object
 {
   public:
+	/// Texture filtering type
+	enum TextureFiltering
+	{
+		NEAREST,
+		LINEAR,
+		NEAREST_MIPMAP_NEAREST,
+		LINEAR_MIPMAP_NEAREST,
+		NEAREST_MIPMAP_LINEAR,
+		LINEAR_MIPMAP_LINEAR
+	};
+
+	/// Texture wrap type
+	enum TextureWrap
+	{
+		CLAMP_TO_EDGE,
+		MIRRORED_REPEAT,
+		REPEAT
+	};
+
 	Texture();
 	explicit Texture(const char *filename);
 	Texture(const char *filename, int width, int height);
@@ -39,7 +55,9 @@ class DLL_PUBLIC Texture : public Object
 	inline bool hasAlpha() const { return hasAlphaChannel_; }
 
 	// Sets texture filtering for both magnification and minification
-	void setFiltering(GLenum filter);
+	void setFiltering(TextureFiltering filter);
+	// Sets texture wrap for both `s` and `t` coordinate
+	void setWrap(TextureWrap wrap);
 
 	inline static ObjectType sType() { return TEXTURE_TYPE; }
 

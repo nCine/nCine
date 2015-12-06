@@ -1,8 +1,6 @@
 #ifndef CLASS_NCINE_AUDIOSTREAM
 #define CLASS_NCINE_AUDIOSTREAM
 
-#define NCINE_INCLUDE_OPENAL
-#include "common_headers.h"
 #include "IAudioLoader.h"
 #include "StaticArray.h"
 
@@ -15,9 +13,9 @@ class DLL_PUBLIC AudioStream
 	virtual ~AudioStream();
 
 	// Enqueues new buffers and unqueues processed ones
-	bool enqueue(ALuint source, bool looping);
+	bool enqueue(unsigned int source, bool looping);
 	// Unqueues any left buffer and rewinds the loader
-	void stop(ALuint source);
+	void stop(unsigned int source);
 
 	/// Returns samples frequency
 	inline int frequency() const { return frequency_; }
@@ -26,7 +24,7 @@ class DLL_PUBLIC AudioStream
 	/// Number of buffers for streaming
 	static const int NumBuffers = 3;
 	/// OpenAL buffer queue for streaming
-	StaticArray<ALuint, NumBuffers> alBuffers_;
+	StaticArray<unsigned int, NumBuffers> alBuffers_;
 	/// Index of the next available OpenAL buffer
 	int nextAvailALBuffer_;
 
@@ -38,7 +36,7 @@ class DLL_PUBLIC AudioStream
 	/// Samples frequency
 	int frequency_;
 	/// OpenAL channel format enumeration
-	ALenum format_;
+	int format_;
 	/// The associated loader to continuosly stream decoded data
 	IAudioLoader *audioLoader_;
 

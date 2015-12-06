@@ -1,4 +1,7 @@
 #include <cstdlib> // for exit()
+#define NCINE_INCLUDE_OPENAL
+#include "common_headers.h"
+
 #include "AudioStreamPlayer.h"
 #include "ServiceLocator.h"
 

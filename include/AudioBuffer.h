@@ -1,8 +1,6 @@
 #ifndef CLASS_NCINE_AUDIOBUFFER
 #define CLASS_NCINE_AUDIOBUFFER
 
-#define NCINE_INCLUDE_OPENAL
-#include "common_headers.h"
 #include "Object.h"
 
 namespace ncine {
@@ -20,7 +18,7 @@ class DLL_PUBLIC AudioBuffer : public Object
 	virtual ~AudioBuffer();
 
 	/// Returns the OpenAL buffer id
-	inline ALuint bufferId() const { return bufferId_; }
+	inline unsigned int bufferId() const { return bufferId_; }
 	/// Returns number of audio channels
 	inline int numChannels() const { return numChannels_; }
 	/// Returns samples frequency
@@ -30,7 +28,7 @@ class DLL_PUBLIC AudioBuffer : public Object
 
   private:
 	/// The OpenAL buffer id
-	ALuint bufferId_;
+	unsigned int bufferId_;
 	/// Number of channels
 	int numChannels_;
 	/// Samples frequency

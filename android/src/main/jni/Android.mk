@@ -106,6 +106,7 @@ LOCAL_SRC_FILES := \
 	$(SRC)/audio/AudioLoaderOgg.cpp \
 	$(SRC)/audio/AudioBuffer.cpp \
 	$(SRC)/audio/AudioStream.cpp \
+	$(SRC)/audio/IAudioPlayer.cpp \
 	$(SRC)/audio/AudioBufferPlayer.cpp \
 	$(SRC)/audio/AudioStreamPlayer.cpp \
 	$(SRC)/threading/PosixThread.cpp \

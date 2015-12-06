@@ -1,8 +1,6 @@
 #ifndef CLASS_NCINE_IAUDIOPLAYER
 #define CLASS_NCINE_IAUDIOPLAYER
 
-#define NCINE_INCLUDE_OPENAL
-#include "common_headers.h"
 #include "Object.h"
 #include "StaticArray.h"
 
@@ -21,14 +19,7 @@ class DLL_PUBLIC IAudioPlayer : public Object
 		STATE_STOPPED
 	};
 
-	IAudioPlayer()
-		: sourceId_(-1), state_(STATE_STOPPED),
-		  isLooping_(false), gain_(1.0f), pitch_(1.0f)
-	{
-		position_[0] = 0.0f;
-		position_[1] = 0.0f;
-		position_[2] = 0.0f;
-	}
+	IAudioPlayer();
 	virtual ~IAudioPlayer() { }
 
 	/// Starts playing
@@ -84,56 +75,6 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	/// Player position in space
 	StaticArray<float, 3> position_;
 };
-
-/// Sets player gain value
-/*! It gets applied to the OpenAL source only when playing */
-inline void IAudioPlayer::setGain(float gain)
-{
-	gain_ = gain;
-	if (state_ == STATE_PLAYING)
-	{
-		alSourcef(sourceId_, AL_GAIN, gain_);
-	}
-}
-
-/// Sets player pitch value
-/*! It gets applied to the OpenAL source only when playing */
-inline void IAudioPlayer::setPitch(float pitch)
-{
-	pitch_ = pitch;
-	if (state_ == STATE_PLAYING)
-	{
-		alSourcef(sourceId_, AL_PITCH, pitch_);
-	}
-}
-
-/// Sets player position value through vector
-/*! It gets applied to the OpenAL source only when playing */
-inline void IAudioPlayer::setPosition(float position[3])
-{
-	position_[0] = position[0];
-	position_[1] = position[1];
-	position_[2] = position[2];
-
-	if (state_ == STATE_PLAYING)
-	{
-		alSourcefv(sourceId_, AL_POSITION, position_.data());
-	}
-}
-
-/// Sets player position value through components
-/*! It gets applied to the OpenAL source only when playing */
-inline void IAudioPlayer::setPosition(float x, float y, float z)
-{
-	position_[0] = x;
-	position_[1] = y;
-	position_[2] = z;
-
-	if (state_ == STATE_PLAYING)
-	{
-		alSourcefv(sourceId_, AL_POSITION, position_.data());
-	}
-}
 
 }
 
