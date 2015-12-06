@@ -20,7 +20,6 @@ nc::IAppEventHandler* createApphandler()
 
 void MyEventHandler::onInit()
 {
-	nc::IInputManager::setHandler(this);
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 	joyString_ = new nc::String(NumChars);

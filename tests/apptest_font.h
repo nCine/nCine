@@ -6,9 +6,8 @@
 
 namespace ncine {
 
-class SceneNode;
-class Texture;
-class Sprite;
+class Font;
+class TextNode;
 
 }
 
@@ -23,19 +22,20 @@ class MyEventHandler
 	virtual void onInit();
 	virtual void onShutdown();
 
-#ifdef __ANDROID__
-	virtual void onTouchUp(const nc::TouchEvent &event);
-#else
+#ifndef __ANDROID__
 	virtual void onKeyReleased(const nc::KeyboardEvent &event);
-	virtual void onMouseButtonReleased(const nc::MouseEvent &event);
 #endif
 
   private:
-	bool pause_;
-	nc::SceneNode *dummy_;
-	nc::Texture *texture_;
-	nc::Sprite *sprite_;
-	unsigned int divider_;
+	nc::Font *font1_;
+	nc::Font *font2_;
+	nc::Font *font3_;
+	nc::TextNode *text1_;
+	nc::TextNode *text2_;
+	nc::TextNode *text3_;
+	nc::TextNode *text4_;
+	nc::TextNode *text5_;
+	nc::TextNode *text6_;
 };
 
 #endif

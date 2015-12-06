@@ -5,10 +5,9 @@
 #include "AnimatedSprite.h"
 #include "Font.h"
 #include "TextNode.h"
-#include "IInputManager.h"
 #include "IFile.h" // for dataPath()
 
-//#define WITH_8DIRECTIONS
+#define WITH_8DIRECTIONS (0)
 
 nc::IAppEventHandler* createApphandler()
 {
@@ -17,7 +16,6 @@ nc::IAppEventHandler* createApphandler()
 
 void MyEventHandler::onInit()
 {
-	nc::IInputManager::setHandler(this);
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 #ifdef __ANDROID__
@@ -42,7 +40,7 @@ void MyEventHandler::onInit()
 	animation->addRect(96, 0, 32, 32);
 	animation->addRect(128, 0, 32, 32);
 	animSprite_->addAnimation(animation);
-#ifdef WITH_8DIRECTIONS
+#if WITH_8DIRECTIONS
 	// Up-right
 	animation = new nc::RectAnimation(0.06f, true, true);
 	animation->addRect(160, 0, 32, 32);
@@ -124,7 +122,7 @@ void MyEventHandler::onFrameStart()
 		reachVector.normalize();
 		animSprite_->setPaused(false);
 
-#ifdef WITH_8DIRECTIONS
+#if WITH_8DIRECTIONS
 		const float dirTolerance = 0.3f;
 		if (reachVector.x > dirTolerance) // Right
 		{

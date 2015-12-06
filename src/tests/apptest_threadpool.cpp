@@ -12,8 +12,6 @@ nc::IAppEventHandler* createApphandler()
 
 void MyEventHandler::onInit()
 {
-	nc::IInputManager::setHandler(this);
-
 	for (unsigned int i = 0; i < 4; i++)
 	{
 		nc::theServiceLocator().threadPool().enqueueCommand(new nc::DummyCommand(i));

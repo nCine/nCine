@@ -17,8 +17,10 @@ class DLL_PUBLIC AndroidApplication : public Application
 	// Processes an Android application command
 	static void processCommand(struct android_app* state, int32_t cmd);
 
-	// Wrapper around AndroidJniHelper::sdkVersion()
+	// Wrapper around `AndroidJniHelper::sdkVersion()`
 	unsigned int sdkVersion() const;
+	// Wrapper around `AndroidInputManager::enableAccelerometer()`
+	void enableAccelerometer(bool enabled);
 
 	inline bool isInitialized() const { return isInitialized_; }
 

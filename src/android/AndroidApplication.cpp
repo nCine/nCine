@@ -167,7 +167,7 @@ void AndroidApplication::processCommand(struct android_app* app, int32_t cmd)
 	}
 }
 
-/// Wrapper around AndroidJniHelper::sdkVersion()
+/// Wrapper around `AndroidJniHelper::sdkVersion()`
 unsigned int AndroidApplication::sdkVersion() const
 {
 	unsigned int sdkVersion = 0;
@@ -178,6 +178,15 @@ unsigned int AndroidApplication::sdkVersion() const
 	}
 
 	return sdkVersion;
+}
+
+/// Wrapper around `AndroidInputManager::enableAccelerometer()`
+void AndroidApplication::enableAccelerometer(bool enabled)
+{
+	if (isInitialized_)
+	{
+		AndroidInputManager::enableAccelerometer(enabled);
+	}
 }
 
 ///////////////////////////////////////////////////////////

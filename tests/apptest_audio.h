@@ -6,9 +6,8 @@
 
 namespace ncine {
 
-class SceneNode;
-class Texture;
-class Sprite;
+class AudioBuffer;
+class IAudioPlayer;
 
 }
 
@@ -21,21 +20,24 @@ class MyEventHandler
 {
   public:
 	virtual void onInit();
+	virtual void onFrameStart();
 	virtual void onShutdown();
 
-#ifdef __ANDROID__
-	virtual void onTouchUp(const nc::TouchEvent &event);
-#else
+#ifndef __ANDROID__
 	virtual void onKeyReleased(const nc::KeyboardEvent &event);
-	virtual void onMouseButtonReleased(const nc::MouseEvent &event);
 #endif
 
   private:
-	bool pause_;
-	nc::SceneNode *dummy_;
-	nc::Texture *texture_;
-	nc::Sprite *sprite_;
-	unsigned int divider_;
+	static const float DefaultGain;
+	float gain_;
+	static const float DefaultPitch;
+	float pitch_;
+	static const float DefaultXPos;
+	float xPos_;
+	bool isLooping_;
+
+	nc::AudioBuffer *audioBuffer_;
+	nc::IAudioPlayer *player_;
 };
 
 #endif

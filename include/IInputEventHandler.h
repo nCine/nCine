@@ -9,8 +9,8 @@ namespace ncine {
 class DLL_PUBLIC IInputEventHandler
 {
   public:
-	/// Pure virtual destructor in order to make the class abstract
-	virtual ~IInputEventHandler() = 0;
+	IInputEventHandler() { IInputManager::setHandler(this); }
+	inline virtual ~IInputEventHandler() { }
 
 	inline virtual void onKeyPressed(const KeyboardEvent &event) { }
 	inline virtual void onKeyReleased(const KeyboardEvent &event) { }
@@ -33,8 +33,6 @@ class DLL_PUBLIC IInputEventHandler
 	inline virtual void onJoyAxisMoved(const JoyAxisEvent &event) { }
 #endif
 };
-
-inline IInputEventHandler::~IInputEventHandler() { }
 
 }
 

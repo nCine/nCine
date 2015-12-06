@@ -1,16 +1,17 @@
 #ifndef CLASS_NCINE_FONT
 #define CLASS_NCINE_FONT
 
-#include "IFile.h"
+#include "Object.h"
 #include "Vector2.h"
 
 namespace ncine {
 
 class FontGlyph;
 class Texture;
+class IFile;
 
 /// A class holding every information needed to correctly render text
-class DLL_PUBLIC Font
+class DLL_PUBLIC Font : public Object
 {
   public:
 	// Constructs a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)
@@ -32,6 +33,8 @@ class DLL_PUBLIC Font
 	inline unsigned int numGlyphs() const { return numGlyphs_; }
 	/// Reurns a constant pointer to a glyph
 	const FontGlyph* glyph(unsigned int glyphId) const;
+
+	inline static ObjectType sType() { return FONT_TYPE; }
 
   private:
 	/// The font texture

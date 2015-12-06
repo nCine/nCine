@@ -13,8 +13,6 @@ nc::IAppEventHandler* createApphandler()
 
 void MyEventHandler::onInit()
 {
-	nc::IInputManager::setHandler(this);
-
 	for (unsigned int i = 0; i < NumTextures; i++)
 	{
 		angles_[i] = 0.0f;

@@ -2,14 +2,12 @@
 #include "Application.h"
 #include "Texture.h"
 #include "ParticleSystem.h"
-#include "IInputManager.h"
 #include "Timer.h"
 #include "IFile.h" // for dataPath()
 
 #ifdef __ANDROID__
-	#include "AndroidInputManager.h"
+	#include "AndroidApplication.h"
 #endif
-
 
 nc::IAppEventHandler* createApphandler()
 {
@@ -18,11 +16,11 @@ nc::IAppEventHandler* createApphandler()
 
 void MyEventHandler::onInit()
 {
-	nc::IInputManager::setHandler(this);
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 #ifdef __ANDROID__
-	nc::AndroidInputManager::enableAccelerometer(true);
+	nc::AndroidApplication &application = static_cast<nc::AndroidApplication &>(nc::theApplication());
+	application.enableAccelerometer(true);
 //	texture_ = new nc::Texture((nc::IFile::dataPath() + "smoke_128.dds").data()); // Adreno SD
 	texture_ = new nc::Texture((nc::IFile::dataPath() + "smoke2_256_8888.pvr").data()); // Mali HD
 #else

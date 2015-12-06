@@ -16,8 +16,6 @@ nc::IAppEventHandler* createApphandler()
 
 void MyEventHandler::onInit()
 {
-	nc::IInputManager::setHandler(this);
-
 	pause_ = false;
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
@@ -36,11 +34,6 @@ void MyEventHandler::onInit()
 	divider_ = 1;
 
 	sprite_ = new nc::Sprite(dummy_, texture_);
-}
-
-void MyEventHandler::onFrameStart()
-{
-
 }
 
 void MyEventHandler::onShutdown()

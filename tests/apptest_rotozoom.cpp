@@ -14,8 +14,6 @@ nc::IAppEventHandler* createApphandler()
 
 void MyEventHandler::onInit()
 {
-	nc::IInputManager::setHandler(this);
-
 	pause_ = false;
 	angle_ = 0.0f;
 	nc::StaticArray<nc::Recti, NumTextures> texRects;

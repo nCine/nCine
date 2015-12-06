@@ -104,8 +104,6 @@ void MyEventHandler::onPreInit(nc::AppConfiguration& config)
 
 void MyEventHandler::onInit()
 {
-	nc::IInputManager::setHandler(this);
-
 	colorProgram_ = new nc::GLShaderProgram();
 	colorProgram_->attachShader(GL_VERTEX_SHADER, "shaders/vcolor_vs.glsl");
 	colorProgram_->attachShader(GL_FRAGMENT_SHADER, "shaders/vcolor_fs.glsl");

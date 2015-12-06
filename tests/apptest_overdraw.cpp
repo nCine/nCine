@@ -14,7 +14,6 @@ nc::IAppEventHandler* createApphandler()
 
 void MyEventHandler::onInit()
 {
-	nc::IInputManager::setHandler(this);
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 #ifdef __ANDROID__
