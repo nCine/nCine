@@ -11,6 +11,7 @@ class GLShader
   public:
 	inline GLuint glHandle() const { return glHandle_; }
 
+	void loadFromString(const char *string);
 	void loadFromFile(const char *filename);
 	bool compile();
 

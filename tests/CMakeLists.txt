@@ -6,10 +6,13 @@ if(NOT NCINE_DYNAMIC_LIBRARY)
 endif()
 
 if(UNIX)
-	add_custom_target(link_shaders_tests ALL
-		COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/tests/shaders
-		COMMENT "Symlinking shaders to tests..."
-	)
+	if(NOT NCINE_EMBED_SHADERS)
+		add_custom_target(link_shaders_tests ALL
+			COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/tests/shaders
+			COMMENT "Symlinking shaders to tests..."
+		)
+		set_target_properties(link_shaders_tests PROPERTIES FOLDER "CustomSymlinkTargets")
+	endif()
 	if(IS_DIRECTORY ${NCINE_DATA_DIR})
 		add_custom_target(link_data_tests ALL
 			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATA_DIR}/fonts ${CMAKE_BINARY_DIR}/tests/fonts
@@ -17,21 +20,27 @@ if(UNIX)
 			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATA_DIR}/textures ${CMAKE_BINARY_DIR}/tests/textures
 			COMMENT "Symlinking data to tests..."
 		)
+		set_target_properties(link_data_tests PROPERTIES FOLDER "CustomSymlinkTargets")
 	endif()
 elseif(WIN32)
-	add_custom_target(copy_shaders_tests ALL
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/tests/shaders
-		COMMENT "Copying shaders to tests..."
-	)
+	if(NOT NCINE_EMBED_SHADERS)
+		add_custom_target(copy_shaders_tests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/tests/shaders
+			COMMENT "Copying shaders to tests..."
+		)
+		set_target_properties(copy_shaders_tests PROPERTIES FOLDER "CustomCopyTargets")
+	endif()
 	add_custom_target(copy_dlls_tests ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/tests
 		COMMENT "Copying DLLs to tests..."
 	)
+	set_target_properties(copy_dlls_tests PROPERTIES FOLDER "CustomCopyTargets")
 	if(IS_DIRECTORY ${NCINE_DATA_DIR})
 		add_custom_target(copy_data_tests ALL
 			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/ ${CMAKE_BINARY_DIR}/tests
 			COMMENT "Copying data to tests..."
 		)
+		set_target_properties(copy_data_tests PROPERTIES FOLDER "CustomCopyTargets")
 	endif()
 endif()
 
@@ -48,6 +57,7 @@ if(OPENAL_FOUND)
 	target_link_libraries(apptest_animsprites ncine)
 	add_executable(apptest_audio main.cpp apptest_audio.cpp)
 	target_link_libraries(apptest_audio ncine)
+	set_target_properties(apptest_animsprites apptest_audio PROPERTIES FOLDER "AppTests")
 	install(TARGETS apptest_animsprites apptest_audio RUNTIME DESTINATION bin)
 endif()
 add_executable(apptest_particles main.cpp apptest_particles.cpp)
@@ -56,6 +66,7 @@ add_executable(apptest_scene main.cpp apptest_scene.cpp)
 target_link_libraries(apptest_scene ncine)
 add_executable(apptest_font main.cpp apptest_font.cpp)
 target_link_libraries(apptest_font ncine)
+set_target_properties(apptest_mipmapping apptest_joystick apptest_overdraw apptest_rotozoom apptest_particles apptest_scene apptest_font PROPERTIES FOLDER "AppTests")
 install(TARGETS apptest_mipmapping apptest_joystick apptest_overdraw apptest_rotozoom apptest_particles apptest_scene apptest_font RUNTIME DESTINATION bin)
 
 add_executable(test_array test_array.cpp test_functions.h)
@@ -70,6 +81,7 @@ add_executable(test_hashmap test_hashmap.cpp)
 target_link_libraries(test_hashmap ncine)
 add_executable(test2_hashmap test2_hashmap.cpp)
 target_link_libraries(test2_hashmap ncine)
+set_target_properties(test_array test_staticarray test_list test_string test_hashmap test2_hashmap test2_hashmap PROPERTIES FOLDER "Tests")
 install(TARGETS test_array test_staticarray test_list test_string test_hashmap test2_hashmap test2_hashmap RUNTIME DESTINATION bin)
 
 add_executable(test_algorithms_array test_algorithms_array.cpp test_functions.h)
@@ -78,6 +90,7 @@ add_executable(test_algorithms_list test_algorithms_list.cpp test_functions.h)
 target_link_libraries(test_algorithms_list ncine)
 add_executable(test_algorithms_hashmap test_algorithms_hashmap.cpp test_functions.h)
 target_link_libraries(test_algorithms_hashmap ncine)
+set_target_properties(test_algorithms_array test_algorithms_list test_algorithms_hashmap PROPERTIES FOLDER "Tests")
 install(TARGETS test_algorithms_array test_algorithms_list test_algorithms_hashmap RUNTIME DESTINATION bin)
 
 add_executable(test_vector2 test_vector2.cpp)
@@ -94,4 +107,5 @@ add_executable(test_quaternion test_quaternion.cpp)
 target_link_libraries(test_quaternion ncine)
 add_executable(test2_quaternion test2_quaternion.cpp test_functions.h)
 target_link_libraries(test2_quaternion ncine)
+set_target_properties(test_vector2 test_vector3 test_vector4 test_matrix4x4 test2_matrix4x4 test_quaternion test2_quaternion PROPERTIES FOLDER "Tests")
 install(TARGETS test_vector2 test_vector3 test_vector4 test_matrix4x4 test2_matrix4x4 test_quaternion test2_quaternion RUNTIME DESTINATION bin)

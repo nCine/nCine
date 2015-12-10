@@ -30,6 +30,11 @@ GLShader::~GLShader()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+void GLShader::loadFromString(const char *string)
+{
+	const GLchar* source_lines[1] = { string };
+	glShaderSource(glHandle_, 1, source_lines, NULL);
+}
 
 void GLShader::loadFromFile(const char *filename)
 {

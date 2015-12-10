@@ -56,6 +56,16 @@ void GLShaderProgram::attachShader(GLenum type, const char *filename)
 	attachedShaders_.pushBack(shader);
 }
 
+void GLShaderProgram::attachShaderFromString(GLenum type, const char *string)
+{
+	GLShader *shader = new GLShader(type);
+	shader->loadFromString(string);
+	glAttachShader(glHandle_, shader->glHandle_);
+	shader->compile();
+
+	attachedShaders_.pushBack(shader);
+}
+
 bool GLShaderProgram::link()
 {
 	glLinkProgram(glHandle_);

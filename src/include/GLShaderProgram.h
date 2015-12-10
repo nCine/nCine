@@ -19,6 +19,7 @@ class GLShaderProgram
 	inline GLuint glHandle() const { return glHandle_; }
 
 	void attachShader(GLenum type, const char *filename);
+	void attachShaderFromString(GLenum type, const char *string);
 	bool link();
 	void use();
 
