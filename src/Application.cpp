@@ -238,7 +238,8 @@ void Application::shutdownCommon()
 
 	if (theServiceLocator().indexer().isEmpty() == false)
 	{
-		LOGW("The object indexer is not empty");
+		LOGW_X("The object indexer is not empty, %u object(s) left", theServiceLocator().indexer().size());
+		theServiceLocator().indexer().logReport();
 	}
 
 	LOGI("Application shutted down");

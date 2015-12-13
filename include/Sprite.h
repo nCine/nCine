@@ -64,7 +64,7 @@ class DLL_PUBLIC Sprite : public DrawableNode
   private:
 	/// The sprite texture
 	Texture *texture_;
-	/// Used as source rectangle by the sprite batch class
+	/// The texture source rectangle
 	Recti texRect_;
 	/// Sprite width in pixel
 	float width_;
@@ -73,8 +73,6 @@ class DLL_PUBLIC Sprite : public DrawableNode
 
 	void init();
 	virtual void updateRenderCommand();
-
-	friend class SpriteBatchNode;
 };
 
 /// Returns sprite rectangle

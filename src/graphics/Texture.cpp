@@ -15,20 +15,17 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Texture::Texture()
-	: glTexture_(new GLTexture(GL_TEXTURE_2D)), width_(0), height_(0),
+	: Object(TEXTURE_TYPE), glTexture_(new GLTexture(GL_TEXTURE_2D)), width_(0), height_(0),
 	  mipMapLevels_(1), isCompressed_(false), hasAlphaChannel_(false)
 {
-	type_ = TEXTURE_TYPE;
+
 }
 
 
 Texture::Texture(const char *filename)
-	: glTexture_(new GLTexture(GL_TEXTURE_2D)), width_(0), height_(0),
-	  mipMapLevels_(1), isCompressed_(false), hasAlphaChannel_(false)
+	: Object(TEXTURE_TYPE, filename), glTexture_(new GLTexture(GL_TEXTURE_2D)),
+	  width_(0), height_(0), mipMapLevels_(1), isCompressed_(false), hasAlphaChannel_(false)
 {
-	type_ = TEXTURE_TYPE;
-	setName(filename);
-
 	glTexture_->bind();
 
 	ITextureLoader *pTexLoader = ITextureLoader::createFromFile(filename);
@@ -37,11 +34,9 @@ Texture::Texture(const char *filename)
 }
 
 Texture::Texture(const char *filename, int width, int height)
-	: glTexture_(new GLTexture(GL_TEXTURE_2D)), width_(0), height_(0), isCompressed_(false), hasAlphaChannel_(false)
+	: Object(TEXTURE_TYPE, filename), glTexture_(new GLTexture(GL_TEXTURE_2D)),
+	  width_(0), height_(0), isCompressed_(false), hasAlphaChannel_(false)
 {
-	type_ = TEXTURE_TYPE;
-	setName(filename);
-
 	glTexture_->bind();
 
 	ITextureLoader *pTexLoader = ITextureLoader::createFromFile(filename);
@@ -50,11 +45,9 @@ Texture::Texture(const char *filename, int width, int height)
 }
 
 Texture::Texture(const char *filename, Vector2i size)
-	: glTexture_(new GLTexture(GL_TEXTURE_2D)), width_(0), height_(0), isCompressed_(false), hasAlphaChannel_(false)
+	: Object(TEXTURE_TYPE, filename), glTexture_(new GLTexture(GL_TEXTURE_2D)),
+	  width_(0), height_(0), isCompressed_(false), hasAlphaChannel_(false)
 {
-	type_ = TEXTURE_TYPE;
-	setName(filename);
-
 	glTexture_->bind();
 
 	ITextureLoader *pTexLoader = ITextureLoader::createFromFile(filename);

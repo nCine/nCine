@@ -147,7 +147,6 @@ set(HEADERS
 	include/Texture.h
 	include/SceneNode.h
 	include/Sprite.h
-	include/SpriteBatchNode.h
 	include/Application.h
 	include/PCApplication.h
 	include/AppConfiguration.h
@@ -198,6 +197,7 @@ set(PRIVATE_HEADERS
 	src/include/GLTexture.h
 )
 set(SOURCES
+	src/base/Object.cpp
 	src/base/String.cpp
 	src/ServiceLocator.cpp
 	src/FileLogger.cpp
@@ -229,7 +229,6 @@ set(SOURCES
 	src/graphics/DrawableNode.cpp
 	src/graphics/SceneNode.cpp
 	src/graphics/Sprite.cpp
-	src/graphics/SpriteBatchNode.cpp
 	src/Application.cpp
 	src/PCApplication.cpp
 	src/AppConfiguration.cpp

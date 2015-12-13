@@ -13,9 +13,8 @@ namespace ncine {
 
 /// Constructs a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)
 Font::Font(const char *texFilename, const char *fntFilename)
-	: texture_(NULL), lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_ (0), numKernings_(0), glyphs_(NULL)
+	: Object(FONT_TYPE, fntFilename), texture_(NULL), lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_ (0), numKernings_(0), glyphs_(NULL)
 {
-	type_ = FONT_TYPE;
 	texture_ = new Texture(texFilename);
 	glyphs_ = new FontGlyph[MaxGlyphs];
 

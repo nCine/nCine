@@ -46,7 +46,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 
 	virtual void draw(RenderQueue& renderQueue);
 
-	inline static ObjectType sType() { return TEXT_TYPE; }
+	inline static ObjectType sType() { return TEXTNODE_TYPE; }
 
   private:
 	/// Maximum length for a string to be rendered

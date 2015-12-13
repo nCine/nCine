@@ -9,7 +9,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 IAudioPlayer::IAudioPlayer()
-	: sourceId_(-1), state_(STATE_STOPPED),
+	: Object(BASE_TYPE), sourceId_(-1), state_(STATE_STOPPED),
 	  isLooping_(false), gain_(1.0f), pitch_(1.0f)
 {
 	position_[0] = 0.0f;

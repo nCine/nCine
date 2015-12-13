@@ -19,12 +19,10 @@ const float SceneNode::MinRotation = 0.5f;
 ///////////////////////////////////////////////////////////
 
 SceneNode::SceneNode(SceneNode* parent, float xx, float yy)
-	: x(xx), y(yy), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
+	: Object(SCENENODE_TYPE), x(xx), y(yy), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
 	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
 	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {
-	type_ = SCENENODE_TYPE;
-
 	if (parent)
 	{
 		parent->addChildNode(this);
@@ -32,12 +30,10 @@ SceneNode::SceneNode(SceneNode* parent, float xx, float yy)
 }
 
 SceneNode::SceneNode(SceneNode* parent)
-	: x(0.0f), y(0.0f), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
+	: Object(SCENENODE_TYPE), x(0.0f), y(0.0f), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
 	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
 	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {
-	type_ = SCENENODE_TYPE;
-
 	if (parent)
 	{
 		parent->addChildNode(this);
@@ -45,11 +41,11 @@ SceneNode::SceneNode(SceneNode* parent)
 }
 
 SceneNode::SceneNode()
-	: Object(), x(0.0f), y(0.0f), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
+	: Object(SCENENODE_TYPE), x(0.0f), y(0.0f), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
 	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
 	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {
-	type_ = SCENENODE_TYPE;
+
 }
 
 SceneNode::~SceneNode()

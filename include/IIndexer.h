@@ -24,6 +24,12 @@ class DLL_PUBLIC IIndexer
 
 	/// Returns true if the index is empty
 	virtual bool isEmpty() const = 0;
+
+	/// Returns the number of objects in the index
+	virtual unsigned int size() const = 0;
+
+	/// Logs a list of currently indexed objects
+	virtual void logReport() const = 0;
 };
 
 inline IIndexer::~IIndexer() { }
@@ -37,12 +43,16 @@ inline IIndexer::~IIndexer() { }
 class DLL_PUBLIC NullIndexer : public IIndexer
 {
   public:
-	virtual unsigned int addObject(Object* object) { return 0; }
+	virtual unsigned int addObject(Object* object) { return 0U; }
 	virtual void removeObject(unsigned int id) { }
 
 	virtual Object* object(unsigned int id) const { return NULL; }
 
 	virtual bool isEmpty() const { return true; }
+
+	virtual unsigned int size() const { return 0U; }
+
+	virtual void logReport() const { }
 };
 
 }

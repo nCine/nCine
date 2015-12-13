@@ -14,19 +14,16 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AudioBuffer::AudioBuffer()
-	: numChannels_(0), frequency_(0)
+	: Object(AUDIOBUFFER_TYPE), numChannels_(0), frequency_(0)
 {
-	type_ = AUDIOBUFFER_TYPE;
 	alGenBuffers(1, &bufferId_);
 }
 
 /// A constructor creating a buffer from a file
 AudioBuffer::AudioBuffer(const char *filename)
-	: numChannels_(0), frequency_(0)
+	: Object(AUDIOBUFFER_TYPE, filename), numChannels_(0), frequency_(0)
 {
-	type_ = AUDIOBUFFER_TYPE;
 	alGenBuffers(1, &bufferId_);
-	setName(filename);
 
 	IAudioLoader* audioLoader = IAudioLoader::createFromFile(filename);
 	load(audioLoader);

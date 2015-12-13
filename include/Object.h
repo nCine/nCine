@@ -2,7 +2,6 @@
 #define CLASS_NCINE_OBJECT
 
 #include "ncString.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -17,10 +16,9 @@ class DLL_PUBLIC Object
 		TEXTURE_TYPE,
 		SCENENODE_TYPE,
 		SPRITE_TYPE,
-		SPRITEBATCH_TYPE,
 		PARTICLESYSTEM_TYPE,
 		FONT_TYPE,
-		TEXT_TYPE,
+		TEXTNODE_TYPE,
 		ANIMATEDSPRITE_TYPE,
 		AUDIOBUFFER_TYPE,
 		AUDIOBUFFERPLAYER_TYPE,
@@ -30,24 +28,25 @@ class DLL_PUBLIC Object
 	/// Maximum length for an object name
 	static const unsigned int MaxNameLength = 128;
 
-	Object() : type_(BASE_TYPE), id_(0), name_(MaxNameLength)
-	{
-		id_ = theServiceLocator().indexer().addObject(this);
-	}
-	virtual ~Object() { theServiceLocator().indexer().removeObject(id_); }
+	// Constructs an object with a specified type and adds it to the index
+	Object(ObjectType type);
+	// Constructs an object with a specified type and name and adds it to the index
+	Object(ObjectType type, const char *name);
+	// Remove an object from the index and then destroys it
+	virtual ~Object();
 
 	/// Returns the object identification number
 	inline unsigned int id() const { return id_; }
 
 	/// Returns the object type (RTTI)
-	ObjectType type() const { return type_; }
+	inline ObjectType type() const { return type_; }
 	/// Static method to return class type
 	inline static ObjectType sType() { return BASE_TYPE; }
 
 	/// Returns object name
-	const String& name() const { return name_; }
+	inline const String& name() const { return name_; }
 	/// Sets the object name
-	void setName(const String &name) { name_ = name; }
+	inline void setName(const String &name) { name_ = name; }
 
 	// Returns a casted pointer to the object with the specified id, if any exists
 	template <class T> static T* fromId(unsigned int id);
@@ -70,31 +69,6 @@ class DLL_PUBLIC Object
 	/// Private assignment operator
 	Object& operator=(const Object&);
 };
-
-/// Returns a casted pointer to the object with the specified id, if any exists
-template <class T>
-T* Object::fromId(unsigned int id)
-{
-	Object *object = theServiceLocator().indexer().object(id);
-
-	if (object)
-	{
-		if (object->type_ == T::sType())
-		{
-			return static_cast<T *>(object);
-		}
-		else // Cannot cast
-		{
-			LOGF_X("Object \"%s\" (%u) is of type %u instead of %u", object->name_, id, object->type_, T::sType());
-			return NULL;
-		}
-	}
-	else
-	{
-		LOGW_X("Object %u not found", id);
-		return NULL;
-	}
-}
 
 }
 

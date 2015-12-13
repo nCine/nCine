@@ -19,9 +19,13 @@ class ArrayIndexer : public IIndexer
 
 	virtual Object* object(unsigned int id) const;
 
-	virtual bool isEmpty() const;
+	virtual bool isEmpty() const { return numObjects_ == 0; }
+	virtual unsigned int size() const { return numObjects_; }
+
+	virtual void logReport() const;
 
   private:
+	unsigned int numObjects_;
 	unsigned int nextId_;
 	Array<Object*> pointers_;
 
@@ -30,51 +34,6 @@ class ArrayIndexer : public IIndexer
 	/// Private assignment operator
 	ArrayIndexer& operator=(const ArrayIndexer&);
 };
-
-inline unsigned int ArrayIndexer::addObject(Object* object)
-{
-	pointers_[nextId_] = object;
-	nextId_++;
-
-	return nextId_ - 1;
-}
-inline void ArrayIndexer::removeObject(unsigned int id)
-{
-	// setting to NULL instead of physically removing
-	if (id < pointers_.size())
-	{
-		pointers_[id] = NULL;
-	}
-}
-
-inline Object *ArrayIndexer::object(unsigned int id) const
-{
-	if (id < pointers_.size())
-	{
-		return pointers_[id];
-	}
-	else
-	{
-		return NULL;
-	}
-}
-
-inline bool ArrayIndexer::isEmpty() const
-{
-	bool isEmpty = true;
-
-	for (unsigned int i = 0; i < pointers_.size(); i++)
-	{
-		if (pointers_[i])
-		{
-			// There is at least one pointer stored
-			isEmpty = false;
-			break;
-		}
-	}
-
-	return isEmpty;
-}
 
 }
 

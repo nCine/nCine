@@ -40,6 +40,7 @@ LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/$(INC) \
 	$(LOCAL_PATH)/$(SRC)/include
 LOCAL_SRC_FILES := \
+	$(SRC)/base/Object.cpp \
 	$(SRC)/base/String.cpp \
 	$(SRC)/ServiceLocator.cpp \
 	$(SRC)/FileLogger.cpp \
@@ -81,7 +82,6 @@ LOCAL_SRC_FILES := \
 	$(SRC)/graphics/DrawableNode.cpp \
 	$(SRC)/graphics/SceneNode.cpp \
 	$(SRC)/graphics/Sprite.cpp \
-	$(SRC)/graphics/SpriteBatchNode.cpp \
 	$(SRC)/graphics/Particle.cpp \
 	$(SRC)/graphics/ParticleAffectors.cpp \
 	$(SRC)/graphics/ParticleSystem.cpp \
