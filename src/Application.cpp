@@ -22,6 +22,10 @@
 	#include "ThreadPool.h"
 #endif
 
+#ifdef WITH_GIT_VERSION
+	#include "version.h"
+#endif
+
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
@@ -74,7 +78,11 @@ void Application::togglePause()
 /// Must be called before giving control to the application
 void Application::initCommon()
 {
+#ifdef WITH_GIT_VERSION
+	LOGI_X("nCine %s compiled on " __DATE__ " at " __TIME__, VersionStrings::Version);
+#else
 	LOGI("nCine compiled on " __DATE__ " at " __TIME__);
+#endif
 	theServiceLocator().registerIndexer(new ArrayIndexer());
 #ifdef WITH_AUDIO
 	if (appCfg_.withAudio_)

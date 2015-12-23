@@ -1,9 +1,5 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8.12)
 project(nCine-tests)
-
-if(NOT NCINE_DYNAMIC_LIBRARY)
-	add_definitions(-DNCINE_STATIC)
-endif()
 
 if(UNIX)
 	if(NOT NCINE_EMBED_SHADERS)

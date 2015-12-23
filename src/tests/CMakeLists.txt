@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 2.8.11)
-project(nCine-private_tests)
-
-# these tests can only be linked against the engine static library
-add_definitions(-DNCINE_STATIC)
+cmake_minimum_required(VERSION 2.8.12)
+project(nCine-srctests)
 
 if(UNIX)
 	if(NOT NCINE_EMBED_SHADERS)

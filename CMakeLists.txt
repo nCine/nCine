@@ -1,10 +1,5 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8.12)
 project(nCine)
-
-string(TIMESTAMP NCINE_MAJOR_VERSION "%Y")
-string(TIMESTAMP NCINE_MINOR_VERSION "%m")
-set(NCINE_VERSION ${NCINE_MAJOR_VERSION}.${NCINE_MINOR_VERSION})
-mark_as_advanced(NCINE_MAJOR_VERSION NCINE_MINOR_VERSION NCINE_VERSION)
 
 option(NCINE_BUILD_TESTS "Build the engine test programs" ON)
 option(NCINE_EXTRA_OPTIMIZATION "Compile the engine with extra optimizations in release mode" ON)
@@ -12,10 +7,26 @@ option(NCINE_AUTOVECTORIZATION_REPORT "Enable report generation from compiler au
 option(NCINE_DYNAMIC_LIBRARY "Compile the engine as a dynamic library" ON)
 option(NCINE_BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
 option(NCINE_EMBED_SHADERS "Export shader files to C strings to be included in engine sources" ON)
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+	option(NCINE_ADDRESS_SANITIZER "Enable the AddressSanitizer memory error detector of GCC and Clang" OFF)
+endif()
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+	option(NCINE_GCC_HARDENING "Enable memory corruption mitigation methods of GCC" OFF)
+endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 get_filename_component(PARENT_SOURCE_DIR ${CMAKE_SOURCE_DIR} DIRECTORY)
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+include(ncine_get_version)
+set(CPACK_PACKAGE_NAME "nCine")
+set(CPACK_PACKAGE_VENDOR "Encelo")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A multi-platform 2d game engine")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.md")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
+set(CPACK_PACKAGE_CONTACT "encelo@gmail.com")
+set(CPACK_PACKAGE_VERSION ${NCINE_VERSION})
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "nCine")
+include(CPack)
 
 find_package(Threads)
 if(MSVC)
@@ -29,9 +40,6 @@ if(MSVC)
 	else()
 		set(LIBDIR "${EXTERNAL_MSVC_DIR}/lib/x86")
 		set(BINDIR "${EXTERNAL_MSVC_DIR}/bin/x86")
-	endif()
-	if(NOT (MSVC_VERSION LESS 1800)) # If Visual Studio 2013 or greater
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FS")
 	endif()
 	
 	set(OPENGL_gl_LIBRARY opengl32.lib ${LIBDIR}/glew32.lib)
@@ -49,50 +57,7 @@ if(MSVC)
 	set(WEBP_FOUND 1)
 	set(VORBISFILE_LIBRARY ${LIBDIR}/libogg.lib ${LIBDIR}/libvorbis.lib ${LIBDIR}/libvorbisfile.lib)
 	set(VORBIS_FOUND 1)
-	
-	string(REGEX REPLACE "/Zm[0-9]*" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-	if(NCINE_EXTRA_OPTIMIZATION)
-		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Ox /Qpar")
-	endif()
-	if(NCINE_AUTOVECTORIZATION_REPORT)
-		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Qvec-report:2 /Qpar-report:2")
-	endif()
-	add_definitions(-DWITH_GLEW -D_CRT_SECURE_NO_DEPRECATE)
 else() # GCC and LLVM
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math")
-	if(NCINE_DYNAMIC_LIBRARY)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
-	endif()
-	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra -Wold-style-cast -Wno-long-long -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-variadic-macros")
-		if(CMAKE_BUILD_TYPE MATCHES Debug)
-			#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O1 -ggdb -fsanitize=address -fno-omit-frame-pointer -rdynamic")
-			#set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -fsanitize=address")
-		endif()
-		if(NCINE_EXTRA_OPTIMIZATION)
-			set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -funsafe-loop-optimizations -ftree-loop-if-convert-stores")
-		endif()
-		if(NCINE_AUTOVECTORIZATION_REPORT)
-			set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fopt-info-vec-optimized")
-		endif()
-		if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9.0 OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.9.0)
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=auto")
-			# Enabling Link Time Optimizations of GCC 4.9
-			if(CMAKE_BUILD_TYPE MATCHES Release)
-				set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -flto")
-				set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -flto")
-			endif()
-		endif()
-	elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-parameter -Wno-variadic-macros -Wno-c++11-long-long -Wno-missing-braces")
-		if(NCINE_EXTRA_OPTIMIZATION)
-			set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -fslp-vectorize-aggressive")
-		endif()
-		if(NCINE_AUTOVECTORIZATION_REPORT)
-			set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize")
-		endif()
-	endif()
-
 	if(APPLE)
 		set(CMAKE_FRAMEWORK_PATH "${PARENT_SOURCE_DIR}/nCine-external")
 		set(CMAKE_MACOSX_RPATH ${CMAKE_FRAMEWORK_PATH})
@@ -111,146 +76,11 @@ else() # GCC and LLVM
 	find_package(Vorbis)
 endif()
 
-set(HEADERS
-	include/common_defines.h
-	include/algorithms.h
-	include/iterator_traits.h
-	include/Array.h
-	include/ArrayIterator.h
-	include/StaticArray.h
-	include/List.h
-	include/ListIterator.h
-	include/ncString.h
-	include/StringIterator.h
-	include/HashMap.h
-	include/HashFunctions.h
-	include/HashMapIterator.h
-	include/Rect.h
-	include/Color.h
-	include/Object.h
-	include/DrawableNode.h
-	include/IAppEventHandler.h
-	include/IInputEventHandler.h
-	include/IInputManager.h
-	include/Keys.h
-	include/Vector2.h
-	include/Vector3.h
-	include/Vector4.h
-	include/Matrix4x4.h
-	include/Quaternion.h
-	include/ServiceLocator.h
-	include/DisplayMode.h
-	include/Timer.h
-	include/Font.h
-	include/IFile.h
-	include/IGfxDevice.h
-	include/Texture.h
-	include/SceneNode.h
-	include/Sprite.h
-	include/Application.h
-	include/PCApplication.h
-	include/AppConfiguration.h
-	include/ParticleAffectors.h
-	include/ParticleSystem.h
-	include/TextNode.h
-	include/RectAnimation.h
-	include/AnimatedSprite.h
-)
+include(ncine_compiler_options)
 
-set(PRIVATE_HEADERS
-	src/include/common_headers.h
-	src/include/ArrayIndexer.h
-	src/include/FrameTimer.h
-	src/include/StandardFile.h
-	src/include/FileLogger.h
-	src/include/FontGlyph.h
-	src/include/ProfileVariable.h
-	src/include/PlottingVariable.h
-	src/include/ProfilePlotter.h
-	src/include/LinePlotter.h
-	src/include/StackedBarPlotter.h
-	src/include/GfxCapabilities.h
-	src/include/RenderResources.h
-	src/include/RenderCommand.h
-	src/include/RenderQueue.h
-	src/include/Material.h
-	src/include/Geometry.h
-	src/include/Particle.h
-	src/include/TextureFormat.h
-	src/include/ITextureLoader.h
-	src/include/TextureLoaderDds.h
-	src/include/TextureLoaderPvr.h
-	src/include/TextureLoaderKtx.h
-	src/include/GLHashMap.h
-	src/include/GLBufferObject.h
-	src/include/GLBufferObject.h
-	src/include/GLFramebufferObject.h
-	src/include/GLRenderbuffer.h
-	src/include/GLShader.h
-	src/include/GLShaderProgram.h
-	src/include/GLShaderUniforms.h
-	src/include/GLUniform.h
-	src/include/GLUniformCache.h
-	src/include/GLShaderAttributes.h
-	src/include/GLAttribute.h
-	src/include/GLVertexAttribute.h
-	src/include/GLTexture.h
-)
-set(SOURCES
-	src/base/Object.cpp
-	src/base/String.cpp
-	src/ServiceLocator.cpp
-	src/FileLogger.cpp
-	src/ArrayIndexer.cpp
-	src/Timer.cpp
-	src/FrameTimer.cpp
-	src/ProfileVariable.cpp
-	src/Font.cpp
-	src/FontGlyph.cpp
-	src/IFile.cpp
-	src/StandardFile.cpp
-	src/graphics/IGfxDevice.cpp
-	src/graphics/GfxCapabilities.cpp
-	src/graphics/RenderResources.cpp
-	src/graphics/RenderCommand.cpp
-	src/graphics/RenderQueue.cpp
-	src/graphics/Material.cpp
-	src/graphics/Geometry.cpp
-	src/graphics/TextureFormat.cpp
-	src/graphics/ITextureLoader.cpp
-	src/graphics/TextureLoaderDds.cpp
-	src/graphics/TextureLoaderPvr.cpp
-	src/graphics/TextureLoaderKtx.cpp
-	src/graphics/Texture.cpp
-	src/graphics/ProfilePlotter.cpp
-	src/graphics/PlottingVariable.cpp
-	src/graphics/LinePlotter.cpp
-	src/graphics/StackedBarPlotter.cpp
-	src/graphics/DrawableNode.cpp
-	src/graphics/SceneNode.cpp
-	src/graphics/Sprite.cpp
-	src/Application.cpp
-	src/PCApplication.cpp
-	src/AppConfiguration.cpp
-	src/graphics/Particle.cpp
-	src/graphics/ParticleAffectors.cpp
-	src/graphics/ParticleSystem.cpp
-	src/graphics/TextNode.cpp
-	src/graphics/RectAnimation.cpp
-	src/graphics/AnimatedSprite.cpp
-	src/graphics/opengl/GLBufferObject.cpp
-	src/graphics/opengl/GLFramebufferObject.cpp
-	src/graphics/opengl/GLRenderbuffer.cpp
-	src/graphics/opengl/GLShader.cpp
-	src/graphics/opengl/GLShaderProgram.cpp
-	src/graphics/opengl/GLShaderUniforms.cpp
-	src/graphics/opengl/GLUniform.cpp
-	src/graphics/opengl/GLUniformCache.cpp
-	src/graphics/opengl/GLShaderAttributes.cpp
-	src/graphics/opengl/GLAttribute.cpp
-	src/graphics/opengl/GLVertexAttribute.cpp
-	src/graphics/opengl/GLTexture.cpp
-)
+include(ncine_headers)
+include(ncine_private_headers)
+include(ncine_sources)
 
 # Forcing the use of SDL
 #set(GLFW_FOUND 0)
@@ -260,9 +90,8 @@ if(NOT SDL_FOUND AND NOT GLFW_FOUND)
 endif()
 
 if(GLFW_FOUND)
-	add_definitions(-DWITH_GLFW)
-	add_definitions(-DGLFW_NO_GLU)
-	list(APPEND LINK_LIBS ${GLFW_LIBRARY})
+	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_GLFW" "GLFW_NO_GLU")
+	list(APPEND PRIVATE_LINK_LIBRARIES ${GLFW_LIBRARY})
 
 	list(APPEND PRIVATE_HEADERS src/include/GlfwInputManager.h)
 	list(APPEND PRIVATE_HEADERS src/include/GlfwGfxDevice.h)
@@ -272,14 +101,14 @@ if(GLFW_FOUND)
 endif()
 
 if(SDL_FOUND AND NOT GLFW_FOUND)
-	add_definitions(-DWITH_SDL)
+	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_SDL")
 	if(${CMAKE_SYSTEM_NAME} MATCHES Darwin) # SDLmain on OS X
-		list(APPEND LINK_LIBS ${SDLMAIN_LIBRARY})
+		list(APPEND PRIVATE_LINK_LIBRARIES ${SDLMAIN_LIBRARY})
 	endif()
-	list(APPEND LINK_LIBS ${SDL_LIBRARY})
+	list(APPEND PRIVATE_LINK_LIBRARIES ${SDL_LIBRARY})
 	if(SDLIMAGE_FOUND)
-		add_definitions(-DWITH_SDLIMAGE)
-		list(APPEND LINK_LIBS ${SDLIMAGE_LIBRARY})
+		list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_SDLIMAGE")
+		list(APPEND PRIVATE_LINK_LIBRARIES ${SDLIMAGE_LIBRARY})
 	endif()
 
 	list(APPEND PRIVATE_HEADERS src/include/SdlInputManager.h)
@@ -294,11 +123,11 @@ if(SDL_FOUND AND NOT GLFW_FOUND)
 endif()
 
 if(OPENAL_FOUND)
-	add_definitions(-DWITH_AUDIO)
-	list(APPEND LINK_LIBS ${OPENAL_LIBRARY})
+	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_AUDIO")
+	list(APPEND PRIVATE_LINK_LIBRARIES ${OPENAL_LIBRARY})
 	if(VORBIS_FOUND)
-		add_definitions(-DWITH_VORBIS)
-		list(APPEND LINK_LIBS ${VORBISFILE_LIBRARY})
+		list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_VORBIS")
+		list(APPEND PRIVATE_LINK_LIBRARIES ${VORBISFILE_LIBRARY})
 	endif()
 
 	list(APPEND HEADERS
@@ -334,25 +163,25 @@ if(OPENAL_FOUND)
 endif()
 
 if(PNG_FOUND AND GLFW_FOUND)
-	add_definitions(-DWITH_PNG)
-	list(APPEND LINK_LIBS ${PNG_LIBRARY})
+	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_PNG")
+	list(APPEND PRIVATE_LINK_LIBRARIES ${PNG_LIBRARY})
 
 	list(APPEND PRIVATE_HEADERS src/include/TextureLoaderPng.h)
 	list(APPEND SOURCES src/graphics/TextureLoaderPng.cpp)
 endif()
 if(WEBP_FOUND)
-	add_definitions(-DWITH_WEBP)
-	list(APPEND LINK_LIBS ${WEBP_LIBRARY})
+	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_WEBP")
+	list(APPEND PRIVATE_LINK_LIBRARIES ${WEBP_LIBRARY})
 
 	list(APPEND PRIVATE_HEADERS src/include/TextureLoaderWebP.h)
 	list(APPEND SOURCES src/graphics/TextureLoaderWebP.cpp)
 endif()
 
 if(Threads_FOUND)
-	add_definitions(-DWITH_THREADS)
-	list(APPEND LINK_LIBS ${CMAKE_THREAD_LIBS_INIT})
+	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_THREADS")
+	list(APPEND PRIVATE_LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 	# Experimental multi-threading scene update
-	#add_definitions(-DWITH_MULTITHREADING)
+	#list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_MULTITHREADING")
 
 	list(APPEND HEADERS include/IThreadPool.h)
 	list(APPEND HEADERS include/IThreadCommand.h)
@@ -372,175 +201,77 @@ if(Threads_FOUND)
 	list(APPEND PRIVATE_HEADERS src/include/ThreadCommands.h)
 endif()
 
-set(SHADERS_H_FILE "src/include/shader_strings.h")
-set(SHADERS_CPP_FILE "src/shaders/shader_strings.cpp")
-if(EXISTS ${CMAKE_SOURCE_DIR}/${SHADERS_H_FILE})
-	file(REMOVE ${CMAKE_SOURCE_DIR}/${SHADERS_H_FILE})
-endif()
-if(EXISTS ${CMAKE_SOURCE_DIR}/${SHADERS_CPP_FILE})
-	file(REMOVE ${CMAKE_SOURCE_DIR}/${SHADERS_CPP_FILE})
-endif()
-file(GLOB SHADER_FILES "src/shaders/*.glsl")
-if(NCINE_EMBED_SHADERS)
-	message(STATUS "Exporting shader files to C strings")
-	set(SHADER_STRUCT_NAME "ShaderStrings")
-	get_filename_component(SHADERS_H_FILENAME ${SHADERS_H_FILE} NAME)
-	file(APPEND ${SHADERS_H_FILE} "namespace ncine {\n\n")
-	file(APPEND ${SHADERS_H_FILE} "struct ${SHADER_STRUCT_NAME}\n{\n")
-	file(APPEND ${SHADERS_CPP_FILE} "#include \"${SHADERS_H_FILENAME}\"\n\n")
-	file(APPEND ${SHADERS_CPP_FILE} "namespace ncine {\n\n")
-	foreach(SHADER_FILE ${SHADER_FILES})
-		get_filename_component(SHADER_CSTRING_NAME ${SHADER_FILE} NAME_WE)
-		file(STRINGS ${SHADER_FILE} SHADER_LINES)
-		file(APPEND ${SHADERS_H_FILE} "\tstatic char const * const ${SHADER_CSTRING_NAME};\n")
-		file(APPEND ${SHADERS_CPP_FILE} "char const * const ${SHADER_STRUCT_NAME}::${SHADER_CSTRING_NAME} = ")
-		foreach(SHADER_LINE ${SHADER_LINES})
-			file(APPEND ${SHADERS_CPP_FILE} "\n\"${SHADER_LINE}\\n\"")
-		endforeach()
-		file(APPEND ${SHADERS_CPP_FILE} ";\n\n")
-	endforeach()
-	file(APPEND ${SHADERS_H_FILE} "};\n\n}\n")
-	file(APPEND ${SHADERS_CPP_FILE} "}\n")
+include(ncine_generated_sources)
 
-	list(APPEND PRIVATE_HEADERS ${SHADERS_H_FILE})
-	list(APPEND SOURCES ${SHADERS_CPP_FILE})
-	add_definitions(-DWITH_EMBEDDED_SHADERS)
-
-	# Don't need to add shader files to the library target if they are embedded
-	set(SHADER_FILES "")
-endif()
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+foreach(SOURCE_FILE IN LISTS SOURCES HEADERS PRIVATE_HEADERS SHADER_FILES)
+	get_filename_component(SOURCE_FILE_GROUP ${SOURCE_FILE} DIRECTORY)
+	string(REPLACE / \\ SOURCE_FILE_GROUP ${SOURCE_FILE_GROUP})
+	source_group("${SOURCE_FILE_GROUP}" FILES ${SOURCE_FILE})
+endforeach()
+foreach(SOURCE_FILE ${GENERATED_SOURCES})
+	source_group("generated" FILES ${SOURCE_FILE})
+endforeach()
 
 if(NCINE_DYNAMIC_LIBRARY)
-	add_library(ncine SHARED ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${SHADER_FILES})
+	add_library(ncine SHARED ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${SHADER_FILES} ${GENERATED_SOURCES})
 else()
-	add_library(ncine STATIC ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${SHADER_FILES})
-endif()
-
-target_link_libraries(ncine ${OPENGL_gl_LIBRARY} ${LINK_LIBS})
-
-set(CPACK_PACKAGE_NAME "nCine")
-set(CPACK_PACKAGE_VENDOR "Encelo")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A multi-platform 2d game engine")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.md")
-#set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
-set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
-set(CPACK_PACKAGE_CONTACT "encelo@gmail.com")
-set(CPACK_PACKAGE_VERSION ${NCINE_VERSION})
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "nCine")
-include(CPack)
-
-find_package(Doxygen)
-if(NCINE_BUILD_DOCUMENTATION)
-	if(NOT DOXYGEN_FOUND)
-		message(FATAL_ERROR "Doxygen is needed to build the documentation")
-	endif()
-
-	set(DOXYGEN_OUTPUT_DIR ${CMAKE_BINARY_DIR}/docs)
-	set(DOXYFILE_IN ${CMAKE_SOURCE_DIR}/Doxyfile.in)
-	set(DOXYFILE ${CMAKE_BINARY_DIR}/Doxyfile)
-
-	configure_file(${DOXYFILE_IN} ${DOXYFILE} @ONLY)
-
-	add_custom_target(documentation ALL DEPENDS ${DOXYGEN_OUTPUT_DIR})
-
-	add_custom_command(OUTPUT ${DOXYGEN_OUTPUT_DIR}
-		COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE}
-		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-		COMMENT "Generating API documentation with Doxygen"
-	)
-
-	if(WIN32)
-		install(DIRECTORY ${DOXYGEN_OUTPUT_DIR}/html/ DESTINATION docs)
-	else()
-		install(DIRECTORY ${DOXYGEN_OUTPUT_DIR}/html/ DESTINATION share/doc/ncine)
-	endif()
-endif()
-
-if(WIN32)
-	install(TARGETS ncine RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
-	install(DIRECTORY include/ DESTINATION include/ncine FILES_MATCHING PATTERN "*.h")
-	if (NOT NCINE_EMBED_SHADERS)
-		install(DIRECTORY src/shaders DESTINATION data)
-	endif()
-
-	install(DIRECTORY ${BINDIR}/ DESTINATION bin)
-	install(DIRECTORY ${LIBDIR}/ DESTINATION lib)
-	install(DIRECTORY ${EXTERNAL_MSVC_DIR}/include/ DESTINATION include)
-
-	# Install a previously created documentation, if available
-	if(NOT NCINE_BUILD_DOCUMENTATION AND IS_DIRECTORY ${CMAKE_SOURCE_DIR}/docs/html)
-		install(DIRECTORY docs/html/ DESTINATION docs)
-	endif()
-else()
-	install(TARGETS ncine LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
-	install(DIRECTORY include/ DESTINATION include/ncine FILES_MATCHING PATTERN "*.h")
-	if (NOT NCINE_EMBED_SHADERS)
-		install(DIRECTORY src/shaders DESTINATION share/ncine)
-	endif()
-	install(FILES ${CMAKE_MODULE_PATH}/FindnCine.cmake DESTINATION lib/cmake/nCine/ RENAME nCineConfig.cmake)
+	add_library(ncine STATIC ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${SHADER_FILES} ${GENERATED_SOURCES})
+	target_compile_definitions(ncine INTERFACE "NCINE_STATIC")
 endif()
 
 if(MSVC)
-	# Disabling incremental linking and manifest generation
-	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /MANIFEST:NO /INCREMENTAL:NO")
-	set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /MANIFEST:NO /INCREMENTAL:NO")
-
-	if(NCINE_DYNAMIC_LIBRARY)
-		# Disabling incremental linking and manifest generation
-		set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} /MANIFEST:NO /INCREMENTAL:NO")
-		set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} /MANIFEST:NO /INCREMENTAL:NO")
-
-		# Disable linker warning about templates
-		add_definitions("/wd4251")
-	else()
-		add_definitions(-DNCINE_STATIC)
-	endif()
-
 	target_include_directories(ncine PRIVATE "${EXTERNAL_MSVC_DIR}/include")
+	if(NCINE_DYNAMIC_LIBRARY)
+		# Disable linker warning about templates
+		target_compile_options(ncine PUBLIC "/wd4251")
+	endif()
 else()
 	if(PNG_FOUND AND GLFW_FOUND)
 		target_include_directories(ncine PRIVATE ${PNG_INCLUDE_DIR})
 	endif()
 endif()
 target_include_directories(ncine PUBLIC include PRIVATE src/include)
-
-foreach(SOURCE_FILE IN LISTS SOURCES HEADERS PRIVATE_HEADERS SHADER_FILES)
-	get_filename_component(SOURCE_FILE_GROUP ${SOURCE_FILE} DIRECTORY)
-	string(REPLACE / \\ SOURCE_FILE_GROUP ${SOURCE_FILE_GROUP})
-	source_group("${SOURCE_FILE_GROUP}" FILES ${SOURCE_FILE})
-endforeach()
-
-if(NCINE_BUILD_TESTS)
-	set(NCINE_DATA_DIR ${PARENT_SOURCE_DIR}/nCine-data)
-	if(NOT IS_DIRECTORY ${NCINE_DATA_DIR})
-		message(WARNING "nCine data directory not found at: ${NCINE_DATA_DIR}")
-	else()
-		if(WIN32)
-			install(DIRECTORY ${NCINE_DATA_DIR}/ DESTINATION data)
-		else()
-			install(DIRECTORY ${NCINE_DATA_DIR}/ DESTINATION share/ncine)
-		endif()
-	endif()
-
-	if(WIN32 AND NCINE_DYNAMIC_LIBRARY)
-		if(MSVC_IDE)
-			add_custom_target(copy_ncine_dll ALL
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/$<CONFIGURATION>/ncine.dll ${CMAKE_BINARY_DIR}/tests
-				DEPENDS ncine
-				COMMENT "Copying nCine DLL..."
-			)
-		else()
-			add_custom_target(copy_ncine_dll ALL
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/ncine.dll ${CMAKE_BINARY_DIR}/tests
-				DEPENDS ncine
-				COMMENT "Copying nCine DLL..."
-			)
-		endif()
-		set_target_properties(copy_ncine_dll PROPERTIES FOLDER "CustomCopyTargets")
-	endif()
-	
-	add_subdirectory(tests)
-	if(NOT NCINE_DYNAMIC_LIBRARY)
-		add_subdirectory(src/tests)
-	endif()
+if (IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
+	target_include_directories(ncine PRIVATE ${GENERATED_INCLUDE_DIR})
 endif()
+
+target_compile_definitions(ncine PRIVATE ${PRIVATE_COMPILE_DEFINITIONS})
+target_link_libraries(ncine PRIVATE ${OPENGL_gl_LIBRARY} ${PRIVATE_LINK_LIBRARIES})
+
+if(WIN32)
+	install(TARGETS ncine RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+	set(MAIN_CPP_INSTALL_DESTINATION src)
+	set(SHADERS_INSTALL_DESTINATION data/shaders)
+
+	install(DIRECTORY ${BINDIR}/ DESTINATION bin)
+	install(DIRECTORY ${LIBDIR}/ DESTINATION lib)
+	install(DIRECTORY ${EXTERNAL_MSVC_DIR}/include/ DESTINATION include)
+else()
+	install(TARGETS ncine LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+	set(MAIN_CPP_INSTALL_DESTINATION share/ncine)
+	set(SHADERS_INSTALL_DESTINATION share/ncine/shaders)
+endif()
+install(DIRECTORY include/ DESTINATION include/ncine FILES_MATCHING PATTERN "*.h")
+install(FILES tests/main.cpp DESTINATION ${MAIN_CPP_INSTALL_DESTINATION})
+if (NOT NCINE_EMBED_SHADERS)
+	install(DIRECTORY src/shaders/ DESTINATION ${SHADERS_INSTALL_DESTINATION})
+endif()
+
+if (UNIX)
+	set(NCINE_CONFIG_PATH "lib/cmake/nCine/")
+else()
+	set(NCINE_CONFIG_PATH "cmake")
+endif()
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+	"${CMAKE_SOURCE_DIR}/cmake/nCineConfig.cmake.in"
+	"${CMAKE_BINARY_DIR}/nCineConfig.cmake"
+	INSTALL_DESTINATION "${NCINE_CONFIG_PATH}"
+	PATH_VARS CMAKE_INSTALL_PREFIX
+	NO_CHECK_REQUIRED_COMPONENTS_MACRO)
+install(FILES ${CMAKE_BINARY_DIR}/nCineConfig.cmake DESTINATION ${NCINE_CONFIG_PATH})
+
+include(ncine_build_documentation)
+include(ncine_build_tests)

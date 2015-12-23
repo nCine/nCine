@@ -1,0 +1,21 @@
+# - Config file for the nCine package
+# It defines the following variables
+#   NCINE_INCLUDE_DIR, the path where nCine headers are located
+#   NCINE_LIBRARY_DIR, folder in which the nCine library is located
+#   NCINE_LIBRARY, library to link against to use nCine
+
+set(NCINE_VERSION "@NCINE_VERSION@")
+
+@PACKAGE_INIT@
+
+set_and_check(NCINE_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_PREFIX@/include/ncine")
+set_and_check(NCINE_LIBRARY_DIR "@PACKAGE_CMAKE_INSTALL_PREFIX@/lib")
+set_and_check(NCINE_MAIN_CPP_DIR "@PACKAGE_CMAKE_INSTALL_PREFIX@/@MAIN_CPP_INSTALL_DESTINATION@")
+
+set(NCINE_EMBEDDED_SHADERS @NCINE_EMBED_SHADERS@)
+if(NOT NCINE_EMBEDDED_SHADERS)
+	set_and_check(NCINE_SHADERS_DIR "@PACKAGE_CMAKE_INSTALL_PREFIX@/@SHADERS_INSTALL_DESTINATION@")
+endif()
+
+find_library(NCINE_LIBRARY "ncine" HINTS ${NCINE_LIBRARY_DIR})
+find_file(NCINE_MAIN_CPP "main.cpp" HINTS ${NCINE_MAIN_CPP_DIR})
