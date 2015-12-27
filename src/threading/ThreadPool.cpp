@@ -70,6 +70,9 @@ void ThreadPool::init()
 	for (unsigned int i = 0; i < numThreads_; i++)
 	{
 		threads_[i].run(workerFunction, &threadStruct_);
+	#ifndef __ANDROID__
+		threads_[i].setAffinityMask(ThreadAffinityMask(i));
+	#endif
 	}
 }
 
@@ -77,7 +80,7 @@ void ThreadPool::workerFunction(void *arg)
 {
 	ThreadStruct *threadStruct = static_cast<ThreadStruct *>(arg);
 
-	LOGD_X("worker thread %u is starting", Thread::self());
+	LOGD_X("Worker thread %u is starting", Thread::self());
 
 	while (true)
 	{
@@ -97,12 +100,12 @@ void ThreadPool::workerFunction(void *arg)
 		threadStruct->queue->popFront();
 		threadStruct->queueMutex->unlock();
 
-		LOGD_X("worker thread %u is executing its command", Thread::self());
+		LOGD_X("Worker thread %u is executing its command", Thread::self());
 		threadCommand->execute();
 		delete threadCommand;
 	}
 
-	LOGD_X("worker thread %u is exiting", Thread::self());
+	LOGD_X("Worker thread %u is exiting", Thread::self());
 }
 
 }

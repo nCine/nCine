@@ -8,7 +8,43 @@
 	#include <pthread.h>
 #endif
 
+#ifdef __APPLE__
+	#include <mach/mach_init.h>
+#endif
+
 namespace ncine {
+
+#ifndef __ANDROID__
+
+/// A class representing the CPU affinity mask for a thread
+class ThreadAffinityMask
+{
+  public:
+	ThreadAffinityMask() { zero(); }
+	ThreadAffinityMask(int cpuNum) { zero(); set(cpuNum); }
+
+	// Clears the CPU set
+	void zero();
+	// Sets the specified CPU number to be included in the set
+	void set(int cpuNum);
+	// Sets the specified CPU number to be excluded by the set
+	void clear(int cpuNum);
+	// Returns true if the specified CPU number belongs to the set
+	bool isSet(int cpuNum);
+
+  private:
+#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+	DWORD_PTR affinityMask_;
+#elif __APPLE__
+	integer_t affinityTag_;
+#else
+	cpu_set_t cpuSet_;
+#endif
+
+	friend class Thread;
+};
+
+#endif
 
 /// Thread class
 class Thread
@@ -39,6 +75,11 @@ class Thread
 #ifndef __ANDROID__
 	// Asks the thread for termination
 	void cancel();
+
+	// Gets the thread affinity mask
+	ThreadAffinityMask affinityMask() const;
+	// Sets the thread affinity mask
+	void setAffinityMask(ThreadAffinityMask affinityMask);
 #endif
 
   private:

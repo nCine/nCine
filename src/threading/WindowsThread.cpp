@@ -4,6 +4,34 @@
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
+
+/// Clears the CPU set
+void ThreadAffinityMask::zero()
+{
+	affinityMask_ = 0L;
+}
+
+/// Sets the specified CPU number to be included in the set
+void ThreadAffinityMask::set(int cpuNum)
+{
+	affinityMask_ |= static_cast<DWORD_PTR>(1 << cpuNum);
+}
+
+/// Sets the specified CPU number to be excluded by the set
+void ThreadAffinityMask::clear(int cpuNum)
+{
+	affinityMask_ &= ~(1 << cpuNum);
+}
+
+/// Returns true if the specified CPU number belongs to the set
+bool ThreadAffinityMask::isSet(int cpuNum)
+{
+	return ((affinityMask_ >> cpuNum) & 1) != 0;
+}
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
@@ -25,7 +53,7 @@ Thread::Thread(ThreadFunctionPtr startFunction, void* arg)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-// Gets the number of processors in the machine
+/// Gets the number of processors in the machine
 unsigned int Thread::numProcessors()
 {
 	unsigned int numProcs = 0;
@@ -47,13 +75,13 @@ void Thread::run(ThreadFunctionPtr startFunction, void* arg)
 		handle_ = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, wrapperFunction, &threadInfo_, 0, NULL));
 		if (handle_ == 0)
 		{
-			LOGE("_beginthreadex error");
+			LOGE("Error in _beginthreadex()");
 			::exit(EXIT_FAILURE);
 		}
 	}
 	else
 	{
-		LOGW_X("thread %u is already running", handle_);
+		LOGW_X("Thread %u is already running", handle_);
 	}
 }
 
@@ -87,6 +115,40 @@ void Thread::yieldExecution()
 void Thread::cancel()
 {
 	TerminateThread(handle_, 0);
+}
+
+/// Gets the thread affinity mask
+ThreadAffinityMask Thread::affinityMask() const
+{
+	ThreadAffinityMask affinityMask;
+
+	if (handle_ != 0)
+	{
+		// A neutral value for the temporary mask
+		DWORD_PTR allCpus = ~(allCpus & 0);
+
+		affinityMask.affinityMask_ = SetThreadAffinityMask(handle_, allCpus);
+		SetThreadAffinityMask(handle_, affinityMask.affinityMask_);
+	}
+	else
+	{
+		LOGW("Cannot get the affinity for a thread that has not been created yet");
+	}
+
+	return affinityMask;
+}
+
+/// Sets the thread affinity mask
+void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
+{
+	if (handle_ != 0)
+	{
+		SetThreadAffinityMask(handle_, affinityMask.affinityMask_);
+	}
+	else
+	{
+		LOGW("Cannot set the affinity mask for a not yet created thread");
+	}
 }
 
 ///////////////////////////////////////////////////////////

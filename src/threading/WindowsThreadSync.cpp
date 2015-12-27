@@ -87,7 +87,7 @@ void CondVariable::signal()
 
 	if (haveWaiters)
 	{
-		SetEvent(events_[0]);    // Signal
+		SetEvent(events_[0]); // Signal
 	}
 }
 
@@ -99,7 +99,7 @@ void CondVariable::broadcast()
 
 	if (haveWaiters)
 	{
-		SetEvent(events_[1]);    // Broadcast
+		SetEvent(events_[1]); // Broadcast
 	}
 }
 
@@ -118,7 +118,7 @@ void CondVariable::waitEvents()
 
 	if (isLastWaiter)
 	{
-		ResetEvent(events_[1]);    // Broadcast
+		ResetEvent(events_[1]); // Broadcast
 	}
 }
 
