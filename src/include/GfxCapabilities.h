@@ -1,12 +1,10 @@
 #ifndef CLASS_NCINE_GFXCAPABILITIES
 #define CLASS_NCINE_GFXCAPABILITIES
 
-#include "common_defines.h"
-
 namespace ncine {
 
 /// A class to query and store OpenGL device runtime capabilities
-class DLL_PUBLIC GfxCapabilities
+class GfxCapabilities
 {
   public:
 	/// Default constructor

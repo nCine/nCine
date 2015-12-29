@@ -1,42 +1,28 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(nCine-tests)
 
-if(UNIX)
-	if(NOT NCINE_EMBED_SHADERS)
-		add_custom_target(link_shaders_tests ALL
-			COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/tests/shaders
-			COMMENT "Symlinking shaders to tests..."
-		)
-		set_target_properties(link_shaders_tests PROPERTIES FOLDER "CustomSymlinkTargets")
-	endif()
-	if(IS_DIRECTORY ${NCINE_DATA_DIR})
-		add_custom_target(link_data_tests ALL
-			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATA_DIR}/fonts ${CMAKE_BINARY_DIR}/tests/fonts
-			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATA_DIR}/sounds ${CMAKE_BINARY_DIR}/tests/sounds
-			COMMAND ${CMAKE_COMMAND} -E create_symlink ${NCINE_DATA_DIR}/textures ${CMAKE_BINARY_DIR}/tests/textures
-			COMMENT "Symlinking data to tests..."
-		)
-		set_target_properties(link_data_tests PROPERTIES FOLDER "CustomSymlinkTargets")
-	endif()
-elseif(WIN32)
-	if(NOT NCINE_EMBED_SHADERS)
-		add_custom_target(copy_shaders_tests ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${CMAKE_BINARY_DIR}/tests/shaders
-			COMMENT "Copying shaders to tests..."
-		)
-		set_target_properties(copy_shaders_tests PROPERTIES FOLDER "CustomCopyTargets")
-	endif()
+if(WIN32)
 	add_custom_target(copy_dlls_tests ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/tests
 		COMMENT "Copying DLLs to tests..."
 	)
 	set_target_properties(copy_dlls_tests PROPERTIES FOLDER "CustomCopyTargets")
-	if(IS_DIRECTORY ${NCINE_DATA_DIR})
-		add_custom_target(copy_data_tests ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_DATA_DIR}/ ${CMAKE_BINARY_DIR}/tests
-			COMMENT "Copying data to tests..."
-		)
-		set_target_properties(copy_data_tests PROPERTIES FOLDER "CustomCopyTargets")
+
+	if(NCINE_DYNAMIC_LIBRARY)
+		if(MSVC_IDE)
+			add_custom_target(copy_ncine_dll ALL
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/$<CONFIGURATION>/ncine.dll ${CMAKE_BINARY_DIR}/tests
+				DEPENDS ncine
+				COMMENT "Copying nCine DLL..."
+			)
+		else()
+			add_custom_target(copy_ncine_dll ALL
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/ncine.dll ${CMAKE_BINARY_DIR}/tests
+				DEPENDS ncine
+				COMMENT "Copying nCine DLL..."
+			)
+		endif()
+		set_target_properties(copy_ncine_dll PROPERTIES FOLDER "CustomCopyTargets")
 	endif()
 endif()
 

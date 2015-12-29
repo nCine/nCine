@@ -1,6 +1,3 @@
-#define NCINE_INCLUDE_OPENGL
-#include "common_headers.h"
-
 #include <stddef.h> // for offsetof()
 #include "glapptest_fbo_cube.h"
 #include "Application.h"
@@ -11,6 +8,11 @@
 #include "GLTexture.h"
 #include "GLFramebufferObject.h"
 #include "GLBufferObject.h"
+#include "IFile.h" // for dataPath()
+
+#ifdef WITH_EMBEDDED_SHADERS
+	#include "shader_strings.h"
+#endif
 
 namespace {
 
@@ -105,8 +107,13 @@ void MyEventHandler::onPreInit(nc::AppConfiguration& config)
 void MyEventHandler::onInit()
 {
 	colorProgram_ = new nc::GLShaderProgram();
-	colorProgram_->attachShader(GL_VERTEX_SHADER, "shaders/vcolor_vs.glsl");
-	colorProgram_->attachShader(GL_FRAGMENT_SHADER, "shaders/vcolor_fs.glsl");
+#ifndef WITH_EMBEDDED_SHADERS
+	colorProgram_->attachShader(GL_VERTEX_SHADER, (nc::IFile::dataPath() + "shaders/vcolor_vs.glsl").data());
+	colorProgram_->attachShader(GL_FRAGMENT_SHADER, (nc::IFile::dataPath() + "shaders/vcolor_fs.glsl").data());
+#else
+	colorProgram_->attachShaderFromString(GL_VERTEX_SHADER, nc::ShaderStrings::vcolor_vs);
+	colorProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, nc::ShaderStrings::vcolor_fs);
+#endif
 	colorProgram_->bindAttribLocation(ATTRIB_POSITION, "aPosition");
 	colorProgram_->bindAttribLocation(ATTRIB_COLOR, "aColor");
 	colorProgram_->link();
@@ -115,8 +122,13 @@ void MyEventHandler::onInit()
 	colorAttributes_ = new nc::GLShaderAttributes(colorProgram_);
 
 	texProgram_ = new nc::GLShaderProgram();
-	texProgram_->attachShader(GL_VERTEX_SHADER, "shaders/texture_vs.glsl");
-	texProgram_->attachShader(GL_FRAGMENT_SHADER, "shaders/texture_fs.glsl");
+#ifndef WITH_EMBEDDED_SHADERS
+	texProgram_->attachShader(GL_VERTEX_SHADER, (nc::IFile::dataPath() + "shaders/texture_vs.glsl").data());
+	texProgram_->attachShader(GL_FRAGMENT_SHADER, (nc::IFile::dataPath() + "shaders/texture_fs.glsl").data());
+#else
+	texProgram_->attachShaderFromString(GL_VERTEX_SHADER, nc::ShaderStrings::texture_vs);
+	texProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, nc::ShaderStrings::texture_fs);
+#endif
 	texProgram_->bindAttribLocation(ATTRIB_POSITION, "aPosition");
 	texProgram_->bindAttribLocation(ATTRIB_TEXCOORDS, "aTexCoords");
 	texProgram_->link();

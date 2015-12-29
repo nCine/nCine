@@ -63,8 +63,6 @@ class DLL_PUBLIC MouseEvent
 class DLL_PUBLIC KeyboardState
 {
   public:
-	KeyboardState() { }
-
 	virtual bool isKeyDown(KeySym key) const = 0;
 };
 #endif

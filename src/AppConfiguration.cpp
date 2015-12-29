@@ -41,6 +41,10 @@ AppConfiguration::AppConfiguration()
 	fontTexFilename_ = "fonts/trebuchet32_256_gray.png";
 	fontFntFilename_ = "fonts/trebuchet32_256.fnt";
 #endif
+
+#ifdef NCINE_DEFAULT_DATA_DIR
+	IFile::dataPath_ = NCINE_DEFAULT_DATA_DIR;
+#endif
 }
 
 ///////////////////////////////////////////////////////////
