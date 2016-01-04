@@ -67,25 +67,25 @@ KeySym AndroidInputManager::keySymValueToEnum(int keysym)
 		case AKEYCODE_Z:				return KEY_Z;
 		case AKEYCODE_COMMA:			return KEY_COMMA;
 		case AKEYCODE_PERIOD:			return KEY_PERIOD;
-		case AKEYCODE_ALT_LEFT:			return KEY_ALT_LEFT;
-		case AKEYCODE_ALT_RIGHT:		return KEY_ALT_RIGHT;
-		case AKEYCODE_SHIFT_LEFT:		return KEY_SHIFT_LEFT;
-		case AKEYCODE_SHIFT_RIGHT:		return KEY_SHIFT_RIGHT;
+		case AKEYCODE_ALT_LEFT:			return KEY_LALT;
+		case AKEYCODE_ALT_RIGHT:		return KEY_RALT;
+		case AKEYCODE_SHIFT_LEFT:		return KEY_LSHIFT;
+		case AKEYCODE_SHIFT_RIGHT:		return KEY_RSHIFT;
 		case AKEYCODE_TAB:				return KEY_TAB;
 		case AKEYCODE_SPACE:			return KEY_SPACE;
 		case AKEYCODE_SYM:				return KEY_SYM;
 		case AKEYCODE_EXPLORER:			return KEY_EXPLORER;
 		case AKEYCODE_ENVELOPE:			return KEY_ENVELOPE;
-		case AKEYCODE_ENTER:			return KEY_ENTER;
-		case AKEYCODE_DEL:				return KEY_DEL;
-		case AKEYCODE_GRAVE:			return KEY_GRAVE;
+		case AKEYCODE_ENTER:			return KEY_RETURN;
+		case AKEYCODE_DEL:				return KEY_DELETE;
+		case AKEYCODE_GRAVE:			return KEY_BACKQUOTE;
 		case AKEYCODE_MINUS:			return KEY_MINUS;
 		case AKEYCODE_EQUALS:			return KEY_EQUALS;
-		case AKEYCODE_LEFT_BRACKET:		return KEY_LEFT_BRACKET;
-		case AKEYCODE_RIGHT_BRACKET:	return KEY_RIGHT_BRACKET;
+		case AKEYCODE_LEFT_BRACKET:		return KEY_LEFTBRACKET;
+		case AKEYCODE_RIGHT_BRACKET:	return KEY_RIGHTBRACKET;
 		case AKEYCODE_BACKSLASH:		return KEY_BACKSLASH;
 		case AKEYCODE_SEMICOLON:		return KEY_SEMICOLON;
-		case AKEYCODE_APOSTROPHE:		return KEY_APOSTROPHE;
+		case AKEYCODE_APOSTROPHE:		return KEY_QUOTE;
 		case AKEYCODE_SLASH:			return KEY_SLASH;
 		case AKEYCODE_AT:				return KEY_AT;
 		case AKEYCODE_NUM:				return KEY_NUM;
@@ -137,6 +137,19 @@ KeyMod AndroidInputManager::keyModValueToEnum(int keymod)
 		case AMETA_SHIFT_ON:		return KEYMOD_SHIFT;
 		case AMETA_SHIFT_LEFT_ON:	return KEYMOD_LSHIFT;
 		case AMETA_SHIFT_RIGHT_ON:	return KEYMOD_RSHIFT;
+#if __ANDROID_API >= 13
+		case AMETA_CONTROL_ON:		return KEYMOD_CTRL;
+		case AMETA_CONTROL_LEFT_ON:	return KEYMOD_LCTRL;
+		case AMETA_CONTROL_RIGHT_ON:return KEYMOD_RCTRL;
+#endif
+		case AMETA_META_ON:			return KEYMOD_META;
+		case AMETA_META_LEFT_ON:	return KEYMOD_LMETA;
+		case AMETA_META_RIGHT_ON:	return KEYMOD_RMETA;
+#if __ANDROID_API >= 13
+		case AMETA_CAPS_LOCK_ON:	return KEYMOD_CAPS;
+		case AMETA_NUM_LOCK_ON:		return KEYMOD_NUM;
+		case AMETA_SCROLL_LOCK_ON:	return KEYMOD_SCROLL;
+#endif
 		case AMETA_SYM_ON:			return KEYMOD_SYM;
 
 		default:					return KEYMOD_NONE;

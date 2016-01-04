@@ -120,8 +120,8 @@ KeySym GlfwInputManager::keySymValueToEnum(int keysym)
 		case GLFW_KEY_LEFT_CONTROL:	return KEY_LCTRL;
 		case GLFW_KEY_RIGHT_ALT:	return KEY_RALT;
 		case GLFW_KEY_LEFT_ALT:		return KEY_LALT;
-		case GLFW_KEY_LEFT_SUPER:	return KEY_LSUPER;
 		case GLFW_KEY_RIGHT_SUPER:	return KEY_RSUPER;
+		case GLFW_KEY_LEFT_SUPER:	return KEY_LSUPER;
 
 		case GLFW_KEY_PRINT_SCREEN:	return KEY_PRINT;
 		case GLFW_KEY_PAUSE:		return KEY_BREAK;
