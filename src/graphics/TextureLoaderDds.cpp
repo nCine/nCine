@@ -1,6 +1,5 @@
 #include <cstdlib> // for exit()
 #include "TextureLoaderDds.h"
-#include "GfxCapabilities.h"
 #include "ServiceLocator.h"
 
 namespace ncine {
@@ -64,7 +63,7 @@ void TextureLoaderDds::readHeader(DdsHeader& header)
 void TextureLoaderDds::parseFormat(const DdsHeader &header)
 {
 	GLenum internalFormat = GL_RGB; // to suppress uninitialized variable warning
-	const GfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
+	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
 
 	uint32_t flags = IFile::int32FromLE(header.ddspf.dwFlags);
 
@@ -83,7 +82,7 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 			case DDS_DXT1:
 			case DDS_DXT3:
 			case DDS_DXT5:
-				if (gfxCaps.extTextureCompressionS3TC() == false)
+				if (gfxCaps.hasExtension(IGfxCapabilities::EXT_TEXTURE_COMPRESSION_S3TC) == false)
 				{
 					LOGF("GL_EXT_texture_compression_s3tc not available");
 					exit(EXIT_FAILURE);
@@ -93,7 +92,7 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 			case DDS_ATC:
 			case DDS_ATCA:
 			case DDS_ATCI:
-				if (gfxCaps.amdCompressedAtcTexture() == false)
+				if (gfxCaps.hasExtension(IGfxCapabilities::AMD_COMPRESSED_ATC_TEXTURE) == false)
 				{
 					LOGF("GL_AMD_compressed_ATC_texture not available");
 					exit(EXIT_FAILURE);

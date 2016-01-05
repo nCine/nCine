@@ -30,10 +30,6 @@ class DLL_PUBLIC ILogger
 
 inline ILogger::~ILogger() { }
 
-#endif
-
-#ifndef CLASS_NCNULLLOGGER
-#define CLASS_NCNULLLOGGER
 
 /// A fake logger which doesn't log anything
 class DLL_PUBLIC NullLogger : public ILogger

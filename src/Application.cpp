@@ -83,6 +83,7 @@ void Application::initCommon()
 #else
 	LOGI("nCine compiled on " __DATE__ " at " __TIME__);
 #endif
+
 	theServiceLocator().registerIndexer(new ArrayIndexer());
 #ifdef WITH_AUDIO
 	if (appCfg_.withAudio_)
@@ -96,14 +97,13 @@ void Application::initCommon()
 		theServiceLocator().registerThreadPool(new ThreadPool());
 	}
 #endif
+	theServiceLocator().registerGfxCapabilities(new GfxCapabilities());
+
 	LOGI_X("Data path: %s", IFile::dataPath().data());
 	LOGI_X("Save path: %s", IFile::savePath().data());
 
 	frameTimer_ = new FrameTimer(appCfg_.frameTimerLogInterval_, appCfg_.profileTextUpdateTime_);
 	profileTimer_ = new Timer();
-
-	GfxCapabilities& gfxCaps = const_cast<GfxCapabilities&>(theServiceLocator().gfxCapabilities());
-	gfxCaps.init();
 
 	if (appCfg_.withScenegraph_)
 	{

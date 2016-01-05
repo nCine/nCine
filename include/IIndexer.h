@@ -34,10 +34,6 @@ class DLL_PUBLIC IIndexer
 
 inline IIndexer::~IIndexer() { }
 
-#endif
-
-#ifndef CLASS_NCINE_NULLINDEXER
-#define CLASS_NCINE_NULLINDEXER
 
 /// Fake indexer, always returning a NULL object and a zero index
 class DLL_PUBLIC NullIndexer : public IIndexer

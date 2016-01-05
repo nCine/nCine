@@ -12,27 +12,85 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GfxCapabilities::GfxCapabilities()
-	: majorGL_(-1),
-	  minorGL_(-1),
-#ifndef __ANDROID__
-	  releaseGL_(-1),
-#endif
-	  maxTextureSize_(-1),
-	  maxTextureImageUnits_(-1),
-#ifndef __ANDROID__
-	  extTextureCompressionS3TC_(false)
-#else
-	  oesCompressedEtc1Rgb8Texture_(false),
-	  amdCompressedAtcTexture_(false),
-	  imgTextureCompressionPvrTC_(false)
-#endif
+	: glMajorVersion_(0),
+	  glMinorVersion_(0),
+	  glReleaseVersion_(0)
 {
+	for (unsigned int i = 0; i < IGfxCapabilities::NUM_INTVALUES; i++)
+	{
+		glIntValues_[i] = 0;
+	}
 
+	for (unsigned int i = 0; i < IGfxCapabilities::NUM_EXTENSIONS; i++)
+	{
+		glExtensions_[i] = false;
+	}
+
+	init();
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+int GfxCapabilities::glVersion(IGfxCapabilities::GLVersion version) const
+{
+	switch(version)
+	{
+		case IGfxCapabilities::MAJOR: return glMajorVersion_;
+		case IGfxCapabilities::MINOR: return glMinorVersion_;
+		case IGfxCapabilities::RELEASE: return glReleaseVersion_;
+
+		default : return 0;
+	}
+}
+
+int GfxCapabilities::value(GLIntValues valueName) const
+{
+	int value = 0;
+
+	if (valueName >= 0 && valueName < NUM_INTVALUES)
+	{
+		value = glIntValues_[valueName];
+	}
+
+	return value;
+}
+
+bool GfxCapabilities::hasExtension(GLExtensions extensionName) const
+{
+	bool extensionAvailable = false;
+
+	if (extensionName >= 0 && extensionName < NUM_EXTENSIONS)
+	{
+		extensionAvailable = glExtensions_[extensionName];
+	}
+
+	return extensionAvailable;
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+/// Queries the device about its runtime graphics capabilities
+void GfxCapabilities::init()
+{
+	const char *pVersion = reinterpret_cast<const char *>(glGetString(GL_VERSION));
+#ifndef __ANDROID__
+	sscanf(pVersion, "%2d.%2d.%2d", &glMajorVersion_, &glMinorVersion_, &glReleaseVersion_);
+#else
+	sscanf(pVersion, "OpenGL ES-%*2s %2d.%2d", &glMajorVersion_, &glMinorVersion_);
+#endif
+
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &glIntValues_[MAX_TEXTURE_SIZE]);
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &glIntValues_[MAX_TEXTURE_IMAGE_UNITS]);
+
+	glExtensions_[EXT_TEXTURE_COMPRESSION_S3TC] = checkGLExtension("GL_EXT_texture_compression_s3tc");
+	glExtensions_[OES_COMPRESSED_ETC1_RGB8_TEXTURE] = checkGLExtension("GL_OES_compressed_ETC1_RGB8_texture");
+	glExtensions_[AMD_COMPRESSED_ATC_TEXTURE] = checkGLExtension("GL_AMD_compressed_ATC_texture");
+	glExtensions_[IMG_TEXTURE_COMPRESSION_PVRTC] = checkGLExtension("GL_IMG_texture_compression_pvrtc");
+}
 
 /// Logs OpenGL device info
 void GfxCapabilities::logGLInfo()
@@ -57,22 +115,20 @@ void GfxCapabilities::logGLExtensions()
 void GfxCapabilities::logGLCaps() const
 {
 	LOGI("OpenGL device capabilities ---");
-	LOGI_X("OpenGL Major: %d", majorGL_);
-	LOGI_X("OpenGL Minor: %d", minorGL_);
-#ifndef __ANDROID__
-	LOGI_X("OpenGL Release: %d", releaseGL_);
-#endif
+	LOGI_X("OpenGL Major: %d", glMajorVersion_);
+	LOGI_X("OpenGL Minor: %d", glMinorVersion_);
+	LOGI_X("OpenGL Release: %d", glReleaseVersion_);
+
 	LOGI("---");
-	LOGI_X("GL_MAX_TEXTURE_SIZE: %d", maxTextureSize_);
-	LOGI_X("GL_MAX_TEXTURE_IMAGE_UNITS: %d", maxTextureImageUnits_);
+	LOGI_X("GL_MAX_TEXTURE_SIZE: %d", glIntValues_[MAX_TEXTURE_SIZE]);
+	LOGI_X("GL_MAX_TEXTURE_IMAGE_UNITS: %d", glIntValues_[MAX_TEXTURE_IMAGE_UNITS]);
 	LOGI("---");
-#ifndef __ANDROID__
-	LOGI_X("GL_EXT_texture_compression_s3tc: %d", extTextureCompressionS3TC_);
-#else
-	LOGI_X("GL_OES_compressed_ETC1_RGB8_texture: %d", oesCompressedEtc1Rgb8Texture_);
-	LOGI_X("GL_AMD_compressed_ATC_texture: %d", amdCompressedAtcTexture_);
-	LOGI_X("GL_IMG_texture_compression_pvrtc: %d", imgTextureCompressionPvrTC_);
-#endif
+
+	LOGI_X("GL_EXT_texture_compression_s3tc: %d", glExtensions_[EXT_TEXTURE_COMPRESSION_S3TC]);
+	LOGI_X("GL_OES_compressed_ETC1_RGB8_texture: %d", glExtensions_[OES_COMPRESSED_ETC1_RGB8_TEXTURE]);
+	LOGI_X("GL_AMD_compressed_ATC_texture: %d", glExtensions_[AMD_COMPRESSED_ATC_TEXTURE]);
+	LOGI_X("GL_IMG_texture_compression_pvrtc: %d", glExtensions_[IMG_TEXTURE_COMPRESSION_PVRTC]);
+
 	LOGI("OpenGL device capabilities ---");
 }
 
@@ -99,32 +155,6 @@ bool GfxCapabilities::checkGLExtension(const char *extensionName) const
 		extensions += (n + 1);
 	}
 	return false;
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-/// Queries the device about its capabilities
-void GfxCapabilities::init()
-{
-	const char *pVersion = reinterpret_cast<const char *>(glGetString(GL_VERSION));
-#ifndef __ANDROID__
-	sscanf(pVersion, "%2d.%2d.%2d", &majorGL_, &minorGL_, &releaseGL_);
-#else
-	sscanf(pVersion, "OpenGL ES-%*2s %2d.%2d", &majorGL_, &minorGL_);
-#endif
-
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize_);
-	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureImageUnits_);
-
-#ifndef __ANDROID__
-	extTextureCompressionS3TC_ = checkGLExtension("GL_EXT_texture_compression_s3tc");
-#else
-	oesCompressedEtc1Rgb8Texture_ = checkGLExtension("GL_OES_compressed_ETC1_RGB8_texture");
-	amdCompressedAtcTexture_ = checkGLExtension("GL_AMD_compressed_ATC_texture");
-	imgTextureCompressionPvrTC_ = checkGLExtension("GL_IMG_texture_compression_pvrtc");
-#endif
 }
 
 }

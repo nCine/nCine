@@ -1,14 +1,33 @@
 #ifndef CLASS_NCINE_GFXCAPABILITIES
 #define CLASS_NCINE_GFXCAPABILITIES
 
+#include "IGfxCapabilities.h"
+
 namespace ncine {
 
-/// A class to query and store OpenGL device runtime capabilities
-class GfxCapabilities
+/// A class that stores and retrieves runtime OpenGL device capabilities
+class GfxCapabilities : public IGfxCapabilities
 {
   public:
-	/// Default constructor
 	GfxCapabilities();
+
+	int glVersion(GLVersion version) const;
+	int value(GLIntValues valueName) const;
+	bool hasExtension(GLExtensions extensionName) const;
+
+  private:
+	int glMajorVersion_;
+	int glMinorVersion_;
+	/// The OpenGL release version number (not available in OpenGL ES)
+	int glReleaseVersion_;
+
+	/// Array of OpenGL integer values
+	int glIntValues_[IGfxCapabilities::NUM_INTVALUES];
+	/// Array of OpenGL extension availability flags
+	bool glExtensions_[IGfxCapabilities::NUM_EXTENSIONS];
+
+	// Queries the device about its runtime graphics capabilities
+	void init();
 
 	// Logs OpenGL device info
 	void logGLInfo();
@@ -19,55 +38,6 @@ class GfxCapabilities
 
 	// Check for an OpenGL extension
 	bool checkGLExtension(const char *extensionName) const;
-
-	/// Returns OpenGL major version number
-	inline int majorGL() const { return majorGL_; }
-	/// Returns OpenGL minor version number
-	inline int minorGL() const { return minorGL_; }
-#ifndef __ANDROID__
-	/// Returns OpenGL release version number
-	inline int releaseGL() const { return releaseGL_; }
-#endif
-
-	/// Returns a rough estimate of the largest texture that the device can handle
-	inline int maxTextureSize() const { return maxTextureSize_; }
-	/// Returns the number of texture image units supported
-	inline int maxTextureImageUnits() const { return maxTextureImageUnits_; }
-
-#ifndef __ANDROID__
-	/// Returns true if the extension GL_EXT_texture_compression_s3tc is available
-	inline bool extTextureCompressionS3TC() const { return extTextureCompressionS3TC_; }
-#else
-	/// Returns true if the extension GL_OES_compressed_ETC1_RGB8_texture is available
-	inline bool oesCompressedEtc1Rgb8Texture() const { return oesCompressedEtc1Rgb8Texture_; }
-	/// Returns true if the extension GL_AMD_compressed_ATC_texture is available
-	inline bool amdCompressedAtcTexture() const { return amdCompressedAtcTexture_; }
-	/// Returns true if the extension GL_IMG_texture_compression_pvrtc is available
-	inline bool imgTextureCompressionPvrTC() const { return imgTextureCompressionPvrTC_; }
-#endif
-
-  private:
-	int majorGL_;
-	int minorGL_;
-#ifndef __ANDROID__
-	int releaseGL_;
-#endif
-
-	int maxTextureSize_;
-	int maxTextureImageUnits_;
-
-#ifndef __ANDROID__
-	bool extTextureCompressionS3TC_;
-#else
-	bool oesCompressedEtc1Rgb8Texture_;
-	bool amdCompressedAtcTexture_;
-	bool imgTextureCompressionPvrTC_;
-#endif
-
-	// Queries the device about its capabilities
-	void init();
-
-	friend class Application;
 };
 
 }

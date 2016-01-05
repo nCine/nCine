@@ -19,10 +19,6 @@ class DLL_PUBLIC IThreadPool
 
 inline IThreadPool::~IThreadPool() { }
 
-#endif
-
-#ifndef CLASS_NCINE_NULLTHREADPOOL
-#define CLASS_NCINE_NULLTHREADPOOL
 
 /// A fake thread pool which doesn't create any thread
 class DLL_PUBLIC NullThreadPool : public IThreadPool

@@ -1,7 +1,6 @@
 #include <cstdlib> // for exit()
 #include <cstring>
 #include "TextureLoaderEtc.h"
-#include "GfxCapabilities.h"
 #include "ServiceLocator.h"
 
 namespace ncine {
@@ -28,7 +27,7 @@ TextureLoaderEtc::TextureLoaderEtc(IFile* fileHandle)
 
 void TextureLoaderEtc::init()
 {
-	const GfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();
+	const IGfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();
 
 	fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
 
@@ -50,7 +49,7 @@ void TextureLoaderEtc::init()
 	}
 
 	// Checking for extension availability before loading
-	if (gfxCaps.oesCompressedEtc1Rgb8Texture() == false)
+	if (gfxCaps.hasExtension(IGfxCapabilities::OES_COMPRESSED_ETC1_RGB8_TEXTURE) == false)
 	{
 		LOGF("GL_OES_compressed_ETC1_RGB8_texture not available");
 		exit(EXIT_FAILURE);

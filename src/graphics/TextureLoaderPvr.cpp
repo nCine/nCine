@@ -1,6 +1,5 @@
 #include <cstdlib> // for exit()
 #include "TextureLoaderPvr.h"
-#include "GfxCapabilities.h"
 #include "ServiceLocator.h"
 
 namespace ncine {
@@ -64,7 +63,7 @@ void TextureLoaderPvr::readHeader(Pvr3Header &header)
 void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
 {
 	GLenum internalFormat = GL_RGB; // to suppress uninitialized variable warning
-	const GfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();
+	const IGfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();
 
 	uint64_t pixelFormat = IFile::int64FromLE(header.pixelFormat);
 
@@ -80,7 +79,7 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
 			case FMT_DXT1:
 			case FMT_DXT3:
 			case FMT_DXT5:
-				if (gfxCaps.extTextureCompressionS3TC() == false)
+				if (gfxCaps.hasExtension(IGfxCapabilities::EXT_TEXTURE_COMPRESSION_S3TC) == false)
 				{
 					LOGF("GL_EXT_texture_compression_s3tc not available");
 					exit(EXIT_FAILURE);
@@ -91,7 +90,7 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
 			case FMT_PVRTC_2BPP_RGBA:
 			case FMT_PVRTC_4BPP_RGB:
 			case FMT_PVRTC_4BPP_RGBA:
-				if (gfxCaps.imgTextureCompressionPvrTC() == false)
+				if (gfxCaps.hasExtension(IGfxCapabilities::IMG_TEXTURE_COMPRESSION_PVRTC) == false)
 				{
 					LOGF("GL_IMG_texture_compression_pvrtc not available");
 					exit(EXIT_FAILURE);

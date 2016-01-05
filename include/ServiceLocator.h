@@ -12,10 +12,9 @@
 #include "ILogger.h"
 #include "IAudioDevice.h"
 #include "IThreadPool.h"
+#include "IGfxCapabilities.h"
 
 namespace ncine {
-
-class GfxCapabilities;
 
 /// Provides base services to requesting classes
 /*! It has memory ownership on service classes */
@@ -39,14 +38,13 @@ class DLL_PUBLIC ServiceLocator
 
 	/// Returns a reference to the current thread pool instance
 	IThreadPool& threadPool() { return *threadPool_; }
-	/// Registers an audio device provider
+	/// Registers a thread pool provider
 	void registerThreadPool(IThreadPool* service);
 
-	/// Returns a constant reference to the graphics capabilities class
-	/*! There is no registering process for the GfxCapabilities class, no
-	 *  interface and no null version: it is unique and no-op before initialization.
-	 */
-	const GfxCapabilities& gfxCapabilities() { return *gfxCapabilities_; }
+	/// Returns a reference to the current graphics capabilities instance
+	const IGfxCapabilities& gfxCapabilities() { return *gfxCapabilities_; }
+	/// Registers a graphics capabilities provider
+	void registerGfxCapabilities(IGfxCapabilities* service);
 
 	// Deletes every registered service reestablishing null ones
 	void unregisterAll();
@@ -64,10 +62,10 @@ class DLL_PUBLIC ServiceLocator
 	IThreadPool* threadPool_;
 	NullThreadPool nullThreadPool_;
 
-	GfxCapabilities* gfxCapabilities_;
+	IGfxCapabilities* gfxCapabilities_;
+	NullGfxCapabilities nullGfxCapabilities_;
 
 	ServiceLocator();
-	~ServiceLocator();
 	/// Private copy constructor
 	ServiceLocator(const ServiceLocator&);
 	/// Private assignment operator

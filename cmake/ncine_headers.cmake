@@ -31,6 +31,7 @@ set(HEADERS
 	include/Font.h
 	include/IFile.h
 	include/IGfxDevice.h
+	include/IGfxCapabilities.h
 	include/Texture.h
 	include/SceneNode.h
 	include/Sprite.h

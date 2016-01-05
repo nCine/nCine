@@ -5,7 +5,6 @@
 #include "Texture.h"
 #include "ITextureLoader.h"
 #include "GLTexture.h"
-#include "GfxCapabilities.h"
 #include "ServiceLocator.h"
 
 namespace ncine {
@@ -114,8 +113,9 @@ void Texture::load(const ITextureLoader& texLoader)
 /// Loads a texture overriding the size detected by the texture loader
 void Texture::load(const ITextureLoader& texLoader, int width, int height)
 {
-	const GfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();
-	if (width > gfxCaps.maxTextureSize() || height > gfxCaps.maxTextureSize())
+	const IGfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();
+	if (width > gfxCaps.value(IGfxCapabilities::MAX_TEXTURE_SIZE) ||
+		height > gfxCaps.value(IGfxCapabilities::MAX_TEXTURE_SIZE))
 	{
 		LOGF("Texture size is bigger than device maximum");
 		exit(EXIT_FAILURE);

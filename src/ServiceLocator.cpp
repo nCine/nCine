@@ -1,6 +1,5 @@
 #include <cstdio> // for NULL
 #include "ServiceLocator.h"
-#include "GfxCapabilities.h"
 
 namespace ncine {
 
@@ -18,13 +17,9 @@ ServiceLocator& theServiceLocator()
 ServiceLocator::ServiceLocator()
 	: indexerService_(&nullIndexer_), loggerService_(&nullLogger_)
 	, audioDevice_(&nullAudioDevice_), threadPool_(&nullThreadPool_)
+	, gfxCapabilities_(&nullGfxCapabilities_)
 {
-	gfxCapabilities_ = new GfxCapabilities();
-}
 
-ServiceLocator::~ServiceLocator()
-{
-	delete gfxCapabilities_;
 }
 
 ///////////////////////////////////////////////////////////
@@ -79,6 +74,18 @@ void ServiceLocator::registerThreadPool(IThreadPool* service)
 	}
 }
 
+void ServiceLocator::registerGfxCapabilities(IGfxCapabilities* service)
+{
+	if (service == NULL)
+	{
+		gfxCapabilities_ = &nullGfxCapabilities_;
+	}
+	else
+	{
+		gfxCapabilities_ = service;
+	}
+}
+
 /// Deletes every registered service reestablishing null ones
 void ServiceLocator::unregisterAll()
 {
@@ -100,6 +107,12 @@ void ServiceLocator::unregisterAll()
 	{
 		delete threadPool_;
 		threadPool_ = &nullThreadPool_;
+	}
+
+	if (gfxCapabilities_ != &nullGfxCapabilities_)
+	{
+		delete gfxCapabilities_;
+		gfxCapabilities_ = &nullGfxCapabilities_;
 	}
 
 	// Logger unregistered at the end to give a last chance for logging

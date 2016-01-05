@@ -45,10 +45,6 @@ class DLL_PUBLIC IAudioDevice
 
 inline IAudioDevice::~IAudioDevice() { }
 
-#endif
-
-#ifndef CLASS_NCINE_NULLAUDIODEVICE
-#define CLASS_NCINE_NULLAUDIODEVICE
 
 /// A fake audio device which doesn't play anything
 class DLL_PUBLIC NullAudioDevice : public IAudioDevice
