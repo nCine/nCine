@@ -17,6 +17,7 @@ if(NCINE_BUILD_TESTS)
 				)
 				set_target_properties(copy_shaders_data PROPERTIES FOLDER "CustomCopyTargets")
 			endif()
+
 			set(DATA_INSTALL_DESTINATION data)
 		else()
 			if(NOT NCINE_EMBED_SHADERS)
@@ -26,12 +27,28 @@ if(NCINE_BUILD_TESTS)
 				)
 				set_target_properties(symlink_shaders_data PROPERTIES FOLDER "CustomSymlinkTargets")
 			endif()
+
 			set(DATA_INSTALL_DESTINATION share/ncine)
+		endif()
+
+		if(DEFAULT_DATA_DIR_DIST)
+			set(NCINE_DEFAULT_DATA_DIR ${CMAKE_INSTALL_PREFIX}/${DATA_INSTALL_DESTINATION})
 		endif()
 
 		install(DIRECTORY ${NCINE_DATA_DIR}/fonts DESTINATION ${DATA_INSTALL_DESTINATION})
 		install(DIRECTORY ${NCINE_DATA_DIR}/sounds DESTINATION ${DATA_INSTALL_DESTINATION})
 		install(DIRECTORY ${NCINE_DATA_DIR}/textures DESTINATION ${DATA_INSTALL_DESTINATION})
+	endif()
+
+	if(NCINE_INSTALL_DEV_SUPPORT)
+		if(WIN32)
+			set(TEST_SOURCES_INSTALL_DESTINATION src)
+		else()
+			set(TEST_SOURCES_INSTALL_DESTINATION share/ncine)
+		endif()
+
+		file(GLOB TEST_SOURCES "tests/*test*.h" "tests/*test*.cpp")
+		install(FILES ${TEST_SOURCES} DESTINATION ${TEST_SOURCES_INSTALL_DESTINATION})
 	endif()
 
 	add_subdirectory(tests)
