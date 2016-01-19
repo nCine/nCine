@@ -41,6 +41,8 @@ class TextureFormat
 #ifndef __ANDROID__
 	// Searches a match between an integer internal format and an external one
 	bool integerFormat();
+	// Searches a match between a non integer internal format and an external one
+	bool nonIntegerFormat();
 	// Searches a match between a floating point internal format and an external one
 	bool floatFormat();
 	// Searches a match between a compressed internal format and an external one

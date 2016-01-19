@@ -72,7 +72,7 @@ LOCAL_SRC_FILES := \
 	$(SRC)/graphics/TextureLoaderDds.cpp \
 	$(SRC)/graphics/TextureLoaderPvr.cpp \
 	$(SRC)/graphics/TextureLoaderWebP.cpp \
-	$(SRC)/android/TextureLoaderEtc.cpp \
+	$(SRC)/android/TextureLoaderPkm.cpp \
 	$(SRC)/graphics/TextureLoaderKtx.cpp \
 	$(SRC)/graphics/Texture.cpp \
 	$(SRC)/graphics/ProfilePlotter.cpp \

@@ -66,6 +66,10 @@ void TextureFormat::findExternalFmt()
 	}
 	if (found == false)
 	{
+		found = nonIntegerFormat();
+	}
+	if (found == false)
+	{
 		found = floatFormat();
 	}
 	if (found == false)
@@ -144,6 +148,33 @@ bool TextureFormat::integerFormat()
 	if (found)
 	{
 		type_ = GL_UNSIGNED_BYTE;
+	}
+
+	return found;
+}
+
+/// Searches a match between a non integer internal format and an external one
+bool TextureFormat::nonIntegerFormat()
+{
+	bool found = true;
+
+	switch (internalFormat_)
+	{
+		case GL_RGB5_A1:
+			format_ = GL_RGBA;
+			type_ = GL_UNSIGNED_SHORT_5_5_5_1;
+			break;
+		case GL_RGBA4:
+			format_ = GL_RGBA;
+			type_ = GL_UNSIGNED_SHORT_4_4_4_4;
+			break;
+		case GL_RGB565:
+			format_ = GL_RGB;
+			type_ = GL_UNSIGNED_SHORT_5_6_5;
+			break;
+		default:
+			found = false;
+			break;
 	}
 
 	return found;
@@ -342,9 +373,15 @@ long int TextureFormat::calculateMipSizes(GLenum internalFormat, int width, int 
 	switch (internalFormat)
 	{
 		case GL_RGBA:
+#ifndef __ANDROID__
+		case GL_RGBA8:
+#endif
 			bpp = 32;
 			break;
 		case GL_RGB:
+#ifndef __ANDROID__
+		case GL_RGB8:
+#endif
 			bpp = 24;
 			break;
 		case GL_LUMINANCE_ALPHA:

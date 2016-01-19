@@ -12,7 +12,7 @@
 	#include "TextureLoaderWebP.h"
 #endif
 #ifdef __ANDROID__
-	#include "TextureLoaderEtc.h"
+	#include "TextureLoaderPkm.h"
 #endif
 #include "ServiceLocator.h"
 
@@ -142,7 +142,7 @@ ITextureLoader* ITextureLoader::createFromFile(const char *filename)
 #ifdef __ANDROID__
 	else if (fileHandle->hasExtension("pkm"))
 	{
-		return new TextureLoaderEtc(fileHandle);
+		return new TextureLoaderPkm(fileHandle);
 	}
 #endif
 	else

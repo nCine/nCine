@@ -1,6 +1,6 @@
 #include <cstdlib> // for exit()
 #include <cstring>
-#include "TextureLoaderEtc.h"
+#include "TextureLoaderPkm.h"
 #include "ServiceLocator.h"
 
 namespace ncine {
@@ -9,13 +9,13 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-TextureLoaderEtc::TextureLoaderEtc(const char *filename)
+TextureLoaderPkm::TextureLoaderPkm(const char *filename)
 	: ITextureLoader(filename)
 {
 	init();
 }
 
-TextureLoaderEtc::TextureLoaderEtc(IFile* fileHandle)
+TextureLoaderPkm::TextureLoaderPkm(IFile* fileHandle)
 	: ITextureLoader(fileHandle)
 {
 	init();
@@ -25,27 +25,39 @@ TextureLoaderEtc::TextureLoaderEtc(IFile* fileHandle)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void TextureLoaderEtc::init()
+void TextureLoaderPkm::init()
 {
 	const IGfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();
 
 	fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
 
-	// ETC1 header is 16 bytes long
-	// It have been splitted in two structures to avoid compiler-specific alignment pragmas
-	Etc1Magic magic;
-	Etc1Header header;
-	fileHandle_->read(&magic, 8);
+	PkmHeader header;
+	// PKM header is 16 bytes long
+	fileHandle_->read(&header, 16);
 
 	// Checking for the header presence
-	if (strncmp(magic.magicId, "PKM 10", 6) == 0)
+	if (IFile::int32FromBE(header.magicId) == 0x504B4D20) // "PKM 10"
 	{
-		fileHandle_->read(&header, 8);
+		if (IFile::int16FromBE(header.version) != 0x3130) // "10"
+		{
+			LOGF_X("PKM version not supported: 0x%04x", header.version);
+			exit(EXIT_FAILURE);
+		}
+
+		if (IFile::int16FromBE(header.dataType) != 0)
+		{
+			LOGF_X("PKM data type not supported: 0x%04x", header.dataType);
+			exit(EXIT_FAILURE);
+		}
+
 		headerSize_ = 16;
 		width_ = IFile::int16FromBE(header.width);
 		height_ = IFile::int16FromBE(header.height);
 
-		LOGI_X("Header found: w:%d h:%d", width_, height_);
+		int extWidth = IFile::int16FromBE(header.extendedWidth);
+		int extHeight = IFile::int16FromBE(header.extendedHeight);
+
+		LOGI_X("Header found: w:%d h:%d, xw:%d xh:%d", width_, height_, extWidth, extHeight);
 	}
 
 	// Checking for extension availability before loading
