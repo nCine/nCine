@@ -10,7 +10,19 @@ namespace ncine {
 class DLL_PUBLIC RectAnimation
 {
   public:
-	RectAnimation(float frameTime, bool isLooping, bool backward);
+	enum LoopMode
+	{
+		NOT_LOOPING,
+		LOOPING
+	};
+
+	enum RewindMode
+	{
+		FROM_START,
+		BACKWARD
+	};
+
+	RectAnimation(float frameTime, LoopMode loopMode, RewindMode rewindMode);
 
 	/// Returns current frame
 	inline unsigned int frame() const { return currentFrame_; }

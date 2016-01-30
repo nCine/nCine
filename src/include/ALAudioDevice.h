@@ -22,10 +22,8 @@ class ALAudioDevice : public IAudioDevice
 
 	virtual void stopPlayers();
 	virtual void pausePlayers();
-	inline virtual void stopBufferPlayers() { stopOrPauseBufferPlayers(true); }
-	inline virtual void pauseBufferPlayers() { stopOrPauseBufferPlayers(false); }
-	inline virtual void stopStreamPlayers() { stopOrPauseStreamPlayers(true); }
-	inline virtual void pauseStreamPlayers() { stopOrPauseStreamPlayers(false); }
+	virtual void stopPlayers(PlayerType playerType);
+	virtual void pausePlayers(PlayerType playerType);
 
 	virtual void freezePlayers();
 	virtual void unfreezePlayers();
@@ -54,11 +52,6 @@ class ALAudioDevice : public IAudioDevice
 	ALAudioDevice(const ALAudioDevice&);
 	/// Private assignment operator
 	ALAudioDevice& operator=(const ALAudioDevice&);
-
-	// Stops or pauses all buffer players
-	void stopOrPauseBufferPlayers(bool shouldStop);
-	// Stops or pauses all stream players
-	void stopOrPauseStreamPlayers(bool shouldStop);
 };
 
 }

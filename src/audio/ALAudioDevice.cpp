@@ -90,6 +90,52 @@ void ALAudioDevice::pausePlayers()
 	players_.clear();
 }
 
+void ALAudioDevice::stopPlayers(PlayerType playerType)
+{
+	Object::ObjectType objectType = AudioBufferPlayer::sType();
+	if (playerType == AUDIOSTREAM_PLAYER)
+	{
+		objectType = AudioStreamPlayer::sType();
+	}
+
+	List<IAudioPlayer *>::ConstIterator i = players_.begin();
+	while (i != players_.end())
+	{
+		if ((*i)->type() == objectType)
+		{
+			(*i)->stop();
+			i = players_.erase(i);
+		}
+		else
+		{
+			++i;
+		}
+	}
+}
+
+void ALAudioDevice::pausePlayers(PlayerType playerType)
+{
+	Object::ObjectType objectType = AudioBufferPlayer::sType();
+	if (playerType == AUDIOSTREAM_PLAYER)
+	{
+		objectType = AudioStreamPlayer::sType();
+	}
+
+	List<IAudioPlayer *>::ConstIterator i = players_.begin();
+	while (i != players_.end())
+	{
+		if ((*i)->type() == objectType)
+		{
+			(*i)->pause();
+			i = players_.erase(i);
+		}
+		else
+		{
+			++i;
+		}
+	}
+}
+
 void ALAudioDevice::freezePlayers()
 {
 	forEach(players_.begin(), players_.end(), pausePlayer);
@@ -135,60 +181,6 @@ void ALAudioDevice::updatePlayers()
 		else
 		{
 			i = players_.erase(i);
-		}
-	}
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-/// Stops or pauses all buffer players
-void ALAudioDevice::stopOrPauseBufferPlayers(bool shouldStop)
-{
-	List<IAudioPlayer *>::ConstIterator i = players_.begin();
-	while (i != players_.end())
-	{
-		if ((*i)->type() == AudioBufferPlayer::sType())
-		{
-			if (shouldStop)
-			{
-				(*i)->stop();
-			}
-			else
-			{
-				(*i)->pause();
-			}
-			i = players_.erase(i);
-		}
-		else
-		{
-			++i;
-		}
-	}
-}
-
-/// Stops or pauses all stream players
-void ALAudioDevice::stopOrPauseStreamPlayers(bool shouldStop)
-{
-	List<IAudioPlayer *>::ConstIterator i = players_.begin();
-	while (i != players_.end())
-	{
-		if ((*i)->type() == AudioStreamPlayer::sType())
-		{
-			if (shouldStop)
-			{
-				(*i)->stop();
-			}
-			else
-			{
-				(*i)->pause();
-			}
-			i = players_.erase(i);
-		}
-		else
-		{
-			i++;
 		}
 	}
 }

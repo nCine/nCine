@@ -207,8 +207,8 @@ void AndroidApplication::preInit()
 void AndroidApplication::init()
 {
 	// Graphics device should always be created before the input manager!
-	DisplayMode displayMode32(8, 8, 8, 8, 24, 8, true, false);
-	DisplayMode displayMode16(5, 6, 5, 0, 16, 0, true, false);
+	DisplayMode displayMode32(8, 8, 8, 8, 24, 8, DisplayMode::DOUBLE_BUFFERED, DisplayMode::NO_VSYNC);
+	DisplayMode displayMode16(5, 6, 5, 0, 16, 0, DisplayMode::DOUBLE_BUFFERED, DisplayMode::NO_VSYNC);
 	if (EglGfxDevice::isModeSupported(state_, displayMode32))
 	{
 		gfxDevice_ = new EglGfxDevice(state_, displayMode32);

@@ -9,6 +9,18 @@ namespace ncine {
 class DLL_PUBLIC DisplayMode
 {
   public:
+	enum DoubleBufferingMode
+	{
+		NON_DOUBLE_BUFFERED,
+		DOUBLE_BUFFERED
+	};
+
+	enum VSyncMode
+	{
+		NO_VSYNC,
+		WITH_VSYNC
+	};
+
 	// Constructor with no parameters
 	DisplayMode()
 		: redBits_(0), greenBits_(0), blueBits_(0), alphaBits_(0),
@@ -19,13 +31,13 @@ class DLL_PUBLIC DisplayMode
 	DisplayMode(unsigned int redBits, unsigned int greenBits, unsigned int blueBits, unsigned int alphaBits)
 		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits), alphaBits_(alphaBits),
 		  depthBits_(0), stencilBits_(0), isDoubleBuffered_(true), hasVSync_(false) { }
-	DisplayMode(unsigned int depthBits, unsigned int stencilBits, bool doubleBuffered, bool withVSync)
+	DisplayMode(unsigned int depthBits, unsigned int stencilBits, DoubleBufferingMode dbMode, VSyncMode vsMode)
 		: redBits_(0), greenBits_(0), blueBits_(0), alphaBits_(0),
-		  depthBits_(depthBits), stencilBits_(stencilBits), isDoubleBuffered_(doubleBuffered), hasVSync_(withVSync) { }
+		  depthBits_(depthBits), stencilBits_(stencilBits), isDoubleBuffered_(dbMode == DOUBLE_BUFFERED), hasVSync_(vsMode == WITH_VSYNC) { }
 	DisplayMode(unsigned int redBits, unsigned int greenBits, unsigned int blueBits, unsigned int alphaBits,
-				unsigned int depthBits, unsigned int stencilBits, bool doubleBuffered, bool withVSync)
+				unsigned int depthBits, unsigned int stencilBits, DoubleBufferingMode dbMode, VSyncMode vsMode)
 		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits), alphaBits_(alphaBits),
-		  depthBits_(depthBits), stencilBits_(stencilBits), isDoubleBuffered_(doubleBuffered), hasVSync_(withVSync) { }
+		  depthBits_(depthBits), stencilBits_(stencilBits), isDoubleBuffered_(dbMode == DOUBLE_BUFFERED), hasVSync_(vsMode == WITH_VSYNC) { }
 
 	// Getters
 	/// Returns the number of bits for the red channel

@@ -8,6 +8,19 @@
 
 namespace ncine {
 
+/// Construction modes for the `StaticArray` class
+/*! Declared outside the template class to use it without template parameters */
+struct StaticArrayMode
+{
+	enum Modes
+	{
+		/// `StaticArray` will have a zero size
+		ZERO_SIZE,
+		/// `StaticArray` will extend the size to match its capacity
+		EXTEND_SIZE
+	};
+};
+
 /// A static array based on templates and stored on the stack
 template <class T, unsigned int C>
 class StaticArray
@@ -21,10 +34,10 @@ class StaticArray
 	/// Constructs an empty array with fixed capacity
 	explicit StaticArray() : size_(0), capacity_(C) { }
 	/// Constructs an array with the option for it to have the size as its capacity
-	explicit StaticArray(bool extend)
+	explicit StaticArray(StaticArrayMode::Modes mode)
 		: size_(0), capacity_(C)
 	{
-		if (extend)
+		if (mode == StaticArrayMode::EXTEND_SIZE)
 		{
 			size_ = capacity_;
 		}

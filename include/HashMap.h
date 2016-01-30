@@ -304,7 +304,7 @@ bool HashMap<K, T, HashFunc>::HashBucket::remove(hash_t hash, const K& key)
 
 template <class K, class T, class HashFunc>
 HashMap<K, T, HashFunc>::HashMap(unsigned int size)
-	: buckets_(size, true)
+	: buckets_(size, ArrayMode::FIXED_CAPACITY)
 {
 	for (unsigned int i = 0; i < size; i++)
 	{

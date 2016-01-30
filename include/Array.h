@@ -10,6 +10,19 @@
 
 namespace ncine {
 
+/// Construction modes for the `Array` class
+/*! Declared outside the template class to use it without template parameters */
+struct ArrayMode
+{
+	enum Modes
+	{
+		/// `Array` will have a growing capacity
+		GROWING_CAPACITY,
+		/// `Array` will have a fixed capacity
+		FIXED_CAPACITY
+	};
+};
+
 /// A dynamic array based on templates and stored in the heap
 template <class T>
 class Array
@@ -27,8 +40,9 @@ class Array
 		setCapacity(capacity);
 	}
 	/// Constructs an array with explicit capacity and the option for it to be fixed
-	explicit Array(unsigned int capacity, bool fixedCapacity)
-		: array_(NULL), size_(0), capacity_(0), fixedCapacity_(fixedCapacity)
+	explicit Array(unsigned int capacity, ArrayMode::Modes mode)
+		: array_(NULL), size_(0), capacity_(0),
+		  fixedCapacity_(mode == ArrayMode::FIXED_CAPACITY)
 	{
 		setCapacity(capacity);
 	}

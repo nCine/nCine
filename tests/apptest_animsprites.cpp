@@ -33,7 +33,7 @@ void MyEventHandler::onInit()
 	audioPlayer_->play();
 	animSprite_ = new nc::AnimatedSprite(&rootNode, texture_);
 	// Up
-	nc::RectAnimation *animation = new nc::RectAnimation(0.06f, true, true);
+	nc::RectAnimation *animation = new nc::RectAnimation(0.06f, nc::RectAnimation::LOOPING, nc::RectAnimation::BACKWARD);
 	animation->addRect(0, 0, 32, 32);
 	animation->addRect(32, 0, 32, 32);
 	animation->addRect(64, 0, 32, 32);

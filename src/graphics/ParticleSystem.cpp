@@ -10,8 +10,8 @@ namespace ncine {
 
 /// Constructs a particle system made of the specified maximum amount of particles
 ParticleSystem::ParticleSystem(SceneNode* parent, unsigned int count, Texture *texture, Recti texRect)
-	: SceneNode(parent, 0, 0), poolSize_(count), poolTop_(count - 1), particlePool_(poolSize_, true),
-	  particleList_(poolSize_, true), affectors_(4), inLocalSpace_(false)
+	: SceneNode(parent, 0, 0), poolSize_(count), poolTop_(count - 1),particlePool_(poolSize_, ArrayMode::FIXED_CAPACITY),
+	  particleList_(poolSize_, ArrayMode::FIXED_CAPACITY), affectors_(4), inLocalSpace_(false)
 {
 	type_ = PARTICLESYSTEM_TYPE;
 

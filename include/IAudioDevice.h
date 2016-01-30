@@ -11,6 +11,12 @@ class IAudioPlayer;
 class DLL_PUBLIC IAudioDevice
 {
   public:
+	enum PlayerType
+	{
+		BUFFER_PLAYER,
+		AUDIOSTREAM_PLAYER
+	};
+
 	virtual ~IAudioDevice() = 0;
 	/// Returns the listener gain value
 	virtual float gain() = 0;
@@ -21,14 +27,10 @@ class DLL_PUBLIC IAudioDevice
 	virtual void stopPlayers() = 0;
 	/// Pauses every player currently playing
 	virtual void pausePlayers() = 0;
-	/// Stops every buffer player currently playing
-	virtual void stopBufferPlayers() = 0;
-	/// Pauses every buffer player currently playing
-	virtual void pauseBufferPlayers() = 0;
-	/// Stops every stream player currently playing
-	virtual void stopStreamPlayers() = 0;
-	/// Pauses every stream player currently playing
-	virtual void pauseStreamPlayers() = 0;
+	/// Stops every player of the specified type
+	virtual void stopPlayers(PlayerType playerType) = 0;
+	/// Pauses every player of the specified type
+	virtual void pausePlayers(PlayerType playerType) = 0;
 
 	/// Pauses every player currently playing without unregistering it
 	virtual void freezePlayers() = 0;
@@ -55,10 +57,8 @@ class DLL_PUBLIC NullAudioDevice : public IAudioDevice
 
 	virtual void stopPlayers() { }
 	virtual void pausePlayers() { }
-	virtual void stopBufferPlayers() { }
-	virtual void pauseBufferPlayers() { }
-	virtual void stopStreamPlayers() { }
-	virtual void pauseStreamPlayers() { }
+	virtual void stopPlayers(PlayerType playerType) { }
+	virtual void pausePlayers(PlayerType playerType) { }
 
 	virtual void freezePlayers() { }
 	virtual void unfreezePlayers() { }
