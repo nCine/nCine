@@ -8,6 +8,10 @@ namespace ncine {
 
 class AudioBuffer;
 class IAudioPlayer;
+class SceneNode;
+class Font;
+class TextNode;
+class String;
 
 }
 
@@ -23,21 +27,28 @@ class MyEventHandler
 	virtual void onFrameStart();
 	virtual void onShutdown();
 
-#ifndef __ANDROID__
+#ifdef __ANDROID__
+	virtual void onTouchUp(const nc::TouchEvent &event);
+#else
 	virtual void onKeyReleased(const nc::KeyboardEvent &event);
 #endif
 
   private:
-	static const float DefaultGain;
 	float gain_;
-	static const float DefaultPitch;
 	float pitch_;
-	static const float DefaultXPos;
 	float xPos_;
 	bool isLooping_;
 
 	nc::AudioBuffer *audioBuffer_;
-	nc::IAudioPlayer *player_;
+	nc::IAudioPlayer *soundPlayer_;
+	nc::IAudioPlayer *musicPlayer_;
+	nc::SceneNode *dummy_;
+	nc::Font *font_;
+	nc::TextNode *textNode_;
+	nc::String *textString_;
+
+	void toggleMusic();
+	void toggleSound();
 };
 
 #endif

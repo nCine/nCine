@@ -3,12 +3,16 @@
 
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
+#include "StaticArray.h"
+#include "ncString.h"
 
 namespace ncine {
 
 class SceneNode;
 class Texture;
 class Sprite;
+class Font;
+class TextNode;
 
 }
 
@@ -31,11 +35,21 @@ class MyEventHandler
 #endif
 
   private:
-	bool pause_;
+	static const int MaxTexFormats = 32;
+
+	static int selected_;
+	static int newSelection_;
+	static float scale_;
+	static float newScale_;
+
 	nc::SceneNode *dummy_;
-	nc::Texture *texture_;
-	nc::Sprite *sprite_;
-	unsigned int divider_;
+	nc::StaticArray<nc::String, MaxTexFormats> filenames_;
+	nc::StaticArray<nc::Texture*, MaxTexFormats> textures_;
+	nc::StaticArray<nc::Sprite*, MaxTexFormats> sprites_;
+	nc::Font *font_;
+	nc::TextNode *textNode_;
+
+	void handleInput(float x, float y);
 };
 
 #endif

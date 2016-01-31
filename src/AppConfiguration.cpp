@@ -14,7 +14,7 @@ AppConfiguration::AppConfiguration()
 	, consoleLogLevel_(ILogger::LOG_VERBOSE)
 	, fileLogLevel_(ILogger::LOG_OFF)
 	, frameTimerLogInterval_(5.0f)
-	, xResolution_(960), yResolution_(640)
+	, xResolution_(1280), yResolution_(720)
 	, inFullscreen_(false)
 	, windowTitle_(128)
 	, fontTexFilename_(128)
@@ -30,16 +30,14 @@ AppConfiguration::AppConfiguration()
 	IFile::dataPath_ = "/sdcard/ncine/";
 	fileLogLevel_ = ILogger::LOG_VERBOSE;
 
-//	fontTexFilename_ = "asset::trebuchet16_128_L8.pvr.mp3";
-//	fontFntFilename_ = "asset::trebuchet16_128.fnt";
-	fontTexFilename_ = "trebuchet32_256_L8.pvr";
-	fontFntFilename_ = "trebuchet32_256.fnt";
-//	fontTexFilename_ = "trebuchet16_128_L8.pvr";
-//	fontFntFilename_ = "trebuchet16_128.fnt";
+//	fontTexFilename_ = "asset::DroidSans32_256_8888.ktx.mp3";
+//	fontFntFilename_ = "asset::DroidSans32_256.fnt";
+	fontTexFilename_ = "fonts/DroidSans32_256_8888.ktx";
+	fontFntFilename_ = "fonts/DroidSans32_256.fnt";
 #else
 	windowTitle_ = "nCine";
-	fontTexFilename_ = "fonts/trebuchet32_256_gray.png";
-	fontFntFilename_ = "fonts/trebuchet32_256.fnt";
+	fontTexFilename_ = "fonts/DroidSans32_256.png";
+	fontFntFilename_ = "fonts/DroidSans32_256.fnt";
 #endif
 
 #ifdef NCINE_DEFAULT_DATA_DIR

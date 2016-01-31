@@ -6,6 +6,22 @@
 #include "Sprite.h"
 #include "IFile.h" // for dataPath()
 
+namespace {
+
+#ifdef __ANDROID__
+const char* Texture1File = "texture1.webp";
+const char* Texture2File = "texture2.webp";
+const char* Texture3File = "texture3.webp";
+const char* Texture4File = "texture4.webp";
+#else
+const char* Texture1File = "texture1.png";
+const char* Texture2File = "texture2.png";
+const char* Texture3File = "texture3.png";
+const char* Texture4File = "texture4.png";
+#endif
+
+}
+
 nc::IAppEventHandler* createApphandler()
 {
 	return new MyEventHandler;
@@ -13,56 +29,41 @@ nc::IAppEventHandler* createApphandler()
 
 void MyEventHandler::onInit()
 {
-	for (unsigned int i = 0; i < NumTextures; i++)
-	{
-		angles_[i] = 0.0f;
-	}
+	pause_ = false;
+	angle_ = 0.0f;
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-#ifdef __ANDROID__
-	textures_[0] = new nc::Texture((nc::IFile::dataPath() + "texture1.pkm").data()); // 145x121
-	textures_[1] = new nc::Texture((nc::IFile::dataPath() + "texture2.pkm").data()); // 100x100
-	textures_[2] = new nc::Texture((nc::IFile::dataPath() + "texture3.pkm").data()); // 96x96
-	textures_[3] = new nc::Texture((nc::IFile::dataPath() + "texture4.pkm").data()); // 96x96
-#else
-	textures_[0] = new nc::Texture((nc::IFile::dataPath() + "textures/texture1.png").data());
-	textures_[1] = new nc::Texture((nc::IFile::dataPath() + "textures/texture2.png").data());
-	textures_[2] = new nc::Texture((nc::IFile::dataPath() + "textures/texture3.png").data());
-	textures_[3] = new nc::Texture((nc::IFile::dataPath() + "textures/texture4.png").data());
-#endif
+	textures_[0] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture1File).data());
+	textures_[1] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture2File).data());
+	textures_[2] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture3File).data());
+	textures_[3] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture4File).data());
 
-	sprites_[0] = new nc::Sprite(textures_[0], 0, 0);
-	sprites_[0]->setTexRect(nc::Recti(40, 0, static_cast<int>(sprites_[0]->width()) - 80, static_cast<int>(sprites_[0]->height()) - 30));
-	sprites_[0]->setScale(0.75f);
-	rootNode.addChildNode(sprites_[0]);
-
-	for (unsigned int i = 1; i < NumSprites; i++)
+	float width = static_cast<float>(nc::theApplication().width());
+	for (unsigned int i = 0; i < NumSprites; i++)
 	{
-		sprites_[i] = new nc::Sprite(sprites_[i - 1], textures_[i % NumTextures], 0, 0);
+		sprites_[i] = new nc::Sprite(&rootNode, textures_[i % NumTextures], width * 0.15f + width * 0.1f * i, 0.0f);
 		sprites_[i]->setScale(0.5f);
 	}
 }
 
 void MyEventHandler::onFrameStart()
 {
-	float sine[NumTextures];
-	float cosine[NumTextures];
+	float height = static_cast<float>(nc::theApplication().height());
 
-	for (unsigned int i = 0; i < NumTextures; i++)
+	if (pause_ == false)
 	{
-		angles_[i] += (250 + 25 * i) * nc::theApplication().interval();
-		sine[i] = sinf(angles_[i] * 0.01f);
-		cosine[i] = cosf(2 * angles_[i] * 0.01f);
+		angle_ += 1.0f * nc::theApplication().interval();
+		if (angle_ > 360.0f)
+		{
+			angle_ -= 360.0f;
+		}
 	}
 
-	sprites_[0]->x = nc::theApplication().width() * 0.5f + sine[0] * 100.0f;
-	sprites_[0]->y = nc::theApplication().height() * 0.5f + cosine[0] * 50.0f;
-
-	for (unsigned int i = 1; i < NumSprites; i++)
+	for (unsigned int i = 0; i < NumSprites; i++)
 	{
-		sprites_[i]->x = sine[i % NumTextures] * 50;
-		sprites_[i]->y = cosine[i % NumTextures] * 50;
+		sprites_[i]->y = height * 0.3f + fabs(sinf(angle_ + 5.0f * i)) * (height * (0.25f + 0.02f * i));
+		sprites_[i]->setRotation(angle_ * 20);
 	}
 }
 
@@ -75,7 +76,33 @@ void MyEventHandler::onShutdown()
 	}
 }
 
-#ifndef __ANDROID__
+#ifdef __ANDROID__
+void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
+{
+	pause_ = true;
+}
+
+void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
+{
+	pause_ = false;
+}
+#else
+void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
+{
+	if (event.isLeftButton())
+	{
+		pause_ = true;
+	}
+}
+
+void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent& event)
+{
+	if (event.isLeftButton())
+	{
+		pause_ = false;
+	}
+}
+
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)

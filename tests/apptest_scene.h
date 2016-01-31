@@ -24,15 +24,21 @@ class MyEventHandler
 	virtual void onFrameStart();
 	virtual void onShutdown();
 
-#ifndef __ANDROID__
+#ifdef __ANDROID__
+	virtual void onTouchDown(const nc::TouchEvent &event);
+	virtual void onTouchUp(const nc::TouchEvent &event);
+#else
 	virtual void onKeyReleased(const nc::KeyboardEvent &event);
+	virtual void onMouseButtonPressed(const nc::MouseEvent &event);
+	virtual void onMouseButtonReleased(const nc::MouseEvent &event);
 #endif
 
   private:
 	static const unsigned int NumTextures = 4;
 	static const unsigned int NumSprites = 8;
 
-	nc::StaticArray<float, NumTextures> angles_;
+	bool pause_;
+	float angle_;
 	nc::StaticArray<nc::Texture*, NumTextures> textures_;
 	nc::StaticArray<nc::Sprite*, NumSprites> sprites_;
 };

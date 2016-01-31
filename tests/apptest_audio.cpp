@@ -4,12 +4,23 @@
 #include "AudioBufferPlayer.h"
 #include "AudioStream.h"
 #include "AudioStreamPlayer.h"
+#include "TextNode.h"
 
-#define WITH_STREAMING (1)
+namespace {
 
-const float MyEventHandler::DefaultGain = 1.0f;
-const float MyEventHandler::DefaultPitch = 1.0f;
-const float MyEventHandler::DefaultXPos = 0.0f;
+const float DefaultGain = 1.0f;
+const float DefaultPitch = 1.0f;
+const float DefaultXPos = 0.0f;
+const float VerticalTextPos = 0.45f;
+
+#ifdef __ANDROID__
+const char* FontTextureFile = "DroidSans32_256_8888.ktx";
+#else
+const char* FontTextureFile = "DroidSans32_256.png";
+#endif
+const char* FontFntFile = "DroidSans32_256.fnt";
+
+}
 
 nc::IAppEventHandler* createApphandler()
 {
@@ -23,68 +34,132 @@ void MyEventHandler::onInit()
 	xPos_ = DefaultXPos;
 	isLooping_ = true;
 
-#if WITH_STREAMING
-	#ifdef __ANDROID__
-	player_ = new nc::AudioStreamPlayer((nc::IFile::dataPath() + "bomb.ogg").data());
-	#else
-	player_ = new nc::AudioStreamPlayer((nc::IFile::dataPath() + "sounds/bomb.ogg").data());
-	#endif
-#else
-	#ifdef __ANDROID__
-	audioBuffer_ = new nc::AudioBuffer((nc::IFile::dataPath() + "bomb.wav").data());
-	#else
+	font_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
+						 (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
+	musicPlayer_ = new nc::AudioStreamPlayer((nc::IFile::dataPath() + "sounds/music.ogg").data());
 	audioBuffer_ = new nc::AudioBuffer((nc::IFile::dataPath() + "sounds/bomb.wav").data());
-	#endif
-	player_ = new nc::AudioBufferPlayer(audioBuffer_);
-#endif
-	player_->play();
+	soundPlayer_ = new nc::AudioBufferPlayer(audioBuffer_);
+	soundPlayer_->play();
+
+	nc::SceneNode &rootNode = nc::theApplication().rootNode();
+	dummy_ = new nc::SceneNode(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
+	textNode_ = new nc::TextNode(dummy_, font_);
+	textNode_->setAlignment(nc::TextNode::ALIGN_LEFT);
+	textString_ = new nc::String(256);
 }
 
 void MyEventHandler::onFrameStart()
 {
-	player_->setGain(gain_);
-	player_->setPitch(pitch_);
-	player_->setPosition(xPos_, 0.0f, 0.0f);
-	player_->setLooping(isLooping_);
+	soundPlayer_->setGain(gain_);
+	soundPlayer_->setPitch(pitch_);
+	soundPlayer_->setPosition(xPos_, 0.0f, 0.0f);
+	soundPlayer_->setLooping(isLooping_);
+
+	textString_->clear();
+
+	textString_->append("Music: ");
+	switch(musicPlayer_->state())
+	{
+		case nc::IAudioPlayer::STATE_PLAYING:
+			textString_->append("playing");
+			break;
+		case nc::IAudioPlayer::STATE_PAUSED:
+			textString_->append("paused");
+			break;
+		case nc::IAudioPlayer::STATE_STOPPED:
+			textString_->append("stopped");
+			break;
+		default:
+			break;
+
+	}
+	textString_->append(" (press M)\n");
+
+	textString_->append("Sound: ");
+	switch(soundPlayer_->state())
+	{
+		case nc::IAudioPlayer::STATE_PLAYING:
+			textString_->append("playing");
+			break;
+		case nc::IAudioPlayer::STATE_PAUSED:
+			textString_->append("paused");
+			break;
+		case nc::IAudioPlayer::STATE_STOPPED:
+			textString_->append("stopped");
+			break;
+		default:
+			break;
+
+	}
+	textString_->append(" (press A/S/D)\n");
+
+	if (soundPlayer_->isLooping())
+	{
+		textString_->append("Sound is looping");
+	}
+	else
+	{
+		textString_->append("Sound is not looping");
+	}
+	textString_->append(" (press L)\n");
+
+	textString_->formatAppend("Gain: %.2f (press KP 7/8/9)\n", gain_);
+	textString_->formatAppend("Pitch: %.2f (press KP 4/5/6)\n", pitch_);
+	textString_->formatAppend("Position: %.2f (press KP 1/2/3)\n", xPos_);
+
+	textNode_->setString(*textString_);
+	textNode_->setPosition(-textNode_->width() * 0.5f, nc::theApplication().height() * VerticalTextPos);
 }
 
 void MyEventHandler::onShutdown()
 {
-	delete player_;
-#if !(WITH_STREAMING)
+	delete textString_;
+	delete textNode_;
+	delete dummy_;
+	delete musicPlayer_;
+	delete soundPlayer_;
 	delete audioBuffer_;
-#endif
 }
 
-#ifndef __ANDROID__
+
+#ifdef __ANDROID__
+void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
+{
+	if (event.x < nc::theApplication().width() * 0.5f)
+	{
+		toggleMusic();
+	}
+	else
+	{
+		toggleSound();
+	}
+}
+#else
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
 	{
 		nc::theApplication().quit();
 	}
+	else if (event.sym == nc::KEY_M)
+	{
+		toggleMusic();
+	}
 	else if (event.sym == nc::KEY_SPACE)
 	{
-		if (player_->isPaused() || player_->isStopped())
-		{
-			player_->play();
-		}
-		else if (player_->isPlaying())
-		{
-			player_->pause();
-		}
+		toggleSound();
 	}
 	else if (event.sym == nc::KEY_A)
 	{
-		player_->play();
+		soundPlayer_->play();
 	}
 	else if (event.sym == nc::KEY_S)
 	{
-		player_->stop();
+		soundPlayer_->stop();
 	}
 	else if (event.sym == nc::KEY_D)
 	{
-		player_->pause();
+		soundPlayer_->pause();
 	}
 	else if (event.sym == nc::KEY_L)
 	{
@@ -95,9 +170,6 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		gain_ = DefaultGain;
 		pitch_ = DefaultPitch;
 		xPos_ = DefaultXPos;
-	}
-	else if (event.sym == nc::KEY_KP0)
-	{
 	}
 	else if (event.sym == nc::KEY_KP7)
 	{
@@ -145,3 +217,27 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 	}
 }
 #endif
+
+void MyEventHandler::toggleMusic()
+{
+	if (musicPlayer_->isPaused() || musicPlayer_->isStopped())
+	{
+		musicPlayer_->play();
+	}
+	else if (musicPlayer_->isPlaying())
+	{
+		musicPlayer_->pause();
+	}
+}
+
+void MyEventHandler::toggleSound()
+{
+	if (soundPlayer_->isPaused() || soundPlayer_->isStopped())
+	{
+		soundPlayer_->play();
+	}
+	else if (soundPlayer_->isPlaying())
+	{
+		soundPlayer_->pause();
+	}
+}

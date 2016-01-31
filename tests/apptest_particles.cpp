@@ -9,6 +9,16 @@
 	#include "AndroidApplication.h"
 #endif
 
+namespace {
+
+#ifdef __ANDROID__
+const char* TextureFile = "smoke_256.webp";
+#else
+const char* TextureFile = "smoke_256.png";
+#endif
+
+}
+
 nc::IAppEventHandler* createApphandler()
 {
 	return new MyEventHandler;
@@ -21,27 +31,22 @@ void MyEventHandler::onInit()
 #ifdef __ANDROID__
 	nc::AndroidApplication &application = static_cast<nc::AndroidApplication &>(nc::theApplication());
 	application.enableAccelerometer(true);
-//	texture_ = new nc::Texture((nc::IFile::dataPath() + "smoke_128.dds").data()); // Adreno SD
-	texture_ = new nc::Texture((nc::IFile::dataPath() + "smoke2_256_8888.pvr").data()); // Mali HD
-#else
-//	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/smoke_256.webp").data());
-//	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/smoke_256_4444.pvr").data());
-	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/smoke_256.png").data());
 #endif
 
+	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/" + TextureFile).data());
 	particleSystem_ = new nc::ParticleSystem(&rootNode, NumParticles, texture_, texture_->rect());
 	particleSystem_->setPosition(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.33f);
 
-//	particleSystem_->addAffector(new nc::AccelerationAffector(0.000025f, 0.0f));
+	//particleSystem_->addAffector(new nc::AccelerationAffector(0.2f, 0.0f));
 	nc::ColorAffector *colAffector = new nc::ColorAffector();
-	colAffector->addColorStep(0.0f, nc::Color(0.86f, 0.39f, 0.0f, 0.7f)); // 0.05
-	colAffector->addColorStep(0.65f, nc::Color(0.86f, 0.59f, 0.0f, 0.75f)); // 0.55
-	colAffector->addColorStep(0.7f, nc::Color(0.86f, 0.7f, 0.0f, 0.6f)); // 0.295
-	colAffector->addColorStep(1.0f, nc::Color(0.0f, 0.0f, 1.0f, 0.85f)); // 0.59
+	colAffector->addColorStep(0.0f, nc::Color(0.86f, 0.39f, 0.0f, 0.75f));
+	colAffector->addColorStep(0.65f, nc::Color(0.86f, 0.59f, 0.0f, 0.8f));
+	colAffector->addColorStep(0.7f, nc::Color(0.86f, 0.7f, 0.0f, 0.65f));
+	colAffector->addColorStep(1.0f, nc::Color(0.0f, 0.0f, 1.0f, 0.9f));
 	particleSystem_->addAffector(colAffector);
-	nc::SizeAffector *sizeAffector = new nc::SizeAffector(0.45f); // 0.25
+	nc::SizeAffector *sizeAffector = new nc::SizeAffector(0.45f);
 	sizeAffector->addSizeStep(0.0f, 0.01f);
-	sizeAffector->addSizeStep(0.7f, 1.6f);
+	sizeAffector->addSizeStep(0.7f, 1.7f);
 	sizeAffector->addSizeStep(1.0f, 0.4f);
 	particleSystem_->addAffector(sizeAffector);
 	emitVector_.set(0.0f, 350.0f);
@@ -52,10 +57,10 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
-	if (emitTimer_->interval() > 0.085f) // 0.150f
+	if (emitTimer_->interval() > 0.085f)
 	{
 		emitTimer_->start();
-		particleSystem_->emitParticles(3, 1.0f, emitVector_); // (25, 3.0f, Vector2f(0.0f, 100.0f))
+		particleSystem_->emitParticles(3, 1.0f, emitVector_);
 	}
 }
 

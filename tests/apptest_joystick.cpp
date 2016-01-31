@@ -8,10 +8,18 @@
 #include "TextNode.h"
 #include "IFile.h" // for dataPath()
 
-// Xbox 360 controller defines from XInput includes
-#define XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE  7849
-#define XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE 8689
-#define XINPUT_GAMEPAD_TRIGGER_THRESHOLD    30
+namespace {
+
+#ifdef __ANDROID__
+const char* TextureFile = "texture4.webp";
+const char* FontTextureFile = "DroidSans32_256_8888.ktx";
+#else
+const char* TextureFile = "texture4.png";
+const char* FontTextureFile = "DroidSans32_256.png";
+#endif
+const char* FontFntFile = "DroidSans32_256.fnt";
+
+}
 
 nc::IAppEventHandler* createApphandler()
 {
@@ -23,26 +31,17 @@ void MyEventHandler::onInit()
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 	joyString_ = new nc::String(NumChars);
-#ifdef __ANDROID__
-	texture_ = new nc::Texture((nc::IFile::dataPath() + "checker_256_ETC1_MIP.ktx").data());
-#else
-	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/texture3.png").data());
-#endif
+	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/" + TextureFile).data());
 	sprites_[0] = new nc::Sprite(&rootNode, texture_, nc::theApplication().width() * 0.25f, nc::theApplication().height() * 0.5f);
 	sprites_[1] = new nc::Sprite(&rootNode, texture_, nc::theApplication().width() * 0.75f, nc::theApplication().height() * 0.5f);
 	sprites_[0]->setScale(0.5f);
 	sprites_[1]->setScale(0.5f);
 
-#ifdef __ANDROID__
-	font_ = new nc::Font((nc::IFile::dataPath() + "trebuchet32_256_4444.pvr").data(),
-						 (nc::IFile::dataPath() + "trebuchet32_256.fnt").data());
-#else
-	font_ = new nc::Font((nc::IFile::dataPath() + "fonts/trebuchet32_256_gray.png").data(),
-						 (nc::IFile::dataPath() + "fonts/trebuchet32_256.fnt").data());
-#endif
+	font_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
+						 (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
 	textNode_ = new nc::TextNode(&rootNode, font_);
 	textNode_->setScale(0.85f);
-	textNode_->setPosition(nc::theApplication().width() * 0.1f, nc::theApplication().height() * 0.4f);
+	textNode_->setPosition(nc::theApplication().width() * 0.1f, nc::theApplication().height() * 0.35f);
 
 	for (int i = 0; i < NumJoysticks; i++)
 	{

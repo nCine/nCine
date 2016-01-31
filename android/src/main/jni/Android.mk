@@ -130,7 +130,7 @@ LOCAL_CFLAGS := -Wall -ffast-math
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/$(INC)
 LOCAL_SRC_FILES := main.cpp \
-	$(TST)/apptest_mipmapping.cpp
+	$(TST)/apptest_texformats.cpp
 
 LOCAL_LDLIBS := -landroid
 LOCAL_STATIC_LIBRARIES := android_native_app_glue

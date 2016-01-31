@@ -7,6 +7,16 @@
 #include "Sprite.h"
 #include "IFile.h" // for dataPath()
 
+namespace {
+
+#ifdef __ANDROID__
+const char* TextureFile = "megatexture_256.webp";
+#else
+const char* TextureFile = "megatexture_256.png";
+#endif
+
+}
+
 nc::IAppEventHandler* createApphandler()
 {
 	return new MyEventHandler;
@@ -20,15 +30,11 @@ void MyEventHandler::onInit()
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-#ifdef __ANDROID__
-	megaTexture_ = new nc::Texture((nc::IFile::dataPath() + "megatexture_256.dds").data());
-#else
-	megaTexture_ = new nc::Texture((nc::IFile::dataPath() + "textures/megatexture_256.png").data());
-#endif
-	texRects[0] = nc::Recti(0, 0, 145, 121);
-	texRects[1] = nc::Recti(256 - 100, 0, 100, 100);
-	texRects[2] = nc::Recti(0, 256 - 96, 96, 96);
-	texRects[3] = nc::Recti(256 - 96, 256 - 96, 96, 96);
+	megaTexture_ = new nc::Texture((nc::IFile::dataPath() + "textures/" + TextureFile).data());
+	texRects[0] = nc::Recti(0, 0, 128, 128);
+	texRects[1] = nc::Recti(128, 0, 128, 128);
+	texRects[2] = nc::Recti(0, 128, 128, 128);
+	texRects[3] = nc::Recti(128, 128, 128, 128);
 
 	dummy_ = new nc::SceneNode(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	dummy_->setScale(0.75f);
@@ -38,7 +44,7 @@ void MyEventHandler::onInit()
 	{
 		for (int j = static_cast<int>(-NumColSprites * 0.5f); j < static_cast<int>(NumColSprites * 0.5f); j++)
 		{
-			sprites_[index] = new nc::Sprite(dummy_, megaTexture_, i * 100.0f, j * 100.0f);
+			sprites_[index] = new nc::Sprite(dummy_, megaTexture_, i * 128.0f, j * 128.0f);
 			sprites_[index]->setTexRect(texRects[index % NumTextures]);
 			sprites_[index]->setScale(0.75f);
 			index++;

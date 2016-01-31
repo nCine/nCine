@@ -7,7 +7,6 @@
 
 namespace ncine {
 
-class AudioStreamPlayer;
 class Texture;
 class AnimatedSprite;
 
@@ -35,7 +34,6 @@ class MyEventHandler
 #endif
 
   private:
-	nc::AudioStreamPlayer *audioPlayer_;
 	nc::Texture *texture_;
 	nc::AnimatedSprite *animSprite_;
 	nc::Vector2f destVector_;

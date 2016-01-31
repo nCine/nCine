@@ -5,6 +5,23 @@
 #include "TextNode.h"
 #include "IFile.h" // for dataPath()
 
+namespace {
+
+#ifdef __ANDROID__
+const char* Font1TextureFile = "DroidSans32_256.webp";
+const char* Font2TextureFile = "NotoSerif-Regular32_256.webp";
+const char* Font3TextureFile = "Roboto-Regular32_256.webp";
+#else
+const char* Font1TextureFile = "DroidSans32_256.png";
+const char* Font2TextureFile = "NotoSerif-Regular32_256.png";
+const char* Font3TextureFile = "Roboto-Regular32_256.png";
+#endif
+const char* Font1FntFile = "DroidSans32_256.fnt";
+const char* Font2FntFile = "NotoSerif-Regular32_256.fnt";
+const char* Font3FntFile = "Roboto-Regular32_256.fnt";
+
+}
+
 nc::IAppEventHandler* createApphandler()
 {
 	return new MyEventHandler;
@@ -14,18 +31,15 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-#ifdef __ANDROID__
-	font1_ = new nc::Font((nc::IFile::dataPath() + "trebuchet32_256_4444.pvr").data(), (nc::IFile::dataPath() + "trebuchet32_256.fnt").data());
-	font2_ = new nc::Font((nc::IFile::dataPath() + "arial32_256_4444.pvr").data(), (nc::IFile::dataPath() + "arial32_256.fnt").data());
-	font3_ = new nc::Font((nc::IFile::dataPath() + "verdana32_256_4444.pvr").data(), (nc::IFile::dataPath() + "verdana32_256.fnt").data());
-#else
-	font1_ = new nc::Font((nc::IFile::dataPath() + "fonts/trebuchet32_256_gray.png").data(), (nc::IFile::dataPath() + "fonts/trebuchet32_256.fnt").data());
-	font2_ = new nc::Font((nc::IFile::dataPath() + "fonts/arial32_256_gray.png").data(), (nc::IFile::dataPath() + "fonts/arial32_256.fnt").data());
-	font3_ = new nc::Font((nc::IFile::dataPath() + "fonts/verdana32_256_gray.png").data(), (nc::IFile::dataPath() + "fonts/verdana32_256.fnt").data());
-#endif
+	font1_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + Font1TextureFile).data(),
+						  (nc::IFile::dataPath() + "fonts/" + Font1FntFile).data());
+	font2_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + Font2TextureFile).data(),
+						  (nc::IFile::dataPath() + "fonts/" + Font2FntFile).data());
+	font3_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + Font3TextureFile).data(),
+						  (nc::IFile::dataPath() + "fonts/" + Font3FntFile).data());
 
 	char testString[] = "WAY.P.ATAV";
-	float textHeight = nc::theApplication().height() * 0.7f;
+	float textHeight = nc::theApplication().height() * 0.8f;
 	int screenWidth = nc::theApplication().width();
 	text1_ = new nc::TextNode(&rootNode, font1_);
 	text1_->setScale(2.0f);
