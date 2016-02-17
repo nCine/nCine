@@ -63,7 +63,6 @@ void TextureLoaderDds::readHeader(DdsHeader& header)
 void TextureLoaderDds::parseFormat(const DdsHeader &header)
 {
 	GLenum internalFormat = GL_RGB; // to suppress uninitialized variable warning
-	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
 
 	uint32_t flags = IFile::int32FromLE(header.ddspf.dwFlags);
 
@@ -74,36 +73,6 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 
 		LOGI_X("FourCC: \"%c%c%c%c\" (0x%x)", (reinterpret_cast<char*>(&fourCC))[0], (reinterpret_cast<char*>(&fourCC))[1],
 			(reinterpret_cast<char*>(&fourCC))[2], (reinterpret_cast<char*>(&fourCC))[3], fourCC);
-
-		// Check for OpenGL extension support
-		switch (fourCC)
-		{
-#ifndef __ANDROID__
-			case DDS_DXT1:
-			case DDS_DXT3:
-			case DDS_DXT5:
-				if (gfxCaps.hasExtension(IGfxCapabilities::EXT_TEXTURE_COMPRESSION_S3TC) == false)
-				{
-					LOGF("GL_EXT_texture_compression_s3tc not available");
-					exit(EXIT_FAILURE);
-				}
-				break;
-#else
-			case DDS_ATC:
-			case DDS_ATCA:
-			case DDS_ATCI:
-				if (gfxCaps.hasExtension(IGfxCapabilities::AMD_COMPRESSED_ATC_TEXTURE) == false)
-				{
-					LOGF("GL_AMD_compressed_ATC_texture not available");
-					exit(EXIT_FAILURE);
-				}
-				break;
-#endif
-			default:
-				LOGF("Unsupported FourCC compression code");
-				exit(EXIT_FAILURE);
-				break;
-		}
 
 		// Parsing the FourCC format
 		switch (fourCC)
@@ -119,6 +88,9 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 				break;
 #else
+			case DDS_ETC1:
+				internalFormat = GL_ETC1_RGB8_OES;
+				break;
 			case DDS_ATC:
 				internalFormat = GL_ATC_RGB_AMD;
 				break;
@@ -129,6 +101,10 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 				internalFormat = GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD;
 				break;
 #endif
+			default:
+				LOGF("Unsupported FourCC compression code");
+				exit(EXIT_FAILURE);
+				break;
 		}
 
 		loadPixels(internalFormat);

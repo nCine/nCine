@@ -63,7 +63,6 @@ void TextureLoaderPvr::readHeader(Pvr3Header &header)
 void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
 {
 	GLenum internalFormat = GL_RGB; // to suppress uninitialized variable warning
-	const IGfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();
 
 	uint64_t pixelFormat = IFile::int64FromLE(header.pixelFormat);
 
@@ -71,42 +70,6 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
 	if (pixelFormat < 0x0000000100000000ULL)
 	{
 		LOGI_X("Compressed format: %u", pixelFormat);
-
-		// Check for OpenGL extension support
-		switch (pixelFormat)
-		{
-#ifndef __ANDROID__
-			case FMT_DXT1:
-			case FMT_DXT3:
-			case FMT_DXT5:
-				if (gfxCaps.hasExtension(IGfxCapabilities::EXT_TEXTURE_COMPRESSION_S3TC) == false)
-				{
-					LOGF("GL_EXT_texture_compression_s3tc not available");
-					exit(EXIT_FAILURE);
-				}
-				break;
-#else
-			case FMT_PVRTC_2BPP_RGB:
-			case FMT_PVRTC_2BPP_RGBA:
-			case FMT_PVRTC_4BPP_RGB:
-			case FMT_PVRTC_4BPP_RGBA:
-				if (gfxCaps.hasExtension(IGfxCapabilities::IMG_TEXTURE_COMPRESSION_PVRTC) == false)
-				{
-					LOGF("GL_IMG_texture_compression_pvrtc not available");
-					exit(EXIT_FAILURE);
-				}
-				break;
-			case FMT_PVRTCII_2BPP:
-			case FMT_PVRTCII_4BPP:
-				LOGF("No support for PVRTC-II compression");
-				exit(EXIT_FAILURE);
-				break;
-#endif
-			default:
-				LOGF_X("Unsupported PVR3 compressed format: %u", pixelFormat);
-				exit(EXIT_FAILURE);
-				break;
-		}
 
 		// Parsing the pixel format
 		switch (pixelFormat)
@@ -137,7 +100,60 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
 			case FMT_PVRTC_4BPP_RGBA:
 				internalFormat = GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG;
 				break;
+			case FMT_PVRTCII_2BPP:
+			case FMT_PVRTCII_4BPP:
+				LOGF("No support for PVRTC-II compression");
+				exit(EXIT_FAILURE);
+				break;
+			#if __ANDROID_API__ >= 21
+			case FMT_ASTC_4x4:
+				internalFormat = GL_COMPRESSED_RGBA_ASTC_4x4_KHR;
+				break;
+			case FMT_ASTC_5x4:
+				internalFormat = GL_COMPRESSED_RGBA_ASTC_5x4_KHR;
+				break;
+			case FMT_ASTC_5x5:
+				internalFormat = GL_COMPRESSED_RGBA_ASTC_5x5_KHR;
+				break;
+			case FMT_ASTC_6x5:
+				internalFormat = GL_COMPRESSED_RGBA_ASTC_6x5_KHR;
+				break;
+			case FMT_ASTC_6x6:
+				internalFormat = GL_COMPRESSED_RGBA_ASTC_6x6_KHR;
+				break;
+			case FMT_ASTC_8x5:
+				internalFormat = GL_COMPRESSED_RGBA_ASTC_8x5_KHR;
+				break;
+			case FMT_ASTC_8x6:
+				internalFormat = GL_COMPRESSED_RGBA_ASTC_8x6_KHR;
+				break;
+			case FMT_ASTC_8x8:
+				internalFormat = GL_COMPRESSED_RGBA_ASTC_8x8_KHR;
+				break;
+			case FMT_ASTC_10x5:
+				internalFormat = GL_COMPRESSED_RGBA_ASTC_10x5_KHR;
+				break;
+			case FMT_ASTC_10x6:
+				internalFormat = GL_COMPRESSED_RGBA_ASTC_10x6_KHR;
+				break;
+			case FMT_ASTC_10x8:
+				internalFormat = GL_COMPRESSED_RGBA_ASTC_10x8_KHR;
+				break;
+			case FMT_ASTC_10x10:
+				internalFormat = GL_COMPRESSED_RGBA_ASTC_10x10_KHR;
+				break;
+			case FMT_ASTC_12x10:
+				internalFormat = GL_COMPRESSED_RGBA_ASTC_12x10_KHR;
+				break;
+			case FMT_ASTC_12x12:
+				internalFormat = GL_COMPRESSED_RGBA_ASTC_12x12_KHR;
+				break;
+			#endif
 #endif
+			default:
+				LOGF_X("Unsupported PVR3 compressed format: 0x%llx", pixelFormat);
+				exit(EXIT_FAILURE);
+				break;
 		}
 
 		loadPixels(internalFormat);

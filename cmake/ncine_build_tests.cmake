@@ -19,6 +19,7 @@ if(NCINE_BUILD_TESTS)
 			endif()
 
 			set(DATA_INSTALL_DESTINATION data)
+			include(InstallRequiredSystemLibraries)
 		else()
 			if(NOT NCINE_EMBED_SHADERS)
 				add_custom_target(symlink_shaders_data ALL

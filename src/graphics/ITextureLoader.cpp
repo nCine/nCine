@@ -154,7 +154,7 @@ ITextureLoader* ITextureLoader::createFromFile(const char *filename)
 }
 
 ///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
+// PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
 
 /// Loads pixel data from a texture file holding either compressed or uncompressed data

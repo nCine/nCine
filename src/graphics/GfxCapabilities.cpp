@@ -80,7 +80,7 @@ void GfxCapabilities::init()
 #ifndef __ANDROID__
 	sscanf(pVersion, "%2d.%2d.%2d", &glMajorVersion_, &glMinorVersion_, &glReleaseVersion_);
 #else
-	sscanf(pVersion, "OpenGL ES-%*2s %2d.%2d", &glMajorVersion_, &glMinorVersion_);
+	sscanf(pVersion, "OpenGL ES %2d.%2d", &glMajorVersion_, &glMinorVersion_);
 #endif
 
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &glIntValues_[MAX_TEXTURE_SIZE]);
@@ -90,6 +90,8 @@ void GfxCapabilities::init()
 	glExtensions_[OES_COMPRESSED_ETC1_RGB8_TEXTURE] = checkGLExtension("GL_OES_compressed_ETC1_RGB8_texture");
 	glExtensions_[AMD_COMPRESSED_ATC_TEXTURE] = checkGLExtension("GL_AMD_compressed_ATC_texture");
 	glExtensions_[IMG_TEXTURE_COMPRESSION_PVRTC] = checkGLExtension("GL_IMG_texture_compression_pvrtc");
+	glExtensions_[KHR_TEXTURE_COMPRESSION_ASTC_LDR] = checkGLExtension("GL_KHR_texture_compression_astc_ldr");
+
 }
 
 /// Logs OpenGL device info
@@ -128,6 +130,7 @@ void GfxCapabilities::logGLCaps() const
 	LOGI_X("GL_OES_compressed_ETC1_RGB8_texture: %d", glExtensions_[OES_COMPRESSED_ETC1_RGB8_TEXTURE]);
 	LOGI_X("GL_AMD_compressed_ATC_texture: %d", glExtensions_[AMD_COMPRESSED_ATC_TEXTURE]);
 	LOGI_X("GL_IMG_texture_compression_pvrtc: %d", glExtensions_[IMG_TEXTURE_COMPRESSION_PVRTC]);
+	LOGI_X("GL_KHR_texture_compression_astc_ldr: %d", glExtensions_[KHR_TEXTURE_COMPRESSION_ASTC_LDR]);
 
 	LOGI("OpenGL device capabilities ---");
 }

@@ -15,15 +15,17 @@ TextureFormat::TextureFormat(GLenum internalFormat)
 	: internalFormat_(internalFormat), format_(-1),
 	  type_(-1), isCompressed_(false)
 {
-	findExternalFmt();
+	findExternalFormat();
+	checkFormatSupport();
 }
 
 TextureFormat::TextureFormat(GLenum internalFormat, GLenum type)
 	: internalFormat_(internalFormat), format_(-1),
 	  type_(-1), isCompressed_(false)
 {
-	findExternalFmt();
-	// Overriding the type found by FindExternalFmt()
+	findExternalFormat();
+	checkFormatSupport();
+	// Overriding the type found by `findExternalFormat()`
 	type_ = type;
 }
 
@@ -50,12 +52,201 @@ void TextureFormat::bgrFormat()
 #endif
 }
 
+/// Calculates the pixel data size for each MIP map level
+long int TextureFormat::calculateMipSizes(GLenum internalFormat, int width, int height, int mipMapCount, long int *mipDataOffsets, long int *mipDataSizes)
+{
+	unsigned int blockWidth = 1; // Compression block width in pixels
+	unsigned int blockHeight = 1; // Compression block height in pixels
+	unsigned int bpp = 1; // Bits per pixel
+	unsigned int blockSize = 0; // Compression block size in byts
+	unsigned int minDataSize = 1; // Minimum data size in bytes
+
+	switch (internalFormat)
+	{
+		case GL_RGBA:
+#ifndef __ANDROID__
+		case GL_RGBA8:
+#else
+		case GL_RGBA8_OES:
+#endif
+			bpp = 32;
+			break;
+		case GL_RGB:
+#ifndef __ANDROID__
+		case GL_RGB8:
+#else
+		case GL_RGB8_OES:
+#endif
+			bpp = 24;
+			break;
+		case GL_LUMINANCE_ALPHA:
+#ifndef __APPLE__
+		case GL_RGB565:
+#endif
+		case GL_RGB5_A1:
+		case GL_RGBA4:
+#if defined(__ANDROID__) && __ANDROID_API__ >= 21
+		case GL_LUMINANCE8_ALPHA8_OES:
+#endif
+			bpp = 16;
+			break;
+		case GL_LUMINANCE:
+		case GL_ALPHA:
+#if defined(__ANDROID__) && __ANDROID_API__ >= 21
+		case GL_LUMINANCE8_OES:
+		case GL_ALPHA8_OES:
+#endif
+			bpp = 8;
+			break;
+#ifndef __ANDROID__
+		case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+			// max(1, width / 4) x max(1, height / 4) x 8(DXT1)
+			blockWidth = 4;
+			blockHeight = 4;
+			bpp = 4;
+			minDataSize = 8;
+			break;
+		case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+			// max(1, width / 4) x max(1, height / 4) x 16(DXT2-5)
+			blockWidth = 4;
+			blockHeight = 4;
+			bpp = 8;
+			minDataSize = 16;
+			break;
+#else
+		case GL_ETC1_RGB8_OES:
+			blockWidth = 4;
+			blockHeight = 4;
+			bpp = 4;
+			minDataSize = 8;
+			break;
+
+		case GL_ATC_RGBA_EXPLICIT_ALPHA_AMD:
+		case GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD:
+			// ((width_in_texels+3)/4) * ((height_in_texels+3)/4) * 16
+			blockWidth = 4;
+			blockHeight = 4;
+			bpp = 8;
+			minDataSize = 16;
+			break;
+		case GL_ATC_RGB_AMD:
+			// ((width_in_texels+3)/4) * ((height_in_texels+3)/4) * 8
+			blockWidth = 4;
+			blockHeight = 4;
+			bpp = 4;
+			minDataSize = 8;
+			break;
+
+		case GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG:
+		case GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG:
+			blockWidth = 8;
+			blockHeight = 4;
+			bpp = 2;
+			minDataSize = 2 * 2 * ((blockWidth * blockHeight * bpp) / 8);
+			break;
+		case GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG:
+		case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
+			blockWidth = 4;
+			blockHeight = 4;
+			bpp = 4;
+			minDataSize = 2 * 2 * ((blockWidth * blockHeight * bpp) / 8);
+			break;
+		#if __ANDROID_API__ >= 21
+		case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
+			blockWidth = 4; blockHeight = 4;
+			blockSize = 16; minDataSize = 16;
+			break;
+		case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
+			blockWidth = 5; blockHeight = 4;
+			blockSize = 16; minDataSize = 16;
+			break;
+		case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:
+			blockWidth = 5; blockHeight = 5;
+			blockSize = 16; minDataSize = 16;
+			break;
+		case GL_COMPRESSED_RGBA_ASTC_6x5_KHR:
+			blockWidth = 6; blockHeight = 5;
+			blockSize = 16; minDataSize = 16;
+			break;
+		case GL_COMPRESSED_RGBA_ASTC_6x6_KHR:
+			blockWidth = 6; blockHeight = 6;
+			blockSize = 16; minDataSize = 16;
+			break;
+		case GL_COMPRESSED_RGBA_ASTC_8x5_KHR:
+			blockWidth = 8; blockHeight = 5;
+			blockSize = 16; minDataSize = 16;
+			break;
+		case GL_COMPRESSED_RGBA_ASTC_8x6_KHR:
+			blockWidth = 8; blockHeight = 6;
+			blockSize = 16; minDataSize = 16;
+			break;
+		case GL_COMPRESSED_RGBA_ASTC_8x8_KHR:
+			blockWidth = 8; blockHeight = 8;
+			blockSize = 16; minDataSize = 16;
+			break;
+		case GL_COMPRESSED_RGBA_ASTC_10x5_KHR:
+			blockWidth = 10; blockHeight = 5;
+			blockSize = 16; minDataSize = 16;
+			break;
+		case GL_COMPRESSED_RGBA_ASTC_10x6_KHR:
+			blockWidth = 10; blockHeight = 6;
+			blockSize = 16; minDataSize = 16;
+			break;
+		case GL_COMPRESSED_RGBA_ASTC_10x8_KHR:
+			blockWidth = 10; blockHeight = 8;
+			blockSize = 16; minDataSize = 16;
+			break;
+		case GL_COMPRESSED_RGBA_ASTC_10x10_KHR:
+			blockWidth = 10; blockHeight = 10;
+			blockSize = 16; minDataSize = 16;
+			break;
+		case GL_COMPRESSED_RGBA_ASTC_12x10_KHR:
+			blockWidth = 12; blockHeight = 10;
+			blockSize = 16; minDataSize = 16;
+			break;
+		case GL_COMPRESSED_RGBA_ASTC_12x12_KHR:
+			blockWidth = 12; blockHeight = 12;
+			blockSize = 16; minDataSize = 16;
+			break;
+		#endif
+#endif
+		default:
+			LOGF_X("MIP maps not supported for internal format: 0x%x", internalFormat);
+			exit(EXIT_FAILURE);
+			break;
+	}
+
+	int levelWidth = width;
+	int levelHeight = height;
+	long int dataSizesSum = 0;
+	for (int i = 0; i < mipMapCount; i++)
+	{
+		mipDataOffsets[i] = dataSizesSum;
+		mipDataSizes[i] = (blockSize > 0) ? (levelWidth / blockWidth) * (levelHeight / blockHeight) * blockSize :
+											(levelWidth / blockWidth) * (levelHeight / blockHeight) * ((blockWidth * blockHeight  * bpp) / 8);
+
+		// Clamping to the minimum valid size
+		if (mipDataSizes[i] < int(minDataSize))
+		{
+			mipDataSizes[i] = minDataSize;
+		}
+
+		levelWidth /= 2;
+		levelHeight /= 2;
+		dataSizesSum += mipDataSizes[i];
+	}
+
+	return dataSizesSum;
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Tries to find an external format corresponding to the internal one
-void TextureFormat::findExternalFmt()
+/// Attempts to find a match between an external format and the corresponding internal one
+void TextureFormat::findExternalFormat()
 {
 	bool found = false;
 
@@ -95,6 +286,10 @@ void TextureFormat::findExternalFmt()
 	{
 		LOGF_X("Unknown internal format: 0x%x", internalFormat_);
 		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		LOGI_X("Internal format: 0x%x - type: 0x%x", internalFormat_, type_);
 	}
 }
 
@@ -168,10 +363,12 @@ bool TextureFormat::nonIntegerFormat()
 			format_ = GL_RGBA;
 			type_ = GL_UNSIGNED_SHORT_4_4_4_4;
 			break;
+#ifndef __APPLE__
 		case GL_RGB565:
 			format_ = GL_RGB;
 			type_ = GL_UNSIGNED_SHORT_5_6_5;
 			break;
+#endif
 		default:
 			found = false;
 			break;
@@ -280,20 +477,13 @@ bool TextureFormat::oesFormat()
 /// Searches a match between an OpenGL ES internal format and an external one
 bool TextureFormat::oesFormatApi21()
 {
-#if __ANDROID_API < 21
+#if __ANDROID_API__ < 21
 	bool found = false;
 #else
 	bool found = true;
 
 	switch (internalFormat_)
 	{
-		case GL_RGBA4_OES:
-		case GL_RGB5_A1_OES:
-			format_ = GL_RGBA;
-			break;
-		case GL_RGB565_OES:
-			format_ = GL_RGB;
-			break;
 		case GL_LUMINANCE8_ALPHA8_OES:
 			format_ = GL_LUMINANCE_ALPHA;
 			break;
@@ -310,15 +500,6 @@ bool TextureFormat::oesFormatApi21()
 
 	switch (internalFormat_)
 	{
-		case GL_RGBA4_OES:
-			type_ = GL_UNSIGNED_SHORT_4_4_4_4;
-			break;
-		case GL_RGB5_A1_OES:
-			type_ = GL_UNSIGNED_SHORT_5_5_5_1;
-			break;
-		case GL_RGB565_OES:
-			type_ = GL_UNSIGNED_SHORT_5_6_5;
-			break;
 		case GL_LUMINANCE8_ALPHA8_OES:
 		case GL_LUMINANCE8_OES:
 		case GL_ALPHA8_OES:
@@ -341,10 +522,30 @@ bool TextureFormat::oesCompressedFormat()
 	{
 		case GL_ATC_RGBA_EXPLICIT_ALPHA_AMD:
 		case GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD:
+		case GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG:
+		case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
+		#if __ANDROID_API__ >= 21
+		case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_6x5_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_6x6_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_8x5_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_8x6_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_8x8_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_10x5_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_10x6_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_10x8_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_10x10_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_12x10_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_12x12_KHR:
+		#endif
 			format_ = GL_RGBA;
 			break;
 		case GL_ETC1_RGB8_OES:
 		case GL_ATC_RGB_AMD:
+		case GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG:
+		case GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG:
 			format_ = GL_RGB;
 			break;
 		default:
@@ -362,119 +563,74 @@ bool TextureFormat::oesCompressedFormat()
 }
 #endif
 
-/// Calculates the pixel data size for each MIP map level
-long int TextureFormat::calculateMipSizes(GLenum internalFormat, int width, int height, int mipMapCount, long int *mipDataOffsets, long int *mipDataSizes)
+/// Checks if the internal format is supported by the GPU
+void TextureFormat::checkFormatSupport() const
 {
-	unsigned int blockWidth = 1; // Compression block width in pixels
-	unsigned int blockHeight = 1; // Compression block height in pixels
-	unsigned int bpp = 1; // Bits per pixel
-	unsigned int minDataSize = 1; // Minimum data size in bytes
+	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
 
-	switch (internalFormat)
+	switch(internalFormat_)
 	{
-		case GL_RGBA:
 #ifndef __ANDROID__
-		case GL_RGBA8:
-#endif
-			bpp = 32;
-			break;
-		case GL_RGB:
-#ifndef __ANDROID__
-		case GL_RGB8:
-#endif
-			bpp = 24;
-			break;
-		case GL_LUMINANCE_ALPHA:
-		case GL_UNSIGNED_SHORT_5_6_5:
-		case GL_UNSIGNED_SHORT_5_5_5_1:
-		case GL_UNSIGNED_SHORT_4_4_4_4:
-			bpp = 16;
-			break;
-		case GL_LUMINANCE:
-		case GL_ALPHA:
-			bpp = 8;
-			break;
-#ifndef __ANDROID__
-		case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
-		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
-			// max(1, width / 4) x max(1, height / 4) x 8(DXT1)
-			blockWidth = 4;
-			blockHeight = 4;
-			bpp = 4;
-			minDataSize = 8;
-			break;
-		case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
-		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-			// max(1, width / 4) x max(1, height / 4) x 16(DXT2-5)
-			blockWidth = 4;
-			blockHeight = 4;
-			bpp = 8;
-			minDataSize = 16;
-			break;
-#else
-		case GL_ETC1_RGB8_OES:
-			blockWidth = 4;
-			blockHeight = 4;
-			bpp = 4;
-			minDataSize = 8;
-			break;
-
-		case GL_ATC_RGBA_EXPLICIT_ALPHA_AMD:
-		case GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD:
-			// ((width_in_texels+3)/4) * ((height_in_texels+3)/4) * 16
-			blockWidth = 4;
-			blockHeight = 4;
-			bpp = 8;
-			minDataSize = 16;
-			break;
-		case GL_ATC_RGB_AMD:
-			// ((width_in_texels+3)/4) * ((height_in_texels+3)/4) * 8
-			blockWidth = 4;
-			blockHeight = 4;
-			bpp = 4;
-			minDataSize = 8;
-			break;
-
-		case GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG:
-		case GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG:
-			blockWidth = 8;
-			blockHeight = 4;
-			bpp = 2;
-			minDataSize = 2 * 2 * ((blockWidth * blockHeight * bpp) / 8);
-			break;
-		case GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG:
-		case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
-			blockWidth = 4;
-			blockHeight = 4;
-			bpp = 4;
-			minDataSize = 2 * 2 * ((blockWidth * blockHeight * bpp) / 8);
-			break;
-#endif
-		default:
-			LOGF_X("MIP maps not supported for internal format: %d", internalFormat);
-			exit(EXIT_FAILURE);
-			break;
-	}
-
-	int levelWidth = width;
-	int levelHeight = height;
-	long int dataSizesSum = 0;
-	for (int i = 0; i < mipMapCount; i++)
-	{
-		mipDataOffsets[i] = dataSizesSum;
-		mipDataSizes[i] = (levelWidth / blockWidth) * (levelHeight / blockHeight) * ((blockWidth * blockHeight  * bpp) / 8);
-		// Clamping to the minimum valid size
-		if (mipDataSizes[i] < int(minDataSize))
+	case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+	case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+	case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+		if (gfxCaps.hasExtension(IGfxCapabilities::EXT_TEXTURE_COMPRESSION_S3TC) == false)
 		{
-			mipDataSizes[i] = minDataSize;
+			LOGF("GL_EXT_texture_compression_s3tc not available");
+			exit(EXIT_FAILURE);
 		}
-
-		levelWidth /= 2;
-		levelHeight /= 2;
-		dataSizesSum += mipDataSizes[i];
+		break;
+#else
+	case GL_ETC1_RGB8_OES:
+		if (gfxCaps.hasExtension(IGfxCapabilities::OES_COMPRESSED_ETC1_RGB8_TEXTURE) == false)
+		{
+			LOGF("GL_OES_compressed_etc1_rgb8_texture not available");
+			exit(EXIT_FAILURE);
+		}
+		break;
+	case GL_ATC_RGB_AMD:
+	case GL_ATC_RGBA_EXPLICIT_ALPHA_AMD:
+	case GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD:
+		if (gfxCaps.hasExtension(IGfxCapabilities::AMD_COMPRESSED_ATC_TEXTURE) == false)
+		{
+			LOGF("GL_AMD_compressed_ATC_texture not available");
+			exit(EXIT_FAILURE);
+		}
+		break;
+	case GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG:
+	case GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG:
+	case GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG:
+	case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
+		if (gfxCaps.hasExtension(IGfxCapabilities::IMG_TEXTURE_COMPRESSION_PVRTC) == false)
+		{
+			LOGF("GL_IMG_texture_compression_pvrtc not available");
+			exit(EXIT_FAILURE);
+		}
+		break;
+	#if __ANDROID_API__ >= 21
+	case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
+	case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
+	case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:
+	case GL_COMPRESSED_RGBA_ASTC_6x5_KHR:
+	case GL_COMPRESSED_RGBA_ASTC_6x6_KHR:
+	case GL_COMPRESSED_RGBA_ASTC_8x5_KHR:
+	case GL_COMPRESSED_RGBA_ASTC_8x6_KHR:
+	case GL_COMPRESSED_RGBA_ASTC_8x8_KHR:
+	case GL_COMPRESSED_RGBA_ASTC_10x5_KHR:
+	case GL_COMPRESSED_RGBA_ASTC_10x6_KHR:
+	case GL_COMPRESSED_RGBA_ASTC_10x8_KHR:
+	case GL_COMPRESSED_RGBA_ASTC_10x10_KHR:
+	case GL_COMPRESSED_RGBA_ASTC_12x10_KHR:
+	case GL_COMPRESSED_RGBA_ASTC_12x12_KHR:
+		if (gfxCaps.hasExtension(IGfxCapabilities::KHR_TEXTURE_COMPRESSION_ASTC_LDR) == false)
+		{
+			LOGF("GL_KHR_texture_compression_astc_ldr not available");
+			exit(EXIT_FAILURE);
+		}
+		break;
+	#endif
+#endif
 	}
-
-	return dataSizesSum;
 }
 
 }

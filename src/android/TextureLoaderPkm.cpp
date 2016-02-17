@@ -27,8 +27,6 @@ TextureLoaderPkm::TextureLoaderPkm(IFile* fileHandle)
 
 void TextureLoaderPkm::init()
 {
-	const IGfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();
-
 	fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
 
 	PkmHeader header;
@@ -58,13 +56,6 @@ void TextureLoaderPkm::init()
 		int extHeight = IFile::int16FromBE(header.extendedHeight);
 
 		LOGI_X("Header found: w:%d h:%d, xw:%d xh:%d", width_, height_, extWidth, extHeight);
-	}
-
-	// Checking for extension availability before loading
-	if (gfxCaps.hasExtension(IGfxCapabilities::OES_COMPRESSED_ETC1_RGB8_TEXTURE) == false)
-	{
-		LOGF("GL_OES_compressed_ETC1_RGB8_texture not available");
-		exit(EXIT_FAILURE);
 	}
 
 	loadPixels(GL_ETC1_RGB8_OES);

@@ -62,6 +62,7 @@ class TextureLoaderDds : public ITextureLoader
 	static const uint32_t DDS_DXT1 = 0x31545844; // "DXT1"
 	static const uint32_t DDS_DXT3 = 0x33545844; // "DXT3"
 	static const uint32_t DDS_DXT5 = 0x35545844; // "DXT5"
+	static const uint32_t DDS_ETC1 = 0x31435445; // "ETC1"
 	static const uint32_t DDS_ATC  = 0x20435441; // "ATC "
 	static const uint32_t DDS_ATCA = 0x41435441; // "ATCA"
 	static const uint32_t DDS_ATCI = 0x49435441; // "ATCI"

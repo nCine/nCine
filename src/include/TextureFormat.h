@@ -56,8 +56,10 @@ class TextureFormat
 	bool oesCompressedFormat();
 #endif
 
-	// Tries to find an external format corresponding to the internal one
-	void findExternalFmt();
+	// Attempts to find a match between an external format and the corresponding internal one
+	void findExternalFormat();
+	// Checks if the internal format is supported by the GPU
+	void checkFormatSupport() const;
 };
 
 /// Returns true if the format provides an alpha channel

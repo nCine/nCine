@@ -52,6 +52,8 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	// Sets player position value through components
 	void setPosition(float x, float y, float z);
 
+	/// Returns the state of the player
+	inline PlayerState state() const { return state_; }
 	/// Queries the playing state of the player
 	inline bool isPlaying() const { return state_ == STATE_PLAYING; }
 	/// Queries the paused state of the player

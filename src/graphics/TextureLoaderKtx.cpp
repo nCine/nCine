@@ -80,44 +80,8 @@ void TextureLoaderKtx::readHeader(KtxHeader &header)
 /// Parses the PVR3 header to determine its format
 void TextureLoaderKtx::parseFormat(const KtxHeader& header)
 {
-	const IGfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();
-
 	GLenum internalFormat = IFile::int32FromLE(header.glInternalFormat);
 	GLenum type = IFile::int32FromLE(header.glType);
-
-	switch (internalFormat)
-	{
-#ifndef __ANDROID__
-		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
-		case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
-		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-			if (gfxCaps.hasExtension(IGfxCapabilities::EXT_TEXTURE_COMPRESSION_S3TC) == false)
-			{
-				LOGF("GL_EXT_texture_compression_s3tc not available");
-				exit(EXIT_FAILURE);
-			}
-			break;
-#else
-		case GL_ETC1_RGB8_OES:
-			if (gfxCaps.hasExtension(IGfxCapabilities::OES_COMPRESSED_ETC1_RGB8_TEXTURE) == false)
-			{
-				LOGF("GL_OES_compressed_ETC1_RGB8_texture not available");
-				exit(EXIT_FAILURE);
-			}
-			break;
-
-		case GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG:
-		case GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG:
-		case GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG:
-		case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
-			if (gfxCaps.hasExtension(IGfxCapabilities::IMG_TEXTURE_COMPRESSION_PVRTC) == false)
-			{
-				LOGF("GL_IMG_texture_compression_pvrtc not available");
-				exit(EXIT_FAILURE);
-			}
-			break;
-#endif
-	}
 
 	loadPixels(internalFormat, type);
 
