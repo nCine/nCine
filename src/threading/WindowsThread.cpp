@@ -10,25 +10,25 @@ namespace ncine {
 /// Clears the CPU set
 void ThreadAffinityMask::zero()
 {
-	affinityMask_ = 0L;
+	affinityMask_ = 0LL;
 }
 
 /// Sets the specified CPU number to be included in the set
 void ThreadAffinityMask::set(int cpuNum)
 {
-	affinityMask_ |= static_cast<DWORD_PTR>(1 << cpuNum);
+	affinityMask_ |= 1LL << cpuNum;
 }
 
 /// Sets the specified CPU number to be excluded by the set
 void ThreadAffinityMask::clear(int cpuNum)
 {
-	affinityMask_ &= ~(1 << cpuNum);
+	affinityMask_ &= ~(1LL << cpuNum);
 }
 
 /// Returns true if the specified CPU number belongs to the set
 bool ThreadAffinityMask::isSet(int cpuNum)
 {
-	return ((affinityMask_ >> cpuNum) & 1) != 0;
+	return ((affinityMask_ >> cpuNum) & 1LL) != 0;
 }
 
 ///////////////////////////////////////////////////////////

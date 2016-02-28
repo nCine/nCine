@@ -10,6 +10,16 @@ namespace ncine {
 
 class GlfwInputManager;
 
+/// Utility functions to convert between engine key enumerations and GLFW ones
+class GlfwKeys
+{
+  public:
+	static KeySym keySymValueToEnum(int keysym);
+	static KeyMod keyModValueToEnum(int keymod);
+	static int enumToKeySymValue(KeySym keysym);
+	static int enumToKeyModValue(KeyMod keymod);
+};
+
 /// Information about GLFW mouse state
 class GlfwMouseState : public MouseState
 {
@@ -43,7 +53,9 @@ class GlfwMouseEvent : public MouseEvent
 class GlfwKeyboardState : public KeyboardState
 {
   public:
-	inline bool isKeyDown(KeySym key) const { return glfwGetKey(GlfwGfxDevice::windowHandle(), key) == GLFW_PRESS; }
+	inline bool isKeyDown(KeySym key) const { return glfwGetKey(GlfwGfxDevice::windowHandle(), GlfwKeys::enumToKeySymValue(key)) == GLFW_PRESS; }
+
+	friend class GlfwInputManager;
 };
 
 /// Information about GLFW joystick state
@@ -102,6 +114,7 @@ class GlfwInputManager : public IInputManager
 
 	static KeySym keySymValueToEnum(int keysym);
 	static KeyMod keyModValueToEnum(int keymod);
+	static int enumToKeySymValue(KeySym keysym);
 };
 
 inline const MouseState& GlfwInputManager::mouseState()

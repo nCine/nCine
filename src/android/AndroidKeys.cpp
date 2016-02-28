@@ -1,12 +1,9 @@
-#ifndef NCINE_ANDROIDKEYS
-#define NCINE_ANDROIDKEYS
-
 #include "AndroidInputManager.h"
 #include <android/input.h>
 
 namespace ncine {
 
-KeySym AndroidInputManager::keySymValueToEnum(int keysym)
+KeySym AndroidKeys::keySymValueToEnum(int keysym)
 {
 	switch(keysym)
 	{
@@ -102,8 +99,8 @@ KeySym AndroidInputManager::keySymValueToEnum(int keysym)
 		case AKEYCODE_MEDIA_REWIND:		return KEY_MEDIA_REWIND;
 		case AKEYCODE_MEDIA_FAST_FORWARD:	return KEY_MEDIA_FAST_FORWARD;
 		case AKEYCODE_MUTE:				return KEY_MUTE;
-		case AKEYCODE_PAGE_UP:			return KEY_PAGE_UP;
-		case AKEYCODE_PAGE_DOWN:		return KEY_PAGE_DOWN;
+		case AKEYCODE_PAGE_UP:			return KEY_PAGEUP;
+		case AKEYCODE_PAGE_DOWN:		return KEY_PAGEDOWN;
 		case AKEYCODE_PICTSYMBOLS:		return KEY_PICTSYMBOLS;
 		case AKEYCODE_SWITCH_CHARSET:	return KEY_SWITCH_CHARSET;
 		case AKEYCODE_BUTTON_A:			return KEY_BUTTON_A;
@@ -126,7 +123,7 @@ KeySym AndroidInputManager::keySymValueToEnum(int keysym)
 	}
 }
 
-KeyMod AndroidInputManager::keyModValueToEnum(int keymod)
+KeyMod AndroidKeys::keyModValueToEnum(int keymod)
 {
 	switch(keymod)
 	{
@@ -157,5 +154,3 @@ KeyMod AndroidInputManager::keyModValueToEnum(int keymod)
 }
 
 }
-
-#endif

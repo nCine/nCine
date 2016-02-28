@@ -14,6 +14,14 @@ namespace ncine {
 class AndroidApplication;
 class Timer;
 
+/// Utility functions to convert between engine key enumerations and Android ones
+class AndroidKeys
+{
+  public:
+	static KeySym keySymValueToEnum(int keysym);
+	static KeyMod keyModValueToEnum(int keymod);
+};
+
 /// Information about Android joystick state
 class AndroidJoystickState
 {
@@ -100,9 +108,6 @@ class AndroidInputManager : public IInputManager
 	static int findJoyId(int deviceId);
 	static bool isDeviceConnected(int deviceId);
 	static void deviceInfo(int deviceId, int joyId);
-
-	static KeySym keySymValueToEnum(int keysym);
-	static KeyMod keyModValueToEnum(int keymod);
 
 	// To update joystick connections in `AndroidApplication::androidMain()`
 	friend class AndroidApplication;

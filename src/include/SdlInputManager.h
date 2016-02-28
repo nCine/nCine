@@ -6,6 +6,16 @@
 
 namespace ncine {
 
+/// Utility functions to convert between engine key enumerations and SDL ones
+class SdlKeys
+{
+  public:
+	static KeySym keySymValueToEnum(int keysym);
+	static KeyMod keyModValueToEnum(int keymod);
+	static int enumToKeySymValue(KeySym keysym);
+	static int enumToKeyModValue(KeyMod keymod);
+};
+
 /// Information about SDL mouse state
 class SdlMouseState : public MouseState
 {
@@ -68,7 +78,7 @@ class SdlKeyboardState : public KeyboardState
   public:
 	SdlKeyboardState() { keyState_ = SDL_GetKeyState(NULL); }
 
-	inline bool isKeyDown(KeySym key) const { return keyState_[key]; }
+	inline bool isKeyDown(KeySym key) const { return keyState_[SdlKeys::enumToKeySymValue(key)]; }
 
 	friend class SdlInputManager;
 
@@ -121,8 +131,6 @@ class SdlInputManager : public IInputManager
 	SdlInputManager& operator=(const SdlInputManager&);
 
 	static short int hatEnumToAxisValue(unsigned char hatState, bool upDownAxis);
-	static KeySym keySymValueToEnum(int keysym);
-	static KeyMod keyModValueToEnum(int keymod);
 };
 
 }
