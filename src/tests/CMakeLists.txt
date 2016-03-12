@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(nCine-srctests)
 
-if(WIN32)
+if(MSVC)
 	add_custom_target(copy_dlls_srctests ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/src/tests
 		COMMENT "Copying DLLs to src/tests..."
@@ -35,7 +35,9 @@ if(NCINE_EMBED_SHADERS)
 	target_compile_definitions(glapptest_fbo_cube PRIVATE "WITH_EMBEDDED_SHADERS")
 	target_include_directories(glapptest_fbo_cube PRIVATE ${GENERATED_INCLUDE_DIR})
 endif()
-if(MSVC)
+if(WIN32)
 	target_compile_definitions(glapptest_fbo_cube PRIVATE "WITH_GLEW")
-	target_include_directories(glapptest_fbo_cube PRIVATE "${EXTERNAL_MSVC_DIR}/include")
+	if(MSVC)
+		target_include_directories(glapptest_fbo_cube PRIVATE "${EXTERNAL_MSVC_DIR}/include")
+	endif()
 endif()

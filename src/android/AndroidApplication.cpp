@@ -32,7 +32,8 @@ Application& theApplication()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void AndroidApplication::main(struct android_app* state, IAppEventHandler* (*createAppEventHandler)())
+/// Entry point method to be called in the `android_main()` function
+void AndroidApplication::start(struct android_app* state, IAppEventHandler* (*createAppEventHandler)())
 {
 	theAndroidApplication().state_ = state;
 	theAndroidApplication().createAppEventHandler_ = createAppEventHandler;

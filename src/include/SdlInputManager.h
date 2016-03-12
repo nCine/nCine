@@ -22,11 +22,11 @@ class SdlMouseState : public MouseState
   public:
 	SdlMouseState() : buttons_(0) { }
 
-	inline bool isLeftButtonDown() const { return (buttons_ & LEFT_BUTTON); }
-	inline bool isMiddleButtonDown() const { return (buttons_ & MIDDLE_BUTTON); }
-	inline bool isRightButtonDown() const { return (buttons_ & RIGHT_BUTTON); }
-	inline bool isWheelUpButtonDown() const { return (buttons_ & WHEELUP_BUTTON); }
-	inline bool isWheelDownButtonDown() const { return (buttons_ & WHEELDOWN_BUTTON); }
+	inline bool isLeftButtonDown() const { return (buttons_ & LEFT_BUTTON) != 0; }
+	inline bool isMiddleButtonDown() const { return (buttons_ & MIDDLE_BUTTON) != 0; }
+	inline bool isRightButtonDown() const { return (buttons_ & RIGHT_BUTTON) != 0; }
+	inline bool isWheelUpButtonDown() const { return (buttons_ & WHEELUP_BUTTON) != 0; }
+	inline bool isWheelDownButtonDown() const { return (buttons_ & WHEELDOWN_BUTTON) != 0; }
 
   private:
 	// Extracted from SDL/SDL_mouse.h
@@ -78,7 +78,7 @@ class SdlKeyboardState : public KeyboardState
   public:
 	SdlKeyboardState() { keyState_ = SDL_GetKeyState(NULL); }
 
-	inline bool isKeyDown(KeySym key) const { return keyState_[SdlKeys::enumToKeySymValue(key)]; }
+	inline bool isKeyDown(KeySym key) const { return keyState_[SdlKeys::enumToKeySymValue(key)] != 0; }
 
 	friend class SdlInputManager;
 

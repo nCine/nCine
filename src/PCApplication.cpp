@@ -24,7 +24,8 @@ Application& theApplication()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void PCApplication::main(IAppEventHandler* (*createAppEventHandler)())
+/// Entry point method to be called in the `main()` function
+void PCApplication::start(IAppEventHandler* (*createAppEventHandler)())
 {
 	PCApplication &app = static_cast<PCApplication &>(theApplication());
 
@@ -37,7 +38,7 @@ void PCApplication::main(IAppEventHandler* (*createAppEventHandler)())
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Must be called at start to init the application
+/// Must be called at the beginning to init the application
 void PCApplication::init(IAppEventHandler* (*createAppEventHandler)())
 {
 	appEventHandler_ = createAppEventHandler();
@@ -78,7 +79,7 @@ void PCApplication::run()
 				case SDL_ACTIVEEVENT:
 					if (event.active.state != SDL_APPMOUSEFOCUS)
 					{
-						setFocus(event.active.gain);
+						setFocus(event.active.gain != 0);
 					}
 					break;
 				default:

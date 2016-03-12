@@ -24,7 +24,7 @@ if(NCINE_BUILD_TESTS)
 				set_target_properties(symlink_shaders_data PROPERTIES FOLDER "CustomSymlinkTargets")
 			endif()
 
-			set(DATA_INSTALL_DESTINATION share/ncine)
+			set(DATA_INSTALL_DESTINATION share/ncine/data)
 		endif()
 
 		if(DEFAULT_DATA_DIR_DIST)
@@ -55,6 +55,7 @@ if(NCINE_BUILD_TESTS)
 
 		file(GLOB TEST_SOURCES "tests/*test*.h" "tests/*test*.cpp")
 		install(FILES ${TEST_SOURCES} DESTINATION ${TEST_SOURCES_INSTALL_DESTINATION})
+		install(FILES cmake/ncine_devdist_tests.cmake DESTINATION ${TEST_SOURCES_INSTALL_DESTINATION} RENAME CMakeLists.txt)
 	endif()
 
 	add_subdirectory(tests)

@@ -14,5 +14,5 @@ void android_main(struct android_app* state)
 	// Make sure glue isn't stripped.
 	app_dummy();
 
-	ncine::AndroidApplication::main(state, createApphandler);
+	ncine::AndroidApplication::start(state, createApphandler);
 }

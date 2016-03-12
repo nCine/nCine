@@ -221,7 +221,7 @@ bool SdlInputManager::isJoyButtonPressed(int joyId, int buttonId) const
 {
 	if (isJoyPresent(joyId))
 	{
-		return SDL_JoystickGetButton(sdlJoysticks_[joyId], buttonId);
+		return SDL_JoystickGetButton(sdlJoysticks_[joyId], buttonId) != 0;
 	}
 	else
 	{
@@ -244,7 +244,7 @@ short int SdlInputManager::joyAxisValue(int joyId, int axisId) const
 		{
 			int hatId = (axisId - numAxes) / 2;
 			unsigned char hatState = SDL_JoystickGetHat(sdlJoysticks_[joyId], hatId);
-			bool upDownAxis = ((axisId - numAxes) % 2); // odd axis is left-right, even axis is down-up
+			bool upDownAxis = ((axisId - numAxes) % 2) != 0; // odd axis is left-right, even axis is down-up
 
 			axisValue = hatEnumToAxisValue(hatState, upDownAxis);
 		}

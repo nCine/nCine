@@ -12,7 +12,8 @@ namespace ncine {
 class DLL_PUBLIC AndroidApplication : public Application
 {
   public:
-	static void main(struct android_app* state, IAppEventHandler* (*createAppEventHandler)());
+	// Entry point method to be called in the `android_main()` function
+	static void start(struct android_app* state, IAppEventHandler* (*createAppEventHandler)());
 
 	// Processes an Android application command
 	static void processCommand(struct android_app* state, int32_t cmd);
