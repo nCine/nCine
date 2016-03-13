@@ -71,12 +71,8 @@ unsigned long int AudioLoaderOgg::read(char *buffer, unsigned long int bufferSiz
 	do
 	{
 		// Read up to a buffer's worth of decoded sound data
-#ifdef __ANDROID__
-		bytes = ov_read(&oggFile_, buffer + bufferSeek, bufferSize - bufferSeek, &bitStream);
-#else
-		// 0 - little endian, 2 - 16bit, 1 - signed
+		// (0: little endian, 2: 16bit, 1: signed)
 		bytes = ov_read(&oggFile_, buffer + bufferSeek, bufferSize - bufferSeek, 0, 2, 1, &bitStream);
-#endif
 
 		if (bytes < 0)
 		{

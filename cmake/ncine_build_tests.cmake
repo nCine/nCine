@@ -1,9 +1,5 @@
 if(NCINE_BUILD_TESTS)
-	set(NCINE_DATA_DIR ${PARENT_SOURCE_DIR}/nCine-data)
-
-	if(NOT IS_DIRECTORY ${NCINE_DATA_DIR})
-		message(WARNING "nCine data directory not found at: ${NCINE_DATA_DIR}")
-	else()
+	if(IS_DIRECTORY ${NCINE_DATA_DIR})
 		if(WIN32)
 			if(NOT NCINE_EMBED_SHADERS)
 				add_custom_target(copy_shaders_data ALL
@@ -13,7 +9,6 @@ if(NCINE_BUILD_TESTS)
 				set_target_properties(copy_shaders_data PROPERTIES FOLDER "CustomCopyTargets")
 			endif()
 
-			set(DATA_INSTALL_DESTINATION data)
 			include(InstallRequiredSystemLibraries)
 		else()
 			if(NOT NCINE_EMBED_SHADERS)
@@ -23,8 +18,6 @@ if(NCINE_BUILD_TESTS)
 				)
 				set_target_properties(symlink_shaders_data PROPERTIES FOLDER "CustomSymlinkTargets")
 			endif()
-
-			set(DATA_INSTALL_DESTINATION share/ncine/data)
 		endif()
 
 		if(DEFAULT_DATA_DIR_DIST)

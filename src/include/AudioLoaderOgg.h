@@ -1,11 +1,8 @@
 #ifndef CLASS_NCINE_AUDIOLOADEROGG
 #define CLASS_NCINE_AUDIOLOADEROGG
 
-#ifdef __ANDROID__
-	#include "ivorbisfile.h"
-#else
-	#include <vorbis/vorbisfile.h>
-#endif
+#define OV_EXCLUDE_STATIC_CALLBACKS
+#include <vorbis/vorbisfile.h>
 
 #include "IAudioLoader.h"
 
