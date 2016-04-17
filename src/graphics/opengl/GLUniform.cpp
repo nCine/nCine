@@ -28,7 +28,7 @@ GLUniform::GLUniform(GLuint program, GLuint index)
 
 GLenum GLUniform::basicType() const
 {
-	switch(type_)
+	switch (type_)
 	{
 		case GL_FLOAT:
 		case GL_FLOAT_VEC2:
@@ -61,7 +61,7 @@ GLenum GLUniform::basicType() const
 
 unsigned int GLUniform::numComponents() const
 {
-	switch(type_)
+	switch (type_)
 	{
 		case GL_FLOAT:
 		case GL_INT:

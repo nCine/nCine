@@ -84,7 +84,7 @@ class DLL_PUBLIC Application
 	// Sets the focus flag
 	virtual void setFocus(bool hasFocus);
 
-  private:	
+  private:
 	/// Private copy constructor
 	Application(const Application&);
 	/// Private assignment operator

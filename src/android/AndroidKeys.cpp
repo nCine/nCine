@@ -5,7 +5,7 @@ namespace ncine {
 
 KeySym AndroidKeys::keySymValueToEnum(int keysym)
 {
-	switch(keysym)
+	switch (keysym)
 	{
 		case AKEYCODE_UNKNOWN:			return KEY_UNKNOWN;
 		case AKEYCODE_SOFT_LEFT:		return KEY_SOFT_LEFT;
@@ -125,7 +125,7 @@ KeySym AndroidKeys::keySymValueToEnum(int keysym)
 
 KeyMod AndroidKeys::keyModValueToEnum(int keymod)
 {
-	switch(keymod)
+	switch (keymod)
 	{
 		case AMETA_NONE:			return KEYMOD_NONE;
 		case AMETA_ALT_ON:			return KEYMOD_ALT;

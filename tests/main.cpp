@@ -9,7 +9,7 @@ extern "C"
 };
 #endif
 
-namespace ncine{
+namespace ncine {
 
 class IAppEventHandler;
 

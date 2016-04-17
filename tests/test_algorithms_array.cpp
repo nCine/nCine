@@ -44,7 +44,7 @@ int main(int argc, char **argv)
 	printf("First element not bigger than 13 in position: %d\n", nc::distance(array.begin(), nc::findIfNot(array.begin(), array.end(), nc::IsGreaterThan<int>(13))));
 
 	printf("Fill half array with zeroes\n");
-	nc::fillN(array.begin(), Capacity/2, 0);
+	nc::fillN(array.begin(), Capacity / 2, 0);
 	printArray(array);
 
 	printf("Fill the whole array with zeroes\n");

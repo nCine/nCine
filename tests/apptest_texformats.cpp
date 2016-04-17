@@ -161,7 +161,7 @@ void MyEventHandler::onInit()
 	dummy_ = new nc::SceneNode(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	textNode_ = new nc::TextNode(dummy_, font_);
 
-	for(unsigned int i = 0; i < filenames_.size(); i++)
+	for (unsigned int i = 0; i < filenames_.size(); i++)
 	{
 		textures_[i] = new nc::Texture((texPath + filenames_[i]).data());
 		sprites_[i] = new nc::Sprite(dummy_, textures_[i]);
@@ -175,12 +175,12 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onShutdown()
 {
-	for(unsigned int i = 0; i < sprites_.size(); i++)
+	for (unsigned int i = 0; i < sprites_.size(); i++)
 	{
 		delete sprites_[i];
 	}
 
-	for(unsigned int i = 0; i < textures_.size(); i++)
+	for (unsigned int i = 0; i < textures_.size(); i++)
 	{
 		delete textures_[i];
 	}

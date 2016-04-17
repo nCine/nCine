@@ -5,7 +5,7 @@
 #include "IInputEventHandler.h"
 #include "StaticArray.h"
 
-namespace ncine{
+namespace ncine {
 
 class SceneNode;
 class Texture;

@@ -4,7 +4,7 @@ namespace ncine {
 
 KeySym GlfwKeys::keySymValueToEnum(int keysym)
 {
-	switch(keysym)
+	switch (keysym)
 	{
 		case GLFW_KEY_UNKNOWN:		return KEY_UNKNOWN;
 		case GLFW_KEY_BACKSPACE:	return KEY_BACKSPACE;
@@ -130,7 +130,7 @@ KeySym GlfwKeys::keySymValueToEnum(int keysym)
 
 KeyMod GlfwKeys::keyModValueToEnum(int keymod)
 {
-	switch(keymod)
+	switch (keymod)
 	{
 		case 0x0000:				return KEYMOD_NONE;
 		case GLFW_MOD_SHIFT:		return KEYMOD_SHIFT;
@@ -144,7 +144,7 @@ KeyMod GlfwKeys::keyModValueToEnum(int keymod)
 
 int GlfwKeys::enumToKeySymValue(KeySym keysym)
 {
-	switch(keysym)
+	switch (keysym)
 	{
 		case KEY_UNKNOWN:			return GLFW_KEY_UNKNOWN;
 		case KEY_BACKSPACE:			return GLFW_KEY_BACKSPACE;
@@ -270,7 +270,7 @@ int GlfwKeys::enumToKeySymValue(KeySym keysym)
 
 int GlfwKeys::enumToKeyModValue(KeyMod keymod)
 {
-	switch(keymod)
+	switch (keymod)
 	{
 		case KEYMOD_NONE:			return 0x0000;
 		case KEYMOD_SHIFT:			return GLFW_MOD_SHIFT;

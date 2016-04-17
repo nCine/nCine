@@ -230,7 +230,7 @@ template <class T>
 typename List<T>::ConstIterator List<T>::insert(Iterator position, Iterator first, const Iterator last)
 {
 	ListNode<T> *node = position.node_;
-	while(first != last)
+	while (first != last)
 	{
 		node = insertAfterNode(node, *first);
 		++first;
@@ -296,7 +296,7 @@ void List<T>::removeIf(Predicate pred)
 /// Transfers all the elements from the source list
 template <class T>
 void List<T>::splice(Iterator position, List& source)
-{	
+{
 	ListNode<T> *node = position.node_;
 
 	// Cannot attach at the back because the end iterator is
@@ -394,7 +394,6 @@ void List<T>::splice(Iterator position, List& source, Iterator it)
 template <class T>
 void List<T>::splice(Iterator position, List& source, Iterator first, Iterator last)
 {
-
 	ListNode<T> *node = position.node_;
 	ListNode<T> *firstNode = first.node_;
 
@@ -413,7 +412,7 @@ void List<T>::splice(Iterator position, List& source, Iterator first, Iterator l
 
 	ListNode<T> *firstPrev = firstNode->previous_;
 	ListNode<T> *lastIncludedNode = first.node_;
-	while(first != last)
+	while (first != last)
 	{
 		lastIncludedNode = first.node_;
 
@@ -456,17 +455,6 @@ void List<T>::splice(Iterator position, List& source, Iterator first, Iterator l
 		head_ = firstNode;
 		tail_ = lastIncludedNode;
 	}
-
-
-
-	/*
-	while(first != last)
-	{
-		splice(position, source, first);
-		++position;
-		++first;
-	}
-	*/
 }
 
 ///////////////////////////////////////////////////////////
@@ -574,7 +562,7 @@ ListNode<T>* List<T>::removeRange(ListNode<T> *firstNode, ListNode<T> *lastNode)
 	ListNode<T> *previous = firstNode->previous_;
 	ListNode<T> *next = NULL;
 	ListNode<T> *current = firstNode;
-	while(current != lastNode)
+	while (current != lastNode)
 	{
 		next = current->next_;
 		delete current;

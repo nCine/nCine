@@ -44,8 +44,8 @@ int main(int argc, char **argv)
 
 	printf("Removing the first and twice the last\n");
 	array.removeAt(0);
-	array.removeAt(array.size()-1);
-	array.removeAt(array.size()-1);
+	array.removeAt(array.size() - 1);
+	array.removeAt(array.size() - 1);
 	printArray(array);
 
 	printf("Extending the size by two elements\n");

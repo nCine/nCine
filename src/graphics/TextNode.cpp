@@ -235,18 +235,18 @@ void TextNode::processGlyph(const FontGlyph* glyph)
 	float topCoord = float(texRect.y) / float(texSize.y);
 
 
-	interleavedVertices_.pushBack(leftPos);	interleavedVertices_.pushBack(bottomPos);
+	interleavedVertices_.pushBack(leftPos);		interleavedVertices_.pushBack(bottomPos);
 	interleavedVertices_.pushBack(leftCoord);	interleavedVertices_.pushBack(bottomCoord);
-	interleavedVertices_.pushBack(leftPos);	interleavedVertices_.pushBack(topPos);
+	interleavedVertices_.pushBack(leftPos);		interleavedVertices_.pushBack(topPos);
 	interleavedVertices_.pushBack(leftCoord);	interleavedVertices_.pushBack(topCoord);
 	interleavedVertices_.pushBack(rightPos);	interleavedVertices_.pushBack(bottomPos);
-	interleavedVertices_.pushBack(rightCoord);interleavedVertices_.pushBack(bottomCoord);
+	interleavedVertices_.pushBack(rightCoord);	interleavedVertices_.pushBack(bottomCoord);
 
 	interleavedVertices_.pushBack(rightPos);	interleavedVertices_.pushBack(bottomPos);
-	interleavedVertices_.pushBack(rightCoord);interleavedVertices_.pushBack(bottomCoord);
+	interleavedVertices_.pushBack(rightCoord);	interleavedVertices_.pushBack(bottomCoord);
 	interleavedVertices_.pushBack(rightPos);	interleavedVertices_.pushBack(topPos);
-	interleavedVertices_.pushBack(rightCoord);interleavedVertices_.pushBack(topCoord);
-	interleavedVertices_.pushBack(leftPos);	interleavedVertices_.pushBack(topPos);
+	interleavedVertices_.pushBack(rightCoord);	interleavedVertices_.pushBack(topCoord);
+	interleavedVertices_.pushBack(leftPos);		interleavedVertices_.pushBack(topPos);
 	interleavedVertices_.pushBack(leftCoord);	interleavedVertices_.pushBack(topCoord);
 
 	xAdvance_ += glyph->xAdvance();

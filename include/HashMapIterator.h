@@ -223,7 +223,7 @@ void HashMapIterator<K, T, HashFunc, IsConst>::next()
 		do
 		{
 			bucket = &(hashMap_->buckets_[++bucketIndex_]);
-		} while(bucketIndex_ < hashMap_->buckets_.size()-1 && bucket->size() == 0);
+		} while (bucketIndex_ < hashMap_->buckets_.size()-1 && bucket->size() == 0);
 
 		if (bucket->size() > 0)
 		{
@@ -243,7 +243,7 @@ void HashMapIterator<K, T, HashFunc, IsConst>::previous()
 		do
 		{
 			bucket = &(hashMap_->buckets_[--bucketIndex_]);
-		} while(bucketIndex_ > 0 && bucket->size() == 0);
+		} while (bucketIndex_ > 0 && bucket->size() == 0);
 
 		if (bucket->size() > 0)
 		{

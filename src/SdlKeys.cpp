@@ -4,7 +4,7 @@ namespace ncine {
 
 KeySym SdlKeys::keySymValueToEnum(int keysym)
 {
-	switch(keysym)
+	switch (keysym)
 	{
 		case SDLK_UNKNOWN:			return KEY_UNKNOWN;
 		case SDLK_BACKSPACE:		return KEY_BACKSPACE;
@@ -155,7 +155,7 @@ KeySym SdlKeys::keySymValueToEnum(int keysym)
 
 KeyMod SdlKeys::keyModValueToEnum(int keymod)
 {
-	switch(keymod)
+	switch (keymod)
 	{
 		case KMOD_NONE:				return KEYMOD_NONE;
 		case KMOD_LSHIFT:			return KEYMOD_LSHIFT;
@@ -176,7 +176,7 @@ KeyMod SdlKeys::keyModValueToEnum(int keymod)
 
 int SdlKeys::enumToKeySymValue(KeySym keysym)
 {
-	switch(keysym)
+	switch (keysym)
 	{
 		case KEY_UNKNOWN:			return SDLK_UNKNOWN;
 		case KEY_BACKSPACE:			return SDLK_BACKSPACE;
@@ -327,7 +327,7 @@ int SdlKeys::enumToKeySymValue(KeySym keysym)
 
 int SdlKeys::enumToKeyModValue(KeyMod keymod)
 {
-	switch(keymod)
+	switch (keymod)
 	{
 		case KEYMOD_NONE:			return KMOD_NONE;
 		case KEYMOD_LSHIFT:			return KMOD_LSHIFT;

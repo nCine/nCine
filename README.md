@@ -44,7 +44,7 @@ nCine is a multi-platform 2d game engine
 `cppcheck --quiet --enable=all --inconclusive --std=c++03 -I include -I src/include src 2> cppcheck.log`
 
 ### Artistic Style
-`./astyle --style=allman --indent=tab --pad-oper --pad-header --indent-modifiers --indent-switches --add-brackets --keep-one-line-blocks --keep-one-line-statements --suffix=none --recursive "src/*" "include/*" "tests/*"`
+`./astyle --style=allman --indent=force-tab --attach-namespaces --indent-modifiers --indent-switches --indent-preproc-block --indent-preproc-cond --pad-oper --pad-header --add-brackets --keep-one-line-blocks --keep-one-line-statements --suffix=none --recursive "src/*" "include/*" "tests/*"`
 
 ## Developing
 

@@ -196,11 +196,11 @@ inline void advance(Iterator& it, int n, BidirectionalIteratorTag)
 {
 	if (n < 0)
 	{
-		while (n++) --it;
+		while (n++) { --it; }
 	}
 	else
 	{
-		while (n--) ++it;
+		while (n--) { ++it; }
 	}
 }
 
@@ -210,7 +210,7 @@ inline void advance(Iterator& it, int n, ForwardIteratorTag)
 {
 	if (n > 0)
 	{
-		while (n--) ++it;
+		while (n--) { ++it; }
 	}
 }
 
@@ -293,7 +293,7 @@ inline bool allOf(Iterator first, const Iterator last, UnaryPredicate pred)
 {
 	for (; first != last; ++first)
 	{
-		if(!pred(*first)) return false;
+		if (!pred(*first)) { return false; }
 	}
 
 	return true;
@@ -305,7 +305,7 @@ inline bool noneOf(Iterator first, const Iterator last, UnaryPredicate pred)
 {
 	for (; first != last; ++first)
 	{
-		if(pred(*first)) return false;
+		if (pred(*first)) { return false; }
 	}
 
 	return true;
@@ -317,7 +317,7 @@ inline bool anyOf(Iterator first, const Iterator last, UnaryPredicate pred)
 {
 	for (; first != last; ++first)
 	{
-		if(pred(*first)) return true;
+		if (pred(*first)) { return true; }
 	}
 
 	return false;
@@ -341,7 +341,7 @@ Iterator find(Iterator first, const Iterator last, const T& value)
 {
 	for (; first != last; ++first)
 	{
-		if (*first == value) return first;
+		if (*first == value) { return first; }
 	}
 
 	return last;
@@ -353,7 +353,7 @@ Iterator findIf(Iterator first, const Iterator last, UnaryPredicate pred)
 {
 	for (; first != last; ++first)
 	{
-		if (pred(*first)) return first;
+		if (pred(*first)) { return first; }
 	}
 
 	return last;
@@ -365,7 +365,7 @@ Iterator findIfNot(Iterator first, const Iterator last, UnaryPredicate pred)
 {
 	for (; first != last; ++first)
 	{
-		if (!pred(*first)) return first;
+		if (!pred(*first)) { return first; }
 	}
 
 	return last;
@@ -379,7 +379,7 @@ inline int count(Iterator first, const Iterator last, const T& value)
 
 	for (; first != last; ++first)
 	{
-		if (*first == value) counter++;
+		if (*first == value) { counter++; }
 	}
 
 	return counter;
@@ -393,7 +393,7 @@ inline int countIf(Iterator first, const Iterator last, UnaryPredicate pred)
 
 	for (; first != last; ++first)
 	{
-		if (pred(*first)) counter++;
+		if (pred(*first)) { counter++; }
 	}
 
 	return counter;
@@ -418,7 +418,7 @@ inline bool equal(Iterator1 first1, const Iterator1 last1, Iterator2 first2)
 template <class Iterator>
 inline Iterator minElement(Iterator first, const Iterator last)
 {
-	if (first == last) return last;
+	if (first == last) { return last; }
 	Iterator smallest = first;
 	++first;
 
@@ -437,7 +437,7 @@ inline Iterator minElement(Iterator first, const Iterator last)
 template <class Iterator>
 inline Iterator maxElement(Iterator first, const Iterator last)
 {
-	if (first == last) return last;
+	if (first == last) { return last; }
 	Iterator largest = first;
 	++first;
 
@@ -469,7 +469,7 @@ inline const T& clampElements(Iterator first, const Iterator last, const T& minV
 template<class Iterator1, class Iterator2>
 void iterSwap(Iterator1 a, Iterator2 b)
 {
-   swap(*a, *b);
+	swap(*a, *b);
 }
 
 /// Copies the elements from the first range into the one beginning at result
@@ -604,7 +604,7 @@ inline void fill(Iterator first, const Iterator last, const T& value)
 template <class Iterator, class T>
 inline void fillN(Iterator first, unsigned int n, const T& value)
 {
-	for(unsigned int i = 0; i < n; i++, ++first)
+	for (unsigned int i = 0; i < n; i++, ++first)
 	{
 		*first = value;
 	}
@@ -681,7 +681,7 @@ void reverse (Iterator first, Iterator last)
 template <class IteratorIn, class IteratorOut>
 IteratorOut reverseCopy (IteratorIn first, IteratorIn last, IteratorOut result)
 {
-	while (first!=last)
+	while (first != last)
 	{
 		--last;
 		*result = *last;
@@ -694,7 +694,7 @@ IteratorOut reverseCopy (IteratorIn first, IteratorIn last, IteratorOut result)
 template <class Iterator>
 bool isSorted(Iterator first, const Iterator last)
 {
-	if (first == last) return true;
+	if (first == last) { return true; }
 
 	Iterator next = first;
 	while (++next != last)
@@ -712,7 +712,7 @@ bool isSorted(Iterator first, const Iterator last)
 template <class Iterator, class Compare>
 bool isSorted(Iterator first, const Iterator last, Compare comp)
 {
-	if (first == last) return true;
+	if (first == last) { return true; }
 
 	Iterator next = first;
 	while (++next != last)
@@ -730,7 +730,7 @@ bool isSorted(Iterator first, const Iterator last, Compare comp)
 template <class Iterator>
 bool isSortedUntil(Iterator first, const Iterator last)
 {
-	if (first == last) return first;
+	if (first == last) { return first; }
 
 	Iterator next = first;
 	while (++next != last)
@@ -748,7 +748,7 @@ bool isSortedUntil(Iterator first, const Iterator last)
 template <class Iterator, class Compare>
 bool isSortedUntil(Iterator first, const Iterator last, Compare comp)
 {
-	if (first == last) return first;
+	if (first == last) { return first; }
 
 	Iterator next = first;
 	while (++next != last)
@@ -771,12 +771,13 @@ Iterator partition(Iterator first, Iterator last, UnaryPredicate pred)
 		while (pred(*first))
 		{
 			++first;
-			if (first == last) return first;
+			if (first == last) { return first; }
 		}
 
-		do {
+		do
+		{
 			--last;
-			if (first == last) return first;
+			if (first == last) { return first; }
 		} while (!pred(*last));
 		swap(*first, *last);
 		++first;

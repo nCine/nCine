@@ -21,8 +21,10 @@ class DLL_PUBLIC Color
 	{ set(red, green, blue); }
 	/// Four channels constructor (unsigned int)
 	Color(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha)
-	{ set(static_cast<unsigned char>(red), static_cast<unsigned char>(green),
-		  static_cast<unsigned char>(blue), static_cast<unsigned char>(alpha)); }
+	{
+		set(static_cast<unsigned char>(red), static_cast<unsigned char>(green),
+			static_cast<unsigned char>(blue), static_cast<unsigned char>(alpha));
+	}
 	/// Three channels constructor (unsigned int)
 	Color(unsigned int red, unsigned int green, unsigned int blue)
 	{ set(static_cast<unsigned char>(red), static_cast<unsigned char>(green), static_cast<unsigned char>(blue)); }

@@ -110,7 +110,7 @@ class Array
 	/// Inserts a new element as the last one in constant time
 	inline void pushBack(T element) { operator[](size_) = element; }
 	/// Removes the last element in constant time
-	inline void popBack() { if (size_ > 0) size_--; }
+	inline void popBack() { if (size_ > 0) { size_--; } }
 	// Inserts new elements at the specified position from a source range, last not included (shifting elements around)
 	void insertRange(unsigned int index, const T* firstPtr, const T* lastPtr);
 	// Inserts a new element at a specified position (shifting elements around)
@@ -122,7 +122,7 @@ class Array
 	// Removes the specified range of elements, last not included (shifting elements around)
 	void removeRange(unsigned int firstIndex, unsigned int lastIndex);
 	/// Removes an element at a specified position (shifting elements around)
-	inline void removeAt(unsigned int index) { removeRange(index, index+1); }
+	inline void removeAt(unsigned int index) { removeRange(index, index + 1); }
 	// Removes the element pointed by the iterator (shifting elements around)
 	Iterator erase(Iterator position);
 	// Removes the elements in the range, last not included (shifting elements around)

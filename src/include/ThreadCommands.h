@@ -26,7 +26,7 @@ class DummyCommand : public IThreadCommand
 /// A thread command to update a SceneNode object
 class UpdateComand : public IThreadCommand
 {
- public:
+  public:
 	UpdateComand(SceneNode *node, float interval)
 		: node_(node), interval_(interval) { }
 
@@ -38,7 +38,7 @@ class UpdateComand : public IThreadCommand
 		}
 	}
 
- private:
+  private:
 	SceneNode *node_;
 	float interval_;
 };

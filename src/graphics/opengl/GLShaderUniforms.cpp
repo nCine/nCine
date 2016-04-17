@@ -90,9 +90,10 @@ void GLShaderUniforms::importUniforms()
 		const GLUniform& uniform = shaderProgram_->uniforms_[i];
 		GLUniformCache uniformCache(&uniform);
 
-		switch(uniform.basicType())
+		switch (uniform.basicType())
 		{
 			case GL_FLOAT:
+			{
 				if (nextFreeFloat < UniformFloatBufferSize)
 				{
 					uniformCache.setDataPointer(&uniformsFloatBuffer_[nextFreeFloat]);
@@ -103,7 +104,9 @@ void GLShaderUniforms::importUniforms()
 					LOGW_X("Shader %u - No more floating point buffer space for uniform \"%s\"", shaderProgram_->glHandle(), uniform.name());
 				}
 				break;
+			}
 			case GL_INT:
+			{
 				if (nextFreeInt < UniformIntBufferSize)
 				{
 					uniformCache.setDataPointer(&uniformsIntBuffer_[nextFreeInt]);
@@ -114,6 +117,7 @@ void GLShaderUniforms::importUniforms()
 					LOGW_X("Shader %u - No more integer buffer space for uniform \"%s\"", shaderProgram_->glHandle(), uniform.name());
 				}
 				break;
+			}
 		}
 
 		uniformCaches_[uniform.name()] = uniformCache;

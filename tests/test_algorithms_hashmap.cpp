@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 	printf("First element not bigger than 13 in position: %d\n", nc::distance(hashmap.begin(), nc::findIfNot(hashmap.begin(), hashmap.end(), nc::IsGreaterThan<int>(13))));
 
 	printf("Fill half hashmap with zeroes:\n");
-	nc::fillN(hashmap.begin(), Size/2, 0);
+	nc::fillN(hashmap.begin(), Size / 2, 0);
 	printHashmap(hashmap);
 
 	printf("Fill the whole hashmap with zeroes:\n");

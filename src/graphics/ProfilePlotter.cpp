@@ -23,7 +23,7 @@ ProfilePlotter::ProfilePlotter(SceneNode* parent, Rectf rect)
 	refValueCmd_.setType(RenderCommand::PLOTTER_TYPE);
 	refValueCmd_.material().setShaderProgram(Material::COLOR_PROGRAM);
 	refValueCmd_.geometry().createCustomVbo(4, GL_DYNAMIC_DRAW);
-	refValueCmd_.geometry().setDrawParameters(GL_LINES, 0, 2);	
+	refValueCmd_.geometry().setDrawParameters(GL_LINES, 0, 2);
 }
 
 ProfilePlotter::~ProfilePlotter()

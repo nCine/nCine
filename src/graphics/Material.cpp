@@ -32,7 +32,7 @@ Material::Material(GLShaderProgram* program, GLTexture* texture)
 
 void Material::setShaderProgram(ShaderProgramPresets preset)
 {
-	switch(preset)
+	switch (preset)
 	{
 		case SPRITE_PROGRAM:
 			setShaderProgram(const_cast<GLShaderProgram *>(RenderResources::spriteShaderProgram()));

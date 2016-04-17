@@ -27,7 +27,7 @@ GLAttribute::GLAttribute(GLuint program, GLuint index)
 
 GLenum GLAttribute::basicType() const
 {
-	switch(type_)
+	switch (type_)
 	{
 		case GL_FLOAT:
 		case GL_FLOAT_VEC2:
@@ -44,7 +44,7 @@ GLenum GLAttribute::basicType() const
 
 int GLAttribute::numComponents() const
 {
-	switch(type_)
+	switch (type_)
 	{
 		case GL_FLOAT:
 			return 1;

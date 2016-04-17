@@ -35,11 +35,11 @@ GfxCapabilities::GfxCapabilities()
 
 int GfxCapabilities::glVersion(IGfxCapabilities::GLVersion version) const
 {
-	switch(version)
+	switch (version)
 	{
-		case IGfxCapabilities::MAJOR: return glMajorVersion_;
-		case IGfxCapabilities::MINOR: return glMinorVersion_;
-		case IGfxCapabilities::RELEASE: return glReleaseVersion_;
+		case IGfxCapabilities::MAJOR:	return glMajorVersion_;
+		case IGfxCapabilities::MINOR:	return glMinorVersion_;
+		case IGfxCapabilities::RELEASE:	return glReleaseVersion_;
 
 		default : return 0;
 	}

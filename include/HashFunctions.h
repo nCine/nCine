@@ -32,7 +32,7 @@ class SaxHashFunc
 	hash_t operator()(const K& key) const
 	{
 		hash_t hash = static_cast<hash_t>(0);
-		for(unsigned int i = 0; i < key.length(); i++)
+		for (unsigned int i = 0; i < key.length(); i++)
 		{
 			hash ^= (hash << 5) + (hash >> 2) + static_cast<hash_t>(key[i]);
 		}
@@ -51,7 +51,7 @@ class JenkinsHashFunc
 	hash_t operator()(const K& key) const
 	{
 		hash_t hash = static_cast<hash_t>(0);
-		for(unsigned int i = 0; i < key.length(); i++)
+		for (unsigned int i = 0; i < key.length(); i++)
 		{
 			hash += static_cast<hash_t>(key[i]);
 			hash += (hash << 10);

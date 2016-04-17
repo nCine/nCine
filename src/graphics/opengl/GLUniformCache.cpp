@@ -124,7 +124,7 @@ void GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2, GLint v3)
 void GLUniformCache::commitValue()
 {
 	GLint location = uniform_->location();
-	switch(uniform_->type())
+	switch (uniform_->type())
 	{
 		case GL_FLOAT:
 			glUniform1fv(location, 1, reinterpret_cast<const GLfloat*>(dataPointer_));

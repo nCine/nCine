@@ -44,7 +44,7 @@ class GLBufferObjectMappingFunc
 	static const unsigned int Size = 2;
 	inline unsigned int operator()(key_t key) const
 	{
-		switch(key)
+		switch (key)
 		{
 			case GL_ARRAY_BUFFER:
 				return 0;
@@ -66,7 +66,7 @@ class GLFramebufferMappingFunc
 	static const unsigned int Size = 1;
 	inline unsigned int operator()(key_t key) const
 	{
-		switch(key)
+		switch (key)
 		{
 			case GL_FRAMEBUFFER:
 				return 0;
@@ -85,7 +85,7 @@ class GLTextureMappingFunc
 	static const unsigned int Size = 3;
 	inline unsigned int operator()(key_t key) const
 	{
-		switch(key)
+		switch (key)
 		{
 #ifndef __ANDROID__ // not available in OpenGL ES
 			case GL_TEXTURE_1D:

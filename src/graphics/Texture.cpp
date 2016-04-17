@@ -67,15 +67,15 @@ Texture::~Texture()
 void Texture::setFiltering(TextureFiltering filter)
 {
 	GLenum glFilter = GL_NEAREST;
-	switch(filter)
+	switch (filter)
 	{
-		case NEAREST: glFilter = GL_NEAREST; break;
-		case LINEAR: glFilter = GL_LINEAR; break;
-		case NEAREST_MIPMAP_NEAREST: glFilter = GL_NEAREST_MIPMAP_NEAREST; break;
-		case LINEAR_MIPMAP_NEAREST: glFilter = GL_LINEAR_MIPMAP_NEAREST; break;
-		case NEAREST_MIPMAP_LINEAR: glFilter = GL_NEAREST_MIPMAP_LINEAR; break;
-		case LINEAR_MIPMAP_LINEAR: glFilter = GL_LINEAR_MIPMAP_LINEAR; break;
-		default: glFilter = GL_NEAREST; break;
+		case NEAREST:					glFilter = GL_NEAREST; break;
+		case LINEAR:					glFilter = GL_LINEAR; break;
+		case NEAREST_MIPMAP_NEAREST:	glFilter = GL_NEAREST_MIPMAP_NEAREST; break;
+		case LINEAR_MIPMAP_NEAREST:		glFilter = GL_LINEAR_MIPMAP_NEAREST; break;
+		case NEAREST_MIPMAP_LINEAR:		glFilter = GL_NEAREST_MIPMAP_LINEAR; break;
+		case LINEAR_MIPMAP_LINEAR:		glFilter = GL_LINEAR_MIPMAP_LINEAR; break;
+		default:						glFilter = GL_NEAREST; break;
 	}
 
 	glTexture_->bind();
@@ -87,12 +87,12 @@ void Texture::setFiltering(TextureFiltering filter)
 void Texture::setWrap(TextureWrap wrap)
 {
 	GLenum glWrap = GL_CLAMP_TO_EDGE;
-	switch(wrap)
+	switch (wrap)
 	{
-		case CLAMP_TO_EDGE: glWrap = GL_CLAMP_TO_EDGE; break;
-		case MIRRORED_REPEAT: glWrap = GL_MIRRORED_REPEAT; break;
-		case REPEAT: glWrap = GL_REPEAT; break;
-		default: glWrap = GL_CLAMP_TO_EDGE; break;
+		case CLAMP_TO_EDGE:				glWrap = GL_CLAMP_TO_EDGE; break;
+		case MIRRORED_REPEAT:			glWrap = GL_MIRRORED_REPEAT; break;
+		case REPEAT:					glWrap = GL_REPEAT; break;
+		default:						glWrap = GL_CLAMP_TO_EDGE; break;
 	}
 
 	glTexture_->bind();

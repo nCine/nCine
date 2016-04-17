@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 	printf("Appending a formatted string to the first one: \"%s\" (capacity %u, length %u)\n", str.data(), str.capacity(), str.length());
 
 	printf("Printing the first character of the third string: %c\n", str3[0]);
-	printf("Printing the last character of the third string: %c\n", str3[str3.length()-1]);
+	printf("Printing the last character of the third string: %c\n", str3[str3.length() - 1]);
 	printf("Accessing a character beyond the length of the third string: %c\n", str3[str3.length()]);
 
 	printf("Printing the first position of the character 'S' in the fourth string: %d\n", str4.findFirstChar('S'));

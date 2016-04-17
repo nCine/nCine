@@ -568,68 +568,68 @@ void TextureFormat::checkFormatSupport() const
 {
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
 
-	switch(internalFormat_)
+	switch (internalFormat_)
 	{
-#ifndef __ANDROID__
-	case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
-	case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
-	case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-		if (gfxCaps.hasExtension(IGfxCapabilities::EXT_TEXTURE_COMPRESSION_S3TC) == false)
-		{
-			LOGF("GL_EXT_texture_compression_s3tc not available");
-			exit(EXIT_FAILURE);
-		}
-		break;
-#else
-	case GL_ETC1_RGB8_OES:
-		if (gfxCaps.hasExtension(IGfxCapabilities::OES_COMPRESSED_ETC1_RGB8_TEXTURE) == false)
-		{
-			LOGF("GL_OES_compressed_etc1_rgb8_texture not available");
-			exit(EXIT_FAILURE);
-		}
-		break;
-	case GL_ATC_RGB_AMD:
-	case GL_ATC_RGBA_EXPLICIT_ALPHA_AMD:
-	case GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD:
-		if (gfxCaps.hasExtension(IGfxCapabilities::AMD_COMPRESSED_ATC_TEXTURE) == false)
-		{
-			LOGF("GL_AMD_compressed_ATC_texture not available");
-			exit(EXIT_FAILURE);
-		}
-		break;
-	case GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG:
-	case GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG:
-	case GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG:
-	case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
-		if (gfxCaps.hasExtension(IGfxCapabilities::IMG_TEXTURE_COMPRESSION_PVRTC) == false)
-		{
-			LOGF("GL_IMG_texture_compression_pvrtc not available");
-			exit(EXIT_FAILURE);
-		}
-		break;
-	#if __ANDROID_API__ >= 21
-	case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
-	case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
-	case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:
-	case GL_COMPRESSED_RGBA_ASTC_6x5_KHR:
-	case GL_COMPRESSED_RGBA_ASTC_6x6_KHR:
-	case GL_COMPRESSED_RGBA_ASTC_8x5_KHR:
-	case GL_COMPRESSED_RGBA_ASTC_8x6_KHR:
-	case GL_COMPRESSED_RGBA_ASTC_8x8_KHR:
-	case GL_COMPRESSED_RGBA_ASTC_10x5_KHR:
-	case GL_COMPRESSED_RGBA_ASTC_10x6_KHR:
-	case GL_COMPRESSED_RGBA_ASTC_10x8_KHR:
-	case GL_COMPRESSED_RGBA_ASTC_10x10_KHR:
-	case GL_COMPRESSED_RGBA_ASTC_12x10_KHR:
-	case GL_COMPRESSED_RGBA_ASTC_12x12_KHR:
-		if (gfxCaps.hasExtension(IGfxCapabilities::KHR_TEXTURE_COMPRESSION_ASTC_LDR) == false)
-		{
-			LOGF("GL_KHR_texture_compression_astc_ldr not available");
-			exit(EXIT_FAILURE);
-		}
-		break;
+	#ifndef __ANDROID__
+		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+		case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+			if (gfxCaps.hasExtension(IGfxCapabilities::EXT_TEXTURE_COMPRESSION_S3TC) == false)
+			{
+				LOGF("GL_EXT_texture_compression_s3tc not available");
+				exit(EXIT_FAILURE);
+			}
+			break;
+	#else
+		case GL_ETC1_RGB8_OES:
+			if (gfxCaps.hasExtension(IGfxCapabilities::OES_COMPRESSED_ETC1_RGB8_TEXTURE) == false)
+			{
+				LOGF("GL_OES_compressed_etc1_rgb8_texture not available");
+				exit(EXIT_FAILURE);
+			}
+			break;
+		case GL_ATC_RGB_AMD:
+		case GL_ATC_RGBA_EXPLICIT_ALPHA_AMD:
+		case GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD:
+			if (gfxCaps.hasExtension(IGfxCapabilities::AMD_COMPRESSED_ATC_TEXTURE) == false)
+			{
+				LOGF("GL_AMD_compressed_ATC_texture not available");
+				exit(EXIT_FAILURE);
+			}
+			break;
+		case GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG:
+		case GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG:
+		case GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG:
+		case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
+			if (gfxCaps.hasExtension(IGfxCapabilities::IMG_TEXTURE_COMPRESSION_PVRTC) == false)
+			{
+				LOGF("GL_IMG_texture_compression_pvrtc not available");
+				exit(EXIT_FAILURE);
+			}
+			break;
+		#if __ANDROID_API__ >= 21
+		case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_6x5_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_6x6_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_8x5_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_8x6_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_8x8_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_10x5_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_10x6_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_10x8_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_10x10_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_12x10_KHR:
+		case GL_COMPRESSED_RGBA_ASTC_12x12_KHR:
+			if (gfxCaps.hasExtension(IGfxCapabilities::KHR_TEXTURE_COMPRESSION_ASTC_LDR) == false)
+			{
+				LOGF("GL_KHR_texture_compression_astc_ldr not available");
+				exit(EXIT_FAILURE);
+			}
+			break;
+		#endif
 	#endif
-#endif
 	}
 }
 

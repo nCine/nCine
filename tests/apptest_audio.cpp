@@ -58,7 +58,7 @@ void MyEventHandler::onFrameStart()
 	textString_->clear();
 
 	textString_->append("Music: ");
-	switch(musicPlayer_->state())
+	switch (musicPlayer_->state())
 	{
 		case nc::IAudioPlayer::STATE_PLAYING:
 			textString_->append("playing");
@@ -76,7 +76,7 @@ void MyEventHandler::onFrameStart()
 	textString_->append(" (press M)\n");
 
 	textString_->append("Sound: ");
-	switch(soundPlayer_->state())
+	switch (soundPlayer_->state())
 	{
 		case nc::IAudioPlayer::STATE_PLAYING:
 			textString_->append("playing");

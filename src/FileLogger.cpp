@@ -111,28 +111,14 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 	{
 		switch (level)
 		{
-			case LOG_FATAL:
-				priority = ANDROID_LOG_FATAL;
-				break;
-			case LOG_ERROR:
-				priority = ANDROID_LOG_ERROR;
-				break;
-			case LOG_WARN:
-				priority = ANDROID_LOG_WARN;
-				break;
-			case LOG_INFO:
-				priority = ANDROID_LOG_INFO;
-				break;
-			case LOG_DEBUG:
-				priority = ANDROID_LOG_DEBUG;
-				break;
-			case LOG_VERBOSE:
-				priority = ANDROID_LOG_VERBOSE;
-				break;
-			case LOG_UNKNOWN:
-			default:
-				priority = ANDROID_LOG_UNKNOWN;
-				break;
+			case LOG_FATAL:		priority = ANDROID_LOG_FATAL;	break;
+			case LOG_ERROR:		priority = ANDROID_LOG_ERROR;	break;
+			case LOG_WARN:		priority = ANDROID_LOG_WARN; break;
+			case LOG_INFO:		priority = ANDROID_LOG_INFO; break;
+			case LOG_DEBUG:		priority = ANDROID_LOG_DEBUG;	break;
+			case LOG_VERBOSE:	priority = ANDROID_LOG_VERBOSE; break;
+			case LOG_UNKNOWN:	priority = ANDROID_LOG_UNKNOWN; break;
+			default:			priority = ANDROID_LOG_UNKNOWN; break;
 		}
 
 		va_list args;
