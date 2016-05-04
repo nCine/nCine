@@ -20,6 +20,7 @@ if(NCINE_BUILD_ANDROID)
 	if(NOT EXISTS ${NDK_DIR}/${NDK_BUILD})
 		message(FATAL_ERROR "${NDK_BUILD} command cannot be found in: ${NDK_DIR}")
 	endif()
+	message(STATUS "Android NDK directory: ${NDK_DIR}")
 
 	set(ARCHITECTURES armeabi-v7a)
 	set(NCINE_APP_MODULES ncine)

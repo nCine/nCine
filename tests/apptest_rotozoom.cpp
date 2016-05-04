@@ -31,10 +31,10 @@ void MyEventHandler::onInit()
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 	megaTexture_ = new nc::Texture((nc::IFile::dataPath() + "textures/" + TextureFile).data());
-	texRects[0] = nc::Recti(0, 0, 128, 128);
-	texRects[1] = nc::Recti(128, 0, 128, 128);
-	texRects[2] = nc::Recti(0, 128, 128, 128);
-	texRects[3] = nc::Recti(128, 128, 128, 128);
+	texRects[0] = nc::Recti(1, 1, 126, 126);
+	texRects[1] = nc::Recti(129, 0, 126, 126);
+	texRects[2] = nc::Recti(0, 129, 126, 126);
+	texRects[3] = nc::Recti(129, 129, 126, 126);
 
 	dummy_ = new nc::SceneNode(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	dummy_->setScale(0.75f);

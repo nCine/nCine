@@ -40,6 +40,9 @@ foreach(APPTEST ${APPTESTS})
 	target_include_directories(${APPTEST} PUBLIC ${NCINE_INCLUDE_DIR})
 	target_link_libraries(${APPTEST} ${NCINE_LIBRARY})
 	set_target_properties(${APPTEST} PROPERTIES FOLDER "AppTests")
+	if(MSVC)
+		target_compile_options(${APPTEST} PRIVATE "/wd4251")
+	endif()
 endforeach()
 
 list(APPEND TESTS test_array test_staticarray

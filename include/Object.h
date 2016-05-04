@@ -29,7 +29,7 @@ class DLL_PUBLIC Object
 	static const unsigned int MaxNameLength = 128;
 
 	// Constructs an object with a specified type and adds it to the index
-	Object(ObjectType type);
+	explicit Object(ObjectType type);
 	// Constructs an object with a specified type and name and adds it to the index
 	Object(ObjectType type, const char *name);
 	// Remove an object from the index and then destroys it
