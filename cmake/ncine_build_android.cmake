@@ -8,9 +8,13 @@ if(NCINE_BUILD_ANDROID)
 
 	if(WIN32)
 		set(NDK_BUILD ndk-build.cmd)
-		set(ANDROID_INSTALL_DESTINATION android)
 	else()
 		set(NDK_BUILD ndk-build)
+	endif()
+
+	if(MSVC)
+		set(ANDROID_INSTALL_DESTINATION android)
+	else()
 		set(ANDROID_INSTALL_DESTINATION share/ncine/android)
 	endif()
 

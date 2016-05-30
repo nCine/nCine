@@ -187,7 +187,7 @@ void Application::step()
 		renderQueue_->draw();
 	}
 
-	if (textLines_ && Timer::now() - textUpdateTime_ > appCfg_.profileTextUpdateTime_)
+	if (renderQueue_ && textLines_ && Timer::now() - textUpdateTime_ > appCfg_.profileTextUpdateTime_)
 	{
 		textUpdateTime_ = Timer::now();
 		textString_.format(static_cast<const char *>("FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC"),

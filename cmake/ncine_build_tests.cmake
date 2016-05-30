@@ -9,7 +9,9 @@ if(NCINE_BUILD_TESTS)
 				set_target_properties(copy_shaders_data PROPERTIES FOLDER "CustomCopyTargets")
 			endif()
 
-			include(InstallRequiredSystemLibraries)
+			if(MSVC)
+				include(InstallRequiredSystemLibraries)
+			endif()
 		else()
 			if(NOT NCINE_EMBED_SHADERS)
 				add_custom_target(symlink_shaders_data ALL
@@ -21,7 +23,7 @@ if(NCINE_BUILD_TESTS)
 		endif()
 
 		if(DEFAULT_DATA_DIR_DIST)
-			if(WIN32)
+			if(MSVC)
 				# Relative path from tests to data on Windows, where the user can choose the installation directory
 				file(RELATIVE_PATH NCINE_DEFAULT_DATA_DIR ${CMAKE_INSTALL_PREFIX}/bin ${CMAKE_INSTALL_PREFIX}/${DATA_INSTALL_DESTINATION})
 				set(NCINE_DEFAULT_DATA_DIR "${NCINE_DEFAULT_DATA_DIR}/")
@@ -40,7 +42,7 @@ if(NCINE_BUILD_TESTS)
 	endif()
 
 	if(NCINE_INSTALL_DEV_SUPPORT)
-		if(WIN32)
+		if(MSVC)
 			set(TEST_SOURCES_INSTALL_DESTINATION src)
 		else()
 			set(TEST_SOURCES_INSTALL_DESTINATION share/ncine)

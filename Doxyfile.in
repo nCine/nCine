@@ -4,7 +4,7 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "@CMAKE_PROJECT_NAME@"
+PROJECT_NAME           = @CMAKE_PROJECT_NAME@
 PROJECT_NUMBER         = @NCINE_VERSION@
 PROJECT_BRIEF          = "A multi-platform 2d game engine"
 PROJECT_LOGO           =

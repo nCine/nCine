@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.12)
 project(nCine-tests)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-if (WIN32)
+if (MSVC)
 	get_filename_component(NCINE_REGISTRY_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\nCine]" ABSOLUTE)
 	if(IS_DIRECTORY ${NCINE_REGISTRY_PATH})
 		set(NCINE_INSTALL_DIR ${NCINE_REGISTRY_PATH})
@@ -17,7 +17,7 @@ else()
 	find_package(nCine)
 endif()
 
-if(WIN32)
+if(MSVC)
 	add_custom_target(copy_dlls_tests ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_INSTALL_DIR}/bin ${CMAKE_BINARY_DIR}
 		COMMENT "Copying DLLs to tests..."

@@ -27,7 +27,9 @@ AppConfiguration::AppConfiguration()
 {
 	logFile_ = "ncine_log.txt";
 #ifdef __ANDROID__
-	IFile::dataPath_ = "/sdcard/ncine/";
+	char *extStorage = getenv("EXTERNAL_STORAGE");
+	IFile::dataPath_ = (extStorage ? extStorage : "/sdcard");
+	IFile::dataPath_ += "/ncine/";
 	fileLogLevel_ = ILogger::LOG_VERBOSE;
 
 //	fontTexFilename_ = "asset::DroidSans32_256_8888.ktx.mp3";
