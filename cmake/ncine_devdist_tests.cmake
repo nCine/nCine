@@ -14,8 +14,12 @@ if (MSVC)
 		find_package(nCine PATHS ${NCINE_INSTALL_DIR} NO_DEFAULT_PATH)
 	endif()
 else()
-	find_package(nCine)
+	find_package(nCine REQUIRED)
 endif()
+
+message(STATUS "nCine library: ${NCINE_LIBRARY}")
+message(STATUS "nCine include directory: ${NCINE_INCLUDE_DIR}")
+message(STATUS "nCine main.cpp: ${NCINE_MAIN_CPP}")
 
 if(MSVC)
 	add_custom_target(copy_dlls_tests ALL
@@ -23,7 +27,7 @@ if(MSVC)
 		COMMENT "Copying DLLs to tests..."
 	)
 	set_target_properties(copy_dlls_tests PROPERTIES FOLDER "CustomCopyTargets")
-	
+
 	get_filename_component(PARENT_BINARY_DIR ${CMAKE_BINARY_DIR} DIRECTORY)
 	add_custom_target(copy_data_tests ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_directory ${NCINE_INSTALL_DIR}/data ${PARENT_BINARY_DIR}/data
@@ -54,7 +58,7 @@ list(APPEND TESTS test_algorithms_array
 list(APPEND TESTS test_vector2 test_vector3 test_vector4
 	test_matrix4x4 test2_matrix4x4
 	test_quaternion test2_quaternion)
-	
+
 foreach(TEST ${TESTS})
 	add_executable(${TEST} ${TEST}.cpp test_functions.h)
 	target_include_directories(${TEST} PUBLIC ${NCINE_INCLUDE_DIR})

@@ -5,12 +5,12 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.0'
+        classpath 'com.android.tools.build:gradle:2.1.2'
     }
 }
 
 apply plugin: 'com.android.application'
- 
+
 android {
 
 	def numCores = Runtime.runtime.availableProcessors()
@@ -22,16 +22,16 @@ android {
 		ndkCommand = 'ndk-build'
 	}
 
-	compileSdkVersion 22
-	buildToolsVersion "23.0.3"
- 
+	compileSdkVersion @NCINE_COMPILESDK_VERSION@
+	buildToolsVersion "24"
+
 	defaultConfig {
-		minSdkVersion 13
-		targetSdkVersion 22
+		minSdkVersion @NCINE_MINSDK_VERSION@
+		targetSdkVersion @NCINE_TARGETSDK_VERSION@
 		versionCode 1
-		versionName "0.01"
+		versionName "@NCINE_VERSION@"
 	}
- 
+
 	sourceSets.main {
 		jniLibs.srcDir 'src/main/libs'
 		jni.srcDirs = [] // disable automatic ndk-build call

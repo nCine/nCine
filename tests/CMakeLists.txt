@@ -16,7 +16,7 @@ if(WIN32)
 		else()
 			set(NCINE_LIBRARY_NAME libncine.dll)
 		endif()
-	
+
 		if(MSVC_IDE)
 			add_custom_target(copy_ncine_dll ALL
 				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/$<CONFIGURATION>/${NCINE_LIBRARY_NAME} ${CMAKE_BINARY_DIR}/tests
@@ -32,6 +32,8 @@ if(WIN32)
 		endif()
 		set_target_properties(copy_ncine_dll PROPERTIES FOLDER "CustomCopyTargets")
 	endif()
+elseif(APPLE)
+	file(RELATIVE_PATH RELPATH_TO_LIB ${CMAKE_INSTALL_PREFIX}/${RUNTIME_INSTALL_DESTINATION} ${CMAKE_INSTALL_PREFIX}/${LIBRARY_INSTALL_DESTINATION})
 endif()
 
 if((SDLIMAGE_FOUND OR PNG_FOUND) AND WEBP_FOUND)
@@ -46,7 +48,10 @@ foreach(APPTEST ${APPTESTS})
 	add_executable(${APPTEST} main.cpp ${APPTEST}.cpp)
 	target_link_libraries(${APPTEST} ncine)
 	set_target_properties(${APPTEST} PROPERTIES FOLDER "AppTests")
-	install(TARGETS ${APPTEST} RUNTIME DESTINATION bin)
+	if(APPLE)
+		set_target_properties(${APPTEST} PROPERTIES INSTALL_RPATH "@executable_path/${RELPATH_TO_LIB}")
+	endif()
+	install(TARGETS ${APPTEST} RUNTIME DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
 endforeach()
 
 list(APPEND TESTS test_array test_staticarray
@@ -58,10 +63,13 @@ list(APPEND TESTS test_algorithms_array
 list(APPEND TESTS test_vector2 test_vector3 test_vector4
 	test_matrix4x4 test2_matrix4x4
 	test_quaternion test2_quaternion)
-	
+
 foreach(TEST ${TESTS})
 	add_executable(${TEST} ${TEST}.cpp test_functions.h)
 	target_link_libraries(${TEST} ncine)
 	set_target_properties(${TEST} PROPERTIES FOLDER "Tests")
-	install(TARGETS ${TEST} RUNTIME DESTINATION bin)
+	if(APPLE)
+		set_target_properties(${APPTEST} PROPERTIES INSTALL_RPATH "@executable_path/${RELPATH_TO_LIB}")
+	endif()
+	install(TARGETS ${TEST} RUNTIME DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
 endforeach()
