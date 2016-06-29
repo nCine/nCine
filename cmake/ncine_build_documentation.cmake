@@ -16,6 +16,10 @@ if(NCINE_BUILD_DOCUMENTATION)
 	endif()
 	set(DOXYGEN_OUTPUT_DIR docs)
 
+	if(EXISTS ${NCINE_DATA_DIR}/icons/icon48.png)
+		set(DOXYGEN_PROJECT_LOGO ${NCINE_DATA_DIR}/icons/icon48.png)
+	endif()
+
 	set(DOXYFILE_IN ${CMAKE_SOURCE_DIR}/Doxyfile.in)
 	set(DOXYFILE ${CMAKE_BINARY_DIR}/Doxyfile)
 	configure_file(${DOXYFILE_IN} ${DOXYFILE} @ONLY)

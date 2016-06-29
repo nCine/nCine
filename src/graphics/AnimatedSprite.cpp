@@ -123,7 +123,7 @@ void AnimatedSprite::setFrame(unsigned int frameNum)
 {
 	if (anims_.isEmpty() == false)
 	{
-		anims_[currentAnim_]->SetFrame(frameNum);
+		anims_[currentAnim_]->setFrame(frameNum);
 	}
 }
 

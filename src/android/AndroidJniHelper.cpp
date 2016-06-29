@@ -189,6 +189,7 @@ int AndroidJniClass_InputDevice::getDeviceIds(int *destination, int maxSize)
 		destination[i] = int(intsDeviceIds[i]);
 	}
 	jniEnv_->ReleaseIntArrayElements(arrDeviceIds, intsDeviceIds, 0);
+	jniEnv_->DeleteLocalRef(arrDeviceIds);
 
 	return int(length);
 }
@@ -240,6 +241,7 @@ void AndroidJniClass_InputDevice::hasKeys(int *buttons, const int length, bool *
 	jniEnv_->ReleaseIntArrayElements(arrButtons, intsButtons, 0);
 
 	jbooleanArray arrBooleans = (jbooleanArray)jniEnv_->CallObjectMethod(javaObject_, midHasKeys_, arrButtons);
+	jniEnv_->DeleteLocalRef(arrButtons);
 
 	jboolean *booleans = jniEnv_->GetBooleanArrayElements(arrBooleans, NULL);
 	for (int i = 0; i < length; i++)
@@ -247,6 +249,7 @@ void AndroidJniClass_InputDevice::hasKeys(int *buttons, const int length, bool *
 		bools[i] = bool(booleans[i]);
 	}
 	jniEnv_->ReleaseBooleanArrayElements(arrBooleans, booleans, 0);
+	jniEnv_->DeleteLocalRef(arrBooleans);
 }
 
 void AndroidJniClass_KeyCharacterMap::init()

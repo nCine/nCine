@@ -11,7 +11,7 @@ namespace ncine {
 AppConfiguration::AppConfiguration()
 	: profileTextUpdateTime_(0.2f)
 	, logFile_(128)
-	, consoleLogLevel_(ILogger::LOG_VERBOSE)
+	, consoleLogLevel_(ILogger::LOG_INFO)
 	, fileLogLevel_(ILogger::LOG_OFF)
 	, frameTimerLogInterval_(5.0f)
 	, xResolution_(1280), yResolution_(720)
@@ -22,7 +22,7 @@ AppConfiguration::AppConfiguration()
 	, withProfilerGraphs_(true)
 	, withProfilerText_(true)
 	, withAudio_(true)
-	, withThreads_(true)
+	, withThreads_(false)
 	, withScenegraph_(true)
 {
 	logFile_ = "ncine_log.txt";
@@ -32,15 +32,12 @@ AppConfiguration::AppConfiguration()
 	IFile::dataPath_ += "/ncine/";
 	fileLogLevel_ = ILogger::LOG_VERBOSE;
 
-//	fontTexFilename_ = "asset::DroidSans32_256_8888.ktx.mp3";
-//	fontFntFilename_ = "asset::DroidSans32_256.fnt";
 	fontTexFilename_ = "fonts/DroidSans32_256_8888.ktx";
-	fontFntFilename_ = "fonts/DroidSans32_256.fnt";
 #else
 	windowTitle_ = "nCine";
 	fontTexFilename_ = "fonts/DroidSans32_256.png";
-	fontFntFilename_ = "fonts/DroidSans32_256.fnt";
 #endif
+	fontFntFilename_ = "fonts/DroidSans32_256.fnt";
 
 #ifdef NCINE_DEFAULT_DATA_DIR
 	IFile::dataPath_ = NCINE_DEFAULT_DATA_DIR;

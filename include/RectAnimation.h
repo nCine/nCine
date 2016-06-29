@@ -27,7 +27,7 @@ class DLL_PUBLIC RectAnimation
 	/// Returns current frame
 	inline unsigned int frame() const { return currentFrame_; }
 	// Sets current frame
-	void SetFrame(unsigned int frameNum);
+	void setFrame(unsigned int frameNum);
 	/// Returns frame time
 	float frameTime() const { return frameTime_; }
 	/// Sets frame time
@@ -47,8 +47,6 @@ class DLL_PUBLIC RectAnimation
 	inline bool isPaused() const { return isPaused_; }
 	/// Sets the animation flag
 	inline void setPaused(bool isPaused) { isPaused_ = isPaused; }
-	// Pause on a specified frame
-	void pause(unsigned int frameNum);
 
   private:
 	/// The rectangles array

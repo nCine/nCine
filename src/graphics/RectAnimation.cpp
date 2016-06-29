@@ -18,7 +18,7 @@ RectAnimation::RectAnimation(float frameTime, LoopMode loopMode, RewindMode rewi
 ///////////////////////////////////////////////////////////
 
 /// Sets current frame
-void RectAnimation::SetFrame(unsigned int frameNum)
+void RectAnimation::setFrame(unsigned int frameNum)
 {
 	if (frameNum >= rects_.size())
 	{
@@ -91,21 +91,6 @@ void RectAnimation::updateFrame(float interval)
 			}
 		}
 	}
-}
-
-/// Pause on a specified frame
-void RectAnimation::pause(unsigned int frameNum)
-{
-	if (frameNum >= rects_.size())
-	{
-		currentFrame_ = rects_.size() - 1;
-	}
-	else
-	{
-		currentFrame_ = frameNum;
-	}
-
-	isPaused_ = true;
 }
 
 }
