@@ -43,26 +43,17 @@ void DrawableNode::draw(RenderQueue& renderQueue)
 	renderQueue.addCommand(renderCommand_);
 }
 
-/// Returns the node rendering priority
-unsigned int DrawableNode::priority() const
+/// Returns the node rendering layer
+unsigned int DrawableNode::layer() const
 {
-	return renderCommand_->priority();
+	return renderCommand_->layer();
 }
 
-
-/// Sets the node rendering priority
-void DrawableNode::setPriority(unsigned int priority)
+/// Sets the node rendering layer
+/*! The maximum admissible value is 65535 */
+void DrawableNode::setLayer(unsigned int layer)
 {
-	renderCommand_->setPriority(priority);
-}
-
-/// Increases or decreases the node rendering priority by adding a certain amount
-unsigned int DrawableNode::addPriority(int amount)
-{
-	unsigned int priority = renderCommand_->priority() + amount;
-	renderCommand_->setPriority(priority);
-
-	return priority;
+	renderCommand_->setLayer(layer);
 }
 
 }

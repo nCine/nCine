@@ -27,15 +27,19 @@ class RenderCommand
 		TYPE_COUNT
 	};
 
+	/// The enumeration for rendering layer limits
+	enum LayerLimits
+	{
+		BOTTOM_LAYER = 0,
+		TOP_LAYER = 65535
+	};
+
 	RenderCommand();
 
-	/// Relational operator to allow sorting based on the key
-	inline bool operator<(const RenderCommand &other) const { return sortKey_ < other.sortKey_; }
-
-	/// Returns the rendering priority
-	inline unsigned int priority() const { return priority_; }
-	/// Sets the rendering priority
-	inline void setPriority(unsigned int priority) { priority_ = priority; }
+	/// Returns the rendering layer
+	inline unsigned int layer() const { return layer_; }
+	/// Sets the rendering layer
+	inline void setLayer(unsigned int layer) { layer_ = (layer < static_cast<unsigned int>(TOP_LAYER)) ? layer : static_cast<unsigned int>(TOP_LAYER); }
 
 	/// Returns the queue sort key
 	inline unsigned long int sortKey() const { return sortKey_; }
@@ -58,7 +62,7 @@ class RenderCommand
 
   private:
 	unsigned long int sortKey_;
-	unsigned int priority_;
+	unsigned int layer_;
 	/// Command type for profiling counter
 	CommandType profilingType_;
 

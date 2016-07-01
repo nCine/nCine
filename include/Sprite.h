@@ -48,6 +48,9 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	inline const Texture* texture() const { return texture_; }
 	/// Sets the texture object
 	inline void setTexture(Texture *texture) { texture_ = texture; }
+	/// Sets a flag that makes a transparent texture to be considered opaque
+	/*! This flag comes in handy when the sprite uses an opaque region of a transparent texture atlas */
+	inline void setOpaqueTexture(bool opaqueTexture) { opaqueTexture_ = opaqueTexture; }
 
 	/// Gets the texture source rectangle for blitting
 	inline Recti texRect() const { return texRect_; }
@@ -64,6 +67,8 @@ class DLL_PUBLIC Sprite : public DrawableNode
   private:
 	/// The sprite texture
 	Texture *texture_;
+	/// The opaque texture flag
+	bool opaqueTexture_;
 	/// The texture source rectangle
 	Recti texRect_;
 	/// Sprite width in pixel

@@ -134,7 +134,7 @@ template <class T>
 inline bool IsGreater(const T& a, const T& b) { return a > b; }
 
 template <class T>
-inline bool IsNotGreater(const T& a, const T& b) { return !(a < b); }
+inline bool IsNotGreater(const T& a, const T& b) { return !(a > b); }
 
 template <class T>
 inline bool IsLess(const T& a, const T& b) { return a < b; }
@@ -763,12 +763,14 @@ bool isSortedUntil(Iterator first, const Iterator last, Compare comp)
 }
 
 /// Partition function for quicksort with iterators
-template <class Iterator, class UnaryPredicate>
-Iterator partition(Iterator first, Iterator last, UnaryPredicate pred)
+template <class Iterator, class Compare>
+Iterator partition(Iterator first, Iterator last, Compare comp)
 {
+	typename IteratorTraits<Iterator>::ValueType pivot = *last;
+
 	while (first != last)
 	{
-		while (pred(*first))
+		while (comp(*first, pivot))
 		{
 			++first;
 			if (first == last) { return first; }
@@ -778,7 +780,7 @@ Iterator partition(Iterator first, Iterator last, UnaryPredicate pred)
 		{
 			--last;
 			if (first == last) { return first; }
-		} while (!pred(*last));
+		} while (!comp(*last, pivot));
 		swap(*first, *last);
 		++first;
 	}
@@ -787,83 +789,60 @@ Iterator partition(Iterator first, Iterator last, UnaryPredicate pred)
 
 namespace {
 
-/// Quicksort implementation with random access iterators, ascending order
-template <class Iterator>
-void quicksort(Iterator first, Iterator last, RandomAccessIteratorTag)
+/// Quicksort implementation with random access iterators and custom compare function
+template <class Iterator, class Compare>
+void quicksort(Iterator first, Iterator last, RandomAccessIteratorTag, Compare comp)
 {
 	int size = distance(first, last);
 	if (size > 1)
 	{
 		Iterator p = prev(last);
 		swap(*next(first, size / 2), *p);
-		Iterator q = partition(first, p, IsLessThan<typename IteratorTraits<Iterator>::ValueType>(*p));
+		Iterator q = partition(first, p, comp);
 		swap(*q, *p);
-		quicksort(first, q, RandomAccessIteratorTag());
-		quicksort(next(q), last, RandomAccessIteratorTag());
+		quicksort(first, q, RandomAccessIteratorTag(), comp);
+		quicksort(next(q), last, RandomAccessIteratorTag(), comp);
 	}
 }
 
-/// Quicksort implementation with random access iterators, descending order
-template <class Iterator>
-void quicksortDesc(Iterator first, Iterator last, RandomAccessIteratorTag)
-{
-	int size = distance(first, last);
-	if (size > 1)
-	{
-		Iterator p = prev(last);
-		swap(*next(first, size / 2), *p);
-		Iterator q = partition(first, p, IsNotLessThan<typename IteratorTraits<Iterator>::ValueType>(*p));
-		swap(*q, *p);
-		quicksortDesc(first, q, RandomAccessIteratorTag());
-		quicksortDesc(next(q), last, RandomAccessIteratorTag());
-	}
-}
-
-/// Quicksort implementation with bidirectional iterators, ascending order
-template <class Iterator>
-void quicksort(Iterator first, Iterator last, BidirectionalIteratorTag)
+/// Quicksort implementation with bidirectional iterators and custom compare function
+template <class Iterator, class Compare>
+void quicksort(Iterator first, Iterator last, BidirectionalIteratorTag, Compare comp)
 {
 	if (first != last)
 	{
 		Iterator p = prev(last);
 		swap(*first, *p);
-		Iterator q = partition(first, p, IsLessThan<typename IteratorTraits<Iterator>::ValueType>(*p));
+		Iterator q = partition(first, p, comp);
 		swap(*q, *p);
 		quicksort(first, q, BidirectionalIteratorTag());
 		quicksort(next(q), last, BidirectionalIteratorTag());
 	}
 }
 
-/// Quicksort implementation with bidirectional iterators, descending order
-template <class Iterator>
-void quicksortDesc(Iterator first, Iterator last, BidirectionalIteratorTag)
-{
-	if (first != last)
-	{
-		Iterator p = prev(last);
-		swap(*first, *p);
-		Iterator q = partition(first, p, IsNotLessThan<typename IteratorTraits<Iterator>::ValueType>(*p));
-		swap(*q, *p);
-		quicksortDesc(first, q, BidirectionalIteratorTag());
-		quicksortDesc(next(q), last, BidirectionalIteratorTag());
-	}
 }
 
+/// Quicksort implementation with iterators and custom compare function
+template <class Iterator, class Compare>
+void quicksort(Iterator first, Iterator last, Compare comp)
+{
+	quicksort(first, last, IteratorTraits<Iterator>::IteratorCategory(), comp);
 }
 
 /// Quicksort implementation with iterators, ascending order
 template <class Iterator>
 void quicksort(Iterator first, Iterator last)
 {
-	quicksort(first, last, IteratorTraits<Iterator>::IteratorCategory());
+	quicksort(first, last, IteratorTraits<Iterator>::IteratorCategory(), IsLess<typename IteratorTraits<Iterator>::ValueType>);
 }
 
 /// Quicksort implementation with iterators, descending order
 template <class Iterator>
 void quicksortDesc(Iterator first, Iterator last)
 {
-	quicksortDesc(first, last, IteratorTraits<Iterator>::IteratorCategory());
+	quicksort(first, last, IteratorTraits<Iterator>::IteratorCategory(), IsNotLess<typename IteratorTraits<Iterator>::ValueType>);
 }
+
 
 }
 

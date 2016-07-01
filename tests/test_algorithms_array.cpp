@@ -83,7 +83,7 @@ int main(int argc, char **argv)
 	printArray(array2);
 
 	printf("Remove all the elements greater than 50 from the second array\n");
-	array2.erase(nc::removeIf(array2.begin(), array2.end(), nc::IsLessThan<int>(90)), array2.end());
+	array2.erase(nc::removeIf(array2.begin(), array2.end(), nc::IsGreaterThan<int>(50)), array2.end());
 	printArray(array2);
 
 	return EXIT_SUCCESS;

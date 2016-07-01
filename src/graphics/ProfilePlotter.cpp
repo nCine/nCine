@@ -11,7 +11,7 @@ ProfilePlotter::ProfilePlotter(SceneNode* parent, Rectf rect)
 	: DrawableNode(parent, rect.x, rect.y), width_(rect.w), height_(rect.h), variables_(2),
 	  shouldPlotRefValue_(false), refValueColor_(1.0f, 1.0f, 1.0f), refValue_(0.0f)
 {
-	setPriority(DrawableNode::HUD_PRIORITY);
+	setLayer(DrawableNode::HUD_LAYER);
 	renderCommand_->material().setShaderProgram(Material::COLOR_PROGRAM);
 	renderCommand_->geometry().createCustomVbo(8, GL_STATIC_DRAW);
 	renderCommand_->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, 4);
@@ -19,7 +19,7 @@ ProfilePlotter::ProfilePlotter(SceneNode* parent, Rectf rect)
 	renderCommand_->geometry().updateVboData(0, 8, backgroundVertices_.data());
 
 	// Priority is one more than variable mean lines
-	refValueCmd_.setPriority(DrawableNode::HUD_PRIORITY + 3);
+	refValueCmd_.setLayer(DrawableNode::HUD_LAYER + 3);
 	refValueCmd_.setType(RenderCommand::PLOTTER_TYPE);
 	refValueCmd_.material().setShaderProgram(Material::COLOR_PROGRAM);
 	refValueCmd_.geometry().createCustomVbo(4, GL_DYNAMIC_DRAW);

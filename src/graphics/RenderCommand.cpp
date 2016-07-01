@@ -1,4 +1,4 @@
-#include "RenderCommand.h"
+﻿#include "RenderCommand.h"
 #include "GLShaderProgram.h"
 #include "Matrix4x4.h" // TODO: Remove dependency
 #include "Application.h" // TODO: Remove dependency
@@ -10,7 +10,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 RenderCommand::RenderCommand()
-	: sortKey_(0), priority_(0), profilingType_(GENERIC_TYPE),
+	: sortKey_(0), layer_(BOTTOM_LAYER), profilingType_(GENERIC_TYPE),
 	  modelView_(Matrix4x4f::Identity)
 {
 
@@ -23,7 +23,7 @@ RenderCommand::RenderCommand()
 /// Calculates a sort key for the queue
 void RenderCommand::calculateSortKey()
 {
-	unsigned long int upper = priority_ << 16;
+	unsigned long int upper = layer_ << 16;
 	unsigned int lower = material_.sortKey();
 	sortKey_ = upper + lower;
 }
@@ -55,11 +55,15 @@ void RenderCommand::setTransformation()
 {
 	float width = static_cast<float>(theApplication().width());
 	float height = static_cast<float>(theApplication().height());
+	float near = -1.0f;
+	float far = 1.0f;
 
 	// TODO: Projection is hard-coded, should go in a camera class (Y-axis points downward)
-	Matrix4x4f projection = Matrix4x4f::ortho(0.0f, width, 0.0f, height, -1.0f, 1.0f);
-	// Priority becomes depth
-	modelView_[3][2] = priority_ / 1000.0f; // TODO: Check that is always inside the frustum
+	Matrix4x4f projection = Matrix4x4f::ortho(0.0f, width, 0.0f, height, near, far);
+
+	// The layer translates to depth, from near to far
+	float layerStep = 1.0f / static_cast<float>(TOP_LAYER);
+	modelView_[3][2] = near + layerStep + (far - near - layerStep) * (layer_ * layerStep);
 
 	if (material_.shaderProgram_)
 	{

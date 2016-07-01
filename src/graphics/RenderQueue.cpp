@@ -48,13 +48,20 @@ void RenderQueue::addCommand(RenderCommand *command)
 	}
 }
 
-/// Sorts the queue then issues every render command in order
+namespace {
+	bool descendingOrder(const RenderCommand* a, const RenderCommand* b) { return a->sortKey() > b->sortKey(); }
+	bool ascendingOrder(const RenderCommand* a, const RenderCommand* b) { return a->sortKey() < b->sortKey(); }
+}
+
+/// Sorts the queues then issues every render command in order
 void RenderQueue::draw()
 {
-	sortQueues();
+	// Sorting the queues with the relevant orders
+	nc::quicksort(opaqueRenderCommands_.begin(), opaqueRenderCommands_.end(), descendingOrder);
+	nc::quicksort(transparentRenderCommands_.begin(), transparentRenderCommands_.end(), ascendingOrder);
 
 	// Rendering opaque nodes front to back
-	for (int i = opaqueRenderCommands_.size() - 1; i > -1; i--)
+	for (unsigned int i = 0; i < opaqueRenderCommands_.size(); i++)
 	{
 		opaqueRenderCommands_[i]->issue();
 	}
@@ -85,30 +92,6 @@ void RenderQueue::draw()
 
 	opaqueRenderCommands_.clear();
 	transparentRenderCommands_.clear();
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-/// Sorts render nodes in both queues to minimize state changes
-void RenderQueue::sortQueues()
-{
-	nc::quicksortDesc(opaqueRenderCommands_.begin(), opaqueRenderCommands_.end());
-	nc::quicksortDesc(transparentRenderCommands_.begin(), transparentRenderCommands_.end());
-
-	// Check sorting correctness
-/*
-	if (nc::isSorted(opaqueRenderCommands_.begin(), opaqueRenderCommands_.end(), nc::IsGreater<RenderCommand *>) == false)
-	{
-		printf("Opaque not sorted1\n");
-	}
-
-	if (nc::isSorted(transparentRenderCommands_.begin(), transparentRenderCommands_.end(), nc::IsGreater<RenderCommand *>) == false)
-	{
-		printf("Transparent not sorted1\n");
-	}
-*/
 }
 
 }

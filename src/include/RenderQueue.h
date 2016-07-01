@@ -19,7 +19,7 @@ class RenderQueue
 
 	// Adds a draw command to the queue
 	void addCommand(RenderCommand *command);
-	// Sorts the queue then issues every render command in order
+	// Sorts the queues then issues every render command in order
 	void draw();
 
 	/// Returns the total number of vertices to be rendered by the queue
@@ -53,9 +53,6 @@ class RenderQueue
 	Array<RenderCommand *> opaqueRenderCommands_;
 	/// Array of transparent render command pointers
 	Array<RenderCommand *> transparentRenderCommands_;
-
-	// Sorts render nodes in both queues to minimize state changes
-	void sortQueues();
 };
 
 }

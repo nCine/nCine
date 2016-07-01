@@ -12,9 +12,9 @@ PlottingVariable::PlottingVariable(unsigned int numValues, float rejectDelay, co
 	  variable_(numValues, rejectDelay), vertices_(NULL), worldMatrix_(worldMatrix)
 {
 	// One more than the profile plotter background
-	valuesCmd_.setPriority(DrawableNode::HUD_PRIORITY + 1);
+	valuesCmd_.setLayer(DrawableNode::HUD_LAYER + 1);
 	// One more than the variable graph
-	meanCmd_.setPriority(DrawableNode::HUD_PRIORITY + 2);
+	meanCmd_.setLayer(DrawableNode::HUD_LAYER + 2);
 
 	valuesCmd_.setType(RenderCommand::PLOTTER_TYPE);
 	meanCmd_.setType(RenderCommand::PLOTTER_TYPE);

@@ -42,7 +42,7 @@ Sprite::Sprite(Texture *texture, float x, float y)
 void Sprite::init()
 {
 	type_ = SPRITE_TYPE;
-	setPriority(DrawableNode::SCENE_PRIORITY);
+	setLayer(DrawableNode::SCENE_LAYER);
 	renderCommand_->setType(RenderCommand::SPRITE_TYPE);
 	renderCommand_->material().setShaderProgram(Material::SPRITE_PROGRAM);
 	renderCommand_->geometry().makeSharedQuad();
@@ -61,7 +61,7 @@ void Sprite::updateRenderCommand()
 	renderCommand_->material().setTexture(*texture_);
 
 	renderCommand_->material().uniform("color")->setFloatValue(absColor().fR(), absColor().fG(), absColor().fB(), absColor().fA());
-	bool isTransparent = absColor().a() < 255 || texture()->hasAlpha();
+	bool isTransparent = absColor().a() < 255 || (texture()->hasAlpha() && opaqueTexture_ == false);
 	renderCommand_->material().setTransparent(isTransparent);
 
 	Vector2i texSize = texture_->size();

@@ -16,7 +16,7 @@ TextNode::TextNode(SceneNode* parent, Font* font)
 	  xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f), lineLengths_(4), alignment_(ALIGN_LEFT)
 {
 	type_ = TEXTNODE_TYPE;
-	setPriority(DrawableNode::HUD_PRIORITY);
+	setLayer(DrawableNode::HUD_LAYER);
 	renderCommand_->setType(RenderCommand::TEXT_TYPE);
 	renderCommand_->material().setTransparent(true);
 	renderCommand_->material().setShaderProgram(Material::TEXTNODE_PROGRAM);

@@ -12,11 +12,11 @@ class RenderQueue;
 class DLL_PUBLIC DrawableNode : public SceneNode
 {
   public:
-	/// Drawing priorities from back to front
-	enum PriorityBase
+	/// Drawing layers from back to front
+	enum LayerBase
 	{
-		SCENE_PRIORITY = 0,
-		HUD_PRIORITY = 128
+		SCENE_LAYER = 0,
+		HUD_LAYER = 32767
 	};
 
 	DrawableNode(SceneNode* parent, float x, float y);
@@ -27,12 +27,10 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	// Updates the draw command and adds it to the queue
 	virtual void draw(RenderQueue& renderQueue);
 
-	// Returns the node rendering priority
-	unsigned int priority() const;
-	// Sets the node rendering priority
-	void setPriority(unsigned int priority);
-	// Increases or decreases the node rendering priority by adding a certain amount
-	unsigned int addPriority(int amount);
+	// Returns the node rendering layer
+	unsigned int layer() const;
+	// Sets the node rendering layer
+	void setLayer(unsigned int layer);
 
   protected:
 	/// The render command class associated with this node
