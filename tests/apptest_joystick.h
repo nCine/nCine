@@ -32,12 +32,12 @@ class MyEventHandler
 #endif
 
   private:
-	static const int NumJoysticks = 4;
-	static const int NumAxes = 10;
-	nc::StaticArray<float, NumAxes> axisValues_;
-	static const int NumButtons = 12;
-	nc::StaticArray<unsigned char, NumButtons> buttonStates_;
-	static const int NumChars = 256;
+	static const int MaxNumJoysticks = 4;
+	static const int MaxNumAxes = 16;
+	nc::StaticArray<float, MaxNumAxes> axisValues_;
+	static const int MaxNumButtons = 16;
+	nc::StaticArray<unsigned char, MaxNumButtons> buttonStates_;
+	static const int MaxNumChars = 256;
 	nc::String *joyString_;
 
 	nc::Texture *texture_;

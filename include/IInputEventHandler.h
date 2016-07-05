@@ -21,17 +21,16 @@ class DLL_PUBLIC IInputEventHandler
 	inline virtual void onSecondaryTouchDown(const TouchEvent &event) { }
 	inline virtual void onSecondaryTouchUp(const TouchEvent &event) { }
 	inline virtual void onAcceleration(const AccelerometerEvent &event) { }
-	inline virtual void onJoyButtonPressed(const JoyButtonEvent &event) { }
-	inline virtual void onJoyButtonReleased(const JoyButtonEvent &event) { }
-	inline virtual void onJoyAxisMoved(const JoyAxisEvent &event) { }
 #else
 	inline virtual void onMouseButtonPressed(const MouseEvent &event) { }
 	inline virtual void onMouseButtonReleased(const MouseEvent &event) { }
 	inline virtual void onMouseMoved(const MouseState &state) { }
+#endif
 	inline virtual void onJoyButtonPressed(const JoyButtonEvent &event) { }
 	inline virtual void onJoyButtonReleased(const JoyButtonEvent &event) { }
 	inline virtual void onJoyAxisMoved(const JoyAxisEvent &event) { }
-#endif
+	inline virtual void onJoyConnected(const JoyConnectionEvent &event) { }
+	inline virtual void onJoyDisconnected(const JoyConnectionEvent &event) { }
 };
 
 }

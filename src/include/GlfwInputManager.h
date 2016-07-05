@@ -63,14 +63,14 @@ class GlfwJoystickState
 {
   public:
 	GlfwJoystickState()
-		: numButtons_(0), numAxes_(0), buttons_(NULL), axisValues_(NULL) { }
+		: numButtons_(0), numAxes_(0), buttons_(NULL), axesValues_(NULL) { }
 
   private:
 	int numButtons_;
 	int numAxes_;
 
 	const unsigned char *buttons_;
-	const float *axisValues_;
+	const float *axesValues_;
 
 	friend class GlfwInputManager;
 };
@@ -83,7 +83,7 @@ class GlfwInputManager : public IInputManager
 
 	// Detects window focus gain/loss events
 	static bool hasFocus();
-	// Updates joystick state structures
+	// Updates joystick state structures and simulates events
 	static void updateJoystickStates();
 
 	const MouseState& mouseState();
@@ -100,17 +100,42 @@ class GlfwInputManager : public IInputManager
   private:
 	static const unsigned int MaxNumJoysticks = GLFW_JOYSTICK_LAST - GLFW_JOYSTICK_1 + 1;
 
+	class JoystickEventsSimulator
+	{
+	  public:
+		JoystickEventsSimulator();
+		void resetJoystickState(int joyId);
+		void simulateButtonsEvents(int joyId, int numButtons, const unsigned char *buttons);
+		void simulateAxesEvents(int joyId, int numAxes, const float *axes);
+
+	  private:
+		static const unsigned int MaxNumButtons = 16;
+		static const unsigned int MaxNumAxes = 16;
+		/// Minimum difference between two axis readings in order to trigger an event
+		static const float AxisEventTolerance;
+
+		/// Old state used to simulate joystick buttons events
+		unsigned char buttonsState_[MaxNumJoysticks][MaxNumButtons];
+		/// Old state used to simulate joystick axes events
+		float axesValuesState_[MaxNumJoysticks][MaxNumAxes];
+	};
+
 	static bool windowHasFocus_;
 	static GlfwMouseState mouseState_;
 	static GlfwMouseEvent mouseEvent_;
 	static GlfwKeyboardState keyboardState_;
 	static KeyboardEvent keyboardEvent_;
 	static StaticArray<GlfwJoystickState, MaxNumJoysticks> joystickStates_;
+	static JoyButtonEvent joyButtonEvent_;
+	static JoyAxisEvent joyAxisEvent_;
+	static JoyConnectionEvent joyConnectionEvent_;
+	static JoystickEventsSimulator joyEventsSimulator_;
 
 	static void windowCloseCallback(GLFWwindow *window);
 	static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 	static void cursorPosCallback(GLFWwindow *window, double x, double y);
 	static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
+	static void joystickCallback(int joy, int event);
 
 	static KeySym keySymValueToEnum(int keysym);
 	static KeyMod keyModValueToEnum(int keymod);

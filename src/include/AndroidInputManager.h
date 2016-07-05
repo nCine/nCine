@@ -63,7 +63,7 @@ class AndroidInputManager : public IInputManager
 	// Allows the application to make use of the accelerometer
 	static void enableAccelerometer(bool enabled);
 
-	// Parses and Android sensor event related to the accelerometer
+	// Parses an Android sensor event related to the accelerometer
 	static void parseAccelerometerEvent();
 	// Parses an Android input event
 	static bool parseEvent(const AInputEvent* event);
@@ -91,6 +91,7 @@ class AndroidInputManager : public IInputManager
 	static AndroidJoystickState joystickStates_[MaxNumJoysticks];
 	static JoyButtonEvent joyButtonEvent_;
 	static JoyAxisEvent joyAxisEvent_;
+	static JoyConnectionEvent joyConnectionEvent_;
 	/// Update rate of CheckJoystickDisconnections() in seconds
 	static const float JoyCheckRate;
 	static Timer joyCheckTimer_;

@@ -19,6 +19,17 @@ const char* FontTextureFile = "DroidSans32_256.png";
 #endif
 const char* FontFntFile = "DroidSans32_256.fnt";
 
+// Only tested with the Xbox 360 Controller
+#ifdef _WIN32
+unsigned int axesMapping[] = { 0, 1, 4, 2, 3, 5 };
+int invertAxis[] = { 1, -1, 1, -1, 1, 1 };
+unsigned int buttonsMapping[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
+#else
+unsigned int axesMapping[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+int invertAxis[] = { 1, 1, 1, 1, 1, 1, 1, 1 };
+unsigned int buttonsMapping[] = { 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 8 };
+#endif
+
 }
 
 nc::IAppEventHandler* createApphandler()
@@ -30,7 +41,7 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	joyString_ = new nc::String(NumChars);
+	joyString_ = new nc::String(MaxNumChars);
 	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/" + TextureFile).data());
 	sprites_[0] = new nc::Sprite(&rootNode, texture_, nc::theApplication().width() * 0.25f, nc::theApplication().height() * 0.5f);
 	sprites_[1] = new nc::Sprite(&rootNode, texture_, nc::theApplication().width() * 0.75f, nc::theApplication().height() * 0.5f);
@@ -41,9 +52,9 @@ void MyEventHandler::onInit()
 						 (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
 	textNode_ = new nc::TextNode(&rootNode, font_);
 	textNode_->setScale(0.85f);
-	textNode_->setPosition(nc::theApplication().width() * 0.1f, nc::theApplication().height() * 0.35f);
+	textNode_->setPosition(nc::theApplication().width() * 0.1f, nc::theApplication().height() * 0.38f);
 
-	for (int i = 0; i < NumJoysticks; i++)
+	for (int i = 0; i < MaxNumJoysticks; i++)
 	{
 		if (nc::theApplication().inputManager().isJoyPresent(i))
 		{
@@ -58,7 +69,7 @@ void MyEventHandler::onInit()
 void MyEventHandler::onFrameStart()
 {
 	int firstJoy = 0;
-	for (int i = 0; i < NumJoysticks; i++)
+	for (int i = 0; i < MaxNumJoysticks; i++)
 	{
 		if (nc::theApplication().inputManager().isJoyPresent(i))
 		{
@@ -68,27 +79,34 @@ void MyEventHandler::onFrameStart()
 	}
 
 	joyString_->clear();
-	for (int i = 0; i < NumJoysticks; i++)
+	for (int i = 0; i < MaxNumJoysticks; i++)
 	{
 		if (nc::theApplication().inputManager().isJoyPresent(i))
 		{
-			joyString_->format("Joystick %d: %s (%d axes, %d buttons)\n", i,
+			joyString_->formatAppend("Joystick %d: %s (%d axes, %d buttons)\n", i,
 				nc::theApplication().inputManager().joyName(i),
 				nc::theApplication().inputManager().joyNumAxes(i),
 				nc::theApplication().inputManager().joyNumButtons(i));
 		}
 	}
-	*joyString_ += "Axes:";
-	for (int i = 0; i < NumAxes; i++)
+	
+	if (nc::theApplication().inputManager().isJoyPresent(firstJoy))
 	{
-		axisValues_[i] = nc::theApplication().inputManager().joyAxisNormValue(firstJoy, i);
-		joyString_->formatAppend(" %.2f", axisValues_[i]);
-	}
-	*joyString_ += "\nButtons:";
-	for (int i = 0; i < NumButtons; i++)
-	{
-		buttonStates_[i] = nc::theApplication().inputManager().isJoyButtonPressed(firstJoy, i);
-		joyString_->formatAppend(" %u", buttonStates_[i]);
+		int numAxes = nc::theApplication().inputManager().joyNumAxes(firstJoy);
+		int numButtons = nc::theApplication().inputManager().joyNumButtons(firstJoy);
+
+		*joyString_ += "Axes:";
+		for (int i = 0; i < numAxes; i++)
+		{
+			axisValues_[i] = nc::theApplication().inputManager().joyAxisNormValue(firstJoy, axesMapping[i]) * invertAxis[axesMapping[i]];
+			joyString_->formatAppend(" %.2f", axisValues_[i]);
+		}
+		*joyString_ += "\nButtons:";
+		for (int i = 0; i < numButtons; i++)
+		{
+			buttonStates_[i] = nc::theApplication().inputManager().isJoyButtonPressed(firstJoy, buttonsMapping[i]);
+			joyString_->formatAppend(" %u", buttonStates_[i]);
+		}
 	}
 	textNode_->setString(*joyString_);
 

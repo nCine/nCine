@@ -28,6 +28,7 @@ short int IInputManager::MaxAxisValue = 32767;
 AndroidJoystickState AndroidInputManager::joystickStates_[MaxNumJoysticks];
 JoyButtonEvent AndroidInputManager::joyButtonEvent_;
 JoyAxisEvent AndroidInputManager::joyAxisEvent_;
+JoyConnectionEvent AndroidInputManager::joyConnectionEvent_;
 const float AndroidInputManager::JoyCheckRate = 0.25f;
 Timer AndroidInputManager::joyCheckTimer_;
 const int AndroidJoystickState::AxesToMap[AndroidJoystickState::NumAxesToMap] =
@@ -107,10 +108,10 @@ void AndroidInputManager::enableAccelerometer(bool enabled)
 	accelerometerEnabled_ = enabled;
 }
 
-/// Parses and Android sensor event related to the accelerometer
+/// Parses an Android sensor event related to the accelerometer
 void AndroidInputManager::parseAccelerometerEvent()
 {
-	if (accelerometerEnabled_ && accelerometerSensor_ != NULL)
+	if (inputEventHandler_ != NULL && accelerometerEnabled_ && accelerometerSensor_ != NULL)
 	{
 		ASensorEvent event;
 		while (ASensorEventQueue_getEvents(sensorEventQueue_, &event, 1) > 0)
@@ -428,6 +429,12 @@ void AndroidInputManager::checkDisconnectedJoysticks()
 		{
 			LOGI_X("Joystick %d (device %d) \"%s\" has been disconnected", i, deviceId, joystickStates_[i].name_);
 			joystickStates_[i].deviceId_ = -1;
+
+			if (inputEventHandler_ != NULL)
+			{
+				joyConnectionEvent_.joyId = i;
+				inputEventHandler_->onJoyDisconnected(joyConnectionEvent_);
+			}
 		}
 	}
 }
@@ -497,6 +504,12 @@ int AndroidInputManager::findJoyId(int deviceId)
 		deviceInfo(deviceId, joyId);
 		LOGI_X("Joystick %d (device %d) \"%s\" has been connected - %d axes, %d buttons",
 			joyId, deviceId, joystickStates_[joyId].name_, joystickStates_[joyId].numAxes_, joystickStates_[joyId].numButtons_);
+
+		if (inputEventHandler_ != NULL)
+		{
+			joyConnectionEvent_.joyId = joyId;
+			inputEventHandler_->onJoyConnected(joyConnectionEvent_);
+		}
 	}
 
 	return joyId;

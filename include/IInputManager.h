@@ -101,6 +101,13 @@ class DLL_PUBLIC JoyButtonEvent
 	int buttonId;
 };
 
+/// Information about a joystick connection event
+class DLL_PUBLIC JoyConnectionEvent
+{
+  public:
+	int joyId;
+};
+
 /// The interface class for parsing and dispatching input events
 class DLL_PUBLIC IInputManager
 {
