@@ -24,6 +24,7 @@ AppConfiguration::AppConfiguration()
 	, withAudio_(true)
 	, withThreads_(false)
 	, withScenegraph_(true)
+	, withVSync_(true)
 {
 	logFile_ = "ncine_log.txt";
 #ifdef __ANDROID__
@@ -142,6 +143,12 @@ void AppConfiguration::enableThreads(bool shouldEnable)
 void AppConfiguration::enableScenegraph(bool shouldEnable)
 {
 	withScenegraph_ = shouldEnable;
+}
+
+/// Enables vertical synchronization
+void AppConfiguration::enableVSync(bool shouldEnable)
+{
+	withVSync_ = shouldEnable;
 }
 
 }

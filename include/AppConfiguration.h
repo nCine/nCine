@@ -43,6 +43,8 @@ class DLL_PUBLIC AppConfiguration
 	void enableThreads(bool shouldEnable);
 	// Enables the scenegraph based rendering
 	void enableScenegraph(bool shouldEnable);
+	// Enables vertical synchronization
+	void enableVSync(bool shouldEnable);
 
   private:
 	// Pre-configured compile-time variables
@@ -64,6 +66,7 @@ class DLL_PUBLIC AppConfiguration
 	bool withAudio_;
 	bool withThreads_;
 	bool withScenegraph_;
+	bool withVSync_;
 
 	friend class Application;
 	friend class PCApplication;

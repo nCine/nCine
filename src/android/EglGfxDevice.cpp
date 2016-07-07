@@ -174,6 +174,11 @@ void EglGfxDevice::initDevice(struct android_app* state)
 	bindContext();
 	querySurfaceSize();
 
+#ifndef __ANDROID__
+	EGLint swapInterval = mode_.hasVSync() ? 1 : 0;
+	eglSwapInterval(display_, swapInterval);
+#endif
+
 	EGLint red, blue, green, alpha, depth, stencil, samples;
 	eglGetConfigAttrib(display_, config_, EGL_RED_SIZE, &red);
 	eglGetConfigAttrib(display_, config_, EGL_GREEN_SIZE, &green);
