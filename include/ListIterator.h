@@ -23,17 +23,17 @@ class ListIterator
 	ListIterator(const ListIterator<T, false>& it)
 		: node_(it.node_) { }
 
-	// Deferencing operator
+	/// Deferencing operator
 	Reference operator*() const;
 
-	// Iterates to the next element (prefix)
+	/// Iterates to the next element (prefix)
 	ListIterator& operator++();
-	// Iterates to the next element (postfix)
+	/// Iterates to the next element (postfix)
 	ListIterator operator++(int);
 
-	// Iterates to the previous element (prefix)
+	/// Iterates to the previous element (prefix)
 	ListIterator& operator--();
-	// Iterates to the previous element (postfix)
+	/// Iterates to the previous element (postfix)
 	ListIterator operator--(int);
 
 	/// Equality operator
@@ -46,11 +46,11 @@ class ListIterator
 
 	friend class List<T>;
 
-	// For non constant to constant iterator implicit conversion
+	/// For non constant to constant iterator implicit conversion
 	friend class ListIterator<T, true>;
 };
 
-/// Iterator traits structure specialization
+/// Iterator traits structure specialization for `ListIterator` class
 template <class T>
 struct IteratorTraits<ListIterator<T, false> >
 {
@@ -64,7 +64,7 @@ struct IteratorTraits<ListIterator<T, false> >
 	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
 };
 
-/// Constant iterator traits structure specialization
+/// Iterator traits structure specialization for constant `ListIterator` class
 template <class T>
 struct IteratorTraits<ListIterator<T, true> >
 {
@@ -78,7 +78,6 @@ struct IteratorTraits<ListIterator<T, true> >
 	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
 };
 
-/// Deferencing operator
 template <class T, bool IsConst>
 inline typename ListIterator<T, IsConst>::Reference ListIterator<T, IsConst>::operator*() const
 {
@@ -87,7 +86,6 @@ inline typename ListIterator<T, IsConst>::Reference ListIterator<T, IsConst>::op
 	return node_->data_;
 }
 
-/// Iterates to the next element (prefix)
 template <class T, bool IsConst>
 ListIterator<T, IsConst>& ListIterator<T, IsConst>::operator++()
 {
@@ -99,7 +97,6 @@ ListIterator<T, IsConst>& ListIterator<T, IsConst>::operator++()
 	return *this;
 }
 
-/// Iterates to the next element (postfix)
 template <class T, bool IsConst>
 ListIterator<T, IsConst> ListIterator<T, IsConst>::operator++(int)
 {
@@ -114,7 +111,6 @@ ListIterator<T, IsConst> ListIterator<T, IsConst>::operator++(int)
 	return iterator;
 }
 
-/// Iterates to the previous element (prefix)
 template <class T, bool IsConst>
 ListIterator<T, IsConst>& ListIterator<T, IsConst>::operator--()
 {
@@ -126,7 +122,6 @@ ListIterator<T, IsConst>& ListIterator<T, IsConst>::operator--()
 	return *this;
 }
 
-/// Iterates to the previous element (postfix)
 template <class T, bool IsConst>
 ListIterator<T, IsConst> ListIterator<T, IsConst>::operator--(int)
 {

@@ -14,13 +14,13 @@ class IThreadCommand;
 class ThreadPool : public IThreadPool
 {
   public:
-	// Creates a thread pool with as many threads as available processors
+	/// Creates a thread pool with as many threads as available processors
 	ThreadPool();
-	// Creates a thread pool with a specified number of threads
+	/// Creates a thread pool with a specified number of threads
 	explicit ThreadPool(unsigned int numThreads);
 	~ThreadPool();
 
-	// Enqueues a command request for a worker thread
+	/// Enqueues a command request for a worker thread
 	void enqueueCommand(IThreadCommand *threadCommand);
 
   private:

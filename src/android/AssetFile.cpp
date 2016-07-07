@@ -44,7 +44,6 @@ AssetFile::~AssetFile()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Tries to open the file
 void AssetFile::open(unsigned char mode)
 {
 	// Checking if the file is already opened
@@ -68,7 +67,7 @@ void AssetFile::open(unsigned char mode)
 }
 
 
-/// Closes the file (both opened or fopened)
+/*! This method will close a file both normally opened or fopened */
 void AssetFile::close()
 {
 	if (fileDescriptor_ >= 0)
@@ -182,7 +181,6 @@ bool AssetFile::isOpened() const
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Opens the file with `AAsset_openFileDescriptor()`
 void AssetFile::openFD(unsigned char mode)
 {
 	// An asset file can only be read
@@ -232,7 +230,6 @@ void AssetFile::openFD(unsigned char mode)
 	}
 }
 
-/// Opens the file with `AAssetManager_open()` only
 void AssetFile::openAsset(unsigned char mode)
 {
 	// An asset file can only be read
@@ -266,8 +263,7 @@ void AssetFile::openAsset(unsigned char mode)
 	}
 }
 
-/// Checks if a file can be accessed with specified mode
-/*! It is called by `IFile::access()` */
+/*! This method is called by `IFile::access()` */
 bool AssetFile::access(const char *filename, unsigned char mode)
 {
 	bool isAccessible = false;

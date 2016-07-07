@@ -7,10 +7,9 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// Empty constructor
 Geometry::Geometry()
 	: vboSharingType_(SHARED),
-	  drawType_(GL_TRIANGLES), firstVertex_(0), numVertices_(0),
+	  primitiveType_(GL_TRIANGLES), firstVertex_(0), numVertices_(0),
 	  vbo_(NULL), ibo_(NULL)
 {
 
@@ -28,9 +27,9 @@ Geometry::~Geometry()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void Geometry::setDrawParameters(GLenum drawType, GLint firstVertex, GLsizei numVertices)
+void Geometry::setDrawParameters(GLenum primitiveType, GLint firstVertex, GLsizei numVertices)
 {
-	drawType_ = drawType;
+	primitiveType_ = primitiveType;
 	firstVertex_ = firstVertex;
 	numVertices_ = numVertices;
 }
@@ -52,6 +51,7 @@ void Geometry::createCustomVbo(unsigned int numFloats, GLenum usage)
 	vbo_->bufferData(numFloats * sizeof(GLfloat), NULL, usage);
 }
 
+/*! \note If the buffer is shared across the application it will not be modified. */
 void Geometry::updateVboData(unsigned int floatOffset, unsigned int floatSize, const GLfloat *data)
 {
 	// Common resources cannot be altered
@@ -101,6 +101,7 @@ void Geometry::bind()
 	}
 }
 
+/*! \todo Handle multiple VBOs? */
 GLuint Geometry::vboHandle()
 {
 	GLuint glHandle = 0;

@@ -12,9 +12,9 @@ class DLL_PUBLIC AudioStream
   public:
 	virtual ~AudioStream();
 
-	// Enqueues new buffers and unqueues processed ones
+	/// Enqueues new buffers and unqueues processed ones
 	bool enqueue(unsigned int source, bool looping);
-	// Unqueues any left buffer and rewinds the loader
+	/// Unqueues any left buffer and rewinds the loader
 	void stop(unsigned int source);
 
 	/// Returns samples frequency
@@ -40,7 +40,7 @@ class DLL_PUBLIC AudioStream
 	/// The associated loader to continuosly stream decoded data
 	IAudioLoader *audioLoader_;
 
-	// Constructor creating an audio stream from an audio file
+	/// Constructor creating an audio stream from an audio file
 	explicit AudioStream(const char *filename);
 	/// Private copy constructor
 	AudioStream(const AudioStream&);

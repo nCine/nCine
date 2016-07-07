@@ -27,7 +27,6 @@ JoyAxisEvent SdlInputManager::joyAxisEvent_;
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// The constructor takes care of opening available joysticks
 SdlInputManager::SdlInputManager()
 {
 	if (SDL_WasInit(SDL_INIT_VIDEO) == 0)
@@ -60,7 +59,6 @@ SdlInputManager::SdlInputManager()
 	}
 }
 
-/// The destructor releases every opened joystick
 SdlInputManager::~SdlInputManager()
 {
 	// Close a joystick if opened

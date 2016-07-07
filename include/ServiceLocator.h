@@ -17,7 +17,7 @@
 namespace ncine {
 
 /// Provides base services to requesting classes
-/*! It has memory ownership on service classes */
+/*! It has memory ownership on service classes. */
 class DLL_PUBLIC ServiceLocator
 {
   public:
@@ -46,7 +46,7 @@ class DLL_PUBLIC ServiceLocator
 	/// Registers a graphics capabilities provider
 	void registerGfxCapabilities(IGfxCapabilities* service);
 
-	// Deletes every registered service reestablishing null ones
+	/// Deletes every registered service and reestablishes null ones
 	void unregisterAll();
 
   private:
@@ -74,7 +74,7 @@ class DLL_PUBLIC ServiceLocator
 	friend DLL_PUBLIC ServiceLocator& theServiceLocator();
 };
 
-// Meyers' Singleton
+/// Meyers' Singleton
 DLL_PUBLIC ServiceLocator& theServiceLocator();
 
 }

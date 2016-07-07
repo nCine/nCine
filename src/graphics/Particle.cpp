@@ -7,7 +7,6 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// Private constructor accessible only by `ParticleSystem`
 Particle::Particle(SceneNode* parent, Texture *texture)
 	: Sprite(parent, texture), life_(0.0f), startingLife(0.0f), inLocalSpace_(false)
 {
@@ -18,7 +17,6 @@ Particle::Particle(SceneNode* parent, Texture *texture)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Initializes a particle with initial life, position, velocity and rotation
 void Particle::init(float life, Vector2f pos, Vector2f vel, float rot, bool inLocalSpace)
 {
 	life_ = life;
@@ -29,7 +27,6 @@ void Particle::init(float life, Vector2f pos, Vector2f vel, float rot, bool inLo
 	inLocalSpace_ = inLocalSpace;
 }
 
-/// Updates particle data after the specified amount of seconds has passed
 void Particle::update(float interval)
 {
 	if (interval > life_)
@@ -45,7 +42,6 @@ void Particle::update(float interval)
 	}
 }
 
-/// Custom transform method to allow independent position from parent
 void Particle::transform()
 {
 	SceneNode::transform();

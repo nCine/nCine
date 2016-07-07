@@ -19,17 +19,20 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 		HUD_LAYER = 32767
 	};
 
+	/// Constructor for a drawable node with a parent and a specified relative position
 	DrawableNode(SceneNode* parent, float x, float y);
+	/// Constructor for a drawable node with a parent and positioned in the relative origin
 	explicit DrawableNode(SceneNode* parent);
+	/// Constructor for a drawable node with no parent and positioned in the origin
 	DrawableNode();
 	virtual ~DrawableNode();
 
-	// Updates the draw command and adds it to the queue
+	/// Updates the draw command and adds it to the queue
 	virtual void draw(RenderQueue& renderQueue);
 
-	// Returns the node rendering layer
+	/// Returns the node rendering layer
 	unsigned int layer() const;
-	// Sets the node rendering layer
+	/// Sets the node rendering layer
 	void setLayer(unsigned int layer);
 
   protected:

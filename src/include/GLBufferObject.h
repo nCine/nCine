@@ -7,6 +7,7 @@
 
 namespace ncine {
 
+/// A class to handle OpenGL buffer objects of different kinds
 class GLBufferObject
 {
   public:

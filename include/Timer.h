@@ -9,15 +9,15 @@ namespace ncine {
 class DLL_PUBLIC Timer
 {
   public:
-	// Empty constructor
+	/// Default constructor
 	Timer();
 	/// Starts the timer
 	inline void start() { startTime_ = counter(); }
-	// Returns now-start time interval in seconds
+	/// Returns elapsed time in seconds since starting the timer
 	float interval() const;
-	// Returns elapsed time in seconds since base time
+	/// Returns elapsed time in seconds since base time
 	static float now();
-	// Puts the current thread to sleep for the specified number of seconds
+	/// Puts the current thread to sleep for the specified number of seconds
 	static void sleep(float seconds);
 
   protected:
@@ -31,21 +31,20 @@ class DLL_PUBLIC Timer
 	static bool hasMonotonicClock_;
 #endif
 
-	/// Have the static fields been initialized?
+	/// A flag indicating whether the static fields have been initialized
 	static bool isInitialized_;
 	/// Counter frequency in counts per second
 	static unsigned long int frequency_;
 	/// Counter value at initialization time
 	static unsigned long long int baseCount_;
 
-	// Initializes the static fields
+	/// Initializes the static fields
 	static void init();
 
-	// Returns current value of the counter
+	/// Returns current value of the counter
 	static unsigned long long int counter();
 };
 
-/// Returns now-start time interval in seconds
 inline float Timer::interval() const
 {
 	return float(counter() - startTime_) / frequency_;

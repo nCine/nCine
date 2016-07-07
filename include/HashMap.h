@@ -11,6 +11,7 @@ template <class K, class T, class HashFunc, bool IsConst> class HashMapIterator;
 template <class K, class T, class HashFunc, bool IsConst> struct HelperTraits;
 class String;
 
+/// The template class for the node stored inside a hashmap
 template <class K, class T>
 class HashMapNode
 {
@@ -37,9 +38,9 @@ class HashMap
 	explicit HashMap(unsigned int size);
 	~HashMap() { clear(); }
 
-	// Copy constructor
+	/// Copy constructor
 	HashMap(const HashMap& other);
-	// Copy-and-swap assignment operator
+	/// Copy-and-swap assignment operator
 	HashMap& operator=(HashMap other);
 
 	/// Swaps two hashmaps without copying their data
@@ -49,14 +50,14 @@ class HashMap
 		nc::swap(first.hashFunc_, second.hashFunc_);
 	}
 
-	// Returns an iterator to the first element
+	/// Returns an iterator to the first element
 	Iterator begin();
-	// Returns an iterator to past the last element
+	/// Returns an iterator to past the last element
 	Iterator end();
 
-	// Returns a constant iterator to the first element
+	/// Returns a constant iterator to the first element
 	ConstIterator begin() const;
-	// Returns a constant iterator to past the last lement
+	/// Returns a constant iterator to past the last lement
 	ConstIterator end() const;
 
 	/// Subscript operator
@@ -69,14 +70,14 @@ class HashMap
 	/// Returns the hash of a given key
 	inline hash_t hash(const K& key) const { return hashFunc_(key); }
 
-	// Clears the hashmap
+	/// Clears the hashmap
 	void clear();
 	/// Checks whether an element is in the hashmap or not
 	inline bool contains(const K& key, T& returnedValue) const { return retrieveBucket(key).contains(hashFunc_(key), key, returnedValue); }
 	/// Checks whether an element is in the hashmap or not
-	/*! Prefer this method if copying T is expensive, but always check the validity of returned pointer */
+	/*! \note Prefer this method if copying `T` is expensive, but always check the validity of returned pointer. */
 	inline T* find(const K& key) { return retrieveBucket(key).find(hashFunc_(key), key); }
-	// Removes a key from the hashmap, if it exists
+	/// Removes a key from the hashmap, if it exists
 	inline bool remove(const K& key) { return retrieveBucket(key).remove(hashFunc_(key), key); }
 
   private:
@@ -256,9 +257,7 @@ T& HashMap<K, T, HashFunc>::HashBucket::findOrAdd(hash_t hash, const K& key)
 	return (*collisionList_.rBegin()).value;
 }
 
-/*!
-	\return True if the element has been found and removed
-*/
+/*!	\return True if the element has been found and removed */
 template <class K, class T, class HashFunc>
 bool HashMap<K, T, HashFunc>::HashBucket::remove(hash_t hash, const K& key)
 {
@@ -312,7 +311,6 @@ HashMap<K, T, HashFunc>::HashMap(unsigned int size)
 	}
 }
 
-/// Copy constructor
 template <class K, class T, class HashFunc>
 HashMap<K, T, HashFunc>::HashMap(const HashMap<K, T, HashFunc>& other)
 	: buckets_(other.buckets_), hashFunc_(other.hashFunc_)
@@ -320,8 +318,7 @@ HashMap<K, T, HashFunc>::HashMap(const HashMap<K, T, HashFunc>& other)
 
 }
 
-/// Copy-and-swap assignment operator
-/** The parameter should be passed by value for the idiom to work */
+/*! The parameter should be passed by value for the idiom to work. */
 template <class K, class T, class HashFunc>
 HashMap<K, T, HashFunc>& HashMap<K, T, HashFunc>::operator=(HashMap<K, T, HashFunc> other)
 {
@@ -329,7 +326,6 @@ HashMap<K, T, HashFunc>& HashMap<K, T, HashFunc>::operator=(HashMap<K, T, HashFu
 	return *this;
 }
 
-/// Clears the hashmap
 template <class K, class T, class HashFunc>
 void HashMap<K, T, HashFunc>::clear()
 {

@@ -70,8 +70,7 @@ AndroidInputManager::AndroidInputManager(struct android_app* state)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Enables the accelerometer sensor
-/*! It is called by EnableAccelerometer() and when the application gains focus */
+/*! This method is called by `enableAccelerometer()` and when the application gains focus */
 void AndroidInputManager::enableAccelerometerSensor()
 {
 	if (accelerometerEnabled_ && accelerometerSensor_ != NULL)
@@ -82,8 +81,7 @@ void AndroidInputManager::enableAccelerometerSensor()
 	}
 }
 
-/// Disables the accelerometer sensor
-/*! It is called by EnableAccelerometer() and when the application loses focus */
+/*! This method is called by `enableAccelerometer()` and when the application loses focus */
 void AndroidInputManager::disableAccelerometerSensor()
 {
 	if (accelerometerEnabled_ && accelerometerSensor_ != NULL)
@@ -92,7 +90,6 @@ void AndroidInputManager::disableAccelerometerSensor()
 	}
 }
 
-/// Allows the application to make use of the accelerometer
 /*! Activates the sensor and raises the flag needed for application focus handling */
 void AndroidInputManager::enableAccelerometer(bool enabled)
 {
@@ -108,7 +105,6 @@ void AndroidInputManager::enableAccelerometer(bool enabled)
 	accelerometerEnabled_ = enabled;
 }
 
-/// Parses an Android sensor event related to the accelerometer
 void AndroidInputManager::parseAccelerometerEvent()
 {
 	if (inputEventHandler_ != NULL && accelerometerEnabled_ && accelerometerSensor_ != NULL)
@@ -124,7 +120,6 @@ void AndroidInputManager::parseAccelerometerEvent()
 	}
 }
 
-/// Parses an Android input event
 bool AndroidInputManager::parseEvent(const AInputEvent *event)
 {
 	bool isEventHandled = false;
@@ -391,7 +386,6 @@ float AndroidInputManager::joyAxisNormValue(int joyId, int axisId) const
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Initializes the accelerometer sensor
 void AndroidInputManager::initAccelerometerSensor(android_app *state)
 {
 	// Prepare to monitor accelerometer
@@ -407,7 +401,6 @@ void AndroidInputManager::initAccelerometerSensor(android_app *state)
 	}
 }
 
-/// Updates joystick states after connections and disconnections
 void AndroidInputManager::updateJoystickConnections()
 {
 	if (joyCheckTimer_.interval() >= JoyCheckRate)
@@ -419,7 +412,6 @@ void AndroidInputManager::updateJoystickConnections()
 	}
 }
 
-/// Checks if a previously connected joystick has been disconnected
 void AndroidInputManager::checkDisconnectedJoysticks()
 {
 	for (unsigned int i = 0; i < MaxNumJoysticks; i++)
@@ -439,7 +431,6 @@ void AndroidInputManager::checkDisconnectedJoysticks()
 	}
 }
 
-/// Checks if a new joystick has been connected
 void AndroidInputManager::checkConnectedJoysticks()
 {
 	// InputDevice.getDeviceIds() will not fill an array longer than MaxDevices

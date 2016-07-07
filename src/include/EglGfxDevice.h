@@ -15,7 +15,7 @@ namespace ncine {
 class EglGfxDevice : public IGfxDevice
 {
   public:
-	// Constructor taking a DisplayMode
+	/// Constructor taking a `DisplayMode` object
 	EglGfxDevice(struct android_app* state, DisplayMode mode);
 	~EglGfxDevice();
 
@@ -28,16 +28,16 @@ class EglGfxDevice : public IGfxDevice
 
 	void setWindowTitle(const char *windowTitle) { }
 
-	// Recreates a surface from a native window
+	/// Recreates a surface from a native window
 	void createSurface(struct android_app* state);
-	// Binds the current context
+	/// Binds the current context
 	void bindContext();
-	// Unbinds the current context
+	/// Unbinds the current context
 	void unbindContext();
-	// Queries the size of the current surface
+	/// Queries the size of the current surface
 	void querySurfaceSize();
 
-	// Checks if the desired pixel format is supported
+	/// Checks if the desired pixel format is supported
 	static bool isModeSupported(struct android_app* state, DisplayMode mode);
 
   private:
@@ -50,7 +50,7 @@ class EglGfxDevice : public IGfxDevice
 	/// The EGL config used to create the first surface
 	EGLConfig config_;
 
-	// Initializes the OpenGL graphic context
+	/// Initializes the OpenGL graphic context
 	void initDevice(struct android_app* state);
 };
 

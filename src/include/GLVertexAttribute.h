@@ -8,7 +8,7 @@ namespace ncine {
 
 class GLAttribute;
 
-/// A class to wrap all the parameters needed by a `GLVertexAttribPointer()` call
+/// A class to wrap all the parameters needed by a `glVertexAttribPointer()` call
 class GLVertexAttribute
 {
   public:

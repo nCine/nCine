@@ -6,6 +6,7 @@
 
 namespace ncine {
 
+/// A class to handle OpenGL shader objects
 class GLShader
 {
   public:

@@ -11,25 +11,21 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// Constructor taking the resolution as two integer
 SdlGfxDevice::SdlGfxDevice(int width, int height, bool isFullScreen)
 {
 	init(width, height, DisplayMode(), isFullScreen);
 }
 
-/// Constructor taking the resolution as a Vector2i class
 SdlGfxDevice::SdlGfxDevice(Vector2i size, bool isFullScreen_)
 {
 	init(size.x, size.y, DisplayMode(), isFullScreen_);
 }
 
-/// Constructor taking the resolution as two integer and a DisplayMode
 SdlGfxDevice::SdlGfxDevice(int width, int height, DisplayMode mode, bool isFullScreen)
 {
 	init(width, height, mode, isFullScreen);
 }
 
-/// Constructor taking the resolution as a Vector2i class and a DisplayMode
 SdlGfxDevice::SdlGfxDevice(Vector2i size, DisplayMode mode, bool isFullScreen)
 {
 	init(size.x, size.y, mode, isFullScreen);
@@ -73,7 +69,6 @@ void SdlGfxDevice::toggleFullScreen()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Initializes the class
 void SdlGfxDevice::init(int width, int height, DisplayMode mode, bool isFullScreen)
 {
 	width_ = width;
@@ -85,7 +80,6 @@ void SdlGfxDevice::init(int width, int height, DisplayMode mode, bool isFullScre
 	initDevice();
 }
 
-/// Initilizes the video subsystem (SDL)
 void SdlGfxDevice::initGraphics()
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -95,7 +89,6 @@ void SdlGfxDevice::initGraphics()
 	}
 }
 
-/// Initilizes the OpenGL graphic context
 void SdlGfxDevice::initDevice()
 {
 	// setting OpenGL attributes

@@ -21,7 +21,6 @@ int32_t engine_handle_input(struct android_app* app, AInputEvent* event)
 
 namespace ncine {
 
-/// Meyers' Singleton
 Application& theApplication()
 {
 	static AndroidApplication instance;
@@ -32,7 +31,6 @@ Application& theApplication()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Entry point method to be called in the `android_main()` function
 void AndroidApplication::start(struct android_app* state, IAppEventHandler* (*createAppEventHandler)())
 {
 	theAndroidApplication().state_ = state;
@@ -79,7 +77,6 @@ void AndroidApplication::start(struct android_app* state, IAppEventHandler* (*cr
 	ANativeActivity_finish(state->activity);
 }
 
-/// Processes an Android application command
 void AndroidApplication::processCommand(struct android_app* app, int32_t cmd)
 {
 	static EglGfxDevice *eglGfxDevice = NULL;
@@ -168,7 +165,6 @@ void AndroidApplication::processCommand(struct android_app* app, int32_t cmd)
 	}
 }
 
-/// Wrapper around `AndroidJniHelper::sdkVersion()`
 unsigned int AndroidApplication::sdkVersion() const
 {
 	unsigned int sdkVersion = 0;
@@ -181,7 +177,6 @@ unsigned int AndroidApplication::sdkVersion() const
 	return sdkVersion;
 }
 
-/// Wrapper around `AndroidInputManager::enableAccelerometer()`
 void AndroidApplication::enableAccelerometer(bool enabled)
 {
 	if (isInitialized_)
@@ -204,7 +199,6 @@ void AndroidApplication::preInit()
 	theServiceLocator().registerLogger(new FileLogger(logFilePath.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
 }
 
-/// Must be called at start to init the application
 void AndroidApplication::init()
 {
 	// Graphics device should always be created before the input manager!
@@ -232,7 +226,6 @@ void AndroidApplication::init()
 	isInitialized_ = true;
 }
 
-/// Must be called before exiting to shut down the application
 void AndroidApplication::shutdown()
 {
 	AndroidJniHelper::detachJVM();

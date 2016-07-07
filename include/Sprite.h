@@ -12,9 +12,13 @@ namespace ncine {
 class DLL_PUBLIC Sprite : public DrawableNode
 {
   public:
+	/// Constructor for a sprite with a parent and texture, positioned in the relative origin
 	Sprite(SceneNode* parent, Texture *texture);
+	/// Constructor for a sprite with a texture but no parent, positioned in the origin
 	explicit Sprite(Texture *texture);
+	/// Constructor for a sprite with a parent, a texture and a specified relative position
 	Sprite(SceneNode* parent, Texture *texture, float x, float y);
+	/// Constructor for a sprite with a texture and a specified position but no parent
 	Sprite(Texture *texture, float x, float y);
 
 	/// Returns sprite width
@@ -23,7 +27,7 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	inline float height() const { return height_ * scaleFactor_; }
 	/// Returns sprite size
 	inline Vector2f size() const { return Vector2f(width(), height()); }
-	// Returns sprite rectangle
+	/// Returns sprite rectangle
 	Rectf rect() const;
 
 	/// Sets sprite width
@@ -49,17 +53,17 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	/// Sets the texture object
 	inline void setTexture(Texture *texture) { texture_ = texture; }
 	/// Sets a flag that makes a transparent texture to be considered opaque
-	/*! This flag comes in handy when the sprite uses an opaque region of a transparent texture atlas */
+	/*! \note This flag comes in handy when the sprite uses an opaque region of a transparent texture atlas. */
 	inline void setOpaqueTexture(bool opaqueTexture) { opaqueTexture_ = opaqueTexture; }
 
 	/// Gets the texture source rectangle for blitting
 	inline Recti texRect() const { return texRect_; }
-	// Ses the texture source rectangle for blitting
+	/// Ses the texture source rectangle for blitting
 	void setTexRect(const Recti& rect);
 
-	// Flips the texture rect along the X coordinate
+	/// Flips the texture rect along the X coordinate
 	void flipX();
-	// Flips the texture rect along the Y coordinate
+	/// Flips the texture rect along the Y coordinate
 	void flipY();
 
 	inline static ObjectType sType() { return SPRITE_TYPE; }
@@ -76,11 +80,11 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	/// Sprite height in pixel
 	float height_;
 
+	/// Common sprite initialization for every constructor
 	void init();
 	virtual void updateRenderCommand();
 };
 
-/// Returns sprite rectangle
 inline Rectf Sprite::rect() const
 {
 	float halfAbsW = width_ * absScaleFactor_ * 0.5f;
@@ -88,7 +92,6 @@ inline Rectf Sprite::rect() const
 	return Rectf(x - halfAbsW, y - halfAbsH, halfAbsW * 2.0f, halfAbsH * 2.0f);
 }
 
-/// Sets the texture source rectangle for blitting
 inline void Sprite::setTexRect(const Recti& rect)
 {
 	texRect_ = rect;
@@ -96,14 +99,12 @@ inline void Sprite::setTexRect(const Recti& rect)
 	width_ = static_cast<float>(rect.w);
 }
 
-/// Flips the texture rect along the X coordinate
 inline void Sprite::flipX()
 {
 	texRect_.x += texRect_.w;
 	texRect_.w *= -1;
 }
 
-/// Flips the texture rect along the Y coordinate
 inline void Sprite::flipY()
 {
 	texRect_.y += texRect_.h;

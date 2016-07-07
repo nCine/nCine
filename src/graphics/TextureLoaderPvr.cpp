@@ -33,7 +33,6 @@ void TextureLoaderPvr::init()
 	parseFormat(header);
 }
 
-/// Reads the PVR3 header and fills the corresponding structure
 void TextureLoaderPvr::readHeader(Pvr3Header &header)
 {
 	// PVR3 header is 52 bytes long
@@ -59,7 +58,6 @@ void TextureLoaderPvr::readHeader(Pvr3Header &header)
 	}
 }
 
-/// Parses the PVR3 header to determine its format
 void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
 {
 	GLenum internalFormat = GL_RGB; // to suppress uninitialized variable warning

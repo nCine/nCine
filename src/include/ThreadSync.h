@@ -37,8 +37,8 @@ class Mutex
 };
 
 /// Condition variable class (threads synchronization)
-/*! Windows version based on the TinyThread++ library implementation
- * More info at http://www.cs.wustl.edu/~schmidt/win32-cv-1.html */
+/*! Windows version based on the <em>TinyThread++</em> library implementation.
+ *  More info at: http://www.cs.wustl.edu/~schmidt/win32-cv-1.html */
 class CondVariable
 {
   public:
@@ -96,7 +96,7 @@ class RWLock
 class Barrier
 {
   public:
-	// Creates a barrier for the specified amount of waiting threads
+	/// Creates a barrier for the specified amount of waiting threads
 	explicit Barrier(unsigned int count);
 	~Barrier();
 

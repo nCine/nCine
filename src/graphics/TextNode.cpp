@@ -29,7 +29,6 @@ TextNode::TextNode(SceneNode* parent, Font* font)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Returns rendered text width
 float TextNode::width() const
 {
 	calculateBoundaries();
@@ -37,7 +36,6 @@ float TextNode::width() const
 	return xAdvanceSum_ * currentAbsScale();
 }
 
-/// Returns rendered text height
 float TextNode::height() const
 {
 	calculateBoundaries();
@@ -45,7 +43,6 @@ float TextNode::height() const
 	return yAdvanceSum_ * currentAbsScale();
 }
 
-/// Sets the kerning flag for this node renderin
 void TextNode::enableKerning(bool withKerning)
 {
 	if (withKerning != withKerning_)
@@ -56,7 +53,6 @@ void TextNode::enableKerning(bool withKerning)
 	}
 }
 
-/// Sets the horizontal text alignment
 void TextNode::setAlignment(Alignment alignment)
 {
 	if (alignment != alignment_)
@@ -67,7 +63,6 @@ void TextNode::setAlignment(Alignment alignment)
 	}
 }
 
-/// Sets the string to render
 void TextNode::setString(const String &string)
 {
 	if (string_ != string)
@@ -130,7 +125,6 @@ void TextNode::draw(RenderQueue& renderQueue)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Calculates rectangle boundaries for the rendered text
 void TextNode::calculateBoundaries() const
 {
 	if (dirtyBoundaries_)
@@ -181,7 +175,6 @@ void TextNode::calculateBoundaries() const
 	}
 }
 
-/// Calculates align offset for a particular line
 float TextNode::calculateAlignment(unsigned int lineIndex) const
 {
 	float alignOffset = 0.0f;
@@ -202,7 +195,6 @@ float TextNode::calculateAlignment(unsigned int lineIndex) const
 	return alignOffset;
 }
 
-/// Calculates absolute scale factor on the fly
 float TextNode::currentAbsScale() const
 {
 	float absScaleFactor = scaleFactor_;
@@ -214,7 +206,6 @@ float TextNode::currentAbsScale() const
 	return absScaleFactor;
 }
 
-/// Fills the batch draw command with data from a glyph
 void TextNode::processGlyph(const FontGlyph* glyph)
 {
 	Vector2i size = glyph->size();
@@ -252,11 +243,10 @@ void TextNode::processGlyph(const FontGlyph* glyph)
 	xAdvance_ += glyph->xAdvance();
 }
 
+/*! \todo Only the transformation matrix should be updated per frame */
 void TextNode::updateRenderCommand()
 {
 	renderCommand_->transformation() = worldMatrix_;
-
-	// TODO: Only the transformation matrix should be updated per frame
 	renderCommand_->material().uniform("color")->setFloatValue(absColor().fR(), absColor().fG(), absColor().fB(), absColor().fA());
 }
 

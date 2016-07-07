@@ -9,7 +9,6 @@ namespace ncine {
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Clears the screen
 void IGfxDevice::clear()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -19,7 +18,6 @@ void IGfxDevice::clear()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Sets up the initial OpenGL state
 void IGfxDevice::setupGL()
 {
 	glDisable(GL_DITHER);

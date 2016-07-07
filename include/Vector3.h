@@ -56,9 +56,13 @@ class Vector3
 	template <class S> friend S dot(const Vector3<S>& v1, const Vector3<S>& v2);
 	template <class S> friend Vector3<S> cross(const Vector3<S>& v1, const Vector3<S>& v2);
 
+	/// A vector with all zero elements
 	static const Vector3 Zero;
+	/// A unit vector on the X axis
 	static const Vector3 XAxis;
+	/// A unit vector on the Y axis
 	static const Vector3 YAxis;
+	/// A unit vector on the Z axis
 	static const Vector3 ZAxis;
 };
 

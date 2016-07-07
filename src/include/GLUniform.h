@@ -7,7 +7,7 @@
 namespace ncine {
 
 /// A class to store information about an active OpenGL shader uniform
-/*! Its only purpose is to initialize a `GLUniformCache` class */
+/*! Its only purpose is to initialize a `GLUniformCache` class. */
 class GLUniform
 {
   public:

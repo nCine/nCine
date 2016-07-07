@@ -23,27 +23,33 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Relative Y coordinate as a public property
 	float y;
 
+	/// Constructor for a node with a parent and a specified relative position
 	SceneNode(SceneNode* parent, float xx, float yy);
+	/// Constructor for a node with a parent and positioned in the relative origin
 	explicit SceneNode(SceneNode* parent);
+	/// Constructor for a node with no parent and positioned in the origin
 	SceneNode();
+	/// The destructor will delete every child node
 	virtual ~SceneNode();
 
 	inline static ObjectType sType() { return SCENENODE_TYPE; }
 
-	const SceneNode* parentNode() const { return parent_; }
-	const List<SceneNode *>& children() const { return children_; }
-	// Adds a node as a child of this one
+	/// Returns the parent node, if there is any
+	inline const SceneNode* parentNode() const { return parent_; }
+	/// Returns a list of child nodes
+	inline const List<SceneNode *>& children() const { return children_; }
+	/// Adds a node as a child of this one
 	bool addChildNode(SceneNode *childNode);
-	// Removes a child of this node, without reparenting nephews
+	/// Removes a child of this node, without reparenting nephews
 	bool removeChildNode(SceneNode *childNode);
-	// Removes a child of this node while iterating on children, without reparenting nephews
+	/// Removes a child of this node while iterating on children, without reparenting nephews
 	bool removeChildNode(List<SceneNode *>::ConstIterator it);
-	// Removes a child of this node reparenting nephews as children
+	/// Removes a child of this node reparenting nephews as children
 	bool unlinkChildNode(SceneNode *childNode);
 
-	// Called once every frame to update the node
+	/// Called once every frame to update the node
 	virtual void update(float interval);
-	// Draws the node and visits its children
+	/// Draws the node and visits its children
 	virtual void visit(RenderQueue& renderQueue);
 	/// Renders the node
 	virtual void draw(RenderQueue& renderQueue) { }
@@ -63,7 +69,7 @@ class DLL_PUBLIC SceneNode : public Object
 	inline void setPosition(const Vector2f& pos) { x = pos.x; y = pos.y; }
 	/// Moves a node based on two offsets
 	inline void move(float xx, float yy) { x += xx; y += yy; }
-	/// Add a move vector to the node current position
+	/// Adds a move vector to the node current position
 	inline void move(const Vector2f& pos) { x += pos.x; y += pos.y; }
 
 	/// Gets the node scale factor
@@ -77,14 +83,14 @@ class DLL_PUBLIC SceneNode : public Object
 	inline float rotation() const { return rotation_; }
 	/// Gets the node absolute rotation in degrees
 	inline float absRotation() const { return absRotation_; }
-	// Sets the node rotation in degrees
+	/// Sets the node rotation in degrees
 	void setRotation(float rotation);
 
 	/// Gets the node color
 	inline Color color() const { return color_; }
 	/// Gets the node absolute color
 	inline Color absColor() const { return absColor_; }
-	/// Sets the node color through a Color object
+	/// Sets the node color through a `Color` object
 	inline void setColor(Color color) { color_ = color; }
 	/// Sets the node color through unsigned char components
 	inline void setColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha) { color_.set(red, green, blue, alpha); }
@@ -104,7 +110,9 @@ class DLL_PUBLIC SceneNode : public Object
 	bool shouldUpdate_;
 	bool shouldDraw_;
 
+	/// A pointer to the parent node
 	SceneNode* parent_;
+	/// The list of child nodes
 	List<SceneNode *> children_;
 
 	/// Scale factor for node size
@@ -112,21 +120,21 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Degrees for clock-wise node rotation in degrees
 	float rotation_;
 
-	/// Node color for transparency, translucency, etc...
-	/** Even if the base scene node is not always drawable, it carries
-		color information to easily pass that information to its children */
+	/// Node color for transparency and translucency
+	/*! Even if the base scene node is not always drawable, it carries
+	 *  color information to easily pass that information to its children. */
 	Color color_;
 
-	/// Absolute X coordinate as calculated by the Transform() function
+	/// Absolute X coordinate as calculated by the `Transform()` function
 	float absX_;
-	/// Absolute Y coordinate as calculated by the Transform() function
+	/// Absolute Y coordinate as calculated by the `Transform()` function
 	float absY_;
-	/// Absolute scale factor as calculated by the Transform() function
+	/// Absolute scale factor as calculated by the `Transform()` function
 	float absScaleFactor_;
-	/// Absolute node rotation as calculated by the Transform() function
+	/// Absolute node rotation as calculated by the `Transform()` function
 	float absRotation_;
 
-	/// Absolute node color as calculated by the Transform() function
+	/// Absolute node color as calculated by the `Transform()` function
 	Color absColor_;
 
 	/// World transformation matrix (calculated from local and parent's world)
@@ -142,7 +150,6 @@ class DLL_PUBLIC SceneNode : public Object
 	virtual void transform();
 };
 
-/// Sets the node rotation in degrees
 inline void SceneNode::setRotation(float rotation)
 {
 	while (rotation > 360.0f)

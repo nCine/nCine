@@ -8,12 +8,13 @@ namespace ncine {
 class IAudioLoader;
 
 /// A class representing an OpenAL buffer
-/*! It inherits from Object because a buffer can be shared by more than one AudioBufferPlayer object */
+/*! It inherits from `Object` because a buffer can be
+ *  shared by more than one `AudioBufferPlayer` object. */
 class DLL_PUBLIC AudioBuffer : public Object
 {
   public:
 	AudioBuffer();
-	// A constructor creating a buffer from a file
+	/// A constructor creating a buffer from a file
 	explicit AudioBuffer(const char *filename);
 	virtual ~AudioBuffer();
 
@@ -39,7 +40,7 @@ class DLL_PUBLIC AudioBuffer : public Object
 	/// Private assignment operator
 	AudioBuffer& operator=(const AudioBuffer&);
 
-	// Loads audio samples based on information from the audio loader
+	/// Loads audio samples based on information from the audio loader
 	void load(const IAudioLoader *audioLoader);
 };
 

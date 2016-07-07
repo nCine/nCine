@@ -63,7 +63,9 @@ class Matrix4x4
 	static Matrix4x4 frustum(T left, T right, T bottom, T top, T near, T far);
 	static Matrix4x4 perspective(T fovY, T aspect, T near, T far);
 
+	/// A matrix with all zero elements
 	static const Matrix4x4 Zero;
+	/// An identity matrix
 	static const Matrix4x4 Identity;
 
   private:

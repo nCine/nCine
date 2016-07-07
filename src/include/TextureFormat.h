@@ -23,13 +23,13 @@ class TextureFormat
 	inline GLenum type() const { return type_; }
 	/// Returns true if the format holds compressed data
 	inline bool isCompressed() const { return isCompressed_; }
-	// Returns true if the format provides an alpha channel
+	/// Returns true if the format provides an alpha channel
 	bool hasAlpha() const;
 
-	// Converts the external format to the corresponding BGR one
+	/// Converts the external format to the corresponding BGR one
 	void bgrFormat();
 
-	// Calculates the pixel data size for each MIP map level
+	/// Calculates the pixel data size for each MIP map level
 	static long int calculateMipSizes(GLenum internalFormat, int width, int height, int mipMapCount, long int *mipDataOffsets, long int *mipDataSizes);
 
   private:
@@ -39,30 +39,29 @@ class TextureFormat
 	bool isCompressed_;
 
 #ifndef __ANDROID__
-	// Searches a match between an integer internal format and an external one
+	/// Searches a match between an integer internal format and an external one
 	bool integerFormat();
-	// Searches a match between a non integer internal format and an external one
+	/// Searches a match between a non integer internal format and an external one
 	bool nonIntegerFormat();
-	// Searches a match between a floating point internal format and an external one
+	/// Searches a match between a floating point internal format and an external one
 	bool floatFormat();
-	// Searches a match between a compressed internal format and an external one
+	/// Searches a match between a compressed internal format and an external one
 	bool compressedFormat();
 #else
-	// Searches a match between an OpenGL ES internal format and an external one
+	/// Searches a match between an OpenGL ES internal format and an external one
 	bool oesFormat();
-	// Searches a match between a OpenGL ES compressed internal format and an external one
+	/// Searches a match between a OpenGL ES compressed internal format and an external one
 	bool oesFormatApi21();
-	// Searches a match between a OpenGL ES compressed internal format and an external one
+	/// Searches a match between a OpenGL ES compressed internal format and an external one
 	bool oesCompressedFormat();
 #endif
 
-	// Attempts to find a match between an external format and the corresponding internal one
+	/// Attempts to find a match between an external format and the corresponding internal one
 	void findExternalFormat();
-	// Checks if the internal format is supported by the GPU
+	/// Checks if the internal format is supported by the GPU
 	void checkFormatSupport() const;
 };
 
-/// Returns true if the format provides an alpha channel
 inline bool TextureFormat::hasAlpha() const
 {
 	return (format_ == GL_RGBA ||

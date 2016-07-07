@@ -15,6 +15,7 @@ class FontGlyph;
 class DLL_PUBLIC TextNode : public DrawableNode
 {
   public:
+	/// Horizontal alignment modes
 	enum Alignment
 	{
 		ALIGN_LEFT,
@@ -24,24 +25,24 @@ class DLL_PUBLIC TextNode : public DrawableNode
 
 	TextNode(SceneNode* parent, Font *font);
 
-	// Returns rendered text width
+	/// Returns rendered text width
 	float width() const;
-	// Returns rendered text height
+	/// Returns rendered text height
 	float height() const;
-	/// Is kerning enabled for this node rendering?
+	/// Returns true if kerning is enabled for this node rendering
 	inline bool withKerning() const { return withKerning_; }
-	// Sets the kerning flag for this node rendering
+	/// Sets the kerning flag for this node rendering
 	void enableKerning(bool withKerning);
 	/// Gets the horizontal text alignment
 	inline Alignment alignment() const { return alignment_; }
-	// Sets the horizontal text alignment
+	/// Sets the horizontal text alignment
 	void setAlignment(Alignment alignment);
 
 	/// Gets the font base scaled by the scale factor
 	inline float fontBase() const { return font_->base() * currentAbsScale(); }
 	/// Gets the font line height scaled by the scale factor
 	inline float fontLineHeight() const { return font_->lineHeight() * currentAbsScale(); }
-	// Sets the string to render
+	/// Sets the string to render
 	void setString(const String &string);
 
 	virtual void draw(RenderQueue& renderQueue);
@@ -50,7 +51,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 
   private:
 	/// Maximum length for a string to be rendered
-	/*! This number affects both the string container and VBO size */
+	/*! This number affects the size of both the string container and the VBO. */
 	static const unsigned int MaxStringLength = 256;
 
 	/// The string to be rendered
@@ -79,13 +80,13 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Horizontal text alignment
 	Alignment alignment_;
 
-	// Calculates rectangle boundaries for the rendered text
+	/// Calculates rectangle boundaries for the rendered text
 	void calculateBoundaries() const;
-	// Calculates align offset for a particular line
+	/// Calculates align offset for a particular line
 	float calculateAlignment(unsigned int lineIndex) const;
-	// Calculates absolute scale factor on the fly
+	/// Calculates absolute scale factor on the fly
 	float currentAbsScale() const;
-	// Fills the batch draw command with data from a glyph
+	/// Fills the batch draw command with data from a glyph
 	void processGlyph(const FontGlyph* glyph);
 
 	virtual void updateRenderCommand();

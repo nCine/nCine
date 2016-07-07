@@ -12,7 +12,7 @@ class ProfileVariable
 	ProfileVariable(unsigned int numValues, float rejectDelay);
 	~ProfileVariable();
 
-	// Adds a new value for the variable
+	/// Adds a new value for the variable
 	bool addValue(float value);
 	/// Returns the number of values that can be stored
 	inline unsigned int numValues() const { return numValues_; }
@@ -26,9 +26,9 @@ class ProfileVariable
 	inline float max() const { return max_; }
 	/// Returns the mathematical mean of the values
 	inline float mean() const { return mean_; }
-	// Returns the value at the specified index normalized between the two numbers provided
+	/// Returns the value at the specified index normalized between `min` and `max`
 	float normBetweenValue(unsigned int index, float min, float max) const;
-	// Returns the mathematical mean normalized between the two numbers provided
+	/// Returns the mathematical mean normalized between `min` and `max`
 	float normBetweenMean(float min, float max) const;
 
 	/// Returns a normalized version of the value with the specified index
@@ -40,7 +40,7 @@ class ProfileVariable
 	/// Returns the delay in seconds for value rejection
 	inline float delay() const { return rejectDelay_; }
 	/// Set the delay in seconds for value rejection
-	/** If you try to add a value before the delay, it gets discarded. */
+	/*! A value added before the delay will be discarded. */
 	inline void setDelay(float rejectDelay) { rejectDelay_ = rejectDelay; }
 
   private:

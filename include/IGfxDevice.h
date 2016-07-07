@@ -14,7 +14,7 @@ class DLL_PUBLIC IGfxDevice
 
 	/// Sets screen resolution with two integers
 	virtual void setResolution(int width, int height) = 0;
-	/// Sets screen resolution with the Size class
+	/// Sets screen resolution with a `Vector2<int>` object
 	virtual void setResolution(Vector2i size) = 0;
 
 	/// Toggles between fullscreen and windowed mode
@@ -23,7 +23,7 @@ class DLL_PUBLIC IGfxDevice
 	/// Sets the application window title
 	virtual void setWindowTitle(const char *windowTitle) = 0;
 
-	/// Returns device resolution
+	/// Returns device resolution as a `Vector2<int>` object
 	inline Vector2i resolution() const { return Vector2i(width_, height_); }
 	/// Returns device width
 	inline int width() const { return width_; }
@@ -43,18 +43,17 @@ class DLL_PUBLIC IGfxDevice
 	int height_;
 	/// Display properties
 	DisplayMode mode_;
-	/// Device rendering occurs in full screen
+	/// Whether device rendering occurs in full screen
 	bool isFullScreen_;
 
   private:
-	// Sets up the initial OpenGL state
+	/// Sets up the initial OpenGL state
 	virtual void setupGL();
 
 	/// Updates the screen swapping back and front buffers
 	virtual void update() = 0;
-	// Clears the screen
+	/// Clears the screen
 	virtual void clear();
-
 
 	friend class Application;
 };

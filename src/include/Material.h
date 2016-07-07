@@ -26,7 +26,7 @@ class Material
 		COLOR_PROGRAM
 	};
 
-	// Empty constructor
+	/// Default constructor
 	Material();
 	Material(GLShaderProgram* program, GLTexture* texture);
 

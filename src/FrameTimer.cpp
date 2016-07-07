@@ -8,9 +8,8 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/*! Constructs a timer which calculates average FPS every dAvgInterval
-	seconds and prints in the log every dLogInterval seconds
-*/
+/*! Constructs a timer which calculates average FPS every `avgInterval`
+ *  seconds and prints in the log every `logInterval` seconds. */
 FrameTimer::FrameTimer(float logInterval, float avgInterval)
 	: logInterval_(logInterval), avgInterval_(avgInterval),
 	  frameInterval_(0.0f), avgNumFrames_(0L), logNumFrames_(0L),
@@ -24,7 +23,6 @@ FrameTimer::FrameTimer(float logInterval, float avgInterval)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Adds a frame to the counter and calculates the interval since the previous one
 void FrameTimer::addFrame()
 {
 	frameInterval_ = Timer::interval();

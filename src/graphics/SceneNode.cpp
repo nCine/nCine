@@ -18,6 +18,7 @@ const float SceneNode::MinRotation = 0.5f;
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+/*! \param parent The parent can be `NULL` */
 SceneNode::SceneNode(SceneNode* parent, float xx, float yy)
 	: Object(SCENENODE_TYPE), x(xx), y(yy), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
 	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
@@ -29,6 +30,7 @@ SceneNode::SceneNode(SceneNode* parent, float xx, float yy)
 	}
 }
 
+/*! \param parent The parent can be `NULL` */
 SceneNode::SceneNode(SceneNode* parent)
 	: Object(SCENENODE_TYPE), x(0.0f), y(0.0f), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
 	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
@@ -67,10 +69,7 @@ SceneNode::~SceneNode()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Adds a node as a child of this one
-/*!
-	\return True if the node has been added
-*/
+/*!	\return True if the node has been added */
 bool SceneNode::addChildNode(SceneNode *childNode)
 {
 	bool hasBeenAdded = false;
@@ -90,10 +89,7 @@ bool SceneNode::addChildNode(SceneNode *childNode)
 	return hasBeenAdded;
 }
 
-/// Removes a child of this node, without reparenting nephews
-/*!
-	\return True if the node has been removed
-*/
+/*!	\return True if the node has been removed */
 bool SceneNode::removeChildNode(SceneNode *childNode)
 {
 	bool hasBeenRemoved = false;
@@ -110,9 +106,8 @@ bool SceneNode::removeChildNode(SceneNode *childNode)
 	return hasBeenRemoved;
 }
 
-/// Removes a child of this node while iterating on children, without reparenting nephews
 /*!
-	It is faster to remove through an iterator than with a linear search for a specific node
+	It is faster to remove through an iterator than with a linear search for a specific node.
 	\return True if the node has been removed
 */
 bool SceneNode::removeChildNode(List<SceneNode *>::ConstIterator it)
@@ -131,10 +126,7 @@ bool SceneNode::removeChildNode(List<SceneNode *>::ConstIterator it)
 	return hasBeenRemoved;
 }
 
-/// Removes a child of this node reparenting nephews as children
-/*!
-	\return True if the node has been unlinked
-*/
+/*!	\return True if the node has been unlinked */
 bool SceneNode::unlinkChildNode(SceneNode *childNode)
 {
 	bool hasBeenUnlinked = false;
@@ -160,7 +152,6 @@ bool SceneNode::unlinkChildNode(SceneNode *childNode)
 	return hasBeenUnlinked;
 }
 
-/// Called once every frame to update the node
 void SceneNode::update(float interval)
 {
 	// Early return not needed, the first call to this method is on the root node
@@ -179,7 +170,6 @@ void SceneNode::update(float interval)
 	}
 }
 
-/// Draws the node and visits its children
 void SceneNode::visit(RenderQueue &renderQueue)
 {
 	// Early return not needed, the first call to this method is on the root node

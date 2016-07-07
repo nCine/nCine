@@ -51,7 +51,9 @@ class Quaternion
 	static Quaternion fromAxisAngle(T xx, T yy, T zz, T degrees);
 	static Quaternion fromAxisAngle(const Vector3<T>& axis, T degrees);
 
+	/// A quaternion with all zero elements
 	static const Quaternion Zero;
+	/// An identity quaternion
 	static const Quaternion Identity;
 };
 

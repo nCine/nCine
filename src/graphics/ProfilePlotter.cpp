@@ -38,7 +38,6 @@ ProfilePlotter::~ProfilePlotter()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Adds a value to the specified variable
 bool ProfilePlotter::addValue(unsigned int varIndex, float value)
 {
 	bool valueRegistered = false;
@@ -51,7 +50,6 @@ bool ProfilePlotter::addValue(unsigned int varIndex, float value)
 	return valueRegistered;
 }
 
-/// Returns the variable with the specified index
 PlottingVariable& ProfilePlotter::variable(unsigned int index)
 {
 	if (index < variables_.size())
@@ -65,7 +63,6 @@ PlottingVariable& ProfilePlotter::variable(unsigned int index)
 	}
 }
 
-/// Returns the reference value normalized and clamped between the two numbers provided
 float ProfilePlotter::normBetweenRefValue(float min, float max) const
 {
 	float value = 0.0f;
@@ -93,7 +90,6 @@ float ProfilePlotter::normBetweenRefValue(float min, float max) const
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Fill the background buffer with vertices
 void ProfilePlotter::setBackgroundVertices()
 {
 	// Graph background vertices
@@ -114,7 +110,6 @@ void ProfilePlotter::updateRenderCommand()
 	renderCommand_->material().setTransparent(isTransparent);
 }
 
-/// Updates the reference value rendering command
 void ProfilePlotter::UpdateRefValueRenderCommand()
 {
 	refValueCmd_.transformation() = worldMatrix_;

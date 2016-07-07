@@ -18,22 +18,22 @@ class FontGlyph
 	void set(unsigned int x, unsigned int y, unsigned int width, unsigned int height,
 			 int xOffset, int yOffset, unsigned int xAdvance);
 
-	/// Return the size in pixels of a glyph
+	/// Returns the size in pixels of a glyph
 	inline Vector2i size() const { return Vector2i(width_, height_); }
-	/// Return the texture rectangle of a glyph
+	/// Returns the texture rectangle of a glyph
 	inline Recti texRect() const { return Recti(x_, y_, width_, height_); }
-	/// Return the X and Y offset of a glyph
+	/// Returns the X and Y offset of a glyph
 	inline Vector2i offset() const { return Vector2i(xOffset_, yOffset_); }
-	/// Return the X offset to advance in order to start rendering the next glyph
+	/// Returns the X offset to advance in order to start rendering the next glyph
 	inline unsigned int xAdvance() const { return xAdvance_; }
 
-	/// Add kerning amount for a subsequent glyph
+	/// Adds the kerning amount for a subsequent glyph
 	inline void addKerning(int secondGlyph, int amount) { kernings_.pushBack(Kerning(secondGlyph, amount)); }
-	// Return the kerning amount for a subsequent glyph
+	/// Returns the kerning amount for a subsequent glyph
 	int kerning(int secondGlyph) const;
 
   private:
-	/// A structure holding glyph pairs kerning offstes
+	/// A structure holding glyph pairs kerning offsets
 	struct Kerning
 	{
 		int secondGlyph_;
@@ -57,7 +57,6 @@ class FontGlyph
 	Array<Kerning> kernings_;
 };
 
-/// Sets glyph properties
 inline void FontGlyph::set(unsigned int x, unsigned int y, unsigned int width, unsigned int height,
 	int xOffset, int yOffset, unsigned int xAdvance)
 {

@@ -46,7 +46,6 @@ GlfwInputManager::GlfwInputManager()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Detects window focus gain/loss events
 bool GlfwInputManager::hasFocus()
 {
 	bool glfwFocused = (glfwGetWindowAttrib(GlfwGfxDevice::windowHandle(), GLFW_FOCUSED) != 0);
@@ -60,7 +59,6 @@ bool GlfwInputManager::hasFocus()
 	return windowHasFocus_;
 }
 
-/// Updates joystick state structures and simulates events
 void GlfwInputManager::updateJoystickStates()
 {
 	for (unsigned int joyId = 0; joyId < MaxNumJoysticks; joyId++)

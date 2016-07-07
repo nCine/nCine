@@ -5,7 +5,7 @@
 
 namespace ncine {
 
-/// A rectangle in a two dimensional space
+/// A template based rectangle in a two dimensional space
 template <class T>
 class Rect
 {
@@ -28,24 +28,23 @@ class Rect
 	Rect(const Vector2<T>& p1, const Vector2<T>& p2)
 		: x(p1.x), y(p1.y), w(p2.x), h(p2.y) { }
 
-	// Creates a rect from center and size
+	/// Creates a rectangle from center and size
 	static Rect fromCenterAndSize(const Vector2<T>& center, const Vector2<T>& size);
 
-	// Calculates the center of the rect
+	/// Calculates the center of the rectangle
 	Vector2<T> center() const;
-	// Sets rect elements
+	/// Sets rectangle elements
 	void set(T xx, T yy, T ww, T hh);
-	// Retains size but move to another position
+	/// Retains rectangle size but moves its center to another position
 	void setCenter(const Vector2<T>& center);
 
-	/// Eqality operators
+	/// Eqality operator
 	bool operator==(const Rect& rect) const;
 };
 
 typedef Rect<float> Rectf;
 typedef Rect<int> Recti;
 
-/// Creates a rect from center and size
 template <class T>
 inline Rect<T> Rect<T>::fromCenterAndSize(const Vector2<T>& center, const Vector2<T>& size)
 {
@@ -54,14 +53,12 @@ inline Rect<T> Rect<T>::fromCenterAndSize(const Vector2<T>& center, const Vector
 				size.x, size.y);
 }
 
-/// Calculates the center of the rect
 template <class T>
 inline Vector2<T> Rect<T>::center() const
 {
 	return Vector2<T>(x + static_cast<T>(w * 0.5f), y + static_cast<T>(h * 0.5f));
 }
 
-/// Sets rect elements
 template <class T>
 inline void Rect<T>::set(T xx, T yy, T ww, T hh)
 {
@@ -71,7 +68,6 @@ inline void Rect<T>::set(T xx, T yy, T ww, T hh)
 	h = hh;
 }
 
-/// Retains size but move to another position
 template <class T>
 inline void Rect<T>::setCenter(const Vector2<T>& center)
 {
@@ -79,7 +75,6 @@ inline void Rect<T>::setCenter(const Vector2<T>& center)
 	y = center.y - static_cast<T>(h * 0.5f);
 }
 
-/// Equality operators
 template <class T>
 inline bool Rect<T>::operator==(const Rect &rect) const
 {

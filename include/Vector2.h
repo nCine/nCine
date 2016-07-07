@@ -55,8 +55,11 @@ class Vector2
 
 	template <class S> friend S dot(const Vector2<S>& v1, const Vector2<S>& v2);
 
+	/// A vector with all zero elements
 	static const Vector2 Zero;
+	/// A unit vector on the X axis
 	static const Vector2 XAxis;
+	/// A unit vector on the Y axis
 	static const Vector2 YAxis;
 };
 

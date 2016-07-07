@@ -22,31 +22,31 @@ class ArrayIterator
 	ArrayIterator(const ArrayIterator<T, false>& it)
 		: elementPtr_(it.elementPtr_) { }
 
-	// Deferencing operator
+	/// Deferencing operator
 	Reference operator*() const;
 
-	// Iterates to the next element (prefix)
+	/// Iterates to the next element (prefix)
 	ArrayIterator& operator++();
-	// Iterates to the next element (postfix)
+	/// Iterates to the next element (postfix)
 	ArrayIterator operator++(int);
 
-	// Iterates to the previous element (prefix)
+	/// Iterates to the previous element (prefix)
 	ArrayIterator& operator--();
-	// Iterates to the previous element (postfix)
+	/// Iterates to the previous element (postfix)
 	ArrayIterator operator--(int);
 
-	// Compound addition operator
+	/// Compound addition operator
 	ArrayIterator& operator+=(int n);
-	// Compound subtraction operator
+	/// Compound subtraction operator
 	ArrayIterator& operator-=(int n);
-	// Addition operator
+	/// Addition operator
 	ArrayIterator operator+(int n) const;
-	// Subtraction operator
+	/// Subtraction operator
 	ArrayIterator operator-(int n) const;
 	/// Pointer subtraction operator
 	friend inline int operator-(const ArrayIterator& lhs, const ArrayIterator& rhs)	{ return static_cast<int>(lhs.elementPtr_ - rhs.elementPtr_); }
 
-	// Subscript operator
+	/// Subscript operator
 	Reference operator[](int n) const;
 
 	/// Equality operator
@@ -67,11 +67,11 @@ class ArrayIterator
   private:
 	Pointer elementPtr_;
 
-	// For non constant to constant iterator implicit conversion
+	/// For non constant to constant iterator implicit conversion
 	friend class ArrayIterator<T, true>;
 };
 
-/// Iterator traits structure specialization
+/// Iterator traits structure specialization for `ArrayIterator` class
 template <class T>
 struct IteratorTraits<ArrayIterator<T, false> >
 {
@@ -85,7 +85,7 @@ struct IteratorTraits<ArrayIterator<T, false> >
 	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
 };
 
-/// Constant iterator traits structure specialization
+/// Iterator traits structure specialization for constant `ArrayIterator` class
 template <class T>
 struct IteratorTraits<ArrayIterator<T, true> >
 {
@@ -99,14 +99,12 @@ struct IteratorTraits<ArrayIterator<T, true> >
 	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
 };
 
-/// Deferencing operator
 template <class T, bool IsConst>
 inline typename ArrayIterator<T, IsConst>::Reference ArrayIterator<T, IsConst>::operator*() const
 {
 	return *elementPtr_;
 }
 
-/// Iterates to the next element (prefix)
 template <class T, bool IsConst>
 ArrayIterator<T, IsConst>& ArrayIterator<T, IsConst>::operator++()
 {
@@ -115,7 +113,6 @@ ArrayIterator<T, IsConst>& ArrayIterator<T, IsConst>::operator++()
 	return *this;
 }
 
-/// Iterates to the next element (postfix)
 template <class T, bool IsConst>
 ArrayIterator<T, IsConst> ArrayIterator<T, IsConst>::operator++(int)
 {
@@ -127,7 +124,6 @@ ArrayIterator<T, IsConst> ArrayIterator<T, IsConst>::operator++(int)
 	return iterator;
 }
 
-/// Iterates to the previous element (prefix)
 template <class T, bool IsConst>
 ArrayIterator<T, IsConst>& ArrayIterator<T, IsConst>::operator--()
 {
@@ -136,7 +132,6 @@ ArrayIterator<T, IsConst>& ArrayIterator<T, IsConst>::operator--()
 	return *this;
 }
 
-/// Iterates to the previous element (postfix)
 template <class T, bool IsConst>
 ArrayIterator<T, IsConst> ArrayIterator<T, IsConst>::operator--(int)
 {
@@ -148,7 +143,6 @@ ArrayIterator<T, IsConst> ArrayIterator<T, IsConst>::operator--(int)
 	return iterator;
 }
 
-/// Compound addition operator
 template <class T, bool IsConst>
 ArrayIterator<T, IsConst>& ArrayIterator<T, IsConst>::operator+=(int n)
 {
@@ -157,7 +151,6 @@ ArrayIterator<T, IsConst>& ArrayIterator<T, IsConst>::operator+=(int n)
 	return *this;
 }
 
-/// Compound subtraction operator
 template <class T, bool IsConst>
 ArrayIterator<T, IsConst>& ArrayIterator<T, IsConst>::operator-=(int n)
 {
@@ -166,7 +159,6 @@ ArrayIterator<T, IsConst>& ArrayIterator<T, IsConst>::operator-=(int n)
 	return *this;
 }
 
-/// Addition operator
 template <class T, bool IsConst>
 ArrayIterator<T, IsConst> ArrayIterator<T, IsConst>::operator+(int n) const
 {
@@ -176,7 +168,6 @@ ArrayIterator<T, IsConst> ArrayIterator<T, IsConst>::operator+(int n) const
 	return iterator;
 }
 
-/// Subtraction operator
 template <class T, bool IsConst>
 ArrayIterator<T, IsConst> ArrayIterator<T, IsConst>::operator-(int n) const
 {
@@ -186,7 +177,6 @@ ArrayIterator<T, IsConst> ArrayIterator<T, IsConst>::operator-(int n) const
 	return iterator;
 }
 
-/// Subscript operator
 template <class T, bool IsConst>
 inline typename ArrayIterator<T, IsConst>::Reference ArrayIterator<T, IsConst>::operator[](int n) const
 {

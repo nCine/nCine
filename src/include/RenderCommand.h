@@ -15,8 +15,8 @@ class Color;
 class RenderCommand
 {
   public:
-	/// The enumeration of command types
-	/*! Its sole purpose is to allow separated profiling counters in the RenderQueue class */
+	/// Command types
+	/*! Its sole purpose is to allow separated profiling counters in the `RenderQueue` class. */
 	enum CommandType
 	{
 		GENERIC_TYPE = 0,
@@ -27,7 +27,7 @@ class RenderCommand
 		TYPE_COUNT
 	};
 
-	/// The enumeration for rendering layer limits
+	/// Rendering layer limits
 	enum LayerLimits
 	{
 		BOTTOM_LAYER = 0,
@@ -43,14 +43,14 @@ class RenderCommand
 
 	/// Returns the queue sort key
 	inline unsigned long int sortKey() const { return sortKey_; }
-	// Calculates a sort key for the queue
+	/// Calculates a sort key for the queue
 	void calculateSortKey();
-	// Issues the render command
+	/// Issues the render command
 	void issue();
 
-	/// Gets the command type (profiling purpose)
+	/// Gets the command type (for profiling purposes)
 	inline CommandType type() const { return profilingType_; }
-	/// Sets the command type (profiling purpose)
+	/// Sets the command type (for profiling purposes)
 	inline void setType(CommandType eType) { profilingType_ = eType; }
 
 	inline Matrix4x4f& transformation() { return modelView_; }

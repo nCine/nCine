@@ -62,7 +62,6 @@ void LinePlotter::draw(RenderQueue& renderQueue)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Fill the buffer of every line variable with vertices
 void LinePlotter::updateAllVertices(float x, float y, float w, float h)
 {
 	float commonMin = 0.0f;

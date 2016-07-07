@@ -11,24 +11,28 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(SceneNode* parent, Texture *texture)
 	: DrawableNode(parent), texture_(texture), texRect_(0, 0, 0, 0)
 {
 	init();
 }
 
+/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(Texture *texture)
 	: DrawableNode(NULL), texture_(texture), texRect_(0, 0, 0, 0)
 {
 	init();
 }
 
+/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(SceneNode* parent, Texture *texture, float x, float y)
 	: DrawableNode(parent, x, y), texture_(texture), texRect_(0, 0, 0, 0)
 {
 	init();
 }
 
+/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(Texture *texture, float x, float y)
 	: DrawableNode(NULL, x, y), texture_(texture), texRect_(0, 0, 0, 0)
 {
@@ -53,11 +57,11 @@ void Sprite::init()
 	}
 }
 
+/*! \todo Only the transformation matrix should be updated per frame */
 void Sprite::updateRenderCommand()
 {
 	renderCommand_->transformation() = worldMatrix_;
 
-	// TODO: Only the transformation matrix should be updated per frame
 	renderCommand_->material().setTexture(*texture_);
 
 	renderCommand_->material().uniform("color")->setFloatValue(absColor().fR(), absColor().fG(), absColor().fB(), absColor().fA());

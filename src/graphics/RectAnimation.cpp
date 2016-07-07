@@ -17,7 +17,6 @@ RectAnimation::RectAnimation(float frameTime, LoopMode loopMode, RewindMode rewi
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Sets current frame
 void RectAnimation::setFrame(unsigned int frameNum)
 {
 	if (frameNum >= rects_.size())
@@ -30,7 +29,6 @@ void RectAnimation::setFrame(unsigned int frameNum)
 	}
 }
 
-/// Updates current frame based on time passed
 void RectAnimation::updateFrame(float interval)
 {
 	// No frame calculation if the animation is paused or has only one rect

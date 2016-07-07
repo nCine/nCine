@@ -29,7 +29,7 @@ class SdlMouseState : public MouseState
 	inline bool isWheelDownButtonDown() const { return (buttons_ & WHEELDOWN_BUTTON) != 0; }
 
   private:
-	// Extracted from SDL/SDL_mouse.h
+	/// Enumeration extracted from `SDL/SDL_mouse.h`
 	enum eMouseButtonMask
 	{
 		LEFT_BUTTON   = 1,
@@ -57,7 +57,7 @@ class SdlMouseEvent : public MouseEvent
 	inline bool isWheelDownButton() const { return button_ == WHEELDOWN_BUTTON; }
 
   private:
-	// Extracted from SDL/SDL_mouse.h
+	/// Enumeration extracted from `SDL/SDL_mouse.h`
 	enum eMouseButtonIndex
 	{
 		LEFT_BUTTON = 1,
@@ -90,9 +90,9 @@ class SdlKeyboardState : public KeyboardState
 class SdlInputManager : public IInputManager
 {
   public:
-	// The constructor takes care of opening available joysticks
+	/// The constructor takes care of opening available joysticks
 	SdlInputManager();
-	// The destructor releases every opened joystick
+	/// The destructor releases every opened joystick
 	~SdlInputManager();
 
 	static void parseEvent(const SDL_Event &event);

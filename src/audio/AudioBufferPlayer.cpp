@@ -12,7 +12,6 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// A constructor creating a player from a shared buffer
 AudioBufferPlayer::AudioBufferPlayer(AudioBuffer *audioBuffer)
 	: audioBuffer_(audioBuffer)
 {
@@ -107,7 +106,6 @@ void AudioBufferPlayer::stop()
 	}
 }
 
-/// Updates the player state
 void AudioBufferPlayer::updateState()
 {
 	if (state_ == STATE_PLAYING)

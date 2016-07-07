@@ -9,7 +9,6 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// Constructor taking a DisplayMode
 EglGfxDevice::EglGfxDevice(struct android_app* state, DisplayMode mode)
 {
 	isFullScreen_ = true;
@@ -42,7 +41,6 @@ EglGfxDevice::~EglGfxDevice()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Recreates a surface from a native window
 void EglGfxDevice::createSurface(struct android_app* state)
 {
 	if (state->window != NULL)
@@ -56,7 +54,6 @@ void EglGfxDevice::createSurface(struct android_app* state)
 	}
 }
 
-/// Binds the current context
 void EglGfxDevice::bindContext()
 {
 	if (eglMakeCurrent(display_, surface_, surface_, context_) == EGL_FALSE)
@@ -66,7 +63,6 @@ void EglGfxDevice::bindContext()
 	}
 }
 
-/// Unbinds the current context
 void EglGfxDevice::unbindContext()
 {
 	if (eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT) == EGL_FALSE)
@@ -76,14 +72,12 @@ void EglGfxDevice::unbindContext()
 	}
 }
 
-/// Queries the size of the current surface
 void EglGfxDevice::querySurfaceSize()
 {
 	eglQuerySurface(display_, surface_, EGL_WIDTH, &width_);
 	eglQuerySurface(display_, surface_, EGL_HEIGHT, &height_);
 }
 
-/// Checks if the desired pixel format is supported
 bool EglGfxDevice::isModeSupported(struct android_app *state, DisplayMode mode)
 {
 	const EGLint attribs[] =
@@ -129,7 +123,6 @@ bool EglGfxDevice::isModeSupported(struct android_app *state, DisplayMode mode)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Initializes the OpenGL graphic context
 void EglGfxDevice::initDevice(struct android_app* state)
 {
 	const EGLint attribs[] =

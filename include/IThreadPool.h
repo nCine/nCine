@@ -7,7 +7,7 @@ namespace ncine {
 
 class IThreadCommand;
 
-/// It represents the interface to a thread pool
+/// Thread pool interface class
 class DLL_PUBLIC IThreadPool
 {
   public:

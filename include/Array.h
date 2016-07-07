@@ -11,7 +11,7 @@
 namespace ncine {
 
 /// Construction modes for the `Array` class
-/*! Declared outside the template class to use it without template parameters */
+/*! Declared outside the template class to use it without template parameters. */
 struct ArrayMode
 {
 	enum Modes
@@ -23,7 +23,7 @@ struct ArrayMode
 	};
 };
 
-/// A dynamic array based on templates and stored in the heap
+/// A dynamic array based on templates that stores elements in the heap
 template <class T>
 class Array
 {
@@ -49,9 +49,9 @@ class Array
 
 	~Array() { delete[] array_; }
 
-	// Copy constructor
+	/// Copy constructor
 	Array(const Array& other);
-	// Copy-and-swap assignment operator
+	/// Copy-and-swap assignment operator
 	Array& operator=(Array other);
 
 	/// Swaps two arrays without copying their data
@@ -84,20 +84,20 @@ class Array
 	/// Returns true if the array is empty
 	inline bool isEmpty() const { return size_ == 0; }
 	/// Returns the array size
-	/** The array is filled without gaps until the Size()-1 element */
+	/*! The array is filled without gaps until the `Size()`-1 element. */
 	inline unsigned int size() const { return size_; }
 	/// Returns the array capacity
-	/** The array has memory allocated to store until the Capacity()-1 element */
+	/*! The array has memory allocated to store until the `Capacity()`-1 element. */
 	inline unsigned int capacity() const { return capacity_; }
-	// Sets a new capacity for the array (can be bigger or smaller than the current one)
+	/// Sets a new capacity for the array (can be bigger or smaller than the current one)
 	void setCapacity(unsigned int newCapacity);
-	// Sets a new size for the array (allowing for "holes")
+	/// Sets a new size for the array (allowing for "holes")
 	void setSize(unsigned int newSize);
-	// Decreases the capacity to match the current size of the array
+	/// Decreases the capacity to match the current size of the array
 	void shrinkToFit();
 
 	/// Clears the array
-	/** Size will be set to zero but capacity remains untouched */
+	/*! Size will be set to zero but capacity remains unmodified. */
 	inline void clear() { size_ = 0; }
 	/// Returns a constant reference to the first element in constant time
 	inline const T& front() const { return array_[0]; }
@@ -111,35 +111,34 @@ class Array
 	inline void pushBack(T element) { operator[](size_) = element; }
 	/// Removes the last element in constant time
 	inline void popBack() { if (size_ > 0) { size_--; } }
-	// Inserts new elements at the specified position from a source range, last not included (shifting elements around)
+	/// Inserts new elements at the specified position from a source range, last not included (shifting elements around)
 	void insertRange(unsigned int index, const T* firstPtr, const T* lastPtr);
-	// Inserts a new element at a specified position (shifting elements around)
+	/// Inserts a new element at a specified position (shifting elements around)
 	void insertAt(unsigned int index, T element);
-	// Inserts a new element at the position specified by the iterator (shifting elements around)
+	/// Inserts a new element at the position specified by the iterator (shifting elements around)
 	Iterator insert(Iterator position, const T& value);
-	// Inserts new elements from a source at the position specified by the iterator (shifting elements around)
+	/// Inserts new elements from a source at the position specified by the iterator (shifting elements around)
 	Iterator insert(Iterator position, Iterator first, Iterator last);
-	// Removes the specified range of elements, last not included (shifting elements around)
+	/// Removes the specified range of elements, last not included (shifting elements around)
 	void removeRange(unsigned int firstIndex, unsigned int lastIndex);
 	/// Removes an element at a specified position (shifting elements around)
 	inline void removeAt(unsigned int index) { removeRange(index, index + 1); }
-	// Removes the element pointed by the iterator (shifting elements around)
+	/// Removes the element pointed by the iterator (shifting elements around)
 	Iterator erase(Iterator position);
-	// Removes the elements in the range, last not included (shifting elements around)
+	/// Removes the elements in the range, last not included (shifting elements around)
 	Iterator erase(Iterator first, const Iterator last);
-	// Inserts an array of elements at the end in constant time
+	/// Inserts an array of elements at the end in constant time
 	void append(const T* elements, unsigned int amount);
 
-	// Read-only subscript operator
+	/// Read-only subscript operator
 	const T& operator[](unsigned int index) const;
-	// Subscript operator
+	/// Subscript operator
 	T& operator[](unsigned int index);
 
 	/// Returns a constant pointer to the allocated memory
-	/** It's useful when holding arrays of OpenGL data */
 	inline const T* data() const { return array_; }
 	/// Returns a pointer to the allocated memory
-	/** When adding new elements through a pointer the size field is not updated, like with std::vector */
+	/*! When adding new elements through a pointer the size field is not updated, like with `std::vector`. */
 	inline T* data() { return array_; }
 
   private:
@@ -149,7 +148,6 @@ class Array
 	bool fixedCapacity_;
 };
 
-/// Copy constructor
 template <class T>
 Array<T>::Array(const Array<T>& other)
 	: array_(NULL), size_(other.size_), capacity_(other.capacity_), fixedCapacity_(other.fixedCapacity_)
@@ -162,8 +160,7 @@ Array<T>::Array(const Array<T>& other)
 	}
 }
 
-/// Copy-and-swap assignment operator
-/** The parameter should be passed by value for the idiom to work */
+/*! The parameter should be passed by value for the idiom to work. */
 template <class T>
 Array<T>& Array<T>::operator=(Array<T> other)
 {
@@ -171,7 +168,6 @@ Array<T>& Array<T>::operator=(Array<T> other)
 	return *this;
 }
 
-/// Sets a new capacity for the array (can be bigger or smaller than the current one)
 template <class T>
 void Array<T>::setCapacity(unsigned int newCapacity)
 {
@@ -222,7 +218,6 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 	capacity_ = newCapacity;
 }
 
-/// Sets a new size for the array (allowing for "holes")
 template <class T>
 void Array<T>::setSize(unsigned int newSize)
 {
@@ -233,14 +228,12 @@ void Array<T>::setSize(unsigned int newSize)
 	size_ = newSize;
 }
 
-/// Decreases the capacity to match the current size of the array
 template <class T>
 void Array<T>::shrinkToFit()
 {
 	setCapacity(size_);
 }
 
-/// Inserts new elements at the specified position from a source range, last not included (shifting elements around)
 template <class T>
 void Array<T>::insertRange(unsigned int index, const T* firstPtr, const T* lastPtr)
 {
@@ -272,7 +265,6 @@ void Array<T>::insertRange(unsigned int index, const T* firstPtr, const T* lastP
 	size_ += static_cast<unsigned int>(lastPtr - firstPtr);
 }
 
-/// Inserts a new element at a specified position (shifting elements around)
 template <class T>
 void Array<T>::insertAt(unsigned int index, T element)
 {
@@ -294,7 +286,6 @@ void Array<T>::insertAt(unsigned int index, T element)
 	size_++;
 }
 
-/// Inserts a new element at the position specified by the iterator (shifting elements around)
 template <class T>
 typename Array<T>::Iterator Array<T>::insert(Iterator position, const T& value)
 {
@@ -304,7 +295,6 @@ typename Array<T>::Iterator Array<T>::insert(Iterator position, const T& value)
 	return ++position;
 }
 
-/// Inserts new elements from a source at the position specified by the iterator (shifting elements around)
 template <class T>
 typename Array<T>::Iterator Array<T>::insert(Iterator position, Iterator first, Iterator last)
 {
@@ -316,7 +306,6 @@ typename Array<T>::Iterator Array<T>::insert(Iterator position, Iterator first, 
 	return position + static_cast<unsigned int>(lastPtr - firstPtr);
 }
 
-/// Removes the specified range of elements, last not included (shifting elements around)
 template <class T>
 void Array<T>::removeRange(unsigned int firstIndex, unsigned int lastIndex)
 {
@@ -343,7 +332,6 @@ void Array<T>::removeRange(unsigned int firstIndex, unsigned int lastIndex)
 	size_ -= (lastIndex - firstIndex);
 }
 
-/// Removes the element pointed by the iterator (shifting elements around)
 template <class T>
 typename Array<T>::Iterator Array<T>::erase(Iterator position)
 {
@@ -353,7 +341,6 @@ typename Array<T>::Iterator Array<T>::erase(Iterator position)
 	return ++position;
 }
 
-/// Removes the elements in the range, last not included (shifting elements around)
 template <class T>
 typename Array<T>::Iterator Array<T>::erase(Iterator first, const Iterator last)
 {
@@ -364,7 +351,6 @@ typename Array<T>::Iterator Array<T>::erase(Iterator first, const Iterator last)
 	return ++first;
 }
 
-/// Inserts an array of elements at the end in constant time
 template <class T>
 void Array<T>::append(const T* elements, unsigned int amount)
 {
@@ -377,7 +363,6 @@ void Array<T>::append(const T* elements, unsigned int amount)
 	size_ += amount;
 }
 
-/// Read-only subscript operator
 template <class T>
 const T& Array<T>::operator[](unsigned int index) const
 {
@@ -390,7 +375,6 @@ const T& Array<T>::operator[](unsigned int index) const
 	return array_[index];
 }
 
-/// Subscript operator
 template <class T>
 T& Array<T>::operator[](unsigned int index)
 {

@@ -17,7 +17,6 @@ namespace ncine {
 
 #ifndef __ANDROID__
 
-/// Clears the CPU set
 void ThreadAffinityMask::zero()
 {
 #ifdef __APPLE__
@@ -27,7 +26,6 @@ void ThreadAffinityMask::zero()
 #endif
 }
 
-/// Sets the specified CPU number to be included in the set
 void ThreadAffinityMask::set(int cpuNum)
 {
 #ifdef __APPLE__
@@ -37,7 +35,6 @@ void ThreadAffinityMask::set(int cpuNum)
 #endif
 }
 
-/// Sets the specified CPU number to be excluded by the set
 void ThreadAffinityMask::clear(int cpuNum)
 {
 #ifdef __APPLE__
@@ -47,7 +44,6 @@ void ThreadAffinityMask::clear(int cpuNum)
 #endif
 }
 
-/// Returns true if the specified CPU number belongs to the set
 bool ThreadAffinityMask::isSet(int cpuNum)
 {
 #ifdef __APPLE__
@@ -63,14 +59,12 @@ bool ThreadAffinityMask::isSet(int cpuNum)
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// A default constructor for a class without the associated function
 Thread::Thread()
 	: tid_(0)
 {
 
 }
 
-/// Creates a thread around a function and runs it
 Thread::Thread(ThreadFunctionPtr startFunction, void *arg)
 	: tid_(0)
 {
@@ -81,7 +75,6 @@ Thread::Thread(ThreadFunctionPtr startFunction, void *arg)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Gets the number of processors in the machine
 unsigned int Thread::numProcessors()
 {
 	unsigned int numProcs = 0;
@@ -101,7 +94,6 @@ unsigned int Thread::numProcessors()
 	return numProcs;
 }
 
-/// Spawns a new thread if the class hasn't one already associated
 void Thread::run(ThreadFunctionPtr startFunction, void *arg)
 {
 	if (tid_ == 0)
@@ -120,7 +112,6 @@ void Thread::run(ThreadFunctionPtr startFunction, void *arg)
 	}
 }
 
-/// Joins the thread
 void* Thread::join()
 {
 	void* pRetVal = NULL;
@@ -128,7 +119,6 @@ void* Thread::join()
 	return pRetVal;
 }
 
-/// Returns the calling thread id
 long int Thread::self()
 {
 #if defined(__APPLE__)
@@ -138,26 +128,22 @@ long int Thread::self()
 #endif
 }
 
-/// Terminates the calling thread
 void Thread::exit(void *retVal)
 {
 	pthread_exit(retVal);
 }
 
-/// Yields the calling thread in favour of another one with the same priority
 void Thread::yieldExecution()
 {
 	sched_yield();
 }
 
 #ifndef __ANDROID__
-/// Asks the thread for termination
 void Thread::cancel()
 {
 	pthread_cancel(tid_);
 }
 
-/// Gets the thread affinity mask
 ThreadAffinityMask Thread::affinityMask() const
 {
 	ThreadAffinityMask affinityMask;
@@ -183,7 +169,6 @@ ThreadAffinityMask Thread::affinityMask() const
 	return affinityMask;
 }
 
-/// Sets the thread affinity mask
 void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
 {
 	if (tid_ != 0)
@@ -207,7 +192,6 @@ void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// The wrapper start function for thread creation
 void *Thread::wrapperFunction(void *arg)
 {
 	ThreadInfo* pThreadInfo = static_cast<ThreadInfo*>(arg);

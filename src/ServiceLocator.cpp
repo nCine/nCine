@@ -3,7 +3,6 @@
 
 namespace ncine {
 
-/// Meyers' Singleton
 ServiceLocator& theServiceLocator()
 {
 	static ServiceLocator instance;
@@ -86,7 +85,6 @@ void ServiceLocator::registerGfxCapabilities(IGfxCapabilities* service)
 	}
 }
 
-/// Deletes every registered service reestablishing null ones
 void ServiceLocator::unregisterAll()
 {
 	LOGI("Unregistering all services");

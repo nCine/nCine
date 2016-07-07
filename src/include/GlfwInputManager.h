@@ -81,9 +81,9 @@ class GlfwInputManager : public IInputManager
   public:
 	GlfwInputManager();
 
-	// Detects window focus gain/loss events
+	/// Detects window focus gain/loss events
 	static bool hasFocus();
-	// Updates joystick state structures and simulates events
+	/// Updates joystick state structures and simulates events
 	static void updateJoystickStates();
 
 	const MouseState& mouseState();

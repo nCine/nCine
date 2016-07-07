@@ -33,7 +33,6 @@ void TextureLoaderDds::init()
 	parseFormat(header);
 }
 
-/// Reads the DDS header and fills the corresponding structure
 void TextureLoaderDds::readHeader(DdsHeader& header)
 {
 	// DDS header is 128 bytes long
@@ -59,7 +58,6 @@ void TextureLoaderDds::readHeader(DdsHeader& header)
 	}
 }
 
-/// Parses the DDS header to determine its format
 void TextureLoaderDds::parseFormat(const DdsHeader &header)
 {
 	GLenum internalFormat = GL_RGB; // to suppress uninitialized variable warning

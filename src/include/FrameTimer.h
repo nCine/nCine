@@ -9,14 +9,14 @@ namespace ncine {
 class FrameTimer: public Timer
 {
   public:
-	// Constructor
+	/// Constructor
 	FrameTimer(float logInterval, float avgInterval);
 
-	// Adds a frame to the counter and calculates the interval since the previous one
+	/// Adds a frame to the counter and calculates the interval since the previous one
 	void addFrame();
-	/// Returns the interval between two subsequent calls to AddFrame()
+	/// Returns the interval between two subsequent calls to `addFrame()`
 	inline float interval() const { return frameInterval_; }
-	/// Returns the average FPS on the update interval
+	/// Returns the average FPS during the update interval
 	inline float averageFps() const { return fps_; }
 
   private:

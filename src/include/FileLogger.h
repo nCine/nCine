@@ -7,14 +7,14 @@
 
 namespace ncine {
 
-/// The usual console and file logger
+/// The standard console and file logger
 class FileLogger : public ILogger
 {
   public:
 	FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fileLevel);
 	~FileLogger();
 
-	virtual void write(LogLevel level, const char* fmt, ...);
+	virtual void write(LogLevel level, const char *fmt, ...);
 
   private:
 	IFile *fileHandle_;

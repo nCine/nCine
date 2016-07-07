@@ -23,13 +23,13 @@ class ThreadAffinityMask
 	ThreadAffinityMask() { zero(); }
 	ThreadAffinityMask(int cpuNum) { zero(); set(cpuNum); }
 
-	// Clears the CPU set
+	/// Clears the CPU set
 	void zero();
-	// Sets the specified CPU number to be included in the set
+	/// Sets the specified CPU number to be included in the set
 	void set(int cpuNum);
-	// Sets the specified CPU number to be excluded by the set
+	/// Sets the specified CPU number to be excluded by the set
 	void clear(int cpuNum);
-	// Returns true if the specified CPU number belongs to the set
+	/// Returns true if the specified CPU number belongs to the set
 	bool isSet(int cpuNum);
 
   private:
@@ -52,33 +52,33 @@ class Thread
   public:
 	typedef void (*ThreadFunctionPtr)(void *);
 
-	// A default constructor for a class without the associated function
+	/// A default constructor for an object without the associated function
 	Thread();
-	// Creates a thread around a function and runs it
+	/// Creates a thread around a function and runs it
 	Thread(ThreadFunctionPtr startFunction, void* arg);
 
-	// Gets the number of processors in the machine
+	/// Returns the number of processors in the machine
 	static unsigned int numProcessors();
 
-	// Spawns a new thread if the class hasn't one already associated
+	/// Spawns a new thread if the object hasn't one already associated
 	void run(ThreadFunctionPtr startFunction, void* arg);
-	// Joins the thread
+	/// Joins the thread
 	void* join();
 
-	// Returns the calling thread id
+	/// Returns the calling thread id
 	static long int self();
-	// Terminates the calling thread
+	/// Terminates the calling thread
 	static void exit(void *retVal);
-	// Yields the calling thread in favour of another one with the same priority
+	/// Yields the calling thread in favour of another one with the same priority
 	static void yieldExecution();
 
 #ifndef __ANDROID__
-	// Asks the thread for termination
+	/// Asks the thread for termination
 	void cancel();
 
-	// Gets the thread affinity mask
+	/// Gets the thread affinity mask
 	ThreadAffinityMask affinityMask() const;
-	// Sets the thread affinity mask
+	/// Sets the thread affinity mask
 	void setAffinityMask(ThreadAffinityMask affinityMask);
 #endif
 
@@ -98,7 +98,7 @@ class Thread
 #endif
 
 	ThreadInfo threadInfo_;
-	// The wrapper start function for thread creation
+	/// The wrapper start function for thread creation
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
 	#ifdef __GNUC__ // MinGW
 		static unsigned int (__attribute__((__stdcall__)) wrapperFunction)(void* arg);

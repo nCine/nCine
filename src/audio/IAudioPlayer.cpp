@@ -21,8 +21,7 @@ IAudioPlayer::IAudioPlayer()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Sets player gain value
-/*! It gets applied to the OpenAL source only when playing */
+/*! The change is applied to the OpenAL source only when playing. */
 void IAudioPlayer::setGain(float gain)
 {
 	gain_ = gain;
@@ -32,8 +31,7 @@ void IAudioPlayer::setGain(float gain)
 	}
 }
 
-/// Sets player pitch value
-/*! It gets applied to the OpenAL source only when playing */
+/*! The change is applied to the OpenAL source only when playing. */
 void IAudioPlayer::setPitch(float pitch)
 {
 	pitch_ = pitch;
@@ -43,15 +41,13 @@ void IAudioPlayer::setPitch(float pitch)
 	}
 }
 
-/// Sets player position value through vector
-/*! It gets applied to the OpenAL source only when playing */
+/*! The change is applied to the OpenAL source only when playing. */
 void IAudioPlayer::setPosition(float position[3])
 {
 	setPosition(position[0], position[1], position[2]);
 }
 
-/// Sets player position value through components
-/*! It gets applied to the OpenAL source only when playing */
+/*! The change is applied to the OpenAL source only when playing. */
 void IAudioPlayer::setPosition(float x, float y, float z)
 {
 	position_[0] = x;

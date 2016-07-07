@@ -42,7 +42,6 @@ AnimatedSprite::~AnimatedSprite()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Returns true if the current animation is paused
 bool AnimatedSprite::isPaused() const
 {
 	bool isPaused = true;
@@ -55,7 +54,6 @@ bool AnimatedSprite::isPaused() const
 	return isPaused;
 }
 
-/// Sets the pause state for the animation
 void AnimatedSprite::setPaused(bool isPaused)
 {
 	if (anims_.isEmpty() == false)
@@ -81,7 +79,6 @@ void AnimatedSprite::update(float interval)
 	Sprite::update(interval);
 }
 
-/// Adds a new animation
 void AnimatedSprite::addAnimation(RectAnimation* anim)
 {
 	if (anim)
@@ -92,7 +89,6 @@ void AnimatedSprite::addAnimation(RectAnimation* anim)
 	}
 }
 
-/// Sets the current animation and its frame number
 void AnimatedSprite::setAnimation(int animNum)
 {
 	// early-out if no animations available
@@ -118,7 +114,6 @@ void AnimatedSprite::setAnimation(int animNum)
 	setTexRect(anims_[currentAnim_]->rect());
 }
 
-/// Sets the current animation to a specified frame number
 void AnimatedSprite::setFrame(unsigned int frameNum)
 {
 	if (anims_.isEmpty() == false)

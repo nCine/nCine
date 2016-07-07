@@ -10,15 +10,19 @@ namespace ncine {
 class DLL_PUBLIC RectAnimation
 {
   public:
+	/// Loop modes
 	enum LoopMode
 	{
 		NOT_LOOPING,
 		LOOPING
 	};
 
+	/// Rewind modes
 	enum RewindMode
 	{
+		/// When the animation reaches the last frame it begins again from start
 		FROM_START,
+		/// When the animation reaches the last frame it goes backward
 		BACKWARD
 	};
 
@@ -26,26 +30,26 @@ class DLL_PUBLIC RectAnimation
 
 	/// Returns current frame
 	inline unsigned int frame() const { return currentFrame_; }
-	// Sets current frame
+	/// Sets current frame
 	void setFrame(unsigned int frameNum);
 	/// Returns frame time
 	float frameTime() const { return frameTime_; }
 	/// Sets frame time
 	inline void setFrameTime(float frameTime) { frameTime_ = frameTime; }
 
-	/// Adds a rectangles to the array
+	/// Adds a rectangle to the array
 	inline void addRect(const Recti& rect) { rects_.pushBack(rect); }
-	/// Creates a rectangles from origin and size and then adds it to the array
+	/// Creates a rectangle from origin and size and then adds it to the array
 	inline void addRect(int x, int y, int w, int h) { rects_.pushBack(Recti(x, y, w, h)); }
 	/// Returns the current rectangle
 	inline const Recti& rect() const { return rects_[currentFrame_]; }
 
-	// Updates current frame based on time passed
+	/// Updates current frame based on time passed
 	void updateFrame(float interval);
 
-	/// Is the animation paused?
+	/// Returns true if the animation is paused
 	inline bool isPaused() const { return isPaused_; }
-	/// Sets the animation flag
+	/// Sets the pause flag
 	inline void setPaused(bool isPaused) { isPaused_ = isPaused; }
 
   private:

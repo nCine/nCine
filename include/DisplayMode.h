@@ -21,7 +21,7 @@ class DLL_PUBLIC DisplayMode
 		WITH_VSYNC
 	};
 
-	// Constructor with no parameters
+	/// Default constructor
 	DisplayMode()
 		: redBits_(0), greenBits_(0), blueBits_(0), alphaBits_(0),
 		  depthBits_(0), stencilBits_(0), isDoubleBuffered_(true), hasVSync_(false) { }
@@ -39,7 +39,6 @@ class DLL_PUBLIC DisplayMode
 		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits), alphaBits_(alphaBits),
 		  depthBits_(depthBits), stencilBits_(stencilBits), isDoubleBuffered_(dbMode == DOUBLE_BUFFERED), hasVSync_(vsMode == WITH_VSYNC) { }
 
-	// Getters
 	/// Returns the number of bits for the red channel
 	inline unsigned int redBits() const { return redBits_; }
 	/// Returns the number of bits for the green channel

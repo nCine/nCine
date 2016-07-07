@@ -10,41 +10,46 @@ namespace ncine {
 class Geometry
 {
   public:
-	// Empty constructor
+	/// Default constructor
 	Geometry();
 	~Geometry();
 
-	/// Returns the drawing type (GL_TRIANGLE, GL_LINES, ...)
-	inline GLenum drawType() const { return drawType_; }
+	/// Returns the primitive type (`GL_TRIANGLE`, `GL_LINES`, ...)
+	inline GLenum primitiveType() const { return primitiveType_; }
 	/// Returns the first vertex to draw from the arrays
 	inline GLint firstVertex() const { return firstVertex_; }
 	/// Returns the number of vertices
 	inline GLsizei numVertices() const { return numVertices_; }
 
-	void setDrawParameters(GLenum drawType, GLint firstVertex, GLsizei numVertices);
+	/// Sets all the drawing parameters
+	void setDrawParameters(GLenum primitiveType, GLint firstVertex, GLsizei numVertices);
+	/// Creates a custom VBO that is unique to this `Geometry` object
 	void createCustomVbo(unsigned int numFloats, GLenum usage);
+	/// Creates a custom VBO that is unique to this object
 	void updateVboData(unsigned int floatOffset, unsigned int floatSize, const GLfloat *data);
 
+	/// Shares the VBO of another `Geometry` object
 	void shareVbo(const Geometry& geometry);
+	/// Makes this `Geometry` object use the common quad VBO from `RenderResources`
 	void makeSharedQuad();
 
   private:
 	/// Sharing type for the buffers
-	enum SHARING_TYPE
+	enum SharingType
 	{
 		/// It must not be modified, the buffer is a resource shared across the application
 		COMMON_RESOURCE,
 		/// It can be modified, the buffer is shared between more objects
 		SHARED,
 		/// It can be modified, the buffer belongs only to this object
-		/*! In this case the destructor needs to delete the buffer */
+		/*! In this case the destructor needs to delete the buffer. */
 		UNIQUE
 	};
 
 	/// The sharing type for the vertex buffer object
-	SHARING_TYPE vboSharingType_;
+	SharingType vboSharingType_;
 
-	GLenum drawType_;
+	GLenum primitiveType_;
 	GLint firstVertex_;
 	GLsizei numVertices_;
 
@@ -52,7 +57,6 @@ class Geometry
 	GLBufferObject *ibo_;
 
 	void bind();
-	// TODO: Handle multiple VBOs?
 	GLuint vboHandle();
 
 	/// Private copy constructor

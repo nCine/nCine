@@ -6,44 +6,44 @@
 
 namespace ncine {
 
-/// A class that stores the settings for an nCine application
+/// The class storing initialization settings for an nCine application
 class DLL_PUBLIC AppConfiguration
 {
   public:
-	// Empty constructor setting the defaults
+	/// Default constructor setting the defaults
 	AppConfiguration();
 
-	// Sets the path for the application to load data from
+	/// Sets the path for the application to load data from
 	void setDataPath(const String& dataPath);
-	// Sets the name of the log file
+	/// Sets the name of the log file
 	void setLogFile(const String& logFile);
-	// Sets the logging level for messages printed on the console
+	/// Sets the logging level for messages printed on the console
 	void setConsoleLogLevel(ILogger::LogLevel logLevel);
-	// Sets the logging level for messages written in the log file
+	/// Sets the logging level for messages written in the log file
 	void setFileLogLevel(ILogger::LogLevel logLevel);
-	// Sets the interval for frame timer accumulation average and log
+	/// Sets the interval for frame timer accumulation average and log
 	void setFrameTimerLogInterval(float logInterval);
-	// Sets the screen resolution
+	/// Sets the screen resolution
 	void setResolution(unsigned int x, unsigned int y);
-	// Sets the fullscreen mode
+	/// Sets the fullscreen mode
 	void setFullScreen(bool inFullscreen);
-	// Sets the window title
+	/// Sets the window title
 	void setWindowTitle(const String& windowTitle);
-	// Sets the font texture filename for profiler information text
+	/// Sets the font texture filename for profiler information text
 	void setFontTexFilename(const String& fontTexFilename);
-	// Sets the font FNT filename for profiler information text
+	/// Sets the font FNT filename for profiler information text
 	void setFontFntFilename_(const String& fontFntFilename);
-	// Enables the profiler graphs
+	/// Enables the profiler graphs
 	void enableProfilerGraphs(bool shouldEnable);
-	// Enables the profiler information text
+	/// Enables the profiler information text
 	void enableProfilerText(bool shouldEnable);
-	// Enables the audio subsystem
+	/// Enables the audio subsystem
 	void enableAudio(bool shouldEnable);
-	// Enables the threading subsystem
+	/// Enables the threading subsystem
 	void enableThreads(bool shouldEnable);
-	// Enables the scenegraph based rendering
+	/// Enables the scenegraph based rendering
 	void enableScenegraph(bool shouldEnable);
-	// Enables vertical synchronization
+	/// Enables vertical synchronization
 	void enableVSync(bool shouldEnable);
 
   private:

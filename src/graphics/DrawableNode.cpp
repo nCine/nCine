@@ -36,21 +36,18 @@ DrawableNode::~DrawableNode()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Updates the draw command and adds it to the queue
 void DrawableNode::draw(RenderQueue& renderQueue)
 {
 	updateRenderCommand();
 	renderQueue.addCommand(renderCommand_);
 }
 
-/// Returns the node rendering layer
 unsigned int DrawableNode::layer() const
 {
 	return renderCommand_->layer();
 }
 
-/// Sets the node rendering layer
-/*! The maximum admissible value is 65535 */
+/*! \note The maximum admissible value for `layer` is 65535. */
 void DrawableNode::setLayer(unsigned int layer)
 {
 	renderCommand_->setLayer(layer);

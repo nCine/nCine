@@ -8,7 +8,7 @@ namespace ncine {
 
 template <bool IsConst> class StringIterator;
 
-/// Iterator traits structure specialization
+/// Iterator traits structure specialization for `StringIterator` class
 template < >
 struct IteratorTraits<StringIterator<false> >
 {
@@ -22,7 +22,7 @@ struct IteratorTraits<StringIterator<false> >
 	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
 };
 
-/// Constant iterator traits structure specialization
+/// Iterator traits structure specialization for constant `StringIterator` class
 template < >
 struct IteratorTraits<StringIterator<true> >
 {
@@ -53,31 +53,31 @@ class StringIterator
 	StringIterator(const StringIterator<false>& it)
 		: charPtr_(it.charPtr_) { }
 
-	// Deferencing operator
+	/// Deferencing operator
 	Reference operator*() const;
 
-	// Iterates to the next element (prefix)
+	/// Iterates to the next element (prefix)
 	StringIterator& operator++();
-	// Iterates to the next element (postfix)
+	/// Iterates to the next element (postfix)
 	StringIterator operator++(int);
 
-	// Iterates to the previous element (prefix)
+	/// Iterates to the previous element (prefix)
 	StringIterator& operator--();
-	// Iterates to the previous element (postfix)
+	/// Iterates to the previous element (postfix)
 	StringIterator operator--(int);
 
-	// Compound addition operator
+	/// Compound addition operator
 	StringIterator& operator+=(int n);
-	// Compound subtraction operator
+	/// Compound subtraction operator
 	StringIterator& operator-=(int n);
-	// Addition operator
+	/// Addition operator
 	StringIterator operator+(int n) const;
-	// Subtraction operator
+	/// Subtraction operator
 	StringIterator operator-(int n) const;
 	/// Pointer subtraction operator
 	friend inline int operator-(const StringIterator& lhs, const StringIterator& rhs)	{ return (lhs.charPtr_ - rhs.charPtr_); }
 
-	// Subscript operator
+	/// Subscript operator
 	Reference operator[](int n) const;
 
 	/// Equality operator
@@ -97,18 +97,16 @@ class StringIterator
   private:
 	Pointer charPtr_;
 
-	// For non constant to constant iterator implicit conversion
+	/// For non constant to constant iterator implicit conversion
 	friend class StringIterator<true>;
 };
 
-/// Deferencing operator
 template <bool IsConst>
 inline typename StringIterator<IsConst>::Reference StringIterator<IsConst>::operator*() const
 {
 	return *charPtr_;
 }
 
-/// Iterates to the next element (prefix)
 template <bool IsConst>
 inline StringIterator<IsConst>& StringIterator<IsConst>::operator++()
 {
@@ -117,7 +115,6 @@ inline StringIterator<IsConst>& StringIterator<IsConst>::operator++()
 	return *this;
 }
 
-/// Iterates to the next element (postfix)
 template <bool IsConst>
 inline StringIterator<IsConst> StringIterator<IsConst>::operator++(int)
 {
@@ -129,7 +126,6 @@ inline StringIterator<IsConst> StringIterator<IsConst>::operator++(int)
 	return iterator;
 }
 
-/// Iterates to the previous element (prefix)
 template <bool IsConst>
 inline StringIterator<IsConst>& StringIterator<IsConst>::operator--()
 {
@@ -138,7 +134,6 @@ inline StringIterator<IsConst>& StringIterator<IsConst>::operator--()
 	return *this;
 }
 
-/// Iterates to the previous element (postfix)
 template <bool IsConst>
 inline StringIterator<IsConst> StringIterator<IsConst>::operator--(int)
 {
@@ -150,7 +145,6 @@ inline StringIterator<IsConst> StringIterator<IsConst>::operator--(int)
 	return iterator;
 }
 
-/// Compound addition operator
 template <bool IsConst>
 inline StringIterator<IsConst>& StringIterator<IsConst>::operator+=(int n)
 {
@@ -159,7 +153,6 @@ inline StringIterator<IsConst>& StringIterator<IsConst>::operator+=(int n)
 	return *this;
 }
 
-/// Compound subtraction operator
 template <bool IsConst>
 inline StringIterator<IsConst>& StringIterator<IsConst>::operator-=(int n)
 {
@@ -168,7 +161,6 @@ inline StringIterator<IsConst>& StringIterator<IsConst>::operator-=(int n)
 	return *this;
 }
 
-/// Addition operator
 template <bool IsConst>
 inline StringIterator<IsConst> StringIterator<IsConst>::operator+(int n) const
 {
@@ -178,7 +170,6 @@ inline StringIterator<IsConst> StringIterator<IsConst>::operator+(int n) const
 	return iterator;
 }
 
-/// Subtraction operator
 template <bool IsConst>
 inline StringIterator<IsConst> StringIterator<IsConst>::operator-(int n) const
 {
@@ -188,7 +179,6 @@ inline StringIterator<IsConst> StringIterator<IsConst>::operator-(int n) const
 	return iterator;
 }
 
-/// Subscript operator
 template <bool IsConst>
 inline typename StringIterator<IsConst>::Reference StringIterator<IsConst>::operator[](int n) const
 {

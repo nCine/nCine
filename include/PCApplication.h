@@ -9,13 +9,13 @@ namespace ncine {
 class DLL_PUBLIC PCApplication : public Application
 {
   public:
-	// Entry point method to be called in the `main()` function
+	/// Entry point method to be called in the `main()` function
 	static void start(IAppEventHandler* (*createAppEventHandler)());
 
   private:
-	// Must be called at the beginning to init the application
+	/// Must be called at the beginning to initialize the application
 	void init(IAppEventHandler* (*createAppEventHandler)());
-	// The main game loop, handling events and rendering
+	/// The main game loop, handling events and rendering
 	void run();
 
 	/// Private constructor
@@ -30,7 +30,7 @@ class DLL_PUBLIC PCApplication : public Application
 	friend DLL_PUBLIC Application& theApplication();
 };
 
-// Meyers' Singleton
+/// Meyers' Singleton
 DLL_PUBLIC Application& theApplication();
 
 }

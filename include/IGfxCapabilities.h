@@ -5,10 +5,11 @@
 
 namespace ncine {
 
-/// The interface to query runtime OpenGL device capabilities
+/// The interface class to query runtime OpenGL device capabilities
 class DLL_PUBLIC IGfxCapabilities
 {
   public:
+	/// OpenGL version components
 	enum GLVersion
 	{
 		MAJOR = 0,
@@ -18,6 +19,7 @@ class DLL_PUBLIC IGfxCapabilities
 		NUM_VERSIONS
 	};
 
+	/// OpenGL queryable runtime integer values
 	enum GLIntValues
 	{
 		MAX_TEXTURE_SIZE = 0,
@@ -26,6 +28,7 @@ class DLL_PUBLIC IGfxCapabilities
 		NUM_INTVALUES
 	};
 
+	/// OpenGL queryable extensions
 	enum GLExtensions
 	{
 		EXT_TEXTURE_COMPRESSION_S3TC = 0,
@@ -39,7 +42,7 @@ class DLL_PUBLIC IGfxCapabilities
 
 	virtual ~IGfxCapabilities() = 0;
 
-	/// Returns OpenGL version numbers
+	/// Returns the OpenGL version numbers
 	virtual int glVersion(GLVersion version) const = 0;
 	/// Returns the value of a runtime OpenGL integer value
 	virtual int value(GLIntValues valueName) const = 0;
@@ -50,7 +53,7 @@ class DLL_PUBLIC IGfxCapabilities
 inline IGfxCapabilities::~IGfxCapabilities() { }
 
 
-/// A fake graphics capabilities class that reports no available capability
+/// A fake graphics capabilities class that reports no available capabilities
 class DLL_PUBLIC NullGfxCapabilities : public IGfxCapabilities
 {
   public:

@@ -15,6 +15,7 @@ class GLHashMap
 {
   public:
 	GLHashMap();
+	/// Returns the bucket index using the mapping function on the key
 	value_t& operator[](key_t key);
 
   private:
@@ -38,6 +39,7 @@ inline value_t& GLHashMap<S, MappingFunc>::operator[](key_t key)
 	return buckets_[mappingFunc(key)];
 }
 
+/// A class to perform a mapping between OpenGL buffer object targets and array indices
 class GLBufferObjectMappingFunc
 {
   public:
@@ -60,6 +62,7 @@ class GLBufferObjectMappingFunc
 	}
 };
 
+/// A class to perform a mapping between OpenGL framebuffer object targets and array indices
 class GLFramebufferMappingFunc
 {
   public:
@@ -79,6 +82,7 @@ class GLFramebufferMappingFunc
 	}
 };
 
+/// A class to perform a mapping between OpenGL texture targets and array indices
 class GLTextureMappingFunc
 {
   public:

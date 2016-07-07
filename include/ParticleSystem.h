@@ -17,7 +17,7 @@ class Particle;
 class DLL_PUBLIC ParticleSystem : public SceneNode
 {
   public:
-	// Constructs a particle system made of the specified maximum amount of particles
+	/// Constructs a particle system made of the specified maximum amount of particles
 	ParticleSystem(SceneNode* parent, unsigned int count, Texture *texture, Recti texRect);
 	~ParticleSystem();
 
@@ -48,7 +48,7 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	/// The array of particle affectors
 	Array<ParticleAffector *> affectors_;
 
-	/// Should the system simulate in local space?
+	/// A flag indicating whether the system should be simulated in local space
 	bool inLocalSpace_;
 
 	/// Private copy constructor

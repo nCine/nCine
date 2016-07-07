@@ -54,6 +54,7 @@ inline const T& clamp(const T& value, const T& minValue, const T& maxValue)
 // UNARY PREDICATES
 ///////////////////////////////////////////////////////////
 
+/// A function object returning true if its argument is equal to a reference value sets upon object construction
 template <class T>
 class IsEqualTo
 {
@@ -65,6 +66,7 @@ class IsEqualTo
 	T refValue_;
 };
 
+/// A function object returning true if its argument is not equal to a reference value sets upon object construction
 template <class T>
 class IsNotEqualTo
 {
@@ -76,6 +78,7 @@ class IsNotEqualTo
 	T refValue_;
 };
 
+/// A function object returning true if its argument is greater than a reference value sets upon object construction
 template <class T>
 class IsGreaterThan
 {
@@ -87,6 +90,7 @@ class IsGreaterThan
 	T refValue_;
 };
 
+/// A function object returning true if its argument is not greater than a reference value sets upon object construction
 template <class T>
 class IsNotGreaterThan
 {
@@ -98,6 +102,7 @@ class IsNotGreaterThan
 	T refValue_;
 };
 
+/// A function object returning true if its argument is less than a reference value sets upon object construction
 template <class T>
 class IsLessThan
 {
@@ -109,6 +114,7 @@ class IsLessThan
 	T refValue_;
 };
 
+/// A function object returning true if its argument is not less than a reference value sets upon object construction
 template <class T>
 class IsNotLessThan
 {

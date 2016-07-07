@@ -13,13 +13,13 @@ namespace ncine {
 class SdlGfxDevice : public IGfxDevice
 {
   public:
-	// Constructor taking the resolution as two integer
+	/// Constructor taking the resolution as two integer
 	SdlGfxDevice(int width, int height, bool isFullScreen);
-	// Constructor taking the resolution as a Vector2i class
+	/// Constructor taking the resolution as a `Vector2<int>` object
 	SdlGfxDevice(Vector2i size, bool isFullScreen);
-	// Constructor taking the resolution as two integer and a DisplayMode
+	/// Constructor taking the resolution as two integer and a `DisplayMode`
 	SdlGfxDevice(int width, int height, DisplayMode mode, bool isFullScreen);
-	// Constructor taking the resolution as a Vector2i class and a DisplayMode
+	/// Constructor taking the resolution as a `Vector2<int>` object and a `DisplayMode`
 	SdlGfxDevice(Vector2i size, DisplayMode mode, bool isFullScreen);
 	~SdlGfxDevice() { SDL_Quit(); }
 
@@ -38,11 +38,11 @@ class SdlGfxDevice : public IGfxDevice
 	/// Private assignment operator
 	SdlGfxDevice& operator=(const SdlGfxDevice&);
 
-	// Initilizes the class
+	/// Initilizes the object
 	void init(int width, int height, DisplayMode mode, bool isFullScreen_);
-	// Initilizes the video subsystem (SDL)
+	/// Initilizes the video subsystem (SDL)
 	void initGraphics();
-	// Initilizes the OpenGL graphic context
+	/// Initilizes the OpenGL graphic context
 	void initDevice();
 };
 

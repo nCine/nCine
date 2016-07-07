@@ -55,17 +55,17 @@ class AndroidInputManager : public IInputManager
   public:
 	explicit AndroidInputManager(struct android_app* state);
 
-	// Enables the accelerometer sensor
+	/// Enables the accelerometer sensor
 	static void enableAccelerometerSensor();
-	// Disables the accelerometer sensor
+	/// Disables the accelerometer sensor
 	static void disableAccelerometerSensor();
 
-	// Allows the application to make use of the accelerometer
+	/// Allows the application to make use of the accelerometer
 	static void enableAccelerometer(bool enabled);
 
-	// Parses an Android sensor event related to the accelerometer
+	/// Parses an Android sensor event related to the accelerometer
 	static void parseAccelerometerEvent();
-	// Parses an Android input event
+	/// Parses an Android input event
 	static bool parseEvent(const AInputEvent* event);
 
 	bool isJoyPresent(int joyId) const;
@@ -92,25 +92,25 @@ class AndroidInputManager : public IInputManager
 	static JoyButtonEvent joyButtonEvent_;
 	static JoyAxisEvent joyAxisEvent_;
 	static JoyConnectionEvent joyConnectionEvent_;
-	/// Update rate of CheckJoystickDisconnections() in seconds
+	/// Update rate of `updateJoystickConnections()` in seconds
 	static const float JoyCheckRate;
 	static Timer joyCheckTimer_;
 
-	// Initializes the accelerometer sensor
+	/// Initializes the accelerometer sensor
 	static void initAccelerometerSensor(struct android_app* state);
 
-	// Updates joystick states after connections and disconnections
+	/// Updates joystick states after connections and disconnections
 	static void updateJoystickConnections();
-	// Checks if a previously connected joystick has been disconnected
+	/// Checks if a previously connected joystick has been disconnected
 	static void checkDisconnectedJoysticks();
-	// Checks if a new joystick has been connected
+	/// Checks if a new joystick has been connected
 	static void checkConnectedJoysticks();
 
 	static int findJoyId(int deviceId);
 	static bool isDeviceConnected(int deviceId);
 	static void deviceInfo(int deviceId, int joyId);
 
-	// To update joystick connections in `AndroidApplication::androidMain()`
+	/// To update joystick connections in `AndroidApplication::androidMain()`
 	friend class AndroidApplication;
 };
 

@@ -5,16 +5,17 @@
 
 namespace ncine {
 
-/// Audio loader class
+/// Audio loader interface class
 class DLL_PUBLIC IAudioLoader
 {
   public:
 	virtual ~IAudioLoader();
 
 	/// Decodes audio data in a specified buffer
-	/*! \param buffer Buffer pointer
-	 *  \param bufferSize Buffer size in bytes
-	 *  \return Number of bytes read.
+	/*!
+	 * \param buffer Buffer pointer
+	 * \param bufferSize Buffer size in bytes
+	 * \return Number of bytes read
 	 */
 	virtual unsigned long int read(char *buffer, unsigned long int bufferSize) const = 0;
 	/// Resets the audio file seek value
@@ -34,7 +35,7 @@ class DLL_PUBLIC IAudioLoader
 	/// Returns the decoded buffer size in bytes
 	inline unsigned long int bufferSize() const { return numSamples_ * numChannels_ * bytesPerSample_; }
 
-	// Returns the proper audio loader according to the file extension
+	/// Returns the proper audio loader according to the file extension
 	static IAudioLoader* createFromFile(const char *filename);
 
   protected:
@@ -56,7 +57,7 @@ class DLL_PUBLIC IAudioLoader
 	explicit IAudioLoader(const char *filename);
 	explicit IAudioLoader(IFile *fileHandle);
 
-	/// Load the audio parameters from file
+	/// Loads the audio parameters from file
 	virtual void init() = 0;
 };
 

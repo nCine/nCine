@@ -6,6 +6,7 @@
 
 namespace ncine {
 
+/// A class to handle OpenGL renderbuffer objects
 class GLRenderbuffer
 {
   public:

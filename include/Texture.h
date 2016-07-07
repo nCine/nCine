@@ -13,7 +13,7 @@ class GLTexture;
 class DLL_PUBLIC Texture : public Object
 {
   public:
-	/// Texture filtering type
+	/// Texture filtering modes
 	enum TextureFiltering
 	{
 		NEAREST,
@@ -24,7 +24,7 @@ class DLL_PUBLIC Texture : public Object
 		LINEAR_MIPMAP_LINEAR
 	};
 
-	/// Texture wrap type
+	/// Texture wrap modes
 	enum TextureWrap
 	{
 		CLAMP_TO_EDGE,
@@ -54,9 +54,9 @@ class DLL_PUBLIC Texture : public Object
 	/// Returns true if the texture provides an alpha channel
 	inline bool hasAlpha() const { return hasAlphaChannel_; }
 
-	// Sets texture filtering for both magnification and minification
+	/// Sets texture filtering for both magnification and minification
 	void setFiltering(TextureFiltering filter);
-	// Sets texture wrap for both `s` and `t` coordinate
+	/// Sets texture wrap for both `s` and `t` coordinate
 	void setWrap(TextureWrap wrap);
 
 	inline static ObjectType sType() { return TEXTURE_TYPE; }
@@ -74,9 +74,9 @@ class DLL_PUBLIC Texture : public Object
 	/// Private assignment operator
 	Texture& operator=(const Texture&);
 
-	// Loads a texture based on information from the texture format and loader
+	/// Loads a texture based on information from the texture format and loader
 	void load(const ITextureLoader& texLoader);
-	// Loads a texture overriding the size detected by the texture loader
+	/// Loads a texture overriding the size detected by the texture loader
 	void load(const ITextureLoader& texLoader, int width, int height);
 
 	friend class Material;

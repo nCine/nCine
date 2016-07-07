@@ -7,7 +7,7 @@
 
 namespace ncine {
 
-/// The class for calling the Java Android API via JNI
+/// The class for setting up JNI and initialize requests classes
 class AndroidJniHelper
 {
   public:
@@ -19,7 +19,9 @@ class AndroidJniHelper
 
 	static unsigned int sdkVersion_;
 
+	/// Attaches the Java virtual machine to make use of JNI
 	static void attachJVM(struct android_app* state);
+	/// Detaches the Java virtual machine
 	static void detachJVM();
 	static void initClasses();
 
@@ -33,6 +35,7 @@ class AndroidJniHelper
 	friend class AndroidApplication;
 };
 
+/// The base class for the classes handling JNI requests to the Android API
 class AndroidJniClass
 {
   public:
@@ -54,6 +57,7 @@ class AndroidJniClass
 	friend class AndroidJniHelper;
 };
 
+/// A class to handle JNI requests to `android.os.Build.VERSION`
 class AndroidJniClass_Version : public AndroidJniClass
 {
   public:
@@ -65,6 +69,7 @@ class AndroidJniClass_Version : public AndroidJniClass
 	static jfieldID fidSdkInt_;
 };
 
+/// A class to handle JNI requests to `android.view.InputDevice.MotionRange`
 class AndroidJniClass_MotionRange : public AndroidJniClass
 {
   private:
@@ -74,6 +79,7 @@ class AndroidJniClass_MotionRange : public AndroidJniClass
 	explicit AndroidJniClass_MotionRange(jobject javaObject);
 };
 
+/// A class to handle JNI requests to `android.view.InputDevice`
 class AndroidJniClass_InputDevice : public AndroidJniClass
 {
   public:
@@ -97,6 +103,7 @@ class AndroidJniClass_InputDevice : public AndroidJniClass
 	static jmethodID midHasKeys_;
 };
 
+/// A class to handle JNI requests to `android.view.KeyCharacterMap`
 class AndroidJniClass_KeyCharacterMap : public AndroidJniClass
 {
   public:

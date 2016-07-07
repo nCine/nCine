@@ -27,7 +27,6 @@ RenderQueue::RenderQueue()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Adds a draw command to the queue
 void RenderQueue::addCommand(RenderCommand *command)
 {
 	// Calculating a sorting key before adding the command to the queue
@@ -53,7 +52,6 @@ namespace {
 	bool ascendingOrder(const RenderCommand* a, const RenderCommand* b) { return a->sortKey() < b->sortKey(); }
 }
 
-/// Sorts the queues then issues every render command in order
 void RenderQueue::draw()
 {
 	// Sorting the queues with the relevant orders

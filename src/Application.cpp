@@ -47,13 +47,11 @@ Application::Application()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Returns the elapsed time since the end of the previous frame in milliseconds
 float Application::interval() const
 {
 	return frameTimer_->interval();
 }
 
-/// Sets the pause flag value
 void Application::setPause(bool paused)
 {
 	isPaused_ = paused;
@@ -64,7 +62,6 @@ void Application::setPause(bool paused)
 	}
 }
 
-/// Toggles the pause flag on and off
 void Application::togglePause()
 {
 	bool paused = !isPaused_;
@@ -75,7 +72,6 @@ void Application::togglePause()
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Must be called before giving control to the application
 void Application::initCommon()
 {
 #ifdef WITH_GIT_VERSION
@@ -164,7 +160,6 @@ void Application::initCommon()
 	srand(static_cast<unsigned int>(time(NULL)));
 }
 
-/// A single step of the game loop made to render a frame
 void Application::step()
 {
 	frameTimer_->addFrame();
@@ -222,7 +217,6 @@ void Application::step()
 	appEventHandler_->onFrameEnd();
 }
 
-/// Must be called before exiting to shut down the application
 void Application::shutdownCommon()
 {
 	appEventHandler_->onShutdown();
@@ -255,7 +249,6 @@ void Application::shutdownCommon()
 	theServiceLocator().unregisterAll();
 }
 
-/// Sets the focus flag
 void Application::setFocus(bool hasFocus)
 {
 	// Check if a focus event has occurred

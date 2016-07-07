@@ -26,12 +26,12 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	virtual void play() = 0;
 	/// Pauses playing
 	virtual void pause() = 0;
-	/// Stop playing and rewind
+	/// Stops playing and rewind
 	virtual void stop() = 0;
 
 	/// Updates the state of the player if the source has done playing
-	/*! It is called every frame by the IAudioDevice class and it is
-		also responsible for buffer queueing/unqueueing in stream players */
+	/*! It is called every frame by the `IAudioDevice` class and it is
+	 *  also responsible for buffer queueing/unqueueing in stream players. */
 	virtual void updateState() = 0;
 
 	/// Sets player looping property
@@ -39,17 +39,17 @@ class DLL_PUBLIC IAudioPlayer : public Object
 
 	/// Returns player gain value
 	inline float gain() const { return gain_; }
-	// Sets player gain value
+	/// Sets player gain value
 	void setGain(float gain);
 	/// Returns player pitch value
 	inline float pitch() const { return pitch_; }
-	// Sets player pitch value
+	/// Sets player pitch value
 	void setPitch(float pitch);
 	/// Returns player position value
 	inline const float* Position() const { return position_.data(); }
-	// Sets player position value through vector
+	/// Sets player position value through vector
 	void setPosition(float position[3]);
-	// Sets player position value through components
+	/// Sets player position value through components
 	void setPosition(float x, float y, float z);
 
 	/// Returns the state of the player

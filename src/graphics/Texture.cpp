@@ -63,7 +63,6 @@ Texture::~Texture()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Sets texture filtering for both magnification and minification
 void Texture::setFiltering(TextureFiltering filter)
 {
 	GLenum glFilter = GL_NEAREST;
@@ -83,7 +82,6 @@ void Texture::setFiltering(TextureFiltering filter)
 	glTexture_->texParameteri(GL_TEXTURE_MIN_FILTER, glFilter);
 }
 
-/// Sets texture wrap for both `s` and `t` coordinate
 void Texture::setWrap(TextureWrap wrap)
 {
 	GLenum glWrap = GL_CLAMP_TO_EDGE;
@@ -104,13 +102,11 @@ void Texture::setWrap(TextureWrap wrap)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Loads a texture based on information from the texture format and loader
 void Texture::load(const ITextureLoader& texLoader)
 {
 	load(texLoader, texLoader.width(), texLoader.height());
 }
 
-/// Loads a texture overriding the size detected by the texture loader
 void Texture::load(const ITextureLoader& texLoader, int width, int height)
 {
 	const IGfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();

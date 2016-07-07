@@ -13,25 +13,25 @@ class DLL_PUBLIC Color
 	/// Default constructor (white color)
 	Color()
 	{ set(255, 255, 255, 255); }
-	/// Four channels constructor (unsigned char)
+	/// Four channels constructor (`unsigned char`)
 	Color(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
 	{ set(red, green, blue, alpha); }
-	/// Three channels constructor (unsigned char)
+	/// Three channels constructor (`unsigned char`)
 	Color(unsigned char red, unsigned char green, unsigned char blue)
 	{ set(red, green, blue); }
-	/// Four channels constructor (unsigned int)
+	/// Four channels constructor (`unsigned int`)
 	Color(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha)
 	{
 		set(static_cast<unsigned char>(red), static_cast<unsigned char>(green),
 			static_cast<unsigned char>(blue), static_cast<unsigned char>(alpha));
 	}
-	/// Three channels constructor (unsigned int)
+	/// Three channels constructor (`unsigned int`)
 	Color(unsigned int red, unsigned int green, unsigned int blue)
 	{ set(static_cast<unsigned char>(red), static_cast<unsigned char>(green), static_cast<unsigned char>(blue)); }
-	/// Four channels constructor (normalized float)
+	/// Four channels constructor (normalized `float`)
 	Color(float red, float green, float blue, float alpha)
 	{ setF(red, green, blue, alpha); }
-	/// Three channels constructor (normalized float)
+	/// Three channels constructor (normalized `float`)
 	Color(float red, float green, float blue)
 	{ setF(red, green, blue); }
 
@@ -44,7 +44,6 @@ class DLL_PUBLIC Color
 	/// Getter for the alpha channel of the color
 	inline unsigned char a() const { return channels_[3]; }
 	/// Getter for the color vector
-	/*! Note: It is useful with glColor4ub */
 	inline const unsigned char* vector() const { return channels_.data(); }
 	/// Flaot getter for the red channel of the color
 	inline float fR() const { return channels_[0] / 255.0f; }
@@ -55,34 +54,34 @@ class DLL_PUBLIC Color
 	/// Float getter for the alpha channel of the color
 	inline float fA() const { return channels_[3] / 255.0f; }
 
-	// Sets four color channels (unsigned char)
+	/// Sets four color channels (`unsigned char`)
 	void set(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha);
-	// Sets three color channels (unsigned char)
+	/// Sets three color channels (`unsigned char`)
 	void set(unsigned char red, unsigned char green, unsigned char blue);
-	// Sets four color channels (unsigned char vector)
+	/// Sets four color channels (`unsigned char` vector)
 	void setVec(unsigned char channels[4]);
 
-	// Sets four color channels (normalized float)
+	/// Sets four color channels (normalized `float`)
 	void setF(float red, float green, float blue, float alpha);
-	// Sets three color channels (normalized float)
+	/// Sets three color channels (normalized `float`)
 	void setF(float red, float green, float blue);
-	// Sets four color channels (float vector)
+	/// Sets four color channels (`float` vector)
 	void setFVec(float channels[4]);
 
-	// Sets the alpha channel (unsigned char)
+	/// Sets the alpha channel (`unsigned char`)
 	void setAlpha(unsigned char alpha);
-	// Sets the alpha channel (normalized float)
+	/// Sets the alpha channel (normalized `float`)
 	void setAlphaF(float alpha);
 
-	// Equality operator
+	/// Equality operator
 	bool operator==(const Color& color) const;
 
 	Color& operator*=(const Color& color);
-	// Multiplication by a constant scalar
+	/// Multiplication by a constant scalar
 	Color& operator*=(float scalar);
 
 	Color operator*(const Color& color) const;
-	// Multiplication by a constant scalar
+	/// Multiplication by a constant scalar
 	Color operator*(float scalar) const;
 
   private:
@@ -91,7 +90,6 @@ class DLL_PUBLIC Color
 };
 
 
-/// Sets four color channels (unsigned char)
 inline void Color::set(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
 {
 	channels_[0] = red;
@@ -100,19 +98,16 @@ inline void Color::set(unsigned char red, unsigned char green, unsigned char blu
 	channels_[3] = alpha;
 }
 
-/// Sets three color channels (unsigned char)
 inline void Color::set(unsigned char red, unsigned char green, unsigned char blue)
 {
 	set(red, green, blue, 255);
 }
 
-/// Sets four color channels (unsigned char vector)
 inline void Color::setVec(unsigned char channels[4])
 {
 	set(channels[0], channels[1], channels[2], channels[3]);
 }
 
-/// Sets four color channels (normalized float)
 inline void Color::setF(float red, float green, float blue, float alpha)
 {
 	channels_[0] = static_cast<unsigned char>(nc::clamp(red, 0.0f, 1.0f) * 255);
@@ -121,31 +116,26 @@ inline void Color::setF(float red, float green, float blue, float alpha)
 	channels_[3] = static_cast<unsigned char>(nc::clamp(alpha, 0.0f, 1.0f) * 255);
 }
 
-/// Sets three color channels (normalized float)
 inline void Color::setF(float red, float green, float blue)
 {
 	setF(red, green, blue, 1.0f);
 }
 
-/// Sets four color channels (float vector)
 inline void Color::setFVec(float channels[4])
 {
 	setF(channels[0], channels[1], channels[2], channels[3]);
 }
 
-/// Sets the alpha channel (unsigned char)
 inline void Color::setAlpha(unsigned char alpha)
 {
 	channels_[3] = alpha;
 }
 
-/// Sets the alpha channel (normalized float)
 inline void Color::setAlphaF(float alpha)
 {
 	channels_[3] = static_cast<unsigned char>(nc::clamp(alpha, 0.0f, 1.0f) * 255);
 }
 
-/// Equality operator
 inline bool Color::operator==(const Color& color) const
 {
 	return (r() == color.r() && g() == color.g() &&
@@ -164,7 +154,6 @@ inline Color& Color::operator*=(const Color& color)
 	return *this;
 }
 
-/// Multiplication by a constant scalar
 inline Color& Color::operator*=(float scalar)
 {
 	for (unsigned int i = 0; i < 4; i++)
@@ -191,7 +180,6 @@ inline Color Color::operator*(const Color& color) const
 	return result;
 }
 
-/// Multiplication by a constant scalar
 inline Color Color::operator*(float scalar) const
 {
 	Color result;

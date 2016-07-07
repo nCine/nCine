@@ -1,64 +1,48 @@
 # nCine
-nCine is a multi-platform 2d game engine
+nCine is a multi-platform 2D game engine.
+It is released under the MIT License, Copyright (c) 2011-2016 Angelo Theodorou.
+For additional information: https://ncine.github.io/
 
 ## Information
 
-### Features
-- OpenGL 2 / OpenGL ES 2 renderer
-- Custom containers with iterators and algorithms
-- Thread pool
-- Streaming of OGG Vorbis audio
-- Android assets support
-- Joystick support
-- SDL 1.2 / GLFW 3 support
-- Font rendering (AngelCode's BMFont format)
-- Particle system
+### Dependencies
+- GLEW
+- GLFW 3.x
+- SDL 1.2.x (deprecated)
+- SDL_image 1.2.x (deprecated)
+- libwebp
+- libpng
+- OpenAL-soft
+- libogg, libvorbis, libvorbisfile
 
-### Supported platforms
-- Windows (MSVC, MinGW)
+### Supported Platforms and Compilers
+- Windows (MSVC, MinGW-w64 on MSYS2)
 - Mac Os X (LLVM)
 - Linux (GCC, LLVM)
 - Android (GCC, LLVM)
 
 ### Development Tools
+- git
 - CMake
 - Qt Creator
 - Doxygen with GraphViz
 - Valgrind
 - Cppcheck
-- git (originally Mercurial)
+- Artistic Style
 
-### Libraries
-- GLEW
-- GLFW 3
-- SDL 1.2
-- SDL_image
-- libwebp
-- libpng
-- OpenAL
-- libogg, libvorbis, libvorbisfile
+## Development
 
-## Tool Notes
+### Tool Notes
 
-### Cppcheck
+#### Cppcheck
 `cppcheck --quiet --enable=all --inconclusive --std=c++03 -I include -I src/include src 2> cppcheck.log`
 
-### Artistic Style
-`./astyle --style=allman --indent=force-tab --attach-namespaces --indent-modifiers --indent-switches --indent-preproc-block --indent-preproc-cond --pad-oper --pad-header --add-brackets --keep-one-line-blocks --keep-one-line-statements --suffix=none --recursive "src/*" "include/*" "tests/*"`
+#### Artistic Style
+`astyle --style=allman --indent=force-tab --attach-namespaces --indent-modifiers --indent-switches --indent-preproc-block --indent-preproc-cond --pad-oper --pad-header --add-brackets --keep-one-line-blocks --keep-one-line-statements --suffix=none --recursive "src/*" "include/*" "tests/*"`
 
-## Developing
+### Conventions
 
-### Checklist
-- compiler warnings
-  - GCC + address sanitizer
-  - LLVM
-  - MSVC
-- static analysis with Cppcheck
-- memory analysis with Valgrind
-- deploy and test on all platforms
-  - check both GLFW 3 and SDL 1.2 support
-
-### Coding conventions
+#### Coding Conventions
 - Indent with tabs (4 spaces wide)
 - Allman brackets
   - Brackets around one line conditional statements
@@ -67,11 +51,15 @@ nCine is a multi-platform 2d game engine
 - Access specifiers order: `public`, `protected`, `private`
   - One half indent for access specifiers (2 spaces)
 - Declarations order: typedefs and enums, data members, constructors, destructors, methods
-  - Friend defined in the private section of a class, after everything else
+  - Friends defined in the private section of a class, after everything else
 - One space padding around operators
 - Use of the `explicit` keyword all the times it makes sense
 
-#### Naming conventions
+#### Naming Conventions
 - Pascal case for classes, enumerations, typedefs and constants
 - Camel case for variables, functions and parameters
 - All upper case for enumerators in an enumeration
+
+#### Documenting Conventions
+- Put Doxygen brief descriptions in header files and additional documentation in implementation ones
+- Use Qt style for Doxygen detailed descriptions (`/*! */`) and end them with a period

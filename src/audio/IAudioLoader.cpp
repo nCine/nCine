@@ -39,7 +39,6 @@ IAudioLoader::~IAudioLoader()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Returns the proper audio loader according to the file extension
 IAudioLoader* IAudioLoader::createFromFile(const char *filename)
 {
 	// Creating a handle from IFile static method to detect assets file

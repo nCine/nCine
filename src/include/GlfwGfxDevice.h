@@ -16,13 +16,13 @@ namespace ncine {
 class GlfwGfxDevice : public IGfxDevice
 {
   public:
-	// Constructor taking the resolution as two integer
+	/// Constructor taking the resolution as two integer
 	GlfwGfxDevice(int width, int height, bool isFullScreen_);
-	// Constructor taking the resolution as a Vector2i class
+	/// Constructor taking the resolution as a `Vector2<int>` object
 	explicit GlfwGfxDevice(Vector2i size, bool isFullScreen_);
-	// Constructor taking the resolution as two integer and a DisplayMode
+	/// Constructor taking the resolution as two integer and a `DisplayMode`
 	GlfwGfxDevice(int width, int height, DisplayMode mode, bool isFullScreen_);
-	// Constructor taking the resolution as a Vector2i class and a DisplayMode
+	/// Constructor taking the resolution as a `Vector2<int>` object and a `DisplayMode`
 	GlfwGfxDevice(Vector2i size, DisplayMode mode, bool isFullScreen_);
 	~GlfwGfxDevice();
 
@@ -44,17 +44,17 @@ class GlfwGfxDevice : public IGfxDevice
 	/// Private assignment operator
 	GlfwGfxDevice& operator=(const GlfwGfxDevice&);
 
-	// Initilizes the class
+	/// Initilizes the object
 	void init(int width, int height, DisplayMode mode, bool isFullScreen_);
-	// Initilizes the video subsystem (GLFW)
+	/// Initilizes the video subsystem (GLFW)
 	void initGraphics();
-	// Initilizes the OpenGL graphic context
+	/// Initilizes the OpenGL graphic context
 	void initDevice();
 
 	/// Returns the window handle used by GLFW3
 	static GLFWwindow* windowHandle() { return windowHandle_; }
 
-	// Callback for glfwSetErrorCallback()
+	/// Callback for glfwSetErrorCallback()
 	static void errorCallback(int error, const char* description);
 
 	friend class GlfwInputManager;

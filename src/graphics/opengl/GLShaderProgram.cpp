@@ -121,7 +121,7 @@ GLint GLShaderProgram::getUniformLocation(const GLchar *name) const
 
 void GLShaderProgram::bindAttribLocation(GLuint index, const GLchar *name)
 {
-	// TODO: Add a isLinked flag and check it before binding an attribute location?
+	// TODO: Add a `isLinked` flag and check it before binding an attribute location?
 	glBindAttribLocation(glHandle_, index, name);
 }
 

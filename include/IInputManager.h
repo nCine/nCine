@@ -87,9 +87,13 @@ class DLL_PUBLIC KeyboardEvent
 class DLL_PUBLIC JoyAxisEvent
 {
   public:
+	/// Joystick id
 	int joyId;
+	/// Axis id
 	int axisId;
+	/// Axis value between -32768 and 32767
 	short int value;
+	/// Axis value normalized between -1.0f and 1.0
 	float normValue;
 };
 
@@ -97,7 +101,9 @@ class DLL_PUBLIC JoyAxisEvent
 class DLL_PUBLIC JoyButtonEvent
 {
   public:
+	/// Joystick id
 	int joyId;
+	/// Button id
 	int buttonId;
 };
 
@@ -105,6 +111,7 @@ class DLL_PUBLIC JoyButtonEvent
 class DLL_PUBLIC JoyConnectionEvent
 {
   public:
+	/// Joystick id
 	int joyId;
 };
 
@@ -136,7 +143,7 @@ class DLL_PUBLIC IInputManager
 	virtual bool isJoyButtonPressed(int joyId, int buttonId) const = 0;
 	/// Returns a value between -32768 and 32767 for a joystick axis
 	virtual short int joyAxisValue(int joyId, int axisId) const = 0;
-	/// Returns a normalized value between -1 and 1 for a joystick axis
+	/// Returns a normalized value between -1.0 and 1.0 for a joystick axis
 	virtual float joyAxisNormValue(int joyId, int axisId) const = 0;
 
   protected:

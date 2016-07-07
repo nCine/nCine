@@ -7,9 +7,11 @@
 
 namespace ncine {
 
+/// Base helper structure for type traits used in the hashmap iterator
 template <class K, class T, class HashFunc, bool IsConst>
 struct HelperTraits { };
 
+/// Helper structure providing type traits used in the non constant hashmap iterator
 template <class K, class T, class HashFunc>
 struct HelperTraits<K, T, HashFunc, false>
 {
@@ -19,6 +21,7 @@ struct HelperTraits<K, T, HashFunc, false>
 	typedef HashMapNode<K, T>& NodeReference;
 };
 
+/// Helper structure providing type traits used in the constant hashmap iterator
 template <class K, class T, class HashFunc>
 struct HelperTraits<K, T, HashFunc, true>
 {
@@ -44,17 +47,17 @@ class HashMapIterator
 	HashMapIterator(const HashMapIterator<K, T, HashFunc, false>& it)
 		: hashMap_(it.hashMap_), bucketIndex_(it.bucketIndex_), listIterator_(it.listIterator_), atFirstNode_(it.atFirstNode_) { }
 
-	// Deferencing operator
+	/// Deferencing operator
 	Reference operator*() const;
 
-	// Iterates to the next element (prefix)
+	/// Iterates to the next element (prefix)
 	HashMapIterator& operator++();
 	// Iterates to the next element (postfix)
 	HashMapIterator operator++(int);
 
-	// Iterates to the previous element (prefix)
+	/// Iterates to the previous element (prefix)
 	HashMapIterator& operator--();
-	// Iterates to the previous element (postfix)
+	/// Iterates to the previous element (postfix)
 	HashMapIterator operator--(int);
 
 	/// Equality operator
@@ -71,13 +74,13 @@ class HashMapIterator
 				lhs.listIterator_ != rhs.listIterator_ || lhs.atFirstNode_ != rhs.atFirstNode_);
 	}
 
-	// Returns the hashmap node currently pointed by the iterator
+	/// Returns the hashmap node currently pointed by the iterator
 	typename HelperTraits<K, T, HashFunc, IsConst>::NodeReference node() const;
-	// Returns the value associated to the currently pointed node
+	/// Returns the value associated to the currently pointed node
 	const T& value() const;
-	// Returns the key associated to the currently pointed node
+	/// Returns the key associated to the currently pointed node
 	const K& key() const;
-	// Returns the hash associated to the currently pointed node
+	/// Returns the hash associated to the currently pointed node
 	hash_t hash() const;
 
   private:
@@ -86,16 +89,16 @@ class HashMapIterator
 	typename HelperTraits<K, T, HashFunc, IsConst>::ListIteratorType listIterator_;
 	bool atFirstNode_;
 
-	// Makes the iterator point to the next element in the hashmap
+	/// Makes the iterator point to the next element in the hashmap
 	void next();
-	// Makes the iterator point to the previous element in the hashmap
+	/// Makes the iterator point to the previous element in the hashmap
 	void previous();
 
-	// For non constant to constant iterator implicit conversion
+	/// For non constant to constant iterator implicit conversion
 	friend class HashMapIterator<K, T, HashFunc, true>;
 };
 
-/// Iterator traits structure specialization
+/// Iterator traits structure specialization for `HashMapIterator` class
 template <class K, class T, class HashFunc>
 struct IteratorTraits<HashMapIterator<K, T, HashFunc, false> >
 {
@@ -109,7 +112,7 @@ struct IteratorTraits<HashMapIterator<K, T, HashFunc, false> >
 	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
 };
 
-/// Constant iterator traits structure specialization
+/// Iterator traits structure specialization for constant `HashMapIterator` class
 template <class K, class T, class HashFunc>
 struct IteratorTraits<HashMapIterator<K, T, HashFunc, true> >
 {
@@ -123,14 +126,12 @@ struct IteratorTraits<HashMapIterator<K, T, HashFunc, true> >
 	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
 };
 
-/// Deferencing operator
 template <class K, class T, class HashFunc, bool IsConst>
 inline typename HashMapIterator<K, T, HashFunc, IsConst>::Reference HashMapIterator<K, T, HashFunc, IsConst>::operator*() const
 {
 	return node().value;
 }
 
-/// Iterates to the next element (prefix)
 template <class K, class T, class HashFunc, bool IsConst>
 HashMapIterator<K, T, HashFunc, IsConst>& HashMapIterator<K, T, HashFunc, IsConst>::operator++()
 {
@@ -138,7 +139,6 @@ HashMapIterator<K, T, HashFunc, IsConst>& HashMapIterator<K, T, HashFunc, IsCons
 	return *this;
 }
 
-/// Iterates to the next element (postfix)
 template <class K, class T, class HashFunc, bool IsConst>
 HashMapIterator<K, T, HashFunc, IsConst> HashMapIterator<K, T, HashFunc, IsConst>::operator++(int)
 {
@@ -148,7 +148,6 @@ HashMapIterator<K, T, HashFunc, IsConst> HashMapIterator<K, T, HashFunc, IsConst
 	return iterator;
 }
 
-/// Iterates to the previous element (prefix)
 template <class K, class T, class HashFunc, bool IsConst>
 HashMapIterator<K, T, HashFunc, IsConst>& HashMapIterator<K, T, HashFunc, IsConst>::operator--()
 {
@@ -156,7 +155,6 @@ HashMapIterator<K, T, HashFunc, IsConst>& HashMapIterator<K, T, HashFunc, IsCons
 	return *this;
 }
 
-/// Iterates to the previous element (postfix)
 template <class K, class T, class HashFunc, bool IsConst>
 HashMapIterator<K, T, HashFunc, IsConst> HashMapIterator<K, T, HashFunc, IsConst>::operator--(int)
 {
@@ -166,7 +164,6 @@ HashMapIterator<K, T, HashFunc, IsConst> HashMapIterator<K, T, HashFunc, IsConst
 	return iterator;
 }
 
-/// Returns the hashmap node currently pointed by the iterator
 template <class K, class T, class HashFunc, bool IsConst>
 typename HelperTraits<K, T, HashFunc, IsConst>::NodeReference HashMapIterator<K, T, HashFunc, IsConst>::node() const
 {
@@ -180,28 +177,24 @@ typename HelperTraits<K, T, HashFunc, IsConst>::NodeReference HashMapIterator<K,
 	}
 }
 
-/// Returns the value associated to the currently pointed node
 template <class K, class T, class HashFunc, bool IsConst>
 inline const T& HashMapIterator<K, T, HashFunc, IsConst>::value() const
 {
 	return node().value;
 }
 
-/// Returns the key associated to the currently pointed node
 template <class K, class T, class HashFunc, bool IsConst>
 inline const K& HashMapIterator<K, T, HashFunc, IsConst>::key() const
 {
 	return node().key;
 }
 
-/// Returns the hash associated to the currently pointed node
 template <class K, class T, class HashFunc, bool IsConst>
 inline hash_t HashMapIterator<K, T, HashFunc, IsConst>::hash() const
 {
 	return node().hash;
 }
 
-/// Makes the iterator point to the next element in the hashmap
 template <class K, class T, class HashFunc, bool IsConst>
 void HashMapIterator<K, T, HashFunc, IsConst>::next()
 {
@@ -232,7 +225,6 @@ void HashMapIterator<K, T, HashFunc, IsConst>::next()
 	}
 }
 
-/// Makes the iterator point to the previous element in the hashmap
 template <class K, class T, class HashFunc, bool IsConst>
 void HashMapIterator<K, T, HashFunc, IsConst>::previous()
 {

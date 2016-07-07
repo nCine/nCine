@@ -10,7 +10,6 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// Creates a thread pool with as many threads as available processors
 ThreadPool::ThreadPool()
 	: threads_(NULL)
 {
@@ -18,7 +17,6 @@ ThreadPool::ThreadPool()
 	init();
 }
 
-/// Creates a thread pool with a specified number of threads
 ThreadPool::ThreadPool(unsigned int numThreads)
 	: threads_(NULL), numThreads_(numThreads)
 {
@@ -42,8 +40,7 @@ ThreadPool::~ThreadPool()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Enqueues a command request for a worker thread
-/*! The command should be allocated on the heap for the worker thread to release it after its execution */
+/*! \note The command should be allocated on the heap for the worker thread to release it after its execution. */
 void ThreadPool::enqueueCommand(IThreadCommand *pThreadCommand)
 {
 	queueMutex_.lock();

@@ -33,7 +33,6 @@ TextureFormat::TextureFormat(GLenum internalFormat, GLenum type)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Converts the external format to the corresponding BGR one
 void TextureFormat::bgrFormat()
 {
 	if (format_ == GL_RGBA)
@@ -52,7 +51,6 @@ void TextureFormat::bgrFormat()
 #endif
 }
 
-/// Calculates the pixel data size for each MIP map level
 long int TextureFormat::calculateMipSizes(GLenum internalFormat, int width, int height, int mipMapCount, long int *mipDataOffsets, long int *mipDataSizes)
 {
 	unsigned int blockWidth = 1; // Compression block width in pixels
@@ -245,7 +243,6 @@ long int TextureFormat::calculateMipSizes(GLenum internalFormat, int width, int 
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Attempts to find a match between an external format and the corresponding internal one
 void TextureFormat::findExternalFormat()
 {
 	bool found = false;
@@ -294,7 +291,6 @@ void TextureFormat::findExternalFormat()
 }
 
 #ifndef __ANDROID__
-/// Searches a match between an integer internal format and an external one
 bool TextureFormat::integerFormat()
 {
 	bool found = true;
@@ -348,7 +344,6 @@ bool TextureFormat::integerFormat()
 	return found;
 }
 
-/// Searches a match between a non integer internal format and an external one
 bool TextureFormat::nonIntegerFormat()
 {
 	bool found = true;
@@ -377,7 +372,6 @@ bool TextureFormat::nonIntegerFormat()
 	return found;
 }
 
-/// Searches a match between a floating point internal format and an external one
 bool TextureFormat::floatFormat()
 {
 	bool found = true;
@@ -405,7 +399,6 @@ bool TextureFormat::floatFormat()
 	return found;
 }
 
-/// Searches a match between a compressed internal format and an external one
 bool TextureFormat::compressedFormat()
 {
 	bool found = true;
@@ -436,7 +429,6 @@ bool TextureFormat::compressedFormat()
 	return found;
 }
 #else
-/// Searches a match between an OpenGL ES internal format and an external one
 bool TextureFormat::oesFormat()
 {
 	bool found = true;
@@ -474,7 +466,6 @@ bool TextureFormat::oesFormat()
 	return found;
 }
 
-/// Searches a match between an OpenGL ES internal format and an external one
 bool TextureFormat::oesFormatApi21()
 {
 #if __ANDROID_API__ < 21
@@ -513,7 +504,6 @@ bool TextureFormat::oesFormatApi21()
 	return found;
 }
 
-/// Searches a match between a OpenGL ES compressed internal format and an external one
 bool TextureFormat::oesCompressedFormat()
 {
 	bool found = true;
@@ -563,7 +553,6 @@ bool TextureFormat::oesCompressedFormat()
 }
 #endif
 
-/// Checks if the internal format is supported by the GPU
 void TextureFormat::checkFormatSupport() const
 {
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();

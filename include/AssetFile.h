@@ -7,7 +7,7 @@
 
 namespace ncine {
 
-/// The class dealing with file open/close, its path and extension
+/// The class dealing with Android asset files
 class AssetFile: public IFile
 {
   public:
@@ -16,10 +16,11 @@ class AssetFile: public IFile
 	explicit AssetFile(const char *filename);
 	~AssetFile();
 
-	/// Static method to return class type
 	inline static FileType sType() { return ASSET_TYPE; }
 
+	/// Tries to open the asset file
 	void open(unsigned char mode);
+	/// Closes the asset file
 	void close();
 	long int seek(long int offset, int whence) const;
 	long int tell() const;
@@ -35,12 +36,12 @@ class AssetFile: public IFile
 	AAsset *asset_;
 	long int startOffset_;
 
-	// Opens the file with `AAsset_openFileDescriptor()`
+	/// Opens the file with `AAsset_openFileDescriptor()`
 	void openFD(unsigned char mode);
-	// Opens the file with `AAssetManager_open()` only
+	/// Opens the file with `AAssetManager_open()` only
 	void openAsset(unsigned char mode);
 
-	// Checks if a file can be accessed with specified mode
+	/// Checks if a file can be accessed with specified mode
 	static bool access(const char *filename, unsigned char mode);
 
 	friend bool IFile::access(const char *filename, unsigned char mode);

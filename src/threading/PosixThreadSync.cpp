@@ -112,7 +112,6 @@ RWLock::~RWLock()
 
 #if !defined (__ANDROID__) && !defined(__APPLE__)
 
-/// Creates a barrier for the specified amount of waiting threads
 Barrier::Barrier(unsigned int count)
 {
 	pthread_barrier_init(&barrier_, NULL, count);

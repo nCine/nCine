@@ -27,7 +27,7 @@ class DLL_PUBLIC Application
 	/// Returns the input manager instance
 	inline IInputManager& inputManager() { return *inputManager_; }
 
-	// Returns the elapsed time since the end of the previous frame in milliseconds
+	/// Returns the elapsed time since the end of the previous frame in milliseconds
 	float interval() const;
 
 	/// Returns the screen width
@@ -37,9 +37,9 @@ class DLL_PUBLIC Application
 
 	/// Returns the value of the pause flag
 	inline bool isPaused() const { return isPaused_; }
-	// Sets the pause flag value
+	/// Sets the pause flag value
 	void setPause(bool paused);
-	// Toggles the pause flag on and off
+	/// Toggles the pause flag on and off
 	void togglePause();
 
 	/// Raises the quit flag
@@ -74,14 +74,14 @@ class DLL_PUBLIC Application
 	Application();
 	~Application() { }
 
-	// Must be called before giving control to the application
+	/// Must be called before giving control to the application
 	void initCommon();
-	// A single step of the game loop made to render a frame
+	/// A single step of the game loop made to render a frame
 	void step();
-	// Must be called before exiting to shut down the application
+	/// Must be called before exiting to shut down the application
 	void shutdownCommon();
 
-	// Sets the focus flag
+	/// Sets the focus flag
 	virtual void setFocus(bool hasFocus);
 
   private:

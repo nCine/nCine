@@ -9,17 +9,15 @@ namespace ncine {
 
 class SceneNode;
 
-/// Traverse and flatten the scenegraph representation
-/** This class is responsible for traversing the scenegraph
-and creating a tree of render commands */
+/// A class that sorts and issues the render commands collected by the scenegraph visit
 class RenderQueue
 {
   public:
 	RenderQueue();
 
-	// Adds a draw command to the queue
+	/// Adds a draw command to the queue
 	void addCommand(RenderCommand *command);
-	// Sorts the queues then issues every render command in order
+	/// Sorts the queues then issues every render command in order
 	void draw();
 
 	/// Returns the total number of vertices to be rendered by the queue
@@ -27,9 +25,9 @@ class RenderQueue
 	/// Returns the queue's length
 	inline unsigned int numCommands() const { return lastNumCommands_; }
 
-	/// Returns the total number of vertices to be rendered by the queue for a specified command type
+	/// Returns the total number of vertices to be rendered by the queue for the specified command type
 	inline unsigned int numVertices(RenderCommand::CommandType type) const { return typedLastNumVertices_[type]; }
-	/// Returns the number of commands to render a specified category of commands
+	/// Returns the number of commands to render for the specified type
 	inline unsigned int numCommands(RenderCommand::CommandType type) const { return typedLastNumCommands_[type]; }
 
   private:

@@ -47,7 +47,6 @@ IFile::IFile(const char *filename)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Returns true if the file is already opened
 bool IFile::isOpened() const
 {
 	if (fileDescriptor_ >= 0 || filePointer_ != NULL)
@@ -60,13 +59,11 @@ bool IFile::isOpened() const
 	}
 }
 
-/// Checks if file extension matches
 bool IFile::hasExtension(const char *extension) const
 {
 	return extension_ == extension;
 }
 
-/// Returns the proper file handle according to prepended tags
 IFile* IFile::createFileHandle(const char *filename)
 {
 #ifdef __ANDROID__
@@ -79,7 +76,6 @@ IFile* IFile::createFileHandle(const char *filename)
 		return new StandardFile(filename);
 }
 
-/// Checks if a file can be accessed with specified mode
 bool IFile::access(const char *filename, unsigned char mode)
 {
 #ifdef __ANDROID__
@@ -92,7 +88,6 @@ bool IFile::access(const char *filename, unsigned char mode)
 		return StandardFile::access(filename, mode);
 }
 
-/// Returns the writable directory for saving data
 const String& IFile::savePath()
 {
 	if (savePath_.isEmpty())

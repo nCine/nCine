@@ -19,7 +19,6 @@ AudioBuffer::AudioBuffer()
 	alGenBuffers(1, &bufferId_);
 }
 
-/// A constructor creating a buffer from a file
 AudioBuffer::AudioBuffer(const char *filename)
 	: Object(AUDIOBUFFER_TYPE, filename), numChannels_(0), frequency_(0)
 {
@@ -39,7 +38,6 @@ AudioBuffer::~AudioBuffer()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Loads audio samples based on information from the audio loader
 void AudioBuffer::load(const IAudioLoader *audioLoader)
 {
 	char *buffer;

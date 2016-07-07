@@ -11,7 +11,6 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// Constructs a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)
 Font::Font(const char *texFilename, const char *fntFilename)
 	: Object(FONT_TYPE, fntFilename), texture_(NULL), lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_ (0), numKernings_(0), glyphs_(NULL)
 {
@@ -34,7 +33,6 @@ Font::~Font()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Returns a constant pointer to a glyph
 const FontGlyph* Font::glyph(unsigned int glyphId) const
 {
 	if (glyphId < MaxGlyphs)
@@ -51,7 +49,6 @@ const FontGlyph* Font::glyph(unsigned int glyphId) const
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Loads an AngelCode's FNT file in a RAM buffer then parses it
 void Font::parseFntFile(IFile *fileHandle)
 {
 	int fileLine = 0;

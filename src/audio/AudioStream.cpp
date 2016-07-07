@@ -13,8 +13,7 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// Constructor creating an audio stream from an audio file
-/*! Private constructor called only by AudioStreamPlayer */
+/*! Private constructor called only by `AudioStreamPlayer`. */
 AudioStream::AudioStream(const char *filename)
 	: nextAvailALBuffer_(0), frequency_(0)
 {
@@ -51,8 +50,7 @@ AudioStream::~AudioStream()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Enqueues new buffers and unqueues processed ones
-/*! /return A flag indicating whether the stream has been entirely decoded and played or not */
+/*! \return A flag indicating whether the stream has been entirely decoded and played or not. */
 bool AudioStream::enqueue(unsigned int source, bool looping)
 {
 	// Set to false when the queue is empty and there is no more data to decode
@@ -125,7 +123,6 @@ bool AudioStream::enqueue(unsigned int source, bool looping)
 	return shouldKeepPlaying;
 }
 
-/// Unqueues any left buffer and rewinds the loader
 void AudioStream::stop(unsigned int source)
 {
 	// In order to unqueue all the buffers, the source must be stopped first

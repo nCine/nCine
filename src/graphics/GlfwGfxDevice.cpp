@@ -14,25 +14,21 @@ GLFWwindow* GlfwGfxDevice::windowHandle_ = NULL;
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// Constructor taking the resolution as two integer
 GlfwGfxDevice::GlfwGfxDevice(int width, int height, bool isFullScreen)
 {
 	init(width, height, DisplayMode(), isFullScreen);
 }
 
-/// Constructor taking the resolution as a Vector2i class
 GlfwGfxDevice::GlfwGfxDevice(Vector2i size, bool isFullScreen)
 {
 	init(size.x, size.y, DisplayMode(), isFullScreen);
 }
 
-/// Constructor taking the resolution as two integer and a DisplayMode
 GlfwGfxDevice::GlfwGfxDevice(int width, int height, DisplayMode mode, bool isFullScreen)
 {
 	init(width, height, mode, isFullScreen);
 }
 
-/// Constructor taking the resolution as a Vector2i class and a DisplayMode
 GlfwGfxDevice::GlfwGfxDevice(Vector2i size, DisplayMode mode, bool isFullScreen)
 {
 	init(size.x, size.y, mode, isFullScreen);
@@ -81,7 +77,6 @@ void GlfwGfxDevice::toggleFullScreen()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Initializes the class
 void GlfwGfxDevice::init(int width, int height, DisplayMode mode, bool isFullScreen)
 {
 	width_ = width;
@@ -93,7 +88,6 @@ void GlfwGfxDevice::init(int width, int height, DisplayMode mode, bool isFullScr
 	initDevice();
 }
 
-/// Initilizes the video subsystem (GLFW)
 void GlfwGfxDevice::initGraphics()
 {
 	glfwSetErrorCallback(errorCallback);
@@ -105,7 +99,6 @@ void GlfwGfxDevice::initGraphics()
 	}
 }
 
-/// Initilizes the OpenGL graphic context
 void GlfwGfxDevice::initDevice()
 {
 	GLFWmonitor* monitor = NULL;
@@ -160,7 +153,6 @@ void GlfwGfxDevice::initDevice()
 #endif
 }
 
-/// Callback for glfwSetErrorCallback()
 void GlfwGfxDevice::errorCallback(int error, const char* description)
 {
 	LOGE_X("(%d) %s", error, description);

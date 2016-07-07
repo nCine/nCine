@@ -40,7 +40,6 @@ void TextureLoaderKtx::init()
 	parseFormat(header);
 }
 
-/// Reads the KTX header and fills the corresponding structure
 void TextureLoaderKtx::readHeader(KtxHeader &header)
 {
 	bool checkPassed = true;
@@ -77,7 +76,6 @@ void TextureLoaderKtx::readHeader(KtxHeader &header)
 	}
 }
 
-/// Parses the PVR3 header to determine its format
 void TextureLoaderKtx::parseFormat(const KtxHeader& header)
 {
 	GLenum internalFormat = IFile::int32FromLE(header.glInternalFormat);

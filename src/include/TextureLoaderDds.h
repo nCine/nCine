@@ -69,9 +69,9 @@ class TextureLoaderDds : public ITextureLoader
 
 	void init();
 
-	// Reads the DDS header and fills the corresponding structure
+	/// Reads the DDS header and fills the corresponding structure
 	void readHeader(DdsHeader& header);
-	// Parses the DDS header to determine its format
+	/// Parses the DDS header to determine its format
 	void parseFormat(const DdsHeader& header);
 };
 

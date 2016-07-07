@@ -8,7 +8,7 @@ namespace ncine {
 
 class GLUniform;
 
-/// A class to cache a uniform value and then update the shader
+/// A class to cache a uniform value and then update it in the shader
 class GLUniformCache
 {
   public:

@@ -11,7 +11,6 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// A constructor creating a player from a file
 AudioStreamPlayer::AudioStreamPlayer(const char *filename)
 	: audioStream_(filename)
 {
@@ -110,7 +109,6 @@ void AudioStreamPlayer::stop()
 	}
 }
 
-/// Updates the player state and the stream buffer queue
 void AudioStreamPlayer::updateState()
 {
 	if (state_ == STATE_PLAYING)

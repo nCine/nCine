@@ -12,7 +12,6 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// Empty constructor
 Material::Material()
 	: isTransparent_(false), shaderProgram_(NULL), texture_(NULL)
 {

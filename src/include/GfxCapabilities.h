@@ -26,17 +26,17 @@ class GfxCapabilities : public IGfxCapabilities
 	/// Array of OpenGL extension availability flags
 	bool glExtensions_[IGfxCapabilities::NUM_EXTENSIONS];
 
-	// Queries the device about its runtime graphics capabilities
+	/// Queries the device about its runtime graphics capabilities
 	void init();
 
-	// Logs OpenGL device info
+	/// Logs OpenGL device info
 	void logGLInfo();
-	// Logs OpenGL extensions
+	/// Logs OpenGL extensions
 	void logGLExtensions();
-	// Logs OpenGL device capabilites
+	/// Logs OpenGL device capabilites
 	void logGLCaps() const;
 
-	// Check for an OpenGL extension
+	/// Checks for an OpenGL extension
 	bool checkGLExtension(const char *extensionName) const;
 };
 

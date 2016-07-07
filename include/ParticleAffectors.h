@@ -14,6 +14,7 @@ class DLL_PUBLIC ParticleAffector
 {
   public:
 	virtual ~ParticleAffector() { }
+	/// Affects a property of the specified particle
 	virtual void affect(Particle* particle) = 0;
 };
 
@@ -24,6 +25,7 @@ class DLL_PUBLIC AccelerationAffector: public ParticleAffector
 	/// X and Y components of the accelerator vector
 	AccelerationAffector(float x, float y) : acceleration_(x, y) { }
 
+	/// Affects the acceleration of the specified particle
 	virtual void affect(Particle* particle);
 
   private:
@@ -43,6 +45,7 @@ class DLL_PUBLIC ColorAffector: public ParticleAffector
 		}
 	}
 
+	/// Affects the color of the specified particle
 	virtual void affect(Particle* particle);
 	void addColorStep(float time, Color color);
 
@@ -77,6 +80,7 @@ class DLL_PUBLIC SizeAffector: public ParticleAffector
 		}
 	}
 
+	/// Affects the size of the specified particle
 	virtual void affect(Particle* particle);
 	void addSizeStep(float time, float scale);
 

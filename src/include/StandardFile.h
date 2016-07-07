@@ -5,7 +5,7 @@
 
 namespace ncine {
 
-/// The class dealing with file open/close, its path and extension
+/// The class handling opening, reading and closing a standard file
 class StandardFile: public IFile
 {
   public:
@@ -17,7 +17,9 @@ class StandardFile: public IFile
 	/// Static method to return class type
 	inline static FileType sType() { return STANDARD_TYPE; }
 
+	/// Tries to open the standard file
 	void open(unsigned char mode);
+	/// Closes the standard file
 	void close();
 	long int seek(long int offset, int whence) const;
 	long int tell() const;
@@ -29,12 +31,12 @@ class StandardFile: public IFile
 	/// Private assignment operator
 	StandardFile& operator=(const StandardFile&);
 
-	// Opens the file with `open()`
+	/// Opens the file with `open()`
 	void openFD(unsigned char mode);
-	// Opens the file with `fopen()`
+	/// Opens the file with `fopen()`
 	void openStream(unsigned char mode);
 
-	// Checks if a file can be accessed with specified mode
+	/// Checks if a file can be accessed with specified mode
 	static bool access(const char *filename, unsigned char mode);
 
 	friend bool IFile::access(const char *filename, unsigned char mode);

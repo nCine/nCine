@@ -28,7 +28,7 @@ class DLL_PUBLIC IIndexer
 	/// Returns the number of objects in the index
 	virtual unsigned int size() const = 0;
 
-	/// Logs a list of currently indexed objects
+	/// Prints in the log a list of currently indexed objects
 	virtual void logReport() const = 0;
 };
 

@@ -26,7 +26,7 @@ class StackedBarPlotter : public ProfilePlotter
 	virtual void draw(RenderQueue& renderQueue);
 
   private:
-	// Fill the buffer of every stacked variable with vertices
+	/// Fill the buffer of every stacked variable with vertices
 	void updateAllVertices(float x, float y, float w, float h);
 };
 

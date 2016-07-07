@@ -33,7 +33,6 @@ unsigned long long int Timer::baseCount_ = 0LL;
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/// Empty constructor
 Timer::Timer()
 	: startTime_(0LL)
 {
@@ -44,13 +43,11 @@ Timer::Timer()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Returns elapsed time in seconds since base time
 float Timer::now()
 {
 	return float(counter() - baseCount_) / frequency_;
 }
 
-/// Puts the current thread to sleep for the specified number of seconds
 void Timer::sleep(float seconds)
 {
 	// From seconds to milliseconds
@@ -67,7 +64,6 @@ void Timer::sleep(float seconds)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Initializes the static fields
 void Timer::init()
 {
 #ifdef _WIN32
@@ -102,7 +98,6 @@ void Timer::init()
 	baseCount_ = counter();
 }
 
-/// Returns current value of the counter
 unsigned long long int Timer::counter()
 {
 	if (isInitialized_ == false)

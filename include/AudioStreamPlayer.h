@@ -11,7 +11,7 @@ namespace ncine {
 class DLL_PUBLIC AudioStreamPlayer : public IAudioPlayer
 {
   public:
-	// A constructor creating a player from a file
+	/// A constructor creating a player from a file
 	explicit AudioStreamPlayer(const char *filename);
 	virtual ~AudioStreamPlayer();
 
@@ -19,7 +19,7 @@ class DLL_PUBLIC AudioStreamPlayer : public IAudioPlayer
 	virtual void pause();
 	virtual void stop();
 
-	// Updates the player state and the stream buffer queue
+	/// Updates the player state and the stream buffer queue
 	virtual void updateState();
 
 	inline static ObjectType sType() { return AUDIOSTREAMPLAYER_TYPE; }

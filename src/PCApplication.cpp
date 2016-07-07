@@ -13,7 +13,6 @@
 
 namespace ncine {
 
-/// Meyers' Singleton
 Application& theApplication()
 {
 	static PCApplication instance;
@@ -24,7 +23,6 @@ Application& theApplication()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Entry point method to be called in the `main()` function
 void PCApplication::start(IAppEventHandler* (*createAppEventHandler)())
 {
 	PCApplication &app = static_cast<PCApplication &>(theApplication());
@@ -38,7 +36,6 @@ void PCApplication::start(IAppEventHandler* (*createAppEventHandler)())
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Must be called at the beginning to init the application
 void PCApplication::init(IAppEventHandler* (*createAppEventHandler)())
 {
 	appEventHandler_ = createAppEventHandler();
@@ -62,7 +59,6 @@ void PCApplication::init(IAppEventHandler* (*createAppEventHandler)())
 	initCommon();
 }
 
-/// The main game loop, handling events and rendering
 void PCApplication::run()
 {
 	while (!shouldQuit_)

@@ -28,7 +28,6 @@ StandardFile::~StandardFile()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Tries to open the file
 void StandardFile::open(unsigned char mode)
 {
 	// Checking if the file is already opened
@@ -51,7 +50,7 @@ void StandardFile::open(unsigned char mode)
 	}
 }
 
-/// Closes the file (both opened or fopened)
+/*! This method will close a file both normally opened or fopened */
 void StandardFile::close()
 {
 	if (fileDescriptor_ >= 0)
@@ -144,7 +143,6 @@ unsigned long int StandardFile::read(void *buffer, unsigned long int bytes) cons
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Opens the file with `open()`
 void StandardFile::openFD(unsigned char mode)
 {
 #if !(defined(_WIN32) && !defined(__MINGW32__))
@@ -195,7 +193,6 @@ void StandardFile::openFD(unsigned char mode)
 #endif
 }
 
-/// Opens the file with `fopen()`
 void StandardFile::openStream(unsigned char mode)
 {
 	char modeChars[3] = {'\0', '\0', '\0'};
@@ -259,8 +256,7 @@ void StandardFile::openStream(unsigned char mode)
 	}
 }
 
-/// Checks if a file can be accessed with specified mode
-/*! It is called by `IFile::access()` */
+/*! This method is called by `IFile::access()`. */
 bool StandardFile::access(const char *filename, unsigned char mode)
 {
 	bool isAccessible = false;

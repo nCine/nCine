@@ -55,10 +55,15 @@ class Vector4
 
 	template <class S> friend S dot(const Vector4<S>& v1, const Vector4<S>& v2);
 
+	/// A vector with all zero elements
 	static const Vector4 Zero;
+	/// A unit vector on the X axis
 	static const Vector4 XAxis;
+	/// A unit vector on the Y axis
 	static const Vector4 YAxis;
+	/// A unit vector on the Z axis
 	static const Vector4 ZAxis;
+	/// A unit vector on the W axis
 	static const Vector4 WAxis;
 };
 

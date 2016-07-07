@@ -27,7 +27,6 @@ FontGlyph::FontGlyph(unsigned int x, unsigned int y, unsigned int width, unsigne
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Return the kerning amount for a subsequent glyph
 int FontGlyph::kerning(int secondGlyph) const
 {
 	int kerningAmount = 0;

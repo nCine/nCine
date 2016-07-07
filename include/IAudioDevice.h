@@ -7,7 +7,7 @@ namespace ncine {
 
 class IAudioPlayer;
 
-/// It represents the interface to the audio device
+/// Audio device interface class
 class DLL_PUBLIC IAudioDevice
 {
   public:
@@ -39,7 +39,7 @@ class DLL_PUBLIC IAudioDevice
 
 	/// Returns the next available source index available for playing
 	virtual int nextAvailableSource() = 0;
-	/// Register a new stream player for buffer update
+	/// Registers a new stream player for buffer update
 	virtual void registerPlayer(IAudioPlayer *player) = 0;
 	/// Updates players state (and buffer queue in the case of stream players)
 	virtual void updatePlayers() = 0;

@@ -28,7 +28,6 @@ class ListNode
 	friend class List<T>;
 };
 
-
 /// A double linked list based on templates
 template <class T>
 class List
@@ -42,9 +41,9 @@ class List
 	List() : size_(0), head_(NULL), tail_(NULL) { }
 	~List() { clear(); }
 
-	// Copy constructor
+	/// Copy constructor
 	List(const List& other);
-	// Copy-and-swap assignment operator
+	/// Copy-and-swap assignment operator
 	List& operator=(List other);
 
 	/// Swaps two lists without copying their data
@@ -62,7 +61,7 @@ class List
 	/// Returns an iterator to the end of the list sentinel (valid for reverse traversal too)
 	inline Iterator end() { return Iterator(NULL); }
 	/// Returns an iterator to the end of the list sentinel
-	/** It exists only for coherency with the rest of the containers */
+	/*! It exists only for coherency with the rest of the containers. */
 	inline Iterator rEnd() { return end(); }
 
 	/// Returns a constant iterator to the first element
@@ -72,14 +71,14 @@ class List
 	/// Returns a constant iterator to the end of the list sentinel (valid reverse traversal too)
 	inline ConstIterator end() const { return ConstIterator(NULL); }
 	/// Returns a constant iterator to the end of the list sentinel
-	/** It exists only for coherency with the rest of the containers */
+	/*! It exists only for coherency with the rest of the containers. */
 	inline ConstIterator rEnd() const { return end(); }
 
 	/// Returns true if the list is empty
 	inline bool isEmpty() const { return head_ == NULL; }
 	/// Returns the number of elements in the list
 	inline unsigned int size() const { return size_; }
-	// Clears the list
+	/// Clears the list
 	void clear();
 	/// Returns a constant reference to the first element in constant time
 	inline const T& front() const { return head_->data_; }
@@ -89,33 +88,33 @@ class List
 	inline const T& back() const { return tail_->data_; }
 	/// Returns a reference to the last element in constant time
 	inline T& back() { return tail_->data_; }
-	// Inserts a new element as the first, in constant time
+	/// Inserts a new element as the first, in constant time
 	void pushFront(const T& element);
-	// Inserts a new element as the last, in constant time
+	/// Inserts a new element as the last, in constant time
 	void pushBack(const T& element);
 	/// Removes the first element in constant time
 	void popFront() { removeNode(head_); }
 	/// Removes the last element in constant time
 	void popBack() { removeNode(tail_); }
-	// Inserts a new element after the node pointed by the constant iterator
+	/// Inserts a new element after the node pointed by the constant iterator
 	ConstIterator insertAfter(const Iterator position, const T& element);
-	// Inserts a new element before the node pointed by the constant iterator
+	/// Inserts a new element before the node pointed by the constant iterator
 	ConstIterator insertBefore(const Iterator position, const T& element);
-	// Inserts new elements from a source range after the node pointed by the constant iterator, last not included
+	/// Inserts new elements from a source range after the node pointed by the constant iterator, last not included
 	ConstIterator insert(const Iterator position, Iterator first, const Iterator last);
-	// Removes the node pointed by the constant iterator in constant time
+	/// Removes the node pointed by the constant iterator in constant time
 	ConstIterator erase(ConstIterator position);
-	// Removes the range of nodes pointed by the iterators in constant time
+	/// Removes the range of nodes pointed by the iterators in constant time
 	ConstIterator erase(ConstIterator first, const ConstIterator last);
-	// Removes a specified element in linear time
+	/// Removes a specified element in linear time
 	void remove(const T& element);
-	// Removes all the elements that fulfill the condition
+	/// Removes all the elements that fulfill the condition
 	template <class Predicate> void removeIf(Predicate pred);
-	// Transfers all the elements from the source list
+	/// Transfers all the elements from the source list
 	void splice(Iterator position, List& source);
-	// Transfers one element from the source list
+	/// Transfers one element from the source list
 	void splice(Iterator position, List& source, Iterator it);
-	// Transfers a range of elements from the source list, last not included
+	/// Transfers a range of elements from the source list, last not included
 	void splice(Iterator position, List& source, Iterator first, Iterator last);
 
   private:
@@ -126,17 +125,16 @@ class List
 	/// Pointer to the last node in the list
 	ListNode<T> *tail_;
 
-	// Inserts a new element after a specified node
+	/// Inserts a new element after a specified node
 	ListNode<T>* insertAfterNode(ListNode<T> *node, const T& element);
-	// Inserts a new element before a specified node
+	/// Inserts a new element before a specified node
 	ListNode<T>* insertBeforeNode(ListNode<T> *node, const T& element);
-	// Removes a specified node in constant time
+	/// Removes a specified node in constant time
 	ListNode<T>* removeNode(ListNode<T> *node);
-	// Removes a range of nodes in constant time, last not included
+	/// Removes a range of nodes in constant time, last not included
 	ListNode<T>* removeRange(ListNode<T> *firstNode, ListNode<T> *lastNode);
 };
 
-/// Copy constructor
 template <class T>
 List<T>::List(const List<T>& other)
 	: size_(0), head_(NULL), tail_(NULL)
@@ -147,8 +145,7 @@ List<T>::List(const List<T>& other)
 	}
 }
 
-/// Copy-and-swap assignment operator
-/** The parameter should be passed by value for the idiom to work */
+/*! The parameter should be passed by value for the idiom to work. */
 template <class T>
 List<T>& List<T>::operator=(List<T> other)
 {
@@ -156,7 +153,6 @@ List<T>& List<T>::operator=(List<T> other)
 	return *this;
 }
 
-/// Clears the list
 template <class T>
 void List<T>::clear()
 {
@@ -173,7 +169,6 @@ void List<T>::clear()
 	size_ = 0;
 }
 
-/// Inserts a new element as the first, in constant time
 template <class T>
 void List<T>::pushFront(const T& element)
 {
@@ -192,7 +187,6 @@ void List<T>::pushFront(const T& element)
 	size_++;
 }
 
-/// Inserts a new element as the last, in constant time
 template <class T>
 void List<T>::pushBack(const T &element)
 {
@@ -211,21 +205,18 @@ void List<T>::pushBack(const T &element)
 	size_++;
 }
 
-/// Inserts a new element after the node pointed by the constant iterator
 template <class T>
 inline typename List<T>::ConstIterator List<T>::insertAfter(const Iterator position, const T& element)
 {
 	return ConstIterator(insertAfterNode(position.node_, element));
 }
 
-/// Inserts a new element before the node pointed by the constant iterator
 template <class T>
 inline typename List<T>::ConstIterator List<T>::insertBefore(const Iterator position, const T& element)
 {
 	return ConstIterator(insertBeforeNode(position.node_, element));
 }
 
-/// Inserts new elements from a source range after the node pointed by the constant iterator, last not included
 template <class T>
 typename List<T>::ConstIterator List<T>::insert(Iterator position, Iterator first, const Iterator last)
 {
@@ -239,8 +230,7 @@ typename List<T>::ConstIterator List<T>::insert(Iterator position, Iterator firs
 	return ConstIterator(node);
 }
 
-/// Removes the node pointed by the constant iterator in constant time
-/*! Note: The iterator cannot be used after on */
+/*! \note The iterator cannot be used after on. */
 template <class T>
 inline typename List<T>::ConstIterator List<T>::erase(ConstIterator position)
 {
@@ -248,8 +238,7 @@ inline typename List<T>::ConstIterator List<T>::erase(ConstIterator position)
 	return ConstIterator(nextNode);
 }
 
-/// Removes the range of nodes pointed by the iterators in constant time
-/*! Note: The first iterator cannot be used after on */
+/*! \note The first iterator cannot be used after on. */
 template <class T>
 inline typename List<T>::ConstIterator List<T>::erase(ConstIterator first, const ConstIterator last)
 {
@@ -257,7 +246,6 @@ inline typename List<T>::ConstIterator List<T>::erase(ConstIterator first, const
 	return ConstIterator(nextNode);
 }
 
-/// Removes a specified element in linear time
 template <class T>
 void List<T>::remove(const T& element)
 {
@@ -275,7 +263,6 @@ void List<T>::remove(const T& element)
 	}
 }
 
-/// Removes all the elements that fulfill the condition
 template <class T> template <class Predicate>
 void List<T>::removeIf(Predicate pred)
 {
@@ -293,7 +280,6 @@ void List<T>::removeIf(Predicate pred)
 	}
 }
 
-/// Transfers all the elements from the source list
 template <class T>
 void List<T>::splice(Iterator position, List& source)
 {
@@ -330,7 +316,6 @@ void List<T>::splice(Iterator position, List& source)
 	source.size_ = 0;
 }
 
-/// Transfers one element from the source list
 template <class T>
 void List<T>::splice(Iterator position, List& source, Iterator it)
 {
@@ -390,7 +375,6 @@ void List<T>::splice(Iterator position, List& source, Iterator it)
 	source.size_--;
 }
 
-/// Transfers a range of elements from the source list, last not included
 template <class T>
 void List<T>::splice(Iterator position, List& source, Iterator first, Iterator last)
 {
@@ -461,7 +445,6 @@ void List<T>::splice(Iterator position, List& source, Iterator first, Iterator l
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Inserts a new element after a specified node
 template <class T>
 ListNode<T>* List<T>::insertAfterNode(ListNode<T> *node, const T& element)
 {
@@ -488,7 +471,6 @@ ListNode<T>* List<T>::insertAfterNode(ListNode<T> *node, const T& element)
 	return newNode;
 }
 
-/// Inserts a new element before a specified node
 template <class T>
 ListNode<T>* List<T>::insertBeforeNode(ListNode<T> *node, const T& element)
 {
@@ -515,7 +497,6 @@ ListNode<T>* List<T>::insertBeforeNode(ListNode<T> *node, const T& element)
 	return newNode;
 }
 
-/// Removes a specified node in constant time
 template <class T>
 ListNode<T>* List<T>::removeNode(ListNode<T> *node)
 {
@@ -549,7 +530,6 @@ ListNode<T>* List<T>::removeNode(ListNode<T> *node)
 	return nextNode;
 }
 
-/// Removes a range of nodes in constant time, last not included
 template <class T>
 ListNode<T>* List<T>::removeRange(ListNode<T> *firstNode, ListNode<T> *lastNode)
 {

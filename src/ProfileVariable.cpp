@@ -39,8 +39,7 @@ ProfileVariable::~ProfileVariable()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Adds a new value for the variable
-/*! /return A bool indicating wether the value has been registered or not (rejected) */
+/*! \return A boolean indicating wether the value has been registered or not (rejected) */
 bool ProfileVariable::addValue(float value)
 {
 	if (isFirstValue_)
@@ -112,7 +111,6 @@ bool ProfileVariable::addValue(float value)
 	return registerValue;
 }
 
-/// Returns the value at the specified index normalized between the two numbers provided
 float ProfileVariable::normBetweenValue(unsigned int index, float min, float max) const
 {
 	float value = 0.0f;
@@ -125,7 +123,6 @@ float ProfileVariable::normBetweenValue(unsigned int index, float min, float max
 	return value;
 }
 
-/// Returns the mathematical mean normalized between the two numbers provided
 float ProfileVariable::normBetweenMean(float min, float max) const
 {
 	float value = 0.0f;

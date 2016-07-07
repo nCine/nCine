@@ -11,6 +11,7 @@ namespace ncine {
 class GLRenderbuffer;
 class GLTexture;
 
+/// A class to handle OpenGL framebuffer objects
 class GLFramebufferObject
 {
   public:
@@ -35,7 +36,7 @@ class GLFramebufferObject
 
 	GLuint glHandle_;
 	/// The target is mutable in order for constant FBO objects to be bound
-	/*! The FBO binding can change to become the target for read, write or both operations */
+	/*! The FBO binding can change to become the target for read, write or both operations. */
 	mutable GLenum target_;
 
 	/// Private copy constructor

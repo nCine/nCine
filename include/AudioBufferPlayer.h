@@ -12,7 +12,7 @@ class AudioBuffer;
 class DLL_PUBLIC AudioBufferPlayer : public IAudioPlayer
 {
   public:
-	// A constructor creating a player from a shared buffer
+	/// A constructor creating a player from a shared buffer
 	explicit AudioBufferPlayer(AudioBuffer *audioBuffer);
 	virtual ~AudioBufferPlayer() { stop(); }
 
@@ -20,7 +20,7 @@ class DLL_PUBLIC AudioBufferPlayer : public IAudioPlayer
 	virtual void pause();
 	virtual void stop();
 
-	// Updates the player state
+	/// Updates the player state
 	virtual void updateState();
 
 	inline static ObjectType sType() { return AUDIOBUFFERPLAYER_TYPE; }

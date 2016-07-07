@@ -5,7 +5,7 @@
 
 namespace ncine {
 
-/// The interface for every logger
+/// The interface class for loggers
 class DLL_PUBLIC ILogger
 {
   public:
@@ -25,7 +25,7 @@ class DLL_PUBLIC ILogger
 	virtual ~ILogger() = 0;
 
 	/// Logs a message with a specified level of severity
-	virtual void write(LogLevel level, const char *message, ...) = 0;
+	virtual void write(LogLevel level, const char *fmt, ...) = 0;
 };
 
 inline ILogger::~ILogger() { }
@@ -35,7 +35,7 @@ inline ILogger::~ILogger() { }
 class DLL_PUBLIC NullLogger : public ILogger
 {
   public:
-	virtual void write(LogLevel level, const char *message, ...) { }
+	virtual void write(LogLevel level, const char *fmt, ...) { }
 };
 
 }

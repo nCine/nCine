@@ -7,6 +7,7 @@
 
 namespace ncine {
 
+/// A class to handle OpenGL 2D textures
 class GLTexture
 {
   public:
@@ -41,7 +42,7 @@ class GLTexture
 	GLuint glHandle_;
 	GLenum target_;
 	/// The texture unit is mutable in order for constant texture objects to be bound
-	/*! A texture can be bound to a specific texture unit */
+	/*! A texture can be bound to a specific texture unit. */
 	mutable unsigned int textureUnit_;
 	GLenum imageFormat_;
 

@@ -63,7 +63,6 @@ ITextureLoader::~ITextureLoader()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Returns the texture data size in bytes for the specified MIP map level
 long ITextureLoader::dataSize(unsigned int mipMapLevel) const
 {
 	long int dataSize = 0;
@@ -83,7 +82,6 @@ long ITextureLoader::dataSize(unsigned int mipMapLevel) const
 	return dataSize;
 }
 
-/// Returns the pointer to pixel data for the specified MIP map level
 const GLubyte* ITextureLoader::pixels(unsigned int mipMapLevel) const
 {
 	GLubyte *pixels = NULL;
@@ -103,7 +101,6 @@ const GLubyte* ITextureLoader::pixels(unsigned int mipMapLevel) const
 	return pixels;
 }
 
-/// Returns the proper texture loader according to the file extension
 ITextureLoader* ITextureLoader::createFromFile(const char *filename)
 {
 	// Creating a handle from IFile static method to detect assets file
@@ -157,13 +154,11 @@ ITextureLoader* ITextureLoader::createFromFile(const char *filename)
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Loads pixel data from a texture file holding either compressed or uncompressed data
 void ITextureLoader::loadPixels(GLenum internalFormat)
 {
 	loadPixels(internalFormat, 0);
 }
 
-/// Loads pixel data from a texture file holding either compressed or uncompressed data, overriding pixel type
 void ITextureLoader::loadPixels(GLenum internalFormat, GLenum type)
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());

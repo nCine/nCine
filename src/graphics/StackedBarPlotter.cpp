@@ -77,8 +77,6 @@ void StackedBarPlotter::draw(RenderQueue& renderQueue)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-
-/// Fill the buffer of every stacked variable with vertices
 void StackedBarPlotter::updateAllVertices(float x, float y, float w, float h)
 {
 	unsigned int numVariables = variables_.size();

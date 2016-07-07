@@ -16,18 +16,18 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	AnimatedSprite(Texture *texture, float x, float y);
 	virtual ~AnimatedSprite();
 
-	// Returns true if the current animation is paused
+	/// Returns true if the current animation is paused
 	bool isPaused() const;
-	// Sets the pause state for the animation
+	/// Sets the pause state for the animation
 	void setPaused(bool isPaused);
 
 	virtual void update(float interval);
 
-	// Adds a new animation
+	/// Adds a new animation
 	void addAnimation(RectAnimation* anim);
-	// Sets the current animation and its frame number
+	/// Sets the current animation and its frame number
 	void setAnimation(int animNum);
-	// Sets the current animation to a specified frame number
+	/// Sets the current animation to a specified frame number
 	void setFrame(unsigned int frameNum);
 
 	inline static ObjectType sType() { return ANIMATEDSPRITE_TYPE; }

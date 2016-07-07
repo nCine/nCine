@@ -17,9 +17,9 @@ class ProfilePlotter : public DrawableNode
 	ProfilePlotter(SceneNode* parent, Rectf rect);
 	virtual ~ProfilePlotter();
 
-	// Adds a value to the specified variable
+	/// Adds a value to the specified variable
 	bool addValue(unsigned int varIndex, float value);
-	// Returns the variable with the specified index
+	/// Returns the variable with the specified index
 	PlottingVariable& variable(unsigned int index);
 	/// Sets the backgound color for the graphs
 	void setBackgroundColor(Color backgroundColor) { backgroundColor_ = backgroundColor; }
@@ -37,7 +37,7 @@ class ProfilePlotter : public DrawableNode
 	inline void setPlotRefValue(bool enabled) { shouldPlotRefValue_ = enabled; }
 	/// Sets the reference value
 	inline void setRefValue(float value) { refValue_ = value; }
-	// Returns the reference value normalized and clamped between the two numbers provided
+	/// Returns the reference value normalized and clamped between `min` and `max`
 	float normBetweenRefValue(float min, float max) const;
 
 	inline virtual void drawRefValue(RenderQueue& renderQueue)
@@ -73,9 +73,10 @@ class ProfilePlotter : public DrawableNode
 	/// The command used to render the reference value
 	RenderCommand refValueCmd_;
 
+	/// Fills the background buffer with vertices
 	void setBackgroundVertices();
 	virtual void updateRenderCommand();
-	// Updates the reference value rendering command
+	/// Updates the reference value rendering command
 	void UpdateRefValueRenderCommand();
 
   private:

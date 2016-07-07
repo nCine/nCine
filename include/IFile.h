@@ -7,11 +7,11 @@
 
 namespace ncine {
 
-/// The interface dealing with file operations
+/// The interface class dealing with file operations
 class DLL_PUBLIC IFile
 {
   public:
-	/// The enumeration of file types
+	/// File types
 	enum FileType
 	{
 		BASE_TYPE = 0,
@@ -19,7 +19,7 @@ class DLL_PUBLIC IFile
 		ASSET_TYPE
 	};
 
-	/// The enumeration for the open mode bitmask
+	/// Open mode bitmask
 	enum OpenMode
 	{
 #if !(defined(_WIN32) && !defined(__MINGW32__))
@@ -30,7 +30,7 @@ class DLL_PUBLIC IFile
 		MODE_BINARY = 8
 	};
 
-	/// The enumeration for the access mode bitmask
+	/// Access mode bitmask
 	enum AccessMode
 	{
 		MODE_EXISTS = 0,
@@ -54,22 +54,24 @@ class DLL_PUBLIC IFile
 	virtual long int seek(long int offset, int whence) const = 0;
 	/// Tells the seek position of an opened file
 	virtual long int tell() const = 0;
-	/// Read a certain amount of bytes from the file to a buffer
+	/// Reads a certain amount of bytes from the file to a buffer
 	/*! \return Number of bytes read */
 	virtual unsigned long int read(void *buffer, unsigned long int bytes) const = 0;
 
 	/// Sets the close on destruction flag
+	/*! If the flag is true the file is closed upon object destruction. */
 	inline void setCloseOnDestruction(bool shouldCloseOnDestruction) { shouldCloseOnDestruction_ = shouldCloseOnDestruction; }
-	/// Sets the exit on open fail
+	/// Sets the exit on fail to open flag
+	/*! If the flag is true the application exits if the file cannot be opened. */
 	inline void setExitOnFailToOpen(bool shouldExitOnFailToOpen) { shouldExitOnFailToOpen_ = shouldExitOnFailToOpen; }
-	// Returns true if the file is already opened
+	/// Returns true if the file is already opened
 	virtual bool isOpened() const;
 
 	/// Returns file name with path
 	const char* filename() const { return filename_.data(); }
 	/// Returns file extension
 	const char* extension() const { return extension_.data(); }
-	// Checks if file extension matches
+	/// Checks if file extension matches
 	bool hasExtension(const char *extension) const;
 
 	/// Returns file descriptor
@@ -103,14 +105,14 @@ class DLL_PUBLIC IFile
 			   ((number >> 24) & 0x0000000000FF0000ULL) | ((number >> 40) & 0x000000000000FF00ULL) | (number << 56);
 	}
 
-	// Returns the proper file handle according to prepended tags
+	/// Returns the proper file handle according to prepended tags
 	static IFile* createFileHandle(const char *filename);
-	// Checks if a file can be accessed with specified mode
+	/// Checks if a file can be accessed with the specified mode
 	static bool access(const char *filename, unsigned char mode);
 
 	/// Returns the base directory for data loading
 	static const String& dataPath() { return dataPath_; }
-	// Returns the writable directory for saving data
+	/// Returns the writable directory for saving data
 	static const String& savePath();
 
   protected:
@@ -131,11 +133,11 @@ class DLL_PUBLIC IFile
 	int fileDescriptor_;
 	/// File pointer for `fopen()` and `fclose()`
 	FILE *filePointer_;
-	/// Should the destructor close the file?
-	/*! Useful for `ov_open()`/`ov_fopen()` and `ov_clear()` */
+	/// A flag indicating whether the destructor should also close the file
+	/*! Useful for `ov_open()`/`ov_fopen()` and `ov_clear()` functions of the <em>Vorbisfile</em> library. */
 	bool shouldCloseOnDestruction_;
-	/// Should the application exit if the file cannot be opened?
-	/*! Useful for the log file creation */
+	/// A flag indicating whether the application should exit if the file cannot be opened
+	/*! Useful for the log file creation. */
 	bool shouldExitOnFailToOpen_;
 
 	/// File size in bytes
@@ -147,9 +149,11 @@ class DLL_PUBLIC IFile
 	/// The path for the application to write files into
 	static String savePath_;
 
+	/// Determines the correct save path based on the platform
 	static void initSavePath();
 
-	friend class AppConfiguration; // needs to call IFile::setDataPath()
+	/// The `AppConfiguration` class needs to call `IFile::setDataPath()`
+	friend class AppConfiguration;
 };
 
 }

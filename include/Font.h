@@ -14,7 +14,7 @@ class IFile;
 class DLL_PUBLIC Font : public Object
 {
   public:
-	// Constructs a font class from a texture and a FNT file (from AngelCode's Bitmap Font Generator)
+	/// Constructs the object from a texture and a `FNT` file (from <em>AngelCode's Bitmap Font Generator</em>)
 	Font(const char* texFilename, const char *fntFilename);
 	virtual ~Font();
 
@@ -31,7 +31,7 @@ class DLL_PUBLIC Font : public Object
 	inline Vector2i textureSize() const { return Vector2i(width_, height_); }
 	/// Returns number of glyphs
 	inline unsigned int numGlyphs() const { return numGlyphs_; }
-	/// Reurns a constant pointer to a glyph
+	/// Returns a constant pointer to a glyph
 	const FontGlyph* glyph(unsigned int glyphId) const;
 
 	inline static ObjectType sType() { return FONT_TYPE; }
@@ -62,7 +62,7 @@ class DLL_PUBLIC Font : public Object
 	/// Private assignment operator
 	Font& operator=(const Font&);
 
-	// Loads an AngelCode's FNT file in a RAM buffer then parses it
+	/// Loads an <em>AngelCode's</em> `FNT` file in a memory buffer then parses it
 	void parseFntFile(IFile *fileHandle);
 };
 

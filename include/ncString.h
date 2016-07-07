@@ -20,19 +20,19 @@ class DLL_PUBLIC String
 	/// Maximum length when creating an object from C-style strings
 	static const unsigned int MaxCStringLength = DefaultCapacity - 1;
 
-	// Default constructor
+	/// Default constructor
 	String();
-	// Constructs an empty string with explicit size
+	/// Constructs an empty string with explicit size
 	explicit String(unsigned int capacity);
-	// Constructs a string from a C string
+	/// Constructs a string object from a C string
 	String(const char *cString);
 	~String();
 
-	// Copy constructor
+	/// Copy constructor
 	String(const String& other);
-	// Assignment operator that preserves the original string capacity
+	/// Assignment operator that preserves the original string capacity
 	String& operator=(const String& other);
-	// Assigns a constant C string to the string object
+	/// Assigns a constant C string to the string object
 	String& operator=(const char *cString);
 
 	/// Swaps two strings without copying their data
@@ -69,7 +69,7 @@ class DLL_PUBLIC String
 	inline unsigned int capacity() const { return capacity_; }
 
 	/// Clears the string
-	/** Length will be zero but capacity remains untouched */
+	/*! Length will be zero but capacity remains unmodified. */
 	inline void clear() { length_ = 0; array_[0] = '\0'; }
 
 	/// Returns a pointer to the internal array
@@ -77,40 +77,40 @@ class DLL_PUBLIC String
 	/// Returns a constant pointer to the internal array
 	const char* data() const { return array_; }
 
-	// Copies characters from somewhere in the source to somewhere in the destnation
+	/// Copies characters from somewhere in the source to somewhere in the destnation
 	unsigned int copy(const String& source, unsigned int srcChar, unsigned int numChar, unsigned int destChar);
-	// Copies all the characters from the source at the beginning of the destination
+	/// Copies all the characters from the source at the beginning of the destination
 	unsigned int copy(const String& source);
-	// Appends all the characters from the source at the end of the destination
+	/// Appends all the characters from the source at the end of the destination
 	unsigned int append(const String& source);
 
-	// Compares the string with another one in lexicographical order
+	/// Compares the string with another one in lexicographical order
 	int compare(const String& other) const;
-	// Compares the string with a constant C string in lexicographical order
+	/// Compares the string with a constant C string in lexicographical order
 	int compare(const char *cString) const;
 
-	// Finds the first occurrence of a character
+	/// Finds the first occurrence of a character
 	int findFirstChar(char c) const;
-	// Finds the last occurrence of a character
+	/// Finds the last occurrence of a character
 	int findLastChar(char c) const;
 
-	// Finds the first occurrence of the given string
+	/// Finds the first occurrence of the given string
 	int find(const String& other) const;
-	// Finds the first occurrence of the given constant C string
+	/// Finds the first occurrence of the given constant C string
 	int find(const char *cString) const;
 
-	// Replaces the string with the formatted result
+	/// Replaces the string with the formatted result
 	String& format(const char *fmt, ...);
-	// Append the formatted result to the string
+	/// Append the formatted result to the string
 	String& formatAppend(const char *fmt, ...);
 
-	// Appends another string to this one
+	/// Appends another string to this one
 	String& operator+=(const String& other);
-	// Appends a constant C string to the string object
+	/// Appends a constant C string to the string object
 	String& operator+=(const char *cString);
-	// Concatenate two strings together to create a third one
+	/// Concatenate two strings together to create a third one
 	String operator+(const String& other) const;
-	// Concatenates a string with a constant C string to create a third one
+	/// Concatenates a string with a constant C string to create a third one
 	String operator+(const char *cString) const;
 
 	inline bool operator==(const String& other) const { return (length_ != other.length_) ? false : (compare(other) == 0); }

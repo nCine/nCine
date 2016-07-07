@@ -20,7 +20,6 @@ RenderCommand::RenderCommand()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Calculates a sort key for the queue
 void RenderCommand::calculateSortKey()
 {
 	unsigned long int upper = layer_ << 16;
@@ -28,7 +27,6 @@ void RenderCommand::calculateSortKey()
 	sortKey_ = upper + lower;
 }
 
-/// Issues the render command
 void RenderCommand::issue()
 {
 	geometry_.bind();
@@ -76,11 +74,11 @@ void RenderCommand::draw()
 {
 	if (geometry_.ibo_)
 	{
-		glDrawElements(geometry_.drawType_, geometry_.numVertices_, GL_UNSIGNED_SHORT, 0);
+		glDrawElements(geometry_.primitiveType_, geometry_.numVertices_, GL_UNSIGNED_SHORT, 0);
 	}
 	else
 	{
-		glDrawArrays(geometry_.drawType_, geometry_.firstVertex_, geometry_.numVertices_);
+		glDrawArrays(geometry_.primitiveType_, geometry_.firstVertex_, geometry_.numVertices_);
 	}
 }
 

@@ -73,7 +73,6 @@ bool GfxCapabilities::hasExtension(GLExtensions extensionName) const
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/// Queries the device about its runtime graphics capabilities
 void GfxCapabilities::init()
 {
 	const char *pVersion = reinterpret_cast<const char *>(glGetString(GL_VERSION));
@@ -94,7 +93,6 @@ void GfxCapabilities::init()
 
 }
 
-/// Logs OpenGL device info
 void GfxCapabilities::logGLInfo()
 {
 	LOGI("OpenGL device info ---");
@@ -105,7 +103,6 @@ void GfxCapabilities::logGLInfo()
 	LOGI("OpenGL device info ---");
 }
 
-/// Logs OpenGL extensions
 void GfxCapabilities::logGLExtensions()
 {
 	LOGI("OpenGL extensions ---");
@@ -113,7 +110,6 @@ void GfxCapabilities::logGLExtensions()
 	LOGI("OpenGL extensions ---");
 }
 
-/// Logs OpenGL device capabilites
 void GfxCapabilities::logGLCaps() const
 {
 	LOGI("OpenGL device capabilities ---");
@@ -135,7 +131,6 @@ void GfxCapabilities::logGLCaps() const
 	LOGI("OpenGL device capabilities ---");
 }
 
-/// Check for an OpenGL extension
 bool GfxCapabilities::checkGLExtension(const char *extensionName) const
 {
 	/*
