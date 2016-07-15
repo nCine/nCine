@@ -29,9 +29,9 @@ class DLL_PUBLIC AudioBufferPlayer : public IAudioPlayer
 	AudioBuffer *audioBuffer_;
 
 	/// Private copy constructor
-	AudioBufferPlayer(const AudioBufferPlayer&);
+	AudioBufferPlayer(const AudioBufferPlayer &);
 	/// Private assignment operator
-	AudioBufferPlayer& operator=(const AudioBufferPlayer&);
+	AudioBufferPlayer &operator=(const AudioBufferPlayer &);
 };
 
 }

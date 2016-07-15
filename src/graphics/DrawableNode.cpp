@@ -8,13 +8,13 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-DrawableNode::DrawableNode(SceneNode* parent, float x, float y)
+DrawableNode::DrawableNode(SceneNode *parent, float x, float y)
 	: SceneNode(parent, x, y), renderCommand_(new RenderCommand)
 {
 
 }
 
-DrawableNode::DrawableNode(SceneNode* parent)
+DrawableNode::DrawableNode(SceneNode *parent)
 	: SceneNode(parent), renderCommand_(new RenderCommand)
 {
 
@@ -36,7 +36,7 @@ DrawableNode::~DrawableNode()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void DrawableNode::draw(RenderQueue& renderQueue)
+void DrawableNode::draw(RenderQueue &renderQueue)
 {
 	updateRenderCommand();
 	renderQueue.addCommand(renderCommand_);

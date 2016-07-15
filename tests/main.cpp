@@ -15,7 +15,7 @@ class IAppEventHandler;
 
 }
 
-ncine::IAppEventHandler* createApphandler();
+ncine::IAppEventHandler *createApphandler();
 
 int main(int argc, char **argv)
 {

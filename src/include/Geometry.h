@@ -29,7 +29,7 @@ class Geometry
 	void updateVboData(unsigned int floatOffset, unsigned int floatSize, const GLfloat *data);
 
 	/// Shares the VBO of another `Geometry` object
-	void shareVbo(const Geometry& geometry);
+	void shareVbo(const Geometry &geometry);
 	/// Makes this `Geometry` object use the common quad VBO from `RenderResources`
 	void makeSharedQuad();
 
@@ -60,9 +60,9 @@ class Geometry
 	GLuint vboHandle();
 
 	/// Private copy constructor
-	Geometry(const Geometry&);
+	Geometry(const Geometry &);
 	/// Private assignment operator
-	Geometry& operator=(const Geometry&);
+	Geometry &operator=(const Geometry &);
 
 	friend class RenderCommand;
 };

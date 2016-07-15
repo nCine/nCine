@@ -44,12 +44,12 @@ class DLL_PUBLIC Object
 	inline static ObjectType sType() { return BASE_TYPE; }
 
 	/// Returns the object name
-	inline const String& name() const { return name_; }
+	inline const String &name() const { return name_; }
 	/// Sets the object name
 	inline void setName(const String &name) { name_ = name; }
 
 	/// Returns a casted pointer to the object with the specified id, if any exists
-	template <class T> static T* fromId(unsigned int id);
+	template <class T> static T *fromId(unsigned int id);
 
   protected:
 	/// Object type
@@ -65,9 +65,9 @@ class DLL_PUBLIC Object
 	String name_;
 
 	/// Private copy constructor
-	Object(const Object&);
+	Object(const Object &);
 	/// Private assignment operator
-	Object& operator=(const Object&);
+	Object &operator=(const Object &);
 };
 
 }

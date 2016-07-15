@@ -20,7 +20,7 @@ class AndroidJniHelper
 	static unsigned int sdkVersion_;
 
 	/// Attaches the Java virtual machine to make use of JNI
-	static void attachJVM(struct android_app* state);
+	static void attachJVM(struct android_app *state);
 	/// Detaches the Java virtual machine
 	static void detachJVM();
 	static void initClasses();
@@ -28,9 +28,9 @@ class AndroidJniHelper
 	/// Static class, no constructor
 	AndroidJniHelper();
 	/// Static class, no copy constructor
-	AndroidJniHelper(const AndroidJniHelper& other);
+	AndroidJniHelper(const AndroidJniHelper &other);
 	/// Static class, no assignement operator
-	AndroidJniHelper& operator=(const AndroidJniHelper& other);
+	AndroidJniHelper &operator=(const AndroidJniHelper &other);
 
 	friend class AndroidApplication;
 };

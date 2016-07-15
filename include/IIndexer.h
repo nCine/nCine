@@ -15,12 +15,12 @@ class DLL_PUBLIC IIndexer
 	virtual ~IIndexer() = 0;
 
 	/// Adds an object to the index
-	virtual unsigned int addObject(Object* object) = 0;
+	virtual unsigned int addObject(Object *object) = 0;
 	/// Removes an object from the index
 	virtual void removeObject(unsigned int id) = 0;
 
 	/// Returns the object with the specified object id, if any
-	virtual Object* object(unsigned int id) const = 0;
+	virtual Object *object(unsigned int id) const = 0;
 
 	/// Returns true if the index is empty
 	virtual bool isEmpty() const = 0;
@@ -39,10 +39,10 @@ inline IIndexer::~IIndexer() { }
 class DLL_PUBLIC NullIndexer : public IIndexer
 {
   public:
-	virtual unsigned int addObject(Object* object) { return 0U; }
+	virtual unsigned int addObject(Object *object) { return 0U; }
 	virtual void removeObject(unsigned int id) { }
 
-	virtual Object* object(unsigned int id) const { return NULL; }
+	virtual Object *object(unsigned int id) const { return NULL; }
 
 	virtual bool isEmpty() const { return true; }
 

@@ -15,7 +15,7 @@ TextureLoaderPkm::TextureLoaderPkm(const char *filename)
 	init();
 }
 
-TextureLoaderPkm::TextureLoaderPkm(IFile* fileHandle)
+TextureLoaderPkm::TextureLoaderPkm(IFile *fileHandle)
 	: ITextureLoader(fileHandle)
 {
 	init();

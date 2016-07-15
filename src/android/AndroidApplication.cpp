@@ -8,20 +8,20 @@
 #include "AndroidJniHelper.h"
 
 /// Processes the next application command
-void engine_handle_cmd(struct android_app* app, int32_t cmd)
+void engine_handle_cmd(struct android_app *app, int32_t cmd)
 {
 	nc::AndroidApplication::processCommand(app, cmd);
 }
 
 /// Parses the next input event
-int32_t engine_handle_input(struct android_app* app, AInputEvent* event)
+int32_t engine_handle_input(struct android_app *app, AInputEvent *event)
 {
 	return static_cast<int32_t>(nc::AndroidInputManager::parseEvent(event));
 }
 
 namespace ncine {
 
-Application& theApplication()
+Application &theApplication()
 {
 	static AndroidApplication instance;
 	return instance;
@@ -31,7 +31,7 @@ Application& theApplication()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void AndroidApplication::start(struct android_app* state, IAppEventHandler* (*createAppEventHandler)())
+void AndroidApplication::start(struct android_app *state, IAppEventHandler * (*createAppEventHandler)())
 {
 	theAndroidApplication().state_ = state;
 	theAndroidApplication().createAppEventHandler_ = createAppEventHandler;
@@ -43,9 +43,9 @@ void AndroidApplication::start(struct android_app* state, IAppEventHandler* (*cr
 	{
 		int ident;
 		int events;
-		struct android_poll_source* source;
+		struct android_poll_source *source;
 
-		while ((ident = ALooper_pollAll(!theApplication().isPaused() ? 0 : -1, NULL, &events, (void**)&source)) >= 0)
+		while ((ident = ALooper_pollAll(!theApplication().isPaused() ? 0 : -1, NULL, &events, (void **)&source)) >= 0)
 		{
 			if (source != NULL)
 			{
@@ -65,8 +65,8 @@ void AndroidApplication::start(struct android_app* state, IAppEventHandler* (*cr
 		}
 
 		if (theAndroidApplication().isInitialized() &&
-			theApplication().hasFocus() &&
-			!theApplication().isPaused())
+		    theApplication().hasFocus() &&
+		    !theApplication().isPaused())
 		{
 			AndroidInputManager::updateJoystickConnections();
 			theApplication().step();
@@ -77,7 +77,7 @@ void AndroidApplication::start(struct android_app* state, IAppEventHandler* (*cr
 	ANativeActivity_finish(state->activity);
 }
 
-void AndroidApplication::processCommand(struct android_app* app, int32_t cmd)
+void AndroidApplication::processCommand(struct android_app *app, int32_t cmd)
 {
 	static EglGfxDevice *eglGfxDevice = NULL;
 

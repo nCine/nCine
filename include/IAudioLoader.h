@@ -36,7 +36,7 @@ class DLL_PUBLIC IAudioLoader
 	inline unsigned long int bufferSize() const { return numSamples_ * numChannels_ * bytesPerSample_; }
 
 	/// Returns the proper audio loader according to the file extension
-	static IAudioLoader* createFromFile(const char *filename);
+	static IAudioLoader *createFromFile(const char *filename);
 
   protected:
 	/// Audio file handle

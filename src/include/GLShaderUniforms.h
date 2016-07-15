@@ -18,11 +18,11 @@ class GLShaderUniforms
 	explicit GLShaderUniforms(GLShaderProgram *shaderProgram);
 	void setProgram(GLShaderProgram *shaderProgram);
 
-	GLUniformCache* uniform(const char *name);
+	GLUniformCache *uniform(const char *name);
 	void commitUniforms();
 
   private:
-	GLShaderProgram* shaderProgram_;
+	GLShaderProgram *shaderProgram_;
 
 	static const int UniformCachesHashSize = 16;
 	StringHashMap<GLUniformCache>::Type uniformCaches_;

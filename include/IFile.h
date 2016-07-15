@@ -68,16 +68,16 @@ class DLL_PUBLIC IFile
 	virtual bool isOpened() const;
 
 	/// Returns file name with path
-	const char* filename() const { return filename_.data(); }
+	const char *filename() const { return filename_.data(); }
 	/// Returns file extension
-	const char* extension() const { return extension_.data(); }
+	const char *extension() const { return extension_.data(); }
 	/// Checks if file extension matches
 	bool hasExtension(const char *extension) const;
 
 	/// Returns file descriptor
 	inline int fd() const { return fileDescriptor_; }
 	/// Returns file stream pointer
-	inline FILE* ptr() const { return filePointer_; }
+	inline FILE *ptr() const { return filePointer_; }
 	/// Returns file size in bytes
 	inline long int size() const { return fileSize_; }
 
@@ -101,19 +101,19 @@ class DLL_PUBLIC IFile
 	inline static uint64_t int64FromBE(uint64_t number)
 	{
 		return (number >> 56) | ((number << 40) & 0x00FF000000000000ULL) | ((number << 24) & 0x0000FF0000000000ULL) |
-			   ((number << 8) & 0x000000FF00000000ULL) | ((number >> 8) & 0x00000000FF000000ULL) |
-			   ((number >> 24) & 0x0000000000FF0000ULL) | ((number >> 40) & 0x000000000000FF00ULL) | (number << 56);
+		       ((number << 8) & 0x000000FF00000000ULL) | ((number >> 8) & 0x00000000FF000000ULL) |
+		       ((number >> 24) & 0x0000000000FF0000ULL) | ((number >> 40) & 0x000000000000FF00ULL) | (number << 56);
 	}
 
 	/// Returns the proper file handle according to prepended tags
-	static IFile* createFileHandle(const char *filename);
+	static IFile *createFileHandle(const char *filename);
 	/// Checks if a file can be accessed with the specified mode
 	static bool access(const char *filename, unsigned char mode);
 
 	/// Returns the base directory for data loading
-	static const String& dataPath() { return dataPath_; }
+	static const String &dataPath() { return dataPath_; }
 	/// Returns the writable directory for saving data
-	static const String& savePath();
+	static const String &savePath();
 
   protected:
 	/// File type

@@ -13,10 +13,10 @@ class DLL_PUBLIC AndroidApplication : public Application
 {
   public:
 	/// Entry point method to be called in the `android_main()` function
-	static void start(struct android_app* state, IAppEventHandler* (*createAppEventHandler)());
+	static void start(struct android_app *state, IAppEventHandler * (*createAppEventHandler)());
 
 	/// Processes an Android application command
-	static void processCommand(struct android_app* state, int32_t cmd);
+	static void processCommand(struct android_app *state, int32_t cmd);
 
 	/// Wrapper around `AndroidJniHelper::sdkVersion()`
 	unsigned int sdkVersion() const;
@@ -29,8 +29,8 @@ class DLL_PUBLIC AndroidApplication : public Application
   private:
 	bool isInitialized_;
 
-	struct android_app* state_;
-	IAppEventHandler* (*createAppEventHandler_)();
+	struct android_app *state_;
+	IAppEventHandler *(*createAppEventHandler_)();
 	void preInit();
 	/// Must be called at the beginning to initialize the application
 	void init();
@@ -44,18 +44,18 @@ class DLL_PUBLIC AndroidApplication : public Application
 	/// Private destructor
 	~AndroidApplication() { }
 	/// Private copy constructor
-	AndroidApplication(const AndroidApplication&);
+	AndroidApplication(const AndroidApplication &);
 	/// Private assignment operator
-	AndroidApplication& operator=(const AndroidApplication&);
+	AndroidApplication &operator=(const AndroidApplication &);
 
 	/// Returns the singleton reference to the Android application
-	static AndroidApplication& theAndroidApplication() { return static_cast<AndroidApplication &>(theApplication()); }
+	static AndroidApplication &theAndroidApplication() { return static_cast<AndroidApplication &>(theApplication()); }
 
-	friend DLL_PUBLIC Application& theApplication();
+	friend DLL_PUBLIC Application &theApplication();
 };
 
 /// Meyers' Singleton
-DLL_PUBLIC Application& theApplication();
+DLL_PUBLIC Application &theApplication();
 
 }
 

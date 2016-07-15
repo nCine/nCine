@@ -13,11 +13,11 @@ class DLL_PUBLIC Sprite : public DrawableNode
 {
   public:
 	/// Constructor for a sprite with a parent and texture, positioned in the relative origin
-	Sprite(SceneNode* parent, Texture *texture);
+	Sprite(SceneNode *parent, Texture *texture);
 	/// Constructor for a sprite with a texture but no parent, positioned in the origin
 	explicit Sprite(Texture *texture);
 	/// Constructor for a sprite with a parent, a texture and a specified relative position
-	Sprite(SceneNode* parent, Texture *texture, float x, float y);
+	Sprite(SceneNode *parent, Texture *texture, float x, float y);
 	/// Constructor for a sprite with a texture and a specified position but no parent
 	Sprite(Texture *texture, float x, float y);
 
@@ -49,7 +49,7 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	inline Vector2f absSize() const { return Vector2f(absWidth(), absHeight()); }
 
 	/// Gets the texture object
-	inline const Texture* texture() const { return texture_; }
+	inline const Texture *texture() const { return texture_; }
 	/// Sets the texture object
 	inline void setTexture(Texture *texture) { texture_ = texture; }
 	/// Sets a flag that makes a transparent texture to be considered opaque
@@ -59,7 +59,7 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	/// Gets the texture source rectangle for blitting
 	inline Recti texRect() const { return texRect_; }
 	/// Ses the texture source rectangle for blitting
-	void setTexRect(const Recti& rect);
+	void setTexRect(const Recti &rect);
 
 	/// Flips the texture rect along the X coordinate
 	void flipX();
@@ -92,7 +92,7 @@ inline Rectf Sprite::rect() const
 	return Rectf(x - halfAbsW, y - halfAbsH, halfAbsW * 2.0f, halfAbsH * 2.0f);
 }
 
-inline void Sprite::setTexRect(const Recti& rect)
+inline void Sprite::setTexRect(const Recti &rect)
 {
 	texRect_ = rect;
 	height_ = static_cast<float>(rect.h);

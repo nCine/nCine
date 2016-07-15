@@ -53,12 +53,12 @@ class RenderCommand
 	/// Sets the command type (for profiling purposes)
 	inline void setType(CommandType eType) { profilingType_ = eType; }
 
-	inline Matrix4x4f& transformation() { return modelView_; }
-	inline const Material& material() const { return material_; }
-	inline const Geometry& geometry() const { return geometry_; }
-	inline Material& material() { return material_; }
-	inline Geometry& geometry() { return geometry_; }
-	void setVertexAttribute(const char* name, GLsizei vboStride, const GLvoid *vboPointer);
+	inline Matrix4x4f &transformation() { return modelView_; }
+	inline const Material &material() const { return material_; }
+	inline const Geometry &geometry() const { return geometry_; }
+	inline Material &material() { return material_; }
+	inline Geometry &geometry() { return geometry_; }
+	void setVertexAttribute(const char *name, GLsizei vboStride, const GLvoid *vboPointer);
 
   private:
 	unsigned long int sortKey_;

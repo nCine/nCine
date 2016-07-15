@@ -14,15 +14,15 @@ const float DefaultXPos = 0.0f;
 const float VerticalTextPos = 0.45f;
 
 #ifdef __ANDROID__
-const char* FontTextureFile = "DroidSans32_256_8888.ktx";
+	const char *FontTextureFile = "DroidSans32_256_8888.ktx";
 #else
-const char* FontTextureFile = "DroidSans32_256.png";
+	const char *FontTextureFile = "DroidSans32_256.png";
 #endif
-const char* FontFntFile = "DroidSans32_256.fnt";
+const char *FontFntFile = "DroidSans32_256.fnt";
 
 }
 
-nc::IAppEventHandler* createApphandler()
+nc::IAppEventHandler *createApphandler()
 {
 	return new MyEventHandler;
 }
@@ -35,7 +35,7 @@ void MyEventHandler::onInit()
 	isLooping_ = true;
 
 	font_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
-						 (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
+	                     (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
 	musicPlayer_ = new nc::AudioStreamPlayer((nc::IFile::dataPath() + "sounds/music.ogg").data());
 	audioBuffer_ = new nc::AudioBuffer((nc::IFile::dataPath() + "sounds/bomb.wav").data());
 	soundPlayer_ = new nc::AudioBufferPlayer(audioBuffer_);

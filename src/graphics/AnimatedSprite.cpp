@@ -6,7 +6,7 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-AnimatedSprite::AnimatedSprite(SceneNode* parent, Texture *texture)
+AnimatedSprite::AnimatedSprite(SceneNode *parent, Texture *texture)
 	: Sprite(parent, texture), anims_(4), currentAnim_(-1)
 {
 
@@ -18,7 +18,7 @@ AnimatedSprite::AnimatedSprite(Texture *texture)
 
 }
 
-AnimatedSprite::AnimatedSprite(SceneNode* parent, Texture *texture, float x, float y)
+AnimatedSprite::AnimatedSprite(SceneNode *parent, Texture *texture, float x, float y)
 	: Sprite(parent, texture, x, y), anims_(4), currentAnim_(-1)
 {
 
@@ -79,7 +79,7 @@ void AnimatedSprite::update(float interval)
 	Sprite::update(interval);
 }
 
-void AnimatedSprite::addAnimation(RectAnimation* anim)
+void AnimatedSprite::addAnimation(RectAnimation *anim)
 {
 	if (anim)
 	{

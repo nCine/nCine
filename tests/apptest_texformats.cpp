@@ -30,11 +30,11 @@ const float MinScaleFactor = 1.0f / 32.0f;
 const float VerticalTextPos = 0.45f;
 
 #ifdef __ANDROID__
-const char* FontTextureFile = "DroidSans32_256_8888.ktx";
+	const char *FontTextureFile = "DroidSans32_256_8888.ktx";
 #else
-const char* FontTextureFile = "DroidSans32_256.png";
+	const char *FontTextureFile = "DroidSans32_256.png";
 #endif
-const char* FontFntFile = "DroidSans32_256.fnt";
+const char *FontFntFile = "DroidSans32_256.fnt";
 
 }
 
@@ -43,7 +43,7 @@ int MyEventHandler::newSelection_ = 0;
 float MyEventHandler::scale_ = 1.0f;
 float MyEventHandler::newScale_ = 1.0f;
 
-nc::IAppEventHandler* createApphandler()
+nc::IAppEventHandler *createApphandler()
 {
 	return new MyEventHandler;
 }
@@ -54,7 +54,7 @@ void MyEventHandler::onInit()
 
 	nc::String texPath = nc::IFile::dataPath() + "textures/testformats/";
 	font_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
-						 (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
+	                     (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
 
 	const nc::IGfxCapabilities &gfxCaps = nc::theServiceLocator().gfxCapabilities();
 	if (gfxCaps.value(nc::IGfxCapabilities::MAX_TEXTURE_SIZE) < 512)

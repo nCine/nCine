@@ -13,13 +13,13 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-IInputEventHandler* IInputManager::inputEventHandler_ = NULL;
+IInputEventHandler *IInputManager::inputEventHandler_ = NULL;
 SdlMouseState SdlInputManager::mouseState_;
 SdlMouseEvent SdlInputManager::mouseEvent_;
 SdlKeyboardState SdlInputManager::keyboardState_;
 KeyboardEvent	SdlInputManager::keyboardEvent_;
 short int IInputManager::MaxAxisValue = 32767;
-SDL_Joystick* SdlInputManager::sdlJoysticks_[MaxNumJoysticks];
+SDL_Joystick *SdlInputManager::sdlJoysticks_[MaxNumJoysticks];
 JoyButtonEvent SdlInputManager::joyButtonEvent_;
 JoyAxisEvent SdlInputManager::joyAxisEvent_;
 
@@ -53,7 +53,7 @@ SdlInputManager::SdlInputManager()
 			{
 				SDL_Joystick *sdlJoy = sdlJoysticks_[i];
 				LOGI_X("Joystick %d: %s - %d hats, %d axes, %d buttons, %d balls",
-					 i, SDL_JoystickName(i), SDL_JoystickNumHats(sdlJoy), SDL_JoystickNumAxes(sdlJoy), SDL_JoystickNumButtons(sdlJoy), SDL_JoystickNumBalls(sdlJoy));
+				       i, SDL_JoystickName(i), SDL_JoystickNumHats(sdlJoy), SDL_JoystickNumAxes(sdlJoy), SDL_JoystickNumButtons(sdlJoy), SDL_JoystickNumBalls(sdlJoy));
 			}
 		}
 	}

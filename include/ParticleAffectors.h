@@ -15,7 +15,7 @@ class DLL_PUBLIC ParticleAffector
   public:
 	virtual ~ParticleAffector() { }
 	/// Affects a property of the specified particle
-	virtual void affect(Particle* particle) = 0;
+	virtual void affect(Particle *particle) = 0;
 };
 
 /// Particle acceleration affector
@@ -26,7 +26,7 @@ class DLL_PUBLIC AccelerationAffector: public ParticleAffector
 	AccelerationAffector(float x, float y) : acceleration_(x, y) { }
 
 	/// Affects the acceleration of the specified particle
-	virtual void affect(Particle* particle);
+	virtual void affect(Particle *particle);
 
   private:
 	Vector2f acceleration_;
@@ -46,7 +46,7 @@ class DLL_PUBLIC ColorAffector: public ParticleAffector
 	}
 
 	/// Affects the color of the specified particle
-	virtual void affect(Particle* particle);
+	virtual void affect(Particle *particle);
 	void addColorStep(float time, Color color);
 
   private:
@@ -61,9 +61,9 @@ class DLL_PUBLIC ColorAffector: public ParticleAffector
 	Array<ColorStep *> colorSteps_;
 
 	/// Private copy constructor
-	ColorAffector(const ColorAffector&);
+	ColorAffector(const ColorAffector &);
 	/// Private assignment operator
-	ColorAffector& operator=(const ColorAffector&);
+	ColorAffector &operator=(const ColorAffector &);
 };
 
 /// Particle size affector
@@ -81,7 +81,7 @@ class DLL_PUBLIC SizeAffector: public ParticleAffector
 	}
 
 	/// Affects the size of the specified particle
-	virtual void affect(Particle* particle);
+	virtual void affect(Particle *particle);
 	void addSizeStep(float time, float scale);
 
   private:
@@ -97,9 +97,9 @@ class DLL_PUBLIC SizeAffector: public ParticleAffector
 	float baseScale_;
 
 	/// Private copy constructor
-	SizeAffector(const SizeAffector&);
+	SizeAffector(const SizeAffector &);
 	/// Private assignment operator
-	SizeAffector& operator=(const SizeAffector&);
+	SizeAffector &operator=(const SizeAffector &);
 };
 
 }

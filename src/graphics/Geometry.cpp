@@ -61,7 +61,7 @@ void Geometry::updateVboData(unsigned int floatOffset, unsigned int floatSize, c
 	}
 }
 
-void Geometry::shareVbo(const Geometry& geometry)
+void Geometry::shareVbo(const Geometry &geometry)
 {
 	if (vboSharingType_ == UNIQUE)
 	{

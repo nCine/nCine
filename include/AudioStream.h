@@ -43,9 +43,9 @@ class DLL_PUBLIC AudioStream
 	/// Constructor creating an audio stream from an audio file
 	explicit AudioStream(const char *filename);
 	/// Private copy constructor
-	AudioStream(const AudioStream&);
+	AudioStream(const AudioStream &);
 	/// Private assignment operator
-	AudioStream& operator=(const AudioStream&);
+	AudioStream &operator=(const AudioStream &);
 
 	friend class AudioStreamPlayer;
 };

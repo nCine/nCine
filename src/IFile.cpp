@@ -4,17 +4,17 @@
 #include "StandardFile.h"
 
 #ifdef __ANDROID__
-#include "AssetFile.h"
-#include <unistd.h> // for getpid()
-#include <sys/stat.h> // for mkdir()
-#include <errno.h> // for EEXIST
-#include "ServiceLocator.h"
+	#include "AssetFile.h"
+	#include <unistd.h> // for getpid()
+	#include <sys/stat.h> // for mkdir()
+	#include <errno.h> // for EEXIST
+	#include "ServiceLocator.h"
 #endif
 
 #ifndef _WIN32
-#include <unistd.h> // for getpid()
-#include <sys/types.h> // for getpwuid()
-#include <pwd.h> // for getpwuid()
+	#include <unistd.h> // for getpid()
+	#include <sys/types.h> // for getpwuid()
+	#include <pwd.h> // for getpwuid()
 #endif
 
 namespace ncine {
@@ -64,7 +64,7 @@ bool IFile::hasExtension(const char *extension) const
 	return extension_ == extension;
 }
 
-IFile* IFile::createFileHandle(const char *filename)
+IFile *IFile::createFileHandle(const char *filename)
 {
 #ifdef __ANDROID__
 	if (strncmp(filename, (const char *)"asset::", 7) == 0)
@@ -88,7 +88,7 @@ bool IFile::access(const char *filename, unsigned char mode)
 		return StandardFile::access(filename, mode);
 }
 
-const String& IFile::savePath()
+const String &IFile::savePath()
 {
 	if (savePath_.isEmpty())
 	{
@@ -134,7 +134,7 @@ void IFile::initSavePath()
 		char *homePathEnv = getenv("HOMEPATH");
 
 		if ((homeDriveEnv == NULL || strlen(homeDriveEnv) == 0) &&
-			(homePathEnv == NULL || strlen(homePathEnv) == 0))
+		    (homePathEnv == NULL || strlen(homePathEnv) == 0))
 		{
 			char *homeEnv = getenv("HOME");
 			if (homeEnv && strlen(homeEnv))

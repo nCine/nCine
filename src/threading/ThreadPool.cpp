@@ -67,9 +67,9 @@ void ThreadPool::init()
 	for (unsigned int i = 0; i < numThreads_; i++)
 	{
 		threads_[i].run(workerFunction, &threadStruct_);
-	#ifndef __ANDROID__
+#ifndef __ANDROID__
 		threads_[i].setAffinityMask(ThreadAffinityMask(i));
-	#endif
+#endif
 	}
 }
 

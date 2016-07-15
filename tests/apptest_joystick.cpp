@@ -11,28 +11,28 @@
 namespace {
 
 #ifdef __ANDROID__
-const char* TextureFile = "texture4.webp";
-const char* FontTextureFile = "DroidSans32_256_8888.ktx";
+	const char *TextureFile = "texture4.webp";
+	const char *FontTextureFile = "DroidSans32_256_8888.ktx";
 #else
-const char* TextureFile = "texture4.png";
-const char* FontTextureFile = "DroidSans32_256.png";
+	const char *TextureFile = "texture4.png";
+	const char *FontTextureFile = "DroidSans32_256.png";
 #endif
-const char* FontFntFile = "DroidSans32_256.fnt";
+const char *FontFntFile = "DroidSans32_256.fnt";
 
 // Only tested with the Xbox 360 Controller
 #ifdef _WIN32
-unsigned int axesMapping[] = { 0, 1, 4, 2, 3, 5 };
-int invertAxis[] = { 1, -1, 1, -1, 1, 1 };
-unsigned int buttonsMapping[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
+	const unsigned int axesMapping[] = { 0, 1, 4, 2, 3, 5 };
+	const int invertAxis[] = { 1, -1, 1, -1, 1, 1 };
+	const unsigned int buttonsMapping[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
 #else
-unsigned int axesMapping[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
-int invertAxis[] = { 1, 1, 1, 1, 1, 1, 1, 1 };
-unsigned int buttonsMapping[] = { 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 8 };
+	const unsigned int axesMapping[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+	const int invertAxis[] = { 1, 1, 1, 1, 1, 1, 1, 1 };
+	const unsigned int buttonsMapping[] = { 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 8 };
 #endif
 
 }
 
-nc::IAppEventHandler* createApphandler()
+nc::IAppEventHandler *createApphandler()
 {
 	return new MyEventHandler;
 }
@@ -49,7 +49,7 @@ void MyEventHandler::onInit()
 	sprites_[1]->setScale(0.5f);
 
 	font_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
-						 (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
+	                     (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
 	textNode_ = new nc::TextNode(&rootNode, font_);
 	textNode_->setScale(0.85f);
 	textNode_->setPosition(nc::theApplication().width() * 0.1f, nc::theApplication().height() * 0.38f);
@@ -59,9 +59,9 @@ void MyEventHandler::onInit()
 		if (nc::theApplication().inputManager().isJoyPresent(i))
 		{
 			LOGI_X("Joystick %d (%s) - %d axes, %d buttons", i,
-				nc::theApplication().inputManager().joyName(i),
-				nc::theApplication().inputManager().joyNumAxes(i),
-				nc::theApplication().inputManager().joyNumButtons(i));
+			       nc::theApplication().inputManager().joyName(i),
+			       nc::theApplication().inputManager().joyNumAxes(i),
+			       nc::theApplication().inputManager().joyNumButtons(i));
 		}
 	}
 }
@@ -84,12 +84,12 @@ void MyEventHandler::onFrameStart()
 		if (nc::theApplication().inputManager().isJoyPresent(i))
 		{
 			joyString_->formatAppend("Joystick %d: %s (%d axes, %d buttons)\n", i,
-				nc::theApplication().inputManager().joyName(i),
-				nc::theApplication().inputManager().joyNumAxes(i),
-				nc::theApplication().inputManager().joyNumButtons(i));
+			                         nc::theApplication().inputManager().joyName(i),
+			                         nc::theApplication().inputManager().joyNumAxes(i),
+			                         nc::theApplication().inputManager().joyNumButtons(i));
 		}
 	}
-	
+
 	if (nc::theApplication().inputManager().isJoyPresent(firstJoy))
 	{
 		int numAxes = nc::theApplication().inputManager().joyNumAxes(firstJoy);

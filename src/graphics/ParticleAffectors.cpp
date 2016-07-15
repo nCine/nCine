@@ -26,7 +26,7 @@ void ColorAffector::addColorStep(float time, Color color)
 	}
 }
 
-void ColorAffector::affect(Particle* particle)
+void ColorAffector::affect(Particle *particle)
 {
 	unsigned int index;
 	float normalizedLife = particle->life_ / particle->startingLife;
@@ -67,7 +67,7 @@ void SizeAffector::addSizeStep(float time, float scale)
 	}
 }
 
-void SizeAffector::affect(Particle* particle)
+void SizeAffector::affect(Particle *particle)
 {
 	unsigned int index;
 	float normalizedLife = particle->life_ / particle->startingLife;

@@ -15,10 +15,10 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-IInputEventHandler* IInputManager::inputEventHandler_ = NULL;
-ASensorManager* AndroidInputManager::sensorManager_ = NULL;
-const ASensor* AndroidInputManager::accelerometerSensor_ = NULL;
-ASensorEventQueue* AndroidInputManager::sensorEventQueue_ = NULL;
+IInputEventHandler *IInputManager::inputEventHandler_ = NULL;
+ASensorManager *AndroidInputManager::sensorManager_ = NULL;
+const ASensor *AndroidInputManager::accelerometerSensor_ = NULL;
+ASensorEventQueue *AndroidInputManager::sensorEventQueue_ = NULL;
 bool AndroidInputManager::accelerometerEnabled_ = false;
 AccelerometerEvent AndroidInputManager::accelerometerEvent_;
 TouchEvent AndroidInputManager::touchEvent_;
@@ -60,7 +60,7 @@ AndroidJoystickState::AndroidJoystickState()
 	}
 }
 
-AndroidInputManager::AndroidInputManager(struct android_app* state)
+AndroidInputManager::AndroidInputManager(struct android_app *state)
 {
 	initAccelerometerSensor(state);
 	checkConnectedJoysticks();
@@ -126,9 +126,9 @@ bool AndroidInputManager::parseEvent(const AInputEvent *event)
 
 	// Checking for gamepad events first
 	if (inputEventHandler_ != NULL &&
-		((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD ||
-		(AInputEvent_getSource(event) & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK ||
-		(AInputEvent_getSource(event) & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD))
+	    ((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD ||
+	     (AInputEvent_getSource(event) & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK ||
+	     (AInputEvent_getSource(event) & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD))
 	{
 		int deviceId = AInputEvent_getDeviceId(event);
 		int joyId = findJoyId(deviceId);
@@ -237,10 +237,10 @@ bool AndroidInputManager::parseEvent(const AInputEvent *event)
 		isEventHandled = true;
 	}
 	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD &&
-			  AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY &&
-			 // Hardware volume keys are not handled by the engine
-			 AKeyEvent_getKeyCode(event) != AKEYCODE_VOLUME_UP &&
-			 AKeyEvent_getKeyCode(event) != AKEYCODE_VOLUME_DOWN)
+	         AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY &&
+	         // Hardware volume keys are not handled by the engine
+	         AKeyEvent_getKeyCode(event) != AKEYCODE_VOLUME_UP &&
+	         AKeyEvent_getKeyCode(event) != AKEYCODE_VOLUME_DOWN)
 	{
 		keyboardEvent_.scancode = AKeyEvent_getScanCode(event);
 		keyboardEvent_.sym = AndroidKeys::keySymValueToEnum(AKeyEvent_getKeyCode(event));
@@ -261,7 +261,7 @@ bool AndroidInputManager::parseEvent(const AInputEvent *event)
 		isEventHandled = true;
 	}
 	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_TOUCHSCREEN) == AINPUT_SOURCE_TOUCHSCREEN &&
-			  AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
+	         AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
 	{
 		touchEvent_.count = AMotionEvent_getPointerCount(event);
 		touchEvent_.id = AMotionEvent_getPointerId(event, 0);
@@ -390,10 +390,8 @@ void AndroidInputManager::initAccelerometerSensor(android_app *state)
 {
 	// Prepare to monitor accelerometer
 	sensorManager_ = ASensorManager_getInstance();
-	accelerometerSensor_ = ASensorManager_getDefaultSensor(sensorManager_,
-		ASENSOR_TYPE_ACCELEROMETER);
-	sensorEventQueue_ = ASensorManager_createEventQueue(sensorManager_,
-		state->looper, LOOPER_ID_USER, NULL, NULL);
+	accelerometerSensor_ = ASensorManager_getDefaultSensor(sensorManager_, ASENSOR_TYPE_ACCELEROMETER);
+	sensorEventQueue_ = ASensorManager_createEventQueue(sensorManager_, state->looper, LOOPER_ID_USER, NULL, NULL);
 
 	if (accelerometerSensor_ == NULL)
 	{
@@ -453,7 +451,7 @@ void AndroidInputManager::checkConnectedJoysticks()
 		int sources = inputDevice.getSources();
 
 		if (((sources & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD) ||
-			((sources & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK))
+		    ((sources & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK))
 		{
 			int joyId = findJoyId(deviceIds[i]);
 			if (joyId > -1)
@@ -494,7 +492,7 @@ int AndroidInputManager::findJoyId(int deviceId)
 	{
 		deviceInfo(deviceId, joyId);
 		LOGI_X("Joystick %d (device %d) \"%s\" has been connected - %d axes, %d buttons",
-			joyId, deviceId, joystickStates_[joyId].name_, joystickStates_[joyId].numAxes_, joystickStates_[joyId].numButtons_);
+		       joyId, deviceId, joystickStates_[joyId].name_, joystickStates_[joyId].numAxes_, joystickStates_[joyId].numButtons_);
 
 		if (inputEventHandler_ != NULL)
 		{

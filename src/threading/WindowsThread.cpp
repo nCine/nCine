@@ -37,7 +37,7 @@ Thread::Thread()
 
 }
 
-Thread::Thread(ThreadFunctionPtr startFunction, void* arg)
+Thread::Thread(ThreadFunctionPtr startFunction, void *arg)
 	: handle_(0)
 {
 	run(startFunction, arg);
@@ -58,7 +58,7 @@ unsigned int Thread::numProcessors()
 	return numProcs;
 }
 
-void Thread::run(ThreadFunctionPtr startFunction, void* arg)
+void Thread::run(ThreadFunctionPtr startFunction, void *arg)
 {
 	if (handle_ == 0)
 	{
@@ -77,7 +77,7 @@ void Thread::run(ThreadFunctionPtr startFunction, void* arg)
 	}
 }
 
-void* Thread::join()
+void *Thread::join()
 {
 	WaitForSingleObject(handle_, INFINITE);
 	return NULL;
@@ -140,9 +140,9 @@ void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-unsigned int Thread::wrapperFunction(void* arg)
+unsigned int Thread::wrapperFunction(void *arg)
 {
-	ThreadInfo* threadInfo = static_cast<ThreadInfo*>(arg);
+	ThreadInfo *threadInfo = static_cast<ThreadInfo *>(arg);
 	threadInfo->startFunction(threadInfo->threadArg);
 
 	return 0;

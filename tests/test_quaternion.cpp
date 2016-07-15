@@ -6,7 +6,7 @@ namespace nc = ncine;
 
 namespace {
 
-inline void printQuaternion(const nc::Quaternionf& quat)
+inline void printQuaternion(const nc::Quaternionf &quat)
 {
 	printf("<%.2f, %.2f, %.2f, %.2f>\n", quat.x, quat.y, quat.z, quat.w);
 }

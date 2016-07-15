@@ -126,15 +126,15 @@ class DLL_PUBLIC IInputManager
 	}
 
 #ifndef __ANDROID__
-	virtual const MouseState& mouseState() = 0;
-	virtual const KeyboardState& keyboardState() const = 0;
+	virtual const MouseState &mouseState() = 0;
+	virtual const KeyboardState &keyboardState() const = 0;
 #endif
 
 	static short int MaxAxisValue;
 	/// Returns true if the specified joystick is connected
 	virtual bool isJoyPresent(int joyId) const = 0;
 	/// Returns the name of the specified joystick
-	virtual const char* joyName(int joyId) const = 0;
+	virtual const char *joyName(int joyId) const = 0;
 	/// Returns the number of available buttons for the specified joystick
 	virtual int joyNumButtons(int joyId) const = 0;
 	/// Returns the number of available axes for the specified joystick

@@ -50,12 +50,12 @@ class Array
 	~Array() { delete[] array_; }
 
 	/// Copy constructor
-	Array(const Array& other);
+	Array(const Array &other);
 	/// Copy-and-swap assignment operator
-	Array& operator=(Array other);
+	Array &operator=(Array other);
 
 	/// Swaps two arrays without copying their data
-	void swap(Array& first, Array& second)
+	void swap(Array &first, Array &second)
 	{
 		nc::swap(first.array_, second.array_);
 		nc::swap(first.size_, second.size_);
@@ -100,23 +100,23 @@ class Array
 	/*! Size will be set to zero but capacity remains unmodified. */
 	inline void clear() { size_ = 0; }
 	/// Returns a constant reference to the first element in constant time
-	inline const T& front() const { return array_[0]; }
+	inline const T &front() const { return array_[0]; }
 	/// Returns a reference to the first element in constant time
-	inline T& front() { return array_[0]; }
+	inline T &front() { return array_[0]; }
 	/// Returns a constant reference to the last element in constant time
-	inline const T& back() const { return array_[size_ - 1]; }
+	inline const T &back() const { return array_[size_ - 1]; }
 	/// Returns a reference to the last element in constant time
-	inline T& back() { return array_[size_ - 1]; }
+	inline T &back() { return array_[size_ - 1]; }
 	/// Inserts a new element as the last one in constant time
 	inline void pushBack(T element) { operator[](size_) = element; }
 	/// Removes the last element in constant time
 	inline void popBack() { if (size_ > 0) { size_--; } }
 	/// Inserts new elements at the specified position from a source range, last not included (shifting elements around)
-	void insertRange(unsigned int index, const T* firstPtr, const T* lastPtr);
+	void insertRange(unsigned int index, const T *firstPtr, const T *lastPtr);
 	/// Inserts a new element at a specified position (shifting elements around)
 	void insertAt(unsigned int index, T element);
 	/// Inserts a new element at the position specified by the iterator (shifting elements around)
-	Iterator insert(Iterator position, const T& value);
+	Iterator insert(Iterator position, const T &value);
 	/// Inserts new elements from a source at the position specified by the iterator (shifting elements around)
 	Iterator insert(Iterator position, Iterator first, Iterator last);
 	/// Removes the specified range of elements, last not included (shifting elements around)
@@ -128,28 +128,28 @@ class Array
 	/// Removes the elements in the range, last not included (shifting elements around)
 	Iterator erase(Iterator first, const Iterator last);
 	/// Inserts an array of elements at the end in constant time
-	void append(const T* elements, unsigned int amount);
+	void append(const T *elements, unsigned int amount);
 
 	/// Read-only subscript operator
-	const T& operator[](unsigned int index) const;
+	const T &operator[](unsigned int index) const;
 	/// Subscript operator
-	T& operator[](unsigned int index);
+	T &operator[](unsigned int index);
 
 	/// Returns a constant pointer to the allocated memory
-	inline const T* data() const { return array_; }
+	inline const T *data() const { return array_; }
 	/// Returns a pointer to the allocated memory
 	/*! When adding new elements through a pointer the size field is not updated, like with `std::vector`. */
-	inline T* data() { return array_; }
+	inline T *data() { return array_; }
 
   private:
-	T* array_;
+	T *array_;
 	unsigned int size_;
 	unsigned int capacity_;
 	bool fixedCapacity_;
 };
 
 template <class T>
-Array<T>::Array(const Array<T>& other)
+Array<T>::Array(const Array<T> &other)
 	: array_(NULL), size_(other.size_), capacity_(other.capacity_), fixedCapacity_(other.fixedCapacity_)
 {
 	array_ = new T[capacity_];
@@ -162,7 +162,7 @@ Array<T>::Array(const Array<T>& other)
 
 /*! The parameter should be passed by value for the idiom to work. */
 template <class T>
-Array<T>& Array<T>::operator=(Array<T> other)
+Array<T> &Array<T>::operator=(Array<T> other)
 {
 	swap(*this, other);
 	return *this;
@@ -201,7 +201,7 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 		}
 	}
 
-	T* newArray = new T[newCapacity];
+	T *newArray = new T[newCapacity];
 
 	if (size_ > 0)
 	{
@@ -235,7 +235,7 @@ void Array<T>::shrinkToFit()
 }
 
 template <class T>
-void Array<T>::insertRange(unsigned int index, const T* firstPtr, const T* lastPtr)
+void Array<T>::insertRange(unsigned int index, const T *firstPtr, const T *lastPtr)
 {
 	// Cannot insert at more than one position after the last element
 	if (index > size_)
@@ -287,7 +287,7 @@ void Array<T>::insertAt(unsigned int index, T element)
 }
 
 template <class T>
-typename Array<T>::Iterator Array<T>::insert(Iterator position, const T& value)
+typename Array<T>::Iterator Array<T>::insert(Iterator position, const T &value)
 {
 	unsigned int index = &(*position) - array_;
 	insertAt(index);
@@ -299,8 +299,8 @@ template <class T>
 typename Array<T>::Iterator Array<T>::insert(Iterator position, Iterator first, Iterator last)
 {
 	unsigned int index = static_cast<unsigned int>(&(*position) - array_);
-	T* firstPtr = &(*first);
-	T* lastPtr = &(*last);
+	T *firstPtr = &(*first);
+	T *lastPtr = &(*last);
 	insertRange(index, firstPtr, lastPtr);
 
 	return position + static_cast<unsigned int>(lastPtr - firstPtr);
@@ -352,7 +352,7 @@ typename Array<T>::Iterator Array<T>::erase(Iterator first, const Iterator last)
 }
 
 template <class T>
-void Array<T>::append(const T* elements, unsigned int amount)
+void Array<T>::append(const T *elements, unsigned int amount)
 {
 	if (size_ + amount > capacity_)
 	{
@@ -364,7 +364,7 @@ void Array<T>::append(const T* elements, unsigned int amount)
 }
 
 template <class T>
-const T& Array<T>::operator[](unsigned int index) const
+const T &Array<T>::operator[](unsigned int index) const
 {
 	if (index > size_)
 	{
@@ -376,7 +376,7 @@ const T& Array<T>::operator[](unsigned int index) const
 }
 
 template <class T>
-T& Array<T>::operator[](unsigned int index)
+T &Array<T>::operator[](unsigned int index)
 {
 	// Avoid creating "holes" into the array
 	if (index > size_)

@@ -86,11 +86,11 @@ class GlfwInputManager : public IInputManager
 	/// Updates joystick state structures and simulates events
 	static void updateJoystickStates();
 
-	const MouseState& mouseState();
-	inline const KeyboardState& keyboardState() const { return keyboardState_; }
+	const MouseState &mouseState();
+	inline const KeyboardState &keyboardState() const { return keyboardState_; }
 
 	bool isJoyPresent(int joyId) const;
-	const char* joyName(int joyId) const;
+	const char *joyName(int joyId) const;
 	int joyNumButtons(int joyId) const;
 	int joyNumAxes(int joyId) const;
 	bool isJoyButtonPressed(int joyId, int buttonId) const;
@@ -142,7 +142,7 @@ class GlfwInputManager : public IInputManager
 	static int enumToKeySymValue(KeySym keysym);
 };
 
-inline const MouseState& GlfwInputManager::mouseState()
+inline const MouseState &GlfwInputManager::mouseState()
 {
 	double xCursor, yCursor;
 

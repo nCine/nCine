@@ -16,26 +16,26 @@ class Quaternion
 
 	Quaternion() { }
 	Quaternion(T xx, T yy, T zz, T ww) : x(xx), y(yy), z(zz), w(ww) { }
-	explicit Quaternion(const Vector4<T>& v) : x(v.x), y(v.y), z(v.z), w(v.w) { }
+	explicit Quaternion(const Vector4<T> &v) : x(v.x), y(v.y), z(v.z), w(v.w) { }
 
 	void set(T xx, T yy, T zz, T ww);
 
-	T& operator[](unsigned int index);
-	const T& operator[](unsigned int index) const;
+	T &operator[](unsigned int index);
+	const T &operator[](unsigned int index) const;
 
-	bool operator==(const Quaternion& q) const;
+	bool operator==(const Quaternion &q) const;
 	Quaternion operator-() const;
 
-	Quaternion& operator+=(const Quaternion& q);
-	Quaternion& operator-=(const Quaternion& q);
-	Quaternion& operator*=(const Quaternion& q);
+	Quaternion &operator+=(const Quaternion &q);
+	Quaternion &operator-=(const Quaternion &q);
+	Quaternion &operator*=(const Quaternion &q);
 
-	Quaternion& operator*=(T s);
-	Quaternion& operator/=(T s);
+	Quaternion &operator*=(T s);
+	Quaternion &operator/=(T s);
 
-	Quaternion operator+(const Quaternion& q) const;
-	Quaternion operator-(const Quaternion& q) const;
-	Quaternion operator*(const Quaternion& q) const;
+	Quaternion operator+(const Quaternion &q) const;
+	Quaternion operator-(const Quaternion &q) const;
+	Quaternion operator*(const Quaternion &q) const;
 
 	Quaternion operator*(T s) const;
 	Quaternion operator/(T s) const;
@@ -43,13 +43,13 @@ class Quaternion
 	T magnitude() const;
 	T sqrMagnitude() const;
 	Quaternion normalized() const;
-	Quaternion& normalize();
+	Quaternion &normalize();
 	Quaternion conjugated() const;
-	Quaternion& conjugate();
+	Quaternion &conjugate();
 
 	Matrix4x4<T> toMatrix4x4();
 	static Quaternion fromAxisAngle(T xx, T yy, T zz, T degrees);
-	static Quaternion fromAxisAngle(const Vector3<T>& axis, T degrees);
+	static Quaternion fromAxisAngle(const Vector3<T> &axis, T degrees);
 
 	/// A quaternion with all zero elements
 	static const Quaternion Zero;
@@ -69,19 +69,19 @@ inline void Quaternion<T>::set(T xx, T yy, T zz, T ww)
 }
 
 template <class T>
-inline T& Quaternion<T>::operator[](unsigned int index)
+inline T &Quaternion<T>::operator[](unsigned int index)
 {
 	return (&x)[index];
 }
 
 template <class T>
-inline const T& Quaternion<T>::operator[](unsigned int index) const
+inline const T &Quaternion<T>::operator[](unsigned int index) const
 {
 	return (&x)[index];
 }
 
 template <class T>
-inline bool Quaternion<T>::operator==(const Quaternion& q) const
+inline bool Quaternion<T>::operator==(const Quaternion &q) const
 {
 	return (x == q.x && y == q.y && z == q.z && w == q.w);
 }
@@ -93,7 +93,7 @@ inline Quaternion<T> Quaternion<T>::operator-() const
 }
 
 template <class T>
-inline Quaternion<T>& Quaternion<T>::operator+=(const Quaternion& q)
+inline Quaternion<T> &Quaternion<T>::operator+=(const Quaternion &q)
 {
 	x += q.x;
 	y += q.y;
@@ -104,7 +104,7 @@ inline Quaternion<T>& Quaternion<T>::operator+=(const Quaternion& q)
 }
 
 template <class T>
-inline Quaternion<T>& Quaternion<T>::operator-=(const Quaternion& q)
+inline Quaternion<T> &Quaternion<T>::operator-=(const Quaternion &q)
 {
 	x -= q.x;
 	y -= q.y;
@@ -115,18 +115,18 @@ inline Quaternion<T>& Quaternion<T>::operator-=(const Quaternion& q)
 }
 
 template <class T>
-inline Quaternion<T>& Quaternion<T>::operator*=(const Quaternion& q)
+inline Quaternion<T> &Quaternion<T>::operator*=(const Quaternion &q)
 {
-	x = w*q.x + x*q.w + y*q.z - z*q.y;
-	y = w*q.y + y*q.w + z*q.x - x*q.z;
-	z = w*q.z + z*q.w + x*q.y - y*q.x;
-	w = w*q.w - x*q.x - y*q.y - z*q.z;
+	x = w * q.x + x * q.w + y * q.z - z * q.y;
+	y = w * q.y + y * q.w + z * q.x - x * q.z;
+	z = w * q.z + z * q.w + x * q.y - y * q.x;
+	w = w * q.w - x * q.x - y * q.y - z * q.z;
 
 	return *this;
 }
 
 template <class T>
-inline Quaternion<T>& Quaternion<T>::operator*=(T s)
+inline Quaternion<T> &Quaternion<T>::operator*=(T s)
 {
 	x *= s;
 	y *= s;
@@ -137,7 +137,7 @@ inline Quaternion<T>& Quaternion<T>::operator*=(T s)
 }
 
 template <class T>
-inline Quaternion<T>& Quaternion<T>::operator/=(T s)
+inline Quaternion<T> &Quaternion<T>::operator/=(T s)
 {
 	x /= s;
 	y /= s;
@@ -148,71 +148,71 @@ inline Quaternion<T>& Quaternion<T>::operator/=(T s)
 }
 
 template <class T>
-inline Quaternion<T> Quaternion<T>::operator+(const Quaternion& q) const
+inline Quaternion<T> Quaternion<T>::operator+(const Quaternion &q) const
 {
 	return Quaternion(x + q.x,
-					  y + q.y,
-					  z + q.z,
-					  w + q.w);
+	                  y + q.y,
+	                  z + q.z,
+	                  w + q.w);
 }
 
 template <class T>
-inline Quaternion<T> Quaternion<T>::operator-(const Quaternion& q) const
+inline Quaternion<T> Quaternion<T>::operator-(const Quaternion &q) const
 {
 	return Quaternion(x - q.x,
-					  y - q.y,
-					  z - q.z,
-					  w - q.w);
+	                  y - q.y,
+	                  z - q.z,
+	                  w - q.w);
 }
 
 template <class T>
-inline Quaternion<T> Quaternion<T>::operator*(const Quaternion& q) const
+inline Quaternion<T> Quaternion<T>::operator*(const Quaternion &q) const
 {
-	return Quaternion(w*q.x + x*q.w + y*q.z - z*q.y,
-					  w*q.y + y*q.w + z*q.x - x*q.z,
-					  w*q.z + z*q.w + x*q.y - y*q.x,
-					  w*q.w - x*q.x - y*q.y - z*q.z);
+	return Quaternion(w * q.x + x * q.w + y * q.z - z * q.y,
+	                  w * q.y + y * q.w + z * q.x - x * q.z,
+	                  w * q.z + z * q.w + x * q.y - y * q.x,
+	                  w * q.w - x * q.x - y * q.y - z * q.z);
 }
 
 template <class T>
 inline Quaternion<T> Quaternion<T>::operator*(T s) const
 {
 	return Quaternion(x * s,
-					  y * s,
-					  z * s,
-					  w * s);
+	                  y * s,
+	                  z * s,
+	                  w * s);
 }
 
 template <class T>
 inline Quaternion<T> Quaternion<T>::operator/(T s) const
 {
 	return Quaternion(x / s,
-					  y / s,
-					  z / s,
-					  w / s);
+	                  y / s,
+	                  z / s,
+	                  w / s);
 }
 
 template <class T>
 inline T Quaternion<T>::magnitude() const
 {
-	return sqrt(x*x + y*y + z*z + w*w);
+	return sqrt(x * x + y * y + z * z + w * w);
 }
 
 template <class T>
 inline T Quaternion<T>::sqrMagnitude() const
 {
-	return x*x + y*y + z*z + w*w;
+	return x * x + y * y + z * z + w * w;
 }
 
 template <class T>
 inline Quaternion<T> Quaternion<T>::normalized() const
 {
 	T mag = magnitude();
-	return Quaternion(x / mag, y / mag , z / mag, w / mag);
+	return Quaternion(x / mag, y / mag, z / mag, w / mag);
 }
 
 template <class T>
-inline Quaternion<T>& Quaternion<T>::normalize()
+inline Quaternion<T> &Quaternion<T>::normalize()
 {
 	T mag = magnitude();
 
@@ -227,11 +227,11 @@ inline Quaternion<T>& Quaternion<T>::normalize()
 template <class T>
 inline Quaternion<T> Quaternion<T>::conjugated() const
 {
-	return Quaternion(-x, -y , -z, w);
+	return Quaternion(-x, -y, -z, w);
 }
 
 template <class T>
-inline Quaternion<T>& Quaternion<T>::conjugate()
+inline Quaternion<T> &Quaternion<T>::conjugate()
 {
 	x = -x;
 	y = -y;
@@ -256,10 +256,10 @@ inline Matrix4x4<T> Quaternion<T>::toMatrix4x4()
 	const T zw = z * w;
 
 
-	return Matrix4x4<T>(Vector4<T>(1 - 2*(yy + zz), 2*(xy - zw), 2*(xz + yw), 0),
-						Vector4<T>(2*(xy + zw), 1 - 2*(xx + zz), 2*(yz - xw), 0),
-						Vector4<T>(2*(xz - yw), 2*(yz + xw), 1 - 2*(xx + yy), 0),
-						Vector4<T>(0, 0, 0, 1));
+	return Matrix4x4<T>(Vector4<T>(1 - 2 * (yy + zz), 2 * (xy - zw), 2 * (xz + yw), 0),
+	                    Vector4<T>(2 * (xy + zw), 1 - 2 * (xx + zz), 2 * (yz - xw), 0),
+	                    Vector4<T>(2 * (xz - yw), 2 * (yz + xw), 1 - 2 * (xx + yy), 0),
+	                    Vector4<T>(0, 0, 0, 1));
 }
 
 template <class T>
@@ -269,13 +269,13 @@ inline Quaternion<T> Quaternion<T>::fromAxisAngle(T xx, T yy, T zz, T degrees)
 	T sinus = sin(radians / 2);
 
 	return Quaternion<T>(xx * sinus,
-						 yy * sinus,
-						 zz * sinus,
-						 cos(radians / 2));
+	                     yy * sinus,
+	                     zz * sinus,
+	                     cos(radians / 2));
 }
 
 template <class T>
-inline Quaternion<T> Quaternion<T>::fromAxisAngle(const Vector3<T>& axis, T degrees)
+inline Quaternion<T> Quaternion<T>::fromAxisAngle(const Vector3<T> &axis, T degrees)
 {
 	return fromAxisAngle(axis.x, axis.y, axis.z, degrees);
 }

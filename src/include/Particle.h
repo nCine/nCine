@@ -27,7 +27,7 @@ class Particle : public Sprite
 
   private:
 	/// Private constructor accessible only by `ParticleSystem`
-	Particle(SceneNode* parent, Texture *texture);
+	Particle(SceneNode *parent, Texture *texture);
 
 	/// Initializes a particle with initial life, position, velocity and rotation
 	void init(float life, Vector2f pos, Vector2f vel, float rot, bool inLocalSpace);

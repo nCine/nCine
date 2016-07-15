@@ -44,8 +44,8 @@ class MyEventHandler
 
 	nc::SceneNode *dummy_;
 	nc::StaticArray<nc::String, MaxTexFormats> filenames_;
-	nc::StaticArray<nc::Texture*, MaxTexFormats> textures_;
-	nc::StaticArray<nc::Sprite*, MaxTexFormats> sprites_;
+	nc::StaticArray<nc::Texture *, MaxTexFormats> textures_;
+	nc::StaticArray<nc::Sprite *, MaxTexFormats> sprites_;
 	nc::Font *font_;
 	nc::TextNode *textNode_;
 

@@ -83,7 +83,7 @@ class SdlKeyboardState : public KeyboardState
 	friend class SdlInputManager;
 
   private:
-	unsigned char* keyState_;
+	unsigned char *keyState_;
 };
 
 /// The class for parsing and dispatching SDL input events
@@ -97,16 +97,16 @@ class SdlInputManager : public IInputManager
 
 	static void parseEvent(const SDL_Event &event);
 
-	inline const MouseState& mouseState()
+	inline const MouseState &mouseState()
 	{
 		mouseState_.buttons_ = SDL_GetMouseState(&mouseState_.x, &mouseState_.y);
 		return mouseState_;
 	}
 
-	inline const KeyboardState& keyboardState() const	{ return keyboardState_; }
+	inline const KeyboardState &keyboardState() const	{ return keyboardState_; }
 
 	bool isJoyPresent(int joyId) const;
-	const char* joyName(int joyId) const;
+	const char *joyName(int joyId) const;
 	int joyNumButtons(int joyId) const;
 	int joyNumAxes(int joyId) const;
 	bool isJoyButtonPressed(int joyId, int buttonId) const;
@@ -121,14 +121,14 @@ class SdlInputManager : public IInputManager
 	static SdlKeyboardState keyboardState_;
 	static KeyboardEvent	keyboardEvent_;
 
-	static SDL_Joystick* sdlJoysticks_[MaxNumJoysticks];
+	static SDL_Joystick *sdlJoysticks_[MaxNumJoysticks];
 	static JoyButtonEvent joyButtonEvent_;
 	static JoyAxisEvent joyAxisEvent_;
 
 	/// Private copy constructor
-	SdlInputManager(const SdlInputManager&);
+	SdlInputManager(const SdlInputManager &);
 	/// Private assignment operator
-	SdlInputManager& operator=(const SdlInputManager&);
+	SdlInputManager &operator=(const SdlInputManager &);
 
 	static short int hatEnumToAxisValue(unsigned char hatState, bool upDownAxis);
 };

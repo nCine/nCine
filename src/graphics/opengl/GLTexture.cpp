@@ -73,19 +73,19 @@ void GLTexture::unbind() const
 	}
 }
 
-void GLTexture::texImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* data)
+void GLTexture::texImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data)
 {
 	bind();
 	glTexImage2D(target_, level, internalFormat, width, height, 0, format, type, data);
 }
 
-void GLTexture::texSubImage2D(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* data)
+void GLTexture::texSubImage2D(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data)
 {
 	bind();
 	glTexSubImage2D(target_, level, xoffset, yoffset, width, height, format, type, data);
 }
 
-void GLTexture::compressedTexImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei imageSize, const void* data)
+void GLTexture::compressedTexImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei imageSize, const void *data)
 {
 	bind();
 	glCompressedTexImage2D(target_, level, internalFormat, width, height, 0, imageSize, data);

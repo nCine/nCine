@@ -53,7 +53,7 @@ String::~String()
 	delete[] array_;
 }
 
-String::String(const String& other)
+String::String(const String &other)
 	: array_(NULL), length_(other.length_), capacity_(other.capacity_)
 {
 	array_ = new char[capacity_];
@@ -71,7 +71,7 @@ String::String(const String& other)
 ///////////////////////////////////////////////////////////
 
 /*! \note Not implemented with the copy-and-swap idiom because it has to copy data. */
-String& String::operator=(const String& other)
+String &String::operator=(const String &other)
 {
 	if (this != &other)
 	{
@@ -84,7 +84,7 @@ String& String::operator=(const String& other)
 	return *this;
 }
 
-String& String::operator=(const char *cString)
+String &String::operator=(const char *cString)
 {
 #if defined(_WIN32) && !defined(__MINGW32__)
 	length_ = static_cast<unsigned int>(strnlen_s(cString, capacity_));
@@ -99,7 +99,7 @@ String& String::operator=(const char *cString)
 }
 
 /*! The method returns the number of characters copied, to allow truncation. */
-unsigned int String::copy(const String& source, unsigned int srcChar, unsigned int numChar, unsigned int destChar)
+unsigned int String::copy(const String &source, unsigned int srcChar, unsigned int numChar, unsigned int destChar)
 {
 	// Clamping parameters to string lengths and capacities
 
@@ -127,17 +127,17 @@ unsigned int String::copy(const String& source, unsigned int srcChar, unsigned i
 	return charsToCopy;
 }
 
-unsigned int String::copy(const String& source)
+unsigned int String::copy(const String &source)
 {
 	return copy(source, 0, source.length_, 0);
 }
 
-unsigned int String::append(const String& source)
+unsigned int String::append(const String &source)
 {
 	return copy(source, 0, source.length_, length_);
 }
 
-int String::compare(const String& other) const
+int String::compare(const String &other) const
 {
 	unsigned int minCapacity = nc::min(capacity_, other.capacity_);
 	return strncmp(array_, other.array_, minCapacity);
@@ -176,7 +176,7 @@ int String::findLastChar(char c) const
 	}
 }
 
-int String::find(const String& other) const
+int String::find(const String &other) const
 {
 	const char *foundPtr = strstr(array_, other.array_);
 
@@ -204,7 +204,7 @@ int String::find(const char *cString) const
 	}
 }
 
-String& String::format(const char *fmt, ...)
+String &String::format(const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
@@ -224,7 +224,7 @@ String& String::format(const char *fmt, ...)
 	return *this;
 }
 
-String& String::formatAppend(const char *fmt, ...)
+String &String::formatAppend(const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
@@ -244,7 +244,7 @@ String& String::formatAppend(const char *fmt, ...)
 	return *this;
 }
 
-String& String::operator+=(const String& other)
+String &String::operator+=(const String &other)
 {
 	unsigned int availCapacity = capacity_ - length_;
 	unsigned int minLength = min(other.length_, availCapacity);
@@ -260,7 +260,7 @@ String& String::operator+=(const String& other)
 	return *this;
 }
 
-String& String::operator+=(const char *cString)
+String &String::operator+=(const char *cString)
 {
 	unsigned int availCapacity = capacity_ - length_;
 
@@ -277,7 +277,7 @@ String& String::operator+=(const char *cString)
 	return *this;
 }
 
-String String::operator+(const String& other) const
+String String::operator+(const String &other) const
 {
 	unsigned int sumLength = length_ + other.length_ + 1;
 	String result(sumLength);

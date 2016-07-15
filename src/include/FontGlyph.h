@@ -12,11 +12,11 @@ class FontGlyph
   public:
 	FontGlyph();
 	FontGlyph(unsigned int x, unsigned int y, unsigned int width, unsigned int height,
-				int xOffset, int yOffset, unsigned int xAdvance);
+	          int xOffset, int yOffset, unsigned int xAdvance);
 
 	/// Sets glyph properties
 	void set(unsigned int x, unsigned int y, unsigned int width, unsigned int height,
-			 int xOffset, int yOffset, unsigned int xAdvance);
+	         int xOffset, int yOffset, unsigned int xAdvance);
 
 	/// Returns the size in pixels of a glyph
 	inline Vector2i size() const { return Vector2i(width_, height_); }
@@ -58,7 +58,7 @@ class FontGlyph
 };
 
 inline void FontGlyph::set(unsigned int x, unsigned int y, unsigned int width, unsigned int height,
-	int xOffset, int yOffset, unsigned int xAdvance)
+                           int xOffset, int yOffset, unsigned int xAdvance)
 {
 	x_ = x;
 	y_ = y;

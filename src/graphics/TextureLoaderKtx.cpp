@@ -76,7 +76,7 @@ void TextureLoaderKtx::readHeader(KtxHeader &header)
 	}
 }
 
-void TextureLoaderKtx::parseFormat(const KtxHeader& header)
+void TextureLoaderKtx::parseFormat(const KtxHeader &header)
 {
 	GLenum internalFormat = IFile::int32FromLE(header.glInternalFormat);
 	GLenum type = IFile::int32FromLE(header.glType);

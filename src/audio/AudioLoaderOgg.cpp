@@ -88,7 +88,8 @@ unsigned long int AudioLoaderOgg::read(char *buffer, unsigned long int bufferSiz
 		}
 
 		bufferSeek += bytes;
-	} while (bytes > 0 && bufferSize - bufferSeek > 0);
+	}
+	while (bytes > 0 && bufferSize - bufferSeek > 0);
 
 	return bufferSeek;
 }

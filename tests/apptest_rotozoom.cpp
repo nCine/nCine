@@ -10,14 +10,14 @@
 namespace {
 
 #ifdef __ANDROID__
-const char* TextureFile = "megatexture_256.webp";
+	const char *TextureFile = "megatexture_256.webp";
 #else
-const char* TextureFile = "megatexture_256.png";
+	const char *TextureFile = "megatexture_256.png";
 #endif
 
 }
 
-nc::IAppEventHandler* createApphandler()
+nc::IAppEventHandler *createApphandler()
 {
 	return new MyEventHandler;
 }
@@ -102,7 +102,7 @@ void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 	}
 }
 
-void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent& event)
+void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
 	{

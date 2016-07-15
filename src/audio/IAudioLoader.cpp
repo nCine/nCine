@@ -39,7 +39,7 @@ IAudioLoader::~IAudioLoader()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-IAudioLoader* IAudioLoader::createFromFile(const char *filename)
+IAudioLoader *IAudioLoader::createFromFile(const char *filename)
 {
 	// Creating a handle from IFile static method to detect assets file
 	IFile *fileHandle = IFile::createFileHandle(filename);

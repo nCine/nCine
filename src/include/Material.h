@@ -28,29 +28,29 @@ class Material
 
 	/// Default constructor
 	Material();
-	Material(GLShaderProgram* program, GLTexture* texture);
+	Material(GLShaderProgram *program, GLTexture *texture);
 
 	bool isTransparent() const { return isTransparent_; }
 	void setTransparent(bool isTransparent) { isTransparent_ = isTransparent; }
 
 	void setShaderProgram(ShaderProgramPresets preset);
 	/// Wrapper around `GLShaderUniforms::uniform()`
-	inline GLUniformCache* uniform(const char *name) { return shaderUniforms_.uniform(name); }
+	inline GLUniformCache *uniform(const char *name) { return shaderUniforms_.uniform(name); }
 	/// Wrapper around `GLShaderAttributes::attribute()`
-	inline GLVertexAttribute* attribute(const char *name) { return shaderAttributes_.attribute(name); }
-	inline void setTexture(GLTexture* texture) { texture_ = texture; }
-	void setTexture(const Texture& texture);
+	inline GLVertexAttribute *attribute(const char *name) { return shaderAttributes_.attribute(name); }
+	inline void setTexture(GLTexture *texture) { texture_ = texture; }
+	void setTexture(const Texture &texture);
 
   private:
 	bool isTransparent_;
 
-	GLShaderProgram* shaderProgram_;
+	GLShaderProgram *shaderProgram_;
 	GLShaderUniforms shaderUniforms_;
 	GLShaderAttributes shaderAttributes_;
-	GLTexture* texture_;
+	GLTexture *texture_;
 
 	void bind();
-	void setShaderProgram(GLShaderProgram* program);
+	void setShaderProgram(GLShaderProgram *program);
 	/// Wrapper around `GLShaderUniforms::commitUniforms()`
 	void commitUniforms() { shaderUniforms_.commitUniforms(); }
 	/// Wrapper around `GLShaderAttributes::defineVertexPointers()`

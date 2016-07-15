@@ -19,7 +19,7 @@ const float SceneNode::MinRotation = 0.5f;
 ///////////////////////////////////////////////////////////
 
 /*! \param parent The parent can be `NULL` */
-SceneNode::SceneNode(SceneNode* parent, float xx, float yy)
+SceneNode::SceneNode(SceneNode *parent, float xx, float yy)
 	: Object(SCENENODE_TYPE), x(xx), y(yy), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
 	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
 	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
@@ -31,7 +31,7 @@ SceneNode::SceneNode(SceneNode* parent, float xx, float yy)
 }
 
 /*! \param parent The parent can be `NULL` */
-SceneNode::SceneNode(SceneNode* parent)
+SceneNode::SceneNode(SceneNode *parent)
 	: Object(SCENENODE_TYPE), x(0.0f), y(0.0f), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
 	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
 	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
@@ -95,8 +95,8 @@ bool SceneNode::removeChildNode(SceneNode *childNode)
 	bool hasBeenRemoved = false;
 
 	if (childNode && // cannot pass a NULL pointer
-		!children_.isEmpty() && // avoid checking if this node has no children
-		childNode->parent_ == this) // avoid checking the child doesn't belong to this one
+	    !children_.isEmpty() && // avoid checking if this node has no children
+	    childNode->parent_ == this) // avoid checking the child doesn't belong to this one
 	{
 		childNode->parent_ = NULL;
 		children_.remove(childNode);
@@ -115,8 +115,8 @@ bool SceneNode::removeChildNode(List<SceneNode *>::ConstIterator it)
 	bool hasBeenRemoved = false;
 
 	if (*it && // cannot pass a NULL pointer
-		!children_.isEmpty() && // avoid checking if this node has no children
-		(*it)->parent_ == this) // avoid checking the child doesn't belong to this one
+	    !children_.isEmpty() && // avoid checking if this node has no children
+	    (*it)->parent_ == this) // avoid checking the child doesn't belong to this one
 	{
 		(*it)->parent_ = NULL;
 		children_.erase(it);
@@ -132,8 +132,8 @@ bool SceneNode::unlinkChildNode(SceneNode *childNode)
 	bool hasBeenUnlinked = false;
 
 	if (childNode && // cannot pass a NULL pointer
-		!children_.isEmpty() && // avoid checking if this node has no children
-		childNode->parent_ == this) // avoid checking the child doesn't belong to this one
+	    !children_.isEmpty() && // avoid checking if this node has no children
+	    childNode->parent_ == this) // avoid checking the child doesn't belong to this one
 	{
 		childNode->parent_ = NULL;
 		children_.remove(childNode);

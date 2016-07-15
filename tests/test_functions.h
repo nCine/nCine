@@ -32,7 +32,7 @@ inline void printList(const nc::List<int> &list)
 	printf("\n");
 }
 
-inline void printMatrix4x4f(const nc::Matrix4x4f& mat)
+inline void printMatrix4x4f(const nc::Matrix4x4f &mat)
 {
 	printf("[");
 	for (unsigned int i = 0; i < 4; i++)
@@ -54,14 +54,14 @@ template<int value>
 class AddValue
 {
   public:
-	inline void operator()(int& n) const { n += value; }
+	inline void operator()(int &n) const { n += value; }
 };
 
 template<int value>
-inline void addValue(int& n) { n += value; }
+inline void addValue(int &n) { n += value; }
 
 template<int value>
-inline int copyAddValue(const int& n) { return n + value; }
+inline int copyAddValue(const int &n) { return n + value; }
 
 }
 

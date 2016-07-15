@@ -21,11 +21,11 @@ class DLL_PUBLIC Application
 {
   public:
 	/// Returns the graphics device instance
-	inline IGfxDevice& gfxDevice() { return *gfxDevice_; }
+	inline IGfxDevice &gfxDevice() { return *gfxDevice_; }
 	/// Returns the root of the transformation graph
-	inline SceneNode& rootNode() { return *rootNode_; }
+	inline SceneNode &rootNode() { return *rootNode_; }
 	/// Returns the input manager instance
-	inline IInputManager& inputManager() { return *inputManager_; }
+	inline IInputManager &inputManager() { return *inputManager_; }
 
 	/// Returns the elapsed time since the end of the previous frame in milliseconds
 	float interval() const;
@@ -86,16 +86,16 @@ class DLL_PUBLIC Application
 
   private:
 	/// Private copy constructor
-	Application(const Application&);
+	Application(const Application &);
 	/// Private assignment operator
-	Application& operator=(const Application&);
+	Application &operator=(const Application &);
 
 	friend class PCApplication;
 	friend class AndroidApplication;
 };
 
 // Meyers' Singleton
-extern DLL_PUBLIC Application& theApplication();
+extern DLL_PUBLIC Application &theApplication();
 
 }
 

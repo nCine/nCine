@@ -17,7 +17,7 @@ class DLL_PUBLIC IAppEventHandler
 	/// Called once before initialization to setup the application
 	/*! \warning At this stage it is only safe to modify the `config` object.
 	 *  No other engine API calls should be made. */
-	virtual void onPreInit(AppConfiguration& config) { }
+	virtual void onPreInit(AppConfiguration &config) { }
 	/// Called once on application initialization
 	virtual void onInit() { }
 	/// Called every time a frame is about to be rendered

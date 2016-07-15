@@ -8,21 +8,21 @@
 namespace {
 
 #ifdef __ANDROID__
-const char* Font1TextureFile = "DroidSans32_256.webp";
-const char* Font2TextureFile = "NotoSerif-Regular32_256.webp";
-const char* Font3TextureFile = "Roboto-Regular32_256.webp";
+	const char *Font1TextureFile = "DroidSans32_256.webp";
+	const char *Font2TextureFile = "NotoSerif-Regular32_256.webp";
+	const char *Font3TextureFile = "Roboto-Regular32_256.webp";
 #else
-const char* Font1TextureFile = "DroidSans32_256.png";
-const char* Font2TextureFile = "NotoSerif-Regular32_256.png";
-const char* Font3TextureFile = "Roboto-Regular32_256.png";
+	const char *Font1TextureFile = "DroidSans32_256.png";
+	const char *Font2TextureFile = "NotoSerif-Regular32_256.png";
+	const char *Font3TextureFile = "Roboto-Regular32_256.png";
 #endif
-const char* Font1FntFile = "DroidSans32_256.fnt";
-const char* Font2FntFile = "NotoSerif-Regular32_256.fnt";
-const char* Font3FntFile = "Roboto-Regular32_256.fnt";
+const char *Font1FntFile = "DroidSans32_256.fnt";
+const char *Font2FntFile = "NotoSerif-Regular32_256.fnt";
+const char *Font3FntFile = "Roboto-Regular32_256.fnt";
 
 }
 
-nc::IAppEventHandler* createApphandler()
+nc::IAppEventHandler *createApphandler()
 {
 	return new MyEventHandler;
 }
@@ -32,11 +32,11 @@ void MyEventHandler::onInit()
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 	font1_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + Font1TextureFile).data(),
-						  (nc::IFile::dataPath() + "fonts/" + Font1FntFile).data());
+	                      (nc::IFile::dataPath() + "fonts/" + Font1FntFile).data());
 	font2_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + Font2TextureFile).data(),
-						  (nc::IFile::dataPath() + "fonts/" + Font2FntFile).data());
+	                      (nc::IFile::dataPath() + "fonts/" + Font2FntFile).data());
 	font3_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + Font3TextureFile).data(),
-						  (nc::IFile::dataPath() + "fonts/" + Font3FntFile).data());
+	                      (nc::IFile::dataPath() + "fonts/" + Font3FntFile).data());
 
 	char testString[] = "WAY.P.ATAV";
 	float textHeight = nc::theApplication().height() * 0.8f;

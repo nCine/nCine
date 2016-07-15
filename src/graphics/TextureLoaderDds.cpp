@@ -33,7 +33,7 @@ void TextureLoaderDds::init()
 	parseFormat(header);
 }
 
-void TextureLoaderDds::readHeader(DdsHeader& header)
+void TextureLoaderDds::readHeader(DdsHeader &header)
 {
 	// DDS header is 128 bytes long
 	fileHandle_->read(&header, 128);
@@ -69,8 +69,8 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 	{
 		uint32_t fourCC = IFile::int32FromLE(header.ddspf.dwFourCC);
 
-		LOGI_X("FourCC: \"%c%c%c%c\" (0x%x)", (reinterpret_cast<char*>(&fourCC))[0], (reinterpret_cast<char*>(&fourCC))[1],
-			(reinterpret_cast<char*>(&fourCC))[2], (reinterpret_cast<char*>(&fourCC))[3], fourCC);
+		LOGI_X("FourCC: \"%c%c%c%c\" (0x%x)", (reinterpret_cast<char *>(&fourCC))[0], (reinterpret_cast<char *>(&fourCC))[1],
+		       (reinterpret_cast<char *>(&fourCC))[2], (reinterpret_cast<char *>(&fourCC))[3], fourCC);
 
 		// Parsing the FourCC format
 		switch (fourCC)
@@ -125,12 +125,12 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 		if (flags & DDPF_RGB || flags & (DDPF_RGB | DDPF_ALPHAPIXELS))
 		{
 			if ((redMask == 0x00FF0000 && greenMask == 0x0000FF00 && blueMask == 0x000000FF && alphaMask == 0x0) ||
-				(blueMask == 0x00FF0000 && greenMask == 0x0000FF00 && redMask == 0x000000FF && alphaMask == 0x0)) // 888
+			    (blueMask == 0x00FF0000 && greenMask == 0x0000FF00 && redMask == 0x000000FF && alphaMask == 0x0)) // 888
 			{
 				internalFormat = GL_RGB;
 			}
 			else if ((alphaMask == 0xFF000000 && redMask == 0x00FF0000 && greenMask == 0x0000FF00 && blueMask == 0x000000FF) ||
-					 (alphaMask == 0xFF000000 && blueMask == 0x00FF0000 && greenMask == 0x0000FF00 && redMask == 0x000000FF)) // 8888
+			         (alphaMask == 0xFF000000 && blueMask == 0x00FF0000 && greenMask == 0x0000FF00 && redMask == 0x000000FF)) // 8888
 			{
 				internalFormat = GL_RGBA;
 			}

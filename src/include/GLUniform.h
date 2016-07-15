@@ -17,7 +17,7 @@ class GLUniform
 	inline GLint location() const { return location_; }
 	inline GLint size() const { return size_; }
 	inline GLenum type() const { return type_; }
-	inline const char* name() const { return name_; }
+	inline const char *name() const { return name_; }
 	GLenum basicType() const;
 	unsigned int numComponents() const;
 

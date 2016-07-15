@@ -49,9 +49,9 @@ class ALAudioDevice : public IAudioDevice
 	List<IAudioPlayer *> players_;
 
 	/// Private copy constructor
-	ALAudioDevice(const ALAudioDevice&);
+	ALAudioDevice(const ALAudioDevice &);
 	/// Private assignment operator
-	ALAudioDevice& operator=(const ALAudioDevice&);
+	ALAudioDevice &operator=(const ALAudioDevice &);
 };
 
 }

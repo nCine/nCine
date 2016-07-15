@@ -6,7 +6,7 @@ namespace nc = ncine;
 
 namespace {
 
-inline void printVector2f(const nc::Vector2f& vec)
+inline void printVector2f(const nc::Vector2f &vec)
 {
 	printf("<%.2f, %.2f>\n", vec.x, vec.y);
 }

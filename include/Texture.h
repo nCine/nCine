@@ -70,14 +70,14 @@ class DLL_PUBLIC Texture : public Object
 	bool hasAlphaChannel_;
 
 	/// Private copy constructor
-	Texture(const Texture&);
+	Texture(const Texture &);
 	/// Private assignment operator
-	Texture& operator=(const Texture&);
+	Texture &operator=(const Texture &);
 
 	/// Loads a texture based on information from the texture format and loader
-	void load(const ITextureLoader& texLoader);
+	void load(const ITextureLoader &texLoader);
 	/// Loads a texture overriding the size detected by the texture loader
-	void load(const ITextureLoader& texLoader, int width, int height);
+	void load(const ITextureLoader &texLoader, int width, int height);
 
 	friend class Material;
 };

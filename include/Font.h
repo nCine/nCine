@@ -15,11 +15,11 @@ class DLL_PUBLIC Font : public Object
 {
   public:
 	/// Constructs the object from a texture and a `FNT` file (from <em>AngelCode's Bitmap Font Generator</em>)
-	Font(const char* texFilename, const char *fntFilename);
+	Font(const char *texFilename, const char *fntFilename);
 	virtual ~Font();
 
 	/// Gets the texture object
-	inline const Texture* texture() const { return texture_; }
+	inline const Texture *texture() const { return texture_; }
 	/// Sets the texture object
 	inline void setTexture(Texture *texture) { texture_ = texture; }
 
@@ -32,7 +32,7 @@ class DLL_PUBLIC Font : public Object
 	/// Returns number of glyphs
 	inline unsigned int numGlyphs() const { return numGlyphs_; }
 	/// Returns a constant pointer to a glyph
-	const FontGlyph* glyph(unsigned int glyphId) const;
+	const FontGlyph *glyph(unsigned int glyphId) const;
 
 	inline static ObjectType sType() { return FONT_TYPE; }
 
@@ -58,9 +58,9 @@ class DLL_PUBLIC Font : public Object
 	FontGlyph *glyphs_;
 
 	/// Private copy constructor
-	Font(const Font&);
+	Font(const Font &);
 	/// Private assignment operator
-	Font& operator=(const Font&);
+	Font &operator=(const Font &);
 
 	/// Loads an <em>AngelCode's</em> `FNT` file in a memory buffer then parses it
 	void parseFntFile(IFile *fileHandle);

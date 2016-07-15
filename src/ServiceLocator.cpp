@@ -3,7 +3,7 @@
 
 namespace ncine {
 
-ServiceLocator& theServiceLocator()
+ServiceLocator &theServiceLocator()
 {
 	static ServiceLocator instance;
 	return instance;
@@ -25,7 +25,7 @@ ServiceLocator::ServiceLocator()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ServiceLocator::registerIndexer(IIndexer* service)
+void ServiceLocator::registerIndexer(IIndexer *service)
 {
 	if (service == NULL)
 	{
@@ -37,7 +37,7 @@ void ServiceLocator::registerIndexer(IIndexer* service)
 	}
 }
 
-void ServiceLocator::registerLogger(ILogger* service)
+void ServiceLocator::registerLogger(ILogger *service)
 {
 	if (service == NULL)
 	{
@@ -49,7 +49,7 @@ void ServiceLocator::registerLogger(ILogger* service)
 	}
 }
 
-void ServiceLocator::registerAudioDevice(IAudioDevice* service)
+void ServiceLocator::registerAudioDevice(IAudioDevice *service)
 {
 	if (service == NULL)
 	{
@@ -61,7 +61,7 @@ void ServiceLocator::registerAudioDevice(IAudioDevice* service)
 	}
 }
 
-void ServiceLocator::registerThreadPool(IThreadPool* service)
+void ServiceLocator::registerThreadPool(IThreadPool *service)
 {
 	if (service == NULL)
 	{
@@ -73,7 +73,7 @@ void ServiceLocator::registerThreadPool(IThreadPool* service)
 	}
 }
 
-void ServiceLocator::registerGfxCapabilities(IGfxCapabilities* service)
+void ServiceLocator::registerGfxCapabilities(IGfxCapabilities *service)
 {
 	if (service == NULL)
 	{

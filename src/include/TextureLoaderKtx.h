@@ -39,9 +39,9 @@ class TextureLoaderKtx : public ITextureLoader
 	void init();
 
 	/// Reads the KTX header and fills the corresponding structure
-	void readHeader(KtxHeader& header);
+	void readHeader(KtxHeader &header);
 	/// Parses the KTX header to determine its format
-	void parseFormat(const KtxHeader& header);
+	void parseFormat(const KtxHeader &header);
 };
 
 }

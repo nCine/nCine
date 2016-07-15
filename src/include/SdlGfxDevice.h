@@ -34,9 +34,9 @@ class SdlGfxDevice : public IGfxDevice
 
   private:
 	/// Private copy constructor
-	SdlGfxDevice(const SdlGfxDevice&);
+	SdlGfxDevice(const SdlGfxDevice &);
 	/// Private assignment operator
-	SdlGfxDevice& operator=(const SdlGfxDevice&);
+	SdlGfxDevice &operator=(const SdlGfxDevice &);
 
 	/// Initilizes the object
 	void init(int width, int height, DisplayMode mode, bool isFullScreen_);

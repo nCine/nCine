@@ -46,7 +46,7 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	/// Sets player pitch value
 	void setPitch(float pitch);
 	/// Returns player position value
-	inline const float* Position() const { return position_.data(); }
+	inline const float *Position() const { return position_.data(); }
 	/// Sets player position value through vector
 	void setPosition(float position[3]);
 	/// Sets player position value through components

@@ -19,29 +19,29 @@ class Vector4
 
 	void set(T xx, T yy, T zz, T ww);
 
-	T* data();
-	const T* data() const;
+	T *data();
+	const T *data() const;
 
-	T& operator[](unsigned int index);
-	const T& operator[](unsigned int index) const;
+	T &operator[](unsigned int index);
+	const T &operator[](unsigned int index) const;
 
-	bool operator==(const Vector4& v) const;
+	bool operator==(const Vector4 &v) const;
 	Vector4 operator-() const;
 
-	Vector4& operator+=(const Vector4& v);
-	Vector4& operator-=(const Vector4& v);
-	Vector4& operator*=(const Vector4& v);
-	Vector4& operator/=(const Vector4& v);
+	Vector4 &operator+=(const Vector4 &v);
+	Vector4 &operator-=(const Vector4 &v);
+	Vector4 &operator*=(const Vector4 &v);
+	Vector4 &operator/=(const Vector4 &v);
 
-	Vector4& operator+=(T s);
-	Vector4& operator-=(T s);
-	Vector4& operator*=(T s);
-	Vector4& operator/=(T s);
+	Vector4 &operator+=(T s);
+	Vector4 &operator-=(T s);
+	Vector4 &operator*=(T s);
+	Vector4 &operator/=(T s);
 
-	Vector4 operator+(const Vector4& v) const;
-	Vector4 operator-(const Vector4& v) const;
-	Vector4 operator*(const Vector4& v) const;
-	Vector4 operator/(const Vector4& v) const;
+	Vector4 operator+(const Vector4 &v) const;
+	Vector4 operator-(const Vector4 &v) const;
+	Vector4 operator*(const Vector4 &v) const;
+	Vector4 operator/(const Vector4 &v) const;
 
 	Vector4 operator+(T s) const;
 	Vector4 operator-(T s) const;
@@ -51,9 +51,9 @@ class Vector4
 	T length() const;
 	T sqrLength() const;
 	Vector4 normalized() const;
-	Vector4& normalize();
+	Vector4 &normalize();
 
-	template <class S> friend S dot(const Vector4<S>& v1, const Vector4<S>& v2);
+	template <class S> friend S dot(const Vector4<S> &v1, const Vector4<S> &v2);
 
 	/// A vector with all zero elements
 	static const Vector4 Zero;
@@ -80,31 +80,31 @@ inline void Vector4<T>::set(T xx, T yy, T zz, T ww)
 }
 
 template <class T>
-T* Vector4<T>::data()
+T *Vector4<T>::data()
 {
 	return &x;
 }
 
 template <class T>
-const T* Vector4<T>::data() const
+const T *Vector4<T>::data() const
 {
 	return &x;
 }
 
 template <class T>
-inline T& Vector4<T>::operator[](unsigned int index)
+inline T &Vector4<T>::operator[](unsigned int index)
 {
 	return (&x)[index];
 }
 
 template <class T>
-inline const T& Vector4<T>::operator[](unsigned int index) const
+inline const T &Vector4<T>::operator[](unsigned int index) const
 {
 	return (&x)[index];
 }
 
 template <class T>
-inline bool Vector4<T>::operator==(const Vector4& v) const
+inline bool Vector4<T>::operator==(const Vector4 &v) const
 {
 	return (x == v.x && y == v.y && z == v.z && w == v.w);
 }
@@ -116,7 +116,7 @@ inline Vector4<T> Vector4<T>::operator-() const
 }
 
 template <class T>
-inline Vector4<T>& Vector4<T>::operator+=(const Vector4& v)
+inline Vector4<T> &Vector4<T>::operator+=(const Vector4 &v)
 {
 	x += v.x;
 	y += v.y;
@@ -127,7 +127,7 @@ inline Vector4<T>& Vector4<T>::operator+=(const Vector4& v)
 }
 
 template <class T>
-inline Vector4<T>& Vector4<T>::operator-=(const Vector4& v)
+inline Vector4<T> &Vector4<T>::operator-=(const Vector4 &v)
 {
 	x -= v.x;
 	y -= v.y;
@@ -138,7 +138,7 @@ inline Vector4<T>& Vector4<T>::operator-=(const Vector4& v)
 }
 
 template <class T>
-inline Vector4<T>& Vector4<T>::operator*=(const Vector4& v)
+inline Vector4<T> &Vector4<T>::operator*=(const Vector4 &v)
 {
 	x *= v.x;
 	y *= v.y;
@@ -149,7 +149,7 @@ inline Vector4<T>& Vector4<T>::operator*=(const Vector4& v)
 }
 
 template <class T>
-inline Vector4<T>& Vector4<T>::operator/=(const Vector4& v)
+inline Vector4<T> &Vector4<T>::operator/=(const Vector4 &v)
 {
 	x /= v.x;
 	y /= v.y;
@@ -160,7 +160,7 @@ inline Vector4<T>& Vector4<T>::operator/=(const Vector4& v)
 }
 
 template <class T>
-inline Vector4<T>& Vector4<T>::operator+=(T s)
+inline Vector4<T> &Vector4<T>::operator+=(T s)
 {
 	x += s;
 	y += s;
@@ -171,7 +171,7 @@ inline Vector4<T>& Vector4<T>::operator+=(T s)
 }
 
 template <class T>
-inline Vector4<T>& Vector4<T>::operator-=(T s)
+inline Vector4<T> &Vector4<T>::operator-=(T s)
 {
 	x -= s;
 	y -= s;
@@ -182,7 +182,7 @@ inline Vector4<T>& Vector4<T>::operator-=(T s)
 }
 
 template <class T>
-inline Vector4<T>& Vector4<T>::operator*=(T s)
+inline Vector4<T> &Vector4<T>::operator*=(T s)
 {
 	x *= s;
 	y *= s;
@@ -193,7 +193,7 @@ inline Vector4<T>& Vector4<T>::operator*=(T s)
 }
 
 template <class T>
-inline Vector4<T>& Vector4<T>::operator/=(T s)
+inline Vector4<T> &Vector4<T>::operator/=(T s)
 {
 	x /= s;
 	y /= s;
@@ -204,98 +204,98 @@ inline Vector4<T>& Vector4<T>::operator/=(T s)
 }
 
 template <class T>
-inline Vector4<T> Vector4<T>::operator+(const Vector4& v) const
+inline Vector4<T> Vector4<T>::operator+(const Vector4 &v) const
 {
 	return Vector4(x + v.x,
-				   y + v.y,
-				   z + v.z,
-				   w + v.w);
+	               y + v.y,
+	               z + v.z,
+	               w + v.w);
 }
 
 template <class T>
-inline Vector4<T> Vector4<T>::operator-(const Vector4& v) const
+inline Vector4<T> Vector4<T>::operator-(const Vector4 &v) const
 {
 	return Vector4(x - v.x,
-				   y - v.y,
-				   z - v.z,
-				   w - v.w);
+	               y - v.y,
+	               z - v.z,
+	               w - v.w);
 }
 
 template <class T>
-inline Vector4<T> Vector4<T>::operator*(const Vector4& v) const
+inline Vector4<T> Vector4<T>::operator*(const Vector4 &v) const
 {
 	return Vector4(x * v.x,
-				   y * v.y,
-				   z * v.z,
-				   w * v.w);
+	               y * v.y,
+	               z * v.z,
+	               w * v.w);
 }
 
 template <class T>
-inline Vector4<T> Vector4<T>::operator/(const Vector4& v) const
+inline Vector4<T> Vector4<T>::operator/(const Vector4 &v) const
 {
 	return Vector4(x / v.x,
-				   y / v.y,
-				   z / v.z,
-				   w / v.w);
+	               y / v.y,
+	               z / v.z,
+	               w / v.w);
 }
 
 template <class T>
 inline Vector4<T> Vector4<T>::operator+(T s) const
 {
 	return Vector4(x + s,
-				   y + s,
-				   z + s,
-				   w + s);
+	               y + s,
+	               z + s,
+	               w + s);
 }
 
 template <class T>
 inline Vector4<T> Vector4<T>::operator-(T s) const
 {
 	return Vector4(x - s,
-				   y - s,
-				   z - s,
-				   w - s);
+	               y - s,
+	               z - s,
+	               w - s);
 }
 
 template <class T>
 inline Vector4<T> Vector4<T>::operator*(T s) const
 {
 	return Vector4(x * s,
-				   y * s,
-				   z * s,
-				   w * s);
+	               y * s,
+	               z * s,
+	               w * s);
 }
 
 template <class T>
 inline Vector4<T> Vector4<T>::operator/(T s) const
 {
 	return Vector4(x / s,
-				   y / s,
-				   z / s,
-				   w / s);
+	               y / s,
+	               z / s,
+	               w / s);
 }
 
 template <class T>
 inline T Vector4<T>::length() const
 {
-	return sqrt(x*x + y*y + z*z + w*w);
+	return sqrt(x * x + y * y + z * z + w * w);
 }
 
 template <class T>
 inline T Vector4<T>::sqrLength() const
 {
-	return x*x + y*y + z*z + w*w;
+	return x * x + y * y + z * z + w * w;
 }
 
 template <class T>
 inline Vector4<T> Vector4<T>::normalized() const
 {
 	T len = length();
-	return Vector4(x / len, y / len , z / len, w / len);
+	return Vector4(x / len, y / len, z / len, w / len);
 }
 
 template <class T>
-inline Vector4<T>& Vector4<T>::normalize()
+inline Vector4<T> &Vector4<T>::normalize()
 {
 	T len = length();
 
@@ -308,12 +308,12 @@ inline Vector4<T>& Vector4<T>::normalize()
 }
 
 template <class S>
-inline S dot(const Vector4<S>& v1, const Vector4<S>& v2)
+inline S dot(const Vector4<S> &v1, const Vector4<S> &v2)
 {
 	return S(v1.x * v2.x +
-			 v1.y * v2.y +
-			 v1.z * v2.z +
-			 v1.w * v2.w);
+	         v1.y * v2.y +
+	         v1.z * v2.z +
+	         v1.w * v2.w);
 }
 
 template <class T> const Vector4<T> Vector4<T>::Zero(0, 0, 0, 0);

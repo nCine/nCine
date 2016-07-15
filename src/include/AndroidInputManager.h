@@ -53,7 +53,7 @@ class AndroidJoystickState
 class AndroidInputManager : public IInputManager
 {
   public:
-	explicit AndroidInputManager(struct android_app* state);
+	explicit AndroidInputManager(struct android_app *state);
 
 	/// Enables the accelerometer sensor
 	static void enableAccelerometerSensor();
@@ -66,10 +66,10 @@ class AndroidInputManager : public IInputManager
 	/// Parses an Android sensor event related to the accelerometer
 	static void parseAccelerometerEvent();
 	/// Parses an Android input event
-	static bool parseEvent(const AInputEvent* event);
+	static bool parseEvent(const AInputEvent *event);
 
 	bool isJoyPresent(int joyId) const;
-	const char* joyName(int joyId) const;
+	const char *joyName(int joyId) const;
 	int joyNumButtons(int joyId) const;
 	int joyNumAxes(int joyId) const;
 	bool isJoyButtonPressed(int joyId, int buttonId) const;
@@ -79,9 +79,9 @@ class AndroidInputManager : public IInputManager
   private:
 	static const unsigned int MaxNumJoysticks = 4;
 
-	static ASensorManager* sensorManager_;
-	static const ASensor* accelerometerSensor_;
-	static ASensorEventQueue* sensorEventQueue_;
+	static ASensorManager *sensorManager_;
+	static const ASensor *accelerometerSensor_;
+	static ASensorEventQueue *sensorEventQueue_;
 	static bool accelerometerEnabled_;
 
 	static AccelerometerEvent accelerometerEvent_;
@@ -97,7 +97,7 @@ class AndroidInputManager : public IInputManager
 	static Timer joyCheckTimer_;
 
 	/// Initializes the accelerometer sensor
-	static void initAccelerometerSensor(struct android_app* state);
+	static void initAccelerometerSensor(struct android_app *state);
 
 	/// Updates joystick states after connections and disconnections
 	static void updateJoystickConnections();

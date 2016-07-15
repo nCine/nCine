@@ -49,13 +49,13 @@ AppConfiguration::AppConfiguration()
 ///////////////////////////////////////////////////////////
 
 /*! Directly sets the value of the static field `IFile::dataPath_`. */
-void AppConfiguration::setDataPath(const String& dataPath)
+void AppConfiguration::setDataPath(const String &dataPath)
 {
 	IFile::dataPath_ = dataPath;
 }
 
 /*! The data path will be prefixed automatically before loading. */
-void AppConfiguration::setLogFile(const String& logFile)
+void AppConfiguration::setLogFile(const String &logFile)
 {
 	logFile_ = logFile;
 }
@@ -87,19 +87,19 @@ void AppConfiguration::setFullScreen(bool inFullscreen)
 	inFullscreen_ = inFullscreen;
 }
 
-void AppConfiguration::setWindowTitle(const String& windowTitle)
+void AppConfiguration::setWindowTitle(const String &windowTitle)
 {
 	windowTitle_ = windowTitle;
 }
 
 /*! The data path will be prefixed automatically before loading. */
-void AppConfiguration::setFontTexFilename(const String& fontTexFilename)
+void AppConfiguration::setFontTexFilename(const String &fontTexFilename)
 {
 	fontTexFilename_ = fontTexFilename;
 }
 
 /*! The data path will be prefixed automatically before loading. */
-void AppConfiguration::setFontFntFilename_(const String& fontFntFilename)
+void AppConfiguration::setFontFntFilename_(const String &fontFntFilename)
 {
 	fontFntFilename_ = fontFntFilename;
 }

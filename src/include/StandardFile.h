@@ -27,9 +27,9 @@ class StandardFile: public IFile
 
   private:
 	/// Private copy constructor
-	StandardFile(const StandardFile&);
+	StandardFile(const StandardFile &);
 	/// Private assignment operator
-	StandardFile& operator=(const StandardFile&);
+	StandardFile &operator=(const StandardFile &);
 
 	/// Opens the file with `open()`
 	void openFD(unsigned char mode);

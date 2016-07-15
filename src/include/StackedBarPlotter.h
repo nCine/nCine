@@ -9,7 +9,7 @@ namespace ncine {
 class StackedBarVariable : public PlottingVariable
 {
   public:
-	StackedBarVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f& worldMatrix);
+	StackedBarVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f &worldMatrix);
 
   private:
 	virtual void updateRenderCommand();
@@ -20,10 +20,10 @@ class StackedBarVariable : public PlottingVariable
 class StackedBarPlotter : public ProfilePlotter
 {
   public:
-	StackedBarPlotter(SceneNode* parent, Rectf rect) : ProfilePlotter(parent, rect) { }
+	StackedBarPlotter(SceneNode *parent, Rectf rect) : ProfilePlotter(parent, rect) { }
 
 	virtual unsigned int addVariable(unsigned int numValues, float rejectDelay);
-	virtual void draw(RenderQueue& renderQueue);
+	virtual void draw(RenderQueue &renderQueue);
 
   private:
 	/// Fill the buffer of every stacked variable with vertices

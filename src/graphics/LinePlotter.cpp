@@ -7,7 +7,7 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-LineVariable::LineVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f& worldMatrix)
+LineVariable::LineVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f &worldMatrix)
 	: PlottingVariable(numValues, rejectDelay, worldMatrix)
 {
 	// Two vertices for the mean quote plus...
@@ -29,13 +29,13 @@ LineVariable::LineVariable(unsigned int numValues, float rejectDelay, const Matr
 
 unsigned int LinePlotter::addVariable(unsigned int numValues, float rejectDelay)
 {
-	LineVariable* variable = new LineVariable(numValues, rejectDelay, worldMatrix_);
+	LineVariable *variable = new LineVariable(numValues, rejectDelay, worldMatrix_);
 	variables_.pushBack(variable);
 
 	return variables_.size() - 1;
 }
 
-void LinePlotter::draw(RenderQueue& renderQueue)
+void LinePlotter::draw(RenderQueue &renderQueue)
 {
 	// Drawing the background
 	DrawableNode::draw(renderQueue);
@@ -89,8 +89,8 @@ void LinePlotter::updateAllVertices(float x, float y, float w, float h)
 
 	for (unsigned int i = 0; i < variables_.size(); i++)
 	{
-		const ProfileVariable* profVariable = variables_[i]->variable();
-		GLfloat* vertices = variables_[i]->vertices();
+		const ProfileVariable *profVariable = variables_[i]->variable();
+		GLfloat *vertices = variables_[i]->vertices();
 
 		float normalizedMean = profVariable->normBetweenMean(commonMin, commonMax);
 		// Variable mean vertices

@@ -10,11 +10,11 @@ class DLL_PUBLIC PCApplication : public Application
 {
   public:
 	/// Entry point method to be called in the `main()` function
-	static void start(IAppEventHandler* (*createAppEventHandler)());
+	static void start(IAppEventHandler * (*createAppEventHandler)());
 
   private:
 	/// Must be called at the beginning to initialize the application
-	void init(IAppEventHandler* (*createAppEventHandler)());
+	void init(IAppEventHandler * (*createAppEventHandler)());
 	/// The main game loop, handling events and rendering
 	void run();
 
@@ -23,15 +23,15 @@ class DLL_PUBLIC PCApplication : public Application
 	/// Private destructor
 	~PCApplication() { }
 	/// Private copy constructor
-	PCApplication(const PCApplication&);
+	PCApplication(const PCApplication &);
 	/// Private assignment operator
-	PCApplication& operator=(const PCApplication&);
+	PCApplication &operator=(const PCApplication &);
 
-	friend DLL_PUBLIC Application& theApplication();
+	friend DLL_PUBLIC Application &theApplication();
 };
 
 /// Meyers' Singleton
-DLL_PUBLIC Application& theApplication();
+DLL_PUBLIC Application &theApplication();
 
 }
 

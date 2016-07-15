@@ -82,7 +82,7 @@ long ITextureLoader::dataSize(unsigned int mipMapLevel) const
 	return dataSize;
 }
 
-const GLubyte* ITextureLoader::pixels(unsigned int mipMapLevel) const
+const GLubyte *ITextureLoader::pixels(unsigned int mipMapLevel) const
 {
 	GLubyte *pixels = NULL;
 
@@ -101,7 +101,7 @@ const GLubyte* ITextureLoader::pixels(unsigned int mipMapLevel) const
 	return pixels;
 }
 
-ITextureLoader* ITextureLoader::createFromFile(const char *filename)
+ITextureLoader *ITextureLoader::createFromFile(const char *filename)
 {
 	// Creating a handle from IFile static method to detect assets file
 	IFile *fileHandle = IFile::createFileHandle(filename);

@@ -43,9 +43,9 @@ class ThreadPool : public IThreadPool
 	static void workerFunction(void *arg);
 
 	/// Private copy constructor
-	ThreadPool(const ThreadPool&);
+	ThreadPool(const ThreadPool &);
 	/// Private assignment operator
-	ThreadPool& operator=(const ThreadPool&);
+	ThreadPool &operator=(const ThreadPool &);
 
 	void init();
 };

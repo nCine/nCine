@@ -38,15 +38,16 @@ For additional information: https://ncine.github.io/
 `cppcheck --quiet --enable=all --inconclusive --std=c++03 -I include -I src/include src 2> cppcheck.log`
 
 #### Artistic Style
-`astyle --style=allman --indent=force-tab --attach-namespaces --indent-modifiers --indent-switches --indent-preproc-block --indent-preproc-cond --pad-oper --pad-header --add-brackets --keep-one-line-blocks --keep-one-line-statements --suffix=none --recursive "src/*" "include/*" "tests/*"`
+`astyle --style=allman --indent=tab --attach-namespaces --indent-modifiers --indent-switches --indent-preproc-block --min-conditional-indent=0 --pad-oper --pad-header --add-brackets --align-pointer=name --align-reference=name --keep-one-line-blocks --keep-one-line-statements --suffix=none --recursive "src/*.h" "src/*.cpp" "include/*.h" "tests/*.h" "tests/*.cpp"`
 
 ### Conventions
 
 #### Coding Conventions
-- Indent with tabs (4 spaces wide)
+- Indent with tabs but use spaces for continuation line alignment
 - Allman brackets
   - Brackets around one line conditional statements
 - Padding space after parenthesis headers (`if`, `do`, `while`, `for`, `switch`)
+- Align pointer and reference operator to the variable or function name
 - `inline` keyword always before `virtual` and `static`
 - Access specifiers order: `public`, `protected`, `private`
   - One half indent for access specifiers (2 spaces)

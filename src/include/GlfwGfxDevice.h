@@ -40,9 +40,9 @@ class GlfwGfxDevice : public IGfxDevice
 	static GLFWwindow *windowHandle_;
 
 	/// Private copy constructor
-	GlfwGfxDevice(const GlfwGfxDevice&);
+	GlfwGfxDevice(const GlfwGfxDevice &);
 	/// Private assignment operator
-	GlfwGfxDevice& operator=(const GlfwGfxDevice&);
+	GlfwGfxDevice &operator=(const GlfwGfxDevice &);
 
 	/// Initilizes the object
 	void init(int width, int height, DisplayMode mode, bool isFullScreen_);
@@ -52,10 +52,10 @@ class GlfwGfxDevice : public IGfxDevice
 	void initDevice();
 
 	/// Returns the window handle used by GLFW3
-	static GLFWwindow* windowHandle() { return windowHandle_; }
+	static GLFWwindow *windowHandle() { return windowHandle_; }
 
 	/// Callback for glfwSetErrorCallback()
-	static void errorCallback(int error, const char* description);
+	static void errorCallback(int error, const char *description);
 
 	friend class GlfwInputManager;
 	friend class GlfwMouseState;

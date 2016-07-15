@@ -43,7 +43,7 @@ class MyEventHandler
 	float angle_;
 	nc::SceneNode *dummy_;
 	nc::Texture *megaTexture_;
-	nc::StaticArray<nc::Sprite*, NumColSprites * NumRowSprites> sprites_;
+	nc::StaticArray<nc::Sprite *, NumColSprites * NumRowSprites> sprites_;
 };
 
 #endif

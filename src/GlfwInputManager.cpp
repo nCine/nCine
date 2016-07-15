@@ -10,7 +10,7 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-IInputEventHandler* IInputManager::inputEventHandler_ = NULL;
+IInputEventHandler *IInputManager::inputEventHandler_ = NULL;
 bool GlfwInputManager::windowHasFocus_ = true;
 GlfwMouseState GlfwInputManager::mouseState_;
 GlfwMouseEvent GlfwInputManager::mouseEvent_;
@@ -233,7 +233,7 @@ void GlfwInputManager::joystickCallback(int joy, int event)
 
 
 		LOGI_X("Joystick %d \"%s\" has been connected - %d axes, %d buttons",
-			joyId, glfwGetJoystickName(joy), numAxes, numButtons);
+		       joyId, glfwGetJoystickName(joy), numAxes, numButtons);
 		if (inputEventHandler_ != NULL)
 		{
 			inputEventHandler_->onJoyConnected(joyConnectionEvent_);

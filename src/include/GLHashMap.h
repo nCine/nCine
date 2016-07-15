@@ -16,7 +16,7 @@ class GLHashMap
   public:
 	GLHashMap();
 	/// Returns the bucket index using the mapping function on the key
-	value_t& operator[](key_t key);
+	value_t &operator[](key_t key);
 
   private:
 	value_t buckets_[S];
@@ -34,7 +34,7 @@ GLHashMap<S, MappingFunc>::GLHashMap()
 }
 
 template<unsigned int S, class MappingFunc>
-inline value_t& GLHashMap<S, MappingFunc>::operator[](key_t key)
+inline value_t &GLHashMap<S, MappingFunc>::operator[](key_t key)
 {
 	return buckets_[mappingFunc(key)];
 }

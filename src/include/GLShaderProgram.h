@@ -48,9 +48,9 @@ class GLShaderProgram
 	void discoverAttributes();
 
 	/// Private copy constructor
-	GLShaderProgram(const GLShaderProgram&);
+	GLShaderProgram(const GLShaderProgram &);
 	/// Private assignment operator
-	GLShaderProgram& operator=(const GLShaderProgram&);
+	GLShaderProgram &operator=(const GLShaderProgram &);
 
 	friend class GLShaderUniforms;
 	friend class GLShaderAttributes;

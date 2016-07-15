@@ -15,9 +15,9 @@ class GLVertexAttribute
 	GLVertexAttribute();
 	explicit GLVertexAttribute(const GLAttribute *shaderAttribute);
 
-	inline const GLAttribute* shaderAttribute() const { return attribute_; }
+	inline const GLAttribute *shaderAttribute() const { return attribute_; }
 	inline GLsizei vboStride() const { return vboStride_; }
-	inline const GLvoid* vboPointer() const { return vboPointer_; }
+	inline const GLvoid *vboPointer() const { return vboPointer_; }
 	void setVboParameters(GLsizei vboStride, const GLvoid *vboPointer);
 
   private:

@@ -22,9 +22,9 @@ class FileLogger : public ILogger
 	LogLevel fileLevel_;
 
 	/// Private copy constructor
-	FileLogger(const FileLogger&);
+	FileLogger(const FileLogger &);
 	/// Private assignment operator
-	FileLogger& operator=(const FileLogger&);
+	FileLogger &operator=(const FileLogger &);
 };
 
 }

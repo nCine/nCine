@@ -10,7 +10,7 @@ template <class K>
 class FixedHashFunc
 {
   public:
-	hash_t operator()(const K& key) const { return static_cast<hash_t>(0); }
+	hash_t operator()(const K &key) const { return static_cast<hash_t>(0); }
 };
 
 /// Hash function returning the key unchanged
@@ -19,7 +19,7 @@ template <class K>
 class IdentityHashFunc
 {
   public:
-	hash_t operator()(const K& key) const { return static_cast<hash_t>(key); }
+	hash_t operator()(const K &key) const { return static_cast<hash_t>(key); }
 };
 
 /// Shift-Add-XOR hash function
@@ -29,7 +29,7 @@ template <class K>
 class SaxHashFunc
 {
   public:
-	hash_t operator()(const K& key) const
+	hash_t operator()(const K &key) const
 	{
 		hash_t hash = static_cast<hash_t>(0);
 		for (unsigned int i = 0; i < key.length(); i++)
@@ -48,7 +48,7 @@ template <class K>
 class JenkinsHashFunc
 {
   public:
-	hash_t operator()(const K& key) const
+	hash_t operator()(const K &key) const
 	{
 		hash_t hash = static_cast<hash_t>(0);
 		for (unsigned int i = 0; i < key.length(); i++)

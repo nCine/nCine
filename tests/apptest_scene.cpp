@@ -9,20 +9,20 @@
 namespace {
 
 #ifdef __ANDROID__
-const char* Texture1File = "texture1.webp";
-const char* Texture2File = "texture2.webp";
-const char* Texture3File = "texture3.webp";
-const char* Texture4File = "texture4.webp";
+	const char *Texture1File = "texture1.webp";
+	const char *Texture2File = "texture2.webp";
+	const char *Texture3File = "texture3.webp";
+	const char *Texture4File = "texture4.webp";
 #else
-const char* Texture1File = "texture1.png";
-const char* Texture2File = "texture2.png";
-const char* Texture3File = "texture3.png";
-const char* Texture4File = "texture4.png";
+	const char *Texture1File = "texture1.png";
+	const char *Texture2File = "texture2.png";
+	const char *Texture3File = "texture3.png";
+	const char *Texture4File = "texture4.png";
 #endif
 
 }
 
-nc::IAppEventHandler* createApphandler()
+nc::IAppEventHandler *createApphandler()
 {
 	return new MyEventHandler;
 }
@@ -95,7 +95,7 @@ void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 	}
 }
 
-void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent& event)
+void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
 	{

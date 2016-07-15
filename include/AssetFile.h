@@ -29,10 +29,10 @@ class AssetFile: public IFile
 	bool isOpened() const;
 
 	/// Sets the global pointer to the AAssetManager
-	static void initAssetManager(struct android_app* state) { assetManager_ = state->activity->assetManager; }
+	static void initAssetManager(struct android_app *state) { assetManager_ = state->activity->assetManager; }
 
   private:
-	static AAssetManager* assetManager_;
+	static AAssetManager *assetManager_;
 	AAsset *asset_;
 	long int startOffset_;
 

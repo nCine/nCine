@@ -13,7 +13,7 @@
 
 namespace ncine {
 
-Application& theApplication()
+Application &theApplication()
 {
 	static PCApplication instance;
 	return instance;
@@ -23,7 +23,7 @@ Application& theApplication()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void PCApplication::start(IAppEventHandler* (*createAppEventHandler)())
+void PCApplication::start(IAppEventHandler * (*createAppEventHandler)())
 {
 	PCApplication &app = static_cast<PCApplication &>(theApplication());
 
@@ -36,7 +36,7 @@ void PCApplication::start(IAppEventHandler* (*createAppEventHandler)())
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void PCApplication::init(IAppEventHandler* (*createAppEventHandler)())
+void PCApplication::init(IAppEventHandler * (*createAppEventHandler)())
 {
 	appEventHandler_ = createAppEventHandler();
 	appEventHandler_->onPreInit(appCfg_);

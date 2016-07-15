@@ -34,7 +34,7 @@ class DLL_PUBLIC IGfxDevice
 	/// Returns true if the device renders in full screen
 	inline bool isFullScreen() const { return isFullScreen_; }
 	/// Returns display mode
-	inline const DisplayMode& mode() const { return mode_; }
+	inline const DisplayMode &mode() const { return mode_; }
 
   protected:
 	/// Device width

@@ -37,9 +37,9 @@ void GLShaderUniforms::setProgram(GLShaderProgram *shaderProgram)
 	importUniforms();
 }
 
-GLUniformCache* GLShaderUniforms::uniform(const char *name)
+GLUniformCache *GLShaderUniforms::uniform(const char *name)
 {
-	GLUniformCache* uniformCache = NULL;
+	GLUniformCache *uniformCache = NULL;
 
 	if (shaderProgram_)
 	{
@@ -87,7 +87,7 @@ void GLShaderUniforms::importUniforms()
 	unsigned int nextFreeInt = 0;
 	for (unsigned int i = 0; i < count; i++)
 	{
-		const GLUniform& uniform = shaderProgram_->uniforms_[i];
+		const GLUniform &uniform = shaderProgram_->uniforms_[i];
 		GLUniformCache uniformCache(&uniform);
 
 		switch (uniform.basicType())

@@ -70,9 +70,9 @@ class TextureLoaderPvr : public ITextureLoader
 	void init();
 
 	/// Reads the PVR3 header and fills the corresponding structure
-	void readHeader(Pvr3Header& header);
+	void readHeader(Pvr3Header &header);
 	/// Parses the PVR3 header to determine its format
-	void parseFormat(const Pvr3Header& header);
+	void parseFormat(const Pvr3Header &header);
 };
 
 }

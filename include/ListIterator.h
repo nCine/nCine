@@ -20,26 +20,26 @@ class ListIterator
 		: node_(node) { }
 
 	/// Copy constructor to implicitly convert a non constant iterator to a constant one
-	ListIterator(const ListIterator<T, false>& it)
+	ListIterator(const ListIterator<T, false> &it)
 		: node_(it.node_) { }
 
 	/// Deferencing operator
 	Reference operator*() const;
 
 	/// Iterates to the next element (prefix)
-	ListIterator& operator++();
+	ListIterator &operator++();
 	/// Iterates to the next element (postfix)
 	ListIterator operator++(int);
 
 	/// Iterates to the previous element (prefix)
-	ListIterator& operator--();
+	ListIterator &operator--();
 	/// Iterates to the previous element (postfix)
 	ListIterator operator--(int);
 
 	/// Equality operator
-	friend inline bool operator==(const ListIterator& lhs, const ListIterator& rhs) { return lhs.node_ == rhs.node_; }
+	friend inline bool operator==(const ListIterator &lhs, const ListIterator &rhs) { return lhs.node_ == rhs.node_; }
 	/// Inequality operator
-	friend inline bool operator!=(const ListIterator& lhs, const ListIterator& rhs) { return lhs.node_ != rhs.node_; }
+	friend inline bool operator!=(const ListIterator &lhs, const ListIterator &rhs) { return lhs.node_ != rhs.node_; }
 
   private:
 	ListNode<T> *node_;
@@ -57,9 +57,9 @@ struct IteratorTraits<ListIterator<T, false> >
 	/// Type of the values deferenced by the iterator
 	typedef T ValueType;
 	/// Pointer to the type of the values deferenced by the iterator
-	typedef T* Pointer;
+	typedef T *Pointer;
 	/// Reference to the type of the values deferenced by the iterator
-	typedef T& Reference;
+	typedef T &Reference;
 	/// Type trait for iterator category
 	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
 };
@@ -71,9 +71,9 @@ struct IteratorTraits<ListIterator<T, true> >
 	/// Type of the values deferenced by the iterator (never const)
 	typedef T ValueType;
 	/// Pointer to the type of the values deferenced by the iterator
-	typedef const T* Pointer;
+	typedef const T *Pointer;
 	/// Reference to the type of the values deferenced by the iterator
-	typedef const T& Reference;
+	typedef const T &Reference;
 	/// Type trait for iterator category
 	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
 };
@@ -87,7 +87,7 @@ inline typename ListIterator<T, IsConst>::Reference ListIterator<T, IsConst>::op
 }
 
 template <class T, bool IsConst>
-ListIterator<T, IsConst>& ListIterator<T, IsConst>::operator++()
+ListIterator<T, IsConst> &ListIterator<T, IsConst>::operator++()
 {
 	if (node_)
 	{
@@ -112,7 +112,7 @@ ListIterator<T, IsConst> ListIterator<T, IsConst>::operator++(int)
 }
 
 template <class T, bool IsConst>
-ListIterator<T, IsConst>& ListIterator<T, IsConst>::operator--()
+ListIterator<T, IsConst> &ListIterator<T, IsConst>::operator--()
 {
 	if (node_)
 	{

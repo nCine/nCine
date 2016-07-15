@@ -41,7 +41,7 @@ class MyEventHandler
 	nc::String *joyString_;
 
 	nc::Texture *texture_;
-	nc::StaticArray<nc::Sprite*, 2> sprites_;
+	nc::StaticArray<nc::Sprite *, 2> sprites_;
 	nc::Font *font_;
 	nc::TextNode *textNode_;
 };

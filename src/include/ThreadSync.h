@@ -29,9 +29,9 @@ class Mutex
 #endif
 
 	/// Private copy constructor
-	Mutex(const Mutex&);
+	Mutex(const Mutex &);
 	/// Private assignment operator
-	Mutex& operator=(const Mutex&);
+	Mutex &operator=(const Mutex &);
 
 	friend class CondVariable;
 };
@@ -61,9 +61,9 @@ class CondVariable
 #endif
 
 	/// Private copy constructor
-	CondVariable(const CondVariable&);
+	CondVariable(const CondVariable &);
 	/// Private assignment operator
-	CondVariable& operator=(const CondVariable&);
+	CondVariable &operator=(const CondVariable &);
 };
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(__WINDOWS__)
@@ -85,9 +85,9 @@ class RWLock
 	pthread_rwlock_t rwlock_;
 
 	/// Private copy constructor
-	RWLock(const RWLock&);
+	RWLock(const RWLock &);
 	/// Private assignment operator
-	RWLock& operator=(const RWLock&);
+	RWLock &operator=(const RWLock &);
 };
 
 #if !defined (__ANDROID__) && !defined(__APPLE__)
@@ -107,9 +107,9 @@ class Barrier
 	pthread_barrier_t barrier_;
 
 	/// Private copy constructor
-	Barrier(const Barrier&);
+	Barrier(const Barrier &);
 	/// Private assignment operator
-	Barrier& operator=(const Barrier&);
+	Barrier &operator=(const Barrier &);
 };
 
 #endif

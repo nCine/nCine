@@ -31,7 +31,7 @@ ArrayIndexer::~ArrayIndexer()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-unsigned int ArrayIndexer::addObject(Object* object)
+unsigned int ArrayIndexer::addObject(Object *object)
 {
 	if (object == NULL)
 	{

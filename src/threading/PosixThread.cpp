@@ -112,9 +112,9 @@ void Thread::run(ThreadFunctionPtr startFunction, void *arg)
 	}
 }
 
-void* Thread::join()
+void *Thread::join()
 {
-	void* pRetVal = NULL;
+	void *pRetVal = NULL;
 	pthread_join(tid_, &pRetVal);
 	return pRetVal;
 }
@@ -194,7 +194,7 @@ void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
 
 void *Thread::wrapperFunction(void *arg)
 {
-	ThreadInfo* pThreadInfo = static_cast<ThreadInfo*>(arg);
+	ThreadInfo *pThreadInfo = static_cast<ThreadInfo *>(arg);
 	pThreadInfo->startFunction(pThreadInfo->threadArg);
 
 	return NULL;

@@ -58,7 +58,7 @@ void TextureLoaderPvr::readHeader(Pvr3Header &header)
 	}
 }
 
-void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
+void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 {
 	GLenum internalFormat = GL_RGB; // to suppress uninitialized variable warning
 
@@ -103,7 +103,7 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
 				LOGF("No support for PVRTC-II compression");
 				exit(EXIT_FAILURE);
 				break;
-			#if __ANDROID_API__ >= 21
+#if __ANDROID_API__ >= 21
 			case FMT_ASTC_4x4:
 				internalFormat = GL_COMPRESSED_RGBA_ASTC_4x4_KHR;
 				break;
@@ -146,7 +146,7 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
 			case FMT_ASTC_12x12:
 				internalFormat = GL_COMPRESSED_RGBA_ASTC_12x12_KHR;
 				break;
-			#endif
+#endif
 #endif
 			default:
 				LOGF_X("Unsupported PVR3 compressed format: 0x%llx", pixelFormat);
@@ -162,10 +162,10 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header& header)
 		GLenum type = GL_UNSIGNED_BYTE;
 
 		LOGI_X("Uncompressed format: %c%c%c%c (%u, %u, %u, %u)",
-			reinterpret_cast<char*>(&pixelFormat)[0], reinterpret_cast<char*>(&pixelFormat)[1],
-			reinterpret_cast<char*>(&pixelFormat)[2], reinterpret_cast<char*>(&pixelFormat)[3],
-			reinterpret_cast<unsigned char*>(&pixelFormat)[4], reinterpret_cast<unsigned char*>(&pixelFormat)[5],
-			reinterpret_cast<unsigned char*>(&pixelFormat)[6], reinterpret_cast<unsigned char*>(&pixelFormat)[7]);
+		       reinterpret_cast<char *>(&pixelFormat)[0], reinterpret_cast<char *>(&pixelFormat)[1],
+		       reinterpret_cast<char *>(&pixelFormat)[2], reinterpret_cast<char *>(&pixelFormat)[3],
+		       reinterpret_cast<unsigned char *>(&pixelFormat)[4], reinterpret_cast<unsigned char *>(&pixelFormat)[5],
+		       reinterpret_cast<unsigned char *>(&pixelFormat)[6], reinterpret_cast<unsigned char *>(&pixelFormat)[7]);
 
 		switch (pixelFormat)
 		{

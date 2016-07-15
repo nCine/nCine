@@ -11,7 +11,7 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-AAssetManager* AssetFile::assetManager_ = NULL;
+AAssetManager *AssetFile::assetManager_ = NULL;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR

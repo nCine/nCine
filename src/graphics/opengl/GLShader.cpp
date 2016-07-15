@@ -32,7 +32,7 @@ GLShader::~GLShader()
 
 void GLShader::loadFromString(const char *string)
 {
-	const GLchar* source_lines[1] = { string };
+	const GLchar *source_lines[1] = { string };
 	glShaderSource(glHandle_, 1, source_lines, NULL);
 }
 
@@ -46,7 +46,7 @@ void GLShader::loadFromFile(const char *filename)
 		GLint length = static_cast<int>(fileHandle->size());
 		String source(length);
 		fileHandle->read(source.data(), length);
-		const GLchar* source_lines[1] = { source.data() };
+		const GLchar *source_lines[1] = { source.data() };
 		glShaderSource(glHandle_, 1, source_lines, &length);
 	}
 }

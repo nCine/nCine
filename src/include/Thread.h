@@ -55,15 +55,15 @@ class Thread
 	/// A default constructor for an object without the associated function
 	Thread();
 	/// Creates a thread around a function and runs it
-	Thread(ThreadFunctionPtr startFunction, void* arg);
+	Thread(ThreadFunctionPtr startFunction, void *arg);
 
 	/// Returns the number of processors in the machine
 	static unsigned int numProcessors();
 
 	/// Spawns a new thread if the object hasn't one already associated
-	void run(ThreadFunctionPtr startFunction, void* arg);
+	void run(ThreadFunctionPtr startFunction, void *arg);
 	/// Joins the thread
-	void* join();
+	void *join();
 
 	/// Returns the calling thread id
 	static long int self();
@@ -100,13 +100,13 @@ class Thread
 	ThreadInfo threadInfo_;
 	/// The wrapper start function for thread creation
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
-	#ifdef __GNUC__ // MinGW
-		static unsigned int (__attribute__((__stdcall__)) wrapperFunction)(void* arg);
-	#else // MSVC
-		static unsigned int __stdcall wrapperFunction(void* arg);
-	#endif
+#ifdef __GNUC__ // MinGW
+	static unsigned int (__attribute__((__stdcall__)) wrapperFunction)(void *arg);
+#else // MSVC
+	static unsigned int __stdcall wrapperFunction(void *arg);
+#endif
 #else
-	static void *wrapperFunction(void* arg);
+	static void *wrapperFunction(void *arg);
 #endif
 };
 

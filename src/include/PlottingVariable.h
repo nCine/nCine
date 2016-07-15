@@ -13,7 +13,7 @@ namespace ncine {
 class PlottingVariable
 {
   public:
-	PlottingVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f& worldMatrix);
+	PlottingVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f &worldMatrix);
 	virtual ~PlottingVariable();
 
 	/// Returns the number of value for the variable
@@ -21,15 +21,15 @@ class PlottingVariable
 	/// Returns the normalized mathematic mean of the variable
 	inline float normMean() const { return variable_.normMean(); }
 	/// Returns the graph color
-	inline const Color& graphColor() const { return graphColor_; }
+	inline const Color &graphColor() const { return graphColor_; }
 	/// Returns the mean line color
-	inline const Color& meanColor() const { return meanColor_; }
+	inline const Color &meanColor() const { return meanColor_; }
 	/// Returns a constant pointer to the vertices buffer
-	inline const float* vertices() const { return vertices_; }
+	inline const float *vertices() const { return vertices_; }
 	/// Returns the pointer to the vertices buffer
-	inline float* vertices() { return vertices_; }
+	inline float *vertices() { return vertices_; }
 	/// Returns the pointer to the variable
-	inline const ProfileVariable* variable() const { return &variable_; }
+	inline const ProfileVariable *variable() const { return &variable_; }
 	/// Returns the state of the mean drawing flag
 	inline bool shouldPlotMean() const { return shouldPlotMean_; }
 
@@ -42,12 +42,12 @@ class PlottingVariable
 	/// Sets the mean drawing flag state
 	inline void setPlotMean(bool enabled) { shouldPlotMean_ = enabled; }
 
-	inline virtual void draw(RenderQueue& renderQueue)
+	inline virtual void draw(RenderQueue &renderQueue)
 	{
 		updateRenderCommand();
 		renderQueue.addCommand(&valuesCmd_);
 	}
-	inline virtual void drawMean(RenderQueue& renderQueue)
+	inline virtual void drawMean(RenderQueue &renderQueue)
 	{
 		updateMeanRenderCommand();
 		renderQueue.addCommand(&meanCmd_);
@@ -65,7 +65,7 @@ class PlottingVariable
 	/// The vertices buffer
 	float *vertices_;
 	/// A reference to the world matrix of the profile plotter
-	const Matrix4x4f& worldMatrix_;
+	const Matrix4x4f &worldMatrix_;
 
 	/// The command used to render variable values
 	RenderCommand valuesCmd_;
@@ -79,9 +79,9 @@ class PlottingVariable
 
   private:
 	/// Private copy constructor
-	PlottingVariable(const PlottingVariable&);
+	PlottingVariable(const PlottingVariable &);
 	/// Private assignment operator
-	PlottingVariable& operator=(const PlottingVariable&);
+	PlottingVariable &operator=(const PlottingVariable &);
 };
 
 }

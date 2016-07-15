@@ -14,18 +14,18 @@ namespace ncine {
 class ProfilePlotter : public DrawableNode
 {
   public:
-	ProfilePlotter(SceneNode* parent, Rectf rect);
+	ProfilePlotter(SceneNode *parent, Rectf rect);
 	virtual ~ProfilePlotter();
 
 	/// Adds a value to the specified variable
 	bool addValue(unsigned int varIndex, float value);
 	/// Returns the variable with the specified index
-	PlottingVariable& variable(unsigned int index);
+	PlottingVariable &variable(unsigned int index);
 	/// Sets the backgound color for the graphs
 	void setBackgroundColor(Color backgroundColor) { backgroundColor_ = backgroundColor; }
 
 	/// Returns the reference value line color
-	inline const Color& refValueColor() const { return refValueColor_; }
+	inline const Color &refValueColor() const { return refValueColor_; }
 	/// Returns the state of the reference value drawing flag
 	inline bool shouldPlotRefValue() const { return shouldPlotRefValue_; }
 	/// Returns the reference value
@@ -40,7 +40,7 @@ class ProfilePlotter : public DrawableNode
 	/// Returns the reference value normalized and clamped between `min` and `max`
 	float normBetweenRefValue(float min, float max) const;
 
-	inline virtual void drawRefValue(RenderQueue& renderQueue)
+	inline virtual void drawRefValue(RenderQueue &renderQueue)
 	{
 		UpdateRefValueRenderCommand();
 		renderQueue.addCommand(&refValueCmd_);
@@ -81,9 +81,9 @@ class ProfilePlotter : public DrawableNode
 
   private:
 	/// Private copy constructor
-	ProfilePlotter(const ProfilePlotter&);
+	ProfilePlotter(const ProfilePlotter &);
 	/// Private assignment operator
-	ProfilePlotter& operator=(const ProfilePlotter&);
+	ProfilePlotter &operator=(const ProfilePlotter &);
 };
 
 }

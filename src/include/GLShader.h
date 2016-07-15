@@ -24,9 +24,9 @@ class GLShader
 	~GLShader();
 
 	/// Private copy constructor
-	GLShader(const GLShader&);
+	GLShader(const GLShader &);
 	/// Private assignment operator
-	GLShader& operator=(const GLShader&);
+	GLShader &operator=(const GLShader &);
 
 	friend class GLShaderProgram;
 };

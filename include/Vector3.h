@@ -19,29 +19,29 @@ class Vector3
 
 	void set(T xx, T yy, T zz);
 
-	T* data();
-	const T* data() const;
+	T *data();
+	const T *data() const;
 
-	T& operator[](unsigned int index);
-	const T& operator[](unsigned int index) const;
+	T &operator[](unsigned int index);
+	const T &operator[](unsigned int index) const;
 
-	bool operator==(const Vector3& v) const;
+	bool operator==(const Vector3 &v) const;
 	Vector3 operator-() const;
 
-	Vector3& operator+=(const Vector3& v);
-	Vector3& operator-=(const Vector3& v);
-	Vector3& operator*=(const Vector3& v);
-	Vector3& operator/=(const Vector3& v);
+	Vector3 &operator+=(const Vector3 &v);
+	Vector3 &operator-=(const Vector3 &v);
+	Vector3 &operator*=(const Vector3 &v);
+	Vector3 &operator/=(const Vector3 &v);
 
-	Vector3& operator+=(T s);
-	Vector3& operator-=(T s);
-	Vector3& operator*=(T s);
-	Vector3& operator/=(T s);
+	Vector3 &operator+=(T s);
+	Vector3 &operator-=(T s);
+	Vector3 &operator*=(T s);
+	Vector3 &operator/=(T s);
 
-	Vector3 operator+(const Vector3& v) const;
-	Vector3 operator-(const Vector3& v) const;
-	Vector3 operator*(const Vector3& v) const;
-	Vector3 operator/(const Vector3& v) const;
+	Vector3 operator+(const Vector3 &v) const;
+	Vector3 operator-(const Vector3 &v) const;
+	Vector3 operator*(const Vector3 &v) const;
+	Vector3 operator/(const Vector3 &v) const;
 
 	Vector3 operator+(T s) const;
 	Vector3 operator-(T s) const;
@@ -51,10 +51,10 @@ class Vector3
 	T length() const;
 	T sqrLength() const;
 	Vector3 normalized() const;
-	Vector3& normalize();
+	Vector3 &normalize();
 
-	template <class S> friend S dot(const Vector3<S>& v1, const Vector3<S>& v2);
-	template <class S> friend Vector3<S> cross(const Vector3<S>& v1, const Vector3<S>& v2);
+	template <class S> friend S dot(const Vector3<S> &v1, const Vector3<S> &v2);
+	template <class S> friend Vector3<S> cross(const Vector3<S> &v1, const Vector3<S> &v2);
 
 	/// A vector with all zero elements
 	static const Vector3 Zero;
@@ -78,31 +78,31 @@ inline void Vector3<T>::set(T xx, T yy, T zz)
 }
 
 template <class T>
-T* Vector3<T>::data()
+T *Vector3<T>::data()
 {
 	return &x;
 }
 
 template <class T>
-const T* Vector3<T>::data() const
+const T *Vector3<T>::data() const
 {
 	return &x;
 }
 
 template <class T>
-inline T& Vector3<T>::operator[](unsigned int index)
+inline T &Vector3<T>::operator[](unsigned int index)
 {
 	return (&x)[index];
 }
 
 template <class T>
-inline const T& Vector3<T>::operator[](unsigned int index) const
+inline const T &Vector3<T>::operator[](unsigned int index) const
 {
 	return (&x)[index];
 }
 
 template <class T>
-inline bool Vector3<T>::operator==(const Vector3& v) const
+inline bool Vector3<T>::operator==(const Vector3 &v) const
 {
 	return (x == v.x && y == v.y && z == v.z);
 }
@@ -114,7 +114,7 @@ inline Vector3<T> Vector3<T>::operator-() const
 }
 
 template <class T>
-inline Vector3<T>& Vector3<T>::operator+=(const Vector3& v)
+inline Vector3<T> &Vector3<T>::operator+=(const Vector3 &v)
 {
 	x += v.x;
 	y += v.y;
@@ -124,7 +124,7 @@ inline Vector3<T>& Vector3<T>::operator+=(const Vector3& v)
 }
 
 template <class T>
-inline Vector3<T>& Vector3<T>::operator-=(const Vector3& v)
+inline Vector3<T> &Vector3<T>::operator-=(const Vector3 &v)
 {
 	x -= v.x;
 	y -= v.y;
@@ -134,7 +134,7 @@ inline Vector3<T>& Vector3<T>::operator-=(const Vector3& v)
 }
 
 template <class T>
-inline Vector3<T>& Vector3<T>::operator*=(const Vector3& v)
+inline Vector3<T> &Vector3<T>::operator*=(const Vector3 &v)
 {
 	x *= v.x;
 	y *= v.y;
@@ -144,7 +144,7 @@ inline Vector3<T>& Vector3<T>::operator*=(const Vector3& v)
 }
 
 template <class T>
-inline Vector3<T>& Vector3<T>::operator/=(const Vector3& v)
+inline Vector3<T> &Vector3<T>::operator/=(const Vector3 &v)
 {
 	x /= v.x;
 	y /= v.y;
@@ -154,7 +154,7 @@ inline Vector3<T>& Vector3<T>::operator/=(const Vector3& v)
 }
 
 template <class T>
-inline Vector3<T>& Vector3<T>::operator+=(T s)
+inline Vector3<T> &Vector3<T>::operator+=(T s)
 {
 	x += s;
 	y += s;
@@ -164,7 +164,7 @@ inline Vector3<T>& Vector3<T>::operator+=(T s)
 }
 
 template <class T>
-inline Vector3<T>& Vector3<T>::operator-=(T s)
+inline Vector3<T> &Vector3<T>::operator-=(T s)
 {
 	x -= s;
 	y -= s;
@@ -174,7 +174,7 @@ inline Vector3<T>& Vector3<T>::operator-=(T s)
 }
 
 template <class T>
-inline Vector3<T>& Vector3<T>::operator*=(T s)
+inline Vector3<T> &Vector3<T>::operator*=(T s)
 {
 	x *= s;
 	y *= s;
@@ -184,7 +184,7 @@ inline Vector3<T>& Vector3<T>::operator*=(T s)
 }
 
 template <class T>
-inline Vector3<T>& Vector3<T>::operator/=(T s)
+inline Vector3<T> &Vector3<T>::operator/=(T s)
 {
 	x /= s;
 	y /= s;
@@ -194,90 +194,90 @@ inline Vector3<T>& Vector3<T>::operator/=(T s)
 }
 
 template <class T>
-inline Vector3<T> Vector3<T>::operator+(const Vector3& v) const
+inline Vector3<T> Vector3<T>::operator+(const Vector3 &v) const
 {
 	return Vector3(x + v.x,
-				   y + v.y,
-				   z + v.z);
+	               y + v.y,
+	               z + v.z);
 }
 
 template <class T>
-inline Vector3<T> Vector3<T>::operator-(const Vector3& v) const
+inline Vector3<T> Vector3<T>::operator-(const Vector3 &v) const
 {
 	return Vector3(x - v.x,
-				   y - v.y,
-				   z - v.z);
+	               y - v.y,
+	               z - v.z);
 }
 
 template <class T>
-inline Vector3<T> Vector3<T>::operator*(const Vector3& v) const
+inline Vector3<T> Vector3<T>::operator*(const Vector3 &v) const
 {
 	return Vector3(x * v.x,
-				   y * v.y,
-				   z * v.z);
+	               y * v.y,
+	               z * v.z);
 }
 
 template <class T>
-inline Vector3<T> Vector3<T>::operator/(const Vector3& v) const
+inline Vector3<T> Vector3<T>::operator/(const Vector3 &v) const
 {
 	return Vector3(x / v.x,
-				   y / v.y,
-				   z / v.z);
+	               y / v.y,
+	               z / v.z);
 }
 
 template <class T>
 inline Vector3<T> Vector3<T>::operator+(T s) const
 {
 	return Vector3(x + s,
-				   y + s,
-				   z + s);
+	               y + s,
+	               z + s);
 }
 
 template <class T>
 inline Vector3<T> Vector3<T>::operator-(T s) const
 {
 	return Vector3(x - s,
-				   y - s,
-				   z - s);
+	               y - s,
+	               z - s);
 }
 
 template <class T>
 inline Vector3<T> Vector3<T>::operator*(T s) const
 {
 	return Vector3(x * s,
-				   y * s,
-				   z * s);
+	               y * s,
+	               z * s);
 }
 
 template <class T>
 inline Vector3<T> Vector3<T>::operator/(T s) const
 {
 	return Vector3(x / s,
-				   y / s,
-				   z / s);
+	               y / s,
+	               z / s);
 }
 
 template <class T>
 inline T Vector3<T>::length() const
 {
-	return sqrt(x*x + y*y + z*z);
+	return sqrt(x * x + y * y + z * z);
 }
 
 template <class T>
 inline T Vector3<T>::sqrLength() const
 {
-	return x*x + y*y + z*z;
+	return x * x + y * y + z * z;
 }
 
 template <class T>
 inline Vector3<T> Vector3<T>::normalized() const
 {
 	T len = length();
-	return Vector3(x / len, y / len , z / len);
+	return Vector3(x / len, y / len, z / len);
 }
 
 template <class T>
-inline Vector3<T>& Vector3<T>::normalize()
+inline Vector3<T> &Vector3<T>::normalize()
 {
 	T len = length();
 
@@ -289,19 +289,19 @@ inline Vector3<T>& Vector3<T>::normalize()
 }
 
 template <class S>
-inline S dot(const Vector3<S>& v1, const Vector3<S>& v2)
+inline S dot(const Vector3<S> &v1, const Vector3<S> &v2)
 {
 	return S(v1.x * v2.x +
-			 v1.y * v2.y +
-			 v1.z * v2.z);
+	         v1.y * v2.y +
+	         v1.z * v2.z);
 }
 
 template <class S>
-inline Vector3<S> cross(const Vector3<S>& v1, const Vector3<S>& v2)
+inline Vector3<S> cross(const Vector3<S> &v1, const Vector3<S> &v2)
 {
 	return Vector3<S>(v1.y * v2.z - v1.z * v2.y,
-					  v1.z * v2.x - v1.x * v2.z,
-					  v1.x * v2.y - v1.y * v2.x);
+	                  v1.z * v2.x - v1.x * v2.z,
+	                  v1.x * v2.y - v1.y * v2.x);
 }
 
 template <class T> const Vector3<T> Vector3<T>::Zero(0, 0, 0);

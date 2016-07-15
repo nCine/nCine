@@ -19,7 +19,7 @@ class GLShaderAttributes
 	explicit GLShaderAttributes(GLShaderProgram *shaderProgram);
 	void setProgram(GLShaderProgram *shaderProgram);
 
-	GLVertexAttribute* attribute(const char *name);
+	GLVertexAttribute *attribute(const char *name);
 	void defineVertexPointers(GLuint boundVboHandle);
 
   private:
@@ -40,16 +40,16 @@ class GLShaderAttributes
 		inline void setEnabled(bool enabled) { enabled_ = enabled; }
 		inline GLuint boundVbo() const { return boundVboHandle_; }
 		inline void setBoundVbo(GLuint boundVboHandle) { boundVboHandle_ = boundVboHandle; }
-		bool operator==(const GLVertexAttribute& attribute) const;
-		bool operator!=(const GLVertexAttribute& attribute) const;
-		GLVertexAttribPointerState& operator=(const GLVertexAttribute& attribute);
+		bool operator==(const GLVertexAttribute &attribute) const;
+		bool operator!=(const GLVertexAttribute &attribute) const;
+		GLVertexAttribPointerState &operator=(const GLVertexAttribute &attribute);
 	};
 
 	static const unsigned int MaxDefinedVertexAttribPointers = 16;
 	/// An array to cache the state of `glVertexAttribPointer()` calls
 	static StaticArray<GLVertexAttribPointerState, MaxDefinedVertexAttribPointers> definedPointers_;
 
-	GLShaderProgram* shaderProgram_;
+	GLShaderProgram *shaderProgram_;
 
 	static const unsigned int VertexAttributesHashSize = 8;
 	StringHashMap<GLVertexAttribute>::Type vertexAttributes_;

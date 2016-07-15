@@ -38,66 +38,66 @@ enum
 
 const VertexFormatCol triVertices[] =
 {
-	{ 0.0f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f},
-	{-0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f},
-	{ 0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f}
+	{  0.0f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f},
+	{ -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f},
+	{  0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f}
 };
 
 const VertexFormatTex cubeVertices[] =
 {
-	1.0f, 1.0f,-1.0f,  0.0f, 0.0f,
-	1.0f,-1.0f,-1.0f,  1.0f, 0.0f,
-   -1.0f,-1.0f,-1.0f,  1.0f, 1.0f,
+	 1.0f, 1.0f,-1.0f,  0.0f, 0.0f,
+	 1.0f,-1.0f,-1.0f,  1.0f, 0.0f,
+	-1.0f,-1.0f,-1.0f,  1.0f, 1.0f,
 
-	1.0f, 1.0f, 1.0f,  0.0f, 0.0f,
-   -1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
-	1.0f,-1.0f, 1.0f,  0.0f, 1.0f,
+	 1.0f, 1.0f, 1.0f,  0.0f, 0.0f,
+	-1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+	 1.0f,-1.0f, 1.0f,  0.0f, 1.0f,
 
-	1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
-	1.0f,-1.0f,-1.0f,  0.0f, 1.0f,
-	1.0f,-1.0f,-1.0f,  1.0f, 0.0f,
+	 1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
+	 1.0f,-1.0f,-1.0f,  0.0f, 1.0f,
+	 1.0f,-1.0f,-1.0f,  1.0f, 0.0f,
 
-	1.0f,-1.0f, 1.0f,  1.0f, 1.0f,
-   -1.0f,-1.0f,-1.0f,  0.0f, 0.0f,
-   -1.0f,-1.0f,-1.0f,  0.0f, 0.0f,
+	 1.0f,-1.0f, 1.0f,  1.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,  0.0f, 0.0f,
+	-1.0f,-1.0f,-1.0f,  0.0f, 0.0f,
 
-   -1.0f,-1.0f, 1.0f,  1.0f, 0.0f,
-   -1.0f, 1.0f, 1.0f,  1.0f, 1.0f,
-	1.0f, 1.0f,-1.0f,  1.0f, 0.0f,
+	-1.0f,-1.0f, 1.0f,  1.0f, 0.0f,
+	-1.0f, 1.0f, 1.0f,  1.0f, 1.0f,
+	 1.0f, 1.0f,-1.0f,  1.0f, 0.0f,
 
-   -1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
-   -1.0f, 1.0f,-1.0f,  0.0f, 1.0f,
-	1.0f,-1.0f, 1.0f,  1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
+	-1.0f, 1.0f,-1.0f,  0.0f, 1.0f,
+	 1.0f,-1.0f, 1.0f,  1.0f, 1.0f,
 
-   -1.0f, 1.0f,-1.0f,  1.0f, 1.0f,
-   -1.0f,-1.0f, 1.0f,  1.0f, 1.0f,
-   -1.0f,-1.0f, 1.0f,  0.0f, 1.0f
+	-1.0f, 1.0f,-1.0f,  1.0f, 1.0f,
+	-1.0f,-1.0f, 1.0f,  1.0f, 1.0f,
+	-1.0f,-1.0f, 1.0f,  0.0f, 1.0f
 };
 
 const GLushort cubeIndices[] =
 {
-	0, 1, 2,
-	3, 4, 5,
-	0, 6, 7,
-	8, 9, 10,
+	 0,  1,  2,
+	 3,  4,  5,
+	 0,  6,  7,
+	 8,  9, 10,
 	11, 12, 13,
-	3, 14, 15,
-	16, 0, 2,
-	6, 17, 7,
+	 3, 14, 15,
+	16,  0,  2,
+	 6, 17,  7,
 	14, 18, 15,
-	4, 19, 5,
+	 4, 19,  5,
 	16, 11, 13,
-	9, 20, 10
+	 9, 20, 10
 };
 
 }
 
-nc::IAppEventHandler* createApphandler()
+nc::IAppEventHandler *createApphandler()
 {
 	return new MyEventHandler;
 }
 
-void MyEventHandler::onPreInit(nc::AppConfiguration& config)
+void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
 	config.enableScenegraph(false);
 	config.enableAudio(false);
@@ -153,14 +153,14 @@ void MyEventHandler::onInit()
 
 	vboTri_ = new nc::GLBufferObject(GL_ARRAY_BUFFER);
 	vboTri_->bufferData(sizeof(triVertices), triVertices, GL_STATIC_DRAW);
-	colorAttributes_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatCol), (void*)offsetof(VertexFormatCol, position));
-	colorAttributes_->attribute("aColor")->setVboParameters(sizeof(VertexFormatCol), (void*)offsetof(VertexFormatCol, color));
+	colorAttributes_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatCol), (void *)offsetof(VertexFormatCol, position));
+	colorAttributes_->attribute("aColor")->setVboParameters(sizeof(VertexFormatCol), (void *)offsetof(VertexFormatCol, color));
 	colorAttributes_->defineVertexPointers(vboTri_->glHandle());
 
 	vboCube_ = new nc::GLBufferObject(GL_ARRAY_BUFFER);
 	vboCube_->bufferData(sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
-	texAttributes_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatTex), (void*)offsetof(VertexFormatTex, position));
-	texAttributes_->attribute("aTexCoords")->setVboParameters(sizeof(VertexFormatTex), (void*)offsetof(VertexFormatTex, texcoords));
+	texAttributes_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatTex), (void *)offsetof(VertexFormatTex, position));
+	texAttributes_->attribute("aTexCoords")->setVboParameters(sizeof(VertexFormatTex), (void *)offsetof(VertexFormatTex, texcoords));
 	texAttributes_->defineVertexPointers(vboCube_->glHandle());
 
 	iboCube_ = new nc::GLBufferObject(GL_ELEMENT_ARRAY_BUFFER);

@@ -40,9 +40,9 @@ class GLFramebufferObject
 	mutable GLenum target_;
 
 	/// Private copy constructor
-	GLFramebufferObject(const GLFramebufferObject&);
+	GLFramebufferObject(const GLFramebufferObject &);
 	/// Private assignment operator
-	GLFramebufferObject& operator=(const GLFramebufferObject&);
+	GLFramebufferObject &operator=(const GLFramebufferObject &);
 };
 
 }

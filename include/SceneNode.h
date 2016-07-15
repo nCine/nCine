@@ -24,9 +24,9 @@ class DLL_PUBLIC SceneNode : public Object
 	float y;
 
 	/// Constructor for a node with a parent and a specified relative position
-	SceneNode(SceneNode* parent, float xx, float yy);
+	SceneNode(SceneNode *parent, float xx, float yy);
 	/// Constructor for a node with a parent and positioned in the relative origin
-	explicit SceneNode(SceneNode* parent);
+	explicit SceneNode(SceneNode *parent);
 	/// Constructor for a node with no parent and positioned in the origin
 	SceneNode();
 	/// The destructor will delete every child node
@@ -35,9 +35,9 @@ class DLL_PUBLIC SceneNode : public Object
 	inline static ObjectType sType() { return SCENENODE_TYPE; }
 
 	/// Returns the parent node, if there is any
-	inline const SceneNode* parentNode() const { return parent_; }
+	inline const SceneNode *parentNode() const { return parent_; }
 	/// Returns a list of child nodes
-	inline const List<SceneNode *>& children() const { return children_; }
+	inline const List<SceneNode *> &children() const { return children_; }
 	/// Adds a node as a child of this one
 	bool addChildNode(SceneNode *childNode);
 	/// Removes a child of this node, without reparenting nephews
@@ -50,9 +50,9 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Called once every frame to update the node
 	virtual void update(float interval);
 	/// Draws the node and visits its children
-	virtual void visit(RenderQueue& renderQueue);
+	virtual void visit(RenderQueue &renderQueue);
 	/// Renders the node
-	virtual void draw(RenderQueue& renderQueue) { }
+	virtual void draw(RenderQueue &renderQueue) { }
 
 	/// Enables node updating
 	inline void enableUpdate(bool shouldUpdate) { shouldUpdate_ = shouldUpdate; }
@@ -66,11 +66,11 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Sets the node position through two coordinates
 	inline void setPosition(float xx, float yy) { x = xx; y = yy; }
 	/// Sets the node position through a vector
-	inline void setPosition(const Vector2f& pos) { x = pos.x; y = pos.y; }
+	inline void setPosition(const Vector2f &pos) { x = pos.x; y = pos.y; }
 	/// Moves a node based on two offsets
 	inline void move(float xx, float yy) { x += xx; y += yy; }
 	/// Adds a move vector to the node current position
-	inline void move(const Vector2f& pos) { x += pos.x; y += pos.y; }
+	inline void move(const Vector2f &pos) { x += pos.x; y += pos.y; }
 
 	/// Gets the node scale factor
 	inline float scale() const { return scaleFactor_; }
@@ -102,16 +102,16 @@ class DLL_PUBLIC SceneNode : public Object
 	inline void setAlphaF(float alpha) { color_.setAlphaF(alpha); }
 
 	/// Gets the node world matrix
-	inline const Matrix4x4f& worldMatrix() const { return worldMatrix_; }
+	inline const Matrix4x4f &worldMatrix() const { return worldMatrix_; }
 	/// Gets the node local matrix
-	inline const Matrix4x4f& localMatrix() const { return localMatrix_; }
+	inline const Matrix4x4f &localMatrix() const { return localMatrix_; }
 
   protected:
 	bool shouldUpdate_;
 	bool shouldDraw_;
 
 	/// A pointer to the parent node
-	SceneNode* parent_;
+	SceneNode *parent_;
 	/// The list of child nodes
 	List<SceneNode *> children_;
 
@@ -143,9 +143,9 @@ class DLL_PUBLIC SceneNode : public Object
 	Matrix4x4f localMatrix_;
 
 	/// Protected copy constructor
-	SceneNode(const SceneNode&);
+	SceneNode(const SceneNode &);
 	/// Protected assignment operator
-	SceneNode& operator=(const SceneNode&);
+	SceneNode &operator=(const SceneNode &);
 
 	virtual void transform();
 };

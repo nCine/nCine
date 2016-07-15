@@ -15,7 +15,7 @@ GLUniformCache::GLUniformCache()
 
 }
 
-GLUniformCache::GLUniformCache(const GLUniform* uniform)
+GLUniformCache::GLUniformCache(const GLUniform *uniform)
 	: uniform_(uniform), dataPointer_(NULL)
 {
 
@@ -127,43 +127,43 @@ void GLUniformCache::commitValue()
 	switch (uniform_->type())
 	{
 		case GL_FLOAT:
-			glUniform1fv(location, 1, reinterpret_cast<const GLfloat*>(dataPointer_));
+			glUniform1fv(location, 1, reinterpret_cast<const GLfloat *>(dataPointer_));
 			break;
 		case GL_FLOAT_VEC2:
-			glUniform2fv(location, 1, reinterpret_cast<const GLfloat*>(dataPointer_));
+			glUniform2fv(location, 1, reinterpret_cast<const GLfloat *>(dataPointer_));
 			break;
 		case GL_FLOAT_VEC3:
-			glUniform3fv(location, 1, reinterpret_cast<const GLfloat*>(dataPointer_));
+			glUniform3fv(location, 1, reinterpret_cast<const GLfloat *>(dataPointer_));
 			break;
 		case GL_FLOAT_VEC4:
-			glUniform4fv(location, 1, reinterpret_cast<const GLfloat*>(dataPointer_));
+			glUniform4fv(location, 1, reinterpret_cast<const GLfloat *>(dataPointer_));
 			break;
 		case GL_INT:
-			glUniform1iv(location, 1, reinterpret_cast<const GLint*>(dataPointer_));
+			glUniform1iv(location, 1, reinterpret_cast<const GLint *>(dataPointer_));
 			break;
 		case GL_INT_VEC2:
-			glUniform2iv(location, 1, reinterpret_cast<const GLint*>(dataPointer_));
+			glUniform2iv(location, 1, reinterpret_cast<const GLint *>(dataPointer_));
 			break;
 		case GL_INT_VEC3:
-			glUniform3iv(location, 1, reinterpret_cast<const GLint*>(dataPointer_));
+			glUniform3iv(location, 1, reinterpret_cast<const GLint *>(dataPointer_));
 			break;
 		case GL_INT_VEC4:
-			glUniform4iv(location, 1, reinterpret_cast<const GLint*>(dataPointer_));
+			glUniform4iv(location, 1, reinterpret_cast<const GLint *>(dataPointer_));
 			break;
 		case GL_FLOAT_MAT2:
-			glUniformMatrix2fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat*>(dataPointer_));
+			glUniformMatrix2fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(dataPointer_));
 			break;
 		case GL_FLOAT_MAT3:
-			glUniformMatrix3fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat*>(dataPointer_));
+			glUniformMatrix3fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(dataPointer_));
 			break;
 		case GL_FLOAT_MAT4:
-			glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat*>(dataPointer_));
+			glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(dataPointer_));
 			break;
 		case GL_SAMPLER_2D:
-			glUniform1iv(location, 1, reinterpret_cast<const GLint*>(dataPointer_));
+			glUniform1iv(location, 1, reinterpret_cast<const GLint *>(dataPointer_));
 			break;
 		case GL_SAMPLER_CUBE:
-			glUniform1iv(location, 1, reinterpret_cast<const GLint*>(dataPointer_));
+			glUniform1iv(location, 1, reinterpret_cast<const GLint *>(dataPointer_));
 			break;
 		default:
 			LOGW_X("No available case to handle type: %u", uniform_->type());
@@ -186,7 +186,7 @@ void GLUniformCache::checkFloat()
 void GLUniformCache::checkInt()
 {
 	if (uniform_->basicType() != GL_INT && uniform_->basicType() != GL_BOOL &&
-		uniform_->basicType() != GL_SAMPLER_2D && uniform_->basicType() != GL_SAMPLER_CUBE)
+	    uniform_->basicType() != GL_SAMPLER_2D && uniform_->basicType() != GL_SAMPLER_CUBE)
 	{
 		LOGE_X("Uniform \"%s\" is not integer", uniform_->name());
 	}

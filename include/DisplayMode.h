@@ -35,7 +35,7 @@ class DLL_PUBLIC DisplayMode
 		: redBits_(0), greenBits_(0), blueBits_(0), alphaBits_(0),
 		  depthBits_(depthBits), stencilBits_(stencilBits), isDoubleBuffered_(dbMode == DOUBLE_BUFFERED), hasVSync_(vsMode == WITH_VSYNC) { }
 	DisplayMode(unsigned int redBits, unsigned int greenBits, unsigned int blueBits, unsigned int alphaBits,
-				unsigned int depthBits, unsigned int stencilBits, DoubleBufferingMode dbMode, VSyncMode vsMode)
+	            unsigned int depthBits, unsigned int stencilBits, DoubleBufferingMode dbMode, VSyncMode vsMode)
 		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits), alphaBits_(alphaBits),
 		  depthBits_(depthBits), stencilBits_(stencilBits), isDoubleBuffered_(dbMode == DOUBLE_BUFFERED), hasVSync_(vsMode == WITH_VSYNC) { }
 

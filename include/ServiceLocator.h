@@ -22,60 +22,60 @@ class DLL_PUBLIC ServiceLocator
 {
   public:
 	/// Returns a reference to the current indexer provider instance
-	IIndexer& indexer() { return *indexerService_; }
+	IIndexer &indexer() { return *indexerService_; }
 	/// Registers an indexer service provider
-	void registerIndexer(IIndexer* service);
+	void registerIndexer(IIndexer *service);
 
 	/// Returns a reference to the current logger provider instance
-	ILogger& logger() { return *loggerService_; }
+	ILogger &logger() { return *loggerService_; }
 	/// Registers a logger service provider
-	void registerLogger(ILogger* service);
+	void registerLogger(ILogger *service);
 
 	/// Returns a reference to the current audio device instance
-	IAudioDevice& audioDevice() { return *audioDevice_; }
+	IAudioDevice &audioDevice() { return *audioDevice_; }
 	/// Registers an audio device provider
-	void registerAudioDevice(IAudioDevice* service);
+	void registerAudioDevice(IAudioDevice *service);
 
 	/// Returns a reference to the current thread pool instance
-	IThreadPool& threadPool() { return *threadPool_; }
+	IThreadPool &threadPool() { return *threadPool_; }
 	/// Registers a thread pool provider
-	void registerThreadPool(IThreadPool* service);
+	void registerThreadPool(IThreadPool *service);
 
 	/// Returns a reference to the current graphics capabilities instance
-	const IGfxCapabilities& gfxCapabilities() { return *gfxCapabilities_; }
+	const IGfxCapabilities &gfxCapabilities() { return *gfxCapabilities_; }
 	/// Registers a graphics capabilities provider
-	void registerGfxCapabilities(IGfxCapabilities* service);
+	void registerGfxCapabilities(IGfxCapabilities *service);
 
 	/// Deletes every registered service and reestablishes null ones
 	void unregisterAll();
 
   private:
-	IIndexer* indexerService_;
+	IIndexer *indexerService_;
 	NullIndexer nullIndexer_;
 
-	ILogger* loggerService_;
+	ILogger *loggerService_;
 	NullLogger nullLogger_;
 
-	IAudioDevice* audioDevice_;
+	IAudioDevice *audioDevice_;
 	NullAudioDevice nullAudioDevice_;
 
-	IThreadPool* threadPool_;
+	IThreadPool *threadPool_;
 	NullThreadPool nullThreadPool_;
 
-	IGfxCapabilities* gfxCapabilities_;
+	IGfxCapabilities *gfxCapabilities_;
 	NullGfxCapabilities nullGfxCapabilities_;
 
 	ServiceLocator();
 	/// Private copy constructor
-	ServiceLocator(const ServiceLocator&);
+	ServiceLocator(const ServiceLocator &);
 	/// Private assignment operator
-	ServiceLocator& operator=(const ServiceLocator&);
+	ServiceLocator &operator=(const ServiceLocator &);
 
-	friend DLL_PUBLIC ServiceLocator& theServiceLocator();
+	friend DLL_PUBLIC ServiceLocator &theServiceLocator();
 };
 
 /// Meyers' Singleton
-DLL_PUBLIC ServiceLocator& theServiceLocator();
+DLL_PUBLIC ServiceLocator &theServiceLocator();
 
 }
 

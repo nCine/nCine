@@ -10,9 +10,9 @@ namespace ncine {
 class DLL_PUBLIC AnimatedSprite : public Sprite
 {
   public:
-	AnimatedSprite(SceneNode* parent, Texture *texture);
+	AnimatedSprite(SceneNode *parent, Texture *texture);
 	explicit AnimatedSprite(Texture *texture);
-	AnimatedSprite(SceneNode* parent, Texture *texture, float x, float y);
+	AnimatedSprite(SceneNode *parent, Texture *texture, float x, float y);
 	AnimatedSprite(Texture *texture, float x, float y);
 	virtual ~AnimatedSprite();
 
@@ -24,7 +24,7 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	virtual void update(float interval);
 
 	/// Adds a new animation
-	void addAnimation(RectAnimation* anim);
+	void addAnimation(RectAnimation *anim);
 	/// Sets the current animation and its frame number
 	void setAnimation(int animNum);
 	/// Sets the current animation to a specified frame number
@@ -37,9 +37,9 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	int currentAnim_;
 
 	/// Private copy constructor
-	AnimatedSprite(const AnimatedSprite&);
+	AnimatedSprite(const AnimatedSprite &);
 	/// Private assignment operator
-	AnimatedSprite& operator=(const AnimatedSprite&);
+	AnimatedSprite &operator=(const AnimatedSprite &);
 
 	void init();
 };

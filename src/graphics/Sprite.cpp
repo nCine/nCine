@@ -12,7 +12,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
-Sprite::Sprite(SceneNode* parent, Texture *texture)
+Sprite::Sprite(SceneNode *parent, Texture *texture)
 	: DrawableNode(parent), texture_(texture), texRect_(0, 0, 0, 0)
 {
 	init();
@@ -26,7 +26,7 @@ Sprite::Sprite(Texture *texture)
 }
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
-Sprite::Sprite(SceneNode* parent, Texture *texture, float x, float y)
+Sprite::Sprite(SceneNode *parent, Texture *texture, float x, float y)
 	: DrawableNode(parent, x, y), texture_(texture), texRect_(0, 0, 0, 0)
 {
 	init();

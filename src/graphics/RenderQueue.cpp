@@ -48,8 +48,8 @@ void RenderQueue::addCommand(RenderCommand *command)
 }
 
 namespace {
-	bool descendingOrder(const RenderCommand* a, const RenderCommand* b) { return a->sortKey() > b->sortKey(); }
-	bool ascendingOrder(const RenderCommand* a, const RenderCommand* b) { return a->sortKey() < b->sortKey(); }
+bool descendingOrder(const RenderCommand *a, const RenderCommand *b) { return a->sortKey() > b->sortKey(); }
+bool ascendingOrder(const RenderCommand *a, const RenderCommand *b) { return a->sortKey() < b->sortKey(); }
 }
 
 void RenderQueue::draw()

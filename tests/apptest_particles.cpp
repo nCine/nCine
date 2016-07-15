@@ -12,14 +12,14 @@
 namespace {
 
 #ifdef __ANDROID__
-const char* TextureFile = "smoke_256.webp";
+	const char *TextureFile = "smoke_256.webp";
 #else
-const char* TextureFile = "smoke_256.png";
+	const char *TextureFile = "smoke_256.png";
 #endif
 
 }
 
-nc::IAppEventHandler* createApphandler()
+nc::IAppEventHandler *createApphandler()
 {
 	return new MyEventHandler;
 }

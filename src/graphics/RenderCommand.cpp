@@ -39,9 +39,9 @@ void RenderCommand::issue()
 	draw();
 }
 
-void RenderCommand::setVertexAttribute(const char* name, GLsizei vboStride, const GLvoid *vboPointer)
+void RenderCommand::setVertexAttribute(const char *name, GLsizei vboStride, const GLvoid *vboPointer)
 {
-	GLVertexAttribute* vertexAttribute = material_.attribute(name);
+	GLVertexAttribute *vertexAttribute = material_.attribute(name);
 	vertexAttribute->setVboParameters(vboStride, vboPointer);
 }
 

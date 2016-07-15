@@ -23,9 +23,9 @@ class TextureLoaderSdl : public ITextureLoader
 	SDL_Surface *sdlSurface_;
 
 	/// Private copy constructor
-	TextureLoaderSdl(const TextureLoaderSdl&);
+	TextureLoaderSdl(const TextureLoaderSdl &);
 	/// Private assignment operator
-	TextureLoaderSdl& operator=(const TextureLoaderSdl&);
+	TextureLoaderSdl &operator=(const TextureLoaderSdl &);
 
 	void init();
 };

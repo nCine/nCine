@@ -102,16 +102,16 @@ void Texture::setWrap(TextureWrap wrap)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void Texture::load(const ITextureLoader& texLoader)
+void Texture::load(const ITextureLoader &texLoader)
 {
 	load(texLoader, texLoader.width(), texLoader.height());
 }
 
-void Texture::load(const ITextureLoader& texLoader, int width, int height)
+void Texture::load(const ITextureLoader &texLoader, int width, int height)
 {
-	const IGfxCapabilities& gfxCaps = theServiceLocator().gfxCapabilities();
+	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
 	if (width > gfxCaps.value(IGfxCapabilities::MAX_TEXTURE_SIZE) ||
-		height > gfxCaps.value(IGfxCapabilities::MAX_TEXTURE_SIZE))
+	    height > gfxCaps.value(IGfxCapabilities::MAX_TEXTURE_SIZE))
 	{
 		LOGF("Texture size is bigger than device maximum");
 		exit(EXIT_FAILURE);
@@ -144,12 +144,12 @@ void Texture::load(const ITextureLoader& texLoader, int width, int height)
 		if (texFormat.isCompressed())
 		{
 			glTexture_->compressedTexImage2D(i, texFormat.internalFormat(), levelWidth, levelHeight,
-				texLoader.dataSize(i), texLoader.pixels(i));
+			                                 texLoader.dataSize(i), texLoader.pixels(i));
 		}
 		else
 		{
 			glTexture_->texImage2D(i, texFormat.internalFormat(), levelWidth, levelHeight,
-				texFormat.format(), texFormat.type(), texLoader.pixels(i));
+			                       texFormat.format(), texFormat.type(), texLoader.pixels(i));
 		}
 
 		levelWidth /= 2;

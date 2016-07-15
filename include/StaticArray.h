@@ -44,9 +44,9 @@ class StaticArray
 	}
 
 	/// Copy constructor
-	StaticArray(const StaticArray& other);
+	StaticArray(const StaticArray &other);
 	/// Assignment operator
-	StaticArray& operator=(const StaticArray& other);
+	StaticArray &operator=(const StaticArray &other);
 
 	/// Returns an iterator to the first element
 	inline Iterator begin() { return Iterator(array_); }
@@ -83,14 +83,14 @@ class StaticArray
 	inline void insertBack(T element) { operator[](size_) = element; }
 
 	/// Read-only subscript operator
-	const T& operator[](unsigned int index) const;
+	const T &operator[](unsigned int index) const;
 	/// Subscript operator
-	T& operator[](unsigned int index);
+	T &operator[](unsigned int index);
 
 	/// Returns a constant pointer to the allocated memory
-	inline const T* data() const { return array_; }
+	inline const T *data() const { return array_; }
 	/// Returns a pointer to the allocated memory
-	inline T* data() { return array_; }
+	inline T *data() { return array_; }
 
   private:
 	T array_[C];
@@ -99,7 +99,7 @@ class StaticArray
 };
 
 template <class T, unsigned int C>
-StaticArray<T, C>::StaticArray(const StaticArray<T, C>& other)
+StaticArray<T, C>::StaticArray(const StaticArray<T, C> &other)
 	: size_(other.size_), capacity_(other.capacity_)
 {
 	for (unsigned int i = 0; i < other.size_; i++)
@@ -110,7 +110,7 @@ StaticArray<T, C>::StaticArray(const StaticArray<T, C>& other)
 }
 
 template <class T, unsigned int C>
-StaticArray<T, C>& StaticArray<T, C>::operator=(const StaticArray<T, C>& other)
+StaticArray<T, C> &StaticArray<T, C>::operator=(const StaticArray<T, C> &other)
 {
 	size_ = other.size_;
 	for (unsigned int i = 0; i < other.size_; i++)
@@ -135,7 +135,7 @@ void StaticArray<T, C>::setSize(unsigned int newSize)
 }
 
 template <class T, unsigned int C>
-const T& StaticArray<T, C>::operator[](unsigned int index) const
+const T &StaticArray<T, C>::operator[](unsigned int index) const
 {
 	if (index >= size_)
 	{
@@ -147,7 +147,7 @@ const T& StaticArray<T, C>::operator[](unsigned int index) const
 }
 
 template <class T, unsigned int C>
-T& StaticArray<T, C>::operator[](unsigned int index)
+T &StaticArray<T, C>::operator[](unsigned int index)
 {
 	// Avoid creating "holes" into the array
 	if (index > size_)

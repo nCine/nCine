@@ -9,7 +9,7 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-EglGfxDevice::EglGfxDevice(struct android_app* state, DisplayMode mode)
+EglGfxDevice::EglGfxDevice(struct android_app *state, DisplayMode mode)
 {
 	isFullScreen_ = true;
 	mode_ = mode;
@@ -41,7 +41,7 @@ EglGfxDevice::~EglGfxDevice()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void EglGfxDevice::createSurface(struct android_app* state)
+void EglGfxDevice::createSurface(struct android_app *state)
 {
 	if (state->window != NULL)
 	{
@@ -123,7 +123,7 @@ bool EglGfxDevice::isModeSupported(struct android_app *state, DisplayMode mode)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void EglGfxDevice::initDevice(struct android_app* state)
+void EglGfxDevice::initDevice(struct android_app *state)
 {
 	const EGLint attribs[] =
 	{

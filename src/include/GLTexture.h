@@ -21,9 +21,9 @@ class GLTexture
 	void bind() const;
 	void unbind() const;
 
-	void texImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* data);
-	void texSubImage2D(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void* data);
-	void compressedTexImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei imageSize, const void* data);
+	void texImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data);
+	void texSubImage2D(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data);
+	void compressedTexImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei imageSize, const void *data);
 
 #if !defined(__ANDROID__) && !defined(__APPLE__)
 	void texStorage2D(GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height);
@@ -47,9 +47,9 @@ class GLTexture
 	GLenum imageFormat_;
 
 	/// Private copy constructor
-	GLTexture(const GLTexture&);
+	GLTexture(const GLTexture &);
 	/// Private assignment operator
-	GLTexture& operator=(const GLTexture&);
+	GLTexture &operator=(const GLTexture &);
 
 	friend class GLFramebufferObject;
 };

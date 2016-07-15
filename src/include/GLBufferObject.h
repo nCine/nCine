@@ -46,9 +46,9 @@ class GLBufferObject
 	GLenum target_;
 
 	/// Private copy constructor
-	GLBufferObject(const GLBufferObject&);
+	GLBufferObject(const GLBufferObject &);
 	/// Private assignment operator
-	GLBufferObject& operator=(const GLBufferObject&);
+	GLBufferObject &operator=(const GLBufferObject &);
 };
 
 }

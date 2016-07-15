@@ -5,7 +5,7 @@
 
 namespace {
 
-inline void printHashmap(const nc::HashMap<int, int, nc::FixedHashFunc<int> >& hashmap)
+inline void printHashmap(const nc::HashMap<int, int, nc::FixedHashFunc<int> > &hashmap)
 {
 	unsigned int index = 0;
 

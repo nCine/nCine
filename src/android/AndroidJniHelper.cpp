@@ -29,7 +29,7 @@ jclass AndroidJniClass_MotionRange::javaClass_ = NULL;
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void AndroidJniHelper::attachJVM(struct android_app* state)
+void AndroidJniHelper::attachJVM(struct android_app *state)
 {
 	javaVM_ = state->activity->vm;
 

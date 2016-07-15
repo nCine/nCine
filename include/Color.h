@@ -23,7 +23,7 @@ class DLL_PUBLIC Color
 	Color(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha)
 	{
 		set(static_cast<unsigned char>(red), static_cast<unsigned char>(green),
-			static_cast<unsigned char>(blue), static_cast<unsigned char>(alpha));
+		    static_cast<unsigned char>(blue), static_cast<unsigned char>(alpha));
 	}
 	/// Three channels constructor (`unsigned int`)
 	Color(unsigned int red, unsigned int green, unsigned int blue)
@@ -44,7 +44,7 @@ class DLL_PUBLIC Color
 	/// Getter for the alpha channel of the color
 	inline unsigned char a() const { return channels_[3]; }
 	/// Getter for the color vector
-	inline const unsigned char* vector() const { return channels_.data(); }
+	inline const unsigned char *vector() const { return channels_.data(); }
 	/// Flaot getter for the red channel of the color
 	inline float fR() const { return channels_[0] / 255.0f; }
 	/// Float getter for the green channel of the color
@@ -74,13 +74,13 @@ class DLL_PUBLIC Color
 	void setAlphaF(float alpha);
 
 	/// Equality operator
-	bool operator==(const Color& color) const;
+	bool operator==(const Color &color) const;
 
-	Color& operator*=(const Color& color);
+	Color &operator*=(const Color &color);
 	/// Multiplication by a constant scalar
-	Color& operator*=(float scalar);
+	Color &operator*=(float scalar);
 
-	Color operator*(const Color& color) const;
+	Color operator*(const Color &color) const;
 	/// Multiplication by a constant scalar
 	Color operator*(float scalar) const;
 
@@ -136,13 +136,13 @@ inline void Color::setAlphaF(float alpha)
 	channels_[3] = static_cast<unsigned char>(nc::clamp(alpha, 0.0f, 1.0f) * 255);
 }
 
-inline bool Color::operator==(const Color& color) const
+inline bool Color::operator==(const Color &color) const
 {
 	return (r() == color.r() && g() == color.g() &&
-			b() == color.b() && a() == color.a());
+	        b() == color.b() && a() == color.a());
 }
 
-inline Color& Color::operator*=(const Color& color)
+inline Color &Color::operator*=(const Color &color)
 {
 	for (unsigned int i = 0; i < 4; i++)
 	{
@@ -154,7 +154,7 @@ inline Color& Color::operator*=(const Color& color)
 	return *this;
 }
 
-inline Color& Color::operator*=(float scalar)
+inline Color &Color::operator*=(float scalar)
 {
 	for (unsigned int i = 0; i < 4; i++)
 	{
@@ -166,7 +166,7 @@ inline Color& Color::operator*=(float scalar)
 	return *this;
 }
 
-inline Color Color::operator*(const Color& color) const
+inline Color Color::operator*(const Color &color) const
 {
 	Color result;
 

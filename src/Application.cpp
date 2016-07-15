@@ -34,11 +34,11 @@ namespace ncine {
 
 Application::Application()
 	: isPaused_(false), hasFocus_(true), shouldQuit_(false),
-	frameTimer_(NULL), gfxDevice_(NULL),
-	renderQueue_(NULL), rootNode_(NULL),
-	profileTimer_(NULL), profilePlotter_(NULL),
-	font_(NULL), textLines_(NULL), textUpdateTime_(0.0f),
-	textString_(MaxTextLength), inputManager_(NULL), appEventHandler_(NULL)
+	  frameTimer_(NULL), gfxDevice_(NULL),
+	  renderQueue_(NULL), rootNode_(NULL),
+	  profileTimer_(NULL), profilePlotter_(NULL),
+	  font_(NULL), textLines_(NULL), textUpdateTime_(0.0f),
+	  textString_(MaxTextLength), inputManager_(NULL), appEventHandler_(NULL)
 {
 
 }
@@ -186,12 +186,12 @@ void Application::step()
 	{
 		textUpdateTime_ = Timer::now();
 		textString_.format(static_cast<const char *>("FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC"),
-				frameTimer_->averageFps(), frameTimer_->interval() * 1000.0f,
-				renderQueue_->numVertices(RenderCommand::SPRITE_TYPE), renderQueue_->numCommands(RenderCommand::SPRITE_TYPE),
-				renderQueue_->numVertices(RenderCommand::PARTICLE_TYPE), renderQueue_->numCommands(RenderCommand::PARTICLE_TYPE),
-				renderQueue_->numVertices(RenderCommand::TEXT_TYPE), renderQueue_->numCommands(RenderCommand::TEXT_TYPE),
-				renderQueue_->numVertices(RenderCommand::PLOTTER_TYPE), renderQueue_->numCommands(RenderCommand::PLOTTER_TYPE),
-				renderQueue_->numVertices(), renderQueue_->numCommands());
+		                   frameTimer_->averageFps(), frameTimer_->interval() * 1000.0f,
+		                   renderQueue_->numVertices(RenderCommand::SPRITE_TYPE), renderQueue_->numCommands(RenderCommand::SPRITE_TYPE),
+		                   renderQueue_->numVertices(RenderCommand::PARTICLE_TYPE), renderQueue_->numCommands(RenderCommand::PARTICLE_TYPE),
+		                   renderQueue_->numVertices(RenderCommand::TEXT_TYPE), renderQueue_->numCommands(RenderCommand::TEXT_TYPE),
+		                   renderQueue_->numVertices(RenderCommand::PLOTTER_TYPE), renderQueue_->numCommands(RenderCommand::PLOTTER_TYPE),
+		                   renderQueue_->numVertices(), renderQueue_->numCommands());
 
 		textLines_->setString(textString_);
 		textLines_->setAlignment(TextNode::ALIGN_RIGHT);

@@ -39,8 +39,8 @@ class MyEventHandler
 
 	bool pause_;
 	float angle_;
-	nc::StaticArray<nc::Texture*, NumTextures> textures_;
-	nc::StaticArray<nc::Sprite*, NumSprites> sprites_;
+	nc::StaticArray<nc::Texture *, NumTextures> textures_;
+	nc::StaticArray<nc::Sprite *, NumSprites> sprites_;
 };
 
 #endif

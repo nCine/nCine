@@ -127,29 +127,29 @@ KeyMod AndroidKeys::keyModValueToEnum(int keymod)
 {
 	switch (keymod)
 	{
-		case AMETA_NONE:			return KEYMOD_NONE;
-		case AMETA_ALT_ON:			return KEYMOD_ALT;
-		case AMETA_ALT_LEFT_ON:		return KEYMOD_LALT;
-		case AMETA_ALT_RIGHT_ON:	return KEYMOD_RALT;
-		case AMETA_SHIFT_ON:		return KEYMOD_SHIFT;
-		case AMETA_SHIFT_LEFT_ON:	return KEYMOD_LSHIFT;
-		case AMETA_SHIFT_RIGHT_ON:	return KEYMOD_RSHIFT;
+		case AMETA_NONE:				return KEYMOD_NONE;
+		case AMETA_ALT_ON:				return KEYMOD_ALT;
+		case AMETA_ALT_LEFT_ON:			return KEYMOD_LALT;
+		case AMETA_ALT_RIGHT_ON:		return KEYMOD_RALT;
+		case AMETA_SHIFT_ON:			return KEYMOD_SHIFT;
+		case AMETA_SHIFT_LEFT_ON:		return KEYMOD_LSHIFT;
+		case AMETA_SHIFT_RIGHT_ON:		return KEYMOD_RSHIFT;
 #if __ANDROID_API >= 13
-		case AMETA_CONTROL_ON:		return KEYMOD_CTRL;
-		case AMETA_CONTROL_LEFT_ON:	return KEYMOD_LCTRL;
-		case AMETA_CONTROL_RIGHT_ON:return KEYMOD_RCTRL;
+		case AMETA_CONTROL_ON:			return KEYMOD_CTRL;
+		case AMETA_CONTROL_LEFT_ON:		return KEYMOD_LCTRL;
+		case AMETA_CONTROL_RIGHT_ON:	return KEYMOD_RCTRL;
 #endif
-		case AMETA_META_ON:			return KEYMOD_META;
-		case AMETA_META_LEFT_ON:	return KEYMOD_LMETA;
-		case AMETA_META_RIGHT_ON:	return KEYMOD_RMETA;
+		case AMETA_META_ON:				return KEYMOD_META;
+		case AMETA_META_LEFT_ON:		return KEYMOD_LMETA;
+		case AMETA_META_RIGHT_ON:		return KEYMOD_RMETA;
 #if __ANDROID_API >= 13
-		case AMETA_CAPS_LOCK_ON:	return KEYMOD_CAPS;
-		case AMETA_NUM_LOCK_ON:		return KEYMOD_NUM;
-		case AMETA_SCROLL_LOCK_ON:	return KEYMOD_SCROLL;
+		case AMETA_CAPS_LOCK_ON:		return KEYMOD_CAPS;
+		case AMETA_NUM_LOCK_ON:			return KEYMOD_NUM;
+		case AMETA_SCROLL_LOCK_ON:		return KEYMOD_SCROLL;
 #endif
-		case AMETA_SYM_ON:			return KEYMOD_SYM;
+		case AMETA_SYM_ON:				return KEYMOD_SYM;
 
-		default:					return KEYMOD_NONE;
+		default:						return KEYMOD_NONE;
 	}
 }
 

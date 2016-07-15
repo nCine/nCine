@@ -10,7 +10,7 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-TextNode::TextNode(SceneNode* parent, Font* font)
+TextNode::TextNode(SceneNode *parent, Font *font)
 	: DrawableNode(parent, 0, 0), string_(MaxStringLength), dirtyDraw_(true), dirtyBoundaries_(true),
 	  withKerning_(true), font_(font), interleavedVertices_(32),
 	  xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f), lineLengths_(4), alignment_(ALIGN_LEFT)
@@ -73,7 +73,7 @@ void TextNode::setString(const String &string)
 	}
 }
 
-void TextNode::draw(RenderQueue& renderQueue)
+void TextNode::draw(RenderQueue &renderQueue)
 {
 	// Precalculate boundaries for horizontal alignment
 	calculateBoundaries();
@@ -113,7 +113,7 @@ void TextNode::draw(RenderQueue& renderQueue)
 		}
 
 		// Uploading data to the VBO only if the string changes
-		renderCommand_->geometry().setDrawParameters(GL_TRIANGLES, 0 , interleavedVertices_.size() / 4);
+		renderCommand_->geometry().setDrawParameters(GL_TRIANGLES, 0, interleavedVertices_.size() / 4);
 		renderCommand_->geometry().updateVboData(0, interleavedVertices_.size(), interleavedVertices_.data());
 	}
 
@@ -206,7 +206,7 @@ float TextNode::currentAbsScale() const
 	return absScaleFactor;
 }
 
-void TextNode::processGlyph(const FontGlyph* glyph)
+void TextNode::processGlyph(const FontGlyph *glyph)
 {
 	Vector2i size = glyph->size();
 	Vector2i offset = glyph->offset();

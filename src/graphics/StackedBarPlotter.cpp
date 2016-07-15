@@ -7,7 +7,7 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-StackedBarVariable::StackedBarVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f& worldMatrix)
+StackedBarVariable::StackedBarVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f &worldMatrix)
 	: PlottingVariable(numValues, rejectDelay, worldMatrix)
 {
 	// Two vertices for the mean quote plus...
@@ -44,13 +44,13 @@ unsigned int StackedBarPlotter::addVariable(unsigned int numValues, float reject
 		}
 	}
 
-	StackedBarVariable* variable = new StackedBarVariable(numValues, rejectDelay, worldMatrix_);
+	StackedBarVariable *variable = new StackedBarVariable(numValues, rejectDelay, worldMatrix_);
 	variables_.pushBack(variable);
 
 	return variables_.size() - 1;
 }
 
-void StackedBarPlotter::draw(RenderQueue& renderQueue)
+void StackedBarPlotter::draw(RenderQueue &renderQueue)
 {
 	// Drawing the background
 	DrawableNode::draw(renderQueue);
@@ -102,8 +102,8 @@ void StackedBarPlotter::updateAllVertices(float x, float y, float w, float h)
 	float meanVerticalOffset = 0.0f;
 	for (unsigned int i = 0; i < variables_.size(); i++)
 	{
-		const ProfileVariable* profVariable = variables_[i]->variable();
-		GLfloat* vertices = variables_[i]->vertices();
+		const ProfileVariable *profVariable = variables_[i]->variable();
+		GLfloat *vertices = variables_[i]->vertices();
 
 		float normalizedMean = profVariable->normBetweenMean(minSum, maxSum);
 		// Variable mean vertices
@@ -129,8 +129,8 @@ void StackedBarPlotter::updateAllVertices(float x, float y, float w, float h)
 
 		for (unsigned int j = 0; j < variables_.size(); j++)
 		{
-			const ProfileVariable* profVariable = variables_[j]->variable();
-			GLfloat* vertices = variables_[j]->vertices();
+			const ProfileVariable *profVariable = variables_[j]->variable();
+			GLfloat *vertices = variables_[j]->vertices();
 
 			float normValue = profVariable->normBetweenValue((nextIndex + i) % numValues, minSum, maxSum);
 

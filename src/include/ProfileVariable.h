@@ -36,7 +36,7 @@ class ProfileVariable
 	/// Returns a normalized mathematical mean
 	float normMean() const { return normBetweenMean(min_, max_); }
 	/// Returns the pointer to values
-	inline const float* values() const { return values_; }
+	inline const float *values() const { return values_; }
 	/// Returns the delay in seconds for value rejection
 	inline float delay() const { return rejectDelay_; }
 	/// Set the delay in seconds for value rejection
@@ -57,9 +57,9 @@ class ProfileVariable
 	Timer timer_;
 
 	/// Private copy constructor
-	ProfileVariable(const ProfileVariable&);
+	ProfileVariable(const ProfileVariable &);
 	/// Private assignment operator
-	ProfileVariable& operator=(const ProfileVariable&);
+	ProfileVariable &operator=(const ProfileVariable &);
 };
 
 }

@@ -24,7 +24,7 @@ AudioBuffer::AudioBuffer(const char *filename)
 {
 	alGenBuffers(1, &bufferId_);
 
-	IAudioLoader* audioLoader = IAudioLoader::createFromFile(filename);
+	IAudioLoader *audioLoader = IAudioLoader::createFromFile(filename);
 	load(audioLoader);
 	delete audioLoader;
 }

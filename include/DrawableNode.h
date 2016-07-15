@@ -20,15 +20,15 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	};
 
 	/// Constructor for a drawable node with a parent and a specified relative position
-	DrawableNode(SceneNode* parent, float x, float y);
+	DrawableNode(SceneNode *parent, float x, float y);
 	/// Constructor for a drawable node with a parent and positioned in the relative origin
-	explicit DrawableNode(SceneNode* parent);
+	explicit DrawableNode(SceneNode *parent);
 	/// Constructor for a drawable node with no parent and positioned in the origin
 	DrawableNode();
 	virtual ~DrawableNode();
 
 	/// Updates the draw command and adds it to the queue
-	virtual void draw(RenderQueue& renderQueue);
+	virtual void draw(RenderQueue &renderQueue);
 
 	/// Returns the node rendering layer
 	unsigned int layer() const;
@@ -37,16 +37,16 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 
   protected:
 	/// The render command class associated with this node
-	RenderCommand* renderCommand_;
+	RenderCommand *renderCommand_;
 
 	/// Updates the render command
 	virtual void updateRenderCommand() = 0;
 
   private:
 	/// Private copy constructor
-	DrawableNode(const DrawableNode&);
+	DrawableNode(const DrawableNode &);
 	/// Private assignment operator
-	DrawableNode& operator=(const DrawableNode&);
+	DrawableNode &operator=(const DrawableNode &);
 };
 
 }

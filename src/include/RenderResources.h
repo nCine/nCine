@@ -24,10 +24,10 @@ class RenderResources
 	} VertexFormatPos2Tex2;
 
 	/// Returns the OpenGL VBO of a quad made of two triangles, used by every sprite
-	static inline const GLBufferObject* quadVbo() { return quadVbo_; }
-	static inline const GLShaderProgram* spriteShaderProgram() { return spriteShaderProgram_; }
-	static inline const GLShaderProgram* textnodeShaderProgram() { return textnodeShaderProgram_; }
-	static inline const GLShaderProgram* colorShaderProgram() { return colorShaderProgram_; }
+	static inline const GLBufferObject *quadVbo() { return quadVbo_; }
+	static inline const GLShaderProgram *spriteShaderProgram() { return spriteShaderProgram_; }
+	static inline const GLShaderProgram *textnodeShaderProgram() { return textnodeShaderProgram_; }
+	static inline const GLShaderProgram *colorShaderProgram() { return colorShaderProgram_; }
 
   private:
 	static GLBufferObject *quadVbo_;
@@ -41,9 +41,9 @@ class RenderResources
 	/// Static class, no constructor
 	RenderResources();
 	/// Static class, no copy constructor
-	RenderResources(const RenderResources& other);
+	RenderResources(const RenderResources &other);
 	/// Static class, no assignement operator
-	RenderResources& operator=(const RenderResources& other);
+	RenderResources &operator=(const RenderResources &other);
 
 	/// The `Application` class needs to create and dispose the resources
 	friend class Application;

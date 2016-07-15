@@ -28,14 +28,14 @@ class ITextureLoader
 	/// Returns the texture data size in bytes for the specified MIP map level
 	long dataSize(unsigned int mipMapLevel) const;
 	/// Returns the texture format object
-	inline const TextureFormat& texFormat() const { return texFormat_; }
+	inline const TextureFormat &texFormat() const { return texFormat_; }
 	/// Returns the pointer to pixel data
-	inline const GLubyte* pixels() const { return pixels_; }
+	inline const GLubyte *pixels() const { return pixels_; }
 	/// Returns the pointer to pixel data for the specified MIP map level
-	const GLubyte* pixels(unsigned int mipMapLevel) const;
+	const GLubyte *pixels(unsigned int mipMapLevel) const;
 
 	/// Returns the proper texture loader according to the file extension
-	static ITextureLoader* createFromFile(const char *filename);
+	static ITextureLoader *createFromFile(const char *filename);
 
   protected:
 	/// Texture file handle
@@ -50,7 +50,7 @@ class ITextureLoader
 	long *mipDataOffsets_;
 	long *mipDataSizes_;
 	TextureFormat texFormat_;
-	GLubyte* pixels_;
+	GLubyte *pixels_;
 
 	explicit ITextureLoader(const char *filename);
 	explicit ITextureLoader(IFile *fileHandle);

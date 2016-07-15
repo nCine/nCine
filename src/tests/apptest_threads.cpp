@@ -35,7 +35,7 @@ void threadFunction(void *arg)
 
 }
 
-nc::IAppEventHandler* createApphandler()
+nc::IAppEventHandler *createApphandler()
 {
 	return new MyEventHandler;
 }

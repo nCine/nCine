@@ -14,10 +14,10 @@ class ArrayIndexer : public IIndexer
 	ArrayIndexer();
 	~ArrayIndexer();
 
-	virtual unsigned int addObject(Object* object);
+	virtual unsigned int addObject(Object *object);
 	virtual void removeObject(unsigned int id);
 
-	virtual Object* object(unsigned int id) const;
+	virtual Object *object(unsigned int id) const;
 
 	virtual bool isEmpty() const { return numObjects_ == 0; }
 	virtual unsigned int size() const { return numObjects_; }
@@ -27,12 +27,12 @@ class ArrayIndexer : public IIndexer
   private:
 	unsigned int numObjects_;
 	unsigned int nextId_;
-	Array<Object*> pointers_;
+	Array<Object *> pointers_;
 
 	/// Private copy constructor
-	ArrayIndexer(const ArrayIndexer&);
+	ArrayIndexer(const ArrayIndexer &);
 	/// Private assignment operator
-	ArrayIndexer& operator=(const ArrayIndexer&);
+	ArrayIndexer &operator=(const ArrayIndexer &);
 };
 
 }

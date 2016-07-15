@@ -36,9 +36,9 @@ void GLShaderAttributes::setProgram(GLShaderProgram *shaderProgram)
 	importAttributes();
 }
 
-GLVertexAttribute* GLShaderAttributes::attribute(const char *name)
+GLVertexAttribute *GLShaderAttributes::attribute(const char *name)
 {
-	GLVertexAttribute* vertexAttribute = NULL;
+	GLVertexAttribute *vertexAttribute = NULL;
 
 	if (shaderProgram_)
 	{
@@ -63,7 +63,7 @@ void GLShaderAttributes::defineVertexPointers(GLuint boundVboHandle)
 	{
 		for (StringHashMap<GLVertexAttribute>::Iterator i = vertexAttributes_.begin(); i != vertexAttributes_.end(); ++i)
 		{
-			GLVertexAttribute& attribute = *i;
+			GLVertexAttribute &attribute = *i;
 			int location = attribute.shaderAttribute()->location();
 			if (definedPointers_[location] != attribute || definedPointers_[location].boundVbo() != boundVboHandle)
 			{
@@ -98,7 +98,7 @@ void GLShaderAttributes::importAttributes()
 
 	for (unsigned int i = 0; i < count; i++)
 	{
-		const GLAttribute& attribute = shaderProgram_->attributes_[i];
+		const GLAttribute &attribute = shaderProgram_->attributes_[i];
 		GLVertexAttribute vertexAttribute(&attribute);
 
 		vertexAttributes_[attribute.name()] = vertexAttribute;
@@ -111,11 +111,11 @@ GLShaderAttributes::GLVertexAttribPointerState::GLVertexAttribPointerState()
 
 }
 
-bool GLShaderAttributes::GLVertexAttribPointerState::operator==(const GLVertexAttribute& attribute) const
+bool GLShaderAttributes::GLVertexAttribPointerState::operator==(const GLVertexAttribute &attribute) const
 {
 	if (attribute.shaderAttribute()->numComponents() == size_ &&
-		attribute.shaderAttribute()->basicType() == type_ &&
-		attribute.vboStride() == vboStride_ && attribute.vboPointer() == vboPointer_)
+	    attribute.shaderAttribute()->basicType() == type_ &&
+	    attribute.vboStride() == vboStride_ && attribute.vboPointer() == vboPointer_)
 	{
 		return true;
 	}
@@ -125,12 +125,12 @@ bool GLShaderAttributes::GLVertexAttribPointerState::operator==(const GLVertexAt
 	}
 }
 
-bool GLShaderAttributes::GLVertexAttribPointerState::operator!=(const GLVertexAttribute& attribute) const
+bool GLShaderAttributes::GLVertexAttribPointerState::operator!=(const GLVertexAttribute &attribute) const
 {
 	return !operator==(attribute);
 }
 
-GLShaderAttributes::GLVertexAttribPointerState& GLShaderAttributes::GLVertexAttribPointerState::operator=(const GLVertexAttribute& attribute)
+GLShaderAttributes::GLVertexAttribPointerState &GLShaderAttributes::GLVertexAttribPointerState::operator=(const GLVertexAttribute &attribute)
 {
 	size_ = attribute.shaderAttribute()->numComponents();
 	type_ = attribute.shaderAttribute()->basicType();

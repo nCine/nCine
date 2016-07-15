@@ -33,7 +33,7 @@ Font::~Font()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-const FontGlyph* Font::glyph(unsigned int glyphId) const
+const FontGlyph *Font::glyph(unsigned int glyphId) const
 {
 	if (glyphId < MaxGlyphs)
 	{
@@ -105,7 +105,8 @@ void Font::parseFntFile(IFile *fileHandle)
 			sscanf(buffer, "kerning first=%d second=%d amount=%d ", &glyphId, &secondGlyphId, &kerningAmount);
 			glyphs_[glyphId].addKerning(secondGlyphId, kerningAmount);
 		}
-	} while (strchr(buffer, '\n') && (buffer = strchr(buffer, '\n')+1) < fileBuffer + fileHandle->size());
+	}
+	while (strchr(buffer, '\n') && (buffer = strchr(buffer, '\n') + 1) < fileBuffer + fileHandle->size());
 
 	LOGI_X("FNT file parsed: %u glyphs and %u kernings", numGlyphs_, numKernings_);
 	delete[] fileBuffer;

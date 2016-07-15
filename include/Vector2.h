@@ -19,29 +19,29 @@ class Vector2
 
 	void set(T xx, T yy);
 
-	T* data();
-	const T* data() const;
+	T *data();
+	const T *data() const;
 
-	T& operator[](unsigned int index);
-	const T& operator[](unsigned int index) const;
+	T &operator[](unsigned int index);
+	const T &operator[](unsigned int index) const;
 
-	bool operator==(const Vector2& v) const;
+	bool operator==(const Vector2 &v) const;
 	Vector2 operator-() const;
 
-	Vector2& operator+=(const Vector2& v);
-	Vector2& operator-=(const Vector2& v);
-	Vector2& operator*=(const Vector2& v);
-	Vector2& operator/=(const Vector2& v);
+	Vector2 &operator+=(const Vector2 &v);
+	Vector2 &operator-=(const Vector2 &v);
+	Vector2 &operator*=(const Vector2 &v);
+	Vector2 &operator/=(const Vector2 &v);
 
-	Vector2& operator+=(T s);
-	Vector2& operator-=(T s);
-	Vector2& operator*=(T s);
-	Vector2& operator/=(T s);
+	Vector2 &operator+=(T s);
+	Vector2 &operator-=(T s);
+	Vector2 &operator*=(T s);
+	Vector2 &operator/=(T s);
 
-	Vector2 operator+(const Vector2& v) const;
-	Vector2 operator-(const Vector2& v) const;
-	Vector2 operator*(const Vector2& v) const;
-	Vector2 operator/(const Vector2& v) const;
+	Vector2 operator+(const Vector2 &v) const;
+	Vector2 operator-(const Vector2 &v) const;
+	Vector2 operator*(const Vector2 &v) const;
+	Vector2 operator/(const Vector2 &v) const;
 
 	Vector2 operator+(T s) const;
 	Vector2 operator-(T s) const;
@@ -51,9 +51,9 @@ class Vector2
 	T length() const;
 	T sqrLength() const;
 	Vector2 normalized() const;
-	Vector2& normalize();
+	Vector2 &normalize();
 
-	template <class S> friend S dot(const Vector2<S>& v1, const Vector2<S>& v2);
+	template <class S> friend S dot(const Vector2<S> &v1, const Vector2<S> &v2);
 
 	/// A vector with all zero elements
 	static const Vector2 Zero;
@@ -74,31 +74,31 @@ inline void Vector2<T>::set(T xx, T yy)
 }
 
 template <class T>
-T* Vector2<T>::data()
+T *Vector2<T>::data()
 {
 	return &x;
 }
 
 template <class T>
-const T* Vector2<T>::data() const
+const T *Vector2<T>::data() const
 {
 	return &x;
 }
 
 template <class T>
-inline T& Vector2<T>::operator[](unsigned int index)
+inline T &Vector2<T>::operator[](unsigned int index)
 {
 	return (&x)[index];
 }
 
 template <class T>
-inline const T& Vector2<T>::operator[](unsigned int index) const
+inline const T &Vector2<T>::operator[](unsigned int index) const
 {
 	return (&x)[index];
 }
 
 template <class T>
-inline bool Vector2<T>::operator==(const Vector2& v) const
+inline bool Vector2<T>::operator==(const Vector2 &v) const
 {
 	return (x == v.x && y == v.y);
 }
@@ -110,7 +110,7 @@ inline Vector2<T> Vector2<T>::operator-() const
 }
 
 template <class T>
-inline Vector2<T>& Vector2<T>::operator+=(const Vector2& v)
+inline Vector2<T> &Vector2<T>::operator+=(const Vector2 &v)
 {
 	x += v.x;
 	y += v.y;
@@ -119,7 +119,7 @@ inline Vector2<T>& Vector2<T>::operator+=(const Vector2& v)
 }
 
 template <class T>
-inline Vector2<T>& Vector2<T>::operator-=(const Vector2& v)
+inline Vector2<T> &Vector2<T>::operator-=(const Vector2 &v)
 {
 	x -= v.x;
 	y -= v.y;
@@ -128,7 +128,7 @@ inline Vector2<T>& Vector2<T>::operator-=(const Vector2& v)
 }
 
 template <class T>
-inline Vector2<T>& Vector2<T>::operator*=(const Vector2& v)
+inline Vector2<T> &Vector2<T>::operator*=(const Vector2 &v)
 {
 	x *= v.x;
 	y *= v.y;
@@ -137,7 +137,7 @@ inline Vector2<T>& Vector2<T>::operator*=(const Vector2& v)
 }
 
 template <class T>
-inline Vector2<T>& Vector2<T>::operator/=(const Vector2& v)
+inline Vector2<T> &Vector2<T>::operator/=(const Vector2 &v)
 {
 	x /= v.x;
 	y /= v.y;
@@ -146,7 +146,7 @@ inline Vector2<T>& Vector2<T>::operator/=(const Vector2& v)
 }
 
 template <class T>
-inline Vector2<T>& Vector2<T>::operator+=(T s)
+inline Vector2<T> &Vector2<T>::operator+=(T s)
 {
 	x += s;
 	y += s;
@@ -155,7 +155,7 @@ inline Vector2<T>& Vector2<T>::operator+=(T s)
 }
 
 template <class T>
-inline Vector2<T>& Vector2<T>::operator-=(T s)
+inline Vector2<T> &Vector2<T>::operator-=(T s)
 {
 	x -= s;
 	y -= s;
@@ -164,7 +164,7 @@ inline Vector2<T>& Vector2<T>::operator-=(T s)
 }
 
 template <class T>
-inline Vector2<T>& Vector2<T>::operator*=(T s)
+inline Vector2<T> &Vector2<T>::operator*=(T s)
 {
 	x *= s;
 	y *= s;
@@ -173,7 +173,7 @@ inline Vector2<T>& Vector2<T>::operator*=(T s)
 }
 
 template <class T>
-inline Vector2<T>& Vector2<T>::operator/=(T s)
+inline Vector2<T> &Vector2<T>::operator/=(T s)
 {
 	x /= s;
 	y /= s;
@@ -182,71 +182,71 @@ inline Vector2<T>& Vector2<T>::operator/=(T s)
 }
 
 template <class T>
-inline Vector2<T> Vector2<T>::operator+(const Vector2& v) const
+inline Vector2<T> Vector2<T>::operator+(const Vector2 &v) const
 {
 	return Vector2(x + v.x,
-				   y + v.y);
+	               y + v.y);
 }
 
 template <class T>
-inline Vector2<T> Vector2<T>::operator-(const Vector2& v) const
+inline Vector2<T> Vector2<T>::operator-(const Vector2 &v) const
 {
 	return Vector2(x - v.x,
-				   y - v.y);
+	               y - v.y);
 }
 
 template <class T>
-inline Vector2<T> Vector2<T>::operator*(const Vector2& v) const
+inline Vector2<T> Vector2<T>::operator*(const Vector2 &v) const
 {
 	return Vector2(x * v.x,
-				   y * v.y);
+	               y * v.y);
 }
 
 template <class T>
-inline Vector2<T> Vector2<T>::operator/(const Vector2& v) const
+inline Vector2<T> Vector2<T>::operator/(const Vector2 &v) const
 {
 	return Vector2(x / v.x,
-				   y / v.y);
+	               y / v.y);
 }
 
 template <class T>
 inline Vector2<T> Vector2<T>::operator+(T s) const
 {
 	return Vector2(x + s,
-				   y + s);
+	               y + s);
 }
 
 template <class T>
 inline Vector2<T> Vector2<T>::operator-(T s) const
 {
 	return Vector2(x - s,
-				   y - s);
+	               y - s);
 }
 
 template <class T>
 inline Vector2<T> Vector2<T>::operator*(T s) const
 {
 	return Vector2(x * s,
-				   y * s);
+	               y * s);
 }
 
 template <class T>
 inline Vector2<T> Vector2<T>::operator/(T s) const
 {
 	return Vector2(x / s,
-				   y / s);
+	               y / s);
 }
 
 template <class T>
 inline T Vector2<T>::length() const
 {
-	return sqrt(x*x + y*y);
+	return sqrt(x * x + y * y);
 }
 
 template <class T>
 inline T Vector2<T>::sqrLength() const
 {
-	return x*x + y*y;
+	return x * x + y * y;
 }
 
 template <class T>
@@ -257,7 +257,7 @@ inline Vector2<T> Vector2<T>::normalized() const
 }
 
 template <class T>
-inline Vector2<T>& Vector2<T>::normalize()
+inline Vector2<T> &Vector2<T>::normalize()
 {
 	T len = length();
 
@@ -268,10 +268,10 @@ inline Vector2<T>& Vector2<T>::normalize()
 }
 
 template <class S>
-inline S dot(const Vector2<S>& v1, const Vector2<S>& v2)
+inline S dot(const Vector2<S> &v1, const Vector2<S> &v2)
 {
 	return S(v1.x * v2.x +
-			 v1.y * v2.y);
+	         v1.y * v2.y);
 }
 
 template <class T> const Vector2<T> Vector2<T>::Zero(0, 0);

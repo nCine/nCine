@@ -70,7 +70,7 @@ void TextureLoaderSdl::init()
 	width_ = sdlSurface_->w;
 	height_ = sdlSurface_->h;
 	mipMapCount_ = 1; // No MIP Mapping
-	pixels_ = static_cast<GLubyte*>(sdlSurface_->pixels);
+	pixels_ = static_cast<GLubyte *>(sdlSurface_->pixels);
 }
 
 }

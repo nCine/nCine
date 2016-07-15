@@ -113,12 +113,14 @@ int partition(uint32_t *array, int start, int end)
 		do
 		{
 			j--;
-		} while (array[j] > pivot);
+		}
+		while (array[j] > pivot);
 
 		do
 		{
 			i++;
-		} while (array[i] < pivot);
+		}
+		while (array[i] < pivot);
 
 		if (i < j)
 		{
@@ -130,7 +132,8 @@ int partition(uint32_t *array, int start, int end)
 		{
 			quit = 0;
 		}
-	} while (quit);
+	}
+	while (quit);
 
 	return j;
 }

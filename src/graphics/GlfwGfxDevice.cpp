@@ -8,7 +8,7 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-GLFWwindow* GlfwGfxDevice::windowHandle_ = NULL;
+GLFWwindow *GlfwGfxDevice::windowHandle_ = NULL;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -101,7 +101,7 @@ void GlfwGfxDevice::initGraphics()
 
 void GlfwGfxDevice::initDevice()
 {
-	GLFWmonitor* monitor = NULL;
+	GLFWmonitor *monitor = NULL;
 	if (isFullScreen_)
 	{
 		monitor = glfwGetPrimaryMonitor();
@@ -153,7 +153,7 @@ void GlfwGfxDevice::initDevice()
 #endif
 }
 
-void GlfwGfxDevice::errorCallback(int error, const char* description)
+void GlfwGfxDevice::errorCallback(int error, const char *description)
 {
 	LOGE_X("(%d) %s", error, description);
 }

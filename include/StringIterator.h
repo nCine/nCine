@@ -15,9 +15,9 @@ struct IteratorTraits<StringIterator<false> >
 	/// Type of the values deferenced by the iterator
 	typedef char ValueType;
 	/// Pointer to the type of the values deferenced by the iterator
-	typedef char* Pointer;
+	typedef char *Pointer;
 	/// Reference to the type of the values deferenced by the iterator
-	typedef char& Reference;
+	typedef char &Reference;
 	/// Type trait for iterator category
 	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
 };
@@ -29,9 +29,9 @@ struct IteratorTraits<StringIterator<true> >
 	/// Type of the values deferenced by the iterator (never const)
 	typedef char ValueType;
 	/// Pointer to the type of the values deferenced by the iterator
-	typedef const char* Pointer;
+	typedef const char *Pointer;
 	/// Reference to the type of the values deferenced by the iterator
-	typedef const char& Reference;
+	typedef const char &Reference;
 	/// Type trait for iterator category
 	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
 };
@@ -50,49 +50,49 @@ class StringIterator
 		: charPtr_(c) { }
 
 	/// Copy constructor to implicitly convert a non constant iterator to a constant one
-	StringIterator(const StringIterator<false>& it)
+	StringIterator(const StringIterator<false> &it)
 		: charPtr_(it.charPtr_) { }
 
 	/// Deferencing operator
 	Reference operator*() const;
 
 	/// Iterates to the next element (prefix)
-	StringIterator& operator++();
+	StringIterator &operator++();
 	/// Iterates to the next element (postfix)
 	StringIterator operator++(int);
 
 	/// Iterates to the previous element (prefix)
-	StringIterator& operator--();
+	StringIterator &operator--();
 	/// Iterates to the previous element (postfix)
 	StringIterator operator--(int);
 
 	/// Compound addition operator
-	StringIterator& operator+=(int n);
+	StringIterator &operator+=(int n);
 	/// Compound subtraction operator
-	StringIterator& operator-=(int n);
+	StringIterator &operator-=(int n);
 	/// Addition operator
 	StringIterator operator+(int n) const;
 	/// Subtraction operator
 	StringIterator operator-(int n) const;
 	/// Pointer subtraction operator
-	friend inline int operator-(const StringIterator& lhs, const StringIterator& rhs)	{ return (lhs.charPtr_ - rhs.charPtr_); }
+	friend inline int operator-(const StringIterator &lhs, const StringIterator &rhs)	{ return (lhs.charPtr_ - rhs.charPtr_); }
 
 	/// Subscript operator
 	Reference operator[](int n) const;
 
 	/// Equality operator
-	friend inline bool operator==(const StringIterator& lhs, const StringIterator& rhs) { return lhs.charPtr_ == rhs.charPtr_; }
+	friend inline bool operator==(const StringIterator &lhs, const StringIterator &rhs) { return lhs.charPtr_ == rhs.charPtr_; }
 	/// Inequality operator
-	friend inline bool operator!=(const StringIterator& lhs, const StringIterator& rhs) { return lhs.charPtr_ != rhs.charPtr_; }
+	friend inline bool operator!=(const StringIterator &lhs, const StringIterator &rhs) { return lhs.charPtr_ != rhs.charPtr_; }
 
 	/// Greater than operator
-	friend inline bool operator>(const StringIterator& lhs, const StringIterator& rhs) { return lhs.charPtr_ > rhs.charPtr_; }
+	friend inline bool operator>(const StringIterator &lhs, const StringIterator &rhs) { return lhs.charPtr_ > rhs.charPtr_; }
 	/// Less than operator
-	friend inline bool operator<(const StringIterator& lhs, const StringIterator& rhs) { return lhs.charPtr_ < rhs.charPtr_; }
+	friend inline bool operator<(const StringIterator &lhs, const StringIterator &rhs) { return lhs.charPtr_ < rhs.charPtr_; }
 	/// Greater than or equal to operator
-	friend inline bool operator>=(const StringIterator& lhs, const StringIterator& rhs) { return lhs.charPtr_ >= rhs.charPtr_; }
+	friend inline bool operator>=(const StringIterator &lhs, const StringIterator &rhs) { return lhs.charPtr_ >= rhs.charPtr_; }
 	/// Less than or equal to operator
-	friend inline bool operator<=(const StringIterator& lhs, const StringIterator& rhs) { return lhs.charPtr_ <= rhs.charPtr_; }
+	friend inline bool operator<=(const StringIterator &lhs, const StringIterator &rhs) { return lhs.charPtr_ <= rhs.charPtr_; }
 
   private:
 	Pointer charPtr_;
@@ -108,7 +108,7 @@ inline typename StringIterator<IsConst>::Reference StringIterator<IsConst>::oper
 }
 
 template <bool IsConst>
-inline StringIterator<IsConst>& StringIterator<IsConst>::operator++()
+inline StringIterator<IsConst> &StringIterator<IsConst>::operator++()
 {
 	++charPtr_;
 
@@ -127,7 +127,7 @@ inline StringIterator<IsConst> StringIterator<IsConst>::operator++(int)
 }
 
 template <bool IsConst>
-inline StringIterator<IsConst>& StringIterator<IsConst>::operator--()
+inline StringIterator<IsConst> &StringIterator<IsConst>::operator--()
 {
 	--charPtr_;
 
@@ -146,7 +146,7 @@ inline StringIterator<IsConst> StringIterator<IsConst>::operator--(int)
 }
 
 template <bool IsConst>
-inline StringIterator<IsConst>& StringIterator<IsConst>::operator+=(int n)
+inline StringIterator<IsConst> &StringIterator<IsConst>::operator+=(int n)
 {
 	charPtr_ += n;
 
@@ -154,7 +154,7 @@ inline StringIterator<IsConst>& StringIterator<IsConst>::operator+=(int n)
 }
 
 template <bool IsConst>
-inline StringIterator<IsConst>& StringIterator<IsConst>::operator-=(int n)
+inline StringIterator<IsConst> &StringIterator<IsConst>::operator-=(int n)
 {
 	charPtr_ -= n;
 

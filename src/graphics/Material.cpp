@@ -18,7 +18,7 @@ Material::Material()
 
 }
 
-Material::Material(GLShaderProgram* program, GLTexture* texture)
+Material::Material(GLShaderProgram *program, GLTexture *texture)
 	: isTransparent_(false), shaderProgram_(program), texture_(texture)
 {
 	shaderUniforms_.setProgram(shaderProgram_);
@@ -52,14 +52,14 @@ void Material::setShaderProgram(ShaderProgramPresets preset)
 	}
 }
 
-void Material::setShaderProgram(GLShaderProgram* program)
+void Material::setShaderProgram(GLShaderProgram *program)
 {
 	shaderProgram_ = program;
 	shaderUniforms_.setProgram(shaderProgram_);
 	shaderAttributes_.setProgram(shaderProgram_);
 }
 
-void Material::setTexture(const Texture& texture)
+void Material::setTexture(const Texture &texture)
 {
 	texture_ = texture.glTexture_;
 }

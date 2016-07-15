@@ -23,7 +23,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 		ALIGN_RIGHT
 	};
 
-	TextNode(SceneNode* parent, Font *font);
+	TextNode(SceneNode *parent, Font *font);
 
 	/// Returns rendered text width
 	float width() const;
@@ -45,7 +45,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Sets the string to render
 	void setString(const String &string);
 
-	virtual void draw(RenderQueue& renderQueue);
+	virtual void draw(RenderQueue &renderQueue);
 
 	inline static ObjectType sType() { return TEXTNODE_TYPE; }
 
@@ -87,7 +87,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Calculates absolute scale factor on the fly
 	float currentAbsScale() const;
 	/// Fills the batch draw command with data from a glyph
-	void processGlyph(const FontGlyph* glyph);
+	void processGlyph(const FontGlyph *glyph);
 
 	virtual void updateRenderCommand();
 };

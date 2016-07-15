@@ -24,9 +24,9 @@ class AudioLoaderOgg : public IAudioLoader
 	mutable OggVorbis_File oggFile_;
 
 	/// Private copy constructor
-	AudioLoaderOgg(const AudioLoaderOgg&);
+	AudioLoaderOgg(const AudioLoaderOgg &);
 	/// Private assignment operator
-	AudioLoaderOgg& operator=(const AudioLoaderOgg&);
+	AudioLoaderOgg &operator=(const AudioLoaderOgg &);
 
 	void init();
 };
