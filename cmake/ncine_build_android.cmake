@@ -51,7 +51,8 @@ if(NCINE_BUILD_ANDROID)
 
 	file(COPY android/gradle.properties DESTINATION android)
 	file(COPY android/src/main/AndroidManifest.xml DESTINATION android/src/main)
-	file(COPY android/src/main/java/com/encelo/ncine/LoadLibraries.java DESTINATION android/src/main/java/com/encelo/ncine)
+	file(COPY android/src/main/java/io/github/ncine/LoadLibraries.java DESTINATION android/src/main/java/io/github/ncine)
+	file(COPY android/src/main/java/io/github/ncine/LoadLibrariesTV.java DESTINATION android/src/main/java/io/github/ncine)
 	file(COPY android/src/main/jni/main.cpp DESTINATION android/src/main/jni)
 	file(COPY android/src/main/res/values/strings.xml DESTINATION android/src/main/res/values)
 	file(COPY ${NCINE_DATA_DIR}/icons/icon48.png DESTINATION android/src/main/res/mipmap-mdpi)
@@ -64,6 +65,8 @@ if(NCINE_BUILD_ANDROID)
 	file(RENAME ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xxhdpi/icon144.png ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xxhdpi/ic_launcher.png)
 	file(COPY ${NCINE_DATA_DIR}/icons/icon192.png DESTINATION android/src/main/res/mipmap-xxxhdpi)
 	file(RENAME ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xxxhdpi/icon192.png ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
+	file(COPY ${NCINE_DATA_DIR}/icons/banner320x180.png DESTINATION android/src/main/res/drawable-xhdpi)
+	file(RENAME ${CMAKE_BINARY_DIR}/android/src/main/res/drawable-xhdpi/banner320x180.png ${CMAKE_BINARY_DIR}/android/src/main/res/drawable-xhdpi/banner.png)
 	file(COPY ${EXTERNAL_ANDROID_DIR}/ DESTINATION android/src/main/jni/)
 
 	foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
@@ -98,8 +101,10 @@ if(NCINE_BUILD_ANDROID)
 			DESTINATION ${ANDROID_INSTALL_DESTINATION} COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/AndroidManifest.xml
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/java/com/encelo/ncine/LoadLibraries.java
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/java/com/encelo/ncine COMPONENT android)
+		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/java/io/github/ncine/LoadLibraries.java
+			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/java/io/github/ncine COMPONENT android)
+		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/java/io/github/ncine/LoadLibrariesTV.java
+			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/java/io/github/ncine COMPONENT android)
 		install(FILES ${CMAKE_SOURCE_DIR}/android/src/main/jni/Android-devdist.mk
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/jni RENAME Android.mk COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/jni/Application-devdist.mk
@@ -118,6 +123,8 @@ if(NCINE_BUILD_ANDROID)
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-xxhdpi/ic_launcher.png COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xxxhdpi/ic_launcher.png
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-xxxhdpi/ic_launcher.png COMPONENT android)
+		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/drawable-xhdpi/banner.png
+			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/drawable-xhdpi/banner.png COMPONENT android)
 
 		foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
 			install(FILES ${CMAKE_BINARY_DIR}/android/src/main/libs/${ARCHITECTURE}/libncine.so

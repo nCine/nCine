@@ -20,6 +20,12 @@ if(NCINE_BUILD_DOCUMENTATION)
 		set(DOXYGEN_PROJECT_LOGO ${NCINE_DATA_DIR}/icons/icon48.png)
 	endif()
 
+	set(NCINE_GENERATE_QHP OFF)
+	if(NCINE_GENERATE_QHP)
+		set(DOXYGEN_GENERATE_QHP "YES")
+		set(DOXYGEN_QHP_NAMESPACE "io.github.ncine.${NCINE_VERSION}")
+	endif()
+
 	set(DOXYFILE_IN ${CMAKE_SOURCE_DIR}/Doxyfile.in)
 	set(DOXYFILE ${CMAKE_BINARY_DIR}/Doxyfile)
 	configure_file(${DOXYFILE_IN} ${DOXYFILE} @ONLY)
