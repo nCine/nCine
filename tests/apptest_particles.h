@@ -23,7 +23,6 @@ class MyEventHandler
   public:
 	virtual void onInit();
 	virtual void onFrameStart();
-	virtual void onFrameEnd();
 	virtual void onShutdown();
 
 #ifdef __ANDROID__
@@ -35,6 +34,8 @@ class MyEventHandler
 	virtual void onMouseButtonPressed(const nc::MouseEvent &event);
 	virtual void onMouseMoved(const nc::MouseState &state);
 #endif
+	virtual void onJoyAxisMoved(const nc::JoyAxisEvent &event);
+	virtual void onJoyDisconnected(const nc::JoyConnectionEvent &event);
 
   private:
 	static const unsigned int NumParticles = 50;
@@ -43,6 +44,9 @@ class MyEventHandler
 	nc::ParticleSystem *particleSystem_;
 	nc::Timer *emitTimer_;
 	nc::Vector2f emitVector_;
+
+	nc::Vector2f joyVectorLeft_;
+	nc::Vector2f joyVectorRight_;
 };
 
 #endif

@@ -33,6 +33,15 @@ class Array
 	/// Constant iterator type
 	typedef ArrayIterator<T, true> ConstIterator;
 
+	/// Default capacity for objects created by the default constructor
+	static const unsigned int DefaultCapacity = 8;
+
+	/// Default constructor
+	Array()
+		: array_(NULL), size_(0), capacity_(0), fixedCapacity_(false)
+	{
+		setCapacity(DefaultCapacity);
+	}
 	/// Constructs an array with explicit capacity
 	explicit Array(unsigned int capacity)
 		: array_(NULL), size_(0), capacity_(0), fixedCapacity_(false)

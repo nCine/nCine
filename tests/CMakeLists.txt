@@ -45,7 +45,7 @@ if((SDLIMAGE_FOUND OR PNG_FOUND) AND WEBP_FOUND)
 endif()
 
 foreach(APPTEST ${APPTESTS})
-	add_executable(${APPTEST} main.cpp ${APPTEST}.cpp)
+	add_executable(${APPTEST} main.cpp ${APPTEST}.cpp apptest_joymapping.h)
 	target_link_libraries(${APPTEST} ncine)
 	set_target_properties(${APPTEST} PROPERTIES FOLDER "AppTests")
 	if(APPLE)

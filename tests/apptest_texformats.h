@@ -33,9 +33,19 @@ class MyEventHandler
 	virtual void onKeyReleased(const nc::KeyboardEvent &event);
 	virtual void onMouseButtonReleased(const nc::MouseEvent &event);
 #endif
+	virtual void onJoyAxisMoved(const nc::JoyAxisEvent &event);
+	virtual void onJoyDisconnected(const nc::JoyConnectionEvent &event);
 
   private:
 	static const int MaxTexFormats = 32;
+
+	enum Direction
+	{
+		UP,
+		DOWN,
+		LEFT,
+		RIGHT
+	};
 
 	static int selected_;
 	static int newSelection_;
@@ -49,7 +59,8 @@ class MyEventHandler
 	nc::Font *font_;
 	nc::TextNode *textNode_;
 
-	void handleInput(float x, float y);
+	void handleInput(Direction direction);
+	void handleCoordInput(float x, float y);
 };
 
 #endif

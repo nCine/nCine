@@ -4,6 +4,7 @@
 #include "ParticleSystem.h"
 #include "Timer.h"
 #include "IFile.h" // for dataPath()
+#include "apptest_joymapping.h"
 
 #ifdef __ANDROID__
 	#include "AndroidApplication.h"
@@ -15,7 +16,10 @@ namespace {
 	const char *TextureFile = "smoke_256.webp";
 #else
 	const char *TextureFile = "smoke_256.png";
+	const float KeySpeed = 200.0f;
 #endif
+
+const float JoySpeed = 200.0f;
 
 }
 
@@ -53,6 +57,9 @@ void MyEventHandler::onInit()
 
 	emitTimer_ = new nc::Timer();
 	emitTimer_->start();
+
+	joyVectorLeft_ = nc::Vector2f::Zero;
+	joyVectorRight_ = nc::Vector2f::Zero;
 }
 
 void MyEventHandler::onFrameStart()
@@ -62,29 +69,22 @@ void MyEventHandler::onFrameStart()
 		emitTimer_->start();
 		particleSystem_->emitParticles(3, 1.0f, emitVector_);
 	}
-}
 
-void MyEventHandler::onFrameEnd()
-{
+	particleSystem_->move(joyVectorLeft_ * JoySpeed * nc::theApplication().interval());
+	emitVector_ += joyVectorRight_ * JoySpeed * nc::theApplication().interval();
+
 #ifndef __ANDROID__
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
-	if (keyState.isKeyDown(nc::KEY_RIGHT))
-	{
-		particleSystem_->x += 0.1f * nc::theApplication().interval();
-	}
-	else if (keyState.isKeyDown(nc::KEY_LEFT))
-	{
-		particleSystem_->x -= 0.1f * nc::theApplication().interval();
-	}
-	else if (keyState.isKeyDown(nc::KEY_UP))
-	{
-		particleSystem_->y += 0.1f * nc::theApplication().interval();
-	}
-	else if (keyState.isKeyDown(nc::KEY_DOWN))
-	{
-		particleSystem_->y -= 0.1f * nc::theApplication().interval();
-	}
+	if (keyState.isKeyDown(nc::KEY_D)) { particleSystem_->x += KeySpeed * nc::theApplication().interval(); }
+	else if (keyState.isKeyDown(nc::KEY_A)) { particleSystem_->x -= KeySpeed * nc::theApplication().interval(); }
+	if (keyState.isKeyDown(nc::KEY_W)) { particleSystem_->y += KeySpeed * nc::theApplication().interval(); }
+	else if (keyState.isKeyDown(nc::KEY_S)) { particleSystem_->y -= KeySpeed * nc::theApplication().interval(); }
+
+	if (keyState.isKeyDown(nc::KEY_RIGHT)) { emitVector_.x += KeySpeed * nc::theApplication().interval(); }
+	else if (keyState.isKeyDown(nc::KEY_LEFT)) { emitVector_.x -= KeySpeed * nc::theApplication().interval(); }
+	if (keyState.isKeyDown(nc::KEY_UP)) { emitVector_.y += KeySpeed * nc::theApplication().interval(); }
+	else if (keyState.isKeyDown(nc::KEY_DOWN)) { emitVector_.y -= KeySpeed * nc::theApplication().interval(); }
 #endif
 }
 
@@ -113,6 +113,7 @@ void MyEventHandler::onTouchMove(const nc::TouchEvent &event)
 		emitVector_.y = (event.y2 - particleSystem_->y) * 2.5f;
 	}
 }
+
 void MyEventHandler::onAcceleration(const nc::AccelerometerEvent &event)
 {
 	particleSystem_->x += event.y * 0.75f;
@@ -154,3 +155,21 @@ void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 	}
 }
 #endif
+
+void MyEventHandler::onJoyAxisMoved(const nc::JoyAxisEvent &event)
+{
+	if (isAxis(event, AXIS_LX)) { joyVectorLeft_.x = normValue(event, AXIS_LX); }
+	else if (isAxis(event, AXIS_LY)) { joyVectorLeft_.y = -normValue(event, AXIS_LY); }
+
+	if (isAxis(event, AXIS_RX)) { joyVectorRight_.x = normValue(event, AXIS_RX); }
+	else if (isAxis(event, AXIS_RY)) { joyVectorRight_.y = -normValue(event, AXIS_RY); }
+
+	deadZoneNormalize(joyVectorLeft_, LeftStickDeadZone);
+	deadZoneNormalize(joyVectorRight_, RightStickDeadZone);
+}
+
+void MyEventHandler::onJoyDisconnected(const nc::JoyConnectionEvent &event)
+{
+	joyVectorLeft_ = nc::Vector2f::Zero;
+	joyVectorRight_ = nc::Vector2f::Zero;
+}

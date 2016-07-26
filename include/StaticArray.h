@@ -32,7 +32,7 @@ class StaticArray
 	typedef ArrayIterator<T, true> ConstIterator;
 
 	/// Constructs an empty array with fixed capacity
-	explicit StaticArray() : size_(0), capacity_(C) { }
+	StaticArray() : size_(0), capacity_(C) { }
 	/// Constructs an array with the option for it to have the size match its capacity
 	explicit StaticArray(StaticArrayMode::Modes mode)
 		: size_(0), capacity_(C)

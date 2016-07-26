@@ -32,11 +32,14 @@ class MyEventHandler
 	virtual void onMouseButtonPressed(const nc::MouseEvent &event);
 	virtual void onMouseMoved(const nc::MouseState &state);
 #endif
+	virtual void onJoyAxisMoved(const nc::JoyAxisEvent &event);
+	virtual void onJoyDisconnected(const nc::JoyConnectionEvent &event);
 
   private:
 	nc::Texture *texture_;
 	nc::AnimatedSprite *animSprite_;
 	nc::Vector2f destVector_;
+	nc::Vector2f joyVector_;
 };
 
 #endif

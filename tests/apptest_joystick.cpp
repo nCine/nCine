@@ -7,6 +7,7 @@
 #include "Font.h"
 #include "TextNode.h"
 #include "IFile.h" // for dataPath()
+#include "apptest_joymapping.h"
 
 namespace {
 
@@ -18,17 +19,6 @@ namespace {
 	const char *FontTextureFile = "DroidSans32_256.png";
 #endif
 const char *FontFntFile = "DroidSans32_256.fnt";
-
-// Only tested with the Xbox 360 Controller
-#ifdef _WIN32
-	const unsigned int axesMapping[] = { 0, 1, 4, 2, 3, 5 };
-	const int invertAxis[] = { 1, -1, 1, -1, 1, 1 };
-	const unsigned int buttonsMapping[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
-#else
-	const unsigned int axesMapping[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
-	const int invertAxis[] = { 1, 1, 1, 1, 1, 1, 1, 1 };
-	const unsigned int buttonsMapping[] = { 0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 8 };
-#endif
 
 }
 
@@ -98,30 +88,30 @@ void MyEventHandler::onFrameStart()
 		*joyString_ += "Axes:";
 		for (int i = 0; i < numAxes; i++)
 		{
-			axisValues_[i] = nc::theApplication().inputManager().joyAxisNormValue(firstJoy, axesMapping[i]) * invertAxis[axesMapping[i]];
+			axisValues_[i] = nc::theApplication().inputManager().joyAxisNormValue(firstJoy, i);
 			joyString_->formatAppend(" %.2f", axisValues_[i]);
 		}
 		*joyString_ += "\nButtons:";
 		for (int i = 0; i < numButtons; i++)
 		{
-			buttonStates_[i] = nc::theApplication().inputManager().isJoyButtonPressed(firstJoy, buttonsMapping[i]);
+			buttonStates_[i] = nc::theApplication().inputManager().isJoyButtonPressed(firstJoy, i);
 			joyString_->formatAppend(" %u", buttonStates_[i]);
 		}
 	}
 	textNode_->setString(*joyString_);
 
 
-	float xOffset1 = axisValues_[0] * 0.1f;
-	float yOffset1 = -axisValues_[1] * 0.1f;
-	float scale1 = 1.0f + 0.5f * axisValues_[2];
-	sprites_[0]->setPosition(nc::theApplication().width() * (0.25f + xOffset1), nc::theApplication().height() * (0.5f + yOffset1));
-	sprites_[0]->setScale(scale1);
+	nc::Vector2f joyLeftStick(mappedAxisNormValue (firstJoy, AXIS_LX), mappedAxisNormValue (firstJoy, AXIS_LY));
+	nc::Vector2f joyRightStick(mappedAxisNormValue (firstJoy, AXIS_RX), mappedAxisNormValue (firstJoy, AXIS_RY));
+	float joyLeftTrigger = mappedAxisNormValue(firstJoy, AXIS_LTRIGGER);
+	float joyRightTrigger = mappedAxisNormValue(firstJoy, AXIS_RTRIGGER);
+	deadZoneNormalize(joyLeftStick, LeftStickDeadZone);
+	deadZoneNormalize(joyRightStick, RightStickDeadZone);
 
-	float xOffset2 = axisValues_[3] * 0.1f;
-	float yOffset2 = -axisValues_[4] * 0.1f;
-	float scale2 = 1.0f + 0.5f * axisValues_[5];
-	sprites_[1]->setPosition(nc::theApplication().width() * (0.75f + xOffset2), nc::theApplication().height() * (0.5f + yOffset2));
-	sprites_[1]->setScale(scale2);
+	sprites_[0]->setPosition(nc::theApplication().width() * (0.25f + joyLeftStick.x * 0.1f), nc::theApplication().height() * (0.5f - joyLeftStick.y * 0.1f));
+	sprites_[0]->setScale(1.0f + joyLeftTrigger * 0.5f);
+	sprites_[1]->setPosition(nc::theApplication().width() * (0.75f + joyRightStick.x * 0.1f), nc::theApplication().height() * (0.5f - joyRightStick.y * 0.1f));
+	sprites_[1]->setScale(1.0f + joyRightTrigger * 0.5f);
 }
 
 void MyEventHandler::onShutdown()

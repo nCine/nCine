@@ -97,7 +97,6 @@ void AnimatedSprite::setAnimation(int animNum)
 		return;
 	}
 
-
 	if (static_cast<unsigned int>(animNum) >= anims_.size())
 	{
 		currentAnim_ = anims_.size() - 1;
@@ -119,6 +118,7 @@ void AnimatedSprite::setFrame(unsigned int frameNum)
 	if (anims_.isEmpty() == false)
 	{
 		anims_[currentAnim_]->setFrame(frameNum);
+		setTexRect(anims_[currentAnim_]->rect());
 	}
 }
 
