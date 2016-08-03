@@ -22,7 +22,7 @@ const char *FontFntFile = "DroidSans32_256.fnt";
 
 }
 
-nc::IAppEventHandler *createApphandler()
+nc::IAppEventHandler *createAppEventHandler()
 {
 	return new MyEventHandler;
 }

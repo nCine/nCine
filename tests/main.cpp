@@ -15,10 +15,10 @@ class IAppEventHandler;
 
 }
 
-ncine::IAppEventHandler *createApphandler();
+ncine::IAppEventHandler *createAppEventHandler();
 
 int main(int argc, char **argv)
 {
-	ncine::PCApplication::start(createApphandler);
+	ncine::PCApplication::start(createAppEventHandler);
 	return EXIT_SUCCESS;
 }

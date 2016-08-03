@@ -22,7 +22,7 @@ const char *Font3FntFile = "Roboto-Regular32_256.fnt";
 
 }
 
-nc::IAppEventHandler *createApphandler()
+nc::IAppEventHandler *createAppEventHandler()
 {
 	return new MyEventHandler;
 }

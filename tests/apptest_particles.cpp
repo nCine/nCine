@@ -23,7 +23,7 @@ const float JoySpeed = 200.0f;
 
 }
 
-nc::IAppEventHandler *createApphandler()
+nc::IAppEventHandler *createAppEventHandler()
 {
 	return new MyEventHandler;
 }

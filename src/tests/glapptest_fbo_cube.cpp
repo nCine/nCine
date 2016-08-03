@@ -92,7 +92,7 @@ const GLushort cubeIndices[] =
 
 }
 
-nc::IAppEventHandler *createApphandler()
+nc::IAppEventHandler *createAppEventHandler()
 {
 	return new MyEventHandler;
 }

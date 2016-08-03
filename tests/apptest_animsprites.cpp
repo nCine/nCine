@@ -18,7 +18,7 @@ namespace {
 const float SpriteSpeed = 100.0f;
 }
 
-nc::IAppEventHandler *createApphandler()
+nc::IAppEventHandler *createAppEventHandler()
 {
 	return new MyEventHandler;
 }

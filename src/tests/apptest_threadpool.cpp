@@ -5,7 +5,7 @@
 #include "ServiceLocator.h"
 #include "Timer.h"
 
-nc::IAppEventHandler *createApphandler()
+nc::IAppEventHandler *createAppEventHandler()
 {
 	return new MyEventHandler;
 }

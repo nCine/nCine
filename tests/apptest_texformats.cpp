@@ -48,7 +48,7 @@ int MyEventHandler::newSelection_ = 0;
 float MyEventHandler::scale_ = 1.0f;
 float MyEventHandler::newScale_ = 1.0f;
 
-nc::IAppEventHandler *createApphandler()
+nc::IAppEventHandler *createAppEventHandler()
 {
 	return new MyEventHandler;
 }
