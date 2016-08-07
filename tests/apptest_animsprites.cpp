@@ -16,6 +16,7 @@ namespace {
 #endif
 
 const float SpriteSpeed = 100.0f;
+
 }
 
 nc::IAppEventHandler *createAppEventHandler()
@@ -57,9 +58,9 @@ void MyEventHandler::onFrameStart()
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
 	if (keyState.isKeyDown(nc::KEY_RIGHT) || keyState.isKeyDown(nc::KEY_D) ||
-		keyState.isKeyDown(nc::KEY_LEFT) || keyState.isKeyDown(nc::KEY_A) ||
-		keyState.isKeyDown(nc::KEY_UP) || keyState.isKeyDown(nc::KEY_W) ||
-		keyState.isKeyDown(nc::KEY_DOWN) || keyState.isKeyDown(nc::KEY_S))
+	    keyState.isKeyDown(nc::KEY_LEFT) || keyState.isKeyDown(nc::KEY_A) ||
+	    keyState.isKeyDown(nc::KEY_UP) || keyState.isKeyDown(nc::KEY_W) ||
+	    keyState.isKeyDown(nc::KEY_DOWN) || keyState.isKeyDown(nc::KEY_S))
 	{
 		if (reachVector.length() > 1.0f) { reachVector.normalize(); }
 	}
@@ -79,7 +80,7 @@ void MyEventHandler::onFrameStart()
 		reachVector.y = 2.0f;
 		destVector_ = animSprite_->position() + reachVector;
 	}
-	else if (keyState.isKeyDown(nc::KEY_DOWN)  || keyState.isKeyDown(nc::KEY_S))
+	else if (keyState.isKeyDown(nc::KEY_DOWN) || keyState.isKeyDown(nc::KEY_S))
 	{
 		reachVector.y = -2.0f;
 		destVector_ = animSprite_->position() + reachVector;
@@ -119,14 +120,14 @@ void MyEventHandler::onShutdown()
 #ifdef __ANDROID__
 void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 {
-	destVector_.x = event.x;
-	destVector_.y = event.y;
+	destVector_.x = event.pointers[0].x;
+	destVector_.y = event.pointers[0].y;
 }
 
 void MyEventHandler::onTouchMove(const nc::TouchEvent &event)
 {
-	destVector_.x = event.x;
-	destVector_.y = event.y;
+	destVector_.x = event.pointers[0].x;
+	destVector_.y = event.pointers[0].y;
 }
 #else
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)

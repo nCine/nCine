@@ -15,6 +15,10 @@ class FontGlyph;
 class DLL_PUBLIC TextNode : public DrawableNode
 {
   public:
+	/// Default maximum length for a string to be rendered
+	/*! This number affects the size of both the string container and the VBO. */
+	static const unsigned int DefaultStringLength = 256;
+
 	/// Horizontal alignment modes
 	enum Alignment
 	{
@@ -23,6 +27,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 		ALIGN_RIGHT
 	};
 
+	TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength);
 	TextNode(SceneNode *parent, Font *font);
 
 	/// Returns rendered text width
@@ -50,10 +55,6 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	inline static ObjectType sType() { return TEXTNODE_TYPE; }
 
   private:
-	/// Maximum length for a string to be rendered
-	/*! This number affects the size of both the string container and the VBO. */
-	static const unsigned int MaxStringLength = 256;
-
 	/// The string to be rendered
 	String string_;
 	/// Dirty flag for vertices and texture coordinates
@@ -80,6 +81,8 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Horizontal text alignment
 	Alignment alignment_;
 
+	/// Initializes the object with the parameters passed to the constructor
+	void init(unsigned int maxStringLength);
 	/// Calculates rectangle boundaries for the rendered text
 	void calculateBoundaries() const;
 	/// Calculates align offset for a particular line

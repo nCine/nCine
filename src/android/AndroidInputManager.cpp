@@ -263,15 +263,19 @@ bool AndroidInputManager::parseEvent(const AInputEvent *event)
 	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_TOUCHSCREEN) == AINPUT_SOURCE_TOUCHSCREEN &&
 	         AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
 	{
-		touchEvent_.count = AMotionEvent_getPointerCount(event);
-		touchEvent_.id = AMotionEvent_getPointerId(event, 0);
-		touchEvent_.x = AMotionEvent_getX(event, 0);
-		touchEvent_.y = theApplication().height() - AMotionEvent_getY(event, 0);
-		touchEvent_.id2 = AMotionEvent_getPointerId(event, 1);
-		touchEvent_.x2 = AMotionEvent_getX(event, 1);
-		touchEvent_.y2 = theApplication().height() - AMotionEvent_getY(event, 1);
+		const int action = AMotionEvent_getAction(event);
 
-		switch (AMotionEvent_getAction(event))
+		touchEvent_.count = AMotionEvent_getPointerCount(event);
+		touchEvent_.actionIndex = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+		for (unsigned int i = 0; i < touchEvent_.count && i < TouchEvent::MaxPointers; i++)
+		{
+			TouchEvent::Pointer &pointer = touchEvent_.pointers[i];
+			pointer.id = AMotionEvent_getPointerId(event, i);
+			pointer.x = AMotionEvent_getX(event, i);
+			pointer.y = theApplication().height() - AMotionEvent_getY(event, i);
+		}
+
+		switch (action & AMOTION_EVENT_ACTION_MASK)
 		{
 			case AMOTION_EVENT_ACTION_DOWN:
 				inputEventHandler_->onTouchDown(touchEvent_);
@@ -283,10 +287,10 @@ bool AndroidInputManager::parseEvent(const AInputEvent *event)
 				inputEventHandler_->onTouchMove(touchEvent_);
 				break;
 			case AMOTION_EVENT_ACTION_POINTER_DOWN:
-				inputEventHandler_->onSecondaryTouchDown(touchEvent_);
+				inputEventHandler_->onPointerDown(touchEvent_);
 				break;
 			case AMOTION_EVENT_ACTION_POINTER_UP:
-				inputEventHandler_->onSecondaryTouchUp(touchEvent_);
+				inputEventHandler_->onPointerUp(touchEvent_);
 				break;
 		}
 

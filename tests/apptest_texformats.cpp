@@ -198,7 +198,7 @@ void MyEventHandler::onShutdown()
 #ifdef __ANDROID__
 void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 {
-	handleCoordInput(event.x, event.y);
+	handleCoordInput(event.pointers[0].x, event.pointers[0].y);
 }
 #else
 void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)

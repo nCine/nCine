@@ -98,19 +98,19 @@ void MyEventHandler::onShutdown()
 #ifdef __ANDROID__
 void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 {
-	particleSystem_->x = event.x;
-	particleSystem_->y = event.y;
+	particleSystem_->x = event.pointers[0].x;
+	particleSystem_->y = event.pointers[0].y;
 }
 
 void MyEventHandler::onTouchMove(const nc::TouchEvent &event)
 {
-	particleSystem_->x = event.x;
-	particleSystem_->y = event.y;
+	particleSystem_->x = event.pointers[0].x;
+	particleSystem_->y = event.pointers[0].y;
 
 	if (event.count > 1)
 	{
-		emitVector_.x = (event.x2 - particleSystem_->x) * 2.5f;
-		emitVector_.y = (event.y2 - particleSystem_->y) * 2.5f;
+		emitVector_.x = (event.pointers[1].x - particleSystem_->x) * 2.5f;
+		emitVector_.y = (event.pointers[1].y - particleSystem_->y) * 2.5f;
 	}
 }
 

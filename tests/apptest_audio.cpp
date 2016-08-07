@@ -125,7 +125,7 @@ void MyEventHandler::onShutdown()
 #ifdef __ANDROID__
 void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 {
-	if (event.x < nc::theApplication().width() * 0.5f)
+	if (event.pointers[0].x < nc::theApplication().width() * 0.5f)
 	{
 		toggleMusic();
 	}

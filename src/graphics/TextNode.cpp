@@ -10,19 +10,20 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-TextNode::TextNode(SceneNode *parent, Font *font)
-	: DrawableNode(parent, 0, 0), string_(MaxStringLength), dirtyDraw_(true), dirtyBoundaries_(true),
+TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
+	: DrawableNode(parent, 0, 0), string_(maxStringLength), dirtyDraw_(true), dirtyBoundaries_(true),
 	  withKerning_(true), font_(font), interleavedVertices_(32),
 	  xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f), lineLengths_(4), alignment_(ALIGN_LEFT)
 {
-	type_ = TEXTNODE_TYPE;
-	setLayer(DrawableNode::HUD_LAYER);
-	renderCommand_->setType(RenderCommand::TEXT_TYPE);
-	renderCommand_->material().setTransparent(true);
-	renderCommand_->material().setShaderProgram(Material::TEXTNODE_PROGRAM);
-	renderCommand_->material().setTexture(*font_->texture());
-	// MaxStringLength characters, each has 6 vertices with 2 components for position and 2 for texcoords
-	renderCommand_->geometry().createCustomVbo(MaxStringLength * 6 * 2 * 2, GL_DYNAMIC_DRAW);
+	init(maxStringLength);
+}
+
+TextNode::TextNode(SceneNode *parent, Font *font)
+	: DrawableNode(parent, 0, 0), string_(DefaultStringLength), dirtyDraw_(true), dirtyBoundaries_(true),
+	  withKerning_(true), font_(font), interleavedVertices_(32),
+	  xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f), lineLengths_(4), alignment_(ALIGN_LEFT)
+{
+	init(DefaultStringLength);
 }
 
 ///////////////////////////////////////////////////////////
@@ -96,7 +97,7 @@ void TextNode::draw(RenderQueue &renderQueue)
 			}
 			else
 			{
-				const FontGlyph *glyph = font_->glyph(int(string_[i]));
+				const FontGlyph *glyph = font_->glyph(static_cast<unsigned int>(string_[i]));
 				if (glyph)
 				{
 					processGlyph(glyph);
@@ -125,6 +126,18 @@ void TextNode::draw(RenderQueue &renderQueue)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+void TextNode::init(unsigned int stringLength)
+{
+	type_ = TEXTNODE_TYPE;
+	setLayer(DrawableNode::HUD_LAYER);
+	renderCommand_->setType(RenderCommand::TEXT_TYPE);
+	renderCommand_->material().setTransparent(true);
+	renderCommand_->material().setShaderProgram(Material::TEXTNODE_PROGRAM);
+	renderCommand_->material().setTexture(*font_->texture());
+	// `stringLength` characters, each has 6 vertices with 2 components for position and 2 for texcoords
+	renderCommand_->geometry().createCustomVbo(stringLength * 6 * 2 * 2, GL_DYNAMIC_DRAW);
+}
+
 void TextNode::calculateBoundaries() const
 {
 	if (dirtyBoundaries_)
@@ -147,7 +160,7 @@ void TextNode::calculateBoundaries() const
 			}
 			else
 			{
-				const FontGlyph *glyph = font_->glyph(int(string_[i]));
+				const FontGlyph *glyph = font_->glyph(static_cast<unsigned int>(string_[i]));
 				if (glyph)
 				{
 					xAdvance_ += glyph->xAdvance();

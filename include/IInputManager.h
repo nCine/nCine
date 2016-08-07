@@ -12,11 +12,32 @@ class IInputEventHandler;
 class DLL_PUBLIC TouchEvent
 {
   public:
-	TouchEvent() : count(0), id(0), id2(1), x(0.0f), y(0.0f), x2(0.0f), y2(0.0f) { }
+	static const unsigned int MaxPointers = 10;
+	struct Pointer
+	{
+		int id;
+		float x, y;
+	};
 
-	int count;
-	int id, id2;
-	float x, y, x2, y2;
+	TouchEvent() : count(0) { }
+
+	unsigned int count;
+	int actionIndex;
+	Pointer pointers[MaxPointers];
+
+	inline int findPointerIndex(int pointerId) const
+	{
+		int pointerIndex = -1;
+		for (unsigned int i = 0; i < count && i < MaxPointers; i++)
+		{
+			if (pointers[i].id == pointerId)
+			{
+				pointerIndex = i;
+				break;
+			}
+		}
+		return pointerIndex;
+	}
 };
 
 class DLL_PUBLIC AccelerometerEvent

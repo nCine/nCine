@@ -36,8 +36,8 @@ if(MSVC)
 	set_target_properties(copy_data_tests PROPERTIES FOLDER "CustomCopyTargets")
 endif()
 
-list(APPEND APPTESTS apptest_texformats apptest_joystick apptest_rotozoom
-	apptest_animsprites apptest_audio apptest_particles apptest_scene apptest_font)
+list(APPEND APPTESTS apptest_texformats apptest_joystick apptest_rotozoom apptest_animsprites
+	apptest_audio apptest_particles apptest_scene apptest_font apptest_multitouch)
 
 foreach(APPTEST ${APPTESTS})
 	add_executable(${APPTEST} ${NCINE_MAIN_CPP} ${APPTEST}.cpp apptest_joymapping.h)
