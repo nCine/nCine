@@ -23,7 +23,7 @@ android {
 	}
 
 	compileSdkVersion @NCINE_COMPILESDK_VERSION@
-	buildToolsVersion "24"
+	buildToolsVersion "24.0.1"
 
 	defaultConfig {
 		minSdkVersion @NCINE_MINSDK_VERSION@
