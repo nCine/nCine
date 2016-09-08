@@ -80,3 +80,11 @@ if(NCINE_EMBED_SHADERS)
 	# Don't need to add shader files to the library target if they are embedded
 	set(SHADER_FILES "")
 endif()
+
+if(MSVC AND EXISTS ${NCINE_DATA_DIR}/icons/nCine.ico)
+	message(STATUS "Writing a resource file for executables icon")
+
+	set(RESOURCE_RC_FILE "${GENERATED_SOURCE_DIR}/resource.rc")
+	file(WRITE ${RESOURCE_RC_FILE} "IDI_ICON1 ICON DISCARDABLE \"nCine.ico\"")
+	file(COPY ${NCINE_DATA_DIR}/icons/nCine.ico DESTINATION ${GENERATED_INCLUDE_DIR})
+endif()

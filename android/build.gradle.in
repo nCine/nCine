@@ -1,12 +1,12 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 
 buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.2'
-    }
+	repositories {
+		jcenter()
+	}
+	dependencies {
+		classpath 'com.android.tools.build:gradle:2.2.0'
+	}
 }
 
 apply plugin: 'com.android.application'
@@ -23,7 +23,7 @@ android {
 	}
 
 	compileSdkVersion @NCINE_COMPILESDK_VERSION@
-	buildToolsVersion "24.0.1"
+	buildToolsVersion "24.0.2"
 
 	defaultConfig {
 		minSdkVersion @NCINE_MINSDK_VERSION@

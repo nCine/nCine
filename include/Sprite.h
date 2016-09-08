@@ -71,14 +71,14 @@ class DLL_PUBLIC Sprite : public DrawableNode
   private:
 	/// The sprite texture
 	Texture *texture_;
-	/// The opaque texture flag
-	bool opaqueTexture_;
 	/// The texture source rectangle
 	Recti texRect_;
 	/// Sprite width in pixel
 	float width_;
 	/// Sprite height in pixel
 	float height_;
+	/// The opaque texture flag
+	bool opaqueTexture_;
 
 	/// Common sprite initialization for every constructor
 	void init();
