@@ -36,6 +36,15 @@ if(MSVC)
 		COMMENT "Copying data to tests..."
 	)
 	set_target_properties(copy_data_tests PROPERTIES FOLDER "CustomCopyTargets")
+elseif(APPLE)
+	get_filename_component(RESOURCES_DIR ${NCINE_LIBRARY} DIRECTORY)
+	get_filename_component(RESOURCES_DIR ${RESOURCES_DIR} DIRECTORY)
+	get_filename_component(PARENT_BINARY_DIR ${CMAKE_BINARY_DIR} DIRECTORY)
+	add_custom_target(symlink_data_tests ALL
+		COMMAND ${CMAKE_COMMAND} -E create_symlink ${RESOURCES_DIR}/data ${PARENT_BINARY_DIR}/data
+		COMMENT "Symlinking data to tests..."
+	)
+	set_target_properties(symlink_data_tests PROPERTIES FOLDER "CustomSymlinkTargets")
 endif()
 
 list(APPEND APPTESTS apptest_texformats apptest_joystick apptest_rotozoom apptest_animsprites

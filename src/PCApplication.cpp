@@ -83,10 +83,16 @@ void PCApplication::run()
 					SdlInputManager::parseEvent(event);
 					break;
 			}
+
+			if (!hasFocus_ || isPaused_)
+			{
+				SDL_WaitEvent(&event);
+				SDL_PushEvent(&event);
+			}
 		}
 #elif defined(WITH_GLFW)
 		setFocus(GlfwInputManager::hasFocus());
-		glfwPollEvents();
+		if (!hasFocus_ || isPaused_) { glfwWaitEvents(); } else { glfwPollEvents(); }
 		GlfwInputManager::updateJoystickStates();
 #endif
 

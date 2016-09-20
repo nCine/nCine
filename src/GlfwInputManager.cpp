@@ -34,12 +34,7 @@ GlfwInputManager::GlfwInputManager()
 	glfwSetKeyCallback(GlfwGfxDevice::windowHandle(), keyCallback);
 	glfwSetCursorPosCallback(GlfwGfxDevice::windowHandle(), cursorPosCallback);
 	glfwSetMouseButtonCallback(GlfwGfxDevice::windowHandle(), mouseButtonCallback);
-
-	// GLFW 3.2 is needed for setting the joystick callback function
-	// But on OS X if GLFW version is newer than 3.0 the window cannot be created
-#ifndef __APPLE__
 	glfwSetJoystickCallback(joystickCallback);
-#endif
 }
 
 ///////////////////////////////////////////////////////////
