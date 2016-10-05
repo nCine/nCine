@@ -50,38 +50,38 @@ void MyEventHandler::onInit()
 	text2_ = new nc::TextNode(&rootNode, font1_);
 	text2_->setScale(2.0f);
 	text2_->setString(testString);
-	textHeight -= text2_->fontBase();
-	text2_->setPosition((screenWidth - text1_->width()) * 0.5f, textHeight);
+	textHeight -= text1_->fontBase();
+	text2_->setPosition((screenWidth - text2_->width()) * 0.5f, textHeight);
 	text2_->enableKerning(false);
 	text2_->setColor(255, 0, 0, 128);
 
 	text3_ = new nc::TextNode(&rootNode, font2_);
 	text3_->setScale(2.0f);
 	text3_->setString(testString);
-	textHeight -= text3_->fontBase();
+	textHeight -= text2_->fontBase();
 	text3_->setPosition((screenWidth - text3_->width()) * 0.5f, textHeight);
 	text3_->setColor(0, 255, 0, 255);
 
 	text4_ = new nc::TextNode(&rootNode, font2_);
 	text4_->setScale(2.0f);
 	text4_->setString(testString);
-	textHeight -= text4_->fontBase();
-	text4_->setPosition((screenWidth - text3_->width()) * 0.5f, textHeight);
+	textHeight -= text3_->fontBase();
+	text4_->setPosition((screenWidth - text4_->width()) * 0.5f, textHeight);
 	text4_->enableKerning(false);
 	text4_->setColor(0, 255, 0, 128);
 
 	text5_ = new nc::TextNode(&rootNode, font3_);
 	text5_->setScale(2.0f);
 	text5_->setString(testString);
-	textHeight -= text5_->fontBase();
+	textHeight -= text4_->fontBase();
 	text5_->setPosition((screenWidth - text5_->width()) * 0.5f, textHeight);
 	text5_->setColor(0, 0, 255, 255);
 
 	text6_ = new nc::TextNode(&rootNode, font3_);
 	text6_->setScale(2.0f);
 	text6_->setString(testString);
-	textHeight -= text6_->fontBase();
-	text6_->setPosition((screenWidth - text5_->width()) * 0.5f, textHeight);
+	textHeight -= text5_->fontBase();
+	text6_->setPosition((screenWidth - text6_->width()) * 0.5f, textHeight);
 	text6_->enableKerning(false);
 	text6_->setColor(0, 0, 255, 128);
 }

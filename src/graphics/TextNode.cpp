@@ -132,7 +132,9 @@ void TextNode::init(unsigned int stringLength)
 	setLayer(DrawableNode::HUD_LAYER);
 	renderCommand_->setType(RenderCommand::TEXT_TYPE);
 	renderCommand_->material().setTransparent(true);
-	renderCommand_->material().setShaderProgram(Material::TEXTNODE_PROGRAM);
+	Material::ShaderProgramPresets shaderProgram = font_->texture()->hasAlpha() ?
+	                                               Material::TEXTNODE_COLOR_PROGRAM : Material::TEXTNODE_GRAY_PROGRAM;
+	renderCommand_->material().setShaderProgram(shaderProgram);
 	renderCommand_->material().setTexture(*font_->texture());
 	// `stringLength` characters, each has 6 vertices with 2 components for position and 2 for texcoords
 	renderCommand_->geometry().createCustomVbo(stringLength * 6 * 2 * 2, GL_DYNAMIC_DRAW);

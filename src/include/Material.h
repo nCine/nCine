@@ -20,8 +20,10 @@ class Material
 	{
 		/// Shader program for Sprite classes
 		SPRITE_PROGRAM,
-		/// Shader program for TextNode classes
-		TEXTNODE_PROGRAM,
+		/// Shader program for TextNode classes with grayscale font texture
+		TEXTNODE_GRAY_PROGRAM,
+		/// Shader program for TextNode classes with color font texture
+		TEXTNODE_COLOR_PROGRAM,
 		/// Shader program for ProfilePlotter
 		COLOR_PROGRAM
 	};

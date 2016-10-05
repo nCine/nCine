@@ -53,11 +53,11 @@ void Font::parseFntFile(IFile *fileHandle)
 {
 	int fileLine = 0;
 
-	int glyphId;
+	unsigned int glyphId;
 	unsigned int x, y, width, height;
 	int xOffset, yOffset;
-	unsigned int xAdvance;
-	int secondGlyphId;
+	int xAdvance;
+	unsigned int secondGlyphId;
 	int kerningAmount;
 
 	char *fileBuffer = new char[fileHandle->size()];
@@ -93,8 +93,17 @@ void Font::parseFntFile(IFile *fileHandle)
 		}
 		else if (strncmp(buffer, "char", 4) == 0)
 		{
-			sscanf(buffer, "char id=%d x=%u y=%u width=%u height=%u xoffset=%d yoffset=%d xadvance=%u", &glyphId, &x, &y, &width, &height, &xOffset, &yOffset, &xAdvance);
-			glyphs_[glyphId].set(x, y, width, height, xOffset, yOffset, xAdvance);
+			sscanf(buffer, "char id=%u x=%u y=%u width=%u height=%u xoffset=%d yoffset=%d xadvance=%d", &glyphId, &x, &y, &width, &height, &xOffset, &yOffset, &xAdvance);
+			if (glyphId < MaxGlyphs)
+			{
+				glyphs_[glyphId].set(x, y, width, height, xOffset, yOffset, xAdvance);
+			}
+			else
+			{
+				LOGW_X("Skipping character id #%u because bigger than glyph array size (%u)", glyphId, MaxGlyphs);
+				numGlyphs_--;
+				continue;
+			}
 		}
 		else if (strncmp(buffer, "kernings", 8) == 0)
 		{
@@ -102,8 +111,17 @@ void Font::parseFntFile(IFile *fileHandle)
 		}
 		else if (strncmp(buffer, "kerning", 7) == 0)
 		{
-			sscanf(buffer, "kerning first=%d second=%d amount=%d ", &glyphId, &secondGlyphId, &kerningAmount);
-			glyphs_[glyphId].addKerning(secondGlyphId, kerningAmount);
+			sscanf(buffer, "kerning first=%u second=%u amount=%d ", &glyphId, &secondGlyphId, &kerningAmount);
+			if (glyphId < MaxGlyphs && secondGlyphId < MaxGlyphs)
+			{
+				glyphs_[glyphId].addKerning(secondGlyphId, kerningAmount);
+			}
+			else
+			{
+				LOGW_X("Skipping kerning couple (#%u, #%u) because bigger than glyph array size (%u)", glyphId, secondGlyphId, MaxGlyphs);
+				numKernings_--;
+				continue;
+			}
 		}
 	}
 	while (strchr(buffer, '\n') && (buffer = strchr(buffer, '\n') + 1) < fileBuffer + fileHandle->size());

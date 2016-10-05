@@ -39,8 +39,14 @@ void Material::setShaderProgram(ShaderProgramPresets preset)
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
 			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
 			break;
-		case TEXTNODE_PROGRAM:
-			setShaderProgram(const_cast<GLShaderProgram *>(RenderResources::textnodeShaderProgram()));
+		case TEXTNODE_GRAY_PROGRAM:
+			setShaderProgram(const_cast<GLShaderProgram *>(RenderResources::textnodeGrayShaderProgram()));
+			uniform("texture")->setIntValue(0); // GL_TEXTURE0
+			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
+			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
+			break;
+		case TEXTNODE_COLOR_PROGRAM:
+			setShaderProgram(const_cast<GLShaderProgram *>(RenderResources::textnodeColorShaderProgram()));
 			uniform("texture")->setIntValue(0); // GL_TEXTURE0
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
 			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));

@@ -15,7 +15,7 @@ FontGlyph::FontGlyph()
 }
 
 FontGlyph::FontGlyph(unsigned int x, unsigned int y, unsigned int width, unsigned int height,
-                     int xOffset, int yOffset, unsigned int xAdvance)
+                     int xOffset, int yOffset, int xAdvance)
 	: x_(x), y_(y), width_(width), height_(height),
 	  xOffset_(xOffset), yOffset_(yOffset), xAdvance_(xAdvance),
 	  kernings_(4)
@@ -27,7 +27,7 @@ FontGlyph::FontGlyph(unsigned int x, unsigned int y, unsigned int width, unsigne
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-int FontGlyph::kerning(int secondGlyph) const
+int FontGlyph::kerning(unsigned int secondGlyph) const
 {
 	int kerningAmount = 0;
 

@@ -15,7 +15,8 @@ namespace ncine {
 
 GLBufferObject *RenderResources::quadVbo_ = NULL;
 GLShaderProgram *RenderResources::spriteShaderProgram_ = NULL;
-GLShaderProgram *RenderResources::textnodeShaderProgram_ = NULL;
+GLShaderProgram *RenderResources::textnodeGrayShaderProgram_ = NULL;
+GLShaderProgram *RenderResources::textnodeColorShaderProgram_ = NULL;
 GLShaderProgram *RenderResources::colorShaderProgram_ = NULL;
 
 ///////////////////////////////////////////////////////////
@@ -49,16 +50,27 @@ void RenderResources::create()
 	spriteShaderProgram_->link();
 	spriteShaderProgram_->use();
 
-	textnodeShaderProgram_ = new GLShaderProgram();
+	textnodeGrayShaderProgram_ = new GLShaderProgram();
 #ifndef WITH_EMBEDDED_SHADERS
-	textnodeShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/textnode_vs.glsl").data());
-	textnodeShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/textnode_fs.glsl").data());
+	textnodeGrayShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/textnode_vs.glsl").data());
+	textnodeGrayShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/textnode_gray_fs.glsl").data());
 #else
-	textnodeShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::textnode_vs);
-	textnodeShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::textnode_fs);
+	textnodeGrayShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::textnode_vs);
+	textnodeGrayShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::textnode_gray_fs);
 #endif
-	textnodeShaderProgram_->link();
-	textnodeShaderProgram_->use();
+	textnodeGrayShaderProgram_->link();
+	textnodeGrayShaderProgram_->use();
+
+	textnodeColorShaderProgram_ = new GLShaderProgram();
+#ifndef WITH_EMBEDDED_SHADERS
+	textnodeColorShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/textnode_vs.glsl").data());
+	textnodeColorShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/textnode_color_fs.glsl").data());
+#else
+	textnodeColorShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::textnode_vs);
+	textnodeColorShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::textnode_color_fs);
+#endif
+	textnodeColorShaderProgram_->link();
+	textnodeColorShaderProgram_->use();
 
 	colorShaderProgram_ = new GLShaderProgram();
 #ifndef WITH_EMBEDDED_SHADERS
@@ -77,12 +89,14 @@ void RenderResources::create()
 void RenderResources::dispose()
 {
 	delete colorShaderProgram_;
-	delete textnodeShaderProgram_;
+	delete textnodeColorShaderProgram_;
+	delete textnodeGrayShaderProgram_;
 	delete spriteShaderProgram_;
 	delete quadVbo_;
 
 	colorShaderProgram_ = NULL;
-	textnodeShaderProgram_ = NULL;
+	textnodeColorShaderProgram_ = NULL;
+	textnodeGrayShaderProgram_ = NULL;
 	spriteShaderProgram_ = NULL;
 	quadVbo_ = NULL;
 

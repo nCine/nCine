@@ -26,13 +26,15 @@ class RenderResources
 	/// Returns the OpenGL VBO of a quad made of two triangles, used by every sprite
 	static inline const GLBufferObject *quadVbo() { return quadVbo_; }
 	static inline const GLShaderProgram *spriteShaderProgram() { return spriteShaderProgram_; }
-	static inline const GLShaderProgram *textnodeShaderProgram() { return textnodeShaderProgram_; }
+	static inline const GLShaderProgram *textnodeGrayShaderProgram() { return textnodeGrayShaderProgram_; }
+	static inline const GLShaderProgram *textnodeColorShaderProgram() { return textnodeColorShaderProgram_; }
 	static inline const GLShaderProgram *colorShaderProgram() { return colorShaderProgram_; }
 
   private:
 	static GLBufferObject *quadVbo_;
 	static GLShaderProgram *spriteShaderProgram_;
-	static GLShaderProgram *textnodeShaderProgram_;
+	static GLShaderProgram *textnodeGrayShaderProgram_;
+	static GLShaderProgram *textnodeColorShaderProgram_;
 	static GLShaderProgram *colorShaderProgram_;
 
 	static void create();

@@ -12,11 +12,11 @@ class FontGlyph
   public:
 	FontGlyph();
 	FontGlyph(unsigned int x, unsigned int y, unsigned int width, unsigned int height,
-	          int xOffset, int yOffset, unsigned int xAdvance);
+	          int xOffset, int yOffset, int xAdvance);
 
 	/// Sets glyph properties
 	void set(unsigned int x, unsigned int y, unsigned int width, unsigned int height,
-	         int xOffset, int yOffset, unsigned int xAdvance);
+	         int xOffset, int yOffset, int xAdvance);
 
 	/// Returns the size in pixels of a glyph
 	inline Vector2i size() const { return Vector2i(width_, height_); }
@@ -25,22 +25,22 @@ class FontGlyph
 	/// Returns the X and Y offset of a glyph
 	inline Vector2i offset() const { return Vector2i(xOffset_, yOffset_); }
 	/// Returns the X offset to advance in order to start rendering the next glyph
-	inline unsigned int xAdvance() const { return xAdvance_; }
+	inline int xAdvance() const { return xAdvance_; }
 
 	/// Adds the kerning amount for a subsequent glyph
-	inline void addKerning(int secondGlyph, int amount) { kernings_.pushBack(Kerning(secondGlyph, amount)); }
+	inline void addKerning(unsigned int secondGlyph, int amount) { kernings_.pushBack(Kerning(secondGlyph, amount)); }
 	/// Returns the kerning amount for a subsequent glyph
-	int kerning(int secondGlyph) const;
+	int kerning(unsigned int secondGlyph) const;
 
   private:
 	/// A structure holding glyph pairs kerning offsets
 	struct Kerning
 	{
-		int secondGlyph_;
+		unsigned int secondGlyph_;
 		int amount_;
 
 		Kerning() : secondGlyph_(0), amount_(0) { }
-		Kerning(int secondGlyph, int amount)
+		Kerning(unsigned int secondGlyph, int amount)
 		{
 			secondGlyph_ = secondGlyph;
 			amount_ = amount;
@@ -53,12 +53,12 @@ class FontGlyph
 	unsigned int height_;
 	int xOffset_;
 	int yOffset_;
-	unsigned int xAdvance_;
+	int xAdvance_;
 	Array<Kerning> kernings_;
 };
 
 inline void FontGlyph::set(unsigned int x, unsigned int y, unsigned int width, unsigned int height,
-                           int xOffset, int yOffset, unsigned int xAdvance)
+                           int xOffset, int yOffset, int xAdvance)
 {
 	x_ = x;
 	y_ = y;
