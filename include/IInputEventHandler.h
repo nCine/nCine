@@ -36,6 +36,8 @@ class DLL_PUBLIC IInputEventHandler
 	inline virtual void onMouseButtonReleased(const MouseEvent &event) { }
 	/// Callback function called every time the mouse is moved
 	inline virtual void onMouseMoved(const MouseState &state) { }
+	/// Callback function called every time a scroll input occurs (mouse wheel, touchpad gesture, etc.)
+	inline virtual void onScrollInput(const ScrollEvent &event) { }
 #endif
 	/// Callback function called every time a joystick button is pressed
 	inline virtual void onJoyButtonPressed(const JoyButtonEvent &event) { }

@@ -27,8 +27,8 @@ class GlfwMouseState : public MouseState
 	inline bool isLeftButtonDown() const { return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS); }
 	inline bool isMiddleButtonDown() const { return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS); }
 	inline bool isRightButtonDown() const { return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS); }
-	inline bool isWheelUpButtonDown() const { return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_4) == GLFW_PRESS); }
-	inline bool isWheelDownButtonDown() const { return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_5) == GLFW_PRESS); }
+	inline bool isFourthButtonDown() const { return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_4) == GLFW_PRESS); }
+	inline bool isFifthButtonDown() const { return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_5) == GLFW_PRESS); }
 };
 
 /// Information about a GLFW mouse event
@@ -40,11 +40,20 @@ class GlfwMouseEvent : public MouseEvent
 	inline bool isLeftButton() const { return button_ == GLFW_MOUSE_BUTTON_LEFT; }
 	inline bool isMiddleButton() const { return button_ == GLFW_MOUSE_BUTTON_MIDDLE; }
 	inline bool isRightButton() const { return button_ == GLFW_MOUSE_BUTTON_RIGHT; }
-	inline bool isWheelUpButton() const { return button_ == GLFW_MOUSE_BUTTON_4; }
-	inline bool isWheelDownButton() const { return button_ == GLFW_MOUSE_BUTTON_5; }
+	inline bool isFourthButton() const { return button_ == GLFW_MOUSE_BUTTON_4; }
+	inline bool isFifthButton() const { return button_ == GLFW_MOUSE_BUTTON_5; }
 
   private:
 	int button_;
+
+	friend class GlfwInputManager;
+};
+
+/// Information about a GLFW scroll event
+class GlfwScrollEvent : public ScrollEvent
+{
+  public:
+	GlfwScrollEvent() { }
 
 	friend class GlfwInputManager;
 };
@@ -123,6 +132,7 @@ class GlfwInputManager : public IInputManager
 	static bool windowHasFocus_;
 	static GlfwMouseState mouseState_;
 	static GlfwMouseEvent mouseEvent_;
+	static GlfwScrollEvent scrollEvent_;
 	static GlfwKeyboardState keyboardState_;
 	static KeyboardEvent keyboardEvent_;
 	static StaticArray<GlfwJoystickState, MaxNumJoysticks> joystickStates_;
@@ -135,6 +145,7 @@ class GlfwInputManager : public IInputManager
 	static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 	static void cursorPosCallback(GLFWwindow *window, double x, double y);
 	static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
+	static void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
 	static void joystickCallback(int joy, int event);
 
 	static KeySym keySymValueToEnum(int keysym);

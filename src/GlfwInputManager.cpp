@@ -14,8 +14,9 @@ IInputEventHandler *IInputManager::inputEventHandler_ = NULL;
 bool GlfwInputManager::windowHasFocus_ = true;
 GlfwMouseState GlfwInputManager::mouseState_;
 GlfwMouseEvent GlfwInputManager::mouseEvent_;
+GlfwScrollEvent GlfwInputManager::scrollEvent_;
 GlfwKeyboardState GlfwInputManager::keyboardState_;
-KeyboardEvent	GlfwInputManager::keyboardEvent_;
+KeyboardEvent GlfwInputManager::keyboardEvent_;
 short int IInputManager::MaxAxisValue = 32767;
 StaticArray<GlfwJoystickState, GlfwInputManager::MaxNumJoysticks> GlfwInputManager::joystickStates_;
 JoyButtonEvent GlfwInputManager::joyButtonEvent_;
@@ -34,6 +35,7 @@ GlfwInputManager::GlfwInputManager()
 	glfwSetKeyCallback(GlfwGfxDevice::windowHandle(), keyCallback);
 	glfwSetCursorPosCallback(GlfwGfxDevice::windowHandle(), cursorPosCallback);
 	glfwSetMouseButtonCallback(GlfwGfxDevice::windowHandle(), mouseButtonCallback);
+	glfwSetScrollCallback(GlfwGfxDevice::windowHandle(), scrollCallback);
 	glfwSetJoystickCallback(joystickCallback);
 }
 
@@ -186,8 +188,8 @@ void GlfwInputManager::cursorPosCallback(GLFWwindow *window, double x, double y)
 		return;
 	}
 
-	mouseState_.x = int(x);
-	mouseState_.y = theApplication().height() - int(y);
+	mouseState_.x = static_cast<int>(x);
+	mouseState_.y = theApplication().height() - static_cast<int>(y);
 	inputEventHandler_->onMouseMoved(mouseState_);
 }
 
@@ -200,8 +202,8 @@ void GlfwInputManager::mouseButtonCallback(GLFWwindow *window, int button, int a
 
 	double xCursor, yCursor;
 	glfwGetCursorPos(window, &xCursor, &yCursor);
-	mouseEvent_.x = int(xCursor); mouseEvent_.y = int(yCursor);
-	mouseEvent_.y = theApplication().height() - mouseEvent_.y;
+	mouseEvent_.x = static_cast<int>(xCursor);
+	mouseEvent_.y = theApplication().height() - static_cast<int>(yCursor);
 	mouseEvent_.button_ = button;
 
 	if (action == GLFW_PRESS)
@@ -212,6 +214,19 @@ void GlfwInputManager::mouseButtonCallback(GLFWwindow *window, int button, int a
 	{
 		inputEventHandler_->onMouseButtonReleased(mouseEvent_);
 	}
+}
+
+void GlfwInputManager::scrollCallback(GLFWwindow *window, double xoffset, double yoffset)
+{
+	if (inputEventHandler_ == NULL)
+	{
+		return;
+	}
+
+	scrollEvent_.x = static_cast<float>(xoffset);
+	scrollEvent_.y = static_cast<float>(yoffset);
+
+	inputEventHandler_->onScrollInput(scrollEvent_);
 }
 
 void GlfwInputManager::joystickCallback(int joy, int event)

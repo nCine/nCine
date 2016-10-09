@@ -16,6 +16,7 @@ namespace ncine {
 IInputEventHandler *IInputManager::inputEventHandler_ = NULL;
 SdlMouseState SdlInputManager::mouseState_;
 SdlMouseEvent SdlInputManager::mouseEvent_;
+SdlScrollEvent SdlInputManager::scrollEvent_;
 SdlKeyboardState SdlInputManager::keyboardState_;
 KeyboardEvent	SdlInputManager::keyboardEvent_;
 short int IInputManager::MaxAxisValue = 32767;
@@ -135,6 +136,7 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 			inputEventHandler_->onMouseButtonPressed(mouseEvent_);
+			SdlInputManager::simulateScrollEvent(event);
 			break;
 		case SDL_MOUSEBUTTONUP:
 			inputEventHandler_->onMouseButtonReleased(mouseEvent_);
@@ -262,6 +264,26 @@ float SdlInputManager::joyAxisNormValue(int joyId, int axisId) const
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 //////////////////////////////////////////////////////////
+
+void SdlInputManager::simulateScrollEvent(const SDL_Event &event)
+{
+	scrollEvent_.x = 0.0f;
+
+	// Mouse wheel events are broken in SDL 1.x and fixed in SDL 2
+	if (event.type == SDL_MOUSEBUTTONDOWN)
+	{
+		if (event.button.button == SDL_BUTTON_WHEELUP)
+		{
+			scrollEvent_.y = 1.0f;
+			inputEventHandler_->onScrollInput(scrollEvent_);
+		}
+		else if (event.button.button == SDL_BUTTON_WHEELDOWN)
+		{
+			scrollEvent_.y = -1.0f;
+			inputEventHandler_->onScrollInput(scrollEvent_);
+		}
+	}
+}
 
 short int SdlInputManager::hatEnumToAxisValue(unsigned char hatState, bool upDownAxis)
 {

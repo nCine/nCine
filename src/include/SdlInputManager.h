@@ -2,6 +2,7 @@
 #define CLASS_NCINE_SDLINPUTMANAGER
 
 #include <SDL/SDL_events.h>
+#include <SDL/SDL_mouse.h>
 #include "IInputManager.h"
 
 namespace ncine {
@@ -22,23 +23,13 @@ class SdlMouseState : public MouseState
   public:
 	SdlMouseState() : buttons_(0) { }
 
-	inline bool isLeftButtonDown() const { return (buttons_ & LEFT_BUTTON) != 0; }
-	inline bool isMiddleButtonDown() const { return (buttons_ & MIDDLE_BUTTON) != 0; }
-	inline bool isRightButtonDown() const { return (buttons_ & RIGHT_BUTTON) != 0; }
-	inline bool isWheelUpButtonDown() const { return (buttons_ & WHEELUP_BUTTON) != 0; }
-	inline bool isWheelDownButtonDown() const { return (buttons_ & WHEELDOWN_BUTTON) != 0; }
+	inline bool isLeftButtonDown() const { return (buttons_ & SDL_BUTTON_LEFT) != 0; }
+	inline bool isMiddleButtonDown() const { return (buttons_ & SDL_BUTTON_MIDDLE) != 0; }
+	inline bool isRightButtonDown() const { return (buttons_ & SDL_BUTTON_RIGHT) != 0; }
+	inline bool isFourthButtonDown() const { return (buttons_ & SDL_BUTTON_WHEELUP) != 0; }
+	inline bool isFifthButtonDown() const { return (buttons_ & SDL_BUTTON_WHEELDOWN) != 0; }
 
   private:
-	/// Enumeration extracted from `SDL/SDL_mouse.h`
-	enum eMouseButtonMask
-	{
-		LEFT_BUTTON   = 1,
-		MIDDLE_BUTTON = 2,
-		RIGHT_BUTTON  = 4,
-		WHEELUP_BUTTON = 8,
-		WHEELDOWN_BUTTON = 16
-	};
-
 	unsigned char buttons_;
 
 	friend class SdlInputManager;
@@ -50,24 +41,23 @@ class SdlMouseEvent : public MouseEvent
   public:
 	SdlMouseEvent() : button_(0) { }
 
-	inline bool isLeftButton() const { return button_ == LEFT_BUTTON; }
-	inline bool isMiddleButton() const { return button_ == MIDDLE_BUTTON; }
-	inline bool isRightButton() const { return button_ == RIGHT_BUTTON; }
-	inline bool isWheelUpButton() const { return button_ == WHEELUP_BUTTON; }
-	inline bool isWheelDownButton() const { return button_ == WHEELDOWN_BUTTON; }
+	inline bool isLeftButton() const { return button_ == SDL_BUTTON_LEFT; }
+	inline bool isMiddleButton() const { return button_ == SDL_BUTTON_MIDDLE; }
+	inline bool isRightButton() const { return button_ == SDL_BUTTON_RIGHT; }
+	inline bool isFourthButton() const { return button_ == SDL_BUTTON_WHEELUP; }
+	inline bool isFifthButton() const { return button_ == SDL_BUTTON_WHEELDOWN; }
 
   private:
-	/// Enumeration extracted from `SDL/SDL_mouse.h`
-	enum eMouseButtonIndex
-	{
-		LEFT_BUTTON = 1,
-		MIDDLE_BUTTON = 2,
-		RIGHT_BUTTON = 3,
-		WHEELUP_BUTTON = 4,
-		WHEELDOWN_BUTTON = 5
-	};
-
 	unsigned char button_;
+
+	friend class SdlInputManager;
+};
+
+/// Information about an SDL scroll event
+class SdlScrollEvent : public ScrollEvent
+{
+  public:
+	SdlScrollEvent() { }
 
 	friend class SdlInputManager;
 };
@@ -118,8 +108,9 @@ class SdlInputManager : public IInputManager
 
 	static SdlMouseState mouseState_;
 	static SdlMouseEvent mouseEvent_;
+	static SdlScrollEvent scrollEvent_;
 	static SdlKeyboardState keyboardState_;
-	static KeyboardEvent	keyboardEvent_;
+	static KeyboardEvent keyboardEvent_;
 
 	static SDL_Joystick *sdlJoysticks_[MaxNumJoysticks];
 	static JoyButtonEvent joyButtonEvent_;
@@ -130,6 +121,7 @@ class SdlInputManager : public IInputManager
 	/// Private assignment operator
 	SdlInputManager &operator=(const SdlInputManager &);
 
+	static void simulateScrollEvent(const SDL_Event &event);
 	static short int hatEnumToAxisValue(unsigned char hatState, bool upDownAxis);
 };
 

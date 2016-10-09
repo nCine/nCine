@@ -60,8 +60,8 @@ class DLL_PUBLIC MouseState
 	virtual bool isLeftButtonDown() const = 0;
 	virtual bool isMiddleButtonDown() const = 0;
 	virtual bool isRightButtonDown() const = 0;
-	virtual bool isWheelUpButtonDown() const = 0;
-	virtual bool isWheelDownButtonDown() const = 0;
+	virtual bool isFourthButtonDown() const = 0;
+	virtual bool isFifthButtonDown() const = 0;
 };
 
 /// Information about a mouse event
@@ -76,8 +76,18 @@ class DLL_PUBLIC MouseEvent
 	virtual bool isLeftButton() const = 0;
 	virtual bool isMiddleButton() const = 0;
 	virtual bool isRightButton() const = 0;
-	virtual bool isWheelUpButton() const = 0;
-	virtual bool isWheelDownButton() const = 0;
+	virtual bool isFourthButton() const = 0;
+	virtual bool isFifthButton() const = 0;
+};
+
+/// Information about a scroll event (mouse wheel, touchpad gesture, etc.)
+class DLL_PUBLIC ScrollEvent
+{
+  public:
+	/// Scroll offset on the X axis
+	float x;
+	/// Scroll offset on the Y axis
+	float y;
 };
 
 /// Information about keyboard state

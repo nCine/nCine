@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=nCine Test
+Comment=Test application made with the nCine
+TryExec=apptest_scene
+Exec=apptest_scene
+Icon=nCine
+Terminal=false
+Type=Application
+Categories=Game;
