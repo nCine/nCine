@@ -27,21 +27,12 @@ AppConfiguration::AppConfiguration()
 {
 	logFile_ = "ncine_log.txt";
 #ifdef __ANDROID__
-	char *extStorage = getenv("EXTERNAL_STORAGE");
-	IFile::dataPath_ = (extStorage ? extStorage : "/sdcard");
-	IFile::dataPath_ += "/ncine/";
-	fileLogLevel_ = ILogger::LOG_VERBOSE;
-
 	fontTexFilename_ = "fonts/DroidSans32_256_8888.ktx";
 #else
 	windowTitle_ = "nCine";
 	fontTexFilename_ = "fonts/DroidSans32_256.png";
 #endif
 	fontFntFilename_ = "fonts/DroidSans32_256.fnt";
-
-#ifdef NCINE_DEFAULT_DATA_DIR
-	IFile::dataPath_ = NCINE_DEFAULT_DATA_DIR;
-#endif
 }
 
 ///////////////////////////////////////////////////////////

@@ -4,6 +4,7 @@
 #include "ParticleSystem.h"
 #include "Timer.h"
 #include "IFile.h" // for dataPath()
+#include "apptest_datapath.h"
 #include "apptest_joymapping.h"
 
 #ifdef __ANDROID__
@@ -26,6 +27,11 @@ const float JoySpeed = 200.0f;
 nc::IAppEventHandler *createAppEventHandler()
 {
 	return new MyEventHandler;
+}
+
+void MyEventHandler::onPreInit(nc::AppConfiguration &config)
+{
+	setDataPath(config);
 }
 
 void MyEventHandler::onInit()

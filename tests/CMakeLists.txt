@@ -45,9 +45,10 @@ if((SDLIMAGE_FOUND OR PNG_FOUND) AND WEBP_FOUND)
 endif()
 
 foreach(APPTEST ${APPTESTS})
-	add_executable(${APPTEST} main.cpp ${APPTEST}.cpp apptest_joymapping.h ${RESOURCE_RC_FILE})
+	add_executable(${APPTEST} main.cpp ${APPTEST}.cpp apptest_datapath.h apptest_joymapping.h ${RESOURCE_RC_FILE})
 	target_link_libraries(${APPTEST} ncine)
 	set_target_properties(${APPTEST} PROPERTIES FOLDER "AppTests")
+	target_compile_definitions(${APPTEST} PRIVATE "NCINE_TESTS_DATA_DIR=\"${NCINE_TESTS_DATA_DIR}\"")
 	if(MSVC)
 		target_include_directories(${APPTEST} PRIVATE ${GENERATED_INCLUDE_DIR}) # for the executable icon
 	elseif(APPLE)

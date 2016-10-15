@@ -6,6 +6,7 @@
 #include "TextNode.h"
 #include "IGfxCapabilities.h"
 #include "IFile.h" // for dataPath()
+#include "apptest_datapath.h"
 #include "apptest_joymapping.h"
 
 #ifndef __ANDROID__
@@ -51,6 +52,11 @@ float MyEventHandler::newScale_ = 1.0f;
 nc::IAppEventHandler *createAppEventHandler()
 {
 	return new MyEventHandler;
+}
+
+void MyEventHandler::onPreInit(nc::AppConfiguration &config)
+{
+	setDataPath(config);
 }
 
 void MyEventHandler::onInit()

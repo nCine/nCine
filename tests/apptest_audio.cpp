@@ -5,6 +5,7 @@
 #include "AudioStream.h"
 #include "AudioStreamPlayer.h"
 #include "TextNode.h"
+#include "apptest_datapath.h"
 
 namespace {
 
@@ -25,6 +26,11 @@ const char *FontFntFile = "DroidSans32_256.fnt";
 nc::IAppEventHandler *createAppEventHandler()
 {
 	return new MyEventHandler;
+}
+
+void MyEventHandler::onPreInit(nc::AppConfiguration &config)
+{
+	setDataPath(config);
 }
 
 void MyEventHandler::onInit()

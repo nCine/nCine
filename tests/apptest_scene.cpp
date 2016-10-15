@@ -5,6 +5,7 @@
 #include "Texture.h"
 #include "Sprite.h"
 #include "IFile.h" // for dataPath()
+#include "apptest_datapath.h"
 
 namespace {
 
@@ -25,6 +26,11 @@ namespace {
 nc::IAppEventHandler *createAppEventHandler()
 {
 	return new MyEventHandler;
+}
+
+void MyEventHandler::onPreInit(nc::AppConfiguration &config)
+{
+	setDataPath(config);
 }
 
 void MyEventHandler::onInit()

@@ -7,6 +7,7 @@
 
 namespace ncine {
 
+class AppConfiguration;
 class Texture;
 class Sprite;
 
@@ -20,6 +21,7 @@ class MyEventHandler
 	  public nc::IInputEventHandler
 {
   public:
+	virtual void onPreInit(nc::AppConfiguration &config);
 	virtual void onInit();
 	virtual void onFrameStart();
 	virtual void onShutdown();

@@ -95,8 +95,8 @@ void Application::initCommon()
 #endif
 	theServiceLocator().registerGfxCapabilities(new GfxCapabilities());
 
-	LOGI_X("Data path: %s", IFile::dataPath().data());
-	LOGI_X("Save path: %s", IFile::savePath().data());
+	LOGI_X("Data path: \"%s\"", IFile::dataPath().data());
+	LOGI_X("Save path: \"%s\"", IFile::savePath().data());
 
 	frameTimer_ = new FrameTimer(appCfg_.frameTimerLogInterval_, appCfg_.profileTextUpdateTime_);
 	profileTimer_ = new Timer();

@@ -6,6 +6,7 @@
 
 namespace ncine {
 
+class AppConfiguration;
 class Font;
 class TextNode;
 
@@ -19,6 +20,7 @@ class MyEventHandler
 	  public nc::IInputEventHandler
 {
   public:
+	virtual void onPreInit(nc::AppConfiguration &config);
 	virtual void onInit();
 	virtual void onShutdown();
 
