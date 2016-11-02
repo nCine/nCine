@@ -38,7 +38,11 @@ if(NCINE_BUILD_ANDROID)
 	set(APPLICATION_DEVDIST_MK ${CMAKE_BINARY_DIR}/android/src/main/jni/Application-devdist.mk)
 	configure_file(${APPLICATION_MK_IN} ${APPLICATION_DEVDIST_MK} @ONLY)
 
-	set(ANDROID_MK_IN ${CMAKE_SOURCE_DIR}/android/src/main/jni/Android.mk.in)
+	if(NCINE_DYNAMIC_LIBRARY)
+		set(ANDROID_MK_IN ${CMAKE_SOURCE_DIR}/android/src/main/jni/Android.mk.in)
+	else()
+		set(ANDROID_MK_IN ${CMAKE_SOURCE_DIR}/android/src/main/jni/Android-static.mk.in)
+	endif()
 	set(ANDROID_MK ${CMAKE_BINARY_DIR}/android/src/main/jni/Android.mk)
 	configure_file(${ANDROID_MK_IN} ${ANDROID_MK} @ONLY)
 
@@ -69,8 +73,17 @@ if(NCINE_BUILD_ANDROID)
 	file(RENAME ${CMAKE_BINARY_DIR}/android/src/main/res/drawable-xhdpi/banner320x180.png ${CMAKE_BINARY_DIR}/android/src/main/res/drawable-xhdpi/banner.png)
 	file(COPY ${EXTERNAL_ANDROID_DIR}/ DESTINATION android/src/main/jni/)
 
+	if(NCINE_DYNAMIC_LIBRARY)
+		set(ANDROID_LIBPATH libs)
+		set(ANDROID_LIBNAME libncine.so)
+	else()
+		set(ANDROID_LIBPATH obj/local)
+		set(ANDROID_LIBNAME libncine.a)
+		set(COPY_SRCINCLUDE_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/include ${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/include)
+	endif()
+
 	foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
-		list(APPEND NCINE_ANDROID_LIBRARY_FILES android/src/main/libs/${ARCHITECTURE}/libncine.so)
+		list(APPEND NCINE_ANDROID_LIBRARY_FILES android/src/main/${ANDROID_LIBPATH}/${ARCHITECTURE}/${ANDROID_LIBNAME})
 	endforeach()
 	add_custom_command(OUTPUT ${NCINE_ANDROID_LIBRARY_FILES}
 		COMMAND ${NDK_DIR}/${NDK_BUILD} -j${NCINE_CORES}
@@ -80,17 +93,20 @@ if(NCINE_BUILD_ANDROID)
 	set_target_properties(ncine_android PROPERTIES FOLDER "Android")
 	add_dependencies(ncine_android ncine)
 
-	# Creating an ncine directory inside jni to allow building external Android applications without installing the project
+	# Creating an ncine directory inside jni to allow building external Android applications without installing the engine
 	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/include
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/include)
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/include
+		# Projects relying on a static and uninstalled version of the engine can use implementation headers
+		COMMAND ${COPY_SRCINCLUDE_COMMAND})
 	add_custom_target(ncine_ndkdir_include ALL DEPENDS ${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/include)
 	set_target_properties(ncine_ndkdir_include PROPERTIES FOLDER "Android")
 	add_dependencies(ncine_ndkdir_include ncine_android)
 
 	foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
-		add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/${ARCHITECTURE}/libncine.so
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/android/src/main/libs/${ARCHITECTURE}/libncine.so ${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/${ARCHITECTURE}/libncine.so)
-		add_custom_target(ncine_ndkdir_${ARCHITECTURE} ALL DEPENDS ${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/${ARCHITECTURE}/libncine.so)
+		add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/${ARCHITECTURE}/${ANDROID_LIBNAME}
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/android/src/main/${ANDROID_LIBPATH}/${ARCHITECTURE}/${ANDROID_LIBNAME}
+			${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/${ARCHITECTURE}/${ANDROID_LIBNAME})
+		add_custom_target(ncine_ndkdir_${ARCHITECTURE} ALL DEPENDS ${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/${ARCHITECTURE}/${ANDROID_LIBNAME})
 		set_target_properties(ncine_ndkdir_${ARCHITECTURE} PROPERTIES FOLDER "Android")
 		add_dependencies(ncine_ndkdir_${ARCHITECTURE} ncine_android)
 	endforeach()
@@ -127,7 +143,8 @@ if(NCINE_BUILD_ANDROID)
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/drawable-xhdpi/banner.png COMPONENT android)
 
 		foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
-			install(FILES ${CMAKE_BINARY_DIR}/android/src/main/libs/${ARCHITECTURE}/libncine.so
+			# The static version of the library will be installed if available, but Android-devdist.mk will not support it
+			install(FILES ${CMAKE_BINARY_DIR}/android/src/main/${ANDROID_LIBPATH}/${ARCHITECTURE}/${ANDROID_LIBNAME}
 				DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/jni/ncine/${ARCHITECTURE}/ COMPONENT android)
 			install(FILES ${CMAKE_BINARY_DIR}/android/src/main/libs/${ARCHITECTURE}/libopenal.so
 				DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/jni/openal/${ARCHITECTURE}/ COMPONENT android)

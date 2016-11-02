@@ -248,7 +248,7 @@ if(NCINE_DYNAMIC_LIBRARY)
 	add_library(ncine SHARED ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${SHADER_FILES} ${GENERATED_SOURCES})
 else()
 	add_library(ncine STATIC ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${SHADER_FILES} ${GENERATED_SOURCES})
-	target_compile_definitions(ncine INTERFACE "NCINE_STATIC")
+	target_compile_definitions(ncine PUBLIC "NCINE_STATIC")
 endif()
 
 if(MSVC)

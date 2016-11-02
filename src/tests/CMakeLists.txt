@@ -9,12 +9,6 @@ if(MSVC)
 	set_target_properties(copy_dlls_srctests PROPERTIES FOLDER "CustomCopyTargets")
 endif()
 
-#add_executable(test_radixsort test_radixsort.cpp)
-#target_link_libraries(test_radixsort ncine)
-#target_include_directories(test_radixsort PRIVATE ../include)
-#set_target_properties(test_radixsort PROPERTIES FOLDER "SrcTests")
-#install(TARGETS test_radixsort RUNTIME DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
-
 if(Threads_FOUND)
 	add_executable(apptest_threads ../../tests/main.cpp apptest_threads.cpp)
 	target_link_libraries(apptest_threads ncine)

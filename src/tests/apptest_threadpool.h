@@ -4,6 +4,12 @@
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
 
+namespace ncine {
+
+class AppConfiguration;
+
+}
+
 namespace nc = ncine;
 
 /// My nCine event handler
@@ -12,6 +18,7 @@ class MyEventHandler
 	  public nc::IInputEventHandler
 {
   public:
+	virtual void onPreInit(nc::AppConfiguration &config);
 	virtual void onInit();
 
 #ifndef __ANDROID__

@@ -38,40 +38,40 @@ enum
 
 const VertexFormatCol triVertices[] =
 {
-	{  0.0f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f},
-	{ -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f},
-	{  0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f}
+	{{ 0.0f,  0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+	{{-0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+	{{ 0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}
 };
 
 const VertexFormatTex cubeVertices[] =
 {
-	 1.0f, 1.0f,-1.0f,  0.0f, 0.0f,
-	 1.0f,-1.0f,-1.0f,  1.0f, 0.0f,
-	-1.0f,-1.0f,-1.0f,  1.0f, 1.0f,
+	{{ 1.0f, 1.0f,-1.0f}, {0.0f, 0.0f}},
+	{{ 1.0f,-1.0f,-1.0f}, {1.0f, 0.0f}},
+	{{-1.0f,-1.0f,-1.0f}, {1.0f, 1.0f}},
 
-	 1.0f, 1.0f, 1.0f,  0.0f, 0.0f,
-	-1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
-	 1.0f,-1.0f, 1.0f,  0.0f, 1.0f,
+	{{ 1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
+	{{-1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
+	{{ 1.0f,-1.0f, 1.0f}, {0.0f, 1.0f}},
 
-	 1.0f, 1.0f, 1.0f,  1.0f, 0.0f,
-	 1.0f,-1.0f,-1.0f,  0.0f, 1.0f,
-	 1.0f,-1.0f,-1.0f,  1.0f, 0.0f,
+	{{ 1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
+	{{ 1.0f,-1.0f,-1.0f}, {0.0f, 1.0f}},
+	{{ 1.0f,-1.0f,-1.0f}, {1.0f, 0.0f}},
 
-	 1.0f,-1.0f, 1.0f,  1.0f, 1.0f,
-	-1.0f,-1.0f,-1.0f,  0.0f, 0.0f,
-	-1.0f,-1.0f,-1.0f,  0.0f, 0.0f,
+	{{ 1.0f,-1.0f, 1.0f}, {1.0f, 1.0f}},
+	{{-1.0f,-1.0f,-1.0f}, {0.0f, 0.0f}},
+	{{-1.0f,-1.0f,-1.0f}, {0.0f, 0.0f}},
 
-	-1.0f,-1.0f, 1.0f,  1.0f, 0.0f,
-	-1.0f, 1.0f, 1.0f,  1.0f, 1.0f,
-	 1.0f, 1.0f,-1.0f,  1.0f, 0.0f,
+	{{-1.0f,-1.0f, 1.0f}, {1.0f, 0.0f}},
+	{{-1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
+	{{ 1.0f, 1.0f,-1.0f}, {1.0f, 0.0f}},
 
-	-1.0f, 1.0f, 1.0f,  0.0f, 1.0f,
-	-1.0f, 1.0f,-1.0f,  0.0f, 1.0f,
-	 1.0f,-1.0f, 1.0f,  1.0f, 1.0f,
+	{{-1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+	{{-1.0f, 1.0f,-1.0f}, {0.0f, 1.0f}},
+	{{ 1.0f,-1.0f, 1.0f}, {1.0f, 1.0f}},
 
-	-1.0f, 1.0f,-1.0f,  1.0f, 1.0f,
-	-1.0f,-1.0f, 1.0f,  1.0f, 1.0f,
-	-1.0f,-1.0f, 1.0f,  0.0f, 1.0f
+	{{-1.0f, 1.0f,-1.0f}, {1.0f, 1.0f}},
+	{{-1.0f,-1.0f, 1.0f}, {1.0f, 1.0f}},
+	{{-1.0f,-1.0f, 1.0f}, {0.0f, 1.0f}}
 };
 
 const GLushort cubeIndices[] =
@@ -145,7 +145,7 @@ void MyEventHandler::onInit()
 
 	fbo_ = new nc::GLFramebufferObject();
 	fbo_->attachTexture(*texture_, GL_COLOR_ATTACHMENT0);
-	fbo_->attachRenderbuffer(GL_DEPTH_COMPONENT, FboSize, FboSize, GL_DEPTH_ATTACHMENT);
+	fbo_->attachRenderbuffer(GL_DEPTH_COMPONENT16, FboSize, FboSize, GL_DEPTH_ATTACHMENT);
 	if (fbo_->isStatusComplete() == false)
 	{
 		LOGE("Framebuffer object status is not complete\n");

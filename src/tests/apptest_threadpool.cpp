@@ -2,12 +2,18 @@
 #include "IThreadPool.h"
 #include "ThreadCommands.h"
 #include "Application.h"
+#include "AppConfiguration.h"
 #include "ServiceLocator.h"
 #include "Timer.h"
 
 nc::IAppEventHandler *createAppEventHandler()
 {
 	return new MyEventHandler;
+}
+
+void MyEventHandler::onPreInit(nc::AppConfiguration &config)
+{
+	config.enableThreads(true);
 }
 
 void MyEventHandler::onInit()

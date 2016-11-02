@@ -61,7 +61,12 @@ public class LoadLibraries extends NativeActivity {
 
 	static {
 		System.loadLibrary("openal");
-		System.loadLibrary("ncine");
+
+		try {
+			System.loadLibrary("ncine");
+		} catch (UnsatisfiedLinkError e) {
+			System.err.println("Caught UnsatisfiedLinkError: " + e.getMessage());
+		}
 	}
 
 }
