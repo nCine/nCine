@@ -101,17 +101,4 @@ void Geometry::bind()
 	}
 }
 
-/*! \todo Handle multiple VBOs? */
-GLuint Geometry::vboHandle()
-{
-	GLuint glHandle = 0;
-
-	if (vbo_)
-	{
-		glHandle = vbo_->glHandle();
-	}
-
-	return glHandle;
-}
-
 }

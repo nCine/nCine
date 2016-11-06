@@ -1,5 +1,6 @@
 #include "GLShaderAttributes.h"
 #include "GLShaderProgram.h"
+#include "GLBufferObject.h"
 #include "HashMapIterator.h"
 
 namespace ncine {
@@ -57,10 +58,17 @@ GLVertexAttribute *GLShaderAttributes::attribute(const char *name)
 	return vertexAttribute;
 }
 
-void GLShaderAttributes::defineVertexPointers(GLuint boundVboHandle)
+void GLShaderAttributes::defineVertexPointers(const GLBufferObject *vbo)
 {
 	if (shaderProgram_)
 	{
+		GLuint boundVboHandle = 0;
+		if (vbo)
+		{
+			vbo->bind(); // VBO has to be bound before setting attribute pointers
+			boundVboHandle = vbo->glHandle();
+		}
+
 		for (StringHashMap<GLVertexAttribute>::Iterator i = vertexAttributes_.begin(); i != vertexAttributes_.end(); ++i)
 		{
 			GLVertexAttribute &attribute = *i;

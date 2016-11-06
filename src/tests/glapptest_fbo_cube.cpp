@@ -32,8 +32,7 @@ enum
 {
 	ATTRIB_POSITION,
 	ATTRIB_COLOR,
-	ATTRIB_TEXCOORDS,
-	ATTRIB_COUNT
+	ATTRIB_TEXCOORDS
 };
 
 const VertexFormatCol triVertices[] =
@@ -153,24 +152,21 @@ void MyEventHandler::onInit()
 
 	vboTri_ = new nc::GLBufferObject(GL_ARRAY_BUFFER);
 	vboTri_->bufferData(sizeof(triVertices), triVertices, GL_STATIC_DRAW);
-	colorAttributes_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatCol), (void *)offsetof(VertexFormatCol, position));
-	colorAttributes_->attribute("aColor")->setVboParameters(sizeof(VertexFormatCol), (void *)offsetof(VertexFormatCol, color));
-	colorAttributes_->defineVertexPointers(vboTri_->glHandle());
+	colorAttributes_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatCol), reinterpret_cast<void *>(offsetof(VertexFormatCol, position)));
+	colorAttributes_->attribute("aColor")->setVboParameters(sizeof(VertexFormatCol), reinterpret_cast<void *>(offsetof(VertexFormatCol, color)));
+	colorAttributes_->defineVertexPointers(vboTri_);
 
 	vboCube_ = new nc::GLBufferObject(GL_ARRAY_BUFFER);
 	vboCube_->bufferData(sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
-	texAttributes_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatTex), (void *)offsetof(VertexFormatTex, position));
-	texAttributes_->attribute("aTexCoords")->setVboParameters(sizeof(VertexFormatTex), (void *)offsetof(VertexFormatTex, texcoords));
-	texAttributes_->defineVertexPointers(vboCube_->glHandle());
+	texAttributes_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatTex), reinterpret_cast<void *>(offsetof(VertexFormatTex, position)));
+	texAttributes_->attribute("aTexCoords")->setVboParameters(sizeof(VertexFormatTex), reinterpret_cast<void *>(offsetof(VertexFormatTex, texcoords)));
+	texAttributes_->defineVertexPointers(vboCube_);
 
 	iboCube_ = new nc::GLBufferObject(GL_ELEMENT_ARRAY_BUFFER);
 	iboCube_->bufferData(sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
 
 	width_ = nc::theApplication().width();
 	height_ = nc::theApplication().height();
-
-	projection_ = nc::Matrix4x4f::perspective(45.0f, width_ / static_cast<float>(height_), 1.0f, 20.0f);
-
 	glViewport(0, 0, width_, height_);
 	glEnable(GL_DEPTH_TEST);
 

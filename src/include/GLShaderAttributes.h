@@ -10,6 +10,7 @@
 namespace ncine {
 
 class GLShaderProgram;
+class GLBufferObject;
 
 /// A class to handle all the attributes of a shader program using a hashmap
 class GLShaderAttributes
@@ -20,7 +21,7 @@ class GLShaderAttributes
 	void setProgram(GLShaderProgram *shaderProgram);
 
 	GLVertexAttribute *attribute(const char *name);
-	void defineVertexPointers(GLuint boundVboHandle);
+	void defineVertexPointers(const GLBufferObject *vbo);
 
   private:
 	/// This class stores the OpenGL state regarding a defined vertex attribute pointer

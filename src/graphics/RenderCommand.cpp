@@ -34,7 +34,7 @@ void RenderCommand::issue()
 	material_.bind();
 	setTransformation();
 	material_.commitUniforms();
-	material_.defineVertexPointers(geometry_.vboHandle());
+	material_.defineVertexPointers(geometry_.vbo_);
 
 	draw();
 }

@@ -56,7 +56,7 @@ class Material
 	/// Wrapper around `GLShaderUniforms::commitUniforms()`
 	void commitUniforms() { shaderUniforms_.commitUniforms(); }
 	/// Wrapper around `GLShaderAttributes::defineVertexPointers()`
-	void defineVertexPointers(GLuint boundVboHandle) { shaderAttributes_.defineVertexPointers(boundVboHandle); }
+	void defineVertexPointers(const GLBufferObject *vbo) { shaderAttributes_.defineVertexPointers(vbo); }
 	unsigned int sortKey();
 
 	friend class RenderCommand;

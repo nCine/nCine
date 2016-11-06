@@ -57,7 +57,6 @@ class Geometry
 	GLBufferObject *ibo_;
 
 	void bind();
-	GLuint vboHandle();
 
 	/// Private copy constructor
 	Geometry(const Geometry &);
