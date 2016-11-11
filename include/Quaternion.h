@@ -50,6 +50,9 @@ class Quaternion
 	Matrix4x4<T> toMatrix4x4();
 	static Quaternion fromAxisAngle(T xx, T yy, T zz, T degrees);
 	static Quaternion fromAxisAngle(const Vector3<T> &axis, T degrees);
+	static Quaternion fromXAxisAngle(T degrees);
+	static Quaternion fromYAxisAngle(T degrees);
+	static Quaternion fromZAxisAngle(T degrees);
 
 	/// A quaternion with all zero elements
 	static const Quaternion Zero;
@@ -243,41 +246,64 @@ inline Quaternion<T> &Quaternion<T>::conjugate()
 template <class T>
 inline Matrix4x4<T> Quaternion<T>::toMatrix4x4()
 {
-	const T xx = x * x;
-	const T xy = x * y;
-	const T xz = x * z;
-	const T xw = x * w;
+	const T x2 = x * 2;
+	const T y2 = y * 2;
+	const T z2 = z * 2;
 
-	const T yy = y * y;
-	const T yz = y * z;
-	const T yw = y * w;
+	const T xx = x * x2;
+	const T xy = x * y2;
+	const T xz = x * z2;
+	const T yy = y * y2;
+	const T yz = y * z2;
+	const T zz = z * z2;
 
-	const T zz = z * z;
-	const T zw = z * w;
+	const T xw = w * x2;
+	const T yw = w * y2;
+	const T zw = w * z2;
 
-
-	return Matrix4x4<T>(Vector4<T>(1 - 2 * (yy + zz), 2 * (xy - zw), 2 * (xz + yw), 0),
-	                    Vector4<T>(2 * (xy + zw), 1 - 2 * (xx + zz), 2 * (yz - xw), 0),
-	                    Vector4<T>(2 * (xz - yw), 2 * (yz + xw), 1 - 2 * (xx + yy), 0),
+	return Matrix4x4<T>(Vector4<T>(1 - (yy + zz), xy - zw, xz + yw, 0),
+	                    Vector4<T>(xy + zw, 1 - (xx + zz), yz - xw, 0),
+	                    Vector4<T>(xz - yw, yz + xw, 1 - (xx + yy), 0),
 	                    Vector4<T>(0, 0, 0, 1));
 }
 
 template <class T>
 inline Quaternion<T> Quaternion<T>::fromAxisAngle(T xx, T yy, T zz, T degrees)
 {
-	T radians = degrees * (static_cast<T>(M_PI) / 180);
-	T sinus = sin(radians / 2);
+	T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(M_PI) / 180);
+	T sinus = sin(halfRadians);
 
 	return Quaternion<T>(xx * sinus,
 	                     yy * sinus,
 	                     zz * sinus,
-	                     cos(radians / 2));
+	                     cos(halfRadians));
 }
 
 template <class T>
 inline Quaternion<T> Quaternion<T>::fromAxisAngle(const Vector3<T> &axis, T degrees)
 {
 	return fromAxisAngle(axis.x, axis.y, axis.z, degrees);
+}
+
+template <class T>
+inline Quaternion<T> Quaternion<T>::fromXAxisAngle(T degrees)
+{
+	T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(M_PI) / 180);
+	return Quaternion<T>(sin(halfRadians), 0, 0, cos(halfRadians));
+}
+
+template <class T>
+inline Quaternion<T> Quaternion<T>::fromYAxisAngle(T degrees)
+{
+	T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(M_PI) / 180);
+	return Quaternion<T>(0, sin(halfRadians), 0, cos(halfRadians));
+}
+
+template <class T>
+inline Quaternion<T> Quaternion<T>::fromZAxisAngle(T degrees)
+{
+	T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(M_PI) / 180);
+	return Quaternion<T>(0, 0, sin(halfRadians), cos(halfRadians));
 }
 
 template <class T> const Quaternion<T> Quaternion<T>::Zero(0, 0, 0, 0);

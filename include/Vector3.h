@@ -3,6 +3,7 @@
 
 #define _USE_MATH_DEFINES // for M_PI on MSVC
 #include <cmath>
+#include "Vector2.h"
 
 namespace ncine {
 
@@ -52,6 +53,8 @@ class Vector3
 	T sqrLength() const;
 	Vector3 normalized() const;
 	Vector3 &normalize();
+
+	Vector2<T> toVector2() const;
 
 	template <class S> friend S dot(const Vector3<S> &v1, const Vector3<S> &v2);
 	template <class S> friend Vector3<S> cross(const Vector3<S> &v1, const Vector3<S> &v2);
@@ -288,12 +291,18 @@ inline Vector3<T> &Vector3<T>::normalize()
 	return *this;
 }
 
+template <class T>
+inline Vector2<T> Vector3<T>::toVector2() const
+{
+	return Vector2<T>(x, y);
+}
+
 template <class S>
 inline S dot(const Vector3<S> &v1, const Vector3<S> &v2)
 {
-	return S(v1.x * v2.x +
-	         v1.y * v2.y +
-	         v1.z * v2.z);
+	return static_cast<S>(v1.x * v2.x +
+	                      v1.y * v2.y +
+	                      v1.z * v2.z);
 }
 
 template <class S>

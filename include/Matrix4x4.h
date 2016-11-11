@@ -36,6 +36,7 @@ class Matrix4x4
 	Matrix4x4 &operator/=(T s);
 
 	Vector4<T> operator*(const Vector4<T> &v) const;
+	Vector3<T> operator*(const Vector3<T> &v) const;
 
 	Matrix4x4 operator+(const Matrix4x4 &m) const;
 	Matrix4x4 operator-(const Matrix4x4 &m) const;
@@ -58,6 +59,7 @@ class Matrix4x4
 	static Matrix4x4 rotationZ(T degrees);
 	static Matrix4x4 scale(T xx, T yy, T zz);
 	static Matrix4x4 scale(const Vector3<T> &v);
+	static Matrix4x4 scale(T s);
 
 	static Matrix4x4 ortho(T left, T right, T bottom, T top, T near, T far);
 	static Matrix4x4 frustum(T left, T right, T bottom, T top, T near, T far);
@@ -217,6 +219,16 @@ inline Vector4<T> Matrix4x4<T>::operator*(const Vector4<T> &v) const
 	                  m[1][0] * v[0] + m[1][1] * v[1] + m[1][2] * v[2] + m[1][3] * v[3],
 	                  m[2][0] * v[0] + m[2][1] * v[1] + m[2][2] * v[2] + m[2][3] * v[3],
 	                  m[3][0] * v[0] + m[3][1] * v[1] + m[3][2] * v[2] + m[3][3] * v[3]);
+}
+
+template <class T>
+inline Vector3<T> Matrix4x4<T>::operator*(const Vector3<T> &v) const
+{
+	const Matrix4x4 &m = *this;
+
+	return Vector3<T>(m[0][0] * v[0] + m[0][1] * v[1] + m[0][2] * v[2],
+	                  m[1][0] * v[0] + m[1][1] * v[1] + m[1][2] * v[2],
+	                  m[2][0] * v[0] + m[2][1] * v[1] + m[2][2] * v[2]);
 }
 
 template <class T>
@@ -413,7 +425,7 @@ inline Matrix4x4<T> Matrix4x4<T>::translation(T xx, T yy, T zz)
 template <class T>
 inline Matrix4x4<T> Matrix4x4<T>::translation(const Vector3<T> &v)
 {
-	return translation(Vector3<T>(v.x, v.y, v.z));
+	return translation(v.x, v.y, v.z);
 }
 
 template <class T>
@@ -461,7 +473,13 @@ inline Matrix4x4<T> Matrix4x4<T>::scale(T xx, T yy, T zz)
 template <class T>
 inline Matrix4x4<T> Matrix4x4<T>::scale(const Vector3<T> &v)
 {
-	return scale(Vector3<T>(v.x, v.y, v.z));
+	return scale(v.x, v.y, v.z);
+}
+
+template <class T>
+inline Matrix4x4<T> Matrix4x4<T>::scale(T s)
+{
+	return scale(s, s, s);
 }
 
 template <class T>

@@ -270,8 +270,8 @@ inline Vector2<T> &Vector2<T>::normalize()
 template <class S>
 inline S dot(const Vector2<S> &v1, const Vector2<S> &v2)
 {
-	return S(v1.x * v2.x +
-	         v1.y * v2.y);
+	return static_cast<S>(v1.x * v2.x +
+	                      v1.y * v2.y);
 }
 
 template <class T> const Vector2<T> Vector2<T>::Zero(0, 0);
