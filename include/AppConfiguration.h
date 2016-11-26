@@ -24,6 +24,7 @@ class DLL_PUBLIC AppConfiguration
 	/// Sets the interval for frame timer accumulation average and log
 	void setFrameTimerLogInterval(float logInterval);
 	/// Sets the screen resolution
+	/*! \note If either \p x or \p y are zero then the screen resolution will not be changed. */
 	void setResolution(unsigned int x, unsigned int y);
 	/// Sets the fullscreen mode
 	void setFullScreen(bool inFullscreen);

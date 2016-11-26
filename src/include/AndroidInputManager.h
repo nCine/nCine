@@ -76,6 +76,8 @@ class AndroidInputManager : public IInputManager
 	short int joyAxisValue(int joyId, int axisId) const;
 	float joyAxisNormValue(int joyId, int axisId) const;
 
+	void setMouseCursorMode(MouseCursorMode mode) { mouseCursorMode_ = mode; }
+
   private:
 	static const unsigned int MaxNumJoysticks = 4;
 

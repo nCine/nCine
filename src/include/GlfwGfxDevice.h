@@ -54,7 +54,7 @@ class GlfwGfxDevice : public IGfxDevice
 	/// Returns the window handle used by GLFW3
 	static GLFWwindow *windowHandle() { return windowHandle_; }
 
-	/// Callback for glfwSetErrorCallback()
+	/// Callback for `glfwSetErrorCallback()`
 	static void errorCallback(int error, const char *description);
 
 	friend class GlfwInputManager;

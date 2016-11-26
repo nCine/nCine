@@ -150,6 +150,17 @@ class DLL_PUBLIC JoyConnectionEvent
 class DLL_PUBLIC IInputManager
 {
   public:
+	enum MouseCursorMode
+	{
+		/// Mouse cursor behaves normally
+		MOUSE_CURSOR_NORMAL,
+		/// Mouse cursor is hidden but behaves normally
+		MOUSE_CURSOR_HIDDEN,
+		/// Mouse cursor is hidden and locked to the window
+		/*! \note Does not work properly when using SDL 1.2.x */
+		MOUSE_CURSOR_DISABLED
+	};
+
 	virtual ~IInputManager() { }
 	inline static void setHandler(IInputEventHandler *inputEventHandler)
 	{
@@ -177,9 +188,16 @@ class DLL_PUBLIC IInputManager
 	/// Returns a normalized value between -1.0 and 1.0 for a joystick axis
 	virtual float joyAxisNormValue(int joyId, int axisId) const = 0;
 
+	/// Returns current mouse cursor mode
+	inline MouseCursorMode mouseCursorMode() const { return mouseCursorMode_; }
+	/// Sets the mouse cursor mode
+	virtual void setMouseCursorMode(MouseCursorMode mode) = 0;
+
   protected:
-	IInputManager() { }
 	static IInputEventHandler *inputEventHandler_;
+	MouseCursorMode mouseCursorMode_;
+
+	IInputManager() : mouseCursorMode_(MOUSE_CURSOR_NORMAL) { }
 };
 
 }

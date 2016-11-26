@@ -13,7 +13,15 @@ if(NCINE_BUILD_ANDROID)
 	endif()
 
 	if(NDK_DIR STREQUAL "")
-		message(FATAL_ERROR "NDK_DIR is not set")
+		if(DEFINED ENV{ANDROID_NDK_HOME})
+			set(NDK_DIR $ENV{ANDROID_NDK_HOME})
+		elseif(DEFINED ENV{ANDROID_NDK_ROOT})
+			set(NDK_DIR $ENV{ANDROID_NDK_ROOT})
+		elseif(DEFINED ENV{ANDROID_NDK})
+			set(NDK_DIR $ENV{ANDROID_NDK})
+		else()
+			message(FATAL_ERROR "NDK_DIR is not set")
+		endif()
 	endif()
 	if(NOT EXISTS ${NDK_DIR}/${NDK_BUILD})
 		message(FATAL_ERROR "${NDK_BUILD} command cannot be found in: ${NDK_DIR}")
@@ -143,7 +151,7 @@ if(NCINE_BUILD_ANDROID)
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/drawable-xhdpi/banner.png COMPONENT android)
 
 		foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
-			# The static version of the library will be installed if available, but Android-devdist.mk will not support it
+			# The static version of the library will be installed if available, but Android-devdist.mk does not support it
 			install(FILES ${CMAKE_BINARY_DIR}/android/src/main/${ANDROID_LIBPATH}/${ARCHITECTURE}/${ANDROID_LIBNAME}
 				DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/jni/ncine/${ARCHITECTURE}/ COMPONENT android)
 			install(FILES ${CMAKE_BINARY_DIR}/android/src/main/libs/${ARCHITECTURE}/libopenal.so

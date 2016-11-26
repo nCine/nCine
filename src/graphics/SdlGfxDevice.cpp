@@ -91,6 +91,13 @@ void SdlGfxDevice::initGraphics()
 
 void SdlGfxDevice::initDevice()
 {
+	// asking for a video mode that does not change current screen resolution
+	if (width_ == 0 || height_ == 0)
+	{
+		width_ = 0;
+		height_ = 0;
+	}
+
 	// setting OpenGL attributes
 	if (mode_.redBits() > 0)
 	{
@@ -127,10 +134,18 @@ void SdlGfxDevice::initDevice()
 	}
 
 	// setting screen mode, get a screen from SDL
-	if (!SDL_SetVideoMode(width_, height_, 0, flags))
+	SDL_Surface *screen = SDL_SetVideoMode(width_, height_, 0, flags);
+	if (screen == NULL)
 	{
 		LOGF_X("SDL_SetVideoMode failed: %s", SDL_GetError());
 		exit(-1);
+	}
+
+	// resolution should be set to current screen size
+	if (width_ == 0 || height_ == 0)
+	{
+		width_ = screen->w;
+		height_ = screen->h;
 	}
 
 #ifdef WITH_GLEW

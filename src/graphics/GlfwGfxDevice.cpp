@@ -101,6 +101,14 @@ void GlfwGfxDevice::initGraphics()
 
 void GlfwGfxDevice::initDevice()
 {
+	// asking for a video mode that does not change current screen resolution
+	if (width_ == 0 || height_ == 0)
+	{
+		const GLFWvidmode *vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		width_ = vidMode->width;
+		height_ = vidMode->height;
+	}
+
 	GLFWmonitor *monitor = NULL;
 	if (isFullScreen_)
 	{
@@ -108,7 +116,7 @@ void GlfwGfxDevice::initDevice()
 	}
 
 	// setting window hints and creating a window with GLFW
-	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_RED_BITS, mode_.redBits());
@@ -155,7 +163,7 @@ void GlfwGfxDevice::initDevice()
 
 void GlfwGfxDevice::errorCallback(int error, const char *description)
 {
-	LOGE_X("(%d) %s", error, description);
+	LOGE_X("GLFW error %d: \"%s\"", error, description);
 }
 
 }

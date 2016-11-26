@@ -261,6 +261,21 @@ float SdlInputManager::joyAxisNormValue(int joyId, int axisId) const
 	return axisValue;
 }
 
+void SdlInputManager::setMouseCursorMode(MouseCursorMode mode)
+{
+	if (mode != mouseCursorMode_)
+	{
+		switch (mode)
+		{
+			case MOUSE_CURSOR_NORMAL: SDL_ShowCursor(SDL_ENABLE); SDL_WM_GrabInput(SDL_GRAB_OFF); break;
+			case MOUSE_CURSOR_HIDDEN: SDL_ShowCursor(SDL_DISABLE); SDL_WM_GrabInput(SDL_GRAB_OFF); break;
+			case MOUSE_CURSOR_DISABLED: SDL_ShowCursor(SDL_DISABLE); SDL_WM_GrabInput(SDL_GRAB_ON); break;
+		}
+
+		mouseCursorMode_ = mode;
+	}
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 //////////////////////////////////////////////////////////

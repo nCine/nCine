@@ -10,7 +10,7 @@ option(NCINE_BUILD_DOCUMENTATION "Create and install the HTML based API document
 option(NCINE_IMPLEMENTATION_DOCUMENTATION "Include implementation classes in the documentation" OFF)
 option(NCINE_EMBED_SHADERS "Export shader files to C strings to be included in engine sources" ON)
 option(NCINE_BUILD_ANDROID "Build the Android version of the engine" OFF)
-set(NDK_DIR $ENV{ANDROID_NDK_HOME} CACHE PATH "Set the path to the Android NDK")
+set(NDK_DIR "" CACHE PATH "Set the path to the Android NDK")
 set(NCINE_NDK_ARCHITECTURES armeabi-v7a CACHE STRING "Set the NDK target architectures")
 set(NCINE_TESTS_DATA_DIR "" CACHE STRING "Set the path to the data directory that will be embedded in test executables")
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")

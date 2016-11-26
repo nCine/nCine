@@ -103,6 +103,8 @@ class SdlInputManager : public IInputManager
 	short int joyAxisValue(int joyId, int axisId) const;
 	float joyAxisNormValue(int joyId, int axisId) const;
 
+	void setMouseCursorMode(MouseCursorMode mode);
+
   private:
 	static const unsigned int MaxNumJoysticks = 16;
 

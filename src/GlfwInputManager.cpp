@@ -151,6 +151,21 @@ float GlfwInputManager::joyAxisNormValue(int joyId, int axisId) const
 	return axisValue;
 }
 
+void GlfwInputManager::setMouseCursorMode(MouseCursorMode mode)
+{
+	if (mode != mouseCursorMode_)
+	{
+		switch (mode)
+		{
+			case MOUSE_CURSOR_NORMAL: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL); break;
+			case MOUSE_CURSOR_HIDDEN: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN); break;
+			case MOUSE_CURSOR_DISABLED: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED); break;
+		}
+
+		mouseCursorMode_ = mode;
+	}
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
