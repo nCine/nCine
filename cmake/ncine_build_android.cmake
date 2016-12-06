@@ -54,6 +54,10 @@ if(NCINE_BUILD_ANDROID)
 	set(ANDROID_MK ${CMAKE_BINARY_DIR}/android/src/main/jni/Android.mk)
 	configure_file(${ANDROID_MK_IN} ${ANDROID_MK} @ONLY)
 
+	set(ANDROID_DEVDIST_MK_IN ${CMAKE_SOURCE_DIR}/android/src/main/jni/Android-devdist.mk.in)
+	set(ANDROID_DEVDIST_MK ${CMAKE_BINARY_DIR}/android/src/main/jni/Android-devdist.mk)
+	configure_file(${ANDROID_DEVDIST_MK_IN} ${ANDROID_DEVDIST_MK} @ONLY)
+
 	set(NCINE_COMPILESDK_VERSION 23)
 	set(NCINE_MINSDK_VERSION 13)
 	set(NCINE_TARGETSDK_VERSION 23)
@@ -129,7 +133,7 @@ if(NCINE_BUILD_ANDROID)
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/java/io/github/ncine COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/java/io/github/ncine/LoadLibrariesTV.java
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/java/io/github/ncine COMPONENT android)
-		install(FILES ${CMAKE_SOURCE_DIR}/android/src/main/jni/Android-devdist.mk
+		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/jni/Android-devdist.mk
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/jni RENAME Android.mk COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/jni/Application-devdist.mk
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/jni RENAME Application.mk COMPONENT android)

@@ -19,6 +19,7 @@ endif()
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
 	option(NCINE_GCC_HARDENING "Enable memory corruption mitigation methods of GCC" OFF)
 endif()
+set(NCINE_STARTUP_TEST "apptest_scene" CACHE STRING "Set the starting test project and default running executable")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 get_filename_component(PARENT_SOURCE_DIR ${CMAKE_SOURCE_DIR} DIRECTORY)

@@ -67,6 +67,16 @@ list(APPEND TESTS test_vector2 test_vector3 test_vector4
 	test_matrix4x4 test2_matrix4x4
 	test_quaternion test2_quaternion)
 
+list(FIND APPTESTS ${NCINE_STARTUP_TEST} STARTUP_TEST_INDEX)
+if(STARTUP_TEST_INDEX GREATER -1)
+	if(NOT TESTS_DATA_DIR_DIST) # Don't set the startup test if it wouldn't find the data directory
+		set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${NCINE_STARTUP_TEST})
+	endif()
+	message(STATUS "Startup test target: \"${NCINE_STARTUP_TEST}\"")
+else()
+	message(FATAL_ERROR "Startup test target not found: \"${NCINE_STARTUP_TEST}\"")
+endif()
+
 foreach(TEST ${TESTS})
 	add_executable(${TEST} ${TEST}.cpp test_functions.h)
 	target_link_libraries(${TEST} ncine)

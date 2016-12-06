@@ -48,6 +48,14 @@ if(MSVC)
 			set(CPACK_NSIS_MENU_LINKS "${CPACK_NSIS_MENU_LINKS};${NCINE_WEBSITE}/docs/index.html;nCine Documentation")
 		endif()
 	endif()
+	if(NCINE_BUILD_TESTS)
+		# Custom NSIS commands needed in order to set the "Start in" property of the start menu shortcut
+		set(CPACK_NSIS_CREATE_ICONS_EXTRA
+			"SetOutPath '$INSTDIR\\\\bin'
+			CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\nCine Test.lnk' '$INSTDIR\\\\bin\\\\${NCINE_STARTUP_TEST}.exe'
+			SetOutPath '$INSTDIR'")
+		set(CPACK_NSIS_DELETE_ICONS_EXTRA "Delete '$SMPROGRAMS\\\\$MUI_TEMP\\\\nCine Test.lnk'")
+	endif()
 	set(CPACK_NSIS_COMPRESSOR "/SOLID lzma")
 	set(CPACK_NSIS_MODIFY_PATH ON)
 elseif(APPLE)
@@ -59,7 +67,7 @@ elseif(APPLE)
 	set(CPACK_BUNDLE_PLIST ${CMAKE_BINARY_DIR}/Info.plist)
 
 	file(RELATIVE_PATH RELPATH_TO_BIN ${CMAKE_INSTALL_PREFIX}/MacOS ${CMAKE_INSTALL_PREFIX}/Resources/${RUNTIME_INSTALL_DESTINATION})
-	file(WRITE ${CMAKE_BINARY_DIR}/bundle_executable "#!/usr/bin/env sh\ncd \"$(dirname \"$0\")\" \ncd ${RELPATH_TO_BIN} &&./apptest_scene")
+	file(WRITE ${CMAKE_BINARY_DIR}/bundle_executable "#!/usr/bin/env sh\ncd \"$(dirname \"$0\")\" \ncd ${RELPATH_TO_BIN} &&./${NCINE_STARTUP_TEST}")
 	install(FILES ${CMAKE_BINARY_DIR}/bundle_executable DESTINATION ../MacOS/ RENAME ${CPACK_BUNDLE_NAME}
 		PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE COMPONENT tests)
 
@@ -93,7 +101,8 @@ elseif(UNIX AND NOT APPLE)
 			install(FILES ${NCINE_DATA_DIR}/icons/icon48.png DESTINATION ${ICONS_INSTALL_DESTINATION}/48x48/apps/ RENAME nCine.png COMPONENT data)
 		endif()
 
-		install(FILES ${CMAKE_SOURCE_DIR}/io.github.ncine.desktop DESTINATION share/applications COMPONENT tests)
+		configure_file(${CMAKE_SOURCE_DIR}/io.github.ncine.desktop.in ${CMAKE_BINARY_DIR}/io.github.ncine.desktop @ONLY)
+		install(FILES ${CMAKE_BINARY_DIR}/io.github.ncine.desktop DESTINATION share/applications COMPONENT tests)
 	endif()
 endif()
 
