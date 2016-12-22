@@ -5,7 +5,7 @@ buildscript {
 		jcenter()
 	}
 	dependencies {
-		classpath 'com.android.tools.build:gradle:2.2.2'
+		classpath 'com.android.tools.build:gradle:2.2.+'
 	}
 }
 
@@ -22,13 +22,13 @@ android {
 		ndkCommand = 'ndk-build'
 	}
 
+    buildToolsVersion "@NCINE_BUILDTOOLS_VERSION@"
 	compileSdkVersion @NCINE_COMPILESDK_VERSION@
-	buildToolsVersion "25.0.0"
 
 	defaultConfig {
 		minSdkVersion @NCINE_MINSDK_VERSION@
 		targetSdkVersion @NCINE_TARGETSDK_VERSION@
-		versionCode 1
+		versionCode @NCINE_VERSIONCODE@
 		versionName "@NCINE_VERSION@"
 	}
 

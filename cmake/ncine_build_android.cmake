@@ -58,9 +58,11 @@ if(NCINE_BUILD_ANDROID)
 	set(ANDROID_DEVDIST_MK ${CMAKE_BINARY_DIR}/android/src/main/jni/Android-devdist.mk)
 	configure_file(${ANDROID_DEVDIST_MK_IN} ${ANDROID_DEVDIST_MK} @ONLY)
 
+	set(NCINE_BUILDTOOLS_VERSION 25.0.2)
 	set(NCINE_COMPILESDK_VERSION 23)
 	set(NCINE_MINSDK_VERSION 13)
 	set(NCINE_TARGETSDK_VERSION 23)
+	set(NCINE_VERSIONCODE 1)
 	set(BUILD_GRADLE_IN ${CMAKE_SOURCE_DIR}/android/build.gradle.in)
 	set(BUILD_GRADLE ${CMAKE_BINARY_DIR}/android/build.gradle)
 	configure_file(${BUILD_GRADLE_IN} ${BUILD_GRADLE} @ONLY)
@@ -142,17 +144,17 @@ if(NCINE_BUILD_ANDROID)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/values/strings.xml
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/values COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-mdpi/ic_launcher.png
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-mdpi/ic_launcher.png COMPONENT android)
+			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-mdpi COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-hdpi/ic_launcher.png
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-hdpi/ic_launcher.png COMPONENT android)
+			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-hdpi COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xhdpi/ic_launcher.png
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-xhdpi/ic_launcher.png COMPONENT android)
+			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-xhdpi COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xxhdpi/ic_launcher.png
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-xxhdpi/ic_launcher.png COMPONENT android)
+			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-xxhdpi COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xxxhdpi/ic_launcher.png
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-xxxhdpi/ic_launcher.png COMPONENT android)
+			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-xxxhdpi COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/drawable-xhdpi/banner.png
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/drawable-xhdpi/banner.png COMPONENT android)
+			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/drawable-xhdpi COMPONENT android)
 
 		foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
 			# The static version of the library will be installed if available, but Android-devdist.mk does not support it
