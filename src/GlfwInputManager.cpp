@@ -255,7 +255,7 @@ void GlfwInputManager::joystickCallback(int joy, int event)
 		int numAxes = -1;
 		glfwGetJoystickButtons(joy, &numButtons);
 		glfwGetJoystickAxes(joy, &numAxes);
-
+		updateJoystickStates();
 
 		LOGI_X("Joystick %d \"%s\" has been connected - %d axes, %d buttons",
 		       joyId, glfwGetJoystickName(joy), numAxes, numButtons);

@@ -64,7 +64,7 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
-	int firstJoy = 0;
+	int firstJoy = -1;
 	for (int i = 0; i < MaxNumJoysticks; i++)
 	{
 		if (nc::theApplication().inputManager().isJoyPresent(i))
@@ -75,34 +75,41 @@ void MyEventHandler::onFrameStart()
 	}
 
 	joyString_->clear();
-	for (int i = 0; i < MaxNumJoysticks; i++)
+	if (firstJoy >= 0)
 	{
-		if (nc::theApplication().inputManager().isJoyPresent(i))
+		for (int i = 0; i < MaxNumJoysticks; i++)
 		{
-			joyString_->formatAppend("Joystick %d: %s (%d axes, %d buttons)\n", i,
-			                         nc::theApplication().inputManager().joyName(i),
-			                         nc::theApplication().inputManager().joyNumAxes(i),
-			                         nc::theApplication().inputManager().joyNumButtons(i));
+			if (nc::theApplication().inputManager().isJoyPresent(i))
+			{
+				joyString_->formatAppend("Joystick %d: %s (%d axes, %d buttons)\n", i,
+				                         nc::theApplication().inputManager().joyName(i),
+				                         nc::theApplication().inputManager().joyNumAxes(i),
+				                         nc::theApplication().inputManager().joyNumButtons(i));
+			}
+		}
+
+		if (nc::theApplication().inputManager().isJoyPresent(firstJoy))
+		{
+			int numAxes = nc::theApplication().inputManager().joyNumAxes(firstJoy);
+			int numButtons = nc::theApplication().inputManager().joyNumButtons(firstJoy);
+
+			*joyString_ += "Axes:";
+			for (int i = 0; i < numAxes; i++)
+			{
+				axisValues_[i] = nc::theApplication().inputManager().joyAxisNormValue(firstJoy, i);
+				joyString_->formatAppend(" %.2f", axisValues_[i]);
+			}
+			*joyString_ += "\nButtons:";
+			for (int i = 0; i < numButtons; i++)
+			{
+				buttonStates_[i] = nc::theApplication().inputManager().isJoyButtonPressed(firstJoy, i);
+				joyString_->formatAppend(" %u", buttonStates_[i]);
+			}
 		}
 	}
-
-	if (nc::theApplication().inputManager().isJoyPresent(firstJoy))
+	else
 	{
-		int numAxes = nc::theApplication().inputManager().joyNumAxes(firstJoy);
-		int numButtons = nc::theApplication().inputManager().joyNumButtons(firstJoy);
-
-		*joyString_ += "Axes:";
-		for (int i = 0; i < numAxes; i++)
-		{
-			axisValues_[i] = nc::theApplication().inputManager().joyAxisNormValue(firstJoy, i);
-			joyString_->formatAppend(" %.2f", axisValues_[i]);
-		}
-		*joyString_ += "\nButtons:";
-		for (int i = 0; i < numButtons; i++)
-		{
-			buttonStates_[i] = nc::theApplication().inputManager().isJoyButtonPressed(firstJoy, i);
-			joyString_->formatAppend(" %u", buttonStates_[i]);
-		}
+		joyString_->formatAppend("No joysticks connected");
 	}
 	textNode_->setString(*joyString_);
 
