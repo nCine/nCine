@@ -1,8 +1,7 @@
 #ifndef CLASS_NCINE_VECTOR2
 #define CLASS_NCINE_VECTOR2
 
-#define _USE_MATH_DEFINES // for M_PI on MSVC
-#include <cmath>
+#include "common_constants.h"
 
 namespace ncine {
 

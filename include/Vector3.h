@@ -1,8 +1,6 @@
 #ifndef CLASS_NCINE_VECTOR3
 #define CLASS_NCINE_VECTOR3
 
-#define _USE_MATH_DEFINES // for M_PI on MSVC
-#include <cmath>
 #include "Vector2.h"
 
 namespace ncine {

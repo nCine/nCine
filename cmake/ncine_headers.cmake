@@ -1,5 +1,6 @@
 set(HEADERS
 	include/common_defines.h
+	include/common_constants.h
 	include/algorithms.h
 	include/iterator_traits.h
 	include/Array.h

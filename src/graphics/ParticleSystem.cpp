@@ -50,7 +50,7 @@ void ParticleSystem::emitParticles(unsigned int amount, float life, const Vector
 	Vector2f rndVelocity;
 
 	// Particles are rotated towards the emission vector
-	float rotation = -(atan2(vel.y, vel.x) - atan2(1.0f, 0.0f)) * 180.0f / static_cast<float>(M_PI);
+	float rotation = -(atan2f(vel.y, vel.x) - atan2f(1.0f, 0.0f)) * 180.0f / fPi;
 	if (rotation < 0.0f)
 	{
 		rotation += 360.0f;

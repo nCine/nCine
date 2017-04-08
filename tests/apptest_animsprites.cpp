@@ -1,3 +1,4 @@
+#include "common_constants.h"
 #include "apptest_animsprites.h"
 #include "Application.h"
 #include "Texture.h"
@@ -104,7 +105,7 @@ void MyEventHandler::onFrameStart()
 		reachVector.normalize();
 		animSprite_->setPaused(false);
 
-		float angle = 180.0f + (atan2(reachVector.y, reachVector.x) - atan2(1.0f, 0.0f)) * 180.0f / static_cast<float>(M_PI); // TODO clamp
+		float angle = 180.0f + (atan2f(reachVector.y, reachVector.x) - atan2f(1.0f, 0.0f)) * 180.0f / nc::fPi; // TODO clamp
 		animSprite_->setRotation(angle);
 
 		reachVector *= nc::theApplication().interval() * SpriteSpeed;

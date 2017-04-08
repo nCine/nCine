@@ -1,8 +1,6 @@
 #ifndef CLASS_NCINE_QUATERNION
 #define CLASS_NCINE_QUATERNION
 
-#define _USE_MATH_DEFINES // for M_PI on MSVC
-#include <cmath>
 #include "Matrix4x4.h"
 
 namespace ncine {
@@ -270,7 +268,7 @@ inline Matrix4x4<T> Quaternion<T>::toMatrix4x4()
 template <class T>
 inline Quaternion<T> Quaternion<T>::fromAxisAngle(T xx, T yy, T zz, T degrees)
 {
-	T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(M_PI) / 180);
+	T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(Pi) / 180);
 	T sinus = sin(halfRadians);
 
 	return Quaternion<T>(xx * sinus,
@@ -288,21 +286,21 @@ inline Quaternion<T> Quaternion<T>::fromAxisAngle(const Vector3<T> &axis, T degr
 template <class T>
 inline Quaternion<T> Quaternion<T>::fromXAxisAngle(T degrees)
 {
-	T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(M_PI) / 180);
+	T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(Pi) / 180);
 	return Quaternion<T>(sin(halfRadians), 0, 0, cos(halfRadians));
 }
 
 template <class T>
 inline Quaternion<T> Quaternion<T>::fromYAxisAngle(T degrees)
 {
-	T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(M_PI) / 180);
+	T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(Pi) / 180);
 	return Quaternion<T>(0, sin(halfRadians), 0, cos(halfRadians));
 }
 
 template <class T>
 inline Quaternion<T> Quaternion<T>::fromZAxisAngle(T degrees)
 {
-	T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(M_PI) / 180);
+	T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(Pi) / 180);
 	return Quaternion<T>(0, 0, sin(halfRadians), cos(halfRadians));
 }
 

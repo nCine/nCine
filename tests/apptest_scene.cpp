@@ -1,5 +1,3 @@
-#define _USE_MATH_DEFINES // for M_PI in MSVC
-#include <cmath>
 #include "apptest_scene.h"
 #include "Application.h"
 #include "Texture.h"
@@ -68,7 +66,7 @@ void MyEventHandler::onFrameStart()
 
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
-		sprites_[i]->y = height * 0.3f + fabs(sinf(angle_ + 5.0f * i)) * (height * (0.25f + 0.02f * i));
+		sprites_[i]->y = height * 0.3f + fabsf(sinf(angle_ + 5.0f * i)) * (height * (0.25f + 0.02f * i));
 		sprites_[i]->setRotation(angle_ * 20);
 	}
 }

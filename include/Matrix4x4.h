@@ -431,7 +431,7 @@ inline Matrix4x4<T> Matrix4x4<T>::translation(const Vector3<T> &v)
 template <class T>
 inline Matrix4x4<T> Matrix4x4<T>::rotationX(T degrees)
 {
-	T radians = degrees * (static_cast<T>(M_PI) / 180);
+	T radians = degrees * (static_cast<T>(Pi) / 180);
 
 	return Matrix4x4(Vector4<T>(1, 0, 0, 0),
 	                 Vector4<T>(0, cos(radians), sin(radians), 0),
@@ -442,7 +442,7 @@ inline Matrix4x4<T> Matrix4x4<T>::rotationX(T degrees)
 template <class T>
 inline Matrix4x4<T> Matrix4x4<T>::rotationY(T degrees)
 {
-	T radians = degrees * (static_cast<T>(M_PI) / 180);
+	T radians = degrees * (static_cast<T>(Pi) / 180);
 
 	return Matrix4x4(Vector4<T>(cos(radians), 0, -sin(radians), 0),
 	                 Vector4<T>(0, 1, 0, 0),
@@ -453,7 +453,7 @@ inline Matrix4x4<T> Matrix4x4<T>::rotationY(T degrees)
 template <class T>
 inline Matrix4x4<T> Matrix4x4<T>::rotationZ(T degrees)
 {
-	T radians = degrees * (static_cast<T>(M_PI) / 180);
+	T radians = degrees * (static_cast<T>(Pi) / 180);
 
 	return Matrix4x4(Vector4<T>(cos(radians), sin(radians), 0, 0),
 	                 Vector4<T>(-sin(radians), cos(radians), 0, 0),
@@ -503,7 +503,7 @@ inline Matrix4x4<T> Matrix4x4<T>::frustum(T left, T right, T bottom, T top, T ne
 template <class T>
 inline Matrix4x4<T> Matrix4x4<T>::perspective(T fovY, T aspect, T near, T far)
 {
-	T yMax = near * tan(fovY * static_cast<T>(M_PI) / 360);
+	T yMax = near * tan(fovY * static_cast<T>(Pi) / 360);
 	T yMin = -yMax;
 	T xMin = yMin * aspect;
 	T xMax = yMax * aspect;

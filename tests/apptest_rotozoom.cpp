@@ -1,5 +1,3 @@
-#define _USE_MATH_DEFINES // for M_PI in MSVC
-#include <cmath>
 #include "apptest_rotozoom.h"
 #include "Application.h"
 #include "SceneNode.h"
