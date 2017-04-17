@@ -26,6 +26,8 @@ if(NCINE_BUILD_DOCUMENTATION)
 		set(DOXYGEN_QHP_NAMESPACE "io.github.ncine.${NCINE_VERSION}")
 	endif()
 
+	set(DOXYGEN_WARNINGS "NO")
+
 	set(DOXYFILE_IN ${CMAKE_SOURCE_DIR}/Doxyfile.in)
 	set(DOXYFILE ${CMAKE_BINARY_DIR}/Doxyfile)
 	configure_file(${DOXYFILE_IN} ${DOXYFILE} @ONLY)

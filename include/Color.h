@@ -55,40 +55,39 @@ class DLL_PUBLIC Color
 	inline float fA() const { return channels_[3] / 255.0f; }
 
 	/// Sets four color channels (`unsigned char`)
-	void set(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha);
+	inline void set(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha);
 	/// Sets three color channels (`unsigned char`)
-	void set(unsigned char red, unsigned char green, unsigned char blue);
+	inline void set(unsigned char red, unsigned char green, unsigned char blue);
 	/// Sets four color channels (`unsigned char` vector)
-	void setVec(unsigned char channels[4]);
+	inline void setVec(unsigned char channels[4]);
 
 	/// Sets four color channels (normalized `float`)
-	void setF(float red, float green, float blue, float alpha);
+	inline void setF(float red, float green, float blue, float alpha);
 	/// Sets three color channels (normalized `float`)
-	void setF(float red, float green, float blue);
+	inline void setF(float red, float green, float blue);
 	/// Sets four color channels (`float` vector)
-	void setFVec(float channels[4]);
+	inline void setFVec(float channels[4]);
 
 	/// Sets the alpha channel (`unsigned char`)
-	void setAlpha(unsigned char alpha);
+	inline void setAlpha(unsigned char alpha);
 	/// Sets the alpha channel (normalized `float`)
-	void setAlphaF(float alpha);
+	inline void setAlphaF(float alpha);
 
 	/// Equality operator
-	bool operator==(const Color &color) const;
+	inline bool operator==(const Color &color) const;
 
-	Color &operator*=(const Color &color);
+	inline Color &operator*=(const Color &color);
 	/// Multiplication by a constant scalar
-	Color &operator*=(float scalar);
+	inline Color &operator*=(float scalar);
 
-	Color operator*(const Color &color) const;
+	inline Color operator*(const Color &color) const;
 	/// Multiplication by a constant scalar
-	Color operator*(float scalar) const;
+	inline Color operator*(float scalar) const;
 
   private:
 	/// The four unsigned byte color channels
 	StaticArray<unsigned char, 4> channels_;
 };
-
 
 inline void Color::set(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
 {
