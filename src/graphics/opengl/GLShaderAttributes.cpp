@@ -10,6 +10,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 StaticArray<GLShaderAttributes::GLVertexAttribPointerState, GLShaderAttributes::MaxDefinedVertexAttribPointers> GLShaderAttributes::definedPointers_(StaticArrayMode::EXTEND_SIZE);
+GLVertexAttribute GLShaderAttributes::attributeNotFound_;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -47,6 +48,8 @@ GLVertexAttribute *GLShaderAttributes::attribute(const char *name)
 
 		if (vertexAttribute == NULL)
 		{
+			// Returning the dummy vertex attribute to prevent the application from crashing
+			vertexAttribute = &attributeNotFound_;
 			LOGW_X("Attribute \"%s\" not found in shader program %u", name, shaderProgram_->glHandle());
 		}
 	}

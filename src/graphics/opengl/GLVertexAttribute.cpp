@@ -36,16 +36,19 @@ void GLVertexAttribute::setVboParameters(GLsizei vboStride, const GLvoid *vboPoi
 
 void GLVertexAttribute::vertexAttribPointer()
 {
+	if (attribute_ == NULL) { return; }
 	glVertexAttribPointer(attribute_->location(), attribute_->numComponents(), attribute_->basicType(), GL_FALSE, vboStride_, vboPointer_);
 }
 
 void GLVertexAttribute::enable()
 {
+	if (attribute_ == NULL) { return; }
 	glEnableVertexAttribArray(attribute_->location());
 }
 
 void GLVertexAttribute::disable()
 {
+	if (attribute_ == NULL) { return; }
 	glDisableVertexAttribArray(attribute_->location());
 }
 

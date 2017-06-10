@@ -27,12 +27,16 @@ GLUniformCache::GLUniformCache(const GLUniform *uniform)
 
 void GLUniformCache::setFloatVector(const GLfloat *vec)
 {
+	if (uniform_ == NULL) { return; }
+
 	checkFloat();
 	memcpy(dataPointer_, vec, sizeof(GLfloat) * uniform_->numComponents());
 }
 
 void GLUniformCache::setFloatValue(GLfloat v0)
 {
+	if (uniform_ == NULL) { return; }
+
 	checkFloat();
 	checkComponents(1);
 
@@ -42,6 +46,8 @@ void GLUniformCache::setFloatValue(GLfloat v0)
 
 void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1)
 {
+	if (uniform_ == NULL) { return; }
+
 	checkFloat();
 	checkComponents(2);
 
@@ -52,6 +58,8 @@ void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1)
 
 void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2)
 {
+	if (uniform_ == NULL) { return; }
+
 	checkFloat();
 	checkComponents(3);
 
@@ -63,6 +71,8 @@ void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2)
 
 void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
 {
+	if (uniform_ == NULL) { return; }
+
 	checkFloat();
 	checkComponents(4);
 
@@ -75,12 +85,16 @@ void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v
 
 void GLUniformCache::setIntVector(const GLint *vec)
 {
+	if (uniform_ == NULL) { return; }
+
 	checkInt();
 	memcpy(dataPointer_, vec, sizeof(GLint) * uniform_->numComponents());
 }
 
 void GLUniformCache::setIntValue(GLint v0)
 {
+	if (uniform_ == NULL) { return; }
+
 	checkInt();
 	checkComponents(1);
 
@@ -90,6 +104,8 @@ void GLUniformCache::setIntValue(GLint v0)
 
 void GLUniformCache::setIntValue(GLint v0, GLint v1)
 {
+	if (uniform_ == NULL) { return; }
+
 	checkInt();
 	checkComponents(2);
 
@@ -100,6 +116,8 @@ void GLUniformCache::setIntValue(GLint v0, GLint v1)
 
 void GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2)
 {
+	if (uniform_ == NULL) { return; }
+
 	checkInt();
 	checkComponents(3);
 
@@ -111,6 +129,8 @@ void GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2)
 
 void GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2, GLint v3)
 {
+	if (uniform_ == NULL) { return; }
+
 	checkInt();
 	checkComponents(4);
 
@@ -123,6 +143,8 @@ void GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2, GLint v3)
 
 void GLUniformCache::commitValue()
 {
+	if (uniform_ == NULL) { return; }
+
 	GLint location = uniform_->location();
 	switch (uniform_->type())
 	{

@@ -54,6 +54,8 @@ class GLShaderAttributes
 
 	static const unsigned int VertexAttributesHashSize = 8;
 	StringHashMap<GLVertexAttribute>::Type vertexAttributes_;
+	/// A dummy attribute returned when a vertex attribute is not found in the hashmap
+	static GLVertexAttribute attributeNotFound_;
 
 	void importAttributes();
 };

@@ -12,6 +12,12 @@ void commitValue(GLUniformCache &uniformCache) { uniformCache.commitValue(); }
 }
 
 ///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
+GLUniformCache GLShaderUniforms::uniformNotFound_;
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
@@ -47,6 +53,8 @@ GLUniformCache *GLShaderUniforms::uniform(const char *name)
 
 		if (uniformCache == NULL)
 		{
+			// Returning the dummy uniform cache to prevent the application from crashing
+			uniformCache = &uniformNotFound_;
 			LOGW_X("Uniform \"%s\" not found in shader program %u", name, shaderProgram_->glHandle());
 		}
 	}

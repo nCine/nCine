@@ -26,6 +26,8 @@ class GLShaderUniforms
 
 	static const int UniformCachesHashSize = 16;
 	StringHashMap<GLUniformCache>::Type uniformCaches_;
+	/// A dummy uniform cache returned when a uniform is not found in the hashmap
+	static GLUniformCache uniformNotFound_;
 
 	static const unsigned int UniformFloatBufferSize = 128;
 	GLfloat uniformsFloatBuffer_[UniformFloatBufferSize];
