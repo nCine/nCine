@@ -49,6 +49,9 @@ class DLL_PUBLIC AppConfiguration
 
   private:
 	// Pre-configured compile-time variables
+	const bool glDebugContext_;
+	const unsigned int glMajorVersion_;
+	const unsigned int glMinorVersion_;
 	const float profileTextUpdateTime_;
 
 	// User configurable compile-time variables

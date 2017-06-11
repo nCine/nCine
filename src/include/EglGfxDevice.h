@@ -2,6 +2,7 @@
 #define CLASS_NCINE_EGLGFXDEVICE
 
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 #include "IGfxDevice.h"
 #include "Vector2.h"
@@ -16,7 +17,7 @@ class EglGfxDevice : public IGfxDevice
 {
   public:
 	/// Constructor taking a `DisplayMode` object
-	EglGfxDevice(struct android_app *state, DisplayMode mode);
+	EglGfxDevice(struct android_app *state, const GLContextInfo &contextInfo, const DisplayMode &mode);
 	~EglGfxDevice();
 
 	void setResolution(int width, int height) { }
@@ -38,7 +39,7 @@ class EglGfxDevice : public IGfxDevice
 	void querySurfaceSize();
 
 	/// Checks if the desired pixel format is supported
-	static bool isModeSupported(struct android_app *state, DisplayMode mode);
+	static bool isModeSupported(struct android_app *state, const GLContextInfo &contextInfo, const DisplayMode &mode);
 
   private:
 	/// The EGL display connection
@@ -51,7 +52,7 @@ class EglGfxDevice : public IGfxDevice
 	EGLConfig config_;
 
 	/// Initializes the OpenGL graphic context
-	void initDevice(struct android_app *state);
+	void initDevice(struct android_app *state, const GLContextInfo &contextInfo);
 };
 
 }

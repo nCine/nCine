@@ -11,24 +11,11 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-SdlGfxDevice::SdlGfxDevice(int width, int height, bool isFullScreen)
-{
-	init(width, height, DisplayMode(), isFullScreen);
-}
-
-SdlGfxDevice::SdlGfxDevice(Vector2i size, bool isFullScreen_)
-{
-	init(size.x, size.y, DisplayMode(), isFullScreen_);
-}
-
 SdlGfxDevice::SdlGfxDevice(int width, int height, DisplayMode mode, bool isFullScreen)
+	: IGfxDevice(width, height, mode, isFullScreen)
 {
-	init(width, height, mode, isFullScreen);
-}
-
-SdlGfxDevice::SdlGfxDevice(Vector2i size, DisplayMode mode, bool isFullScreen)
-{
-	init(size.x, size.y, mode, isFullScreen);
+	initGraphics();
+	initDevice();
 }
 
 ///////////////////////////////////////////////////////////
@@ -69,23 +56,12 @@ void SdlGfxDevice::toggleFullScreen()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void SdlGfxDevice::init(int width, int height, DisplayMode mode, bool isFullScreen)
-{
-	width_ = width;
-	height_ = height;
-	mode_ = mode;
-	isFullScreen_ = isFullScreen;
-
-	initGraphics();
-	initDevice();
-}
-
 void SdlGfxDevice::initGraphics()
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
 		LOGF_X("SDL_Init(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -138,7 +114,7 @@ void SdlGfxDevice::initDevice()
 	if (screen == NULL)
 	{
 		LOGF_X("SDL_SetVideoMode failed: %s", SDL_GetError());
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	// resolution should be set to current screen size
@@ -154,13 +130,13 @@ void SdlGfxDevice::initDevice()
 	if (GLEW_OK != err)
 	{
 		LOGF_X("GLEW error: %s", glewGetErrorString(err));
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	if (!GLEW_VERSION_2_1)
 	{
 		LOGF("OpenGL 2.1 is not supported");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 #endif
 }

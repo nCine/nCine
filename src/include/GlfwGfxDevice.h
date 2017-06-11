@@ -16,14 +16,7 @@ namespace ncine {
 class GlfwGfxDevice : public IGfxDevice
 {
   public:
-	/// Constructor taking the resolution as two integer
-	GlfwGfxDevice(int width, int height, bool isFullScreen_);
-	/// Constructor taking the resolution as a `Vector2<int>` object
-	explicit GlfwGfxDevice(Vector2i size, bool isFullScreen_);
-	/// Constructor taking the resolution as two integer and a `DisplayMode`
-	GlfwGfxDevice(int width, int height, DisplayMode mode, bool isFullScreen_);
-	/// Constructor taking the resolution as a `Vector2<int>` object and a `DisplayMode`
-	GlfwGfxDevice(Vector2i size, DisplayMode mode, bool isFullScreen_);
+	GlfwGfxDevice(int width, int height, const GLContextInfo &contextInfo, const DisplayMode &mode, bool isFullScreen);
 	~GlfwGfxDevice();
 
 	void setResolution(int width, int height);
@@ -38,14 +31,14 @@ class GlfwGfxDevice : public IGfxDevice
   private:
 	/// GLFW3 window handle
 	static GLFWwindow *windowHandle_;
+	/// OpenGL context properties
+	GLContextInfo contextInfo_;
 
 	/// Private copy constructor
 	GlfwGfxDevice(const GlfwGfxDevice &);
 	/// Private assignment operator
 	GlfwGfxDevice &operator=(const GlfwGfxDevice &);
 
-	/// Initilizes the object
-	void init(int width, int height, DisplayMode mode, bool isFullScreen_);
 	/// Initilizes the video subsystem (GLFW)
 	void initGraphics();
 	/// Initilizes the OpenGL graphic context

@@ -47,10 +47,12 @@ void PCApplication::init(IAppEventHandler * (*createAppEventHandler)())
 	DisplayMode::VSyncMode vSyncMode = appCfg_.withVSync_ ? DisplayMode::WITH_VSYNC : DisplayMode::NO_VSYNC;
 	DisplayMode displayMode(8, 8, 8, 8, 24, 8, DisplayMode::DOUBLE_BUFFERED, vSyncMode);
 #if defined(WITH_SDL)
+	// SDL 1.2.x does not support the creation of an OpenGL context with attributes
 	gfxDevice_ = new SdlGfxDevice(appCfg_.xResolution_, appCfg_.yResolution_, displayMode, appCfg_.inFullscreen_);
 	inputManager_ = new SdlInputManager();
 #elif defined(WITH_GLFW)
-	gfxDevice_ = new GlfwGfxDevice(appCfg_.xResolution_, appCfg_.yResolution_, displayMode, appCfg_.inFullscreen_);
+	IGfxDevice::GLContextInfo contextInfo(appCfg_.glMajorVersion_, appCfg_.glMinorVersion_, appCfg_.glDebugContext_);
+	gfxDevice_ = new GlfwGfxDevice(appCfg_.xResolution_, appCfg_.yResolution_, contextInfo, displayMode, appCfg_.inFullscreen_);
 	inputManager_ = new GlfwInputManager();
 #endif
 	gfxDevice_->setWindowTitle(appCfg_.windowTitle_.data());

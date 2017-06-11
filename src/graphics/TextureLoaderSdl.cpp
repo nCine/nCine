@@ -40,7 +40,7 @@ void TextureLoaderSdl::init()
 	if (!sdlSurface_)
 	{
 		LOGF_X("Cannot load \"%s\"", fileHandle_->filename());
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	bpp_ = sdlSurface_->format->BitsPerPixel;
@@ -59,7 +59,7 @@ void TextureLoaderSdl::init()
 	else
 	{
 		LOGF_X("Not a true color or alpha image: %d", bpp_);
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	if (sdlSurface_->format->Rmask != 0x000000ff)

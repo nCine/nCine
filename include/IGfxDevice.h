@@ -10,6 +10,17 @@ namespace ncine {
 class DLL_PUBLIC IGfxDevice
 {
   public:
+	struct GLContextInfo
+	{
+		GLContextInfo(unsigned int major, unsigned int minor, bool debug)
+			: majorVersion(major), minorVersion(minor), debugContext(debug) { }
+
+		unsigned int majorVersion;
+		unsigned int minorVersion;
+		bool debugContext;
+	};
+
+	IGfxDevice(int width, int height, const DisplayMode &mode, bool isFullScreen);
 	virtual ~IGfxDevice() { }
 
 	/// Sets screen resolution with two integers
@@ -46,8 +57,11 @@ class DLL_PUBLIC IGfxDevice
 	/// Whether device rendering occurs in full screen
 	bool isFullScreen_;
 
+	/// Enables OpenGL debug output and setup a callback function to log messages
+	void enableGlDebugOutput();
+
   private:
-	/// Sets up the initial OpenGL state
+	/// Sets up the initial OpenGL state for the scenegraph
 	virtual void setupGL();
 
 	/// Updates the screen swapping back and front buffers

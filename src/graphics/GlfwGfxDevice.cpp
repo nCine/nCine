@@ -14,24 +14,11 @@ GLFWwindow *GlfwGfxDevice::windowHandle_ = NULL;
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-GlfwGfxDevice::GlfwGfxDevice(int width, int height, bool isFullScreen)
+GlfwGfxDevice::GlfwGfxDevice(int width, int height, const GLContextInfo &contextInfo, const DisplayMode &mode, bool isFullScreen)
+	: IGfxDevice(width, height, mode, isFullScreen), contextInfo_(contextInfo)
 {
-	init(width, height, DisplayMode(), isFullScreen);
-}
-
-GlfwGfxDevice::GlfwGfxDevice(Vector2i size, bool isFullScreen)
-{
-	init(size.x, size.y, DisplayMode(), isFullScreen);
-}
-
-GlfwGfxDevice::GlfwGfxDevice(int width, int height, DisplayMode mode, bool isFullScreen)
-{
-	init(width, height, mode, isFullScreen);
-}
-
-GlfwGfxDevice::GlfwGfxDevice(Vector2i size, DisplayMode mode, bool isFullScreen)
-{
-	init(size.x, size.y, mode, isFullScreen);
+	initGraphics();
+	initDevice();
 }
 
 GlfwGfxDevice::~GlfwGfxDevice()
@@ -77,17 +64,6 @@ void GlfwGfxDevice::toggleFullScreen()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void GlfwGfxDevice::init(int width, int height, DisplayMode mode, bool isFullScreen)
-{
-	width_ = width;
-	height_ = height;
-	mode_ = mode;
-	isFullScreen_ = isFullScreen;
-
-	initGraphics();
-	initDevice();
-}
-
 void GlfwGfxDevice::initGraphics()
 {
 	glfwSetErrorCallback(errorCallback);
@@ -117,8 +93,9 @@ void GlfwGfxDevice::initDevice()
 
 	// setting window hints and creating a window with GLFW
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, contextInfo_.majorVersion);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, contextInfo_.minorVersion);
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, contextInfo_.debugContext ? GLFW_TRUE : GLFW_FALSE);
 	glfwWindowHint(GLFW_RED_BITS, mode_.redBits());
 	glfwWindowHint(GLFW_GREEN_BITS, mode_.greenBits());
 	glfwWindowHint(GLFW_BLUE_BITS, mode_.blueBits());
@@ -153,12 +130,13 @@ void GlfwGfxDevice::initDevice()
 		exit(EXIT_FAILURE);
 	}
 
-	if (!GLEW_VERSION_2_1)
-	{
-		LOGF("OpenGL 2.1 is not supported");
-		exit(EXIT_FAILURE);
-	}
+	contextInfo_.debugContext = contextInfo_.debugContext && glewIsSupported("GL_ARB_debug_output");
 #endif
+
+	if (contextInfo_.debugContext)
+	{
+		enableGlDebugOutput();
+	}
 }
 
 void GlfwGfxDevice::errorCallback(int error, const char *description)

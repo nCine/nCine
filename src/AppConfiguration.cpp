@@ -8,7 +8,15 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AppConfiguration::AppConfiguration()
-	: profileTextUpdateTime_(0.2f)
+	: glDebugContext_(false)
+#ifdef __ANDROID__
+	, glMajorVersion_(2)
+	, glMinorVersion_(0)
+#else
+	, glMajorVersion_(2)
+	, glMinorVersion_(1)
+#endif
+	, profileTextUpdateTime_(0.2f)
 	, logFile_(128)
 	, consoleLogLevel_(ILogger::LOG_INFO)
 	, fileLogLevel_(ILogger::LOG_OFF)

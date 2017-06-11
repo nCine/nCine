@@ -9,11 +9,10 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-EglGfxDevice::EglGfxDevice(struct android_app *state, DisplayMode mode)
+EglGfxDevice::EglGfxDevice(struct android_app *state, const GLContextInfo &contextInfo, const DisplayMode &mode)
+	: IGfxDevice(-1, -1, mode, true)
 {
-	isFullScreen_ = true;
-	mode_ = mode;
-	initDevice(state);
+	initDevice(state, contextInfo);
 }
 
 EglGfxDevice::~EglGfxDevice()
@@ -78,12 +77,14 @@ void EglGfxDevice::querySurfaceSize()
 	eglQuerySurface(display_, surface_, EGL_HEIGHT, &height_);
 }
 
-bool EglGfxDevice::isModeSupported(struct android_app *state, DisplayMode mode)
+bool EglGfxDevice::isModeSupported(struct android_app *state, const GLContextInfo &contextInfo, const DisplayMode &mode)
 {
+	EGLint renderableTypeBit = (contextInfo.majorVersion == 3) ? EGL_OPENGL_ES3_BIT_KHR : EGL_OPENGL_ES2_BIT;
+
 	const EGLint attribs[] =
 	{
 		EGL_SURFACE_TYPE,		EGL_WINDOW_BIT,
-		EGL_RENDERABLE_TYPE,	EGL_OPENGL_ES2_BIT,
+		EGL_RENDERABLE_TYPE,	renderableTypeBit,
 		EGL_BLUE_SIZE,			static_cast<int>(mode.blueBits()),
 		EGL_GREEN_SIZE,			static_cast<int>(mode.greenBits()),
 		EGL_RED_SIZE,			static_cast<int>(mode.redBits()),
@@ -123,12 +124,14 @@ bool EglGfxDevice::isModeSupported(struct android_app *state, DisplayMode mode)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void EglGfxDevice::initDevice(struct android_app *state)
+void EglGfxDevice::initDevice(struct android_app *state, const GLContextInfo &contextInfo)
 {
+	EGLint renderableTypeBit = (contextInfo.majorVersion == 3) ? EGL_OPENGL_ES3_BIT_KHR : EGL_OPENGL_ES2_BIT;
+
 	const EGLint attribs[] =
 	{
 		EGL_SURFACE_TYPE,		EGL_WINDOW_BIT,
-		EGL_RENDERABLE_TYPE,	EGL_OPENGL_ES2_BIT,
+		EGL_RENDERABLE_TYPE,	renderableTypeBit,
 		EGL_BLUE_SIZE,			static_cast<int>(mode_.blueBits()),
 		EGL_GREEN_SIZE,			static_cast<int>(mode_.greenBits()),
 		EGL_RED_SIZE,			static_cast<int>(mode_.redBits()),
@@ -138,11 +141,21 @@ void EglGfxDevice::initDevice(struct android_app *state)
 		EGL_NONE
 	};
 
-	const EGLint attribList[] =
+	EGLint attribList[] =
 	{
-		EGL_CONTEXT_CLIENT_VERSION, 2,
+		EGL_CONTEXT_MAJOR_VERSION_KHR, static_cast<EGLint>(contextInfo.majorVersion),
+		EGL_CONTEXT_MINOR_VERSION_KHR, static_cast<EGLint>(contextInfo.minorVersion),
+		EGL_NONE, EGL_NONE,
 		EGL_NONE
 	};
+
+#if !defined(__ANDROID__) || (GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21)
+	if (contextInfo.debugContext)
+	{
+		attribList[4] = EGL_CONTEXT_FLAGS_KHR;
+		attribList[5] = EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR;
+	}
+#endif
 
 	EGLint format, numConfigs;
 
@@ -171,6 +184,11 @@ void EglGfxDevice::initDevice(struct android_app *state)
 	EGLint swapInterval = mode_.hasVSync() ? 1 : 0;
 	eglSwapInterval(display_, swapInterval);
 #endif
+
+	if (contextInfo.debugContext)
+	{
+		enableGlDebugOutput();
+	}
 
 	EGLint red, blue, green, alpha, depth, stencil, samples;
 	eglGetConfigAttrib(display_, config_, EGL_RED_SIZE, &red);

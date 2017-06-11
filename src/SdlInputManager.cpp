@@ -33,7 +33,7 @@ SdlInputManager::SdlInputManager()
 	if (SDL_WasInit(SDL_INIT_VIDEO) == 0)
 	{
 		LOGF("SDL video subsystem is not initialized");
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 
 	// Initializing the joystick subsystem
@@ -189,7 +189,7 @@ const char *SdlInputManager::joyName(int joyId) const
 	}
 	else
 	{
-		return '\0';
+		return NULL;
 	}
 }
 

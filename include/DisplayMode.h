@@ -21,10 +21,6 @@ class DLL_PUBLIC DisplayMode
 		WITH_VSYNC
 	};
 
-	/// Default constructor
-	DisplayMode()
-		: redBits_(0), greenBits_(0), blueBits_(0), alphaBits_(0),
-		  depthBits_(0), stencilBits_(0), isDoubleBuffered_(true), hasVSync_(false) { }
 	DisplayMode(unsigned int redBits, unsigned int greenBits, unsigned int blueBits)
 		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits), alphaBits_(0),
 		  depthBits_(0), stencilBits_(0), isDoubleBuffered_(true), hasVSync_(false) { }
