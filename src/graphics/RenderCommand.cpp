@@ -51,8 +51,8 @@ void RenderCommand::setVertexAttribute(const char *name, GLsizei vboStride, cons
 
 void RenderCommand::setTransformation()
 {
-	float width = static_cast<float>(theApplication().width());
-	float height = static_cast<float>(theApplication().height());
+	float width = theApplication().width();
+	float height = theApplication().height();
 	float near = -1.0f;
 	float far = 1.0f;
 

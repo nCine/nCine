@@ -165,8 +165,8 @@ void MyEventHandler::onInit()
 	iboCube_ = new nc::GLBufferObject(GL_ELEMENT_ARRAY_BUFFER);
 	iboCube_->bufferData(sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
 
-	width_ = nc::theApplication().width();
-	height_ = nc::theApplication().height();
+	width_ = nc::theApplication().widthInt();
+	height_ = nc::theApplication().heightInt();
 	glViewport(0, 0, width_, height_);
 	glEnable(GL_DEPTH_TEST);
 

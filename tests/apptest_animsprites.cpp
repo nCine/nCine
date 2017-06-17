@@ -3,8 +3,6 @@
 #include "Application.h"
 #include "Texture.h"
 #include "AnimatedSprite.h"
-#include "Font.h"
-#include "TextNode.h"
 #include "IFile.h" // for dataPath()
 #include "apptest_datapath.h"
 #include "apptest_joymapping.h"

@@ -145,7 +145,7 @@ void Application::initCommon()
 			{
 				font_ = new Font(fontTexFilePath.data(), fontFntFilePath.data());
 				textLines_ = new TextNode(rootNode_, font_);
-				textLines_->setPosition(0.0f, static_cast<float>(height()));
+				textLines_->setPosition(0.0f, height());
 			}
 		}
 	}
@@ -195,7 +195,7 @@ void Application::step()
 
 		textLines_->setString(textString_);
 		textLines_->setAlignment(TextNode::ALIGN_RIGHT);
-		textLines_->setPosition((static_cast<float>(width()) - textLines_->width()), static_cast<float>(height()));
+		textLines_->setPosition(width() - textLines_->width(), height());
 	}
 
 	theServiceLocator().audioDevice().updatePlayers();

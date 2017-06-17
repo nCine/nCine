@@ -28,6 +28,16 @@ void ColorAffector::addColorStep(float time, Color color)
 
 void ColorAffector::affect(Particle *particle)
 {
+	// one or no color steps in the affector
+	if (colorSteps_.size() < 2)
+	{
+		if (colorSteps_.size() == 1)
+		{
+			particle->setColor(colorSteps_[0]->color);
+		}
+		return;
+	}
+
 	unsigned int index;
 	float normalizedLife = particle->life_ / particle->startingLife;
 
@@ -69,6 +79,16 @@ void SizeAffector::addSizeStep(float time, float scale)
 
 void SizeAffector::affect(Particle *particle)
 {
+	// one or no size steps in the affector
+	if (sizeSteps_.size() < 2)
+	{
+		if (sizeSteps_.size() == 1)
+		{
+			particle->setScale(sizeSteps_[0]->scale);
+		}
+		return;
+	}
+
 	unsigned int index;
 	float normalizedLife = particle->life_ / particle->startingLife;
 

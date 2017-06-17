@@ -30,10 +30,15 @@ class DLL_PUBLIC Application
 	/// Returns the elapsed time since the end of the previous frame in milliseconds
 	float interval() const;
 
-	/// Returns the screen width
-	inline int width() const { return gfxDevice_->width(); }
-	/// Returns the screen height
-	inline int height() const { return gfxDevice_->height(); }
+	/// Returns the screen width as a float number
+	inline float width() const { return static_cast<float>(gfxDevice_->width()); }
+	/// Returns the screen height as a float number
+	inline float height() const { return static_cast<float>(gfxDevice_->height()); }
+
+	/// Returns the screen width as an integer number
+	inline int widthInt() const { return gfxDevice_->width(); }
+	/// Returns the screen height as an integer number
+	inline int heightInt() const { return gfxDevice_->height(); }
 
 	/// Returns the value of the pause flag
 	inline bool isPaused() const { return isPaused_; }

@@ -46,7 +46,7 @@ void MyEventHandler::onInit()
 
 	char testString[] = "WAY.P.ATAV";
 	float textHeight = nc::theApplication().height() * 0.8f;
-	int screenWidth = nc::theApplication().width();
+	float screenWidth = nc::theApplication().width();
 	text1_ = new nc::TextNode(&rootNode, font1_);
 	text1_->setScale(2.0f);
 	text1_->setString(testString);

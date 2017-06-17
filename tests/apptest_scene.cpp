@@ -43,7 +43,7 @@ void MyEventHandler::onInit()
 	textures_[2] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture3File).data());
 	textures_[3] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture4File).data());
 
-	float width = static_cast<float>(nc::theApplication().width());
+	float width = nc::theApplication().width();
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
 		sprites_[i] = new nc::Sprite(&rootNode, textures_[i % NumTextures], width * 0.15f + width * 0.1f * i, 0.0f);
@@ -53,7 +53,7 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
-	float height = static_cast<float>(nc::theApplication().height());
+	float height = nc::theApplication().height();
 
 	if (pause_ == false)
 	{
