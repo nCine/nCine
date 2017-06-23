@@ -2,6 +2,7 @@
 #define CLASS_NCINE_IGFXDEVICE
 
 #include "Vector2.h"
+#include "Rect.h"
 #include "DisplayMode.h"
 
 namespace ncine {
@@ -34,14 +35,16 @@ class DLL_PUBLIC IGfxDevice
 	/// Sets the application window title
 	virtual void setWindowTitle(const char *windowTitle) = 0;
 
-	/// Returns device resolution as a `Vector2<int>` object
-	inline Vector2i resolution() const { return Vector2i(width_, height_); }
 	/// Returns device width
 	inline int width() const { return width_; }
 	/// Returns device height
 	inline int height() const { return height_; }
+	/// Returns device resolution as a `Vector2<int>` object
+	inline const Vector2i resolution() const { return Vector2i(width_, height_); }
+	/// Returns device resolution as a `Rect<float>` object
+	inline const Rectf screenRect() const { return Rectf(0.0f, 0.0f, static_cast<float>(width_), static_cast<float>(height_)); }
 	/// Returns device aspect ratio
-	inline float aspect() const { return width_ / float(height_); }
+	inline float aspect() const { return width_ / static_cast<float>(height_); }
 	/// Returns true if the device renders in full screen
 	inline bool isFullScreen() const { return isFullScreen_; }
 	/// Returns display mode

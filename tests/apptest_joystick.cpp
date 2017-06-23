@@ -4,7 +4,6 @@
 #include "ncString.h"
 #include "Texture.h"
 #include "Sprite.h"
-#include "Font.h"
 #include "TextNode.h"
 #include "IFile.h" // for dataPath()
 #include "apptest_datapath.h"
@@ -48,7 +47,6 @@ void MyEventHandler::onInit()
 	                     (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
 	textNode_ = new nc::TextNode(&rootNode, font_);
 	textNode_->setScale(0.85f);
-	textNode_->setPosition(nc::theApplication().width() * 0.1f, nc::theApplication().height() * 0.38f);
 
 	for (int i = 0; i < MaxNumJoysticks; i++)
 	{
@@ -112,7 +110,8 @@ void MyEventHandler::onFrameStart()
 		joyString_->formatAppend("No joysticks connected");
 	}
 	textNode_->setString(*joyString_);
-
+	textNode_->setPosition(nc::theApplication().width() * 0.1f + textNode_->width() * 0.5f,
+	                       nc::theApplication().height() * 0.38f - textNode_->height() * 0.5f);
 
 	nc::Vector2f joyLeftStick(mappedAxisNormValue (firstJoy, AXIS_LX), mappedAxisNormValue (firstJoy, AXIS_LY));
 	nc::Vector2f joyRightStick(mappedAxisNormValue (firstJoy, AXIS_RX), mappedAxisNormValue (firstJoy, AXIS_RY));

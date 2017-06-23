@@ -181,7 +181,7 @@ void MyEventHandler::onInit()
 
 	sprites_[selected_]->enableDraw(true);
 	textNode_->setString(filenames_[selected_]);
-	textNode_->setPosition(-textNode_->width() * 0.5f, nc::theApplication().height() * VerticalTextPos);
+	textNode_->setPosition(0.0f, nc::theApplication().height() * VerticalTextPos - textNode_->height() * 0.5f);
 }
 
 void MyEventHandler::onShutdown()
@@ -283,7 +283,7 @@ void MyEventHandler::handleInput(Direction direction)
 		sprites_[selected_]->enableDraw(false);
 		sprites_[newSelection_]->enableDraw(true);
 		textNode_->setString(filenames_[newSelection_]);
-		textNode_->setPosition(-textNode_->width() * 0.5f, nc::theApplication().height() * VerticalTextPos);
+		textNode_->setPosition(0.0f, nc::theApplication().height() * VerticalTextPos - textNode_->height() * 0.5f);
 		selected_ = newSelection_;
 	}
 

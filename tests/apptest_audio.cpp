@@ -114,7 +114,7 @@ void MyEventHandler::onFrameStart()
 	textString_->formatAppend("Position: %.2f (press KP 1/2/3)\n", xPos_);
 
 	textNode_->setString(*textString_);
-	textNode_->setPosition(-textNode_->width() * 0.5f, nc::theApplication().height() * VerticalTextPos);
+	textNode_->setPosition(0.0f, nc::theApplication().height() * VerticalTextPos - textNode_->height() * 0.5f);
 }
 
 void MyEventHandler::onShutdown()

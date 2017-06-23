@@ -1,6 +1,7 @@
 #include "DrawableNode.h"
 #include "RenderQueue.h"
 #include "RenderCommand.h"
+#include "Application.h"
 
 namespace ncine {
 
@@ -9,19 +10,22 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 DrawableNode::DrawableNode(SceneNode *parent, float x, float y)
-	: SceneNode(parent, x, y), renderCommand_(new RenderCommand)
+	: SceneNode(parent, x, y), width_(0.0f), height_(0.0f),
+	  renderCommand_(new RenderCommand)
 {
 
 }
 
 DrawableNode::DrawableNode(SceneNode *parent)
-	: SceneNode(parent), renderCommand_(new RenderCommand)
+	: SceneNode(parent), width_(0.0f), height_(0.0f),
+	  renderCommand_(new RenderCommand)
 {
 
 }
 
 DrawableNode::DrawableNode()
-	: SceneNode(), renderCommand_(new RenderCommand)
+	: SceneNode(), width_(0.0f), height_(0.0f),
+	  renderCommand_(new RenderCommand)
 {
 
 }
@@ -38,8 +42,14 @@ DrawableNode::~DrawableNode()
 
 void DrawableNode::draw(RenderQueue &renderQueue)
 {
-	updateRenderCommand();
-	renderQueue.addCommand(renderCommand_);
+	updateAabb();
+
+	// `isOutsideOf() == false` is not the same as `isInsideOf()`
+	if (aabb_.isOutsideOf(theApplication().gfxDevice().screenRect()) == false)
+	{
+		updateRenderCommand();
+		renderQueue.addCommand(renderCommand_);
+	}
 }
 
 unsigned int DrawableNode::layer() const
@@ -51,6 +61,26 @@ unsigned int DrawableNode::layer() const
 void DrawableNode::setLayer(unsigned int layer)
 {
 	renderCommand_->setLayer(layer);
+}
+
+///////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void DrawableNode::updateAabb()
+{
+	float rotatedWidth = absWidth();
+	float rotatedHeight = absHeight();
+
+	if (absRotation_ > MinRotation || absRotation_ < -MinRotation)
+	{
+		float sinRot = sinf(absRotation_ * fDegToRad);
+		float cosRot = cosf(absRotation_ * fDegToRad);
+		rotatedWidth = fabsf(absHeight() * sinRot) + fabsf(absWidth() * cosRot);
+		rotatedHeight = fabsf(absWidth() * sinRot) + fabsf(absHeight() * cosRot);
+	}
+
+	aabb_ = Rectf::fromCenterAndSize(absX_, absY_, rotatedWidth, rotatedHeight);
 }
 
 }

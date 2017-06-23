@@ -4,7 +4,6 @@
 #include "ncString.h"
 #include "Texture.h"
 #include "Sprite.h"
-#include "Font.h"
 #include "TextNode.h"
 #include "IFile.h" // for dataPath()
 #include "apptest_datapath.h"
@@ -53,7 +52,6 @@ void MyEventHandler::onInit()
 	                     (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
 	textNode_ = new nc::TextNode(&rootNode, font_, MaxNumChars);
 	textNode_->setScale(0.85f);
-	textNode_->setPosition(nc::theApplication().width() * 0.1f, nc::theApplication().height() * VerticalTextPos);
 
 #ifdef __ANDROID__
 	multitouchString_->append("Waiting for the first touch event");
@@ -65,6 +63,8 @@ void MyEventHandler::onInit()
 void MyEventHandler::onFrameStart()
 {
 	textNode_->setString(*multitouchString_);
+	textNode_->setPosition(nc::theApplication().width() * 0.1f + textNode_->width() * 0.5f,
+	                       nc::theApplication().height() * VerticalTextPos - textNode_->height() * 0.5f);
 }
 
 void MyEventHandler::onShutdown()

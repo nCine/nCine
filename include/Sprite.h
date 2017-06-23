@@ -21,15 +21,6 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	/// Constructor for a sprite with a texture and a specified position but no parent
 	Sprite(Texture *texture, float x, float y);
 
-	/// Returns sprite width
-	inline float width() const { return width_ * scaleFactor_; }
-	/// Returns sprite height
-	inline float height() const { return height_ * scaleFactor_; }
-	/// Returns sprite size
-	inline Vector2f size() const { return Vector2f(width(), height()); }
-	/// Returns sprite rectangle
-	Rectf rect() const;
-
 	/// Sets sprite width
 	inline void setWidth(float width) { width_ = width; }
 	/// Sets sprite height
@@ -40,13 +31,6 @@ class DLL_PUBLIC Sprite : public DrawableNode
 		width_ = size.x;
 		height_ = size.y;
 	}
-
-	/// Returns sprite absolute width
-	inline float absWidth() const { return width_ * absScaleFactor_; }
-	/// Returns sprite absolute height
-	inline float absHeight() const { return height_ * absScaleFactor_; }
-	/// Returns sprite absolute size
-	inline Vector2f absSize() const { return Vector2f(absWidth(), absHeight()); }
 
 	/// Gets the texture object
 	inline const Texture *texture() const { return texture_; }
@@ -73,10 +57,6 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	Texture *texture_;
 	/// The texture source rectangle
 	Recti texRect_;
-	/// Sprite width in pixel
-	float width_;
-	/// Sprite height in pixel
-	float height_;
 	/// The opaque texture flag
 	bool opaqueTexture_;
 
@@ -84,13 +64,6 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	void init();
 	virtual void updateRenderCommand();
 };
-
-inline Rectf Sprite::rect() const
-{
-	float halfAbsW = width_ * absScaleFactor_ * 0.5f;
-	float halfAbsH = height_ * absScaleFactor_ * 0.5f;
-	return Rectf(x - halfAbsW, y - halfAbsH, halfAbsW * 2.0f, halfAbsH * 2.0f);
-}
 
 inline void Sprite::setTexRect(const Recti &rect)
 {

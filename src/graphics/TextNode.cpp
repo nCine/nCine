@@ -33,15 +33,25 @@ TextNode::TextNode(SceneNode *parent, Font *font)
 float TextNode::width() const
 {
 	calculateBoundaries();
-
-	return xAdvanceSum_ * currentAbsScale();
+	return xAdvanceSum_ * scaleFactor_;
 }
 
 float TextNode::height() const
 {
 	calculateBoundaries();
+	return yAdvanceSum_ * scaleFactor_;
+}
 
-	return yAdvanceSum_ * currentAbsScale();
+float TextNode::absWidth() const
+{
+	calculateBoundaries();
+	return xAdvanceSum_ * absScaleFactor_;
+}
+
+float TextNode::absHeight() const
+{
+	calculateBoundaries();
+	return yAdvanceSum_ * absScaleFactor_;
 }
 
 void TextNode::enableKerning(bool withKerning)
@@ -85,14 +95,14 @@ void TextNode::draw(RenderQueue &renderQueue)
 		interleavedVertices_.clear();
 
 		unsigned int currentLine = 0;
-		xAdvance_ = calculateAlignment(currentLine);
-		yAdvance_ = 0.0f;
+		xAdvance_ = calculateAlignment(currentLine) - xAdvanceSum_ * 0.5f;
+		yAdvance_ = 0.0f - yAdvanceSum_ * 0.5f;
 		for (unsigned int i = 0; i < string_.length(); i++)
 		{
 			if (string_[i] == '\n')
 			{
 				currentLine++;
-				xAdvance_ = calculateAlignment(currentLine);
+				xAdvance_ = calculateAlignment(currentLine) - xAdvanceSum_ * 0.5f;
 				yAdvance_ += font_->base();;
 			}
 			else
@@ -177,6 +187,14 @@ void TextNode::calculateBoundaries() const
 				}
 			}
 		}
+
+		// If the string does not end with a new line character,
+		// last line height has not been taken into account before
+		if (!string_.isEmpty() && string_[string_.length() - 1] != '\n')
+		{
+			yAdvance_ += font_->base();
+		}
+
 		lineLengths_.pushBack(xAdvance_);
 		if (xAdvance_ > xAdvanceMax)
 		{
@@ -208,17 +226,6 @@ float TextNode::calculateAlignment(unsigned int lineIndex) const
 	}
 
 	return alignOffset;
-}
-
-float TextNode::currentAbsScale() const
-{
-	float absScaleFactor = scaleFactor_;
-	if (parent_)
-	{
-		absScaleFactor *= parent_->absScale();
-	}
-
-	return absScaleFactor;
 }
 
 void TextNode::processGlyph(const FontGlyph *glyph)

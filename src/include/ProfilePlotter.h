@@ -50,11 +50,6 @@ class ProfilePlotter : public DrawableNode
 	virtual unsigned int addVariable(unsigned int numValues, float rejectDelay) = 0;
 
   protected:
-	/// Background width
-	float width_;
-	/// Background height
-	float height_;
-
 	/// Background color
 	Color backgroundColor_;
 	/// The vertices for the background

@@ -30,10 +30,15 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength);
 	TextNode(SceneNode *parent, Font *font);
 
-	/// Returns rendered text width
-	float width() const;
-	/// Returns rendered text height
-	float height() const;
+	/// Returns the width of rendered text
+	virtual float width() const;
+	/// Returns the height of rendered text
+	virtual float height() const;
+	/// Returns the absolute width of rendered text
+	virtual float absWidth() const;
+	/// Returns the absolute height of rendered text
+	virtual float absHeight() const;
+
 	/// Returns true if kerning is enabled for this node rendering
 	inline bool withKerning() const { return withKerning_; }
 	/// Sets the kerning flag for this node rendering
@@ -44,9 +49,9 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	void setAlignment(Alignment alignment);
 
 	/// Gets the font base scaled by the scale factor
-	inline float fontBase() const { return font_->base() * currentAbsScale(); }
+	inline float fontBase() const { return font_->base() * scaleFactor_; }
 	/// Gets the font line height scaled by the scale factor
-	inline float fontLineHeight() const { return font_->lineHeight() * currentAbsScale(); }
+	inline float fontLineHeight() const { return font_->lineHeight() * scaleFactor_; }
 	/// Sets the string to render
 	void setString(const String &string);
 
@@ -87,8 +92,6 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	void calculateBoundaries() const;
 	/// Calculates align offset for a particular line
 	float calculateAlignment(unsigned int lineIndex) const;
-	/// Calculates absolute scale factor on the fly
-	float currentAbsScale() const;
 	/// Fills the batch draw command with data from a glyph
 	void processGlyph(const FontGlyph *glyph);
 

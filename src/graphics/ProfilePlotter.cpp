@@ -8,9 +8,12 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ProfilePlotter::ProfilePlotter(SceneNode *parent, Rectf rect)
-	: DrawableNode(parent, rect.x, rect.y), width_(rect.w), height_(rect.h), variables_(2),
-	  shouldPlotRefValue_(false), refValueColor_(1.0f, 1.0f, 1.0f), refValue_(0.0f)
+	: DrawableNode(parent, rect.x, rect.y), variables_(2), shouldPlotRefValue_(false),
+	  refValueColor_(1.0f, 1.0f, 1.0f), refValue_(0.0f)
 {
+	width_ = rect.w;
+	height_ = rect.h;
+
 	setLayer(DrawableNode::HUD_LAYER);
 	renderCommand_->material().setShaderProgram(Material::COLOR_PROGRAM);
 	renderCommand_->geometry().createCustomVbo(8, GL_STATIC_DRAW);

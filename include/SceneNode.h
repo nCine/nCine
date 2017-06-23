@@ -61,6 +61,10 @@ class DLL_PUBLIC SceneNode : public Object
 
 	/// Returns node position relative to its parent
 	inline Vector2f position() const { return Vector2f(x, y); }
+	/// Returns absolute X coordinate node position
+	inline float absX() const { return absX_; }
+	/// Returns absolute Y coordinate node position
+	inline float absY() const { return absY_; }
 	/// Returns absolute node position
 	inline Vector2f absPosition() const { return Vector2f(absX_, absY_); }
 	/// Sets the node position through two coordinates
@@ -152,16 +156,7 @@ class DLL_PUBLIC SceneNode : public Object
 
 inline void SceneNode::setRotation(float rotation)
 {
-	while (rotation > 360.0f)
-	{
-		rotation -= 360.0f;
-	}
-	while (rotation < -360.0f)
-	{
-		rotation += 360.0f;
-	}
-
-	rotation_ = rotation;
+	rotation_ = fmod(rotation, 360.0f);
 }
 
 }

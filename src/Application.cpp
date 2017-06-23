@@ -195,7 +195,7 @@ void Application::step()
 
 		textLines_->setString(textString_);
 		textLines_->setAlignment(TextNode::ALIGN_RIGHT);
-		textLines_->setPosition(width() - textLines_->width(), height());
+		textLines_->setPosition(width() - textLines_->width() * 0.5f, height() - textLines_->height() * 0.5f);
 	}
 
 	theServiceLocator().audioDevice().updatePlayers();
