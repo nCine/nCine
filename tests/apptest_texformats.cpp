@@ -36,7 +36,7 @@ const float PressedAxisThreshold = 0.85f;
 unsigned char axesLeftStickPressed[4];
 
 #ifdef __ANDROID__
-	const char *FontTextureFile = "DroidSans32_256_8888.ktx";
+	const char *FontTextureFile = "DroidSans32_256.webp";
 #else
 	const char *FontTextureFile = "DroidSans32_256.png";
 #endif

@@ -43,18 +43,42 @@ void TextureLoaderWebP::init()
 
 	LOGI_X("Header found: w:%d h:%d", width_, height_);
 
-	mipMapCount_ = 1; // No MIP Mapping
-	// HACK: assuming WebP always decodes to RGBA
-	texFormat_ = TextureFormat(GL_RGBA);
-	long int lDecodedSize = width_ * height_ * 4;
-	pixels_ =  new unsigned char[lDecodedSize];
-
-	if (WebPDecodeRGBAInto(fileBuffer, fileSize, pixels_, lDecodedSize, width_ * 4) == NULL)
+	WebPBitstreamFeatures features;
+	if (WebPGetFeatures(fileBuffer, fileSize, &features) != VP8_STATUS_OK)
 	{
 		delete[] fileBuffer;
-		delete[] pixels_;
-		LOGF("Cannot decode WebP image");
+		LOGF("Cannot retrieve WebP features from headers");
 		exit(EXIT_FAILURE);
+	}
+
+	LOGI_X("Bitstream features found: alpha:%d animation:%d format:%d",
+	       features.has_alpha, features.has_animation, features.format);
+
+	mipMapCount_ = 1; // No MIP Mapping
+	texFormat_ = features.has_alpha ? TextureFormat(GL_RGBA) : TextureFormat(GL_RGB);
+	bpp_ = features.has_alpha ? 4 : 3;
+	long int decodedSize = width_ * height_ * bpp_;
+	pixels_ =  new unsigned char[decodedSize];
+
+	if (features.has_alpha)
+	{
+		if (WebPDecodeRGBAInto(fileBuffer, fileSize, pixels_, decodedSize, width_ * bpp_) == NULL)
+		{
+			delete[] fileBuffer;
+			delete[] pixels_;
+			LOGF("Cannot decode RGBA WebP image");
+			exit(EXIT_FAILURE);
+		}
+	}
+	else
+	{
+		if (WebPDecodeRGBInto(fileBuffer, fileSize, pixels_, decodedSize, width_ * bpp_) == NULL)
+		{
+			delete[] fileBuffer;
+			delete[] pixels_;
+			LOGF("Cannot decode RGB WebP image");
+			exit(EXIT_FAILURE);
+		}
 	}
 
 	delete[] fileBuffer;

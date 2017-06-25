@@ -35,7 +35,7 @@ AppConfiguration::AppConfiguration()
 {
 	logFile_ = "ncine_log.txt";
 #ifdef __ANDROID__
-	fontTexFilename_ = "fonts/DroidSans32_256_8888.ktx";
+	fontTexFilename_ = "fonts/DroidSans32_256_888.ktx";
 #else
 	windowTitle_ = "nCine";
 	fontTexFilename_ = "fonts/DroidSans32_256.png";

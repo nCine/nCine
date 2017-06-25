@@ -83,18 +83,22 @@ void TextureLoaderPng::init()
 
 	width_ = width;
 	height_ = height;
-	LOGI_X("Header found: w:%d h:%d", width_, height_);
+	mipMapCount_ = 1; // No MIP Mapping
+	LOGI_X("Header found: w:%d h:%d bitDepth:%d colorType:%d", width_, height_, bitDepth, colorType);
 
 	switch (colorType)
 	{
 		case PNG_COLOR_TYPE_RGB_ALPHA:
 			texFormat_ = TextureFormat(GL_RGBA);
+			bpp_ = 4;
 			break;
 		case PNG_COLOR_TYPE_RGB:
 			texFormat_ = TextureFormat(GL_RGB);
+			bpp_ = 3;
 			break;
 		case PNG_COLOR_TYPE_GRAY:
 			texFormat_ = TextureFormat(GL_LUMINANCE);
+			bpp_ = 1;
 			break;
 		default:
 			LOGF_X("Color type not supported: %d", colorType);

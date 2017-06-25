@@ -64,10 +64,11 @@ void TextureLoaderKtx::readHeader(KtxHeader &header)
 			exit(EXIT_FAILURE);
 		}
 
-		headerSize_ = 64 + IFile::int32FromLE(header.bytesOfKeyValueData);
+		// Accounting for key-value data and `UInt32 imageSize` from first MIP level
+		headerSize_ = 64 + IFile::int32FromLE(header.bytesOfKeyValueData) + 4;
 		width_ = IFile::int32FromLE(header.pixelWidth);
 		height_ = IFile::int32FromLE(header.pixelHeight);
-		mipMapCount_ = header.numberOfMipmapLevels;
+		mipMapCount_ = IFile::int32FromLE(header.numberOfMipmapLevels);
 	}
 	else
 	{
@@ -90,10 +91,11 @@ void TextureLoaderKtx::parseFormat(const KtxHeader &header)
 		mipDataSizes_ = new long[mipMapCount_];
 		long int dataSizesSum = TextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_, mipDataSizes_);
 
-		// HACK: accounting for "UInt32 imageSize;" on top of each MIP level
-		for (int i = 0; i < mipMapCount_; i++)
+		// HACK: accounting for `UInt32 imageSize` on top of each MIP level
+		// Excluding the first one, already taken into account in header size
+		for (int i = 1; i < mipMapCount_; i++)
 		{
-			mipDataOffsets_[i] += 4 * (i + 1);
+			mipDataOffsets_[i] += 4 * i;
 		}
 		dataSizesSum += 4 * mipMapCount_;
 

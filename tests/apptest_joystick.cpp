@@ -13,7 +13,7 @@ namespace {
 
 #ifdef __ANDROID__
 	const char *TextureFile = "texture4.webp";
-	const char *FontTextureFile = "DroidSans32_256_8888.ktx";
+	const char *FontTextureFile = "DroidSans32_256.webp";
 #else
 	const char *TextureFile = "texture4.png";
 	const char *FontTextureFile = "DroidSans32_256.png";
