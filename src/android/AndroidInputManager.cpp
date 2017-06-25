@@ -22,7 +22,12 @@ ASensorEventQueue *AndroidInputManager::sensorEventQueue_ = NULL;
 bool AndroidInputManager::accelerometerEnabled_ = false;
 AccelerometerEvent AndroidInputManager::accelerometerEvent_;
 TouchEvent AndroidInputManager::touchEvent_;
+AndroidKeyboardState AndroidInputManager::keyboardState_;
 KeyboardEvent AndroidInputManager::keyboardEvent_;
+AndroidMouseState AndroidInputManager::mouseState_;
+AndroidMouseEvent AndroidInputManager::mouseEvent_;
+ScrollEvent AndroidInputManager::scrollEvent_;
+int AndroidInputManager::simulatedMouseButtonState_ = 0;
 
 short int IInputManager::MaxAxisValue = 32767;
 AndroidJoystickState AndroidInputManager::joystickStates_[MaxNumJoysticks];
@@ -69,6 +74,18 @@ AndroidInputManager::AndroidInputManager(struct android_app *state)
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+bool AndroidMouseState::isLeftButtonDown() const { return (buttonState_ & AMOTION_EVENT_BUTTON_PRIMARY) != 0; }
+bool AndroidMouseState::isMiddleButtonDown() const { return (buttonState_ & AMOTION_EVENT_BUTTON_TERTIARY) != 0; }
+bool AndroidMouseState::isRightButtonDown() const { return (buttonState_ & AMOTION_EVENT_BUTTON_SECONDARY) != 0; }
+bool AndroidMouseState::isFourthButtonDown() const { return (buttonState_ & AMOTION_EVENT_BUTTON_BACK) != 0; }
+bool AndroidMouseState::isFifthButtonDown() const { return (buttonState_ & AMOTION_EVENT_BUTTON_FORWARD) != 0; }
+
+bool AndroidMouseEvent::isLeftButton() const { return (button_ & AMOTION_EVENT_BUTTON_PRIMARY) != 0; }
+bool AndroidMouseEvent::isMiddleButton() const { return (button_ & AMOTION_EVENT_BUTTON_TERTIARY) != 0; }
+bool AndroidMouseEvent::isRightButton() const { return (button_ & AMOTION_EVENT_BUTTON_SECONDARY) != 0; }
+bool AndroidMouseEvent::isFourthButton() const { return (button_ & AMOTION_EVENT_BUTTON_BACK) != 0; }
+bool AndroidMouseEvent::isFifthButton() const { return (button_ & AMOTION_EVENT_BUTTON_FORWARD) != 0; }
 
 /*! This method is called by `enableAccelerometer()` and when the application gains focus */
 void AndroidInputManager::enableAccelerometerSensor()
@@ -122,182 +139,40 @@ void AndroidInputManager::parseAccelerometerEvent()
 
 bool AndroidInputManager::parseEvent(const AInputEvent *event)
 {
+	// Early out if there is no input event handler
+	if (inputEventHandler_ == NULL) { return false; }
+
 	bool isEventHandled = false;
 
 	// Checking for gamepad events first
-	if (inputEventHandler_ != NULL &&
-	    ((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD ||
+	if (((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD ||
 	     (AInputEvent_getSource(event) & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK ||
 	     (AInputEvent_getSource(event) & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD))
 	{
-		int deviceId = AInputEvent_getDeviceId(event);
-		int joyId = findJoyId(deviceId);
-
-		// If the index is valid then the structure can be updated
-		if (joyId > -1)
-		{
-			joystickStates_[joyId].deviceId_ = deviceId;
-
-			if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
-			{
-				int keyCode = AKeyEvent_getKeyCode(event);
-				int buttonIndex = -1;
-				if (keyCode >= AKEYCODE_BUTTON_A && keyCode < AKEYCODE_ESCAPE)
-				{
-					buttonIndex = joystickStates_[joyId].buttonsMapping_[keyCode - AKEYCODE_BUTTON_A];
-				}
-
-				if (buttonIndex > -1)
-				{
-					joyButtonEvent_.joyId = joyId;
-					joyButtonEvent_.buttonId = buttonIndex;
-					switch (AKeyEvent_getAction(event))
-					{
-						case AKEY_EVENT_ACTION_DOWN:
-							joystickStates_[joyId].buttons_[buttonIndex] = true;
-							inputEventHandler_->onJoyButtonPressed(joyButtonEvent_);
-							break;
-						case AKEY_EVENT_ACTION_UP:
-							joystickStates_[joyId].buttons_[buttonIndex] = false;
-							inputEventHandler_->onJoyButtonReleased(joyButtonEvent_);
-							break;
-						case AKEY_EVENT_ACTION_MULTIPLE:
-							break;
-					}
-				}
-
-				// Handling a D-Pad button event as an axis value
-				if (keyCode >= AKEYCODE_DPAD_UP && keyCode < AKEYCODE_DPAD_CENTER)
-				{
-					int axisIndex = -1;
-					float axisValue = 1.0f;
-					switch (keyCode)
-					{
-						case AKEYCODE_DPAD_UP:
-							axisIndex = joystickStates_[joyId].numAxes_ - 1;
-							axisValue = -1.0f;
-							break;
-						case AKEYCODE_DPAD_DOWN:
-							axisIndex = joystickStates_[joyId].numAxes_ - 1;
-							axisValue = 1.0f;
-							break;
-						case AKEYCODE_DPAD_LEFT:
-							axisIndex = joystickStates_[joyId].numAxes_ - 2;
-							axisValue = -1.0f;
-							break;
-						case AKEYCODE_DPAD_RIGHT:
-							axisIndex = joystickStates_[joyId].numAxes_ - 2;
-							axisValue = 1.0f;
-							break;
-					}
-
-					if (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN)
-					{
-						joystickStates_[joyId].axisValues_[axisIndex] = axisValue;
-					}
-					else
-					{
-						joystickStates_[joyId].axisValues_[axisIndex] = 0.0f;
-					}
-
-					joyAxisEvent_.joyId = joyId;
-					joyAxisEvent_.axisId = axisIndex;
-					joyAxisEvent_.value = axisValue * MaxAxisValue;
-					joyAxisEvent_.normValue = axisValue;
-					inputEventHandler_->onJoyAxisMoved(joyAxisEvent_);
-				}
-			}
-			else if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
-			{
-				joyAxisEvent_.joyId = joyId;
-
-				int numAxesNoDPad = joystickStates_[joyId].numAxes_;
-				if (joystickStates_[joyId].hasDPad_)
-				{
-					numAxesNoDPad -= 2;
-				}
-				for (int i = 0; i < numAxesNoDPad; i++)
-				{
-					int axis = joystickStates_[joyId].axesMapping_[i];
-					float axisValue = AMotionEvent_getAxisValue(event, axis, 0);
-					joystickStates_[joyId].axisValues_[i] = axisValue;
-
-					joyAxisEvent_.axisId = axis;
-					joyAxisEvent_.value = axisValue * MaxAxisValue;
-					joyAxisEvent_.normValue = axisValue;
-					inputEventHandler_->onJoyAxisMoved(joyAxisEvent_);
-				}
-			}
-		}
-		else
-		{
-			LOGW_X("No available joystick id for device %d, dropping button event", deviceId);
-		}
-
-		isEventHandled = true;
+		isEventHandled = processGamepadEvent(event);
 	}
 	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD &&
-	         AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY &&
-	         // Hardware volume keys are not handled by the engine
-	         AKeyEvent_getKeyCode(event) != AKEYCODE_VOLUME_UP &&
-	         AKeyEvent_getKeyCode(event) != AKEYCODE_VOLUME_DOWN)
+	         AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
 	{
-		keyboardEvent_.scancode = AKeyEvent_getScanCode(event);
-		keyboardEvent_.sym = AndroidKeys::keySymValueToEnum(AKeyEvent_getKeyCode(event));
-		keyboardEvent_.mod = AndroidKeys::keyModValueToEnum(AKeyEvent_getMetaState(event));
-
-		switch (AKeyEvent_getAction(event))
-		{
-			case AKEY_EVENT_ACTION_DOWN:
-				inputEventHandler_->onKeyPressed(keyboardEvent_);
-				break;
-			case AKEY_EVENT_ACTION_UP:
-				inputEventHandler_->onKeyReleased(keyboardEvent_);
-				break;
-			case AKEY_EVENT_ACTION_MULTIPLE:
-				break;
-		}
-
-		isEventHandled = true;
+		isEventHandled = processKeyboardEvent(event);
 	}
 	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_TOUCHSCREEN) == AINPUT_SOURCE_TOUCHSCREEN &&
 	         AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
 	{
-		const int action = AMotionEvent_getAction(event);
-
-		touchEvent_.count = AMotionEvent_getPointerCount(event);
-		touchEvent_.actionIndex = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
-		for (unsigned int i = 0; i < touchEvent_.count && i < TouchEvent::MaxPointers; i++)
-		{
-			TouchEvent::Pointer &pointer = touchEvent_.pointers[i];
-			pointer.id = AMotionEvent_getPointerId(event, i);
-			pointer.x = AMotionEvent_getX(event, i);
-			pointer.y = theApplication().height() - AMotionEvent_getY(event, i);
-		}
-
-		switch (action & AMOTION_EVENT_ACTION_MASK)
-		{
-			case AMOTION_EVENT_ACTION_DOWN:
-				inputEventHandler_->onTouchDown(touchEvent_);
-				break;
-			case AMOTION_EVENT_ACTION_UP:
-				inputEventHandler_->onTouchUp(touchEvent_);
-				break;
-			case AMOTION_EVENT_ACTION_MOVE:
-				inputEventHandler_->onTouchMove(touchEvent_);
-				break;
-			case AMOTION_EVENT_ACTION_POINTER_DOWN:
-				inputEventHandler_->onPointerDown(touchEvent_);
-				break;
-			case AMOTION_EVENT_ACTION_POINTER_UP:
-				inputEventHandler_->onPointerUp(touchEvent_);
-				break;
-		}
-
-		isEventHandled = true;
+		isEventHandled = processTouchEvent(event);
+	}
+	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_MOUSE) == AINPUT_SOURCE_MOUSE &&
+	         AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
+	{
+		isEventHandled = processMouseEvent(event);
+	}
+	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_MOUSE) == AINPUT_SOURCE_MOUSE &&
+	         AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
+	{
+		isEventHandled = processMouseKeyEvent(event);
 	}
 
-	return isEventHandled;
+	return true;//isEventHandled;
 }
 
 bool AndroidInputManager::isJoyPresent(int joyId) const
@@ -384,11 +259,275 @@ float AndroidInputManager::joyAxisNormValue(int joyId, int axisId) const
 	return axisValue;
 }
 
-
-
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+bool AndroidInputManager::processGamepadEvent(const AInputEvent *event)
+{
+	int deviceId = AInputEvent_getDeviceId(event);
+	int joyId = findJoyId(deviceId);
+
+	// If the index is valid then the structure can be updated
+	if (joyId > -1)
+	{
+		joystickStates_[joyId].deviceId_ = deviceId;
+
+		if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
+		{
+			int keyCode = AKeyEvent_getKeyCode(event);
+			int buttonIndex = -1;
+			if (keyCode >= AKEYCODE_BUTTON_A && keyCode < AKEYCODE_ESCAPE)
+			{
+				buttonIndex = joystickStates_[joyId].buttonsMapping_[keyCode - AKEYCODE_BUTTON_A];
+			}
+
+			if (buttonIndex > -1)
+			{
+				joyButtonEvent_.joyId = joyId;
+				joyButtonEvent_.buttonId = buttonIndex;
+				switch (AKeyEvent_getAction(event))
+				{
+					case AKEY_EVENT_ACTION_DOWN:
+						joystickStates_[joyId].buttons_[buttonIndex] = true;
+						inputEventHandler_->onJoyButtonPressed(joyButtonEvent_);
+						break;
+					case AKEY_EVENT_ACTION_UP:
+						joystickStates_[joyId].buttons_[buttonIndex] = false;
+						inputEventHandler_->onJoyButtonReleased(joyButtonEvent_);
+						break;
+					case AKEY_EVENT_ACTION_MULTIPLE:
+						break;
+				}
+			}
+
+			// Handling a D-Pad button event as an axis value
+			if (keyCode >= AKEYCODE_DPAD_UP && keyCode < AKEYCODE_DPAD_CENTER)
+			{
+				int axisIndex = -1;
+				float axisValue = 1.0f;
+				switch (keyCode)
+				{
+					case AKEYCODE_DPAD_UP:
+						axisIndex = joystickStates_[joyId].numAxes_ - 1;
+						axisValue = -1.0f;
+						break;
+					case AKEYCODE_DPAD_DOWN:
+						axisIndex = joystickStates_[joyId].numAxes_ - 1;
+						axisValue = 1.0f;
+						break;
+					case AKEYCODE_DPAD_LEFT:
+						axisIndex = joystickStates_[joyId].numAxes_ - 2;
+						axisValue = -1.0f;
+						break;
+					case AKEYCODE_DPAD_RIGHT:
+						axisIndex = joystickStates_[joyId].numAxes_ - 2;
+						axisValue = 1.0f;
+						break;
+				}
+
+				if (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN)
+				{
+					joystickStates_[joyId].axisValues_[axisIndex] = axisValue;
+				}
+				else
+				{
+					joystickStates_[joyId].axisValues_[axisIndex] = 0.0f;
+				}
+
+				joyAxisEvent_.joyId = joyId;
+				joyAxisEvent_.axisId = axisIndex;
+				joyAxisEvent_.value = axisValue * MaxAxisValue;
+				joyAxisEvent_.normValue = axisValue;
+				inputEventHandler_->onJoyAxisMoved(joyAxisEvent_);
+			}
+		}
+		else if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
+		{
+			joyAxisEvent_.joyId = joyId;
+
+			int numAxesNoDPad = joystickStates_[joyId].numAxes_;
+			if (joystickStates_[joyId].hasDPad_)
+			{
+				numAxesNoDPad -= 2;
+			}
+			for (int i = 0; i < numAxesNoDPad; i++)
+			{
+				int axis = joystickStates_[joyId].axesMapping_[i];
+				float axisValue = AMotionEvent_getAxisValue(event, axis, 0);
+				joystickStates_[joyId].axisValues_[i] = axisValue;
+
+				joyAxisEvent_.axisId = axis;
+				joyAxisEvent_.value = axisValue * MaxAxisValue;
+				joyAxisEvent_.normValue = axisValue;
+				inputEventHandler_->onJoyAxisMoved(joyAxisEvent_);
+			}
+		}
+	}
+	else
+	{
+		LOGW_X("No available joystick id for device %d, dropping button event", deviceId);
+	}
+
+	return true;
+}
+
+bool AndroidInputManager::processKeyboardEvent(const AInputEvent *event)
+{
+	const int keyCode = AKeyEvent_getKeyCode(event);
+
+	// Hardware volume keys are not handled by the engine
+	if (keyCode == AKEYCODE_VOLUME_UP || keyCode == AKEYCODE_VOLUME_DOWN)
+	{
+		return false;
+	}
+
+	keyboardEvent_.scancode = AKeyEvent_getScanCode(event);
+	keyboardEvent_.sym = AndroidKeys::keySymValueToEnum(AKeyEvent_getKeyCode(event));
+	keyboardEvent_.mod = AndroidKeys::keyModValueToEnum(AKeyEvent_getMetaState(event));
+
+	switch (AKeyEvent_getAction(event))
+	{
+		case AKEY_EVENT_ACTION_DOWN:
+			keyboardState_.keys_[keyboardEvent_.sym] = 1;
+			inputEventHandler_->onKeyPressed(keyboardEvent_);
+			break;
+		case AKEY_EVENT_ACTION_UP:
+			keyboardState_.keys_[keyboardEvent_.sym] = 0;
+			inputEventHandler_->onKeyReleased(keyboardEvent_);
+			break;
+		case AKEY_EVENT_ACTION_MULTIPLE:
+			inputEventHandler_->onKeyPressed(keyboardEvent_);
+			break;
+	}
+
+	return true;
+}
+
+bool AndroidInputManager::processTouchEvent(const AInputEvent *event)
+{
+	const int action = AMotionEvent_getAction(event);
+
+	touchEvent_.count = AMotionEvent_getPointerCount(event);
+	touchEvent_.actionIndex = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+	for (unsigned int i = 0; i < touchEvent_.count && i < TouchEvent::MaxPointers; i++)
+	{
+		TouchEvent::Pointer &pointer = touchEvent_.pointers[i];
+		pointer.id = AMotionEvent_getPointerId(event, i);
+		pointer.x = AMotionEvent_getX(event, i);
+		pointer.y = theApplication().height() - AMotionEvent_getY(event, i);
+	}
+
+	switch (action & AMOTION_EVENT_ACTION_MASK)
+	{
+		case AMOTION_EVENT_ACTION_DOWN:
+			inputEventHandler_->onTouchDown(touchEvent_);
+			break;
+		case AMOTION_EVENT_ACTION_UP:
+			inputEventHandler_->onTouchUp(touchEvent_);
+			break;
+		case AMOTION_EVENT_ACTION_MOVE:
+			inputEventHandler_->onTouchMove(touchEvent_);
+			break;
+		case AMOTION_EVENT_ACTION_POINTER_DOWN:
+			inputEventHandler_->onPointerDown(touchEvent_);
+			break;
+		case AMOTION_EVENT_ACTION_POINTER_UP:
+			inputEventHandler_->onPointerUp(touchEvent_);
+			break;
+	}
+
+	return true;
+}
+
+bool AndroidInputManager::processMouseEvent(const AInputEvent *event)
+{
+	const int action = AMotionEvent_getAction(event);
+	int buttonState = 0;
+
+	mouseEvent_.x = static_cast<int>(AMotionEvent_getX(event, 0));
+	mouseEvent_.y = static_cast<int>(theApplication().height() - AMotionEvent_getY(event, 0));
+	mouseState_.x = mouseEvent_.x;
+	mouseState_.y = mouseEvent_.y;
+
+	// Mask out back and forward buttons in the detected state
+	// as those are simulated as right and middle buttons
+	int maskOutButtons = 0;
+	if (simulatedMouseButtonState_ & AMOTION_EVENT_BUTTON_SECONDARY)
+	{
+		maskOutButtons |= AMOTION_EVENT_BUTTON_BACK;
+	}
+	if (simulatedMouseButtonState_ & AMOTION_EVENT_BUTTON_TERTIARY)
+	{
+		maskOutButtons |= AMOTION_EVENT_BUTTON_FORWARD;
+	}
+
+	switch (action)
+	{
+		case AMOTION_EVENT_ACTION_DOWN:
+			buttonState = AMotionEvent_getButtonState(event);
+			buttonState &= ~maskOutButtons;
+			buttonState |= simulatedMouseButtonState_;
+
+			mouseEvent_.button_ = mouseState_.buttonState_ ^ buttonState; // pressed button mask
+			mouseState_.buttonState_ = buttonState;
+			inputEventHandler_->onMouseButtonPressed(mouseEvent_);
+			break;
+		case AMOTION_EVENT_ACTION_UP:
+			buttonState = AMotionEvent_getButtonState(event);
+			buttonState &= ~maskOutButtons;
+			buttonState |= simulatedMouseButtonState_;
+
+			mouseEvent_.button_ = mouseState_.buttonState_ ^ buttonState; // released button mask
+			mouseState_.buttonState_ = buttonState;
+			inputEventHandler_->onMouseButtonReleased(mouseEvent_);
+			break;
+		case AMOTION_EVENT_ACTION_MOVE:
+		case AMOTION_EVENT_ACTION_HOVER_MOVE:
+			inputEventHandler_->onMouseMoved(mouseState_);
+			break;
+	}
+
+	scrollEvent_.x = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HSCROLL, 0);
+	scrollEvent_.y = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_VSCROLL, 0);
+	if (fabsf(scrollEvent_.x) > 0.0f || fabsf(scrollEvent_.y) > 0.0f)
+	{
+		inputEventHandler_->onScrollInput(scrollEvent_);
+	}
+
+	return true;
+}
+
+bool AndroidInputManager::processMouseKeyEvent(const AInputEvent *event)
+{
+	int keyCode = AKeyEvent_getKeyCode(event);
+	if (keyCode == AKEYCODE_BACK || keyCode == AKEYCODE_FORWARD)
+	{
+		int simulatedButton = (keyCode == AKEYCODE_BACK) ? AMOTION_EVENT_BUTTON_SECONDARY : AMOTION_EVENT_BUTTON_TERTIARY;
+		static int oldAction = AKEY_EVENT_ACTION_UP;
+		const int action = AKeyEvent_getAction(event);
+
+		// checking previous action to avoid key repeat events
+		if (action == AKEY_EVENT_ACTION_DOWN && oldAction == AKEY_EVENT_ACTION_UP)
+		{
+			oldAction = action;
+			simulatedMouseButtonState_ |= simulatedButton;
+			mouseEvent_.button_ = simulatedButton;
+			mouseState_.buttonState_ |= simulatedButton;
+			inputEventHandler_->onMouseButtonPressed(mouseEvent_);
+		}
+		else if (action == AKEY_EVENT_ACTION_UP && oldAction == AKEY_EVENT_ACTION_DOWN)
+		{
+			oldAction = action;
+			simulatedMouseButtonState_ &= ~simulatedButton;
+			mouseEvent_.button_ = simulatedButton;
+			mouseState_.buttonState_ &= ~simulatedButton;
+			inputEventHandler_->onMouseButtonReleased(mouseEvent_);
+		}
+	}
+
+	return true;
+}
 
 void AndroidInputManager::initAccelerometerSensor(android_app *state)
 {

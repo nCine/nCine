@@ -31,11 +31,11 @@ class MyEventHandler
 	virtual void onTouchDown(const nc::TouchEvent &event);
 	virtual void onTouchMove(const nc::TouchEvent &event);
 	virtual void onAcceleration(const nc::AccelerometerEvent &event);
-#else
+#endif
 	virtual void onKeyReleased(const nc::KeyboardEvent &event);
 	virtual void onMouseButtonPressed(const nc::MouseEvent &event);
 	virtual void onMouseMoved(const nc::MouseState &state);
-#endif
+
 	virtual void onJoyAxisMoved(const nc::JoyAxisEvent &event);
 	virtual void onJoyDisconnected(const nc::JoyConnectionEvent &event);
 

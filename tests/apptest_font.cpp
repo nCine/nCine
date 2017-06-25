@@ -106,7 +106,6 @@ void MyEventHandler::onShutdown()
 	delete font1_;
 }
 
-#ifndef __ANDROID__
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
@@ -118,4 +117,3 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		nc::theApplication().togglePause();
 	}
 }
-#endif

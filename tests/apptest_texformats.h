@@ -31,10 +31,10 @@ class MyEventHandler
 
 #ifdef __ANDROID__
 	virtual void onTouchUp(const nc::TouchEvent &event);
-#else
+#endif
 	virtual void onKeyReleased(const nc::KeyboardEvent &event);
 	virtual void onMouseButtonReleased(const nc::MouseEvent &event);
-#endif
+
 	virtual void onJoyAxisMoved(const nc::JoyAxisEvent &event);
 	virtual void onJoyDisconnected(const nc::JoyConnectionEvent &event);
 

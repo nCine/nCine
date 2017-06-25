@@ -59,7 +59,6 @@ void MyEventHandler::onFrameStart()
 {
 	nc::Vector2f reachVector = destVector_ - animSprite_->position();
 
-#ifndef __ANDROID__
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
 	if (keyState.isKeyDown(nc::KEY_RIGHT) || keyState.isKeyDown(nc::KEY_D) ||
@@ -90,7 +89,6 @@ void MyEventHandler::onFrameStart()
 		reachVector.y = -2.0f;
 		destVector_ = animSprite_->position() + reachVector;
 	}
-#endif
 
 	if (joyVector_.length() > LeftStickDeadZone)
 	{
@@ -134,7 +132,8 @@ void MyEventHandler::onTouchMove(const nc::TouchEvent &event)
 	destVector_.x = event.pointers[0].x;
 	destVector_.y = event.pointers[0].y;
 }
-#else
+#endif
+
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
@@ -164,7 +163,6 @@ void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 		destVector_.y = static_cast<float>(state.y);
 	}
 }
-#endif
 
 void MyEventHandler::onJoyAxisMoved(const nc::JoyAxisEvent &event)
 {

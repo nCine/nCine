@@ -29,9 +29,7 @@ class MyEventHandler
 	virtual void onFrameStart();
 	virtual void onShutdown();
 
-#ifndef __ANDROID__
 	virtual void onKeyReleased(const nc::KeyboardEvent &event);
-#endif
 
   private:
 	static const int MaxNumJoysticks = 4;

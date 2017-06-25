@@ -97,7 +97,8 @@ void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 {
 	pause_ = false;
 }
-#else
+#endif
+
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
@@ -125,4 +126,3 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		nc::theApplication().togglePause();
 	}
 }
-#endif

@@ -24,9 +24,7 @@ class MyEventHandler
 	virtual void onInit();
 	virtual void onShutdown();
 
-#ifndef __ANDROID__
 	virtual void onKeyReleased(const nc::KeyboardEvent &event);
-#endif
 
   private:
 	nc::Font *font1_;

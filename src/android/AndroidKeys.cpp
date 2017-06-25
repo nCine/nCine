@@ -26,10 +26,10 @@ KeySym AndroidKeys::keySymValueToEnum(int keysym)
 		case AKEYCODE_9:				return KEY_9;
 		case AKEYCODE_STAR:				return KEY_STAR;
 		case AKEYCODE_POUND:			return KEY_POUND;
-		case AKEYCODE_DPAD_UP:			return KEY_DPAD_UP;
-		case AKEYCODE_DPAD_DOWN:		return KEY_DPAD_DOWN;
-		case AKEYCODE_DPAD_LEFT:		return KEY_DPAD_LEFT;
-		case AKEYCODE_DPAD_RIGHT:		return KEY_DPAD_RIGHT;
+		case AKEYCODE_DPAD_UP:			return KEY_UP;
+		case AKEYCODE_DPAD_DOWN:		return KEY_DOWN;
+		case AKEYCODE_DPAD_LEFT:		return KEY_LEFT;
+		case AKEYCODE_DPAD_RIGHT:		return KEY_RIGHT;
 		case AKEYCODE_DPAD_CENTER:		return KEY_DPAD_CENTER;
 		case AKEYCODE_VOLUME_UP:		return KEY_VOLUME_UP;
 		case AKEYCODE_VOLUME_DOWN:		return KEY_VOLUME_DOWN;
@@ -87,7 +87,7 @@ KeySym AndroidKeys::keySymValueToEnum(int keysym)
 		case AKEYCODE_AT:				return KEY_AT;
 		case AKEYCODE_NUM:				return KEY_NUM;
 		case AKEYCODE_HEADSETHOOK:		return KEY_HEADSETHOOK;
-		case AKEYCODE_FOCUS:			return KEY_FOCUS;
+		case AKEYCODE_FOCUS:			return KEY_FOCUS; // *camera* focus
 		case AKEYCODE_PLUS:				return KEY_PLUS;
 		case AKEYCODE_MENU:				return KEY_MENU;
 		case AKEYCODE_NOTIFICATION:		return KEY_NOTIFICATION;
@@ -118,6 +118,101 @@ KeySym AndroidKeys::keySymValueToEnum(int keysym)
 		case AKEYCODE_BUTTON_START:		return KEY_BUTTON_START;
 		case AKEYCODE_BUTTON_SELECT:	return KEY_BUTTON_SELECT;
 		case AKEYCODE_BUTTON_MODE:		return KEY_BUTTON_MODE;
+	#if __ANDROID_API__ >= 13
+		case AKEYCODE_ESCAPE:			return KEY_ESCAPE;
+		case AKEYCODE_FORWARD_DEL:		return KEY_FORWARD_DEL;
+		case AKEYCODE_CTRL_LEFT:		return KEY_LCTRL;
+		case AKEYCODE_CTRL_RIGHT:		return KEY_RCTRL;
+		case AKEYCODE_CAPS_LOCK:		return KEY_CAPSLOCK;
+		case AKEYCODE_SCROLL_LOCK:		return KEY_SCROLLOCK;
+		case AKEYCODE_META_LEFT:		return KEY_LMETA;
+		case AKEYCODE_META_RIGHT:		return KEY_RMETA;
+		case AKEYCODE_FUNCTION:			return KEY_FUNCTION;
+		case AKEYCODE_SYSRQ:			return KEY_SYSREQ;
+		case AKEYCODE_BREAK:			return KEY_BREAK;
+		case AKEYCODE_MOVE_HOME:		return KEY_MOVE_HOME;
+		case AKEYCODE_MOVE_END:			return KEY_MOVE_END;
+		case AKEYCODE_INSERT:			return KEY_INSERT;
+		case AKEYCODE_FORWARD:			return KEY_FORWARD;
+		case AKEYCODE_MEDIA_PLAY:		return KEY_MEDIA_PLAY;
+		case AKEYCODE_MEDIA_PAUSE:		return KEY_MEDIA_PAUSE;
+		case AKEYCODE_MEDIA_CLOSE:		return KEY_MEDIA_CLOSE;
+		case AKEYCODE_MEDIA_EJECT:		return KEY_MEDIA_EJECT;
+		case AKEYCODE_MEDIA_RECORD:		return KEY_MEDIA_EJECT;
+		case AKEYCODE_F1:				return KEY_F1;
+		case AKEYCODE_F2:				return KEY_F2;
+		case AKEYCODE_F3:				return KEY_F3;
+		case AKEYCODE_F4:				return KEY_F4;
+		case AKEYCODE_F5:				return KEY_F5;
+		case AKEYCODE_F6:				return KEY_F6;
+		case AKEYCODE_F7:				return KEY_F7;
+		case AKEYCODE_F8:				return KEY_F8;
+		case AKEYCODE_F9:				return KEY_F9;
+		case AKEYCODE_F10:				return KEY_F10;
+		case AKEYCODE_F11:				return KEY_F11;
+		case AKEYCODE_F12:				return KEY_F12;
+		case AKEYCODE_NUM_LOCK:			return KEY_NUMLOCK;
+		case AKEYCODE_NUMPAD_0:			return KEY_KP0;
+		case AKEYCODE_NUMPAD_1:			return KEY_KP1;
+		case AKEYCODE_NUMPAD_2:			return KEY_KP2;
+		case AKEYCODE_NUMPAD_3:			return KEY_KP3;
+		case AKEYCODE_NUMPAD_4:			return KEY_KP4;
+		case AKEYCODE_NUMPAD_5:			return KEY_KP5;
+		case AKEYCODE_NUMPAD_6:			return KEY_KP6;
+		case AKEYCODE_NUMPAD_7:			return KEY_KP7;
+		case AKEYCODE_NUMPAD_8:			return KEY_KP8;
+		case AKEYCODE_NUMPAD_9:			return KEY_KP9;
+		case AKEYCODE_NUMPAD_DIVIDE:	return KEY_KP_DIVIDE;
+		case AKEYCODE_NUMPAD_MULTIPLY:	return KEY_KP_MULTIPLY;
+		case AKEYCODE_NUMPAD_SUBTRACT:	return KEY_KP_MINUS;
+		case AKEYCODE_NUMPAD_ADD:		return KEY_KP_PLUS;
+		case AKEYCODE_NUMPAD_DOT:		return KEY_KP_PERIOD;
+		case AKEYCODE_NUMPAD_COMMA:		return KEY_KP_COMMA;
+		case AKEYCODE_NUMPAD_ENTER:		return KEY_KP_ENTER;
+		case AKEYCODE_NUMPAD_EQUALS:	return KEY_KP_EQUALS;
+		case AKEYCODE_NUMPAD_LEFT_PAREN:	return KEY_KP_LEFTPAREN;
+		case AKEYCODE_NUMPAD_RIGHT_PAREN:	return KEY_KP_RIGHTPAREN;
+		case AKEYCODE_VOLUME_MUTE:		return KEY_VOLUME_MUTE;
+		case AKEYCODE_INFO:				return KEY_INFO;
+		case AKEYCODE_CHANNEL_UP:		return KEY_CHANNEL_UP;
+		case AKEYCODE_CHANNEL_DOWN:		return KEY_CHANNEL_DOWN;
+		case AKEYCODE_ZOOM_IN:			return KEY_ZOOM_IN;
+		case AKEYCODE_ZOOM_OUT:			return KEY_ZOOM_OUT;
+		case AKEYCODE_TV:				return KEY_TV;
+		case AKEYCODE_WINDOW:			return KEY_WINDOW;
+		case AKEYCODE_GUIDE:			return KEY_GUIDE;
+		case AKEYCODE_DVR:				return KEY_DVR;
+		case AKEYCODE_BOOKMARK:			return KEY_BOOKMARK;
+		case AKEYCODE_CAPTIONS:			return KEY_CAPTIONS;
+		case AKEYCODE_SETTINGS:			return KEY_SETTINGS;
+		case AKEYCODE_TV_POWER:			return KEY_TV_POWER;
+		case AKEYCODE_TV_INPUT:			return KEY_TV_INPUT;
+		case AKEYCODE_STB_POWER:		return KEY_STB_POWER;
+		case AKEYCODE_STB_INPUT:		return KEY_STB_INPUT;
+		case AKEYCODE_AVR_POWER:		return KEY_AVR_POWER;
+		case AKEYCODE_AVR_INPUT:		return KEY_AVR_INPUT;
+		case AKEYCODE_PROG_RED:			return KEY_PROG_RED;
+		case AKEYCODE_PROG_GREEN:		return KEY_PROG_GREEN;
+		case AKEYCODE_PROG_YELLOW:		return KEY_PROG_YELLOW;
+		case AKEYCODE_PROG_BLUE:		return KEY_PROG_BLUE;
+		case AKEYCODE_APP_SWITCH:		return KEY_APP_SWITCH;
+		case AKEYCODE_BUTTON_1:			return KEY_BUTTON_1;
+		case AKEYCODE_BUTTON_2:			return KEY_BUTTON_2;
+		case AKEYCODE_BUTTON_3:			return KEY_BUTTON_3;
+		case AKEYCODE_BUTTON_4:			return KEY_BUTTON_4;
+		case AKEYCODE_BUTTON_5:			return KEY_BUTTON_5;
+		case AKEYCODE_BUTTON_6:			return KEY_BUTTON_6;
+		case AKEYCODE_BUTTON_7:			return KEY_BUTTON_7;
+		case AKEYCODE_BUTTON_8:			return KEY_BUTTON_8;
+		case AKEYCODE_BUTTON_9:			return KEY_BUTTON_9;
+		case AKEYCODE_BUTTON_10:		return KEY_BUTTON_10;
+		case AKEYCODE_BUTTON_11:		return KEY_BUTTON_11;
+		case AKEYCODE_BUTTON_12:		return KEY_BUTTON_12;
+		case AKEYCODE_BUTTON_13:		return KEY_BUTTON_13;
+		case AKEYCODE_BUTTON_14:		return KEY_BUTTON_14;
+		case AKEYCODE_BUTTON_15:		return KEY_BUTTON_15;
+		case AKEYCODE_BUTTON_16:		return KEY_BUTTON_16;
+	#endif
 
 		default:						return KEY_UNKNOWN;
 	}
@@ -134,15 +229,15 @@ KeyMod AndroidKeys::keyModValueToEnum(int keymod)
 		case AMETA_SHIFT_ON:			return KEYMOD_SHIFT;
 		case AMETA_SHIFT_LEFT_ON:		return KEYMOD_LSHIFT;
 		case AMETA_SHIFT_RIGHT_ON:		return KEYMOD_RSHIFT;
-#if __ANDROID_API >= 13
-		case AMETA_CONTROL_ON:			return KEYMOD_CTRL;
-		case AMETA_CONTROL_LEFT_ON:		return KEYMOD_LCTRL;
-		case AMETA_CONTROL_RIGHT_ON:	return KEYMOD_RCTRL;
+#if __ANDROID_API__ >= 13
+		case AMETA_CTRL_ON:				return KEYMOD_CTRL;
+		case AMETA_CTRL_LEFT_ON:		return KEYMOD_LCTRL;
+		case AMETA_CTRL_RIGHT_ON:		return KEYMOD_RCTRL;
 #endif
 		case AMETA_META_ON:				return KEYMOD_META;
 		case AMETA_META_LEFT_ON:		return KEYMOD_LMETA;
 		case AMETA_META_RIGHT_ON:		return KEYMOD_RMETA;
-#if __ANDROID_API >= 13
+#if __ANDROID_API__ >= 13
 		case AMETA_CAPS_LOCK_ON:		return KEYMOD_CAPS;
 		case AMETA_NUM_LOCK_ON:			return KEYMOD_NUM;
 		case AMETA_SCROLL_LOCK_ON:		return KEYMOD_SCROLL;

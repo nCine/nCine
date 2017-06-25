@@ -123,7 +123,6 @@ void MyEventHandler::onFrameStart()
 	float interval = nc::theApplication().interval();
 	if (!pause_) { angle_ += 2.0f * interval; }
 
-#ifndef __ANDROID__
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
 	if (keyState.isKeyDown(nc::KEY_D))
@@ -160,7 +159,6 @@ void MyEventHandler::onFrameStart()
 	{
 		camScale_ -= ScaleSpeed * interval;
 	}
-#endif
 
 	if (joyVectorLeft_.length() > LeftStickDeadZone)
 	{
@@ -295,7 +293,8 @@ void MyEventHandler::onPointerDown(const nc::TouchEvent &event)
 		scrollMove2_ = scrollOrigin2_;
 	}
 }
-#else
+#endif
+
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_P)
@@ -363,7 +362,6 @@ void MyEventHandler::onScrollInput(const nc::ScrollEvent &event)
 	camRot_ += 10.0f * event.x;
 	camScale_ += 0.1f * event.y;
 }
-#endif
 
 void MyEventHandler::onJoyAxisMoved(const nc::JoyAxisEvent &event)
 {

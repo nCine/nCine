@@ -31,9 +31,8 @@ class MyEventHandler
 
 #ifdef __ANDROID__
 	virtual void onTouchUp(const nc::TouchEvent &event);
-#else
-	virtual void onKeyReleased(const nc::KeyboardEvent &event);
 #endif
+	virtual void onKeyReleased(const nc::KeyboardEvent &event);
 
   private:
 	float gain_;

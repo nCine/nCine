@@ -17,9 +17,9 @@ namespace {
 	const char *TextureFile = "smoke_256.webp";
 #else
 	const char *TextureFile = "smoke_256.png";
-	const float KeySpeed = 200.0f;
 #endif
 
+const float KeySpeed = 200.0f;
 const float JoySpeed = 200.0f;
 
 }
@@ -79,7 +79,6 @@ void MyEventHandler::onFrameStart()
 	particleSystem_->move(joyVectorLeft_ * JoySpeed * nc::theApplication().interval());
 	emitVector_ += joyVectorRight_ * JoySpeed * nc::theApplication().interval();
 
-#ifndef __ANDROID__
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
 	if (keyState.isKeyDown(nc::KEY_D)) { particleSystem_->x += KeySpeed * nc::theApplication().interval(); }
@@ -91,7 +90,6 @@ void MyEventHandler::onFrameStart()
 	else if (keyState.isKeyDown(nc::KEY_LEFT)) { emitVector_.x -= KeySpeed * nc::theApplication().interval(); }
 	if (keyState.isKeyDown(nc::KEY_UP)) { emitVector_.y += KeySpeed * nc::theApplication().interval(); }
 	else if (keyState.isKeyDown(nc::KEY_DOWN)) { emitVector_.y -= KeySpeed * nc::theApplication().interval(); }
-#endif
 }
 
 void MyEventHandler::onShutdown()
@@ -125,7 +123,8 @@ void MyEventHandler::onAcceleration(const nc::AccelerometerEvent &event)
 	particleSystem_->x += event.y * 0.75f;
 	particleSystem_->y += -event.x * 0.75f;
 }
-#else
+#endif
+
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
@@ -160,7 +159,6 @@ void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 		emitVector_.y = (state.y - particleSystem_->y) * 2.5f;
 	}
 }
-#endif
 
 void MyEventHandler::onJoyAxisMoved(const nc::JoyAxisEvent &event)
 {

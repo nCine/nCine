@@ -206,7 +206,8 @@ void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 {
 	handleCoordInput(event.pointers[0].x, event.pointers[0].y);
 }
-#else
+#endif
+
 void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
@@ -242,7 +243,6 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		handleInput(DOWN);
 	}
 }
-#endif
 
 void MyEventHandler::handleInput(Direction direction)
 {

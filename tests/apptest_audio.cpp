@@ -140,7 +140,8 @@ void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 		toggleSound();
 	}
 }
-#else
+#endif
+
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
@@ -222,7 +223,6 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		xPos_ += 0.1f;
 	}
 }
-#endif
 
 void MyEventHandler::toggleMusic()
 {

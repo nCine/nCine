@@ -47,7 +47,8 @@ class DLL_PUBLIC AccelerometerEvent
 
 	float x, y, z;
 };
-#else
+#endif
+
 /// Information about mouse state
 class DLL_PUBLIC MouseState
 {
@@ -96,7 +97,6 @@ class DLL_PUBLIC KeyboardState
   public:
 	virtual bool isKeyDown(KeySym key) const = 0;
 };
-#endif
 
 /// Information about a keyboard event
 class DLL_PUBLIC KeyboardEvent
@@ -167,10 +167,10 @@ class DLL_PUBLIC IInputManager
 		inputEventHandler_ = inputEventHandler;
 	}
 
-#ifndef __ANDROID__
+	/// Returns current mouse state
 	virtual const MouseState &mouseState() = 0;
+	/// Returns current keyboard state
 	virtual const KeyboardState &keyboardState() const = 0;
-#endif
 
 	static short int MaxAxisValue;
 	/// Returns true if the specified joystick is connected
