@@ -15,7 +15,7 @@ GLFWwindow *GlfwGfxDevice::windowHandle_ = NULL;
 ///////////////////////////////////////////////////////////
 
 GlfwGfxDevice::GlfwGfxDevice(int width, int height, const GLContextInfo &contextInfo, const DisplayMode &mode, bool isFullScreen)
-	: IGfxDevice(width, height, mode, isFullScreen), contextInfo_(contextInfo)
+	: IGfxDevice(width, height, contextInfo, mode, isFullScreen)
 {
 	initGraphics();
 	initDevice();
@@ -44,11 +44,6 @@ void GlfwGfxDevice::setResolution(int width, int height)
 		windowHandle_ = NULL;
 		initDevice();
 	}
-}
-
-void GlfwGfxDevice::setResolution(Vector2i size)
-{
-	setResolution(size.x, size.y);
 }
 
 void GlfwGfxDevice::toggleFullScreen()
@@ -112,14 +107,8 @@ void GlfwGfxDevice::initDevice()
 
 	glfwMakeContextCurrent(windowHandle_);
 
-	if (mode_.hasVSync())
-	{
-		glfwSwapInterval(1);
-	}
-	else
-	{
-		glfwSwapInterval(0);
-	}
+	int interval = mode_.hasVSync() ? 1 : 0;
+	glfwSwapInterval(interval);
 
 #ifdef WITH_GLEW
 	GLenum err = glewInit();

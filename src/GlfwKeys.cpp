@@ -108,9 +108,9 @@ KeySym GlfwKeys::keySymValueToEnum(int keysym)
 		case GLFW_KEY_F14:				return KEY_F14;
 		case GLFW_KEY_F15:				return KEY_F15;
 
-		case GLFW_KEY_NUM_LOCK:			return KEY_NUMLOCK;
-		case GLFW_KEY_CAPS_LOCK:		return KEY_CAPSLOCK;
-		case GLFW_KEY_SCROLL_LOCK:		return KEY_SCROLLOCK;
+		case GLFW_KEY_NUM_LOCK:			return KEY_NUM_LOCK;
+		case GLFW_KEY_CAPS_LOCK:		return KEY_CAPS_LOCK;
+		case GLFW_KEY_SCROLL_LOCK:		return KEY_SCROLL_LOCK;
 		case GLFW_KEY_RIGHT_SHIFT:		return KEY_RSHIFT;
 		case GLFW_KEY_LEFT_SHIFT:		return KEY_LSHIFT;
 		case GLFW_KEY_RIGHT_CONTROL:	return KEY_RCTRL;
@@ -120,8 +120,8 @@ KeySym GlfwKeys::keySymValueToEnum(int keysym)
 		case GLFW_KEY_RIGHT_SUPER:		return KEY_RSUPER;
 		case GLFW_KEY_LEFT_SUPER:		return KEY_LSUPER;
 
-		case GLFW_KEY_PRINT_SCREEN:		return KEY_PRINT;
-		case GLFW_KEY_PAUSE:			return KEY_BREAK;
+		case GLFW_KEY_PRINT_SCREEN:		return KEY_PRINTSCREEN;
+		case GLFW_KEY_PAUSE:			return KEY_PAUSE;
 		case GLFW_KEY_MENU:				return KEY_MENU;
 
 		default:						return KEY_UNKNOWN;
@@ -136,7 +136,7 @@ KeyMod GlfwKeys::keyModValueToEnum(int keymod)
 		case GLFW_MOD_SHIFT:			return KEYMOD_SHIFT;
 		case GLFW_MOD_CONTROL:			return KEYMOD_CTRL;
 		case GLFW_MOD_ALT:				return KEYMOD_ALT;
-		case GLFW_MOD_SUPER:			return KEYMOD_META;
+		case GLFW_MOD_SUPER:			return KEYMOD_SUPER;
 
 		default:						return KEYMOD_NONE;
 	}
@@ -248,9 +248,9 @@ int GlfwKeys::enumToKeySymValue(KeySym keysym)
 		case KEY_F14:					return GLFW_KEY_F14;
 		case KEY_F15:					return GLFW_KEY_F15;
 
-		case KEY_NUMLOCK:				return GLFW_KEY_NUM_LOCK;
-		case KEY_CAPSLOCK:				return GLFW_KEY_CAPS_LOCK;
-		case KEY_SCROLLOCK:				return GLFW_KEY_SCROLL_LOCK;
+		case KEY_NUM_LOCK:				return GLFW_KEY_NUM_LOCK;
+		case KEY_CAPS_LOCK:				return GLFW_KEY_CAPS_LOCK;
+		case KEY_SCROLL_LOCK:			return GLFW_KEY_SCROLL_LOCK;
 		case KEY_RSHIFT:				return GLFW_KEY_RIGHT_SHIFT;
 		case KEY_LSHIFT:				return GLFW_KEY_LEFT_SHIFT;
 		case KEY_RCTRL:					return GLFW_KEY_RIGHT_CONTROL;
@@ -260,8 +260,8 @@ int GlfwKeys::enumToKeySymValue(KeySym keysym)
 		case KEY_RSUPER:				return GLFW_KEY_RIGHT_SUPER;
 		case KEY_LSUPER:				return GLFW_KEY_LEFT_SUPER;
 
-		case KEY_PRINT:					return GLFW_KEY_PRINT_SCREEN;
-		case KEY_BREAK:					return GLFW_KEY_PAUSE;
+		case KEY_PRINTSCREEN:			return GLFW_KEY_PRINT_SCREEN;
+		case KEY_PAUSE:					return GLFW_KEY_PAUSE;
 		case KEY_MENU:					return GLFW_KEY_MENU;
 
 		default:						return GLFW_KEY_UNKNOWN;
@@ -276,7 +276,7 @@ int GlfwKeys::enumToKeyModValue(KeyMod keymod)
 		case KEYMOD_SHIFT:				return GLFW_MOD_SHIFT;
 		case KEYMOD_CTRL:				return GLFW_MOD_CONTROL;
 		case KEYMOD_ALT:				return GLFW_MOD_ALT;
-		case KEYMOD_META:				return GLFW_MOD_SUPER;
+		case KEYMOD_SUPER:				return GLFW_MOD_SUPER;
 
 		default:						return 0x0000;
 	}

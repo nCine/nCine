@@ -1,8 +1,8 @@
 #ifndef CLASS_NCINE_SDLINPUTMANAGER
 #define CLASS_NCINE_SDLINPUTMANAGER
 
-#include <SDL/SDL_events.h>
-#include <SDL/SDL_mouse.h>
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_mouse.h>
 #include "IInputManager.h"
 
 namespace ncine {
@@ -15,6 +15,7 @@ class SdlKeys
 	static KeyMod keyModValueToEnum(int keymod);
 	static int enumToKeySymValue(KeySym keysym);
 	static int enumToKeyModValue(KeyMod keymod);
+	static int enumToScancode(KeySym keysym);
 };
 
 /// Information about SDL mouse state
@@ -23,14 +24,14 @@ class SdlMouseState : public MouseState
   public:
 	SdlMouseState() : buttons_(0) { }
 
-	inline bool isLeftButtonDown() const { return (buttons_ & SDL_BUTTON_LEFT) != 0; }
-	inline bool isMiddleButtonDown() const { return (buttons_ & SDL_BUTTON_MIDDLE) != 0; }
-	inline bool isRightButtonDown() const { return (buttons_ & SDL_BUTTON_RIGHT) != 0; }
-	inline bool isFourthButtonDown() const { return (buttons_ & SDL_BUTTON_WHEELUP) != 0; }
-	inline bool isFifthButtonDown() const { return (buttons_ & SDL_BUTTON_WHEELDOWN) != 0; }
+	inline bool isLeftButtonDown() const { return (buttons_ & SDL_BUTTON_LMASK) != 0; }
+	inline bool isMiddleButtonDown() const { return (buttons_ & SDL_BUTTON_MMASK) != 0; }
+	inline bool isRightButtonDown() const { return (buttons_ & SDL_BUTTON_RMASK) != 0; }
+	inline bool isFourthButtonDown() const { return (buttons_ & SDL_BUTTON_X1MASK) != 0; }
+	inline bool isFifthButtonDown() const { return (buttons_ & SDL_BUTTON_X2MASK) != 0; }
 
   private:
-	unsigned char buttons_;
+	unsigned int buttons_;
 
 	friend class SdlInputManager;
 };
@@ -44,8 +45,8 @@ class SdlMouseEvent : public MouseEvent
 	inline bool isLeftButton() const { return button_ == SDL_BUTTON_LEFT; }
 	inline bool isMiddleButton() const { return button_ == SDL_BUTTON_MIDDLE; }
 	inline bool isRightButton() const { return button_ == SDL_BUTTON_RIGHT; }
-	inline bool isFourthButton() const { return button_ == SDL_BUTTON_WHEELUP; }
-	inline bool isFifthButton() const { return button_ == SDL_BUTTON_WHEELDOWN; }
+	inline bool isFourthButton() const { return button_ == SDL_BUTTON_X1; }
+	inline bool isFifthButton() const { return button_ == SDL_BUTTON_X2; }
 
   private:
 	unsigned char button_;
@@ -66,14 +67,14 @@ class SdlScrollEvent : public ScrollEvent
 class SdlKeyboardState : public KeyboardState
 {
   public:
-	SdlKeyboardState() { keyState_ = SDL_GetKeyState(NULL); }
+	SdlKeyboardState() { keyState_ = SDL_GetKeyboardState(NULL); }
 
-	inline bool isKeyDown(KeySym key) const { return keyState_[SdlKeys::enumToKeySymValue(key)] != 0; }
+	inline bool isKeyDown(KeySym key) const { return keyState_[SdlKeys::enumToScancode(key)] != 0; }
 
 	friend class SdlInputManager;
 
   private:
-	unsigned char *keyState_;
+	const unsigned char *keyState_;
 };
 
 /// The class for parsing and dispatching SDL input events
@@ -117,14 +118,15 @@ class SdlInputManager : public IInputManager
 	static SDL_Joystick *sdlJoysticks_[MaxNumJoysticks];
 	static JoyButtonEvent joyButtonEvent_;
 	static JoyAxisEvent joyAxisEvent_;
+	static JoyConnectionEvent joyConnectionEvent_;
 
 	/// Private copy constructor
 	SdlInputManager(const SdlInputManager &);
 	/// Private assignment operator
 	SdlInputManager &operator=(const SdlInputManager &);
 
-	static void simulateScrollEvent(const SDL_Event &event);
 	static short int hatEnumToAxisValue(unsigned char hatState, bool upDownAxis);
+	static void handleJoyDeviceEvent(const SDL_Event &event);
 };
 
 }

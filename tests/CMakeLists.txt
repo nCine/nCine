@@ -36,7 +36,7 @@ elseif(APPLE)
 	file(RELATIVE_PATH RELPATH_TO_LIB ${CMAKE_INSTALL_PREFIX}/${RUNTIME_INSTALL_DESTINATION} ${CMAKE_INSTALL_PREFIX}/${LIBRARY_INSTALL_DESTINATION})
 endif()
 
-if((SDLIMAGE_FOUND OR PNG_FOUND) AND WEBP_FOUND)
+if(PNG_FOUND AND WEBP_FOUND)
 	list(APPEND APPTESTS apptest_texformats apptest_joystick apptest_rotozoom apptest_animsprites
 		apptest_particles apptest_scene apptest_font apptest_multitouch apptest_camera)
 	if(OPENAL_FOUND)

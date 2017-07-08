@@ -20,7 +20,7 @@ class GlfwGfxDevice : public IGfxDevice
 	~GlfwGfxDevice();
 
 	void setResolution(int width, int height);
-	void setResolution(Vector2i size);
+	inline void setResolution(Vector2i size) { setResolution(size.x, size.y); }
 
 	void toggleFullScreen();
 
@@ -31,8 +31,6 @@ class GlfwGfxDevice : public IGfxDevice
   private:
 	/// GLFW3 window handle
 	static GLFWwindow *windowHandle_;
-	/// OpenGL context properties
-	GLContextInfo contextInfo_;
 
 	/// Private copy constructor
 	GlfwGfxDevice(const GlfwGfxDevice &);

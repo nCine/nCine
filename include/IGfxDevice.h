@@ -11,6 +11,7 @@ namespace ncine {
 class DLL_PUBLIC IGfxDevice
 {
   public:
+	/// Contains the attributes to create an OpenGL context
 	struct GLContextInfo
 	{
 		GLContextInfo(unsigned int major, unsigned int minor, bool debug)
@@ -21,7 +22,7 @@ class DLL_PUBLIC IGfxDevice
 		bool debugContext;
 	};
 
-	IGfxDevice(int width, int height, const DisplayMode &mode, bool isFullScreen);
+	IGfxDevice(int width, int height, const GLContextInfo &contextInfo, const DisplayMode &mode, bool isFullScreen);
 	virtual ~IGfxDevice() { }
 
 	/// Sets screen resolution with two integers
@@ -55,6 +56,8 @@ class DLL_PUBLIC IGfxDevice
 	int width_;
 	/// Device height
 	int height_;
+	/// OpenGL context creation attributes
+	GLContextInfo contextInfo_;
 	/// Display properties
 	DisplayMode mode_;
 	/// Whether device rendering occurs in full screen

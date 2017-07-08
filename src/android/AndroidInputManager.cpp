@@ -16,6 +16,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 IInputEventHandler *IInputManager::inputEventHandler_ = NULL;
+IInputManager::MouseCursorMode IInputManager::mouseCursorMode_ = IInputManager::MOUSE_CURSOR_NORMAL;
 ASensorManager *AndroidInputManager::sensorManager_ = NULL;
 const ASensor *AndroidInputManager::accelerometerSensor_ = NULL;
 ASensorEventQueue *AndroidInputManager::sensorEventQueue_ = NULL;

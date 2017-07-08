@@ -8,14 +8,29 @@
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
+SDL_Window *SdlGfxDevice::windowHandle_ = NULL;
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-SdlGfxDevice::SdlGfxDevice(int width, int height, DisplayMode mode, bool isFullScreen)
-	: IGfxDevice(width, height, mode, isFullScreen)
+SdlGfxDevice::SdlGfxDevice(int width, int height, const GLContextInfo &contextInfo, DisplayMode mode, bool isFullScreen)
+	: IGfxDevice(width, height, contextInfo, mode, isFullScreen)
 {
 	initGraphics();
 	initDevice();
+}
+
+SdlGfxDevice::~SdlGfxDevice()
+{
+	SDL_GL_DeleteContext(glContextHandle_);
+	glContextHandle_ = NULL;
+	SDL_DestroyWindow(windowHandle_);
+	windowHandle_ = NULL;
+	SDL_Quit();
 }
 
 ///////////////////////////////////////////////////////////
@@ -25,7 +40,15 @@ SdlGfxDevice::SdlGfxDevice(int width, int height, DisplayMode mode, bool isFullS
 void SdlGfxDevice::setResolution(int width, int height)
 {
 	// change resolution only in the case it really changes
-	if (width != width_ || height != height_)
+	if (width == width_ && height == height_) { return; }
+
+	// asking for fullscreen mode that does not change current screen resolution
+	if (width == 0 || height == 0)
+	{
+		SDL_SetWindowFullscreen(windowHandle_, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		SDL_GetWindowSize(windowHandle_, &width_, &height_);
+	}
+	else
 	{
 		width_ = width;
 		height_ = height;
@@ -34,22 +57,12 @@ void SdlGfxDevice::setResolution(int width, int height)
 	}
 }
 
-void SdlGfxDevice::setResolution(Vector2i size)
-{
-	// change resolution only in the case it really changes
-	if (size.x != width_ || size.y != height_)
-	{
-		width_ = size.x;
-		height_ = size.y;
-
-		initDevice();
-	}
-}
-
 void SdlGfxDevice::toggleFullScreen()
 {
 	isFullScreen_ = !isFullScreen_;
-	initDevice();
+
+	int flags = isFullScreen_ ? SDL_WINDOW_FULLSCREEN : 0;
+	SDL_SetWindowFullscreen(windowHandle_, flags);
 }
 
 ///////////////////////////////////////////////////////////
@@ -75,54 +88,55 @@ void SdlGfxDevice::initDevice()
 	}
 
 	// setting OpenGL attributes
-	if (mode_.redBits() > 0)
-	{
-		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, mode_.redBits());
-	}
-	if (mode_.greenBits() > 0)
-	{
-		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, mode_.greenBits());
-	}
-	if (mode_.blueBits() > 0)
-	{
-		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, mode_.blueBits());
-	}
-	if (mode_.alphaBits() > 0)
-	{
-		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, mode_.alphaBits());
-	}
-
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, mode_.redBits());
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, mode_.greenBits());
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, mode_.blueBits());
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, mode_.alphaBits());
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, mode_.isDoubleBuffered());
-	SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, mode_.hasVSync());
-	if (mode_.depthBits() > 0)
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, mode_.depthBits());
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, mode_.stencilBits());
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, contextInfo_.majorVersion);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, contextInfo_.minorVersion);
+	if (contextInfo_.debugContext)
 	{
-		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, mode_.depthBits());
-	}
-	if (mode_.stencilBits() > 0)
-	{
-		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, mode_.stencilBits());
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 	}
 
-	Uint32 flags = SDL_OPENGL;
+	Uint32 flags = SDL_WINDOW_OPENGL;
 	if (isFullScreen_)
 	{
-		flags |= SDL_FULLSCREEN;
+		flags |= SDL_WINDOW_FULLSCREEN;
+	}
+	else if (width_ == 0 || height_ == 0)
+	{
+		flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 	}
 
-	// setting screen mode, get a screen from SDL
-	SDL_Surface *screen = SDL_SetVideoMode(width_, height_, 0, flags);
-	if (screen == NULL)
+	// Creating a window with SDL2
+	windowHandle_ = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width_, height_, flags);
+
+	if (windowHandle_ == NULL)
 	{
-		LOGF_X("SDL_SetVideoMode failed: %s", SDL_GetError());
+		LOGF_X("SDL_CreateWindow failed: %s", SDL_GetError());
 		exit(EXIT_FAILURE);
 	}
 
 	// resolution should be set to current screen size
 	if (width_ == 0 || height_ == 0)
 	{
-		width_ = screen->w;
-		height_ = screen->h;
+		SDL_GetWindowSize(windowHandle_, &width_, &height_);
 	}
+
+	glContextHandle_ = SDL_GL_CreateContext(windowHandle_);
+
+	if (glContextHandle_ == NULL)
+	{
+		LOGF_X("SDL_GL_CreateContext failed: %s", SDL_GetError());
+		exit(EXIT_FAILURE);
+	}
+
+	int interval = mode_.hasVSync() ? 1 : 0;
+	SDL_GL_SetSwapInterval(interval);
 
 #ifdef WITH_GLEW
 	GLenum err = glewInit();

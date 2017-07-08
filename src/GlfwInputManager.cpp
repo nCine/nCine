@@ -11,6 +11,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 IInputEventHandler *IInputManager::inputEventHandler_ = NULL;
+IInputManager::MouseCursorMode IInputManager::mouseCursorMode_ = IInputManager::MOUSE_CURSOR_NORMAL;
 bool GlfwInputManager::windowHasFocus_ = true;
 GlfwMouseState GlfwInputManager::mouseState_;
 GlfwMouseEvent GlfwInputManager::mouseEvent_;

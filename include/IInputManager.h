@@ -108,10 +108,8 @@ class DLL_PUBLIC KeyboardEvent
 	KeySym sym;
 	/// Key modifiers mask
 	int mod;
-	/// Unicode character
-	unsigned short int unicode;
 
-	KeyboardEvent() : scancode(0), sym(KEY_UNKNOWN), mod(0), unicode(0) { }
+	KeyboardEvent() : scancode(0), sym(KEY_UNKNOWN), mod(0) { }
 };
 
 /// Information about a joystick axis event
@@ -157,7 +155,6 @@ class DLL_PUBLIC IInputManager
 		/// Mouse cursor is hidden but behaves normally
 		MOUSE_CURSOR_HIDDEN,
 		/// Mouse cursor is hidden and locked to the window
-		/*! \note Does not work properly when using SDL 1.2.x */
 		MOUSE_CURSOR_DISABLED
 	};
 
@@ -195,9 +192,9 @@ class DLL_PUBLIC IInputManager
 
   protected:
 	static IInputEventHandler *inputEventHandler_;
-	MouseCursorMode mouseCursorMode_;
+	static MouseCursorMode mouseCursorMode_;
 
-	IInputManager() : mouseCursorMode_(MOUSE_CURSOR_NORMAL) { }
+	IInputManager() { }
 };
 
 }

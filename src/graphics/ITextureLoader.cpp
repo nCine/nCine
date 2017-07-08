@@ -3,9 +3,7 @@
 #include "TextureLoaderDds.h"
 #include "TextureLoaderPvr.h"
 #include "TextureLoaderKtx.h"
-#if defined(WITH_SDLIMAGE)
-	#include "TextureLoaderSdl.h"
-#elif defined(WITH_PNG)
+#ifdef WITH_PNG
 	#include "TextureLoaderPng.h"
 #endif
 #ifdef WITH_WEBP
@@ -119,12 +117,7 @@ ITextureLoader *ITextureLoader::createFromFile(const char *filename)
 	{
 		return new TextureLoaderKtx(fileHandle);
 	}
-#if defined(WITH_SDLIMAGE)
-	else if (fileHandle->hasExtension("png") || fileHandle->hasExtension("jpg"))
-	{
-		return new TextureLoaderSdl(fileHandle);
-	}
-#elif defined(WITH_PNG)
+#ifdef WITH_PNG
 	else if (fileHandle->hasExtension("png"))
 	{
 		return new TextureLoaderPng(fileHandle);

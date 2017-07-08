@@ -52,7 +52,7 @@ class EglGfxDevice : public IGfxDevice
 	EGLConfig config_;
 
 	/// Initializes the OpenGL graphic context
-	void initDevice(struct android_app *state, const GLContextInfo &contextInfo);
+	void initDevice(struct android_app *state);
 };
 
 }

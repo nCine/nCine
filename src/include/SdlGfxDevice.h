@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_SDLGFXDEVICE
 #define CLASS_NCINE_SDLGFXDEVICE
 
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 
 #include "IGfxDevice.h"
 #include "Vector2.h"
@@ -13,19 +13,24 @@ namespace ncine {
 class SdlGfxDevice : public IGfxDevice
 {
   public:
-	SdlGfxDevice(int width, int height, DisplayMode mode, bool isFullScreen);
-	~SdlGfxDevice() { SDL_Quit(); }
+	SdlGfxDevice(int width, int height, const GLContextInfo &contextInfo, DisplayMode mode, bool isFullScreen);
+	~SdlGfxDevice();
 
 	void setResolution(int width, int height);
-	void setResolution(Vector2i size);
+	inline void setResolution(Vector2i size) { setResolution(size.x, size.y); }
 
 	void toggleFullScreen();
 
-	inline void update() { SDL_GL_SwapBuffers(); }
+	inline void update() { SDL_GL_SwapWindow(windowHandle_); }
 
-	inline void setWindowTitle(const char *windowTitle) { SDL_WM_SetCaption(windowTitle, NULL); }
+	inline void setWindowTitle(const char *windowTitle) { SDL_SetWindowTitle(windowHandle_, windowTitle); }
 
   private:
+	/// SDL2 window handle
+	static SDL_Window *windowHandle_;
+	/// SDL2 OpenGL context handle
+	SDL_GLContext glContextHandle_;
+
 	/// Private copy constructor
 	SdlGfxDevice(const SdlGfxDevice &);
 	/// Private assignment operator

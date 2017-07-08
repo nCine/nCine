@@ -1,5 +1,5 @@
-#include <SDL/SDL.h> // for SDL_WasInit()
-#include <SDL/SDL_joystick.h>
+#include <cstring> // for memset()
+#include <SDL2/SDL.h>
 
 #include "SdlInputManager.h"
 #include "IInputEventHandler.h"
@@ -14,15 +14,17 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 IInputEventHandler *IInputManager::inputEventHandler_ = NULL;
+IInputManager::MouseCursorMode IInputManager::mouseCursorMode_ = IInputManager::MOUSE_CURSOR_NORMAL;
 SdlMouseState SdlInputManager::mouseState_;
 SdlMouseEvent SdlInputManager::mouseEvent_;
 SdlScrollEvent SdlInputManager::scrollEvent_;
 SdlKeyboardState SdlInputManager::keyboardState_;
-KeyboardEvent	SdlInputManager::keyboardEvent_;
+KeyboardEvent SdlInputManager::keyboardEvent_;
 short int IInputManager::MaxAxisValue = 32767;
 SDL_Joystick *SdlInputManager::sdlJoysticks_[MaxNumJoysticks];
 JoyButtonEvent SdlInputManager::joyButtonEvent_;
 JoyAxisEvent SdlInputManager::joyAxisEvent_;
+JoyConnectionEvent SdlInputManager::joyConnectionEvent_;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -45,17 +47,14 @@ SdlInputManager::SdlInputManager()
 
 	// Opening attached joysticks
 	int numJoysticks = SDL_NumJoysticks();
-	if (numJoysticks > 0)
+	for (int i = 0; i < numJoysticks; i++)
 	{
-		for (int i = 0; i < numJoysticks; i++)
+		sdlJoysticks_[i] = SDL_JoystickOpen(i);
+		if (sdlJoysticks_[i])
 		{
-			sdlJoysticks_[i] = SDL_JoystickOpen(i);
-			if (sdlJoysticks_[i])
-			{
-				SDL_Joystick *sdlJoy = sdlJoysticks_[i];
-				LOGI_X("Joystick %d: %s - %d hats, %d axes, %d buttons, %d balls",
-				       i, SDL_JoystickName(i), SDL_JoystickNumHats(sdlJoy), SDL_JoystickNumAxes(sdlJoy), SDL_JoystickNumButtons(sdlJoy), SDL_JoystickNumBalls(sdlJoy));
-			}
+			SDL_Joystick *sdlJoy = sdlJoysticks_[i];
+			LOGI_X("Joystick %d \"%s\" - %d hats, %d axes, %d buttons, %d balls",
+			       i, SDL_JoystickName(sdlJoy), SDL_JoystickNumHats(sdlJoy), SDL_JoystickNumAxes(sdlJoy), SDL_JoystickNumButtons(sdlJoy), SDL_JoystickNumBalls(sdlJoy));
 		}
 	}
 }
@@ -85,6 +84,12 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 		return;
 	}
 
+	if (event.type == SDL_JOYDEVICEADDED || event.type == SDL_JOYDEVICEREMOVED)
+	{
+		handleJoyDeviceEvent(event);
+		return;
+	}
+
 	// Filling static event structures
 	switch (event.type)
 	{
@@ -93,18 +98,29 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 			keyboardEvent_.scancode = event.key.keysym.scancode;
 			keyboardEvent_.sym = SdlKeys::keySymValueToEnum(event.key.keysym.sym);
 			keyboardEvent_.mod = SdlKeys::keyModValueToEnum(event.key.keysym.mod);
-			keyboardEvent_.unicode = event.key.keysym.unicode;
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
 			mouseEvent_.x = event.button.x;
-			mouseEvent_.y = theApplication().height() - event.button.y;
+			mouseEvent_.y = theApplication().heightInt() - event.button.y;
 			mouseEvent_.button_ = event.button.button;
 			break;
 		case SDL_MOUSEMOTION:
-			mouseState_.x = event.motion.x;
-			mouseState_.y = theApplication().height() - event.motion.y;
+			if (mouseCursorMode_ != MOUSE_CURSOR_DISABLED)
+			{
+				mouseState_.x = event.motion.x;
+				mouseState_.y = theApplication().heightInt() - event.motion.y;
+			}
+			else
+			{
+				mouseState_.x += event.motion.xrel;
+				mouseState_.y -= event.motion.yrel;
+			}
 			mouseState_.buttons_ = event.motion.state;
+			break;
+		case SDL_MOUSEWHEEL:
+			scrollEvent_.x = static_cast<float>(event.wheel.x);
+			scrollEvent_.y = static_cast<float>(event.wheel.y);
 			break;
 		case SDL_JOYBUTTONDOWN:
 		case SDL_JOYBUTTONUP:
@@ -136,13 +152,15 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 			inputEventHandler_->onMouseButtonPressed(mouseEvent_);
-			SdlInputManager::simulateScrollEvent(event);
 			break;
 		case SDL_MOUSEBUTTONUP:
 			inputEventHandler_->onMouseButtonReleased(mouseEvent_);
 			break;
 		case SDL_MOUSEMOTION:
 			inputEventHandler_->onMouseMoved(mouseState_);
+			break;
+		case SDL_MOUSEWHEEL:
+			inputEventHandler_->onScrollInput(scrollEvent_);
 			break;
 		case SDL_JOYBUTTONDOWN:
 			inputEventHandler_->onJoyButtonPressed(joyButtonEvent_);
@@ -171,7 +189,8 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 
 bool SdlInputManager::isJoyPresent(int joyId) const
 {
-	if (joyId >= 0 && joyId < int(MaxNumJoysticks) && SDL_JoystickOpened(joyId) && sdlJoysticks_[joyId])
+	if (joyId >= 0 && joyId < int(MaxNumJoysticks) &&
+	    sdlJoysticks_[joyId] && SDL_JoystickGetAttached(sdlJoysticks_[joyId]))
 	{
 		return true;
 	}
@@ -185,7 +204,7 @@ const char *SdlInputManager::joyName(int joyId) const
 {
 	if (isJoyPresent(joyId))
 	{
-		return SDL_JoystickName(joyId);
+		return SDL_JoystickName(sdlJoysticks_[joyId]);
 	}
 	else
 	{
@@ -267,9 +286,9 @@ void SdlInputManager::setMouseCursorMode(MouseCursorMode mode)
 	{
 		switch (mode)
 		{
-			case MOUSE_CURSOR_NORMAL: SDL_ShowCursor(SDL_ENABLE); SDL_WM_GrabInput(SDL_GRAB_OFF); break;
-			case MOUSE_CURSOR_HIDDEN: SDL_ShowCursor(SDL_DISABLE); SDL_WM_GrabInput(SDL_GRAB_OFF); break;
-			case MOUSE_CURSOR_DISABLED: SDL_ShowCursor(SDL_DISABLE); SDL_WM_GrabInput(SDL_GRAB_ON); break;
+			case MOUSE_CURSOR_NORMAL: SDL_ShowCursor(SDL_ENABLE); SDL_SetRelativeMouseMode(SDL_FALSE); break;
+			case MOUSE_CURSOR_HIDDEN: SDL_ShowCursor(SDL_DISABLE); SDL_SetRelativeMouseMode(SDL_FALSE); break;
+			case MOUSE_CURSOR_DISABLED: SDL_SetRelativeMouseMode(SDL_TRUE); break;
 		}
 
 		mouseCursorMode_ = mode;
@@ -279,26 +298,6 @@ void SdlInputManager::setMouseCursorMode(MouseCursorMode mode)
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 //////////////////////////////////////////////////////////
-
-void SdlInputManager::simulateScrollEvent(const SDL_Event &event)
-{
-	scrollEvent_.x = 0.0f;
-
-	// Mouse wheel events are broken in SDL 1.x and fixed in SDL 2
-	if (event.type == SDL_MOUSEBUTTONDOWN)
-	{
-		if (event.button.button == SDL_BUTTON_WHEELUP)
-		{
-			scrollEvent_.y = 1.0f;
-			inputEventHandler_->onScrollInput(scrollEvent_);
-		}
-		else if (event.button.button == SDL_BUTTON_WHEELDOWN)
-		{
-			scrollEvent_.y = -1.0f;
-			inputEventHandler_->onScrollInput(scrollEvent_);
-		}
-	}
-}
 
 short int SdlInputManager::hatEnumToAxisValue(unsigned char hatState, bool upDownAxis)
 {
@@ -328,6 +327,48 @@ short int SdlInputManager::hatEnumToAxisValue(unsigned char hatState, bool upDow
 	}
 
 	return axisValue;
+}
+
+void SdlInputManager::handleJoyDeviceEvent(const SDL_Event &event)
+{
+	if (event.type == SDL_JOYDEVICEADDED)
+	{
+		int deviceIndex = event.jdevice.which;
+		joyConnectionEvent_.joyId = deviceIndex;
+		sdlJoysticks_[deviceIndex] = SDL_JoystickOpen(deviceIndex);
+
+		SDL_Joystick *joy = sdlJoysticks_[deviceIndex];
+		LOGI_X("Joystick %d \"%s\" has been connected - %d hats, %d axes, %d buttons, %d balls",
+		       deviceIndex, SDL_JoystickName(joy), SDL_JoystickNumHats(joy), SDL_JoystickNumAxes(joy), SDL_JoystickNumButtons(joy), SDL_JoystickNumBalls(joy));
+		inputEventHandler_->onJoyConnected(joyConnectionEvent_);
+	}
+	else if (event.type == SDL_JOYDEVICEREMOVED)
+	{
+		int instanceId = event.jdevice.which;
+		int deviceIndex = MaxNumJoysticks;
+		for (unsigned int i = 0; i < MaxNumJoysticks; i++)
+		{
+			int id = SDL_JoystickInstanceID(sdlJoysticks_[i]);
+			if (instanceId == id)
+			{
+				joyConnectionEvent_.joyId = i;
+				SDL_JoystickClose(sdlJoysticks_[i]);
+				sdlJoysticks_[i] = NULL;
+				deviceIndex = i;
+				break;
+			}
+		}
+
+		// Compacting the array of SDL joystick pointers
+		for (unsigned int i = deviceIndex; i < MaxNumJoysticks - 1; i++)
+		{
+			sdlJoysticks_[i] = sdlJoysticks_[i+1];
+		}
+		sdlJoysticks_[MaxNumJoysticks - 1] = NULL;
+
+		LOGI_X("Joystick %d has been disconnected", deviceIndex);
+		inputEventHandler_->onJoyDisconnected(joyConnectionEvent_);
+	}
 }
 
 }

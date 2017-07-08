@@ -123,13 +123,13 @@ KeySym AndroidKeys::keySymValueToEnum(int keysym)
 		case AKEYCODE_FORWARD_DEL:		return KEY_FORWARD_DEL;
 		case AKEYCODE_CTRL_LEFT:		return KEY_LCTRL;
 		case AKEYCODE_CTRL_RIGHT:		return KEY_RCTRL;
-		case AKEYCODE_CAPS_LOCK:		return KEY_CAPSLOCK;
-		case AKEYCODE_SCROLL_LOCK:		return KEY_SCROLLOCK;
-		case AKEYCODE_META_LEFT:		return KEY_LMETA;
-		case AKEYCODE_META_RIGHT:		return KEY_RMETA;
+		case AKEYCODE_CAPS_LOCK:		return KEY_CAPS_LOCK;
+		case AKEYCODE_SCROLL_LOCK:		return KEY_SCROLL_LOCK;
+		case AKEYCODE_META_LEFT:		return KEY_LSUPER;
+		case AKEYCODE_META_RIGHT:		return KEY_RSUPER;
 		case AKEYCODE_FUNCTION:			return KEY_FUNCTION;
 		case AKEYCODE_SYSRQ:			return KEY_SYSREQ;
-		case AKEYCODE_BREAK:			return KEY_BREAK;
+		case AKEYCODE_BREAK:			return KEY_PAUSE;
 		case AKEYCODE_MOVE_HOME:		return KEY_MOVE_HOME;
 		case AKEYCODE_MOVE_END:			return KEY_MOVE_END;
 		case AKEYCODE_INSERT:			return KEY_INSERT;
@@ -151,7 +151,7 @@ KeySym AndroidKeys::keySymValueToEnum(int keysym)
 		case AKEYCODE_F10:				return KEY_F10;
 		case AKEYCODE_F11:				return KEY_F11;
 		case AKEYCODE_F12:				return KEY_F12;
-		case AKEYCODE_NUM_LOCK:			return KEY_NUMLOCK;
+		case AKEYCODE_NUM_LOCK:			return KEY_NUM_LOCK;
 		case AKEYCODE_NUMPAD_0:			return KEY_KP0;
 		case AKEYCODE_NUMPAD_1:			return KEY_KP1;
 		case AKEYCODE_NUMPAD_2:			return KEY_KP2;
@@ -234,9 +234,9 @@ KeyMod AndroidKeys::keyModValueToEnum(int keymod)
 		case AMETA_CTRL_LEFT_ON:		return KEYMOD_LCTRL;
 		case AMETA_CTRL_RIGHT_ON:		return KEYMOD_RCTRL;
 #endif
-		case AMETA_META_ON:				return KEYMOD_META;
-		case AMETA_META_LEFT_ON:		return KEYMOD_LMETA;
-		case AMETA_META_RIGHT_ON:		return KEYMOD_RMETA;
+		case AMETA_META_ON:				return KEYMOD_SUPER;
+		case AMETA_META_LEFT_ON:		return KEYMOD_LSUPER;
+		case AMETA_META_RIGHT_ON:		return KEYMOD_RSUPER;
 #if __ANDROID_API__ >= 13
 		case AMETA_CAPS_LOCK_ON:		return KEYMOD_CAPS;
 		case AMETA_NUM_LOCK_ON:			return KEYMOD_NUM;

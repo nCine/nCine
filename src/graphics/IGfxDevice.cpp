@@ -10,8 +10,8 @@ namespace ncine {
 // CONSTRUCTORS AND DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-IGfxDevice::IGfxDevice(int width, int height, const DisplayMode &mode, bool isFullScreen)
-	: width_(width), height_(height), mode_(mode), isFullScreen_(isFullScreen)
+IGfxDevice::IGfxDevice(int width, int height, const GLContextInfo &contextInfo, const DisplayMode &mode, bool isFullScreen)
+	: width_(width), height_(height), contextInfo_(contextInfo), mode_(mode), isFullScreen_(isFullScreen)
 {
 
 }
