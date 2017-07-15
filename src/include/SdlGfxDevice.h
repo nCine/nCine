@@ -24,6 +24,7 @@ class SdlGfxDevice : public IGfxDevice
 	inline void update() { SDL_GL_SwapWindow(windowHandle_); }
 
 	inline void setWindowTitle(const char *windowTitle) { SDL_SetWindowTitle(windowHandle_, windowTitle); }
+	void setWindowIcon(const char *windowIconFilename);
 
   private:
 	/// SDL2 window handle

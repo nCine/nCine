@@ -35,6 +35,8 @@ class DLL_PUBLIC IGfxDevice
 
 	/// Sets the application window title
 	virtual void setWindowTitle(const char *windowTitle) = 0;
+	/// Sets the application window icon
+	virtual void setWindowIcon(const char *iconFilename) = 0;
 
 	/// Returns device width
 	inline int width() const { return width_; }

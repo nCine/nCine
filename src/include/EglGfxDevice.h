@@ -28,6 +28,7 @@ class EglGfxDevice : public IGfxDevice
 	inline void update() { eglSwapBuffers(display_, surface_); }
 
 	void setWindowTitle(const char *windowTitle) { }
+	void setWindowIcon(const char *windowIconFilename) { }
 
 	/// Recreates a surface from a native window
 	void createSurface(struct android_app *state);

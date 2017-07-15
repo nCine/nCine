@@ -24,6 +24,7 @@ AppConfiguration::AppConfiguration()
 	, xResolution_(1280), yResolution_(720)
 	, inFullscreen_(false)
 	, windowTitle_(128)
+	, windowIconFilename_(128)
 	, fontTexFilename_(128)
 	, fontFntFilename_(128)
 	, withProfilerGraphs_(true)
@@ -38,6 +39,7 @@ AppConfiguration::AppConfiguration()
 	fontTexFilename_ = "fonts/DroidSans32_256_888.ktx";
 #else
 	windowTitle_ = "nCine";
+	windowIconFilename_ = "icons/icon48.png";
 	fontTexFilename_ = "fonts/DroidSans32_256.png";
 #endif
 	fontFntFilename_ = "fonts/DroidSans32_256.fnt";
@@ -89,6 +91,11 @@ void AppConfiguration::setFullScreen(bool inFullscreen)
 void AppConfiguration::setWindowTitle(const String &windowTitle)
 {
 	windowTitle_ = windowTitle;
+}
+
+void AppConfiguration::setWindowIconFilename(const String &windowIconFilename)
+{
+	windowIconFilename_ = windowIconFilename;
 }
 
 /*! The data path will be prefixed automatically before loading. */

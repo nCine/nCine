@@ -30,6 +30,8 @@ class DLL_PUBLIC AppConfiguration
 	void setFullScreen(bool inFullscreen);
 	/// Sets the window title
 	void setWindowTitle(const String &windowTitle);
+	/// Sets the window icon filename
+	void setWindowIconFilename(const String &windowIconFilename);
 	/// Sets the font texture filename for profiler information text
 	void setFontTexFilename(const String &fontTexFilename);
 	/// Sets the font FNT filename for profiler information text
@@ -63,6 +65,7 @@ class DLL_PUBLIC AppConfiguration
 	unsigned int yResolution_;
 	bool inFullscreen_;
 	String windowTitle_;
+	String windowIconFilename_;
 	String fontTexFilename_;
 	String fontFntFilename_;
 	bool withProfilerGraphs_;

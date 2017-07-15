@@ -27,6 +27,7 @@ class GlfwGfxDevice : public IGfxDevice
 	inline void update() { glfwSwapBuffers(windowHandle_); }
 
 	inline void setWindowTitle(const char *windowTitle) { glfwSetWindowTitle(windowHandle_, windowTitle); }
+	void setWindowIcon(const char *windowIconFilename);
 
   private:
 	/// GLFW3 window handle

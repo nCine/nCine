@@ -1,6 +1,7 @@
 #include <cstdlib> // for exit()
 #include "GlfwGfxDevice.h"
 #include "ServiceLocator.h"
+#include "ITextureLoader.h"
 
 namespace ncine {
 
@@ -53,6 +54,18 @@ void GlfwGfxDevice::toggleFullScreen()
 	glfwDestroyWindow(windowHandle_);
 	windowHandle_ = NULL;
 	initDevice();
+}
+
+void GlfwGfxDevice::setWindowIcon(const char *windowIconFilename)
+{
+	ITextureLoader *image = ITextureLoader::createFromFile(windowIconFilename);
+	GLFWimage glfwImage;
+	glfwImage.width = image->width();
+	glfwImage.height = image->height();
+	glfwImage.pixels = const_cast<unsigned char *>(image->pixels());
+
+	glfwSetWindowIcon(windowHandle_, 1, &glfwImage);
+	delete image;
 }
 
 ///////////////////////////////////////////////////////////

@@ -4,6 +4,7 @@
 
 #include "SdlGfxDevice.h"
 #include "ServiceLocator.h"
+#include "ITextureLoader.h"
 
 namespace ncine {
 
@@ -63,6 +64,20 @@ void SdlGfxDevice::toggleFullScreen()
 
 	int flags = isFullScreen_ ? SDL_WINDOW_FULLSCREEN : 0;
 	SDL_SetWindowFullscreen(windowHandle_, flags);
+}
+
+void SdlGfxDevice::setWindowIcon(const char *windowIconFilename)
+{
+	ITextureLoader *image = ITextureLoader::createFromFile(windowIconFilename);
+	Uint32 pixelFormat = (image->bpp() == 4) ? SDL_PIXELFORMAT_ABGR8888 : SDL_PIXELFORMAT_BGR888;
+
+	SDL_Surface *surface = NULL;
+	int pitch = image->width() * image->bpp();
+	void *pixels = reinterpret_cast<void *>(const_cast<GLubyte *>(image->pixels()));
+	surface = SDL_CreateRGBSurfaceWithFormatFrom(pixels, image->width(), image->height(), image->bpp() * 8, pitch, pixelFormat);
+	SDL_SetWindowIcon(windowHandle_, surface);
+	SDL_FreeSurface(surface);
+	delete image;
 }
 
 ///////////////////////////////////////////////////////////
