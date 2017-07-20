@@ -533,7 +533,12 @@ bool AndroidInputManager::processMouseKeyEvent(const AInputEvent *event)
 void AndroidInputManager::initAccelerometerSensor(android_app *state)
 {
 	// Prepare to monitor accelerometer
+#if __ANDROID_API__ >= 26
+	nc::AndroidApplication &application = static_cast<nc::AndroidApplication &>(nc::theApplication());
+	sensorManager_ = ASensorManager_getInstanceForPackage(application.packageName().data());
+#else
 	sensorManager_ = ASensorManager_getInstance();
+#endif
 	accelerometerSensor_ = ASensorManager_getDefaultSensor(sensorManager_, ASENSOR_TYPE_ACCELEROMETER);
 	sensorEventQueue_ = ASensorManager_createEventQueue(sensorManager_, state->looper, LOOPER_ID_USER, NULL, NULL);
 

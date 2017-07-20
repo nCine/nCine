@@ -4,10 +4,10 @@
 #include "StandardFile.h"
 
 #ifdef __ANDROID__
-	#include "AssetFile.h"
-	#include <unistd.h> // for getpid()
 	#include <sys/stat.h> // for mkdir()
 	#include <errno.h> // for EEXIST
+	#include "AndroidApplication.h"
+	#include "AssetFile.h"
 	#include "ServiceLocator.h"
 #endif
 
@@ -105,26 +105,16 @@ const String &IFile::savePath()
 void IFile::initSavePath()
 {
 #ifdef __ANDROID__
-	int pid = getpid();
-	String procFileName(MaxFilenameLength);
-	procFileName.format("/proc/%d/cmdline", pid);
+	nc::AndroidApplication &application = static_cast<nc::AndroidApplication &>(nc::theApplication());
 
-	FILE *procFile = fopen(procFileName.data(), "r");
-	if (procFile)
+	// Creating the path "/data/data/PACKAGE_NAME/files/"
+	savePath_.format("/data/data/%s/files/", application.packageName().data());
+
+	// Trying to create the data directory
+	if (mkdir(savePath_.data(), 0770) && errno != EEXIST)
 	{
-		const int processNameLength = 64;
-		char processName[processNameLength];
-		// Creating the path "/data/data/PACKAGE_NAME/files/"
-		fread(processName, processNameLength, 1, procFile);
-		savePath_.format("/data/data/%s/files/", processName);
-		fclose(procFile);
-
-		// Trying to create the data directory
-		if (mkdir(savePath_.data(), 0770) && errno != EEXIST)
-		{
-			LOGE_X("Cannot create directory: %s", savePath_.data());
-			savePath_.clear();
-		}
+		LOGE_X("Cannot create directory: %s", savePath_.data());
+		savePath_.clear();
 	}
 #elif _WIN32
 	char *userProfileEnv = getenv("USERPROFILE");

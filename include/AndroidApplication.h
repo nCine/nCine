@@ -26,8 +26,12 @@ class DLL_PUBLIC AndroidApplication : public Application
 	/// Returns true if the application has already called `init()`
 	inline bool isInitialized() const { return isInitialized_; }
 
+	/// Returns the application package name
+	inline const String &packageName() const { return packageName_; }
+
   private:
 	bool isInitialized_;
+	String packageName_;
 
 	struct android_app *state_;
 	IAppEventHandler *(*createAppEventHandler_)();
@@ -39,8 +43,11 @@ class DLL_PUBLIC AndroidApplication : public Application
 
 	void setFocus(bool hasFocus);
 
+	/// Retrieves package name accessing the `/proc` fs
+	void retrievePackageName();
+
 	/// Private constructor
-	AndroidApplication() : Application(),  isInitialized_(false), state_(NULL), createAppEventHandler_(NULL) { }
+	AndroidApplication() : Application(),  isInitialized_(false), packageName_(128), state_(NULL), createAppEventHandler_(NULL) { }
 	/// Private destructor
 	~AndroidApplication() { }
 	/// Private copy constructor
