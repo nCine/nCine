@@ -68,11 +68,15 @@ class GlfwKeyboardState : public KeyboardState
 };
 
 /// Information about GLFW joystick state
-class GlfwJoystickState
+class GlfwJoystickState : public JoystickState
 {
   public:
 	GlfwJoystickState()
 		: numButtons_(0), numAxes_(0), buttons_(NULL), axesValues_(NULL) { }
+
+	bool isButtonPressed(int buttonId) const;
+	short int axisValue(int axisId) const;
+	float axisNormValue(int axisId) const;
 
   private:
 	int numButtons_;
@@ -100,16 +104,15 @@ class GlfwInputManager : public IInputManager
 
 	bool isJoyPresent(int joyId) const;
 	const char *joyName(int joyId) const;
+	const char *joyGuid(int joyId) const;
 	int joyNumButtons(int joyId) const;
 	int joyNumAxes(int joyId) const;
-	bool isJoyButtonPressed(int joyId, int buttonId) const;
-	short int joyAxisValue(int joyId, int axisId) const;
-	float joyAxisNormValue(int joyId, int axisId) const;
+	const JoystickState &joystickState(int joyId) const;
 
 	void setMouseCursorMode(MouseCursorMode mode);
 
   private:
-	static const unsigned int MaxNumJoysticks = GLFW_JOYSTICK_LAST - GLFW_JOYSTICK_1 + 1;
+	static const int MaxNumJoysticks = GLFW_JOYSTICK_LAST - GLFW_JOYSTICK_1 + 1;
 
 	class JoystickEventsSimulator
 	{
@@ -137,6 +140,7 @@ class GlfwInputManager : public IInputManager
 	static GlfwScrollEvent scrollEvent_;
 	static GlfwKeyboardState keyboardState_;
 	static KeyboardEvent keyboardEvent_;
+	static GlfwJoystickState nullJoystickState_;
 	static StaticArray<GlfwJoystickState, MaxNumJoysticks> joystickStates_;
 	static JoyButtonEvent joyButtonEvent_;
 	static JoyAxisEvent joyAxisEvent_;

@@ -5,7 +5,6 @@
 #include "Timer.h"
 #include "IFile.h" // for dataPath()
 #include "apptest_datapath.h"
-#include "apptest_joymapping.h"
 
 #ifdef __ANDROID__
 	#include "AndroidApplication.h"
@@ -160,16 +159,16 @@ void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 	}
 }
 
-void MyEventHandler::onJoyAxisMoved(const nc::JoyAxisEvent &event)
+void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 {
-	if (isAxis(event, AXIS_LX)) { joyVectorLeft_.x = normValue(event, AXIS_LX); }
-	else if (isAxis(event, AXIS_LY)) { joyVectorLeft_.y = -normValue(event, AXIS_LY); }
+	if (event.axisName == nc::AXIS_LX) { joyVectorLeft_.x = event.value; }
+	else if (event.axisName == nc::AXIS_LY) { joyVectorLeft_.y = -event.value; }
 
-	if (isAxis(event, AXIS_RX)) { joyVectorRight_.x = normValue(event, AXIS_RX); }
-	else if (isAxis(event, AXIS_RY)) { joyVectorRight_.y = -normValue(event, AXIS_RY); }
+	if (event.axisName == nc::AXIS_RX) { joyVectorRight_.x = event.value; }
+	else if (event.axisName == nc::AXIS_RY) { joyVectorRight_.y = -event.value; }
 
-	deadZoneNormalize(joyVectorLeft_, LeftStickDeadZone);
-	deadZoneNormalize(joyVectorRight_, RightStickDeadZone);
+	nc::theApplication().inputManager().deadZoneNormalize(joyVectorLeft_, nc::IInputManager::LeftStickDeadZone);
+	nc::theApplication().inputManager().deadZoneNormalize(joyVectorRight_, nc::IInputManager::RightStickDeadZone);
 }
 
 void MyEventHandler::onJoyDisconnected(const nc::JoyConnectionEvent &event)

@@ -80,28 +80,34 @@ class AndroidMouseEvent : public MouseEvent
 };
 
 /// Information about Android joystick state
-class AndroidJoystickState
+class AndroidJoystickState : JoystickState
 {
   public:
 	AndroidJoystickState();
 
+	bool isButtonPressed(int buttonId) const;
+	short int axisValue(int axisId) const;
+	float axisNormValue(int axisId) const;
+
   private:
 	static const unsigned int MaxNameLength = 256;
-	static const int MaxButtons = 10;
+	/// All AKEYCODE_BUTTON_* plus AKEYCODE_BACK
+	static const int MaxButtons = AKEYCODE_ESCAPE - AKEYCODE_BUTTON_A + 1;
 	static const int MaxAxes = 10;
-	static const int NumAxesToMap = 10;
+	static const int NumAxesToMap = 8;
 	static const int AxesToMap[NumAxesToMap];
 
 	int deviceId_;
+	char guid_[33];
 	char name_[MaxNameLength];
 
 	int numButtons_;
 	int numAxes_;
 	bool hasDPad_;
-	short int buttonsMapping_[AKEYCODE_ESCAPE - AKEYCODE_BUTTON_A];
+	short int buttonsMapping_[MaxButtons];
 	short int axesMapping_[MaxAxes];
 	bool buttons_[MaxButtons];
-	float axisValues_[MaxAxes];
+	float axesValues_[MaxAxes];
 
 	friend class AndroidInputManager;
 };
@@ -130,16 +136,15 @@ class AndroidInputManager : public IInputManager
 
 	bool isJoyPresent(int joyId) const;
 	const char *joyName(int joyId) const;
+	const char *joyGuid(int joyId) const;
 	int joyNumButtons(int joyId) const;
 	int joyNumAxes(int joyId) const;
-	bool isJoyButtonPressed(int joyId, int buttonId) const;
-	short int joyAxisValue(int joyId, int axisId) const;
-	float joyAxisNormValue(int joyId, int axisId) const;
+	const JoystickState &joystickState(int joyId) const;
 
 	void setMouseCursorMode(MouseCursorMode mode) { mouseCursorMode_ = mode; }
 
   private:
-	static const unsigned int MaxNumJoysticks = 4;
+	static const int MaxNumJoysticks = 4;
 
 	static ASensorManager *sensorManager_;
 	static const ASensor *accelerometerSensor_;
@@ -156,6 +161,7 @@ class AndroidInputManager : public IInputManager
 	/// Back and forward key events triggered by the mouse are simulated as right and middle button
 	static int simulatedMouseButtonState_;
 
+	static AndroidJoystickState nullJoystickState_;
 	static AndroidJoystickState joystickStates_[MaxNumJoysticks];
 	static JoyButtonEvent joyButtonEvent_;
 	static JoyAxisEvent joyAxisEvent_;

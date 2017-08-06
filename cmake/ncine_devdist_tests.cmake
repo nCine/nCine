@@ -54,7 +54,7 @@ list(APPEND APPTESTS apptest_texformats apptest_joystick apptest_rotozoom apptes
 	apptest_audio apptest_particles apptest_scene apptest_font apptest_multitouch)
 
 foreach(APPTEST ${APPTESTS})
-	add_executable(${APPTEST} ${NCINE_MAIN_CPP} ${APPTEST}.cpp apptest_datapath.h apptest_joymapping.h)
+	add_executable(${APPTEST} ${NCINE_MAIN_CPP} ${APPTEST}.cpp apptest_datapath.h)
 	target_include_directories(${APPTEST} PUBLIC ${NCINE_INCLUDE_DIR})
 	target_compile_definitions(${APPTEST} PRIVATE "NCINE_TESTS_DATA_DIR=\"${NCINE_TESTS_DATA_DIR}\"")
 	target_link_libraries(${APPTEST} ${NCINE_LIBRARY})

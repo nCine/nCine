@@ -82,6 +82,8 @@ LOCAL_SRC_FILES := \
 	$(SRC)/FontGlyph.cpp \
 	$(SRC)/IFile.cpp \
 	$(SRC)/StandardFile.cpp \
+	$(SRC)/IInputManager.cpp \
+	$(SRC)/JoyMapping.cpp \
 	$(SRC)/android/AssetFile.cpp \
 	$(SRC)/android/AndroidJniHelper.cpp \
 	$(SRC)/android/AndroidInputManager.cpp \

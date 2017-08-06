@@ -5,7 +5,6 @@
 #include "AnimatedSprite.h"
 #include "IFile.h" // for dataPath()
 #include "apptest_datapath.h"
-#include "apptest_joymapping.h"
 
 namespace {
 
@@ -90,7 +89,7 @@ void MyEventHandler::onFrameStart()
 		destVector_ = animSprite_->position() + reachVector;
 	}
 
-	if (joyVector_.length() > LeftStickDeadZone)
+	if (joyVector_.length() > nc::IInputManager::LeftStickDeadZone)
 	{
 		reachVector = joyVector_.normalized() * 2.0;
 		destVector_ = animSprite_->position() + reachVector;
@@ -164,15 +163,15 @@ void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 	}
 }
 
-void MyEventHandler::onJoyAxisMoved(const nc::JoyAxisEvent &event)
+void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 {
-	if (isAxis(event, AXIS_LX))
+	if (event.axisName == nc::AXIS_LX)
 	{
-		joyVector_.x = normValue(event, AXIS_LX);
+		joyVector_.x = event.value;
 	}
-	else if (isAxis(event, AXIS_LY))
+	else if (event.axisName == nc::AXIS_LY)
 	{
-		joyVector_.y = -normValue(event, AXIS_LY);
+		joyVector_.y = -event.value;
 	}
 }
 

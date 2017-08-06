@@ -19,6 +19,7 @@ set(HEADERS
 	include/DrawableNode.h
 	include/IAppEventHandler.h
 	include/IInputEventHandler.h
+	include/InputEvents.h
 	include/IInputManager.h
 	include/Keys.h
 	include/Vector2.h

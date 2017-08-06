@@ -7,7 +7,6 @@
 #include "IGfxCapabilities.h"
 #include "IFile.h" // for dataPath()
 #include "apptest_datapath.h"
-#include "apptest_joymapping.h"
 
 #ifndef __ANDROID__
 	#define WITH_PNG_FORMAT (1)
@@ -318,11 +317,11 @@ void MyEventHandler::handleCoordInput(float x, float y)
 	}
 }
 
-void MyEventHandler::onJoyAxisMoved(const nc::JoyAxisEvent &event)
+void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 {
-	if (isAxis(event, AXIS_LX))
+	if (event.axisName == nc::AXIS_LX)
 	{
-		float x = normValue(event, AXIS_LX);
+		float x = event.value;
 		if (x > PressedAxisThreshold && axesLeftStickPressed[0] == false)
 		{
 			handleInput(RIGHT);
@@ -342,9 +341,9 @@ void MyEventHandler::onJoyAxisMoved(const nc::JoyAxisEvent &event)
 			axesLeftStickPressed[1] = false;
 		}
 	}
-	else if (isAxis(event, AXIS_LY))
+	else if (event.axisName == nc::AXIS_LY)
 	{
-		float y = -normValue(event, AXIS_LY);
+		float y = -event.value;
 		if (y > PressedAxisThreshold && axesLeftStickPressed[2] == false)
 		{
 			handleInput(UP);

@@ -4,6 +4,7 @@
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_mouse.h>
 #include "IInputManager.h"
+#include "StaticArray.h"
 
 namespace ncine {
 
@@ -77,6 +78,22 @@ class SdlKeyboardState : public KeyboardState
 	const unsigned char *keyState_;
 };
 
+/// Information about SDL joystick state
+class SdlJoystickState : public JoystickState
+{
+  public:
+	SdlJoystickState() : sdlJoystick_(NULL) { }
+
+	bool isButtonPressed(int buttonId) const;
+	short int axisValue(int axisId) const;
+	float axisNormValue(int axisId) const;
+
+  private:
+	SDL_Joystick *sdlJoystick_;
+
+	friend class SdlInputManager;
+};
+
 /// The class for parsing and dispatching SDL input events
 class SdlInputManager : public IInputManager
 {
@@ -98,16 +115,17 @@ class SdlInputManager : public IInputManager
 
 	bool isJoyPresent(int joyId) const;
 	const char *joyName(int joyId) const;
+	const char *joyGuid(int joyId) const;
 	int joyNumButtons(int joyId) const;
 	int joyNumAxes(int joyId) const;
-	bool isJoyButtonPressed(int joyId, int buttonId) const;
-	short int joyAxisValue(int joyId, int axisId) const;
-	float joyAxisNormValue(int joyId, int axisId) const;
+	const JoystickState &joystickState(int joyId) const;
 
 	void setMouseCursorMode(MouseCursorMode mode);
 
+	static short int hatEnumToAxisValue(unsigned char hatState, bool upDownAxis);
+
   private:
-	static const unsigned int MaxNumJoysticks = 16;
+	static const int MaxNumJoysticks = 16;
 
 	static SdlMouseState mouseState_;
 	static SdlMouseEvent mouseEvent_;
@@ -116,17 +134,20 @@ class SdlInputManager : public IInputManager
 	static KeyboardEvent keyboardEvent_;
 
 	static SDL_Joystick *sdlJoysticks_[MaxNumJoysticks];
+	static StaticArray<SdlJoystickState, MaxNumJoysticks> joystickStates_;
 	static JoyButtonEvent joyButtonEvent_;
 	static JoyAxisEvent joyAxisEvent_;
 	static JoyConnectionEvent joyConnectionEvent_;
+
+	static char joyGuidString_[33];
 
 	/// Private copy constructor
 	SdlInputManager(const SdlInputManager &);
 	/// Private assignment operator
 	SdlInputManager &operator=(const SdlInputManager &);
 
-	static short int hatEnumToAxisValue(unsigned char hatState, bool upDownAxis);
 	static void handleJoyDeviceEvent(const SDL_Event &event);
+	static int joyInstanceIdToDeviceIndex(SDL_JoystickID instanceId);
 };
 
 }

@@ -6,6 +6,7 @@
 #include "ServiceLocator.h"
 #include "FileLogger.h"
 #include "Application.h"
+#include "JoyMapping.h"
 
 namespace ncine {
 
@@ -13,18 +14,21 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-IInputEventHandler *IInputManager::inputEventHandler_ = NULL;
-IInputManager::MouseCursorMode IInputManager::mouseCursorMode_ = IInputManager::MOUSE_CURSOR_NORMAL;
+const int IInputManager::MaxNumJoysticks = 16;
+
 SdlMouseState SdlInputManager::mouseState_;
 SdlMouseEvent SdlInputManager::mouseEvent_;
 SdlScrollEvent SdlInputManager::scrollEvent_;
 SdlKeyboardState SdlInputManager::keyboardState_;
 KeyboardEvent SdlInputManager::keyboardEvent_;
-short int IInputManager::MaxAxisValue = 32767;
+
 SDL_Joystick *SdlInputManager::sdlJoysticks_[MaxNumJoysticks];
+StaticArray<SdlJoystickState, SdlInputManager::MaxNumJoysticks> SdlInputManager::joystickStates_;
 JoyButtonEvent SdlInputManager::joyButtonEvent_;
 JoyAxisEvent SdlInputManager::joyAxisEvent_;
 JoyConnectionEvent SdlInputManager::joyConnectionEvent_;
+
+char SdlInputManager::joyGuidString_[33];
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -57,6 +61,8 @@ SdlInputManager::SdlInputManager()
 			       i, SDL_JoystickName(sdlJoy), SDL_JoystickNumHats(sdlJoy), SDL_JoystickNumAxes(sdlJoy), SDL_JoystickNumButtons(sdlJoy), SDL_JoystickNumBalls(sdlJoy));
 		}
 	}
+
+	joyMapping_.init(this);
 }
 
 SdlInputManager::~SdlInputManager()
@@ -76,6 +82,47 @@ SdlInputManager::~SdlInputManager()
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+bool SdlJoystickState::isButtonPressed(int buttonId) const
+{
+	bool isPressed = false;
+	if (sdlJoystick_ != NULL)
+	{
+		isPressed = SDL_JoystickGetButton(sdlJoystick_, buttonId) != 0;
+	}
+	return isPressed;
+}
+
+short int SdlJoystickState::axisValue(int axisId) const
+{
+	if (sdlJoystick_ == NULL) { return 0; }
+
+	short int axisValue = 0;
+
+	int numAxes = SDL_JoystickNumAxes(sdlJoystick_);
+	if (axisId < numAxes) // axisId is an analog axis
+	{
+		axisValue = SDL_JoystickGetAxis(sdlJoystick_, axisId);
+	}
+	else // axisId is a digital d-pad
+	{
+		int hatId = (axisId - numAxes) / 2;
+		unsigned char hatState = SDL_JoystickGetHat(sdlJoystick_, hatId);
+		bool upDownAxis = ((axisId - numAxes) % 2) != 0; // odd axis is left-right, even axis is down-up
+
+		axisValue = SdlInputManager::hatEnumToAxisValue(hatState, upDownAxis);
+	}
+
+	return axisValue;
+}
+
+float SdlJoystickState::axisNormValue(int axisId) const
+{
+	// If the joystick is not present the returned value is zero
+	float value = axisValue(axisId) / float(IInputManager::MaxAxisValue);
+
+	return value;
+}
 
 void SdlInputManager::parseEvent(const SDL_Event &event)
 {
@@ -124,18 +171,18 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 			break;
 		case SDL_JOYBUTTONDOWN:
 		case SDL_JOYBUTTONUP:
-			joyButtonEvent_.joyId = event.jbutton.which;
+			joyButtonEvent_.joyId = joyInstanceIdToDeviceIndex(event.jbutton.which);
 			joyButtonEvent_.buttonId = event.jbutton.button;
 			break;
 		case SDL_JOYAXISMOTION:
-			joyAxisEvent_.joyId = event.jaxis.which;
+			joyAxisEvent_.joyId = joyInstanceIdToDeviceIndex(event.jaxis.which);
 			joyAxisEvent_.axisId = event.jaxis.axis;
 			joyAxisEvent_.value = event.jaxis.value;
 			joyAxisEvent_.normValue = joyAxisEvent_.value / float(MaxAxisValue);
 			break;
 		case SDL_JOYHATMOTION:
-			joyAxisEvent_.joyId = event.jhat.which;
-			joyAxisEvent_.axisId = SDL_JoystickNumAxes(sdlJoysticks_[event.jhat.which]) + event.jhat.hat;
+			joyAxisEvent_.joyId = joyInstanceIdToDeviceIndex(event.jhat.which);
+			joyAxisEvent_.axisId = SDL_JoystickNumAxes(sdlJoysticks_[joyAxisEvent_.joyId]) + event.jhat.hat;
 			break;
 		default:
 			break;
@@ -163,12 +210,15 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 			inputEventHandler_->onScrollInput(scrollEvent_);
 			break;
 		case SDL_JOYBUTTONDOWN:
+			joyMapping_.onJoyButtonPressed(joyButtonEvent_);
 			inputEventHandler_->onJoyButtonPressed(joyButtonEvent_);
 			break;
 		case SDL_JOYBUTTONUP:
+			joyMapping_.onJoyButtonReleased(joyButtonEvent_);
 			inputEventHandler_->onJoyButtonReleased(joyButtonEvent_);
 			break;
 		case SDL_JOYAXISMOTION:
+			joyMapping_.onJoyAxisMoved(joyAxisEvent_);
 			inputEventHandler_->onJoyAxisMoved(joyAxisEvent_);
 			break;
 		case SDL_JOYHATMOTION:
@@ -212,6 +262,20 @@ const char *SdlInputManager::joyName(int joyId) const
 	}
 }
 
+const char *SdlInputManager::joyGuid(int joyId) const
+{
+	if (isJoyPresent(joyId))
+	{
+		SDL_JoystickGUID joystickGuid = SDL_JoystickGetGUID(sdlJoysticks_[joyId]);
+		SDL_JoystickGetGUIDString(joystickGuid, joyGuidString_, 33);
+		return joyGuidString_;
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
 int SdlInputManager::joyNumButtons(int joyId) const
 {
 	int numButtons = -1;
@@ -236,48 +300,16 @@ int SdlInputManager::joyNumAxes(int joyId) const
 	return numAxes;
 }
 
-bool SdlInputManager::isJoyButtonPressed(int joyId, int buttonId) const
+const JoystickState &SdlInputManager::joystickState(int joyId) const
 {
-	if (isJoyPresent(joyId))
-	{
-		return SDL_JoystickGetButton(sdlJoysticks_[joyId], buttonId) != 0;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-short int SdlInputManager::joyAxisValue(int joyId, int axisId) const
-{
-	short int axisValue = 0;
+	joystickStates_[joyId].sdlJoystick_ = NULL;
 
 	if (isJoyPresent(joyId))
 	{
-		int numAxes = SDL_JoystickNumAxes(sdlJoysticks_[joyId]);
-		if (axisId < numAxes) // axisId is an analog axis
-		{
-			axisValue = SDL_JoystickGetAxis(sdlJoysticks_[joyId], axisId);
-		}
-		else // axisId is a digital d-pad
-		{
-			int hatId = (axisId - numAxes) / 2;
-			unsigned char hatState = SDL_JoystickGetHat(sdlJoysticks_[joyId], hatId);
-			bool upDownAxis = ((axisId - numAxes) % 2) != 0; // odd axis is left-right, even axis is down-up
-
-			axisValue = hatEnumToAxisValue(hatState, upDownAxis);
-		}
+		joystickStates_[joyId].sdlJoystick_ = sdlJoysticks_[joyId];
 	}
 
-	return axisValue;
-}
-
-float SdlInputManager::joyAxisNormValue(int joyId, int axisId) const
-{
-	// If the joystick is not present the returned value is zero
-	float axisValue = joyAxisValue(joyId, axisId) / float(MaxAxisValue);
-
-	return axisValue;
+	return joystickStates_[joyId];
 }
 
 void SdlInputManager::setMouseCursorMode(MouseCursorMode mode)
@@ -338,29 +370,24 @@ void SdlInputManager::handleJoyDeviceEvent(const SDL_Event &event)
 		sdlJoysticks_[deviceIndex] = SDL_JoystickOpen(deviceIndex);
 
 		SDL_Joystick *joy = sdlJoysticks_[deviceIndex];
-		LOGI_X("Joystick %d \"%s\" has been connected - %d hats, %d axes, %d buttons, %d balls",
-		       deviceIndex, SDL_JoystickName(joy), SDL_JoystickNumHats(joy), SDL_JoystickNumAxes(joy), SDL_JoystickNumButtons(joy), SDL_JoystickNumBalls(joy));
+		SDL_JoystickGUID joystickGuid = SDL_JoystickGetGUID(joy);
+		SDL_JoystickGetGUIDString(joystickGuid, joyGuidString_, 33);
+		LOGI_X("Joystick %d \"%s\" (%s) has been connected - %d hats, %d axes, %d buttons, %d balls",
+		       deviceIndex, SDL_JoystickName(joy), joyGuidString_, SDL_JoystickNumHats(joy), SDL_JoystickNumAxes(joy), SDL_JoystickNumButtons(joy), SDL_JoystickNumBalls(joy));
+		joyMapping_.onJoyConnected(joyConnectionEvent_);
 		inputEventHandler_->onJoyConnected(joyConnectionEvent_);
 	}
 	else if (event.type == SDL_JOYDEVICEREMOVED)
 	{
-		int instanceId = event.jdevice.which;
-		int deviceIndex = MaxNumJoysticks;
-		for (unsigned int i = 0; i < MaxNumJoysticks; i++)
-		{
-			int id = SDL_JoystickInstanceID(sdlJoysticks_[i]);
-			if (instanceId == id)
-			{
-				joyConnectionEvent_.joyId = i;
-				SDL_JoystickClose(sdlJoysticks_[i]);
-				sdlJoysticks_[i] = NULL;
-				deviceIndex = i;
-				break;
-			}
-		}
+		int deviceIndex = joyInstanceIdToDeviceIndex(event.jdevice.which);
+		if (deviceIndex == -1) { return; }
+
+		joyConnectionEvent_.joyId = deviceIndex;
+		SDL_JoystickClose(sdlJoysticks_[deviceIndex]);
+		sdlJoysticks_[deviceIndex] = NULL;
 
 		// Compacting the array of SDL joystick pointers
-		for (unsigned int i = deviceIndex; i < MaxNumJoysticks - 1; i++)
+		for (int i = deviceIndex; i < MaxNumJoysticks - 1; i++)
 		{
 			sdlJoysticks_[i] = sdlJoysticks_[i+1];
 		}
@@ -368,7 +395,23 @@ void SdlInputManager::handleJoyDeviceEvent(const SDL_Event &event)
 
 		LOGI_X("Joystick %d has been disconnected", deviceIndex);
 		inputEventHandler_->onJoyDisconnected(joyConnectionEvent_);
+		joyMapping_.onJoyDisconnected(joyConnectionEvent_);
 	}
+}
+
+int SdlInputManager::joyInstanceIdToDeviceIndex(SDL_JoystickID instanceId)
+{
+	int deviceIndex = -1;
+	for (int i = 0; i < MaxNumJoysticks; i++)
+	{
+		SDL_JoystickID id = SDL_JoystickInstanceID(sdlJoysticks_[i]);
+		if (instanceId == id)
+		{
+			deviceIndex = i;
+			break;
+		}
+	}
+	return deviceIndex;
 }
 
 }

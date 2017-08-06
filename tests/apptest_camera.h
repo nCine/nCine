@@ -12,7 +12,6 @@ class AppConfiguration;
 class Texture;
 class Sprite;
 class SceneNode;
-
 class Font;
 class TextNode;
 class String;
@@ -44,8 +43,8 @@ class MyEventHandler
 	virtual void onMouseMoved(const nc::MouseState &state);
 	virtual void onScrollInput(const nc::ScrollEvent &event);
 
-	virtual void onJoyAxisMoved(const nc::JoyAxisEvent &event);
-	virtual void onJoyButtonReleased(const nc::JoyButtonEvent &event);
+	virtual void onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event);
+	virtual void onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event);
 	virtual void onJoyDisconnected(const nc::JoyConnectionEvent &event);
 
   private:
@@ -53,8 +52,8 @@ class MyEventHandler
 	static const unsigned int NumSprites = 500;
 	static const unsigned int NumTexts = 5;
 
-	float angle_;
 	bool pause_;
+	float angle_;
 	nc::Vector2f camPos_;
 	float camRot_;
 	float camScale_;

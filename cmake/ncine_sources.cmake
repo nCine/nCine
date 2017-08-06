@@ -11,6 +11,8 @@ set(SOURCES
 	src/FontGlyph.cpp
 	src/IFile.cpp
 	src/StandardFile.cpp
+	src/IInputManager.cpp
+	src/JoyMapping.cpp
 	src/graphics/IGfxDevice.cpp
 	src/graphics/GfxCapabilities.cpp
 	src/graphics/RenderResources.cpp

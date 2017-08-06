@@ -88,16 +88,20 @@ class AndroidJniClass_InputDevice : public AndroidJniClass
 		: AndroidJniClass(javaObject) { }
 	static AndroidJniClass_InputDevice getDevice(int deviceId);
 	static int getDeviceIds(int *destination, int maxSize);
-	void getName(char *destination, int maxStringSize);
-	AndroidJniClass_MotionRange getMotionRange(int axis);
-	int getSources();
-	void hasKeys(int *buttons, const int length, bool *bools);
+	void getName(char *destination, int maxStringSize) const;
+	int getProductId() const;
+	int getVendorId() const;
+	AndroidJniClass_MotionRange getMotionRange(int axis) const;
+	int getSources() const;
+	void hasKeys(const int *buttons, const int length, bool *bools) const;
 
   private:
 	static jclass javaClass_;
 	static jmethodID midGetDevice_;
 	static jmethodID midGetDeviceIds_;
 	static jmethodID midGetName_;
+	static jmethodID midGetVendorId_;
+	static jmethodID midGetProductId_;
 	static jmethodID midGetMotionRange_;
 	static jmethodID midGetSources_;
 	static jmethodID midHasKeys_;

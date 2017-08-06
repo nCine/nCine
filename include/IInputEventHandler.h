@@ -45,6 +45,14 @@ class DLL_PUBLIC IInputEventHandler
 	inline virtual void onJoyButtonReleased(const JoyButtonEvent &event) { }
 	/// Callback function called every time a joystick axis is moved
 	inline virtual void onJoyAxisMoved(const JoyAxisEvent &event) { }
+
+	/// Callback function called every time a button of a joystick with mapping is pressed
+	inline virtual void onJoyMappedButtonPressed(const JoyMappedButtonEvent &event) { }
+	/// Callback function called every time a button of a joystick with mapping is released
+	inline virtual void onJoyMappedButtonReleased(const JoyMappedButtonEvent &event) { }
+	/// Callback function called every time an axis of a joystick with mapping is moved
+	inline virtual void onJoyMappedAxisMoved(const JoyMappedAxisEvent &event) { }
+
 	/// Callback function called every time a joystick is connected
 	inline virtual void onJoyConnected(const JoyConnectionEvent &event) { }
 	/// Callback function called every time a joystick is disconnected

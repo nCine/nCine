@@ -7,7 +7,6 @@
 #include "Timer.h"
 #include "IFile.h" // for dataPath()
 #include "apptest_datapath.h"
-#include "apptest_joymapping.h"
 
 namespace {
 
@@ -160,12 +159,12 @@ void MyEventHandler::onFrameStart()
 		camScale_ -= ScaleSpeed * interval;
 	}
 
-	if (joyVectorLeft_.length() > LeftStickDeadZone)
+	if (joyVectorLeft_.length() > nc::IInputManager::LeftStickDeadZone)
 	{
 		camPos_.x -= joyVectorLeft_.x * MoveSpeed * interval;
 		camPos_.y -= joyVectorLeft_.y * MoveSpeed * interval;
 	}
-	if (joyVectorRight_.length() > LeftStickDeadZone)
+	if (joyVectorRight_.length() > nc::IInputManager::LeftStickDeadZone)
 	{
 		camRot_ += joyVectorRight_.x * RotateSpeed * interval;
 		camScale_ += joyVectorRight_.y * ScaleSpeed * interval;
@@ -363,18 +362,18 @@ void MyEventHandler::onScrollInput(const nc::ScrollEvent &event)
 	camScale_ += 0.1f * event.y;
 }
 
-void MyEventHandler::onJoyAxisMoved(const nc::JoyAxisEvent &event)
+void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 {
-	if (isAxis(event, AXIS_LX))	{ joyVectorLeft_.x = normValue(event, AXIS_LX);	}
-	else if (isAxis(event, AXIS_LY)) { joyVectorLeft_.y = -normValue(event, AXIS_LY); }
+	if (event.axisName == nc::AXIS_LX)	{ joyVectorLeft_.x = event.value; }
+	else if (event.axisName == nc::AXIS_LY) { joyVectorLeft_.y = -event.value; }
 
-	if (isAxis(event, AXIS_RX))	{ joyVectorRight_.x = normValue(event, AXIS_RX);	}
-	else if (isAxis(event, AXIS_RY)) { joyVectorRight_.y = -normValue(event, AXIS_RY); }
+	if (event.axisName == nc::AXIS_RX)	{ joyVectorRight_.x = event.value; }
+	else if (event.axisName == nc::AXIS_RY) { joyVectorRight_.y = -event.value; }
 }
 
-void MyEventHandler::onJoyButtonReleased(const nc::JoyButtonEvent &event)
+void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event)
 {
-	if (isButton(event, BUTTON_B))
+	if (event.buttonName == nc::BUTTON_B)
 	{
 		resetCamera();
 	}

@@ -13,6 +13,7 @@
 #include "TextNode.h"
 #include "ncString.h"
 #include "IInputManager.h"
+#include "JoyMapping.h"
 
 #ifdef WITH_AUDIO
 	#include "ALAudioDevice.h"

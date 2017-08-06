@@ -4,6 +4,7 @@ set(PRIVATE_HEADERS
 	src/include/FrameTimer.h
 	src/include/StandardFile.h
 	src/include/FileLogger.h
+	src/include/JoyMapping.h
 	src/include/FontGlyph.h
 	src/include/ProfileVariable.h
 	src/include/PlottingVariable.h

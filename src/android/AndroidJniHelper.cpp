@@ -18,6 +18,8 @@ jclass AndroidJniClass_InputDevice::javaClass_ = NULL;
 jmethodID AndroidJniClass_InputDevice::midGetDevice_ = NULL;
 jmethodID AndroidJniClass_InputDevice::midGetDeviceIds_ = NULL;
 jmethodID AndroidJniClass_InputDevice::midGetName_ = NULL;
+jmethodID AndroidJniClass_InputDevice::midGetProductId_ = NULL;
+jmethodID AndroidJniClass_InputDevice::midGetVendorId_ = NULL;
 jmethodID AndroidJniClass_InputDevice::midGetMotionRange_ = NULL;
 jmethodID AndroidJniClass_InputDevice::midGetSources_ = NULL;
 jmethodID AndroidJniClass_InputDevice::midHasKeys_ = NULL;
@@ -151,6 +153,18 @@ void AndroidJniClass_InputDevice::init()
 				LOGE("Cannot find method getName()");
 			}
 
+			midGetProductId_ = jniEnv_->GetMethodID(javaClass_, "getProductId", "()I");
+			if (midGetProductId_ == NULL)
+			{
+				LOGE("Cannot find method getProductId()");
+			}
+
+			midGetVendorId_ = jniEnv_->GetMethodID(javaClass_, "getVendorId", "()I");
+			if (midGetVendorId_ == NULL)
+			{
+				LOGE("Cannot find method getVendorId()");
+			}
+
 			midGetMotionRange_ = jniEnv_->GetMethodID(javaClass_, "getMotionRange", "(I)Landroid/view/InputDevice$MotionRange;");
 			if (midGetMotionRange_ == NULL)
 			{
@@ -194,7 +208,7 @@ int AndroidJniClass_InputDevice::getDeviceIds(int *destination, int maxSize)
 	return int(length);
 }
 
-void AndroidJniClass_InputDevice::getName(char *destination, int maxStringSize)
+void AndroidJniClass_InputDevice::getName(char *destination, int maxStringSize) const
 {
 	jstring strDeviceName = (jstring)jniEnv_->CallObjectMethod(javaObject_, midGetName_);
 	if (strDeviceName)
@@ -211,19 +225,43 @@ void AndroidJniClass_InputDevice::getName(char *destination, int maxStringSize)
 	}
 }
 
-AndroidJniClass_MotionRange AndroidJniClass_InputDevice::getMotionRange(int axis)
+int AndroidJniClass_InputDevice::getProductId() const
+{
+	// Early-out if SDK version requirements are not met
+	if (AndroidJniHelper::sdkVersion() < 19 || __ANDROID_API__ < 19)
+	{
+		return 0;
+	}
+
+	jint productId = jniEnv_->CallIntMethod(javaObject_, midGetProductId_);
+	return int(productId);
+}
+
+int AndroidJniClass_InputDevice::getVendorId() const
+{
+	// Early-out if SDK version requirements are not met
+	if (AndroidJniHelper::sdkVersion() < 19 || __ANDROID_API__ < 19)
+	{
+		return 0;
+	}
+
+	jint vendorID = jniEnv_->CallIntMethod(javaObject_, midGetVendorId_);
+	return int(vendorID);
+}
+
+AndroidJniClass_MotionRange AndroidJniClass_InputDevice::getMotionRange(int axis) const
 {
 	jobject objMotionRange = jniEnv_->CallObjectMethod(javaObject_, midGetMotionRange_, axis);
 	return AndroidJniClass_MotionRange(objMotionRange);
 }
 
-int AndroidJniClass_InputDevice::getSources()
+int AndroidJniClass_InputDevice::getSources() const
 {
 	jint sources = jniEnv_->CallIntMethod(javaObject_, midGetSources_);
 	return int(sources);
 }
 
-void AndroidJniClass_InputDevice::hasKeys(int *buttons, const int length, bool *bools)
+void AndroidJniClass_InputDevice::hasKeys(const int *buttons, const int length, bool *bools) const
 {
 	// Early-out if SDK version requirements are not met
 	if (AndroidJniHelper::sdkVersion() < 19 || __ANDROID_API__ < 19)

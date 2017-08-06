@@ -10,6 +10,7 @@ namespace ncine {
 class AppConfiguration;
 class String;
 class Texture;
+class SceneNode;
 class Sprite;
 class Font;
 class TextNode;
@@ -32,16 +33,17 @@ class MyEventHandler
 	virtual void onKeyReleased(const nc::KeyboardEvent &event);
 
   private:
-	static const int MaxNumJoysticks = 4;
-	static const int MaxNumAxes = 16;
+	static const unsigned int MaxNumAxes = 16;
 	nc::StaticArray<float, MaxNumAxes> axisValues_;
-	static const int MaxNumButtons = 16;
+	static const unsigned int MaxNumButtons = 20;
 	nc::StaticArray<unsigned char, MaxNumButtons> buttonStates_;
-	static const int MaxNumChars = 256;
+	static const unsigned int MaxNumChars = 384;
 	nc::String *joyString_;
 
 	nc::Texture *texture_;
-	nc::StaticArray<nc::Sprite *, 2> sprites_;
+	nc::SceneNode *joyNode_;
+	static const unsigned int NumSprites = 13;
+	nc::StaticArray<nc::Sprite *, NumSprites> sprites_;
 	nc::Font *font_;
 	nc::TextNode *textNode_;
 };

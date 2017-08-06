@@ -35,7 +35,7 @@ class MyEventHandler
 	virtual void onKeyReleased(const nc::KeyboardEvent &event);
 	virtual void onMouseButtonReleased(const nc::MouseEvent &event);
 
-	virtual void onJoyAxisMoved(const nc::JoyAxisEvent &event);
+	virtual void onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event);
 	virtual void onJoyDisconnected(const nc::JoyConnectionEvent &event);
 
   private:
