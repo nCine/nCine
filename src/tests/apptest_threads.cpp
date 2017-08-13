@@ -67,7 +67,6 @@ void MyEventHandler::onInit()
 	delete[] globalArray;
 }
 
-#ifndef __ANDROID__
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
@@ -75,4 +74,3 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		nc::theApplication().quit();
 	}
 }
-#endif

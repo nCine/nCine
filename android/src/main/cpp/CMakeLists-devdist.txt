@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 3.7)
+project(nCine-Android-${CMAKE_ANDROID_ARCH_ABI})
+
+add_library(ncine SHARED IMPORTED)
+set_property(TARGET ncine PROPERTY IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/ncine/${CMAKE_ANDROID_ARCH_ABI}/libncine.so")
+set_property(TARGET ncine PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/ncine/include")
+
+add_library(native_app_glue STATIC ${CMAKE_ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
+add_library(game SHARED main.cpp tests/${NCINE_STARTUP_TEST}.cpp)
+target_link_libraries(game PRIVATE ncine native_app_glue)
+target_include_directories(game PRIVATE ${CMAKE_ANDROID_NDK}/sources/android/native_app_glue)
+
+# Export ANativeActivity_onCreate() - https://github.com/android-ndk/ndk/issues/381
+set_property(TARGET game APPEND_STRING PROPERTY LINK_FLAGS " -u ANativeActivity_onCreate")

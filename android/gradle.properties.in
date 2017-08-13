@@ -1,0 +1,4 @@
+org.gradle.daemon=true
+org.gradle.jvmargs=-Xms256m -Xmx2048m
+cmakeCommand=@GRADLE_CMAKE_COMMAND@
+ndkDir=@GRADLE_NDK_DIR@

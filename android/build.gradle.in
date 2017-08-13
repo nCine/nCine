@@ -1,5 +1,3 @@
-import org.apache.tools.ant.taskdefs.condition.Os
-
 buildscript {
 	repositories {
 		jcenter()
@@ -12,42 +10,66 @@ buildscript {
 apply plugin: 'com.android.application'
 
 android {
-
-	def numCores = Runtime.runtime.availableProcessors()
-
-	def ndkCommand = null
-	if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-		ndkCommand = 'ndk-build.cmd'
-	} else {
-		ndkCommand = 'ndk-build'
-	}
-
-    buildToolsVersion "@NCINE_BUILDTOOLS_VERSION@"
-	compileSdkVersion @NCINE_COMPILESDK_VERSION@
+	buildToolsVersion "@GRADLE_BUILDTOOLS_VERSION@"
+	compileSdkVersion @GRADLE_COMPILESDK_VERSION@
 
 	defaultConfig {
-		minSdkVersion @NCINE_MINSDK_VERSION@
-		targetSdkVersion @NCINE_TARGETSDK_VERSION@
-		versionCode @NCINE_VERSIONCODE@
-		versionName "@NCINE_VERSION@"
+		minSdkVersion @GRADLE_MINSDK_VERSION@
+		targetSdkVersion @GRADLE_TARGETSDK_VERSION@
+		versionCode @GRADLE_VERSIONCODE@
+		versionName "@GRADLE_VERSION@"
+	}
+
+	buildTypes {
+		release {
+			minifyEnabled true
+			shrinkResources true
+		}
+
+		debug {
+			applicationIdSuffix ".debug"
+		}
+	}
+
+	splits {
+		abi {
+			enable true
+			reset()
+			include '@GRADLE_NDK_ARCHITECTURES@'
+			universalApk false
+		}
+	}
+
+	final def cmakeBuildDir = new File(project.buildDir, "ncine")
+	final def architectures = ['@GRADLE_NDK_ARCHITECTURES@']
+
+	def cmakeBuildTasks = []
+	for (arch in architectures) {
+		final def archDir = new File(cmakeBuildDir, arch)
+
+		tasks.create(name:'cmakeConfigure_' + arch, type: Exec) {
+			commandLine cmakeCommand, '-H' + file('src/main/cpp').absolutePath, '-B' + archDir, '@GRADLE_PASSTHROUGH_ARGS@', '@GRADLE_CMAKE_ARGS@', '-DCMAKE_ANDROID_NDK=' + ndkDir, '-DCMAKE_ANDROID_ARCH_ABI=' + arch
+
+			if (arch == "armeabi-v7a")
+				commandLine += ['@GRADLE_ARM_ARGS@']
+		}
+
+		tasks.create(name:'cmakeBuild_' + arch, type: Exec, dependsOn: 'cmakeConfigure_' + arch) {
+			commandLine cmakeCommand, '--build', archDir
+		}
+		cmakeBuildTasks.add('cmakeBuild_' + arch)
 	}
 
 	sourceSets.main {
-		jniLibs.srcDir 'src/main/libs'
+		jniLibs.srcDirs = [@GRADLE_JNILIBS_DIRS@, cmakeBuildDir]
 		jni.srcDirs = [] // disable automatic ndk-build call
 	}
 
-	task ndkBuild(type: Exec) {
-		commandLine ndkCommand, '-C', file('src/main').absolutePath, '-j' + numCores
-	}
-
 	tasks.withType(JavaCompile) {
-		compileTask -> compileTask.dependsOn ndkBuild
+		compileTask -> compileTask.dependsOn cmakeBuildTasks
 	}
 
-	task ndkClean(type: Exec) {
-		commandLine ndkCommand, '-C', file('src/main').absolutePath, 'clean'
+	clean {
+		delete cmakeBuildDir
 	}
-
-	clean.dependsOn 'ndkClean'
 }

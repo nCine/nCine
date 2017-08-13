@@ -9,6 +9,7 @@
 #include "GLFramebufferObject.h"
 #include "GLBufferObject.h"
 #include "IFile.h" // for dataPath()
+#include "../../tests/apptest_datapath.h"
 
 #ifdef WITH_EMBEDDED_SHADERS
 	#include "shader_strings.h"
@@ -101,6 +102,8 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 	config.enableScenegraph(false);
 	config.enableAudio(false);
 	config.enableThreads(false);
+
+	setDataPath(config);
 }
 
 void MyEventHandler::onInit()
@@ -231,7 +234,6 @@ void MyEventHandler::onShutdown()
 	delete colorProgram_;
 }
 
-#ifndef __ANDROID__
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
@@ -243,4 +245,3 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		nc::theApplication().togglePause();
 	}
 }
-#endif

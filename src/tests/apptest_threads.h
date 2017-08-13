@@ -14,9 +14,7 @@ class MyEventHandler
   public:
 	virtual void onInit();
 
-#ifndef __ANDROID__
 	virtual void onKeyReleased(const nc::KeyboardEvent &event);
-#endif
 };
 
 #endif

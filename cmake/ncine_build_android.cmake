@@ -1,15 +1,8 @@
 if(NCINE_BUILD_ANDROID)
-	set(EXTERNAL_ANDROID_DIR "${PARENT_SOURCE_DIR}/nCine-android-external" CACHE PATH "Set the path to the Android libraries directory")
 	if(NOT IS_DIRECTORY ${EXTERNAL_ANDROID_DIR})
 		message(FATAL_ERROR "nCine external Android libraries directory not found at: ${EXTERNAL_ANDROID_DIR}")
 	else()
 		message(STATUS "nCine external Android libraries directory: ${EXTERNAL_ANDROID_DIR}")
-	endif()
-
-	if(WIN32)
-		set(NDK_BUILD ndk-build.cmd)
-	else()
-		set(NDK_BUILD ndk-build)
 	endif()
 
 	if(NDK_DIR STREQUAL "")
@@ -23,55 +16,76 @@ if(NCINE_BUILD_ANDROID)
 			message(FATAL_ERROR "NDK_DIR is not set")
 		endif()
 	endif()
-	if(NOT EXISTS ${NDK_DIR}/${NDK_BUILD})
-		message(FATAL_ERROR "${NDK_BUILD} command cannot be found in: ${NDK_DIR}")
-	endif()
 	message(STATUS "Android NDK directory: ${NDK_DIR}")
 
-	set(NCINE_APP_MODULES ncine)
-	foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
-		set(NCINE_APP_ABI "${NCINE_APP_ABI} ${ARCHITECTURE}")
-	endforeach()
-	set(NCINE_APP_PLATFORM android-19)
-	if(CMAKE_BUILD_TYPE STREQUAL "Release")
-		set(NCINE_APP_OPTIM release)
-	else()
-		set(NCINE_APP_OPTIM debug)
+	set(ANDROID_API_LEVEL 21)
+	set(ANDROID_TOOLCHAIN_VERSION clang)
+	set(ANDROID_STL_TYPE c++_static)
+
+	# Reset compilation flags that external tools might have set in environment variables
+	set(RESET_FLAGS_ARGS -DCMAKE_C_FLAGS="" -DCMAKE_CXX_FLAGS="" -DCMAKE_EXE_LINKER_FLAGS=""
+		-DCMAKE_MODULE_LINKER_FLAGS="" -DCMAKE_SHARED_LINKER_FLAGS="" -DCMAKE_STATIC_LINKER_FLAGS="")
+	set(ANDROID_PASSTHROUGH_ARGS -DNCINE_ROOT=${NCINE_ROOT} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+		-DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH} -DNCINE_DYNAMIC_LIBRARY=${NCINE_DYNAMIC_LIBRARY}
+		-DNCINE_STARTUP_TEST=${NCINE_STARTUP_TEST} -DEXTERNAL_ANDROID_DIR=${EXTERNAL_ANDROID_DIR}
+		-DGENERATED_INCLUDE_DIR=${GENERATED_INCLUDE_DIR})
+	set(ANDROID_CMAKE_ARGS -DCMAKE_SYSTEM_NAME=Android -DCMAKE_SYSTEM_VERSION=${ANDROID_API_LEVEL}
+		-DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=${ANDROID_TOOLCHAIN_VERSION} -DCMAKE_ANDROID_STL_TYPE=${ANDROID_STL_TYPE})
+	set(ANDROID_ARM_ARGS -DCMAKE_ANDROID_ARM_MODE=ON -DCMAKE_ANDROID_ARM_NEON=ON)
+	set(ANDROID_DEVDIST_PASSTHROUGH_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DNCINE_STARTUP_TEST=${NCINE_STARTUP_TEST})
+
+	if(CMAKE_BUILD_TYPE MATCHES "Release")
+		list(APPEND ANDROID_PASSTHROUGH_ARGS -DNCINE_EXTRA_OPTIMIZATION=${NCINE_EXTRA_OPTIMIZATION}
+			-DNCINE_AUTOVECTORIZATION_REPORT=${NCINE_AUTOVECTORIZATION_REPORT})
 	endif()
-	set(APPLICATION_MK_IN ${CMAKE_SOURCE_DIR}/android/src/main/jni/Application.mk.in)
-	set(APPLICATION_MK ${CMAKE_BINARY_DIR}/android/src/main/jni/Application.mk)
-	configure_file(${APPLICATION_MK_IN} ${APPLICATION_MK} @ONLY)
 
-	set(NCINE_APP_MODULES game)
-	set(APPLICATION_DEVDIST_MK ${CMAKE_BINARY_DIR}/android/src/main/jni/Application-devdist.mk)
-	configure_file(${APPLICATION_MK_IN} ${APPLICATION_DEVDIST_MK} @ONLY)
-
-	if(NCINE_DYNAMIC_LIBRARY)
-		set(ANDROID_MK_IN ${CMAKE_SOURCE_DIR}/android/src/main/jni/Android.mk.in)
+	if(MSVC)
+		list(APPEND ANDROID_CMAKE_ARGS "-GNMake Makefiles")
 	else()
-		set(ANDROID_MK_IN ${CMAKE_SOURCE_DIR}/android/src/main/jni/Android-static.mk.in)
+		list(APPEND ANDROID_CMAKE_ARGS "-G${CMAKE_GENERATOR}")
 	endif()
-	set(ANDROID_MK ${CMAKE_BINARY_DIR}/android/src/main/jni/Android.mk)
-	configure_file(${ANDROID_MK_IN} ${ANDROID_MK} @ONLY)
 
-	set(ANDROID_DEVDIST_MK_IN ${CMAKE_SOURCE_DIR}/android/src/main/jni/Android-devdist.mk.in)
-	set(ANDROID_DEVDIST_MK ${CMAKE_BINARY_DIR}/android/src/main/jni/Android-devdist.mk)
-	configure_file(${ANDROID_DEVDIST_MK_IN} ${ANDROID_DEVDIST_MK} @ONLY)
+	string(REPLACE ";" "', '" GRADLE_PASSTHROUGH_ARGS "${ANDROID_PASSTHROUGH_ARGS}")
+	string(REPLACE ";" "', '" GRADLE_CMAKE_ARGS "${ANDROID_CMAKE_ARGS}")
+	string(REPLACE ";" "', '" GRADLE_ARM_ARGS "${ANDROID_ARM_ARGS}")
+	string(REPLACE ";" "', '" GRADLE_NDK_ARCHITECTURES "${NCINE_NDK_ARCHITECTURES}")
+	string(REPLACE ";" "', '" GRADLE_DEVDIST_PASSTHROUGH_ARGS "${ANDROID_DEVDIST_PASSTHROUGH_ARGS}")
 
-	set(NCINE_BUILDTOOLS_VERSION 26)
-	set(NCINE_COMPILESDK_VERSION 23)
-	set(NCINE_MINSDK_VERSION 15)
-	set(NCINE_TARGETSDK_VERSION 23)
-	set(NCINE_VERSIONCODE 1)
+	# Added later to skip the string replace operation and keep them as lists in Gradle too
+	list(APPEND ANDROID_PASSTHROUGH_ARGS -DGENERATED_SOURCES="${GENERATED_SOURCES}" -DANDROID_GENERATED_FLAGS="${ANDROID_GENERATED_FLAGS}")
+	set(GRADLE_PASSTHROUGH_ARGS "${GRADLE_PASSTHROUGH_ARGS}', '-DGENERATED_SOURCES=${GENERATED_SOURCES}', '-DANDROID_GENERATED_FLAGS=${ANDROID_GENERATED_FLAGS}")
+	# Not added to Gradle arguments as it is handled by substituting `GRADLE_NDK_DIR`
+	list(APPEND ANDROID_CMAKE_ARGS -DCMAKE_ANDROID_NDK=${NDK_DIR})
+
+	set(GRADLE_BUILDTOOLS_VERSION 26.0.1)
+	set(GRADLE_COMPILESDK_VERSION 23)
+	set(GRADLE_MINSDK_VERSION 15)
+	set(GRADLE_TARGETSDK_VERSION 23)
+	set(GRADLE_VERSIONCODE 1)
+	set(GRADLE_VERSION ${NCINE_VERSION})
+
 	set(BUILD_GRADLE_IN ${CMAKE_SOURCE_DIR}/android/build.gradle.in)
 	set(BUILD_GRADLE ${CMAKE_BINARY_DIR}/android/build.gradle)
+	set(GRADLE_JNILIBS_DIRS "'${EXTERNAL_ANDROID_DIR}/openal'")
 	configure_file(${BUILD_GRADLE_IN} ${BUILD_GRADLE} @ONLY)
+	set(GRADLE_PROPERTIES_IN ${CMAKE_SOURCE_DIR}/android/gradle.properties.in)
+	set(GRADLE_PROPERTIES ${CMAKE_BINARY_DIR}/android/gradle.properties)
+	set(GRADLE_CMAKE_COMMAND ${CMAKE_COMMAND})
+	set(GRADLE_NDK_DIR ${NDK_DIR})
+	configure_file(${GRADLE_PROPERTIES_IN} ${GRADLE_PROPERTIES} @ONLY)
 
-	file(COPY android/gradle.properties DESTINATION android)
+	set(BUILD_DEVDIST_GRADLE ${CMAKE_BINARY_DIR}/android/build-devdist.gradle)
+	set(GRADLE_PASSTHROUGH_ARGS ${GRADLE_DEVDIST_PASSTHROUGH_ARGS})
+	set(GRADLE_JNILIBS_DIRS "'src/main/cpp/ncine', 'src/main/cpp/openal'")
+	configure_file(${BUILD_GRADLE_IN} ${BUILD_DEVDIST_GRADLE} @ONLY)
+
+	file(COPY android/gradle-devdist.properties DESTINATION android)
 	file(COPY android/src/main/AndroidManifest.xml DESTINATION android/src/main)
 	file(COPY android/src/main/java/io/github/ncine/LoadLibraries.java DESTINATION android/src/main/java/io/github/ncine)
 	file(COPY android/src/main/java/io/github/ncine/LoadLibrariesTV.java DESTINATION android/src/main/java/io/github/ncine)
-	file(COPY android/src/main/jni/main.cpp DESTINATION android/src/main/jni)
+	file(COPY android/src/main/cpp/main.cpp DESTINATION android/src/main/cpp)
+	file(COPY android/src/main/cpp/CMakeLists.txt DESTINATION android/src/main/cpp)
+	file(COPY android/src/main/cpp/CMakeLists-devdist.txt DESTINATION android/src/main/cpp)
 	file(COPY android/src/main/res/values/strings.xml DESTINATION android/src/main/res/values)
 	file(COPY ${NCINE_DATA_DIR}/icons/icon48.png DESTINATION android/src/main/res/mipmap-mdpi)
 	file(RENAME ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-mdpi/icon48.png ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-mdpi/ic_launcher.png)
@@ -85,62 +99,82 @@ if(NCINE_BUILD_ANDROID)
 	file(RENAME ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xxxhdpi/icon192.png ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
 	file(COPY ${NCINE_DATA_DIR}/icons/banner320x180.png DESTINATION android/src/main/res/drawable-xhdpi)
 	file(RENAME ${CMAKE_BINARY_DIR}/android/src/main/res/drawable-xhdpi/banner320x180.png ${CMAKE_BINARY_DIR}/android/src/main/res/drawable-xhdpi/banner.png)
-	file(COPY ${EXTERNAL_ANDROID_DIR}/ DESTINATION android/src/main/jni/)
 
 	if(NCINE_DYNAMIC_LIBRARY)
-		set(ANDROID_LIBPATH libs)
 		set(ANDROID_LIBNAME libncine.so)
 	else()
-		set(ANDROID_LIBPATH obj/local)
 		set(ANDROID_LIBNAME libncine.a)
-		set(COPY_SRCINCLUDE_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/include ${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/include)
+		set(COPY_SRCINCLUDE_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/include ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include)
 	endif()
 
-	foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
-		list(APPEND NCINE_ANDROID_LIBRARY_FILES android/src/main/${ANDROID_LIBPATH}/${ARCHITECTURE}/${ANDROID_LIBNAME})
-	endforeach()
-	add_custom_command(OUTPUT ${NCINE_ANDROID_LIBRARY_FILES}
-		COMMAND ${NDK_DIR}/${NDK_BUILD} -j${NCINE_CORES}
-		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/android/src/main/jni
-		COMMENT "Compiling Android library with ndk-build")
-	add_custom_target(ncine_android ALL DEPENDS ${NCINE_ANDROID_LIBRARY_FILES})
+	add_custom_target(ncine_android ALL)
 	set_target_properties(ncine_android PROPERTIES FOLDER "Android")
 	add_dependencies(ncine_android ncine)
 
-	# Creating an ncine directory inside jni to allow building external Android applications without installing the engine
-	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/include
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/include
+	foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
+		set(ANDROID_BINARY_DIR ${CMAKE_BINARY_DIR}/android/build/ncine/${ARCHITECTURE})
+		set(ANDROID_ARCH_ARGS -DCMAKE_ANDROID_ARCH_ABI=${ARCHITECTURE})
+		if(ARCHITECTURE STREQUAL "armeabi-v7a")
+			list(APPEND ANDROID_ARCH_ARGS ${ANDROID_ARM_ARGS})
+		endif()
+		add_custom_command(OUTPUT ${ANDROID_BINARY_DIR}/${ANDROID_LIBNAME}
+			COMMAND ${CMAKE_COMMAND} -H${CMAKE_BINARY_DIR}/android/src/main/cpp/ -B${ANDROID_BINARY_DIR}
+				${RESET_FLAGS_ARGS} ${ANDROID_PASSTHROUGH_ARGS} ${ANDROID_CMAKE_ARGS} ${ANDROID_ARCH_ARGS}
+			COMMAND ${CMAKE_COMMAND} --build ${ANDROID_BINARY_DIR}
+			COMMENT "Compiling the Android library for ${ARCHITECTURE}")
+		add_custom_target(ncine_android_${ARCHITECTURE} DEPENDS ${ANDROID_BINARY_DIR}/${ANDROID_LIBNAME})
+		set_target_properties(ncine_android_${ARCHITECTURE} PROPERTIES FOLDER "Android")
+		add_dependencies(ncine_android ncine_android_${ARCHITECTURE})
+	endforeach()
+
+	# Creating an ncine directory inside cpp to allow building external Android applications without installing the engine
+	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${NCINE_CONFIG_H} ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include
 		# Projects relying on a static and uninstalled version of the engine can use implementation headers
 		COMMAND ${COPY_SRCINCLUDE_COMMAND})
-	add_custom_target(ncine_ndkdir_include ALL DEPENDS ${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/include)
+	add_custom_target(ncine_ndkdir_include ALL DEPENDS ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include)
 	set_target_properties(ncine_ndkdir_include PROPERTIES FOLDER "Android")
 	add_dependencies(ncine_ndkdir_include ncine_android)
 
-	foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
-		add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/${ARCHITECTURE}/${ANDROID_LIBNAME}
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/android/src/main/${ANDROID_LIBPATH}/${ARCHITECTURE}/${ANDROID_LIBNAME}
-			${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/${ARCHITECTURE}/${ANDROID_LIBNAME})
-		add_custom_target(ncine_ndkdir_${ARCHITECTURE} ALL DEPENDS ${CMAKE_BINARY_DIR}/android/src/main/jni/ncine/${ARCHITECTURE}/${ANDROID_LIBNAME})
-		set_target_properties(ncine_ndkdir_${ARCHITECTURE} PROPERTIES FOLDER "Android")
-		add_dependencies(ncine_ndkdir_${ARCHITECTURE} ncine_android)
-	endforeach()
+	if (NCINE_ASSEMBLE_APK)
+		if(CMAKE_BUILD_TYPE MATCHES "Release")
+			set(GRADLE_TASK assembleRelease)
+			set(APK_NAME android-release-unsigned.apk)
+		else()
+			set(GRADLE_TASK assembleDebug)
+			set(APK_NAME android-debug.apk)
+		endif()
+
+		find_program(GRADLE_EXECUTABLE gradle $ENV{GRADLE_HOME}/bin)
+		if (GRADLE_EXECUTABLE)
+			message(STATUS "Gradle executable: ${GRADLE_EXECUTABLE}")
+			# Invoking Gradle to create the Android APK of the startup test
+			add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/android/build/output/apks/${APK_NAME}
+				COMMAND ${GRADLE_EXECUTABLE} -p android ${GRADLE_TASK})
+			add_custom_target(ncine_gradle_apk ALL DEPENDS ${CMAKE_BINARY_DIR}/android/build/output/apks/android-debug.apk)
+			set_target_properties(ncine_gradle_apk PROPERTIES FOLDER "Android")
+			add_dependencies(ncine_gradle_apk ncine_android)
+		else()
+			message(WARNING "Gradle executable not found, Android APK will not be assembled")
+		endif()
+	endif()
 
 	if(NCINE_INSTALL_DEV_SUPPORT)
-		install(FILES ${CMAKE_BINARY_DIR}/android/build.gradle
-			${CMAKE_BINARY_DIR}/android/gradle.properties
-			DESTINATION ${ANDROID_INSTALL_DESTINATION} COMPONENT android)
+		install(FILES ${CMAKE_BINARY_DIR}/android/build-devdist.gradle
+			DESTINATION ${ANDROID_INSTALL_DESTINATION} RENAME build.gradle COMPONENT android)
+		install(FILES ${CMAKE_BINARY_DIR}/android/gradle-devdist.properties
+			DESTINATION ${ANDROID_INSTALL_DESTINATION} RENAME gradle.properties COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/AndroidManifest.xml
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/java/io/github/ncine/LoadLibraries.java
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/java/io/github/ncine COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/java/io/github/ncine/LoadLibrariesTV.java
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/java/io/github/ncine COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/jni/Android-devdist.mk
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/jni RENAME Android.mk COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/jni/Application-devdist.mk
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/jni RENAME Application.mk COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/jni/main.cpp
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/jni COMPONENT android)
+		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/cpp/CMakeLists-devdist.txt
+			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp RENAME CMakeLists.txt COMPONENT android)
+		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/cpp/main.cpp
+			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/values/strings.xml
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/values COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-mdpi/ic_launcher.png
@@ -157,15 +191,14 @@ if(NCINE_BUILD_ANDROID)
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/drawable-xhdpi COMPONENT android)
 
 		foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
-			# The static version of the library will be installed if available, but Android-devdist.mk does not support it
-			install(FILES ${CMAKE_BINARY_DIR}/android/src/main/${ANDROID_LIBPATH}/${ARCHITECTURE}/${ANDROID_LIBNAME}
-				DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/jni/ncine/${ARCHITECTURE}/ COMPONENT android)
-			install(FILES ${CMAKE_BINARY_DIR}/android/src/main/libs/${ARCHITECTURE}/libopenal.so
-				DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/jni/openal/${ARCHITECTURE}/ COMPONENT android)
+			install(FILES ${CMAKE_BINARY_DIR}/android/build/ncine/${ARCHITECTURE}/${ANDROID_LIBNAME}
+				DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/${ARCHITECTURE}/ COMPONENT android)
+			install(FILES ${EXTERNAL_ANDROID_DIR}/openal/${ARCHITECTURE}/libopenal.so
+				DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/openal/${ARCHITECTURE}/ COMPONENT android)
 		endforeach()
-		install(DIRECTORY include/ DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/jni/ncine/include COMPONENT android FILES_MATCHING PATTERN "*.h")
+		install(DIRECTORY include/ DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/include COMPONENT android FILES_MATCHING PATTERN "*.h")
 		file(GLOB APPTEST_SOURCES "tests/apptest*.h" "tests/apptest*.cpp")
-		install(FILES ${APPTEST_SOURCES} DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/jni/tests COMPONENT android)
+		install(FILES ${APPTEST_SOURCES} DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/tests COMPONENT android)
 
 		install(DIRECTORY ${NCINE_DATA_DIR}/android/fonts DESTINATION ${DATA_INSTALL_DESTINATION}/android COMPONENT android)
 		install(DIRECTORY ${NCINE_DATA_DIR}/android/textures DESTINATION ${DATA_INSTALL_DESTINATION}/android COMPONENT android)

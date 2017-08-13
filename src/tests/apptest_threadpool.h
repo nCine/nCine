@@ -21,9 +21,7 @@ class MyEventHandler
 	virtual void onPreInit(nc::AppConfiguration &config);
 	virtual void onInit();
 
-#ifndef __ANDROID__
 	virtual void onKeyReleased(const nc::KeyboardEvent &event);
-#endif
 };
 
 #endif

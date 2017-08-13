@@ -1,12 +1,3 @@
 *.user
 docs
 Doxyfile
-staging
-android/.gradle
-android/src/.gradle
-android/build
-android/src/main/assets
-android/src/main/jni
-android/src/main/libs
-android/src/main/obj
-android/src/main/res
