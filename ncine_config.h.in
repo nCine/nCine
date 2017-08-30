@@ -1,0 +1,16 @@
+#ifndef NCINE_CONFIG_H
+#define NCINE_CONFIG_H
+
+#cmakedefine01 NCINE_WITH_THREADS
+
+#cmakedefine01 NCINE_WITH_GLEW
+#cmakedefine01 NCINE_WITH_GLFW
+#cmakedefine01 NCINE_WITH_SDL
+
+#cmakedefine01 NCINE_WITH_AUDIO
+#cmakedefine01 NCINE_WITH_VORBIS
+
+#cmakedefine01 NCINE_WITH_PNG
+#cmakedefine01 NCINE_WITH_WEBP
+
+#endif

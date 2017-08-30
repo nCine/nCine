@@ -1,4 +1,5 @@
 #include "apptest_texformats.h"
+#include "ncine_config.h"
 #include "Application.h"
 #include "SceneNode.h"
 #include "Texture.h"
@@ -9,8 +10,8 @@
 #include "apptest_datapath.h"
 
 #ifndef __ANDROID__
-	#define WITH_PNG_FORMAT (1)
-	#define WITH_WEBP_FORMAT (0)
+	#define WITH_PNG_FORMAT (1 && NCINE_WITH_PNG)
+	#define WITH_WEBP_FORMAT (0 && NCINE_WITH_WEBP)
 #else
 	#define WITH_ETC1_FORMAT (1)
 	#define WITH_ATC_FORMAT (1)

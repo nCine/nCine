@@ -49,9 +49,8 @@ foreach(APPTEST ${APPTESTS})
 	target_link_libraries(${APPTEST} ncine)
 	set_target_properties(${APPTEST} PROPERTIES FOLDER "AppTests")
 	target_compile_definitions(${APPTEST} PRIVATE "NCINE_TESTS_DATA_DIR=\"${NCINE_TESTS_DATA_DIR}\"")
-	if(MSVC)
-		target_include_directories(${APPTEST} PRIVATE ${GENERATED_INCLUDE_DIR}) # for the executable icon
-	elseif(APPLE)
+	target_include_directories(${APPTEST} PRIVATE ${GENERATED_INCLUDE_DIR}) # for ncine_config.h and for the Windows executable icon
+	if(APPLE)
 		set_target_properties(${APPTEST} PROPERTIES INSTALL_RPATH "@executable_path/${RELPATH_TO_LIB}")
 	endif()
 	install(TARGETS ${APPTEST} RUNTIME DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
