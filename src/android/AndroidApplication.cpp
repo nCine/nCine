@@ -46,7 +46,7 @@ void AndroidApplication::start(struct android_app *state, IAppEventHandler * (*c
 		int events;
 		struct android_poll_source *source;
 
-		while ((ident = ALooper_pollAll(!theApplication().isPaused() ? 0 : -1, NULL, &events, (void **)&source)) >= 0)
+		while ((ident = ALooper_pollAll(!theApplication().isPaused() ? 0 : -1, NULL, &events, reinterpret_cast<void **>(&source))) >= 0)
 		{
 			if (source != NULL)
 			{

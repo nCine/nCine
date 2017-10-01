@@ -1,7 +1,6 @@
 #ifndef CLASS_NCINE_RENDERCOMMAND
 #define CLASS_NCINE_RENDERCOMMAND
 
-#include "Vector2.h"
 #include "Matrix4x4.h"
 #include "Material.h"
 #include "Geometry.h"

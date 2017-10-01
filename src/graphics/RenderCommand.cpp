@@ -1,6 +1,5 @@
 ﻿#include "RenderCommand.h"
 #include "GLShaderProgram.h"
-#include "Matrix4x4.h" // TODO: Remove dependency
 #include "Application.h" // TODO: Remove dependency
 
 namespace ncine {

@@ -1,5 +1,5 @@
-#ifndef CLASS_NCTEXTURELOADERPKM
-#define CLASS_NCTEXTURELOADERPKM
+#ifndef CLASS_NCINE_TEXTURELOADERPKM
+#define CLASS_NCINE_TEXTURELOADERPKM
 
 #include <stdint.h> // for header
 #include "ITextureLoader.h"

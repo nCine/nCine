@@ -41,7 +41,7 @@ void AndroidJniHelper::attachJVM(struct android_app *state)
 	}
 	else
 	{
-		int getEnvStatus = javaVM_->GetEnv((void **)&jniEnv_, JNI_VERSION_1_6);
+		int getEnvStatus = javaVM_->GetEnv(reinterpret_cast<void **>(&jniEnv_), JNI_VERSION_1_6);
 		if (getEnvStatus == JNI_EDETACHED)
 		{
 			LOGW("GetEnv() cannot attach the JVM");
@@ -194,7 +194,7 @@ AndroidJniClass_InputDevice AndroidJniClass_InputDevice::getDevice(int deviceId)
 
 int AndroidJniClass_InputDevice::getDeviceIds(int *destination, int maxSize)
 {
-	jintArray arrDeviceIds = (jintArray)jniEnv_->CallStaticObjectMethod(javaClass_, midGetDeviceIds_);
+	jintArray arrDeviceIds = static_cast<jintArray>(jniEnv_->CallStaticObjectMethod(javaClass_, midGetDeviceIds_));
 	jint length = jniEnv_->GetArrayLength(arrDeviceIds);
 
 	jint *intsDeviceIds = jniEnv_->GetIntArrayElements(arrDeviceIds, NULL);
@@ -210,7 +210,7 @@ int AndroidJniClass_InputDevice::getDeviceIds(int *destination, int maxSize)
 
 void AndroidJniClass_InputDevice::getName(char *destination, int maxStringSize) const
 {
-	jstring strDeviceName = (jstring)jniEnv_->CallObjectMethod(javaObject_, midGetName_);
+	jstring strDeviceName = static_cast<jstring>(jniEnv_->CallObjectMethod(javaObject_, midGetName_));
 	if (strDeviceName)
 	{
 		const char *deviceName = jniEnv_->GetStringUTFChars(strDeviceName, 0);
@@ -221,7 +221,7 @@ void AndroidJniClass_InputDevice::getName(char *destination, int maxStringSize) 
 	}
 	else
 	{
-		strncpy(destination, (const char *)"Unknown", maxStringSize);
+		strncpy(destination, static_cast<const char *>("Unknown"), maxStringSize);
 	}
 }
 
@@ -278,7 +278,7 @@ void AndroidJniClass_InputDevice::hasKeys(const int *buttons, const int length, 
 	}
 	jniEnv_->ReleaseIntArrayElements(arrButtons, intsButtons, 0);
 
-	jbooleanArray arrBooleans = (jbooleanArray)jniEnv_->CallObjectMethod(javaObject_, midHasKeys_, arrButtons);
+	jbooleanArray arrBooleans = static_cast<jbooleanArray>(jniEnv_->CallObjectMethod(javaObject_, midHasKeys_, arrButtons));
 	jniEnv_->DeleteLocalRef(arrButtons);
 
 	jboolean *booleans = jniEnv_->GetBooleanArrayElements(arrBooleans, NULL);

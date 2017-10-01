@@ -67,7 +67,7 @@ bool IFile::hasExtension(const char *extension) const
 IFile *IFile::createFileHandle(const char *filename)
 {
 #ifdef __ANDROID__
-	if (strncmp(filename, (const char *)"asset::", 7) == 0)
+	if (strncmp(filename, static_cast<const char *>("asset::"), 7) == 0)
 	{
 		return new AssetFile(filename + 7);
 	}
@@ -79,7 +79,7 @@ IFile *IFile::createFileHandle(const char *filename)
 bool IFile::access(const char *filename, unsigned char mode)
 {
 #ifdef __ANDROID__
-	if (strncmp(filename, (const char *)"asset::", 7) == 0)
+	if (strncmp(filename, static_cast<const char *>("asset::"), 7) == 0)
 	{
 		return AssetFile::access(filename + 7, mode);
 	}

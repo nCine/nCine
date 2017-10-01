@@ -27,14 +27,12 @@ ParticleSystem::~ParticleSystem()
 	// Empty the children list before the mass deletion
 	children_.clear();
 
-	unsigned int i;
-
-	for (i = 0; i < affectors_.size(); i++)
+	for (unsigned int i = 0; i < affectors_.size(); i++)
 	{
 		delete affectors_[i];
 	}
 
-	for (i = 0; i < poolSize_; i++)
+	for (unsigned int i = 0; i < poolSize_; i++)
 	{
 		delete particleList_[i];
 	}

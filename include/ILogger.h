@@ -1,5 +1,5 @@
-#ifndef CLASS_NCILOGGER
-#define CLASS_NCILOGGER
+#ifndef CLASS_NCINE_ILOGGER
+#define CLASS_NCINE_ILOGGER
 
 #include "common_defines.h"
 

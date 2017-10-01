@@ -23,7 +23,7 @@ class Particle : public Sprite
 	bool inLocalSpace_;
 
 	/// Returns true if the particle is still alive
-	inline bool isAlive() const { return life_ > 0.0; }
+	inline bool isAlive() const { return life_ > 0.0f; }
 
   private:
 	/// Private constructor accessible only by `ParticleSystem`
