@@ -19,7 +19,8 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/*! This number affects the size of both the string container and the VBO. */
 	static const unsigned int DefaultStringLength = 256;
 
-	/// Horizontal alignment modes
+	/// Horizontal alignment modes for text made of multiple lines
+	/*! \note It does not change the node anchor point */
 	enum Alignment
 	{
 		ALIGN_LEFT,
@@ -43,9 +44,9 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	inline bool withKerning() const { return withKerning_; }
 	/// Sets the kerning flag for this node rendering
 	void enableKerning(bool withKerning);
-	/// Gets the horizontal text alignment
+	/// Gets the horizontal text alignment of multiple lines
 	inline Alignment alignment() const { return alignment_; }
-	/// Sets the horizontal text alignment
+	/// Sets the horizontal text alignment of multiple lines
 	void setAlignment(Alignment alignment);
 
 	/// Gets the font base scaled by the scale factor
@@ -83,7 +84,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	mutable float yAdvanceSum_;
 	/// Text width for each line of text
 	mutable Array<float> lineLengths_;
-	/// Horizontal text alignment
+	/// Horizontal text alignment of multiple lines
 	Alignment alignment_;
 
 	/// Initializes the object with the parameters passed to the constructor

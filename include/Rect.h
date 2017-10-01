@@ -10,7 +10,7 @@ template <class T>
 class Rect
 {
   public:
-	/// Top-left X coordinate of as a public property
+	/// Top-left X coordinate as a public property
 	T x;
 	/// Top-left Y coordinate as a public property
 	T y;

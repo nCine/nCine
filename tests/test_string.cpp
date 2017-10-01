@@ -44,6 +44,7 @@ int main(int argc, char **argv)
 
 	printf("Printing the first position of the character 'S' in the fourth string: %d\n", str4.findFirstChar('S'));
 	printf("Printing the last position of the character 'S' in the fourth string: %d\n", str4.findLastChar('S'));
+	printf("Printing the position of the character 't' after the second in the fourth string: %d\n", str4.findFirstCharAfterIndex('t', 1));
 
 
 	str2.copy(str3, 1, 2, 3);
@@ -56,6 +57,11 @@ int main(int argc, char **argv)
 	printf("Trying to copy from the third string to beyond the end of the second: \"%s\" (capacity %u, length %u)\n", str2.data(), str2.capacity(), str2.length());
 	str2.copy(str3, 0, str3.length() + 1, 0);
 	printf("Trying to copy from the third string to the second more than the available characters: \"%s\" (capacity %u, length %u)\n", str2.data(), str2.capacity(), str2.length());
+
+	const unsigned int CStringLength = 4;
+	char cString[CStringLength];
+	str3.copyTo(cString, 2, CStringLength);
+	printf("Copying some characters from the third string into an array of %u characters: \"%s\"\n", CStringLength, cString);
 
 
 	printf("\n--- String traversals (for cycles) ---\n");

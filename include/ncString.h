@@ -77,12 +77,14 @@ class DLL_PUBLIC String
 	/// Returns a constant pointer to the internal array
 	const char *data() const { return array_; }
 
-	/// Copies characters from somewhere in the source to somewhere in the destnation
+	/// Copies characters from somewhere in the source to somewhere in the destination
 	unsigned int copy(const String &source, unsigned int srcChar, unsigned int numChar, unsigned int destChar);
 	/// Copies all the characters from the source at the beginning of the destination
 	unsigned int copy(const String &source);
 	/// Appends all the characters from the source at the end of the destination
 	unsigned int append(const String &source);
+	/// Copies characters from the string to a C string
+	unsigned int copyTo(char *dest, unsigned int srcChar, unsigned int numChar) const;
 
 	/// Compares the string with another one in lexicographical order
 	int compare(const String &other) const;
@@ -93,6 +95,8 @@ class DLL_PUBLIC String
 	int findFirstChar(char c) const;
 	/// Finds the last occurrence of a character
 	int findLastChar(char c) const;
+	/// Finds the first occurrence of a character after the character at the index
+	int findFirstCharAfterIndex(char c, unsigned int index) const;
 
 	/// Finds the first occurrence of the given string
 	int find(const String &other) const;

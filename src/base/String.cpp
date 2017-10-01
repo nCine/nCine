@@ -137,6 +137,27 @@ unsigned int String::append(const String &source)
 	return copy(source, 0, source.length_, length_);
 }
 
+unsigned int String::copyTo(char *dest, unsigned int srcChar, unsigned int numChar) const
+{
+	// Cannot copy from beyond the end of the source string
+	unsigned int clampedSrcChar = min(srcChar, length_);
+	char *srcStart = array_ + clampedSrcChar;
+	// Cannot copy more characters than the source has left until its length
+	unsigned int charsToCopy = min(numChar, length_ - clampedSrcChar);
+
+	// Always assuming that the destination is big enough
+	if (charsToCopy > 0)
+	{
+#if defined(_WIN32) && !defined(__MINGW32__)
+		strncpy_s(dest, charsToCopy, srcStart, charsToCopy);
+#else
+		strncpy(dest, srcStart, charsToCopy);
+#endif
+	}
+
+	return charsToCopy;
+}
+
 int String::compare(const String &other) const
 {
 	unsigned int minCapacity = nc::min(capacity_, other.capacity_);
@@ -150,7 +171,12 @@ int String::compare(const char *cString) const
 
 int String::findFirstChar(char c) const
 {
-	const char *foundPtr = strchr(array_, c);
+	return findFirstCharAfterIndex(c, 0);
+}
+
+int String::findLastChar(char c) const
+{
+	const char *foundPtr = strrchr(array_, c);
 
 	if (foundPtr)
 	{
@@ -162,9 +188,14 @@ int String::findFirstChar(char c) const
 	}
 }
 
-int String::findLastChar(char c) const
+int String::findFirstCharAfterIndex(char c, unsigned int index) const
 {
-	const char *foundPtr = strrchr(array_, c);
+	if (index >= length_ - 1)
+	{
+		return -1;
+	}
+
+	const char *foundPtr = strchr(array_ + index + 1, c);
 
 	if (foundPtr)
 	{

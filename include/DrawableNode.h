@@ -42,7 +42,7 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	inline virtual float absWidth() const { return width_ * absScaleFactor_; }
 	/// Returns the absolute height of the node area
 	inline virtual float absHeight() const { return height_ * absScaleFactor_; }
-	/// /// Returns the absolute size of the node area
+	/// Returns the absolute size of the node area
 	inline Vector2f absSize() const { return Vector2f(absWidth(), absHeight()); }
 
 	/// Returns the node rendering layer

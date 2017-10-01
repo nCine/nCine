@@ -129,16 +129,16 @@ class DLL_PUBLIC SceneNode : public Object
 	 *  color information to easily pass that information to its children. */
 	Color color_;
 
-	/// Absolute X coordinate as calculated by the `Transform()` function
+	/// Absolute X coordinate as calculated by the `transform()` function
 	float absX_;
-	/// Absolute Y coordinate as calculated by the `Transform()` function
+	/// Absolute Y coordinate as calculated by the `transform()` function
 	float absY_;
-	/// Absolute scale factor as calculated by the `Transform()` function
+	/// Absolute scale factor as calculated by the `transform()` function
 	float absScaleFactor_;
-	/// Absolute node rotation as calculated by the `Transform()` function
+	/// Absolute node rotation as calculated by the `transform()` function
 	float absRotation_;
 
-	/// Absolute node color as calculated by the `Transform()` function
+	/// Absolute node color as calculated by the `transform()` function
 	Color absColor_;
 
 	/// World transformation matrix (calculated from local and parent's world)

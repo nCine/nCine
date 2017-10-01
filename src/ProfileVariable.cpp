@@ -70,7 +70,7 @@ bool ProfileVariable::addValue(float value)
 	}
 
 	// A new value has to be registered in the array
-	if (registerValue)
+	if (registerValue && numValues_ > 0)
 	{
 		if (value > max_)
 		{
