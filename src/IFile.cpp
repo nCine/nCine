@@ -13,7 +13,6 @@
 
 #ifndef _WIN32
 	#include <unistd.h> // for getpid()
-	#include <sys/types.h> // for getpwuid()
 	#include <pwd.h> // for getpwuid()
 #endif
 
@@ -107,8 +106,8 @@ void IFile::initSavePath()
 #ifdef __ANDROID__
 	nc::AndroidApplication &application = static_cast<nc::AndroidApplication &>(nc::theApplication());
 
-	// Creating the path "/data/data/PACKAGE_NAME/files/"
-	savePath_.format("/data/data/%s/files/", application.packageName().data());
+	// Get the internal data path from the Android application
+	savePath_ = application.internalDataPath();
 
 	// Trying to create the data directory
 	if (mkdir(savePath_.data(), 0770) && errno != EEXIST)

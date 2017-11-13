@@ -1,4 +1,3 @@
-#include <unistd.h> // for getpid()
 #include "AndroidApplication.h"
 #include "IAppEventHandler.h"
 #include "ServiceLocator.h"
@@ -186,6 +185,21 @@ void AndroidApplication::enableAccelerometer(bool enabled)
 	}
 }
 
+const char *AndroidApplication::internalDataPath() const
+{
+	return state_->activity->internalDataPath;
+}
+
+const char *AndroidApplication::externalDataPath() const
+{
+	return state_->activity->externalDataPath;
+}
+
+const char *AndroidApplication::obbPath() const
+{
+	return state_->activity->obbPath;
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -253,19 +267,6 @@ void AndroidApplication::setFocus(bool hasFocus)
 			theServiceLocator().audioDevice().freezePlayers();
 		}
 	}
-}
-
-void AndroidApplication::retrievePackageName()
-{
-	const int pid = getpid();
-	String procFileName(128);
-	procFileName.format("/proc/%d/cmdline", pid);
-
-	IFile *fileHandle = IFile::createFileHandle(procFileName.data());
-	fileHandle->open(IFile::MODE_READ);
-	fileHandle->read(packageName_.data(), 128);
-	fileHandle->close();
-	delete fileHandle;
 }
 
 }

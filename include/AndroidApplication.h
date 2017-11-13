@@ -26,8 +26,12 @@ class DLL_PUBLIC AndroidApplication : public Application
 	/// Returns true if the application has already called `init()`
 	inline bool isInitialized() const { return isInitialized_; }
 
-	/// Returns the application package name
-	inline const String &packageName() const { return packageName_; }
+	/// Returns the path to the internal data directory from the native activity
+	const char *internalDataPath() const;
+	/// Returns the path to the external data directory from the native activity
+	const char *externalDataPath() const;
+	/// Returns the path to the OBB directory from the native activity
+	const char *obbPath() const;
 
   private:
 	bool isInitialized_;
@@ -42,9 +46,6 @@ class DLL_PUBLIC AndroidApplication : public Application
 	void shutdown();
 
 	void setFocus(bool hasFocus);
-
-	/// Retrieves package name accessing the `/proc` fs
-	void retrievePackageName();
 
 	/// Private constructor
 	AndroidApplication() : Application(),  isInitialized_(false), packageName_(128), state_(NULL), createAppEventHandler_(NULL) { }
