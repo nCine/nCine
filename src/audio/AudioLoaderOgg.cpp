@@ -1,6 +1,5 @@
-#include <cstdlib> // for exit()
+#include "common_macros.h"
 #include "AudioLoaderOgg.h"
-#include "ServiceLocator.h"
 
 #ifdef __ANDROID__
 #include "AssetFile.h" // for AssetFile::sType()
@@ -77,8 +76,7 @@ unsigned long int AudioLoaderOgg::read(char *buffer, unsigned long int bufferSiz
 		if (bytes < 0)
 		{
 			ov_clear(&oggFile_);
-			LOGF_X("Error decoding at bitstream %d", bitStream);
-			exit(EXIT_FAILURE);
+			FATAL_MSG_X("Error decoding at bitstream %d", bitStream);
 		}
 
 		// Reset the static variable at the end of a decoding process
@@ -136,11 +134,8 @@ void AudioLoaderOgg::init()
 		}
 	}
 #else
-	if (ov_fopen(fileHandle_->filename(), &oggFile_) != 0)
-	{
-		LOGF_X("Cannot open \"%s\" with ov_fopen()", fileHandle_->filename());
-		exit(EXIT_FAILURE);
-	}
+	const int err = ov_fopen(fileHandle_->filename(), &oggFile_);
+	FATAL_ASSERT_MSG_X(err == 0, "Cannot open \"%s\" with ov_fopen()", fileHandle_->filename());
 #endif
 
 	// Get some information about the OGG file

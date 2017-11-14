@@ -1,7 +1,6 @@
-#include <cstdlib> // for exit()
+#include "common_macros.h"
 #include <cstring>
 #include "TextureLoaderPkm.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -38,14 +37,12 @@ void TextureLoaderPkm::init()
 	{
 		if (IFile::int16FromBE(header.version) != 0x3130) // "10"
 		{
-			LOGF_X("PKM version not supported: 0x%04x", header.version);
-			exit(EXIT_FAILURE);
+			FATAL_MSG_X("PKM version not supported: 0x%04x", header.version);
 		}
 
 		if (IFile::int16FromBE(header.dataType) != 0)
 		{
-			LOGF_X("PKM data type not supported: 0x%04x", header.dataType);
-			exit(EXIT_FAILURE);
+			FATAL_MSG_X("PKM data type not supported: 0x%04x", header.dataType);
 		}
 
 		headerSize_ = 16;

@@ -1,10 +1,8 @@
-#include <cstdlib> // for exit()
 #define NCINE_INCLUDE_OPENAL
 #include "common_headers.h"
-
+#include "common_macros.h"
 #include "AudioBuffer.h"
 #include "IAudioLoader.h"
-#include "ServiceLocator.h"
 #include "Array.h"
 
 namespace ncine {
@@ -45,18 +43,14 @@ void AudioBuffer::load(const IAudioLoader *audioLoader)
 	frequency_ = audioLoader->frequency();
 	numChannels_ = audioLoader->numChannels();
 
+	FATAL_ASSERT_MSG_X(numChannels_ == 1 || numChannels_ == 2, "Unsupported number of channels: %d", numChannels_);
 	if (numChannels_ == 1)
 	{
 		format = AL_FORMAT_MONO16;
 	}
-	else if (numChannels_ == 2)
-	{
-		format = AL_FORMAT_STEREO16;
-	}
 	else
 	{
-		LOGF_X("Unsupported number of channels: %d", numChannels_);
-		exit(EXIT_FAILURE);
+		format = AL_FORMAT_STEREO16;
 	}
 
 	// Buffer size calculated as samples * channels * 16bit

@@ -1,10 +1,7 @@
-#include <cstdlib> // for exit()
 #define NCINE_INCLUDE_OPENAL
 #include "common_headers.h"
-
 #include "AudioBufferPlayer.h"
 #include "AudioBuffer.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 

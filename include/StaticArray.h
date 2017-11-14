@@ -2,9 +2,8 @@
 #define CLASS_NCINE_STATICARRAY
 
 #include <cstdio> // for NULL
-#include <cstdlib> // for exit()
+#include "common_macros.h"
 #include "ArrayIterator.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -82,6 +81,10 @@ class StaticArray
 	/// Inserts a new element as the last one in constant time
 	inline void insertBack(T element) { operator[](size_) = element; }
 
+	/// Read-only access to the specified element (with bounds checking)
+	const T &at(unsigned int index) const;
+	/// Access to the specified element (with bounds checking)
+	T &at(unsigned int index);
 	/// Read-only subscript operator
 	const T &operator[](unsigned int index) const;
 	/// Subscript operator
@@ -135,14 +138,24 @@ void StaticArray<T, C>::setSize(unsigned int newSize)
 }
 
 template <class T, unsigned int C>
+const T &StaticArray<T, C>::at(unsigned int index) const
+{
+	FATAL_ASSERT_MSG_X(index < size_, "Index %u is out of bounds (size: %u)", index, size_);
+	return operator[](index);
+}
+
+template <class T, unsigned int C>
+T &StaticArray<T, C>::at(unsigned int index)
+{
+	// Avoid creating "holes" into the array
+	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
+	return operator[](index);
+}
+
+template <class T, unsigned int C>
 const T &StaticArray<T, C>::operator[](unsigned int index) const
 {
-	if (index >= size_)
-	{
-		LOGF_X("Element %u out of size range", index);
-		exit(EXIT_FAILURE);
-	}
-
+	ASSERT_MSG_X(index < size_, "Index %u is out of bounds (size: %u)", index, size_);
 	return array_[index];
 }
 
@@ -150,18 +163,15 @@ template <class T, unsigned int C>
 T &StaticArray<T, C>::operator[](unsigned int index)
 {
 	// Avoid creating "holes" into the array
-	if (index > size_)
-	{
-		LOGF_X("Element %u out of size range", index);
-		exit(EXIT_FAILURE);
-	}
+	ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
+
 	// Adding an element at the back of the array
-	else if (index == size_)
+	if (index == size_)
 	{
 		// Need growing
 		if (size_ == capacity_)
 		{
-			LOGW_X("Element %u out of capacity range", index);
+			LOGW_X("Index %u is beyond capacity", index);
 		}
 		else
 		{

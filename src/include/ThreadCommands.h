@@ -1,8 +1,8 @@
 #ifndef CLASS_NCINE_THREADCOMMANDS
 #define CLASS_NCINE_THREADCOMMANDS
 
+#include "common_macros.h"
 #include "IThreadCommand.h"
-#include "ServiceLocator.h"
 #ifdef WITH_MULTITHREADING
 	#include "SceneNode.h"
 #endif

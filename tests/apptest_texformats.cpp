@@ -68,11 +68,8 @@ void MyEventHandler::onInit()
 	                     (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
 
 	const nc::IGfxCapabilities &gfxCaps = nc::theServiceLocator().gfxCapabilities();
-	if (gfxCaps.value(nc::IGfxCapabilities::MAX_TEXTURE_SIZE) < 512)
-	{
-		LOGF("Maximum device texture size is less than 512 pixels");
-		exit(EXIT_FAILURE);
-	}
+	const int maxTextureSize = gfxCaps.value(nc::IGfxCapabilities::MAX_TEXTURE_SIZE);
+	FATAL_ASSERT_MSG_X(maxTextureSize >= 512, "Maximum device texture size is %d, which is less than 512 pixels", maxTextureSize);
 
 #if WITH_PNG_FORMAT
 	filenames_.insertBack("texture_512_RGB.png");
@@ -163,11 +160,7 @@ void MyEventHandler::onInit()
 	}
 #endif
 
-	if (filenames_.isEmpty())
-	{
-		LOGF("No texture file names to load");
-		exit(EXIT_FAILURE);
-	}
+	FATAL_ASSERT_MSG(!filenames_.isEmpty(), "No texture file names to load");
 
 	dummy_ = new nc::SceneNode(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	textNode_ = new nc::TextNode(dummy_, font_);

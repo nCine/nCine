@@ -1,5 +1,4 @@
 #include "StackedBarPlotter.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 

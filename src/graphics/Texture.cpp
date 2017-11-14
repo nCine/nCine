@@ -1,11 +1,9 @@
-#include <cstdlib> // for exit()
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
-
+#include "common_macros.h"
 #include "Texture.h"
 #include "ITextureLoader.h"
 #include "GLTexture.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -110,12 +108,9 @@ void Texture::load(const ITextureLoader &texLoader)
 void Texture::load(const ITextureLoader &texLoader, int width, int height)
 {
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
-	if (width > gfxCaps.value(IGfxCapabilities::MAX_TEXTURE_SIZE) ||
-	    height > gfxCaps.value(IGfxCapabilities::MAX_TEXTURE_SIZE))
-	{
-		LOGF("Texture size is bigger than device maximum");
-		exit(EXIT_FAILURE);
-	}
+	const int maxTextureSize = gfxCaps.value(IGfxCapabilities::MAX_TEXTURE_SIZE);
+	FATAL_ASSERT_MSG_X(width <= maxTextureSize, "Texture width %d is bigger than device maximum %d", width, maxTextureSize);
+	FATAL_ASSERT_MSG_X(height <= maxTextureSize, "Texture height %d is bigger than device maximum %d", height, maxTextureSize);
 
 	glTexture_->texParameteri(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexture_->texParameteri(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

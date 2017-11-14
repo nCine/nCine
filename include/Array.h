@@ -2,11 +2,10 @@
 #define CLASS_NCINE_ARRAY
 
 #include <cstdio> // for NULL
-#include <cstdlib> // for exit()
 #include <cstring> // for memmove() and memcpy()
+#include "common_macros.h"
 #include "algorithms.h"
 #include "ArrayIterator.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -139,6 +138,10 @@ class Array
 	/// Inserts an array of elements at the end in constant time
 	void append(const T *elements, unsigned int amount);
 
+	/// Read-only access to the specified element (with bounds checking)
+	const T &at(unsigned int index) const;
+	/// Access to the specified element (with bounds checking)
+	T &at(unsigned int index);
 	/// Read-only subscript operator
 	const T &operator[](unsigned int index) const;
 	/// Subscript operator
@@ -180,6 +183,8 @@ Array<T> &Array<T>::operator=(Array<T> other)
 template <class T>
 void Array<T>::setCapacity(unsigned int newCapacity)
 {
+	FATAL_ASSERT_MSG(newCapacity > 0, "Zero is not a valid capacity");
+
 	// If the call does not come from the constructor
 	if (capacity_ != 0)
 	{
@@ -190,12 +195,7 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 			return;
 		}
 
-		if (newCapacity == 0)
-		{
-			LOGF("Zero is not a valid capacity");
-			exit(EXIT_FAILURE);
-		}
-		else if (newCapacity == capacity_)
+		if (newCapacity == capacity_)
 		{
 			LOGW_X("Array capacity already equal to %u", capacity_);
 			return;
@@ -216,7 +216,7 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 	{
 		if (newCapacity < size_) // shrinking
 		{
-			size_ = newCapacity;    // cropping last elements
+			size_ = newCapacity; // cropping last elements
 		}
 
 		memcpy(newArray, array_, sizeof(T)*size_);
@@ -247,22 +247,8 @@ template <class T>
 void Array<T>::insertRange(unsigned int index, const T *firstPtr, const T *lastPtr)
 {
 	// Cannot insert at more than one position after the last element
-	if (index > size_)
-	{
-		LOGF_X("Element %u out of size range", index);
-		exit(EXIT_FAILURE);
-	}
-
-	if (firstPtr == lastPtr)
-	{
-		// Graceful exit from the method
-		return;
-	}
-	else if (firstPtr > lastPtr)
-	{
-		LOGF_X("First pointer %p should precede the last one %p", firstPtr, lastPtr);
-		exit(EXIT_FAILURE);
-	}
+	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
+	FATAL_ASSERT_MSG_X(firstPtr < lastPtr, "First pointer %p should precede the last one %p", firstPtr, lastPtr);
 
 	if (size_ + 1 > capacity_)
 	{
@@ -278,11 +264,7 @@ template <class T>
 void Array<T>::insertAt(unsigned int index, T element)
 {
 	// Cannot insert at more than one position after the last element
-	if (index > size_)
-	{
-		LOGF_X("Element %u out of size range", index);
-		exit(EXIT_FAILURE);
-	}
+	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
 
 	if (size_ + 1 > capacity_)
 	{
@@ -319,22 +301,9 @@ template <class T>
 void Array<T>::removeRange(unsigned int firstIndex, unsigned int lastIndex)
 {
 	// Cannot remove past the last element
-	if (firstIndex > size_ - 1 || lastIndex > size_)
-	{
-		LOGF_X("Element %u and/or element %u out of size range", firstIndex, lastIndex);
-		exit(EXIT_FAILURE);
-	}
-
-	if (firstIndex == lastIndex)
-	{
-		// Graceful exit from the method
-		return;
-	}
-	else if (firstIndex > lastIndex)
-	{
-		LOGF_X("First index %u should be less than last index %u", firstIndex, lastIndex);
-		exit(EXIT_FAILURE);
-	}
+	FATAL_ASSERT_MSG_X(firstIndex < size_, "First index %u out of size range", firstIndex);
+	FATAL_ASSERT_MSG_X(lastIndex <= size_, "Last index %u out of size range", lastIndex);
+	FATAL_ASSERT_MSG_X(firstIndex < lastIndex, "First index %u should be less than last index %u", firstIndex, lastIndex);
 
 	// memmove() takes care of overlapping regions
 	memmove(array_ + firstIndex, array_ + lastIndex, sizeof(T) * (size_ - lastIndex));
@@ -373,14 +342,24 @@ void Array<T>::append(const T *elements, unsigned int amount)
 }
 
 template <class T>
+const T &Array<T>::at(unsigned int index) const
+{
+	FATAL_ASSERT_MSG_X(index < size_, "Index %u is out of bounds (size: %u)", index, size_);
+	return operator[](index);
+}
+
+template <class T>
+T &Array<T>::at(unsigned int index)
+{
+	// Avoid creating "holes" into the array
+	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
+	return operator[](index);
+}
+
+template <class T>
 const T &Array<T>::operator[](unsigned int index) const
 {
-	if (index > size_)
-	{
-		LOGF_X("Element %u out of size range", index);
-		exit(EXIT_FAILURE);
-	}
-
+	ASSERT_MSG_X(index < size_, "Index %u is out of bounds (size: %u)", index, size_);
 	return array_[index];
 }
 
@@ -388,13 +367,10 @@ template <class T>
 T &Array<T>::operator[](unsigned int index)
 {
 	// Avoid creating "holes" into the array
-	if (index > size_)
-	{
-		LOGF_X("Element %u out of size range", index);
-		exit(EXIT_FAILURE);
-	}
+	ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
+
 	// Adding an element at the back of the array
-	else if (index == size_)
+	if (index == size_)
 	{
 		// Need growing
 		if (size_ == capacity_)

@@ -1,7 +1,6 @@
 #include <stddef.h> // for offsetof()
 #include "RenderResources.h"
 #include "IFile.h" // for dataPath()
-#include "ServiceLocator.h"
 
 #ifdef WITH_EMBEDDED_SHADERS
 	#include "shader_strings.h"

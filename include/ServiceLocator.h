@@ -79,26 +79,4 @@ DLL_PUBLIC ServiceLocator &theServiceLocator();
 
 }
 
-#ifdef __GNUC__
-	#define FUNCTION __PRETTY_FUNCTION__
-#elif _MSC_VER
-	#define FUNCTION __FUNCTION__
-#else
-	#define FUNCTION __func__
-#endif
-
-#define LOGV_X(fmt, ...) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_VERBOSE, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
-#define LOGD_X(fmt, ...) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_DEBUG, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
-#define LOGI_X(fmt, ...) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_INFO, static_cast<const char *>("%s, -> " fmt), FUNCTION, ## __VA_ARGS__)
-#define LOGW_X(fmt, ...) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_WARN, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
-#define LOGE_X(fmt, ...) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_ERROR, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
-#define LOGF_X(fmt, ...) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_FATAL, static_cast<const char *>("%s -> " fmt), FUNCTION, ## __VA_ARGS__)
-
-#define LOGV(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_VERBOSE, static_cast<const char *>("%s -> " fmt), FUNCTION)
-#define LOGD(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_DEBUG, static_cast<const char *>("%s -> " fmt), FUNCTION)
-#define LOGI(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_INFO, static_cast<const char *>("%s, -> " fmt), FUNCTION)
-#define LOGW(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_WARN, static_cast<const char *>("%s -> " fmt), FUNCTION)
-#define LOGE(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_ERROR, static_cast<const char *>("%s -> " fmt), FUNCTION)
-#define LOGF(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LOG_FATAL, static_cast<const char *>("%s -> " fmt), FUNCTION)
-
 #endif

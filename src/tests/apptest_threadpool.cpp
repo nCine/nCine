@@ -3,7 +3,6 @@
 #include "ThreadCommands.h"
 #include "Application.h"
 #include "AppConfiguration.h"
-#include "ServiceLocator.h"
 #include "Timer.h"
 
 nc::IAppEventHandler *createAppEventHandler()

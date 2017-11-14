@@ -1,7 +1,6 @@
-#include <cstdlib> // for exit()
 #include <android_native_app_glue.h> // for android_app
+#include "common_macros.h"
 #include "EglGfxDevice.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -45,30 +44,20 @@ void EglGfxDevice::createSurface(struct android_app *state)
 	if (state->window != NULL)
 	{
 		surface_ = eglCreateWindowSurface(display_, config_, state->window, NULL);
-		if (surface_ == EGL_NO_SURFACE)
-		{
-			LOGF("eglCreateWindowSurface() returned EGL_NO_SURFACE");
-			exit(EXIT_FAILURE);
-		}
+		FATAL_ASSERT_MSG(surface_ != EGL_NO_SURFACE, "eglCreateWindowSurface() returned EGL_NO_SURFACE");
 	}
 }
 
 void EglGfxDevice::bindContext()
 {
-	if (eglMakeCurrent(display_, surface_, surface_, context_) == EGL_FALSE)
-	{
-		LOGF("eglMakeCurrent() returned EGL_FALSE");
-		exit(EXIT_FAILURE);
-	}
+	const EGLBoolean ret = eglMakeCurrent(display_, surface_, surface_, context_);
+	FATAL_ASSERT_MSG(ret != EGL_FALSE, "eglMakeCurrent() returned EGL_FALSE");
 }
 
 void EglGfxDevice::unbindContext()
 {
-	if (eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT) == EGL_FALSE)
-	{
-		LOGF("eglMakeCurrent() returned EGL_FALSE");
-		exit(EXIT_FAILURE);
-	}
+	const EGLBoolean ret = eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+	FATAL_ASSERT_MSG(ret != EGL_FALSE, "eglMakeCurrent() returned EGL_FALSE");
 }
 
 void EglGfxDevice::querySurfaceSize()
@@ -171,11 +160,7 @@ void EglGfxDevice::initDevice(struct android_app *state)
 
 	createSurface(state);
 	context_ = eglCreateContext(display_, config_, NULL, attribList);
-	if (context_ == EGL_NO_CONTEXT)
-	{
-		LOGF("eglCreateContext() returned EGL_NO_CONTEXT");
-		exit(EXIT_FAILURE);
-	}
+	FATAL_ASSERT_MSG(context_ != EGL_NO_CONTEXT, "eglCreateContext() returned EGL_NO_CONTEXT");
 
 	bindContext();
 	querySurfaceSize();

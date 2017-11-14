@@ -1,9 +1,8 @@
-#include <cstdlib> // for exit()
 #ifdef __ANDROID__
 	#include <android/api-level.h>
 #endif
+#include "common_macros.h"
 #include "TextureFormat.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -211,8 +210,7 @@ long int TextureFormat::calculateMipSizes(GLenum internalFormat, int width, int 
 	#endif
 #endif
 		default:
-			LOGF_X("MIP maps not supported for internal format: 0x%x", internalFormat);
-			exit(EXIT_FAILURE);
+			FATAL_MSG_X("MIP maps not supported for internal format: 0x%x", internalFormat);
 			break;
 	}
 
@@ -280,15 +278,9 @@ void TextureFormat::findExternalFormat()
 	}
 #endif
 
-	if (found == false)
-	{
-		LOGF_X("Unknown internal format: 0x%x", internalFormat_);
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		LOGI_X("Internal format: 0x%x - type: 0x%x", internalFormat_, type_);
-	}
+	FATAL_ASSERT_MSG_X(found, "Unknown internal format: 0x%x", internalFormat_);
+
+	LOGI_X("Internal format: 0x%x - type: 0x%x", internalFormat_, type_);
 }
 
 #ifndef __ANDROID__
@@ -564,39 +556,35 @@ void TextureFormat::checkFormatSupport() const
 		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
 		case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
 		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-			if (gfxCaps.hasExtension(IGfxCapabilities::EXT_TEXTURE_COMPRESSION_S3TC) == false)
-			{
-				LOGF("GL_EXT_texture_compression_s3tc not available");
-				exit(EXIT_FAILURE);
-			}
+		{
+			const bool hasS3tc = gfxCaps.hasExtension(IGfxCapabilities::EXT_TEXTURE_COMPRESSION_S3TC);
+			FATAL_ASSERT_MSG(hasS3tc, "GL_EXT_texture_compression_s3tc not available");
 			break;
+		}
 #else
 		case GL_ETC1_RGB8_OES:
-			if (gfxCaps.hasExtension(IGfxCapabilities::OES_COMPRESSED_ETC1_RGB8_TEXTURE) == false)
-			{
-				LOGF("GL_OES_compressed_etc1_rgb8_texture not available");
-				exit(EXIT_FAILURE);
-			}
+		{
+			const bool hasEct1 = gfxCaps.hasExtension(IGfxCapabilities::OES_COMPRESSED_ETC1_RGB8_TEXTURE);
+			FATAL_ASSERT_MSG(hasEct1, "GL_OES_compressed_etc1_rgb8_texture not available");
 			break;
+		}
 		case GL_ATC_RGB_AMD:
 		case GL_ATC_RGBA_EXPLICIT_ALPHA_AMD:
 		case GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD:
-			if (gfxCaps.hasExtension(IGfxCapabilities::AMD_COMPRESSED_ATC_TEXTURE) == false)
-			{
-				LOGF("GL_AMD_compressed_ATC_texture not available");
-				exit(EXIT_FAILURE);
-			}
+		{
+			const bool hasAtc = gfxCaps.hasExtension(IGfxCapabilities::AMD_COMPRESSED_ATC_TEXTURE);
+			FATAL_ASSERT_MSG(hasAtc, "GL_AMD_compressed_ATC_texture not available");
 			break;
+		}
 		case GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG:
 		case GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG:
 		case GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG:
 		case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
-			if (gfxCaps.hasExtension(IGfxCapabilities::IMG_TEXTURE_COMPRESSION_PVRTC) == false)
-			{
-				LOGF("GL_IMG_texture_compression_pvrtc not available");
-				exit(EXIT_FAILURE);
-			}
+		{
+			const bool hasPvr = gfxCaps.hasExtension(IGfxCapabilities::IMG_TEXTURE_COMPRESSION_PVRTC);
+			FATAL_ASSERT_MSG(hasPvr, "GL_IMG_texture_compression_pvrtc not available");
 			break;
+		}
 	#if __ANDROID_API__ >= 21
 		case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
 		case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
@@ -612,12 +600,11 @@ void TextureFormat::checkFormatSupport() const
 		case GL_COMPRESSED_RGBA_ASTC_10x10_KHR:
 		case GL_COMPRESSED_RGBA_ASTC_12x10_KHR:
 		case GL_COMPRESSED_RGBA_ASTC_12x12_KHR:
-			if (gfxCaps.hasExtension(IGfxCapabilities::KHR_TEXTURE_COMPRESSION_ASTC_LDR) == false)
-			{
-				LOGF("GL_KHR_texture_compression_astc_ldr not available");
-				exit(EXIT_FAILURE);
-			}
+		{
+			const bool hasAstc = gfxCaps.hasExtension(IGfxCapabilities::KHR_TEXTURE_COMPRESSION_ASTC_LDR);
+			FATAL_ASSERT_MSG(hasAstc, "GL_KHR_texture_compression_astc_ldr not available");
 			break;
+		}
 	#endif
 #endif
 	}

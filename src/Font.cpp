@@ -1,8 +1,8 @@
 #include <cstring>
+#include "common_macros.h"
 #include "Font.h"
 #include "FontGlyph.h"
 #include "IFile.h"
-#include "ServiceLocator.h"
 #include "Texture.h"
 
 namespace ncine {
@@ -76,11 +76,9 @@ void Font::parseFntFile(IFile *fileHandle)
 		else if (strncmp(buffer, "common", 6) == 0)
 		{
 			sscanf(buffer, "common lineHeight=%u base=%u scaleW=%u scaleH=%u", &lineHeight_, &base_, &width_, &height_);
-			if (static_cast<int>(width_) != texture_->width() || static_cast<int>(height_) != texture_->height())
-			{
-				LOGF_X("FNT texture has a different size: (%u, %u)", width_, height_);
-				exit(EXIT_FAILURE);
-			}
+
+			FATAL_ASSERT_MSG_X(static_cast<int>(width_) == texture_->width(), "FNT texture has a different width: %u", width_);
+			FATAL_ASSERT_MSG_X(static_cast<int>(height_) == texture_->height(), "FNT texture has a different height: %u", height_);
 		}
 		// skipping entirely the "page" line
 		else if (strncmp(buffer, "page", 4) == 0)

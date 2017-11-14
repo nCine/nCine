@@ -7,8 +7,8 @@
 #else
 	#include <io.h> // for _access()
 #endif
+#include "common_macros.h"
 #include "StandardFile.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 

@@ -1,8 +1,7 @@
-#include <cstdlib> // for exit()
+#include "common_macros.h"
 #include "ALAudioDevice.h"
 #include "AudioBufferPlayer.h"
 #include "AudioStreamPlayer.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -22,26 +21,20 @@ ALAudioDevice::ALAudioDevice()
 	: device_(NULL), context_(NULL), gain_(1.0f)
 {
 	device_ = alcOpenDevice(NULL);
-	if (device_ == NULL)
-	{
-		LOGF_X("alcOpenDevice failed: %x", alGetError());
-		exit(EXIT_FAILURE);
-	}
+	FATAL_ASSERT_MSG_X(device_ != NULL, "alcOpenDevice failed: %x", alGetError());
 
 	context_ = alcCreateContext(device_, NULL);
 	if (context_ == NULL)
 	{
 		alcCloseDevice(device_);
-		LOGF_X("alcCreateContext failed: %x", alGetError());
-		exit(EXIT_FAILURE);
+		FATAL_MSG_X("alcCreateContext failed: %x", alGetError());
 	}
 
 	if (!alcMakeContextCurrent(context_))
 	{
 		alcDestroyContext(context_);
 		alcCloseDevice(device_);
-		LOGF_X("alcMakeContextCurrent failed: %x", alGetError());
-		exit(EXIT_FAILURE);
+		FATAL_MSG_X("alcMakeContextCurrent failed: %x", alGetError());
 	}
 
 	alGenSources(MaxSources, sources_.data());
@@ -60,11 +53,7 @@ ALAudioDevice::~ALAudioDevice()
 	alcDestroyContext(context_);
 
 	ALCboolean result = alcCloseDevice(device_);
-	if (!result)
-	{
-		LOGF_X("alcCloseDevice failed: %d", alGetError());
-		exit(EXIT_FAILURE);
-	}
+	FATAL_ASSERT_MSG_X(result, "alcCloseDevice failed: %d", alGetError());
 }
 
 

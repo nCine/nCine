@@ -1,6 +1,5 @@
-#include <cstdlib> // for exit()
+#include "common_macros.h"
 #include "TextureLoaderKtx.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -55,26 +54,15 @@ void TextureLoaderKtx::readHeader(KtxHeader &header)
 		}
 	}
 
+	FATAL_ASSERT_MSG(checkPassed, "Not a KTX file");
 	// Checking for the header identifier
-	if (checkPassed)
-	{
-		if (header.endianess == 0x01020304)
-		{
-			LOGF("File endianess doesn't match machine one");
-			exit(EXIT_FAILURE);
-		}
+	FATAL_ASSERT_MSG(header.endianess != 0x01020304, "File endianess doesn't match machine one");
 
-		// Accounting for key-value data and `UInt32 imageSize` from first MIP level
-		headerSize_ = 64 + IFile::int32FromLE(header.bytesOfKeyValueData) + 4;
-		width_ = IFile::int32FromLE(header.pixelWidth);
-		height_ = IFile::int32FromLE(header.pixelHeight);
-		mipMapCount_ = IFile::int32FromLE(header.numberOfMipmapLevels);
-	}
-	else
-	{
-		LOGF("Not a KTX file");
-		exit(EXIT_FAILURE);
-	}
+	// Accounting for key-value data and `UInt32 imageSize` from first MIP level
+	headerSize_ = 64 + IFile::int32FromLE(header.bytesOfKeyValueData) + 4;
+	width_ = IFile::int32FromLE(header.pixelWidth);
+	height_ = IFile::int32FromLE(header.pixelHeight);
+	mipMapCount_ = IFile::int32FromLE(header.numberOfMipmapLevels);
 }
 
 void TextureLoaderKtx::parseFormat(const KtxHeader &header)

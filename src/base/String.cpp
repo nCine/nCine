@@ -1,7 +1,6 @@
 #include <cstring>
-#include <cstdlib> // for exit()
+#include "common_macros.h"
 #include "ncString.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -19,11 +18,7 @@ String::String()
 String::String(unsigned int capacity)
 	: array_(NULL), length_(0), capacity_(capacity)
 {
-	if (capacity_ == 0)
-	{
-		LOGF("Zero is not a valid capacity");
-		exit(EXIT_FAILURE);
-	}
+	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
 
 	array_ = new char[capacity_];
 	array_[0] = '\0';

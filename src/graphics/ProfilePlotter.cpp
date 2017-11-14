@@ -1,5 +1,5 @@
+#include "common_macros.h"
 #include "ProfilePlotter.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -55,15 +55,8 @@ bool ProfilePlotter::addValue(unsigned int varIndex, float value)
 
 PlottingVariable &ProfilePlotter::variable(unsigned int index)
 {
-	if (index < variables_.size())
-	{
-		return *variables_[index];
-	}
-	else
-	{
-		LOGF("Index out of range");
-		exit(EXIT_FAILURE);
-	}
+	ASSERT_MSG_X(index < variables_.size(), "Index %u is out of bounds (size: %u)", index, variables_.size());
+	return *variables_[index];
 }
 
 float ProfilePlotter::normBetweenRefValue(float min, float max) const

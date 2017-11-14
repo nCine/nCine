@@ -1,5 +1,5 @@
+#include "common_macros.h"
 #include "Thread.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -65,11 +65,7 @@ void Thread::run(ThreadFunctionPtr startFunction, void *arg)
 		threadInfo_.startFunction = startFunction;
 		threadInfo_.threadArg = arg;
 		handle_ = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, wrapperFunction, &threadInfo_, 0, NULL));
-		if (handle_ == 0)
-		{
-			LOGE("Error in _beginthreadex()");
-			::exit(EXIT_FAILURE);
-		}
+		FATAL_ASSERT_MSG(handle_, "Error in _beginthreadex()");
 	}
 	else
 	{

@@ -1,6 +1,4 @@
-#include <cstdlib> // for exit()
 #include "SceneNode.h"
-#include "ServiceLocator.h"
 #ifdef WITH_MULTITHREADING
 	#include "ThreadPool.h"
 	#include "ThreadCommands.h"

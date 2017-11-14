@@ -1,8 +1,7 @@
-#include <cstdlib> // for exit()
+#include "common_macros.h"
 #include "ThreadPool.h"
 #include "Thread.h"
 #include "IThreadCommand.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 

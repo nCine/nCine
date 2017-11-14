@@ -1,9 +1,8 @@
 #include <sys/stat.h> // for open()
 #include <fcntl.h> // for open()
 #include <unistd.h> // for close()
-#include <stdlib.h> // for exit()
+#include "common_macros.h"
 #include "AssetFile.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 

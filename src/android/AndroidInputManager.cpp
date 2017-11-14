@@ -6,7 +6,6 @@
 #include "IInputEventHandler.h"
 #include "AndroidJniHelper.h"
 #include "AndroidApplication.h"
-#include "ServiceLocator.h"
 #include "Timer.h"
 #include "JoyMapping.h"
 

@@ -1,5 +1,4 @@
 #include "FontGlyph.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 

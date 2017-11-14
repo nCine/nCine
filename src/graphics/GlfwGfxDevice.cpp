@@ -1,6 +1,5 @@
-#include <cstdlib> // for exit()
+#include "common_macros.h"
 #include "GlfwGfxDevice.h"
-#include "ServiceLocator.h"
 #include "ITextureLoader.h"
 
 namespace ncine {
@@ -75,12 +74,7 @@ void GlfwGfxDevice::setWindowIcon(const char *windowIconFilename)
 void GlfwGfxDevice::initGraphics()
 {
 	glfwSetErrorCallback(errorCallback);
-
-	if (glfwInit() != GL_TRUE)
-	{
-		LOGF("glfwInit() failed");
-		exit(EXIT_FAILURE);
-	}
+	FATAL_ASSERT_MSG(glfwInit() == GL_TRUE, "glfwInit() failed");
 }
 
 void GlfwGfxDevice::initDevice()
@@ -112,11 +106,7 @@ void GlfwGfxDevice::initDevice()
 	glfwWindowHint(GLFW_STENCIL_BITS, mode_.stencilBits());
 
 	windowHandle_ = glfwCreateWindow(width_, height_, "", monitor, NULL);
-	if (windowHandle_ == NULL)
-	{
-		LOGF("glfwCreateWindow failed");
-		exit(EXIT_FAILURE);
-	}
+	FATAL_ASSERT_MSG(windowHandle_, "glfwCreateWindow() failed");
 
 	glfwMakeContextCurrent(windowHandle_);
 
@@ -125,12 +115,7 @@ void GlfwGfxDevice::initDevice()
 
 #ifdef WITH_GLEW
 	GLenum err = glewInit();
-
-	if (GLEW_OK != err)
-	{
-		LOGF_X("GLEW error: %s", glewGetErrorString(err));
-		exit(EXIT_FAILURE);
-	}
+	FATAL_ASSERT_MSG_X(err == GLEW_OK, "GLEW error: %s", glewGetErrorString(err));
 
 	contextInfo_.debugContext = contextInfo_.debugContext && glewIsSupported("GL_ARB_debug_output");
 #endif

@@ -1,6 +1,6 @@
+#include "common_macros.h"
 #include "AndroidApplication.h"
 #include "IAppEventHandler.h"
-#include "ServiceLocator.h"
 #include "FileLogger.h"
 #include "EglGfxDevice.h"
 #include "AndroidInputManager.h"

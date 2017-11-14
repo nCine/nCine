@@ -1,8 +1,7 @@
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
-
+#include "common_macros.h"
 #include "IGfxDevice.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 

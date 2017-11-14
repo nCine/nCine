@@ -1,6 +1,4 @@
-#include <cstdlib> // for exit()
 #include "Sprite.h"
-#include "ServiceLocator.h"
 #include "RenderQueue.h"
 
 namespace ncine {

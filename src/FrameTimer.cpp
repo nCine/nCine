@@ -1,6 +1,6 @@
 #include <cstdio>
+#include "common_macros.h"
 #include "FrameTimer.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 

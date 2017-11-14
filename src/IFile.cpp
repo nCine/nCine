@@ -1,5 +1,6 @@
-#include <cstdlib> // for exit() and getenv()
+#include <cstdlib> // for getenv()
 #include <cstring> // for strlen()
+#include "common_macros.h"
 #include "IFile.h"
 #include "StandardFile.h"
 
@@ -8,7 +9,6 @@
 	#include <errno.h> // for EEXIST
 	#include "AndroidApplication.h"
 	#include "AssetFile.h"
-	#include "ServiceLocator.h"
 #endif
 
 #ifndef _WIN32

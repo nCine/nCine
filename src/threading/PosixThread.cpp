@@ -1,13 +1,13 @@
-#include <cstdlib> // for exit()
 #include <unistd.h> // for sysconf()
 #include <sched.h> // for sched_yield()
-#include "Thread.h"
-#include "ServiceLocator.h"
 
 #ifdef __APPLE__
 	#include <mach/thread_act.h>
 	#include <mach/thread_policy.h>
 #endif
+
+#include "common_macros.h"
+#include "Thread.h"
 
 namespace ncine {
 
@@ -100,11 +100,8 @@ void Thread::run(ThreadFunctionPtr startFunction, void *arg)
 	{
 		threadInfo_.startFunction = startFunction;
 		threadInfo_.threadArg = arg;
-		if (int error = pthread_create(&tid_, NULL, wrapperFunction, &threadInfo_))
-		{
-			LOGE_X("Error in pthread_create(): %d", error);
-			::exit(EXIT_FAILURE);
-		}
+		const int error = pthread_create(&tid_, NULL, wrapperFunction, &threadInfo_);
+		FATAL_ASSERT_MSG_X(!error, "Error in pthread_create(): %d", error);
 	}
 	else
 	{

@@ -1,6 +1,5 @@
-#include <cstdlib> // for exit()
+#include "common_macros.h"
 #include "TextureLoaderPng.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -34,21 +33,13 @@ void TextureLoaderPng::init()
 	fileHandle_->read(signature, SignatureLength);
 
 	// Checking PNG signature
-	if (!png_check_sig(signature, SignatureLength))
-	{
-		LOGF("PNG signature check failed");
-		exit(EXIT_FAILURE);
-	}
+	const int isValid = png_check_sig(signature, SignatureLength);
+	FATAL_ASSERT_MSG(isValid, "PNG signature check failed");
 
 	// Get PNG file info struct (memory is allocated by libpng)
 	png_structp pngPtr = NULL;
 	pngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-
-	if (pngPtr == NULL)
-	{
-		LOGF("Cannot create png read structure");
-		exit(EXIT_FAILURE);
-	}
+	FATAL_ASSERT_MSG(pngPtr, "Cannot create png read structure");
 
 	// Get PNG image data info struct (memory is allocated by libpng)
 	png_infop infoPtr = NULL;
@@ -56,9 +47,8 @@ void TextureLoaderPng::init()
 
 	if (infoPtr == NULL)
 	{
-		LOGF("Cannot create png info structure");
 		png_destroy_read_struct(&pngPtr, NULL, NULL);
-		exit(EXIT_FAILURE);
+		FATAL_MSG("Cannot create png info structure");
 	}
 
 	// Setting custom read function that uses an IFile as input
@@ -76,9 +66,8 @@ void TextureLoaderPng::init()
 
 	if (retVal != 1)
 	{
-		LOGF("Cannot create png info structure");
 		png_destroy_read_struct(&pngPtr, &infoPtr, NULL);
-		exit(EXIT_FAILURE);
+		FATAL_MSG("Cannot create png info structure");
 	}
 
 	width_ = width;
@@ -101,9 +90,8 @@ void TextureLoaderPng::init()
 			bpp_ = 1;
 			break;
 		default:
-			LOGF_X("Color type not supported: %d", colorType);
 			png_destroy_read_struct(&pngPtr, &infoPtr, NULL);
-			exit(EXIT_FAILURE);
+			FATAL_MSG_X("Color type not supported: %d", colorType);
 			break;
 	}
 

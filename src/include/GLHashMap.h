@@ -1,8 +1,7 @@
 #ifndef CLASS_NCINE_GLHASHMAP
 #define CLASS_NCINE_GLHASHMAP
 
-#include <cstdlib> // for exit()
-#include "ServiceLocator.h"
+#include "common_macros.h"
 
 namespace ncine {
 
@@ -55,8 +54,7 @@ class GLBufferObjectMappingFunc
 				return 1;
 				break;
 			default:
-				LOGE_X("No available case to handle key: %u", key);
-				exit(EXIT_FAILURE);
+				FATAL_MSG_X("No available case to handle key: %u", key);
 				break;
 		}
 	}
@@ -75,8 +73,7 @@ class GLFramebufferMappingFunc
 				return 0;
 				break;
 			default:
-				LOGE_X("No available case to handle key: %u", key);
-				exit(EXIT_FAILURE);
+				FATAL_MSG_X("No available case to handle key: %u", key);
 				break;
 		}
 	}
@@ -105,8 +102,7 @@ class GLTextureMappingFunc
 				break;
 #endif
 			default:
-				LOGE_X("No available case to handle key: %u", key);
-				exit(EXIT_FAILURE);
+				FATAL_MSG_X("No available case to handle key: %u", key);
 				break;
 		}
 	}

@@ -2,8 +2,8 @@
 	#include <GL/glew.h>
 #endif
 
+#include "common_macros.h"
 #include "SdlGfxDevice.h"
-#include "ServiceLocator.h"
 #include "ITextureLoader.h"
 
 namespace ncine {
@@ -86,11 +86,8 @@ void SdlGfxDevice::setWindowIcon(const char *windowIconFilename)
 
 void SdlGfxDevice::initGraphics()
 {
-	if (SDL_Init(SDL_INIT_VIDEO) < 0)
-	{
-		LOGF_X("SDL_Init(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
-		exit(EXIT_FAILURE);
-	}
+	const int err = SDL_Init(SDL_INIT_VIDEO);
+	FATAL_ASSERT_MSG_X(!err, "SDL_Init(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
 }
 
 void SdlGfxDevice::initDevice()
@@ -129,12 +126,7 @@ void SdlGfxDevice::initDevice()
 
 	// Creating a window with SDL2
 	windowHandle_ = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width_, height_, flags);
-
-	if (windowHandle_ == NULL)
-	{
-		LOGF_X("SDL_CreateWindow failed: %s", SDL_GetError());
-		exit(EXIT_FAILURE);
-	}
+	FATAL_ASSERT_MSG_X(windowHandle_, "SDL_CreateWindow failed: %s", SDL_GetError());
 
 	// resolution should be set to current screen size
 	if (width_ == 0 || height_ == 0)
@@ -143,30 +135,14 @@ void SdlGfxDevice::initDevice()
 	}
 
 	glContextHandle_ = SDL_GL_CreateContext(windowHandle_);
-
-	if (glContextHandle_ == NULL)
-	{
-		LOGF_X("SDL_GL_CreateContext failed: %s", SDL_GetError());
-		exit(EXIT_FAILURE);
-	}
+	FATAL_ASSERT_MSG_X(glContextHandle_, "SDL_GL_CreateContext failed: %s", SDL_GetError());
 
 	int interval = mode_.hasVSync() ? 1 : 0;
 	SDL_GL_SetSwapInterval(interval);
 
 #ifdef WITH_GLEW
 	GLenum err = glewInit();
-
-	if (GLEW_OK != err)
-	{
-		LOGF_X("GLEW error: %s", glewGetErrorString(err));
-		exit(EXIT_FAILURE);
-	}
-
-	if (!GLEW_VERSION_2_1)
-	{
-		LOGF("OpenGL 2.1 is not supported");
-		exit(EXIT_FAILURE);
-	}
+	FATAL_ASSERT_MSG_X(err == GLEW_OK, "GLEW error: %s", glewGetErrorString(err));
 #endif
 }
 

@@ -1,5 +1,4 @@
 #include "ThreadSync.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 

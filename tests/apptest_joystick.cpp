@@ -1,6 +1,5 @@
 #include "apptest_joystick.h"
 #include "Application.h"
-#include "ServiceLocator.h"
 #include "ncString.h"
 #include "Texture.h"
 #include "Sprite.h"

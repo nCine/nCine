@@ -1,6 +1,5 @@
-#include <cstdlib> // for exit()
+#include "common_macros.h"
 #include "TextureLoaderWebP.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -37,8 +36,7 @@ void TextureLoaderWebP::init()
 	if (WebPGetInfo(fileBuffer, fileSize, &width_, &height_) == 0)
 	{
 		delete[] fileBuffer;
-		LOGF("Cannot read WebP header");
-		exit(EXIT_FAILURE);
+		FATAL_MSG("Cannot read WebP header");
 	}
 
 	LOGI_X("Header found: w:%d h:%d", width_, height_);
@@ -47,8 +45,7 @@ void TextureLoaderWebP::init()
 	if (WebPGetFeatures(fileBuffer, fileSize, &features) != VP8_STATUS_OK)
 	{
 		delete[] fileBuffer;
-		LOGF("Cannot retrieve WebP features from headers");
-		exit(EXIT_FAILURE);
+		FATAL_MSG("Cannot retrieve WebP features from headers");
 	}
 
 	LOGI_X("Bitstream features found: alpha:%d animation:%d format:%d",
@@ -66,8 +63,7 @@ void TextureLoaderWebP::init()
 		{
 			delete[] fileBuffer;
 			delete[] pixels_;
-			LOGF("Cannot decode RGBA WebP image");
-			exit(EXIT_FAILURE);
+			FATAL_MSG("Cannot decode RGBA WebP image");
 		}
 	}
 	else
@@ -76,8 +72,7 @@ void TextureLoaderWebP::init()
 		{
 			delete[] fileBuffer;
 			delete[] pixels_;
-			LOGF("Cannot decode RGB WebP image");
-			exit(EXIT_FAILURE);
+			FATAL_MSG("Cannot decode RGB WebP image");
 		}
 	}
 

@@ -1,9 +1,8 @@
+#include <cstring> // for CheckGLExtension()
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
-
-#include <cstring> // for CheckGLExtension()
+#include "common_macros.h"
 #include "GfxCapabilities.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 

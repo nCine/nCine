@@ -1,5 +1,5 @@
+#include "common_macros.h"
 #include "GLShader.h"
-#include "ServiceLocator.h"
 #include "IFile.h"
 
 namespace ncine {

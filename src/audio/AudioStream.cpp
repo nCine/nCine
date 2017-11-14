@@ -1,10 +1,8 @@
-#include <cstdlib> // for exit()
 #define NCINE_INCLUDE_OPENAL
 #include "common_headers.h"
-
+#include "common_macros.h"
 #include "AudioStream.h"
 #include "IAudioLoader.h"
-#include "ServiceLocator.h"
 #include "Array.h"
 
 namespace ncine {
@@ -22,20 +20,16 @@ AudioStream::AudioStream(const char *filename)
 
 	audioLoader_ = IAudioLoader::createFromFile(filename);
 	frequency_ = audioLoader_->frequency();
-	int numhannels = audioLoader_->numChannels();
+	int numChannels = audioLoader_->numChannels();
 
-	if (numhannels == 1)
+	FATAL_ASSERT_MSG_X(numChannels == 1 || numChannels == 2, "Unsupported number of channels: %d", numChannels);
+	if (numChannels == 1)
 	{
 		format_ = AL_FORMAT_MONO16;
 	}
-	else if (numhannels == 2)
-	{
-		format_ = AL_FORMAT_STEREO16;
-	}
 	else
 	{
-		LOGF_X("Unsupported number of channels: %d", numhannels);
-		exit(EXIT_FAILURE);
+		format_ = AL_FORMAT_STEREO16;
 	}
 }
 

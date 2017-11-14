@@ -2,7 +2,6 @@
 #include "FontGlyph.h"
 #include "Texture.h"
 #include "RenderCommand.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 

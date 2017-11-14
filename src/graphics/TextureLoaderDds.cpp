@@ -1,6 +1,5 @@
-#include <cstdlib> // for exit()
+#include "common_macros.h"
 #include "TextureLoaderDds.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -53,8 +52,7 @@ void TextureLoaderDds::readHeader(DdsHeader &header)
 	}
 	else
 	{
-		LOGF("Not a DDS file");
-		exit(EXIT_FAILURE);
+		FATAL_MSG("Not a DDS file");
 	}
 }
 
@@ -67,10 +65,10 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 	// Texture contains compressed RGB data, dwFourCC contains valid data
 	if (flags & DDPF_FOURCC)
 	{
-		uint32_t fourCC = IFile::int32FromLE(header.ddspf.dwFourCC);
+		const uint32_t fourCC = IFile::int32FromLE(header.ddspf.dwFourCC);
 
-		LOGI_X("FourCC: \"%c%c%c%c\" (0x%x)", (reinterpret_cast<char *>(&fourCC))[0], (reinterpret_cast<char *>(&fourCC))[1],
-		       (reinterpret_cast<char *>(&fourCC))[2], (reinterpret_cast<char *>(&fourCC))[3], fourCC);
+		const char *fourCCchars = reinterpret_cast<const char *>(&fourCC);
+		LOGI_X("FourCC: \"%c%c%c%c\" (0x%x)", fourCCchars[0], fourCCchars[1], fourCCchars[2], fourCCchars[3], fourCC);
 
 		// Parsing the FourCC format
 		switch (fourCC)
@@ -100,8 +98,7 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 				break;
 #endif
 			default:
-				LOGF("Unsupported FourCC compression code");
-				exit(EXIT_FAILURE);
+				FATAL_MSG_X("Unsupported FourCC compression code: %u", fourCC);
 				break;
 		}
 
@@ -154,8 +151,7 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 */
 			else
 			{
-				LOGF("Unsupported DDPF_RGB pixel format");
-				exit(EXIT_FAILURE);
+				FATAL_MSG("Unsupported DDPF_RGB pixel format");
 			}
 		}
 		// Used in some older DDS files for single channel color uncompressed data
@@ -177,8 +173,7 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 		}
 		else
 		{
-			LOGF("Unsupported DDS uncompressed pixel format");
-			exit(EXIT_FAILURE);
+			FATAL_MSG_X("Unsupported DDS uncompressed pixel format: %u", flags);
 		}
 
 		loadPixels(internalFormat, type);

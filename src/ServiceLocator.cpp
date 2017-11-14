@@ -1,5 +1,5 @@
 #include <cstdio> // for NULL
-#include "ServiceLocator.h"
+#include "common_macros.h"
 
 namespace ncine {
 

@@ -1,10 +1,9 @@
-#include <cstdlib> // for exit()
+#include "common_macros.h"
 #include "IAudioLoader.h"
 #include "AudioLoaderWav.h"
 #ifdef WITH_VORBIS
 	#include "AudioLoaderOgg.h"
 #endif
-#include "ServiceLocator.h"
 #include "IFile.h"
 
 namespace ncine {

@@ -1,7 +1,6 @@
 #include <ctime>
 #include "Application.h"
 #include "IAppEventHandler.h"
-#include "ServiceLocator.h"
 #include "IFile.h"
 #include "ArrayIndexer.h"
 #include "GfxCapabilities.h"

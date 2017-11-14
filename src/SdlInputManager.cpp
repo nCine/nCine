@@ -1,9 +1,9 @@
 #include <cstring> // for memset()
 #include <SDL2/SDL.h>
 
+#include "common_macros.h"
 #include "SdlInputManager.h"
 #include "IInputEventHandler.h"
-#include "ServiceLocator.h"
 #include "FileLogger.h"
 #include "Application.h"
 #include "JoyMapping.h"
@@ -36,11 +36,8 @@ char SdlInputManager::joyGuidString_[33];
 
 SdlInputManager::SdlInputManager()
 {
-	if (SDL_WasInit(SDL_INIT_VIDEO) == 0)
-	{
-		LOGF("SDL video subsystem is not initialized");
-		exit(EXIT_FAILURE);
-	}
+	const unsigned int ret = SDL_WasInit(SDL_INIT_VIDEO);
+	FATAL_ASSERT_MSG(ret != 0, "SDL video subsystem is not initialized");
 
 	// Initializing the joystick subsystem
 	SDL_InitSubSystem(SDL_INIT_JOYSTICK);

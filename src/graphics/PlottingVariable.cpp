@@ -1,5 +1,4 @@
 #include "PlottingVariable.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 

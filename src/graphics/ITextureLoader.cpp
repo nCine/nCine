@@ -1,4 +1,4 @@
-#include <cstdlib> // for exit()
+#include "common_macros.h"
 #include "ITextureLoader.h"
 #include "TextureLoaderDds.h"
 #include "TextureLoaderPvr.h"
@@ -12,7 +12,6 @@
 #ifdef __ANDROID__
 	#include "TextureLoaderPkm.h"
 #endif
-#include "ServiceLocator.h"
 
 namespace ncine {
 

@@ -1,6 +1,5 @@
-#include <cstdlib> // for exit()
+#include "common_macros.h"
 #include "TextureLoaderPvr.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -38,23 +37,17 @@ void TextureLoaderPvr::readHeader(Pvr3Header &header)
 	// PVR3 header is 52 bytes long
 	fileHandle_->read(&header, 52);
 
-	// Checking for the header presence
-	if (IFile::int32FromLE(header.version) == 0x03525650) // "PVR"03
-	{
-		headerSize_ = 52 + IFile::int32FromLE(header.metaDataSize);
-		width_ = IFile::int32FromLE(header.width);
-		height_ = IFile::int32FromLE(header.height);
-		mipMapCount_ = header.numMipmaps;
+	// Checking for the header presence ("PVR"03)
+	FATAL_ASSERT_MSG(IFile::int32FromLE(header.version) == 0x03525650, "Not a PVR3 file");
 
-		if (mipMapCount_ == 0)
-		{
-			mipMapCount_ = 1;
-		}
-	}
-	else
+	headerSize_ = 52 + IFile::int32FromLE(header.metaDataSize);
+	width_ = IFile::int32FromLE(header.width);
+	height_ = IFile::int32FromLE(header.height);
+	mipMapCount_ = header.numMipmaps;
+
+	if (mipMapCount_ == 0)
 	{
-		LOGF("Not a PVR3 file");
-		exit(EXIT_FAILURE);
+		mipMapCount_ = 1;
 	}
 }
 
@@ -100,8 +93,7 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 				break;
 			case FMT_PVRTCII_2BPP:
 			case FMT_PVRTCII_4BPP:
-				LOGF("No support for PVRTC-II compression");
-				exit(EXIT_FAILURE);
+				FATAL_MSG("No support for PVRTC-II compression");
 				break;
 #if __ANDROID_API__ >= 21
 			case FMT_ASTC_4x4:
@@ -149,8 +141,7 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 #endif
 #endif
 			default:
-				LOGF_X("Unsupported PVR3 compressed format: 0x%llx", pixelFormat);
-				exit(EXIT_FAILURE);
+				FATAL_MSG_X("Unsupported PVR3 compressed format: 0x%llx", pixelFormat);
 				break;
 		}
 
@@ -204,8 +195,7 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 				internalFormat = GL_ALPHA;
 				break;
 			default:
-				LOGF_X("Unsupported PVR3 uncompressed format: 0x%llx", pixelFormat);
-				exit(EXIT_FAILURE);
+				FATAL_MSG_X("Unsupported PVR3 uncompressed format: 0x%llx", pixelFormat);
 				break;
 		}
 

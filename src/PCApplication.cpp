@@ -1,6 +1,5 @@
 #include "PCApplication.h"
 #include "IAppEventHandler.h"
-#include "ServiceLocator.h"
 #include "FileLogger.h"
 
 #if defined(WITH_SDL)

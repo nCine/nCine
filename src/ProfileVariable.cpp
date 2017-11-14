@@ -1,6 +1,5 @@
-#include <cstdlib> // for exit()
+#include "common_macros.h"
 #include "ProfileVariable.h"
-#include "ServiceLocator.h"
 
 namespace ncine {
 
@@ -12,18 +11,12 @@ ProfileVariable::ProfileVariable(unsigned int numValues, float rejectDelay)
 	: numValues_(numValues), rejectDelay_(rejectDelay), nextIndex_(0),
 	  min_(0.0f), max_(0.0f), mean_(0.0f), isFirstValue_(true)
 {
-	if (numValues_ > 0)
+	FATAL_ASSERT_MSG(numValues > 0, "Array size should be greater than zero");
+
+	values_ = new float[numValues_];
+	for (unsigned int i = 0; i < numValues_; i++)
 	{
-		values_ = new float[numValues_];
-		for (unsigned int i = 0; i < numValues_; i++)
-		{
-			values_[i] = 0.0f;
-		}
-	}
-	else
-	{
-		LOGF("Array size should be greater than zero");
-		exit(EXIT_FAILURE);
+		values_[i] = 0.0f;
 	}
 }
 
