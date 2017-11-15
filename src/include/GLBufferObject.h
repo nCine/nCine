@@ -11,7 +11,7 @@ namespace ncine {
 class GLBufferObject
 {
   public:
-	explicit GLBufferObject(GLenum type);
+	explicit GLBufferObject(GLenum target);
 	~GLBufferObject();
 
 	inline GLuint glHandle() const { return glHandle_; }

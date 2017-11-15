@@ -135,7 +135,7 @@ void TextNode::draw(RenderQueue &renderQueue)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void TextNode::init(unsigned int stringLength)
+void TextNode::init(unsigned int maxStringLength)
 {
 	type_ = TEXTNODE_TYPE;
 	setLayer(DrawableNode::HUD_LAYER);
@@ -145,8 +145,8 @@ void TextNode::init(unsigned int stringLength)
 	                                               Material::TEXTNODE_COLOR_PROGRAM : Material::TEXTNODE_GRAY_PROGRAM;
 	renderCommand_->material().setShaderProgram(shaderProgram);
 	renderCommand_->material().setTexture(*font_->texture());
-	// `stringLength` characters, each has 6 vertices with 2 components for position and 2 for texcoords
-	renderCommand_->geometry().createCustomVbo(stringLength * 6 * 2 * 2, GL_DYNAMIC_DRAW);
+	// `maxStringLength` characters, each has 6 vertices with 2 components for position and 2 for texcoords
+	renderCommand_->geometry().createCustomVbo(maxStringLength * 6 * 2 * 2, GL_DYNAMIC_DRAW);
 }
 
 void TextNode::calculateBoundaries() const

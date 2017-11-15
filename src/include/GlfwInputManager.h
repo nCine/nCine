@@ -120,7 +120,7 @@ class GlfwInputManager : public IInputManager
 		JoystickEventsSimulator();
 		void resetJoystickState(int joyId);
 		void simulateButtonsEvents(int joyId, int numButtons, const unsigned char *buttons);
-		void simulateAxesEvents(int joyId, int numAxes, const float *axes);
+		void simulateAxesEvents(int joyId, int numAxes, const float *axesValues);
 
 	  private:
 		static const unsigned int MaxNumButtons = 16;

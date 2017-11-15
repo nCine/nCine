@@ -8,13 +8,13 @@
 #include "AndroidJniHelper.h"
 
 /// Processes the next application command
-void engine_handle_cmd(struct android_app *app, int32_t cmd)
+void engine_handle_cmd(struct android_app *state, int32_t cmd)
 {
-	nc::AndroidApplication::processCommand(app, cmd);
+	nc::AndroidApplication::processCommand(state, cmd);
 }
 
 /// Parses the next input event
-int32_t engine_handle_input(struct android_app *app, AInputEvent *event)
+int32_t engine_handle_input(struct android_app *state, AInputEvent *event)
 {
 	return static_cast<int32_t>(nc::AndroidInputManager::parseEvent(event));
 }
@@ -77,7 +77,7 @@ void AndroidApplication::start(struct android_app *state, IAppEventHandler * (*c
 	ANativeActivity_finish(state->activity);
 }
 
-void AndroidApplication::processCommand(struct android_app *app, int32_t cmd)
+void AndroidApplication::processCommand(struct android_app *state, int32_t cmd)
 {
 	static EglGfxDevice *eglGfxDevice = NULL;
 
@@ -89,7 +89,7 @@ void AndroidApplication::processCommand(struct android_app *app, int32_t cmd)
 
 		case APP_CMD_INIT_WINDOW:
 			LOGI("APP_CMD_INIT_WINDOW event received");
-			if (app->window != NULL)
+			if (state->window != NULL)
 			{
 				if (theAndroidApplication().isInitialized() == false)
 				{
@@ -99,7 +99,7 @@ void AndroidApplication::processCommand(struct android_app *app, int32_t cmd)
 				}
 				else
 				{
-					eglGfxDevice->createSurface(app);
+					eglGfxDevice->createSurface(state);
 					eglGfxDevice->bindContext();
 				}
 			}

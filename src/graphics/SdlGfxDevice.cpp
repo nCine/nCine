@@ -18,7 +18,7 @@ SDL_Window *SdlGfxDevice::windowHandle_ = NULL;
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-SdlGfxDevice::SdlGfxDevice(int width, int height, const GLContextInfo &contextInfo, DisplayMode mode, bool isFullScreen)
+SdlGfxDevice::SdlGfxDevice(int width, int height, const GLContextInfo &contextInfo, const DisplayMode &mode, bool isFullScreen)
 	: IGfxDevice(width, height, contextInfo, mode, isFullScreen)
 {
 	initGraphics();

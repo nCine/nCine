@@ -22,7 +22,7 @@ class Matrix4x4
 	Vector4<T> &operator[](unsigned int index);
 	const Vector4<T> &operator[](unsigned int index) const;
 
-	bool operator==(const Matrix4x4 &v) const;
+	bool operator==(const Matrix4x4 &m) const;
 	Matrix4x4 operator-() const;
 
 	Matrix4x4 &operator+=(const Matrix4x4 &m);
