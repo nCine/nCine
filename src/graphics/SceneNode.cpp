@@ -53,7 +53,7 @@ SceneNode::~SceneNode()
 	List<SceneNode *>::ConstIterator i = children_.begin();
 	while (i != children_.end())
 	{
-		delete(*i++);
+		delete (*i++);
 	}
 
 	if (parent_)
@@ -98,9 +98,9 @@ bool SceneNode::removeChildNode(SceneNode *childNode)
 }
 
 /*!
-	It is faster to remove through an iterator than with a linear search for a specific node.
-	\return True if the node has been removed
-*/
+ * It is faster to remove through an iterator than with a linear search for a specific node.
+ * \return True if the node has been removed
+ */
 bool SceneNode::removeChildNode(List<SceneNode *>::ConstIterator it)
 {
 	bool hasBeenRemoved = false;
@@ -196,7 +196,7 @@ void SceneNode::transform()
 		worldMatrix_ = parent_->worldMatrix_ * localMatrix_;
 
 		absScaleFactor_ *= parent_->absScaleFactor_;
-		absRotation_ += parent_->absRotation_ ;
+		absRotation_ += parent_->absRotation_;
 		absColor_ *= parent_->absColor_;
 	}
 	else

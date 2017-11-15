@@ -50,17 +50,17 @@ inline void printMatrix4x4f(const nc::Matrix4x4f &mat)
 	printf("]\n");
 }
 
-template<int value>
+template <int value>
 class AddValue
 {
   public:
 	inline void operator()(int &n) const { n += value; }
 };
 
-template<int value>
+template <int value>
 inline void addValue(int &n) { n += value; }
 
-template<int value>
+template <int value>
 inline int copyAddValue(const int &n) { return n + value; }
 
 }

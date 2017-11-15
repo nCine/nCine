@@ -10,12 +10,12 @@
 namespace {
 
 #ifdef __ANDROID__
-	const float VerticalTextPos = 0.5f;
-	const char *TextureFile = "texture4.webp";
-	const char *FontTextureFile = "DroidSans32_256.webp";
+const float VerticalTextPos = 0.5f;
+const char *TextureFile = "texture4.webp";
+const char *FontTextureFile = "DroidSans32_256.webp";
 #else
-	const float VerticalTextPos = 0.3f;
-	const char *FontTextureFile = "DroidSans32_256.png";
+const float VerticalTextPos = 0.3f;
+const char *FontTextureFile = "DroidSans32_256.png";
 #endif
 const char *FontFntFile = "DroidSans32_256.fnt";
 

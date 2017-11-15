@@ -6,7 +6,7 @@
 namespace ncine {
 
 /// The class handling opening, reading and closing a standard file
-class StandardFile: public IFile
+class StandardFile : public IFile
 {
   public:
 	/// Constructs a standard file object

@@ -19,7 +19,7 @@ class DLL_PUBLIC ParticleAffector
 };
 
 /// Particle acceleration affector
-class DLL_PUBLIC AccelerationAffector: public ParticleAffector
+class DLL_PUBLIC AccelerationAffector : public ParticleAffector
 {
   public:
 	/// X and Y components of the accelerator vector
@@ -33,7 +33,7 @@ class DLL_PUBLIC AccelerationAffector: public ParticleAffector
 };
 
 /// Particle color affector
-class DLL_PUBLIC ColorAffector: public ParticleAffector
+class DLL_PUBLIC ColorAffector : public ParticleAffector
 {
   public:
 	ColorAffector() : colorSteps_(4) { }
@@ -55,7 +55,7 @@ class DLL_PUBLIC ColorAffector: public ParticleAffector
 		float time;
 		Color color;
 
-		ColorStep(float newTime, Color newColor): time(newTime), color(newColor) { }
+		ColorStep(float newTime, Color newColor) : time(newTime), color(newColor) { }
 	};
 
 	Array<ColorStep *> colorSteps_;
@@ -67,7 +67,7 @@ class DLL_PUBLIC ColorAffector: public ParticleAffector
 };
 
 /// Particle size affector
-class DLL_PUBLIC SizeAffector: public ParticleAffector
+class DLL_PUBLIC SizeAffector : public ParticleAffector
 {
   public:
 	/// Constructs a size affector with a base scale factor as a reference
@@ -90,7 +90,7 @@ class DLL_PUBLIC SizeAffector: public ParticleAffector
 		float time;
 		float scale;
 
-		SizeStep(float newTime, float newScale): time(newTime), scale(newScale) { }
+		SizeStep(float newTime, float newScale) : time(newTime), scale(newScale) { }
 	};
 
 	Array<SizeStep *> sizeSteps_;

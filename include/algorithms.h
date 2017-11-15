@@ -18,7 +18,7 @@ inline const T &min(const T &a, const T &b)
 }
 
 /// Returns the maximum between two objects that support operator<
-template<class T>
+template <class T>
 inline const T &max(const T &a, const T &b)
 {
 	return (a < b) ? b : a;
@@ -44,7 +44,7 @@ inline void swap(T &a, T &b)
 }
 
 /// Clamp the value of an object between two others that support operator<
-template<class T>
+template <class T>
 inline const T &clamp(const T &value, const T &minValue, const T &maxValue)
 {
 	return min(max(value, minValue), maxValue);
@@ -202,11 +202,17 @@ inline void advance(Iterator &it, int n, BidirectionalIteratorTag)
 {
 	if (n < 0)
 	{
-		while (n++) { --it; }
+		while (n++)
+		{
+			--it;
+		}
 	}
 	else
 	{
-		while (n--) { ++it; }
+		while (n--)
+		{
+			++it;
+		}
 	}
 }
 
@@ -216,7 +222,10 @@ inline void advance(Iterator &it, int n, ForwardIteratorTag)
 {
 	if (n > 0)
 	{
-		while (n--) { ++it; }
+		while (n--)
+		{
+			++it;
+		}
 	}
 }
 
@@ -299,7 +308,10 @@ inline bool allOf(Iterator first, const Iterator last, UnaryPredicate pred)
 {
 	for (; first != last; ++first)
 	{
-		if (!pred(*first)) { return false; }
+		if (!pred(*first))
+		{
+			return false;
+		}
 	}
 
 	return true;
@@ -311,7 +323,10 @@ inline bool noneOf(Iterator first, const Iterator last, UnaryPredicate pred)
 {
 	for (; first != last; ++first)
 	{
-		if (pred(*first)) { return false; }
+		if (pred(*first))
+		{
+			return false;
+		}
 	}
 
 	return true;
@@ -323,14 +338,17 @@ inline bool anyOf(Iterator first, const Iterator last, UnaryPredicate pred)
 {
 	for (; first != last; ++first)
 	{
-		if (pred(*first)) { return true; }
+		if (pred(*first))
+		{
+			return true;
+		}
 	}
 
 	return false;
 }
 
 /// Applies a function to each element in range
-template<class Iterator, class Function>
+template <class Iterator, class Function>
 Function forEach(Iterator first, const Iterator last, Function fn)
 {
 	for (; first != last; ++first)
@@ -342,36 +360,45 @@ Function forEach(Iterator first, const Iterator last, Function fn)
 }
 
 /// Returns an iterator to the first element in range equal to value, last element otherwise
-template<class Iterator, class T>
+template <class Iterator, class T>
 Iterator find(Iterator first, const Iterator last, const T &value)
 {
 	for (; first != last; ++first)
 	{
-		if (*first == value) { return first; }
+		if (*first == value)
+		{
+			return first;
+		}
 	}
 
 	return last;
 }
 
 /// Returns an iterator to the first element in range satisfying the condition, last element otherwise
-template<class Iterator, class UnaryPredicate>
+template <class Iterator, class UnaryPredicate>
 Iterator findIf(Iterator first, const Iterator last, UnaryPredicate pred)
 {
 	for (; first != last; ++first)
 	{
-		if (pred(*first)) { return first; }
+		if (pred(*first))
+		{
+			return first;
+		}
 	}
 
 	return last;
 }
 
 /// Returns an iterator to the first element in range not satisfying the condition, last element otherwise
-template<class Iterator, class UnaryPredicate>
+template <class Iterator, class UnaryPredicate>
 Iterator findIfNot(Iterator first, const Iterator last, UnaryPredicate pred)
 {
 	for (; first != last; ++first)
 	{
-		if (!pred(*first)) { return first; }
+		if (!pred(*first))
+		{
+			return first;
+		}
 	}
 
 	return last;
@@ -385,7 +412,10 @@ inline int count(Iterator first, const Iterator last, const T &value)
 
 	for (; first != last; ++first)
 	{
-		if (*first == value) { counter++; }
+		if (*first == value)
+		{
+			counter++;
+		}
 	}
 
 	return counter;
@@ -399,7 +429,10 @@ inline int countIf(Iterator first, const Iterator last, UnaryPredicate pred)
 
 	for (; first != last; ++first)
 	{
-		if (pred(*first)) { counter++; }
+		if (pred(*first))
+		{
+			counter++;
+		}
 	}
 
 	return counter;
@@ -424,7 +457,10 @@ inline bool equal(Iterator1 first1, const Iterator1 last1, Iterator2 first2)
 template <class Iterator>
 inline Iterator minElement(Iterator first, const Iterator last)
 {
-	if (first == last) { return last; }
+	if (first == last)
+	{
+		return last;
+	}
 	Iterator smallest = first;
 	++first;
 
@@ -443,7 +479,10 @@ inline Iterator minElement(Iterator first, const Iterator last)
 template <class Iterator>
 inline Iterator maxElement(Iterator first, const Iterator last)
 {
-	if (first == last) { return last; }
+	if (first == last)
+	{
+		return last;
+	}
 	Iterator largest = first;
 	++first;
 
@@ -459,7 +498,7 @@ inline Iterator maxElement(Iterator first, const Iterator last)
 }
 
 /// Clamp the value of all elements in the range
-template<class Iterator, class T>
+template <class Iterator, class T>
 inline const T &clampElements(Iterator first, const Iterator last, const T &minValue, const T &maxValue)
 {
 	for (; first != last; ++first)
@@ -472,7 +511,7 @@ inline const T &clampElements(Iterator first, const Iterator last, const T &minV
 // TEMPLATE FUNCTIONS WITH ITERATORS (modifying)
 ///////////////////////////////////////////////////////////
 
-template<class Iterator1, class Iterator2>
+template <class Iterator1, class Iterator2>
 void iterSwap(Iterator1 a, Iterator2 b)
 {
 	swap(*a, *b);
@@ -618,7 +657,7 @@ inline void fillN(Iterator first, unsigned int n, const T &value)
 
 /// Assigns the values returned by the generator to the elements in the range
 template <class Iterator, class Generator>
-void generate(Iterator first, const Iterator last, Generator gen )
+void generate(Iterator first, const Iterator last, Generator gen)
 {
 	while (first != last)
 	{
@@ -629,7 +668,7 @@ void generate(Iterator first, const Iterator last, Generator gen )
 
 /// Assigns the values returned by the generator to the first n elements pointed by the iterator
 template <class Iterator, class Generator>
-void generateN(Iterator first, unsigned int n, Generator gen )
+void generateN(Iterator first, unsigned int n, Generator gen)
 {
 	while (n > 0)
 	{
@@ -674,7 +713,7 @@ Iterator removeIf(Iterator first, const Iterator last, UnaryPredicate pred)
 
 /// Reverses the order of the elements in the range
 template <class Iterator>
-void reverse (Iterator first, Iterator last)
+void reverse(Iterator first, Iterator last)
 {
 	while ((first != last) && (first != --last))
 	{
@@ -685,7 +724,7 @@ void reverse (Iterator first, Iterator last)
 
 /// Copies the elements in the range at result, but in reverse order
 template <class IteratorIn, class IteratorOut>
-IteratorOut reverseCopy (IteratorIn first, IteratorIn last, IteratorOut result)
+IteratorOut reverseCopy(IteratorIn first, IteratorIn last, IteratorOut result)
 {
 	while (first != last)
 	{
@@ -700,7 +739,10 @@ IteratorOut reverseCopy (IteratorIn first, IteratorIn last, IteratorOut result)
 template <class Iterator>
 bool isSorted(Iterator first, const Iterator last)
 {
-	if (first == last) { return true; }
+	if (first == last)
+	{
+		return true;
+	}
 
 	Iterator next = first;
 	while (++next != last)
@@ -718,7 +760,10 @@ bool isSorted(Iterator first, const Iterator last)
 template <class Iterator, class Compare>
 bool isSorted(Iterator first, const Iterator last, Compare comp)
 {
-	if (first == last) { return true; }
+	if (first == last)
+	{
+		return true;
+	}
 
 	Iterator next = first;
 	while (++next != last)
@@ -736,7 +781,10 @@ bool isSorted(Iterator first, const Iterator last, Compare comp)
 template <class Iterator>
 bool isSortedUntil(Iterator first, const Iterator last)
 {
-	if (first == last) { return first; }
+	if (first == last)
+	{
+		return first;
+	}
 
 	Iterator next = first;
 	while (++next != last)
@@ -754,7 +802,10 @@ bool isSortedUntil(Iterator first, const Iterator last)
 template <class Iterator, class Compare>
 bool isSortedUntil(Iterator first, const Iterator last, Compare comp)
 {
-	if (first == last) { return first; }
+	if (first == last)
+	{
+		return first;
+	}
 
 	Iterator next = first;
 	while (++next != last)
@@ -779,13 +830,19 @@ Iterator partition(Iterator first, Iterator last, Compare comp)
 		while (comp(*first, pivot))
 		{
 			++first;
-			if (first == last) { return first; }
+			if (first == last)
+			{
+				return first;
+			}
 		}
 
 		do
 		{
 			--last;
-			if (first == last) { return first; }
+			if (first == last)
+			{
+				return first;
+			}
 		}
 		while (!comp(*last, pivot));
 

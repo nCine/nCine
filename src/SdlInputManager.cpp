@@ -388,7 +388,7 @@ void SdlInputManager::handleJoyDeviceEvent(const SDL_Event &event)
 		// Compacting the array of SDL joystick pointers
 		for (int i = deviceIndex; i < MaxNumJoysticks - 1; i++)
 		{
-			sdlJoysticks_[i] = sdlJoysticks_[i+1];
+			sdlJoysticks_[i] = sdlJoysticks_[i + 1];
 		}
 		sdlJoysticks_[MaxNumJoysticks - 1] = NULL;
 

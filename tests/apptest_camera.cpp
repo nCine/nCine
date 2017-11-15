@@ -11,17 +11,17 @@
 namespace {
 
 #ifdef __ANDROID__
-	const char *Texture1File = "texture1.webp";
-	const char *Texture2File = "texture2.webp";
-	const char *Texture3File = "texture3.webp";
-	const char *Texture4File = "texture4.webp";
-	const char *FontTextureFile = "DroidSans32_256.webp";
+const char *Texture1File = "texture1.webp";
+const char *Texture2File = "texture2.webp";
+const char *Texture3File = "texture3.webp";
+const char *Texture4File = "texture4.webp";
+const char *FontTextureFile = "DroidSans32_256.webp";
 #else
-	const char *Texture1File = "texture1.png";
-	const char *Texture2File = "texture2.png";
-	const char *Texture3File = "texture3.png";
-	const char *Texture4File = "texture4.png";
-	const char *FontTextureFile = "DroidSans32_256.png";
+const char *Texture1File = "texture1.png";
+const char *Texture2File = "texture2.png";
+const char *Texture3File = "texture3.png";
+const char *Texture4File = "texture4.png";
+const char *FontTextureFile = "DroidSans32_256.png";
 #endif
 const char *FontFntFile = "DroidSans32_256.fnt";
 
@@ -120,7 +120,10 @@ void MyEventHandler::onInit()
 void MyEventHandler::onFrameStart()
 {
 	float interval = nc::theApplication().interval();
-	if (!pause_) { angle_ += 2.0f * interval; }
+	if (!pause_)
+	{
+		angle_ += 2.0f * interval;
+	}
 
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
@@ -185,8 +188,14 @@ void MyEventHandler::onFrameStart()
 		scrollOrigin2_ = scrollMove2_;
 	}
 
-	if (camScale_ > MaxCameraScale) { camScale_ = MaxCameraScale; }
-	else if (camScale_ < MinCameraScale) { camScale_ = MinCameraScale; }
+	if (camScale_ > MaxCameraScale)
+	{
+		camScale_ = MaxCameraScale;
+	}
+	else if (camScale_ < MinCameraScale)
+	{
+		camScale_ = MinCameraScale;
+	}
 
 	float scaledWidth = ViewHalfWidth * 2.0f * camScale_;
 	float scaledHeight = ViewHalfHeight * 2.0f * camScale_;
@@ -203,14 +212,26 @@ void MyEventHandler::onFrameStart()
 	}
 
 	float maxX = rotatedWidth * 0.5f;
-	float minX = (-rotatedWidth * 0.5f) + nc::theApplication().width();;
+	float minX = (-rotatedWidth * 0.5f) + nc::theApplication().width();
 	float maxY = rotatedHeight * 0.5f;
-	float minY = (-rotatedHeight * 0.5f) + nc::theApplication().height();;
+	float minY = (-rotatedHeight * 0.5f) + nc::theApplication().height();
 
-	if (camPos_.x > maxX) {camPos_.x = maxX; }
-	if (camPos_.x < minX) {camPos_.x = minX; }
-	if (camPos_.y > maxY) {camPos_.y = maxY; }
-	if (camPos_.y < minY) {camPos_.y = minY; }
+	if (camPos_.x > maxX)
+	{
+		camPos_.x = maxX;
+	}
+	if (camPos_.x < minX)
+	{
+		camPos_.x = minX;
+	}
+	if (camPos_.y > maxY)
+	{
+		camPos_.y = maxY;
+	}
+	if (camPos_.y < minY)
+	{
+		camPos_.y = minY;
+	}
 
 	debugString_->clear();
 	debugString_->format("x: %.2f, y: %.2f, scale: %.2f, angle: %.2f", -camPos_.x, -camPos_.y, camScale_, camRot_);
@@ -364,11 +385,23 @@ void MyEventHandler::onScrollInput(const nc::ScrollEvent &event)
 
 void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 {
-	if (event.axisName == nc::AXIS_LX)	{ joyVectorLeft_.x = event.value; }
-	else if (event.axisName == nc::AXIS_LY) { joyVectorLeft_.y = -event.value; }
+	if (event.axisName == nc::AXIS_LX)
+	{
+		joyVectorLeft_.x = event.value;
+	}
+	else if (event.axisName == nc::AXIS_LY)
+	{
+		joyVectorLeft_.y = -event.value;
+	}
 
-	if (event.axisName == nc::AXIS_RX)	{ joyVectorRight_.x = event.value; }
-	else if (event.axisName == nc::AXIS_RY) { joyVectorRight_.y = -event.value; }
+	if (event.axisName == nc::AXIS_RX)
+	{
+		joyVectorRight_.x = event.value;
+	}
+	else if (event.axisName == nc::AXIS_RY)
+	{
+		joyVectorRight_.y = -event.value;
+	}
 }
 
 void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event)

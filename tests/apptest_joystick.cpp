@@ -10,11 +10,11 @@
 namespace {
 
 #ifdef __ANDROID__
-	const char *TextureFile = "texture4.webp";
-	const char *FontTextureFile = "DroidSans32_256.webp";
+const char *TextureFile = "texture4.webp";
+const char *FontTextureFile = "DroidSans32_256.webp";
 #else
-	const char *TextureFile = "texture4.png";
-	const char *FontTextureFile = "DroidSans32_256.png";
+const char *TextureFile = "texture4.png";
+const char *FontTextureFile = "DroidSans32_256.png";
 #endif
 const char *FontFntFile = "DroidSans32_256.fnt";
 
@@ -207,7 +207,7 @@ void MyEventHandler::onShutdown()
 {
 	delete textNode_;
 	delete font_;
-	for (unsigned int i = 0; i < NumSprites; i ++)
+	for (unsigned int i = 0; i < NumSprites; i++)
 	{
 		delete sprites_[i];
 	}

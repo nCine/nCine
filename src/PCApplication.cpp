@@ -95,7 +95,14 @@ void PCApplication::run()
 		}
 #elif defined(WITH_GLFW)
 		setFocus(GlfwInputManager::hasFocus());
-		if (!hasFocus_ || isPaused_) { glfwWaitEvents(); } else { glfwPollEvents(); }
+		if (!hasFocus_ || isPaused_)
+		{
+			glfwWaitEvents();
+		}
+		else
+		{
+			glfwPollEvents();
+		}
 		GlfwInputManager::updateJoystickStates();
 #endif
 

@@ -36,9 +36,9 @@ const float PressedAxisThreshold = 0.85f;
 unsigned char axesLeftStickPressed[4];
 
 #ifdef __ANDROID__
-	const char *FontTextureFile = "DroidSans32_256.webp";
+const char *FontTextureFile = "DroidSans32_256.webp";
 #else
-	const char *FontTextureFile = "DroidSans32_256.png";
+const char *FontTextureFile = "DroidSans32_256.png";
 #endif
 const char *FontFntFile = "DroidSans32_256.fnt";
 
@@ -90,7 +90,7 @@ void MyEventHandler::onInit()
 
 #if WITH_DDS_UNCOMPRESSED_FORMAT
 	filenames_.insertBack("texture_512_RGB_888.dds");
-	//filenames_.insertBack("texture_512_RGB_565.dds"); // unsupported
+	// filenames_.insertBack("texture_512_RGB_565.dds"); // unsupported
 	filenames_.insertBack("texture_512_RGBA_8888.dds");
 #endif
 

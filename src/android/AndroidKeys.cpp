@@ -118,7 +118,7 @@ KeySym AndroidKeys::keySymValueToEnum(int keysym)
 		case AKEYCODE_BUTTON_START:		return KEY_BUTTON_START;
 		case AKEYCODE_BUTTON_SELECT:	return KEY_BUTTON_SELECT;
 		case AKEYCODE_BUTTON_MODE:		return KEY_BUTTON_MODE;
-	#if __ANDROID_API__ >= 13
+#if __ANDROID_API__ >= 13
 		case AKEYCODE_ESCAPE:			return KEY_ESCAPE;
 		case AKEYCODE_FORWARD_DEL:		return KEY_FORWARD_DEL;
 		case AKEYCODE_CTRL_LEFT:		return KEY_LCTRL;
@@ -212,7 +212,7 @@ KeySym AndroidKeys::keySymValueToEnum(int keysym)
 		case AKEYCODE_BUTTON_14:		return KEY_BUTTON_14;
 		case AKEYCODE_BUTTON_15:		return KEY_BUTTON_15;
 		case AKEYCODE_BUTTON_16:		return KEY_BUTTON_16;
-	#endif
+#endif
 
 		default:						return KEY_UNKNOWN;
 	}

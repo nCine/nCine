@@ -41,7 +41,10 @@ SdlGfxDevice::~SdlGfxDevice()
 void SdlGfxDevice::setResolution(int width, int height)
 {
 	// change resolution only in the case it really changes
-	if (width == width_ && height == height_) { return; }
+	if (width == width_ && height == height_)
+	{
+		return;
+	}
 
 	// asking for fullscreen mode that does not change current screen resolution
 	if (width == 0 || height == 0)

@@ -46,74 +46,74 @@
 
 // Fatal assert macros
 #define FATAL_ASSERT_MSG_X(x, fmt, ...) \
-do {\
-	if (!(x))\
-	{\
-		LOGF_X(fmt, ## __VA_ARGS__);\
-		BREAK();\
-	}\
+do { \
+	if (!(x)) \
+	{ \
+		LOGF_X(fmt, ## __VA_ARGS__); \
+		BREAK(); \
+	} \
 } while (false)
 
 #define FATAL_ASSERT_MSG(x, fmt) \
-do {\
-	if (!(x))\
-	{\
-		LOGF(fmt);\
-		BREAK();\
-	}\
+do { \
+	if (!(x)) \
+	{ \
+		LOGF(fmt); \
+		BREAK(); \
+	} \
 } while (false)
 
 #define FATAL_ASSERT(x) \
-do {\
-	if (!(x))\
-	{\
-		LOGF(#x);\
-		BREAK();\
-	}\
+do { \
+	if (!(x)) \
+	{ \
+		LOGF(#x); \
+		BREAK(); \
+	} \
 } while (false)
 
 // Fatal macros
 #define FATAL_MSG_X(fmt, ...) \
-do {\
-	LOGF_X(fmt, ## __VA_ARGS__);\
-	BREAK();\
+do { \
+	LOGF_X(fmt, ## __VA_ARGS__); \
+	BREAK(); \
 } while (false)
 
 #define FATAL_MSG(fmt) \
-do {\
-	LOGF(fmt);\
-	BREAK();\
+do { \
+	LOGF(fmt); \
+	BREAK(); \
 } while (false)
 
 #define FATAL() \
-do {\
-	BREAK();\
+do { \
+	BREAK(); \
 } while (false)
 
 // Non-fatal assert macros
 #ifndef NDEBUG
 	#define ASSERT_MSG_X(x, fmt, ...) \
-	do {\
-		if (!(x))\
-		{\
-			LOGE_X(fmt, ## __VA_ARGS__);\
-		}\
+	do { \
+		if (!(x)) \
+		{ \
+			LOGE_X(fmt, ## __VA_ARGS__); \
+		} \
 	} while (false)
 
 	#define ASSERT_MSG(x, fmt) \
-	do {\
-		if (!(x))\
-		{\
-			LOGE(fmt);\
-		}\
+	do { \
+		if (!(x)) \
+		{ \
+			LOGE(fmt); \
+		} \
 	} while (false)
 
 	#define ASSERT(x) \
-	do {\
-		if (!(x))\
-		{\
-			LOGE(#x);\
-		}\
+	do { \
+		if (!(x)) \
+		{ \
+			LOGE(#x); \
+		} \
 	} while (false)
 #else
 	#define ASSERT_MSG_X(x, fmt, ...) do { (void)sizeof(x); } while (false)

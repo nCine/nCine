@@ -171,7 +171,10 @@ void AndroidInputManager::parseAccelerometerEvent()
 bool AndroidInputManager::parseEvent(const AInputEvent *event)
 {
 	// Early out if there is no input event handler
-	if (inputEventHandler_ == NULL) { return false; }
+	if (inputEventHandler_ == NULL)
+	{
+		return false;
+	}
 
 	bool isEventHandled = false;
 
@@ -374,7 +377,7 @@ bool AndroidInputManager::processGamepadEvent(const AInputEvent *event)
 			int numAxesNoDPad = joystickStates_[joyId].numAxes_;
 			if (joystickStates_[joyId].hasDPad_)
 			{
-				//numAxesNoDPad -= 2;
+				// numAxesNoDPad -= 2;
 
 				// D-Pad already handled as the two axes
 				// AMOTION_EVENT_AXIS_HAT_X and AMOTION_EVENT_AXIS_HAT_Y
@@ -729,7 +732,7 @@ void AndroidInputManager::deviceInfo(int deviceId, int joyId)
 			for (unsigned int i = 0; i < charsToCopy; i++)
 			{
 				// GUID calculated using the first 16 characters of the device name
-				snprintf(&joystickStates_[joyId].guid_[i*2], 32 - i*2, "%02x", joyName[i]);
+				snprintf(&joystickStates_[joyId].guid_[i * 2], 32 - i * 2, "%02x", joyName[i]);
 			}
 		}
 		joystickStates_[joyId].guid_[32] = '\0';
@@ -820,7 +823,7 @@ void AndroidInputManager::deviceInfo(int deviceId, int joyId)
 		// Taking into account the D-Pad
 		if (joystickStates_[joyId].hasDPad_)
 		{
-			//joystickStates_[joyId].numAxes_ += 2;
+			// joystickStates_[joyId].numAxes_ += 2;
 
 			// D-Pad already handled as the two axes
 			// AMOTION_EVENT_AXIS_HAT_X and AMOTION_EVENT_AXIS_HAT_Y

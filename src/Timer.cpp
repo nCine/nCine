@@ -20,9 +20,9 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 #ifdef _WIN32
-	bool Timer::hasPerfCounter_ = false;
+bool Timer::hasPerfCounter_ = false;
 #elif !defined(__APPLE__)
-	bool Timer::hasMonotonicClock_ = false;
+bool Timer::hasMonotonicClock_ = false;
 #endif
 
 bool Timer::isInitialized_ = false;

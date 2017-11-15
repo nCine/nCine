@@ -92,7 +92,7 @@ class Thread
 	};
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
-	HANDLE	handle_;
+	HANDLE handle_;
 #else
 	pthread_t tid_;
 #endif
@@ -101,7 +101,7 @@ class Thread
 	/// The wrapper start function for thread creation
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
 #ifdef __GNUC__ // MinGW
-	static unsigned int (__attribute__((__stdcall__)) wrapperFunction)(void *arg);
+	static unsigned int(__attribute__((__stdcall__)) wrapperFunction) (void *arg);
 #else // MSVC
 	static unsigned int __stdcall wrapperFunction(void *arg);
 #endif

@@ -131,24 +131,22 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 			{
 				internalFormat = GL_RGBA;
 			}
-// 16 bits uncompressed DDS data is not compatbile with OpenGL color channels order
-/*
-			else if (redMask == 0xF800 && greenMask == 0x07E0 && blueMask == 0x001F) // 565
-			{
-				internalFormat = GL_RGB;
-				type = GL_UNSIGNED_SHORT_5_6_5;
-			}
-			else if (alphaMask == 0x8000 && redMask == 0x7C00 && greenMask == 0x03E0 && blueMask == 0x001F) // 5551
-			{
-				internalFormat = GL_RGBA;
-				type = GL_UNSIGNED_SHORT_5_5_5_1;
-			}
-			else if (alphaMask == 0xF000 && redMask == 0x0F00 && greenMask == 0x00F0 && blueMask == 0x000F) // 4444
-			{
-				internalFormat = GL_RGBA;
-				type = GL_UNSIGNED_SHORT_4_4_4_4;
-			}
-*/
+			// 16 bits uncompressed DDS data is not compatbile with OpenGL color channels order
+//			else if (redMask == 0xF800 && greenMask == 0x07E0 && blueMask == 0x001F) // 565
+//			{
+//				internalFormat = GL_RGB;
+//				type = GL_UNSIGNED_SHORT_5_6_5;
+//			}
+//			else if (alphaMask == 0x8000 && redMask == 0x7C00 && greenMask == 0x03E0 && blueMask == 0x001F) // 5551
+//			{
+//				internalFormat = GL_RGBA;
+//				type = GL_UNSIGNED_SHORT_5_5_5_1;
+//			}
+//			else if (alphaMask == 0xF000 && redMask == 0x0F00 && greenMask == 0x00F0 && blueMask == 0x000F) // 4444
+//			{
+//				internalFormat = GL_RGBA;
+//				type = GL_UNSIGNED_SHORT_4_4_4_4;
+//			}
 			else
 			{
 				FATAL_MSG("Unsupported DDPF_RGB pixel format");

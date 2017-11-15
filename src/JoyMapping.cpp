@@ -8,7 +8,9 @@
 namespace ncine {
 
 namespace {
-	#include "JoyMappingDb.h"
+
+#include "JoyMappingDb.h"
+
 }
 
 ///////////////////////////////////////////////////////////
@@ -40,14 +42,23 @@ JoyMapping::MappedJoystick::MappedJoystick()
 {
 	name[0] = '\0';
 
-	for (unsigned int i = 0; i < MaxNumAxes; i++) { axes[i].name = AXIS_UNKNOWN; }
-	for (unsigned int i = 0; i < MaxNumButtons; i++) { buttons[i] = BUTTON_UNKNOWN; }
-	for (unsigned int i = 0; i < MaxNumButtons; i++) { hats[i] = BUTTON_UNKNOWN; }
+	for (unsigned int i = 0; i < MaxNumAxes; i++)
+	{
+		axes[i].name = AXIS_UNKNOWN;
+	}
+	for (unsigned int i = 0; i < MaxNumButtons; i++)
+	{
+		buttons[i] = BUTTON_UNKNOWN;
+	}
+	for (unsigned int i = 0; i < MaxNumButtons; i++)
+	{
+		hats[i] = BUTTON_UNKNOWN;
+	}
 }
 
 JoyMapping::MappedJoystick::Guid::Guid()
 {
-	for (unsigned int i = 0; i < 4; i ++)
+	for (unsigned int i = 0; i < 4; i++)
 	{
 		array_[i] = 0;
 	}
@@ -86,7 +97,7 @@ void JoyMapping::MappedJoystick::Guid::fromString(const char *string)
 	char component[9];
 
 	unsigned int offset = 0;
-	for (unsigned int i = 0; i < 4; i ++)
+	for (unsigned int i = 0; i < 4; i++)
 	{
 		memcpy(component, string + offset, 8);
 		component[8] = '\0';
@@ -289,7 +300,7 @@ void JoyMapping::onJoyDisconnected(const JoyConnectionEvent &event)
 {
 #ifdef WITH_SDL
 	// Compacting the array of mapping indices
-	for(int i = event.joyId; i < MaxNumJoysticks - 1; i++)
+	for (int i = event.joyId; i < MaxNumJoysticks - 1; i++)
 	{
 		mappingIndex_[i] = mappingIndex_[i + 1];
 	}

@@ -13,9 +13,9 @@
 namespace {
 
 #ifdef __ANDROID__
-	const char *TextureFile = "smoke_256.webp";
+const char *TextureFile = "smoke_256.webp";
 #else
-	const char *TextureFile = "smoke_256.png";
+const char *TextureFile = "smoke_256.png";
 #endif
 
 const float KeySpeed = 200.0f;
@@ -46,7 +46,7 @@ void MyEventHandler::onInit()
 	particleSystem_ = new nc::ParticleSystem(&rootNode, NumParticles, texture_, texture_->rect());
 	particleSystem_->setPosition(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.33f);
 
-	//particleSystem_->addAffector(new nc::AccelerationAffector(0.2f, 0.0f));
+	// particleSystem_->addAffector(new nc::AccelerationAffector(0.2f, 0.0f));
 	nc::ColorAffector *colAffector = new nc::ColorAffector();
 	colAffector->addColorStep(0.0f, nc::Color(0.86f, 0.39f, 0.0f, 0.75f));
 	colAffector->addColorStep(0.65f, nc::Color(0.86f, 0.59f, 0.0f, 0.8f));
@@ -80,15 +80,39 @@ void MyEventHandler::onFrameStart()
 
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
-	if (keyState.isKeyDown(nc::KEY_D)) { particleSystem_->x += KeySpeed * nc::theApplication().interval(); }
-	else if (keyState.isKeyDown(nc::KEY_A)) { particleSystem_->x -= KeySpeed * nc::theApplication().interval(); }
-	if (keyState.isKeyDown(nc::KEY_W)) { particleSystem_->y += KeySpeed * nc::theApplication().interval(); }
-	else if (keyState.isKeyDown(nc::KEY_S)) { particleSystem_->y -= KeySpeed * nc::theApplication().interval(); }
+	if (keyState.isKeyDown(nc::KEY_D))
+	{
+		particleSystem_->x += KeySpeed * nc::theApplication().interval();
+	}
+	else if (keyState.isKeyDown(nc::KEY_A))
+	{
+		particleSystem_->x -= KeySpeed * nc::theApplication().interval();
+	}
+	if (keyState.isKeyDown(nc::KEY_W))
+	{
+		particleSystem_->y += KeySpeed * nc::theApplication().interval();
+	}
+	else if (keyState.isKeyDown(nc::KEY_S))
+	{
+		particleSystem_->y -= KeySpeed * nc::theApplication().interval();
+	}
 
-	if (keyState.isKeyDown(nc::KEY_RIGHT)) { emitVector_.x += KeySpeed * nc::theApplication().interval(); }
-	else if (keyState.isKeyDown(nc::KEY_LEFT)) { emitVector_.x -= KeySpeed * nc::theApplication().interval(); }
-	if (keyState.isKeyDown(nc::KEY_UP)) { emitVector_.y += KeySpeed * nc::theApplication().interval(); }
-	else if (keyState.isKeyDown(nc::KEY_DOWN)) { emitVector_.y -= KeySpeed * nc::theApplication().interval(); }
+	if (keyState.isKeyDown(nc::KEY_RIGHT))
+	{
+		emitVector_.x += KeySpeed * nc::theApplication().interval();
+	}
+	else if (keyState.isKeyDown(nc::KEY_LEFT))
+	{
+		emitVector_.x -= KeySpeed * nc::theApplication().interval();
+	}
+	if (keyState.isKeyDown(nc::KEY_UP))
+	{
+		emitVector_.y += KeySpeed * nc::theApplication().interval();
+	}
+	else if (keyState.isKeyDown(nc::KEY_DOWN))
+	{
+		emitVector_.y -= KeySpeed * nc::theApplication().interval();
+	}
 }
 
 void MyEventHandler::onShutdown()
@@ -161,11 +185,23 @@ void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 
 void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 {
-	if (event.axisName == nc::AXIS_LX) { joyVectorLeft_.x = event.value; }
-	else if (event.axisName == nc::AXIS_LY) { joyVectorLeft_.y = -event.value; }
+	if (event.axisName == nc::AXIS_LX)
+	{
+		joyVectorLeft_.x = event.value;
+	}
+	else if (event.axisName == nc::AXIS_LY)
+	{
+		joyVectorLeft_.y = -event.value;
+	}
 
-	if (event.axisName == nc::AXIS_RX) { joyVectorRight_.x = event.value; }
-	else if (event.axisName == nc::AXIS_RY) { joyVectorRight_.y = -event.value; }
+	if (event.axisName == nc::AXIS_RX)
+	{
+		joyVectorRight_.x = event.value;
+	}
+	else if (event.axisName == nc::AXIS_RY)
+	{
+		joyVectorRight_.y = -event.value;
+	}
 
 	nc::theApplication().inputManager().deadZoneNormalize(joyVectorLeft_, nc::IInputManager::LeftStickDeadZone);
 	nc::theApplication().inputManager().deadZoneNormalize(joyVectorRight_, nc::IInputManager::RightStickDeadZone);

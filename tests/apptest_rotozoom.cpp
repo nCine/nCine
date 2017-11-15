@@ -9,9 +9,9 @@
 namespace {
 
 #ifdef __ANDROID__
-	const char *TextureFile = "megatexture_256.webp";
+const char *TextureFile = "megatexture_256.webp";
 #else
-	const char *TextureFile = "megatexture_256.png";
+const char *TextureFile = "megatexture_256.png";
 #endif
 
 }

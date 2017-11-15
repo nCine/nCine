@@ -67,8 +67,8 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 
 	now = time(0);
 	ts = localtime(&now);
-//	strftime(buffer, sizeof(char)*bufferSize, "%a %Y-%m-%d %H:%M:%S %Z", ts);
-	strftime(buffer, sizeof(char)*bufferSize, "%H:%M:%S", ts);
+	// strftime(buffer, sizeof(char) * bufferSize, "%a %Y-%m-%d %H:%M:%S %Z", ts);
+	strftime(buffer, sizeof(char) * bufferSize, "%H:%M:%S", ts);
 
 	if (consoleLevel_ != LOG_OFF && int(level) >= int(consoleLevel_))
 	{
@@ -107,7 +107,7 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 
 	now = time(0);
 	ts = localtime(&now);
-	strftime(buffer, sizeof(char)*bufferSize, "%H:%M:%S", ts);
+	strftime(buffer, sizeof(char) * bufferSize, "%H:%M:%S", ts);
 
 	android_LogPriority priority;
 

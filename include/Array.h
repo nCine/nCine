@@ -202,7 +202,7 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 		}
 		else if (newCapacity > capacity_)
 		{
-			//LOGW_X("Array capacity growing from %u to %u", capacity_, newCapacity);
+			// LOGW_X("Array capacity growing from %u to %u", capacity_, newCapacity);
 		}
 		else if (newCapacity < capacity_)
 		{
@@ -219,7 +219,7 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 			size_ = newCapacity; // cropping last elements
 		}
 
-		memcpy(newArray, array_, sizeof(T)*size_);
+		memcpy(newArray, array_, sizeof(T) * size_);
 	}
 
 	delete[] array_;
@@ -337,7 +337,7 @@ void Array<T>::append(const T *elements, unsigned int amount)
 		setCapacity(size_ + amount);
 	}
 
-	memcpy(array_ + size_, elements, sizeof(T)*amount);
+	memcpy(array_ + size_, elements, sizeof(T) * amount);
 	size_ += amount;
 }
 

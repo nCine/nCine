@@ -152,13 +152,13 @@ void StandardFile::openFD(unsigned char mode)
 
 	switch (mode)
 	{
-		case (MODE_FD|MODE_READ):
+		case (MODE_FD | MODE_READ):
 			openFlag = O_RDONLY;
 			break;
-		case (MODE_FD|MODE_WRITE):
+		case (MODE_FD | MODE_WRITE):
 			openFlag = O_WRONLY;
 			break;
-		case (MODE_FD|MODE_READ|MODE_WRITE):
+		case (MODE_FD | MODE_READ | MODE_WRITE):
 			openFlag = O_RDWR;
 			break;
 		default:
@@ -207,19 +207,19 @@ void StandardFile::openStream(unsigned char mode)
 		case (MODE_WRITE):
 			modeChars[0] = 'w';
 			break;
-		case (MODE_READ|MODE_WRITE):
+		case (MODE_READ | MODE_WRITE):
 			modeChars[0] = 'r';
 			modeChars[1] = '+';
 			break;
-		case (MODE_READ|MODE_BINARY):
+		case (MODE_READ | MODE_BINARY):
 			modeChars[0] = 'r';
 			modeChars[1] = 'b';
 			break;
-		case (MODE_WRITE|MODE_BINARY):
+		case (MODE_WRITE | MODE_BINARY):
 			modeChars[0] = 'w';
 			modeChars[1] = 'b';
 			break;
-		case (MODE_READ|MODE_WRITE|MODE_BINARY):
+		case (MODE_READ | MODE_WRITE | MODE_BINARY):
 			modeChars[0] = 'r';
 			modeChars[1] = '+';
 			modeChars[2] = 'b';
@@ -276,7 +276,7 @@ bool StandardFile::access(const char *filename, unsigned char mode)
 		case (IFile::MODE_CAN_WRITE):
 			accessMode = W_OK;
 			break;
-		case (IFile::MODE_CAN_READ|IFile::MODE_CAN_WRITE):
+		case (IFile::MODE_CAN_READ | IFile::MODE_CAN_WRITE):
 			accessMode = R_OK | W_OK;
 			break;
 		default:

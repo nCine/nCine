@@ -9,9 +9,9 @@
 namespace {
 
 #ifdef __ANDROID__
-	const char *TextureFile = "spritesheet.webp";
+const char *TextureFile = "spritesheet.webp";
 #else
-	const char *TextureFile = "spritesheet.png";
+const char *TextureFile = "spritesheet.png";
 #endif
 
 const float SpriteSpeed = 100.0f;
@@ -65,7 +65,10 @@ void MyEventHandler::onFrameStart()
 	    keyState.isKeyDown(nc::KEY_UP) || keyState.isKeyDown(nc::KEY_W) ||
 	    keyState.isKeyDown(nc::KEY_DOWN) || keyState.isKeyDown(nc::KEY_S))
 	{
-		if (reachVector.length() > 1.0f) { reachVector.normalize(); }
+		if (reachVector.length() > 1.0f)
+		{
+			reachVector.normalize();
+		}
 	}
 
 	if (keyState.isKeyDown(nc::KEY_RIGHT) || keyState.isKeyDown(nc::KEY_D))

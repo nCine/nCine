@@ -40,7 +40,7 @@ int GfxCapabilities::glVersion(IGfxCapabilities::GLVersion version) const
 		case IGfxCapabilities::MINOR:	return glMinorVersion_;
 		case IGfxCapabilities::RELEASE:	return glReleaseVersion_;
 
-		default : return 0;
+		default: return 0;
 	}
 }
 
@@ -130,10 +130,10 @@ bool GfxCapabilities::checkGLExtension(const char *extensionName) const
 	if (extensions)
 	{
 		/*
-		 ** Search for extName in the extensions string.  Use of strstr()
-		 ** is not sufficient because extension names can be prefixes of
-		 ** other extension names.  Could use strtok() but the constant
-		 ** string returned by glGetString can be in read-only memory.
+		 * Search for extName in the extensions string.  Use of strstr()
+		 * is not sufficient because extension names can be prefixes of
+		 * other extension names.  Could use strtok() but the constant
+		 * string returned by glGetString can be in read-only memory.
 		 */
 
 		const char *end = extensions + strlen(extensions);

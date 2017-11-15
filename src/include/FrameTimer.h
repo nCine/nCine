@@ -6,7 +6,7 @@
 namespace ncine {
 
 /// Frame interval and average FPS calculator class
-class FrameTimer: public Timer
+class FrameTimer : public Timer
 {
   public:
 	/// Constructor

@@ -8,7 +8,7 @@
 namespace ncine {
 
 /// The class dealing with Android asset files
-class AssetFile: public IFile
+class AssetFile : public IFile
 {
   public:
 	/// Constructs an asset file object

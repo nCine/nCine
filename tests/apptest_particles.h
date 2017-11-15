@@ -17,9 +17,9 @@ class Timer;
 namespace nc = ncine;
 
 /// My nCine event handler
-class MyEventHandler
-	: public nc::IAppEventHandler,
-	  public nc::IInputEventHandler
+class MyEventHandler :
+	public nc::IAppEventHandler,
+	public nc::IInputEventHandler
 {
   public:
 	virtual void onPreInit(nc::AppConfiguration &config);

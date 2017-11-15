@@ -7,7 +7,7 @@ namespace nc = ncine;
 int main(int argc, char **argv)
 {
 	printf("Creating a hashmap of numbers\n");
-	//nc::HashMap<int, int, nc::IdentityHashFunc<int> > hashmap(32);
+	// nc::HashMap<int, int, nc::IdentityHashFunc<int> > hashmap(32);
 	nc::HashMap<int, int, nc::FixedHashFunc<int> > hashmap(32);
 
 	printf("Number of buckets: %d\n", hashmap.bucketAmount());

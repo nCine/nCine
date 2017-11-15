@@ -111,7 +111,7 @@ class SdlInputManager : public IInputManager
 		return mouseState_;
 	}
 
-	inline const KeyboardState &keyboardState() const	{ return keyboardState_; }
+	inline const KeyboardState &keyboardState() const { return keyboardState_; }
 
 	bool isJoyPresent(int joyId) const;
 	const char *joyName(int joyId) const;

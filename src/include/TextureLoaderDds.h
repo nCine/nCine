@@ -17,34 +17,34 @@ class TextureLoaderDds : public ITextureLoader
 	/// Header for the DDS pixel format
 	typedef struct DdsPixelformat
 	{
-		uint32_t dwSize;
-		uint32_t dwFlags;
-		uint32_t dwFourCC;
-		uint32_t dwRGBBitCount;
-		uint32_t dwRBitMask;
-		uint32_t dwGBitMask;
-		uint32_t dwBBitMask;
-		uint32_t dwABitMask;
+		uint32_t	dwSize;
+		uint32_t	dwFlags;
+		uint32_t	dwFourCC;
+		uint32_t	dwRGBBitCount;
+		uint32_t	dwRBitMask;
+		uint32_t	dwGBitMask;
+		uint32_t	dwBBitMask;
+		uint32_t	dwABitMask;
 	} DdsPixelformat;
 
 	/// Header for the DDS format
 	typedef struct DdsHeader
 	{
-		uint32_t	dwMagic;
-		uint32_t	dwSize;
-		uint32_t	dwFlags;
-		uint32_t	dwHeight;
-		uint32_t	dwWidth;
-		uint32_t	dwPitchOrLinearSize;
-		uint32_t	dwDepth;
-		uint32_t	dwMipMapCount;
-		uint32_t	dwReserved1[11];
-		DdsPixelformat ddspf;
-		uint32_t	dwCaps;
-		uint32_t	dwCaps2;
-		uint32_t	dwCaps3;
-		uint32_t	dwCaps4;
-		uint32_t	dwReserved2;
+		uint32_t		dwMagic;
+		uint32_t		dwSize;
+		uint32_t		dwFlags;
+		uint32_t		dwHeight;
+		uint32_t		dwWidth;
+		uint32_t		dwPitchOrLinearSize;
+		uint32_t		dwDepth;
+		uint32_t		dwMipMapCount;
+		uint32_t		dwReserved1[11];
+		DdsPixelformat	ddspf;
+		uint32_t		dwCaps;
+		uint32_t		dwCaps2;
+		uint32_t		dwCaps3;
+		uint32_t		dwCaps4;
+		uint32_t		dwReserved2;
 	} DdsHeader;
 
 	static const uint32_t DDPF_ALPHAPIXELS = 0x1;

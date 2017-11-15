@@ -23,8 +23,10 @@ class IdentityHashFunc
 };
 
 /// Shift-Add-XOR hash function
-/*! The key type should be a container exposing `length()` and `operator[]()` methods.
- Contained elements should be convertible to `hash_t`. */
+/*!
+ * The key type should be a container exposing `length()` and `operator[]()` methods.
+ * Contained elements should be convertible to `hash_t`.
+ */
 template <class K>
 class SaxHashFunc
 {
@@ -41,9 +43,11 @@ class SaxHashFunc
 };
 
 /// Jenkins hash function
-/*! The key type should be a container exposing `length()` and `operator[]()` methods.
-	Contained elements should be convertible to `hash_t`.\n
-	For more information: http://en.wikipedia.org/wiki/Jenkins_hash_function */
+/*!
+ * The key type should be a container exposing `length()` and `operator[]()` methods.
+ * Contained elements should be convertible to `hash_t`.\n
+ * For more information: http://en.wikipedia.org/wiki/Jenkins_hash_function
+ */
 template <class K>
 class JenkinsHashFunc
 {

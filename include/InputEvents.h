@@ -41,7 +41,7 @@ class DLL_PUBLIC TouchEvent
 class DLL_PUBLIC AccelerometerEvent
 {
   public:
-	AccelerometerEvent(): x(0.0f), y(0.0f), z(0.0f) { }
+	AccelerometerEvent() : x(0.0f), y(0.0f), z(0.0f) { }
 
 	float x, y, z;
 };

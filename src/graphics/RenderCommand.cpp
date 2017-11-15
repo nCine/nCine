@@ -1,4 +1,4 @@
-﻿#include "RenderCommand.h"
+#include "RenderCommand.h"
 #include "GLShaderProgram.h"
 #include "Application.h" // TODO: Remove dependency
 

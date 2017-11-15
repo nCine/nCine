@@ -13,8 +13,8 @@ GLHashMap<GLBufferObjectMappingFunc::Size, GLBufferObjectMappingFunc> GLBufferOb
 ///////////////////////////////////////////////////////////
 
 GLBufferObject::GLBufferObject(GLenum target)
-	: glHandle_(0)
-	, target_(target)
+	: glHandle_(0),
+	  target_(target)
 {
 	glGenBuffers(1, &glHandle_);
 }

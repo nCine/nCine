@@ -109,7 +109,7 @@ RWLock::~RWLock()
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-#if !defined (__ANDROID__) && !defined(__APPLE__)
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 
 Barrier::Barrier(unsigned int count)
 {

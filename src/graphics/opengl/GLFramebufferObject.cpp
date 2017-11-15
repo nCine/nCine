@@ -72,7 +72,7 @@ void GLFramebufferObject::attachRenderbuffer(GLenum internalFormat, GLsizei widt
 void GLFramebufferObject::attachTexture(GLTexture &texture, GLenum attachment)
 {
 	bind(GL_FRAMEBUFFER);
-	//glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture.glHandle_, 0);
+	// glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture.glHandle_, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texture.target_, texture.glHandle_, 0);
 }
 

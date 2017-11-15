@@ -105,7 +105,7 @@ void TextNode::draw(RenderQueue &renderQueue)
 			{
 				currentLine++;
 				xAdvance_ = calculateAlignment(currentLine) - xAdvanceSum_ * 0.5f;
-				yAdvance_ += font_->base();;
+				yAdvance_ += font_->base();
 			}
 			else
 			{

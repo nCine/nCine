@@ -9,7 +9,7 @@ typedef GLenum key_t;
 typedef GLuint value_t;
 
 /// Naive implementation of a hashmap for storing pairs of OpenGL targets and object ids
-template<unsigned int S, class MappingFunc>
+template <unsigned int S, class MappingFunc>
 class GLHashMap
 {
   public:
@@ -22,7 +22,7 @@ class GLHashMap
 	MappingFunc mappingFunc;
 };
 
-template<unsigned int S, class MappingFunc>
+template <unsigned int S, class MappingFunc>
 GLHashMap<S, MappingFunc>::GLHashMap()
 {
 	for (unsigned int i = 0; i < S; i++)
@@ -32,7 +32,7 @@ GLHashMap<S, MappingFunc>::GLHashMap()
 	}
 }
 
-template<unsigned int S, class MappingFunc>
+template <unsigned int S, class MappingFunc>
 inline value_t &GLHashMap<S, MappingFunc>::operator[](key_t key)
 {
 	return buckets_[mappingFunc(key)];
