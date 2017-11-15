@@ -137,6 +137,8 @@ long int AssetFile::tell() const
 
 unsigned long int AssetFile::read(void *buffer, unsigned long int bytes) const
 {
+	ASSERT(buffer);
+
 	unsigned long int bytesRead = 0;
 
 	if (fileDescriptor_ >= 0)
@@ -265,6 +267,8 @@ void AssetFile::openAsset(unsigned char mode)
 /*! This method is called by `IFile::access()` */
 bool AssetFile::access(const char *filename, unsigned char mode)
 {
+	ASSERT(filename);
+
 	bool isAccessible = false;
 
 	if (mode == IFile::MODE_EXISTS || mode == IFile::MODE_CAN_READ)

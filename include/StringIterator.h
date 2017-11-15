@@ -2,6 +2,7 @@
 #define CLASS_NCINE_STRINGITERATOR
 
 #include "common_defines.h"
+#include "common_macros.h"
 #include "iterator_traits.h"
 
 namespace ncine {
@@ -104,6 +105,7 @@ class StringIterator
 template <bool IsConst>
 inline typename StringIterator<IsConst>::Reference StringIterator<IsConst>::operator*() const
 {
+	ASSERT(charPtr_);
 	return *charPtr_;
 }
 

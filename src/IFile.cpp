@@ -34,6 +34,8 @@ IFile::IFile(const char *filename)
 	  fileDescriptor_(-1), filePointer_(NULL), shouldCloseOnDestruction_(true),
 	  shouldExitOnFailToOpen_(true), fileSize_(0)
 {
+	ASSERT(filename);
+
 	int dotChar = filename_.findLastChar('.');
 	// A dot followed by at least three extension characters
 	if (dotChar && (filename_.length() - dotChar) >= 4)
@@ -60,11 +62,13 @@ bool IFile::isOpened() const
 
 bool IFile::hasExtension(const char *extension) const
 {
+	ASSERT(extension);
 	return extension_ == extension;
 }
 
 IFile *IFile::createFileHandle(const char *filename)
 {
+	ASSERT(filename);
 #ifdef __ANDROID__
 	if (strncmp(filename, static_cast<const char *>("asset::"), 7) == 0)
 	{
@@ -77,6 +81,7 @@ IFile *IFile::createFileHandle(const char *filename)
 
 bool IFile::access(const char *filename, unsigned char mode)
 {
+	ASSERT(filename);
 #ifdef __ANDROID__
 	if (strncmp(filename, static_cast<const char *>("asset::"), 7) == 0)
 	{

@@ -154,6 +154,7 @@ int ALAudioDevice::nextAvailableSource()
 
 void ALAudioDevice::registerPlayer(IAudioPlayer *player)
 {
+	ASSERT(player);
 	players_.pushBack(player);
 }
 

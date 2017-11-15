@@ -11,6 +11,7 @@ namespace ncine {
 Sprite::Sprite(SceneNode *parent, Texture *texture)
 	: DrawableNode(parent), texture_(texture), texRect_(0, 0, 0, 0), opaqueTexture_(false)
 {
+	ASSERT(texture);
 	init();
 }
 
@@ -18,6 +19,7 @@ Sprite::Sprite(SceneNode *parent, Texture *texture)
 Sprite::Sprite(Texture *texture)
 	: DrawableNode(NULL), texture_(texture), texRect_(0, 0, 0, 0), opaqueTexture_(false)
 {
+	ASSERT(texture);
 	init();
 }
 
@@ -25,6 +27,7 @@ Sprite::Sprite(Texture *texture)
 Sprite::Sprite(SceneNode *parent, Texture *texture, float x, float y)
 	: DrawableNode(parent, x, y), texture_(texture), texRect_(0, 0, 0, 0), opaqueTexture_(false)
 {
+	ASSERT(texture);
 	init();
 }
 
@@ -32,6 +35,7 @@ Sprite::Sprite(SceneNode *parent, Texture *texture, float x, float y)
 Sprite::Sprite(Texture *texture, float x, float y)
 	: DrawableNode(NULL, x, y), texture_(texture), texRect_(0, 0, 0, 0), opaqueTexture_(false)
 {
+	ASSERT(texture);
 	init();
 }
 
@@ -47,10 +51,7 @@ void Sprite::init()
 	renderCommand_->material().setShaderProgram(Material::SPRITE_PROGRAM);
 	renderCommand_->geometry().makeSharedQuad();
 
-	if (texture_)
-	{
-		setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
-	}
+	setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
 }
 
 /*! \todo Only the transformation matrix should be updated per frame */

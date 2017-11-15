@@ -30,7 +30,7 @@ ITextureLoader::ITextureLoader(IFile *fileHandle)
 	: fileHandle_(fileHandle), width_(0), height_(0), bpp_(0), headerSize_(0), dataSize_(0),
 	  mipMapCount_(1), mipDataOffsets_(NULL), mipDataSizes_(NULL), pixels_(NULL)
 {
-
+	ASSERT(fileHandle);
 }
 
 ITextureLoader::~ITextureLoader()

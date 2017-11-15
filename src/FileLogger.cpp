@@ -58,6 +58,8 @@ FileLogger::~FileLogger()
 #ifndef __ANDROID__
 void FileLogger::write(LogLevel level, const char *fmt, ...)
 {
+	ASSERT(fmt);
+
 	time_t now;
 	struct tm *ts;
 	const unsigned int bufferSize = 80;
@@ -96,6 +98,8 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 #else
 void FileLogger::write(LogLevel level, const char *fmt, ...)
 {
+	ASSERT(fmt);
+
 	time_t now;
 	struct tm *ts;
 	const unsigned int bufferSize = 80;

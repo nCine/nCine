@@ -33,16 +33,16 @@ Font::~Font()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+void Font::setTexture(Texture *texture)
+{
+	ASSERT(texture);
+	texture_ = texture;
+}
+
 const FontGlyph *Font::glyph(unsigned int glyphId) const
 {
-	if (glyphId < MaxGlyphs)
-	{
-		return &glyphs_[glyphId];
-	}
-	else
-	{
-		return NULL;
-	}
+	ASSERT(glyphId < MaxGlyphs);
+	return &glyphs_[glyphId];
 }
 
 ///////////////////////////////////////////////////////////

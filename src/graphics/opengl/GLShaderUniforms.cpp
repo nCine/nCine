@@ -45,6 +45,7 @@ void GLShaderUniforms::setProgram(GLShaderProgram *shaderProgram)
 
 GLUniformCache *GLShaderUniforms::uniform(const char *name)
 {
+	ASSERT(name);
 	GLUniformCache *uniformCache = NULL;
 
 	if (shaderProgram_)

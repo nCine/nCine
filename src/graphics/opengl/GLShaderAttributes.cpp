@@ -40,6 +40,7 @@ void GLShaderAttributes::setProgram(GLShaderProgram *shaderProgram)
 
 GLVertexAttribute *GLShaderAttributes::attribute(const char *name)
 {
+	ASSERT(name);
 	GLVertexAttribute *vertexAttribute = NULL;
 
 	if (shaderProgram_)

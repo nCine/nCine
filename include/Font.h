@@ -21,7 +21,7 @@ class DLL_PUBLIC Font : public Object
 	/// Gets the texture object
 	inline const Texture *texture() const { return texture_; }
 	/// Sets the texture object
-	inline void setTexture(Texture *texture) { texture_ = texture; }
+	void setTexture(Texture *texture);
 
 	/// Returns font line height
 	inline unsigned int lineHeight() const { return lineHeight_; }

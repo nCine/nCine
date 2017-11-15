@@ -42,6 +42,8 @@ ThreadPool::~ThreadPool()
 /*! \note The command should be allocated on the heap for the worker thread to release it after its execution. */
 void ThreadPool::enqueueCommand(IThreadCommand *threadCommand)
 {
+	ASSERT(threadCommand);
+
 	queueMutex_.lock();
 	queue_.pushBack(threadCommand);
 	queueCV_.broadcast();

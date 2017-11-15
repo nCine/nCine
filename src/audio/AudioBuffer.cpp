@@ -38,6 +38,8 @@ AudioBuffer::~AudioBuffer()
 
 void AudioBuffer::load(const IAudioLoader *audioLoader)
 {
+	ASSERT(audioLoader);
+
 	char *buffer;
 	ALenum format;
 	frequency_ = audioLoader->frequency();

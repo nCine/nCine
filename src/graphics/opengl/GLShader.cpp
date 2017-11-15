@@ -32,6 +32,7 @@ GLShader::~GLShader()
 
 void GLShader::loadFromString(const char *string)
 {
+	ASSERT(string);
 	const GLchar *source_lines[1] = { string };
 	glShaderSource(glHandle_, 1, source_lines, NULL);
 }

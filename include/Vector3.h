@@ -93,12 +93,14 @@ const T *Vector3<T>::data() const
 template <class T>
 inline T &Vector3<T>::operator[](unsigned int index)
 {
+	ASSERT(index < 3);
 	return (&x)[index];
 }
 
 template <class T>
 inline const T &Vector3<T>::operator[](unsigned int index) const
 {
+	ASSERT(index < 3);
 	return (&x)[index];
 }
 

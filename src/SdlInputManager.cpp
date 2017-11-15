@@ -236,8 +236,10 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 
 bool SdlInputManager::isJoyPresent(int joyId) const
 {
-	if (joyId >= 0 && joyId < int(MaxNumJoysticks) &&
-	    sdlJoysticks_[joyId] && SDL_JoystickGetAttached(sdlJoysticks_[joyId]))
+	ASSERT(joyId >= 0);
+	ASSERT_MSG_X(joyId < int(MaxNumJoysticks), "joyId is %d and the maximum is %u", joyId, MaxNumJoysticks - 1);
+
+	if (sdlJoysticks_[joyId] && SDL_JoystickGetAttached(sdlJoysticks_[joyId]))
 	{
 		return true;
 	}

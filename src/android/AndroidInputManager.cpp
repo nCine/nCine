@@ -208,18 +208,11 @@ bool AndroidInputManager::parseEvent(const AInputEvent *event)
 
 bool AndroidInputManager::isJoyPresent(int joyId) const
 {
-	bool isPresent = false;
+	ASSERT(joyId >= 0);
+	ASSERT_MSG_X(joyId < int(MaxNumJoysticks), "joyId is %d and the maximum is %u", joyId, MaxNumJoysticks - 1);
 
-	if (joyId >= 0 && joyId < int(MaxNumJoysticks))
-	{
-		int deviceId = joystickStates_[joyId].deviceId_;
-		if (deviceId > -1)
-		{
-			isPresent = true;
-		}
-	}
-
-	return isPresent;
+	int deviceId = joystickStates_[joyId].deviceId_;
+	return (deviceId != -1);
 }
 
 const char *AndroidInputManager::joyName(int joyId) const

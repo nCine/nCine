@@ -106,12 +106,14 @@ const T *Matrix4x4<T>::data() const
 template <class T>
 inline Vector4<T> &Matrix4x4<T>::operator[](unsigned int index)
 {
+	ASSERT(index < 4);
 	return vecs_[index];
 }
 
 template <class T>
 inline const Vector4<T> &Matrix4x4<T>::operator[](unsigned int index) const
 {
+	ASSERT(index < 4);
 	return vecs_[index];
 }
 

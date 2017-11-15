@@ -107,6 +107,9 @@ void Texture::load(const ITextureLoader &texLoader)
 
 void Texture::load(const ITextureLoader &texLoader, int width, int height)
 {
+	ASSERT(width > 0);
+	ASSERT(height > 0);
+
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
 	const int maxTextureSize = gfxCaps.value(IGfxCapabilities::MAX_TEXTURE_SIZE);
 	FATAL_ASSERT_MSG_X(width <= maxTextureSize, "Texture width %d is bigger than device maximum %d", width, maxTextureSize);

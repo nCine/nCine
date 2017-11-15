@@ -122,6 +122,8 @@ long int StandardFile::tell() const
 
 unsigned long int StandardFile::read(void *buffer, unsigned long int bytes) const
 {
+	ASSERT(buffer);
+
 	unsigned long int bytesRead = 0;
 
 	if (fileDescriptor_ >= 0)

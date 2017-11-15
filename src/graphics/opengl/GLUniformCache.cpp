@@ -18,7 +18,7 @@ GLUniformCache::GLUniformCache()
 GLUniformCache::GLUniformCache(const GLUniform *uniform)
 	: uniform_(uniform), dataPointer_(NULL)
 {
-
+	ASSERT(uniform);
 }
 
 ///////////////////////////////////////////////////////////

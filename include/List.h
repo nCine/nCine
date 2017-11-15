@@ -81,13 +81,13 @@ class List
 	/// Clears the list
 	void clear();
 	/// Returns a constant reference to the first element in constant time
-	inline const T &front() const { return head_->data_; }
+	inline const T &front() const { ASSERT(head_); return head_->data_; }
 	/// Returns a reference to the first element in constant time
-	inline T &front() { return head_->data_; }
+	inline T &front() { ASSERT(head_); return head_->data_; }
 	/// Returns a constant reference to the last element in constant time
-	inline const T &back() const { return tail_->data_; }
+	inline const T &back() const { ASSERT(tail_); return tail_->data_; }
 	/// Returns a reference to the last element in constant time
-	inline T &back() { return tail_->data_; }
+	inline T &back() { ASSERT(tail_); return tail_->data_; }
 	/// Inserts a new element as the first, in constant time
 	void pushFront(const T &element);
 	/// Inserts a new element as the last, in constant time

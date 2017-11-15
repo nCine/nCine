@@ -11,6 +11,7 @@ namespace ncine {
 
 void AccelerationAffector::affect(Particle *particle)
 {
+	ASSERT(particle);
 	particle->velocity_ += acceleration_;
 }
 
@@ -28,6 +29,8 @@ void ColorAffector::addColorStep(float time, Color color)
 
 void ColorAffector::affect(Particle *particle)
 {
+	ASSERT(particle);
+
 	// one or no color steps in the affector
 	if (colorSteps_.size() < 2)
 	{
@@ -38,9 +41,9 @@ void ColorAffector::affect(Particle *particle)
 		return;
 	}
 
-	unsigned int index;
 	float normalizedLife = particle->life_ / particle->startingLife;
 
+	unsigned int index = 0;
 	for (index = 0; index < colorSteps_.size() - 1; index++)
 	{
 		if (colorSteps_[index]->time > normalizedLife)
@@ -49,7 +52,7 @@ void ColorAffector::affect(Particle *particle)
 		}
 	}
 
-//	assert(colorSteps_[index - 1]->time <= normalizedLife);
+	ASSERT(colorSteps_[index - 1]->time <= normalizedLife);
 
 	float prevTime = colorSteps_[index - 1]->time;
 	float thisTime = colorSteps_[index]->time;
@@ -79,6 +82,8 @@ void SizeAffector::addSizeStep(float time, float scale)
 
 void SizeAffector::affect(Particle *particle)
 {
+	ASSERT(particle);
+
 	// one or no size steps in the affector
 	if (sizeSteps_.size() < 2)
 	{
@@ -89,9 +94,9 @@ void SizeAffector::affect(Particle *particle)
 		return;
 	}
 
-	unsigned int index;
 	float normalizedLife = particle->life_ / particle->startingLife;
 
+	unsigned int index = 0;
 	for (index = 0; index < sizeSteps_.size() - 1; index++)
 	{
 		if (sizeSteps_[index]->time > normalizedLife)
@@ -100,7 +105,7 @@ void SizeAffector::affect(Particle *particle)
 		}
 	}
 
-//	assert(sizeSteps[index - 1]->time <= normalizedLife);
+	ASSERT(sizeSteps_[index - 1]->time <= normalizedLife);
 
 	float prevTime = sizeSteps_[index - 1]->time;
 	float thisTime = sizeSteps_[index]->time;

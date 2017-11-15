@@ -1,6 +1,7 @@
 #ifndef CLASS_NCINE_LISTITERATOR
 #define CLASS_NCINE_LISTITERATOR
 
+#include "common_macros.h"
 #include "iterator_traits.h"
 
 namespace ncine {
@@ -81,6 +82,7 @@ struct IteratorTraits<ListIterator<T, true> >
 template <class T, bool IsConst>
 inline typename ListIterator<T, IsConst>::Reference ListIterator<T, IsConst>::operator*() const
 {
+	ASSERT(node_);
 	// Cannot simply return only if node_ is not NULL or
 	// "control may reach end of non-void function"
 	return node_->data_;

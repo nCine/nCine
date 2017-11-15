@@ -72,12 +72,14 @@ inline void Quaternion<T>::set(T xx, T yy, T zz, T ww)
 template <class T>
 inline T &Quaternion<T>::operator[](unsigned int index)
 {
+	ASSERT(index < 4);
 	return (&x)[index];
 }
 
 template <class T>
 inline const T &Quaternion<T>::operator[](unsigned int index) const
 {
+	ASSERT(index < 4);
 	return (&x)[index];
 }
 

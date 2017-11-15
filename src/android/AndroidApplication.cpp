@@ -33,6 +33,8 @@ Application &theApplication()
 
 void AndroidApplication::start(struct android_app *state, IAppEventHandler * (*createAppEventHandler)())
 {
+	ASSERT(state);
+	ASSERT(createAppEventHandler);
 	theAndroidApplication().state_ = state;
 	theAndroidApplication().createAppEventHandler_ = createAppEventHandler;
 

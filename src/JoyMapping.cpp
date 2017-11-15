@@ -103,12 +103,15 @@ bool JoyMapping::MappedJoystick::Guid::operator==(const Guid &guid) const
 
 void JoyMapping::init(const IInputManager *inputManager)
 {
+	ASSERT(inputManager);
 	inputManager_ = inputManager;
 	checkConnectedJoystics();
 }
 
 bool JoyMapping::addMappingFromString(const char *mappingString)
 {
+	ASSERT(mappingString);
+
 	MappedJoystick newMapping;
 	bool parsed = parseMappingFromString(mappingString, newMapping);
 	if (parsed)
@@ -125,6 +128,8 @@ bool JoyMapping::addMappingFromString(const char *mappingString)
 
 void JoyMapping::addMappingsFromStrings(const char **mappingStrings)
 {
+	ASSERT(mappingStrings);
+
 	while (*mappingStrings)
 	{
 		MappedJoystick newMapping;

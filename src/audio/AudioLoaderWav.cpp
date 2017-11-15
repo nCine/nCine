@@ -27,6 +27,9 @@ AudioLoaderWav::AudioLoaderWav(IFile *fileHandle)
 
 unsigned long int AudioLoaderWav::read(char *buffer, unsigned long int bufferSize) const
 {
+	ASSERT(buffer);
+	ASSERT(bufferSize > 0);
+
 	long bytes_;
 	long int bufferSeek = 0;
 

@@ -24,6 +24,7 @@ Application &theApplication()
 
 void PCApplication::start(IAppEventHandler * (*createAppEventHandler)())
 {
+	ASSERT(createAppEventHandler);
 	PCApplication &app = static_cast<PCApplication &>(theApplication());
 
 	app.init(createAppEventHandler);

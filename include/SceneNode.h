@@ -39,7 +39,7 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Returns a list of child nodes
 	inline const List<SceneNode *> &children() const { return children_; }
 	/// Adds a node as a child of this one
-	bool addChildNode(SceneNode *childNode);
+	void addChildNode(SceneNode *childNode);
 	/// Removes a child of this node, without reparenting nephews
 	bool removeChildNode(SceneNode *childNode);
 	/// Removes a child of this node while iterating on children, without reparenting nephews

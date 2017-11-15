@@ -106,14 +106,10 @@ void GlfwInputManager::updateJoystickStates()
 
 bool GlfwInputManager::isJoyPresent(int joyId) const
 {
-	if (joyId >= 0 && GLFW_JOYSTICK_1 + joyId <= GLFW_JOYSTICK_LAST)
-	{
-		return (glfwJoystickPresent(GLFW_JOYSTICK_1 + joyId) != 0);
-	}
-	else
-	{
-		return false;
-	}
+	ASSERT(joyId >= 0);
+	ASSERT_MSG_X(GLFW_JOYSTICK_1 + joyId <= GLFW_JOYSTICK_LAST,
+	             "joyId is %d and the maximum is %d", joyId, GLFW_JOYSTICK_LAST - GLFW_JOYSTICK_1);
+	return (glfwJoystickPresent(GLFW_JOYSTICK_1 + joyId) != 0);
 }
 
 const char *GlfwInputManager::joyName(int joyId) const

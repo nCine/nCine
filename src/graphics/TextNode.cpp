@@ -14,6 +14,8 @@ TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
 	  withKerning_(true), font_(font), interleavedVertices_(32),
 	  xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f), lineLengths_(4), alignment_(ALIGN_LEFT)
 {
+	ASSERT(font);
+	ASSERT(maxStringLength > 0);
 	init(maxStringLength);
 }
 
@@ -22,6 +24,7 @@ TextNode::TextNode(SceneNode *parent, Font *font)
 	  withKerning_(true), font_(font), interleavedVertices_(32),
 	  xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f), lineLengths_(4), alignment_(ALIGN_LEFT)
 {
+	ASSERT(font);
 	init(DefaultStringLength);
 }
 

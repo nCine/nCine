@@ -67,34 +67,27 @@ SceneNode::~SceneNode()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/*!	\return True if the node has been added */
-bool SceneNode::addChildNode(SceneNode *childNode)
+void SceneNode::addChildNode(SceneNode *childNode)
 {
-	bool hasBeenAdded = false;
+	ASSERT(childNode);
 
-	if (childNode)
+	if (childNode->parent_)
 	{
-		if (childNode->parent_)
-		{
-			childNode->parent_->removeChildNode(childNode);
-		}
-
-		childNode->parent_ = this;
-		children_.pushBack(childNode);
-		hasBeenAdded = true;
+		childNode->parent_->removeChildNode(childNode);
 	}
 
-	return hasBeenAdded;
+	childNode->parent_ = this;
+	children_.pushBack(childNode);
 }
 
 /*!	\return True if the node has been removed */
 bool SceneNode::removeChildNode(SceneNode *childNode)
 {
+	ASSERT(childNode);
 	bool hasBeenRemoved = false;
 
-	if (childNode && // cannot pass a NULL pointer
-	    !children_.isEmpty() && // avoid checking if this node has no children
-	    childNode->parent_ == this) // avoid checking the child doesn't belong to this one
+	if (!children_.isEmpty() && // avoid checking if this node has no children
+	    childNode->parent_ == this) // avoid checking if the child doesn't belong to this node
 	{
 		childNode->parent_ = NULL;
 		children_.remove(childNode);
@@ -127,11 +120,11 @@ bool SceneNode::removeChildNode(List<SceneNode *>::ConstIterator it)
 /*!	\return True if the node has been unlinked */
 bool SceneNode::unlinkChildNode(SceneNode *childNode)
 {
+	ASSERT(childNode);
 	bool hasBeenUnlinked = false;
 
-	if (childNode && // cannot pass a NULL pointer
-	    !children_.isEmpty() && // avoid checking if this node has no children
-	    childNode->parent_ == this) // avoid checking the child doesn't belong to this one
+	if (!children_.isEmpty() && // avoid checking if this node has no children
+	    childNode->parent_ == this) // avoid checking if the child doesn't belong to this node
 	{
 		childNode->parent_ = NULL;
 		children_.remove(childNode);

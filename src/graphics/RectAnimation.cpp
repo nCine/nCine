@@ -19,14 +19,8 @@ RectAnimation::RectAnimation(float frameTime, LoopMode loopMode, RewindMode rewi
 
 void RectAnimation::setFrame(unsigned int frameNum)
 {
-	if (frameNum >= rects_.size())
-	{
-		currentFrame_ = rects_.size() - 1;
-	}
-	else
-	{
-		currentFrame_ = frameNum;
-	}
+	ASSERT(frameNum < rects_.size());
+	currentFrame_ = frameNum;
 }
 
 void RectAnimation::updateFrame(float interval)

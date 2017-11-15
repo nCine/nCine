@@ -102,6 +102,7 @@ struct IteratorTraits<ArrayIterator<T, true> >
 template <class T, bool IsConst>
 inline typename ArrayIterator<T, IsConst>::Reference ArrayIterator<T, IsConst>::operator*() const
 {
+	ASSERT(elementPtr_);
 	return *elementPtr_;
 }
 

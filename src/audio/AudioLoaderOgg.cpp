@@ -63,6 +63,9 @@ AudioLoaderOgg::~AudioLoaderOgg()
 
 unsigned long int AudioLoaderOgg::read(char *buffer, unsigned long int bufferSize) const
 {
+	ASSERT(buffer);
+	ASSERT(bufferSize > 0);
+
 	static int bitStream = 0;
 	long bytes;
 	long int bufferSeek = 0;

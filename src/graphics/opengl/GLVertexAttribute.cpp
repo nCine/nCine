@@ -1,4 +1,5 @@
 #include <cstdio> // for NULL
+#include "common_macros.h"
 #include "GLVertexAttribute.h"
 #include "GLAttribute.h"
 
@@ -17,7 +18,7 @@ GLVertexAttribute::GLVertexAttribute()
 GLVertexAttribute::GLVertexAttribute(const GLAttribute *attribute)
 	: attribute_(attribute), vboStride_(0), vboPointer_(NULL)
 {
-
+	ASSERT(attribute);
 }
 
 ///////////////////////////////////////////////////////////

@@ -27,6 +27,7 @@ String::String(unsigned int capacity)
 String::String(const char *cString)
 	: array_(NULL), length_(0), capacity_(0)
 {
+	ASSERT(cString);
 #if defined(_WIN32) && !defined(__MINGW32__)
 	capacity_ = static_cast<unsigned int>(strnlen_s(cString, MaxCStringLength)) + 1;
 #else
@@ -81,6 +82,7 @@ String &String::operator=(const String &other)
 
 String &String::operator=(const char *cString)
 {
+	ASSERT(cString);
 #if defined(_WIN32) && !defined(__MINGW32__)
 	length_ = static_cast<unsigned int>(strnlen_s(cString, capacity_));
 	strncpy_s(array_, capacity_, cString, length_);
@@ -134,6 +136,8 @@ unsigned int String::append(const String &source)
 
 unsigned int String::copyTo(char *dest, unsigned int srcChar, unsigned int numChar) const
 {
+	ASSERT(dest);
+
 	// Cannot copy from beyond the end of the source string
 	unsigned int clampedSrcChar = min(srcChar, length_);
 	char *srcStart = array_ + clampedSrcChar;
@@ -161,6 +165,7 @@ int String::compare(const String &other) const
 
 int String::compare(const char *cString) const
 {
+	ASSERT(cString);
 	return strncmp(array_, cString, capacity_);
 }
 
@@ -218,6 +223,7 @@ int String::find(const String &other) const
 
 int String::find(const char *cString) const
 {
+	ASSERT(cString);
 	const char *foundPtr = strstr(array_, cString);
 
 	if (foundPtr)
@@ -232,6 +238,8 @@ int String::find(const char *cString) const
 
 String &String::format(const char *fmt, ...)
 {
+	ASSERT(fmt);
+
 	va_list args;
 	va_start(args, fmt);
 #if defined(_WIN32) && !defined(__MINGW32__)
@@ -252,6 +260,8 @@ String &String::format(const char *fmt, ...)
 
 String &String::formatAppend(const char *fmt, ...)
 {
+	ASSERT(fmt);
+
 	va_list args;
 	va_start(args, fmt);
 #if defined(_WIN32) && !defined(__MINGW32__)
@@ -288,6 +298,7 @@ String &String::operator+=(const String &other)
 
 String &String::operator+=(const char *cString)
 {
+	ASSERT(cString);
 	unsigned int availCapacity = capacity_ - length_;
 
 #if defined(_WIN32) && !defined(__MINGW32__)
@@ -316,6 +327,7 @@ String String::operator+(const String &other) const
 
 String String::operator+(const char *cString) const
 {
+	ASSERT(cString);
 	unsigned int sumLength = length_ + static_cast<unsigned int>(strlen(cString)) + 1;
 	String result(sumLength);
 

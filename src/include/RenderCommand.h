@@ -38,7 +38,7 @@ class RenderCommand
 	/// Returns the rendering layer
 	inline unsigned int layer() const { return layer_; }
 	/// Sets the rendering layer
-	inline void setLayer(unsigned int layer) { layer_ = (layer < static_cast<unsigned int>(TOP_LAYER)) ? layer : static_cast<unsigned int>(TOP_LAYER); }
+	inline void setLayer(unsigned int layer) { ASSERT(layer <= TOP_LAYER); layer_ = layer; }
 
 	/// Returns the queue sort key
 	inline unsigned long int sortKey() const { return sortKey_; }
