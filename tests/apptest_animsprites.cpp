@@ -66,9 +66,7 @@ void MyEventHandler::onFrameStart()
 	    keyState.isKeyDown(nc::KEY_DOWN) || keyState.isKeyDown(nc::KEY_S))
 	{
 		if (reachVector.length() > 1.0f)
-		{
 			reachVector.normalize();
-		}
 	}
 
 	if (keyState.isKeyDown(nc::KEY_RIGHT) || keyState.isKeyDown(nc::KEY_D))
@@ -139,13 +137,9 @@ void MyEventHandler::onTouchMove(const nc::TouchEvent &event)
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
-	{
 		nc::theApplication().quit();
-	}
 	else if (event.sym == nc::KEY_SPACE)
-	{
 		nc::theApplication().togglePause();
-	}
 }
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
@@ -169,13 +163,9 @@ void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 {
 	if (event.axisName == nc::AXIS_LX)
-	{
 		joyVector_.x = event.value;
-	}
 	else if (event.axisName == nc::AXIS_LY)
-	{
 		joyVector_.y = -event.value;
-	}
 }
 
 void MyEventHandler::onJoyDisconnected(const nc::JoyConnectionEvent &event)

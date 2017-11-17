@@ -18,9 +18,7 @@ AudioStreamPlayer::AudioStreamPlayer(const char *filename)
 AudioStreamPlayer::~AudioStreamPlayer()
 {
 	if (state_ != STATE_STOPPED)
-	{
 		audioStream_.stop(sourceId_);
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -112,9 +110,7 @@ void AudioStreamPlayer::updateState()
 	{
 		bool shouldStillPlay = audioStream_.enqueue(sourceId_, isLooping_);
 		if (shouldStillPlay == false)
-		{
 			state_ = STATE_STOPPED;
-		}
 	}
 }
 

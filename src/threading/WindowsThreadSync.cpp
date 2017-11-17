@@ -85,9 +85,7 @@ void CondVariable::signal()
 	LeaveCriticalSection(&waitersCountLock_);
 
 	if (haveWaiters)
-	{
 		SetEvent(events_[0]); // Signal
-	}
 }
 
 void CondVariable::broadcast()
@@ -97,9 +95,7 @@ void CondVariable::broadcast()
 	LeaveCriticalSection(&waitersCountLock_);
 
 	if (haveWaiters)
-	{
 		SetEvent(events_[1]); // Broadcast
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -116,9 +112,7 @@ void CondVariable::waitEvents()
 	LeaveCriticalSection(&waitersCountLock_);
 
 	if (isLastWaiter)
-	{
 		ResetEvent(events_[1]); // Broadcast
-	}
 }
 
 }

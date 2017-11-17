@@ -14,9 +14,7 @@ int main(int argc, char **argv)
 
 	printf("Inserting some elements to the back\n");
 	for (int i = 0; i < 11; i++)
-	{
 		list.pushBack(i);
-	}
 	printList(list);
 
 	printf("Inserting one element at the front and one at the back\n");
@@ -47,16 +45,12 @@ int main(int argc, char **argv)
 	printf("\n--- List traversals (for cycles) ---\n");
 	printf("Iterating through nodes:");
 	for (nc::List<int>::ConstIterator i = list.begin(); i != list.end(); ++i)
-	{
 		printf(" %d", *i);
-	}
 	printf("\n");
 
 	printf("Iterating through nodes (reverse):");
 	for (nc::List<int>::ConstIterator r = list.rBegin(); r != list.rEnd(); --r)
-	{
 		printf(" %d", *r);
-	}
 	printf("\n");
 
 
@@ -88,9 +82,7 @@ int main(int argc, char **argv)
 
 	printf("Clearing the first list\n");
 	if (!list.isEmpty())
-	{
 		list.clear();
-	}
 	printf("Removing first node on empty\n");
 	list.erase(list.begin());
 	printf("Removing last node on empty\n");
@@ -129,9 +121,7 @@ int main(int argc, char **argv)
 	printf("Recreating the first list\n");
 	list.clear();
 	for (int j = 0; j < 11; j++)
-	{
 		list.pushBack(j);
-	}
 	printList(list);
 	printf("\n");
 

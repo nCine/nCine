@@ -8,9 +8,7 @@ int main(int argc, char **argv)
 
 	printf("Filling the whole array\n");
 	for (unsigned int i = 0; i < Capacity; i++)
-	{
 		array[i] = i;
-	}
 	printArray(array);
 
 	int minimum = *nc::minElement(array.begin(), array.end());
@@ -55,9 +53,7 @@ int main(int argc, char **argv)
 
 	printf("Filling a second array with random numbers\n");
 	for (unsigned int i = 0; i < Capacity; i++)
-	{
 		array2[i] = rand() % 100;
-	}
 	printArray(array2);
 
 	printf("Storing transformed random numbers back into the first array\n");

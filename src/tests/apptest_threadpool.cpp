@@ -28,7 +28,5 @@ void MyEventHandler::onInit()
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
-	{
 		nc::theApplication().quit();
-	}
 }

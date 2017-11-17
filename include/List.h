@@ -140,9 +140,7 @@ List<T>::List(const List<T> &other)
 	: size_(0), head_(NULL), tail_(NULL)
 {
 	for (List<T>::ConstIterator i = other.begin(); i != other.end(); ++i)
-	{
 		pushBack(*i);
-	}
 }
 
 /*! The parameter should be passed by value for the idiom to work. */
@@ -174,16 +172,12 @@ void List<T>::pushFront(const T &element)
 {
 	ListNode<T> *node = new ListNode<T>(element, NULL, head_);
 	if (head_)
-	{
 		head_->previous_ = node;
-	}
 	head_ = node;
 
 	// The list is empty
 	if (tail_ == NULL)
-	{
 		tail_ = node;
-	}
 	size_++;
 }
 
@@ -192,16 +186,12 @@ void List<T>::pushBack(const T &element)
 {
 	ListNode<T> *node = new ListNode<T>(element, tail_, NULL);
 	if (tail_)
-	{
 		tail_->next_ = node;
-	}
 	tail_ = node;
 
 	// The list is empty
 	if (head_ == NULL)
-	{
 		head_ = node;
-	}
 	size_++;
 }
 
@@ -270,13 +260,9 @@ void List<T>::removeIf(Predicate pred)
 	while (i != end())
 	{
 		if (pred(*i))
-		{
 			i = erase(i);
-		}
 		else
-		{
 			++i;
-		}
 	}
 }
 
@@ -288,9 +274,7 @@ void List<T>::splice(Iterator position, List &source)
 	// Cannot attach at the back because the end iterator is
 	// only a sentinel, cannot be decremented by one
 	if (node == NULL && size_ > 0)
-	{
 		return;
-	}
 
 	if (node)
 	{
@@ -299,9 +283,7 @@ void List<T>::splice(Iterator position, List &source)
 		source.head_->previous_ = node;
 		source.tail_->next_ = nextNode;
 		if (nextNode)
-		{
 			nextNode->previous_ = source.tail_;
-		}
 	}
 	else
 	{
@@ -325,35 +307,23 @@ void List<T>::splice(Iterator position, List &source, Iterator it)
 	// Cannot attach at the back because the end iterator is
 	// only a sentinel, cannot be decremented by one
 	if (node == NULL && size_ > 0)
-	{
 		return;
-	}
 
 	// Early-out if there is nothing to transfer
 	if (sourceNode == NULL)
-	{
 		return;
-	}
 
 	ListNode<T> *sourcePrev = sourceNode->previous_;
 	ListNode<T> *sourceNext = sourceNode->next_;
 	if (sourcePrev == NULL)
-	{
 		source.head_ = sourceNode->next_;
-	}
 	else
-	{
 		sourcePrev->next_ = sourceNext;
-	}
 
 	if (sourceNode->next_ == NULL)
-	{
 		source.tail_ = sourceNode->previous_;
-	}
 	else
-	{
 		sourceNext->previous_ = sourcePrev;
-	}
 
 	if (node)
 	{
@@ -362,9 +332,7 @@ void List<T>::splice(Iterator position, List &source, Iterator it)
 		sourceNode->previous_ = node;
 		sourceNode->next_ = nextNode;
 		if (nextNode)
-		{
 			nextNode->previous_ = sourceNode;
-		}
 	}
 	else
 	{
@@ -384,15 +352,11 @@ void List<T>::splice(Iterator position, List &source, Iterator first, Iterator l
 	// Cannot attach at the back because the end iterator is
 	// only a sentinel, cannot be decremented by one
 	if (node == NULL && size_ > 0)
-	{
 		return;
-	}
 
 	// Early-out if there is nothing to transfer
 	if (firstNode == NULL)
-	{
 		return;
-	}
 
 	ListNode<T> *firstPrev = firstNode->previous_;
 	ListNode<T> *lastIncludedNode = first.node_;
@@ -406,22 +370,14 @@ void List<T>::splice(Iterator position, List &source, Iterator first, Iterator l
 	}
 
 	if (firstPrev == NULL)
-	{
 		source.head_ = lastIncludedNode->next_;
-	}
 	else
-	{
 		firstPrev->next_ = lastIncludedNode->next_;
-	}
 
 	if (lastIncludedNode->next_ == NULL)
-	{
 		source.tail_ = firstPrev;
-	}
 	else
-	{
 		lastIncludedNode->next_->previous_ = firstPrev;
-	}
 
 	if (node)
 	{
@@ -429,9 +385,7 @@ void List<T>::splice(Iterator position, List &source, Iterator first, Iterator l
 		node->next_ = firstNode;
 		firstNode->previous_ = node;
 		if (nextNode)
-		{
 			nextNode->previous_ = lastIncludedNode;
-		}
 		lastIncludedNode->next_ = nextNode;
 	}
 	else
@@ -457,13 +411,9 @@ ListNode<T> *List<T>::insertAfterNode(ListNode<T> *node, const T &element)
 	ListNode<T> *newNode = new ListNode<T>(element, node, node->next_);
 
 	if (node->next_ == NULL)
-	{
 		tail_ = newNode;
-	}
 	else
-	{
 		node->next_->previous_ = newNode;
-	}
 
 	node->next_ = newNode;
 	size_++;
@@ -483,13 +433,9 @@ ListNode<T> *List<T>::insertBeforeNode(ListNode<T> *node, const T &element)
 	ListNode<T> *newNode = new ListNode<T>(element, node->previous_, node);
 
 	if (node->previous_ == NULL)
-	{
 		head_ = newNode;
-	}
 	else
-	{
 		node->previous_->next_ = newNode;
-	}
 
 	node->previous_ = newNode;
 	size_++;
@@ -502,27 +448,17 @@ ListNode<T> *List<T>::removeNode(ListNode<T> *node)
 {
 	// Early-out to prevent NULL pointer dereferencing
 	if (node == NULL)
-	{
 		return NULL;
-	}
 
 	if (node->previous_)
-	{
 		node->previous_->next_ = node->next_;
-	}
 	else // removing the head
-	{
 		head_ = node->next_;
-	}
 
 	if (node->next_)
-	{
 		node->next_->previous_ = node->previous_;
-	}
 	else // removing the tail
-	{
 		tail_ = node->previous_;
-	}
 	size_--;
 
 	ListNode<T> *nextNode = node->next_;
@@ -535,9 +471,7 @@ ListNode<T> *List<T>::removeRange(ListNode<T> *firstNode, ListNode<T> *lastNode)
 {
 	// Early-out to prevent NULL pointer dereferencing
 	if (firstNode == NULL)
-	{
 		return NULL;
-	}
 
 	ListNode<T> *previous = firstNode->previous_;
 	ListNode<T> *next = NULL;
@@ -551,22 +485,14 @@ ListNode<T> *List<T>::removeRange(ListNode<T> *firstNode, ListNode<T> *lastNode)
 	}
 
 	if (previous)
-	{
 		previous->next_ = lastNode;
-	}
 	else // removing the head
-	{
 		head_ = lastNode;
-	}
 
 	if (lastNode)
-	{
 		lastNode->previous_ = previous;
-	}
 	else // removing the tail
-	{
 		tail_ = previous;
-	}
 
 	return lastNode;
 }

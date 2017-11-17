@@ -34,9 +34,7 @@ T *Object::fromId(unsigned int id)
 	if (object)
 	{
 		if (object->type_ == T::sType())
-		{
 			return static_cast<T *>(object);
-		}
 		else // Cannot cast
 		{
 			LOGF_X("Object \"%s\" (%u) is of type %u instead of %u", object->name_, id, object->type_, T::sType());

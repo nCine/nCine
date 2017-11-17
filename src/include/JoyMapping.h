@@ -22,17 +22,17 @@ class JoyMappedStateImpl : public JoyMappedState
   public:
 	JoyMappedStateImpl()
 	{
-		for (unsigned int i = 0; i < JoyMappedState::NumButtons; i++) { buttons_[i] = false; }
-		for (unsigned int i = 0; i < JoyMappedState::NumAxes; i++) { axesValues_[i] = 0.0f; }
+		for (unsigned int i = 0; i < JoyMappedState::NumButtons; i++)
+			buttons_[i] = false;
+		for (unsigned int i = 0; i < JoyMappedState::NumAxes; i++)
+			axesValues_[i] = 0.0f;
 	}
 
 	bool isButtonPressed(ButtonName name) const
 	{
 		bool pressed = false;
 		if (name != BUTTON_UNKNOWN)
-		{
 			pressed = buttons_[static_cast<int>(name)];
-		}
 		return pressed;
 	}
 
@@ -40,9 +40,7 @@ class JoyMappedStateImpl : public JoyMappedState
 	{
 		float value = 0.0f;
 		if (name != AXIS_UNKNOWN)
-		{
 			value = axesValues_[static_cast<int>(name)];
-		}
 		return value;
 	}
 

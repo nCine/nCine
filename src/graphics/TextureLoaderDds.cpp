@@ -46,14 +46,10 @@ void TextureLoaderDds::readHeader(DdsHeader &header)
 		mipMapCount_ = IFile::int32FromLE(header.dwMipMapCount);
 
 		if (mipMapCount_ == 0)
-		{
 			mipMapCount_ = 1;
-		}
 	}
 	else
-	{
 		FATAL_MSG("Not a DDS file");
-	}
 }
 
 void TextureLoaderDds::parseFormat(const DdsHeader &header)
@@ -148,38 +144,26 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 //				type = GL_UNSIGNED_SHORT_4_4_4_4;
 //			}
 			else
-			{
 				FATAL_MSG("Unsupported DDPF_RGB pixel format");
-			}
 		}
 		// Used in some older DDS files for single channel color uncompressed data
 		// dwRGBBitCount contains the luminance channel bit count; dwRBitMask contains the channel mask
 		// Can be combined with DDPF_ALPHAPIXELS for a two channel DDS file
 		else if (flags & (DDPF_LUMINANCE | DDPF_ALPHAPIXELS))
-		{
 			internalFormat = GL_LUMINANCE_ALPHA;
-		}
 		else if (flags & DDPF_LUMINANCE)
-		{
 			internalFormat = GL_LUMINANCE;
-		}
 		// Used in some older DDS files for alpha channel only uncompressed data
 		// dwRGBBitCount contains the alpha channel bitcount; dwABitMask contains valid data
 		else if (flags & DDPF_ALPHA)
-		{
 			internalFormat = GL_ALPHA;
-		}
 		else
-		{
 			FATAL_MSG_X("Unsupported DDS uncompressed pixel format: %u", flags);
-		}
 
 		loadPixels(internalFormat, type);
 
 		if (redMask > blueMask && bitCount > 16)
-		{
 			texFormat_.bgrFormat();
-		}
 	}
 
 	if (mipMapCount_ > 1)
@@ -189,9 +173,7 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 		mipDataSizes_ = new long[mipMapCount_];
 		long int dataSizesSum = TextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_, mipDataSizes_);
 		if (dataSizesSum != dataSize_)
-		{
 			LOGW_X("The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
-		}
 	}
 }
 

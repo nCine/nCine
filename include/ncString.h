@@ -142,13 +142,9 @@ class DLL_PUBLIC String
 inline char String::operator[](unsigned int index) const
 {
 	if (index < length_)
-	{
 		return array_[index];
-	}
 	else
-	{
 		return '\0';
-	}
 }
 
 }

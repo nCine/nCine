@@ -92,9 +92,7 @@ template <class T, bool IsConst>
 ListIterator<T, IsConst> &ListIterator<T, IsConst>::operator++()
 {
 	if (node_)
-	{
 		node_ = node_->next_;
-	}
 
 	return *this;
 }
@@ -106,9 +104,7 @@ ListIterator<T, IsConst> ListIterator<T, IsConst>::operator++(int)
 	ListIterator iterator = *this;
 
 	if (node_)
-	{
 		node_ = node_->next_;
-	}
 
 	return iterator;
 }
@@ -117,9 +113,7 @@ template <class T, bool IsConst>
 ListIterator<T, IsConst> &ListIterator<T, IsConst>::operator--()
 {
 	if (node_)
-	{
 		node_ = node_->previous_;
-	}
 
 	return *this;
 }
@@ -131,9 +125,7 @@ ListIterator<T, IsConst> ListIterator<T, IsConst>::operator--(int)
 	ListIterator iterator = *this;
 
 	if (node_)
-	{
 		node_ = node_->previous_;
-	}
 
 	return iterator;
 }

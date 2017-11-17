@@ -47,9 +47,7 @@ int main(int argc, char **argv)
 	printf("\n--- HashMap traversals (for cycles) ---\n");
 	printf("Iterating through the elements of the second hashmap (copy constructed)\n");
 	for (nc::StringHashMap<nc::String>::ConstIterator i = strHashmap2.begin(); i != strHashmap2.end(); ++i)
-	{
 		printf("hash: %lu, key: %s, value: %s\n", i.hash(), i.key().data(), i.value().data());
-	}
 
 	printf("\n--- HashMap traversals (while cycles) ---\n");
 	printf("Iterating through the elements of the third hashmap (created and then assigned)\n");

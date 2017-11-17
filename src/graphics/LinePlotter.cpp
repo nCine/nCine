@@ -44,17 +44,13 @@ void LinePlotter::draw(RenderQueue &renderQueue)
 
 	// Drawing the reference value line
 	if (shouldPlotRefValue())
-	{
 		drawRefValue(renderQueue);
-	}
 
 	for (unsigned int i = 0; i < variables_.size(); i++)
 	{
 		variables_[i]->draw(renderQueue);
 		if (variables_[i]->shouldPlotMean())
-		{
 			variables_[i]->drawMean(renderQueue);
-		}
 	}
 }
 
@@ -74,13 +70,9 @@ void LinePlotter::updateAllVertices(float x, float y, float w, float h)
 	for (unsigned int i = 1; i < variables_.size(); i++)
 	{
 		if (variables_[i]->variable()->min() < commonMin)
-		{
 			commonMin = variables_[i]->variable()->min();
-		}
 		else if (variables_[i]->variable()->max() > commonMax)
-		{
 			commonMax = variables_[i]->variable()->max();
-		}
 	}
 
 	float normalizedRefValue = normBetweenRefValue(commonMin, commonMax);

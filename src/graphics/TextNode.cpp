@@ -117,9 +117,7 @@ void TextNode::draw(RenderQueue &renderQueue)
 					{
 						// font kerning
 						if (i < string_.length() - 1)
-						{
 							xAdvance_ += glyph->kerning(int(string_[i + 1]));
-						}
 					}
 				}
 			}
@@ -166,9 +164,7 @@ void TextNode::calculateBoundaries() const
 			{
 				lineLengths_.pushBack(xAdvance_);
 				if (xAdvance_ > xAdvanceMax)
-				{
 					xAdvanceMax = xAdvance_;
-				}
 				xAdvance_ = 0.0f;
 				yAdvance_ += font_->base();
 			}
@@ -182,9 +178,7 @@ void TextNode::calculateBoundaries() const
 					{
 						// font kerning
 						if (i < string_.length() - 1)
-						{
 							xAdvance_ += glyph->kerning(int(string_[i + 1]));
-						}
 					}
 				}
 			}
@@ -193,15 +187,11 @@ void TextNode::calculateBoundaries() const
 		// If the string does not end with a new line character,
 		// last line height has not been taken into account before
 		if (!string_.isEmpty() && string_[string_.length() - 1] != '\n')
-		{
 			yAdvance_ += font_->base();
-		}
 
 		lineLengths_.pushBack(xAdvance_);
 		if (xAdvance_ > xAdvanceMax)
-		{
 			xAdvanceMax = xAdvance_;
-		}
 
 		xAdvanceSum_ = xAdvanceMax;
 		yAdvanceSum_ = yAdvance_;

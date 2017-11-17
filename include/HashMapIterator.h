@@ -168,13 +168,9 @@ template <class K, class T, class HashFunc, bool IsConst>
 typename HelperTraits<K, T, HashFunc, IsConst>::NodeReference HashMapIterator<K, T, HashFunc, IsConst>::node() const
 {
 	if (atFirstNode_)
-	{
 		return hashMap_->buckets_[bucketIndex_].firstNode_;
-	}
 	else
-	{
 		return *listIterator_;
-	}
 }
 
 template <class K, class T, class HashFunc, bool IsConst>
@@ -206,9 +202,7 @@ void HashMapIterator<K, T, HashFunc, IsConst>::next()
 		listIterator_ = bucket->collisionList_.begin();
 	}
 	else
-	{
 		listIterator_++;
-	}
 
 	// The list iterator condition also applies when it points to the beginning of an empty list
 	if (listIterator_ == bucket->collisionList_.end() && bucketIndex_ < hashMap_->buckets_.size() - 1)
@@ -220,9 +214,7 @@ void HashMapIterator<K, T, HashFunc, IsConst>::next()
 		while (bucketIndex_ < hashMap_->buckets_.size() - 1 && bucket->size() == 0);
 
 		if (bucket->size() > 0)
-		{
 			atFirstNode_ = true;
-		}
 	}
 }
 
@@ -246,14 +238,10 @@ void HashMapIterator<K, T, HashFunc, IsConst>::previous()
 		}
 	}
 	else
-	{
 		listIterator_--;
-	}
 
 	if (listIterator_ == bucket->collisionList_.begin())
-	{
 		atFirstNode_ = true;
-	}
 }
 
 }

@@ -47,13 +47,9 @@ void AudioBuffer::load(const IAudioLoader *audioLoader)
 
 	FATAL_ASSERT_MSG_X(numChannels_ == 1 || numChannels_ == 2, "Unsupported number of channels: %d", numChannels_);
 	if (numChannels_ == 1)
-	{
 		format = AL_FORMAT_MONO16;
-	}
 	else
-	{
 		format = AL_FORMAT_STEREO16;
-	}
 
 	// Buffer size calculated as samples * channels * 16bit
 	unsigned long int bufferSize = audioLoader->bufferSize();

@@ -27,9 +27,7 @@ void RectAnimation::updateFrame(float interval)
 {
 	// No frame calculation if the animation is paused or has only one rect
 	if (isPaused_ == true || rects_.size() < 2)
-	{
 		return;
-	}
 
 	elapsedFrameTime_ += interval;
 	// A NEXT frame rectangle should be determined
@@ -49,28 +47,20 @@ void RectAnimation::updateFrame(float interval)
 				else
 				{
 					if (isLooping_ == false)
-					{
 						isPaused_ = true;
-					}
 					else
-					{
 						currentFrame_ = 0;
-					}
 				}
 			}
 			else
-			{
 				currentFrame_++;
-			}
 		}
 		else
 		{
 			if (currentFrame_ == 0)
 			{
 				if (isLooping_ == false)
-				{
 					isPaused_ = true;
-				}
 				else
 				{
 					goingForward_ = true;
@@ -78,9 +68,7 @@ void RectAnimation::updateFrame(float interval)
 				}
 			}
 			else
-			{
 				currentFrame_--;
-			}
 		}
 	}
 }

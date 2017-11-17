@@ -24,14 +24,10 @@ GLFramebufferObject::GLFramebufferObject()
 GLFramebufferObject::~GLFramebufferObject()
 {
 	if (boundBuffers_[target_] == glHandle_)
-	{
 		unbind();
-	}
 
 	for (unsigned int i = 0; i < attachedRenderbuffers_.size(); i++)
-	{
 		delete attachedRenderbuffers_[i];
-	}
 
 	glDeleteFramebuffers(1, &glHandle_);
 }

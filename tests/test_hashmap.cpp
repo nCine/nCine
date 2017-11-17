@@ -13,15 +13,11 @@ int main(int argc, char **argv)
 	printf("Number of buckets: %d\n", hashmap.bucketAmount());
 	printf("Inserting some elements\n");
 	for (unsigned int i = 0; i < 10; i++)
-	{
 		hashmap[i] = i + 10;
-	}
 
 	printf("Retrieving the elements\n");
 	for (unsigned int i = 0; i < 10; i++)
-	{
 		printf("key: %u, value: %d\n", i, hashmap[i]);
-	}
 
 	printf("Removing a couple elements\n");
 	hashmap.remove(5);
@@ -46,9 +42,7 @@ int main(int argc, char **argv)
 	printf("\n--- HashMap traversals (for cycles) ---\n");
 	printf("Iterating through the elements of second hashmap (copy constructed)\n");
 	for (nc::HashMap<int, int, nc::FixedHashFunc<int> >::ConstIterator i = hashmap2.begin(); i != hashmap2.end(); ++i)
-	{
 		printf("hash: %lu, key: %d, value: %d\n", i.hash(), i.key(), i.value());
-	}
 
 	printf("\n--- HashMap traversals (while cycles) ---\n");
 	printf("Iterating through the elements of the third hashmap (created and then assigned)\n");

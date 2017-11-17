@@ -72,13 +72,9 @@ void RenderCommand::setTransformation()
 void RenderCommand::draw()
 {
 	if (geometry_.ibo_)
-	{
 		glDrawElements(geometry_.primitiveType_, geometry_.numVertices_, GL_UNSIGNED_SHORT, 0);
-	}
 	else
-	{
 		glDrawArrays(geometry_.primitiveType_, geometry_.firstVertex_, geometry_.numVertices_);
-	}
 }
 
 }

@@ -70,9 +70,7 @@ void Font::parseFntFile(IFile *fileHandle)
 
 		// skipping entirely the "info" line
 		if (strncmp(buffer, "info", 4) == 0)
-		{
 			continue;
-		}
 		else if (strncmp(buffer, "common", 6) == 0)
 		{
 			sscanf(buffer, "common lineHeight=%u base=%u scaleW=%u scaleH=%u", &lineHeight_, &base_, &width_, &height_);
@@ -82,20 +80,14 @@ void Font::parseFntFile(IFile *fileHandle)
 		}
 		// skipping entirely the "page" line
 		else if (strncmp(buffer, "page", 4) == 0)
-		{
 			continue;
-		}
 		else if (strncmp(buffer, "chars", 5) == 0)
-		{
 			sscanf(buffer, "chars count=%u", &numGlyphs_);
-		}
 		else if (strncmp(buffer, "char", 4) == 0)
 		{
 			sscanf(buffer, "char id=%u x=%u y=%u width=%u height=%u xoffset=%d yoffset=%d xadvance=%d", &glyphId, &x, &y, &width, &height, &xOffset, &yOffset, &xAdvance);
 			if (glyphId < MaxGlyphs)
-			{
 				glyphs_[glyphId].set(x, y, width, height, xOffset, yOffset, xAdvance);
-			}
 			else
 			{
 				LOGW_X("Skipping character id #%u because bigger than glyph array size (%u)", glyphId, MaxGlyphs);
@@ -104,16 +96,12 @@ void Font::parseFntFile(IFile *fileHandle)
 			}
 		}
 		else if (strncmp(buffer, "kernings", 8) == 0)
-		{
 			sscanf(buffer, "kernings count=%u", &numKernings_);
-		}
 		else if (strncmp(buffer, "kerning", 7) == 0)
 		{
 			sscanf(buffer, "kerning first=%u second=%u amount=%d ", &glyphId, &secondGlyphId, &kerningAmount);
 			if (glyphId < MaxGlyphs && secondGlyphId < MaxGlyphs)
-			{
 				glyphs_[glyphId].addKerning(secondGlyphId, kerningAmount);
-			}
 			else
 			{
 				LOGW_X("Skipping kerning couple (#%u, #%u) because bigger than glyph array size (%u)", glyphId, secondGlyphId, MaxGlyphs);

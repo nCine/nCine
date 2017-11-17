@@ -55,9 +55,7 @@ GLVertexAttribute *GLShaderAttributes::attribute(const char *name)
 		}
 	}
 	else
-	{
 		LOGE_X("Cannot find attribute \"%s\", no shader program associated", name);
-	}
 
 	return vertexAttribute;
 }
@@ -91,9 +89,7 @@ void GLShaderAttributes::defineVertexPointers(const GLBufferObject *vbo)
 		}
 	}
 	else
-	{
 		LOGE("No shader program associated");
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -104,9 +100,7 @@ void GLShaderAttributes::importAttributes()
 {
 	unsigned int count = shaderProgram_->attributes_.size();
 	if (count > VertexAttributesHashSize)
-	{
 		LOGW_X("More active attributes (%d) than hashmap buckets (%d)", count, VertexAttributesHashSize);
-	}
 
 	for (unsigned int i = 0; i < count; i++)
 	{
@@ -132,9 +126,7 @@ bool GLShaderAttributes::GLVertexAttribPointerState::operator==(const GLVertexAt
 		return true;
 	}
 	else
-	{
 		return false;
-	}
 }
 
 bool GLShaderAttributes::GLVertexAttribPointerState::operator!=(const GLVertexAttribute &attribute) const

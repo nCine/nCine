@@ -59,9 +59,7 @@ void MyEventHandler::onFrameStart()
 	{
 		angle_ += 1.0f * nc::theApplication().interval();
 		if (angle_ > 360.0f)
-		{
 			angle_ -= 360.0f;
-		}
 	}
 
 	for (unsigned int i = 0; i < NumSprites; i++)
@@ -75,9 +73,7 @@ void MyEventHandler::onShutdown()
 {
 	delete sprites_[0]; // and all its children (the remaining sprites)
 	for (unsigned int i = 0; i < NumTextures; i++)
-	{
 		delete textures_[i];
-	}
 }
 
 #ifdef __ANDROID__
@@ -95,27 +91,19 @@ void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
-	{
 		pause_ = true;
-	}
 }
 
 void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
-	{
 		pause_ = false;
-	}
 }
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
-	{
 		nc::theApplication().quit();
-	}
 	else if (event.sym == nc::KEY_SPACE)
-	{
 		nc::theApplication().togglePause();
-	}
 }

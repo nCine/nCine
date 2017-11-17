@@ -22,9 +22,7 @@ GLRenderbuffer::GLRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei hei
 GLRenderbuffer::~GLRenderbuffer()
 {
 	if (boundBuffer_ == glHandle_)
-	{
 		unbind();
-	}
 
 	glDeleteRenderbuffers(1, &glHandle_);
 }

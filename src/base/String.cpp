@@ -179,32 +179,22 @@ int String::findLastChar(char c) const
 	const char *foundPtr = strrchr(array_, c);
 
 	if (foundPtr)
-	{
 		return static_cast<int>(foundPtr - array_);
-	}
 	else
-	{
 		return -1;
-	}
 }
 
 int String::findFirstCharAfterIndex(char c, unsigned int index) const
 {
 	if (index >= length_ - 1)
-	{
 		return -1;
-	}
 
 	const char *foundPtr = strchr(array_ + index + 1, c);
 
 	if (foundPtr)
-	{
 		return static_cast<int>(foundPtr - array_);
-	}
 	else
-	{
 		return -1;
-	}
 }
 
 int String::find(const String &other) const
@@ -212,13 +202,9 @@ int String::find(const String &other) const
 	const char *foundPtr = strstr(array_, other.array_);
 
 	if (foundPtr)
-	{
 		return static_cast<int>(foundPtr - array_);
-	}
 	else
-	{
 		return -1;
-	}
 }
 
 int String::find(const char *cString) const
@@ -227,13 +213,9 @@ int String::find(const char *cString) const
 	const char *foundPtr = strstr(array_, cString);
 
 	if (foundPtr)
-	{
 		return static_cast<int>(foundPtr - array_);
-	}
 	else
-	{
 		return -1;
-	}
 }
 
 String &String::format(const char *fmt, ...)

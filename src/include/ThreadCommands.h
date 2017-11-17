@@ -33,9 +33,7 @@ class UpdateComand : public IThreadCommand
 	inline void execute()
 	{
 		if (node_)
-		{
 			node_->update(interval_);
-		}
 	}
 
   private:

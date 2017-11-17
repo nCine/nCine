@@ -34,9 +34,7 @@ ArrayIndexer::~ArrayIndexer()
 unsigned int ArrayIndexer::addObject(Object *object)
 {
 	if (object == NULL)
-	{
 		return 0;
-	}
 
 	numObjects_++;
 
@@ -61,9 +59,7 @@ Object *ArrayIndexer::object(unsigned int id) const
 	Object *objPtr = NULL;
 
 	if (id < pointers_.size())
-	{
 		objPtr = pointers_[id];
-	}
 
 	return objPtr;
 }

@@ -28,14 +28,10 @@ ParticleSystem::~ParticleSystem()
 	children_.clear();
 
 	for (unsigned int i = 0; i < affectors_.size(); i++)
-	{
 		delete affectors_[i];
-	}
 
 	for (unsigned int i = 0; i < poolSize_; i++)
-	{
 		delete particleList_[i];
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -50,17 +46,13 @@ void ParticleSystem::emitParticles(unsigned int amount, float life, const Vector
 	// Particles are rotated towards the emission vector
 	float rotation = -(atan2f(vel.y, vel.x) - atan2f(1.0f, 0.0f)) * 180.0f / fPi;
 	if (rotation < 0.0f)
-	{
 		rotation += 360.0f;
-	}
 
 	for (unsigned int i = 0; i < amount; i++)
 	{
 		// No more unused particles in the pool
 		if (poolTop_ == 0)
-		{
 			break;
-		}
 
 		float rndLife = life * randBetween(0.85f, 1.0f);
 		// HACK: hard-coded random position amount
@@ -70,9 +62,7 @@ void ParticleSystem::emitParticles(unsigned int amount, float life, const Vector
 		rndVelocity.y = vel.y * randBetween(0.8f, 1.0f);
 
 		if (inLocalSpace_ == false)
-		{
 			rndPosition += absPosition();
-		}
 
 		// Acquiring a particle from the pool
 		particlePool_[poolTop_]->init(rndLife, rndPosition, rndVelocity, rotation, inLocalSpace_);
@@ -91,9 +81,7 @@ void ParticleSystem::update(float interval)
 		if (particle->isAlive())
 		{
 			for (unsigned int j = 0; j < affectors_.size(); j++)
-			{
 				affectors_[j]->affect(particle);
-			}
 
 			particle->update(interval);
 			particle->transform();

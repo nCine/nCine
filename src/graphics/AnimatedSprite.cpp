@@ -33,9 +33,7 @@ AnimatedSprite::AnimatedSprite(Texture *texture, float x, float y)
 AnimatedSprite::~AnimatedSprite()
 {
 	for (unsigned int i = 0; i < anims_.size(); i++)
-	{
 		delete anims_[i];
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -64,9 +62,7 @@ void AnimatedSprite::update(float interval)
 
 	// Updating sprite texture rectangle only on change
 	if (previousFrame != anims_[currentAnim_]->frame())
-	{
 		setTexRect(anims_[currentAnim_]->rect());
-	}
 
 	Sprite::update(interval);
 }

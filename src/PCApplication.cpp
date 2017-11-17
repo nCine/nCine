@@ -57,9 +57,7 @@ void PCApplication::init(IAppEventHandler * (*createAppEventHandler)())
 	gfxDevice_->setWindowTitle(appCfg_.windowTitle_.data());
 	String windowIconFilePath = IFile::dataPath() + appCfg_.windowIconFilename_;
 	if (IFile::access(windowIconFilePath.data(), IFile::MODE_EXISTS))
-	{
 		gfxDevice_->setWindowIcon(windowIconFilePath.data());
-	}
 
 	initCommon();
 }
@@ -79,8 +77,10 @@ void PCApplication::run()
 					shouldQuit_ = true;
 					break;
 				case SDL_WINDOWEVENT:
-					if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) { setFocus(true); }
-					else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST) { setFocus(false); }
+					if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
+						setFocus(true);
+					else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+						setFocus(false);
 					break;
 				default:
 					SdlInputManager::parseEvent(event);
@@ -96,20 +96,14 @@ void PCApplication::run()
 #elif defined(WITH_GLFW)
 		setFocus(GlfwInputManager::hasFocus());
 		if (!hasFocus_ || isPaused_)
-		{
 			glfwWaitEvents();
-		}
 		else
-		{
 			glfwPollEvents();
-		}
 		GlfwInputManager::updateJoystickStates();
 #endif
 
 		if (hasFocus_ && !isPaused_)
-		{
 			step();
-		}
 	}
 }
 

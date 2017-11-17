@@ -68,13 +68,9 @@ void Timer::init()
 {
 #ifdef _WIN32
 	if (QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER *>(&frequency_)))
-	{
 		hasPerfCounter_ = true;
-	}
 	else
-	{
 		frequency_ = 1000L;
-	}
 #elif __APPLE__
 	mach_timebase_info_data_t info;
 	mach_timebase_info(&info);
@@ -88,9 +84,7 @@ void Timer::init()
 		hasMonotonicClock_ = true;
 	}
 	else
-	{
 		frequency_ = 1.0e6L;
-	}
 #endif
 
 	// Counter() must be called after setting the flag
@@ -101,21 +95,15 @@ void Timer::init()
 unsigned long long int Timer::counter()
 {
 	if (isInitialized_ == false)
-	{
 		init();
-	}
 
 	unsigned long long int counter = 0LL;
 
 #ifdef _WIN32
 	if (hasPerfCounter_)
-	{
 		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER *>(&counter));
-	}
 	else
-	{
 		counter = GetTickCount();
-	}
 #elif __APPLE__
 	counter = mach_absolute_time();
 #else

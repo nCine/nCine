@@ -26,17 +26,13 @@ AssetFile::AssetFile(const char *filename)
 	int lastDotChar = filename_.findLastChar('.');
 	int extLength = lastDotChar - firstDotChar - 1;
 	if (extLength >= 3 && extLength <= 4)
-	{
 		extension_.copy(filename_, firstDotChar + 1, extLength, 0);
-	}
 }
 
 AssetFile::~AssetFile()
 {
 	if (shouldCloseOnDestruction_)
-	{
 		close();
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -47,21 +43,15 @@ void AssetFile::open(unsigned char mode)
 {
 	// Checking if the file is already opened
 	if (fileDescriptor_ >= 0 || asset_ != NULL)
-	{
 		LOGW_X("File \"%s\" is already opened", filename_.data());
-	}
 	else
 	{
 		// Opening with a file descriptor
 		if (mode & MODE_FD)
-		{
 			openFD(mode);
-		}
 		// Opening as an asset only
 		else
-		{
 			openAsset(mode);
-		}
 	}
 }
 
@@ -73,9 +63,7 @@ void AssetFile::close()
 	{
 		int retValue = ::close(fileDescriptor_);
 		if (retValue < 0)
-		{
 			LOGW_X("Cannot close the file \"%s\"", filename_.data());
-		}
 		else
 		{
 			LOGI_X("File \"%s\" closed", filename_.data());
@@ -111,9 +99,7 @@ long int AssetFile::seek(long int offset, int whence) const
 		seekValue -= startOffset_;
 	}
 	else if (asset_)
-	{
 		seekValue = AAsset_seek(asset_, offset, whence);
-	}
 
 	return seekValue;
 }
@@ -123,13 +109,9 @@ long int AssetFile::tell() const
 	long int tellValue = -1;
 
 	if (fileDescriptor_ >= 0)
-	{
 		tellValue = lseek(fileDescriptor_, 0L, SEEK_CUR) - startOffset_;
-	}
 	else if (asset_)
-	{
 		tellValue = AAsset_seek(asset_, 0L, SEEK_CUR);
-	}
 
 	return tellValue;
 }
@@ -148,20 +130,14 @@ unsigned long int AssetFile::read(void *buffer, unsigned long int bytes) const
 		long int seekValue = lseek(fileDescriptor_, 0L, SEEK_CUR);
 
 		if (seekValue >=  startOffset_ + fileSize_)
-		{
-			bytesToRead = 0;    // simulating EOF
-		}
+			bytesToRead = 0; // simulating EOF
 		else if (seekValue + static_cast<long int>(bytes) > startOffset_ + fileSize_)
-		{
 			bytesToRead = (startOffset_ + fileSize_) - seekValue;
-		}
 
 		bytesRead = ::read(fileDescriptor_, buffer, bytesToRead);
 	}
 	else if (asset_)
-	{
 		bytesRead = AAsset_read(asset_, buffer, bytes);
-	}
 
 	return bytesRead;
 }
@@ -169,13 +145,9 @@ unsigned long int AssetFile::read(void *buffer, unsigned long int bytes) const
 bool AssetFile::isOpened() const
 {
 	if (fileDescriptor_ >= 0 || asset_ != NULL)
-	{
 		return true;
-	}
 	else
-	{
 		return false;
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -221,14 +193,10 @@ void AssetFile::openFD(unsigned char mode)
 			}
 		}
 		else
-		{
 			LOGI_X("File \"%s\" opened", filename_.data());
-		}
 	}
 	else
-	{
 		LOGE_X("Cannot open the file \"%s\", wrong open mode", filename_.data());
-	}
 }
 
 void AssetFile::openAsset(unsigned char mode)
@@ -251,17 +219,13 @@ void AssetFile::openAsset(unsigned char mode)
 			}
 		}
 		else
-		{
 			LOGI_X("File \"%s\" opened", filename_.data());
-		}
 
 		// Calculating file size
 		fileSize_ = AAsset_getLength(asset_);
 	}
 	else
-	{
 		LOGE_X("Cannot open the file \"%s\", wrong open mode", filename_.data());
-	}
 }
 
 /*! This method is called by `IFile::access()` */
@@ -281,13 +245,9 @@ bool AssetFile::access(const char *filename, unsigned char mode)
 		}
 	}
 	else if (mode & MODE_CAN_WRITE)
-	{
 		LOGE_X("Cannot access the file \"%s\", an asset can only be read", filename);
-	}
 	else
-	{
 		LOGE_X("Cannot access the file \"%s\", wrong access mode", filename);
-	}
 
 	return isAccessible;
 }

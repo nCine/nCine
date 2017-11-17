@@ -27,7 +27,8 @@ GLUniformCache::GLUniformCache(const GLUniform *uniform)
 
 void GLUniformCache::setFloatVector(const GLfloat *vec)
 {
-	if (uniform_ == NULL) { return; }
+	if (uniform_ == NULL)
+		return;
 
 	checkFloat();
 	memcpy(dataPointer_, vec, sizeof(GLfloat) * uniform_->numComponents());
@@ -35,7 +36,8 @@ void GLUniformCache::setFloatVector(const GLfloat *vec)
 
 void GLUniformCache::setFloatValue(GLfloat v0)
 {
-	if (uniform_ == NULL) { return; }
+	if (uniform_ == NULL)
+		return;
 
 	checkFloat();
 	checkComponents(1);
@@ -46,7 +48,8 @@ void GLUniformCache::setFloatValue(GLfloat v0)
 
 void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1)
 {
-	if (uniform_ == NULL) { return; }
+	if (uniform_ == NULL)
+		return;
 
 	checkFloat();
 	checkComponents(2);
@@ -58,7 +61,8 @@ void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1)
 
 void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2)
 {
-	if (uniform_ == NULL) { return; }
+	if (uniform_ == NULL)
+		return;
 
 	checkFloat();
 	checkComponents(3);
@@ -71,7 +75,8 @@ void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2)
 
 void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
 {
-	if (uniform_ == NULL) { return; }
+	if (uniform_ == NULL)
+		return;
 
 	checkFloat();
 	checkComponents(4);
@@ -85,7 +90,8 @@ void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v
 
 void GLUniformCache::setIntVector(const GLint *vec)
 {
-	if (uniform_ == NULL) { return; }
+	if (uniform_ == NULL)
+		return;
 
 	checkInt();
 	memcpy(dataPointer_, vec, sizeof(GLint) * uniform_->numComponents());
@@ -93,7 +99,8 @@ void GLUniformCache::setIntVector(const GLint *vec)
 
 void GLUniformCache::setIntValue(GLint v0)
 {
-	if (uniform_ == NULL) { return; }
+	if (uniform_ == NULL)
+		return;
 
 	checkInt();
 	checkComponents(1);
@@ -104,7 +111,8 @@ void GLUniformCache::setIntValue(GLint v0)
 
 void GLUniformCache::setIntValue(GLint v0, GLint v1)
 {
-	if (uniform_ == NULL) { return; }
+	if (uniform_ == NULL)
+		return;
 
 	checkInt();
 	checkComponents(2);
@@ -116,7 +124,8 @@ void GLUniformCache::setIntValue(GLint v0, GLint v1)
 
 void GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2)
 {
-	if (uniform_ == NULL) { return; }
+	if (uniform_ == NULL)
+		return;
 
 	checkInt();
 	checkComponents(3);
@@ -129,7 +138,8 @@ void GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2)
 
 void GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2, GLint v3)
 {
-	if (uniform_ == NULL) { return; }
+	if (uniform_ == NULL)
+		return;
 
 	checkInt();
 	checkComponents(4);
@@ -143,7 +153,8 @@ void GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2, GLint v3)
 
 void GLUniformCache::commitValue()
 {
-	if (uniform_ == NULL) { return; }
+	if (uniform_ == NULL)
+		return;
 
 	GLint location = uniform_->location();
 	switch (uniform_->type())
@@ -200,9 +211,7 @@ void GLUniformCache::commitValue()
 void GLUniformCache::checkFloat()
 {
 	if (uniform_->basicType() != GL_FLOAT)
-	{
 		LOGE_X("Uniform \"%s\" is not floating point", uniform_->name());
-	}
 }
 
 void GLUniformCache::checkInt()
@@ -217,9 +226,7 @@ void GLUniformCache::checkInt()
 void GLUniformCache::checkComponents(unsigned int requiredComponents)
 {
 	if (uniform_->numComponents() != requiredComponents)
-	{
 		LOGE_X("Uniform \"%s\" has %u components, not %u", uniform_->name(), uniform_->numComponents(), requiredComponents);
-	}
 }
 
 }

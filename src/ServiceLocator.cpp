@@ -28,61 +28,41 @@ ServiceLocator::ServiceLocator()
 void ServiceLocator::registerIndexer(IIndexer *service)
 {
 	if (service == NULL)
-	{
 		indexerService_ = &nullIndexer_;
-	}
 	else
-	{
 		indexerService_ = service;
-	}
 }
 
 void ServiceLocator::registerLogger(ILogger *service)
 {
 	if (service == NULL)
-	{
 		loggerService_ = &nullLogger_;
-	}
 	else
-	{
 		loggerService_ = service;
-	}
 }
 
 void ServiceLocator::registerAudioDevice(IAudioDevice *service)
 {
 	if (service == NULL)
-	{
 		audioDevice_ = &nullAudioDevice_;
-	}
 	else
-	{
 		audioDevice_ = service;
-	}
 }
 
 void ServiceLocator::registerThreadPool(IThreadPool *service)
 {
 	if (service == NULL)
-	{
 		threadPool_ = &nullThreadPool_;
-	}
 	else
-	{
 		threadPool_ = service;
-	}
 }
 
 void ServiceLocator::registerGfxCapabilities(IGfxCapabilities *service)
 {
 	if (service == NULL)
-	{
 		gfxCapabilities_ = &nullGfxCapabilities_;
-	}
 	else
-	{
 		gfxCapabilities_ = service;
-	}
 }
 
 void ServiceLocator::unregisterAll()

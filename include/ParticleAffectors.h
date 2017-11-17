@@ -40,9 +40,7 @@ class DLL_PUBLIC ColorAffector : public ParticleAffector
 	~ColorAffector()
 	{
 		for (unsigned int i = 0; i < colorSteps_.size(); i++)
-		{
 			delete colorSteps_[i];
-		}
 	}
 
 	/// Affects the color of the specified particle
@@ -75,9 +73,7 @@ class DLL_PUBLIC SizeAffector : public ParticleAffector
 	~SizeAffector()
 	{
 		for (unsigned int i = 0; i < sizeSteps_.size(); i++)
-		{
 			delete sizeSteps_[i];
-		}
 	}
 
 	/// Affects the size of the specified particle

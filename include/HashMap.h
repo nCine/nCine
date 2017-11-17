@@ -122,9 +122,7 @@ inline typename HashMap<K, T, HashFunc>::Iterator HashMap<K, T, HashFunc>::begin
 {
 	Iterator iterator(this, 0, buckets_[0].collisionList_.begin(), true);
 	if (buckets_[0].size_ == 0)
-	{
 		++iterator;
-	}
 
 	return iterator;
 }
@@ -141,9 +139,7 @@ inline typename HashMap<K, T, HashFunc>::ConstIterator HashMap<K, T, HashFunc>::
 {
 	ConstIterator iterator(this, 0, buckets_[0].collisionList_.begin(), true);
 	if (buckets_[0].size_ == 0)
-	{
 		++iterator;
-	}
 
 	return iterator;
 }
@@ -166,9 +162,7 @@ template <class K, class T, class HashFunc>
 bool HashMap<K, T, HashFunc>::HashBucket::contains(hash_t hash, const K &key, T &returnedValue) const
 {
 	if (size_ == 0)
-	{
 		return false;
-	}
 
 	bool found = false;
 	if (firstNode_.hash == hash && firstNode_.key == key)
@@ -198,9 +192,7 @@ template <class K, class T, class HashFunc>
 T *HashMap<K, T, HashFunc>::HashBucket::find(hash_t hash, const K &key)
 {
 	if (size_ == 0)
-	{
 		return NULL;
-	}
 
 	if (firstNode_.hash == hash && firstNode_.key == key)
 	{
@@ -261,11 +253,9 @@ T &HashMap<K, T, HashFunc>::HashBucket::findOrAdd(hash_t hash, const K &key)
 template <class K, class T, class HashFunc>
 bool HashMap<K, T, HashFunc>::HashBucket::remove(hash_t hash, const K &key)
 {
+	// Early-out if the bucket is empty
 	if (size_ == 0)
-	{
-		// Early-out if the bucket is empty
 		return false;
-	}
 
 	bool found = false;
 	if (firstNode_.hash == hash && firstNode_.key == key)
@@ -306,9 +296,7 @@ HashMap<K, T, HashFunc>::HashMap(unsigned int size)
 	: buckets_(size, ArrayMode::FIXED_CAPACITY)
 {
 	for (unsigned int i = 0; i < size; i++)
-	{
 		buckets_[i] = HashBucket();
-	}
 }
 
 template <class K, class T, class HashFunc>
@@ -330,9 +318,7 @@ template <class K, class T, class HashFunc>
 void HashMap<K, T, HashFunc>::clear()
 {
 	for (unsigned int i = 0; i < buckets_.size(); i++)
-	{
 		buckets_[i].clear();
-	}
 }
 
 template <class K, class T, class HashFunc>

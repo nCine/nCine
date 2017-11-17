@@ -37,9 +37,7 @@ class StaticArray
 		: size_(0), capacity_(C)
 	{
 		if (mode == StaticArrayMode::EXTEND_SIZE)
-		{
 			size_ = capacity_;
-		}
 	}
 
 	/// Copy constructor
@@ -105,22 +103,19 @@ template <class T, unsigned int C>
 StaticArray<T, C>::StaticArray(const StaticArray<T, C> &other)
 	: size_(other.size_), capacity_(other.capacity_)
 {
+	// copying all elements invoking their copy constructor
 	for (unsigned int i = 0; i < other.size_; i++)
-	{
-		// copying all elements invoking their copy constructor
 		array_[i] = other.array_[i];
-	}
 }
 
 template <class T, unsigned int C>
 StaticArray<T, C> &StaticArray<T, C>::operator=(const StaticArray<T, C> &other)
 {
 	size_ = other.size_;
+
+	// copying all elements invoking their assignment operator
 	for (unsigned int i = 0; i < other.size_; i++)
-	{
-		// copying all elements invoking their assignment operator
 		array_[i] = other.array_[i];
-	}
 
 	return *this;
 }
@@ -170,13 +165,9 @@ T &StaticArray<T, C>::operator[](unsigned int index)
 	{
 		// Need growing
 		if (size_ == capacity_)
-		{
 			LOGW_X("Index %u is beyond capacity", index);
-		}
 		else
-		{
 			size_++;
-		}
 	}
 
 	return array_[index];

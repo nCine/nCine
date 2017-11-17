@@ -180,14 +180,10 @@ void MyEventHandler::onInit()
 void MyEventHandler::onShutdown()
 {
 	for (unsigned int i = 0; i < sprites_.size(); i++)
-	{
 		delete sprites_[i];
-	}
 
 	for (unsigned int i = 0; i < textures_.size(); i++)
-	{
 		delete textures_[i];
-	}
 
 	delete textNode_;
 	delete dummy_; // and all its children
@@ -204,37 +200,23 @@ void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
-	{
 		handleCoordInput(static_cast<float>(event.x), static_cast<float>(event.y));
-	}
 }
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
-	{
 		nc::theApplication().quit();
-	}
 	else if (event.sym == nc::KEY_SPACE)
-	{
 		nc::theApplication().togglePause();
-	}
 	else if (event.sym == nc::KEY_D || event.sym == nc::KEY_RIGHT)
-	{
 		handleInput(RIGHT);
-	}
 	else if (event.sym == nc::KEY_A || event.sym == nc::KEY_LEFT)
-	{
 		handleInput(LEFT);
-	}
 	else if (event.sym == nc::KEY_W || event.sym == nc::KEY_UP)
-	{
 		handleInput(UP);
-	}
 	else if (event.sym == nc::KEY_S || event.sym == nc::KEY_DOWN)
-	{
 		handleInput(DOWN);
-	}
 }
 
 void MyEventHandler::handleInput(Direction direction)
@@ -244,30 +226,22 @@ void MyEventHandler::handleInput(Direction direction)
 		case RIGHT:
 			newSelection_ = selected_ + 1;
 			if (newSelection_ > static_cast<int>(filenames_.size() - 1))
-			{
 				newSelection_ = 0;
-			}
 			break;
 		case LEFT:
 			newSelection_ = selected_ - 1;
 			if (newSelection_ < 0)
-			{
 				newSelection_ = filenames_.size() - 1;
-			}
 			break;
 		case UP:
 			newScale_ = scale_ * 2.0f;
 			if (newScale_ > MaxScaleFactor)
-			{
 				newScale_ = MaxScaleFactor;
-			}
 			break;
 		case DOWN:
 			newScale_ = scale_ * 0.5f;
 			if (newScale_ < MinScaleFactor)
-			{
 				newScale_ = MinScaleFactor;
-			}
 			break;
 	}
 
@@ -283,9 +257,7 @@ void MyEventHandler::handleInput(Direction direction)
 	if (newScale_ != scale_)
 	{
 		for (unsigned int i = 0; i < sprites_.size(); i++)
-		{
 			sprites_[i]->setScale(newScale_);
-		}
 		scale_ = newScale_;
 	}
 }
@@ -293,22 +265,14 @@ void MyEventHandler::handleInput(Direction direction)
 void MyEventHandler::handleCoordInput(float x, float y)
 {
 	if (x > nc::theApplication().width() * (0.5f + DeadScreenZone))
-	{
 		handleInput(RIGHT);
-	}
 	else if (x < nc::theApplication().width() * (0.5f - DeadScreenZone))
-	{
 		handleInput(LEFT);
-	}
 
 	if (y > nc::theApplication().height() * (0.5f + DeadScreenZone))
-	{
 		handleInput(UP);
-	}
 	else if (y < nc::theApplication().height() * (0.5f - DeadScreenZone))
-	{
 		handleInput(DOWN);
-	}
 }
 
 void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
@@ -322,18 +286,14 @@ void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 			axesLeftStickPressed[0] = true;
 		}
 		else if (x > 0.0f && x < ReleasedAxisThreshold)
-		{
 			axesLeftStickPressed[0] = false;
-		}
 		else if (x < -PressedAxisThreshold && axesLeftStickPressed[1] == false)
 		{
 			handleInput(LEFT);
 			axesLeftStickPressed[1] = true;
 		}
 		else if (x < 0.0f && x > -ReleasedAxisThreshold)
-		{
 			axesLeftStickPressed[1] = false;
-		}
 	}
 	else if (event.axisName == nc::AXIS_LY)
 	{
@@ -344,18 +304,14 @@ void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 			axesLeftStickPressed[2] = true;
 		}
 		else if (y > 0.0f && y < ReleasedAxisThreshold)
-		{
 			axesLeftStickPressed[2] = false;
-		}
 		else if (y < -PressedAxisThreshold && axesLeftStickPressed[3] == false)
 		{
 			handleInput(DOWN);
 			axesLeftStickPressed[3] = true;
 		}
 		else if (y < 0.0f && y > -ReleasedAxisThreshold)
-		{
 			axesLeftStickPressed[3] = false;
-		}
 	}
 }
 

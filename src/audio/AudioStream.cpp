@@ -24,13 +24,9 @@ AudioStream::AudioStream(const char *filename)
 
 	FATAL_ASSERT_MSG_X(numChannels == 1 || numChannels == 2, "Unsupported number of channels: %d", numChannels);
 	if (numChannels == 1)
-	{
 		format_ = AL_FORMAT_MONO16;
-	}
 	else
-	{
 		format_ = AL_FORMAT_STEREO16;
-	}
 }
 
 AudioStream::~AudioStream()

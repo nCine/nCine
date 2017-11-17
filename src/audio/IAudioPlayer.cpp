@@ -26,9 +26,7 @@ void IAudioPlayer::setGain(float gain)
 {
 	gain_ = gain;
 	if (state_ == STATE_PLAYING)
-	{
 		alSourcef(sourceId_, AL_GAIN, gain_);
-	}
 }
 
 /*! The change is applied to the OpenAL source only when playing. */
@@ -36,9 +34,7 @@ void IAudioPlayer::setPitch(float pitch)
 {
 	pitch_ = pitch;
 	if (state_ == STATE_PLAYING)
-	{
 		alSourcef(sourceId_, AL_PITCH, pitch_);
-	}
 }
 
 /*! The change is applied to the OpenAL source only when playing. */
@@ -55,9 +51,7 @@ void IAudioPlayer::setPosition(float x, float y, float z)
 	position_[2] = z;
 
 	if (state_ == STATE_PLAYING)
-	{
 		alSourcefv(sourceId_, AL_POSITION, position_.data());
-	}
 }
 
 }

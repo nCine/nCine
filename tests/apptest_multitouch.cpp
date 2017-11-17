@@ -73,9 +73,7 @@ void MyEventHandler::onShutdown()
 
 #ifdef __ANDROID__
 	for (unsigned int i = 0; i < nc::TouchEvent::MaxPointers; i++)
-	{
 		delete sprites_[i];
-	}
 	delete texture_;
 #endif
 
@@ -96,9 +94,7 @@ void MyEventHandler::handleEvent(const nc::TouchEvent &event, nc::String *string
 		sprites_[i]->setPosition(pointer.x, pointer.y);
 	}
 	for (unsigned int i = event.count; i < nc::TouchEvent::MaxPointers; i++)
-	{
 		sprites_[i]->enableDraw(false);
-	}
 }
 
 void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
@@ -129,12 +125,8 @@ void MyEventHandler::onPointerUp(const nc::TouchEvent &event)
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
-	{
 		nc::theApplication().quit();
-	}
 	else if (event.sym == nc::KEY_SPACE)
-	{
 		nc::theApplication().togglePause();
-	}
 }
 #endif

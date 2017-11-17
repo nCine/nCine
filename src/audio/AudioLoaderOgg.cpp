@@ -84,9 +84,7 @@ unsigned long int AudioLoaderOgg::read(char *buffer, unsigned long int bufferSiz
 
 		// Reset the static variable at the end of a decoding process
 		if (bytes <= 0)
-		{
 			bitStream = 0;
-		}
 
 		bufferSeek += bytes;
 	}

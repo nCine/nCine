@@ -25,9 +25,7 @@ PlottingVariable::PlottingVariable(unsigned int numValues, float rejectDelay, co
 PlottingVariable::~PlottingVariable()
 {
 	if (vertices_)
-	{
 		delete[] vertices_;
-	}
 }
 
 }

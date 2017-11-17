@@ -110,10 +110,9 @@ void AudioBufferPlayer::updateState()
 	{
 		ALenum eALState;
 		alGetSourcei(sourceId_, AL_SOURCE_STATE, &eALState);
+
 		if (eALState != AL_PLAYING)
-		{
 			state_ = STATE_STOPPED;
-		}
 	}
 }
 

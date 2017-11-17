@@ -109,11 +109,7 @@ void MyEventHandler::onShutdown()
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
-	{
 		nc::theApplication().quit();
-	}
 	else if (event.sym == nc::KEY_SPACE)
-	{
 		nc::theApplication().togglePause();
-	}
 }

@@ -36,14 +36,10 @@ void TextureLoaderPkm::init()
 	if (IFile::int32FromBE(header.magicId) == 0x504B4D20) // "PKM 10"
 	{
 		if (IFile::int16FromBE(header.version) != 0x3130) // "10"
-		{
 			FATAL_MSG_X("PKM version not supported: 0x%04x", header.version);
-		}
 
 		if (IFile::int16FromBE(header.dataType) != 0)
-		{
 			FATAL_MSG_X("PKM data type not supported: 0x%04x", header.dataType);
-		}
 
 		headerSize_ = 16;
 		width_ = IFile::int16FromBE(header.width);

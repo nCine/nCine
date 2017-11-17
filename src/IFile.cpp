@@ -39,9 +39,7 @@ IFile::IFile(const char *filename)
 	int dotChar = filename_.findLastChar('.');
 	// A dot followed by at least three extension characters
 	if (dotChar && (filename_.length() - dotChar) >= 4)
-	{
 		extension_.copy(filename_, dotChar + 1, filename_.length() - dotChar - 1, 0);
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -51,13 +49,9 @@ IFile::IFile(const char *filename)
 bool IFile::isOpened() const
 {
 	if (fileDescriptor_ >= 0 || filePointer_ != NULL)
-	{
 		return true;
-	}
 	else
-	{
 		return false;
-	}
 }
 
 bool IFile::hasExtension(const char *extension) const
@@ -71,9 +65,7 @@ IFile *IFile::createFileHandle(const char *filename)
 	ASSERT(filename);
 #ifdef __ANDROID__
 	if (strncmp(filename, static_cast<const char *>("asset::"), 7) == 0)
-	{
 		return new AssetFile(filename + 7);
-	}
 	else
 #endif
 		return new StandardFile(filename);
@@ -84,9 +76,7 @@ bool IFile::access(const char *filename, unsigned char mode)
 	ASSERT(filename);
 #ifdef __ANDROID__
 	if (strncmp(filename, static_cast<const char *>("asset::"), 7) == 0)
-	{
 		return AssetFile::access(filename + 7, mode);
-	}
 	else
 #endif
 		return StandardFile::access(filename, mode);
@@ -95,9 +85,7 @@ bool IFile::access(const char *filename, unsigned char mode)
 const String &IFile::savePath()
 {
 	if (savePath_.isEmpty())
-	{
 		initSavePath();
-	}
 
 	return savePath_;
 }
@@ -132,9 +120,7 @@ void IFile::initSavePath()
 		{
 			char *homeEnv = getenv("HOME");
 			if (homeEnv && strlen(homeEnv))
-			{
 				savePath_ = homeEnv;
-			}
 		}
 		else
 		{
@@ -143,25 +129,17 @@ void IFile::initSavePath()
 		}
 	}
 	else
-	{
 		savePath_ = userProfileEnv;
-	}
 
 	if (savePath_.isEmpty() == false)
-	{
 		savePath_ += "\\";
-	}
 #else
 	char *homeEnv = getenv("HOME");
 
 	if (homeEnv == NULL || strlen(homeEnv) == 0)
-	{
 		savePath_ = getpwuid(getuid())->pw_dir;
-	}
 	else
-	{
 		savePath_ = homeEnv;
-	}
 
 	savePath_ += "/.config/";
 #endif

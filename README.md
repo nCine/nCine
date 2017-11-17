@@ -43,9 +43,9 @@ For additional information: https://ncine.github.io/
 ### Conventions
 
 #### Coding Conventions
-- Indent with tabs but use spaces for continuation line alignment
+- Indent with tabs (4 spaces) but use spaces for continuation line alignment
 - Allman brackets
-  - Brackets around one line conditional statements
+  - No brackets around one line conditional statements
 - Padding space after parenthesis headers (`if`, `do`, `while`, `for`, `switch`)
 - Align pointer and reference operator to the variable or function name
 - `inline` keyword always before `virtual` and `static`

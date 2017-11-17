@@ -16,14 +16,10 @@ GfxCapabilities::GfxCapabilities()
 	  glReleaseVersion_(0)
 {
 	for (unsigned int i = 0; i < IGfxCapabilities::NUM_INTVALUES; i++)
-	{
 		glIntValues_[i] = 0;
-	}
 
 	for (unsigned int i = 0; i < IGfxCapabilities::NUM_EXTENSIONS; i++)
-	{
 		glExtensions_[i] = false;
-	}
 
 	init();
 }
@@ -49,9 +45,7 @@ int GfxCapabilities::value(GLIntValues valueName) const
 	int value = 0;
 
 	if (valueName >= 0 && valueName < NUM_INTVALUES)
-	{
 		value = glIntValues_[valueName];
-	}
 
 	return value;
 }
@@ -61,9 +55,7 @@ bool GfxCapabilities::hasExtension(GLExtensions extensionName) const
 	bool extensionAvailable = false;
 
 	if (extensionName >= 0 && extensionName < NUM_EXTENSIONS)
-	{
 		extensionAvailable = glExtensions_[extensionName];
-	}
 
 	return extensionAvailable;
 }
@@ -142,9 +134,8 @@ bool GfxCapabilities::checkGLExtension(const char *extensionName) const
 		{
 			size_t n = strcspn(extensions, " ");
 			if ((nameLength == n) && (strncmp(extensionName, extensions, n) == 0))
-			{
 				return true;
-			}
+
 			extensions += (n + 1);
 		}
 	}
@@ -158,9 +149,7 @@ bool GfxCapabilities::checkGLExtension(const char *extensionName) const
 		{
 			const char *extension = reinterpret_cast<const char *>(glGetStringi(GL_EXTENSIONS, i));
 			if (strncmp(extensionName, extension, nameLength) == 0)
-			{
 				return true;
-			}
 		}
 	}
 #endif

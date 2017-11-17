@@ -121,46 +121,28 @@ void MyEventHandler::onFrameStart()
 {
 	float interval = nc::theApplication().interval();
 	if (!pause_)
-	{
 		angle_ += 2.0f * interval;
-	}
 
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
 	if (keyState.isKeyDown(nc::KEY_D))
-	{
 		camPos_.x -= MoveSpeed * interval;
-	}
 	else if (keyState.isKeyDown(nc::KEY_A))
-	{
 		camPos_.x += MoveSpeed * interval;
-	}
 	if (keyState.isKeyDown(nc::KEY_W))
-	{
 		camPos_.y -= MoveSpeed * interval;
-	}
 	else if (keyState.isKeyDown(nc::KEY_S))
-	{
 		camPos_.y += MoveSpeed * interval;
-	}
 
 	if (keyState.isKeyDown(nc::KEY_RIGHT))
-	{
 		camRot_ += RotateSpeed * interval;
-	}
 	else if (keyState.isKeyDown(nc::KEY_LEFT))
-	{
 		camRot_ -= RotateSpeed * interval;
-	}
 
 	if (keyState.isKeyDown(nc::KEY_UP))
-	{
 		camScale_ += ScaleSpeed * interval;
-	}
 	else if (keyState.isKeyDown(nc::KEY_DOWN))
-	{
 		camScale_ -= ScaleSpeed * interval;
-	}
 
 	if (joyVectorLeft_.length() > nc::IInputManager::LeftStickDeadZone)
 	{
@@ -189,13 +171,9 @@ void MyEventHandler::onFrameStart()
 	}
 
 	if (camScale_ > MaxCameraScale)
-	{
 		camScale_ = MaxCameraScale;
-	}
 	else if (camScale_ < MinCameraScale)
-	{
 		camScale_ = MinCameraScale;
-	}
 
 	float scaledWidth = ViewHalfWidth * 2.0f * camScale_;
 	float scaledHeight = ViewHalfHeight * 2.0f * camScale_;
@@ -217,21 +195,13 @@ void MyEventHandler::onFrameStart()
 	float minY = (-rotatedHeight * 0.5f) + nc::theApplication().height();
 
 	if (camPos_.x > maxX)
-	{
 		camPos_.x = maxX;
-	}
 	if (camPos_.x < minX)
-	{
 		camPos_.x = minX;
-	}
 	if (camPos_.y > maxY)
-	{
 		camPos_.y = maxY;
-	}
 	if (camPos_.y < minY)
-	{
 		camPos_.y = minY;
-	}
 
 	debugString_->clear();
 	debugString_->format("x: %.2f, y: %.2f, scale: %.2f, angle: %.2f", -camPos_.x, -camPos_.y, camScale_, camRot_);
@@ -255,14 +225,10 @@ void MyEventHandler::onFrameStart()
 void MyEventHandler::onShutdown()
 {
 	for (unsigned int i = 0; i < NumSprites; i++)
-	{
 		delete sprites_[i];
-	}
 
 	for (unsigned int i = 0; i < NumTexts; i++)
-	{
 		delete texts_[i];
-	}
 
 	delete debugtext_;
 	delete debugString_;
@@ -270,9 +236,7 @@ void MyEventHandler::onShutdown()
 	delete font_;
 
 	for (unsigned int i = 0; i < NumTextures; i++)
-	{
 		delete textures_[i];
-	}
 }
 
 #ifdef __ANDROID__
@@ -298,9 +262,7 @@ void MyEventHandler::onTouchMove(const nc::TouchEvent &event)
 void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 {
 	if (nc::Timer::now() - lastClick_ < DoubleClickDelay)
-	{
 		resetCamera();
-	}
 	lastClick_ = nc::Timer::now();
 }
 
@@ -318,21 +280,13 @@ void MyEventHandler::onPointerDown(const nc::TouchEvent &event)
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_P)
-	{
 		pause_ = !pause_;
-	}
 	else if (event.sym == nc::KEY_R)
-	{
 		resetCamera();
-	}
 	else if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
-	{
 		nc::theApplication().quit();
-	}
 	else if (event.sym == nc::KEY_SPACE)
-	{
 		nc::theApplication().togglePause();
-	}
 }
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
@@ -356,9 +310,7 @@ void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 	if (event.isLeftButton())
 	{
 		if (nc::Timer::now() - lastClick_ < DoubleClickDelay)
-		{
 			resetCamera();
-		}
 		lastClick_ = nc::Timer::now();
 	}
 }
@@ -386,30 +338,20 @@ void MyEventHandler::onScrollInput(const nc::ScrollEvent &event)
 void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 {
 	if (event.axisName == nc::AXIS_LX)
-	{
 		joyVectorLeft_.x = event.value;
-	}
 	else if (event.axisName == nc::AXIS_LY)
-	{
 		joyVectorLeft_.y = -event.value;
-	}
 
 	if (event.axisName == nc::AXIS_RX)
-	{
 		joyVectorRight_.x = event.value;
-	}
 	else if (event.axisName == nc::AXIS_RY)
-	{
 		joyVectorRight_.y = -event.value;
-	}
 }
 
 void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event)
 {
 	if (event.buttonName == nc::BUTTON_B)
-	{
 		resetCamera();
-	}
 }
 
 void MyEventHandler::onJoyDisconnected(const nc::JoyConnectionEvent &event)

@@ -12,9 +12,7 @@ int main(int argc, char **argv)
 
 	printf("Filling the whole array\n");
 	for (unsigned int i = 0; i < Capacity; i++)
-	{
 		array[i] = static_cast<int>(i);
-	}
 	printArray(array);
 
 	printf("Writing beyond capacity\n");
@@ -68,16 +66,12 @@ int main(int argc, char **argv)
 	printf("\n--- Array traversals (for cycles) ---\n");
 	printf("Iterating through elements:");
 	for (nc::Array<int>::ConstIterator i = array.begin(); i != array.end(); ++i)
-	{
 		printf(" %d", *i);
-	}
 	printf("\n");
 
 	printf("Iterating through elements (reverse):");
 	for (nc::Array<int>::ConstIterator r = array.rBegin(); r != array.rEnd(); --r)
-	{
 		printf(" %d", *r);
-	}
 	printf("\n");
 
 
@@ -109,9 +103,7 @@ int main(int argc, char **argv)
 
 	printf("Clearing the first array\n");
 	if (!array.isEmpty())
-	{
 		array.clear();
-	}
 	printArray(array);
 
 	printf("Contents of second array\n");

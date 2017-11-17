@@ -37,18 +37,14 @@ FileLogger::FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fil
 	}
 
 	if (consoleLevel_ != LOG_OFF)
-	{
 		setvbuf(stdout, NULL, _IONBF, 0);
-	}
 }
 
 FileLogger::~FileLogger()
 {
 	write(LOG_VERBOSE, "FileLogger::~FileLogger -> End of the log");
 	if (fileHandle_)
-	{
 		delete fileHandle_;
-	}
 }
 
 ///////////////////////////////////////////////////////////

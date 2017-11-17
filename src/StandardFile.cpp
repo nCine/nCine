@@ -19,9 +19,7 @@ namespace ncine {
 StandardFile::~StandardFile()
 {
 	if (shouldCloseOnDestruction_)
-	{
 		close();
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -32,17 +30,13 @@ void StandardFile::open(unsigned char mode)
 {
 	// Checking if the file is already opened
 	if (fileDescriptor_ >= 0 || filePointer_ != NULL)
-	{
 		LOGW_X("File \"%s\" is already opened", filename_.data());
-	}
 	else
 	{
 #if !(defined(_WIN32) && !defined(__MINGW32__))
 		// Opening with a file descriptor
 		if (mode & MODE_FD)
-		{
 			openFD(mode);
-		}
 		// Opening with a file stream
 		else
 #endif
@@ -58,9 +52,7 @@ void StandardFile::close()
 #if !(defined(_WIN32) && !defined(__MINGW32__))
 		int retValue = ::close(fileDescriptor_);
 		if (retValue < 0)
-		{
 			LOGW_X("Cannot close the file \"%s\"", filename_.data());
-		}
 		else
 		{
 			LOGI_X("File \"%s\" closed", filename_.data());
@@ -72,9 +64,7 @@ void StandardFile::close()
 	{
 		int retValue = fclose(filePointer_);
 		if (retValue == EOF)
-		{
 			LOGW_X("Cannot close the file \"%s\"", filename_.data());
-		}
 		else
 		{
 			LOGI_X("File \"%s\" closed", filename_.data());
@@ -94,9 +84,7 @@ long int StandardFile::seek(long int offset, int whence) const
 #endif
 	}
 	else if (filePointer_)
-	{
 		seekValue = fseek(filePointer_, offset, whence);
-	}
 
 	return seekValue;
 }
@@ -112,9 +100,7 @@ long int StandardFile::tell() const
 #endif
 	}
 	else if (filePointer_)
-	{
 		tellValue = ftell(filePointer_);
-	}
 
 	return tellValue;
 }
@@ -133,9 +119,7 @@ unsigned long int StandardFile::read(void *buffer, unsigned long int bytes) cons
 #endif
 	}
 	else if (filePointer_)
-	{
 		bytesRead = static_cast<unsigned long int>(fread(buffer, 1, bytes, filePointer_));
-	}
 
 	return bytesRead;
 }
@@ -184,9 +168,7 @@ void StandardFile::openFD(unsigned char mode)
 			}
 		}
 		else
-		{
 			LOGI_X("File \"%s\" opened", filename_.data());
-		}
 
 		// Calculating file size
 		fileSize_ = lseek(fileDescriptor_, 0L, SEEK_END);
@@ -247,9 +229,7 @@ void StandardFile::openStream(unsigned char mode)
 			}
 		}
 		else
-		{
 			LOGI_X("File \"%s\" opened", filename_.data());
-		}
 
 		// Calculating file size
 		fseek(filePointer_, 0L, SEEK_END);
@@ -285,9 +265,7 @@ bool StandardFile::access(const char *filename, unsigned char mode)
 	}
 
 	if (accessMode != -1)
-	{
 		isAccessible = (::access(filename, accessMode) == 0);
-	}
 #else
 	switch (mode)
 	{
@@ -309,9 +287,7 @@ bool StandardFile::access(const char *filename, unsigned char mode)
 	}
 
 	if (accessMode != -1)
-	{
 		isAccessible = (::_access(filename, accessMode) == 0);
-	}
 #endif
 
 	return isAccessible;

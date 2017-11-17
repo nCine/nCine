@@ -28,13 +28,16 @@ class AndroidKeyboardState : public KeyboardState
   public:
 	AndroidKeyboardState()
 	{
-		for (unsigned int i = 0; i < KEYSYM_COUNT; i++) { keys_[i] = 0; }
+		for (unsigned int i = 0; i < KEYSYM_COUNT; i++)
+			keys_[i] = 0;
 	}
 
 	inline bool isKeyDown(KeySym key) const
 	{
-		if (key == KEY_UNKNOWN) { return false; }
-		else { return keys_[key] != 0; }
+		if (key == KEY_UNKNOWN)
+			return false;
+		else
+			return keys_[key] != 0;
 	}
 
   private:

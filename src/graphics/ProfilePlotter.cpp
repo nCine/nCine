@@ -32,9 +32,7 @@ ProfilePlotter::ProfilePlotter(SceneNode *parent, Rectf rect)
 ProfilePlotter::~ProfilePlotter()
 {
 	for (unsigned int i = 0; i < variables_.size(); i++)
-	{
 		delete variables_[i];
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -46,9 +44,7 @@ bool ProfilePlotter::addValue(unsigned int varIndex, float value)
 	bool valueRegistered = false;
 
 	if (varIndex < variables_.size())
-	{
 		valueRegistered = variables_[varIndex]->addValue(value);
-	}
 
 	return valueRegistered;
 }
@@ -66,17 +62,11 @@ float ProfilePlotter::normBetweenRefValue(float min, float max) const
 	if (max - min > 0.0f)
 	{
 		if (refValue_ < min)
-		{
 			value = 0.0f;
-		}
 		else if (refValue_ > max)
-		{
 			value = 1.0f;
-		}
 		else
-		{
 			value = (refValue_ - min) / (max - min);
-		}
 	}
 
 	return value;

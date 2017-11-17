@@ -19,14 +19,13 @@ EglGfxDevice::~EglGfxDevice()
 	if (display_ != EGL_NO_DISPLAY)
 	{
 		eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
 		if (context_ != EGL_NO_CONTEXT)
-		{
 			eglDestroyContext(display_, context_);
-		}
+
 		if (surface_ != EGL_NO_SURFACE)
-		{
 			eglDestroySurface(display_, surface_);
-		}
+
 		eglTerminate(display_);
 	}
 
@@ -101,9 +100,8 @@ bool EglGfxDevice::isModeSupported(struct android_app *state, const GLContextInf
 	bool modeIsSupported = (surface != EGL_NO_SURFACE);
 
 	if (surface != EGL_NO_SURFACE)
-	{
 		eglDestroySurface(display, surface);
-	}
+
 	eglTerminate(display);
 
 	return modeIsSupported;
@@ -171,9 +169,7 @@ void EglGfxDevice::initDevice(struct android_app *state)
 #endif
 
 	if (contextInfo_.debugContext)
-	{
 		enableGlDebugOutput();
-	}
 
 	EGLint red, blue, green, alpha, depth, stencil, samples;
 	eglGetConfigAttrib(display_, config_, EGL_RED_SIZE, &red);

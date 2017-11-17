@@ -58,17 +58,13 @@ void StackedBarPlotter::draw(RenderQueue &renderQueue)
 
 	// Drawing the reference value line
 	if (shouldPlotRefValue())
-	{
 		drawRefValue(renderQueue);
-	}
 
 	for (unsigned int i = 0; i < variables_.size(); i++)
 	{
 		variables_[i]->draw(renderQueue);
 		if (variables_[i]->shouldPlotMean())
-		{
 			variables_[i]->drawMean(renderQueue);
-		}
 	}
 }
 

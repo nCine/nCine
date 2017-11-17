@@ -60,9 +60,7 @@ GLUniformCache *GLShaderUniforms::uniform(const char *name)
 		}
 	}
 	else
-	{
 		LOGE_X("Cannot find uniform \"%s\", no shader program associated", name);
-	}
 
 	return uniformCache;
 }
@@ -75,9 +73,7 @@ void GLShaderUniforms::commitUniforms()
 		forEach(uniformCaches_.begin(), uniformCaches_.end(), commitValue);
 	}
 	else
-	{
 		LOGE("No shader program associated");
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -88,9 +84,7 @@ void GLShaderUniforms::importUniforms()
 {
 	unsigned int count = shaderProgram_->uniforms_.size();
 	if (count > UniformCachesHashSize)
-	{
 		LOGW_X("More active uniforms (%d) than hashmap buckets (%d)", count, UniformCachesHashSize);
-	}
 
 	unsigned int nextFreeFloat = 0;
 	unsigned int nextFreeInt = 0;
@@ -109,9 +103,8 @@ void GLShaderUniforms::importUniforms()
 					nextFreeFloat += uniform.numComponents(); // tight packing, not aligned
 				}
 				else
-				{
 					LOGW_X("Shader %u - No more floating point buffer space for uniform \"%s\"", shaderProgram_->glHandle(), uniform.name());
-				}
+
 				break;
 			}
 			case GL_INT:
@@ -122,9 +115,8 @@ void GLShaderUniforms::importUniforms()
 					nextFreeInt += uniform.numComponents(); // tight packing, not aligned
 				}
 				else
-				{
 					LOGW_X("Shader %u - No more integer buffer space for uniform \"%s\"", shaderProgram_->glHandle(), uniform.name());
-				}
+
 				break;
 			}
 		}

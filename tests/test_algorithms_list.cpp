@@ -8,9 +8,7 @@ int main(int argc, char **argv)
 
 	printf("Inserting some elements to the back\n");
 	for (int i = 0; i < Size; i++)
-	{
 		list.pushBack(i);
-	}
 	printList(list);
 
 	int minimum = *nc::minElement(list.begin(), list.end());
@@ -54,9 +52,7 @@ int main(int argc, char **argv)
 	printf("Creating a second list with random elements\n");
 	nc::List<int> list2;
 	for (int i = 0; i < Size; i++)
-	{
 		list2.pushBack(rand() % 100);
-	}
 	printList(list2);
 
 	printf("Storing transformed random numbers back into the first list\n");

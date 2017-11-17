@@ -22,9 +22,7 @@ GLBufferObject::GLBufferObject(GLenum target)
 GLBufferObject::~GLBufferObject()
 {
 	if (boundBuffers_[target_] == glHandle_)
-	{
 		unbind();
-	}
 
 	glDeleteBuffers(1, &glHandle_);
 }

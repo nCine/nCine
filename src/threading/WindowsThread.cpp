@@ -68,9 +68,7 @@ void Thread::run(ThreadFunctionPtr startFunction, void *arg)
 		FATAL_ASSERT_MSG(handle_, "Error in _beginthreadex()");
 	}
 	else
-	{
 		LOGW_X("Thread %u is already running", handle_);
-	}
 }
 
 void *Thread::join()
@@ -113,9 +111,7 @@ ThreadAffinityMask Thread::affinityMask() const
 		SetThreadAffinityMask(handle_, affinityMask.affinityMask_);
 	}
 	else
-	{
 		LOGW("Cannot get the affinity for a thread that has not been created yet");
-	}
 
 	return affinityMask;
 }
@@ -123,13 +119,9 @@ ThreadAffinityMask Thread::affinityMask() const
 void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
 {
 	if (handle_ != 0)
-	{
 		SetThreadAffinityMask(handle_, affinityMask.affinityMask_);
-	}
 	else
-	{
 		LOGW("Cannot set the affinity mask for a not yet created thread");
-	}
 }
 
 ///////////////////////////////////////////////////////////

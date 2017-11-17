@@ -83,15 +83,11 @@ void Application::initCommon()
 	theServiceLocator().registerIndexer(new ArrayIndexer());
 #ifdef WITH_AUDIO
 	if (appCfg_.withAudio_)
-	{
 		theServiceLocator().registerAudioDevice(new ALAudioDevice());
-	}
 #endif
 #ifdef WITH_THREADS
 	if (appCfg_.withThreads_)
-	{
 		theServiceLocator().registerThreadPool(new ThreadPool());
-	}
 #endif
 	theServiceLocator().registerGfxCapabilities(new GfxCapabilities());
 
@@ -134,13 +130,9 @@ void Application::initCommon()
 			String fontTexFilePath = IFile::dataPath() + appCfg_.fontTexFilename_;
 			String fontFntFilePath = IFile::dataPath() + appCfg_.fontFntFilename_;
 			if (IFile::access(fontTexFilePath.data(), IFile::MODE_EXISTS) == false)
-			{
 				LOGW_X("Cannot access font texture file \"%s\" to enable profiling text", fontTexFilePath.data());
-			}
 			else if (IFile::access(fontFntFilePath.data(), IFile::MODE_EXISTS) == false)
-			{
 				LOGW_X("Cannot access font FNT file \"%s\" to enable profiling text", fontFntFilePath.data());
-			}
 			else
 			{
 				font_ = new Font(fontTexFilePath.data(), fontFntFilePath.data());
@@ -164,9 +156,7 @@ void Application::step()
 {
 	frameTimer_->addFrame();
 	if (appCfg_.withScenegraph_)
-	{
 		gfxDevice_->clear();
-	}
 	appEventHandler_->onFrameStart();
 	if (profilePlotter_)
 	{
@@ -223,9 +213,7 @@ void Application::shutdownCommon()
 	LOGI("IAppEventHandler::OnShutdown() invoked");
 
 	if (appEventHandler_)
-	{
 		delete appEventHandler_;
-	}
 
 	delete textLines_;
 	delete font_;

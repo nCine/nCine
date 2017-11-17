@@ -36,9 +36,7 @@ GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFil
 GLShaderProgram::~GLShaderProgram()
 {
 	if (boundProgram_ == glHandle_)
-	{
 		glUseProgram(0);
-	}
 
 	glDeleteProgram(glHandle_);
 }
@@ -88,9 +86,7 @@ bool GLShaderProgram::link()
 	}
 
 	for (unsigned int i = 0; i < attachedShaders_.size(); i++)
-	{
 		delete attachedShaders_[i];
-	}
 
 	discoverUniforms();
 	discoverAttributes();
@@ -112,9 +108,7 @@ GLint GLShaderProgram::getUniformLocation(const GLchar *name) const
 	GLint location = glGetUniformLocation(glHandle_, name);
 
 	if (location == -1)
-	{
 		LOGW_X("Location not found for uniform \"%s\" in shader program %u", name, glHandle_);
-	}
 
 	return location;
 }
@@ -131,9 +125,7 @@ GLuint GLShaderProgram::getUniformBlockIndex(const GLchar *uniformBlockName) con
 	GLuint index = glGetUniformBlockIndex(glHandle_, uniformBlockName);
 
 	if (index == GL_INVALID_INDEX)
-	{
 		LOGW_X("Index not found for uniform block \"%s\" in shader program %u", uniformBlockName, glHandle_);
-	}
 
 	return index;
 }

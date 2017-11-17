@@ -50,14 +50,10 @@ void AndroidApplication::start(struct android_app *state, IAppEventHandler * (*c
 		while ((ident = ALooper_pollAll(!theApplication().isPaused() ? 0 : -1, NULL, &events, reinterpret_cast<void **>(&source))) >= 0)
 		{
 			if (source != NULL)
-			{
 				source->process(state, source);
-			}
 
 			if (ident == LOOPER_ID_USER)
-			{
 				AndroidInputManager::parseAccelerometerEvent();
-			}
 
 			if (state->destroyRequested)
 			{
@@ -172,9 +168,7 @@ unsigned int AndroidApplication::sdkVersion() const
 	unsigned int sdkVersion = 0;
 
 	if (isInitialized_)
-	{
 		sdkVersion = AndroidJniHelper::sdkVersion();
-	}
 
 	return sdkVersion;
 }
@@ -182,9 +176,7 @@ unsigned int AndroidApplication::sdkVersion() const
 void AndroidApplication::enableAccelerometer(bool enabled)
 {
 	if (isInitialized_)
-	{
 		AndroidInputManager::enableAccelerometer(enabled);
-	}
 }
 
 const char *AndroidApplication::internalDataPath() const
@@ -222,19 +214,17 @@ void AndroidApplication::init()
 	DisplayMode displayMode32(8, 8, 8, 8, 24, 8, DisplayMode::DOUBLE_BUFFERED, DisplayMode::NO_VSYNC);
 	DisplayMode displayMode16(5, 6, 5, 0, 16, 0, DisplayMode::DOUBLE_BUFFERED, DisplayMode::NO_VSYNC);
 	IGfxDevice::GLContextInfo contextInfo(appCfg_.glMajorVersion_, appCfg_.glMinorVersion_, appCfg_.glDebugContext_);
+
 	if (EglGfxDevice::isModeSupported(state_, contextInfo, displayMode32))
-	{
 		gfxDevice_ = new EglGfxDevice(state_, contextInfo, displayMode32);
-	}
 	else if (EglGfxDevice::isModeSupported(state_, contextInfo, displayMode16))
-	{
 		gfxDevice_ = new EglGfxDevice(state_, contextInfo, displayMode16);
-	}
 	else
 	{
 		LOGF("Cannot find a suitable EGL configuration, graphics device not created");
 		exit(EXIT_FAILURE);
 	}
+
 	AndroidJniHelper::attachJVM(state_);
 	inputManager_ = new AndroidInputManager(state_);
 	AssetFile::initAssetManager(state_);
@@ -261,13 +251,9 @@ void AndroidApplication::setFocus(bool hasFocus)
 		hasFocus_ = hasFocus;
 		// Check if focus has been gained
 		if (hasFocus == true)
-		{
 			theServiceLocator().audioDevice().unfreezePlayers();
-		}
 		else
-		{
 			theServiceLocator().audioDevice().freezePlayers();
-		}
 	}
 }
 

@@ -29,9 +29,7 @@ IAudioLoader::IAudioLoader(IFile *fileHandle)
 IAudioLoader::~IAudioLoader()
 {
 	if (fileHandle_)
-	{
 		delete fileHandle_;
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -44,14 +42,10 @@ IAudioLoader *IAudioLoader::createFromFile(const char *filename)
 	IFile *fileHandle = IFile::createFileHandle(filename);
 
 	if (fileHandle->hasExtension("wav"))
-	{
 		return new AudioLoaderWav(fileHandle);
-	}
 #ifdef WITH_VORBIS
 	else if (fileHandle->hasExtension("ogg"))
-	{
 		return new AudioLoaderOgg(fileHandle);
-	}
 #endif
 	else
 	{

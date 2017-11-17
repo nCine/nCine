@@ -84,23 +84,20 @@ bool SdlJoystickState::isButtonPressed(int buttonId) const
 {
 	bool isPressed = false;
 	if (sdlJoystick_ != NULL)
-	{
 		isPressed = SDL_JoystickGetButton(sdlJoystick_, buttonId) != 0;
-	}
 	return isPressed;
 }
 
 short int SdlJoystickState::axisValue(int axisId) const
 {
-	if (sdlJoystick_ == NULL) { return 0; }
+	if (sdlJoystick_ == NULL)
+		return 0;
 
 	short int axisValue = 0;
 
 	int numAxes = SDL_JoystickNumAxes(sdlJoystick_);
 	if (axisId < numAxes) // axisId is an analog axis
-	{
 		axisValue = SDL_JoystickGetAxis(sdlJoystick_, axisId);
-	}
 	else // axisId is a digital d-pad
 	{
 		int hatId = (axisId - numAxes) / 2;
@@ -124,9 +121,7 @@ float SdlJoystickState::axisNormValue(int axisId) const
 void SdlInputManager::parseEvent(const SDL_Event &event)
 {
 	if (inputEventHandler_ == NULL)
-	{
 		return;
-	}
 
 	if (event.type == SDL_JOYDEVICEADDED || event.type == SDL_JOYDEVICEREMOVED)
 	{
@@ -240,25 +235,17 @@ bool SdlInputManager::isJoyPresent(int joyId) const
 	ASSERT_MSG_X(joyId < int(MaxNumJoysticks), "joyId is %d and the maximum is %u", joyId, MaxNumJoysticks - 1);
 
 	if (sdlJoysticks_[joyId] && SDL_JoystickGetAttached(sdlJoysticks_[joyId]))
-	{
 		return true;
-	}
 	else
-	{
 		return false;
-	}
 }
 
 const char *SdlInputManager::joyName(int joyId) const
 {
 	if (isJoyPresent(joyId))
-	{
 		return SDL_JoystickName(sdlJoysticks_[joyId]);
-	}
 	else
-	{
 		return NULL;
-	}
 }
 
 const char *SdlInputManager::joyGuid(int joyId) const
@@ -270,9 +257,7 @@ const char *SdlInputManager::joyGuid(int joyId) const
 		return joyGuidString_;
 	}
 	else
-	{
 		return NULL;
-	}
 }
 
 int SdlInputManager::joyNumButtons(int joyId) const
@@ -280,9 +265,7 @@ int SdlInputManager::joyNumButtons(int joyId) const
 	int numButtons = -1;
 
 	if (isJoyPresent(joyId))
-	{
 		numButtons = SDL_JoystickNumButtons(sdlJoysticks_[joyId]);
-	}
 
 	return numButtons;
 }
@@ -292,9 +275,7 @@ int SdlInputManager::joyNumAxes(int joyId) const
 	int numAxes = -1;
 
 	if (isJoyPresent(joyId))
-	{
 		numAxes = SDL_JoystickNumAxes(sdlJoysticks_[joyId]) + (SDL_JoystickNumHats(sdlJoysticks_[joyId]) * 2);
-	}
 
 	return numAxes;
 }
@@ -304,9 +285,7 @@ const JoystickState &SdlInputManager::joystickState(int joyId) const
 	joystickStates_[joyId].sdlJoystick_ = NULL;
 
 	if (isJoyPresent(joyId))
-	{
 		joystickStates_[joyId].sdlJoystick_ = sdlJoysticks_[joyId];
-	}
 
 	return joystickStates_[joyId];
 }
@@ -337,24 +316,16 @@ short int SdlInputManager::hatEnumToAxisValue(unsigned char hatState, bool upDow
 	if (upDownAxis == false) // odd axis is left-right
 	{
 		if (hatState == SDL_HAT_LEFT || hatState == SDL_HAT_LEFTUP || hatState == SDL_HAT_LEFTDOWN)
-		{
 			axisValue = -MaxAxisValue;
-		}
 		else if (hatState == SDL_HAT_RIGHT || hatState == SDL_HAT_RIGHTDOWN || hatState == SDL_HAT_RIGHTUP)
-		{
 			axisValue = MaxAxisValue;
-		}
 	}
 	else // even axis is down-up
 	{
 		if (hatState == SDL_HAT_DOWN || hatState == SDL_HAT_RIGHTDOWN || hatState == SDL_HAT_LEFTDOWN)
-		{
 			axisValue = -MaxAxisValue;
-		}
 		else if (hatState == SDL_HAT_UP || hatState == SDL_HAT_RIGHTUP || hatState == SDL_HAT_LEFTUP)
-		{
 			axisValue = MaxAxisValue;
-		}
 	}
 
 	return axisValue;
@@ -379,7 +350,8 @@ void SdlInputManager::handleJoyDeviceEvent(const SDL_Event &event)
 	else if (event.type == SDL_JOYDEVICEREMOVED)
 	{
 		int deviceIndex = joyInstanceIdToDeviceIndex(event.jdevice.which);
-		if (deviceIndex == -1) { return; }
+		if (deviceIndex == -1)
+			return;
 
 		joyConnectionEvent_.joyId = deviceIndex;
 		SDL_JoystickClose(sdlJoysticks_[deviceIndex]);
@@ -387,9 +359,7 @@ void SdlInputManager::handleJoyDeviceEvent(const SDL_Event &event)
 
 		// Compacting the array of SDL joystick pointers
 		for (int i = deviceIndex; i < MaxNumJoysticks - 1; i++)
-		{
 			sdlJoysticks_[i] = sdlJoysticks_[i + 1];
-		}
 		sdlJoysticks_[MaxNumJoysticks - 1] = NULL;
 
 		LOGI_X("Joystick %d has been disconnected", deviceIndex);

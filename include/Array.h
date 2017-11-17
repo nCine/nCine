@@ -118,7 +118,7 @@ class Array
 	/// Inserts a new element as the last one in constant time
 	inline void pushBack(T element) { operator[](size_) = element; }
 	/// Removes the last element in constant time
-	inline void popBack() { if (size_ > 0) { size_--; } }
+	void popBack();
 	/// Inserts new elements at the specified position from a source range, last not included (shifting elements around)
 	void insertRange(unsigned int index, const T *firstPtr, const T *lastPtr);
 	/// Inserts a new element at a specified position (shifting elements around)
@@ -205,9 +205,7 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 			// LOGW_X("Array capacity growing from %u to %u", capacity_, newCapacity);
 		}
 		else if (newCapacity < capacity_)
-		{
 			LOGW_X("Array capacity shrinking from %u to %u", capacity_, newCapacity);
-		}
 	}
 
 	T *newArray = new T[newCapacity];
@@ -215,9 +213,7 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 	if (size_ > 0)
 	{
 		if (newCapacity < size_) // shrinking
-		{
 			size_ = newCapacity; // cropping last elements
-		}
 
 		memcpy(newArray, array_, sizeof(T) * size_);
 	}
@@ -231,9 +227,8 @@ template <class T>
 void Array<T>::setSize(unsigned int newSize)
 {
 	if (newSize > capacity_)
-	{
 		setCapacity(newSize);
-	}
+
 	size_ = newSize;
 }
 
@@ -244,6 +239,13 @@ void Array<T>::shrinkToFit()
 }
 
 template <class T>
+void Array<T>::popBack()
+{
+	if (size_ > 0)
+		size_--;
+}
+
+template <class T>
 void Array<T>::insertRange(unsigned int index, const T *firstPtr, const T *lastPtr)
 {
 	// Cannot insert at more than one position after the last element
@@ -251,9 +253,7 @@ void Array<T>::insertRange(unsigned int index, const T *firstPtr, const T *lastP
 	FATAL_ASSERT_MSG_X(firstPtr < lastPtr, "First pointer %p should precede the last one %p", firstPtr, lastPtr);
 
 	if (size_ + 1 > capacity_)
-	{
 		setCapacity(size_ * 2);
-	}
 
 	// memmove() takes care of overlapping regions
 	memmove(array_ + index, firstPtr, sizeof(T) * (lastPtr - firstPtr));
@@ -267,9 +267,7 @@ void Array<T>::insertAt(unsigned int index, T element)
 	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
 
 	if (size_ + 1 > capacity_)
-	{
 		setCapacity(size_ * 2);
-	}
 
 	// memmove() takes care of overlapping regions
 	memmove(array_ + index + 1, array_ + index, sizeof(T) * (size_ - index));
@@ -333,9 +331,7 @@ template <class T>
 void Array<T>::append(const T *elements, unsigned int amount)
 {
 	if (size_ + amount > capacity_)
-	{
 		setCapacity(size_ + amount);
-	}
 
 	memcpy(array_ + size_, elements, sizeof(T) * amount);
 	size_ += amount;
@@ -374,9 +370,7 @@ T &Array<T>::operator[](unsigned int index)
 	{
 		// Need growing
 		if (size_ == capacity_)
-		{
 			setCapacity(capacity_ * 2);
-		}
 
 		size_++;
 	}

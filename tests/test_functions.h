@@ -13,9 +13,7 @@ inline void printArray(const nc::Array<int> &array)
 {
 	printf("Size %d: ", array.size());
 	for (unsigned int i = 0; i < array.size(); i++)
-	{
 		printf("[%u]=%d ", i, array[i]);
-	}
 	printf("\n");
 }
 
@@ -38,14 +36,10 @@ inline void printMatrix4x4f(const nc::Matrix4x4f &mat)
 	for (unsigned int i = 0; i < 4; i++)
 	{
 		if (i > 0)
-		{
 			printf(" ");
-		}
 		printf("%.2f,\t%.2f,\t%.2f,\t%.2f", mat[i].x, mat[i].y, mat[i].z, mat[i].w);
 		if (i < 3)
-		{
 			printf(",\n");
-		}
 	}
 	printf("]\n");
 }

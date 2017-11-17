@@ -55,9 +55,8 @@ void MyEventHandler::onInit()
 	joyNode_ = new nc::SceneNode(&rootNode, appWidth * 0.5f, appHeight * 0.65f);
 	joyNode_->setScale(1.33f);
 	for (unsigned int i = 0; i < NumSprites; i++)
-	{
 		sprites_[i] = new nc::Sprite(joyNode_, texture_);
-	}
+
 	sprites_[0]->setPosition(appWidth * -triggerPosX, 0.0f); // Left stick
 	sprites_[1]->setPosition(appWidth * triggerPosX * 0.5f, -appWidth * 0.075f); // Right stick
 	sprites_[0]->setScale(stickUnpressedSize);
@@ -157,9 +156,8 @@ void MyEventHandler::onFrameStart()
 		}
 	}
 	else
-	{
 		joyString_->formatAppend("No joysticks connected");
-	}
+
 	textNode_->setString(*joyString_);
 	textNode_->setPosition(appWidth * 0.1f + textNode_->width() * 0.5f, appHeight * 0.38f - textNode_->height() * 0.5f);
 
@@ -208,9 +206,7 @@ void MyEventHandler::onShutdown()
 	delete textNode_;
 	delete font_;
 	for (unsigned int i = 0; i < NumSprites; i++)
-	{
 		delete sprites_[i];
-	}
 	delete joyNode_;
 	delete texture_;
 	delete joyString_;
@@ -219,11 +215,7 @@ void MyEventHandler::onShutdown()
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
-	{
 		nc::theApplication().quit();
-	}
 	else if (event.sym == nc::KEY_SPACE)
-	{
 		nc::theApplication().togglePause();
-	}
 }

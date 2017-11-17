@@ -44,9 +44,7 @@ class AndroidJniClass
 	virtual ~AndroidJniClass()
 	{
 		if (javaObject_)
-		{
 			jniEnv_->DeleteLocalRef(javaObject_);
-		}
 	}
 	bool isNull() const { return javaObject_ == NULL; }
 

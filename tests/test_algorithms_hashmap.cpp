@@ -26,14 +26,10 @@ int main(int argc, char **argv)
 
 	printf("Inserting some elements\n");
 	for (int i = 0; i < Size; i++)
-	{
 		hashmap[i] = i;
-	}
 
 	for (nc::HashMap<int, int, nc::FixedHashFunc<int> >::ConstIterator i = hashmap.begin(); i != hashmap.end(); ++i)
-	{
 		printf("hash: %lu, key: %d, value: %d\n", i.hash(), i.key(), i.value());
-	}
 
 	int minimum = *nc::minElement(hashmap.begin(), hashmap.end());
 	printf("Minimum element: %d\n", minimum);

@@ -38,13 +38,9 @@ void RenderQueue::addCommand(RenderCommand *command)
 	numVertices_ += command->geometry().numVertices();
 
 	if (command->material().isTransparent() == false)
-	{
 		opaqueRenderCommands_.pushBack(command);
-	}
 	else
-	{
 		transparentRenderCommands_.pushBack(command);
-	}
 }
 
 namespace {
@@ -62,17 +58,13 @@ void RenderQueue::draw()
 
 	// Rendering opaque nodes front to back
 	for (unsigned int i = 0; i < opaqueRenderCommands_.size(); i++)
-	{
 		opaqueRenderCommands_[i]->issue();
-	}
 
 	glEnable(GL_BLEND);
 	glDepthMask(GL_FALSE);
 	// Rendering transparent nodes back to front
 	for (unsigned int i = 0; i < transparentRenderCommands_.size(); i++)
-	{
 		transparentRenderCommands_[i]->issue();
-	}
 	// Has to be enabled again before exiting this method
 	// or glClear(GL_DEPTH_BUFFER_BIT) won't have any effect
 	glDepthMask(GL_TRUE);

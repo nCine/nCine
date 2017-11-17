@@ -18,9 +18,7 @@ GLTexture::GLTexture(GLenum target)
 GLTexture::~GLTexture()
 {
 	if (boundTextures_[boundUnit_][target_] == glHandle_)
-	{
 		unbind();
-	}
 
 	glDeleteTextures(1, &glHandle_);
 }

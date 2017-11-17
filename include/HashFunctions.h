@@ -35,9 +35,8 @@ class SaxHashFunc
 	{
 		hash_t hash = static_cast<hash_t>(0);
 		for (unsigned int i = 0; i < key.length(); i++)
-		{
 			hash ^= (hash << 5) + (hash >> 2) + static_cast<hash_t>(key[i]);
-		}
+
 		return hash;
 	}
 };

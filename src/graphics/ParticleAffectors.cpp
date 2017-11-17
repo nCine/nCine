@@ -18,13 +18,9 @@ void AccelerationAffector::affect(Particle *particle)
 void ColorAffector::addColorStep(float time, Color color)
 {
 	if (colorSteps_.isEmpty() || time > colorSteps_[colorSteps_.size() - 1]->time)
-	{
 		colorSteps_.pushBack(new ColorStep(time, color));
-	}
 	else
-	{
 		LOGW("Out of order step not added");
-	}
 }
 
 void ColorAffector::affect(Particle *particle)
@@ -35,9 +31,7 @@ void ColorAffector::affect(Particle *particle)
 	if (colorSteps_.size() < 2)
 	{
 		if (colorSteps_.size() == 1)
-		{
 			particle->setColor(colorSteps_[0]->color);
-		}
 		return;
 	}
 
@@ -47,9 +41,7 @@ void ColorAffector::affect(Particle *particle)
 	for (index = 0; index < colorSteps_.size() - 1; index++)
 	{
 		if (colorSteps_[index]->time > normalizedLife)
-		{
 			break;
-		}
 	}
 
 	ASSERT(colorSteps_[index - 1]->time <= normalizedLife);
@@ -71,13 +63,9 @@ void ColorAffector::affect(Particle *particle)
 void SizeAffector::addSizeStep(float time, float scale)
 {
 	if (sizeSteps_.isEmpty() || time > sizeSteps_[sizeSteps_.size() - 1]->time)
-	{
 		sizeSteps_.pushBack(new SizeStep(time, scale));
-	}
 	else
-	{
 		LOGW("Out of order step not added");
-	}
 }
 
 void SizeAffector::affect(Particle *particle)
@@ -88,9 +76,7 @@ void SizeAffector::affect(Particle *particle)
 	if (sizeSteps_.size() < 2)
 	{
 		if (sizeSteps_.size() == 1)
-		{
 			particle->setScale(sizeSteps_[0]->scale);
-		}
 		return;
 	}
 
@@ -100,9 +86,7 @@ void SizeAffector::affect(Particle *particle)
 	for (index = 0; index < sizeSteps_.size() - 1; index++)
 	{
 		if (sizeSteps_[index]->time > normalizedLife)
-		{
 			break;
-		}
 	}
 
 	ASSERT(sizeSteps_[index - 1]->time <= normalizedLife);

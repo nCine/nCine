@@ -44,9 +44,7 @@ void TextureFormat::bgrFormat()
 	}
 #ifndef __ANDROID__
 	else if (format_ == GL_RGB)
-	{
 		format_ = GL_BGR;
-	}
 #endif
 }
 
@@ -226,9 +224,7 @@ long int TextureFormat::calculateMipSizes(GLenum internalFormat, int width, int 
 
 		// Clamping to the minimum valid size
 		if (mipDataSizes[i] < int(minDataSize))
-		{
 			mipDataSizes[i] = minDataSize;
-		}
 
 		levelWidth /= 2;
 		levelHeight /= 2;
@@ -248,34 +244,20 @@ void TextureFormat::findExternalFormat()
 
 #ifndef __ANDROID__
 	if (found == false)
-	{
 		found = integerFormat();
-	}
 	if (found == false)
-	{
 		found = nonIntegerFormat();
-	}
 	if (found == false)
-	{
 		found = floatFormat();
-	}
 	if (found == false)
-	{
 		found = compressedFormat();
-	}
 #else
 	if (found == false)
-	{
 		found = oesFormat();
-	}
 	if (found == false)
-	{
 		found = oesFormatApi21();
-	}
 	if (found == false)
-	{
 		found = oesCompressedFormat();
-	}
 #endif
 
 	FATAL_ASSERT_MSG_X(found, "Unknown internal format: 0x%x", internalFormat_);
@@ -330,9 +312,7 @@ bool TextureFormat::integerFormat()
 	}
 
 	if (found)
-	{
 		type_ = GL_UNSIGNED_BYTE;
-	}
 
 	return found;
 }
@@ -385,9 +365,7 @@ bool TextureFormat::floatFormat()
 	}
 
 	if (found)
-	{
 		type_ = GL_FLOAT;
-	}
 
 	return found;
 }
@@ -452,9 +430,7 @@ bool TextureFormat::oesFormat()
 	}
 
 	if (found)
-	{
 		type_ = GL_UNSIGNED_BYTE;
-	}
 
 	return found;
 }

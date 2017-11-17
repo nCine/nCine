@@ -30,9 +30,7 @@ void Particle::init(float life, Vector2f pos, Vector2f vel, float rot, bool inLo
 void Particle::update(float interval)
 {
 	if (interval > life_)
-	{
 		life_ = 0.0f; // dead particle
-	}
 	else
 	{
 		life_ -= interval;

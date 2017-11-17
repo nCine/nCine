@@ -87,9 +87,7 @@ unsigned int Thread::numProcessors()
 #endif
 
 	if (confRet > 0)
-	{
 		numProcs = static_cast<unsigned int>(confRet);
-	}
 
 	return numProcs;
 }
@@ -104,9 +102,7 @@ void Thread::run(ThreadFunctionPtr startFunction, void *arg)
 		FATAL_ASSERT_MSG_X(!error, "Error in pthread_create(): %d", error);
 	}
 	else
-	{
 		LOGW_X("Thread %u is already running", tid_);
-	}
 }
 
 void *Thread::join()
@@ -159,9 +155,7 @@ ThreadAffinityMask Thread::affinityMask() const
 #endif
 	}
 	else
-	{
 		LOGW("Cannot get the affinity for a thread that has not been created yet");
-	}
 
 	return affinityMask;
 }
@@ -179,9 +173,7 @@ void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
 #endif
 	}
 	else
-	{
 		LOGW("Cannot set the affinity mask for a not yet created thread");
-	}
 }
 #endif
 

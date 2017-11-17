@@ -149,9 +149,7 @@ void MyEventHandler::onInit()
 	fbo_->attachTexture(*texture_, GL_COLOR_ATTACHMENT0);
 	fbo_->attachRenderbuffer(GL_DEPTH_COMPONENT16, FboSize, FboSize, GL_DEPTH_ATTACHMENT);
 	if (fbo_->isStatusComplete() == false)
-	{
 		LOGE("Framebuffer object status is not complete\n");
-	}
 
 	vboTri_ = new nc::GLBufferObject(GL_ARRAY_BUFFER);
 	vboTri_->bufferData(sizeof(triVertices), triVertices, GL_STATIC_DRAW);
@@ -237,11 +235,7 @@ void MyEventHandler::onShutdown()
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
-	{
 		nc::theApplication().quit();
-	}
 	else if (event.sym == nc::KEY_SPACE)
-	{
 		nc::theApplication().togglePause();
-	}
 }

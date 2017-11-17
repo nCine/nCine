@@ -45,9 +45,7 @@ ALAudioDevice::ALAudioDevice()
 ALAudioDevice::~ALAudioDevice()
 {
 	for (unsigned int i = 0; i < MaxSources; i++)
-	{
 		alSourcei(sources_[i], AL_BUFFER, AL_NONE);
-	}
 	alDeleteSources(MaxSources, sources_.data());
 
 	alcDestroyContext(context_);
@@ -83,9 +81,7 @@ void ALAudioDevice::stopPlayers(PlayerType playerType)
 {
 	Object::ObjectType objectType = AudioBufferPlayer::sType();
 	if (playerType == AUDIOSTREAM_PLAYER)
-	{
 		objectType = AudioStreamPlayer::sType();
-	}
 
 	List<IAudioPlayer *>::ConstIterator i = players_.begin();
 	while (i != players_.end())
@@ -96,9 +92,7 @@ void ALAudioDevice::stopPlayers(PlayerType playerType)
 			i = players_.erase(i);
 		}
 		else
-		{
 			++i;
-		}
 	}
 }
 
@@ -106,9 +100,7 @@ void ALAudioDevice::pausePlayers(PlayerType playerType)
 {
 	Object::ObjectType objectType = AudioBufferPlayer::sType();
 	if (playerType == AUDIOSTREAM_PLAYER)
-	{
 		objectType = AudioStreamPlayer::sType();
-	}
 
 	List<IAudioPlayer *>::ConstIterator i = players_.begin();
 	while (i != players_.end())
@@ -119,9 +111,7 @@ void ALAudioDevice::pausePlayers(PlayerType playerType)
 			i = players_.erase(i);
 		}
 		else
-		{
 			++i;
-		}
 	}
 }
 
@@ -144,9 +134,7 @@ int ALAudioDevice::nextAvailableSource()
 	{
 		alGetSourcei(sources_[i], AL_SOURCE_STATE, &sourceState);
 		if (sourceState != AL_PLAYING && sourceState != AL_PAUSED)
-		{
 			return sources_[i];
-		}
 	}
 
 	return -1;
@@ -169,9 +157,7 @@ void ALAudioDevice::updatePlayers()
 			++i;
 		}
 		else
-		{
 			i = players_.erase(i);
-		}
 	}
 }
 

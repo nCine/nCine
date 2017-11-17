@@ -102,9 +102,7 @@ void TextureLoaderPng::init()
 
 	png_bytep *rowPointers = new png_bytep[height_];
 	for (int i = 0; i < height_; i++)
-	{
 		rowPointers[i] = pixels_ + i * bytesPerRow;
-	}
 
 	// Decoding png data through row pointers
 	png_read_image(pngPtr, rowPointers);
@@ -120,9 +118,7 @@ void TextureLoaderPng::readFromFileHandle(png_structp pngPtr, png_bytep outBytes
 
 	unsigned long int bytesRead = fileHandle->read(outBytes, static_cast<unsigned long int>(byteCountToRead));
 	if (bytesRead > 0 && bytesRead != byteCountToRead)
-	{
 		LOGW_X("Read %ul bytes instead of %ul", bytesRead, byteCountToRead);
-	}
 }
 
 }

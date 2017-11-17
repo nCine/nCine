@@ -89,9 +89,7 @@ void GlfwGfxDevice::initDevice()
 
 	GLFWmonitor *monitor = NULL;
 	if (isFullScreen_)
-	{
 		monitor = glfwGetPrimaryMonitor();
-	}
 
 	// setting window hints and creating a window with GLFW
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
@@ -121,9 +119,7 @@ void GlfwGfxDevice::initDevice()
 #endif
 
 	if (contextInfo_.debugContext)
-	{
 		enableGlDebugOutput();
-	}
 }
 
 void GlfwGfxDevice::errorCallback(int error, const char *description)

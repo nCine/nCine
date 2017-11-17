@@ -57,11 +57,9 @@ void MyEventHandler::onInit()
 	}
 
 	for (int i = 0; i < NumThreads; i++)
-	{
 		threads[i].join();
-	}
-	float endTime = nc::Timer::now();
 
+	float endTime = nc::Timer::now();
 	LOGI_X("APPTEST_THREADS: total time %fms", (endTime - startTime) * 1000.0f);
 
 	delete[] globalArray;
@@ -70,7 +68,5 @@ void MyEventHandler::onInit()
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
-	{
 		nc::theApplication().quit();
-	}
 }

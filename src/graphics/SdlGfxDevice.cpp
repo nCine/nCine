@@ -42,9 +42,7 @@ void SdlGfxDevice::setResolution(int width, int height)
 {
 	// change resolution only in the case it really changes
 	if (width == width_ && height == height_)
-	{
 		return;
-	}
 
 	// asking for fullscreen mode that does not change current screen resolution
 	if (width == 0 || height == 0)
@@ -113,19 +111,13 @@ void SdlGfxDevice::initDevice()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, contextInfo_.majorVersion);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, contextInfo_.minorVersion);
 	if (contextInfo_.debugContext)
-	{
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-	}
 
 	Uint32 flags = SDL_WINDOW_OPENGL;
 	if (isFullScreen_)
-	{
 		flags |= SDL_WINDOW_FULLSCREEN;
-	}
 	else if (width_ == 0 || height_ == 0)
-	{
 		flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-	}
 
 	// Creating a window with SDL2
 	windowHandle_ = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width_, height_, flags);
@@ -133,9 +125,7 @@ void SdlGfxDevice::initDevice()
 
 	// resolution should be set to current screen size
 	if (width_ == 0 || height_ == 0)
-	{
 		SDL_GetWindowSize(windowHandle_, &width_, &height_);
-	}
 
 	glContextHandle_ = SDL_GL_CreateContext(windowHandle_);
 	FATAL_ASSERT_MSG_X(glContextHandle_, "SDL_GL_CreateContext failed: %s", SDL_GetError());

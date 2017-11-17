@@ -46,9 +46,7 @@ void TextureLoaderPvr::readHeader(Pvr3Header &header)
 	mipMapCount_ = header.numMipmaps;
 
 	if (mipMapCount_ == 0)
-	{
 		mipMapCount_ = 1;
-	}
 }
 
 void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
@@ -209,9 +207,7 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 		mipDataSizes_ = new long[mipMapCount_];
 		long int dataSizesSum = TextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_, mipDataSizes_);
 		if (dataSizesSum != dataSize_)
-		{
 			LOGW_X("The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
-		}
 	}
 }
 

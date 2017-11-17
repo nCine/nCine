@@ -59,9 +59,7 @@ void MyEventHandler::onInit()
 void MyEventHandler::onFrameStart()
 {
 	if (pause_ == false)
-	{
 		angle_ += 2.5f * nc::theApplication().interval();
-	}
 	float sine = sinf(angle_);
 	float cosine = cosf(angle_);
 
@@ -71,9 +69,7 @@ void MyEventHandler::onFrameStart()
 	dummy_->setScale(((sine * 0.15f) + 1.0f) * 0.5f);
 
 	for (unsigned int i = 0; i < NumColSprites * NumRowSprites; i++)
-	{
 		sprites_[i]->setRotation(-angle_ * 8.0f);
-	}
 
 	nc::theApplication().rootNode().x = (sine + 1.0f) * 50.0f;
 	nc::theApplication().rootNode().y = (cosine + 1.0f) * 50.0f;
@@ -102,27 +98,19 @@ void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
-	{
 		pause_ = true;
-	}
 }
 
 void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
-	{
 		pause_ = false;
-	}
 }
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
-	{
 		nc::theApplication().quit();
-	}
 	else if (event.sym == nc::KEY_SPACE)
-	{
 		nc::theApplication().togglePause();
-	}
 }

@@ -100,13 +100,9 @@ void MyEventHandler::onFrameStart()
 	textString_->append(" (press A/S/D)\n");
 
 	if (soundPlayer_->isLooping())
-	{
 		textString_->append("Sound is looping");
-	}
 	else
-	{
 		textString_->append("Sound is not looping");
-	}
 	textString_->append(" (press L)\n");
 
 	textString_->formatAppend("Gain: %.2f (press KP 7/8/9)\n", gain_);
@@ -132,46 +128,28 @@ void MyEventHandler::onShutdown()
 void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 {
 	if (event.pointers[0].x < nc::theApplication().width() * 0.5f)
-	{
 		toggleMusic();
-	}
 	else
-	{
 		toggleSound();
-	}
 }
 #endif
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
-	{
 		nc::theApplication().quit();
-	}
 	else if (event.sym == nc::KEY_M)
-	{
 		toggleMusic();
-	}
 	else if (event.sym == nc::KEY_SPACE)
-	{
 		toggleSound();
-	}
 	else if (event.sym == nc::KEY_A)
-	{
 		soundPlayer_->play();
-	}
 	else if (event.sym == nc::KEY_S)
-	{
 		soundPlayer_->stop();
-	}
 	else if (event.sym == nc::KEY_D)
-	{
 		soundPlayer_->pause();
-	}
 	else if (event.sym == nc::KEY_L)
-	{
 		isLooping_ = !isLooping_;
-	}
 	else if (event.sym == nc::KEY_KP0)
 	{
 		gain_ = DefaultGain;
@@ -182,68 +160,42 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 	{
 		gain_ -= 0.1f;
 		if (gain_ < 0.0f)
-		{
 			gain_ = 0.0f;
-		}
 	}
 	else if (event.sym == nc::KEY_KP8)
-	{
 		gain_ = DefaultGain;
-	}
 	else if (event.sym == nc::KEY_KP9)
 	{
 		gain_ += 0.1f;
 		if (gain_ > 1.0f)
-		{
 			gain_ = 1.0f;
-		}
 	}
 	else if (event.sym == nc::KEY_KP4)
-	{
 		pitch_ -= 0.1f;
-	}
 	else if (event.sym == nc::KEY_KP5)
-	{
 		pitch_ = DefaultPitch;
-	}
 	else if (event.sym == nc::KEY_KP6)
-	{
 		pitch_ += 0.1f;
-	}
 	else if (event.sym == nc::KEY_KP1)
-	{
 		xPos_ -= 0.1f;
-	}
 	else if (event.sym == nc::KEY_KP2)
-	{
 		xPos_ = DefaultXPos;
-	}
 	else if (event.sym == nc::KEY_KP3)
-	{
 		xPos_ += 0.1f;
-	}
 }
 
 void MyEventHandler::toggleMusic()
 {
 	if (musicPlayer_->isPaused() || musicPlayer_->isStopped())
-	{
 		musicPlayer_->play();
-	}
 	else if (musicPlayer_->isPlaying())
-	{
 		musicPlayer_->pause();
-	}
 }
 
 void MyEventHandler::toggleSound()
 {
 	if (soundPlayer_->isPaused() || soundPlayer_->isStopped())
-	{
 		soundPlayer_->play();
-	}
 	else if (soundPlayer_->isPlaying())
-	{
 		soundPlayer_->pause();
-	}
 }

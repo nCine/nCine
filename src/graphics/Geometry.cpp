@@ -18,9 +18,7 @@ Geometry::Geometry()
 Geometry::~Geometry()
 {
 	if (vboSharingType_ == UNIQUE)
-	{
 		delete vbo_;
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -56,17 +54,13 @@ void Geometry::updateVboData(unsigned int floatOffset, unsigned int floatSize, c
 {
 	// Common resources cannot be altered
 	if (vboSharingType_ != COMMON_RESOURCE)
-	{
 		vbo_->bufferSubData(floatOffset * sizeof(GLfloat), floatSize * sizeof(GLfloat), data);
-	}
 }
 
 void Geometry::shareVbo(const Geometry &geometry)
 {
 	if (vboSharingType_ == UNIQUE)
-	{
 		delete vbo_;
-	}
 
 	vboSharingType_ = SHARED;
 	vbo_ = geometry.vbo_;
@@ -75,9 +69,7 @@ void Geometry::shareVbo(const Geometry &geometry)
 void Geometry::makeSharedQuad()
 {
 	if (vboSharingType_ == UNIQUE)
-	{
 		delete vbo_;
-	}
 
 	vboSharingType_ = COMMON_RESOURCE;
 	vbo_ = const_cast<GLBufferObject *>(RenderResources::quadVbo());
@@ -91,14 +83,10 @@ void Geometry::makeSharedQuad()
 void Geometry::bind()
 {
 	if (ibo_)
-	{
 		ibo_->bind();
-	}
 
 	if (vbo_)
-	{
 		vbo_->bind();
-	}
 }
 
 }

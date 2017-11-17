@@ -49,9 +49,7 @@ void TextureLoaderKtx::readHeader(KtxHeader &header)
 	for (int i = 0; i < KtxIdentifierLength; i++)
 	{
 		if (header.identifier[i] != fileIdentifier_[i])
-		{
 			checkPassed = false;
-		}
 	}
 
 	FATAL_ASSERT_MSG(checkPassed, "Not a KTX file");
@@ -82,15 +80,11 @@ void TextureLoaderKtx::parseFormat(const KtxHeader &header)
 		// HACK: accounting for `UInt32 imageSize` on top of each MIP level
 		// Excluding the first one, already taken into account in header size
 		for (int i = 1; i < mipMapCount_; i++)
-		{
 			mipDataOffsets_[i] += 4 * i;
-		}
 		dataSizesSum += 4 * mipMapCount_;
 
 		if (dataSizesSum != dataSize_)
-		{
 			LOGW_X("The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
-		}
 	}
 }
 

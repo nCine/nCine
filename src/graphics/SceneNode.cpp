@@ -23,9 +23,7 @@ SceneNode::SceneNode(SceneNode *parent, float xx, float yy)
 	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {
 	if (parent)
-	{
 		parent->addChildNode(this);
-	}
 }
 
 /*! \param parent The parent can be `NULL` */
@@ -35,9 +33,7 @@ SceneNode::SceneNode(SceneNode *parent)
 	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {
 	if (parent)
-	{
 		parent->addChildNode(this);
-	}
 }
 
 SceneNode::SceneNode()
@@ -52,9 +48,7 @@ SceneNode::~SceneNode()
 {
 	List<SceneNode *>::ConstIterator i = children_.begin();
 	while (i != children_.end())
-	{
 		delete (*i++);
-	}
 
 	if (parent_)
 	{
@@ -72,9 +66,7 @@ void SceneNode::addChildNode(SceneNode *childNode)
 	ASSERT(childNode);
 
 	if (childNode->parent_)
-	{
 		childNode->parent_->removeChildNode(childNode);
-	}
 
 	childNode->parent_ = this;
 	children_.pushBack(childNode);
@@ -200,9 +192,7 @@ void SceneNode::transform()
 		absColor_ *= parent_->absColor_;
 	}
 	else
-	{
 		worldMatrix_ = localMatrix_;
-	}
 
 	absX_ = worldMatrix_[3][0];
 	absY_ = worldMatrix_[3][1];

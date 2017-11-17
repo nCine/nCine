@@ -77,14 +77,10 @@ void Material::setTexture(const Texture &texture)
 void Material::bind()
 {
 	if (texture_)
-	{
 		texture_->bind();
-	}
 
 	if (shaderProgram_)
-	{
 		shaderProgram_->use();
-	}
 }
 
 unsigned int Material::sortKey()
@@ -93,14 +89,10 @@ unsigned int Material::sortKey()
 	unsigned int upper = 0;
 
 	if (texture_)
-	{
 		lower = static_cast<unsigned char>(texture_->glHandle());
-	}
 
 	if (shaderProgram_)
-	{
 		upper = shaderProgram_->glHandle() << 8;
-	}
 
 	return upper + lower;
 }

@@ -9,9 +9,7 @@ const unsigned int Capacity = 10;
 void printArray(const nc::StaticArray<int, Capacity> &array)
 {
 	for (unsigned int i = 0; i < array.size(); i++)
-	{
 		printf("[%u]=%d ", i, array[i]);
-	}
 	printf("\n");
 }
 
@@ -23,9 +21,7 @@ int main(int argc, char **argv)
 
 	printf("Initializing the whole array\n");
 	for (unsigned int i = 0; i < Capacity; i++)
-	{
 		array[i] = i;
-	}
 	printArray(array);
 
 //	printf("Writing beyond size\n");
@@ -36,16 +32,12 @@ int main(int argc, char **argv)
 	printf("\n--- Array traversals (for cycles) ---\n");
 	printf("Iterating through elements:");
 	for (nc::StaticArray<int, Capacity>::ConstIterator i = array.begin(); i != array.end(); ++i)
-	{
 		printf(" %d", *i);
-	}
 	printf("\n");
 
 	printf("Iterating through elements (reverse):");
 	for (nc::StaticArray<int, Capacity>::ConstIterator r = array.rBegin(); r != array.rEnd(); --r)
-	{
 		printf(" %d", *r);
-	}
 	printf("\n");
 
 
@@ -79,9 +71,7 @@ int main(int argc, char **argv)
 
 	printf("Clearing the first array\n");
 	if (!array.isEmpty())
-	{
 		array.clear();
-	}
 	printArray(array);
 
 	printf("Inserting twice at the back\n");

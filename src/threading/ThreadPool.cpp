@@ -28,9 +28,7 @@ ThreadPool::~ThreadPool()
 	queueCV_.broadcast();
 
 	for (unsigned int i = 0; i < numThreads_; i++)
-	{
 		threads_[i].join();
-	}
 
 	delete[] threads_;
 }
@@ -84,9 +82,7 @@ void ThreadPool::workerFunction(void *arg)
 	{
 		threadStruct->queueMutex->lock();
 		while (threadStruct->queue->isEmpty() && threadStruct->shouldQuit == false)
-		{
 			threadStruct->queueCV->wait(*(threadStruct->queueMutex));
-		}
 
 		if (threadStruct->shouldQuit)
 		{

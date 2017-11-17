@@ -52,9 +52,7 @@ bool GlfwJoystickState::isButtonPressed(int buttonId) const
 {
 	bool isPressed = false;
 	if (buttonId >= 0 && buttonId < numButtons_)
-	{
 		isPressed = (buttons_[buttonId] != GLFW_RELEASE);
-	}
 	return isPressed;
 }
 
@@ -70,9 +68,7 @@ float GlfwJoystickState::axisNormValue(int axisId) const
 {
 	float axisValue = 0.0f;
 	if (axisId >= 0 && axisId < numAxes_)
-	{
 		axisValue = axesValues_[axisId];
-	}
 	return axisValue;
 }
 
@@ -82,9 +78,7 @@ bool GlfwInputManager::hasFocus()
 
 	// A focus event has occurred (either gain or loss)
 	if (windowHasFocus_ != glfwFocused)
-	{
 		windowHasFocus_ = glfwFocused;
-	}
 
 	return windowHasFocus_;
 }
@@ -115,26 +109,18 @@ bool GlfwInputManager::isJoyPresent(int joyId) const
 const char *GlfwInputManager::joyName(int joyId) const
 {
 	if (isJoyPresent(joyId))
-	{
 		return glfwGetJoystickName(joyId);
-	}
 	else
-	{
 		return NULL;
-	}
 }
 
 const char *GlfwInputManager::joyGuid(int joyId) const
 {
 #if GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
 	if (isJoyPresent(joyId))
-	{
 		return glfwGetJoystickGUID(joyId);
-	}
 	else
-	{
 		return NULL;
-	}
 #else
 	return NULL;
 #endif
@@ -145,9 +131,7 @@ int GlfwInputManager::joyNumButtons(int joyId) const
 	int numButtons = -1;
 
 	if (isJoyPresent(joyId))
-	{
 		glfwGetJoystickButtons(GLFW_JOYSTICK_1 + joyId, &numButtons);
-	}
 
 	return numButtons;
 }
@@ -157,9 +141,7 @@ int GlfwInputManager::joyNumAxes(int joyId) const
 	int numAxes = -1;
 
 	if (isJoyPresent(joyId))
-	{
 		glfwGetJoystickAxes(GLFW_JOYSTICK_1 + joyId, &numAxes);
-	}
 
 	return numAxes;
 }
@@ -167,13 +149,9 @@ int GlfwInputManager::joyNumAxes(int joyId) const
 const JoystickState &GlfwInputManager::joystickState(int joyId) const
 {
 	if (isJoyPresent(joyId))
-	{
 		return joystickStates_[joyId];
-	}
 	else
-	{
 		return nullJoystickState_;
-	}
 }
 
 void GlfwInputManager::setMouseCursorMode(MouseCursorMode mode)
@@ -203,30 +181,22 @@ void GlfwInputManager::windowCloseCallback(GLFWwindow *window)
 void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
 	if (inputEventHandler_ == NULL)
-	{
 		return;
-	}
 
 	keyboardEvent_.scancode = scancode;
 	keyboardEvent_.sym = GlfwKeys::keySymValueToEnum(key);
 	keyboardEvent_.mod = GlfwKeys::keyModValueToEnum(mods);
 
 	if (action == GLFW_PRESS)
-	{
 		inputEventHandler_->onKeyPressed(keyboardEvent_);
-	}
 	else if (action == GLFW_RELEASE)
-	{
 		inputEventHandler_->onKeyReleased(keyboardEvent_);
-	}
 }
 
 void GlfwInputManager::cursorPosCallback(GLFWwindow *window, double x, double y)
 {
 	if (inputEventHandler_ == NULL)
-	{
 		return;
-	}
 
 	mouseState_.x = static_cast<int>(x);
 	mouseState_.y = theApplication().heightInt() - static_cast<int>(y);
@@ -236,9 +206,7 @@ void GlfwInputManager::cursorPosCallback(GLFWwindow *window, double x, double y)
 void GlfwInputManager::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
 	if (inputEventHandler_ == NULL)
-	{
 		return;
-	}
 
 	double xCursor, yCursor;
 	glfwGetCursorPos(window, &xCursor, &yCursor);
@@ -247,21 +215,15 @@ void GlfwInputManager::mouseButtonCallback(GLFWwindow *window, int button, int a
 	mouseEvent_.button_ = button;
 
 	if (action == GLFW_PRESS)
-	{
 		inputEventHandler_->onMouseButtonPressed(mouseEvent_);
-	}
 	else if (action == GLFW_RELEASE)
-	{
 		inputEventHandler_->onMouseButtonReleased(mouseEvent_);
-	}
 }
 
 void GlfwInputManager::scrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
 	if (inputEventHandler_ == NULL)
-	{
 		return;
-	}
 
 	scrollEvent_.x = static_cast<float>(xoffset);
 	scrollEvent_.y = static_cast<float>(yoffset);
@@ -342,9 +304,7 @@ void GlfwInputManager::JoystickEventsSimulator::simulateButtonsEvents(int joyId,
 	}
 
 	if (numButtons > 0)
-	{
 		memcpy(buttonsState_[joyId], buttons, sizeof(unsigned char) * numButtons);
-	}
 }
 
 void GlfwInputManager::JoystickEventsSimulator::simulateAxesEvents(int joyId, int numAxes, const float *axesValues)
@@ -363,9 +323,7 @@ void GlfwInputManager::JoystickEventsSimulator::simulateAxesEvents(int joyId, in
 	}
 
 	if (numAxes > 0)
-	{
 		memcpy(axesValuesState_[joyId], axesValues, sizeof(float) * numAxes);
-	}
 }
 
 }

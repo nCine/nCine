@@ -81,38 +81,22 @@ void MyEventHandler::onFrameStart()
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
 	if (keyState.isKeyDown(nc::KEY_D))
-	{
 		particleSystem_->x += KeySpeed * nc::theApplication().interval();
-	}
 	else if (keyState.isKeyDown(nc::KEY_A))
-	{
 		particleSystem_->x -= KeySpeed * nc::theApplication().interval();
-	}
 	if (keyState.isKeyDown(nc::KEY_W))
-	{
 		particleSystem_->y += KeySpeed * nc::theApplication().interval();
-	}
 	else if (keyState.isKeyDown(nc::KEY_S))
-	{
 		particleSystem_->y -= KeySpeed * nc::theApplication().interval();
-	}
 
 	if (keyState.isKeyDown(nc::KEY_RIGHT))
-	{
 		emitVector_.x += KeySpeed * nc::theApplication().interval();
-	}
 	else if (keyState.isKeyDown(nc::KEY_LEFT))
-	{
 		emitVector_.x -= KeySpeed * nc::theApplication().interval();
-	}
 	if (keyState.isKeyDown(nc::KEY_UP))
-	{
 		emitVector_.y += KeySpeed * nc::theApplication().interval();
-	}
 	else if (keyState.isKeyDown(nc::KEY_DOWN))
-	{
 		emitVector_.y -= KeySpeed * nc::theApplication().interval();
-	}
 }
 
 void MyEventHandler::onShutdown()
@@ -151,13 +135,9 @@ void MyEventHandler::onAcceleration(const nc::AccelerometerEvent &event)
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
-	{
 		nc::theApplication().quit();
-	}
 	else if (event.sym == nc::KEY_SPACE)
-	{
 		nc::theApplication().togglePause();
-	}
 }
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
@@ -186,22 +166,14 @@ void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 {
 	if (event.axisName == nc::AXIS_LX)
-	{
 		joyVectorLeft_.x = event.value;
-	}
 	else if (event.axisName == nc::AXIS_LY)
-	{
 		joyVectorLeft_.y = -event.value;
-	}
 
 	if (event.axisName == nc::AXIS_RX)
-	{
 		joyVectorRight_.x = event.value;
-	}
 	else if (event.axisName == nc::AXIS_RY)
-	{
 		joyVectorRight_.y = -event.value;
-	}
 
 	nc::theApplication().inputManager().deadZoneNormalize(joyVectorLeft_, nc::IInputManager::LeftStickDeadZone);
 	nc::theApplication().inputManager().deadZoneNormalize(joyVectorRight_, nc::IInputManager::RightStickDeadZone);
