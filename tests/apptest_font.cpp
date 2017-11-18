@@ -43,9 +43,9 @@ void MyEventHandler::onInit()
 	font3_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + Font3TextureFile).data(),
 	                      (nc::IFile::dataPath() + "fonts/" + Font3FntFile).data());
 
-	char testString[] = "WAY.P.ATAV";
+	const char testString[] = "WAY.P.ATAV";
 	float textHeight = nc::theApplication().height() * 0.8f;
-	float screenWidth = nc::theApplication().width();
+	const float screenWidth = nc::theApplication().width();
 	text1_ = new nc::TextNode(&rootNode, font1_);
 	text1_->setScale(2.0f);
 	text1_->setString(testString);

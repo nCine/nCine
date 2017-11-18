@@ -82,7 +82,7 @@ void GLShaderUniforms::commitUniforms()
 
 void GLShaderUniforms::importUniforms()
 {
-	unsigned int count = shaderProgram_->uniforms_.size();
+	const unsigned int count = shaderProgram_->uniforms_.size();
 	if (count > UniformCachesHashSize)
 		LOGW_X("More active uniforms (%d) than hashmap buckets (%d)", count, UniformCachesHashSize);
 

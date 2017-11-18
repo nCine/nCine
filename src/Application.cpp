@@ -64,7 +64,7 @@ void Application::setPause(bool paused)
 
 void Application::togglePause()
 {
-	bool paused = !isPaused_;
+	const bool paused = !isPaused_;
 	setPause(paused);
 }
 

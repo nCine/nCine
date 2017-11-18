@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 	printArray(array);
 
 	printf("Extending the size by two elements\n");
-	unsigned int oldSize = array.size();
+	const unsigned int oldSize = array.size();
 	array.setSize(oldSize + 2);
 	// No "hole" when setting this element
 	array[oldSize + 1] = 55;

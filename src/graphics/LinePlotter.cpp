@@ -75,7 +75,7 @@ void LinePlotter::updateAllVertices(float x, float y, float w, float h)
 			commonMax = variables_[i]->variable()->max();
 	}
 
-	float normalizedRefValue = normBetweenRefValue(commonMin, commonMax);
+	const float normalizedRefValue = normBetweenRefValue(commonMin, commonMax);
 	refValueVertices_[0] = x;		refValueVertices_[1] = y + h * normalizedRefValue;
 	refValueVertices_[2] = x + w;	refValueVertices_[3] = y + h * normalizedRefValue;
 
@@ -84,13 +84,13 @@ void LinePlotter::updateAllVertices(float x, float y, float w, float h)
 		const ProfileVariable *profVariable = variables_[i]->variable();
 		GLfloat *vertices = variables_[i]->vertices();
 
-		float normalizedMean = profVariable->normBetweenMean(commonMin, commonMax);
+		const float normalizedMean = profVariable->normBetweenMean(commonMin, commonMax);
 		// Variable mean vertices
 		vertices[0] = x;			vertices[1] = y + h * normalizedMean;
 		vertices[2] = x + w;		vertices[3] = y + h * normalizedMean;
 
-		unsigned int numValues = profVariable->numValues();
-		unsigned int nextIndex = profVariable->nextIndex();
+		const unsigned int numValues = profVariable->numValues();
+		const unsigned int nextIndex = profVariable->nextIndex();
 
 		// Variable value vertices
 		for (unsigned int j = 0; j < numValues; j++)

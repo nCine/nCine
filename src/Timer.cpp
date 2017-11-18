@@ -51,7 +51,7 @@ float Timer::now()
 void Timer::sleep(float seconds)
 {
 	// From seconds to milliseconds
-	unsigned int milliseconds = static_cast<unsigned int>(seconds) * 1000;
+	const unsigned int milliseconds = static_cast<unsigned int>(seconds) * 1000;
 
 #if defined(_WIN32)
 	SleepEx(milliseconds, FALSE);

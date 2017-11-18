@@ -210,14 +210,14 @@ inline T Quaternion<T>::sqrMagnitude() const
 template <class T>
 inline Quaternion<T> Quaternion<T>::normalized() const
 {
-	T mag = magnitude();
+	const T mag = magnitude();
 	return Quaternion(x / mag, y / mag, z / mag, w / mag);
 }
 
 template <class T>
 inline Quaternion<T> &Quaternion<T>::normalize()
 {
-	T mag = magnitude();
+	const T mag = magnitude();
 
 	x /= mag;
 	y /= mag;
@@ -270,8 +270,8 @@ inline Matrix4x4<T> Quaternion<T>::toMatrix4x4()
 template <class T>
 inline Quaternion<T> Quaternion<T>::fromAxisAngle(T xx, T yy, T zz, T degrees)
 {
-	T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(Pi) / 180);
-	T sinus = sin(halfRadians);
+	const T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(Pi) / 180);
+	const T sinus = sin(halfRadians);
 
 	return Quaternion<T>(xx * sinus,
 	                     yy * sinus,
@@ -288,21 +288,21 @@ inline Quaternion<T> Quaternion<T>::fromAxisAngle(const Vector3<T> &axis, T degr
 template <class T>
 inline Quaternion<T> Quaternion<T>::fromXAxisAngle(T degrees)
 {
-	T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(Pi) / 180);
+	const T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(Pi) / 180);
 	return Quaternion<T>(sin(halfRadians), 0, 0, cos(halfRadians));
 }
 
 template <class T>
 inline Quaternion<T> Quaternion<T>::fromYAxisAngle(T degrees)
 {
-	T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(Pi) / 180);
+	const T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(Pi) / 180);
 	return Quaternion<T>(0, sin(halfRadians), 0, cos(halfRadians));
 }
 
 template <class T>
 inline Quaternion<T> Quaternion<T>::fromZAxisAngle(T degrees)
 {
-	T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(Pi) / 180);
+	const T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(Pi) / 180);
 	return Quaternion<T>(0, 0, sin(halfRadians), cos(halfRadians));
 }
 

@@ -97,8 +97,8 @@ void MyEventHandler::onInit()
 
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
-		float randomX = nc::randBetween(-ViewHalfWidth, ViewHalfWidth);
-		float randomY = nc::randBetween(-ViewHalfHeight, ViewHalfHeight);
+		const float randomX = nc::randBetween(-ViewHalfWidth, ViewHalfWidth);
+		const float randomY = nc::randBetween(-ViewHalfHeight, ViewHalfHeight);
 		sprites_[i] = new nc::Sprite(cameraNode_, textures_[i % NumTextures], randomX, randomY);
 		sprites_[i]->setScale(0.5f);
 		spritePos_[i].set(randomX, randomY);
@@ -119,7 +119,7 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
-	float interval = nc::theApplication().interval();
+	const float interval = nc::theApplication().interval();
 	if (!pause_)
 		angle_ += 2.0f * interval;
 
@@ -155,14 +155,14 @@ void MyEventHandler::onFrameStart()
 		camScale_ += joyVectorRight_.y * ScaleSpeed * interval;
 	}
 
-	nc::Vector2f scrollDiff = scrollMove_ - scrollOrigin_;
+	const nc::Vector2f scrollDiff = scrollMove_ - scrollOrigin_;
 	if (scrollDiff.sqrLength() > 2.0f)
 	{
 		camPos_.x += scrollDiff.x;
 		camPos_.y += scrollDiff.y;
 		scrollOrigin_ = scrollMove_;
 	}
-	nc::Vector2f scrollDiff2 = scrollMove2_ - scrollOrigin2_;
+	const nc::Vector2f scrollDiff2 = scrollMove2_ - scrollOrigin2_;
 	if (scrollDiff2.sqrLength() > 2.0f)
 	{
 		camRot_ += scrollDiff2.x * 0.1f;
@@ -175,24 +175,24 @@ void MyEventHandler::onFrameStart()
 	else if (camScale_ < MinCameraScale)
 		camScale_ = MinCameraScale;
 
-	float scaledWidth = ViewHalfWidth * 2.0f * camScale_;
-	float scaledHeight = ViewHalfHeight * 2.0f * camScale_;
+	const float scaledWidth = ViewHalfWidth * 2.0f * camScale_;
+	const float scaledHeight = ViewHalfHeight * 2.0f * camScale_;
 
 	float rotatedWidth = scaledWidth;
 	float rotatedHeight = scaledHeight;
 	if (camRot_ > 0.01f || camRot_ < -0.01f)
 	{
 		camRot_ = fmod(camRot_, 360.0f);
-		float sinRot = sinf(camRot_ * nc::fDegToRad);
-		float cosRot = cosf(camRot_ * nc::fDegToRad);
+		const float sinRot = sinf(camRot_ * nc::fDegToRad);
+		const float cosRot = cosf(camRot_ * nc::fDegToRad);
 		rotatedWidth = fabsf(scaledHeight * sinRot) + fabsf(scaledWidth * cosRot);
 		rotatedHeight = fabsf(scaledWidth * sinRot) + fabsf(scaledHeight * cosRot);
 	}
 
-	float maxX = rotatedWidth * 0.5f;
-	float minX = (-rotatedWidth * 0.5f) + nc::theApplication().width();
-	float maxY = rotatedHeight * 0.5f;
-	float minY = (-rotatedHeight * 0.5f) + nc::theApplication().height();
+	const float maxX = rotatedWidth * 0.5f;
+	const float minX = (-rotatedWidth * 0.5f) + nc::theApplication().width();
+	const float maxY = rotatedHeight * 0.5f;
+	const float minY = (-rotatedHeight * 0.5f) + nc::theApplication().height();
 
 	if (camPos_.x > maxX)
 		camPos_.x = maxX;
@@ -213,11 +213,11 @@ void MyEventHandler::onFrameStart()
 
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
-		float t = i / static_cast<float>(NumSprites - 1);
-		float scaleX = 50.0f * (2.0f * t - 1.0f);
-		float scaleY = 50.0f * (-2.0f * t + 1.0f);
-		float moveX = scaleX * sinf(angle_) * cosf(angle_ * 0.5f * t);
-		float moveY = scaleY * sinf(angle_ * 0.5f * t) * cosf(angle_);
+		const float t = i / static_cast<float>(NumSprites - 1);
+		const float scaleX = 50.0f * (2.0f * t - 1.0f);
+		const float scaleY = 50.0f * (-2.0f * t + 1.0f);
+		const float moveX = scaleX * sinf(angle_) * cosf(angle_ * 0.5f * t);
+		const float moveY = scaleY * sinf(angle_ * 0.5f * t) * cosf(angle_);
 		sprites_[i]->setPosition(spritePos_[i].x + moveX, spritePos_[i].y + moveY);
 	}
 }

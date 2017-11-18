@@ -52,7 +52,7 @@ void AudioBuffer::load(const IAudioLoader *audioLoader)
 		format = AL_FORMAT_STEREO16;
 
 	// Buffer size calculated as samples * channels * 16bit
-	unsigned long int bufferSize = audioLoader->bufferSize();
+	const unsigned long int bufferSize = audioLoader->bufferSize();
 	buffer = new char[bufferSize];
 
 	audioLoader->read(buffer, bufferSize);

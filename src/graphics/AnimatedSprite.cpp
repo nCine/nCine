@@ -43,7 +43,7 @@ AnimatedSprite::~AnimatedSprite()
 bool AnimatedSprite::isPaused() const
 {
 	ASSERT(!anims_.isEmpty());
-	bool isPaused = anims_[currentAnim_]->isPaused();
+	const bool isPaused = anims_[currentAnim_]->isPaused();
 	return isPaused;
 }
 
@@ -57,7 +57,7 @@ void AnimatedSprite::update(float interval)
 {
 	ASSERT(!anims_.isEmpty());
 
-	unsigned int previousFrame = anims_[currentAnim_]->frame();
+	const unsigned int previousFrame = anims_[currentAnim_]->frame();
 	anims_[currentAnim_]->updateFrame(interval);
 
 	// Updating sprite texture rectangle only on change

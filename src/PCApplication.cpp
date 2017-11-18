@@ -45,7 +45,7 @@ void PCApplication::init(IAppEventHandler * (*createAppEventHandler)())
 	theServiceLocator().registerLogger(new FileLogger(appCfg_.logFile_.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
 	// Graphics device should always be created before the input manager!
 	IGfxDevice::GLContextInfo contextInfo(appCfg_.glMajorVersion_, appCfg_.glMinorVersion_, appCfg_.glDebugContext_);
-	DisplayMode::VSyncMode vSyncMode = appCfg_.withVSync_ ? DisplayMode::WITH_VSYNC : DisplayMode::NO_VSYNC;
+	const DisplayMode::VSyncMode vSyncMode = appCfg_.withVSync_ ? DisplayMode::WITH_VSYNC : DisplayMode::NO_VSYNC;
 	DisplayMode displayMode(8, 8, 8, 8, 24, 8, DisplayMode::DOUBLE_BUFFERED, vSyncMode);
 #if defined(WITH_SDL)
 	gfxDevice_ = new SdlGfxDevice(appCfg_.xResolution_, appCfg_.yResolution_, contextInfo, displayMode, appCfg_.inFullscreen_);

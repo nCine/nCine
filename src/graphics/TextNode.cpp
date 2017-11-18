@@ -222,22 +222,22 @@ float TextNode::calculateAlignment(unsigned int lineIndex) const
 
 void TextNode::processGlyph(const FontGlyph *glyph)
 {
-	Vector2i size = glyph->size();
-	Vector2i offset = glyph->offset();
+	const Vector2i size = glyph->size();
+	const Vector2i offset = glyph->offset();
 
-	float leftPos = xAdvance_ + offset.x;
-	float rightPos = leftPos + size.x;
-	float topPos = -yAdvance_ - offset.y;
-	float bottomPos = topPos - size.y;
+	const float leftPos = xAdvance_ + offset.x;
+	const float rightPos = leftPos + size.x;
+	const float topPos = -yAdvance_ - offset.y;
+	const float bottomPos = topPos - size.y;
 
 
-	Vector2i texSize = font_->texture()->size();
-	Recti texRect = glyph->texRect();
+	const Vector2i texSize = font_->texture()->size();
+	const Recti texRect = glyph->texRect();
 
-	float leftCoord = float(texRect.x) / float(texSize.x);
-	float rightCoord = float(texRect.x + texRect.w) / float(texSize.x);
-	float bottomCoord = float(texRect.y + texRect.h) / float(texSize.y);
-	float topCoord = float(texRect.y) / float(texSize.y);
+	const float leftCoord = float(texRect.x) / float(texSize.x);
+	const float rightCoord = float(texRect.x + texRect.w) / float(texSize.x);
+	const float bottomCoord = float(texRect.y + texRect.h) / float(texSize.y);
+	const float topCoord = float(texRect.y) / float(texSize.y);
 
 
 	interleavedVertices_.pushBack(leftPos);		interleavedVertices_.pushBack(bottomPos);

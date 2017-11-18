@@ -204,15 +204,15 @@ void AndroidApplication::preInit()
 	appEventHandler_->onPreInit(appCfg_);
 
 	// Registering the logger as early as possible
-	String logFilePath = IFile::dataPath() + appCfg_.logFile_;
+	const String logFilePath = IFile::dataPath() + appCfg_.logFile_;
 	theServiceLocator().registerLogger(new FileLogger(logFilePath.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
 }
 
 void AndroidApplication::init()
 {
 	// Graphics device should always be created before the input manager!
-	DisplayMode displayMode32(8, 8, 8, 8, 24, 8, DisplayMode::DOUBLE_BUFFERED, DisplayMode::NO_VSYNC);
-	DisplayMode displayMode16(5, 6, 5, 0, 16, 0, DisplayMode::DOUBLE_BUFFERED, DisplayMode::NO_VSYNC);
+	const DisplayMode displayMode32(8, 8, 8, 8, 24, 8, DisplayMode::DOUBLE_BUFFERED, DisplayMode::NO_VSYNC);
+	const DisplayMode displayMode16(5, 6, 5, 0, 16, 0, DisplayMode::DOUBLE_BUFFERED, DisplayMode::NO_VSYNC);
 	IGfxDevice::GLContextInfo contextInfo(appCfg_.glMajorVersion_, appCfg_.glMinorVersion_, appCfg_.glDebugContext_);
 
 	if (EglGfxDevice::isModeSupported(state_, contextInfo, displayMode32))

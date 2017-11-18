@@ -29,7 +29,7 @@ void TextureLoaderWebP::init()
 
 	// Loading the whole file in memory
 	fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
-	long int fileSize = fileHandle_->size();
+	const long int fileSize = fileHandle_->size();
 	unsigned char *fileBuffer = new unsigned char[fileSize];
 	fileHandle_->read(fileBuffer, fileSize);
 

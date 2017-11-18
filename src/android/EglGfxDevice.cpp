@@ -67,7 +67,7 @@ void EglGfxDevice::querySurfaceSize()
 
 bool EglGfxDevice::isModeSupported(struct android_app *state, const GLContextInfo &contextInfo, const DisplayMode &mode)
 {
-	EGLint renderableTypeBit = (contextInfo.majorVersion == 3) ? EGL_OPENGL_ES3_BIT_KHR : EGL_OPENGL_ES2_BIT;
+	const EGLint renderableTypeBit = (contextInfo.majorVersion == 3) ? EGL_OPENGL_ES3_BIT_KHR : EGL_OPENGL_ES2_BIT;
 
 	const EGLint attribs[] =
 	{
@@ -97,7 +97,7 @@ bool EglGfxDevice::isModeSupported(struct android_app *state, const GLContextInf
 
 	EGLSurface surface = eglCreateWindowSurface(display, config, state->window, NULL);
 
-	bool modeIsSupported = (surface != EGL_NO_SURFACE);
+	const bool modeIsSupported = (surface != EGL_NO_SURFACE);
 
 	if (surface != EGL_NO_SURFACE)
 		eglDestroySurface(display, surface);
@@ -113,7 +113,7 @@ bool EglGfxDevice::isModeSupported(struct android_app *state, const GLContextInf
 
 void EglGfxDevice::initDevice(struct android_app *state)
 {
-	EGLint renderableTypeBit = (contextInfo_.majorVersion == 3) ? EGL_OPENGL_ES3_BIT_KHR : EGL_OPENGL_ES2_BIT;
+	const EGLint renderableTypeBit = (contextInfo_.majorVersion == 3) ? EGL_OPENGL_ES3_BIT_KHR : EGL_OPENGL_ES2_BIT;
 
 	const EGLint attribs[] =
 	{
@@ -164,7 +164,7 @@ void EglGfxDevice::initDevice(struct android_app *state)
 	querySurfaceSize();
 
 #ifndef __ANDROID__
-	EGLint swapInterval = mode_.hasVSync() ? 1 : 0;
+	const EGLint swapInterval = mode_.hasVSync() ? 1 : 0;
 	eglSwapInterval(display_, swapInterval);
 #endif
 

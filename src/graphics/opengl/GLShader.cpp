@@ -44,7 +44,7 @@ void GLShader::loadFromFile(const char *filename)
 	fileHandle->open(IFile::MODE_READ);
 	if (fileHandle->isOpened())
 	{
-		GLint length = static_cast<int>(fileHandle->size());
+		const GLint length = static_cast<int>(fileHandle->size());
 		String source(length);
 		fileHandle->read(source.data(), length);
 		const GLchar *source_lines[1] = { source.data() };

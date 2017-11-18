@@ -183,7 +183,7 @@ void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
 
 void *Thread::wrapperFunction(void *arg)
 {
-	ThreadInfo *pThreadInfo = static_cast<ThreadInfo *>(arg);
+	const ThreadInfo *pThreadInfo = static_cast<ThreadInfo *>(arg);
 	pThreadInfo->startFunction(pThreadInfo->threadArg);
 
 	return NULL;

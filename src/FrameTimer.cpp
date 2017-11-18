@@ -44,7 +44,7 @@ void FrameTimer::addFrame()
 	if (logInterval_ > 0.0f && avgNumFrames_ != 0 && (now() - lastLogUpdate_ > logInterval_))
 	{
 		fps_ = float(logNumFrames_) / logInterval_;
-		float msPerFrame = (logInterval_ * 1000.0f) / float(logNumFrames_);
+		const float msPerFrame = (logInterval_ * 1000.0f) / float(logNumFrames_);
 		LOGV_X("%lu frames in %.0f seconds = %f FPS (%.3fms per frame)",  logNumFrames_, logInterval_, fps_, msPerFrame);
 
 		logNumFrames_ = 0L;

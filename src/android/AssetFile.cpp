@@ -22,9 +22,9 @@ AssetFile::AssetFile(const char *filename)
 	type_ = ASSET_TYPE;
 
 	// Detect fake second extension added to prevent compression
-	int firstDotChar = filename_.findFirstChar('.');
-	int lastDotChar = filename_.findLastChar('.');
-	int extLength = lastDotChar - firstDotChar - 1;
+	const int firstDotChar = filename_.findFirstChar('.');
+	const int lastDotChar = filename_.findLastChar('.');
+	const int extLength = lastDotChar - firstDotChar - 1;
 	if (extLength >= 3 && extLength <= 4)
 		extension_.copy(filename_, firstDotChar + 1, extLength, 0);
 }
@@ -61,7 +61,7 @@ void AssetFile::close()
 {
 	if (fileDescriptor_ >= 0)
 	{
-		int retValue = ::close(fileDescriptor_);
+		const int retValue = ::close(fileDescriptor_);
 		if (retValue < 0)
 			LOGW_X("Cannot close the file \"%s\"", filename_.data());
 		else
@@ -127,7 +127,7 @@ unsigned long int AssetFile::read(void *buffer, unsigned long int bytes) const
 	{
 		int bytesToRead = bytes;
 
-		long int seekValue = lseek(fileDescriptor_, 0L, SEEK_CUR);
+		const long int seekValue = lseek(fileDescriptor_, 0L, SEEK_CUR);
 
 		if (seekValue >=  startOffset_ + fileSize_)
 			bytesToRead = 0; // simulating EOF

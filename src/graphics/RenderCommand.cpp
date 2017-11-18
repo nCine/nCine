@@ -21,8 +21,8 @@ RenderCommand::RenderCommand()
 
 void RenderCommand::calculateSortKey()
 {
-	unsigned long int upper = layer_ << 16;
-	unsigned int lower = material_.sortKey();
+	const unsigned long int upper = layer_ << 16;
+	const unsigned int lower = material_.sortKey();
 	sortKey_ = upper + lower;
 }
 
@@ -50,16 +50,16 @@ void RenderCommand::setVertexAttribute(const char *name, GLsizei vboStride, cons
 
 void RenderCommand::setTransformation()
 {
-	float width = theApplication().width();
-	float height = theApplication().height();
-	float near = -1.0f;
-	float far = 1.0f;
+	const float width = theApplication().width();
+	const float height = theApplication().height();
+	const float near = -1.0f;
+	const float far = 1.0f;
 
 	// TODO: Projection is hard-coded, should go in a camera class (Y-axis points downward)
 	Matrix4x4f projection = Matrix4x4f::ortho(0.0f, width, 0.0f, height, near, far);
 
 	// The layer translates to depth, from near to far
-	float layerStep = 1.0f / static_cast<float>(TOP_LAYER);
+	const float layerStep = 1.0f / static_cast<float>(TOP_LAYER);
 	modelView_[3][2] = near + layerStep + (far - near - layerStep) * (layer_ * layerStep);
 
 	if (material_.shaderProgram_)

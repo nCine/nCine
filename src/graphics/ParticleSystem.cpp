@@ -54,7 +54,7 @@ void ParticleSystem::emitParticles(unsigned int amount, float life, const Vector
 		if (poolTop_ == 0)
 			break;
 
-		float rndLife = life * randBetween(0.85f, 1.0f);
+		const float rndLife = life * randBetween(0.85f, 1.0f);
 		// HACK: hard-coded random position amount
 		rndPosition.x = 10.0f * randBetween(-1.0f, 1.0f); // 25
 		rndPosition.y = 10.0f * randBetween(-1.0f, 1.0f);

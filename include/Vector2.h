@@ -254,14 +254,14 @@ inline T Vector2<T>::sqrLength() const
 template <class T>
 inline Vector2<T> Vector2<T>::normalized() const
 {
-	T len = length();
+	const T len = length();
 	return Vector2(x / len, y / len);
 }
 
 template <class T>
 inline Vector2<T> &Vector2<T>::normalize()
 {
-	T len = length();
+	const T len = length();
 
 	x /= len;
 	y /= len;

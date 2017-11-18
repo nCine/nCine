@@ -278,8 +278,8 @@ void Array<T>::insertAt(unsigned int index, T element)
 template <class T>
 typename Array<T>::Iterator Array<T>::insert(Iterator position, const T &value)
 {
-	unsigned int index = &(*position) - array_;
-	insertAt(index);
+	const unsigned int index = &(*position) - array_;
+	insertAt(index, value);
 
 	return ++position;
 }
@@ -287,9 +287,9 @@ typename Array<T>::Iterator Array<T>::insert(Iterator position, const T &value)
 template <class T>
 typename Array<T>::Iterator Array<T>::insert(Iterator position, Iterator first, Iterator last)
 {
-	unsigned int index = static_cast<unsigned int>(&(*position) - array_);
-	T *firstPtr = &(*first);
-	T *lastPtr = &(*last);
+	const unsigned int index = static_cast<unsigned int>(&(*position) - array_);
+	const T *firstPtr = &(*first);
+	const T *lastPtr = &(*last);
 	insertRange(index, firstPtr, lastPtr);
 
 	return position + static_cast<unsigned int>(lastPtr - firstPtr);
@@ -311,7 +311,7 @@ void Array<T>::removeRange(unsigned int firstIndex, unsigned int lastIndex)
 template <class T>
 typename Array<T>::Iterator Array<T>::erase(Iterator position)
 {
-	unsigned int index = static_cast<unsigned int>(&(*position) - array_);
+	const unsigned int index = static_cast<unsigned int>(&(*position) - array_);
 	removeAt(index);
 
 	return ++position;
@@ -320,8 +320,8 @@ typename Array<T>::Iterator Array<T>::erase(Iterator position)
 template <class T>
 typename Array<T>::Iterator Array<T>::erase(Iterator first, const Iterator last)
 {
-	unsigned int firstIndex = static_cast<unsigned int>(&(*first) - array_);
-	unsigned int lastIndex = static_cast<unsigned int>(&(*last) - array_);
+	const unsigned int firstIndex = static_cast<unsigned int>(&(*first) - array_);
+	const unsigned int lastIndex = static_cast<unsigned int>(&(*last) - array_);
 	removeRange(firstIndex, lastIndex);
 
 	return ++first;

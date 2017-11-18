@@ -30,20 +30,20 @@ unsigned long int AudioLoaderWav::read(char *buffer, unsigned long int bufferSiz
 	ASSERT(buffer);
 	ASSERT(bufferSize > 0);
 
-	long bytes_;
+	long bytes = 0;
 	long int bufferSeek = 0;
 
 	do
 	{
 		// Read up to a buffer's worth of decoded sound data
-		bytes_ = fileHandle_->read(buffer, bufferSize);
-		FATAL_ASSERT_MSG(bytes_ > 0, "Zero bytes read from file");
+		bytes = fileHandle_->read(buffer, bufferSize);
+		FATAL_ASSERT_MSG(bytes > 0, "Zero bytes read from file");
 		const int err = ferror(fileHandle_->ptr());
 		FATAL_ASSERT_MSG(err == 0, "Error reading the file");
 
-		bufferSeek += bytes_;
+		bufferSeek += bytes;
 	}
-	while (bytes_ > 0 && bufferSize - bufferSeek > 0);
+	while (bytes > 0 && bufferSize - bufferSeek > 0);
 
 	return bufferSeek;
 }

@@ -45,8 +45,8 @@ void TextureLoaderPkm::init()
 		width_ = IFile::int16FromBE(header.width);
 		height_ = IFile::int16FromBE(header.height);
 
-		int extWidth = IFile::int16FromBE(header.extendedWidth);
-		int extHeight = IFile::int16FromBE(header.extendedHeight);
+		const int extWidth = IFile::int16FromBE(header.extendedWidth);
+		const int extHeight = IFile::int16FromBE(header.extendedHeight);
 
 		LOGI_X("Header found: w:%d h:%d, xw:%d xh:%d", width_, height_, extWidth, extHeight);
 	}

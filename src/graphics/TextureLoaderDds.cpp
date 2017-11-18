@@ -56,7 +56,7 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 {
 	GLenum internalFormat = GL_RGB; // to suppress uninitialized variable warning
 
-	uint32_t flags = IFile::int32FromLE(header.ddspf.dwFlags);
+	const uint32_t flags = IFile::int32FromLE(header.ddspf.dwFlags);
 
 	// Texture contains compressed RGB data, dwFourCC contains valid data
 	if (flags & DDPF_FOURCC)
@@ -105,11 +105,11 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 	{
 		GLenum type = GL_UNSIGNED_BYTE;
 
-		uint32_t bitCount = IFile::int32FromLE(header.ddspf.dwRGBBitCount);
-		uint32_t redMask = IFile::int32FromLE(header.ddspf.dwRBitMask);
-		uint32_t greenMask = IFile::int32FromLE(header.ddspf.dwGBitMask);
-		uint32_t blueMask = IFile::int32FromLE(header.ddspf.dwBBitMask);
-		uint32_t alphaMask = IFile::int32FromLE(header.ddspf.dwABitMask);
+		const uint32_t bitCount = IFile::int32FromLE(header.ddspf.dwRGBBitCount);
+		const uint32_t redMask = IFile::int32FromLE(header.ddspf.dwRBitMask);
+		const uint32_t greenMask = IFile::int32FromLE(header.ddspf.dwGBitMask);
+		const uint32_t blueMask = IFile::int32FromLE(header.ddspf.dwBBitMask);
+		const uint32_t alphaMask = IFile::int32FromLE(header.ddspf.dwABitMask);
 
 		LOGI_X("Pixel masks (%ubit): R:0x%x G:0x%x B:0x%x A:0x%x", bitCount, redMask, greenMask, blueMask, alphaMask);
 

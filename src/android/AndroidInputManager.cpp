@@ -100,7 +100,7 @@ bool AndroidJoystickState::isButtonPressed(int buttonId) const
 short int AndroidJoystickState::axisValue(int axisId) const
 {
 	// If the joystick is not present the returned value is zero
-	short int axisValue = static_cast<short int>(axisNormValue(axisId) * IInputManager::MaxAxisValue);
+	const short int axisValue = static_cast<short int>(axisNormValue(axisId) * IInputManager::MaxAxisValue);
 
 	return axisValue;
 }
@@ -202,7 +202,7 @@ bool AndroidInputManager::isJoyPresent(int joyId) const
 	ASSERT(joyId >= 0);
 	ASSERT_MSG_X(joyId < int(MaxNumJoysticks), "joyId is %d and the maximum is %u", joyId, MaxNumJoysticks - 1);
 
-	int deviceId = joystickStates_[joyId].deviceId_;
+	const int deviceId = joystickStates_[joyId].deviceId_;
 	return (deviceId != -1);
 }
 
@@ -256,8 +256,8 @@ const JoystickState &AndroidInputManager::joystickState(int joyId) const
 
 bool AndroidInputManager::processGamepadEvent(const AInputEvent *event)
 {
-	int deviceId = AInputEvent_getDeviceId(event);
-	int joyId = findJoyId(deviceId);
+	const int deviceId = AInputEvent_getDeviceId(event);
+	const int joyId = findJoyId(deviceId);
 
 	// If the index is valid then the structure can be updated
 	if (joyId > -1)
@@ -350,8 +350,8 @@ bool AndroidInputManager::processGamepadEvent(const AInputEvent *event)
 			}
 			for (int i = 0; i < numAxesNoDPad; i++)
 			{
-				int axis = joystickStates_[joyId].axesMapping_[i];
-				float axisValue = AMotionEvent_getAxisValue(event, axis, 0);
+				const int axis = joystickStates_[joyId].axesMapping_[i];
+				const float axisValue = AMotionEvent_getAxisValue(event, axis, 0);
 				joystickStates_[joyId].axesValues_[i] = axisValue;
 
 				const float AxisThresholdValue = 0.01f;
@@ -552,7 +552,7 @@ void AndroidInputManager::checkDisconnectedJoysticks()
 {
 	for (unsigned int i = 0; i < MaxNumJoysticks; i++)
 	{
-		int deviceId = joystickStates_[i].deviceId_;
+		const int deviceId = joystickStates_[i].deviceId_;
 		if (deviceId > -1 && isDeviceConnected(deviceId) == false)
 		{
 			LOGI_X("Joystick %d (device %d) \"%s\" has been disconnected", i, deviceId, joystickStates_[i].name_);
@@ -581,16 +581,16 @@ void AndroidInputManager::checkConnectedJoysticks()
 			connectedJoys++;
 	}
 
-	int connectedDevices = AndroidJniClass_InputDevice::getDeviceIds(deviceIds, MaxDevices);
+	const int connectedDevices = AndroidJniClass_InputDevice::getDeviceIds(deviceIds, MaxDevices);
 	for (int i = 0; i < MaxDevices && i < connectedDevices; i++)
 	{
 		AndroidJniClass_InputDevice inputDevice = AndroidJniClass_InputDevice::getDevice(deviceIds[i]);
-		int sources = inputDevice.getSources();
+		const int sources = inputDevice.getSources();
 
 		if (((sources & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD) ||
 		    ((sources & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK))
 		{
-			int joyId = findJoyId(deviceIds[i]);
+			const int joyId = findJoyId(deviceIds[i]);
 			if (joyId > -1)
 				joystickStates_[joyId].deviceId_ = deviceIds[i];
 
@@ -660,8 +660,8 @@ void AndroidInputManager::deviceInfo(int deviceId, int joyId)
 		inputDevice.getName(joystickStates_[joyId].name_, AndroidJoystickState::MaxNameLength);
 
 		memset(joystickStates_[joyId].guid_, 0, 33);
-		int vendorId = inputDevice.getVendorId();
-		int productId = inputDevice.getProductId();
+		const int vendorId = inputDevice.getVendorId();
+		const int productId = inputDevice.getProductId();
 		if (vendorId > 0 && productId > 0)
 		{
 			// GUID calculated concatenating the vendorId and the productId
@@ -727,7 +727,7 @@ void AndroidInputManager::deviceInfo(int deviceId, int joyId)
 		joystickStates_[joyId].hasDPad_ = true;
 		for (int button = AKEYCODE_DPAD_UP; button < AKEYCODE_DPAD_CENTER; button++)
 		{
-			bool hasKey = AndroidJniClass_KeyCharacterMap::deviceHasKey(button);
+			const bool hasKey = AndroidJniClass_KeyCharacterMap::deviceHasKey(button);
 			if (hasKey == false)
 			{
 				joystickStates_[joyId].hasDPad_ = false;
@@ -741,7 +741,7 @@ void AndroidInputManager::deviceInfo(int deviceId, int joyId)
 		int numAxes = 0;
 		for (int i = 0; i < AndroidJoystickState::NumAxesToMap; i++)
 		{
-			int axis = AndroidJoystickState::AxesToMap[i];
+			const int axis = AndroidJoystickState::AxesToMap[i];
 			AndroidJniClass_MotionRange motionRange = inputDevice.getMotionRange(axis);
 
 			if (motionRange.isNull() == false)

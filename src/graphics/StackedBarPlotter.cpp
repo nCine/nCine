@@ -35,7 +35,7 @@ unsigned int StackedBarPlotter::addVariable(unsigned int numValues, float reject
 			LOGW("Variable not added because number of values is inconsistent");
 			return 0; // TODO: switch to signed int and return -1?
 		}
-		float diff = rejectDelay - variables_[0]->variable()->delay();
+		const float diff = rejectDelay - variables_[0]->variable()->delay();
 		if (diff < -0.001f || diff > 0.001f) // HACK: one millisecond fixed tolerance
 		{
 			LOGW("Variable not added because reject delay is inconsistent");
@@ -74,8 +74,8 @@ void StackedBarPlotter::draw(RenderQueue &renderQueue)
 
 void StackedBarPlotter::updateAllVertices(float x, float y, float w, float h)
 {
-	unsigned int numVariables = variables_.size();
-	float scaledH = h / static_cast<float>(numVariables);
+	const unsigned int numVariables = variables_.size();
+	const float scaledH = h / static_cast<float>(numVariables);
 
 	// In a stacked plot every variable should be scaled in relationship with the sum
 	float minSum = 0.0f;
@@ -86,7 +86,7 @@ void StackedBarPlotter::updateAllVertices(float x, float y, float w, float h)
 		maxSum += variables_[i]->variable()->max();
 	}
 
-	float normalizedRefValue = normBetweenRefValue(minSum, maxSum);
+	const float normalizedRefValue = normBetweenRefValue(minSum, maxSum);
 	refValueVertices_[0] = x;		refValueVertices_[1] = y + h * normalizedRefValue;
 	refValueVertices_[2] = x + w;	refValueVertices_[3] = y + h * normalizedRefValue;
 
@@ -119,15 +119,15 @@ void StackedBarPlotter::updateAllVertices(float x, float y, float w, float h)
 	for (unsigned int i = 0; i < numValues; i++)
 	{
 		float verticalOffset = 0.0f;
-		float step = (float(w) / float(numValues)) * 0.5f;
-		float center = 2.0f * step * (i + 1) - step;
+		const float step = (float(w) / float(numValues)) * 0.5f;
+		const float center = 2.0f * step * (i + 1) - step;
 
 		for (unsigned int j = 0; j < variables_.size(); j++)
 		{
 			const ProfileVariable *profVariable = variables_[j]->variable();
 			GLfloat *vertices = variables_[j]->vertices();
 
-			float normValue = profVariable->normBetweenValue((nextIndex + i) % numValues, minSum, maxSum);
+			const float normValue = profVariable->normBetweenValue((nextIndex + i) % numValues, minSum, maxSum);
 
 			vertices[4 + 12 * i + 0] = x + center - step;
 			vertices[4 + 12 * i + 1] = y + scaledH * verticalOffset;

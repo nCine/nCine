@@ -116,7 +116,7 @@ void GfxCapabilities::logGLCaps() const
 
 bool GfxCapabilities::checkGLExtension(const char *extensionName) const
 {
-	size_t nameLength = strlen(extensionName);
+	const size_t nameLength = strlen(extensionName);
 	const char *extensions = reinterpret_cast<const char *>(glGetString(GL_EXTENSIONS));
 
 	if (extensions)
@@ -132,7 +132,7 @@ bool GfxCapabilities::checkGLExtension(const char *extensionName) const
 
 		while (extensions < end)
 		{
-			size_t n = strcspn(extensions, " ");
+			const size_t n = strcspn(extensions, " ");
 			if ((nameLength == n) && (strncmp(extensionName, extensions, n) == 0))
 				return true;
 
@@ -142,10 +142,10 @@ bool GfxCapabilities::checkGLExtension(const char *extensionName) const
 #if !(defined(__ANDROID__) && !defined(GL_ES_VERSION_3_0))
 	else
 	{
-		GLint n, i;
+		GLint n;
 		glGetIntegerv(GL_NUM_EXTENSIONS, &n);
 
-		for (i = 0; i < n; i++)
+		for (GLint i = 0; i < n; i++)
 		{
 			const char *extension = reinterpret_cast<const char *>(glGetStringi(GL_EXTENSIONS, i));
 			if (strncmp(extensionName, extension, nameLength) == 0)

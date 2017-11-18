@@ -38,7 +38,7 @@ inline float randBetween(float x0, float x1)
 template <class T>
 inline void swap(T &a, T &b)
 {
-	T temp = a;
+	const T temp = a;
 	a = b;
 	b = temp;
 }

@@ -62,14 +62,14 @@ void Sprite::updateRenderCommand()
 	renderCommand_->material().setTexture(*texture_);
 
 	renderCommand_->material().uniform("color")->setFloatValue(absColor().fR(), absColor().fG(), absColor().fB(), absColor().fA());
-	bool isTransparent = absColor().a() < 255 || (texture()->hasAlpha() && opaqueTexture_ == false);
+	const bool isTransparent = absColor().a() < 255 || (texture()->hasAlpha() && opaqueTexture_ == false);
 	renderCommand_->material().setTransparent(isTransparent);
 
-	Vector2i texSize = texture_->size();
-	float texScaleX = texRect_.w / float(texSize.x);
-	float texBiasX = texRect_.x / float(texSize.x);
-	float texScaleY = texRect_.h / float(texSize.y);
-	float texBiasY = texRect_.y / float(texSize.y);
+	const Vector2i texSize = texture_->size();
+	const float texScaleX = texRect_.w / float(texSize.x);
+	const float texBiasX = texRect_.x / float(texSize.x);
+	const float texScaleY = texRect_.h / float(texSize.y);
+	const float texBiasY = texRect_.y / float(texSize.y);
 	renderCommand_->material().uniform("texRect")->setFloatValue(texScaleX, texBiasX, texScaleY, texBiasY);
 	renderCommand_->material().uniform("spriteSize")->setFloatValue(width_, height_);
 }

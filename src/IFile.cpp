@@ -109,16 +109,16 @@ void IFile::initSavePath()
 		savePath_.clear();
 	}
 #elif _WIN32
-	char *userProfileEnv = getenv("USERPROFILE");
+	const char *userProfileEnv = getenv("USERPROFILE");
 	if (userProfileEnv == NULL || strlen(userProfileEnv) == 0)
 	{
-		char *homeDriveEnv = getenv("HOMEDRIVE");
-		char *homePathEnv = getenv("HOMEPATH");
+		const char *homeDriveEnv = getenv("HOMEDRIVE");
+		const char *homePathEnv = getenv("HOMEPATH");
 
 		if ((homeDriveEnv == NULL || strlen(homeDriveEnv) == 0) &&
 		    (homePathEnv == NULL || strlen(homePathEnv) == 0))
 		{
-			char *homeEnv = getenv("HOME");
+			const char *homeEnv = getenv("HOME");
 			if (homeEnv && strlen(homeEnv))
 				savePath_ = homeEnv;
 		}
@@ -134,7 +134,7 @@ void IFile::initSavePath()
 	if (savePath_.isEmpty() == false)
 		savePath_ += "\\";
 #else
-	char *homeEnv = getenv("HOME");
+	const char *homeEnv = getenv("HOME");
 
 	if (homeEnv == NULL || strlen(homeEnv) == 0)
 		savePath_ = getpwuid(getuid())->pw_dir;

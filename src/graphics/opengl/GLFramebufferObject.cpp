@@ -75,7 +75,7 @@ void GLFramebufferObject::attachTexture(GLTexture &texture, GLenum attachment)
 bool GLFramebufferObject::isStatusComplete()
 {
 	bind(GL_FRAMEBUFFER);
-	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
 	return (status == GL_FRAMEBUFFER_COMPLETE);
 }

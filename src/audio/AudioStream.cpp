@@ -20,7 +20,7 @@ AudioStream::AudioStream(const char *filename)
 
 	audioLoader_ = IAudioLoader::createFromFile(filename);
 	frequency_ = audioLoader_->frequency();
-	int numChannels = audioLoader_->numChannels();
+	const int numChannels = audioLoader_->numChannels();
 
 	FATAL_ASSERT_MSG_X(numChannels == 1 || numChannels == 2, "Unsupported number of channels: %d", numChannels);
 	if (numChannels == 1)

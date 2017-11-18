@@ -59,7 +59,7 @@ bool GlfwJoystickState::isButtonPressed(int buttonId) const
 short int GlfwJoystickState::axisValue(int axisId) const
 {
 	// If the joystick is not present the returned value is zero
-	short int axisValue = static_cast<short int>(axisNormValue(axisId) * IInputManager::MaxAxisValue);
+	const short int axisValue = static_cast<short int>(axisNormValue(axisId) * IInputManager::MaxAxisValue);
 
 	return axisValue;
 }
@@ -74,7 +74,7 @@ float GlfwJoystickState::axisNormValue(int axisId) const
 
 bool GlfwInputManager::hasFocus()
 {
-	bool glfwFocused = (glfwGetWindowAttrib(GlfwGfxDevice::windowHandle(), GLFW_FOCUSED) != 0);
+	const bool glfwFocused = (glfwGetWindowAttrib(GlfwGfxDevice::windowHandle(), GLFW_FOCUSED) != 0);
 
 	// A focus event has occurred (either gain or loss)
 	if (windowHasFocus_ != glfwFocused)
@@ -233,7 +233,7 @@ void GlfwInputManager::scrollCallback(GLFWwindow *window, double xoffset, double
 
 void GlfwInputManager::joystickCallback(int joy, int event)
 {
-	int joyId = joy - GLFW_JOYSTICK_1;
+	const int joyId = joy - GLFW_JOYSTICK_1;
 	joyConnectionEvent_.joyId = joyId;
 
 	if (event == GLFW_CONNECTED)

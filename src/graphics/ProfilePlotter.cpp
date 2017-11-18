@@ -92,7 +92,7 @@ void ProfilePlotter::updateRenderCommand()
 
 	renderCommand_->material().setTexture(NULL);
 	renderCommand_->material().uniform("color")->setFloatValue(backgroundColor_.fR(), backgroundColor_.fG(), backgroundColor_.fB(), backgroundColor_.fA());
-	bool isTransparent = backgroundColor_.a() < 255;
+	const bool isTransparent = backgroundColor_.a() < 255;
 	renderCommand_->material().setTransparent(isTransparent);
 }
 

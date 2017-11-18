@@ -166,36 +166,36 @@ void MyEventHandler::onFrameStart()
 	nc::Vector2f joyVectorRight(joyMappedState.axisValue(nc::AXIS_RX), joyMappedState.axisValue(nc::AXIS_RY));
 	nc::theApplication().inputManager().deadZoneNormalize(joyVectorLeft, nc::IInputManager::LeftStickDeadZone);
 	nc::theApplication().inputManager().deadZoneNormalize(joyVectorRight, nc::IInputManager::RightStickDeadZone);
-	bool lPressed = joyMappedState.isButtonPressed(nc::BUTTON_LSTICK);
-	bool rPressed = joyMappedState.isButtonPressed(nc::BUTTON_RSTICK);
+	const bool lPressed = joyMappedState.isButtonPressed(nc::BUTTON_LSTICK);
+	const bool rPressed = joyMappedState.isButtonPressed(nc::BUTTON_RSTICK);
 
 	sprites_[0]->setPosition(appWidth * (-triggerPosX + joyVectorLeft.x * stickMovement), appWidth * -joyVectorLeft.y * stickMovement);
 	sprites_[1]->setPosition(appWidth * (triggerPosX * 0.5f + joyVectorRight.x * stickMovement), appWidth * (-0.075f - joyVectorRight.y * stickMovement));
 	sprites_[0]->setScale(lPressed ? stickPressedSize : stickUnpressedSize);
 	sprites_[1]->setScale(rPressed ? stickPressedSize : stickUnpressedSize);
 
-	bool bxPressed = joyMappedState.isButtonPressed(nc::BUTTON_X);
-	bool byPressed = joyMappedState.isButtonPressed(nc::BUTTON_Y);
-	bool baPressed = joyMappedState.isButtonPressed(nc::BUTTON_A);
-	bool bbPressed = joyMappedState.isButtonPressed(nc::BUTTON_B);
+	const bool bxPressed = joyMappedState.isButtonPressed(nc::BUTTON_X);
+	const bool byPressed = joyMappedState.isButtonPressed(nc::BUTTON_Y);
+	const bool baPressed = joyMappedState.isButtonPressed(nc::BUTTON_A);
+	const bool bbPressed = joyMappedState.isButtonPressed(nc::BUTTON_B);
 	sprites_[2]->setScale(bxPressed ? buttonPressedSize : buttonUnpressedSize);
 	sprites_[3]->setScale(byPressed ? buttonPressedSize : buttonUnpressedSize);
 	sprites_[4]->setScale(baPressed ? buttonPressedSize : buttonUnpressedSize);
 	sprites_[5]->setScale(bbPressed ? buttonPressedSize : buttonUnpressedSize);
 
-	bool lsPressed = joyMappedState.isButtonPressed(nc::BUTTON_LBUMPER);
-	bool rsPressed = joyMappedState.isButtonPressed(nc::BUTTON_RBUMPER);
+	const bool lsPressed = joyMappedState.isButtonPressed(nc::BUTTON_LBUMPER);
+	const bool rsPressed = joyMappedState.isButtonPressed(nc::BUTTON_RBUMPER);
 	sprites_[6]->setScale(lsPressed ? buttonPressedSize : buttonUnpressedSize);
 	sprites_[7]->setScale(rsPressed ? buttonPressedSize : buttonUnpressedSize);
 
-	float joyLeftTrigger = joyMappedState.axisValue(nc::AXIS_LTRIGGER);
-	float joyRightTrigger = joyMappedState.axisValue(nc::AXIS_RTRIGGER);
+	const float joyLeftTrigger = joyMappedState.axisValue(nc::AXIS_LTRIGGER);
+	const float joyRightTrigger = joyMappedState.axisValue(nc::AXIS_RTRIGGER);
 	sprites_[8]->setScale(buttonUnpressedSize + (joyLeftTrigger * 0.1f));
 	sprites_[9]->setScale(buttonUnpressedSize + (joyRightTrigger * 0.1f));
 
-	bool backPressed = joyMappedState.isButtonPressed(nc::BUTTON_BACK);
-	bool guidePressed = joyMappedState.isButtonPressed(nc::BUTTON_GUIDE);
-	bool startPressed = joyMappedState.isButtonPressed(nc::BUTTON_START);
+	const bool backPressed = joyMappedState.isButtonPressed(nc::BUTTON_BACK);
+	const bool guidePressed = joyMappedState.isButtonPressed(nc::BUTTON_GUIDE);
+	const bool startPressed = joyMappedState.isButtonPressed(nc::BUTTON_START);
 	sprites_[10]->setScale(backPressed ? startPressedSize : startUnpressedSize);
 	sprites_[11]->setScale(guidePressed ? guidePressedSize : guideUnpressedSize);
 	sprites_[12]->setScale(startPressed ? startPressedSize : startUnpressedSize);

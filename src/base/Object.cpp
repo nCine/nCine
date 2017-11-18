@@ -29,7 +29,7 @@ Object::~Object()
 template <class T>
 T *Object::fromId(unsigned int id)
 {
-	Object *object = theServiceLocator().indexer().object(id);
+	const Object *object = theServiceLocator().indexer().object(id);
 
 	if (object)
 	{

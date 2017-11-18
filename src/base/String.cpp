@@ -72,7 +72,7 @@ String &String::operator=(const String &other)
 	if (this != &other)
 	{
 		// copy and truncate
-		unsigned int copiedChars = copy(other);
+		const unsigned int copiedChars = copy(other);
 		length_ = copiedChars;
 		array_[length_] = '\0';
 	}
@@ -101,13 +101,13 @@ unsigned int String::copy(const String &source, unsigned int srcChar, unsigned i
 	// Clamping parameters to string lengths and capacities
 
 	// Cannot copy from beyond the end of the source string
-	unsigned int clampedSrcChar = min(srcChar, source.length_);
-	char *srcStart = source.array_ + clampedSrcChar;
+	const unsigned int clampedSrcChar = min(srcChar, source.length_);
+	const char *srcStart = source.array_ + clampedSrcChar;
 	// It is possible to write beyond the end of the destination string, but without creating holes
-	unsigned int clampedDestChar = min(destChar, length_);
+	const unsigned int clampedDestChar = min(destChar, length_);
 	char *destStart = array_ + clampedDestChar;
 	// Cannot copy more characters than the source has left until its length or more than the destination has until its capacity
-	unsigned int charsToCopy = min(min(numChar, source.length_ - clampedSrcChar), capacity_ - clampedDestChar);
+	const unsigned int charsToCopy = min(min(numChar, source.length_ - clampedSrcChar), capacity_ - clampedDestChar);
 
 	if (charsToCopy > 0)
 	{
@@ -139,10 +139,10 @@ unsigned int String::copyTo(char *dest, unsigned int srcChar, unsigned int numCh
 	ASSERT(dest);
 
 	// Cannot copy from beyond the end of the source string
-	unsigned int clampedSrcChar = min(srcChar, length_);
-	char *srcStart = array_ + clampedSrcChar;
+	const unsigned int clampedSrcChar = min(srcChar, length_);
+	const char *srcStart = array_ + clampedSrcChar;
 	// Cannot copy more characters than the source has left until its length
-	unsigned int charsToCopy = min(numChar, length_ - clampedSrcChar);
+	const unsigned int charsToCopy = min(numChar, length_ - clampedSrcChar);
 
 	// Always assuming that the destination is big enough
 	if (charsToCopy > 0)
@@ -159,7 +159,7 @@ unsigned int String::copyTo(char *dest, unsigned int srcChar, unsigned int numCh
 
 int String::compare(const String &other) const
 {
-	unsigned int minCapacity = nc::min(capacity_, other.capacity_);
+	const unsigned int minCapacity = nc::min(capacity_, other.capacity_);
 	return strncmp(array_, other.array_, minCapacity);
 }
 
@@ -225,9 +225,9 @@ String &String::format(const char *fmt, ...)
 	va_list args;
 	va_start(args, fmt);
 #if defined(_WIN32) && !defined(__MINGW32__)
-	int formattedLength = vsnprintf_s(array_, capacity_, capacity_, fmt, args);
+	const int formattedLength = vsnprintf_s(array_, capacity_, capacity_, fmt, args);
 #else
-	int formattedLength = vsnprintf(array_, capacity_, fmt, args);
+	const int formattedLength = vsnprintf(array_, capacity_, fmt, args);
 #endif
 	va_end(args);
 
@@ -247,9 +247,9 @@ String &String::formatAppend(const char *fmt, ...)
 	va_list args;
 	va_start(args, fmt);
 #if defined(_WIN32) && !defined(__MINGW32__)
-	int formattedLength = vsnprintf_s(array_ + length_, capacity_ - length_, capacity_ - length_, fmt, args);
+	const int formattedLength = vsnprintf_s(array_ + length_, capacity_ - length_, capacity_ - length_, fmt, args);
 #else
-	int formattedLength = vsnprintf(array_ + length_, capacity_ - length_, fmt, args);
+	const int formattedLength = vsnprintf(array_ + length_, capacity_ - length_, fmt, args);
 #endif
 	va_end(args);
 
@@ -264,8 +264,8 @@ String &String::formatAppend(const char *fmt, ...)
 
 String &String::operator+=(const String &other)
 {
-	unsigned int availCapacity = capacity_ - length_;
-	unsigned int minLength = min(other.length_, availCapacity);
+	const unsigned int availCapacity = capacity_ - length_;
+	const unsigned int minLength = min(other.length_, availCapacity);
 
 #if defined(_WIN32) && !defined(__MINGW32__)
 	strncpy_s(array_ + length_, capacity_ - length_, other.array_, minLength);
@@ -281,13 +281,13 @@ String &String::operator+=(const String &other)
 String &String::operator+=(const char *cString)
 {
 	ASSERT(cString);
-	unsigned int availCapacity = capacity_ - length_;
+	const unsigned int availCapacity = capacity_ - length_;
 
 #if defined(_WIN32) && !defined(__MINGW32__)
-	unsigned int cLength = static_cast<unsigned int>(strnlen_s(cString, availCapacity));
+	const unsigned int cLength = static_cast<unsigned int>(strnlen_s(cString, availCapacity));
 	strncpy_s(array_ + length_, capacity_ - length_, cString, cLength);
 #else
-	unsigned int cLength = static_cast<unsigned int>(strnlen(cString, availCapacity));
+	const unsigned int cLength = static_cast<unsigned int>(strnlen(cString, availCapacity));
 	strncpy(array_ + length_, cString, cLength);
 #endif
 	length_ += cLength;
@@ -298,7 +298,7 @@ String &String::operator+=(const char *cString)
 
 String String::operator+(const String &other) const
 {
-	unsigned int sumLength = length_ + other.length_ + 1;
+	const unsigned int sumLength = length_ + other.length_ + 1;
 	String result(sumLength);
 
 	result = *this;
@@ -310,7 +310,7 @@ String String::operator+(const String &other) const
 String String::operator+(const char *cString) const
 {
 	ASSERT(cString);
-	unsigned int sumLength = length_ + static_cast<unsigned int>(strlen(cString)) + 1;
+	const unsigned int sumLength = length_ + static_cast<unsigned int>(strlen(cString)) + 1;
 	String result(sumLength);
 
 	result = *this;

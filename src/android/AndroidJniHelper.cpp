@@ -104,8 +104,8 @@ void AndroidJniClass_Version::init()
 
 int AndroidJniClass_Version::sdkInt()
 {
-	jint sdkInt = jniEnv_->GetStaticIntField(javaClass_, fidSdkInt_);
-	return sdkInt;
+	const jint sdkInt = jniEnv_->GetStaticIntField(javaClass_, fidSdkInt_);
+	return int(sdkInt);
 }
 
 void AndroidJniClass_InputDevice::init()
@@ -161,7 +161,7 @@ AndroidJniClass_InputDevice AndroidJniClass_InputDevice::getDevice(int deviceId)
 int AndroidJniClass_InputDevice::getDeviceIds(int *destination, int maxSize)
 {
 	jintArray arrDeviceIds = static_cast<jintArray>(jniEnv_->CallStaticObjectMethod(javaClass_, midGetDeviceIds_));
-	jint length = jniEnv_->GetArrayLength(arrDeviceIds);
+	const jint length = jniEnv_->GetArrayLength(arrDeviceIds);
 
 	jint *intsDeviceIds = jniEnv_->GetIntArrayElements(arrDeviceIds, NULL);
 	for (int i = 0; i < length && i < maxSize; i++)
@@ -193,7 +193,7 @@ int AndroidJniClass_InputDevice::getProductId() const
 	if (AndroidJniHelper::sdkVersion() < 19 || __ANDROID_API__ < 19)
 		return 0;
 
-	jint productId = jniEnv_->CallIntMethod(javaObject_, midGetProductId_);
+	const jint productId = jniEnv_->CallIntMethod(javaObject_, midGetProductId_);
 	return int(productId);
 }
 
@@ -203,7 +203,7 @@ int AndroidJniClass_InputDevice::getVendorId() const
 	if (AndroidJniHelper::sdkVersion() < 19 || __ANDROID_API__ < 19)
 		return 0;
 
-	jint vendorID = jniEnv_->CallIntMethod(javaObject_, midGetVendorId_);
+	const jint vendorID = jniEnv_->CallIntMethod(javaObject_, midGetVendorId_);
 	return int(vendorID);
 }
 
@@ -215,7 +215,7 @@ AndroidJniClass_MotionRange AndroidJniClass_InputDevice::getMotionRange(int axis
 
 int AndroidJniClass_InputDevice::getSources() const
 {
-	jint sources = jniEnv_->CallIntMethod(javaObject_, midGetSources_);
+	const jint sources = jniEnv_->CallIntMethod(javaObject_, midGetSources_);
 	return int(sources);
 }
 
@@ -260,7 +260,7 @@ void AndroidJniClass_KeyCharacterMap::init()
 
 bool AndroidJniClass_KeyCharacterMap::deviceHasKey(int button)
 {
-	jboolean hasKey = jniEnv_->CallStaticBooleanMethod(javaClass_, midDeviceHasKey_, button);
+	const jboolean hasKey = jniEnv_->CallStaticBooleanMethod(javaClass_, midDeviceHasKey_, button);
 	return (hasKey == JNI_TRUE);
 }
 

@@ -295,14 +295,14 @@ inline T Vector4<T>::sqrLength() const
 template <class T>
 inline Vector4<T> Vector4<T>::normalized() const
 {
-	T len = length();
+	const T len = length();
 	return Vector4(x / len, y / len, z / len, w / len);
 }
 
 template <class T>
 inline Vector4<T> &Vector4<T>::normalize()
 {
-	T len = length();
+	const T len = length();
 
 	x /= len;
 	y /= len;

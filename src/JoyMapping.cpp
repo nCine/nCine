@@ -115,7 +115,7 @@ bool JoyMapping::addMappingFromString(const char *mappingString)
 	ASSERT(mappingString);
 
 	MappedJoystick newMapping;
-	bool parsed = parseMappingFromString(mappingString, newMapping);
+	const bool parsed = parseMappingFromString(mappingString, newMapping);
 	if (parsed)
 	{
 		int index = findMappingByGuid(newMapping.guid);
@@ -136,7 +136,7 @@ void JoyMapping::addMappingsFromStrings(const char **mappingStrings)
 	while (*mappingStrings)
 	{
 		MappedJoystick newMapping;
-		bool parsed = parseMappingFromString(*mappingStrings, newMapping);
+		const bool parsed = parseMappingFromString(*mappingStrings, newMapping);
 		if (parsed)
 		{
 			int index = findMappingByGuid(newMapping.guid);
@@ -171,7 +171,7 @@ void JoyMapping::addMappingsFromFile(const char *filename)
 		fileLine++;
 
 		MappedJoystick newMapping;
-		bool parsed = parseMappingFromString(buffer, newMapping);
+		const bool parsed = parseMappingFromString(buffer, newMapping);
 		if (parsed)
 		{
 			numParsed++;
@@ -205,7 +205,7 @@ void JoyMapping::onJoyButtonPressed(const JoyButtonEvent &event)
 		mappedButtonEvent_.buttonName = mappings_[idToIndex].buttons[event.buttonId];
 		if (mappedButtonEvent_.buttonName != BUTTON_UNKNOWN)
 		{
-			int buttonId = static_cast<int>(mappedButtonEvent_.buttonName);
+			const int buttonId = static_cast<int>(mappedButtonEvent_.buttonName);
 			mappedJoyStates_[event.joyId].buttons_[buttonId] = true;
 			inputEventHandler_->onJoyMappedButtonPressed(mappedButtonEvent_);
 		}
@@ -225,7 +225,7 @@ void JoyMapping::onJoyButtonReleased(const JoyButtonEvent &event)
 		mappedButtonEvent_.buttonName = mappings_[idToIndex].buttons[event.buttonId];
 		if (mappedButtonEvent_.buttonName != BUTTON_UNKNOWN)
 		{
-			int buttonId = static_cast<int>(mappedButtonEvent_.buttonName);
+			const int buttonId = static_cast<int>(mappedButtonEvent_.buttonName);
 			mappedJoyStates_[event.joyId].buttons_[buttonId] = false;
 			inputEventHandler_->onJoyMappedButtonReleased(mappedButtonEvent_);
 		}
@@ -428,10 +428,10 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 			return false;
 		}
 
-		bool keywordFound = parsePlatformKeyword(subStart, subMid);
+		const bool keywordFound = parsePlatformKeyword(subStart, subMid);
 		if (keywordFound)
 		{
-			bool thisPlatform = parsePlatformName(subMid + 1, subEnd);
+			const bool thisPlatform = parsePlatformName(subMid + 1, subEnd);
 			if (thisPlatform == false)
 				return false;
 		}

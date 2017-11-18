@@ -81,7 +81,7 @@ void CondVariable::wait(Mutex &mutex)
 void CondVariable::signal()
 {
 	EnterCriticalSection(&waitersCountLock_);
-	bool haveWaiters = (waitersCount_ > 0);
+	const bool haveWaiters = (waitersCount_ > 0);
 	LeaveCriticalSection(&waitersCountLock_);
 
 	if (haveWaiters)
@@ -91,7 +91,7 @@ void CondVariable::signal()
 void CondVariable::broadcast()
 {
 	EnterCriticalSection(&waitersCountLock_);
-	bool haveWaiters = (waitersCount_ > 0);
+	const bool haveWaiters = (waitersCount_ > 0);
 	LeaveCriticalSection(&waitersCountLock_);
 
 	if (haveWaiters)
@@ -104,11 +104,11 @@ void CondVariable::broadcast()
 
 void CondVariable::waitEvents()
 {
-	int result = WaitForMultipleObjects(2, events_, FALSE, INFINITE);
+	const int result = WaitForMultipleObjects(2, events_, FALSE, INFINITE);
 
 	EnterCriticalSection(&waitersCountLock_);
 	waitersCount_--;
-	bool isLastWaiter = (result == (WAIT_OBJECT_0 + 1)) && (waitersCount_ == 0);
+	const bool isLastWaiter = (result == (WAIT_OBJECT_0 + 1)) && (waitersCount_ == 0);
 	LeaveCriticalSection(&waitersCountLock_);
 
 	if (isLastWaiter)

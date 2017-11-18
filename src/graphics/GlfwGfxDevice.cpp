@@ -108,11 +108,11 @@ void GlfwGfxDevice::initDevice()
 
 	glfwMakeContextCurrent(windowHandle_);
 
-	int interval = mode_.hasVSync() ? 1 : 0;
+	const int interval = mode_.hasVSync() ? 1 : 0;
 	glfwSwapInterval(interval);
 
 #ifdef WITH_GLEW
-	GLenum err = glewInit();
+	const GLenum err = glewInit();
 	FATAL_ASSERT_MSG_X(err == GLEW_OK, "GLEW error: %s", glewGetErrorString(err));
 
 	contextInfo_.debugContext = contextInfo_.debugContext && glewIsSupported("GL_ARB_debug_output");

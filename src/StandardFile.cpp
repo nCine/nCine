@@ -50,7 +50,7 @@ void StandardFile::close()
 	if (fileDescriptor_ >= 0)
 	{
 #if !(defined(_WIN32) && !defined(__MINGW32__))
-		int retValue = ::close(fileDescriptor_);
+		const int retValue = ::close(fileDescriptor_);
 		if (retValue < 0)
 			LOGW_X("Cannot close the file \"%s\"", filename_.data());
 		else
@@ -62,7 +62,7 @@ void StandardFile::close()
 	}
 	else if (filePointer_)
 	{
-		int retValue = fclose(filePointer_);
+		const int retValue = fclose(filePointer_);
 		if (retValue == EOF)
 			LOGW_X("Cannot close the file \"%s\"", filename_.data());
 		else

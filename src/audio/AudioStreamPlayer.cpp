@@ -108,7 +108,7 @@ void AudioStreamPlayer::updateState()
 {
 	if (state_ == STATE_PLAYING)
 	{
-		bool shouldStillPlay = audioStream_.enqueue(sourceId_, isLooping_);
+		const bool shouldStillPlay = audioStream_.enqueue(sourceId_, isLooping_);
 		if (shouldStillPlay == false)
 			state_ = STATE_STOPPED;
 	}

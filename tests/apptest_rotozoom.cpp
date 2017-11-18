@@ -60,8 +60,8 @@ void MyEventHandler::onFrameStart()
 {
 	if (pause_ == false)
 		angle_ += 2.5f * nc::theApplication().interval();
-	float sine = sinf(angle_);
-	float cosine = cosf(angle_);
+	const float sine = sinf(angle_);
+	const float cosine = cosf(angle_);
 
 	dummy_->x = nc::theApplication().width() * 0.5f + sine * 100.0f;
 	dummy_->y = nc::theApplication().height() * 0.5f + cosine * 150.0f;

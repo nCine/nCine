@@ -130,7 +130,7 @@ inline typename HashMap<K, T, HashFunc>::Iterator HashMap<K, T, HashFunc>::begin
 template <class K, class T, class HashFunc>
 inline typename HashMap<K, T, HashFunc>::Iterator HashMap<K, T, HashFunc>::end()
 {
-	unsigned int lastIndex = buckets_.size() - 1;
+	const unsigned int lastIndex = buckets_.size() - 1;
 	return Iterator(this, lastIndex, buckets_[lastIndex].collisionList_.end(), false);
 }
 
@@ -147,7 +147,7 @@ inline typename HashMap<K, T, HashFunc>::ConstIterator HashMap<K, T, HashFunc>::
 template <class K, class T, class HashFunc>
 inline typename HashMap<K, T, HashFunc>::ConstIterator HashMap<K, T, HashFunc>::end() const
 {
-	unsigned int lastIndex = buckets_.size() - 1;
+	const unsigned int lastIndex = buckets_.size() - 1;
 	return ConstIterator(this, lastIndex, buckets_[lastIndex].collisionList_.end(), false);
 }
 
@@ -324,16 +324,16 @@ void HashMap<K, T, HashFunc>::clear()
 template <class K, class T, class HashFunc>
 inline const typename HashMap<K, T, HashFunc>::HashBucket &HashMap<K, T, HashFunc>::retrieveBucket(const K &key) const
 {
-	hash_t hash = hashFunc_(key);
-	unsigned int index = hash % buckets_.size();
+	const hash_t hash = hashFunc_(key);
+	const unsigned int index = hash % buckets_.size();
 	return buckets_[index];
 }
 
 template <class K, class T, class HashFunc>
 inline typename HashMap<K, T, HashFunc>::HashBucket &HashMap<K, T, HashFunc>::retrieveBucket(const K &key)
 {
-	hash_t hash = hashFunc_(key);
-	unsigned int index = hash % buckets_.size();
+	const hash_t hash = hashFunc_(key);
+	const unsigned int index = hash % buckets_.size();
 	return buckets_[index];
 }
 
