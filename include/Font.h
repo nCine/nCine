@@ -16,7 +16,7 @@ class DLL_PUBLIC Font : public Object
   public:
 	/// Constructs the object from a texture and a `FNT` file (from <em>AngelCode's Bitmap Font Generator</em>)
 	Font(const char *texFilename, const char *fntFilename);
-	virtual ~Font();
+	~Font() override;
 
 	/// Gets the texture object
 	inline const Texture *texture() const { return texture_; }

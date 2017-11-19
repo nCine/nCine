@@ -9,7 +9,7 @@ class HashMapAlgorithmsTest : public ::testing::Test
 	HashMapAlgorithmsTest() : hashmap_(Capacity) { }
 
   protected:
-	void SetUp() { initHashMap(hashmap_); }
+	void SetUp() override { initHashMap(hashmap_); }
 
 	nc::HashMap<int, int, nc::FixedHashFunc<int> > hashmap_;
 };

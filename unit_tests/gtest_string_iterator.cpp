@@ -8,7 +8,7 @@ class StringIteratorTest : public ::testing::Test
 	StringIteratorTest() : string_(Capacity) { }
 
   protected:
-	void SetUp() { string_ = "String1String2"; }
+	void SetUp() override { string_ = "String1String2"; }
 
 	nc::String string_;
 };

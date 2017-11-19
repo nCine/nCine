@@ -30,7 +30,7 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Constructor for a node with no parent and positioned in the origin
 	SceneNode();
 	/// The destructor will delete every child node
-	virtual ~SceneNode();
+	~SceneNode() override;
 
 	inline static ObjectType sType() { return SCENENODE_TYPE; }
 

@@ -62,7 +62,7 @@ class DLL_PUBLIC Sprite : public DrawableNode
 
 	/// Common sprite initialization for every constructor
 	void init();
-	virtual void updateRenderCommand();
+	void updateRenderCommand() override;
 };
 
 inline void Sprite::setTexRect(const Recti &rect)

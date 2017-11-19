@@ -14,14 +14,14 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	explicit AnimatedSprite(Texture *texture);
 	AnimatedSprite(SceneNode *parent, Texture *texture, float x, float y);
 	AnimatedSprite(Texture *texture, float x, float y);
-	virtual ~AnimatedSprite();
+	~AnimatedSprite() override;
 
 	/// Returns true if the current animation is paused
 	bool isPaused() const;
 	/// Sets the pause state for the animation
 	void setPaused(bool isPaused);
 
-	virtual void update(float interval);
+	void update(float interval) override;
 
 	/// Adds a new animation
 	void addAnimation(RectAnimation *anim);

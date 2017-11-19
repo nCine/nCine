@@ -15,7 +15,7 @@ class ProfilePlotter : public DrawableNode
 {
   public:
 	ProfilePlotter(SceneNode *parent, Rectf rect);
-	virtual ~ProfilePlotter();
+	~ProfilePlotter() override;
 
 	/// Adds a value to the specified variable
 	bool addValue(unsigned int varIndex, float value);
@@ -70,7 +70,7 @@ class ProfilePlotter : public DrawableNode
 
 	/// Fills the background buffer with vertices
 	void setBackgroundVertices();
-	virtual void updateRenderCommand();
+	void updateRenderCommand() override;
 	/// Updates the reference value rendering command
 	void UpdateRefValueRenderCommand();
 

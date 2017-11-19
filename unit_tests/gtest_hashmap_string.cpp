@@ -8,7 +8,7 @@ class HashMapStringTest : public ::testing::Test
 	HashMapStringTest() : strHashmap_(Capacity) { }
 
   protected:
-	void SetUp() { initHashMap(strHashmap_); }
+	void SetUp() override { initHashMap(strHashmap_); }
 
 	nc::StringHashMap<nc::String>::Type strHashmap_;
 };

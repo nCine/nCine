@@ -12,9 +12,9 @@ class FileLogger : public ILogger
 {
   public:
 	FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fileLevel);
-	~FileLogger();
+	~FileLogger() override;
 
-	virtual void write(LogLevel level, const char *fmt, ...);
+	void write(LogLevel level, const char *fmt, ...) override;
 
   private:
 	IFile *fileHandle_;

@@ -9,7 +9,7 @@ class ArrayAlgorithmsTest : public ::testing::Test
 	ArrayAlgorithmsTest() : array_(Capacity) { }
 
   protected:
-	void SetUp() { initArray(array_); }
+	void SetUp() override { initArray(array_); }
 
 	nc::Array<int> array_;
 };

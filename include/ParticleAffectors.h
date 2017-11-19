@@ -26,7 +26,7 @@ class DLL_PUBLIC AccelerationAffector : public ParticleAffector
 	AccelerationAffector(float x, float y) : acceleration_(x, y) { }
 
 	/// Affects the acceleration of the specified particle
-	virtual void affect(Particle *particle);
+	void affect(Particle *particle) override;
 
   private:
 	Vector2f acceleration_;
@@ -37,14 +37,14 @@ class DLL_PUBLIC ColorAffector : public ParticleAffector
 {
   public:
 	ColorAffector() : colorSteps_(4) { }
-	~ColorAffector()
+	~ColorAffector() override
 	{
 		for (unsigned int i = 0; i < colorSteps_.size(); i++)
 			delete colorSteps_[i];
 	}
 
 	/// Affects the color of the specified particle
-	virtual void affect(Particle *particle);
+	void affect(Particle *particle) override;
 	void addColorStep(float time, Color color);
 
   private:
@@ -70,14 +70,14 @@ class DLL_PUBLIC SizeAffector : public ParticleAffector
   public:
 	/// Constructs a size affector with a base scale factor as a reference
 	explicit SizeAffector(float baseScale) : sizeSteps_(4), baseScale_(baseScale) { }
-	~SizeAffector()
+	~SizeAffector() override
 	{
 		for (unsigned int i = 0; i < sizeSteps_.size(); i++)
 			delete sizeSteps_[i];
 	}
 
 	/// Affects the size of the specified particle
-	virtual void affect(Particle *particle);
+	void affect(Particle *particle) override;
 	void addSizeStep(float time, float scale);
 
   private:

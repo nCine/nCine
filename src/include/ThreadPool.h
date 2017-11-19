@@ -18,10 +18,10 @@ class ThreadPool : public IThreadPool
 	ThreadPool();
 	/// Creates a thread pool with a specified number of threads
 	explicit ThreadPool(unsigned int numThreads);
-	~ThreadPool();
+	~ThreadPool() override;
 
 	/// Enqueues a command request for a worker thread
-	void enqueueCommand(IThreadCommand *threadCommand);
+	void enqueueCommand(IThreadCommand *threadCommand) override;
 
   private:
 	struct ThreadStruct

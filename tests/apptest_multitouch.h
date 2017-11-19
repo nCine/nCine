@@ -24,20 +24,20 @@ class MyEventHandler :
 	public nc::IInputEventHandler
 {
   public:
-	virtual void onPreInit(nc::AppConfiguration &config);
-	virtual void onInit();
-	virtual void onFrameStart();
-	virtual void onShutdown();
+	void onPreInit(nc::AppConfiguration &config) override;
+	void onInit() override;
+	void onFrameStart() override;
+	void onShutdown() override;
 
 #ifdef __ANDROID__
 	void handleEvent(const nc::TouchEvent &event, nc::String *string, const char *eventName);
-	virtual void onTouchDown(const nc::TouchEvent &event);
-	virtual void onTouchUp(const nc::TouchEvent &event);
-	virtual void onTouchMove(const nc::TouchEvent &event);
-	virtual void onPointerDown(const nc::TouchEvent &event);
-	virtual void onPointerUp(const nc::TouchEvent &event);
+	void onTouchDown(const nc::TouchEvent &event) override;
+	void onTouchUp(const nc::TouchEvent &event) override;
+	void onTouchMove(const nc::TouchEvent &event) override;
+	void onPointerDown(const nc::TouchEvent &event) override;
+	void onPointerUp(const nc::TouchEvent &event) override;
 #else
-	virtual void onKeyReleased(const nc::KeyboardEvent &event);
+	void onKeyReleased(const nc::KeyboardEvent &event) override;
 #endif
 
   private:

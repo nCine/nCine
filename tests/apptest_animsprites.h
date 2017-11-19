@@ -21,21 +21,21 @@ class MyEventHandler :
 	public nc::IInputEventHandler
 {
   public:
-	virtual void onPreInit(nc::AppConfiguration &config);
-	virtual void onInit();
-	virtual void onFrameStart();
-	virtual void onShutdown();
+	void onPreInit(nc::AppConfiguration &config) override;
+	void onInit() override;
+	void onFrameStart() override;
+	void onShutdown() override;
 
 #ifdef __ANDROID__
-	virtual void onTouchDown(const nc::TouchEvent &event);
-	virtual void onTouchMove(const nc::TouchEvent &event);
+	void onTouchDown(const nc::TouchEvent &event) override;
+	void onTouchMove(const nc::TouchEvent &event) override;
 #endif
-	virtual void onKeyReleased(const nc::KeyboardEvent &event);
-	virtual void onMouseButtonPressed(const nc::MouseEvent &event);
-	virtual void onMouseMoved(const nc::MouseState &state);
+	void onKeyReleased(const nc::KeyboardEvent &event) override;
+	void onMouseButtonPressed(const nc::MouseEvent &event) override;
+	void onMouseMoved(const nc::MouseState &state) override;
 
-	virtual void onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event);
-	virtual void onJoyDisconnected(const nc::JoyConnectionEvent &event);
+	void onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event) override;
+	void onJoyDisconnected(const nc::JoyConnectionEvent &event) override;
 
   private:
 	nc::Texture *texture_;

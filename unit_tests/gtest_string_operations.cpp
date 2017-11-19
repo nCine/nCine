@@ -8,7 +8,7 @@ class StringOperationTest : public ::testing::Test
 	StringOperationTest() : string_(Capacity) { }
 
   protected:
-	void SetUp() { string_ = "String1"; }
+	void SetUp() override { string_ = "String1"; }
 
 	nc::String string_;
 };

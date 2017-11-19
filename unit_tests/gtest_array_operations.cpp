@@ -8,7 +8,7 @@ class ArrayOperationsTest : public ::testing::Test
 	ArrayOperationsTest() : array_(Capacity) { }
 
   protected:
-	void SetUp() { initArray(array_); }
+	void SetUp() override { initArray(array_); }
 
 	nc::Array<int> array_;
 };

@@ -14,19 +14,19 @@ class AssetFile : public IFile
 	/// Constructs an asset file object
 	/*! \param filename File name including path relative to the assets directory */
 	explicit AssetFile(const char *filename);
-	~AssetFile();
+	~AssetFile() override;
 
 	inline static FileType sType() { return ASSET_TYPE; }
 
 	/// Tries to open the asset file
-	void open(unsigned char mode);
+	void open(unsigned char mode) override;
 	/// Closes the asset file
-	void close();
-	long int seek(long int offset, int whence) const;
-	long int tell() const;
-	unsigned long int read(void *buffer, unsigned long int bytes) const;
+	void close() override;
+	long int seek(long int offset, int whence) const override;
+	long int tell() const override;
+	unsigned long int read(void *buffer, unsigned long int bytes) const override;
 
-	bool isOpened() const;
+	bool isOpened() const override;
 
 	/// Sets the global pointer to the AAssetManager
 	static void initAssetManager(struct android_app *state) { assetManager_ = state->activity->assetManager; }

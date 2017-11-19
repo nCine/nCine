@@ -19,7 +19,7 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
   public:
 	/// Constructs a particle system made of the specified maximum amount of particles
 	ParticleSystem(SceneNode *parent, unsigned int count, Texture *texture, Recti texRect);
-	~ParticleSystem();
+	~ParticleSystem() override;
 
 	/// Adds a particle affector
 	void addAffector(ParticleAffector *affector) { affectors_.pushBack(affector); }
@@ -31,7 +31,7 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	/// Sets the local space flag of the system
 	inline void setInLocalSpace(bool inLocalSpace) { inLocalSpace_ = inLocalSpace; }
 
-	virtual void update(float interval);
+	void update(float interval) override;
 
 	inline static ObjectType sType() { return PARTICLESYSTEM_TYPE; }
 

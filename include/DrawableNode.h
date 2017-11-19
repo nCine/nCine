@@ -26,10 +26,10 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	explicit DrawableNode(SceneNode *parent);
 	/// Constructor for a drawable node with no parent and positioned in the origin
 	DrawableNode();
-	virtual ~DrawableNode();
+	~DrawableNode() override;
 
 	/// Updates the draw command and adds it to the queue
-	virtual void draw(RenderQueue &renderQueue);
+	void draw(RenderQueue &renderQueue) override;
 
 	/// Returns the width of the node area
 	inline virtual float width() const { return width_ * scaleFactor_; }

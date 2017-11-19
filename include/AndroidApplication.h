@@ -45,7 +45,7 @@ class DLL_PUBLIC AndroidApplication : public Application
 	/// Must be called before exiting to shut down the application
 	void shutdown();
 
-	void setFocus(bool hasFocus);
+	void setFocus(bool hasFocus) override;
 
 	/// Private constructor
 	AndroidApplication() : Application(),  isInitialized_(false), packageName_(128), state_(nullptr), createAppEventHandler_(nullptr) { }

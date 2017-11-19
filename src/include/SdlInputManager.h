@@ -25,11 +25,11 @@ class SdlMouseState : public MouseState
   public:
 	SdlMouseState() : buttons_(0) { }
 
-	inline bool isLeftButtonDown() const { return (buttons_ & SDL_BUTTON_LMASK) != 0; }
-	inline bool isMiddleButtonDown() const { return (buttons_ & SDL_BUTTON_MMASK) != 0; }
-	inline bool isRightButtonDown() const { return (buttons_ & SDL_BUTTON_RMASK) != 0; }
-	inline bool isFourthButtonDown() const { return (buttons_ & SDL_BUTTON_X1MASK) != 0; }
-	inline bool isFifthButtonDown() const { return (buttons_ & SDL_BUTTON_X2MASK) != 0; }
+	inline bool isLeftButtonDown() const override { return (buttons_ & SDL_BUTTON_LMASK) != 0; }
+	inline bool isMiddleButtonDown() const override { return (buttons_ & SDL_BUTTON_MMASK) != 0; }
+	inline bool isRightButtonDown() const override { return (buttons_ & SDL_BUTTON_RMASK) != 0; }
+	inline bool isFourthButtonDown() const override { return (buttons_ & SDL_BUTTON_X1MASK) != 0; }
+	inline bool isFifthButtonDown() const override { return (buttons_ & SDL_BUTTON_X2MASK) != 0; }
 
   private:
 	unsigned int buttons_;
@@ -43,11 +43,11 @@ class SdlMouseEvent : public MouseEvent
   public:
 	SdlMouseEvent() : button_(0) { }
 
-	inline bool isLeftButton() const { return button_ == SDL_BUTTON_LEFT; }
-	inline bool isMiddleButton() const { return button_ == SDL_BUTTON_MIDDLE; }
-	inline bool isRightButton() const { return button_ == SDL_BUTTON_RIGHT; }
-	inline bool isFourthButton() const { return button_ == SDL_BUTTON_X1; }
-	inline bool isFifthButton() const { return button_ == SDL_BUTTON_X2; }
+	inline bool isLeftButton() const override { return button_ == SDL_BUTTON_LEFT; }
+	inline bool isMiddleButton() const override { return button_ == SDL_BUTTON_MIDDLE; }
+	inline bool isRightButton() const override { return button_ == SDL_BUTTON_RIGHT; }
+	inline bool isFourthButton() const override { return button_ == SDL_BUTTON_X1; }
+	inline bool isFifthButton() const override { return button_ == SDL_BUTTON_X2; }
 
   private:
 	unsigned char button_;
@@ -70,7 +70,10 @@ class SdlKeyboardState : public KeyboardState
   public:
 	SdlKeyboardState() { keyState_ = SDL_GetKeyboardState(nullptr); }
 
-	inline bool isKeyDown(KeySym key) const { return keyState_[SdlKeys::enumToScancode(key)] != 0; }
+	inline bool isKeyDown(KeySym key) const override
+	{
+		return keyState_[SdlKeys::enumToScancode(key)] != 0;
+	}
 
 	friend class SdlInputManager;
 
@@ -84,9 +87,9 @@ class SdlJoystickState : public JoystickState
   public:
 	SdlJoystickState() : sdlJoystick_(nullptr) { }
 
-	bool isButtonPressed(int buttonId) const;
-	short int axisValue(int axisId) const;
-	float axisNormValue(int axisId) const;
+	bool isButtonPressed(int buttonId) const override;
+	short int axisValue(int axisId) const override;
+	float axisNormValue(int axisId) const override;
 
   private:
 	SDL_Joystick *sdlJoystick_;
@@ -105,22 +108,22 @@ class SdlInputManager : public IInputManager
 
 	static void parseEvent(const SDL_Event &event);
 
-	inline const MouseState &mouseState()
+	inline const MouseState &mouseState() override
 	{
 		mouseState_.buttons_ = SDL_GetMouseState(&mouseState_.x, &mouseState_.y);
 		return mouseState_;
 	}
 
-	inline const KeyboardState &keyboardState() const { return keyboardState_; }
+	inline const KeyboardState &keyboardState() const override { return keyboardState_; }
 
-	bool isJoyPresent(int joyId) const;
-	const char *joyName(int joyId) const;
-	const char *joyGuid(int joyId) const;
-	int joyNumButtons(int joyId) const;
-	int joyNumAxes(int joyId) const;
-	const JoystickState &joystickState(int joyId) const;
+	bool isJoyPresent(int joyId) const override;
+	const char *joyName(int joyId) const override;
+	const char *joyGuid(int joyId) const override;
+	int joyNumButtons(int joyId) const override;
+	int joyNumAxes(int joyId) const override;
+	const JoystickState &joystickState(int joyId) const override;
 
-	void setMouseCursorMode(MouseCursorMode mode);
+	void setMouseCursorMode(MouseCursorMode mode) override;
 
 	static short int hatEnumToAxisValue(unsigned char hatState, bool upDownAxis);
 

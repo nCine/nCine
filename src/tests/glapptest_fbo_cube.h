@@ -25,12 +25,12 @@ class MyEventHandler :
 	public nc::IInputEventHandler
 {
   public:
-	virtual void onPreInit(nc::AppConfiguration &config);
-	virtual void onInit();
-	virtual void onFrameStart();
-	virtual void onShutdown();
+	void onPreInit(nc::AppConfiguration &config) override;
+	void onInit() override;
+	void onFrameStart() override;
+	void onShutdown() override;
 
-	virtual void onKeyReleased(const nc::KeyboardEvent &event);
+	void onKeyReleased(const nc::KeyboardEvent &event) override;
 
   private:
 	static const int FboSize = 256;

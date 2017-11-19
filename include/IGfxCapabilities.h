@@ -57,9 +57,9 @@ inline IGfxCapabilities::~IGfxCapabilities() { }
 class DLL_PUBLIC NullGfxCapabilities : public IGfxCapabilities
 {
   public:
-	virtual int glVersion(GLVersion version) const { return 0; }
-	virtual int value(GLIntValues valueName) const { return 0; }
-	virtual bool hasExtension(GLExtensions extensionName) const { return false; }
+	int glVersion(GLVersion version) const override { return 0; }
+	int value(GLIntValues valueName) const override { return 0; }
+	bool hasExtension(GLExtensions extensionName) const override { return false; }
 };
 
 }

@@ -32,13 +32,13 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	TextNode(SceneNode *parent, Font *font);
 
 	/// Returns the width of rendered text
-	virtual float width() const;
+	float width() const override;
 	/// Returns the height of rendered text
-	virtual float height() const;
+	float height() const override;
 	/// Returns the absolute width of rendered text
-	virtual float absWidth() const;
+	float absWidth() const override;
 	/// Returns the absolute height of rendered text
-	virtual float absHeight() const;
+	float absHeight() const override;
 
 	/// Returns true if kerning is enabled for this node rendering
 	inline bool withKerning() const { return withKerning_; }
@@ -56,7 +56,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Sets the string to render
 	void setString(const String &string);
 
-	virtual void draw(RenderQueue &renderQueue);
+	void draw(RenderQueue &renderQueue) override;
 
 	inline static ObjectType sType() { return TEXTNODE_TYPE; }
 
@@ -96,7 +96,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Fills the batch draw command with data from a glyph
 	void processGlyph(const FontGlyph *glyph);
 
-	virtual void updateRenderCommand();
+	void updateRenderCommand() override;
 };
 
 }

@@ -8,7 +8,7 @@ class ListIteratorTest : public ::testing::Test
 	ListIteratorTest() { }
 
   protected:
-	void SetUp() { initList(list_); }
+	void SetUp() override { initList(list_); }
 
 	nc::List<int> list_;
 };

@@ -14,7 +14,7 @@ class TextureLoaderWebP : public ITextureLoader
 	explicit TextureLoaderWebP(IFile *fileHandle);
 
   private:
-	void init();
+	void init() override;
 };
 
 }

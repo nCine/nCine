@@ -7,7 +7,7 @@ namespace {
 class StaticArrayAlgorithmsTest : public ::testing::Test
 {
   protected:
-	void SetUp() { initArray(array_); }
+	void SetUp() override { initArray(array_); }
 
 	nc::StaticArray<int, Capacity> array_;
 };

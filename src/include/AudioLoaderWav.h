@@ -12,8 +12,8 @@ class AudioLoaderWav : public IAudioLoader
 	explicit AudioLoaderWav(const char *filename);
 	explicit AudioLoaderWav(IFile *fileHandle);
 
-	unsigned long int read(char *buffer, unsigned long int bufferSize) const;
-	void rewind() const;
+	unsigned long int read(char *buffer, unsigned long int bufferSize) const override;
+	void rewind() const override;
 
   private:
 	/// Header for the RIFF WAVE format
@@ -36,7 +36,7 @@ class AudioLoaderWav : public IAudioLoader
 		uint32_t	subchunk2Size;
 	} WavHeader;
 
-	void init();
+	void init() override;
 };
 
 }

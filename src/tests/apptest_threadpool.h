@@ -18,10 +18,10 @@ class MyEventHandler :
 	public nc::IInputEventHandler
 {
   public:
-	virtual void onPreInit(nc::AppConfiguration &config);
-	virtual void onInit();
+	void onPreInit(nc::AppConfiguration &config) override;
+	void onInit() override;
 
-	virtual void onKeyReleased(const nc::KeyboardEvent &event);
+	void onKeyReleased(const nc::KeyboardEvent &event) override;
 };
 
 #endif

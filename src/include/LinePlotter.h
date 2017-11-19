@@ -14,8 +14,8 @@ class LineVariable : public PlottingVariable
 	LineVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f &worldMatrix);
 
   private:
-	virtual void updateRenderCommand();
-	virtual void updateMeanRenderCommand();
+	void updateRenderCommand() override;
+	void updateMeanRenderCommand() override;
 };
 
 /// A class that plots line strip variables
@@ -24,9 +24,9 @@ class LinePlotter : public ProfilePlotter
   public:
 	LinePlotter(SceneNode *parent, Rectf rect) : ProfilePlotter(parent, rect) { }
 
-	virtual unsigned int addVariable(unsigned int numValues, float rejectDelay);
+	unsigned int addVariable(unsigned int numValues, float rejectDelay) override;
 
-	virtual void draw(RenderQueue &renderQueue);
+	void draw(RenderQueue &renderQueue) override;
 
   private:
 	/// Fill the buffer of every line variable with vertices

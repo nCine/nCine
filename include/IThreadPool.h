@@ -24,7 +24,7 @@ inline IThreadPool::~IThreadPool() { }
 class DLL_PUBLIC NullThreadPool : public IThreadPool
 {
   public:
-	virtual void enqueueCommand(IThreadCommand *threadCommand) { }
+	void enqueueCommand(IThreadCommand *threadCommand) override { }
 };
 
 }

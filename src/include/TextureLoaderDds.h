@@ -67,7 +67,7 @@ class TextureLoaderDds : public ITextureLoader
 	static const uint32_t DDS_ATCA = 0x41435441; // "ATCA"
 	static const uint32_t DDS_ATCI = 0x49435441; // "ATCI"
 
-	void init();
+	void init() override;
 
 	/// Reads the DDS header and fills the corresponding structure
 	void readHeader(DdsHeader &header);

@@ -42,6 +42,7 @@ For additional information: https://ncine.github.io/
 - Padding space after parenthesis headers (`if`, `do`, `while`, `for`, `switch`)
 - Align pointer and reference operator to the variable or function name
 - `inline` keyword always before `virtual` and `static`
+- Mark an override method with the `override` specifier and remove `virtual`
 - Access specifiers order: `public`, `protected`, `private`
   - One half indent for access specifiers (2 spaces)
 - Declarations order: typedefs and enums, data members, constructors, destructors, methods

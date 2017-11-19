@@ -36,7 +36,7 @@ class DLL_PUBLIC Texture : public Object
 	explicit Texture(const char *filename);
 	Texture(const char *filename, int width, int height);
 	Texture(const char *filename, Vector2i size);
-	virtual ~Texture();
+	~Texture() override;
 
 	/// Returns texture width
 	inline int width() const { return width_; }

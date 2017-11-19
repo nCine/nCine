@@ -67,7 +67,7 @@ class TextureLoaderPvr : public ITextureLoader
 	static const uint64_t FMT_L_8 = 0x000000080000006cULL;
 	static const uint64_t FMT_A_8 = 0x0000000800000061ULL;
 
-	void init();
+	void init() override;
 
 	/// Reads the PVR3 header and fills the corresponding structure
 	void readHeader(Pvr3Header &header);

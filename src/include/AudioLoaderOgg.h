@@ -14,10 +14,10 @@ class AudioLoaderOgg : public IAudioLoader
   public:
 	explicit AudioLoaderOgg(const char *filename);
 	explicit AudioLoaderOgg(IFile *fileHandle);
-	~AudioLoaderOgg();
+	~AudioLoaderOgg() override;
 
-	unsigned long int read(char *buffer, unsigned long int bufferSize) const;
-	void rewind() const;
+	unsigned long int read(char *buffer, unsigned long int bufferSize) const override;
+	void rewind() const override;
 
   private:
 	/// Vorbisfile handle
@@ -28,7 +28,7 @@ class AudioLoaderOgg : public IAudioLoader
 	/// Deleted assignment operator
 	AudioLoaderOgg &operator=(const AudioLoaderOgg &) = delete;
 
-	void init();
+	void init() override;
 };
 
 }

@@ -15,22 +15,22 @@ class ALAudioDevice : public IAudioDevice
 {
   public:
 	ALAudioDevice();
-	virtual ~ALAudioDevice();
+	~ALAudioDevice() override;
 
-	virtual float gain() { return gain_; }
-	virtual void setGain(float gain);
+	float gain() override { return gain_; }
+	void setGain(float gain) override;
 
-	virtual void stopPlayers();
-	virtual void pausePlayers();
-	virtual void stopPlayers(PlayerType playerType);
-	virtual void pausePlayers(PlayerType playerType);
+	void stopPlayers() override;
+	void pausePlayers() override;
+	void stopPlayers(PlayerType playerType) override;
+	void pausePlayers(PlayerType playerType) override;
 
-	virtual void freezePlayers();
-	virtual void unfreezePlayers();
+	void freezePlayers() override;
+	void unfreezePlayers() override;
 
-	virtual int nextAvailableSource();
-	virtual void registerPlayer(IAudioPlayer *player);
-	virtual void updatePlayers();
+	int nextAvailableSource() override;
+	void registerPlayer(IAudioPlayer *player) override;
+	void updatePlayers() override;
 
   private:
 	/// Maximum number of OpenAL sources (HACK: should use a query)

@@ -24,11 +24,26 @@ class GlfwKeys
 class GlfwMouseState : public MouseState
 {
   public:
-	inline bool isLeftButtonDown() const { return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS); }
-	inline bool isMiddleButtonDown() const { return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS); }
-	inline bool isRightButtonDown() const { return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS); }
-	inline bool isFourthButtonDown() const { return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_4) == GLFW_PRESS); }
-	inline bool isFifthButtonDown() const { return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_5) == GLFW_PRESS); }
+	inline bool isLeftButtonDown() const override
+	{
+		return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
+	}
+	inline bool isMiddleButtonDown() const override
+	{
+		return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS);
+	}
+	inline bool isRightButtonDown() const override
+	{
+		return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS);
+	}
+	inline bool isFourthButtonDown() const override
+	{
+		return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_4) == GLFW_PRESS);
+	}
+	inline bool isFifthButtonDown() const override
+	{
+		return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_5) == GLFW_PRESS);
+	}
 };
 
 /// Information about a GLFW mouse event
@@ -37,11 +52,11 @@ class GlfwMouseEvent : public MouseEvent
   public:
 	GlfwMouseEvent() : button_(0) { }
 
-	inline bool isLeftButton() const { return button_ == GLFW_MOUSE_BUTTON_LEFT; }
-	inline bool isMiddleButton() const { return button_ == GLFW_MOUSE_BUTTON_MIDDLE; }
-	inline bool isRightButton() const { return button_ == GLFW_MOUSE_BUTTON_RIGHT; }
-	inline bool isFourthButton() const { return button_ == GLFW_MOUSE_BUTTON_4; }
-	inline bool isFifthButton() const { return button_ == GLFW_MOUSE_BUTTON_5; }
+	inline bool isLeftButton() const override { return button_ == GLFW_MOUSE_BUTTON_LEFT; }
+	inline bool isMiddleButton() const override { return button_ == GLFW_MOUSE_BUTTON_MIDDLE; }
+	inline bool isRightButton() const override { return button_ == GLFW_MOUSE_BUTTON_RIGHT; }
+	inline bool isFourthButton() const override { return button_ == GLFW_MOUSE_BUTTON_4; }
+	inline bool isFifthButton() const override { return button_ == GLFW_MOUSE_BUTTON_5; }
 
   private:
 	int button_;
@@ -62,7 +77,10 @@ class GlfwScrollEvent : public ScrollEvent
 class GlfwKeyboardState : public KeyboardState
 {
   public:
-	inline bool isKeyDown(KeySym key) const { return glfwGetKey(GlfwGfxDevice::windowHandle(), GlfwKeys::enumToKeySymValue(key)) == GLFW_PRESS; }
+	inline bool isKeyDown(KeySym key) const override
+	{
+		return glfwGetKey(GlfwGfxDevice::windowHandle(), GlfwKeys::enumToKeySymValue(key)) == GLFW_PRESS;
+	}
 
 	friend class GlfwInputManager;
 };
@@ -74,9 +92,9 @@ class GlfwJoystickState : public JoystickState
 	GlfwJoystickState()
 		: numButtons_(0), numAxes_(0), buttons_(nullptr), axesValues_(nullptr) { }
 
-	bool isButtonPressed(int buttonId) const;
-	short int axisValue(int axisId) const;
-	float axisNormValue(int axisId) const;
+	bool isButtonPressed(int buttonId) const override;
+	short int axisValue(int axisId) const override;
+	float axisNormValue(int axisId) const override;
 
   private:
 	int numButtons_;
@@ -99,17 +117,17 @@ class GlfwInputManager : public IInputManager
 	/// Updates joystick state structures and simulates events
 	static void updateJoystickStates();
 
-	const MouseState &mouseState();
-	inline const KeyboardState &keyboardState() const { return keyboardState_; }
+	const MouseState &mouseState() override;
+	inline const KeyboardState &keyboardState() const override { return keyboardState_; }
 
-	bool isJoyPresent(int joyId) const;
-	const char *joyName(int joyId) const;
-	const char *joyGuid(int joyId) const;
-	int joyNumButtons(int joyId) const;
-	int joyNumAxes(int joyId) const;
-	const JoystickState &joystickState(int joyId) const;
+	bool isJoyPresent(int joyId) const override;
+	const char *joyName(int joyId) const override;
+	const char *joyGuid(int joyId) const override;
+	int joyNumButtons(int joyId) const override;
+	int joyNumAxes(int joyId) const override;
+	const JoystickState &joystickState(int joyId) const override;
 
-	void setMouseCursorMode(MouseCursorMode mode);
+	void setMouseCursorMode(MouseCursorMode mode) override;
 
   private:
 	static const int MaxNumJoysticks = GLFW_JOYSTICK_LAST - GLFW_JOYSTICK_1 + 1;

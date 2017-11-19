@@ -35,7 +35,7 @@ inline ILogger::~ILogger() { }
 class DLL_PUBLIC NullLogger : public ILogger
 {
   public:
-	virtual void write(LogLevel level, const char *fmt, ...) { }
+	void write(LogLevel level, const char *fmt, ...) override { }
 };
 
 }

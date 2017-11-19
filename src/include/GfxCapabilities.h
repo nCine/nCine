@@ -11,9 +11,9 @@ class GfxCapabilities : public IGfxCapabilities
   public:
 	GfxCapabilities();
 
-	int glVersion(GLVersion version) const;
-	int value(GLIntValues valueName) const;
-	bool hasExtension(GLExtensions extensionName) const;
+	int glVersion(GLVersion version) const override;
+	int value(GLIntValues valueName) const override;
+	bool hasExtension(GLExtensions extensionName) const override;
 
   private:
 	int glMajorVersion_;

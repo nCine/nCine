@@ -36,7 +36,7 @@ class TextureLoaderKtx : public ITextureLoader
 		uint32_t	bytesOfKeyValueData;
 	} KtxHeader;
 
-	void init();
+	void init() override;
 
 	/// Reads the KTX header and fills the corresponding structure
 	void readHeader(KtxHeader &header);
