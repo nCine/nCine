@@ -10,13 +10,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GLUniformCache::GLUniformCache()
-	: uniform_(NULL), dataPointer_(NULL)
+	: uniform_(nullptr), dataPointer_(nullptr)
 {
 
 }
 
 GLUniformCache::GLUniformCache(const GLUniform *uniform)
-	: uniform_(uniform), dataPointer_(NULL)
+	: uniform_(uniform), dataPointer_(nullptr)
 {
 	ASSERT(uniform);
 }
@@ -27,7 +27,7 @@ GLUniformCache::GLUniformCache(const GLUniform *uniform)
 
 void GLUniformCache::setFloatVector(const GLfloat *vec)
 {
-	if (uniform_ == NULL)
+	if (uniform_ == nullptr)
 		return;
 
 	checkFloat();
@@ -36,7 +36,7 @@ void GLUniformCache::setFloatVector(const GLfloat *vec)
 
 void GLUniformCache::setFloatValue(GLfloat v0)
 {
-	if (uniform_ == NULL)
+	if (uniform_ == nullptr)
 		return;
 
 	checkFloat();
@@ -48,7 +48,7 @@ void GLUniformCache::setFloatValue(GLfloat v0)
 
 void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1)
 {
-	if (uniform_ == NULL)
+	if (uniform_ == nullptr)
 		return;
 
 	checkFloat();
@@ -61,7 +61,7 @@ void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1)
 
 void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2)
 {
-	if (uniform_ == NULL)
+	if (uniform_ == nullptr)
 		return;
 
 	checkFloat();
@@ -75,7 +75,7 @@ void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2)
 
 void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
 {
-	if (uniform_ == NULL)
+	if (uniform_ == nullptr)
 		return;
 
 	checkFloat();
@@ -90,7 +90,7 @@ void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v
 
 void GLUniformCache::setIntVector(const GLint *vec)
 {
-	if (uniform_ == NULL)
+	if (uniform_ == nullptr)
 		return;
 
 	checkInt();
@@ -99,7 +99,7 @@ void GLUniformCache::setIntVector(const GLint *vec)
 
 void GLUniformCache::setIntValue(GLint v0)
 {
-	if (uniform_ == NULL)
+	if (uniform_ == nullptr)
 		return;
 
 	checkInt();
@@ -111,7 +111,7 @@ void GLUniformCache::setIntValue(GLint v0)
 
 void GLUniformCache::setIntValue(GLint v0, GLint v1)
 {
-	if (uniform_ == NULL)
+	if (uniform_ == nullptr)
 		return;
 
 	checkInt();
@@ -124,7 +124,7 @@ void GLUniformCache::setIntValue(GLint v0, GLint v1)
 
 void GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2)
 {
-	if (uniform_ == NULL)
+	if (uniform_ == nullptr)
 		return;
 
 	checkInt();
@@ -138,7 +138,7 @@ void GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2)
 
 void GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2, GLint v3)
 {
-	if (uniform_ == NULL)
+	if (uniform_ == nullptr)
 		return;
 
 	checkInt();
@@ -153,7 +153,7 @@ void GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2, GLint v3)
 
 void GLUniformCache::commitValue()
 {
-	if (uniform_ == NULL)
+	if (uniform_ == nullptr)
 		return;
 
 	GLint location = uniform_->location();

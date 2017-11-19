@@ -72,7 +72,7 @@ class GlfwJoystickState : public JoystickState
 {
   public:
 	GlfwJoystickState()
-		: numButtons_(0), numAxes_(0), buttons_(NULL), axesValues_(NULL) { }
+		: numButtons_(0), numAxes_(0), buttons_(nullptr), axesValues_(nullptr) { }
 
 	bool isButtonPressed(int buttonId) const;
 	short int axisValue(int axisId) const;

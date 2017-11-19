@@ -10,7 +10,7 @@ namespace ncine {
 Geometry::Geometry()
 	: vboSharingType_(SHARED),
 	  primitiveType_(GL_TRIANGLES), firstVertex_(0), numVertices_(0),
-	  vbo_(NULL), ibo_(NULL)
+	  vbo_(nullptr), ibo_(nullptr)
 {
 
 }
@@ -46,7 +46,7 @@ void Geometry::createCustomVbo(unsigned int numFloats, GLenum usage)
 	}
 
 	vbo_ = new GLBufferObject(GL_ARRAY_BUFFER);
-	vbo_->bufferData(numFloats * sizeof(GLfloat), NULL, usage);
+	vbo_->bufferData(numFloats * sizeof(GLfloat), nullptr, usage);
 }
 
 /*! \note If the buffer is shared across the application it will not be modified. */

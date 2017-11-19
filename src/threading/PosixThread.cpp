@@ -98,7 +98,7 @@ void Thread::run(ThreadFunctionPtr startFunction, void *arg)
 	{
 		threadInfo_.startFunction = startFunction;
 		threadInfo_.threadArg = arg;
-		const int error = pthread_create(&tid_, NULL, wrapperFunction, &threadInfo_);
+		const int error = pthread_create(&tid_, nullptr, wrapperFunction, &threadInfo_);
 		FATAL_ASSERT_MSG_X(!error, "Error in pthread_create(): %d", error);
 	}
 	else
@@ -107,7 +107,7 @@ void Thread::run(ThreadFunctionPtr startFunction, void *arg)
 
 void *Thread::join()
 {
-	void *pRetVal = NULL;
+	void *pRetVal = nullptr;
 	pthread_join(tid_, &pRetVal);
 	return pRetVal;
 }
@@ -186,7 +186,7 @@ void *Thread::wrapperFunction(void *arg)
 	const ThreadInfo *pThreadInfo = static_cast<ThreadInfo *>(arg);
 	pThreadInfo->startFunction(pThreadInfo->threadArg);
 
-	return NULL;
+	return nullptr;
 }
 
 }

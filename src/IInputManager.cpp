@@ -7,7 +7,7 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-IInputEventHandler *IInputManager::inputEventHandler_ = NULL;
+IInputEventHandler *IInputManager::inputEventHandler_ = nullptr;
 IInputManager::MouseCursorMode IInputManager::mouseCursorMode_ = IInputManager::MOUSE_CURSOR_NORMAL;
 JoyMapping IInputManager::joyMapping_;
 

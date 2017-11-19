@@ -8,7 +8,7 @@ namespace {
 
 const int NumThreads = 2;
 const int NumFloats = 100000000;
-float *globalArray = NULL;
+float *globalArray = nullptr;
 
 void threadFunction(void *arg)
 {

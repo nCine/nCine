@@ -39,14 +39,14 @@ class AndroidJniHelper
 class AndroidJniClass
 {
   public:
-	AndroidJniClass() :  javaObject_(NULL) { }
+	AndroidJniClass() :  javaObject_(nullptr) { }
 	explicit AndroidJniClass(jobject javaObject) : javaObject_(javaObject) { }
 	virtual ~AndroidJniClass()
 	{
 		if (javaObject_)
 			jniEnv_->DeleteLocalRef(javaObject_);
 	}
-	bool isNull() const { return javaObject_ == NULL; }
+	bool isNull() const { return javaObject_ == nullptr; }
 
   protected:
 	static JNIEnv *jniEnv_;

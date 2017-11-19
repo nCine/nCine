@@ -152,7 +152,7 @@ void StackedBarVariable::updateRenderCommand()
 {
 	valuesCmd_.transformation() = worldMatrix_;
 
-	valuesCmd_.material().setTexture(NULL);
+	valuesCmd_.material().setTexture(nullptr);
 	valuesCmd_.material().uniform("color")->setFloatValue(graphColor_.fR(), graphColor_.fG(), graphColor_.fB(), graphColor_.fA());
 	valuesCmd_.geometry().updateVboData(4, variable_.numValues() * 6 * 2, vertices_ + 4);
 }
@@ -161,7 +161,7 @@ void StackedBarVariable::updateMeanRenderCommand()
 {
 	meanCmd_.transformation() = worldMatrix_;
 
-	meanCmd_.material().setTexture(NULL);
+	meanCmd_.material().setTexture(nullptr);
 	meanCmd_.material().uniform("color")->setFloatValue(meanColor_.fR(), meanColor_.fG(), meanColor_.fB(), meanColor_.fA());
 	meanCmd_.geometry().updateVboData(0, 4, vertices_);
 }

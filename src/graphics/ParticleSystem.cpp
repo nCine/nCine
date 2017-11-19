@@ -16,7 +16,7 @@ ParticleSystem::ParticleSystem(SceneNode *parent, unsigned int count, Texture *t
 
 	for (unsigned int i = 0; i < poolSize_; i++)
 	{
-		particlePool_[i] = new Particle(NULL, texture);
+		particlePool_[i] = new Particle(nullptr, texture);
 		particlePool_[i]->setTexRect(texRect);
 		particleList_[i] = particlePool_[i];
 	}

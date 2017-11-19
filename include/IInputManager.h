@@ -64,7 +64,7 @@ class DLL_PUBLIC IInputManager
 
 	/// Adds joystick mapping configurations from a text file
 	void addJoyMappingsFromFile(const char *filename);
-	/// Adds joystick mapping configurations from a strings array terminated by a `NULL` pointer
+	/// Adds joystick mapping configurations from a strings array terminated by a `nullptr`
 	void addJoyMappingsFromStrings(const char **mappingStrings);
 
 	/// Returns current mouse cursor mode

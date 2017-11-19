@@ -16,9 +16,9 @@ const float SceneNode::MinRotation = 0.5f;
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/*! \param parent The parent can be `NULL` */
+/*! \param parent The parent can be `nullptr` */
 SceneNode::SceneNode(SceneNode *parent, float xx, float yy)
-	: Object(SCENENODE_TYPE), x(xx), y(yy), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
+	: Object(SCENENODE_TYPE), x(xx), y(yy), shouldUpdate_(true), shouldDraw_(true), parent_(nullptr),
 	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
 	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {
@@ -26,9 +26,9 @@ SceneNode::SceneNode(SceneNode *parent, float xx, float yy)
 		parent->addChildNode(this);
 }
 
-/*! \param parent The parent can be `NULL` */
+/*! \param parent The parent can be `nullptr` */
 SceneNode::SceneNode(SceneNode *parent)
-	: Object(SCENENODE_TYPE), x(0.0f), y(0.0f), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
+	: Object(SCENENODE_TYPE), x(0.0f), y(0.0f), shouldUpdate_(true), shouldDraw_(true), parent_(nullptr),
 	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
 	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {
@@ -37,7 +37,7 @@ SceneNode::SceneNode(SceneNode *parent)
 }
 
 SceneNode::SceneNode()
-	: Object(SCENENODE_TYPE), x(0.0f), y(0.0f), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
+	: Object(SCENENODE_TYPE), x(0.0f), y(0.0f), shouldUpdate_(true), shouldDraw_(true), parent_(nullptr),
 	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
 	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {
@@ -53,7 +53,7 @@ SceneNode::~SceneNode()
 	if (parent_)
 	{
 		parent_->removeChildNode(this);
-		parent_ = NULL;
+		parent_ = nullptr;
 	}
 }
 
@@ -81,7 +81,7 @@ bool SceneNode::removeChildNode(SceneNode *childNode)
 	if (!children_.isEmpty() && // avoid checking if this node has no children
 	    childNode->parent_ == this) // avoid checking if the child doesn't belong to this node
 	{
-		childNode->parent_ = NULL;
+		childNode->parent_ = nullptr;
 		children_.remove(childNode);
 		hasBeenRemoved = true;
 	}
@@ -97,11 +97,11 @@ bool SceneNode::removeChildNode(List<SceneNode *>::ConstIterator it)
 {
 	bool hasBeenRemoved = false;
 
-	if (*it && // cannot pass a NULL pointer
+	if (*it && // cannot pass a `nullptr`
 	    !children_.isEmpty() && // avoid checking if this node has no children
 	    (*it)->parent_ == this) // avoid checking the child doesn't belong to this one
 	{
-		(*it)->parent_ = NULL;
+		(*it)->parent_ = nullptr;
 		children_.erase(it);
 		hasBeenRemoved = true;
 	}
@@ -118,7 +118,7 @@ bool SceneNode::unlinkChildNode(SceneNode *childNode)
 	if (!children_.isEmpty() && // avoid checking if this node has no children
 	    childNode->parent_ == this) // avoid checking if the child doesn't belong to this node
 	{
-		childNode->parent_ = NULL;
+		childNode->parent_ = nullptr;
 		children_.remove(childNode);
 
 		// Nephews reparenting

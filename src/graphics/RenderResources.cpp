@@ -12,11 +12,11 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-GLBufferObject *RenderResources::quadVbo_ = NULL;
-GLShaderProgram *RenderResources::spriteShaderProgram_ = NULL;
-GLShaderProgram *RenderResources::textnodeGrayShaderProgram_ = NULL;
-GLShaderProgram *RenderResources::textnodeColorShaderProgram_ = NULL;
-GLShaderProgram *RenderResources::colorShaderProgram_ = NULL;
+GLBufferObject *RenderResources::quadVbo_ = nullptr;
+GLShaderProgram *RenderResources::spriteShaderProgram_ = nullptr;
+GLShaderProgram *RenderResources::textnodeGrayShaderProgram_ = nullptr;
+GLShaderProgram *RenderResources::textnodeColorShaderProgram_ = nullptr;
+GLShaderProgram *RenderResources::colorShaderProgram_ = nullptr;
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
@@ -93,11 +93,11 @@ void RenderResources::dispose()
 	delete spriteShaderProgram_;
 	delete quadVbo_;
 
-	colorShaderProgram_ = NULL;
-	textnodeColorShaderProgram_ = NULL;
-	textnodeGrayShaderProgram_ = NULL;
-	spriteShaderProgram_ = NULL;
-	quadVbo_ = NULL;
+	colorShaderProgram_ = nullptr;
+	textnodeColorShaderProgram_ = nullptr;
+	textnodeGrayShaderProgram_ = nullptr;
+	spriteShaderProgram_ = nullptr;
+	quadVbo_ = nullptr;
 
 	LOGI("Rendering resources disposed");
 }

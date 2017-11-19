@@ -1,4 +1,3 @@
-#include <cstdio> // for NULL
 #include "common_macros.h"
 
 namespace ncine {
@@ -27,7 +26,7 @@ ServiceLocator::ServiceLocator()
 
 void ServiceLocator::registerIndexer(IIndexer *service)
 {
-	if (service == NULL)
+	if (service == nullptr)
 		indexerService_ = &nullIndexer_;
 	else
 		indexerService_ = service;
@@ -35,7 +34,7 @@ void ServiceLocator::registerIndexer(IIndexer *service)
 
 void ServiceLocator::registerLogger(ILogger *service)
 {
-	if (service == NULL)
+	if (service == nullptr)
 		loggerService_ = &nullLogger_;
 	else
 		loggerService_ = service;
@@ -43,7 +42,7 @@ void ServiceLocator::registerLogger(ILogger *service)
 
 void ServiceLocator::registerAudioDevice(IAudioDevice *service)
 {
-	if (service == NULL)
+	if (service == nullptr)
 		audioDevice_ = &nullAudioDevice_;
 	else
 		audioDevice_ = service;
@@ -51,7 +50,7 @@ void ServiceLocator::registerAudioDevice(IAudioDevice *service)
 
 void ServiceLocator::registerThreadPool(IThreadPool *service)
 {
-	if (service == NULL)
+	if (service == nullptr)
 		threadPool_ = &nullThreadPool_;
 	else
 		threadPool_ = service;
@@ -59,7 +58,7 @@ void ServiceLocator::registerThreadPool(IThreadPool *service)
 
 void ServiceLocator::registerGfxCapabilities(IGfxCapabilities *service)
 {
-	if (service == NULL)
+	if (service == nullptr)
 		gfxCapabilities_ = &nullGfxCapabilities_;
 	else
 		gfxCapabilities_ = service;

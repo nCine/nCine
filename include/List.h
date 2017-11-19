@@ -1,7 +1,6 @@
 #ifndef CLASS_NCINE_LIST
 #define CLASS_NCINE_LIST
 
-#include <cstdio> // for NULL
 #include "algorithms.h"
 #include "ListIterator.h"
 
@@ -38,7 +37,7 @@ class List
 	/// Constant iterator type
 	typedef ListIterator<T, true> ConstIterator;
 
-	List() : size_(0), head_(NULL), tail_(NULL) { }
+	List() : size_(0), head_(nullptr), tail_(nullptr) { }
 	~List() { clear(); }
 
 	/// Copy constructor
@@ -59,7 +58,7 @@ class List
 	/// Returns an iterator to the last element
 	inline Iterator rBegin() { return Iterator(tail_); }
 	/// Returns an iterator to the end of the list sentinel (valid for reverse traversal too)
-	inline Iterator end() { return Iterator(NULL); }
+	inline Iterator end() { return Iterator(nullptr); }
 	/// Returns an iterator to the end of the list sentinel
 	/*! It exists only for coherency with the rest of the containers. */
 	inline Iterator rEnd() { return end(); }
@@ -69,13 +68,13 @@ class List
 	/// Returns a constant iterator to the last element
 	inline ConstIterator rBegin() const { return ConstIterator(tail_); }
 	/// Returns a constant iterator to the end of the list sentinel (valid reverse traversal too)
-	inline ConstIterator end() const { return ConstIterator(NULL); }
+	inline ConstIterator end() const { return ConstIterator(nullptr); }
 	/// Returns a constant iterator to the end of the list sentinel
 	/*! It exists only for coherency with the rest of the containers. */
 	inline ConstIterator rEnd() const { return end(); }
 
 	/// Returns true if the list is empty
-	inline bool isEmpty() const { return head_ == NULL; }
+	inline bool isEmpty() const { return head_ == nullptr; }
 	/// Returns the number of elements in the list
 	inline unsigned int size() const { return size_; }
 	/// Clears the list
@@ -137,7 +136,7 @@ class List
 
 template <class T>
 List<T>::List(const List<T> &other)
-	: size_(0), head_(NULL), tail_(NULL)
+	: size_(0), head_(nullptr), tail_(nullptr)
 {
 	for (List<T>::ConstIterator i = other.begin(); i != other.end(); ++i)
 		pushBack(*i);
@@ -154,7 +153,7 @@ List<T> &List<T>::operator=(List<T> other)
 template <class T>
 void List<T>::clear()
 {
-	ListNode<T> *next = NULL;
+	ListNode<T> *next = nullptr;
 
 	while (head_)
 	{
@@ -163,20 +162,20 @@ void List<T>::clear()
 		head_ = next;
 	}
 
-	tail_ = NULL;
+	tail_ = nullptr;
 	size_ = 0;
 }
 
 template <class T>
 void List<T>::pushFront(const T &element)
 {
-	ListNode<T> *node = new ListNode<T>(element, NULL, head_);
+	ListNode<T> *node = new ListNode<T>(element, nullptr, head_);
 	if (head_)
 		head_->previous_ = node;
 	head_ = node;
 
 	// The list is empty
-	if (tail_ == NULL)
+	if (tail_ == nullptr)
 		tail_ = node;
 	size_++;
 }
@@ -184,13 +183,13 @@ void List<T>::pushFront(const T &element)
 template <class T>
 void List<T>::pushBack(const T &element)
 {
-	ListNode<T> *node = new ListNode<T>(element, tail_, NULL);
+	ListNode<T> *node = new ListNode<T>(element, tail_, nullptr);
 	if (tail_)
 		tail_->next_ = node;
 	tail_ = node;
 
 	// The list is empty
-	if (head_ == NULL)
+	if (head_ == nullptr)
 		head_ = node;
 	size_++;
 }
@@ -273,7 +272,7 @@ void List<T>::splice(Iterator position, List &source)
 
 	// Cannot attach at the back because the end iterator is
 	// only a sentinel, cannot be decremented by one
-	if (node == NULL && size_ > 0)
+	if (node == nullptr && size_ > 0)
 		return;
 
 	if (node)
@@ -295,8 +294,8 @@ void List<T>::splice(Iterator position, List &source)
 	}
 	size_ += source.size_;
 
-	source.head_ = NULL;
-	source.tail_ = NULL;
+	source.head_ = nullptr;
+	source.tail_ = nullptr;
 	source.size_ = 0;
 }
 
@@ -308,21 +307,21 @@ void List<T>::splice(Iterator position, List &source, Iterator it)
 
 	// Cannot attach at the back because the end iterator is
 	// only a sentinel, cannot be decremented by one
-	if (node == NULL && size_ > 0)
+	if (node == nullptr && size_ > 0)
 		return;
 
 	// Early-out if there is nothing to transfer
-	if (sourceNode == NULL)
+	if (sourceNode == nullptr)
 		return;
 
 	ListNode<T> *sourcePrev = sourceNode->previous_;
 	ListNode<T> *sourceNext = sourceNode->next_;
-	if (sourcePrev == NULL)
+	if (sourcePrev == nullptr)
 		source.head_ = sourceNode->next_;
 	else
 		sourcePrev->next_ = sourceNext;
 
-	if (sourceNode->next_ == NULL)
+	if (sourceNode->next_ == nullptr)
 		source.tail_ = sourceNode->previous_;
 	else
 		sourceNext->previous_ = sourcePrev;
@@ -342,8 +341,8 @@ void List<T>::splice(Iterator position, List &source, Iterator it)
 	{
 		head_ = sourceNode;
 		tail_ = sourceNode;
-		sourceNode->previous_ = NULL;
-		sourceNode->next_ = NULL;
+		sourceNode->previous_ = nullptr;
+		sourceNode->next_ = nullptr;
 	}
 	size_++;
 	source.size_--;
@@ -357,11 +356,11 @@ void List<T>::splice(Iterator position, List &source, Iterator first, Iterator l
 
 	// Cannot attach at the back because the end iterator is
 	// only a sentinel, cannot be decremented by one
-	if (node == NULL && size_ > 0)
+	if (node == nullptr && size_ > 0)
 		return;
 
 	// Early-out if there is nothing to transfer
-	if (firstNode == NULL)
+	if (firstNode == nullptr)
 		return;
 
 	ListNode<T> *firstPrev = firstNode->previous_;
@@ -375,12 +374,12 @@ void List<T>::splice(Iterator position, List &source, Iterator first, Iterator l
 		source.size_--;
 	}
 
-	if (firstPrev == NULL)
+	if (firstPrev == nullptr)
 		source.head_ = lastIncludedNode->next_;
 	else
 		firstPrev->next_ = lastIncludedNode->next_;
 
-	if (lastIncludedNode->next_ == NULL)
+	if (lastIncludedNode->next_ == nullptr)
 		source.tail_ = firstPrev;
 	else
 		lastIncludedNode->next_->previous_ = firstPrev;
@@ -401,8 +400,8 @@ void List<T>::splice(Iterator position, List &source, Iterator first, Iterator l
 	{
 		head_ = firstNode;
 		tail_ = lastIncludedNode;
-		firstNode->previous_ = NULL;
-		lastIncludedNode->next_ = NULL;
+		firstNode->previous_ = nullptr;
+		lastIncludedNode->next_ = nullptr;
 	}
 }
 
@@ -413,7 +412,7 @@ void List<T>::splice(Iterator position, List &source, Iterator first, Iterator l
 template <class T>
 ListNode<T> *List<T>::insertAfterNode(ListNode<T> *node, const T &element)
 {
-	if (head_ == NULL && node == NULL)
+	if (head_ == nullptr && node == nullptr)
 	{
 		pushBack(element);
 		return head_;
@@ -421,7 +420,7 @@ ListNode<T> *List<T>::insertAfterNode(ListNode<T> *node, const T &element)
 
 	ListNode<T> *newNode = new ListNode<T>(element, node, node->next_);
 
-	if (node->next_ == NULL)
+	if (node->next_ == nullptr)
 		tail_ = newNode;
 	else
 		node->next_->previous_ = newNode;
@@ -435,7 +434,7 @@ ListNode<T> *List<T>::insertAfterNode(ListNode<T> *node, const T &element)
 template <class T>
 ListNode<T> *List<T>::insertBeforeNode(ListNode<T> *node, const T &element)
 {
-	if (tail_ == NULL && node == NULL)
+	if (tail_ == nullptr && node == nullptr)
 	{
 		pushFront(element);
 		return tail_;
@@ -443,7 +442,7 @@ ListNode<T> *List<T>::insertBeforeNode(ListNode<T> *node, const T &element)
 
 	ListNode<T> *newNode = new ListNode<T>(element, node->previous_, node);
 
-	if (node->previous_ == NULL)
+	if (node->previous_ == nullptr)
 		head_ = newNode;
 	else
 		node->previous_->next_ = newNode;
@@ -457,9 +456,9 @@ ListNode<T> *List<T>::insertBeforeNode(ListNode<T> *node, const T &element)
 template <class T>
 ListNode<T> *List<T>::removeNode(ListNode<T> *node)
 {
-	// Early-out to prevent NULL pointer dereferencing
-	if (node == NULL)
-		return NULL;
+	// Early-out to prevent `nullptr` dereferencing
+	if (node == nullptr)
+		return nullptr;
 
 	if (node->previous_)
 		node->previous_->next_ = node->next_;
@@ -480,12 +479,12 @@ ListNode<T> *List<T>::removeNode(ListNode<T> *node)
 template <class T>
 ListNode<T> *List<T>::removeRange(ListNode<T> *firstNode, ListNode<T> *lastNode)
 {
-	// Early-out to prevent NULL pointer dereferencing
-	if (firstNode == NULL)
-		return NULL;
+	// Early-out to prevent `nullptr` dereferencing
+	if (firstNode == nullptr)
+		return nullptr;
 
 	ListNode<T> *previous = firstNode->previous_;
-	ListNode<T> *next = NULL;
+	ListNode<T> *next = nullptr;
 	ListNode<T> *current = firstNode;
 	while (current != lastNode)
 	{

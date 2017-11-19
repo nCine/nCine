@@ -34,11 +34,11 @@ namespace ncine {
 
 Application::Application()
 	: isPaused_(false), hasFocus_(true), shouldQuit_(false),
-	  frameTimer_(NULL), gfxDevice_(NULL),
-	  renderQueue_(NULL), rootNode_(NULL),
-	  profileTimer_(NULL), profilePlotter_(NULL),
-	  font_(NULL), textLines_(NULL), textUpdateTime_(0.0f),
-	  textString_(MaxTextLength), inputManager_(NULL), appEventHandler_(NULL)
+	  frameTimer_(nullptr), gfxDevice_(nullptr),
+	  renderQueue_(nullptr), rootNode_(nullptr),
+	  profileTimer_(nullptr), profilePlotter_(nullptr),
+	  font_(nullptr), textLines_(nullptr), textUpdateTime_(0.0f),
+	  textString_(MaxTextLength), inputManager_(nullptr), appEventHandler_(nullptr)
 {
 
 }
@@ -149,7 +149,7 @@ void Application::initCommon()
 
 	// HACK: Init of the random seed
 	// In the future there could be a random generator service
-	srand(static_cast<unsigned int>(time(NULL)));
+	srand(static_cast<unsigned int>(time(nullptr)));
 }
 
 void Application::step()
@@ -165,7 +165,7 @@ void Application::step()
 	}
 
 	profileTimer_->start();
-	if (rootNode_ != NULL && renderQueue_ != NULL)
+	if (rootNode_ != nullptr && renderQueue_ != nullptr)
 	{
 		rootNode_->update(frameTimer_->interval());
 		rootNode_->visit(*renderQueue_);

@@ -10,14 +10,14 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ThreadPool::ThreadPool()
-	: threads_(NULL)
+	: threads_(nullptr)
 {
 	numThreads_ = Thread::numProcessors();
 	init();
 }
 
 ThreadPool::ThreadPool(unsigned int numThreads)
-	: threads_(NULL), numThreads_(numThreads)
+	: threads_(nullptr), numThreads_(numThreads)
 {
 	init();
 }

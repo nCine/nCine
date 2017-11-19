@@ -86,7 +86,7 @@ class Thread
 	/// The structure wrapping the information for thread creation
 	struct ThreadInfo
 	{
-		ThreadInfo() : startFunction(NULL), threadArg(NULL) { }
+		ThreadInfo() : startFunction(nullptr), threadArg(nullptr) { }
 		ThreadFunctionPtr startFunction;
 		void *threadArg;
 	};

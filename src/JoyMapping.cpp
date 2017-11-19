@@ -57,7 +57,7 @@ JoyMapping::MappedJoystick::Guid::Guid()
 }
 
 JoyMapping::JoyMapping()
-	: mappings_(256), inputManager_(NULL), inputEventHandler_(NULL)
+	: mappings_(256), inputManager_(nullptr), inputEventHandler_(nullptr)
 {
 	for (unsigned int i = 0; i < MaxNumJoysticks; i++)
 		mappingIndex_[i] = -1;
@@ -92,7 +92,7 @@ void JoyMapping::MappedJoystick::Guid::fromString(const char *string)
 	{
 		memcpy(component, string + offset, 8);
 		component[8] = '\0';
-		array_[i] = strtoul(component, NULL, 16);
+		array_[i] = strtoul(component, nullptr, 16);
 		offset += 8;
 	}
 }
@@ -194,7 +194,7 @@ void JoyMapping::addMappingsFromFile(const char *filename)
 
 void JoyMapping::onJoyButtonPressed(const JoyButtonEvent &event)
 {
-	if (inputEventHandler_ == NULL)
+	if (inputEventHandler_ == nullptr)
 		return;
 
 	const int idToIndex = mappingIndex_[event.joyId];
@@ -214,7 +214,7 @@ void JoyMapping::onJoyButtonPressed(const JoyButtonEvent &event)
 
 void JoyMapping::onJoyButtonReleased(const JoyButtonEvent &event)
 {
-	if (inputEventHandler_ == NULL)
+	if (inputEventHandler_ == nullptr)
 		return;
 
 	const int idToIndex = mappingIndex_[event.joyId];
@@ -234,7 +234,7 @@ void JoyMapping::onJoyButtonReleased(const JoyButtonEvent &event)
 
 void JoyMapping::onJoyAxisMoved(const JoyAxisEvent &event)
 {
-	if (inputEventHandler_ == NULL)
+	if (inputEventHandler_ == nullptr)
 		return;
 
 	const int idToIndex = mappingIndex_[event.joyId];
@@ -261,7 +261,7 @@ bool JoyMapping::onJoyConnected(const JoyConnectionEvent &event)
 	const char *joyGuid = inputManager_->joyGuid(event.joyId);
 
 	mappingIndex_[event.joyId] = -1;
-	if (joyGuid != NULL)
+	if (joyGuid != nullptr)
 	{
 		MappedJoystick::Guid guid(joyGuid);
 		const int index = findMappingByGuid(guid);
@@ -392,7 +392,7 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 	const char *end = mappingString + strlen(mappingString);
 	const char *subStart = mappingString;
 	const char *subEnd = strchr(subStart, ',');
-	if (subEnd == NULL)
+	if (subEnd == nullptr)
 	{
 		LOGE("Invalid mapping string");
 		return false;
@@ -408,7 +408,7 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 
 	subStart += subLength + 1; // GUID plus the following  ',' character
 	subEnd = strchr(subStart, ',');
-	if (subEnd == NULL)
+	if (subEnd == nullptr)
 	{
 		LOGE("Invalid mapping string");
 		return false;
@@ -422,7 +422,7 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 	while (subStart < end && *subStart != '\n')
 	{
 		const char *subMid = strchr(subStart, ':');
-		if (subMid == NULL || subEnd == NULL)
+		if (subMid == nullptr || subEnd == nullptr)
 		{
 			LOGE("Invalid mapping string");
 			return false;
@@ -467,7 +467,7 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 		if (subStart < end)
 		{
 			subEnd = strchr(subStart, ',');
-			if (subEnd == NULL)
+			if (subEnd == nullptr)
 				subEnd = end;
 		}
 	}

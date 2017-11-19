@@ -1,7 +1,6 @@
 #ifndef CLASS_NCINE_IINDEXER
 #define CLASS_NCINE_IINDEXER
 
-#include <cstdio> // for NULL
 #include "common_defines.h"
 
 namespace ncine {
@@ -35,14 +34,14 @@ class DLL_PUBLIC IIndexer
 inline IIndexer::~IIndexer() { }
 
 
-/// Fake indexer, always returning a NULL object and a zero index
+/// Fake indexer, always returning `nullptr` and a zero index
 class DLL_PUBLIC NullIndexer : public IIndexer
 {
   public:
 	virtual unsigned int addObject(Object *object) { return 0U; }
 	virtual void removeObject(unsigned int id) { }
 
-	virtual Object *object(unsigned int id) const { return NULL; }
+	virtual Object *object(unsigned int id) const { return nullptr; }
 
 	virtual bool isEmpty() const { return true; }
 

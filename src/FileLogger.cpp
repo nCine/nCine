@@ -14,7 +14,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 FileLogger::FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fileLevel)
-	: fileHandle_(NULL), consoleLevel_(consoleLevel), fileLevel_(fileLevel)
+	: fileHandle_(nullptr), consoleLevel_(consoleLevel), fileLevel_(fileLevel)
 {
 	fileHandle_ = IFile::createFileHandle(filename);
 
@@ -37,7 +37,7 @@ FileLogger::FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fil
 	}
 
 	if (consoleLevel_ != LOG_OFF)
-		setvbuf(stdout, NULL, _IONBF, 0);
+		setvbuf(stdout, nullptr, _IONBF, 0);
 }
 
 FileLogger::~FileLogger()
@@ -61,7 +61,7 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 	const unsigned int bufferSize = 80;
 	char buffer[bufferSize];
 
-	now = time(0);
+	now = time(nullptr);
 	ts = localtime(&now);
 	// strftime(buffer, sizeof(char) * bufferSize, "%a %Y-%m-%d %H:%M:%S %Z", ts);
 	strftime(buffer, sizeof(char) * bufferSize, "%H:%M:%S", ts);
@@ -101,7 +101,7 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 	const unsigned int bufferSize = 80;
 	char buffer[bufferSize];
 
-	now = time(0);
+	now = time(nullptr);
 	ts = localtime(&now);
 	strftime(buffer, sizeof(char) * bufferSize, "%H:%M:%S", ts);
 

@@ -83,7 +83,7 @@ template <class T, bool IsConst>
 inline typename ListIterator<T, IsConst>::Reference ListIterator<T, IsConst>::operator*() const
 {
 	ASSERT(node_);
-	// Cannot simply return only if node_ is not NULL or
+	// Cannot simply return only if node_ is not a `nullptr` or
 	// "control may reach end of non-void function"
 	return node_->data_;
 }

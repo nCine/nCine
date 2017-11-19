@@ -33,7 +33,7 @@ DrawableNode::DrawableNode()
 DrawableNode::~DrawableNode()
 {
 	delete renderCommand_;
-	renderCommand_ = NULL;
+	renderCommand_ = nullptr;
 }
 
 ///////////////////////////////////////////////////////////

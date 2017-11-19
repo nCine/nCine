@@ -18,13 +18,13 @@ void stopPlayer(IAudioPlayer *player) { player->stop(); }
 ///////////////////////////////////////////////////////////
 
 ALAudioDevice::ALAudioDevice()
-	: device_(NULL), context_(NULL), gain_(1.0f)
+	: device_(nullptr), context_(nullptr), gain_(1.0f)
 {
-	device_ = alcOpenDevice(NULL);
-	FATAL_ASSERT_MSG_X(device_ != NULL, "alcOpenDevice failed: %x", alGetError());
+	device_ = alcOpenDevice(nullptr);
+	FATAL_ASSERT_MSG_X(device_ != nullptr, "alcOpenDevice failed: %x", alGetError());
 
-	context_ = alcCreateContext(device_, NULL);
-	if (context_ == NULL)
+	context_ = alcCreateContext(device_, nullptr);
+	if (context_ == nullptr)
 	{
 		alcCloseDevice(device_);
 		FATAL_MSG_X("alcCreateContext failed: %x", alGetError());

@@ -13,7 +13,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 IAudioLoader::IAudioLoader(const char *filename)
-	: fileHandle_(NULL), bytesPerSample_(0), numChannels_(0), frequency_(0), numSamples_(0L), duration_(0.0f)
+	: fileHandle_(nullptr), bytesPerSample_(0), numChannels_(0), frequency_(0), numSamples_(0L), duration_(0.0f)
 {
 	fileHandle_ = IFile::createFileHandle(filename);
 

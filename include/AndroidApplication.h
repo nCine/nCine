@@ -48,7 +48,7 @@ class DLL_PUBLIC AndroidApplication : public Application
 	void setFocus(bool hasFocus);
 
 	/// Private constructor
-	AndroidApplication() : Application(),  isInitialized_(false), packageName_(128), state_(NULL), createAppEventHandler_(NULL) { }
+	AndroidApplication() : Application(),  isInitialized_(false), packageName_(128), state_(nullptr), createAppEventHandler_(nullptr) { }
 	/// Private destructor
 	~AndroidApplication() { }
 	/// Private copy constructor

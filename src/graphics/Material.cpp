@@ -13,7 +13,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Material::Material()
-	: isTransparent_(false), shaderProgram_(NULL), texture_(NULL)
+	: isTransparent_(false), shaderProgram_(nullptr), texture_(nullptr)
 {
 
 }

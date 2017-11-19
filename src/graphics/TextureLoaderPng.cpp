@@ -37,17 +37,17 @@ void TextureLoaderPng::init()
 	FATAL_ASSERT_MSG(isValid, "PNG signature check failed");
 
 	// Get PNG file info struct (memory is allocated by libpng)
-	png_structp pngPtr = NULL;
-	pngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	png_structp pngPtr = nullptr;
+	pngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
 	FATAL_ASSERT_MSG(pngPtr, "Cannot create png read structure");
 
 	// Get PNG image data info struct (memory is allocated by libpng)
-	png_infop infoPtr = NULL;
+	png_infop infoPtr = nullptr;
 	infoPtr = png_create_info_struct(pngPtr);
 
-	if (infoPtr == NULL)
+	if (infoPtr == nullptr)
 	{
-		png_destroy_read_struct(&pngPtr, NULL, NULL);
+		png_destroy_read_struct(&pngPtr, nullptr, nullptr);
 		FATAL_MSG("Cannot create png info structure");
 	}
 
@@ -62,11 +62,11 @@ void TextureLoaderPng::init()
 	png_uint_32 height = 0;
 	int bitDepth = 0;
 	int colorType = -1;
-	png_uint_32 retVal = png_get_IHDR(pngPtr, infoPtr, &width, &height, &bitDepth, &colorType, NULL, NULL, NULL);
+	png_uint_32 retVal = png_get_IHDR(pngPtr, infoPtr, &width, &height, &bitDepth, &colorType, nullptr, nullptr, nullptr);
 
 	if (retVal != 1)
 	{
-		png_destroy_read_struct(&pngPtr, &infoPtr, NULL);
+		png_destroy_read_struct(&pngPtr, &infoPtr, nullptr);
 		FATAL_MSG("Cannot create png info structure");
 	}
 
@@ -90,7 +90,7 @@ void TextureLoaderPng::init()
 			bpp_ = 1;
 			break;
 		default:
-			png_destroy_read_struct(&pngPtr, &infoPtr, NULL);
+			png_destroy_read_struct(&pngPtr, &infoPtr, nullptr);
 			FATAL_MSG_X("Color type not supported: %d", colorType);
 			break;
 	}
@@ -109,7 +109,7 @@ void TextureLoaderPng::init()
 
 	delete[] rowPointers;
 
-	png_destroy_read_struct(&pngPtr, &infoPtr, NULL);
+	png_destroy_read_struct(&pngPtr, &infoPtr, nullptr);
 }
 
 void TextureLoaderPng::readFromFileHandle(png_structp pngPtr, png_bytep outBytes, png_size_t byteCountToRead)

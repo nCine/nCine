@@ -68,7 +68,7 @@ class SdlScrollEvent : public ScrollEvent
 class SdlKeyboardState : public KeyboardState
 {
   public:
-	SdlKeyboardState() { keyState_ = SDL_GetKeyboardState(NULL); }
+	SdlKeyboardState() { keyState_ = SDL_GetKeyboardState(nullptr); }
 
 	inline bool isKeyDown(KeySym key) const { return keyState_[SdlKeys::enumToScancode(key)] != 0; }
 
@@ -82,7 +82,7 @@ class SdlKeyboardState : public KeyboardState
 class SdlJoystickState : public JoystickState
 {
   public:
-	SdlJoystickState() : sdlJoystick_(NULL) { }
+	SdlJoystickState() : sdlJoystick_(nullptr) { }
 
 	bool isButtonPressed(int buttonId) const;
 	short int axisValue(int axisId) const;

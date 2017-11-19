@@ -40,9 +40,9 @@ EglGfxDevice::~EglGfxDevice()
 
 void EglGfxDevice::createSurface(struct android_app *state)
 {
-	if (state->window != NULL)
+	if (state->window != nullptr)
 	{
-		surface_ = eglCreateWindowSurface(display_, config_, state->window, NULL);
+		surface_ = eglCreateWindowSurface(display_, config_, state->window, nullptr);
 		FATAL_ASSERT_MSG(surface_ != EGL_NO_SURFACE, "eglCreateWindowSurface() returned EGL_NO_SURFACE");
 	}
 }
@@ -95,7 +95,7 @@ bool EglGfxDevice::isModeSupported(struct android_app *state, const GLContextInf
 	ANativeWindow_setBuffersGeometry(state->window, 0, 0, format);
 #endif
 
-	EGLSurface surface = eglCreateWindowSurface(display, config, state->window, NULL);
+	EGLSurface surface = eglCreateWindowSurface(display, config, state->window, nullptr);
 
 	const bool modeIsSupported = (surface != EGL_NO_SURFACE);
 
@@ -157,7 +157,7 @@ void EglGfxDevice::initDevice(struct android_app *state)
 #endif
 
 	createSurface(state);
-	context_ = eglCreateContext(display_, config_, NULL, attribList);
+	context_ = eglCreateContext(display_, config_, nullptr, attribList);
 	FATAL_ASSERT_MSG(context_ != EGL_NO_CONTEXT, "eglCreateContext() returned EGL_NO_CONTEXT");
 
 	bindContext();

@@ -10,14 +10,14 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-AAssetManager *AssetFile::assetManager_ = NULL;
+AAssetManager *AssetFile::assetManager_ = nullptr;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 AssetFile::AssetFile(const char *filename)
-	: IFile(filename), asset_(NULL), startOffset_(0L)
+	: IFile(filename), asset_(nullptr), startOffset_(0L)
 {
 	type_ = ASSET_TYPE;
 
@@ -42,7 +42,7 @@ AssetFile::~AssetFile()
 void AssetFile::open(unsigned char mode)
 {
 	// Checking if the file is already opened
-	if (fileDescriptor_ >= 0 || asset_ != NULL)
+	if (fileDescriptor_ >= 0 || asset_ != nullptr)
 		LOGW_X("File \"%s\" is already opened", filename_.data());
 	else
 	{
@@ -73,7 +73,7 @@ void AssetFile::close()
 	else if (asset_)
 	{
 		AAsset_close(asset_);
-		asset_ = NULL;
+		asset_ = nullptr;
 		LOGI_X("File \"%s\" closed", filename_.data());
 	}
 }
@@ -144,7 +144,7 @@ unsigned long int AssetFile::read(void *buffer, unsigned long int bytes) const
 
 bool AssetFile::isOpened() const
 {
-	if (fileDescriptor_ >= 0 || asset_ != NULL)
+	if (fileDescriptor_ >= 0 || asset_ != nullptr)
 		return true;
 	else
 		return false;
@@ -160,7 +160,7 @@ void AssetFile::openFD(unsigned char mode)
 	if (mode == (MODE_FD | MODE_READ))
 	{
 		asset_ = AAssetManager_open(assetManager_, filename_.data(), AASSET_MODE_UNKNOWN);
-		if (asset_ == NULL)
+		if (asset_ == nullptr)
 		{
 			if (shouldExitOnFailToOpen_)
 			{
@@ -177,7 +177,7 @@ void AssetFile::openFD(unsigned char mode)
 		fileDescriptor_ = AAsset_openFileDescriptor(asset_, &startOffset_, &fileSize_);
 		lseek(fileDescriptor_, startOffset_, SEEK_SET);
 		AAsset_close(asset_);
-		asset_ = NULL;
+		asset_ = nullptr;
 
 		if (fileDescriptor_ < 0)
 		{
@@ -205,7 +205,7 @@ void AssetFile::openAsset(unsigned char mode)
 	if (mode == MODE_READ || mode == (MODE_READ | MODE_BINARY))
 	{
 		asset_ = AAssetManager_open(assetManager_, filename_.data(), AASSET_MODE_UNKNOWN);
-		if (asset_ == NULL)
+		if (asset_ == nullptr)
 		{
 			if (shouldExitOnFailToOpen_)
 			{

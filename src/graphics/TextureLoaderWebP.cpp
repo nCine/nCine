@@ -59,7 +59,7 @@ void TextureLoaderWebP::init()
 
 	if (features.has_alpha)
 	{
-		if (WebPDecodeRGBAInto(fileBuffer, fileSize, pixels_, decodedSize, width_ * bpp_) == NULL)
+		if (WebPDecodeRGBAInto(fileBuffer, fileSize, pixels_, decodedSize, width_ * bpp_) == nullptr)
 		{
 			delete[] fileBuffer;
 			delete[] pixels_;
@@ -68,7 +68,7 @@ void TextureLoaderWebP::init()
 	}
 	else
 	{
-		if (WebPDecodeRGBInto(fileBuffer, fileSize, pixels_, decodedSize, width_ * bpp_) == NULL)
+		if (WebPDecodeRGBInto(fileBuffer, fileSize, pixels_, decodedSize, width_ * bpp_) == nullptr)
 		{
 			delete[] fileBuffer;
 			delete[] pixels_;

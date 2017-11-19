@@ -64,7 +64,7 @@ void Thread::run(ThreadFunctionPtr startFunction, void *arg)
 	{
 		threadInfo_.startFunction = startFunction;
 		threadInfo_.threadArg = arg;
-		handle_ = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, wrapperFunction, &threadInfo_, 0, NULL));
+		handle_ = reinterpret_cast<HANDLE>(_beginthreadex(nullptr, 0, wrapperFunction, &threadInfo_, 0, nullptr));
 		FATAL_ASSERT_MSG(handle_, "Error in _beginthreadex()");
 	}
 	else
@@ -74,7 +74,7 @@ void Thread::run(ThreadFunctionPtr startFunction, void *arg)
 void *Thread::join()
 {
 	WaitForSingleObject(handle_, INFINITE);
-	return NULL;
+	return nullptr;
 }
 
 long int Thread::self()

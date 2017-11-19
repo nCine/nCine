@@ -20,15 +20,15 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ITextureLoader::ITextureLoader(const char *filename)
-	: fileHandle_(NULL), width_(0), height_(0), bpp_(0), headerSize_(0), dataSize_(0),
-	  mipMapCount_(1), mipDataOffsets_(NULL), mipDataSizes_(NULL), pixels_(NULL)
+	: fileHandle_(nullptr), width_(0), height_(0), bpp_(0), headerSize_(0), dataSize_(0),
+	  mipMapCount_(1), mipDataOffsets_(nullptr), mipDataSizes_(nullptr), pixels_(nullptr)
 {
 	fileHandle_ = IFile::createFileHandle(filename);
 }
 
 ITextureLoader::ITextureLoader(IFile *fileHandle)
 	: fileHandle_(fileHandle), width_(0), height_(0), bpp_(0), headerSize_(0), dataSize_(0),
-	  mipMapCount_(1), mipDataOffsets_(NULL), mipDataSizes_(NULL), pixels_(NULL)
+	  mipMapCount_(1), mipDataOffsets_(nullptr), mipDataSizes_(nullptr), pixels_(nullptr)
 {
 	ASSERT(fileHandle);
 }
@@ -69,7 +69,7 @@ long ITextureLoader::dataSize(unsigned int mipMapLevel) const
 
 const GLubyte *ITextureLoader::pixels(unsigned int mipMapLevel) const
 {
-	GLubyte *pixels = NULL;
+	GLubyte *pixels = nullptr;
 
 	if (mipMapCount_ > 1)
 	{

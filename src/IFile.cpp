@@ -31,7 +31,7 @@ String IFile::savePath_(MaxFilenameLength);
 
 IFile::IFile(const char *filename)
 	: type_(BASE_TYPE), filename_(filename), extension_(MaxExtensionLength),
-	  fileDescriptor_(-1), filePointer_(NULL), shouldCloseOnDestruction_(true),
+	  fileDescriptor_(-1), filePointer_(nullptr), shouldCloseOnDestruction_(true),
 	  shouldExitOnFailToOpen_(true), fileSize_(0)
 {
 	ASSERT(filename);
@@ -48,7 +48,7 @@ IFile::IFile(const char *filename)
 
 bool IFile::isOpened() const
 {
-	if (fileDescriptor_ >= 0 || filePointer_ != NULL)
+	if (fileDescriptor_ >= 0 || filePointer_ != nullptr)
 		return true;
 	else
 		return false;
@@ -110,13 +110,13 @@ void IFile::initSavePath()
 	}
 #elif _WIN32
 	const char *userProfileEnv = getenv("USERPROFILE");
-	if (userProfileEnv == NULL || strlen(userProfileEnv) == 0)
+	if (userProfileEnv == nullptr || strlen(userProfileEnv) == 0)
 	{
 		const char *homeDriveEnv = getenv("HOMEDRIVE");
 		const char *homePathEnv = getenv("HOMEPATH");
 
-		if ((homeDriveEnv == NULL || strlen(homeDriveEnv) == 0) &&
-		    (homePathEnv == NULL || strlen(homePathEnv) == 0))
+		if ((homeDriveEnv == nullptr || strlen(homeDriveEnv) == 0) &&
+		    (homePathEnv == nullptr || strlen(homePathEnv) == 0))
 		{
 			const char *homeEnv = getenv("HOME");
 			if (homeEnv && strlen(homeEnv))
@@ -136,7 +136,7 @@ void IFile::initSavePath()
 #else
 	const char *homeEnv = getenv("HOME");
 
-	if (homeEnv == NULL || strlen(homeEnv) == 0)
+	if (homeEnv == nullptr || strlen(homeEnv) == 0)
 		savePath_ = getpwuid(getuid())->pw_dir;
 	else
 		savePath_ = homeEnv;

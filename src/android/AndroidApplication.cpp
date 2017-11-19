@@ -47,9 +47,9 @@ void AndroidApplication::start(struct android_app *state, IAppEventHandler * (*c
 		int events;
 		struct android_poll_source *source;
 
-		while ((ident = ALooper_pollAll(!theApplication().isPaused() ? 0 : -1, NULL, &events, reinterpret_cast<void **>(&source))) >= 0)
+		while ((ident = ALooper_pollAll(!theApplication().isPaused() ? 0 : -1, nullptr, &events, reinterpret_cast<void **>(&source))) >= 0)
 		{
-			if (source != NULL)
+			if (source != nullptr)
 				source->process(state, source);
 
 			if (ident == LOOPER_ID_USER)
@@ -77,7 +77,7 @@ void AndroidApplication::start(struct android_app *state, IAppEventHandler * (*c
 
 void AndroidApplication::processCommand(struct android_app *state, int32_t cmd)
 {
-	static EglGfxDevice *eglGfxDevice = NULL;
+	static EglGfxDevice *eglGfxDevice = nullptr;
 
 	switch (cmd)
 	{
@@ -87,7 +87,7 @@ void AndroidApplication::processCommand(struct android_app *state, int32_t cmd)
 
 		case APP_CMD_INIT_WINDOW:
 			LOGI("APP_CMD_INIT_WINDOW event received");
-			if (state->window != NULL)
+			if (state->window != nullptr)
 			{
 				if (theAndroidApplication().isInitialized() == false)
 				{

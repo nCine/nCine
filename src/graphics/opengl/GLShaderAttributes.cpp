@@ -17,12 +17,12 @@ GLVertexAttribute GLShaderAttributes::attributeNotFound_;
 ///////////////////////////////////////////////////////////
 
 GLShaderAttributes::GLShaderAttributes()
-	: shaderProgram_(NULL), vertexAttributes_(VertexAttributesHashSize)
+	: shaderProgram_(nullptr), vertexAttributes_(VertexAttributesHashSize)
 {
 }
 
 GLShaderAttributes::GLShaderAttributes(GLShaderProgram *shaderProgram)
-	: shaderProgram_(NULL), vertexAttributes_(VertexAttributesHashSize)
+	: shaderProgram_(nullptr), vertexAttributes_(VertexAttributesHashSize)
 {
 	setProgram(shaderProgram);
 }
@@ -41,13 +41,13 @@ void GLShaderAttributes::setProgram(GLShaderProgram *shaderProgram)
 GLVertexAttribute *GLShaderAttributes::attribute(const char *name)
 {
 	ASSERT(name);
-	GLVertexAttribute *vertexAttribute = NULL;
+	GLVertexAttribute *vertexAttribute = nullptr;
 
 	if (shaderProgram_)
 	{
 		vertexAttribute = vertexAttributes_.find(name);
 
-		if (vertexAttribute == NULL)
+		if (vertexAttribute == nullptr)
 		{
 			// Returning the dummy vertex attribute to prevent the application from crashing
 			vertexAttribute = &attributeNotFound_;
@@ -112,7 +112,7 @@ void GLShaderAttributes::importAttributes()
 }
 
 GLShaderAttributes::GLVertexAttribPointerState::GLVertexAttribPointerState()
-	: enabled_(false), size_(-1), type_(GL_FLOAT), vboStride_(0), vboPointer_(NULL)
+	: enabled_(false), size_(-1), type_(GL_FLOAT), vboStride_(0), vboPointer_(nullptr)
 {
 
 }

@@ -1,7 +1,6 @@
 #ifndef CLASS_NCINE_STATICARRAY
 #define CLASS_NCINE_STATICARRAY
 
-#include <cstdio> // for NULL
 #include "common_macros.h"
 #include "ArrayIterator.h"
 

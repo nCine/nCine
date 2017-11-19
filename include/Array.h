@@ -1,7 +1,6 @@
 #ifndef CLASS_NCINE_ARRAY
 #define CLASS_NCINE_ARRAY
 
-#include <cstdio> // for NULL
 #include <cstring> // for memmove() and memcpy()
 #include "common_macros.h"
 #include "algorithms.h"
@@ -37,19 +36,19 @@ class Array
 
 	/// Default constructor
 	Array()
-		: array_(NULL), size_(0), capacity_(0), fixedCapacity_(false)
+		: array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
 	{
 		setCapacity(DefaultCapacity);
 	}
 	/// Constructs an array with explicit capacity
 	explicit Array(unsigned int capacity)
-		: array_(NULL), size_(0), capacity_(0), fixedCapacity_(false)
+		: array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
 	{
 		setCapacity(capacity);
 	}
 	/// Constructs an array with explicit capacity and the option for it to be fixed
 	explicit Array(unsigned int capacity, ArrayMode::Modes mode)
-		: array_(NULL), size_(0), capacity_(0),
+		: array_(nullptr), size_(0), capacity_(0),
 		  fixedCapacity_(mode == ArrayMode::FIXED_CAPACITY)
 	{
 		setCapacity(capacity);
@@ -160,7 +159,7 @@ class Array
 
 template <class T>
 Array<T>::Array(const Array<T> &other)
-	: array_(NULL), size_(other.size_), capacity_(other.capacity_), fixedCapacity_(other.fixedCapacity_)
+	: array_(nullptr), size_(other.size_), capacity_(other.capacity_), fixedCapacity_(other.fixedCapacity_)
 {
 	array_ = new T[capacity_];
 	for (unsigned int i = 0; i < size_; i++)

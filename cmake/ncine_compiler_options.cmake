@@ -1,3 +1,5 @@
+set(CMAKE_CXX_STANDARD 11)
+
 if(MSVC)
 	if(NOT (MSVC_VERSION LESS 1800)) # If Visual Studio 2013 or greater
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FS")

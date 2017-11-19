@@ -12,7 +12,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Font::Font(const char *texFilename, const char *fntFilename)
-	: Object(FONT_TYPE, fntFilename), texture_(NULL), lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_(0), numKernings_(0), glyphs_(NULL)
+	: Object(FONT_TYPE, fntFilename), texture_(nullptr), lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_(0), numKernings_(0), glyphs_(nullptr)
 {
 	texture_ = new Texture(texFilename);
 	glyphs_ = new FontGlyph[MaxGlyphs];

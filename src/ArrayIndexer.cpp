@@ -10,7 +10,7 @@ ArrayIndexer::ArrayIndexer()
 	: numObjects_(0), nextId_(0), pointers_(16)
 {
 	// First element reserved
-	pointers_.pushBack(NULL);
+	pointers_.pushBack(nullptr);
 	nextId_++;
 }
 
@@ -21,7 +21,7 @@ ArrayIndexer::~ArrayIndexer()
 		if (pointers_[i])
 		{
 			delete pointers_[i];
-			pointers_[i] = NULL;
+			pointers_[i] = nullptr;
 		}
 	}
 
@@ -33,7 +33,7 @@ ArrayIndexer::~ArrayIndexer()
 
 unsigned int ArrayIndexer::addObject(Object *object)
 {
-	if (object == NULL)
+	if (object == nullptr)
 		return 0;
 
 	numObjects_++;
@@ -46,17 +46,17 @@ unsigned int ArrayIndexer::addObject(Object *object)
 
 void ArrayIndexer::removeObject(unsigned int id)
 {
-	// setting to NULL instead of physically removing
-	if (id < pointers_.size() && pointers_[id] != NULL)
+	// setting to `nullptrptr` instead of physically removing
+	if (id < pointers_.size() && pointers_[id] != nullptr)
 	{
-		pointers_[id] = NULL;
+		pointers_[id] = nullptr;
 		numObjects_--;
 	}
 }
 
 Object *ArrayIndexer::object(unsigned int id) const
 {
-	Object *objPtr = NULL;
+	Object *objPtr = nullptr;
 
 	if (id < pointers_.size())
 		objPtr = pointers_[id];

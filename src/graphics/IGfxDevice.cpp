@@ -109,7 +109,7 @@ void IGfxDevice::enableGlDebugOutput()
 #endif
 
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-	glDebugMessageCallback(static_cast<GLDEBUGPROC>(glDebugCallback), NULL);
+	glDebugMessageCallback(static_cast<GLDEBUGPROC>(glDebugCallback), nullptr);
 
 	LOGI("OpenGL debug callback set");
 #endif

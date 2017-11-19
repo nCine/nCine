@@ -90,7 +90,7 @@ void ProfilePlotter::updateRenderCommand()
 {
 	renderCommand_->transformation() = worldMatrix_;
 
-	renderCommand_->material().setTexture(NULL);
+	renderCommand_->material().setTexture(nullptr);
 	renderCommand_->material().uniform("color")->setFloatValue(backgroundColor_.fR(), backgroundColor_.fG(), backgroundColor_.fB(), backgroundColor_.fA());
 	const bool isTransparent = backgroundColor_.a() < 255;
 	renderCommand_->material().setTransparent(isTransparent);
@@ -100,7 +100,7 @@ void ProfilePlotter::UpdateRefValueRenderCommand()
 {
 	refValueCmd_.transformation() = worldMatrix_;
 
-	refValueCmd_.material().setTexture(NULL);
+	refValueCmd_.material().setTexture(nullptr);
 	refValueCmd_.material().uniform("color")->setFloatValue(refValueColor_.fR(), refValueColor_.fG(), refValueColor_.fB(), refValueColor_.fA());
 	refValueCmd_.geometry().updateVboData(0, 4, refValueVertices_.data());
 }

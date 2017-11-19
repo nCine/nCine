@@ -1,3 +1,4 @@
+#include <cstdio> // for vsnprintf()
 #include <cstring>
 #include "common_macros.h"
 #include "ncString.h"
@@ -9,14 +10,14 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 String::String()
-	: array_(NULL), length_(0), capacity_(DefaultCapacity)
+	: array_(nullptr), length_(0), capacity_(DefaultCapacity)
 {
 	array_ = new char[capacity_];
 	array_[0] = '\0';
 }
 
 String::String(unsigned int capacity)
-	: array_(NULL), length_(0), capacity_(capacity)
+	: array_(nullptr), length_(0), capacity_(capacity)
 {
 	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
 
@@ -25,7 +26,7 @@ String::String(unsigned int capacity)
 }
 
 String::String(const char *cString)
-	: array_(NULL), length_(0), capacity_(0)
+	: array_(nullptr), length_(0), capacity_(0)
 {
 	ASSERT(cString);
 #if defined(_WIN32) && !defined(__MINGW32__)
@@ -50,7 +51,7 @@ String::~String()
 }
 
 String::String(const String &other)
-	: array_(NULL), length_(other.length_), capacity_(other.capacity_)
+	: array_(nullptr), length_(other.length_), capacity_(other.capacity_)
 {
 	array_ = new char[capacity_];
 

@@ -192,7 +192,7 @@ template <class K, class T, class HashFunc>
 T *HashMap<K, T, HashFunc>::HashBucket::find(hash_t hash, const K &key)
 {
 	if (size_ == 0)
-		return NULL;
+		return nullptr;
 
 	if (firstNode_.hash == hash && firstNode_.key == key)
 	{
@@ -211,7 +211,7 @@ T *HashMap<K, T, HashFunc>::HashBucket::find(hash_t hash, const K &key)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 template <class K, class T, class HashFunc>

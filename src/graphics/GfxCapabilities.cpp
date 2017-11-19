@@ -1,4 +1,5 @@
-#include <cstring> // for CheckGLExtension()
+#include <cstdio> // for sscanf()
+#include <cstring> // for checkGLExtension()
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
 #include "common_macros.h"

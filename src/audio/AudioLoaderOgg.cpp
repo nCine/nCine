@@ -116,7 +116,7 @@ void AudioLoaderOgg::init()
 	{
 		fileHandle_->open(IFile::MODE_FD | IFile::MODE_READ);
 
-		if (ov_open_callbacks(fileHandle_, &oggFile_, NULL, 0, oggCallbacks) != 0)
+		if (ov_open_callbacks(fileHandle_, &oggFile_, nullptr, 0, oggCallbacks) != 0)
 		{
 			LOGF_X("Cannot open \"%s\" with ov_open_callbacks()", fileHandle_->filename());
 			fileHandle_->close();
@@ -127,7 +127,7 @@ void AudioLoaderOgg::init()
 	{
 		fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
 
-		if (ov_open(fileHandle_->ptr(), &oggFile_, NULL, 0) != 0)
+		if (ov_open(fileHandle_->ptr(), &oggFile_, nullptr, 0) != 0)
 		{
 			LOGF_X("Cannot open \"%s\" with ov_open()", fileHandle_->filename());
 			fileHandle_->close();

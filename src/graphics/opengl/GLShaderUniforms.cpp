@@ -22,12 +22,12 @@ GLUniformCache GLShaderUniforms::uniformNotFound_;
 ///////////////////////////////////////////////////////////
 
 GLShaderUniforms::GLShaderUniforms()
-	: shaderProgram_(NULL), uniformCaches_(UniformCachesHashSize)
+	: shaderProgram_(nullptr), uniformCaches_(UniformCachesHashSize)
 {
 }
 
 GLShaderUniforms::GLShaderUniforms(GLShaderProgram *shaderProgram)
-	: shaderProgram_(NULL), uniformCaches_(UniformCachesHashSize)
+	: shaderProgram_(nullptr), uniformCaches_(UniformCachesHashSize)
 {
 	setProgram(shaderProgram);
 }
@@ -46,13 +46,13 @@ void GLShaderUniforms::setProgram(GLShaderProgram *shaderProgram)
 GLUniformCache *GLShaderUniforms::uniform(const char *name)
 {
 	ASSERT(name);
-	GLUniformCache *uniformCache = NULL;
+	GLUniformCache *uniformCache = nullptr;
 
 	if (shaderProgram_)
 	{
 		uniformCache = uniformCaches_.find(name);
 
-		if (uniformCache == NULL)
+		if (uniformCache == nullptr)
 		{
 			// Returning the dummy uniform cache to prevent the application from crashing
 			uniformCache = &uniformNotFound_;

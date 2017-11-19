@@ -142,7 +142,7 @@ void MyEventHandler::onInit()
 
 
 	texture_ = new nc::GLTexture(GL_TEXTURE_2D);
-	texture_->texImage2D(0, GL_RGB, FboSize, FboSize, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	texture_->texImage2D(0, GL_RGB, FboSize, FboSize, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 	texture_->texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	fbo_ = new nc::GLFramebufferObject();

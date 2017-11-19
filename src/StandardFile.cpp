@@ -29,7 +29,7 @@ StandardFile::~StandardFile()
 void StandardFile::open(unsigned char mode)
 {
 	// Checking if the file is already opened
-	if (fileDescriptor_ >= 0 || filePointer_ != NULL)
+	if (fileDescriptor_ >= 0 || filePointer_ != nullptr)
 		LOGW_X("File \"%s\" is already opened", filename_.data());
 	else
 	{
@@ -68,7 +68,7 @@ void StandardFile::close()
 		else
 		{
 			LOGI_X("File \"%s\" closed", filename_.data());
-			filePointer_ = NULL;
+			filePointer_ = nullptr;
 		}
 	}
 }
@@ -215,7 +215,7 @@ void StandardFile::openStream(unsigned char mode)
 	{
 		filePointer_ = fopen(filename_.data(), modeChars);
 
-		if (filePointer_ == NULL)
+		if (filePointer_ == nullptr)
 		{
 			if (shouldExitOnFailToOpen_)
 			{

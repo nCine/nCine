@@ -70,7 +70,7 @@ SdlInputManager::~SdlInputManager()
 		if (isJoyPresent(i))
 		{
 			SDL_JoystickClose(sdlJoysticks_[i]);
-			sdlJoysticks_[i] = NULL;
+			sdlJoysticks_[i] = nullptr;
 		}
 
 	}
@@ -83,14 +83,14 @@ SdlInputManager::~SdlInputManager()
 bool SdlJoystickState::isButtonPressed(int buttonId) const
 {
 	bool isPressed = false;
-	if (sdlJoystick_ != NULL)
+	if (sdlJoystick_ != nullptr)
 		isPressed = SDL_JoystickGetButton(sdlJoystick_, buttonId) != 0;
 	return isPressed;
 }
 
 short int SdlJoystickState::axisValue(int axisId) const
 {
-	if (sdlJoystick_ == NULL)
+	if (sdlJoystick_ == nullptr)
 		return 0;
 
 	short int axisValue = 0;
@@ -120,7 +120,7 @@ float SdlJoystickState::axisNormValue(int axisId) const
 
 void SdlInputManager::parseEvent(const SDL_Event &event)
 {
-	if (inputEventHandler_ == NULL)
+	if (inputEventHandler_ == nullptr)
 		return;
 
 	if (event.type == SDL_JOYDEVICEADDED || event.type == SDL_JOYDEVICEREMOVED)
@@ -245,7 +245,7 @@ const char *SdlInputManager::joyName(int joyId) const
 	if (isJoyPresent(joyId))
 		return SDL_JoystickName(sdlJoysticks_[joyId]);
 	else
-		return NULL;
+		return nullptr;
 }
 
 const char *SdlInputManager::joyGuid(int joyId) const
@@ -257,7 +257,7 @@ const char *SdlInputManager::joyGuid(int joyId) const
 		return joyGuidString_;
 	}
 	else
-		return NULL;
+		return nullptr;
 }
 
 int SdlInputManager::joyNumButtons(int joyId) const
@@ -282,7 +282,7 @@ int SdlInputManager::joyNumAxes(int joyId) const
 
 const JoystickState &SdlInputManager::joystickState(int joyId) const
 {
-	joystickStates_[joyId].sdlJoystick_ = NULL;
+	joystickStates_[joyId].sdlJoystick_ = nullptr;
 
 	if (isJoyPresent(joyId))
 		joystickStates_[joyId].sdlJoystick_ = sdlJoysticks_[joyId];
@@ -355,12 +355,12 @@ void SdlInputManager::handleJoyDeviceEvent(const SDL_Event &event)
 
 		joyConnectionEvent_.joyId = deviceIndex;
 		SDL_JoystickClose(sdlJoysticks_[deviceIndex]);
-		sdlJoysticks_[deviceIndex] = NULL;
+		sdlJoysticks_[deviceIndex] = nullptr;
 
 		// Compacting the array of SDL joystick pointers
 		for (int i = deviceIndex; i < MaxNumJoysticks - 1; i++)
 			sdlJoysticks_[i] = sdlJoysticks_[i + 1];
-		sdlJoysticks_[MaxNumJoysticks - 1] = NULL;
+		sdlJoysticks_[MaxNumJoysticks - 1] = nullptr;
 
 		LOGI_X("Joystick %d has been disconnected", deviceIndex);
 		inputEventHandler_->onJoyDisconnected(joyConnectionEvent_);
