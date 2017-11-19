@@ -36,10 +36,10 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	Array<RectAnimation *> anims_;
 	int currentAnim_;
 
-	/// Private copy constructor
-	AnimatedSprite(const AnimatedSprite &);
-	/// Private assignment operator
-	AnimatedSprite &operator=(const AnimatedSprite &);
+	/// Deleted copy constructor
+	AnimatedSprite(const AnimatedSprite &) = delete;
+	/// Deleted assignment operator
+	AnimatedSprite &operator=(const AnimatedSprite &) = delete;
 
 	void init();
 };

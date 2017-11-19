@@ -51,10 +51,10 @@ class DLL_PUBLIC AndroidApplication : public Application
 	AndroidApplication() : Application(),  isInitialized_(false), packageName_(128), state_(nullptr), createAppEventHandler_(nullptr) { }
 	/// Private destructor
 	~AndroidApplication() { }
-	/// Private copy constructor
-	AndroidApplication(const AndroidApplication &);
-	/// Private assignment operator
-	AndroidApplication &operator=(const AndroidApplication &);
+	/// Deleted copy constructor
+	AndroidApplication(const AndroidApplication &) = delete;
+	/// Deleted assignment operator
+	AndroidApplication &operator=(const AndroidApplication &) = delete;
 
 	/// Returns the singleton reference to the Android application
 	static AndroidApplication &theAndroidApplication() { return static_cast<AndroidApplication &>(theApplication()); }

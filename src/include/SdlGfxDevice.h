@@ -32,10 +32,10 @@ class SdlGfxDevice : public IGfxDevice
 	/// SDL2 OpenGL context handle
 	SDL_GLContext glContextHandle_;
 
-	/// Private copy constructor
-	SdlGfxDevice(const SdlGfxDevice &);
-	/// Private assignment operator
-	SdlGfxDevice &operator=(const SdlGfxDevice &);
+	/// Deleted copy constructor
+	SdlGfxDevice(const SdlGfxDevice &) = delete;
+	/// Deleted assignment operator
+	SdlGfxDevice &operator=(const SdlGfxDevice &) = delete;
 
 	/// Initilizes the video subsystem (SDL)
 	void initGraphics();

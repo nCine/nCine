@@ -40,12 +40,12 @@ class RenderResources
 	static void create();
 	static void dispose();
 
-	/// Static class, no constructor
-	RenderResources();
-	/// Static class, no copy constructor
-	RenderResources(const RenderResources &other);
-	/// Static class, no assignement operator
-	RenderResources &operator=(const RenderResources &other);
+	/// Static class, deleted constructor
+	RenderResources() = delete;
+	/// Static class, deleted copy constructor
+	RenderResources(const RenderResources &other) = delete;
+	/// Static class, deleted assignement operator
+	RenderResources &operator=(const RenderResources &other) = delete;
 
 	/// The `Application` class needs to create and dispose the resources
 	friend class Application;

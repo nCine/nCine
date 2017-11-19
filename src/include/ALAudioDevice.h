@@ -48,10 +48,10 @@ class ALAudioDevice : public IAudioDevice
 	/// A list of active audio players
 	List<IAudioPlayer *> players_;
 
-	/// Private copy constructor
-	ALAudioDevice(const ALAudioDevice &);
-	/// Private assignment operator
-	ALAudioDevice &operator=(const ALAudioDevice &);
+	/// Deleted copy constructor
+	ALAudioDevice(const ALAudioDevice &) = delete;
+	/// Deleted assignment operator
+	ALAudioDevice &operator=(const ALAudioDevice &) = delete;
 };
 
 }

@@ -46,10 +46,10 @@ class GLTexture
 	mutable unsigned int textureUnit_;
 	GLenum imageFormat_;
 
-	/// Private copy constructor
-	GLTexture(const GLTexture &);
-	/// Private assignment operator
-	GLTexture &operator=(const GLTexture &);
+	/// Deleted copy constructor
+	GLTexture(const GLTexture &) = delete;
+	/// Deleted assignment operator
+	GLTexture &operator=(const GLTexture &) = delete;
 
 	friend class GLFramebufferObject;
 };

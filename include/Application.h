@@ -90,10 +90,10 @@ class DLL_PUBLIC Application
 	virtual void setFocus(bool hasFocus);
 
   private:
-	/// Private copy constructor
-	Application(const Application &);
-	/// Private assignment operator
-	Application &operator=(const Application &);
+	/// Deleted copy constructor
+	Application(const Application &) = delete;
+	/// Deleted assignment operator
+	Application &operator=(const Application &) = delete;
 
 	friend class PCApplication;
 	friend class AndroidApplication;

@@ -45,10 +45,10 @@ class GLBufferObject
 	GLuint glHandle_;
 	GLenum target_;
 
-	/// Private copy constructor
-	GLBufferObject(const GLBufferObject &);
-	/// Private assignment operator
-	GLBufferObject &operator=(const GLBufferObject &);
+	/// Deleted copy constructor
+	GLBufferObject(const GLBufferObject &) = delete;
+	/// Deleted assignment operator
+	GLBufferObject &operator=(const GLBufferObject &) = delete;
 };
 
 }

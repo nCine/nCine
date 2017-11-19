@@ -141,10 +141,10 @@ class SdlInputManager : public IInputManager
 
 	static char joyGuidString_[33];
 
-	/// Private copy constructor
-	SdlInputManager(const SdlInputManager &);
-	/// Private assignment operator
-	SdlInputManager &operator=(const SdlInputManager &);
+	/// Deleted copy constructor
+	SdlInputManager(const SdlInputManager &) = delete;
+	/// Deleted assignment operator
+	SdlInputManager &operator=(const SdlInputManager &) = delete;
 
 	static void handleJoyDeviceEvent(const SDL_Event &event);
 	static int joyInstanceIdToDeviceIndex(SDL_JoystickID instanceId);

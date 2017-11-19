@@ -27,10 +27,10 @@ class DLL_PUBLIC AudioStreamPlayer : public IAudioPlayer
   private:
 	AudioStream audioStream_;
 
-	/// Private copy constructor
-	AudioStreamPlayer(const AudioStreamPlayer &);
-	/// Private assignment operator
-	AudioStreamPlayer &operator=(const AudioStreamPlayer &);
+	/// Deleted copy constructor
+	AudioStreamPlayer(const AudioStreamPlayer &) = delete;
+	/// Deleted assignment operator
+	AudioStreamPlayer &operator=(const AudioStreamPlayer &) = delete;
 };
 
 }

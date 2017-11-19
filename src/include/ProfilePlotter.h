@@ -75,10 +75,10 @@ class ProfilePlotter : public DrawableNode
 	void UpdateRefValueRenderCommand();
 
   private:
-	/// Private copy constructor
-	ProfilePlotter(const ProfilePlotter &);
-	/// Private assignment operator
-	ProfilePlotter &operator=(const ProfilePlotter &);
+	/// Deleted copy constructor
+	ProfilePlotter(const ProfilePlotter &) = delete;
+	/// Deleted assignment operator
+	ProfilePlotter &operator=(const ProfilePlotter &) = delete;
 };
 
 }

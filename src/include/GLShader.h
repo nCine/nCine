@@ -23,10 +23,10 @@ class GLShader
 	GLShader(GLenum type, const char *filename);
 	~GLShader();
 
-	/// Private copy constructor
-	GLShader(const GLShader &);
-	/// Private assignment operator
-	GLShader &operator=(const GLShader &);
+	/// Deleted copy constructor
+	GLShader(const GLShader &) = delete;
+	/// Deleted assignment operator
+	GLShader &operator=(const GLShader &) = delete;
 
 	friend class GLShaderProgram;
 };

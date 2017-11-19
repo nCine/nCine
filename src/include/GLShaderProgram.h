@@ -47,10 +47,10 @@ class GLShaderProgram
 	void discoverUniforms();
 	void discoverAttributes();
 
-	/// Private copy constructor
-	GLShaderProgram(const GLShaderProgram &);
-	/// Private assignment operator
-	GLShaderProgram &operator=(const GLShaderProgram &);
+	/// Deleted copy constructor
+	GLShaderProgram(const GLShaderProgram &) = delete;
+	/// Deleted assignment operator
+	GLShaderProgram &operator=(const GLShaderProgram &) = delete;
 
 	friend class GLShaderUniforms;
 	friend class GLShaderAttributes;

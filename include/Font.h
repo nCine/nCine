@@ -57,10 +57,10 @@ class DLL_PUBLIC Font : public Object
 	/// Array of font glyphs
 	FontGlyph *glyphs_;
 
-	/// Private copy constructor
-	Font(const Font &);
-	/// Private assignment operator
-	Font &operator=(const Font &);
+	/// Deleted copy constructor
+	Font(const Font &) = delete;
+	/// Deleted assignment operator
+	Font &operator=(const Font &) = delete;
 
 	/// Loads an <em>AngelCode's</em> `FNT` file in a memory buffer then parses it
 	void parseFntFile(IFile *fileHandle);

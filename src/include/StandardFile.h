@@ -26,10 +26,10 @@ class StandardFile : public IFile
 	unsigned long int read(void *buffer, unsigned long int bytes) const;
 
   private:
-	/// Private copy constructor
-	StandardFile(const StandardFile &);
-	/// Private assignment operator
-	StandardFile &operator=(const StandardFile &);
+	/// Deleted copy constructor
+	StandardFile(const StandardFile &) = delete;
+	/// Deleted assignment operator
+	StandardFile &operator=(const StandardFile &) = delete;
 
 	/// Opens the file with `open()`
 	void openFD(unsigned char mode);

@@ -39,10 +39,10 @@ class GLFramebufferObject
 	/*! The FBO binding can change to become the target for read, write or both operations. */
 	mutable GLenum target_;
 
-	/// Private copy constructor
-	GLFramebufferObject(const GLFramebufferObject &);
-	/// Private assignment operator
-	GLFramebufferObject &operator=(const GLFramebufferObject &);
+	/// Deleted copy constructor
+	GLFramebufferObject(const GLFramebufferObject &) = delete;
+	/// Deleted assignment operator
+	GLFramebufferObject &operator=(const GLFramebufferObject &) = delete;
 };
 
 }

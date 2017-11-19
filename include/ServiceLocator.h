@@ -66,10 +66,10 @@ class DLL_PUBLIC ServiceLocator
 	NullGfxCapabilities nullGfxCapabilities_;
 
 	ServiceLocator();
-	/// Private copy constructor
-	ServiceLocator(const ServiceLocator &);
-	/// Private assignment operator
-	ServiceLocator &operator=(const ServiceLocator &);
+	/// Deleted copy constructor
+	ServiceLocator(const ServiceLocator &) = delete;
+	/// Deleted assignment operator
+	ServiceLocator &operator=(const ServiceLocator &) = delete;
 
 	friend DLL_PUBLIC ServiceLocator &theServiceLocator();
 };

@@ -29,10 +29,10 @@ class ArrayIndexer : public IIndexer
 	unsigned int nextId_;
 	Array<Object *> pointers_;
 
-	/// Private copy constructor
-	ArrayIndexer(const ArrayIndexer &);
-	/// Private assignment operator
-	ArrayIndexer &operator=(const ArrayIndexer &);
+	/// Deleted copy constructor
+	ArrayIndexer(const ArrayIndexer &) = delete;
+	/// Deleted assignment operator
+	ArrayIndexer &operator=(const ArrayIndexer &) = delete;
 };
 
 }

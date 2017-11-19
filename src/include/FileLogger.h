@@ -21,10 +21,10 @@ class FileLogger : public ILogger
 	LogLevel consoleLevel_;
 	LogLevel fileLevel_;
 
-	/// Private copy constructor
-	FileLogger(const FileLogger &);
-	/// Private assignment operator
-	FileLogger &operator=(const FileLogger &);
+	/// Deleted copy constructor
+	FileLogger(const FileLogger &) = delete;
+	/// Deleted assignment operator
+	FileLogger &operator=(const FileLogger &) = delete;
 };
 
 }

@@ -51,10 +51,10 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	/// A flag indicating whether the system should be simulated in local space
 	bool inLocalSpace_;
 
-	/// Private copy constructor
-	ParticleSystem(const ParticleSystem &);
-	/// Private assignment operator
-	ParticleSystem &operator=(const ParticleSystem &);
+	/// Deleted copy constructor
+	ParticleSystem(const ParticleSystem &) = delete;
+	/// Deleted assignment operator
+	ParticleSystem &operator=(const ParticleSystem &) = delete;
 };
 
 }

@@ -23,10 +23,10 @@ class GLRenderbuffer
 	GLRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height);
 	~GLRenderbuffer();
 
-	/// Private copy constructor
-	GLRenderbuffer(const GLRenderbuffer &);
-	/// Private assignment operator
-	GLRenderbuffer &operator=(const GLRenderbuffer &);
+	/// Deleted copy constructor
+	GLRenderbuffer(const GLRenderbuffer &) = delete;
+	/// Deleted assignment operator
+	GLRenderbuffer &operator=(const GLRenderbuffer &) = delete;
 
 	void storage(GLenum internalFormat, GLsizei width, GLsizei height);
 

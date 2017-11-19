@@ -78,10 +78,10 @@ class PlottingVariable
 	virtual void updateMeanRenderCommand() = 0;
 
   private:
-	/// Private copy constructor
-	PlottingVariable(const PlottingVariable &);
-	/// Private assignment operator
-	PlottingVariable &operator=(const PlottingVariable &);
+	/// Deleted copy constructor
+	PlottingVariable(const PlottingVariable &) = delete;
+	/// Deleted assignment operator
+	PlottingVariable &operator=(const PlottingVariable &) = delete;
 };
 
 }

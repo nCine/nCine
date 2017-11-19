@@ -22,10 +22,10 @@ class DLL_PUBLIC PCApplication : public Application
 	PCApplication() : Application() { }
 	/// Private destructor
 	~PCApplication() { }
-	/// Private copy constructor
-	PCApplication(const PCApplication &);
-	/// Private assignment operator
-	PCApplication &operator=(const PCApplication &);
+	/// Deleted copy constructor
+	PCApplication(const PCApplication &) = delete;
+	/// Deleted assignment operator
+	PCApplication &operator=(const PCApplication &) = delete;
 
 	friend DLL_PUBLIC Application &theApplication();
 };

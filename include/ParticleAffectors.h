@@ -58,10 +58,10 @@ class DLL_PUBLIC ColorAffector : public ParticleAffector
 
 	Array<ColorStep *> colorSteps_;
 
-	/// Private copy constructor
-	ColorAffector(const ColorAffector &);
-	/// Private assignment operator
-	ColorAffector &operator=(const ColorAffector &);
+	/// Deleted copy constructor
+	ColorAffector(const ColorAffector &) = delete;
+	/// Deleted assignment operator
+	ColorAffector &operator=(const ColorAffector &) = delete;
 };
 
 /// Particle size affector
@@ -92,10 +92,10 @@ class DLL_PUBLIC SizeAffector : public ParticleAffector
 	Array<SizeStep *> sizeSteps_;
 	float baseScale_;
 
-	/// Private copy constructor
-	SizeAffector(const SizeAffector &);
-	/// Private assignment operator
-	SizeAffector &operator=(const SizeAffector &);
+	/// Deleted copy constructor
+	SizeAffector(const SizeAffector &) = delete;
+	/// Deleted assignment operator
+	SizeAffector &operator=(const SizeAffector &) = delete;
 };
 
 }

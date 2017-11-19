@@ -68,10 +68,10 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	virtual void updateRenderCommand() = 0;
 
   private:
-	/// Private copy constructor
-	DrawableNode(const DrawableNode &);
-	/// Private assignment operator
-	DrawableNode &operator=(const DrawableNode &);
+	/// Deleted copy constructor
+	DrawableNode(const DrawableNode &) = delete;
+	/// Deleted assignment operator
+	DrawableNode &operator=(const DrawableNode &) = delete;
 };
 
 }

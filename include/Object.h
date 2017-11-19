@@ -64,10 +64,10 @@ class DLL_PUBLIC Object
 	 *  as there is still no string hashing based search. */
 	String name_;
 
-	/// Private copy constructor
-	Object(const Object &);
-	/// Private assignment operator
-	Object &operator=(const Object &);
+	/// Deleted copy constructor
+	Object(const Object &) = delete;
+	/// Deleted assignment operator
+	Object &operator=(const Object &) = delete;
 };
 
 }

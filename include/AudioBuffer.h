@@ -35,10 +35,10 @@ class DLL_PUBLIC AudioBuffer : public Object
 	/// Samples frequency
 	int frequency_;
 
-	/// Private copy constructor
-	AudioBuffer(const AudioBuffer &);
-	/// Private assignment operator
-	AudioBuffer &operator=(const AudioBuffer &);
+	/// Deleted copy constructor
+	AudioBuffer(const AudioBuffer &) = delete;
+	/// Deleted assignment operator
+	AudioBuffer &operator=(const AudioBuffer &) = delete;
 
 	/// Loads audio samples based on information from the audio loader
 	void load(const IAudioLoader *audioLoader);

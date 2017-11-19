@@ -58,10 +58,10 @@ class Geometry
 
 	void bind();
 
-	/// Private copy constructor
-	Geometry(const Geometry &);
-	/// Private assignment operator
-	Geometry &operator=(const Geometry &);
+	/// Deleted copy constructor
+	Geometry(const Geometry &) = delete;
+	/// Deleted assignment operator
+	Geometry &operator=(const Geometry &) = delete;
 
 	friend class RenderCommand;
 };
