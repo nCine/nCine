@@ -14,7 +14,6 @@ class TextureLoaderPng : public ITextureLoader
 	explicit TextureLoaderPng(IFile *fileHandle);
 
   private:
-	void init() override;
 	static void readFromFileHandle(png_structp pngPtr, png_bytep outBytes, png_size_t byteCountToRead);
 };
 

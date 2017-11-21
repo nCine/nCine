@@ -56,9 +56,6 @@ class DLL_PUBLIC IAudioLoader
 
 	explicit IAudioLoader(const char *filename);
 	explicit IAudioLoader(IFile *fileHandle);
-
-	/// Loads the audio parameters from file
-	virtual void init() = 0;
 };
 
 }

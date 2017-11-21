@@ -59,9 +59,6 @@ class ITextureLoader
 	void loadPixels(GLenum internalFormat);
 	/// Loads pixel data from a texture file holding either compressed or uncompressed data, overriding pixel type
 	void loadPixels(GLenum internalFormat, GLenum type);
-
-	/// Loads the texture data from file
-	virtual void init() = 0;
 };
 
 }

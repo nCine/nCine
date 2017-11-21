@@ -20,10 +20,9 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ITextureLoader::ITextureLoader(const char *filename)
-	: fileHandle_(nullptr), width_(0), height_(0), bpp_(0), headerSize_(0), dataSize_(0),
-	  mipMapCount_(1), mipDataOffsets_(nullptr), mipDataSizes_(nullptr), pixels_(nullptr)
+	: ITextureLoader(IFile::createFileHandle(filename))
 {
-	fileHandle_ = IFile::createFileHandle(filename);
+
 }
 
 ITextureLoader::ITextureLoader(IFile *fileHandle)

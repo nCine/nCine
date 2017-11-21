@@ -8,22 +8,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 TextureLoaderDds::TextureLoaderDds(const char *filename)
-	: ITextureLoader(filename)
+	: TextureLoaderDds(IFile::createFileHandle(filename))
 {
-	init();
+
 }
 
 TextureLoaderDds::TextureLoaderDds(IFile *fileHandle)
 	: ITextureLoader(fileHandle)
-{
-	init();
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void TextureLoaderDds::init()
 {
 	DdsHeader header;
 
@@ -31,6 +22,10 @@ void TextureLoaderDds::init()
 	readHeader(header);
 	parseFormat(header);
 }
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
 
 void TextureLoaderDds::readHeader(DdsHeader &header)
 {

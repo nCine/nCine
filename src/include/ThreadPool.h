@@ -46,8 +46,6 @@ class ThreadPool : public IThreadPool
 	ThreadPool(const ThreadPool &) = delete;
 	/// Deleted assignment operator
 	ThreadPool &operator=(const ThreadPool &) = delete;
-
-	void init();
 };
 
 }

@@ -27,8 +27,6 @@ class AudioLoaderOgg : public IAudioLoader
 	AudioLoaderOgg(const AudioLoaderOgg &) = delete;
 	/// Deleted assignment operator
 	AudioLoaderOgg &operator=(const AudioLoaderOgg &) = delete;
-
-	void init() override;
 };
 
 }

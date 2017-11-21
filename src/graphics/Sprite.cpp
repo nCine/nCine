@@ -9,18 +9,23 @@ namespace ncine {
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(SceneNode *parent, Texture *texture)
-	: DrawableNode(parent), texture_(texture), texRect_(0, 0, 0, 0), opaqueTexture_(false)
+	: Sprite(parent, texture, 0.0f, 0.0f)
 {
-	ASSERT(texture);
-	init();
+
 }
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(Texture *texture)
-	: DrawableNode(nullptr), texture_(texture), texRect_(0, 0, 0, 0), opaqueTexture_(false)
+	: Sprite(nullptr, texture, 0.0f, 0.0f)
 {
-	ASSERT(texture);
-	init();
+
+}
+
+/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
+Sprite::Sprite(Texture *texture, float x, float y)
+	: Sprite(nullptr, texture, x, y)
+{
+
 }
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
@@ -28,23 +33,7 @@ Sprite::Sprite(SceneNode *parent, Texture *texture, float x, float y)
 	: DrawableNode(parent, x, y), texture_(texture), texRect_(0, 0, 0, 0), opaqueTexture_(false)
 {
 	ASSERT(texture);
-	init();
-}
 
-/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
-Sprite::Sprite(Texture *texture, float x, float y)
-	: DrawableNode(nullptr, x, y), texture_(texture), texRect_(0, 0, 0, 0), opaqueTexture_(false)
-{
-	ASSERT(texture);
-	init();
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void Sprite::init()
-{
 	type_ = SPRITE_TYPE;
 	setLayer(DrawableNode::SCENE_LAYER);
 	renderCommand_->setType(RenderCommand::SPRITE_TYPE);
@@ -53,6 +42,10 @@ void Sprite::init()
 
 	setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
 }
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
 
 /*! \todo Only the transformation matrix should be updated per frame */
 void Sprite::updateRenderCommand()

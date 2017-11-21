@@ -41,68 +41,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AudioLoaderOgg::AudioLoaderOgg(const char *filename)
-	: IAudioLoader(filename)
+	: AudioLoaderOgg(IFile::createFileHandle(filename))
 {
-	init();
+
 }
 
 AudioLoaderOgg::AudioLoaderOgg(IFile *fileHandle)
 	: IAudioLoader(fileHandle)
-{
-	init();
-}
-
-AudioLoaderOgg::~AudioLoaderOgg()
-{
-	ov_clear(&oggFile_);
-}
-
-///////////////////////////////////////////////////////////
-// PUBLIC FUNCTIONS
-///////////////////////////////////////////////////////////
-
-unsigned long int AudioLoaderOgg::read(char *buffer, unsigned long int bufferSize) const
-{
-	ASSERT(buffer);
-	ASSERT(bufferSize > 0);
-
-	static int bitStream = 0;
-	long bytes = 0;
-	long int bufferSeek = 0;
-
-	do
-	{
-		// Read up to a buffer's worth of decoded sound data
-		// (0: little endian, 2: 16bit, 1: signed)
-		bytes = ov_read(&oggFile_, buffer + bufferSeek, bufferSize - bufferSeek, 0, 2, 1, &bitStream);
-
-		if (bytes < 0)
-		{
-			ov_clear(&oggFile_);
-			FATAL_MSG_X("Error decoding at bitstream %d", bitStream);
-		}
-
-		// Reset the static variable at the end of a decoding process
-		if (bytes <= 0)
-			bitStream = 0;
-
-		bufferSeek += bytes;
-	}
-	while (bytes > 0 && bufferSize - bufferSeek > 0);
-
-	return bufferSeek;
-}
-
-void AudioLoaderOgg::rewind() const
-{
-	ov_raw_seek(&oggFile_, 0);
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void AudioLoaderOgg::init()
 {
 	vorbis_info *info;
 
@@ -150,6 +95,52 @@ void AudioLoaderOgg::init()
 	duration_ = float(ov_time_total(&oggFile_, -1));
 
 	LOGI_X("duration: %.2f, channels: %d, frequency: %d", duration_, numChannels_, frequency_);
+}
+
+AudioLoaderOgg::~AudioLoaderOgg()
+{
+	ov_clear(&oggFile_);
+}
+
+///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
+
+unsigned long int AudioLoaderOgg::read(char *buffer, unsigned long int bufferSize) const
+{
+	ASSERT(buffer);
+	ASSERT(bufferSize > 0);
+
+	static int bitStream = 0;
+	long bytes = 0;
+	long int bufferSeek = 0;
+
+	do
+	{
+		// Read up to a buffer's worth of decoded sound data
+		// (0: little endian, 2: 16bit, 1: signed)
+		bytes = ov_read(&oggFile_, buffer + bufferSeek, bufferSize - bufferSeek, 0, 2, 1, &bitStream);
+
+		if (bytes < 0)
+		{
+			ov_clear(&oggFile_);
+			FATAL_MSG_X("Error decoding at bitstream %d", bitStream);
+		}
+
+		// Reset the static variable at the end of a decoding process
+		if (bytes <= 0)
+			bitStream = 0;
+
+		bufferSeek += bytes;
+	}
+	while (bytes > 0 && bufferSize - bufferSeek > 0);
+
+	return bufferSeek;
+}
+
+void AudioLoaderOgg::rewind() const
+{
+	ov_raw_seek(&oggFile_, 0);
 }
 
 }

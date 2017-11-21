@@ -9,22 +9,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 TextureLoaderPkm::TextureLoaderPkm(const char *filename)
-	: ITextureLoader(filename)
+	: TextureLoaderPkm(IFile::createFileHandle(filename))
 {
-	init();
+
 }
 
 TextureLoaderPkm::TextureLoaderPkm(IFile *fileHandle)
 	: ITextureLoader(fileHandle)
-{
-	init();
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void TextureLoaderPkm::init()
 {
 	fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
 

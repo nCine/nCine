@@ -8,22 +8,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 TextureLoaderWebP::TextureLoaderWebP(const char *filename)
-	: ITextureLoader(filename)
+	: TextureLoaderWebP(IFile::createFileHandle(filename))
 {
-	init();
+
 }
 
 TextureLoaderWebP::TextureLoaderWebP(IFile *fileHandle)
 	: ITextureLoader(fileHandle)
-{
-	init();
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void TextureLoaderWebP::init()
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 

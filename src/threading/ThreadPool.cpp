@@ -10,16 +10,30 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ThreadPool::ThreadPool()
-	: threads_(nullptr)
+	: ThreadPool(Thread::numProcessors())
 {
-	numThreads_ = Thread::numProcessors();
-	init();
+
 }
 
 ThreadPool::ThreadPool(unsigned int numThreads)
 	: threads_(nullptr), numThreads_(numThreads)
 {
-	init();
+	threads_ = new Thread[numThreads_];
+
+	threadStruct_.queue = &queue_;
+	threadStruct_.queueMutex = &queueMutex_;
+	threadStruct_.queueCV = &queueCV_;
+	threadStruct_.shouldQuit = false;
+
+	quitMutex_.lock();
+
+	for (unsigned int i = 0; i < numThreads_; i++)
+	{
+		threads_[i].run(workerFunction, &threadStruct_);
+#ifndef __ANDROID__
+		threads_[i].setAffinityMask(ThreadAffinityMask(i));
+#endif
+	}
 }
 
 ThreadPool::~ThreadPool()
@@ -51,26 +65,6 @@ void ThreadPool::enqueueCommand(IThreadCommand *threadCommand)
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
-
-void ThreadPool::init()
-{
-	threads_ = new Thread[numThreads_];
-
-	threadStruct_.queue = &queue_;
-	threadStruct_.queueMutex = &queueMutex_;
-	threadStruct_.queueCV = &queueCV_;
-	threadStruct_.shouldQuit = false;
-
-	quitMutex_.lock();
-
-	for (unsigned int i = 0; i < numThreads_; i++)
-	{
-		threads_[i].run(workerFunction, &threadStruct_);
-#ifndef __ANDROID__
-		threads_[i].setAffinityMask(ThreadAffinityMask(i));
-#endif
-	}
-}
 
 void ThreadPool::workerFunction(void *arg)
 {

@@ -35,8 +35,6 @@ class AudioLoaderWav : public IAudioLoader
 		char		subchunk2Id[4];
 		uint32_t	subchunk2Size;
 	} WavHeader;
-
-	void init() override;
 };
 
 }

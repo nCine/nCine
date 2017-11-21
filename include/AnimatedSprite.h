@@ -40,8 +40,6 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	AnimatedSprite(const AnimatedSprite &) = delete;
 	/// Deleted assignment operator
 	AnimatedSprite &operator=(const AnimatedSprite &) = delete;
-
-	void init();
 };
 
 }

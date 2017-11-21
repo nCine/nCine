@@ -15,22 +15,13 @@ uint8_t TextureLoaderKtx::fileIdentifier_[] =
 ///////////////////////////////////////////////////////////
 
 TextureLoaderKtx::TextureLoaderKtx(const char *filename)
-	: ITextureLoader(filename)
+	: TextureLoaderKtx(IFile::createFileHandle(filename))
 {
-	init();
+
 }
 
 TextureLoaderKtx::TextureLoaderKtx(IFile *fileHandle)
 	: ITextureLoader(fileHandle)
-{
-	init();
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void TextureLoaderKtx::init()
 {
 	KtxHeader header;
 
@@ -38,6 +29,10 @@ void TextureLoaderKtx::init()
 	readHeader(header);
 	parseFormat(header);
 }
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
 
 void TextureLoaderKtx::readHeader(KtxHeader &header)
 {

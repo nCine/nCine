@@ -8,22 +8,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 TextureLoaderPng::TextureLoaderPng(const char *filename)
-	: ITextureLoader(filename)
+	: TextureLoaderPng(IFile::createFileHandle(filename))
 {
-	init();
+
 }
 
 TextureLoaderPng::TextureLoaderPng(IFile *fileHandle)
 	: ITextureLoader(fileHandle)
-{
-	init();
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void TextureLoaderPng::init()
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 
@@ -111,6 +102,10 @@ void TextureLoaderPng::init()
 
 	png_destroy_read_struct(&pngPtr, &infoPtr, nullptr);
 }
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
 
 void TextureLoaderPng::readFromFileHandle(png_structp pngPtr, png_bytep outBytes, png_size_t byteCountToRead)
 {

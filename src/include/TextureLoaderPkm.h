@@ -29,8 +29,6 @@ class TextureLoaderPkm : public ITextureLoader
 		uint16_t	width;
 		uint16_t	height;
 	} PkmHeader;
-
-	void init() override;
 };
 
 }

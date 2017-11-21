@@ -8,22 +8,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 TextureLoaderPvr::TextureLoaderPvr(const char *filename)
-	: ITextureLoader(filename)
+	: TextureLoaderPvr(IFile::createFileHandle(filename))
 {
-	init();
+
 }
 
 TextureLoaderPvr::TextureLoaderPvr(IFile *fileHandle)
 	: ITextureLoader(fileHandle)
-{
-	init();
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void TextureLoaderPvr::init()
 {
 	Pvr3Header header;
 
@@ -31,6 +22,10 @@ void TextureLoaderPvr::init()
 	readHeader(header);
 	parseFormat(header);
 }
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
 
 void TextureLoaderPvr::readHeader(Pvr3Header &header)
 {

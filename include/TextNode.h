@@ -87,8 +87,6 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Horizontal text alignment of multiple lines
 	Alignment alignment_;
 
-	/// Initializes the object with the parameters passed to the constructor
-	void init(unsigned int maxStringLength);
 	/// Calculates rectangle boundaries for the rendered text
 	void calculateBoundaries() const;
 	/// Calculates align offset for a particular line

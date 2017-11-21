@@ -60,8 +60,6 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	/// The opaque texture flag
 	bool opaqueTexture_;
 
-	/// Common sprite initialization for every constructor
-	void init();
 	void updateRenderCommand() override;
 };
 
