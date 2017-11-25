@@ -30,7 +30,7 @@ String IFile::savePath_(MaxFilenameLength);
 ///////////////////////////////////////////////////////////
 
 IFile::IFile(const char *filename)
-	: type_(BASE_TYPE), filename_(filename), extension_(MaxExtensionLength),
+	: type_(FileType::BASE), filename_(filename), extension_(MaxExtensionLength),
 	  fileDescriptor_(-1), filePointer_(nullptr), shouldCloseOnDestruction_(true),
 	  shouldExitOnFailToOpen_(true), fileSize_(0)
 {

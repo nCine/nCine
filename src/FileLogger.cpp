@@ -18,10 +18,10 @@ FileLogger::FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fil
 {
 	fileHandle_ = IFile::createFileHandle(filename);
 
-	if (fileLevel_ != LOG_OFF)
+	if (fileLevel_ != LogLevel::OFF)
 	{
 		fileHandle_->setExitOnFailToOpen(false);
-		fileHandle_->open(IFile::MODE_WRITE);
+		fileHandle_->open(IFile::OpenMode::WRITE);
 
 		if (fileHandle_->isOpened() == false)
 		{
@@ -32,17 +32,17 @@ FileLogger::FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fil
 			}
 
 			// Disabling file logging if the log file cannot be opened
-			fileLevel_ = LOG_OFF;
+			fileLevel_ = LogLevel::OFF;
 		}
 	}
 
-	if (consoleLevel_ != LOG_OFF)
+	if (consoleLevel_ != LogLevel::OFF)
 		setvbuf(stdout, nullptr, _IONBF, 0);
 }
 
 FileLogger::~FileLogger()
 {
-	write(LOG_VERBOSE, "FileLogger::~FileLogger -> End of the log");
+	write(LogLevel::VERBOSE, "FileLogger::~FileLogger -> End of the log");
 	if (fileHandle_)
 		delete fileHandle_;
 }
@@ -56,6 +56,10 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 {
 	ASSERT(fmt);
 
+	const int levelInt = static_cast<int>(level);
+	const int consoleLevelInt = static_cast<int>(consoleLevel_);
+	const int fileLevelInt = static_cast<int>(fileLevel_);
+
 	time_t now;
 	struct tm *ts;
 	const unsigned int bufferSize = 80;
@@ -66,9 +70,9 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 	// strftime(buffer, sizeof(char) * bufferSize, "%a %Y-%m-%d %H:%M:%S %Z", ts);
 	strftime(buffer, sizeof(char) * bufferSize, "%H:%M:%S", ts);
 
-	if (consoleLevel_ != LOG_OFF && int(level) >= int(consoleLevel_))
+	if (consoleLevel_ != LogLevel::OFF && levelInt >= consoleLevelInt)
 	{
-		printf("- %s [L%d] - ", buffer, int(level));
+		printf("- %s [L%d] - ", buffer, levelInt);
 
 		va_list args;
 		va_start(args, fmt);
@@ -78,9 +82,9 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 		printf("\n");
 	}
 
-	if (fileLevel_ != LOG_OFF && int(level) >= int(fileLevel_))
+	if (fileLevel_ != LogLevel::OFF && levelInt >= fileLevelInt)
 	{
-		fprintf(fileHandle_->ptr(), "- %s [L%d] - ", buffer, int(level));
+		fprintf(fileHandle_->ptr(), "- %s [L%d] - ", buffer, levelInt);
 
 		va_list args;
 		va_start(args, fmt);
@@ -96,6 +100,10 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 {
 	ASSERT(fmt);
 
+	const int levelInt = static_cast<int>(level);
+	const int consoleLevelInt = static_cast<int>(consoleLevel_);
+	const int fileLevelInt = static_cast<int>(fileLevel_);
+
 	time_t now;
 	struct tm *ts;
 	const unsigned int bufferSize = 80;
@@ -107,18 +115,18 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 
 	android_LogPriority priority;
 
-	if (consoleLevel_ != LOG_OFF && int(level) >= int(consoleLevel_))
+	if (consoleLevel_ != LogLevel::OFF && levelInt >= consoleLevelInt)
 	{
 		switch (level)
 		{
-			case LOG_FATAL:		priority = ANDROID_LOG_FATAL;	break;
-			case LOG_ERROR:		priority = ANDROID_LOG_ERROR;	break;
-			case LOG_WARN:		priority = ANDROID_LOG_WARN; break;
-			case LOG_INFO:		priority = ANDROID_LOG_INFO; break;
-			case LOG_DEBUG:		priority = ANDROID_LOG_DEBUG;	break;
-			case LOG_VERBOSE:	priority = ANDROID_LOG_VERBOSE; break;
-			case LOG_UNKNOWN:	priority = ANDROID_LOG_UNKNOWN; break;
-			default:			priority = ANDROID_LOG_UNKNOWN; break;
+			case LogLevel::FATAL:		priority = ANDROID_LOG_FATAL;	break;
+			case LogLevel::ERROR:		priority = ANDROID_LOG_ERROR;	break;
+			case LogLevel::WARN:		priority = ANDROID_LOG_WARN; break;
+			case LogLevel::INFO:		priority = ANDROID_LOG_INFO; break;
+			case LogLevel::DEBUG:		priority = ANDROID_LOG_DEBUG;	break;
+			case LogLevel::VERBOSE:		priority = ANDROID_LOG_VERBOSE; break;
+			case LogLevel::UNKNOWN:		priority = ANDROID_LOG_UNKNOWN; break;
+			default:					priority = ANDROID_LOG_UNKNOWN; break;
 		}
 
 		va_list args;
@@ -127,9 +135,9 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 		va_end(args);
 	}
 
-	if (fileLevel_ != LOG_OFF && int(level) >= int(fileLevel_))
+	if (fileLevel_ != LogLevel::OFF && levelInt >= fileLevelInt)
 	{
-		fprintf(fileHandle_->ptr(), "- %s [L%d] -> ", buffer, int(level));
+		fprintf(fileHandle_->ptr(), "- %s [L%d] -> ", buffer, levelInt);
 
 		va_list args;
 		va_start(args, fmt);

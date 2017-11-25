@@ -160,9 +160,9 @@ void GlfwInputManager::setMouseCursorMode(MouseCursorMode mode)
 	{
 		switch (mode)
 		{
-			case MOUSE_CURSOR_NORMAL: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL); break;
-			case MOUSE_CURSOR_HIDDEN: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN); break;
-			case MOUSE_CURSOR_DISABLED: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED); break;
+			case MouseCursorMode::NORMAL: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL); break;
+			case MouseCursorMode::HIDDEN: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN); break;
+			case MouseCursorMode::DISABLED: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED); break;
 		}
 
 		mouseCursorMode_ = mode;
@@ -185,7 +185,7 @@ void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, in
 
 	keyboardEvent_.scancode = scancode;
 	keyboardEvent_.sym = GlfwKeys::keySymValueToEnum(key);
-	keyboardEvent_.mod = GlfwKeys::keyModValueToEnum(mods);
+	keyboardEvent_.mod = static_cast<int>(GlfwKeys::keyModValueToEnum(mods));
 
 	if (action == GLFW_PRESS)
 		inputEventHandler_->onKeyPressed(keyboardEvent_);

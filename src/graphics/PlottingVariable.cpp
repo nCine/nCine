@@ -11,15 +11,15 @@ PlottingVariable::PlottingVariable(unsigned int numValues, float rejectDelay, co
 	  variable_(numValues, rejectDelay), vertices_(nullptr), worldMatrix_(worldMatrix)
 {
 	// One more than the profile plotter background
-	valuesCmd_.setLayer(DrawableNode::HUD_LAYER + 1);
+	valuesCmd_.setLayer(DrawableNode::LayerBase::HUD + 1);
 	// One more than the variable graph
-	meanCmd_.setLayer(DrawableNode::HUD_LAYER + 2);
+	meanCmd_.setLayer(DrawableNode::LayerBase::HUD + 2);
 
-	valuesCmd_.setType(RenderCommand::PLOTTER_TYPE);
-	meanCmd_.setType(RenderCommand::PLOTTER_TYPE);
+	valuesCmd_.setType(RenderCommand::CommandType::PLOTTER);
+	meanCmd_.setType(RenderCommand::CommandType::PLOTTER);
 
-	valuesCmd_.material().setShaderProgram(Material::COLOR_PROGRAM);
-	meanCmd_.material().setShaderProgram(Material::COLOR_PROGRAM);
+	valuesCmd_.material().setShaderProgram(Material::ShaderProgram::COLOR);
+	meanCmd_.material().setShaderProgram(Material::ShaderProgram::COLOR);
 }
 
 PlottingVariable::~PlottingVariable()

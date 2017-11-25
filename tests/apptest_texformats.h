@@ -41,7 +41,7 @@ class MyEventHandler :
   private:
 	static const int MaxTexFormats = 32;
 
-	enum Direction
+	enum class Direction
 	{
 		UP,
 		DOWN,

@@ -29,29 +29,29 @@ Material::Material(GLShaderProgram *program, GLTexture *texture)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void Material::setShaderProgram(ShaderProgramPresets preset)
+void Material::setShaderProgram(ShaderProgram shaderProgram)
 {
-	switch (preset)
+	switch (shaderProgram)
 	{
-		case SPRITE_PROGRAM:
+		case ShaderProgram::SPRITE:
 			setShaderProgram(const_cast<GLShaderProgram *>(RenderResources::spriteShaderProgram()));
 			uniform("texture")->setIntValue(0); // GL_TEXTURE0
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
 			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
 			break;
-		case TEXTNODE_GRAY_PROGRAM:
+		case ShaderProgram::TEXTNODE_GRAY:
 			setShaderProgram(const_cast<GLShaderProgram *>(RenderResources::textnodeGrayShaderProgram()));
 			uniform("texture")->setIntValue(0); // GL_TEXTURE0
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
 			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
 			break;
-		case TEXTNODE_COLOR_PROGRAM:
+		case ShaderProgram::TEXTNODE_COLOR:
 			setShaderProgram(const_cast<GLShaderProgram *>(RenderResources::textnodeColorShaderProgram()));
 			uniform("texture")->setIntValue(0); // GL_TEXTURE0
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
 			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
 			break;
-		case COLOR_PROGRAM:
+		case ShaderProgram::COLOR:
 			setShaderProgram(const_cast<GLShaderProgram *>(RenderResources::colorShaderProgram()));
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2, position)));
 			break;

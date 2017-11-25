@@ -34,10 +34,10 @@ Sprite::Sprite(SceneNode *parent, Texture *texture, float x, float y)
 {
 	ASSERT(texture);
 
-	type_ = SPRITE_TYPE;
-	setLayer(DrawableNode::SCENE_LAYER);
-	renderCommand_->setType(RenderCommand::SPRITE_TYPE);
-	renderCommand_->material().setShaderProgram(Material::SPRITE_PROGRAM);
+	type_ = ObjectType::SPRITE;
+	setLayer(DrawableNode::LayerBase::SCENE);
+	renderCommand_->setType(RenderCommand::CommandType::SPRITE);
+	renderCommand_->material().setShaderProgram(Material::ShaderProgram::SPRITE);
 	renderCommand_->geometry().makeSharedQuad();
 
 	setTexRect(Recti(0, 0, texture_->width(), texture_->height()));

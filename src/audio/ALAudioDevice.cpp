@@ -80,7 +80,7 @@ void ALAudioDevice::pausePlayers()
 void ALAudioDevice::stopPlayers(PlayerType playerType)
 {
 	Object::ObjectType objectType = AudioBufferPlayer::sType();
-	if (playerType == AUDIOSTREAM_PLAYER)
+	if (playerType == PlayerType::AUDIOSTREAM)
 		objectType = AudioStreamPlayer::sType();
 
 	List<IAudioPlayer *>::ConstIterator i = players_.begin();
@@ -99,7 +99,7 @@ void ALAudioDevice::stopPlayers(PlayerType playerType)
 void ALAudioDevice::pausePlayers(PlayerType playerType)
 {
 	Object::ObjectType objectType = AudioBufferPlayer::sType();
-	if (playerType == AUDIOSTREAM_PLAYER)
+	if (playerType == PlayerType::AUDIOSTREAM)
 		objectType = AudioStreamPlayer::sType();
 
 	List<IAudioPlayer *>::ConstIterator i = players_.begin();

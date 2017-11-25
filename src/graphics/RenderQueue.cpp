@@ -14,7 +14,7 @@ RenderQueue::RenderQueue()
 	: numVertices_(0), lastNumVertices_(0), lastNumCommands_(0),
 	  opaqueRenderCommands_(16), transparentRenderCommands_(16)
 {
-	for (unsigned int i = 0; i < RenderCommand::TYPE_COUNT; i++)
+	for (unsigned int i = 0; i < RenderCommand::CommandType::COUNT; i++)
 	{
 		typedLastNumVertices_[i] = typedNumVertices_[i];
 		typedLastNumCommands_[i] = typedNumCommands_[i];
@@ -74,7 +74,7 @@ void RenderQueue::draw()
 	lastNumCommands_ = opaqueRenderCommands_.size() + transparentRenderCommands_.size();
 	numVertices_ = 0;
 
-	for (unsigned int i = 0; i < RenderCommand::TYPE_COUNT; i++)
+	for (unsigned int i = 0; i < RenderCommand::CommandType::COUNT; i++)
 	{
 		typedLastNumVertices_[i] = typedNumVertices_[i];
 		typedLastNumCommands_[i] = typedNumCommands_[i];

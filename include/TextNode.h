@@ -21,11 +21,11 @@ class DLL_PUBLIC TextNode : public DrawableNode
 
 	/// Horizontal alignment modes for text made of multiple lines
 	/*! \note It does not change the node anchor point */
-	enum Alignment
+	enum class Alignment
 	{
-		ALIGN_LEFT,
-		ALIGN_CENTER,
-		ALIGN_RIGHT
+		LEFT,
+		CENTER,
+		RIGHT
 	};
 
 	TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength);
@@ -58,7 +58,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 
 	void draw(RenderQueue &renderQueue) override;
 
-	inline static ObjectType sType() { return TEXTNODE_TYPE; }
+	inline static ObjectType sType() { return ObjectType::TEXTNODE; }
 
   private:
 	/// The string to be rendered

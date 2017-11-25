@@ -14,7 +14,7 @@ class DLL_PUBLIC Texture : public Object
 {
   public:
 	/// Texture filtering modes
-	enum TextureFiltering
+	enum class Filtering
 	{
 		NEAREST,
 		LINEAR,
@@ -25,7 +25,7 @@ class DLL_PUBLIC Texture : public Object
 	};
 
 	/// Texture wrap modes
-	enum TextureWrap
+	enum class Wrap
 	{
 		CLAMP_TO_EDGE,
 		MIRRORED_REPEAT,
@@ -55,11 +55,11 @@ class DLL_PUBLIC Texture : public Object
 	inline bool hasAlpha() const { return hasAlphaChannel_; }
 
 	/// Sets texture filtering for both magnification and minification
-	void setFiltering(TextureFiltering filter);
+	void setFiltering(Filtering filter);
 	/// Sets texture wrap for both `s` and `t` coordinate
-	void setWrap(TextureWrap wrap);
+	void setWrap(Wrap wrapMode);
 
-	inline static ObjectType sType() { return TEXTURE_TYPE; }
+	inline static ObjectType sType() { return ObjectType::TEXTURE; }
 
   private:
 	GLTexture *glTexture_;

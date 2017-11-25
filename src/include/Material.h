@@ -16,16 +16,16 @@ class GLAttribute;
 class Material
 {
   public:
-	enum ShaderProgramPresets
+	enum class ShaderProgram
 	{
 		/// Shader program for Sprite classes
-		SPRITE_PROGRAM,
+		SPRITE,
 		/// Shader program for TextNode classes with grayscale font texture
-		TEXTNODE_GRAY_PROGRAM,
+		TEXTNODE_GRAY,
 		/// Shader program for TextNode classes with color font texture
-		TEXTNODE_COLOR_PROGRAM,
+		TEXTNODE_COLOR,
 		/// Shader program for ProfilePlotter
-		COLOR_PROGRAM
+		COLOR
 	};
 
 	/// Default constructor
@@ -35,7 +35,7 @@ class Material
 	bool isTransparent() const { return isTransparent_; }
 	void setTransparent(bool isTransparent) { isTransparent_ = isTransparent; }
 
-	void setShaderProgram(ShaderProgramPresets preset);
+	void setShaderProgram(ShaderProgram shaderProgram);
 	/// Wrapper around `GLShaderUniforms::uniform()`
 	inline GLUniformCache *uniform(const char *name) { return shaderUniforms_.uniform(name); }
 	/// Wrapper around `GLShaderAttributes::attribute()`

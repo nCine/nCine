@@ -18,7 +18,7 @@ TextureLoaderPvr::TextureLoaderPvr(IFile *fileHandle)
 {
 	Pvr3Header header;
 
-	fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
+	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 	readHeader(header);
 	parseFormat(header);
 }

@@ -33,7 +33,7 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 
 	void update(float interval) override;
 
-	inline static ObjectType sType() { return PARTICLESYSTEM_TYPE; }
+	inline static ObjectType sType() { return ObjectType::PARTICLE_SYSTEM; }
 
   private:
 	/// The particle pool size

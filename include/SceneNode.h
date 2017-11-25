@@ -32,7 +32,7 @@ class DLL_PUBLIC SceneNode : public Object
 	/// The destructor will delete every child node
 	~SceneNode() override;
 
-	inline static ObjectType sType() { return SCENENODE_TYPE; }
+	inline static ObjectType sType() { return ObjectType::SCENENODE; }
 
 	/// Returns the parent node, if there is any
 	inline const SceneNode *parentNode() const { return parent_; }

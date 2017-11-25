@@ -19,7 +19,7 @@ AudioLoaderWav::AudioLoaderWav(IFile *fileHandle)
 	: IAudioLoader(fileHandle)
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
-	fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
+	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 
 	WavHeader header;
 	fileHandle_->read(&header, sizeof(WavHeader));

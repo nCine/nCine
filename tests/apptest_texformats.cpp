@@ -68,7 +68,7 @@ void MyEventHandler::onInit()
 	                     (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
 
 	const nc::IGfxCapabilities &gfxCaps = nc::theServiceLocator().gfxCapabilities();
-	const int maxTextureSize = gfxCaps.value(nc::IGfxCapabilities::MAX_TEXTURE_SIZE);
+	const int maxTextureSize = gfxCaps.value(nc::IGfxCapabilities::GLIntValues::MAX_TEXTURE_SIZE);
 	FATAL_ASSERT_MSG_X(maxTextureSize >= 512, "Maximum device texture size is %d, which is less than 512 pixels", maxTextureSize);
 
 #if WITH_PNG_FORMAT
@@ -205,40 +205,40 @@ void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
+	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
 		nc::theApplication().quit();
-	else if (event.sym == nc::KEY_SPACE)
+	else if (event.sym == nc::KeySym::SPACE)
 		nc::theApplication().togglePause();
-	else if (event.sym == nc::KEY_D || event.sym == nc::KEY_RIGHT)
-		handleInput(RIGHT);
-	else if (event.sym == nc::KEY_A || event.sym == nc::KEY_LEFT)
-		handleInput(LEFT);
-	else if (event.sym == nc::KEY_W || event.sym == nc::KEY_UP)
-		handleInput(UP);
-	else if (event.sym == nc::KEY_S || event.sym == nc::KEY_DOWN)
-		handleInput(DOWN);
+	else if (event.sym == nc::KeySym::D || event.sym == nc::KeySym::RIGHT)
+		handleInput(Direction::RIGHT);
+	else if (event.sym == nc::KeySym::A || event.sym == nc::KeySym::LEFT)
+		handleInput(Direction::LEFT);
+	else if (event.sym == nc::KeySym::W || event.sym == nc::KeySym::UP)
+		handleInput(Direction::UP);
+	else if (event.sym == nc::KeySym::S || event.sym == nc::KeySym::DOWN)
+		handleInput(Direction::DOWN);
 }
 
 void MyEventHandler::handleInput(Direction direction)
 {
 	switch (direction)
 	{
-		case RIGHT:
+		case Direction::RIGHT:
 			newSelection_ = selected_ + 1;
 			if (newSelection_ > static_cast<int>(filenames_.size() - 1))
 				newSelection_ = 0;
 			break;
-		case LEFT:
+		case Direction::LEFT:
 			newSelection_ = selected_ - 1;
 			if (newSelection_ < 0)
 				newSelection_ = filenames_.size() - 1;
 			break;
-		case UP:
+		case Direction::UP:
 			newScale_ = scale_ * 2.0f;
 			if (newScale_ > MaxScaleFactor)
 				newScale_ = MaxScaleFactor;
 			break;
-		case DOWN:
+		case Direction::DOWN:
 			newScale_ = scale_ * 0.5f;
 			if (newScale_ < MinScaleFactor)
 				newScale_ = MinScaleFactor;
@@ -265,49 +265,49 @@ void MyEventHandler::handleInput(Direction direction)
 void MyEventHandler::handleCoordInput(float x, float y)
 {
 	if (x > nc::theApplication().width() * (0.5f + DeadScreenZone))
-		handleInput(RIGHT);
+		handleInput(Direction::RIGHT);
 	else if (x < nc::theApplication().width() * (0.5f - DeadScreenZone))
-		handleInput(LEFT);
+		handleInput(Direction::LEFT);
 
 	if (y > nc::theApplication().height() * (0.5f + DeadScreenZone))
-		handleInput(UP);
+		handleInput(Direction::UP);
 	else if (y < nc::theApplication().height() * (0.5f - DeadScreenZone))
-		handleInput(DOWN);
+		handleInput(Direction::DOWN);
 }
 
 void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 {
-	if (event.axisName == nc::AXIS_LX)
+	if (event.axisName == nc::AxisName::LX)
 	{
 		float x = event.value;
 		if (x > PressedAxisThreshold && axesLeftStickPressed[0] == false)
 		{
-			handleInput(RIGHT);
+			handleInput(Direction::RIGHT);
 			axesLeftStickPressed[0] = true;
 		}
 		else if (x > 0.0f && x < ReleasedAxisThreshold)
 			axesLeftStickPressed[0] = false;
 		else if (x < -PressedAxisThreshold && axesLeftStickPressed[1] == false)
 		{
-			handleInput(LEFT);
+			handleInput(Direction::LEFT);
 			axesLeftStickPressed[1] = true;
 		}
 		else if (x < 0.0f && x > -ReleasedAxisThreshold)
 			axesLeftStickPressed[1] = false;
 	}
-	else if (event.axisName == nc::AXIS_LY)
+	else if (event.axisName == nc::AxisName::LY)
 	{
 		float y = -event.value;
 		if (y > PressedAxisThreshold && axesLeftStickPressed[2] == false)
 		{
-			handleInput(UP);
+			handleInput(Direction::UP);
 			axesLeftStickPressed[2] = true;
 		}
 		else if (y > 0.0f && y < ReleasedAxisThreshold)
 			axesLeftStickPressed[2] = false;
 		else if (y < -PressedAxisThreshold && axesLeftStickPressed[3] == false)
 		{
-			handleInput(DOWN);
+			handleInput(Direction::DOWN);
 			axesLeftStickPressed[3] = true;
 		}
 		else if (y < 0.0f && y > -ReleasedAxisThreshold)

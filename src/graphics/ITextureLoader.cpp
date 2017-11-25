@@ -132,7 +132,7 @@ void ITextureLoader::loadPixels(GLenum internalFormat, GLenum type)
 
 	// If the file has not been already opened by a header reader method
 	if (fileHandle_->isOpened() == false)
-		fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
+		fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 
 	dataSize_ = fileHandle_->size() - headerSize_;
 	fileHandle_->seek(headerSize_, SEEK_SET);

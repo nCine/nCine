@@ -16,29 +16,31 @@ class RenderCommand
   public:
 	/// Command types
 	/*! Its sole purpose is to allow separated profiling counters in the `RenderQueue` class. */
-	enum CommandType
+	struct CommandType
 	{
-		GENERIC_TYPE = 0,
-		PLOTTER_TYPE,
-		SPRITE_TYPE,
-		PARTICLE_TYPE,
-		TEXT_TYPE,
-		TYPE_COUNT
+		enum Enum
+		{
+			GENERIC = 0,
+			PLOTTER,
+			SPRITE,
+			PARTICLE,
+			TEXT,
+
+			COUNT
+		};
 	};
 
-	/// Rendering layer limits
-	enum LayerLimits
-	{
-		BOTTOM_LAYER = 0,
-		TOP_LAYER = 65535
-	};
+	/// Bottom rendering layer limit
+	static const unsigned int BottomLayer = 0;
+	/// Top rendering layer limit
+	static const unsigned int TopLayer = 65535;
 
 	RenderCommand();
 
 	/// Returns the rendering layer
 	inline unsigned int layer() const { return layer_; }
 	/// Sets the rendering layer
-	inline void setLayer(unsigned int layer) { ASSERT(layer <= TOP_LAYER); layer_ = layer; }
+	inline void setLayer(unsigned int layer) { ASSERT(layer <= TopLayer); layer_ = layer; }
 
 	/// Returns the queue sort key
 	inline unsigned long int sortKey() const { return sortKey_; }
@@ -48,9 +50,9 @@ class RenderCommand
 	void issue();
 
 	/// Gets the command type (for profiling purposes)
-	inline CommandType type() const { return profilingType_; }
+	inline CommandType::Enum type() const { return profilingType_; }
 	/// Sets the command type (for profiling purposes)
-	inline void setType(CommandType eType) { profilingType_ = eType; }
+	inline void setType(CommandType::Enum type) { profilingType_ = type; }
 
 	inline Matrix4x4f &transformation() { return modelView_; }
 	inline const Material &material() const { return material_; }
@@ -63,7 +65,7 @@ class RenderCommand
 	unsigned long int sortKey_;
 	unsigned int layer_;
 	/// Command type for profiling counter
-	CommandType profilingType_;
+	CommandType::Enum profilingType_;
 
 	Matrix4x4f modelView_;
 	Material material_;

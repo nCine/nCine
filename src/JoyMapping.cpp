@@ -43,11 +43,11 @@ JoyMapping::MappedJoystick::MappedJoystick()
 	name[0] = '\0';
 
 	for (unsigned int i = 0; i < MaxNumAxes; i++)
-		axes[i].name = AXIS_UNKNOWN;
+		axes[i].name = AxisName::UNKNOWN;
 	for (unsigned int i = 0; i < MaxNumButtons; i++)
-		buttons[i] = BUTTON_UNKNOWN;
+		buttons[i] = ButtonName::UNKNOWN;
 	for (unsigned int i = 0; i < MaxNumButtons; i++)
-		hats[i] = BUTTON_UNKNOWN;
+		hats[i] = static_cast<int>(ButtonName::UNKNOWN);
 }
 
 JoyMapping::MappedJoystick::Guid::Guid()
@@ -154,7 +154,7 @@ void JoyMapping::addMappingsFromStrings(const char **mappingStrings)
 void JoyMapping::addMappingsFromFile(const char *filename)
 {
 	IFile *fileHandle = IFile::createFileHandle(filename);
-	fileHandle->open(IFile::MODE_READ);
+	fileHandle->open(IFile::OpenMode::READ);
 
 	const long int fileSize = fileHandle->size();
 	unsigned int fileLine = 0;
@@ -203,7 +203,7 @@ void JoyMapping::onJoyButtonPressed(const JoyButtonEvent &event)
 	{
 		mappedButtonEvent_.joyId = event.joyId;
 		mappedButtonEvent_.buttonName = mappings_[idToIndex].buttons[event.buttonId];
-		if (mappedButtonEvent_.buttonName != BUTTON_UNKNOWN)
+		if (mappedButtonEvent_.buttonName != ButtonName::UNKNOWN)
 		{
 			const int buttonId = static_cast<int>(mappedButtonEvent_.buttonName);
 			mappedJoyStates_[event.joyId].buttons_[buttonId] = true;
@@ -223,7 +223,7 @@ void JoyMapping::onJoyButtonReleased(const JoyButtonEvent &event)
 	{
 		mappedButtonEvent_.joyId = event.joyId;
 		mappedButtonEvent_.buttonName = mappings_[idToIndex].buttons[event.buttonId];
-		if (mappedButtonEvent_.buttonName != BUTTON_UNKNOWN)
+		if (mappedButtonEvent_.buttonName != ButtonName::UNKNOWN)
 		{
 			const int buttonId = static_cast<int>(mappedButtonEvent_.buttonName);
 			mappedJoyStates_[event.joyId].buttons_[buttonId] = false;
@@ -245,7 +245,7 @@ void JoyMapping::onJoyAxisMoved(const JoyAxisEvent &event)
 
 		mappedAxisEvent_.joyId = event.joyId;
 		mappedAxisEvent_.axisName = axis.name;
-		if (mappedAxisEvent_.axisName != AXIS_UNKNOWN)
+		if (mappedAxisEvent_.axisName != AxisName::UNKNOWN)
 		{
 			const float value = (event.normValue + 1.0f) * 0.5f;
 			mappedAxisEvent_.value = axis.min + value * (axis.max - axis.min);
@@ -457,7 +457,7 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 					else
 					{
 						const int hatMapping = parseHatMapping(subMid + 1, subEnd);
-						map.hats[hatMapping] = static_cast<ButtonName>(buttonIndex);
+						map.hats[hatMapping] = static_cast<int>(buttonIndex);
 					}
 				}
 			}
@@ -548,7 +548,7 @@ int JoyMapping::parseAxisMapping(const char *start, const char *end, MappedJoyst
 	{
 		const char *digits = &start[1];
 
-		if (axis.name == AXIS_LTRIGGER || axis.name == AXIS_RTRIGGER)
+		if (axis.name == AxisName::LTRIGGER || axis.name == AxisName::RTRIGGER)
 		{
 			axis.min = 0.0f;
 			axis.max = 1.0f;

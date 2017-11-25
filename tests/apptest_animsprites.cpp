@@ -35,7 +35,9 @@ void MyEventHandler::onInit()
 	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/" + TextureFile).data());
 	animSprite_ = new nc::AnimatedSprite(&rootNode, texture_);
 	// Down
-	nc::RectAnimation *animation = new nc::RectAnimation(0.12f, nc::RectAnimation::LOOPING, nc::RectAnimation::FROM_START);
+	nc::RectAnimation *animation = new nc::RectAnimation(0.12f,
+	                                                     nc::RectAnimation::LoopMode::ENABLED,
+	                                                     nc::RectAnimation::RewindMode::FROM_START);
 	animation->addRect(0, 0, 48, 48);
 	animation->addRect(48, 0, 48, 48);
 	animation->addRect(96, 0, 48, 48);
@@ -60,31 +62,31 @@ void MyEventHandler::onFrameStart()
 
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
-	if (keyState.isKeyDown(nc::KEY_RIGHT) || keyState.isKeyDown(nc::KEY_D) ||
-	    keyState.isKeyDown(nc::KEY_LEFT) || keyState.isKeyDown(nc::KEY_A) ||
-	    keyState.isKeyDown(nc::KEY_UP) || keyState.isKeyDown(nc::KEY_W) ||
-	    keyState.isKeyDown(nc::KEY_DOWN) || keyState.isKeyDown(nc::KEY_S))
+	if (keyState.isKeyDown(nc::KeySym::RIGHT) || keyState.isKeyDown(nc::KeySym::D) ||
+	    keyState.isKeyDown(nc::KeySym::LEFT) || keyState.isKeyDown(nc::KeySym::A) ||
+	    keyState.isKeyDown(nc::KeySym::UP) || keyState.isKeyDown(nc::KeySym::W) ||
+	    keyState.isKeyDown(nc::KeySym::DOWN) || keyState.isKeyDown(nc::KeySym::S))
 	{
 		if (reachVector.length() > 1.0f)
 			reachVector.normalize();
 	}
 
-	if (keyState.isKeyDown(nc::KEY_RIGHT) || keyState.isKeyDown(nc::KEY_D))
+	if (keyState.isKeyDown(nc::KeySym::RIGHT) || keyState.isKeyDown(nc::KeySym::D))
 	{
 		reachVector.x = 2.0f;
 		destVector_ = animSprite_->position() + reachVector;
 	}
-	else if (keyState.isKeyDown(nc::KEY_LEFT) || keyState.isKeyDown(nc::KEY_A))
+	else if (keyState.isKeyDown(nc::KeySym::LEFT) || keyState.isKeyDown(nc::KeySym::A))
 	{
 		reachVector.x = -2.0f;
 		destVector_ = animSprite_->position() + reachVector;
 	}
-	if (keyState.isKeyDown(nc::KEY_UP) || keyState.isKeyDown(nc::KEY_W))
+	if (keyState.isKeyDown(nc::KeySym::UP) || keyState.isKeyDown(nc::KeySym::W))
 	{
 		reachVector.y = 2.0f;
 		destVector_ = animSprite_->position() + reachVector;
 	}
-	else if (keyState.isKeyDown(nc::KEY_DOWN) || keyState.isKeyDown(nc::KEY_S))
+	else if (keyState.isKeyDown(nc::KeySym::DOWN) || keyState.isKeyDown(nc::KeySym::S))
 	{
 		reachVector.y = -2.0f;
 		destVector_ = animSprite_->position() + reachVector;
@@ -136,9 +138,9 @@ void MyEventHandler::onTouchMove(const nc::TouchEvent &event)
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
+	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
 		nc::theApplication().quit();
-	else if (event.sym == nc::KEY_SPACE)
+	else if (event.sym == nc::KeySym::SPACE)
 		nc::theApplication().togglePause();
 }
 
@@ -162,9 +164,9 @@ void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 
 void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 {
-	if (event.axisName == nc::AXIS_LX)
+	if (event.axisName == nc::AxisName::LX)
 		joyVector_.x = event.value;
-	else if (event.axisName == nc::AXIS_LY)
+	else if (event.axisName == nc::AxisName::LY)
 		joyVector_.y = -event.value;
 }
 

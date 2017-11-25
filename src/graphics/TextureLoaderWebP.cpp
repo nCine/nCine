@@ -19,7 +19,7 @@ TextureLoaderWebP::TextureLoaderWebP(IFile *fileHandle)
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 
 	// Loading the whole file in memory
-	fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
+	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 	const long int fileSize = fileHandle_->size();
 	unsigned char *fileBuffer = new unsigned char[fileSize];
 	fileHandle_->read(fileBuffer, fileSize);

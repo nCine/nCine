@@ -14,17 +14,17 @@ ProfilePlotter::ProfilePlotter(SceneNode *parent, Rectf rect)
 	width_ = rect.w;
 	height_ = rect.h;
 
-	setLayer(DrawableNode::HUD_LAYER);
-	renderCommand_->material().setShaderProgram(Material::COLOR_PROGRAM);
+	setLayer(DrawableNode::LayerBase::HUD);
+	renderCommand_->material().setShaderProgram(Material::ShaderProgram::COLOR);
 	renderCommand_->geometry().createCustomVbo(8, GL_STATIC_DRAW);
 	renderCommand_->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, 4);
 	setBackgroundVertices();
 	renderCommand_->geometry().updateVboData(0, 8, backgroundVertices_.data());
 
 	// Priority is one more than variable mean lines
-	refValueCmd_.setLayer(DrawableNode::HUD_LAYER + 3);
-	refValueCmd_.setType(RenderCommand::PLOTTER_TYPE);
-	refValueCmd_.material().setShaderProgram(Material::COLOR_PROGRAM);
+	refValueCmd_.setLayer(DrawableNode::LayerBase::HUD + 3);
+	refValueCmd_.setType(RenderCommand::CommandType::PLOTTER);
+	refValueCmd_.material().setShaderProgram(Material::ShaderProgram::COLOR);
 	refValueCmd_.geometry().createCustomVbo(4, GL_DYNAMIC_DRAW);
 	refValueCmd_.geometry().setDrawParameters(GL_LINES, 0, 2);
 }

@@ -59,7 +59,7 @@ AudioLoaderOgg::AudioLoaderOgg(IFile *fileHandle)
 #ifdef __ANDROID__
 	if (fileHandle_->type() == AssetFile::sType())
 	{
-		fileHandle_->open(IFile::MODE_FD | IFile::MODE_READ);
+		fileHandle_->open(IFile::OpenMode::FD | IFile::OpenMode::READ);
 
 		if (ov_open_callbacks(fileHandle_, &oggFile_, nullptr, 0, oggCallbacks) != 0)
 		{
@@ -70,7 +70,7 @@ AudioLoaderOgg::AudioLoaderOgg(IFile *fileHandle)
 	}
 	else
 	{
-		fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
+		fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 
 		if (ov_open(fileHandle_->ptr(), &oggFile_, nullptr, 0) != 0)
 		{

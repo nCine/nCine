@@ -13,11 +13,11 @@ StackedBarVariable::StackedBarVariable(unsigned int numValues, float rejectDelay
 	// Six vertices (two coordinates each) for every recorded value
 	vertices_ = new GLfloat[4 + numValues * 2 * 6];
 
-	valuesCmd_.material().setShaderProgram(Material::COLOR_PROGRAM);
+	valuesCmd_.material().setShaderProgram(Material::ShaderProgram::COLOR);
 	valuesCmd_.geometry().createCustomVbo(4 + numValues * 2 * 6, GL_DYNAMIC_DRAW);
 	valuesCmd_.geometry().setDrawParameters(GL_TRIANGLES, 2, variable_.numValues() * 6);
 
-	meanCmd_.material().setShaderProgram(Material::COLOR_PROGRAM);
+	meanCmd_.material().setShaderProgram(Material::ShaderProgram::COLOR);
 	meanCmd_.geometry().shareVbo(valuesCmd_.geometry());
 	meanCmd_.geometry().setDrawParameters(GL_LINES, 0, 2);
 }

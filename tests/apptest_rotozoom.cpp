@@ -109,8 +109,8 @@ void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
+	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
 		nc::theApplication().quit();
-	else if (event.sym == nc::KEY_SPACE)
+	else if (event.sym == nc::KeySym::SPACE)
 		nc::theApplication().togglePause();
 }

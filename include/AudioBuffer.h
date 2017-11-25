@@ -25,7 +25,7 @@ class DLL_PUBLIC AudioBuffer : public Object
 	/// Returns samples frequency
 	inline int frequency() const { return frequency_; }
 
-	inline static ObjectType sType() { return AUDIOBUFFER_TYPE; }
+	inline static ObjectType sType() { return ObjectType::AUDIOBUFFER; }
 
   private:
 	/// The OpenAL buffer id

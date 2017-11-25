@@ -50,7 +50,7 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	/// Flips the texture rect along the Y coordinate
 	void flipY();
 
-	inline static ObjectType sType() { return SPRITE_TYPE; }
+	inline static ObjectType sType() { return ObjectType::SPRITE; }
 
   private:
 	/// The sprite texture

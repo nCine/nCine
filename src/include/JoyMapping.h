@@ -31,7 +31,7 @@ class JoyMappedStateImpl : public JoyMappedState
 	bool isButtonPressed(ButtonName name) const override
 	{
 		bool pressed = false;
-		if (name != BUTTON_UNKNOWN)
+		if (name != ButtonName::UNKNOWN)
 			pressed = buttons_[static_cast<int>(name)];
 		return pressed;
 	}
@@ -39,7 +39,7 @@ class JoyMappedStateImpl : public JoyMappedState
 	float axisValue(AxisName name) const override
 	{
 		float value = 0.0f;
-		if (name != AXIS_UNKNOWN)
+		if (name != AxisName::UNKNOWN)
 			value = axesValues_[static_cast<int>(name)];
 		return value;
 	}

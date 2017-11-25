@@ -23,7 +23,7 @@ class DLL_PUBLIC AudioBufferPlayer : public IAudioPlayer
 	/// Updates the player state
 	void updateState() override;
 
-	inline static ObjectType sType() { return AUDIOBUFFERPLAYER_TYPE; }
+	inline static ObjectType sType() { return ObjectType::AUDIOBUFFER_PLAYER; }
 
   private:
 	AudioBuffer *audioBuffer_;

@@ -14,14 +14,14 @@ typedef class Vector2<float> Vector2f;
 class DLL_PUBLIC IInputManager
 {
   public:
-	enum MouseCursorMode
+	enum class MouseCursorMode
 	{
 		/// Mouse cursor behaves normally
-		MOUSE_CURSOR_NORMAL,
+		NORMAL,
 		/// Mouse cursor is hidden but behaves normally
-		MOUSE_CURSOR_HIDDEN,
+		HIDDEN,
 		/// Mouse cursor is hidden and locked to the window
-		MOUSE_CURSOR_DISABLED
+		DISABLED
 	};
 
 	static const int MaxNumJoysticks;

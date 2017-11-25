@@ -12,30 +12,36 @@ class DLL_PUBLIC IFile
 {
   public:
 	/// File types
-	enum FileType
+	enum class FileType
 	{
-		BASE_TYPE = 0,
-		STANDARD_TYPE,
-		ASSET_TYPE
+		BASE = 0,
+		STANDARD,
+		ASSET
 	};
 
 	/// Open mode bitmask
-	enum OpenMode
+	struct OpenMode
 	{
-#if !(defined(_WIN32) && !defined(__MINGW32__))
-		MODE_FD = 1,
-#endif
-		MODE_READ = 2,
-		MODE_WRITE = 4,
-		MODE_BINARY = 8
+		enum
+		{
+		#if !(defined(_WIN32) && !defined(__MINGW32__))
+			FD = 1,
+		#endif
+			READ = 2,
+			WRITE = 4,
+			BINARY = 8
+		};
 	};
 
 	/// Access mode bitmask
-	enum AccessMode
+	struct AccessMode
 	{
-		MODE_EXISTS = 0,
-		MODE_CAN_READ = 2,
-		MODE_CAN_WRITE = 4
+		enum
+		{
+			EXISTS = 0,
+			READABLE = 2,
+			WRITABLE = 4
+		};
 	};
 
 	/// Constructs a base file object

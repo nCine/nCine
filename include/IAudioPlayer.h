@@ -11,12 +11,12 @@ class DLL_PUBLIC IAudioPlayer : public Object
 {
   public:
 	/// Player state
-	enum PlayerState
+	enum class PlayerState
 	{
-		STATE_INITIAL = 0,
-		STATE_PLAYING,
-		STATE_PAUSED,
-		STATE_STOPPED
+		INITIAL = 0,
+		PLAYING,
+		PAUSED,
+		STOPPED
 	};
 
 	IAudioPlayer();
@@ -55,11 +55,11 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	/// Returns the state of the player
 	inline PlayerState state() const { return state_; }
 	/// Queries the playing state of the player
-	inline bool isPlaying() const { return state_ == STATE_PLAYING; }
+	inline bool isPlaying() const { return state_ == PlayerState::PLAYING; }
 	/// Queries the paused state of the player
-	inline bool isPaused() const { return state_ == STATE_PAUSED; }
+	inline bool isPaused() const { return state_ == PlayerState::PAUSED; }
 	/// Queries the stopped state of the player
-	inline bool isStopped() const { return state_ == STATE_STOPPED; }
+	inline bool isStopped() const { return state_ == PlayerState::STOPPED; }
 	/// Queries the looping property of the player
 	inline bool isLooping() const { return isLooping_; }
 

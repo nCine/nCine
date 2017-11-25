@@ -12,13 +12,15 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Font::Font(const char *texFilename, const char *fntFilename)
-	: Object(FONT_TYPE, fntFilename), texture_(nullptr), lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_(0), numKernings_(0), glyphs_(nullptr)
+	: Object(ObjectType::FONT, fntFilename),
+	  texture_(nullptr), lineHeight_(0), base_(0), width_(0), height_(0),
+	  numGlyphs_(0), numKernings_(0), glyphs_(nullptr)
 {
 	texture_ = new Texture(texFilename);
 	glyphs_ = new FontGlyph[MaxGlyphs];
 
 	IFile *fileHandle = IFile::createFileHandle(fntFilename);
-	fileHandle->open(IFile::MODE_READ);
+	fileHandle->open(IFile::OpenMode::READ);
 	parseFntFile(fileHandle);
 	delete fileHandle;
 }

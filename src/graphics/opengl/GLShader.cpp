@@ -41,7 +41,7 @@ void GLShader::loadFromFile(const char *filename)
 {
 	IFile *fileHandle = IFile::createFileHandle(filename);
 
-	fileHandle->open(IFile::MODE_READ);
+	fileHandle->open(IFile::OpenMode::READ);
 	if (fileHandle->isOpened())
 	{
 		const GLint length = static_cast<int>(fileHandle->size());

@@ -12,13 +12,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AudioBuffer::AudioBuffer()
-	: Object(AUDIOBUFFER_TYPE), numChannels_(0), frequency_(0)
+	: Object(ObjectType::AUDIOBUFFER), numChannels_(0), frequency_(0)
 {
 	alGenBuffers(1, &bufferId_);
 }
 
 AudioBuffer::AudioBuffer(const char *filename)
-	: Object(AUDIOBUFFER_TYPE, filename), numChannels_(0), frequency_(0)
+	: Object(ObjectType::AUDIOBUFFER, filename), numChannels_(0), frequency_(0)
 {
 	alGenBuffers(1, &bufferId_);
 

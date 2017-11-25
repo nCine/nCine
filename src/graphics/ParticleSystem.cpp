@@ -12,7 +12,7 @@ ParticleSystem::ParticleSystem(SceneNode *parent, unsigned int count, Texture *t
 	: SceneNode(parent, 0, 0), poolSize_(count), poolTop_(count - 1), particlePool_(poolSize_, ArrayMode::FIXED_CAPACITY),
 	  particleList_(poolSize_, ArrayMode::FIXED_CAPACITY), affectors_(4), inLocalSpace_(false)
 {
-	type_ = PARTICLESYSTEM_TYPE;
+	type_ = ObjectType::PARTICLE_SYSTEM;
 
 	for (unsigned int i = 0; i < poolSize_; i++)
 	{

@@ -129,9 +129,9 @@ void Application::initCommon()
 		{
 			String fontTexFilePath = IFile::dataPath() + appCfg_.fontTexFilename_;
 			String fontFntFilePath = IFile::dataPath() + appCfg_.fontFntFilename_;
-			if (IFile::access(fontTexFilePath.data(), IFile::MODE_EXISTS) == false)
+			if (IFile::access(fontTexFilePath.data(), IFile::AccessMode::EXISTS) == false)
 				LOGW_X("Cannot access font texture file \"%s\" to enable profiling text", fontTexFilePath.data());
-			else if (IFile::access(fontFntFilePath.data(), IFile::MODE_EXISTS) == false)
+			else if (IFile::access(fontFntFilePath.data(), IFile::AccessMode::EXISTS) == false)
 				LOGW_X("Cannot access font FNT file \"%s\" to enable profiling text", fontFntFilePath.data());
 			else
 			{
@@ -177,14 +177,14 @@ void Application::step()
 		textUpdateTime_ = Timer::now();
 		textString_.format(static_cast<const char *>("FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC"),
 		                   frameTimer_->averageFps(), frameTimer_->interval() * 1000.0f,
-		                   renderQueue_->numVertices(RenderCommand::SPRITE_TYPE), renderQueue_->numCommands(RenderCommand::SPRITE_TYPE),
-		                   renderQueue_->numVertices(RenderCommand::PARTICLE_TYPE), renderQueue_->numCommands(RenderCommand::PARTICLE_TYPE),
-		                   renderQueue_->numVertices(RenderCommand::TEXT_TYPE), renderQueue_->numCommands(RenderCommand::TEXT_TYPE),
-		                   renderQueue_->numVertices(RenderCommand::PLOTTER_TYPE), renderQueue_->numCommands(RenderCommand::PLOTTER_TYPE),
+		                   renderQueue_->numVertices(RenderCommand::CommandType::SPRITE), renderQueue_->numCommands(RenderCommand::CommandType::SPRITE),
+		                   renderQueue_->numVertices(RenderCommand::CommandType::PARTICLE), renderQueue_->numCommands(RenderCommand::CommandType::PARTICLE),
+		                   renderQueue_->numVertices(RenderCommand::CommandType::TEXT), renderQueue_->numCommands(RenderCommand::CommandType::TEXT),
+		                   renderQueue_->numVertices(RenderCommand::CommandType::PLOTTER), renderQueue_->numCommands(RenderCommand::CommandType::PLOTTER),
 		                   renderQueue_->numVertices(), renderQueue_->numCommands());
 
 		textLines_->setString(textString_);
-		textLines_->setAlignment(TextNode::ALIGN_RIGHT);
+		textLines_->setAlignment(TextNode::Alignment::RIGHT);
 		textLines_->setPosition(width() - textLines_->width() * 0.5f, height() - textLines_->height() * 0.5f);
 	}
 

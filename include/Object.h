@@ -10,19 +10,19 @@ class DLL_PUBLIC Object
 {
   public:
 	/// Object types
-	enum ObjectType
+	enum class ObjectType
 	{
-		BASE_TYPE = 0,
-		TEXTURE_TYPE,
-		SCENENODE_TYPE,
-		SPRITE_TYPE,
-		PARTICLESYSTEM_TYPE,
-		FONT_TYPE,
-		TEXTNODE_TYPE,
-		ANIMATEDSPRITE_TYPE,
-		AUDIOBUFFER_TYPE,
-		AUDIOBUFFERPLAYER_TYPE,
-		AUDIOSTREAMPLAYER_TYPE
+		BASE = 0,
+		TEXTURE,
+		SCENENODE,
+		SPRITE,
+		PARTICLE_SYSTEM,
+		FONT,
+		TEXTNODE,
+		ANIMATED_SPRITE,
+		AUDIOBUFFER,
+		AUDIOBUFFER_PLAYER,
+		AUDIOSTREAM_PLAYER
 	};
 
 	/// Maximum length for an object name
@@ -41,7 +41,7 @@ class DLL_PUBLIC Object
 	/// Returns the object type (RTTI)
 	inline ObjectType type() const { return type_; }
 	/// Static method to return class type
-	inline static ObjectType sType() { return BASE_TYPE; }
+	inline static ObjectType sType() { return ObjectType::BASE; }
 
 	/// Returns the object name
 	inline const String &name() const { return name_; }

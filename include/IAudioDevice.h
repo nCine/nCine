@@ -11,10 +11,10 @@ class IAudioPlayer;
 class DLL_PUBLIC IAudioDevice
 {
   public:
-	enum PlayerType
+	enum class PlayerType
 	{
-		BUFFER_PLAYER,
-		AUDIOSTREAM_PLAYER
+		BUFFER,
+		AUDIOSTREAM
 	};
 
 	virtual ~IAudioDevice() = 0;

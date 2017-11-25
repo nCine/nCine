@@ -11,11 +11,11 @@ class StandardFile : public IFile
   public:
 	/// Constructs a standard file object
 	/*! \param filename File name including its path */
-	explicit StandardFile(const char *filename) : IFile(filename) { type_ = STANDARD_TYPE; }
+	explicit StandardFile(const char *filename) : IFile(filename) { type_ = FileType::STANDARD; }
 	~StandardFile() override;
 
 	/// Static method to return class type
-	inline static FileType sType() { return STANDARD_TYPE; }
+	inline static FileType sType() { return FileType::STANDARD; }
 
 	/// Tries to open the standard file
 	void open(unsigned char mode) override;

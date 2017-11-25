@@ -14,10 +14,15 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 {
   public:
 	/// Drawing layers from back to front
-	enum LayerBase
+	struct LayerBase
 	{
-		SCENE_LAYER = 0,
-		HUD_LAYER = 32767
+		enum
+		{
+			LOWEST = 0,
+			SCENE = 0,
+			HUD = 32767,
+			HIGHEST = 65535
+		};
 	};
 
 	/// Constructor for a drawable node with a parent and a specified relative position

@@ -9,7 +9,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 IAudioPlayer::IAudioPlayer()
-	: Object(BASE_TYPE), sourceId_(-1), state_(STATE_STOPPED),
+	: Object(ObjectType::BASE), sourceId_(-1), state_(PlayerState::STOPPED),
 	  isLooping_(false), gain_(1.0f), pitch_(1.0f)
 {
 	position_[0] = 0.0f;
@@ -25,7 +25,7 @@ IAudioPlayer::IAudioPlayer()
 void IAudioPlayer::setGain(float gain)
 {
 	gain_ = gain;
-	if (state_ == STATE_PLAYING)
+	if (state_ == PlayerState::PLAYING)
 		alSourcef(sourceId_, AL_GAIN, gain_);
 }
 
@@ -33,7 +33,7 @@ void IAudioPlayer::setGain(float gain)
 void IAudioPlayer::setPitch(float pitch)
 {
 	pitch_ = pitch;
-	if (state_ == STATE_PLAYING)
+	if (state_ == PlayerState::PLAYING)
 		alSourcef(sourceId_, AL_PITCH, pitch_);
 }
 
@@ -50,7 +50,7 @@ void IAudioPlayer::setPosition(float x, float y, float z)
 	position_[1] = y;
 	position_[2] = z;
 
-	if (state_ == STATE_PLAYING)
+	if (state_ == PlayerState::PLAYING)
 		alSourcefv(sourceId_, AL_POSITION, position_.data());
 }
 

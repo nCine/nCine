@@ -20,7 +20,7 @@ TextureLoaderPng::TextureLoaderPng(IFile *fileHandle)
 
 	const int SignatureLength = 8;
 	unsigned char signature[SignatureLength];
-	fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
+	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 	fileHandle_->read(signature, SignatureLength);
 
 	// Checking PNG signature

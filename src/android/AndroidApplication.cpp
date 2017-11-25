@@ -211,8 +211,8 @@ void AndroidApplication::preInit()
 void AndroidApplication::init()
 {
 	// Graphics device should always be created before the input manager!
-	const DisplayMode displayMode32(8, 8, 8, 8, 24, 8, DisplayMode::DOUBLE_BUFFERED, DisplayMode::NO_VSYNC);
-	const DisplayMode displayMode16(5, 6, 5, 0, 16, 0, DisplayMode::DOUBLE_BUFFERED, DisplayMode::NO_VSYNC);
+	const DisplayMode displayMode32(8, 8, 8, 8, 24, 8, DisplayMode::DoubleBuffering::ENABLED, DisplayMode::VSync::DISABLED);
+	const DisplayMode displayMode16(5, 6, 5, 0, 16, 0, DisplayMode::DoubleBuffering::ENABLED, DisplayMode::VSync::DISABLED);
 	IGfxDevice::GLContextInfo contextInfo(appCfg_.glMajorVersion_, appCfg_.glMinorVersion_, appCfg_.glDebugContext_);
 
 	if (EglGfxDevice::isModeSupported(state_, contextInfo, displayMode32))

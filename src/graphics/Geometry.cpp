@@ -8,7 +8,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Geometry::Geometry()
-	: vboSharingType_(SHARED),
+	: vboSharingType_(SharingType::SHARED),
 	  primitiveType_(GL_TRIANGLES), firstVertex_(0), numVertices_(0),
 	  vbo_(nullptr), ibo_(nullptr)
 {
@@ -17,7 +17,7 @@ Geometry::Geometry()
 
 Geometry::~Geometry()
 {
-	if (vboSharingType_ == UNIQUE)
+	if (vboSharingType_ == SharingType::UNIQUE)
 		delete vbo_;
 }
 
@@ -34,10 +34,10 @@ void Geometry::setDrawParameters(GLenum primitiveType, GLint firstVertex, GLsize
 
 void Geometry::createCustomVbo(unsigned int numFloats, GLenum usage)
 {
-	if (vboSharingType_ != UNIQUE)
+	if (vboSharingType_ != SharingType::UNIQUE)
 	{
 		// VBO is now a custom one
-		vboSharingType_ = UNIQUE;
+		vboSharingType_ = SharingType::UNIQUE;
 	}
 	else
 	{
@@ -53,25 +53,25 @@ void Geometry::createCustomVbo(unsigned int numFloats, GLenum usage)
 void Geometry::updateVboData(unsigned int floatOffset, unsigned int floatSize, const GLfloat *data)
 {
 	// Common resources cannot be altered
-	if (vboSharingType_ != COMMON_RESOURCE)
+	if (vboSharingType_ != SharingType::COMMON_RESOURCE)
 		vbo_->bufferSubData(floatOffset * sizeof(GLfloat), floatSize * sizeof(GLfloat), data);
 }
 
 void Geometry::shareVbo(const Geometry &geometry)
 {
-	if (vboSharingType_ == UNIQUE)
+	if (vboSharingType_ == SharingType::UNIQUE)
 		delete vbo_;
 
-	vboSharingType_ = SHARED;
+	vboSharingType_ = SharingType::SHARED;
 	vbo_ = geometry.vbo_;
 }
 
 void Geometry::makeSharedQuad()
 {
-	if (vboSharingType_ == UNIQUE)
+	if (vboSharingType_ == SharingType::UNIQUE)
 		delete vbo_;
 
-	vboSharingType_ = COMMON_RESOURCE;
+	vboSharingType_ = SharingType::COMMON_RESOURCE;
 	vbo_ = const_cast<GLBufferObject *>(RenderResources::quadVbo());
 	setDrawParameters(GL_TRIANGLE_STRIP, 0, 4);
 }

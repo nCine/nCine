@@ -16,7 +16,7 @@ class AssetFile : public IFile
 	explicit AssetFile(const char *filename);
 	~AssetFile() override;
 
-	inline static FileType sType() { return ASSET_TYPE; }
+	inline static FileType sType() { return FileType::ASSET; }
 
 	/// Tries to open the asset file
 	void open(unsigned char mode) override;

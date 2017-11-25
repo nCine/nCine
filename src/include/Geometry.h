@@ -35,7 +35,7 @@ class Geometry
 
   private:
 	/// Sharing type for the buffers
-	enum SharingType
+	enum class SharingType
 	{
 		/// It must not be modified, the buffer is a resource shared across the application
 		COMMON_RESOURCE,

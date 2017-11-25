@@ -11,13 +11,13 @@ namespace ncine {
 AudioStreamPlayer::AudioStreamPlayer(const char *filename)
 	: audioStream_(filename)
 {
-	type_ = AUDIOSTREAMPLAYER_TYPE;
+	type_ = ObjectType::AUDIOSTREAM_PLAYER;
 	setName(filename);
 }
 
 AudioStreamPlayer::~AudioStreamPlayer()
 {
-	if (state_ != STATE_STOPPED)
+	if (state_ != PlayerState::STOPPED)
 		audioStream_.stop(sourceId_);
 }
 
@@ -29,8 +29,8 @@ void AudioStreamPlayer::play()
 {
 	switch (state_)
 	{
-		case STATE_INITIAL:
-		case STATE_STOPPED:
+		case PlayerState::INITIAL:
+		case PlayerState::STOPPED:
 		{
 			// source is a signed integer in order to check for unavailble source return value.
 			// It is then converted to an OpenAL unsigned integer to be used as a valid source.
@@ -48,17 +48,17 @@ void AudioStreamPlayer::play()
 			alSourcefv(sourceId_, AL_POSITION, position_.data());
 
 			alSourcePlay(sourceId_);
-			state_ = STATE_PLAYING;
+			state_ = PlayerState::PLAYING;
 
 			theServiceLocator().audioDevice().registerPlayer(this);
 			break;
 		}
-		case STATE_PLAYING:
+		case PlayerState::PLAYING:
 			break;
-		case STATE_PAUSED:
+		case PlayerState::PAUSED:
 		{
 			alSourcePlay(sourceId_);
-			state_ = STATE_PLAYING;
+			state_ = PlayerState::PLAYING;
 
 			theServiceLocator().audioDevice().registerPlayer(this);
 			break;
@@ -70,16 +70,16 @@ void AudioStreamPlayer::pause()
 {
 	switch (state_)
 	{
-		case STATE_INITIAL:
-		case STATE_STOPPED:
+		case PlayerState::INITIAL:
+		case PlayerState::STOPPED:
 			break;
-		case STATE_PLAYING:
+		case PlayerState::PLAYING:
 		{
 			alSourcePause(sourceId_);
-			state_ = STATE_PAUSED;
+			state_ = PlayerState::PAUSED;
 			break;
 		}
-		case STATE_PAUSED:
+		case PlayerState::PAUSED:
 			break;
 	}
 }
@@ -88,29 +88,29 @@ void AudioStreamPlayer::stop()
 {
 	switch (state_)
 	{
-		case STATE_INITIAL:
-		case STATE_STOPPED:
+		case PlayerState::INITIAL:
+		case PlayerState::STOPPED:
 			break;
-		case STATE_PLAYING:
+		case PlayerState::PLAYING:
 		{
 			// Stop the source then unqueue every buffer
 			audioStream_.stop(sourceId_);
 
-			state_ = STATE_STOPPED;
+			state_ = PlayerState::STOPPED;
 			break;
 		}
-		case STATE_PAUSED:
+		case PlayerState::PAUSED:
 			break;
 	}
 }
 
 void AudioStreamPlayer::updateState()
 {
-	if (state_ == STATE_PLAYING)
+	if (state_ == PlayerState::PLAYING)
 	{
 		const bool shouldStillPlay = audioStream_.enqueue(sourceId_, isLooping_);
 		if (shouldStillPlay == false)
-			state_ = STATE_STOPPED;
+			state_ = PlayerState::STOPPED;
 	}
 }
 

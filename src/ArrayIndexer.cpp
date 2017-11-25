@@ -75,18 +75,18 @@ void ArrayIndexer::logReport() const
 			String typeName(Object::MaxNameLength);
 			switch (objPtr->type())
 			{
-				case Object::BASE_TYPE:					typeName = "Base"; break;
-				case Object::TEXTURE_TYPE:				typeName = "Texture"; break;
-				case Object::SCENENODE_TYPE:			typeName = "SceneNode"; break;
-				case Object::SPRITE_TYPE:				typeName = "Sprite"; break;
-				case Object::PARTICLESYSTEM_TYPE:		typeName = "ParticleSystem"; break;
-				case Object::FONT_TYPE:					typeName = "Font"; break;
-				case Object::TEXTNODE_TYPE:				typeName = "TextNode"; break;
-				case Object::ANIMATEDSPRITE_TYPE:		typeName = "AnimatedSprite"; break;
-				case Object::AUDIOBUFFER_TYPE:			typeName = "AudioBuffer"; break;
-				case Object::AUDIOBUFFERPLAYER_TYPE:	typeName = "AudioBufferPlayer"; break;
-				case Object::AUDIOSTREAMPLAYER_TYPE:	typeName = "AudioStreamPlayer"; break;
-				default:								typeName = "Unknown"; break;
+				case Object::ObjectType::BASE:					typeName = "Base"; break;
+				case Object::ObjectType::TEXTURE:				typeName = "Texture"; break;
+				case Object::ObjectType::SCENENODE:				typeName = "SceneNode"; break;
+				case Object::ObjectType::SPRITE:				typeName = "Sprite"; break;
+				case Object::ObjectType::PARTICLE_SYSTEM:		typeName = "ParticleSystem"; break;
+				case Object::ObjectType::FONT:					typeName = "Font"; break;
+				case Object::ObjectType::TEXTNODE:				typeName = "TextNode"; break;
+				case Object::ObjectType::ANIMATED_SPRITE:		typeName = "AnimatedSprite"; break;
+				case Object::ObjectType::AUDIOBUFFER:			typeName = "AudioBuffer"; break;
+				case Object::ObjectType::AUDIOBUFFER_PLAYER:	typeName = "AudioBufferPlayer"; break;
+				case Object::ObjectType::AUDIOSTREAM_PLAYER:	typeName = "AudioStreamPlayer"; break;
+				default:										typeName = "Unknown"; break;
 			}
 
 			LOGI_X("Object %u - type: %s - name: \"%s\"", objPtr->id(), typeName.data(), objPtr->name().data());

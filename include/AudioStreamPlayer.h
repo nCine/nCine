@@ -22,7 +22,7 @@ class DLL_PUBLIC AudioStreamPlayer : public IAudioPlayer
 	/// Updates the player state and the stream buffer queue
 	void updateState() override;
 
-	inline static ObjectType sType() { return AUDIOSTREAMPLAYER_TYPE; }
+	inline static ObjectType sType() { return ObjectType::AUDIOSTREAM_PLAYER; }
 
   private:
 	AudioStream audioStream_;

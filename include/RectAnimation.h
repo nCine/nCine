@@ -11,14 +11,14 @@ class DLL_PUBLIC RectAnimation
 {
   public:
 	/// Loop modes
-	enum LoopMode
+	enum class LoopMode
 	{
-		NOT_LOOPING,
-		LOOPING
+		DISABLED,
+		ENABLED
 	};
 
 	/// Rewind modes
-	enum RewindMode
+	enum class RewindMode
 	{
 		/// When the animation reaches the last frame it begins again from start
 		FROM_START,

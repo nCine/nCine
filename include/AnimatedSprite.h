@@ -30,7 +30,7 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	/// Sets the current animation to a specified frame number
 	void setFrame(unsigned int frameNum);
 
-	inline static ObjectType sType() { return ANIMATEDSPRITE_TYPE; }
+	inline static ObjectType sType() { return ObjectType::ANIMATED_SPRITE; }
 
   private:
 	Array<RectAnimation *> anims_;

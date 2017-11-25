@@ -125,23 +125,23 @@ void MyEventHandler::onFrameStart()
 
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
-	if (keyState.isKeyDown(nc::KEY_D))
+	if (keyState.isKeyDown(nc::KeySym::D))
 		camPos_.x -= MoveSpeed * interval;
-	else if (keyState.isKeyDown(nc::KEY_A))
+	else if (keyState.isKeyDown(nc::KeySym::A))
 		camPos_.x += MoveSpeed * interval;
-	if (keyState.isKeyDown(nc::KEY_W))
+	if (keyState.isKeyDown(nc::KeySym::W))
 		camPos_.y -= MoveSpeed * interval;
-	else if (keyState.isKeyDown(nc::KEY_S))
+	else if (keyState.isKeyDown(nc::KeySym::S))
 		camPos_.y += MoveSpeed * interval;
 
-	if (keyState.isKeyDown(nc::KEY_RIGHT))
+	if (keyState.isKeyDown(nc::KeySym::RIGHT))
 		camRot_ += RotateSpeed * interval;
-	else if (keyState.isKeyDown(nc::KEY_LEFT))
+	else if (keyState.isKeyDown(nc::KeySym::LEFT))
 		camRot_ -= RotateSpeed * interval;
 
-	if (keyState.isKeyDown(nc::KEY_UP))
+	if (keyState.isKeyDown(nc::KeySym::UP))
 		camScale_ += ScaleSpeed * interval;
-	else if (keyState.isKeyDown(nc::KEY_DOWN))
+	else if (keyState.isKeyDown(nc::KeySym::DOWN))
 		camScale_ -= ScaleSpeed * interval;
 
 	if (joyVectorLeft_.length() > nc::IInputManager::LeftStickDeadZone)
@@ -279,13 +279,13 @@ void MyEventHandler::onPointerDown(const nc::TouchEvent &event)
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KEY_P)
+	if (event.sym == nc::KeySym::P)
 		pause_ = !pause_;
-	else if (event.sym == nc::KEY_R)
+	else if (event.sym == nc::KeySym::R)
 		resetCamera();
-	else if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
+	else if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
 		nc::theApplication().quit();
-	else if (event.sym == nc::KEY_SPACE)
+	else if (event.sym == nc::KeySym::SPACE)
 		nc::theApplication().togglePause();
 }
 
@@ -337,20 +337,20 @@ void MyEventHandler::onScrollInput(const nc::ScrollEvent &event)
 
 void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 {
-	if (event.axisName == nc::AXIS_LX)
+	if (event.axisName == nc::AxisName::LX)
 		joyVectorLeft_.x = event.value;
-	else if (event.axisName == nc::AXIS_LY)
+	else if (event.axisName == nc::AxisName::LY)
 		joyVectorLeft_.y = -event.value;
 
-	if (event.axisName == nc::AXIS_RX)
+	if (event.axisName == nc::AxisName::RX)
 		joyVectorRight_.x = event.value;
-	else if (event.axisName == nc::AXIS_RY)
+	else if (event.axisName == nc::AxisName::RY)
 		joyVectorRight_.y = -event.value;
 }
 
 void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event)
 {
-	if (event.buttonName == nc::BUTTON_B)
+	if (event.buttonName == nc::ButtonName::B)
 		resetCamera();
 }
 

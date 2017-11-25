@@ -17,7 +17,7 @@ TextureLoaderPkm::TextureLoaderPkm(const char *filename)
 TextureLoaderPkm::TextureLoaderPkm(IFile *fileHandle)
 	: ITextureLoader(fileHandle)
 {
-	fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
+	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 
 	PkmHeader header;
 	// PKM header is 16 bytes long

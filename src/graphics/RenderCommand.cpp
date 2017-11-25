@@ -9,7 +9,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 RenderCommand::RenderCommand()
-	: sortKey_(0), layer_(BOTTOM_LAYER), profilingType_(GENERIC_TYPE),
+	: sortKey_(0), layer_(BottomLayer), profilingType_(CommandType::GENERIC),
 	  modelView_(Matrix4x4f::Identity)
 {
 
@@ -59,7 +59,7 @@ void RenderCommand::setTransformation()
 	Matrix4x4f projection = Matrix4x4f::ortho(0.0f, width, 0.0f, height, near, far);
 
 	// The layer translates to depth, from near to far
-	const float layerStep = 1.0f / static_cast<float>(TOP_LAYER);
+	const float layerStep = 1.0f / static_cast<float>(TopLayer);
 	modelView_[3][2] = near + layerStep + (far - near - layerStep) * (layer_ * layerStep);
 
 	if (material_.shaderProgram_)

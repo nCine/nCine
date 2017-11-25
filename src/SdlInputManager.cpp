@@ -136,7 +136,7 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 		case SDL_KEYUP:
 			keyboardEvent_.scancode = event.key.keysym.scancode;
 			keyboardEvent_.sym = SdlKeys::keySymValueToEnum(event.key.keysym.sym);
-			keyboardEvent_.mod = SdlKeys::keyModValueToEnum(event.key.keysym.mod);
+			keyboardEvent_.mod = static_cast<int>(SdlKeys::keyModValueToEnum(event.key.keysym.mod));
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
@@ -145,7 +145,7 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 			mouseEvent_.button_ = event.button.button;
 			break;
 		case SDL_MOUSEMOTION:
-			if (mouseCursorMode_ != MOUSE_CURSOR_DISABLED)
+			if (mouseCursorMode_ != MouseCursorMode::DISABLED)
 			{
 				mouseState_.x = event.motion.x;
 				mouseState_.y = theApplication().heightInt() - event.motion.y;
@@ -296,9 +296,9 @@ void SdlInputManager::setMouseCursorMode(MouseCursorMode mode)
 	{
 		switch (mode)
 		{
-			case MOUSE_CURSOR_NORMAL: SDL_ShowCursor(SDL_ENABLE); SDL_SetRelativeMouseMode(SDL_FALSE); break;
-			case MOUSE_CURSOR_HIDDEN: SDL_ShowCursor(SDL_DISABLE); SDL_SetRelativeMouseMode(SDL_FALSE); break;
-			case MOUSE_CURSOR_DISABLED: SDL_SetRelativeMouseMode(SDL_TRUE); break;
+			case MouseCursorMode::NORMAL: SDL_ShowCursor(SDL_ENABLE); SDL_SetRelativeMouseMode(SDL_FALSE); break;
+			case MouseCursorMode::HIDDEN: SDL_ShowCursor(SDL_DISABLE); SDL_SetRelativeMouseMode(SDL_FALSE); break;
+			case MouseCursorMode::DISABLED: SDL_SetRelativeMouseMode(SDL_TRUE); break;
 		}
 
 		mouseCursorMode_ = mode;

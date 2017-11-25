@@ -28,20 +28,21 @@ class AndroidKeyboardState : public KeyboardState
   public:
 	AndroidKeyboardState()
 	{
-		for (unsigned int i = 0; i < KEYSYM_COUNT; i++)
+		for (unsigned int i = 0; i < NumKeys; i++)
 			keys_[i] = 0;
 	}
 
 	inline bool isKeyDown(KeySym key) const override
 	{
-		if (key == KEY_UNKNOWN)
+		if (key == KeySym::UNKNOWN)
 			return false;
 		else
-			return keys_[key] != 0;
+			return keys_[static_cast<unsigned int>(key)] != 0;
 	}
 
   private:
-	unsigned char keys_[KEYSYM_COUNT];
+	static const unsigned int NumKeys = static_cast<unsigned int>(KeySym::COUNT);
+	unsigned char keys_[NumKeys];
 
 	friend class AndroidInputManager;
 };

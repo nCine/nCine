@@ -382,16 +382,18 @@ bool AndroidInputManager::processKeyboardEvent(const AInputEvent *event)
 
 	keyboardEvent_.scancode = AKeyEvent_getScanCode(event);
 	keyboardEvent_.sym = AndroidKeys::keySymValueToEnum(AKeyEvent_getKeyCode(event));
-	keyboardEvent_.mod = AndroidKeys::keyModValueToEnum(AKeyEvent_getMetaState(event));
+	const int keyMod = static_cast<int>(AndroidKeys::keyModValueToEnum(AKeyEvent_getMetaState(event)));
+	keyboardEvent_.mod = keyMod;
 
+	const unsigned int keySym = static_cast<unsigned int>(keyboardEvent_.sym);
 	switch (AKeyEvent_getAction(event))
 	{
 		case AKEY_EVENT_ACTION_DOWN:
-			keyboardState_.keys_[keyboardEvent_.sym] = 1;
+			keyboardState_.keys_[keySym] = 1;
 			inputEventHandler_->onKeyPressed(keyboardEvent_);
 			break;
 		case AKEY_EVENT_ACTION_UP:
-			keyboardState_.keys_[keyboardEvent_.sym] = 0;
+			keyboardState_.keys_[keySym] = 0;
 			inputEventHandler_->onKeyReleased(keyboardEvent_);
 			break;
 		case AKEY_EVENT_ACTION_MULTIPLE:

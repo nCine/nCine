@@ -34,7 +34,7 @@ class DLL_PUBLIC Font : public Object
 	/// Returns a constant pointer to a glyph
 	const FontGlyph *glyph(unsigned int glyphId) const;
 
-	inline static ObjectType sType() { return FONT_TYPE; }
+	inline static ObjectType sType() { return ObjectType::FONT; }
 
   private:
 	/// The font texture
