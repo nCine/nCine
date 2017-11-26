@@ -7,8 +7,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 FontGlyph::FontGlyph()
-	: x_(0), y_(0), width_(0), height_(0), xOffset_(0),
-	  yOffset_(0), xAdvance_(0), kernings_(4)
+	: FontGlyph(0, 0, 0, 0, 0, 0, 0)
 {
 
 }

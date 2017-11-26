@@ -42,14 +42,9 @@ Texture::Texture(const char *filename, int width, int height)
 }
 
 Texture::Texture(const char *filename, Vector2i size)
-	: Object(ObjectType::TEXTURE, filename), glTexture_(new GLTexture(GL_TEXTURE_2D)),
-	  width_(0), height_(0), isCompressed_(false), hasAlphaChannel_(false)
+	: Texture(filename, size.x, size.y)
 {
-	glTexture_->bind();
 
-	ITextureLoader *pTexLoader = ITextureLoader::createFromFile(filename);
-	load(*pTexLoader, size.x, size.y);
-	delete pTexLoader;
 }
 
 Texture::~Texture()

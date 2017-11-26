@@ -11,29 +11,22 @@ class DLL_PUBLIC Color
 {
   public:
 	/// Default constructor (white color)
-	Color()
-	{ set(255, 255, 255, 255); }
-	/// Four channels constructor (`unsigned char`)
-	Color(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
-	{ set(red, green, blue, alpha); }
+	Color() { set(255, 255, 255, 255); }
 	/// Three channels constructor (`unsigned char`)
 	Color(unsigned char red, unsigned char green, unsigned char blue)
-	{ set(red, green, blue); }
-	/// Four channels constructor (`unsigned int`)
-	Color(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha)
+		: Color(red, green, blue, 255) { }
+	/// Four channels constructor (`unsigned char`)
+	Color(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
 	{
-		set(static_cast<unsigned char>(red), static_cast<unsigned char>(green),
-		    static_cast<unsigned char>(blue), static_cast<unsigned char>(alpha));
+		set(red, green, blue, alpha);
 	}
-	/// Three channels constructor (`unsigned int`)
-	Color(unsigned int red, unsigned int green, unsigned int blue)
-	{ set(static_cast<unsigned char>(red), static_cast<unsigned char>(green), static_cast<unsigned char>(blue)); }
+	/// Three channels constructor (normalized `float`)
+	Color(float red, float green, float blue) : Color(red, green, blue, 1.0f) { }
 	/// Four channels constructor (normalized `float`)
 	Color(float red, float green, float blue, float alpha)
-	{ setF(red, green, blue, alpha); }
-	/// Three channels constructor (normalized `float`)
-	Color(float red, float green, float blue)
-	{ setF(red, green, blue); }
+	{
+		setF(red, green, blue, alpha);
+	}
 
 	/// Getter for the red channel of the color
 	inline unsigned char r() const { return channels_[0]; }

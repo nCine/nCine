@@ -7,13 +7,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AnimatedSprite::AnimatedSprite(SceneNode *parent, Texture *texture)
-	: Sprite(parent, texture), anims_(4), currentAnim_(-1)
+	: AnimatedSprite(parent, texture, 0.0f, 0.0f)
 {
 
 }
 
 AnimatedSprite::AnimatedSprite(Texture *texture)
-	: Sprite(texture), anims_(4), currentAnim_(-1)
+	: AnimatedSprite(nullptr, texture, 0.0f, 0.0f)
 {
 
 }
@@ -25,7 +25,7 @@ AnimatedSprite::AnimatedSprite(SceneNode *parent, Texture *texture, float x, flo
 }
 
 AnimatedSprite::AnimatedSprite(Texture *texture, float x, float y)
-	: Sprite(texture, x, y), anims_(4), currentAnim_(-1)
+	: AnimatedSprite(nullptr, texture, x, y)
 {
 
 }

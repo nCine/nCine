@@ -22,13 +22,6 @@ Sprite::Sprite(Texture *texture)
 }
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
-Sprite::Sprite(Texture *texture, float x, float y)
-	: Sprite(nullptr, texture, x, y)
-{
-
-}
-
-/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(SceneNode *parent, Texture *texture, float x, float y)
 	: DrawableNode(parent, x, y), texture_(texture), texRect_(0, 0, 0, 0), opaqueTexture_(false)
 {
@@ -41,6 +34,13 @@ Sprite::Sprite(SceneNode *parent, Texture *texture, float x, float y)
 	renderCommand_->geometry().makeSharedQuad();
 
 	setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
+}
+
+/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
+Sprite::Sprite(Texture *texture, float x, float y)
+	: Sprite(nullptr, texture, x, y)
+{
+
 }
 
 ///////////////////////////////////////////////////////////

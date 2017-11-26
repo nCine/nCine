@@ -17,15 +17,13 @@ DrawableNode::DrawableNode(SceneNode *parent, float x, float y)
 }
 
 DrawableNode::DrawableNode(SceneNode *parent)
-	: SceneNode(parent), width_(0.0f), height_(0.0f),
-	  renderCommand_(new RenderCommand)
+	: DrawableNode(parent, 0.0f, 0.0f)
 {
 
 }
 
 DrawableNode::DrawableNode()
-	: SceneNode(), width_(0.0f), height_(0.0f),
-	  renderCommand_(new RenderCommand)
+	: DrawableNode(nullptr, 0.0f, 0.0f)
 {
 
 }
