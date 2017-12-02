@@ -49,8 +49,8 @@ class Rect
 	bool operator==(const Rect &rect) const;
 };
 
-typedef Rect<float> Rectf;
-typedef Rect<int> Recti;
+using Rectf = Rect<float>;
+using Recti = Rect<int>;
 
 template <class T>
 inline Rect<T> Rect<T>::fromCenterAndSize(T xx, T yy, T ww, T hh)

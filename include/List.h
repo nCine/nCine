@@ -33,9 +33,9 @@ class List
 {
   public:
 	/// Iterator type
-	typedef ListIterator<T, false> Iterator;
+	using Iterator = ListIterator<T, false>;
 	/// Constant iterator type
-	typedef ListIterator<T, true> ConstIterator;
+	using ConstIterator = ListIterator<T, true>;
 
 	List() : size_(0), head_(nullptr), tail_(nullptr) { }
 	~List() { clear(); }

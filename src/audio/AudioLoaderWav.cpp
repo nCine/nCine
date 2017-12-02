@@ -1,5 +1,4 @@
 #include <cstring>
-#include <stdint.h> // for WAV header
 #include "common_macros.h"
 #include "AudioLoaderWav.h"
 

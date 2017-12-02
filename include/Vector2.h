@@ -63,8 +63,8 @@ class Vector2
 	static const Vector2 YAxis;
 };
 
-typedef Vector2<float> Vector2f;
-typedef Vector2<int> Vector2i;
+using Vector2f = Vector2<float>;
+using Vector2i = Vector2<int>;
 
 template <class T>
 inline void Vector2<T>::set(T xx, T yy)

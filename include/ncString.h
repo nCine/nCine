@@ -11,9 +11,9 @@ class DLL_PUBLIC String
 {
   public:
 	/// Iterator type
-	typedef StringIterator<false> Iterator;
+	using Iterator = StringIterator<false>;
 	/// Constant iterator type
-	typedef StringIterator<true> ConstIterator;
+	using ConstIterator = StringIterator<true>;
 
 	/// Default capacity for objects created by the default constructor
 	static const unsigned int DefaultCapacity = 128;

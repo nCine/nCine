@@ -17,17 +17,17 @@
 
 namespace {
 
-typedef struct
+struct VertexFormatCol
 {
 	GLfloat position[3];
 	GLfloat color[3];
-} VertexFormatCol;
+};
 
-typedef struct
+struct VertexFormatTex
 {
 	GLfloat position[3];
 	GLfloat texcoords[2];
-} VertexFormatTex;
+};
 
 enum
 {

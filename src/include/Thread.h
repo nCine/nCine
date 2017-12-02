@@ -50,7 +50,7 @@ class ThreadAffinityMask
 class Thread
 {
   public:
-	typedef void (*ThreadFunctionPtr)(void *);
+	using ThreadFunctionPtr = void (*)(void *);
 
 	/// A default constructor for an object without the associated function
 	Thread();

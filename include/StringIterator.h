@@ -14,11 +14,11 @@ template < >
 struct IteratorTraits<StringIterator<false> >
 {
 	/// Type of the values deferenced by the iterator
-	typedef char ValueType;
+	using ValueType = char;
 	/// Pointer to the type of the values deferenced by the iterator
-	typedef char *Pointer;
+	using Pointer = char *;
 	/// Reference to the type of the values deferenced by the iterator
-	typedef char &Reference;
+	using Reference = char &;
 	/// Type trait for iterator category
 	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
 };
@@ -28,11 +28,11 @@ template < >
 struct IteratorTraits<StringIterator<true> >
 {
 	/// Type of the values deferenced by the iterator (never const)
-	typedef char ValueType;
+	using ValueType = char;
 	/// Pointer to the type of the values deferenced by the iterator
-	typedef const char *Pointer;
+	using Pointer = const char *;
 	/// Reference to the type of the values deferenced by the iterator
-	typedef const char &Reference;
+	using Reference = const char &;
 	/// Type trait for iterator category
 	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
 };
@@ -43,9 +43,9 @@ class StringIterator
 {
   public:
 	/// Pointer type which respects iterator constness
-	typedef typename IteratorTraits<StringIterator>::Pointer Pointer;
+	using Pointer = typename IteratorTraits<StringIterator>::Pointer;
 	/// Reference type which respects iterator constness
-	typedef typename IteratorTraits<StringIterator>::Reference Reference;
+	using Reference =  typename IteratorTraits<StringIterator>::Reference;
 
 	explicit StringIterator(char *c)
 		: charPtr_(c) { }

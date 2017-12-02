@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_TEXTURELOADERDDS
 #define CLASS_NCINE_TEXTURELOADERDDS
 
-#include <stdint.h> // for header
+#include <cstdint> // for header
 #include "ITextureLoader.h"
 
 namespace ncine {
@@ -15,7 +15,7 @@ class TextureLoaderDds : public ITextureLoader
 
   private:
 	/// Header for the DDS pixel format
-	typedef struct DdsPixelformat
+	struct DdsPixelformat
 	{
 		uint32_t	dwSize;
 		uint32_t	dwFlags;
@@ -25,10 +25,10 @@ class TextureLoaderDds : public ITextureLoader
 		uint32_t	dwGBitMask;
 		uint32_t	dwBBitMask;
 		uint32_t	dwABitMask;
-	} DdsPixelformat;
+	};
 
 	/// Header for the DDS format
-	typedef struct DdsHeader
+	struct DdsHeader
 	{
 		uint32_t		dwMagic;
 		uint32_t		dwSize;
@@ -45,7 +45,7 @@ class TextureLoaderDds : public ITextureLoader
 		uint32_t		dwCaps3;
 		uint32_t		dwCaps4;
 		uint32_t		dwReserved2;
-	} DdsHeader;
+	};
 
 	static const uint32_t DDPF_ALPHAPIXELS = 0x1;
 	static const uint32_t DDPF_ALPHA = 0x2;

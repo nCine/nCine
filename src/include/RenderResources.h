@@ -11,17 +11,17 @@ class RenderResources
 {
   public:
 	/// A vertex format structure for vertices with positions only
-	typedef struct
+	struct VertexFormatPos2
 	{
 		GLfloat position[2];
-	} VertexFormatPos2;
+	};
 
 	/// A vertex format structure for vertices with positions and texture coordinates
-	typedef struct
+	struct VertexFormatPos2Tex2
 	{
 		GLfloat position[2];
 		GLfloat texcoords[2];
-	} VertexFormatPos2Tex2;
+	};
 
 	/// Returns the OpenGL VBO of a quad made of two triangles, used by every sprite
 	static inline const GLBufferObject *quadVbo() { return quadVbo_; }

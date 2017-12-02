@@ -24,9 +24,9 @@ class Array
 {
   public:
 	/// Iterator type
-	typedef ArrayIterator<T, false> Iterator;
+	using Iterator = ArrayIterator<T, false>;
 	/// Constant iterator type
-	typedef ArrayIterator<T, true> ConstIterator;
+	using ConstIterator = ArrayIterator<T, true>;
 
 	/// Default capacity for objects created by the default constructor
 	static const unsigned int DefaultCapacity = 8;

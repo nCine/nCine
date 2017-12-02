@@ -14,7 +14,7 @@ class JoyAxisEvent;
 class JoyConnectionEvent;
 class IInputEventHandler;
 template <class T> class Vector2;
-typedef class Vector2<float> Vector2f;
+using Vector2f = Vector2<float>;
 
 /// Information about a mapped joystick state (implementation)
 class JoyMappedStateImpl : public JoyMappedState

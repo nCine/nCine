@@ -11,9 +11,9 @@ class ArrayIterator
 {
   public:
 	/// Pointer type which respects iterator constness
-	typedef typename IteratorTraits<ArrayIterator>::Pointer Pointer;
+	using Pointer = typename IteratorTraits<ArrayIterator>::Pointer;
 	/// Reference type which respects iterator constness
-	typedef typename IteratorTraits<ArrayIterator>::Reference Reference;
+	using Reference = typename IteratorTraits<ArrayIterator>::Reference;
 
 	explicit ArrayIterator(T *elementPtr)
 		: elementPtr_(elementPtr) { }
@@ -76,11 +76,11 @@ template <class T>
 struct IteratorTraits<ArrayIterator<T, false> >
 {
 	/// Type of the values deferenced by the iterator
-	typedef T ValueType;
+	using ValueType = T;
 	/// Pointer to the type of the values deferenced by the iterator
-	typedef T *Pointer;
+	using Pointer = T *;
 	/// Reference to the type of the values deferenced by the iterator
-	typedef T &Reference;
+	using Reference = T &;
 	/// Type trait for iterator category
 	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
 };
@@ -90,11 +90,11 @@ template <class T>
 struct IteratorTraits<ArrayIterator<T, true> >
 {
 	/// Type of the values deferenced by the iterator (never const)
-	typedef T ValueType;
+	using ValueType = T;
 	/// Pointer to the type of the values deferenced by the iterator
-	typedef const T *Pointer;
+	using Pointer = const T *;
 	/// Reference to the type of the values deferenced by the iterator
-	typedef const T &Reference;
+	using Reference = const T &;
 	/// Type trait for iterator category
 	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
 };

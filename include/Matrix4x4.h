@@ -74,7 +74,7 @@ class Matrix4x4
 	Vector4<T> vecs_[4];
 };
 
-typedef Matrix4x4<float> Matrix4x4f;
+using Matrix4x4f = Matrix4x4<float>;
 
 template <class T>
 Matrix4x4<T>::Matrix4x4(const Vector4<T> &v0, const Vector4<T> &v1, const Vector4<T> &v2, const Vector4<T> &v3)

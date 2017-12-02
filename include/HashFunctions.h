@@ -3,7 +3,7 @@
 
 namespace ncine {
 
-typedef unsigned long int hash_t;
+using hash_t = unsigned long int;
 
 /// Hash function returning always the first hashmap bucket, for debug purposes
 template <class K>

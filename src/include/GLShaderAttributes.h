@@ -53,7 +53,7 @@ class GLShaderAttributes
 	GLShaderProgram *shaderProgram_;
 
 	static const unsigned int VertexAttributesHashSize = 8;
-	StringHashMap<GLVertexAttribute>::Type vertexAttributes_;
+	StringHashMap<GLVertexAttribute> vertexAttributes_;
 	/// A dummy attribute returned when a vertex attribute is not found in the hashmap
 	static GLVertexAttribute attributeNotFound_;
 

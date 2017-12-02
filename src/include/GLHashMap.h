@@ -5,8 +5,8 @@
 
 namespace ncine {
 
-typedef GLenum key_t;
-typedef GLuint value_t;
+using key_t = GLenum;
+using value_t = GLuint;
 
 /// Naive implementation of a hashmap for storing pairs of OpenGL targets and object ids
 template <unsigned int S, class MappingFunc>

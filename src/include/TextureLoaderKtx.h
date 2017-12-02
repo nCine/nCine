@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_TEXTURELOADERKTX
 #define CLASS_NCINE_TEXTURELOADERKTX
 
-#include <stdint.h> // for header
+#include <cstdint> // for header
 #include "ITextureLoader.h"
 
 namespace ncine {
@@ -18,7 +18,7 @@ class TextureLoaderKtx : public ITextureLoader
 	static uint8_t fileIdentifier_[KtxIdentifierLength];
 
 	/// Header for the KTX format
-	typedef struct KtxHeader
+	struct KtxHeader
 	{
 		uint8_t		identifier[KtxIdentifierLength];
 		uint32_t	endianess;
@@ -34,7 +34,7 @@ class TextureLoaderKtx : public ITextureLoader
 		uint32_t	numberOfFaces;
 		uint32_t	numberOfMipmapLevels;
 		uint32_t	bytesOfKeyValueData;
-	} KtxHeader;
+	};
 
 	/// Reads the KTX header and fills the corresponding structure
 	void readHeader(KtxHeader &header);

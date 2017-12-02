@@ -10,7 +10,7 @@ class HashMapStringTest : public ::testing::Test
   protected:
 	void SetUp() override { initHashMap(strHashmap_); }
 
-	nc::StringHashMap<nc::String>::Type strHashmap_;
+	nc::StringHashMap<nc::String> strHashmap_;
 };
 
 TEST_F(HashMapStringTest, BucketAmount)
@@ -55,7 +55,7 @@ TEST_F(HashMapStringTest, RemoveElements)
 TEST_F(HashMapStringTest, CopyConstruction)
 {
 	printf("Creating a new hashmap with copy construction\n");
-	nc::StringHashMap<nc::String>::Type newStrHashmap(strHashmap_);
+	nc::StringHashMap<nc::String> newStrHashmap(strHashmap_);
 	printHashMap(newStrHashmap);
 
 	assertHashMapsAreEqual(strHashmap_, newStrHashmap);
@@ -64,7 +64,7 @@ TEST_F(HashMapStringTest, CopyConstruction)
 TEST_F(HashMapStringTest, AssignmentOperator)
 {
 	printf("Creating a new hashmap with the assignment operator\n");
-	nc::StringHashMap<nc::String>::Type newStrHashmap = strHashmap_;
+	nc::StringHashMap<nc::String> newStrHashmap = strHashmap_;
 	printHashMap(newStrHashmap);
 
 	assertHashMapsAreEqual(strHashmap_, newStrHashmap);

@@ -2,7 +2,7 @@
 #define CLASS_NCINE_IFILE
 
 #include <cstdio> // for FILE
-#include <stdint.h> // for endianness conversions
+#include <cstdint> // for endianness conversions
 #include "ncString.h"
 
 namespace ncine {

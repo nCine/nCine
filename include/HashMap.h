@@ -31,9 +31,9 @@ class HashMap
 {
   public:
 	/// Iterator type
-	typedef HashMapIterator<K, T, HashFunc, false> Iterator;
+	using Iterator = HashMapIterator<K, T, HashFunc, false>;
 	/// Constant iterator type
-	typedef HashMapIterator<K, T, HashFunc, true> ConstIterator;
+	using ConstIterator = HashMapIterator<K, T, HashFunc, true>;
 
 	explicit HashMap(unsigned int size);
 	~HashMap() { clear(); }
@@ -337,14 +337,8 @@ inline typename HashMap<K, T, HashFunc>::HashBucket &HashMap<K, T, HashFunc>::re
 	return buckets_[index];
 }
 
-/// A way to simulate C++11 alias templates
 template <class T>
-struct StringHashMap
-{
-	typedef HashMap<String, T, SaxHashFunc<String> > Type;
-	typedef typename Type::Iterator Iterator;
-	typedef typename Type::ConstIterator ConstIterator;
-};
+using StringHashMap = HashMap<String, T, SaxHashFunc<String> >;
 
 }
 

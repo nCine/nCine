@@ -70,8 +70,8 @@ class Vector4
 	static const Vector4 WAxis;
 };
 
-typedef Vector4<float> Vector4f;
-typedef Vector4<int> Vector4i;
+using Vector4f = Vector4<float>;
+using Vector4i = Vector4<int>;
 
 template <class T>
 inline void Vector4<T>::set(T xx, T yy, T zz, T ww)

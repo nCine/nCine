@@ -22,9 +22,9 @@ class StaticArray
 {
   public:
 	/// Iterator type
-	typedef ArrayIterator<T, false> Iterator;
+	using Iterator = ArrayIterator<T, false>;
 	/// Constant iterator type
-	typedef ArrayIterator<T, true> ConstIterator;
+	using ConstIterator = ArrayIterator<T, true>;
 
 	/// Constructs an empty array with fixed capacity
 	StaticArray() : size_(0), capacity_(C) { }

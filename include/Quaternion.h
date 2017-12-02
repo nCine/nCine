@@ -61,7 +61,7 @@ class Quaternion
 	static const Quaternion Identity;
 };
 
-typedef Quaternion<float> Quaternionf;
+using Quaternionf = Quaternion<float>;
 
 template <class T>
 inline void Quaternion<T>::set(T xx, T yy, T zz, T ww)

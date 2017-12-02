@@ -15,20 +15,20 @@ struct HelperTraits { };
 template <class K, class T, class HashFunc>
 struct HelperTraits<K, T, HashFunc, false>
 {
-	typedef HashMap<K, T, HashFunc> *HashMapPtr;
-	typedef typename HashMap<K, T, HashFunc>::HashBucket *BucketPtr;
-	typedef typename List<HashMapNode<K, T> >::Iterator ListIteratorType;
-	typedef HashMapNode<K, T> &NodeReference;
+	using HashMapPtr = HashMap<K, T, HashFunc> *;
+	using BucketPtr = typename HashMap<K, T, HashFunc>::HashBucket *;
+	using ListIteratorType = typename List<HashMapNode<K, T> >::Iterator;
+	using NodeReference = HashMapNode<K, T> &;
 };
 
 /// Helper structure providing type traits used in the constant hashmap iterator
 template <class K, class T, class HashFunc>
 struct HelperTraits<K, T, HashFunc, true>
 {
-	typedef const HashMap<K, T, HashFunc> *HashMapPtr;
-	typedef const typename HashMap<K, T, HashFunc>::HashBucket *BucketPtr;
-	typedef typename List<HashMapNode<K, T> >::ConstIterator ListIteratorType;
-	typedef const HashMapNode<K, T> &NodeReference;
+	using HashMapPtr = const HashMap<K, T, HashFunc> *;
+	using BucketPtr = const typename HashMap<K, T, HashFunc>::HashBucket *;
+	using ListIteratorType = typename List<HashMapNode<K, T> >::ConstIterator;
+	using NodeReference = const HashMapNode<K, T> &;
 };
 
 /// A hashmap iterator
@@ -37,7 +37,7 @@ class HashMapIterator
 {
   public:
 	/// Reference type which respects iterator constness
-	typedef typename IteratorTraits<HashMapIterator>::Reference Reference;
+	using Reference = typename IteratorTraits<HashMapIterator>::Reference;
 
 	HashMapIterator(typename HelperTraits<K, T, HashFunc, IsConst>::HashMapPtr hashMap, unsigned int bucketIndex,
 	                typename HelperTraits<K, T, HashFunc, IsConst>::ListIteratorType listIterator, bool atFirstNode)
@@ -103,11 +103,11 @@ template <class K, class T, class HashFunc>
 struct IteratorTraits<HashMapIterator<K, T, HashFunc, false> >
 {
 	/// Type of the values deferenced by the iterator
-	typedef T ValueType;
+	using ValueType = T;
 	/// Pointer to the type of the values deferenced by the iterator
-	typedef T *Pointer;
+	using Pointer = T *;
 	/// Reference to the type of the values deferenced by the iterator
-	typedef T &Reference;
+	using Reference = T &;
 	/// Type trait for iterator category
 	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
 };
@@ -117,11 +117,11 @@ template <class K, class T, class HashFunc>
 struct IteratorTraits<HashMapIterator<K, T, HashFunc, true> >
 {
 	/// Type of the values deferenced by the iterator (never const)
-	typedef T ValueType;
+	using ValueType = T;
 	/// Pointer to the type of the values deferenced by the iterator
-	typedef const T *Pointer;
+	using Pointer = const T *;
 	/// Reference to the type of the values deferenced by the iterator
-	typedef const T &Reference;
+	using Reference = const T &;
 	/// Type trait for iterator category
 	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
 };

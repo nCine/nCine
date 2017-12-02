@@ -15,7 +15,7 @@ class ListIterator
 {
   public:
 	/// Reference type which respects iterator constness
-	typedef typename IteratorTraits<ListIterator>::Reference Reference;
+	using Reference = typename IteratorTraits<ListIterator>::Reference;
 
 	explicit ListIterator(ListNode<T> *node)
 		: node_(node) { }
@@ -56,11 +56,11 @@ template <class T>
 struct IteratorTraits<ListIterator<T, false> >
 {
 	/// Type of the values deferenced by the iterator
-	typedef T ValueType;
+	using ValueType = T;
 	/// Pointer to the type of the values deferenced by the iterator
-	typedef T *Pointer;
+	using Pointer = T *;
 	/// Reference to the type of the values deferenced by the iterator
-	typedef T &Reference;
+	using Reference = T &;
 	/// Type trait for iterator category
 	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
 };
@@ -70,11 +70,11 @@ template <class T>
 struct IteratorTraits<ListIterator<T, true> >
 {
 	/// Type of the values deferenced by the iterator (never const)
-	typedef T ValueType;
+	using ValueType = T;
 	/// Pointer to the type of the values deferenced by the iterator
-	typedef const T *Pointer;
+	using Pointer = const T *;
 	/// Reference to the type of the values deferenced by the iterator
-	typedef const T &Reference;
+	using Reference = const T &;
 	/// Type trait for iterator category
 	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
 };
