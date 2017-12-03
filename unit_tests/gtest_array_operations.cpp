@@ -10,7 +10,7 @@ class ArrayOperationsTest : public ::testing::Test
   protected:
 	void SetUp() override { initArray(array_); }
 
-	nc::Array<int> array_;
+	nctl::Array<int> array_;
 };
 
 TEST_F(ArrayOperationsTest, Clear)
@@ -26,7 +26,7 @@ TEST_F(ArrayOperationsTest, Clear)
 TEST_F(ArrayOperationsTest, CopyConstruction)
 {
 	printf("Creating a new array with copy construction\n");
-	nc::Array<int> newArray(array_);
+	nctl::Array<int> newArray(array_);
 	printArray(newArray);
 
 	ASSERT_EQ(array_.size(), newArray.size());
@@ -37,7 +37,7 @@ TEST_F(ArrayOperationsTest, CopyConstruction)
 TEST_F(ArrayOperationsTest, AssignmentOperator)
 {
 	printf("Creating a new array with the assignment operator\n");
-	nc::Array<int> newArray = array_;
+	nctl::Array<int> newArray = array_;
 	printArray(newArray);
 
 	ASSERT_EQ(array_.size(), newArray.size());
@@ -106,7 +106,7 @@ TEST_F(ArrayOperationsTest, RemoveHalfThenShrink)
 
 TEST_F(ArrayOperationsTest, RemoveFirstHalfWithReturnedIterator)
 {
-	nc::Array<int>::Iterator it = array_.begin();
+	nctl::Array<int>::Iterator it = array_.begin();
 
 	printf("Removing the first half of the array with the returned iterator\n");
 	for (unsigned int i = 0; i < Capacity / 2; i++)
@@ -120,7 +120,7 @@ TEST_F(ArrayOperationsTest, RemoveFirstHalfWithReturnedIterator)
 
 TEST_F(ArrayOperationsTest, RemoveRangeWithReturnedIterator)
 {
-	nc::Array<int>::Iterator it = array_.begin();
+	nctl::Array<int>::Iterator it = array_.begin();
 
 	printf("Removing a range of elements of the array with the returned iterator\n");
 	for (unsigned int i = 0; i < Capacity / 2; i++)
@@ -166,7 +166,7 @@ TEST_F(ArrayOperationsTest, InsertValueAtFrontWithIterator)
 
 TEST_F(ArrayOperationsTest, InsertAtFrontWithIterator)
 {
-	nc::Array<int> newArray(Capacity);
+	nctl::Array<int> newArray(Capacity);
 	initArray(newArray);
 
 	printf("Inserting the first half of a new array at the beginning of the first one\n");
@@ -182,7 +182,7 @@ TEST_F(ArrayOperationsTest, InsertAtFrontWithIterator)
 
 TEST_F(ArrayOperationsTest, InsertAtBackWithIterator)
 {
-	nc::Array<int> newArray(Capacity);
+	nctl::Array<int> newArray(Capacity);
 	initArray(newArray);
 
 	printf("Inserting the second half of a new array at the end of the first one\n");
@@ -198,8 +198,8 @@ TEST_F(ArrayOperationsTest, InsertAtBackWithIterator)
 
 TEST_F(ArrayOperationsTest, InsertWithReturnedIterator)
 {
-	nc::Array<int> newArray(Capacity);
-	nc::Array<int>::Iterator it = newArray.begin();
+	nctl::Array<int> newArray(Capacity);
+	nctl::Array<int>::Iterator it = newArray.begin();
 
 	printf("Inserting elements in a new array with the returned iterator\n");
 	for (unsigned int i = 0; i < Capacity; i++)
@@ -213,8 +213,8 @@ TEST_F(ArrayOperationsTest, InsertWithReturnedIterator)
 
 TEST_F(ArrayOperationsTest, InsertRangeWithReturnedIterator)
 {
-	nc::Array<int> newArray(Capacity);
-	nc::Array<int>::Iterator it = newArray.begin();
+	nctl::Array<int> newArray(Capacity);
+	nctl::Array<int>::Iterator it = newArray.begin();
 
 	printf("Inserting a range of elements in a new array with the returned iterator\n");
 	for (unsigned int i = 0; i < Capacity; i += 2)
@@ -228,7 +228,7 @@ TEST_F(ArrayOperationsTest, InsertRangeWithReturnedIterator)
 
 TEST_F(ArrayOperationsTest, InsertEmptyBeginRangeAtFrontWithIterator)
 {
-	nc::Array<int> newArray(Capacity);
+	nctl::Array<int> newArray(Capacity);
 	initArray(newArray);
 
 	printf("Inserting an empty begin-to-begin range at the beginning of the array\n");
@@ -241,7 +241,7 @@ TEST_F(ArrayOperationsTest, InsertEmptyBeginRangeAtFrontWithIterator)
 
 TEST_F(ArrayOperationsTest, InsertEmptyEndRangeAtBackWithIterator)
 {
-	nc::Array<int> newArray(Capacity);
+	nctl::Array<int> newArray(Capacity);
 	initArray(newArray);
 
 	printf("Inserting an empty end-to-end range at the end of the array\n");

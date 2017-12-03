@@ -4,7 +4,7 @@
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_mouse.h>
 #include "IInputManager.h"
-#include "StaticArray.h"
+#include "nctl/StaticArray.h"
 
 namespace ncine {
 
@@ -137,7 +137,7 @@ class SdlInputManager : public IInputManager
 	static KeyboardEvent keyboardEvent_;
 
 	static SDL_Joystick *sdlJoysticks_[MaxNumJoysticks];
-	static StaticArray<SdlJoystickState, MaxNumJoysticks> joystickStates_;
+	static nctl::StaticArray<SdlJoystickState, MaxNumJoysticks> joystickStates_;
 	static JoyButtonEvent joyButtonEvent_;
 	static JoyAxisEvent joyAxisEvent_;
 	static JoyConnectionEvent joyConnectionEvent_;

@@ -7,6 +7,8 @@
 #include "AssetFile.h"
 #include "AndroidJniHelper.h"
 
+namespace nc = ncine;
+
 /// Processes the next application command
 void engine_handle_cmd(struct android_app *state, int32_t cmd)
 {
@@ -204,7 +206,7 @@ void AndroidApplication::preInit()
 	appEventHandler_->onPreInit(appCfg_);
 
 	// Registering the logger as early as possible
-	const String logFilePath = IFile::dataPath() + appCfg_.logFile_;
+	const nctl::String logFilePath = IFile::dataPath() + appCfg_.logFile_;
 	theServiceLocator().registerLogger(new FileLogger(logFilePath.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
 }
 

@@ -30,7 +30,7 @@ const char *JoyMapping::ButtonsStrings[JoyMappedState::NumButtons] =
 };
 
 JoyMappedStateImpl JoyMapping::nullMappedJoyState_;
-StaticArray<JoyMappedStateImpl, JoyMapping::MaxNumJoysticks> JoyMapping::mappedJoyStates_(StaticArrayMode::EXTEND_SIZE);
+nctl::StaticArray<JoyMappedStateImpl, JoyMapping::MaxNumJoysticks> JoyMapping::mappedJoyStates_(nctl::StaticArrayMode::EXTEND_SIZE);
 JoyMappedButtonEvent JoyMapping::mappedButtonEvent_;
 JoyMappedAxisEvent JoyMapping::mappedAxisEvent_;
 
@@ -314,16 +314,16 @@ const JoyMappedStateImpl &JoyMapping::joyMappedState(int joyId) const
 		return mappedJoyStates_[joyId];
 }
 
-void JoyMapping::deadZoneNormalize(nc::Vector2f &joyVector, float deadZoneValue) const
+void JoyMapping::deadZoneNormalize(Vector2f &joyVector, float deadZoneValue) const
 {
-	deadZoneValue = nc::clamp(deadZoneValue, 0.0f, 1.0f);
+	deadZoneValue = nctl::clamp(deadZoneValue, 0.0f, 1.0f);
 
 	if (joyVector.length() <= deadZoneValue)
-		joyVector = nc::Vector2f::Zero;
+		joyVector = Vector2f::Zero;
 	else
 	{
 		float normalizedLength = (joyVector.length() - deadZoneValue) / (1.0f - deadZoneValue);
-		normalizedLength = nc::clamp(normalizedLength, 0.0f, 1.0f);
+		normalizedLength = nctl::clamp(normalizedLength, 0.0f, 1.0f);
 		joyVector = joyVector.normalize() * normalizedLength;
 	}
 }
@@ -414,8 +414,8 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 		return false;
 	}
 	subLength = static_cast<unsigned int>(subEnd - subStart);
-	memcpy(map.name, subStart, nc::min(subLength, MaxNameLength));
-	map.name[nc::min(subLength, MaxNameLength)] = '\0';
+	memcpy(map.name, subStart, nctl::min(subLength, MaxNameLength));
+	map.name[nctl::min(subLength, MaxNameLength)] = '\0';
 
 	subStart += subLength + 1; // name plus the following ',' character
 	subEnd = strchr(subStart, ',');

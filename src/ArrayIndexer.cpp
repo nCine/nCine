@@ -72,7 +72,7 @@ void ArrayIndexer::logReport() const
 		{
 			Object *objPtr = object(i);
 
-			String typeName(Object::MaxNameLength);
+			nctl::String typeName(Object::MaxNameLength);
 			switch (objPtr->type())
 			{
 				case Object::ObjectType::BASE:					typeName = "Base"; break;

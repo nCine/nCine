@@ -83,7 +83,7 @@ void ALAudioDevice::stopPlayers(PlayerType playerType)
 	if (playerType == PlayerType::AUDIOSTREAM)
 		objectType = AudioStreamPlayer::sType();
 
-	List<IAudioPlayer *>::ConstIterator i = players_.begin();
+	nctl::List<IAudioPlayer *>::ConstIterator i = players_.begin();
 	while (i != players_.end())
 	{
 		if ((*i)->type() == objectType)
@@ -102,7 +102,7 @@ void ALAudioDevice::pausePlayers(PlayerType playerType)
 	if (playerType == PlayerType::AUDIOSTREAM)
 		objectType = AudioStreamPlayer::sType();
 
-	List<IAudioPlayer *>::ConstIterator i = players_.begin();
+	nctl::List<IAudioPlayer *>::ConstIterator i = players_.begin();
 	while (i != players_.end())
 	{
 		if ((*i)->type() == objectType)
@@ -148,7 +148,7 @@ void ALAudioDevice::registerPlayer(IAudioPlayer *player)
 
 void ALAudioDevice::updatePlayers()
 {
-	List<IAudioPlayer *>::ConstIterator i = players_.begin();
+	nctl::List<IAudioPlayer *>::ConstIterator i = players_.begin();
 	while (i != players_.end())
 	{
 		if ((*i)->isPlaying())

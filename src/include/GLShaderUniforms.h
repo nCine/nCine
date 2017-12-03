@@ -1,9 +1,8 @@
 #ifndef CLASS_NCINE_GLSHADERUNIFORMS
 #define CLASS_NCINE_GLSHADERUNIFORMS
 
-#include "Array.h"
-#include "HashMap.h"
-#include "ncString.h"
+#include "nctl/HashMap.h"
+#include "nctl/ncString.h"
 #include "GLUniformCache.h"
 
 namespace ncine {
@@ -25,7 +24,7 @@ class GLShaderUniforms
 	GLShaderProgram *shaderProgram_;
 
 	static const int UniformCachesHashSize = 16;
-	StringHashMap<GLUniformCache> uniformCaches_;
+	nctl::StringHashMap<GLUniformCache> uniformCaches_;
 	/// A dummy uniform cache returned when a uniform is not found in the hashmap
 	static GLUniformCache uniformNotFound_;
 

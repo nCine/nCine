@@ -3,7 +3,6 @@
 
 #include <ctime>
 #include <cstdlib>
-#include "Array.h"
 #include "Rect.h"
 #include "SceneNode.h"
 #include "ParticleAffectors.h"
@@ -41,12 +40,12 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	/// The index of the next free particle in the pool
 	unsigned int poolTop_;
 	/// The pool containing available particles (only dead ones)
-	Array<Particle *> particlePool_;
+	nctl::Array<Particle *> particlePool_;
 	/// The array containing every particle (dead or alive)
-	Array<Particle *> particleList_;
+	nctl::Array<Particle *> particleList_;
 
 	/// The array of particle affectors
-	Array<ParticleAffector *> affectors_;
+	nctl::Array<ParticleAffector *> affectors_;
 
 	/// A flag indicating whether the system should be simulated in local space
 	bool inLocalSpace_;

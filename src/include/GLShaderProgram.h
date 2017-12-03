@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_GLSHADERPROGRAM
 #define CLASS_NCINE_GLSHADERPROGRAM
 
-#include "Array.h"
+#include "nctl/Array.h"
 #include "GLUniform.h"
 #include "GLAttribute.h"
 
@@ -37,12 +37,12 @@ class GLShaderProgram
 
 	GLuint glHandle_;
 	static const int AttachedShadersInitialSize = 4;
-	Array<GLShader *> attachedShaders_;
+	nctl::Array<GLShader *> attachedShaders_;
 
 	static const int UniformsInitialSize = 8;
-	Array<GLUniform> uniforms_;
+	nctl::Array<GLUniform> uniforms_;
 	static const int AttributesInitialSize = 4;
-	Array<GLAttribute> attributes_;
+	nctl::Array<GLAttribute> attributes_;
 
 	void discoverUniforms();
 	void discoverAttributes();

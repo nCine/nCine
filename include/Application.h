@@ -72,7 +72,7 @@ class DLL_PUBLIC Application
 	Font *font_;
 	TextNode *textLines_;
 	float textUpdateTime_;
-	String textString_;
+	nctl::String textString_;
 	IInputManager *inputManager_;
 	IAppEventHandler *appEventHandler_;
 

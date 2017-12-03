@@ -1,10 +1,10 @@
-#ifndef CLASS_NCINE_LISTITERATOR
-#define CLASS_NCINE_LISTITERATOR
+#ifndef CLASS_NCTL_LISTITERATOR
+#define CLASS_NCTL_LISTITERATOR
 
 #include "common_macros.h"
 #include "iterator_traits.h"
 
-namespace ncine {
+namespace nctl {
 
 template <class T> class List;
 template <class T> class ListNode;

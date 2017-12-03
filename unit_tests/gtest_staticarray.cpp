@@ -7,13 +7,13 @@ class StaticArrayTest : public ::testing::Test
   protected:
 	void SetUp() override { initArray(array_); }
 
-	nc::StaticArray<int, Capacity> array_;
+	nctl::StaticArray<int, Capacity> array_;
 };
 
 TEST(StaticArrayDeathTest, AccessBeyondSize)
 {
 	printf("Trying to access an element within capacity but beyond size\n");
-	nc::StaticArray<int, Capacity> array;
+	nctl::StaticArray<int, Capacity> array;
 	array[0] = 0;
 
 	ASSERT_DEATH(array.at(5) = 1, "");
@@ -22,10 +22,10 @@ TEST(StaticArrayDeathTest, AccessBeyondSize)
 TEST(StaticArrayDeathTest, AccessConstAtSize)
 {
 	printf("Trying to access an element of a const array at size\n");
-	nc::StaticArray<int, Capacity> array;
+	nctl::StaticArray<int, Capacity> array;
 	array[0] = 0;
 
-	const nc::StaticArray<int, Capacity> &constArray = array;
+	const nctl::StaticArray<int, Capacity> &constArray = array;
 
 	ASSERT_DEATH(constArray.at(1), "");
 }
@@ -33,7 +33,7 @@ TEST(StaticArrayDeathTest, AccessConstAtSize)
 TEST_F(StaticArrayTest, AccessEmptyWithinSize)
 {
 	printf("Accessing at array size to add elements\n");
-	nc::StaticArray<int, Capacity> newArray;
+	nctl::StaticArray<int, Capacity> newArray;
 	for (unsigned int i = 0; i < Capacity; i++)
 		newArray.at(i) = i;
 
@@ -61,10 +61,10 @@ TEST_F(StaticArrayTest, AccessWithPointer)
 
 TEST_F(StaticArrayTest, SubscriptAccessConstAtSize)
 {
-	nc::StaticArray<int, Capacity> newArray;
+	nctl::StaticArray<int, Capacity> newArray;
 	newArray[0] = 0;
 
-	const nc::StaticArray<int, Capacity> &constArray = newArray;
+	const nctl::StaticArray<int, Capacity> &constArray = newArray;
 	const int value = constArray[1];
 	printf("Trying to access an element of a const array at size: %d\n", value);
 
@@ -75,7 +75,7 @@ TEST_F(StaticArrayTest, SubscriptAccessConstAtSize)
 TEST_F(StaticArrayTest, SubscriptAccessEmptyWithinSize)
 {
 	printf("Accessing at array size to add elements\n");
-	nc::StaticArray<int, Capacity> newArray;
+	nctl::StaticArray<int, Capacity> newArray;
 	for (unsigned int i = 0; i < Capacity; i++)
 		newArray[i] = static_cast<int>(i);
 	printArray(newArray);
@@ -97,7 +97,7 @@ TEST_F(StaticArrayTest, SubscriptAccessNotGrowing)
 TEST_F(StaticArrayTest, SetSizeOnStatic)
 {
 	printf("Trying to extend the size of a static array\n");
-	nc::StaticArray<int, 1> array;
+	nctl::StaticArray<int, 1> array;
 	array[0] = 0;
 	array_.setSize(Capacity);
 

@@ -1,7 +1,7 @@
-#ifndef CLASS_NCINE_HASHFUNCTIONS
-#define CLASS_NCINE_HASHFUNCTIONS
+#ifndef CLASS_NCTL_HASHFUNCTIONS
+#define CLASS_NCTL_HASHFUNCTIONS
 
-namespace ncine {
+namespace nctl {
 
 using hash_t = unsigned long int;
 

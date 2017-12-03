@@ -3,7 +3,7 @@
 
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
-#include "StaticArray.h"
+#include "nctl/StaticArray.h"
 
 namespace ncine {
 
@@ -44,7 +44,7 @@ class MyEventHandler :
 	float angle_;
 	nc::SceneNode *dummy_;
 	nc::Texture *megaTexture_;
-	nc::StaticArray<nc::Sprite *, NumColSprites * NumRowSprites> sprites_;
+	nctl::StaticArray<nc::Sprite *, NumColSprites * NumRowSprites> sprites_;
 };
 
 #endif

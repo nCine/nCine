@@ -1,12 +1,12 @@
-#ifndef CLASS_NCINE_ARRAY
-#define CLASS_NCINE_ARRAY
+#ifndef CLASS_NCTL_ARRAY
+#define CLASS_NCTL_ARRAY
 
 #include <cstring> // for memmove() and memcpy()
 #include "common_macros.h"
 #include "algorithms.h"
 #include "ArrayIterator.h"
 
-namespace ncine {
+namespace nctl {
 
 /// Construction modes for the `Array` class
 /*! Declared outside the template class to use it without template parameters. */
@@ -44,7 +44,7 @@ class Array
 		setCapacity(capacity);
 	}
 	/// Constructs an array with explicit capacity and the option for it to be fixed
-	explicit Array(unsigned int capacity, ArrayMode mode)
+	Array(unsigned int capacity, ArrayMode mode)
 		: array_(nullptr), size_(0), capacity_(0),
 		  fixedCapacity_(mode == ArrayMode::FIXED_CAPACITY)
 	{
@@ -61,10 +61,10 @@ class Array
 	/// Swaps two arrays without copying their data
 	void swap(Array &first, Array &second)
 	{
-		nc::swap(first.array_, second.array_);
-		nc::swap(first.size_, second.size_);
-		nc::swap(first.capacity_, second.capacity_);
-		nc::swap(first.fixedCapacity_, second.fixedCapacity_);
+		nctl::swap(first.array_, second.array_);
+		nctl::swap(first.size_, second.size_);
+		nctl::swap(first.capacity_, second.capacity_);
+		nctl::swap(first.fixedCapacity_, second.fixedCapacity_);
 	}
 
 	/// Returns an iterator to the first element

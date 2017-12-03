@@ -2,7 +2,6 @@
 #define CLASS_NCINE_GEOMETRY
 
 #include "GLBufferObject.h"
-#include "Array.h"
 
 namespace ncine {
 

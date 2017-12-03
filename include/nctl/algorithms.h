@@ -1,10 +1,10 @@
-#ifndef NCINE_ALGORITHMS
-#define NCINE_ALGORITHMS
+#ifndef NCTL_ALGORITHMS
+#define NCTL_ALGORITHMS
 
 #include <cstdlib> // for rand()
 #include "iterator_traits.h"
 
-namespace ncine {
+namespace nctl {
 
 ///////////////////////////////////////////////////////////
 // TEMPLATE FUNCTIONS (non modifying)
@@ -863,7 +863,5 @@ inline void quicksortDesc(Iterator first, Iterator last)
 }
 
 }
-
-namespace nc = ncine;
 
 #endif

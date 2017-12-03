@@ -51,7 +51,7 @@ void MyEventHandler::onInit()
 	dummy_ = new nc::SceneNode(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	textNode_ = new nc::TextNode(dummy_, font_);
 	textNode_->setAlignment(nc::TextNode::Alignment::LEFT);
-	textString_ = new nc::String(256);
+	textString_ = new nctl::String(256);
 }
 
 void MyEventHandler::onFrameStart()

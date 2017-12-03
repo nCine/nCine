@@ -1,6 +1,6 @@
 #include "apptest_multitouch.h"
 #include "Application.h"
-#include "ncString.h"
+#include "nctl/ncString.h"
 #include "Texture.h"
 #include "Sprite.h"
 #include "TextNode.h"
@@ -35,7 +35,7 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	multitouchString_ = new nc::String(MaxNumChars);
+	multitouchString_ = new nctl::String(MaxNumChars);
 
 #ifdef __ANDROID__
 	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/" + TextureFile).data());
@@ -81,7 +81,7 @@ void MyEventHandler::onShutdown()
 }
 
 #ifdef __ANDROID__
-void MyEventHandler::handleEvent(const nc::TouchEvent &event, nc::String *string, const char *eventName)
+void MyEventHandler::handleEvent(const nc::TouchEvent &event, nctl::String *string, const char *eventName)
 {
 	string->clear();
 	string->formatAppend("count: %d, actionIndex:%d, event: %s\n", event.count, event.actionIndex, eventName);

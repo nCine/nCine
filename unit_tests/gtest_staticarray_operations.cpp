@@ -7,7 +7,7 @@ class StaticArrayOperationsTest : public ::testing::Test
   protected:
 	void SetUp() override { initArray(array_); }
 
-	nc::StaticArray<int, Capacity> array_;
+	nctl::StaticArray<int, Capacity> array_;
 };
 
 TEST_F(StaticArrayOperationsTest, Clear)
@@ -23,7 +23,7 @@ TEST_F(StaticArrayOperationsTest, Clear)
 TEST_F(StaticArrayOperationsTest, CopyConstruction)
 {
 	printf("Creating a new array with copy construction\n");
-	nc::StaticArray<int, Capacity> newArray(array_);
+	nctl::StaticArray<int, Capacity> newArray(array_);
 	printArray(newArray);
 
 	ASSERT_EQ(array_.size(), newArray.size());
@@ -34,7 +34,7 @@ TEST_F(StaticArrayOperationsTest, CopyConstruction)
 TEST_F(StaticArrayOperationsTest, AssignmentOperator)
 {
 	printf("Creating a new array with the assignment operator\n");
-	nc::StaticArray<int, Capacity> newArray = array_;
+	nctl::StaticArray<int, Capacity> newArray = array_;
 	printArray(newArray);
 
 	ASSERT_EQ(array_.size(), newArray.size());
@@ -44,7 +44,7 @@ TEST_F(StaticArrayOperationsTest, AssignmentOperator)
 
 TEST_F(StaticArrayOperationsTest, InsertAtBackWithIterator)
 {
-	nc::StaticArray<int, Capacity> newArray;
+	nctl::StaticArray<int, Capacity> newArray;
 
 	printf("Inserting twice at the back\n");
 	newArray.insertBack(1);

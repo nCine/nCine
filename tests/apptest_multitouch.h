@@ -3,12 +3,17 @@
 
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
-#include "StaticArray.h"
+#include "nctl/StaticArray.h"
+
+namespace nctl {
+
+class String;
+
+}
 
 namespace ncine {
 
 class AppConfiguration;
-class String;
 class Texture;
 class Sprite;
 class Font;
@@ -30,7 +35,7 @@ class MyEventHandler :
 	void onShutdown() override;
 
 #ifdef __ANDROID__
-	void handleEvent(const nc::TouchEvent &event, nc::String *string, const char *eventName);
+	void handleEvent(const nc::TouchEvent &event, nctl::String *string, const char *eventName);
 	void onTouchDown(const nc::TouchEvent &event) override;
 	void onTouchUp(const nc::TouchEvent &event) override;
 	void onTouchMove(const nc::TouchEvent &event) override;
@@ -42,11 +47,11 @@ class MyEventHandler :
 
   private:
 	static const unsigned int MaxNumChars = 1024;
-	nc::String *multitouchString_;
+	nctl::String *multitouchString_;
 
 #ifdef __ANDROID__
 	nc::Texture *texture_;
-	nc::StaticArray<nc::Sprite *, nc::TouchEvent::MaxPointers> sprites_;
+	nctl::StaticArray<nc::Sprite *, nc::TouchEvent::MaxPointers> sprites_;
 #endif
 	nc::Font *font_;
 	nc::TextNode *textNode_;

@@ -3,8 +3,14 @@
 
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
-#include "StaticArray.h"
+#include "nctl/StaticArray.h"
 #include "Vector2.h"
+
+namespace nctl {
+
+class String;
+
+}
 
 namespace ncine {
 
@@ -14,7 +20,6 @@ class Sprite;
 class SceneNode;
 class Font;
 class TextNode;
-class String;
 
 }
 
@@ -67,13 +72,13 @@ class MyEventHandler :
 	nc::Vector2f joyVectorRight_;
 
 	nc::SceneNode *cameraNode_;
-	nc::StaticArray<nc::Texture *, NumTextures> textures_;
-	nc::StaticArray<nc::Sprite *, NumSprites> sprites_;
-	nc::StaticArray<nc::Vector2f, NumSprites> spritePos_;
+	nctl::StaticArray<nc::Texture *, NumTextures> textures_;
+	nctl::StaticArray<nc::Sprite *, NumSprites> sprites_;
+	nctl::StaticArray<nc::Vector2f, NumSprites> spritePos_;
 	nc::Font *font_;
-	nc::StaticArray<nc::TextNode *, NumTexts> texts_;
+	nctl::StaticArray<nc::TextNode *, NumTexts> texts_;
 	nc::TextNode *debugtext_;
-	nc::String *debugString_;
+	nctl::String *debugString_;
 
 	void resetCamera();
 };

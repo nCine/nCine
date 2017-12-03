@@ -1,7 +1,7 @@
 #include "GLShaderAttributes.h"
 #include "GLShaderProgram.h"
 #include "GLBufferObject.h"
-#include "HashMapIterator.h"
+#include "nctl/HashMapIterator.h"
 
 namespace ncine {
 
@@ -9,7 +9,7 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-StaticArray<GLShaderAttributes::GLVertexAttribPointerState, GLShaderAttributes::MaxDefinedVertexAttribPointers> GLShaderAttributes::definedPointers_(StaticArrayMode::EXTEND_SIZE);
+nctl::StaticArray<GLShaderAttributes::GLVertexAttribPointerState, GLShaderAttributes::MaxDefinedVertexAttribPointers> GLShaderAttributes::definedPointers_(nctl::StaticArrayMode::EXTEND_SIZE);
 GLVertexAttribute GLShaderAttributes::attributeNotFound_;
 
 ///////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ void GLShaderAttributes::defineVertexPointers(const GLBufferObject *vbo)
 			boundVboHandle = vbo->glHandle();
 		}
 
-		for (StringHashMap<GLVertexAttribute>::Iterator i = vertexAttributes_.begin(); i != vertexAttributes_.end(); ++i)
+		for (nctl::StringHashMap<GLVertexAttribute>::Iterator i = vertexAttributes_.begin(); i != vertexAttributes_.end(); ++i)
 		{
 			GLVertexAttribute &attribute = *i;
 			int location = attribute.shaderAttribute()->location();

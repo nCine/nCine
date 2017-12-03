@@ -5,8 +5,8 @@
 #include "common_headers.h"
 
 #include "IAudioDevice.h"
-#include "List.h"
-#include "StaticArray.h"
+#include "nctl/List.h"
+#include "nctl/StaticArray.h"
 
 namespace ncine {
 
@@ -43,10 +43,10 @@ class ALAudioDevice : public IAudioDevice
 	/// The listener gain value (master volume)
 	ALfloat gain_;
 	/// The sources pool
-	StaticArray<ALuint, MaxSources> sources_;
+	nctl::StaticArray<ALuint, MaxSources> sources_;
 
 	/// A list of active audio players
-	List<IAudioPlayer *> players_;
+	nctl::List<IAudioPlayer *> players_;
 
 	/// Deleted copy constructor
 	ALAudioDevice(const ALAudioDevice &) = delete;

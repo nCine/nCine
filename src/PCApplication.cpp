@@ -55,7 +55,7 @@ void PCApplication::init(IAppEventHandler * (*createAppEventHandler)())
 	inputManager_ = new GlfwInputManager();
 #endif
 	gfxDevice_->setWindowTitle(appCfg_.windowTitle_.data());
-	String windowIconFilePath = IFile::dataPath() + appCfg_.windowIconFilename_;
+	nctl::String windowIconFilePath = IFile::dataPath() + appCfg_.windowIconFilename_;
 	if (IFile::access(windowIconFilePath.data(), IFile::AccessMode::EXISTS))
 		gfxDevice_->setWindowIcon(windowIconFilePath.data());
 

@@ -10,7 +10,7 @@ class StringIteratorTest : public ::testing::Test
   protected:
 	void SetUp() override { string_ = "String1String2"; }
 
-	nc::String string_;
+	nctl::String string_;
 };
 
 TEST_F(StringIteratorTest, ForLoopIteration)
@@ -18,7 +18,7 @@ TEST_F(StringIteratorTest, ForLoopIteration)
 	unsigned int n = 0;
 
 	printf("Iterating through string characters with for loop:");
-	for (nc::String::ConstIterator i = string_.begin(); i != string_.end(); ++i)
+	for (nctl::String::ConstIterator i = string_.begin(); i != string_.end(); ++i)
 	{
 		printf(" %c", *i);
 		ASSERT_EQ(*i, string_[n++]);
@@ -28,10 +28,10 @@ TEST_F(StringIteratorTest, ForLoopIteration)
 
 TEST_F(StringIteratorTest, ForLoopEmptyIteration)
 {
-	nc::String newString(Capacity);
+	nctl::String newString(Capacity);
 
 	printf("Iterating over an empty string with for loop:\n");
-	for (nc::String::ConstIterator i = newString.begin(); i != newString.end(); ++i)
+	for (nctl::String::ConstIterator i = newString.begin(); i != newString.end(); ++i)
 		ASSERT_TRUE(false); // should never reach this point
 	printf("\n");
 }
@@ -41,7 +41,7 @@ TEST_F(StringIteratorTest, ReverseForLoopIteration)
 	unsigned int n = string_.length() - 1;
 
 	printf("Iterating through string characters with for loop (reverse):");
-	for (nc::String::ConstIterator r = string_.rBegin(); r != string_.rEnd(); --r)
+	for (nctl::String::ConstIterator r = string_.rBegin(); r != string_.rEnd(); --r)
 	{
 		printf(" %c", *r);
 		ASSERT_EQ(*r, string_[n--]);
@@ -51,10 +51,10 @@ TEST_F(StringIteratorTest, ReverseForLoopIteration)
 
 TEST_F(StringIteratorTest, ReverseForLoopEmptyIteration)
 {
-	nc::String newString(Capacity);
+	nctl::String newString(Capacity);
 
 	printf("Iterating over an empty string with for loop (reverse):\n");
-	for (nc::String::ConstIterator r = newString.rBegin(); r != newString.rEnd(); --r)
+	for (nctl::String::ConstIterator r = newString.rBegin(); r != newString.rEnd(); --r)
 		ASSERT_TRUE(false); // should never reach this point
 	printf("\n");
 }
@@ -64,7 +64,7 @@ TEST_F(StringIteratorTest, WhileLoopIteration)
 	unsigned int n = 0;
 
 	printf("Iterating through string characters with while loop:");
-	nc::String::ConstIterator i = string_.begin();
+	nctl::String::ConstIterator i = string_.begin();
 	while (i != string_.end())
 	{
 		printf(" %c", *i);
@@ -76,10 +76,10 @@ TEST_F(StringIteratorTest, WhileLoopIteration)
 
 TEST_F(StringIteratorTest, WhileLoopEmptyIteration)
 {
-	nc::String newString(Capacity);
+	nctl::String newString(Capacity);
 
 	printf("Iterating over an empty string with while loop:\n");
-	nc::String::ConstIterator i = newString.begin();
+	nctl::String::ConstIterator i = newString.begin();
 	while (i != newString.end())
 	{
 		ASSERT_TRUE(false); // should never reach this point
@@ -93,7 +93,7 @@ TEST_F(StringIteratorTest, ReverseWhileLoopIteration)
 	unsigned int n = string_.length() - 1;
 
 	printf("Iterating through string characters with while loop (reverse):");
-	nc::String::ConstIterator r = string_.rBegin();
+	nctl::String::ConstIterator r = string_.rBegin();
 	while (r != string_.rEnd())
 	{
 		printf(" %c", *r);
@@ -105,10 +105,10 @@ TEST_F(StringIteratorTest, ReverseWhileLoopIteration)
 
 TEST_F(StringIteratorTest, ReverseWhileLoopEmptyIteration)
 {
-	nc::String newString(Capacity);
+	nctl::String newString(Capacity);
 
 	printf("Iterating over an empty string with while loop (reverse):\n");
-	nc::String::ConstIterator r = newString.rBegin();
+	nctl::String::ConstIterator r = newString.rBegin();
 	while (r != newString.rEnd())
 	{
 		ASSERT_TRUE(false); // should never reach this point
@@ -119,7 +119,7 @@ TEST_F(StringIteratorTest, ReverseWhileLoopEmptyIteration)
 
 TEST_F(StringIteratorTest, AddIndexToIterator)
 {
-	nc::String::ConstIterator it = string_.begin();
+	nctl::String::ConstIterator it = string_.begin();
 
 	printf("Accessing characters with an iterator and a positive index\n");
 	for (int i = 0; i < static_cast<int>(string_.length()); i++)
@@ -135,7 +135,7 @@ TEST_F(StringIteratorTest, AddIndexToIteratorInPlace)
 	printf("Accessing characters with an iterator and a positive index\n");
 	for (int i = 0; i < static_cast<int>(string_.length()); i++)
 	{
-		nc::String::ConstIterator it = string_.begin();
+		nctl::String::ConstIterator it = string_.begin();
 
 		it += i;
 		printf(" %c", *it);
@@ -146,7 +146,7 @@ TEST_F(StringIteratorTest, AddIndexToIteratorInPlace)
 
 TEST_F(StringIteratorTest, SubtractIndexToIterator)
 {
-	nc::String::ConstIterator it = string_.end();
+	nctl::String::ConstIterator it = string_.end();
 
 	printf("Accessing characters with an iterator and a negative index\n");
 	for (int i = 1; i <= static_cast<int>(string_.length()); i++)
@@ -162,7 +162,7 @@ TEST_F(StringIteratorTest, SubtractIndexToIteratorInPlace)
 	printf("Accessing characters with an iterator and a negative index\n");
 	for (unsigned int i = 1; i <= static_cast<int>(string_.length()); i++)
 	{
-		nc::String::ConstIterator it = string_.end();
+		nctl::String::ConstIterator it = string_.end();
 
 		it -= i;
 		printf(" %c", *it);
@@ -180,7 +180,7 @@ TEST_F(StringIteratorTest, SubtractIterators)
 
 TEST_F(StringIteratorTest, SubscriptOperator)
 {
-	nc::String::ConstIterator it = string_.begin();
+	nctl::String::ConstIterator it = string_.begin();
 
 	printf("Accessing characters with the iterator subscript operator\n");
 	for (int i = 0; i < static_cast<int>(string_.length()); i++)

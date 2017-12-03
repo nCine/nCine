@@ -3,12 +3,17 @@
 
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
-#include "StaticArray.h"
+#include "nctl/StaticArray.h"
+
+namespace nctl {
+
+class String;
+
+}
 
 namespace ncine {
 
 class AppConfiguration;
-class String;
 class Texture;
 class SceneNode;
 class Sprite;
@@ -34,16 +39,16 @@ class MyEventHandler :
 
   private:
 	static const unsigned int MaxNumAxes = 16;
-	nc::StaticArray<float, MaxNumAxes> axisValues_;
+	nctl::StaticArray<float, MaxNumAxes> axisValues_;
 	static const unsigned int MaxNumButtons = 20;
-	nc::StaticArray<unsigned char, MaxNumButtons> buttonStates_;
+	nctl::StaticArray<unsigned char, MaxNumButtons> buttonStates_;
 	static const unsigned int MaxNumChars = 384;
-	nc::String *joyString_;
+	nctl::String *joyString_;
 
 	nc::Texture *texture_;
 	nc::SceneNode *joyNode_;
 	static const unsigned int NumSprites = 13;
-	nc::StaticArray<nc::Sprite *, NumSprites> sprites_;
+	nctl::StaticArray<nc::Sprite *, NumSprites> sprites_;
 	nc::Font *font_;
 	nc::TextNode *textNode_;
 };

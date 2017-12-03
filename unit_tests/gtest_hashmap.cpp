@@ -10,7 +10,7 @@ class HashMapTest : public ::testing::Test
   protected:
 	void SetUp() override { initHashMap(hashmap_); }
 
-	nc::HashMap<int, int, nc::FixedHashFunc<int> > hashmap_;
+	nctl::HashMap<int, int, nctl::FixedHashFunc<int> > hashmap_;
 };
 
 TEST_F(HashMapTest, BucketAmount)
@@ -55,7 +55,7 @@ TEST_F(HashMapTest, RemoveElements)
 TEST_F(HashMapTest, CopyConstruction)
 {
 	printf("Creating a new hashmap with copy construction\n");
-	nc::HashMap<int, int, nc::FixedHashFunc<int> > newHashmap(hashmap_);
+	nctl::HashMap<int, int, nctl::FixedHashFunc<int> > newHashmap(hashmap_);
 	printHashMap(newHashmap);
 
 	assertHashMapsAreEqual(hashmap_, newHashmap);
@@ -64,7 +64,7 @@ TEST_F(HashMapTest, CopyConstruction)
 TEST_F(HashMapTest, AssignmentOperator)
 {
 	printf("Creating a new hashmap with the assignment operator\n");
-	nc::HashMap<int, int, nc::FixedHashFunc<int> > newHashmap = hashmap_;
+	nctl::HashMap<int, int, nctl::FixedHashFunc<int> > newHashmap = hashmap_;
 	printHashMap(newHashmap);
 
 	assertHashMapsAreEqual(hashmap_, newHashmap);

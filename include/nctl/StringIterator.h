@@ -1,11 +1,11 @@
-#ifndef CLASS_NCINE_STRINGITERATOR
-#define CLASS_NCINE_STRINGITERATOR
+#ifndef CLASS_NCTL_STRINGITERATOR
+#define CLASS_NCTL_STRINGITERATOR
 
 #include "common_defines.h"
 #include "common_macros.h"
 #include "iterator_traits.h"
 
-namespace ncine {
+namespace nctl {
 
 template <bool IsConst> class StringIterator;
 

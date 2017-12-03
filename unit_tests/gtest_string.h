@@ -1,16 +1,14 @@
 #ifndef GTEST_STRING_H
 #define GTEST_STRING_H
 
-#include "ncString.h"
+#include "nctl/ncString.h"
 #include "gtest/gtest.h"
-
-namespace nc = ncine;
 
 namespace {
 
 const unsigned int Capacity = 16;
 
-void printString(const nc::String &string)
+void printString(const nctl::String &string)
 {
 	printf("\"%s\" (capacity %u, length %u)\n", string.data(), string.capacity(), string.length());
 }

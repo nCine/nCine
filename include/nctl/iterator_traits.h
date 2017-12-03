@@ -1,7 +1,7 @@
-#ifndef NCINE_ITERATOR_TRAITS
-#define NCINE_ITERATOR_TRAITS
+#ifndef NCTL_ITERATOR_TRAITS
+#define NCTL_ITERATOR_TRAITS
 
-namespace ncine {
+namespace nctl {
 
 /// Dispatching tag for iterators that can only move forward, one element at a time
 struct ForwardIteratorTag { };

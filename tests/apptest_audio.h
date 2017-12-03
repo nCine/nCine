@@ -4,6 +4,12 @@
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
 
+namespace nctl {
+
+class String;
+
+}
+
 namespace ncine {
 
 class AppConfiguration;
@@ -12,7 +18,6 @@ class IAudioPlayer;
 class SceneNode;
 class Font;
 class TextNode;
-class String;
 
 }
 
@@ -46,7 +51,7 @@ class MyEventHandler :
 	nc::SceneNode *dummy_;
 	nc::Font *font_;
 	nc::TextNode *textNode_;
-	nc::String *textString_;
+	nctl::String *textString_;
 
 	void toggleMusic();
 	void toggleSound();

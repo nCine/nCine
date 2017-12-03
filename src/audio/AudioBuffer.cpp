@@ -3,7 +3,6 @@
 #include "common_macros.h"
 #include "AudioBuffer.h"
 #include "IAudioLoader.h"
-#include "Array.h"
 
 namespace ncine {
 

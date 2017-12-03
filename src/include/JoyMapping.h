@@ -2,8 +2,8 @@
 #define CLASS_NCINE_JOYMAPPING
 
 #include <cstdint>
-#include "Array.h"
-#include "StaticArray.h"
+#include "nctl/Array.h"
+#include "nctl/StaticArray.h"
 #include "InputEvents.h"
 
 namespace ncine {
@@ -115,10 +115,10 @@ class JoyMapping
 
 	static const int MaxNumJoysticks = 4;
 	int mappingIndex_[MaxNumJoysticks];
-	nc::Array<MappedJoystick> mappings_;
+	nctl::Array<MappedJoystick> mappings_;
 
 	static JoyMappedStateImpl nullMappedJoyState_;
-	static StaticArray<JoyMappedStateImpl, MaxNumJoysticks> mappedJoyStates_;
+	static nctl::StaticArray<JoyMappedStateImpl, MaxNumJoysticks> mappedJoyStates_;
 	static JoyMappedButtonEvent mappedButtonEvent_;
 	static JoyMappedAxisEvent mappedAxisEvent_;
 

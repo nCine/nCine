@@ -4,7 +4,7 @@ inline void setDataPath(nc::AppConfiguration &config)
 {
 #ifdef __ANDROID__
 	const char *extStorage = getenv("EXTERNAL_STORAGE");
-	nc::String dataPath;
+	nctl::String dataPath;
 	dataPath = extStorage ? extStorage : "/sdcard";
 	dataPath += "/ncine/";
 	config.setDataPath(dataPath);

@@ -1,9 +1,9 @@
 #include <cstdio> // for vsnprintf()
 #include <cstring>
 #include "common_macros.h"
-#include "ncString.h"
+#include "nctl/ncString.h"
 
-namespace ncine {
+namespace nctl {
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -165,7 +165,7 @@ unsigned int String::append(const String &source)
 
 int String::compare(const String &other) const
 {
-	const unsigned int minCapacity = nc::min(capacity_, other.capacity_);
+	const unsigned int minCapacity = nctl::min(capacity_, other.capacity_);
 	return strncmp(array_, other.array_, minCapacity);
 }
 
@@ -244,7 +244,7 @@ String &String::format(const char *fmt, ...)
 
 	if (formattedLength > 0)
 	{
-		length_ = nc::min(capacity_, static_cast<unsigned int>(formattedLength));
+		length_ = nctl::min(capacity_, static_cast<unsigned int>(formattedLength));
 		array_[length_] = '\0';
 	}
 

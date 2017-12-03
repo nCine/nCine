@@ -3,7 +3,7 @@
 
 #include "Vector2.h"
 #include "Color.h"
-#include "Array.h"
+#include "nctl/Array.h"
 
 namespace ncine {
 
@@ -56,7 +56,7 @@ class DLL_PUBLIC ColorAffector : public ParticleAffector
 		ColorStep(float newTime, Color newColor) : time(newTime), color(newColor) { }
 	};
 
-	Array<ColorStep *> colorSteps_;
+	nctl::Array<ColorStep *> colorSteps_;
 
 	/// Deleted copy constructor
 	ColorAffector(const ColorAffector &) = delete;
@@ -89,7 +89,7 @@ class DLL_PUBLIC SizeAffector : public ParticleAffector
 		SizeStep(float newTime, float newScale) : time(newTime), scale(newScale) { }
 	};
 
-	Array<SizeStep *> sizeSteps_;
+	nctl::Array<SizeStep *> sizeSteps_;
 	float baseScale_;
 
 	/// Deleted copy constructor

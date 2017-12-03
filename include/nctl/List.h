@@ -1,10 +1,10 @@
-#ifndef CLASS_NCINE_LIST
-#define CLASS_NCINE_LIST
+#ifndef CLASS_NCTL_LIST
+#define CLASS_NCTL_LIST
 
 #include "algorithms.h"
 #include "ListIterator.h"
 
-namespace ncine {
+namespace nctl {
 
 template <class T> class List;
 
@@ -48,9 +48,9 @@ class List
 	/// Swaps two lists without copying their data
 	void swap(List &first, List &second)
 	{
-		nc::swap(first.size_, second.size_);
-		nc::swap(first.head_, second.head_);
-		nc::swap(first.tail_, second.tail_);
+		nctl::swap(first.size_, second.size_);
+		nctl::swap(first.head_, second.head_);
+		nctl::swap(first.tail_, second.tail_);
 	}
 
 	/// Returns an iterator to the first element

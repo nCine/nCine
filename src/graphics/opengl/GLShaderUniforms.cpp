@@ -1,7 +1,7 @@
 #include "GLShaderUniforms.h"
 #include "GLShaderProgram.h"
 #include "GLUniformCache.h"
-#include "HashMapIterator.h"
+#include "nctl/HashMapIterator.h"
 
 namespace ncine {
 

@@ -84,7 +84,7 @@ void TextNode::setAlignment(Alignment alignment)
 	}
 }
 
-void TextNode::setString(const String &string)
+void TextNode::setString(const nctl::String &string)
 {
 	if (string_ != string)
 	{

@@ -10,12 +10,12 @@ class StringTest : public ::testing::Test
   protected:
 	void SetUp() override { string_ = "String1"; }
 
-	nc::String string_;
+	nctl::String string_;
 };
 
 TEST_F(StringTest, EmptyString)
 {
-	nc::String newString(Capacity);
+	nctl::String newString(Capacity);
 	printf("Creating an empty string: "); printString(newString);
 
 	ASSERT_EQ(newString.capacity(), Capacity);
@@ -24,7 +24,7 @@ TEST_F(StringTest, EmptyString)
 
 TEST_F(StringTest, AssignCString)
 {
-	nc::String newString(Capacity);
+	nctl::String newString(Capacity);
 	newString = "String1";
 	printf("Assigning a C-style string to an empty one: "); printString(newString);
 
@@ -44,7 +44,7 @@ TEST_F(StringTest, EqualityOperatorCString)
 
 TEST_F(StringTest, EqualityOperator)
 {
-	nc::String newString(string_);
+	nctl::String newString(string_);
 	printf("The first string and the new one are equal: %d\n", string_ == newString);
 
 	ASSERT_TRUE(string_ == newString);
@@ -53,7 +53,7 @@ TEST_F(StringTest, EqualityOperator)
 
 TEST_F(StringTest, InequalityOperator)
 {
-	nc::String newString = "String2";
+	nctl::String newString = "String2";
 	printf("The first string and the new one are not equal: %d\n", string_ != newString);
 
 	ASSERT_TRUE(string_ != newString);
@@ -62,7 +62,7 @@ TEST_F(StringTest, InequalityOperator)
 
 TEST_F(StringTest, GreaterThanOperator)
 {
-	nc::String newString = "String2";
+	nctl::String newString = "String2";
 	printf("The second string is lexicographically bigger than the first: %d\n", newString > string_);
 
 	ASSERT_TRUE(newString > string_);

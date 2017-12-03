@@ -1,10 +1,10 @@
-#ifndef CLASS_NCINE_STATICARRAY
-#define CLASS_NCINE_STATICARRAY
+#ifndef CLASS_NCTL_STATICARRAY
+#define CLASS_NCTL_STATICARRAY
 
 #include "common_macros.h"
 #include "ArrayIterator.h"
 
-namespace ncine {
+namespace nctl {
 
 /// Construction modes for the `StaticArray` class
 /*! Declared outside the template class to use it without template parameters. */

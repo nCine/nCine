@@ -22,8 +22,8 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-String IFile::dataPath_(MaxFilenameLength);
-String IFile::savePath_(MaxFilenameLength);
+nctl::String IFile::dataPath_(MaxFilenameLength);
+nctl::String IFile::savePath_(MaxFilenameLength);
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -82,7 +82,7 @@ bool IFile::access(const char *filename, unsigned char mode)
 		return StandardFile::access(filename, mode);
 }
 
-const String &IFile::savePath()
+const nctl::String &IFile::savePath()
 {
 	if (savePath_.isEmpty())
 		initSavePath();
@@ -97,7 +97,7 @@ const String &IFile::savePath()
 void IFile::initSavePath()
 {
 #ifdef __ANDROID__
-	nc::AndroidApplication &application = static_cast<nc::AndroidApplication &>(nc::theApplication());
+	AndroidApplication &application = static_cast<AndroidApplication &>(theApplication());
 
 	// Get the internal data path from the Android application
 	savePath_ = application.internalDataPath();

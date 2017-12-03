@@ -10,7 +10,7 @@
 #include "StackedBarPlotter.h"
 #include "Font.h"
 #include "TextNode.h"
-#include "ncString.h"
+#include "nctl/ncString.h"
 #include "IInputManager.h"
 #include "JoyMapping.h"
 
@@ -127,8 +127,8 @@ void Application::initCommon()
 
 		if (appCfg_.withProfilerText_)
 		{
-			String fontTexFilePath = IFile::dataPath() + appCfg_.fontTexFilename_;
-			String fontFntFilePath = IFile::dataPath() + appCfg_.fontFntFilename_;
+			nctl::String fontTexFilePath = IFile::dataPath() + appCfg_.fontTexFilename_;
+			nctl::String fontFntFilePath = IFile::dataPath() + appCfg_.fontFntFilename_;
 			if (IFile::access(fontTexFilePath.data(), IFile::AccessMode::EXISTS) == false)
 				LOGW_X("Cannot access font texture file \"%s\" to enable profiling text", fontTexFilePath.data());
 			else if (IFile::access(fontFntFilePath.data(), IFile::AccessMode::EXISTS) == false)

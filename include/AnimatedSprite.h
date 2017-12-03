@@ -33,7 +33,7 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	inline static ObjectType sType() { return ObjectType::ANIMATED_SPRITE; }
 
   private:
-	Array<RectAnimation *> anims_;
+	nctl::Array<RectAnimation *> anims_;
 	int currentAnim_;
 
 	/// Deleted copy constructor

@@ -63,7 +63,7 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	nc::String texPath = nc::IFile::dataPath() + "textures/testformats/";
+	nctl::String texPath = nc::IFile::dataPath() + "textures/testformats/";
 	font_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
 	                     (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
 

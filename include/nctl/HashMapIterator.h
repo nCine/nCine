@@ -1,11 +1,11 @@
-#ifndef CLASS_NCINE_HASHMAPITERATOR
-#define CLASS_NCINE_HASHMAPITERATOR
+#ifndef CLASS_NCTL_HASHMAPITERATOR
+#define CLASS_NCTL_HASHMAPITERATOR
 
 #include "HashMap.h"
 #include "List.h"
 #include "iterator_traits.h"
 
-namespace ncine {
+namespace nctl {
 
 /// Base helper structure for type traits used in the hashmap iterator
 template <class K, class T, class HashFunc, bool IsConst>

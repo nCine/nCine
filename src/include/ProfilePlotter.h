@@ -3,8 +3,8 @@
 
 #include "Rect.h"
 #include "Color.h"
-#include "Array.h"
-#include "StaticArray.h"
+#include "nctl/Array.h"
+#include "nctl/StaticArray.h"
 #include "DrawableNode.h"
 #include "PlottingVariable.h"
 
@@ -53,16 +53,16 @@ class ProfilePlotter : public DrawableNode
 	/// Background color
 	Color backgroundColor_;
 	/// The vertices for the background
-	StaticArray<float, 8> backgroundVertices_; // Quad with a triangle strip
+	nctl::StaticArray<float, 8> backgroundVertices_; // Quad with a triangle strip
 	/// The array of variables
-	Array<PlottingVariable *> variables_;
+	nctl::Array<PlottingVariable *> variables_;
 
 	/// Reference value drawing flag
 	bool shouldPlotRefValue_;
 	/// Reference value line color
 	Color refValueColor_;
 	/// The vertices for the reference value line
-	StaticArray<float, 4> refValueVertices_;
+	nctl::StaticArray<float, 4> refValueVertices_;
 	/// The reference value
 	float refValue_;
 	/// The command used to render the reference value

@@ -41,7 +41,7 @@ SceneNode::SceneNode()
 
 SceneNode::~SceneNode()
 {
-	List<SceneNode *>::ConstIterator i = children_.begin();
+	nctl::List<SceneNode *>::ConstIterator i = children_.begin();
 	while (i != children_.end())
 		delete (*i++);
 
@@ -88,7 +88,7 @@ bool SceneNode::removeChildNode(SceneNode *childNode)
  * It is faster to remove through an iterator than with a linear search for a specific node.
  * \return True if the node has been removed
  */
-bool SceneNode::removeChildNode(List<SceneNode *>::ConstIterator it)
+bool SceneNode::removeChildNode(nctl::List<SceneNode *>::ConstIterator it)
 {
 	bool hasBeenRemoved = false;
 
@@ -117,7 +117,7 @@ bool SceneNode::unlinkChildNode(SceneNode *childNode)
 		children_.remove(childNode);
 
 		// Nephews reparenting
-		List<SceneNode *>::ConstIterator i = childNode->children_.begin();
+		nctl::List<SceneNode *>::ConstIterator i = childNode->children_.begin();
 		while (i != childNode->children_.end())
 		{
 			addChildNode(*i);
@@ -134,7 +134,7 @@ void SceneNode::update(float interval)
 {
 	// Early return not needed, the first call to this method is on the root node
 
-	for (List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
+	for (nctl::List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
 	{
 		if ((*i)->shouldUpdate_)
 		{
@@ -152,7 +152,7 @@ void SceneNode::visit(RenderQueue &renderQueue)
 {
 	// Early return not needed, the first call to this method is on the root node
 
-	for (List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
+	for (nctl::List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
 	{
 		if ((*i)->shouldDraw_)
 		{

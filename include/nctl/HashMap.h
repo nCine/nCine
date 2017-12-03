@@ -1,11 +1,11 @@
-#ifndef CLASS_NCINE_HASHMAP
-#define CLASS_NCINE_HASHMAP
+#ifndef CLASS_NCTL_HASHMAP
+#define CLASS_NCTL_HASHMAP
 
 #include "Array.h"
 #include "List.h"
 #include "HashFunctions.h"
 
-namespace ncine {
+namespace nctl {
 
 template <class K, class T, class HashFunc, bool IsConst> class HashMapIterator;
 template <class K, class T, class HashFunc, bool IsConst> struct HelperTraits;
@@ -46,8 +46,8 @@ class HashMap
 	/// Swaps two hashmaps without copying their data
 	inline void swap(HashMap &first, HashMap &second)
 	{
-		nc::swap(first.buckets_, second.buckets_);
-		nc::swap(first.hashFunc_, second.hashFunc_);
+		nctl::swap(first.buckets_, second.buckets_);
+		nctl::swap(first.hashFunc_, second.hashFunc_);
 	}
 
 	/// Returns an iterator to the first element

@@ -4,8 +4,8 @@
 #include "DrawableNode.h"
 #include "Font.h"
 #include "Color.h"
-#include "Array.h"
-#include "ncString.h"
+#include "nctl/Array.h"
+#include "nctl/ncString.h"
 
 namespace ncine {
 
@@ -54,7 +54,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Gets the font line height scaled by the scale factor
 	inline float fontLineHeight() const { return font_->lineHeight() * scaleFactor_; }
 	/// Sets the string to render
-	void setString(const String &string);
+	void setString(const nctl::String &string);
 
 	void draw(RenderQueue &renderQueue) override;
 
@@ -62,7 +62,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 
   private:
 	/// The string to be rendered
-	String string_;
+	nctl::String string_;
 	/// Dirty flag for vertices and texture coordinates
 	bool dirtyDraw_;
 	/// Dirty flag for boundary rectangle
@@ -72,7 +72,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// The font class used to render text
 	Font *font_;
 	/// The array of vertex positions interleaved with texture coordinates for every glyph in the batch
-	Array<float> interleavedVertices_;
+	nctl::Array<float> interleavedVertices_;
 
 	/// Advance on the X-axis for the next processed glyph
 	mutable float xAdvance_;
@@ -83,7 +83,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Total advance on the Y-axis for the entire string (vertical boundary)
 	mutable float yAdvanceSum_;
 	/// Text width for each line of text
-	mutable Array<float> lineLengths_;
+	mutable nctl::Array<float> lineLengths_;
 	/// Horizontal text alignment of multiple lines
 	Alignment alignment_;
 

@@ -4,7 +4,7 @@
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
 #include "GLHashMap.h"
-#include "Array.h"
+#include "nctl/Array.h"
 
 namespace ncine {
 
@@ -32,7 +32,7 @@ class GLFramebufferObject
   private:
 	static class GLHashMap<GLFramebufferMappingFunc::Size, GLFramebufferMappingFunc> boundBuffers_;
 
-	Array<GLRenderbuffer *> attachedRenderbuffers_;
+	nctl::Array<GLRenderbuffer *> attachedRenderbuffers_;
 
 	GLuint glHandle_;
 	/// The target is mutable in order for constant FBO objects to be bound

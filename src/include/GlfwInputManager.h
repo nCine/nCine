@@ -4,7 +4,7 @@
 #include <cstdio>
 #include "IInputManager.h"
 #include "GlfwGfxDevice.h" // for WindowHandle()
-#include "StaticArray.h"
+#include "nctl/StaticArray.h"
 
 namespace ncine {
 
@@ -159,7 +159,7 @@ class GlfwInputManager : public IInputManager
 	static GlfwKeyboardState keyboardState_;
 	static KeyboardEvent keyboardEvent_;
 	static GlfwJoystickState nullJoystickState_;
-	static StaticArray<GlfwJoystickState, MaxNumJoysticks> joystickStates_;
+	static nctl::StaticArray<GlfwJoystickState, MaxNumJoysticks> joystickStates_;
 	static JoyButtonEvent joyButtonEvent_;
 	static JoyAxisEvent joyAxisEvent_;
 	static JoyConnectionEvent joyConnectionEvent_;

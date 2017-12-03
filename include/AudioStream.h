@@ -2,7 +2,7 @@
 #define CLASS_NCINE_AUDIOSTREAM
 
 #include "IAudioLoader.h"
-#include "StaticArray.h"
+#include "nctl/StaticArray.h"
 
 namespace ncine {
 
@@ -24,7 +24,7 @@ class DLL_PUBLIC AudioStream
 	/// Number of buffers for streaming
 	static const int NumBuffers = 3;
 	/// OpenAL buffer queue for streaming
-	StaticArray<unsigned int, NumBuffers> alBuffers_;
+	nctl::StaticArray<unsigned int, NumBuffers> alBuffers_;
 	/// Index of the next available OpenAL buffer
 	int nextAvailALBuffer_;
 

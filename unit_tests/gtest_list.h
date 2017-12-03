@@ -1,10 +1,8 @@
 #ifndef GTEST_LIST_H
 #define GTEST_LIST_H
 
-#include "List.h"
+#include "nctl/List.h"
 #include "gtest/gtest.h"
-
-namespace nc = ncine;
 
 namespace {
 
@@ -12,12 +10,12 @@ const unsigned int Length = 11;
 const int FirstElement = 0;
 const int LastElement = 10;
 
-void printList(const nc::List<int> &list)
+void printList(const nctl::List<int> &list)
 {
 	unsigned int index = 0;
 
 	printf("Size %d: ", list.size());
-	for (nc::List<int>::ConstIterator i = list.begin(); i != list.end(); ++i)
+	for (nctl::List<int>::ConstIterator i = list.begin(); i != list.end(); ++i)
 	{
 		printf("[%u]=%d ", index, *i);
 		index++;
@@ -25,7 +23,7 @@ void printList(const nc::List<int> &list)
 	printf("\n");
 }
 
-void initList(nc::List<int> &list)
+void initList(nctl::List<int> &list)
 {
 	list.clear();
 
@@ -34,7 +32,7 @@ void initList(nc::List<int> &list)
 		list.pushBack(value++);
 }
 
-void initListReverse(nc::List<int> &list)
+void initListReverse(nctl::List<int> &list)
 {
 	list.clear();
 
@@ -43,7 +41,7 @@ void initListReverse(nc::List<int> &list)
 		list.pushBack(value--);
 }
 
-void initListRandom(nc::List<int> &list)
+void initListRandom(nctl::List<int> &list)
 {
 	list.clear();
 
@@ -51,11 +49,11 @@ void initListRandom(nc::List<int> &list)
 		list.pushBack(rand() % 100);
 }
 
-bool isUnmodified(const nc::List<int> &list)
+bool isUnmodified(const nctl::List<int> &list)
 {
 	int value = FirstElement;
 
-	for (nc::List<int>::ConstIterator i = list.begin(); i != list.end(); ++i)
+	for (nctl::List<int>::ConstIterator i = list.begin(); i != list.end(); ++i)
 	{
 		if (*i != value)
 			return false;
@@ -66,31 +64,31 @@ bool isUnmodified(const nc::List<int> &list)
 		return true;
 }
 
-unsigned int calcLength(const nc::List<int> &list)
+unsigned int calcLength(const nctl::List<int> &list)
 {
 	unsigned int length = 0;
 
-	for (nc::List<int>::ConstIterator i = list.begin(); i != list.end(); ++i)
+	for (nctl::List<int>::ConstIterator i = list.begin(); i != list.end(); ++i)
 		length++;
 
 	return length;
 }
 
-void assertListMatchesArray(const nc::List<int> &list, int *array)
+void assertListMatchesArray(const nctl::List<int> &list, int *array)
 {
-	for (nc::List<int>::ConstIterator i = list.begin(); i != list.end(); ++i)
+	for (nctl::List<int>::ConstIterator i = list.begin(); i != list.end(); ++i)
 	{
 		ASSERT_EQ(*i, *array);
 		array++;
 	}
 }
 
-void assertListsAreEqual(const nc::List<int> &list1, const nc::List<int> &list2)
+void assertListsAreEqual(const nctl::List<int> &list1, const nctl::List<int> &list2)
 {
 	ASSERT_EQ(list1.size(), list2.size());
 
-	nc::List<int>::ConstIterator list1It = list1.begin();
-	nc::List<int>::ConstIterator list2It = list2.begin();
+	nctl::List<int>::ConstIterator list1It = list1.begin();
+	nctl::List<int>::ConstIterator list2It = list2.begin();
 	while (list1It != list1.end())
 	{
 		ASSERT_EQ(*list1It, *list2It);
@@ -100,10 +98,10 @@ void assertListsAreEqual(const nc::List<int> &list1, const nc::List<int> &list2)
 	}
 }
 
-bool isSorted(const nc::List<int> &list)
+bool isSorted(const nctl::List<int> &list)
 {
-	nc::List<int>::ConstIterator currentNode = list.begin();
-	nc::List<int>::ConstIterator nextNode = list.begin()++;
+	nctl::List<int>::ConstIterator currentNode = list.begin();
+	nctl::List<int>::ConstIterator nextNode = list.begin()++;
 
 	while (nextNode != list.end())
 	{
@@ -117,10 +115,10 @@ bool isSorted(const nc::List<int> &list)
 		return true;
 }
 
-bool isReverseSorted(const nc::List<int> &list)
+bool isReverseSorted(const nctl::List<int> &list)
 {
-	nc::List<int>::ConstIterator currentNode = list.begin();
-	nc::List<int>::ConstIterator nextNode = list.begin()++;
+	nctl::List<int>::ConstIterator currentNode = list.begin();
+	nctl::List<int>::ConstIterator nextNode = list.begin()++;
 
 	while (nextNode != list.end())
 	{

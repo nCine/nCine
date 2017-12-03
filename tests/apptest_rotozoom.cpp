@@ -30,7 +30,7 @@ void MyEventHandler::onInit()
 {
 	pause_ = false;
 	angle_ = 0.0f;
-	nc::StaticArray<nc::Recti, NumTextures> texRects;
+	nctl::StaticArray<nc::Recti, NumTextures> texRects;
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 

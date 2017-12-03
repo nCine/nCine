@@ -1,7 +1,6 @@
-#include "algorithms.h"
+#include "nctl/algorithms.h"
 #include "RenderQueue.h"
 #include "SceneNode.h"
-#include "Array.h"
 #include "Sprite.h"
 
 namespace ncine {
@@ -53,8 +52,8 @@ bool ascendingOrder(const RenderCommand *a, const RenderCommand *b) { return a->
 void RenderQueue::draw()
 {
 	// Sorting the queues with the relevant orders
-	nc::quicksort(opaqueRenderCommands_.begin(), opaqueRenderCommands_.end(), descendingOrder);
-	nc::quicksort(transparentRenderCommands_.begin(), transparentRenderCommands_.end(), ascendingOrder);
+	nctl::quicksort(opaqueRenderCommands_.begin(), opaqueRenderCommands_.end(), descendingOrder);
+	nctl::quicksort(transparentRenderCommands_.begin(), transparentRenderCommands_.end(), ascendingOrder);
 
 	// Rendering opaque nodes front to back
 	for (unsigned int i = 0; i < opaqueRenderCommands_.size(); i++)

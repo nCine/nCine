@@ -35,7 +35,7 @@ class DLL_PUBLIC AndroidApplication : public Application
 
   private:
 	bool isInitialized_;
-	String packageName_;
+	nctl::String packageName_;
 
 	struct android_app *state_;
 	IAppEventHandler *(*createAppEventHandler_)();

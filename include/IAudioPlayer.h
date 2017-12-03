@@ -2,7 +2,7 @@
 #define CLASS_NCINE_IAUDIOPLAYER
 
 #include "Object.h"
-#include "StaticArray.h"
+#include "nctl/StaticArray.h"
 
 namespace ncine {
 
@@ -75,7 +75,7 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	/// Player pitch value
 	float pitch_;
 	/// Player position in space
-	StaticArray<float, 3> position_;
+	nctl::StaticArray<float, 3> position_;
 };
 
 }

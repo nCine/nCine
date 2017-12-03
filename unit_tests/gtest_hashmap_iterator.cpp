@@ -10,7 +10,7 @@ class HashMapIteratorTest : public ::testing::Test
   protected:
 	void SetUp() override { initHashMap(hashmap_); }
 
-	nc::HashMap<int, int, nc::FixedHashFunc<int> > hashmap_;
+	nctl::HashMap<int, int, nctl::FixedHashFunc<int> > hashmap_;
 };
 
 TEST_F(HashMapIteratorTest, ForLoopIteration)
@@ -18,7 +18,7 @@ TEST_F(HashMapIteratorTest, ForLoopIteration)
 	int n = 0;
 
 	printf("Iterating through elements with for loop:\n");
-	for (nc::HashMap<int, int, nc::FixedHashFunc<int> >::ConstIterator i = hashmap_.begin(); i != hashmap_.end(); ++i)
+	for (nctl::HashMap<int, int, nctl::FixedHashFunc<int> >::ConstIterator i = hashmap_.begin(); i != hashmap_.end(); ++i)
 	{
 		printf(" [%d] hash: %lu, key: %d, value: %d\n", n, i.hash(), i.key(), i.value());
 		ASSERT_EQ(i.key(), n);
@@ -30,10 +30,10 @@ TEST_F(HashMapIteratorTest, ForLoopIteration)
 
 TEST_F(HashMapIteratorTest, ForLoopEmptyIteration)
 {
-	nc::HashMap<int, int, nc::FixedHashFunc<int> > newHashmap(Capacity);
+	nctl::HashMap<int, int, nctl::FixedHashFunc<int> > newHashmap(Capacity);
 
 	printf("Iterating over an empty hashmap with for loop:\n");
-	for (nc::HashMap<int, int, nc::FixedHashFunc<int> >::ConstIterator i = newHashmap.begin(); i != newHashmap.end(); ++i)
+	for (nctl::HashMap<int, int, nctl::FixedHashFunc<int> >::ConstIterator i = newHashmap.begin(); i != newHashmap.end(); ++i)
 		ASSERT_TRUE(false); // should never reach this point
 	printf("\n");
 }
@@ -43,7 +43,7 @@ TEST_F(HashMapIteratorTest, WhileLoopIteration)
 	int n = 0;
 
 	printf("Iterating through elements with while loop:\n");
-	nc::HashMap<int, int, nc::FixedHashFunc<int> >::ConstIterator i = hashmap_.begin();
+	nctl::HashMap<int, int, nctl::FixedHashFunc<int> >::ConstIterator i = hashmap_.begin();
 	while (i != hashmap_.end())
 	{
 		printf(" [%d] hash: %lu, key: %d, value: %d\n", n, i.hash(), i.key(), i.value());
@@ -56,10 +56,10 @@ TEST_F(HashMapIteratorTest, WhileLoopIteration)
 
 TEST_F(HashMapIteratorTest, WhileLoopEmptyIteration)
 {
-	nc::HashMap<int, int, nc::FixedHashFunc<int> > newHashmap(Capacity);
+	nctl::HashMap<int, int, nctl::FixedHashFunc<int> > newHashmap(Capacity);
 
 	printf("Iterating over an empty hashmap with while loop:\n");
-	nc::HashMap<int, int, nc::FixedHashFunc<int> >::ConstIterator i = newHashmap.begin();
+	nctl::HashMap<int, int, nctl::FixedHashFunc<int> >::ConstIterator i = newHashmap.begin();
 	while (i != newHashmap.end())
 	{
 		ASSERT_TRUE(false); // should never reach this point

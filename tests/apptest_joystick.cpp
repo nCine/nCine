@@ -1,6 +1,6 @@
 #include "apptest_joystick.h"
 #include "Application.h"
-#include "ncString.h"
+#include "nctl/ncString.h"
 #include "Texture.h"
 #include "Sprite.h"
 #include "TextNode.h"
@@ -46,7 +46,7 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	joyString_ = new nc::String(MaxNumChars);
+	joyString_ = new nctl::String(MaxNumChars);
 	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/" + TextureFile).data());
 
 	const float appWidth = nc::theApplication().width();

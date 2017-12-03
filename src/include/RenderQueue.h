@@ -2,8 +2,8 @@
 #define CLASS_NCINE_RENDERQUEUE
 
 #include "RenderCommand.h"
-#include "Array.h"
-#include "StaticArray.h"
+#include "nctl/Array.h"
+#include "nctl/StaticArray.h"
 
 namespace ncine {
 
@@ -39,18 +39,18 @@ class RenderQueue
 	unsigned int lastNumCommands_;
 
 	/// The current sum of vertices for a specified command type
-	StaticArray<unsigned int, RenderCommand::CommandType::COUNT> typedNumVertices_;
+	nctl::StaticArray<unsigned int, RenderCommand::CommandType::COUNT> typedNumVertices_;
 	/// The current sum of draw commands for a specified command type
-	StaticArray<unsigned int, RenderCommand::CommandType::COUNT> typedNumCommands_;
+	nctl::StaticArray<unsigned int, RenderCommand::CommandType::COUNT> typedNumCommands_;
 	/// The sum of vertices for a specified command type in the previous frame (it never contains a partial sum)
-	StaticArray<unsigned int, RenderCommand::CommandType::COUNT> typedLastNumVertices_;
+	nctl::StaticArray<unsigned int, RenderCommand::CommandType::COUNT> typedLastNumVertices_;
 	/// The sum of draw commands for a specified command type in the previous frame (it never contains a partial sum)
-	StaticArray<unsigned int, RenderCommand::CommandType::COUNT> typedLastNumCommands_;
+	nctl::StaticArray<unsigned int, RenderCommand::CommandType::COUNT> typedLastNumCommands_;
 
 	/// Array of opaque render command pointers
-	Array<RenderCommand *> opaqueRenderCommands_;
+	nctl::Array<RenderCommand *> opaqueRenderCommands_;
 	/// Array of transparent render command pointers
-	Array<RenderCommand *> transparentRenderCommands_;
+	nctl::Array<RenderCommand *> transparentRenderCommands_;
 };
 
 }

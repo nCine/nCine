@@ -2,7 +2,7 @@
 #define CLASS_NCINE_THREADPOOL
 
 #include "IThreadPool.h"
-#include "List.h"
+#include "nctl/List.h"
 #include "ThreadSync.h"
 
 namespace ncine {
@@ -26,13 +26,13 @@ class ThreadPool : public IThreadPool
   private:
 	struct ThreadStruct
 	{
-		List<IThreadCommand *> *queue;
+		nctl::List<IThreadCommand *> *queue;
 		Mutex *queueMutex;
 		CondVariable *queueCV;
 		bool shouldQuit;
 	};
 
-	List<IThreadCommand *> queue_;
+	nctl::List<IThreadCommand *> queue_;
 	Thread *threads_;
 	Mutex queueMutex_;
 	CondVariable queueCV_;

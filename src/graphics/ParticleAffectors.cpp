@@ -1,7 +1,6 @@
 #include "ParticleAffectors.h"
 #include "Color.h"
 #include "Particle.h"
-#include "Array.h"
 
 namespace ncine {
 

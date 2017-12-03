@@ -10,7 +10,7 @@ class ListTest : public ::testing::Test
   protected:
 	void SetUp() override { initList(list_); }
 
-	nc::List<int> list_;
+	nctl::List<int> list_;
 };
 
 TEST_F(ListTest, PushBack)
@@ -137,7 +137,7 @@ TEST_F(ListTest, RemoveTwoElements)
 	ASSERT_EQ(list_.front(), FirstElement);
 	ASSERT_EQ(list_.back(), LastElement);
 
-	for (nc::List<int>::ConstIterator i = list_.begin(); i != list_.end(); ++i)
+	for (nctl::List<int>::ConstIterator i = list_.begin(); i != list_.end(); ++i)
 	{
 		ASSERT_NE(*i, 3);
 		ASSERT_NE(*i, 5);

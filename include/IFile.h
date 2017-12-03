@@ -3,7 +3,7 @@
 
 #include <cstdio> // for FILE
 #include <cstdint> // for endianness conversions
-#include "ncString.h"
+#include "nctl/ncString.h"
 
 namespace ncine {
 
@@ -117,9 +117,9 @@ class DLL_PUBLIC IFile
 	static bool access(const char *filename, unsigned char mode);
 
 	/// Returns the base directory for data loading
-	static const String &dataPath() { return dataPath_; }
+	static const nctl::String &dataPath() { return dataPath_; }
 	/// Returns the writable directory for saving data
-	static const String &savePath();
+	static const nctl::String &savePath();
 
   protected:
 	/// File type
@@ -128,12 +128,12 @@ class DLL_PUBLIC IFile
 	/// Maximum number of characters for a file name (path included)
 	static const unsigned int MaxFilenameLength = 256;
 	/// File name with path
-	String filename_;
+	nctl::String filename_;
 
 	/// Maximum number of characters for a file extension, plus '\0'
 	static const unsigned int MaxExtensionLength = 5;
 	/// File extension
-	String extension_;
+	nctl::String extension_;
 
 	/// File descriptor for `open()` and `close()`
 	int fileDescriptor_;
@@ -151,9 +151,9 @@ class DLL_PUBLIC IFile
 
   private:
 	/// The path for the application to load files from
-	static String dataPath_;
+	static nctl::String dataPath_;
 	/// The path for the application to write files into
-	static String savePath_;
+	static nctl::String savePath_;
 
 	/// Determines the correct save path based on the platform
 	static void initSavePath();

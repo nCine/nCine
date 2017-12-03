@@ -1,9 +1,9 @@
-#ifndef CLASS_NCINE_ARRAYITERATOR
-#define CLASS_NCINE_ARRAYITERATOR
+#ifndef CLASS_NCTL_ARRAYITERATOR
+#define CLASS_NCTL_ARRAYITERATOR
 
 #include "iterator_traits.h"
 
-namespace ncine {
+namespace nctl {
 
 /// An Array iterator
 template <class T, bool IsConst>

@@ -10,12 +10,12 @@ class StringOperationTest : public ::testing::Test
   protected:
 	void SetUp() override { string_ = "String1"; }
 
-	nc::String string_;
+	nctl::String string_;
 };
 
 TEST_F(StringOperationTest, AppendString)
 {
-	nc::String newString = "Append";
+	nctl::String newString = "Append";
 	printf("Creating a new string: "); printString(newString);
 
 	string_.append(newString);
@@ -37,7 +37,7 @@ TEST_F(StringOperationTest, Clear)
 
 TEST_F(StringOperationTest, ImplicitCStringConstructor)
 {
-	nc::String newString = "String2";
+	nctl::String newString = "String2";
 	printf("Creating a new string from a C-style string assignment: "); printString(newString);
 
 	// Termination character is taken into account for capacity
@@ -49,7 +49,7 @@ TEST_F(StringOperationTest, ImplicitCStringConstructor)
 
 TEST_F(StringOperationTest, CopyConstructor)
 {
-	nc::String newString(string_);
+	nctl::String newString(string_);
 	printf("Creating a new string as a copy of the first one: "); printString(newString);
 
 	ASSERT_EQ(newString.capacity(), string_.capacity());
@@ -59,7 +59,7 @@ TEST_F(StringOperationTest, CopyConstructor)
 
 TEST_F(StringOperationTest, AssignmentOperator)
 {
-	nc::String newString = string_;
+	nctl::String newString = string_;
 	printf("Creating a new string with the assignment operator: "); printString(newString);
 
 	ASSERT_EQ(newString.capacity(), string_.capacity());
@@ -69,10 +69,10 @@ TEST_F(StringOperationTest, AssignmentOperator)
 
 TEST_F(StringOperationTest, ConstructByConcatenation)
 {
-	nc::String secondString = "String2";
+	nctl::String secondString = "String2";
 	printf("Creating a second string: "); printString(secondString);
 
-	nc::String thirdString = secondString + string_;
+	nctl::String thirdString = secondString + string_;
 	printf("Creating a third string by concatenating the second and the first one: "); printString(thirdString);
 
 	// Termination character is taken into account for capacity
@@ -88,7 +88,7 @@ TEST_F(StringOperationTest, ConstructByConcatenationWithCStringAsFirst)
 	printf("Creating a second string: %s", secondString);
 
 	// using `friend String operator+(const char *cString, const String &string)`
-	nc::String thirdString = secondString + string_;
+	nctl::String thirdString = secondString + string_;
 	printf("Creating a third string by concatenating the second and the first one: "); printString(thirdString);
 
 	// Termination character is taken into account for capacity
@@ -104,7 +104,7 @@ TEST_F(StringOperationTest, ConstructByConcatenationWithCStringAsSecond)
 	printf("Creating a second string: %s", secondString);
 
 	// using `String String::operator+(const char *cString) const`
-	nc::String thirdString = string_ + secondString;
+	nctl::String thirdString = string_ + secondString;
 	printf("Creating a third string by concatenating the first and the second one: "); printString(thirdString);
 
 	// Termination character is taken into account for capacity
@@ -219,7 +219,7 @@ TEST_F(StringOperationTest, FindString)
 {
 	const unsigned int oldLength = string_.length();
 
-	nc::String newString = "String2";
+	nctl::String newString = "String2";
 	printf("Creating a new string: "); printString(newString);
 	string_ += newString;
 	printf("Appending the new string to the first one: "); printString(string_);
@@ -231,7 +231,7 @@ TEST_F(StringOperationTest, FindString)
 
 TEST_F(StringOperationTest, FindNonExistentString)
 {
-	nc::String newString = "String2";
+	nctl::String newString = "String2";
 	printf("Creating a new string: "); printString(newString);
 
 	const int position = string_.find(newString);
@@ -265,9 +265,9 @@ TEST_F(StringOperationTest, FindNonExistentCString)
 
 TEST_F(StringOperationTest, CopyCharacters)
 {
-	nc::String srcString = "0123456";
+	nctl::String srcString = "0123456";
 	printf("Creating a new source string: "); printString(srcString);
-	nc::String destString = "abcdefg";
+	nctl::String destString = "abcdefg";
 	printf("Creating a new destination string: "); printString(destString);
 
 	const unsigned int srcChar = 4;
@@ -282,9 +282,9 @@ TEST_F(StringOperationTest, CopyCharacters)
 
 TEST_F(StringOperationTest, CopyCharactersToBeginning)
 {
-	nc::String srcString = "0123456";
+	nctl::String srcString = "0123456";
 	printf("Creating a new source string: "); printString(srcString);
-	nc::String destString = "abcdefg";
+	nctl::String destString = "abcdefg";
 	printf("Creating a new destination string: "); printString(destString);
 
 	const unsigned int srcChar = 4;
@@ -298,9 +298,9 @@ TEST_F(StringOperationTest, CopyCharactersToBeginning)
 
 TEST_F(StringOperationTest, CopyAllCharactersToBeginning)
 {
-	nc::String srcString = "0123456";
+	nctl::String srcString = "0123456";
 	printf("Creating a new source string: "); printString(srcString);
-	nc::String destString = "abcdefg";
+	nctl::String destString = "abcdefg";
 	printf("Creating a new destination string: "); printString(destString);
 
 	const unsigned int numCopied = srcString.copy(destString);
@@ -312,9 +312,9 @@ TEST_F(StringOperationTest, CopyAllCharactersToBeginning)
 
 TEST_F(StringOperationTest, CopyCharactersFromBeyondEnd)
 {
-	nc::String srcString = "0123456";
+	nctl::String srcString = "0123456";
 	printf("Creating a new source string: "); printString(srcString);
-	nc::String destString = "abcdefg";
+	nctl::String destString = "abcdefg";
 	printf("Creating a new destination string: "); printString(destString);
 
 	const unsigned int srcChar = srcString.length() + 1; // beyond the end of source
@@ -329,9 +329,9 @@ TEST_F(StringOperationTest, CopyCharactersFromBeyondEnd)
 
 TEST_F(StringOperationTest, CopyCharactersToBeyondEnd)
 {
-	nc::String srcString = "0123456";
+	nctl::String srcString = "0123456";
 	printf("Creating a new source string: "); printString(srcString);
-	nc::String destString = "abcdefg";
+	nctl::String destString = "abcdefg";
 	printf("Creating a new destination string: "); printString(destString);
 
 	const unsigned int numAvailable = destString.capacity() - destString.length();
@@ -348,9 +348,9 @@ TEST_F(StringOperationTest, CopyCharactersToBeyondEnd)
 
 TEST_F(StringOperationTest, CopyMoreCharactersThanSourceLength)
 {
-	nc::String srcString = "012";
+	nctl::String srcString = "012";
 	printf("Creating a new source string: "); printString(srcString);
-	nc::String destString = "abcdefg";
+	nctl::String destString = "abcdefg";
 	printf("Creating a new destination string: "); printString(destString);
 
 	const unsigned int srcChar = 0;
@@ -366,9 +366,9 @@ TEST_F(StringOperationTest, CopyMoreCharactersThanSourceLength)
 
 TEST_F(StringOperationTest, CopyMoreCharactersThanDestinationLength)
 {
-	nc::String srcString = "0123456";
+	nctl::String srcString = "0123456";
 	printf("Creating a new source string: "); printString(srcString);
-	nc::String destString = "abc";
+	nctl::String destString = "abc";
 	printf("Creating a new destination string: "); printString(destString);
 
 	const unsigned int srcChar = 0;
@@ -384,7 +384,7 @@ TEST_F(StringOperationTest, CopyMoreCharactersThanDestinationLength)
 
 TEST_F(StringOperationTest, CopyCharactersToCString)
 {
-	nc::String srcString = "0123456";
+	nctl::String srcString = "0123456";
 	printf("Creating a new source string: "); printString(srcString);
 	const unsigned int stringLength = 4;
 	char destString[stringLength] = "abc";

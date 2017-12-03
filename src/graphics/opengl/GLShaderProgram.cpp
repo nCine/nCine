@@ -1,6 +1,6 @@
 #include "GLShaderProgram.h"
 #include "GLShader.h"
-#include "ncString.h"
+#include "nctl/ncString.h"
 
 namespace ncine {
 
@@ -77,7 +77,7 @@ bool GLShaderProgram::link()
 
 		if (length > 0)
 		{
-			String infoLog(length);
+			nctl::String infoLog(length);
 			glGetProgramInfoLog(glHandle_, length, &length, infoLog.data());
 			LOGW_X("%s", infoLog.data());
 		}

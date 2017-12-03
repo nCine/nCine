@@ -62,7 +62,7 @@ void MyEventHandler::onInit()
 
 	cameraNode_ = new nc::SceneNode(&rootNode);
 
-	debugString_ = new nc::String(64);
+	debugString_ = new nctl::String(64);
 	debugtext_ = new nc::TextNode(&rootNode, font_);
 	debugtext_->setPosition((nc::theApplication().width() - debugtext_->width()) * 0.5f,
 	                        nc::theApplication().height() - debugtext_->fontLineHeight() * 0.5f);
@@ -75,7 +75,7 @@ void MyEventHandler::onInit()
 		texts_[i]->setColor(0, 0, 255, 255);
 	}
 
-	nc::String textString(16);
+	nctl::String textString(16);
 	texts_[0]->setPosition(0.0f, 0.0f);
 	texts_[0]->setString("(0, 0)");
 
@@ -97,8 +97,8 @@ void MyEventHandler::onInit()
 
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
-		const float randomX = nc::randBetween(-ViewHalfWidth, ViewHalfWidth);
-		const float randomY = nc::randBetween(-ViewHalfHeight, ViewHalfHeight);
+		const float randomX = nctl::randBetween(-ViewHalfWidth, ViewHalfWidth);
+		const float randomY = nctl::randBetween(-ViewHalfHeight, ViewHalfHeight);
 		sprites_[i] = new nc::Sprite(cameraNode_, textures_[i % NumTextures], randomX, randomY);
 		sprites_[i]->setScale(0.5f);
 		spritePos_[i].set(randomX, randomY);

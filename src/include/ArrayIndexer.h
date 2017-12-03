@@ -2,7 +2,7 @@
 #define CLASS_NCINE_ARRAYINDEXER
 
 #include "IIndexer.h"
-#include "Array.h"
+#include "nctl/Array.h"
 #include "Object.h"
 
 namespace ncine {
@@ -27,7 +27,7 @@ class ArrayIndexer : public IIndexer
   private:
 	unsigned int numObjects_;
 	unsigned int nextId_;
-	Array<Object *> pointers_;
+	nctl::Array<Object *> pointers_;
 
 	/// Deleted copy constructor
 	ArrayIndexer(const ArrayIndexer &) = delete;

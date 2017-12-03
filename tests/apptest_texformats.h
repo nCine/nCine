@@ -3,8 +3,8 @@
 
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
-#include "StaticArray.h"
-#include "ncString.h"
+#include "nctl/StaticArray.h"
+#include "nctl/ncString.h"
 
 namespace ncine {
 
@@ -55,9 +55,9 @@ class MyEventHandler :
 	static float newScale_;
 
 	nc::SceneNode *dummy_;
-	nc::StaticArray<nc::String, MaxTexFormats> filenames_;
-	nc::StaticArray<nc::Texture *, MaxTexFormats> textures_;
-	nc::StaticArray<nc::Sprite *, MaxTexFormats> sprites_;
+	nctl::StaticArray<nctl::String, MaxTexFormats> filenames_;
+	nctl::StaticArray<nc::Texture *, MaxTexFormats> textures_;
+	nctl::StaticArray<nc::Sprite *, MaxTexFormats> sprites_;
 	nc::Font *font_;
 	nc::TextNode *textNode_;
 

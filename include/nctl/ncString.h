@@ -1,10 +1,10 @@
-#ifndef CLASS_NCINE_STRING
-#define CLASS_NCINE_STRING
+#ifndef CLASS_NCTL_STRING
+#define CLASS_NCTL_STRING
 
 #include "algorithms.h"
 #include "StringIterator.h"
 
-namespace ncine {
+namespace nctl {
 
 /// A basic string class made of chars
 class DLL_PUBLIC String
@@ -38,9 +38,9 @@ class DLL_PUBLIC String
 	/// Swaps two strings without copying their data
 	void swap(String &first, String &second)
 	{
-		nc::swap(first.array_, second.array_);
-		nc::swap(first.length_, second.length_);
-		nc::swap(first.capacity_, second.capacity_);
+		nctl::swap(first.array_, second.array_);
+		nctl::swap(first.length_, second.length_);
+		nctl::swap(first.capacity_, second.capacity_);
 	}
 
 	/// Returns an iterator to the first character
