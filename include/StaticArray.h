@@ -76,6 +76,14 @@ class StaticArray
 	/// Clears the array
 	/*! Size will be set to zero but capacity remains unmodified. */
 	inline void clear() { size_ = 0; }
+	/// Returns a constant reference to the first element in constant time
+	inline const T &front() const { return array_[0]; }
+	/// Returns a reference to the first element in constant time
+	inline T &front() { return array_[0]; }
+	/// Returns a constant reference to the last element in constant time
+	inline const T &back() const { return array_[size_ - 1]; }
+	/// Returns a reference to the last element in constant time
+	inline T &back() { return array_[size_ - 1]; }
 	/// Inserts a new element as the last one in constant time
 	inline void insertBack(T element) { operator[](size_) = element; }
 

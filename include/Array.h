@@ -120,23 +120,21 @@ class Array
 	/// Removes the last element in constant time
 	void popBack();
 	/// Inserts new elements at the specified position from a source range, last not included (shifting elements around)
-	void insertRange(unsigned int index, const T *firstPtr, const T *lastPtr);
+	T *insertRange(unsigned int index, const T *firstPtr, const T *lastPtr);
 	/// Inserts a new element at a specified position (shifting elements around)
-	void insertAt(unsigned int index, T element);
+	T *insertAt(unsigned int index, T element);
 	/// Inserts a new element at the position specified by the iterator (shifting elements around)
 	Iterator insert(Iterator position, const T &value);
 	/// Inserts new elements from a source at the position specified by the iterator (shifting elements around)
 	Iterator insert(Iterator position, Iterator first, Iterator last);
 	/// Removes the specified range of elements, last not included (shifting elements around)
-	void removeRange(unsigned int firstIndex, unsigned int lastIndex);
+	T *removeRange(unsigned int firstIndex, unsigned int lastIndex);
 	/// Removes an element at a specified position (shifting elements around)
-	inline void removeAt(unsigned int index) { removeRange(index, index + 1); }
+	inline Iterator removeAt(unsigned int index) { return Iterator(removeRange(index, index + 1)); }
 	/// Removes the element pointed by the iterator (shifting elements around)
 	Iterator erase(Iterator position);
 	/// Removes the elements in the range, last not included (shifting elements around)
 	Iterator erase(Iterator first, const Iterator last);
-	/// Inserts an array of elements at the end in constant time
-	void append(const T *elements, unsigned int amount);
 
 	/// Read-only access to the specified element (with bounds checking)
 	const T &at(unsigned int index) const;
@@ -227,9 +225,14 @@ template <class T>
 void Array<T>::setSize(unsigned int newSize)
 {
 	if (newSize > capacity_)
+	{
 		setCapacity(newSize);
-
-	size_ = newSize;
+		// Extending size only if the capacity is not fixed
+		if (capacity_ == newSize)
+			size_ = newSize;
+	}
+	else
+		size_ = newSize;
 }
 
 template <class T>
@@ -246,22 +249,27 @@ void Array<T>::popBack()
 }
 
 template <class T>
-void Array<T>::insertRange(unsigned int index, const T *firstPtr, const T *lastPtr)
+T *Array<T>::insertRange(unsigned int index, const T *firstPtr, const T *lastPtr)
 {
 	// Cannot insert at more than one position after the last element
 	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
-	FATAL_ASSERT_MSG_X(firstPtr < lastPtr, "First pointer %p should precede the last one %p", firstPtr, lastPtr);
+	FATAL_ASSERT_MSG_X(firstPtr <= lastPtr, "First pointer %p should precede or be equal to the last one %p", firstPtr, lastPtr);
 
-	if (size_ + 1 > capacity_)
-		setCapacity(size_ * 2);
+	const unsigned int numElements = static_cast<unsigned int>(lastPtr - firstPtr);
+
+	if(size_ + numElements > capacity_)
+		setCapacity((size_ + numElements) * 2);
 
 	// memmove() takes care of overlapping regions
-	memmove(array_ + index, firstPtr, sizeof(T) * (lastPtr - firstPtr));
-	size_ += static_cast<unsigned int>(lastPtr - firstPtr);
+	memmove(array_ + index + numElements, array_ + index, sizeof(T) * (size_ - index));
+	memcpy(array_ + index, firstPtr, sizeof(T) * numElements);
+	size_ += numElements;
+
+	return (array_ + index + numElements);
 }
 
 template <class T>
-void Array<T>::insertAt(unsigned int index, T element)
+T *Array<T>::insertAt(unsigned int index, T element)
 {
 	// Cannot insert at more than one position after the last element
 	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
@@ -273,15 +281,17 @@ void Array<T>::insertAt(unsigned int index, T element)
 	memmove(array_ + index + 1, array_ + index, sizeof(T) * (size_ - index));
 	array_[index] = element;
 	size_++;
+
+	return (array_ + index + 1);
 }
 
 template <class T>
 typename Array<T>::Iterator Array<T>::insert(Iterator position, const T &value)
 {
 	const unsigned int index = &(*position) - array_;
-	insertAt(index, value);
+	T *nextElement = insertAt(index, value);
 
-	return ++position;
+	return Iterator(nextElement);
 }
 
 template <class T>
@@ -290,31 +300,31 @@ typename Array<T>::Iterator Array<T>::insert(Iterator position, Iterator first, 
 	const unsigned int index = static_cast<unsigned int>(&(*position) - array_);
 	const T *firstPtr = &(*first);
 	const T *lastPtr = &(*last);
-	insertRange(index, firstPtr, lastPtr);
+	T *nextElement = insertRange(index, firstPtr, lastPtr);
 
-	return position + static_cast<unsigned int>(lastPtr - firstPtr);
+	return Iterator(nextElement);
 }
 
 template <class T>
-void Array<T>::removeRange(unsigned int firstIndex, unsigned int lastIndex)
+T *Array<T>::removeRange(unsigned int firstIndex, unsigned int lastIndex)
 {
 	// Cannot remove past the last element
 	FATAL_ASSERT_MSG_X(firstIndex < size_, "First index %u out of size range", firstIndex);
 	FATAL_ASSERT_MSG_X(lastIndex <= size_, "Last index %u out of size range", lastIndex);
-	FATAL_ASSERT_MSG_X(firstIndex < lastIndex, "First index %u should be less than last index %u", firstIndex, lastIndex);
+	FATAL_ASSERT_MSG_X(firstIndex <= lastIndex, "First index %u should precede or be equal to the last one %u", firstIndex, lastIndex);
 
 	// memmove() takes care of overlapping regions
 	memmove(array_ + firstIndex, array_ + lastIndex, sizeof(T) * (size_ - lastIndex));
 	size_ -= (lastIndex - firstIndex);
+
+	return (array_ + firstIndex);
 }
 
 template <class T>
 typename Array<T>::Iterator Array<T>::erase(Iterator position)
 {
 	const unsigned int index = static_cast<unsigned int>(&(*position) - array_);
-	removeAt(index);
-
-	return ++position;
+	return removeAt(index);
 }
 
 template <class T>
@@ -322,19 +332,9 @@ typename Array<T>::Iterator Array<T>::erase(Iterator first, const Iterator last)
 {
 	const unsigned int firstIndex = static_cast<unsigned int>(&(*first) - array_);
 	const unsigned int lastIndex = static_cast<unsigned int>(&(*last) - array_);
-	removeRange(firstIndex, lastIndex);
+	T *nextElement = removeRange(firstIndex, lastIndex);
 
-	return ++first;
-}
-
-template <class T>
-void Array<T>::append(const T *elements, unsigned int amount)
-{
-	if (size_ + amount > capacity_)
-		setCapacity(size_ + amount);
-
-	memcpy(array_ + size_, elements, sizeof(T) * amount);
-	size_ += amount;
+	return Iterator(nextElement);
 }
 
 template <class T>
@@ -370,9 +370,15 @@ T &Array<T>::operator[](unsigned int index)
 	{
 		// Need growing
 		if (size_ == capacity_)
-			setCapacity(capacity_ * 2);
-
-		size_++;
+		{
+			const unsigned int oldCapacity = capacity_;
+			setCapacity(oldCapacity * 2);
+			// Extending size only if the capacity is not fixed
+			if (capacity_ == oldCapacity * 2)
+				size_++;
+		}
+		else
+			size_++;
 	}
 
 	return array_[index];

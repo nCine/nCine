@@ -249,7 +249,7 @@ T &HashMap<K, T, HashFunc>::HashBucket::findOrAdd(hash_t hash, const K &key)
 	return (*collisionList_.rBegin()).value;
 }
 
-/*!	\return True if the element has been found and removed */
+/*! \return True if the element has been found and removed */
 template <class K, class T, class HashFunc>
 bool HashMap<K, T, HashFunc>::HashBucket::remove(hash_t hash, const K &key)
 {

@@ -78,13 +78,15 @@ class DLL_PUBLIC String
 	const char *data() const { return array_; }
 
 	/// Copies characters from somewhere in the source to somewhere in the destination
-	unsigned int copy(const String &source, unsigned int srcChar, unsigned int numChar, unsigned int destChar);
-	/// Copies all the characters from the source at the beginning of the destination
-	unsigned int copy(const String &source);
-	/// Appends all the characters from the source at the end of the destination
+	unsigned int copy(String &dest, unsigned int srcChar, unsigned int numChar, unsigned int destChar) const;
+	/// Copies characters from somewhere in the source to the beginning of the destination
+	unsigned int copy(String &dest, unsigned int srcChar, unsigned int numChar) const;
+	/// Copies all the characters from the source to the beginning of the destination
+	unsigned int copy(String &dest) const;
+	/// Copies characters from the source string to a C string
+	unsigned int copy(char *dest, unsigned int srcChar, unsigned int numChar) const;
+	/// Appends all the characters from the source to the end of the destination
 	unsigned int append(const String &source);
-	/// Copies characters from the string to a C string
-	unsigned int copyTo(char *dest, unsigned int srcChar, unsigned int numChar) const;
 
 	/// Compares the string with another one in lexicographical order
 	int compare(const String &other) const;
@@ -117,6 +119,9 @@ class DLL_PUBLIC String
 	/// Concatenates a string with a constant C string to create a third one
 	String operator+(const char *cString) const;
 
+	/// Friend operator to concatenate a constant C string with a string to create a third one
+	friend DLL_PUBLIC String operator+(const char *cString, const String &string);
+
 	inline bool operator==(const String &other) const { return (length_ != other.length_) ? false : (compare(other) == 0); }
 	inline bool operator!=(const String &other) const { return (length_ != other.length_) ? true : (compare(other) != 0); }
 	inline bool operator>(const String &other) const { return compare(other) > 0; }
@@ -146,6 +151,8 @@ inline char String::operator[](unsigned int index) const
 	else
 		return '\0';
 }
+
+DLL_PUBLIC String operator+(const char *cString, const String &string);
 
 }
 

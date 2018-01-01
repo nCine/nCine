@@ -307,7 +307,7 @@ inline Matrix4x4<T> Matrix4x4<T>::operator/(T s) const
 	return Matrix4x4(vecs_[0] / s,
 	                 vecs_[1] / s,
 	                 vecs_[2] / s,
-	                 vecs_[3] * s);
+	                 vecs_[3] / s);
 }
 
 template <class T>

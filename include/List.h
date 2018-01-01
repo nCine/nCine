@@ -110,11 +110,11 @@ class List
 	void remove(const T &element);
 	/// Removes all the elements that fulfill the condition
 	template <class Predicate> void removeIf(Predicate pred);
-	/// Transfers all the elements from the source list
+	/// Transfers all the elements from the source list in front of `position`
 	void splice(Iterator position, List &source);
-	/// Transfers one element from the source list
+	/// Transfers one element at `it` from the source list in front of `position`
 	void splice(Iterator position, List &source, Iterator it);
-	/// Transfers a range of elements from the source list, last not included
+	/// Transfers a range of elements from the source list, `last` not included, in front of `position`
 	void splice(Iterator position, List &source, Iterator first, Iterator last);
 
   private:
@@ -278,12 +278,14 @@ void List<T>::splice(Iterator position, List &source)
 
 	if (node)
 	{
-		ListNode<T> *nextNode = node->next_;
-		node->next_ = source.head_;
-		source.head_->previous_ = node;
-		source.tail_->next_ = nextNode;
-		if (nextNode)
-			nextNode->previous_ = source.tail_;
+		ListNode<T> *prevNode = node->previous_;
+		node->previous_ = source.tail_;
+		source.tail_->next_ = node;
+		source.head_->previous_ = prevNode;
+		if (prevNode)
+			prevNode->next_ = source.head_;
+		else
+			head_ = source.head_;
 	}
 	else
 	{
@@ -327,17 +329,21 @@ void List<T>::splice(Iterator position, List &source, Iterator it)
 
 	if (node)
 	{
-		ListNode<T> *nextNode = node->next_;
-		node->next_ = sourceNode;
-		sourceNode->previous_ = node;
-		sourceNode->next_ = nextNode;
-		if (nextNode)
-			nextNode->previous_ = sourceNode;
+		ListNode<T> *prevNode = node->previous_;
+		node->previous_ = sourceNode;
+		sourceNode->previous_ = prevNode;
+		sourceNode->next_ = node;
+		if (prevNode)
+			prevNode->next_ = sourceNode;
+		else
+			head_ = sourceNode;
 	}
 	else
 	{
 		head_ = sourceNode;
 		tail_ = sourceNode;
+		sourceNode->previous_ = NULL;
+		sourceNode->next_ = NULL;
 	}
 	size_++;
 	source.size_--;
@@ -381,17 +387,22 @@ void List<T>::splice(Iterator position, List &source, Iterator first, Iterator l
 
 	if (node)
 	{
-		ListNode<T> *nextNode = node->next_;
-		node->next_ = firstNode;
-		firstNode->previous_ = node;
-		if (nextNode)
-			nextNode->previous_ = lastIncludedNode;
-		lastIncludedNode->next_ = nextNode;
+		ListNode<T> *prevNode = node->previous_;
+		node->previous_ = lastIncludedNode;
+		firstNode->previous_ = prevNode;
+		lastIncludedNode->next_ = node;
+		if (prevNode)
+			prevNode->next_ = firstNode;
+		else
+			head_ = firstNode;
+		lastIncludedNode->next_ = node;
 	}
 	else
 	{
 		head_ = firstNode;
 		tail_ = lastIncludedNode;
+		firstNode->previous_ = NULL;
+		lastIncludedNode->next_ = NULL;
 	}
 }
 

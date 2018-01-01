@@ -18,6 +18,9 @@ class Quaternion
 
 	void set(T xx, T yy, T zz, T ww);
 
+	T *data();
+	const T *data() const;
+
 	T &operator[](unsigned int index);
 	const T &operator[](unsigned int index) const;
 
@@ -45,7 +48,7 @@ class Quaternion
 	Quaternion conjugated() const;
 	Quaternion &conjugate();
 
-	Matrix4x4<T> toMatrix4x4();
+	Matrix4x4<T> toMatrix4x4() const;
 	static Quaternion fromAxisAngle(T xx, T yy, T zz, T degrees);
 	static Quaternion fromAxisAngle(const Vector3<T> &axis, T degrees);
 	static Quaternion fromXAxisAngle(T degrees);
@@ -67,6 +70,18 @@ inline void Quaternion<T>::set(T xx, T yy, T zz, T ww)
 	y = yy;
 	z = zz;
 	w = ww;
+}
+
+template <class T>
+T *Quaternion<T>::data()
+{
+	return &x;
+}
+
+template <class T>
+const T *Quaternion<T>::data() const
+{
+	return &x;
 }
 
 template <class T>
@@ -120,10 +135,12 @@ inline Quaternion<T> &Quaternion<T>::operator-=(const Quaternion &q)
 template <class T>
 inline Quaternion<T> &Quaternion<T>::operator*=(const Quaternion &q)
 {
-	x = w * q.x + x * q.w + y * q.z - z * q.y;
-	y = w * q.y + y * q.w + z * q.x - x * q.z;
-	z = w * q.z + z * q.w + x * q.y - y * q.x;
-	w = w * q.w - x * q.x - y * q.y - z * q.z;
+	const Quaternion<T> q0 = *this;
+
+	x = q0.w * q.x + q0.x * q.w + q0.y * q.z - q0.z * q.y;
+	y = q0.w * q.y + q0.y * q.w + q0.z * q.x - q0.x * q.z;
+	z = q0.w * q.z + q0.z * q.w + q0.x * q.y - q0.y * q.x;
+	w = q0.w * q.w - q0.x * q.x - q0.y * q.y - q0.z * q.z;
 
 	return *this;
 }
@@ -244,7 +261,7 @@ inline Quaternion<T> &Quaternion<T>::conjugate()
 }
 
 template <class T>
-inline Matrix4x4<T> Quaternion<T>::toMatrix4x4()
+inline Matrix4x4<T> Quaternion<T>::toMatrix4x4() const
 {
 	const T x2 = x * 2;
 	const T y2 = y * 2;
@@ -261,9 +278,9 @@ inline Matrix4x4<T> Quaternion<T>::toMatrix4x4()
 	const T yw = w * y2;
 	const T zw = w * z2;
 
-	return Matrix4x4<T>(Vector4<T>(1 - (yy + zz), xy - zw, xz + yw, 0),
-	                    Vector4<T>(xy + zw, 1 - (xx + zz), yz - xw, 0),
-	                    Vector4<T>(xz - yw, yz + xw, 1 - (xx + yy), 0),
+	return Matrix4x4<T>(Vector4<T>(1 - (yy + zz), xy + zw, xz - yw, 0),
+	                    Vector4<T>(xy - zw, 1 - (xx + zz), yz + xw, 0),
+	                    Vector4<T>(xz + yw, yz - xw, 1 - (xx + yy), 0),
 	                    Vector4<T>(0, 0, 0, 1));
 }
 

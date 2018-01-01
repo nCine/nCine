@@ -72,7 +72,7 @@ String &String::operator=(const String &other)
 	if (this != &other)
 	{
 		// copy and truncate
-		const unsigned int copiedChars = copy(other);
+		const unsigned int copiedChars = other.copy(*this);
 		length_ = copiedChars;
 		array_[length_] = '\0';
 	}
@@ -96,45 +96,45 @@ String &String::operator=(const char *cString)
 }
 
 /*! The method returns the number of characters copied, to allow truncation. */
-unsigned int String::copy(const String &source, unsigned int srcChar, unsigned int numChar, unsigned int destChar)
+unsigned int String::copy(String &dest, unsigned int srcChar, unsigned int numChar, unsigned int destChar) const
 {
 	// Clamping parameters to string lengths and capacities
 
 	// Cannot copy from beyond the end of the source string
-	const unsigned int clampedSrcChar = min(srcChar, source.length_);
-	const char *srcStart = source.array_ + clampedSrcChar;
+	const unsigned int clampedSrcChar = min(srcChar, length_);
+	const char *srcStart = array_ + clampedSrcChar;
 	// It is possible to write beyond the end of the destination string, but without creating holes
-	const unsigned int clampedDestChar = min(destChar, length_);
-	char *destStart = array_ + clampedDestChar;
+	const unsigned int clampedDestChar = min(destChar, dest.length_);
+	char *destStart = dest.array_ + clampedDestChar;
 	// Cannot copy more characters than the source has left until its length or more than the destination has until its capacity
-	const unsigned int charsToCopy = min(min(numChar, source.length_ - clampedSrcChar), capacity_ - clampedDestChar);
+	const unsigned int charsToCopy = min(min(numChar, length_ - clampedSrcChar), dest.capacity_ - clampedDestChar);
 
 	if (charsToCopy > 0)
 	{
 #if defined(_WIN32) && !defined(__MINGW32__)
-		strncpy_s(destStart, capacity_ - clampedDestChar, srcStart, charsToCopy);
+		strncpy_s(destStart, dest.capacity_ - clampedDestChar, srcStart, charsToCopy);
 #else
 		strncpy(destStart, srcStart, charsToCopy);
 #endif
 		// Source string length can only grow, truncation has to be performed by the calling function using the return value
-		length_ = max(length_, static_cast<unsigned int>(destStart - array_) + charsToCopy);
-		array_[length_] = '\0';
+		dest.length_ = max(dest.length_, static_cast<unsigned int>(destStart - dest.array_) + charsToCopy);
+		dest.array_[dest.length_] = '\0';
 	}
 
 	return charsToCopy;
 }
 
-unsigned int String::copy(const String &source)
+unsigned int String::copy(String &dest, unsigned int srcChar, unsigned int numChar) const
 {
-	return copy(source, 0, source.length_, 0);
+	return copy(dest, srcChar, numChar, 0);
 }
 
-unsigned int String::append(const String &source)
+unsigned int String::copy(String &dest) const
 {
-	return copy(source, 0, source.length_, length_);
+	return copy(dest, 0, length_, 0);
 }
 
-unsigned int String::copyTo(char *dest, unsigned int srcChar, unsigned int numChar) const
+unsigned int String::copy(char *dest, unsigned int srcChar, unsigned int numChar) const
 {
 	ASSERT(dest);
 
@@ -157,6 +157,11 @@ unsigned int String::copyTo(char *dest, unsigned int srcChar, unsigned int numCh
 	return charsToCopy;
 }
 
+unsigned int String::append(const String &source)
+{
+	return source.copy(*this, 0, source.length_, length_);
+}
+
 int String::compare(const String &other) const
 {
 	const unsigned int minCapacity = nc::min(capacity_, other.capacity_);
@@ -171,7 +176,12 @@ int String::compare(const char *cString) const
 
 int String::findFirstChar(char c) const
 {
-	return findFirstCharAfterIndex(c, 0);
+	const char *foundPtr = strchr(array_, c);
+
+	if (foundPtr)
+		return static_cast<int>(foundPtr - array_);
+	else
+		return -1;
 }
 
 int String::findLastChar(char c) const
@@ -315,6 +325,18 @@ String String::operator+(const char *cString) const
 
 	result = *this;
 	result += cString;
+
+	return result;
+}
+
+String operator+(const char *cString, const String &string)
+{
+	ASSERT(cString);
+	const unsigned int sumLength = string.length_ + static_cast<unsigned int>(strlen(cString)) + 1;
+	String result(sumLength);
+
+	result = cString;
+	result += string;
 
 	return result;
 }

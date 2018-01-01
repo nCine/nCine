@@ -44,7 +44,7 @@ class ArrayIterator
 	/// Subtraction operator
 	ArrayIterator operator-(int n) const;
 	/// Pointer subtraction operator
-	friend inline int operator-(const ArrayIterator &lhs, const ArrayIterator &rhs)	{ return static_cast<int>(lhs.elementPtr_ - rhs.elementPtr_); }
+	friend inline int operator-(const ArrayIterator &lhs, const ArrayIterator &rhs) { return static_cast<int>(lhs.elementPtr_ - rhs.elementPtr_); }
 
 	/// Subscript operator
 	Reference operator[](int n) const;
