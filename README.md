@@ -17,9 +17,9 @@ For additional information: https://ncine.github.io/
 
 ### Supported Platforms and Compilers
 - Windows (MSVC, MinGW-w64 on MSYS2)
-- Mac Os X (LLVM)
-- Linux (GCC, LLVM)
-- Android (GCC, LLVM)
+- Mac Os X (Clang)
+- Linux (GCC, Clang)
+- Android (GCC, Clang)
 
 ### Development Tools
 - git
@@ -28,17 +28,10 @@ For additional information: https://ncine.github.io/
 - Doxygen with GraphViz
 - Valgrind
 - Cppcheck
-- Artistic Style
+- Artistic Style and Uncrustify
+- Google Test and Gcovr
 
 ## Development
-
-### Tool Notes
-
-#### Cppcheck
-`cppcheck --quiet --enable=all --inconclusive --std=c++03 -I include -I src/include src 2> cppcheck.log`
-
-#### Artistic Style
-`astyle --style=allman --indent=tab --attach-namespaces --indent-modifiers --indent-switches --indent-preproc-block --min-conditional-indent=0 --pad-oper --pad-header --add-brackets --align-pointer=name --align-reference=name --keep-one-line-blocks --keep-one-line-statements --suffix=none --recursive "src/*.h" "src/*.cpp" "include/*.h" "tests/*.h" "tests/*.cpp"`
 
 ### Conventions
 

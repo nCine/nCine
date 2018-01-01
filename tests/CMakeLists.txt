@@ -18,19 +18,19 @@ if(WIN32)
 		endif()
 
 		if(MSVC_IDE)
-			add_custom_target(copy_ncine_dll ALL
+			add_custom_target(copy_ncine_dll_tests ALL
 				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/$<CONFIGURATION>/${NCINE_LIBRARY_NAME} ${CMAKE_BINARY_DIR}/tests
 				DEPENDS ncine
 				COMMENT "Copying nCine DLL..."
 			)
 		else()
-			add_custom_target(copy_ncine_dll ALL
+			add_custom_target(copy_ncine_dll_tests ALL
 				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/${NCINE_LIBRARY_NAME} ${CMAKE_BINARY_DIR}/tests
 				DEPENDS ncine
 				COMMENT "Copying nCine DLL..."
 			)
 		endif()
-		set_target_properties(copy_ncine_dll PROPERTIES FOLDER "CustomCopyTargets")
+		set_target_properties(copy_ncine_dll_tests PROPERTIES FOLDER "CustomCopyTargets")
 	endif()
 elseif(APPLE)
 	file(RELATIVE_PATH RELPATH_TO_LIB ${CMAKE_INSTALL_PREFIX}/${RUNTIME_INSTALL_DESTINATION} ${CMAKE_INSTALL_PREFIX}/${LIBRARY_INSTALL_DESTINATION})
@@ -56,16 +56,6 @@ foreach(APPTEST ${APPTESTS})
 	install(TARGETS ${APPTEST} RUNTIME DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
 endforeach()
 
-list(APPEND TESTS test_array test_staticarray
-	test_list test_string
-	test_hashmap test2_hashmap)
-list(APPEND TESTS test_algorithms_array
-	test_algorithms_list
-	test_algorithms_hashmap)
-list(APPEND TESTS test_vector2 test_vector3 test_vector4
-	test_matrix4x4 test2_matrix4x4
-	test_quaternion test2_quaternion)
-
 list(FIND APPTESTS ${NCINE_STARTUP_TEST} STARTUP_TEST_INDEX)
 if(STARTUP_TEST_INDEX GREATER -1)
 	if(NOT TESTS_DATA_DIR_DIST) # Don't set the startup test if it wouldn't find the data directory
@@ -75,13 +65,3 @@ if(STARTUP_TEST_INDEX GREATER -1)
 else()
 	message(FATAL_ERROR "Startup test target not found: \"${NCINE_STARTUP_TEST}\"")
 endif()
-
-foreach(TEST ${TESTS})
-	add_executable(${TEST} ${TEST}.cpp test_functions.h)
-	target_link_libraries(${TEST} ncine)
-	set_target_properties(${TEST} PROPERTIES FOLDER "Tests")
-	if(APPLE)
-		set_target_properties(${APPTEST} PROPERTIES INSTALL_RPATH "@executable_path/${RELPATH_TO_LIB}")
-	endif()
-	install(TARGETS ${TEST} RUNTIME DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
-endforeach()

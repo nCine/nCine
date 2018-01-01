@@ -114,10 +114,16 @@ else()
 	target_compile_definitions(ncine PUBLIC "NCINE_STATIC")
 endif()
 
+if(CMAKE_BUILD_TYPE MATCHES "Debug" AND NCINE_CODE_COVERAGE AND CODE_COVERAGE_SUPPORTED)
+	set_target_properties(ncine PROPERTIES COMPILE_FLAGS "--coverage")
+	set_target_properties(ncine PROPERTIES LINK_FLAGS "--coverage")
+endif()
+
 if(MSVC)
 	target_include_directories(ncine PRIVATE "${EXTERNAL_MSVC_DIR}/include")
 	# Suppress linker warning about templates
 	target_compile_options(ncine PUBLIC "/wd4251")
+	set_target_properties(ncine PROPERTIES DEBUG_POSTFIX "")
 else()
 	if(PNG_FOUND)
 		target_include_directories(ncine PRIVATE ${PNG_INCLUDE_DIR})
@@ -189,4 +195,5 @@ endif()
 
 include(ncine_build_documentation)
 include(ncine_build_tests)
+include(ncine_build_unit_tests)
 include(ncine_build_android)
