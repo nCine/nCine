@@ -23,12 +23,28 @@ class IdentityHashFunc
 };
 
 /// Shift-Add-XOR hash function
+template <class K>
+class SaxHashFunc
+{
+  public:
+	hash_t operator()(const K &key) const
+	{
+		const unsigned char *bytes = reinterpret_cast<const unsigned char *>(&key);
+		hash_t hash = static_cast<hash_t>(0);
+		for (unsigned int i = 0; i < sizeof(K); i++)
+			hash ^= (hash << 5) + (hash >> 2) + static_cast<hash_t>(bytes[i]);
+
+		return hash;
+	}
+};
+
+/// Shift-Add-XOR hash function
 /*!
- * The key type should be a container exposing `length()` and `operator[]()` methods.
+ * \note The key type should be a container exposing `length()` and `operator[]()` methods.
  * Contained elements should be convertible to `hash_t`.
  */
 template <class K>
-class SaxHashFunc
+class SaxHashFuncContainer
 {
   public:
 	hash_t operator()(const K &key) const
@@ -43,12 +59,39 @@ class SaxHashFunc
 
 /// Jenkins hash function
 /*!
- * The key type should be a container exposing `length()` and `operator[]()` methods.
- * Contained elements should be convertible to `hash_t`.\n
  * For more information: http://en.wikipedia.org/wiki/Jenkins_hash_function
  */
 template <class K>
 class JenkinsHashFunc
+{
+  public:
+	hash_t operator()(const K &key) const
+	{
+		const unsigned char *bytes = reinterpret_cast<const unsigned char *>(&key);
+		hash_t hash = static_cast<hash_t>(0);
+		for (unsigned int i = 0; i < sizeof(K); i++)
+		{
+			hash += static_cast<hash_t>(bytes[i]);
+			hash += (hash << 10);
+			hash ^= (hash >> 6);
+		}
+		hash += (hash << 3);
+		hash ^= (hash >> 11);
+		hash += (hash << 15);
+
+		return hash;
+	}
+};
+
+/// Jenkins hash function
+/*!
+ * \note The key type should be a container exposing `length()` and `operator[]()` methods.
+ * Contained elements should be convertible to `hash_t`.
+ *
+ * For more information: http://en.wikipedia.org/wiki/Jenkins_hash_function
+ */
+template <class K>
+class JenkinsHashFuncContainer
 {
   public:
 	hash_t operator()(const K &key) const
@@ -63,6 +106,7 @@ class JenkinsHashFunc
 		hash += (hash << 3);
 		hash ^= (hash >> 11);
 		hash += (hash << 15);
+
 		return hash;
 	}
 };

@@ -218,7 +218,7 @@ TEST_F(ListOperationsTest, SpliceRangeToEmptyList)
 {
 	printf("Splicing a range of nodes into a new empty one\n");
 	nctl::List<int> newList;
-	newList.splice(newList.begin(), list_, nctl::next(list_.begin(), 2), nctl::next(list_.rBegin(), -3));
+	newList.splice(newList.begin(), list_, nctl::next(list_.begin(), 2), nctl::next(list_.rBegin().base(), -3));
 	printf("List 1 - "); printList(list_);
 	printf("List 2 - "); printList(newList);
 	printf("\n");
@@ -240,7 +240,7 @@ TEST_F(ListOperationsTest, SpliceRangeToListBeginning)
 	nctl::List<int> newList;
 	newList.pushBack(11);
 	newList.pushBack(12);
-	newList.splice(newList.begin(), list_, nctl::next(list_.begin(), 2), nctl::next(list_.rBegin(), -3));
+	newList.splice(newList.begin(), list_, nctl::next(list_.begin(), 2), nctl::next(list_.rBegin().base(), -3));
 	printf("List 1 - "); printList(list_);
 	printf("List 2 - "); printList(newList);
 	printf("\n");
@@ -262,7 +262,7 @@ TEST_F(ListOperationsTest, SpliceRangeToList)
 	nctl::List<int> newList;
 	newList.pushBack(-1);
 	newList.pushBack(11);
-	newList.splice(nctl::next(newList.begin()), list_, nctl::next(list_.begin(), 2), nctl::next(list_.rBegin(), -3));
+	newList.splice(nctl::next(newList.begin()), list_, nctl::next(list_.begin(), 2), nctl::next(list_.rBegin().base(), -3));
 	printf("List 1 - "); printList(list_);
 	printf("List 2 - "); printList(newList);
 	printf("\n");

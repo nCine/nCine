@@ -36,29 +36,6 @@ TEST_F(StringIteratorTest, ForLoopEmptyIteration)
 	printf("\n");
 }
 
-TEST_F(StringIteratorTest, ReverseForLoopIteration)
-{
-	unsigned int n = string_.length() - 1;
-
-	printf("Iterating through string characters with for loop (reverse):");
-	for (nctl::String::ConstIterator r = string_.rBegin(); r != string_.rEnd(); --r)
-	{
-		printf(" %c", *r);
-		ASSERT_EQ(*r, string_[n--]);
-	}
-	printf("\n");
-}
-
-TEST_F(StringIteratorTest, ReverseForLoopEmptyIteration)
-{
-	nctl::String newString(Capacity);
-
-	printf("Iterating over an empty string with for loop (reverse):\n");
-	for (nctl::String::ConstIterator r = newString.rBegin(); r != newString.rEnd(); --r)
-		ASSERT_TRUE(false); // should never reach this point
-	printf("\n");
-}
-
 TEST_F(StringIteratorTest, WhileLoopIteration)
 {
 	unsigned int n = 0;
@@ -84,35 +61,6 @@ TEST_F(StringIteratorTest, WhileLoopEmptyIteration)
 	{
 		ASSERT_TRUE(false); // should never reach this point
 		++i;
-	}
-	printf("\n");
-}
-
-TEST_F(StringIteratorTest, ReverseWhileLoopIteration)
-{
-	unsigned int n = string_.length() - 1;
-
-	printf("Iterating through string characters with while loop (reverse):");
-	nctl::String::ConstIterator r = string_.rBegin();
-	while (r != string_.rEnd())
-	{
-		printf(" %c", *r);
-		ASSERT_EQ(*r, string_[n]);
-		--r; --n;
-	}
-	printf("\n");
-}
-
-TEST_F(StringIteratorTest, ReverseWhileLoopEmptyIteration)
-{
-	nctl::String newString(Capacity);
-
-	printf("Iterating over an empty string with while loop (reverse):\n");
-	nctl::String::ConstIterator r = newString.rBegin();
-	while (r != newString.rEnd())
-	{
-		ASSERT_TRUE(false); // should never reach this point
-		--r;
 	}
 	printf("\n");
 }

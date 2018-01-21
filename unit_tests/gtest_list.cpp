@@ -89,7 +89,7 @@ TEST_F(ListTest, RemoveFrontAndBackWithIterators)
 {
 	printf("Removing first and last node with iterators\n");
 	list_.erase(list_.begin());
-	list_.erase(list_.rBegin());
+	list_.erase(list_.rBegin().base());
 	printList(list_);
 
 	ASSERT_FALSE(list_.isEmpty());
@@ -118,7 +118,7 @@ TEST_F(ListTest, EraseLastNodeOnEmpty)
 	list_.clear();
 
 	printf("Removing the last node of an empty list with iterators\n");
-	list_.erase(list_.rBegin());
+	list_.erase(list_.rBegin().base());
 	printList(list_);
 
 	ASSERT_TRUE(list_.isEmpty());

@@ -36,29 +36,6 @@ TEST_F(ArrayIteratorTest, ForLoopEmptyIteration)
 	printf("\n");
 }
 
-TEST_F(ArrayIteratorTest, ReverseForLoopIteration)
-{
-	int n = Capacity - 1;
-
-	printf("Iterating through elements with for loop (reverse):");
-	for (nctl::Array<int>::ConstIterator r = array_.rBegin(); r != array_.rEnd(); --r)
-	{
-		printf(" %d", *r);
-		ASSERT_EQ(*r, n--);
-	}
-	printf("\n");
-}
-
-TEST_F(ArrayIteratorTest, ReverseForLoopEmptyIteration)
-{
-	nctl::Array<int> newArray;
-
-	printf("Iterating over an empty array with for loop (reverse):\n");
-	for (nctl::Array<int>::ConstIterator r = newArray.rBegin(); r != newArray.rEnd(); --r)
-		ASSERT_TRUE(false); // should never reach this point
-	printf("\n");
-}
-
 TEST_F(ArrayIteratorTest, WhileLoopIteration)
 {
 	int n = FirstElement;
@@ -84,35 +61,6 @@ TEST_F(ArrayIteratorTest, WhileLoopEmptyIteration)
 	{
 		ASSERT_TRUE(false); // should never reach this point
 		++i;
-	}
-	printf("\n");
-}
-
-TEST_F(ArrayIteratorTest, ReverseWhileLoopIteration)
-{
-	int n = Capacity - 1;
-
-	printf("Iterating through elements with while loop (reverse):");
-	nctl::Array<int>::ConstIterator r = array_.rBegin();
-	while (r != array_.rEnd())
-	{
-		printf(" %d", *r);
-		ASSERT_EQ(*r, n);
-		--r; --n;
-	}
-	printf("\n");
-}
-
-TEST_F(ArrayIteratorTest, ReverseWhileLoopEmptyIteration)
-{
-	nctl::Array<int> newArray;
-
-	printf("Iterating over an empty array with while loop (reverse):\n");
-	nctl::Array<int>::ConstIterator r = newArray.rBegin();
-	while (r != newArray.rEnd())
-	{
-		ASSERT_TRUE(false); // should never reach this point
-		--r;
 	}
 	printf("\n");
 }

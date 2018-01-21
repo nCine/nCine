@@ -3,6 +3,7 @@
 
 #include "common_macros.h"
 #include "ArrayIterator.h"
+#include "ReverseIterator.h"
 
 namespace nctl {
 
@@ -25,6 +26,10 @@ class StaticArray
 	using Iterator = ArrayIterator<T, false>;
 	/// Constant iterator type
 	using ConstIterator = ArrayIterator<T, true>;
+	/// Reverse iterator type
+	using ReverseIterator = nctl::ReverseIterator<Iterator>;
+	/// Reverse constant iterator type
+	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
 	/// Constructs an empty array with fixed capacity
 	StaticArray() : size_(0), capacity_(C) { }
@@ -43,21 +48,21 @@ class StaticArray
 
 	/// Returns an iterator to the first element
 	inline Iterator begin() { return Iterator(array_); }
-	/// Returns an iterator to the last element
-	inline Iterator rBegin() { return Iterator(array_ + size_ - 1); }
+	/// Returns a reverse iterator to the last element
+	inline ReverseIterator rBegin() { return ReverseIterator(Iterator(array_ + size_ - 1)); }
 	/// Returns an iterator to past the last element
 	inline Iterator end() { return Iterator(array_ + size_); }
-	/// Returns an iterator to prior the first element
-	inline Iterator rEnd() { return Iterator(array_ - 1); }
+	/// Returns a reverse iterator to prior the first element
+	inline ReverseIterator rEnd() { return ReverseIterator(Iterator(array_ - 1)); }
 
 	/// Returns a constant iterator to the first element
 	inline ConstIterator begin() const { return ConstIterator(array_); }
-	/// Returns a constant iterator to the last element
-	inline ConstIterator rBegin() const { return ConstIterator(array_ + size_ - 1); }
+	/// Returns a constant reverse iterator to the last element
+	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(ConstIterator(array_ + size_ - 1)); }
 	/// Returns a constant iterator to past the last lement
 	inline ConstIterator end() const { return ConstIterator(array_ + size_); }
-	/// Returns a constant iterator to prior the first element
-	inline ConstIterator rEnd() const { return ConstIterator(array_ - 1); }
+	/// Returns a constant reverse iterator to prior the first element
+	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(ConstIterator(array_ - 1)); }
 
 	/// Returns true if the array is empty
 	inline bool isEmpty() const { return size_ == 0; }

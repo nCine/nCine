@@ -3,7 +3,7 @@ set(HEADERS
 	${NCINE_ROOT}/include/common_constants.h
 	${NCINE_ROOT}/include/common_macros.h
 	${NCINE_ROOT}/include/nctl/algorithms.h
-	${NCINE_ROOT}/include/nctl/iterator_traits.h
+	${NCINE_ROOT}/include/nctl/iterator.h
 	${NCINE_ROOT}/include/nctl/Array.h
 	${NCINE_ROOT}/include/nctl/ArrayIterator.h
 	${NCINE_ROOT}/include/nctl/StaticArray.h
@@ -14,6 +14,7 @@ set(HEADERS
 	${NCINE_ROOT}/include/nctl/HashMap.h
 	${NCINE_ROOT}/include/nctl/HashFunctions.h
 	${NCINE_ROOT}/include/nctl/HashMapIterator.h
+	${NCINE_ROOT}/include/nctl/ReverseIterator.h
 	${NCINE_ROOT}/include/Rect.h
 	${NCINE_ROOT}/include/Color.h
 	${NCINE_ROOT}/include/Object.h

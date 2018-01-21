@@ -40,8 +40,8 @@ TEST_F(ListIteratorTest, ReverseForLoopIteration)
 {
 	int n = LastElement;
 
-	printf("Iterating through nodes with for loop (reverse):");
-	for (nctl::List<int>::ConstIterator r = list_.rBegin(); r != list_.rEnd(); --r)
+	printf("Reverse iterating through nodes with for loop:");
+	for (nctl::List<int>::ConstReverseIterator r = list_.rBegin(); r != list_.rEnd(); ++r)
 	{
 		printf(" %d", *r);
 		ASSERT_EQ(*r, n--);
@@ -53,8 +53,8 @@ TEST_F(ListIteratorTest, ReverseForLoopEmptyIteration)
 {
 	nctl::List<int> newList;
 
-	printf("Iterating over an empty list with for loop (reverse):\n");
-	for (nctl::List<int>::ConstIterator r = newList.rBegin(); r != newList.rEnd(); --r)
+	printf("Reverse iterating over an empty list with for loop:\n");
+	for (nctl::List<int>::ConstReverseIterator r = newList.rBegin(); r != newList.rEnd(); ++r)
 		ASSERT_TRUE(false); // should never reach this point
 	printf("\n");
 }
@@ -92,13 +92,13 @@ TEST_F(ListIteratorTest, ReverseWhileLoopIteration)
 {
 	int n = LastElement;
 
-	printf("Iterating through nodes with while loop (reverse):");
-	nctl::List<int>::ConstIterator r = list_.rBegin();
+	printf("Reverse iterating through nodes with while loop:");
+	nctl::List<int>::ConstReverseIterator r = list_.rBegin();
 	while (r != list_.rEnd())
 	{
 		printf(" %d", *r);
 		ASSERT_EQ(*r, n);
-		--r; --n;
+		++r; --n;
 	}
 	printf("\n");
 }
@@ -107,12 +107,12 @@ TEST_F(ListIteratorTest, ReverseWhileLoopEmptyIteration)
 {
 	nctl::List<int> newList;
 
-	printf("Iterating over an empty list with while loop (reverse):\n");
-	nctl::List<int>::ConstIterator r = newList.rBegin();
+	printf("Reverse iterating over an empty list with while loop:\n");
+	nctl::List<int>::ConstReverseIterator r = newList.rBegin();
 	while (r != newList.rEnd())
 	{
 		ASSERT_TRUE(false); // should never reach this point
-		--r;
+		++r;
 	}
 	printf("\n");
 }

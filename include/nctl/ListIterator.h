@@ -2,7 +2,7 @@
 #define CLASS_NCTL_LISTITERATOR
 
 #include "common_macros.h"
-#include "iterator_traits.h"
+#include "iterator.h"
 
 namespace nctl {
 

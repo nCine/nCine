@@ -3,6 +3,7 @@
 
 #include "algorithms.h"
 #include "StringIterator.h"
+#include "ReverseIterator.h"
 
 namespace nctl {
 
@@ -14,6 +15,10 @@ class DLL_PUBLIC String
 	using Iterator = StringIterator<false>;
 	/// Constant iterator type
 	using ConstIterator = StringIterator<true>;
+	/// Reverse iterator type
+	using ReverseIterator = nctl::ReverseIterator<Iterator>;
+	/// Reverse constant iterator type
+	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
 	/// Default capacity for objects created by the default constructor
 	static const unsigned int DefaultCapacity = 128;
@@ -45,21 +50,21 @@ class DLL_PUBLIC String
 
 	/// Returns an iterator to the first character
 	inline Iterator begin() { return Iterator(array_); }
-	/// Returns an iterator to the last character
-	inline Iterator rBegin() { return Iterator(array_ + length_ - 1); }
+	/// Returns a reverse iterator to the last character
+	inline ReverseIterator rBegin() { return ReverseIterator(Iterator(array_ + length_ - 1)); }
 	/// Returns an iterator to the termination character
 	inline Iterator end() { return Iterator(array_ + length_); }
-	/// Returns an iterator to the byte preceding the first character
-	inline Iterator rEnd() { return Iterator(array_ - 1); }
+	/// Returns a reverse iterator to the byte preceding the first character
+	inline ReverseIterator rEnd() { return ReverseIterator(Iterator(array_ - 1)); }
 
 	/// Returns a constant iterator to the first character
 	inline ConstIterator begin() const { return ConstIterator(array_); }
-	/// Returns a constant iterator to the last character
-	inline ConstIterator rBegin() const { return ConstIterator(array_ + length_ - 1); }
+	/// Returns a constant reverse iterator to the last character
+	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(ConstIterator(array_ + length_ - 1)); }
 	/// Returns a constant iterator to the termination character
 	inline ConstIterator end() const { return ConstIterator(array_ + length_); }
-	/// Returns a constant iterator to the byte preceding the first character
-	inline ConstIterator rEnd() const { return ConstIterator(array_ - 1); }
+	/// Returns a constant reverse iterator to the byte preceding the first character
+	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(ConstIterator(array_ - 1)); }
 
 	/// Returns true if the string is empty
 	inline bool isEmpty() const { return length_ == 0; }

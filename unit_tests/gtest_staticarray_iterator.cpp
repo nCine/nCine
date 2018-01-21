@@ -33,29 +33,6 @@ TEST_F(StaticArrayIteratorTest, ForLoopEmptyIteration)
 	printf("\n");
 }
 
-TEST_F(StaticArrayIteratorTest, ReverseForLoopIteration)
-{
-	int n = Capacity - 1;
-
-	printf("Iterating through elements with for loop (reverse):");
-	for (nctl::StaticArray<int, Capacity>::ConstIterator r = array_.rBegin(); r != array_.rEnd(); --r)
-	{
-		printf(" %d", *r);
-		ASSERT_EQ(*r, n--);
-	}
-	printf("\n");
-}
-
-TEST_F(StaticArrayIteratorTest, ReverseForLoopEmptyIteration)
-{
-	nctl::StaticArray<int, Capacity> newArray;
-
-	printf("Iterating over an empty array with for loop (reverse):\n");
-	for (nctl::StaticArray<int, Capacity>::ConstIterator r = newArray.rBegin(); r != newArray.rEnd(); --r)
-		ASSERT_TRUE(false); // should never reach this point
-	printf("\n");
-}
-
 TEST_F(StaticArrayIteratorTest, WhileLoopIteration)
 {
 	int n = FirstElement;
@@ -81,35 +58,6 @@ TEST_F(StaticArrayIteratorTest, WhileLoopEmptyIteration)
 	{
 		ASSERT_TRUE(false); // should never reach this point
 		++i;
-	}
-	printf("\n");
-}
-
-TEST_F(StaticArrayIteratorTest, ReverseWhileLoopIteration)
-{
-	int n = Capacity - 1;
-
-	printf("Iterating through elements with while loop (reverse):");
-	nctl::StaticArray<int, Capacity>::ConstIterator r = array_.rBegin();
-	while (r != array_.rEnd())
-	{
-		printf(" %d", *r);
-		ASSERT_EQ(*r, n);
-		--r; --n;
-	}
-	printf("\n");
-}
-
-TEST_F(StaticArrayIteratorTest, ReverseWhileLoopEmptyIteration)
-{
-	nctl::StaticArray<int, Capacity> newArray;
-
-	printf("Iterating over an empty array with while loop (reverse):\n");
-	nctl::StaticArray<int, Capacity>::ConstIterator r = newArray.rBegin();
-	while (r != newArray.rEnd())
-	{
-		ASSERT_TRUE(false); // should never reach this point
-		--r;
 	}
 	printf("\n");
 }

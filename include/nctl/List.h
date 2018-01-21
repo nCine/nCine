@@ -3,6 +3,7 @@
 
 #include "algorithms.h"
 #include "ListIterator.h"
+#include "ReverseIterator.h"
 
 namespace nctl {
 
@@ -36,6 +37,10 @@ class List
 	using Iterator = ListIterator<T, false>;
 	/// Constant iterator type
 	using ConstIterator = ListIterator<T, true>;
+	/// Reverse iterator type
+	using ReverseIterator = nctl::ReverseIterator<Iterator>;
+	/// Reverse constant iterator type
+	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
 	List() : size_(0), head_(nullptr), tail_(nullptr) { }
 	~List() { clear(); }
@@ -55,23 +60,23 @@ class List
 
 	/// Returns an iterator to the first element
 	inline Iterator begin() { return Iterator(head_); }
-	/// Returns an iterator to the last element
-	inline Iterator rBegin() { return Iterator(tail_); }
+	/// Returns a reverse iterator to the last element
+	inline ReverseIterator rBegin() { return ReverseIterator(Iterator(tail_)); }
 	/// Returns an iterator to the end of the list sentinel (valid for reverse traversal too)
 	inline Iterator end() { return Iterator(nullptr); }
-	/// Returns an iterator to the end of the list sentinel
+	/// Returns a reverse iterator to the end of the list sentinel
 	/*! It exists only for coherency with the rest of the containers. */
-	inline Iterator rEnd() { return end(); }
+	inline ReverseIterator rEnd() { return ReverseIterator(end()); }
 
 	/// Returns a constant iterator to the first element
 	inline ConstIterator begin() const { return ConstIterator(head_); }
-	/// Returns a constant iterator to the last element
-	inline ConstIterator rBegin() const { return ConstIterator(tail_); }
+	/// Returns a constant reverse iterator to the last element
+	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(ConstIterator(tail_)); }
 	/// Returns a constant iterator to the end of the list sentinel (valid reverse traversal too)
 	inline ConstIterator end() const { return ConstIterator(nullptr); }
-	/// Returns a constant iterator to the end of the list sentinel
+	/// Returns a constant reverse iterator to the end of the list sentinel
 	/*! It exists only for coherency with the rest of the containers. */
-	inline ConstIterator rEnd() const { return end(); }
+	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(end()); }
 
 	/// Returns true if the list is empty
 	inline bool isEmpty() const { return head_ == nullptr; }

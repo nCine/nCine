@@ -1,7 +1,7 @@
 #ifndef CLASS_NCTL_ARRAYITERATOR
 #define CLASS_NCTL_ARRAYITERATOR
 
-#include "iterator_traits.h"
+#include "iterator.h"
 
 namespace nctl {
 
