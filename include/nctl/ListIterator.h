@@ -82,18 +82,13 @@ struct IteratorTraits<ListIterator<T, true> >
 template <class T, bool IsConst>
 inline typename ListIterator<T, IsConst>::Reference ListIterator<T, IsConst>::operator*() const
 {
-	ASSERT(node_);
-	// Cannot simply return only if node_ is not a `nullptr` or
-	// "control may reach end of non-void function"
 	return node_->data_;
 }
 
 template <class T, bool IsConst>
 ListIterator<T, IsConst> &ListIterator<T, IsConst>::operator++()
 {
-	if (node_)
-		node_ = node_->next_;
-
+	node_ = static_cast<ListNode<T> *>(node_->next_);
 	return *this;
 }
 
@@ -103,8 +98,7 @@ ListIterator<T, IsConst> ListIterator<T, IsConst>::operator++(int)
 	// Create an unmodified copy to return
 	ListIterator iterator = *this;
 
-	if (node_)
-		node_ = node_->next_;
+	node_ = static_cast<ListNode<T> *>(node_->next_);
 
 	return iterator;
 }
@@ -112,9 +106,7 @@ ListIterator<T, IsConst> ListIterator<T, IsConst>::operator++(int)
 template <class T, bool IsConst>
 ListIterator<T, IsConst> &ListIterator<T, IsConst>::operator--()
 {
-	if (node_)
-		node_ = node_->previous_;
-
+	node_ = static_cast<ListNode<T> *>(node_->previous_);
 	return *this;
 }
 
@@ -124,8 +116,7 @@ ListIterator<T, IsConst> ListIterator<T, IsConst>::operator--(int)
 	// Create an unmodified copy to return
 	ListIterator iterator = *this;
 
-	if (node_)
-		node_ = node_->previous_;
+	node_ = static_cast<ListNode<T> *>(node_->previous_);
 
 	return iterator;
 }

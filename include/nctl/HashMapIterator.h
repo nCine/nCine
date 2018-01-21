@@ -308,7 +308,7 @@ void HashMapIterator<K, T, HashFunc, IsConst>::previous()
 		else if (bucket->size() > 1)
 		{
 			atFirstNode_ = false;
-			listIterator_ = bucket->collisionList_.rBegin().base();
+			listIterator_ = --bucket->collisionList_.end();
 		}
 	}
 	else
@@ -346,7 +346,7 @@ void HashMapIterator<K, T, HashFunc, IsConst>::findLastValid()
 
 	if (bucket->size() > 1)
 	{
-		listIterator_ = bucket->collisionList_.rBegin().base();
+		listIterator_ = --bucket->collisionList_.end();
 		atFirstNode_ = false;
 	}
 	else if (bucket->size() == 0)

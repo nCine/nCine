@@ -89,7 +89,7 @@ TEST_F(ListTest, RemoveFrontAndBackWithIterators)
 {
 	printf("Removing first and last node with iterators\n");
 	list_.erase(list_.begin());
-	list_.erase(list_.rBegin().base());
+	list_.erase(--list_.end());
 	printList(list_);
 
 	ASSERT_FALSE(list_.isEmpty());
@@ -118,7 +118,7 @@ TEST_F(ListTest, EraseLastNodeOnEmpty)
 	list_.clear();
 
 	printf("Removing the last node of an empty list with iterators\n");
-	list_.erase(list_.rBegin().base());
+	list_.erase(--list_.end());
 	printList(list_);
 
 	ASSERT_TRUE(list_.isEmpty());
@@ -153,6 +153,58 @@ TEST_F(ListTest, RemoveNonExistantElement)
 	ASSERT_FALSE(list_.isEmpty());
 	ASSERT_EQ(list_.size(), Length);
 	ASSERT_TRUE(isUnmodified(list_));
+}
+
+TEST_F(ListTest, InsertAfterBeginning)
+{
+	printf("Insert a node after the beginning of the list\n");
+	list_.insertAfter(list_.begin(), 11);
+	printList(list_);
+
+	ASSERT_EQ(list_.size(), Length + 1);
+	ASSERT_EQ(list_.size(), calcLength(list_));
+
+	int array[Length + 1] = { 0, 11, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(list_, array);
+}
+
+TEST_F(ListTest, InsertBeforeBeginning)
+{
+	printf("Insert a node before the beginning of the list\n");
+	list_.insertBefore(list_.begin(), -1);
+	printList(list_);
+
+	ASSERT_EQ(list_.size(), Length + 1);
+	ASSERT_EQ(list_.size(), calcLength(list_));
+
+	int array[Length + 1] = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(list_, array);
+}
+
+TEST_F(ListTest, InsertAfterEnd)
+{
+	printf("Insert a node after the end of the list\n");
+	list_.insertAfter(list_.end(), -1);
+	printList(list_);
+
+	ASSERT_EQ(list_.size(), Length + 1);
+	ASSERT_EQ(list_.size(), calcLength(list_));
+
+	int array[Length + 1] = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(list_, array);
+}
+
+TEST_F(ListTest, InsertBeforeEnd)
+{
+	printf("Insert a node before the end of the list\n");
+	list_.insertBefore(list_.end(), 11);
+	printList(list_);
+
+	ASSERT_EQ(list_.size(), Length + 1);
+	ASSERT_EQ(list_.size(), calcLength(list_));
+
+	int array[Length + 1] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+	assertListMatchesArray(list_, array);
 }
 
 }

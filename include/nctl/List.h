@@ -9,21 +9,36 @@ namespace nctl {
 
 template <class T> class List;
 
+/// The base list node used as sentinel
+class BaseListNode
+{
+  public:
+	/// A pointer to the previous node in the list
+	BaseListNode *previous_;
+	/// A pointer to the next node in the list
+	BaseListNode *next_;
+
+  protected:
+	BaseListNode() : previous_(this), next_(this) { }
+
+	BaseListNode(BaseListNode *previous, BaseListNode *next)
+		: previous_(previous), next_(next) { }
+
+	template<class T>
+	friend class List;
+};
+
 /// A list node based on templates
 template <class T>
-class ListNode
+class ListNode : public BaseListNode
 {
   public:
 	/// Data payload for the node
 	T data_;
-	/// A pointer to the previous node in the list
-	ListNode *previous_;
-	/// A pointer to the next node in the list
-	ListNode *next_;
 
   private:
-	ListNode(const T &data, ListNode *previous, ListNode *next)
-		: data_(data), previous_(previous), next_(next) { }
+	ListNode(const T &data, BaseListNode *previous, BaseListNode *next)
+		: BaseListNode(previous, next), data_(data) { }
 
 	friend class List<T>;
 };
@@ -42,7 +57,7 @@ class List
 	/// Reverse constant iterator type
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
-	List() : size_(0), head_(nullptr), tail_(nullptr) { }
+	List() : size_(0) { }
 	~List() { clear(); }
 
 	/// Copy constructor
@@ -54,52 +69,50 @@ class List
 	void swap(List &first, List &second)
 	{
 		nctl::swap(first.size_, second.size_);
-		nctl::swap(first.head_, second.head_);
-		nctl::swap(first.tail_, second.tail_);
+		nctl::swap(first.sentinel_.previous_, second.sentinel_.previous_);
+		nctl::swap(first.sentinel_.next_, second.sentinel_.next_);
 	}
 
 	/// Returns an iterator to the first element
-	inline Iterator begin() { return Iterator(head_); }
+	inline Iterator begin() { return Iterator(static_cast<ListNode<T> *>(sentinel_.next_)); }
 	/// Returns a reverse iterator to the last element
-	inline ReverseIterator rBegin() { return ReverseIterator(Iterator(tail_)); }
+	inline ReverseIterator rBegin() { return ReverseIterator(Iterator(static_cast<ListNode<T> *>(sentinel_.previous_))); }
 	/// Returns an iterator to the end of the list sentinel (valid for reverse traversal too)
-	inline Iterator end() { return Iterator(nullptr); }
+	inline Iterator end() { return Iterator(static_cast<ListNode<T> *>(&sentinel_)); }
 	/// Returns a reverse iterator to the end of the list sentinel
-	/*! It exists only for coherency with the rest of the containers. */
 	inline ReverseIterator rEnd() { return ReverseIterator(end()); }
 
 	/// Returns a constant iterator to the first element
-	inline ConstIterator begin() const { return ConstIterator(head_); }
+	inline ConstIterator begin() const { return ConstIterator(static_cast<ListNode<T> *>(sentinel_.next_)); }
 	/// Returns a constant reverse iterator to the last element
-	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(ConstIterator(tail_)); }
+	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(ConstIterator(static_cast<ListNode<T> *>(sentinel_.previous_))); }
 	/// Returns a constant iterator to the end of the list sentinel (valid reverse traversal too)
-	inline ConstIterator end() const { return ConstIterator(nullptr); }
+	inline ConstIterator end() const { return ConstIterator(static_cast<ListNode<T> *>(const_cast<BaseListNode *>(&sentinel_))); }
 	/// Returns a constant reverse iterator to the end of the list sentinel
-	/*! It exists only for coherency with the rest of the containers. */
 	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(end()); }
 
 	/// Returns true if the list is empty
-	inline bool isEmpty() const { return head_ == nullptr; }
+	inline bool isEmpty() const { return (sentinel_.next_ == &sentinel_); }
 	/// Returns the number of elements in the list
 	inline unsigned int size() const { return size_; }
 	/// Clears the list
 	void clear();
 	/// Returns a constant reference to the first element in constant time
-	inline const T &front() const { ASSERT(head_); return head_->data_; }
+	inline const T &front() const { ASSERT(sentinel_.next_ != &sentinel_); return static_cast<ListNode<T> *>(sentinel_.next_)->data_; }
 	/// Returns a reference to the first element in constant time
-	inline T &front() { ASSERT(head_); return head_->data_; }
+	inline T &front() { ASSERT(sentinel_.next_ != &sentinel_); return static_cast<ListNode<T> *>(sentinel_.next_)->data_; }
 	/// Returns a constant reference to the last element in constant time
-	inline const T &back() const { ASSERT(tail_); return tail_->data_; }
+	inline const T &back() const { ASSERT(sentinel_.previous_ != &sentinel_); return static_cast<ListNode<T> *>(sentinel_.previous_)->data_; }
 	/// Returns a reference to the last element in constant time
-	inline T &back() { ASSERT(tail_); return tail_->data_; }
+	inline T &back() { ASSERT(sentinel_.previous_ != &sentinel_); return static_cast<ListNode<T> *>(sentinel_.previous_)->data_; }
 	/// Inserts a new element as the first, in constant time
 	void pushFront(const T &element);
 	/// Inserts a new element as the last, in constant time
 	void pushBack(const T &element);
 	/// Removes the first element in constant time
-	void popFront() { removeNode(head_); }
+	inline void popFront() { removeNode(sentinel_.next_); }
 	/// Removes the last element in constant time
-	void popBack() { removeNode(tail_); }
+	inline void popBack() { removeNode(sentinel_.previous_); }
 	/// Inserts a new element after the node pointed by the constant iterator
 	ConstIterator insertAfter(const Iterator position, const T &element);
 	/// Inserts a new element before the node pointed by the constant iterator
@@ -124,24 +137,22 @@ class List
   private:
 	/// Number of elements in the list
 	unsigned int size_;
-	/// Pointer to the first node in the list
-	ListNode<T> *head_;
-	/// Pointer to the last node in the list
-	ListNode<T> *tail_;
+	/// The sentinel node
+	BaseListNode sentinel_;
 
 	/// Inserts a new element after a specified node
 	ListNode<T> *insertAfterNode(ListNode<T> *node, const T &element);
 	/// Inserts a new element before a specified node
 	ListNode<T> *insertBeforeNode(ListNode<T> *node, const T &element);
 	/// Removes a specified node in constant time
-	ListNode<T> *removeNode(ListNode<T> *node);
+	ListNode<T> *removeNode(BaseListNode *node);
 	/// Removes a range of nodes in constant time, last not included
 	ListNode<T> *removeRange(ListNode<T> *firstNode, ListNode<T> *lastNode);
 };
 
 template <class T>
 List<T>::List(const List<T> &other)
-	: size_(0), head_(nullptr), tail_(nullptr)
+	: size_(0)
 {
 	for (List<T>::ConstIterator i = other.begin(); i != other.end(); ++i)
 		pushBack(*i);
@@ -151,51 +162,73 @@ List<T>::List(const List<T> &other)
 template <class T>
 List<T> &List<T>::operator=(List<T> other)
 {
+	if (size_ == 0)
+	{
+		sentinel_.previous_ = &other.sentinel_;
+		sentinel_.next_ = &other.sentinel_;
+	}
+	if (other.size_ == 0)
+	{
+		other.sentinel_.previous_ = &sentinel_;
+		other.sentinel_.next_ = &sentinel_;
+	}
+
 	swap(*this, other);
+
+	sentinel_.previous_->next_ = &sentinel_;
+	sentinel_.next_->previous_ = &sentinel_;
+	other.sentinel_.previous_->next_ = &other.sentinel_;
+	other.sentinel_.next_->previous_ = &other.sentinel_;
+
 	return *this;
 }
 
 template <class T>
 void List<T>::clear()
 {
-	ListNode<T> *next = nullptr;
+	BaseListNode *nextNode = sentinel_.next_;
 
-	while (head_)
+	while (nextNode != &sentinel_)
 	{
-		next = head_->next_;
-		delete head_;
-		head_ = next;
+		nextNode = nextNode->next_;
+		// Cast is needed to prevent memory leaking
+		delete static_cast<ListNode<T> *>(sentinel_.next_);
+		sentinel_.next_ = nextNode;
 	}
 
-	tail_ = nullptr;
+	sentinel_.previous_ = &sentinel_;
 	size_ = 0;
 }
 
 template <class T>
 void List<T>::pushFront(const T &element)
 {
-	ListNode<T> *node = new ListNode<T>(element, nullptr, head_);
-	if (head_)
-		head_->previous_ = node;
-	head_ = node;
+	ListNode<T> *node = new ListNode<T>(element, &sentinel_, sentinel_.next_);
+
+	if (sentinel_.next_ != &sentinel_)
+		sentinel_.next_->previous_ = node;
+	sentinel_.next_ = node;
 
 	// The list is empty
-	if (tail_ == nullptr)
-		tail_ = node;
+	if (sentinel_.previous_ == &sentinel_)
+		sentinel_.previous_ = node;
+
 	size_++;
 }
 
 template <class T>
 void List<T>::pushBack(const T &element)
 {
-	ListNode<T> *node = new ListNode<T>(element, tail_, nullptr);
-	if (tail_)
-		tail_->next_ = node;
-	tail_ = node;
+	ListNode<T> *node = new ListNode<T>(element, sentinel_.previous_, &sentinel_);
+
+	if (sentinel_.previous_ != &sentinel_)
+		sentinel_.previous_->next_ = node;
+	sentinel_.previous_ = node;
 
 	// The list is empty
-	if (head_ == nullptr)
-		head_ = node;
+	if (sentinel_.next_ == &sentinel_)
+		sentinel_.next_ = node;
+
 	size_++;
 }
 
@@ -243,13 +276,14 @@ inline typename List<T>::ConstIterator List<T>::erase(ConstIterator first, const
 template <class T>
 void List<T>::remove(const T &element)
 {
-	ListNode<T> *current = head_;
+	BaseListNode *current = sentinel_.next_;
 
-	while (current)
+	while (current != &sentinel_)
 	{
-		if (current->data_ == element)
+		ListNode<T> *dataNode = static_cast<ListNode<T> *>(current);
+		if (dataNode->data_ == element)
 		{
-			removeNode(current);
+			removeNode(dataNode);
 			break;
 		}
 
@@ -273,103 +307,28 @@ void List<T>::removeIf(Predicate pred)
 template <class T>
 void List<T>::splice(Iterator position, List &source)
 {
-	ListNode<T> *node = position.node_;
-
-	// Cannot attach at the back because the end iterator is
-	// only a sentinel, cannot be decremented by one
-	if (node == nullptr && size_ > 0)
-		return;
-
-	if (node)
-	{
-		ListNode<T> *prevNode = node->previous_;
-		node->previous_ = source.tail_;
-		source.tail_->next_ = node;
-		source.head_->previous_ = prevNode;
-		if (prevNode)
-			prevNode->next_ = source.head_;
-		else
-			head_ = source.head_;
-	}
-	else
-	{
-		// The destination list is empty
-		head_ = source.head_;
-		tail_ = source.tail_;
-	}
-	size_ += source.size_;
-
-	source.head_ = nullptr;
-	source.tail_ = nullptr;
-	source.size_ = 0;
+	splice(position, source, source.begin(), source.end());
 }
 
 template <class T>
 void List<T>::splice(Iterator position, List &source, Iterator it)
 {
-	ListNode<T> *node = position.node_;
-	ListNode<T> *sourceNode = it.node_;
-
-	// Cannot attach at the back because the end iterator is
-	// only a sentinel, cannot be decremented by one
-	if (node == nullptr && size_ > 0)
-		return;
-
-	// Early-out if there is nothing to transfer
-	if (sourceNode == nullptr)
-		return;
-
-	ListNode<T> *sourcePrev = sourceNode->previous_;
-	ListNode<T> *sourceNext = sourceNode->next_;
-	if (sourcePrev == nullptr)
-		source.head_ = sourceNode->next_;
-	else
-		sourcePrev->next_ = sourceNext;
-
-	if (sourceNode->next_ == nullptr)
-		source.tail_ = sourceNode->previous_;
-	else
-		sourceNext->previous_ = sourcePrev;
-
-	if (node)
-	{
-		ListNode<T> *prevNode = node->previous_;
-		node->previous_ = sourceNode;
-		sourceNode->previous_ = prevNode;
-		sourceNode->next_ = node;
-		if (prevNode)
-			prevNode->next_ = sourceNode;
-		else
-			head_ = sourceNode;
-	}
-	else
-	{
-		head_ = sourceNode;
-		tail_ = sourceNode;
-		sourceNode->previous_ = nullptr;
-		sourceNode->next_ = nullptr;
-	}
-	size_++;
-	source.size_--;
+	Iterator next = it;
+	splice(position, source, it, ++next);
 }
 
 template <class T>
 void List<T>::splice(Iterator position, List &source, Iterator first, Iterator last)
 {
-	ListNode<T> *node = position.node_;
-	ListNode<T> *firstNode = first.node_;
-
-	// Cannot attach at the back because the end iterator is
-	// only a sentinel, cannot be decremented by one
-	if (node == nullptr && size_ > 0)
+	// Early-out if the source list is empty
+	if (source.isEmpty())
 		return;
 
-	// Early-out if there is nothing to transfer
-	if (firstNode == nullptr)
-		return;
+	BaseListNode *node = position.node_;
+	BaseListNode *firstNode = first.node_;
 
-	ListNode<T> *firstPrev = firstNode->previous_;
-	ListNode<T> *lastIncludedNode = first.node_;
+	BaseListNode *firstPrev = firstNode->previous_;
+	BaseListNode *lastIncludedNode = first.node_;
 	while (first != last)
 	{
 		lastIncludedNode = first.node_;
@@ -379,35 +338,19 @@ void List<T>::splice(Iterator position, List &source, Iterator first, Iterator l
 		source.size_--;
 	}
 
-	if (firstPrev == nullptr)
-		source.head_ = lastIncludedNode->next_;
-	else
-		firstPrev->next_ = lastIncludedNode->next_;
+	// it also works if `firstPrev` is the source sentinel
+	firstPrev->next_ = lastIncludedNode->next_;
+	// it also works if `lastIncludedNode` is the source sentinel
+	lastIncludedNode->next_->previous_ = firstPrev;
 
-	if (lastIncludedNode->next_ == nullptr)
-		source.tail_ = firstPrev;
-	else
-		lastIncludedNode->next_->previous_ = firstPrev;
+	BaseListNode *prevNode = node->previous_;
+	node->previous_ = lastIncludedNode;
+	firstNode->previous_ = prevNode;
+	lastIncludedNode->next_ = node;
+	// it also works if `prevNode` is the sentinel
+	prevNode->next_ = firstNode;
 
-	if (node)
-	{
-		ListNode<T> *prevNode = node->previous_;
-		node->previous_ = lastIncludedNode;
-		firstNode->previous_ = prevNode;
-		lastIncludedNode->next_ = node;
-		if (prevNode)
-			prevNode->next_ = firstNode;
-		else
-			head_ = firstNode;
-		lastIncludedNode->next_ = node;
-	}
-	else
-	{
-		head_ = firstNode;
-		tail_ = lastIncludedNode;
-		firstNode->previous_ = nullptr;
-		lastIncludedNode->next_ = nullptr;
-	}
+	lastIncludedNode->next_ = node;
 }
 
 ///////////////////////////////////////////////////////////
@@ -417,19 +360,10 @@ void List<T>::splice(Iterator position, List &source, Iterator first, Iterator l
 template <class T>
 ListNode<T> *List<T>::insertAfterNode(ListNode<T> *node, const T &element)
 {
-	if (head_ == nullptr && node == nullptr)
-	{
-		pushBack(element);
-		return head_;
-	}
-
 	ListNode<T> *newNode = new ListNode<T>(element, node, node->next_);
 
-	if (node->next_ == nullptr)
-		tail_ = newNode;
-	else
-		node->next_->previous_ = newNode;
-
+	// it also works if `node->next_` is the sentinel
+	node->next_->previous_ = newNode;
 	node->next_ = newNode;
 	size_++;
 
@@ -439,19 +373,10 @@ ListNode<T> *List<T>::insertAfterNode(ListNode<T> *node, const T &element)
 template <class T>
 ListNode<T> *List<T>::insertBeforeNode(ListNode<T> *node, const T &element)
 {
-	if (tail_ == nullptr && node == nullptr)
-	{
-		pushFront(element);
-		return tail_;
-	}
-
 	ListNode<T> *newNode = new ListNode<T>(element, node->previous_, node);
 
-	if (node->previous_ == nullptr)
-		head_ = newNode;
-	else
-		node->previous_->next_ = newNode;
-
+	// it also works if `node->previous_` is the sentinel
+	node->previous_->next_ = newNode;
 	node->previous_ = newNode;
 	size_++;
 
@@ -459,55 +384,32 @@ ListNode<T> *List<T>::insertBeforeNode(ListNode<T> *node, const T &element)
 }
 
 template <class T>
-ListNode<T> *List<T>::removeNode(ListNode<T> *node)
+ListNode<T> *List<T>::removeNode(BaseListNode *node)
 {
-	// Early-out to prevent `nullptr` dereferencing
-	if (node == nullptr)
-		return nullptr;
-
-	if (node->previous_)
-		node->previous_->next_ = node->next_;
-	else // removing the head
-		head_ = node->next_;
-
-	if (node->next_)
-		node->next_->previous_ = node->previous_;
-	else // removing the tail
-		tail_ = node->previous_;
-	size_--;
-
-	ListNode<T> *nextNode = node->next_;
-	delete node;
-	return nextNode;
+	ListNode<T> *firstNode = static_cast<ListNode<T> *>(node);
+	ListNode<T> *lastNode = static_cast<ListNode<T> *>(node->next_);
+	return removeRange(firstNode, lastNode);
 }
 
 template <class T>
 ListNode<T> *List<T>::removeRange(ListNode<T> *firstNode, ListNode<T> *lastNode)
 {
-	// Early-out to prevent `nullptr` dereferencing
-	if (firstNode == nullptr)
-		return nullptr;
-
-	ListNode<T> *previous = firstNode->previous_;
-	ListNode<T> *next = nullptr;
-	ListNode<T> *current = firstNode;
+	BaseListNode *previous = firstNode->previous_;
+	BaseListNode *next = &sentinel_;
+	BaseListNode *current = firstNode;
 	while (current != lastNode)
 	{
 		next = current->next_;
-		delete current;
+		// Cast is needed to prevent memory leaking
+		delete static_cast<ListNode<T> *>(current);
 		size_--;
 		current = next;
 	}
 
-	if (previous)
-		previous->next_ = lastNode;
-	else // removing the head
-		head_ = lastNode;
-
-	if (lastNode)
-		lastNode->previous_ = previous;
-	else // removing the tail
-		tail_ = previous;
+	// if `previous` is the sentinel, the head is going to be removed
+	previous->next_ = lastNode;
+	// if `lastNode` is the sentinel, the tail is going to be removed
+	lastNode->previous_ = previous;
 
 	return lastNode;
 }
