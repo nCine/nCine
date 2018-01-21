@@ -18,6 +18,8 @@ set(HEADERS
 	${NCINE_ROOT}/include/nctl/HashMapIterator.h
 	${NCINE_ROOT}/include/nctl/ReverseIterator.h
 	${NCINE_ROOT}/include/nctl/Atomic.h
+	${NCINE_ROOT}/include/nctl/UniquePtr.h
+	${NCINE_ROOT}/include/nctl/SharedPtr.h
 	${NCINE_ROOT}/include/Rect.h
 	${NCINE_ROOT}/include/Color.h
 	${NCINE_ROOT}/include/Object.h

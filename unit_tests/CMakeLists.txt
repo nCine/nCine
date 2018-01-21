@@ -45,6 +45,7 @@ list(APPEND TESTS
 	gtest_vector2 gtest_vector3 gtest_vector4
 	gtest_matrix4x4 gtest_matrix4x4_operations gtest_quaternion gtest_quaternion_operations
 	gtest_atomic32 gtest_atomic64
+	gtest_uniqueptr gtest_uniqueptr_array gtest_sharedptr
 )
 
 foreach(TEST ${TESTS})
