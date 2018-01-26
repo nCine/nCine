@@ -44,6 +44,7 @@ list(APPEND TESTS
 	gtest_hashmap gtest_hashmap_iterator gtest_hashmap_algorithms gtest_hashmap_string
 	gtest_vector2 gtest_vector3 gtest_vector4
 	gtest_matrix4x4 gtest_matrix4x4_operations gtest_quaternion gtest_quaternion_operations
+	gtest_atomic32 gtest_atomic64
 )
 
 foreach(TEST ${TESTS})
