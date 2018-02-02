@@ -26,12 +26,35 @@ TEST_F(ArrayReverseIteratorTest, ForLoopIteration)
 	printf("\n");
 }
 
+TEST_F(ArrayReverseIteratorTest, ForRangeIteration)
+{
+	int n = Capacity - 1;
+
+	printf("Reverse iterating through elements with range-based for:");
+	for (int r : reverse(array_))
+	{
+		printf(" %d", r);
+		ASSERT_EQ(r, n--);
+	}
+	printf("\n");
+}
+
 TEST_F(ArrayReverseIteratorTest, ForLoopEmptyIteration)
 {
 	nctl::Array<int> newArray;
 
 	printf("Reverse iterating over an empty array with for loop:\n");
 	for (nctl::Array<int>::ConstReverseIterator r = newArray.rBegin(); r != newArray.rEnd(); ++r)
+		ASSERT_TRUE(false); // should never reach this point
+	printf("\n");
+}
+
+TEST_F(ArrayReverseIteratorTest, ForRangeEmptyIteration)
+{
+	nctl::Array<int> newArray;
+
+	printf("Reverse iterating over an empty array with range-based for:\n");
+	for (int r : reverse(newArray))
 		ASSERT_TRUE(false); // should never reach this point
 	printf("\n");
 }

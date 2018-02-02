@@ -26,12 +26,35 @@ TEST_F(ListIteratorTest, ForLoopIteration)
 	printf("\n");
 }
 
+TEST_F(ListIteratorTest, ForRangeIteration)
+{
+	int n = FirstElement;
+
+	printf("Iterating through nodes with range-based for:");
+	for (int i : list_)
+	{
+		printf(" %d", i);
+		ASSERT_EQ(i, n++);
+	}
+	printf("\n");
+}
+
 TEST_F(ListIteratorTest, ForLoopEmptyIteration)
 {
 	nctl::List<int> newList;
 
 	printf("Iterating over an empty list with for loop:\n");
 	for (nctl::List<int>::ConstIterator i = newList.begin(); i != newList.end(); ++i)
+		ASSERT_TRUE(false); // should never reach this point
+	printf("\n");
+}
+
+TEST_F(ListIteratorTest, ForRangeEmptyIteration)
+{
+	nctl::List<int> newList;
+
+	printf("Iterating over an empty list with range-based for:\n");
+	for (int i : newList)
 		ASSERT_TRUE(false); // should never reach this point
 	printf("\n");
 }
@@ -49,12 +72,35 @@ TEST_F(ListIteratorTest, ReverseForLoopIteration)
 	printf("\n");
 }
 
+TEST_F(ListIteratorTest, ReverseForRangeIteration)
+{
+	int n = LastElement;
+
+	printf("Reverse iterating through nodes with range-based for:");
+	for (int r : reverse(list_))
+	{
+		printf(" %d", r);
+		ASSERT_EQ(r, n--);
+	}
+	printf("\n");
+}
+
 TEST_F(ListIteratorTest, ReverseForLoopEmptyIteration)
 {
 	nctl::List<int> newList;
 
 	printf("Reverse iterating over an empty list with for loop:\n");
 	for (nctl::List<int>::ConstReverseIterator r = newList.rBegin(); r != newList.rEnd(); ++r)
+		ASSERT_TRUE(false); // should never reach this point
+	printf("\n");
+}
+
+TEST_F(ListIteratorTest, ReverseForRangeEmptyIteration)
+{
+	nctl::List<int> newList;
+
+	printf("Reverse iterating over an empty list with range-based for:\n");
+	for (int r : reverse(newList))
 		ASSERT_TRUE(false); // should never reach this point
 	printf("\n");
 }

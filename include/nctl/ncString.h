@@ -66,6 +66,15 @@ class DLL_PUBLIC String
 	/// Returns a constant reverse iterator to the byte preceding the first character
 	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(ConstIterator(array_ - 1)); }
 
+	/// Returns a constant iterator to the first character
+	inline ConstIterator cBegin() const { return ConstIterator(array_); }
+	/// Returns a constant reverse iterator to the last character
+	inline ConstReverseIterator crBegin() const { return ConstReverseIterator(ConstIterator(array_ + length_ - 1)); }
+	/// Returns a constant iterator to the termination character
+	inline ConstIterator cEnd() const { return ConstIterator(array_ + length_); }
+	/// Returns a constant reverse iterator to the byte preceding the first character
+	inline ConstReverseIterator crEnd() const { return ConstReverseIterator(ConstIterator(array_ - 1)); }
+
 	/// Returns true if the string is empty
 	inline bool isEmpty() const { return length_ == 0; }
 	/// Returns the string length

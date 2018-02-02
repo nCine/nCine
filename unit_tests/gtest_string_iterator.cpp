@@ -26,12 +26,35 @@ TEST_F(StringIteratorTest, ForLoopIteration)
 	printf("\n");
 }
 
+TEST_F(StringIteratorTest, ForRangeIteration)
+{
+	unsigned int n = 0;
+
+	printf("Iterating through string characters with range-based for:");
+	for (char i : string_)
+	{
+		printf(" %c", i);
+		ASSERT_EQ(i, string_[n++]);
+	}
+	printf("\n");
+}
+
 TEST_F(StringIteratorTest, ForLoopEmptyIteration)
 {
 	nctl::String newString(Capacity);
 
 	printf("Iterating over an empty string with for loop:\n");
 	for (nctl::String::ConstIterator i = newString.begin(); i != newString.end(); ++i)
+		ASSERT_TRUE(false); // should never reach this point
+	printf("\n");
+}
+
+TEST_F(StringIteratorTest, ForRangeEmptyIteration)
+{
+	nctl::String newString(Capacity);
+
+	printf("Iterating over an empty string with range-based for:\n");
+	for (char i : newString)
 		ASSERT_TRUE(false); // should never reach this point
 	printf("\n");
 }

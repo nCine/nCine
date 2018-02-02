@@ -23,12 +23,35 @@ TEST_F(StaticArrayIteratorTest, ForLoopIteration)
 	printf("\n");
 }
 
+TEST_F(StaticArrayIteratorTest, ForRangeIteration)
+{
+	int n = FirstElement;
+
+	printf("Iterating through elements with range-based for:");
+	for (int i : array_)
+	{
+		printf(" %d", i);
+		ASSERT_EQ(i, n++);
+	}
+	printf("\n");
+}
+
 TEST_F(StaticArrayIteratorTest, ForLoopEmptyIteration)
 {
 	nctl::StaticArray<int, Capacity> newArray;
 
 	printf("Iterating over an empty array with for loop:\n");
 	for (nctl::StaticArray<int, Capacity>::ConstIterator i = newArray.begin(); i != newArray.end(); ++i)
+		ASSERT_TRUE(false); // should never reach this point
+	printf("\n");
+}
+
+TEST_F(StaticArrayIteratorTest, ForRangeEmptyIteration)
+{
+	nctl::StaticArray<int, Capacity> newArray;
+
+	printf("Iterating over an empty array with range-based for:\n");
+	for (int i : newArray)
 		ASSERT_TRUE(false); // should never reach this point
 	printf("\n");
 }

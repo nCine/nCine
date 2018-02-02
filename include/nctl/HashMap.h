@@ -73,6 +73,15 @@ class HashMap
 	/// Returns a constant reverse iterator to prior the first element
 	ConstReverseIterator rEnd() const;
 
+	/// Returns a constant iterator to the first element
+	inline ConstIterator cBegin() const { return begin(); }
+	/// Returns a constant reverse iterator to the last element
+	inline ConstReverseIterator crBegin() const { return rBegin(); }
+	/// Returns a constant iterator to past the last lement
+	inline ConstIterator cEnd() const { return end(); }
+	/// Returns a constant reverse iterator to prior the first element
+	inline ConstReverseIterator crEnd() const { return rEnd(); }
+
 	/// Subscript operator
 	T &operator[](const K &key);
 

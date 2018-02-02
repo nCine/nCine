@@ -26,12 +26,35 @@ TEST_F(ArrayIteratorTest, ForLoopIteration)
 	printf("\n");
 }
 
+TEST_F(ArrayIteratorTest, ForRangeIteration)
+{
+	int n = FirstElement;
+
+	printf("Iterating through elements with range-based for:");
+	for (int i : array_)
+	{
+		printf(" %d", i);
+		ASSERT_EQ(i, n++);
+	}
+	printf("\n");
+}
+
 TEST_F(ArrayIteratorTest, ForLoopEmptyIteration)
 {
 	nctl::Array<int> newArray;
 
 	printf("Iterating over an empty array with for loop:\n");
 	for (nctl::Array<int>::ConstIterator i = newArray.begin(); i != newArray.end(); ++i)
+		ASSERT_TRUE(false); // should never reach this point
+	printf("\n");
+}
+
+TEST_F(ArrayIteratorTest, ForRangeEmptyIteration)
+{
+	nctl::Array<int> newArray;
+
+	printf("Iterating over an empty array with range-based for:\n");
+	for (int i : newArray)
 		ASSERT_TRUE(false); // should never reach this point
 	printf("\n");
 }

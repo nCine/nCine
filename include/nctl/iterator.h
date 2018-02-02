@@ -124,6 +124,80 @@ inline int distance(Iterator first, const Iterator last)
 	return distance(first, last, IteratorTraits<Iterator>::IteratorCategory());
 }
 
+///////////////////////////////////////////////////////////
+// REVERSE RANGE ADAPTER
+///////////////////////////////////////////////////////////
+
+template <class T>
+struct ReversionWrapper { T &iterable; };
+
+template <class T>
+auto begin(ReversionWrapper<T> c) -> decltype(rBegin(c.iterable))
+{
+	return rBegin(c.iterable);
+}
+
+template <class T>
+auto end(ReversionWrapper<T> c) -> decltype(rEnd(c.iterable))
+{
+	return rEnd(c.iterable);
+}
+
+template <class T>
+ReversionWrapper<T> reverse(T&& iterable) { return { iterable }; }
+
+///////////////////////////////////////////////////////////
+// RANGE
+///////////////////////////////////////////////////////////
+
+template <class Container>
+typename Container::Iterator begin(Container &c)
+{
+	return c.begin();
+}
+
+template <class Container>
+typename Container::ConstIterator cBegin(const Container &c)
+{
+	return c.begin();
+}
+
+template <class Container>
+typename Container::Iterator end(Container &c)
+{
+	return c.end();
+}
+
+template <class Container>
+typename Container::ConstIterator cEnd(const Container &c)
+{
+	return c.end();
+}
+
+template <class Container>
+typename Container::ReverseIterator rBegin(Container &c)
+{
+	return c.rBegin();
+}
+
+template <class Container>
+typename Container::ConstReverseIterator crBegin(const Container &c)
+{
+	return c.rBegin();
+}
+
+template <class Container>
+typename Container::ReverseIterator rEnd(Container &c)
+{
+	return c.rEnd();
+}
+
+template <class Container>
+typename Container::ConstReverseIterator crEnd(const Container &c)
+{
+	return c.rEnd();
+}
+
 }
 
 #endif

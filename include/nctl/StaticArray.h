@@ -64,6 +64,15 @@ class StaticArray
 	/// Returns a constant reverse iterator to prior the first element
 	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(ConstIterator(array_ - 1)); }
 
+	/// Returns a constant iterator to the first element
+	inline ConstIterator cBegin() const { return ConstIterator(array_); }
+	/// Returns a constant reverse iterator to the last element
+	inline ConstReverseIterator crBegin() const { return ConstReverseIterator(ConstIterator(array_ + size_ - 1)); }
+	/// Returns a constant iterator to past the last lement
+	inline ConstIterator cEnd() const { return ConstIterator(array_ + size_); }
+	/// Returns a constant reverse iterator to prior the first element
+	inline ConstReverseIterator crEnd() const { return ConstReverseIterator(ConstIterator(array_ - 1)); }
+
 	/// Returns true if the array is empty
 	inline bool isEmpty() const { return size_ == 0; }
 	/// Returns the array size

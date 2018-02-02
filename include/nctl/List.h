@@ -91,6 +91,15 @@ class List
 	/// Returns a constant reverse iterator to the end of the list sentinel
 	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(end()); }
 
+	/// Returns a constant iterator to the first element
+	inline ConstIterator cBegin() const { return ConstIterator(static_cast<ListNode<T> *>(sentinel_.next_)); }
+	/// Returns a constant reverse iterator to the last element
+	inline ConstReverseIterator crBegin() const { return ConstReverseIterator(ConstIterator(static_cast<ListNode<T> *>(sentinel_.previous_))); }
+	/// Returns a constant iterator to the end of the list sentinel (valid reverse traversal too)
+	inline ConstIterator cEnd() const { return ConstIterator(static_cast<ListNode<T> *>(const_cast<BaseListNode *>(&sentinel_))); }
+	/// Returns a constant reverse iterator to the end of the list sentinel
+	inline ConstReverseIterator crEnd() const { return ConstReverseIterator(end()); }
+
 	/// Returns true if the list is empty
 	inline bool isEmpty() const { return (sentinel_.next_ == &sentinel_); }
 	/// Returns the number of elements in the list

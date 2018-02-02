@@ -26,12 +26,35 @@ TEST_F(StringReverseIteratorTest, ForLoopIteration)
 	printf("\n");
 }
 
+TEST_F(StringReverseIteratorTest, ForRangeIteration)
+{
+	unsigned int n = string_.length() - 1;
+
+	printf("Reverse iterating through string characters with range-based for:");
+	for (char r : reverse(string_))
+	{
+		printf(" %c", r);
+		ASSERT_EQ(r, string_[n--]);
+	}
+	printf("\n");
+}
+
 TEST_F(StringReverseIteratorTest, ForLoopEmptyIteration)
 {
 	nctl::String newString(Capacity);
 
 	printf("Reverse iterating over an empty string with for loop:\n");
 	for (nctl::String::ConstReverseIterator r = newString.rBegin(); r != newString.rEnd(); ++r)
+		ASSERT_TRUE(false); // should never reach this point
+	printf("\n");
+}
+
+TEST_F(StringReverseIteratorTest, ForRangeEmptyIteration)
+{
+	nctl::String newString(Capacity);
+
+	printf("Reverse iterating over an empty string with range-based for:\n");
+	for (char r : reverse(newString))
 		ASSERT_TRUE(false); // should never reach this point
 	printf("\n");
 }
