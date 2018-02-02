@@ -5,12 +5,6 @@
 
 namespace ncine {
 
-namespace {
-
-void commitValue(GLUniformCache &uniformCache) { uniformCache.commitValue(); }
-
-}
-
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
@@ -70,7 +64,7 @@ void GLShaderUniforms::commitUniforms()
 	if (shaderProgram_)
 	{
 		shaderProgram_->use();
-		forEach(uniformCaches_.begin(), uniformCaches_.end(), commitValue);
+		forEach(uniformCaches_.begin(), uniformCaches_.end(), [](GLUniformCache &uniform){ uniform.commitValue(); });
 	}
 	else
 		LOGE("No shader program associated");
@@ -88,9 +82,8 @@ void GLShaderUniforms::importUniforms()
 
 	unsigned int nextFreeFloat = 0;
 	unsigned int nextFreeInt = 0;
-	for (unsigned int i = 0; i < count; i++)
+	for (const GLUniform &uniform : shaderProgram_->uniforms_)
 	{
-		const GLUniform &uniform = shaderProgram_->uniforms_[i];
 		GLUniformCache uniformCache(&uniform);
 
 		switch (uniform.basicType())

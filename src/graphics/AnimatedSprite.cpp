@@ -32,8 +32,8 @@ AnimatedSprite::AnimatedSprite(Texture *texture, float x, float y)
 
 AnimatedSprite::~AnimatedSprite()
 {
-	for (unsigned int i = 0; i < anims_.size(); i++)
-		delete anims_[i];
+	for (RectAnimation *anim : anims_)
+		delete anim;
 }
 
 ///////////////////////////////////////////////////////////

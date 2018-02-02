@@ -31,8 +31,8 @@ ProfilePlotter::ProfilePlotter(SceneNode *parent, Rectf rect)
 
 ProfilePlotter::~ProfilePlotter()
 {
-	for (unsigned int i = 0; i < variables_.size(); i++)
-		delete variables_[i];
+	for (PlottingVariable *variable : variables_)
+		delete variable;
 }
 
 ///////////////////////////////////////////////////////////

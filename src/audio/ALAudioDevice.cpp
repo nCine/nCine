@@ -5,14 +5,6 @@
 
 namespace ncine {
 
-namespace {
-
-void playPlayer(IAudioPlayer *player) { player->play(); }
-void pausePlayer(IAudioPlayer *player) { player->pause(); }
-void stopPlayer(IAudioPlayer *player) { player->stop(); }
-
-}
-
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
@@ -67,13 +59,13 @@ void ALAudioDevice::setGain(ALfloat gain)
 
 void ALAudioDevice::stopPlayers()
 {
-	forEach(players_.begin(), players_.end(), stopPlayer);
+	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player){ player->stop(); });
 	players_.clear();
 }
 
 void ALAudioDevice::pausePlayers()
 {
-	forEach(players_.begin(), players_.end(), pausePlayer);
+	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player){ player->pause(); });
 	players_.clear();
 }
 
@@ -117,13 +109,13 @@ void ALAudioDevice::pausePlayers(PlayerType playerType)
 
 void ALAudioDevice::freezePlayers()
 {
-	forEach(players_.begin(), players_.end(), pausePlayer);
+	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player){ player->pause(); });
 	// The player list is not cleared at this point, it is needed as-is by the unfreeze method
 }
 
 void ALAudioDevice::unfreezePlayers()
 {
-	forEach(players_.begin(), players_.end(), playPlayer);
+	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player){ player->play(); });
 }
 
 int ALAudioDevice::nextAvailableSource()

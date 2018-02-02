@@ -56,14 +56,14 @@ void RenderQueue::draw()
 	nctl::quicksort(transparentRenderCommands_.begin(), transparentRenderCommands_.end(), ascendingOrder);
 
 	// Rendering opaque nodes front to back
-	for (unsigned int i = 0; i < opaqueRenderCommands_.size(); i++)
-		opaqueRenderCommands_[i]->issue();
+	for (RenderCommand *opaqueRenderCommand : opaqueRenderCommands_)
+		opaqueRenderCommand->issue();
 
 	glEnable(GL_BLEND);
 	glDepthMask(GL_FALSE);
 	// Rendering transparent nodes back to front
-	for (unsigned int i = 0; i < transparentRenderCommands_.size(); i++)
-		transparentRenderCommands_[i]->issue();
+	for (RenderCommand *transparentRenderCommand : transparentRenderCommands_)
+		transparentRenderCommand->issue();
 	// Has to be enabled again before exiting this method
 	// or glClear(GL_DEPTH_BUFFER_BIT) won't have any effect
 	glDepthMask(GL_TRUE);

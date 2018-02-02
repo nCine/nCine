@@ -71,19 +71,18 @@ void GLShaderAttributes::defineVertexPointers(const GLBufferObject *vbo)
 			boundVboHandle = vbo->glHandle();
 		}
 
-		for (nctl::StringHashMap<GLVertexAttribute>::Iterator i = vertexAttributes_.begin(); i != vertexAttributes_.end(); ++i)
+		for (GLVertexAttribute &attribute : vertexAttributes_)
 		{
-			GLVertexAttribute &attribute = *i;
 			int location = attribute.shaderAttribute()->location();
 			if (definedPointers_[location] != attribute || definedPointers_[location].boundVbo() != boundVboHandle)
 			{
-				(*i).vertexAttribPointer();
+				attribute.vertexAttribPointer();
 				definedPointers_[location] = attribute;
 				definedPointers_[location].setBoundVbo(boundVboHandle);
 			}
 			if (definedPointers_[location].isEnabled() == false)
 			{
-				(*i).enable();
+				attribute.enable();
 				definedPointers_[location].setEnabled(true);
 			}
 		}
@@ -102,11 +101,9 @@ void GLShaderAttributes::importAttributes()
 	if (count > VertexAttributesHashSize)
 		LOGW_X("More active attributes (%d) than hashmap buckets (%d)", count, VertexAttributesHashSize);
 
-	for (unsigned int i = 0; i < count; i++)
+	for (const GLAttribute &attribute : shaderProgram_->attributes_)
 	{
-		const GLAttribute &attribute = shaderProgram_->attributes_[i];
 		GLVertexAttribute vertexAttribute(&attribute);
-
 		vertexAttributes_[attribute.name()] = vertexAttribute;
 	}
 }

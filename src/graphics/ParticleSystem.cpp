@@ -81,8 +81,8 @@ void ParticleSystem::update(float interval)
 		// Update the particle if it's alive
 		if (particle->isAlive())
 		{
-			for (unsigned int j = 0; j < affectors_.size(); j++)
-				affectors_[j]->affect(particle);
+			for (ParticleAffector *affector : affectors_)
+				affector->affect(particle);
 
 			particle->update(interval);
 			particle->transform();

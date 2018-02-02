@@ -29,11 +29,11 @@ int FontGlyph::kerning(unsigned int secondGlyph) const
 {
 	int kerningAmount = 0;
 
-	for (unsigned int i = 0; i < kernings_.size(); i++)
+	for (const Kerning &kerning : kernings_)
 	{
-		if (secondGlyph == kernings_[i].secondGlyph_)
+		if (secondGlyph == kerning.secondGlyph_)
 		{
-			kerningAmount = kernings_[i].amount_;
+			kerningAmount = kerning.amount_;
 			break;
 		}
 	}

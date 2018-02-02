@@ -60,11 +60,11 @@ void StackedBarPlotter::draw(RenderQueue &renderQueue)
 	if (shouldPlotRefValue())
 		drawRefValue(renderQueue);
 
-	for (unsigned int i = 0; i < variables_.size(); i++)
+	for (PlottingVariable *variable : variables_)
 	{
-		variables_[i]->draw(renderQueue);
-		if (variables_[i]->shouldPlotMean())
-			variables_[i]->drawMean(renderQueue);
+		variable->draw(renderQueue);
+		if (variable->shouldPlotMean())
+			variable->drawMean(renderQueue);
 	}
 }
 
@@ -80,10 +80,10 @@ void StackedBarPlotter::updateAllVertices(float x, float y, float w, float h)
 	// In a stacked plot every variable should be scaled in relationship with the sum
 	float minSum = 0.0f;
 	float maxSum = 0.0f;
-	for (unsigned int i = 0; i < variables_.size(); i++)
+	for (PlottingVariable *variable : variables_)
 	{
-		minSum += variables_[i]->variable()->min();
-		maxSum += variables_[i]->variable()->max();
+		minSum += variable->variable()->min();
+		maxSum += variable->variable()->max();
 	}
 
 	const float normalizedRefValue = normBetweenRefValue(minSum, maxSum);
@@ -95,10 +95,10 @@ void StackedBarPlotter::updateAllVertices(float x, float y, float w, float h)
 	maxSum /= numVariables;
 
 	float meanVerticalOffset = 0.0f;
-	for (unsigned int i = 0; i < variables_.size(); i++)
+	for (PlottingVariable *variable : variables_)
 	{
-		const ProfileVariable *profVariable = variables_[i]->variable();
-		GLfloat *vertices = variables_[i]->vertices();
+		const ProfileVariable *profVariable = variable->variable();
+		GLfloat *vertices = variable->vertices();
 
 		float normalizedMean = profVariable->normBetweenMean(minSum, maxSum);
 		// Variable mean vertices
@@ -122,10 +122,10 @@ void StackedBarPlotter::updateAllVertices(float x, float y, float w, float h)
 		const float step = (float(w) / float(numValues)) * 0.5f;
 		const float center = 2.0f * step * (i + 1) - step;
 
-		for (unsigned int j = 0; j < variables_.size(); j++)
+		for (PlottingVariable *variable : variables_)
 		{
-			const ProfileVariable *profVariable = variables_[j]->variable();
-			GLfloat *vertices = variables_[j]->vertices();
+			const ProfileVariable *profVariable = variable->variable();
+			GLfloat *vertices = variable->vertices();
 
 			const float normValue = profVariable->normBetweenValue((nextIndex + i) % numValues, minSum, maxSum);
 

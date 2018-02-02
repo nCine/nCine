@@ -39,8 +39,8 @@ class DLL_PUBLIC ColorAffector : public ParticleAffector
 	ColorAffector() : colorSteps_(4) { }
 	~ColorAffector() override
 	{
-		for (unsigned int i = 0; i < colorSteps_.size(); i++)
-			delete colorSteps_[i];
+		for (ColorStep *colorStep : colorSteps_)
+			delete colorStep;
 	}
 
 	/// Affects the color of the specified particle
@@ -72,8 +72,8 @@ class DLL_PUBLIC SizeAffector : public ParticleAffector
 	explicit SizeAffector(float baseScale) : sizeSteps_(4), baseScale_(baseScale) { }
 	~SizeAffector() override
 	{
-		for (unsigned int i = 0; i < sizeSteps_.size(); i++)
-			delete sizeSteps_[i];
+		for (SizeStep *sizeStep : sizeSteps_)
+			delete sizeStep;
 	}
 
 	/// Affects the size of the specified particle

@@ -41,9 +41,8 @@ SceneNode::SceneNode()
 
 SceneNode::~SceneNode()
 {
-	nctl::List<SceneNode *>::ConstIterator i = children_.begin();
-	while (i != children_.end())
-		delete (*i++);
+	for (SceneNode *child : children_)
+		delete(child);
 
 	if (parent_)
 	{
@@ -117,12 +116,8 @@ bool SceneNode::unlinkChildNode(SceneNode *childNode)
 		children_.remove(childNode);
 
 		// Nephews reparenting
-		nctl::List<SceneNode *>::ConstIterator i = childNode->children_.begin();
-		while (i != childNode->children_.end())
-		{
-			addChildNode(*i);
-			++i;
-		}
+		for (SceneNode *child : childNode->children_)
+			addChildNode(child);
 
 		hasBeenUnlinked = true;
 	}
@@ -134,16 +129,16 @@ void SceneNode::update(float interval)
 {
 	// Early return not needed, the first call to this method is on the root node
 
-	for (nctl::List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
+	for (SceneNode *child : children_)
 	{
-		if ((*i)->shouldUpdate_)
+		if (child->shouldUpdate_)
 		{
 #ifndef WITH_MULTITHREADING
-			(*i)->update(interval);
+			child->update(interval);
 #else
 			theServiceLocator().threadPool().enqueueCommand(new UpdateNodeCommand(*i, interval));
 #endif
-			(*i)->transform();
+			child->transform();
 		}
 	}
 }
@@ -152,12 +147,12 @@ void SceneNode::visit(RenderQueue &renderQueue)
 {
 	// Early return not needed, the first call to this method is on the root node
 
-	for (nctl::List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
+	for (SceneNode *child : children_)
 	{
-		if ((*i)->shouldDraw_)
+		if (child->shouldDraw_)
 		{
-			(*i)->draw(renderQueue);
-			(*i)->visit(renderQueue);
+			child->draw(renderQueue);
+			child->visit(renderQueue);
 		}
 	}
 }

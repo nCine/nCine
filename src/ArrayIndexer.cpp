@@ -16,15 +16,8 @@ ArrayIndexer::ArrayIndexer()
 
 ArrayIndexer::~ArrayIndexer()
 {
-	for (unsigned int i = 0; i < pointers_.size(); i++)
-	{
-		if (pointers_[i])
-		{
-			delete pointers_[i];
-			pointers_[i] = nullptr;
-		}
-	}
-
+	for (Object *obj : pointers_)
+		delete obj;
 }
 
 ///////////////////////////////////////////////////////////

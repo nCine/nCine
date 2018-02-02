@@ -85,8 +85,8 @@ bool GLShaderProgram::link()
 		return false;
 	}
 
-	for (unsigned int i = 0; i < attachedShaders_.size(); i++)
-		delete attachedShaders_[i];
+	for (GLShader *attachedShader : attachedShaders_)
+		delete attachedShader;
 
 	discoverUniforms();
 	discoverAttributes();

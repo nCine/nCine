@@ -46,11 +46,11 @@ void LinePlotter::draw(RenderQueue &renderQueue)
 	if (shouldPlotRefValue())
 		drawRefValue(renderQueue);
 
-	for (unsigned int i = 0; i < variables_.size(); i++)
+	for (PlottingVariable *variable : variables_)
 	{
-		variables_[i]->draw(renderQueue);
-		if (variables_[i]->shouldPlotMean())
-			variables_[i]->drawMean(renderQueue);
+		variable->draw(renderQueue);
+		if (variable->shouldPlotMean())
+			variable->drawMean(renderQueue);
 	}
 }
 
@@ -67,22 +67,23 @@ void LinePlotter::updateAllVertices(float x, float y, float w, float h)
 		commonMin = variables_[0]->variable()->min();
 		commonMax = variables_[0]->variable()->max();
 	}
-	for (unsigned int i = 1; i < variables_.size(); i++)
+
+	for (PlottingVariable *variable : variables_)
 	{
-		if (variables_[i]->variable()->min() < commonMin)
-			commonMin = variables_[i]->variable()->min();
-		else if (variables_[i]->variable()->max() > commonMax)
-			commonMax = variables_[i]->variable()->max();
+		if (variable->variable()->min() < commonMin)
+			commonMin = variable->variable()->min();
+		else if (variable->variable()->max() > commonMax)
+			commonMax = variable->variable()->max();
 	}
 
 	const float normalizedRefValue = normBetweenRefValue(commonMin, commonMax);
 	refValueVertices_[0] = x;		refValueVertices_[1] = y + h * normalizedRefValue;
 	refValueVertices_[2] = x + w;	refValueVertices_[3] = y + h * normalizedRefValue;
 
-	for (unsigned int i = 0; i < variables_.size(); i++)
+	for (PlottingVariable *variable : variables_)
 	{
-		const ProfileVariable *profVariable = variables_[i]->variable();
-		GLfloat *vertices = variables_[i]->vertices();
+		const ProfileVariable *profVariable = variable->variable();
+		GLfloat *vertices = variable->vertices();
 
 		const float normalizedMean = profVariable->normBetweenMean(commonMin, commonMax);
 		// Variable mean vertices
