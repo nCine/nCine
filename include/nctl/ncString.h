@@ -1,9 +1,9 @@
 #ifndef CLASS_NCTL_STRING
 #define CLASS_NCTL_STRING
 
-#include "algorithms.h"
 #include "StringIterator.h"
 #include "ReverseIterator.h"
+#include "utility.h"
 
 namespace nctl {
 
@@ -35,8 +35,12 @@ class DLL_PUBLIC String
 
 	/// Copy constructor
 	String(const String &other);
+	/// Move constructor
+	String(String &&other);
 	/// Assignment operator that preserves the original string capacity
 	String &operator=(const String &other);
+	/// Move assignment operator
+	String &operator=(String &&other);
 	/// Assigns a constant C string to the string object
 	String &operator=(const char *cString);
 

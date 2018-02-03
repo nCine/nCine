@@ -47,7 +47,7 @@ TEST_F(StringOperationTest, ImplicitCStringConstructor)
 	ASSERT_STREQ(newString.data(), "String2");
 }
 
-TEST_F(StringOperationTest, CopyConstructor)
+TEST_F(StringOperationTest, CopyConstruction)
 {
 	nctl::String newString(string_);
 	printf("Creating a new string as a copy of the first one: "); printString(newString);
@@ -55,6 +55,18 @@ TEST_F(StringOperationTest, CopyConstructor)
 	ASSERT_EQ(newString.capacity(), string_.capacity());
 	ASSERT_EQ(newString.length(), string_.length());
 	ASSERT_STREQ(newString.data(), string_.data());
+}
+
+TEST_F(StringOperationTest, MoveConstruction)
+{
+	nctl::String newString(nctl::move(string_));
+	printf("Creating a new string moving from the first one: "); printString(newString);
+
+	ASSERT_EQ(newString.capacity(), Capacity);
+	ASSERT_EQ(newString.length(), strnlen("String1", Capacity));
+	ASSERT_STREQ(newString.data(), "String1");
+	ASSERT_EQ(string_.capacity(), 0);
+	ASSERT_EQ(string_.length(), 0);
 }
 
 TEST_F(StringOperationTest, AssignmentOperator)
@@ -65,6 +77,19 @@ TEST_F(StringOperationTest, AssignmentOperator)
 	ASSERT_EQ(newString.capacity(), string_.capacity());
 	ASSERT_EQ(newString.length(), string_.length());
 	ASSERT_STREQ(newString.data(), string_.data());
+}
+
+TEST_F(StringOperationTest, MoveAssignmentOperator)
+{
+	nctl::String newString(Capacity);
+	newString = nctl::move(string_);
+	printf("Creating a new string with the move assignment operator: "); printString(newString);
+
+	ASSERT_EQ(newString.capacity(), Capacity);
+	ASSERT_EQ(newString.length(), strnlen("String1", Capacity));
+	ASSERT_STREQ(newString.data(), "String1");
+	ASSERT_EQ(string_.capacity(), Capacity);
+	ASSERT_EQ(string_.length(), 0);
 }
 
 TEST_F(StringOperationTest, ConstructByConcatenation)

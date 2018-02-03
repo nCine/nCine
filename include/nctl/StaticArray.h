@@ -4,6 +4,7 @@
 #include "common_macros.h"
 #include "ArrayIterator.h"
 #include "ReverseIterator.h"
+#include "utility.h"
 
 namespace nctl {
 
@@ -43,8 +44,12 @@ class StaticArray
 
 	/// Copy constructor
 	StaticArray(const StaticArray &other);
+	/// Move constructor
+	StaticArray(StaticArray &&other);
 	/// Assignment operator
 	StaticArray &operator=(const StaticArray &other);
+	/// Move assignment operator
+	StaticArray &operator=(StaticArray &&other);
 
 	/// Returns an iterator to the first element
 	inline Iterator begin() { return Iterator(array_); }
@@ -95,7 +100,9 @@ class StaticArray
 	/// Returns a reference to the last element in constant time
 	inline T &back() { return array_[size_ - 1]; }
 	/// Inserts a new element as the last one in constant time
-	inline void insertBack(T element) { operator[](size_) = element; }
+	inline void insertBack(const T &element) { operator[](size_) = element; }
+	/// Move inserts a new element as the last one in constant time
+	inline void insertBack(T &&element) { operator[](size_) = nctl::move(element); }
 
 	/// Read-only access to the specified element (with bounds checking)
 	const T &at(unsigned int index) const;
@@ -127,6 +134,17 @@ StaticArray<T, C>::StaticArray(const StaticArray<T, C> &other)
 }
 
 template <class T, unsigned int C>
+StaticArray<T, C>::StaticArray(StaticArray<T, C> &&other)
+	: size_(other.size_), capacity_(other.capacity_)
+{
+	// moving all elements invoking their move constructor
+	for (unsigned int i = 0; i < other.size_; i++)
+		array_[i] = nctl::move(other.array_[i]);
+
+	other.size_ = 0;
+}
+
+template <class T, unsigned int C>
 StaticArray<T, C> &StaticArray<T, C>::operator=(const StaticArray<T, C> &other)
 {
 	size_ = other.size_;
@@ -134,6 +152,20 @@ StaticArray<T, C> &StaticArray<T, C>::operator=(const StaticArray<T, C> &other)
 	// copying all elements invoking their assignment operator
 	for (unsigned int i = 0; i < other.size_; i++)
 		array_[i] = other.array_[i];
+
+	return *this;
+}
+
+template <class T, unsigned int C>
+StaticArray<T, C> &StaticArray<T, C>::operator=(StaticArray<T, C> &&other)
+{
+	size_ = other.size_;
+
+	// moving all elements invoking their move constructor
+	for (unsigned int i = 0; i < other.size_; i++)
+		array_[i] = nctl::move(other.array_[i]);
+
+	other.size_ = 0;
 
 	return *this;
 }

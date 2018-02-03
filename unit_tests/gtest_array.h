@@ -1,6 +1,7 @@
 #ifndef GTEST_ARRAY_H
 #define GTEST_ARRAY_H
 
+#include "nctl/algorithms.h"
 #include "nctl/Array.h"
 #include "gtest/gtest.h"
 

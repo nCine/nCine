@@ -24,6 +24,8 @@ class HashMapNode
 	HashMapNode() : hash(0) { }
 	HashMapNode(hash_t hh, const K &kk)
 		: hash(hh), key(kk) { }
+	HashMapNode(hash_t hh, K &&kk)
+		: hash(hh), key(nctl::move(kk)) { }
 };
 
 /// A template based hashmap implementation with separate chaining and list head cell
@@ -45,6 +47,8 @@ class HashMap
 
 	/// Copy constructor
 	HashMap(const HashMap &other);
+	/// Move constructor
+	HashMap(HashMap &&other);
 	/// Copy-and-swap assignment operator
 	HashMap &operator=(HashMap other);
 
@@ -98,6 +102,8 @@ class HashMap
 	bool contains(const K &key, T &returnedValue) const;
 	/// Checks whether an element is in the hashmap or not
 	T *find(const K &key);
+	/// Checks whether an element is in the hashmap or not (read-only)
+	const T *find(const K &key) const;
 	/// Removes a key from the hashmap, if it exists
 	bool remove(const K &key);
 
@@ -347,7 +353,14 @@ HashMap<K, T, HashFunc>::HashMap(const HashMap<K, T, HashFunc> &other)
 
 }
 
-/*! The parameter should be passed by value for the idiom to work. */
+template <class K, class T, class HashFunc>
+HashMap<K, T, HashFunc>::HashMap(HashMap<K, T, HashFunc> &&other)
+	: buckets_(nctl::move(other.buckets_)), hashFunc_(other.hashFunc_)
+{
+
+}
+
+/*! \note The parameter should be passed by value for the idiom to work. */
 template <class K, class T, class HashFunc>
 HashMap<K, T, HashFunc> &HashMap<K, T, HashFunc>::operator=(HashMap<K, T, HashFunc> other)
 {
@@ -372,6 +385,14 @@ bool HashMap<K, T, HashFunc>::contains(const K &key, T &returnedValue) const
 /*! \note Prefer this method if copying `T` is expensive, but always check the validity of returned pointer. */
 template <class K, class T, class HashFunc>
 T *HashMap<K, T, HashFunc>::find(const K &key)
+{
+	const hash_t hash = hashFunc_(key);
+	return retrieveBucket(hash).find(hash, key);
+}
+
+/*! \note Prefer this method if copying `T` is expensive, but always check the validity of returned pointer. */
+template <class K, class T, class HashFunc>
+const T *HashMap<K, T, HashFunc>::find(const K &key) const
 {
 	const hash_t hash = hashFunc_(key);
 	return retrieveBucket(hash).find(hash, key);

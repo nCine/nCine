@@ -3,6 +3,7 @@
 
 #include <cstdlib> // for rand()
 #include "iterator.h"
+#include "utility.h"
 
 namespace nctl {
 
@@ -24,30 +25,17 @@ inline const T &max(const T &a, const T &b)
 	return (a < b) ? b : a;
 }
 
-/// Returns a random float between x0 and x1
-inline float randBetween(float x0, float x1)
-{
-	return x0 + (x1 - x0) * (rand() / static_cast<float>(RAND_MAX));
-}
-
-///////////////////////////////////////////////////////////
-// TEMPLATE FUNCTIONS (modifying)
-///////////////////////////////////////////////////////////
-
-/// Swaps the content of two objects of the same type
-template <class T>
-inline void swap(T &a, T &b)
-{
-	const T temp = a;
-	a = b;
-	b = temp;
-}
-
 /// Clamp the value of an object between two others that support operator<
 template <class T>
 inline const T &clamp(const T &value, const T &minValue, const T &maxValue)
 {
 	return min(max(value, minValue), maxValue);
+}
+
+/// Returns a random float between x0 and x1
+inline float randBetween(float x0, float x1)
+{
+	return x0 + (x1 - x0) * (rand() / static_cast<float>(RAND_MAX));
 }
 
 ///////////////////////////////////////////////////////////

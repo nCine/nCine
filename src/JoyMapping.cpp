@@ -4,6 +4,7 @@
 #include "IInputEventHandler.h"
 #include "IFile.h"
 #include "Vector2.h"
+#include "nctl/algorithms.h"
 
 namespace ncine {
 

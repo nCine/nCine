@@ -2,6 +2,7 @@
 #include <cstring>
 #include "common_macros.h"
 #include "nctl/ncString.h"
+#include "nctl/algorithms.h"
 
 namespace nctl {
 
@@ -63,6 +64,12 @@ String::String(const String &other)
 	array_[length_] = '\0';
 }
 
+String::String(String &&other)
+	: array_(nullptr), length_(0), capacity_(0)
+{
+	swap(*this, other);
+}
+
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -78,6 +85,12 @@ String &String::operator=(const String &other)
 		array_[length_] = '\0';
 	}
 
+	return *this;
+}
+
+String &String::operator=(String &&other)
+{
+	swap(*this, other);
 	return *this;
 }
 

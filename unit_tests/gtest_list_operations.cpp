@@ -49,6 +49,32 @@ TEST_F(ListOperationsTest, CopyConstruction)
 	assertListsAreEqual(list_, newList);
 }
 
+TEST_F(ListOperationsTest, MoveConstruction)
+{
+	printf("Creating a new list with move construction\n");
+	nctl::List<int> newList(nctl::move(list_));
+	printList(newList);
+
+	ASSERT_EQ(list_.size(), 0);
+	ASSERT_EQ(calcLength(list_), 0);
+	ASSERT_EQ(newList.size(), Length);
+	int array[Length] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(newList, array);
+}
+
+TEST_F(ListOperationsTest, MoveConstructionFromEmpty)
+{
+	printf("Creating a new list from an empty one with move construction\n");
+	nctl::List<int> emptyList;
+	nctl::List<int> newList(nctl::move(emptyList));
+	printList(newList);
+
+	ASSERT_EQ(emptyList.size(), 0);
+	ASSERT_EQ(calcLength(emptyList), 0);
+	ASSERT_EQ(newList.size(), 0);
+	ASSERT_EQ(calcLength(newList), 0);
+}
+
 TEST_F(ListOperationsTest, AssignmentOperator)
 {
 	printf("Creating a new list with the assignment operator\n");
@@ -56,6 +82,20 @@ TEST_F(ListOperationsTest, AssignmentOperator)
 	printList(newList);
 
 	assertListsAreEqual(list_, newList);
+}
+
+TEST_F(ListOperationsTest, MoveAssignmentOperator)
+{
+	printf("Creating a new list with the move assignment operator\n");
+	nctl::List<int> newList;
+	newList = nctl::move(list_);
+	printList(newList);
+
+	ASSERT_EQ(list_.size(), 0);
+	ASSERT_EQ(calcLength(list_), 0);
+	ASSERT_EQ(newList.size(), Length);
+	int array[Length] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(newList, array);
 }
 
 TEST_F(ListOperationsTest, RemoveOddNumbers)

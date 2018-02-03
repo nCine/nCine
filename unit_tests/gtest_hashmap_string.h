@@ -28,6 +28,16 @@ void printHashMap(nctl::StringHashMap<nctl::String> &strHashmap)
 	printf("\n");
 }
 
+unsigned int calcSize(const nctl::StringHashMap<nctl::String> &strHashmap)
+{
+	unsigned int length = 0;
+
+	for (typename nctl::StringHashMap<nctl::String>::ConstIterator i = strHashmap.begin(); i != strHashmap.end(); ++i)
+		length++;
+
+	return length;
+}
+
 void assertHashMapsAreEqual(const nctl::StringHashMap<nctl::String> &strHashmap1, const nctl::StringHashMap<nctl::String> &strHashmap2)
 {
 	nctl::StringHashMap<nctl::String>::ConstIterator strHashmap1It = strHashmap1.begin();

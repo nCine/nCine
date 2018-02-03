@@ -1,6 +1,7 @@
 #ifndef GTEST_LIST_H
 #define GTEST_LIST_H
 
+#include "nctl/algorithms.h"
 #include "nctl/List.h"
 #include "gtest/gtest.h"
 

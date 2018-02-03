@@ -1,6 +1,7 @@
 #ifndef GTEST_HASHMAP_H
 #define GTEST_HASHMAP_H
 
+#include "nctl/algorithms.h"
 #include "nctl/HashMap.h"
 #include "nctl/HashMapIterator.h"
 #include "gtest/gtest.h"
@@ -26,6 +27,17 @@ void printHashMap(const nctl::HashMap<int, int, HashFunc> &hashmap)
 	for (typename nctl::HashMap<int, int, HashFunc>::ConstIterator i = hashmap.begin(); i != hashmap.end(); ++i)
 		printf("[%u] hash: %lu, key: %d, value: %d\n", n++, i.hash(), i.key(), i.value());
 	printf("\n");
+}
+
+template <class HashFunc>
+unsigned int calcSize(const nctl::HashMap<int, int, HashFunc> &hashmap)
+{
+	unsigned int length = 0;
+
+	for (typename nctl::HashMap<int, int, HashFunc>::ConstIterator i = hashmap.begin(); i != hashmap.end(); ++i)
+		length++;
+
+	return length;
 }
 
 template <class HashFunc>

@@ -61,6 +61,17 @@ TEST_F(HashMapStringTest, CopyConstruction)
 	assertHashMapsAreEqual(strHashmap_, newStrHashmap);
 }
 
+TEST_F(HashMapStringTest, MoveConstruction)
+{
+	printf("Creating a new hashmap with move construction\n");
+	nctl::StringHashMap<nctl::String> newStrHashmap = nctl::move(strHashmap_);
+	printHashMap(newStrHashmap);
+
+	ASSERT_EQ(strHashmap_.bucketAmount(), 0);
+	ASSERT_EQ(newStrHashmap.bucketAmount(), Capacity);
+	ASSERT_EQ(calcSize(newStrHashmap), Size);
+}
+
 TEST_F(HashMapStringTest, AssignmentOperator)
 {
 	printf("Creating a new hashmap with the assignment operator\n");
@@ -68,6 +79,18 @@ TEST_F(HashMapStringTest, AssignmentOperator)
 	printHashMap(newStrHashmap);
 
 	assertHashMapsAreEqual(strHashmap_, newStrHashmap);
+}
+
+TEST_F(HashMapStringTest, MoveAssignmentOperator)
+{
+	printf("Creating a new hashmap with the move assignment operator\n");
+	nctl::StringHashMap<nctl::String> newStrHashmap(Capacity);
+	newStrHashmap = nctl::move(strHashmap_);
+	printHashMap(newStrHashmap);
+
+	ASSERT_EQ(strHashmap_.bucketAmount(), 0);
+	ASSERT_EQ(newStrHashmap.bucketAmount(), Capacity);
+	ASSERT_EQ(calcSize(newStrHashmap), Size);
 }
 
 TEST_F(HashMapStringTest, Contains)

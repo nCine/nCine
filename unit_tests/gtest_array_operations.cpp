@@ -34,6 +34,18 @@ TEST_F(ArrayOperationsTest, CopyConstruction)
 		ASSERT_EQ(array_[i], newArray[i]);
 }
 
+TEST_F(ArrayOperationsTest, MoveConstruction)
+{
+	printf("Creating a new array with move construction\n");
+	nctl::Array<int> newArray(nctl::move(array_));
+	printArray(newArray);
+
+	ASSERT_EQ(array_.size(), 0);
+	ASSERT_EQ(newArray.size(), Capacity);
+	for (unsigned int i = 0; i < newArray.size(); i++)
+		ASSERT_EQ(newArray[i], i);
+}
+
 TEST_F(ArrayOperationsTest, AssignmentOperator)
 {
 	printf("Creating a new array with the assignment operator\n");
@@ -43,6 +55,19 @@ TEST_F(ArrayOperationsTest, AssignmentOperator)
 	ASSERT_EQ(array_.size(), newArray.size());
 	for (unsigned int i = 0; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], newArray[i]);
+}
+
+TEST_F(ArrayOperationsTest, MoveAssignmentOperator)
+{
+	printf("Creating a new array with the move assignment operator\n");
+	nctl::Array<int> newArray;
+	newArray = nctl::move(array_);
+	printArray(newArray);
+
+	ASSERT_EQ(array_.size(), 0);
+	ASSERT_EQ(newArray.size(), Capacity);
+	for (unsigned int i = 0; i < newArray.size(); i++)
+		ASSERT_EQ(newArray[i], i);
 }
 
 TEST_F(ArrayOperationsTest, RemoveFirstWithIterator)

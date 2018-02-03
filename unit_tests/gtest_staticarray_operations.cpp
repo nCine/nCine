@@ -31,6 +31,18 @@ TEST_F(StaticArrayOperationsTest, CopyConstruction)
 		ASSERT_EQ(array_[i], newArray[i]);
 }
 
+TEST_F(StaticArrayOperationsTest, MoveConstruction)
+{
+	printf("Creating a new array with move construction\n");
+	nctl::StaticArray<int, Capacity> newArray(std::move(array_));
+	printArray(newArray);
+
+	ASSERT_EQ(array_.size(), 0);
+	ASSERT_EQ(newArray.size(), Capacity);
+	for (unsigned int i = 0; i < newArray.size(); i++)
+		ASSERT_EQ(newArray[i], i);
+}
+
 TEST_F(StaticArrayOperationsTest, AssignmentOperator)
 {
 	printf("Creating a new array with the assignment operator\n");
@@ -42,7 +54,20 @@ TEST_F(StaticArrayOperationsTest, AssignmentOperator)
 		ASSERT_EQ(array_[i], newArray[i]);
 }
 
-TEST_F(StaticArrayOperationsTest, InsertAtBackWithIterator)
+TEST_F(StaticArrayOperationsTest, MoveAssignmentOperator)
+{
+	printf("Creating a new array with the move assignment operator\n");
+	nctl::StaticArray<int, Capacity> newArray;
+	newArray = nctl::move(array_);
+	printArray(newArray);
+
+	ASSERT_EQ(newArray.size(), Capacity);
+	ASSERT_EQ(array_.size(), 0);
+	for (unsigned int i = 0; i < newArray.size(); i++)
+		ASSERT_EQ(newArray[i], i);
+}
+
+TEST_F(StaticArrayOperationsTest, InsertBack)
 {
 	nctl::StaticArray<int, Capacity> newArray;
 

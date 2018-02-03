@@ -165,7 +165,7 @@ struct IteratorTraits<HashMapIterator<K, T, HashFunc, true> >
 
 template <class K, class T, class HashFunc, bool IsConst>
 inline HashMapIterator<K, T, HashFunc, IsConst>::HashMapIterator(typename HelperTraits<K, T, HashFunc, IsConst>::HashMapPtr hashMap, SentinelTagInit tag)
-	: hashMap_(hashMap), listIterator_(nullptr), bucketIndex_(0), atFirstNode_(true)
+	: hashMap_(hashMap), bucketIndex_(0), listIterator_(nullptr), atFirstNode_(true)
 {
 	switch (tag)
 	{
