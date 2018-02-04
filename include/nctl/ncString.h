@@ -20,10 +20,8 @@ class DLL_PUBLIC String
 	/// Reverse constant iterator type
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
-	/// Default capacity for objects created by the default constructor
-	static const unsigned int DefaultCapacity = 128;
 	/// Maximum length when creating an object from C-style strings
-	static const unsigned int MaxCStringLength = DefaultCapacity - 1;
+	static const unsigned int MaxCStringLength = 512 - 1;
 
 	/// Default constructor
 	String();
@@ -53,31 +51,31 @@ class DLL_PUBLIC String
 	}
 
 	/// Returns an iterator to the first character
-	inline Iterator begin() { return Iterator(array_); }
+	inline Iterator begin() { return Iterator(data()); }
 	/// Returns a reverse iterator to the last character
-	inline ReverseIterator rBegin() { return ReverseIterator(Iterator(array_ + length_ - 1)); }
+	inline ReverseIterator rBegin() { return ReverseIterator(Iterator(data() + length_ - 1)); }
 	/// Returns an iterator to the termination character
-	inline Iterator end() { return Iterator(array_ + length_); }
+	inline Iterator end() { return Iterator(data() + length_); }
 	/// Returns a reverse iterator to the byte preceding the first character
-	inline ReverseIterator rEnd() { return ReverseIterator(Iterator(array_ - 1)); }
+	inline ReverseIterator rEnd() { return ReverseIterator(Iterator(data() - 1)); }
 
 	/// Returns a constant iterator to the first character
-	inline ConstIterator begin() const { return ConstIterator(array_); }
+	inline ConstIterator begin() const { return ConstIterator(data()); }
 	/// Returns a constant reverse iterator to the last character
-	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(ConstIterator(array_ + length_ - 1)); }
+	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(ConstIterator(data() + length_ - 1)); }
 	/// Returns a constant iterator to the termination character
-	inline ConstIterator end() const { return ConstIterator(array_ + length_); }
+	inline ConstIterator end() const { return ConstIterator(data() + length_); }
 	/// Returns a constant reverse iterator to the byte preceding the first character
-	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(ConstIterator(array_ - 1)); }
+	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(ConstIterator(data() - 1)); }
 
 	/// Returns a constant iterator to the first character
-	inline ConstIterator cBegin() const { return ConstIterator(array_); }
+	inline ConstIterator cBegin() const { return ConstIterator(data()); }
 	/// Returns a constant reverse iterator to the last character
-	inline ConstReverseIterator crBegin() const { return ConstReverseIterator(ConstIterator(array_ + length_ - 1)); }
+	inline ConstReverseIterator crBegin() const { return ConstReverseIterator(ConstIterator(data() + length_ - 1)); }
 	/// Returns a constant iterator to the termination character
-	inline ConstIterator cEnd() const { return ConstIterator(array_ + length_); }
+	inline ConstIterator cEnd() const { return ConstIterator(data() + length_); }
 	/// Returns a constant reverse iterator to the byte preceding the first character
-	inline ConstReverseIterator crEnd() const { return ConstReverseIterator(ConstIterator(array_ - 1)); }
+	inline ConstReverseIterator crEnd() const { return ConstReverseIterator(ConstIterator(data() - 1)); }
 
 	/// Returns true if the string is empty
 	inline bool isEmpty() const { return length_ == 0; }
@@ -88,12 +86,12 @@ class DLL_PUBLIC String
 
 	/// Clears the string
 	/*! Length will be zero but capacity remains unmodified. */
-	inline void clear() { length_ = 0; array_[0] = '\0'; }
+	inline void clear() { length_ = 0; data()[0] = '\0'; }
 
 	/// Returns a pointer to the internal array
-	char *data() { return array_; }
+	inline char *data() { return (capacity_ > SmallBufferSize) ? array_.begin_ : array_.local_; }
 	/// Returns a constant pointer to the internal array
-	const char *data() const { return array_; }
+	inline const char *data() const { return (capacity_ > SmallBufferSize) ? array_.begin_ : array_.local_; }
 
 	/// Copies characters from somewhere in the source to somewhere in the destination
 	unsigned int copy(String &dest, unsigned int srcChar, unsigned int numChar, unsigned int destChar) const;
@@ -157,7 +155,17 @@ class DLL_PUBLIC String
 	char operator[](unsigned int index) const;
 
   private:
-	char *array_;
+	/// Size of the local buffer
+	static const unsigned int SmallBufferSize = 16;
+
+	/// Union used for small buffer optimization
+	union Buffer
+	{
+		char *begin_;
+		char local_[SmallBufferSize];
+	};
+
+	Buffer array_;
 	unsigned int length_;
 	unsigned int capacity_;
 };
@@ -165,7 +173,7 @@ class DLL_PUBLIC String
 inline char String::operator[](unsigned int index) const
 {
 	if (index < length_)
-		return array_[index];
+		return data()[index];
 	else
 		return '\0';
 }

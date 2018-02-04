@@ -67,13 +67,13 @@ TEST_F(StaticArrayOperationsTest, MoveAssignmentOperator)
 		ASSERT_EQ(newArray[i], i);
 }
 
-TEST_F(StaticArrayOperationsTest, InsertBack)
+TEST_F(StaticArrayOperationsTest, PushBack)
 {
 	nctl::StaticArray<int, Capacity> newArray;
 
 	printf("Inserting twice at the back\n");
-	newArray.insertBack(1);
-	newArray.insertBack(2);
+	newArray.pushBack(1);
+	newArray.pushBack(2);
 	printArray(newArray);
 
 	ASSERT_EQ(newArray.size(), 2);

@@ -100,9 +100,9 @@ class StaticArray
 	/// Returns a reference to the last element in constant time
 	inline T &back() { return array_[size_ - 1]; }
 	/// Inserts a new element as the last one in constant time
-	inline void insertBack(const T &element) { operator[](size_) = element; }
+	inline void pushBack(const T &element) { operator[](size_) = element; }
 	/// Move inserts a new element as the last one in constant time
-	inline void insertBack(T &&element) { operator[](size_) = nctl::move(element); }
+	inline void pushBack(T &&element) { operator[](size_) = nctl::move(element); }
 
 	/// Read-only access to the specified element (with bounds checking)
 	const T &at(unsigned int index) const;

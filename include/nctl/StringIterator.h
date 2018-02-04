@@ -47,7 +47,7 @@ class StringIterator
 	/// Reference type which respects iterator constness
 	using Reference =  typename IteratorTraits<StringIterator>::Reference;
 
-	explicit StringIterator(char *c)
+	explicit StringIterator(Pointer c)
 		: charPtr_(c) { }
 
 	/// Copy constructor to implicitly convert a non constant iterator to a constant one

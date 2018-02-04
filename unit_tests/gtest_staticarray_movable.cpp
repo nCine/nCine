@@ -12,7 +12,7 @@ class StaticArrayMovableTest : public ::testing::Test
 TEST_F(StaticArrayMovableTest, CopyConstruction)
 {
 	printf("Inserting a complex object at the back\n");
-	array_.insertBack(Movable(Movable::Construction::INITIALIZED));
+	array_.pushBack(Movable(Movable::Construction::INITIALIZED));
 	printf("Creating a new array with copy construction\n");
 	nctl::StaticArray<Movable, Capacity> newArray(array_);
 
@@ -30,7 +30,7 @@ TEST_F(StaticArrayMovableTest, CopyConstruction)
 TEST_F(StaticArrayMovableTest, MoveConstruction)
 {
 	printf("Inserting a complex object at the back\n");
-	array_.insertBack(Movable(Movable::Construction::INITIALIZED));
+	array_.pushBack(Movable(Movable::Construction::INITIALIZED));
 	printf("Creating a new array with move construction\n");
 	nctl::StaticArray<Movable, Capacity> newArray(nctl::move(array_));
 
@@ -39,11 +39,11 @@ TEST_F(StaticArrayMovableTest, MoveConstruction)
 	ASSERT_EQ(newArray.size(), 1);
 }
 
-TEST_F(StaticArrayMovableTest, InsertBackLValue)
+TEST_F(StaticArrayMovableTest, PushBackLValue)
 {
 	Movable movable(Movable::Construction::INITIALIZED);
 	printf("Inserting a complex object at the back\n");
-	array_.insertBack(movable);
+	array_.pushBack(movable);
 
 	array_[0].printAndAssert();
 	ASSERT_EQ(array_.size(), 1);
@@ -51,11 +51,11 @@ TEST_F(StaticArrayMovableTest, InsertBackLValue)
 	ASSERT_NE(movable.data(), nullptr);
 }
 
-TEST_F(StaticArrayMovableTest, InsertBackRValue)
+TEST_F(StaticArrayMovableTest, PushBackRValue)
 {
 	Movable movable(Movable::Construction::INITIALIZED);
 	printf("Move inserting a complex object at the back\n");
-	array_.insertBack(nctl::move(movable));
+	array_.pushBack(nctl::move(movable));
 
 	array_[0].printAndAssert();
 	ASSERT_EQ(array_.size(), 1);

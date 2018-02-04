@@ -72,52 +72,52 @@ void MyEventHandler::onInit()
 	FATAL_ASSERT_MSG_X(maxTextureSize >= 512, "Maximum device texture size is %d, which is less than 512 pixels", maxTextureSize);
 
 #if WITH_PNG_FORMAT
-	filenames_.insertBack("texture_512_RGB.png");
-	filenames_.insertBack("texture_512_RGBA.png");
+	filenames_.pushBack("texture_512_RGB.png");
+	filenames_.pushBack("texture_512_RGBA.png");
 #endif
 
 #if WITH_WEBP_FORMAT
-	filenames_.insertBack("texture_512_RGB.webp");
-	filenames_.insertBack("texture_512_RGBA.webp");
+	filenames_.pushBack("texture_512_RGB.webp");
+	filenames_.pushBack("texture_512_RGBA.webp");
 #endif
 
 #if WITH_PVR_UNCOMPRESSED_FORMAT
-	filenames_.insertBack("texture_512_RGB_888.pvr");
-	filenames_.insertBack("texture_512_RGB_565.pvr");
-	filenames_.insertBack("texture_512_RGBA_8888.pvr");
-	filenames_.insertBack("texture_512_RGBA_4444.pvr");
+	filenames_.pushBack("texture_512_RGB_888.pvr");
+	filenames_.pushBack("texture_512_RGB_565.pvr");
+	filenames_.pushBack("texture_512_RGBA_8888.pvr");
+	filenames_.pushBack("texture_512_RGBA_4444.pvr");
 #endif
 
 #if WITH_DDS_UNCOMPRESSED_FORMAT
-	filenames_.insertBack("texture_512_RGB_888.dds");
-	// filenames_.insertBack("texture_512_RGB_565.dds"); // unsupported
-	filenames_.insertBack("texture_512_RGBA_8888.dds");
+	filenames_.pushBack("texture_512_RGB_888.dds");
+	// filenames_.pushBack("texture_512_RGB_565.dds"); // unsupported
+	filenames_.pushBack("texture_512_RGBA_8888.dds");
 #endif
 
 #if WITH_KTX_UNCOMPRESSED_FORMAT
-	filenames_.insertBack("texture_512_RGB_888.ktx"); // swapped channel
-	filenames_.insertBack("texture_512_RGB_565.ktx");
-	filenames_.insertBack("texture_512_RGBA_8888.ktx");
-	filenames_.insertBack("texture_512_RGBA_4444.ktx");
+	filenames_.pushBack("texture_512_RGB_888.ktx"); // swapped channel
+	filenames_.pushBack("texture_512_RGB_565.ktx");
+	filenames_.pushBack("texture_512_RGBA_8888.ktx");
+	filenames_.pushBack("texture_512_RGBA_4444.ktx");
 #endif
 
 #if WITH_DDS_COMPRESSED_FORMAT
 	if (gfxCaps.hasExtension(nc::IGfxCapabilities::EXT_TEXTURE_COMPRESSION_S3TC))
 	{
 		LOGI("S3TC textures are supported");
-		filenames_.insertBack("texture_512_RGB_DXT1.dds");
-		filenames_.insertBack("texture_512_RGBA_DXT3.dds");
-		filenames_.insertBack("texture_512_RGBA_DXT5.dds");
+		filenames_.pushBack("texture_512_RGB_DXT1.dds");
+		filenames_.pushBack("texture_512_RGBA_DXT3.dds");
+		filenames_.pushBack("texture_512_RGBA_DXT5.dds");
 	#if WITH_MIPMAPPED_FORMATS
-		filenames_.insertBack("texture_512_RGB_DXT1_MIP.dds");
+		filenames_.pushBack("texture_512_RGB_DXT1_MIP.dds");
 	#endif
 	}
 #endif
 
 #if WITH_MIPMAPPED_FORMATS
-	filenames_.insertBack("texture_512_RGB_888_MIP.pvr");
-	filenames_.insertBack("texture_512_RGB_888_MIP.dds");
-	filenames_.insertBack("texture_512_RGB_888_MIP.ktx");
+	filenames_.pushBack("texture_512_RGB_888_MIP.pvr");
+	filenames_.pushBack("texture_512_RGB_888_MIP.dds");
+	filenames_.pushBack("texture_512_RGB_888_MIP.ktx");
 #endif
 
 
@@ -125,12 +125,12 @@ void MyEventHandler::onInit()
 	if (gfxCaps.hasExtension(nc::IGfxCapabilities::OES_COMPRESSED_ETC1_RGB8_TEXTURE))
 	{
 		LOGI("ETC1 textures are supported");
-		filenames_.insertBack("texture_512_RGB_ETC1.ktx");
-		filenames_.insertBack("texture_512_RGB_ETC1.dds");
-		filenames_.insertBack("texture_512_RGB_ETC1.pvr");
-		filenames_.insertBack("texture_512_RGB_ETC1.pkm");
+		filenames_.pushBack("texture_512_RGB_ETC1.ktx");
+		filenames_.pushBack("texture_512_RGB_ETC1.dds");
+		filenames_.pushBack("texture_512_RGB_ETC1.pvr");
+		filenames_.pushBack("texture_512_RGB_ETC1.pkm");
 	#if WITH_MIPMAPPED_FORMATS
-		filenames_.insertBack("texture_512_RGB_ETC1_MIP.dds");
+		filenames_.pushBack("texture_512_RGB_ETC1_MIP.dds");
 	#endif
 	}
 #endif
@@ -139,9 +139,9 @@ void MyEventHandler::onInit()
 	if (gfxCaps.hasExtension(nc::IGfxCapabilities::AMD_COMPRESSED_ATC_TEXTURE))
 	{
 		LOGI("ATC textures are supported");
-		filenames_.insertBack("texture_512_RGB_ATC.dds");
-		filenames_.insertBack("texture_512_RGBA_ATC_explicit.dds");
-		filenames_.insertBack("texture_512_RGBA_ATC_interpolated.dds");
+		filenames_.pushBack("texture_512_RGB_ATC.dds");
+		filenames_.pushBack("texture_512_RGBA_ATC_explicit.dds");
+		filenames_.pushBack("texture_512_RGBA_ATC_interpolated.dds");
 	}
 #endif
 
@@ -149,13 +149,13 @@ void MyEventHandler::onInit()
 	if (gfxCaps.hasExtension(nc::IGfxCapabilities::KHR_TEXTURE_COMPRESSION_ASTC_LDR))
 	{
 		LOGI("ASTC textures are supported");
-		filenames_.insertBack("texture_512_RGB_ASTC8x8.ktx");
-		filenames_.insertBack("texture_512_RGB_ASTC8x8.pvr");
-		filenames_.insertBack("texture_512_RGBA_ASTC8x8.ktx");
-		filenames_.insertBack("texture_512_RGBA_ASTC8x8.pvr");
+		filenames_.pushBack("texture_512_RGB_ASTC8x8.ktx");
+		filenames_.pushBack("texture_512_RGB_ASTC8x8.pvr");
+		filenames_.pushBack("texture_512_RGBA_ASTC8x8.ktx");
+		filenames_.pushBack("texture_512_RGBA_ASTC8x8.pvr");
 	#if WITH_MIPMAPPED_FORMATS
-		filenames_.insertBack("texture_512_RGBA_ASTC8x8_MIP.ktx");
-		filenames_.insertBack("texture_512_RGBA_ASTC8x8_MIP.pvr");
+		filenames_.pushBack("texture_512_RGBA_ASTC8x8_MIP.ktx");
+		filenames_.pushBack("texture_512_RGBA_ASTC8x8_MIP.pvr");
 	#endif
 	}
 #endif

@@ -6,6 +6,7 @@
 
 namespace {
 
+// Capacity is within the size of the small local buffer
 const unsigned int Capacity = 16;
 
 void printString(const nctl::String &string)
