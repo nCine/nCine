@@ -1,7 +1,4 @@
-#include "common_macros.h"
 #include "ThreadPool.h"
-#include "Thread.h"
-#include "IThreadCommand.h"
 
 namespace ncine {
 
@@ -16,10 +13,8 @@ ThreadPool::ThreadPool()
 }
 
 ThreadPool::ThreadPool(unsigned int numThreads)
-	: threads_(nullptr), numThreads_(numThreads)
+	: threads_(numThreads, nctl::ArrayMode::FIXED_CAPACITY), numThreads_(numThreads)
 {
-	threads_ = new Thread[numThreads_];
-
 	threadStruct_.queue = &queue_;
 	threadStruct_.queueMutex = &queueMutex_;
 	threadStruct_.queueCV = &queueCV_;
@@ -43,21 +38,18 @@ ThreadPool::~ThreadPool()
 
 	for (unsigned int i = 0; i < numThreads_; i++)
 		threads_[i].join();
-
-	delete[] threads_;
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/*! \note The command should be allocated on the heap for the worker thread to release it after its execution. */
-void ThreadPool::enqueueCommand(IThreadCommand *threadCommand)
+void ThreadPool::enqueueCommand(nctl::UniquePtr<IThreadCommand> threadCommand)
 {
 	ASSERT(threadCommand);
 
 	queueMutex_.lock();
-	queue_.pushBack(threadCommand);
+	queue_.pushBack(nctl::move(threadCommand));
 	queueCV_.broadcast();
 	queueMutex_.unlock();
 }
@@ -84,13 +76,12 @@ void ThreadPool::workerFunction(void *arg)
 			break;
 		}
 
-		IThreadCommand *threadCommand = threadStruct->queue->front();
+		nctl::UniquePtr<IThreadCommand> threadCommand = nctl::move(threadStruct->queue->front());
 		threadStruct->queue->popFront();
 		threadStruct->queueMutex->unlock();
 
 		LOGD_X("Worker thread %u is executing its command", Thread::self());
 		threadCommand->execute();
-		delete threadCommand;
 	}
 
 	LOGD_X("Worker thread %u is exiting", Thread::self());

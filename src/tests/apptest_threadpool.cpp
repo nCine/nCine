@@ -19,7 +19,7 @@ void MyEventHandler::onInit()
 {
 	for (unsigned int i = 0; i < 4; i++)
 	{
-		nc::theServiceLocator().threadPool().enqueueCommand(new nc::DummyCommand(i));
+		nc::theServiceLocator().threadPool().enqueueCommand(nctl::makeUnique<nc::DummyCommand>(i));
 		LOGI_X("APPTEST_THREADPOOL: enqueued %u", i);
 		nc::Timer::sleep(1000);
 	}

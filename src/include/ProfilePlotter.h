@@ -15,7 +15,6 @@ class ProfilePlotter : public DrawableNode
 {
   public:
 	ProfilePlotter(SceneNode *parent, Rectf rect);
-	~ProfilePlotter() override;
 
 	/// Adds a value to the specified variable
 	bool addValue(unsigned int varIndex, float value);
@@ -55,7 +54,7 @@ class ProfilePlotter : public DrawableNode
 	/// The vertices for the background
 	nctl::StaticArray<float, 8> backgroundVertices_; // Quad with a triangle strip
 	/// The array of variables
-	nctl::Array<PlottingVariable *> variables_;
+	nctl::Array<nctl::UniquePtr<PlottingVariable> > variables_;
 
 	/// Reference value drawing flag
 	bool shouldPlotRefValue_;

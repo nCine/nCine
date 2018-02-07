@@ -4,6 +4,7 @@
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
 #include "Matrix4x4.h"
+#include "nctl/UniquePtr.h"
 
 namespace ncine {
 
@@ -28,7 +29,6 @@ class MyEventHandler :
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;
-	void onShutdown() override;
 
 	void onKeyReleased(const nc::KeyboardEvent &event) override;
 
@@ -37,17 +37,19 @@ class MyEventHandler :
 
 	float angle_;
 	int width_, height_;
-	nc::GLShaderProgram *colorProgram_;
-	nc::GLShaderUniforms *colorUniforms_;
-	nc::GLShaderAttributes *colorAttributes_;
-	nc::GLShaderProgram *texProgram_;
-	nc::GLShaderUniforms *texUniforms_;
-	nc::GLShaderAttributes *texAttributes_;
-	nc::GLTexture *texture_;
-	nc::GLFramebufferObject *fbo_;
-	nc::GLBufferObject *vboTri_;
-	nc::GLBufferObject *vboCube_;
-	nc::GLBufferObject *iboCube_;
+
+	nctl::UniquePtr<nc::GLShaderProgram> colorProgram_;
+	nctl::UniquePtr<nc::GLShaderUniforms> colorUniforms_;
+	nctl::UniquePtr<nc::GLShaderAttributes> colorAttributes_;
+	nctl::UniquePtr<nc::GLShaderProgram> texProgram_;
+	nctl::UniquePtr<nc::GLShaderUniforms> texUniforms_;
+	nctl::UniquePtr<nc::GLShaderAttributes> texAttributes_;
+	nctl::UniquePtr<nc::GLTexture> texture_;
+	nctl::UniquePtr<nc::GLFramebufferObject> fbo_;
+	nctl::UniquePtr<nc::GLBufferObject> vboTri_;
+	nctl::UniquePtr<nc::GLBufferObject> vboCube_;
+	nctl::UniquePtr<nc::GLBufferObject> iboCube_;
+
 	nc::Matrix4x4f projection_;
 	nc::Matrix4x4f modelView_;
 };

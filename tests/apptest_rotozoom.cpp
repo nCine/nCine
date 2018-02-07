@@ -34,13 +34,13 @@ void MyEventHandler::onInit()
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	megaTexture_ = new nc::Texture((nc::IFile::dataPath() + "textures/" + TextureFile).data());
+	megaTexture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + TextureFile).data());
 	texRects[0] = nc::Recti(1, 1, 126, 126);
 	texRects[1] = nc::Recti(129, 0, 126, 126);
 	texRects[2] = nc::Recti(0, 129, 126, 126);
 	texRects[3] = nc::Recti(129, 129, 126, 126);
 
-	dummy_ = new nc::SceneNode(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
+	dummy_ = nctl::makeUnique<nc::SceneNode>(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	dummy_->setScale(0.75f);
 
 	unsigned int index = 0;
@@ -48,7 +48,7 @@ void MyEventHandler::onInit()
 	{
 		for (int j = static_cast<int>(-NumColSprites * 0.5f); j < static_cast<int>(NumColSprites * 0.5f); j++)
 		{
-			sprites_[index] = new nc::Sprite(dummy_, megaTexture_, i * 128.0f, j * 128.0f);
+			sprites_[index] = nctl::makeUnique<nc::Sprite>(dummy_.get(), megaTexture_.get(), i * 128.0f, j * 128.0f);
 			sprites_[index]->setTexRect(texRects[index % NumTextures]);
 			sprites_[index]->setScale(0.75f);
 			index++;
@@ -75,12 +75,6 @@ void MyEventHandler::onFrameStart()
 	nc::theApplication().rootNode().y = (cosine + 1.0f) * 50.0f;
 	nc::theApplication().rootNode().setRotation(sine * 10.0f);
 	nc::theApplication().rootNode().setScale(((cosine * 0.1f) + 1.0f) * 0.75f);
-}
-
-void MyEventHandler::onShutdown()
-{
-	delete dummy_; // and all its children (the sprites)
-	delete megaTexture_;
 }
 
 #ifdef __ANDROID__

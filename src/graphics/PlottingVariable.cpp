@@ -22,10 +22,4 @@ PlottingVariable::PlottingVariable(unsigned int numValues, float rejectDelay, co
 	meanCmd_.material().setShaderProgram(Material::ShaderProgram::COLOR);
 }
 
-PlottingVariable::~PlottingVariable()
-{
-	if (vertices_)
-		delete[] vertices_;
-}
-
 }

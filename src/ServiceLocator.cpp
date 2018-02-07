@@ -24,80 +24,85 @@ ServiceLocator::ServiceLocator()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ServiceLocator::registerIndexer(IIndexer *service)
+void ServiceLocator::registerIndexer(nctl::UniquePtr<IIndexer> service)
 {
-	if (service == nullptr)
-		indexerService_ = &nullIndexer_;
-	else
-		indexerService_ = service;
+	registeredIndexer_ = nctl::move(service);
+	indexerService_ = registeredIndexer_.get();
 }
 
-void ServiceLocator::registerLogger(ILogger *service)
+void ServiceLocator::unregisterIndexer()
 {
-	if (service == nullptr)
-		loggerService_ = &nullLogger_;
-	else
-		loggerService_ = service;
+	registeredIndexer_.reset(nullptr);
+	indexerService_ = &nullIndexer_;
 }
 
-void ServiceLocator::registerAudioDevice(IAudioDevice *service)
+void ServiceLocator::registerLogger(nctl::UniquePtr<ILogger> service)
 {
-	if (service == nullptr)
-		audioDevice_ = &nullAudioDevice_;
-	else
-		audioDevice_ = service;
+	registeredLogger_ = nctl::move(service);
+	loggerService_ = registeredLogger_.get();
 }
 
-void ServiceLocator::registerThreadPool(IThreadPool *service)
+void ServiceLocator::unregisterLogger()
 {
-	if (service == nullptr)
-		threadPool_ = &nullThreadPool_;
-	else
-		threadPool_ = service;
+	registeredLogger_.reset(nullptr);
+	loggerService_ = &nullLogger_;
 }
 
-void ServiceLocator::registerGfxCapabilities(IGfxCapabilities *service)
+void ServiceLocator::registerAudioDevice(nctl::UniquePtr<IAudioDevice> service)
 {
-	if (service == nullptr)
-		gfxCapabilities_ = &nullGfxCapabilities_;
-	else
-		gfxCapabilities_ = service;
+	registeredAudioDevice_ = nctl::move(service);
+	audioDevice_ = registeredAudioDevice_.get();
+}
+
+void ServiceLocator::unregisterAudioDevice()
+{
+	registeredAudioDevice_.reset(nullptr);
+	audioDevice_ = &nullAudioDevice_;
+}
+
+void ServiceLocator::registerThreadPool(nctl::UniquePtr<IThreadPool> service)
+{
+	registeredThreadPool_ = nctl::move(service);
+	threadPool_ = registeredThreadPool_.get();
+}
+
+void ServiceLocator::unregisterThreadPool()
+{
+	registeredThreadPool_.reset(nullptr);
+	threadPool_ = &nullThreadPool_;
+}
+
+void ServiceLocator::registerGfxCapabilities(nctl::UniquePtr<ncine::IGfxCapabilities> service)
+{
+	registeredGfxCapabilities_ = nctl::move(service);
+	gfxCapabilities_ = registeredGfxCapabilities_.get();
+}
+
+void ServiceLocator::unregisterGfxCapabilities()
+{
+	registeredGfxCapabilities_.reset(nullptr);
+	gfxCapabilities_ = &nullGfxCapabilities_;
 }
 
 void ServiceLocator::unregisterAll()
 {
 	LOGI("Unregistering all services");
 
-	if (indexerService_ != &nullIndexer_)
-	{
-		delete indexerService_;
-		indexerService_ = &nullIndexer_;
-	}
+	registeredIndexer_.reset(nullptr);
+	indexerService_ = &nullIndexer_;
 
-	if (audioDevice_ != &nullAudioDevice_)
-	{
-		delete audioDevice_;
-		audioDevice_ = &nullAudioDevice_;
-	}
+	registeredAudioDevice_.reset(nullptr);
+	audioDevice_ = &nullAudioDevice_;
 
-	if (threadPool_ != &nullThreadPool_)
-	{
-		delete threadPool_;
-		threadPool_ = &nullThreadPool_;
-	}
+	registeredThreadPool_.reset(nullptr);
+	threadPool_ = &nullThreadPool_;
 
-	if (gfxCapabilities_ != &nullGfxCapabilities_)
-	{
-		delete gfxCapabilities_;
-		gfxCapabilities_ = &nullGfxCapabilities_;
-	}
+	registeredGfxCapabilities_.reset(nullptr);
+	gfxCapabilities_ = &nullGfxCapabilities_;
 
 	// Logger unregistered at the end to give a last chance for logging
-	if (loggerService_ != &nullLogger_)
-	{
-		delete loggerService_;
-		loggerService_ = &nullLogger_;
-	}
+	registeredLogger_.reset(nullptr);
+	loggerService_ = &nullLogger_;
 }
 
 }

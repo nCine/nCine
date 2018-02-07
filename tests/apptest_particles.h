@@ -4,6 +4,7 @@
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
 #include "Vector2.h"
+#include "nctl/UniquePtr.h"
 
 namespace ncine {
 
@@ -25,7 +26,6 @@ class MyEventHandler :
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;
-	void onShutdown() override;
 
 #ifdef __ANDROID__
 	void onTouchDown(const nc::TouchEvent &event) override;
@@ -42,9 +42,9 @@ class MyEventHandler :
   private:
 	static const unsigned int NumParticles = 50;
 
-	nc::Texture *texture_;
-	nc::ParticleSystem *particleSystem_;
-	nc::Timer *emitTimer_;
+	nctl::UniquePtr<nc::Texture> texture_;
+	nctl::UniquePtr<nc::ParticleSystem> particleSystem_;
+	nctl::UniquePtr<nc::Timer> emitTimer_;
 	nc::Vector2f emitVector_;
 
 	nc::Vector2f joyVectorLeft_;

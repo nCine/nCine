@@ -29,12 +29,6 @@ ProfilePlotter::ProfilePlotter(SceneNode *parent, Rectf rect)
 	refValueCmd_.geometry().setDrawParameters(GL_LINES, 0, 2);
 }
 
-ProfilePlotter::~ProfilePlotter()
-{
-	for (PlottingVariable *variable : variables_)
-		delete variable;
-}
-
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////

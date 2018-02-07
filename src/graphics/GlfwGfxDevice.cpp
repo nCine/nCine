@@ -57,14 +57,13 @@ void GlfwGfxDevice::toggleFullScreen()
 
 void GlfwGfxDevice::setWindowIcon(const char *windowIconFilename)
 {
-	ITextureLoader *image = ITextureLoader::createFromFile(windowIconFilename);
+	nctl::UniquePtr<ITextureLoader> image = ITextureLoader::createFromFile(windowIconFilename);
 	GLFWimage glfwImage;
 	glfwImage.width = image->width();
 	glfwImage.height = image->height();
 	glfwImage.pixels = const_cast<unsigned char *>(image->pixels());
 
 	glfwSetWindowIcon(windowHandle_, 1, &glfwImage);
-	delete image;
 }
 
 ///////////////////////////////////////////////////////////

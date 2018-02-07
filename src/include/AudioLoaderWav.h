@@ -10,7 +10,7 @@ class AudioLoaderWav : public IAudioLoader
 {
   public:
 	explicit AudioLoaderWav(const char *filename);
-	explicit AudioLoaderWav(IFile *fileHandle);
+	explicit AudioLoaderWav(nctl::UniquePtr<IFile> fileHandle);
 
 	unsigned long int read(char *buffer, unsigned long int bufferSize) const override;
 	void rewind() const override;

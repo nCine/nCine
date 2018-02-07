@@ -62,7 +62,7 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	float height_;
 
 	/// The render command class associated with this node
-	RenderCommand *renderCommand_;
+	nctl::UniquePtr<RenderCommand> renderCommand_;
 
 	/// Axis Aligned Bounding Box of the node area
 	Rectf aabb_;

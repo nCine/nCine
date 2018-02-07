@@ -11,7 +11,7 @@ class TextureLoaderDds : public ITextureLoader
 {
   public:
 	explicit TextureLoaderDds(const char *filename);
-	explicit TextureLoaderDds(IFile *fileHandle);
+	explicit TextureLoaderDds(nctl::UniquePtr<IFile> fileHandle);
 
   private:
 	/// Header for the DDS pixel format

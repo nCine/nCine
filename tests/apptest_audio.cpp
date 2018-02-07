@@ -40,18 +40,18 @@ void MyEventHandler::onInit()
 	xPos_ = DefaultXPos;
 	isLooping_ = true;
 
-	font_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
-	                     (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
-	musicPlayer_ = new nc::AudioStreamPlayer((nc::IFile::dataPath() + "sounds/music.ogg").data());
-	audioBuffer_ = new nc::AudioBuffer((nc::IFile::dataPath() + "sounds/bomb.wav").data());
-	soundPlayer_ = new nc::AudioBufferPlayer(audioBuffer_);
+	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
+	                                   (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
+	musicPlayer_ = nctl::makeUnique<nc::AudioStreamPlayer>((nc::IFile::dataPath() + "sounds/music.ogg").data());
+	audioBuffer_ = nctl::makeUnique<nc::AudioBuffer>((nc::IFile::dataPath() + "sounds/bomb.wav").data());
+	soundPlayer_ = nctl::makeUnique<nc::AudioBufferPlayer>(audioBuffer_.get());
 	soundPlayer_->play();
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
-	dummy_ = new nc::SceneNode(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
-	textNode_ = new nc::TextNode(dummy_, font_);
+	dummy_ = nctl::makeUnique<nc::SceneNode>(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
+	textNode_ = nctl::makeUnique<nc::TextNode>(dummy_.get(), font_.get());
 	textNode_->setAlignment(nc::TextNode::Alignment::LEFT);
-	textString_ = new nctl::String(256);
+	textString_ = nctl::makeUnique<nctl::String>(256);
 }
 
 void MyEventHandler::onFrameStart()
@@ -112,17 +112,6 @@ void MyEventHandler::onFrameStart()
 	textNode_->setString(*textString_);
 	textNode_->setPosition(0.0f, nc::theApplication().height() * VerticalTextPos - textNode_->height() * 0.5f);
 }
-
-void MyEventHandler::onShutdown()
-{
-	delete textString_;
-	delete textNode_;
-	delete dummy_;
-	delete musicPlayer_;
-	delete soundPlayer_;
-	delete audioBuffer_;
-}
-
 
 #ifdef __ANDROID__
 void MyEventHandler::onTouchUp(const nc::TouchEvent &event)

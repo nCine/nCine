@@ -4,6 +4,7 @@
 #include <cstdio> // for FILE
 #include <cstdint> // for endianness conversions
 #include "nctl/ncString.h"
+#include "nctl/UniquePtr.h"
 
 namespace ncine {
 
@@ -112,7 +113,7 @@ class DLL_PUBLIC IFile
 	}
 
 	/// Returns the proper file handle according to prepended tags
-	static IFile *createFileHandle(const char *filename);
+	static nctl::UniquePtr<IFile> createFileHandle(const char *filename);
 	/// Checks if a file can be accessed with the specified mode
 	static bool access(const char *filename, unsigned char mode);
 

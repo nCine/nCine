@@ -31,14 +31,14 @@ class DLL_PUBLIC AudioStream
 	/// Size in bytes of each streaming buffer
 	static const int BufferSize = 16 * 1024;
 	/// Memory buffer to feed OpenAL ones
-	char *memBuffer_;
+	nctl::UniquePtr<char []> memBuffer_;
 
 	/// Samples frequency
 	int frequency_;
 	/// OpenAL channel format enumeration
 	int format_;
 	/// The associated loader to continuosly stream decoded data
-	IAudioLoader *audioLoader_;
+	nctl::UniquePtr<IAudioLoader> audioLoader_;
 
 	/// Constructor creating an audio stream from an audio file
 	explicit AudioStream(const char *filename);

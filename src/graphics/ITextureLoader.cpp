@@ -25,26 +25,11 @@ ITextureLoader::ITextureLoader(const char *filename)
 
 }
 
-ITextureLoader::ITextureLoader(IFile *fileHandle)
-	: fileHandle_(fileHandle), width_(0), height_(0), bpp_(0), headerSize_(0), dataSize_(0),
-	  mipMapCount_(1), mipDataOffsets_(nullptr), mipDataSizes_(nullptr), pixels_(nullptr)
+ITextureLoader::ITextureLoader(nctl::UniquePtr<IFile> fileHandle)
+	: fileHandle_(nctl::move(fileHandle)), width_(0), height_(0),
+	  bpp_(0), headerSize_(0), dataSize_(0), mipMapCount_(1)
 {
-	ASSERT(fileHandle);
-}
 
-ITextureLoader::~ITextureLoader()
-{
-	if (pixels_)
-		delete[] pixels_;
-
-	if (mipDataSizes_)
-		delete[] mipDataSizes_;
-
-	if (mipDataOffsets_)
-		delete[] mipDataOffsets_;
-
-	if (fileHandle_)
-		delete fileHandle_;
 }
 
 ///////////////////////////////////////////////////////////
@@ -68,47 +53,47 @@ long ITextureLoader::dataSize(unsigned int mipMapLevel) const
 
 const GLubyte *ITextureLoader::pixels(unsigned int mipMapLevel) const
 {
-	GLubyte *pixels = nullptr;
+	const GLubyte *pixels = nullptr;
 
 	if (mipMapCount_ > 1)
 	{
 		if (int(mipMapLevel) < mipMapCount_)
-			pixels = pixels_ + mipDataOffsets_[mipMapLevel];
+			pixels = pixels_.get() + mipDataOffsets_[mipMapLevel];
 	}
 	else if (mipMapLevel == 0)
-		pixels = pixels_;
+		pixels = pixels_.get();
 
 	return pixels;
 }
 
-ITextureLoader *ITextureLoader::createFromFile(const char *filename)
+nctl::UniquePtr<ITextureLoader> ITextureLoader::createFromFile(const char *filename)
 {
 	// Creating a handle from IFile static method to detect assets file
-	IFile *fileHandle = IFile::createFileHandle(filename);
+	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
 	LOGI_X("Loading file: \"%s\"", fileHandle->filename());
 
 	if (fileHandle->hasExtension("dds"))
-		return new TextureLoaderDds(fileHandle);
+		return nctl::makeUnique<TextureLoaderDds>(nctl::move(fileHandle));
 	else if (fileHandle->hasExtension("pvr"))
-		return new TextureLoaderPvr(fileHandle);
+		return nctl::makeUnique<TextureLoaderPvr>(nctl::move(fileHandle));
 	else if (fileHandle->hasExtension("ktx"))
-		return new TextureLoaderKtx(fileHandle);
+		return nctl::makeUnique<TextureLoaderKtx>(nctl::move(fileHandle));
 #ifdef WITH_PNG
 	else if (fileHandle->hasExtension("png"))
-		return new TextureLoaderPng(fileHandle);
+		return nctl::makeUnique<TextureLoaderPng>(nctl::move(fileHandle));
 #endif
 #ifdef WITH_WEBP
 	else if (fileHandle->hasExtension("webp"))
-		return new TextureLoaderWebP(fileHandle);
+		return nctl::makeUnique<TextureLoaderWebP>(nctl::move(fileHandle));
 #endif
 #ifdef __ANDROID__
 	else if (fileHandle->hasExtension("pkm"))
-		return new TextureLoaderPkm(fileHandle);
+		return nctl::makeUnique<TextureLoaderPkm>(nctl::move(fileHandle));
 #endif
 	else
 	{
 		LOGF_X("Extension unknown: \"%s\"", fileHandle->extension());
-		delete fileHandle;
+		fileHandle.reset(nullptr);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -137,8 +122,8 @@ void ITextureLoader::loadPixels(GLenum internalFormat, GLenum type)
 	dataSize_ = fileHandle_->size() - headerSize_;
 	fileHandle_->seek(headerSize_, SEEK_SET);
 
-	pixels_ =  new unsigned char[dataSize_];
-	fileHandle_->read(pixels_, dataSize_);
+	pixels_ =  nctl::makeUnique<unsigned char []>(dataSize_);
+	fileHandle_->read(pixels_.get(), dataSize_);
 }
 
 }

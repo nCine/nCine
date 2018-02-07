@@ -14,7 +14,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 FileLogger::FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fileLevel)
-	: fileHandle_(nullptr), consoleLevel_(consoleLevel), fileLevel_(fileLevel)
+	: consoleLevel_(consoleLevel), fileLevel_(fileLevel)
 {
 	fileHandle_ = IFile::createFileHandle(filename);
 
@@ -43,8 +43,6 @@ FileLogger::FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fil
 FileLogger::~FileLogger()
 {
 	write(LogLevel::VERBOSE, "FileLogger::~FileLogger -> End of the log");
-	if (fileHandle_)
-		delete fileHandle_;
 }
 
 ///////////////////////////////////////////////////////////

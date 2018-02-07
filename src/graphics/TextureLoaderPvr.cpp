@@ -13,8 +13,8 @@ TextureLoaderPvr::TextureLoaderPvr(const char *filename)
 
 }
 
-TextureLoaderPvr::TextureLoaderPvr(IFile *fileHandle)
-	: ITextureLoader(fileHandle)
+TextureLoaderPvr::TextureLoaderPvr(nctl::UniquePtr<IFile> fileHandle)
+	: ITextureLoader(nctl::move(fileHandle))
 {
 	Pvr3Header header;
 
@@ -198,9 +198,9 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 	if (mipMapCount_ > 1)
 	{
 		LOGI_X("MIP Maps: %d", mipMapCount_);
-		mipDataOffsets_ = new long[mipMapCount_];
-		mipDataSizes_ = new long[mipMapCount_];
-		long int dataSizesSum = TextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_, mipDataSizes_);
+		mipDataOffsets_ = nctl::makeUnique<long []>(mipMapCount_);
+		mipDataSizes_ = nctl::makeUnique<long []>(mipMapCount_);
+		long int dataSizesSum = TextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_.get(), mipDataSizes_.get());
 		if (dataSizesSum != dataSize_)
 			LOGW_X("The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
 	}

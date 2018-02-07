@@ -69,7 +69,7 @@ void SdlGfxDevice::toggleFullScreen()
 
 void SdlGfxDevice::setWindowIcon(const char *windowIconFilename)
 {
-	ITextureLoader *image = ITextureLoader::createFromFile(windowIconFilename);
+	nctl::UniquePtr<ITextureLoader> image = ITextureLoader::createFromFile(windowIconFilename);
 	const Uint32 pixelFormat = (image->bpp() == 4) ? SDL_PIXELFORMAT_ABGR8888 : SDL_PIXELFORMAT_BGR888;
 
 	SDL_Surface *surface = nullptr;
@@ -78,7 +78,6 @@ void SdlGfxDevice::setWindowIcon(const char *windowIconFilename)
 	surface = SDL_CreateRGBSurfaceWithFormatFrom(pixels, image->width(), image->height(), image->bpp() * 8, pitch, pixelFormat);
 	SDL_SetWindowIcon(windowHandle_, surface);
 	SDL_FreeSurface(surface);
-	delete image;
 }
 
 ///////////////////////////////////////////////////////////

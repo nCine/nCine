@@ -37,11 +37,6 @@ class DLL_PUBLIC ColorAffector : public ParticleAffector
 {
   public:
 	ColorAffector() : colorSteps_(4) { }
-	~ColorAffector() override
-	{
-		for (ColorStep *colorStep : colorSteps_)
-			delete colorStep;
-	}
 
 	/// Affects the color of the specified particle
 	void affect(Particle *particle) override;
@@ -53,15 +48,11 @@ class DLL_PUBLIC ColorAffector : public ParticleAffector
 		float time;
 		Color color;
 
+		ColorStep() : time(0.0f) { }
 		ColorStep(float newTime, Color newColor) : time(newTime), color(newColor) { }
 	};
 
-	nctl::Array<ColorStep *> colorSteps_;
-
-	/// Deleted copy constructor
-	ColorAffector(const ColorAffector &) = delete;
-	/// Deleted assignment operator
-	ColorAffector &operator=(const ColorAffector &) = delete;
+	nctl::Array<ColorStep> colorSteps_;
 };
 
 /// Particle size affector
@@ -70,11 +61,6 @@ class DLL_PUBLIC SizeAffector : public ParticleAffector
   public:
 	/// Constructs a size affector with a base scale factor as a reference
 	explicit SizeAffector(float baseScale) : sizeSteps_(4), baseScale_(baseScale) { }
-	~SizeAffector() override
-	{
-		for (SizeStep *sizeStep : sizeSteps_)
-			delete sizeStep;
-	}
 
 	/// Affects the size of the specified particle
 	void affect(Particle *particle) override;
@@ -86,16 +72,12 @@ class DLL_PUBLIC SizeAffector : public ParticleAffector
 		float time;
 		float scale;
 
+		SizeStep() : time(0.0f), scale(1.0f) { }
 		SizeStep(float newTime, float newScale) : time(newTime), scale(newScale) { }
 	};
 
-	nctl::Array<SizeStep *> sizeSteps_;
+	nctl::Array<SizeStep> sizeSteps_;
 	float baseScale_;
-
-	/// Deleted copy constructor
-	SizeAffector(const SizeAffector &) = delete;
-	/// Deleted assignment operator
-	SizeAffector &operator=(const SizeAffector &) = delete;
 };
 
 }

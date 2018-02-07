@@ -1,5 +1,6 @@
 #include "JoyMapping.h"
 #include "IInputManager.h"
+#include <cstring> // for memcpy()
 #include <cstdlib> // for strtoul()
 #include "IInputEventHandler.h"
 #include "IFile.h"
@@ -154,19 +155,19 @@ void JoyMapping::addMappingsFromStrings(const char **mappingStrings)
 
 void JoyMapping::addMappingsFromFile(const char *filename)
 {
-	IFile *fileHandle = IFile::createFileHandle(filename);
+	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
 	fileHandle->open(IFile::OpenMode::READ);
 
 	const long int fileSize = fileHandle->size();
 	unsigned int fileLine = 0;
 
-	char *fileBuffer = new char[fileSize + 1];
-	fileHandle->read(fileBuffer, fileSize);
-	delete fileHandle;
+	nctl::UniquePtr<char []> fileBuffer = nctl::makeUnique<char []>(fileSize + 1);
+	fileHandle->read(fileBuffer.get(), fileSize);
+	fileHandle.reset(nullptr);
 	fileBuffer[fileSize] = '\0';
 
 	unsigned int numParsed = 0;
-	const char *buffer = fileBuffer;
+	const char *buffer = fileBuffer.get();
 	do
 	{
 		fileLine++;
@@ -184,11 +185,11 @@ void JoyMapping::addMappingsFromFile(const char *filename)
 		}
 
 	}
-	while (strchr(buffer, '\n') && (buffer = strchr(buffer, '\n') + 1) < fileBuffer + fileSize);
+	while (strchr(buffer, '\n') && (buffer = strchr(buffer, '\n') + 1) < fileBuffer.get() + fileSize);
 
 	LOGI_X("Joystick mapping file parsed: %u mappings in %u lines", numParsed, fileLine);
 
-	delete[] fileBuffer;
+	fileBuffer.reset(nullptr);
 
 	checkConnectedJoystics();
 }

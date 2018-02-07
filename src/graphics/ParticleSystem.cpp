@@ -17,9 +17,9 @@ ParticleSystem::ParticleSystem(SceneNode *parent, unsigned int count, Texture *t
 
 	for (unsigned int i = 0; i < poolSize_; i++)
 	{
-		particlePool_[i] = new Particle(nullptr, texture);
-		particlePool_[i]->setTexRect(texRect);
-		particleList_[i] = particlePool_[i];
+		particleList_[i] = nctl::UniquePtr<Particle>(new Particle(nullptr, texture));
+		particleList_[i]->setTexRect(texRect);
+		particlePool_[i] = particleList_[i].get();
 	}
 }
 
@@ -27,12 +27,6 @@ ParticleSystem::~ParticleSystem()
 {
 	// Empty the children list before the mass deletion
 	children_.clear();
-
-	for (unsigned int i = 0; i < affectors_.size(); i++)
-		delete affectors_[i];
-
-	for (unsigned int i = 0; i < poolSize_; i++)
-		delete particleList_[i];
 }
 
 ///////////////////////////////////////////////////////////
@@ -81,7 +75,7 @@ void ParticleSystem::update(float interval)
 		// Update the particle if it's alive
 		if (particle->isAlive())
 		{
-			for (ParticleAffector *affector : affectors_)
+			for (nctl::UniquePtr<ParticleAffector> &affector : affectors_)
 				affector->affect(particle);
 
 			particle->update(interval);

@@ -5,6 +5,7 @@
 #include "IInputEventHandler.h"
 #include "nctl/StaticArray.h"
 #include "Vector2.h"
+#include "nctl/UniquePtr.h"
 
 namespace nctl {
 
@@ -34,7 +35,6 @@ class MyEventHandler :
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;
-	void onShutdown() override;
 
 #ifdef __ANDROID__
 	void onTouchDown(const nc::TouchEvent &event) override;
@@ -71,14 +71,16 @@ class MyEventHandler :
 	nc::Vector2f joyVectorLeft_;
 	nc::Vector2f joyVectorRight_;
 
-	nc::SceneNode *cameraNode_;
-	nctl::StaticArray<nc::Texture *, NumTextures> textures_;
-	nctl::StaticArray<nc::Sprite *, NumSprites> sprites_;
+	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, NumTextures> textures_;
+	nctl::UniquePtr<nc::Font> font_;
+	nctl::UniquePtr<nc::SceneNode> cameraNode_;
+
+	nctl::UniquePtr<nctl::String> debugString_;
+	nctl::UniquePtr<nc::TextNode> debugtext_;
+	nctl::StaticArray<nctl::UniquePtr<nc::TextNode>, NumTexts> texts_;
+
+	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumSprites> sprites_;
 	nctl::StaticArray<nc::Vector2f, NumSprites> spritePos_;
-	nc::Font *font_;
-	nctl::StaticArray<nc::TextNode *, NumTexts> texts_;
-	nc::TextNode *debugtext_;
-	nctl::String *debugString_;
 
 	void resetCamera();
 };

@@ -14,8 +14,8 @@ AudioLoaderWav::AudioLoaderWav(const char *filename)
 
 }
 
-AudioLoaderWav::AudioLoaderWav(IFile *fileHandle)
-	: IAudioLoader(fileHandle)
+AudioLoaderWav::AudioLoaderWav(nctl::UniquePtr<IFile> fileHandle)
+	: IAudioLoader(nctl::move(fileHandle))
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);

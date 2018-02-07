@@ -64,8 +64,8 @@ void MyEventHandler::onInit()
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 	nctl::String texPath = nc::IFile::dataPath() + "textures/testformats/";
-	font_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
-	                     (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
+	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
+	                                   (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
 
 	const nc::IGfxCapabilities &gfxCaps = nc::theServiceLocator().gfxCapabilities();
 	const int maxTextureSize = gfxCaps.value(nc::IGfxCapabilities::GLIntValues::MAX_TEXTURE_SIZE);
@@ -162,32 +162,19 @@ void MyEventHandler::onInit()
 
 	FATAL_ASSERT_MSG(!filenames_.isEmpty(), "No texture file names to load");
 
-	dummy_ = new nc::SceneNode(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
-	textNode_ = new nc::TextNode(dummy_, font_);
+	dummy_ = nctl::makeUnique<nc::SceneNode>(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
+	textNode_ = nctl::makeUnique<nc::TextNode>(dummy_.get(), font_.get());
 
 	for (unsigned int i = 0; i < filenames_.size(); i++)
 	{
-		textures_[i] = new nc::Texture((texPath + filenames_[i]).data());
-		sprites_[i] = new nc::Sprite(dummy_, textures_[i]);
+		textures_[i] = nctl::makeUnique<nc::Texture>((texPath + filenames_[i]).data());
+		sprites_[i] = nctl::makeUnique<nc::Sprite>(dummy_.get(), textures_[i].get());
 		sprites_[i]->enableDraw(false);
 	}
 
 	sprites_[selected_]->enableDraw(true);
 	textNode_->setString(filenames_[selected_]);
 	textNode_->setPosition(0.0f, nc::theApplication().height() * VerticalTextPos - textNode_->height() * 0.5f);
-}
-
-void MyEventHandler::onShutdown()
-{
-	for (unsigned int i = 0; i < sprites_.size(); i++)
-		delete sprites_[i];
-
-	for (unsigned int i = 0; i < textures_.size(); i++)
-		delete textures_[i];
-
-	delete textNode_;
-	delete dummy_; // and all its children
-	delete font_;
 }
 
 #ifdef __ANDROID__

@@ -11,7 +11,7 @@ class TextureLoaderPvr : public ITextureLoader
 {
   public:
 	explicit TextureLoaderPvr(const char *filename);
-	explicit TextureLoaderPvr(IFile *fileHandle);
+	explicit TextureLoaderPvr(nctl::UniquePtr<IFile> fileHandle);
 
   private:
 	/// Header for the PVR3 format

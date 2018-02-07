@@ -17,7 +17,7 @@ class FileLogger : public ILogger
 	void write(LogLevel level, const char *fmt, ...) override;
 
   private:
-	IFile *fileHandle_;
+	nctl::UniquePtr<IFile> fileHandle_;
 	LogLevel consoleLevel_;
 	LogLevel fileLevel_;
 

@@ -30,12 +30,6 @@ AnimatedSprite::AnimatedSprite(Texture *texture, float x, float y)
 
 }
 
-AnimatedSprite::~AnimatedSprite()
-{
-	for (RectAnimation *anim : anims_)
-		delete anim;
-}
-
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -67,11 +61,11 @@ void AnimatedSprite::update(float interval)
 	Sprite::update(interval);
 }
 
-void AnimatedSprite::addAnimation(RectAnimation *anim)
+void AnimatedSprite::addAnimation(nctl::UniquePtr<RectAnimation> anim)
 {
 	ASSERT(anim);
 
-	anims_.pushBack(anim);
+	anims_.pushBack(nctl::move(anim));
 	currentAnim_ = anims_.size() - 1;
 	setTexRect(anims_[currentAnim_]->rect());
 }

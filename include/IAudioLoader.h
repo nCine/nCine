@@ -2,6 +2,7 @@
 #define CLASS_NCINE_IAUDIOLOADER
 
 #include "IFile.h"
+#include "nctl/UniquePtr.h"
 
 namespace ncine {
 
@@ -9,7 +10,7 @@ namespace ncine {
 class DLL_PUBLIC IAudioLoader
 {
   public:
-	virtual ~IAudioLoader();
+	virtual ~IAudioLoader() { }
 
 	/// Decodes audio data in a specified buffer
 	/*!
@@ -36,11 +37,11 @@ class DLL_PUBLIC IAudioLoader
 	inline unsigned long int bufferSize() const { return numSamples_ * numChannels_ * bytesPerSample_; }
 
 	/// Returns the proper audio loader according to the file extension
-	static IAudioLoader *createFromFile(const char *filename);
+	static nctl::UniquePtr<IAudioLoader> createFromFile(const char *filename);
 
   protected:
 	/// Audio file handle
-	IFile *fileHandle_;
+	nctl::UniquePtr<IFile> fileHandle_;
 
 	/// Number of bytes per sample
 	int bytesPerSample_;
@@ -55,7 +56,7 @@ class DLL_PUBLIC IAudioLoader
 	float duration_;
 
 	explicit IAudioLoader(const char *filename);
-	explicit IAudioLoader(IFile *fileHandle);
+	explicit IAudioLoader(nctl::UniquePtr<IFile> fileHandle);
 };
 
 }

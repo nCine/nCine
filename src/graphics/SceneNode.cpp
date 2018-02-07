@@ -136,7 +136,7 @@ void SceneNode::update(float interval)
 #ifndef WITH_MULTITHREADING
 			child->update(interval);
 #else
-			theServiceLocator().threadPool().enqueueCommand(new UpdateNodeCommand(*i, interval));
+			theServiceLocator().threadPool().enqueueCommand(nctl::makeUnique<UpdateNodeCommand>(*i, interval));
 #endif
 			child->transform();
 		}

@@ -85,6 +85,7 @@ bool GLShaderProgram::link()
 		return false;
 	}
 
+	// After linking, shader objects are not needed anymore
 	for (GLShader *attachedShader : attachedShaders_)
 		delete attachedShader;
 
@@ -156,7 +157,7 @@ void GLShaderProgram::discoverUniforms()
 
 void GLShaderProgram::discoverAttributes()
 {
-	int count;
+	GLint count;
 	glGetProgramiv(glHandle_, GL_ACTIVE_ATTRIBUTES, &count);
 
 	for (int i = 0; i < count; i++)

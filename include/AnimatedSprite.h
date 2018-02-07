@@ -14,7 +14,6 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	explicit AnimatedSprite(Texture *texture);
 	AnimatedSprite(SceneNode *parent, Texture *texture, float x, float y);
 	AnimatedSprite(Texture *texture, float x, float y);
-	~AnimatedSprite() override;
 
 	/// Returns true if the current animation is paused
 	bool isPaused() const;
@@ -24,7 +23,7 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	void update(float interval) override;
 
 	/// Adds a new animation
-	void addAnimation(RectAnimation *anim);
+	void addAnimation(nctl::UniquePtr<RectAnimation> anim);
 	/// Sets the current animation and its frame number
 	void setAnimation(int animNum);
 	/// Sets the current animation to a specified frame number
@@ -33,7 +32,7 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	inline static ObjectType sType() { return ObjectType::ANIMATED_SPRITE; }
 
   private:
-	nctl::Array<RectAnimation *> anims_;
+	nctl::Array<nctl::UniquePtr<RectAnimation> > anims_;
 	int currentAnim_;
 
 	/// Deleted copy constructor

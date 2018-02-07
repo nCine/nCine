@@ -11,7 +11,7 @@ class TextureLoaderKtx : public ITextureLoader
 {
   public:
 	explicit TextureLoaderKtx(const char *filename);
-	explicit TextureLoaderKtx(IFile *fileHandle);
+	explicit TextureLoaderKtx(nctl::UniquePtr<IFile> fileHandle);
 
   private:
 	static const int KtxIdentifierLength = 12;

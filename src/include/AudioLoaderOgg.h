@@ -13,7 +13,7 @@ class AudioLoaderOgg : public IAudioLoader
 {
   public:
 	explicit AudioLoaderOgg(const char *filename);
-	explicit AudioLoaderOgg(IFile *fileHandle);
+	explicit AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle);
 	~AudioLoaderOgg() override;
 
 	unsigned long int read(char *buffer, unsigned long int bufferSize) const override;

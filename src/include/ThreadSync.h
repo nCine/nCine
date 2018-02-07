@@ -2,6 +2,7 @@
 #define CLASS_NCINE_THREADSYNC
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+	#define NOGDI
 	#include <windows.h>
 	#include <process.h>
 #else

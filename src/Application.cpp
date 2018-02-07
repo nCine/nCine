@@ -43,6 +43,11 @@ Application::Application()
 
 }
 
+Application::~Application()
+{
+
+}
+
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -80,33 +85,33 @@ void Application::initCommon()
 	LOGI("nCine compiled on " __DATE__ " at " __TIME__);
 #endif
 
-	theServiceLocator().registerIndexer(new ArrayIndexer());
+	theServiceLocator().registerIndexer(nctl::makeUnique<ArrayIndexer>());
 #ifdef WITH_AUDIO
 	if (appCfg_.withAudio_)
-		theServiceLocator().registerAudioDevice(new ALAudioDevice());
+		theServiceLocator().registerAudioDevice(nctl::makeUnique<ALAudioDevice>());
 #endif
 #ifdef WITH_THREADS
 	if (appCfg_.withThreads_)
-		theServiceLocator().registerThreadPool(new ThreadPool());
+		theServiceLocator().registerThreadPool(nctl::makeUnique<ThreadPool>());
 #endif
-	theServiceLocator().registerGfxCapabilities(new GfxCapabilities());
+	theServiceLocator().registerGfxCapabilities(nctl::makeUnique<GfxCapabilities>());
 
 	LOGI_X("Data path: \"%s\"", IFile::dataPath().data());
 	LOGI_X("Save path: \"%s\"", IFile::savePath().data());
 
-	frameTimer_ = new FrameTimer(appCfg_.frameTimerLogInterval_, appCfg_.profileTextUpdateTime_);
-	profileTimer_ = new Timer();
+	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.frameTimerLogInterval_, appCfg_.profileTextUpdateTime_);
+	profileTimer_ = nctl::makeUnique<Timer>();
 
 	if (appCfg_.withScenegraph_)
 	{
 		gfxDevice_->setupGL();
 		RenderResources::create();
-		renderQueue_ = new RenderQueue();
-		rootNode_ = new SceneNode();
+		renderQueue_ = nctl::makeUnique<RenderQueue>();
+		rootNode_ = nctl::makeUnique<SceneNode>();
 
 		if (appCfg_.withProfilerGraphs_)
 		{
-			profilePlotter_ = new StackedBarPlotter(rootNode_, Rectf(width() * 0.1f, height() * 0.1f, width() * 0.8f, height() * 0.15f));
+			profilePlotter_ = nctl::makeUnique<StackedBarPlotter>(rootNode_.get(), Rectf(width() * 0.1f, height() * 0.1f, width() * 0.8f, height() * 0.15f));
 			profilePlotter_->setBackgroundColor(Color(0.35f, 0.35f, 0.45f, 0.5f));
 			profilePlotter_->addVariable(50, 0.2f);
 			profilePlotter_->variable(0).setGraphColor(Color(0.8f, 0.0f, 0.0f));
@@ -135,8 +140,8 @@ void Application::initCommon()
 				LOGW_X("Cannot access font FNT file \"%s\" to enable profiling text", fontFntFilePath.data());
 			else
 			{
-				font_ = new Font(fontTexFilePath.data(), fontFntFilePath.data());
-				textLines_ = new TextNode(rootNode_, font_);
+				font_ = nctl::makeUnique<Font>(fontTexFilePath.data(), fontFntFilePath.data());
+				textLines_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
 				textLines_->setPosition(0.0f, height());
 			}
 		}
@@ -211,20 +216,18 @@ void Application::shutdownCommon()
 {
 	appEventHandler_->onShutdown();
 	LOGI("IAppEventHandler::OnShutdown() invoked");
+	appEventHandler_.reset(nullptr);
 
-	if (appEventHandler_)
-		delete appEventHandler_;
-
-	delete textLines_;
-	delete font_;
-	delete profilePlotter_;
-	delete profileTimer_;
-	delete rootNode_; // deletes every child too
-	delete renderQueue_;
+	textLines_.reset(nullptr);
+	font_.reset(nullptr);
+	profilePlotter_.reset(nullptr);
+	profileTimer_.reset(nullptr);
+	rootNode_.reset(nullptr);
+	renderQueue_.reset(nullptr);
 	RenderResources::dispose();
-	delete frameTimer_;
-	delete inputManager_;
-	delete gfxDevice_;
+	frameTimer_.reset(nullptr);
+	inputManager_.reset(nullptr);
+	gfxDevice_.reset(nullptr);
 
 	if (theServiceLocator().indexer().isEmpty() == false)
 	{

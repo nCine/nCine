@@ -49,7 +49,7 @@ class Material
 	GLShaderProgram *shaderProgram_;
 	GLShaderUniforms shaderUniforms_;
 	GLShaderAttributes shaderAttributes_;
-	GLTexture *texture_;
+	const GLTexture *texture_;
 
 	void bind();
 	void setShaderProgram(GLShaderProgram *program);

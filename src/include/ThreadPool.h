@@ -4,11 +4,10 @@
 #include "IThreadPool.h"
 #include "nctl/List.h"
 #include "ThreadSync.h"
+#include "nctl/Array.h"
+#include "Thread.h"
 
 namespace ncine {
-
-class Thread;
-class IThreadCommand;
 
 /// Thread pool class
 class ThreadPool : public IThreadPool
@@ -21,19 +20,19 @@ class ThreadPool : public IThreadPool
 	~ThreadPool() override;
 
 	/// Enqueues a command request for a worker thread
-	void enqueueCommand(IThreadCommand *threadCommand) override;
+	void enqueueCommand(nctl::UniquePtr<IThreadCommand> threadCommand) override;
 
   private:
 	struct ThreadStruct
 	{
-		nctl::List<IThreadCommand *> *queue;
+		nctl::List<nctl::UniquePtr<IThreadCommand> > *queue;
 		Mutex *queueMutex;
 		CondVariable *queueCV;
 		bool shouldQuit;
 	};
 
-	nctl::List<IThreadCommand *> queue_;
-	Thread *threads_;
+	nctl::List<nctl::UniquePtr<IThreadCommand> > queue_;
+	nctl::Array<Thread> threads_;
 	Mutex queueMutex_;
 	CondVariable queueCV_;
 	Mutex quitMutex_;

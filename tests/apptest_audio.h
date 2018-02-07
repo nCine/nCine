@@ -3,6 +3,7 @@
 
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
+#include "nctl/UniquePtr.h"
 
 namespace nctl {
 
@@ -32,7 +33,6 @@ class MyEventHandler :
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;
-	void onShutdown() override;
 
 #ifdef __ANDROID__
 	void onTouchUp(const nc::TouchEvent &event) override;
@@ -45,13 +45,13 @@ class MyEventHandler :
 	float xPos_;
 	bool isLooping_;
 
-	nc::AudioBuffer *audioBuffer_;
-	nc::IAudioPlayer *soundPlayer_;
-	nc::IAudioPlayer *musicPlayer_;
-	nc::SceneNode *dummy_;
-	nc::Font *font_;
-	nc::TextNode *textNode_;
-	nctl::String *textString_;
+	nctl::UniquePtr<nc::AudioBuffer> audioBuffer_;
+	nctl::UniquePtr<nc::IAudioPlayer> soundPlayer_;
+	nctl::UniquePtr<nc::IAudioPlayer> musicPlayer_;
+	nctl::UniquePtr<nc::SceneNode> dummy_;
+	nctl::UniquePtr<nc::Font> font_;
+	nctl::UniquePtr<nc::TextNode> textNode_;
+	nctl::UniquePtr<nctl::String> textString_;
 
 	void toggleMusic();
 	void toggleSound();

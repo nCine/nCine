@@ -20,8 +20,8 @@ TextureLoaderKtx::TextureLoaderKtx(const char *filename)
 
 }
 
-TextureLoaderKtx::TextureLoaderKtx(IFile *fileHandle)
-	: ITextureLoader(fileHandle)
+TextureLoaderKtx::TextureLoaderKtx(nctl::UniquePtr<IFile> fileHandle)
+	: ITextureLoader(nctl::move(fileHandle))
 {
 	KtxHeader header;
 
@@ -68,9 +68,9 @@ void TextureLoaderKtx::parseFormat(const KtxHeader &header)
 	if (mipMapCount_ > 1)
 	{
 		LOGI_X("MIP Maps: %d", mipMapCount_);
-		mipDataOffsets_ = new long[mipMapCount_];
-		mipDataSizes_ = new long[mipMapCount_];
-		long int dataSizesSum = TextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_, mipDataSizes_);
+		mipDataOffsets_ = nctl::makeUnique<long []>(mipMapCount_);
+		mipDataSizes_ = nctl::makeUnique<long []>(mipMapCount_);
+		long int dataSizesSum = TextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_.get(), mipDataSizes_.get());
 
 		// HACK: accounting for `UInt32 imageSize` on top of each MIP level
 		// Excluding the first one, already taken into account in header size

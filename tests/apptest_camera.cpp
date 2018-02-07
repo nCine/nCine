@@ -52,25 +52,25 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	textures_[0] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture1File).data());
-	textures_[1] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture2File).data());
-	textures_[2] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture3File).data());
-	textures_[3] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture4File).data());
+	textures_[0] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture1File).data());
+	textures_[1] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture2File).data());
+	textures_[2] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture3File).data());
+	textures_[3] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture4File).data());
 
-	font_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
-	                     (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
+	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
+	                                   (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
 
-	cameraNode_ = new nc::SceneNode(&rootNode);
+	cameraNode_ = nctl::makeUnique<nc::SceneNode>(&rootNode);
 
-	debugString_ = new nctl::String(64);
-	debugtext_ = new nc::TextNode(&rootNode, font_);
+	debugString_ = nctl::makeUnique<nctl::String>(64);
+	debugtext_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get());
 	debugtext_->setPosition((nc::theApplication().width() - debugtext_->width()) * 0.5f,
 	                        nc::theApplication().height() - debugtext_->fontLineHeight() * 0.5f);
 	debugtext_->setColor(255, 255, 0, 255);
 
 	for (unsigned int i = 0; i < NumTexts; i++)
 	{
-		texts_[i] = new nc::TextNode(cameraNode_, font_);
+		texts_[i] = nctl::makeUnique<nc::TextNode>(cameraNode_.get(), font_.get());
 		texts_[i]->setScale(1.5f);
 		texts_[i]->setColor(0, 0, 255, 255);
 	}
@@ -99,7 +99,7 @@ void MyEventHandler::onInit()
 	{
 		const float randomX = nctl::randBetween(-ViewHalfWidth, ViewHalfWidth);
 		const float randomY = nctl::randBetween(-ViewHalfHeight, ViewHalfHeight);
-		sprites_[i] = new nc::Sprite(cameraNode_, textures_[i % NumTextures], randomX, randomY);
+		sprites_[i] = nctl::makeUnique<nc::Sprite>(cameraNode_.get(), textures_[i % NumTextures].get(), randomX, randomY);
 		sprites_[i]->setScale(0.5f);
 		spritePos_[i].set(randomX, randomY);
 	}
@@ -220,23 +220,6 @@ void MyEventHandler::onFrameStart()
 		const float moveY = scaleY * sinf(angle_ * 0.5f * t) * cosf(angle_);
 		sprites_[i]->setPosition(spritePos_[i].x + moveX, spritePos_[i].y + moveY);
 	}
-}
-
-void MyEventHandler::onShutdown()
-{
-	for (unsigned int i = 0; i < NumSprites; i++)
-		delete sprites_[i];
-
-	for (unsigned int i = 0; i < NumTexts; i++)
-		delete texts_[i];
-
-	delete debugtext_;
-	delete debugString_;
-	delete cameraNode_; // and all its children
-	delete font_;
-
-	for (unsigned int i = 0; i < NumTextures; i++)
-		delete textures_[i];
 }
 
 #ifdef __ANDROID__

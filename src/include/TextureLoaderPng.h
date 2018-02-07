@@ -11,7 +11,7 @@ class TextureLoaderPng : public ITextureLoader
 {
   public:
 	explicit TextureLoaderPng(const char *filename);
-	explicit TextureLoaderPng(IFile *fileHandle);
+	explicit TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle);
 
   private:
 	static void readFromFileHandle(png_structp pngPtr, png_bytep outBytes, png_size_t byteCountToRead);

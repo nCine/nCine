@@ -13,8 +13,8 @@ TextureLoaderPng::TextureLoaderPng(const char *filename)
 
 }
 
-TextureLoaderPng::TextureLoaderPng(IFile *fileHandle)
-	: ITextureLoader(fileHandle)
+TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
+	: ITextureLoader(nctl::move(fileHandle))
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 
@@ -43,7 +43,7 @@ TextureLoaderPng::TextureLoaderPng(IFile *fileHandle)
 	}
 
 	// Setting custom read function that uses an IFile as input
-	png_set_read_fn(pngPtr, fileHandle_, readFromFileHandle);
+	png_set_read_fn(pngPtr, fileHandle_.get(), readFromFileHandle);
 	// Telling libpng the signature has already be read
 	png_set_sig_bytes(pngPtr, SignatureLength);
 
@@ -89,16 +89,14 @@ TextureLoaderPng::TextureLoaderPng(IFile *fileHandle)
 	// Row size in bytes
 	const png_size_t bytesPerRow = png_get_rowbytes(pngPtr, infoPtr);
 
-	pixels_ = new unsigned char[bytesPerRow * height_];
+	pixels_ = nctl::makeUnique<unsigned char []>(static_cast<unsigned long>(bytesPerRow * height_));
 
-	png_bytep *rowPointers = new png_bytep[height_];
+	nctl::UniquePtr<png_bytep []> rowPointers = nctl::makeUnique<png_bytep []>(height_);
 	for (int i = 0; i < height_; i++)
-		rowPointers[i] = pixels_ + i * bytesPerRow;
+		rowPointers[i] = pixels_.get() + i * bytesPerRow;
 
 	// Decoding png data through row pointers
-	png_read_image(pngPtr, rowPointers);
-
-	delete[] rowPointers;
+	png_read_image(pngPtr, rowPointers.get());
 
 	png_destroy_read_struct(&pngPtr, &infoPtr, nullptr);
 }

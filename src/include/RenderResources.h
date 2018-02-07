@@ -3,6 +3,7 @@
 
 #include "GLBufferObject.h"
 #include "GLShaderProgram.h"
+#include "nctl/UniquePtr.h"
 
 namespace ncine {
 
@@ -24,18 +25,18 @@ class RenderResources
 	};
 
 	/// Returns the OpenGL VBO of a quad made of two triangles, used by every sprite
-	static inline const GLBufferObject *quadVbo() { return quadVbo_; }
-	static inline const GLShaderProgram *spriteShaderProgram() { return spriteShaderProgram_; }
-	static inline const GLShaderProgram *textnodeGrayShaderProgram() { return textnodeGrayShaderProgram_; }
-	static inline const GLShaderProgram *textnodeColorShaderProgram() { return textnodeColorShaderProgram_; }
-	static inline const GLShaderProgram *colorShaderProgram() { return colorShaderProgram_; }
+	static inline const GLBufferObject *quadVbo() { return quadVbo_.get(); }
+	static inline const GLShaderProgram *spriteShaderProgram() { return spriteShaderProgram_.get(); }
+	static inline const GLShaderProgram *textnodeGrayShaderProgram() { return textnodeGrayShaderProgram_.get(); }
+	static inline const GLShaderProgram *textnodeColorShaderProgram() { return textnodeColorShaderProgram_.get(); }
+	static inline const GLShaderProgram *colorShaderProgram() { return colorShaderProgram_.get(); }
 
   private:
-	static GLBufferObject *quadVbo_;
-	static GLShaderProgram *spriteShaderProgram_;
-	static GLShaderProgram *textnodeGrayShaderProgram_;
-	static GLShaderProgram *textnodeColorShaderProgram_;
-	static GLShaderProgram *colorShaderProgram_;
+	static nctl::UniquePtr<GLBufferObject> quadVbo_;
+	static nctl::UniquePtr<GLShaderProgram> spriteShaderProgram_;
+	static nctl::UniquePtr<GLShaderProgram> textnodeGrayShaderProgram_;
+	static nctl::UniquePtr<GLShaderProgram> textnodeColorShaderProgram_;
+	static nctl::UniquePtr<GLShaderProgram> colorShaderProgram_;
 
 	static void create();
 	static void dispose();

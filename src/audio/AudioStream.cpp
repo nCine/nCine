@@ -15,7 +15,7 @@ AudioStream::AudioStream(const char *filename)
 	: nextAvailALBuffer_(0), frequency_(0)
 {
 	alGenBuffers(NumBuffers, alBuffers_.data());
-	memBuffer_ = new char[BufferSize];
+	memBuffer_ = nctl::makeUnique<char []>(BufferSize);
 
 	audioLoader_ = IAudioLoader::createFromFile(filename);
 	frequency_ = audioLoader_->frequency();
@@ -30,8 +30,6 @@ AudioStream::AudioStream(const char *filename)
 
 AudioStream::~AudioStream()
 {
-	delete audioLoader_;
-	delete[] memBuffer_;
 	alDeleteBuffers(NumBuffers, alBuffers_.data());
 }
 
@@ -64,7 +62,7 @@ bool AudioStream::enqueue(unsigned int source, bool looping)
 	{
 		ALuint currentBuffer = alBuffers_[nextAvailALBuffer_];
 
-		long bytes = audioLoader_->read(memBuffer_, BufferSize);
+		long bytes = audioLoader_->read(memBuffer_.get(), BufferSize);
 
 		// EOF reached
 		if (bytes < BufferSize)
@@ -72,7 +70,7 @@ bool AudioStream::enqueue(unsigned int source, bool looping)
 			if (looping)
 			{
 				audioLoader_->rewind();
-				long moreBytes = audioLoader_->read(memBuffer_ + bytes, BufferSize - bytes);
+				long moreBytes = audioLoader_->read(memBuffer_.get() + bytes, BufferSize - bytes);
 				bytes += moreBytes;
 			}
 		}
@@ -81,7 +79,7 @@ bool AudioStream::enqueue(unsigned int source, bool looping)
 		if (bytes > 0)
 		{
 			// On iOS alBufferDataStatic could be used instead
-			alBufferData(currentBuffer, format_, memBuffer_, bytes, frequency_);
+			alBufferData(currentBuffer, format_, memBuffer_.get(), bytes, frequency_);
 			alSourceQueueBuffers(source, 1, &currentBuffer);
 			nextAvailALBuffer_++;
 		}

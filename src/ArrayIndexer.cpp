@@ -39,7 +39,7 @@ unsigned int ArrayIndexer::addObject(Object *object)
 
 void ArrayIndexer::removeObject(unsigned int id)
 {
-	// setting to `nullptrptr` instead of physically removing
+	// setting to `nullptr` instead of physically removing
 	if (id < pointers_.size() && pointers_[id] != nullptr)
 	{
 		pointers_[id] = nullptr;

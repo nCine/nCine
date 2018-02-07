@@ -35,21 +35,21 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	multitouchString_ = new nctl::String(MaxNumChars);
+	multitouchString_ = nctl::makeUnique<nctl::String>(unsigned(MaxNumChars));
 
 #ifdef __ANDROID__
-	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/" + TextureFile).data());
+	texture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + TextureFile).data());
 	for (unsigned int i = 0; i < nc::TouchEvent::MaxPointers; i++)
 	{
-		sprites_[i] = new nc::Sprite(&rootNode, texture_);
+		sprites_[i] = nctl::makeUnique<nc::Sprite>(&rootNode, texture_.get());
 		sprites_[i]->setScale(0.5f);
 		sprites_[i]->enableDraw(false);
 	}
 #endif
 
-	font_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
-	                     (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
-	textNode_ = new nc::TextNode(&rootNode, font_, MaxNumChars);
+	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
+	                                   (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
+	textNode_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get(), unsigned(MaxNumChars));
 	textNode_->setScale(0.85f);
 
 #ifdef __ANDROID__
@@ -64,20 +64,6 @@ void MyEventHandler::onFrameStart()
 	textNode_->setString(*multitouchString_);
 	textNode_->setPosition(nc::theApplication().width() * 0.1f + textNode_->width() * 0.5f,
 	                       nc::theApplication().height() * VerticalTextPos - textNode_->height() * 0.5f);
-}
-
-void MyEventHandler::onShutdown()
-{
-	delete textNode_;
-	delete font_;
-
-#ifdef __ANDROID__
-	for (unsigned int i = 0; i < nc::TouchEvent::MaxPointers; i++)
-		delete sprites_[i];
-	delete texture_;
-#endif
-
-	delete multitouchString_;
 }
 
 #ifdef __ANDROID__

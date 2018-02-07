@@ -67,7 +67,7 @@ void Material::setShaderProgram(GLShaderProgram *program)
 
 void Material::setTexture(const Texture &texture)
 {
-	texture_ = texture.glTexture_;
+	texture_ = texture.glTexture_.get();
 }
 
 ///////////////////////////////////////////////////////////

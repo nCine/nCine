@@ -62,7 +62,7 @@ class DLL_PUBLIC Texture : public Object
 	inline static ObjectType sType() { return ObjectType::TEXTURE; }
 
   private:
-	GLTexture *glTexture_;
+	nctl::UniquePtr<GLTexture> glTexture_;
 	int width_;
 	int height_;
 	int mipMapLevels_;

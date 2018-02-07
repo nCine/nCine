@@ -202,12 +202,12 @@ const char *AndroidApplication::obbPath() const
 
 void AndroidApplication::preInit()
 {
-	appEventHandler_ = createAppEventHandler_();
+	appEventHandler_ = nctl::UniquePtr<IAppEventHandler>(createAppEventHandler_());
 	appEventHandler_->onPreInit(appCfg_);
 
 	// Registering the logger as early as possible
 	const nctl::String logFilePath = IFile::dataPath() + appCfg_.logFile_;
-	theServiceLocator().registerLogger(new FileLogger(logFilePath.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
+	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(logFilePath.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
 }
 
 void AndroidApplication::init()
@@ -218,9 +218,9 @@ void AndroidApplication::init()
 	IGfxDevice::GLContextInfo contextInfo(appCfg_.glMajorVersion_, appCfg_.glMinorVersion_, appCfg_.glDebugContext_);
 
 	if (EglGfxDevice::isModeSupported(state_, contextInfo, displayMode32))
-		gfxDevice_ = new EglGfxDevice(state_, contextInfo, displayMode32);
+		gfxDevice_ = nctl::makeUnique<EglGfxDevice>(state_, contextInfo, displayMode32);
 	else if (EglGfxDevice::isModeSupported(state_, contextInfo, displayMode16))
-		gfxDevice_ = new EglGfxDevice(state_, contextInfo, displayMode16);
+		gfxDevice_ = nctl::makeUnique<EglGfxDevice>(state_, contextInfo, displayMode16);
 	else
 	{
 		LOGF("Cannot find a suitable EGL configuration, graphics device not created");
@@ -228,7 +228,7 @@ void AndroidApplication::init()
 	}
 
 	AndroidJniHelper::attachJVM(state_);
-	inputManager_ = new AndroidInputManager(state_);
+	inputManager_ = nctl::makeUnique<AndroidInputManager>(state_);
 	AssetFile::initAssetManager(state_);
 
 	Application::initCommon();

@@ -1,3 +1,4 @@
+#include <cstring>
 #include "common_macros.h"
 #include "AndroidJniHelper.h"
 

@@ -1,6 +1,7 @@
 #include <android_native_app_glue.h>
 #include <android/input.h>
 #include <android/sensor.h>
+#include <cstring> // for memset()
 
 #include "AndroidInputManager.h"
 #include "IInputEventHandler.h"

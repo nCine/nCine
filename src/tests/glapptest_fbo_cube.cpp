@@ -108,7 +108,7 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 
 void MyEventHandler::onInit()
 {
-	colorProgram_ = new nc::GLShaderProgram();
+	colorProgram_ = nctl::makeUnique<nc::GLShaderProgram>();
 #ifndef WITH_EMBEDDED_SHADERS
 	colorProgram_->attachShader(GL_VERTEX_SHADER, (nc::IFile::dataPath() + "shaders/vcolor_vs.glsl").data());
 	colorProgram_->attachShader(GL_FRAGMENT_SHADER, (nc::IFile::dataPath() + "shaders/vcolor_fs.glsl").data());
@@ -120,10 +120,10 @@ void MyEventHandler::onInit()
 	colorProgram_->bindAttribLocation(ATTRIB_COLOR, "aColor");
 	colorProgram_->link();
 	colorProgram_->use();
-	colorUniforms_ = new nc::GLShaderUniforms(colorProgram_);
-	colorAttributes_ = new nc::GLShaderAttributes(colorProgram_);
+	colorUniforms_ = nctl::makeUnique<nc::GLShaderUniforms>(colorProgram_.get());
+	colorAttributes_ = nctl::makeUnique<nc::GLShaderAttributes>(colorProgram_.get());
 
-	texProgram_ = new nc::GLShaderProgram();
+	texProgram_ = nctl::makeUnique<nc::GLShaderProgram>();
 #ifndef WITH_EMBEDDED_SHADERS
 	texProgram_->attachShader(GL_VERTEX_SHADER, (nc::IFile::dataPath() + "shaders/texture_vs.glsl").data());
 	texProgram_->attachShader(GL_FRAGMENT_SHADER, (nc::IFile::dataPath() + "shaders/texture_fs.glsl").data());
@@ -135,35 +135,35 @@ void MyEventHandler::onInit()
 	texProgram_->bindAttribLocation(ATTRIB_TEXCOORDS, "aTexCoords");
 	texProgram_->link();
 	texProgram_->use();
-	texUniforms_ = new nc::GLShaderUniforms(texProgram_);
+	texUniforms_ = nctl::makeUnique<nc::GLShaderUniforms>(texProgram_.get());
 	texUniforms_->uniform("texture")->setIntValue(0);
 	texUniforms_->uniform("color")->setFloatValue(1.0f, 1.0f, 1.0f, 1.0f);
-	texAttributes_ = new nc::GLShaderAttributes(texProgram_);
+	texAttributes_ = nctl::makeUnique<nc::GLShaderAttributes>(texProgram_.get());
 
 
-	texture_ = new nc::GLTexture(GL_TEXTURE_2D);
+	texture_ = nctl::makeUnique<nc::GLTexture>(GL_TEXTURE_2D);
 	texture_->texImage2D(0, GL_RGB, FboSize, FboSize, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 	texture_->texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	fbo_ = new nc::GLFramebufferObject();
+	fbo_ = nctl::makeUnique<nc::GLFramebufferObject>();
 	fbo_->attachTexture(*texture_, GL_COLOR_ATTACHMENT0);
 	fbo_->attachRenderbuffer(GL_DEPTH_COMPONENT16, FboSize, FboSize, GL_DEPTH_ATTACHMENT);
 	if (fbo_->isStatusComplete() == false)
 		LOGE("Framebuffer object status is not complete\n");
 
-	vboTri_ = new nc::GLBufferObject(GL_ARRAY_BUFFER);
+	vboTri_ = nctl::makeUnique<nc::GLBufferObject>(GL_ARRAY_BUFFER);
 	vboTri_->bufferData(sizeof(triVertices), triVertices, GL_STATIC_DRAW);
 	colorAttributes_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatCol), reinterpret_cast<void *>(offsetof(VertexFormatCol, position)));
 	colorAttributes_->attribute("aColor")->setVboParameters(sizeof(VertexFormatCol), reinterpret_cast<void *>(offsetof(VertexFormatCol, color)));
-	colorAttributes_->defineVertexPointers(vboTri_);
+	colorAttributes_->defineVertexPointers(vboTri_.get());
 
-	vboCube_ = new nc::GLBufferObject(GL_ARRAY_BUFFER);
+	vboCube_ = nctl::makeUnique<nc::GLBufferObject>(GL_ARRAY_BUFFER);
 	vboCube_->bufferData(sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
 	texAttributes_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatTex), reinterpret_cast<void *>(offsetof(VertexFormatTex, position)));
 	texAttributes_->attribute("aTexCoords")->setVboParameters(sizeof(VertexFormatTex), reinterpret_cast<void *>(offsetof(VertexFormatTex, texcoords)));
-	texAttributes_->defineVertexPointers(vboCube_);
+	texAttributes_->defineVertexPointers(vboCube_.get());
 
-	iboCube_ = new nc::GLBufferObject(GL_ELEMENT_ARRAY_BUFFER);
+	iboCube_ = nctl::makeUnique<nc::GLBufferObject>(GL_ELEMENT_ARRAY_BUFFER);
 	iboCube_->bufferData(sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
 
 	width_ = nc::theApplication().widthInt();
@@ -215,21 +215,6 @@ void MyEventHandler::onFrameStart()
 	glDrawElements(GL_TRIANGLES, 12 * 3, GL_UNSIGNED_SHORT, 0);
 
 	angle_ += 20.0f * nc::theApplication().interval();
-}
-
-void MyEventHandler::onShutdown()
-{
-	delete iboCube_;
-	delete vboCube_;
-	delete vboTri_;
-	delete fbo_;
-	delete texture_;
-	delete texAttributes_;
-	delete texUniforms_;
-	delete texProgram_;
-	delete colorAttributes_;
-	delete colorUniforms_;
-	delete colorProgram_;
 }
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)

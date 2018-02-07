@@ -14,8 +14,8 @@ TextureLoaderPkm::TextureLoaderPkm(const char *filename)
 
 }
 
-TextureLoaderPkm::TextureLoaderPkm(IFile *fileHandle)
-	: ITextureLoader(fileHandle)
+TextureLoaderPkm::TextureLoaderPkm(nctl::UniquePtr<IFile> fileHandle)
+	: ITextureLoader(nctl::move(fileHandle))
 {
 	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 

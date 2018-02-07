@@ -46,16 +46,16 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	joyString_ = new nctl::String(MaxNumChars);
-	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/" + TextureFile).data());
+	joyString_ = nctl::makeUnique<nctl::String>(unsigned(MaxNumChars));
+	texture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + TextureFile).data());
 
 	const float appWidth = nc::theApplication().width();
 	const float appHeight = nc::theApplication().height();
 
-	joyNode_ = new nc::SceneNode(&rootNode, appWidth * 0.5f, appHeight * 0.65f);
+	joyNode_ = nctl::makeUnique<nc::SceneNode>(&rootNode, appWidth * 0.5f, appHeight * 0.65f);
 	joyNode_->setScale(1.33f);
 	for (unsigned int i = 0; i < NumSprites; i++)
-		sprites_[i] = new nc::Sprite(joyNode_, texture_);
+		sprites_[i] = nctl::makeUnique<nc::Sprite>(joyNode_.get(), texture_.get());
 
 	sprites_[0]->setPosition(appWidth * -triggerPosX, 0.0f); // Left stick
 	sprites_[1]->setPosition(appWidth * triggerPosX * 0.5f, -appWidth * 0.075f); // Right stick
@@ -87,9 +87,9 @@ void MyEventHandler::onInit()
 	sprites_[11]->setScale(guideUnpressedSize);
 	sprites_[12]->setScale(startUnpressedSize);
 
-	font_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
-	                     (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
-	textNode_ = new nc::TextNode(&rootNode, font_, MaxNumChars);
+	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
+	                                   (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
+	textNode_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get(), unsigned(MaxNumChars));
 	textNode_->setScale(0.85f);
 
 	for (int i = 0; i < nc::IInputManager::MaxNumJoysticks; i++)
@@ -199,17 +199,6 @@ void MyEventHandler::onFrameStart()
 	sprites_[10]->setScale(backPressed ? startPressedSize : startUnpressedSize);
 	sprites_[11]->setScale(guidePressed ? guidePressedSize : guideUnpressedSize);
 	sprites_[12]->setScale(startPressed ? startPressedSize : startUnpressedSize);
-}
-
-void MyEventHandler::onShutdown()
-{
-	delete textNode_;
-	delete font_;
-	for (unsigned int i = 0; i < NumSprites; i++)
-		delete sprites_[i];
-	delete joyNode_;
-	delete texture_;
-	delete joyString_;
 }
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)

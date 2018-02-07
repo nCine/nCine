@@ -38,15 +38,15 @@ void MyEventHandler::onInit()
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	textures_[0] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture1File).data());
-	textures_[1] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture2File).data());
-	textures_[2] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture3File).data());
-	textures_[3] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture4File).data());
+	textures_[0] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture1File).data());
+	textures_[1] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture2File).data());
+	textures_[2] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture3File).data());
+	textures_[3] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture4File).data());
 
 	const float width = nc::theApplication().width();
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
-		sprites_[i] = new nc::Sprite(&rootNode, textures_[i % NumTextures], width * 0.15f + width * 0.1f * i, 0.0f);
+		sprites_[i] = nctl::makeUnique<nc::Sprite>(&rootNode, textures_[i % NumTextures].get(), width * 0.15f + width * 0.1f * i, 0.0f);
 		sprites_[i]->setScale(0.5f);
 	}
 }
@@ -67,13 +67,6 @@ void MyEventHandler::onFrameStart()
 		sprites_[i]->y = height * 0.3f + fabsf(sinf(angle_ + 5.0f * i)) * (height * (0.25f + 0.02f * i));
 		sprites_[i]->setRotation(angle_ * 20);
 	}
-}
-
-void MyEventHandler::onShutdown()
-{
-	delete sprites_[0]; // and all its children (the remaining sprites)
-	for (unsigned int i = 0; i < NumTextures; i++)
-		delete textures_[i];
 }
 
 #ifdef __ANDROID__

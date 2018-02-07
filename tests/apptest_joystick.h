@@ -4,6 +4,7 @@
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
 #include "nctl/StaticArray.h"
+#include "nctl/UniquePtr.h"
 
 namespace nctl {
 
@@ -33,7 +34,6 @@ class MyEventHandler :
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;
-	void onShutdown() override;
 
 	void onKeyReleased(const nc::KeyboardEvent &event) override;
 
@@ -43,14 +43,14 @@ class MyEventHandler :
 	static const unsigned int MaxNumButtons = 20;
 	nctl::StaticArray<unsigned char, MaxNumButtons> buttonStates_;
 	static const unsigned int MaxNumChars = 384;
-	nctl::String *joyString_;
+	nctl::UniquePtr<nctl::String> joyString_;
 
-	nc::Texture *texture_;
-	nc::SceneNode *joyNode_;
+	nctl::UniquePtr<nc::Texture> texture_;
+	nctl::UniquePtr<nc::SceneNode> joyNode_;
 	static const unsigned int NumSprites = 13;
-	nctl::StaticArray<nc::Sprite *, NumSprites> sprites_;
-	nc::Font *font_;
-	nc::TextNode *textNode_;
+	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumSprites> sprites_;
+	nctl::UniquePtr<nc::Font> font_;
+	nctl::UniquePtr<nc::TextNode> textNode_;
 };
 
 #endif

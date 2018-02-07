@@ -4,6 +4,7 @@
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
 #include "nctl/StaticArray.h"
+#include "nctl/UniquePtr.h"
 
 namespace nctl {
 
@@ -32,7 +33,6 @@ class MyEventHandler :
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;
-	void onShutdown() override;
 
 #ifdef __ANDROID__
 	void handleEvent(const nc::TouchEvent &event, nctl::String *string, const char *eventName);
@@ -47,14 +47,14 @@ class MyEventHandler :
 
   private:
 	static const unsigned int MaxNumChars = 1024;
-	nctl::String *multitouchString_;
+	nctl::UniquePtr<nctl::String> multitouchString_;
 
 #ifdef __ANDROID__
-	nc::Texture *texture_;
-	nctl::StaticArray<nc::Sprite *, nc::TouchEvent::MaxPointers> sprites_;
+	nctl::UniquePtr<nc::Texture> texture_;
+	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, nc::TouchEvent::MaxPointers> sprites_;
 #endif
-	nc::Font *font_;
-	nc::TextNode *textNode_;
+	nctl::UniquePtr<nc::Font> font_;
+	nctl::UniquePtr<nc::TextNode> textNode_;
 };
 
 #endif

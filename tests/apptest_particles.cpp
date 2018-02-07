@@ -42,25 +42,25 @@ void MyEventHandler::onInit()
 	application.enableAccelerometer(true);
 #endif
 
-	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/" + TextureFile).data());
-	particleSystem_ = new nc::ParticleSystem(&rootNode, NumParticles, texture_, texture_->rect());
+	texture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + TextureFile).data());
+	particleSystem_ = nctl::makeUnique<nc::ParticleSystem>(&rootNode, unsigned(NumParticles), texture_.get(), texture_->rect());
 	particleSystem_->setPosition(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.33f);
 
-	// particleSystem_->addAffector(new nc::AccelerationAffector(0.2f, 0.0f));
-	nc::ColorAffector *colAffector = new nc::ColorAffector();
+	//particleSystem_->addAffector(nctl::makeUnique<nc::AccelerationAffector>(0.2f, 0.0f));
+	nctl::UniquePtr<nc::ColorAffector> colAffector = nctl::makeUnique<nc::ColorAffector>();
 	colAffector->addColorStep(0.0f, nc::Color(0.86f, 0.39f, 0.0f, 0.75f));
 	colAffector->addColorStep(0.65f, nc::Color(0.86f, 0.59f, 0.0f, 0.8f));
 	colAffector->addColorStep(0.7f, nc::Color(0.86f, 0.7f, 0.0f, 0.65f));
 	colAffector->addColorStep(1.0f, nc::Color(0.0f, 0.0f, 1.0f, 0.9f));
-	particleSystem_->addAffector(colAffector);
-	nc::SizeAffector *sizeAffector = new nc::SizeAffector(0.45f);
+	particleSystem_->addAffector(nctl::move(colAffector));
+	nctl::UniquePtr<nc::SizeAffector> sizeAffector = nctl::makeUnique<nc::SizeAffector>(0.45f);
 	sizeAffector->addSizeStep(0.0f, 0.01f);
 	sizeAffector->addSizeStep(0.7f, 1.7f);
 	sizeAffector->addSizeStep(1.0f, 0.4f);
-	particleSystem_->addAffector(sizeAffector);
+	particleSystem_->addAffector(nctl::move(sizeAffector));
 	emitVector_.set(0.0f, 350.0f);
 
-	emitTimer_ = new nc::Timer();
+	emitTimer_ = nctl::makeUnique<nc::Timer>();
 	emitTimer_->start();
 
 	joyVectorLeft_ = nc::Vector2f::Zero;
@@ -97,13 +97,6 @@ void MyEventHandler::onFrameStart()
 		emitVector_.y += KeySpeed * nc::theApplication().interval();
 	else if (keyState.isKeyDown(nc::KeySym::DOWN))
 		emitVector_.y -= KeySpeed * nc::theApplication().interval();
-}
-
-void MyEventHandler::onShutdown()
-{
-	delete emitTimer_;
-	delete particleSystem_;
-	delete texture_;
 }
 
 #ifdef __ANDROID__

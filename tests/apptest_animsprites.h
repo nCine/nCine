@@ -4,6 +4,7 @@
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
 #include "Vector2.h"
+#include "nctl/UniquePtr.h"
 
 namespace ncine {
 
@@ -24,7 +25,6 @@ class MyEventHandler :
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;
-	void onShutdown() override;
 
 #ifdef __ANDROID__
 	void onTouchDown(const nc::TouchEvent &event) override;
@@ -38,8 +38,8 @@ class MyEventHandler :
 	void onJoyDisconnected(const nc::JoyConnectionEvent &event) override;
 
   private:
-	nc::Texture *texture_;
-	nc::AnimatedSprite *animSprite_;
+	nctl::UniquePtr<nc::Texture> texture_;
+	nctl::UniquePtr<nc::AnimatedSprite> animSprite_;
 	nc::Vector2f destVector_;
 	nc::Vector2f joyVector_;
 };

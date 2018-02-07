@@ -60,15 +60,15 @@ bool IFile::hasExtension(const char *extension) const
 	return extension_ == extension;
 }
 
-IFile *IFile::createFileHandle(const char *filename)
+nctl::UniquePtr<IFile> IFile::createFileHandle(const char *filename)
 {
 	ASSERT(filename);
 #ifdef __ANDROID__
 	if (strncmp(filename, static_cast<const char *>("asset::"), 7) == 0)
-		return new AssetFile(filename + 7);
+		return nctl::makeUnique<AssetFile>(filename + 7);
 	else
 #endif
-		return new StandardFile(filename);
+		return nctl::makeUnique<StandardFile>(filename);
 }
 
 bool IFile::access(const char *filename, unsigned char mode)

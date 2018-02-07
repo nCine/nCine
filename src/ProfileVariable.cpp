@@ -9,19 +9,13 @@ namespace ncine {
 
 ProfileVariable::ProfileVariable(unsigned int numValues, float rejectDelay)
 	: numValues_(numValues), rejectDelay_(rejectDelay), nextIndex_(0),
-	  min_(0.0f), max_(0.0f), mean_(0.0f), isFirstValue_(true)
+	  min_(0.0f), max_(0.0f), mean_(0.0f), isFirstValue_(true),
+	  values_(numValues, nctl::ArrayMode::FIXED_CAPACITY)
 {
 	FATAL_ASSERT_MSG(numValues > 0, "Array size should be greater than zero");
 
-	values_ = new float[numValues_];
 	for (unsigned int i = 0; i < numValues_; i++)
 		values_[i] = 0.0f;
-}
-
-ProfileVariable::~ProfileVariable()
-{
-	if (values_)
-		delete[] values_;
 }
 
 ///////////////////////////////////////////////////////////

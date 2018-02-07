@@ -32,12 +32,11 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/" + TextureFile).data());
-	animSprite_ = new nc::AnimatedSprite(&rootNode, texture_);
+	texture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + TextureFile).data());
+	animSprite_ = nctl::makeUnique<nc::AnimatedSprite>(&rootNode, texture_.get());
 	// Down
-	nc::RectAnimation *animation = new nc::RectAnimation(0.12f,
-	                                                     nc::RectAnimation::LoopMode::ENABLED,
-	                                                     nc::RectAnimation::RewindMode::FROM_START);
+	nctl::UniquePtr<nc::RectAnimation> animation = nctl::makeUnique<nc::RectAnimation>
+		(0.12f, nc::RectAnimation::LoopMode::ENABLED, nc::RectAnimation::RewindMode::FROM_START);
 	animation->addRect(0, 0, 48, 48);
 	animation->addRect(48, 0, 48, 48);
 	animation->addRect(96, 0, 48, 48);
@@ -46,7 +45,7 @@ void MyEventHandler::onInit()
 	animation->addRect(48, 48, 48, 48);
 	animation->addRect(96, 48, 48, 48);
 	animation->addRect(144, 48, 48, 48);
-	animSprite_->addAnimation(animation);
+	animSprite_->addAnimation(nctl::move(animation));
 
 	animSprite_->setPosition(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	animSprite_->setAnimation(0);
@@ -114,12 +113,6 @@ void MyEventHandler::onFrameStart()
 		animSprite_->setFrame(0);
 		animSprite_->setPaused(true);
 	}
-}
-
-void MyEventHandler::onShutdown()
-{
-	delete animSprite_;
-	delete texture_;
 }
 
 #ifdef __ANDROID__

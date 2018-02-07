@@ -46,8 +46,8 @@ AudioLoaderOgg::AudioLoaderOgg(const char *filename)
 
 }
 
-AudioLoaderOgg::AudioLoaderOgg(IFile *fileHandle)
-	: IAudioLoader(fileHandle)
+AudioLoaderOgg::AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle)
+	: IAudioLoader(nctl::move(fileHandle))
 {
 	vorbis_info *info;
 
@@ -61,7 +61,7 @@ AudioLoaderOgg::AudioLoaderOgg(IFile *fileHandle)
 	{
 		fileHandle_->open(IFile::OpenMode::FD | IFile::OpenMode::READ);
 
-		if (ov_open_callbacks(fileHandle_, &oggFile_, nullptr, 0, oggCallbacks) != 0)
+		if (ov_open_callbacks(fileHandle_.get(), &oggFile_, nullptr, 0, oggCallbacks) != 0)
 		{
 			LOGF_X("Cannot open \"%s\" with ov_open_callbacks()", fileHandle_->filename());
 			fileHandle_->close();

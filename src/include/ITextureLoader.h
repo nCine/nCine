@@ -11,7 +11,7 @@ namespace ncine {
 class ITextureLoader
 {
   public:
-	virtual ~ITextureLoader();
+	virtual ~ITextureLoader() { }
 
 	/// Returns texture width
 	inline int width() const { return width_; }
@@ -30,16 +30,16 @@ class ITextureLoader
 	/// Returns the texture format object
 	inline const TextureFormat &texFormat() const { return texFormat_; }
 	/// Returns the pointer to pixel data
-	inline const GLubyte *pixels() const { return pixels_; }
+	inline const GLubyte *pixels() const { return pixels_.get(); }
 	/// Returns the pointer to pixel data for the specified MIP map level
 	const GLubyte *pixels(unsigned int mipMapLevel) const;
 
 	/// Returns the proper texture loader according to the file extension
-	static ITextureLoader *createFromFile(const char *filename);
+	static nctl::UniquePtr<ITextureLoader> createFromFile(const char *filename);
 
   protected:
 	/// Texture file handle
-	IFile *fileHandle_;
+	nctl::UniquePtr<IFile> fileHandle_;
 
 	int width_;
 	int height_;
@@ -47,13 +47,13 @@ class ITextureLoader
 	int headerSize_;
 	long dataSize_;
 	int mipMapCount_;
-	long *mipDataOffsets_;
-	long *mipDataSizes_;
+	nctl::UniquePtr<long []> mipDataOffsets_;
+	nctl::UniquePtr<long []> mipDataSizes_;
 	TextureFormat texFormat_;
-	GLubyte *pixels_;
+	nctl::UniquePtr<GLubyte []> pixels_;
 
 	explicit ITextureLoader(const char *filename);
-	explicit ITextureLoader(IFile *fileHandle);
+	explicit ITextureLoader(nctl::UniquePtr<IFile> fileHandle);
 
 	/// Loads pixel data from a texture file holding either compressed or uncompressed data
 	void loadPixels(GLenum internalFormat);

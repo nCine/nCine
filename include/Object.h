@@ -60,7 +60,7 @@ class DLL_PUBLIC Object
 	unsigned int id_;
 
 	/// Object name
-	/*! This field is currently only useful in debug,
+	/*! \note This field is currently only useful in debug,
 	 *  as there is still no string hashing based search. */
 	nctl::String name_;
 

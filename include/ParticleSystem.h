@@ -21,7 +21,7 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	~ParticleSystem() override;
 
 	/// Adds a particle affector
-	void addAffector(ParticleAffector *affector) { affectors_.pushBack(affector); }
+	void addAffector(nctl::UniquePtr<ParticleAffector> affector) { affectors_.pushBack(nctl::move(affector)); }
 	/// Emits an amount of particles with a specified initial life and velocity
 	void emitParticles(unsigned int amount, float life, const Vector2f &vel);
 
@@ -42,10 +42,10 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	/// The pool containing available particles (only dead ones)
 	nctl::Array<Particle *> particlePool_;
 	/// The array containing every particle (dead or alive)
-	nctl::Array<Particle *> particleList_;
+	nctl::Array<nctl::UniquePtr<Particle> > particleList_;
 
 	/// The array of particle affectors
-	nctl::Array<ParticleAffector *> affectors_;
+	nctl::Array<nctl::UniquePtr<ParticleAffector> > affectors_;
 
 	/// A flag indicating whether the system should be simulated in local space
 	bool inLocalSpace_;

@@ -5,6 +5,7 @@
 #include "IInputEventHandler.h"
 #include "nctl/StaticArray.h"
 #include "nctl/ncString.h"
+#include "nctl/UniquePtr.h"
 
 namespace ncine {
 
@@ -27,7 +28,6 @@ class MyEventHandler :
   public:
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
-	void onShutdown() override;
 
 #ifdef __ANDROID__
 	void onTouchUp(const nc::TouchEvent &event) override;
@@ -54,12 +54,12 @@ class MyEventHandler :
 	static float scale_;
 	static float newScale_;
 
-	nc::SceneNode *dummy_;
+	nctl::UniquePtr<nc::Font> font_;
+	nctl::UniquePtr<nc::SceneNode> dummy_;
+	nctl::UniquePtr<nc::TextNode> textNode_;
 	nctl::StaticArray<nctl::String, MaxTexFormats> filenames_;
-	nctl::StaticArray<nc::Texture *, MaxTexFormats> textures_;
-	nctl::StaticArray<nc::Sprite *, MaxTexFormats> sprites_;
-	nc::Font *font_;
-	nc::TextNode *textNode_;
+	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, MaxTexFormats> textures_;
+	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, MaxTexFormats> sprites_;
 
 	void handleInput(Direction direction);
 	void handleCoordInput(float x, float y);

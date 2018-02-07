@@ -19,9 +19,7 @@ class DLL_PUBLIC Font : public Object
 	~Font() override;
 
 	/// Gets the texture object
-	inline const Texture *texture() const { return texture_; }
-	/// Sets the texture object
-	void setTexture(Texture *texture);
+	inline const Texture *texture() const { return texture_.get(); }
 
 	/// Returns font line height
 	inline unsigned int lineHeight() const { return lineHeight_; }
@@ -38,7 +36,7 @@ class DLL_PUBLIC Font : public Object
 
   private:
 	/// The font texture
-	Texture *texture_;
+	nctl::UniquePtr<Texture> texture_;
 	/// Font line height
 	unsigned int lineHeight_;
 	/// Font base
@@ -55,7 +53,7 @@ class DLL_PUBLIC Font : public Object
 	/// Maximum number of glyphs in a font
 	static const unsigned int MaxGlyphs = 256;
 	/// Array of font glyphs
-	FontGlyph *glyphs_;
+	nctl::UniquePtr<FontGlyph []> glyphs_;
 
 	/// Deleted copy constructor
 	Font(const Font &) = delete;

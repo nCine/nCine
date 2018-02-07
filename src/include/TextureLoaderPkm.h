@@ -11,8 +11,7 @@ class TextureLoaderPkm : public ITextureLoader
 {
   public:
 	explicit TextureLoaderPkm(const char *filename);
-	explicit TextureLoaderPkm(IFile *fileHandle);
-	~TextureLoaderPkm() { }
+	explicit TextureLoaderPkm(nctl::UniquePtr<IFile> fileHandle);
 
   private:
 	/// Header for the PKM header
