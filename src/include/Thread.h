@@ -2,6 +2,7 @@
 #define CLASS_NCINE_THREAD
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+	#define NOGDI
 	#include <windows.h>
 	#include <process.h>
 #else
@@ -50,7 +51,7 @@ class ThreadAffinityMask
 class Thread
 {
   public:
-	typedef void (*ThreadFunctionPtr)(void *);
+	using ThreadFunctionPtr = void (*)(void *);
 
 	/// A default constructor for an object without the associated function
 	Thread();
@@ -86,7 +87,7 @@ class Thread
 	/// The structure wrapping the information for thread creation
 	struct ThreadInfo
 	{
-		ThreadInfo() : startFunction(NULL), threadArg(NULL) { }
+		ThreadInfo() : startFunction(nullptr), threadArg(nullptr) { }
 		ThreadFunctionPtr startFunction;
 		void *threadArg;
 	};

@@ -40,18 +40,18 @@ void MyEventHandler::onInit()
 	xPos_ = DefaultXPos;
 	isLooping_ = true;
 
-	font_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
-	                     (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
-	musicPlayer_ = new nc::AudioStreamPlayer((nc::IFile::dataPath() + "sounds/music.ogg").data());
-	audioBuffer_ = new nc::AudioBuffer((nc::IFile::dataPath() + "sounds/bomb.wav").data());
-	soundPlayer_ = new nc::AudioBufferPlayer(audioBuffer_);
+	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
+	                                   (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
+	musicPlayer_ = nctl::makeUnique<nc::AudioStreamPlayer>((nc::IFile::dataPath() + "sounds/music.ogg").data());
+	audioBuffer_ = nctl::makeUnique<nc::AudioBuffer>((nc::IFile::dataPath() + "sounds/bomb.wav").data());
+	soundPlayer_ = nctl::makeUnique<nc::AudioBufferPlayer>(audioBuffer_.get());
 	soundPlayer_->play();
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
-	dummy_ = new nc::SceneNode(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
-	textNode_ = new nc::TextNode(dummy_, font_);
-	textNode_->setAlignment(nc::TextNode::ALIGN_LEFT);
-	textString_ = new nc::String(256);
+	dummy_ = nctl::makeUnique<nc::SceneNode>(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
+	textNode_ = nctl::makeUnique<nc::TextNode>(dummy_.get(), font_.get());
+	textNode_->setAlignment(nc::TextNode::Alignment::LEFT);
+	textString_ = nctl::makeUnique<nctl::String>(256);
 }
 
 void MyEventHandler::onFrameStart()
@@ -66,13 +66,13 @@ void MyEventHandler::onFrameStart()
 	textString_->append("Music: ");
 	switch (musicPlayer_->state())
 	{
-		case nc::IAudioPlayer::STATE_PLAYING:
+		case nc::IAudioPlayer::PlayerState::PLAYING:
 			textString_->append("playing");
 			break;
-		case nc::IAudioPlayer::STATE_PAUSED:
+		case nc::IAudioPlayer::PlayerState::PAUSED:
 			textString_->append("paused");
 			break;
-		case nc::IAudioPlayer::STATE_STOPPED:
+		case nc::IAudioPlayer::PlayerState::STOPPED:
 			textString_->append("stopped");
 			break;
 		default:
@@ -84,13 +84,13 @@ void MyEventHandler::onFrameStart()
 	textString_->append("Sound: ");
 	switch (soundPlayer_->state())
 	{
-		case nc::IAudioPlayer::STATE_PLAYING:
+		case nc::IAudioPlayer::PlayerState::PLAYING:
 			textString_->append("playing");
 			break;
-		case nc::IAudioPlayer::STATE_PAUSED:
+		case nc::IAudioPlayer::PlayerState::PAUSED:
 			textString_->append("paused");
 			break;
-		case nc::IAudioPlayer::STATE_STOPPED:
+		case nc::IAudioPlayer::PlayerState::STOPPED:
 			textString_->append("stopped");
 			break;
 		default:
@@ -113,17 +113,6 @@ void MyEventHandler::onFrameStart()
 	textNode_->setPosition(0.0f, nc::theApplication().height() * VerticalTextPos - textNode_->height() * 0.5f);
 }
 
-void MyEventHandler::onShutdown()
-{
-	delete textString_;
-	delete textNode_;
-	delete dummy_;
-	delete musicPlayer_;
-	delete soundPlayer_;
-	delete audioBuffer_;
-}
-
-
 #ifdef __ANDROID__
 void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 {
@@ -136,51 +125,51 @@ void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
+	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
 		nc::theApplication().quit();
-	else if (event.sym == nc::KEY_M)
+	else if (event.sym == nc::KeySym::M)
 		toggleMusic();
-	else if (event.sym == nc::KEY_SPACE)
+	else if (event.sym == nc::KeySym::SPACE)
 		toggleSound();
-	else if (event.sym == nc::KEY_A)
+	else if (event.sym == nc::KeySym::A)
 		soundPlayer_->play();
-	else if (event.sym == nc::KEY_S)
+	else if (event.sym == nc::KeySym::S)
 		soundPlayer_->stop();
-	else if (event.sym == nc::KEY_D)
+	else if (event.sym == nc::KeySym::D)
 		soundPlayer_->pause();
-	else if (event.sym == nc::KEY_L)
+	else if (event.sym == nc::KeySym::L)
 		isLooping_ = !isLooping_;
-	else if (event.sym == nc::KEY_KP0)
+	else if (event.sym == nc::KeySym::KP0)
 	{
 		gain_ = DefaultGain;
 		pitch_ = DefaultPitch;
 		xPos_ = DefaultXPos;
 	}
-	else if (event.sym == nc::KEY_KP7)
+	else if (event.sym == nc::KeySym::KP7)
 	{
 		gain_ -= 0.1f;
 		if (gain_ < 0.0f)
 			gain_ = 0.0f;
 	}
-	else if (event.sym == nc::KEY_KP8)
+	else if (event.sym == nc::KeySym::KP8)
 		gain_ = DefaultGain;
-	else if (event.sym == nc::KEY_KP9)
+	else if (event.sym == nc::KeySym::KP9)
 	{
 		gain_ += 0.1f;
 		if (gain_ > 1.0f)
 			gain_ = 1.0f;
 	}
-	else if (event.sym == nc::KEY_KP4)
+	else if (event.sym == nc::KeySym::KP4)
 		pitch_ -= 0.1f;
-	else if (event.sym == nc::KEY_KP5)
+	else if (event.sym == nc::KeySym::KP5)
 		pitch_ = DefaultPitch;
-	else if (event.sym == nc::KEY_KP6)
+	else if (event.sym == nc::KeySym::KP6)
 		pitch_ += 0.1f;
-	else if (event.sym == nc::KEY_KP1)
+	else if (event.sym == nc::KeySym::KP1)
 		xPos_ -= 0.1f;
-	else if (event.sym == nc::KEY_KP2)
+	else if (event.sym == nc::KeySym::KP2)
 		xPos_ = DefaultXPos;
-	else if (event.sym == nc::KEY_KP3)
+	else if (event.sym == nc::KeySym::KP3)
 		xPos_ += 0.1f;
 }
 

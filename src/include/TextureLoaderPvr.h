@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_TEXTURELOADERPVR
 #define CLASS_NCINE_TEXTURELOADERPVR
 
-#include <stdint.h> // for header
+#include <cstdint> // for header
 #include "ITextureLoader.h"
 
 namespace ncine {
@@ -11,11 +11,11 @@ class TextureLoaderPvr : public ITextureLoader
 {
   public:
 	explicit TextureLoaderPvr(const char *filename);
-	explicit TextureLoaderPvr(IFile *fileHandle);
+	explicit TextureLoaderPvr(nctl::UniquePtr<IFile> fileHandle);
 
   private:
 	/// Header for the PVR3 format
-	typedef struct Pvr3Header
+	struct Pvr3Header
 	{
 		uint32_t	version;
 		uint32_t	flags;
@@ -29,7 +29,7 @@ class TextureLoaderPvr : public ITextureLoader
 		uint32_t	numFaces;
 		uint32_t	numMipmaps;
 		uint32_t	metaDataSize;
-	} Pvr3Header;
+	};
 
 	static const uint64_t FMT_PVRTC_2BPP_RGB = 0;
 	static const uint64_t FMT_PVRTC_2BPP_RGBA = 1;
@@ -66,8 +66,6 @@ class TextureLoaderPvr : public ITextureLoader
 	static const uint64_t FMT_LA_88 = 0x000008080000616cULL;
 	static const uint64_t FMT_L_8 = 0x000000080000006cULL;
 	static const uint64_t FMT_A_8 = 0x0000000800000061ULL;
-
-	void init();
 
 	/// Reads the PVR3 header and fills the corresponding structure
 	void readHeader(Pvr3Header &header);

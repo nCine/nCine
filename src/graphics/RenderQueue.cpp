@@ -1,7 +1,6 @@
-#include "algorithms.h"
+#include "nctl/algorithms.h"
 #include "RenderQueue.h"
 #include "SceneNode.h"
-#include "Array.h"
 #include "Sprite.h"
 
 namespace ncine {
@@ -14,7 +13,7 @@ RenderQueue::RenderQueue()
 	: numVertices_(0), lastNumVertices_(0), lastNumCommands_(0),
 	  opaqueRenderCommands_(16), transparentRenderCommands_(16)
 {
-	for (unsigned int i = 0; i < RenderCommand::TYPE_COUNT; i++)
+	for (unsigned int i = 0; i < RenderCommand::CommandType::COUNT; i++)
 	{
 		typedLastNumVertices_[i] = typedNumVertices_[i];
 		typedLastNumCommands_[i] = typedNumCommands_[i];
@@ -53,18 +52,18 @@ bool ascendingOrder(const RenderCommand *a, const RenderCommand *b) { return a->
 void RenderQueue::draw()
 {
 	// Sorting the queues with the relevant orders
-	nc::quicksort(opaqueRenderCommands_.begin(), opaqueRenderCommands_.end(), descendingOrder);
-	nc::quicksort(transparentRenderCommands_.begin(), transparentRenderCommands_.end(), ascendingOrder);
+	nctl::quicksort(opaqueRenderCommands_.begin(), opaqueRenderCommands_.end(), descendingOrder);
+	nctl::quicksort(transparentRenderCommands_.begin(), transparentRenderCommands_.end(), ascendingOrder);
 
 	// Rendering opaque nodes front to back
-	for (unsigned int i = 0; i < opaqueRenderCommands_.size(); i++)
-		opaqueRenderCommands_[i]->issue();
+	for (RenderCommand *opaqueRenderCommand : opaqueRenderCommands_)
+		opaqueRenderCommand->issue();
 
 	glEnable(GL_BLEND);
 	glDepthMask(GL_FALSE);
 	// Rendering transparent nodes back to front
-	for (unsigned int i = 0; i < transparentRenderCommands_.size(); i++)
-		transparentRenderCommands_[i]->issue();
+	for (RenderCommand *transparentRenderCommand : transparentRenderCommands_)
+		transparentRenderCommand->issue();
 	// Has to be enabled again before exiting this method
 	// or glClear(GL_DEPTH_BUFFER_BIT) won't have any effect
 	glDepthMask(GL_TRUE);
@@ -74,7 +73,7 @@ void RenderQueue::draw()
 	lastNumCommands_ = opaqueRenderCommands_.size() + transparentRenderCommands_.size();
 	numVertices_ = 0;
 
-	for (unsigned int i = 0; i < RenderCommand::TYPE_COUNT; i++)
+	for (unsigned int i = 0; i < RenderCommand::CommandType::COUNT; i++)
 	{
 		typedLastNumVertices_[i] = typedNumVertices_[i];
 		typedLastNumCommands_[i] = typedNumCommands_[i];

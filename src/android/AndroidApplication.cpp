@@ -7,6 +7,8 @@
 #include "AssetFile.h"
 #include "AndroidJniHelper.h"
 
+namespace nc = ncine;
+
 /// Processes the next application command
 void engine_handle_cmd(struct android_app *state, int32_t cmd)
 {
@@ -47,9 +49,9 @@ void AndroidApplication::start(struct android_app *state, IAppEventHandler * (*c
 		int events;
 		struct android_poll_source *source;
 
-		while ((ident = ALooper_pollAll(!theApplication().isPaused() ? 0 : -1, NULL, &events, reinterpret_cast<void **>(&source))) >= 0)
+		while ((ident = ALooper_pollAll(!theApplication().isPaused() ? 0 : -1, nullptr, &events, reinterpret_cast<void **>(&source))) >= 0)
 		{
-			if (source != NULL)
+			if (source != nullptr)
 				source->process(state, source);
 
 			if (ident == LOOPER_ID_USER)
@@ -77,7 +79,7 @@ void AndroidApplication::start(struct android_app *state, IAppEventHandler * (*c
 
 void AndroidApplication::processCommand(struct android_app *state, int32_t cmd)
 {
-	static EglGfxDevice *eglGfxDevice = NULL;
+	static EglGfxDevice *eglGfxDevice = nullptr;
 
 	switch (cmd)
 	{
@@ -87,7 +89,7 @@ void AndroidApplication::processCommand(struct android_app *state, int32_t cmd)
 
 		case APP_CMD_INIT_WINDOW:
 			LOGI("APP_CMD_INIT_WINDOW event received");
-			if (state->window != NULL)
+			if (state->window != nullptr)
 			{
 				if (theAndroidApplication().isInitialized() == false)
 				{
@@ -200,25 +202,25 @@ const char *AndroidApplication::obbPath() const
 
 void AndroidApplication::preInit()
 {
-	appEventHandler_ = createAppEventHandler_();
+	appEventHandler_ = nctl::UniquePtr<IAppEventHandler>(createAppEventHandler_());
 	appEventHandler_->onPreInit(appCfg_);
 
 	// Registering the logger as early as possible
-	const String logFilePath = IFile::dataPath() + appCfg_.logFile_;
-	theServiceLocator().registerLogger(new FileLogger(logFilePath.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
+	const nctl::String logFilePath = IFile::dataPath() + appCfg_.logFile_;
+	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(logFilePath.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
 }
 
 void AndroidApplication::init()
 {
 	// Graphics device should always be created before the input manager!
-	const DisplayMode displayMode32(8, 8, 8, 8, 24, 8, DisplayMode::DOUBLE_BUFFERED, DisplayMode::NO_VSYNC);
-	const DisplayMode displayMode16(5, 6, 5, 0, 16, 0, DisplayMode::DOUBLE_BUFFERED, DisplayMode::NO_VSYNC);
+	const DisplayMode displayMode32(8, 8, 8, 8, 24, 8, DisplayMode::DoubleBuffering::ENABLED, DisplayMode::VSync::DISABLED);
+	const DisplayMode displayMode16(5, 6, 5, 0, 16, 0, DisplayMode::DoubleBuffering::ENABLED, DisplayMode::VSync::DISABLED);
 	IGfxDevice::GLContextInfo contextInfo(appCfg_.glMajorVersion_, appCfg_.glMinorVersion_, appCfg_.glDebugContext_);
 
 	if (EglGfxDevice::isModeSupported(state_, contextInfo, displayMode32))
-		gfxDevice_ = new EglGfxDevice(state_, contextInfo, displayMode32);
+		gfxDevice_ = nctl::makeUnique<EglGfxDevice>(state_, contextInfo, displayMode32);
 	else if (EglGfxDevice::isModeSupported(state_, contextInfo, displayMode16))
-		gfxDevice_ = new EglGfxDevice(state_, contextInfo, displayMode16);
+		gfxDevice_ = nctl::makeUnique<EglGfxDevice>(state_, contextInfo, displayMode16);
 	else
 	{
 		LOGF("Cannot find a suitable EGL configuration, graphics device not created");
@@ -226,7 +228,7 @@ void AndroidApplication::init()
 	}
 
 	AndroidJniHelper::attachJVM(state_);
-	inputManager_ = new AndroidInputManager(state_);
+	inputManager_ = nctl::makeUnique<AndroidInputManager>(state_);
 	AssetFile::initAssetManager(state_);
 
 	Application::initCommon();

@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_RECTANIMATION
 #define CLASS_NCINE_RECTANIMATION
 
-#include "Array.h"
+#include "nctl/Array.h"
 #include "Rect.h"
 
 namespace ncine {
@@ -11,14 +11,14 @@ class DLL_PUBLIC RectAnimation
 {
   public:
 	/// Loop modes
-	enum LoopMode
+	enum class LoopMode
 	{
-		NOT_LOOPING,
-		LOOPING
+		DISABLED,
+		ENABLED
 	};
 
 	/// Rewind modes
-	enum RewindMode
+	enum class RewindMode
 	{
 		/// When the animation reaches the last frame it begins again from start
 		FROM_START,
@@ -54,7 +54,7 @@ class DLL_PUBLIC RectAnimation
 
   private:
 	/// The rectangles array
-	Array<Recti> rects_;
+	nctl::Array<Recti> rects_;
 	/// Current frame
 	unsigned int currentFrame_;
 	/// The time until the next frame change

@@ -13,7 +13,7 @@ AudioBufferPlayer::AudioBufferPlayer(AudioBuffer *audioBuffer)
 	: audioBuffer_(audioBuffer)
 {
 	ASSERT(audioBuffer);
-	type_ = AUDIOBUFFERPLAYER_TYPE;
+	type_ = ObjectType::AUDIOBUFFER_PLAYER;
 }
 
 ///////////////////////////////////////////////////////////
@@ -24,8 +24,8 @@ void AudioBufferPlayer::play()
 {
 	switch (state_)
 	{
-		case STATE_INITIAL:
-		case STATE_STOPPED:
+		case PlayerState::INITIAL:
+		case PlayerState::STOPPED:
 		{
 			// source is a signed integer in order to check for unavailble source return value.
 			// It is then converted to an OpenAL unsigned integer to be used as a valid source.
@@ -50,17 +50,17 @@ void AudioBufferPlayer::play()
 			alSourcefv(sourceId_, AL_POSITION, position_.data());
 
 			alSourcePlay(sourceId_);
-			state_ = STATE_PLAYING;
+			state_ = PlayerState::PLAYING;
 
 			theServiceLocator().audioDevice().registerPlayer(this);
 			break;
 		}
-		case STATE_PLAYING:
+		case PlayerState::PLAYING:
 			break;
-		case STATE_PAUSED:
+		case PlayerState::PAUSED:
 		{
 			alSourcePlay(sourceId_);
-			state_ = STATE_PLAYING;
+			state_ = PlayerState::PLAYING;
 
 			theServiceLocator().audioDevice().registerPlayer(this);
 			break;
@@ -72,16 +72,16 @@ void AudioBufferPlayer::pause()
 {
 	switch (state_)
 	{
-		case STATE_INITIAL:
-		case STATE_STOPPED:
+		case PlayerState::INITIAL:
+		case PlayerState::STOPPED:
 			break;
-		case STATE_PLAYING:
+		case PlayerState::PLAYING:
 		{
 			alSourcePause(sourceId_);
-			state_ = STATE_PAUSED;
+			state_ = PlayerState::PAUSED;
 			break;
 		}
-		case STATE_PAUSED:
+		case PlayerState::PAUSED:
 			break;
 	}
 }
@@ -90,29 +90,29 @@ void AudioBufferPlayer::stop()
 {
 	switch (state_)
 	{
-		case STATE_INITIAL:
-		case STATE_STOPPED:
+		case PlayerState::INITIAL:
+		case PlayerState::STOPPED:
 			break;
-		case STATE_PLAYING:
+		case PlayerState::PLAYING:
 		{
 			alSourceStop(sourceId_);
-			state_ = STATE_STOPPED;
+			state_ = PlayerState::STOPPED;
 			break;
 		}
-		case STATE_PAUSED:
+		case PlayerState::PAUSED:
 			break;
 	}
 }
 
 void AudioBufferPlayer::updateState()
 {
-	if (state_ == STATE_PLAYING)
+	if (state_ == PlayerState::PLAYING)
 	{
 		ALenum eALState;
 		alGetSourcei(sourceId_, AL_SOURCE_STATE, &eALState);
 
 		if (eALState != AL_PLAYING)
-			state_ = STATE_STOPPED;
+			state_ = PlayerState::STOPPED;
 	}
 }
 

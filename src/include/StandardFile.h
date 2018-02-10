@@ -11,25 +11,25 @@ class StandardFile : public IFile
   public:
 	/// Constructs a standard file object
 	/*! \param filename File name including its path */
-	explicit StandardFile(const char *filename) : IFile(filename) { type_ = STANDARD_TYPE; }
-	~StandardFile();
+	explicit StandardFile(const char *filename) : IFile(filename) { type_ = FileType::STANDARD; }
+	~StandardFile() override;
 
 	/// Static method to return class type
-	inline static FileType sType() { return STANDARD_TYPE; }
+	inline static FileType sType() { return FileType::STANDARD; }
 
 	/// Tries to open the standard file
-	void open(unsigned char mode);
+	void open(unsigned char mode) override;
 	/// Closes the standard file
-	void close();
-	long int seek(long int offset, int whence) const;
-	long int tell() const;
-	unsigned long int read(void *buffer, unsigned long int bytes) const;
+	void close() override;
+	long int seek(long int offset, int whence) const override;
+	long int tell() const override;
+	unsigned long int read(void *buffer, unsigned long int bytes) const override;
 
   private:
-	/// Private copy constructor
-	StandardFile(const StandardFile &);
-	/// Private assignment operator
-	StandardFile &operator=(const StandardFile &);
+	/// Deleted copy constructor
+	StandardFile(const StandardFile &) = delete;
+	/// Deleted assignment operator
+	StandardFile &operator=(const StandardFile &) = delete;
 
 	/// Opens the file with `open()`
 	void openFD(unsigned char mode);

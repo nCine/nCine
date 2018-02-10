@@ -2,8 +2,8 @@
 #define CLASS_NCINE_JOYMAPPING
 
 #include <cstdint>
-#include "Array.h"
-#include "StaticArray.h"
+#include "nctl/Array.h"
+#include "nctl/StaticArray.h"
 #include "InputEvents.h"
 
 namespace ncine {
@@ -14,7 +14,7 @@ class JoyAxisEvent;
 class JoyConnectionEvent;
 class IInputEventHandler;
 template <class T> class Vector2;
-typedef class Vector2<float> Vector2f;
+using Vector2f = Vector2<float>;
 
 /// Information about a mapped joystick state (implementation)
 class JoyMappedStateImpl : public JoyMappedState
@@ -28,18 +28,18 @@ class JoyMappedStateImpl : public JoyMappedState
 			axesValues_[i] = 0.0f;
 	}
 
-	bool isButtonPressed(ButtonName name) const
+	bool isButtonPressed(ButtonName name) const override
 	{
 		bool pressed = false;
-		if (name != BUTTON_UNKNOWN)
+		if (name != ButtonName::UNKNOWN)
 			pressed = buttons_[static_cast<int>(name)];
 		return pressed;
 	}
 
-	float axisValue(AxisName name) const
+	float axisValue(AxisName name) const override
 	{
 		float value = 0.0f;
-		if (name != AXIS_UNKNOWN)
+		if (name != AxisName::UNKNOWN)
 			value = axesValues_[static_cast<int>(name)];
 		return value;
 	}
@@ -115,10 +115,10 @@ class JoyMapping
 
 	static const int MaxNumJoysticks = 4;
 	int mappingIndex_[MaxNumJoysticks];
-	nc::Array<MappedJoystick> mappings_;
+	nctl::Array<MappedJoystick> mappings_;
 
 	static JoyMappedStateImpl nullMappedJoyState_;
-	static StaticArray<JoyMappedStateImpl, MaxNumJoysticks> mappedJoyStates_;
+	static nctl::StaticArray<JoyMappedStateImpl, MaxNumJoysticks> mappedJoyStates_;
 	static JoyMappedButtonEvent mappedButtonEvent_;
 	static JoyMappedAxisEvent mappedAxisEvent_;
 

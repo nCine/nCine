@@ -28,20 +28,21 @@ class AndroidKeyboardState : public KeyboardState
   public:
 	AndroidKeyboardState()
 	{
-		for (unsigned int i = 0; i < KEYSYM_COUNT; i++)
+		for (unsigned int i = 0; i < NumKeys; i++)
 			keys_[i] = 0;
 	}
 
-	inline bool isKeyDown(KeySym key) const
+	inline bool isKeyDown(KeySym key) const override
 	{
-		if (key == KEY_UNKNOWN)
+		if (key == KeySym::UNKNOWN)
 			return false;
 		else
-			return keys_[key] != 0;
+			return keys_[static_cast<unsigned int>(key)] != 0;
 	}
 
   private:
-	unsigned char keys_[KEYSYM_COUNT];
+	static const unsigned int NumKeys = static_cast<unsigned int>(KeySym::COUNT);
+	unsigned char keys_[NumKeys];
 
 	friend class AndroidInputManager;
 };
@@ -52,11 +53,11 @@ class AndroidMouseState : public MouseState
   public:
 	AndroidMouseState() : buttonState_(0) { }
 
-	bool isLeftButtonDown() const;
-	bool isMiddleButtonDown() const;
-	bool isRightButtonDown() const;
-	bool isFourthButtonDown() const;
-	bool isFifthButtonDown() const;
+	bool isLeftButtonDown() const override;
+	bool isMiddleButtonDown() const override;
+	bool isRightButtonDown() const override;
+	bool isFourthButtonDown() const override;
+	bool isFifthButtonDown() const override;
 
   private:
 	int buttonState_;
@@ -70,11 +71,11 @@ class AndroidMouseEvent : public MouseEvent
   public:
 	AndroidMouseEvent() : button_(0) { }
 
-	bool isLeftButton() const;
-	bool isMiddleButton() const;
-	bool isRightButton() const;
-	bool isFourthButton() const;
-	bool isFifthButton() const;
+	bool isLeftButton() const override;
+	bool isMiddleButton() const override;
+	bool isRightButton() const override;
+	bool isFourthButton() const override;
+	bool isFifthButton() const override;
 
   private:
 	int button_;
@@ -88,9 +89,9 @@ class AndroidJoystickState : JoystickState
   public:
 	AndroidJoystickState();
 
-	bool isButtonPressed(int buttonId) const;
-	short int axisValue(int axisId) const;
-	float axisNormValue(int axisId) const;
+	bool isButtonPressed(int buttonId) const override;
+	short int axisValue(int axisId) const override;
+	float axisNormValue(int axisId) const override;
 
   private:
 	static const unsigned int MaxNameLength = 256;
@@ -129,22 +130,22 @@ class AndroidInputManager : public IInputManager
 	/// Allows the application to make use of the accelerometer
 	static void enableAccelerometer(bool enabled);
 
-	inline const MouseState &mouseState() { return mouseState_; }
-	inline const KeyboardState &keyboardState() const { return keyboardState_; }
+	inline const MouseState &mouseState() override { return mouseState_; }
+	inline const KeyboardState &keyboardState() const override { return keyboardState_; }
 
 	/// Parses an Android sensor event related to the accelerometer
 	static void parseAccelerometerEvent();
 	/// Parses an Android input event
 	static bool parseEvent(const AInputEvent *event);
 
-	bool isJoyPresent(int joyId) const;
-	const char *joyName(int joyId) const;
-	const char *joyGuid(int joyId) const;
-	int joyNumButtons(int joyId) const;
-	int joyNumAxes(int joyId) const;
-	const JoystickState &joystickState(int joyId) const;
+	bool isJoyPresent(int joyId) const override;
+	const char *joyName(int joyId) const override;
+	const char *joyGuid(int joyId) const override;
+	int joyNumButtons(int joyId) const override;
+	int joyNumAxes(int joyId) const override;
+	const JoystickState &joystickState(int joyId) const override;
 
-	void setMouseCursorMode(MouseCursorMode mode) { mouseCursorMode_ = mode; }
+	void setMouseCursorMode(MouseCursorMode mode) override { mouseCursorMode_ = mode; }
 
   private:
 	static const int MaxNumJoysticks = 4;

@@ -16,12 +16,10 @@ class DLL_PUBLIC Font : public Object
   public:
 	/// Constructs the object from a texture and a `FNT` file (from <em>AngelCode's Bitmap Font Generator</em>)
 	Font(const char *texFilename, const char *fntFilename);
-	virtual ~Font();
+	~Font() override;
 
 	/// Gets the texture object
-	inline const Texture *texture() const { return texture_; }
-	/// Sets the texture object
-	void setTexture(Texture *texture);
+	inline const Texture *texture() const { return texture_.get(); }
 
 	/// Returns font line height
 	inline unsigned int lineHeight() const { return lineHeight_; }
@@ -34,11 +32,11 @@ class DLL_PUBLIC Font : public Object
 	/// Returns a constant pointer to a glyph
 	const FontGlyph *glyph(unsigned int glyphId) const;
 
-	inline static ObjectType sType() { return FONT_TYPE; }
+	inline static ObjectType sType() { return ObjectType::FONT; }
 
   private:
 	/// The font texture
-	Texture *texture_;
+	nctl::UniquePtr<Texture> texture_;
 	/// Font line height
 	unsigned int lineHeight_;
 	/// Font base
@@ -55,12 +53,12 @@ class DLL_PUBLIC Font : public Object
 	/// Maximum number of glyphs in a font
 	static const unsigned int MaxGlyphs = 256;
 	/// Array of font glyphs
-	FontGlyph *glyphs_;
+	nctl::UniquePtr<FontGlyph []> glyphs_;
 
-	/// Private copy constructor
-	Font(const Font &);
-	/// Private assignment operator
-	Font &operator=(const Font &);
+	/// Deleted copy constructor
+	Font(const Font &) = delete;
+	/// Deleted assignment operator
+	Font &operator=(const Font &) = delete;
 
 	/// Loads an <em>AngelCode's</em> `FNT` file in a memory buffer then parses it
 	void parseFntFile(IFile *fileHandle);

@@ -11,29 +11,26 @@ namespace ncine {
 
 DrawableNode::DrawableNode(SceneNode *parent, float x, float y)
 	: SceneNode(parent, x, y), width_(0.0f), height_(0.0f),
-	  renderCommand_(new RenderCommand)
+	  renderCommand_(nctl::makeUnique<RenderCommand>())
 {
 
 }
 
 DrawableNode::DrawableNode(SceneNode *parent)
-	: SceneNode(parent), width_(0.0f), height_(0.0f),
-	  renderCommand_(new RenderCommand)
+	: DrawableNode(parent, 0.0f, 0.0f)
 {
 
 }
 
 DrawableNode::DrawableNode()
-	: SceneNode(), width_(0.0f), height_(0.0f),
-	  renderCommand_(new RenderCommand)
+	: DrawableNode(nullptr, 0.0f, 0.0f)
 {
 
 }
 
 DrawableNode::~DrawableNode()
 {
-	delete renderCommand_;
-	renderCommand_ = NULL;
+
 }
 
 ///////////////////////////////////////////////////////////
@@ -48,7 +45,7 @@ void DrawableNode::draw(RenderQueue &renderQueue)
 	if (aabb_.isOutsideOf(theApplication().gfxDevice().screenRect()) == false)
 	{
 		updateRenderCommand();
-		renderQueue.addCommand(renderCommand_);
+		renderQueue.addCommand(renderCommand_.get());
 	}
 }
 

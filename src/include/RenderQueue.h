@@ -2,8 +2,8 @@
 #define CLASS_NCINE_RENDERQUEUE
 
 #include "RenderCommand.h"
-#include "Array.h"
-#include "StaticArray.h"
+#include "nctl/Array.h"
+#include "nctl/StaticArray.h"
 
 namespace ncine {
 
@@ -26,9 +26,9 @@ class RenderQueue
 	inline unsigned int numCommands() const { return lastNumCommands_; }
 
 	/// Returns the total number of vertices to be rendered by the queue for the specified command type
-	inline unsigned int numVertices(RenderCommand::CommandType type) const { return typedLastNumVertices_[type]; }
+	inline unsigned int numVertices(RenderCommand::CommandType::Enum type) const { return typedLastNumVertices_[type]; }
 	/// Returns the number of commands to render for the specified type
-	inline unsigned int numCommands(RenderCommand::CommandType type) const { return typedLastNumCommands_[type]; }
+	inline unsigned int numCommands(RenderCommand::CommandType::Enum type) const { return typedLastNumCommands_[type]; }
 
   private:
 	/// The current sum of vertices for every command in the queue
@@ -39,18 +39,18 @@ class RenderQueue
 	unsigned int lastNumCommands_;
 
 	/// The current sum of vertices for a specified command type
-	StaticArray<unsigned int, RenderCommand::TYPE_COUNT> typedNumVertices_;
+	nctl::StaticArray<unsigned int, RenderCommand::CommandType::COUNT> typedNumVertices_;
 	/// The current sum of draw commands for a specified command type
-	StaticArray<unsigned int, RenderCommand::TYPE_COUNT> typedNumCommands_;
+	nctl::StaticArray<unsigned int, RenderCommand::CommandType::COUNT> typedNumCommands_;
 	/// The sum of vertices for a specified command type in the previous frame (it never contains a partial sum)
-	StaticArray<unsigned int, RenderCommand::TYPE_COUNT> typedLastNumVertices_;
+	nctl::StaticArray<unsigned int, RenderCommand::CommandType::COUNT> typedLastNumVertices_;
 	/// The sum of draw commands for a specified command type in the previous frame (it never contains a partial sum)
-	StaticArray<unsigned int, RenderCommand::TYPE_COUNT> typedLastNumCommands_;
+	nctl::StaticArray<unsigned int, RenderCommand::CommandType::COUNT> typedLastNumCommands_;
 
 	/// Array of opaque render command pointers
-	Array<RenderCommand *> opaqueRenderCommands_;
+	nctl::Array<RenderCommand *> opaqueRenderCommands_;
 	/// Array of transparent render command pointers
-	Array<RenderCommand *> transparentRenderCommands_;
+	nctl::Array<RenderCommand *> transparentRenderCommands_;
 };
 
 }

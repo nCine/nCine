@@ -1,17 +1,15 @@
 #ifndef GTEST_STATICARRAY_H
 #define GTEST_STATICARRAY_H
 
-#include "StaticArray.h"
+#include "nctl/StaticArray.h"
 #include "gtest/gtest.h"
-
-namespace nc = ncine;
 
 namespace {
 
 const unsigned int Capacity = 10;
 const int FirstElement = 0;
 
-void printArray(const nc::StaticArray<int, Capacity> &array)
+void printArray(const nctl::StaticArray<int, Capacity> &array)
 {
 	printf("Size: %u, ", array.size());
 	for (unsigned int i = 0; i < array.size(); i++)
@@ -19,7 +17,7 @@ void printArray(const nc::StaticArray<int, Capacity> &array)
 	printf("\n");
 }
 
-void initArray(nc::StaticArray<int, Capacity> &array)
+void initArray(nctl::StaticArray<int, Capacity> &array)
 {
 	int value = FirstElement;
 
@@ -27,13 +25,13 @@ void initArray(nc::StaticArray<int, Capacity> &array)
 		array[i] = value++;
 }
 
-void initArrayRandom(nc::StaticArray<int, Capacity> &array)
+void initArrayRandom(nctl::StaticArray<int, Capacity> &array)
 {
 	for (unsigned int i = 0; i < Capacity; i++)
 		array[i] = rand() % 100;
 }
 
-bool isUnmodified(const nc::StaticArray<int, Capacity> &array)
+bool isUnmodified(const nctl::StaticArray<int, Capacity> &array)
 {
 	int value = FirstElement;
 
@@ -48,7 +46,7 @@ bool isUnmodified(const nc::StaticArray<int, Capacity> &array)
 		return true;
 }
 
-bool isSorted(const nc::StaticArray<int, Capacity> &array)
+bool isSorted(const nctl::StaticArray<int, Capacity> &array)
 {
 	for (unsigned int i = 0; i < Capacity - 1; i++)
 	{
@@ -59,7 +57,7 @@ bool isSorted(const nc::StaticArray<int, Capacity> &array)
 		return true;
 }
 
-bool isReverseSorted(const nc::StaticArray<int, Capacity> &array)
+bool isReverseSorted(const nctl::StaticArray<int, Capacity> &array)
 {
 	for (unsigned int i = 0; i < Capacity - 1; i++)
 	{

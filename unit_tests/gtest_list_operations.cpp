@@ -8,9 +8,9 @@ class ListOperationsTest : public ::testing::Test
 	ListOperationsTest() { }
 
   protected:
-	void SetUp() { initList(list_); }
+	void SetUp() override { initList(list_); }
 
-	nc::List<int> list_;
+	nctl::List<int> list_;
 };
 
 TEST_F(ListOperationsTest, Clear)
@@ -26,22 +26,76 @@ TEST_F(ListOperationsTest, Clear)
 	ASSERT_EQ(list_.size(), 0);
 }
 
+TEST_F(ListOperationsTest, ClearEmpty)
+{
+	nctl::List<int> newList;
+
+	ASSERT_TRUE(newList.isEmpty());
+	ASSERT_EQ(newList.size(), 0);
+
+	printf("Clearing an empty list\n");
+	list_.clear();
+
+	ASSERT_TRUE(newList.isEmpty());
+	ASSERT_EQ(newList.size(), 0);
+}
+
 TEST_F(ListOperationsTest, CopyConstruction)
 {
 	printf("Creating a new list with copy construction\n");
-	nc::List<int> newList(list_);
+	nctl::List<int> newList(list_);
 	printList(newList);
 
 	assertListsAreEqual(list_, newList);
 }
 
+TEST_F(ListOperationsTest, MoveConstruction)
+{
+	printf("Creating a new list with move construction\n");
+	nctl::List<int> newList(nctl::move(list_));
+	printList(newList);
+
+	ASSERT_EQ(list_.size(), 0);
+	ASSERT_EQ(calcLength(list_), 0);
+	ASSERT_EQ(newList.size(), Length);
+	int array[Length] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(newList, array);
+}
+
+TEST_F(ListOperationsTest, MoveConstructionFromEmpty)
+{
+	printf("Creating a new list from an empty one with move construction\n");
+	nctl::List<int> emptyList;
+	nctl::List<int> newList(nctl::move(emptyList));
+	printList(newList);
+
+	ASSERT_EQ(emptyList.size(), 0);
+	ASSERT_EQ(calcLength(emptyList), 0);
+	ASSERT_EQ(newList.size(), 0);
+	ASSERT_EQ(calcLength(newList), 0);
+}
+
 TEST_F(ListOperationsTest, AssignmentOperator)
 {
 	printf("Creating a new list with the assignment operator\n");
-	nc::List<int> newList = list_;
+	nctl::List<int> newList = list_;
 	printList(newList);
 
 	assertListsAreEqual(list_, newList);
+}
+
+TEST_F(ListOperationsTest, MoveAssignmentOperator)
+{
+	printf("Creating a new list with the move assignment operator\n");
+	nctl::List<int> newList;
+	newList = nctl::move(list_);
+	printList(newList);
+
+	ASSERT_EQ(list_.size(), 0);
+	ASSERT_EQ(calcLength(list_), 0);
+	ASSERT_EQ(newList.size(), Length);
+	int array[Length] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(newList, array);
 }
 
 TEST_F(ListOperationsTest, RemoveOddNumbers)
@@ -53,7 +107,7 @@ TEST_F(ListOperationsTest, RemoveOddNumbers)
 	ASSERT_FALSE(list_.isEmpty());
 	ASSERT_EQ(list_.size(), 6);
 
-	for (nc::List<int>::ConstIterator i = list_.begin(); i != list_.end(); ++i)
+	for (nctl::List<int>::ConstIterator i = list_.begin(); i != list_.end(); ++i)
 		ASSERT_EQ(*i % 2, 0);
 }
 
@@ -66,7 +120,7 @@ TEST_F(ListOperationsTest, RemoveEvenNumbers)
 	ASSERT_FALSE(list_.isEmpty());
 	ASSERT_EQ(list_.size(), 5);
 
-	for (nc::List<int>::ConstIterator i = list_.begin(); i != list_.end(); ++i)
+	for (nctl::List<int>::ConstIterator i = list_.begin(); i != list_.end(); ++i)
 		ASSERT_EQ(*i % 2, 1);
 }
 
@@ -80,10 +134,32 @@ TEST_F(ListOperationsTest, RemoveAllWithIterators)
 	ASSERT_EQ(list_.size(), 0);
 }
 
+TEST_F(ListOperationsTest, RemoveHeadWithIterators)
+{
+	printf("Removing first node through iterator\n");
+	list_.erase(list_.begin());
+	printList(list_);
+
+	ASSERT_EQ(list_.size(), Length - 1);
+	int array[Length - 1] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(list_, array);
+}
+
+TEST_F(ListOperationsTest, RemoveTailWithIterators)
+{
+	printf("Removing last node through iterator\n");
+	list_.erase(--list_.end());
+	printList(list_);
+
+	ASSERT_EQ(list_.size(), Length - 1);
+	int array[Length - 1] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	assertListMatchesArray(list_, array);
+}
+
 TEST_F(ListOperationsTest, CopyAllWithIterators)
 {
 	printf("Inserting all list nodes into a new one through iterators\n");
-	nc::List<int> newList;
+	nctl::List<int> newList;
 	newList.insert(newList.begin(), list_.begin(), list_.end());
 	printList(newList);
 	printf("\n");
@@ -94,8 +170,8 @@ TEST_F(ListOperationsTest, CopyAllWithIterators)
 TEST_F(ListOperationsTest, SpliceOneNodeToEmptyList)
 {
 	printf("Splicing the sixth node of the list into a new empty one\n");
-	nc::List<int> newList;
-	newList.splice(newList.begin(), list_, nc::next(list_.begin(), 5));
+	nctl::List<int> newList;
+	newList.splice(newList.begin(), list_, nctl::next(list_.begin(), 5));
 	printf("List 1 - "); printList(list_);
 	printf("List 2 - "); printList(newList);
 	printf("\n");
@@ -114,10 +190,10 @@ TEST_F(ListOperationsTest, SpliceOneNodeToEmptyList)
 TEST_F(ListOperationsTest, SpliceOneNodeToListBeginning)
 {
 	printf("Splicing the sixth node of the list at the beginning of a new non-empty one\n");
-	nc::List<int> newList;
-	newList.pushBack(0);
-	newList.pushBack(1);
-	newList.splice(newList.begin(), list_, nc::next(list_.begin(), 5));
+	nctl::List<int> newList;
+	newList.pushBack(11);
+	newList.pushBack(12);
+	newList.splice(newList.begin(), list_, nctl::next(list_.begin(), 5));
 	printf("List 1 - "); printList(list_);
 	printf("List 2 - "); printList(newList);
 	printf("\n");
@@ -129,17 +205,39 @@ TEST_F(ListOperationsTest, SpliceOneNodeToListBeginning)
 
 	int array[Length - 1] = { 0, 1, 2, 3, 4, 6, 7, 8, 9, 10 };
 	assertListMatchesArray(list_, array);
-	int newArray[3] = { 5, 0, 1 };
+	int newArray[3] = { 5, 11, 12 };
+	assertListMatchesArray(newList, newArray);
+}
+
+TEST_F(ListOperationsTest, SpliceOneNodeToListEnd)
+{
+	printf("Splicing the sixth node of the list at the end of a new non-empty one\n");
+	nctl::List<int> newList;
+	newList.pushBack(-2);
+	newList.pushBack(-1);
+	newList.splice(newList.end(), list_, nctl::next(list_.begin(), 5));
+	printf("List 1 - "); printList(list_);
+	printf("List 2 - "); printList(newList);
+	printf("\n");
+
+	ASSERT_EQ(list_.size(), Length - 1);
+	ASSERT_EQ(newList.size(), 3);
+	ASSERT_EQ(list_.size(), calcLength(list_));
+	ASSERT_EQ(newList.size(), calcLength(newList));
+
+	int array[Length - 1] = { 0, 1, 2, 3, 4, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(list_, array);
+	int newArray[3] = { -2, -1, 5 };
 	assertListMatchesArray(newList, newArray);
 }
 
 TEST_F(ListOperationsTest, SpliceOneNodeToList)
 {
 	printf("Splicing the sixth node of the list into a new non-empty one\n");
-	nc::List<int> newList;
+	nctl::List<int> newList;
 	newList.pushBack(0);
 	newList.pushBack(1);
-	newList.splice(nc::next(newList.begin()), list_, nc::next(list_.begin(), 5));
+	newList.splice(nctl::next(newList.begin()), list_, nctl::next(list_.begin(), 5));
 	printf("List 1 - "); printList(list_);
 	printf("List 2 - "); printList(newList);
 	printf("\n");
@@ -155,10 +253,29 @@ TEST_F(ListOperationsTest, SpliceOneNodeToList)
 	assertListMatchesArray(newList, newArray);
 }
 
+TEST_F(ListOperationsTest, SpliceOneNodeFromEmptyList)
+{
+	printf("Splicing a node from a new empty list into the first one\n");
+	nctl::List<int> newList;
+	list_.splice(list_.begin(), newList, newList.begin());
+	printf("List 1 - "); printList(list_);
+	printf("List 2 - "); printList(newList);
+	printf("\n");
+
+	ASSERT_EQ(list_.size(), Length);
+	ASSERT_EQ(newList.size(), 0);
+	ASSERT_TRUE(newList.isEmpty());
+	ASSERT_EQ(list_.size(), calcLength(list_));
+	ASSERT_EQ(newList.size(), calcLength(newList));
+
+	int array[Length] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(list_, array);
+}
+
 TEST_F(ListOperationsTest, SpliceAllNodesToEmptyList)
 {
 	printf("Splicing all list nodes into a new empty one\n");
-	nc::List<int> newList;
+	nctl::List<int> newList;
 	newList.splice(newList.begin(), list_);
 	printf("List 1 - "); printList(list_);
 	printf("List 2 - "); printList(newList);
@@ -176,7 +293,7 @@ TEST_F(ListOperationsTest, SpliceAllNodesToEmptyList)
 TEST_F(ListOperationsTest, SpliceAllNodesToListBeginning)
 {
 	printf("Splicing all list nodes at the beginning of a new non-empty one\n");
-	nc::List<int> newList;
+	nctl::List<int> newList;
 	newList.pushBack(11);
 	newList.pushBack(12);
 	newList.splice(newList.begin(), list_);
@@ -193,14 +310,33 @@ TEST_F(ListOperationsTest, SpliceAllNodesToListBeginning)
 	assertListMatchesArray(newList, array);
 }
 
+TEST_F(ListOperationsTest, SpliceAllNodesToListEnd)
+{
+	printf("Splicing all list nodes at the end of a new non-empty one\n");
+	nctl::List<int> newList;
+	newList.pushBack(-2);
+	newList.pushBack(-1);
+	newList.splice(newList.end(), list_);
+	printf("List 1 - "); printList(list_);
+	printf("List 2 - "); printList(newList);
+	printf("\n");
+
+	ASSERT_TRUE(list_.isEmpty());
+	ASSERT_EQ(newList.size(), Length + 2);
+	ASSERT_EQ(list_.size(), calcLength(list_));
+	ASSERT_EQ(newList.size(), calcLength(newList));
+
+	int array[Length + 2] = { -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(newList, array);
+}
 
 TEST_F(ListOperationsTest, SpliceAllNodesToList)
 {
 	printf("Splicing all list nodes into a new non-empty one\n");
-	nc::List<int> newList;
+	nctl::List<int> newList;
 	newList.pushBack(-1);
 	newList.pushBack(11);
-	newList.splice(nc::next(newList.begin()), list_);
+	newList.splice(nctl::next(newList.begin()), list_);
 	printf("List 1 - "); printList(list_);
 	printf("List 2 - "); printList(newList);
 	printf("\n");
@@ -214,11 +350,30 @@ TEST_F(ListOperationsTest, SpliceAllNodesToList)
 	assertListMatchesArray(newList, array);
 }
 
+TEST_F(ListOperationsTest, SpliceAllNodesFromEmptyList)
+{
+	printf("Splicing all nodes from a new empty list into the first one\n");
+	nctl::List<int> newList;
+	list_.splice(list_.begin(), newList);
+	printf("List 1 - "); printList(list_);
+	printf("List 2 - "); printList(newList);
+	printf("\n");
+
+	ASSERT_EQ(list_.size(), Length);
+	ASSERT_EQ(newList.size(), 0);
+	ASSERT_TRUE(newList.isEmpty());
+	ASSERT_EQ(list_.size(), calcLength(list_));
+	ASSERT_EQ(newList.size(), calcLength(newList));
+
+	int array[Length] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(list_, array);
+}
+
 TEST_F(ListOperationsTest, SpliceRangeToEmptyList)
 {
 	printf("Splicing a range of nodes into a new empty one\n");
-	nc::List<int> newList;
-	newList.splice(newList.begin(), list_, nc::next(list_.begin(), 2), nc::next(list_.rBegin(), -3));
+	nctl::List<int> newList;
+	newList.splice(newList.begin(), list_, nctl::next(list_.begin(), 2), nctl::prev(list_.end(), 4));
 	printf("List 1 - "); printList(list_);
 	printf("List 2 - "); printList(newList);
 	printf("\n");
@@ -237,10 +392,10 @@ TEST_F(ListOperationsTest, SpliceRangeToEmptyList)
 TEST_F(ListOperationsTest, SpliceRangeToListBeginning)
 {
 	printf("Splicing a range of nodes at the beginning of a new non-empty one\n");
-	nc::List<int> newList;
+	nctl::List<int> newList;
 	newList.pushBack(11);
 	newList.pushBack(12);
-	newList.splice(newList.begin(), list_, nc::next(list_.begin(), 2), nc::next(list_.rBegin(), -3));
+	newList.splice(newList.begin(), list_, nctl::next(list_.begin(), 2), nctl::prev(list_.end(), 4));
 	printf("List 1 - "); printList(list_);
 	printf("List 2 - "); printList(newList);
 	printf("\n");
@@ -256,13 +411,35 @@ TEST_F(ListOperationsTest, SpliceRangeToListBeginning)
 	assertListMatchesArray(newList, newArray);
 }
 
+TEST_F(ListOperationsTest, SpliceRangeToListEnd)
+{
+	printf("Splicing a range of nodes at the end of a new non-empty one\n");
+	nctl::List<int> newList;
+	newList.pushBack(-2);
+	newList.pushBack(-1);
+	newList.splice(newList.end(), list_, nctl::next(list_.begin(), 2), nctl::prev(list_.end(), 4));
+	printf("List 1 - "); printList(list_);
+	printf("List 2 - "); printList(newList);
+	printf("\n");
+
+	ASSERT_EQ(list_.size(), Length - 5);
+	ASSERT_EQ(newList.size(), 5 + 2);
+	ASSERT_EQ(list_.size(), calcLength(list_));
+	ASSERT_EQ(newList.size(), calcLength(newList));
+
+	int array[Length - 5] = { 0, 1, 7, 8, 9, 10 };
+	assertListMatchesArray(list_, array);
+	int newArray[5 + 2] = { -2, -1, 2, 3, 4, 5, 6};
+	assertListMatchesArray(newList, newArray);
+}
+
 TEST_F(ListOperationsTest, SpliceRangeToList)
 {
 	printf("Splicing a range of nodes into a new non-empty one\n");
-	nc::List<int> newList;
+	nctl::List<int> newList;
 	newList.pushBack(-1);
 	newList.pushBack(11);
-	newList.splice(nc::next(newList.begin()), list_, nc::next(list_.begin(), 2), nc::next(list_.rBegin(), -3));
+	newList.splice(nctl::next(newList.begin()), list_, nctl::next(list_.begin(), 2), nctl::prev(list_.end(), 4));
 	printf("List 1 - "); printList(list_);
 	printf("List 2 - "); printList(newList);
 	printf("\n");
@@ -276,24 +453,6 @@ TEST_F(ListOperationsTest, SpliceRangeToList)
 	assertListMatchesArray(list_, array);
 	int newArray[5 + 2] = { -1, 2, 3, 4, 5, 6, 11};
 	assertListMatchesArray(newList, newArray);
-}
-
-TEST_F(ListOperationsTest, SpliceWholeRangeToEmptyist)
-{
-	printf("Splicing a range of all nodes into a new empty one\n");
-	nc::List<int> newList;
-	newList.splice(newList.begin(), list_, list_.begin(), list_.end());
-	printf("List 1 - "); printList(list_);
-	printf("List 2 - "); printList(newList);
-	printf("\n");
-
-	ASSERT_TRUE(list_.isEmpty());
-	ASSERT_EQ(newList.size(), Length);
-	ASSERT_EQ(list_.size(), calcLength(list_));
-	ASSERT_EQ(newList.size(), calcLength(newList));
-
-	int array[Length] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-	assertListMatchesArray(newList, array);
 }
 
 }

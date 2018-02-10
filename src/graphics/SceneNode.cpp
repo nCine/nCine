@@ -16,9 +16,9 @@ const float SceneNode::MinRotation = 0.5f;
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/*! \param parent The parent can be `NULL` */
+/*! \param parent The parent can be `nullptr` */
 SceneNode::SceneNode(SceneNode *parent, float xx, float yy)
-	: Object(SCENENODE_TYPE), x(xx), y(yy), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
+	: Object(ObjectType::SCENENODE), x(xx), y(yy), shouldUpdate_(true), shouldDraw_(true), parent_(nullptr),
 	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
 	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {
@@ -26,34 +26,28 @@ SceneNode::SceneNode(SceneNode *parent, float xx, float yy)
 		parent->addChildNode(this);
 }
 
-/*! \param parent The parent can be `NULL` */
+/*! \param parent The parent can be `nullptr` */
 SceneNode::SceneNode(SceneNode *parent)
-	: Object(SCENENODE_TYPE), x(0.0f), y(0.0f), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
-	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
-	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
+	: SceneNode(parent, 0.0f, 0.0f)
 {
-	if (parent)
-		parent->addChildNode(this);
+
 }
 
 SceneNode::SceneNode()
-	: Object(SCENENODE_TYPE), x(0.0f), y(0.0f), shouldUpdate_(true), shouldDraw_(true), parent_(NULL),
-	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
-	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
+	: SceneNode(nullptr, 0.0f, 0.0f)
 {
 
 }
 
 SceneNode::~SceneNode()
 {
-	List<SceneNode *>::ConstIterator i = children_.begin();
-	while (i != children_.end())
-		delete (*i++);
+	for (SceneNode *child : children_)
+		delete(child);
 
 	if (parent_)
 	{
 		parent_->removeChildNode(this);
-		parent_ = NULL;
+		parent_ = nullptr;
 	}
 }
 
@@ -81,7 +75,7 @@ bool SceneNode::removeChildNode(SceneNode *childNode)
 	if (!children_.isEmpty() && // avoid checking if this node has no children
 	    childNode->parent_ == this) // avoid checking if the child doesn't belong to this node
 	{
-		childNode->parent_ = NULL;
+		childNode->parent_ = nullptr;
 		children_.remove(childNode);
 		hasBeenRemoved = true;
 	}
@@ -93,15 +87,15 @@ bool SceneNode::removeChildNode(SceneNode *childNode)
  * It is faster to remove through an iterator than with a linear search for a specific node.
  * \return True if the node has been removed
  */
-bool SceneNode::removeChildNode(List<SceneNode *>::ConstIterator it)
+bool SceneNode::removeChildNode(nctl::List<SceneNode *>::ConstIterator it)
 {
 	bool hasBeenRemoved = false;
 
-	if (*it && // cannot pass a NULL pointer
+	if (*it && // cannot pass a `nullptr`
 	    !children_.isEmpty() && // avoid checking if this node has no children
 	    (*it)->parent_ == this) // avoid checking the child doesn't belong to this one
 	{
-		(*it)->parent_ = NULL;
+		(*it)->parent_ = nullptr;
 		children_.erase(it);
 		hasBeenRemoved = true;
 	}
@@ -118,16 +112,12 @@ bool SceneNode::unlinkChildNode(SceneNode *childNode)
 	if (!children_.isEmpty() && // avoid checking if this node has no children
 	    childNode->parent_ == this) // avoid checking if the child doesn't belong to this node
 	{
-		childNode->parent_ = NULL;
+		childNode->parent_ = nullptr;
 		children_.remove(childNode);
 
 		// Nephews reparenting
-		List<SceneNode *>::ConstIterator i = childNode->children_.begin();
-		while (i != childNode->children_.end())
-		{
-			addChildNode(*i);
-			++i;
-		}
+		for (SceneNode *child : childNode->children_)
+			addChildNode(child);
 
 		hasBeenUnlinked = true;
 	}
@@ -139,16 +129,16 @@ void SceneNode::update(float interval)
 {
 	// Early return not needed, the first call to this method is on the root node
 
-	for (List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
+	for (SceneNode *child : children_)
 	{
-		if ((*i)->shouldUpdate_)
+		if (child->shouldUpdate_)
 		{
 #ifndef WITH_MULTITHREADING
-			(*i)->update(interval);
+			child->update(interval);
 #else
-			theServiceLocator().threadPool().enqueueCommand(new UpdateNodeCommand(*i, interval));
+			theServiceLocator().threadPool().enqueueCommand(nctl::makeUnique<UpdateNodeCommand>(*i, interval));
 #endif
-			(*i)->transform();
+			child->transform();
 		}
 	}
 }
@@ -157,12 +147,12 @@ void SceneNode::visit(RenderQueue &renderQueue)
 {
 	// Early return not needed, the first call to this method is on the root node
 
-	for (List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
+	for (SceneNode *child : children_)
 	{
-		if ((*i)->shouldDraw_)
+		if (child->shouldDraw_)
 		{
-			(*i)->draw(renderQueue);
-			(*i)->visit(renderQueue);
+			child->draw(renderQueue);
+			child->visit(renderQueue);
 		}
 	}
 }

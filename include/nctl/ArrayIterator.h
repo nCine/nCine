@@ -1,9 +1,11 @@
-#ifndef CLASS_NCINE_ARRAYITERATOR
-#define CLASS_NCINE_ARRAYITERATOR
+#ifndef CLASS_NCTL_ARRAYITERATOR
+#define CLASS_NCTL_ARRAYITERATOR
 
-#include "iterator_traits.h"
+#include "common_macros.h"
+#include "iterator.h"
+#include "ReverseIterator.h"
 
-namespace ncine {
+namespace nctl {
 
 /// An Array iterator
 template <class T, bool IsConst>
@@ -11,9 +13,9 @@ class ArrayIterator
 {
   public:
 	/// Pointer type which respects iterator constness
-	typedef typename IteratorTraits<ArrayIterator>::Pointer Pointer;
+	using Pointer = typename IteratorTraits<ArrayIterator>::Pointer;
 	/// Reference type which respects iterator constness
-	typedef typename IteratorTraits<ArrayIterator>::Reference Reference;
+	using Reference = typename IteratorTraits<ArrayIterator>::Reference;
 
 	explicit ArrayIterator(T *elementPtr)
 		: elementPtr_(elementPtr) { }
@@ -76,11 +78,11 @@ template <class T>
 struct IteratorTraits<ArrayIterator<T, false> >
 {
 	/// Type of the values deferenced by the iterator
-	typedef T ValueType;
+	using ValueType = T;
 	/// Pointer to the type of the values deferenced by the iterator
-	typedef T *Pointer;
+	using Pointer = T *;
 	/// Reference to the type of the values deferenced by the iterator
-	typedef T &Reference;
+	using Reference = T &;
 	/// Type trait for iterator category
 	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
 };
@@ -90,11 +92,11 @@ template <class T>
 struct IteratorTraits<ArrayIterator<T, true> >
 {
 	/// Type of the values deferenced by the iterator (never const)
-	typedef T ValueType;
+	using ValueType = T;
 	/// Pointer to the type of the values deferenced by the iterator
-	typedef const T *Pointer;
+	using Pointer = const T *;
 	/// Reference to the type of the values deferenced by the iterator
-	typedef const T &Reference;
+	using Reference = const T &;
 	/// Type trait for iterator category
 	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
 };
@@ -182,6 +184,58 @@ template <class T, bool IsConst>
 inline typename ArrayIterator<T, IsConst>::Reference ArrayIterator<T, IsConst>::operator[](int n) const
 {
 	return *(elementPtr_ + n);
+}
+
+///////////////////////////////////////////////////////////
+// C-STYLE ARRAYS
+///////////////////////////////////////////////////////////
+
+template <class T, unsigned int N>
+ArrayIterator<T, false> begin(T (&array)[N])
+{
+	return ArrayIterator<T, false>(array);
+}
+
+template <class T, unsigned int N>
+ReverseIterator<ArrayIterator<T, false> > rBegin(T (&array)[N])
+{
+	return ReverseIterator<ArrayIterator<T, false> >(ArrayIterator<T, false>(array + N - 1));
+}
+
+template <class T, unsigned int N>
+const ArrayIterator<T, true> cBegin(T (&array)[N])
+{
+	return ArrayIterator<T, true>(array);
+}
+
+template <class T, unsigned int N>
+const ReverseIterator<ArrayIterator<T, true> > crBegin(T (&array)[N])
+{
+	return ReverseIterator<ArrayIterator<T, true> >(ArrayIterator<T, true>(array + N - 1));
+}
+
+template <class T, unsigned int N>
+ArrayIterator<T, false> end(T (&array)[N])
+{
+	return ArrayIterator<T, false>(array + N);
+}
+
+template <class T, unsigned int N>
+ReverseIterator<ArrayIterator<T, false> > rEnd(T (&array)[N])
+{
+	return ReverseIterator<ArrayIterator<T, false> >(ArrayIterator<T, false>(array - 1));
+}
+
+template <class T, unsigned int N>
+const ArrayIterator<T, true> cEnd(T (&array)[N])
+{
+	return ArrayIterator<T, true>(array + N);
+}
+
+template <class T, unsigned int N>
+const ReverseIterator<ArrayIterator<T, true> > crEnd(T (&array)[N])
+{
+	return ReverseIterator<ArrayIterator<T, true> >(ArrayIterator<T, true>(array - 1));
 }
 
 }

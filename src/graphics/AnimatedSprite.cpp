@@ -7,13 +7,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AnimatedSprite::AnimatedSprite(SceneNode *parent, Texture *texture)
-	: Sprite(parent, texture), anims_(4), currentAnim_(-1)
+	: AnimatedSprite(parent, texture, 0.0f, 0.0f)
 {
 
 }
 
 AnimatedSprite::AnimatedSprite(Texture *texture)
-	: Sprite(texture), anims_(4), currentAnim_(-1)
+	: AnimatedSprite(nullptr, texture, 0.0f, 0.0f)
 {
 
 }
@@ -25,15 +25,9 @@ AnimatedSprite::AnimatedSprite(SceneNode *parent, Texture *texture, float x, flo
 }
 
 AnimatedSprite::AnimatedSprite(Texture *texture, float x, float y)
-	: Sprite(texture, x, y), anims_(4), currentAnim_(-1)
+	: AnimatedSprite(nullptr, texture, x, y)
 {
 
-}
-
-AnimatedSprite::~AnimatedSprite()
-{
-	for (unsigned int i = 0; i < anims_.size(); i++)
-		delete anims_[i];
 }
 
 ///////////////////////////////////////////////////////////
@@ -67,11 +61,11 @@ void AnimatedSprite::update(float interval)
 	Sprite::update(interval);
 }
 
-void AnimatedSprite::addAnimation(RectAnimation *anim)
+void AnimatedSprite::addAnimation(nctl::UniquePtr<RectAnimation> anim)
 {
 	ASSERT(anim);
 
-	anims_.pushBack(anim);
+	anims_.pushBack(nctl::move(anim));
 	currentAnim_ = anims_.size() - 1;
 	setTexRect(anims_[currentAnim_]->rect());
 }

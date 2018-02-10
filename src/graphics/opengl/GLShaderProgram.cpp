@@ -1,6 +1,6 @@
 #include "GLShaderProgram.h"
 #include "GLShader.h"
-#include "ncString.h"
+#include "nctl/String.h"
 
 namespace ncine {
 
@@ -77,7 +77,7 @@ bool GLShaderProgram::link()
 
 		if (length > 0)
 		{
-			String infoLog(length);
+			nctl::String infoLog(length);
 			glGetProgramInfoLog(glHandle_, length, &length, infoLog.data());
 			LOGW_X("%s", infoLog.data());
 		}
@@ -85,8 +85,9 @@ bool GLShaderProgram::link()
 		return false;
 	}
 
-	for (unsigned int i = 0; i < attachedShaders_.size(); i++)
-		delete attachedShaders_[i];
+	// After linking, shader objects are not needed anymore
+	for (GLShader *attachedShader : attachedShaders_)
+		delete attachedShader;
 
 	discoverUniforms();
 	discoverAttributes();
@@ -156,7 +157,7 @@ void GLShaderProgram::discoverUniforms()
 
 void GLShaderProgram::discoverAttributes()
 {
-	int count;
+	GLint count;
 	glGetProgramiv(glHandle_, GL_ACTIVE_ATTRIBUTES, &count);
 
 	for (int i = 0; i < count; i++)

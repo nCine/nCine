@@ -12,8 +12,8 @@ class StackedBarVariable : public PlottingVariable
 	StackedBarVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f &worldMatrix);
 
   private:
-	virtual void updateRenderCommand();
-	virtual void updateMeanRenderCommand();
+	void updateRenderCommand() override;
+	void updateMeanRenderCommand() override;
 };
 
 /// A class that plots variables as stacked histograms
@@ -22,8 +22,8 @@ class StackedBarPlotter : public ProfilePlotter
   public:
 	StackedBarPlotter(SceneNode *parent, Rectf rect) : ProfilePlotter(parent, rect) { }
 
-	virtual unsigned int addVariable(unsigned int numValues, float rejectDelay);
-	virtual void draw(RenderQueue &renderQueue);
+	unsigned int addVariable(unsigned int numValues, float rejectDelay) override;
+	void draw(RenderQueue &renderQueue) override;
 
   private:
 	/// Fill the buffer of every stacked variable with vertices

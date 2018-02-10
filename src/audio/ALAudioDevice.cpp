@@ -2,29 +2,22 @@
 #include "ALAudioDevice.h"
 #include "AudioBufferPlayer.h"
 #include "AudioStreamPlayer.h"
+#include "nctl/algorithms.h"
 
 namespace ncine {
-
-namespace {
-
-void playPlayer(IAudioPlayer *player) { player->play(); }
-void pausePlayer(IAudioPlayer *player) { player->pause(); }
-void stopPlayer(IAudioPlayer *player) { player->stop(); }
-
-}
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 ALAudioDevice::ALAudioDevice()
-	: device_(NULL), context_(NULL), gain_(1.0f)
+	: device_(nullptr), context_(nullptr), gain_(1.0f)
 {
-	device_ = alcOpenDevice(NULL);
-	FATAL_ASSERT_MSG_X(device_ != NULL, "alcOpenDevice failed: %x", alGetError());
+	device_ = alcOpenDevice(nullptr);
+	FATAL_ASSERT_MSG_X(device_ != nullptr, "alcOpenDevice failed: %x", alGetError());
 
-	context_ = alcCreateContext(device_, NULL);
-	if (context_ == NULL)
+	context_ = alcCreateContext(device_, nullptr);
+	if (context_ == nullptr)
 	{
 		alcCloseDevice(device_);
 		FATAL_MSG_X("alcCreateContext failed: %x", alGetError());
@@ -67,23 +60,23 @@ void ALAudioDevice::setGain(ALfloat gain)
 
 void ALAudioDevice::stopPlayers()
 {
-	forEach(players_.begin(), players_.end(), stopPlayer);
+	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player){ player->stop(); });
 	players_.clear();
 }
 
 void ALAudioDevice::pausePlayers()
 {
-	forEach(players_.begin(), players_.end(), pausePlayer);
+	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player){ player->pause(); });
 	players_.clear();
 }
 
 void ALAudioDevice::stopPlayers(PlayerType playerType)
 {
 	Object::ObjectType objectType = AudioBufferPlayer::sType();
-	if (playerType == AUDIOSTREAM_PLAYER)
+	if (playerType == PlayerType::AUDIOSTREAM)
 		objectType = AudioStreamPlayer::sType();
 
-	List<IAudioPlayer *>::ConstIterator i = players_.begin();
+	nctl::List<IAudioPlayer *>::ConstIterator i = players_.begin();
 	while (i != players_.end())
 	{
 		if ((*i)->type() == objectType)
@@ -99,10 +92,10 @@ void ALAudioDevice::stopPlayers(PlayerType playerType)
 void ALAudioDevice::pausePlayers(PlayerType playerType)
 {
 	Object::ObjectType objectType = AudioBufferPlayer::sType();
-	if (playerType == AUDIOSTREAM_PLAYER)
+	if (playerType == PlayerType::AUDIOSTREAM)
 		objectType = AudioStreamPlayer::sType();
 
-	List<IAudioPlayer *>::ConstIterator i = players_.begin();
+	nctl::List<IAudioPlayer *>::ConstIterator i = players_.begin();
 	while (i != players_.end())
 	{
 		if ((*i)->type() == objectType)
@@ -117,13 +110,13 @@ void ALAudioDevice::pausePlayers(PlayerType playerType)
 
 void ALAudioDevice::freezePlayers()
 {
-	forEach(players_.begin(), players_.end(), pausePlayer);
+	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player){ player->pause(); });
 	// The player list is not cleared at this point, it is needed as-is by the unfreeze method
 }
 
 void ALAudioDevice::unfreezePlayers()
 {
-	forEach(players_.begin(), players_.end(), playPlayer);
+	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player){ player->play(); });
 }
 
 int ALAudioDevice::nextAvailableSource()
@@ -148,7 +141,7 @@ void ALAudioDevice::registerPlayer(IAudioPlayer *player)
 
 void ALAudioDevice::updatePlayers()
 {
-	List<IAudioPlayer *>::ConstIterator i = players_.begin();
+	nctl::List<IAudioPlayer *>::ConstIterator i = players_.begin();
 	while (i != players_.end())
 	{
 		if ((*i)->isPlaying())

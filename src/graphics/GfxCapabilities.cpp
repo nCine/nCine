@@ -1,4 +1,5 @@
-#include <cstring> // for CheckGLExtension()
+#include <cstdio> // for sscanf()
+#include <cstring> // for checkGLExtension()
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
 #include "common_macros.h"
@@ -15,10 +16,10 @@ GfxCapabilities::GfxCapabilities()
 	  glMinorVersion_(0),
 	  glReleaseVersion_(0)
 {
-	for (unsigned int i = 0; i < IGfxCapabilities::NUM_INTVALUES; i++)
+	for (unsigned int i = 0; i < GLIntValues::COUNT; i++)
 		glIntValues_[i] = 0;
 
-	for (unsigned int i = 0; i < IGfxCapabilities::NUM_EXTENSIONS; i++)
+	for (unsigned int i = 0; i < GLExtensions::COUNT; i++)
 		glExtensions_[i] = false;
 
 	init();
@@ -32,29 +33,29 @@ int GfxCapabilities::glVersion(IGfxCapabilities::GLVersion version) const
 {
 	switch (version)
 	{
-		case IGfxCapabilities::MAJOR:	return glMajorVersion_;
-		case IGfxCapabilities::MINOR:	return glMinorVersion_;
-		case IGfxCapabilities::RELEASE:	return glReleaseVersion_;
+		case GLVersion::MAJOR:		return glMajorVersion_;
+		case GLVersion::MINOR:		return glMinorVersion_;
+		case GLVersion::RELEASE:	return glReleaseVersion_;
 
 		default: return 0;
 	}
 }
 
-int GfxCapabilities::value(GLIntValues valueName) const
+int GfxCapabilities::value(GLIntValues::Enum valueName) const
 {
 	int value = 0;
 
-	if (valueName >= 0 && valueName < NUM_INTVALUES)
+	if (valueName >= 0 && valueName < GLIntValues::COUNT)
 		value = glIntValues_[valueName];
 
 	return value;
 }
 
-bool GfxCapabilities::hasExtension(GLExtensions extensionName) const
+bool GfxCapabilities::hasExtension(GLExtensions::Enum extensionName) const
 {
 	bool extensionAvailable = false;
 
-	if (extensionName >= 0 && extensionName < NUM_EXTENSIONS)
+	if (extensionName >= 0 && extensionName < GLExtensions::COUNT)
 		extensionAvailable = glExtensions_[extensionName];
 
 	return extensionAvailable;
@@ -73,14 +74,14 @@ void GfxCapabilities::init()
 	sscanf(pVersion, "OpenGL ES %2d.%2d", &glMajorVersion_, &glMinorVersion_);
 #endif
 
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &glIntValues_[MAX_TEXTURE_SIZE]);
-	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &glIntValues_[MAX_TEXTURE_IMAGE_UNITS]);
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &glIntValues_[GLIntValues::MAX_TEXTURE_SIZE]);
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &glIntValues_[GLIntValues::MAX_TEXTURE_IMAGE_UNITS]);
 
-	glExtensions_[EXT_TEXTURE_COMPRESSION_S3TC] = checkGLExtension("GL_EXT_texture_compression_s3tc");
-	glExtensions_[OES_COMPRESSED_ETC1_RGB8_TEXTURE] = checkGLExtension("GL_OES_compressed_ETC1_RGB8_texture");
-	glExtensions_[AMD_COMPRESSED_ATC_TEXTURE] = checkGLExtension("GL_AMD_compressed_ATC_texture");
-	glExtensions_[IMG_TEXTURE_COMPRESSION_PVRTC] = checkGLExtension("GL_IMG_texture_compression_pvrtc");
-	glExtensions_[KHR_TEXTURE_COMPRESSION_ASTC_LDR] = checkGLExtension("GL_KHR_texture_compression_astc_ldr");
+	glExtensions_[GLExtensions::EXT_TEXTURE_COMPRESSION_S3TC] = checkGLExtension("GL_EXT_texture_compression_s3tc");
+	glExtensions_[GLExtensions::OES_COMPRESSED_ETC1_RGB8_TEXTURE] = checkGLExtension("GL_OES_compressed_ETC1_RGB8_texture");
+	glExtensions_[GLExtensions::AMD_COMPRESSED_ATC_TEXTURE] = checkGLExtension("GL_AMD_compressed_ATC_texture");
+	glExtensions_[GLExtensions::IMG_TEXTURE_COMPRESSION_PVRTC] = checkGLExtension("GL_IMG_texture_compression_pvrtc");
+	glExtensions_[GLExtensions::KHR_TEXTURE_COMPRESSION_ASTC_LDR] = checkGLExtension("GL_KHR_texture_compression_astc_ldr");
 }
 
 void GfxCapabilities::logGLInfo()
@@ -103,14 +104,14 @@ void GfxCapabilities::logGLExtensions()
 void GfxCapabilities::logGLCaps() const
 {
 	LOGI("--- OpenGL device capabilities ---");
-	LOGI_X("GL_MAX_TEXTURE_SIZE: %d", glIntValues_[MAX_TEXTURE_SIZE]);
-	LOGI_X("GL_MAX_TEXTURE_IMAGE_UNITS: %d", glIntValues_[MAX_TEXTURE_IMAGE_UNITS]);
+	LOGI_X("GL_MAX_TEXTURE_SIZE: %d", glIntValues_[GLIntValues::MAX_TEXTURE_SIZE]);
+	LOGI_X("GL_MAX_TEXTURE_IMAGE_UNITS: %d", glIntValues_[GLIntValues::MAX_TEXTURE_IMAGE_UNITS]);
 	LOGI("---");
-	LOGI_X("GL_EXT_texture_compression_s3tc: %d", glExtensions_[EXT_TEXTURE_COMPRESSION_S3TC]);
-	LOGI_X("GL_OES_compressed_ETC1_RGB8_texture: %d", glExtensions_[OES_COMPRESSED_ETC1_RGB8_TEXTURE]);
-	LOGI_X("GL_AMD_compressed_ATC_texture: %d", glExtensions_[AMD_COMPRESSED_ATC_TEXTURE]);
-	LOGI_X("GL_IMG_texture_compression_pvrtc: %d", glExtensions_[IMG_TEXTURE_COMPRESSION_PVRTC]);
-	LOGI_X("GL_KHR_texture_compression_astc_ldr: %d", glExtensions_[KHR_TEXTURE_COMPRESSION_ASTC_LDR]);
+	LOGI_X("GL_EXT_texture_compression_s3tc: %d", glExtensions_[GLExtensions::EXT_TEXTURE_COMPRESSION_S3TC]);
+	LOGI_X("GL_OES_compressed_ETC1_RGB8_texture: %d", glExtensions_[GLExtensions::OES_COMPRESSED_ETC1_RGB8_TEXTURE]);
+	LOGI_X("GL_AMD_compressed_ATC_texture: %d", glExtensions_[GLExtensions::AMD_COMPRESSED_ATC_TEXTURE]);
+	LOGI_X("GL_IMG_texture_compression_pvrtc: %d", glExtensions_[GLExtensions::IMG_TEXTURE_COMPRESSION_PVRTC]);
+	LOGI_X("GL_KHR_texture_compression_astc_ldr: %d", glExtensions_[GLExtensions::KHR_TEXTURE_COMPRESSION_ASTC_LDR]);
 	LOGI("--- OpenGL device capabilities ---");
 }
 

@@ -18,8 +18,8 @@ AppConfiguration::AppConfiguration()
 #endif
 	, profileTextUpdateTime_(0.2f)
 	, logFile_(128)
-	, consoleLogLevel_(ILogger::LOG_INFO)
-	, fileLogLevel_(ILogger::LOG_OFF)
+	, consoleLogLevel_(ILogger::LogLevel::INFO)
+	, fileLogLevel_(ILogger::LogLevel::OFF)
 	, frameTimerLogInterval_(5.0f)
 	, xResolution_(1280), yResolution_(720)
 	, inFullscreen_(false)
@@ -50,13 +50,13 @@ AppConfiguration::AppConfiguration()
 ///////////////////////////////////////////////////////////
 
 /*! Directly sets the value of the static field `IFile::dataPath_`. */
-void AppConfiguration::setDataPath(const String &dataPath)
+void AppConfiguration::setDataPath(const nctl::String &dataPath)
 {
 	IFile::dataPath_ = dataPath;
 }
 
 /*! The data path will be prefixed automatically before loading. */
-void AppConfiguration::setLogFile(const String &logFile)
+void AppConfiguration::setLogFile(const nctl::String &logFile)
 {
 	logFile_ = logFile;
 }
@@ -88,24 +88,24 @@ void AppConfiguration::setFullScreen(bool inFullscreen)
 	inFullscreen_ = inFullscreen;
 }
 
-void AppConfiguration::setWindowTitle(const String &windowTitle)
+void AppConfiguration::setWindowTitle(const nctl::String &windowTitle)
 {
 	windowTitle_ = windowTitle;
 }
 
-void AppConfiguration::setWindowIconFilename(const String &windowIconFilename)
+void AppConfiguration::setWindowIconFilename(const nctl::String &windowIconFilename)
 {
 	windowIconFilename_ = windowIconFilename;
 }
 
 /*! The data path will be prefixed automatically before loading. */
-void AppConfiguration::setFontTexFilename(const String &fontTexFilename)
+void AppConfiguration::setFontTexFilename(const nctl::String &fontTexFilename)
 {
 	fontTexFilename_ = fontTexFilename;
 }
 
 /*! The data path will be prefixed automatically before loading. */
-void AppConfiguration::setFontFntFilename_(const String &fontFntFilename)
+void AppConfiguration::setFontFntFilename_(const nctl::String &fontFntFilename)
 {
 	fontFntFilename_ = fontFntFilename;
 }

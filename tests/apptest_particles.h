@@ -4,6 +4,7 @@
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
 #include "Vector2.h"
+#include "nctl/UniquePtr.h"
 
 namespace ncine {
 
@@ -22,29 +23,28 @@ class MyEventHandler :
 	public nc::IInputEventHandler
 {
   public:
-	virtual void onPreInit(nc::AppConfiguration &config);
-	virtual void onInit();
-	virtual void onFrameStart();
-	virtual void onShutdown();
+	void onPreInit(nc::AppConfiguration &config) override;
+	void onInit() override;
+	void onFrameStart() override;
 
 #ifdef __ANDROID__
-	virtual void onTouchDown(const nc::TouchEvent &event);
-	virtual void onTouchMove(const nc::TouchEvent &event);
-	virtual void onAcceleration(const nc::AccelerometerEvent &event);
+	void onTouchDown(const nc::TouchEvent &event) override;
+	void onTouchMove(const nc::TouchEvent &event) override;
+	void onAcceleration(const nc::AccelerometerEvent &event) override;
 #endif
-	virtual void onKeyReleased(const nc::KeyboardEvent &event);
-	virtual void onMouseButtonPressed(const nc::MouseEvent &event);
-	virtual void onMouseMoved(const nc::MouseState &state);
+	void onKeyReleased(const nc::KeyboardEvent &event) override;
+	void onMouseButtonPressed(const nc::MouseEvent &event) override;
+	void onMouseMoved(const nc::MouseState &state) override;
 
-	virtual void onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event);
-	virtual void onJoyDisconnected(const nc::JoyConnectionEvent &event);
+	void onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event) override;
+	void onJoyDisconnected(const nc::JoyConnectionEvent &event) override;
 
   private:
 	static const unsigned int NumParticles = 50;
 
-	nc::Texture *texture_;
-	nc::ParticleSystem *particleSystem_;
-	nc::Timer *emitTimer_;
+	nctl::UniquePtr<nc::Texture> texture_;
+	nctl::UniquePtr<nc::ParticleSystem> particleSystem_;
+	nctl::UniquePtr<nc::Timer> emitTimer_;
 	nc::Vector2f emitVector_;
 
 	nc::Vector2f joyVectorLeft_;

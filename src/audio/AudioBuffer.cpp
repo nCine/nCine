@@ -3,7 +3,6 @@
 #include "common_macros.h"
 #include "AudioBuffer.h"
 #include "IAudioLoader.h"
-#include "Array.h"
 
 namespace ncine {
 
@@ -12,19 +11,18 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AudioBuffer::AudioBuffer()
-	: Object(AUDIOBUFFER_TYPE), numChannels_(0), frequency_(0)
+	: Object(ObjectType::AUDIOBUFFER), numChannels_(0), frequency_(0)
 {
 	alGenBuffers(1, &bufferId_);
 }
 
 AudioBuffer::AudioBuffer(const char *filename)
-	: Object(AUDIOBUFFER_TYPE, filename), numChannels_(0), frequency_(0)
+	: Object(ObjectType::AUDIOBUFFER, filename), numChannels_(0), frequency_(0)
 {
 	alGenBuffers(1, &bufferId_);
 
-	IAudioLoader *audioLoader = IAudioLoader::createFromFile(filename);
-	load(audioLoader);
-	delete audioLoader;
+	nctl::UniquePtr<IAudioLoader> audioLoader = IAudioLoader::createFromFile(filename);
+	load(audioLoader.get());
 }
 
 AudioBuffer::~AudioBuffer()
@@ -40,7 +38,6 @@ void AudioBuffer::load(const IAudioLoader *audioLoader)
 {
 	ASSERT(audioLoader);
 
-	char *buffer;
 	ALenum format;
 	frequency_ = audioLoader->frequency();
 	numChannels_ = audioLoader->numChannels();
@@ -53,13 +50,11 @@ void AudioBuffer::load(const IAudioLoader *audioLoader)
 
 	// Buffer size calculated as samples * channels * 16bit
 	const unsigned long int bufferSize = audioLoader->bufferSize();
-	buffer = new char[bufferSize];
+	nctl::UniquePtr<char []> buffer = nctl::makeUnique<char []>(bufferSize);
 
-	audioLoader->read(buffer, bufferSize);
+	audioLoader->read(buffer.get(), bufferSize);
 	// On iOS alBufferDataStatic could be used instead
-	alBufferData(bufferId_, format, buffer, bufferSize, frequency_);
-
-	delete[] buffer;
+	alBufferData(bufferId_, format, buffer.get(), bufferSize, frequency_);
 }
 
 }

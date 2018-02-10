@@ -10,16 +10,16 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-AAssetManager *AssetFile::assetManager_ = NULL;
+AAssetManager *AssetFile::assetManager_ = nullptr;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 AssetFile::AssetFile(const char *filename)
-	: IFile(filename), asset_(NULL), startOffset_(0L)
+	: IFile(filename), asset_(nullptr), startOffset_(0L)
 {
-	type_ = ASSET_TYPE;
+	type_ = FileType::ASSET;
 
 	// Detect fake second extension added to prevent compression
 	const int firstDotChar = filename_.findFirstChar('.');
@@ -42,12 +42,12 @@ AssetFile::~AssetFile()
 void AssetFile::open(unsigned char mode)
 {
 	// Checking if the file is already opened
-	if (fileDescriptor_ >= 0 || asset_ != NULL)
+	if (fileDescriptor_ >= 0 || asset_ != nullptr)
 		LOGW_X("File \"%s\" is already opened", filename_.data());
 	else
 	{
 		// Opening with a file descriptor
-		if (mode & MODE_FD)
+		if (mode & OpenMode::FD)
 			openFD(mode);
 		// Opening as an asset only
 		else
@@ -73,7 +73,7 @@ void AssetFile::close()
 	else if (asset_)
 	{
 		AAsset_close(asset_);
-		asset_ = NULL;
+		asset_ = nullptr;
 		LOGI_X("File \"%s\" closed", filename_.data());
 	}
 }
@@ -144,7 +144,7 @@ unsigned long int AssetFile::read(void *buffer, unsigned long int bytes) const
 
 bool AssetFile::isOpened() const
 {
-	if (fileDescriptor_ >= 0 || asset_ != NULL)
+	if (fileDescriptor_ >= 0 || asset_ != nullptr)
 		return true;
 	else
 		return false;
@@ -157,10 +157,10 @@ bool AssetFile::isOpened() const
 void AssetFile::openFD(unsigned char mode)
 {
 	// An asset file can only be read
-	if (mode == (MODE_FD | MODE_READ))
+	if (mode == (OpenMode::FD | OpenMode::READ))
 	{
 		asset_ = AAssetManager_open(assetManager_, filename_.data(), AASSET_MODE_UNKNOWN);
-		if (asset_ == NULL)
+		if (asset_ == nullptr)
 		{
 			if (shouldExitOnFailToOpen_)
 			{
@@ -177,7 +177,7 @@ void AssetFile::openFD(unsigned char mode)
 		fileDescriptor_ = AAsset_openFileDescriptor(asset_, &startOffset_, &fileSize_);
 		lseek(fileDescriptor_, startOffset_, SEEK_SET);
 		AAsset_close(asset_);
-		asset_ = NULL;
+		asset_ = nullptr;
 
 		if (fileDescriptor_ < 0)
 		{
@@ -202,10 +202,10 @@ void AssetFile::openFD(unsigned char mode)
 void AssetFile::openAsset(unsigned char mode)
 {
 	// An asset file can only be read
-	if (mode == MODE_READ || mode == (MODE_READ | MODE_BINARY))
+	if (mode == OpenMode::READ || mode == (OpenMode::READ | OpenMode::BINARY))
 	{
 		asset_ = AAssetManager_open(assetManager_, filename_.data(), AASSET_MODE_UNKNOWN);
-		if (asset_ == NULL)
+		if (asset_ == nullptr)
 		{
 			if (shouldExitOnFailToOpen_)
 			{
@@ -235,7 +235,7 @@ bool AssetFile::access(const char *filename, unsigned char mode)
 
 	bool isAccessible = false;
 
-	if (mode == IFile::MODE_EXISTS || mode == IFile::MODE_CAN_READ)
+	if (mode == IFile::AccessMode::EXISTS || mode == IFile::AccessMode::READABLE)
 	{
 		AAsset *asset = AAssetManager_open(assetManager_, filename, AASSET_MODE_UNKNOWN);
 		if (asset)
@@ -244,7 +244,7 @@ bool AssetFile::access(const char *filename, unsigned char mode)
 			AAsset_close(asset);
 		}
 	}
-	else if (mode & MODE_CAN_WRITE)
+	else if (mode & AccessMode::WRITABLE)
 		LOGE_X("Cannot access the file \"%s\", an asset can only be read", filename);
 	else
 		LOGE_X("Cannot access the file \"%s\", wrong access mode", filename);

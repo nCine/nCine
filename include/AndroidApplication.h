@@ -35,7 +35,7 @@ class DLL_PUBLIC AndroidApplication : public Application
 
   private:
 	bool isInitialized_;
-	String packageName_;
+	nctl::String packageName_;
 
 	struct android_app *state_;
 	IAppEventHandler *(*createAppEventHandler_)();
@@ -45,16 +45,16 @@ class DLL_PUBLIC AndroidApplication : public Application
 	/// Must be called before exiting to shut down the application
 	void shutdown();
 
-	void setFocus(bool hasFocus);
+	void setFocus(bool hasFocus) override;
 
 	/// Private constructor
-	AndroidApplication() : Application(),  isInitialized_(false), packageName_(128), state_(NULL), createAppEventHandler_(NULL) { }
+	AndroidApplication() : Application(),  isInitialized_(false), packageName_(128), state_(nullptr), createAppEventHandler_(nullptr) { }
 	/// Private destructor
 	~AndroidApplication() { }
-	/// Private copy constructor
-	AndroidApplication(const AndroidApplication &);
-	/// Private assignment operator
-	AndroidApplication &operator=(const AndroidApplication &);
+	/// Deleted copy constructor
+	AndroidApplication(const AndroidApplication &) = delete;
+	/// Deleted assignment operator
+	AndroidApplication &operator=(const AndroidApplication &) = delete;
 
 	/// Returns the singleton reference to the Android application
 	static AndroidApplication &theAndroidApplication() { return static_cast<AndroidApplication &>(theApplication()); }

@@ -1,7 +1,7 @@
 #include "GLShaderAttributes.h"
 #include "GLShaderProgram.h"
 #include "GLBufferObject.h"
-#include "HashMapIterator.h"
+#include "nctl/HashMapIterator.h"
 
 namespace ncine {
 
@@ -9,7 +9,7 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-StaticArray<GLShaderAttributes::GLVertexAttribPointerState, GLShaderAttributes::MaxDefinedVertexAttribPointers> GLShaderAttributes::definedPointers_(StaticArrayMode::EXTEND_SIZE);
+nctl::StaticArray<GLShaderAttributes::GLVertexAttribPointerState, GLShaderAttributes::MaxDefinedVertexAttribPointers> GLShaderAttributes::definedPointers_(nctl::StaticArrayMode::EXTEND_SIZE);
 GLVertexAttribute GLShaderAttributes::attributeNotFound_;
 
 ///////////////////////////////////////////////////////////
@@ -17,12 +17,12 @@ GLVertexAttribute GLShaderAttributes::attributeNotFound_;
 ///////////////////////////////////////////////////////////
 
 GLShaderAttributes::GLShaderAttributes()
-	: shaderProgram_(NULL), vertexAttributes_(VertexAttributesHashSize)
+	: shaderProgram_(nullptr), vertexAttributes_(VertexAttributesHashSize)
 {
 }
 
 GLShaderAttributes::GLShaderAttributes(GLShaderProgram *shaderProgram)
-	: shaderProgram_(NULL), vertexAttributes_(VertexAttributesHashSize)
+	: shaderProgram_(nullptr), vertexAttributes_(VertexAttributesHashSize)
 {
 	setProgram(shaderProgram);
 }
@@ -41,13 +41,13 @@ void GLShaderAttributes::setProgram(GLShaderProgram *shaderProgram)
 GLVertexAttribute *GLShaderAttributes::attribute(const char *name)
 {
 	ASSERT(name);
-	GLVertexAttribute *vertexAttribute = NULL;
+	GLVertexAttribute *vertexAttribute = nullptr;
 
 	if (shaderProgram_)
 	{
 		vertexAttribute = vertexAttributes_.find(name);
 
-		if (vertexAttribute == NULL)
+		if (vertexAttribute == nullptr)
 		{
 			// Returning the dummy vertex attribute to prevent the application from crashing
 			vertexAttribute = &attributeNotFound_;
@@ -71,19 +71,18 @@ void GLShaderAttributes::defineVertexPointers(const GLBufferObject *vbo)
 			boundVboHandle = vbo->glHandle();
 		}
 
-		for (StringHashMap<GLVertexAttribute>::Iterator i = vertexAttributes_.begin(); i != vertexAttributes_.end(); ++i)
+		for (GLVertexAttribute &attribute : vertexAttributes_)
 		{
-			GLVertexAttribute &attribute = *i;
 			int location = attribute.shaderAttribute()->location();
 			if (definedPointers_[location] != attribute || definedPointers_[location].boundVbo() != boundVboHandle)
 			{
-				(*i).vertexAttribPointer();
+				attribute.vertexAttribPointer();
 				definedPointers_[location] = attribute;
 				definedPointers_[location].setBoundVbo(boundVboHandle);
 			}
 			if (definedPointers_[location].isEnabled() == false)
 			{
-				(*i).enable();
+				attribute.enable();
 				definedPointers_[location].setEnabled(true);
 			}
 		}
@@ -102,17 +101,15 @@ void GLShaderAttributes::importAttributes()
 	if (count > VertexAttributesHashSize)
 		LOGW_X("More active attributes (%d) than hashmap buckets (%d)", count, VertexAttributesHashSize);
 
-	for (unsigned int i = 0; i < count; i++)
+	for (const GLAttribute &attribute : shaderProgram_->attributes_)
 	{
-		const GLAttribute &attribute = shaderProgram_->attributes_[i];
 		GLVertexAttribute vertexAttribute(&attribute);
-
 		vertexAttributes_[attribute.name()] = vertexAttribute;
 	}
 }
 
 GLShaderAttributes::GLVertexAttribPointerState::GLVertexAttribPointerState()
-	: enabled_(false), size_(-1), type_(GL_FLOAT), vboStride_(0), vboPointer_(NULL)
+	: enabled_(false), size_(-1), type_(GL_FLOAT), vboStride_(0), vboPointer_(nullptr)
 {
 
 }

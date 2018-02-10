@@ -2,7 +2,7 @@
 #define CLASS_NCINE_ARRAYINDEXER
 
 #include "IIndexer.h"
-#include "Array.h"
+#include "nctl/Array.h"
 #include "Object.h"
 
 namespace ncine {
@@ -12,27 +12,27 @@ class ArrayIndexer : public IIndexer
 {
   public:
 	ArrayIndexer();
-	~ArrayIndexer();
+	~ArrayIndexer() override;
 
-	virtual unsigned int addObject(Object *object);
-	virtual void removeObject(unsigned int id);
+	unsigned int addObject(Object *object) override;
+	void removeObject(unsigned int id) override;
 
-	virtual Object *object(unsigned int id) const;
+	Object *object(unsigned int id) const override;
 
-	virtual bool isEmpty() const { return numObjects_ == 0; }
-	virtual unsigned int size() const { return numObjects_; }
+	bool isEmpty() const override { return numObjects_ == 0; }
+	unsigned int size() const override { return numObjects_; }
 
-	virtual void logReport() const;
+	void logReport() const override;
 
   private:
 	unsigned int numObjects_;
 	unsigned int nextId_;
-	Array<Object *> pointers_;
+	nctl::Array<Object *> pointers_;
 
-	/// Private copy constructor
-	ArrayIndexer(const ArrayIndexer &);
-	/// Private assignment operator
-	ArrayIndexer &operator=(const ArrayIndexer &);
+	/// Deleted copy constructor
+	ArrayIndexer(const ArrayIndexer &) = delete;
+	/// Deleted assignment operator
+	ArrayIndexer &operator=(const ArrayIndexer &) = delete;
 };
 
 }

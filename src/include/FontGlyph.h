@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_FONTGLYPH
 #define CLASS_NCINE_FONTGLYPH
 
-#include "Array.h"
+#include "nctl/Array.h"
 #include "Rect.h"
 
 namespace ncine {
@@ -54,7 +54,7 @@ class FontGlyph
 	int xOffset_;
 	int yOffset_;
 	int xAdvance_;
-	Array<Kerning> kernings_;
+	nctl::Array<Kerning> kernings_;
 };
 
 inline void FontGlyph::set(unsigned int x, unsigned int y, unsigned int width, unsigned int height,

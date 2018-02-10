@@ -8,15 +8,15 @@ class ArrayTest : public ::testing::Test
 	ArrayTest() : array_(Capacity) { }
 
   protected:
-	void SetUp() { initArray(array_); }
+	void SetUp() override { initArray(array_); }
 
-	nc::Array<int> array_;
+	nctl::Array<int> array_;
 };
 
 TEST(ArrayDeathTest, AccessBeyondSize)
 {
 	printf("Trying to access an element within capacity but beyond size\n");
-	nc::Array<int> array(Capacity);
+	nctl::Array<int> array(Capacity);
 	array[0] = 0;
 
 	ASSERT_DEATH(array.at(5) = 1, "");
@@ -25,10 +25,10 @@ TEST(ArrayDeathTest, AccessBeyondSize)
 TEST(ArrayDeathTest, AccessConstAtSize)
 {
 	printf("Trying to access an element of a const array at size\n");
-	nc::Array<int> array(Capacity);
+	nctl::Array<int> array(Capacity);
 	array[0] = 0;
 
-	const nc::Array<int> &constArray = array;
+	const nctl::Array<int> &constArray = array;
 
 	ASSERT_DEATH(constArray.at(1), "");
 }
@@ -36,7 +36,7 @@ TEST(ArrayDeathTest, AccessConstAtSize)
 TEST_F(ArrayTest, AccessEmptyWithinSize)
 {
 	printf("Accessing at array size to add elements\n");
-	nc::Array<int> newArray(Capacity);
+	nctl::Array<int> newArray(Capacity);
 	for (unsigned int i = 0; i < Capacity; i++)
 		newArray.at(i) = i;
 
@@ -64,10 +64,10 @@ TEST_F(ArrayTest, AccessWithPointer)
 
 TEST_F(ArrayTest, SubscriptAccessConstAtSize)
 {
-	nc::Array<int> newArray(Capacity);
+	nctl::Array<int> newArray(Capacity);
 	newArray[0] = 0;
 
-	const nc::Array<int> &constArray = newArray;
+	const nctl::Array<int> &constArray = newArray;
 	const int value = constArray[1];
 	printf("Trying to access an element of a const array at size: %d\n", value);
 
@@ -78,7 +78,7 @@ TEST_F(ArrayTest, SubscriptAccessConstAtSize)
 TEST_F(ArrayTest, SubscriptAccessEmptyWithinSize)
 {
 	printf("Accessing at array size to add elements\n");
-	nc::Array<int> newArray(Capacity);
+	nctl::Array<int> newArray(Capacity);
 	for (unsigned int i = 0; i < Capacity; i++)
 		newArray[i] = static_cast<int>(i);
 	printArray(newArray);
@@ -91,7 +91,7 @@ TEST_F(ArrayTest, SubscriptAccessEmptyWithinSize)
 TEST_F(ArrayTest, SubscriptAccessNotGrowing)
 {
 	printf("Trying to access an element beyond the capacity of a fixed capacity array\n");
-	nc::Array<int> array(1, nc::ArrayMode::FIXED_CAPACITY);
+	nctl::Array<int> array(1, nctl::ArrayMode::FIXED_CAPACITY);
 	array[0] = 0;
 	array[1] = 1;
 
@@ -102,7 +102,7 @@ TEST_F(ArrayTest, SubscriptAccessNotGrowing)
 TEST_F(ArrayTest, SetSizeOnFixed)
 {
 	printf("Trying to extend the size of a fixed capacity array\n");
-	nc::Array<int> array(1, nc::ArrayMode::FIXED_CAPACITY);
+	nctl::Array<int> array(1, nctl::ArrayMode::FIXED_CAPACITY);
 	array[0] = 0;
 	array_.setSize(Capacity);
 
@@ -113,7 +113,7 @@ TEST_F(ArrayTest, SetSizeOnFixed)
 TEST_F(ArrayTest, SetCapacityOnFixed)
 {
 	printf("Setting a new capacity for a fixed capacity array\n");
-	nc::Array<int> array(Capacity, nc::ArrayMode::FIXED_CAPACITY);
+	nctl::Array<int> array(Capacity, nctl::ArrayMode::FIXED_CAPACITY);
 	array.setCapacity(Capacity * 2);
 
 	ASSERT_EQ(array.capacity(), Capacity);

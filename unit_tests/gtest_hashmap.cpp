@@ -8,9 +8,9 @@ class HashMapTest : public ::testing::Test
 	HashMapTest() : hashmap_(Capacity) { }
 
   protected:
-	void SetUp() { initHashMap(hashmap_); }
+	void SetUp() override { initHashMap(hashmap_); }
 
-	nc::HashMap<int, int, nc::FixedHashFunc<int> > hashmap_;
+	nctl::HashMap<int, int, nctl::FixedHashFunc<int> > hashmap_;
 };
 
 TEST_F(HashMapTest, BucketAmount)
@@ -38,6 +38,8 @@ TEST_F(HashMapTest, RetrieveElements)
 		printf("key: %u, value: %d\n", i, hashmap_[i]);
 		ASSERT_EQ(hashmap_[i], KeyValueDifference + i);
 	}
+
+	ASSERT_EQ(calcSize(hashmap_), Size);
 }
 
 TEST_F(HashMapTest, RemoveElements)
@@ -50,24 +52,52 @@ TEST_F(HashMapTest, RemoveElements)
 	int value = 0;
 	ASSERT_FALSE(hashmap_.contains(5, value));
 	ASSERT_FALSE(hashmap_.contains(7, value));
+	ASSERT_EQ(calcSize(hashmap_), Size - 2);
 }
 
 TEST_F(HashMapTest, CopyConstruction)
 {
 	printf("Creating a new hashmap with copy construction\n");
-	nc::HashMap<int, int, nc::FixedHashFunc<int> > newHashmap(hashmap_);
+	nctl::HashMap<int, int, nctl::FixedHashFunc<int> > newHashmap(hashmap_);
 	printHashMap(newHashmap);
 
 	assertHashMapsAreEqual(hashmap_, newHashmap);
+	ASSERT_EQ(calcSize(hashmap_), Size);
+	ASSERT_EQ(calcSize(newHashmap), Size);
+}
+
+TEST_F(HashMapTest, MoveConstruction)
+{
+	printf("Creating a new hashmap with move construction\n");
+	nctl::HashMap<int, int, nctl::FixedHashFunc<int> > newHashmap = nctl::move(hashmap_);
+	printHashMap(newHashmap);
+
+	ASSERT_EQ(hashmap_.bucketAmount(), 0);
+	ASSERT_EQ(newHashmap.bucketAmount(), Capacity);
+	ASSERT_EQ(calcSize(newHashmap), Size);
 }
 
 TEST_F(HashMapTest, AssignmentOperator)
 {
 	printf("Creating a new hashmap with the assignment operator\n");
-	nc::HashMap<int, int, nc::FixedHashFunc<int> > newHashmap = hashmap_;
+	nctl::HashMap<int, int, nctl::FixedHashFunc<int> > newHashmap = hashmap_;
 	printHashMap(newHashmap);
 
 	assertHashMapsAreEqual(hashmap_, newHashmap);
+	ASSERT_EQ(calcSize(hashmap_), Size);
+	ASSERT_EQ(calcSize(newHashmap), Size);
+}
+
+TEST_F(HashMapTest, MoveAssignmentOperator)
+{
+	printf("Creating a new hashmap with the move assignment operator\n");
+	nctl::HashMap<int, int, nctl::FixedHashFunc<int> > newHashmap(Capacity);
+	newHashmap = nctl::move(hashmap_);
+	printHashMap(newHashmap);
+
+	ASSERT_EQ(hashmap_.bucketAmount(), 0);
+	ASSERT_EQ(newHashmap.bucketAmount(), Capacity);
+	ASSERT_EQ(calcSize(newHashmap), Size);
 }
 
 TEST_F(HashMapTest, Contains)

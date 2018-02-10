@@ -3,12 +3,18 @@
 
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
-#include "StaticArray.h"
+#include "nctl/StaticArray.h"
+#include "nctl/UniquePtr.h"
+
+namespace nctl {
+
+class String;
+
+}
 
 namespace ncine {
 
 class AppConfiguration;
-class String;
 class Texture;
 class Sprite;
 class Font;
@@ -24,32 +30,31 @@ class MyEventHandler :
 	public nc::IInputEventHandler
 {
   public:
-	virtual void onPreInit(nc::AppConfiguration &config);
-	virtual void onInit();
-	virtual void onFrameStart();
-	virtual void onShutdown();
+	void onPreInit(nc::AppConfiguration &config) override;
+	void onInit() override;
+	void onFrameStart() override;
 
 #ifdef __ANDROID__
-	void handleEvent(const nc::TouchEvent &event, nc::String *string, const char *eventName);
-	virtual void onTouchDown(const nc::TouchEvent &event);
-	virtual void onTouchUp(const nc::TouchEvent &event);
-	virtual void onTouchMove(const nc::TouchEvent &event);
-	virtual void onPointerDown(const nc::TouchEvent &event);
-	virtual void onPointerUp(const nc::TouchEvent &event);
+	void handleEvent(const nc::TouchEvent &event, nctl::String *string, const char *eventName);
+	void onTouchDown(const nc::TouchEvent &event) override;
+	void onTouchUp(const nc::TouchEvent &event) override;
+	void onTouchMove(const nc::TouchEvent &event) override;
+	void onPointerDown(const nc::TouchEvent &event) override;
+	void onPointerUp(const nc::TouchEvent &event) override;
 #else
-	virtual void onKeyReleased(const nc::KeyboardEvent &event);
+	void onKeyReleased(const nc::KeyboardEvent &event) override;
 #endif
 
   private:
 	static const unsigned int MaxNumChars = 1024;
-	nc::String *multitouchString_;
+	nctl::UniquePtr<nctl::String> multitouchString_;
 
 #ifdef __ANDROID__
-	nc::Texture *texture_;
-	nc::StaticArray<nc::Sprite *, nc::TouchEvent::MaxPointers> sprites_;
+	nctl::UniquePtr<nc::Texture> texture_;
+	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, nc::TouchEvent::MaxPointers> sprites_;
 #endif
-	nc::Font *font_;
-	nc::TextNode *textNode_;
+	nctl::UniquePtr<nc::Font> font_;
+	nctl::UniquePtr<nc::TextNode> textNode_;
 };
 
 #endif

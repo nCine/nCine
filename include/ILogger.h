@@ -10,16 +10,16 @@ class DLL_PUBLIC ILogger
 {
   public:
 	/// Log levels, from less to more severe
-	enum LogLevel
+	enum class LogLevel
 	{
-		LOG_UNKNOWN = 0,
-		LOG_VERBOSE,
-		LOG_DEBUG,
-		LOG_INFO,
-		LOG_WARN,
-		LOG_ERROR,
-		LOG_FATAL,
-		LOG_OFF
+		UNKNOWN = 0,
+		VERBOSE,
+		DEBUG,
+		INFO,
+		WARN,
+		ERROR,
+		FATAL,
+		OFF
 	};
 
 	virtual ~ILogger() = 0;
@@ -35,7 +35,7 @@ inline ILogger::~ILogger() { }
 class DLL_PUBLIC NullLogger : public ILogger
 {
   public:
-	virtual void write(LogLevel level, const char *fmt, ...) { }
+	void write(LogLevel level, const char *fmt, ...) override { }
 };
 
 }

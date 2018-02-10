@@ -1,10 +1,10 @@
-#ifndef CLASS_NCINE_LISTITERATOR
-#define CLASS_NCINE_LISTITERATOR
+#ifndef CLASS_NCTL_LISTITERATOR
+#define CLASS_NCTL_LISTITERATOR
 
 #include "common_macros.h"
-#include "iterator_traits.h"
+#include "iterator.h"
 
-namespace ncine {
+namespace nctl {
 
 template <class T> class List;
 template <class T> class ListNode;
@@ -15,7 +15,7 @@ class ListIterator
 {
   public:
 	/// Reference type which respects iterator constness
-	typedef typename IteratorTraits<ListIterator>::Reference Reference;
+	using Reference = typename IteratorTraits<ListIterator>::Reference;
 
 	explicit ListIterator(ListNode<T> *node)
 		: node_(node) { }
@@ -56,11 +56,11 @@ template <class T>
 struct IteratorTraits<ListIterator<T, false> >
 {
 	/// Type of the values deferenced by the iterator
-	typedef T ValueType;
+	using ValueType = T;
 	/// Pointer to the type of the values deferenced by the iterator
-	typedef T *Pointer;
+	using Pointer = T *;
 	/// Reference to the type of the values deferenced by the iterator
-	typedef T &Reference;
+	using Reference = T &;
 	/// Type trait for iterator category
 	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
 };
@@ -70,11 +70,11 @@ template <class T>
 struct IteratorTraits<ListIterator<T, true> >
 {
 	/// Type of the values deferenced by the iterator (never const)
-	typedef T ValueType;
+	using ValueType = T;
 	/// Pointer to the type of the values deferenced by the iterator
-	typedef const T *Pointer;
+	using Pointer = const T *;
 	/// Reference to the type of the values deferenced by the iterator
-	typedef const T &Reference;
+	using Reference = const T &;
 	/// Type trait for iterator category
 	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
 };
@@ -82,18 +82,13 @@ struct IteratorTraits<ListIterator<T, true> >
 template <class T, bool IsConst>
 inline typename ListIterator<T, IsConst>::Reference ListIterator<T, IsConst>::operator*() const
 {
-	ASSERT(node_);
-	// Cannot simply return only if node_ is not NULL or
-	// "control may reach end of non-void function"
 	return node_->data_;
 }
 
 template <class T, bool IsConst>
 ListIterator<T, IsConst> &ListIterator<T, IsConst>::operator++()
 {
-	if (node_)
-		node_ = node_->next_;
-
+	node_ = static_cast<ListNode<T> *>(node_->next_);
 	return *this;
 }
 
@@ -103,8 +98,7 @@ ListIterator<T, IsConst> ListIterator<T, IsConst>::operator++(int)
 	// Create an unmodified copy to return
 	ListIterator iterator = *this;
 
-	if (node_)
-		node_ = node_->next_;
+	node_ = static_cast<ListNode<T> *>(node_->next_);
 
 	return iterator;
 }
@@ -112,9 +106,7 @@ ListIterator<T, IsConst> ListIterator<T, IsConst>::operator++(int)
 template <class T, bool IsConst>
 ListIterator<T, IsConst> &ListIterator<T, IsConst>::operator--()
 {
-	if (node_)
-		node_ = node_->previous_;
-
+	node_ = static_cast<ListNode<T> *>(node_->previous_);
 	return *this;
 }
 
@@ -124,8 +116,7 @@ ListIterator<T, IsConst> ListIterator<T, IsConst>::operator--(int)
 	// Create an unmodified copy to return
 	ListIterator iterator = *this;
 
-	if (node_)
-		node_ = node_->previous_;
+	node_ = static_cast<ListNode<T> *>(node_->previous_);
 
 	return iterator;
 }

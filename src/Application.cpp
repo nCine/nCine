@@ -10,7 +10,7 @@
 #include "StackedBarPlotter.h"
 #include "Font.h"
 #include "TextNode.h"
-#include "ncString.h"
+#include "nctl/String.h"
 #include "IInputManager.h"
 #include "JoyMapping.h"
 
@@ -34,11 +34,16 @@ namespace ncine {
 
 Application::Application()
 	: isPaused_(false), hasFocus_(true), shouldQuit_(false),
-	  frameTimer_(NULL), gfxDevice_(NULL),
-	  renderQueue_(NULL), rootNode_(NULL),
-	  profileTimer_(NULL), profilePlotter_(NULL),
-	  font_(NULL), textLines_(NULL), textUpdateTime_(0.0f),
-	  textString_(MaxTextLength), inputManager_(NULL), appEventHandler_(NULL)
+	  frameTimer_(nullptr), gfxDevice_(nullptr),
+	  renderQueue_(nullptr), rootNode_(nullptr),
+	  profileTimer_(nullptr), profilePlotter_(nullptr),
+	  font_(nullptr), textLines_(nullptr), textUpdateTime_(0.0f),
+	  textString_(MaxTextLength), inputManager_(nullptr), appEventHandler_(nullptr)
+{
+
+}
+
+Application::~Application()
 {
 
 }
@@ -80,33 +85,33 @@ void Application::initCommon()
 	LOGI("nCine compiled on " __DATE__ " at " __TIME__);
 #endif
 
-	theServiceLocator().registerIndexer(new ArrayIndexer());
+	theServiceLocator().registerIndexer(nctl::makeUnique<ArrayIndexer>());
 #ifdef WITH_AUDIO
 	if (appCfg_.withAudio_)
-		theServiceLocator().registerAudioDevice(new ALAudioDevice());
+		theServiceLocator().registerAudioDevice(nctl::makeUnique<ALAudioDevice>());
 #endif
 #ifdef WITH_THREADS
 	if (appCfg_.withThreads_)
-		theServiceLocator().registerThreadPool(new ThreadPool());
+		theServiceLocator().registerThreadPool(nctl::makeUnique<ThreadPool>());
 #endif
-	theServiceLocator().registerGfxCapabilities(new GfxCapabilities());
+	theServiceLocator().registerGfxCapabilities(nctl::makeUnique<GfxCapabilities>());
 
 	LOGI_X("Data path: \"%s\"", IFile::dataPath().data());
 	LOGI_X("Save path: \"%s\"", IFile::savePath().data());
 
-	frameTimer_ = new FrameTimer(appCfg_.frameTimerLogInterval_, appCfg_.profileTextUpdateTime_);
-	profileTimer_ = new Timer();
+	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.frameTimerLogInterval_, appCfg_.profileTextUpdateTime_);
+	profileTimer_ = nctl::makeUnique<Timer>();
 
 	if (appCfg_.withScenegraph_)
 	{
 		gfxDevice_->setupGL();
 		RenderResources::create();
-		renderQueue_ = new RenderQueue();
-		rootNode_ = new SceneNode();
+		renderQueue_ = nctl::makeUnique<RenderQueue>();
+		rootNode_ = nctl::makeUnique<SceneNode>();
 
 		if (appCfg_.withProfilerGraphs_)
 		{
-			profilePlotter_ = new StackedBarPlotter(rootNode_, Rectf(width() * 0.1f, height() * 0.1f, width() * 0.8f, height() * 0.15f));
+			profilePlotter_ = nctl::makeUnique<StackedBarPlotter>(rootNode_.get(), Rectf(width() * 0.1f, height() * 0.1f, width() * 0.8f, height() * 0.15f));
 			profilePlotter_->setBackgroundColor(Color(0.35f, 0.35f, 0.45f, 0.5f));
 			profilePlotter_->addVariable(50, 0.2f);
 			profilePlotter_->variable(0).setGraphColor(Color(0.8f, 0.0f, 0.0f));
@@ -127,16 +132,16 @@ void Application::initCommon()
 
 		if (appCfg_.withProfilerText_)
 		{
-			String fontTexFilePath = IFile::dataPath() + appCfg_.fontTexFilename_;
-			String fontFntFilePath = IFile::dataPath() + appCfg_.fontFntFilename_;
-			if (IFile::access(fontTexFilePath.data(), IFile::MODE_EXISTS) == false)
+			nctl::String fontTexFilePath = IFile::dataPath() + appCfg_.fontTexFilename_;
+			nctl::String fontFntFilePath = IFile::dataPath() + appCfg_.fontFntFilename_;
+			if (IFile::access(fontTexFilePath.data(), IFile::AccessMode::EXISTS) == false)
 				LOGW_X("Cannot access font texture file \"%s\" to enable profiling text", fontTexFilePath.data());
-			else if (IFile::access(fontFntFilePath.data(), IFile::MODE_EXISTS) == false)
+			else if (IFile::access(fontFntFilePath.data(), IFile::AccessMode::EXISTS) == false)
 				LOGW_X("Cannot access font FNT file \"%s\" to enable profiling text", fontFntFilePath.data());
 			else
 			{
-				font_ = new Font(fontTexFilePath.data(), fontFntFilePath.data());
-				textLines_ = new TextNode(rootNode_, font_);
+				font_ = nctl::makeUnique<Font>(fontTexFilePath.data(), fontFntFilePath.data());
+				textLines_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
 				textLines_->setPosition(0.0f, height());
 			}
 		}
@@ -149,7 +154,7 @@ void Application::initCommon()
 
 	// HACK: Init of the random seed
 	// In the future there could be a random generator service
-	srand(static_cast<unsigned int>(time(NULL)));
+	srand(static_cast<unsigned int>(time(nullptr)));
 }
 
 void Application::step()
@@ -165,7 +170,7 @@ void Application::step()
 	}
 
 	profileTimer_->start();
-	if (rootNode_ != NULL && renderQueue_ != NULL)
+	if (rootNode_ != nullptr && renderQueue_ != nullptr)
 	{
 		rootNode_->update(frameTimer_->interval());
 		rootNode_->visit(*renderQueue_);
@@ -177,14 +182,14 @@ void Application::step()
 		textUpdateTime_ = Timer::now();
 		textString_.format(static_cast<const char *>("FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC"),
 		                   frameTimer_->averageFps(), frameTimer_->interval() * 1000.0f,
-		                   renderQueue_->numVertices(RenderCommand::SPRITE_TYPE), renderQueue_->numCommands(RenderCommand::SPRITE_TYPE),
-		                   renderQueue_->numVertices(RenderCommand::PARTICLE_TYPE), renderQueue_->numCommands(RenderCommand::PARTICLE_TYPE),
-		                   renderQueue_->numVertices(RenderCommand::TEXT_TYPE), renderQueue_->numCommands(RenderCommand::TEXT_TYPE),
-		                   renderQueue_->numVertices(RenderCommand::PLOTTER_TYPE), renderQueue_->numCommands(RenderCommand::PLOTTER_TYPE),
+		                   renderQueue_->numVertices(RenderCommand::CommandType::SPRITE), renderQueue_->numCommands(RenderCommand::CommandType::SPRITE),
+		                   renderQueue_->numVertices(RenderCommand::CommandType::PARTICLE), renderQueue_->numCommands(RenderCommand::CommandType::PARTICLE),
+		                   renderQueue_->numVertices(RenderCommand::CommandType::TEXT), renderQueue_->numCommands(RenderCommand::CommandType::TEXT),
+		                   renderQueue_->numVertices(RenderCommand::CommandType::PLOTTER), renderQueue_->numCommands(RenderCommand::CommandType::PLOTTER),
 		                   renderQueue_->numVertices(), renderQueue_->numCommands());
 
 		textLines_->setString(textString_);
-		textLines_->setAlignment(TextNode::ALIGN_RIGHT);
+		textLines_->setAlignment(TextNode::Alignment::RIGHT);
 		textLines_->setPosition(width() - textLines_->width() * 0.5f, height() - textLines_->height() * 0.5f);
 	}
 
@@ -211,20 +216,18 @@ void Application::shutdownCommon()
 {
 	appEventHandler_->onShutdown();
 	LOGI("IAppEventHandler::OnShutdown() invoked");
+	appEventHandler_.reset(nullptr);
 
-	if (appEventHandler_)
-		delete appEventHandler_;
-
-	delete textLines_;
-	delete font_;
-	delete profilePlotter_;
-	delete profileTimer_;
-	delete rootNode_; // deletes every child too
-	delete renderQueue_;
+	textLines_.reset(nullptr);
+	font_.reset(nullptr);
+	profilePlotter_.reset(nullptr);
+	profileTimer_.reset(nullptr);
+	rootNode_.reset(nullptr);
+	renderQueue_.reset(nullptr);
 	RenderResources::dispose();
-	delete frameTimer_;
-	delete inputManager_;
-	delete gfxDevice_;
+	frameTimer_.reset(nullptr);
+	inputManager_.reset(nullptr);
+	gfxDevice_.reset(nullptr);
 
 	if (theServiceLocator().indexer().isEmpty() == false)
 	{

@@ -1,4 +1,3 @@
-#include <cstdlib> // for NULL
 #include "Timer.h"
 
 #ifdef _WIN32
@@ -116,7 +115,7 @@ unsigned long long int Timer::counter()
 	else
 	{
 		struct timeval now;
-		gettimeofday(&now, NULL);
+		gettimeofday(&now, nullptr);
 		counter = now.tv_sec * frequency_ + now.tv_usec;
 	}
 #endif

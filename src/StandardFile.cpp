@@ -29,13 +29,13 @@ StandardFile::~StandardFile()
 void StandardFile::open(unsigned char mode)
 {
 	// Checking if the file is already opened
-	if (fileDescriptor_ >= 0 || filePointer_ != NULL)
+	if (fileDescriptor_ >= 0 || filePointer_ != nullptr)
 		LOGW_X("File \"%s\" is already opened", filename_.data());
 	else
 	{
 #if !(defined(_WIN32) && !defined(__MINGW32__))
 		// Opening with a file descriptor
-		if (mode & MODE_FD)
+		if (mode & OpenMode::FD)
 			openFD(mode);
 		// Opening with a file stream
 		else
@@ -68,7 +68,7 @@ void StandardFile::close()
 		else
 		{
 			LOGI_X("File \"%s\" closed", filename_.data());
-			filePointer_ = NULL;
+			filePointer_ = nullptr;
 		}
 	}
 }
@@ -136,13 +136,13 @@ void StandardFile::openFD(unsigned char mode)
 
 	switch (mode)
 	{
-		case (MODE_FD | MODE_READ):
+		case (OpenMode::FD | OpenMode::READ):
 			openFlag = O_RDONLY;
 			break;
-		case (MODE_FD | MODE_WRITE):
+		case (OpenMode::FD | OpenMode::WRITE):
 			openFlag = O_WRONLY;
 			break;
-		case (MODE_FD | MODE_READ | MODE_WRITE):
+		case (OpenMode::FD | OpenMode::READ | OpenMode::WRITE):
 			openFlag = O_RDWR;
 			break;
 		default:
@@ -183,25 +183,25 @@ void StandardFile::openStream(unsigned char mode)
 
 	switch (mode)
 	{
-		case (MODE_READ):
+		case (OpenMode::READ):
 			modeChars[0] = 'r';
 			break;
-		case (MODE_WRITE):
+		case (OpenMode::WRITE):
 			modeChars[0] = 'w';
 			break;
-		case (MODE_READ | MODE_WRITE):
+		case (OpenMode::READ | OpenMode::WRITE):
 			modeChars[0] = 'r';
 			modeChars[1] = '+';
 			break;
-		case (MODE_READ | MODE_BINARY):
+		case (OpenMode::READ | OpenMode::BINARY):
 			modeChars[0] = 'r';
 			modeChars[1] = 'b';
 			break;
-		case (MODE_WRITE | MODE_BINARY):
+		case (OpenMode::WRITE | OpenMode::BINARY):
 			modeChars[0] = 'w';
 			modeChars[1] = 'b';
 			break;
-		case (MODE_READ | MODE_WRITE | MODE_BINARY):
+		case (OpenMode::READ | OpenMode::WRITE | OpenMode::BINARY):
 			modeChars[0] = 'r';
 			modeChars[1] = '+';
 			modeChars[2] = 'b';
@@ -215,7 +215,7 @@ void StandardFile::openStream(unsigned char mode)
 	{
 		filePointer_ = fopen(filename_.data(), modeChars);
 
-		if (filePointer_ == NULL)
+		if (filePointer_ == nullptr)
 		{
 			if (shouldExitOnFailToOpen_)
 			{
@@ -247,16 +247,16 @@ bool StandardFile::access(const char *filename, unsigned char mode)
 #if !(defined(_WIN32) && !defined(__MINGW32__))
 	switch (mode)
 	{
-		case (IFile::MODE_EXISTS):
+		case (IFile::AccessMode::EXISTS):
 			accessMode = F_OK;
 			break;
-		case (IFile::MODE_CAN_READ):
+		case (IFile::AccessMode::READABLE):
 			accessMode = R_OK;
 			break;
-		case (IFile::MODE_CAN_WRITE):
+		case (IFile::AccessMode::WRITABLE):
 			accessMode = W_OK;
 			break;
-		case (IFile::MODE_CAN_READ | IFile::MODE_CAN_WRITE):
+		case (IFile::AccessMode::READABLE | IFile::AccessMode::WRITABLE):
 			accessMode = R_OK | W_OK;
 			break;
 		default:
@@ -269,16 +269,16 @@ bool StandardFile::access(const char *filename, unsigned char mode)
 #else
 	switch (mode)
 	{
-		case (IFile::MODE_EXISTS):
+		case (IFile::AccessMode::EXISTS):
 			accessMode = 0;
 			break;
-		case (IFile::MODE_CAN_READ):
+		case (IFile::AccessMode::READABLE):
 			accessMode = 2;
 			break;
-		case (IFile::MODE_CAN_WRITE):
+		case (IFile::AccessMode::WRITABLE):
 			accessMode = 4;
 			break;
-		case (IFile::MODE_CAN_READ | IFile::MODE_CAN_WRITE):
+		case (IFile::AccessMode::READABLE | IFile::AccessMode::WRITABLE):
 			accessMode = 6;
 			break;
 		default:

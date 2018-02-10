@@ -42,25 +42,25 @@ void MyEventHandler::onInit()
 	application.enableAccelerometer(true);
 #endif
 
-	texture_ = new nc::Texture((nc::IFile::dataPath() + "textures/" + TextureFile).data());
-	particleSystem_ = new nc::ParticleSystem(&rootNode, NumParticles, texture_, texture_->rect());
+	texture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + TextureFile).data());
+	particleSystem_ = nctl::makeUnique<nc::ParticleSystem>(&rootNode, unsigned(NumParticles), texture_.get(), texture_->rect());
 	particleSystem_->setPosition(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.33f);
 
-	// particleSystem_->addAffector(new nc::AccelerationAffector(0.2f, 0.0f));
-	nc::ColorAffector *colAffector = new nc::ColorAffector();
+	//particleSystem_->addAffector(nctl::makeUnique<nc::AccelerationAffector>(0.2f, 0.0f));
+	nctl::UniquePtr<nc::ColorAffector> colAffector = nctl::makeUnique<nc::ColorAffector>();
 	colAffector->addColorStep(0.0f, nc::Color(0.86f, 0.39f, 0.0f, 0.75f));
 	colAffector->addColorStep(0.65f, nc::Color(0.86f, 0.59f, 0.0f, 0.8f));
 	colAffector->addColorStep(0.7f, nc::Color(0.86f, 0.7f, 0.0f, 0.65f));
 	colAffector->addColorStep(1.0f, nc::Color(0.0f, 0.0f, 1.0f, 0.9f));
-	particleSystem_->addAffector(colAffector);
-	nc::SizeAffector *sizeAffector = new nc::SizeAffector(0.45f);
+	particleSystem_->addAffector(nctl::move(colAffector));
+	nctl::UniquePtr<nc::SizeAffector> sizeAffector = nctl::makeUnique<nc::SizeAffector>(0.45f);
 	sizeAffector->addSizeStep(0.0f, 0.01f);
 	sizeAffector->addSizeStep(0.7f, 1.7f);
 	sizeAffector->addSizeStep(1.0f, 0.4f);
-	particleSystem_->addAffector(sizeAffector);
+	particleSystem_->addAffector(nctl::move(sizeAffector));
 	emitVector_.set(0.0f, 350.0f);
 
-	emitTimer_ = new nc::Timer();
+	emitTimer_ = nctl::makeUnique<nc::Timer>();
 	emitTimer_->start();
 
 	joyVectorLeft_ = nc::Vector2f::Zero;
@@ -80,30 +80,23 @@ void MyEventHandler::onFrameStart()
 
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
-	if (keyState.isKeyDown(nc::KEY_D))
+	if (keyState.isKeyDown(nc::KeySym::D))
 		particleSystem_->x += KeySpeed * nc::theApplication().interval();
-	else if (keyState.isKeyDown(nc::KEY_A))
+	else if (keyState.isKeyDown(nc::KeySym::A))
 		particleSystem_->x -= KeySpeed * nc::theApplication().interval();
-	if (keyState.isKeyDown(nc::KEY_W))
+	if (keyState.isKeyDown(nc::KeySym::W))
 		particleSystem_->y += KeySpeed * nc::theApplication().interval();
-	else if (keyState.isKeyDown(nc::KEY_S))
+	else if (keyState.isKeyDown(nc::KeySym::S))
 		particleSystem_->y -= KeySpeed * nc::theApplication().interval();
 
-	if (keyState.isKeyDown(nc::KEY_RIGHT))
+	if (keyState.isKeyDown(nc::KeySym::RIGHT))
 		emitVector_.x += KeySpeed * nc::theApplication().interval();
-	else if (keyState.isKeyDown(nc::KEY_LEFT))
+	else if (keyState.isKeyDown(nc::KeySym::LEFT))
 		emitVector_.x -= KeySpeed * nc::theApplication().interval();
-	if (keyState.isKeyDown(nc::KEY_UP))
+	if (keyState.isKeyDown(nc::KeySym::UP))
 		emitVector_.y += KeySpeed * nc::theApplication().interval();
-	else if (keyState.isKeyDown(nc::KEY_DOWN))
+	else if (keyState.isKeyDown(nc::KeySym::DOWN))
 		emitVector_.y -= KeySpeed * nc::theApplication().interval();
-}
-
-void MyEventHandler::onShutdown()
-{
-	delete emitTimer_;
-	delete particleSystem_;
-	delete texture_;
 }
 
 #ifdef __ANDROID__
@@ -134,9 +127,9 @@ void MyEventHandler::onAcceleration(const nc::AccelerometerEvent &event)
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
+	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
 		nc::theApplication().quit();
-	else if (event.sym == nc::KEY_SPACE)
+	else if (event.sym == nc::KeySym::SPACE)
 		nc::theApplication().togglePause();
 }
 
@@ -165,14 +158,14 @@ void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 
 void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 {
-	if (event.axisName == nc::AXIS_LX)
+	if (event.axisName == nc::AxisName::LX)
 		joyVectorLeft_.x = event.value;
-	else if (event.axisName == nc::AXIS_LY)
+	else if (event.axisName == nc::AxisName::LY)
 		joyVectorLeft_.y = -event.value;
 
-	if (event.axisName == nc::AXIS_RX)
+	if (event.axisName == nc::AxisName::RX)
 		joyVectorRight_.x = event.value;
-	else if (event.axisName == nc::AXIS_RY)
+	else if (event.axisName == nc::AxisName::RY)
 		joyVectorRight_.y = -event.value;
 
 	nc::theApplication().inputManager().deadZoneNormalize(joyVectorLeft_, nc::IInputManager::LeftStickDeadZone);

@@ -17,26 +17,26 @@ class GlfwGfxDevice : public IGfxDevice
 {
   public:
 	GlfwGfxDevice(int width, int height, const GLContextInfo &contextInfo, const DisplayMode &mode, bool isFullScreen);
-	~GlfwGfxDevice();
+	~GlfwGfxDevice() override;
 
-	void setResolution(int width, int height);
-	inline void setResolution(Vector2i size) { setResolution(size.x, size.y); }
+	void setResolution(int width, int height) override;
+	inline void setResolution(Vector2i size) override { setResolution(size.x, size.y); }
 
-	void toggleFullScreen();
+	void toggleFullScreen() override;
 
-	inline void update() { glfwSwapBuffers(windowHandle_); }
+	inline void update() override { glfwSwapBuffers(windowHandle_); }
 
-	inline void setWindowTitle(const char *windowTitle) { glfwSetWindowTitle(windowHandle_, windowTitle); }
-	void setWindowIcon(const char *windowIconFilename);
+	inline void setWindowTitle(const char *windowTitle) override { glfwSetWindowTitle(windowHandle_, windowTitle); }
+	void setWindowIcon(const char *windowIconFilename) override;
 
   private:
 	/// GLFW3 window handle
 	static GLFWwindow *windowHandle_;
 
-	/// Private copy constructor
-	GlfwGfxDevice(const GlfwGfxDevice &);
-	/// Private assignment operator
-	GlfwGfxDevice &operator=(const GlfwGfxDevice &);
+	/// Deleted copy constructor
+	GlfwGfxDevice(const GlfwGfxDevice &) = delete;
+	/// Deleted assignment operator
+	GlfwGfxDevice &operator=(const GlfwGfxDevice &) = delete;
 
 	/// Initilizes the video subsystem (GLFW)
 	void initGraphics();

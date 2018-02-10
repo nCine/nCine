@@ -2,10 +2,10 @@
 #define CLASS_NCINE_ITHREADPOOL
 
 #include "common_defines.h"
+#include "IThreadCommand.h"
+#include "nctl/UniquePtr.h"
 
 namespace ncine {
-
-class IThreadCommand;
 
 /// Thread pool interface class
 class DLL_PUBLIC IThreadPool
@@ -14,7 +14,7 @@ class DLL_PUBLIC IThreadPool
 	virtual ~IThreadPool() = 0;
 
 	/// Enqueues a command request for a worker thread
-	virtual void enqueueCommand(IThreadCommand *threadCommand) = 0;
+	virtual void enqueueCommand(nctl::UniquePtr<IThreadCommand> threadCommand) = 0;
 };
 
 inline IThreadPool::~IThreadPool() { }
@@ -24,7 +24,7 @@ inline IThreadPool::~IThreadPool() { }
 class DLL_PUBLIC NullThreadPool : public IThreadPool
 {
   public:
-	virtual void enqueueCommand(IThreadCommand *threadCommand) { }
+	void enqueueCommand(nctl::UniquePtr<IThreadCommand> threadCommand) override { }
 };
 
 }

@@ -9,23 +9,31 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+TextNode::TextNode(SceneNode *parent, Font *font)
+	: TextNode(parent, font, DefaultStringLength)
+{
+
+}
+
 TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
-	: DrawableNode(parent, 0, 0), string_(maxStringLength), dirtyDraw_(true), dirtyBoundaries_(true),
+	: DrawableNode(parent, 0.0f, 0.0f), string_(maxStringLength), dirtyDraw_(true), dirtyBoundaries_(true),
 	  withKerning_(true), font_(font), interleavedVertices_(32),
-	  xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f), lineLengths_(4), alignment_(ALIGN_LEFT)
+	  xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f), lineLengths_(4), alignment_(Alignment::LEFT)
 {
 	ASSERT(font);
 	ASSERT(maxStringLength > 0);
-	init(maxStringLength);
-}
 
-TextNode::TextNode(SceneNode *parent, Font *font)
-	: DrawableNode(parent, 0, 0), string_(DefaultStringLength), dirtyDraw_(true), dirtyBoundaries_(true),
-	  withKerning_(true), font_(font), interleavedVertices_(32),
-	  xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f), lineLengths_(4), alignment_(ALIGN_LEFT)
-{
-	ASSERT(font);
-	init(DefaultStringLength);
+	type_ = ObjectType::TEXTNODE;
+	setLayer(DrawableNode::LayerBase::HUD);
+	renderCommand_->setType(RenderCommand::CommandType::TEXT);
+	renderCommand_->material().setTransparent(true);
+	Material::ShaderProgram shaderProgram = font_->texture()->hasAlpha() ?
+	                                               Material::ShaderProgram::TEXTNODE_COLOR :
+	                                               Material::ShaderProgram::TEXTNODE_GRAY;
+	renderCommand_->material().setShaderProgram(shaderProgram);
+	renderCommand_->material().setTexture(*font_->texture());
+	// `maxStringLength` characters, each has 6 vertices with 2 components for position and 2 for texcoords
+	renderCommand_->geometry().createCustomVbo(maxStringLength * 6 * 2 * 2, GL_DYNAMIC_DRAW);
 }
 
 ///////////////////////////////////////////////////////////
@@ -76,7 +84,7 @@ void TextNode::setAlignment(Alignment alignment)
 	}
 }
 
-void TextNode::setString(const String &string)
+void TextNode::setString(const nctl::String &string)
 {
 	if (string_ != string)
 	{
@@ -136,20 +144,6 @@ void TextNode::draw(RenderQueue &renderQueue)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void TextNode::init(unsigned int maxStringLength)
-{
-	type_ = TEXTNODE_TYPE;
-	setLayer(DrawableNode::HUD_LAYER);
-	renderCommand_->setType(RenderCommand::TEXT_TYPE);
-	renderCommand_->material().setTransparent(true);
-	Material::ShaderProgramPresets shaderProgram = font_->texture()->hasAlpha() ?
-	                                               Material::TEXTNODE_COLOR_PROGRAM : Material::TEXTNODE_GRAY_PROGRAM;
-	renderCommand_->material().setShaderProgram(shaderProgram);
-	renderCommand_->material().setTexture(*font_->texture());
-	// `maxStringLength` characters, each has 6 vertices with 2 components for position and 2 for texcoords
-	renderCommand_->geometry().createCustomVbo(maxStringLength * 6 * 2 * 2, GL_DYNAMIC_DRAW);
-}
-
 void TextNode::calculateBoundaries() const
 {
 	if (dirtyBoundaries_)
@@ -206,13 +200,13 @@ float TextNode::calculateAlignment(unsigned int lineIndex) const
 
 	switch (alignment_)
 	{
-		case ALIGN_LEFT:
+		case Alignment::LEFT:
 			alignOffset = 0.0f;
 			break;
-		case ALIGN_CENTER:
+		case Alignment::CENTER:
 			alignOffset = (xAdvanceSum_ - lineLengths_[lineIndex]) * 0.5f;
 			break;
-		case ALIGN_RIGHT:
+		case Alignment::RIGHT:
 			alignOffset = xAdvanceSum_ - lineLengths_[lineIndex];
 			break;
 	}

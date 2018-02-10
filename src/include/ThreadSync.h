@@ -2,6 +2,7 @@
 #define CLASS_NCINE_THREADSYNC
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+	#define NOGDI
 	#include <windows.h>
 	#include <process.h>
 #else
@@ -28,10 +29,10 @@ class Mutex
 	pthread_mutex_t mutex_;
 #endif
 
-	/// Private copy constructor
-	Mutex(const Mutex &);
-	/// Private assignment operator
-	Mutex &operator=(const Mutex &);
+	/// Deleted copy constructor
+	Mutex(const Mutex &) = delete;
+	/// Deleted assignment operator
+	Mutex &operator=(const Mutex &) = delete;
 
 	friend class CondVariable;
 };
@@ -60,10 +61,10 @@ class CondVariable
 	pthread_cond_t cond_;
 #endif
 
-	/// Private copy constructor
-	CondVariable(const CondVariable &);
-	/// Private assignment operator
-	CondVariable &operator=(const CondVariable &);
+	/// Deleted copy constructor
+	CondVariable(const CondVariable &) = delete;
+	/// Deleted assignment operator
+	CondVariable &operator=(const CondVariable &) = delete;
 };
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(__WINDOWS__)
@@ -84,10 +85,10 @@ class RWLock
   private:
 	pthread_rwlock_t rwlock_;
 
-	/// Private copy constructor
-	RWLock(const RWLock &);
-	/// Private assignment operator
-	RWLock &operator=(const RWLock &);
+	/// Deleted copy constructor
+	RWLock(const RWLock &) = delete;
+	/// Deleted assignment operator
+	RWLock &operator=(const RWLock &) = delete;
 };
 
 #if !defined(__ANDROID__) && !defined(__APPLE__)
@@ -106,10 +107,10 @@ class Barrier
   private:
 	pthread_barrier_t barrier_;
 
-	/// Private copy constructor
-	Barrier(const Barrier &);
-	/// Private assignment operator
-	Barrier &operator=(const Barrier &);
+	/// Deleted copy constructor
+	Barrier(const Barrier &) = delete;
+	/// Deleted assignment operator
+	Barrier &operator=(const Barrier &) = delete;
 };
 
 #endif

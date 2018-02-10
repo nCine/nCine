@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_APPCONFIGURATION
 #define CLASS_NCINE_APPCONFIGURATION
 
-#include "ncString.h"
+#include "nctl/String.h"
 #include "ILogger.h"
 
 namespace ncine {
@@ -14,9 +14,9 @@ class DLL_PUBLIC AppConfiguration
 	AppConfiguration();
 
 	/// Sets the path for the application to load data from
-	void setDataPath(const String &dataPath);
+	void setDataPath(const nctl::String &dataPath);
 	/// Sets the name of the log file
-	void setLogFile(const String &logFile);
+	void setLogFile(const nctl::String &logFile);
 	/// Sets the logging level for messages printed on the console
 	void setConsoleLogLevel(ILogger::LogLevel logLevel);
 	/// Sets the logging level for messages written in the log file
@@ -29,13 +29,13 @@ class DLL_PUBLIC AppConfiguration
 	/// Sets the fullscreen mode
 	void setFullScreen(bool inFullscreen);
 	/// Sets the window title
-	void setWindowTitle(const String &windowTitle);
+	void setWindowTitle(const nctl::String &windowTitle);
 	/// Sets the window icon filename
-	void setWindowIconFilename(const String &windowIconFilename);
+	void setWindowIconFilename(const nctl::String &windowIconFilename);
 	/// Sets the font texture filename for profiler information text
-	void setFontTexFilename(const String &fontTexFilename);
+	void setFontTexFilename(const nctl::String &fontTexFilename);
 	/// Sets the font FNT filename for profiler information text
-	void setFontFntFilename_(const String &fontFntFilename);
+	void setFontFntFilename_(const nctl::String &fontFntFilename);
 	/// Enables the profiler graphs
 	void enableProfilerGraphs(bool shouldEnable);
 	/// Enables the profiler information text
@@ -57,17 +57,17 @@ class DLL_PUBLIC AppConfiguration
 	const float profileTextUpdateTime_;
 
 	// User configurable compile-time variables
-	String logFile_;
+	nctl::String logFile_;
 	ILogger::LogLevel consoleLogLevel_;
 	ILogger::LogLevel fileLogLevel_;
 	float frameTimerLogInterval_;
 	unsigned int xResolution_;
 	unsigned int yResolution_;
 	bool inFullscreen_;
-	String windowTitle_;
-	String windowIconFilename_;
-	String fontTexFilename_;
-	String fontFntFilename_;
+	nctl::String windowTitle_;
+	nctl::String windowIconFilename_;
+	nctl::String fontTexFilename_;
+	nctl::String fontFntFilename_;
 	bool withProfilerGraphs_;
 	bool withProfilerText_;
 	bool withAudio_;

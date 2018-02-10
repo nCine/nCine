@@ -15,7 +15,7 @@ class DummyCommand : public IThreadCommand
   public:
 	explicit DummyCommand(unsigned int requestCode) : requestCode_(requestCode) { }
 
-	inline void execute() { LOGI_X("worker thread got request code %u", requestCode_); }
+	inline void execute() override { LOGI_X("worker thread got request code %u", requestCode_); }
 
   private:
 	unsigned int requestCode_;
@@ -30,7 +30,7 @@ class UpdateComand : public IThreadCommand
 	UpdateComand(SceneNode *node, float interval)
 		: node_(node), interval_(interval) { }
 
-	inline void execute()
+	inline void execute() override
 	{
 		if (node_)
 			node_->update(interval_);

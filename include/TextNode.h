@@ -4,8 +4,8 @@
 #include "DrawableNode.h"
 #include "Font.h"
 #include "Color.h"
-#include "Array.h"
-#include "ncString.h"
+#include "nctl/Array.h"
+#include "nctl/String.h"
 
 namespace ncine {
 
@@ -21,24 +21,24 @@ class DLL_PUBLIC TextNode : public DrawableNode
 
 	/// Horizontal alignment modes for text made of multiple lines
 	/*! \note It does not change the node anchor point */
-	enum Alignment
+	enum class Alignment
 	{
-		ALIGN_LEFT,
-		ALIGN_CENTER,
-		ALIGN_RIGHT
+		LEFT,
+		CENTER,
+		RIGHT
 	};
 
 	TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength);
 	TextNode(SceneNode *parent, Font *font);
 
 	/// Returns the width of rendered text
-	virtual float width() const;
+	float width() const override;
 	/// Returns the height of rendered text
-	virtual float height() const;
+	float height() const override;
 	/// Returns the absolute width of rendered text
-	virtual float absWidth() const;
+	float absWidth() const override;
 	/// Returns the absolute height of rendered text
-	virtual float absHeight() const;
+	float absHeight() const override;
 
 	/// Returns true if kerning is enabled for this node rendering
 	inline bool withKerning() const { return withKerning_; }
@@ -54,15 +54,15 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Gets the font line height scaled by the scale factor
 	inline float fontLineHeight() const { return font_->lineHeight() * scaleFactor_; }
 	/// Sets the string to render
-	void setString(const String &string);
+	void setString(const nctl::String &string);
 
-	virtual void draw(RenderQueue &renderQueue);
+	void draw(RenderQueue &renderQueue) override;
 
-	inline static ObjectType sType() { return TEXTNODE_TYPE; }
+	inline static ObjectType sType() { return ObjectType::TEXTNODE; }
 
   private:
 	/// The string to be rendered
-	String string_;
+	nctl::String string_;
 	/// Dirty flag for vertices and texture coordinates
 	bool dirtyDraw_;
 	/// Dirty flag for boundary rectangle
@@ -72,7 +72,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// The font class used to render text
 	Font *font_;
 	/// The array of vertex positions interleaved with texture coordinates for every glyph in the batch
-	Array<float> interleavedVertices_;
+	nctl::Array<float> interleavedVertices_;
 
 	/// Advance on the X-axis for the next processed glyph
 	mutable float xAdvance_;
@@ -83,12 +83,10 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Total advance on the Y-axis for the entire string (vertical boundary)
 	mutable float yAdvanceSum_;
 	/// Text width for each line of text
-	mutable Array<float> lineLengths_;
+	mutable nctl::Array<float> lineLengths_;
 	/// Horizontal text alignment of multiple lines
 	Alignment alignment_;
 
-	/// Initializes the object with the parameters passed to the constructor
-	void init(unsigned int maxStringLength);
 	/// Calculates rectangle boundaries for the rendered text
 	void calculateBoundaries() const;
 	/// Calculates align offset for a particular line
@@ -96,7 +94,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Fills the batch draw command with data from a glyph
 	void processGlyph(const FontGlyph *glyph);
 
-	virtual void updateRenderCommand();
+	void updateRenderCommand() override;
 };
 
 }

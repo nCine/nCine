@@ -38,13 +38,13 @@ T *Object::fromId(unsigned int id)
 		else // Cannot cast
 		{
 			LOGF_X("Object \"%s\" (%u) is of type %u instead of %u", object->name_, id, object->type_, T::sType());
-			return NULL;
+			return nullptr;
 		}
 	}
 	else
 	{
 		LOGW_X("Object %u not found", id);
-		return NULL;
+		return nullptr;
 	}
 }
 

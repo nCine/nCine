@@ -12,67 +12,60 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Texture::Texture()
-	: Object(TEXTURE_TYPE), glTexture_(new GLTexture(GL_TEXTURE_2D)), width_(0), height_(0),
-	  mipMapLevels_(1), isCompressed_(false), hasAlphaChannel_(false)
+	: Object(ObjectType::TEXTURE), glTexture_(nctl::makeUnique<GLTexture>(GL_TEXTURE_2D)),
+	  width_(0), height_(0), mipMapLevels_(1), isCompressed_(false), hasAlphaChannel_(false)
 {
 
 }
 
 
 Texture::Texture(const char *filename)
-	: Object(TEXTURE_TYPE, filename), glTexture_(new GLTexture(GL_TEXTURE_2D)),
+	: Object(ObjectType::TEXTURE, filename), glTexture_(nctl::makeUnique<GLTexture>(GL_TEXTURE_2D)),
 	  width_(0), height_(0), mipMapLevels_(1), isCompressed_(false), hasAlphaChannel_(false)
 {
 	glTexture_->bind();
 
-	ITextureLoader *pTexLoader = ITextureLoader::createFromFile(filename);
-	load(*pTexLoader);
-	delete pTexLoader;
+	nctl::UniquePtr<ITextureLoader> texLoader = ITextureLoader::createFromFile(filename);
+	load(*texLoader.get());
 }
 
 Texture::Texture(const char *filename, int width, int height)
-	: Object(TEXTURE_TYPE, filename), glTexture_(new GLTexture(GL_TEXTURE_2D)),
+	: Object(ObjectType::TEXTURE, filename), glTexture_(nctl::makeUnique<GLTexture>(GL_TEXTURE_2D)),
 	  width_(0), height_(0), isCompressed_(false), hasAlphaChannel_(false)
 {
 	glTexture_->bind();
 
-	ITextureLoader *pTexLoader = ITextureLoader::createFromFile(filename);
-	load(*pTexLoader, width, height);
-	delete pTexLoader;
+	nctl::UniquePtr<ITextureLoader> texLoader = ITextureLoader::createFromFile(filename);
+	load(*texLoader.get(), width, height);
 }
 
 Texture::Texture(const char *filename, Vector2i size)
-	: Object(TEXTURE_TYPE, filename), glTexture_(new GLTexture(GL_TEXTURE_2D)),
-	  width_(0), height_(0), isCompressed_(false), hasAlphaChannel_(false)
+	: Texture(filename, size.x, size.y)
 {
-	glTexture_->bind();
 
-	ITextureLoader *pTexLoader = ITextureLoader::createFromFile(filename);
-	load(*pTexLoader, size.x, size.y);
-	delete pTexLoader;
 }
 
 Texture::~Texture()
 {
-	delete glTexture_;
+
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void Texture::setFiltering(TextureFiltering filter)
+void Texture::setFiltering(Filtering filter)
 {
 	GLenum glFilter = GL_NEAREST;
 	switch (filter)
 	{
-		case NEAREST:					glFilter = GL_NEAREST; break;
-		case LINEAR:					glFilter = GL_LINEAR; break;
-		case NEAREST_MIPMAP_NEAREST:	glFilter = GL_NEAREST_MIPMAP_NEAREST; break;
-		case LINEAR_MIPMAP_NEAREST:		glFilter = GL_LINEAR_MIPMAP_NEAREST; break;
-		case NEAREST_MIPMAP_LINEAR:		glFilter = GL_NEAREST_MIPMAP_LINEAR; break;
-		case LINEAR_MIPMAP_LINEAR:		glFilter = GL_LINEAR_MIPMAP_LINEAR; break;
-		default:						glFilter = GL_NEAREST; break;
+		case Filtering::NEAREST:					glFilter = GL_NEAREST; break;
+		case Filtering::LINEAR:						glFilter = GL_LINEAR; break;
+		case Filtering::NEAREST_MIPMAP_NEAREST:		glFilter = GL_NEAREST_MIPMAP_NEAREST; break;
+		case Filtering::LINEAR_MIPMAP_NEAREST:		glFilter = GL_LINEAR_MIPMAP_NEAREST; break;
+		case Filtering::NEAREST_MIPMAP_LINEAR:		glFilter = GL_NEAREST_MIPMAP_LINEAR; break;
+		case Filtering::LINEAR_MIPMAP_LINEAR:		glFilter = GL_LINEAR_MIPMAP_LINEAR; break;
+		default:									glFilter = GL_NEAREST; break;
 	}
 
 	glTexture_->bind();
@@ -80,15 +73,15 @@ void Texture::setFiltering(TextureFiltering filter)
 	glTexture_->texParameteri(GL_TEXTURE_MIN_FILTER, glFilter);
 }
 
-void Texture::setWrap(TextureWrap wrap)
+void Texture::setWrap(Wrap wrapMode)
 {
 	GLenum glWrap = GL_CLAMP_TO_EDGE;
-	switch (wrap)
+	switch (wrapMode)
 	{
-		case CLAMP_TO_EDGE:				glWrap = GL_CLAMP_TO_EDGE; break;
-		case MIRRORED_REPEAT:			glWrap = GL_MIRRORED_REPEAT; break;
-		case REPEAT:					glWrap = GL_REPEAT; break;
-		default:						glWrap = GL_CLAMP_TO_EDGE; break;
+		case Wrap::CLAMP_TO_EDGE:			glWrap = GL_CLAMP_TO_EDGE; break;
+		case Wrap::MIRRORED_REPEAT:			glWrap = GL_MIRRORED_REPEAT; break;
+		case Wrap::REPEAT:					glWrap = GL_REPEAT; break;
+		default:							glWrap = GL_CLAMP_TO_EDGE; break;
 	}
 
 	glTexture_->bind();
@@ -111,7 +104,7 @@ void Texture::load(const ITextureLoader &texLoader, int width, int height)
 	ASSERT(height > 0);
 
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
-	const int maxTextureSize = gfxCaps.value(IGfxCapabilities::MAX_TEXTURE_SIZE);
+	const int maxTextureSize = gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_TEXTURE_SIZE);
 	FATAL_ASSERT_MSG_X(width <= maxTextureSize, "Texture width %d is bigger than device maximum %d", width, maxTextureSize);
 	FATAL_ASSERT_MSG_X(height <= maxTextureSize, "Texture height %d is bigger than device maximum %d", height, maxTextureSize);
 

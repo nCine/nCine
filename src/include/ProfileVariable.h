@@ -2,6 +2,7 @@
 #define CLASS_NCINE_PROFILEVARIABLE
 
 #include "Timer.h"
+#include "nctl/Array.h"
 
 namespace ncine {
 
@@ -10,7 +11,6 @@ class ProfileVariable
 {
   public:
 	ProfileVariable(unsigned int numValues, float rejectDelay);
-	~ProfileVariable();
 
 	/// Adds a new value for the variable
 	bool addValue(float value);
@@ -36,7 +36,7 @@ class ProfileVariable
 	/// Returns a normalized mathematical mean
 	float normMean() const { return normBetweenMean(min_, max_); }
 	/// Returns the pointer to values
-	inline const float *values() const { return values_; }
+	inline const float *values() const { return values_.data(); }
 	/// Returns the delay in seconds for value rejection
 	inline float delay() const { return rejectDelay_; }
 	/// Set the delay in seconds for value rejection
@@ -53,13 +53,13 @@ class ProfileVariable
 	float mean_;
 	bool isFirstValue_;
 
-	float *values_;
+	nctl::Array<float> values_;
 	Timer timer_;
 
-	/// Private copy constructor
-	ProfileVariable(const ProfileVariable &);
-	/// Private assignment operator
-	ProfileVariable &operator=(const ProfileVariable &);
+	/// Deleted copy constructor
+	ProfileVariable(const ProfileVariable &) = delete;
+	/// Deleted assignment operator
+	ProfileVariable &operator=(const ProfileVariable &) = delete;
 };
 
 }

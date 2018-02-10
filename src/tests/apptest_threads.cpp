@@ -8,7 +8,7 @@ namespace {
 
 const int NumThreads = 2;
 const int NumFloats = 100000000;
-float *globalArray = NULL;
+float *globalArray = nullptr;
 
 void threadFunction(void *arg)
 {
@@ -67,6 +67,6 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
+	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
 		nc::theApplication().quit();
 }

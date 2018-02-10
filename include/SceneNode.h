@@ -2,7 +2,7 @@
 #define CLASS_NCINE_SCENENODE
 
 #include "Object.h"
-#include "List.h"
+#include "nctl/List.h"
 #include "Vector2.h"
 #include "Matrix4x4.h"
 #include "Color.h"
@@ -30,20 +30,20 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Constructor for a node with no parent and positioned in the origin
 	SceneNode();
 	/// The destructor will delete every child node
-	virtual ~SceneNode();
+	~SceneNode() override;
 
-	inline static ObjectType sType() { return SCENENODE_TYPE; }
+	inline static ObjectType sType() { return ObjectType::SCENENODE; }
 
 	/// Returns the parent node, if there is any
 	inline const SceneNode *parentNode() const { return parent_; }
 	/// Returns a list of child nodes
-	inline const List<SceneNode *> &children() const { return children_; }
+	inline const nctl::List<SceneNode *> &children() const { return children_; }
 	/// Adds a node as a child of this one
 	void addChildNode(SceneNode *childNode);
 	/// Removes a child of this node, without reparenting nephews
 	bool removeChildNode(SceneNode *childNode);
 	/// Removes a child of this node while iterating on children, without reparenting nephews
-	bool removeChildNode(List<SceneNode *>::ConstIterator it);
+	bool removeChildNode(nctl::List<SceneNode *>::ConstIterator it);
 	/// Removes a child of this node reparenting nephews as children
 	bool unlinkChildNode(SceneNode *childNode);
 
@@ -117,7 +117,7 @@ class DLL_PUBLIC SceneNode : public Object
 	/// A pointer to the parent node
 	SceneNode *parent_;
 	/// The list of child nodes
-	List<SceneNode *> children_;
+	nctl::List<SceneNode *> children_;
 
 	/// Scale factor for node size
 	float scaleFactor_;

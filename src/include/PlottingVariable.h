@@ -14,7 +14,7 @@ class PlottingVariable
 {
   public:
 	PlottingVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f &worldMatrix);
-	virtual ~PlottingVariable();
+	virtual ~PlottingVariable() { }
 
 	/// Returns the number of value for the variable
 	inline unsigned int numValues() const { return variable_.numValues(); }
@@ -25,9 +25,9 @@ class PlottingVariable
 	/// Returns the mean line color
 	inline const Color &meanColor() const { return meanColor_; }
 	/// Returns a constant pointer to the vertices buffer
-	inline const float *vertices() const { return vertices_; }
+	inline const float *vertices() const { return vertices_.get(); }
 	/// Returns the pointer to the vertices buffer
-	inline float *vertices() { return vertices_; }
+	inline float *vertices() { return vertices_.get(); }
 	/// Returns the pointer to the variable
 	inline const ProfileVariable *variable() const { return &variable_; }
 	/// Returns the state of the mean drawing flag
@@ -63,7 +63,7 @@ class PlottingVariable
 	/// The variable to be plotted
 	ProfileVariable variable_;
 	/// The vertices buffer
-	float *vertices_;
+	nctl::UniquePtr<float []> vertices_;
 	/// A reference to the world matrix of the profile plotter
 	const Matrix4x4f &worldMatrix_;
 
@@ -78,10 +78,10 @@ class PlottingVariable
 	virtual void updateMeanRenderCommand() = 0;
 
   private:
-	/// Private copy constructor
-	PlottingVariable(const PlottingVariable &);
-	/// Private assignment operator
-	PlottingVariable &operator=(const PlottingVariable &);
+	/// Deleted copy constructor
+	PlottingVariable(const PlottingVariable &) = delete;
+	/// Deleted assignment operator
+	PlottingVariable &operator=(const PlottingVariable &) = delete;
 };
 
 }

@@ -34,18 +34,18 @@ void GLShader::loadFromString(const char *string)
 {
 	ASSERT(string);
 	const GLchar *source_lines[1] = { string };
-	glShaderSource(glHandle_, 1, source_lines, NULL);
+	glShaderSource(glHandle_, 1, source_lines, nullptr);
 }
 
 void GLShader::loadFromFile(const char *filename)
 {
-	IFile *fileHandle = IFile::createFileHandle(filename);
+	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
 
-	fileHandle->open(IFile::MODE_READ);
+	fileHandle->open(IFile::OpenMode::READ);
 	if (fileHandle->isOpened())
 	{
 		const GLint length = static_cast<int>(fileHandle->size());
-		String source(length);
+		nctl::String source(length);
 		fileHandle->read(source.data(), length);
 		const GLchar *source_lines[1] = { source.data() };
 		glShaderSource(glHandle_, 1, source_lines, &length);
@@ -65,7 +65,7 @@ bool GLShader::compile()
 
 		if (length > 0)
 		{
-			String infoLog(length);
+			nctl::String infoLog(length);
 			glGetShaderInfoLog(glHandle_, length, &length, infoLog.data());
 			LOGW_X("%s", infoLog.data());
 		}

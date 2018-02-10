@@ -10,34 +10,38 @@ class DLL_PUBLIC IGfxCapabilities
 {
   public:
 	/// OpenGL version components
-	enum GLVersion
+	enum class GLVersion
 	{
-		MAJOR = 0,
+		MAJOR,
 		MINOR,
-		RELEASE,
-
-		NUM_VERSIONS
+		RELEASE
 	};
 
 	/// OpenGL queryable runtime integer values
-	enum GLIntValues
+	struct GLIntValues
 	{
-		MAX_TEXTURE_SIZE = 0,
-		MAX_TEXTURE_IMAGE_UNITS,
+		enum Enum
+		{
+			MAX_TEXTURE_SIZE = 0,
+			MAX_TEXTURE_IMAGE_UNITS,
 
-		NUM_INTVALUES
+			COUNT
+		};
 	};
 
 	/// OpenGL queryable extensions
-	enum GLExtensions
+	struct GLExtensions
 	{
-		EXT_TEXTURE_COMPRESSION_S3TC = 0,
-		OES_COMPRESSED_ETC1_RGB8_TEXTURE,
-		AMD_COMPRESSED_ATC_TEXTURE,
-		IMG_TEXTURE_COMPRESSION_PVRTC,
-		KHR_TEXTURE_COMPRESSION_ASTC_LDR,
+		enum Enum
+		{
+			EXT_TEXTURE_COMPRESSION_S3TC = 0,
+			OES_COMPRESSED_ETC1_RGB8_TEXTURE,
+			AMD_COMPRESSED_ATC_TEXTURE,
+			IMG_TEXTURE_COMPRESSION_PVRTC,
+			KHR_TEXTURE_COMPRESSION_ASTC_LDR,
 
-		NUM_EXTENSIONS
+			COUNT
+		};
 	};
 
 	virtual ~IGfxCapabilities() = 0;
@@ -45,9 +49,9 @@ class DLL_PUBLIC IGfxCapabilities
 	/// Returns the OpenGL version numbers
 	virtual int glVersion(GLVersion version) const = 0;
 	/// Returns the value of a runtime OpenGL integer value
-	virtual int value(GLIntValues valueName) const = 0;
+	virtual int value(GLIntValues::Enum valueName) const = 0;
 	/// Returns true if the specified OpenGL extension is available
-	virtual bool hasExtension(GLExtensions extensionName) const = 0;
+	virtual bool hasExtension(GLExtensions::Enum extensionName) const = 0;
 };
 
 inline IGfxCapabilities::~IGfxCapabilities() { }
@@ -57,9 +61,9 @@ inline IGfxCapabilities::~IGfxCapabilities() { }
 class DLL_PUBLIC NullGfxCapabilities : public IGfxCapabilities
 {
   public:
-	virtual int glVersion(GLVersion version) const { return 0; }
-	virtual int value(GLIntValues valueName) const { return 0; }
-	virtual bool hasExtension(GLExtensions extensionName) const { return false; }
+	int glVersion(GLVersion version) const override { return 0; }
+	int value(GLIntValues::Enum valueName) const override { return 0; }
+	bool hasExtension(GLExtensions::Enum extensionName) const override { return false; }
 };
 
 }

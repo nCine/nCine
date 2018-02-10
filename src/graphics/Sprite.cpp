@@ -9,18 +9,16 @@ namespace ncine {
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(SceneNode *parent, Texture *texture)
-	: DrawableNode(parent), texture_(texture), texRect_(0, 0, 0, 0), opaqueTexture_(false)
+	: Sprite(parent, texture, 0.0f, 0.0f)
 {
-	ASSERT(texture);
-	init();
+
 }
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(Texture *texture)
-	: DrawableNode(NULL), texture_(texture), texRect_(0, 0, 0, 0), opaqueTexture_(false)
+	: Sprite(nullptr, texture, 0.0f, 0.0f)
 {
-	ASSERT(texture);
-	init();
+
 }
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
@@ -28,31 +26,26 @@ Sprite::Sprite(SceneNode *parent, Texture *texture, float x, float y)
 	: DrawableNode(parent, x, y), texture_(texture), texRect_(0, 0, 0, 0), opaqueTexture_(false)
 {
 	ASSERT(texture);
-	init();
+
+	type_ = ObjectType::SPRITE;
+	setLayer(DrawableNode::LayerBase::SCENE);
+	renderCommand_->setType(RenderCommand::CommandType::SPRITE);
+	renderCommand_->material().setShaderProgram(Material::ShaderProgram::SPRITE);
+	renderCommand_->geometry().makeSharedQuad();
+
+	setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
 }
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(Texture *texture, float x, float y)
-	: DrawableNode(NULL, x, y), texture_(texture), texRect_(0, 0, 0, 0), opaqueTexture_(false)
+	: Sprite(nullptr, texture, x, y)
 {
-	ASSERT(texture);
-	init();
+
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
-
-void Sprite::init()
-{
-	type_ = SPRITE_TYPE;
-	setLayer(DrawableNode::SCENE_LAYER);
-	renderCommand_->setType(RenderCommand::SPRITE_TYPE);
-	renderCommand_->material().setShaderProgram(Material::SPRITE_PROGRAM);
-	renderCommand_->geometry().makeSharedQuad();
-
-	setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
-}
 
 /*! \todo Only the transformation matrix should be updated per frame */
 void Sprite::updateRenderCommand()

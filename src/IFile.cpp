@@ -22,16 +22,16 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-String IFile::dataPath_(MaxFilenameLength);
-String IFile::savePath_(MaxFilenameLength);
+nctl::String IFile::dataPath_(MaxFilenameLength);
+nctl::String IFile::savePath_(MaxFilenameLength);
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 IFile::IFile(const char *filename)
-	: type_(BASE_TYPE), filename_(filename), extension_(MaxExtensionLength),
-	  fileDescriptor_(-1), filePointer_(NULL), shouldCloseOnDestruction_(true),
+	: type_(FileType::BASE), filename_(filename), extension_(MaxExtensionLength),
+	  fileDescriptor_(-1), filePointer_(nullptr), shouldCloseOnDestruction_(true),
 	  shouldExitOnFailToOpen_(true), fileSize_(0)
 {
 	ASSERT(filename);
@@ -48,7 +48,7 @@ IFile::IFile(const char *filename)
 
 bool IFile::isOpened() const
 {
-	if (fileDescriptor_ >= 0 || filePointer_ != NULL)
+	if (fileDescriptor_ >= 0 || filePointer_ != nullptr)
 		return true;
 	else
 		return false;
@@ -60,15 +60,15 @@ bool IFile::hasExtension(const char *extension) const
 	return extension_ == extension;
 }
 
-IFile *IFile::createFileHandle(const char *filename)
+nctl::UniquePtr<IFile> IFile::createFileHandle(const char *filename)
 {
 	ASSERT(filename);
 #ifdef __ANDROID__
 	if (strncmp(filename, static_cast<const char *>("asset::"), 7) == 0)
-		return new AssetFile(filename + 7);
+		return nctl::makeUnique<AssetFile>(filename + 7);
 	else
 #endif
-		return new StandardFile(filename);
+		return nctl::makeUnique<StandardFile>(filename);
 }
 
 bool IFile::access(const char *filename, unsigned char mode)
@@ -82,7 +82,7 @@ bool IFile::access(const char *filename, unsigned char mode)
 		return StandardFile::access(filename, mode);
 }
 
-const String &IFile::savePath()
+const nctl::String &IFile::savePath()
 {
 	if (savePath_.isEmpty())
 		initSavePath();
@@ -97,7 +97,7 @@ const String &IFile::savePath()
 void IFile::initSavePath()
 {
 #ifdef __ANDROID__
-	nc::AndroidApplication &application = static_cast<nc::AndroidApplication &>(nc::theApplication());
+	AndroidApplication &application = static_cast<AndroidApplication &>(theApplication());
 
 	// Get the internal data path from the Android application
 	savePath_ = application.internalDataPath();
@@ -110,13 +110,13 @@ void IFile::initSavePath()
 	}
 #elif _WIN32
 	const char *userProfileEnv = getenv("USERPROFILE");
-	if (userProfileEnv == NULL || strlen(userProfileEnv) == 0)
+	if (userProfileEnv == nullptr || strlen(userProfileEnv) == 0)
 	{
 		const char *homeDriveEnv = getenv("HOMEDRIVE");
 		const char *homePathEnv = getenv("HOMEPATH");
 
-		if ((homeDriveEnv == NULL || strlen(homeDriveEnv) == 0) &&
-		    (homePathEnv == NULL || strlen(homePathEnv) == 0))
+		if ((homeDriveEnv == nullptr || strlen(homeDriveEnv) == 0) &&
+		    (homePathEnv == nullptr || strlen(homePathEnv) == 0))
 		{
 			const char *homeEnv = getenv("HOME");
 			if (homeEnv && strlen(homeEnv))
@@ -136,7 +136,7 @@ void IFile::initSavePath()
 #else
 	const char *homeEnv = getenv("HOME");
 
-	if (homeEnv == NULL || strlen(homeEnv) == 0)
+	if (homeEnv == nullptr || strlen(homeEnv) == 0)
 		savePath_ = getpwuid(getuid())->pw_dir;
 	else
 		savePath_ = homeEnv;

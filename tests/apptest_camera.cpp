@@ -52,30 +52,30 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	textures_[0] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture1File).data());
-	textures_[1] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture2File).data());
-	textures_[2] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture3File).data());
-	textures_[3] = new nc::Texture((nc::IFile::dataPath() + "textures/" + Texture4File).data());
+	textures_[0] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture1File).data());
+	textures_[1] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture2File).data());
+	textures_[2] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture3File).data());
+	textures_[3] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture4File).data());
 
-	font_ = new nc::Font((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
-	                     (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
+	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
+	                                   (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
 
-	cameraNode_ = new nc::SceneNode(&rootNode);
+	cameraNode_ = nctl::makeUnique<nc::SceneNode>(&rootNode);
 
-	debugString_ = new nc::String(64);
-	debugtext_ = new nc::TextNode(&rootNode, font_);
+	debugString_ = nctl::makeUnique<nctl::String>(64);
+	debugtext_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get());
 	debugtext_->setPosition((nc::theApplication().width() - debugtext_->width()) * 0.5f,
 	                        nc::theApplication().height() - debugtext_->fontLineHeight() * 0.5f);
 	debugtext_->setColor(255, 255, 0, 255);
 
 	for (unsigned int i = 0; i < NumTexts; i++)
 	{
-		texts_[i] = new nc::TextNode(cameraNode_, font_);
+		texts_[i] = nctl::makeUnique<nc::TextNode>(cameraNode_.get(), font_.get());
 		texts_[i]->setScale(1.5f);
 		texts_[i]->setColor(0, 0, 255, 255);
 	}
 
-	nc::String textString(16);
+	nctl::String textString(16);
 	texts_[0]->setPosition(0.0f, 0.0f);
 	texts_[0]->setString("(0, 0)");
 
@@ -97,9 +97,9 @@ void MyEventHandler::onInit()
 
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
-		const float randomX = nc::randBetween(-ViewHalfWidth, ViewHalfWidth);
-		const float randomY = nc::randBetween(-ViewHalfHeight, ViewHalfHeight);
-		sprites_[i] = new nc::Sprite(cameraNode_, textures_[i % NumTextures], randomX, randomY);
+		const float randomX = nctl::randBetween(-ViewHalfWidth, ViewHalfWidth);
+		const float randomY = nctl::randBetween(-ViewHalfHeight, ViewHalfHeight);
+		sprites_[i] = nctl::makeUnique<nc::Sprite>(cameraNode_.get(), textures_[i % NumTextures].get(), randomX, randomY);
 		sprites_[i]->setScale(0.5f);
 		spritePos_[i].set(randomX, randomY);
 	}
@@ -125,23 +125,23 @@ void MyEventHandler::onFrameStart()
 
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
-	if (keyState.isKeyDown(nc::KEY_D))
+	if (keyState.isKeyDown(nc::KeySym::D))
 		camPos_.x -= MoveSpeed * interval;
-	else if (keyState.isKeyDown(nc::KEY_A))
+	else if (keyState.isKeyDown(nc::KeySym::A))
 		camPos_.x += MoveSpeed * interval;
-	if (keyState.isKeyDown(nc::KEY_W))
+	if (keyState.isKeyDown(nc::KeySym::W))
 		camPos_.y -= MoveSpeed * interval;
-	else if (keyState.isKeyDown(nc::KEY_S))
+	else if (keyState.isKeyDown(nc::KeySym::S))
 		camPos_.y += MoveSpeed * interval;
 
-	if (keyState.isKeyDown(nc::KEY_RIGHT))
+	if (keyState.isKeyDown(nc::KeySym::RIGHT))
 		camRot_ += RotateSpeed * interval;
-	else if (keyState.isKeyDown(nc::KEY_LEFT))
+	else if (keyState.isKeyDown(nc::KeySym::LEFT))
 		camRot_ -= RotateSpeed * interval;
 
-	if (keyState.isKeyDown(nc::KEY_UP))
+	if (keyState.isKeyDown(nc::KeySym::UP))
 		camScale_ += ScaleSpeed * interval;
-	else if (keyState.isKeyDown(nc::KEY_DOWN))
+	else if (keyState.isKeyDown(nc::KeySym::DOWN))
 		camScale_ -= ScaleSpeed * interval;
 
 	if (joyVectorLeft_.length() > nc::IInputManager::LeftStickDeadZone)
@@ -222,23 +222,6 @@ void MyEventHandler::onFrameStart()
 	}
 }
 
-void MyEventHandler::onShutdown()
-{
-	for (unsigned int i = 0; i < NumSprites; i++)
-		delete sprites_[i];
-
-	for (unsigned int i = 0; i < NumTexts; i++)
-		delete texts_[i];
-
-	delete debugtext_;
-	delete debugString_;
-	delete cameraNode_; // and all its children
-	delete font_;
-
-	for (unsigned int i = 0; i < NumTextures; i++)
-		delete textures_[i];
-}
-
 #ifdef __ANDROID__
 void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 {
@@ -279,13 +262,13 @@ void MyEventHandler::onPointerDown(const nc::TouchEvent &event)
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KEY_P)
+	if (event.sym == nc::KeySym::P)
 		pause_ = !pause_;
-	else if (event.sym == nc::KEY_R)
+	else if (event.sym == nc::KeySym::R)
 		resetCamera();
-	else if (event.sym == nc::KEY_ESCAPE || event.sym == nc::KEY_Q)
+	else if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
 		nc::theApplication().quit();
-	else if (event.sym == nc::KEY_SPACE)
+	else if (event.sym == nc::KeySym::SPACE)
 		nc::theApplication().togglePause();
 }
 
@@ -337,20 +320,20 @@ void MyEventHandler::onScrollInput(const nc::ScrollEvent &event)
 
 void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 {
-	if (event.axisName == nc::AXIS_LX)
+	if (event.axisName == nc::AxisName::LX)
 		joyVectorLeft_.x = event.value;
-	else if (event.axisName == nc::AXIS_LY)
+	else if (event.axisName == nc::AxisName::LY)
 		joyVectorLeft_.y = -event.value;
 
-	if (event.axisName == nc::AXIS_RX)
+	if (event.axisName == nc::AxisName::RX)
 		joyVectorRight_.x = event.value;
-	else if (event.axisName == nc::AXIS_RY)
+	else if (event.axisName == nc::AxisName::RY)
 		joyVectorRight_.y = -event.value;
 }
 
 void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event)
 {
-	if (event.buttonName == nc::BUTTON_B)
+	if (event.buttonName == nc::ButtonName::B)
 		resetCamera();
 }
 

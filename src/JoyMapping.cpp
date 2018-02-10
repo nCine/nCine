@@ -1,9 +1,11 @@
 #include "JoyMapping.h"
 #include "IInputManager.h"
+#include <cstring> // for memcpy()
 #include <cstdlib> // for strtoul()
 #include "IInputEventHandler.h"
 #include "IFile.h"
 #include "Vector2.h"
+#include "nctl/algorithms.h"
 
 namespace ncine {
 
@@ -30,7 +32,7 @@ const char *JoyMapping::ButtonsStrings[JoyMappedState::NumButtons] =
 };
 
 JoyMappedStateImpl JoyMapping::nullMappedJoyState_;
-StaticArray<JoyMappedStateImpl, JoyMapping::MaxNumJoysticks> JoyMapping::mappedJoyStates_(StaticArrayMode::EXTEND_SIZE);
+nctl::StaticArray<JoyMappedStateImpl, JoyMapping::MaxNumJoysticks> JoyMapping::mappedJoyStates_(nctl::StaticArrayMode::EXTEND_SIZE);
 JoyMappedButtonEvent JoyMapping::mappedButtonEvent_;
 JoyMappedAxisEvent JoyMapping::mappedAxisEvent_;
 
@@ -43,11 +45,11 @@ JoyMapping::MappedJoystick::MappedJoystick()
 	name[0] = '\0';
 
 	for (unsigned int i = 0; i < MaxNumAxes; i++)
-		axes[i].name = AXIS_UNKNOWN;
+		axes[i].name = AxisName::UNKNOWN;
 	for (unsigned int i = 0; i < MaxNumButtons; i++)
-		buttons[i] = BUTTON_UNKNOWN;
+		buttons[i] = ButtonName::UNKNOWN;
 	for (unsigned int i = 0; i < MaxNumButtons; i++)
-		hats[i] = BUTTON_UNKNOWN;
+		hats[i] = static_cast<int>(ButtonName::UNKNOWN);
 }
 
 JoyMapping::MappedJoystick::Guid::Guid()
@@ -57,7 +59,7 @@ JoyMapping::MappedJoystick::Guid::Guid()
 }
 
 JoyMapping::JoyMapping()
-	: mappings_(256), inputManager_(NULL), inputEventHandler_(NULL)
+	: mappings_(256), inputManager_(nullptr), inputEventHandler_(nullptr)
 {
 	for (unsigned int i = 0; i < MaxNumJoysticks; i++)
 		mappingIndex_[i] = -1;
@@ -92,7 +94,7 @@ void JoyMapping::MappedJoystick::Guid::fromString(const char *string)
 	{
 		memcpy(component, string + offset, 8);
 		component[8] = '\0';
-		array_[i] = strtoul(component, NULL, 16);
+		array_[i] = strtoul(component, nullptr, 16);
 		offset += 8;
 	}
 }
@@ -153,19 +155,19 @@ void JoyMapping::addMappingsFromStrings(const char **mappingStrings)
 
 void JoyMapping::addMappingsFromFile(const char *filename)
 {
-	IFile *fileHandle = IFile::createFileHandle(filename);
-	fileHandle->open(IFile::MODE_READ);
+	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
+	fileHandle->open(IFile::OpenMode::READ);
 
 	const long int fileSize = fileHandle->size();
 	unsigned int fileLine = 0;
 
-	char *fileBuffer = new char[fileSize + 1];
-	fileHandle->read(fileBuffer, fileSize);
-	delete fileHandle;
+	nctl::UniquePtr<char []> fileBuffer = nctl::makeUnique<char []>(fileSize + 1);
+	fileHandle->read(fileBuffer.get(), fileSize);
+	fileHandle.reset(nullptr);
 	fileBuffer[fileSize] = '\0';
 
 	unsigned int numParsed = 0;
-	const char *buffer = fileBuffer;
+	const char *buffer = fileBuffer.get();
 	do
 	{
 		fileLine++;
@@ -183,18 +185,18 @@ void JoyMapping::addMappingsFromFile(const char *filename)
 		}
 
 	}
-	while (strchr(buffer, '\n') && (buffer = strchr(buffer, '\n') + 1) < fileBuffer + fileSize);
+	while (strchr(buffer, '\n') && (buffer = strchr(buffer, '\n') + 1) < fileBuffer.get() + fileSize);
 
 	LOGI_X("Joystick mapping file parsed: %u mappings in %u lines", numParsed, fileLine);
 
-	delete[] fileBuffer;
+	fileBuffer.reset(nullptr);
 
 	checkConnectedJoystics();
 }
 
 void JoyMapping::onJoyButtonPressed(const JoyButtonEvent &event)
 {
-	if (inputEventHandler_ == NULL)
+	if (inputEventHandler_ == nullptr)
 		return;
 
 	const int idToIndex = mappingIndex_[event.joyId];
@@ -203,7 +205,7 @@ void JoyMapping::onJoyButtonPressed(const JoyButtonEvent &event)
 	{
 		mappedButtonEvent_.joyId = event.joyId;
 		mappedButtonEvent_.buttonName = mappings_[idToIndex].buttons[event.buttonId];
-		if (mappedButtonEvent_.buttonName != BUTTON_UNKNOWN)
+		if (mappedButtonEvent_.buttonName != ButtonName::UNKNOWN)
 		{
 			const int buttonId = static_cast<int>(mappedButtonEvent_.buttonName);
 			mappedJoyStates_[event.joyId].buttons_[buttonId] = true;
@@ -214,7 +216,7 @@ void JoyMapping::onJoyButtonPressed(const JoyButtonEvent &event)
 
 void JoyMapping::onJoyButtonReleased(const JoyButtonEvent &event)
 {
-	if (inputEventHandler_ == NULL)
+	if (inputEventHandler_ == nullptr)
 		return;
 
 	const int idToIndex = mappingIndex_[event.joyId];
@@ -223,7 +225,7 @@ void JoyMapping::onJoyButtonReleased(const JoyButtonEvent &event)
 	{
 		mappedButtonEvent_.joyId = event.joyId;
 		mappedButtonEvent_.buttonName = mappings_[idToIndex].buttons[event.buttonId];
-		if (mappedButtonEvent_.buttonName != BUTTON_UNKNOWN)
+		if (mappedButtonEvent_.buttonName != ButtonName::UNKNOWN)
 		{
 			const int buttonId = static_cast<int>(mappedButtonEvent_.buttonName);
 			mappedJoyStates_[event.joyId].buttons_[buttonId] = false;
@@ -234,7 +236,7 @@ void JoyMapping::onJoyButtonReleased(const JoyButtonEvent &event)
 
 void JoyMapping::onJoyAxisMoved(const JoyAxisEvent &event)
 {
-	if (inputEventHandler_ == NULL)
+	if (inputEventHandler_ == nullptr)
 		return;
 
 	const int idToIndex = mappingIndex_[event.joyId];
@@ -245,7 +247,7 @@ void JoyMapping::onJoyAxisMoved(const JoyAxisEvent &event)
 
 		mappedAxisEvent_.joyId = event.joyId;
 		mappedAxisEvent_.axisName = axis.name;
-		if (mappedAxisEvent_.axisName != AXIS_UNKNOWN)
+		if (mappedAxisEvent_.axisName != AxisName::UNKNOWN)
 		{
 			const float value = (event.normValue + 1.0f) * 0.5f;
 			mappedAxisEvent_.value = axis.min + value * (axis.max - axis.min);
@@ -261,7 +263,7 @@ bool JoyMapping::onJoyConnected(const JoyConnectionEvent &event)
 	const char *joyGuid = inputManager_->joyGuid(event.joyId);
 
 	mappingIndex_[event.joyId] = -1;
-	if (joyGuid != NULL)
+	if (joyGuid != nullptr)
 	{
 		MappedJoystick::Guid guid(joyGuid);
 		const int index = findMappingByGuid(guid);
@@ -314,16 +316,16 @@ const JoyMappedStateImpl &JoyMapping::joyMappedState(int joyId) const
 		return mappedJoyStates_[joyId];
 }
 
-void JoyMapping::deadZoneNormalize(nc::Vector2f &joyVector, float deadZoneValue) const
+void JoyMapping::deadZoneNormalize(Vector2f &joyVector, float deadZoneValue) const
 {
-	deadZoneValue = nc::clamp(deadZoneValue, 0.0f, 1.0f);
+	deadZoneValue = nctl::clamp(deadZoneValue, 0.0f, 1.0f);
 
 	if (joyVector.length() <= deadZoneValue)
-		joyVector = nc::Vector2f::Zero;
+		joyVector = Vector2f::Zero;
 	else
 	{
 		float normalizedLength = (joyVector.length() - deadZoneValue) / (1.0f - deadZoneValue);
-		normalizedLength = nc::clamp(normalizedLength, 0.0f, 1.0f);
+		normalizedLength = nctl::clamp(normalizedLength, 0.0f, 1.0f);
 		joyVector = joyVector.normalize() * normalizedLength;
 	}
 }
@@ -392,7 +394,7 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 	const char *end = mappingString + strlen(mappingString);
 	const char *subStart = mappingString;
 	const char *subEnd = strchr(subStart, ',');
-	if (subEnd == NULL)
+	if (subEnd == nullptr)
 	{
 		LOGE("Invalid mapping string");
 		return false;
@@ -408,21 +410,21 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 
 	subStart += subLength + 1; // GUID plus the following  ',' character
 	subEnd = strchr(subStart, ',');
-	if (subEnd == NULL)
+	if (subEnd == nullptr)
 	{
 		LOGE("Invalid mapping string");
 		return false;
 	}
 	subLength = static_cast<unsigned int>(subEnd - subStart);
-	memcpy(map.name, subStart, nc::min(subLength, MaxNameLength));
-	map.name[nc::min(subLength, MaxNameLength)] = '\0';
+	memcpy(map.name, subStart, nctl::min(subLength, MaxNameLength));
+	map.name[nctl::min(subLength, MaxNameLength)] = '\0';
 
 	subStart += subLength + 1; // name plus the following ',' character
 	subEnd = strchr(subStart, ',');
 	while (subStart < end && *subStart != '\n')
 	{
 		const char *subMid = strchr(subStart, ':');
-		if (subMid == NULL || subEnd == NULL)
+		if (subMid == nullptr || subEnd == nullptr)
 		{
 			LOGE("Invalid mapping string");
 			return false;
@@ -457,7 +459,7 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 					else
 					{
 						const int hatMapping = parseHatMapping(subMid + 1, subEnd);
-						map.hats[hatMapping] = static_cast<ButtonName>(buttonIndex);
+						map.hats[hatMapping] = static_cast<int>(buttonIndex);
 					}
 				}
 			}
@@ -467,7 +469,7 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 		if (subStart < end)
 		{
 			subEnd = strchr(subStart, ',');
-			if (subEnd == NULL)
+			if (subEnd == nullptr)
 				subEnd = end;
 		}
 	}
@@ -548,7 +550,7 @@ int JoyMapping::parseAxisMapping(const char *start, const char *end, MappedJoyst
 	{
 		const char *digits = &start[1];
 
-		if (axis.name == AXIS_LTRIGGER || axis.name == AXIS_RTRIGGER)
+		if (axis.name == AxisName::LTRIGGER || axis.name == AxisName::RTRIGGER)
 		{
 			axis.min = 0.0f;
 			axis.max = 1.0f;

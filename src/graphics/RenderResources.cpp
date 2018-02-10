@@ -12,11 +12,11 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-GLBufferObject *RenderResources::quadVbo_ = NULL;
-GLShaderProgram *RenderResources::spriteShaderProgram_ = NULL;
-GLShaderProgram *RenderResources::textnodeGrayShaderProgram_ = NULL;
-GLShaderProgram *RenderResources::textnodeColorShaderProgram_ = NULL;
-GLShaderProgram *RenderResources::colorShaderProgram_ = NULL;
+nctl::UniquePtr<GLBufferObject> RenderResources::quadVbo_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::spriteShaderProgram_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::textnodeGrayShaderProgram_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::textnodeColorShaderProgram_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::colorShaderProgram_;
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
@@ -35,10 +35,10 @@ void RenderResources::create()
 
 	LOGI("Creating rendering resources...");
 
-	quadVbo_ = new GLBufferObject(GL_ARRAY_BUFFER);
+	quadVbo_ = nctl::makeUnique<GLBufferObject>(GL_ARRAY_BUFFER);
 	quadVbo_->bufferData(sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 
-	spriteShaderProgram_ = new GLShaderProgram();
+	spriteShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
 #ifndef WITH_EMBEDDED_SHADERS
 	spriteShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/sprite_vs.glsl").data());
 	spriteShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/sprite_fs.glsl").data());
@@ -49,7 +49,7 @@ void RenderResources::create()
 	spriteShaderProgram_->link();
 	spriteShaderProgram_->use();
 
-	textnodeGrayShaderProgram_ = new GLShaderProgram();
+	textnodeGrayShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
 #ifndef WITH_EMBEDDED_SHADERS
 	textnodeGrayShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/textnode_vs.glsl").data());
 	textnodeGrayShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/textnode_gray_fs.glsl").data());
@@ -60,7 +60,7 @@ void RenderResources::create()
 	textnodeGrayShaderProgram_->link();
 	textnodeGrayShaderProgram_->use();
 
-	textnodeColorShaderProgram_ = new GLShaderProgram();
+	textnodeColorShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
 #ifndef WITH_EMBEDDED_SHADERS
 	textnodeColorShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/textnode_vs.glsl").data());
 	textnodeColorShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/textnode_color_fs.glsl").data());
@@ -71,7 +71,7 @@ void RenderResources::create()
 	textnodeColorShaderProgram_->link();
 	textnodeColorShaderProgram_->use();
 
-	colorShaderProgram_ = new GLShaderProgram();
+	colorShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
 #ifndef WITH_EMBEDDED_SHADERS
 	colorShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/color_vs.glsl").data());
 	colorShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/color_fs.glsl").data());
@@ -87,17 +87,11 @@ void RenderResources::create()
 
 void RenderResources::dispose()
 {
-	delete colorShaderProgram_;
-	delete textnodeColorShaderProgram_;
-	delete textnodeGrayShaderProgram_;
-	delete spriteShaderProgram_;
-	delete quadVbo_;
-
-	colorShaderProgram_ = NULL;
-	textnodeColorShaderProgram_ = NULL;
-	textnodeGrayShaderProgram_ = NULL;
-	spriteShaderProgram_ = NULL;
-	quadVbo_ = NULL;
+	colorShaderProgram_.reset(nullptr);
+	textnodeColorShaderProgram_.reset(nullptr);
+	textnodeGrayShaderProgram_.reset(nullptr);
+	spriteShaderProgram_.reset(nullptr);
+	quadVbo_.reset(nullptr);
 
 	LOGI("Rendering resources disposed");
 }

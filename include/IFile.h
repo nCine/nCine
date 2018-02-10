@@ -2,8 +2,9 @@
 #define CLASS_NCINE_IFILE
 
 #include <cstdio> // for FILE
-#include <stdint.h> // for endianness conversions
-#include "ncString.h"
+#include <cstdint> // for endianness conversions
+#include "nctl/String.h"
+#include "nctl/UniquePtr.h"
 
 namespace ncine {
 
@@ -12,30 +13,36 @@ class DLL_PUBLIC IFile
 {
   public:
 	/// File types
-	enum FileType
+	enum class FileType
 	{
-		BASE_TYPE = 0,
-		STANDARD_TYPE,
-		ASSET_TYPE
+		BASE = 0,
+		STANDARD,
+		ASSET
 	};
 
 	/// Open mode bitmask
-	enum OpenMode
+	struct OpenMode
 	{
-#if !(defined(_WIN32) && !defined(__MINGW32__))
-		MODE_FD = 1,
-#endif
-		MODE_READ = 2,
-		MODE_WRITE = 4,
-		MODE_BINARY = 8
+		enum
+		{
+		#if !(defined(_WIN32) && !defined(__MINGW32__))
+			FD = 1,
+		#endif
+			READ = 2,
+			WRITE = 4,
+			BINARY = 8
+		};
 	};
 
 	/// Access mode bitmask
-	enum AccessMode
+	struct AccessMode
 	{
-		MODE_EXISTS = 0,
-		MODE_CAN_READ = 2,
-		MODE_CAN_WRITE = 4
+		enum
+		{
+			EXISTS = 0,
+			READABLE = 2,
+			WRITABLE = 4
+		};
 	};
 
 	/// Constructs a base file object
@@ -106,14 +113,14 @@ class DLL_PUBLIC IFile
 	}
 
 	/// Returns the proper file handle according to prepended tags
-	static IFile *createFileHandle(const char *filename);
+	static nctl::UniquePtr<IFile> createFileHandle(const char *filename);
 	/// Checks if a file can be accessed with the specified mode
 	static bool access(const char *filename, unsigned char mode);
 
 	/// Returns the base directory for data loading
-	static const String &dataPath() { return dataPath_; }
+	static const nctl::String &dataPath() { return dataPath_; }
 	/// Returns the writable directory for saving data
-	static const String &savePath();
+	static const nctl::String &savePath();
 
   protected:
 	/// File type
@@ -122,12 +129,12 @@ class DLL_PUBLIC IFile
 	/// Maximum number of characters for a file name (path included)
 	static const unsigned int MaxFilenameLength = 256;
 	/// File name with path
-	String filename_;
+	nctl::String filename_;
 
 	/// Maximum number of characters for a file extension, plus '\0'
 	static const unsigned int MaxExtensionLength = 5;
 	/// File extension
-	String extension_;
+	nctl::String extension_;
 
 	/// File descriptor for `open()` and `close()`
 	int fileDescriptor_;
@@ -145,9 +152,9 @@ class DLL_PUBLIC IFile
 
   private:
 	/// The path for the application to load files from
-	static String dataPath_;
+	static nctl::String dataPath_;
 	/// The path for the application to write files into
-	static String savePath_;
+	static nctl::String savePath_;
 
 	/// Determines the correct save path based on the platform
 	static void initSavePath();

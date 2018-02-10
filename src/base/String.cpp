@@ -1,31 +1,36 @@
+#include <cstdio> // for vsnprintf()
 #include <cstring>
 #include "common_macros.h"
-#include "ncString.h"
+#include "nctl/String.h"
+#include "nctl/algorithms.h"
 
-namespace ncine {
+namespace nctl {
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 String::String()
-	: array_(NULL), length_(0), capacity_(DefaultCapacity)
+	: length_(0), capacity_(SmallBufferSize)
 {
-	array_ = new char[capacity_];
-	array_[0] = '\0';
+	array_.local_[0] = '\0';
 }
 
 String::String(unsigned int capacity)
-	: array_(NULL), length_(0), capacity_(capacity)
+	: length_(0), capacity_(capacity)
 {
 	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
 
-	array_ = new char[capacity_];
-	array_[0] = '\0';
+	array_.local_[0] = '\0';
+	if (capacity > SmallBufferSize)
+	{
+		array_.begin_ = new char[capacity_];
+		array_.begin_[0] = '\0';
+	}
 }
 
 String::String(const char *cString)
-	: array_(NULL), length_(0), capacity_(0)
+	: length_(0), capacity_(0)
 {
 	ASSERT(cString);
 #if defined(_WIN32) && !defined(__MINGW32__)
@@ -34,32 +39,52 @@ String::String(const char *cString)
 	capacity_ = static_cast<unsigned int>(strnlen(cString, MaxCStringLength)) + 1;
 #endif
 	length_ = capacity_ - 1;
-	array_ = new char[capacity_];
+
+	char *dest = array_.local_;
+	if (capacity_ > SmallBufferSize)
+	{
+		array_.begin_ = new char[capacity_];
+		dest = array_.begin_;
+	}
 
 #if defined(_WIN32) && !defined(__MINGW32__)
-	strncpy_s(array_, capacity_, cString, length_);
+	strncpy_s(dest, capacity_, cString, length_);
 #else
-	strncpy(array_, cString, length_);
+	strncpy(dest, cString, length_);
 #endif
-	array_[length_] = '\0';
+	dest[length_] = '\0';
 }
 
 String::~String()
 {
-	delete[] array_;
+	if (capacity_ > SmallBufferSize)
+		delete[] array_.begin_;
 }
 
 String::String(const String &other)
-	: array_(NULL), length_(other.length_), capacity_(other.capacity_)
+	: length_(other.length_), capacity_(other.capacity_)
 {
-	array_ = new char[capacity_];
+	const char *src = other.array_.local_;
+	char *dest = array_.local_;
+	if (capacity_ > SmallBufferSize)
+	{
+		array_.begin_ = new char[capacity_];
+		src = other.array_.begin_;
+		dest = array_.begin_;
+	}
 
 #if defined(_WIN32) && !defined(__MINGW32__)
-	strncpy_s(array_, capacity_, other.array_, length_);
+	strncpy_s(dest, capacity_, src, length_);
 #else
-	strncpy(array_, other.array_, length_);
+	strncpy(dest, src, length_);
 #endif
-	array_[length_] = '\0';
+	dest[length_] = '\0';
+}
+
+String::String(String &&other)
+	: length_(0), capacity_(0)
+{
+	swap(*this, other);
 }
 
 ///////////////////////////////////////////////////////////
@@ -74,24 +99,31 @@ String &String::operator=(const String &other)
 		// copy and truncate
 		const unsigned int copiedChars = other.copy(*this);
 		length_ = copiedChars;
-		array_[length_] = '\0';
+		data()[length_] = '\0';
 	}
 
+	return *this;
+}
+
+String &String::operator=(String &&other)
+{
+	swap(*this, other);
 	return *this;
 }
 
 String &String::operator=(const char *cString)
 {
 	ASSERT(cString);
+
 #if defined(_WIN32) && !defined(__MINGW32__)
 	length_ = static_cast<unsigned int>(strnlen_s(cString, capacity_));
-	strncpy_s(array_, capacity_, cString, length_);
+	strncpy_s(data(), capacity_, cString, length_);
 #else
 	length_ = static_cast<unsigned int>(strnlen(cString, capacity_));
-	strncpy(array_, cString, length_);
+	strncpy(data(), cString, length_);
 #endif
 
-	array_[length_] = '\0';
+	data()[length_] = '\0';
 	return *this;
 }
 
@@ -102,10 +134,10 @@ unsigned int String::copy(String &dest, unsigned int srcChar, unsigned int numCh
 
 	// Cannot copy from beyond the end of the source string
 	const unsigned int clampedSrcChar = min(srcChar, length_);
-	const char *srcStart = array_ + clampedSrcChar;
+	const char *srcStart = data() + clampedSrcChar;
 	// It is possible to write beyond the end of the destination string, but without creating holes
 	const unsigned int clampedDestChar = min(destChar, dest.length_);
-	char *destStart = dest.array_ + clampedDestChar;
+	char *destStart = dest.data() + clampedDestChar;
 	// Cannot copy more characters than the source has left until its length or more than the destination has until its capacity
 	const unsigned int charsToCopy = min(min(numChar, length_ - clampedSrcChar), dest.capacity_ - clampedDestChar);
 
@@ -117,8 +149,8 @@ unsigned int String::copy(String &dest, unsigned int srcChar, unsigned int numCh
 		strncpy(destStart, srcStart, charsToCopy);
 #endif
 		// Source string length can only grow, truncation has to be performed by the calling function using the return value
-		dest.length_ = max(dest.length_, static_cast<unsigned int>(destStart - dest.array_) + charsToCopy);
-		dest.array_[dest.length_] = '\0';
+		dest.length_ = max(dest.length_, static_cast<unsigned int>(destStart - dest.data()) + charsToCopy);
+		dest.data()[dest.length_] = '\0';
 	}
 
 	return charsToCopy;
@@ -140,7 +172,7 @@ unsigned int String::copy(char *dest, unsigned int srcChar, unsigned int numChar
 
 	// Cannot copy from beyond the end of the source string
 	const unsigned int clampedSrcChar = min(srcChar, length_);
-	const char *srcStart = array_ + clampedSrcChar;
+	const char *srcStart = data() + clampedSrcChar;
 	// Cannot copy more characters than the source has left until its length
 	const unsigned int charsToCopy = min(numChar, length_ - clampedSrcChar);
 
@@ -164,32 +196,32 @@ unsigned int String::append(const String &source)
 
 int String::compare(const String &other) const
 {
-	const unsigned int minCapacity = nc::min(capacity_, other.capacity_);
-	return strncmp(array_, other.array_, minCapacity);
+	const unsigned int minCapacity = nctl::min(capacity_, other.capacity_);
+	return strncmp(data(), other.data(), minCapacity);
 }
 
 int String::compare(const char *cString) const
 {
 	ASSERT(cString);
-	return strncmp(array_, cString, capacity_);
+	return strncmp(data(), cString, capacity_);
 }
 
 int String::findFirstChar(char c) const
 {
-	const char *foundPtr = strchr(array_, c);
+	const char *foundPtr = strchr(data(), c);
 
 	if (foundPtr)
-		return static_cast<int>(foundPtr - array_);
+		return static_cast<int>(foundPtr - data());
 	else
 		return -1;
 }
 
 int String::findLastChar(char c) const
 {
-	const char *foundPtr = strrchr(array_, c);
+	const char *foundPtr = strrchr(data(), c);
 
 	if (foundPtr)
-		return static_cast<int>(foundPtr - array_);
+		return static_cast<int>(foundPtr - data());
 	else
 		return -1;
 }
@@ -199,20 +231,20 @@ int String::findFirstCharAfterIndex(char c, unsigned int index) const
 	if (index >= length_ - 1)
 		return -1;
 
-	const char *foundPtr = strchr(array_ + index + 1, c);
+	const char *foundPtr = strchr(data() + index + 1, c);
 
 	if (foundPtr)
-		return static_cast<int>(foundPtr - array_);
+		return static_cast<int>(foundPtr - data());
 	else
 		return -1;
 }
 
 int String::find(const String &other) const
 {
-	const char *foundPtr = strstr(array_, other.array_);
+	const char *foundPtr = strstr(data(), other.data());
 
 	if (foundPtr)
-		return static_cast<int>(foundPtr - array_);
+		return static_cast<int>(foundPtr - data());
 	else
 		return -1;
 }
@@ -220,10 +252,10 @@ int String::find(const String &other) const
 int String::find(const char *cString) const
 {
 	ASSERT(cString);
-	const char *foundPtr = strstr(array_, cString);
+	const char *foundPtr = strstr(data(), cString);
 
 	if (foundPtr)
-		return static_cast<int>(foundPtr - array_);
+		return static_cast<int>(foundPtr - data());
 	else
 		return -1;
 }
@@ -235,16 +267,16 @@ String &String::format(const char *fmt, ...)
 	va_list args;
 	va_start(args, fmt);
 #if defined(_WIN32) && !defined(__MINGW32__)
-	const int formattedLength = vsnprintf_s(array_, capacity_, capacity_, fmt, args);
+	const int formattedLength = vsnprintf_s(data(), capacity_, capacity_, fmt, args);
 #else
-	const int formattedLength = vsnprintf(array_, capacity_, fmt, args);
+	const int formattedLength = vsnprintf(data(), capacity_, fmt, args);
 #endif
 	va_end(args);
 
 	if (formattedLength > 0)
 	{
-		length_ = nc::min(capacity_, static_cast<unsigned int>(formattedLength));
-		array_[length_] = '\0';
+		length_ = nctl::min(capacity_, static_cast<unsigned int>(formattedLength));
+		data()[length_] = '\0';
 	}
 
 	return *this;
@@ -257,16 +289,16 @@ String &String::formatAppend(const char *fmt, ...)
 	va_list args;
 	va_start(args, fmt);
 #if defined(_WIN32) && !defined(__MINGW32__)
-	const int formattedLength = vsnprintf_s(array_ + length_, capacity_ - length_, capacity_ - length_, fmt, args);
+	const int formattedLength = vsnprintf_s(data() + length_, capacity_ - length_, capacity_ - length_, fmt, args);
 #else
-	const int formattedLength = vsnprintf(array_ + length_, capacity_ - length_, fmt, args);
+	const int formattedLength = vsnprintf(data() + length_, capacity_ - length_, fmt, args);
 #endif
 	va_end(args);
 
 	if (formattedLength > 0)
 	{
 		length_ += min(capacity_ - length_, static_cast<unsigned int>(formattedLength));
-		array_[length_] = '\0';
+		data()[length_] = '\0';
 	}
 
 	return *this;
@@ -278,13 +310,13 @@ String &String::operator+=(const String &other)
 	const unsigned int minLength = min(other.length_, availCapacity);
 
 #if defined(_WIN32) && !defined(__MINGW32__)
-	strncpy_s(array_ + length_, capacity_ - length_, other.array_, minLength);
+	strncpy_s(data() + length_, capacity_ - length_, other.data(), minLength);
 #else
-	strncpy(array_ + length_, other.array_, minLength);
+	strncpy(data() + length_, other.data(), minLength);
 #endif
 	length_ += minLength;
 
-	array_[length_] = '\0';
+	data()[length_] = '\0';
 	return *this;
 }
 
@@ -295,14 +327,14 @@ String &String::operator+=(const char *cString)
 
 #if defined(_WIN32) && !defined(__MINGW32__)
 	const unsigned int cLength = static_cast<unsigned int>(strnlen_s(cString, availCapacity));
-	strncpy_s(array_ + length_, capacity_ - length_, cString, cLength);
+	strncpy_s(data() + length_, capacity_ - length_, cString, cLength);
 #else
 	const unsigned int cLength = static_cast<unsigned int>(strnlen(cString, availCapacity));
-	strncpy(array_ + length_, cString, cLength);
+	strncpy(data() + length_, cString, cLength);
 #endif
 	length_ += cLength;
 
-	array_[length_] = '\0';
+	data()[length_] = '\0';
 	return *this;
 }
 

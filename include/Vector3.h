@@ -67,8 +67,8 @@ class Vector3
 	static const Vector3 ZAxis;
 };
 
-typedef Vector3<float> Vector3f;
-typedef Vector3<int> Vector3i;
+using Vector3f = Vector3<float>;
+using Vector3i = Vector3<int>;
 
 template <class T>
 inline void Vector3<T>::set(T xx, T yy, T zz)

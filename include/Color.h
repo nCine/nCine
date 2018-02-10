@@ -1,8 +1,8 @@
 #ifndef CLASS_NCINE_COLOR
 #define CLASS_NCINE_COLOR
 
-#include "algorithms.h"
-#include "StaticArray.h"
+#include "nctl/algorithms.h"
+#include "nctl/StaticArray.h"
 
 namespace ncine {
 
@@ -11,29 +11,22 @@ class DLL_PUBLIC Color
 {
   public:
 	/// Default constructor (white color)
-	Color()
-	{ set(255, 255, 255, 255); }
-	/// Four channels constructor (`unsigned char`)
-	Color(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
-	{ set(red, green, blue, alpha); }
+	Color() { set(255, 255, 255, 255); }
 	/// Three channels constructor (`unsigned char`)
 	Color(unsigned char red, unsigned char green, unsigned char blue)
-	{ set(red, green, blue); }
-	/// Four channels constructor (`unsigned int`)
-	Color(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha)
+		: Color(red, green, blue, 255) { }
+	/// Four channels constructor (`unsigned char`)
+	Color(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
 	{
-		set(static_cast<unsigned char>(red), static_cast<unsigned char>(green),
-		    static_cast<unsigned char>(blue), static_cast<unsigned char>(alpha));
+		set(red, green, blue, alpha);
 	}
-	/// Three channels constructor (`unsigned int`)
-	Color(unsigned int red, unsigned int green, unsigned int blue)
-	{ set(static_cast<unsigned char>(red), static_cast<unsigned char>(green), static_cast<unsigned char>(blue)); }
+	/// Three channels constructor (normalized `float`)
+	Color(float red, float green, float blue) : Color(red, green, blue, 1.0f) { }
 	/// Four channels constructor (normalized `float`)
 	Color(float red, float green, float blue, float alpha)
-	{ setF(red, green, blue, alpha); }
-	/// Three channels constructor (normalized `float`)
-	Color(float red, float green, float blue)
-	{ setF(red, green, blue); }
+	{
+		setF(red, green, blue, alpha);
+	}
 
 	/// Getter for the red channel of the color
 	inline unsigned char r() const { return channels_[0]; }
@@ -86,7 +79,7 @@ class DLL_PUBLIC Color
 
   private:
 	/// The four unsigned byte color channels
-	StaticArray<unsigned char, 4> channels_;
+	nctl::StaticArray<unsigned char, 4> channels_;
 };
 
 inline void Color::set(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
@@ -109,10 +102,10 @@ inline void Color::setVec(unsigned char channels[4])
 
 inline void Color::setF(float red, float green, float blue, float alpha)
 {
-	channels_[0] = static_cast<unsigned char>(nc::clamp(red, 0.0f, 1.0f) * 255);
-	channels_[1] = static_cast<unsigned char>(nc::clamp(green, 0.0f, 1.0f) * 255);
-	channels_[2] = static_cast<unsigned char>(nc::clamp(blue, 0.0f, 1.0f) * 255);
-	channels_[3] = static_cast<unsigned char>(nc::clamp(alpha, 0.0f, 1.0f) * 255);
+	channels_[0] = static_cast<unsigned char>(nctl::clamp(red, 0.0f, 1.0f) * 255);
+	channels_[1] = static_cast<unsigned char>(nctl::clamp(green, 0.0f, 1.0f) * 255);
+	channels_[2] = static_cast<unsigned char>(nctl::clamp(blue, 0.0f, 1.0f) * 255);
+	channels_[3] = static_cast<unsigned char>(nctl::clamp(alpha, 0.0f, 1.0f) * 255);
 }
 
 inline void Color::setF(float red, float green, float blue)
@@ -132,7 +125,7 @@ inline void Color::setAlpha(unsigned char alpha)
 
 inline void Color::setAlphaF(float alpha)
 {
-	channels_[3] = static_cast<unsigned char>(nc::clamp(alpha, 0.0f, 1.0f) * 255);
+	channels_[3] = static_cast<unsigned char>(nctl::clamp(alpha, 0.0f, 1.0f) * 255);
 }
 
 inline bool Color::operator==(const Color &color) const
@@ -146,7 +139,7 @@ inline Color &Color::operator*=(const Color &color)
 	for (unsigned int i = 0; i < 4; i++)
 	{
 		float channelValue = (color.channels_[i] / 255.0f) * channels_[i];
-		channelValue = nc::clamp(channelValue, 0.0f, 255.0f);
+		channelValue = nctl::clamp(channelValue, 0.0f, 255.0f);
 		channels_[i] = static_cast<unsigned char>(channelValue);
 	}
 
@@ -158,7 +151,7 @@ inline Color &Color::operator*=(float scalar)
 	for (unsigned int i = 0; i < 4; i++)
 	{
 		float channelValue = scalar * channels_[i];
-		channelValue = nc::clamp(channelValue, 0.0f, 255.0f);
+		channelValue = nctl::clamp(channelValue, 0.0f, 255.0f);
 		channels_[i] = static_cast<unsigned char>(channelValue);
 	}
 
@@ -172,7 +165,7 @@ inline Color Color::operator*(const Color &color) const
 	for (unsigned int i = 0; i < 4; i++)
 	{
 		float channelValue = (color.channels_[i] / 255.0f) * channels_[i];
-		channelValue = nc::clamp(channelValue, 0.0f, 255.0f);
+		channelValue = nctl::clamp(channelValue, 0.0f, 255.0f);
 		result.channels_[i] = static_cast<unsigned char>(channelValue);
 	}
 
@@ -186,7 +179,7 @@ inline Color Color::operator*(float scalar) const
 	for (unsigned int i = 0; i < 4; i++)
 	{
 		float channelValue = scalar * channels_[i];
-		channelValue = nc::clamp(channelValue, 0.0f, 255.0f);
+		channelValue = nctl::clamp(channelValue, 0.0f, 255.0f);
 		result.channels_[i] = static_cast<unsigned char>(channelValue);
 	}
 

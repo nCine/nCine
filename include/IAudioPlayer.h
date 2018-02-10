@@ -2,7 +2,7 @@
 #define CLASS_NCINE_IAUDIOPLAYER
 
 #include "Object.h"
-#include "StaticArray.h"
+#include "nctl/StaticArray.h"
 
 namespace ncine {
 
@@ -11,16 +11,16 @@ class DLL_PUBLIC IAudioPlayer : public Object
 {
   public:
 	/// Player state
-	enum PlayerState
+	enum class PlayerState
 	{
-		STATE_INITIAL = 0,
-		STATE_PLAYING,
-		STATE_PAUSED,
-		STATE_STOPPED
+		INITIAL = 0,
+		PLAYING,
+		PAUSED,
+		STOPPED
 	};
 
 	IAudioPlayer();
-	virtual ~IAudioPlayer() { }
+	~IAudioPlayer()  override { }
 
 	/// Starts playing
 	virtual void play() = 0;
@@ -55,11 +55,11 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	/// Returns the state of the player
 	inline PlayerState state() const { return state_; }
 	/// Queries the playing state of the player
-	inline bool isPlaying() const { return state_ == STATE_PLAYING; }
+	inline bool isPlaying() const { return state_ == PlayerState::PLAYING; }
 	/// Queries the paused state of the player
-	inline bool isPaused() const { return state_ == STATE_PAUSED; }
+	inline bool isPaused() const { return state_ == PlayerState::PAUSED; }
 	/// Queries the stopped state of the player
-	inline bool isStopped() const { return state_ == STATE_STOPPED; }
+	inline bool isStopped() const { return state_ == PlayerState::STOPPED; }
 	/// Queries the looping property of the player
 	inline bool isLooping() const { return isLooping_; }
 
@@ -75,7 +75,7 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	/// Player pitch value
 	float pitch_;
 	/// Player position in space
-	StaticArray<float, 3> position_;
+	nctl::StaticArray<float, 3> position_;
 };
 
 }

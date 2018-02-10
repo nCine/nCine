@@ -11,10 +11,7 @@ class TextureLoaderWebP : public ITextureLoader
 {
   public:
 	explicit TextureLoaderWebP(const char *filename);
-	explicit TextureLoaderWebP(IFile *fileHandle);
-
-  private:
-	void init();
+	explicit TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle);
 };
 
 }

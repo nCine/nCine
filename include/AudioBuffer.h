@@ -16,7 +16,7 @@ class DLL_PUBLIC AudioBuffer : public Object
 	AudioBuffer();
 	/// A constructor creating a buffer from a file
 	explicit AudioBuffer(const char *filename);
-	virtual ~AudioBuffer();
+	~AudioBuffer() override;
 
 	/// Returns the OpenAL buffer id
 	inline unsigned int bufferId() const { return bufferId_; }
@@ -25,7 +25,7 @@ class DLL_PUBLIC AudioBuffer : public Object
 	/// Returns samples frequency
 	inline int frequency() const { return frequency_; }
 
-	inline static ObjectType sType() { return AUDIOBUFFER_TYPE; }
+	inline static ObjectType sType() { return ObjectType::AUDIOBUFFER; }
 
   private:
 	/// The OpenAL buffer id
@@ -35,10 +35,10 @@ class DLL_PUBLIC AudioBuffer : public Object
 	/// Samples frequency
 	int frequency_;
 
-	/// Private copy constructor
-	AudioBuffer(const AudioBuffer &);
-	/// Private assignment operator
-	AudioBuffer &operator=(const AudioBuffer &);
+	/// Deleted copy constructor
+	AudioBuffer(const AudioBuffer &) = delete;
+	/// Deleted assignment operator
+	AudioBuffer &operator=(const AudioBuffer &) = delete;
 
 	/// Loads audio samples based on information from the audio loader
 	void load(const IAudioLoader *audioLoader);

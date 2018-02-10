@@ -14,7 +14,7 @@ class DLL_PUBLIC Texture : public Object
 {
   public:
 	/// Texture filtering modes
-	enum TextureFiltering
+	enum class Filtering
 	{
 		NEAREST,
 		LINEAR,
@@ -25,7 +25,7 @@ class DLL_PUBLIC Texture : public Object
 	};
 
 	/// Texture wrap modes
-	enum TextureWrap
+	enum class Wrap
 	{
 		CLAMP_TO_EDGE,
 		MIRRORED_REPEAT,
@@ -36,7 +36,7 @@ class DLL_PUBLIC Texture : public Object
 	explicit Texture(const char *filename);
 	Texture(const char *filename, int width, int height);
 	Texture(const char *filename, Vector2i size);
-	virtual ~Texture();
+	~Texture() override;
 
 	/// Returns texture width
 	inline int width() const { return width_; }
@@ -55,24 +55,24 @@ class DLL_PUBLIC Texture : public Object
 	inline bool hasAlpha() const { return hasAlphaChannel_; }
 
 	/// Sets texture filtering for both magnification and minification
-	void setFiltering(TextureFiltering filter);
+	void setFiltering(Filtering filter);
 	/// Sets texture wrap for both `s` and `t` coordinate
-	void setWrap(TextureWrap wrap);
+	void setWrap(Wrap wrapMode);
 
-	inline static ObjectType sType() { return TEXTURE_TYPE; }
+	inline static ObjectType sType() { return ObjectType::TEXTURE; }
 
   private:
-	GLTexture *glTexture_;
+	nctl::UniquePtr<GLTexture> glTexture_;
 	int width_;
 	int height_;
 	int mipMapLevels_;
 	bool isCompressed_;
 	bool hasAlphaChannel_;
 
-	/// Private copy constructor
-	Texture(const Texture &);
-	/// Private assignment operator
-	Texture &operator=(const Texture &);
+	/// Deleted copy constructor
+	Texture(const Texture &) = delete;
+	/// Deleted assignment operator
+	Texture &operator=(const Texture &) = delete;
 
 	/// Loads a texture based on information from the texture format and loader
 	void load(const ITextureLoader &texLoader);

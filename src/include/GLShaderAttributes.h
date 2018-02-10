@@ -2,10 +2,9 @@
 #define CLASS_NCINE_GLSHADERATTRIBUTES
 
 #include "GLVertexAttribute.h"
-#include "Array.h"
-#include "StaticArray.h"
-#include "HashMap.h"
-#include "ncString.h"
+#include "nctl/StaticArray.h"
+#include "nctl/HashMap.h"
+#include "nctl/String.h"
 
 namespace ncine {
 
@@ -48,12 +47,12 @@ class GLShaderAttributes
 
 	static const unsigned int MaxDefinedVertexAttribPointers = 16;
 	/// An array to cache the state of `glVertexAttribPointer()` calls
-	static StaticArray<GLVertexAttribPointerState, MaxDefinedVertexAttribPointers> definedPointers_;
+	static nctl::StaticArray<GLVertexAttribPointerState, MaxDefinedVertexAttribPointers> definedPointers_;
 
 	GLShaderProgram *shaderProgram_;
 
 	static const unsigned int VertexAttributesHashSize = 8;
-	StringHashMap<GLVertexAttribute>::Type vertexAttributes_;
+	nctl::StringHashMap<GLVertexAttribute> vertexAttributes_;
 	/// A dummy attribute returned when a vertex attribute is not found in the hashmap
 	static GLVertexAttribute attributeNotFound_;
 

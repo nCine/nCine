@@ -2,7 +2,7 @@
 #define CLASS_NCINE_AUDIOSTREAM
 
 #include "IAudioLoader.h"
-#include "StaticArray.h"
+#include "nctl/StaticArray.h"
 
 namespace ncine {
 
@@ -24,28 +24,28 @@ class DLL_PUBLIC AudioStream
 	/// Number of buffers for streaming
 	static const int NumBuffers = 3;
 	/// OpenAL buffer queue for streaming
-	StaticArray<unsigned int, NumBuffers> alBuffers_;
+	nctl::StaticArray<unsigned int, NumBuffers> alBuffers_;
 	/// Index of the next available OpenAL buffer
 	int nextAvailALBuffer_;
 
 	/// Size in bytes of each streaming buffer
 	static const int BufferSize = 16 * 1024;
 	/// Memory buffer to feed OpenAL ones
-	char *memBuffer_;
+	nctl::UniquePtr<char []> memBuffer_;
 
 	/// Samples frequency
 	int frequency_;
 	/// OpenAL channel format enumeration
 	int format_;
 	/// The associated loader to continuosly stream decoded data
-	IAudioLoader *audioLoader_;
+	nctl::UniquePtr<IAudioLoader> audioLoader_;
 
 	/// Constructor creating an audio stream from an audio file
 	explicit AudioStream(const char *filename);
-	/// Private copy constructor
-	AudioStream(const AudioStream &);
-	/// Private assignment operator
-	AudioStream &operator=(const AudioStream &);
+	/// Deleted copy constructor
+	AudioStream(const AudioStream &) = delete;
+	/// Deleted assignment operator
+	AudioStream &operator=(const AudioStream &) = delete;
 
 	friend class AudioStreamPlayer;
 };

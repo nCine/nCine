@@ -12,32 +12,23 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Font::Font(const char *texFilename, const char *fntFilename)
-	: Object(FONT_TYPE, fntFilename), texture_(NULL), lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_(0), numKernings_(0), glyphs_(NULL)
+	: Object(ObjectType::FONT, fntFilename),
+	  texture_(nctl::makeUnique<Texture>(texFilename)), lineHeight_(0), base_(0), width_(0), height_(0),
+	  numGlyphs_(0), numKernings_(0), glyphs_(nctl::makeUnique<FontGlyph []>(MaxGlyphs))
 {
-	texture_ = new Texture(texFilename);
-	glyphs_ = new FontGlyph[MaxGlyphs];
-
-	IFile *fileHandle = IFile::createFileHandle(fntFilename);
-	fileHandle->open(IFile::MODE_READ);
-	parseFntFile(fileHandle);
-	delete fileHandle;
+	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(fntFilename);
+	fileHandle->open(IFile::OpenMode::READ);
+	parseFntFile(fileHandle.get());
 }
 
 Font::~Font()
 {
-	delete[] glyphs_;
-	delete texture_;
+
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
-
-void Font::setTexture(Texture *texture)
-{
-	ASSERT(texture);
-	texture_ = texture;
-}
 
 const FontGlyph *Font::glyph(unsigned int glyphId) const
 {
@@ -60,10 +51,10 @@ void Font::parseFntFile(IFile *fileHandle)
 	unsigned int secondGlyphId;
 	int kerningAmount;
 
-	char *fileBuffer = new char[fileHandle->size()];
-	fileHandle->read(fileBuffer, fileHandle->size());
+	nctl::UniquePtr<char []> fileBuffer = nctl::makeUnique<char []>(fileHandle->size());
+	fileHandle->read(fileBuffer.get(), fileHandle->size());
 
-	char *buffer = fileBuffer;
+	const char *buffer = fileBuffer.get();
 	do
 	{
 		fileLine++;
@@ -110,10 +101,9 @@ void Font::parseFntFile(IFile *fileHandle)
 			}
 		}
 	}
-	while (strchr(buffer, '\n') && (buffer = strchr(buffer, '\n') + 1) < fileBuffer + fileHandle->size());
+	while (strchr(buffer, '\n') && (buffer = strchr(buffer, '\n') + 1) < fileBuffer.get() + fileHandle->size());
 
 	LOGI_X("FNT file parsed: %u glyphs and %u kernings", numGlyphs_, numKernings_);
-	delete[] fileBuffer;
 }
 
 }

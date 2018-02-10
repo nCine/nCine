@@ -11,10 +11,10 @@ class IAudioPlayer;
 class DLL_PUBLIC IAudioDevice
 {
   public:
-	enum PlayerType
+	enum class PlayerType
 	{
-		BUFFER_PLAYER,
-		AUDIOSTREAM_PLAYER
+		BUFFER,
+		AUDIOSTREAM
 	};
 
 	virtual ~IAudioDevice() = 0;
@@ -52,20 +52,20 @@ inline IAudioDevice::~IAudioDevice() { }
 class DLL_PUBLIC NullAudioDevice : public IAudioDevice
 {
   public:
-	virtual float gain() { return 1.0f; }
-	virtual void setGain(float gain) { }
+	float gain() override { return 1.0f; }
+	void setGain(float gain) override { }
 
-	virtual void stopPlayers() { }
-	virtual void pausePlayers() { }
-	virtual void stopPlayers(PlayerType playerType) { }
-	virtual void pausePlayers(PlayerType playerType) { }
+	void stopPlayers() override { }
+	void pausePlayers() override { }
+	void stopPlayers(PlayerType playerType) override { }
+	void pausePlayers(PlayerType playerType) override { }
 
-	virtual void freezePlayers() { }
-	virtual void unfreezePlayers() { }
+	void freezePlayers() override { }
+	void unfreezePlayers() override { }
 
-	virtual int nextAvailableSource() { return -1; }
-	virtual void registerPlayer(IAudioPlayer *player) { }
-	virtual void updatePlayers() { }
+	int nextAvailableSource() override { return -1; }
+	void registerPlayer(IAudioPlayer *player) override { }
+	void updatePlayers() override { }
 };
 
 }

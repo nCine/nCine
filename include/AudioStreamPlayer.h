@@ -13,24 +13,24 @@ class DLL_PUBLIC AudioStreamPlayer : public IAudioPlayer
   public:
 	/// A constructor creating a player from a file
 	explicit AudioStreamPlayer(const char *filename);
-	virtual ~AudioStreamPlayer();
+	~AudioStreamPlayer() override;
 
-	virtual void play();
-	virtual void pause();
-	virtual void stop();
+	void play() override;
+	void pause() override;
+	void stop() override;
 
 	/// Updates the player state and the stream buffer queue
-	virtual void updateState();
+	void updateState() override;
 
-	inline static ObjectType sType() { return AUDIOSTREAMPLAYER_TYPE; }
+	inline static ObjectType sType() { return ObjectType::AUDIOSTREAM_PLAYER; }
 
   private:
 	AudioStream audioStream_;
 
-	/// Private copy constructor
-	AudioStreamPlayer(const AudioStreamPlayer &);
-	/// Private assignment operator
-	AudioStreamPlayer &operator=(const AudioStreamPlayer &);
+	/// Deleted copy constructor
+	AudioStreamPlayer(const AudioStreamPlayer &) = delete;
+	/// Deleted assignment operator
+	AudioStreamPlayer &operator=(const AudioStreamPlayer &) = delete;
 };
 
 }

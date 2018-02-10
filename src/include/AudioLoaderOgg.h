@@ -13,22 +13,20 @@ class AudioLoaderOgg : public IAudioLoader
 {
   public:
 	explicit AudioLoaderOgg(const char *filename);
-	explicit AudioLoaderOgg(IFile *fileHandle);
-	~AudioLoaderOgg();
+	explicit AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle);
+	~AudioLoaderOgg() override;
 
-	unsigned long int read(char *buffer, unsigned long int bufferSize) const;
-	void rewind() const;
+	unsigned long int read(char *buffer, unsigned long int bufferSize) const override;
+	void rewind() const override;
 
   private:
 	/// Vorbisfile handle
 	mutable OggVorbis_File oggFile_;
 
-	/// Private copy constructor
-	AudioLoaderOgg(const AudioLoaderOgg &);
-	/// Private assignment operator
-	AudioLoaderOgg &operator=(const AudioLoaderOgg &);
-
-	void init();
+	/// Deleted copy constructor
+	AudioLoaderOgg(const AudioLoaderOgg &) = delete;
+	/// Deleted assignment operator
+	AudioLoaderOgg &operator=(const AudioLoaderOgg &) = delete;
 };
 
 }

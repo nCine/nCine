@@ -3,7 +3,7 @@
 
 #include "Vector2.h"
 #include "Color.h"
-#include "Array.h"
+#include "nctl/Array.h"
 
 namespace ncine {
 
@@ -26,7 +26,7 @@ class DLL_PUBLIC AccelerationAffector : public ParticleAffector
 	AccelerationAffector(float x, float y) : acceleration_(x, y) { }
 
 	/// Affects the acceleration of the specified particle
-	virtual void affect(Particle *particle);
+	void affect(Particle *particle) override;
 
   private:
 	Vector2f acceleration_;
@@ -37,14 +37,9 @@ class DLL_PUBLIC ColorAffector : public ParticleAffector
 {
   public:
 	ColorAffector() : colorSteps_(4) { }
-	~ColorAffector()
-	{
-		for (unsigned int i = 0; i < colorSteps_.size(); i++)
-			delete colorSteps_[i];
-	}
 
 	/// Affects the color of the specified particle
-	virtual void affect(Particle *particle);
+	void affect(Particle *particle) override;
 	void addColorStep(float time, Color color);
 
   private:
@@ -53,15 +48,11 @@ class DLL_PUBLIC ColorAffector : public ParticleAffector
 		float time;
 		Color color;
 
+		ColorStep() : time(0.0f) { }
 		ColorStep(float newTime, Color newColor) : time(newTime), color(newColor) { }
 	};
 
-	Array<ColorStep *> colorSteps_;
-
-	/// Private copy constructor
-	ColorAffector(const ColorAffector &);
-	/// Private assignment operator
-	ColorAffector &operator=(const ColorAffector &);
+	nctl::Array<ColorStep> colorSteps_;
 };
 
 /// Particle size affector
@@ -70,14 +61,9 @@ class DLL_PUBLIC SizeAffector : public ParticleAffector
   public:
 	/// Constructs a size affector with a base scale factor as a reference
 	explicit SizeAffector(float baseScale) : sizeSteps_(4), baseScale_(baseScale) { }
-	~SizeAffector()
-	{
-		for (unsigned int i = 0; i < sizeSteps_.size(); i++)
-			delete sizeSteps_[i];
-	}
 
 	/// Affects the size of the specified particle
-	virtual void affect(Particle *particle);
+	void affect(Particle *particle) override;
 	void addSizeStep(float time, float scale);
 
   private:
@@ -86,16 +72,12 @@ class DLL_PUBLIC SizeAffector : public ParticleAffector
 		float time;
 		float scale;
 
+		SizeStep() : time(0.0f), scale(1.0f) { }
 		SizeStep(float newTime, float newScale) : time(newTime), scale(newScale) { }
 	};
 
-	Array<SizeStep *> sizeSteps_;
+	nctl::Array<SizeStep> sizeSteps_;
 	float baseScale_;
-
-	/// Private copy constructor
-	SizeAffector(const SizeAffector &);
-	/// Private assignment operator
-	SizeAffector &operator=(const SizeAffector &);
 };
 
 }

@@ -3,8 +3,8 @@
 
 #include "Rect.h"
 #include "Color.h"
-#include "Array.h"
-#include "StaticArray.h"
+#include "nctl/Array.h"
+#include "nctl/StaticArray.h"
 #include "DrawableNode.h"
 #include "PlottingVariable.h"
 
@@ -15,7 +15,6 @@ class ProfilePlotter : public DrawableNode
 {
   public:
 	ProfilePlotter(SceneNode *parent, Rectf rect);
-	virtual ~ProfilePlotter();
 
 	/// Adds a value to the specified variable
 	bool addValue(unsigned int varIndex, float value);
@@ -53,16 +52,16 @@ class ProfilePlotter : public DrawableNode
 	/// Background color
 	Color backgroundColor_;
 	/// The vertices for the background
-	StaticArray<float, 8> backgroundVertices_; // Quad with a triangle strip
+	nctl::StaticArray<float, 8> backgroundVertices_; // Quad with a triangle strip
 	/// The array of variables
-	Array<PlottingVariable *> variables_;
+	nctl::Array<nctl::UniquePtr<PlottingVariable> > variables_;
 
 	/// Reference value drawing flag
 	bool shouldPlotRefValue_;
 	/// Reference value line color
 	Color refValueColor_;
 	/// The vertices for the reference value line
-	StaticArray<float, 4> refValueVertices_;
+	nctl::StaticArray<float, 4> refValueVertices_;
 	/// The reference value
 	float refValue_;
 	/// The command used to render the reference value
@@ -70,15 +69,15 @@ class ProfilePlotter : public DrawableNode
 
 	/// Fills the background buffer with vertices
 	void setBackgroundVertices();
-	virtual void updateRenderCommand();
+	void updateRenderCommand() override;
 	/// Updates the reference value rendering command
 	void UpdateRefValueRenderCommand();
 
   private:
-	/// Private copy constructor
-	ProfilePlotter(const ProfilePlotter &);
-	/// Private assignment operator
-	ProfilePlotter &operator=(const ProfilePlotter &);
+	/// Deleted copy constructor
+	ProfilePlotter(const ProfilePlotter &) = delete;
+	/// Deleted assignment operator
+	ProfilePlotter &operator=(const ProfilePlotter &) = delete;
 };
 
 }

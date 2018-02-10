@@ -8,43 +8,34 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 TextureLoaderWebP::TextureLoaderWebP(const char *filename)
-	: ITextureLoader(filename)
+	: TextureLoaderWebP(IFile::createFileHandle(filename))
 {
-	init();
+
 }
 
-TextureLoaderWebP::TextureLoaderWebP(IFile *fileHandle)
-	: ITextureLoader(fileHandle)
-{
-	init();
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void TextureLoaderWebP::init()
+TextureLoaderWebP::TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
+	: ITextureLoader(nctl::move(fileHandle))
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 
 	// Loading the whole file in memory
-	fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
+	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 	const long int fileSize = fileHandle_->size();
-	unsigned char *fileBuffer = new unsigned char[fileSize];
-	fileHandle_->read(fileBuffer, fileSize);
+	nctl::UniquePtr<unsigned char []> fileBuffer = nctl::makeUnique<unsigned char []>(fileSize);
+	fileHandle_->read(fileBuffer.get(), fileSize);
 
-	if (WebPGetInfo(fileBuffer, fileSize, &width_, &height_) == 0)
+	if (WebPGetInfo(fileBuffer.get(), fileSize, &width_, &height_) == 0)
 	{
-		delete[] fileBuffer;
+		fileBuffer.reset(nullptr);
 		FATAL_MSG("Cannot read WebP header");
 	}
 
 	LOGI_X("Header found: w:%d h:%d", width_, height_);
 
 	WebPBitstreamFeatures features;
-	if (WebPGetFeatures(fileBuffer, fileSize, &features) != VP8_STATUS_OK)
+	if (WebPGetFeatures(fileBuffer.get(), fileSize, &features) != VP8_STATUS_OK)
 	{
-		delete[] fileBuffer;
+		fileBuffer.reset(nullptr);
 		FATAL_MSG("Cannot retrieve WebP features from headers");
 	}
 
@@ -55,28 +46,26 @@ void TextureLoaderWebP::init()
 	texFormat_ = features.has_alpha ? TextureFormat(GL_RGBA) : TextureFormat(GL_RGB);
 	bpp_ = features.has_alpha ? 4 : 3;
 	long int decodedSize = width_ * height_ * bpp_;
-	pixels_ =  new unsigned char[decodedSize];
+	pixels_ = nctl::makeUnique<unsigned char []>(decodedSize);
 
 	if (features.has_alpha)
 	{
-		if (WebPDecodeRGBAInto(fileBuffer, fileSize, pixels_, decodedSize, width_ * bpp_) == NULL)
+		if (WebPDecodeRGBAInto(fileBuffer.get(), fileSize, pixels_.get(), decodedSize, width_ * bpp_) == nullptr)
 		{
-			delete[] fileBuffer;
-			delete[] pixels_;
+			fileBuffer.reset(nullptr);
+			pixels_.reset(nullptr);
 			FATAL_MSG("Cannot decode RGBA WebP image");
 		}
 	}
 	else
 	{
-		if (WebPDecodeRGBInto(fileBuffer, fileSize, pixels_, decodedSize, width_ * bpp_) == NULL)
+		if (WebPDecodeRGBInto(fileBuffer.get(), fileSize, pixels_.get(), decodedSize, width_ * bpp_) == nullptr)
 		{
-			delete[] fileBuffer;
-			delete[] pixels_;
+			fileBuffer.reset(nullptr);
+			pixels_.reset(nullptr);
 			FATAL_MSG("Cannot decode RGB WebP image");
 		}
 	}
-
-	delete[] fileBuffer;
 }
 
 }

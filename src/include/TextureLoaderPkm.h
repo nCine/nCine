@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_TEXTURELOADERPKM
 #define CLASS_NCINE_TEXTURELOADERPKM
 
-#include <stdint.h> // for header
+#include <cstdint> // for header
 #include "ITextureLoader.h"
 
 namespace ncine {
@@ -11,15 +11,14 @@ class TextureLoaderPkm : public ITextureLoader
 {
   public:
 	explicit TextureLoaderPkm(const char *filename);
-	explicit TextureLoaderPkm(IFile *fileHandle);
-	~TextureLoaderPkm() { }
+	explicit TextureLoaderPkm(nctl::UniquePtr<IFile> fileHandle);
 
   private:
 	/// Header for the PKM header
 	/*! The extended width and height are the dimensions rounded up to a multiple of 4.
 	 *  The total data size in bytes is (extendedWidth / 4) * (extendedHeight / 4) * 8
 	 */
-	typedef struct PkmHeader
+	struct PkmHeader
 	{
 		uint32_t	magicId;
 		uint16_t	version;
@@ -28,9 +27,7 @@ class TextureLoaderPkm : public ITextureLoader
 		uint16_t	extendedHeight;
 		uint16_t	width;
 		uint16_t	height;
-	} PkmHeader;
-
-	void init();
+	};
 };
 
 }

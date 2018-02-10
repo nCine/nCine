@@ -14,17 +14,17 @@ class SdlGfxDevice : public IGfxDevice
 {
   public:
 	SdlGfxDevice(int width, int height, const GLContextInfo &contextInfo, const DisplayMode &mode, bool isFullScreen);
-	~SdlGfxDevice();
+	~SdlGfxDevice() override;
 
-	void setResolution(int width, int height);
-	inline void setResolution(Vector2i size) { setResolution(size.x, size.y); }
+	void setResolution(int width, int height) override;
+	inline void setResolution(Vector2i size) override { setResolution(size.x, size.y); }
 
-	void toggleFullScreen();
+	void toggleFullScreen() override;
 
-	inline void update() { SDL_GL_SwapWindow(windowHandle_); }
+	inline void update() override { SDL_GL_SwapWindow(windowHandle_); }
 
-	inline void setWindowTitle(const char *windowTitle) { SDL_SetWindowTitle(windowHandle_, windowTitle); }
-	void setWindowIcon(const char *windowIconFilename);
+	inline void setWindowTitle(const char *windowTitle) override { SDL_SetWindowTitle(windowHandle_, windowTitle); }
+	void setWindowIcon(const char *windowIconFilename) override;
 
   private:
 	/// SDL2 window handle
@@ -32,10 +32,10 @@ class SdlGfxDevice : public IGfxDevice
 	/// SDL2 OpenGL context handle
 	SDL_GLContext glContextHandle_;
 
-	/// Private copy constructor
-	SdlGfxDevice(const SdlGfxDevice &);
-	/// Private assignment operator
-	SdlGfxDevice &operator=(const SdlGfxDevice &);
+	/// Deleted copy constructor
+	SdlGfxDevice(const SdlGfxDevice &) = delete;
+	/// Deleted assignment operator
+	SdlGfxDevice &operator=(const SdlGfxDevice &) = delete;
 
 	/// Initilizes the video subsystem (SDL)
 	void initGraphics();

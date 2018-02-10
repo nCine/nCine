@@ -9,16 +9,17 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ParticleSystem::ParticleSystem(SceneNode *parent, unsigned int count, Texture *texture, Recti texRect)
-	: SceneNode(parent, 0, 0), poolSize_(count), poolTop_(count - 1), particlePool_(poolSize_, ArrayMode::FIXED_CAPACITY),
-	  particleList_(poolSize_, ArrayMode::FIXED_CAPACITY), affectors_(4), inLocalSpace_(false)
+	: SceneNode(parent, 0, 0), poolSize_(count), poolTop_(count - 1),
+	  particlePool_(poolSize_, nctl::ArrayMode::FIXED_CAPACITY),
+	  particleList_(poolSize_, nctl::ArrayMode::FIXED_CAPACITY), affectors_(4), inLocalSpace_(false)
 {
-	type_ = PARTICLESYSTEM_TYPE;
+	type_ = ObjectType::PARTICLE_SYSTEM;
 
 	for (unsigned int i = 0; i < poolSize_; i++)
 	{
-		particlePool_[i] = new Particle(NULL, texture);
-		particlePool_[i]->setTexRect(texRect);
-		particleList_[i] = particlePool_[i];
+		particleList_[i] = nctl::UniquePtr<Particle>(new Particle(nullptr, texture));
+		particleList_[i]->setTexRect(texRect);
+		particlePool_[i] = particleList_[i].get();
 	}
 }
 
@@ -26,12 +27,6 @@ ParticleSystem::~ParticleSystem()
 {
 	// Empty the children list before the mass deletion
 	children_.clear();
-
-	for (unsigned int i = 0; i < affectors_.size(); i++)
-		delete affectors_[i];
-
-	for (unsigned int i = 0; i < poolSize_; i++)
-		delete particleList_[i];
 }
 
 ///////////////////////////////////////////////////////////
@@ -54,12 +49,12 @@ void ParticleSystem::emitParticles(unsigned int amount, float life, const Vector
 		if (poolTop_ == 0)
 			break;
 
-		const float rndLife = life * randBetween(0.85f, 1.0f);
+		const float rndLife = life * nctl::randBetween(0.85f, 1.0f);
 		// HACK: hard-coded random position amount
-		rndPosition.x = 10.0f * randBetween(-1.0f, 1.0f); // 25
-		rndPosition.y = 10.0f * randBetween(-1.0f, 1.0f);
-		rndVelocity.x = vel.x * randBetween(0.8f, 1.0f);
-		rndVelocity.y = vel.y * randBetween(0.8f, 1.0f);
+		rndPosition.x = 10.0f * nctl::randBetween(-1.0f, 1.0f); // 25
+		rndPosition.y = 10.0f * nctl::randBetween(-1.0f, 1.0f);
+		rndVelocity.x = vel.x * nctl::randBetween(0.8f, 1.0f);
+		rndVelocity.y = vel.y * nctl::randBetween(0.8f, 1.0f);
 
 		if (inLocalSpace_ == false)
 			rndPosition += absPosition();
@@ -73,15 +68,15 @@ void ParticleSystem::emitParticles(unsigned int amount, float life, const Vector
 
 void ParticleSystem::update(float interval)
 {
-	for (List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
+	for (nctl::List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
 	{
 		Particle *particle = static_cast<Particle *>(*i);
 
 		// Update the particle if it's alive
 		if (particle->isAlive())
 		{
-			for (unsigned int j = 0; j < affectors_.size(); j++)
-				affectors_[j]->affect(particle);
+			for (nctl::UniquePtr<ParticleAffector> &affector : affectors_)
+				affector->affect(particle);
 
 			particle->update(interval);
 			particle->transform();

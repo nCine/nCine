@@ -9,31 +9,29 @@ namespace ncine {
 class DLL_PUBLIC DisplayMode
 {
   public:
-	enum DoubleBufferingMode
+	enum class DoubleBuffering
 	{
-		NON_DOUBLE_BUFFERED,
-		DOUBLE_BUFFERED
+		DISABLED,
+		ENABLED
 	};
 
-	enum VSyncMode
+	enum class VSync
 	{
-		NO_VSYNC,
-		WITH_VSYNC
+		DISABLED,
+		ENABLED
 	};
 
 	DisplayMode(unsigned int redBits, unsigned int greenBits, unsigned int blueBits)
-		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits), alphaBits_(0),
-		  depthBits_(0), stencilBits_(0), isDoubleBuffered_(true), hasVSync_(false) { }
+		: DisplayMode(redBits, greenBits, blueBits, 0, 0, 0, DoubleBuffering::ENABLED, VSync::DISABLED) { }
 	DisplayMode(unsigned int redBits, unsigned int greenBits, unsigned int blueBits, unsigned int alphaBits)
-		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits), alphaBits_(alphaBits),
-		  depthBits_(0), stencilBits_(0), isDoubleBuffered_(true), hasVSync_(false) { }
-	DisplayMode(unsigned int depthBits, unsigned int stencilBits, DoubleBufferingMode dbMode, VSyncMode vsMode)
-		: redBits_(0), greenBits_(0), blueBits_(0), alphaBits_(0),
-		  depthBits_(depthBits), stencilBits_(stencilBits), isDoubleBuffered_(dbMode == DOUBLE_BUFFERED), hasVSync_(vsMode == WITH_VSYNC) { }
+		: DisplayMode(redBits, greenBits, blueBits, alphaBits, 0, 0, DoubleBuffering::ENABLED, VSync::DISABLED) { }
+	DisplayMode(unsigned int depthBits, unsigned int stencilBits, DoubleBuffering dbMode, VSync vsMode)
+		: DisplayMode(0, 0, 0, 0, depthBits, stencilBits, dbMode, vsMode) { }
 	DisplayMode(unsigned int redBits, unsigned int greenBits, unsigned int blueBits, unsigned int alphaBits,
-	            unsigned int depthBits, unsigned int stencilBits, DoubleBufferingMode dbMode, VSyncMode vsMode)
+	            unsigned int depthBits, unsigned int stencilBits, DoubleBuffering dbMode, VSync vsMode)
 		: redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits), alphaBits_(alphaBits),
-		  depthBits_(depthBits), stencilBits_(stencilBits), isDoubleBuffered_(dbMode == DOUBLE_BUFFERED), hasVSync_(vsMode == WITH_VSYNC) { }
+		  depthBits_(depthBits), stencilBits_(stencilBits), isDoubleBuffered_(dbMode == DoubleBuffering::ENABLED),
+		  hasVSync_(vsMode == VSync::ENABLED) { }
 
 	/// Returns the number of bits for the red channel
 	inline unsigned int redBits() const { return redBits_; }

@@ -7,8 +7,8 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-IInputEventHandler *IInputManager::inputEventHandler_ = NULL;
-IInputManager::MouseCursorMode IInputManager::mouseCursorMode_ = IInputManager::MOUSE_CURSOR_NORMAL;
+IInputEventHandler *IInputManager::inputEventHandler_ = nullptr;
+IInputManager::MouseCursorMode IInputManager::mouseCursorMode_ = IInputManager::MouseCursorMode::NORMAL;
 JoyMapping IInputManager::joyMapping_;
 
 // From `XInput.h` in DirectX SDK

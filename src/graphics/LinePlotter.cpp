@@ -12,13 +12,13 @@ LineVariable::LineVariable(unsigned int numValues, float rejectDelay, const Matr
 {
 	// Two vertices for the mean quote plus...
 	// One vertex (2 coordinates each) for every recorded value
-	vertices_ = new GLfloat[4 + numValues * 2];
+	vertices_ =  nctl::makeUnique<GLfloat []>(4 + numValues * 2);
 
-	valuesCmd_.material().setShaderProgram(Material::COLOR_PROGRAM);
+	valuesCmd_.material().setShaderProgram(Material::ShaderProgram::COLOR);
 	valuesCmd_.geometry().createCustomVbo(4 + numValues * 2, GL_DYNAMIC_DRAW);
 	valuesCmd_.geometry().setDrawParameters(GL_LINE_STRIP, 2, variable_.numValues());
 
-	meanCmd_.material().setShaderProgram(Material::COLOR_PROGRAM);
+	meanCmd_.material().setShaderProgram(Material::ShaderProgram::COLOR);
 	meanCmd_.geometry().shareVbo(valuesCmd_.geometry());
 	meanCmd_.geometry().setDrawParameters(GL_LINES, 0, 2);
 }
@@ -29,9 +29,7 @@ LineVariable::LineVariable(unsigned int numValues, float rejectDelay, const Matr
 
 unsigned int LinePlotter::addVariable(unsigned int numValues, float rejectDelay)
 {
-	LineVariable *variable = new LineVariable(numValues, rejectDelay, worldMatrix_);
-	variables_.pushBack(variable);
-
+	variables_.pushBack(nctl::makeUnique<LineVariable>(numValues, rejectDelay, worldMatrix_));
 	return variables_.size() - 1;
 }
 
@@ -46,11 +44,11 @@ void LinePlotter::draw(RenderQueue &renderQueue)
 	if (shouldPlotRefValue())
 		drawRefValue(renderQueue);
 
-	for (unsigned int i = 0; i < variables_.size(); i++)
+	for (nctl::UniquePtr<PlottingVariable> &variable : variables_)
 	{
-		variables_[i]->draw(renderQueue);
-		if (variables_[i]->shouldPlotMean())
-			variables_[i]->drawMean(renderQueue);
+		variable->draw(renderQueue);
+		if (variable->shouldPlotMean())
+			variable->drawMean(renderQueue);
 	}
 }
 
@@ -67,22 +65,23 @@ void LinePlotter::updateAllVertices(float x, float y, float w, float h)
 		commonMin = variables_[0]->variable()->min();
 		commonMax = variables_[0]->variable()->max();
 	}
-	for (unsigned int i = 1; i < variables_.size(); i++)
+
+	for (nctl::UniquePtr<PlottingVariable> &variable : variables_)
 	{
-		if (variables_[i]->variable()->min() < commonMin)
-			commonMin = variables_[i]->variable()->min();
-		else if (variables_[i]->variable()->max() > commonMax)
-			commonMax = variables_[i]->variable()->max();
+		if (variable->variable()->min() < commonMin)
+			commonMin = variable->variable()->min();
+		else if (variable->variable()->max() > commonMax)
+			commonMax = variable->variable()->max();
 	}
 
 	const float normalizedRefValue = normBetweenRefValue(commonMin, commonMax);
 	refValueVertices_[0] = x;		refValueVertices_[1] = y + h * normalizedRefValue;
 	refValueVertices_[2] = x + w;	refValueVertices_[3] = y + h * normalizedRefValue;
 
-	for (unsigned int i = 0; i < variables_.size(); i++)
+	for (nctl::UniquePtr<PlottingVariable> &variable : variables_)
 	{
-		const ProfileVariable *profVariable = variables_[i]->variable();
-		GLfloat *vertices = variables_[i]->vertices();
+		const ProfileVariable *profVariable = variable->variable();
+		GLfloat *vertices = variable->vertices();
 
 		const float normalizedMean = profVariable->normBetweenMean(commonMin, commonMax);
 		// Variable mean vertices
@@ -105,18 +104,18 @@ void LineVariable::updateRenderCommand()
 {
 	valuesCmd_.transformation() = worldMatrix_;
 
-	valuesCmd_.material().setTexture(NULL);
+	valuesCmd_.material().setTexture(nullptr);
 	valuesCmd_.material().uniform("color")->setFloatValue(graphColor_.fR(), graphColor_.fG(), graphColor_.fB(), graphColor_.fA());
-	valuesCmd_.geometry().updateVboData(4, variable_.numValues() * 2, vertices_ + 4);
+	valuesCmd_.geometry().updateVboData(4, variable_.numValues() * 2, vertices_.get() + 4);
 }
 
 void LineVariable::updateMeanRenderCommand()
 {
 	meanCmd_.transformation() = worldMatrix_;
 
-	meanCmd_.material().setTexture(NULL);
+	meanCmd_.material().setTexture(nullptr);
 	meanCmd_.material().uniform("color")->setFloatValue(meanColor_.fR(), meanColor_.fG(), meanColor_.fB(), meanColor_.fA());
-	meanCmd_.geometry().updateVboData(0, 4, vertices_);
+	meanCmd_.geometry().updateVboData(0, 4, vertices_.get());
 }
 
 }

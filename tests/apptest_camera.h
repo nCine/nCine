@@ -3,8 +3,15 @@
 
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
-#include "StaticArray.h"
+#include "nctl/StaticArray.h"
 #include "Vector2.h"
+#include "nctl/UniquePtr.h"
+
+namespace nctl {
+
+class String;
+
+}
 
 namespace ncine {
 
@@ -14,7 +21,6 @@ class Sprite;
 class SceneNode;
 class Font;
 class TextNode;
-class String;
 
 }
 
@@ -26,26 +32,25 @@ class MyEventHandler :
 	public nc::IInputEventHandler
 {
   public:
-	virtual void onPreInit(nc::AppConfiguration &config);
-	virtual void onInit();
-	virtual void onFrameStart();
-	virtual void onShutdown();
+	void onPreInit(nc::AppConfiguration &config) override;
+	void onInit() override;
+	void onFrameStart() override;
 
 #ifdef __ANDROID__
-	virtual void onTouchDown(const nc::TouchEvent &event);
-	virtual void onTouchUp(const nc::TouchEvent &event);
-	virtual void onTouchMove(const nc::TouchEvent &event);
-	virtual void onPointerDown(const nc::TouchEvent &event);
+	void onTouchDown(const nc::TouchEvent &event) override;
+	void onTouchUp(const nc::TouchEvent &event) override;
+	void onTouchMove(const nc::TouchEvent &event) override;
+	void onPointerDown(const nc::TouchEvent &event) override;
 #endif
-	virtual void onKeyReleased(const nc::KeyboardEvent &event);
-	virtual void onMouseButtonPressed(const nc::MouseEvent &event);
-	virtual void onMouseButtonReleased(const nc::MouseEvent &event);
-	virtual void onMouseMoved(const nc::MouseState &state);
-	virtual void onScrollInput(const nc::ScrollEvent &event);
+	void onKeyReleased(const nc::KeyboardEvent &event) override;
+	void onMouseButtonPressed(const nc::MouseEvent &event) override;
+	void onMouseButtonReleased(const nc::MouseEvent &event) override;
+	void onMouseMoved(const nc::MouseState &state) override;
+	void onScrollInput(const nc::ScrollEvent &event) override;
 
-	virtual void onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event);
-	virtual void onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event);
-	virtual void onJoyDisconnected(const nc::JoyConnectionEvent &event);
+	void onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event) override;
+	void onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event) override;
+	void onJoyDisconnected(const nc::JoyConnectionEvent &event) override;
 
   private:
 	static const unsigned int NumTextures = 4;
@@ -66,14 +71,16 @@ class MyEventHandler :
 	nc::Vector2f joyVectorLeft_;
 	nc::Vector2f joyVectorRight_;
 
-	nc::SceneNode *cameraNode_;
-	nc::StaticArray<nc::Texture *, NumTextures> textures_;
-	nc::StaticArray<nc::Sprite *, NumSprites> sprites_;
-	nc::StaticArray<nc::Vector2f, NumSprites> spritePos_;
-	nc::Font *font_;
-	nc::StaticArray<nc::TextNode *, NumTexts> texts_;
-	nc::TextNode *debugtext_;
-	nc::String *debugString_;
+	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, NumTextures> textures_;
+	nctl::UniquePtr<nc::Font> font_;
+	nctl::UniquePtr<nc::SceneNode> cameraNode_;
+
+	nctl::UniquePtr<nctl::String> debugString_;
+	nctl::UniquePtr<nc::TextNode> debugtext_;
+	nctl::StaticArray<nctl::UniquePtr<nc::TextNode>, NumTexts> texts_;
+
+	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumSprites> sprites_;
+	nctl::StaticArray<nc::Vector2f, NumSprites> spritePos_;
 
 	void resetCamera();
 };

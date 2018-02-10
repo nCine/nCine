@@ -108,7 +108,7 @@ class DLL_PUBLIC KeyboardEvent
 	/// Key modifiers mask
 	int mod;
 
-	KeyboardEvent() : scancode(0), sym(KEY_UNKNOWN), mod(0) { }
+	KeyboardEvent() : scancode(0), sym(KeySym::UNKNOWN), mod(0) { }
 };
 
 /// Information about the joystick state
@@ -155,31 +155,31 @@ class DLL_PUBLIC JoyConnectionEvent
 	int joyId;
 };
 
-enum ButtonName
+enum class ButtonName
 {
-	BUTTON_UNKNOWN = -1,
-	BUTTON_A = 0,
-	BUTTON_B,
-	BUTTON_X,
-	BUTTON_Y,
-	BUTTON_BACK,
-	BUTTON_GUIDE,
-	BUTTON_START,
-	BUTTON_LSTICK,
-	BUTTON_RSTICK,
-	BUTTON_LBUMPER,
-	BUTTON_RBUMPER
+	UNKNOWN = -1,
+	A = 0,
+	B,
+	X,
+	Y,
+	BACK,
+	GUIDE,
+	START,
+	LSTICK,
+	RSTICK,
+	LBUMPER,
+	RBUMPER
 };
 
-enum AxisName
+enum class AxisName
 {
-	AXIS_UNKNOWN = -1,
-	AXIS_LX = 0,
-	AXIS_LY,
-	AXIS_RX,
-	AXIS_RY,
-	AXIS_LTRIGGER,
-	AXIS_RTRIGGER,
+	UNKNOWN = -1,
+	LX = 0,
+	LY,
+	RX,
+	RY,
+	LTRIGGER,
+	RTRIGGER,
 	DPAD_RX,
 	DPAD_RY
 };

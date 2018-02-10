@@ -3,6 +3,13 @@
 
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
+#include "nctl/UniquePtr.h"
+
+namespace nctl {
+
+class String;
+
+}
 
 namespace ncine {
 
@@ -12,7 +19,6 @@ class IAudioPlayer;
 class SceneNode;
 class Font;
 class TextNode;
-class String;
 
 }
 
@@ -24,15 +30,14 @@ class MyEventHandler :
 	public nc::IInputEventHandler
 {
   public:
-	virtual void onPreInit(nc::AppConfiguration &config);
-	virtual void onInit();
-	virtual void onFrameStart();
-	virtual void onShutdown();
+	void onPreInit(nc::AppConfiguration &config) override;
+	void onInit() override;
+	void onFrameStart() override;
 
 #ifdef __ANDROID__
-	virtual void onTouchUp(const nc::TouchEvent &event);
+	void onTouchUp(const nc::TouchEvent &event) override;
 #endif
-	virtual void onKeyReleased(const nc::KeyboardEvent &event);
+	void onKeyReleased(const nc::KeyboardEvent &event) override;
 
   private:
 	float gain_;
@@ -40,13 +45,13 @@ class MyEventHandler :
 	float xPos_;
 	bool isLooping_;
 
-	nc::AudioBuffer *audioBuffer_;
-	nc::IAudioPlayer *soundPlayer_;
-	nc::IAudioPlayer *musicPlayer_;
-	nc::SceneNode *dummy_;
-	nc::Font *font_;
-	nc::TextNode *textNode_;
-	nc::String *textString_;
+	nctl::UniquePtr<nc::AudioBuffer> audioBuffer_;
+	nctl::UniquePtr<nc::IAudioPlayer> soundPlayer_;
+	nctl::UniquePtr<nc::IAudioPlayer> musicPlayer_;
+	nctl::UniquePtr<nc::SceneNode> dummy_;
+	nctl::UniquePtr<nc::Font> font_;
+	nctl::UniquePtr<nc::TextNode> textNode_;
+	nctl::UniquePtr<nctl::String> textString_;
 
 	void toggleMusic();
 	void toggleSound();

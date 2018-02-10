@@ -383,5 +383,5 @@ static const char *ControllerMappings[] =
 #endif
 
 
-	NULL
+	nullptr
 };

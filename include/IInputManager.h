@@ -8,20 +8,20 @@ namespace ncine {
 class IInputEventHandler;
 class JoyMapping;
 template <class T> class Vector2;
-typedef class Vector2<float> Vector2f;
+using Vector2f = Vector2<float>;
 
 /// The interface class for parsing and dispatching input events
 class DLL_PUBLIC IInputManager
 {
   public:
-	enum MouseCursorMode
+	enum class MouseCursorMode
 	{
 		/// Mouse cursor behaves normally
-		MOUSE_CURSOR_NORMAL,
+		NORMAL,
 		/// Mouse cursor is hidden but behaves normally
-		MOUSE_CURSOR_HIDDEN,
+		HIDDEN,
 		/// Mouse cursor is hidden and locked to the window
-		MOUSE_CURSOR_DISABLED
+		DISABLED
 	};
 
 	static const int MaxNumJoysticks;
@@ -64,7 +64,7 @@ class DLL_PUBLIC IInputManager
 
 	/// Adds joystick mapping configurations from a text file
 	void addJoyMappingsFromFile(const char *filename);
-	/// Adds joystick mapping configurations from a strings array terminated by a `NULL` pointer
+	/// Adds joystick mapping configurations from a strings array terminated by a `nullptr`
 	void addJoyMappingsFromStrings(const char **mappingStrings);
 
 	/// Returns current mouse cursor mode

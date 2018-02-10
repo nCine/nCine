@@ -2,18 +2,24 @@ set(HEADERS
 	${NCINE_ROOT}/include/common_defines.h
 	${NCINE_ROOT}/include/common_constants.h
 	${NCINE_ROOT}/include/common_macros.h
-	${NCINE_ROOT}/include/algorithms.h
-	${NCINE_ROOT}/include/iterator_traits.h
-	${NCINE_ROOT}/include/Array.h
-	${NCINE_ROOT}/include/ArrayIterator.h
-	${NCINE_ROOT}/include/StaticArray.h
-	${NCINE_ROOT}/include/List.h
-	${NCINE_ROOT}/include/ListIterator.h
-	${NCINE_ROOT}/include/ncString.h
-	${NCINE_ROOT}/include/StringIterator.h
-	${NCINE_ROOT}/include/HashMap.h
-	${NCINE_ROOT}/include/HashFunctions.h
-	${NCINE_ROOT}/include/HashMapIterator.h
+	${NCINE_ROOT}/include/nctl/algorithms.h
+	${NCINE_ROOT}/include/nctl/iterator.h
+	${NCINE_ROOT}/include/nctl/type_traits.h
+	${NCINE_ROOT}/include/nctl/utility.h
+	${NCINE_ROOT}/include/nctl/Array.h
+	${NCINE_ROOT}/include/nctl/ArrayIterator.h
+	${NCINE_ROOT}/include/nctl/StaticArray.h
+	${NCINE_ROOT}/include/nctl/List.h
+	${NCINE_ROOT}/include/nctl/ListIterator.h
+	${NCINE_ROOT}/include/nctl/String.h
+	${NCINE_ROOT}/include/nctl/StringIterator.h
+	${NCINE_ROOT}/include/nctl/HashMap.h
+	${NCINE_ROOT}/include/nctl/HashFunctions.h
+	${NCINE_ROOT}/include/nctl/HashMapIterator.h
+	${NCINE_ROOT}/include/nctl/ReverseIterator.h
+	${NCINE_ROOT}/include/nctl/Atomic.h
+	${NCINE_ROOT}/include/nctl/UniquePtr.h
+	${NCINE_ROOT}/include/nctl/SharedPtr.h
 	${NCINE_ROOT}/include/Rect.h
 	${NCINE_ROOT}/include/Color.h
 	${NCINE_ROOT}/include/Object.h

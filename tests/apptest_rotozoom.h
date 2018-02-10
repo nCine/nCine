@@ -3,7 +3,8 @@
 
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
-#include "StaticArray.h"
+#include "nctl/StaticArray.h"
+#include "nctl/UniquePtr.h"
 
 namespace ncine {
 
@@ -22,18 +23,17 @@ class MyEventHandler :
 	public nc::IInputEventHandler
 {
   public:
-	virtual void onPreInit(nc::AppConfiguration &config);
-	virtual void onInit();
-	virtual void onFrameStart();
-	virtual void onShutdown();
+	void onPreInit(nc::AppConfiguration &config) override;
+	void onInit() override;
+	void onFrameStart() override;
 
 #ifdef __ANDROID__
-	virtual void onTouchDown(const nc::TouchEvent &event);
-	virtual void onTouchUp(const nc::TouchEvent &event);
+	void onTouchDown(const nc::TouchEvent &event) override;
+	void onTouchUp(const nc::TouchEvent &event) override;
 #endif
-	virtual void onKeyReleased(const nc::KeyboardEvent &event);
-	virtual void onMouseButtonPressed(const nc::MouseEvent &event);
-	virtual void onMouseButtonReleased(const nc::MouseEvent &event);
+	void onKeyReleased(const nc::KeyboardEvent &event) override;
+	void onMouseButtonPressed(const nc::MouseEvent &event) override;
+	void onMouseButtonReleased(const nc::MouseEvent &event) override;
 
   private:
 	static const unsigned int NumTextures = 4;
@@ -42,9 +42,9 @@ class MyEventHandler :
 
 	bool pause_;
 	float angle_;
-	nc::SceneNode *dummy_;
-	nc::Texture *megaTexture_;
-	nc::StaticArray<nc::Sprite *, NumColSprites * NumRowSprites> sprites_;
+	nctl::UniquePtr<nc::Texture> megaTexture_;
+	nctl::UniquePtr<nc::SceneNode> dummy_;
+	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumColSprites * NumRowSprites> sprites_;
 };
 
 #endif

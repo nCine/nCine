@@ -11,13 +11,13 @@ StackedBarVariable::StackedBarVariable(unsigned int numValues, float rejectDelay
 {
 	// Two vertices for the mean quote plus...
 	// Six vertices (two coordinates each) for every recorded value
-	vertices_ = new GLfloat[4 + numValues * 2 * 6];
+	vertices_ = nctl::makeUnique<GLfloat []>(4 + numValues * 2 * 6);
 
-	valuesCmd_.material().setShaderProgram(Material::COLOR_PROGRAM);
+	valuesCmd_.material().setShaderProgram(Material::ShaderProgram::COLOR);
 	valuesCmd_.geometry().createCustomVbo(4 + numValues * 2 * 6, GL_DYNAMIC_DRAW);
 	valuesCmd_.geometry().setDrawParameters(GL_TRIANGLES, 2, variable_.numValues() * 6);
 
-	meanCmd_.material().setShaderProgram(Material::COLOR_PROGRAM);
+	meanCmd_.material().setShaderProgram(Material::ShaderProgram::COLOR);
 	meanCmd_.geometry().shareVbo(valuesCmd_.geometry());
 	meanCmd_.geometry().setDrawParameters(GL_LINES, 0, 2);
 }
@@ -43,9 +43,7 @@ unsigned int StackedBarPlotter::addVariable(unsigned int numValues, float reject
 		}
 	}
 
-	StackedBarVariable *variable = new StackedBarVariable(numValues, rejectDelay, worldMatrix_);
-	variables_.pushBack(variable);
-
+	variables_.pushBack(nctl::makeUnique<StackedBarVariable>(numValues, rejectDelay, worldMatrix_));
 	return variables_.size() - 1;
 }
 
@@ -60,11 +58,11 @@ void StackedBarPlotter::draw(RenderQueue &renderQueue)
 	if (shouldPlotRefValue())
 		drawRefValue(renderQueue);
 
-	for (unsigned int i = 0; i < variables_.size(); i++)
+	for (nctl::UniquePtr<PlottingVariable> &variable : variables_)
 	{
-		variables_[i]->draw(renderQueue);
-		if (variables_[i]->shouldPlotMean())
-			variables_[i]->drawMean(renderQueue);
+		variable->draw(renderQueue);
+		if (variable->shouldPlotMean())
+			variable->drawMean(renderQueue);
 	}
 }
 
@@ -80,10 +78,10 @@ void StackedBarPlotter::updateAllVertices(float x, float y, float w, float h)
 	// In a stacked plot every variable should be scaled in relationship with the sum
 	float minSum = 0.0f;
 	float maxSum = 0.0f;
-	for (unsigned int i = 0; i < variables_.size(); i++)
+	for (nctl::UniquePtr<PlottingVariable> &variable : variables_)
 	{
-		minSum += variables_[i]->variable()->min();
-		maxSum += variables_[i]->variable()->max();
+		minSum += variable->variable()->min();
+		maxSum += variable->variable()->max();
 	}
 
 	const float normalizedRefValue = normBetweenRefValue(minSum, maxSum);
@@ -95,10 +93,10 @@ void StackedBarPlotter::updateAllVertices(float x, float y, float w, float h)
 	maxSum /= numVariables;
 
 	float meanVerticalOffset = 0.0f;
-	for (unsigned int i = 0; i < variables_.size(); i++)
+	for (nctl::UniquePtr<PlottingVariable> &variable : variables_)
 	{
-		const ProfileVariable *profVariable = variables_[i]->variable();
-		GLfloat *vertices = variables_[i]->vertices();
+		const ProfileVariable *profVariable = variable->variable();
+		GLfloat *vertices = variable->vertices();
 
 		float normalizedMean = profVariable->normBetweenMean(minSum, maxSum);
 		// Variable mean vertices
@@ -122,10 +120,10 @@ void StackedBarPlotter::updateAllVertices(float x, float y, float w, float h)
 		const float step = (float(w) / float(numValues)) * 0.5f;
 		const float center = 2.0f * step * (i + 1) - step;
 
-		for (unsigned int j = 0; j < variables_.size(); j++)
+		for (nctl::UniquePtr<PlottingVariable> &variable : variables_)
 		{
-			const ProfileVariable *profVariable = variables_[j]->variable();
-			GLfloat *vertices = variables_[j]->vertices();
+			const ProfileVariable *profVariable = variable->variable();
+			GLfloat *vertices = variable->vertices();
 
 			const float normValue = profVariable->normBetweenValue((nextIndex + i) % numValues, minSum, maxSum);
 
@@ -152,18 +150,18 @@ void StackedBarVariable::updateRenderCommand()
 {
 	valuesCmd_.transformation() = worldMatrix_;
 
-	valuesCmd_.material().setTexture(NULL);
+	valuesCmd_.material().setTexture(nullptr);
 	valuesCmd_.material().uniform("color")->setFloatValue(graphColor_.fR(), graphColor_.fG(), graphColor_.fB(), graphColor_.fA());
-	valuesCmd_.geometry().updateVboData(4, variable_.numValues() * 6 * 2, vertices_ + 4);
+	valuesCmd_.geometry().updateVboData(4, variable_.numValues() * 6 * 2, vertices_.get() + 4);
 }
 
 void StackedBarVariable::updateMeanRenderCommand()
 {
 	meanCmd_.transformation() = worldMatrix_;
 
-	meanCmd_.material().setTexture(NULL);
+	meanCmd_.material().setTexture(nullptr);
 	meanCmd_.material().uniform("color")->setFloatValue(meanColor_.fR(), meanColor_.fG(), meanColor_.fB(), meanColor_.fA());
-	meanCmd_.geometry().updateVboData(0, 4, vertices_);
+	meanCmd_.geometry().updateVboData(0, 4, vertices_.get());
 }
 
 }

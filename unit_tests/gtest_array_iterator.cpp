@@ -8,9 +8,9 @@ class ArrayIteratorTest : public ::testing::Test
 	ArrayIteratorTest() : array_(Capacity) { }
 
   protected:
-	void SetUp() { initArray(array_); }
+	void SetUp() override { initArray(array_); }
 
-	nc::Array<int> array_;
+	nctl::Array<int> array_;
 };
 
 TEST_F(ArrayIteratorTest, ForLoopIteration)
@@ -18,7 +18,7 @@ TEST_F(ArrayIteratorTest, ForLoopIteration)
 	int n = FirstElement;
 
 	printf("Iterating through elements with for loop:");
-	for (nc::Array<int>::ConstIterator i = array_.begin(); i != array_.end(); ++i)
+	for (nctl::Array<int>::ConstIterator i = array_.begin(); i != array_.end(); ++i)
 	{
 		printf(" %d", *i);
 		ASSERT_EQ(*i, n++);
@@ -26,35 +26,35 @@ TEST_F(ArrayIteratorTest, ForLoopIteration)
 	printf("\n");
 }
 
-TEST_F(ArrayIteratorTest, ForLoopEmptyIteration)
+TEST_F(ArrayIteratorTest, ForRangeIteration)
 {
-	nc::Array<int> newArray;
+	int n = FirstElement;
 
-	printf("Iterating over an empty array with for loop:\n");
-	for (nc::Array<int>::ConstIterator i = newArray.begin(); i != newArray.end(); ++i)
-		ASSERT_TRUE(false); // should never reach this point
-	printf("\n");
-}
-
-TEST_F(ArrayIteratorTest, ReverseForLoopIteration)
-{
-	int n = Capacity - 1;
-
-	printf("Iterating through elements with for loop (reverse):");
-	for (nc::Array<int>::ConstIterator r = array_.rBegin(); r != array_.rEnd(); --r)
+	printf("Iterating through elements with range-based for:");
+	for (int i : array_)
 	{
-		printf(" %d", *r);
-		ASSERT_EQ(*r, n--);
+		printf(" %d", i);
+		ASSERT_EQ(i, n++);
 	}
 	printf("\n");
 }
 
-TEST_F(ArrayIteratorTest, ReverseForLoopEmptyIteration)
+TEST_F(ArrayIteratorTest, ForLoopEmptyIteration)
 {
-	nc::Array<int> newArray;
+	nctl::Array<int> newArray;
 
-	printf("Iterating over an empty array with for loop (reverse):\n");
-	for (nc::Array<int>::ConstIterator r = newArray.rBegin(); r != newArray.rEnd(); --r)
+	printf("Iterating over an empty array with for loop:\n");
+	for (nctl::Array<int>::ConstIterator i = newArray.begin(); i != newArray.end(); ++i)
+		ASSERT_TRUE(false); // should never reach this point
+	printf("\n");
+}
+
+TEST_F(ArrayIteratorTest, ForRangeEmptyIteration)
+{
+	nctl::Array<int> newArray;
+
+	printf("Iterating over an empty array with range-based for:\n");
+	for (int i : newArray)
 		ASSERT_TRUE(false); // should never reach this point
 	printf("\n");
 }
@@ -64,7 +64,7 @@ TEST_F(ArrayIteratorTest, WhileLoopIteration)
 	int n = FirstElement;
 
 	printf("Iterating through elements with while loop:");
-	nc::Array<int>::ConstIterator i = array_.begin();
+	nctl::Array<int>::ConstIterator i = array_.begin();
 	while (i != array_.end())
 	{
 		printf(" %d", *i);
@@ -76,10 +76,10 @@ TEST_F(ArrayIteratorTest, WhileLoopIteration)
 
 TEST_F(ArrayIteratorTest, WhileLoopEmptyIteration)
 {
-	nc::Array<int> newArray;
+	nctl::Array<int> newArray;
 
 	printf("Iterating over an empty array with while loop:\n");
-	nc::Array<int>::ConstIterator i = newArray.begin();
+	nctl::Array<int>::ConstIterator i = newArray.begin();
 	while (i != newArray.end())
 	{
 		ASSERT_TRUE(false); // should never reach this point
@@ -88,38 +88,9 @@ TEST_F(ArrayIteratorTest, WhileLoopEmptyIteration)
 	printf("\n");
 }
 
-TEST_F(ArrayIteratorTest, ReverseWhileLoopIteration)
-{
-	int n = Capacity - 1;
-
-	printf("Iterating through elements with while loop (reverse):");
-	nc::Array<int>::ConstIterator r = array_.rBegin();
-	while (r != array_.rEnd())
-	{
-		printf(" %d", *r);
-		ASSERT_EQ(*r, n);
-		--r; --n;
-	}
-	printf("\n");
-}
-
-TEST_F(ArrayIteratorTest, ReverseWhileLoopEmptyIteration)
-{
-	nc::Array<int> newArray;
-
-	printf("Iterating over an empty array with while loop (reverse):\n");
-	nc::Array<int>::ConstIterator r = newArray.rBegin();
-	while (r != newArray.rEnd())
-	{
-		ASSERT_TRUE(false); // should never reach this point
-		--r;
-	}
-	printf("\n");
-}
-
 TEST_F(ArrayIteratorTest, AddIndexToIterator)
 {
-	nc::Array<int>::ConstIterator it = array_.begin();
+	nctl::Array<int>::ConstIterator it = array_.begin();
 
 	printf("Accessing elements with an iterator and a positive index\n");
 	for (int i = 0; i < static_cast<int>(array_.size()); i++)
@@ -135,7 +106,7 @@ TEST_F(ArrayIteratorTest, AddIndexToIteratorInPlace)
 	printf("Accessing elements with an iterator and a positive index\n");
 	for (int i = 0; i < static_cast<int>(array_.size()); i++)
 	{
-		nc::Array<int>::ConstIterator it = array_.begin();
+		nctl::Array<int>::ConstIterator it = array_.begin();
 
 		it += i;
 		printf(" [%d]=%d", i, *it);
@@ -146,7 +117,7 @@ TEST_F(ArrayIteratorTest, AddIndexToIteratorInPlace)
 
 TEST_F(ArrayIteratorTest, SubtractIndexToIterator)
 {
-	nc::Array<int>::ConstIterator it = array_.end();
+	nctl::Array<int>::ConstIterator it = array_.end();
 
 	printf("Accessing elements with an iterator and a negative index\n");
 	for (int i = 1; i <= static_cast<int>(array_.size()); i++)
@@ -162,7 +133,7 @@ TEST_F(ArrayIteratorTest, SubtractIndexToIteratorInPlace)
 	printf("Accessing elements with an iterator and a negative index\n");
 	for (int i = 1; i <= static_cast<int>(array_.size()); i++)
 	{
-		nc::Array<int>::ConstIterator it = array_.end();
+		nctl::Array<int>::ConstIterator it = array_.end();
 
 		it -= i;
 		printf(" [%d]=%d", i, *it);
@@ -180,7 +151,7 @@ TEST_F(ArrayIteratorTest, SubtractIterators)
 
 TEST_F(ArrayIteratorTest, SubscriptOperator)
 {
-	nc::Array<int>::ConstIterator it = array_.begin();
+	nctl::Array<int>::ConstIterator it = array_.begin();
 
 	printf("Accessing elements with the iterator subscript operator\n");
 	for (int i = 0; i < static_cast<int>(array_.size()); i++)

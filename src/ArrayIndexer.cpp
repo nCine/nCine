@@ -10,21 +10,14 @@ ArrayIndexer::ArrayIndexer()
 	: numObjects_(0), nextId_(0), pointers_(16)
 {
 	// First element reserved
-	pointers_.pushBack(NULL);
+	pointers_.pushBack(nullptr);
 	nextId_++;
 }
 
 ArrayIndexer::~ArrayIndexer()
 {
-	for (unsigned int i = 0; i < pointers_.size(); i++)
-	{
-		if (pointers_[i])
-		{
-			delete pointers_[i];
-			pointers_[i] = NULL;
-		}
-	}
-
+	for (Object *obj : pointers_)
+		delete obj;
 }
 
 ///////////////////////////////////////////////////////////
@@ -33,7 +26,7 @@ ArrayIndexer::~ArrayIndexer()
 
 unsigned int ArrayIndexer::addObject(Object *object)
 {
-	if (object == NULL)
+	if (object == nullptr)
 		return 0;
 
 	numObjects_++;
@@ -46,17 +39,17 @@ unsigned int ArrayIndexer::addObject(Object *object)
 
 void ArrayIndexer::removeObject(unsigned int id)
 {
-	// setting to NULL instead of physically removing
-	if (id < pointers_.size() && pointers_[id] != NULL)
+	// setting to `nullptr` instead of physically removing
+	if (id < pointers_.size() && pointers_[id] != nullptr)
 	{
-		pointers_[id] = NULL;
+		pointers_[id] = nullptr;
 		numObjects_--;
 	}
 }
 
 Object *ArrayIndexer::object(unsigned int id) const
 {
-	Object *objPtr = NULL;
+	Object *objPtr = nullptr;
 
 	if (id < pointers_.size())
 		objPtr = pointers_[id];
@@ -72,21 +65,21 @@ void ArrayIndexer::logReport() const
 		{
 			Object *objPtr = object(i);
 
-			String typeName(Object::MaxNameLength);
+			nctl::String typeName(Object::MaxNameLength);
 			switch (objPtr->type())
 			{
-				case Object::BASE_TYPE:					typeName = "Base"; break;
-				case Object::TEXTURE_TYPE:				typeName = "Texture"; break;
-				case Object::SCENENODE_TYPE:			typeName = "SceneNode"; break;
-				case Object::SPRITE_TYPE:				typeName = "Sprite"; break;
-				case Object::PARTICLESYSTEM_TYPE:		typeName = "ParticleSystem"; break;
-				case Object::FONT_TYPE:					typeName = "Font"; break;
-				case Object::TEXTNODE_TYPE:				typeName = "TextNode"; break;
-				case Object::ANIMATEDSPRITE_TYPE:		typeName = "AnimatedSprite"; break;
-				case Object::AUDIOBUFFER_TYPE:			typeName = "AudioBuffer"; break;
-				case Object::AUDIOBUFFERPLAYER_TYPE:	typeName = "AudioBufferPlayer"; break;
-				case Object::AUDIOSTREAMPLAYER_TYPE:	typeName = "AudioStreamPlayer"; break;
-				default:								typeName = "Unknown"; break;
+				case Object::ObjectType::BASE:					typeName = "Base"; break;
+				case Object::ObjectType::TEXTURE:				typeName = "Texture"; break;
+				case Object::ObjectType::SCENENODE:				typeName = "SceneNode"; break;
+				case Object::ObjectType::SPRITE:				typeName = "Sprite"; break;
+				case Object::ObjectType::PARTICLE_SYSTEM:		typeName = "ParticleSystem"; break;
+				case Object::ObjectType::FONT:					typeName = "Font"; break;
+				case Object::ObjectType::TEXTNODE:				typeName = "TextNode"; break;
+				case Object::ObjectType::ANIMATED_SPRITE:		typeName = "AnimatedSprite"; break;
+				case Object::ObjectType::AUDIOBUFFER:			typeName = "AudioBuffer"; break;
+				case Object::ObjectType::AUDIOBUFFER_PLAYER:	typeName = "AudioBufferPlayer"; break;
+				case Object::ObjectType::AUDIOSTREAM_PLAYER:	typeName = "AudioStreamPlayer"; break;
+				default:										typeName = "Unknown"; break;
 			}
 
 			LOGI_X("Object %u - type: %s - name: \"%s\"", objPtr->id(), typeName.data(), objPtr->name().data());

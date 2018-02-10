@@ -3,6 +3,7 @@
 
 #include "IGfxDevice.h"
 #include "AppConfiguration.h"
+#include "nctl/UniquePtr.h"
 
 namespace ncine {
 
@@ -63,21 +64,21 @@ class DLL_PUBLIC Application
 	bool hasFocus_;
 	bool shouldQuit_;
 	AppConfiguration appCfg_;
-	FrameTimer *frameTimer_;
-	IGfxDevice *gfxDevice_;
-	RenderQueue *renderQueue_;
-	SceneNode *rootNode_;
-	Timer *profileTimer_;
-	ProfilePlotter *profilePlotter_;
-	Font *font_;
-	TextNode *textLines_;
+	nctl::UniquePtr<FrameTimer> frameTimer_;
+	nctl::UniquePtr<IGfxDevice> gfxDevice_;
+	nctl::UniquePtr<RenderQueue> renderQueue_;
+	nctl::UniquePtr<SceneNode> rootNode_;
+	nctl::UniquePtr<Timer> profileTimer_;
+	nctl::UniquePtr<ProfilePlotter> profilePlotter_;
+	nctl::UniquePtr<Font> font_;
+	nctl::UniquePtr<TextNode> textLines_;
 	float textUpdateTime_;
-	String textString_;
-	IInputManager *inputManager_;
-	IAppEventHandler *appEventHandler_;
+	nctl::String textString_;
+	nctl::UniquePtr<IInputManager> inputManager_;
+	nctl::UniquePtr<IAppEventHandler> appEventHandler_;
 
 	Application();
-	~Application() { }
+	~Application();
 
 	/// Must be called before giving control to the application
 	void initCommon();
@@ -90,10 +91,10 @@ class DLL_PUBLIC Application
 	virtual void setFocus(bool hasFocus);
 
   private:
-	/// Private copy constructor
-	Application(const Application &);
-	/// Private assignment operator
-	Application &operator=(const Application &);
+	/// Deleted copy constructor
+	Application(const Application &) = delete;
+	/// Deleted assignment operator
+	Application &operator=(const Application &) = delete;
 
 	friend class PCApplication;
 	friend class AndroidApplication;

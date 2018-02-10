@@ -1,24 +1,27 @@
-#ifndef CLASS_NCINE_STRING
-#define CLASS_NCINE_STRING
+#ifndef CLASS_NCTL_STRING
+#define CLASS_NCTL_STRING
 
-#include "algorithms.h"
 #include "StringIterator.h"
+#include "ReverseIterator.h"
+#include "utility.h"
 
-namespace ncine {
+namespace nctl {
 
 /// A basic string class made of chars
 class DLL_PUBLIC String
 {
   public:
 	/// Iterator type
-	typedef StringIterator<false> Iterator;
+	using Iterator = StringIterator<false>;
 	/// Constant iterator type
-	typedef StringIterator<true> ConstIterator;
+	using ConstIterator = StringIterator<true>;
+	/// Reverse iterator type
+	using ReverseIterator = nctl::ReverseIterator<Iterator>;
+	/// Reverse constant iterator type
+	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
-	/// Default capacity for objects created by the default constructor
-	static const unsigned int DefaultCapacity = 128;
 	/// Maximum length when creating an object from C-style strings
-	static const unsigned int MaxCStringLength = DefaultCapacity - 1;
+	static const unsigned int MaxCStringLength = 512 - 1;
 
 	/// Default constructor
 	String();
@@ -30,36 +33,49 @@ class DLL_PUBLIC String
 
 	/// Copy constructor
 	String(const String &other);
+	/// Move constructor
+	String(String &&other);
 	/// Assignment operator that preserves the original string capacity
 	String &operator=(const String &other);
+	/// Move assignment operator
+	String &operator=(String &&other);
 	/// Assigns a constant C string to the string object
 	String &operator=(const char *cString);
 
 	/// Swaps two strings without copying their data
 	void swap(String &first, String &second)
 	{
-		nc::swap(first.array_, second.array_);
-		nc::swap(first.length_, second.length_);
-		nc::swap(first.capacity_, second.capacity_);
+		nctl::swap(first.array_, second.array_);
+		nctl::swap(first.length_, second.length_);
+		nctl::swap(first.capacity_, second.capacity_);
 	}
 
 	/// Returns an iterator to the first character
-	inline Iterator begin() { return Iterator(array_); }
-	/// Returns an iterator to the last character
-	inline Iterator rBegin() { return Iterator(array_ + length_ - 1); }
+	inline Iterator begin() { return Iterator(data()); }
+	/// Returns a reverse iterator to the last character
+	inline ReverseIterator rBegin() { return ReverseIterator(Iterator(data() + length_ - 1)); }
 	/// Returns an iterator to the termination character
-	inline Iterator end() { return Iterator(array_ + length_); }
-	/// Returns an iterator to the byte preceding the first character
-	inline Iterator rEnd() { return Iterator(array_ - 1); }
+	inline Iterator end() { return Iterator(data() + length_); }
+	/// Returns a reverse iterator to the byte preceding the first character
+	inline ReverseIterator rEnd() { return ReverseIterator(Iterator(data() - 1)); }
 
 	/// Returns a constant iterator to the first character
-	inline ConstIterator begin() const { return ConstIterator(array_); }
-	/// Returns a constant iterator to the last character
-	inline ConstIterator rBegin() const { return ConstIterator(array_ + length_ - 1); }
+	inline ConstIterator begin() const { return ConstIterator(data()); }
+	/// Returns a constant reverse iterator to the last character
+	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(ConstIterator(data() + length_ - 1)); }
 	/// Returns a constant iterator to the termination character
-	inline ConstIterator end() const { return ConstIterator(array_ + length_); }
-	/// Returns a constant iterator to the byte preceding the first character
-	inline ConstIterator rEnd() const { return ConstIterator(array_ - 1); }
+	inline ConstIterator end() const { return ConstIterator(data() + length_); }
+	/// Returns a constant reverse iterator to the byte preceding the first character
+	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(ConstIterator(data() - 1)); }
+
+	/// Returns a constant iterator to the first character
+	inline ConstIterator cBegin() const { return ConstIterator(data()); }
+	/// Returns a constant reverse iterator to the last character
+	inline ConstReverseIterator crBegin() const { return ConstReverseIterator(ConstIterator(data() + length_ - 1)); }
+	/// Returns a constant iterator to the termination character
+	inline ConstIterator cEnd() const { return ConstIterator(data() + length_); }
+	/// Returns a constant reverse iterator to the byte preceding the first character
+	inline ConstReverseIterator crEnd() const { return ConstReverseIterator(ConstIterator(data() - 1)); }
 
 	/// Returns true if the string is empty
 	inline bool isEmpty() const { return length_ == 0; }
@@ -70,12 +86,12 @@ class DLL_PUBLIC String
 
 	/// Clears the string
 	/*! Length will be zero but capacity remains unmodified. */
-	inline void clear() { length_ = 0; array_[0] = '\0'; }
+	inline void clear() { length_ = 0; data()[0] = '\0'; }
 
 	/// Returns a pointer to the internal array
-	char *data() { return array_; }
+	inline char *data() { return (capacity_ > SmallBufferSize) ? array_.begin_ : array_.local_; }
 	/// Returns a constant pointer to the internal array
-	const char *data() const { return array_; }
+	inline const char *data() const { return (capacity_ > SmallBufferSize) ? array_.begin_ : array_.local_; }
 
 	/// Copies characters from somewhere in the source to somewhere in the destination
 	unsigned int copy(String &dest, unsigned int srcChar, unsigned int numChar, unsigned int destChar) const;
@@ -139,7 +155,17 @@ class DLL_PUBLIC String
 	char operator[](unsigned int index) const;
 
   private:
-	char *array_;
+	/// Size of the local buffer
+	static const unsigned int SmallBufferSize = 16;
+
+	/// Union used for small buffer optimization
+	union Buffer
+	{
+		char *begin_;
+		char local_[SmallBufferSize];
+	};
+
+	Buffer array_;
 	unsigned int length_;
 	unsigned int capacity_;
 };
@@ -147,7 +173,7 @@ class DLL_PUBLIC String
 inline char String::operator[](unsigned int index) const
 {
 	if (index < length_)
-		return array_[index];
+		return data()[index];
 	else
 		return '\0';
 }

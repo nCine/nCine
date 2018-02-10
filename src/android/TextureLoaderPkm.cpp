@@ -9,24 +9,15 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 TextureLoaderPkm::TextureLoaderPkm(const char *filename)
-	: ITextureLoader(filename)
+	: TextureLoaderPkm(IFile::createFileHandle(filename))
 {
-	init();
+
 }
 
-TextureLoaderPkm::TextureLoaderPkm(IFile *fileHandle)
-	: ITextureLoader(fileHandle)
+TextureLoaderPkm::TextureLoaderPkm(nctl::UniquePtr<IFile> fileHandle)
+	: ITextureLoader(nctl::move(fileHandle))
 {
-	init();
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void TextureLoaderPkm::init()
-{
-	fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
+	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 
 	PkmHeader header;
 	// PKM header is 16 bytes long

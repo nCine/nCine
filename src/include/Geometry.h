@@ -2,7 +2,6 @@
 #define CLASS_NCINE_GEOMETRY
 
 #include "GLBufferObject.h"
-#include "Array.h"
 
 namespace ncine {
 
@@ -35,7 +34,7 @@ class Geometry
 
   private:
 	/// Sharing type for the buffers
-	enum SharingType
+	enum class SharingType
 	{
 		/// It must not be modified, the buffer is a resource shared across the application
 		COMMON_RESOURCE,
@@ -58,10 +57,10 @@ class Geometry
 
 	void bind();
 
-	/// Private copy constructor
-	Geometry(const Geometry &);
-	/// Private assignment operator
-	Geometry &operator=(const Geometry &);
+	/// Deleted copy constructor
+	Geometry(const Geometry &) = delete;
+	/// Deleted assignment operator
+	Geometry &operator=(const Geometry &) = delete;
 
 	friend class RenderCommand;
 };

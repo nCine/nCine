@@ -21,7 +21,7 @@ GlfwKeyboardState GlfwInputManager::keyboardState_;
 KeyboardEvent GlfwInputManager::keyboardEvent_;
 
 GlfwJoystickState GlfwInputManager::nullJoystickState_;
-StaticArray<GlfwJoystickState, GlfwInputManager::MaxNumJoysticks> GlfwInputManager::joystickStates_;
+nctl::StaticArray<GlfwJoystickState, GlfwInputManager::MaxNumJoysticks> GlfwInputManager::joystickStates_;
 JoyButtonEvent GlfwInputManager::joyButtonEvent_;
 JoyAxisEvent GlfwInputManager::joyAxisEvent_;
 JoyConnectionEvent GlfwInputManager::joyConnectionEvent_;
@@ -111,7 +111,7 @@ const char *GlfwInputManager::joyName(int joyId) const
 	if (isJoyPresent(joyId))
 		return glfwGetJoystickName(joyId);
 	else
-		return NULL;
+		return nullptr;
 }
 
 const char *GlfwInputManager::joyGuid(int joyId) const
@@ -120,9 +120,9 @@ const char *GlfwInputManager::joyGuid(int joyId) const
 	if (isJoyPresent(joyId))
 		return glfwGetJoystickGUID(joyId);
 	else
-		return NULL;
+		return nullptr;
 #else
-	return NULL;
+	return nullptr;
 #endif
 }
 
@@ -160,9 +160,9 @@ void GlfwInputManager::setMouseCursorMode(MouseCursorMode mode)
 	{
 		switch (mode)
 		{
-			case MOUSE_CURSOR_NORMAL: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL); break;
-			case MOUSE_CURSOR_HIDDEN: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN); break;
-			case MOUSE_CURSOR_DISABLED: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED); break;
+			case MouseCursorMode::NORMAL: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL); break;
+			case MouseCursorMode::HIDDEN: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN); break;
+			case MouseCursorMode::DISABLED: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED); break;
 		}
 
 		mouseCursorMode_ = mode;
@@ -180,12 +180,12 @@ void GlfwInputManager::windowCloseCallback(GLFWwindow *window)
 
 void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-	if (inputEventHandler_ == NULL)
+	if (inputEventHandler_ == nullptr)
 		return;
 
 	keyboardEvent_.scancode = scancode;
 	keyboardEvent_.sym = GlfwKeys::keySymValueToEnum(key);
-	keyboardEvent_.mod = GlfwKeys::keyModValueToEnum(mods);
+	keyboardEvent_.mod = static_cast<int>(GlfwKeys::keyModValueToEnum(mods));
 
 	if (action == GLFW_PRESS)
 		inputEventHandler_->onKeyPressed(keyboardEvent_);
@@ -195,7 +195,7 @@ void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, in
 
 void GlfwInputManager::cursorPosCallback(GLFWwindow *window, double x, double y)
 {
-	if (inputEventHandler_ == NULL)
+	if (inputEventHandler_ == nullptr)
 		return;
 
 	mouseState_.x = static_cast<int>(x);
@@ -205,7 +205,7 @@ void GlfwInputManager::cursorPosCallback(GLFWwindow *window, double x, double y)
 
 void GlfwInputManager::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
-	if (inputEventHandler_ == NULL)
+	if (inputEventHandler_ == nullptr)
 		return;
 
 	double xCursor, yCursor;
@@ -222,7 +222,7 @@ void GlfwInputManager::mouseButtonCallback(GLFWwindow *window, int button, int a
 
 void GlfwInputManager::scrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
-	if (inputEventHandler_ == NULL)
+	if (inputEventHandler_ == nullptr)
 		return;
 
 	scrollEvent_.x = static_cast<float>(xoffset);
@@ -247,12 +247,12 @@ void GlfwInputManager::joystickCallback(int joy, int event)
 	#if GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
 		const char *guid = glfwGetJoystickGUID(joy);
 	#else
-		const char *guid = NULL;
+		const char *guid = nullptr;
 	#endif
 
 		LOGI_X("Joystick %d \"%s\" (%s) has been connected - %d axes, %d buttons",
 		       joyId, glfwGetJoystickName(joy), guid, numAxes, numButtons);
-		if (inputEventHandler_ != NULL)
+		if (inputEventHandler_ != nullptr)
 		{
 			joyMapping_.onJoyConnected(joyConnectionEvent_);
 			inputEventHandler_->onJoyConnected(joyConnectionEvent_);
@@ -262,7 +262,7 @@ void GlfwInputManager::joystickCallback(int joy, int event)
 	{
 		joyEventsSimulator_.resetJoystickState(joyId);
 		LOGI_X("Joystick %d has been disconnected", joyId);
-		if (inputEventHandler_ != NULL)
+		if (inputEventHandler_ != nullptr)
 		{
 			inputEventHandler_->onJoyDisconnected(joyConnectionEvent_);
 			joyMapping_.onJoyDisconnected(joyConnectionEvent_);
@@ -286,7 +286,7 @@ void GlfwInputManager::JoystickEventsSimulator::simulateButtonsEvents(int joyId,
 {
 	for (int buttonId = 0; buttonId < numButtons; buttonId++)
 	{
-		if (inputEventHandler_ != NULL && buttonsState_[joyId][buttonId] != buttons[buttonId])
+		if (inputEventHandler_ != nullptr && buttonsState_[joyId][buttonId] != buttons[buttonId])
 		{
 			joyButtonEvent_.joyId = joyId;
 			joyButtonEvent_.buttonId = buttonId;
@@ -311,7 +311,7 @@ void GlfwInputManager::JoystickEventsSimulator::simulateAxesEvents(int joyId, in
 {
 	for (int axisId = 0; axisId < numAxes; axisId++)
 	{
-		if (inputEventHandler_ != NULL && fabsf(axesValuesState_[joyId][axisId] - axesValues[axisId]) > AxisEventTolerance)
+		if (inputEventHandler_ != nullptr && fabsf(axesValuesState_[joyId][axisId] - axesValues[axisId]) > AxisEventTolerance)
 		{
 			joyAxisEvent_.joyId = joyId;
 			joyAxisEvent_.axisId = axisId;

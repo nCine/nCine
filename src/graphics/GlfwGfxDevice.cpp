@@ -8,7 +8,7 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-GLFWwindow *GlfwGfxDevice::windowHandle_ = NULL;
+GLFWwindow *GlfwGfxDevice::windowHandle_ = nullptr;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -24,7 +24,7 @@ GlfwGfxDevice::GlfwGfxDevice(int width, int height, const GLContextInfo &context
 GlfwGfxDevice::~GlfwGfxDevice()
 {
 	glfwDestroyWindow(windowHandle_);
-	windowHandle_ = NULL;
+	windowHandle_ = nullptr;
 	glfwTerminate();
 }
 
@@ -41,7 +41,7 @@ void GlfwGfxDevice::setResolution(int width, int height)
 		height_ = height;
 
 		glfwDestroyWindow(windowHandle_);
-		windowHandle_ = NULL;
+		windowHandle_ = nullptr;
 		initDevice();
 	}
 }
@@ -51,20 +51,19 @@ void GlfwGfxDevice::toggleFullScreen()
 	isFullScreen_ = !isFullScreen_;
 
 	glfwDestroyWindow(windowHandle_);
-	windowHandle_ = NULL;
+	windowHandle_ = nullptr;
 	initDevice();
 }
 
 void GlfwGfxDevice::setWindowIcon(const char *windowIconFilename)
 {
-	ITextureLoader *image = ITextureLoader::createFromFile(windowIconFilename);
+	nctl::UniquePtr<ITextureLoader> image = ITextureLoader::createFromFile(windowIconFilename);
 	GLFWimage glfwImage;
 	glfwImage.width = image->width();
 	glfwImage.height = image->height();
 	glfwImage.pixels = const_cast<unsigned char *>(image->pixels());
 
 	glfwSetWindowIcon(windowHandle_, 1, &glfwImage);
-	delete image;
 }
 
 ///////////////////////////////////////////////////////////
@@ -87,7 +86,7 @@ void GlfwGfxDevice::initDevice()
 		height_ = vidMode->height;
 	}
 
-	GLFWmonitor *monitor = NULL;
+	GLFWmonitor *monitor = nullptr;
 	if (isFullScreen_)
 		monitor = glfwGetPrimaryMonitor();
 
@@ -103,7 +102,7 @@ void GlfwGfxDevice::initDevice()
 	glfwWindowHint(GLFW_DEPTH_BITS, mode_.depthBits());
 	glfwWindowHint(GLFW_STENCIL_BITS, mode_.stencilBits());
 
-	windowHandle_ = glfwCreateWindow(width_, height_, "", monitor, NULL);
+	windowHandle_ = glfwCreateWindow(width_, height_, "", monitor, nullptr);
 	FATAL_ASSERT_MSG(windowHandle_, "glfwCreateWindow() failed");
 
 	glfwMakeContextCurrent(windowHandle_);

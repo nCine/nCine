@@ -3,8 +3,9 @@
 
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
-#include "StaticArray.h"
-#include "ncString.h"
+#include "nctl/StaticArray.h"
+#include "nctl/String.h"
+#include "nctl/UniquePtr.h"
 
 namespace ncine {
 
@@ -25,23 +26,22 @@ class MyEventHandler :
 	public nc::IInputEventHandler
 {
   public:
-	virtual void onPreInit(nc::AppConfiguration &config);
-	virtual void onInit();
-	virtual void onShutdown();
+	void onPreInit(nc::AppConfiguration &config) override;
+	void onInit() override;
 
 #ifdef __ANDROID__
-	virtual void onTouchUp(const nc::TouchEvent &event);
+	void onTouchUp(const nc::TouchEvent &event) override;
 #endif
-	virtual void onKeyReleased(const nc::KeyboardEvent &event);
-	virtual void onMouseButtonReleased(const nc::MouseEvent &event);
+	void onKeyReleased(const nc::KeyboardEvent &event) override;
+	void onMouseButtonReleased(const nc::MouseEvent &event) override;
 
-	virtual void onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event);
-	virtual void onJoyDisconnected(const nc::JoyConnectionEvent &event);
+	void onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event) override;
+	void onJoyDisconnected(const nc::JoyConnectionEvent &event) override;
 
   private:
 	static const int MaxTexFormats = 32;
 
-	enum Direction
+	enum class Direction
 	{
 		UP,
 		DOWN,
@@ -54,12 +54,12 @@ class MyEventHandler :
 	static float scale_;
 	static float newScale_;
 
-	nc::SceneNode *dummy_;
-	nc::StaticArray<nc::String, MaxTexFormats> filenames_;
-	nc::StaticArray<nc::Texture *, MaxTexFormats> textures_;
-	nc::StaticArray<nc::Sprite *, MaxTexFormats> sprites_;
-	nc::Font *font_;
-	nc::TextNode *textNode_;
+	nctl::UniquePtr<nc::Font> font_;
+	nctl::UniquePtr<nc::SceneNode> dummy_;
+	nctl::UniquePtr<nc::TextNode> textNode_;
+	nctl::StaticArray<nctl::String, MaxTexFormats> filenames_;
+	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, MaxTexFormats> textures_;
+	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, MaxTexFormats> sprites_;
 
 	void handleInput(Direction direction);
 	void handleCoordInput(float x, float y);

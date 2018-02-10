@@ -1,23 +1,21 @@
-#ifndef CLASS_NCINE_STATICARRAY
-#define CLASS_NCINE_STATICARRAY
+#ifndef CLASS_NCTL_STATICARRAY
+#define CLASS_NCTL_STATICARRAY
 
-#include <cstdio> // for NULL
 #include "common_macros.h"
 #include "ArrayIterator.h"
+#include "ReverseIterator.h"
+#include "utility.h"
 
-namespace ncine {
+namespace nctl {
 
 /// Construction modes for the `StaticArray` class
 /*! Declared outside the template class to use it without template parameters. */
-struct StaticArrayMode
+enum class StaticArrayMode
 {
-	enum Modes
-	{
-		/// `StaticArray` will have a zero size
-		ZERO_SIZE,
-		/// `StaticArray` will extend the size to match its capacity
-		EXTEND_SIZE
-	};
+	/// `StaticArray` will have a zero size
+	ZERO_SIZE,
+	/// `StaticArray` will extend the size to match its capacity
+	EXTEND_SIZE
 };
 
 /// A static array based on templates that stores elements in the stack
@@ -26,14 +24,18 @@ class StaticArray
 {
   public:
 	/// Iterator type
-	typedef ArrayIterator<T, false> Iterator;
+	using Iterator = ArrayIterator<T, false>;
 	/// Constant iterator type
-	typedef ArrayIterator<T, true> ConstIterator;
+	using ConstIterator = ArrayIterator<T, true>;
+	/// Reverse iterator type
+	using ReverseIterator = nctl::ReverseIterator<Iterator>;
+	/// Reverse constant iterator type
+	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
 	/// Constructs an empty array with fixed capacity
 	StaticArray() : size_(0), capacity_(C) { }
 	/// Constructs an array with the option for it to have the size match its capacity
-	explicit StaticArray(StaticArrayMode::Modes mode)
+	explicit StaticArray(StaticArrayMode mode)
 		: size_(0), capacity_(C)
 	{
 		if (mode == StaticArrayMode::EXTEND_SIZE)
@@ -42,26 +44,39 @@ class StaticArray
 
 	/// Copy constructor
 	StaticArray(const StaticArray &other);
+	/// Move constructor
+	StaticArray(StaticArray &&other);
 	/// Assignment operator
 	StaticArray &operator=(const StaticArray &other);
+	/// Move assignment operator
+	StaticArray &operator=(StaticArray &&other);
 
 	/// Returns an iterator to the first element
 	inline Iterator begin() { return Iterator(array_); }
-	/// Returns an iterator to the last element
-	inline Iterator rBegin() { return Iterator(array_ + size_ - 1); }
+	/// Returns a reverse iterator to the last element
+	inline ReverseIterator rBegin() { return ReverseIterator(Iterator(array_ + size_ - 1)); }
 	/// Returns an iterator to past the last element
 	inline Iterator end() { return Iterator(array_ + size_); }
-	/// Returns an iterator to prior the first element
-	inline Iterator rEnd() { return Iterator(array_ - 1); }
+	/// Returns a reverse iterator to prior the first element
+	inline ReverseIterator rEnd() { return ReverseIterator(Iterator(array_ - 1)); }
 
 	/// Returns a constant iterator to the first element
 	inline ConstIterator begin() const { return ConstIterator(array_); }
-	/// Returns a constant iterator to the last element
-	inline ConstIterator rBegin() const { return ConstIterator(array_ + size_ - 1); }
+	/// Returns a constant reverse iterator to the last element
+	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(ConstIterator(array_ + size_ - 1)); }
 	/// Returns a constant iterator to past the last lement
 	inline ConstIterator end() const { return ConstIterator(array_ + size_); }
-	/// Returns a constant iterator to prior the first element
-	inline ConstIterator rEnd() const { return ConstIterator(array_ - 1); }
+	/// Returns a constant reverse iterator to prior the first element
+	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(ConstIterator(array_ - 1)); }
+
+	/// Returns a constant iterator to the first element
+	inline ConstIterator cBegin() const { return ConstIterator(array_); }
+	/// Returns a constant reverse iterator to the last element
+	inline ConstReverseIterator crBegin() const { return ConstReverseIterator(ConstIterator(array_ + size_ - 1)); }
+	/// Returns a constant iterator to past the last lement
+	inline ConstIterator cEnd() const { return ConstIterator(array_ + size_); }
+	/// Returns a constant reverse iterator to prior the first element
+	inline ConstReverseIterator crEnd() const { return ConstReverseIterator(ConstIterator(array_ - 1)); }
 
 	/// Returns true if the array is empty
 	inline bool isEmpty() const { return size_ == 0; }
@@ -85,7 +100,9 @@ class StaticArray
 	/// Returns a reference to the last element in constant time
 	inline T &back() { return array_[size_ - 1]; }
 	/// Inserts a new element as the last one in constant time
-	inline void insertBack(T element) { operator[](size_) = element; }
+	inline void pushBack(const T &element) { operator[](size_) = element; }
+	/// Move inserts a new element as the last one in constant time
+	inline void pushBack(T &&element) { operator[](size_) = nctl::move(element); }
 
 	/// Read-only access to the specified element (with bounds checking)
 	const T &at(unsigned int index) const;
@@ -117,6 +134,17 @@ StaticArray<T, C>::StaticArray(const StaticArray<T, C> &other)
 }
 
 template <class T, unsigned int C>
+StaticArray<T, C>::StaticArray(StaticArray<T, C> &&other)
+	: size_(other.size_), capacity_(other.capacity_)
+{
+	// moving all elements invoking their move constructor
+	for (unsigned int i = 0; i < other.size_; i++)
+		array_[i] = nctl::move(other.array_[i]);
+
+	other.size_ = 0;
+}
+
+template <class T, unsigned int C>
 StaticArray<T, C> &StaticArray<T, C>::operator=(const StaticArray<T, C> &other)
 {
 	size_ = other.size_;
@@ -124,6 +152,20 @@ StaticArray<T, C> &StaticArray<T, C>::operator=(const StaticArray<T, C> &other)
 	// copying all elements invoking their assignment operator
 	for (unsigned int i = 0; i < other.size_; i++)
 		array_[i] = other.array_[i];
+
+	return *this;
+}
+
+template <class T, unsigned int C>
+StaticArray<T, C> &StaticArray<T, C>::operator=(StaticArray<T, C> &&other)
+{
+	size_ = other.size_;
+
+	// moving all elements invoking their move constructor
+	for (unsigned int i = 0; i < other.size_; i++)
+		array_[i] = nctl::move(other.array_[i]);
+
+	other.size_ = 0;
 
 	return *this;
 }

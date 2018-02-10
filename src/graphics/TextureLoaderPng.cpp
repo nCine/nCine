@@ -8,28 +8,19 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 TextureLoaderPng::TextureLoaderPng(const char *filename)
-	: ITextureLoader(filename)
+	: TextureLoaderPng(IFile::createFileHandle(filename))
 {
-	init();
+
 }
 
-TextureLoaderPng::TextureLoaderPng(IFile *fileHandle)
-	: ITextureLoader(fileHandle)
-{
-	init();
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void TextureLoaderPng::init()
+TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
+	: ITextureLoader(nctl::move(fileHandle))
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 
 	const int SignatureLength = 8;
 	unsigned char signature[SignatureLength];
-	fileHandle_->open(IFile::MODE_READ | IFile::MODE_BINARY);
+	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 	fileHandle_->read(signature, SignatureLength);
 
 	// Checking PNG signature
@@ -37,22 +28,22 @@ void TextureLoaderPng::init()
 	FATAL_ASSERT_MSG(isValid, "PNG signature check failed");
 
 	// Get PNG file info struct (memory is allocated by libpng)
-	png_structp pngPtr = NULL;
-	pngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	png_structp pngPtr = nullptr;
+	pngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
 	FATAL_ASSERT_MSG(pngPtr, "Cannot create png read structure");
 
 	// Get PNG image data info struct (memory is allocated by libpng)
-	png_infop infoPtr = NULL;
+	png_infop infoPtr = nullptr;
 	infoPtr = png_create_info_struct(pngPtr);
 
-	if (infoPtr == NULL)
+	if (infoPtr == nullptr)
 	{
-		png_destroy_read_struct(&pngPtr, NULL, NULL);
+		png_destroy_read_struct(&pngPtr, nullptr, nullptr);
 		FATAL_MSG("Cannot create png info structure");
 	}
 
 	// Setting custom read function that uses an IFile as input
-	png_set_read_fn(pngPtr, fileHandle_, readFromFileHandle);
+	png_set_read_fn(pngPtr, fileHandle_.get(), readFromFileHandle);
 	// Telling libpng the signature has already be read
 	png_set_sig_bytes(pngPtr, SignatureLength);
 
@@ -62,11 +53,11 @@ void TextureLoaderPng::init()
 	png_uint_32 height = 0;
 	int bitDepth = 0;
 	int colorType = -1;
-	png_uint_32 retVal = png_get_IHDR(pngPtr, infoPtr, &width, &height, &bitDepth, &colorType, NULL, NULL, NULL);
+	png_uint_32 retVal = png_get_IHDR(pngPtr, infoPtr, &width, &height, &bitDepth, &colorType, nullptr, nullptr, nullptr);
 
 	if (retVal != 1)
 	{
-		png_destroy_read_struct(&pngPtr, &infoPtr, NULL);
+		png_destroy_read_struct(&pngPtr, &infoPtr, nullptr);
 		FATAL_MSG("Cannot create png info structure");
 	}
 
@@ -90,7 +81,7 @@ void TextureLoaderPng::init()
 			bpp_ = 1;
 			break;
 		default:
-			png_destroy_read_struct(&pngPtr, &infoPtr, NULL);
+			png_destroy_read_struct(&pngPtr, &infoPtr, nullptr);
 			FATAL_MSG_X("Color type not supported: %d", colorType);
 			break;
 	}
@@ -98,19 +89,21 @@ void TextureLoaderPng::init()
 	// Row size in bytes
 	const png_size_t bytesPerRow = png_get_rowbytes(pngPtr, infoPtr);
 
-	pixels_ = new unsigned char[bytesPerRow * height_];
+	pixels_ = nctl::makeUnique<unsigned char []>(static_cast<unsigned long>(bytesPerRow * height_));
 
-	png_bytep *rowPointers = new png_bytep[height_];
+	nctl::UniquePtr<png_bytep []> rowPointers = nctl::makeUnique<png_bytep []>(height_);
 	for (int i = 0; i < height_; i++)
-		rowPointers[i] = pixels_ + i * bytesPerRow;
+		rowPointers[i] = pixels_.get() + i * bytesPerRow;
 
 	// Decoding png data through row pointers
-	png_read_image(pngPtr, rowPointers);
+	png_read_image(pngPtr, rowPointers.get());
 
-	delete[] rowPointers;
-
-	png_destroy_read_struct(&pngPtr, &infoPtr, NULL);
+	png_destroy_read_struct(&pngPtr, &infoPtr, nullptr);
 }
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
 
 void TextureLoaderPng::readFromFileHandle(png_structp pngPtr, png_bytep outBytes, png_size_t byteCountToRead)
 {

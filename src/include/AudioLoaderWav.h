@@ -10,14 +10,14 @@ class AudioLoaderWav : public IAudioLoader
 {
   public:
 	explicit AudioLoaderWav(const char *filename);
-	explicit AudioLoaderWav(IFile *fileHandle);
+	explicit AudioLoaderWav(nctl::UniquePtr<IFile> fileHandle);
 
-	unsigned long int read(char *buffer, unsigned long int bufferSize) const;
-	void rewind() const;
+	unsigned long int read(char *buffer, unsigned long int bufferSize) const override;
+	void rewind() const override;
 
   private:
 	/// Header for the RIFF WAVE format
-	typedef struct WavHeader
+	struct WavHeader
 	{
 		char		chunkId[4];
 		uint32_t	chunkSize;
@@ -34,9 +34,7 @@ class AudioLoaderWav : public IAudioLoader
 
 		char		subchunk2Id[4];
 		uint32_t	subchunk2Size;
-	} WavHeader;
-
-	void init();
+	};
 };
 
 }

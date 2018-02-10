@@ -14,10 +14,15 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 {
   public:
 	/// Drawing layers from back to front
-	enum LayerBase
+	struct LayerBase
 	{
-		SCENE_LAYER = 0,
-		HUD_LAYER = 32767
+		enum
+		{
+			LOWEST = 0,
+			SCENE = 0,
+			HUD = 32767,
+			HIGHEST = 65535
+		};
 	};
 
 	/// Constructor for a drawable node with a parent and a specified relative position
@@ -26,10 +31,10 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	explicit DrawableNode(SceneNode *parent);
 	/// Constructor for a drawable node with no parent and positioned in the origin
 	DrawableNode();
-	virtual ~DrawableNode();
+	~DrawableNode() override;
 
 	/// Updates the draw command and adds it to the queue
-	virtual void draw(RenderQueue &renderQueue);
+	void draw(RenderQueue &renderQueue) override;
 
 	/// Returns the width of the node area
 	inline virtual float width() const { return width_ * scaleFactor_; }
@@ -57,7 +62,7 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	float height_;
 
 	/// The render command class associated with this node
-	RenderCommand *renderCommand_;
+	nctl::UniquePtr<RenderCommand> renderCommand_;
 
 	/// Axis Aligned Bounding Box of the node area
 	Rectf aabb_;
@@ -68,10 +73,10 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	virtual void updateRenderCommand() = 0;
 
   private:
-	/// Private copy constructor
-	DrawableNode(const DrawableNode &);
-	/// Private assignment operator
-	DrawableNode &operator=(const DrawableNode &);
+	/// Deleted copy constructor
+	DrawableNode(const DrawableNode &) = delete;
+	/// Deleted assignment operator
+	DrawableNode &operator=(const DrawableNode &) = delete;
 };
 
 }

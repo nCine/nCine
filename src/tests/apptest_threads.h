@@ -12,9 +12,9 @@ class MyEventHandler :
 	public nc::IInputEventHandler
 {
   public:
-	virtual void onInit();
+	void onInit() override;
 
-	virtual void onKeyReleased(const nc::KeyboardEvent &event);
+	void onKeyReleased(const nc::KeyboardEvent &event) override;
 };
 
 #endif

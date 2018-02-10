@@ -1,10 +1,11 @@
-#ifndef NCINE_ALGORITHMS
-#define NCINE_ALGORITHMS
+#ifndef NCTL_ALGORITHMS
+#define NCTL_ALGORITHMS
 
 #include <cstdlib> // for rand()
-#include "iterator_traits.h"
+#include "iterator.h"
+#include "utility.h"
 
-namespace ncine {
+namespace nctl {
 
 ///////////////////////////////////////////////////////////
 // TEMPLATE FUNCTIONS (non modifying)
@@ -24,30 +25,17 @@ inline const T &max(const T &a, const T &b)
 	return (a < b) ? b : a;
 }
 
-/// Returns a random float between x0 and x1
-inline float randBetween(float x0, float x1)
-{
-	return x0 + (x1 - x0) * (rand() / static_cast<float>(RAND_MAX));
-}
-
-///////////////////////////////////////////////////////////
-// TEMPLATE FUNCTIONS (modifying)
-///////////////////////////////////////////////////////////
-
-/// Swaps the content of two objects of the same type
-template <class T>
-inline void swap(T &a, T &b)
-{
-	const T temp = a;
-	a = b;
-	b = temp;
-}
-
 /// Clamp the value of an object between two others that support operator<
 template <class T>
 inline const T &clamp(const T &value, const T &minValue, const T &maxValue)
 {
 	return min(max(value, minValue), maxValue);
+}
+
+/// Returns a random float between x0 and x1
+inline float randBetween(float x0, float x1)
+{
+	return x0 + (x1 - x0) * (rand() / static_cast<float>(RAND_MAX));
 }
 
 ///////////////////////////////////////////////////////////
@@ -186,113 +174,6 @@ inline T LogicalNot(const T &a) { return !a; }
 ///////////////////////////////////////////////////////////
 // TEMPLATE FUNCTIONS WITH ITERATORS (non-modifying)
 ///////////////////////////////////////////////////////////
-
-namespace {
-
-/// Increments an iterator by n elements, for random access iterators
-template <class Iterator>
-inline void advance(Iterator &it, int n, RandomAccessIteratorTag)
-{
-	it += n;
-}
-
-/// Increments an iterator by n elements, for bidirectional iterators
-template <class Iterator>
-inline void advance(Iterator &it, int n, BidirectionalIteratorTag)
-{
-	if (n < 0)
-	{
-		while (n++)
-			--it;
-	}
-	else
-	{
-		while (n--)
-			++it;
-	}
-}
-
-/// Increments an iterator by n elements, for forward iterators
-template <class Iterator>
-inline void advance(Iterator &it, int n, ForwardIteratorTag)
-{
-	if (n > 0)
-	{
-		while (n--)
-			++it;
-	}
-}
-
-}
-
-/// Increments an iterator by n elements
-template <class Iterator>
-inline void advance(Iterator &it, int n)
-{
-	advance(it, n, IteratorTraits<Iterator>::IteratorCategory());
-}
-
-/// Return the nth successor of an iterator
-template <class Iterator>
-inline Iterator next(Iterator it, unsigned int n)
-{
-	advance(it, n);
-	return it;
-}
-
-/// Return the successor of an iterator
-template <class Iterator>
-inline Iterator next(Iterator it)
-{
-	advance(it, 1);
-	return it;
-}
-
-/// Return the nth predecessor of an iterator
-template <class Iterator>
-inline Iterator prev(Iterator it, unsigned int n)
-{
-	advance(it, -n);
-	return it;
-}
-
-/// Return the predecessor of an iterator
-template <class Iterator>
-inline Iterator prev(Iterator it)
-{
-	advance(it, -1);
-	return it;
-}
-
-namespace {
-
-/// Returns the distance between two random access iterators with a pointer subtraction
-template <class RandomAccessIterator>
-inline int distance(RandomAccessIterator &first, const RandomAccessIterator &last, RandomAccessIteratorTag)
-{
-	return last - first;
-}
-
-/// Returns the distance in number of increments between two forward iterators
-template <class ForwardIterator>
-inline int distance(ForwardIterator &first, const ForwardIterator &last, ForwardIteratorTag)
-{
-	int counter = 0;
-
-	for (; first != last; ++first)
-		counter++;
-
-	return counter;
-}
-
-}
-
-/// Returns the distance between two iterators
-template <class Iterator>
-inline int distance(Iterator first, const Iterator last)
-{
-	return distance(first, last, IteratorTraits<Iterator>::IteratorCategory());
-}
 
 /// Returns true if all elements in range satisfy the condition
 template <class Iterator, class UnaryPredicate>
@@ -863,7 +744,5 @@ inline void quicksortDesc(Iterator first, Iterator last)
 }
 
 }
-
-namespace nc = ncine;
 
 #endif

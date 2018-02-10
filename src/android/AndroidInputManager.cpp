@@ -1,6 +1,7 @@
 #include <android_native_app_glue.h>
 #include <android/input.h>
 #include <android/sensor.h>
+#include <cstring> // for memset()
 
 #include "AndroidInputManager.h"
 #include "IInputEventHandler.h"
@@ -17,9 +18,9 @@ namespace ncine {
 
 const int IInputManager::MaxNumJoysticks = 4;
 
-ASensorManager *AndroidInputManager::sensorManager_ = NULL;
-const ASensor *AndroidInputManager::accelerometerSensor_ = NULL;
-ASensorEventQueue *AndroidInputManager::sensorEventQueue_ = NULL;
+ASensorManager *AndroidInputManager::sensorManager_ = nullptr;
+const ASensor *AndroidInputManager::accelerometerSensor_ = nullptr;
+ASensorEventQueue *AndroidInputManager::sensorEventQueue_ = nullptr;
 bool AndroidInputManager::accelerometerEnabled_ = false;
 AccelerometerEvent AndroidInputManager::accelerometerEvent_;
 TouchEvent AndroidInputManager::touchEvent_;
@@ -117,7 +118,7 @@ float AndroidJoystickState::axisNormValue(int axisId) const
 /*! This method is called by `enableAccelerometer()` and when the application gains focus */
 void AndroidInputManager::enableAccelerometerSensor()
 {
-	if (accelerometerEnabled_ && accelerometerSensor_ != NULL)
+	if (accelerometerEnabled_ && accelerometerSensor_ != nullptr)
 	{
 		ASensorEventQueue_enableSensor(sensorEventQueue_, accelerometerSensor_);
 		// 60 events per second
@@ -128,7 +129,7 @@ void AndroidInputManager::enableAccelerometerSensor()
 /*! This method is called by `enableAccelerometer()` and when the application loses focus */
 void AndroidInputManager::disableAccelerometerSensor()
 {
-	if (accelerometerEnabled_ && accelerometerSensor_ != NULL)
+	if (accelerometerEnabled_ && accelerometerSensor_ != nullptr)
 		ASensorEventQueue_disableSensor(sensorEventQueue_, accelerometerSensor_);
 }
 
@@ -145,7 +146,7 @@ void AndroidInputManager::enableAccelerometer(bool enabled)
 
 void AndroidInputManager::parseAccelerometerEvent()
 {
-	if (inputEventHandler_ != NULL && accelerometerEnabled_ && accelerometerSensor_ != NULL)
+	if (inputEventHandler_ != nullptr && accelerometerEnabled_ && accelerometerSensor_ != nullptr)
 	{
 		ASensorEvent event;
 		while (ASensorEventQueue_getEvents(sensorEventQueue_, &event, 1) > 0)
@@ -161,7 +162,7 @@ void AndroidInputManager::parseAccelerometerEvent()
 bool AndroidInputManager::parseEvent(const AInputEvent *event)
 {
 	// Early out if there is no input event handler
-	if (inputEventHandler_ == NULL)
+	if (inputEventHandler_ == nullptr)
 		return false;
 
 	bool isEventHandled = false;
@@ -211,7 +212,7 @@ const char *AndroidInputManager::joyName(int joyId) const
 	if (isJoyPresent(joyId))
 		return joystickStates_[joyId].name_;
 	else
-		return NULL;
+		return nullptr;
 }
 
 const char *AndroidInputManager::joyGuid(int joyId) const
@@ -219,7 +220,7 @@ const char *AndroidInputManager::joyGuid(int joyId) const
 	if (isJoyPresent(joyId))
 		return joystickStates_[joyId].guid_;
 	else
-		return NULL;
+		return nullptr;
 }
 
 int AndroidInputManager::joyNumButtons(int joyId) const
@@ -382,16 +383,18 @@ bool AndroidInputManager::processKeyboardEvent(const AInputEvent *event)
 
 	keyboardEvent_.scancode = AKeyEvent_getScanCode(event);
 	keyboardEvent_.sym = AndroidKeys::keySymValueToEnum(AKeyEvent_getKeyCode(event));
-	keyboardEvent_.mod = AndroidKeys::keyModValueToEnum(AKeyEvent_getMetaState(event));
+	const int keyMod = static_cast<int>(AndroidKeys::keyModValueToEnum(AKeyEvent_getMetaState(event)));
+	keyboardEvent_.mod = keyMod;
 
+	const unsigned int keySym = static_cast<unsigned int>(keyboardEvent_.sym);
 	switch (AKeyEvent_getAction(event))
 	{
 		case AKEY_EVENT_ACTION_DOWN:
-			keyboardState_.keys_[keyboardEvent_.sym] = 1;
+			keyboardState_.keys_[keySym] = 1;
 			inputEventHandler_->onKeyPressed(keyboardEvent_);
 			break;
 		case AKEY_EVENT_ACTION_UP:
-			keyboardState_.keys_[keyboardEvent_.sym] = 0;
+			keyboardState_.keys_[keySym] = 0;
 			inputEventHandler_->onKeyReleased(keyboardEvent_);
 			break;
 		case AKEY_EVENT_ACTION_MULTIPLE:
@@ -531,9 +534,9 @@ void AndroidInputManager::initAccelerometerSensor(android_app *state)
 	sensorManager_ = ASensorManager_getInstance();
 #endif
 	accelerometerSensor_ = ASensorManager_getDefaultSensor(sensorManager_, ASENSOR_TYPE_ACCELEROMETER);
-	sensorEventQueue_ = ASensorManager_createEventQueue(sensorManager_, state->looper, LOOPER_ID_USER, NULL, NULL);
+	sensorEventQueue_ = ASensorManager_createEventQueue(sensorManager_, state->looper, LOOPER_ID_USER, nullptr, nullptr);
 
-	if (accelerometerSensor_ == NULL)
+	if (accelerometerSensor_ == nullptr)
 		LOGW("No accelerometer sensor available");
 }
 
@@ -558,7 +561,7 @@ void AndroidInputManager::checkDisconnectedJoysticks()
 			LOGI_X("Joystick %d (device %d) \"%s\" has been disconnected", i, deviceId, joystickStates_[i].name_);
 			joystickStates_[i].deviceId_ = -1;
 
-			if (inputEventHandler_ != NULL)
+			if (inputEventHandler_ != nullptr)
 			{
 				joyConnectionEvent_.joyId = i;
 				inputEventHandler_->onJoyDisconnected(joyConnectionEvent_);
@@ -626,7 +629,7 @@ int AndroidInputManager::findJoyId(int deviceId)
 		       deviceId, joystickStates_[joyId].name_, joystickStates_[joyId].guid_, joyId, joystickStates_[joyId].numAxes_, joystickStates_[joyId].numButtons_);
 		joystickStates_[joyId].deviceId_ = deviceId;
 
-		if (inputEventHandler_ != NULL)
+		if (inputEventHandler_ != nullptr)
 		{
 			joyConnectionEvent_.joyId = joyId;
 			joyMapping_.onJoyConnected(joyConnectionEvent_);

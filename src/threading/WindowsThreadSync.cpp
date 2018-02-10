@@ -51,8 +51,8 @@ int Mutex::tryLock()
 CondVariable::CondVariable()
 	: waitersCount_(0)
 {
-	events_[0] = CreateEvent(NULL, FALSE, FALSE, NULL); // Signal
-	events_[1] = CreateEvent(NULL, TRUE, FALSE, NULL); // Broadcast
+	events_[0] = CreateEvent(nullptr, FALSE, FALSE, nullptr); // Signal
+	events_[1] = CreateEvent(nullptr, TRUE, FALSE, nullptr); // Broadcast
 	InitializeCriticalSection(&waitersCountLock_);
 }
 

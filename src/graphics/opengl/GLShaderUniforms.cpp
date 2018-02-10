@@ -1,15 +1,10 @@
 #include "GLShaderUniforms.h"
 #include "GLShaderProgram.h"
 #include "GLUniformCache.h"
-#include "HashMapIterator.h"
+#include "nctl/HashMapIterator.h"
+#include "nctl/algorithms.h"
 
 namespace ncine {
-
-namespace {
-
-void commitValue(GLUniformCache &uniformCache) { uniformCache.commitValue(); }
-
-}
 
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
@@ -22,12 +17,12 @@ GLUniformCache GLShaderUniforms::uniformNotFound_;
 ///////////////////////////////////////////////////////////
 
 GLShaderUniforms::GLShaderUniforms()
-	: shaderProgram_(NULL), uniformCaches_(UniformCachesHashSize)
+	: shaderProgram_(nullptr), uniformCaches_(UniformCachesHashSize)
 {
 }
 
 GLShaderUniforms::GLShaderUniforms(GLShaderProgram *shaderProgram)
-	: shaderProgram_(NULL), uniformCaches_(UniformCachesHashSize)
+	: shaderProgram_(nullptr), uniformCaches_(UniformCachesHashSize)
 {
 	setProgram(shaderProgram);
 }
@@ -46,13 +41,13 @@ void GLShaderUniforms::setProgram(GLShaderProgram *shaderProgram)
 GLUniformCache *GLShaderUniforms::uniform(const char *name)
 {
 	ASSERT(name);
-	GLUniformCache *uniformCache = NULL;
+	GLUniformCache *uniformCache = nullptr;
 
 	if (shaderProgram_)
 	{
 		uniformCache = uniformCaches_.find(name);
 
-		if (uniformCache == NULL)
+		if (uniformCache == nullptr)
 		{
 			// Returning the dummy uniform cache to prevent the application from crashing
 			uniformCache = &uniformNotFound_;
@@ -70,7 +65,7 @@ void GLShaderUniforms::commitUniforms()
 	if (shaderProgram_)
 	{
 		shaderProgram_->use();
-		forEach(uniformCaches_.begin(), uniformCaches_.end(), commitValue);
+		forEach(uniformCaches_.begin(), uniformCaches_.end(), [](GLUniformCache &uniform){ uniform.commitValue(); });
 	}
 	else
 		LOGE("No shader program associated");
@@ -88,9 +83,8 @@ void GLShaderUniforms::importUniforms()
 
 	unsigned int nextFreeFloat = 0;
 	unsigned int nextFreeInt = 0;
-	for (unsigned int i = 0; i < count; i++)
+	for (const GLUniform &uniform : shaderProgram_->uniforms_)
 	{
-		const GLUniform &uniform = shaderProgram_->uniforms_[i];
 		GLUniformCache uniformCache(&uniform);
 
 		switch (uniform.basicType())

@@ -1,4 +1,3 @@
-#include <cstring> // for memcpy()
 #include "common_macros.h"
 #include "GLUniform.h"
 

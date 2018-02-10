@@ -1,25 +1,21 @@
-#ifndef CLASS_NCINE_ARRAY
-#define CLASS_NCINE_ARRAY
+#ifndef CLASS_NCTL_ARRAY
+#define CLASS_NCTL_ARRAY
 
-#include <cstdio> // for NULL
-#include <cstring> // for memmove() and memcpy()
 #include "common_macros.h"
-#include "algorithms.h"
 #include "ArrayIterator.h"
+#include "ReverseIterator.h"
+#include "utility.h"
 
-namespace ncine {
+namespace nctl {
 
 /// Construction modes for the `Array` class
 /*! Declared outside the template class to use it without template parameters. */
-struct ArrayMode
+enum class ArrayMode
 {
-	enum Modes
-	{
-		/// `Array` will have a growing capacity
-		GROWING_CAPACITY,
-		/// `Array` will have a fixed capacity
-		FIXED_CAPACITY
-	};
+	/// `Array` will have a growing capacity
+	GROWING_CAPACITY,
+	/// `Array` will have a fixed capacity
+	FIXED_CAPACITY
 };
 
 /// A dynamic array based on templates that stores elements in the heap
@@ -28,28 +24,32 @@ class Array
 {
   public:
 	/// Iterator type
-	typedef ArrayIterator<T, false> Iterator;
+	using Iterator = ArrayIterator<T, false>;
 	/// Constant iterator type
-	typedef ArrayIterator<T, true> ConstIterator;
+	using ConstIterator = ArrayIterator<T, true>;
+	/// Reverse iterator type
+	using ReverseIterator = nctl::ReverseIterator<Iterator>;
+	/// Reverse constant iterator type
+	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
 	/// Default capacity for objects created by the default constructor
 	static const unsigned int DefaultCapacity = 8;
 
 	/// Default constructor
 	Array()
-		: array_(NULL), size_(0), capacity_(0), fixedCapacity_(false)
+		: array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
 	{
 		setCapacity(DefaultCapacity);
 	}
 	/// Constructs an array with explicit capacity
 	explicit Array(unsigned int capacity)
-		: array_(NULL), size_(0), capacity_(0), fixedCapacity_(false)
+		: array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
 	{
 		setCapacity(capacity);
 	}
 	/// Constructs an array with explicit capacity and the option for it to be fixed
-	explicit Array(unsigned int capacity, ArrayMode::Modes mode)
-		: array_(NULL), size_(0), capacity_(0),
+	Array(unsigned int capacity, ArrayMode mode)
+		: array_(nullptr), size_(0), capacity_(0),
 		  fixedCapacity_(mode == ArrayMode::FIXED_CAPACITY)
 	{
 		setCapacity(capacity);
@@ -59,35 +59,46 @@ class Array
 
 	/// Copy constructor
 	Array(const Array &other);
+	/// Move constructor
+	Array(Array &&other);
 	/// Copy-and-swap assignment operator
 	Array &operator=(Array other);
 
 	/// Swaps two arrays without copying their data
 	void swap(Array &first, Array &second)
 	{
-		nc::swap(first.array_, second.array_);
-		nc::swap(first.size_, second.size_);
-		nc::swap(first.capacity_, second.capacity_);
-		nc::swap(first.fixedCapacity_, second.fixedCapacity_);
+		nctl::swap(first.array_, second.array_);
+		nctl::swap(first.size_, second.size_);
+		nctl::swap(first.capacity_, second.capacity_);
+		nctl::swap(first.fixedCapacity_, second.fixedCapacity_);
 	}
 
 	/// Returns an iterator to the first element
 	inline Iterator begin() { return Iterator(array_); }
-	/// Returns an iterator to the last element
-	inline Iterator rBegin() { return Iterator(array_ + size_ - 1); }
+	/// Returns a reverse iterator to the last element
+	inline ReverseIterator rBegin() { return ReverseIterator(Iterator(array_ + size_ - 1)); }
 	/// Returns an iterator to past the last element
 	inline Iterator end() { return Iterator(array_ + size_); }
-	/// Returns an iterator to prior the first element
-	inline Iterator rEnd() { return Iterator(array_ - 1); }
+	/// Returns a reverse iterator to prior the first element
+	inline ReverseIterator rEnd() { return ReverseIterator(Iterator(array_ - 1)); }
 
 	/// Returns a constant iterator to the first element
 	inline ConstIterator begin() const { return ConstIterator(array_); }
-	/// Returns a constant iterator to the last element
-	inline ConstIterator rBegin() const { return ConstIterator(array_ + size_ - 1); }
+	/// Returns a constant reverse iterator to the last element
+	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(ConstIterator(array_ + size_ - 1)); }
 	/// Returns a constant iterator to past the last lement
 	inline ConstIterator end() const { return ConstIterator(array_ + size_); }
-	/// Returns a constant iterator to prior the first element
-	inline ConstIterator rEnd() const { return ConstIterator(array_ - 1); }
+	/// Returns a constant reverse iterator to prior the first element
+	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(ConstIterator(array_ - 1)); }
+
+	/// Returns a constant iterator to the first element
+	inline ConstIterator cBegin() const { return ConstIterator(array_); }
+	/// Returns a constant reverse iterator to the last element
+	inline ConstReverseIterator crBegin() const { return ConstReverseIterator(ConstIterator(array_ + size_ - 1)); }
+	/// Returns a constant iterator to past the last lement
+	inline ConstIterator cEnd() const { return ConstIterator(array_ + size_); }
+	/// Returns a constant reverse iterator to prior the first element
+	inline ConstReverseIterator crEnd() const { return ConstReverseIterator(ConstIterator(array_ - 1)); }
 
 	/// Returns true if the array is empty
 	inline bool isEmpty() const { return size_ == 0; }
@@ -115,16 +126,22 @@ class Array
 	inline const T &back() const { return array_[size_ - 1]; }
 	/// Returns a reference to the last element in constant time
 	inline T &back() { return array_[size_ - 1]; }
-	/// Inserts a new element as the last one in constant time
-	inline void pushBack(T element) { operator[](size_) = element; }
+	/// Appends a new element in constant time, the element is copied into the array
+	inline void pushBack(const T &element) { operator[](size_) = element; }
+	/// Appends a new element in constant time, the element is moved into the array
+	inline void pushBack(T &&element) { operator[](size_) = nctl::move(element); }
 	/// Removes the last element in constant time
 	void popBack();
 	/// Inserts new elements at the specified position from a source range, last not included (shifting elements around)
 	T *insertRange(unsigned int index, const T *firstPtr, const T *lastPtr);
 	/// Inserts a new element at a specified position (shifting elements around)
-	T *insertAt(unsigned int index, T element);
+	T *insertAt(unsigned int index, const T &element);
+	/// Move inserts a new element at a specified position (shifting elements around)
+	T *insertAt(unsigned int index, T &&element);
 	/// Inserts a new element at the position specified by the iterator (shifting elements around)
 	Iterator insert(Iterator position, const T &value);
+	/// Move inserts a new element at the position specified by the iterator (shifting elements around)
+	Iterator insert(Iterator position, T &&value);
 	/// Inserts new elements from a source at the position specified by the iterator (shifting elements around)
 	Iterator insert(Iterator position, Iterator first, Iterator last);
 	/// Removes the specified range of elements, last not included (shifting elements around)
@@ -160,17 +177,22 @@ class Array
 
 template <class T>
 Array<T>::Array(const Array<T> &other)
-	: array_(NULL), size_(other.size_), capacity_(other.capacity_), fixedCapacity_(other.fixedCapacity_)
+	: array_(nullptr), size_(other.size_), capacity_(other.capacity_), fixedCapacity_(other.fixedCapacity_)
 {
 	array_ = new T[capacity_];
+	// copying all elements invoking their copy constructor
 	for (unsigned int i = 0; i < size_; i++)
-	{
-		// copying all elements invoking their copy constructor
 		array_[i] = other.array_[i];
-	}
 }
 
-/*! The parameter should be passed by value for the idiom to work. */
+template <class T>
+Array<T>::Array(Array<T> &&other)
+	: array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
+{
+	swap(*this, other);
+}
+
+/*! \note The parameter should be passed by value for the idiom to work. */
 template <class T>
 Array<T> &Array<T>::operator=(Array<T> other)
 {
@@ -213,7 +235,8 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 		if (newCapacity < size_) // shrinking
 			size_ = newCapacity; // cropping last elements
 
-		memcpy(newArray, array_, sizeof(T) * size_);
+		for (unsigned int i = 0; i < size_; i++)
+			newArray[i] = nctl::move(array_[i]);
 	}
 
 	delete[] array_;
@@ -260,16 +283,18 @@ T *Array<T>::insertRange(unsigned int index, const T *firstPtr, const T *lastPtr
 	if(size_ + numElements > capacity_)
 		setCapacity((size_ + numElements) * 2);
 
-	// memmove() takes care of overlapping regions
-	memmove(array_ + index + numElements, array_ + index, sizeof(T) * (size_ - index));
-	memcpy(array_ + index, firstPtr, sizeof(T) * numElements);
+	// Backwards loop to account for overlapping areas
+	for(unsigned int i =size_ - index; i > 0; i--)
+		array_[index + numElements + i - 1] = nctl::move(array_[index + i - 1]);
+	for(unsigned int i =0; i < numElements; i++)
+		array_[index + i] = firstPtr[i];
 	size_ += numElements;
 
 	return (array_ + index + numElements);
 }
 
 template <class T>
-T *Array<T>::insertAt(unsigned int index, T element)
+T *Array<T>::insertAt(unsigned int index, const T &element)
 {
 	// Cannot insert at more than one position after the last element
 	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
@@ -277,9 +302,28 @@ T *Array<T>::insertAt(unsigned int index, T element)
 	if (size_ + 1 > capacity_)
 		setCapacity(size_ * 2);
 
-	// memmove() takes care of overlapping regions
-	memmove(array_ + index + 1, array_ + index, sizeof(T) * (size_ - index));
+	// Backwards loop to account for overlapping areas
+	for(unsigned int i = size_ - index; i > 0; i--)
+		array_[index + i] = nctl::move(array_[index + i - 1]);
 	array_[index] = element;
+	size_++;
+
+	return (array_ + index + 1);
+}
+
+template <class T>
+T *Array<T>::insertAt(unsigned int index, T &&element)
+{
+	// Cannot insert at more than one position after the last element
+	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
+
+	if (size_ + 1 > capacity_)
+		setCapacity(size_ * 2);
+
+	// Backwards loop to account for overlapping areas
+	for(unsigned int i = size_ - index; i > 0; i--)
+		array_[index + i] = nctl::move(array_[index + i - 1]);
+	array_[index] = nctl::move(element);
 	size_++;
 
 	return (array_ + index + 1);
@@ -290,6 +334,15 @@ typename Array<T>::Iterator Array<T>::insert(Iterator position, const T &value)
 {
 	const unsigned int index = &(*position) - array_;
 	T *nextElement = insertAt(index, value);
+
+	return Iterator(nextElement);
+}
+
+template <class T>
+typename Array<T>::Iterator Array<T>::insert(Iterator position, T &&value)
+{
+	const unsigned int index = &(*position) - array_;
+	T *nextElement = insertAt(index, nctl::move(value));
 
 	return Iterator(nextElement);
 }
@@ -313,8 +366,8 @@ T *Array<T>::removeRange(unsigned int firstIndex, unsigned int lastIndex)
 	FATAL_ASSERT_MSG_X(lastIndex <= size_, "Last index %u out of size range", lastIndex);
 	FATAL_ASSERT_MSG_X(firstIndex <= lastIndex, "First index %u should precede or be equal to the last one %u", firstIndex, lastIndex);
 
-	// memmove() takes care of overlapping regions
-	memmove(array_ + firstIndex, array_ + lastIndex, sizeof(T) * (size_ - lastIndex));
+	for(unsigned int i =0; i < size_ - lastIndex; i++)
+		array_[firstIndex + i] = nctl::move(array_[lastIndex + i]);
 	size_ -= (lastIndex - firstIndex);
 
 	return (array_ + firstIndex);

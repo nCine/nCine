@@ -1,3 +1,4 @@
+#include <cstring>
 #include "common_macros.h"
 #include "AndroidJniHelper.h"
 
@@ -7,25 +8,25 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-JavaVM *AndroidJniHelper::javaVM_ = NULL;
-JNIEnv *AndroidJniHelper::jniEnv_ = NULL;
-JNIEnv *AndroidJniClass::jniEnv_ = NULL;
+JavaVM *AndroidJniHelper::javaVM_ = nullptr;
+JNIEnv *AndroidJniHelper::jniEnv_ = nullptr;
+JNIEnv *AndroidJniClass::jniEnv_ = nullptr;
 unsigned int AndroidJniHelper::sdkVersion_ = 0;
 
-jclass AndroidJniClass_Version::javaClass_ = NULL;
-jfieldID AndroidJniClass_Version::fidSdkInt_ = NULL;
-jclass AndroidJniClass_InputDevice::javaClass_ = NULL;
-jmethodID AndroidJniClass_InputDevice::midGetDevice_ = NULL;
-jmethodID AndroidJniClass_InputDevice::midGetDeviceIds_ = NULL;
-jmethodID AndroidJniClass_InputDevice::midGetName_ = NULL;
-jmethodID AndroidJniClass_InputDevice::midGetProductId_ = NULL;
-jmethodID AndroidJniClass_InputDevice::midGetVendorId_ = NULL;
-jmethodID AndroidJniClass_InputDevice::midGetMotionRange_ = NULL;
-jmethodID AndroidJniClass_InputDevice::midGetSources_ = NULL;
-jmethodID AndroidJniClass_InputDevice::midHasKeys_ = NULL;
-jclass AndroidJniClass_KeyCharacterMap::javaClass_ = NULL;
-jmethodID AndroidJniClass_KeyCharacterMap::midDeviceHasKey_ = NULL;
-jclass AndroidJniClass_MotionRange::javaClass_ = NULL;
+jclass AndroidJniClass_Version::javaClass_ = nullptr;
+jfieldID AndroidJniClass_Version::fidSdkInt_ = nullptr;
+jclass AndroidJniClass_InputDevice::javaClass_ = nullptr;
+jmethodID AndroidJniClass_InputDevice::midGetDevice_ = nullptr;
+jmethodID AndroidJniClass_InputDevice::midGetDeviceIds_ = nullptr;
+jmethodID AndroidJniClass_InputDevice::midGetName_ = nullptr;
+jmethodID AndroidJniClass_InputDevice::midGetProductId_ = nullptr;
+jmethodID AndroidJniClass_InputDevice::midGetVendorId_ = nullptr;
+jmethodID AndroidJniClass_InputDevice::midGetMotionRange_ = nullptr;
+jmethodID AndroidJniClass_InputDevice::midGetSources_ = nullptr;
+jmethodID AndroidJniClass_InputDevice::midHasKeys_ = nullptr;
+jclass AndroidJniClass_KeyCharacterMap::javaClass_ = nullptr;
+jmethodID AndroidJniClass_KeyCharacterMap::midDeviceHasKey_ = nullptr;
+jclass AndroidJniClass_MotionRange::javaClass_ = nullptr;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -35,7 +36,7 @@ void AndroidJniHelper::attachJVM(struct android_app *state)
 {
 	javaVM_ = state->activity->vm;
 
-	if (javaVM_ == NULL)
+	if (javaVM_ == nullptr)
 		LOGE("JavaVM pointer is null");
 	else
 	{
@@ -43,7 +44,7 @@ void AndroidJniHelper::attachJVM(struct android_app *state)
 		if (getEnvStatus == JNI_EDETACHED)
 		{
 			LOGW("GetEnv() cannot attach the JVM");
-			if (javaVM_->AttachCurrentThread(&jniEnv_, NULL) != 0)
+			if (javaVM_->AttachCurrentThread(&jniEnv_, nullptr) != 0)
 				LOGW("AttachCurrentThread() cannot attach the JVM");
 			else
 				LOGI("AttachCurrentThread() successful");
@@ -53,7 +54,7 @@ void AndroidJniHelper::attachJVM(struct android_app *state)
 		else if (getEnvStatus == JNI_OK)
 			LOGI("GetEnv() successful");
 
-		if (jniEnv_ == NULL)
+		if (jniEnv_ == nullptr)
 			LOGE("JNIEnv pointer is null");
 		else
 		{
@@ -74,8 +75,8 @@ void AndroidJniHelper::detachJVM()
 	{
 		javaVM_->DetachCurrentThread();
 		LOGI("Thread detached");
-		javaVM_ = NULL;
-		jniEnv_ = NULL;
+		javaVM_ = nullptr;
+		jniEnv_ = nullptr;
 	}
 }
 
@@ -88,15 +89,15 @@ void AndroidJniHelper::initClasses()
 
 void AndroidJniClass_Version::init()
 {
-	if (javaClass_ == NULL)
+	if (javaClass_ == nullptr)
 	{
 		javaClass_ = jniEnv_->FindClass("android/os/Build$VERSION");
-		if (javaClass_ == NULL)
+		if (javaClass_ == nullptr)
 			LOGE("Cannot find class");
 		else
 		{
 			fidSdkInt_ = jniEnv_->GetStaticFieldID(javaClass_, "SDK_INT", "I");
-			if (fidSdkInt_ == NULL)
+			if (fidSdkInt_ == nullptr)
 				LOGE("Cannot find static field SDK_INT");
 		}
 	}
@@ -110,43 +111,43 @@ int AndroidJniClass_Version::sdkInt()
 
 void AndroidJniClass_InputDevice::init()
 {
-	if (javaClass_ == NULL)
+	if (javaClass_ == nullptr)
 	{
 		javaClass_ = jniEnv_->FindClass("android/view/InputDevice");
-		if (javaClass_ == NULL)
+		if (javaClass_ == nullptr)
 			LOGE("Cannot find class");
 		else
 		{
 			midGetDevice_ = jniEnv_->GetStaticMethodID(javaClass_, "getDevice", "(I)Landroid/view/InputDevice;");
-			if (midGetDevice_ == NULL)
+			if (midGetDevice_ == nullptr)
 				LOGE("Cannot find static method getDevice()");
 
 			midGetDeviceIds_ = jniEnv_->GetStaticMethodID(javaClass_, "getDeviceIds", "()[I");
-			if (midGetDeviceIds_ == NULL)
+			if (midGetDeviceIds_ == nullptr)
 				LOGE("Cannot find static method getDeviceIds()");
 
 			midGetName_ = jniEnv_->GetMethodID(javaClass_, "getName", "()Ljava/lang/String;");
-			if (midGetName_ == NULL)
+			if (midGetName_ == nullptr)
 				LOGE("Cannot find method getName()");
 
 			midGetProductId_ = jniEnv_->GetMethodID(javaClass_, "getProductId", "()I");
-			if (midGetProductId_ == NULL)
+			if (midGetProductId_ == nullptr)
 				LOGE("Cannot find method getProductId()");
 
 			midGetVendorId_ = jniEnv_->GetMethodID(javaClass_, "getVendorId", "()I");
-			if (midGetVendorId_ == NULL)
+			if (midGetVendorId_ == nullptr)
 				LOGE("Cannot find method getVendorId()");
 
 			midGetMotionRange_ = jniEnv_->GetMethodID(javaClass_, "getMotionRange", "(I)Landroid/view/InputDevice$MotionRange;");
-			if (midGetMotionRange_ == NULL)
+			if (midGetMotionRange_ == nullptr)
 				LOGE("Cannot find method getMotionRange()");
 
 			midGetSources_ = jniEnv_->GetMethodID(javaClass_, "getSources", "()I");
-			if (midGetSources_ == NULL)
+			if (midGetSources_ == nullptr)
 				LOGE("Cannot find method getSources()");
 
 			midHasKeys_ = jniEnv_->GetMethodID(javaClass_, "hasKeys", "([I)[Z");
-			if (midHasKeys_ == NULL)
+			if (midHasKeys_ == nullptr)
 				LOGE("Cannot find method hasKeys()");
 		}
 	}
@@ -163,7 +164,7 @@ int AndroidJniClass_InputDevice::getDeviceIds(int *destination, int maxSize)
 	jintArray arrDeviceIds = static_cast<jintArray>(jniEnv_->CallStaticObjectMethod(javaClass_, midGetDeviceIds_));
 	const jint length = jniEnv_->GetArrayLength(arrDeviceIds);
 
-	jint *intsDeviceIds = jniEnv_->GetIntArrayElements(arrDeviceIds, NULL);
+	jint *intsDeviceIds = jniEnv_->GetIntArrayElements(arrDeviceIds, nullptr);
 	for (int i = 0; i < length && i < maxSize; i++)
 		destination[i] = int(intsDeviceIds[i]);
 	jniEnv_->ReleaseIntArrayElements(arrDeviceIds, intsDeviceIds, 0);
@@ -227,7 +228,7 @@ void AndroidJniClass_InputDevice::hasKeys(const int *buttons, const int length, 
 
 	jintArray arrButtons = jniEnv_->NewIntArray(length);
 
-	jint *intsButtons = jniEnv_->GetIntArrayElements(arrButtons, NULL);
+	jint *intsButtons = jniEnv_->GetIntArrayElements(arrButtons, nullptr);
 	for (int i = 0; i < length; i++)
 		intsButtons[i] = buttons[i];
 	jniEnv_->ReleaseIntArrayElements(arrButtons, intsButtons, 0);
@@ -235,7 +236,7 @@ void AndroidJniClass_InputDevice::hasKeys(const int *buttons, const int length, 
 	jbooleanArray arrBooleans = static_cast<jbooleanArray>(jniEnv_->CallObjectMethod(javaObject_, midHasKeys_, arrButtons));
 	jniEnv_->DeleteLocalRef(arrButtons);
 
-	jboolean *booleans = jniEnv_->GetBooleanArrayElements(arrBooleans, NULL);
+	jboolean *booleans = jniEnv_->GetBooleanArrayElements(arrBooleans, nullptr);
 	for (int i = 0; i < length; i++)
 		bools[i] = bool(booleans[i]);
 	jniEnv_->ReleaseBooleanArrayElements(arrBooleans, booleans, 0);
@@ -244,15 +245,15 @@ void AndroidJniClass_InputDevice::hasKeys(const int *buttons, const int length, 
 
 void AndroidJniClass_KeyCharacterMap::init()
 {
-	if (javaClass_ == NULL)
+	if (javaClass_ == nullptr)
 	{
 		javaClass_ = jniEnv_->FindClass("android/view/KeyCharacterMap");
-		if (javaClass_ == NULL)
+		if (javaClass_ == nullptr)
 			LOGE("Cannot find class");
 		else
 		{
 			midDeviceHasKey_ = jniEnv_->GetStaticMethodID(javaClass_, "deviceHasKey", "(I)Z");
-			if (midDeviceHasKey_ == NULL)
+			if (midDeviceHasKey_ == nullptr)
 				LOGE("Cannot find static method deviceHasKey()");
 		}
 	}
@@ -267,10 +268,10 @@ bool AndroidJniClass_KeyCharacterMap::deviceHasKey(int button)
 AndroidJniClass_MotionRange::AndroidJniClass_MotionRange(jobject javaObject)
 	: AndroidJniClass(javaObject)
 {
-	if (javaClass_ == NULL)
+	if (javaClass_ == nullptr)
 	{
 		javaClass_ = jniEnv_->FindClass("android/view/InputDevice$MotionRange");
-		if (javaClass_ == NULL)
+		if (javaClass_ == nullptr)
 			LOGE("Cannot find class");
 	}
 }

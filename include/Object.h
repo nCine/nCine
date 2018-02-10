@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_OBJECT
 #define CLASS_NCINE_OBJECT
 
-#include "ncString.h"
+#include "nctl/String.h"
 
 namespace ncine {
 
@@ -10,19 +10,19 @@ class DLL_PUBLIC Object
 {
   public:
 	/// Object types
-	enum ObjectType
+	enum class ObjectType
 	{
-		BASE_TYPE = 0,
-		TEXTURE_TYPE,
-		SCENENODE_TYPE,
-		SPRITE_TYPE,
-		PARTICLESYSTEM_TYPE,
-		FONT_TYPE,
-		TEXTNODE_TYPE,
-		ANIMATEDSPRITE_TYPE,
-		AUDIOBUFFER_TYPE,
-		AUDIOBUFFERPLAYER_TYPE,
-		AUDIOSTREAMPLAYER_TYPE
+		BASE = 0,
+		TEXTURE,
+		SCENENODE,
+		SPRITE,
+		PARTICLE_SYSTEM,
+		FONT,
+		TEXTNODE,
+		ANIMATED_SPRITE,
+		AUDIOBUFFER,
+		AUDIOBUFFER_PLAYER,
+		AUDIOSTREAM_PLAYER
 	};
 
 	/// Maximum length for an object name
@@ -41,12 +41,12 @@ class DLL_PUBLIC Object
 	/// Returns the object type (RTTI)
 	inline ObjectType type() const { return type_; }
 	/// Static method to return class type
-	inline static ObjectType sType() { return BASE_TYPE; }
+	inline static ObjectType sType() { return ObjectType::BASE; }
 
 	/// Returns the object name
-	inline const String &name() const { return name_; }
+	inline const nctl::String &name() const { return name_; }
 	/// Sets the object name
-	inline void setName(const String &name) { name_ = name; }
+	inline void setName(const nctl::String &name) { name_ = name; }
 
 	/// Returns a casted pointer to the object with the specified id, if any exists
 	template <class T> static T *fromId(unsigned int id);
@@ -60,14 +60,14 @@ class DLL_PUBLIC Object
 	unsigned int id_;
 
 	/// Object name
-	/*! This field is currently only useful in debug,
+	/*! \note This field is currently only useful in debug,
 	 *  as there is still no string hashing based search. */
-	String name_;
+	nctl::String name_;
 
-	/// Private copy constructor
-	Object(const Object &);
-	/// Private assignment operator
-	Object &operator=(const Object &);
+	/// Deleted copy constructor
+	Object(const Object &) = delete;
+	/// Deleted assignment operator
+	Object &operator=(const Object &) = delete;
 };
 
 }

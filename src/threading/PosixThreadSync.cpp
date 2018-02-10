@@ -12,7 +12,7 @@ namespace ncine {
 
 Mutex::Mutex()
 {
-	pthread_mutex_init(&mutex_, NULL);
+	pthread_mutex_init(&mutex_, nullptr);
 }
 
 Mutex::~Mutex()
@@ -50,7 +50,7 @@ int Mutex::tryLock()
 
 CondVariable::CondVariable()
 {
-	pthread_cond_init(&cond_, NULL);
+	pthread_cond_init(&cond_, nullptr);
 }
 
 CondVariable::~CondVariable()
@@ -91,7 +91,7 @@ void CondVariable::broadcast()
 
 RWLock::RWLock()
 {
-	pthread_rwlock_init(&rwlock_, NULL);
+	pthread_rwlock_init(&rwlock_, nullptr);
 }
 
 RWLock::~RWLock()
@@ -113,7 +113,7 @@ RWLock::~RWLock()
 
 Barrier::Barrier(unsigned int count)
 {
-	pthread_barrier_init(&barrier_, NULL, count);
+	pthread_barrier_init(&barrier_, nullptr, count);
 }
 
 Barrier::~Barrier()
