@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_OBJECT
 #define CLASS_NCINE_OBJECT
 
-#include "nctl/ncString.h"
+#include "nctl/String.h"
 
 namespace ncine {
 

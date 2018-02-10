@@ -1,6 +1,6 @@
 #include "apptest_joystick.h"
 #include "Application.h"
-#include "nctl/ncString.h"
+#include "nctl/String.h"
 #include "Texture.h"
 #include "Sprite.h"
 #include "TextNode.h"

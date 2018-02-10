@@ -4,7 +4,7 @@
 #include "GLVertexAttribute.h"
 #include "nctl/StaticArray.h"
 #include "nctl/HashMap.h"
-#include "nctl/ncString.h"
+#include "nctl/String.h"
 
 namespace ncine {
 

@@ -1,7 +1,7 @@
 #ifndef GTEST_STRING_H
 #define GTEST_STRING_H
 
-#include "nctl/ncString.h"
+#include "nctl/String.h"
 #include "gtest/gtest.h"
 
 namespace {

@@ -1,6 +1,6 @@
 #include "GLShaderProgram.h"
 #include "GLShader.h"
-#include "nctl/ncString.h"
+#include "nctl/String.h"
 
 namespace ncine {
 

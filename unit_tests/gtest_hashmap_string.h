@@ -3,7 +3,7 @@
 
 #include "nctl/HashMap.h"
 #include "nctl/HashMapIterator.h"
-#include "nctl/ncString.h"
+#include "nctl/String.h"
 #include "gtest/gtest.h"
 
 namespace {

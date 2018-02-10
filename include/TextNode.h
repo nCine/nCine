@@ -5,7 +5,7 @@
 #include "Font.h"
 #include "Color.h"
 #include "nctl/Array.h"
-#include "nctl/ncString.h"
+#include "nctl/String.h"
 
 namespace ncine {
 

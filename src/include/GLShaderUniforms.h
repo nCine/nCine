@@ -2,7 +2,7 @@
 #define CLASS_NCINE_GLSHADERUNIFORMS
 
 #include "nctl/HashMap.h"
-#include "nctl/ncString.h"
+#include "nctl/String.h"
 #include "GLUniformCache.h"
 
 namespace ncine {

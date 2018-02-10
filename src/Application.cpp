@@ -10,7 +10,7 @@
 #include "StackedBarPlotter.h"
 #include "Font.h"
 #include "TextNode.h"
-#include "nctl/ncString.h"
+#include "nctl/String.h"
 #include "IInputManager.h"
 #include "JoyMapping.h"
 
