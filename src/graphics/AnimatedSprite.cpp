@@ -73,7 +73,7 @@ void AnimatedSprite::addAnimation(nctl::UniquePtr<RectAnimation> anim)
 void AnimatedSprite::setAnimation(int animNum)
 {
 	ASSERT(!anims_.isEmpty());
-	ASSERT(animNum > 0);
+	ASSERT(animNum >= 0);
 	ASSERT(static_cast<unsigned int>(animNum) < anims_.size());
 
 	currentAnim_ = animNum;

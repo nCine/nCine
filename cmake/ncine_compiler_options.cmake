@@ -1,22 +1,21 @@
 set(CMAKE_CXX_STANDARD 11)
 
 if(MSVC)
-	if(NOT (MSVC_VERSION LESS 1800)) # If Visual Studio 2013 or greater
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FS")
-	endif()
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /fp:fast")
 
 	string(REGEX REPLACE "/Zm[0-9]*" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-	
+
 	if(NCINE_EXTRA_OPTIMIZATION)
 		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Ox /Qpar")
 	endif()
-	
+
 	if(NCINE_AUTOVECTORIZATION_REPORT)
 		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Qvec-report:2 /Qpar-report:2")
 	endif()
-	
+
 	list(APPEND PRIVATE_COMPILE_DEFINITIONS "_CRT_SECURE_NO_DEPRECATE")
-	
+
 	# Disabling incremental linking and manifest generation
 	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /MANIFEST:NO /INCREMENTAL:NO")
 	set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /MANIFEST:NO /INCREMENTAL:NO")
@@ -60,7 +59,7 @@ else() # GCC and LLVM
 		if(CMAKE_BUILD_TYPE MATCHES "Debug")
 			set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fvar-tracking-assignments")
 		endif()
-		
+
 		if(CMAKE_BUILD_TYPE MATCHES "Release")
 			if(NCINE_EXTRA_OPTIMIZATION)
 				set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -funsafe-loop-optimizations -ftree-loop-if-convert-stores")
@@ -70,7 +69,7 @@ else() # GCC and LLVM
 				set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fopt-info-vec-optimized")
 			endif()
 		endif()
-		
+
 		if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9.0)
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=auto")
 

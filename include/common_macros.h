@@ -67,7 +67,7 @@ do { \
 do { \
 	if (!(x)) \
 	{ \
-		LOGF(#x); \
+		LOGF("FATAL_ASSERT("#x")"); \
 		BREAK(); \
 	} \
 } while (false)
@@ -112,7 +112,7 @@ do { \
 	do { \
 		if (!(x)) \
 		{ \
-			LOGE(#x); \
+			LOGE("ASSERT("#x")"); \
 		} \
 	} while (false)
 #else

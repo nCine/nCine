@@ -182,7 +182,7 @@ void MyEventHandler::onFrameStart()
 	float rotatedHeight = scaledHeight;
 	if (camRot_ > 0.01f || camRot_ < -0.01f)
 	{
-		camRot_ = fmod(camRot_, 360.0f);
+		camRot_ = fmodf(camRot_, 360.0f);
 		const float sinRot = sinf(camRot_ * nc::fDegToRad);
 		const float cosRot = cosf(camRot_ * nc::fDegToRad);
 		rotatedWidth = fabsf(scaledHeight * sinRot) + fabsf(scaledWidth * cosRot);

@@ -12,11 +12,11 @@ class DLL_PUBLIC Color
   public:
 	/// Default constructor (white color)
 	Color() { set(255, 255, 255, 255); }
-	/// Three channels constructor (`unsigned char`)
-	Color(unsigned char red, unsigned char green, unsigned char blue)
+	/// Three channels constructor (`unsigned int`)
+	Color(unsigned int red, unsigned int green, unsigned int blue)
 		: Color(red, green, blue, 255) { }
-	/// Four channels constructor (`unsigned char`)
-	Color(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
+	/// Four channels constructor (`unsigned int`)
+	Color(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha)
 	{
 		set(red, green, blue, alpha);
 	}
@@ -47,12 +47,12 @@ class DLL_PUBLIC Color
 	/// Float getter for the alpha channel of the color
 	inline float fA() const { return channels_[3] / 255.0f; }
 
-	/// Sets four color channels (`unsigned char`)
-	inline void set(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha);
-	/// Sets three color channels (`unsigned char`)
-	inline void set(unsigned char red, unsigned char green, unsigned char blue);
-	/// Sets four color channels (`unsigned char` vector)
-	inline void setVec(unsigned char channels[4]);
+	/// Sets four color channels (`unsigned int`)
+	inline void set(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha);
+	/// Sets three color channels (`unsigned int`)
+	inline void set(unsigned int red, unsigned int green, unsigned int blue);
+	/// Sets four color channels (`unsigned int` vector)
+	inline void setVec(unsigned int channels[4]);
 
 	/// Sets four color channels (normalized `float`)
 	inline void setF(float red, float green, float blue, float alpha);
@@ -61,8 +61,8 @@ class DLL_PUBLIC Color
 	/// Sets four color channels (`float` vector)
 	inline void setFVec(float channels[4]);
 
-	/// Sets the alpha channel (`unsigned char`)
-	inline void setAlpha(unsigned char alpha);
+	/// Sets the alpha channel (`unsigned int`)
+	inline void setAlpha(unsigned int alpha);
 	/// Sets the alpha channel (normalized `float`)
 	inline void setAlphaF(float alpha);
 
@@ -82,20 +82,20 @@ class DLL_PUBLIC Color
 	nctl::StaticArray<unsigned char, 4> channels_;
 };
 
-inline void Color::set(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
+inline void Color::set(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha)
 {
-	channels_[0] = red;
-	channels_[1] = green;
-	channels_[2] = blue;
-	channels_[3] = alpha;
+	channels_[0] = static_cast<unsigned char>(red);
+	channels_[1] = static_cast<unsigned char>(green);
+	channels_[2] = static_cast<unsigned char>(blue);
+	channels_[3] = static_cast<unsigned char>(alpha);
 }
 
-inline void Color::set(unsigned char red, unsigned char green, unsigned char blue)
+inline void Color::set(unsigned int red, unsigned int green, unsigned int blue)
 {
 	set(red, green, blue, 255);
 }
 
-inline void Color::setVec(unsigned char channels[4])
+inline void Color::setVec(unsigned int channels[])
 {
 	set(channels[0], channels[1], channels[2], channels[3]);
 }
@@ -118,9 +118,9 @@ inline void Color::setFVec(float channels[4])
 	setF(channels[0], channels[1], channels[2], channels[3]);
 }
 
-inline void Color::setAlpha(unsigned char alpha)
+inline void Color::setAlpha(unsigned int alpha)
 {
-	channels_[3] = alpha;
+	channels_[3] = static_cast<unsigned char>(alpha);
 }
 
 inline void Color::setAlphaF(float alpha)

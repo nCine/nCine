@@ -235,7 +235,7 @@ void Application::shutdownCommon()
 		theServiceLocator().indexer().logReport();
 	}
 
-	LOGI("Application shutted down");
+	LOGI("Application shut down");
 
 	theServiceLocator().unregisterAll();
 }

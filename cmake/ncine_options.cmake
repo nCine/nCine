@@ -10,6 +10,8 @@ option(NCINE_BUILD_ANDROID "Build the Android version of the engine" ON)
 
 set(NCINE_DATA_DIR "${PARENT_SOURCE_DIR}/nCine-data" CACHE PATH "Set the path to the engine data directory")
 set(NCINE_TESTS_DATA_DIR "" CACHE STRING "Set the path to the data directory that will be embedded in test executables")
+# The external Android dir is set regardless of the status of build Android flag, so that presets work even when the flag is off
+set(EXTERNAL_ANDROID_DIR "${PARENT_SOURCE_DIR}/nCine-android-external" CACHE PATH "Set the path to the Android libraries directory")
 if(MSVC)
 	set(EXTERNAL_MSVC_DIR "${PARENT_SOURCE_DIR}/nCine-external" CACHE PATH "Set the path to the MSVC libraries directory")
 endif()
@@ -21,7 +23,6 @@ endif()
 if(NCINE_BUILD_ANDROID)
 	set(NDK_DIR "" CACHE PATH "Set the path to the Android NDK")
 	set(NCINE_NDK_ARCHITECTURES armeabi-v7a CACHE STRING "Set the NDK target architectures")
-	set(EXTERNAL_ANDROID_DIR "${PARENT_SOURCE_DIR}/nCine-android-external" CACHE PATH "Set the path to the Android libraries directory")
 	option(NCINE_ASSEMBLE_APK "Assemble the Android APK of the startup test with Gradle" OFF)
 endif()
 

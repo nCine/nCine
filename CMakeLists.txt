@@ -119,11 +119,11 @@ if(CMAKE_BUILD_TYPE MATCHES "Debug" AND NCINE_CODE_COVERAGE AND CODE_COVERAGE_SU
 	set_target_properties(ncine PROPERTIES LINK_FLAGS "--coverage")
 endif()
 
+set_target_properties(ncine PROPERTIES DEBUG_POSTFIX "")
 if(MSVC)
 	target_include_directories(ncine PRIVATE "${EXTERNAL_MSVC_DIR}/include")
 	# Suppress linker warning about templates
 	target_compile_options(ncine PUBLIC "/wd4251")
-	set_target_properties(ncine PROPERTIES DEBUG_POSTFIX "")
 else()
 	if(PNG_FOUND)
 		target_include_directories(ncine PRIVATE ${PNG_INCLUDE_DIR})

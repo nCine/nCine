@@ -156,7 +156,7 @@ class DLL_PUBLIC SceneNode : public Object
 
 inline void SceneNode::setRotation(float rotation)
 {
-	rotation_ = fmod(rotation, 360.0f);
+	rotation_ = fmodf(rotation, 360.0f);
 }
 
 }
