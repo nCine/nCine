@@ -8,6 +8,8 @@
 
 namespace ncine {
 
+class GLUniformBlockCache;
+
 /// A scene node representing a basic sprite
 class DLL_PUBLIC Sprite : public DrawableNode
 {
@@ -59,6 +61,8 @@ class DLL_PUBLIC Sprite : public DrawableNode
 	Recti texRect_;
 	/// The opaque texture flag
 	bool opaqueTexture_;
+
+	GLUniformBlockCache *spriteBlock_;
 
 	void updateRenderCommand() override;
 };

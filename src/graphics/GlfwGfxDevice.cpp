@@ -14,8 +14,8 @@ GLFWwindow *GlfwGfxDevice::windowHandle_ = nullptr;
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-GlfwGfxDevice::GlfwGfxDevice(int width, int height, const GLContextInfo &contextInfo, const DisplayMode &mode, bool isFullScreen)
-	: IGfxDevice(width, height, contextInfo, mode, isFullScreen)
+GlfwGfxDevice::GlfwGfxDevice(int width, int height, const GLContextInfo &glContextInfo, const DisplayMode &mode, bool isFullScreen)
+	: IGfxDevice(width, height, glContextInfo, mode, isFullScreen)
 {
 	initGraphics();
 	initDevice();
@@ -92,15 +92,17 @@ void GlfwGfxDevice::initDevice()
 
 	// setting window hints and creating a window with GLFW
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, contextInfo_.majorVersion);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, contextInfo_.minorVersion);
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, contextInfo_.debugContext ? GLFW_TRUE : GLFW_FALSE);
-	glfwWindowHint(GLFW_RED_BITS, mode_.redBits());
-	glfwWindowHint(GLFW_GREEN_BITS, mode_.greenBits());
-	glfwWindowHint(GLFW_BLUE_BITS, mode_.blueBits());
-	glfwWindowHint(GLFW_ALPHA_BITS, mode_.alphaBits());
-	glfwWindowHint(GLFW_DEPTH_BITS, mode_.depthBits());
-	glfwWindowHint(GLFW_STENCIL_BITS, mode_.stencilBits());
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, static_cast<int>(glContextInfo_.majorVersion));
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, static_cast<int>(glContextInfo_.minorVersion));
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, glContextInfo_.debugContext ? GLFW_TRUE : GLFW_FALSE);
+	glfwWindowHint(GLFW_RED_BITS, static_cast<int>(mode_.redBits()));
+	glfwWindowHint(GLFW_GREEN_BITS, static_cast<int>(mode_.greenBits()));
+	glfwWindowHint(GLFW_BLUE_BITS, static_cast<int>(mode_.blueBits()));
+	glfwWindowHint(GLFW_ALPHA_BITS, static_cast<int>(mode_.alphaBits()));
+	glfwWindowHint(GLFW_DEPTH_BITS, static_cast<int>(mode_.depthBits()));
+	glfwWindowHint(GLFW_STENCIL_BITS, static_cast<int>(mode_.stencilBits()));
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, glContextInfo_.forwardCompatible ? GLFW_TRUE : GLFW_FALSE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, glContextInfo_.coreProfile ? GLFW_OPENGL_CORE_PROFILE : GLFW_OPENGL_COMPAT_PROFILE);
 
 	windowHandle_ = glfwCreateWindow(width_, height_, "", monitor, nullptr);
 	FATAL_ASSERT_MSG(windowHandle_, "glfwCreateWindow() failed");
@@ -114,11 +116,8 @@ void GlfwGfxDevice::initDevice()
 	const GLenum err = glewInit();
 	FATAL_ASSERT_MSG_X(err == GLEW_OK, "GLEW error: %s", glewGetErrorString(err));
 
-	contextInfo_.debugContext = contextInfo_.debugContext && glewIsSupported("GL_ARB_debug_output");
+	glContextInfo_.debugContext = glContextInfo_.debugContext && glewIsSupported("GL_ARB_debug_output");
 #endif
-
-	if (contextInfo_.debugContext)
-		enableGlDebugOutput();
 }
 
 void GlfwGfxDevice::errorCallback(int error, const char *description)

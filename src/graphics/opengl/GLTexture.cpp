@@ -9,6 +9,10 @@ namespace ncine {
 GLHashMap<GLTextureMappingFunc::Size, GLTextureMappingFunc> GLTexture::boundTextures_[MaxTextureUnits];
 unsigned int GLTexture::boundUnit_ = 0;
 
+///////////////////////////////////////////////////////////
+// CONSTRUCTORS AND DESTRUCTOR
+///////////////////////////////////////////////////////////
+
 GLTexture::GLTexture(GLenum target)
 	: glHandle_(0), target_(target), textureUnit_(0), imageFormat_(GL_RGBA)
 {

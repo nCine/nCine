@@ -4,11 +4,12 @@
 #include "Rect.h"
 #include "Color.h"
 #include "nctl/Array.h"
-#include "nctl/StaticArray.h"
 #include "DrawableNode.h"
 #include "PlottingVariable.h"
 
 namespace ncine {
+
+class GLUniformBlockCache;
 
 /// A class that plots a graphic representation of a time/value function
 class ProfilePlotter : public DrawableNode
@@ -41,7 +42,7 @@ class ProfilePlotter : public DrawableNode
 
 	inline virtual void drawRefValue(RenderQueue &renderQueue)
 	{
-		UpdateRefValueRenderCommand();
+		updateRefValueRenderCommand();
 		renderQueue.addCommand(&refValueCmd_);
 	}
 
@@ -51,8 +52,6 @@ class ProfilePlotter : public DrawableNode
   protected:
 	/// Background color
 	Color backgroundColor_;
-	/// The vertices for the background
-	nctl::StaticArray<float, 8> backgroundVertices_; // Quad with a triangle strip
 	/// The array of variables
 	nctl::Array<nctl::UniquePtr<PlottingVariable> > variables_;
 
@@ -60,18 +59,19 @@ class ProfilePlotter : public DrawableNode
 	bool shouldPlotRefValue_;
 	/// Reference value line color
 	Color refValueColor_;
-	/// The vertices for the reference value line
-	nctl::StaticArray<float, 4> refValueVertices_;
 	/// The reference value
 	float refValue_;
 	/// The command used to render the reference value
 	RenderCommand refValueCmd_;
 
 	/// Fills the background buffer with vertices
-	void setBackgroundVertices();
+	void setBackgroundVertices(GLfloat *vertices);
 	void updateRenderCommand() override;
 	/// Updates the reference value rendering command
-	void UpdateRefValueRenderCommand();
+	void updateRefValueRenderCommand();
+
+	GLUniformBlockCache *backgroundColorBlock_;
+	GLUniformBlockCache *refValueColorBlock_;
 
   private:
 	/// Deleted copy constructor

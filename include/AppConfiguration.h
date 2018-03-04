@@ -13,6 +13,19 @@ class DLL_PUBLIC AppConfiguration
 	/// Default constructor setting the defaults
 	AppConfiguration();
 
+	/// Returns true if the OpenGL profile is going to be core
+	bool glCoreProfile() const { return glCoreProfile_; }
+	/// Returns true if the OpenGL context is going to be forward compatible
+	bool glForwardCompatible() const { return glForwardCompatible_; }
+	/// Returns the major version number of the OpenGL context
+	unsigned int glMajorVersion() const { return glMajorVersion_; }
+	/// Returns the minor version number of the OpenGL context
+	unsigned int glMinorVersion() const { return glMinorVersion_; }
+	/// Returns true if the OpenGL context is going to be a debug context
+	bool glDebugContext() const { return withGLDebug_; }
+	/// Returns the update time in seconds for the profile text nodes
+	float profileTextUpdateTime() const { return profileTextUpdateTime_; }
+
 	/// Sets the path for the application to load data from
 	void setDataPath(const nctl::String &dataPath);
 	/// Sets the name of the log file
@@ -48,10 +61,13 @@ class DLL_PUBLIC AppConfiguration
 	void enableScenegraph(bool shouldEnable);
 	/// Enables vertical synchronization
 	void enableVSync(bool shouldEnable);
+	/// Enables OpenGL debug context
+	void enableGLDebug(bool shouldEnable);
 
   private:
 	// Pre-configured compile-time variables
-	const bool glDebugContext_;
+	const bool glCoreProfile_;
+	const bool glForwardCompatible_;
 	const unsigned int glMajorVersion_;
 	const unsigned int glMinorVersion_;
 	const float profileTextUpdateTime_;
@@ -74,6 +90,7 @@ class DLL_PUBLIC AppConfiguration
 	bool withThreads_;
 	bool withScenegraph_;
 	bool withVSync_;
+	bool withGLDebug_;
 
 	friend class Application;
 	friend class PCApplication;

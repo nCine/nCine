@@ -1,5 +1,5 @@
 #include "LinePlotter.h"
-#include "RenderQueue.h"
+#include "GLDebug.h"
 
 namespace ncine {
 
@@ -10,15 +10,10 @@ namespace ncine {
 LineVariable::LineVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f &worldMatrix)
 	: PlottingVariable(numValues, rejectDelay, worldMatrix)
 {
-	// Two vertices for the mean quote plus...
-	// One vertex (2 coordinates each) for every recorded value
-	vertices_ =  nctl::makeUnique<GLfloat []>(4 + numValues * 2);
-
-	valuesCmd_.material().setShaderProgram(Material::ShaderProgram::COLOR);
-	valuesCmd_.geometry().createCustomVbo(4 + numValues * 2, GL_DYNAMIC_DRAW);
+	valuesCmd_.material().setShaderProgramType(Material::ShaderProgramType::COLOR);
 	valuesCmd_.geometry().setDrawParameters(GL_LINE_STRIP, 2, variable_.numValues());
 
-	meanCmd_.material().setShaderProgram(Material::ShaderProgram::COLOR);
+	meanCmd_.material().setShaderProgramType(Material::ShaderProgramType::COLOR);
 	meanCmd_.geometry().shareVbo(valuesCmd_.geometry());
 	meanCmd_.geometry().setDrawParameters(GL_LINES, 0, 2);
 }
@@ -58,6 +53,8 @@ void LinePlotter::draw(RenderQueue &renderQueue)
 
 void LinePlotter::updateAllVertices(float x, float y, float w, float h)
 {
+	GLDebug::ScopedGroup scoped("LinePlotter vertices");
+
 	float commonMin = 0.0f;
 	float commonMax = 0.0f;
 	if (!variables_.isEmpty())
@@ -75,20 +72,25 @@ void LinePlotter::updateAllVertices(float x, float y, float w, float h)
 	}
 
 	const float normalizedRefValue = normBetweenRefValue(commonMin, commonMax);
-	refValueVertices_[0] = x;		refValueVertices_[1] = y + h * normalizedRefValue;
-	refValueVertices_[2] = x + w;	refValueVertices_[3] = y + h * normalizedRefValue;
+	GLfloat *refValueVertices = refValueCmd_.geometry().acquireVertexPointer(4);
+	refValueVertices[0] = x;		refValueVertices[1] = y + h * normalizedRefValue;
+	refValueVertices[2] = x + w;	refValueVertices[3] = y + h * normalizedRefValue;
+	refValueCmd_.geometry().releaseVertexPointer();
 
 	for (nctl::UniquePtr<PlottingVariable> &variable : variables_)
 	{
+		GLDebug::ScopedGroup scoped("LinePlotter variable vertices");
+
 		const ProfileVariable *profVariable = variable->variable();
-		GLfloat *vertices = variable->vertices();
+		const unsigned int numValues = profVariable->numValues();
+		// 2 vertices for the mean quote plus 1 vertex (2 coordinates each) for every recorded value
+		GLfloat *vertices = variable->acquireVertices(4 + numValues * 2);
 
 		const float normalizedMean = profVariable->normBetweenMean(commonMin, commonMax);
 		// Variable mean vertices
 		vertices[0] = x;			vertices[1] = y + h * normalizedMean;
 		vertices[2] = x + w;		vertices[3] = y + h * normalizedMean;
 
-		const unsigned int numValues = profVariable->numValues();
 		const unsigned int nextIndex = profVariable->nextIndex();
 
 		// Variable value vertices
@@ -97,25 +99,20 @@ void LinePlotter::updateAllVertices(float x, float y, float w, float h)
 			vertices[4 + 2 * j] = x + j * w / (numValues - 1);
 			vertices[4 + 2 * j + 1] = y + h * profVariable->normBetweenValue((nextIndex + j) % numValues, commonMin, commonMax);
 		}
+		variable->releaseVertices();
 	}
 }
 
 void LineVariable::updateRenderCommand()
 {
 	valuesCmd_.transformation() = worldMatrix_;
-
-	valuesCmd_.material().setTexture(nullptr);
-	valuesCmd_.material().uniform("color")->setFloatValue(graphColor_.fR(), graphColor_.fG(), graphColor_.fB(), graphColor_.fA());
-	valuesCmd_.geometry().updateVboData(4, variable_.numValues() * 2, vertices_.get() + 4);
+	valuesColorBlock_->uniform("color")->setFloatValue(graphColor_.fR(), graphColor_.fG(), graphColor_.fB(), graphColor_.fA());
 }
 
 void LineVariable::updateMeanRenderCommand()
 {
 	meanCmd_.transformation() = worldMatrix_;
-
-	meanCmd_.material().setTexture(nullptr);
-	meanCmd_.material().uniform("color")->setFloatValue(meanColor_.fR(), meanColor_.fG(), meanColor_.fB(), meanColor_.fA());
-	meanCmd_.geometry().updateVboData(0, 4, vertices_.get());
+	meanColorBlock_->uniform("color")->setFloatValue(graphColor_.fR(), graphColor_.fG(), graphColor_.fB(), graphColor_.fA());
 }
 
 }

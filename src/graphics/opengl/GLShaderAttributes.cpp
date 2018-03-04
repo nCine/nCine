@@ -73,17 +73,23 @@ void GLShaderAttributes::defineVertexPointers(const GLBufferObject *vbo)
 
 		for (GLVertexAttribute &attribute : vertexAttributes_)
 		{
-			int location = attribute.shaderAttribute()->location();
-			if (definedPointers_[location] != attribute || definedPointers_[location].boundVbo() != boundVboHandle)
+			const unsigned int location = static_cast<unsigned int>(attribute.shaderAttribute()->location());
+			GLVertexAttribPointerState &pointerState = definedPointers_[location];
+
+			if (pointerState != attribute || pointerState.boundVbo != boundVboHandle)
 			{
 				attribute.vertexAttribPointer();
-				definedPointers_[location] = attribute;
-				definedPointers_[location].setBoundVbo(boundVboHandle);
+				pointerState.boundVbo = boundVboHandle;
+
+				pointerState.size = attribute.shaderAttribute()->numComponents();
+				pointerState.type = attribute.shaderAttribute()->basicType();
+				pointerState.vboStride = attribute.vboStride();
+				pointerState.vboPointer = attribute.vboPointer();
 			}
-			if (definedPointers_[location].isEnabled() == false)
+			if (pointerState.enabled == false)
 			{
 				attribute.enable();
-				definedPointers_[location].setEnabled(true);
+				pointerState.enabled = true;
 			}
 		}
 	}
@@ -108,17 +114,11 @@ void GLShaderAttributes::importAttributes()
 	}
 }
 
-GLShaderAttributes::GLVertexAttribPointerState::GLVertexAttribPointerState()
-	: enabled_(false), size_(-1), type_(GL_FLOAT), vboStride_(0), vboPointer_(nullptr)
-{
-
-}
-
 bool GLShaderAttributes::GLVertexAttribPointerState::operator==(const GLVertexAttribute &attribute) const
 {
-	if (attribute.shaderAttribute()->numComponents() == size_ &&
-	    attribute.shaderAttribute()->basicType() == type_ &&
-	    attribute.vboStride() == vboStride_ && attribute.vboPointer() == vboPointer_)
+	if (attribute.shaderAttribute()->numComponents() == size &&
+	    attribute.shaderAttribute()->basicType() == type &&
+	    attribute.vboStride() == vboStride && attribute.vboPointer() == vboPointer)
 	{
 		return true;
 	}
@@ -129,16 +129,6 @@ bool GLShaderAttributes::GLVertexAttribPointerState::operator==(const GLVertexAt
 bool GLShaderAttributes::GLVertexAttribPointerState::operator!=(const GLVertexAttribute &attribute) const
 {
 	return !operator==(attribute);
-}
-
-GLShaderAttributes::GLVertexAttribPointerState &GLShaderAttributes::GLVertexAttribPointerState::operator=(const GLVertexAttribute &attribute)
-{
-	size_ = attribute.shaderAttribute()->numComponents();
-	type_ = attribute.shaderAttribute()->basicType();
-	vboStride_ = attribute.vboStride();
-	vboPointer_ = attribute.vboPointer();
-
-	return *this;
 }
 
 }

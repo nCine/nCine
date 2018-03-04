@@ -4,6 +4,7 @@
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
 #include "GLHashMap.h"
+#include "GLDebug.h"
 
 namespace ncine {
 
@@ -16,6 +17,9 @@ class GLTexture
 
 	inline GLuint glHandle() const { return glHandle_; }
 	inline GLenum target() const { return target_; }
+
+	inline void getObjectLabel(int bufSize, int *length, char *label) const { GLDebug::getObjectLabel(GL_TEXTURE, glHandle_, bufSize, length, label); }
+	inline void setObjectLabel(const char *label) { GLDebug::objectLabel(GL_TEXTURE, glHandle_, label);}
 
 	void bind(unsigned int textureUnit) const;
 	void bind() const;

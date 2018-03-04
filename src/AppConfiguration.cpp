@@ -8,13 +8,14 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AppConfiguration::AppConfiguration()
-	: glDebugContext_(false)
+	: glCoreProfile_(true)
+	, glForwardCompatible_(true)
 #ifdef __ANDROID__
 	, glMajorVersion_(2)
 	, glMinorVersion_(0)
 #else
-	, glMajorVersion_(2)
-	, glMinorVersion_(1)
+	, glMajorVersion_(3)
+	, glMinorVersion_(3)
 #endif
 	, profileTextUpdateTime_(0.2f)
 	, logFile_(128)
@@ -33,6 +34,7 @@ AppConfiguration::AppConfiguration()
 	, withThreads_(false)
 	, withScenegraph_(true)
 	, withVSync_(true)
+	, withGLDebug_(false)
 {
 	logFile_ = "ncine_log.txt";
 #ifdef __ANDROID__
@@ -138,6 +140,11 @@ void AppConfiguration::enableScenegraph(bool shouldEnable)
 void AppConfiguration::enableVSync(bool shouldEnable)
 {
 	withVSync_ = shouldEnable;
+}
+
+void AppConfiguration::enableGLDebug(bool shouldEnable)
+{
+	withGLDebug_ = shouldEnable;
 }
 
 }

@@ -30,7 +30,7 @@ class TextureFormat
 	void bgrFormat();
 
 	/// Calculates the pixel data size for each MIP map level
-	static long int calculateMipSizes(GLenum internalFormat, int width, int height, int mipMapCount, long int *mipDataOffsets, long int *mipDataSizes);
+	static unsigned long calculateMipSizes(GLenum internalFormat, int width, int height, int mipMapCount, unsigned long *mipDataOffsets, unsigned long *mipDataSizes);
 
   private:
 	GLenum internalFormat_;
@@ -70,8 +70,8 @@ inline bool TextureFormat::hasAlpha() const
 #else
 	        format_ == GL_BGRA_EXT ||
 #endif
-	        format_ == GL_LUMINANCE_ALPHA ||
-	        format_ == GL_ALPHA);
+	        format_ == GL_RG ||
+	        format_ == GL_RED);
 }
 
 }

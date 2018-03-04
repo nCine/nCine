@@ -16,6 +16,7 @@ class GLBufferObject
 
 	inline GLuint glHandle() const { return glHandle_; }
 	inline GLenum target() const { return target_; }
+	inline GLsizeiptr size() const { return size_; }
 
 	void bind() const;
 	void unbind() const;
@@ -30,10 +31,11 @@ class GLBufferObject
 #ifndef __APPLE__
 	void bufferStorage(GLsizeiptr size, const GLvoid *data, GLbitfield flags);
 
-	void bindBufferBase(GLenum target, GLuint index);
-	void unbindBufferBase(GLenum target, GLuint index);
+	void bindBufferBase(GLuint index);
+	void bindBufferRange(GLuint index, GLintptr offset, GLsizei ptrsize);
 
 	void *mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access);
+	void flushMappedBufferRange(GLintptr offset, GLsizeiptr length);
 
 	void bindVertexBuffer(GLuint bindingIndex, GLintptr offset, GLsizei stride);
 #endif
@@ -42,8 +44,24 @@ class GLBufferObject
   private:
 	static class GLHashMap<GLBufferObjectMappingFunc::Size, GLBufferObjectMappingFunc> boundBuffers_;
 
+	struct BufferRange
+	{
+		BufferRange() : glHandle(0), offset(0), ptrsize(0) { }
+
+		GLuint glHandle;
+		GLintptr offset;
+		GLsizei ptrsize;
+	};
+
 	GLuint glHandle_;
 	GLenum target_;
+	GLsizeiptr size_;
+
+	static const int MaxIndexBufferRange = 128;
+	/// Current bound index for buffer base. Negative if not bound.
+	static GLuint boundIndexBase_[MaxIndexBufferRange];
+	/// Current range and offset for buffer range index
+	static BufferRange boundBufferRange_[MaxIndexBufferRange];
 
 	/// Deleted copy constructor
 	GLBufferObject(const GLBufferObject &) = delete;

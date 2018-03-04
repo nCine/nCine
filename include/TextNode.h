@@ -11,6 +11,8 @@ namespace ncine {
 
 class FontGlyph;
 
+class GLUniformBlockCache;
+
 /// A scene node to draw a text label
 class DLL_PUBLIC TextNode : public DrawableNode
 {
@@ -71,8 +73,6 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	bool withKerning_;
 	/// The font class used to render text
 	Font *font_;
-	/// The array of vertex positions interleaved with texture coordinates for every glyph in the batch
-	nctl::Array<float> interleavedVertices_;
 
 	/// Advance on the X-axis for the next processed glyph
 	mutable float xAdvance_;
@@ -87,12 +87,14 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Horizontal text alignment of multiple lines
 	Alignment alignment_;
 
+	GLUniformBlockCache *textnodeBlock_;
+
 	/// Calculates rectangle boundaries for the rendered text
 	void calculateBoundaries() const;
 	/// Calculates align offset for a particular line
 	float calculateAlignment(unsigned int lineIndex) const;
 	/// Fills the batch draw command with data from a glyph
-	void processGlyph(const FontGlyph *glyph);
+	void processGlyph(const FontGlyph *glyph, float *glyphVertices);
 
 	void updateRenderCommand() override;
 };

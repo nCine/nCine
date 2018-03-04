@@ -1,5 +1,6 @@
 #include "Geometry.h"
 #include "RenderResources.h"
+#include "RenderStatistics.h"
 
 namespace ncine {
 
@@ -8,17 +9,15 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Geometry::Geometry()
-	: vboSharingType_(SharingType::SHARED),
-	  primitiveType_(GL_TRIANGLES), firstVertex_(0), numVertices_(0),
-	  vbo_(nullptr), ibo_(nullptr)
+	: primitiveType_(GL_TRIANGLES), firstVertex_(0), numVertices_(0), sharedVboParams_(nullptr)
 {
 
 }
 
 Geometry::~Geometry()
 {
-	if (vboSharingType_ == SharingType::UNIQUE)
-		delete vbo_;
+	if (vbo_)
+		RenderStatistics::removeCustomVbo(vbo_->size());
 }
 
 ///////////////////////////////////////////////////////////
@@ -34,46 +33,61 @@ void Geometry::setDrawParameters(GLenum primitiveType, GLint firstVertex, GLsize
 
 void Geometry::createCustomVbo(unsigned int numFloats, GLenum usage)
 {
-	if (vboSharingType_ != SharingType::UNIQUE)
-	{
-		// VBO is now a custom one
-		vboSharingType_ = SharingType::UNIQUE;
-	}
-	else
-	{
-		// There is already a custom VBO, it needs to be deleted
-		delete vbo_;
-	}
-
-	vbo_ = new GLBufferObject(GL_ARRAY_BUFFER);
+	vbo_ = nctl::makeUnique<GLBufferObject>(GL_ARRAY_BUFFER);
 	vbo_->bufferData(numFloats * sizeof(GLfloat), nullptr, usage);
+
+	vboParams_.object = vbo_.get();
+	vboParams_.size = vbo_->size();
+	vboParams_.offset = 0;
+	vboParams_.mapBase = nullptr;
+
+	RenderStatistics::addCustomVbo(vbo_->size());
 }
 
-/*! \note If the buffer is shared across the application it will not be modified. */
-void Geometry::updateVboData(unsigned int floatOffset, unsigned int floatSize, const GLfloat *data)
+GLfloat *Geometry::acquireVertexPointer(unsigned int numFloats)
 {
-	// Common resources cannot be altered
-	if (vboSharingType_ != SharingType::COMMON_RESOURCE)
-		vbo_->bufferSubData(floatOffset * sizeof(GLfloat), floatSize * sizeof(GLfloat), data);
+	ASSERT(vbo_ == nullptr);
+
+	if (sharedVboParams_)
+		vboParams_ = *sharedVboParams_;
+	else
+	{
+		const RenderBuffersManager::BufferTypes::Enum bufferType = RenderBuffersManager::BufferTypes::ARRAY;
+		if (vboParams_.mapBase == nullptr)
+			vboParams_ = RenderResources::buffersManager().acquireMemory(bufferType, numFloats * sizeof(GLfloat));
+	}
+
+	return reinterpret_cast<GLfloat *>(vboParams_.mapBase + vboParams_.offset);
+}
+
+GLfloat *Geometry::acquireVertexPointer()
+{
+	ASSERT(vbo_);
+
+	if (vboParams_.mapBase == nullptr)
+	{
+		const GLenum mapFlags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_UNSYNCHRONIZED_BIT;
+		vboParams_.mapBase = static_cast<GLubyte *>(vbo_->mapBufferRange(0, vbo_->size(), mapFlags));
+	}
+
+	return reinterpret_cast<GLfloat *>(vboParams_.mapBase);
+}
+
+void Geometry::releaseVertexPointer()
+{
+	// Don't flush and unmap if the VBO is not custom
+	if (vbo_ && vboParams_.mapBase != nullptr)
+	{
+		vboParams_.object->flushMappedBufferRange(vboParams_.offset, vboParams_.size);
+		vboParams_.object->unmap();
+	}
+	vboParams_.mapBase = nullptr;
 }
 
 void Geometry::shareVbo(const Geometry &geometry)
 {
-	if (vboSharingType_ == SharingType::UNIQUE)
-		delete vbo_;
-
-	vboSharingType_ = SharingType::SHARED;
-	vbo_ = geometry.vbo_;
-}
-
-void Geometry::makeSharedQuad()
-{
-	if (vboSharingType_ == SharingType::UNIQUE)
-		delete vbo_;
-
-	vboSharingType_ = SharingType::COMMON_RESOURCE;
-	vbo_ = const_cast<GLBufferObject *>(RenderResources::quadVbo());
-	setDrawParameters(GL_TRIANGLE_STRIP, 0, 4);
+	vbo_.reset(nullptr);
+	sharedVboParams_ = &geometry.vboParams_;
 }
 
 ///////////////////////////////////////////////////////////
@@ -85,8 +99,33 @@ void Geometry::bind()
 	if (ibo_)
 		ibo_->bind();
 
-	if (vbo_)
-		vbo_->bind();
+	if (vboParams_.object)
+		vboParams_.object->bind();
+}
+
+void Geometry::draw(GLsizei numInstances)
+{
+	if (sharedVboParams_)
+		vboParams_ = *sharedVboParams_;
+
+	// HACK: Hard-coded float vertices made of 2 components
+	const unsigned int offset = (vboParams_.offset / 2) / sizeof(GLfloat);
+	const void *offsetPtr = reinterpret_cast<const void *>(offset);
+
+	if (numInstances == 0)
+	{
+		if (ibo_)
+			glDrawElements(primitiveType_, numVertices_, GL_UNSIGNED_SHORT, offsetPtr);
+		else
+			glDrawArrays(primitiveType_, offset + firstVertex_, numVertices_);
+	}
+	else if (numInstances > 0)
+	{
+		if (ibo_)
+			glDrawElementsInstanced(primitiveType_, numVertices_, GL_UNSIGNED_SHORT, offsetPtr, numInstances);
+		else
+			glDrawArraysInstanced(primitiveType_, offset + firstVertex_, numVertices_, numInstances);
+	}
 }
 
 }

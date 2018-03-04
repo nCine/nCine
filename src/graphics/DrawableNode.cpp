@@ -2,6 +2,7 @@
 #include "RenderQueue.h"
 #include "RenderCommand.h"
 #include "Application.h"
+#include "RenderStatistics.h"
 
 namespace ncine {
 
@@ -47,6 +48,8 @@ void DrawableNode::draw(RenderQueue &renderQueue)
 		updateRenderCommand();
 		renderQueue.addCommand(renderCommand_.get());
 	}
+	else
+		RenderStatistics::addCulledNode();
 }
 
 unsigned int DrawableNode::layer() const

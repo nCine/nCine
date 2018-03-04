@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.1)
 project(nCine)
 
+# On Linux FindOpenGL prefers GLVND by default when available
+if(POLICY CMP0072)
+	cmake_policy(SET CMP0072 OLD)
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 get_filename_component(PARENT_SOURCE_DIR ${CMAKE_SOURCE_DIR} DIRECTORY)
 

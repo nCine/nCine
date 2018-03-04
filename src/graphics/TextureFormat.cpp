@@ -48,7 +48,7 @@ void TextureFormat::bgrFormat()
 #endif
 }
 
-long int TextureFormat::calculateMipSizes(GLenum internalFormat, int width, int height, int mipMapCount, long int *mipDataOffsets, long int *mipDataSizes)
+unsigned long TextureFormat::calculateMipSizes(GLenum internalFormat, int width, int height, int mipMapCount, unsigned long *mipDataOffsets, unsigned long *mipDataSizes)
 {
 	unsigned int blockWidth = 1; // Compression block width in pixels
 	unsigned int blockHeight = 1; // Compression block height in pixels
@@ -74,6 +74,7 @@ long int TextureFormat::calculateMipSizes(GLenum internalFormat, int width, int 
 #endif
 			bpp = 24;
 			break;
+		case GL_RG:
 		case GL_LUMINANCE_ALPHA:
 #ifndef __APPLE__
 		case GL_RGB565:
@@ -85,6 +86,7 @@ long int TextureFormat::calculateMipSizes(GLenum internalFormat, int width, int 
 #endif
 			bpp = 16;
 			break;
+		case GL_RED:
 		case GL_LUMINANCE:
 		case GL_ALPHA:
 #if defined(__ANDROID__) && __ANDROID_API__ >= 21
@@ -214,7 +216,11 @@ long int TextureFormat::calculateMipSizes(GLenum internalFormat, int width, int 
 
 	int levelWidth = width;
 	int levelHeight = height;
-	long int dataSizesSum = 0;
+	unsigned long dataSizesSum = 0;
+
+	ASSERT(mipDataOffsets);
+	ASSERT(mipDataSizes);
+
 	for (int i = 0; i < mipMapCount; i++)
 	{
 		mipDataOffsets[i] = dataSizesSum;
@@ -223,7 +229,7 @@ long int TextureFormat::calculateMipSizes(GLenum internalFormat, int width, int 
 		                  (levelWidth / blockWidth) * (levelHeight / blockHeight) * ((blockWidth * blockHeight  * bpp) / 8);
 
 		// Clamping to the minimum valid size
-		if (mipDataSizes[i] < int(minDataSize))
+		if (mipDataSizes[i] < minDataSize)
 			mipDataSizes[i] = minDataSize;
 
 		levelWidth /= 2;
@@ -282,23 +288,21 @@ bool TextureFormat::integerFormat()
 		case 3:
 			format_ = GL_RGB;
 			break;
+		case GL_RG:
 		case GL_LUMINANCE_ALPHA:
 		case GL_LUMINANCE8_ALPHA8:
 		case 2:
-			format_ = GL_LUMINANCE_ALPHA;
+			format_ = GL_RG;
 			break;
+		case GL_RED:
 		case GL_LUMINANCE:
 		case GL_LUMINANCE8:
-			format_ = GL_LUMINANCE;
-			break;
+		case GL_INTENSITY:
+		case GL_INTENSITY8:
 		case GL_ALPHA:
 		case GL_ALPHA8:
 		case 1:
-			format_ = GL_ALPHA;
-			break;
-		case GL_INTENSITY:
-		case GL_INTENSITY8:
-			format_ = GL_INTENSITY;
+			format_ = GL_RED;
 			break;
 		case GL_DEPTH_COMPONENT:
 		case GL_DEPTH_COMPONENT16_ARB:

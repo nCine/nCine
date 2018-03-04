@@ -72,8 +72,10 @@ class DLL_PUBLIC Application
 	nctl::UniquePtr<ProfilePlotter> profilePlotter_;
 	nctl::UniquePtr<Font> font_;
 	nctl::UniquePtr<TextNode> textLines_;
+	nctl::UniquePtr<TextNode> textLines2_;
 	float textUpdateTime_;
 	nctl::String textString_;
+	nctl::String textString2_;
 	nctl::UniquePtr<IInputManager> inputManager_;
 	nctl::UniquePtr<IAppEventHandler> appEventHandler_;
 

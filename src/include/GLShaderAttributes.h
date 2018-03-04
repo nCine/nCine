@@ -23,26 +23,21 @@ class GLShaderAttributes
 	void defineVertexPointers(const GLBufferObject *vbo);
 
   private:
-	/// This class stores the OpenGL state regarding a defined vertex attribute pointer
-	class GLVertexAttribPointerState
+	/// This structure stores the OpenGL state regarding a defined vertex attribute pointer
+	struct GLVertexAttribPointerState
 	{
-	  private:
-		bool enabled_;
-		GLuint boundVboHandle_;
-		GLint size_;
-		GLenum type_;
-		GLsizei vboStride_;
-		const GLvoid *vboPointer_;
+		GLVertexAttribPointerState()
+		    : enabled(false), boundVbo(0), size(-1), type(GL_FLOAT), vboStride(0), vboPointer(nullptr) { }
 
-	  public:
-		GLVertexAttribPointerState();
-		inline bool isEnabled() const { return enabled_; }
-		inline void setEnabled(bool enabled) { enabled_ = enabled; }
-		inline GLuint boundVbo() const { return boundVboHandle_; }
-		inline void setBoundVbo(GLuint boundVboHandle) { boundVboHandle_ = boundVboHandle; }
+		bool enabled;
+		GLuint boundVbo;
+		GLint size;
+		GLenum type;
+		GLsizei vboStride;
+		const GLvoid *vboPointer;
+
 		bool operator==(const GLVertexAttribute &attribute) const;
 		bool operator!=(const GLVertexAttribute &attribute) const;
-		GLVertexAttribPointerState &operator=(const GLVertexAttribute &attribute);
 	};
 
 	static const unsigned int MaxDefinedVertexAttribPointers = 16;

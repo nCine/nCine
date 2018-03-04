@@ -2,6 +2,8 @@
 #define CLASS_NCINE_GEOMETRY
 
 #include "GLBufferObject.h"
+#include "nctl/UniquePtr.h"
+#include "RenderBuffersManager.h"
 
 namespace ncine {
 
@@ -24,38 +26,29 @@ class Geometry
 	void setDrawParameters(GLenum primitiveType, GLint firstVertex, GLsizei numVertices);
 	/// Creates a custom VBO that is unique to this `Geometry` object
 	void createCustomVbo(unsigned int numFloats, GLenum usage);
-	/// Creates a custom VBO that is unique to this object
-	void updateVboData(unsigned int floatOffset, unsigned int floatSize, const GLfloat *data);
+	/// Retrieves a pointer that can be used to write vertex data from a custom VBO owned by this object
+	GLfloat *acquireVertexPointer(unsigned int numFloats);
+	/// Retrieves a pointer that can be used to write vertex data from a VBO owned by the buffers manager
+	GLfloat *acquireVertexPointer();
+	/// Releases the pointer used to write vertex data
+	void releaseVertexPointer();
 
 	/// Shares the VBO of another `Geometry` object
 	void shareVbo(const Geometry &geometry);
-	/// Makes this `Geometry` object use the common quad VBO from `RenderResources`
-	void makeSharedQuad();
 
   private:
-	/// Sharing type for the buffers
-	enum class SharingType
-	{
-		/// It must not be modified, the buffer is a resource shared across the application
-		COMMON_RESOURCE,
-		/// It can be modified, the buffer is shared between more objects
-		SHARED,
-		/// It can be modified, the buffer belongs only to this object
-		/*! In this case the destructor needs to delete the buffer. */
-		UNIQUE
-	};
-
-	/// The sharing type for the vertex buffer object
-	SharingType vboSharingType_;
-
 	GLenum primitiveType_;
 	GLint firstVertex_;
 	GLsizei numVertices_;
 
-	GLBufferObject *vbo_;
-	GLBufferObject *ibo_;
+	nctl::UniquePtr<GLBufferObject> vbo_;
+	nctl::UniquePtr<GLBufferObject> ibo_;
+
+	RenderBuffersManager::Parameters vboParams_;
+	const RenderBuffersManager::Parameters *sharedVboParams_;
 
 	void bind();
+	void draw(GLsizei numInstances);
 
 	/// Deleted copy constructor
 	Geometry(const Geometry &) = delete;

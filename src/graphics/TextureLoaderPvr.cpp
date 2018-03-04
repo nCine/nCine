@@ -179,13 +179,13 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 				type = GL_UNSIGNED_SHORT_4_4_4_4;
 				break;
 			case FMT_LA_88:
-				internalFormat = GL_LUMINANCE_ALPHA;
+				internalFormat = GL_RG;
 				break;
 			case FMT_L_8:
-				internalFormat = GL_LUMINANCE;
+				internalFormat = GL_RED;
 				break;
 			case FMT_A_8:
-				internalFormat = GL_ALPHA;
+				internalFormat = GL_RED;
 				break;
 			default:
 				FATAL_MSG_X("Unsupported PVR3 uncompressed format: 0x%llx", pixelFormat);
@@ -198,9 +198,9 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 	if (mipMapCount_ > 1)
 	{
 		LOGI_X("MIP Maps: %d", mipMapCount_);
-		mipDataOffsets_ = nctl::makeUnique<long []>(mipMapCount_);
-		mipDataSizes_ = nctl::makeUnique<long []>(mipMapCount_);
-		long int dataSizesSum = TextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_.get(), mipDataSizes_.get());
+		mipDataOffsets_ = nctl::makeUnique<unsigned long []>(mipMapCount_);
+		mipDataSizes_ = nctl::makeUnique<unsigned long []>(mipMapCount_);
+		unsigned long dataSizesSum = TextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_.get(), mipDataSizes_.get());
 		if (dataSizesSum != dataSize_)
 			LOGW_X("The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
 	}

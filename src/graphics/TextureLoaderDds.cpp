@@ -145,13 +145,13 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 		// dwRGBBitCount contains the luminance channel bit count; dwRBitMask contains the channel mask
 		// Can be combined with DDPF_ALPHAPIXELS for a two channel DDS file
 		else if (flags & (DDPF_LUMINANCE | DDPF_ALPHAPIXELS))
-			internalFormat = GL_LUMINANCE_ALPHA;
+			internalFormat = GL_RG;
 		else if (flags & DDPF_LUMINANCE)
-			internalFormat = GL_LUMINANCE;
+			internalFormat = GL_RED;
 		// Used in some older DDS files for alpha channel only uncompressed data
 		// dwRGBBitCount contains the alpha channel bitcount; dwABitMask contains valid data
 		else if (flags & DDPF_ALPHA)
-			internalFormat = GL_ALPHA;
+			internalFormat = GL_RED;
 		else
 			FATAL_MSG_X("Unsupported DDS uncompressed pixel format: %u", flags);
 
@@ -164,9 +164,9 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 	if (mipMapCount_ > 1)
 	{
 		LOGI_X("MIP Maps: %d", mipMapCount_);
-		mipDataOffsets_ = nctl::makeUnique<long []>(mipMapCount_);
-		mipDataSizes_ = nctl::makeUnique<long []>(mipMapCount_);
-		long int dataSizesSum = TextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_.get(), mipDataSizes_.get());
+		mipDataOffsets_ = nctl::makeUnique<unsigned long []>(mipMapCount_);
+		mipDataSizes_ = nctl::makeUnique<unsigned long []>(mipMapCount_);
+		unsigned long dataSizesSum = TextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_.get(), mipDataSizes_.get());
 		if (dataSizesSum != dataSize_)
 			LOGW_X("The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
 	}

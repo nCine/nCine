@@ -53,6 +53,9 @@ class GLBufferObjectMappingFunc
 			case GL_ELEMENT_ARRAY_BUFFER:
 				value = 1;
 				break;
+			case GL_UNIFORM_BUFFER:
+				value = 2;
+				break;
 			default:
 				FATAL_MSG_X("No available case to handle key: %u", key);
 				break;

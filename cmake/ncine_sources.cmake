@@ -53,4 +53,12 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/opengl/GLAttribute.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLVertexAttribute.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLTexture.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLVertexArrayObject.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLUniformBlock.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLUniformBlockCache.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLShaderUniformBlocks.cpp
+	${NCINE_ROOT}/src/graphics/RenderBuffersManager.cpp
+	${NCINE_ROOT}/src/graphics/RenderBatcher.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLDebug.cpp
+	${NCINE_ROOT}/src/graphics/RenderStatistics.cpp
 )

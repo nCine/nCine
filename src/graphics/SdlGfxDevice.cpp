@@ -18,8 +18,8 @@ SDL_Window *SdlGfxDevice::windowHandle_ = nullptr;
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-SdlGfxDevice::SdlGfxDevice(int width, int height, const GLContextInfo &contextInfo, const DisplayMode &mode, bool isFullScreen)
-	: IGfxDevice(width, height, contextInfo, mode, isFullScreen)
+SdlGfxDevice::SdlGfxDevice(int width, int height, const GLContextInfo &glContextInfo, const DisplayMode &mode, bool isFullScreen)
+	: IGfxDevice(width, height, glContextInfo, mode, isFullScreen)
 {
 	initGraphics();
 	initDevice();
@@ -107,9 +107,13 @@ void SdlGfxDevice::initDevice()
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, mode_.isDoubleBuffered());
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, mode_.depthBits());
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, mode_.stencilBits());
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, contextInfo_.majorVersion);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, contextInfo_.minorVersion);
-	if (contextInfo_.debugContext)
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, glContextInfo_.majorVersion);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, glContextInfo_.minorVersion);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, glContextInfo_.coreProfile ?
+	                    SDL_GL_CONTEXT_PROFILE_CORE : SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+	if (glContextInfo_.forwardCompatible == false)
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+	if (glContextInfo_.debugContext)
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
 	Uint32 flags = SDL_WINDOW_OPENGL;

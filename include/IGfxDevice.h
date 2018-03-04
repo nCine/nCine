@@ -4,6 +4,7 @@
 #include "Vector2.h"
 #include "Rect.h"
 #include "DisplayMode.h"
+#include "AppConfiguration.h"
 
 namespace ncine {
 
@@ -14,15 +15,19 @@ class DLL_PUBLIC IGfxDevice
 	/// Contains the attributes to create an OpenGL context
 	struct GLContextInfo
 	{
-		GLContextInfo(unsigned int major, unsigned int minor, bool debug)
-			: majorVersion(major), minorVersion(minor), debugContext(debug) { }
+		GLContextInfo(const AppConfiguration &appCfg)
+			: majorVersion(appCfg.glMajorVersion()), minorVersion(appCfg.glMinorVersion()),
+			  coreProfile(appCfg.glCoreProfile()), forwardCompatible(appCfg.glForwardCompatible()),
+			  debugContext(appCfg.glDebugContext()) { }
 
 		unsigned int majorVersion;
 		unsigned int minorVersion;
+		bool coreProfile;
+		bool forwardCompatible;
 		bool debugContext;
 	};
 
-	IGfxDevice(int width, int height, const GLContextInfo &contextInfo, const DisplayMode &mode, bool isFullScreen);
+	IGfxDevice(int width, int height, const GLContextInfo &glContextInfo, const DisplayMode &mode, bool isFullScreen);
 	virtual ~IGfxDevice() { }
 
 	/// Sets screen resolution with two integers
@@ -48,10 +53,13 @@ class DLL_PUBLIC IGfxDevice
 	inline const Rectf screenRect() const { return Rectf(0.0f, 0.0f, static_cast<float>(width_), static_cast<float>(height_)); }
 	/// Returns device aspect ratio
 	inline float aspect() const { return width_ / static_cast<float>(height_); }
-	/// Returns true if the device renders in full screen
-	inline bool isFullScreen() const { return isFullScreen_; }
+
+	/// Returns the OpenGL context creation attributes
+	inline const GLContextInfo &glContextInfo() const { return glContextInfo_; }
 	/// Returns display mode
 	inline const DisplayMode &mode() const { return mode_; }
+	/// Returns true if the device renders in full screen
+	inline bool isFullScreen() const { return isFullScreen_; }
 
   protected:
 	/// Device width
@@ -59,14 +67,11 @@ class DLL_PUBLIC IGfxDevice
 	/// Device height
 	int height_;
 	/// OpenGL context creation attributes
-	GLContextInfo contextInfo_;
+	GLContextInfo glContextInfo_;
 	/// Display properties
 	DisplayMode mode_;
 	/// Whether device rendering occurs in full screen
 	bool isFullScreen_;
-
-	/// Enables OpenGL debug output and setup a callback function to log messages
-	void enableGlDebugOutput();
 
   private:
 	/// Sets up the initial OpenGL state for the scenegraph

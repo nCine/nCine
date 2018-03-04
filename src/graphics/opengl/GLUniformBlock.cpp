@@ -1,0 +1,87 @@
+#include "common_macros.h"
+#include "GLUniformBlock.h"
+#include "GLShaderProgram.h"
+
+namespace ncine {
+
+///////////////////////////////////////////////////////////
+// CONSTRUCTORS and DESTRUCTOR
+///////////////////////////////////////////////////////////
+
+GLUniformBlock::GLUniformBlock()
+	: blockUniforms_(BlockUniformHashSize), program_(0), index_(0), size_(0), bindingIndex_(-1)
+{
+	name_[0] = '\0';
+}
+
+GLUniformBlock::GLUniformBlock(GLuint program, GLuint index, DiscoverUniforms discover)
+	: GLUniformBlock()
+{
+	GLint nameLength;
+	GLint uniformCount;
+	program_ = program;
+	index_ = index;
+
+	glGetActiveUniformBlockiv(program, index, GL_UNIFORM_BLOCK_DATA_SIZE, &size_);
+	glGetActiveUniformBlockiv(program, index, GL_UNIFORM_BLOCK_NAME_LENGTH, &nameLength);
+	ASSERT(nameLength <= MaxNameLength);
+	glGetActiveUniformBlockName(program, index, MaxNameLength, &nameLength, name_);
+	glGetActiveUniformBlockiv(program, index, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &uniformCount);
+
+	if (discover == DiscoverUniforms::ENABLED)
+	{
+		ASSERT(uniformCount <= MaxNumBlockUniforms);
+		GLuint uniformIndices[MaxNumBlockUniforms];
+		GLint uniformTypes[MaxNumBlockUniforms];
+		GLint uniformSizes[MaxNumBlockUniforms];
+		GLint uniformOffsets[MaxNumBlockUniforms];
+		GLint uniformNameLengths[MaxNumBlockUniforms];
+
+		GLint uniformQueryIndices[MaxNumBlockUniforms];
+		glGetActiveUniformBlockiv(program, index, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, uniformQueryIndices);
+		for (int i = 0; i < uniformCount; i++)
+			uniformIndices[i] = static_cast<GLuint>(uniformQueryIndices[i]);
+
+		glGetActiveUniformsiv(program, uniformCount, uniformIndices, GL_UNIFORM_TYPE, uniformTypes);
+		glGetActiveUniformsiv(program, uniformCount, uniformIndices, GL_UNIFORM_SIZE, uniformSizes);
+		glGetActiveUniformsiv(program, uniformCount, uniformIndices, GL_UNIFORM_OFFSET, uniformOffsets);
+		glGetActiveUniformsiv(program, uniformCount, uniformIndices, GL_UNIFORM_NAME_LENGTH, uniformNameLengths);
+
+		for (int i = 0; i < uniformCount; i++)
+		{
+			GLUniform blockUniform;
+			blockUniform.index_ = uniformIndices[i];
+			blockUniform.blockIndex_ = static_cast<GLint>(index);
+			blockUniform.type_ = static_cast<GLenum>(uniformTypes[i]);
+			blockUniform.size_ = uniformSizes[i];
+			blockUniform.offset_ = uniformOffsets[i];
+
+			ASSERT(uniformNameLengths[i] <= GLUniform::MaxNameLength);
+			glGetActiveUniformName(program, uniformIndices[i], MaxNameLength, &uniformNameLengths[i], blockUniform.name_);
+			blockUniforms_[blockUniform.name_] = blockUniform;
+		}
+	}
+}
+
+GLUniformBlock::GLUniformBlock(GLuint program, GLuint index)
+	: GLUniformBlock(program, index, DiscoverUniforms::ENABLED)
+{
+
+}
+
+///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void GLUniformBlock::setBlockBinding(GLuint blockBinding)
+{
+	ASSERT(program_ != 0);
+
+	if (bindingIndex_ != static_cast<GLint>(blockBinding))
+	{
+		glUniformBlockBinding(program_, index_, blockBinding);
+		bindingIndex_ = static_cast<GLint>(blockBinding);
+	}
+}
+
+}

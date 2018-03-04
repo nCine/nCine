@@ -102,7 +102,7 @@ void MyEventHandler::onInit()
 #endif
 
 #if WITH_DDS_COMPRESSED_FORMAT
-	if (gfxCaps.hasExtension(nc::IGfxCapabilities::EXT_TEXTURE_COMPRESSION_S3TC))
+	if (gfxCaps.hasExtension(nc::IGfxCapabilities::GLExtensions::EXT_TEXTURE_COMPRESSION_S3TC))
 	{
 		LOGI("S3TC textures are supported");
 		filenames_.pushBack("texture_512_RGB_DXT1.dds");
@@ -122,7 +122,7 @@ void MyEventHandler::onInit()
 
 
 #if WITH_ETC1_FORMAT
-	if (gfxCaps.hasExtension(nc::IGfxCapabilities::OES_COMPRESSED_ETC1_RGB8_TEXTURE))
+	if (gfxCaps.hasExtension(nc::IGfxCapabilities::GLExtensions::OES_COMPRESSED_ETC1_RGB8_TEXTURE))
 	{
 		LOGI("ETC1 textures are supported");
 		filenames_.pushBack("texture_512_RGB_ETC1.ktx");
@@ -136,7 +136,7 @@ void MyEventHandler::onInit()
 #endif
 
 #if WITH_ATC_FORMAT
-	if (gfxCaps.hasExtension(nc::IGfxCapabilities::AMD_COMPRESSED_ATC_TEXTURE))
+	if (gfxCaps.hasExtension(nc::IGfxCapabilities::GLExtensions::AMD_COMPRESSED_ATC_TEXTURE))
 	{
 		LOGI("ATC textures are supported");
 		filenames_.pushBack("texture_512_RGB_ATC.dds");
@@ -146,7 +146,7 @@ void MyEventHandler::onInit()
 #endif
 
 #if WITH_ASTC_FORMAT
-	if (gfxCaps.hasExtension(nc::IGfxCapabilities::KHR_TEXTURE_COMPRESSION_ASTC_LDR))
+	if (gfxCaps.hasExtension(nc::IGfxCapabilities::GLExtensions::KHR_TEXTURE_COMPRESSION_ASTC_LDR))
 	{
 		LOGI("ASTC textures are supported");
 		filenames_.pushBack("texture_512_RGB_ASTC8x8.ktx");
