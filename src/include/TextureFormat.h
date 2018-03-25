@@ -66,12 +66,10 @@ inline bool TextureFormat::hasAlpha() const
 {
 	return (format_ == GL_RGBA ||
 #ifndef __ANDROID__
-	        format_ == GL_BGRA ||
+	        format_ == GL_BGRA);
 #else
-	        format_ == GL_BGRA_EXT ||
+	        format_ == GL_BGRA_EXT);
 #endif
-	        format_ == GL_RG ||
-	        format_ == GL_RED);
 }
 
 }

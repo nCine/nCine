@@ -74,7 +74,6 @@ void GfxCapabilities::init()
 	sscanf(pVersion, "OpenGL ES %2d.%2d", &glMajorVersion_, &glMinorVersion_);
 #endif
 
-	glGetIntegerv(GL_CONTEXT_FLAGS, &glIntValues_[GLIntValues::CONTEXT_FLAGS]);
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &glIntValues_[GLIntValues::MAX_TEXTURE_SIZE]);
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &glIntValues_[GLIntValues::MAX_TEXTURE_IMAGE_UNITS]);
 	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &glIntValues_[GLIntValues::MAX_UNIFORM_BLOCK_SIZE]);
@@ -82,7 +81,6 @@ void GfxCapabilities::init()
 	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &glIntValues_[GLIntValues::MAX_VERTEX_UNIFORM_BLOCKS]);
 	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &glIntValues_[GLIntValues::MAX_FRAGMENT_UNIFORM_BLOCKS]);
 	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &glIntValues_[GLIntValues::UNIFORM_BUFFER_OFFSET_ALIGNMENT]);
-	glGetIntegerv(GL_MAX_LABEL_LENGTH, &glIntValues_[GLIntValues::MAX_LABEL_LENGTH]);
 
 	const unsigned int NumExtensionsToCheck = 6;
 	const char *extensionNames[NumExtensionsToCheck] = {
@@ -120,7 +118,6 @@ void GfxCapabilities::logGLExtensions()
 void GfxCapabilities::logGLCaps() const
 {
 	LOGI("--- OpenGL device capabilities ---");
-	LOGI_X("GL_CONTEXT_FLAGS: %d", glIntValues_[GLIntValues::CONTEXT_FLAGS]);
 	LOGI_X("GL_MAX_TEXTURE_SIZE: %d", glIntValues_[GLIntValues::MAX_TEXTURE_SIZE]);
 	LOGI_X("GL_MAX_TEXTURE_IMAGE_UNITS: %d", glIntValues_[GLIntValues::MAX_TEXTURE_IMAGE_UNITS]);
 	LOGI_X("GL_MAX_UNIFORM_BLOCK_SIZE: %d", glIntValues_[GLIntValues::MAX_UNIFORM_BLOCK_SIZE]);
@@ -128,7 +125,6 @@ void GfxCapabilities::logGLCaps() const
 	LOGI_X("GL_MAX_VERTEX_UNIFORM_BLOCKS: %d", glIntValues_[GLIntValues::MAX_VERTEX_UNIFORM_BLOCKS]);
 	LOGI_X("GL_MAX_FRAGMENT_UNIFORM_BLOCKS: %d", glIntValues_[GLIntValues::MAX_FRAGMENT_UNIFORM_BLOCKS]);
 	LOGI_X("GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT: %d", glIntValues_[GLIntValues::UNIFORM_BUFFER_OFFSET_ALIGNMENT]);
-	LOGI_X("GL_MAX_LABEL_LENGTH: %d", glIntValues_[GLIntValues::MAX_LABEL_LENGTH]);
 	LOGI("---");
 	LOGI_X("GL_KHR_debug: %d", glExtensions_[GLExtensions::KHR_DEBUG]);
 	LOGI_X("GL_EXT_texture_compression_s3tc: %d", glExtensions_[GLExtensions::EXT_TEXTURE_COMPRESSION_S3TC]);

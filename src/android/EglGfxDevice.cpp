@@ -128,19 +128,26 @@ void EglGfxDevice::initDevice(struct android_app *state)
 		EGL_NONE
 	};
 
+	//const EGLint glProfileMaskBit = glContextInfo_.coreProfile ? EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR :
+	//	EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT_KHR; // disabled
+
 	EGLint attribList[] =
 	{
 		EGL_CONTEXT_MAJOR_VERSION_KHR, static_cast<EGLint>(glContextInfo_.majorVersion),
 		EGL_CONTEXT_MINOR_VERSION_KHR, static_cast<EGLint>(glContextInfo_.minorVersion),
+		//EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR, glProfileMaskBit, // disabled
 		EGL_NONE, EGL_NONE,
 		EGL_NONE
 	};
 
 #if !defined(__ANDROID__) || (GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21)
-	if (glContextInfo_.debugContext)
+	if (glContextInfo_.forwardCompatible || glContextInfo_.debugContext)
 	{
 		attribList[4] = EGL_CONTEXT_FLAGS_KHR;
-		attribList[5] = EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR;
+		EGLint contextFlagsMask = 0;
+		contextFlagsMask |= (glContextInfo_.forwardCompatible) ? EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE_BIT_KHR : 0;
+		contextFlagsMask |= (glContextInfo_.debugContext) ? EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR : 0;
+		attribList[5] = contextFlagsMask;
 	}
 #endif
 

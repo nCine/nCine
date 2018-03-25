@@ -1,4 +1,3 @@
-#version 330
 uniform mat4 projection;
 uniform mat4 modelView;
 in vec3 aPosition;

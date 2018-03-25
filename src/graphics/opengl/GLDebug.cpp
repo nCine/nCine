@@ -1,71 +1,18 @@
-#include "GLDebug.h"
 #include "common_macros.h"
+#include "GLDebug.h"
+#include "Application.h"
 
-namespace ncine {
+#if defined(__ANDROID__) && GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21
+	#define glPushDebugGroup glPushDebugGroupKHR
+	#define glPopDebugGroup glPopDebugGroupKHR
+	#define glObjectLabel glObjectLabelKHR
+	#define glGetObjectLabel glGetObjectLabelKHR
+	#define GL_MAX_LABEL_LENGTH GL_MAX_LABEL_LENGTH_KHR
 
-///////////////////////////////////////////////////////////
-// STATIC DEFINITIONS
-///////////////////////////////////////////////////////////
+	#define glDebugMessageCallback glDebugMessageCallbackKHR
+	#define GLDEBUGPROC GLDEBUGPROCKHR
+	#define GL_DEBUG_OUTPUT_SYNCHRONOUS GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR
 
-bool GLDebug::debugAvailable_ = false;
-GLuint GLDebug::debugGroupId_ = 0;
-unsigned int GLDebug::maxLabelLength_ = 0;
-
-///////////////////////////////////////////////////////////
-// PUBLIC FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void GLDebug::init(const IGfxCapabilities &gfxCaps)
-{
-	debugAvailable_ = gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::KHR_DEBUG) &&
-		(gfxCaps.value(IGfxCapabilities::GLIntValues::CONTEXT_FLAGS) & GL_CONTEXT_FLAG_DEBUG_BIT);
-
-	maxLabelLength_ = static_cast<unsigned int>(gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_LABEL_LENGTH));
-
-	if (debugAvailable_)
-		enableDebugOutput();
-}
-
-void GLDebug::pushGroup(const char *message)
-{
-	if (debugAvailable_)
-		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, debugGroupId_++, -1, message);
-}
-
-void GLDebug::popGroup()
-{
-	if (debugAvailable_)
-		glPopDebugGroup();
-}
-
-void GLDebug::objectLabel(GLenum identifier, GLuint name, const char *label)
-{
-	if (debugAvailable_)
-		glObjectLabel(identifier, name, -1, label);
-}
-
-void GLDebug::objectLabel(GLenum identifier, GLuint name, GLsizei length, const char *label)
-{
-	if (debugAvailable_)
-		glObjectLabel(identifier, name, length, label);
-}
-
-void GLDebug::getObjectLabel(GLenum identifier, GLuint name, GLsizei bufSize, GLsizei *length, char *label)
-{
-	if (debugAvailable_)
-		glGetObjectLabel(identifier, name, bufSize, length, label);
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-#if !defined(__ANDROID__) || (GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21)
-
-/// Callback for `glDebugMessageCallback()`
-void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const char *message, const void *userParam)
-{
-#ifdef GL_ES_VERSION_3_0
 	#define GL_DEBUG_SOURCE_API GL_DEBUG_SOURCE_API_KHR
 	#define GL_DEBUG_SOURCE_WINDOW_SYSTEM GL_DEBUG_SOURCE_WINDOW_SYSTEM_KHR
 	#define GL_DEBUG_SOURCE_SHADER_COMPILER GL_DEBUG_SOURCE_SHADER_COMPILER_KHR
@@ -89,6 +36,82 @@ void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsiz
 	#define  GL_DEBUG_SEVERITY_HIGH GL_DEBUG_SEVERITY_HIGH_KHR
 #endif
 
+namespace ncine {
+
+///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
+bool GLDebug::debugAvailable_ = false;
+GLuint GLDebug::debugGroupId_ = 0;
+int GLDebug::maxLabelLength_ = 0;
+
+///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void GLDebug::init(const IGfxCapabilities &gfxCaps)
+{
+#if (!defined(__ANDROID__) && !defined(__APPLE__)) || (GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21)
+	debugAvailable_ = gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::KHR_DEBUG) &&
+		theApplication().gfxDevice().glContextInfo().debugContext;
+
+	glGetIntegerv(GL_MAX_LABEL_LENGTH, &maxLabelLength_);
+
+	if (debugAvailable_)
+		enableDebugOutput();
+#endif
+}
+
+void GLDebug::pushGroup(const char *message)
+{
+#if (!defined(__ANDROID__) && !defined(__APPLE__)) || (GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21)
+	if (debugAvailable_)
+		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, debugGroupId_++, -1, message);
+#endif
+}
+
+void GLDebug::popGroup()
+{
+#if (!defined(__ANDROID__) && !defined(__APPLE__)) || (GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21)
+	if (debugAvailable_)
+		glPopDebugGroup();
+#endif
+}
+
+void GLDebug::objectLabel(LabelTypes identifier, GLuint name, const char *label)
+{
+#if (!defined(__ANDROID__) && !defined(__APPLE__)) || (GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21)
+	if (debugAvailable_)
+		glObjectLabel(static_cast<GLenum>(identifier), name, -1, label);
+#endif
+}
+
+void GLDebug::objectLabel(LabelTypes identifier, GLuint name, GLsizei length, const char *label)
+{
+#if (!defined(__ANDROID__) && !defined(__APPLE__)) || (GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21)
+	if (debugAvailable_)
+		glObjectLabel(static_cast<GLenum>(identifier), name, length, label);
+#endif
+}
+
+void GLDebug::getObjectLabel(LabelTypes identifier, GLuint name, GLsizei bufSize, GLsizei *length, char *label)
+{
+#if (!defined(__ANDROID__) && !defined(__APPLE__)) || (GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21)
+	if (debugAvailable_)
+		glGetObjectLabel(static_cast<GLenum>(identifier), name, bufSize, length, label);
+#endif
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+#if (!defined(__ANDROID__) && !defined(__APPLE__)) || (GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21)
+
+/// Callback for `glDebugMessageCallback()`
+void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const char *message, const void *userParam)
+{
 	const char *sourceString = "Unknown";
 	switch (source)
 	{
@@ -132,14 +155,7 @@ void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsiz
 
 void GLDebug::enableDebugOutput()
 {
-#if !defined(__ANDROID__) || (GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21)
-
-#ifdef GL_ES_VERSION_3_0
-	#define GL_DEBUG_OUTPUT_SYNCHRONOUS GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR
-	#define GLDEBUGPROC GLDEBUGPROCKHR
-	#define glDebugMessageCallback glDebugMessageCallbackKHR
-#endif
-
+#if (!defined(__ANDROID__) && !defined(__APPLE__)) || (GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21)
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(static_cast<GLDEBUGPROC>(debugCallback), nullptr);
 

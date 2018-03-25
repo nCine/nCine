@@ -8,10 +8,10 @@
 namespace {
 
 #ifdef __ANDROID__
-const char *Texture1File = "texture1.webp";
-const char *Texture2File = "texture2.webp";
-const char *Texture3File = "texture3.webp";
-const char *Texture4File = "texture4.webp";
+const char *Texture1File = "texture1_ETC2.ktx";
+const char *Texture2File = "texture2_ETC2.ktx";
+const char *Texture3File = "texture3_ETC2.ktx";
+const char *Texture4File = "texture4_ETC2.ktx";
 #else
 const char *Texture1File = "texture1.png";
 const char *Texture2File = "texture2.png";

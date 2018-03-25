@@ -3,13 +3,13 @@ project(nCine-Android-${CMAKE_ANDROID_ARCH_ABI})
 
 find_library(ANDROID_LIBRARY android)
 find_library(EGL_LIBRARY EGL)
-find_library(GLES2_LIBRARY GLESv2)
+find_library(GLES3_LIBRARY GLESv3)
 find_library(LOG_LIBRARY log)
 find_library(OPENSLES_LIBRARY OpenSLES)
 find_library(ZLIB_LIBRARY z)
 
 list(APPEND PRIVATE_LINK_LIBRARIES
-	${ANDROID_LIBRARY} ${EGL_LIBRARY} ${GLES2_LIBRARY} ${LOG_LIBRARY} ${ZLIB_LIBRARY})
+	${ANDROID_LIBRARY} ${EGL_LIBRARY} ${GLES3_LIBRARY} ${LOG_LIBRARY} ${ZLIB_LIBRARY})
 
 set(Threads_FOUND 1)
 
@@ -72,12 +72,12 @@ add_library(native_app_glue STATIC ${CMAKE_ANDROID_NDK}/sources/android/native_a
 add_library(game SHARED main.cpp ${NCINE_ROOT}/tests/${NCINE_STARTUP_TEST}.cpp)
 target_link_libraries(game PRIVATE ncine native_app_glue)
 target_include_directories(game PRIVATE ${CMAKE_ANDROID_NDK}/sources/android/native_app_glue)
+if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
+	target_include_directories(game PRIVATE ${GENERATED_INCLUDE_DIR}) # for ncine_config.h
+endif()
 if(NOT NCINE_DYNAMIC_LIBRARY)
 	target_include_directories(game PRIVATE ${NCINE_ROOT}/src/include)
 	target_compile_definitions(game PRIVATE ${PRIVATE_COMPILE_DEFINITIONS})
-	if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
-		target_include_directories(game PRIVATE ${GENERATED_INCLUDE_DIR})
-	endif()
 endif()
 
 # Export ANativeActivity_onCreate() - https://github.com/android-ndk/ndk/issues/381

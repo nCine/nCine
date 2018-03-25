@@ -14,6 +14,7 @@
 	#define WITH_WEBP_FORMAT (0 && NCINE_WITH_WEBP)
 #else
 	#define WITH_ETC1_FORMAT (1)
+	#define WITH_ETC2_FORMAT (1)
 	#define WITH_ATC_FORMAT (1)
 	#define WITH_ASTC_FORMAT (1 && __ANDROID_API__ >= 21)
 #endif
@@ -133,6 +134,17 @@ void MyEventHandler::onInit()
 		filenames_.pushBack("texture_512_RGB_ETC1_MIP.dds");
 	#endif
 	}
+#endif
+
+#if WITH_ETC2_FORMAT
+	LOGI("ETC2 textures are supported");
+	filenames_.pushBack("texture_512_RGBA_ETC2.ktx");
+	filenames_.pushBack("texture_512_RGBA_ETC2.pvr");
+
+	#if WITH_MIPMAPPED_FORMATS
+	filenames_.pushBack("texture_512_RGBA_ETC2_MIP.ktx");
+	filenames_.pushBack("texture_512_RGBA_ETC2_MIP.pvr");
+	#endif
 #endif
 
 #if WITH_ATC_FORMAT

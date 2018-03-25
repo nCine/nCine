@@ -9,7 +9,7 @@
 namespace {
 
 #ifdef __ANDROID__
-const char *TextureFile = "megatexture_256.webp";
+const char *TextureFile = "megatexture_256_ETC2.ktx";
 #else
 const char *TextureFile = "megatexture_256.png";
 #endif
@@ -35,10 +35,10 @@ void MyEventHandler::onInit()
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 	megaTexture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + TextureFile).data());
-	texRects[0] = nc::Recti(1, 1, 126, 126);
-	texRects[1] = nc::Recti(129, 0, 126, 126);
-	texRects[2] = nc::Recti(0, 129, 126, 126);
-	texRects[3] = nc::Recti(129, 129, 126, 126);
+	texRects[0] = nc::Recti(0, 0, 128, 128);
+	texRects[1] = nc::Recti(128, 0, 128, 128);
+	texRects[2] = nc::Recti(0, 128, 128, 128);
+	texRects[3] = nc::Recti(128, 128, 128, 128);
 
 	dummy_ = nctl::makeUnique<nc::SceneNode>(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	dummy_->setScale(0.75f);

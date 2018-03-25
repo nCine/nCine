@@ -58,7 +58,7 @@ void GLShaderProgram::attachShader(GLenum type, const char *filename)
 	shader->compile();
 
 	const size_t length = strnlen(filename, GLDebug::maxLabelLength());
-	GLDebug::objectLabel(GL_SHADER, shader->glHandle_, length, filename);
+	GLDebug::objectLabel(GLDebug::LabelTypes::SHADER, shader->glHandle_, length, filename);
 
 	attachedShaders_.pushBack(shader);
 }

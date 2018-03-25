@@ -23,24 +23,16 @@ class GLBufferObject
 
 	void bufferData(GLsizeiptr size, const GLvoid *data, GLenum usage);
 	void bufferSubData(GLintptr offset, GLsizeiptr size, const GLvoid *data);
-
 #ifndef __ANDROID__
-	void *map(GLenum access);
-	GLboolean unmap();
-
-#ifndef __APPLE__
 	void bufferStorage(GLsizeiptr size, const GLvoid *data, GLbitfield flags);
+#endif
 
 	void bindBufferBase(GLuint index);
 	void bindBufferRange(GLuint index, GLintptr offset, GLsizei ptrsize);
-
 	void *mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access);
 	void flushMappedBufferRange(GLintptr offset, GLsizeiptr length);
+	GLboolean unmap();
 
-	void bindVertexBuffer(GLuint bindingIndex, GLintptr offset, GLsizei stride);
-#endif
-
-#endif
   private:
 	static class GLHashMap<GLBufferObjectMappingFunc::Size, GLBufferObjectMappingFunc> boundBuffers_;
 

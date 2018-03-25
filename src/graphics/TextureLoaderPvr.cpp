@@ -88,6 +88,21 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 			case FMT_PVRTCII_4BPP:
 				FATAL_MSG("No support for PVRTC-II compression");
 				break;
+			case FMT_ETC2_RGB:
+				internalFormat = GL_COMPRESSED_RGB8_ETC2;
+				break;
+			case FMT_ETC2_RGBA:
+				internalFormat = GL_COMPRESSED_RGBA8_ETC2_EAC;
+				break;
+			case FMT_ETC2_RGB_A1:
+				internalFormat = GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+				break;
+			case FMT_EAC_R11:
+				internalFormat = GL_COMPRESSED_R11_EAC;
+				break;
+			case FMT_EAC_RG11:
+				internalFormat = GL_COMPRESSED_RG11_EAC;
+				break;
 #if __ANDROID_API__ >= 21
 			case FMT_ASTC_4x4:
 				internalFormat = GL_COMPRESSED_RGBA_ASTC_4x4_KHR;

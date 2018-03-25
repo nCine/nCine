@@ -11,8 +11,8 @@ namespace {
 
 #ifdef __ANDROID__
 const float VerticalTextPos = 0.5f;
-const char *TextureFile = "texture4.webp";
-const char *FontTextureFile = "DroidSans32_256.webp";
+const char *TextureFile = "texture4_ETC2.ktx";
+const char *FontTextureFile = "DroidSans32_256_ETC2.ktx";
 #else
 const float VerticalTextPos = 0.3f;
 const char *FontTextureFile = "DroidSans32_256.png";
@@ -85,27 +85,27 @@ void MyEventHandler::handleEvent(const nc::TouchEvent &event, nctl::String *stri
 
 void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 {
-	handleEvent(event, multitouchString_, "onTouchDown");
+	handleEvent(event, multitouchString_.get(), "onTouchDown");
 }
 
 void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 {
-	handleEvent(event, multitouchString_, "onTouchUp");
+	handleEvent(event, multitouchString_.get(), "onTouchUp");
 }
 
 void MyEventHandler::onTouchMove(const nc::TouchEvent &event)
 {
-	handleEvent(event, multitouchString_, "onTouchMove");
+	handleEvent(event, multitouchString_.get(), "onTouchMove");
 }
 
 void MyEventHandler::onPointerDown(const nc::TouchEvent &event)
 {
-	handleEvent(event, multitouchString_, "onPointerDown");
+	handleEvent(event, multitouchString_.get(), "onPointerDown");
 }
 
 void MyEventHandler::onPointerUp(const nc::TouchEvent &event)
 {
-	handleEvent(event, multitouchString_, "onPointerUp");
+	handleEvent(event, multitouchString_.get(), "onPointerUp");
 }
 #else
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)

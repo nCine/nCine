@@ -57,7 +57,11 @@ GLUniformBlock::GLUniformBlock(GLuint program, GLuint index, DiscoverUniforms di
 			blockUniform.offset_ = uniformOffsets[i];
 
 			ASSERT(uniformNameLengths[i] <= GLUniform::MaxNameLength);
+#ifndef __ANDROID__
 			glGetActiveUniformName(program, uniformIndices[i], MaxNameLength, &uniformNameLengths[i], blockUniform.name_);
+#else
+			glGetActiveUniform(program, uniformIndices[i], MaxNameLength, &uniformNameLengths[i], nullptr, nullptr, blockUniform.name_);
+#endif
 			blockUniforms_[blockUniform.name_] = blockUniform;
 		}
 	}

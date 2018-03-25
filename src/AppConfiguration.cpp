@@ -11,7 +11,7 @@ AppConfiguration::AppConfiguration()
 	: glCoreProfile_(true)
 	, glForwardCompatible_(true)
 #ifdef __ANDROID__
-	, glMajorVersion_(2)
+	, glMajorVersion_(3)
 	, glMinorVersion_(0)
 #else
 	, glMajorVersion_(3)
@@ -38,7 +38,7 @@ AppConfiguration::AppConfiguration()
 {
 	logFile_ = "ncine_log.txt";
 #ifdef __ANDROID__
-	fontTexFilename_ = "fonts/DroidSans32_256_888.ktx";
+	fontTexFilename_ = "fonts/DroidSans32_256_ETC2.ktx";
 #else
 	windowTitle_ = "nCine";
 	windowIconFilename_ = "icons/icon48.png";

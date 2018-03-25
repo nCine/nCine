@@ -67,25 +67,13 @@ void GLBufferObject::bufferSubData(GLintptr offset, GLsizeiptr size, const GLvoi
 }
 
 #ifndef __ANDROID__
-void *GLBufferObject::map(GLenum access)
-{
-	bind();
-	return glMapBuffer(target_, access);
-}
-
-GLboolean GLBufferObject::unmap()
-{
-	bind();
-	return glUnmapBuffer(target_);
-}
-
-#ifndef __APPLE__
 void GLBufferObject::bufferStorage(GLsizeiptr size, const GLvoid *data, GLbitfield flags)
 {
 	bind();
 	glBufferStorage(target_, size, data, flags);
 	size_ = size;
 }
+#endif
 
 void GLBufferObject::bindBufferBase(GLuint index)
 {
@@ -135,13 +123,10 @@ void GLBufferObject::flushMappedBufferRange(GLintptr offset, GLsizeiptr length)
 	glFlushMappedBufferRange(target_, offset, length);
 }
 
-void GLBufferObject::bindVertexBuffer(GLuint bindingIndex, GLintptr offset, GLsizei stride)
+GLboolean GLBufferObject::unmap()
 {
 	bind();
-	glBindVertexBuffer(bindingIndex, glHandle_, offset, stride);
+	return glUnmapBuffer(target_);
 }
-#endif
-
-#endif
 
 }

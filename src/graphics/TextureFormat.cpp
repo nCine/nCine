@@ -59,19 +59,11 @@ unsigned long TextureFormat::calculateMipSizes(GLenum internalFormat, int width,
 	switch (internalFormat)
 	{
 		case GL_RGBA:
-#ifndef __ANDROID__
 		case GL_RGBA8:
-#else
-		case GL_RGBA8_OES:
-#endif
 			bpp = 32;
 			break;
 		case GL_RGB:
-#ifndef __ANDROID__
 		case GL_RGB8:
-#else
-		case GL_RGB8_OES:
-#endif
 			bpp = 24;
 			break;
 		case GL_RG:
@@ -81,18 +73,11 @@ unsigned long TextureFormat::calculateMipSizes(GLenum internalFormat, int width,
 #endif
 		case GL_RGB5_A1:
 		case GL_RGBA4:
-#if defined(__ANDROID__) && __ANDROID_API__ >= 21
-		case GL_LUMINANCE8_ALPHA8_OES:
-#endif
 			bpp = 16;
 			break;
 		case GL_RED:
 		case GL_LUMINANCE:
 		case GL_ALPHA:
-#if defined(__ANDROID__) && __ANDROID_API__ >= 21
-		case GL_LUMINANCE8_OES:
-		case GL_ALPHA8_OES:
-#endif
 			bpp = 8;
 			break;
 #ifndef __ANDROID__
@@ -114,12 +99,21 @@ unsigned long TextureFormat::calculateMipSizes(GLenum internalFormat, int width,
 			break;
 #else
 		case GL_ETC1_RGB8_OES:
+		case GL_COMPRESSED_RGB8_ETC2:
+		case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+		case GL_COMPRESSED_R11_EAC:
 			blockWidth = 4;
 			blockHeight = 4;
 			bpp = 4;
 			minDataSize = 8;
 			break;
-
+		case GL_COMPRESSED_RGBA8_ETC2_EAC:
+		case GL_COMPRESSED_RG11_EAC:
+			blockWidth = 4;
+			blockHeight = 4;
+			bpp = 8;
+			minDataSize = 16;
+			break;
 		case GL_ATC_RGBA_EXPLICIT_ALPHA_AMD:
 		case GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD:
 			// ((width_in_texels+3)/4) * ((height_in_texels+3)/4) * 16
@@ -135,7 +129,6 @@ unsigned long TextureFormat::calculateMipSizes(GLenum internalFormat, int width,
 			bpp = 4;
 			minDataSize = 8;
 			break;
-
 		case GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG:
 		case GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG:
 			blockWidth = 8;
@@ -410,11 +403,11 @@ bool TextureFormat::oesFormat()
 
 	switch (internalFormat_)
 	{
-		case GL_RGBA8_OES:
+		case GL_RGBA8:
 		case GL_RGBA:
 			format_ = GL_RGBA;
 			break;
-		case GL_RGB8_OES:
+		case GL_RGB8:
 		case GL_RGB:
 			format_ = GL_RGB;
 			break;
@@ -448,13 +441,13 @@ bool TextureFormat::oesFormatApi21()
 
 	switch (internalFormat_)
 	{
-		case GL_LUMINANCE8_ALPHA8_OES:
+		case GL_LUMINANCE_ALPHA:
 			format_ = GL_LUMINANCE_ALPHA;
 			break;
-		case GL_LUMINANCE8_OES:
+		case GL_LUMINANCE:
 			format_ = GL_LUMINANCE;
 			break;
-		case GL_ALPHA8_OES:
+		case GL_ALPHA:
 			format_ = GL_ALPHA;
 			break;
 		default:
@@ -487,6 +480,8 @@ bool TextureFormat::oesCompressedFormat()
 		case GL_ATC_RGBA_INTERPOLATED_ALPHA_AMD:
 		case GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG:
 		case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
+		case GL_COMPRESSED_RGBA8_ETC2_EAC:
+		case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
 #if __ANDROID_API__ >= 21
 		case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
 		case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
@@ -506,10 +501,17 @@ bool TextureFormat::oesCompressedFormat()
 			format_ = GL_RGBA;
 			break;
 		case GL_ETC1_RGB8_OES:
+		case GL_COMPRESSED_RGB8_ETC2:
 		case GL_ATC_RGB_AMD:
 		case GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG:
 		case GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG:
 			format_ = GL_RGB;
+			break;
+		case GL_COMPRESSED_RG11_EAC:
+			format_ = GL_RG;
+			break;
+		case GL_COMPRESSED_R11_EAC:
+			format_ = GL_RED;
 			break;
 		default:
 			found = false;
