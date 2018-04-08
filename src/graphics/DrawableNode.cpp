@@ -42,8 +42,7 @@ void DrawableNode::draw(RenderQueue &renderQueue)
 {
 	updateAabb();
 
-	// `isOutsideOf() == false` is not the same as `isInsideOf()`
-	if (aabb_.isOutsideOf(theApplication().gfxDevice().screenRect()) == false)
+	if (aabb_.overlaps(theApplication().gfxDevice().screenRect()))
 	{
 		updateRenderCommand();
 		renderQueue.addCommand(renderCommand_.get());
