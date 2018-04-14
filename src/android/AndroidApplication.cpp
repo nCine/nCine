@@ -206,8 +206,8 @@ void AndroidApplication::preInit()
 	appEventHandler_->onPreInit(appCfg_);
 
 	// Registering the logger as early as possible
-	const nctl::String logFilePath = IFile::dataPath() + appCfg_.logFile_;
-	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(logFilePath.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
+	const nctl::String logFilePath = IFile::dataPath() + appCfg_.logFile();
+	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(logFilePath.data(), appCfg_.consoleLogLevel(), appCfg_.fileLogLevel()));
 }
 
 void AndroidApplication::init()

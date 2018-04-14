@@ -85,11 +85,11 @@ void Application::initCommon()
 
 	theServiceLocator().registerIndexer(nctl::makeUnique<ArrayIndexer>());
 #ifdef WITH_AUDIO
-	if (appCfg_.withAudio_)
+	if (appCfg_.withAudio())
 		theServiceLocator().registerAudioDevice(nctl::makeUnique<ALAudioDevice>());
 #endif
 #ifdef WITH_THREADS
-	if (appCfg_.withThreads_)
+	if (appCfg_.withThreads())
 		theServiceLocator().registerThreadPool(nctl::makeUnique<ThreadPool>());
 #endif
 	theServiceLocator().registerGfxCapabilities(nctl::makeUnique<GfxCapabilities>());
@@ -101,17 +101,17 @@ void Application::initCommon()
 	// Swapping frame now for a cleaner API trace capture when debugging
 	gfxDevice_->update();
 
-	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.frameTimerLogInterval_, appCfg_.profileTextUpdateTime_);
+	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.frameTimerLogInterval(), appCfg_.profileTextUpdateTime());
 	profileTimer_ = nctl::makeUnique<Timer>();
 
-	if (appCfg_.withScenegraph_)
+	if (appCfg_.withScenegraph())
 	{
 		gfxDevice_->setupGL();
 		RenderResources::create();
 		renderQueue_ = nctl::makeUnique<RenderQueue>();
 		rootNode_ = nctl::makeUnique<SceneNode>();
 
-		if (appCfg_.withProfilerGraphs_)
+		if (appCfg_.withProfilerGraphs())
 		{
 			profilePlotter_ = nctl::makeUnique<StackedBarPlotter>(rootNode_.get(), Rectf(width() * 0.1f, height() * 0.1f, width() * 0.8f, height() * 0.15f));
 			profilePlotter_->setBackgroundColor(Color(0.35f, 0.35f, 0.45f, 0.5f));
@@ -132,10 +132,10 @@ void Application::initCommon()
 			profilePlotter_->setRefValue(1.0f / 60.0f); // 60 FPS
 		}
 
-		if (appCfg_.withProfilerText_)
+		if (appCfg_.withProfilerText())
 		{
-			nctl::String fontTexFilePath = IFile::dataPath() + appCfg_.fontTexFilename_;
-			nctl::String fontFntFilePath = IFile::dataPath() + appCfg_.fontFntFilename_;
+			nctl::String fontTexFilePath = IFile::dataPath() + appCfg_.fontTexFilename();
+			nctl::String fontFntFilePath = IFile::dataPath() + appCfg_.fontFntFilename();
 			if (IFile::access(fontTexFilePath.data(), IFile::AccessMode::EXISTS) == false)
 				LOGW_X("Cannot access font texture file \"%s\" to enable profiling text", fontTexFilePath.data());
 			else if (IFile::access(fontFntFilePath.data(), IFile::AccessMode::EXISTS) == false)
@@ -167,12 +167,26 @@ void Application::initCommon()
 void Application::step()
 {
 	frameTimer_->addFrame();
-	if (appCfg_.withScenegraph_)
+	if (appCfg_.withScenegraph())
 		gfxDevice_->clear();
 	appEventHandler_->onFrameStart();
 	// Measuring OnFrameEnd() + OnFrameStart() time
 	if (profilePlotter_)
 		profilePlotter_->addValue(0, profileTimer_->interval());
+
+	if (profilePlotter_)
+	{
+		profilePlotter_->enableUpdate(renderingSettings_.showProfilerGraphs);
+		profilePlotter_->enableDraw(renderingSettings_.showProfilerGraphs);
+	}
+
+	if (textLines_ && textLines2_)
+	{
+		textLines_->enableUpdate(renderingSettings_.showProfilerText);
+		textLines_->enableDraw(renderingSettings_.showProfilerText);
+		textLines2_->enableUpdate(renderingSettings_.showProfilerText);
+		textLines2_->enableDraw(renderingSettings_.showProfilerText);
+	}
 
 	profileTimer_->start();
 	if (rootNode_ != nullptr && renderQueue_ != nullptr)
@@ -182,7 +196,7 @@ void Application::step()
 		renderQueue_->draw();
 	}
 
-	if (renderQueue_ && textLines_ && textLines2_ && Timer::now() - textUpdateTime_ > appCfg_.profileTextUpdateTime_)
+	if (renderQueue_ && textLines_ && textLines2_ && Timer::now() - textUpdateTime_ > appCfg_.profileTextUpdateTime())
 	{
 		textUpdateTime_ = Timer::now();
 

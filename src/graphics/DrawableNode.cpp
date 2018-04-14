@@ -40,15 +40,25 @@ DrawableNode::~DrawableNode()
 
 void DrawableNode::draw(RenderQueue &renderQueue)
 {
-	updateAabb();
+	const bool cullingEnabled = theApplication().renderingSettings().cullingEnabled;
 
-	if (aabb_.overlaps(theApplication().gfxDevice().screenRect()))
+	if (cullingEnabled)
+	{
+		updateAabb();
+
+		if (aabb_.overlaps(theApplication().gfxDevice().screenRect()))
+		{
+			updateRenderCommand();
+			renderQueue.addCommand(renderCommand_.get());
+		}
+		else
+			RenderStatistics::addCulledNode();
+	}
+	else
 	{
 		updateRenderCommand();
 		renderQueue.addCommand(renderCommand_.get());
 	}
-	else
-		RenderStatistics::addCulledNode();
 }
 
 unsigned int DrawableNode::layer() const

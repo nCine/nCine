@@ -57,6 +57,7 @@ class MyEventHandler :
 	static const unsigned int NumSprites = 500;
 	static const unsigned int NumTexts = 5;
 
+	bool withAtlas_;
 	bool pause_;
 	float angle_;
 	nc::Vector2f camPos_;
@@ -72,17 +73,21 @@ class MyEventHandler :
 	nc::Vector2f joyVectorRight_;
 
 	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, NumTextures> textures_;
+	nctl::UniquePtr<nc::Texture> megaTexture_;
 	nctl::UniquePtr<nc::Font> font_;
 	nctl::UniquePtr<nc::SceneNode> cameraNode_;
 
 	nctl::UniquePtr<nctl::String> debugString_;
-	nctl::UniquePtr<nc::TextNode> debugtext_;
+	nctl::UniquePtr<nc::TextNode> debugText_;
 	nctl::StaticArray<nctl::UniquePtr<nc::TextNode>, NumTexts> texts_;
 
 	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumSprites> sprites_;
 	nctl::StaticArray<nc::Vector2f, NumSprites> spritePos_;
 
 	void resetCamera();
+	void setupAtlas();
+	void setupTextures();
+	void checkClick(float x, float y);
 };
 
 #endif

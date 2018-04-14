@@ -32,7 +32,7 @@ void RenderResources::create()
 	vao_ = nctl::makeUnique<GLVertexArrayObject>();
 	vao_->bind();
 
-	buffersManager_ = nctl::makeUnique<RenderBuffersManager>();
+	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(theApplication().appConfiguration().vboSize());
 
 	spriteShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
 #ifndef WITH_EMBEDDED_SHADERS

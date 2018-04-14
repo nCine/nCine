@@ -13,18 +13,57 @@ class DLL_PUBLIC AppConfiguration
 	/// Default constructor setting the defaults
 	AppConfiguration();
 
-	/// Returns true if the OpenGL profile is going to be core
-	bool glCoreProfile() const { return glCoreProfile_; }
-	/// Returns true if the OpenGL context is going to be forward compatible
-	bool glForwardCompatible() const { return glForwardCompatible_; }
-	/// Returns the major version number of the OpenGL context
-	unsigned int glMajorVersion() const { return glMajorVersion_; }
-	/// Returns the minor version number of the OpenGL context
-	unsigned int glMinorVersion() const { return glMinorVersion_; }
-	/// Returns true if the OpenGL context is going to be a debug context
-	bool glDebugContext() const { return withGLDebug_; }
-	/// Returns the update time in seconds for the profile text nodes
-	float profileTextUpdateTime() const { return profileTextUpdateTime_; }
+	/// \returns True if the OpenGL profile is going to be core
+	inline bool glCoreProfile() const { return glCoreProfile_; }
+	/// \returns True if the OpenGL context is going to be forward compatible
+	inline bool glForwardCompatible() const { return glForwardCompatible_; }
+	/// \returns The major version number of the OpenGL context
+	inline unsigned int glMajorVersion() const { return glMajorVersion_; }
+	/// \returns The minor version number of the OpenGL context
+	inline unsigned int glMinorVersion() const { return glMinorVersion_; }
+	/// \returns True if the OpenGL context is going to be a debug context
+	inline bool glDebugContext() const { return withGlDebug_; }
+	/// \returns The update time in seconds for the profile text nodes
+	inline float profileTextUpdateTime() const { return profileTextUpdateTime_; }
+
+	/// \returns The name of the log file
+	inline const nctl::String &logFile() const { return logFile_; }
+	/// \returns The logging level for messages printed on the console
+	inline ILogger::LogLevel consoleLogLevel() const { return consoleLogLevel_; }
+	/// \returns The logging level for messages written in the log file
+	inline ILogger::LogLevel fileLogLevel() const { return fileLogLevel_; }
+	/// \returns The interval for frame timer accumulation average and log
+	inline float frameTimerLogInterval() const { return frameTimerLogInterval_; }
+	/// \returns The screen width
+	inline unsigned int xResolution() const { return xResolution_; }
+	/// \returns The screen height
+	inline unsigned int yResolution() const { return yResolution_; }
+	/// \returns True if the screen is going to be in fullscreen mode
+	inline bool inFullscreen() const { return inFullscreen_; }
+	/// \returns The window title
+	inline const nctl::String &windowTitle() const { return windowTitle_; }
+	/// \returns The window icon filename
+	inline const nctl::String &windowIconFilename() const { return windowIconFilename_; }
+	/// \returns The font texture filename for profiler information text
+	inline const nctl::String &fontTexFilename() const { return fontTexFilename_; }
+	/// \returns The font FNT filename for profiler information text
+	inline const nctl::String &fontFntFilename() const { return fontFntFilename_; }
+	/// \returns The maximum size in bytes for each VBO collecting geometry data
+	inline unsigned long vboSize() const { return vboSize_; }
+	/// \returns True if the profiler graphs are enabled
+	inline bool withProfilerGraphs() const { return withProfilerGraphs_; }
+	/// \returns True if the profiler information text is enabled
+	inline bool withProfilerText() const { return withProfilerText_; }
+	/// \returns True if the audio subsystem is enabled
+	inline bool withAudio() const { return withAudio_; }
+	/// \returns True if the threading subsystem is enabled
+	inline bool withThreads() const { return withThreads_; }
+	/// \returns True if the scenegraph based rendering is enabled
+	inline bool withScenegraph() const { return withScenegraph_; }
+	/// \returns True if the vertical synchronization is enabled
+	inline bool withVSync() const { return withVSync_; }
+	/// \returns True if the OpenGL debug context is enabled
+	inline bool withGlDebug() const { return withGlDebug_; }
 
 	/// Sets the path for the application to load data from
 	void setDataPath(const nctl::String &dataPath);
@@ -48,7 +87,9 @@ class DLL_PUBLIC AppConfiguration
 	/// Sets the font texture filename for profiler information text
 	void setFontTexFilename(const nctl::String &fontTexFilename);
 	/// Sets the font FNT filename for profiler information text
-	void setFontFntFilename_(const nctl::String &fontFntFilename);
+	void setFontFntFilename(const nctl::String &fontFntFilename);
+	/// Sets the maximum size in bytes for each VBO collecting geometry data
+	void setVboSize(unsigned long vboSize);
 	/// Enables the profiler graphs
 	void enableProfilerGraphs(bool shouldEnable);
 	/// Enables the profiler information text
@@ -62,7 +103,7 @@ class DLL_PUBLIC AppConfiguration
 	/// Enables vertical synchronization
 	void enableVSync(bool shouldEnable);
 	/// Enables OpenGL debug context
-	void enableGLDebug(bool shouldEnable);
+	void enableGlDebug(bool shouldEnable);
 
   private:
 	// Pre-configured compile-time variables
@@ -84,17 +125,14 @@ class DLL_PUBLIC AppConfiguration
 	nctl::String windowIconFilename_;
 	nctl::String fontTexFilename_;
 	nctl::String fontFntFilename_;
+	unsigned long vboSize_;
 	bool withProfilerGraphs_;
 	bool withProfilerText_;
 	bool withAudio_;
 	bool withThreads_;
 	bool withScenegraph_;
 	bool withVSync_;
-	bool withGLDebug_;
-
-	friend class Application;
-	friend class PCApplication;
-	friend class AndroidApplication;
+	bool withGlDebug_;
 };
 
 }

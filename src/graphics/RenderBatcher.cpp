@@ -1,6 +1,7 @@
 #include <cstring> // for memcpy()
 #include "RenderBatcher.h"
 #include "RenderResources.h" // TODO: Remove dependency?
+#include "Application.h"
 
 namespace ncine {
 
@@ -20,6 +21,9 @@ RenderBatcher::RenderBatcher()
 
 void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, nctl::Array<RenderCommand *> &destQueue)
 {
+	const unsigned int minBatchSize = theApplication().renderingSettings().minBatchSize;
+	const unsigned int maxBatchSize = theApplication().renderingSettings().maxBatchSize;
+
 	unsigned int lastSplit = 0;
 
 	for (unsigned int i = 1; i < srcQueue.size(); i++)
@@ -42,9 +46,9 @@ void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, 
 
 		const unsigned int batchSize = endSplit - lastSplit;
 		// Split point if last command or split condition
-		if (i == srcQueue.size() - 1 || shouldSplit)
+		if (i == srcQueue.size() - 1 || shouldSplit || batchSize > maxBatchSize)
 		{
-			if (prevType == Material::ShaderProgramType::SPRITE && batchSize >= MinBatchSize)
+			if (prevType == Material::ShaderProgramType::SPRITE && batchSize >= minBatchSize)
 			{
 				nctl::Array<RenderCommand *>::ConstIterator start = srcQueue.cBegin() + lastSplit;
 				nctl::Array<RenderCommand *>::ConstIterator end = srcQueue.cBegin() + endSplit;

@@ -32,7 +32,7 @@ class RenderBuffersManager
 		GLubyte *mapBase;
 	};
 
-	RenderBuffersManager();
+	RenderBuffersManager(unsigned long vboMaxSize);
 
 	/// Requests an amount of bytes from the specified buffer type
 	const Parameters acquireMemory(BufferTypes::Enum type, unsigned long bytes);

@@ -3,6 +3,7 @@
 #include "RenderResources.h"
 #include "RenderStatistics.h"
 #include "GLDebug.h"
+#include "Application.h"
 
 namespace ncine {
 
@@ -54,7 +55,7 @@ const char *commandTypeString(const RenderCommand &command)
 
 void RenderQueue::draw()
 {
-	const bool batchingEnabled = false;
+	const bool batchingEnabled = theApplication().renderingSettings().batchingEnabled;
 
 	// Reset all rendering statistics
 	ncine::RenderStatistics::reset();

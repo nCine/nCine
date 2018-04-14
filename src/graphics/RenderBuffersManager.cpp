@@ -8,7 +8,7 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-RenderBuffersManager::RenderBuffersManager()
+RenderBuffersManager::RenderBuffersManager(unsigned long vboMaxSize)
 	: buffers_(4)
 {
 	BufferSpecifications &vboSpecs = specs_[BufferTypes::ARRAY];
@@ -16,7 +16,7 @@ RenderBuffersManager::RenderBuffersManager()
 	vboSpecs.target = GL_ARRAY_BUFFER;
 	vboSpecs.mapFlags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_UNSYNCHRONIZED_BIT;
 	vboSpecs.usageFlags = GL_STREAM_DRAW;
-	vboSpecs.maxSize = 16 * 1024;
+	vboSpecs.maxSize = vboMaxSize;
 	vboSpecs.alignment = sizeof(GLfloat);
 
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();

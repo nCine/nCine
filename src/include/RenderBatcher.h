@@ -18,7 +18,6 @@ class RenderBatcher
 	void reset();
 
   private:
-	static const unsigned int MinBatchSize = 4;
 	static const unsigned int UniformsBufferCapacity = 64 * 1024;
 
 	nctl::Array<nctl::UniquePtr<RenderCommand> > freeCommandsPool_;

@@ -28,13 +28,14 @@ AppConfiguration::AppConfiguration()
 	, windowIconFilename_(128)
 	, fontTexFilename_(128)
 	, fontFntFilename_(128)
+	, vboSize_(8 * 1024)
 	, withProfilerGraphs_(true)
 	, withProfilerText_(true)
 	, withAudio_(true)
 	, withThreads_(false)
 	, withScenegraph_(true)
 	, withVSync_(true)
-	, withGLDebug_(false)
+	, withGlDebug_(false)
 {
 	logFile_ = "ncine_log.txt";
 #ifdef __ANDROID__
@@ -107,9 +108,14 @@ void AppConfiguration::setFontTexFilename(const nctl::String &fontTexFilename)
 }
 
 /*! The data path will be prefixed automatically before loading. */
-void AppConfiguration::setFontFntFilename_(const nctl::String &fontFntFilename)
+void AppConfiguration::setFontFntFilename(const nctl::String &fontFntFilename)
 {
 	fontFntFilename_ = fontFntFilename;
+}
+
+void AppConfiguration::setVboSize(unsigned long vboSize)
+{
+	vboSize_ = vboSize;
 }
 
 void AppConfiguration::enableProfilerGraphs(bool shouldEnable)
@@ -142,9 +148,9 @@ void AppConfiguration::enableVSync(bool shouldEnable)
 	withVSync_ = shouldEnable;
 }
 
-void AppConfiguration::enableGLDebug(bool shouldEnable)
+void AppConfiguration::enableGlDebug(bool shouldEnable)
 {
-	withGLDebug_ = shouldEnable;
+	withGlDebug_ = shouldEnable;
 }
 
 }

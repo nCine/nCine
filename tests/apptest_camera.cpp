@@ -11,12 +11,14 @@
 namespace {
 
 #ifdef __ANDROID__
+const char *MegaTextureFile = "megatexture_256_ETC2.ktx";
 const char *Texture1File = "texture1_ETC2.ktx";
 const char *Texture2File = "texture2_ETC2.ktx";
 const char *Texture3File = "texture3_ETC2.ktx";
 const char *Texture4File = "texture4_ETC2.ktx";
 const char *FontTextureFile = "DroidSans32_256_ETC2.ktx";
 #else
+const char *MegaTextureFile = "megatexture_256.png";
 const char *Texture1File = "texture1.png";
 const char *Texture2File = "texture2.png";
 const char *Texture3File = "texture3.png";
@@ -52,6 +54,7 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
+	megaTexture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + MegaTextureFile).data());
 	textures_[0] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture1File).data());
 	textures_[1] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture2File).data());
 	textures_[2] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture3File).data());
@@ -62,11 +65,12 @@ void MyEventHandler::onInit()
 
 	cameraNode_ = nctl::makeUnique<nc::SceneNode>(&rootNode);
 
-	debugString_ = nctl::makeUnique<nctl::String>(64);
-	debugtext_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get());
-	debugtext_->setPosition((nc::theApplication().width() - debugtext_->width()) * 0.5f,
-	                        nc::theApplication().height() - debugtext_->fontLineHeight() * 0.5f);
-	debugtext_->setColor(255, 255, 0, 255);
+	debugString_ = nctl::makeUnique<nctl::String>(128);
+	debugText_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get());
+	debugText_->setPosition((nc::theApplication().width() - debugText_->width()) * 0.5f,
+	                        nc::theApplication().height() - debugText_->fontLineHeight() * 0.5f * 2.0f);
+	debugText_->setColor(255, 255, 0, 255);
+	debugText_->setAlignment(nc::TextNode::Alignment::CENTER);
 
 	for (unsigned int i = 0; i < NumTexts; i++)
 	{
@@ -102,10 +106,14 @@ void MyEventHandler::onInit()
 		sprites_[i] = nctl::makeUnique<nc::Sprite>(cameraNode_.get(), textures_[i % NumTextures].get(), randomX, randomY);
 		sprites_[i]->setScale(0.5f);
 		spritePos_[i].set(randomX, randomY);
+		// sprites_[i]->setLayer(i); // Fixes Z-fighting at the expense of batching
 	}
 
-	angle_ = 0.0f;
+	withAtlas_ = false;
+	withAtlas_ ? setupAtlas() : setupTextures();
+
 	pause_ = false;
+	angle_ = 0.0f;
 	resetCamera();
 
 	scrollOrigin_ = nc::Vector2f::Zero;
@@ -149,7 +157,7 @@ void MyEventHandler::onFrameStart()
 		camPos_.x -= joyVectorLeft_.x * MoveSpeed * interval;
 		camPos_.y -= joyVectorLeft_.y * MoveSpeed * interval;
 	}
-	if (joyVectorRight_.length() > nc::IInputManager::LeftStickDeadZone)
+	if (joyVectorRight_.length() > nc::IInputManager::RightStickDeadZone)
 	{
 		camRot_ += joyVectorRight_.x * RotateSpeed * interval;
 		camScale_ += joyVectorRight_.y * ScaleSpeed * interval;
@@ -203,9 +211,11 @@ void MyEventHandler::onFrameStart()
 	if (camPos_.y < minY)
 		camPos_.y = minY;
 
+	const nc::Application::RenderingSettings settings = nc::theApplication().renderingSettings();
 	debugString_->clear();
 	debugString_->format("x: %.2f, y: %.2f, scale: %.2f, angle: %.2f", -camPos_.x, -camPos_.y, camScale_, camRot_);
-	debugtext_->setString(*debugString_);
+	debugString_->formatAppend("\nbatching: %s, culling: %s, texture atlas: %s", settings.batchingEnabled ? "on" : "off", settings.cullingEnabled ? "on" : "off", withAtlas_ ? "on" : "off");
+	debugText_->setString(*debugString_);
 
 	cameraNode_->setPosition(camPos_);
 	cameraNode_->setRotation(camRot_);
@@ -213,7 +223,7 @@ void MyEventHandler::onFrameStart()
 
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
-		const float t = i / static_cast<float>(NumSprites - 1);
+		const float t = i / static_cast<float>(NumSprites);
 		const float scaleX = 50.0f * (2.0f * t - 1.0f);
 		const float scaleY = 50.0f * (-2.0f * t + 1.0f);
 		const float moveX = scaleX * sinf(angle_) * cosf(angle_ * 0.5f * t);
@@ -228,6 +238,8 @@ void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 	scrollOrigin_.x = event.pointers[0].x;
 	scrollOrigin_.y = event.pointers[0].y;
 	scrollMove_ = scrollOrigin_;
+
+	checkClick(event.pointers[0].x, event.pointers[0].y);
 }
 
 void MyEventHandler::onTouchMove(const nc::TouchEvent &event)
@@ -262,7 +274,23 @@ void MyEventHandler::onPointerDown(const nc::TouchEvent &event)
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KeySym::P)
+	nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
+
+	if (event.sym == nc::KeySym::B)
+		settings.batchingEnabled = !settings.batchingEnabled;
+	else if (event.sym == nc::KeySym::C)
+		settings.cullingEnabled = !settings.cullingEnabled;
+	else if (event.sym == nc::KeySym::T)
+	{
+		withAtlas_ = !withAtlas_;
+		withAtlas_ ? setupAtlas() : setupTextures();
+	}
+	else if (event.sym == nc::KeySym::H)
+	{
+		settings.showProfilerGraphs = !settings.showProfilerGraphs;
+		settings.showProfilerText = !settings.showProfilerText;
+	}
+	else if (event.sym == nc::KeySym::P)
 		pause_ = !pause_;
 	else if (event.sym == nc::KeySym::R)
 		resetCamera();
@@ -279,6 +307,8 @@ void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 		scrollOrigin_.x = static_cast<float>(event.x);
 		scrollOrigin_.y = static_cast<float>(event.y);
 		scrollMove_ = scrollOrigin_;
+
+		checkClick(static_cast<float>(event.x), static_cast<float>(event.y));
 	}
 	else if (event.isRightButton())
 	{
@@ -349,4 +379,53 @@ void MyEventHandler::resetCamera()
 	camPos_.y = nc::theApplication().height() * 0.5f;
 	camRot_ = 0.0f;
 	camScale_ = 1.0f;
+}
+
+void MyEventHandler::setupAtlas()
+{
+	nc::Recti texRects[4];
+	texRects[0] = nc::Recti(0, 0, 128, 128);
+	texRects[1] = nc::Recti(128, 0, 128, 128);
+	texRects[2] = nc::Recti(0, 128, 128, 128);
+	texRects[3] = nc::Recti(128, 128, 128, 128);
+
+	for (unsigned int i = 0; i < NumSprites; i++)
+	{
+		sprites_[i]->setTexture(megaTexture_.get());
+		sprites_[i]->setTexRect(texRects[i % NumTextures]);
+	}
+}
+
+void MyEventHandler::setupTextures()
+{
+	for (unsigned int i = 0; i < NumSprites; i++)
+	{
+		sprites_[i]->setTexture(textures_[i % NumTextures].get());
+		sprites_[i]->setTexRect(textures_[i % NumTextures]->rect());
+	}
+}
+
+void MyEventHandler::checkClick(float x, float y)
+{
+	const nc::Rectf debugTextRect = nc::Rectf::fromCenterAndSize(debugText_->absPosition(), debugText_->absSize());
+
+#ifdef __ANDROID__
+	// Make it slightly easier to touch on Android
+	if (debugTextRect.contains(x, y))
+#else
+	if (debugTextRect.contains(x, y) && y <= debugTextRect.y + debugTextRect.h * 0.5f)
+#endif
+	{
+		nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
+		const float xPos = x - debugTextRect.x;
+		if (xPos <= debugTextRect.w * 0.33f)
+			settings.batchingEnabled = !settings.batchingEnabled;
+		else if (xPos >= debugTextRect.w * 0.33f && xPos <= debugTextRect.w * 0.6f)
+			settings.cullingEnabled = !settings.cullingEnabled;
+		else if (xPos >= debugTextRect.w * 0.6f)
+		{
+			withAtlas_ = !withAtlas_;
+			withAtlas_ ? setupAtlas() : setupTextures();
+		}
+	}
 }
