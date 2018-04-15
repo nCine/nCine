@@ -43,7 +43,7 @@ TextureLoaderWebP::TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
 	       features.has_alpha, features.has_animation, features.format);
 
 	mipMapCount_ = 1; // No MIP Mapping
-	texFormat_ = features.has_alpha ? TextureFormat(GL_RGBA) : TextureFormat(GL_RGB);
+	texFormat_ = features.has_alpha ? TextureFormat(GL_RGBA8) : TextureFormat(GL_RGB8);
 	bpp_ = features.has_alpha ? 4 : 3;
 	dataSize_ = width_ * height_ * bpp_;
 	pixels_ = nctl::makeUnique<unsigned char []>(dataSize_);

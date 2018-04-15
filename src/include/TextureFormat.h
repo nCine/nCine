@@ -38,7 +38,6 @@ class TextureFormat
 	GLenum type_;
 	bool isCompressed_;
 
-#ifndef __ANDROID__
 	/// Searches a match between an integer internal format and an external one
 	bool integerFormat();
 	/// Searches a match between a non integer internal format and an external one
@@ -47,12 +46,8 @@ class TextureFormat
 	bool floatFormat();
 	/// Searches a match between a compressed internal format and an external one
 	bool compressedFormat();
-#else
-	/// Searches a match between an OpenGL ES internal format and an external one
-	bool oesFormat();
-	/// Searches a match between a OpenGL ES compressed internal format and an external one
-	bool oesFormatApi21();
-	/// Searches a match between a OpenGL ES compressed internal format and an external one
+#ifdef __ANDROID__
+	/// Searches a match between an OpenGL ES compressed internal format and an external one
 	bool oesCompressedFormat();
 #endif
 

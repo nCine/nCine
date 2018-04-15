@@ -58,16 +58,13 @@ unsigned long TextureFormat::calculateMipSizes(GLenum internalFormat, int width,
 
 	switch (internalFormat)
 	{
-		case GL_RGBA:
 		case GL_RGBA8:
 			bpp = 32;
 			break;
-		case GL_RGB:
 		case GL_RGB8:
 			bpp = 24;
 			break;
-		case GL_RG:
-		case GL_LUMINANCE_ALPHA:
+		case GL_RG8:
 #ifndef __APPLE__
 		case GL_RGB565:
 #endif
@@ -75,9 +72,7 @@ unsigned long TextureFormat::calculateMipSizes(GLenum internalFormat, int width,
 		case GL_RGBA4:
 			bpp = 16;
 			break;
-		case GL_RED:
-		case GL_LUMINANCE:
-		case GL_ALPHA:
+		case GL_R8:
 			bpp = 8;
 			break;
 #ifndef __ANDROID__
@@ -241,7 +236,6 @@ void TextureFormat::findExternalFormat()
 {
 	bool found = false;
 
-#ifndef __ANDROID__
 	if (found == false)
 		found = integerFormat();
 	if (found == false)
@@ -250,11 +244,7 @@ void TextureFormat::findExternalFormat()
 		found = floatFormat();
 	if (found == false)
 		found = compressedFormat();
-#else
-	if (found == false)
-		found = oesFormat();
-	if (found == false)
-		found = oesFormatApi21();
+#ifdef __ANDROID__
 	if (found == false)
 		found = oesCompressedFormat();
 #endif
@@ -264,43 +254,30 @@ void TextureFormat::findExternalFormat()
 	LOGI_X("Internal format: 0x%x - type: 0x%x", internalFormat_, type_);
 }
 
-#ifndef __ANDROID__
 bool TextureFormat::integerFormat()
 {
 	bool found = true;
 
 	switch (internalFormat_)
 	{
-		case GL_RGBA:
 		case GL_RGBA8:
 		case 4:
 			format_ = GL_RGBA;
 			break;
-		case GL_RGB:
 		case GL_RGB8:
 		case 3:
 			format_ = GL_RGB;
 			break;
-		case GL_RG:
-		case GL_LUMINANCE_ALPHA:
-		case GL_LUMINANCE8_ALPHA8:
+		case GL_RG8:
 		case 2:
 			format_ = GL_RG;
 			break;
-		case GL_RED:
-		case GL_LUMINANCE:
-		case GL_LUMINANCE8:
-		case GL_INTENSITY:
-		case GL_INTENSITY8:
-		case GL_ALPHA:
-		case GL_ALPHA8:
+		case GL_R8:
 		case 1:
 			format_ = GL_RED;
 			break;
-		case GL_DEPTH_COMPONENT:
-		case GL_DEPTH_COMPONENT16_ARB:
-		case GL_DEPTH_COMPONENT24_ARB:
-		case GL_DEPTH_COMPONENT32_ARB:
+		case GL_DEPTH_COMPONENT16:
+		case GL_DEPTH_COMPONENT24:
 			format_ = GL_DEPTH_COMPONENT;
 			break;
 		default:
@@ -348,13 +325,16 @@ bool TextureFormat::floatFormat()
 
 	switch (internalFormat_)
 	{
-		case GL_RGBA16F_ARB:
-		case GL_RGBA32F_ARB:
+		case GL_RGBA16F:
+		case GL_RGBA32F:
 			format_ = GL_RGBA;
 			break;
-		case GL_RGB16F_ARB:
-		case GL_RGB32F_ARB:
+		case GL_RGB16F:
+		case GL_RGB32F:
 			format_ = GL_RGB;
+			break;
+		case GL_DEPTH_COMPONENT32F:
+			format_ = GL_DEPTH_COMPONENT;
 			break;
 		default:
 			found = false;
@@ -373,13 +353,11 @@ bool TextureFormat::compressedFormat()
 
 	switch (internalFormat_)
 	{
-		case GL_COMPRESSED_RGBA:
 		case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
 		case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
 		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
 			format_ = GL_RGBA;
 			break;
-		case GL_COMPRESSED_RGB:
 		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
 			format_ = GL_RGB;
 			break;
@@ -396,80 +374,8 @@ bool TextureFormat::compressedFormat()
 
 	return found;
 }
-#else
-bool TextureFormat::oesFormat()
-{
-	bool found = true;
 
-	switch (internalFormat_)
-	{
-		case GL_RGBA8:
-		case GL_RGBA:
-			format_ = GL_RGBA;
-			break;
-		case GL_RGB8:
-		case GL_RGB:
-			format_ = GL_RGB;
-			break;
-		case GL_LUMINANCE_ALPHA:
-			format_ = GL_LUMINANCE_ALPHA;
-			break;
-		case GL_LUMINANCE:
-			format_ = GL_LUMINANCE;
-			break;
-		case GL_ALPHA:
-			format_ = GL_ALPHA;
-			break;
-		// No GL_INTENSITY on OpenGL ES 2
-		default:
-			found = false;
-			break;
-	}
-
-	if (found)
-		type_ = GL_UNSIGNED_BYTE;
-
-	return found;
-}
-
-bool TextureFormat::oesFormatApi21()
-{
-#if __ANDROID_API__ < 21
-	bool found = false;
-#else
-	bool found = true;
-
-	switch (internalFormat_)
-	{
-		case GL_LUMINANCE_ALPHA:
-			format_ = GL_LUMINANCE_ALPHA;
-			break;
-		case GL_LUMINANCE:
-			format_ = GL_LUMINANCE;
-			break;
-		case GL_ALPHA:
-			format_ = GL_ALPHA;
-			break;
-		default:
-			found = false;
-			break;
-	}
-
-	switch (internalFormat_)
-	{
-		case GL_LUMINANCE8_ALPHA8_OES:
-		case GL_LUMINANCE8_OES:
-		case GL_ALPHA8_OES:
-			type_ = GL_UNSIGNED_BYTE;
-			break;
-		default:
-			found = false;
-			break;
-	}
-#endif
-	return found;
-}
-
+#ifdef __ANDROID__
 bool TextureFormat::oesCompressedFormat()
 {
 	bool found = true;

@@ -46,7 +46,7 @@ void TextureLoaderPvr::readHeader(Pvr3Header &header)
 
 void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 {
-	GLenum internalFormat = GL_RGB; // to suppress uninitialized variable warning
+	GLenum internalFormat = GL_RGB8; // to suppress uninitialized variable warning
 
 	uint64_t pixelFormat = IFile::int64FromLE(header.pixelFormat);
 
@@ -176,31 +176,31 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 #endif
 				break;
 			case FMT_RGBA_8888:
-				internalFormat = GL_RGBA;
+				internalFormat = GL_RGBA8;
 				break;
 			case FMT_RGB_888:
-				internalFormat = GL_RGB;
+				internalFormat = GL_RGB8;
 				break;
 			case FMT_RGB_565:
-				internalFormat = GL_RGB;
+				internalFormat = GL_RGB565;
 				type = GL_UNSIGNED_SHORT_5_6_5;
 				break;
 			case FMT_RGBA_5551:
-				internalFormat = GL_RGBA;
+				internalFormat = GL_RGB5_A1;
 				type = GL_UNSIGNED_SHORT_5_5_5_1;
 				break;
 			case FMT_RGBA_4444:
-				internalFormat = GL_RGBA;
+				internalFormat = GL_RGBA4;
 				type = GL_UNSIGNED_SHORT_4_4_4_4;
 				break;
 			case FMT_LA_88:
-				internalFormat = GL_RG;
+				internalFormat = GL_RG8;
 				break;
 			case FMT_L_8:
-				internalFormat = GL_RED;
+				internalFormat = GL_R8;
 				break;
 			case FMT_A_8:
-				internalFormat = GL_RED;
+				internalFormat = GL_R8;
 				break;
 			default:
 				FATAL_MSG_X("Unsupported PVR3 uncompressed format: 0x%llx", pixelFormat);

@@ -119,17 +119,30 @@ void Texture::load(const ITextureLoader &texLoader, int width, int height)
 
 	int levelWidth = width;
 	int levelHeight = height;
+
+#if defined(__ANDROID__) && GL_ES_VERSION_3_0
+	const bool withTexStorage = true;
+#else
+	const bool withTexStorage = gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::ARB_TEXTURE_STORAGE);
+#endif
+
+	if (withTexStorage)
+		glTexture_->texStorage2D(texLoader.mipMapCount(), texFormat.internalFormat(), width, height);
 	for (int i = 0; i < texLoader.mipMapCount(); i++)
 	{
 		if (texFormat.isCompressed())
 		{
-			glTexture_->compressedTexImage2D(i, texFormat.internalFormat(), levelWidth, levelHeight,
-			                                 texLoader.dataSize(i), texLoader.pixels(i));
+			if (withTexStorage)
+				glTexture_->compressedTexSubImage2D(i, 0, 0, levelWidth, levelHeight, texFormat.internalFormat(), texLoader.dataSize(i), texLoader.pixels(i));
+			else
+				glTexture_->compressedTexImage2D(i, texFormat.internalFormat(), levelWidth, levelHeight, texLoader.dataSize(i), texLoader.pixels(i));
 		}
 		else
 		{
-			glTexture_->texImage2D(i, texFormat.internalFormat(), levelWidth, levelHeight,
-			                       texFormat.format(), texFormat.type(), texLoader.pixels(i));
+			if (withTexStorage)
+				glTexture_->texSubImage2D(i, 0, 0, levelWidth, levelHeight, texFormat.format(), texFormat.type(), texLoader.pixels(i));
+			else
+				glTexture_->texImage2D(i, texFormat.internalFormat(), levelWidth, levelHeight, texFormat.format(), texFormat.type(), texLoader.pixels(i));
 		}
 
 		levelWidth /= 2;

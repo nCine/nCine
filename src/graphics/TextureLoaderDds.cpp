@@ -115,27 +115,27 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 			if ((redMask == 0x00FF0000 && greenMask == 0x0000FF00 && blueMask == 0x000000FF && alphaMask == 0x0) ||
 			    (blueMask == 0x00FF0000 && greenMask == 0x0000FF00 && redMask == 0x000000FF && alphaMask == 0x0)) // 888
 			{
-				internalFormat = GL_RGB;
+				internalFormat = GL_RGB8;
 			}
 			else if ((alphaMask == 0xFF000000 && redMask == 0x00FF0000 && greenMask == 0x0000FF00 && blueMask == 0x000000FF) ||
 			         (alphaMask == 0xFF000000 && blueMask == 0x00FF0000 && greenMask == 0x0000FF00 && redMask == 0x000000FF)) // 8888
 			{
-				internalFormat = GL_RGBA;
+				internalFormat = GL_RGBA8;
 			}
 			// 16 bits uncompressed DDS data is not compatbile with OpenGL color channels order
 //			else if (redMask == 0xF800 && greenMask == 0x07E0 && blueMask == 0x001F) // 565
 //			{
-//				internalFormat = GL_RGB;
+//				internalFormat = GL_RGB565;
 //				type = GL_UNSIGNED_SHORT_5_6_5;
 //			}
 //			else if (alphaMask == 0x8000 && redMask == 0x7C00 && greenMask == 0x03E0 && blueMask == 0x001F) // 5551
 //			{
-//				internalFormat = GL_RGBA;
+//				internalFormat = GL_RGB5_A1;
 //				type = GL_UNSIGNED_SHORT_5_5_5_1;
 //			}
 //			else if (alphaMask == 0xF000 && redMask == 0x0F00 && greenMask == 0x00F0 && blueMask == 0x000F) // 4444
 //			{
-//				internalFormat = GL_RGBA;
+//				internalFormat = GL_RGBA4;
 //				type = GL_UNSIGNED_SHORT_4_4_4_4;
 //			}
 			else
@@ -145,13 +145,13 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 		// dwRGBBitCount contains the luminance channel bit count; dwRBitMask contains the channel mask
 		// Can be combined with DDPF_ALPHAPIXELS for a two channel DDS file
 		else if (flags & (DDPF_LUMINANCE | DDPF_ALPHAPIXELS))
-			internalFormat = GL_RG;
+			internalFormat = GL_RG8;
 		else if (flags & DDPF_LUMINANCE)
-			internalFormat = GL_RED;
+			internalFormat = GL_R8;
 		// Used in some older DDS files for alpha channel only uncompressed data
 		// dwRGBBitCount contains the alpha channel bitcount; dwABitMask contains valid data
 		else if (flags & DDPF_ALPHA)
-			internalFormat = GL_RED;
+			internalFormat = GL_R8;
 		else
 			FATAL_MSG_X("Unsupported DDS uncompressed pixel format: %u", flags);
 

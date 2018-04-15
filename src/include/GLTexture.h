@@ -28,12 +28,8 @@ class GLTexture
 	void texImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data);
 	void texSubImage2D(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data);
 	void compressedTexImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei imageSize, const void *data);
-
-#if !defined(__ANDROID__) && !defined(__APPLE__)
+	void compressedTexSubImage2D(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const void *data);
 	void texStorage2D(GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height);
-	void bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format);
-	void unbindImageTexture(GLuint unit);
-#endif
 
 	void texParameterf(GLenum pname, GLfloat param);
 	void texParameteri(GLenum pname, GLint param);
