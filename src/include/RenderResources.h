@@ -3,8 +3,8 @@
 
 #include "GLBufferObject.h"
 #include "GLShaderProgram.h"
-#include "GLVertexArrayObject.h"
 #include "RenderBuffersManager.h"
+#include "RenderVaoPool.h"
 #include "nctl/StaticArray.h"
 #include "nctl/UniquePtr.h"
 #include "Matrix4x4.h"
@@ -28,18 +28,20 @@ class RenderResources
 		GLfloat texcoords[2];
 	};
 
-	static inline const GLVertexArrayObject *vao() { return vao_.get(); }
+	static inline RenderBuffersManager &buffersManager() { return *buffersManager_; }
+	static inline RenderVaoPool &vaoPool() { return *vaoPool_; }
 	static inline GLShaderProgram *spriteShaderProgram() { return spriteShaderProgram_.get(); }
 	static inline GLShaderProgram *textnodeGrayShaderProgram() { return textnodeGrayShaderProgram_.get(); }
 	static inline GLShaderProgram *textnodeColorShaderProgram() { return textnodeColorShaderProgram_.get(); }
 	static inline GLShaderProgram *colorShaderProgram() { return colorShaderProgram_.get(); }
 	static inline GLShaderProgram *instancedSpritesShaderProgram() { return instancedSpritesShaderProgram_.get(); }
-	static RenderBuffersManager &buffersManager() { return *buffersManager_; }
-	static const Matrix4x4f &projectionMatrix() { return projectionMatrix_; }
+	static inline const Matrix4x4f &projectionMatrix() { return projectionMatrix_; }
+
+	static void createMinimal();
 
   private:
-	static nctl::UniquePtr<GLVertexArrayObject> vao_;
 	static nctl::UniquePtr<RenderBuffersManager> buffersManager_;
+	static nctl::UniquePtr<RenderVaoPool> vaoPool_;
 	static nctl::UniquePtr<GLShaderProgram> spriteShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> textnodeGrayShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> textnodeColorShaderProgram_;

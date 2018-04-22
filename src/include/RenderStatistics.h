@@ -65,6 +65,21 @@ class RenderStatistics
 		friend RenderStatistics;
 	};
 
+	class VaoPool
+	{
+	  public:
+		unsigned int size;
+		unsigned int capacity;
+		unsigned int reuses;
+		unsigned int bindings;
+
+		VaoPool() : size(0), capacity(0), reuses(0), bindings(0) { }
+
+	  private:
+		void reset() { size = 0; capacity = 0; reuses = 0; bindings = 0; }
+		friend RenderStatistics;
+	};
+
 	/// Returns the aggregated command statistics for all types
 	static inline const Commands &allCommands() { return allCommands_; }
 	/// Returns the commnad statistics for the specified type
@@ -98,21 +113,26 @@ class RenderStatistics
 	static CustomVbos customVbos_;
 	static unsigned int index;
 	static unsigned int culledNodes_[2];
+	static VaoPool vaoPool_;
 
 	static void reset();
 	static void gatherStatistics(const RenderCommand &command);
 	static void gatherStatistics(const RenderBuffersManager::ManagedBuffer &buffer);
+	static inline void gatherVaoPoolStatistics(unsigned int poolSize, unsigned int poolCapacity) { vaoPool_.size = poolSize; vaoPool_.capacity = poolCapacity; }
 	static inline void addTexture(unsigned long datasize) { textures_.count++; textures_.dataSize += datasize; }
 	static inline void removeTexture(unsigned long datasize) { textures_.count--; textures_.dataSize -= datasize; }
 	static inline void addCustomVbo(unsigned long datasize) { customVbos_.count++; customVbos_.dataSize += datasize; }
 	static inline void removeCustomVbo(unsigned long datasize) { customVbos_.count--; customVbos_.dataSize -= datasize; }
 	static inline void addCulledNode() { culledNodes_[index]++; }
+	static inline void addVaoPoolReuse() { vaoPool_.reuses++; }
+	static inline void addVaoPoolBinding() { vaoPool_.bindings++; }
 
 	friend class RenderQueue;
 	friend class RenderBuffersManager;
 	friend class Texture;
 	friend class Geometry;
 	friend class DrawableNode;
+	friend class RenderVaoPool;
 };
 
 }

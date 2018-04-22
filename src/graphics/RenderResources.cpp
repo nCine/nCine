@@ -12,14 +12,28 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-nctl::UniquePtr<GLVertexArrayObject> RenderResources::vao_;
 nctl::UniquePtr<RenderBuffersManager> RenderResources::buffersManager_;
+nctl::UniquePtr<RenderVaoPool> RenderResources::vaoPool_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::spriteShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::textnodeGrayShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::textnodeColorShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::colorShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::instancedSpritesShaderProgram_;
 Matrix4x4f RenderResources::projectionMatrix_;
+
+///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void RenderResources::createMinimal()
+{
+	LOGI("Creating a minimal set of rendering resources...");
+
+	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(theApplication().appConfiguration().vboSize());
+	vaoPool_ = nctl::makeUnique<RenderVaoPool>(theApplication().appConfiguration().vaoPoolSize());
+
+	LOGI("Minimal rendering resources created");
+}
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
@@ -29,10 +43,8 @@ void RenderResources::create()
 {
 	LOGI("Creating rendering resources...");
 
-	vao_ = nctl::makeUnique<GLVertexArrayObject>();
-	vao_->bind();
-
 	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(theApplication().appConfiguration().vboSize());
+	vaoPool_ = nctl::makeUnique<RenderVaoPool>(theApplication().appConfiguration().vaoPoolSize());
 
 	spriteShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
 #ifndef WITH_EMBEDDED_SHADERS
@@ -103,8 +115,8 @@ void RenderResources::dispose()
 	textnodeColorShaderProgram_.reset(nullptr);
 	textnodeGrayShaderProgram_.reset(nullptr);
 	spriteShaderProgram_.reset(nullptr);
+	vaoPool_.reset(nullptr);
 	buffersManager_.reset(nullptr);
-	vao_.reset(nullptr);
 
 	LOGI("Rendering resources disposed");
 }

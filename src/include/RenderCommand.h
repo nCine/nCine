@@ -68,7 +68,6 @@ class RenderCommand
 	inline const Geometry &geometry() const { return geometry_; }
 	inline Material &material() { return material_; }
 	inline Geometry &geometry() { return geometry_; }
-	void setVertexAttribute(const char *name, GLsizei vboStride, const GLvoid *vboPointer);
 
 	void commitTransformation();
 

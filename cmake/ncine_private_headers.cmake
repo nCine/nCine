@@ -35,7 +35,6 @@ set(PRIVATE_HEADERS
 	${NCINE_ROOT}/src/include/GLUniformCache.h
 	${NCINE_ROOT}/src/include/GLShaderAttributes.h
 	${NCINE_ROOT}/src/include/GLAttribute.h
-	${NCINE_ROOT}/src/include/GLVertexAttribute.h
 	${NCINE_ROOT}/src/include/GLTexture.h
 	${NCINE_ROOT}/src/include/GLVertexArrayObject.h
 	${NCINE_ROOT}/src/include/GLUniformBlock.h
@@ -45,4 +44,6 @@ set(PRIVATE_HEADERS
 	${NCINE_ROOT}/src/include/RenderBatcher.h
 	${NCINE_ROOT}/src/include/GLDebug.h
 	${NCINE_ROOT}/src/include/RenderStatistics.h
+	${NCINE_ROOT}/src/include/GLVertexFormat.h
+	${NCINE_ROOT}/src/include/RenderVaoPool.h
 )

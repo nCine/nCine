@@ -50,7 +50,7 @@ class Material
 	/// Wrapper around `GLShaderUniformBlocks::uniformBlock()`
 	inline GLUniformBlockCache *uniformBlock(const char *name) { return shaderUniformBlocks_.uniformBlock(name); }
 	/// Wrapper around `GLShaderAttributes::attribute()`
-	inline GLVertexAttribute *attribute(const char *name) { return shaderAttributes_.attribute(name); }
+	inline GLVertexFormat::Attribute *attribute(const char *name) { return shaderAttributes_.attribute(name); }
 	inline const GLTexture *texture() const { return texture_; }
 	inline void setTexture(const GLTexture *texture) { texture_ = texture; }
 	void setTexture(const Texture &texture);
@@ -75,7 +75,7 @@ class Material
 	/// Wrapper around `GLShaderUniformBlocks::commitUniformBlocks()`
 	inline void commitUniformBlocks() { shaderUniformBlocks_.commitUniformBlocks(); }
 	/// Wrapper around `GLShaderAttributes::defineVertexPointers()`
-	inline void defineVertexPointers(const GLBufferObject *vbo) { if (vbo) shaderAttributes_.defineVertexPointers(vbo); }
+	inline void defineVertexFormat(const GLBufferObject *vbo) { if (vbo) shaderAttributes_.defineVertexFormat(vbo); }
 	unsigned int sortKey();
 
 	friend class RenderCommand;

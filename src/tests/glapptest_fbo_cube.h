@@ -14,7 +14,6 @@ class GLShaderUniforms;
 class GLShaderAttributes;
 class GLTexture;
 class GLFramebufferObject;
-class GLVertexArrayObject;
 class GLBufferObject;
 
 }
@@ -60,7 +59,6 @@ class MyEventHandler :
 	nctl::UniquePtr<nc::GLShaderAttributes> texAttributes_;
 	nctl::UniquePtr<nc::GLTexture> texture_;
 	nctl::UniquePtr<nc::GLFramebufferObject> fbo_;
-	nctl::UniquePtr<nc::GLVertexArrayObject> vao_;
 	nctl::UniquePtr<nc::GLBufferObject> vboTri_;
 	nctl::UniquePtr<nc::GLBufferObject> vboCube_;
 	nctl::UniquePtr<nc::GLBufferObject> iboCube_;

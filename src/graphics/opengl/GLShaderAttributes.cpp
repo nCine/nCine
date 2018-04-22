@@ -1,7 +1,7 @@
 #include "GLShaderAttributes.h"
 #include "GLShaderProgram.h"
-#include "GLBufferObject.h"
 #include "nctl/HashMapIterator.h"
+#include "RenderResources.h"
 
 namespace ncine {
 
@@ -9,20 +9,19 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-nctl::StaticArray<GLShaderAttributes::GLVertexAttribPointerState, GLShaderAttributes::MaxDefinedVertexAttribPointers> GLShaderAttributes::definedPointers_(nctl::StaticArrayMode::EXTEND_SIZE);
-GLVertexAttribute GLShaderAttributes::attributeNotFound_;
+GLVertexFormat::Attribute GLShaderAttributes::attributeNotFound_;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 GLShaderAttributes::GLShaderAttributes()
-	: shaderProgram_(nullptr), vertexAttributes_(VertexAttributesHashSize)
+	: shaderProgram_(nullptr), attributeLocations_(GLVertexFormat::MaxAttributes)
 {
 }
 
 GLShaderAttributes::GLShaderAttributes(GLShaderProgram *shaderProgram)
-	: shaderProgram_(nullptr), vertexAttributes_(VertexAttributesHashSize)
+	: shaderProgram_(nullptr), attributeLocations_(GLVertexFormat::MaxAttributes)
 {
 	setProgram(shaderProgram);
 }
@@ -34,25 +33,29 @@ GLShaderAttributes::GLShaderAttributes(GLShaderProgram *shaderProgram)
 void GLShaderAttributes::setProgram(GLShaderProgram *shaderProgram)
 {
 	shaderProgram_ = shaderProgram;
-	vertexAttributes_.clear();
+	attributeLocations_.clear();
+	vertexFormat_.reset();
 	importAttributes();
 }
 
-GLVertexAttribute *GLShaderAttributes::attribute(const char *name)
+GLVertexFormat::Attribute *GLShaderAttributes::attribute(const char *name)
 {
 	ASSERT(name);
-	GLVertexAttribute *vertexAttribute = nullptr;
+	GLVertexFormat::Attribute *vertexAttribute = nullptr;
 
 	if (shaderProgram_)
 	{
-		vertexAttribute = vertexAttributes_.find(name);
+		int location = -1;
+		const bool attributeFound = attributeLocations_.contains(name, location);
 
-		if (vertexAttribute == nullptr)
+		if (attributeFound == false)
 		{
 			// Returning the dummy vertex attribute to prevent the application from crashing
 			vertexAttribute = &attributeNotFound_;
 			LOGW_X("Attribute \"%s\" not found in shader program %u", name, shaderProgram_->glHandle());
 		}
+		else
+			vertexAttribute = &vertexFormat_[location];
 	}
 	else
 		LOGE_X("Cannot find attribute \"%s\", no shader program associated", name);
@@ -60,38 +63,15 @@ GLVertexAttribute *GLShaderAttributes::attribute(const char *name)
 	return vertexAttribute;
 }
 
-void GLShaderAttributes::defineVertexPointers(const GLBufferObject *vbo)
+
+void GLShaderAttributes::defineVertexFormat(const GLBufferObject *vbo)
 {
 	if (shaderProgram_)
 	{
-		GLuint boundVboHandle = 0;
-		if (vbo)
-		{
-			vbo->bind(); // VBO has to be bound before setting attribute pointers
-			boundVboHandle = vbo->glHandle();
-		}
+		for (int location : attributeLocations_)
+			vertexFormat_[location].setVbo(vbo);
 
-		for (GLVertexAttribute &attribute : vertexAttributes_)
-		{
-			const unsigned int location = static_cast<unsigned int>(attribute.shaderAttribute()->location());
-			GLVertexAttribPointerState &pointerState = definedPointers_[location];
-
-			if (pointerState != attribute || pointerState.boundVbo != boundVboHandle)
-			{
-				attribute.vertexAttribPointer();
-				pointerState.boundVbo = boundVboHandle;
-
-				pointerState.size = attribute.shaderAttribute()->numComponents();
-				pointerState.type = attribute.shaderAttribute()->basicType();
-				pointerState.vboStride = attribute.vboStride();
-				pointerState.vboPointer = attribute.vboPointer();
-			}
-			if (pointerState.enabled == false)
-			{
-				attribute.enable();
-				pointerState.enabled = true;
-			}
-		}
+		RenderResources::vaoPool().bindVao(vertexFormat_);
 	}
 	else
 		LOGE("No shader program associated");
@@ -104,31 +84,19 @@ void GLShaderAttributes::defineVertexPointers(const GLBufferObject *vbo)
 void GLShaderAttributes::importAttributes()
 {
 	unsigned int count = shaderProgram_->attributes_.size();
-	if (count > VertexAttributesHashSize)
-		LOGW_X("More active attributes (%d) than hashmap buckets (%d)", count, VertexAttributesHashSize);
+	if (count > GLVertexFormat::MaxAttributes)
+		LOGW_X("More active attributes (%d) than supported by the vertex format class (%d)", count, GLVertexFormat::MaxAttributes);
 
-	for (const GLAttribute &attribute : shaderProgram_->attributes_)
+	for (unsigned int i = 0; i < shaderProgram_->attributes_.size(); i++)
 	{
-		GLVertexAttribute vertexAttribute(&attribute);
-		vertexAttributes_[attribute.name()] = vertexAttribute;
-	}
-}
+		const GLAttribute &attribute = shaderProgram_->attributes_[i];
+		const int location = attribute.location();
+		if (location < 0)
+			continue;
 
-bool GLShaderAttributes::GLVertexAttribPointerState::operator==(const GLVertexAttribute &attribute) const
-{
-	if (attribute.shaderAttribute()->numComponents() == size &&
-	    attribute.shaderAttribute()->basicType() == type &&
-	    attribute.vboStride() == vboStride && attribute.vboPointer() == vboPointer)
-	{
-		return true;
+		attributeLocations_[attribute.name()] = location;
+		vertexFormat_[location].init(attribute.location(), attribute.numComponents(), attribute.basicType());
 	}
-	else
-		return false;
-}
-
-bool GLShaderAttributes::GLVertexAttribPointerState::operator!=(const GLVertexAttribute &attribute) const
-{
-	return !operator==(attribute);
 }
 
 }

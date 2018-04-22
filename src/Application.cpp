@@ -150,6 +150,8 @@ void Application::initCommon()
 			}
 		}
 	}
+	else
+		RenderResources::createMinimal(); // some resources are still required for rendering
 
 	LOGI("Application initialized");
 

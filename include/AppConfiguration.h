@@ -50,6 +50,8 @@ class DLL_PUBLIC AppConfiguration
 	inline const nctl::String &fontFntFilename() const { return fontFntFilename_; }
 	/// \returns The maximum size in bytes for each VBO collecting geometry data
 	inline unsigned long vboSize() const { return vboSize_; }
+	/// \returns The maximum size for the pool of VAOs
+	inline unsigned int vaoPoolSize() const { return vaoPoolSize_; }
 	/// \returns True if the profiler graphs are enabled
 	inline bool withProfilerGraphs() const { return withProfilerGraphs_; }
 	/// \returns True if the profiler information text is enabled
@@ -90,6 +92,8 @@ class DLL_PUBLIC AppConfiguration
 	void setFontFntFilename(const nctl::String &fontFntFilename);
 	/// Sets the maximum size in bytes for each VBO collecting geometry data
 	void setVboSize(unsigned long vboSize);
+	/// Sets the maximum size for the pool of VAOs
+	void setVaoPoolSize(unsigned int vaoPoolSize);
 	/// Enables the profiler graphs
 	void enableProfilerGraphs(bool shouldEnable);
 	/// Enables the profiler information text
@@ -126,6 +130,7 @@ class DLL_PUBLIC AppConfiguration
 	nctl::String fontTexFilename_;
 	nctl::String fontFntFilename_;
 	unsigned long vboSize_;
+	unsigned int vaoPoolSize_;
 	bool withProfilerGraphs_;
 	bool withProfilerText_;
 	bool withAudio_;

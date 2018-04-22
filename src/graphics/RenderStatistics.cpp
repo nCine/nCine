@@ -14,6 +14,7 @@ RenderStatistics::Textures RenderStatistics::textures_;
 RenderStatistics::CustomVbos RenderStatistics::customVbos_;
 unsigned int RenderStatistics::index = 0;
 unsigned int RenderStatistics::culledNodes_[2] = {0, 0};
+RenderStatistics::VaoPool RenderStatistics::vaoPool_;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -46,11 +47,13 @@ void RenderStatistics::appendMoreStatistics(nctl::String &string)
 
 	string.formatAppend(
 		"Culled nodes: %u\n"\
+		"%u/%u VAOs (%u reuses, %u bindings)\n"\
 		"%.2f Kb in %u Texture(s)\n"\
 		"%.2f Kb in %u custom VBO(s)\n"\
 		"%.2f/%u Kb in %u VBO(s)\n"\
 		"%.2f/%u Kb in %u UBO(s)\n",
 		culledNodes_[(index + 1) % 2],
+		vaoPool_.size, vaoPool_.capacity, vaoPool_.reuses, vaoPool_.bindings,
 		textures_.dataSize / 1024.0f, textures_.count,
 		customVbos_.dataSize / 1024.0f, customVbos_.count,
 		vboBuffers.usedSpace / 1024.0f, vboBuffers.size / 1024, vboBuffers.count,
@@ -74,6 +77,8 @@ void RenderStatistics::reset()
 	// Ping pong index for last and current frame
 	index = (index + 1) % 2;
 	culledNodes_[index] = 0;
+
+	vaoPool_.reset();
 }
 
 void RenderStatistics::gatherStatistics(const RenderCommand &command)

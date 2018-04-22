@@ -49,14 +49,8 @@ void RenderCommand::issue()
 	uniformBlocksCommitted_ = false;
 
 	geometry_.bind();
-	material_.defineVertexPointers(geometry_.vboParams_.object);
+	material_.defineVertexFormat(geometry_.vboParams_.object);
 	geometry_.draw(numInstances_);
-}
-
-void RenderCommand::setVertexAttribute(const char *name, GLsizei vboStride, const GLvoid *vboPointer)
-{
-	GLVertexAttribute *vertexAttribute = material_.attribute(name);
-	vertexAttribute->setVboParameters(vboStride, vboPointer);
 }
 
 void RenderCommand::commitTransformation()

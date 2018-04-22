@@ -96,6 +96,7 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 	config.enableScenegraph(false);
 	config.enableAudio(false);
 	config.enableThreads(false);
+	config.setVaoPoolSize(2);
 
 	setDataPath(config);
 }
@@ -144,9 +145,6 @@ void MyEventHandler::onInit()
 	if (fbo_->isStatusComplete() == false)
 		LOGE("Framebuffer object status is not complete\n");
 
-	vao_ = nctl::makeUnique<nc::GLVertexArrayObject>();
-	vao_->bind();
-
 	vboTri_ = nctl::makeUnique<nc::GLBufferObject>(GL_ARRAY_BUFFER);
 	vboTri_->bufferData(sizeof(triVertices), triVertices, GL_STATIC_DRAW);
 	colorAttributes_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatCol), reinterpret_cast<void *>(offsetof(VertexFormatCol, position)));
@@ -186,7 +184,7 @@ void MyEventHandler::onFrameStart()
 	fbo_->bind(GL_FRAMEBUFFER);
 	glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	colorAttributes_->defineVertexPointers(vboTri_.get());
+	colorAttributes_->defineVertexFormat(vboTri_.get());
 	vboTri_->bind();
 	iboCube_->unbind();
 	texture_->unbind();
@@ -209,7 +207,7 @@ void MyEventHandler::onFrameStart()
 	fbo_->unbind();
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	texAttributes_->defineVertexPointers(vboCube_.get());
+	texAttributes_->defineVertexFormat(vboCube_.get());
 	vboCube_->bind();
 	iboCube_->bind();
 	texture_->bind();
