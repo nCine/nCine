@@ -29,7 +29,7 @@ class Material
 		/// Shader program for ProfilePlotter
 		COLOR,
 		/// Shader program for a batch of Sprite classes
-		INSTANCED_SPRITES,
+		BATCHED_SPRITES,
 		/// A custom shader program
 		CUSTOM
 	};

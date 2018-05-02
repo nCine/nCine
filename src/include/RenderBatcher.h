@@ -18,16 +18,27 @@ class RenderBatcher
 	void reset();
 
   private:
-	static const unsigned int UniformsBufferCapacity = 64 * 1024;
+	static unsigned int MaxUniformBlockSize;
+
+	struct ManagedBuffer
+	{
+		ManagedBuffer() : size(0), freeSpace(0) { }
+
+		unsigned int size;
+		unsigned int freeSpace;
+		nctl::UniquePtr<unsigned char []> buffer;
+	};
+
+	nctl::Array<ManagedBuffer> buffers_;
 
 	nctl::Array<nctl::UniquePtr<RenderCommand> > freeCommandsPool_;
 	nctl::Array<nctl::UniquePtr<RenderCommand> > usedCommandsPool_;
 
-	/// Memory buffer to collect uniforms from all batched commands
-	nctl::StaticArray<GLubyte, UniformsBufferCapacity> uniformsBuffer_;
-
 	RenderCommand *collectCommands(nctl::Array<RenderCommand *>::ConstIterator start, nctl::Array<RenderCommand *>::ConstIterator end, nctl::Array<RenderCommand *>::ConstIterator &nextStart);
 	RenderCommand *retrieveCommandFromPool(Material::ShaderProgramType shaderProgramType);
+
+	unsigned char *acquireMemory(unsigned int bytes);
+	void createBuffer(unsigned int size);
 };
 
 }

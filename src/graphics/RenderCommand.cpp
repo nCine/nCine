@@ -8,7 +8,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 RenderCommand::RenderCommand(CommandTypes::Enum profilingType)
-	: sortKey_(0), layer_(BottomLayer), numInstances_(0), uniformBlocksCommitted_(false),
+	: sortKey_(0), layer_(BottomLayer), numInstances_(0), batchSize_(0), uniformBlocksCommitted_(false),
 	  profilingType_(profilingType), modelView_(Matrix4x4f::Identity)
 {
 
@@ -72,7 +72,7 @@ void RenderCommand::commitTransformation()
 		else if (material_.shaderProgramType() == Material::ShaderProgramType::TEXTNODE_GRAY ||
 		         material_.shaderProgramType() == Material::ShaderProgramType::TEXTNODE_COLOR)
 			material_.uniformBlock("TextnodeBlock")->uniform("modelView")->setFloatVector(modelView_.data());
-		else if (material_.shaderProgramType() != Material::ShaderProgramType::INSTANCED_SPRITES)
+		else if (material_.shaderProgramType() != Material::ShaderProgramType::BATCHED_SPRITES)
 			material_.uniform("modelView")->setFloatVector(modelView_.data());
 	}
 }

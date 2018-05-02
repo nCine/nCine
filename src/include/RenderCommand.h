@@ -43,10 +43,15 @@ class RenderCommand
 	/// Sets the rendering layer
 	inline void setLayer(unsigned int layer) { ASSERT(layer <= TopLayer); layer_ = layer; }
 
-	/// Returns the number of instances collected in the command or zero if it's not a batch
+	/// Returns the number of instances collected in the command or zero if instancing is not used
 	inline int numInstances() const { return numInstances_; }
-	/// Sets the number of instances in the batch collected in the command
+	/// Sets the number of instances collected in the command
 	inline void setNumInstances(int numInstances) { numInstances_ = numInstances; }
+
+	/// Returns the number of elements collected by the command or zero if it's not a batch
+	inline int batchSize() const { return batchSize_; }
+	/// Sets the number of batch elements collected by the command
+	inline void setBatchSize(int batchSize) { batchSize_ = batchSize; }
 
 	/// Commits all the uniform blocks of command's shader program
 	void commitUniformBlocks();
@@ -75,6 +80,7 @@ class RenderCommand
 	unsigned long int sortKey_;
 	unsigned int layer_;
 	int numInstances_;
+	int batchSize_;
 	bool uniformBlocksCommitted_;
 
 	/// Command type for profiling counter

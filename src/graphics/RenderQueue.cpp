@@ -100,9 +100,13 @@ void RenderQueue::draw()
 	for (RenderCommand *opaqueRenderCommand : *opaques)
 	{
 		const int numInstances = opaqueRenderCommand->numInstances();
+		const int batchSize = opaqueRenderCommand->batchSize();
 		if (numInstances > 0)
 			debugGroupString_.format("Opaque %u (%d %s on layer %u)",
 				commandIndex, numInstances, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
+		else if (batchSize > 0)
+			debugGroupString_.format("Opaque %u (%d %s on layer %u)",
+				commandIndex, batchSize, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
 		else
 			debugGroupString_.format("Opaque %u (%s on layer %u)",
 				commandIndex, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
@@ -120,9 +124,13 @@ void RenderQueue::draw()
 	for (RenderCommand *transparentRenderCommand : *transparents)
 	{
 		const int numInstances = transparentRenderCommand->numInstances();
+		const int batchSize = transparentRenderCommand->batchSize();
 		if (numInstances > 0)
 			debugGroupString_.format("Transparent %u (%d %s on layer %u)",
 				commandIndex, numInstances, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
+		else if (batchSize > 0)
+			debugGroupString_.format("Transparent %u (%d %s on layer %u)",
+				commandIndex, batchSize, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
 		else
 			debugGroupString_.format("Transparent %u (%s on layer %u)",
 				commandIndex, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());

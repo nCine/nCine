@@ -28,16 +28,16 @@ void RenderStatistics::appendCommandsStatistics(nctl::String &string)
 	const Commands &plotterCommands = typedCommands_[RenderCommand::CommandTypes::PLOTTER];
 
 	string.formatAppend(
-		"Sprites: %uV, %uDC (%u Tr), %uI\n"\
-		"Particles: %uV, %uDC (%u Tr), %uI\n"\
-		"Text: %uV, %uDC (%u Tr), %uI\n"\
-		"Plotter: %uV, %uDC (%u Tr), %uI\n"\
-		"Total: %uV, %uDC (%u Tr), %uI\n",
-		spriteCommands.vertices, spriteCommands.commands, spriteCommands.transparents, spriteCommands.instances,
-		particleCommands.vertices, particleCommands.commands, particleCommands.transparents, particleCommands.instances,
-		textCommands.vertices, textCommands.commands, textCommands.transparents, textCommands.instances,
-		plotterCommands.vertices, plotterCommands.commands, plotterCommands.transparents, plotterCommands.instances,
-		allCommands_.vertices, allCommands_.commands, allCommands_.transparents, allCommands_.instances);
+		"Sprites: %uV, %uDC (%u Tr), %uI/%uB\n"\
+		"Particles: %uV, %uDC (%u Tr), %uI/%uB\n"\
+		"Text: %uV, %uDC (%u Tr), %uI/%uB\n"\
+		"Plotter: %uV, %uDC (%u Tr), %uI/%uB\n"\
+		"Total: %uV, %uDC (%u Tr), %uI/%uB\n",
+		spriteCommands.vertices, spriteCommands.commands, spriteCommands.transparents, spriteCommands.instances, spriteCommands.batchSize,
+		particleCommands.vertices, particleCommands.commands, particleCommands.transparents, particleCommands.instances, particleCommands.batchSize,
+		textCommands.vertices, textCommands.commands, textCommands.transparents, textCommands.instances, textCommands.batchSize,
+		plotterCommands.vertices, plotterCommands.commands, plotterCommands.transparents, plotterCommands.instances, plotterCommands.batchSize,
+		allCommands_.vertices, allCommands_.commands, allCommands_.transparents, allCommands_.instances, allCommands_.batchSize);
 }
 
 void RenderStatistics::appendMoreStatistics(nctl::String &string)
@@ -89,11 +89,13 @@ void RenderStatistics::gatherStatistics(const RenderCommand &command)
 	typedCommands_[typeIndex].commands++;
 	typedCommands_[typeIndex].transparents += (command.material().isTransparent()) ? 1 : 0;
 	typedCommands_[typeIndex].instances += command.numInstances();
+	typedCommands_[typeIndex].batchSize += command.batchSize();
 
 	allCommands_.vertices += command.geometry().numVertices();
 	allCommands_.commands++;
 	allCommands_.transparents += (command.material().isTransparent()) ? 1 : 0;
 	allCommands_.instances += command.numInstances();
+	allCommands_.batchSize += command.batchSize();
 }
 
 void RenderStatistics::gatherStatistics(const RenderBuffersManager::ManagedBuffer &buffer)

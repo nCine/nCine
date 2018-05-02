@@ -17,11 +17,12 @@ class RenderStatistics
 		unsigned int commands;
 		unsigned int transparents;
 		unsigned int instances;
+		unsigned int batchSize;
 
-		Commands() : vertices(0), commands(0), transparents(0), instances(0) { }
+		Commands() : vertices(0), commands(0), transparents(0), instances(0), batchSize(0) { }
 
 	  private:
-		void reset() { vertices = 0; commands = 0; transparents = 0; instances = 0; }
+		void reset() { vertices = 0; commands = 0; transparents = 0; instances = 0; batchSize = 0; }
 		friend RenderStatistics;
 	};
 

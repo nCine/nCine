@@ -58,8 +58,8 @@ void Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 			setUniformsDataPointer(nullptr);
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2, position)));
 			break;
-		case ShaderProgramType::INSTANCED_SPRITES:
-			setShaderProgram(RenderResources::instancedSpritesShaderProgram());
+		case ShaderProgramType::BATCHED_SPRITES:
+			setShaderProgram(RenderResources::batchedSpritesShaderProgram());
 			// Uniforms data pointer not set at this time
 			break;
 		case ShaderProgramType::CUSTOM:

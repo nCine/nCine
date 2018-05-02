@@ -18,7 +18,7 @@ nctl::UniquePtr<GLShaderProgram> RenderResources::spriteShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::textnodeGrayShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::textnodeColorShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::colorShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::instancedSpritesShaderProgram_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::batchedSpritesShaderProgram_;
 Matrix4x4f RenderResources::projectionMatrix_;
 
 ///////////////////////////////////////////////////////////
@@ -86,15 +86,15 @@ void RenderResources::create()
 #endif
 	colorShaderProgram_->link();
 
-	instancedSpritesShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
+	batchedSpritesShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
 #ifndef WITH_EMBEDDED_SHADERS
-	instancedSpritesShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/instanced_sprites_vs.glsl").data());
-	instancedSpritesShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/sprite_fs.glsl").data());
+	batchedSpritesShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/batched_sprites_vs.glsl").data());
+	batchedSpritesShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/sprite_fs.glsl").data());
 #else
-	instancedSpritesShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::instanced_sprites_vs);
-	instancedSpritesShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::sprite_fs);
+	batchedSpritesShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::batched_sprites_vs);
+	batchedSpritesShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::sprite_fs);
 #endif
-	instancedSpritesShaderProgram_->link(GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS);
+	batchedSpritesShaderProgram_->link(GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS);
 
 	// Calculating a common projection matrix for all shader programs
 	const float width = theApplication().width();
@@ -110,7 +110,7 @@ void RenderResources::create()
 
 void RenderResources::dispose()
 {
-	instancedSpritesShaderProgram_.reset(nullptr);
+	batchedSpritesShaderProgram_.reset(nullptr);
 	colorShaderProgram_.reset(nullptr);
 	textnodeColorShaderProgram_.reset(nullptr);
 	textnodeGrayShaderProgram_.reset(nullptr);

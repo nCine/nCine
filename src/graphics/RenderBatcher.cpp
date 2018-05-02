@@ -6,13 +6,23 @@
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
+unsigned int RenderBatcher::MaxUniformBlockSize = 0;
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 RenderBatcher::RenderBatcher()
-	: freeCommandsPool_(16), usedCommandsPool_(16)
+	: buffers_(1), freeCommandsPool_(16), usedCommandsPool_(16)
 {
+	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
+	MaxUniformBlockSize = gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE);
 
+	// Create the first buffer right away
+	createBuffer(MaxUniformBlockSize);
 }
 
 ///////////////////////////////////////////////////////////
@@ -87,7 +97,9 @@ void RenderBatcher::reset()
 		freeCommandsPool_.pushBack(nctl::move(command));
 	usedCommandsPool_.clear();
 
-	uniformsBuffer_.clear();
+	// Reset managed buffers
+	for (ManagedBuffer &buffer : buffers_)
+		buffer.freeSpace = buffer.size;
 }
 
 ///////////////////////////////////////////////////////////
@@ -103,48 +115,59 @@ RenderCommand *RenderBatcher::collectCommands(
 
 	const RenderCommand *refCommand = *start;
 	RenderCommand *batchCommand = nullptr;
+	GLUniformBlockCache *instancesBlock = nullptr;
+	int spriteBlockSize = 0;
+
+	// Tracking the amount of memory required by the instances uniform blocks
+	unsigned long instancesBlockSize = 0;
 
 	if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::SPRITE)
 	{
-		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::INSTANCED_SPRITES);
-		batchCommand->setType(RenderCommand::CommandTypes::SPRITE);
+		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_SPRITES);
+		instancesBlock = batchCommand->material().uniformBlock("InstancesBlock");
+		instancesBlockSize += batchCommand->material().shaderProgram()->uniformsSize();
 
-		batchCommand->material().setUniformsDataPointer(uniformsBuffer_.data() + uniformsBuffer_.size());
-		uniformsBuffer_.setSize(uniformsBuffer_.size() + batchCommand->material().shaderProgram()->uniformsSize());
-		batchCommand->material().uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
-		batchCommand->material().uniform("projection")->setFloatVector(RenderResources::projectionMatrix().data());
+		batchCommand->setType(RenderCommand::CommandTypes::SPRITE);
+		spriteBlockSize = (*start)->material().uniformBlock("SpriteBlock")->size();
 	}
 	else
-		return nullptr;
+		FATAL_MSG("Unsupported shader for batch element");
 
-	unsigned int uniformBlockOffset = 0;
 	nctl::Array<RenderCommand *>::ConstIterator it = start;
 	while (it != end)
 	{
-		RenderCommand *command = *it;
-
-		command->commitTransformation();
-		const GLUniformBlockCache *spriteBlock = command->material().uniformBlock("SpriteBlock");
-		const int spriteBlockSize = spriteBlock->size();
-
-		const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
-		const unsigned int maxUniformBlockSize = gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE);
-		if (uniformBlockOffset + spriteBlockSize > maxUniformBlockSize)
+		// Don't request more bytes than a UBO can hold
+		if (instancesBlockSize + spriteBlockSize > MaxUniformBlockSize)
 			break;
 
-		GLUniformBlockCache *instancesBlock = batchCommand->material().uniformBlock("InstancesBlock");
-		memcpy(instancesBlock->dataPointer() + uniformBlockOffset, spriteBlock->dataPointer(), spriteBlockSize);
-		uniformBlockOffset += spriteBlockSize;
+		instancesBlockSize += spriteBlockSize;
 		++it;
 	}
 	nextStart = it;
 
+	batchCommand->material().setUniformsDataPointer(acquireMemory(instancesBlockSize));
+	batchCommand->material().uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
+	batchCommand->material().uniform("projection")->setFloatVector(RenderResources::projectionMatrix().data());
+
+	it = start;
+	unsigned int instancesBlockOffset = 0;
+	while (it != nextStart)
+	{
+		RenderCommand *command = *it;
+		command->commitTransformation();
+
+		const GLUniformBlockCache *spriteBlock = command->material().uniformBlock("SpriteBlock");
+		memcpy(instancesBlock->dataPointer() + instancesBlockOffset, spriteBlock->dataPointer(), spriteBlockSize);
+		instancesBlockOffset += spriteBlockSize;
+
+		++it;
+	}
+
 	batchCommand->material().setTexture(refCommand->material().texture());
 	batchCommand->material().setTransparent(refCommand->material().isTransparent());
-	batchCommand->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, 4);
-	batchCommand->setNumInstances(nextStart - start);
-	batchCommand->material().uniformBlock("InstancesBlock")->setUsedSize(uniformBlockOffset);
-	uniformsBuffer_.setSize(uniformsBuffer_.size() + uniformBlockOffset);
+	batchCommand->geometry().setDrawParameters(GL_TRIANGLES, 0, 6 * (nextStart - start));
+	batchCommand->setBatchSize(nextStart - start);
+	batchCommand->material().uniformBlock("InstancesBlock")->setUsedSize(instancesBlockOffset);
 
 	return batchCommand;
 }
@@ -176,6 +199,43 @@ RenderCommand *RenderBatcher::retrieveCommandFromPool(Material::ShaderProgramTyp
 	}
 
 	return retrievedCommand;
+}
+
+unsigned char *RenderBatcher::acquireMemory(unsigned int bytes)
+{
+	FATAL_ASSERT(bytes <= MaxUniformBlockSize);
+
+	unsigned char *ptr = nullptr;
+
+	for (ManagedBuffer &buffer : buffers_)
+	{
+		if (buffer.freeSpace >= bytes)
+		{
+			const unsigned int offset = buffer.size - buffer.freeSpace;
+			ptr = buffer.buffer.get() + offset;
+			buffer.freeSpace -= bytes;
+			break;
+		}
+	}
+
+	if (ptr == nullptr)
+	{
+		createBuffer(MaxUniformBlockSize);
+		ptr = buffers_.back().buffer.get();
+		buffers_.back().freeSpace -= bytes;
+	}
+
+	return ptr;
+}
+
+void RenderBatcher::createBuffer(unsigned int size)
+{
+	ManagedBuffer managedBuffer;
+	managedBuffer.size = size;
+	managedBuffer.freeSpace = size;
+	managedBuffer.buffer = nctl::makeUnique<unsigned char []>(size);
+
+	buffers_.pushBack(nctl::move(managedBuffer));
 }
 
 }
