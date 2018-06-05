@@ -177,17 +177,12 @@ void Application::step()
 		profilePlotter_->addValue(0, profileTimer_->interval());
 
 	if (profilePlotter_)
-	{
-		profilePlotter_->enableUpdate(renderingSettings_.showProfilerGraphs);
-		profilePlotter_->enableDraw(renderingSettings_.showProfilerGraphs);
-	}
+		profilePlotter_->setEnabled(renderingSettings_.showProfilerGraphs);
 
 	if (textLines_ && textLines2_)
 	{
-		textLines_->enableUpdate(renderingSettings_.showProfilerText);
-		textLines_->enableDraw(renderingSettings_.showProfilerText);
-		textLines2_->enableUpdate(renderingSettings_.showProfilerText);
-		textLines2_->enableDraw(renderingSettings_.showProfilerText);
+		textLines_->setEnabled(renderingSettings_.showProfilerText);
+		textLines2_->setEnabled(renderingSettings_.showProfilerText);
 	}
 
 	profileTimer_->start();

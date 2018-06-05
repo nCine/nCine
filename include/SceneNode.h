@@ -54,10 +54,18 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Renders the node
 	virtual void draw(RenderQueue &renderQueue) { }
 
-	/// Enables node updating
-	inline void enableUpdate(bool shouldUpdate) { shouldUpdate_ = shouldUpdate; }
-	/// Enables node drawing
-	inline void enableDraw(bool shouldDraw) { shouldDraw_ = shouldDraw; }
+	/// Returns true if the node is updating
+	inline bool updateEnabled() const { return updateEnabled_; }
+	/// Enables or disables node updating
+	inline void setUpdateEnabled(bool updateEnabled) { updateEnabled_ = updateEnabled; }
+	/// Returns true if the node is drawing
+	inline bool drawEnabled() const { return drawEnabled_; }
+	/// Enables or disables node drawing
+	inline void setDrawEnabled(bool drawEnabled) { drawEnabled_ = drawEnabled; }
+	/// Returns true if the node is both updating and drawing
+	inline bool enabled() const { return (updateEnabled_ == true && drawEnabled_ == true); }
+	/// Enables or disables both node updating and drawing
+	inline void setEnabled(bool enabled) { updateEnabled_ = enabled; drawEnabled_ = enabled; }
 
 	/// Returns node position relative to its parent
 	inline Vector2f position() const { return Vector2f(x, y); }
@@ -111,8 +119,8 @@ class DLL_PUBLIC SceneNode : public Object
 	inline const Matrix4x4f &localMatrix() const { return localMatrix_; }
 
   protected:
-	bool shouldUpdate_;
-	bool shouldDraw_;
+	bool updateEnabled_;
+	bool drawEnabled_;
 
 	/// A pointer to the parent node
 	SceneNode *parent_;

@@ -181,10 +181,10 @@ void MyEventHandler::onInit()
 	{
 		textures_[i] = nctl::makeUnique<nc::Texture>((texPath + filenames_[i]).data());
 		sprites_[i] = nctl::makeUnique<nc::Sprite>(dummy_.get(), textures_[i].get());
-		sprites_[i]->enableDraw(false);
+		sprites_[i]->setEnabled(false);
 	}
 
-	sprites_[selected_]->enableDraw(true);
+	sprites_[selected_]->setEnabled(true);
 	textNode_->setString(filenames_[selected_]);
 	textNode_->setPosition(0.0f, nc::theApplication().height() * VerticalTextPos - textNode_->height() * 0.5f);
 }
@@ -246,8 +246,8 @@ void MyEventHandler::handleInput(Direction direction)
 
 	if (newSelection_ != selected_)
 	{
-		sprites_[selected_]->enableDraw(false);
-		sprites_[newSelection_]->enableDraw(true);
+		sprites_[selected_]->setEnabled(false);
+		sprites_[newSelection_]->setEnabled(true);
 		textNode_->setString(filenames_[newSelection_]);
 		textNode_->setPosition(0.0f, nc::theApplication().height() * VerticalTextPos - textNode_->height() * 0.5f);
 		selected_ = newSelection_;

@@ -18,7 +18,7 @@ const float SceneNode::MinRotation = 0.5f;
 
 /*! \param parent The parent can be `nullptr` */
 SceneNode::SceneNode(SceneNode *parent, float xx, float yy)
-	: Object(ObjectType::SCENENODE), x(xx), y(yy), shouldUpdate_(true), shouldDraw_(true), parent_(nullptr),
+	: Object(ObjectType::SCENENODE), x(xx), y(yy), updateEnabled_(true), drawEnabled_(true), parent_(nullptr),
 	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
 	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {
@@ -131,7 +131,7 @@ void SceneNode::update(float interval)
 
 	for (SceneNode *child : children_)
 	{
-		if (child->shouldUpdate_)
+		if (child->updateEnabled_)
 		{
 #ifndef WITH_MULTITHREADING
 			child->update(interval);
@@ -149,7 +149,7 @@ void SceneNode::visit(RenderQueue &renderQueue)
 
 	for (SceneNode *child : children_)
 	{
-		if (child->shouldDraw_)
+		if (child->drawEnabled_)
 		{
 			child->draw(renderQueue);
 			child->visit(renderQueue);
