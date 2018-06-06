@@ -15,10 +15,12 @@ namespace ncine {
 nctl::UniquePtr<RenderBuffersManager> RenderResources::buffersManager_;
 nctl::UniquePtr<RenderVaoPool> RenderResources::vaoPool_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::spriteShaderProgram_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::meshspriteShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::textnodeGrayShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::textnodeColorShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::colorShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedSpritesShaderProgram_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::batchedMeshSpritesShaderProgram_;
 Matrix4x4f RenderResources::projectionMatrix_;
 
 ///////////////////////////////////////////////////////////
@@ -55,6 +57,16 @@ void RenderResources::create()
 	spriteShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::sprite_fs);
 #endif
 	spriteShaderProgram_->link();
+
+	meshspriteShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
+#ifndef WITH_EMBEDDED_SHADERS
+	meshspriteShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/meshsprite_vs.glsl").data());
+	meshspriteShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/sprite_fs.glsl").data());
+#else
+	meshspriteShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::meshsprite_vs);
+	meshspriteShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::sprite_fs);
+#endif
+	meshspriteShaderProgram_->link();
 
 	textnodeGrayShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
 #ifndef WITH_EMBEDDED_SHADERS
@@ -96,6 +108,16 @@ void RenderResources::create()
 #endif
 	batchedSpritesShaderProgram_->link(GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS);
 
+	batchedMeshSpritesShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
+#ifndef WITH_EMBEDDED_SHADERS
+	batchedMeshSpritesShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/batched_meshsprites_vs.glsl").data());
+	batchedMeshSpritesShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/sprite_fs.glsl").data());
+#else
+	batchedMeshSpritesShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::batched_meshsprites_vs);
+	batchedMeshSpritesShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::sprite_fs);
+#endif
+	batchedMeshSpritesShaderProgram_->link(GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS);
+
 	// Calculating a common projection matrix for all shader programs
 	const float width = theApplication().width();
 	const float height = theApplication().height();
@@ -110,10 +132,12 @@ void RenderResources::create()
 
 void RenderResources::dispose()
 {
+	batchedMeshSpritesShaderProgram_.reset(nullptr);
 	batchedSpritesShaderProgram_.reset(nullptr);
 	colorShaderProgram_.reset(nullptr);
 	textnodeColorShaderProgram_.reset(nullptr);
 	textnodeGrayShaderProgram_.reset(nullptr);
+	meshspriteShaderProgram_.reset(nullptr);
 	spriteShaderProgram_.reset(nullptr);
 	vaoPool_.reset(nullptr);
 	buffersManager_.reset(nullptr);

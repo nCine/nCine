@@ -23,6 +23,7 @@ class RenderCommand
 			GENERIC = 0,
 			PLOTTER,
 			SPRITE,
+			MESH_SPRITE,
 			PARTICLE,
 			TEXT,
 
@@ -74,7 +75,13 @@ class RenderCommand
 	inline Material &material() { return material_; }
 	inline Geometry &geometry() { return geometry_; }
 
+	/// Commits the modelview matrix uniform
 	void commitTransformation();
+
+	/// Copy the vertices stored in host memory to video memory
+	/*! This step is not needed if the command uses a custom VBO
+	 * or directly writes into the common one */
+	void commitVertices();
 
   private:
 	unsigned long int sortKey_;
@@ -82,6 +89,7 @@ class RenderCommand
 	int numInstances_;
 	int batchSize_;
 	bool uniformBlocksCommitted_;
+	bool verticesCommitted_;
 
 	/// Command type for profiling counter
 	CommandTypes::Enum profilingType_;

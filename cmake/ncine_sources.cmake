@@ -32,7 +32,9 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/StackedBarPlotter.cpp
 	${NCINE_ROOT}/src/graphics/DrawableNode.cpp
 	${NCINE_ROOT}/src/graphics/SceneNode.cpp
+	${NCINE_ROOT}/src/graphics/BaseSprite.cpp
 	${NCINE_ROOT}/src/graphics/Sprite.cpp
+	${NCINE_ROOT}/src/graphics/MeshSprite.cpp
 	${NCINE_ROOT}/src/Application.cpp
 	${NCINE_ROOT}/src/AppConfiguration.cpp
 	${NCINE_ROOT}/src/graphics/Particle.cpp

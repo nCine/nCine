@@ -23,17 +23,20 @@ RenderStatistics::VaoPool RenderStatistics::vaoPool_;
 void RenderStatistics::appendCommandsStatistics(nctl::String &string)
 {
 	const Commands &spriteCommands = typedCommands_[RenderCommand::CommandTypes::SPRITE];
+	const Commands &meshspriteCommands = typedCommands_[RenderCommand::CommandTypes::MESH_SPRITE];
 	const Commands &particleCommands = typedCommands_[RenderCommand::CommandTypes::PARTICLE];
 	const Commands &textCommands = typedCommands_[RenderCommand::CommandTypes::TEXT];
 	const Commands &plotterCommands = typedCommands_[RenderCommand::CommandTypes::PLOTTER];
 
 	string.formatAppend(
 		"Sprites: %uV, %uDC (%u Tr), %uI/%uB\n"\
+		"Mesh Sprites: %uV, %uDC (%u Tr), %uI/%uB\n"\
 		"Particles: %uV, %uDC (%u Tr), %uI/%uB\n"\
 		"Text: %uV, %uDC (%u Tr), %uI/%uB\n"\
 		"Plotter: %uV, %uDC (%u Tr), %uI/%uB\n"\
 		"Total: %uV, %uDC (%u Tr), %uI/%uB\n",
 		spriteCommands.vertices, spriteCommands.commands, spriteCommands.transparents, spriteCommands.instances, spriteCommands.batchSize,
+		meshspriteCommands.vertices, meshspriteCommands.commands, meshspriteCommands.transparents, meshspriteCommands.instances, meshspriteCommands.batchSize,
 		particleCommands.vertices, particleCommands.commands, particleCommands.transparents, particleCommands.instances, particleCommands.batchSize,
 		textCommands.vertices, textCommands.commands, textCommands.transparents, textCommands.instances, textCommands.batchSize,
 		plotterCommands.vertices, plotterCommands.commands, plotterCommands.transparents, plotterCommands.instances, plotterCommands.batchSize,
@@ -83,6 +86,9 @@ void RenderStatistics::reset()
 
 void RenderStatistics::gatherStatistics(const RenderCommand &command)
 {
+	if (command.geometry().numVertices() == 0)
+		return;
+
 	const unsigned int typeIndex = command.type();
 	typedCommands_[typeIndex].vertices += (command.numInstances() > 0) ?
 		command.geometry().numVertices() * command.numInstances() : command.geometry().numVertices();

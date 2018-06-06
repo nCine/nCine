@@ -43,7 +43,9 @@ set(HEADERS
 	${NCINE_ROOT}/include/IGfxCapabilities.h
 	${NCINE_ROOT}/include/Texture.h
 	${NCINE_ROOT}/include/SceneNode.h
+	${NCINE_ROOT}/include/BaseSprite.h
 	${NCINE_ROOT}/include/Sprite.h
+	${NCINE_ROOT}/include/MeshSprite.h
 	${NCINE_ROOT}/include/Application.h
 	${NCINE_ROOT}/include/AppConfiguration.h
 	${NCINE_ROOT}/include/ParticleAffectors.h

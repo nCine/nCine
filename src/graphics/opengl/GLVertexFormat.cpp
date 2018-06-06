@@ -72,7 +72,21 @@ void GLVertexFormat::define()
 		{
 			attributes_[i].vbo_->bind();
 			glEnableVertexAttribArray(attributes_[i].index_);
-			glVertexAttribPointer(attributes_[i].index_, attributes_[i].size_, attributes_[i].type_, GL_FALSE, attributes_[i].stride_, attributes_[i].pointer_);
+
+			switch (attributes_[i].type_)
+			{
+				case GL_BYTE:
+				case GL_UNSIGNED_BYTE:
+				case GL_SHORT:
+				case GL_UNSIGNED_SHORT:
+				case GL_INT:
+				case GL_UNSIGNED_INT:
+					glVertexAttribIPointer(attributes_[i].index_, attributes_[i].size_, attributes_[i].type_, attributes_[i].stride_, attributes_[i].pointer_);
+					break;
+				default:
+					glVertexAttribPointer(attributes_[i].index_, attributes_[i].size_, attributes_[i].type_, GL_FALSE, attributes_[i].stride_, attributes_[i].pointer_);
+					break;
+			}
 		}
 	}
 }

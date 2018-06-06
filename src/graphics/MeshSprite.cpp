@@ -1,0 +1,147 @@
+#include <cstring> // for memcpy()
+#include "MeshSprite.h"
+#include "RenderCommand.h"
+
+namespace ncine {
+
+///////////////////////////////////////////////////////////
+// CONSTRUCTORS and DESTRUCTOR
+///////////////////////////////////////////////////////////
+
+/*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
+MeshSprite::MeshSprite(SceneNode *parent, Texture *texture)
+	: MeshSprite(parent, texture, 0.0f, 0.0f)
+{
+
+}
+
+/*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
+MeshSprite::MeshSprite(Texture *texture)
+	: MeshSprite(nullptr, texture, 0.0f, 0.0f)
+{
+
+}
+
+/*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
+MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, float x, float y)
+	: BaseSprite(parent, texture, x, y), interleavedVertices_(16), vertexDataPointer_(nullptr), numVertices_(0)
+{
+	ASSERT(texture);
+
+	type_ = ObjectType::MESH_SPRITE;
+	setLayer(DrawableNode::LayerBase::SCENE);
+	renderCommand_->setType(RenderCommand::CommandTypes::MESH_SPRITE);
+	renderCommand_->material().setShaderProgramType(Material::ShaderProgramType::MESH_SPRITE);
+	spriteBlock_ = renderCommand_->material().uniformBlock("MeshSpriteBlock");
+	renderCommand_->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, 0);
+	renderCommand_->geometry().setNumElementsPerVertex(sizeof(Vertex) / sizeof(float));
+	renderCommand_->geometry().setHostVertexPointer(reinterpret_cast<const float *>(vertexDataPointer_));
+
+	setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
+}
+
+/*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
+MeshSprite::MeshSprite(Texture *texture, float x, float y)
+	: MeshSprite(nullptr, texture, x, y)
+{
+
+}
+
+///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void MeshSprite::copyVertices(unsigned int numVertices, const Vertex *vertices)
+{
+	interleavedVertices_.setSize(0);
+	interleavedVertices_.setSize(numVertices);
+	memcpy(interleavedVertices_.data(), vertices, numVertices * sizeof(Vertex));
+
+	vertexDataPointer_ = interleavedVertices_.data();
+	numVertices_ = numVertices;
+	renderCommand_->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, numVertices);
+	renderCommand_->geometry().setHostVertexPointer(reinterpret_cast<const float *>(vertexDataPointer_));
+}
+
+void MeshSprite::copyVertices(const MeshSprite &meshSprite)
+{
+	copyVertices(meshSprite.numVertices_, meshSprite.vertexDataPointer_);
+	width_ = meshSprite.width_;
+	height_ = meshSprite.height_;
+}
+
+void MeshSprite::setVertices(unsigned int numVertices, const Vertex *vertices)
+{
+	interleavedVertices_.setSize(0);
+
+	vertexDataPointer_ = vertices;
+	numVertices_ = numVertices;
+	renderCommand_->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, numVertices);
+	renderCommand_->geometry().setHostVertexPointer(reinterpret_cast<const float *>(vertexDataPointer_));
+}
+
+void MeshSprite::setVertices(const MeshSprite &meshSprite)
+{
+	setVertices(meshSprite.numVertices_, meshSprite.vertexDataPointer_);
+	width_ = meshSprite.width_;
+	height_ = meshSprite.height_;
+}
+
+void MeshSprite::createVerticesFromTexels(unsigned int numVertices, const Vector2f *points, TextureCutMode cutMode)
+{
+	FATAL_ASSERT(numVertices >= 3);
+
+	interleavedVertices_.setSize(0);
+	interleavedVertices_.setSize(numVertices);
+	Vector2f min(0.0f, 0.0f);
+
+	if (cutMode == TextureCutMode::CROP)
+	{
+		min = points[0];
+		Vector2f max(min);
+		for (unsigned int i = 1; i < numVertices; i++)
+		{
+			if (points[i].x > max.x)
+				max.x = points[i].x;
+			else if (points[i].x < min.x)
+				min.x = points[i].x;
+
+			if (points[i].y > max.y)
+				max.y = points[i].y;
+			else if (points[i].y < min.y)
+				min.y = points[i].y;
+		}
+
+		width_ = max.x - min.x;
+		height_ = max.y - min.y;
+	}
+	else
+	{
+		width_ = static_cast<float>(texRect_.w);
+		height_ = static_cast<float>(texRect_.h);
+	}
+
+	const float halfWidth = width_ * 0.5f;
+	const float halfHeight = height_ * 0.5f;
+
+	for (unsigned int i = 0; i < numVertices; i++)
+	{
+		Vertex &v = interleavedVertices_[i];
+		v.x = (points[i].x - min.x - halfWidth) / width_; // from -0.5 to 0.5
+		v.y = (points[i].y - min.y - halfHeight) / height_; // from -0.5 to 0.5
+		v.u = points[i].x / (texRect_.w - texRect_.x);
+		v.v = (texRect_.h - points[i].y) / (texRect_.h - texRect_.y); // flipped
+	}
+
+	vertexDataPointer_ = interleavedVertices_.data();
+	numVertices_ = numVertices;
+	renderCommand_->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, numVertices);
+	renderCommand_->geometry().setHostVertexPointer(reinterpret_cast<const float *>(vertexDataPointer_));
+}
+
+void MeshSprite::createVerticesFromTexels(unsigned int numVertices, const Vector2f *points)
+{
+	createVerticesFromTexels(numVertices, points, TextureCutMode::RESIZE);
+}
+
+}

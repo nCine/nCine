@@ -28,13 +28,23 @@ class RenderResources
 		GLfloat texcoords[2];
 	};
 
+	/// A vertex format structure for vertices with positions, texture coordinates and draw indices
+	struct VertexFormatPos2Tex2Index
+	{
+		GLfloat position[2];
+		GLfloat texcoords[2];
+		int drawindex;
+	};
+
 	static inline RenderBuffersManager &buffersManager() { return *buffersManager_; }
 	static inline RenderVaoPool &vaoPool() { return *vaoPool_; }
 	static inline GLShaderProgram *spriteShaderProgram() { return spriteShaderProgram_.get(); }
+	static inline GLShaderProgram *meshspriteShaderProgram() { return meshspriteShaderProgram_.get(); }
 	static inline GLShaderProgram *textnodeGrayShaderProgram() { return textnodeGrayShaderProgram_.get(); }
 	static inline GLShaderProgram *textnodeColorShaderProgram() { return textnodeColorShaderProgram_.get(); }
 	static inline GLShaderProgram *colorShaderProgram() { return colorShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedSpritesShaderProgram() { return batchedSpritesShaderProgram_.get(); }
+	static inline GLShaderProgram *batchedMeshSpritesShaderProgram() { return batchedMeshSpritesShaderProgram_.get(); }
 	static inline const Matrix4x4f &projectionMatrix() { return projectionMatrix_; }
 
 	static void createMinimal();
@@ -43,10 +53,12 @@ class RenderResources
 	static nctl::UniquePtr<RenderBuffersManager> buffersManager_;
 	static nctl::UniquePtr<RenderVaoPool> vaoPool_;
 	static nctl::UniquePtr<GLShaderProgram> spriteShaderProgram_;
+	static nctl::UniquePtr<GLShaderProgram> meshspriteShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> textnodeGrayShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> textnodeColorShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> colorShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedSpritesShaderProgram_;
+	static nctl::UniquePtr<GLShaderProgram> batchedMeshSpritesShaderProgram_;
 
 	static Matrix4x4f projectionMatrix_;
 

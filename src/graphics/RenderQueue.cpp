@@ -45,6 +45,7 @@ const char *commandTypeString(const RenderCommand &command)
 		case RenderCommand::CommandTypes::GENERIC: return "generic";
 		case RenderCommand::CommandTypes::PLOTTER: return "plotter";
 		case RenderCommand::CommandTypes::SPRITE: return "sprite";
+		case RenderCommand::CommandTypes::MESH_SPRITE: return "mesh sprite";
 		case RenderCommand::CommandTypes::PARTICLE: return "particle";
 		case RenderCommand::CommandTypes::TEXT: return "text";
 		default: return "unknown";
@@ -77,22 +78,28 @@ void RenderQueue::draw()
 		transparents = &transparentBatchedQueue_;
 	}
 
-	// Avoid GPU stalls by uploading to UBOs before drawing
+	// Avoid GPU stalls by uploading to UBOs and VBOs before drawing
 	if (opaques->isEmpty() == false)
 	{
-		GLDebug::ScopedGroup scoped("Committing uniform blocks in opaques");
+		GLDebug::ScopedGroup scoped("Committing uniform blocks and vertices in opaques");
 		for (RenderCommand *opaqueRenderCommand : *opaques)
+		{
+			opaqueRenderCommand->commitVertices();
 			opaqueRenderCommand->commitUniformBlocks();
+		}
 	}
 
 	if (transparents->isEmpty() == false)
 	{
-		GLDebug::ScopedGroup scoped("Committing uniform blocks in transparents");
+		GLDebug::ScopedGroup scoped("Committing uniform blocks and vertices in transparents");
 		for (RenderCommand *transparentRenderCommand : *transparents)
+		{
+			transparentRenderCommand->commitVertices();
 			transparentRenderCommand->commitUniformBlocks();
+		}
 	}
 
-	// Now that UBOs have been updated, they can be flushed and unmapped
+	// Now that UBOs and VBOs have been updated, they can be flushed and unmapped
 	RenderResources::buffersManager().flushUnmap();
 
 	unsigned int commandIndex = 0;

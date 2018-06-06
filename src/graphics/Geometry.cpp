@@ -1,3 +1,4 @@
+#include <cstring> // for memcpy()
 #include "Geometry.h"
 #include "RenderResources.h"
 #include "RenderStatistics.h"
@@ -9,7 +10,8 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Geometry::Geometry()
-	: primitiveType_(GL_TRIANGLES), firstVertex_(0), numVertices_(0), sharedVboParams_(nullptr)
+	: primitiveType_(GL_TRIANGLES), firstVertex_(0), numVertices_(0),
+	  numElementsPerVertex_(2), hostVertexPointer_(nullptr), sharedVboParams_(nullptr)
 {
 
 }
@@ -44,7 +46,7 @@ void Geometry::createCustomVbo(unsigned int numFloats, GLenum usage)
 	RenderStatistics::addCustomVbo(vbo_->size());
 }
 
-GLfloat *Geometry::acquireVertexPointer(unsigned int numFloats)
+GLfloat *Geometry::acquireVertexPointer(unsigned int numFloats, unsigned int numFloatsAlignment)
 {
 	ASSERT(vbo_ == nullptr);
 
@@ -54,7 +56,7 @@ GLfloat *Geometry::acquireVertexPointer(unsigned int numFloats)
 	{
 		const RenderBuffersManager::BufferTypes::Enum bufferType = RenderBuffersManager::BufferTypes::ARRAY;
 		if (vboParams_.mapBase == nullptr)
-			vboParams_ = RenderResources::buffersManager().acquireMemory(bufferType, numFloats * sizeof(GLfloat));
+			vboParams_ = RenderResources::buffersManager().acquireMemory(bufferType, numFloats * sizeof(GLfloat), numFloatsAlignment * sizeof(GLfloat));
 	}
 
 	return reinterpret_cast<GLfloat *>(vboParams_.mapBase + vboParams_.offset);
@@ -66,7 +68,7 @@ GLfloat *Geometry::acquireVertexPointer()
 
 	if (vboParams_.mapBase == nullptr)
 	{
-		const GLenum mapFlags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_UNSYNCHRONIZED_BIT;
+		const GLenum mapFlags = RenderResources::buffersManager().specs(RenderBuffersManager::BufferTypes::ARRAY).mapFlags;
 		vboParams_.mapBase = static_cast<GLubyte *>(vbo_->mapBufferRange(0, vbo_->size(), mapFlags));
 	}
 
@@ -108,8 +110,7 @@ void Geometry::draw(GLsizei numInstances)
 	if (sharedVboParams_)
 		vboParams_ = *sharedVboParams_;
 
-	// HACK: Hard-coded float vertices made of 2 components
-	const unsigned int offset = (vboParams_.offset / 2) / sizeof(GLfloat);
+	const unsigned int offset = (vboParams_.offset / numElementsPerVertex_) / sizeof(GLfloat);
 	const void *offsetPtr = reinterpret_cast<const void *>(offset);
 
 	if (numInstances == 0)
@@ -125,6 +126,17 @@ void Geometry::draw(GLsizei numInstances)
 			glDrawElementsInstanced(primitiveType_, numVertices_, GL_UNSIGNED_SHORT, offsetPtr, numInstances);
 		else
 			glDrawArraysInstanced(primitiveType_, offset + firstVertex_, numVertices_, numInstances);
+	}
+}
+
+void Geometry::commitVertices()
+{
+	if (hostVertexPointer_)
+	{
+		const unsigned int numFloats = numVertices_ * numElementsPerVertex_;
+		GLfloat *vertices = acquireVertexPointer(numFloats, numElementsPerVertex_);
+		memcpy(vertices, hostVertexPointer_, numFloats * sizeof(GLfloat));
+		releaseVertexPointer();
 	}
 }
 

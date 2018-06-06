@@ -40,9 +40,13 @@ RenderBuffersManager::RenderBuffersManager(unsigned long vboMaxSize)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-const RenderBuffersManager::Parameters RenderBuffersManager::acquireMemory(BufferTypes::Enum type, unsigned long bytes)
+const RenderBuffersManager::Parameters RenderBuffersManager::acquireMemory(BufferTypes::Enum type, unsigned long bytes, unsigned int alignment)
 {
 	FATAL_ASSERT(bytes <= specs_[type].maxSize);
+
+	// Accepting a custom alignment only if it is a multiple of the specification one
+	if (alignment % specs_[type].alignment != 0)
+		alignment = specs_[type].alignment;
 
 	Parameters params;
 
@@ -50,7 +54,6 @@ const RenderBuffersManager::Parameters RenderBuffersManager::acquireMemory(Buffe
 	{
 		if (buffer.type == type)
 		{
-			const unsigned int alignment = specs_[buffer.type].alignment;
 			const unsigned long offset = buffer.size - buffer.freeSpace;
 			const unsigned int alignAmount = (alignment - offset % alignment) % alignment;
 

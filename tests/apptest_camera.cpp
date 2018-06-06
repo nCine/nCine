@@ -363,8 +363,28 @@ void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 
 void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event)
 {
-	if (event.buttonName == nc::ButtonName::B)
+	nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
+
+	if (event.buttonName == nc::ButtonName::A)
+		settings.batchingEnabled = !settings.batchingEnabled;
+	else if (event.buttonName == nc::ButtonName::Y)
+		settings.cullingEnabled = !settings.cullingEnabled;
+	else if (event.buttonName == nc::ButtonName::X)
+	{
+		withAtlas_ = !withAtlas_;
+		withAtlas_ ? setupAtlas() : setupTextures();
+	}
+	else if (event.buttonName == nc::ButtonName::BACK)
+	{
+		settings.showProfilerGraphs = !settings.showProfilerGraphs;
+		settings.showProfilerText = !settings.showProfilerText;
+	}
+	else if (event.buttonName == nc::ButtonName::START)
+		pause_ = !pause_;
+	else if (event.buttonName == nc::ButtonName::B)
 		resetCamera();
+	else if (event.buttonName == nc::ButtonName::GUIDE)
+		nc::theApplication().quit();
 }
 
 void MyEventHandler::onJoyDisconnected(const nc::JoyConnectionEvent &event)

@@ -22,6 +22,8 @@ class Material
 	{
 		/// Shader program for Sprite classes
 		SPRITE = 0,
+		/// Shader program for MeshSprite classes
+		MESH_SPRITE,
 		/// Shader program for TextNode classes with grayscale font texture
 		TEXTNODE_GRAY,
 		/// Shader program for TextNode classes with color font texture
@@ -30,6 +32,8 @@ class Material
 		COLOR,
 		/// Shader program for a batch of Sprite classes
 		BATCHED_SPRITES,
+		/// Shader program for a batch of MeshSprite classes
+		BATCHED_MESH_SPRITES,
 		/// A custom shader program
 		CUSTOM
 	};

@@ -21,17 +21,29 @@ class Geometry
 	inline GLint firstVertex() const { return firstVertex_; }
 	/// Returns the number of vertices
 	inline GLsizei numVertices() const { return numVertices_; }
+	/// Returns the number of float elements that composes the vertex format
+	inline unsigned int numElementsPerVertex() const { return numElementsPerVertex_; }
 
 	/// Sets all the drawing parameters
 	void setDrawParameters(GLenum primitiveType, GLint firstVertex, GLsizei numVertices);
+	/// Sets the number of float elements that composes the vertex format
+	inline void setNumElementsPerVertex(unsigned int numElements) { numElementsPerVertex_ = numElements; }
 	/// Creates a custom VBO that is unique to this `Geometry` object
 	void createCustomVbo(unsigned int numFloats, GLenum usage);
 	/// Retrieves a pointer that can be used to write vertex data from a custom VBO owned by this object
-	GLfloat *acquireVertexPointer(unsigned int numFloats);
+	/*! This overloaded version allows a custom alignment specification */
+	GLfloat *acquireVertexPointer(unsigned int numFloats, unsigned int numFloatsAlignment);
+	/// Retrieves a pointer that can be used to write vertex data from a custom VBO owned by this object
+	inline GLfloat *acquireVertexPointer(unsigned int numFloats) { return acquireVertexPointer(numFloats, 1); }
 	/// Retrieves a pointer that can be used to write vertex data from a VBO owned by the buffers manager
 	GLfloat *acquireVertexPointer();
 	/// Releases the pointer used to write vertex data
 	void releaseVertexPointer();
+
+	/// Returns a pointer into host memory containing vertex data to be copied into a VBO
+	inline const float *hostVertexPointer() const { return hostVertexPointer_; }
+	/// Sets a pointer into host memory containing vertex data to be copied into a VBO
+	inline void setHostVertexPointer(const float *vertexPointer) { hostVertexPointer_ = vertexPointer; }
 
 	/// Shares the VBO of another `Geometry` object
 	void shareVbo(const Geometry &geometry);
@@ -40,6 +52,8 @@ class Geometry
 	GLenum primitiveType_;
 	GLint firstVertex_;
 	GLsizei numVertices_;
+	unsigned int numElementsPerVertex_;
+	const float *hostVertexPointer_;
 
 	nctl::UniquePtr<GLBufferObject> vbo_;
 	nctl::UniquePtr<GLBufferObject> ibo_;
@@ -49,6 +63,7 @@ class Geometry
 
 	void bind();
 	void draw(GLsizei numInstances);
+	void commitVertices();
 
 	/// Deleted copy constructor
 	Geometry(const Geometry &) = delete;

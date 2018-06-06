@@ -9,7 +9,7 @@ namespace ncine {
 
 RenderCommand::RenderCommand(CommandTypes::Enum profilingType)
 	: sortKey_(0), layer_(BottomLayer), numInstances_(0), batchSize_(0), uniformBlocksCommitted_(false),
-	  profilingType_(profilingType), modelView_(Matrix4x4f::Identity)
+	  verticesCommitted_(false), profilingType_(profilingType), modelView_(Matrix4x4f::Identity)
 {
 
 }
@@ -42,12 +42,17 @@ void RenderCommand::calculateSortKey()
 
 void RenderCommand::issue()
 {
+	if (geometry_.numVertices_ == 0)
+		return;
+
 	material_.bind();
 	commitTransformation();
 	material_.commitUniforms();
 	commitUniformBlocks();
 	uniformBlocksCommitted_ = false;
 
+	commitVertices();
+	verticesCommitted_ = false;
 	geometry_.bind();
 	material_.defineVertexFormat(geometry_.vboParams_.object);
 	geometry_.draw(numInstances_);
@@ -67,13 +72,25 @@ void RenderCommand::commitTransformation()
 	{
 		if (material_.shaderProgramType() == Material::ShaderProgramType::SPRITE)
 			material_.uniformBlock("SpriteBlock")->uniform("modelView")->setFloatVector(modelView_.data());
+		else if (material_.shaderProgramType() == Material::ShaderProgramType::MESH_SPRITE)
+			material_.uniformBlock("MeshSpriteBlock")->uniform("modelView")->setFloatVector(modelView_.data());
 		else if (material_.shaderProgramType() == Material::ShaderProgramType::COLOR)
 			material_.uniformBlock("ColorBlock")->uniform("modelView")->setFloatVector(modelView_.data());
 		else if (material_.shaderProgramType() == Material::ShaderProgramType::TEXTNODE_GRAY ||
 		         material_.shaderProgramType() == Material::ShaderProgramType::TEXTNODE_COLOR)
 			material_.uniformBlock("TextnodeBlock")->uniform("modelView")->setFloatVector(modelView_.data());
-		else if (material_.shaderProgramType() != Material::ShaderProgramType::BATCHED_SPRITES)
+		else if (material_.shaderProgramType() != Material::ShaderProgramType::BATCHED_SPRITES &&
+		         material_.shaderProgramType() != Material::ShaderProgramType::BATCHED_MESH_SPRITES)
 			material_.uniform("modelView")->setFloatVector(modelView_.data());
+	}
+}
+
+void RenderCommand::commitVertices()
+{
+	if (verticesCommitted_ == false)
+	{
+		geometry_.commitVertices();
+		verticesCommitted_ = true;
 	}
 }
 

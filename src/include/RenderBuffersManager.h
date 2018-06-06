@@ -22,6 +22,16 @@ class RenderBuffersManager
 		};
 	};
 
+	struct BufferSpecifications
+	{
+		BufferTypes::Enum type;
+		GLenum target;
+		GLenum mapFlags;
+		GLenum usageFlags;
+		unsigned long maxSize;
+		GLuint alignment;
+	};
+
 	struct Parameters
 	{
 		Parameters() : object(nullptr), size(0), offset(0), mapBase(nullptr) { }
@@ -34,20 +44,14 @@ class RenderBuffersManager
 
 	RenderBuffersManager(unsigned long vboMaxSize);
 
+	/// Returns the specifications for a buffer of the specified type
+	inline const BufferSpecifications &specs(BufferTypes::Enum type) const { return specs_[type]; }
 	/// Requests an amount of bytes from the specified buffer type
-	const Parameters acquireMemory(BufferTypes::Enum type, unsigned long bytes);
+	inline const Parameters acquireMemory(BufferTypes::Enum type, unsigned long bytes) { return acquireMemory(type, bytes, specs_[type].alignment); }
+	/// Requests an amount of bytes from the specified buffer type with a custom alignment requirement
+	const Parameters acquireMemory(BufferTypes::Enum type, unsigned long bytes, unsigned int alignment);
 
   private:
-	struct BufferSpecifications
-	{
-		BufferTypes::Enum type;
-		GLenum target;
-		GLenum mapFlags;
-		GLenum usageFlags;
-		unsigned long maxSize;
-		GLuint alignment;
-	};
-
 	BufferSpecifications specs_[BufferTypes::COUNT];
 
 	struct ManagedBuffer
