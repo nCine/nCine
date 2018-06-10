@@ -11,7 +11,9 @@ namespace ncine {
 
 Geometry::Geometry()
 	: primitiveType_(GL_TRIANGLES), firstVertex_(0), numVertices_(0),
-	  numElementsPerVertex_(2), hostVertexPointer_(nullptr), sharedVboParams_(nullptr)
+	  numElementsPerVertex_(2), numIndices_(0),
+	  hostVertexPointer_(nullptr), hostIndexPointer_(nullptr),
+	  sharedVboParams_(nullptr), sharedIboParams_(nullptr)
 {
 
 }
@@ -20,6 +22,9 @@ Geometry::~Geometry()
 {
 	if (vbo_)
 		RenderStatistics::removeCustomVbo(vbo_->size());
+
+	if (ibo_)
+		RenderStatistics::removeCustomIbo(ibo_->size());
 }
 
 ///////////////////////////////////////////////////////////
@@ -92,15 +97,71 @@ void Geometry::shareVbo(const Geometry &geometry)
 	sharedVboParams_ = &geometry.vboParams_;
 }
 
+void Geometry::createCustomIbo(unsigned int numIndices, GLenum usage)
+{
+	ibo_ = nctl::makeUnique<GLBufferObject>(GL_ELEMENT_ARRAY_BUFFER);
+	ibo_->bufferData(numIndices * sizeof(GLushort), nullptr, usage);
+
+	iboParams_.object = ibo_.get();
+	iboParams_.size = ibo_->size();
+	iboParams_.offset = 0;
+	iboParams_.mapBase = nullptr;
+
+	RenderStatistics::addCustomIbo(ibo_->size());
+}
+
+GLushort *Geometry::acquireIndexPointer(unsigned int numIndices)
+{
+	ASSERT(ibo_ == nullptr);
+
+	if (sharedIboParams_)
+		iboParams_ = *sharedIboParams_;
+	else
+	{
+		const RenderBuffersManager::BufferTypes::Enum bufferType = RenderBuffersManager::BufferTypes::ELEMENT_ARRAY;
+		if (iboParams_.mapBase == nullptr)
+			iboParams_ = RenderResources::buffersManager().acquireMemory(bufferType, numIndices * sizeof(GLushort));
+	}
+
+	return reinterpret_cast<GLushort *>(iboParams_.mapBase + iboParams_.offset);
+}
+
+GLushort *Geometry::acquireIndexPointer()
+{
+	ASSERT(ibo_);
+
+	if (iboParams_.mapBase == nullptr)
+	{
+		const GLenum mapFlags = RenderResources::buffersManager().specs(RenderBuffersManager::BufferTypes::ELEMENT_ARRAY).mapFlags;
+		iboParams_.mapBase = static_cast<GLubyte *>(ibo_->mapBufferRange(0, ibo_->size(), mapFlags));
+	}
+
+	return reinterpret_cast<GLushort *>(iboParams_.mapBase);
+}
+
+void Geometry::releaseIndexPointer()
+{
+	// Don't flush and unmap if the IBO is not custom
+	if (ibo_ && iboParams_.mapBase != nullptr)
+	{
+		iboParams_.object->flushMappedBufferRange(iboParams_.offset, iboParams_.size);
+		iboParams_.object->unmap();
+	}
+	iboParams_.mapBase = nullptr;
+}
+
+void Geometry::shareIbo(const Geometry &geometry)
+{
+	ibo_.reset(nullptr);
+	sharedIboParams_ = &geometry.iboParams_;
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
 void Geometry::bind()
 {
-	if (ibo_)
-		ibo_->bind();
-
 	if (vboParams_.object)
 		vboParams_.object->bind();
 }
@@ -109,23 +170,29 @@ void Geometry::draw(GLsizei numInstances)
 {
 	if (sharedVboParams_)
 		vboParams_ = *sharedVboParams_;
+	const GLint vboOffset = static_cast<GLint>(vboParams_.offset / numElementsPerVertex_ / sizeof(GLfloat));
 
-	const unsigned int offset = (vboParams_.offset / numElementsPerVertex_) / sizeof(GLfloat);
-	const void *offsetPtr = reinterpret_cast<const void *>(offset);
+	void *iboOffsetPtr = nullptr;
+	if (numIndices_ > 0)
+	{
+		if (sharedIboParams_)
+			iboParams_ = *sharedIboParams_;
+		iboOffsetPtr = reinterpret_cast<void *>(iboParams_.offset);
+	}
 
 	if (numInstances == 0)
 	{
-		if (ibo_)
-			glDrawElements(primitiveType_, numVertices_, GL_UNSIGNED_SHORT, offsetPtr);
+		if (numIndices_ > 0)
+			glDrawElementsBaseVertex(primitiveType_, numIndices_, GL_UNSIGNED_SHORT, iboOffsetPtr, vboOffset + firstVertex_);
 		else
-			glDrawArrays(primitiveType_, offset + firstVertex_, numVertices_);
+			glDrawArrays(primitiveType_, vboOffset + firstVertex_, numVertices_);
 	}
 	else if (numInstances > 0)
 	{
-		if (ibo_)
-			glDrawElementsInstanced(primitiveType_, numVertices_, GL_UNSIGNED_SHORT, offsetPtr, numInstances);
+		if (numIndices_ > 0)
+			glDrawElementsInstancedBaseVertex(primitiveType_, numIndices_, GL_UNSIGNED_SHORT, iboOffsetPtr, numInstances, vboOffset + firstVertex_);
 		else
-			glDrawArraysInstanced(primitiveType_, offset + firstVertex_, numVertices_, numInstances);
+			glDrawArraysInstanced(primitiveType_, vboOffset + firstVertex_, numVertices_, numInstances);
 	}
 }
 
@@ -139,5 +206,16 @@ void Geometry::commitVertices()
 		releaseVertexPointer();
 	}
 }
+
+void Geometry::commitIndices()
+{
+	if (hostIndexPointer_)
+	{
+		GLushort *indices = acquireIndexPointer(numIndices_);
+		memcpy(indices, hostIndexPointer_, numIndices_ * sizeof(GLushort));
+		releaseIndexPointer();
+	}
+}
+
 
 }

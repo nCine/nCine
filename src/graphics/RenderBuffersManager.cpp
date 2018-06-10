@@ -8,7 +8,7 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-RenderBuffersManager::RenderBuffersManager(unsigned long vboMaxSize)
+RenderBuffersManager::RenderBuffersManager(unsigned long vboMaxSize, unsigned long iboMaxSize)
 	: buffers_(4)
 {
 	BufferSpecifications &vboSpecs = specs_[BufferTypes::ARRAY];
@@ -18,6 +18,14 @@ RenderBuffersManager::RenderBuffersManager(unsigned long vboMaxSize)
 	vboSpecs.usageFlags = GL_STREAM_DRAW;
 	vboSpecs.maxSize = vboMaxSize;
 	vboSpecs.alignment = sizeof(GLfloat);
+
+	BufferSpecifications &iboSpecs = specs_[BufferTypes::ELEMENT_ARRAY];
+	iboSpecs.type = BufferTypes::ELEMENT_ARRAY;
+	iboSpecs.target = GL_ELEMENT_ARRAY_BUFFER;
+	iboSpecs.mapFlags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_UNSYNCHRONIZED_BIT;
+	iboSpecs.usageFlags = GL_STREAM_DRAW;
+	iboSpecs.maxSize = iboMaxSize;
+	iboSpecs.alignment = sizeof(GLushort);
 
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
 	const int maxUniformBlockSize = gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE);

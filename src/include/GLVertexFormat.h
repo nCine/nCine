@@ -45,6 +45,8 @@ class GLVertexFormat
 	GLVertexFormat();
 	GLVertexFormat(const GLVertexFormat &other);
 
+	inline const GLBufferObject *ibo() const { return ibo_; }
+	inline void setIbo(const GLBufferObject *ibo) { ibo_ = ibo; }
 	void define();
 	void reset();
 
@@ -56,6 +58,7 @@ class GLVertexFormat
 
   private:
 	nctl::StaticArray<Attribute, MaxAttributes> attributes_;
+	const GLBufferObject *ibo_;
 };
 
 }

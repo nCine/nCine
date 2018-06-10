@@ -83,6 +83,11 @@ class RenderCommand
 	 * or directly writes into the common one */
 	void commitVertices();
 
+	/// Copy the indices stored in host memory to video memory
+	/*! This step is not needed if the command uses a custom IBO
+	 * or directly writes into the common one */
+	void commitIndices();
+
   private:
 	unsigned long int sortKey_;
 	unsigned int layer_;
@@ -90,6 +95,7 @@ class RenderCommand
 	int batchSize_;
 	bool uniformBlocksCommitted_;
 	bool verticesCommitted_;
+	bool indicesCommitted_;
 
 	/// Command type for profiling counter
 	CommandTypes::Enum profilingType_;

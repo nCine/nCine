@@ -31,8 +31,9 @@ void RenderResources::createMinimal()
 {
 	LOGI("Creating a minimal set of rendering resources...");
 
-	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(theApplication().appConfiguration().vboSize());
-	vaoPool_ = nctl::makeUnique<RenderVaoPool>(theApplication().appConfiguration().vaoPoolSize());
+	const AppConfiguration &appCfg = theApplication().appConfiguration();
+	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.vboSize(), appCfg.iboSize());
+	vaoPool_ = nctl::makeUnique<RenderVaoPool>(appCfg.vaoPoolSize());
 
 	LOGI("Minimal rendering resources created");
 }
@@ -45,8 +46,9 @@ void RenderResources::create()
 {
 	LOGI("Creating rendering resources...");
 
-	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(theApplication().appConfiguration().vboSize());
-	vaoPool_ = nctl::makeUnique<RenderVaoPool>(theApplication().appConfiguration().vaoPoolSize());
+	const AppConfiguration &appCfg = theApplication().appConfiguration();
+	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.vboSize(), appCfg.iboSize());
+	vaoPool_ = nctl::makeUnique<RenderVaoPool>(appCfg.vaoPoolSize());
 
 	spriteShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
 #ifndef WITH_EMBEDDED_SHADERS

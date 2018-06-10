@@ -78,23 +78,25 @@ void RenderQueue::draw()
 		transparents = &transparentBatchedQueue_;
 	}
 
-	// Avoid GPU stalls by uploading to UBOs and VBOs before drawing
+	// Avoid GPU stalls by uploading to VBOs, IBOs and UBOs before drawing
 	if (opaques->isEmpty() == false)
 	{
-		GLDebug::ScopedGroup scoped("Committing uniform blocks and vertices in opaques");
+		GLDebug::ScopedGroup scoped("Committing vertices, indices and uniform blocks in opaques");
 		for (RenderCommand *opaqueRenderCommand : *opaques)
 		{
 			opaqueRenderCommand->commitVertices();
+			opaqueRenderCommand->commitIndices();
 			opaqueRenderCommand->commitUniformBlocks();
 		}
 	}
 
 	if (transparents->isEmpty() == false)
 	{
-		GLDebug::ScopedGroup scoped("Committing uniform blocks and vertices in transparents");
+		GLDebug::ScopedGroup scoped("Committing vertices, indices and uniform blocks in transparents");
 		for (RenderCommand *transparentRenderCommand : *transparents)
 		{
 			transparentRenderCommand->commitVertices();
+			transparentRenderCommand->commitIndices();
 			transparentRenderCommand->commitUniformBlocks();
 		}
 	}

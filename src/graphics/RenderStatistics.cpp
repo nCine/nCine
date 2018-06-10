@@ -11,7 +11,8 @@ RenderStatistics::Commands RenderStatistics::allCommands_;
 RenderStatistics::Commands RenderStatistics::typedCommands_[RenderCommand::CommandTypes::COUNT];
 RenderStatistics::Buffers RenderStatistics::typedBuffers_[RenderBuffersManager::BufferTypes::COUNT];
 RenderStatistics::Textures RenderStatistics::textures_;
-RenderStatistics::CustomVbos RenderStatistics::customVbos_;
+RenderStatistics::CustomBuffers RenderStatistics::customVbos_;
+RenderStatistics::CustomBuffers RenderStatistics::customIbos_;
 unsigned int RenderStatistics::index = 0;
 unsigned int RenderStatistics::culledNodes_[2] = {0, 0};
 RenderStatistics::VaoPool RenderStatistics::vaoPool_;
@@ -46,6 +47,7 @@ void RenderStatistics::appendCommandsStatistics(nctl::String &string)
 void RenderStatistics::appendMoreStatistics(nctl::String &string)
 {
 	const Buffers &vboBuffers = typedBuffers_[RenderBuffersManager::BufferTypes::ARRAY];
+	const Buffers &iboBuffers = typedBuffers_[RenderBuffersManager::BufferTypes::ELEMENT_ARRAY];
 	const Buffers &uboBuffers = typedBuffers_[RenderBuffersManager::BufferTypes::UNIFORM];
 
 	string.formatAppend(
@@ -53,13 +55,17 @@ void RenderStatistics::appendMoreStatistics(nctl::String &string)
 		"%u/%u VAOs (%u reuses, %u bindings)\n"\
 		"%.2f Kb in %u Texture(s)\n"\
 		"%.2f Kb in %u custom VBO(s)\n"\
+		"%.2f Kb in %u custom IBO(s)\n"\
 		"%.2f/%u Kb in %u VBO(s)\n"\
+		"%.2f/%u Kb in %u IBO(s)\n"\
 		"%.2f/%u Kb in %u UBO(s)\n",
 		culledNodes_[(index + 1) % 2],
 		vaoPool_.size, vaoPool_.capacity, vaoPool_.reuses, vaoPool_.bindings,
 		textures_.dataSize / 1024.0f, textures_.count,
 		customVbos_.dataSize / 1024.0f, customVbos_.count,
+		customIbos_.dataSize / 1024.0f, customIbos_.count,
 		vboBuffers.usedSpace / 1024.0f, vboBuffers.size / 1024, vboBuffers.count,
+		iboBuffers.usedSpace / 1024.0f, iboBuffers.size / 1024, iboBuffers.count,
 		uboBuffers.usedSpace / 1024.0f, uboBuffers.size / 1024, uboBuffers.count);
 }
 

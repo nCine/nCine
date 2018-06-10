@@ -16,6 +16,7 @@ class RenderBuffersManager
 		enum Enum
 		{
 			ARRAY = 0,
+			ELEMENT_ARRAY,
 			UNIFORM,
 
 			COUNT
@@ -42,7 +43,7 @@ class RenderBuffersManager
 		GLubyte *mapBase;
 	};
 
-	RenderBuffersManager(unsigned long vboMaxSize);
+	RenderBuffersManager(unsigned long vboMaxSize, unsigned long iboMaxSize);
 
 	/// Returns the specifications for a buffer of the specified type
 	inline const BufferSpecifications &specs(BufferTypes::Enum type) const { return specs_[type]; }

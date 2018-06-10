@@ -32,6 +32,9 @@ void RenderVaoPool::bindVao(const GLVertexFormat &vertexFormat)
 			GLDebug::pushGroup("Bind VAO");
 			vaoFound = true;
 			binding.object->bind();
+			// Binding a VAO changes the current bound element array buffer
+			const GLuint iboHandle = vertexFormat.ibo() ? vertexFormat.ibo()->glHandle() : 0;
+			GLBufferObject::setBoundHandle(GL_ELEMENT_ARRAY_BUFFER, iboHandle);
 			binding.lastBindTime = Timer::now();
 			RenderStatistics::addVaoPoolBinding();
 			break;
@@ -64,8 +67,11 @@ void RenderVaoPool::bindVao(const GLVertexFormat &vertexFormat)
 			RenderStatistics::addVaoPoolReuse();
 		}
 
-		vaoPool_[index].format = vertexFormat;
 		vaoPool_[index].object->bind();
+		// Binding a VAO changes the current bound element array buffer
+		const GLuint oldIboHandle = vaoPool_[index].format.ibo() ? vaoPool_[index].format.ibo()->glHandle() : 0;
+		GLBufferObject::setBoundHandle(GL_ELEMENT_ARRAY_BUFFER, oldIboHandle);
+		vaoPool_[index].format = vertexFormat;
 		vaoPool_[index].format.define();
 		vaoPool_[index].lastBindTime = Timer::now();
 		RenderStatistics::addVaoPoolBinding();

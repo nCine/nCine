@@ -51,6 +51,21 @@ class DLL_PUBLIC MeshSprite : public BaseSprite
 	/// Creates an internal set of vertices from an external array of points in texture space
 	void createVerticesFromTexels(unsigned int numVertices, const Vector2f *points);
 
+	/// Returns the number of indices used to draw the sprite mesh
+	inline unsigned int numIndices() const { return numIndices_; }
+	/// Returns the indices used to draw the sprite mesh
+	inline const unsigned short *indices() const { return indexDataPointer_; }
+	/// Returns true if the indices belong to the sprite and are not stored externally
+	inline bool uniqueIndices() const { return indexDataPointer_ == indices_.data(); }
+	/// Copies the indices from a pointer into the sprite
+	void copyIndices(unsigned int numIndices, const unsigned short *indices);
+	/// Copies the indices from another sprite
+	void copyIndices(const MeshSprite &meshSprite);
+	/// Sets the indices data to point to an external array
+	void setIndices(unsigned int numIndices, const unsigned short *indices);
+	/// Sets the indices data to the data used by another sprite
+	void setIndices(const MeshSprite &meshSprite);
+
 	inline static ObjectType sType() { return ObjectType::MESH_SPRITE; }
 
   private:
@@ -60,6 +75,13 @@ class DLL_PUBLIC MeshSprite : public BaseSprite
 	const Vertex *vertexDataPointer_;
 	/// The number of vertices, either shared or not, that composes the mesh
 	unsigned int numVertices_;
+
+	/// The array of indices used to draw the sprite mesh
+	nctl::Array<unsigned short> indices_;
+	/// Pointer to index data, either from a shared array or unique to this sprite
+	const unsigned short *indexDataPointer_;
+	/// The number of indices, either shared or not, that composes the mesh
+	unsigned int numIndices_;
 };
 
 

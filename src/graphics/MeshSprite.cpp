@@ -24,7 +24,9 @@ MeshSprite::MeshSprite(Texture *texture)
 
 /*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
 MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, float x, float y)
-	: BaseSprite(parent, texture, x, y), interleavedVertices_(16), vertexDataPointer_(nullptr), numVertices_(0)
+	: BaseSprite(parent, texture, x, y),
+	  interleavedVertices_(16), vertexDataPointer_(nullptr), numVertices_(0),
+	  indices_(16), indexDataPointer_(nullptr), numIndices_(0)
 {
 	ASSERT(texture);
 
@@ -142,6 +144,38 @@ void MeshSprite::createVerticesFromTexels(unsigned int numVertices, const Vector
 void MeshSprite::createVerticesFromTexels(unsigned int numVertices, const Vector2f *points)
 {
 	createVerticesFromTexels(numVertices, points, TextureCutMode::RESIZE);
+}
+
+void MeshSprite::copyIndices(unsigned int numIndices, const unsigned short *indices)
+{
+	indices_.setSize(0);
+	indices_.setSize(numIndices);
+	memcpy(indices_.data(), indices, numIndices * sizeof(unsigned short));
+
+	indexDataPointer_ = indices_.data();
+	numIndices_ = numIndices;
+	renderCommand_->geometry().setNumIndices(numIndices_);
+	renderCommand_->geometry().setHostIndexPointer(indexDataPointer_);
+}
+
+void MeshSprite::copyIndices(const MeshSprite &meshSprite)
+{
+	copyIndices(meshSprite.numIndices_, meshSprite.indexDataPointer_);
+}
+
+void MeshSprite::setIndices(unsigned int numIndices, const unsigned short *indices)
+{
+	indices_.setSize(0);
+
+	indexDataPointer_ = indices;
+	numIndices_ = numIndices;
+	renderCommand_->geometry().setNumIndices(numIndices_);
+	renderCommand_->geometry().setHostIndexPointer(indexDataPointer_);
+}
+
+void MeshSprite::setIndices(const MeshSprite &meshSprite)
+{
+	setIndices(meshSprite.numIndices_, meshSprite.indexDataPointer_);
 }
 
 }

@@ -53,13 +53,13 @@ class RenderStatistics
 		friend RenderStatistics;
 	};
 
-	class CustomVbos
+	class CustomBuffers
 	{
 	  public:
 		unsigned int count;
 		unsigned long dataSize;
 
-		CustomVbos() : count(0), dataSize(0) { }
+		CustomBuffers() : count(0), dataSize(0) { }
 
 	  private:
 		void reset() { count = 0; dataSize = 0; }
@@ -93,7 +93,10 @@ class RenderStatistics
 	static inline const Textures &textures() { return textures_; }
 
 	/// Returns aggregated custom VBOs statistics
-	static inline const CustomVbos &customVBOs() { return customVbos_; }
+	static inline const CustomBuffers &customVBOs() { return customVbos_; }
+
+	/// Returns aggregated custom IBOs statistics
+	static inline const CustomBuffers &customIBOs() { return customIbos_; }
 
 	/// Returns the number of `DrawableNodes` culled because outside of the screen
 	static inline unsigned int culled() { return culledNodes_[(index + 1) % 2]; }
@@ -111,7 +114,8 @@ class RenderStatistics
 	static Commands typedCommands_[RenderCommand::CommandTypes::COUNT];
 	static Buffers typedBuffers_[RenderBuffersManager::BufferTypes::COUNT];
 	static Textures textures_;
-	static CustomVbos customVbos_;
+	static CustomBuffers customVbos_;
+	static CustomBuffers customIbos_;
 	static unsigned int index;
 	static unsigned int culledNodes_[2];
 	static VaoPool vaoPool_;
@@ -124,6 +128,8 @@ class RenderStatistics
 	static inline void removeTexture(unsigned long datasize) { textures_.count--; textures_.dataSize -= datasize; }
 	static inline void addCustomVbo(unsigned long datasize) { customVbos_.count++; customVbos_.dataSize += datasize; }
 	static inline void removeCustomVbo(unsigned long datasize) { customVbos_.count--; customVbos_.dataSize -= datasize; }
+	static inline void addCustomIbo(unsigned long datasize) { customIbos_.count++; customIbos_.dataSize += datasize; }
+	static inline void removeCustomIbo(unsigned long datasize) { customIbos_.count--; customIbos_.dataSize -= datasize; }
 	static inline void addCulledNode() { culledNodes_[index]++; }
 	static inline void addVaoPoolReuse() { vaoPool_.reuses++; }
 	static inline void addVaoPoolBinding() { vaoPool_.bindings++; }

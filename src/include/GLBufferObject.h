@@ -59,6 +59,9 @@ class GLBufferObject
 	GLBufferObject(const GLBufferObject &) = delete;
 	/// Deleted assignment operator
 	GLBufferObject &operator=(const GLBufferObject &) = delete;
+
+	inline static void setBoundHandle(GLenum target, GLuint glHandle) { boundBuffers_[target] = glHandle; }
+	friend class RenderVaoPool;
 };
 
 }

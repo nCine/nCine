@@ -128,10 +128,10 @@ RenderCommand *RenderBatcher::collectCommands(
 	GLUniformBlockCache *instancesBlock = nullptr;
 	int spriteBlockSize = 0;
 
-	// Tracking the amount of memory required by the instances uniform blocks
+	// Tracking the amount of memory required by uniform blocks, vertices and indices of all instances
 	unsigned long instancesBlockSize = 0;
-	// Tracking the amount of memory required by the instances vertices
 	unsigned long instancesVertexDataSize = 0;
+	unsigned int instancesIndicesAmount = 0;
 
 	if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::SPRITE)
 	{
@@ -154,49 +154,86 @@ RenderCommand *RenderBatcher::collectCommands(
 	else
 		FATAL_MSG("Unsupported shader for batch element");
 
-	const unsigned int maxVertexDataSize = RenderResources::buffersManager().specs(RenderBuffersManager::BufferTypes::ARRAY).maxSize;
+	// Set to true if at least one command in the batch has indices or forced by a rendering settings
+	bool batchingWithIndices =  theApplication().renderingSettings().batchingWithIndices;
+	// Sum the amount of UBO memory required by the batch and determine if indices are needed
 	nctl::Array<RenderCommand *>::ConstIterator it = start;
 	while (it != end)
 	{
+		if ((*it)->geometry().numIndices() > 0)
+			batchingWithIndices = true;
+
 		// Don't request more bytes than a UBO can hold
 		if (instancesBlockSize + spriteBlockSize > MaxUniformBlockSize)
 			break;
 		else
 			instancesBlockSize += spriteBlockSize;
 
+		++it;
+	}
+	nextStart = it;
+
+	const unsigned long maxVertexDataSize = RenderResources::buffersManager().specs(RenderBuffersManager::BufferTypes::ARRAY).maxSize;
+	const unsigned long maxIndexDataSize = RenderResources::buffersManager().specs(RenderBuffersManager::BufferTypes::ELEMENT_ARRAY).maxSize;
+	// Sum the amount of VBO and IBO memory required by the batch
+	it = start;
+	while (it != nextStart)
+	{
+		unsigned int vertexDataSize = 0;
+		unsigned int numIndices = (*it)->geometry().numIndices();
+
 		if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::MESH_SPRITE)
 		{
-			const unsigned int numVertices = (*it)->geometry().numVertices() + 2; // plus two degenerates
+			unsigned int numVertices = (*it)->geometry().numVertices();
+			if (batchingWithIndices == false)
+				numVertices += 2; // plus two degenerates if indices are not used
 			const unsigned int numElementsPerVertex = (*it)->geometry().numElementsPerVertex() + 1; // plus the mesh index
-			const unsigned int vertexDataSize = numVertices * numElementsPerVertex * sizeof(GLfloat);
+			vertexDataSize = numVertices * numElementsPerVertex * sizeof(GLfloat);
 
-			if (instancesVertexDataSize + vertexDataSize > maxVertexDataSize)
-				break;
-			else
-				instancesVertexDataSize += vertexDataSize;
+			if (batchingWithIndices)
+				numIndices = (numIndices > 0) ? numIndices + 2 :  numVertices + 2;
+		}
+
+		// Don't request more bytes than a common VBO or IBO can hold
+		if (instancesVertexDataSize + vertexDataSize > maxVertexDataSize ||
+			(instancesIndicesAmount + numIndices) * sizeof(GLushort) > maxIndexDataSize ||
+			instancesIndicesAmount + numIndices > 65535)
+			break;
+		else
+		{
+			instancesVertexDataSize += vertexDataSize;
+			instancesIndicesAmount += numIndices;
 		}
 
 		++it;
 	}
 	nextStart = it;
 
-	// Remove the two missing degenerate vertices from first and last elements
-	instancesVertexDataSize -= 2 * (refCommand->geometry().numElementsPerVertex() + 1) * sizeof(GLfloat);
+	// Remove the two missing degenerate vertices or indices from first and last elements
+	if (instancesIndicesAmount > 0)
+		instancesIndicesAmount -= 2;
+	else
+		instancesVertexDataSize -= 2 * (refCommand->geometry().numElementsPerVertex() + 1) * sizeof(GLfloat);
 
 	batchCommand->material().setUniformsDataPointer(acquireMemory(instancesBlockSize));
 	batchCommand->material().uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
 	batchCommand->material().uniform("projection")->setFloatVector(RenderResources::projectionMatrix().data());
 
-	RenderResources::VertexFormatPos2Tex2Index *dest = nullptr;
+	RenderResources::VertexFormatPos2Tex2Index *destVtx = nullptr;
+	GLushort *destIdx = nullptr;
 	if (batchCommand->material().shaderProgramType() == Material::ShaderProgramType::BATCHED_MESH_SPRITES)
 	{
 		const unsigned int numFloats = instancesVertexDataSize / sizeof(GLfloat);
 		const unsigned int numFloatsAlignment = sizeof(RenderResources::VertexFormatPos2Tex2Index) / sizeof(GLfloat);
-		dest = reinterpret_cast<RenderResources::VertexFormatPos2Tex2Index *>(batchCommand->geometry().acquireVertexPointer(numFloats, numFloatsAlignment));
+		destVtx = reinterpret_cast<RenderResources::VertexFormatPos2Tex2Index *>(batchCommand->geometry().acquireVertexPointer(numFloats, numFloatsAlignment));
+
+		if (instancesIndicesAmount > 0)
+			destIdx = batchCommand->geometry().acquireIndexPointer(instancesIndicesAmount);
 	}
 
 	it = start;
 	unsigned int instancesBlockOffset = 0;
+	unsigned short batchFirstVertexId = 0;
 	while (it != nextStart)
 	{
 		RenderCommand *command = *it;
@@ -216,30 +253,62 @@ RenderCommand *RenderBatcher::collectCommands(
 
 			const unsigned int numVertices = command->geometry().numVertices();
 			const int meshIndex = it - start;
-			const RenderResources::VertexFormatPos2Tex2 *src = reinterpret_cast<const RenderResources::VertexFormatPos2Tex2 *>(command->geometry().hostVertexPointer());
-			FATAL_ASSERT(src != nullptr);
+			const RenderResources::VertexFormatPos2Tex2 *srcVtx = reinterpret_cast<const RenderResources::VertexFormatPos2Tex2 *>(command->geometry().hostVertexPointer());
+			FATAL_ASSERT(srcVtx != nullptr);
 
 			// Vertex of a degenerate triangle, if not a starting element and there are more than one in the batch
-			if (it != start && nextStart - start > 1)
+			if (it != start && nextStart - start > 1 && !batchingWithIndices)
 			{
-				memcpy(dest, src, sizeof(RenderResources::VertexFormatPos2Tex2));
-				dest->index = meshIndex;
-				dest++;
+				memcpy(destVtx, srcVtx, sizeof(RenderResources::VertexFormatPos2Tex2));
+				destVtx->drawindex = meshIndex;
+				destVtx++;
 			}
 			for (unsigned int i = 0; i < numVertices; i++)
 			{
-				memcpy(dest, src, sizeof(RenderResources::VertexFormatPos2Tex2));
-				dest->index = meshIndex;
-				dest++;
-				src++;
+				memcpy(destVtx, srcVtx, sizeof(RenderResources::VertexFormatPos2Tex2));
+				destVtx->drawindex = meshIndex;
+				destVtx++;
+				srcVtx++;
 			}
 			// Vertex of a degenerate triangle, if not an ending element and there are more than one in the batch
-			if (it != nextStart - 1 && nextStart - start > 1)
+			if (it != nextStart - 1 && nextStart - start > 1 && !batchingWithIndices)
 			{
-				src--;
-				memcpy(dest, src, sizeof(RenderResources::VertexFormatPos2Tex2));
-				dest->index = meshIndex;
-				dest++;
+				srcVtx--;
+				memcpy(destVtx, srcVtx, sizeof(RenderResources::VertexFormatPos2Tex2));
+				destVtx->drawindex = meshIndex;
+				destVtx++;
+			}
+
+			unsigned short vertexId = 0;
+			if (instancesIndicesAmount > 0)
+			{
+				const unsigned int numIndices =  command->geometry().numIndices() ? command->geometry().numIndices() : numVertices;
+				const GLushort *srcIdx = command->geometry().hostIndexPointer();
+
+				// Index of a degenerate triangle, if not a starting element and there are more than one in the batch
+				if (it != start && nextStart - start > 1)
+				{
+					*destIdx = batchFirstVertexId + (srcIdx ? *srcIdx : vertexId);
+					destIdx++;
+				}
+				for (unsigned int i = 0; i < numIndices; i++)
+				{
+					*destIdx = batchFirstVertexId + (srcIdx ? *srcIdx : vertexId);
+					destIdx++;
+					vertexId++;
+					if (srcIdx)
+						srcIdx++;
+				}
+				// Index of a degenerate triangle, if not an ending element and there are more than one in the batch
+				if (it != nextStart - 1 && nextStart - start > 1)
+				{
+					if (srcIdx)
+						srcIdx--;
+					*destIdx = batchFirstVertexId + (srcIdx ? *srcIdx : vertexId-1);
+					destIdx++;
+				}
+
+				batchFirstVertexId += srcIdx ? numVertices : vertexId;
 			}
 		}
 
@@ -247,7 +316,11 @@ RenderCommand *RenderBatcher::collectCommands(
 	}
 
 	if (batchCommand->material().shaderProgramType() == Material::ShaderProgramType::BATCHED_MESH_SPRITES)
+	{
 		batchCommand->geometry().releaseVertexPointer();
+		if (destIdx)
+			batchCommand->geometry().releaseIndexPointer();
+	}
 
 	batchCommand->material().setTexture(refCommand->material().texture());
 	batchCommand->material().setTransparent(refCommand->material().isTransparent());
@@ -261,6 +334,7 @@ RenderCommand *RenderBatcher::collectCommands(
 		const unsigned int totalVertices = instancesVertexDataSize / sizeof(RenderResources::VertexFormatPos2Tex2Index);
 		batchCommand->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, totalVertices);
 		batchCommand->geometry().setNumElementsPerVertex(sizeof(RenderResources::VertexFormatPos2Tex2Index) / sizeof(GLfloat));
+		batchCommand->geometry().setNumIndices(instancesIndicesAmount);
 	}
 
 	return batchCommand;

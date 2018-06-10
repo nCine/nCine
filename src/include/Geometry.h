@@ -48,22 +48,48 @@ class Geometry
 	/// Shares the VBO of another `Geometry` object
 	void shareVbo(const Geometry &geometry);
 
+	/// Returns the number of indices used to render the geometry
+	inline unsigned int numIndices() const { return numIndices_; }
+	/// Sets the number of indices used to render the geometry
+	inline void setNumIndices(unsigned int numIndices) { numIndices_ = numIndices; }
+	/// Creates a custom IBO that is unique to this `Geometry` object
+	void createCustomIbo(unsigned int numIndices, GLenum usage);
+	/// Retrieves a pointer that can be used to write index data from a custom IBO owned by this object
+	GLushort *acquireIndexPointer(unsigned int numIndices);
+	/// Retrieves a pointer that can be used to write index data from a IBO owned by the buffers manager
+	GLushort *acquireIndexPointer();
+	/// Releases the pointer used to write index data
+	void releaseIndexPointer();
+
+	/// Returns a pointer into host memory containing index data to be copied into a IBO
+	inline const GLushort *hostIndexPointer() const { return hostIndexPointer_; }
+	/// Sets a pointer into host memory containing index data to be copied into a IBO
+	inline void setHostIndexPointer(const GLushort *indexPointer) { hostIndexPointer_ = indexPointer; }
+
+	/// Shares the IBO of another `Geometry` object
+	void shareIbo(const Geometry &geometry);
+
   private:
 	GLenum primitiveType_;
 	GLint firstVertex_;
 	GLsizei numVertices_;
 	unsigned int numElementsPerVertex_;
+	unsigned int numIndices_;
 	const float *hostVertexPointer_;
+	const GLushort *hostIndexPointer_;
 
 	nctl::UniquePtr<GLBufferObject> vbo_;
-	nctl::UniquePtr<GLBufferObject> ibo_;
-
 	RenderBuffersManager::Parameters vboParams_;
 	const RenderBuffersManager::Parameters *sharedVboParams_;
+
+	nctl::UniquePtr<GLBufferObject> ibo_;
+	RenderBuffersManager::Parameters iboParams_;
+	const RenderBuffersManager::Parameters *sharedIboParams_;
 
 	void bind();
 	void draw(GLsizei numInstances);
 	void commitVertices();
+	void commitIndices();
 
 	/// Deleted copy constructor
 	Geometry(const Geometry &) = delete;

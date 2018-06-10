@@ -25,11 +25,13 @@ class DLL_PUBLIC Application
 	struct RenderingSettings
 	{
 		RenderingSettings() :
-			batchingEnabled(true), cullingEnabled(true), minBatchSize(4), maxBatchSize(500),
-			showProfilerGraphs(true), showProfilerText(true) { }
+			batchingEnabled(true), batchingWithIndices(false), cullingEnabled(true),
+			minBatchSize(4), maxBatchSize(500), showProfilerGraphs(true), showProfilerText(true) { }
 
 		/// True if batching is enabled
 		bool batchingEnabled;
+		/// True if using indices for vertex batching
+		bool batchingWithIndices;
 		/// True if node culling is enabled
 		bool cullingEnabled;
 		/// Minimum size for a batch to be collected

@@ -64,14 +64,18 @@ GLVertexFormat::Attribute *GLShaderAttributes::attribute(const char *name)
 }
 
 
-void GLShaderAttributes::defineVertexFormat(const GLBufferObject *vbo)
+void GLShaderAttributes::defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo)
 {
 	if (shaderProgram_)
 	{
-		for (int location : attributeLocations_)
-			vertexFormat_[location].setVbo(vbo);
+		if (vbo)
+		{
+			for (int location : attributeLocations_)
+				vertexFormat_[location].setVbo(vbo);
+			vertexFormat_.setIbo(ibo);
 
-		RenderResources::vaoPool().bindVao(vertexFormat_);
+			RenderResources::vaoPool().bindVao(vertexFormat_);
+		}
 	}
 	else
 		LOGE("No shader program associated");

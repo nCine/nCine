@@ -28,8 +28,9 @@ AppConfiguration::AppConfiguration()
 	, windowIconFilename_(128)
 	, fontTexFilename_(128)
 	, fontFntFilename_(128)
-	, vboSize_(8 * 1024)
-	, vaoPoolSize_(8)
+	, vboSize_(64 * 1024)
+	, iboSize_(8 * 1024)
+	, vaoPoolSize_(16)
 	, withProfilerGraphs_(true)
 	, withProfilerText_(true)
 	, withAudio_(true)
@@ -117,6 +118,11 @@ void AppConfiguration::setFontFntFilename(const nctl::String &fontFntFilename)
 void AppConfiguration::setVboSize(unsigned long vboSize)
 {
 	vboSize_ = vboSize;
+}
+
+void AppConfiguration::setIboSize(unsigned long iboSize)
+{
+	iboSize_ = iboSize;
 }
 
 void AppConfiguration::setVaoPoolSize(unsigned int vaoPoolSize)

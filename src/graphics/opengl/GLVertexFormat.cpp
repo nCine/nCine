@@ -9,7 +9,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GLVertexFormat::GLVertexFormat()
-	: attributes_(nctl::StaticArrayMode::EXTEND_SIZE)
+	: attributes_(nctl::StaticArrayMode::EXTEND_SIZE), ibo_(nullptr)
 {
 
 }
@@ -30,6 +30,7 @@ GLVertexFormat::GLVertexFormat(const GLVertexFormat &other)
 			attributes_[i].pointer_ = other.attributes_[i].pointer_;
 		}
 	}
+	ibo_ = other.ibo_;
 }
 
 ///////////////////////////////////////////////////////////
@@ -89,23 +90,32 @@ void GLVertexFormat::define()
 			}
 		}
 	}
+
+	if (ibo_)
+		ibo_->bind();
 }
 
 void GLVertexFormat::reset()
 {
 	for (unsigned int i = 0; i < MaxAttributes; i++)
 		attributes_[i].enabled_ = false;
+	ibo_ = nullptr;
 }
 
 bool GLVertexFormat::operator==(const GLVertexFormat &other) const
 {
-	bool areEqual = true;
-	for (unsigned int i = 0; i < MaxAttributes; i++)
+	bool areEqual = (other.ibo_ == ibo_);
+
+	// If indices are the same then check attributes too
+	if (areEqual)
 	{
-		if (other.attributes_[i] != attributes_[i])
+		for (unsigned int i = 0; i < MaxAttributes; i++)
 		{
-			areEqual = false;
-			break;
+			if (other.attributes_[i] != attributes_[i])
+			{
+				areEqual = false;
+				break;
+			}
 		}
 	}
 

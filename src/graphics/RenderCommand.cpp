@@ -8,8 +8,9 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 RenderCommand::RenderCommand(CommandTypes::Enum profilingType)
-	: sortKey_(0), layer_(BottomLayer), numInstances_(0), batchSize_(0), uniformBlocksCommitted_(false),
-	  verticesCommitted_(false), profilingType_(profilingType), modelView_(Matrix4x4f::Identity)
+	: sortKey_(0), layer_(BottomLayer), numInstances_(0), batchSize_(0),
+	  uniformBlocksCommitted_(false), verticesCommitted_(false), indicesCommitted_(false),
+	  profilingType_(profilingType), modelView_(Matrix4x4f::Identity)
 {
 
 }
@@ -53,8 +54,10 @@ void RenderCommand::issue()
 
 	commitVertices();
 	verticesCommitted_ = false;
+	commitIndices();
+	indicesCommitted_ = false;
+	material_.defineVertexFormat(geometry_.vboParams_.object, geometry_.iboParams_.object);
 	geometry_.bind();
-	material_.defineVertexFormat(geometry_.vboParams_.object);
 	geometry_.draw(numInstances_);
 }
 
@@ -91,6 +94,15 @@ void RenderCommand::commitVertices()
 	{
 		geometry_.commitVertices();
 		verticesCommitted_ = true;
+	}
+}
+
+void RenderCommand::commitIndices()
+{
+	if (indicesCommitted_ == false)
+	{
+		geometry_.commitIndices();
+		indicesCommitted_ = true;
 	}
 }
 
