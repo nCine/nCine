@@ -34,6 +34,10 @@ class Material
 		BATCHED_SPRITES,
 		/// Shader program for a batch of MeshSprite classes
 		BATCHED_MESH_SPRITES,
+		/// Shader program for a batch of TextNode classes with grayscale font texture
+		BATCHED_TEXTNODES_GRAY,
+		/// Shader program for a batch of TextNode classes with color font texture
+		BATCHED_TEXTNODES_COLOR,
 		/// A custom shader program
 		CUSTOM
 	};

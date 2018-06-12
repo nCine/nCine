@@ -73,17 +73,21 @@ void RenderCommand::commitTransformation()
 
 	if (material_.shaderProgram_ && material_.shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
 	{
-		if (material_.shaderProgramType() == Material::ShaderProgramType::SPRITE)
+		const Material::ShaderProgramType shaderProgramType = material_.shaderProgramType();
+
+		if (shaderProgramType == Material::ShaderProgramType::SPRITE)
 			material_.uniformBlock("SpriteBlock")->uniform("modelView")->setFloatVector(modelView_.data());
-		else if (material_.shaderProgramType() == Material::ShaderProgramType::MESH_SPRITE)
+		else if (shaderProgramType == Material::ShaderProgramType::MESH_SPRITE)
 			material_.uniformBlock("MeshSpriteBlock")->uniform("modelView")->setFloatVector(modelView_.data());
-		else if (material_.shaderProgramType() == Material::ShaderProgramType::COLOR)
+		else if (shaderProgramType == Material::ShaderProgramType::COLOR)
 			material_.uniformBlock("ColorBlock")->uniform("modelView")->setFloatVector(modelView_.data());
-		else if (material_.shaderProgramType() == Material::ShaderProgramType::TEXTNODE_GRAY ||
-		         material_.shaderProgramType() == Material::ShaderProgramType::TEXTNODE_COLOR)
+		else if (shaderProgramType == Material::ShaderProgramType::TEXTNODE_GRAY ||
+		         shaderProgramType == Material::ShaderProgramType::TEXTNODE_COLOR)
 			material_.uniformBlock("TextnodeBlock")->uniform("modelView")->setFloatVector(modelView_.data());
-		else if (material_.shaderProgramType() != Material::ShaderProgramType::BATCHED_SPRITES &&
-		         material_.shaderProgramType() != Material::ShaderProgramType::BATCHED_MESH_SPRITES)
+		else if (shaderProgramType != Material::ShaderProgramType::BATCHED_SPRITES &&
+		         shaderProgramType != Material::ShaderProgramType::BATCHED_MESH_SPRITES &&
+		         shaderProgramType != Material::ShaderProgramType::BATCHED_TEXTNODES_GRAY &&
+		         shaderProgramType != Material::ShaderProgramType::BATCHED_TEXTNODES_COLOR)
 			material_.uniform("modelView")->setFloatVector(modelView_.data());
 	}
 }

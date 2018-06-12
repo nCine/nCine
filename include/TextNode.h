@@ -18,7 +18,8 @@ class DLL_PUBLIC TextNode : public DrawableNode
 {
   public:
 	/// Default maximum length for a string to be rendered
-	/*! This number affects the size of both the string container and the VBO. */
+	/*! This number affects both the size of the string container
+	 * and the initial size of the vertex array in host memory. */
 	static const unsigned int DefaultStringLength = 256;
 
 	/// Horizontal alignment modes for text made of multiple lines
@@ -30,8 +31,8 @@ class DLL_PUBLIC TextNode : public DrawableNode
 		RIGHT
 	};
 
-	TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength);
 	TextNode(SceneNode *parent, Font *font);
+	TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength);
 
 	/// Returns the width of rendered text
 	float width() const override;
@@ -63,6 +64,25 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	inline static ObjectType sType() { return ObjectType::TEXTNODE; }
 
   private:
+	/// Vertex data for the glyphs
+	struct Vertex
+	{
+		float x, y;
+		float u, v;
+
+		Vertex() { }
+		Vertex(float xx, float yy, float uu, float vv) : x(xx), y(yy), u(uu), v(vv) { }
+	};
+
+	/// Position of degenerate vertices in glyph quad
+	enum class Degenerate
+	{
+		NONE,
+		START,
+		START_END,
+		END
+	};
+
 	/// The string to be rendered
 	nctl::String string_;
 	/// Dirty flag for vertices and texture coordinates
@@ -73,6 +93,8 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	bool withKerning_;
 	/// The font class used to render text
 	Font *font_;
+	/// The array of vertex positions interleaved with texture coordinates for every glyph in the node
+	nctl::Array<Vertex> interleavedVertices_;
 
 	/// Advance on the X-axis for the next processed glyph
 	mutable float xAdvance_;
@@ -94,7 +116,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Calculates align offset for a particular line
 	float calculateAlignment(unsigned int lineIndex) const;
 	/// Fills the batch draw command with data from a glyph
-	void processGlyph(const FontGlyph *glyph, float *glyphVertices);
+	void processGlyph(const FontGlyph *glyph, Degenerate degen);
 
 	void updateRenderCommand() override;
 };

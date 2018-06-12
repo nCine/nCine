@@ -76,6 +76,20 @@ void Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 			attribute("aMeshIndex")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, drawindex)));
 			// Uniforms data pointer not set at this time
 			break;
+		case ShaderProgramType::BATCHED_TEXTNODES_GRAY:
+			setShaderProgram(RenderResources::batchedTextnodesGrayShaderProgram());
+			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, position)));
+			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, texcoords)));
+			attribute("aMeshIndex")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, drawindex)));
+			// Uniforms data pointer not set at this time
+			break;
+		case ShaderProgramType::BATCHED_TEXTNODES_COLOR:
+			setShaderProgram(RenderResources::batchedTextnodesColorShaderProgram());
+			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, position)));
+			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, texcoords)));
+			attribute("aMeshIndex")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, drawindex)));
+			// Uniforms data pointer not set at this time
+			break;
 		case ShaderProgramType::CUSTOM:
 			break;
 	}

@@ -17,8 +17,9 @@ TextNode::TextNode(SceneNode *parent, Font *font)
 }
 
 TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
-	: DrawableNode(parent, 0.0f, 0.0f), string_(maxStringLength),
-	  dirtyDraw_(true), dirtyBoundaries_(true), withKerning_(true), font_(font),
+	: DrawableNode(parent, 0.0f, 0.0f), string_(maxStringLength), dirtyDraw_(true),
+	  dirtyBoundaries_(true), withKerning_(true), font_(font),
+	  interleavedVertices_(maxStringLength * 4 + (maxStringLength - 1) * 2),
 	  xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f),
 	  lineLengths_(4), alignment_(Alignment::LEFT), textnodeBlock_(nullptr)
 {
@@ -34,8 +35,8 @@ TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
 	renderCommand_->material().setShaderProgramType(shaderProgramType);
 	textnodeBlock_ = renderCommand_->material().uniformBlock("TextnodeBlock");
 	renderCommand_->material().setTexture(*font_->texture());
-	// `maxStringLength` characters, each has 6 vertices with 2 components for position and 2 for texcoords
-	renderCommand_->geometry().createCustomVbo(maxStringLength * 6 * 2 * 2, GL_DYNAMIC_DRAW);
+	renderCommand_->geometry().setPrimitiveType(GL_TRIANGLE_STRIP);
+	renderCommand_->geometry().setNumElementsPerVertex(sizeof(Vertex) / sizeof(float));
 }
 
 ///////////////////////////////////////////////////////////
@@ -107,16 +108,16 @@ void TextNode::draw(RenderQueue &renderQueue)
 
 	if (dirtyDraw_)
 	{
-		GLDebug::ScopedGroup scoped("TextNode vertices");
+		GLDebug::ScopedGroup scoped("Processing TextNode glyphs");
 
-		// Vertex positions interleaved with texture coordinates for every glyph in the batch
-		GLfloat *interleavedVertices = renderCommand_->geometry().acquireVertexPointer();
-		GLfloat *glyphVertices = interleavedVertices;
+		// Clear every previous quad before drawing again
+		interleavedVertices_.clear();
 
 		unsigned int currentLine = 0;
 		xAdvance_ = calculateAlignment(currentLine) - xAdvanceSum_ * 0.5f;
 		yAdvance_ = 0.0f - yAdvanceSum_ * 0.5f;
-		for (unsigned int i = 0; i < string_.length(); i++)
+		const unsigned int length = string_.length();
+		for (unsigned int i = 0; i < length; i++)
 		{
 			if (string_[i] == '\n')
 			{
@@ -129,13 +130,22 @@ void TextNode::draw(RenderQueue &renderQueue)
 				const FontGlyph *glyph = font_->glyph(static_cast<unsigned int>(string_[i]));
 				if (glyph)
 				{
-					processGlyph(glyph, glyphVertices);
-					glyphVertices += 24;
+					Degenerate degen = Degenerate::NONE;
+					if (length > 1)
+					{
+						if (i == 0)
+							degen = Degenerate::END;
+						else if (i == length - 1)
+							degen = Degenerate::START;
+						else
+							degen = Degenerate::START_END;
+					}
+					processGlyph(glyph, degen);
 
 					if (withKerning_)
 					{
 						// font kerning
-						if (i < string_.length() - 1)
+						if (i < length - 1)
 							xAdvance_ += glyph->kerning(int(string_[i + 1]));
 					}
 				}
@@ -143,9 +153,8 @@ void TextNode::draw(RenderQueue &renderQueue)
 		}
 
 		// Vertices are updated only if the string changes
-		const unsigned int numVertices = static_cast<unsigned int>(glyphVertices - interleavedVertices) / 4;
-		renderCommand_->geometry().setDrawParameters(GL_TRIANGLES, 0, numVertices);
-		renderCommand_->geometry().releaseVertexPointer();
+		renderCommand_->geometry().setNumVertices(interleavedVertices_.size());
+		renderCommand_->geometry().setHostVertexPointer(reinterpret_cast<const float *>(interleavedVertices_.data()));
 	}
 
 	DrawableNode::draw(renderQueue);
@@ -226,7 +235,7 @@ float TextNode::calculateAlignment(unsigned int lineIndex) const
 	return alignOffset;
 }
 
-void TextNode::processGlyph(const FontGlyph *glyph, float *glyphVertices)
+void TextNode::processGlyph(const FontGlyph *glyph, Degenerate degen)
 {
 	const Vector2i size = glyph->size();
 	const Vector2i offset = glyph->offset();
@@ -236,7 +245,6 @@ void TextNode::processGlyph(const FontGlyph *glyph, float *glyphVertices)
 	const float topPos = -yAdvance_ - offset.y;
 	const float bottomPos = topPos - size.y;
 
-
 	const Vector2i texSize = font_->texture()->size();
 	const Recti texRect = glyph->texRect();
 
@@ -245,20 +253,16 @@ void TextNode::processGlyph(const FontGlyph *glyph, float *glyphVertices)
 	const float bottomCoord = float(texRect.y + texRect.h) / float(texSize.y);
 	const float topCoord = float(texRect.y) / float(texSize.y);
 
+	if (degen == Degenerate::START || degen == Degenerate::START_END)
+		interleavedVertices_.pushBack(Vertex(leftPos, bottomPos, leftCoord, bottomCoord));
 
-	glyphVertices[0] = leftPos;			glyphVertices[1] = bottomPos;
-	glyphVertices[2] = leftCoord;		glyphVertices[3] = bottomCoord;
-	glyphVertices[4] = leftPos;			glyphVertices[5] = topPos;
-	glyphVertices[6] = leftCoord;		glyphVertices[7] = topCoord;
-	glyphVertices[8] = rightPos;		glyphVertices[9] = bottomPos;
-	glyphVertices[10] = rightCoord;		glyphVertices[11] = bottomCoord;
+	interleavedVertices_.pushBack(Vertex(leftPos, bottomPos, leftCoord, bottomCoord));
+	interleavedVertices_.pushBack(Vertex(leftPos, topPos, leftCoord, topCoord));
+	interleavedVertices_.pushBack(Vertex(rightPos, bottomPos, rightCoord, bottomCoord));
+	interleavedVertices_.pushBack(Vertex(rightPos, topPos, rightCoord, topCoord));
 
-	glyphVertices[12] = rightPos;		glyphVertices[13] = bottomPos;
-	glyphVertices[14] = rightCoord;		glyphVertices[15] = bottomCoord;
-	glyphVertices[16] = rightPos;		glyphVertices[17] = topPos;
-	glyphVertices[18] = rightCoord;		glyphVertices[19] = topCoord;
-	glyphVertices[20] = leftPos;		glyphVertices[21] = topPos;
-	glyphVertices[22] = leftCoord;		glyphVertices[23] = topCoord;
+	if (degen == Degenerate::START_END || degen == Degenerate::END)
+		interleavedVertices_.pushBack(Vertex(rightPos, topPos, rightCoord, topCoord));
 
 	xAdvance_ += glyph->xAdvance();
 }

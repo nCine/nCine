@@ -15,17 +15,23 @@ class Geometry
 	Geometry();
 	~Geometry();
 
-	/// Returns the primitive type (`GL_TRIANGLE`, `GL_LINES`, ...)
+	/// Returns the primitive type (`GL_TRIANGLES`, `GL_TRIANGLE_STRIP`, ...)
 	inline GLenum primitiveType() const { return primitiveType_; }
-	/// Returns the first vertex to draw from the arrays
+	/// Returns the index of the first vertex to draw
 	inline GLint firstVertex() const { return firstVertex_; }
 	/// Returns the number of vertices
 	inline GLsizei numVertices() const { return numVertices_; }
 	/// Returns the number of float elements that composes the vertex format
 	inline unsigned int numElementsPerVertex() const { return numElementsPerVertex_; }
 
-	/// Sets all the drawing parameters
+	/// Sets all three drawing parameters
 	void setDrawParameters(GLenum primitiveType, GLint firstVertex, GLsizei numVertices);
+	/// Sets the primitive type (`GL_TRIANGLES`, `GL_TRIANGLE_STRIP`, ...)
+	inline void setPrimitiveType(GLenum primitiveType) { primitiveType_ = primitiveType; }
+	/// Sets the index of the first vertex to draw
+	inline void setFirstVertex(GLint firstVertex) { firstVertex_ = firstVertex; }
+	/// Sets the number of vertices
+	inline void setNumVertices(GLsizei numVertices) { numVertices_ = numVertices; }
 	/// Sets the number of float elements that composes the vertex format
 	inline void setNumElementsPerVertex(unsigned int numElements) { numElementsPerVertex_ = numElements; }
 	/// Creates a custom VBO that is unique to this `Geometry` object

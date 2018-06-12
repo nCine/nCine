@@ -35,7 +35,7 @@ MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, float x, float y)
 	renderCommand_->setType(RenderCommand::CommandTypes::MESH_SPRITE);
 	renderCommand_->material().setShaderProgramType(Material::ShaderProgramType::MESH_SPRITE);
 	spriteBlock_ = renderCommand_->material().uniformBlock("MeshSpriteBlock");
-	renderCommand_->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, 0);
+	renderCommand_->geometry().setPrimitiveType(GL_TRIANGLE_STRIP);
 	renderCommand_->geometry().setNumElementsPerVertex(sizeof(Vertex) / sizeof(float));
 	renderCommand_->geometry().setHostVertexPointer(reinterpret_cast<const float *>(vertexDataPointer_));
 
@@ -61,7 +61,7 @@ void MeshSprite::copyVertices(unsigned int numVertices, const Vertex *vertices)
 
 	vertexDataPointer_ = interleavedVertices_.data();
 	numVertices_ = numVertices;
-	renderCommand_->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, numVertices);
+	renderCommand_->geometry().setNumVertices(numVertices);
 	renderCommand_->geometry().setHostVertexPointer(reinterpret_cast<const float *>(vertexDataPointer_));
 }
 
@@ -78,7 +78,7 @@ void MeshSprite::setVertices(unsigned int numVertices, const Vertex *vertices)
 
 	vertexDataPointer_ = vertices;
 	numVertices_ = numVertices;
-	renderCommand_->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, numVertices);
+	renderCommand_->geometry().setNumVertices(numVertices);
 	renderCommand_->geometry().setHostVertexPointer(reinterpret_cast<const float *>(vertexDataPointer_));
 }
 
@@ -137,7 +137,7 @@ void MeshSprite::createVerticesFromTexels(unsigned int numVertices, const Vector
 
 	vertexDataPointer_ = interleavedVertices_.data();
 	numVertices_ = numVertices;
-	renderCommand_->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, numVertices);
+	renderCommand_->geometry().setNumVertices(numVertices);
 	renderCommand_->geometry().setHostVertexPointer(reinterpret_cast<const float *>(vertexDataPointer_));
 }
 

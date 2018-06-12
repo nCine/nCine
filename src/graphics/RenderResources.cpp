@@ -21,6 +21,8 @@ nctl::UniquePtr<GLShaderProgram> RenderResources::textnodeColorShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::colorShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedSpritesShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedMeshSpritesShaderProgram_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::batchedTextnodesGrayShaderProgram_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::batchedTextnodesColorShaderProgram_;
 Matrix4x4f RenderResources::projectionMatrix_;
 
 ///////////////////////////////////////////////////////////
@@ -120,6 +122,26 @@ void RenderResources::create()
 #endif
 	batchedMeshSpritesShaderProgram_->link(GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS);
 
+	batchedTextnodesGrayShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
+#ifndef WITH_EMBEDDED_SHADERS
+	batchedTextnodesGrayShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/batched_textnodes_vs.glsl").data());
+	batchedTextnodesGrayShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/textnode_gray_fs.glsl").data());
+#else
+	batchedTextnodesGrayShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::batched_textnodes_vs);
+	batchedTextnodesGrayShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::textnode_gray_fs);
+#endif
+	batchedTextnodesGrayShaderProgram_->link(GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS);
+
+	batchedTextnodesColorShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
+#ifndef WITH_EMBEDDED_SHADERS
+	batchedTextnodesColorShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/batched_textnodes_vs.glsl").data());
+	batchedTextnodesColorShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/textnode_color_fs.glsl").data());
+#else
+	batchedTextnodesColorShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::batched_textnodes_vs);
+	batchedTextnodesColorShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::textnode_color_fs);
+#endif
+	batchedTextnodesColorShaderProgram_->link(GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS);
+
 	// Calculating a common projection matrix for all shader programs
 	const float width = theApplication().width();
 	const float height = theApplication().height();
@@ -134,6 +156,8 @@ void RenderResources::create()
 
 void RenderResources::dispose()
 {
+	batchedTextnodesColorShaderProgram_.reset(nullptr);
+	batchedTextnodesGrayShaderProgram_.reset(nullptr);
 	batchedMeshSpritesShaderProgram_.reset(nullptr);
 	batchedSpritesShaderProgram_.reset(nullptr);
 	colorShaderProgram_.reset(nullptr);

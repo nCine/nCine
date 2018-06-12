@@ -45,6 +45,8 @@ class RenderResources
 	static inline GLShaderProgram *colorShaderProgram() { return colorShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedSpritesShaderProgram() { return batchedSpritesShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedMeshSpritesShaderProgram() { return batchedMeshSpritesShaderProgram_.get(); }
+	static inline GLShaderProgram *batchedTextnodesGrayShaderProgram() { return batchedTextnodesGrayShaderProgram_.get(); }
+	static inline GLShaderProgram *batchedTextnodesColorShaderProgram() { return batchedTextnodesColorShaderProgram_.get(); }
 	static inline const Matrix4x4f &projectionMatrix() { return projectionMatrix_; }
 
 	static void createMinimal();
@@ -59,6 +61,8 @@ class RenderResources
 	static nctl::UniquePtr<GLShaderProgram> colorShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedSpritesShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedMeshSpritesShaderProgram_;
+	static nctl::UniquePtr<GLShaderProgram> batchedTextnodesGrayShaderProgram_;
+	static nctl::UniquePtr<GLShaderProgram> batchedTextnodesColorShaderProgram_;
 
 	static Matrix4x4f projectionMatrix_;
 

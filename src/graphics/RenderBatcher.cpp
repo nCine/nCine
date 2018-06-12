@@ -34,7 +34,9 @@ namespace {
 bool isSupportedType(Material::ShaderProgramType type)
 {
 	return (type == Material::ShaderProgramType::SPRITE ||
-	        type == Material::ShaderProgramType::MESH_SPRITE);
+	        type == Material::ShaderProgramType::MESH_SPRITE ||
+	        type == Material::ShaderProgramType::TEXTNODE_GRAY ||
+	        type == Material::ShaderProgramType::TEXTNODE_COLOR);
 }
 
 }
@@ -126,7 +128,7 @@ RenderCommand *RenderBatcher::collectCommands(
 	const RenderCommand *refCommand = *start;
 	RenderCommand *batchCommand = nullptr;
 	GLUniformBlockCache *instancesBlock = nullptr;
-	int spriteBlockSize = 0;
+	int singleInstanceBlockSize = 0;
 
 	// Tracking the amount of memory required by uniform blocks, vertices and indices of all instances
 	unsigned long instancesBlockSize = 0;
@@ -136,23 +138,32 @@ RenderCommand *RenderBatcher::collectCommands(
 	if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::SPRITE)
 	{
 		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_SPRITES);
-		instancesBlock = batchCommand->material().uniformBlock("InstancesBlock");
-		instancesBlockSize += batchCommand->material().shaderProgram()->uniformsSize();
-
 		batchCommand->setType(RenderCommand::CommandTypes::SPRITE);
-		spriteBlockSize = (*start)->material().uniformBlock("SpriteBlock")->size();
+		singleInstanceBlockSize = (*start)->material().uniformBlock("SpriteBlock")->size();
 	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::MESH_SPRITE)
 	{
 		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_MESH_SPRITES);
-		instancesBlock = batchCommand->material().uniformBlock("InstancesBlock");
-		instancesBlockSize += batchCommand->material().shaderProgram()->uniformsSize();
-
 		batchCommand->setType(RenderCommand::CommandTypes::MESH_SPRITE);
-		spriteBlockSize = (*start)->material().uniformBlock("MeshSpriteBlock")->size();
+		singleInstanceBlockSize = (*start)->material().uniformBlock("MeshSpriteBlock")->size();
+	}
+	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::TEXTNODE_GRAY)
+	{
+		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_TEXTNODES_GRAY);
+		batchCommand->setType(RenderCommand::CommandTypes::TEXT);
+		singleInstanceBlockSize = (*start)->material().uniformBlock("TextnodeBlock")->size();
+	}
+	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::TEXTNODE_COLOR)
+	{
+		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_TEXTNODES_COLOR);
+		batchCommand->setType(RenderCommand::CommandTypes::TEXT);
+		singleInstanceBlockSize = (*start)->material().uniformBlock("TextnodeBlock")->size();
 	}
 	else
 		FATAL_MSG("Unsupported shader for batch element");
+
+	instancesBlock = batchCommand->material().uniformBlock("InstancesBlock");
+	instancesBlockSize += batchCommand->material().shaderProgram()->uniformsSize();
 
 	// Set to true if at least one command in the batch has indices or forced by a rendering settings
 	bool batchingWithIndices =  theApplication().renderingSettings().batchingWithIndices;
@@ -164,10 +175,10 @@ RenderCommand *RenderBatcher::collectCommands(
 			batchingWithIndices = true;
 
 		// Don't request more bytes than a UBO can hold
-		if (instancesBlockSize + spriteBlockSize > MaxUniformBlockSize)
+		if (instancesBlockSize + singleInstanceBlockSize > MaxUniformBlockSize)
 			break;
 		else
-			instancesBlockSize += spriteBlockSize;
+			instancesBlockSize += singleInstanceBlockSize;
 
 		++it;
 	}
@@ -182,7 +193,7 @@ RenderCommand *RenderBatcher::collectCommands(
 		unsigned int vertexDataSize = 0;
 		unsigned int numIndices = (*it)->geometry().numIndices();
 
-		if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::MESH_SPRITE)
+		if (refCommand->material().shaderProgramType() != Material::ShaderProgramType::SPRITE)
 		{
 			unsigned int numVertices = (*it)->geometry().numVertices();
 			if (batchingWithIndices == false)
@@ -221,7 +232,7 @@ RenderCommand *RenderBatcher::collectCommands(
 
 	RenderResources::VertexFormatPos2Tex2Index *destVtx = nullptr;
 	GLushort *destIdx = nullptr;
-	if (batchCommand->material().shaderProgramType() == Material::ShaderProgramType::BATCHED_MESH_SPRITES)
+	if (batchCommand->material().shaderProgramType() != Material::ShaderProgramType::BATCHED_SPRITES)
 	{
 		const unsigned int numFloats = instancesVertexDataSize / sizeof(GLfloat);
 		const unsigned int numFloatsAlignment = sizeof(RenderResources::VertexFormatPos2Tex2Index) / sizeof(GLfloat);
@@ -241,15 +252,21 @@ RenderCommand *RenderBatcher::collectCommands(
 
 		if (batchCommand->material().shaderProgramType() == Material::ShaderProgramType::BATCHED_SPRITES)
 		{
-			const GLUniformBlockCache *spriteBlock = command->material().uniformBlock("SpriteBlock");
-			memcpy(instancesBlock->dataPointer() + instancesBlockOffset, spriteBlock->dataPointer(), spriteBlockSize);
-			instancesBlockOffset += spriteBlockSize;
+			const GLUniformBlockCache *singleInstanceBlock = command->material().uniformBlock("SpriteBlock");
+			memcpy(instancesBlock->dataPointer() + instancesBlockOffset, singleInstanceBlock->dataPointer(), singleInstanceBlockSize);
+			instancesBlockOffset += singleInstanceBlockSize;
 		}
-		else if (batchCommand->material().shaderProgramType() == Material::ShaderProgramType::BATCHED_MESH_SPRITES)
+		else
 		{
-			const GLUniformBlockCache *spriteBlock = command->material().uniformBlock("MeshSpriteBlock");
-			memcpy(instancesBlock->dataPointer() + instancesBlockOffset, spriteBlock->dataPointer(), spriteBlockSize);
-			instancesBlockOffset += spriteBlockSize;
+			GLUniformBlockCache *singleInstanceBlock = nullptr;
+			if (batchCommand->material().shaderProgramType() == Material::ShaderProgramType::BATCHED_MESH_SPRITES)
+				singleInstanceBlock = command->material().uniformBlock("MeshSpriteBlock");
+			else if (batchCommand->material().shaderProgramType() == Material::ShaderProgramType::BATCHED_TEXTNODES_GRAY ||
+					 batchCommand->material().shaderProgramType() == Material::ShaderProgramType::BATCHED_TEXTNODES_COLOR)
+				singleInstanceBlock = command->material().uniformBlock("TextnodeBlock");
+
+			memcpy(instancesBlock->dataPointer() + instancesBlockOffset, singleInstanceBlock->dataPointer(), singleInstanceBlockSize);
+			instancesBlockOffset += singleInstanceBlockSize;
 
 			const unsigned int numVertices = command->geometry().numVertices();
 			const int meshIndex = it - start;
@@ -315,7 +332,7 @@ RenderCommand *RenderBatcher::collectCommands(
 		++it;
 	}
 
-	if (batchCommand->material().shaderProgramType() == Material::ShaderProgramType::BATCHED_MESH_SPRITES)
+	if (batchCommand->material().shaderProgramType() != Material::ShaderProgramType::BATCHED_SPRITES)
 	{
 		batchCommand->geometry().releaseVertexPointer();
 		if (destIdx)
@@ -329,10 +346,10 @@ RenderCommand *RenderBatcher::collectCommands(
 
 	if (batchCommand->material().shaderProgramType() == Material::ShaderProgramType::BATCHED_SPRITES)
 		batchCommand->geometry().setDrawParameters(GL_TRIANGLES, 0, 6 * (nextStart - start));
-	else if (batchCommand->material().shaderProgramType() == Material::ShaderProgramType::BATCHED_MESH_SPRITES)
+	else
 	{
 		const unsigned int totalVertices = instancesVertexDataSize / sizeof(RenderResources::VertexFormatPos2Tex2Index);
-		batchCommand->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, totalVertices);
+		batchCommand->geometry().setDrawParameters(refCommand->geometry().primitiveType(), 0, totalVertices);
 		batchCommand->geometry().setNumElementsPerVertex(sizeof(RenderResources::VertexFormatPos2Tex2Index) / sizeof(GLfloat));
 		batchCommand->geometry().setNumIndices(instancesIndicesAmount);
 	}
