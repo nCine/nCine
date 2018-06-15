@@ -83,7 +83,7 @@ class Material
 	/// Wrapper around `GLShaderUniformBlocks::commitUniformBlocks()`
 	inline void commitUniformBlocks() { shaderUniformBlocks_.commitUniformBlocks(); }
 	/// Wrapper around `GLShaderAttributes::defineVertexPointers()`
-	inline void defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo) { shaderAttributes_.defineVertexFormat(vbo, ibo); }
+	void defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo, unsigned int vboOffset);
 	unsigned int sortKey();
 
 	friend class RenderCommand;

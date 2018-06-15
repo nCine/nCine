@@ -56,7 +56,14 @@ void RenderCommand::issue()
 	verticesCommitted_ = false;
 	commitIndices();
 	indicesCommitted_ = false;
-	material_.defineVertexFormat(geometry_.vboParams_.object, geometry_.iboParams_.object);
+
+	unsigned int offset = 0;
+#if defined(__ANDROID__) && !GL_ES_VERSION_3_2
+	/// Simulating missing `glDrawElementsBaseVertex()` on OpenGL ES 3.0
+	if (geometry_.numIndices_ > 0)
+		offset = geometry_.vboParams_.offset + (geometry_.firstVertex_ * geometry_.numElementsPerVertex_ * sizeof(GLfloat));
+#endif
+	material_.defineVertexFormat(geometry_.vboParams_.object, geometry_.iboParams_.object, offset);
 	geometry_.bind();
 	geometry_.draw(numInstances_);
 }

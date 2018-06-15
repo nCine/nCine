@@ -18,7 +18,9 @@ class GLShaderAttributes
 	void setProgram(GLShaderProgram *shaderProgram);
 
 	GLVertexFormat::Attribute *attribute(const char *name);
-	void defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo);
+	inline void defineVertexFormat(const GLBufferObject *vbo) { defineVertexFormat(vbo, nullptr, 0); }
+	inline void defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo) { defineVertexFormat(vbo, ibo, 0); }
+	void defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo, unsigned int vboOffset);
 
   private:
 	GLShaderProgram *shaderProgram_;

@@ -21,7 +21,7 @@ class GLVertexFormat
 	{
 	  public:
 		Attribute()
-			: enabled_(false), vbo_(nullptr), index_(0), size_(-1), type_(GL_FLOAT), stride_(0), pointer_(nullptr) { }
+			: enabled_(false), vbo_(nullptr), index_(0), size_(-1), type_(GL_FLOAT), stride_(0), pointer_(nullptr), baseOffset_(0) { }
 
 		void init(unsigned int index, GLint size, GLenum type);
 		bool operator==(const Attribute &other) const;
@@ -29,6 +29,7 @@ class GLVertexFormat
 
 		inline void setVboParameters(GLsizei stride, const GLvoid *pointer) { stride_ = stride; pointer_ = pointer; }
 		inline void setVbo(const GLBufferObject *vbo) { vbo_ = vbo; }
+		inline void setBaseOffset(unsigned int baseOffset) { baseOffset_ = baseOffset; }
 
 	  private:
 		bool enabled_;
@@ -38,6 +39,8 @@ class GLVertexFormat
 		GLenum type_;
 		GLsizei stride_;
 		const GLvoid *pointer_;
+		/// Used to simulate missing `glDrawElementsBaseVertex()` on OpenGL ES 3.0
+		unsigned int baseOffset_;
 
 		friend class GLVertexFormat;
 	};

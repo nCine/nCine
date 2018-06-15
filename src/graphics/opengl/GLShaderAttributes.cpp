@@ -63,15 +63,17 @@ GLVertexFormat::Attribute *GLShaderAttributes::attribute(const char *name)
 	return vertexAttribute;
 }
 
-
-void GLShaderAttributes::defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo)
+void GLShaderAttributes::defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo, unsigned int vboOffset)
 {
 	if (shaderProgram_)
 	{
 		if (vbo)
 		{
 			for (int location : attributeLocations_)
+			{
 				vertexFormat_[location].setVbo(vbo);
+				vertexFormat_[location].setBaseOffset(vboOffset);
+			}
 			vertexFormat_.setIbo(ibo);
 
 			RenderResources::vaoPool().bindVao(vertexFormat_);

@@ -148,6 +148,11 @@ void Material::setShaderProgram(GLShaderProgram *program)
 	shaderAttributes_.setProgram(shaderProgram_);
 }
 
+void Material::defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo, unsigned int vboOffset)
+{
+	shaderAttributes_.defineVertexFormat(vbo, ibo, vboOffset);
+}
+
 unsigned int Material::sortKey()
 {
 	unsigned char lower = 0;

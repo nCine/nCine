@@ -28,6 +28,7 @@ GLVertexFormat::GLVertexFormat(const GLVertexFormat &other)
 			attributes_[i].type_ = other.attributes_[i].type_;
 			attributes_[i].stride_ = other.attributes_[i].stride_;
 			attributes_[i].pointer_ = other.attributes_[i].pointer_;
+			attributes_[i].baseOffset_ = other.attributes_[i].baseOffset_;
 		}
 	}
 	ibo_ = other.ibo_;
@@ -46,7 +47,8 @@ bool GLVertexFormat::Attribute::operator==(const Attribute &other) const
 	          other.size_ == size_ &&
 	          other.type_ == type_ &&
 	          other.stride_ == stride_ &&
-	          other.pointer_ == pointer_));
+	          other.pointer_ == pointer_ &&
+	          other.baseOffset_ == baseOffset_));
 }
 
 bool GLVertexFormat::Attribute::operator!=(const Attribute &other) const
@@ -63,6 +65,7 @@ void GLVertexFormat::Attribute::init(unsigned int index, GLint size, GLenum type
 	type_ = type;
 	stride_ = 0;
 	pointer_ = nullptr;
+	baseOffset_ = 0;
 }
 
 void GLVertexFormat::define()
@@ -74,6 +77,13 @@ void GLVertexFormat::define()
 			attributes_[i].vbo_->bind();
 			glEnableVertexAttribArray(attributes_[i].index_);
 
+#if defined(__ANDROID__) && !GL_ES_VERSION_3_2
+			const GLubyte *initialPointer = reinterpret_cast<const GLubyte *>(attributes_[i].pointer_);
+			const GLvoid *pointer = reinterpret_cast<const GLvoid *>(initialPointer + attributes_[i].baseOffset_);
+#else
+			const GLvoid *pointer = attributes_[i].pointer_;
+#endif
+
 			switch (attributes_[i].type_)
 			{
 				case GL_BYTE:
@@ -82,10 +92,10 @@ void GLVertexFormat::define()
 				case GL_UNSIGNED_SHORT:
 				case GL_INT:
 				case GL_UNSIGNED_INT:
-					glVertexAttribIPointer(attributes_[i].index_, attributes_[i].size_, attributes_[i].type_, attributes_[i].stride_, attributes_[i].pointer_);
+					glVertexAttribIPointer(attributes_[i].index_, attributes_[i].size_, attributes_[i].type_, attributes_[i].stride_, pointer);
 					break;
 				default:
-					glVertexAttribPointer(attributes_[i].index_, attributes_[i].size_, attributes_[i].type_, GL_FALSE, attributes_[i].stride_, attributes_[i].pointer_);
+					glVertexAttribPointer(attributes_[i].index_, attributes_[i].size_, attributes_[i].type_, GL_FALSE, attributes_[i].stride_, pointer);
 					break;
 			}
 		}

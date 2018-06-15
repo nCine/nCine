@@ -183,14 +183,22 @@ void Geometry::draw(GLsizei numInstances)
 	if (numInstances == 0)
 	{
 		if (numIndices_ > 0)
+#if defined(__ANDROID__) && !GL_ES_VERSION_3_2
+			glDrawElements(primitiveType_, numIndices_, GL_UNSIGNED_SHORT, iboOffsetPtr);
+#else
 			glDrawElementsBaseVertex(primitiveType_, numIndices_, GL_UNSIGNED_SHORT, iboOffsetPtr, vboOffset + firstVertex_);
+#endif
 		else
 			glDrawArrays(primitiveType_, vboOffset + firstVertex_, numVertices_);
 	}
 	else if (numInstances > 0)
 	{
 		if (numIndices_ > 0)
+#if defined(__ANDROID__) && !GL_ES_VERSION_3_2
+			glDrawElementsInstanced(primitiveType_, numIndices_, GL_UNSIGNED_SHORT, iboOffsetPtr, numInstances);
+#else
 			glDrawElementsInstancedBaseVertex(primitiveType_, numIndices_, GL_UNSIGNED_SHORT, iboOffsetPtr, numInstances, vboOffset + firstVertex_);
+#endif
 		else
 			glDrawArraysInstanced(primitiveType_, vboOffset + firstVertex_, numVertices_, numInstances);
 	}
