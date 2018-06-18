@@ -32,7 +32,6 @@ class DLL_PUBLIC Texture : public Object
 		REPEAT
 	};
 
-	Texture();
 	explicit Texture(const char *filename);
 	Texture(const char *filename, int width, int height);
 	Texture(const char *filename, Vector2i size);
@@ -53,6 +52,8 @@ class DLL_PUBLIC Texture : public Object
 	inline bool isCompressed() const { return isCompressed_; }
 	/// Returns true if the texture provides an alpha channel
 	inline bool hasAlpha() const { return hasAlphaChannel_; }
+	/// Returns the amount of video memory needed to load the texture
+	inline unsigned long dataSize() const { return dataSize_; }
 
 	/// Sets texture filtering for both magnification and minification
 	void setFiltering(Filtering filter);
@@ -68,16 +69,18 @@ class DLL_PUBLIC Texture : public Object
 	int mipMapLevels_;
 	bool isCompressed_;
 	bool hasAlphaChannel_;
+	unsigned long dataSize_;
 
 	/// Deleted copy constructor
 	Texture(const Texture &) = delete;
 	/// Deleted assignment operator
 	Texture &operator=(const Texture &) = delete;
 
-	/// Loads a texture based on information from the texture format and loader
-	void load(const ITextureLoader &texLoader);
 	/// Loads a texture overriding the size detected by the texture loader
 	void load(const ITextureLoader &texLoader, int width, int height);
+
+	/// Sets the OpenGL object label for the texture
+	void setGLTextureLabel(const char *filename);
 
 	friend class Material;
 };

@@ -19,6 +19,9 @@ GLAttribute::GLAttribute(GLuint program, GLuint index)
 	GLsizei length;
 	glGetActiveAttrib(program, index, MaxNameLength, &length, &size_, &type_, name_);
 	location_ = glGetAttribLocation(program, name_);
+
+	if (location_ == -1)
+		LOGW_X("Attribute location not found for attribute \"%s\" (%u) in shader program %u", name_, index, program);
 }
 
 ///////////////////////////////////////////////////////////
@@ -34,11 +37,14 @@ GLenum GLAttribute::basicType() const
 		case GL_FLOAT_VEC3:
 		case GL_FLOAT_VEC4:
 			return GL_FLOAT;
-			break;
+		case GL_INT:
+		case GL_INT_VEC2:
+		case GL_INT_VEC3:
+		case GL_INT_VEC4:
+			return GL_INT;
 		default:
 			LOGW_X("No available case to handle type: %u", type_);
 			return type_;
-			break;
 	}
 }
 
@@ -48,20 +54,23 @@ int GLAttribute::numComponents() const
 	{
 		case GL_FLOAT:
 			return 1;
-			break;
 		case GL_FLOAT_VEC2:
 			return 2;
-			break;
 		case GL_FLOAT_VEC3:
 			return 3;
-			break;
 		case GL_FLOAT_VEC4:
 			return 4;
-			break;
+		case GL_INT:
+			return 1;
+		case GL_INT_VEC2:
+			return 2;
+		case GL_INT_VEC3:
+			return 3;
+		case GL_INT_VEC4:
+			return 4;
 		default:
 			LOGW_X("No available case to handle type: %u", type_);
 			return 0;
-			break;
 	}
 }
 

@@ -9,6 +9,8 @@
 
 namespace ncine {
 
+class GLUniformBlockCache;
+
 /// A class to group and wrap all the information needed to plot a variable
 class PlottingVariable
 {
@@ -24,10 +26,12 @@ class PlottingVariable
 	inline const Color &graphColor() const { return graphColor_; }
 	/// Returns the mean line color
 	inline const Color &meanColor() const { return meanColor_; }
-	/// Returns a constant pointer to the vertices buffer
-	inline const float *vertices() const { return vertices_.get(); }
-	/// Returns the pointer to the vertices buffer
-	inline float *vertices() { return vertices_.get(); }
+	/// Returns the pointer to the vertices buffer of the custom VBO
+	inline float *acquireVertices() { return valuesCmd_.geometry().acquireVertexPointer(); }
+	/// Returns the pointer to the vertices buffer of the buffers manager's VBO
+	inline float *acquireVertices(unsigned int bytes) { return valuesCmd_.geometry().acquireVertexPointer(bytes); }
+	/// Releases the pointer to the vertices buffer
+	inline void releaseVertices() { valuesCmd_.geometry().releaseVertexPointer(); }
 	/// Returns the pointer to the variable
 	inline const ProfileVariable *variable() const { return &variable_; }
 	/// Returns the state of the mean drawing flag
@@ -62,8 +66,6 @@ class PlottingVariable
 	Color meanColor_;
 	/// The variable to be plotted
 	ProfileVariable variable_;
-	/// The vertices buffer
-	nctl::UniquePtr<float []> vertices_;
 	/// A reference to the world matrix of the profile plotter
 	const Matrix4x4f &worldMatrix_;
 
@@ -71,6 +73,9 @@ class PlottingVariable
 	RenderCommand valuesCmd_;
 	/// The command used to render the variable mean
 	RenderCommand meanCmd_;
+
+	GLUniformBlockCache *valuesColorBlock_;
+	GLUniformBlockCache *meanColorBlock_;
 
 	/// Updates the values rendering command
 	virtual void updateRenderCommand() = 0;

@@ -206,8 +206,8 @@ void AndroidApplication::preInit()
 	appEventHandler_->onPreInit(appCfg_);
 
 	// Registering the logger as early as possible
-	const nctl::String logFilePath = IFile::dataPath() + appCfg_.logFile_;
-	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(logFilePath.data(), appCfg_.consoleLogLevel_, appCfg_.fileLogLevel_));
+	const nctl::String logFilePath = IFile::dataPath() + appCfg_.logFile();
+	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(logFilePath.data(), appCfg_.consoleLogLevel(), appCfg_.fileLogLevel()));
 }
 
 void AndroidApplication::init()
@@ -215,7 +215,7 @@ void AndroidApplication::init()
 	// Graphics device should always be created before the input manager!
 	const DisplayMode displayMode32(8, 8, 8, 8, 24, 8, DisplayMode::DoubleBuffering::ENABLED, DisplayMode::VSync::DISABLED);
 	const DisplayMode displayMode16(5, 6, 5, 0, 16, 0, DisplayMode::DoubleBuffering::ENABLED, DisplayMode::VSync::DISABLED);
-	IGfxDevice::GLContextInfo contextInfo(appCfg_.glMajorVersion_, appCfg_.glMinorVersion_, appCfg_.glDebugContext_);
+	IGfxDevice::GLContextInfo contextInfo(appCfg_);
 
 	if (EglGfxDevice::isModeSupported(state_, contextInfo, displayMode32))
 		gfxDevice_ = nctl::makeUnique<EglGfxDevice>(state_, contextInfo, displayMode32);

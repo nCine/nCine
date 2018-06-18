@@ -1,6 +1,8 @@
 #include "GLShaderProgram.h"
 #include "GLShader.h"
+#include "GLDebug.h"
 #include "nctl/String.h"
+#include <cstring> // for strnlen()
 
 namespace ncine {
 
@@ -15,22 +17,26 @@ GLuint GLShaderProgram::boundProgram_ = 0;
 ///////////////////////////////////////////////////////////
 
 GLShaderProgram::GLShaderProgram()
-	: glHandle_(0),
-	  attachedShaders_(AttachedShadersInitialSize),
+	: glHandle_(0), attachedShaders_(AttachedShadersInitialSize),
+	  status_(Status::NOT_LINKED), uniformsSize_(0), uniformBlocksSize_(0),
 	  uniforms_(UniformsInitialSize), attributes_(AttributesInitialSize)
 {
 	glHandle_ = glCreateProgram();
 }
 
-GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFile)
-	: glHandle_(0),
-	  attachedShaders_(AttachedShadersInitialSize),
-	  uniforms_(UniformsInitialSize), attributes_(AttributesInitialSize)
+GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFile, Introspection introspection)
+	: GLShaderProgram()
 {
 	glHandle_ = glCreateProgram();
 	attachShader(GL_VERTEX_SHADER, vertexFile);
 	attachShader(GL_FRAGMENT_SHADER, fragmentFile);
-	link();
+	link(introspection);
+}
+
+GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFile)
+	: GLShaderProgram(vertexFile, fragmentFile, Introspection::ENABLED)
+{
+
 }
 
 GLShaderProgram::~GLShaderProgram()
@@ -51,6 +57,9 @@ void GLShaderProgram::attachShader(GLenum type, const char *filename)
 	glAttachShader(glHandle_, shader->glHandle_);
 	shader->compile();
 
+	const size_t length = strnlen(filename, GLDebug::maxLabelLength());
+	GLDebug::objectLabel(GLDebug::LabelTypes::SHADER, shader->glHandle_, length, filename);
+
 	attachedShaders_.pushBack(shader);
 }
 
@@ -64,7 +73,7 @@ void GLShaderProgram::attachShaderFromString(GLenum type, const char *string)
 	attachedShaders_.pushBack(shader);
 }
 
-bool GLShaderProgram::link()
+bool GLShaderProgram::link(Introspection introspection)
 {
 	glLinkProgram(glHandle_);
 
@@ -82,6 +91,7 @@ bool GLShaderProgram::link()
 			LOGW_X("%s", infoLog.data());
 		}
 
+		status_ = Status::LINKING_FAILED;
 		return false;
 	}
 
@@ -89,8 +99,18 @@ bool GLShaderProgram::link()
 	for (GLShader *attachedShader : attachedShaders_)
 		delete attachedShader;
 
-	discoverUniforms();
-	discoverAttributes();
+	if (introspection != Introspection::DISABLED)
+	{
+		const GLUniformBlock::DiscoverUniforms discover = (introspection == Introspection::NO_UNIFORMS_IN_BLOCKS) ?
+			GLUniformBlock::DiscoverUniforms::DISBLED : GLUniformBlock::DiscoverUniforms::ENABLED;
+
+		discoverUniforms();
+		discoverUniformBlocks(discover);
+		discoverAttributes();
+		status_ = Status::LINKED_WITH_INTROSPECTION;
+	}
+	else
+		status_ = Status::LINKED;
 
 	return true;
 }
@@ -104,39 +124,6 @@ void GLShaderProgram::use()
 	}
 }
 
-GLint GLShaderProgram::getUniformLocation(const GLchar *name) const
-{
-	GLint location = glGetUniformLocation(glHandle_, name);
-
-	if (location == -1)
-		LOGW_X("Location not found for uniform \"%s\" in shader program %u", name, glHandle_);
-
-	return location;
-}
-
-void GLShaderProgram::bindAttribLocation(GLuint index, const GLchar *name)
-{
-	// TODO: Add a `isLinked` flag and check it before binding an attribute location?
-	glBindAttribLocation(glHandle_, index, name);
-}
-
-#if !defined(__ANDROID__) && !defined(__APPLE__)
-GLuint GLShaderProgram::getUniformBlockIndex(const GLchar *uniformBlockName) const
-{
-	GLuint index = glGetUniformBlockIndex(glHandle_, uniformBlockName);
-
-	if (index == GL_INVALID_INDEX)
-		LOGW_X("Index not found for uniform block \"%s\" in shader program %u", uniformBlockName, glHandle_);
-
-	return index;
-}
-
-void GLShaderProgram::uniformBlockBinding(GLuint uniformBlockIndex, GLuint uniformBlockBinding)
-{
-	glUniformBlockBinding(glHandle_, uniformBlockIndex, uniformBlockBinding);
-}
-#endif
-
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -146,12 +133,43 @@ void GLShaderProgram::discoverUniforms()
 	GLint count;
 	glGetProgramiv(glHandle_, GL_ACTIVE_UNIFORMS, &count);
 
-	for (int i = 0; i < count; i++)
+	unsigned int uniformsOutsideBlocks = 0;
+	GLuint indices[MaxNumUniforms];
+	GLint blockIndex;
+	for (unsigned int i = 0; i < static_cast<unsigned int>(count); i++)
 	{
-		GLUniform uniform(glHandle_, i);
+		glGetActiveUniformsiv(glHandle_, 1, &i, GL_UNIFORM_BLOCK_INDEX, &blockIndex);
+		if (blockIndex == -1)
+		{
+			indices[uniformsOutsideBlocks] = i;
+			uniformsOutsideBlocks++;
+		}
+	}
+
+	ASSERT(uniformsOutsideBlocks < MaxNumUniforms);
+
+	for (unsigned int i = 0; i < uniformsOutsideBlocks; i++)
+	{
+		GLUniform uniform(glHandle_, indices[i]);
+		uniformsSize_ += uniform.memorySize();
 		uniforms_.pushBack(uniform);
 
 		LOGD_X("Shader %u - uniform %d : \"%s\"", glHandle_, uniform.location(), uniform.name());
+	}
+}
+
+void GLShaderProgram::discoverUniformBlocks(GLUniformBlock::DiscoverUniforms discover)
+{
+	GLint count;
+	glGetProgramiv(glHandle_, GL_ACTIVE_UNIFORM_BLOCKS, &count);
+
+	for (int i = 0; i < count; i++)
+	{
+		GLUniformBlock uniformBlock(glHandle_, i, discover);
+		uniformBlocksSize_ += uniformBlock.size();
+		uniformBlocks_.pushBack(uniformBlock);
+
+		LOGD_X("Shader %u - uniform block %u : \"%s\"", glHandle_, uniformBlock.index(), uniformBlock.name());
 	}
 }
 

@@ -13,7 +13,7 @@
 namespace {
 
 #ifdef __ANDROID__
-const char *TextureFile = "smoke_256.webp";
+const char *TextureFile = "smoke_256_ETC2.ktx";
 #else
 const char *TextureFile = "smoke_256.png";
 #endif

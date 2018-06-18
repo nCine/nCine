@@ -16,7 +16,7 @@ namespace ncine {
 class GlfwGfxDevice : public IGfxDevice
 {
   public:
-	GlfwGfxDevice(int width, int height, const GLContextInfo &contextInfo, const DisplayMode &mode, bool isFullScreen);
+	GlfwGfxDevice(int width, int height, const GLContextInfo &glContextInfo, const DisplayMode &mode, bool isFullScreen);
 	~GlfwGfxDevice() override;
 
 	void setResolution(int width, int height) override;

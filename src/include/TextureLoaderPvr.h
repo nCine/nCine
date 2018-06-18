@@ -42,6 +42,11 @@ class TextureLoaderPvr : public ITextureLoader
 	static const uint64_t FMT_DXT3 = 9;
 	static const uint64_t FMT_DXT5 = 11;
 
+	static const uint64_t FMT_ETC2_RGB = 22;
+	static const uint64_t FMT_ETC2_RGBA = 23;
+	static const uint64_t FMT_ETC2_RGB_A1 = 24;
+	static const uint64_t FMT_EAC_R11 = 25;
+	static const uint64_t FMT_EAC_RG11 = 26;
 	static const uint64_t FMT_ASTC_4x4 = 27;
 	static const uint64_t FMT_ASTC_5x4 = 28;
 	static const uint64_t FMT_ASTC_5x5 = 29;

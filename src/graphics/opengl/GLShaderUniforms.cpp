@@ -1,6 +1,7 @@
 #include "GLShaderUniforms.h"
 #include "GLShaderProgram.h"
 #include "GLUniformCache.h"
+#include "RenderResources.h"
 #include "nctl/HashMapIterator.h"
 #include "nctl/algorithms.h"
 
@@ -22,7 +23,7 @@ GLShaderUniforms::GLShaderUniforms()
 }
 
 GLShaderUniforms::GLShaderUniforms(GLShaderProgram *shaderProgram)
-	: shaderProgram_(nullptr), uniformCaches_(UniformCachesHashSize)
+	: GLShaderUniforms()
 {
 	setProgram(shaderProgram);
 }
@@ -33,9 +34,28 @@ GLShaderUniforms::GLShaderUniforms(GLShaderProgram *shaderProgram)
 
 void GLShaderUniforms::setProgram(GLShaderProgram *shaderProgram)
 {
+	ASSERT(shaderProgram);
+
 	shaderProgram_ = shaderProgram;
 	uniformCaches_.clear();
-	importUniforms();
+
+	if (shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
+		importUniforms();
+}
+
+void GLShaderUniforms::setUniformsDataPointer(GLubyte *dataPointer)
+{
+	ASSERT(dataPointer);
+
+	if (shaderProgram_->status() != GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
+		return;
+
+	unsigned int offset = 0;
+	for (GLUniformCache &uniformCache : uniformCaches_)
+	{
+		uniformCache.setDataPointer(dataPointer + offset);
+		offset += uniformCache.uniform()->memorySize();
+	}
 }
 
 GLUniformCache *GLShaderUniforms::uniform(const char *name)
@@ -64,8 +84,11 @@ void GLShaderUniforms::commitUniforms()
 {
 	if (shaderProgram_)
 	{
-		shaderProgram_->use();
-		forEach(uniformCaches_.begin(), uniformCaches_.end(), [](GLUniformCache &uniform){ uniform.commitValue(); });
+		if (shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
+		{
+			shaderProgram_->use();
+			forEach(uniformCaches_.begin(), uniformCaches_.end(), [](GLUniformCache &uniform){ uniform.commitValue(); });
+		}
 	}
 	else
 		LOGE("No shader program associated");
@@ -81,40 +104,9 @@ void GLShaderUniforms::importUniforms()
 	if (count > UniformCachesHashSize)
 		LOGW_X("More active uniforms (%d) than hashmap buckets (%d)", count, UniformCachesHashSize);
 
-	unsigned int nextFreeFloat = 0;
-	unsigned int nextFreeInt = 0;
 	for (const GLUniform &uniform : shaderProgram_->uniforms_)
 	{
 		GLUniformCache uniformCache(&uniform);
-
-		switch (uniform.basicType())
-		{
-			case GL_FLOAT:
-			{
-				if (nextFreeFloat < UniformFloatBufferSize)
-				{
-					uniformCache.setDataPointer(&uniformsFloatBuffer_[nextFreeFloat]);
-					nextFreeFloat += uniform.numComponents(); // tight packing, not aligned
-				}
-				else
-					LOGW_X("Shader %u - No more floating point buffer space for uniform \"%s\"", shaderProgram_->glHandle(), uniform.name());
-
-				break;
-			}
-			case GL_INT:
-			{
-				if (nextFreeInt < UniformIntBufferSize)
-				{
-					uniformCache.setDataPointer(&uniformsIntBuffer_[nextFreeInt]);
-					nextFreeInt += uniform.numComponents(); // tight packing, not aligned
-				}
-				else
-					LOGW_X("Shader %u - No more integer buffer space for uniform \"%s\"", shaderProgram_->glHandle(), uniform.name());
-
-				break;
-			}
-		}
-
 		uniformCaches_[uniform.name()] = uniformCache;
 	}
 }

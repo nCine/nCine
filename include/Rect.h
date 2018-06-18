@@ -38,12 +38,19 @@ class Rect
 	/// Sets rectangle elements
 	void set(T xx, T yy, T ww, T hh);
 	/// Retains rectangle size but moves its center to another position
+	void setCenter(float cx, float cy);
+	/// Retains rectangle size but moves its center to another position with a `Vector2`
 	void setCenter(const Vector2<T> &center);
 
-	/// \returns True if this rect is all contained inside the other rect
-	bool isInsideOf(const Rect<T> &rect);
-	/// \returns True if this rect is completely outside the other rect
-	bool isOutsideOf(const Rect<T> &rect);
+	/// \returns True if the point is inside this rect
+	bool contains(T px, T py) const;
+	/// \returns True if the point vector is inside this rect
+	bool contains(const Vector2<T> &p) const;
+
+	/// \returns True if this rect surrounds the other rect
+	bool contains(const Rect<T> &rect) const;
+	/// \returns True if this rect does overlap the other rect in any way
+	bool overlaps(const Rect<T> &rect) const;
 
 	/// Eqality operator
 	bool operator==(const Rect &rect) const;
@@ -84,6 +91,13 @@ inline void Rect<T>::set(T xx, T yy, T ww, T hh)
 }
 
 template <class T>
+inline void Rect<T>::setCenter(float cx, float cy)
+{
+	x = cx - static_cast<T>(w * 0.5f);
+	y = cy - static_cast<T>(h * 0.5f);
+}
+
+template <class T>
 inline void Rect<T>::setCenter(const Vector2<T> &center)
 {
 	x = center.x - static_cast<T>(w * 0.5f);
@@ -91,17 +105,31 @@ inline void Rect<T>::setCenter(const Vector2<T> &center)
 }
 
 template <class T>
-inline bool Rect<T>::isInsideOf(const Rect &rect)
+inline bool Rect<T>::contains(T px, T py) const
 {
-	return (x >= rect.x && y >= rect.y &&
-	        x + w <= rect.x + rect.w && y + h <= rect.y + rect.h);
+	return (px >= x && py >= y &&
+	        px <= x + w && py <= y + h);
 }
 
 template <class T>
-inline bool Rect<T>::isOutsideOf(const Rect &rect)
+inline bool Rect<T>::contains(const Vector2<T> &p) const
 {
-	return (x > rect.x + rect.w || y > rect.y + rect.h ||
-	        x + w < rect.x || y + h < rect.y);
+	return (p.x >= x && p.y >= y &&
+	        p.x <= x + w && p.y <= y + h);
+}
+
+template <class T>
+inline bool Rect<T>::contains(const Rect &rect) const
+{
+	return (x <= rect.x && y <= rect.y &&
+	        x + w >= rect.x + rect.w && y + h >= rect.y + rect.h);
+}
+
+template <class T>
+inline bool Rect<T>::overlaps(const Rect &rect) const
+{
+	return !(x > rect.x + rect.w || y > rect.y + rect.h ||
+	         x + w < rect.x || y + h < rect.y);
 }
 
 template <class T>

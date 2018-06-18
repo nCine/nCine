@@ -8,8 +8,8 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-EglGfxDevice::EglGfxDevice(struct android_app *state, const GLContextInfo &contextInfo, const DisplayMode &mode)
-	: IGfxDevice(-1, -1, contextInfo, mode, true)
+EglGfxDevice::EglGfxDevice(struct android_app *state, const GLContextInfo &glContextInfo, const DisplayMode &mode)
+	: IGfxDevice(-1, -1, glContextInfo, mode, true)
 {
 	initDevice(state);
 }
@@ -65,9 +65,9 @@ void EglGfxDevice::querySurfaceSize()
 	eglQuerySurface(display_, surface_, EGL_HEIGHT, &height_);
 }
 
-bool EglGfxDevice::isModeSupported(struct android_app *state, const GLContextInfo &contextInfo, const DisplayMode &mode)
+bool EglGfxDevice::isModeSupported(struct android_app *state, const GLContextInfo &glContextInfo, const DisplayMode &mode)
 {
-	const EGLint renderableTypeBit = (contextInfo.majorVersion == 3) ? EGL_OPENGL_ES3_BIT_KHR : EGL_OPENGL_ES2_BIT;
+	const EGLint renderableTypeBit = (glContextInfo.majorVersion == 3) ? EGL_OPENGL_ES3_BIT_KHR : EGL_OPENGL_ES2_BIT;
 
 	const EGLint attribs[] =
 	{
@@ -113,7 +113,7 @@ bool EglGfxDevice::isModeSupported(struct android_app *state, const GLContextInf
 
 void EglGfxDevice::initDevice(struct android_app *state)
 {
-	const EGLint renderableTypeBit = (contextInfo_.majorVersion == 3) ? EGL_OPENGL_ES3_BIT_KHR : EGL_OPENGL_ES2_BIT;
+	const EGLint renderableTypeBit = (glContextInfo_.majorVersion == 3) ? EGL_OPENGL_ES3_BIT_KHR : EGL_OPENGL_ES2_BIT;
 
 	const EGLint attribs[] =
 	{
@@ -128,19 +128,26 @@ void EglGfxDevice::initDevice(struct android_app *state)
 		EGL_NONE
 	};
 
+	//const EGLint glProfileMaskBit = glContextInfo_.coreProfile ? EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR :
+	//	EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT_KHR; // disabled
+
 	EGLint attribList[] =
 	{
-		EGL_CONTEXT_MAJOR_VERSION_KHR, static_cast<EGLint>(contextInfo_.majorVersion),
-		EGL_CONTEXT_MINOR_VERSION_KHR, static_cast<EGLint>(contextInfo_.minorVersion),
+		EGL_CONTEXT_MAJOR_VERSION_KHR, static_cast<EGLint>(glContextInfo_.majorVersion),
+		EGL_CONTEXT_MINOR_VERSION_KHR, static_cast<EGLint>(glContextInfo_.minorVersion),
+		//EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR, glProfileMaskBit, // disabled
 		EGL_NONE, EGL_NONE,
 		EGL_NONE
 	};
 
 #if !defined(__ANDROID__) || (GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21)
-	if (contextInfo_.debugContext)
+	if (glContextInfo_.forwardCompatible || glContextInfo_.debugContext)
 	{
 		attribList[4] = EGL_CONTEXT_FLAGS_KHR;
-		attribList[5] = EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR;
+		EGLint contextFlagsMask = 0;
+		contextFlagsMask |= (glContextInfo_.forwardCompatible) ? EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE_BIT_KHR : 0;
+		contextFlagsMask |= (glContextInfo_.debugContext) ? EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR : 0;
+		attribList[5] = contextFlagsMask;
 	}
 #endif
 
@@ -167,9 +174,6 @@ void EglGfxDevice::initDevice(struct android_app *state)
 	const EGLint swapInterval = mode_.hasVSync() ? 1 : 0;
 	eglSwapInterval(display_, swapInterval);
 #endif
-
-	if (contextInfo_.debugContext)
-		enableGlDebugOutput();
 
 	EGLint red, blue, green, alpha, depth, stencil, samples;
 	eglGetConfigAttrib(display_, config_, EGL_RED_SIZE, &red);

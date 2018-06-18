@@ -13,7 +13,7 @@ namespace ncine {
 class SdlGfxDevice : public IGfxDevice
 {
   public:
-	SdlGfxDevice(int width, int height, const GLContextInfo &contextInfo, const DisplayMode &mode, bool isFullScreen);
+	SdlGfxDevice(int width, int height, const GLContextInfo &glContextInfo, const DisplayMode &mode, bool isFullScreen);
 	~SdlGfxDevice() override;
 
 	void setResolution(int width, int height) override;

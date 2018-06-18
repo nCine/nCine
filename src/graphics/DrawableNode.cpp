@@ -2,6 +2,7 @@
 #include "RenderQueue.h"
 #include "RenderCommand.h"
 #include "Application.h"
+#include "RenderStatistics.h"
 
 namespace ncine {
 
@@ -39,10 +40,21 @@ DrawableNode::~DrawableNode()
 
 void DrawableNode::draw(RenderQueue &renderQueue)
 {
-	updateAabb();
+	const bool cullingEnabled = theApplication().renderingSettings().cullingEnabled;
 
-	// `isOutsideOf() == false` is not the same as `isInsideOf()`
-	if (aabb_.isOutsideOf(theApplication().gfxDevice().screenRect()) == false)
+	if (cullingEnabled)
+	{
+		updateAabb();
+
+		if (aabb_.overlaps(theApplication().gfxDevice().screenRect()))
+		{
+			updateRenderCommand();
+			renderQueue.addCommand(renderCommand_.get());
+		}
+		else
+			RenderStatistics::addCulledNode();
+	}
+	else
 	{
 		updateRenderCommand();
 		renderQueue.addCommand(renderCommand_.get());

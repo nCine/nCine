@@ -17,7 +17,7 @@ class EglGfxDevice : public IGfxDevice
 {
   public:
 	/// Constructor taking a `DisplayMode` object
-	EglGfxDevice(struct android_app *state, const GLContextInfo &contextInfo, const DisplayMode &mode);
+	EglGfxDevice(struct android_app *state, const GLContextInfo &glContextInfo, const DisplayMode &mode);
 	~EglGfxDevice() override;
 
 	void setResolution(int width, int height) override { }
@@ -40,7 +40,7 @@ class EglGfxDevice : public IGfxDevice
 	void querySurfaceSize();
 
 	/// Checks if the desired pixel format is supported
-	static bool isModeSupported(struct android_app *state, const GLContextInfo &contextInfo, const DisplayMode &mode);
+	static bool isModeSupported(struct android_app *state, const GLContextInfo &glContextInfo, const DisplayMode &mode);
 
   private:
 	/// The EGL display connection

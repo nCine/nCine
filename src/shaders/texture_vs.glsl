@@ -1,8 +1,8 @@
 uniform mat4 projection;
 uniform mat4 modelView;
-attribute vec3 aPosition;
-attribute vec2 aTexCoords;
-varying vec2 vTexCoords;
+in vec3 aPosition;
+in vec2 aTexCoords;
+out vec2 vTexCoords;
 
 void main()
 {

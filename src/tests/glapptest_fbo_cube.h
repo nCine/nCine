@@ -30,13 +30,26 @@ class MyEventHandler :
 	void onInit() override;
 	void onFrameStart() override;
 
+#ifdef __ANDROID__
+	void onTouchDown(const nc::TouchEvent &event) override;
+	void onTouchUp(const nc::TouchEvent &event) override;
+	void onPointerDown(const nc::TouchEvent &event) override;
+	void onPointerUp(const nc::TouchEvent &event) override;
+#endif
 	void onKeyReleased(const nc::KeyboardEvent &event) override;
+	void onMouseButtonPressed(const nc::MouseEvent &event) override;
+	void onMouseButtonReleased(const nc::MouseEvent &event) override;
 
   private:
 	static const int FboSize = 256;
 
-	float angle_;
+	float angleTri_;
+	float angleCube_;
+	bool updateTri_;
+	bool updateCube_;
 	int width_, height_;
+	static const int UniformsBufferSize = 276;
+	unsigned char uniformsBuffer_[UniformsBufferSize];
 
 	nctl::UniquePtr<nc::GLShaderProgram> colorProgram_;
 	nctl::UniquePtr<nc::GLShaderUniforms> colorUniforms_;

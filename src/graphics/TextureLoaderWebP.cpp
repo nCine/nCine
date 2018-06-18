@@ -43,14 +43,14 @@ TextureLoaderWebP::TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
 	       features.has_alpha, features.has_animation, features.format);
 
 	mipMapCount_ = 1; // No MIP Mapping
-	texFormat_ = features.has_alpha ? TextureFormat(GL_RGBA) : TextureFormat(GL_RGB);
+	texFormat_ = features.has_alpha ? TextureFormat(GL_RGBA8) : TextureFormat(GL_RGB8);
 	bpp_ = features.has_alpha ? 4 : 3;
-	long int decodedSize = width_ * height_ * bpp_;
-	pixels_ = nctl::makeUnique<unsigned char []>(decodedSize);
+	dataSize_ = width_ * height_ * bpp_;
+	pixels_ = nctl::makeUnique<unsigned char []>(dataSize_);
 
 	if (features.has_alpha)
 	{
-		if (WebPDecodeRGBAInto(fileBuffer.get(), fileSize, pixels_.get(), decodedSize, width_ * bpp_) == nullptr)
+		if (WebPDecodeRGBAInto(fileBuffer.get(), fileSize, pixels_.get(), dataSize_, width_ * bpp_) == nullptr)
 		{
 			fileBuffer.reset(nullptr);
 			pixels_.reset(nullptr);
@@ -59,7 +59,7 @@ TextureLoaderWebP::TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
 	}
 	else
 	{
-		if (WebPDecodeRGBInto(fileBuffer.get(), fileSize, pixels_.get(), decodedSize, width_ * bpp_) == nullptr)
+		if (WebPDecodeRGBInto(fileBuffer.get(), fileSize, pixels_.get(), dataSize_, width_ * bpp_) == nullptr)
 		{
 			fileBuffer.reset(nullptr);
 			pixels_.reset(nullptr);

@@ -9,23 +9,23 @@ namespace ncine {
 
 ProfilePlotter::ProfilePlotter(SceneNode *parent, Rectf rect)
 	: DrawableNode(parent, rect.x, rect.y), variables_(2), shouldPlotRefValue_(false),
-	  refValueColor_(1.0f, 1.0f, 1.0f), refValue_(0.0f)
+	  refValueColor_(1.0f, 1.0f, 1.0f), refValue_(0.0f),
+	  backgroundColorBlock_(nullptr), refValueColorBlock_(nullptr)
 {
 	width_ = rect.w;
 	height_ = rect.h;
 
 	setLayer(DrawableNode::LayerBase::HUD);
-	renderCommand_->material().setShaderProgram(Material::ShaderProgram::COLOR);
-	renderCommand_->geometry().createCustomVbo(8, GL_STATIC_DRAW);
+	renderCommand_->setType(RenderCommand::CommandTypes::PLOTTER);
+	renderCommand_->material().setShaderProgramType(Material::ShaderProgramType::COLOR);
+	backgroundColorBlock_ = renderCommand_->material().uniformBlock("ColorBlock");
 	renderCommand_->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, 4);
-	setBackgroundVertices();
-	renderCommand_->geometry().updateVboData(0, 8, backgroundVertices_.data());
 
 	// Priority is one more than variable mean lines
 	refValueCmd_.setLayer(DrawableNode::LayerBase::HUD + 3);
-	refValueCmd_.setType(RenderCommand::CommandType::PLOTTER);
-	refValueCmd_.material().setShaderProgram(Material::ShaderProgram::COLOR);
-	refValueCmd_.geometry().createCustomVbo(4, GL_DYNAMIC_DRAW);
+	refValueCmd_.setType(RenderCommand::CommandTypes::PLOTTER);
+	refValueCmd_.material().setShaderProgramType(Material::ShaderProgramType::COLOR);
+	refValueColorBlock_ = refValueCmd_.material().uniformBlock("ColorBlock");
 	refValueCmd_.geometry().setDrawParameters(GL_LINES, 0, 2);
 }
 
@@ -70,33 +70,33 @@ float ProfilePlotter::normBetweenRefValue(float min, float max) const
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ProfilePlotter::setBackgroundVertices()
+void ProfilePlotter::setBackgroundVertices(GLfloat *vertices)
 {
 	// Graph background vertices
-	backgroundVertices_[0] = 0.0f;			backgroundVertices_[1] = 0.0f;
-	backgroundVertices_[2] = width_;		backgroundVertices_[3] = 0.0f;
-	backgroundVertices_[4] = 0.0f;			backgroundVertices_[5] = height_;
+	vertices[0] = 0.0f;			vertices[1] = 0.0f;
+	vertices[2] = width_;		vertices[3] = 0.0f;
+	vertices[4] = 0.0f;			vertices[5] = height_;
 
-	backgroundVertices_[6] = width_;		backgroundVertices_[7] = height_;
+	vertices[6] = width_;		vertices[7] = height_;
 }
 
 void ProfilePlotter::updateRenderCommand()
 {
+	GLfloat *vertices = renderCommand_->geometry().acquireVertexPointer(8);
+	setBackgroundVertices(vertices);
+	renderCommand_->geometry().releaseVertexPointer();
+
 	renderCommand_->transformation() = worldMatrix_;
 
-	renderCommand_->material().setTexture(nullptr);
-	renderCommand_->material().uniform("color")->setFloatValue(backgroundColor_.fR(), backgroundColor_.fG(), backgroundColor_.fB(), backgroundColor_.fA());
+	backgroundColorBlock_->uniform("color")->setFloatValue(backgroundColor_.fR(), backgroundColor_.fG(), backgroundColor_.fB(), backgroundColor_.fA());
 	const bool isTransparent = backgroundColor_.a() < 255;
 	renderCommand_->material().setTransparent(isTransparent);
 }
 
-void ProfilePlotter::UpdateRefValueRenderCommand()
+void ProfilePlotter::updateRefValueRenderCommand()
 {
 	refValueCmd_.transformation() = worldMatrix_;
-
-	refValueCmd_.material().setTexture(nullptr);
-	refValueCmd_.material().uniform("color")->setFloatValue(refValueColor_.fR(), refValueColor_.fG(), refValueColor_.fB(), refValueColor_.fA());
-	refValueCmd_.geometry().updateVboData(0, 4, refValueVertices_.data());
+	refValueColorBlock_->uniform("color")->setFloatValue(refValueColor_.fR(), refValueColor_.fG(), refValueColor_.fB(), refValueColor_.fA());
 }
 
 }

@@ -21,6 +21,34 @@ class IAppEventHandler;
 class DLL_PUBLIC Application
 {
   public:
+	/// Rendering settings that can be changed at run-time
+	struct RenderingSettings
+	{
+		RenderingSettings() :
+			batchingEnabled(true), batchingWithIndices(false), cullingEnabled(true),
+			minBatchSize(4), maxBatchSize(500), showProfilerGraphs(true), showProfilerText(true) { }
+
+		/// True if batching is enabled
+		bool batchingEnabled;
+		/// True if using indices for vertex batching
+		bool batchingWithIndices;
+		/// True if node culling is enabled
+		bool cullingEnabled;
+		/// Minimum size for a batch to be collected
+		unsigned int minBatchSize;
+		/// Maximum size for a batch before a forced split
+		unsigned int maxBatchSize;
+		/// True if showing the profiler graphc
+		bool showProfilerGraphs;
+		/// True if showing the profiler text
+		bool showProfilerText;
+	};
+
+	/// Returns the configuration used to initialize the application
+	inline const AppConfiguration &appConfiguration() const { return appCfg_; }
+	/// Returns the run-time rendering settings
+	inline RenderingSettings &renderingSettings() { return renderingSettings_; }
+
 	/// Returns the graphics device instance
 	inline IGfxDevice &gfxDevice() { return *gfxDevice_; }
 	/// Returns the root of the transformation graph
@@ -64,6 +92,7 @@ class DLL_PUBLIC Application
 	bool hasFocus_;
 	bool shouldQuit_;
 	AppConfiguration appCfg_;
+	RenderingSettings renderingSettings_;
 	nctl::UniquePtr<FrameTimer> frameTimer_;
 	nctl::UniquePtr<IGfxDevice> gfxDevice_;
 	nctl::UniquePtr<RenderQueue> renderQueue_;
@@ -72,8 +101,10 @@ class DLL_PUBLIC Application
 	nctl::UniquePtr<ProfilePlotter> profilePlotter_;
 	nctl::UniquePtr<Font> font_;
 	nctl::UniquePtr<TextNode> textLines_;
+	nctl::UniquePtr<TextNode> textLines2_;
 	float textUpdateTime_;
 	nctl::String textString_;
+	nctl::String textString2_;
 	nctl::UniquePtr<IInputManager> inputManager_;
 	nctl::UniquePtr<IAppEventHandler> appEventHandler_;
 

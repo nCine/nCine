@@ -46,7 +46,7 @@ void TextureLoaderPvr::readHeader(Pvr3Header &header)
 
 void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 {
-	GLenum internalFormat = GL_RGB; // to suppress uninitialized variable warning
+	GLenum internalFormat = GL_RGB8; // to suppress uninitialized variable warning
 
 	uint64_t pixelFormat = IFile::int64FromLE(header.pixelFormat);
 
@@ -87,6 +87,21 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 			case FMT_PVRTCII_2BPP:
 			case FMT_PVRTCII_4BPP:
 				FATAL_MSG("No support for PVRTC-II compression");
+				break;
+			case FMT_ETC2_RGB:
+				internalFormat = GL_COMPRESSED_RGB8_ETC2;
+				break;
+			case FMT_ETC2_RGBA:
+				internalFormat = GL_COMPRESSED_RGBA8_ETC2_EAC;
+				break;
+			case FMT_ETC2_RGB_A1:
+				internalFormat = GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+				break;
+			case FMT_EAC_R11:
+				internalFormat = GL_COMPRESSED_R11_EAC;
+				break;
+			case FMT_EAC_RG11:
+				internalFormat = GL_COMPRESSED_RG11_EAC;
 				break;
 #if __ANDROID_API__ >= 21
 			case FMT_ASTC_4x4:
@@ -161,31 +176,31 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 #endif
 				break;
 			case FMT_RGBA_8888:
-				internalFormat = GL_RGBA;
+				internalFormat = GL_RGBA8;
 				break;
 			case FMT_RGB_888:
-				internalFormat = GL_RGB;
+				internalFormat = GL_RGB8;
 				break;
 			case FMT_RGB_565:
-				internalFormat = GL_RGB;
+				internalFormat = GL_RGB565;
 				type = GL_UNSIGNED_SHORT_5_6_5;
 				break;
 			case FMT_RGBA_5551:
-				internalFormat = GL_RGBA;
+				internalFormat = GL_RGB5_A1;
 				type = GL_UNSIGNED_SHORT_5_5_5_1;
 				break;
 			case FMT_RGBA_4444:
-				internalFormat = GL_RGBA;
+				internalFormat = GL_RGBA4;
 				type = GL_UNSIGNED_SHORT_4_4_4_4;
 				break;
 			case FMT_LA_88:
-				internalFormat = GL_LUMINANCE_ALPHA;
+				internalFormat = GL_RG8;
 				break;
 			case FMT_L_8:
-				internalFormat = GL_LUMINANCE;
+				internalFormat = GL_R8;
 				break;
 			case FMT_A_8:
-				internalFormat = GL_ALPHA;
+				internalFormat = GL_R8;
 				break;
 			default:
 				FATAL_MSG_X("Unsupported PVR3 uncompressed format: 0x%llx", pixelFormat);
@@ -198,9 +213,9 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 	if (mipMapCount_ > 1)
 	{
 		LOGI_X("MIP Maps: %d", mipMapCount_);
-		mipDataOffsets_ = nctl::makeUnique<long []>(mipMapCount_);
-		mipDataSizes_ = nctl::makeUnique<long []>(mipMapCount_);
-		long int dataSizesSum = TextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_.get(), mipDataSizes_.get());
+		mipDataOffsets_ = nctl::makeUnique<unsigned long []>(mipMapCount_);
+		mipDataSizes_ = nctl::makeUnique<unsigned long []>(mipMapCount_);
+		unsigned long dataSizesSum = TextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_.get(), mipDataSizes_.get());
 		if (dataSizesSum != dataSize_)
 			LOGW_X("The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
 	}

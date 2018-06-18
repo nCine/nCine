@@ -68,8 +68,13 @@ void GLFramebufferObject::attachRenderbuffer(GLenum internalFormat, GLsizei widt
 void GLFramebufferObject::attachTexture(GLTexture &texture, GLenum attachment)
 {
 	bind(GL_FRAMEBUFFER);
-	// glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture.glHandle_, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texture.target_, texture.glHandle_, 0);
+}
+
+void GLFramebufferObject::invalidate(GLsizei numAttachments, const GLenum *attachments)
+{
+	bind(GL_FRAMEBUFFER);
+	glInvalidateFramebuffer(GL_FRAMEBUFFER, numAttachments, attachments);
 }
 
 bool GLFramebufferObject::isStatusComplete()

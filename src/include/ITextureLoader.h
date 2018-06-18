@@ -24,7 +24,7 @@ class ITextureLoader
 	/// Returns the number of MIP maps stored in the texture file
 	inline int mipMapCount() const { return mipMapCount_; }
 	/// Returns texture data size in bytes
-	inline long dataSize() const { return dataSize_; }
+	inline unsigned long dataSize() const { return dataSize_; }
 	/// Returns the texture data size in bytes for the specified MIP map level
 	long dataSize(unsigned int mipMapLevel) const;
 	/// Returns the texture format object
@@ -45,10 +45,10 @@ class ITextureLoader
 	int height_;
 	int bpp_;
 	int headerSize_;
-	long dataSize_;
+	unsigned long dataSize_;
 	int mipMapCount_;
-	nctl::UniquePtr<long []> mipDataOffsets_;
-	nctl::UniquePtr<long []> mipDataSizes_;
+	nctl::UniquePtr<unsigned long []> mipDataOffsets_;
+	nctl::UniquePtr<unsigned long []> mipDataSizes_;
 	TextureFormat texFormat_;
 	nctl::UniquePtr<GLubyte []> pixels_;
 

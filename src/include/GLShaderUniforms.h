@@ -16,6 +16,7 @@ class GLShaderUniforms
 	GLShaderUniforms();
 	explicit GLShaderUniforms(GLShaderProgram *shaderProgram);
 	void setProgram(GLShaderProgram *shaderProgram);
+	void setUniformsDataPointer(GLubyte *dataPointer);
 
 	GLUniformCache *uniform(const char *name);
 	void commitUniforms();
@@ -27,11 +28,6 @@ class GLShaderUniforms
 	nctl::StringHashMap<GLUniformCache> uniformCaches_;
 	/// A dummy uniform cache returned when a uniform is not found in the hashmap
 	static GLUniformCache uniformNotFound_;
-
-	static const unsigned int UniformFloatBufferSize = 128;
-	GLfloat uniformsFloatBuffer_[UniformFloatBufferSize];
-	static const unsigned int UniformIntBufferSize = 16;
-	GLfloat uniformsIntBuffer_[UniformIntBufferSize];
 
 	void importUniforms();
 };

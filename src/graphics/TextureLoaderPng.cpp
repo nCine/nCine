@@ -69,15 +69,15 @@ TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
 	switch (colorType)
 	{
 		case PNG_COLOR_TYPE_RGB_ALPHA:
-			texFormat_ = TextureFormat(GL_RGBA);
+			texFormat_ = TextureFormat(GL_RGBA8);
 			bpp_ = 4;
 			break;
 		case PNG_COLOR_TYPE_RGB:
-			texFormat_ = TextureFormat(GL_RGB);
+			texFormat_ = TextureFormat(GL_RGB8);
 			bpp_ = 3;
 			break;
 		case PNG_COLOR_TYPE_GRAY:
-			texFormat_ = TextureFormat(GL_LUMINANCE);
+			texFormat_ = TextureFormat(GL_R8);
 			bpp_ = 1;
 			break;
 		default:
@@ -89,7 +89,8 @@ TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
 	// Row size in bytes
 	const png_size_t bytesPerRow = png_get_rowbytes(pngPtr, infoPtr);
 
-	pixels_ = nctl::makeUnique<unsigned char []>(static_cast<unsigned long>(bytesPerRow * height_));
+	dataSize_ = bytesPerRow * height_;
+	pixels_ = nctl::makeUnique<unsigned char []>(static_cast<unsigned long>(dataSize_));
 
 	nctl::UniquePtr<png_bytep []> rowPointers = nctl::makeUnique<png_bytep []>(height_);
 	for (int i = 0; i < height_; i++)

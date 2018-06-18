@@ -14,6 +14,7 @@
 	#define WITH_WEBP_FORMAT (0 && NCINE_WITH_WEBP)
 #else
 	#define WITH_ETC1_FORMAT (1)
+	#define WITH_ETC2_FORMAT (1)
 	#define WITH_ATC_FORMAT (1)
 	#define WITH_ASTC_FORMAT (1 && __ANDROID_API__ >= 21)
 #endif
@@ -102,7 +103,7 @@ void MyEventHandler::onInit()
 #endif
 
 #if WITH_DDS_COMPRESSED_FORMAT
-	if (gfxCaps.hasExtension(nc::IGfxCapabilities::EXT_TEXTURE_COMPRESSION_S3TC))
+	if (gfxCaps.hasExtension(nc::IGfxCapabilities::GLExtensions::EXT_TEXTURE_COMPRESSION_S3TC))
 	{
 		LOGI("S3TC textures are supported");
 		filenames_.pushBack("texture_512_RGB_DXT1.dds");
@@ -122,7 +123,7 @@ void MyEventHandler::onInit()
 
 
 #if WITH_ETC1_FORMAT
-	if (gfxCaps.hasExtension(nc::IGfxCapabilities::OES_COMPRESSED_ETC1_RGB8_TEXTURE))
+	if (gfxCaps.hasExtension(nc::IGfxCapabilities::GLExtensions::OES_COMPRESSED_ETC1_RGB8_TEXTURE))
 	{
 		LOGI("ETC1 textures are supported");
 		filenames_.pushBack("texture_512_RGB_ETC1.ktx");
@@ -135,8 +136,19 @@ void MyEventHandler::onInit()
 	}
 #endif
 
+#if WITH_ETC2_FORMAT
+	LOGI("ETC2 textures are supported");
+	filenames_.pushBack("texture_512_RGBA_ETC2.ktx");
+	filenames_.pushBack("texture_512_RGBA_ETC2.pvr");
+
+	#if WITH_MIPMAPPED_FORMATS
+	filenames_.pushBack("texture_512_RGBA_ETC2_MIP.ktx");
+	filenames_.pushBack("texture_512_RGBA_ETC2_MIP.pvr");
+	#endif
+#endif
+
 #if WITH_ATC_FORMAT
-	if (gfxCaps.hasExtension(nc::IGfxCapabilities::AMD_COMPRESSED_ATC_TEXTURE))
+	if (gfxCaps.hasExtension(nc::IGfxCapabilities::GLExtensions::AMD_COMPRESSED_ATC_TEXTURE))
 	{
 		LOGI("ATC textures are supported");
 		filenames_.pushBack("texture_512_RGB_ATC.dds");
@@ -146,7 +158,7 @@ void MyEventHandler::onInit()
 #endif
 
 #if WITH_ASTC_FORMAT
-	if (gfxCaps.hasExtension(nc::IGfxCapabilities::KHR_TEXTURE_COMPRESSION_ASTC_LDR))
+	if (gfxCaps.hasExtension(nc::IGfxCapabilities::GLExtensions::KHR_TEXTURE_COMPRESSION_ASTC_LDR))
 	{
 		LOGI("ASTC textures are supported");
 		filenames_.pushBack("texture_512_RGB_ASTC8x8.ktx");
@@ -169,10 +181,10 @@ void MyEventHandler::onInit()
 	{
 		textures_[i] = nctl::makeUnique<nc::Texture>((texPath + filenames_[i]).data());
 		sprites_[i] = nctl::makeUnique<nc::Sprite>(dummy_.get(), textures_[i].get());
-		sprites_[i]->enableDraw(false);
+		sprites_[i]->setEnabled(false);
 	}
 
-	sprites_[selected_]->enableDraw(true);
+	sprites_[selected_]->setEnabled(true);
 	textNode_->setString(filenames_[selected_]);
 	textNode_->setPosition(0.0f, nc::theApplication().height() * VerticalTextPos - textNode_->height() * 0.5f);
 }
@@ -234,8 +246,8 @@ void MyEventHandler::handleInput(Direction direction)
 
 	if (newSelection_ != selected_)
 	{
-		sprites_[selected_]->enableDraw(false);
-		sprites_[newSelection_]->enableDraw(true);
+		sprites_[selected_]->setEnabled(false);
+		sprites_[newSelection_]->setEnabled(true);
 		textNode_->setString(filenames_[newSelection_]);
 		textNode_->setPosition(0.0f, nc::theApplication().height() * VerticalTextPos - textNode_->height() * 0.5f);
 		selected_ = newSelection_;

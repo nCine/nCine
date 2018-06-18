@@ -40,11 +40,8 @@ long ITextureLoader::dataSize(unsigned int mipMapLevel) const
 {
 	long int dataSize = 0;
 
-	if (mipMapCount_ > 1)
-	{
-		if (int(mipMapLevel) < mipMapCount_)
-			dataSize = mipDataSizes_[mipMapLevel];
-	}
+	if (mipMapCount_ > 1 && int(mipMapLevel) < mipMapCount_)
+		dataSize = mipDataSizes_[mipMapLevel];
 	else if (mipMapLevel == 0)
 		dataSize = dataSize_;
 
@@ -55,11 +52,8 @@ const GLubyte *ITextureLoader::pixels(unsigned int mipMapLevel) const
 {
 	const GLubyte *pixels = nullptr;
 
-	if (mipMapCount_ > 1)
-	{
-		if (int(mipMapLevel) < mipMapCount_)
-			pixels = pixels_.get() + mipDataOffsets_[mipMapLevel];
-	}
+	if (mipMapCount_ > 1 && int(mipMapLevel) < mipMapCount_)
+		pixels = pixels_.get() + mipDataOffsets_[mipMapLevel];
 	else if (mipMapLevel == 0)
 		pixels = pixels_.get();
 

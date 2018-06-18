@@ -30,7 +30,7 @@ class TextureFormat
 	void bgrFormat();
 
 	/// Calculates the pixel data size for each MIP map level
-	static long int calculateMipSizes(GLenum internalFormat, int width, int height, int mipMapCount, long int *mipDataOffsets, long int *mipDataSizes);
+	static unsigned long calculateMipSizes(GLenum internalFormat, int width, int height, int mipMapCount, unsigned long *mipDataOffsets, unsigned long *mipDataSizes);
 
   private:
 	GLenum internalFormat_;
@@ -38,7 +38,6 @@ class TextureFormat
 	GLenum type_;
 	bool isCompressed_;
 
-#ifndef __ANDROID__
 	/// Searches a match between an integer internal format and an external one
 	bool integerFormat();
 	/// Searches a match between a non integer internal format and an external one
@@ -47,12 +46,8 @@ class TextureFormat
 	bool floatFormat();
 	/// Searches a match between a compressed internal format and an external one
 	bool compressedFormat();
-#else
-	/// Searches a match between an OpenGL ES internal format and an external one
-	bool oesFormat();
-	/// Searches a match between a OpenGL ES compressed internal format and an external one
-	bool oesFormatApi21();
-	/// Searches a match between a OpenGL ES compressed internal format and an external one
+#ifdef __ANDROID__
+	/// Searches a match between an OpenGL ES compressed internal format and an external one
 	bool oesCompressedFormat();
 #endif
 
@@ -66,12 +61,10 @@ inline bool TextureFormat::hasAlpha() const
 {
 	return (format_ == GL_RGBA ||
 #ifndef __ANDROID__
-	        format_ == GL_BGRA ||
+	        format_ == GL_BGRA);
 #else
-	        format_ == GL_BGRA_EXT ||
+	        format_ == GL_BGRA_EXT);
 #endif
-	        format_ == GL_LUMINANCE_ALPHA ||
-	        format_ == GL_ALPHA);
 }
 
 }

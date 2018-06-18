@@ -4,7 +4,9 @@
 #include "IFile.h"
 #include "ArrayIndexer.h"
 #include "GfxCapabilities.h"
+#include "RenderStatistics.h"
 #include "RenderResources.h"
+#include "GLDebug.h"
 #include "FrameTimer.h"
 #include "LinePlotter.h"
 #include "StackedBarPlotter.h"
@@ -34,11 +36,7 @@ namespace ncine {
 
 Application::Application()
 	: isPaused_(false), hasFocus_(true), shouldQuit_(false),
-	  frameTimer_(nullptr), gfxDevice_(nullptr),
-	  renderQueue_(nullptr), rootNode_(nullptr),
-	  profileTimer_(nullptr), profilePlotter_(nullptr),
-	  font_(nullptr), textLines_(nullptr), textUpdateTime_(0.0f),
-	  textString_(MaxTextLength), inputManager_(nullptr), appEventHandler_(nullptr)
+	  textUpdateTime_(0.0f), textString_(MaxTextLength), textString2_(MaxTextLength)
 {
 
 }
@@ -87,29 +85,33 @@ void Application::initCommon()
 
 	theServiceLocator().registerIndexer(nctl::makeUnique<ArrayIndexer>());
 #ifdef WITH_AUDIO
-	if (appCfg_.withAudio_)
+	if (appCfg_.withAudio())
 		theServiceLocator().registerAudioDevice(nctl::makeUnique<ALAudioDevice>());
 #endif
 #ifdef WITH_THREADS
-	if (appCfg_.withThreads_)
+	if (appCfg_.withThreads())
 		theServiceLocator().registerThreadPool(nctl::makeUnique<ThreadPool>());
 #endif
 	theServiceLocator().registerGfxCapabilities(nctl::makeUnique<GfxCapabilities>());
+	GLDebug::init(theServiceLocator().gfxCapabilities());
 
 	LOGI_X("Data path: \"%s\"", IFile::dataPath().data());
 	LOGI_X("Save path: \"%s\"", IFile::savePath().data());
 
-	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.frameTimerLogInterval_, appCfg_.profileTextUpdateTime_);
+	// Swapping frame now for a cleaner API trace capture when debugging
+	gfxDevice_->update();
+
+	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.frameTimerLogInterval(), appCfg_.profileTextUpdateTime());
 	profileTimer_ = nctl::makeUnique<Timer>();
 
-	if (appCfg_.withScenegraph_)
+	if (appCfg_.withScenegraph())
 	{
 		gfxDevice_->setupGL();
 		RenderResources::create();
 		renderQueue_ = nctl::makeUnique<RenderQueue>();
 		rootNode_ = nctl::makeUnique<SceneNode>();
 
-		if (appCfg_.withProfilerGraphs_)
+		if (appCfg_.withProfilerGraphs())
 		{
 			profilePlotter_ = nctl::makeUnique<StackedBarPlotter>(rootNode_.get(), Rectf(width() * 0.1f, height() * 0.1f, width() * 0.8f, height() * 0.15f));
 			profilePlotter_->setBackgroundColor(Color(0.35f, 0.35f, 0.45f, 0.5f));
@@ -130,10 +132,10 @@ void Application::initCommon()
 			profilePlotter_->setRefValue(1.0f / 60.0f); // 60 FPS
 		}
 
-		if (appCfg_.withProfilerText_)
+		if (appCfg_.withProfilerText())
 		{
-			nctl::String fontTexFilePath = IFile::dataPath() + appCfg_.fontTexFilename_;
-			nctl::String fontFntFilePath = IFile::dataPath() + appCfg_.fontFntFilename_;
+			nctl::String fontTexFilePath = IFile::dataPath() + appCfg_.fontTexFilename();
+			nctl::String fontFntFilePath = IFile::dataPath() + appCfg_.fontFntFilename();
 			if (IFile::access(fontTexFilePath.data(), IFile::AccessMode::EXISTS) == false)
 				LOGW_X("Cannot access font texture file \"%s\" to enable profiling text", fontTexFilePath.data());
 			else if (IFile::access(fontFntFilePath.data(), IFile::AccessMode::EXISTS) == false)
@@ -142,10 +144,14 @@ void Application::initCommon()
 			{
 				font_ = nctl::makeUnique<Font>(fontTexFilePath.data(), fontFntFilePath.data());
 				textLines_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
-				textLines_->setPosition(0.0f, height());
+				textLines_->setAlignment(TextNode::Alignment::RIGHT);
+				textLines2_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
+				textLines2_->setAlignment(TextNode::Alignment::LEFT);
 			}
 		}
 	}
+	else
+		RenderResources::createMinimal(); // some resources are still required for rendering
 
 	LOGI("Application initialized");
 
@@ -155,18 +161,28 @@ void Application::initCommon()
 	// HACK: Init of the random seed
 	// In the future there could be a random generator service
 	srand(static_cast<unsigned int>(time(nullptr)));
+
+	// Swapping frame now for a cleaner API trace capture when debugging
+	gfxDevice_->update();
 }
 
 void Application::step()
 {
 	frameTimer_->addFrame();
-	if (appCfg_.withScenegraph_)
+	if (appCfg_.withScenegraph())
 		gfxDevice_->clear();
 	appEventHandler_->onFrameStart();
+	// Measuring OnFrameEnd() + OnFrameStart() time
 	if (profilePlotter_)
-	{
-		// Measuring OnFrameEnd() + OnFrameStart() time
 		profilePlotter_->addValue(0, profileTimer_->interval());
+
+	if (profilePlotter_)
+		profilePlotter_->setEnabled(renderingSettings_.showProfilerGraphs);
+
+	if (textLines_ && textLines2_)
+	{
+		textLines_->setEnabled(renderingSettings_.showProfilerText);
+		textLines2_->setEnabled(renderingSettings_.showProfilerText);
 	}
 
 	profileTimer_->start();
@@ -177,36 +193,31 @@ void Application::step()
 		renderQueue_->draw();
 	}
 
-	if (renderQueue_ && textLines_ && Timer::now() - textUpdateTime_ > appCfg_.profileTextUpdateTime_)
+	if (renderQueue_ && textLines_ && textLines2_ && Timer::now() - textUpdateTime_ > appCfg_.profileTextUpdateTime())
 	{
 		textUpdateTime_ = Timer::now();
-		textString_.format(static_cast<const char *>("FPS: %.0f (%.2fms)\nSprites: %uV, %uDC\nParticles: %uV, %uDC\nText: %uV, %uDC\nPlotter: %uV, %uDC\nTotal: %uV, %uDC"),
-		                   frameTimer_->averageFps(), frameTimer_->interval() * 1000.0f,
-		                   renderQueue_->numVertices(RenderCommand::CommandType::SPRITE), renderQueue_->numCommands(RenderCommand::CommandType::SPRITE),
-		                   renderQueue_->numVertices(RenderCommand::CommandType::PARTICLE), renderQueue_->numCommands(RenderCommand::CommandType::PARTICLE),
-		                   renderQueue_->numVertices(RenderCommand::CommandType::TEXT), renderQueue_->numCommands(RenderCommand::CommandType::TEXT),
-		                   renderQueue_->numVertices(RenderCommand::CommandType::PLOTTER), renderQueue_->numCommands(RenderCommand::CommandType::PLOTTER),
-		                   renderQueue_->numVertices(), renderQueue_->numCommands());
 
+		textString_.format("FPS: %.0f (%.2fms)\n", frameTimer_->averageFps(), frameTimer_->interval() * 1000.0f);
+		RenderStatistics::appendCommandsStatistics(textString_);
 		textLines_->setString(textString_);
-		textLines_->setAlignment(TextNode::Alignment::RIGHT);
 		textLines_->setPosition(width() - textLines_->width() * 0.5f, height() - textLines_->height() * 0.5f);
+
+		textString2_.clear();
+		RenderStatistics::appendMoreStatistics(textString2_);
+		textLines2_->setString(textString2_);
+		textLines2_->setPosition(textLines2_->width() * 0.5f, height() - textLines2_->height() * 0.5f);
 	}
 
 	theServiceLocator().audioDevice().updatePlayers();
+	// Measuring scenegraph update and visit + draw + audio update
 	if (profilePlotter_)
-	{
-		// Measuring scenegraph update and visit + draw + audio update
 		profilePlotter_->addValue(1, profileTimer_->interval());
-	}
 
 	profileTimer_->start();
 	gfxDevice_->update();
+	// Measuring swap buffers time
 	if (profilePlotter_)
-	{
-		// Measuring swap buffers time
 		profilePlotter_->addValue(2, profileTimer_->interval());
-	}
 
 	profileTimer_->start();
 	appEventHandler_->onFrameEnd();
@@ -218,6 +229,7 @@ void Application::shutdownCommon()
 	LOGI("IAppEventHandler::OnShutdown() invoked");
 	appEventHandler_.reset(nullptr);
 
+	textLines2_.reset(nullptr);
 	textLines_.reset(nullptr);
 	font_.reset(nullptr);
 	profilePlotter_.reset(nullptr);

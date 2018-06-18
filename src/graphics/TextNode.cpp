@@ -2,6 +2,7 @@
 #include "FontGlyph.h"
 #include "Texture.h"
 #include "RenderCommand.h"
+#include "GLDebug.h"
 
 namespace ncine {
 
@@ -16,24 +17,26 @@ TextNode::TextNode(SceneNode *parent, Font *font)
 }
 
 TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
-	: DrawableNode(parent, 0.0f, 0.0f), string_(maxStringLength), dirtyDraw_(true), dirtyBoundaries_(true),
-	  withKerning_(true), font_(font), interleavedVertices_(32),
-	  xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f), lineLengths_(4), alignment_(Alignment::LEFT)
+	: DrawableNode(parent, 0.0f, 0.0f), string_(maxStringLength), dirtyDraw_(true),
+	  dirtyBoundaries_(true), withKerning_(true), font_(font),
+	  interleavedVertices_(maxStringLength * 4 + (maxStringLength - 1) * 2),
+	  xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f),
+	  lineLengths_(4), alignment_(Alignment::LEFT), textnodeBlock_(nullptr)
 {
 	ASSERT(font);
 	ASSERT(maxStringLength > 0);
 
 	type_ = ObjectType::TEXTNODE;
 	setLayer(DrawableNode::LayerBase::HUD);
-	renderCommand_->setType(RenderCommand::CommandType::TEXT);
+	renderCommand_->setType(RenderCommand::CommandTypes::TEXT);
 	renderCommand_->material().setTransparent(true);
-	Material::ShaderProgram shaderProgram = font_->texture()->hasAlpha() ?
-	                                               Material::ShaderProgram::TEXTNODE_COLOR :
-	                                               Material::ShaderProgram::TEXTNODE_GRAY;
-	renderCommand_->material().setShaderProgram(shaderProgram);
+	const Material::ShaderProgramType shaderProgramType = font_->texture()->hasAlpha() ?
+		Material::ShaderProgramType::TEXTNODE_COLOR : Material::ShaderProgramType::TEXTNODE_GRAY;
+	renderCommand_->material().setShaderProgramType(shaderProgramType);
+	textnodeBlock_ = renderCommand_->material().uniformBlock("TextnodeBlock");
 	renderCommand_->material().setTexture(*font_->texture());
-	// `maxStringLength` characters, each has 6 vertices with 2 components for position and 2 for texcoords
-	renderCommand_->geometry().createCustomVbo(maxStringLength * 6 * 2 * 2, GL_DYNAMIC_DRAW);
+	renderCommand_->geometry().setPrimitiveType(GL_TRIANGLE_STRIP);
+	renderCommand_->geometry().setNumElementsPerVertex(sizeof(Vertex) / sizeof(float));
 }
 
 ///////////////////////////////////////////////////////////
@@ -96,18 +99,25 @@ void TextNode::setString(const nctl::String &string)
 
 void TextNode::draw(RenderQueue &renderQueue)
 {
+	// Early-out if the string is empty
+	if (string_.isEmpty())
+		return;
+
 	// Precalculate boundaries for horizontal alignment
 	calculateBoundaries();
 
 	if (dirtyDraw_)
 	{
+		GLDebug::ScopedGroup scoped("Processing TextNode glyphs");
+
 		// Clear every previous quad before drawing again
 		interleavedVertices_.clear();
 
 		unsigned int currentLine = 0;
 		xAdvance_ = calculateAlignment(currentLine) - xAdvanceSum_ * 0.5f;
 		yAdvance_ = 0.0f - yAdvanceSum_ * 0.5f;
-		for (unsigned int i = 0; i < string_.length(); i++)
+		const unsigned int length = string_.length();
+		for (unsigned int i = 0; i < length; i++)
 		{
 			if (string_[i] == '\n')
 			{
@@ -120,20 +130,31 @@ void TextNode::draw(RenderQueue &renderQueue)
 				const FontGlyph *glyph = font_->glyph(static_cast<unsigned int>(string_[i]));
 				if (glyph)
 				{
-					processGlyph(glyph);
+					Degenerate degen = Degenerate::NONE;
+					if (length > 1)
+					{
+						if (i == 0)
+							degen = Degenerate::END;
+						else if (i == length - 1)
+							degen = Degenerate::START;
+						else
+							degen = Degenerate::START_END;
+					}
+					processGlyph(glyph, degen);
+
 					if (withKerning_)
 					{
 						// font kerning
-						if (i < string_.length() - 1)
+						if (i < length - 1)
 							xAdvance_ += glyph->kerning(int(string_[i + 1]));
 					}
 				}
 			}
 		}
 
-		// Uploading data to the VBO only if the string changes
-		renderCommand_->geometry().setDrawParameters(GL_TRIANGLES, 0, interleavedVertices_.size() / 4);
-		renderCommand_->geometry().updateVboData(0, interleavedVertices_.size(), interleavedVertices_.data());
+		// Vertices are updated only if the string changes
+		renderCommand_->geometry().setNumVertices(interleavedVertices_.size());
+		renderCommand_->geometry().setHostVertexPointer(reinterpret_cast<const float *>(interleavedVertices_.data()));
 	}
 
 	DrawableNode::draw(renderQueue);
@@ -214,7 +235,7 @@ float TextNode::calculateAlignment(unsigned int lineIndex) const
 	return alignOffset;
 }
 
-void TextNode::processGlyph(const FontGlyph *glyph)
+void TextNode::processGlyph(const FontGlyph *glyph, Degenerate degen)
 {
 	const Vector2i size = glyph->size();
 	const Vector2i offset = glyph->offset();
@@ -224,7 +245,6 @@ void TextNode::processGlyph(const FontGlyph *glyph)
 	const float topPos = -yAdvance_ - offset.y;
 	const float bottomPos = topPos - size.y;
 
-
 	const Vector2i texSize = font_->texture()->size();
 	const Recti texRect = glyph->texRect();
 
@@ -233,29 +253,24 @@ void TextNode::processGlyph(const FontGlyph *glyph)
 	const float bottomCoord = float(texRect.y + texRect.h) / float(texSize.y);
 	const float topCoord = float(texRect.y) / float(texSize.y);
 
+	if (degen == Degenerate::START || degen == Degenerate::START_END)
+		interleavedVertices_.pushBack(Vertex(leftPos, bottomPos, leftCoord, bottomCoord));
 
-	interleavedVertices_.pushBack(leftPos);		interleavedVertices_.pushBack(bottomPos);
-	interleavedVertices_.pushBack(leftCoord);	interleavedVertices_.pushBack(bottomCoord);
-	interleavedVertices_.pushBack(leftPos);		interleavedVertices_.pushBack(topPos);
-	interleavedVertices_.pushBack(leftCoord);	interleavedVertices_.pushBack(topCoord);
-	interleavedVertices_.pushBack(rightPos);	interleavedVertices_.pushBack(bottomPos);
-	interleavedVertices_.pushBack(rightCoord);	interleavedVertices_.pushBack(bottomCoord);
+	interleavedVertices_.pushBack(Vertex(leftPos, bottomPos, leftCoord, bottomCoord));
+	interleavedVertices_.pushBack(Vertex(leftPos, topPos, leftCoord, topCoord));
+	interleavedVertices_.pushBack(Vertex(rightPos, bottomPos, rightCoord, bottomCoord));
+	interleavedVertices_.pushBack(Vertex(rightPos, topPos, rightCoord, topCoord));
 
-	interleavedVertices_.pushBack(rightPos);	interleavedVertices_.pushBack(bottomPos);
-	interleavedVertices_.pushBack(rightCoord);	interleavedVertices_.pushBack(bottomCoord);
-	interleavedVertices_.pushBack(rightPos);	interleavedVertices_.pushBack(topPos);
-	interleavedVertices_.pushBack(rightCoord);	interleavedVertices_.pushBack(topCoord);
-	interleavedVertices_.pushBack(leftPos);		interleavedVertices_.pushBack(topPos);
-	interleavedVertices_.pushBack(leftCoord);	interleavedVertices_.pushBack(topCoord);
+	if (degen == Degenerate::START_END || degen == Degenerate::END)
+		interleavedVertices_.pushBack(Vertex(rightPos, topPos, rightCoord, topCoord));
 
 	xAdvance_ += glyph->xAdvance();
 }
 
-/*! \todo Only the transformation matrix should be updated per frame */
 void TextNode::updateRenderCommand()
 {
 	renderCommand_->transformation() = worldMatrix_;
-	renderCommand_->material().uniform("color")->setFloatValue(absColor().fR(), absColor().fG(), absColor().fB(), absColor().fA());
+	textnodeBlock_->uniform("color")->setFloatValue(absColor().fR(), absColor().fG(), absColor().fB(), absColor().fA());
 }
 
 }

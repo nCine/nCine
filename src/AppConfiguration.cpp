@@ -8,13 +8,14 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AppConfiguration::AppConfiguration()
-	: glDebugContext_(false)
+	: glCoreProfile_(true)
+	, glForwardCompatible_(true)
 #ifdef __ANDROID__
-	, glMajorVersion_(2)
+	, glMajorVersion_(3)
 	, glMinorVersion_(0)
 #else
-	, glMajorVersion_(2)
-	, glMinorVersion_(1)
+	, glMajorVersion_(3)
+	, glMinorVersion_(3)
 #endif
 	, profileTextUpdateTime_(0.2f)
 	, logFile_(128)
@@ -27,16 +28,20 @@ AppConfiguration::AppConfiguration()
 	, windowIconFilename_(128)
 	, fontTexFilename_(128)
 	, fontFntFilename_(128)
+	, vboSize_(64 * 1024)
+	, iboSize_(8 * 1024)
+	, vaoPoolSize_(16)
 	, withProfilerGraphs_(true)
 	, withProfilerText_(true)
 	, withAudio_(true)
 	, withThreads_(false)
 	, withScenegraph_(true)
 	, withVSync_(true)
+	, withGlDebug_(false)
 {
 	logFile_ = "ncine_log.txt";
 #ifdef __ANDROID__
-	fontTexFilename_ = "fonts/DroidSans32_256_888.ktx";
+	fontTexFilename_ = "fonts/DroidSans32_256_ETC2.ktx";
 #else
 	windowTitle_ = "nCine";
 	windowIconFilename_ = "icons/icon48.png";
@@ -105,9 +110,24 @@ void AppConfiguration::setFontTexFilename(const nctl::String &fontTexFilename)
 }
 
 /*! The data path will be prefixed automatically before loading. */
-void AppConfiguration::setFontFntFilename_(const nctl::String &fontFntFilename)
+void AppConfiguration::setFontFntFilename(const nctl::String &fontFntFilename)
 {
 	fontFntFilename_ = fontFntFilename;
+}
+
+void AppConfiguration::setVboSize(unsigned long vboSize)
+{
+	vboSize_ = vboSize;
+}
+
+void AppConfiguration::setIboSize(unsigned long iboSize)
+{
+	iboSize_ = iboSize;
+}
+
+void AppConfiguration::setVaoPoolSize(unsigned int vaoPoolSize)
+{
+	vaoPoolSize_ = vaoPoolSize;
 }
 
 void AppConfiguration::enableProfilerGraphs(bool shouldEnable)
@@ -138,6 +158,11 @@ void AppConfiguration::enableScenegraph(bool shouldEnable)
 void AppConfiguration::enableVSync(bool shouldEnable)
 {
 	withVSync_ = shouldEnable;
+}
+
+void AppConfiguration::enableGlDebug(bool shouldEnable)
+{
+	withGlDebug_ = shouldEnable;
 }
 
 }

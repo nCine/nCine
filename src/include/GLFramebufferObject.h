@@ -26,6 +26,7 @@ class GLFramebufferObject
 
 	void attachRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height, GLenum attachment);
 	void attachTexture(GLTexture &texture, GLenum attachment);
+	void invalidate(GLsizei numAttachments, const GLenum *attachments);
 
 	bool isStatusComplete();
 

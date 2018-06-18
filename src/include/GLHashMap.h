@@ -40,7 +40,7 @@ inline value_t &GLHashMap<S, MappingFunc>::operator[](key_t key)
 class GLBufferObjectMappingFunc
 {
   public:
-	static const unsigned int Size = 2;
+	static const unsigned int Size = 3;
 	inline unsigned int operator()(key_t key) const
 	{
 		unsigned int value = 0;
@@ -52,6 +52,9 @@ class GLBufferObjectMappingFunc
 				break;
 			case GL_ELEMENT_ARRAY_BUFFER:
 				value = 1;
+				break;
+			case GL_UNIFORM_BUFFER:
+				value = 2;
 				break;
 			default:
 				FATAL_MSG_X("No available case to handle key: %u", key);

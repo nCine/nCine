@@ -8,9 +8,9 @@
 namespace {
 
 #ifdef __ANDROID__
-const char *Font1TextureFile = "DroidSans32_256.webp";
-const char *Font2TextureFile = "NotoSerif-Regular32_256.webp";
-const char *Font3TextureFile = "Roboto-Regular32_256.webp";
+const char *Font1TextureFile = "DroidSans32_256_ETC2.ktx";
+const char *Font2TextureFile = "NotoSerif-Regular32_256_ETC2.ktx";
+const char *Font3TextureFile = "Roboto-Regular32_256_ETC2.ktx";
 #else
 const char *Font1TextureFile = "DroidSans32_256.png";
 const char *Font2TextureFile = "NotoSerif-Regular32_256.png";

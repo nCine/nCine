@@ -36,8 +36,8 @@ class GfxCapabilities : public IGfxCapabilities
 	/// Logs OpenGL device capabilites
 	void logGLCaps() const;
 
-	/// Checks for an OpenGL extension
-	bool checkGLExtension(const char *extensionName) const;
+	/// Checks for OpenGL extensions availability
+	void checkGLExtensions(const char *extensionNames[], bool results[], unsigned int numExtensionsToCheck) const;
 };
 
 }

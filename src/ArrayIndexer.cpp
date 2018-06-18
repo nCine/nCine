@@ -72,10 +72,11 @@ void ArrayIndexer::logReport() const
 				case Object::ObjectType::TEXTURE:				typeName = "Texture"; break;
 				case Object::ObjectType::SCENENODE:				typeName = "SceneNode"; break;
 				case Object::ObjectType::SPRITE:				typeName = "Sprite"; break;
+				case Object::ObjectType::MESH_SPRITE:			typeName = "MeshSprite"; break;
+				case Object::ObjectType::ANIMATED_SPRITE:		typeName = "AnimatedSprite"; break;
 				case Object::ObjectType::PARTICLE_SYSTEM:		typeName = "ParticleSystem"; break;
 				case Object::ObjectType::FONT:					typeName = "Font"; break;
 				case Object::ObjectType::TEXTNODE:				typeName = "TextNode"; break;
-				case Object::ObjectType::ANIMATED_SPRITE:		typeName = "AnimatedSprite"; break;
 				case Object::ObjectType::AUDIOBUFFER:			typeName = "AudioBuffer"; break;
 				case Object::ObjectType::AUDIOBUFFER_PLAYER:	typeName = "AudioBufferPlayer"; break;
 				case Object::ObjectType::AUDIOSTREAM_PLAYER:	typeName = "AudioStreamPlayer"; break;

@@ -10,7 +10,7 @@ namespace ncine {
 Particle::Particle(SceneNode *parent, Texture *texture)
 	: Sprite(parent, texture), life_(0.0f), startingLife(0.0f), inLocalSpace_(false)
 {
-	renderCommand_->setType(RenderCommand::CommandType::PARTICLE);
+	renderCommand_->setType(RenderCommand::CommandTypes::PARTICLE);
 }
 
 ///////////////////////////////////////////////////////////

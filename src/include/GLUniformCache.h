@@ -15,7 +15,10 @@ class GLUniformCache
 	GLUniformCache();
 	explicit GLUniformCache(const GLUniform *uniform);
 
-	inline void setDataPointer(GLvoid *dataPointer) { dataPointer_ = dataPointer; }
+	inline const GLUniform *uniform() const { return uniform_; }
+	inline const GLubyte *dataPointer() const { return dataPointer_; }
+	inline void setDataPointer(GLubyte *dataPointer) { dataPointer_ = dataPointer; }
+
 	void setFloatVector(const GLfloat *vec);
 	void setFloatValue(GLfloat v0);
 	void setFloatValue(GLfloat v0, GLfloat v1);
@@ -26,11 +29,15 @@ class GLUniformCache
 	void setIntValue(GLint v0, GLint v1);
 	void setIntValue(GLint v0, GLint v1, GLint v2);
 	void setIntValue(GLint v0, GLint v1, GLint v2, GLint v3);
+
+	bool isDirty() const { return isDirty_; }
 	void commitValue();
 
   private:
 	const GLUniform *uniform_;
-	GLvoid *dataPointer_;
+	GLubyte *dataPointer_;
+	/// A flag to signal if the uniform needs to be committed
+	bool isDirty_;
 
 	void checkFloat();
 	void checkInt();

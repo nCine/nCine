@@ -33,8 +33,14 @@ GLShader::~GLShader()
 void GLShader::loadFromString(const char *string)
 {
 	ASSERT(string);
-	const GLchar *source_lines[1] = { string };
-	glShaderSource(glHandle_, 1, source_lines, nullptr);
+
+#if defined(__ANDROID__) && GL_ES_VERSION_3_0
+	const char *versionLine = "#version 300 es\n";
+#else
+	const char *versionLine = "#version 330\n";
+#endif
+	const GLchar *source_lines[2] = { versionLine, string };
+	glShaderSource(glHandle_, 2, source_lines, nullptr);
 }
 
 void GLShader::loadFromFile(const char *filename)
@@ -47,8 +53,16 @@ void GLShader::loadFromFile(const char *filename)
 		const GLint length = static_cast<int>(fileHandle->size());
 		nctl::String source(length);
 		fileHandle->read(source.data(), length);
-		const GLchar *source_lines[1] = { source.data() };
-		glShaderSource(glHandle_, 1, source_lines, &length);
+
+	#if defined(__ANDROID__) && GL_ES_VERSION_3_0
+		const char *versionLine = "#version 300 es\n";
+		const GLint lengths[2] = { 16, length };
+	#else
+		const char *versionLine = "#version 330\n";
+		const GLint lengths[2] = { 13, length };
+	#endif
+		const GLchar *source_lines[2] = { versionLine, source.data() };
+		glShaderSource(glHandle_, 2, source_lines, lengths);
 	}
 }
 

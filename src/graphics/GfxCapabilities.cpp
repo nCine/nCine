@@ -76,12 +76,22 @@ void GfxCapabilities::init()
 
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &glIntValues_[GLIntValues::MAX_TEXTURE_SIZE]);
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &glIntValues_[GLIntValues::MAX_TEXTURE_IMAGE_UNITS]);
+	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &glIntValues_[GLIntValues::MAX_UNIFORM_BLOCK_SIZE]);
+	glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &glIntValues_[GLIntValues::MAX_UNIFORM_BUFFER_BINDINGS]);
+	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &glIntValues_[GLIntValues::MAX_VERTEX_UNIFORM_BLOCKS]);
+	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &glIntValues_[GLIntValues::MAX_FRAGMENT_UNIFORM_BLOCKS]);
+	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &glIntValues_[GLIntValues::UNIFORM_BUFFER_OFFSET_ALIGNMENT]);
 
-	glExtensions_[GLExtensions::EXT_TEXTURE_COMPRESSION_S3TC] = checkGLExtension("GL_EXT_texture_compression_s3tc");
-	glExtensions_[GLExtensions::OES_COMPRESSED_ETC1_RGB8_TEXTURE] = checkGLExtension("GL_OES_compressed_ETC1_RGB8_texture");
-	glExtensions_[GLExtensions::AMD_COMPRESSED_ATC_TEXTURE] = checkGLExtension("GL_AMD_compressed_ATC_texture");
-	glExtensions_[GLExtensions::IMG_TEXTURE_COMPRESSION_PVRTC] = checkGLExtension("GL_IMG_texture_compression_pvrtc");
-	glExtensions_[GLExtensions::KHR_TEXTURE_COMPRESSION_ASTC_LDR] = checkGLExtension("GL_KHR_texture_compression_astc_ldr");
+	const unsigned int NumExtensionsToCheck = 7;
+	const char *extensionNames[NumExtensionsToCheck] = {
+		"GL_KHR_debug", "GL_ARB_texture_storage", "GL_EXT_texture_compression_s3tc", "GL_OES_compressed_ETC1_RGB8_texture",
+		"GL_AMD_compressed_ATC_texture", "GL_IMG_texture_compression_pvrtc", "GL_KHR_texture_compression_astc_ldr"
+	};
+
+	for (unsigned int i = 0; i < NumExtensionsToCheck; i++)
+		glExtensions_[i] = false;
+
+	checkGLExtensions(extensionNames, glExtensions_, NumExtensionsToCheck);
 }
 
 void GfxCapabilities::logGLInfo()
@@ -96,8 +106,12 @@ void GfxCapabilities::logGLInfo()
 
 void GfxCapabilities::logGLExtensions()
 {
+	GLint numExtensions;
+	glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+
 	LOGI("--- OpenGL extensions ---");
-	LOGI_X("Extensions: %s", glGetString(GL_EXTENSIONS));
+	for (GLuint i = 0; i < static_cast<GLuint>(numExtensions); i++)
+		LOGI_X("Extension %u: %s", i, glGetStringi(GL_EXTENSIONS, i));
 	LOGI("--- OpenGL extensions ---");
 }
 
@@ -106,7 +120,14 @@ void GfxCapabilities::logGLCaps() const
 	LOGI("--- OpenGL device capabilities ---");
 	LOGI_X("GL_MAX_TEXTURE_SIZE: %d", glIntValues_[GLIntValues::MAX_TEXTURE_SIZE]);
 	LOGI_X("GL_MAX_TEXTURE_IMAGE_UNITS: %d", glIntValues_[GLIntValues::MAX_TEXTURE_IMAGE_UNITS]);
+	LOGI_X("GL_MAX_UNIFORM_BLOCK_SIZE: %d", glIntValues_[GLIntValues::MAX_UNIFORM_BLOCK_SIZE]);
+	LOGI_X("GL_MAX_UNIFORM_BUFFER_BINDINGS: %d", glIntValues_[GLIntValues::MAX_UNIFORM_BUFFER_BINDINGS]);
+	LOGI_X("GL_MAX_VERTEX_UNIFORM_BLOCKS: %d", glIntValues_[GLIntValues::MAX_VERTEX_UNIFORM_BLOCKS]);
+	LOGI_X("GL_MAX_FRAGMENT_UNIFORM_BLOCKS: %d", glIntValues_[GLIntValues::MAX_FRAGMENT_UNIFORM_BLOCKS]);
+	LOGI_X("GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT: %d", glIntValues_[GLIntValues::UNIFORM_BUFFER_OFFSET_ALIGNMENT]);
 	LOGI("---");
+	LOGI_X("GL_KHR_debug: %d", glExtensions_[GLExtensions::KHR_DEBUG]);
+	LOGI_X("GL_ARB_texture_storage: %d", glExtensions_[GLExtensions::ARB_TEXTURE_STORAGE]);
 	LOGI_X("GL_EXT_texture_compression_s3tc: %d", glExtensions_[GLExtensions::EXT_TEXTURE_COMPRESSION_S3TC]);
 	LOGI_X("GL_OES_compressed_ETC1_RGB8_texture: %d", glExtensions_[GLExtensions::OES_COMPRESSED_ETC1_RGB8_TEXTURE]);
 	LOGI_X("GL_AMD_compressed_ATC_texture: %d", glExtensions_[GLExtensions::AMD_COMPRESSED_ATC_TEXTURE]);
@@ -115,47 +136,23 @@ void GfxCapabilities::logGLCaps() const
 	LOGI("--- OpenGL device capabilities ---");
 }
 
-bool GfxCapabilities::checkGLExtension(const char *extensionName) const
+void GfxCapabilities::checkGLExtensions(const char *extensionNames[], bool results[], unsigned int numExtensionsToCheck) const
 {
-	const size_t nameLength = strlen(extensionName);
-	const char *extensions = reinterpret_cast<const char *>(glGetString(GL_EXTENSIONS));
+	GLint numExtensions;
+	glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
 
-	if (extensions)
+	for (GLuint i = 0; i < static_cast<GLuint>(numExtensions); i++)
 	{
-		/*
-		 * Search for extName in the extensions string.  Use of strstr()
-		 * is not sufficient because extension names can be prefixes of
-		 * other extension names.  Could use strtok() but the constant
-		 * string returned by glGetString can be in read-only memory.
-		 */
+		const char *extension = reinterpret_cast<const char *>(glGetStringi(GL_EXTENSIONS, i));
+		const size_t extLength = strlen(extension);
 
-		const char *end = extensions + strlen(extensions);
-
-		while (extensions < end)
+		for (unsigned int j = 0; j < numExtensionsToCheck; j++)
 		{
-			const size_t n = strcspn(extensions, " ");
-			if ((nameLength == n) && (strncmp(extensionName, extensions, n) == 0))
-				return true;
-
-			extensions += (n + 1);
+			const size_t nameLength = strlen(extensionNames[j]);
+			if (results[j] == false && (nameLength == extLength) && (strncmp(extensionNames[j], extension, extLength) == 0))
+				results[j] = true;
 		}
 	}
-#if !(defined(__ANDROID__) && !defined(GL_ES_VERSION_3_0))
-	else
-	{
-		GLint n;
-		glGetIntegerv(GL_NUM_EXTENSIONS, &n);
-
-		for (GLint i = 0; i < n; i++)
-		{
-			const char *extension = reinterpret_cast<const char *>(glGetStringi(GL_EXTENSIONS, i));
-			if (strncmp(extensionName, extension, nameLength) == 0)
-				return true;
-		}
-	}
-#endif
-
-	return false;
 }
 
 }

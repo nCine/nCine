@@ -15,7 +15,7 @@ const float DefaultXPos = 0.0f;
 const float VerticalTextPos = 0.45f;
 
 #ifdef __ANDROID__
-const char *FontTextureFile = "DroidSans32_256.webp";
+const char *FontTextureFile = "DroidSans32_256_ETC2.ktx";
 #else
 const char *FontTextureFile = "DroidSans32_256.png";
 #endif

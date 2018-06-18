@@ -1,8 +1,8 @@
 uniform mat4 projection;
 uniform mat4 modelView;
-attribute vec3 aPosition;
-attribute vec3 aColor;
-varying vec3 vColor;
+in vec3 aPosition;
+in vec3 aColor;
+out vec3 vColor;
 
 void main()
 {

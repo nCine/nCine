@@ -4,6 +4,7 @@
 #include "Texture.h"
 #include "ITextureLoader.h"
 #include "GLTexture.h"
+#include "RenderStatistics.h"
 
 namespace ncine {
 
@@ -11,32 +12,23 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-Texture::Texture()
-	: Object(ObjectType::TEXTURE), glTexture_(nctl::makeUnique<GLTexture>(GL_TEXTURE_2D)),
-	  width_(0), height_(0), mipMapLevels_(1), isCompressed_(false), hasAlphaChannel_(false)
-{
-
-}
-
-
 Texture::Texture(const char *filename)
-	: Object(ObjectType::TEXTURE, filename), glTexture_(nctl::makeUnique<GLTexture>(GL_TEXTURE_2D)),
-	  width_(0), height_(0), mipMapLevels_(1), isCompressed_(false), hasAlphaChannel_(false)
+	: Texture(filename, 0, 0)
 {
-	glTexture_->bind();
 
-	nctl::UniquePtr<ITextureLoader> texLoader = ITextureLoader::createFromFile(filename);
-	load(*texLoader.get());
 }
 
 Texture::Texture(const char *filename, int width, int height)
 	: Object(ObjectType::TEXTURE, filename), glTexture_(nctl::makeUnique<GLTexture>(GL_TEXTURE_2D)),
-	  width_(0), height_(0), isCompressed_(false), hasAlphaChannel_(false)
+	  width_(0), height_(0), mipMapLevels_(1), isCompressed_(false), hasAlphaChannel_(false), dataSize_(0)
 {
 	glTexture_->bind();
+	setGLTextureLabel(filename);
 
 	nctl::UniquePtr<ITextureLoader> texLoader = ITextureLoader::createFromFile(filename);
 	load(*texLoader.get(), width, height);
+
+	RenderStatistics::addTexture(dataSize_);
 }
 
 Texture::Texture(const char *filename, Vector2i size)
@@ -47,7 +39,7 @@ Texture::Texture(const char *filename, Vector2i size)
 
 Texture::~Texture()
 {
-
+	RenderStatistics::removeTexture(dataSize_);
 }
 
 ///////////////////////////////////////////////////////////
@@ -93,15 +85,14 @@ void Texture::setWrap(Wrap wrapMode)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void Texture::load(const ITextureLoader &texLoader)
-{
-	load(texLoader, texLoader.width(), texLoader.height());
-}
-
 void Texture::load(const ITextureLoader &texLoader, int width, int height)
 {
-	ASSERT(width > 0);
-	ASSERT(height > 0);
+	// Loading a texture without overriding the size detected by the loader
+	if (width == 0 || height == 0)
+	{
+		width = texLoader.width();
+		height = texLoader.height();
+	}
 
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
 	const int maxTextureSize = gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_TEXTURE_SIZE);
@@ -115,10 +106,8 @@ void Texture::load(const ITextureLoader &texLoader, int width, int height)
 	{
 		glTexture_->texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexture_->texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-#ifndef __ANDROID__
 		// To prevent artifacts if the MIP map chain is not complete
 		glTexture_->texParameteri(GL_TEXTURE_MAX_LEVEL, texLoader.mipMapCount());
-#endif
 	}
 	else
 	{
@@ -130,17 +119,30 @@ void Texture::load(const ITextureLoader &texLoader, int width, int height)
 
 	int levelWidth = width;
 	int levelHeight = height;
+
+#if defined(__ANDROID__) && GL_ES_VERSION_3_0
+	const bool withTexStorage = true;
+#else
+	const bool withTexStorage = gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::ARB_TEXTURE_STORAGE);
+#endif
+
+	if (withTexStorage)
+		glTexture_->texStorage2D(texLoader.mipMapCount(), texFormat.internalFormat(), width, height);
 	for (int i = 0; i < texLoader.mipMapCount(); i++)
 	{
 		if (texFormat.isCompressed())
 		{
-			glTexture_->compressedTexImage2D(i, texFormat.internalFormat(), levelWidth, levelHeight,
-			                                 texLoader.dataSize(i), texLoader.pixels(i));
+			if (withTexStorage)
+				glTexture_->compressedTexSubImage2D(i, 0, 0, levelWidth, levelHeight, texFormat.internalFormat(), texLoader.dataSize(i), texLoader.pixels(i));
+			else
+				glTexture_->compressedTexImage2D(i, texFormat.internalFormat(), levelWidth, levelHeight, texLoader.dataSize(i), texLoader.pixels(i));
 		}
 		else
 		{
-			glTexture_->texImage2D(i, texFormat.internalFormat(), levelWidth, levelHeight,
-			                       texFormat.format(), texFormat.type(), texLoader.pixels(i));
+			if (withTexStorage)
+				glTexture_->texSubImage2D(i, 0, 0, levelWidth, levelHeight, texFormat.format(), texFormat.type(), texLoader.pixels(i));
+			else
+				glTexture_->texImage2D(i, texFormat.internalFormat(), levelWidth, levelHeight, texFormat.format(), texFormat.type(), texLoader.pixels(i));
 		}
 
 		levelWidth /= 2;
@@ -152,6 +154,12 @@ void Texture::load(const ITextureLoader &texLoader, int width, int height)
 	mipMapLevels_ = texLoader.mipMapCount();
 	isCompressed_ = texFormat.isCompressed();
 	hasAlphaChannel_ = texFormat.hasAlpha();
+	dataSize_ = texLoader.dataSize();
+}
+
+void Texture::setGLTextureLabel(const char *filename)
+{
+	glTexture_->setObjectLabel(filename);
 }
 
 }

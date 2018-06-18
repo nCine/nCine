@@ -42,7 +42,7 @@ list(APPEND TESTS
 	gtest_list gtest_list_iterator gtest_list_operations gtest_list_algorithms gtest_list_movable
 	gtest_string gtest_string_iterator gtest_string_reverseiterator gtest_string_operations
 	gtest_hashmap gtest_hashmap_iterator gtest_hashmap_algorithms gtest_hashmap_string gtest_hashmap_movable
-	gtest_vector2 gtest_vector3 gtest_vector4
+	gtest_vector2 gtest_vector3 gtest_vector4 gtest_rect
 	gtest_matrix4x4 gtest_matrix4x4_operations gtest_quaternion gtest_quaternion_operations
 	gtest_atomic32 gtest_atomic64
 	gtest_uniqueptr gtest_uniqueptr_array gtest_sharedptr

@@ -32,7 +32,9 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/StackedBarPlotter.cpp
 	${NCINE_ROOT}/src/graphics/DrawableNode.cpp
 	${NCINE_ROOT}/src/graphics/SceneNode.cpp
+	${NCINE_ROOT}/src/graphics/BaseSprite.cpp
 	${NCINE_ROOT}/src/graphics/Sprite.cpp
+	${NCINE_ROOT}/src/graphics/MeshSprite.cpp
 	${NCINE_ROOT}/src/Application.cpp
 	${NCINE_ROOT}/src/AppConfiguration.cpp
 	${NCINE_ROOT}/src/graphics/Particle.cpp
@@ -51,6 +53,15 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/opengl/GLUniformCache.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLShaderAttributes.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLAttribute.cpp
-	${NCINE_ROOT}/src/graphics/opengl/GLVertexAttribute.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLTexture.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLVertexArrayObject.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLUniformBlock.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLUniformBlockCache.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLShaderUniformBlocks.cpp
+	${NCINE_ROOT}/src/graphics/RenderBuffersManager.cpp
+	${NCINE_ROOT}/src/graphics/RenderBatcher.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLDebug.cpp
+	${NCINE_ROOT}/src/graphics/RenderStatistics.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLVertexFormat.cpp
+	${NCINE_ROOT}/src/graphics/RenderVaoPool.cpp
 )
