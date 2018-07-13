@@ -36,7 +36,7 @@ namespace ncine {
 
 Application::Application()
 	: isPaused_(false), hasFocus_(true), shouldQuit_(false),
-	  textUpdateTime_(0.0f), textString_(MaxTextLength), textString2_(MaxTextLength)
+	  textUpdateTime_(0.0f), infoStringTopRight_(MaxTextLength),infoStringTopLeft_(MaxTextLength)
 {
 
 }
@@ -78,9 +78,9 @@ void Application::togglePause()
 void Application::initCommon()
 {
 #ifdef WITH_GIT_VERSION
-	LOGI_X("nCine %s compiled on " __DATE__ " at " __TIME__, VersionStrings::Version);
+	LOGI_X("nCine %s (%s) compiled on %s at %s" , VersionStrings::Version, VersionStrings::GitBranch, __DATE__, __TIME__);
 #else
-	LOGI("nCine compiled on " __DATE__ " at " __TIME__);
+	LOGI_X("nCine compiled on %s at %s", __DATE__, __TIME__);
 #endif
 
 	theServiceLocator().registerIndexer(nctl::makeUnique<ArrayIndexer>());
@@ -132,21 +132,35 @@ void Application::initCommon()
 			profilePlotter_->setRefValue(1.0f / 60.0f); // 60 FPS
 		}
 
-		if (appCfg_.withProfilerText())
+		if (appCfg_.withInfoText())
 		{
 			nctl::String fontTexFilePath = IFile::dataPath() + appCfg_.fontTexFilename();
 			nctl::String fontFntFilePath = IFile::dataPath() + appCfg_.fontFntFilename();
 			if (IFile::access(fontTexFilePath.data(), IFile::AccessMode::EXISTS) == false)
-				LOGW_X("Cannot access font texture file \"%s\" to enable profiling text", fontTexFilePath.data());
+				LOGW_X("Cannot access font texture file \"%s\" to enable information text", fontTexFilePath.data());
 			else if (IFile::access(fontFntFilePath.data(), IFile::AccessMode::EXISTS) == false)
-				LOGW_X("Cannot access font FNT file \"%s\" to enable profiling text", fontFntFilePath.data());
+				LOGW_X("Cannot access font FNT file \"%s\" to enable information text", fontFntFilePath.data());
 			else
 			{
 				font_ = nctl::makeUnique<Font>(fontTexFilePath.data(), fontFntFilePath.data());
-				textLines_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
-				textLines_->setAlignment(TextNode::Alignment::RIGHT);
-				textLines2_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
-				textLines2_->setAlignment(TextNode::Alignment::LEFT);
+				infoLineTopRight_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
+				infoLineTopRight_->setAlignment(TextNode::Alignment::RIGHT);
+				infoLineTopRight_->setScale(0.75f);
+				infoLineTopLeft_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
+				infoLineTopLeft_->setAlignment(TextNode::Alignment::LEFT);
+				infoLineTopLeft_->setScale(0.75f);
+				infoLineBottomLeft_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
+				infoLineBottomLeft_->setAlignment(TextNode::Alignment::LEFT);
+				infoLineBottomLeft_->setScale(0.75f);
+
+				nctl::String infoStringBottomLeft(MaxTextLength);
+				#ifdef WITH_GIT_VERSION
+				infoStringBottomLeft.format("%s (%s)", VersionStrings::Version, VersionStrings::GitBranch);
+				#else
+				infoStringBottomLeft.format("%s at %s", __DATE__, __TIME__);
+				#endif
+				infoLineBottomLeft_->setString(infoStringBottomLeft);
+				infoLineBottomLeft_->setPosition(infoLineBottomLeft_->width() * 0.5f, infoLineBottomLeft_->height() * 0.75f);
 			}
 		}
 	}
@@ -179,10 +193,11 @@ void Application::step()
 	if (profilePlotter_)
 		profilePlotter_->setEnabled(renderingSettings_.showProfilerGraphs);
 
-	if (textLines_ && textLines2_)
+	if (infoLineTopRight_ && infoLineTopLeft_ && infoLineBottomLeft_)
 	{
-		textLines_->setEnabled(renderingSettings_.showProfilerText);
-		textLines2_->setEnabled(renderingSettings_.showProfilerText);
+		infoLineTopRight_->setEnabled(renderingSettings_.showInfoText);
+		infoLineTopLeft_->setEnabled(renderingSettings_.showInfoText);
+		infoLineBottomLeft_->setEnabled(renderingSettings_.showInfoText);
 	}
 
 	profileTimer_->start();
@@ -193,19 +208,19 @@ void Application::step()
 		renderQueue_->draw();
 	}
 
-	if (renderQueue_ && textLines_ && textLines2_ && Timer::now() - textUpdateTime_ > appCfg_.profileTextUpdateTime())
+	if (renderQueue_ && infoLineTopRight_ && infoLineTopLeft_ && infoLineBottomLeft_ && Timer::now() - textUpdateTime_ > appCfg_.profileTextUpdateTime())
 	{
 		textUpdateTime_ = Timer::now();
 
-		textString_.format("FPS: %.0f (%.2fms)\n", frameTimer_->averageFps(), frameTimer_->interval() * 1000.0f);
-		RenderStatistics::appendCommandsStatistics(textString_);
-		textLines_->setString(textString_);
-		textLines_->setPosition(width() - textLines_->width() * 0.5f, height() - textLines_->height() * 0.5f);
+		infoStringTopRight_.format("FPS: %.0f (%.2fms)\n", frameTimer_->averageFps(), frameTimer_->interval() * 1000.0f);
+		RenderStatistics::appendCommandsStatistics(infoStringTopRight_);
+		infoLineTopRight_->setString(infoStringTopRight_);
+		infoLineTopRight_->setPosition(width() - infoLineTopRight_->width() * 0.5f, height() - infoLineTopRight_->height() * 0.5f);
 
-		textString2_.clear();
-		RenderStatistics::appendMoreStatistics(textString2_);
-		textLines2_->setString(textString2_);
-		textLines2_->setPosition(textLines2_->width() * 0.5f, height() - textLines2_->height() * 0.5f);
+		infoStringTopLeft_.clear();
+		RenderStatistics::appendMoreStatistics(infoStringTopLeft_);
+		infoLineTopLeft_->setString(infoStringTopLeft_);
+		infoLineTopLeft_->setPosition(infoLineTopLeft_->width() * 0.5f, height() - infoLineTopLeft_->height() * 0.5f);
 	}
 
 	theServiceLocator().audioDevice().updatePlayers();
@@ -229,8 +244,9 @@ void Application::shutdownCommon()
 	LOGI("IAppEventHandler::OnShutdown() invoked");
 	appEventHandler_.reset(nullptr);
 
-	textLines2_.reset(nullptr);
-	textLines_.reset(nullptr);
+	infoLineBottomLeft_.reset(nullptr);
+	infoLineTopLeft_.reset(nullptr);
+	infoLineTopRight_.reset(nullptr);
 	font_.reset(nullptr);
 	profilePlotter_.reset(nullptr);
 	profileTimer_.reset(nullptr);

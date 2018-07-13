@@ -26,7 +26,7 @@
 #define LOGE(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LogLevel::ERROR, static_cast<const char *>("%s -> " fmt), FUNCTION)
 #define LOGF(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LogLevel::FATAL, static_cast<const char *>("%s -> " fmt), FUNCTION)
 
-#ifndef NDEBUG
+#ifdef NCINE_DEBUG
 	#ifdef _MSC_VER
 		#define BREAK() __debugbreak()
 	#else
@@ -91,7 +91,7 @@ do { \
 } while (false)
 
 // Non-fatal assert macros
-#ifndef NDEBUG
+#ifdef NCINE_DEBUG
 	#define ASSERT_MSG_X(x, fmt, ...) \
 	do { \
 		if (!(x)) \

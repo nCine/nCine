@@ -288,7 +288,7 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 	else if (event.sym == nc::KeySym::H)
 	{
 		settings.showProfilerGraphs = !settings.showProfilerGraphs;
-		settings.showProfilerText = !settings.showProfilerText;
+		settings.showInfoText = !settings.showInfoText;
 	}
 	else if (event.sym == nc::KeySym::P)
 		pause_ = !pause_;
@@ -377,7 +377,7 @@ void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &e
 	else if (event.buttonName == nc::ButtonName::BACK)
 	{
 		settings.showProfilerGraphs = !settings.showProfilerGraphs;
-		settings.showProfilerText = !settings.showProfilerText;
+		settings.showInfoText = !settings.showInfoText;
 	}
 	else if (event.buttonName == nc::ButtonName::START)
 		pause_ = !pause_;

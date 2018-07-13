@@ -19,7 +19,11 @@ AppConfiguration::AppConfiguration()
 #endif
 	, profileTextUpdateTime_(0.2f)
 	, logFile_(128)
+#ifdef NCINE_DEBUG
 	, consoleLogLevel_(ILogger::LogLevel::INFO)
+#else
+	, consoleLogLevel_(ILogger::LogLevel::ERROR)
+#endif
 	, fileLogLevel_(ILogger::LogLevel::OFF)
 	, frameTimerLogInterval_(5.0f)
 	, xResolution_(1280), yResolution_(720)
@@ -31,8 +35,13 @@ AppConfiguration::AppConfiguration()
 	, vboSize_(64 * 1024)
 	, iboSize_(8 * 1024)
 	, vaoPoolSize_(16)
+#ifdef NCINE_DEBUG
 	, withProfilerGraphs_(true)
-	, withProfilerText_(true)
+	, withInfoText_(true)
+#else
+	, withProfilerGraphs_(false)
+	, withInfoText_(false)
+#endif
 	, withAudio_(true)
 	, withThreads_(false)
 	, withScenegraph_(true)
@@ -135,9 +144,9 @@ void AppConfiguration::enableProfilerGraphs(bool shouldEnable)
 	withProfilerGraphs_ = shouldEnable;
 }
 
-void AppConfiguration::enableProfilerText(bool shouldEnable)
+void AppConfiguration::enableInfoText(bool shouldEnable)
 {
-	withProfilerText_ = shouldEnable;
+	withInfoText_ = shouldEnable;
 }
 
 void AppConfiguration::enableAudio(bool shouldEnable)

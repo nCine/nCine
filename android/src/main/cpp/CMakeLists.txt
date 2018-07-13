@@ -13,25 +13,32 @@ list(APPEND PRIVATE_LINK_LIBRARIES
 
 set(Threads_FOUND 1)
 
-set(PNG_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/png/include)
-set(PNG_LIBRARY ${EXTERNAL_ANDROID_DIR}/png/${CMAKE_ANDROID_ARCH_ABI}/libpng16.a)
-set(PNG_FOUND 1)
-
-set(WEBP_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/webp/include)
-set(WEBP_LIBRARY ${EXTERNAL_ANDROID_DIR}/webp/${CMAKE_ANDROID_ARCH_ABI}/libwebp.a)
-set(WEBP_FOUND 1)
-
-set(OPENAL_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/openal/include)
-set(OPENAL_LIBRARY ${EXTERNAL_ANDROID_DIR}/openal/${CMAKE_ANDROID_ARCH_ABI}/libopenal.so)
-set(OPENAL_FOUND 1)
-
-set(OGG_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/ogg/include)
-set(VORBIS_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/vorbis/include)
-set(VORBISFILE_LIBRARY
-	${EXTERNAL_ANDROID_DIR}/vorbis/${CMAKE_ANDROID_ARCH_ABI}/libvorbisfile.a
-	${EXTERNAL_ANDROID_DIR}/vorbis/${CMAKE_ANDROID_ARCH_ABI}/libvorbis.a
-	${EXTERNAL_ANDROID_DIR}/ogg/${CMAKE_ANDROID_ARCH_ABI}/libogg.a)
-set(VORBIS_FOUND 1)
+if(EXISTS ${EXTERNAL_ANDROID_DIR}/png/${CMAKE_ANDROID_ARCH_ABI}/libpng16.a)
+	set(PNG_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/png/include)
+	set(PNG_LIBRARY ${EXTERNAL_ANDROID_DIR}/png/${CMAKE_ANDROID_ARCH_ABI}/libpng16.a)
+	set(PNG_FOUND 1)
+endif()
+if(EXISTS ${EXTERNAL_ANDROID_DIR}/webp/${CMAKE_ANDROID_ARCH_ABI}/libwebp.a)
+	set(WEBP_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/webp/include)
+	set(WEBP_LIBRARY ${EXTERNAL_ANDROID_DIR}/webp/${CMAKE_ANDROID_ARCH_ABI}/libwebp.a)
+	set(WEBP_FOUND 1)
+endif()
+if(EXISTS ${EXTERNAL_ANDROID_DIR}/openal/${CMAKE_ANDROID_ARCH_ABI}/libopenal.so)
+	set(OPENAL_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/openal/include)
+	set(OPENAL_LIBRARY ${EXTERNAL_ANDROID_DIR}/openal/${CMAKE_ANDROID_ARCH_ABI}/libopenal.so)
+	set(OPENAL_FOUND 1)
+endif()
+if(EXISTS ${EXTERNAL_ANDROID_DIR}/vorbis/${CMAKE_ANDROID_ARCH_ABI}/libvorbisfile.a AND
+   EXISTS ${EXTERNAL_ANDROID_DIR}/vorbis/${CMAKE_ANDROID_ARCH_ABI}/libvorbis.a AND
+   EXISTS ${EXTERNAL_ANDROID_DIR}/ogg/${CMAKE_ANDROID_ARCH_ABI}/libogg.a)
+	set(OGG_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/ogg/include)
+	set(VORBIS_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/vorbis/include)
+	set(VORBISFILE_LIBRARY
+		${EXTERNAL_ANDROID_DIR}/vorbis/${CMAKE_ANDROID_ARCH_ABI}/libvorbisfile.a
+		${EXTERNAL_ANDROID_DIR}/vorbis/${CMAKE_ANDROID_ARCH_ABI}/libvorbis.a
+		${EXTERNAL_ANDROID_DIR}/ogg/${CMAKE_ANDROID_ARCH_ABI}/libogg.a)
+	set(VORBIS_FOUND 1)
+endif()
 
 include(ncine_compiler_options)
 
@@ -57,11 +64,19 @@ if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
 endif()
 
 target_include_directories(ncine PRIVATE ${CMAKE_ANDROID_NDK}/sources/android/native_app_glue)
-target_include_directories(ncine PRIVATE ${PNG_INCLUDE_DIR})
-target_include_directories(ncine PRIVATE ${WEBP_INCLUDE_DIR})
-target_include_directories(ncine PRIVATE ${OPENAL_INCLUDE_DIR})
-target_include_directories(ncine PRIVATE ${OGG_INCLUDE_DIR})
-target_include_directories(ncine PRIVATE ${VORBIS_INCLUDE_DIR})
+if(PNG_FOUND)
+	target_include_directories(ncine PRIVATE ${PNG_INCLUDE_DIR})
+endif()
+if(WEBP_FOUND)
+	target_include_directories(ncine PRIVATE ${WEBP_INCLUDE_DIR})
+endif()
+if(OPENAL_FOUND)
+	target_include_directories(ncine PRIVATE ${OPENAL_INCLUDE_DIR})
+endif()
+if(VORBIS_FOUND)
+	target_include_directories(ncine PRIVATE ${OGG_INCLUDE_DIR})
+	target_include_directories(ncine PRIVATE ${VORBIS_INCLUDE_DIR})
+endif()
 
 list(APPEND PRIVATE_COMPILE_DEFINITIONS ${ANDROID_GENERATED_FLAGS})
 target_compile_definitions(ncine PRIVATE ${PRIVATE_COMPILE_DEFINITIONS})

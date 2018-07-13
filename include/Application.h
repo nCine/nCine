@@ -26,7 +26,7 @@ class DLL_PUBLIC Application
 	{
 		RenderingSettings() :
 			batchingEnabled(true), batchingWithIndices(false), cullingEnabled(true),
-			minBatchSize(4), maxBatchSize(500), showProfilerGraphs(true), showProfilerText(true) { }
+			minBatchSize(4), maxBatchSize(500), showProfilerGraphs(true), showInfoText(true) { }
 
 		/// True if batching is enabled
 		bool batchingEnabled;
@@ -40,8 +40,8 @@ class DLL_PUBLIC Application
 		unsigned int maxBatchSize;
 		/// True if showing the profiler graphc
 		bool showProfilerGraphs;
-		/// True if showing the profiler text
-		bool showProfilerText;
+		/// True if showing the information text
+		bool showInfoText;
 	};
 
 	/// Returns the configuration used to initialize the application
@@ -85,7 +85,7 @@ class DLL_PUBLIC Application
 	inline bool hasFocus() const { return hasFocus_; }
 
   protected:
-	/// Maximum length for the profile string
+	/// Maximum length for the information strings
 	static const unsigned int MaxTextLength = 256;
 
 	bool isPaused_;
@@ -100,11 +100,12 @@ class DLL_PUBLIC Application
 	nctl::UniquePtr<Timer> profileTimer_;
 	nctl::UniquePtr<ProfilePlotter> profilePlotter_;
 	nctl::UniquePtr<Font> font_;
-	nctl::UniquePtr<TextNode> textLines_;
-	nctl::UniquePtr<TextNode> textLines2_;
+	nctl::UniquePtr<TextNode> infoLineTopRight_;
+	nctl::UniquePtr<TextNode> infoLineTopLeft_;
+	nctl::UniquePtr<TextNode> infoLineBottomLeft_;
 	float textUpdateTime_;
-	nctl::String textString_;
-	nctl::String textString2_;
+	nctl::String infoStringTopRight_;
+	nctl::String infoStringTopLeft_;
 	nctl::UniquePtr<IInputManager> inputManager_;
 	nctl::UniquePtr<IAppEventHandler> appEventHandler_;
 

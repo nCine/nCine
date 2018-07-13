@@ -56,8 +56,8 @@ class DLL_PUBLIC AppConfiguration
 	inline unsigned int vaoPoolSize() const { return vaoPoolSize_; }
 	/// \returns True if the profiler graphs are enabled
 	inline bool withProfilerGraphs() const { return withProfilerGraphs_; }
-	/// \returns True if the profiler information text is enabled
-	inline bool withProfilerText() const { return withProfilerText_; }
+	/// \returns True if the information text is enabled
+	inline bool withInfoText() const { return withInfoText_; }
 	/// \returns True if the audio subsystem is enabled
 	inline bool withAudio() const { return withAudio_; }
 	/// \returns True if the threading subsystem is enabled
@@ -100,8 +100,8 @@ class DLL_PUBLIC AppConfiguration
 	void setVaoPoolSize(unsigned int vaoPoolSize);
 	/// Enables the profiler graphs
 	void enableProfilerGraphs(bool shouldEnable);
-	/// Enables the profiler information text
-	void enableProfilerText(bool shouldEnable);
+	/// Enables the information text
+	void enableInfoText(bool shouldEnable);
 	/// Enables the audio subsystem
 	void enableAudio(bool shouldEnable);
 	/// Enables the threading subsystem
@@ -137,7 +137,7 @@ class DLL_PUBLIC AppConfiguration
 	unsigned long iboSize_;
 	unsigned int vaoPoolSize_;
 	bool withProfilerGraphs_;
-	bool withProfilerText_;
+	bool withInfoText_;
 	bool withAudio_;
 	bool withThreads_;
 	bool withScenegraph_;
