@@ -48,6 +48,8 @@ class Vector2
 	Vector2 operator*(T s) const;
 	Vector2 operator/(T s) const;
 
+	template <class S> friend Vector2<S> operator*(S s, const Vector2<S> &v);
+
 	T length() const;
 	T sqrLength() const;
 	Vector2 normalized() const;
@@ -237,6 +239,13 @@ inline Vector2<T> Vector2<T>::operator/(T s) const
 {
 	return Vector2(x / s,
 	               y / s);
+}
+
+template <class S>
+inline Vector2<S> operator*(S s, const Vector2<S> &v)
+{
+	return Vector2<S>(s * v.x,
+	                  s * v.y);
 }
 
 template <class T>

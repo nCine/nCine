@@ -271,6 +271,21 @@ TEST_F(Matrix4x4Test, DivideScalarInPlace)
 	assertVectorsAreEqual(m1_[3], oldM1[3] / scalar);
 }
 
+TEST_F(Matrix4x4Test, MultiplyScalarAsFirst)
+{
+	const float scalar = 2.0f;
+	printf("m1:\n"); printMatrix(m1_);
+	const nc::Matrix4x4f mul = scalar * m1_;
+	printf("Multiplication by scalar %.2f:\n", scalar);
+	printMatrix(mul);
+
+	assertVectorsAreEqual(mul[0], scalar * m1_[0]);
+	assertVectorsAreEqual(mul[1], scalar * m1_[1]);
+	assertVectorsAreEqual(mul[2], scalar * m1_[2]);
+	assertVectorsAreEqual(mul[3], scalar * m1_[3]);
+}
+
+
 TEST_F(Matrix4x4Test, AddConstantVectors)
 {
 	printf("Adding all constant matrices together:\n");

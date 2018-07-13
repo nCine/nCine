@@ -48,6 +48,8 @@ class Vector4
 	Vector4 operator*(T s) const;
 	Vector4 operator/(T s) const;
 
+	template <class S> friend Vector4<S> operator*(S s, const Vector4<S> &v);
+
 	T length() const;
 	T sqrLength() const;
 	Vector4 normalized() const;
@@ -278,6 +280,15 @@ inline Vector4<T> Vector4<T>::operator/(T s) const
 	               y / s,
 	               z / s,
 	               w / s);
+}
+
+template <class S>
+inline Vector4<S> operator*(S s, const Vector4<S> &v)
+{
+	return Vector4<S>(s * v.x,
+	                  s * v.y,
+	                  s * v.z,
+	                  s * v.w);
 }
 
 template <class T>

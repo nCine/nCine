@@ -252,6 +252,19 @@ TEST_F(Vector3Test, DivideScalarInPlace)
 	ASSERT_FLOAT_EQ(v1_.z, oldV1.z / scalar);
 }
 
+TEST_F(Vector3Test, MultiplyScalarAsFirst)
+{
+	const float scalar = 2.0f;
+	printf("v1: "); printVector(v1_);
+	const nc::Vector3f mul = scalar * v1_;
+	printf("Multiplication by scalar %.2f: ", scalar);
+	printVector(mul);
+
+	ASSERT_FLOAT_EQ(mul.x, scalar * v1_.x);
+	ASSERT_FLOAT_EQ(mul.y, scalar * v1_.y);
+	ASSERT_FLOAT_EQ(mul.z, scalar * v1_.z);
+}
+
 TEST_F(Vector3Test, DotProduct)
 {
 	printf("v1: "); printVector(v1_);

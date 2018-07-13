@@ -40,13 +40,15 @@ class Matrix4x4
 
 	Matrix4x4 operator+(const Matrix4x4 &m) const;
 	Matrix4x4 operator-(const Matrix4x4 &m) const;
-	Matrix4x4 operator*(const Matrix4x4 &m2) const;
+	Matrix4x4 operator*(const Matrix4x4 &m) const;
 	Matrix4x4 operator/(const Matrix4x4 &m) const;
 
 	Matrix4x4 operator+(T s) const;
 	Matrix4x4 operator-(T s) const;
 	Matrix4x4 operator*(T s) const;
 	Matrix4x4 operator/(T s) const;
+
+	template <class S> friend Matrix4x4<S> operator*(S s, const Matrix4x4<S> &m);
 
 	Matrix4x4 transposed() const;
 	Matrix4x4 &transpose();
@@ -308,6 +310,15 @@ inline Matrix4x4<T> Matrix4x4<T>::operator/(T s) const
 	                 vecs_[1] / s,
 	                 vecs_[2] / s,
 	                 vecs_[3] / s);
+}
+
+template <class S>
+inline Matrix4x4<S> operator*(S s, const Matrix4x4<S> &m)
+{
+	return Matrix4x4<S>(s * m.vecs_[0],
+	                    s * m.vecs_[1],
+	                    s * m.vecs_[2],
+	                    s * m.vecs_[3]);
 }
 
 template <class T>

@@ -47,6 +47,8 @@ class Vector3
 	Vector3 operator*(T s) const;
 	Vector3 operator/(T s) const;
 
+	template <class S> friend Vector3<S> operator*(S s, const Vector3<S> &v);
+
 	T length() const;
 	T sqrLength() const;
 	Vector3 normalized() const;
@@ -258,6 +260,14 @@ inline Vector3<T> Vector3<T>::operator/(T s) const
 	return Vector3(x / s,
 	               y / s,
 	               z / s);
+}
+
+template <class S>
+inline Vector3<S> operator*(S s, const Vector3<S> &v)
+{
+	return Vector3<S>(s * v.x,
+	                  s * v.y,
+	                  s * v.z);
 }
 
 template <class T>

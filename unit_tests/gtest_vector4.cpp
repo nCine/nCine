@@ -270,6 +270,20 @@ TEST_F(Vector4Test, DivideScalarInPlace)
 	ASSERT_FLOAT_EQ(v1_.w, oldV1.w / scalar);
 }
 
+TEST_F(Vector4Test, MultiplyScalarAsFirst)
+{
+	const float scalar = 2.0f;
+	printf("v1: "); printVector(v1_);
+	const nc::Vector4f mul = scalar * v1_;
+	printf("Multiplication by scalar %.2f: ", scalar);
+	printVector(mul);
+
+	ASSERT_FLOAT_EQ(mul.x, scalar * v1_.x);
+	ASSERT_FLOAT_EQ(mul.y, scalar * v1_.y);
+	ASSERT_FLOAT_EQ(mul.z, scalar * v1_.z);
+	ASSERT_FLOAT_EQ(mul.w, scalar * v1_.w);
+}
+
 TEST_F(Vector4Test, DotProduct)
 {
 	printf("v1: "); printVector(v1_);
