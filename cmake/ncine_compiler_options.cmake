@@ -102,7 +102,7 @@ else() # GCC and LLVM
 
 		if(CMAKE_BUILD_TYPE MATCHES "Release")
 			if(NCINE_EXTRA_OPTIMIZATION)
-				set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -fslp-vectorize-aggressive")
+				set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
 			endif()
 
 			if(NCINE_AUTOVECTORIZATION_REPORT)

@@ -63,6 +63,11 @@ AppConfiguration::AppConfiguration()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+const nctl::String &AppConfiguration::dataPath() const
+{
+	return IFile::dataPath_;
+}
+
 /*! Directly sets the value of the static field `IFile::dataPath_`. */
 void AppConfiguration::setDataPath(const nctl::String &dataPath)
 {

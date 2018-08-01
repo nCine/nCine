@@ -33,7 +33,7 @@ class DLL_PUBLIC BaseSprite : public DrawableNode
 
 	/// Gets the texture source rectangle for blitting
 	inline Recti texRect() const { return texRect_; }
-	/// Ses the texture source rectangle for blitting
+	/// Sets the texture source rectangle for blitting
 	void setTexRect(const Recti &rect);
 
 	/// Flips the texture rect along the X coordinate

@@ -89,8 +89,6 @@ endif()
 if(Threads_FOUND)
 	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_THREADS")
 	list(APPEND PRIVATE_LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
-	# Experimental multi-threading scene update
-	#list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_MULTITHREADING")
 
 	list(APPEND HEADERS ${NCINE_ROOT}/include/IThreadPool.h)
 	list(APPEND HEADERS ${NCINE_ROOT}/include/IThreadCommand.h)
@@ -110,12 +108,14 @@ if(Threads_FOUND)
 	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ThreadCommands.h)
 endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+if(NCINE_BUILD_ANDROID)
 	list(APPEND HEADERS
 		${NCINE_ROOT}/include/AndroidApplication.h
 		${NCINE_ROOT}/include/AssetFile.h
 	)
+endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Android")
 	list(APPEND PRIVATE_HEADERS
 		${NCINE_ROOT}/src/include/AndroidInputManager.h
 		${NCINE_ROOT}/src/include/AndroidJniHelper.h
@@ -133,6 +133,5 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Android")
 		${NCINE_ROOT}/src/android/TextureLoaderPkm.cpp
 	)
 else()
-	list(APPEND HEADERS ${NCINE_ROOT}/include/PCApplication.h)
 	list(APPEND SOURCES ${NCINE_ROOT}/src/PCApplication.cpp)
 endif()

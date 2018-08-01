@@ -26,6 +26,8 @@ class DLL_PUBLIC AppConfiguration
 	/// \returns The update time in seconds for the profile text nodes
 	inline float profileTextUpdateTime() const { return profileTextUpdateTime_; }
 
+	/// \returns The path for the application to load data from
+	const nctl::String &dataPath() const;
 	/// \returns The name of the log file
 	inline const nctl::String &logFile() const { return logFile_; }
 	/// \returns The logging level for messages printed on the console

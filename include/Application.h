@@ -72,7 +72,7 @@ class DLL_PUBLIC Application
 	/// Returns the value of the pause flag
 	inline bool isPaused() const { return isPaused_; }
 	/// Sets the pause flag value
-	void setPause(bool paused);
+	void setPaused(bool paused);
 	/// Toggles the pause flag on and off
 	void togglePause();
 

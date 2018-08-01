@@ -97,6 +97,7 @@ do { \
 		if (!(x)) \
 		{ \
 			LOGE_X(fmt, ## __VA_ARGS__); \
+			BREAK(); \
 		} \
 	} while (false)
 
@@ -105,6 +106,7 @@ do { \
 		if (!(x)) \
 		{ \
 			LOGE(fmt); \
+			BREAK(); \
 		} \
 	} while (false)
 
@@ -113,6 +115,7 @@ do { \
 		if (!(x)) \
 		{ \
 			LOGE("ASSERT("#x")"); \
+			BREAK(); \
 		} \
 	} while (false)
 #else

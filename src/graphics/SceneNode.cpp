@@ -1,8 +1,4 @@
 #include "SceneNode.h"
-#ifdef WITH_MULTITHREADING
-	#include "ThreadPool.h"
-	#include "ThreadCommands.h"
-#endif
 
 namespace ncine {
 
@@ -133,11 +129,7 @@ void SceneNode::update(float interval)
 	{
 		if (child->updateEnabled_)
 		{
-#ifndef WITH_MULTITHREADING
 			child->update(interval);
-#else
-			theServiceLocator().threadPool().enqueueCommand(nctl::makeUnique<UpdateNodeCommand>(*i, interval));
-#endif
 			child->transform();
 		}
 	}

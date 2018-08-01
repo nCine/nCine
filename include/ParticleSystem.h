@@ -21,7 +21,9 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	~ParticleSystem() override;
 
 	/// Adds a particle affector
-	void addAffector(nctl::UniquePtr<ParticleAffector> affector) { affectors_.pushBack(nctl::move(affector)); }
+	inline void addAffector(nctl::UniquePtr<ParticleAffector> affector) { affectors_.pushBack(nctl::move(affector)); }
+	/// Deletes all particle affectors
+	void clearAffectors();
 	/// Emits an amount of particles with a specified initial life and velocity
 	void emitParticles(unsigned int amount, float life, const Vector2f &vel);
 

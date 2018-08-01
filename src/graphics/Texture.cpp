@@ -20,7 +20,8 @@ Texture::Texture(const char *filename)
 
 Texture::Texture(const char *filename, int width, int height)
 	: Object(ObjectType::TEXTURE, filename), glTexture_(nctl::makeUnique<GLTexture>(GL_TEXTURE_2D)),
-	  width_(0), height_(0), mipMapLevels_(1), isCompressed_(false), hasAlphaChannel_(false), dataSize_(0)
+	  width_(0), height_(0), mipMapLevels_(1), isCompressed_(false), hasAlphaChannel_(false),
+	  dataSize_(0), filtering_(Filtering::NEAREST), wrapMode_(Wrap::CLAMP_TO_EDGE)
 {
 	glTexture_->bind();
 	setGLTextureLabel(filename);
@@ -63,6 +64,7 @@ void Texture::setFiltering(Filtering filter)
 	glTexture_->bind();
 	glTexture_->texParameteri(GL_TEXTURE_MAG_FILTER, glFilter);
 	glTexture_->texParameteri(GL_TEXTURE_MIN_FILTER, glFilter);
+	filtering_ = filter;
 }
 
 void Texture::setWrap(Wrap wrapMode)
@@ -79,6 +81,7 @@ void Texture::setWrap(Wrap wrapMode)
 	glTexture_->bind();
 	glTexture_->texParameteri(GL_TEXTURE_WRAP_S, glWrap);
 	glTexture_->texParameteri(GL_TEXTURE_WRAP_T, glWrap);
+	wrapMode_ = wrapMode;
 }
 
 ///////////////////////////////////////////////////////////
@@ -101,11 +104,13 @@ void Texture::load(const ITextureLoader &texLoader, int width, int height)
 
 	glTexture_->texParameteri(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexture_->texParameteri(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	wrapMode_ = Wrap::CLAMP_TO_EDGE;
 
 	if (texLoader.mipMapCount() > 1)
 	{
 		glTexture_->texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexture_->texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		filtering_ = Filtering::LINEAR_MIPMAP_LINEAR;
 		// To prevent artifacts if the MIP map chain is not complete
 		glTexture_->texParameteri(GL_TEXTURE_MAX_LEVEL, texLoader.mipMapCount());
 	}
@@ -113,6 +118,7 @@ void Texture::load(const ITextureLoader &texLoader, int width, int height)
 	{
 		glTexture_->texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexture_->texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		filtering_ = Filtering::LINEAR;
 	}
 
 	const TextureFormat &texFormat = texLoader.texFormat();

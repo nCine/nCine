@@ -24,6 +24,8 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 
 	/// Adds a new animation
 	void addAnimation(nctl::UniquePtr<RectAnimation> anim);
+	/// Deletes all animations
+	void clearAnimations();
 	/// Sets the current animation and its frame number
 	void setAnimation(int animNum);
 	/// Sets the current animation to a specified frame number

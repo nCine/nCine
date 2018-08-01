@@ -70,6 +70,13 @@ void AnimatedSprite::addAnimation(nctl::UniquePtr<RectAnimation> anim)
 	setTexRect(anims_[currentAnim_]->rect());
 }
 
+void AnimatedSprite::clearAnimations()
+{
+	for (nctl::UniquePtr<RectAnimation> &anim : anims_)
+		anim.reset(nullptr);
+	anims_.clear();
+}
+
 void AnimatedSprite::setAnimation(int animNum)
 {
 	ASSERT(!anims_.isEmpty());

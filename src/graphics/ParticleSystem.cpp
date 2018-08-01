@@ -33,6 +33,13 @@ ParticleSystem::~ParticleSystem()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+void ParticleSystem::clearAffectors()
+{
+	for (nctl::UniquePtr<ParticleAffector> &affector : affectors_)
+		affector.reset(nullptr);
+	affectors_.clear();
+}
+
 void ParticleSystem::emitParticles(unsigned int amount, float life, const Vector2f &vel)
 {
 	Vector2f rndPosition;

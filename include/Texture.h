@@ -55,9 +55,13 @@ class DLL_PUBLIC Texture : public Object
 	/// Returns the amount of video memory needed to load the texture
 	inline unsigned long dataSize() const { return dataSize_; }
 
+	/// Returns texture filtering for both magnification and minification
+	inline Filtering filtering() const { return filtering_; }
+	/// Returns texture wrap for both `s` and `t` coordinates
+	inline Wrap wrap() const { return wrapMode_; }
 	/// Sets texture filtering for both magnification and minification
 	void setFiltering(Filtering filter);
-	/// Sets texture wrap for both `s` and `t` coordinate
+	/// Sets texture wrap for both `s` and `t` coordinates
 	void setWrap(Wrap wrapMode);
 
 	inline static ObjectType sType() { return ObjectType::TEXTURE; }
@@ -70,6 +74,9 @@ class DLL_PUBLIC Texture : public Object
 	bool isCompressed_;
 	bool hasAlphaChannel_;
 	unsigned long dataSize_;
+
+	Filtering filtering_;
+	Wrap wrapMode_;
 
 	/// Deleted copy constructor
 	Texture(const Texture &) = delete;

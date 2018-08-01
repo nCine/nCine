@@ -55,7 +55,7 @@ float Application::interval() const
 	return frameTimer_->interval();
 }
 
-void Application::setPause(bool paused)
+void Application::setPaused(bool paused)
 {
 	isPaused_ = paused;
 	if (isPaused_ == false)
@@ -68,7 +68,7 @@ void Application::setPause(bool paused)
 void Application::togglePause()
 {
 	const bool paused = !isPaused_;
-	setPause(paused);
+	setPaused(paused);
 }
 
 ///////////////////////////////////////////////////////////

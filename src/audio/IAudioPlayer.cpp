@@ -1,6 +1,7 @@
 #define NCINE_INCLUDE_OPENAL
 #include "common_headers.h"
 #include "IAudioPlayer.h"
+#include "Vector3.h"
 
 namespace ncine {
 
@@ -10,11 +11,9 @@ namespace ncine {
 
 IAudioPlayer::IAudioPlayer()
 	: Object(ObjectType::BASE), sourceId_(-1), state_(PlayerState::STOPPED),
-	  isLooping_(false), gain_(1.0f), pitch_(1.0f)
+	  isLooping_(false), gain_(1.0f), pitch_(1.0f), position_(0.0f, 0.0f, 0.0f)
 {
-	position_[0] = 0.0f;
-	position_[1] = 0.0f;
-	position_[2] = 0.0f;
+
 }
 
 ///////////////////////////////////////////////////////////
@@ -38,18 +37,17 @@ void IAudioPlayer::setPitch(float pitch)
 }
 
 /*! The change is applied to the OpenAL source only when playing. */
-void IAudioPlayer::setPosition(float position[3])
+void IAudioPlayer::setPosition(const Vector3f &position)
 {
-	setPosition(position[0], position[1], position[2]);
+	position_ = position;
+	if (state_ == PlayerState::PLAYING)
+		alSourcefv(sourceId_, AL_POSITION, position_.data());
 }
 
 /*! The change is applied to the OpenAL source only when playing. */
 void IAudioPlayer::setPosition(float x, float y, float z)
 {
-	position_[0] = x;
-	position_[1] = y;
-	position_[2] = z;
-
+	position_.set(x, y, z);
 	if (state_ == PlayerState::PLAYING)
 		alSourcefv(sourceId_, AL_POSITION, position_.data());
 }

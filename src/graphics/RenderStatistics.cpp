@@ -13,7 +13,7 @@ RenderStatistics::Buffers RenderStatistics::typedBuffers_[RenderBuffersManager::
 RenderStatistics::Textures RenderStatistics::textures_;
 RenderStatistics::CustomBuffers RenderStatistics::customVbos_;
 RenderStatistics::CustomBuffers RenderStatistics::customIbos_;
-unsigned int RenderStatistics::index = 0;
+unsigned int RenderStatistics::index_ = 0;
 unsigned int RenderStatistics::culledNodes_[2] = {0, 0};
 RenderStatistics::VaoPool RenderStatistics::vaoPool_;
 
@@ -59,7 +59,7 @@ void RenderStatistics::appendMoreStatistics(nctl::String &string)
 		"%.2f/%u Kb in %u VBO(s)\n"\
 		"%.2f/%u Kb in %u IBO(s)\n"\
 		"%.2f/%u Kb in %u UBO(s)\n",
-		culledNodes_[(index + 1) % 2],
+		culledNodes_[(index_ + 1) % 2],
 		vaoPool_.size, vaoPool_.capacity, vaoPool_.reuses, vaoPool_.bindings,
 		textures_.dataSize / 1024.0f, textures_.count,
 		customVbos_.dataSize / 1024.0f, customVbos_.count,
@@ -84,8 +84,8 @@ void RenderStatistics::reset()
 		typedBuffers_[i].reset();
 
 	// Ping pong index for last and current frame
-	index = (index + 1) % 2;
-	culledNodes_[index] = 0;
+	index_ = (index_ + 1) % 2;
+	culledNodes_[index_] = 0;
 
 	vaoPool_.reset();
 }

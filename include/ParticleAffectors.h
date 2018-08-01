@@ -24,6 +24,8 @@ class DLL_PUBLIC AccelerationAffector : public ParticleAffector
   public:
 	/// X and Y components of the accelerator vector
 	AccelerationAffector(float x, float y) : acceleration_(x, y) { }
+	/// X and Y components of the accelerator vector
+	explicit AccelerationAffector(const Vector2f &vec) : acceleration_(vec.x, vec.y) { }
 
 	/// Affects the acceleration of the specified particle
 	void affect(Particle *particle) override;

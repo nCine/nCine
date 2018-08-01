@@ -2,7 +2,7 @@
 #define CLASS_NCINE_IAUDIOPLAYER
 
 #include "Object.h"
-#include "nctl/StaticArray.h"
+#include "Vector3.h"
 
 namespace ncine {
 
@@ -29,11 +29,6 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	/// Stops playing and rewind
 	virtual void stop() = 0;
 
-	/// Updates the state of the player if the source has done playing
-	/*! It is called every frame by the `IAudioDevice` class and it is
-	 *  also responsible for buffer queueing/unqueueing in stream players. */
-	virtual void updateState() = 0;
-
 	/// Sets player looping property
 	inline void setLooping(bool isLooping) { isLooping_ = isLooping; }
 
@@ -46,9 +41,9 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	/// Sets player pitch value
 	void setPitch(float pitch);
 	/// Returns player position value
-	inline const float *Position() const { return position_.data(); }
+	inline Vector3f position() const { return position_; }
 	/// Sets player position value through vector
-	void setPosition(float position[3]);
+	void setPosition(const Vector3f &position);
 	/// Sets player position value through components
 	void setPosition(float x, float y, float z);
 
@@ -75,7 +70,14 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	/// Player pitch value
 	float pitch_;
 	/// Player position in space
-	nctl::StaticArray<float, 3> position_;
+	Vector3f position_;
+
+	/// Updates the state of the player if the source has done playing
+	/*! It is called every frame by the `IAudioDevice` class and it is
+	 *  also responsible for buffer queueing/unqueueing in stream players. */
+	virtual void updateState() = 0;
+
+	friend class ALAudioDevice;
 };
 
 }
