@@ -100,12 +100,14 @@ class DLL_PUBLIC Application
 	nctl::UniquePtr<Timer> profileTimer_;
 	nctl::UniquePtr<ProfilePlotter> profilePlotter_;
 	nctl::UniquePtr<Font> font_;
-	nctl::UniquePtr<TextNode> infoLineTopRight_;
 	nctl::UniquePtr<TextNode> infoLineTopLeft_;
+	nctl::UniquePtr<TextNode> infoLineTopRight_;
 	nctl::UniquePtr<TextNode> infoLineBottomLeft_;
+	nctl::UniquePtr<TextNode> infoLineBottomRight_;
 	float textUpdateTime_;
-	nctl::String infoStringTopRight_;
 	nctl::String infoStringTopLeft_;
+	nctl::String infoStringTopRight_;
+	nctl::String infoStringBottomRight_;
 	nctl::UniquePtr<IInputManager> inputManager_;
 	nctl::UniquePtr<IAppEventHandler> appEventHandler_;
 

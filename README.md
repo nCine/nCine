@@ -1,19 +1,19 @@
 # nCine
 nCine is a multi-platform 2D game engine.  
 It is released under the MIT License, Copyright (c) 2011-2018 Angelo Theodorou.  
-For additional information: https://ncine.github.io/
+For additional information: https://ncine.github.io
 
 ## Information
 
 ### Dependencies
 - GLEW
 - GLFW 3.x
-- SDL 1.2.x (deprecated)
-- SDL_image 1.2.x (deprecated)
-- libwebp
+- SDL 2
 - libpng
+- libwebp
 - OpenAL-soft
 - libogg, libvorbis, libvorbisfile
+- Lua 5.3
 
 ### Supported Platforms and Compilers
 - Windows (MSVC, MinGW-w64 on MSYS2)

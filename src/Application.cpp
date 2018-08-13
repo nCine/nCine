@@ -24,6 +24,10 @@
 	#include "ThreadPool.h"
 #endif
 
+#ifdef WITH_LUA
+	#include "LuaStatistics.h"
+#endif
+
 #ifdef WITH_GIT_VERSION
 	#include "version.h"
 #endif
@@ -36,7 +40,8 @@ namespace ncine {
 
 Application::Application()
 	: isPaused_(false), hasFocus_(true), shouldQuit_(false),
-	  textUpdateTime_(0.0f), infoStringTopRight_(MaxTextLength),infoStringTopLeft_(MaxTextLength)
+	  textUpdateTime_(0.0f), infoStringTopLeft_(MaxTextLength),
+	  infoStringTopRight_(MaxTextLength), infoStringBottomRight_(MaxTextLength)
 {
 
 }
@@ -143,15 +148,26 @@ void Application::initCommon()
 			else
 			{
 				font_ = nctl::makeUnique<Font>(fontTexFilePath.data(), fontFntFilePath.data());
-				infoLineTopRight_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
-				infoLineTopRight_->setAlignment(TextNode::Alignment::RIGHT);
-				infoLineTopRight_->setScale(0.75f);
+
 				infoLineTopLeft_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
+				infoLineTopLeft_->setLayer(DrawableNode::LayerBase::HUD + 3);
 				infoLineTopLeft_->setAlignment(TextNode::Alignment::LEFT);
 				infoLineTopLeft_->setScale(0.75f);
+
+				infoLineTopRight_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
+				infoLineTopRight_->setLayer(DrawableNode::LayerBase::HUD + 3);
+				infoLineTopRight_->setAlignment(TextNode::Alignment::RIGHT);
+				infoLineTopRight_->setScale(0.75f);
+
 				infoLineBottomLeft_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
+				infoLineBottomLeft_->setLayer(DrawableNode::LayerBase::HUD + 3);
 				infoLineBottomLeft_->setAlignment(TextNode::Alignment::LEFT);
 				infoLineBottomLeft_->setScale(0.75f);
+
+				infoLineBottomRight_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
+				infoLineBottomRight_->setLayer(DrawableNode::LayerBase::HUD + 3);
+				infoLineBottomRight_->setAlignment(TextNode::Alignment::RIGHT);
+				infoLineBottomRight_->setScale(0.75f);
 
 				nctl::String infoStringBottomLeft(MaxTextLength);
 				#ifdef WITH_GIT_VERSION
@@ -193,11 +209,12 @@ void Application::step()
 	if (profilePlotter_)
 		profilePlotter_->setEnabled(renderingSettings_.showProfilerGraphs);
 
-	if (infoLineTopRight_ && infoLineTopLeft_ && infoLineBottomLeft_)
+	if (infoLineTopLeft_ && infoLineTopRight_ && infoLineBottomLeft_ && infoLineBottomRight_)
 	{
-		infoLineTopRight_->setEnabled(renderingSettings_.showInfoText);
 		infoLineTopLeft_->setEnabled(renderingSettings_.showInfoText);
+		infoLineTopRight_->setEnabled(renderingSettings_.showInfoText);
 		infoLineBottomLeft_->setEnabled(renderingSettings_.showInfoText);
+		infoLineBottomRight_->setEnabled(renderingSettings_.showInfoText);
 	}
 
 	profileTimer_->start();
@@ -208,19 +225,27 @@ void Application::step()
 		renderQueue_->draw();
 	}
 
-	if (renderQueue_ && infoLineTopRight_ && infoLineTopLeft_ && infoLineBottomLeft_ && Timer::now() - textUpdateTime_ > appCfg_.profileTextUpdateTime())
+	if (renderQueue_ && infoLineTopLeft_ && infoLineTopRight_ && infoLineBottomLeft_ && infoLineBottomRight_ &&
+	    Timer::now() - textUpdateTime_ > appCfg_.profileTextUpdateTime())
 	{
 		textUpdateTime_ = Timer::now();
+
+		infoStringTopLeft_.clear();
+		RenderStatistics::appendMoreStatistics(infoStringTopLeft_);
+		infoLineTopLeft_->setString(infoStringTopLeft_);
+		infoLineTopLeft_->setPosition(infoLineTopLeft_->width() * 0.5f, height() - infoLineTopLeft_->height() * 0.5f);
 
 		infoStringTopRight_.format("FPS: %.0f (%.2fms)\n", frameTimer_->averageFps(), frameTimer_->interval() * 1000.0f);
 		RenderStatistics::appendCommandsStatistics(infoStringTopRight_);
 		infoLineTopRight_->setString(infoStringTopRight_);
 		infoLineTopRight_->setPosition(width() - infoLineTopRight_->width() * 0.5f, height() - infoLineTopRight_->height() * 0.5f);
 
-		infoStringTopLeft_.clear();
-		RenderStatistics::appendMoreStatistics(infoStringTopLeft_);
-		infoLineTopLeft_->setString(infoStringTopLeft_);
-		infoLineTopLeft_->setPosition(infoLineTopLeft_->width() * 0.5f, height() - infoLineTopLeft_->height() * 0.5f);
+#ifdef WITH_LUA
+		infoStringBottomRight_.clear();
+		LuaStatistics::appendStatistics(infoStringBottomRight_);
+		infoLineBottomRight_->setString(infoStringBottomRight_);
+		infoLineBottomRight_->setPosition(width() - infoLineBottomRight_->width() * 0.5f, infoLineBottomRight_->height() * 0.75f);
+#endif
 	}
 
 	theServiceLocator().audioDevice().updatePlayers();
@@ -244,9 +269,11 @@ void Application::shutdownCommon()
 	LOGI("IAppEventHandler::OnShutdown() invoked");
 	appEventHandler_.reset(nullptr);
 
+	infoLineBottomRight_.reset(nullptr);
 	infoLineBottomLeft_.reset(nullptr);
-	infoLineTopLeft_.reset(nullptr);
 	infoLineTopRight_.reset(nullptr);
+	infoLineTopLeft_.reset(nullptr);
+
 	font_.reset(nullptr);
 	profilePlotter_.reset(nullptr);
 	profileTimer_.reset(nullptr);

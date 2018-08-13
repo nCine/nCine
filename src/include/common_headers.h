@@ -34,3 +34,12 @@
 		#include <AL/al.h>
 	#endif
 #endif
+
+
+#if defined(NCINE_INCLUDE_LUA)
+extern "C" {
+	#include "lauxlib.h"
+	#include "lua.h"
+	#include "lualib.h"
+}
+#endif

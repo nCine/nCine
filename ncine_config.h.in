@@ -13,4 +13,6 @@
 #cmakedefine01 NCINE_WITH_PNG
 #cmakedefine01 NCINE_WITH_WEBP
 
+#cmakedefine01 NCINE_WITH_LUA
+
 #endif

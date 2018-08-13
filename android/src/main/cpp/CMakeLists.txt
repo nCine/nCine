@@ -39,6 +39,11 @@ if(EXISTS ${EXTERNAL_ANDROID_DIR}/vorbis/${CMAKE_ANDROID_ARCH_ABI}/libvorbisfile
 		${EXTERNAL_ANDROID_DIR}/ogg/${CMAKE_ANDROID_ARCH_ABI}/libogg.a)
 	set(VORBIS_FOUND 1)
 endif()
+if(EXISTS ${EXTERNAL_ANDROID_DIR}/lua/${CMAKE_ANDROID_ARCH_ABI}/liblua.a)
+	set(LUA_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/lua/include)
+	set(LUA_LIBRARY ${EXTERNAL_ANDROID_DIR}/lua/${CMAKE_ANDROID_ARCH_ABI}/liblua.a)
+	set(LUA_FOUND 1)
+endif()
 
 include(ncine_compiler_options)
 
@@ -76,6 +81,9 @@ endif()
 if(VORBIS_FOUND)
 	target_include_directories(ncine PRIVATE ${OGG_INCLUDE_DIR})
 	target_include_directories(ncine PRIVATE ${VORBIS_INCLUDE_DIR})
+endif()
+if(LUA_FOUND)
+	target_include_directories(ncine PRIVATE ${LUA_INCLUDE_DIR})
 endif()
 
 list(APPEND PRIVATE_COMPILE_DEFINITIONS ${ANDROID_GENERATED_FLAGS})

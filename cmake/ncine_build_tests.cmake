@@ -9,6 +9,14 @@ if(NCINE_BUILD_TESTS)
 				set_target_properties(copy_shaders_data PROPERTIES FOLDER "CustomCopyTargets")
 			endif()
 
+			if(LUA_FOUND)
+				add_custom_target(copy_lua_scripts ALL
+					COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/scripts ${NCINE_DATA_DIR}/scripts
+					COMMENT "Copying Lua scripts to data..."
+				)
+				set_target_properties(copy_lua_scripts PROPERTIES FOLDER "CustomCopyTargets")
+			endif()
+
 			if(MSVC)
 				include(InstallRequiredSystemLibraries)
 			endif()
@@ -19,6 +27,14 @@ if(NCINE_BUILD_TESTS)
 					COMMENT "Symlinking shaders to data..."
 				)
 				set_target_properties(symlink_shaders_data PROPERTIES FOLDER "CustomSymlinkTargets")
+			endif()
+
+			if(LUA_FOUND)
+				add_custom_target(symlink_lua_scripts ALL
+					COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/scripts ${NCINE_DATA_DIR}/scripts
+					COMMENT "Symlinking Lua scripts to data..."
+				)
+				set_target_properties(symlink_lua_scripts PROPERTIES FOLDER "CustomSymlinkTargets")
 			endif()
 		endif()
 
@@ -38,6 +54,10 @@ if(NCINE_BUILD_TESTS)
 		install(DIRECTORY ${NCINE_DATA_DIR}/fonts DESTINATION ${DATA_INSTALL_DESTINATION} COMPONENT data)
 		install(DIRECTORY ${NCINE_DATA_DIR}/sounds DESTINATION ${DATA_INSTALL_DESTINATION} COMPONENT data)
 		install(DIRECTORY ${NCINE_DATA_DIR}/textures DESTINATION ${DATA_INSTALL_DESTINATION} COMPONENT data)
+		if(LUA_FOUND)
+			target_compile_definitions(ncine PRIVATE "NCINE_TESTS_DATA_DIR=\"${NCINE_TESTS_DATA_DIR}\"") # for LuaEventHandler
+			install(DIRECTORY ${CMAKE_SOURCE_DIR}/scripts DESTINATION ${DATA_INSTALL_DESTINATION} COMPONENT data)
+		endif()
 		install(FILES ${NCINE_DATA_DIR}/README.md DESTINATION ${DATA_INSTALL_DESTINATION} COMPONENT data)
 	endif()
 
