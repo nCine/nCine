@@ -12,8 +12,8 @@ if(GLFW_FOUND)
 
 	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/GlfwInputManager.h)
 	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/GlfwGfxDevice.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/GlfwInputManager.cpp)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/GlfwKeys.cpp)
+	list(APPEND SOURCES ${NCINE_ROOT}/src/input/GlfwInputManager.cpp)
+	list(APPEND SOURCES ${NCINE_ROOT}/src/input/GlfwKeys.cpp)
 	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/GlfwGfxDevice.cpp)
 endif()
 
@@ -26,8 +26,8 @@ if(SDL2_FOUND AND NOT GLFW_FOUND)
 
 	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/SdlInputManager.h)
 	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/SdlGfxDevice.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/SdlInputManager.cpp)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/SdlKeys.cpp)
+	list(APPEND SOURCES ${NCINE_ROOT}/src/input/SdlInputManager.cpp)
+	list(APPEND SOURCES ${NCINE_ROOT}/src/input/SdlKeys.cpp)
 	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/SdlGfxDevice.cpp)
 endif()
 
