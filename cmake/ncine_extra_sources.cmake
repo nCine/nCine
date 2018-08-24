@@ -200,6 +200,38 @@ if(LUA_FOUND)
 	endif()
 endif()
 
+if(WITH_IMGUI)
+	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_IMGUI")
+
+	list(APPEND HEADERS ${IMGUI_SOURCE_DIR}/imgui.h)
+	list(APPEND HEADERS ${IMGUI_SOURCE_DIR}/imconfig.h)
+	list(APPEND PRIVATE_HEADERS ${IMGUI_SOURCE_DIR}/imgui_internal.h)
+	list(APPEND PRIVATE_HEADERS ${IMGUI_SOURCE_DIR}/imstb_rectpack.h)
+	list(APPEND PRIVATE_HEADERS ${IMGUI_SOURCE_DIR}/imstb_textedit.h)
+	list(APPEND PRIVATE_HEADERS ${IMGUI_SOURCE_DIR}/imstb_truetype.h)
+
+	list(APPEND SOURCES ${IMGUI_SOURCE_DIR}/imgui.cpp)
+	list(APPEND SOURCES ${IMGUI_SOURCE_DIR}/imgui_draw.cpp)
+	list(APPEND SOURCES ${IMGUI_SOURCE_DIR}/imgui_widgets.cpp)
+	list(APPEND SOURCES ${IMGUI_SOURCE_DIR}/imgui_demo.cpp)
+
+	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ImGuiDrawing.h)
+	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/ImGuiDrawing.cpp)
+
+	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ImGuiJoyMappedInput.h)
+	list(APPEND SOURCES ${NCINE_ROOT}/src/input/ImGuiJoyMappedInput.cpp)
+	if(GLFW_FOUND)
+		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ImGuiGlfwInput.h)
+		list(APPEND SOURCES ${NCINE_ROOT}/src/input/ImGuiGlfwInput.cpp)
+	elseif(SDL2_FOUND)
+		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ImGuiSdlInput.h)
+		list(APPEND SOURCES ${NCINE_ROOT}/src/input/ImGuiSdlInput.cpp)
+	elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
+		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ImGuiAndroidInput.h)
+		list(APPEND SOURCES ${NCINE_ROOT}/src/android/ImGuiAndroidInput.cpp)
+	endif()
+endif()
+
 if(NCINE_BUILD_ANDROID)
 	list(APPEND HEADERS
 		${NCINE_ROOT}/include/AndroidApplication.h

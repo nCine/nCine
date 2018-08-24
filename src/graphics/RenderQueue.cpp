@@ -49,6 +49,9 @@ const char *commandTypeString(const RenderCommand &command)
 		case RenderCommand::CommandTypes::MESH_SPRITE: return "mesh sprite";
 		case RenderCommand::CommandTypes::PARTICLE: return "particle";
 		case RenderCommand::CommandTypes::TEXT: return "text";
+#ifdef WITH_IMGUI
+		case RenderCommand::CommandTypes::IMGUI: return "imgui";
+#endif
 		default: return "unknown";
 	}
 }

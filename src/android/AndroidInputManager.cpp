@@ -10,6 +10,10 @@
 #include "Timer.h"
 #include "JoyMapping.h"
 
+#ifdef WITH_IMGUI
+	#include "ImGuiAndroidInput.h"
+#endif
+
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
@@ -72,6 +76,17 @@ AndroidInputManager::AndroidInputManager(struct android_app *state)
 	initAccelerometerSensor(state);
 	joyMapping_.init(this);
 	checkConnectedJoysticks();
+
+#ifdef WITH_IMGUI
+	ImGuiAndroidInput::init();
+#endif
+}
+
+AndroidInputManager::~AndroidInputManager()
+{
+#ifdef WITH_IMGUI
+	ImGuiAndroidInput::shutdown();
+#endif
 }
 
 ///////////////////////////////////////////////////////////
@@ -164,6 +179,10 @@ bool AndroidInputManager::parseEvent(const AInputEvent *event)
 	// Early out if there is no input event handler
 	if (inputEventHandler_ == nullptr)
 		return false;
+
+#ifdef WITH_IMGUI
+	ImGuiAndroidInput::processEvent(event);
+#endif
 
 	bool isEventHandled = false;
 

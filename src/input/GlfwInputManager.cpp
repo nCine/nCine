@@ -5,6 +5,10 @@
 #include "Application.h"
 #include "JoyMapping.h"
 
+#ifdef WITH_IMGUI
+	#include "ImGuiGlfwInput.h"
+#endif
+
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
@@ -36,12 +40,24 @@ GlfwInputManager::GlfwInputManager()
 {
 	glfwSetWindowCloseCallback(GlfwGfxDevice::windowHandle(), windowCloseCallback);
 	glfwSetKeyCallback(GlfwGfxDevice::windowHandle(), keyCallback);
+	glfwSetCharCallback(GlfwGfxDevice::windowHandle(), charCallback);
 	glfwSetCursorPosCallback(GlfwGfxDevice::windowHandle(), cursorPosCallback);
 	glfwSetMouseButtonCallback(GlfwGfxDevice::windowHandle(), mouseButtonCallback);
 	glfwSetScrollCallback(GlfwGfxDevice::windowHandle(), scrollCallback);
 	glfwSetJoystickCallback(joystickCallback);
 
 	joyMapping_.init(this);
+
+#ifdef WITH_IMGUI
+	ImGuiGlfwInput::init(GlfwGfxDevice::windowHandle());
+#endif
+}
+
+GlfwInputManager::~GlfwInputManager()
+{
+#ifdef WITH_IMGUI
+	ImGuiGlfwInput::shutdown();
+#endif
 }
 
 ///////////////////////////////////////////////////////////
@@ -180,6 +196,10 @@ void GlfwInputManager::windowCloseCallback(GLFWwindow *window)
 
 void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
+#ifdef WITH_IMGUI
+	ImGuiGlfwInput::keyCallback(window, key, scancode, action, mods);
+#endif
+
 	if (inputEventHandler_ == nullptr)
 		return;
 
@@ -191,6 +211,13 @@ void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, in
 		inputEventHandler_->onKeyPressed(keyboardEvent_);
 	else if (action == GLFW_RELEASE)
 		inputEventHandler_->onKeyReleased(keyboardEvent_);
+}
+
+void GlfwInputManager::charCallback(GLFWwindow* window, unsigned int c)
+{
+#ifdef WITH_IMGUI
+	ImGuiGlfwInput::charCallback(window, c);
+#endif
 }
 
 void GlfwInputManager::cursorPosCallback(GLFWwindow *window, double x, double y)
@@ -205,6 +232,10 @@ void GlfwInputManager::cursorPosCallback(GLFWwindow *window, double x, double y)
 
 void GlfwInputManager::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
+#ifdef WITH_IMGUI
+	ImGuiGlfwInput::mouseButtonCallback(window, button, action, mods);
+#endif
+
 	if (inputEventHandler_ == nullptr)
 		return;
 
@@ -222,12 +253,15 @@ void GlfwInputManager::mouseButtonCallback(GLFWwindow *window, int button, int a
 
 void GlfwInputManager::scrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
+#ifdef WITH_IMGUI
+	ImGuiGlfwInput::scrollCallback(window, xoffset, yoffset);
+#endif
+
 	if (inputEventHandler_ == nullptr)
 		return;
 
 	scrollEvent_.x = static_cast<float>(xoffset);
 	scrollEvent_.y = static_cast<float>(yoffset);
-
 	inputEventHandler_->onScrollInput(scrollEvent_);
 }
 

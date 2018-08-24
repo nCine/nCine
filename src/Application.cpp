@@ -28,6 +28,10 @@
 	#include "LuaStatistics.h"
 #endif
 
+#ifdef WITH_IMGUI
+	#include "ImGuiDrawing.h"
+#endif
+
 #ifdef WITH_GIT_VERSION
 	#include "version.h"
 #endif
@@ -108,6 +112,10 @@ void Application::initCommon()
 
 	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.frameTimerLogInterval(), appCfg_.profileTextUpdateTime());
 	profileTimer_ = nctl::makeUnique<Timer>();
+
+#ifdef WITH_IMGUI
+	imguiDrawing_ = nctl::makeUnique<ImGuiDrawing>(appCfg_.withScenegraph());
+#endif
 
 	if (appCfg_.withScenegraph())
 	{
@@ -201,6 +209,11 @@ void Application::step()
 	frameTimer_->addFrame();
 	if (appCfg_.withScenegraph())
 		gfxDevice_->clear();
+
+#ifdef WITH_IMGUI
+	imguiDrawing_->newFrame();
+#endif
+
 	appEventHandler_->onFrameStart();
 	// Measuring OnFrameEnd() + OnFrameStart() time
 	if (profilePlotter_)
@@ -253,6 +266,13 @@ void Application::step()
 	if (profilePlotter_)
 		profilePlotter_->addValue(1, profileTimer_->interval());
 
+#ifdef WITH_IMGUI
+	if (appCfg_.withScenegraph())
+		imguiDrawing_->endFrame(*renderQueue_);
+	else
+		imguiDrawing_->endFrame();
+#endif
+
 	profileTimer_->start();
 	gfxDevice_->update();
 	// Measuring swap buffers time
@@ -273,6 +293,10 @@ void Application::shutdownCommon()
 	infoLineBottomLeft_.reset(nullptr);
 	infoLineTopRight_.reset(nullptr);
 	infoLineTopLeft_.reset(nullptr);
+
+#ifdef WITH_IMGUI
+	imguiDrawing_.reset(nullptr);
+#endif
 
 	font_.reset(nullptr);
 	profilePlotter_.reset(nullptr);

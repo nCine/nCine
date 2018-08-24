@@ -111,6 +111,7 @@ class GlfwInputManager : public IInputManager
 {
   public:
 	GlfwInputManager();
+	~GlfwInputManager() override;
 
 	/// Detects window focus gain/loss events
 	static bool hasFocus();
@@ -167,6 +168,7 @@ class GlfwInputManager : public IInputManager
 
 	static void windowCloseCallback(GLFWwindow *window);
 	static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+	static void charCallback(GLFWwindow* window, unsigned int c);
 	static void cursorPosCallback(GLFWwindow *window, double x, double y);
 	static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
 	static void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);

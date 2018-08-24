@@ -28,19 +28,28 @@ void RenderStatistics::appendCommandsStatistics(nctl::String &string)
 	const Commands &particleCommands = typedCommands_[RenderCommand::CommandTypes::PARTICLE];
 	const Commands &textCommands = typedCommands_[RenderCommand::CommandTypes::TEXT];
 	const Commands &plotterCommands = typedCommands_[RenderCommand::CommandTypes::PLOTTER];
+#ifdef WITH_IMGUI
+	const Commands &imguiCommands = typedCommands_[RenderCommand::CommandTypes::IMGUI];
+#endif
 
 	string.formatAppend(
 		"Sprites: %uV, %uDC (%u Tr), %uI/%uB\n"\
 		"Mesh Sprites: %uV, %uDC (%u Tr), %uI/%uB\n"\
 		"Particles: %uV, %uDC (%u Tr), %uI/%uB\n"\
 		"Text: %uV, %uDC (%u Tr), %uI/%uB\n"\
-		"Plotter: %uV, %uDC (%u Tr), %uI/%uB\n"\
+		"Plotter: %uV, %uDC (%u Tr), %uI/%uB\n"
+#ifdef WITH_IMGUI
+		"ImGui: %uV, %uDC (%u Tr), %uI/%uB\n"
+#endif
 		"Total: %uV, %uDC (%u Tr), %uI/%uB\n",
 		spriteCommands.vertices, spriteCommands.commands, spriteCommands.transparents, spriteCommands.instances, spriteCommands.batchSize,
 		meshspriteCommands.vertices, meshspriteCommands.commands, meshspriteCommands.transparents, meshspriteCommands.instances, meshspriteCommands.batchSize,
 		particleCommands.vertices, particleCommands.commands, particleCommands.transparents, particleCommands.instances, particleCommands.batchSize,
 		textCommands.vertices, textCommands.commands, textCommands.transparents, textCommands.instances, textCommands.batchSize,
 		plotterCommands.vertices, plotterCommands.commands, plotterCommands.transparents, plotterCommands.instances, plotterCommands.batchSize,
+#ifdef WITH_IMGUI
+		imguiCommands.vertices, imguiCommands.commands, imguiCommands.transparents, imguiCommands.instances, imguiCommands.batchSize,
+#endif
 		allCommands_.vertices, allCommands_.commands, allCommands_.transparents, allCommands_.instances, allCommands_.batchSize);
 }
 

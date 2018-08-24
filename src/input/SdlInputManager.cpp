@@ -8,6 +8,11 @@
 #include "Application.h"
 #include "JoyMapping.h"
 
+#ifdef WITH_IMGUI
+	#include "SdlGfxDevice.h"
+	#include "ImGuiSdlInput.h"
+#endif
+
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
@@ -15,6 +20,8 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 const int IInputManager::MaxNumJoysticks = 16;
+
+SDL_Window *SdlInputManager::windowHandle_ = nullptr;
 
 SdlMouseState SdlInputManager::mouseState_;
 SdlMouseEvent SdlInputManager::mouseEvent_;
@@ -60,10 +67,18 @@ SdlInputManager::SdlInputManager()
 	}
 
 	joyMapping_.init(this);
+
+#ifdef WITH_IMGUI
+	ImGuiSdlInput::init(SdlGfxDevice::windowHandle());
+#endif
 }
 
 SdlInputManager::~SdlInputManager()
 {
+#ifdef WITH_IMGUI
+	ImGuiSdlInput::shutdown();
+#endif
+
 	// Close a joystick if opened
 	for (unsigned int i = 0; i < MaxNumJoysticks; i++)
 	{
@@ -120,6 +135,10 @@ float SdlJoystickState::axisNormValue(int axisId) const
 
 void SdlInputManager::parseEvent(const SDL_Event &event)
 {
+#ifdef WITH_IMGUI
+	ImGuiSdlInput::processEvent(&event);
+#endif
+
 	if (inputEventHandler_ == nullptr)
 		return;
 

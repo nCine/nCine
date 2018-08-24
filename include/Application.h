@@ -16,6 +16,7 @@ class Font;
 class TextNode;
 class IInputManager;
 class IAppEventHandler;
+class ImGuiDrawing;
 
 /// Main entry point and handler for nCine applications
 class DLL_PUBLIC Application
@@ -110,6 +111,9 @@ class DLL_PUBLIC Application
 	nctl::String infoStringBottomRight_;
 	nctl::UniquePtr<IInputManager> inputManager_;
 	nctl::UniquePtr<IAppEventHandler> appEventHandler_;
+#ifdef WITH_IMGUI
+	nctl::UniquePtr<ImGuiDrawing> imguiDrawing_;
+#endif
 
 	Application();
 	~Application();

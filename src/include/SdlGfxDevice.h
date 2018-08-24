@@ -26,6 +26,8 @@ class SdlGfxDevice : public IGfxDevice
 	inline void setWindowTitle(const char *windowTitle) override { SDL_SetWindowTitle(windowHandle_, windowTitle); }
 	void setWindowIcon(const char *windowIconFilename) override;
 
+	static inline SDL_Window *windowHandle() { return windowHandle_; }
+
   private:
 	/// SDL2 window handle
 	static SDL_Window *windowHandle_;

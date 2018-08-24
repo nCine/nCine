@@ -15,4 +15,6 @@
 
 #cmakedefine01 NCINE_WITH_LUA
 
+#cmakedefine01 NCINE_WITH_IMGUI
+
 #endif

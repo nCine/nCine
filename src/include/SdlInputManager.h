@@ -130,6 +130,8 @@ class SdlInputManager : public IInputManager
   private:
 	static const int MaxNumJoysticks = 16;
 
+	static SDL_Window *windowHandle_;
+
 	static SdlMouseState mouseState_;
 	static SdlMouseEvent mouseEvent_;
 	static SdlScrollEvent scrollEvent_;

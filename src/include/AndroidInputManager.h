@@ -121,6 +121,7 @@ class AndroidInputManager : public IInputManager
 {
   public:
 	explicit AndroidInputManager(struct android_app *state);
+	~AndroidInputManager() override;
 
 	/// Enables the accelerometer sensor
 	static void enableAccelerometerSensor();

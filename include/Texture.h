@@ -64,6 +64,9 @@ class DLL_PUBLIC Texture : public Object
 	/// Sets texture wrap for both `s` and `t` coordinates
 	void setWrap(Wrap wrapMode);
 
+	/// Returns the user data opaque pointer for ImGui's ImTextureID
+	void *imguiTexId();
+
 	inline static ObjectType sType() { return ObjectType::TEXTURE; }
 
   private:

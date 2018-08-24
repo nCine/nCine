@@ -105,6 +105,9 @@ else() # GCC and LLVM
 	find_package(Lua)
 endif()
 
+set(WITH_IMGUI 1)
+include(ncine_imgui)
+
 # Forcing the use of SDL2
 #set(GLFW_FOUND 0)
 
@@ -168,6 +171,9 @@ else()
 	if(LUA_FOUND)
 		target_include_directories(ncine PRIVATE ${LUA_INCLUDE_DIR})
 	endif()
+endif()
+if(WITH_IMGUI)
+	target_include_directories(ncine PUBLIC ${IMGUI_SOURCE_DIR})
 endif()
 target_include_directories(ncine PUBLIC include PRIVATE src/include)
 if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})

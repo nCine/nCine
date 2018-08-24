@@ -84,6 +84,11 @@ void Texture::setWrap(Wrap wrapMode)
 	wrapMode_ = wrapMode;
 }
 
+void *Texture::imguiTexId()
+{
+	return reinterpret_cast<void *>(glTexture_.get());
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////

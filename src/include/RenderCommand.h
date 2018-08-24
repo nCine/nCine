@@ -26,6 +26,9 @@ class RenderCommand
 			MESH_SPRITE,
 			PARTICLE,
 			TEXT,
+#ifdef WITH_IMGUI
+			IMGUI,
+#endif
 
 			COUNT
 		};
