@@ -14,7 +14,7 @@ LineVariable::LineVariable(unsigned int numValues, float rejectDelay, const Matr
 	valuesCmd_.geometry().setDrawParameters(GL_LINE_STRIP, 2, variable_.numValues());
 
 	meanCmd_.material().setShaderProgramType(Material::ShaderProgramType::COLOR);
-	meanCmd_.geometry().shareVbo(valuesCmd_.geometry());
+	meanCmd_.geometry().shareVbo(&valuesCmd_.geometry());
 	meanCmd_.geometry().setDrawParameters(GL_LINES, 0, 2);
 }
 

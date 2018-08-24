@@ -97,8 +97,18 @@ void Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 	// Should be assigned after calling `setShaderProgram()`
 	shaderProgramType_ = shaderProgramType;
 
-	if (uniform("projection")->dataPointer() != nullptr)
+	if (uniform("projection")->dataPointer() != nullptr && shaderProgramType_ != ShaderProgramType::CUSTOM)
 		uniform("projection")->setFloatVector(RenderResources::projectionMatrix().data());
+}
+
+void Material::setShaderProgram(GLShaderProgram *program)
+{
+	shaderProgramType_ = ShaderProgramType::CUSTOM;
+	shaderProgram_ = program;
+	shaderUniforms_.setProgram(shaderProgram_);
+	shaderUniformBlocks_.setProgram(shaderProgram_);
+
+	shaderAttributes_.setProgram(shaderProgram_);
 }
 
 void Material::setUniformsDataPointer(GLubyte *dataPointer)
@@ -136,16 +146,6 @@ void Material::bind()
 		shaderProgram_->use();
 		shaderUniformBlocks_.bind();
 	}
-}
-
-void Material::setShaderProgram(GLShaderProgram *program)
-{
-	shaderProgramType_ = ShaderProgramType::CUSTOM;
-	shaderProgram_ = program;
-	shaderUniforms_.setProgram(shaderProgram_);
-	shaderUniformBlocks_.setProgram(shaderProgram_);
-
-	shaderAttributes_.setProgram(shaderProgram_);
 }
 
 void Material::defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo, unsigned int vboOffset)

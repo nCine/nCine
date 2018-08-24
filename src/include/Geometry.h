@@ -28,7 +28,7 @@ class Geometry
 	void setDrawParameters(GLenum primitiveType, GLint firstVertex, GLsizei numVertices);
 	/// Sets the primitive type (`GL_TRIANGLES`, `GL_TRIANGLE_STRIP`, ...)
 	inline void setPrimitiveType(GLenum primitiveType) { primitiveType_ = primitiveType; }
-	/// Sets the index of the first vertex to draw
+	/// Sets the index number of the first vertex to draw
 	inline void setFirstVertex(GLint firstVertex) { firstVertex_ = firstVertex; }
 	/// Sets the number of vertices
 	inline void setNumVertices(GLsizei numVertices) { numVertices_ = numVertices; }
@@ -52,10 +52,12 @@ class Geometry
 	inline void setHostVertexPointer(const float *vertexPointer) { hostVertexPointer_ = vertexPointer; }
 
 	/// Shares the VBO of another `Geometry` object
-	void shareVbo(const Geometry &geometry);
+	void shareVbo(const Geometry *geometry);
 
 	/// Returns the number of indices used to render the geometry
 	inline unsigned int numIndices() const { return numIndices_; }
+	/// Sets the index number of the first index to draw
+	inline void setFirstIndex(GLushort firstIndex) { firstIndex_ = firstIndex; }
 	/// Sets the number of indices used to render the geometry
 	inline void setNumIndices(unsigned int numIndices) { numIndices_ = numIndices; }
 	/// Creates a custom IBO that is unique to this `Geometry` object
@@ -73,13 +75,14 @@ class Geometry
 	inline void setHostIndexPointer(const GLushort *indexPointer) { hostIndexPointer_ = indexPointer; }
 
 	/// Shares the IBO of another `Geometry` object
-	void shareIbo(const Geometry &geometry);
+	void shareIbo(const Geometry *geometry);
 
   private:
 	GLenum primitiveType_;
 	GLint firstVertex_;
 	GLsizei numVertices_;
 	unsigned int numElementsPerVertex_;
+	GLushort firstIndex_;
 	unsigned int numIndices_;
 	const float *hostVertexPointer_;
 	const GLushort *hostIndexPointer_;
@@ -96,6 +99,9 @@ class Geometry
 	void draw(GLsizei numInstances);
 	void commitVertices();
 	void commitIndices();
+
+	inline const RenderBuffersManager::Parameters &vboParams() const { return sharedVboParams_ ? *sharedVboParams_ : vboParams_; }
+	inline const RenderBuffersManager::Parameters &iboParams() const { return sharedIboParams_ ? *sharedIboParams_ : iboParams_; }
 
 	/// Deleted copy constructor
 	Geometry(const Geometry &) = delete;

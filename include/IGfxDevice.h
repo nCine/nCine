@@ -54,6 +54,9 @@ class DLL_PUBLIC IGfxDevice
 	/// Returns device aspect ratio
 	inline float aspect() const { return width_ / static_cast<float>(height_); }
 
+	/// Sets the OpenGL clear color through four float
+	void setClearColor(float red, float green, float blue, float alpha);
+
 	/// Returns the OpenGL context creation attributes
 	inline const GLContextInfo &glContextInfo() const { return glContextInfo_; }
 	/// Returns display mode

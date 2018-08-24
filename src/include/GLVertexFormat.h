@@ -31,12 +31,17 @@ class GLVertexFormat
 		inline void setVbo(const GLBufferObject *vbo) { vbo_ = vbo; }
 		inline void setBaseOffset(unsigned int baseOffset) { baseOffset_ = baseOffset; }
 
+		inline void setSize(GLint size) { size_ = size; }
+		inline void setType(GLenum type) { type_ = type; }
+		inline void setNormalized(bool normalized) { normalized_ = normalized; }
+
 	  private:
 		bool enabled_;
 		const GLBufferObject *vbo_;
 		unsigned int index_;
 		GLint size_;
 		GLenum type_;
+		GLboolean normalized_;
 		GLsizei stride_;
 		const GLvoid *pointer_;
 		/// Used to simulate missing `glDrawElementsBaseVertex()` on OpenGL ES 3.0

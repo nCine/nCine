@@ -11,7 +11,7 @@ namespace ncine {
 
 Geometry::Geometry()
 	: primitiveType_(GL_TRIANGLES), firstVertex_(0), numVertices_(0),
-	  numElementsPerVertex_(2), numIndices_(0),
+	  numElementsPerVertex_(2), firstIndex_(0), numIndices_(0),
 	  hostVertexPointer_(nullptr), hostIndexPointer_(nullptr),
 	  sharedVboParams_(nullptr), sharedIboParams_(nullptr)
 {
@@ -91,10 +91,15 @@ void Geometry::releaseVertexPointer()
 	vboParams_.mapBase = nullptr;
 }
 
-void Geometry::shareVbo(const Geometry &geometry)
+void Geometry::shareVbo(const Geometry *geometry)
 {
-	vbo_.reset(nullptr);
-	sharedVboParams_ = &geometry.vboParams_;
+	if (geometry == nullptr)
+		sharedVboParams_ = nullptr;
+	else if (geometry != this)
+	{
+		vbo_.reset(nullptr);
+		sharedVboParams_ = &geometry->vboParams_;
+	}
 }
 
 void Geometry::createCustomIbo(unsigned int numIndices, GLenum usage)
@@ -150,10 +155,15 @@ void Geometry::releaseIndexPointer()
 	iboParams_.mapBase = nullptr;
 }
 
-void Geometry::shareIbo(const Geometry &geometry)
+void Geometry::shareIbo(const Geometry *geometry)
 {
-	ibo_.reset(nullptr);
-	sharedIboParams_ = &geometry.iboParams_;
+	if (geometry == nullptr)
+		sharedIboParams_ = nullptr;
+	else if (geometry != this)
+	{
+		ibo_.reset(nullptr);
+		sharedIboParams_ = &geometry->iboParams_;
+	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -168,17 +178,11 @@ void Geometry::bind()
 
 void Geometry::draw(GLsizei numInstances)
 {
-	if (sharedVboParams_)
-		vboParams_ = *sharedVboParams_;
-	const GLint vboOffset = static_cast<GLint>(vboParams_.offset / numElementsPerVertex_ / sizeof(GLfloat));
+	const GLint vboOffset = static_cast<GLint>(vboParams().offset / numElementsPerVertex_ / sizeof(GLfloat)) + firstVertex_;
 
 	void *iboOffsetPtr = nullptr;
 	if (numIndices_ > 0)
-	{
-		if (sharedIboParams_)
-			iboParams_ = *sharedIboParams_;
-		iboOffsetPtr = reinterpret_cast<void *>(iboParams_.offset);
-	}
+		iboOffsetPtr = reinterpret_cast<void *>(iboParams().offset + firstIndex_ * sizeof(GLushort));
 
 	if (numInstances == 0)
 	{
@@ -186,10 +190,10 @@ void Geometry::draw(GLsizei numInstances)
 #if defined(__ANDROID__) && !GL_ES_VERSION_3_2
 			glDrawElements(primitiveType_, numIndices_, GL_UNSIGNED_SHORT, iboOffsetPtr);
 #else
-			glDrawElementsBaseVertex(primitiveType_, numIndices_, GL_UNSIGNED_SHORT, iboOffsetPtr, vboOffset + firstVertex_);
+			glDrawElementsBaseVertex(primitiveType_, numIndices_, GL_UNSIGNED_SHORT, iboOffsetPtr, vboOffset);
 #endif
 		else
-			glDrawArrays(primitiveType_, vboOffset + firstVertex_, numVertices_);
+			glDrawArrays(primitiveType_, vboOffset, numVertices_);
 	}
 	else if (numInstances > 0)
 	{
@@ -197,10 +201,10 @@ void Geometry::draw(GLsizei numInstances)
 #if defined(__ANDROID__) && !GL_ES_VERSION_3_2
 			glDrawElementsInstanced(primitiveType_, numIndices_, GL_UNSIGNED_SHORT, iboOffsetPtr, numInstances);
 #else
-			glDrawElementsInstancedBaseVertex(primitiveType_, numIndices_, GL_UNSIGNED_SHORT, iboOffsetPtr, numInstances, vboOffset + firstVertex_);
+			glDrawElementsInstancedBaseVertex(primitiveType_, numIndices_, GL_UNSIGNED_SHORT, iboOffsetPtr, numInstances, vboOffset);
 #endif
 		else
-			glDrawArraysInstanced(primitiveType_, vboOffset + firstVertex_, numVertices_, numInstances);
+			glDrawArraysInstanced(primitiveType_, vboOffset, numVertices_, numInstances);
 	}
 }
 

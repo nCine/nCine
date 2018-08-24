@@ -21,8 +21,8 @@ class GLFramebufferObject
 	inline GLuint glHandle() const { return glHandle_; }
 	inline GLenum target() const { return target_; }
 
-	void bind(GLenum target) const;
-	void unbind() const;
+	bool bind(GLenum target) const;
+	bool unbind() const;
 
 	void attachRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height, GLenum attachment);
 	void attachTexture(GLTexture &texture, GLenum attachment);

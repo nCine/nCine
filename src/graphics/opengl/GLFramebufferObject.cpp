@@ -36,23 +36,27 @@ GLFramebufferObject::~GLFramebufferObject()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void GLFramebufferObject::bind(GLenum target) const
+bool GLFramebufferObject::bind(GLenum target) const
 {
 	if (boundBuffers_[target] != glHandle_)
 	{
 		target_ = target;
 		glBindFramebuffer(target_, glHandle_);
 		boundBuffers_[target_] = glHandle_;
+		return true;
 	}
+	return false;
 }
 
-void GLFramebufferObject::unbind() const
+bool GLFramebufferObject::unbind() const
 {
 	if (boundBuffers_[target_] != 0)
 	{
 		glBindFramebuffer(target_, 0);
 		boundBuffers_[target_] = 0;
+		return true;
 	}
+	return false;
 }
 
 void GLFramebufferObject::attachRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height, GLenum attachment)

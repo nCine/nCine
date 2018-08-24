@@ -31,10 +31,18 @@ void RenderVaoPool::bindVao(const GLVertexFormat &vertexFormat)
 		{
 			GLDebug::pushGroup("Bind VAO");
 			vaoFound = true;
-			binding.object->bind();
-			// Binding a VAO changes the current bound element array buffer
+			const bool bindChanged = binding.object->bind();
 			const GLuint iboHandle = vertexFormat.ibo() ? vertexFormat.ibo()->glHandle() : 0;
-			GLBufferObject::setBoundHandle(GL_ELEMENT_ARRAY_BUFFER, iboHandle);
+			if (bindChanged)
+			{
+				// Binding a VAO changes the current bound element array buffer
+				GLBufferObject::setBoundHandle(GL_ELEMENT_ARRAY_BUFFER, iboHandle);
+			}
+			else
+			{
+				// The VAO was already bound but it is not known if the bound element array buffer changed in the meantime
+				GLBufferObject::bindHandle(GL_ELEMENT_ARRAY_BUFFER, iboHandle);
+			}
 			binding.lastBindTime = Timer::now();
 			RenderStatistics::addVaoPoolBinding();
 			break;
@@ -67,7 +75,8 @@ void RenderVaoPool::bindVao(const GLVertexFormat &vertexFormat)
 			RenderStatistics::addVaoPoolReuse();
 		}
 
-		vaoPool_[index].object->bind();
+		const bool bindChanged = vaoPool_[index].object->bind();
+		ASSERT(bindChanged == true);
 		// Binding a VAO changes the current bound element array buffer
 		const GLuint oldIboHandle = vaoPool_[index].format.ibo() ? vaoPool_[index].format.ibo()->glHandle() : 0;
 		GLBufferObject::setBoundHandle(GL_ELEMENT_ARRAY_BUFFER, oldIboHandle);

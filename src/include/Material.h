@@ -50,8 +50,10 @@ class Material
 	inline void setTransparent(bool isTransparent) { isTransparent_ = isTransparent; }
 
 	inline ShaderProgramType shaderProgramType() const { return shaderProgramType_; }
-	inline const GLShaderProgram *shaderProgram() const { return shaderProgram_; }
 	void setShaderProgramType(ShaderProgramType shaderProgramType);
+	inline const GLShaderProgram *shaderProgram() const { return shaderProgram_; }
+	void setShaderProgram(GLShaderProgram *program);
+
 	void setUniformsDataPointer(GLubyte *dataPointer);
 	/// Wrapper around `GLShaderUniforms::uniform()`
 	inline GLUniformCache *uniform(const char *name) { return shaderUniforms_.uniform(name); }
@@ -77,7 +79,6 @@ class Material
 	nctl::UniquePtr<GLubyte []> uniformsHostBuffer_;
 
 	void bind();
-	void setShaderProgram(GLShaderProgram *program);
 	/// Wrapper around `GLShaderUniforms::commitUniforms()`
 	inline void commitUniforms() { shaderUniforms_.commitUniforms(); }
 	/// Wrapper around `GLShaderUniformBlocks::commitUniformBlocks()`

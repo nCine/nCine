@@ -92,18 +92,26 @@ void RenderStatistics::reset()
 
 void RenderStatistics::gatherStatistics(const RenderCommand &command)
 {
-	if (command.geometry().numVertices() == 0)
+	const GLsizei numVertices = command.geometry().numVertices();
+	const unsigned int numIndices = command.geometry().numIndices();
+
+	if (numVertices == 0 && numIndices == 0)
 		return;
 
+	unsigned int verticesToCount = 0;
+	if (numIndices > 0)
+		verticesToCount = (command.numInstances() > 0) ? numIndices * command.numInstances() : numIndices;
+	else
+		verticesToCount = (command.numInstances() > 0) ? numVertices * command.numInstances() : numVertices;
+
 	const unsigned int typeIndex = command.type();
-	typedCommands_[typeIndex].vertices += (command.numInstances() > 0) ?
-		command.geometry().numVertices() * command.numInstances() : command.geometry().numVertices();
+	typedCommands_[typeIndex].vertices += verticesToCount;
 	typedCommands_[typeIndex].commands++;
 	typedCommands_[typeIndex].transparents += (command.material().isTransparent()) ? 1 : 0;
 	typedCommands_[typeIndex].instances += command.numInstances();
 	typedCommands_[typeIndex].batchSize += command.batchSize();
 
-	allCommands_.vertices += command.geometry().numVertices();
+	allCommands_.vertices += verticesToCount;
 	allCommands_.commands++;
 	allCommands_.transparents += (command.material().isTransparent()) ? 1 : 0;
 	allCommands_.instances += command.numInstances();

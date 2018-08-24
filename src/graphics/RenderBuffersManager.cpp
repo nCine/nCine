@@ -14,7 +14,7 @@ RenderBuffersManager::RenderBuffersManager(unsigned long vboMaxSize, unsigned lo
 	BufferSpecifications &vboSpecs = specs_[BufferTypes::ARRAY];
 	vboSpecs.type = BufferTypes::ARRAY;
 	vboSpecs.target = GL_ARRAY_BUFFER;
-	vboSpecs.mapFlags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_UNSYNCHRONIZED_BIT;
+	vboSpecs.mapFlags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT;
 	vboSpecs.usageFlags = GL_STREAM_DRAW;
 	vboSpecs.maxSize = vboMaxSize;
 	vboSpecs.alignment = sizeof(GLfloat);
@@ -22,7 +22,7 @@ RenderBuffersManager::RenderBuffersManager(unsigned long vboMaxSize, unsigned lo
 	BufferSpecifications &iboSpecs = specs_[BufferTypes::ELEMENT_ARRAY];
 	iboSpecs.type = BufferTypes::ELEMENT_ARRAY;
 	iboSpecs.target = GL_ELEMENT_ARRAY_BUFFER;
-	iboSpecs.mapFlags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_UNSYNCHRONIZED_BIT;
+	iboSpecs.mapFlags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT;
 	iboSpecs.usageFlags = GL_STREAM_DRAW;
 	iboSpecs.maxSize = iboMaxSize;
 	iboSpecs.alignment = sizeof(GLushort);
@@ -34,7 +34,7 @@ RenderBuffersManager::RenderBuffersManager(unsigned long vboMaxSize, unsigned lo
 	BufferSpecifications &uboSpecs = specs_[BufferTypes::UNIFORM];
 	uboSpecs.type = BufferTypes::UNIFORM;
 	uboSpecs.target = GL_UNIFORM_BUFFER;
-	uboSpecs.mapFlags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_UNSYNCHRONIZED_BIT;
+	uboSpecs.mapFlags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT;
 	uboSpecs.usageFlags = GL_STREAM_DRAW;
 	uboSpecs.maxSize = static_cast<unsigned int>(maxUniformBlockSize);
 	uboSpecs.alignment = static_cast<unsigned int>(offsetAlignment);
@@ -48,9 +48,27 @@ RenderBuffersManager::RenderBuffersManager(unsigned long vboMaxSize, unsigned lo
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-const RenderBuffersManager::Parameters RenderBuffersManager::acquireMemory(BufferTypes::Enum type, unsigned long bytes, unsigned int alignment)
+namespace {
+
+const char *bufferTypeToString(RenderBuffersManager::BufferTypes::Enum type)
 {
-	FATAL_ASSERT(bytes <= specs_[type].maxSize);
+	switch (type)
+	{
+		case RenderBuffersManager::BufferTypes::Enum::ARRAY: return "Array";
+		case RenderBuffersManager::BufferTypes::Enum::ELEMENT_ARRAY: return "Element Array";
+		case RenderBuffersManager::BufferTypes::Enum::UNIFORM: return "Uniform";
+		case RenderBuffersManager::BufferTypes::Enum::COUNT: return "";
+	}
+
+	return "";
+}
+
+}
+
+RenderBuffersManager::Parameters RenderBuffersManager::acquireMemory(BufferTypes::Enum type, unsigned long bytes, unsigned int alignment)
+{
+	FATAL_ASSERT_MSG_X(bytes <= specs_[type].maxSize,"Trying to acquire %lu bytes when the maximum for buffer type \"%s\" is %lu",
+	                   bytes, bufferTypeToString(type), specs_[type].maxSize);
 
 	// Accepting a custom alignment only if it is a multiple of the specification one
 	if (alignment % specs_[type].alignment != 0)
@@ -137,6 +155,8 @@ void RenderBuffersManager::remap()
 			buffer.mapBase = buffer.hostBuffer.get();
 		else
 			buffer.mapBase = static_cast<GLubyte *>(buffer.object->mapBufferRange(0, buffer.size, specs_[buffer.type].mapFlags));
+
+		FATAL_ASSERT(buffer.mapBase != nullptr);
 	}
 }
 
@@ -158,6 +178,8 @@ void RenderBuffersManager::createBuffer(const BufferSpecifications &specs)
 	}
 	else
 		managedBuffer.mapBase = static_cast<GLubyte *>(managedBuffer.object->mapBufferRange(0, managedBuffer.size, specs.mapFlags));
+
+	FATAL_ASSERT(managedBuffer.mapBase != nullptr);
 
 	buffers_.pushBack(nctl::move(managedBuffer));
 }

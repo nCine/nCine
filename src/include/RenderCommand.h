@@ -20,7 +20,7 @@ class RenderCommand
 	{
 		enum Enum
 		{
-			GENERIC = 0,
+			UNSPECIFIED = 0,
 			PLOTTER,
 			SPRITE,
 			MESH_SPRITE,
@@ -38,6 +38,11 @@ class RenderCommand
 
 	RenderCommand(CommandTypes::Enum profilingType);
 	RenderCommand();
+
+	/// Returns the command type for profiling counter
+	inline CommandTypes::Enum profilingType() const { return profilingType_; }
+	/// Sets the command type for profiling counter
+	inline void setProfilingType(CommandTypes::Enum profilingType) { profilingType_ = profilingType; }
 
 	/// Returns the rendering layer
 	inline unsigned int layer() const { return layer_; }
@@ -69,6 +74,8 @@ class RenderCommand
 	/// Sets the command type (for profiling purposes)
 	inline void setType(CommandTypes::Enum type) { profilingType_ = type; }
 
+	void setScissor(GLint x, GLint y, GLsizei width, GLsizei height);
+
 	inline Matrix4x4f &transformation() { return modelView_; }
 	inline const Material &material() const { return material_; }
 	inline const Geometry &geometry() const { return geometry_; }
@@ -89,6 +96,16 @@ class RenderCommand
 	void commitIndices();
 
   private:
+	struct ScissorState
+	{
+		ScissorState() : x(0), y(0), width(0), height(0) { }
+
+		GLint x;
+		GLint y;
+		GLsizei width;
+		GLsizei height;
+	};
+
 	unsigned long int sortKey_;
 	unsigned int layer_;
 	int numInstances_;
@@ -99,6 +116,8 @@ class RenderCommand
 
 	/// Command type for profiling counter
 	CommandTypes::Enum profilingType_;
+
+	ScissorState scissor_;
 
 	Matrix4x4f modelView_;
 	Material material_;

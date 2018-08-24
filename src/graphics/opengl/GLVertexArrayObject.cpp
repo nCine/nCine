@@ -30,22 +30,26 @@ GLVertexArrayObject::~GLVertexArrayObject()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void GLVertexArrayObject::bind() const
+bool GLVertexArrayObject::bind() const
 {
 	if (boundVAO_ != glHandle_)
 	{
 		glBindVertexArray(glHandle_);
 		boundVAO_ = glHandle_;
+		return true;
 	}
+	return false;
 }
 
-void GLVertexArrayObject::unbind() const
+bool GLVertexArrayObject::unbind() const
 {
 	if (boundVAO_ != 0)
 	{
 		glBindVertexArray(0);
 		boundVAO_ = 0;
+		return true;
 	}
+	return false;
 }
 
 }

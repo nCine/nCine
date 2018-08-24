@@ -1,5 +1,6 @@
 #include "RenderCommand.h"
 #include "GLShaderProgram.h"
+#include "GLScissorTest.h"
 
 namespace ncine {
 
@@ -16,7 +17,7 @@ RenderCommand::RenderCommand(CommandTypes::Enum profilingType)
 }
 
 RenderCommand::RenderCommand()
-	: RenderCommand(CommandTypes::GENERIC)
+	: RenderCommand(CommandTypes::UNSPECIFIED)
 {
 
 }
@@ -43,7 +44,7 @@ void RenderCommand::calculateSortKey()
 
 void RenderCommand::issue()
 {
-	if (geometry_.numVertices_ == 0)
+	if (geometry_.numVertices_ == 0 && geometry_.numIndices_ == 0)
 		return;
 
 	material_.bind();
@@ -57,15 +58,28 @@ void RenderCommand::issue()
 	commitIndices();
 	indicesCommitted_ = false;
 
+	if (scissor_.width > 0 && scissor_.height > 0)
+		GLScissorTest::enable(scissor_.x, scissor_.y, scissor_.width, scissor_.height);
+	else
+		GLScissorTest::disable();
+
 	unsigned int offset = 0;
 #if defined(__ANDROID__) && !GL_ES_VERSION_3_2
-	/// Simulating missing `glDrawElementsBaseVertex()` on OpenGL ES 3.0
+	// Simulating missing `glDrawElementsBaseVertex()` on OpenGL ES 3.0
 	if (geometry_.numIndices_ > 0)
-		offset = geometry_.vboParams_.offset + (geometry_.firstVertex_ * geometry_.numElementsPerVertex_ * sizeof(GLfloat));
+		offset = geometry_.vboParams().offset + (geometry_.firstVertex_ * geometry_.numElementsPerVertex_ * sizeof(GLfloat));
 #endif
-	material_.defineVertexFormat(geometry_.vboParams_.object, geometry_.iboParams_.object, offset);
+	material_.defineVertexFormat(geometry_.vboParams().object, geometry_.iboParams().object, offset);
 	geometry_.bind();
 	geometry_.draw(numInstances_);
+}
+
+void RenderCommand::setScissor(GLint x, GLint y, GLsizei width, GLsizei height)
+{
+	scissor_.x = x;
+	scissor_.y = y;
+	scissor_.width = width;
+	scissor_.height = height;
 }
 
 void RenderCommand::commitTransformation()
@@ -94,7 +108,8 @@ void RenderCommand::commitTransformation()
 		else if (shaderProgramType != Material::ShaderProgramType::BATCHED_SPRITES &&
 		         shaderProgramType != Material::ShaderProgramType::BATCHED_MESH_SPRITES &&
 		         shaderProgramType != Material::ShaderProgramType::BATCHED_TEXTNODES_GRAY &&
-		         shaderProgramType != Material::ShaderProgramType::BATCHED_TEXTNODES_COLOR)
+		         shaderProgramType != Material::ShaderProgramType::BATCHED_TEXTNODES_COLOR &&
+		         shaderProgramType != Material::ShaderProgramType::CUSTOM)
 			material_.uniform("modelView")->setFloatVector(modelView_.data());
 	}
 }

@@ -4,6 +4,7 @@
 #include "RenderStatistics.h"
 #include "GLDebug.h"
 #include "Application.h"
+#include "GLScissorTest.h"
 
 namespace ncine {
 
@@ -42,7 +43,7 @@ const char *commandTypeString(const RenderCommand &command)
 {
 	switch (command.type())
 	{
-		case RenderCommand::CommandTypes::GENERIC: return "generic";
+		case RenderCommand::CommandTypes::UNSPECIFIED: return "unspecified";
 		case RenderCommand::CommandTypes::PLOTTER: return "plotter";
 		case RenderCommand::CommandTypes::SPRITE: return "sprite";
 		case RenderCommand::CommandTypes::MESH_SPRITE: return "mesh sprite";
@@ -154,6 +155,8 @@ void RenderQueue::draw()
 	// or glClear(GL_DEPTH_BUFFER_BIT) won't have any effect
 	glDepthMask(GL_TRUE);
 	glDisable(GL_BLEND);
+
+	GLScissorTest::disable();
 
 	opaqueQueue_.clear();
 	opaqueBatchedQueue_.clear();

@@ -48,9 +48,9 @@ class RenderBuffersManager
 	/// Returns the specifications for a buffer of the specified type
 	inline const BufferSpecifications &specs(BufferTypes::Enum type) const { return specs_[type]; }
 	/// Requests an amount of bytes from the specified buffer type
-	inline const Parameters acquireMemory(BufferTypes::Enum type, unsigned long bytes) { return acquireMemory(type, bytes, specs_[type].alignment); }
+	inline Parameters acquireMemory(BufferTypes::Enum type, unsigned long bytes) { return acquireMemory(type, bytes, specs_[type].alignment); }
 	/// Requests an amount of bytes from the specified buffer type with a custom alignment requirement
-	const Parameters acquireMemory(BufferTypes::Enum type, unsigned long bytes, unsigned int alignment);
+	Parameters acquireMemory(BufferTypes::Enum type, unsigned long bytes, unsigned int alignment);
 
   private:
 	BufferSpecifications specs_[BufferTypes::COUNT];

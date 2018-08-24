@@ -31,29 +31,31 @@ GLRenderbuffer::~GLRenderbuffer()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-
-void GLRenderbuffer::bind() const
+bool GLRenderbuffer::bind() const
 {
 	if (boundBuffer_ != glHandle_)
 	{
 		glBindRenderbuffer(GL_RENDERBUFFER, glHandle_);
 		boundBuffer_ = glHandle_;
+		return true;
 	}
+	return false;
 }
 
-void GLRenderbuffer::unbind() const
+bool GLRenderbuffer::unbind() const
 {
 	if (boundBuffer_ != 0)
 	{
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		boundBuffer_ = 0;
+		return true;
 	}
+	return false;
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
-
 
 void GLRenderbuffer::storage(GLenum internalFormat, GLsizei width, GLsizei height)
 {

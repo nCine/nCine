@@ -18,8 +18,8 @@ class GLBufferObject
 	inline GLenum target() const { return target_; }
 	inline GLsizeiptr size() const { return size_; }
 
-	void bind() const;
-	void unbind() const;
+	bool bind() const;
+	bool unbind() const;
 
 	void bufferData(GLsizeiptr size, const GLvoid *data, GLenum usage);
 	void bufferSubData(GLintptr offset, GLsizeiptr size, const GLvoid *data);
@@ -48,6 +48,7 @@ class GLBufferObject
 	GLuint glHandle_;
 	GLenum target_;
 	GLsizeiptr size_;
+	bool mapped_;
 
 	static const int MaxIndexBufferRange = 128;
 	/// Current bound index for buffer base. Negative if not bound.
@@ -61,6 +62,7 @@ class GLBufferObject
 	GLBufferObject &operator=(const GLBufferObject &) = delete;
 
 	inline static void setBoundHandle(GLenum target, GLuint glHandle) { boundBuffers_[target] = glHandle; }
+	static bool bindHandle(GLenum target, GLuint glHandle);
 	friend class RenderVaoPool;
 };
 

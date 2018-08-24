@@ -14,7 +14,7 @@ StackedBarVariable::StackedBarVariable(unsigned int numValues, float rejectDelay
 	valuesCmd_.geometry().setDrawParameters(GL_TRIANGLES, 2, variable_.numValues() * 6);
 
 	meanCmd_.material().setShaderProgramType(Material::ShaderProgramType::COLOR);
-	meanCmd_.geometry().shareVbo(valuesCmd_.geometry());
+	meanCmd_.geometry().shareVbo(&valuesCmd_.geometry());
 	meanCmd_.geometry().setDrawParameters(GL_LINES, 0, 2);
 }
 

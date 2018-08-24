@@ -46,6 +46,7 @@ bool GLVertexFormat::Attribute::operator==(const Attribute &other) const
 	          other.index_ == index_ &&
 	          other.size_ == size_ &&
 	          other.type_ == type_ &&
+	          other.normalized_ == normalized_ &&
 	          other.stride_ == stride_ &&
 	          other.pointer_ == pointer_ &&
 	          other.baseOffset_ == baseOffset_));
@@ -63,6 +64,7 @@ void GLVertexFormat::Attribute::init(unsigned int index, GLint size, GLenum type
 	index_ = index;
 	size_ = size;
 	type_ = type;
+	normalized_ = GL_FALSE;
 	stride_ = 0;
 	pointer_ = nullptr;
 	baseOffset_ = 0;
@@ -92,10 +94,13 @@ void GLVertexFormat::define()
 				case GL_UNSIGNED_SHORT:
 				case GL_INT:
 				case GL_UNSIGNED_INT:
-					glVertexAttribIPointer(attributes_[i].index_, attributes_[i].size_, attributes_[i].type_, attributes_[i].stride_, pointer);
+					if (attributes_[i].normalized_)
+						glVertexAttribPointer(attributes_[i].index_, attributes_[i].size_, attributes_[i].type_, GL_TRUE, attributes_[i].stride_, pointer);
+					else
+						glVertexAttribIPointer(attributes_[i].index_, attributes_[i].size_, attributes_[i].type_, attributes_[i].stride_, pointer);
 					break;
 				default:
-					glVertexAttribPointer(attributes_[i].index_, attributes_[i].size_, attributes_[i].type_, GL_FALSE, attributes_[i].stride_, pointer);
+					glVertexAttribPointer(attributes_[i].index_, attributes_[i].size_, attributes_[i].type_, attributes_[i].normalized_, attributes_[i].stride_, pointer);
 					break;
 			}
 		}

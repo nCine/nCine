@@ -19,9 +19,9 @@ IGfxDevice::IGfxDevice(int width, int height, const GLContextInfo &glContextInfo
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void IGfxDevice::clear()
+void IGfxDevice::setClearColor(float red, float green, float blue, float alpha)
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClearColor(red, green, blue, alpha);
 }
 
 ///////////////////////////////////////////////////////////
@@ -33,6 +33,11 @@ void IGfxDevice::setupGL()
 	glDisable(GL_DITHER);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
+}
+
+void IGfxDevice::clear()
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 }

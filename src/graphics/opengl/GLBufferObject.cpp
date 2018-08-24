@@ -15,7 +15,7 @@ GLBufferObject::BufferRange GLBufferObject::boundBufferRange_[MaxIndexBufferRang
 ///////////////////////////////////////////////////////////
 
 GLBufferObject::GLBufferObject(GLenum target)
-	: glHandle_(0), target_(target), size_(0)
+	: glHandle_(0), target_(target), size_(0), mapped_(false)
 {
 	for (unsigned int i = 0; i < MaxIndexBufferRange; i++)
 		boundIndexBase_[i] = 0;
@@ -35,22 +35,26 @@ GLBufferObject::~GLBufferObject()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void GLBufferObject::bind() const
+bool GLBufferObject::bind() const
 {
 	if (boundBuffers_[target_] != glHandle_)
 	{
 		glBindBuffer(target_, glHandle_);
 		boundBuffers_[target_] = glHandle_;
+		return true;
 	}
+	return false;
 }
 
-void GLBufferObject::unbind() const
+bool GLBufferObject::unbind() const
 {
 	if (boundBuffers_[target_] != 0)
 	{
 		glBindBuffer(target_, 0);
 		boundBuffers_[target_] = 0;
+		return true;
 	}
+	return false;
 }
 
 void GLBufferObject::bufferData(GLsizeiptr size, const GLvoid *data, GLenum usage)
@@ -113,20 +117,40 @@ void GLBufferObject::bindBufferRange(GLuint index, GLintptr offset, GLsizei ptrs
 
 void *GLBufferObject::mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access)
 {
+	FATAL_ASSERT(mapped_ == false);
+	mapped_ = true;
 	bind();
 	return glMapBufferRange(target_, offset, length, access);
 }
 
 void GLBufferObject::flushMappedBufferRange(GLintptr offset, GLsizeiptr length)
 {
+	FATAL_ASSERT(mapped_ == true);
 	bind();
 	glFlushMappedBufferRange(target_, offset, length);
 }
 
 GLboolean GLBufferObject::unmap()
 {
+	FATAL_ASSERT(mapped_ == true);
+	mapped_ = false;
 	bind();
 	return glUnmapBuffer(target_);
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+bool GLBufferObject::bindHandle(GLenum target, GLuint glHandle)
+{
+	if (boundBuffers_[target] != glHandle)
+	{
+		glBindBuffer(target, glHandle);
+		boundBuffers_[target] = glHandle;
+		return true;
+	}
+	return false;
 }
 
 }

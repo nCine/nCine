@@ -16,8 +16,8 @@ class GLVertexArrayObject
 
 	inline GLuint glHandle() const { return glHandle_; }
 
-	void bind() const;
-	void unbind() const;
+	bool bind() const;
+	bool unbind() const;
 
   private:
 	static GLuint boundVAO_;

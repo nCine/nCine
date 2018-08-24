@@ -31,7 +31,6 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	explicit DrawableNode(SceneNode *parent);
 	/// Constructor for a drawable node with no parent and positioned in the origin
 	DrawableNode();
-	~DrawableNode() override;
 
 	/// Updates the draw command and adds it to the queue
 	void draw(RenderQueue &renderQueue) override;

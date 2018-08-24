@@ -60,11 +60,18 @@ GLUniformBlock::GLUniformBlock(GLuint program, GLuint index, DiscoverUniforms di
 #ifndef __ANDROID__
 			glGetActiveUniformName(program, uniformIndices[i], MaxNameLength, &uniformNameLengths[i], blockUniform.name_);
 #else
-			glGetActiveUniform(program, uniformIndices[i], MaxNameLength, &uniformNameLengths[i], nullptr, nullptr, blockUniform.name_);
+			// Some drivers do not accept a `nullptr` for size and type
+			GLint unusedSize;
+			GLenum unusedType;
+			glGetActiveUniform(program, uniformIndices[i], MaxNameLength, &uniformNameLengths[i], &unusedSize, &unusedType, blockUniform.name_);
 #endif
 			blockUniforms_[blockUniform.name_] = blockUniform;
 		}
 	}
+
+	// Align to 16 bytes as required by the `std140` memory layout
+	const unsigned int alignAmount = (16 - size_ % 16) % 16;
+	size_ += alignAmount;
 }
 
 GLUniformBlock::GLUniformBlock(GLuint program, GLuint index)
