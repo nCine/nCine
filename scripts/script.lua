@@ -62,11 +62,11 @@ function ncine.on_init()
 	particlesys_ = nc.particle_system.new(rootnode, 128, texture3_, tex_rect3)
 	nc.particle_system.set_position(particlesys_, screen.x * 0.5, screen.y * 0.5)
 	nc.particle_system.add_color_affector(particlesys_, {
-		{0.0, {r = 1.0, g = 0.0, b = 0.0, a = 0.0}},
+		{0.0, {r = 1.0, g = 0.0, b = 0.0, a = 1.0}},
 		{0.5, {r = 0.0, g = 1.0, b = 0.0, a = 0.5}},
-		{1.0, {r = 0.0, g = 0.0, b = 1.0, a = 1.0}}
+		{1.0, {r = 0.0, g = 0.0, b = 1.0, a = 0.0}}
 	})
-	nc.particle_system.add_size_affector(particlesys_, 0.5, {{0.0, 0.75}, {0.55, 0.35}, {1.0, 0.25}})
+	nc.particle_system.add_size_affector(particlesys_, 0.5, {{0.0, 0.25}, {0.45, 0.35}, {1.0, 0.75}})
 
 	local settings = nc.application.get_rendering_settings()
 	print("Rendering settings")
@@ -87,7 +87,10 @@ function ncine.on_frame_start()
 	nc.sprite.set_position(meshsprite_, newpos.x, newpos.y)
 	nc.sprite.set_position(meshsprite_, newpos)
 
-	nc.particle_system.emit_particles(particlesys_, 16, 0.3, {x = 0, y = 200})
+	local initParticles = {amount = 16, life = {0.25, 0.35},
+	                       position = {{x = -5, y = -5}, {x = 5, y = 5}},
+	                       velocity = {{x = -10, y = 200}, {x = 10, y = 200}}}
+	nc.particle_system.emit_particles(particlesys_, initParticles)
 end
 
 function ncine.on_shutdown()

@@ -17,14 +17,23 @@ class LuaParticleSystem
   private:
 	static int newObject(lua_State *L);
 
-	static int addAccelerationAffector(lua_State *L);
 	static int addColorAffector(lua_State *L);
 	static int addSizeAffector(lua_State *L);
+	static int addRotationAffector(lua_State *L);
+	static int addPositionAffector(lua_State *L);
+	static int addVelocityAffector(lua_State *L);
 	static int clearAffectors(lua_State *L);
 
 	static int emitParticles(lua_State *L);
+	static int killParticles(lua_State *L);
 	static int inLocalSpace(lua_State *L);
 	static int setInLocalSpace(lua_State *L);
+
+	static int numParticles(lua_State *L);
+	static int numAliveParticles(lua_State *L);
+
+	static int setTexture(lua_State *L);
+	static int setTexRect(lua_State *L);
 };
 
 }

@@ -13,10 +13,12 @@ class Texture;
 class Particle : public Sprite
 {
   public:
-	/// Current particle life in seconds
+	/// Current particle remaining life in seconds
 	float life_;
-	/// Initial particle life
+	/// Initial particle remaining life
 	float startingLife; // for affectors
+	/// Initial particle rotation
+	float startingRotation; // for affectors
 	/// Current particle velocity vector
 	Vector2f velocity_;
 	/// A flag indicating if particle transformations are in local space or not

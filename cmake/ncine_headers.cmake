@@ -43,6 +43,7 @@ set(HEADERS
 	${NCINE_ROOT}/include/AppConfiguration.h
 	${NCINE_ROOT}/include/ParticleAffectors.h
 	${NCINE_ROOT}/include/ParticleSystem.h
+	${NCINE_ROOT}/include/ParticleInitializer.h
 	${NCINE_ROOT}/include/TextNode.h
 	${NCINE_ROOT}/include/RectAnimation.h
 	${NCINE_ROOT}/include/AnimatedSprite.h

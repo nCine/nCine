@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Texture.h"
 #include "ParticleSystem.h"
+#include "ParticleInitializer.h"
 #include "Timer.h"
 #include "LuaStateManager.h"
 #include "LuaIAppEventHandler.h"
@@ -71,8 +72,14 @@ void MyEventHandler::onFrameStart()
 {
 	if (emitTimer_->interval() > 0.085f)
 	{
+		nc::ParticleInitializer init;
+		init.setAmount(16);
+		init.setLife(0.85f, 1.0f);
+		init.setPositionAndRadius(nc::Vector2f::Zero, 5.0f);
+		init.setVelocity(-10.0f, 200.0f, 10.0f, 200.0f);
+
 		emitTimer_->start();
-		particleSystem_->emitParticles(16, 1.0f, nc::Vector2f(0.0f, 200.0f));
+		particleSystem_->emitParticles(init);
 	}
 }
 

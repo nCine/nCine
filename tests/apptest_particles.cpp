@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Texture.h"
 #include "ParticleSystem.h"
+#include "ParticleInitializer.h"
 #include "Timer.h"
 #include "IFile.h" // for dataPath()
 #include "apptest_datapath.h"
@@ -46,17 +47,16 @@ void MyEventHandler::onInit()
 	particleSystem_ = nctl::makeUnique<nc::ParticleSystem>(&rootNode, unsigned(NumParticles), texture_.get(), texture_->rect());
 	particleSystem_->setPosition(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.33f);
 
-	//particleSystem_->addAffector(nctl::makeUnique<nc::AccelerationAffector>(0.2f, 0.0f));
 	nctl::UniquePtr<nc::ColorAffector> colAffector = nctl::makeUnique<nc::ColorAffector>();
-	colAffector->addColorStep(0.0f, nc::Color(0.86f, 0.39f, 0.0f, 0.75f));
-	colAffector->addColorStep(0.65f, nc::Color(0.86f, 0.59f, 0.0f, 0.8f));
-	colAffector->addColorStep(0.7f, nc::Color(0.86f, 0.7f, 0.0f, 0.65f));
-	colAffector->addColorStep(1.0f, nc::Color(0.0f, 0.0f, 1.0f, 0.9f));
+	colAffector->addColorStep(0.0f, nc::Color(0.0f, 0.0f, 1.0f, 0.9f));
+	colAffector->addColorStep(0.3f, nc::Color(0.86f, 0.7f, 0.0f, 0.65f));
+	colAffector->addColorStep(0.35f, nc::Color(0.86f, 0.59f, 0.0f, 0.8f));
+	colAffector->addColorStep(1.0f, nc::Color(0.86f, 0.39f, 0.0f, 0.75f));
 	particleSystem_->addAffector(nctl::move(colAffector));
 	nctl::UniquePtr<nc::SizeAffector> sizeAffector = nctl::makeUnique<nc::SizeAffector>(0.45f);
-	sizeAffector->addSizeStep(0.0f, 0.01f);
-	sizeAffector->addSizeStep(0.7f, 1.7f);
-	sizeAffector->addSizeStep(1.0f, 0.4f);
+	sizeAffector->addSizeStep(0.0f, 0.4f);
+	sizeAffector->addSizeStep(0.3f, 1.7f);
+	sizeAffector->addSizeStep(1.0f, 0.01f);
 	particleSystem_->addAffector(nctl::move(sizeAffector));
 	emitVector_.set(0.0f, 350.0f);
 
@@ -71,8 +71,14 @@ void MyEventHandler::onFrameStart()
 {
 	if (emitTimer_->interval() > 0.085f)
 	{
+		nc::ParticleInitializer init;
+		init.setAmount(3);
+		init.setLife(0.85f, 1.0f);
+		init.setPositionAndRadius(nc::Vector2f::Zero, 10.0f);
+		init.setVelocityAndScale(emitVector_, 0.8f, 1.0f);
+
 		emitTimer_->start();
-		particleSystem_->emitParticles(3, 1.0f, emitVector_);
+		particleSystem_->emitParticles(init);
 	}
 
 	particleSystem_->move(joyVectorLeft_ * JoySpeed * nc::theApplication().interval());

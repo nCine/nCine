@@ -38,6 +38,12 @@ inline float randBetween(float x0, float x1)
 	return x0 + (x1 - x0) * (rand() / static_cast<float>(RAND_MAX));
 }
 
+/// Returns a random integer between x0 and x1 included
+inline int randBetween(int x0, int x1)
+{
+	return x0 + rand() % (x1 - x0 + 1);
+}
+
 ///////////////////////////////////////////////////////////
 // UNARY PREDICATES
 ///////////////////////////////////////////////////////////

@@ -17,9 +17,9 @@ function execute(objects, variation_index)
 		color1 = temp
 	end
 
-	color1.a = 0.0
+	color1.a = 1.0
 	color2.a = 0.5
-	color3.a = 1.0
+	color3.a = 0.0
 
 	nc.particle_system.clear_affectors(objects.particlesys)
 	nc.particle_system.add_color_affector(objects.particlesys, {
@@ -27,5 +27,5 @@ function execute(objects, variation_index)
 		{0.5, color2},
 		{1.0, color3}
 	})
-	nc.particle_system.add_size_affector(objects.particlesys, 0.75, {{0.0, 1.0}, {0.4, 0.5}, {1.0, 0.2}})
+	nc.particle_system.add_size_affector(objects.particlesys, 0.75, {{0.0, 0.2}, {0.6, 0.5}, {1.0, 1.0}})
 end

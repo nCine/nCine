@@ -6,23 +6,46 @@
 #include "LuaVector2Utils.h"
 #include "LuaColorUtils.h"
 #include "ParticleSystem.h"
+#include "ParticleInitializer.h"
 
 namespace ncine {
 
 namespace LuaNames {
+
 namespace ParticleSystem
 {
 	static const char *ParticleSystem = "particle_system";
 
-	static const char *addAccelerationAffector = "add_acceleration_affector";
 	static const char *addColorAffector = "add_color_affector";
 	static const char *addSizeAffector = "add_size_affector";
+	static const char *addRotationAffector = "add_rotation_affector";
+	static const char *addPositionAffector = "add_position_affector";
+	static const char *addVelocityAffector = "add_velocity_affector";
 	static const char *clearAffectors = "clear_affectors";
 
 	static const char *emitParticles = "emit_particles";
+	static const char *killParticles = "kill_particles";
 	static const char *inLocalSpace = "get_in_local_space";
 	static const char *setInLocalSpace = "set_in_local_space";
-}}
+
+	static const char *numParticles = "get_num_particles";
+	static const char *numAliveParticles = "get_num_alive_particles";
+
+	static const char *setTexture = "set_texture";
+	static const char *setTexRect = "set_texture_rect";
+}
+
+namespace ParticleInitializer
+{
+	static const char *amount = "amount";
+	static const char *life = "life";
+	static const char *position = "position";
+	static const char *velocity = "velocity";
+	static const char *rotation = "rotation";
+	static const char *emitterRotation = "emitter_rotation";
+}
+
+}
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -39,14 +62,23 @@ void LuaParticleSystem::expose(LuaStateManager *stateManager)
 		LuaUtils::addFunction(L, LuaNames::newObject, newObject);
 	}
 
-	LuaUtils::addFunction(L, LuaNames::ParticleSystem::addAccelerationAffector, addAccelerationAffector);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::addColorAffector, addColorAffector);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::addSizeAffector, addSizeAffector);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::addRotationAffector, addRotationAffector);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::addPositionAffector, addPositionAffector);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::addVelocityAffector, addVelocityAffector);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::clearAffectors, clearAffectors);
 
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::emitParticles, emitParticles);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::killParticles, killParticles);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::inLocalSpace, inLocalSpace);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setInLocalSpace, setInLocalSpace);
+
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::numParticles, numParticles);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::numAliveParticles, numAliveParticles);
+
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setTexture, setTexture);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setTexRect, setTexRect);
 
 	LuaSceneNode::exposeFunctions(L);
 
@@ -78,14 +110,14 @@ nctl::UniquePtr<ColorAffector> retrieveColorSteps(lua_State *L, int index)
 			luaL_argerror(L, -1, "Expecting a table");
 
 		lua_rawgeti(L, -1, 1);
-		const float time = LuaUtils::retrieve<float>(L, -1);
+		const float age = LuaUtils::retrieve<float>(L, -1);
 		lua_pop(L, 1);
 		lua_rawgeti(L, -1, 2);
 		const Color color = LuaColorUtils::retrieveTable(L, -1);
 		lua_pop(L, 1);
 
 		lua_pop(L, 1);
-		affector->addColorStep(time, color);
+		affector->addColorStep(age, color);
 	}
 
 	return nctl::move(affector);
@@ -104,17 +136,193 @@ nctl::UniquePtr<SizeAffector> retrieveSizeSteps(lua_State *L, int index, float b
 			luaL_argerror(L, -1, "Expecting a table");
 
 		lua_rawgeti(L, -1, 1);
-		const float time = LuaUtils::retrieve<float>(L, -1);
+		const float age = LuaUtils::retrieve<float>(L, -1);
 		lua_pop(L, 1);
 		lua_rawgeti(L, -1, 2);
 		const float scale = LuaUtils::retrieve<float>(L, -1);
 		lua_pop(L, 1);
 
 		lua_pop(L, 1);
-		affector->addSizeStep(time, scale);
+		affector->addSizeStep(age, scale);
 	}
 
 	return nctl::move(affector);
+}
+
+nctl::UniquePtr<RotationAffector> retrieveRotationSteps(lua_State *L, int index)
+{
+	const unsigned int numSteps = lua_rawlen(L, index);
+
+	nctl::UniquePtr<RotationAffector> affector = nctl::makeUnique<RotationAffector>();
+
+	for (unsigned int i = 0; i < numSteps; i++)
+	{
+		const int type = lua_rawgeti(L, index, i + 1);
+		if (type != LUA_TTABLE)
+			luaL_argerror(L, -1, "Expecting a table");
+
+		lua_rawgeti(L, -1, 1);
+		const float age = LuaUtils::retrieve<float>(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, -1, 2);
+		const float angle = LuaUtils::retrieve<float>(L, -1);
+		lua_pop(L, 1);
+
+		lua_pop(L, 1);
+		affector->addRotationStep(age, angle);
+	}
+
+	return nctl::move(affector);
+}
+
+nctl::UniquePtr<PositionAffector> retrievePositionSteps(lua_State *L, int index)
+{
+	const unsigned int numSteps = lua_rawlen(L, index);
+
+	nctl::UniquePtr<PositionAffector> affector = nctl::makeUnique<PositionAffector>();
+
+	for (unsigned int i = 0; i < numSteps; i++)
+	{
+		const int type = lua_rawgeti(L, index, i + 1);
+		if (type != LUA_TTABLE)
+			luaL_argerror(L, -1, "Expecting a table");
+
+		lua_rawgeti(L, -1, 1);
+		const float age = LuaUtils::retrieve<float>(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, -1, 2);
+		const Vector2f position = LuaVector2fUtils::retrieveTable(L, -1);
+		lua_pop(L, 1);
+
+		lua_pop(L, 1);
+		affector->addPositionStep(age, position);
+	}
+
+	return nctl::move(affector);
+}
+
+nctl::UniquePtr<VelocityAffector> retrieveVelocitySteps(lua_State *L, int index)
+{
+	const unsigned int numSteps = lua_rawlen(L, index);
+
+	nctl::UniquePtr<VelocityAffector> affector = nctl::makeUnique<VelocityAffector>();
+
+	for (unsigned int i = 0; i < numSteps; i++)
+	{
+		const int type = lua_rawgeti(L, index, i + 1);
+		if (type != LUA_TTABLE)
+			luaL_argerror(L, -1, "Expecting a table");
+
+		lua_rawgeti(L, -1, 1);
+		const float age = LuaUtils::retrieve<float>(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, -1, 2);
+		const Vector2f velocity = LuaVector2fUtils::retrieveTable(L, -1);
+		lua_pop(L, 1);
+
+		lua_pop(L, 1);
+		affector->addVelocityStep(age, velocity);
+	}
+
+	return nctl::move(affector);
+}
+
+void retrieveParticleInitializer(lua_State *L, int index, ParticleInitializer &init)
+{
+	if (lua_istable(L, index) == false)
+		luaL_argerror(L, -1, "Expecting a table");
+
+	lua_getfield(L, index, LuaNames::ParticleInitializer::amount);
+	if (lua_isinteger(L, -1))
+	{
+		const int amount = LuaUtils::retrieve<int32_t>(L, -1);
+		init.setAmount(amount);
+	}
+	else if (lua_istable(L, -1))
+	{
+		lua_rawgeti(L, -1, 1);
+		const int minAmount = LuaUtils::retrieve<int32_t>(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, -1, 2);
+		const int maxAmount = LuaUtils::retrieve<int32_t>(L, -1);
+		lua_pop(L, 1);
+		init.setAmount(minAmount, maxAmount);
+	}
+	lua_pop(L, 1);
+
+	lua_getfield(L, index, LuaNames::ParticleInitializer::life);
+	if (lua_isnumber(L, -1))
+	{
+		const float life = LuaUtils::retrieve<float>(L, -1);
+		init.setLife(life);
+	}
+	else if (lua_istable(L, -1))
+	{
+		lua_rawgeti(L, -1, 1);
+		const float minLife = LuaUtils::retrieve<float>(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, -1, 2);
+		const float maxLife = LuaUtils::retrieve<float>(L, -1);
+		lua_pop(L, 1);
+		init.setLife(minLife, maxLife);
+	}
+	lua_pop(L, 1);
+
+	lua_getfield(L, index, LuaNames::ParticleInitializer::position);
+	if (lua_istable(L ,-1) && lua_rawlen(L, -1) == 0)
+	{
+		const Vector2f position = LuaVector2fUtils::retrieveTable(L, -1);
+		init.setPosition(position);
+	}
+	else if (lua_istable(L, -1) && lua_rawlen(L, -1) == 2)
+	{
+		lua_rawgeti(L, -1, 1);
+		const Vector2f minPosition = LuaVector2fUtils::retrieveTable(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, -1, 2);
+		const Vector2f maxPosition = LuaVector2fUtils::retrieveTable(L, -1);
+		lua_pop(L, 1);
+		init.setPosition(minPosition, maxPosition);
+	}
+	lua_pop(L, 1);
+
+	lua_getfield(L, index, LuaNames::ParticleInitializer::velocity);
+	if (lua_istable(L ,-1) && lua_rawlen(L, -1) == 0)
+	{
+		const Vector2f velocity = LuaVector2fUtils::retrieveTable(L, -1);
+		init.setVelocity(velocity);
+	}
+	else if (lua_istable(L, -1) && lua_rawlen(L, -1) == 2)
+	{
+		lua_rawgeti(L, -1, 1);
+		const Vector2f minVelocity = LuaVector2fUtils::retrieveTable(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, -1, 2);
+		const Vector2f maxVelocity = LuaVector2fUtils::retrieveTable(L, -1);
+		lua_pop(L, 1);
+		init.setVelocity(minVelocity, maxVelocity);
+	}
+	lua_pop(L, 1);
+
+	lua_getfield(L, index, LuaNames::ParticleInitializer::rotation);
+	if (lua_isnumber(L, -1))
+	{
+		const float rotation = LuaUtils::retrieve<float>(L, -1);
+		init.setRotation(rotation);
+	}
+	else if (lua_istable(L, -1))
+	{
+		lua_rawgeti(L, -1, 1);
+		const float minRotation = LuaUtils::retrieve<float>(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, -1, 2);
+		const float maxRotation = LuaUtils::retrieve<float>(L, -1);
+		lua_pop(L, 1);
+		init.setRotation(minRotation, maxRotation);
+	}
+	lua_pop(L, 1);
+
+	LuaUtils::tryRetrieveField<bool>(L, -1, LuaNames::ParticleInitializer::emitterRotation, init.emitterRotation);
 }
 
 }
@@ -130,18 +338,6 @@ int LuaParticleSystem::newObject(lua_State *L)
 	LuaClassTracker<ParticleSystem>::wrapTrackedUserData(L, particleSys);
 
 	return 1;
-}
-
-int LuaParticleSystem::addAccelerationAffector(lua_State *L)
-{
-	int newIndex = 0;
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
-	const Vector2f acc = LuaVector2fUtils::retrieve(L, -1, newIndex);
-
-	nctl::UniquePtr<AccelerationAffector> affector = nctl::makeUnique<AccelerationAffector>(acc);
-	particleSys->addAffector(nctl::move(affector));
-
-	return 0;
 }
 
 int LuaParticleSystem::addColorAffector(lua_State *L)
@@ -165,6 +361,36 @@ int LuaParticleSystem::addSizeAffector(lua_State *L)
 	return 0;
 }
 
+int LuaParticleSystem::addRotationAffector(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	nctl::UniquePtr<RotationAffector> affector = retrieveRotationSteps(L, -1);
+
+	particleSys->addAffector(nctl::move(affector));
+
+	return 0;
+}
+
+int LuaParticleSystem::addPositionAffector(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	nctl::UniquePtr<PositionAffector> affector = retrievePositionSteps(L, -1);
+
+	particleSys->addAffector(nctl::move(affector));
+
+	return 0;
+}
+
+int LuaParticleSystem::addVelocityAffector(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	nctl::UniquePtr<VelocityAffector> affector = retrieveVelocitySteps(L, -1);
+
+	particleSys->addAffector(nctl::move(affector));
+
+	return 0;
+}
+
 int LuaParticleSystem::clearAffectors(lua_State *L)
 {
 	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -1);
@@ -174,12 +400,20 @@ int LuaParticleSystem::clearAffectors(lua_State *L)
 
 int LuaParticleSystem::emitParticles(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -4);
-	const unsigned int amount = LuaUtils::retrieve<uint32_t>(L, -3);
-	const float life =  LuaUtils::retrieve<float>(L, -2);
-	const Vector2f vel = LuaVector2fUtils::retrieveTable(L, -1);
+	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	ParticleInitializer init;
+	retrieveParticleInitializer(L, -1, init);
 
-	particleSys->emitParticles(amount, life, vel);
+	particleSys->emitParticles(init);
+
+	return 0;
+}
+
+int LuaParticleSystem::killParticles(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -1);
+
+	particleSys->killParticles();
 
 	return 0;
 }
@@ -200,6 +434,45 @@ int LuaParticleSystem::setInLocalSpace(lua_State *L)
 	const bool inLocalSpace = LuaUtils::retrieve<bool>(L, -1);
 
 	particleSys->setInLocalSpace(inLocalSpace);
+
+	return 0;
+}
+
+int LuaParticleSystem::numParticles(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -1);
+
+	LuaUtils::push(L, particleSys->numParticles());
+
+	return 1;
+}
+
+int LuaParticleSystem::numAliveParticles(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -1);
+
+	LuaUtils::push(L, particleSys->numAliveParticles());
+
+	return 1;
+}
+
+int LuaParticleSystem::setTexture(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+
+	particleSys->setTexture(texture);
+
+	return 0;
+}
+
+int LuaParticleSystem::setTexRect(lua_State *L)
+{
+	int rectIndex = 0;
+	const Recti texRect = LuaRectiUtils::retrieve(L, -1, &rectIndex);
+	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, rectIndex - 1);
+
+	particleSys->setTexRect(texRect);
 
 	return 0;
 }

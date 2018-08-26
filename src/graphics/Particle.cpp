@@ -8,9 +8,11 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Particle::Particle(SceneNode *parent, Texture *texture)
-	: Sprite(parent, texture), life_(0.0f), startingLife(0.0f), inLocalSpace_(false)
+	: Sprite(parent, texture), life_(0.0f), startingLife(0.0f),
+	  startingRotation(0.0f), inLocalSpace_(false)
 {
 	renderCommand_->setType(RenderCommand::CommandTypes::PARTICLE);
+	setEnabled(false);
 }
 
 ///////////////////////////////////////////////////////////
@@ -21,16 +23,21 @@ void Particle::init(float life, Vector2f pos, Vector2f vel, float rot, bool inLo
 {
 	life_ = life;
 	startingLife = life;
+	startingRotation = rot;
 	setPosition(pos);
 	velocity_ = vel;
 	setRotation(rot);
 	inLocalSpace_ = inLocalSpace;
+	setEnabled(true);
 }
 
 void Particle::update(float interval)
 {
-	if (interval > life_)
+	if (interval >= life_)
+	{
 		life_ = 0.0f; // dead particle
+		setEnabled(false);
+	}
 	else
 	{
 		life_ -= interval;

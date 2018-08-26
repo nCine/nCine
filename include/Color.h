@@ -27,6 +27,11 @@ class DLL_PUBLIC Color
 	{
 		setF(red, green, blue, alpha);
 	}
+	/// Four channels constructor (`float` vector)
+	Color(float channels[4])
+	{
+		setFVec(channels);
+	}
 
 	/// Getter for the red channel of the color
 	inline unsigned char r() const { return channels_[0]; }

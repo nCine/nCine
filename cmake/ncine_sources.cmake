@@ -40,6 +40,7 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/Particle.cpp
 	${NCINE_ROOT}/src/graphics/ParticleAffectors.cpp
 	${NCINE_ROOT}/src/graphics/ParticleSystem.cpp
+	${NCINE_ROOT}/src/graphics/ParticleInitializer.cpp
 	${NCINE_ROOT}/src/graphics/TextNode.cpp
 	${NCINE_ROOT}/src/graphics/RectAnimation.cpp
 	${NCINE_ROOT}/src/graphics/AnimatedSprite.cpp
