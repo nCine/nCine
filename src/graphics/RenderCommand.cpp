@@ -96,19 +96,23 @@ void RenderCommand::commitTransformation()
 	{
 		const Material::ShaderProgramType shaderProgramType = material_.shaderProgramType();
 
-		if (shaderProgramType == Material::ShaderProgramType::SPRITE)
+		if (shaderProgramType == Material::ShaderProgramType::SPRITE ||
+		    shaderProgramType == Material::ShaderProgramType::SPRITE_GRAY)
 			material_.uniformBlock("SpriteBlock")->uniform("modelView")->setFloatVector(modelView_.data());
-		else if (shaderProgramType == Material::ShaderProgramType::MESH_SPRITE)
+		else if (shaderProgramType == Material::ShaderProgramType::MESH_SPRITE ||
+		         shaderProgramType == Material::ShaderProgramType::MESH_SPRITE_GRAY)
 			material_.uniformBlock("MeshSpriteBlock")->uniform("modelView")->setFloatVector(modelView_.data());
 		else if (shaderProgramType == Material::ShaderProgramType::COLOR)
 			material_.uniformBlock("ColorBlock")->uniform("modelView")->setFloatVector(modelView_.data());
-		else if (shaderProgramType == Material::ShaderProgramType::TEXTNODE_GRAY ||
-		         shaderProgramType == Material::ShaderProgramType::TEXTNODE_COLOR)
+		else if (shaderProgramType == Material::ShaderProgramType::TEXTNODE ||
+		         shaderProgramType == Material::ShaderProgramType::TEXTNODE_GRAY)
 			material_.uniformBlock("TextnodeBlock")->uniform("modelView")->setFloatVector(modelView_.data());
 		else if (shaderProgramType != Material::ShaderProgramType::BATCHED_SPRITES &&
+		         shaderProgramType != Material::ShaderProgramType::BATCHED_SPRITES_GRAY &&
 		         shaderProgramType != Material::ShaderProgramType::BATCHED_MESH_SPRITES &&
+		         shaderProgramType != Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY &&
+		         shaderProgramType != Material::ShaderProgramType::BATCHED_TEXTNODES &&
 		         shaderProgramType != Material::ShaderProgramType::BATCHED_TEXTNODES_GRAY &&
-		         shaderProgramType != Material::ShaderProgramType::BATCHED_TEXTNODES_COLOR &&
 		         shaderProgramType != Material::ShaderProgramType::CUSTOM)
 			material_.uniform("modelView")->setFloatVector(modelView_.data());
 	}

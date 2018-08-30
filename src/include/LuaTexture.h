@@ -22,12 +22,14 @@ class LuaTexture
 	static int height(lua_State *L);
 	static int mipMapLevels(lua_State *L);
 	static int isCompressed(lua_State *L);
-	static int hasAlpha(lua_State *L);
+	static int numChannels(lua_State *L);
 	static int dataSize(lua_State *L);
 
-	static int filtering(lua_State *L);
+	static int minFiltering(lua_State *L);
+	static int magFiltering(lua_State *L);
 	static int wrap(lua_State *L);
-	static int setFiltering(lua_State *L);
+	static int setMinFiltering(lua_State *L);
+	static int setMagFiltering(lua_State *L);
 	static int setWrap(lua_State *L);
 };
 

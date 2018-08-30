@@ -36,55 +36,86 @@ void Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 	{
 		case ShaderProgramType::SPRITE:
 			setShaderProgram(RenderResources::spriteShaderProgram());
+			break;
+		case ShaderProgramType::SPRITE_GRAY:
+			setShaderProgram(RenderResources::spriteGrayShaderProgram());
+			break;
+		case ShaderProgramType::MESH_SPRITE:
+			setShaderProgram(RenderResources::meshSpriteShaderProgram());
+			break;
+		case ShaderProgramType::MESH_SPRITE_GRAY:
+			setShaderProgram(RenderResources::meshSpriteGrayShaderProgram());
+			break;
+		case ShaderProgramType::TEXTNODE:
+			setShaderProgram(RenderResources::textnodeShaderProgram());
+			break;
+		case ShaderProgramType::TEXTNODE_GRAY:
+			setShaderProgram(RenderResources::textnodeGrayShaderProgram());
+			break;
+		case ShaderProgramType::COLOR:
+			setShaderProgram(RenderResources::colorShaderProgram());
+			break;
+		case ShaderProgramType::BATCHED_SPRITES:
+			setShaderProgram(RenderResources::batchedSpritesShaderProgram());
+			break;
+		case ShaderProgramType::BATCHED_SPRITES_GRAY:
+			setShaderProgram(RenderResources::batchedSpritesGrayShaderProgram());
+			break;
+		case ShaderProgramType::BATCHED_MESH_SPRITES:
+			setShaderProgram(RenderResources::batchedMeshSpritesShaderProgram());
+			break;
+		case ShaderProgramType::BATCHED_MESH_SPRITES_GRAY:
+			setShaderProgram(RenderResources::batchedMeshSpritesGrayShaderProgram());
+			break;
+		case ShaderProgramType::BATCHED_TEXTNODES:
+			setShaderProgram(RenderResources::batchedTextnodesShaderProgram());
+			break;
+		case ShaderProgramType::BATCHED_TEXTNODES_GRAY:
+			setShaderProgram(RenderResources::batchedTextnodesGrayShaderProgram());
+			break;
+		case ShaderProgramType::CUSTOM:
+			break;
+	}
+
+
+	switch (shaderProgramType)
+	{
+		case ShaderProgramType::SPRITE:
+		case ShaderProgramType::SPRITE_GRAY:
 			setUniformsDataPointer(nullptr);
 			uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
 			break;
 		case ShaderProgramType::MESH_SPRITE:
-			setShaderProgram(RenderResources::meshspriteShaderProgram());
+		case ShaderProgramType::MESH_SPRITE_GRAY:
 			setUniformsDataPointer(nullptr);
 			uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
 			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
 			break;
+		case ShaderProgramType::TEXTNODE:
 		case ShaderProgramType::TEXTNODE_GRAY:
-			setShaderProgram(RenderResources::textnodeGrayShaderProgram());
-			setUniformsDataPointer(nullptr);
-			uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
-			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
-			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
-			break;
-		case ShaderProgramType::TEXTNODE_COLOR:
-			setShaderProgram(RenderResources::textnodeColorShaderProgram());
 			setUniformsDataPointer(nullptr);
 			uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
 			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
 			break;
 		case ShaderProgramType::COLOR:
-			setShaderProgram(RenderResources::colorShaderProgram());
 			setUniformsDataPointer(nullptr);
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2, position)));
 			break;
 		case ShaderProgramType::BATCHED_SPRITES:
-			setShaderProgram(RenderResources::batchedSpritesShaderProgram());
+		case ShaderProgramType::BATCHED_SPRITES_GRAY:
 			// Uniforms data pointer not set at this time
 			break;
 		case ShaderProgramType::BATCHED_MESH_SPRITES:
-			setShaderProgram(RenderResources::batchedMeshSpritesShaderProgram());
+		case ShaderProgramType::BATCHED_MESH_SPRITES_GRAY:
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, position)));
 			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, texcoords)));
 			attribute("aMeshIndex")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, drawindex)));
 			// Uniforms data pointer not set at this time
 			break;
+		case ShaderProgramType::BATCHED_TEXTNODES:
 		case ShaderProgramType::BATCHED_TEXTNODES_GRAY:
-			setShaderProgram(RenderResources::batchedTextnodesGrayShaderProgram());
-			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, position)));
-			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, texcoords)));
-			attribute("aMeshIndex")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, drawindex)));
-			// Uniforms data pointer not set at this time
-			break;
-		case ShaderProgramType::BATCHED_TEXTNODES_COLOR:
-			setShaderProgram(RenderResources::batchedTextnodesColorShaderProgram());
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, position)));
 			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, texcoords)));
 			attribute("aMeshIndex")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, drawindex)));

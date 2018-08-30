@@ -23,8 +23,8 @@ class TextureFormat
 	inline GLenum type() const { return type_; }
 	/// Returns true if the format holds compressed data
 	inline bool isCompressed() const { return isCompressed_; }
-	/// Returns true if the format provides an alpha channel
-	bool hasAlpha() const;
+	/// Returns the number of color channels
+	unsigned int numChannels() const;
 
 	/// Converts the external format to the corresponding BGR one
 	void bgrFormat();
@@ -57,14 +57,25 @@ class TextureFormat
 	void checkFormatSupport() const;
 };
 
-inline bool TextureFormat::hasAlpha() const
+inline unsigned int TextureFormat::numChannels() const
 {
-	return (format_ == GL_RGBA ||
+	switch (format_)
+	{
+		case GL_RED:
+			return 1;
+		case GL_RG:
+			return 2;
+		case GL_RGB:
+			return 3;
+		case GL_RGBA:
 #ifndef __ANDROID__
-	        format_ == GL_BGRA);
+		case GL_BGRA:
 #else
-	        format_ == GL_BGRA_EXT);
+		case GL_BGRA_EXT:
 #endif
+		default:
+			return 4;
+	}
 }
 
 }

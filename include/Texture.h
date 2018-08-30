@@ -50,17 +50,21 @@ class DLL_PUBLIC Texture : public Object
 
 	/// Returns true if the texture holds compressed data
 	inline bool isCompressed() const { return isCompressed_; }
-	/// Returns true if the texture provides an alpha channel
-	inline bool hasAlpha() const { return hasAlphaChannel_; }
+	/// Returns the number of color channels
+	inline unsigned int numChannels() const { return numChannels_; }
 	/// Returns the amount of video memory needed to load the texture
 	inline unsigned long dataSize() const { return dataSize_; }
 
-	/// Returns texture filtering for both magnification and minification
-	inline Filtering filtering() const { return filtering_; }
+	/// Returns the texture filtering for minification
+	inline Filtering minFiltering() const { return minFiltering_; }
+	/// Returns the texture filtering for magnification
+	inline Filtering magFiltering() const { return magFiltering_; }
 	/// Returns texture wrap for both `s` and `t` coordinates
 	inline Wrap wrap() const { return wrapMode_; }
-	/// Sets texture filtering for both magnification and minification
-	void setFiltering(Filtering filter);
+	/// Sets the texture filtering for minification
+	void setMinFiltering(Filtering filter);
+	/// Sets the texture filtering for magnification
+	void setMagFiltering(Filtering filter);
 	/// Sets texture wrap for both `s` and `t` coordinates
 	void setWrap(Wrap wrapMode);
 
@@ -75,10 +79,11 @@ class DLL_PUBLIC Texture : public Object
 	int height_;
 	int mipMapLevels_;
 	bool isCompressed_;
-	bool hasAlphaChannel_;
+	unsigned int numChannels_;
 	unsigned long dataSize_;
 
-	Filtering filtering_;
+	Filtering minFiltering_;
+	Filtering magFiltering_;
 	Wrap wrapMode_;
 
 	/// Deleted copy constructor

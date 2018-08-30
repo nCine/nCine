@@ -15,12 +15,14 @@ namespace Texture
 	static const char *height = "get_height";
 	static const char *mipMapLevels = "mip_levels";
 	static const char *isCompressed = "is_compressed";
-	static const char *hasAlpha = "has_alpha";
+	static const char *numChannels = "num_channels";
 	static const char *dataSize = "datasize";
 
-	static const char *filtering = "get_filtering";
+	static const char *minFiltering = "get_min_filtering";
+	static const char *magFiltering = "get_mag_filtering";
 	static const char *wrap = "get_wrap";
-	static const char *setFiltering = "set_filtering";
+	static const char *setMinFiltering = "set_min_filtering";
+	static const char *setMagFiltering = "set_mag_filtering";
 	static const char *setWrap = "set_wrap";
 
 	static const char *NEAREST = "NEAREST";
@@ -56,12 +58,14 @@ void LuaTexture::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::Texture::height, height);
 	LuaUtils::addFunction(L, LuaNames::Texture::mipMapLevels, mipMapLevels);
 	LuaUtils::addFunction(L, LuaNames::Texture::isCompressed, isCompressed);
-	LuaUtils::addFunction(L, LuaNames::Texture::hasAlpha, hasAlpha);
+	LuaUtils::addFunction(L, LuaNames::Texture::numChannels, numChannels);
 	LuaUtils::addFunction(L, LuaNames::Texture::dataSize, dataSize);
 
-	LuaUtils::addFunction(L, LuaNames::Texture::filtering, filtering);
+	LuaUtils::addFunction(L, LuaNames::Texture::minFiltering, minFiltering);
+	LuaUtils::addFunction(L, LuaNames::Texture::magFiltering, magFiltering);
 	LuaUtils::addFunction(L, LuaNames::Texture::wrap, wrap);
-	LuaUtils::addFunction(L, LuaNames::Texture::setFiltering, setFiltering);
+	LuaUtils::addFunction(L, LuaNames::Texture::setMinFiltering, setMinFiltering);
+	LuaUtils::addFunction(L, LuaNames::Texture::setMagFiltering, setMagFiltering);
 	LuaUtils::addFunction(L, LuaNames::Texture::setWrap, setWrap);
 
 	lua_setfield(L, -2, LuaNames::Texture::Texture);
@@ -149,12 +153,12 @@ int LuaTexture::isCompressed(lua_State *L)
 	return 1;
 }
 
-int LuaTexture::hasAlpha(lua_State *L)
+int LuaTexture::numChannels(lua_State *L)
 {
 	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
 
-	const bool hasAlpha = texture->hasAlpha();
-	LuaUtils::push(L, hasAlpha);
+	const unsigned int numChannels = texture->numChannels();
+	LuaUtils::push(L, numChannels);
 
 	return 1;
 }
@@ -169,11 +173,20 @@ int LuaTexture::dataSize(lua_State *L)
 	return 1;
 }
 
-int LuaTexture::filtering(lua_State *L)
+int LuaTexture::minFiltering(lua_State *L)
 {
 	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
 
-	LuaUtils::push(L, static_cast<int64_t>(texture->filtering()));
+	LuaUtils::push(L, static_cast<int64_t>(texture->minFiltering()));
+
+	return 1;
+}
+
+int LuaTexture::magFiltering(lua_State *L)
+{
+	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+
+	LuaUtils::push(L, static_cast<int64_t>(texture->magFiltering()));
 
 	return 1;
 }
@@ -187,12 +200,22 @@ int LuaTexture::wrap(lua_State *L)
 	return 1;
 }
 
-int LuaTexture::setFiltering(lua_State *L)
+int LuaTexture::setMinFiltering(lua_State *L)
 {
 	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -2);
 	const Texture::Filtering filter = static_cast<Texture::Filtering>(LuaUtils::retrieve<int64_t>(L, -1));
 
-	texture->setFiltering(filter);
+	texture->setMinFiltering(filter);
+
+	return 0;
+}
+
+int LuaTexture::setMagFiltering(lua_State *L)
+{
+	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -2);
+	const Texture::Filtering filter = static_cast<Texture::Filtering>(LuaUtils::retrieve<int64_t>(L, -1));
+
+	texture->setMagFiltering(filter);
 
 	return 0;
 }

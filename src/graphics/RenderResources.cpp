@@ -15,14 +15,18 @@ namespace ncine {
 nctl::UniquePtr<RenderBuffersManager> RenderResources::buffersManager_;
 nctl::UniquePtr<RenderVaoPool> RenderResources::vaoPool_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::spriteShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::meshspriteShaderProgram_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::spriteGrayShaderProgram_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::meshSpriteShaderProgram_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::meshSpriteGrayShaderProgram_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::textnodeShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::textnodeGrayShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::textnodeColorShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::colorShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedSpritesShaderProgram_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::batchedSpritesGrayShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedMeshSpritesShaderProgram_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::batchedMeshSpritesGrayShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedTextnodesGrayShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::batchedTextnodesColorShaderProgram_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::batchedTextnodesShaderProgram_;
 Matrix4x4f RenderResources::projectionMatrix_;
 
 ///////////////////////////////////////////////////////////
@@ -44,6 +48,18 @@ void RenderResources::createMinimal()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+namespace {
+
+struct ShaderLoad
+{
+	nctl::UniquePtr<GLShaderProgram> &shaderProgram;
+	const char *vertexShader;
+	const char *fragmentShader;
+	GLShaderProgram::Introspection introspection;
+};
+
+}
+
 void RenderResources::create()
 {
 	LOGI("Creating rendering resources...");
@@ -52,95 +68,54 @@ void RenderResources::create()
 	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.vboSize(), appCfg.iboSize());
 	vaoPool_ = nctl::makeUnique<RenderVaoPool>(appCfg.vaoPoolSize());
 
-	spriteShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
+	ShaderLoad shadersToLoad[] =
+	{
 #ifndef WITH_EMBEDDED_SHADERS
-	spriteShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/sprite_vs.glsl").data());
-	spriteShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/sprite_fs.glsl").data());
+		{ RenderResources::spriteShaderProgram_, "sprite_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::spriteGrayShaderProgram_, "sprite_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::meshSpriteShaderProgram_, "meshsprite_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::meshSpriteGrayShaderProgram_, "meshsprite_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::textnodeShaderProgram_, "textnode_vs.glsl", "textnode_fs.glsl", GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::textnodeGrayShaderProgram_, "textnode_vs.glsl", "textnode_gray_fs.glsl", GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::colorShaderProgram_, "color_vs.glsl", "color_fs.glsl", GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::batchedSpritesShaderProgram_, "batched_sprites_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
+		{ RenderResources::batchedSpritesGrayShaderProgram_, "batched_sprites_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
+		{ RenderResources::batchedMeshSpritesShaderProgram_, "batched_meshsprites_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
+		{ RenderResources::batchedMeshSpritesGrayShaderProgram_, "batched_meshsprites_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
+		{ RenderResources::batchedTextnodesShaderProgram_, "batched_textnodes_vs.glsl", "textnode_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
+		{ RenderResources::batchedTextnodesGrayShaderProgram_, "batched_textnodes_vs.glsl", "textnode_gray_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS }
 #else
-	spriteShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::sprite_vs);
-	spriteShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::sprite_fs);
+		{ RenderResources::spriteShaderProgram_, ShaderStrings::sprite_vs, ShaderStrings::sprite_fs, GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::spriteGrayShaderProgram_, ShaderStrings::sprite_vs, ShaderStrings::sprite_gray_fs, GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::meshSpriteShaderProgram_, ShaderStrings::meshsprite_vs, ShaderStrings::sprite_fs, GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::meshSpriteGrayShaderProgram_, ShaderStrings::meshsprite_vs, ShaderStrings::sprite_gray_fs, GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::textnodeShaderProgram_, ShaderStrings::textnode_vs, ShaderStrings::textnode_fs, GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::textnodeGrayShaderProgram_, ShaderStrings::textnode_vs, ShaderStrings::textnode_gray_fs, GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::colorShaderProgram_, ShaderStrings::color_vs, ShaderStrings::color_fs, GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::batchedSpritesShaderProgram_, ShaderStrings::batched_sprites_vs, ShaderStrings::sprite_fs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
+		{ RenderResources::batchedSpritesGrayShaderProgram_, ShaderStrings::batched_sprites_vs, ShaderStrings::sprite_gray_fs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
+		{ RenderResources::batchedMeshSpritesShaderProgram_, ShaderStrings::batched_meshsprites_vs, ShaderStrings::sprite_fs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
+		{ RenderResources::batchedMeshSpritesGrayShaderProgram_, ShaderStrings::batched_meshsprites_vs, ShaderStrings::sprite_gray_fs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
+		{ RenderResources::batchedTextnodesShaderProgram_, ShaderStrings::batched_textnodes_vs, ShaderStrings::textnode_fs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
+		{ RenderResources::batchedTextnodesGrayShaderProgram_, ShaderStrings::batched_textnodes_vs, ShaderStrings::textnode_gray_fs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS }
 #endif
-	spriteShaderProgram_->link();
+	};
 
-	meshspriteShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
-#ifndef WITH_EMBEDDED_SHADERS
-	meshspriteShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/meshsprite_vs.glsl").data());
-	meshspriteShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/sprite_fs.glsl").data());
-#else
-	meshspriteShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::meshsprite_vs);
-	meshspriteShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::sprite_fs);
-#endif
-	meshspriteShaderProgram_->link();
+	const unsigned int numShaderToLoad = (sizeof(shadersToLoad)/sizeof(*shadersToLoad));
+	for (unsigned int i = 0; i < numShaderToLoad; i++)
+	{
+		const ShaderLoad &shaderToLoad = shadersToLoad[i];
 
-	textnodeGrayShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
-#ifndef WITH_EMBEDDED_SHADERS
-	textnodeGrayShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/textnode_vs.glsl").data());
-	textnodeGrayShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/textnode_gray_fs.glsl").data());
-#else
-	textnodeGrayShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::textnode_vs);
-	textnodeGrayShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::textnode_gray_fs);
-#endif
-	textnodeGrayShaderProgram_->link();
-
-	textnodeColorShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
-#ifndef WITH_EMBEDDED_SHADERS
-	textnodeColorShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/textnode_vs.glsl").data());
-	textnodeColorShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/textnode_color_fs.glsl").data());
-#else
-	textnodeColorShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::textnode_vs);
-	textnodeColorShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::textnode_color_fs);
-#endif
-	textnodeColorShaderProgram_->link();
-
-	colorShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
-#ifndef WITH_EMBEDDED_SHADERS
-	colorShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/color_vs.glsl").data());
-	colorShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/color_fs.glsl").data());
-#else
-	colorShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::color_vs);
-	colorShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::color_fs);
-#endif
-	colorShaderProgram_->link();
-
-	batchedSpritesShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
-#ifndef WITH_EMBEDDED_SHADERS
-	batchedSpritesShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/batched_sprites_vs.glsl").data());
-	batchedSpritesShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/sprite_fs.glsl").data());
-#else
-	batchedSpritesShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::batched_sprites_vs);
-	batchedSpritesShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::sprite_fs);
-#endif
-	batchedSpritesShaderProgram_->link(GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS);
-
-	batchedMeshSpritesShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
-#ifndef WITH_EMBEDDED_SHADERS
-	batchedMeshSpritesShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/batched_meshsprites_vs.glsl").data());
-	batchedMeshSpritesShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/sprite_fs.glsl").data());
-#else
-	batchedMeshSpritesShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::batched_meshsprites_vs);
-	batchedMeshSpritesShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::sprite_fs);
-#endif
-	batchedMeshSpritesShaderProgram_->link(GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS);
-
-	batchedTextnodesGrayShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
-#ifndef WITH_EMBEDDED_SHADERS
-	batchedTextnodesGrayShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/batched_textnodes_vs.glsl").data());
-	batchedTextnodesGrayShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/textnode_gray_fs.glsl").data());
-#else
-	batchedTextnodesGrayShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::batched_textnodes_vs);
-	batchedTextnodesGrayShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::textnode_gray_fs);
-#endif
-	batchedTextnodesGrayShaderProgram_->link(GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS);
-
-	batchedTextnodesColorShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
-#ifndef WITH_EMBEDDED_SHADERS
-	batchedTextnodesColorShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/batched_textnodes_vs.glsl").data());
-	batchedTextnodesColorShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/textnode_color_fs.glsl").data());
-#else
-	batchedTextnodesColorShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::batched_textnodes_vs);
-	batchedTextnodesColorShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::textnode_color_fs);
-#endif
-	batchedTextnodesColorShaderProgram_->link(GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS);
+		shaderToLoad.shaderProgram = nctl::makeUnique<GLShaderProgram>();
+	#ifndef WITH_EMBEDDED_SHADERS
+		shaderToLoad.shaderProgram->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/" + shaderToLoad.vertexShader).data());
+		shaderToLoad.shaderProgram->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/" + shaderToLoad.fragmentShader).data());
+	#else
+		shaderToLoad.shaderProgram->attachShaderFromString(GL_VERTEX_SHADER, shaderToLoad.vertexShader);
+		shaderToLoad.shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, shaderToLoad.fragmentShader);
+	#endif
+		shaderToLoad.shaderProgram->link(shaderToLoad.introspection);
+	}
 
 	// Calculating a common projection matrix for all shader programs
 	const float width = theApplication().width();
@@ -156,14 +131,18 @@ void RenderResources::create()
 
 void RenderResources::dispose()
 {
-	batchedTextnodesColorShaderProgram_.reset(nullptr);
 	batchedTextnodesGrayShaderProgram_.reset(nullptr);
+	batchedTextnodesShaderProgram_.reset(nullptr);
+	batchedMeshSpritesGrayShaderProgram_.reset(nullptr);
 	batchedMeshSpritesShaderProgram_.reset(nullptr);
+	batchedSpritesGrayShaderProgram_.reset(nullptr);
 	batchedSpritesShaderProgram_.reset(nullptr);
 	colorShaderProgram_.reset(nullptr);
-	textnodeColorShaderProgram_.reset(nullptr);
 	textnodeGrayShaderProgram_.reset(nullptr);
-	meshspriteShaderProgram_.reset(nullptr);
+	textnodeShaderProgram_.reset(nullptr);
+	meshSpriteGrayShaderProgram_.reset(nullptr);
+	meshSpriteShaderProgram_.reset(nullptr);
+	spriteGrayShaderProgram_.reset(nullptr);
 	spriteShaderProgram_.reset(nullptr);
 	vaoPool_.reset(nullptr);
 	buffersManager_.reset(nullptr);

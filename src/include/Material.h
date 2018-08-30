@@ -22,22 +22,30 @@ class Material
 	{
 		/// Shader program for Sprite classes
 		SPRITE = 0,
+		/// Shader program for Sprite classes with grayscale font texture
+		SPRITE_GRAY,
 		/// Shader program for MeshSprite classes
 		MESH_SPRITE,
+		/// Shader program for MeshSprite classes with grayscale font texture
+		MESH_SPRITE_GRAY,
+		/// Shader program for TextNode classes
+		TEXTNODE,
 		/// Shader program for TextNode classes with grayscale font texture
 		TEXTNODE_GRAY,
-		/// Shader program for TextNode classes with color font texture
-		TEXTNODE_COLOR,
 		/// Shader program for ProfilePlotter
 		COLOR,
 		/// Shader program for a batch of Sprite classes
 		BATCHED_SPRITES,
+		/// Shader program for a batch of Sprite classes with grayscale font texture
+		BATCHED_SPRITES_GRAY,
 		/// Shader program for a batch of MeshSprite classes
 		BATCHED_MESH_SPRITES,
+		/// Shader program for a batch of MeshSprite classes with grayscale font texture
+		BATCHED_MESH_SPRITES_GRAY,
+		/// Shader program for a batch of TextNode classes with color font texture
+		BATCHED_TEXTNODES,
 		/// Shader program for a batch of TextNode classes with grayscale font texture
 		BATCHED_TEXTNODES_GRAY,
-		/// Shader program for a batch of TextNode classes with color font texture
-		BATCHED_TEXTNODES_COLOR,
 		/// A custom shader program
 		CUSTOM
 	};
