@@ -64,6 +64,9 @@ class DLL_PUBLIC IFile
 	/// Reads a certain amount of bytes from the file to a buffer
 	/*! \return Number of bytes read */
 	virtual unsigned long int read(void *buffer, unsigned long int bytes) const = 0;
+	/// Writes a certain amount of bytes from a buffer to the file
+	/*! \return Number of bytes written */
+	virtual unsigned long int write(void *buffer, unsigned long int bytes) = 0;
 
 	/// Sets the close on destruction flag
 	/*! If the flag is true the file is closed upon object destruction. */

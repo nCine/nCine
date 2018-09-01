@@ -105,7 +105,6 @@ long int StandardFile::tell() const
 	return tellValue;
 }
 
-
 unsigned long int StandardFile::read(void *buffer, unsigned long int bytes) const
 {
 	ASSERT(buffer);
@@ -124,6 +123,23 @@ unsigned long int StandardFile::read(void *buffer, unsigned long int bytes) cons
 	return bytesRead;
 }
 
+unsigned long int StandardFile::write(void *buffer, unsigned long int bytes)
+{
+	ASSERT(buffer);
+
+	unsigned long int bytesWritten = 0;
+
+	if (fileDescriptor_ >= 0)
+	{
+#if !(defined(_WIN32) && !defined(__MINGW32__))
+		bytesWritten = ::write(fileDescriptor_, buffer, bytes);
+#endif
+	}
+	else if (filePointer_)
+		bytesWritten = static_cast<unsigned long int>(fwrite(buffer, 1, bytes, filePointer_));
+
+	return bytesWritten;
+}
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
