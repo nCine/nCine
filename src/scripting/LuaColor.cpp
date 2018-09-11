@@ -5,7 +5,7 @@
 #include "LuaColorUtils.h"
 #include "LuaUtils.h"
 #include "LuaDebug.h"
-#include "Color.h"
+#include "Colorf.h"
 
 namespace ncine {
 
@@ -42,7 +42,7 @@ int LuaColor::create(lua_State *L)
 	const float g = LuaUtils::retrieve<float>(L, -3);
 	const float b = LuaUtils::retrieve<float>(L, -2);
 	const float a = LuaUtils::retrieve<float>(L, -1);
-	const Color color(r, g, b, a);
+	const Colorf color(r, g, b, a);
 
 	LuaColorUtils::push(L, color);
 
@@ -52,8 +52,8 @@ int LuaColor::create(lua_State *L)
 int LuaColor::multiply(lua_State *L)
 {
 	float scalar = 1.0f;
-	Color first(1.0f, 1.0f, 1.0f, 1.0f);
-	Color second(1.0f, 1.0f, 1.0f, 1.0f);
+	Colorf first(1.0f, 1.0f, 1.0f, 1.0f);
+	Colorf second(1.0f, 1.0f, 1.0f, 1.0f);
 	bool scalarOp = true;
 
 	if (lua_isnumber(L, -2) && lua_isnumber(L, -1))

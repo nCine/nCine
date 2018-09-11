@@ -13,6 +13,8 @@ set(SOURCES
 	${NCINE_ROOT}/src/StandardFile.cpp
 	${NCINE_ROOT}/src/input/IInputManager.cpp
 	${NCINE_ROOT}/src/input/JoyMapping.cpp
+	${NCINE_ROOT}/src/graphics/Color.cpp
+	${NCINE_ROOT}/src/graphics/Colorf.cpp
 	${NCINE_ROOT}/src/graphics/IGfxDevice.cpp
 	${NCINE_ROOT}/src/graphics/GfxCapabilities.cpp
 	${NCINE_ROOT}/src/graphics/RenderResources.cpp

@@ -152,13 +152,13 @@ void StackedBarPlotter::updateAllVertices(float x, float y, float w, float h)
 void StackedBarVariable::updateRenderCommand()
 {
 	valuesCmd_.transformation() = worldMatrix_;
-	valuesColorBlock_->uniform("color")->setFloatValue(graphColor_.fR(), graphColor_.fG(), graphColor_.fB(), graphColor_.fA());
+	valuesColorBlock_->uniform("color")->setFloatVector(Colorf(graphColor_).data());
 }
 
 void StackedBarVariable::updateMeanRenderCommand()
 {
 	meanCmd_.transformation() = worldMatrix_;
-	meanColorBlock_->uniform("color")->setFloatValue(meanColor_.fR(), meanColor_.fG(), meanColor_.fB(), meanColor_.fA());
+	meanColorBlock_->uniform("color")->setFloatVector(Colorf(meanColor_).data());
 }
 
 }

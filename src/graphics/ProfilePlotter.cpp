@@ -9,7 +9,7 @@ namespace ncine {
 
 ProfilePlotter::ProfilePlotter(SceneNode *parent, Rectf rect)
 	: DrawableNode(parent, rect.x, rect.y), variables_(2), shouldPlotRefValue_(false),
-	  refValueColor_(1.0f, 1.0f, 1.0f), refValue_(0.0f),
+	  refValueColor_(255, 255,255), refValue_(0.0f),
 	  backgroundColorBlock_(nullptr), refValueColorBlock_(nullptr)
 {
 	width_ = rect.w;
@@ -88,7 +88,7 @@ void ProfilePlotter::updateRenderCommand()
 
 	renderCommand_->transformation() = worldMatrix_;
 
-	backgroundColorBlock_->uniform("color")->setFloatValue(backgroundColor_.fR(), backgroundColor_.fG(), backgroundColor_.fB(), backgroundColor_.fA());
+	backgroundColorBlock_->uniform("color")->setFloatVector(Colorf(backgroundColor_).data());
 	const bool isTransparent = backgroundColor_.a() < 255;
 	renderCommand_->material().setTransparent(isTransparent);
 }
@@ -96,7 +96,7 @@ void ProfilePlotter::updateRenderCommand()
 void ProfilePlotter::updateRefValueRenderCommand()
 {
 	refValueCmd_.transformation() = worldMatrix_;
-	refValueColorBlock_->uniform("color")->setFloatValue(refValueColor_.fR(), refValueColor_.fG(), refValueColor_.fB(), refValueColor_.fA());
+	refValueColorBlock_->uniform("color")->setFloatVector(Colorf(refValueColor_).data());
 }
 
 }

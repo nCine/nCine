@@ -7,7 +7,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 PlottingVariable::PlottingVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f &worldMatrix)
-	: shouldPlotMean_(true), graphColor_(1.0f, 1.0f, 1.0f), meanColor_(1.0f, 0.0f, 0.0f),
+	: shouldPlotMean_(true), graphColor_(255, 255, 255), meanColor_(255, 255, 255),
 	  variable_(numValues, rejectDelay), worldMatrix_(worldMatrix),
 	  valuesColorBlock_(nullptr), meanColorBlock_(nullptr)
 {

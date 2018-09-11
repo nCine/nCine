@@ -1,4 +1,5 @@
 #include "common_constants.h"
+#include "nctl/algorithms.h"
 #include "apptest_camera.h"
 #include "Application.h"
 #include "Texture.h"

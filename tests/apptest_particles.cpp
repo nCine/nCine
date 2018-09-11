@@ -48,10 +48,10 @@ void MyEventHandler::onInit()
 	particleSystem_->setPosition(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.33f);
 
 	nctl::UniquePtr<nc::ColorAffector> colAffector = nctl::makeUnique<nc::ColorAffector>();
-	colAffector->addColorStep(0.0f, nc::Color(0.0f, 0.0f, 1.0f, 0.9f));
-	colAffector->addColorStep(0.3f, nc::Color(0.86f, 0.7f, 0.0f, 0.65f));
-	colAffector->addColorStep(0.35f, nc::Color(0.86f, 0.59f, 0.0f, 0.8f));
-	colAffector->addColorStep(1.0f, nc::Color(0.86f, 0.39f, 0.0f, 0.75f));
+	colAffector->addColorStep(0.0f, nc::Colorf(0.0f, 0.0f, 1.0f, 0.9f));
+	colAffector->addColorStep(0.3f, nc::Colorf(0.86f, 0.7f, 0.0f, 0.65f));
+	colAffector->addColorStep(0.35f, nc::Colorf(0.86f, 0.59f, 0.0f, 0.8f));
+	colAffector->addColorStep(1.0f, nc::Colorf(0.86f, 0.39f, 0.0f, 0.75f));
 	particleSystem_->addAffector(nctl::move(colAffector));
 	nctl::UniquePtr<nc::SizeAffector> sizeAffector = nctl::makeUnique<nc::SizeAffector>(0.45f);
 	sizeAffector->addSizeStep(0.0f, 0.4f);

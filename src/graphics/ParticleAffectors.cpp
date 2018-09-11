@@ -1,5 +1,4 @@
 #include "ParticleAffectors.h"
-#include "Color.h"
 #include "Particle.h"
 
 namespace ncine {
@@ -18,7 +17,7 @@ void ParticleAffector::affect(Particle *particle)
 // COLOR AFFECTOR
 ///////////////////////////////////////////////////////////
 
-void ColorAffector::addColorStep(float age, Color color)
+void ColorAffector::addColorStep(float age, const Colorf &color)
 {
 	if (colorSteps_.isEmpty() || age > colorSteps_[colorSteps_.size() - 1].age)
 		colorSteps_.pushBack(ColorStep(age, color));
@@ -57,12 +56,13 @@ void ColorAffector::affect(Particle *particle, float normalizedAge)
 	const ColorStep &nextStep = colorSteps_[index];
 
 	const float factor = (normalizedAge - prevStep.age) / (nextStep.age - prevStep.age);
-	const unsigned char red = static_cast<unsigned char>(prevStep.color.r() + (nextStep.color.r() - prevStep.color.r()) * factor);
-	const unsigned char green = static_cast<unsigned char>(prevStep.color.g() + (nextStep.color.g() - prevStep.color.g()) * factor);
-	const unsigned char blue = static_cast<unsigned char>(prevStep.color.b() + (nextStep.color.b() - prevStep.color.b()) * factor);
-	const unsigned char alpha = static_cast<unsigned char>(prevStep.color.a() + (nextStep.color.a() - prevStep.color.a()) * factor);
+	const float red = prevStep.color.r() + (nextStep.color.r() - prevStep.color.r()) * factor;
+	const float green = prevStep.color.g() + (nextStep.color.g() - prevStep.color.g()) * factor;
+	const float blue = prevStep.color.b() + (nextStep.color.b() - prevStep.color.b()) * factor;
+	const float alpha = prevStep.color.a() + (nextStep.color.a() - prevStep.color.a()) * factor;
+	const Colorf color(red, green, blue, alpha);
 
-	particle->setColor(red, green, blue, alpha);
+	particle->setColor(color);
 }
 
 ///////////////////////////////////////////////////////////

@@ -6,6 +6,7 @@
 #include "Vector2.h"
 #include "Matrix4x4.h"
 #include "Color.h"
+#include "Colorf.h"
 
 namespace ncine {
 
@@ -104,14 +105,16 @@ class DLL_PUBLIC SceneNode : public Object
 	inline Color absColor() const { return absColor_; }
 	/// Sets the node color through a `Color` object
 	inline void setColor(Color color) { color_ = color; }
+	/// Sets the node color through a `Colorf` object
+	inline void setColor(Colorf color) { color_ = color; }
 	/// Sets the node color through unsigned char components
 	inline void setColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha) { color_.set(red, green, blue, alpha); }
 	/// Sets the node color through float components
-	inline void setColorF(float red, float green, float blue, float alpha) { color_.setF(red, green, blue, alpha); }
+	inline void setColorF(float red, float green, float blue, float alpha) { color_ = Colorf(red, green, blue, alpha); }
 	/// Sets the node alpha through an unsigned char component
 	inline void setAlpha(unsigned char alpha) { color_.setAlpha(alpha); }
 	/// Sets the node alpha through a float component
-	inline void setAlphaF(float alpha) { color_.setAlphaF(alpha); }
+	inline void setAlphaF(float alpha) { color_.setAlpha(static_cast<unsigned char>(alpha * 255)); }
 
 	/// Gets the node world matrix
 	inline const Matrix4x4f &worldMatrix() const { return worldMatrix_; }

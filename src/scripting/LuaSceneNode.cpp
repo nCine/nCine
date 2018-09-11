@@ -179,7 +179,7 @@ int LuaSceneNode::setRotation(lua_State *L)
 int LuaSceneNode::color(lua_State *L)
 {
 	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
-	const Color nodeColor = node->color();
+	const Colorf nodeColor(node->color());
 
 	LuaColorUtils::push(L, nodeColor);
 
@@ -189,7 +189,7 @@ int LuaSceneNode::color(lua_State *L)
 int LuaSceneNode::setColor(lua_State *L)
 {
 	int colorIndex = 0;
-	const Color nodeColor = LuaColorUtils::retrieve(L, -1, colorIndex);
+	const Colorf nodeColor = LuaColorUtils::retrieve(L, -1, colorIndex);
 	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, colorIndex - 1);
 
 	node->setColor(nodeColor);

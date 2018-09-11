@@ -106,13 +106,13 @@ void LinePlotter::updateAllVertices(float x, float y, float w, float h)
 void LineVariable::updateRenderCommand()
 {
 	valuesCmd_.transformation() = worldMatrix_;
-	valuesColorBlock_->uniform("color")->setFloatValue(graphColor_.fR(), graphColor_.fG(), graphColor_.fB(), graphColor_.fA());
+	valuesColorBlock_->uniform("color")->setFloatVector(Colorf(graphColor_).data());
 }
 
 void LineVariable::updateMeanRenderCommand()
 {
 	meanCmd_.transformation() = worldMatrix_;
-	meanColorBlock_->uniform("color")->setFloatValue(graphColor_.fR(), graphColor_.fG(), graphColor_.fB(), graphColor_.fA());
+	meanColorBlock_->uniform("color")->setFloatVector(Colorf(graphColor_).data());
 }
 
 }

@@ -2,6 +2,7 @@
 #include "common_headers.h"
 #include "common_macros.h"
 #include "IGfxDevice.h"
+#include "Colorf.h"
 
 namespace ncine {
 
@@ -22,6 +23,11 @@ IGfxDevice::IGfxDevice(int width, int height, const GLContextInfo &glContextInfo
 void IGfxDevice::setClearColor(float red, float green, float blue, float alpha)
 {
 	glClearColor(red, green, blue, alpha);
+}
+
+void IGfxDevice::setClearColor(const Colorf &color)
+{
+	glClearColor(color.r(), color.g(), color.b(), color.a());
 }
 
 ///////////////////////////////////////////////////////////

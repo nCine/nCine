@@ -4,6 +4,7 @@ set(HEADERS
 	${NCINE_ROOT}/include/common_macros.h
 	${NCINE_ROOT}/include/Rect.h
 	${NCINE_ROOT}/include/Color.h
+	${NCINE_ROOT}/include/Colorf.h
 	${NCINE_ROOT}/include/Object.h
 	${NCINE_ROOT}/include/DrawableNode.h
 	${NCINE_ROOT}/include/IAppEventHandler.h

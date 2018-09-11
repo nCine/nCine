@@ -58,7 +58,7 @@ void BaseSprite::updateRenderCommand()
 	renderCommand_->transformation() = worldMatrix_;
 	renderCommand_->material().setTexture(*texture_);
 
-	spriteBlock_->uniform("color")->setFloatValue(absColor().fR(), absColor().fG(), absColor().fB(), absColor().fA());
+	spriteBlock_->uniform("color")->setFloatVector(Colorf(absColor()).data());
 	const bool isTransparent = absColor().a() < 255 || texture()->numChannels() == 1 ||
 		(texture()->numChannels() == 4 && opaqueTexture_ == false);
 	renderCommand_->material().setTransparent(isTransparent);

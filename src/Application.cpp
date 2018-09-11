@@ -126,17 +126,18 @@ void Application::initCommon()
 
 		if (appCfg_.withProfilerGraphs())
 		{
-			profilePlotter_ = nctl::makeUnique<StackedBarPlotter>(rootNode_.get(), Rectf(width() * 0.1f, height() * 0.1f, width() * 0.8f, height() * 0.15f));
-			profilePlotter_->setBackgroundColor(Color(0.35f, 0.35f, 0.45f, 0.5f));
+			const Rectf rect(width() * 0.1f, height() * 0.1f, width() * 0.8f, height() * 0.15f);
+			profilePlotter_ = nctl::makeUnique<StackedBarPlotter>(rootNode_.get(), rect);
+			profilePlotter_->setBackgroundColor(Color(89, 89, 115, 128));
 			profilePlotter_->addVariable(50, 0.2f);
-			profilePlotter_->variable(0).setGraphColor(Color(0.8f, 0.0f, 0.0f));
-			profilePlotter_->variable(0).setMeanColor(Color(1.0f, 0.0f, 0.0f));
+			profilePlotter_->variable(0).setGraphColor(Color(204, 0, 0));
+			profilePlotter_->variable(0).setMeanColor(Color(255, 0, 0));
 			profilePlotter_->addVariable(50, 0.2f);
-			profilePlotter_->variable(1).setGraphColor(Color(0.0f, 0.8f, 0.0f));
-			profilePlotter_->variable(1).setMeanColor(Color(0.0f, 1.0f, 0.0f));
+			profilePlotter_->variable(1).setGraphColor(Color(0, 204, 0));
+			profilePlotter_->variable(1).setMeanColor(Color(0, 255, 0));
 			profilePlotter_->addVariable(50, 0.2f);
-			profilePlotter_->variable(2).setGraphColor(Color(0.0f, 0.0f, 0.8f));
-			profilePlotter_->variable(2).setMeanColor(Color(0.0f, 0.0f, 1.0f));
+			profilePlotter_->variable(2).setGraphColor(Color(0, 0, 204));
+			profilePlotter_->variable(2).setMeanColor(Color(0, 0, 255));
 
 			profilePlotter_->variable(0).setPlotMean(false);
 			profilePlotter_->variable(1).setPlotMean(false);

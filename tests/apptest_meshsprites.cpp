@@ -1,3 +1,4 @@
+#include "nctl/algorithms.h"
 #include "apptest_meshsprites.h"
 #include "Application.h"
 #include "Texture.h"

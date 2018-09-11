@@ -8,6 +8,8 @@
 
 namespace ncine {
 
+class Colorf;
+
 /// It represents the interface to the graphics device where everything is rendered
 class DLL_PUBLIC IGfxDevice
 {
@@ -56,6 +58,8 @@ class DLL_PUBLIC IGfxDevice
 
 	/// Sets the OpenGL clear color through four float
 	void setClearColor(float red, float green, float blue, float alpha);
+	/// Sets the OpenGL clear color through a `Colorf` object
+	void setClearColor(const Colorf &color);
 
 	/// Returns the OpenGL context creation attributes
 	inline const GLContextInfo &glContextInfo() const { return glContextInfo_; }

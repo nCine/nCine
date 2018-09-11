@@ -113,7 +113,7 @@ nctl::UniquePtr<ColorAffector> retrieveColorSteps(lua_State *L, int index)
 		const float age = LuaUtils::retrieve<float>(L, -1);
 		lua_pop(L, 1);
 		lua_rawgeti(L, -1, 2);
-		const Color color = LuaColorUtils::retrieveTable(L, -1);
+		const Colorf color = LuaColorUtils::retrieveTable(L, -1);
 		lua_pop(L, 1);
 
 		lua_pop(L, 1);

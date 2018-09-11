@@ -2,7 +2,7 @@
 #define CLASS_NCINE_PARTICLEAFFECTORS
 
 #include "Vector2.h"
-#include "Color.h"
+#include "Colorf.h"
 #include "nctl/Array.h"
 
 namespace ncine {
@@ -28,17 +28,17 @@ class DLL_PUBLIC ColorAffector : public ParticleAffector
 	struct ColorStep
 	{
 		float age;
-		Color color;
+		Colorf color;
 
 		ColorStep() : age(0.0f) { }
-		ColorStep(float newAge, Color newColor) : age(newAge), color(newColor) { }
+		ColorStep(float newAge, const Colorf &newColor) : age(newAge), color(newColor) { }
 	};
 
 	ColorAffector() : colorSteps_(4) { }
 
 	/// Affects the color of the specified particle
 	void affect(Particle *particle, float normalizedAge) override;
-	void addColorStep(float age, Color color);
+	void addColorStep(float age, const Colorf &color);
 
 	inline nctl::Array<ColorStep> &steps() { return colorSteps_; }
 	inline const nctl::Array<ColorStep> &steps() const { return colorSteps_; }
