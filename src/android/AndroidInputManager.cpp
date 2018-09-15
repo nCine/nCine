@@ -402,8 +402,7 @@ bool AndroidInputManager::processKeyboardEvent(const AInputEvent *event)
 
 	keyboardEvent_.scancode = AKeyEvent_getScanCode(event);
 	keyboardEvent_.sym = AndroidKeys::keySymValueToEnum(AKeyEvent_getKeyCode(event));
-	const int keyMod = static_cast<int>(AndroidKeys::keyModValueToEnum(AKeyEvent_getMetaState(event)));
-	keyboardEvent_.mod = keyMod;
+	keyboardEvent_.mod = AndroidKeys::keyModMaskToEnumMask(AKeyEvent_getMetaState(event));
 
 	const unsigned int keySym = static_cast<unsigned int>(keyboardEvent_.sym);
 	switch (AKeyEvent_getAction(event))

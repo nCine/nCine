@@ -288,7 +288,6 @@ void LuaKeys::exposeConstants(lua_State *L)
 	LuaUtils::pushField(L, "MODE", static_cast<int64_t>(KeyMod::MODE));
 
 	// Android only keymods
-	LuaUtils::pushField(L, "SCROLL", static_cast<int64_t>(KeyMod::SCROLL));
 	LuaUtils::pushField(L, "SYM", static_cast<int64_t>(KeyMod::SYM));
 
 	lua_setfield(L, -2, "keymod");

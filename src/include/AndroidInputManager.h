@@ -19,7 +19,7 @@ class AndroidKeys
 {
   public:
 	static KeySym keySymValueToEnum(int keysym);
-	static KeyMod keyModValueToEnum(int keymod);
+	static int keyModMaskToEnumMask(int keymod);
 };
 
 /// Simulated information about Android keyboard state

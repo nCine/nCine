@@ -205,7 +205,7 @@ void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, in
 
 	keyboardEvent_.scancode = scancode;
 	keyboardEvent_.sym = GlfwKeys::keySymValueToEnum(key);
-	keyboardEvent_.mod = static_cast<int>(GlfwKeys::keyModValueToEnum(mods));
+	keyboardEvent_.mod = GlfwKeys::keyModMaskToEnumMask(mods);
 
 	if (action == GLFW_PRESS)
 		inputEventHandler_->onKeyPressed(keyboardEvent_);

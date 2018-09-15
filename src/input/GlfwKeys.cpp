@@ -128,18 +128,19 @@ KeySym GlfwKeys::keySymValueToEnum(int keysym)
 	}
 }
 
-KeyMod GlfwKeys::keyModValueToEnum(int keymod)
+int GlfwKeys::keyModMaskToEnumMask(int keymod)
 {
-	switch (keymod)
-	{
-		case 0x0000:					return KeyMod::NONE;
-		case GLFW_MOD_SHIFT:			return KeyMod::SHIFT;
-		case GLFW_MOD_CONTROL:			return KeyMod::CTRL;
-		case GLFW_MOD_ALT:				return KeyMod::ALT;
-		case GLFW_MOD_SUPER:			return KeyMod::SUPER;
+	int result = 0;
 
-		default:						return KeyMod::NONE;
+	if (keymod != 0)
+	{
+		result |= (keymod & GLFW_MOD_SHIFT) ? KeyMod::SHIFT : 0;
+		result |= (keymod & GLFW_MOD_CONTROL) ? KeyMod::CTRL : 0;
+		result |= (keymod & GLFW_MOD_ALT) ? KeyMod::ALT : 0;
+		result |= (keymod & GLFW_MOD_SUPER) ? KeyMod::SUPER : 0;
 	}
+
+	return result;
 }
 
 int GlfwKeys::enumToKeySymValue(KeySym keysym)
@@ -265,20 +266,6 @@ int GlfwKeys::enumToKeySymValue(KeySym keysym)
 		case KeySym::MENU:					return GLFW_KEY_MENU;
 
 		default:							return GLFW_KEY_UNKNOWN;
-	}
-}
-
-int GlfwKeys::enumToKeyModValue(KeyMod keymod)
-{
-	switch (keymod)
-	{
-		case KeyMod::NONE:				return 0x0000;
-		case KeyMod::SHIFT:				return GLFW_MOD_SHIFT;
-		case KeyMod::CTRL:				return GLFW_MOD_CONTROL;
-		case KeyMod::ALT:				return GLFW_MOD_ALT;
-		case KeyMod::SUPER:				return GLFW_MOD_SUPER;
-
-		default:						return 0x0000;
 	}
 }
 

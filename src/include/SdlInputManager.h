@@ -13,9 +13,8 @@ class SdlKeys
 {
   public:
 	static KeySym keySymValueToEnum(int keysym);
-	static KeyMod keyModValueToEnum(int keymod);
+	static int keyModMaskToEnumMask(int keymod);
 	static int enumToKeySymValue(KeySym keysym);
-	static int enumToKeyModValue(KeyMod keymod);
 	static int enumToScancode(KeySym keysym);
 };
 
@@ -72,7 +71,11 @@ class SdlKeyboardState : public KeyboardState
 
 	inline bool isKeyDown(KeySym key) const override
 	{
-		return keyState_[SdlKeys::enumToScancode(key)] != 0;
+		const int sdlKey = SdlKeys::enumToScancode(key);
+		if (sdlKey == SDL_SCANCODE_UNKNOWN)
+			return false;
+		else
+			return keyState_[SdlKeys::enumToScancode(key)] != 0;
 	}
 
 	friend class SdlInputManager;

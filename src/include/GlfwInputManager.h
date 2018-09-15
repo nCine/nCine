@@ -15,9 +15,8 @@ class GlfwKeys
 {
   public:
 	static KeySym keySymValueToEnum(int keysym);
-	static KeyMod keyModValueToEnum(int keymod);
+	static int keyModMaskToEnumMask(int keymod);
 	static int enumToKeySymValue(KeySym keysym);
-	static int enumToKeyModValue(KeyMod keymod);
 };
 
 /// Information about GLFW mouse state
@@ -79,7 +78,11 @@ class GlfwKeyboardState : public KeyboardState
   public:
 	inline bool isKeyDown(KeySym key) const override
 	{
-		return glfwGetKey(GlfwGfxDevice::windowHandle(), GlfwKeys::enumToKeySymValue(key)) == GLFW_PRESS;
+		const int glfwKey = GlfwKeys::enumToKeySymValue(key);
+		if (glfwKey == GLFW_KEY_UNKNOWN)
+			return false;
+		else
+			return glfwGetKey(GlfwGfxDevice::windowHandle(), glfwKey) == GLFW_PRESS;
 	}
 
 	friend class GlfwInputManager;

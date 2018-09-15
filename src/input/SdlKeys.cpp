@@ -149,25 +149,26 @@ KeySym SdlKeys::keySymValueToEnum(int keysym)
 	}
 }
 
-KeyMod SdlKeys::keyModValueToEnum(int keymod)
+int SdlKeys::keyModMaskToEnumMask(int keymod)
 {
-	switch (keymod)
-	{
-		case KMOD_NONE:				return KeyMod::NONE;
-		case KMOD_LSHIFT:			return KeyMod::LSHIFT;
-		case KMOD_RSHIFT:			return KeyMod::RSHIFT;
-		case KMOD_LCTRL:			return KeyMod::LCTRL;
-		case KMOD_RCTRL:			return KeyMod::RCTRL;
-		case KMOD_LALT:				return KeyMod::LALT;
-		case KMOD_RALT:				return KeyMod::RALT;
-		case KMOD_LGUI:				return KeyMod::LSUPER;
-		case KMOD_RGUI:				return KeyMod::RSUPER;
-		case KMOD_NUM:				return KeyMod::NUM;
-		case KMOD_CAPS:				return KeyMod::CAPS;
-		case KMOD_MODE:				return KeyMod::MODE;
+	int result = 0;
 
-		default:					return KeyMod::NONE;
+	if (keymod != 0)
+	{
+		result |= (keymod & KMOD_LSHIFT) ? KeyMod::LSHIFT : 0;
+		result |= (keymod & KMOD_RSHIFT) ? KeyMod::RSHIFT : 0;
+		result |= (keymod & KMOD_LCTRL) ? KeyMod::LCTRL : 0;
+		result |= (keymod & KMOD_RCTRL) ? KeyMod::RCTRL : 0;
+		result |= (keymod & KMOD_LALT) ? KeyMod::LALT : 0;
+		result |= (keymod & KMOD_RALT) ? KeyMod::RALT : 0;
+		result |= (keymod & KMOD_LGUI) ? KeyMod::LSUPER : 0;
+		result |= (keymod & KMOD_RGUI) ? KeyMod::RSUPER : 0;
+		result |= (keymod & KMOD_NUM) ? KeyMod::NUM : 0;
+		result |= (keymod & KMOD_CAPS) ? KeyMod::CAPS : 0;
+		result |= (keymod & KMOD_MODE) ? KeyMod::MODE : 0;
 	}
+
+	return result;
 }
 
 int SdlKeys::enumToKeySymValue(KeySym keysym)
@@ -314,27 +315,6 @@ int SdlKeys::enumToKeySymValue(KeySym keysym)
 		case KeySym::UNDO:				return SDLK_UNDO;
 
 		default:						return SDLK_UNKNOWN;
-	}
-}
-
-int SdlKeys::enumToKeyModValue(KeyMod keymod)
-{
-	switch (keymod)
-	{
-		case KeyMod::NONE:				return KMOD_NONE;
-		case KeyMod::LSHIFT:			return KMOD_LSHIFT;
-		case KeyMod::RSHIFT:			return KMOD_RSHIFT;
-		case KeyMod::LCTRL:				return KMOD_LCTRL;
-		case KeyMod::RCTRL:				return KMOD_RCTRL;
-		case KeyMod::LALT:				return KMOD_LALT;
-		case KeyMod::RALT:				return KMOD_RALT;
-		case KeyMod::LSUPER:			return KMOD_LGUI;
-		case KeyMod::RSUPER:			return KMOD_RGUI;
-		case KeyMod::NUM:				return KMOD_NUM;
-		case KeyMod::CAPS:				return KMOD_CAPS;
-		case KeyMod::MODE:				return KMOD_MODE;
-
-		default:						return KMOD_NONE;
 	}
 }
 

@@ -218,34 +218,26 @@ KeySym AndroidKeys::keySymValueToEnum(int keysym)
 	}
 }
 
-KeyMod AndroidKeys::keyModValueToEnum(int keymod)
+int AndroidKeys::keyModMaskToEnumMask(int keymod)
 {
-	switch (keymod)
-	{
-		case AMETA_NONE:				return KeyMod::NONE;
-		case AMETA_ALT_ON:				return KeyMod::ALT;
-		case AMETA_ALT_LEFT_ON:			return KeyMod::LALT;
-		case AMETA_ALT_RIGHT_ON:		return KeyMod::RALT;
-		case AMETA_SHIFT_ON:			return KeyMod::SHIFT;
-		case AMETA_SHIFT_LEFT_ON:		return KeyMod::LSHIFT;
-		case AMETA_SHIFT_RIGHT_ON:		return KeyMod::RSHIFT;
-#if __ANDROID_API__ >= 13
-		case AMETA_CTRL_ON:				return KeyMod::CTRL;
-		case AMETA_CTRL_LEFT_ON:		return KeyMod::LCTRL;
-		case AMETA_CTRL_RIGHT_ON:		return KeyMod::RCTRL;
-#endif
-		case AMETA_META_ON:				return KeyMod::SUPER;
-		case AMETA_META_LEFT_ON:		return KeyMod::LSUPER;
-		case AMETA_META_RIGHT_ON:		return KeyMod::RSUPER;
-#if __ANDROID_API__ >= 13
-		case AMETA_CAPS_LOCK_ON:		return KeyMod::CAPS;
-		case AMETA_NUM_LOCK_ON:			return KeyMod::NUM;
-		case AMETA_SCROLL_LOCK_ON:		return KeyMod::SCROLL;
-#endif
-		case AMETA_SYM_ON:				return KeyMod::SYM;
+	int result = 0;
 
-		default:						return KeyMod::NONE;
+	if (keymod != 0)
+	{
+		result |= (keymod & AMETA_SHIFT_LEFT_ON) ? KeyMod::LSHIFT : 0;
+		result |= (keymod & AMETA_SHIFT_RIGHT_ON) ? KeyMod::RSHIFT : 0;
+		result |= (keymod & AMETA_CTRL_LEFT_ON) ? KeyMod::LCTRL : 0;
+		result |= (keymod & AMETA_CTRL_RIGHT_ON) ? KeyMod::RCTRL : 0;
+		result |= (keymod & AMETA_ALT_LEFT_ON) ? KeyMod::LALT : 0;
+		result |= (keymod & AMETA_ALT_RIGHT_ON) ? KeyMod::RALT : 0;
+		result |= (keymod & AMETA_META_LEFT_ON) ? KeyMod::LSUPER : 0;
+		result |= (keymod & AMETA_META_RIGHT_ON) ? KeyMod::RSUPER : 0;
+		result |= (keymod & AMETA_NUM_LOCK_ON) ? KeyMod::NUM : 0;
+		result |= (keymod & AMETA_CAPS_LOCK_ON) ? KeyMod::CAPS : 0;
+		result |= (keymod & AMETA_SYM_ON) ? KeyMod::SYM : 0;
 	}
+
+	return result;
 }
 
 }
