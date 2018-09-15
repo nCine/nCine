@@ -159,6 +159,46 @@ TEST_F(StringOperationTest, FormatAppend)
 	ASSERT_STREQ(string_.data(), "String1String2");
 }
 
+TEST_F(StringOperationTest, SetLengthShrink)
+{
+	const unsigned int length = string_.length();
+	string_.data()[length - 1] = '\0';
+	const unsigned int newLength = string_.setLength(length - 1);
+	printf("Appending a single character by accessing the data array: "); printString(string_);
+
+	ASSERT_EQ(string_.capacity(), Capacity);
+	ASSERT_EQ(string_.length(), length - 1);
+	ASSERT_EQ(newLength, length - 1);
+	ASSERT_STREQ(string_.data(), "String");
+}
+
+TEST_F(StringOperationTest, SetLengthExpand)
+{
+	const unsigned int length = string_.length();
+	string_.data()[length + 0] = '2';
+	string_.data()[length + 1] = '3';
+	string_.data()[length + 2] = '\0';
+	const unsigned int newLength = string_.setLength(length + 2);
+	printf("Appending a single character by accessing the data array: "); printString(string_);
+
+	ASSERT_EQ(string_.capacity(), Capacity);
+	ASSERT_EQ(string_.length(), length + 2);
+	ASSERT_EQ(newLength, length + 2);
+	ASSERT_STREQ(string_.data(), "String123");
+}
+
+TEST_F(StringOperationTest, SetLengthBeyondCapacity)
+{
+	const unsigned int length = string_.length();
+	const unsigned int newLength = string_.setLength(Capacity + 1);
+	printf("Appending a single character by accessing the data array: "); printString(string_);
+
+	ASSERT_EQ(string_.capacity(), Capacity);
+	ASSERT_EQ(string_.length(), Capacity - 1);
+	ASSERT_EQ(newLength, Capacity - 1);
+	ASSERT_STREQ(string_.data(), "String1");
+}
+
 TEST_F(StringOperationTest, FindFirstCharacter)
 {
 	string_ += "String2";
@@ -359,7 +399,7 @@ TEST_F(StringOperationTest, CopyCharactersToBeyondEnd)
 	nctl::String destString = "abcdefg";
 	printf("Creating a new destination string: "); printString(destString);
 
-	const unsigned int numAvailable = destString.capacity() - destString.length();
+	const unsigned int numAvailable = destString.capacity() - destString.length() - 1;
 
 	const unsigned int srcChar = 0;
 	const unsigned int numChar = 2; // more than available in destination

@@ -127,6 +127,13 @@ String &String::operator=(const char *cString)
 	return *this;
 }
 
+/*! The method is useful to update the string length after writing into it through the `data()` pointer. */
+unsigned int String::setLength(unsigned int length)
+{
+	length_ = (length > capacity_ - 1) ? capacity_ - 1 : length;
+	return length_;
+}
+
 /*! The method returns the number of characters copied, to allow truncation. */
 unsigned int String::copy(String &dest, unsigned int srcChar, unsigned int numChar, unsigned int destChar) const
 {
@@ -139,7 +146,7 @@ unsigned int String::copy(String &dest, unsigned int srcChar, unsigned int numCh
 	const unsigned int clampedDestChar = min(destChar, dest.length_);
 	char *destStart = dest.data() + clampedDestChar;
 	// Cannot copy more characters than the source has left until its length or more than the destination has until its capacity
-	const unsigned int charsToCopy = min(min(numChar, length_ - clampedSrcChar), dest.capacity_ - clampedDestChar);
+	const unsigned int charsToCopy = min(min(numChar, length_ - clampedSrcChar), dest.capacity_ - clampedDestChar - 1);
 
 	if (charsToCopy > 0)
 	{
@@ -180,7 +187,7 @@ unsigned int String::copy(char *dest, unsigned int srcChar, unsigned int numChar
 	if (charsToCopy > 0)
 	{
 #if defined(_WIN32) && !defined(__MINGW32__)
-		strncpy_s(dest, charsToCopy, srcStart, charsToCopy);
+		strncpy_s(dest, charsToCopy + 1, srcStart, charsToCopy);
 #else
 		strncpy(dest, srcStart, charsToCopy);
 #endif
@@ -267,7 +274,7 @@ String &String::format(const char *fmt, ...)
 	va_list args;
 	va_start(args, fmt);
 #if defined(_WIN32) && !defined(__MINGW32__)
-	const int formattedLength = vsnprintf_s(data(), capacity_, capacity_, fmt, args);
+	const int formattedLength = vsnprintf_s(data(), capacity_, capacity_ - 1, fmt, args);
 #else
 	const int formattedLength = vsnprintf(data(), capacity_, fmt, args);
 #endif
@@ -289,7 +296,7 @@ String &String::formatAppend(const char *fmt, ...)
 	va_list args;
 	va_start(args, fmt);
 #if defined(_WIN32) && !defined(__MINGW32__)
-	const int formattedLength = vsnprintf_s(data() + length_, capacity_ - length_, capacity_ - length_, fmt, args);
+	const int formattedLength = vsnprintf_s(data() + length_, capacity_ - length_, capacity_ - length_ - 1, fmt, args);
 #else
 	const int formattedLength = vsnprintf(data() + length_, capacity_ - length_, fmt, args);
 #endif
@@ -306,7 +313,7 @@ String &String::formatAppend(const char *fmt, ...)
 
 String &String::operator+=(const String &other)
 {
-	const unsigned int availCapacity = capacity_ - length_;
+	const unsigned int availCapacity = capacity_ - length_ - 1;
 	const unsigned int minLength = min(other.length_, availCapacity);
 
 #if defined(_WIN32) && !defined(__MINGW32__)
@@ -323,7 +330,7 @@ String &String::operator+=(const String &other)
 String &String::operator+=(const char *cString)
 {
 	ASSERT(cString);
-	const unsigned int availCapacity = capacity_ - length_;
+	const unsigned int availCapacity = capacity_ - length_ - 1;
 
 #if defined(_WIN32) && !defined(__MINGW32__)
 	const unsigned int cLength = static_cast<unsigned int>(strnlen_s(cString, availCapacity));

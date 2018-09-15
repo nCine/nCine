@@ -81,6 +81,8 @@ class DLL_PUBLIC String
 	inline bool isEmpty() const { return length_ == 0; }
 	/// Returns the string length
 	inline unsigned int length() const { return length_; }
+	/// Sets the string length
+	unsigned int setLength(unsigned int length);
 	/// Returns the string capacity
 	inline unsigned int capacity() const { return capacity_; }
 
