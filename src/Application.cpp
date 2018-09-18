@@ -32,9 +32,7 @@
 	#include "ImGuiDrawing.h"
 #endif
 
-#ifdef WITH_GIT_VERSION
-	#include "version.h"
-#endif
+#include "version.h"
 
 namespace ncine {
 
@@ -87,9 +85,10 @@ void Application::togglePause()
 void Application::initCommon()
 {
 #ifdef WITH_GIT_VERSION
-	LOGI_X("nCine %s (%s) compiled on %s at %s" , VersionStrings::Version, VersionStrings::GitBranch, __DATE__, __TIME__);
+	LOGI_X("nCine %s (%s) compiled on %s at %s" , VersionStrings::Version, VersionStrings::GitBranch,
+		VersionStrings::CompilationDate, VersionStrings::CompilationTime);
 #else
-	LOGI_X("nCine compiled on %s at %s", __DATE__, __TIME__);
+	LOGI_X("nCine compiled on %s at %s", VersionStrings::CompilationDate, VersionStrings::CompilationTime);
 #endif
 
 	theServiceLocator().registerIndexer(nctl::makeUnique<ArrayIndexer>());
@@ -182,7 +181,7 @@ void Application::initCommon()
 				#ifdef WITH_GIT_VERSION
 				infoStringBottomLeft.format("%s (%s)", VersionStrings::Version, VersionStrings::GitBranch);
 				#else
-				infoStringBottomLeft.format("%s at %s", __DATE__, __TIME__);
+				infoStringBottomLeft.format("%s at %s", VersionStrings::CompilationDate, VersionStrings::CompilationTime);
 				#endif
 				infoLineBottomLeft_->setString(infoStringBottomLeft);
 				infoLineBottomLeft_->setPosition(infoLineBottomLeft_->width() * 0.5f, infoLineBottomLeft_->height() * 0.75f);

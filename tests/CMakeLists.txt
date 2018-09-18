@@ -49,7 +49,16 @@ if(PNG_FOUND)
 endif()
 
 foreach(APPTEST ${APPTESTS})
-	add_executable(${APPTEST} main.cpp ${APPTEST}.cpp apptest_datapath.h ${RESOURCE_RC_FILE})
+	if(DEFINED ${APPTEST}_SOURCES)
+		# More complex AppTests can define multiple sources
+		list(LENGTH ${APPTEST}_SOURCES NUM_SOURCES)
+		if(NUM_SOURCES GREATER 0)
+			add_executable(${APPTEST} main.cpp ${${APPTEST}_SOURCES} apptest_datapath.h ${RESOURCE_RC_FILE})
+		endif()
+	else()
+		add_executable(${APPTEST} main.cpp ${APPTEST}.cpp ${APPTEST}.h apptest_datapath.h ${RESOURCE_RC_FILE})
+	endif()
+
 	target_link_libraries(${APPTEST} ncine)
 	set_target_properties(${APPTEST} PROPERTIES FOLDER "AppTests")
 	target_compile_definitions(${APPTEST} PRIVATE "NCINE_TESTS_DATA_DIR=\"${NCINE_TESTS_DATA_DIR}\"")

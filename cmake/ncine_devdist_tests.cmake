@@ -51,10 +51,20 @@ if(MSVC)
 endif()
 
 list(APPEND APPTESTS apptest_texformats apptest_joystick apptest_rotozoom apptest_animsprites
-	apptest_audio apptest_particles apptest_scene apptest_font apptest_multitouch)
+	apptest_audio apptest_particles apptest_scene apptest_font apptest_multitouch apptest_camera
+	apptest_meshsprites apptest_meshdeform apptest_sinescroller apptest_lua apptest_luareload)
 
 foreach(APPTEST ${APPTESTS})
-	add_executable(${APPTEST} ${NCINE_MAIN_CPP} ${APPTEST}.cpp apptest_datapath.h)
+	if(DEFINED ${APPTEST}_SOURCES)
+		# More complex AppTests can define multiple sources
+		list(LENGTH ${APPTEST}_SOURCES NUM_SOURCES)
+		if(NUM_SOURCES GREATER 0)
+			add_executable(${APPTEST} ${NCINE_MAIN_CPP} ${${APPTEST}_SOURCES} apptest_datapath.h ${RESOURCE_RC_FILE})
+		endif()
+	else()
+		add_executable(${APPTEST} ${NCINE_MAIN_CPP} ${APPTEST}.cpp ${APPTEST}.h apptest_datapath.h ${RESOURCE_RC_FILE})
+	endif()
+
 	target_include_directories(${APPTEST} PUBLIC ${NCINE_INCLUDE_DIR})
 	target_compile_definitions(${APPTEST} PRIVATE "NCINE_TESTS_DATA_DIR=\"${NCINE_TESTS_DATA_DIR}\"")
 	target_link_libraries(${APPTEST} ${NCINE_LIBRARY})
@@ -62,21 +72,4 @@ foreach(APPTEST ${APPTESTS})
 	if(MSVC)
 		target_compile_options(${APPTEST} PRIVATE "/wd4251")
 	endif()
-endforeach()
-
-list(APPEND TESTS test_array test_staticarray
-	test_list test_string
-	test_hashmap test2_hashmap)
-list(APPEND TESTS test_algorithms_array
-	test_algorithms_list
-	test_algorithms_hashmap)
-list(APPEND TESTS test_vector2 test_vector3 test_vector4
-	test_matrix4x4 test2_matrix4x4
-	test_quaternion test2_quaternion)
-
-foreach(TEST ${TESTS})
-	add_executable(${TEST} ${TEST}.cpp test_functions.h)
-	target_include_directories(${TEST} PUBLIC ${NCINE_INCLUDE_DIR})
-	target_link_libraries(${TEST} ${NCINE_LIBRARY})
-	set_target_properties(${TEST} PROPERTIES FOLDER "Tests")
 endforeach()
