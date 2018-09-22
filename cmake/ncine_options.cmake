@@ -26,11 +26,11 @@ if(NCINE_BUILD_ANDROID)
 	option(NCINE_ASSEMBLE_APK "Assemble the Android APK of the startup test with Gradle" OFF)
 endif()
 
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 	option(NCINE_ADDRESS_SANITIZER "Enable the AddressSanitizer memory error detector of GCC and Clang" OFF)
 	option(NCINE_CODE_COVERAGE "Enable gcov instrumentation for testing code coverage" OFF)
 endif()
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	option(NCINE_GCC_HARDENING "Enable memory corruption mitigation methods of GCC" OFF)
 endif()
 
@@ -40,7 +40,7 @@ set(NCINE_STARTUP_TEST "apptest_camera" CACHE STRING "Set the starting test proj
 set(NCINE_OPTIONS_PRESETS "Default" CACHE STRING "Presets for CMake options")
 set_property(CACHE NCINE_OPTIONS_PRESETS PROPERTY STRINGS Default BinDist DevDist)
 
-if(NCINE_OPTIONS_PRESETS STREQUAL BinDist OR NCINE_OPTIONS_PRESETS STREQUAL DevDist)
+if("${NCINE_OPTIONS_PRESETS}" STREQUAL "BinDist" OR "${NCINE_OPTIONS_PRESETS}" STREQUAL "DevDist")
 	message(STATUS "Options presets: ${NCINE_OPTIONS_PRESETS}")
 
 	set(CMAKE_BUILD_TYPE Release)
@@ -65,11 +65,11 @@ if(NCINE_OPTIONS_PRESETS STREQUAL BinDist OR NCINE_OPTIONS_PRESETS STREQUAL DevD
 	endif()
 endif()
 
-if(NCINE_OPTIONS_PRESETS STREQUAL BinDist)
+if("${NCINE_OPTIONS_PRESETS}" STREQUAL "BinDist")
 	set(NCINE_INSTALL_DEV_SUPPORT OFF)
 	set(NCINE_BUILD_ANDROID OFF)
 	set(NCINE_BUILD_DOCUMENTATION OFF)
-elseif(NCINE_OPTIONS_PRESETS STREQUAL DevDist)
+elseif("${NCINE_OPTIONS_PRESETS}" STREQUAL "DevDist")
 	set(NCINE_INSTALL_DEV_SUPPORT ON)
 	set(NCINE_BUILD_ANDROID ON)
 	set(NCINE_ASSEMBLE_APK OFF)

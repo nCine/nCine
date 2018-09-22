@@ -14,11 +14,15 @@ if(GLFW_FOUND)
 	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_GLFW" "GLFW_NO_GLU")
 	list(APPEND PRIVATE_LINK_LIBRARIES ${GLFW_LIBRARY})
 
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/GlfwInputManager.h)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/GlfwGfxDevice.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/input/GlfwInputManager.cpp)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/input/GlfwKeys.cpp)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/GlfwGfxDevice.cpp)
+	list(APPEND PRIVATE_HEADERS
+		${NCINE_ROOT}/src/include/GlfwInputManager.h
+		${NCINE_ROOT}/src/include/GlfwGfxDevice.h
+	)
+	list(APPEND SOURCES
+		${NCINE_ROOT}/src/input/GlfwInputManager.cpp
+		${NCINE_ROOT}/src/input/GlfwKeys.cpp
+		${NCINE_ROOT}/src/graphics/GlfwGfxDevice.cpp
+	)
 endif()
 
 if(SDL2_FOUND AND NOT GLFW_FOUND)
@@ -28,11 +32,15 @@ if(SDL2_FOUND AND NOT GLFW_FOUND)
 	endif()
 	list(APPEND PRIVATE_LINK_LIBRARIES ${SDL2_LIBRARY})
 
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/SdlInputManager.h)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/SdlGfxDevice.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/input/SdlInputManager.cpp)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/input/SdlKeys.cpp)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/SdlGfxDevice.cpp)
+	list(APPEND PRIVATE_HEADERS
+		${NCINE_ROOT}/src/include/SdlInputManager.h
+		${NCINE_ROOT}/src/include/SdlGfxDevice.h
+	)
+	list(APPEND SOURCES
+		${NCINE_ROOT}/src/input/SdlInputManager.cpp
+		${NCINE_ROOT}/src/input/SdlKeys.cpp
+		${NCINE_ROOT}/src/graphics/SdlGfxDevice.cpp
+	)
 endif()
 
 if(OPENAL_FOUND)
@@ -94,17 +102,25 @@ if(Threads_FOUND)
 	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_THREADS")
 	list(APPEND PRIVATE_LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 
-	list(APPEND HEADERS ${NCINE_ROOT}/include/IThreadPool.h)
-	list(APPEND HEADERS ${NCINE_ROOT}/include/IThreadCommand.h)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/Thread.h)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ThreadSync.h)
+	list(APPEND HEADERS
+		${NCINE_ROOT}/include/IThreadPool.h
+		${NCINE_ROOT}/include/IThreadCommand.h
+	)
+	list(APPEND PRIVATE_HEADERS
+		${NCINE_ROOT}/src/include/Thread.h
+		${NCINE_ROOT}/src/include/ThreadSync.h
+	)
 
 	if(WIN32)
-		list(APPEND SOURCES ${NCINE_ROOT}/src/threading/WindowsThread.cpp)
-		list(APPEND SOURCES ${NCINE_ROOT}/src/threading/WindowsThreadSync.cpp)
+		list(APPEND SOURCES
+			${NCINE_ROOT}/src/threading/WindowsThread.cpp
+			${NCINE_ROOT}/src/threading/WindowsThreadSync.cpp
+		)
 	else()
-		list(APPEND SOURCES ${NCINE_ROOT}/src/threading/PosixThread.cpp)
-		list(APPEND SOURCES ${NCINE_ROOT}/src/threading/PosixThreadSync.cpp)
+		list(APPEND SOURCES
+			${NCINE_ROOT}/src/threading/PosixThread.cpp
+			${NCINE_ROOT}/src/threading/PosixThreadSync.cpp
+		)
 	endif()
 
 	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ThreadPool.h)
@@ -116,86 +132,96 @@ if(LUA_FOUND)
 	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_LUA")
 	list(APPEND PRIVATE_LINK_LIBRARIES ${LUA_LIBRARY})
 
-	list(APPEND HEADERS ${NCINE_ROOT}/include/LuaTypes.h)
-	list(APPEND HEADERS ${NCINE_ROOT}/include/LuaStateManager.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaStateManager.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaClassTracker.h)
-	list(APPEND HEADERS ${NCINE_ROOT}/include/LuaClassWrapper.h)
-	list(APPEND HEADERS ${NCINE_ROOT}/include/LuaUtils.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaUtils.cpp)
-	list(APPEND HEADERS ${NCINE_ROOT}/include/LuaDebug.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaDebug.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaStatistics.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaStatistics.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaNames.h)
+	list(APPEND HEADERS
+		${NCINE_ROOT}/include/LuaTypes.h
+		${NCINE_ROOT}/include/LuaStateManager.h
+		${NCINE_ROOT}/include/LuaClassWrapper.h
+		${NCINE_ROOT}/include/LuaUtils.h
+		${NCINE_ROOT}/include/LuaDebug.h
+		${NCINE_ROOT}/include/LuaIAppEventHandler.h
+		${NCINE_ROOT}/include/LuaRectUtils.h
+		${NCINE_ROOT}/include/LuaVector2Utils.h
+		${NCINE_ROOT}/include/LuaVector3Utils.h
+		${NCINE_ROOT}/include/LuaColorUtils.h
+		${NCINE_ROOT}/include/LuaIInputEventHandler.h
+	)
 
-	list(APPEND HEADERS ${NCINE_ROOT}/include/LuaIAppEventHandler.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaIAppEventHandler.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaILogger.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaILogger.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaRect.h)
-	list(APPEND HEADERS ${NCINE_ROOT}/include/LuaRectUtils.h)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaVector2.h)
-	list(APPEND HEADERS ${NCINE_ROOT}/include/LuaVector2Utils.h)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaVector3.h)
-	list(APPEND HEADERS ${NCINE_ROOT}/include/LuaVector3Utils.h)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaColor.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaColor.cpp)
-	list(APPEND HEADERS ${NCINE_ROOT}/include/LuaColorUtils.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaColorUtils.cpp)
+	list(APPEND PRIVATE_HEADERS
+		${NCINE_ROOT}/src/include/LuaClassTracker.h
+		${NCINE_ROOT}/src/include/LuaStatistics.h
+		${NCINE_ROOT}/src/include/LuaNames.h
+		${NCINE_ROOT}/src/include/LuaILogger.h
+		${NCINE_ROOT}/src/include/LuaRect.h
+		${NCINE_ROOT}/src/include/LuaVector2.h
+		${NCINE_ROOT}/src/include/LuaVector3.h
+		${NCINE_ROOT}/src/include/LuaColor.h
+		${NCINE_ROOT}/src/include/LuaIInputManager.h
+		${NCINE_ROOT}/src/include/LuaMouseEvents.h
+		${NCINE_ROOT}/src/include/LuaKeys.h
+		${NCINE_ROOT}/src/include/LuaKeyboardEvents.h
+		${NCINE_ROOT}/src/include/LuaJoystickEvents.h
+		${NCINE_ROOT}/src/include/LuaApplication.h
+		${NCINE_ROOT}/src/include/LuaAppConfiguration.h
+		${NCINE_ROOT}/src/include/LuaSceneNode.h
+		${NCINE_ROOT}/src/include/LuaDrawableNode.h
+		${NCINE_ROOT}/src/include/LuaTexture.h
+		${NCINE_ROOT}/src/include/LuaBaseSprite.h
+		${NCINE_ROOT}/src/include/LuaSprite.h
+		${NCINE_ROOT}/src/include/LuaMeshSprite.h
+		${NCINE_ROOT}/src/include/LuaRectAnimation.h
+		${NCINE_ROOT}/src/include/LuaAnimatedSprite.h
+		${NCINE_ROOT}/src/include/LuaFont.h
+		${NCINE_ROOT}/src/include/LuaTextNode.h
+		${NCINE_ROOT}/src/include/LuaParticleSystem.h
+	)
 
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaIInputManager.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaIInputManager.cpp)
-	list(APPEND HEADERS ${NCINE_ROOT}/include/LuaIInputEventHandler.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaIInputEventHandler.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaMouseEvents.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaMouseEvents.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaKeys.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaKeys.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaKeyboardEvents.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaKeyboardEvents.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaJoystickEvents.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaJoystickEvents.cpp)
-
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaApplication.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaApplication.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaAppConfiguration.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaAppConfiguration.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaSceneNode.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaSceneNode.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaDrawableNode.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaDrawableNode.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaTexture.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaTexture.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaBaseSprite.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaBaseSprite.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaSprite.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaSprite.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaMeshSprite.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaMeshSprite.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaRectAnimation.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaRectAnimation.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaAnimatedSprite.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaAnimatedSprite.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaFont.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaFont.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaTextNode.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaTextNode.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaParticleSystem.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaParticleSystem.cpp)
+	list(APPEND SOURCES
+		${NCINE_ROOT}/src/scripting/LuaStateManager.cpp
+		${NCINE_ROOT}/src/scripting/LuaUtils.cpp
+		${NCINE_ROOT}/src/scripting/LuaDebug.cpp
+		${NCINE_ROOT}/src/scripting/LuaStatistics.cpp
+		${NCINE_ROOT}/src/scripting/LuaIAppEventHandler.cpp
+		${NCINE_ROOT}/src/scripting/LuaILogger.cpp
+		${NCINE_ROOT}/src/scripting/LuaColor.cpp
+		${NCINE_ROOT}/src/scripting/LuaColorUtils.cpp
+		${NCINE_ROOT}/src/scripting/LuaIInputManager.cpp
+		${NCINE_ROOT}/src/scripting/LuaIInputEventHandler.cpp
+		${NCINE_ROOT}/src/scripting/LuaMouseEvents.cpp
+		${NCINE_ROOT}/src/scripting/LuaKeys.cpp
+		${NCINE_ROOT}/src/scripting/LuaKeyboardEvents.cpp
+		${NCINE_ROOT}/src/scripting/LuaJoystickEvents.cpp
+		${NCINE_ROOT}/src/scripting/LuaApplication.cpp
+		${NCINE_ROOT}/src/scripting/LuaAppConfiguration.cpp
+		${NCINE_ROOT}/src/scripting/LuaSceneNode.cpp
+		${NCINE_ROOT}/src/scripting/LuaDrawableNode.cpp
+		${NCINE_ROOT}/src/scripting/LuaTexture.cpp
+		${NCINE_ROOT}/src/scripting/LuaBaseSprite.cpp
+		${NCINE_ROOT}/src/scripting/LuaSprite.cpp
+		${NCINE_ROOT}/src/scripting/LuaMeshSprite.cpp
+		${NCINE_ROOT}/src/scripting/LuaRectAnimation.cpp
+		${NCINE_ROOT}/src/scripting/LuaAnimatedSprite.cpp
+		${NCINE_ROOT}/src/scripting/LuaFont.cpp
+		${NCINE_ROOT}/src/scripting/LuaTextNode.cpp
+		${NCINE_ROOT}/src/scripting/LuaParticleSystem.cpp
+	)
 
 	if(OPENAL_FOUND)
-		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaIAudioPlayer.h)
-		list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaIAudioPlayer.cpp)
-		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaAudioStreamPlayer.h)
-		list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaAudioStreamPlayer.cpp)
-		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaAudioBuffer.h)
-		list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaAudioBuffer.cpp)
-		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaAudioBufferPlayer.h)
-		list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaAudioBufferPlayer.cpp)
+		list(APPEND PRIVATE_HEADERS
+			${NCINE_ROOT}/src/include/LuaIAudioPlayer.h
+			${NCINE_ROOT}/src/include/LuaAudioStreamPlayer.h
+			${NCINE_ROOT}/src/include/LuaAudioBuffer.h
+			${NCINE_ROOT}/src/include/LuaAudioBufferPlayer.h
+		)
+
+		list(APPEND SOURCES
+			${NCINE_ROOT}/src/scripting/LuaIAudioPlayer.cpp
+			${NCINE_ROOT}/src/scripting/LuaAudioStreamPlayer.cpp
+			${NCINE_ROOT}/src/scripting/LuaAudioBuffer.cpp
+			${NCINE_ROOT}/src/scripting/LuaAudioBufferPlayer.cpp
+		)
 	endif()
 
-	if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+	if("${CMAKE_SYSTEM_NAME}" STREQUAL "Android")
 		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaAndroidEvents.h)
 		list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaAndroidEvents.cpp)
 	else()
@@ -207,30 +233,36 @@ endif()
 if(WITH_IMGUI)
 	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_IMGUI")
 
-	list(APPEND HEADERS ${IMGUI_SOURCE_DIR}/imgui.h)
-	list(APPEND HEADERS ${IMGUI_SOURCE_DIR}/imconfig.h)
-	list(APPEND PRIVATE_HEADERS ${IMGUI_SOURCE_DIR}/imgui_internal.h)
-	list(APPEND PRIVATE_HEADERS ${IMGUI_SOURCE_DIR}/imstb_rectpack.h)
-	list(APPEND PRIVATE_HEADERS ${IMGUI_SOURCE_DIR}/imstb_textedit.h)
-	list(APPEND PRIVATE_HEADERS ${IMGUI_SOURCE_DIR}/imstb_truetype.h)
+	list(APPEND HEADERS
+		${IMGUI_SOURCE_DIR}/imgui.h
+		${IMGUI_SOURCE_DIR}/imconfig.h
+	)
 
-	list(APPEND SOURCES ${IMGUI_SOURCE_DIR}/imgui.cpp)
-	list(APPEND SOURCES ${IMGUI_SOURCE_DIR}/imgui_draw.cpp)
-	list(APPEND SOURCES ${IMGUI_SOURCE_DIR}/imgui_widgets.cpp)
-	list(APPEND SOURCES ${IMGUI_SOURCE_DIR}/imgui_demo.cpp)
+	list(APPEND PRIVATE_HEADERS
+		${IMGUI_SOURCE_DIR}/imgui_internal.h
+		${IMGUI_SOURCE_DIR}/imstb_rectpack.h
+		${IMGUI_SOURCE_DIR}/imstb_textedit.h
+		${IMGUI_SOURCE_DIR}/imstb_truetype.h
+		${NCINE_ROOT}/src/include/ImGuiDrawing.h
+		${NCINE_ROOT}/src/include/ImGuiJoyMappedInput.h
+	)
 
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ImGuiDrawing.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/ImGuiDrawing.cpp)
+	list(APPEND SOURCES
+		${IMGUI_SOURCE_DIR}/imgui.cpp
+		${IMGUI_SOURCE_DIR}/imgui_draw.cpp
+		${IMGUI_SOURCE_DIR}/imgui_widgets.cpp
+		${IMGUI_SOURCE_DIR}/imgui_demo.cpp
+		${NCINE_ROOT}/src/graphics/ImGuiDrawing.cpp
+		${NCINE_ROOT}/src/input/ImGuiJoyMappedInput.cpp
+	)
 
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ImGuiJoyMappedInput.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/input/ImGuiJoyMappedInput.cpp)
 	if(GLFW_FOUND)
 		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ImGuiGlfwInput.h)
 		list(APPEND SOURCES ${NCINE_ROOT}/src/input/ImGuiGlfwInput.cpp)
 	elseif(SDL2_FOUND)
 		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ImGuiSdlInput.h)
 		list(APPEND SOURCES ${NCINE_ROOT}/src/input/ImGuiSdlInput.cpp)
-	elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
+	elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Android")
 		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ImGuiAndroidInput.h)
 		list(APPEND SOURCES ${NCINE_ROOT}/src/android/ImGuiAndroidInput.cpp)
 	endif()
@@ -259,7 +291,7 @@ if(NCINE_BUILD_ANDROID)
 	)
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Android")
 	list(APPEND PRIVATE_HEADERS
 		${NCINE_ROOT}/src/include/AndroidInputManager.h
 		${NCINE_ROOT}/src/include/AndroidJniHelper.h
