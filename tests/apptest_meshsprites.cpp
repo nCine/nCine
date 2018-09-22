@@ -251,12 +251,13 @@ void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
+	nc::Application::RenderingSettings &renderingSettings = nc::theApplication().renderingSettings();
+	nc::IDebugOverlay::DisplaySettings &overlaySettings = nc::theApplication().debugOverlaySettings();
 
 	if (event.sym == nc::KeySym::B)
-		settings.batchingEnabled = !settings.batchingEnabled;
+		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
 	else if (event.sym == nc::KeySym::C)
-		settings.cullingEnabled = !settings.cullingEnabled;
+		renderingSettings.cullingEnabled = !renderingSettings.cullingEnabled;
 	else if (event.sym == nc::KeySym::T)
 	{
 		withAtlas_ = !withAtlas_;
@@ -269,9 +270,11 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 	}
 	else if (event.sym == nc::KeySym::H)
 	{
-		settings.showProfilerGraphs = !settings.showProfilerGraphs;
-		settings.showInfoText = !settings.showInfoText;
+		overlaySettings.showProfilerGraphs = !overlaySettings.showProfilerGraphs;
+		overlaySettings.showInfoText = !overlaySettings.showInfoText;
 	}
+	else if (event.sym == nc::KeySym::BACKQUOTE)
+		overlaySettings.showInterface = !overlaySettings.showInterface;
 	else if (event.sym == nc::KeySym::P)
 		pause_ = !pause_;
 	else if (event.sym == nc::KeySym::R)
@@ -313,12 +316,13 @@ void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 
 void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event)
 {
-	nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
+	nc::Application::RenderingSettings &renderingSettings = nc::theApplication().renderingSettings();
+	nc::IDebugOverlay::DisplaySettings &overlaySettings = nc::theApplication().debugOverlaySettings();
 
 	if (event.buttonName == nc::ButtonName::A)
-		settings.batchingEnabled = !settings.batchingEnabled;
+		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
 	else if (event.buttonName == nc::ButtonName::Y)
-		settings.cullingEnabled = !settings.cullingEnabled;
+		renderingSettings.cullingEnabled = !renderingSettings.cullingEnabled;
 	else if (event.buttonName == nc::ButtonName::X)
 	{
 		withAtlas_ = !withAtlas_;
@@ -331,8 +335,8 @@ void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &e
 	}
 	else if (event.buttonName == nc::ButtonName::BACK)
 	{
-		settings.showProfilerGraphs = !settings.showProfilerGraphs;
-		settings.showInfoText = !settings.showInfoText;
+		overlaySettings.showProfilerGraphs = !overlaySettings.showProfilerGraphs;
+		overlaySettings.showInfoText = !overlaySettings.showInfoText;
 	}
 	else if (event.buttonName == nc::ButtonName::START)
 		pause_ = !pause_;

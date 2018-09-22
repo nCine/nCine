@@ -34,11 +34,13 @@ class DLL_PUBLIC IInputManager
 
 	IInputManager() { }
 	virtual ~IInputManager() { }
+	/// Gets the current input event handler for the manager
+	static inline IInputEventHandler *handler() { return inputEventHandler_; }
 	/// Sets the input event handler for the manager
 	static void setHandler(IInputEventHandler *inputEventHandler);
 
 	/// Returns current mouse state
-	virtual const MouseState &mouseState() = 0;
+	virtual const MouseState &mouseState() const = 0;
 	/// Returns current keyboard state
 	virtual const KeyboardState &keyboardState() const = 0;
 
@@ -66,6 +68,8 @@ class DLL_PUBLIC IInputManager
 	void addJoyMappingsFromFile(const char *filename);
 	/// Adds joystick mapping configurations from a strings array terminated by a `nullptr`
 	void addJoyMappingsFromStrings(const char **mappingStrings);
+	/// Returns the current number of valid joystick mappings
+	unsigned int numJoyMappings() const;
 
 	/// Returns current mouse cursor mode
 	inline MouseCursorMode mouseCursorMode() const { return mouseCursorMode_; }

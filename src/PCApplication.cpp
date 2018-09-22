@@ -1,4 +1,5 @@
 #include "PCApplication.h"
+#include "Timer.h"
 #include "IAppEventHandler.h"
 #include "FileLogger.h"
 
@@ -38,6 +39,9 @@ void PCApplication::start(IAppEventHandler * (*createAppEventHandler)())
 
 void PCApplication::init(IAppEventHandler * (*createAppEventHandler)())
 {
+	profileTimer_ = nctl::makeUnique<Timer>();
+	profileTimer_->start();
+
 	appEventHandler_ = nctl::UniquePtr<IAppEventHandler>(createAppEventHandler());
 	appEventHandler_->onPreInit(appCfg_);
 
@@ -58,6 +62,8 @@ void PCApplication::init(IAppEventHandler * (*createAppEventHandler)())
 	nctl::String windowIconFilePath = IFile::dataPath() + appCfg_.windowIconFilename();
 	if (IFile::access(windowIconFilePath.data(), IFile::AccessMode::EXISTS))
 		gfxDevice_->setWindowIcon(windowIconFilePath.data());
+
+	timings_[Timings::PRE_INIT] = profileTimer_->interval();
 
 	initCommon();
 }

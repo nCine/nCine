@@ -63,6 +63,7 @@ class JoyMapping
 	bool addMappingFromString(const char *mappingString);
 	void addMappingsFromStrings(const char **mappingStrings);
 	void addMappingsFromFile(const char *filename);
+	inline unsigned int numMappings() const { return mappings_.size(); }
 
 	void onJoyButtonPressed(const JoyButtonEvent &event);
 	void onJoyButtonReleased(const JoyButtonEvent &event);

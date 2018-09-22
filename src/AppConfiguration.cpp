@@ -32,8 +32,13 @@ AppConfiguration::AppConfiguration()
 	, windowIconFilename_(128)
 	, fontTexFilename_(128)
 	, fontFntFilename_(128)
+#ifdef WITH_IMGUI
+	, vboSize_(512 * 1024)
+	, iboSize_(128 * 1024)
+#else
 	, vboSize_(64 * 1024)
 	, iboSize_(8 * 1024)
+#endif
 	, vaoPoolSize_(16)
 #ifdef NCINE_DEBUG
 	, withProfilerGraphs_(true)

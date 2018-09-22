@@ -131,7 +131,7 @@ class AndroidInputManager : public IInputManager
 	/// Allows the application to make use of the accelerometer
 	static void enableAccelerometer(bool enabled);
 
-	inline const MouseState &mouseState() override { return mouseState_; }
+	inline const MouseState &mouseState() const override { return mouseState_; }
 	inline const KeyboardState &keyboardState() const override { return keyboardState_; }
 
 	/// Parses an Android sensor event related to the accelerometer

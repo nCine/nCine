@@ -25,7 +25,16 @@ class DLL_PUBLIC ILogger
 	virtual ~ILogger() = 0;
 
 	/// Logs a message with a specified level of severity
-	virtual void write(LogLevel level, const char *fmt, ...) = 0;
+	virtual unsigned int write(LogLevel level, const char *fmt, ...) = 0;
+
+	/// Returns the log string with all the recorded log entries
+	virtual const char *logString() const = 0;
+	/// Clears the entries from the log string
+	virtual void clearLogString() = 0;
+	/// Returns the length of the log string
+	virtual unsigned int logStringLength() const = 0;
+	/// Returns the capacity of the log string
+	virtual unsigned int logStringCapacity() const = 0;
 };
 
 inline ILogger::~ILogger() { }
@@ -35,7 +44,11 @@ inline ILogger::~ILogger() { }
 class DLL_PUBLIC NullLogger : public ILogger
 {
   public:
-	void write(LogLevel level, const char *fmt, ...) override { }
+	inline unsigned int write(LogLevel level, const char *fmt, ...) override { return 0; }
+	inline const char *logString() const override { return nullptr; }
+	inline void clearLogString() override { }
+	inline unsigned int logStringLength() const override { return 0; }
+	inline unsigned int logStringCapacity() const override { return 0; }
 };
 
 }

@@ -101,10 +101,8 @@ class RenderStatistics
 	/// Returns the number of `DrawableNodes` culled because outside of the screen
 	static inline unsigned int culled() { return culledNodes_[(index_ + 1) % 2]; }
 
-	/// Appends commands statistics to the string passed as argument
-	static void appendCommandsStatistics(nctl::String &string);
-	/// Appends additional statistics to the string passed as argument
-	static void appendMoreStatistics(nctl::String &string);
+	/// Returns statistics about the VAO pool
+	static inline const VaoPool &vaoPool() { return vaoPool_; }
 
   private:
 	/// The string used to output OpenGL debug group information

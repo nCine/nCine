@@ -7,11 +7,6 @@ set(PRIVATE_HEADERS
 	${NCINE_ROOT}/src/include/JoyMapping.h
 	${NCINE_ROOT}/src/input/JoyMappingDb.h
 	${NCINE_ROOT}/src/include/FontGlyph.h
-	${NCINE_ROOT}/src/include/ProfileVariable.h
-	${NCINE_ROOT}/src/include/PlottingVariable.h
-	${NCINE_ROOT}/src/include/ProfilePlotter.h
-	${NCINE_ROOT}/src/include/LinePlotter.h
-	${NCINE_ROOT}/src/include/StackedBarPlotter.h
 	${NCINE_ROOT}/src/include/GfxCapabilities.h
 	${NCINE_ROOT}/src/include/RenderResources.h
 	${NCINE_ROOT}/src/include/RenderCommand.h

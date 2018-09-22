@@ -3,6 +3,7 @@
 
 #include "IGfxDevice.h"
 #include "AppConfiguration.h"
+#include "IDebugOverlay.h"
 #include "nctl/UniquePtr.h"
 
 namespace ncine {
@@ -11,9 +12,6 @@ class FrameTimer;
 class Timer;
 class SceneNode;
 class RenderQueue;
-class ProfilePlotter;
-class Font;
-class TextNode;
 class IInputManager;
 class IAppEventHandler;
 class ImGuiDrawing;
@@ -26,8 +24,8 @@ class DLL_PUBLIC Application
 	struct RenderingSettings
 	{
 		RenderingSettings() :
-			batchingEnabled(true), batchingWithIndices(false), cullingEnabled(true),
-			minBatchSize(4), maxBatchSize(500), showProfilerGraphs(true), showInfoText(true) { }
+			batchingEnabled(true), batchingWithIndices(false),
+			cullingEnabled(true), minBatchSize(4), maxBatchSize(500) { }
 
 		/// True if batching is enabled
 		bool batchingEnabled;
@@ -39,16 +37,38 @@ class DLL_PUBLIC Application
 		unsigned int minBatchSize;
 		/// Maximum size for a batch before a forced split
 		unsigned int maxBatchSize;
-		/// True if showing the profiler graphc
-		bool showProfilerGraphs;
-		/// True if showing the information text
-		bool showInfoText;
+	};
+
+	struct Timings
+	{
+		enum {
+			PRE_INIT,
+			INIT_COMMON,
+			APP_INIT,
+			FRAME_START,
+			UPDATE_VISIT_DRAW,
+			UPDATE,
+			VISIT,
+			DRAW,
+			IMGUI,
+			FRAME_END,
+
+			COUNT
+		};
 	};
 
 	/// Returns the configuration used to initialize the application
 	inline const AppConfiguration &appConfiguration() const { return appCfg_; }
 	/// Returns the run-time rendering settings
 	inline RenderingSettings &renderingSettings() { return renderingSettings_; }
+	/// Returns the debug overlay object, if any
+	inline IDebugOverlay::DisplaySettings &debugOverlaySettings()
+	{
+		return (debugOverlay_) ? debugOverlay_->settings() : debugOverlayNullSettings_;
+	}
+
+	/// Returns all timings
+	inline const float *timings() const { return timings_; }
 
 	/// Returns the graphics device instance
 	inline IGfxDevice &gfxDevice() { return *gfxDevice_; }
@@ -94,29 +114,22 @@ class DLL_PUBLIC Application
 	bool shouldQuit_;
 	AppConfiguration appCfg_;
 	RenderingSettings renderingSettings_;
+	float timings_[Timings::COUNT];
+	IDebugOverlay::DisplaySettings debugOverlayNullSettings_;
+
+	nctl::UniquePtr<Timer> profileTimer_;
 	nctl::UniquePtr<FrameTimer> frameTimer_;
 	nctl::UniquePtr<IGfxDevice> gfxDevice_;
 	nctl::UniquePtr<RenderQueue> renderQueue_;
 	nctl::UniquePtr<SceneNode> rootNode_;
-	nctl::UniquePtr<Timer> profileTimer_;
-	nctl::UniquePtr<ProfilePlotter> profilePlotter_;
-	nctl::UniquePtr<Font> font_;
-	nctl::UniquePtr<TextNode> infoLineTopLeft_;
-	nctl::UniquePtr<TextNode> infoLineTopRight_;
-	nctl::UniquePtr<TextNode> infoLineBottomLeft_;
-	nctl::UniquePtr<TextNode> infoLineBottomRight_;
-	float textUpdateTime_;
-	nctl::String infoStringTopLeft_;
-	nctl::String infoStringTopRight_;
-	nctl::String infoStringBottomRight_;
+	nctl::UniquePtr<IDebugOverlay> debugOverlay_;
 	nctl::UniquePtr<IInputManager> inputManager_;
 	nctl::UniquePtr<IAppEventHandler> appEventHandler_;
 #ifdef WITH_IMGUI
 	nctl::UniquePtr<ImGuiDrawing> imguiDrawing_;
 #endif
 
-	Application();
-	~Application();
+	Application() : isPaused_(false), hasFocus_(true), shouldQuit_(false) { }
 
 	/// Must be called before giving control to the application
 	void initCommon();

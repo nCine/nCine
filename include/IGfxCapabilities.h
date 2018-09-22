@@ -17,6 +17,15 @@ class DLL_PUBLIC IGfxCapabilities
 		RELEASE
 	};
 
+	/// OpenGL information strings
+	struct GlInfoStrings
+	{
+		const unsigned char *vendor = nullptr;
+		const unsigned char *renderer = nullptr;
+		const unsigned char *glVersion = nullptr;
+		const unsigned char *glslVersion = nullptr;
+	};
+
 	/// OpenGL queryable runtime integer values
 	struct GLIntValues
 	{
@@ -55,6 +64,8 @@ class DLL_PUBLIC IGfxCapabilities
 
 	/// Returns the OpenGL version numbers
 	virtual int glVersion(GLVersion version) const = 0;
+	/// Returns the OpenGL information strings structure
+	virtual const GlInfoStrings &glInfoStrings() const = 0;
 	/// Returns the value of a runtime OpenGL integer value
 	virtual int value(GLIntValues::Enum valueName) const = 0;
 	/// Returns true if the specified OpenGL extension is available
@@ -68,9 +79,13 @@ inline IGfxCapabilities::~IGfxCapabilities() { }
 class DLL_PUBLIC NullGfxCapabilities : public IGfxCapabilities
 {
   public:
-	int glVersion(GLVersion version) const override { return 0; }
-	int value(GLIntValues::Enum valueName) const override { return 0; }
-	bool hasExtension(GLExtensions::Enum extensionName) const override { return false; }
+	inline int glVersion(GLVersion version) const override { return 0; }
+	inline const GlInfoStrings &glInfoStrings() const override { return glInfoStrings_; };
+	inline int value(GLIntValues::Enum valueName) const override { return 0; }
+	inline bool hasExtension(GLExtensions::Enum extensionName) const override { return false; }
+
+  private:
+	GlInfoStrings glInfoStrings_;
 };
 
 }

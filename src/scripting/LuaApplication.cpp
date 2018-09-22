@@ -17,6 +17,9 @@ namespace Application
 	static const char *renderingSettings = "get_rendering_settings";
 	static const char *setRenderingSettings = "set_rendering_settings";
 
+	static const char *debugOVerlaySettings = "get_debugoverlay_settings";
+	static const char *setDebugOverlaySettings = "set_debugoverlay_settings";
+
 	static const char *rootNode = "rootnode";
 	static const char *interval = "interval";
 
@@ -39,8 +42,13 @@ namespace Application
 		static const char *cullingEnabled = "culling";
 		static const char *minBatchSize = "min_batch_size";
 		static const char *maxBatchSize = "max_batch_size";
+	}
+
+	namespace DebugOverlaySettings
+	{
 		static const char *showProfilerGraphs = "profiler_graphs";
 		static const char *showInfoText = "info_text";
+		static const char *showInterface = "interface";
 	}
 }}
 
@@ -54,6 +62,9 @@ void LuaApplication::expose(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::Application::renderingSettings, renderingSettings);
 	LuaUtils::addFunction(L, LuaNames::Application::setRenderingSettings, setRenderingSettings);
+
+	LuaUtils::addFunction(L, LuaNames::Application::debugOVerlaySettings, debugOverlaySettings);
+	LuaUtils::addFunction(L, LuaNames::Application::setDebugOverlaySettings, setDebugOverlaySettings);
 
 	LuaUtils::addFunction(L, LuaNames::Application::rootNode, rootNode);
 	LuaUtils::addFunction(L, LuaNames::Application::interval, interval);
@@ -82,14 +93,12 @@ int LuaApplication::renderingSettings(lua_State *L)
 {
 	const Application::RenderingSettings &settings = theApplication().renderingSettings();
 
-	lua_newtable(L);
+	lua_createtable(L, 5, 0);
 	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::batchingEnabled, settings.batchingEnabled);
 	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::batchingWithIndices, settings.batchingWithIndices);
 	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::cullingEnabled, settings.cullingEnabled);
 	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::minBatchSize, settings.minBatchSize);
 	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::maxBatchSize, settings.maxBatchSize);
-	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::showProfilerGraphs, settings.showProfilerGraphs);
-	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::showInfoText, settings.showInfoText);
 
 	return 1;
 }
@@ -106,8 +115,32 @@ int LuaApplication::setRenderingSettings(lua_State *L)
 	settings.cullingEnabled = LuaUtils::retrieveField<bool>(L, -1, LuaNames::Application::RenderingSettings::cullingEnabled);
 	settings.minBatchSize = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::Application::RenderingSettings::minBatchSize);
 	settings.maxBatchSize = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::Application::RenderingSettings::maxBatchSize);
-	settings.showProfilerGraphs = LuaUtils::retrieveField<bool>(L, -1, LuaNames::Application::RenderingSettings::showProfilerGraphs);
-	settings.showInfoText = LuaUtils::retrieveField<bool>(L, -1, LuaNames::Application::RenderingSettings::showInfoText);
+
+	return 0;
+}
+
+int LuaApplication::debugOverlaySettings(lua_State *L)
+{
+	const IDebugOverlay::DisplaySettings &settings = theApplication().debugOverlaySettings();
+
+	lua_createtable(L, 3, 0);
+	LuaUtils::pushField(L, LuaNames::Application::DebugOverlaySettings::showProfilerGraphs, settings.showProfilerGraphs);
+	LuaUtils::pushField(L, LuaNames::Application::DebugOverlaySettings::showInfoText, settings.showInfoText);
+	LuaUtils::pushField(L, LuaNames::Application::DebugOverlaySettings::showInterface, settings.showInterface);
+
+	return 1;
+}
+
+int LuaApplication::setDebugOverlaySettings(lua_State *L)
+{
+	if (lua_istable(L, -1) == false)
+		luaL_argerror(L, -1, "Expecting a table");
+
+	IDebugOverlay::DisplaySettings &settings = theApplication().debugOverlaySettings();
+
+	settings.showProfilerGraphs = LuaUtils::retrieveField<bool>(L, -1, LuaNames::Application::DebugOverlaySettings::showProfilerGraphs);
+	settings.showInfoText = LuaUtils::retrieveField<bool>(L, -1, LuaNames::Application::DebugOverlaySettings::showInfoText);
+	settings.showInterface = LuaUtils::retrieveField<bool>(L, -1, LuaNames::Application::DebugOverlaySettings::showInterface);
 
 	return 0;
 }

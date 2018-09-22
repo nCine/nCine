@@ -2,6 +2,7 @@
 #define CLASS_NCINE_LUASTATISTICS
 
 #include "nctl/Array.h"
+#include "LuaTypes.h"
 #include "Timer.h"
 
 namespace nctl {
@@ -18,12 +19,20 @@ class LuaStateManager;
 class LuaStatistics
 {
   public:
-	static void appendStatistics(nctl::String &string);
+	static void update();
+
+	static inline unsigned int numRegistered() { return managers_.size(); }
+	static inline unsigned int numTrackedUserDatas() { return numTrackedUserDatas_; }
+	static inline unsigned int numTypedUserDatas(LuaTypes::UserDataType type) { return numTypedUserDatas_[type]; }
+	static inline size_t usedMemory() { return usedMemory_; }
+	static inline int operations() { return operations_[(index_ + 1) % 2]; }
 
   private:
 	static const int OperationsCount = 1000;
 
 	static nctl::Array<LuaStateManager *> managers_;
+	static unsigned int numTrackedUserDatas_;
+	static unsigned int numTypedUserDatas_[LuaTypes::UserDataType::UNKNOWN + 1];
 	static size_t usedMemory_;
 	static Timer timer_;
 	static unsigned int index_;
@@ -33,7 +42,7 @@ class LuaStatistics
 	static void unregisterState(LuaStateManager *manager);
 
 	static inline void allocMemory(size_t bytes) { usedMemory_ += bytes; }
-	static inline void freeMemory(size_t bytes) { usedMemory_ -= bytes; }
+	static inline void freeMemory(size_t bytes) { usedMemory_ -= (usedMemory_ >= bytes) ? bytes : usedMemory_; }
 	static void countOperations();
 
 	friend class LuaStateManager;

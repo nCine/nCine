@@ -52,4 +52,9 @@ void IInputManager::addJoyMappingsFromStrings(const char **mappingStrings)
 	joyMapping_.addMappingsFromStrings(mappingStrings);
 }
 
+unsigned int IInputManager::numJoyMappings() const
+{
+	return joyMapping_.numMappings();
+}
+
 }

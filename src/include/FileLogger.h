@@ -14,12 +14,32 @@ class FileLogger : public ILogger
 	FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fileLevel);
 	~FileLogger() override;
 
-	void write(LogLevel level, const char *fmt, ...) override;
+	unsigned int write(LogLevel level, const char *fmt, ...) override;
+
+#ifdef WITH_IMGUI
+	inline const char *logString() const override { return logString_.data(); }
+	inline void clearLogString() override { logString_.clear(); }
+	inline unsigned int logStringLength() const override { return logString_.length(); }
+	inline unsigned int logStringCapacity() const override { return logString_.capacity(); }
+#else
+	inline const char *logString() const override { return nullptr; }
+	inline void clearLogString() override { }
+	inline unsigned int logStringLength() const override { return 0; }
+	inline unsigned int logStringCapacity() const override { return 0; }
+#endif
 
   private:
 	nctl::UniquePtr<IFile> fileHandle_;
 	LogLevel consoleLevel_;
 	LogLevel fileLevel_;
+
+	static const unsigned int MaxEntryLength = 512;
+	char logEntry_[MaxEntryLength];
+
+#ifdef WITH_IMGUI
+	static const unsigned int LogStringCapacity = 16 * 1024;
+	nctl::String logString_;
+#endif
 
 	/// Deleted copy constructor
 	FileLogger(const FileLogger &) = delete;

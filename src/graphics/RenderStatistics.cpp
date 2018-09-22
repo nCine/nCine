@@ -1,4 +1,4 @@
-#include "RenderStatistics.h"
+﻿#include "RenderStatistics.h"
 
 namespace ncine {
 
@@ -16,68 +16,6 @@ RenderStatistics::CustomBuffers RenderStatistics::customIbos_;
 unsigned int RenderStatistics::index_ = 0;
 unsigned int RenderStatistics::culledNodes_[2] = {0, 0};
 RenderStatistics::VaoPool RenderStatistics::vaoPool_;
-
-///////////////////////////////////////////////////////////
-// PUBLIC FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void RenderStatistics::appendCommandsStatistics(nctl::String &string)
-{
-	const Commands &spriteCommands = typedCommands_[RenderCommand::CommandTypes::SPRITE];
-	const Commands &meshspriteCommands = typedCommands_[RenderCommand::CommandTypes::MESH_SPRITE];
-	const Commands &particleCommands = typedCommands_[RenderCommand::CommandTypes::PARTICLE];
-	const Commands &textCommands = typedCommands_[RenderCommand::CommandTypes::TEXT];
-	const Commands &plotterCommands = typedCommands_[RenderCommand::CommandTypes::PLOTTER];
-#ifdef WITH_IMGUI
-	const Commands &imguiCommands = typedCommands_[RenderCommand::CommandTypes::IMGUI];
-#endif
-
-	string.formatAppend(
-		"Sprites: %uV, %uDC (%u Tr), %uI/%uB\n"\
-		"Mesh Sprites: %uV, %uDC (%u Tr), %uI/%uB\n"\
-		"Particles: %uV, %uDC (%u Tr), %uI/%uB\n"\
-		"Text: %uV, %uDC (%u Tr), %uI/%uB\n"\
-		"Plotter: %uV, %uDC (%u Tr), %uI/%uB\n"
-#ifdef WITH_IMGUI
-		"ImGui: %uV, %uDC (%u Tr), %uI/%uB\n"
-#endif
-		"Total: %uV, %uDC (%u Tr), %uI/%uB\n",
-		spriteCommands.vertices, spriteCommands.commands, spriteCommands.transparents, spriteCommands.instances, spriteCommands.batchSize,
-		meshspriteCommands.vertices, meshspriteCommands.commands, meshspriteCommands.transparents, meshspriteCommands.instances, meshspriteCommands.batchSize,
-		particleCommands.vertices, particleCommands.commands, particleCommands.transparents, particleCommands.instances, particleCommands.batchSize,
-		textCommands.vertices, textCommands.commands, textCommands.transparents, textCommands.instances, textCommands.batchSize,
-		plotterCommands.vertices, plotterCommands.commands, plotterCommands.transparents, plotterCommands.instances, plotterCommands.batchSize,
-#ifdef WITH_IMGUI
-		imguiCommands.vertices, imguiCommands.commands, imguiCommands.transparents, imguiCommands.instances, imguiCommands.batchSize,
-#endif
-		allCommands_.vertices, allCommands_.commands, allCommands_.transparents, allCommands_.instances, allCommands_.batchSize);
-}
-
-void RenderStatistics::appendMoreStatistics(nctl::String &string)
-{
-	const Buffers &vboBuffers = typedBuffers_[RenderBuffersManager::BufferTypes::ARRAY];
-	const Buffers &iboBuffers = typedBuffers_[RenderBuffersManager::BufferTypes::ELEMENT_ARRAY];
-	const Buffers &uboBuffers = typedBuffers_[RenderBuffersManager::BufferTypes::UNIFORM];
-
-	string.formatAppend(
-		"Culled nodes: %u\n"\
-		"%u/%u VAOs (%u reuses, %u bindings)\n"\
-		"%.2f Kb in %u Texture(s)\n"\
-		"%.2f Kb in %u custom VBO(s)\n"\
-		"%.2f Kb in %u custom IBO(s)\n"\
-		"%.2f/%u Kb in %u VBO(s)\n"\
-		"%.2f/%u Kb in %u IBO(s)\n"\
-		"%.2f/%u Kb in %u UBO(s)\n",
-		culledNodes_[(index_ + 1) % 2],
-		vaoPool_.size, vaoPool_.capacity, vaoPool_.reuses, vaoPool_.bindings,
-		textures_.dataSize / 1024.0f, textures_.count,
-		customVbos_.dataSize / 1024.0f, customVbos_.count,
-		customIbos_.dataSize / 1024.0f, customIbos_.count,
-		vboBuffers.usedSpace / 1024.0f, vboBuffers.size / 1024, vboBuffers.count,
-		iboBuffers.usedSpace / 1024.0f, iboBuffers.size / 1024, iboBuffers.count,
-		uboBuffers.usedSpace / 1024.0f, uboBuffers.size / 1024, uboBuffers.count);
-}
-
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS

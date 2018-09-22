@@ -74,6 +74,11 @@ void GfxCapabilities::init()
 	sscanf(pVersion, "OpenGL ES %2d.%2d", &glMajorVersion_, &glMinorVersion_);
 #endif
 
+	glInfoStrings_.vendor = glGetString(GL_VENDOR);
+	glInfoStrings_.renderer = glGetString(GL_RENDERER);
+	glInfoStrings_.glVersion = glGetString(GL_VERSION);
+	glInfoStrings_.glslVersion = glGetString(GL_SHADING_LANGUAGE_VERSION);
+
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &glIntValues_[GLIntValues::MAX_TEXTURE_SIZE]);
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &glIntValues_[GLIntValues::MAX_TEXTURE_IMAGE_UNITS]);
 	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &glIntValues_[GLIntValues::MAX_UNIFORM_BLOCK_SIZE]);
@@ -97,10 +102,10 @@ void GfxCapabilities::init()
 void GfxCapabilities::logGLInfo()
 {
 	LOGI("--- OpenGL device info ---");
-	LOGI_X("Vendor: %s", glGetString(GL_VENDOR));
-	LOGI_X("Renderer: %s", glGetString(GL_RENDERER));
-	LOGI_X("OpenGL Version: %s", glGetString(GL_VERSION));
-	LOGI_X("GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	LOGI_X("Vendor: %s", glInfoStrings_.vendor);
+	LOGI_X("Renderer: %s", glInfoStrings_.renderer);
+	LOGI_X("OpenGL Version: %s", glInfoStrings_.glVersion);
+	LOGI_X("GLSL Version: %s", glInfoStrings_.glslVersion);
 	LOGI("--- OpenGL device info ---");
 }
 

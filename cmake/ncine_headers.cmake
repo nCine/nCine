@@ -42,6 +42,7 @@ set(HEADERS
 	${NCINE_ROOT}/include/Application.h
 	${NCINE_ROOT}/include/PCApplication.h
 	${NCINE_ROOT}/include/AppConfiguration.h
+	${NCINE_ROOT}/include/IDebugOverlay.h
 	${NCINE_ROOT}/include/ParticleAffectors.h
 	${NCINE_ROOT}/include/ParticleSystem.h
 	${NCINE_ROOT}/include/ParticleInitializer.h

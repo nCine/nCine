@@ -12,6 +12,7 @@ class GfxCapabilities : public IGfxCapabilities
 	GfxCapabilities();
 
 	int glVersion(GLVersion version) const override;
+	inline const GlInfoStrings &glInfoStrings() const override { return glInfoStrings_; }
 	int value(GLIntValues::Enum valueName) const override;
 	bool hasExtension(GLExtensions::Enum extensionName) const override;
 
@@ -20,6 +21,8 @@ class GfxCapabilities : public IGfxCapabilities
 	int glMinorVersion_;
 	/// The OpenGL release version number (not available in OpenGL ES)
 	int glReleaseVersion_;
+
+	GlInfoStrings glInfoStrings_;
 
 	/// Array of OpenGL integer values
 	int glIntValues_[IGfxCapabilities::GLIntValues::COUNT];

@@ -111,7 +111,7 @@ class SdlInputManager : public IInputManager
 
 	static void parseEvent(const SDL_Event &event);
 
-	inline const MouseState &mouseState() override
+	inline const MouseState &mouseState() const override
 	{
 		mouseState_.buttons_ = SDL_GetMouseState(&mouseState_.x, &mouseState_.y);
 		return mouseState_;

@@ -121,7 +121,7 @@ class GlfwInputManager : public IInputManager
 	/// Updates joystick state structures and simulates events
 	static void updateJoystickStates();
 
-	const MouseState &mouseState() override;
+	const MouseState &mouseState() const override;
 	inline const KeyboardState &keyboardState() const override { return keyboardState_; }
 
 	bool isJoyPresent(int joyId) const override;
@@ -182,7 +182,7 @@ class GlfwInputManager : public IInputManager
 	static int enumToKeySymValue(KeySym keysym);
 };
 
-inline const MouseState &GlfwInputManager::mouseState()
+inline const MouseState &GlfwInputManager::mouseState() const
 {
 	double xCursor, yCursor;
 

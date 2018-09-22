@@ -9,6 +9,8 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 nctl::Array<LuaStateManager *> LuaStatistics::managers_(2);
+unsigned int LuaStatistics::numTrackedUserDatas_;
+unsigned int LuaStatistics::numTypedUserDatas_[LuaTypes::UserDataType::UNKNOWN + 1];
 size_t LuaStatistics::usedMemory_ = 0;
 Timer LuaStatistics::timer_;
 unsigned int LuaStatistics::index_ = 0;
@@ -18,40 +20,18 @@ int LuaStatistics::operations_[2] = { 0, 0 };
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void LuaStatistics::appendStatistics(nctl::String &string)
+void LuaStatistics::update()
 {
-	// Do not append statistics if there are no registered state managers
-	if (managers_.isEmpty())
-		return;
-
-	unsigned int numTrackedUserDatas = 0;
-	unsigned int numTypedUserDatas[LuaTypes::UserDataType::UNKNOWN + 1] = { };
+	numTrackedUserDatas_ = 0;
+	for (unsigned int i = 0; i < LuaTypes::UserDataType::UNKNOWN + 1; i++)
+		numTypedUserDatas_[i] = 0;
 
 	for (const LuaStateManager *manager : managers_)
 	{
-		numTrackedUserDatas += manager->trackedUserDatas_.size();
+		numTrackedUserDatas_ += manager->trackedUserDatas_.size();
 		for (const LuaStateManager::UserDataWrapper &wrapper : manager->trackedUserDatas_)
-			numTypedUserDatas[wrapper.type]++;
+			numTypedUserDatas_[wrapper.type]++;
 	}
-
-	string.formatAppend(
-		"Lua States: %u, %u tracked, %zu Kb, %d ops/s\n"\
-		"Textures: %u, Sprites: %u, Mesh sprites: %u\n"\
-		"Animated sprites: %u, Fonts: %u, Textnodes: %u\n"\
-		"Audio buffers: %u, Buffer players: %u\n"\
-		"Stream players: %u, Particle systems: %u",
-		managers_.size(), numTrackedUserDatas,
-		usedMemory_ / 1024, operations_[(index_ + 1) % 2],
-		numTypedUserDatas[LuaTypes::UserDataType::TEXTURE],
-		numTypedUserDatas[LuaTypes::UserDataType::SPRITE],
-		numTypedUserDatas[LuaTypes::UserDataType::MESH_SPRITE],
-		numTypedUserDatas[LuaTypes::UserDataType::ANIMATED_SPRITE],
-		numTypedUserDatas[LuaTypes::UserDataType::FONT],
-		numTypedUserDatas[LuaTypes::UserDataType::TEXTNODE],
-		numTypedUserDatas[LuaTypes::UserDataType::AUDIOBUFFER],
-		numTypedUserDatas[LuaTypes::UserDataType::AUDIOBUFFER_PLAYER],
-		numTypedUserDatas[LuaTypes::UserDataType::AUDIOSTREAM_PLAYER],
-		numTypedUserDatas[LuaTypes::UserDataType::PARTICLE_SYSTEM]);
 }
 
 ///////////////////////////////////////////////////////////

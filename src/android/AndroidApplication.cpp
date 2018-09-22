@@ -1,5 +1,6 @@
 #include "common_macros.h"
 #include "AndroidApplication.h"
+#include "Timer.h"
 #include "IAppEventHandler.h"
 #include "FileLogger.h"
 #include "EglGfxDevice.h"
@@ -202,6 +203,9 @@ const char *AndroidApplication::obbPath() const
 
 void AndroidApplication::preInit()
 {
+	profileTimer_ = nctl::makeUnique<Timer>();
+	profileTimer_->start();
+
 	appEventHandler_ = nctl::UniquePtr<IAppEventHandler>(createAppEventHandler_());
 	appEventHandler_->onPreInit(appCfg_);
 
@@ -230,6 +234,8 @@ void AndroidApplication::init()
 	AndroidJniHelper::attachJVM(state_);
 	inputManager_ = nctl::makeUnique<AndroidInputManager>(state_);
 	AssetFile::initAssetManager(state_);
+
+	timings_[Timings::PRE_INIT] = profileTimer_->interval();
 
 	Application::initCommon();
 

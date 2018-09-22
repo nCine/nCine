@@ -4,14 +4,11 @@
 #include "IFile.h"
 #include "ArrayIndexer.h"
 #include "GfxCapabilities.h"
-#include "RenderStatistics.h"
 #include "RenderResources.h"
+#include "RenderQueue.h"
 #include "GLDebug.h"
 #include "FrameTimer.h"
-#include "LinePlotter.h"
-#include "StackedBarPlotter.h"
-#include "Font.h"
-#include "TextNode.h"
+#include "SceneNode.h"
 #include "nctl/String.h"
 #include "IInputManager.h"
 #include "JoyMapping.h"
@@ -30,28 +27,14 @@
 
 #ifdef WITH_IMGUI
 	#include "ImGuiDrawing.h"
+	#include "ImGuiDebugOverlay.h"
+#else
+	#include "DebugOverlay.h"
 #endif
 
 #include "version.h"
 
 namespace ncine {
-
-///////////////////////////////////////////////////////////
-// CONSTRUCTORS AND DESTRUCTOR
-///////////////////////////////////////////////////////////
-
-Application::Application()
-	: isPaused_(false), hasFocus_(true), shouldQuit_(false),
-	  textUpdateTime_(0.0f), infoStringTopLeft_(MaxTextLength),
-	  infoStringTopRight_(MaxTextLength), infoStringBottomRight_(MaxTextLength)
-{
-
-}
-
-Application::~Application()
-{
-
-}
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -84,6 +67,8 @@ void Application::togglePause()
 
 void Application::initCommon()
 {
+	profileTimer_->start();
+
 #ifdef WITH_GIT_VERSION
 	LOGI_X("nCine %s (%s) compiled on %s at %s" , VersionStrings::Version, VersionStrings::GitBranch,
 		VersionStrings::CompilationDate, VersionStrings::CompilationTime);
@@ -110,7 +95,6 @@ void Application::initCommon()
 	gfxDevice_->update();
 
 	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.frameTimerLogInterval(), appCfg_.profileTextUpdateTime());
-	profileTimer_ = nctl::makeUnique<Timer>();
 
 #ifdef WITH_IMGUI
 	imguiDrawing_ = nctl::makeUnique<ImGuiDrawing>(appCfg_.withScenegraph());
@@ -123,82 +107,30 @@ void Application::initCommon()
 		renderQueue_ = nctl::makeUnique<RenderQueue>();
 		rootNode_ = nctl::makeUnique<SceneNode>();
 
-		if (appCfg_.withProfilerGraphs())
+		if (appCfg_.withProfilerGraphs() || appCfg_.withInfoText())
 		{
-			const Rectf rect(width() * 0.1f, height() * 0.1f, width() * 0.8f, height() * 0.15f);
-			profilePlotter_ = nctl::makeUnique<StackedBarPlotter>(rootNode_.get(), rect);
-			profilePlotter_->setBackgroundColor(Color(89, 89, 115, 128));
-			profilePlotter_->addVariable(50, 0.2f);
-			profilePlotter_->variable(0).setGraphColor(Color(204, 0, 0));
-			profilePlotter_->variable(0).setMeanColor(Color(255, 0, 0));
-			profilePlotter_->addVariable(50, 0.2f);
-			profilePlotter_->variable(1).setGraphColor(Color(0, 204, 0));
-			profilePlotter_->variable(1).setMeanColor(Color(0, 255, 0));
-			profilePlotter_->addVariable(50, 0.2f);
-			profilePlotter_->variable(2).setGraphColor(Color(0, 0, 204));
-			profilePlotter_->variable(2).setMeanColor(Color(0, 0, 255));
-
-			profilePlotter_->variable(0).setPlotMean(false);
-			profilePlotter_->variable(1).setPlotMean(false);
-			profilePlotter_->variable(2).setPlotMean(false);
-			profilePlotter_->setPlotRefValue(true);
-			profilePlotter_->setRefValue(1.0f / 60.0f); // 60 FPS
-		}
-
-		if (appCfg_.withInfoText())
-		{
-			nctl::String fontTexFilePath = IFile::dataPath() + appCfg_.fontTexFilename();
-			nctl::String fontFntFilePath = IFile::dataPath() + appCfg_.fontFntFilename();
-			if (IFile::access(fontTexFilePath.data(), IFile::AccessMode::EXISTS) == false)
-				LOGW_X("Cannot access font texture file \"%s\" to enable information text", fontTexFilePath.data());
-			else if (IFile::access(fontFntFilePath.data(), IFile::AccessMode::EXISTS) == false)
-				LOGW_X("Cannot access font FNT file \"%s\" to enable information text", fontFntFilePath.data());
-			else
-			{
-				font_ = nctl::makeUnique<Font>(fontTexFilePath.data(), fontFntFilePath.data());
-
-				infoLineTopLeft_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
-				infoLineTopLeft_->setLayer(DrawableNode::LayerBase::HUD + 3);
-				infoLineTopLeft_->setAlignment(TextNode::Alignment::LEFT);
-				infoLineTopLeft_->setScale(0.75f);
-
-				infoLineTopRight_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
-				infoLineTopRight_->setLayer(DrawableNode::LayerBase::HUD + 3);
-				infoLineTopRight_->setAlignment(TextNode::Alignment::RIGHT);
-				infoLineTopRight_->setScale(0.75f);
-
-				infoLineBottomLeft_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
-				infoLineBottomLeft_->setLayer(DrawableNode::LayerBase::HUD + 3);
-				infoLineBottomLeft_->setAlignment(TextNode::Alignment::LEFT);
-				infoLineBottomLeft_->setScale(0.75f);
-
-				infoLineBottomRight_ = nctl::makeUnique<TextNode>(rootNode_.get(), font_.get());
-				infoLineBottomRight_->setLayer(DrawableNode::LayerBase::HUD + 3);
-				infoLineBottomRight_->setAlignment(TextNode::Alignment::RIGHT);
-				infoLineBottomRight_->setScale(0.75f);
-
-				nctl::String infoStringBottomLeft(MaxTextLength);
-				#ifdef WITH_GIT_VERSION
-				infoStringBottomLeft.format("%s (%s)", VersionStrings::Version, VersionStrings::GitBranch);
-				#else
-				infoStringBottomLeft.format("%s at %s", VersionStrings::CompilationDate, VersionStrings::CompilationTime);
-				#endif
-				infoLineBottomLeft_->setString(infoStringBottomLeft);
-				infoLineBottomLeft_->setPosition(infoLineBottomLeft_->width() * 0.5f, infoLineBottomLeft_->height() * 0.75f);
-			}
+#ifdef WITH_IMGUI
+			debugOverlay_ = nctl::makeUnique<ImGuiDebugOverlay>(appCfg_);
+#else
+			debugOverlay_ = nctl::makeUnique<DebugOverlay>(appCfg_);
+#endif
 		}
 	}
 	else
 		RenderResources::createMinimal(); // some resources are still required for rendering
 
-	LOGI("Application initialized");
-
-	appEventHandler_->onInit();
-	LOGI("IAppEventHandler::OnInit() invoked");
-
 	// HACK: Init of the random seed
 	// In the future there could be a random generator service
 	srand(static_cast<unsigned int>(time(nullptr)));
+
+	LOGI("Application initialized");
+
+	timings_[Timings::INIT_COMMON] = profileTimer_->interval();
+
+	profileTimer_->start();
+	appEventHandler_->onInit();
+	timings_[Timings::APP_INIT] = profileTimer_->interval();
+	LOGI("IAppEventHandler::OnInit() invoked");
 
 	// Swapping frame now for a cleaner API trace capture when debugging
 	gfxDevice_->update();
@@ -211,76 +143,56 @@ void Application::step()
 		gfxDevice_->clear();
 
 #ifdef WITH_IMGUI
-	imguiDrawing_->newFrame();
-#endif
-
-	appEventHandler_->onFrameStart();
-	// Measuring OnFrameEnd() + OnFrameStart() time
-	if (profilePlotter_)
-		profilePlotter_->addValue(0, profileTimer_->interval());
-
-	if (profilePlotter_)
-		profilePlotter_->setEnabled(renderingSettings_.showProfilerGraphs);
-
-	if (infoLineTopLeft_ && infoLineTopRight_ && infoLineBottomLeft_ && infoLineBottomRight_)
-	{
-		infoLineTopLeft_->setEnabled(renderingSettings_.showInfoText);
-		infoLineTopRight_->setEnabled(renderingSettings_.showInfoText);
-		infoLineBottomLeft_->setEnabled(renderingSettings_.showInfoText);
-		infoLineBottomRight_->setEnabled(renderingSettings_.showInfoText);
-	}
-
 	profileTimer_->start();
-	if (rootNode_ != nullptr && renderQueue_ != nullptr)
-	{
-		rootNode_->update(frameTimer_->interval());
-		rootNode_->visit(*renderQueue_);
-		renderQueue_->draw();
-	}
-
-	if (renderQueue_ && infoLineTopLeft_ && infoLineTopRight_ && infoLineBottomLeft_ && infoLineBottomRight_ &&
-	    Timer::now() - textUpdateTime_ > appCfg_.profileTextUpdateTime())
-	{
-		textUpdateTime_ = Timer::now();
-
-		infoStringTopLeft_.clear();
-		RenderStatistics::appendMoreStatistics(infoStringTopLeft_);
-		infoLineTopLeft_->setString(infoStringTopLeft_);
-		infoLineTopLeft_->setPosition(infoLineTopLeft_->width() * 0.5f, height() - infoLineTopLeft_->height() * 0.5f);
-
-		infoStringTopRight_.format("FPS: %.0f (%.2fms)\n", frameTimer_->averageFps(), frameTimer_->interval() * 1000.0f);
-		RenderStatistics::appendCommandsStatistics(infoStringTopRight_);
-		infoLineTopRight_->setString(infoStringTopRight_);
-		infoLineTopRight_->setPosition(width() - infoLineTopRight_->width() * 0.5f, height() - infoLineTopRight_->height() * 0.5f);
+	imguiDrawing_->newFrame();
+	timings_[Timings::IMGUI] = profileTimer_->interval();
+#endif
 
 #ifdef WITH_LUA
-		infoStringBottomRight_.clear();
-		LuaStatistics::appendStatistics(infoStringBottomRight_);
-		infoLineBottomRight_->setString(infoStringBottomRight_);
-		infoLineBottomRight_->setPosition(width() - infoLineBottomRight_->width() * 0.5f, infoLineBottomRight_->height() * 0.75f);
+	LuaStatistics::update();
 #endif
+
+	profileTimer_->start();
+	appEventHandler_->onFrameStart();
+	timings_[Timings::FRAME_START] = profileTimer_->interval();
+
+	if (debugOverlay_)
+		debugOverlay_->update();
+
+	if (rootNode_ != nullptr && renderQueue_ != nullptr)
+	{
+		profileTimer_->start();
+		rootNode_->update(frameTimer_->interval());
+		timings_[Timings::UPDATE] = profileTimer_->interval();
+
+		profileTimer_->start();
+		rootNode_->visit(*renderQueue_);
+		timings_[Timings::VISIT] = profileTimer_->interval();
+
+		profileTimer_->start();
+		renderQueue_->draw();
+		timings_[Timings::DRAW] = profileTimer_->interval();
 	}
 
 	theServiceLocator().audioDevice().updatePlayers();
-	// Measuring scenegraph update and visit + draw + audio update
-	if (profilePlotter_)
-		profilePlotter_->addValue(1, profileTimer_->interval());
 
 #ifdef WITH_IMGUI
+	profileTimer_->start();
 	if (appCfg_.withScenegraph())
 		imguiDrawing_->endFrame(*renderQueue_);
 	else
 		imguiDrawing_->endFrame();
+	timings_[Timings::IMGUI] += profileTimer_->interval();
 #endif
 
-	profileTimer_->start();
 	gfxDevice_->update();
-	// Measuring swap buffers time
-	if (profilePlotter_)
-		profilePlotter_->addValue(2, profileTimer_->interval());
 
 	profileTimer_->start();
 	appEventHandler_->onFrameEnd();
+	timings_[Timings::FRAME_END] = profileTimer_->interval();
+
+	if (debugOverlay_ && appCfg_.withProfilerGraphs())
+		debugOverlay_->updateFrameTimings();
 }
 
 void Application::shutdownCommon()
@@ -289,24 +201,18 @@ void Application::shutdownCommon()
 	LOGI("IAppEventHandler::OnShutdown() invoked");
 	appEventHandler_.reset(nullptr);
 
-	infoLineBottomRight_.reset(nullptr);
-	infoLineBottomLeft_.reset(nullptr);
-	infoLineTopRight_.reset(nullptr);
-	infoLineTopLeft_.reset(nullptr);
-
 #ifdef WITH_IMGUI
 	imguiDrawing_.reset(nullptr);
 #endif
 
-	font_.reset(nullptr);
-	profilePlotter_.reset(nullptr);
-	profileTimer_.reset(nullptr);
+	debugOverlay_.reset(nullptr);
 	rootNode_.reset(nullptr);
 	renderQueue_.reset(nullptr);
 	RenderResources::dispose();
 	frameTimer_.reset(nullptr);
 	inputManager_.reset(nullptr);
 	gfxDevice_.reset(nullptr);
+	profileTimer_.reset(nullptr);
 
 	if (theServiceLocator().indexer().isEmpty() == false)
 	{

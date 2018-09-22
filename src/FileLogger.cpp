@@ -15,6 +15,9 @@ namespace ncine {
 
 FileLogger::FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fileLevel)
 	: consoleLevel_(consoleLevel), fileLevel_(fileLevel)
+#ifdef WITH_IMGUI
+	, logString_(LogStringCapacity)
+#endif
 {
 	fileHandle_ = IFile::createFileHandle(filename);
 
@@ -49,72 +52,61 @@ FileLogger::~FileLogger()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+#ifdef _WIN32
+void writeOutputDebug(const char *logEntry);
+#endif
+
+unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
+{
+	// Early-out if logging is completely disabled
+	if (consoleLevel_ == LogLevel::OFF && fileLevel_ == LogLevel::OFF)
+		return 0;
+
+	ASSERT(fmt);
+
+	const int levelInt = static_cast<int>(level);
+	const int consoleLevelInt = static_cast<int>(consoleLevel_);
+	const int fileLevelInt = static_cast<int>(fileLevel_);
+
+	time_t now;
+	struct tm *ts;
+	now = time(nullptr);
+	ts = localtime(&now);
+
+	logEntry_[0] = '\0';
+	logEntry_[MaxEntryLength - 1] = '\0';
+	unsigned int length = 0;
+
+	//length += strftime(logEntry_ + length, MaxEntryLength - length - 1, "- %a %Y-%m-%d %H:%M:%S %Z ", ts);
+	length += strftime(logEntry_ + length, MaxEntryLength - length - 1, "- %H:%M:%S ", ts);
+	length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "[L%d] - ", levelInt);
+
+	va_list args;
+	va_start(args, fmt);
+	length += vsnprintf(logEntry_ + length, MaxEntryLength - length - 1, fmt, args);
+	va_end(args);
+
+	if (length < MaxEntryLength -2)
+	{
+		logEntry_[length++] = '\n';
+		logEntry_[length] = '\0';
+	}
+
+	if (consoleLevel_ != LogLevel::OFF && levelInt >= consoleLevelInt)
+	{
 #ifndef __ANDROID__
-void FileLogger::write(LogLevel level, const char *fmt, ...)
-{
-	ASSERT(fmt);
-
-	const int levelInt = static_cast<int>(level);
-	const int consoleLevelInt = static_cast<int>(consoleLevel_);
-	const int fileLevelInt = static_cast<int>(fileLevel_);
-
-	time_t now;
-	struct tm *ts;
-	const unsigned int bufferSize = 80;
-	char buffer[bufferSize];
-
-	now = time(nullptr);
-	ts = localtime(&now);
-	// strftime(buffer, sizeof(char) * bufferSize, "%a %Y-%m-%d %H:%M:%S %Z", ts);
-	strftime(buffer, sizeof(char) * bufferSize, "%H:%M:%S", ts);
-
-	if (consoleLevel_ != LogLevel::OFF && levelInt >= consoleLevelInt)
-	{
-		printf("- %s [L%d] - ", buffer, levelInt);
-
-		va_list args;
-		va_start(args, fmt);
-		vprintf(fmt, args);
-		va_end(args);
-
-		printf("\n");
-	}
-
-	if (fileLevel_ != LogLevel::OFF && levelInt >= fileLevelInt)
-	{
-		fprintf(fileHandle_->ptr(), "- %s [L%d] - ", buffer, levelInt);
-
-		va_list args;
-		va_start(args, fmt);
-		vfprintf(fileHandle_->ptr(), fmt, args);
-		va_end(args);
-
-		fprintf(fileHandle_->ptr(), "\n");
-		fflush(fileHandle_->ptr());
-	}
-}
+		if (level == LogLevel::ERROR || level == LogLevel::FATAL)
+			fputs(logEntry_, stderr);
+		else
+			fputs(logEntry_, stdout);
+		
+#ifdef _WIN32
+	writeOutputDebug(logEntry_);
+#endif
+		
 #else
-void FileLogger::write(LogLevel level, const char *fmt, ...)
-{
-	ASSERT(fmt);
+		android_LogPriority priority;
 
-	const int levelInt = static_cast<int>(level);
-	const int consoleLevelInt = static_cast<int>(consoleLevel_);
-	const int fileLevelInt = static_cast<int>(fileLevel_);
-
-	time_t now;
-	struct tm *ts;
-	const unsigned int bufferSize = 80;
-	char buffer[bufferSize];
-
-	now = time(nullptr);
-	ts = localtime(&now);
-	strftime(buffer, sizeof(char) * bufferSize, "%H:%M:%S", ts);
-
-	android_LogPriority priority;
-
-	if (consoleLevel_ != LogLevel::OFF && levelInt >= consoleLevelInt)
-	{
 		switch (level)
 		{
 			case LogLevel::FATAL:		priority = ANDROID_LOG_FATAL;	break;
@@ -127,25 +119,27 @@ void FileLogger::write(LogLevel level, const char *fmt, ...)
 			default:					priority = ANDROID_LOG_UNKNOWN; break;
 		}
 
-		va_list args;
-		va_start(args, fmt);
-		__android_log_vprint(priority, "nCine", fmt, args);
-		va_end(args);
+		__android_log_write(priority, "nCine", logEntry_);
+#endif
 	}
 
 	if (fileLevel_ != LogLevel::OFF && levelInt >= fileLevelInt)
 	{
-		fprintf(fileHandle_->ptr(), "- %s [L%d] -> ", buffer, levelInt);
-
-		va_list args;
-		va_start(args, fmt);
-		vfprintf(fileHandle_->ptr(), fmt, args);
-		va_end(args);
-
-		fprintf(fileHandle_->ptr(), "\n");
+		fprintf(fileHandle_->ptr(), "%s", logEntry_);
 		fflush(fileHandle_->ptr());
 	}
-}
+
+#ifdef WITH_IMGUI
+	if (levelInt >= consoleLevelInt || levelInt >= fileLevelInt)
+	{
+		if (length > logString_.capacity() - logString_.length() - 1)
+			logString_.clear();
+
+		logString_.append(logEntry_);
+	}
 #endif
+
+	return length;
+}
 
 }
