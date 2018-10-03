@@ -86,6 +86,8 @@ class RenderResources
 
 	/// The `Application` class needs to create and dispose the resources
 	friend class Application;
+	/// The `IGfxDevice` class needs to update the projection matrix
+	friend class IGfxDevice;
 };
 
 }

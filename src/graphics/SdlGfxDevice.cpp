@@ -18,8 +18,8 @@ SDL_Window *SdlGfxDevice::windowHandle_ = nullptr;
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-SdlGfxDevice::SdlGfxDevice(int width, int height, const GLContextInfo &glContextInfo, const DisplayMode &mode, bool isFullScreen)
-	: IGfxDevice(width, height, glContextInfo, mode, isFullScreen)
+SdlGfxDevice::SdlGfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode)
+	: IGfxDevice(windowMode, glContextInfo, displayMode)
 {
 	initGraphics();
 	initDevice();
@@ -55,16 +55,25 @@ void SdlGfxDevice::setResolution(int width, int height)
 		width_ = width;
 		height_ = height;
 
-		initDevice();
+		unsigned int flags = SDL_GetWindowFlags(windowHandle_);
+		if (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)
+		{
+			isFullScreen_ = true;
+			SDL_SetWindowFullscreen(windowHandle_, SDL_WINDOW_FULLSCREEN);
+		}
+		SDL_SetWindowSize(windowHandle_, width, height);
 	}
 }
 
-void SdlGfxDevice::toggleFullScreen()
+void SdlGfxDevice::setFullScreen(bool fullScreen)
 {
-	isFullScreen_ = !isFullScreen_;
+	if (isFullScreen_ != fullScreen)
+	{
+		isFullScreen_ = fullScreen;
 
-	const int flags = isFullScreen_ ? SDL_WINDOW_FULLSCREEN : 0;
-	SDL_SetWindowFullscreen(windowHandle_, flags);
+		const int flags = isFullScreen_ ? SDL_WINDOW_FULLSCREEN : 0;
+		SDL_SetWindowFullscreen(windowHandle_, flags);
+	}
 }
 
 void SdlGfxDevice::setWindowIcon(const char *windowIconFilename)
@@ -100,13 +109,13 @@ void SdlGfxDevice::initDevice()
 	}
 
 	// setting OpenGL attributes
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, mode_.redBits());
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, mode_.greenBits());
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, mode_.blueBits());
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, mode_.alphaBits());
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, mode_.isDoubleBuffered());
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, mode_.depthBits());
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, mode_.stencilBits());
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, displayMode_.redBits());
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, displayMode_.greenBits());
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, displayMode_.blueBits());
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, displayMode_.alphaBits());
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, displayMode_.isDoubleBuffered());
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, displayMode_.depthBits());
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, displayMode_.stencilBits());
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, glContextInfo_.majorVersion);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, glContextInfo_.minorVersion);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, glContextInfo_.coreProfile ?
@@ -126,6 +135,8 @@ void SdlGfxDevice::initDevice()
 	windowHandle_ = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width_, height_, flags);
 	FATAL_ASSERT_MSG_X(windowHandle_, "SDL_CreateWindow failed: %s", SDL_GetError());
 
+	SDL_SetWindowResizable(windowHandle_, isResizable_ ? SDL_TRUE : SDL_FALSE);
+
 	// resolution should be set to current screen size
 	if (width_ == 0 || height_ == 0)
 		SDL_GetWindowSize(windowHandle_, &width_, &height_);
@@ -133,7 +144,7 @@ void SdlGfxDevice::initDevice()
 	glContextHandle_ = SDL_GL_CreateContext(windowHandle_);
 	FATAL_ASSERT_MSG_X(glContextHandle_, "SDL_GL_CreateContext failed: %s", SDL_GetError());
 
-	const int interval = mode_.hasVSync() ? 1 : 0;
+	const int interval = displayMode_.hasVSync() ? 1 : 0;
 	SDL_GL_SetSwapInterval(interval);
 
 #ifdef WITH_GLEW

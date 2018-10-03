@@ -39,6 +39,8 @@ GlfwInputManager::JoystickEventsSimulator GlfwInputManager::joyEventsSimulator_;
 GlfwInputManager::GlfwInputManager()
 {
 	glfwSetWindowCloseCallback(GlfwGfxDevice::windowHandle(), windowCloseCallback);
+	glfwSetWindowSizeCallback(GlfwGfxDevice::windowHandle(), windowSizeCallback);
+	glfwSetFramebufferSizeCallback(GlfwGfxDevice::windowHandle(), framebufferSizeCallback);
 	glfwSetKeyCallback(GlfwGfxDevice::windowHandle(), keyCallback);
 	glfwSetCharCallback(GlfwGfxDevice::windowHandle(), charCallback);
 	glfwSetCursorPosCallback(GlfwGfxDevice::windowHandle(), cursorPosCallback);
@@ -192,6 +194,18 @@ void GlfwInputManager::setMouseCursorMode(MouseCursorMode mode)
 void GlfwInputManager::windowCloseCallback(GLFWwindow *window)
 {
 	ncine::theApplication().quit();
+}
+
+void GlfwInputManager::windowSizeCallback(GLFWwindow *window, int width, int height)
+{
+	GlfwGfxDevice &gfxDevice = static_cast<GlfwGfxDevice &>(theApplication().gfxDevice());
+	gfxDevice.width_ = width;
+	gfxDevice.height_ = height;
+}
+
+void GlfwInputManager::framebufferSizeCallback(GLFWwindow *window, int width, int height)
+{
+	theApplication().gfxDevice().setViewport(width, height);
 }
 
 void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)

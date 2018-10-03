@@ -30,7 +30,8 @@ namespace ncine {
 
 ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 	: withSceneGraph_(withSceneGraph),
-	  freeCommandsPool_(16), usedCommandsPool_(16)
+	  freeCommandsPool_(16), usedCommandsPool_(16),
+	  lastFrameWidth_(0), lastFrameHeight_(0)
 {
 	ImGuiIO& io = ImGui::GetIO();
 
@@ -73,11 +74,16 @@ void ImGuiDrawing::newFrame()
 #endif
 
 	ImGuiIO& io = ImGui::GetIO();
-	projectionMatrix_ = Matrix4x4f::ortho(0.0f, io.DisplaySize.x, io.DisplaySize.y, 0.0f, 0.0f, 1.0f);
-	if (withSceneGraph_ == false)
+
+	if (lastFrameWidth_ != io.DisplaySize.x || lastFrameHeight_ != io.DisplaySize.y)
 	{
-		imguiShaderUniforms_->uniform("projection")->setFloatVector(projectionMatrix_.data());
-		imguiShaderUniforms_->commitUniforms();
+		projectionMatrix_ = Matrix4x4f::ortho(0.0f, io.DisplaySize.x, io.DisplaySize.y, 0.0f, 0.0f, 1.0f);
+
+		if (withSceneGraph_ == false)
+		{
+			imguiShaderUniforms_->uniform("projection")->setFloatVector(projectionMatrix_.data());
+			imguiShaderUniforms_->commitUniforms();
+		}
 	}
 
 	ImGui::NewFrame();
@@ -147,7 +153,6 @@ void ImGuiDrawing::setupRenderCmd(RenderCommand &cmd)
 	material.setShaderProgram(imguiShaderProgram_.get());
 	material.setUniformsDataPointer(nullptr);
 	material.uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
-	material.uniform("projection")->setFloatVector(projectionMatrix_.data());
 	material.attribute("aPosition")->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, pos)));
 	material.attribute("aTexCoords")->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, uv)));
 	material.attribute("aColor")->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, col)));
@@ -182,6 +187,12 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 		GLushort firstIndex = 0;
 
 		RenderCommand &firstCmd = *retrieveCommandFromPool();
+		if (lastFrameWidth_ != io.DisplaySize.x || lastFrameHeight_ != io.DisplaySize.y)
+		{
+			firstCmd.material().uniform("projection")->setFloatVector(projectionMatrix_.data());
+			lastFrameWidth_ = io.DisplaySize.x;
+			lastFrameHeight_ = io.DisplaySize.y;
+		}
 
 		firstCmd.geometry().shareVbo(nullptr);
 		GLfloat *vertices =  firstCmd.geometry().acquireVertexPointer(imCmdList->VtxBuffer.Size * numElements, numElements);

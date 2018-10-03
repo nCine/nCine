@@ -16,13 +16,13 @@ namespace ncine {
 class GlfwGfxDevice : public IGfxDevice
 {
   public:
-	GlfwGfxDevice(int width, int height, const GLContextInfo &glContextInfo, const DisplayMode &mode, bool isFullScreen);
+	GlfwGfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode);
 	~GlfwGfxDevice() override;
 
 	void setResolution(int width, int height) override;
 	inline void setResolution(Vector2i size) override { setResolution(size.x, size.y); }
 
-	void toggleFullScreen() override;
+	void setFullScreen(bool fullScreen) override;
 
 	inline void update() override { glfwSwapBuffers(windowHandle_); }
 

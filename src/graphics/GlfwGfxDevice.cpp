@@ -14,8 +14,8 @@ GLFWwindow *GlfwGfxDevice::windowHandle_ = nullptr;
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-GlfwGfxDevice::GlfwGfxDevice(int width, int height, const GLContextInfo &glContextInfo, const DisplayMode &mode, bool isFullScreen)
-	: IGfxDevice(width, height, glContextInfo, mode, isFullScreen)
+GlfwGfxDevice::GlfwGfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode)
+	: IGfxDevice(windowMode, glContextInfo, displayMode)
 {
 	initGraphics();
 	initDevice();
@@ -35,24 +35,36 @@ GlfwGfxDevice::~GlfwGfxDevice()
 void GlfwGfxDevice::setResolution(int width, int height)
 {
 	// change resolution only in the case it really changes
-	if (width != width_ || height != height_)
+	if (width == width_ && height == height_)
+		return;
+
+	// asking for fullscreen mode that does not change current screen resolution
+	if (width == 0 || height == 0)
+	{
+		GLFWmonitor *primaryMonitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+		width_ = mode->width;
+		height_ = mode->height;
+		isFullScreen_ = true;
+		glfwSetWindowMonitor(windowHandle_, primaryMonitor, 0, 0, width_, height_, GLFW_DONT_CARE);
+	}
+	else
 	{
 		width_ = width;
 		height_ = height;
-
-		glfwDestroyWindow(windowHandle_);
-		windowHandle_ = nullptr;
-		initDevice();
+		glfwSetWindowSize(windowHandle_, width, height);
 	}
 }
 
-void GlfwGfxDevice::toggleFullScreen()
+void GlfwGfxDevice::setFullScreen(bool fullScreen)
 {
-	isFullScreen_ = !isFullScreen_;
+	if (isFullScreen_ != fullScreen)
+	{
+		isFullScreen_ = fullScreen;
 
-	glfwDestroyWindow(windowHandle_);
-	windowHandle_ = nullptr;
-	initDevice();
+		GLFWmonitor *monitor = isFullScreen_ ? glfwGetPrimaryMonitor() : nullptr;
+		glfwSetWindowMonitor(windowHandle_, monitor, 0, 0, width_, height_, GLFW_DONT_CARE);
+	}
 }
 
 void GlfwGfxDevice::setWindowIcon(const char *windowIconFilename)
@@ -91,16 +103,16 @@ void GlfwGfxDevice::initDevice()
 		monitor = glfwGetPrimaryMonitor();
 
 	// setting window hints and creating a window with GLFW
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	glfwWindowHint(GLFW_RESIZABLE, isResizable_ ? GLFW_TRUE : GLFW_FALSE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, static_cast<int>(glContextInfo_.majorVersion));
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, static_cast<int>(glContextInfo_.minorVersion));
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, glContextInfo_.debugContext ? GLFW_TRUE : GLFW_FALSE);
-	glfwWindowHint(GLFW_RED_BITS, static_cast<int>(mode_.redBits()));
-	glfwWindowHint(GLFW_GREEN_BITS, static_cast<int>(mode_.greenBits()));
-	glfwWindowHint(GLFW_BLUE_BITS, static_cast<int>(mode_.blueBits()));
-	glfwWindowHint(GLFW_ALPHA_BITS, static_cast<int>(mode_.alphaBits()));
-	glfwWindowHint(GLFW_DEPTH_BITS, static_cast<int>(mode_.depthBits()));
-	glfwWindowHint(GLFW_STENCIL_BITS, static_cast<int>(mode_.stencilBits()));
+	glfwWindowHint(GLFW_RED_BITS, static_cast<int>(displayMode_.redBits()));
+	glfwWindowHint(GLFW_GREEN_BITS, static_cast<int>(displayMode_.greenBits()));
+	glfwWindowHint(GLFW_BLUE_BITS, static_cast<int>(displayMode_.blueBits()));
+	glfwWindowHint(GLFW_ALPHA_BITS, static_cast<int>(displayMode_.alphaBits()));
+	glfwWindowHint(GLFW_DEPTH_BITS, static_cast<int>(displayMode_.depthBits()));
+	glfwWindowHint(GLFW_STENCIL_BITS, static_cast<int>(displayMode_.stencilBits()));
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, glContextInfo_.forwardCompatible ? GLFW_TRUE : GLFW_FALSE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, glContextInfo_.coreProfile ? GLFW_OPENGL_CORE_PROFILE : GLFW_OPENGL_COMPAT_PROFILE);
 
@@ -109,7 +121,7 @@ void GlfwGfxDevice::initDevice()
 
 	glfwMakeContextCurrent(windowHandle_);
 
-	const int interval = mode_.hasVSync() ? 1 : 0;
+	const int interval = displayMode_.hasVSync() ? 1 : 0;
 	glfwSwapInterval(interval);
 
 #ifdef WITH_GLEW

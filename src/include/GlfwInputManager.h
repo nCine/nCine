@@ -170,6 +170,8 @@ class GlfwInputManager : public IInputManager
 	static JoystickEventsSimulator joyEventsSimulator_;
 
 	static void windowCloseCallback(GLFWwindow *window);
+	static void windowSizeCallback(GLFWwindow *window, int width, int height);
+	static void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 	static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 	static void charCallback(GLFWwindow* window, unsigned int c);
 	static void cursorPosCallback(GLFWwindow *window, double x, double y);

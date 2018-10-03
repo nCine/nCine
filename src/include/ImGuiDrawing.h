@@ -43,6 +43,8 @@ class ImGuiDrawing
 	nctl::UniquePtr<GLShaderUniforms> imguiShaderUniforms_;
 	nctl::UniquePtr<GLShaderAttributes> imguiShaderAttributes_;
 
+	int lastFrameWidth_;
+	int lastFrameHeight_;
 	Matrix4x4f projectionMatrix_;
 
 	RenderCommand *retrieveCommandFromPool();

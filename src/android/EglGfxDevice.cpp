@@ -8,8 +8,8 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-EglGfxDevice::EglGfxDevice(struct android_app *state, const GLContextInfo &glContextInfo, const DisplayMode &mode)
-	: IGfxDevice(-1, -1, glContextInfo, mode, true)
+EglGfxDevice::EglGfxDevice(struct android_app *state, const GLContextInfo &glContextInfo, const DisplayMode &displayMode)
+	: IGfxDevice(WindowMode(0, 0, true, false), glContextInfo, displayMode)
 {
 	initDevice(state);
 }
@@ -119,12 +119,12 @@ void EglGfxDevice::initDevice(struct android_app *state)
 	{
 		EGL_SURFACE_TYPE,		EGL_WINDOW_BIT,
 		EGL_RENDERABLE_TYPE,	renderableTypeBit,
-		EGL_BLUE_SIZE,			static_cast<int>(mode_.blueBits()),
-		EGL_GREEN_SIZE,			static_cast<int>(mode_.greenBits()),
-		EGL_RED_SIZE,			static_cast<int>(mode_.redBits()),
-		EGL_ALPHA_SIZE,			static_cast<int>(mode_.alphaBits()),
-		EGL_DEPTH_SIZE,			static_cast<int>(mode_.depthBits()),
-		EGL_STENCIL_SIZE,		static_cast<int>(mode_.stencilBits()),
+		EGL_BLUE_SIZE,			static_cast<int>(displayMode_.blueBits()),
+		EGL_GREEN_SIZE,			static_cast<int>(displayMode_.greenBits()),
+		EGL_RED_SIZE,			static_cast<int>(displayMode_.redBits()),
+		EGL_ALPHA_SIZE,			static_cast<int>(displayMode_.alphaBits()),
+		EGL_DEPTH_SIZE,			static_cast<int>(displayMode_.depthBits()),
+		EGL_STENCIL_SIZE,		static_cast<int>(displayMode_.stencilBits()),
 		EGL_NONE
 	};
 

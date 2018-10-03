@@ -17,13 +17,13 @@ class EglGfxDevice : public IGfxDevice
 {
   public:
 	/// Constructor taking a `DisplayMode` object
-	EglGfxDevice(struct android_app *state, const GLContextInfo &glContextInfo, const DisplayMode &mode);
+	EglGfxDevice(struct android_app *state, const GLContextInfo &glContextInfo, const DisplayMode &displayMode);
 	~EglGfxDevice() override;
 
 	void setResolution(int width, int height) override { }
 	void setResolution(Vector2i size) override { }
 
-	void toggleFullScreen() override { }
+	void setFullScreen(bool fullScreen) override { }
 
 	inline void update() override { eglSwapBuffers(display_, surface_); }
 

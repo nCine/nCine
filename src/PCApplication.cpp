@@ -51,11 +51,13 @@ void PCApplication::init(IAppEventHandler * (*createAppEventHandler)())
 	IGfxDevice::GLContextInfo glContextInfo(appCfg_);
 	const DisplayMode::VSync vSyncMode = appCfg_.withVSync() ? DisplayMode::VSync::ENABLED : DisplayMode::VSync::DISABLED;
 	DisplayMode displayMode(8, 8, 8, 8, 24, 8, DisplayMode::DoubleBuffering::ENABLED, vSyncMode);
+
+	const IGfxDevice::WindowMode windowMode(appCfg_.xResolution(), appCfg_.yResolution(), appCfg_.inFullscreen(), appCfg_.isResizable());
 #if defined(WITH_SDL)
-	gfxDevice_ = nctl::makeUnique<SdlGfxDevice>(appCfg_.xResolution(), appCfg_.yResolution(), glContextInfo, displayMode, appCfg_.inFullscreen());
+	gfxDevice_ = nctl::makeUnique<SdlGfxDevice>(windowMode, glContextInfo, displayMode);
 	inputManager_ = nctl::makeUnique<SdlInputManager>();
 #elif defined(WITH_GLFW)
-	gfxDevice_ = nctl::makeUnique<GlfwGfxDevice>(appCfg_.xResolution(), appCfg_.yResolution(), glContextInfo, displayMode, appCfg_.inFullscreen());
+	gfxDevice_ = nctl::makeUnique<GlfwGfxDevice>(windowMode, glContextInfo, displayMode);
 	inputManager_ = nctl::makeUnique<GlfwInputManager>();
 #endif
 	gfxDevice_->setWindowTitle(appCfg_.windowTitle().data());
@@ -87,6 +89,12 @@ void PCApplication::run()
 						setFocus(true);
 					else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
 						setFocus(false);
+					else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+					{
+						gfxDevice_->width_ = event.window.data1;
+						gfxDevice_->height_ = event.window.data2;
+						gfxDevice_->setViewport(event.window.data1, event.window.data2);
+					}
 					break;
 				default:
 					SdlInputManager::parseEvent(event);

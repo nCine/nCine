@@ -28,6 +28,7 @@ AppConfiguration::AppConfiguration()
 	, frameTimerLogInterval_(5.0f)
 	, xResolution_(1280), yResolution_(720)
 	, inFullscreen_(false)
+	, isResizable_(false)
 	, windowTitle_(128)
 	, windowIconFilename_(128)
 	, fontTexFilename_(128)
@@ -110,6 +111,11 @@ void AppConfiguration::setResolution(unsigned int x, unsigned int y)
 void AppConfiguration::setFullScreen(bool inFullscreen)
 {
 	inFullscreen_ = inFullscreen;
+}
+
+void AppConfiguration::setResizable(bool isResizable)
+{
+	isResizable_ = isResizable;
 }
 
 void AppConfiguration::setWindowTitle(const nctl::String &windowTitle)

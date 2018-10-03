@@ -42,6 +42,8 @@ class DLL_PUBLIC AppConfiguration
 	inline unsigned int yResolution() const { return yResolution_; }
 	/// \returns True if the screen is going to be in fullscreen mode
 	inline bool inFullscreen() const { return inFullscreen_; }
+	/// \returns True if the window is going to be resizable
+	inline bool isResizable() const { return isResizable_; }
 	/// \returns The window title
 	inline const nctl::String &windowTitle() const { return windowTitle_; }
 	/// \returns The window icon filename
@@ -86,6 +88,8 @@ class DLL_PUBLIC AppConfiguration
 	void setResolution(unsigned int x, unsigned int y);
 	/// Sets the fullscreen mode
 	void setFullScreen(bool inFullscreen);
+	/// Sets the window resizable flag
+	void setResizable(bool resizable);
 	/// Sets the window title
 	void setWindowTitle(const nctl::String &windowTitle);
 	/// Sets the window icon filename
@@ -131,6 +135,7 @@ class DLL_PUBLIC AppConfiguration
 	unsigned int xResolution_;
 	unsigned int yResolution_;
 	bool inFullscreen_;
+	bool isResizable_;
 	nctl::String windowTitle_;
 	nctl::String windowIconFilename_;
 	nctl::String fontTexFilename_;

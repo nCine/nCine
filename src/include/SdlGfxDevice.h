@@ -13,13 +13,13 @@ namespace ncine {
 class SdlGfxDevice : public IGfxDevice
 {
   public:
-	SdlGfxDevice(int width, int height, const GLContextInfo &glContextInfo, const DisplayMode &mode, bool isFullScreen);
+	SdlGfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode);
 	~SdlGfxDevice() override;
 
 	void setResolution(int width, int height) override;
 	inline void setResolution(Vector2i size) override { setResolution(size.x, size.y); }
 
-	void toggleFullScreen() override;
+	void setFullScreen(bool fullScreen) override;
 
 	inline void update() override { SDL_GL_SwapWindow(windowHandle_); }
 
@@ -43,6 +43,8 @@ class SdlGfxDevice : public IGfxDevice
 	void initGraphics();
 	/// Initilizes the OpenGL graphic context
 	void initDevice();
+
+	friend class SdlInputManager;
 };
 
 }

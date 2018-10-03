@@ -77,6 +77,7 @@ class ImGuiDebugOverlay : public IDebugOverlay
 	void guiGraphicsCapabilities();
 	void guiApplicationConfiguration();
 	void guiRenderingSettings();
+	void guiWindowSettings();
 	void guiInputState();
 
 	void guiTopLeft();

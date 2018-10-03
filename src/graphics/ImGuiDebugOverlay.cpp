@@ -171,6 +171,7 @@ void ImGuiDebugOverlay::guiWindow()
 		guiGraphicsCapabilities();
 		guiApplicationConfiguration();
 		guiRenderingSettings();
+		guiWindowSettings();
 		guiInputState();
 	}
 	ImGui::End();
@@ -393,7 +394,8 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("Frametimer Log interval: %f", appCfg.frameTimerLogInterval());
 		ImGui::Text("Text update time: %f", appCfg.profileTextUpdateTime());
 		ImGui::Text("Resolution: %u x %u", appCfg.xResolution(), appCfg.yResolution());
-		ImGui::Text("Fullscreen: %s", appCfg.inFullscreen() ? "true" : "false");
+		ImGui::Text("Full Screen: %s", appCfg.inFullscreen() ? "true" : "false");
+		ImGui::Text("Resizable: %s", appCfg.isResizable() ? "true" : "false");
 
 		ImGui::Separator();
 		ImGui::Text("Window title: %s", appCfg.windowTitle().data());
@@ -435,6 +437,45 @@ void ImGuiDebugOverlay::guiRenderingSettings()
 		settings.minBatchSize = minBatchSize;
 		settings.maxBatchSize = maxBatchSize;
 	}
+}
+
+void ImGuiDebugOverlay::guiWindowSettings()
+{
+#ifndef __ANDROID__
+	if (ImGui::CollapsingHeader("Window Settings"))
+	{
+		static int resolution[2] = { theApplication().widthInt(), theApplication().heightInt() };
+		ImGui::InputInt2("Resolution", resolution);
+
+		static bool fullScreen = theApplication().gfxDevice().isFullScreen();
+		ImGui::Checkbox("Full Screen", &fullScreen);
+
+		ImGui::SameLine();
+		if (ImGui::Button("Apply"))
+		{
+			theApplication().gfxDevice().setResolution(resolution[0], resolution[1]);
+			theApplication().gfxDevice().setFullScreen(fullScreen);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Reset"))
+		{
+			resolution[0] = theApplication().appConfiguration().xResolution();
+			resolution[1] = theApplication().appConfiguration().yResolution();
+			fullScreen = theApplication().appConfiguration().inFullscreen();
+			theApplication().gfxDevice().setResolution(resolution[0], resolution[1]);
+			theApplication().gfxDevice().setFullScreen(fullScreen);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Current"))
+		{
+			resolution[0] = theApplication().widthInt();
+			resolution[1] = theApplication().heightInt();
+			fullScreen = theApplication().gfxDevice().isFullScreen();
+		}
+
+		ImGui::Text("Resizable: %s", theApplication().gfxDevice().isResizable() ? "true" : "false");
+	}
+#endif
 }
 
 void ImGuiDebugOverlay::guiInputState()
