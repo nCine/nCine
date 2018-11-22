@@ -16,6 +16,8 @@ class Vector4
 	Vector4() { }
 	explicit Vector4(T s) : x(s), y(s), z(s), w(s) { }
 	Vector4(T xx, T yy, T zz, T ww) : x(xx), y(yy), z(zz), w(ww) { }
+	Vector4(const Vector4 &other) : x(other.x), y(other.y), z(other.z), w(other.w) { }
+	Vector4& operator=(const Vector4 &other);
 
 	void set(T xx, T yy, T zz, T ww);
 
@@ -76,6 +78,17 @@ using Vector4f = Vector4<float>;
 using Vector4i = Vector4<int>;
 
 template <class T>
+inline Vector4<T> &Vector4<T>::operator=(const Vector4<T> &other)
+{
+	x = other.x;
+	y = other.y;
+	z = other.z;
+	w = other.w;
+
+	return *this;
+}
+
+template <class T>
 inline void Vector4<T>::set(T xx, T yy, T zz, T ww)
 {
 	x = xx;
@@ -85,13 +98,13 @@ inline void Vector4<T>::set(T xx, T yy, T zz, T ww)
 }
 
 template <class T>
-T *Vector4<T>::data()
+inline T *Vector4<T>::data()
 {
 	return &x;
 }
 
 template <class T>
-const T *Vector4<T>::data() const
+inline const T *Vector4<T>::data() const
 {
 	return &x;
 }

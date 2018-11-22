@@ -79,7 +79,7 @@ class Matrix4x4
 using Matrix4x4f = Matrix4x4<float>;
 
 template <class T>
-Matrix4x4<T>::Matrix4x4(const Vector4<T> &v0, const Vector4<T> &v1, const Vector4<T> &v2, const Vector4<T> &v3)
+inline Matrix4x4<T>::Matrix4x4(const Vector4<T> &v0, const Vector4<T> &v1, const Vector4<T> &v2, const Vector4<T> &v3)
 {
 	set(v0, v1, v2, v3);
 }

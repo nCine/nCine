@@ -24,6 +24,47 @@ TEST_F(Vector4Test, ConstructWithSingleScalar)
 	ASSERT_FLOAT_EQ(newVector.w, scalar);
 }
 
+TEST_F(Vector4Test, ConstructWithMultipleScalars)
+{
+	const float x = 1.0f;
+	const float y = 2.0f;
+	const float z = 3.0f;
+	const float w = 4.0f;
+	const nc::Vector4f newVector(x, y, z, w);
+	printf("Constructing a new vector with multiple scalars <%.2f, %.2f, %.2f, %.2f>: ", x, y, z, w);
+	printVector(newVector);
+
+	ASSERT_FLOAT_EQ(newVector.x, x);
+	ASSERT_FLOAT_EQ(newVector.y, y);
+	ASSERT_FLOAT_EQ(newVector.z, z);
+	ASSERT_FLOAT_EQ(newVector.w, w);
+}
+
+TEST_F(Vector4Test, ConstructFromVector)
+{
+	const nc::Vector4f newVector(v1_);
+	printf("Constructing a new vector from the first one <%.2f, %.2f, %.2f, %.2f>: ", v1_.x, v1_.y, v1_.z, v1_.w);
+	printVector(newVector);
+
+	ASSERT_FLOAT_EQ(newVector.x, v1_.x);
+	ASSERT_FLOAT_EQ(newVector.y, v1_.y);
+	ASSERT_FLOAT_EQ(newVector.z, v1_.z);
+	ASSERT_FLOAT_EQ(newVector.w, v1_.w);
+}
+
+TEST_F(Vector4Test, AssignmentOperator)
+{
+	printf("Creating a new vector with the assignment operator\n");
+	nc::Vector4f newVector;
+	newVector = v1_;
+	printVector(newVector);
+
+	ASSERT_FLOAT_EQ(newVector.x, v1_.x);
+	ASSERT_FLOAT_EQ(newVector.y, v1_.y);
+	ASSERT_FLOAT_EQ(newVector.z, v1_.z);
+	ASSERT_FLOAT_EQ(newVector.w, v1_.w);
+}
+
 TEST_F(Vector4Test, SetComponents)
 {
 	const float scalar = 0.0f;

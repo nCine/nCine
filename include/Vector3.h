@@ -15,6 +15,8 @@ class Vector3
 	Vector3() { }
 	explicit Vector3(T s) : x(s), y(s), z(s) { }
 	Vector3(T xx, T yy, T zz) : x(xx), y(yy), z(zz) { }
+	Vector3(const Vector3 &other) : x(other.x), y(other.y), z(other.z) { }
+	Vector3& operator=(const Vector3 &other);
 
 	void set(T xx, T yy, T zz);
 
@@ -73,6 +75,16 @@ using Vector3f = Vector3<float>;
 using Vector3i = Vector3<int>;
 
 template <class T>
+inline Vector3<T> &Vector3<T>::operator=(const Vector3<T> &other)
+{
+	x = other.x;
+	y = other.y;
+	z = other.z;
+
+	return *this;
+}
+
+template <class T>
 inline void Vector3<T>::set(T xx, T yy, T zz)
 {
 	x = xx;
@@ -81,13 +93,13 @@ inline void Vector3<T>::set(T xx, T yy, T zz)
 }
 
 template <class T>
-T *Vector3<T>::data()
+inline T *Vector3<T>::data()
 {
 	return &x;
 }
 
 template <class T>
-const T *Vector3<T>::data() const
+inline const T *Vector3<T>::data() const
 {
 	return &x;
 }

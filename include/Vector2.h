@@ -16,6 +16,8 @@ class Vector2
 	Vector2() { }
 	explicit Vector2(T s) : x(s), y(s) { }
 	Vector2(T xx, T yy) : x(xx), y(yy) { }
+	Vector2(const Vector2 &other) : x(other.x), y(other.y) { }
+	Vector2& operator=(const Vector2 &other);
 
 	void set(T xx, T yy);
 
@@ -69,6 +71,15 @@ using Vector2f = Vector2<float>;
 using Vector2i = Vector2<int>;
 
 template <class T>
+inline Vector2<T> &Vector2<T>::operator=(const Vector2<T> &other)
+{
+	x = other.x;
+	y = other.y;
+
+	return *this;
+}
+
+template <class T>
 inline void Vector2<T>::set(T xx, T yy)
 {
 	x = xx;
@@ -76,13 +87,13 @@ inline void Vector2<T>::set(T xx, T yy)
 }
 
 template <class T>
-T *Vector2<T>::data()
+inline T *Vector2<T>::data()
 {
 	return &x;
 }
 
 template <class T>
-const T *Vector2<T>::data() const
+inline const T *Vector2<T>::data() const
 {
 	return &x;
 }

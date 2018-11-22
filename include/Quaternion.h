@@ -15,6 +15,8 @@ class Quaternion
 	Quaternion() { }
 	Quaternion(T xx, T yy, T zz, T ww) : x(xx), y(yy), z(zz), w(ww) { }
 	explicit Quaternion(const Vector4<T> &v) : x(v.x), y(v.y), z(v.z), w(v.w) { }
+	Quaternion(const Quaternion &other) : x(other.x), y(other.y), z(other.z), w(other.w) { }
+	Quaternion& operator=(const Quaternion &other);
 
 	void set(T xx, T yy, T zz, T ww);
 
@@ -64,6 +66,17 @@ class Quaternion
 using Quaternionf = Quaternion<float>;
 
 template <class T>
+inline Quaternion<T> &Quaternion<T>::operator=(const Quaternion<T> &other)
+{
+	x = other.x;
+	y = other.y;
+	z = other.z;
+	w = other.w;
+
+	return *this;
+}
+
+template <class T>
 inline void Quaternion<T>::set(T xx, T yy, T zz, T ww)
 {
 	x = xx;
@@ -73,13 +86,13 @@ inline void Quaternion<T>::set(T xx, T yy, T zz, T ww)
 }
 
 template <class T>
-T *Quaternion<T>::data()
+inline T *Quaternion<T>::data()
 {
 	return &x;
 }
 
 template <class T>
-const T *Quaternion<T>::data() const
+inline const T *Quaternion<T>::data() const
 {
 	return &x;
 }
