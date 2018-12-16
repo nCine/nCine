@@ -5,6 +5,7 @@
 #include "GLDebug.h"
 #include "Application.h"
 #include "GLScissorTest.h"
+#include "tracy_opengl.h"
 
 namespace ncine {
 
@@ -74,6 +75,7 @@ void RenderQueue::draw()
 
 	if (batchingEnabled)
 	{
+		ZoneScopedN("Batching");
 		// Always create batches after sorting
 		batcher_.createBatches(opaqueQueue_, opaqueBatchedQueue_);
 		opaques = &opaqueBatchedQueue_;
@@ -85,6 +87,7 @@ void RenderQueue::draw()
 	// Avoid GPU stalls by uploading to VBOs, IBOs and UBOs before drawing
 	if (opaques->isEmpty() == false)
 	{
+		ZoneScopedN("Commit opaques");
 		GLDebug::ScopedGroup scoped("Committing vertices, indices and uniform blocks in opaques");
 		for (RenderCommand *opaqueRenderCommand : *opaques)
 		{
@@ -96,6 +99,7 @@ void RenderQueue::draw()
 
 	if (transparents->isEmpty() == false)
 	{
+		ZoneScopedN("Commit transparents");
 		GLDebug::ScopedGroup scoped("Committing vertices, indices and uniform blocks in transparents");
 		for (RenderCommand *transparentRenderCommand : *transparents)
 		{
@@ -112,6 +116,7 @@ void RenderQueue::draw()
 	// Rendering opaque nodes front to back
 	for (RenderCommand *opaqueRenderCommand : *opaques)
 	{
+		TracyGpuZone("Opaque");
 		const int numInstances = opaqueRenderCommand->numInstances();
 		const int batchSize = opaqueRenderCommand->batchSize();
 		if (numInstances > 0)
@@ -136,6 +141,7 @@ void RenderQueue::draw()
 	// Rendering transparent nodes back to front
 	for (RenderCommand *transparentRenderCommand : *transparents)
 	{
+		TracyGpuZone("Transparent");
 		const int numInstances = transparentRenderCommand->numInstances();
 		const int batchSize = transparentRenderCommand->batchSize();
 		if (numInstances > 0)

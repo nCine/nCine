@@ -5,6 +5,7 @@
 #include "ITextureLoader.h"
 #include "GLTexture.h"
 #include "RenderStatistics.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -23,6 +24,8 @@ Texture::Texture(const char *filename, int width, int height)
 	  width_(0), height_(0), mipMapLevels_(1), isCompressed_(false), numChannels_(0), dataSize_(0),
 	  minFiltering_(Filtering::NEAREST), magFiltering_(Filtering::NEAREST), wrapMode_(Wrap::CLAMP_TO_EDGE)
 {
+	ZoneScoped;
+	ZoneText(filename, strnlen(filename, 256));
 	glTexture_->bind();
 	setGLTextureLabel(filename);
 

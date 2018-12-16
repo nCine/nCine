@@ -7,6 +7,7 @@
 #include "AndroidInputManager.h"
 #include "AssetFile.h"
 #include "AndroidJniHelper.h"
+#include "tracy.h"
 
 namespace nc = ncine;
 
@@ -216,6 +217,7 @@ void AndroidApplication::preInit()
 
 void AndroidApplication::init()
 {
+	ZoneScoped;
 	// Graphics device should always be created before the input manager!
 	const DisplayMode displayMode32(8, 8, 8, 8, 24, 8, DisplayMode::DoubleBuffering::ENABLED, DisplayMode::VSync::DISABLED);
 	const DisplayMode displayMode16(5, 6, 5, 0, 16, 0, DisplayMode::DoubleBuffering::ENABLED, DisplayMode::VSync::DISABLED);

@@ -88,6 +88,14 @@ endif()
 if(WITH_IMGUI)
 	target_include_directories(ncine PUBLIC ${IMGUI_SOURCE_DIR})
 endif()
+if(WITH_TRACY)
+	target_include_directories(ncine PUBLIC ${TRACY_SOURCE_DIR})
+endif()
+
+set(GAME_SOURCES ${NCINE_ROOT}/tests/${NCINE_STARTUP_TEST}.cpp)
+if(WITH_TRACY AND NCINE_DYNAMIC_LIBRARY)
+	list(APPEND GAME_SOURCES ${TRACY_SOURCE_DIR}/TracyClientDLL.cpp)
+endif()
 
 list(APPEND PRIVATE_COMPILE_DEFINITIONS ${ANDROID_GENERATED_FLAGS})
 target_compile_definitions(ncine PRIVATE ${PRIVATE_COMPILE_DEFINITIONS})
@@ -95,7 +103,7 @@ target_compile_definitions(ncine PRIVATE __ANDROID_API__=${CMAKE_SYSTEM_VERSION}
 target_link_libraries(ncine PRIVATE ${PRIVATE_LINK_LIBRARIES})
 
 add_library(native_app_glue STATIC ${CMAKE_ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
-add_library(game SHARED main.cpp ${NCINE_ROOT}/tests/${NCINE_STARTUP_TEST}.cpp)
+add_library(game SHARED main.cpp ${GAME_SOURCES})
 target_link_libraries(game PRIVATE ncine native_app_glue)
 target_include_directories(game PRIVATE ${CMAKE_ANDROID_NDK}/sources/android/native_app_glue)
 if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
@@ -104,6 +112,9 @@ endif()
 if(NOT NCINE_DYNAMIC_LIBRARY)
 	target_include_directories(game PRIVATE ${NCINE_ROOT}/src/include)
 	target_compile_definitions(game PRIVATE ${PRIVATE_COMPILE_DEFINITIONS})
+endif()
+if(WITH_TRACY)
+	target_compile_definitions(game PRIVATE TRACY_ENABLE)
 endif()
 
 # Export ANativeActivity_onCreate() - https://github.com/android-ndk/ndk/issues/381

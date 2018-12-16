@@ -1,6 +1,7 @@
 #include "nctl/String.h"
 #include "LuaStatistics.h"
 #include "LuaStateManager.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -73,6 +74,7 @@ void LuaStatistics::countOperations()
 	if (timer_.interval() >= 1.0f)
 	{
 		operations_[index_] = int(float(operations_[index_]) / timer_.interval());
+		TracyPlot("Lua Ops", static_cast<int64_t>(operations_[index_]));
 		timer_.start();
 
 		// Ping pong index for last and current measurement

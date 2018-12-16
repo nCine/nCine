@@ -28,7 +28,8 @@ if(NCINE_BUILD_ANDROID)
 	set(ANDROID_PASSTHROUGH_ARGS -DNCINE_ROOT=${NCINE_ROOT} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
 		-DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH} -DNCINE_DYNAMIC_LIBRARY=${NCINE_DYNAMIC_LIBRARY}
 		-DNCINE_STARTUP_TEST=${NCINE_STARTUP_TEST} -DEXTERNAL_ANDROID_DIR=${EXTERNAL_ANDROID_DIR}
-		-DGENERATED_INCLUDE_DIR=${GENERATED_INCLUDE_DIR} -DWITH_IMGUI=${WITH_IMGUI} -DIMGUI_SOURCE_DIR=${IMGUI_SOURCE_DIR})
+		-DGENERATED_INCLUDE_DIR=${GENERATED_INCLUDE_DIR} -DWITH_IMGUI=${WITH_IMGUI} -DIMGUI_SOURCE_DIR=${IMGUI_SOURCE_DIR}
+		-DWITH_TRACY=${WITH_TRACY} -DTRACY_SOURCE_DIR=${TRACY_SOURCE_DIR})
 	set(ANDROID_CMAKE_ARGS -DCMAKE_SYSTEM_NAME=Android -DCMAKE_SYSTEM_VERSION=${ANDROID_API_LEVEL}
 		-DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=${ANDROID_TOOLCHAIN_VERSION} -DCMAKE_ANDROID_STL_TYPE=${ANDROID_STL_TYPE})
 	set(ANDROID_ARM_ARGS -DCMAKE_ANDROID_ARM_MODE=ON -DCMAKE_ANDROID_ARM_NEON=ON)
@@ -79,8 +80,17 @@ if(NCINE_BUILD_ANDROID)
 	set(GRADLE_JNILIBS_DIRS "'src/main/cpp/ncine', 'src/main/cpp/openal'")
 	configure_file(${BUILD_GRADLE_IN} ${BUILD_DEVDIST_GRADLE} @ONLY)
 
+	set(MANIFEST_PERMISSIONS "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />")
+	if(WITH_TRACY)
+		string(CONCAT MANIFEST_PERMISSIONS "${MANIFEST_PERMISSIONS}\n"
+			"\t<uses-permission android:name=\"android.permission.INTERNET\" />\n"
+			"\t<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />")
+	endif()
+	set(ANDROID_MANIFEST_XML_IN ${CMAKE_SOURCE_DIR}/android/src/main/AndroidManifest.xml.in)
+	set(ANDROID_MANIFEST_XML ${CMAKE_BINARY_DIR}/android/src/main/AndroidManifest.xml)
+	configure_file(${ANDROID_MANIFEST_XML_IN} ${ANDROID_MANIFEST_XML} @ONLY)
+
 	file(COPY android/gradle-devdist.properties DESTINATION android)
-	file(COPY android/src/main/AndroidManifest.xml DESTINATION android/src/main)
 	file(COPY android/src/main/java/io/github/ncine/LoadLibraries.java DESTINATION android/src/main/java/io/github/ncine)
 	file(COPY android/src/main/java/io/github/ncine/LoadLibrariesTV.java DESTINATION android/src/main/java/io/github/ncine)
 	file(COPY android/src/main/cpp/main.cpp DESTINATION android/src/main/cpp)

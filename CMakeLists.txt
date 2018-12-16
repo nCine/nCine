@@ -108,6 +108,9 @@ endif()
 set(WITH_IMGUI 1)
 include(ncine_imgui)
 
+set(WITH_TRACY 0)
+include(ncine_tracy)
+
 # Forcing the use of SDL2
 #set(GLFW_FOUND 0)
 
@@ -174,6 +177,9 @@ else()
 endif()
 if(WITH_IMGUI)
 	target_include_directories(ncine PUBLIC ${IMGUI_SOURCE_DIR})
+endif()
+if(WITH_TRACY)
+	target_include_directories(ncine PUBLIC ${TRACY_SOURCE_DIR})
 endif()
 target_include_directories(ncine PUBLIC include PRIVATE src/include)
 if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})

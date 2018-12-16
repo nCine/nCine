@@ -39,6 +39,10 @@
 #include <cstring> // for memchr()
 #include "IFile.h"
 
+#ifdef WITH_TRACY
+	#include "TracyLua.hpp"
+#endif
+
 #ifdef WITH_GIT_VERSION
 	#include "version.h"
 #endif
@@ -94,6 +98,10 @@ LuaStateManager::LuaStateManager(lua_State *L, ApiType apiType, StatisticsTracki
 		LuaStatistics::registerState(this);
 		lua_sethook(L_, luaCountHook, LUA_MASKCOUNT, LuaStatistics::OperationsCount);
 	}
+
+#ifdef WITH_TRACY
+	tracy::LuaRegister(L_);
+#endif
 }
 
 LuaStateManager::~LuaStateManager()

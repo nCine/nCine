@@ -3,6 +3,7 @@
 #include "Texture.h"
 #include "RenderCommand.h"
 #include "GLDebug.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -169,6 +170,7 @@ void TextNode::calculateBoundaries() const
 {
 	if (dirtyBoundaries_)
 	{
+		ZoneScoped;
 		lineLengths_.clear();
 		float xAdvanceMax = 0.0f; // longest line
 		xAdvance_ = 0.0f;

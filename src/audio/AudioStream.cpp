@@ -3,6 +3,7 @@
 #include "common_macros.h"
 #include "AudioStream.h"
 #include "IAudioLoader.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -14,6 +15,8 @@ namespace ncine {
 AudioStream::AudioStream(const char *filename)
 	: nextAvailALBuffer_(0), frequency_(0)
 {
+	ZoneScoped;
+	ZoneText(filename, strnlen(filename, 256));
 	alGenBuffers(NumBuffers, alBuffers_.data());
 	memBuffer_ = nctl::makeUnique<char []>(BufferSize);
 

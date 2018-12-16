@@ -4,6 +4,12 @@
 #include "Particle.h"
 #include "ParticleInitializer.h"
 
+#include "tracy.h"
+#ifdef WITH_TRACY
+	#include "Texture.h"
+	static nctl::String tracyInfoString(128);
+#endif
+
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
@@ -16,6 +22,9 @@ ParticleSystem::ParticleSystem(SceneNode *parent, unsigned int count, Texture *t
 	  particleArray_(poolSize_, nctl::ArrayMode::FIXED_CAPACITY),
 	  affectors_(4), inLocalSpace_(false)
 {
+	ZoneScoped;
+	ZoneText(texture->name().data(), texture->name().length());
+
 	type_ = ObjectType::PARTICLE_SYSTEM;
 
 	for (unsigned int i = 0; i < poolSize_; i++)
@@ -45,7 +54,12 @@ void ParticleSystem::clearAffectors()
 
 void ParticleSystem::emitParticles(const ParticleInitializer &init)
 {
+	ZoneScoped;
 	const unsigned int amount = static_cast<unsigned int>(nctl::randBetween(init.rndAmount.x, init.rndAmount.y));
+#ifdef WITH_TRACY
+	tracyInfoString.format("Count: %d", amount);
+	ZoneText(tracyInfoString.data(), tracyInfoString.length());
+#endif
 	Vector2f position(0.0f, 0.0f);
 	Vector2f velocity(0.0f, 0.0f);
 
@@ -120,6 +134,7 @@ void ParticleSystem::setLayer(unsigned int layer)
 
 void ParticleSystem::update(float interval)
 {
+	ZoneScoped;
 	for (nctl::List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
 	{
 		Particle *particle = static_cast<Particle *>(*i);
@@ -147,6 +162,11 @@ void ParticleSystem::update(float interval)
 			particle->transform();
 		}
 	}
+
+#ifdef WITH_TRACY
+	tracyInfoString.format("Alive: %d", numAliveParticles());
+	ZoneText(tracyInfoString.data(), tracyInfoString.length());
+#endif
 }
 
 }

@@ -284,6 +284,30 @@ else()
 	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/DebugOverlay.cpp)
 endif()
 
+if(WITH_TRACY)
+	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_TRACY")
+	if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android" AND NOT APPLE)
+		list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_TRACY_OPENGL")
+	endif()
+	list(APPEND PRIVATE_COMPILE_DEFINITIONS "TRACY_ENABLE")
+
+	list(APPEND PRIVATE_HEADERS
+		${NCINE_ROOT}/src/include/tracy.h
+		${NCINE_ROOT}/src/include/tracy_opengl.h
+		${TRACY_SOURCE_DIR}/Tracy.hpp
+		${TRACY_SOURCE_DIR}/TracyOpenGL.hpp
+	)
+
+	if(WITH_LUA)
+		list(APPEND PRIVATE_HEADERS ${TRACY_SOURCE_DIR}/TracyLua.hpp)
+	endif()
+
+	list(APPEND SOURCES
+		${NCINE_ROOT}/src/tracy_memory.cpp
+		${TRACY_SOURCE_DIR}/TracyClient.cpp
+	)
+endif()
+
 if(NCINE_BUILD_ANDROID)
 	list(APPEND HEADERS
 		${NCINE_ROOT}/include/AndroidApplication.h

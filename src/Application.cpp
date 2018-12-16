@@ -32,6 +32,8 @@
 	#include "DebugOverlay.h"
 #endif
 
+#include "tracy_opengl.h"
+
 #include "version.h"
 
 namespace ncine {
@@ -67,6 +69,8 @@ void Application::togglePause()
 
 void Application::initCommon()
 {
+	TracyGpuContext;
+	ZoneScoped;
 	profileTimer_->start();
 
 #ifdef WITH_GIT_VERSION
@@ -93,6 +97,8 @@ void Application::initCommon()
 
 	// Swapping frame now for a cleaner API trace capture when debugging
 	gfxDevice_->update();
+	FrameMark;
+	TracyGpuCollect;
 
 	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.frameTimerLogInterval(), appCfg_.profileTextUpdateTime());
 
@@ -127,69 +133,105 @@ void Application::initCommon()
 
 	timings_[Timings::INIT_COMMON] = profileTimer_->interval();
 
-	profileTimer_->start();
-	appEventHandler_->onInit();
-	timings_[Timings::APP_INIT] = profileTimer_->interval();
-	LOGI("IAppEventHandler::OnInit() invoked");
+	{
+		ZoneScopedN("onInit");
+		profileTimer_->start();
+		appEventHandler_->onInit();
+		timings_[Timings::APP_INIT] = profileTimer_->interval();
+		LOGI("IAppEventHandler::OnInit() invoked");
+	}
 
 	// Swapping frame now for a cleaner API trace capture when debugging
 	gfxDevice_->update();
+	FrameMark;
+	TracyGpuCollect;
 }
 
 void Application::step()
 {
+	ZoneScoped;
 	frameTimer_->addFrame();
 	if (appCfg_.withScenegraph())
+	{
+		TracyGpuZone("Clear");
 		gfxDevice_->clear();
+	}
 
 #ifdef WITH_IMGUI
-	profileTimer_->start();
-	imguiDrawing_->newFrame();
-	timings_[Timings::IMGUI] = profileTimer_->interval();
+	{
+		ZoneScopedN("ImGui newFrame");
+		profileTimer_->start();
+		imguiDrawing_->newFrame();
+		timings_[Timings::IMGUI] = profileTimer_->interval();
+	}
 #endif
 
 #ifdef WITH_LUA
 	LuaStatistics::update();
 #endif
 
-	profileTimer_->start();
-	appEventHandler_->onFrameStart();
-	timings_[Timings::FRAME_START] = profileTimer_->interval();
+	{
+		ZoneScopedN("onFrameStart");
+		profileTimer_->start();
+		appEventHandler_->onFrameStart();
+		timings_[Timings::FRAME_START] = profileTimer_->interval();
+	}
 
 	if (debugOverlay_)
 		debugOverlay_->update();
 
 	if (rootNode_ != nullptr && renderQueue_ != nullptr)
 	{
-		profileTimer_->start();
-		rootNode_->update(frameTimer_->interval());
-		timings_[Timings::UPDATE] = profileTimer_->interval();
+		ZoneScopedN("SceneGraph");
+		{
+			ZoneScopedN("Update");
+			profileTimer_->start();
+			rootNode_->update(frameTimer_->interval());
+			timings_[Timings::UPDATE] = profileTimer_->interval();
+		}
 
-		profileTimer_->start();
-		rootNode_->visit(*renderQueue_);
-		timings_[Timings::VISIT] = profileTimer_->interval();
+		{
+			ZoneScopedN("Visit");
+			profileTimer_->start();
+			rootNode_->visit(*renderQueue_);
+			timings_[Timings::VISIT] = profileTimer_->interval();
+		}
 
-		profileTimer_->start();
-		renderQueue_->draw();
-		timings_[Timings::DRAW] = profileTimer_->interval();
+		{
+			ZoneScopedN("Draw");
+			profileTimer_->start();
+			renderQueue_->draw();
+			timings_[Timings::DRAW] = profileTimer_->interval();
+		}
 	}
 
-	theServiceLocator().audioDevice().updatePlayers();
+	{
+		ZoneScopedN("Audio");
+		theServiceLocator().audioDevice().updatePlayers();
+	}
 
 #ifdef WITH_IMGUI
-	profileTimer_->start();
-	if (appCfg_.withScenegraph())
-		imguiDrawing_->endFrame(*renderQueue_);
-	else
-		imguiDrawing_->endFrame();
-	timings_[Timings::IMGUI] += profileTimer_->interval();
+	{
+		ZoneScopedN("ImGui endFrame");
+		profileTimer_->start();
+		if (appCfg_.withScenegraph())
+			imguiDrawing_->endFrame(*renderQueue_);
+		else
+			imguiDrawing_->endFrame();
+		timings_[Timings::IMGUI] += profileTimer_->interval();
+	}
 #endif
 
 	gfxDevice_->update();
+	FrameMark;
+	TracyGpuCollect;
 
-	profileTimer_->start();
-	appEventHandler_->onFrameEnd();
-	timings_[Timings::FRAME_END] = profileTimer_->interval();
+	{
+		ZoneScopedN("onFrameEnd");
+		profileTimer_->start();
+		appEventHandler_->onFrameEnd();
+		timings_[Timings::FRAME_END] = profileTimer_->interval();
+	}
 
 	if (debugOverlay_ && appCfg_.withProfilerGraphs())
 		debugOverlay_->updateFrameTimings();
@@ -197,9 +239,13 @@ void Application::step()
 
 void Application::shutdownCommon()
 {
-	appEventHandler_->onShutdown();
-	LOGI("IAppEventHandler::OnShutdown() invoked");
-	appEventHandler_.reset(nullptr);
+	ZoneScoped;
+	{
+		ZoneScopedN("onShutdown");
+		appEventHandler_->onShutdown();
+		LOGI("IAppEventHandler::OnShutdown() invoked");
+		appEventHandler_.reset(nullptr);
+	}
 
 #ifdef WITH_IMGUI
 	imguiDrawing_.reset(nullptr);
@@ -227,6 +273,10 @@ void Application::shutdownCommon()
 
 void Application::setFocus(bool hasFocus)
 {
+#if defined(WITH_TRACY) && !defined(__ANDROID__)
+	hasFocus = true;
+#endif
+
 	// Check if a focus event has occurred
 	if (hasFocus_ != hasFocus)
 	{

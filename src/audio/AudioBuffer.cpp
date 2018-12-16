@@ -3,6 +3,7 @@
 #include "common_macros.h"
 #include "AudioBuffer.h"
 #include "IAudioLoader.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -19,6 +20,8 @@ AudioBuffer::AudioBuffer()
 AudioBuffer::AudioBuffer(const char *filename)
 	: Object(ObjectType::AUDIOBUFFER, filename), numChannels_(0), frequency_(0)
 {
+	ZoneScoped;
+	ZoneText(filename, strnlen(filename, 256));
 	alGenBuffers(1, &bufferId_);
 
 	nctl::UniquePtr<IAudioLoader> audioLoader = IAudioLoader::createFromFile(filename);

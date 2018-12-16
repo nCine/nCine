@@ -1,4 +1,5 @@
 #include "GLBufferObject.h"
+#include "tracy_opengl.h"
 
 namespace ncine {
 
@@ -59,6 +60,7 @@ bool GLBufferObject::unbind() const
 
 void GLBufferObject::bufferData(GLsizeiptr size, const GLvoid *data, GLenum usage)
 {
+	TracyGpuZone("glBufferData");
 	bind();
 	glBufferData(target_, size, data, usage);
 	size_ = size;
@@ -66,6 +68,7 @@ void GLBufferObject::bufferData(GLsizeiptr size, const GLvoid *data, GLenum usag
 
 void GLBufferObject::bufferSubData(GLintptr offset, GLsizeiptr size, const GLvoid *data)
 {
+	TracyGpuZone("glBufferSubData");
 	bind();
 	glBufferSubData(target_, offset, size, data);
 }
@@ -73,6 +76,7 @@ void GLBufferObject::bufferSubData(GLintptr offset, GLsizeiptr size, const GLvoi
 #ifndef __ANDROID__
 void GLBufferObject::bufferStorage(GLsizeiptr size, const GLvoid *data, GLbitfield flags)
 {
+	TracyGpuZone("glBufferStorage");
 	bind();
 	glBufferStorage(target_, size, data, flags);
 	size_ = size;

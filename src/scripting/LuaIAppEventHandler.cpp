@@ -8,6 +8,8 @@
 #include "LuaAppConfiguration.h"
 #include "LuaNames.h"
 
+#include "tracy.h"
+
 namespace ncine {
 
 namespace LuaNames {
@@ -46,6 +48,7 @@ void LuaIAppEventHandler::onInit(lua_State *L)
 
 	if (type != LUA_TNIL)
 	{
+		ZoneScopedN("Lua onInit");
 		ASSERT(type == LUA_TFUNCTION);
 		lua_call(L, 0, 0);
 	}
@@ -60,6 +63,7 @@ void LuaIAppEventHandler::onFrameStart(lua_State *L)
 
 	if (type != LUA_TNIL)
 	{
+		ZoneScopedN("Lua onFrameStart");
 		ASSERT(type == LUA_TFUNCTION);
 		lua_call(L, 0, 0);
 	}
@@ -72,6 +76,7 @@ void LuaIAppEventHandler::onShutdown(lua_State *L)
 
 	if (type != LUA_TNIL)
 	{
+		ZoneScopedN("Lua onShutdown");
 		ASSERT(type == LUA_TFUNCTION);
 		lua_call(L, 0, 0);
 	}

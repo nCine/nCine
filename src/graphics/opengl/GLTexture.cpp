@@ -1,4 +1,5 @@
 #include "GLTexture.h"
+#include "tracy_opengl.h"
 
 namespace ncine {
 
@@ -77,30 +78,35 @@ void GLTexture::unbind() const
 
 void GLTexture::texImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data)
 {
+	TracyGpuZone("glTexImage2D");
 	bind();
 	glTexImage2D(target_, level, internalFormat, width, height, 0, format, type, data);
 }
 
 void GLTexture::texSubImage2D(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data)
 {
+	TracyGpuZone("glTexSubImage2D");
 	bind();
 	glTexSubImage2D(target_, level, xoffset, yoffset, width, height, format, type, data);
 }
 
 void GLTexture::compressedTexImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei imageSize, const void *data)
 {
+	TracyGpuZone("glCompressedTexImage2D");
 	bind();
 	glCompressedTexImage2D(target_, level, internalFormat, width, height, 0, imageSize, data);
 }
 
 void GLTexture::compressedTexSubImage2D(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const void *data)
 {
+	TracyGpuZone("glCompressedTexSubImage2D");
 	bind();
 	glCompressedTexSubImage2D(target_, level, xoffset, yoffset, width, height, format, imageSize, data);
 }
 
 void GLTexture::texStorage2D(GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height)
 {
+	TracyGpuZone("glTexStorage2D");
 	bind();
 	glTexStorage2D(target_, levels, internalFormat, width, height);
 }

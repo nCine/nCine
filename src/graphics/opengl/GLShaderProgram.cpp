@@ -3,6 +3,7 @@
 #include "GLDebug.h"
 #include "nctl/String.h"
 #include <cstring> // for strnlen()
+#include "tracy.h"
 
 namespace ncine {
 
@@ -130,6 +131,7 @@ void GLShaderProgram::use()
 
 void GLShaderProgram::discoverUniforms()
 {
+	ZoneScoped;
 	GLint count;
 	glGetProgramiv(glHandle_, GL_ACTIVE_UNIFORMS, &count);
 
@@ -160,6 +162,7 @@ void GLShaderProgram::discoverUniforms()
 
 void GLShaderProgram::discoverUniformBlocks(GLUniformBlock::DiscoverUniforms discover)
 {
+	ZoneScoped;
 	GLint count;
 	glGetProgramiv(glHandle_, GL_ACTIVE_UNIFORM_BLOCKS, &count);
 
@@ -175,6 +178,7 @@ void GLShaderProgram::discoverUniformBlocks(GLUniformBlock::DiscoverUniforms dis
 
 void GLShaderProgram::discoverAttributes()
 {
+	ZoneScoped;
 	GLint count;
 	glGetProgramiv(glHandle_, GL_ACTIVE_ATTRIBUTES, &count);
 

@@ -4,6 +4,7 @@
 #include "FontGlyph.h"
 #include "IFile.h"
 #include "Texture.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -16,6 +17,9 @@ Font::Font(const char *texFilename, const char *fntFilename)
 	  texture_(nctl::makeUnique<Texture>(texFilename)), lineHeight_(0), base_(0), width_(0), height_(0),
 	  numGlyphs_(0), numKernings_(0), glyphs_(nctl::makeUnique<FontGlyph []>(MaxGlyphs))
 {
+	ZoneScoped;
+	ZoneText(fntFilename, strnlen(fntFilename, 256));
+
 	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(fntFilename);
 	fileHandle->open(IFile::OpenMode::READ);
 	parseFntFile(fileHandle.get());

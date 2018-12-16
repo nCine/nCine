@@ -31,6 +31,7 @@ For additional information: https://ncine.github.io
 - Cppcheck
 - Artistic Style and Uncrustify
 - Google Test and Gcovr
+- Tracy frame profiler
 
 ## Development
 

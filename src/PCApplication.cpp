@@ -11,6 +11,8 @@
 	#include "GlfwInputManager.h"
 #endif
 
+#include "tracy.h"
+
 namespace ncine {
 
 Application &theApplication()
@@ -39,6 +41,7 @@ void PCApplication::start(IAppEventHandler * (*createAppEventHandler)())
 
 void PCApplication::init(IAppEventHandler * (*createAppEventHandler)())
 {
+	ZoneScoped;
 	profileTimer_ = nctl::makeUnique<Timer>();
 	profileTimer_->start();
 
@@ -74,47 +77,51 @@ void PCApplication::run()
 {
 	while (!shouldQuit_)
 	{
-#if defined(WITH_SDL)
-		SDL_Event event;
-
-		while (SDL_PollEvent(&event))
 		{
-			switch (event.type)
-			{
-				case SDL_QUIT:
-					shouldQuit_ = true;
-					break;
-				case SDL_WINDOWEVENT:
-					if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
-						setFocus(true);
-					else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
-						setFocus(false);
-					else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-					{
-						gfxDevice_->width_ = event.window.data1;
-						gfxDevice_->height_ = event.window.data2;
-						gfxDevice_->setViewport(event.window.data1, event.window.data2);
-					}
-					break;
-				default:
-					SdlInputManager::parseEvent(event);
-					break;
-			}
+			ZoneScopedN("Poll events");
+#if defined(WITH_SDL)
+			SDL_Event event;
 
-			if (!hasFocus_ || isPaused_)
+			while (SDL_PollEvent(&event))
 			{
-				SDL_WaitEvent(&event);
-				SDL_PushEvent(&event);
+
+				switch (event.type)
+				{
+					case SDL_QUIT:
+						shouldQuit_ = true;
+						break;
+					case SDL_WINDOWEVENT:
+						if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
+							setFocus(true);
+						else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+							setFocus(false);
+						else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+						{
+							gfxDevice_->width_ = event.window.data1;
+							gfxDevice_->height_ = event.window.data2;
+							gfxDevice_->setViewport(event.window.data1, event.window.data2);
+						}
+						break;
+					default:
+						SdlInputManager::parseEvent(event);
+						break;
+				}
+
+				if (!hasFocus_ || isPaused_)
+				{
+					SDL_WaitEvent(&event);
+					SDL_PushEvent(&event);
+				}
 			}
-		}
 #elif defined(WITH_GLFW)
-		setFocus(GlfwInputManager::hasFocus());
-		if (!hasFocus_ || isPaused_)
-			glfwWaitEvents();
-		else
-			glfwPollEvents();
-		GlfwInputManager::updateJoystickStates();
+			setFocus(GlfwInputManager::hasFocus());
+			if (!hasFocus_ || isPaused_)
+				glfwWaitEvents();
+			else
+				glfwPollEvents();
+			GlfwInputManager::updateJoystickStates();
 #endif
+		}
 
 		if (hasFocus_ && !isPaused_)
 			step();

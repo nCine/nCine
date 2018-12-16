@@ -1,6 +1,7 @@
 #include "RenderBuffersManager.h"
 #include "RenderStatistics.h"
 #include "GLDebug.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -114,6 +115,7 @@ RenderBuffersManager::Parameters RenderBuffersManager::acquireMemory(BufferTypes
 
 void RenderBuffersManager::flushUnmap()
 {
+	ZoneScoped;
 	GLDebug::ScopedGroup scoped("RenderBuffersManager::flushUnmap()");
 
 	for (ManagedBuffer &buffer : buffers_)
@@ -144,6 +146,7 @@ void RenderBuffersManager::flushUnmap()
 
 void RenderBuffersManager::remap()
 {
+	ZoneScoped;
 	GLDebug::ScopedGroup scoped("RenderBuffersManager::remap()");
 
 	for (ManagedBuffer &buffer : buffers_)
@@ -162,6 +165,7 @@ void RenderBuffersManager::remap()
 
 void RenderBuffersManager::createBuffer(const BufferSpecifications &specs)
 {
+	ZoneScoped;
 	GLDebug::ScopedGroup scoped("RenderBuffersManager::createBuffer()");
 
 	ManagedBuffer managedBuffer;

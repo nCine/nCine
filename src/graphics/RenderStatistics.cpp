@@ -1,4 +1,5 @@
 ﻿#include "RenderStatistics.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -23,6 +24,9 @@ RenderStatistics::VaoPool RenderStatistics::vaoPool_;
 
 void RenderStatistics::reset()
 {
+	TracyPlot("Vertices", static_cast<int64_t>(allCommands_.vertices));
+	TracyPlot("Render Commands", static_cast<int64_t>(allCommands_.commands));
+
 	for (unsigned int i = 0; i < RenderCommand::CommandTypes::COUNT; i++)
 		typedCommands_[i].reset();
 	allCommands_.reset();

@@ -1,6 +1,7 @@
 #include <cstring> // for memcpy()
 #include "MeshSprite.h"
 #include "RenderCommand.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -30,6 +31,8 @@ MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, float x, float y)
 {
 	ASSERT(texture);
 
+	ZoneScoped;
+	ZoneText(texture->name().data(), texture->name().length());
 	type_ = ObjectType::MESH_SPRITE;
 	setLayer(DrawableNode::LayerBase::SCENE);
 	renderCommand_->setType(RenderCommand::CommandTypes::MESH_SPRITE);
