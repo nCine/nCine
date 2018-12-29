@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_GLSHADERUNIFORMBLOCKS
 #define CLASS_NCINE_GLSHADERUNIFORMBLOCKS
 
-#include "nctl/HashMap.h"
+#include "nctl/StaticHashMap.h"
 #include "nctl/String.h"
 #include "GLUniformBlockCache.h"
 #include "RenderBuffersManager.h"
@@ -34,7 +34,7 @@ class GLShaderUniformBlocks
 	RenderBuffersManager::Parameters uboParams_;
 
 	static const int UniformBlockCachesHashSize = 4;
-	nctl::StringHashMap<GLUniformBlockCache> uniformBlockCaches_;
+	nctl::StaticStringHashMap<GLUniformBlockCache, UniformBlockCachesHashSize> uniformBlockCaches_;
 	/// A dummy uniform block cache returned when a uniform block is not found in the hashmap
 	static GLUniformBlockCache uniformBlockNotFound_;
 

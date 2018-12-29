@@ -1,7 +1,7 @@
 #include "common_macros.h"
 #include "GLUniformBlockCache.h"
 #include "GLUniformBlock.h"
-#include "nctl/HashMapIterator.h"
+#include "nctl/StaticHashMapIterator.h"
 
 namespace ncine {
 
@@ -10,13 +10,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GLUniformBlockCache::GLUniformBlockCache()
-	: uniformBlock_(nullptr), dataPointer_(nullptr), usedSize_(0), uniformCaches_(UniformHashSize)
+	: uniformBlock_(nullptr), dataPointer_(nullptr), usedSize_(0)
 {
 
 }
 
 GLUniformBlockCache::GLUniformBlockCache(GLUniformBlock *uniformBlock)
-	: uniformBlock_(uniformBlock), dataPointer_(nullptr), usedSize_(0), uniformCaches_(UniformHashSize)
+	: uniformBlock_(uniformBlock), dataPointer_(nullptr), usedSize_(0)
 {
 	ASSERT(uniformBlock);
 	usedSize_ = uniformBlock->size();

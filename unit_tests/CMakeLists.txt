@@ -42,6 +42,8 @@ list(APPEND TESTS
 	gtest_list gtest_list_iterator gtest_list_operations gtest_list_algorithms gtest_list_movable
 	gtest_string gtest_string_iterator gtest_string_reverseiterator gtest_string_operations
 	gtest_hashmap gtest_hashmap_iterator gtest_hashmap_algorithms gtest_hashmap_string gtest_hashmap_movable
+	gtest_statichashmap gtest_statichashmap_iterator gtest_statichashmap_algorithms gtest_statichashmap_string gtest_statichashmap_movable
+	gtest_hashmaplist gtest_hashmaplist_iterator gtest_hashmaplist_algorithms gtest_hashmaplist_string gtest_hashmaplist_movable
 	gtest_vector2 gtest_vector3 gtest_vector4 gtest_rect
 	gtest_matrix4x4 gtest_matrix4x4_operations gtest_quaternion gtest_quaternion_operations
 	gtest_atomic32 gtest_atomic64
@@ -61,6 +63,6 @@ foreach(TEST ${TESTS})
 	endif()
 
 	if(APPLE)
-		set_target_properties(${APPTEST} PROPERTIES INSTALL_RPATH "@executable_path/${RELPATH_TO_LIB}")
+		set_target_properties(${TEST} PROPERTIES INSTALL_RPATH "@executable_path/${RELPATH_TO_LIB}")
 	endif()
 endforeach()

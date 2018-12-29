@@ -1,60 +1,41 @@
-#ifndef CLASS_NCTL_HASHMAP
-#define CLASS_NCTL_HASHMAP
+#ifndef CLASS_NCTL_STATICHASHMAP
+#define CLASS_NCTL_STATICHASHMAP
 
 #include "common_macros.h"
 #include "UniquePtr.h"
 #include "HashFunctions.h"
 #include "ReverseIterator.h"
-#include <cstring> // for memcpy()
 
 namespace nctl {
 
-template <class K, class T, class HashFunc, bool IsConst> class HashMapIterator;
-template <class K, class T, class HashFunc, bool IsConst> struct HashMapHelperTraits;
+template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst> class StaticHashMapIterator;
+template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst> struct StaticHashMapHelperTraits;
 class String;
 
-/// A template based hashmap implementation with open addressing and leapfrog probing
-template <class K, class T, class HashFunc = FNV1aHashFunc<K>>
-class HashMap
+/// A template based hashmap implementation with open addressing and leapfrog probing (version with static allocation)
+template <class K, class T, unsigned int Capacity, class HashFunc = FNV1aHashFunc<K>>
+class StaticHashMap
 {
   public:
-	/// The template class for the node stored inside the hashmap
-	class Node
-	{
-	  public:
-		K key;
-		T value;
-	};
-
 	/// Iterator type
-	using Iterator = HashMapIterator<K, T, HashFunc, false>;
+	using Iterator = StaticHashMapIterator<K, T, HashFunc, Capacity, false>;
 	/// Constant iterator type
-	using ConstIterator = HashMapIterator<K, T, HashFunc, true>;
+	using ConstIterator = StaticHashMapIterator<K, T, HashFunc, Capacity, true>;
 	/// Reverse iterator type
 	using ReverseIterator = nctl::ReverseIterator<Iterator>;
 	/// Reverse constant iterator type
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
-	explicit HashMap(unsigned int capacity);
+	StaticHashMap() : size_(0) { clear(); }
 
 	/// Copy constructor
-	HashMap(const HashMap &other);
+	StaticHashMap(const StaticHashMap &other);
 	/// Move constructor
-	HashMap(HashMap &&other);
-	/// Copy-and-swap assignment operator
-	HashMap &operator=(HashMap other);
-
-	/// Swaps two hashmaps without copying their data
-	inline void swap(HashMap &first, HashMap &second)
-	{
-		nctl::swap(first.size_, second.size_);
-		nctl::swap(first.capacity_, second.capacity_);
-		nctl::swap(first.buffer_, second.buffer_);
-		nctl::swap(first.delta1_, second.delta1_);
-		nctl::swap(first.delta2_, second.delta2_);
-		nctl::swap(first.hashes_, second.hashes_);
-		nctl::swap(first.nodes_, second.nodes_);
-	}
+	StaticHashMap(StaticHashMap &&other);
+	/// Aassignment operator
+	StaticHashMap &operator=(const StaticHashMap &other);
+	/// Move aassignment operator
+	StaticHashMap &operator=(StaticHashMap &&other);
 
 	/// Returns an iterator to the first element
 	Iterator begin();
@@ -87,13 +68,13 @@ class HashMap
 	T &operator[](const K &key);
 
 	/// Returns the capacity of the hashmap
-	inline unsigned int capacity() const { return capacity_; }
+	inline unsigned int capacity() const { return Capacity; }
 	/// Returns true if the hashmap is empty
 	inline bool isEmpty() const { return size_ == 0; }
 	/// Returns the number of elements in the hashmap
 	inline unsigned int size() const { return size_; }
 	/// Returns the ratio between used and total buckets
-	inline float loadFactor() const { return size_ / static_cast<float>(capacity_); }
+	inline float loadFactor() const { return size_ / static_cast<float>(Capacity); }
 	/// Returns the hash of a given key
 	inline hash_t hash(const K &key) const { return hashFunc_(key); }
 
@@ -109,14 +90,19 @@ class HashMap
 	bool remove(const K &key);
 
   private:
+	/// The template class for the node stored inside the hashmap
+	class Node
+	{
+	  public:
+		K key;
+		T value;
+	};
+
 	unsigned int size_;
-	unsigned int capacity_;
-	/// Single allocated buffer for all the hashmap per-node data
-	UniquePtr<uint8_t []> buffer_;
-	uint8_t *delta1_;
-	uint8_t *delta2_;
-	hash_t *hashes_;
-	UniquePtr<Node []> nodes_;
+	uint8_t delta1_[Capacity];
+	uint8_t delta2_[Capacity];
+	hash_t hashes_[Capacity];
+	Node nodes_[Capacity];
 	HashFunc hashFunc_;
 
 	bool findBucketIndex(K key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const;
@@ -129,133 +115,129 @@ class HashMap
 	bool bucketFound(unsigned int index, hash_t hash, K key) const;
 	T &addNode(unsigned int index, hash_t hash, K key);
 
-	friend class HashMapIterator<K, T, HashFunc, false>;
-	friend class HashMapIterator<K, T, HashFunc, true>;
-	friend struct HashMapHelperTraits<K, T, HashFunc, false>;
-	friend struct HashMapHelperTraits<K, T, HashFunc, true>;
+	friend class StaticHashMapIterator<K, T, HashFunc, Capacity, false>;
+	friend class StaticHashMapIterator<K, T, HashFunc, Capacity, true>;
+	friend struct StaticHashMapHelperTraits<K, T, HashFunc, Capacity, false>;
+	friend struct StaticHashMapHelperTraits<K, T, HashFunc, Capacity, true>;
 };
 
-template <class K, class T, class HashFunc>
-inline typename HashMap<K, T, HashFunc>::Iterator HashMap<K, T, HashFunc>::begin()
+template <class K, class T, unsigned int Capacity, class HashFunc>
+typename StaticHashMap<K, T, Capacity, HashFunc>::Iterator StaticHashMap<K, T, Capacity, HashFunc>::begin()
 {
 	Iterator iterator(this, Iterator::SentinelTagInit::BEGINNING);
 	return ++iterator;
 }
 
-template <class K, class T, class HashFunc>
-typename HashMap<K, T, HashFunc>::ReverseIterator HashMap<K, T, HashFunc>::rBegin()
+template <class K, class T, unsigned int Capacity, class HashFunc>
+typename StaticHashMap<K, T, Capacity, HashFunc>::ReverseIterator StaticHashMap<K, T, Capacity, HashFunc>::rBegin()
 {
 	Iterator iterator(this, Iterator::SentinelTagInit::END);
 	return ReverseIterator(--iterator);
 }
 
-template <class K, class T, class HashFunc>
-typename HashMap<K, T, HashFunc>::Iterator HashMap<K, T, HashFunc>::end()
+template <class K, class T, unsigned int Capacity, class HashFunc>
+typename StaticHashMap<K, T, Capacity, HashFunc>::Iterator StaticHashMap<K, T, Capacity, HashFunc>::end()
 {
 	return Iterator(this, Iterator::SentinelTagInit::END);
 }
 
-template <class K, class T, class HashFunc>
-typename HashMap<K, T, HashFunc>::ReverseIterator HashMap<K, T, HashFunc>::rEnd()
+template <class K, class T, unsigned int Capacity, class HashFunc>
+typename StaticHashMap<K, T, Capacity, HashFunc>::ReverseIterator StaticHashMap<K, T, Capacity, HashFunc>::rEnd()
 {
 	Iterator iterator(this, Iterator::SentinelTagInit::BEGINNING);
 	return ReverseIterator(iterator);
 }
 
-template <class K, class T, class HashFunc>
-typename HashMap<K, T, HashFunc>::ConstIterator HashMap<K, T, HashFunc>::begin() const
+template <class K, class T, unsigned int Capacity, class HashFunc>
+inline typename StaticHashMap<K, T, Capacity, HashFunc>::ConstIterator StaticHashMap<K, T, Capacity, HashFunc>::begin() const
 {
 	ConstIterator iterator(this, ConstIterator::SentinelTagInit::BEGINNING);
 	return ++iterator;
 }
 
-template <class K, class T, class HashFunc>
-typename HashMap<K, T, HashFunc>::ConstReverseIterator HashMap<K, T, HashFunc>::rBegin() const
+template <class K, class T, unsigned int Capacity, class HashFunc>
+typename StaticHashMap<K, T, Capacity, HashFunc>::ConstReverseIterator StaticHashMap<K, T, Capacity, HashFunc>::rBegin() const
 {
 	ConstIterator iterator(this, ConstIterator::SentinelTagInit::END);
 	return ConstReverseIterator(--iterator);
 }
 
-template <class K, class T, class HashFunc>
-typename HashMap<K, T, HashFunc>::ConstIterator HashMap<K, T, HashFunc>::end() const
+template <class K, class T, unsigned int Capacity, class HashFunc>
+inline typename StaticHashMap<K, T, Capacity, HashFunc>::ConstIterator StaticHashMap<K, T, Capacity, HashFunc>::end() const
 {
 	return ConstIterator(this, ConstIterator::SentinelTagInit::END);
 }
 
-template <class K, class T, class HashFunc>
-typename HashMap<K, T, HashFunc>::ConstReverseIterator HashMap<K, T, HashFunc>::rEnd() const
+template <class K, class T, unsigned int Capacity, class HashFunc>
+typename StaticHashMap<K, T, Capacity, HashFunc>::ConstReverseIterator StaticHashMap<K, T, Capacity, HashFunc>::rEnd() const
 {
 	ConstIterator iterator(this, ConstIterator::SentinelTagInit::BEGINNING);
 	return ConstReverseIterator(iterator);
 }
 
-template <class K, class T, class HashFunc>
-HashMap<K, T, HashFunc>::HashMap(unsigned int capacity)
-	: size_(0), capacity_(capacity), delta1_(nullptr),
-	  delta2_(nullptr), hashes_(nullptr), nodes_(nullptr)
+template <class K, class T, unsigned int Capacity, class HashFunc>
+StaticHashMap<K, T, Capacity, HashFunc>::StaticHashMap(const StaticHashMap<K, T, Capacity, HashFunc> &other)
+	: size_(other.size_)
 {
-	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
-	buffer_ = makeUnique<uint8_t []>(bytes);
-
-	uint8_t *pointer = buffer_.get();
-	delta1_ = pointer;
-	pointer += sizeof(uint8_t) * capacity_;
-	delta2_ = pointer;
-	pointer += sizeof(uint8_t) * capacity_;
-	hashes_ = reinterpret_cast<hash_t *>(pointer);
-	FATAL_ASSERT(pointer + sizeof(hash_t) * capacity_ == buffer_.get() + bytes);
-
-	nodes_ = makeUnique<Node []>(capacity);
-
-	clear();
-}
-
-template <class K, class T, class HashFunc>
-HashMap<K, T, HashFunc>::HashMap(const HashMap<K, T, HashFunc> &other)
-	: size_(other.size_), capacity_(other.capacity_)
-{
-	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
-	buffer_ = makeUnique<uint8_t []>(bytes);
-	memcpy(buffer_.get(), other.buffer_.get(), bytes);
-
-	uint8_t *pointer = buffer_.get();
-	delta1_ = pointer;
-	pointer += sizeof(uint8_t) * capacity_;
-	delta2_ = pointer;
-	pointer += sizeof(uint8_t) * capacity_;
-	hashes_ = reinterpret_cast<hash_t *>(pointer);
-	FATAL_ASSERT(pointer + sizeof(hash_t) * capacity_ == buffer_.get() + bytes);
-
-	nodes_ = makeUnique<Node []>(capacity_);
-	for (unsigned int i =0; i < capacity_; i++)
+	for (unsigned int i = 0; i < Capacity; i++)
+	{
+		delta1_[i] = other.delta1_[i];
+		delta2_[i] = other.delta2_[i];
+		hashes_[i] = other.hashes_[i];
 		nodes_[i] = other.nodes_[i];
+	}
 }
 
-template <class K, class T, class HashFunc>
-HashMap<K, T, HashFunc>::HashMap(HashMap<K, T, HashFunc> &&other)
-	: size_(other.size_), capacity_(other.capacity_), buffer_(nctl::move(other.buffer_)),
-	  delta1_(other.delta1_), delta2_(other.delta2_), hashes_(other.hashes_), nodes_(nctl::move(other.nodes_))
+template <class K, class T, unsigned int Capacity, class HashFunc>
+StaticHashMap<K, T, Capacity, HashFunc>::StaticHashMap(StaticHashMap<K, T, Capacity, HashFunc> &&other)
+	: size_(other.size_)
 {
-	other.size_ = 0;
-	other.capacity_ = 0;
-	other.delta1_ = nullptr;
-	other.delta2_ = nullptr;
-	other.hashes_ = nullptr;
+	for (unsigned int i = 0; i < Capacity; i++)
+	{
+		delta1_[i] = other.delta1_[i];
+		delta2_[i] = other.delta2_[i];
+		hashes_[i] = other.hashes_[i];
+		nodes_[i] = nctl::move(other.nodes_[i]);
+	}
 }
 
-/*! \note The parameter should be passed by value for the idiom to work. */
-template <class K, class T, class HashFunc>
-HashMap<K, T, HashFunc> &HashMap<K, T, HashFunc>::operator=(HashMap<K, T, HashFunc> other)
+template <class K, class T, unsigned int Capacity, class HashFunc>
+StaticHashMap<K, T, Capacity, HashFunc> &StaticHashMap<K, T, Capacity, HashFunc>::operator=(const StaticHashMap<K, T, Capacity, HashFunc> &other)
 {
-	swap(*this, other);
+	size_ = other.size_;
+
+	for (unsigned int i = 0; i < Capacity; i++)
+	{
+		delta1_[i] = other.delta1_[i];
+		delta2_[i] = other.delta2_[i];
+		hashes_[i] = other.hashes_[i];
+		nodes_[i] = other.nodes_[i];
+	}
+
 	return *this;
 }
 
-template <class K, class T, class HashFunc>
-T &HashMap<K, T, HashFunc>::operator[](const K &key)
+template <class K, class T, unsigned int Capacity, class HashFunc>
+StaticHashMap<K, T, Capacity, HashFunc> &StaticHashMap<K, T, Capacity, HashFunc>::operator=(StaticHashMap<K, T, Capacity, HashFunc> &&other)
+{
+	size_ = other.size_;
+
+	for (unsigned int i = 0; i < Capacity; i++)
+	{
+		delta1_[i] = other.delta1_[i];
+		delta2_[i] = other.delta2_[i];
+		hashes_[i] = other.hashes_[i];
+		nodes_[i] = nctl::move(other.nodes_[i]);
+	}
+
+	return *this;
+}
+
+template <class K, class T, unsigned int Capacity, class HashFunc>
+T &StaticHashMap<K, T, Capacity, HashFunc>::operator[](const K &key)
 {
 	const hash_t hash = hashFunc_(key);
-	int unsigned bucketIndex = hash % capacity_;
+	int unsigned bucketIndex = hash % Capacity;
 
 	if (bucketFoundOrEmpty(bucketIndex, hash, key) == false)
 	{
@@ -301,8 +283,8 @@ T &HashMap<K, T, HashFunc>::operator[](const K &key)
 	}
 }
 
-template <class K, class T, class HashFunc>
-bool HashMap<K, T, HashFunc>::contains(const K &key, T &returnedValue) const
+template <class K, class T, unsigned int Capacity, class HashFunc>
+bool StaticHashMap<K, T, Capacity, HashFunc>::contains(const K &key, T &returnedValue) const
 {
 	int unsigned bucketIndex = 0;
 	const bool found = findBucketIndex(key, bucketIndex);
@@ -314,8 +296,8 @@ bool HashMap<K, T, HashFunc>::contains(const K &key, T &returnedValue) const
 }
 
 /*! \note Prefer this method if copying `T` is expensive, but always check the validity of returned pointer. */
-template <class K, class T, class HashFunc>
-T *HashMap<K, T, HashFunc>::find(const K &key)
+template <class K, class T, unsigned int Capacity, class HashFunc>
+T *StaticHashMap<K, T, Capacity, HashFunc>::find(const K &key)
 {
 	int unsigned bucketIndex = 0;
 	const bool found = findBucketIndex(key, bucketIndex);
@@ -328,8 +310,8 @@ T *HashMap<K, T, HashFunc>::find(const K &key)
 }
 
 /*! \note Prefer this method if copying `T` is expensive, but always check the validity of returned pointer. */
-template <class K, class T, class HashFunc>
-const T *HashMap<K, T, HashFunc>::find(const K &key) const
+template <class K, class T, unsigned int Capacity, class HashFunc>
+const T *StaticHashMap<K, T, Capacity, HashFunc>::find(const K &key) const
 {
 	int unsigned bucketIndex = 0;
 	const bool found = findBucketIndex(key, bucketIndex);
@@ -342,8 +324,8 @@ const T *HashMap<K, T, HashFunc>::find(const K &key) const
 }
 
 /*! \return True if the element has been found and removed */
-template <class K, class T, class HashFunc>
-bool HashMap<K, T, HashFunc>::remove(const K &key)
+template <class K, class T, unsigned int Capacity, class HashFunc>
+bool StaticHashMap<K, T, Capacity, HashFunc>::remove(const K &key)
 {
 	int unsigned foundBucketIndex = 0;
 	int unsigned prevFoundBucketIndex = 0;
@@ -353,7 +335,7 @@ bool HashMap<K, T, HashFunc>::remove(const K &key)
 	if (found)
 	{
 		// The found bucket is the last of the chain, previous one needs a delta fix
-		if (foundBucketIndex != hashes_[foundBucketIndex] % capacity_ && delta2_[foundBucketIndex] == 0)
+		if (foundBucketIndex != hashes_[foundBucketIndex] % Capacity && delta2_[foundBucketIndex] == 0)
 		{
 			if (addDelta1(prevFoundBucketIndex) == foundBucketIndex)
 				delta1_[prevFoundBucketIndex] = 0;
@@ -396,27 +378,27 @@ bool HashMap<K, T, HashFunc>::remove(const K &key)
 	return found;
 }
 
-template <class K, class T, class HashFunc>
-void HashMap<K, T, HashFunc>::clear()
+template <class K, class T, unsigned int Capacity, class HashFunc>
+void StaticHashMap<K, T, Capacity, HashFunc>::clear()
 {
-	for (unsigned int i = 0; i < capacity_; i++)
+	for (unsigned int i = 0; i < Capacity; i++)
 		delta1_[i] = 0;
-	for (unsigned int i = 0; i < capacity_; i++)
+	for (unsigned int i = 0; i < Capacity; i++)
 		delta2_[i] = 0;
-	for (unsigned int i = 0; i < capacity_; i++)
+	for (unsigned int i = 0; i < Capacity; i++)
 		hashes_[i] = NullHash;
 	size_ = 0;
 }
 
-template <class K, class T, class HashFunc>
-bool HashMap<K, T, HashFunc>::findBucketIndex(K key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const
+template <class K, class T, unsigned int Capacity, class HashFunc>
+bool StaticHashMap<K, T, Capacity, HashFunc>::findBucketIndex(K key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const
 {
 	if (size_ == 0)
 		return false;
 
 	bool found = false;
 	const hash_t hash = hashFunc_(key);
-	foundIndex = hash % capacity_;
+	foundIndex = hash % Capacity;
 	prevFoundIndex = foundIndex;
 
 	if (bucketFoundOrEmpty(foundIndex, hash, key) == false)
@@ -458,48 +440,48 @@ bool HashMap<K, T, HashFunc>::findBucketIndex(K key, unsigned int &foundIndex, u
 	return found;
 }
 
-template <class K, class T, class HashFunc>
-bool HashMap<K, T, HashFunc>::findBucketIndex(K key, unsigned int &foundIndex) const
+template <class K, class T, unsigned int Capacity, class HashFunc>
+bool StaticHashMap<K, T, Capacity, HashFunc>::findBucketIndex(K key, unsigned int &foundIndex) const
 {
 	unsigned int prevFoundIndex = 0;
 	return findBucketIndex(key, foundIndex, prevFoundIndex);
 }
 
-template <class K, class T, class HashFunc>
-unsigned int HashMap<K, T, HashFunc>::addDelta1(unsigned int bucketIndex) const
+template <class K, class T, unsigned int Capacity, class HashFunc>
+unsigned int StaticHashMap<K, T, Capacity, HashFunc>::addDelta1(unsigned int bucketIndex) const
 {
 	unsigned int newIndex = bucketIndex + delta1_[bucketIndex];
-	if (newIndex > capacity_ - 1)
-		newIndex -= capacity_;
+	if (newIndex > Capacity - 1)
+		newIndex -= Capacity;
 	return newIndex;
 }
 
-template <class K, class T, class HashFunc>
-unsigned int HashMap<K, T, HashFunc>::addDelta2(unsigned int bucketIndex) const
+template <class K, class T, unsigned int Capacity, class HashFunc>
+unsigned int StaticHashMap<K, T, Capacity, HashFunc>::addDelta2(unsigned int bucketIndex) const
 {
 	unsigned int newIndex = bucketIndex + delta2_[bucketIndex];
-	if (newIndex > capacity_ - 1)
-		newIndex -= capacity_;
+	if (newIndex > Capacity - 1)
+		newIndex -= Capacity;
 	return newIndex;
 }
 
-template <class K, class T, class HashFunc>
-unsigned int HashMap<K, T, HashFunc>::calcNewDelta(unsigned int bucketIndex, unsigned int newIndex) const
+template <class K, class T, unsigned int Capacity, class HashFunc>
+unsigned int StaticHashMap<K, T, Capacity, HashFunc>::calcNewDelta(unsigned int bucketIndex, unsigned int newIndex) const
 {
 	unsigned int delta = 0;
 	if (newIndex >= bucketIndex)
 		delta = newIndex - bucketIndex;
 	else
-		delta = capacity_ - bucketIndex + newIndex;
+		delta = Capacity - bucketIndex + newIndex;
 
 	FATAL_ASSERT(delta < 256); // deltas are uint8_t
 	return delta;
 }
 
-template <class K, class T, class HashFunc>
-unsigned int HashMap<K, T, HashFunc>::linearSearch(unsigned int index, hash_t hash, K key) const
+template <class K, class T, unsigned int Capacity, class HashFunc>
+unsigned int StaticHashMap<K, T, Capacity, HashFunc>::linearSearch(unsigned int index, hash_t hash, K key) const
 {
-	for (unsigned int i = index; i < capacity_; i++)
+	for (unsigned int i = index; i < Capacity; i++)
 	{
 		if (bucketFoundOrEmpty(i, hash, key))
 			return i;
@@ -514,22 +496,22 @@ unsigned int HashMap<K, T, HashFunc>::linearSearch(unsigned int index, hash_t ha
 	return index;
 }
 
-template <class K, class T, class HashFunc>
-bool HashMap<K, T, HashFunc>::bucketFoundOrEmpty(unsigned int index, hash_t hash, K key) const
+template <class K, class T, unsigned int Capacity, class HashFunc>
+bool StaticHashMap<K, T, Capacity, HashFunc>::bucketFoundOrEmpty(unsigned int index, hash_t hash, K key) const
 {
 	return (hashes_[index] == NullHash || (hashes_[index] == hash && nodes_[index].key == key));
 }
 
-template <class K, class T, class HashFunc>
-bool HashMap<K, T, HashFunc>::bucketFound(unsigned int index, hash_t hash, K key) const
+template <class K, class T, unsigned int Capacity, class HashFunc>
+bool StaticHashMap<K, T, Capacity, HashFunc>::bucketFound(unsigned int index, hash_t hash, K key) const
 {
 	return (hashes_[index] == hash && nodes_[index].key == key);
 }
 
-template <class K, class T, class HashFunc>
-T &HashMap<K, T, HashFunc>::addNode(unsigned int index, hash_t hash, K key)
+template <class K, class T, unsigned int Capacity, class HashFunc>
+T &StaticHashMap<K, T, Capacity, HashFunc>::addNode(unsigned int index, hash_t hash, K key)
 {
-	FATAL_ASSERT(size_ < capacity_);
+	FATAL_ASSERT(size_ < Capacity);
 	FATAL_ASSERT(hashes_[index] == NullHash);
 
 	size_++;
@@ -538,8 +520,8 @@ T &HashMap<K, T, HashFunc>::addNode(unsigned int index, hash_t hash, K key)
 	return nodes_[index].value;
 }
 
-template <class T>
-using StringHashMap = HashMap<String, T, FNV1aFuncHashContainer<String> >;
+template <class T, unsigned int Capacity>
+using StaticStringHashMap = StaticHashMap<String, T, Capacity, FNV1aFuncHashContainer<String> >;
 
 }
 

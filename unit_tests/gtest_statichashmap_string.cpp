@@ -1,19 +1,16 @@
-#include "gtest_hashmap_string.h"
+#include "gtest_statichashmap_string.h"
 
 namespace {
 
-class HashMapStringTest : public ::testing::Test
+class StaticHashMapStringTest : public ::testing::Test
 {
-  public:
-	HashMapStringTest() : strHashmap_(Capacity) { }
-
   protected:
 	void SetUp() override { initHashMap(strHashmap_); }
 
-	nctl::StringHashMap<nctl::String> strHashmap_;
+	nctl::StaticStringHashMap<nctl::String, Capacity> strHashmap_;
 };
 
-TEST_F(HashMapStringTest, Capacity)
+TEST_F(StaticHashMapStringTest, Capacity)
 {
 	const unsigned int capacity = strHashmap_.capacity();
 	printf("Capacity: %u\n", capacity);
@@ -21,7 +18,7 @@ TEST_F(HashMapStringTest, Capacity)
 	ASSERT_EQ(capacity, Capacity);
 }
 
-TEST_F(HashMapStringTest, Size)
+TEST_F(StaticHashMapStringTest, Size)
 {
 	const unsigned int size = strHashmap_.size();
 	printf("Size: %u\n", size);
@@ -29,7 +26,7 @@ TEST_F(HashMapStringTest, Size)
 	ASSERT_EQ(size, Size);
 }
 
-TEST_F(HashMapStringTest, RetrieveElements)
+TEST_F(StaticHashMapStringTest, RetrieveElements)
 {
 	printf("Retrieving the elements\n");
 	for (unsigned int i = 0; i < Size; i++)
@@ -40,7 +37,7 @@ TEST_F(HashMapStringTest, RetrieveElements)
 	}
 }
 
-TEST_F(HashMapStringTest, RemoveElements)
+TEST_F(StaticHashMapStringTest, RemoveElements)
 {
 	printf("Removing a couple elements\n");
 	strHashmap_.remove(Keys[0]);
@@ -52,25 +49,25 @@ TEST_F(HashMapStringTest, RemoveElements)
 	ASSERT_FALSE(strHashmap_.contains(Keys[3], value));
 }
 
-TEST_F(HashMapStringTest, CopyConstruction)
+TEST_F(StaticHashMapStringTest, CopyConstruction)
 {
 	printf("Creating a new hashmap with copy construction\n");
-	nctl::StringHashMap<nctl::String> newStrHashmap(strHashmap_);
+	nctl::StaticStringHashMap<nctl::String, Capacity> newStrHashmap(strHashmap_);
 	printHashMap(newStrHashmap);
 
 	assertHashMapsAreEqual(strHashmap_, newStrHashmap);
 }
 
-TEST_F(HashMapStringTest, AssignmentOperator)
+TEST_F(StaticHashMapStringTest, AssignmentOperator)
 {
 	printf("Creating a new hashmap with the assignment operator\n");
-	nctl::StringHashMap<nctl::String> newStrHashmap = strHashmap_;
+	nctl::StaticStringHashMap<nctl::String, Capacity> newStrHashmap = strHashmap_;
 	printHashMap(newStrHashmap);
 
 	assertHashMapsAreEqual(strHashmap_, newStrHashmap);
 }
 
-TEST_F(HashMapStringTest, Contains)
+TEST_F(StaticHashMapStringTest, Contains)
 {
 	nctl::String value;
 	const bool found = strHashmap_.contains(Keys[0], value);
@@ -80,7 +77,7 @@ TEST_F(HashMapStringTest, Contains)
 	ASSERT_STREQ(value.data(), Values[0]);
 }
 
-TEST_F(HashMapStringTest, DoesNotContain)
+TEST_F(StaticHashMapStringTest, DoesNotContain)
 {
 	const char *key = "Z";
 	nctl::String value;

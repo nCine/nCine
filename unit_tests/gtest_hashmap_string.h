@@ -24,7 +24,7 @@ void printHashMap(nctl::StringHashMap<nctl::String> &strHashmap)
 	unsigned int n = 0;
 
 	for (nctl::StringHashMap<nctl::String>::ConstIterator i = strHashmap.begin(); i != strHashmap.end(); ++i)
-		printf("[%u] hash: %lu, key: %s, value: %s\n", n++, i.hash(), i.key().data(), i.value().data());
+		printf("[%u] hash: %u, key: %s, value: %s\n", n++, i.hash(), i.key().data(), i.value().data());
 	printf("\n");
 }
 

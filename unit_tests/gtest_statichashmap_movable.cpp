@@ -1,18 +1,15 @@
-#include "gtest_hashmap.h"
+#include "gtest_statichashmap.h"
 #include "test_movable.h"
 
 namespace {
 
-class HashMapMovableTest : public ::testing::Test
+class StaticHashMapMovableTest : public ::testing::Test
 {
-  public:
-	HashMapMovableTest() : hashmap_(Capacity) { }
-
   protected:
-	nctl::HashMap<int, Movable, nctl::FixedHashFunc<int> > hashmap_;
+	nctl::StaticHashMap<int, Movable, Capacity, nctl::FixedHashFunc<int> > hashmap_;
 };
 
-TEST_F(HashMapMovableTest, SubscriptLValue)
+TEST_F(StaticHashMapMovableTest, SubscriptLValue)
 {
 	Movable movable(Movable::Construction::INITIALIZED);
 
@@ -25,7 +22,7 @@ TEST_F(HashMapMovableTest, SubscriptLValue)
 	ASSERT_NE(movable.data(), nullptr);
 }
 
-TEST_F(HashMapMovableTest, SubscriptRValue)
+TEST_F(StaticHashMapMovableTest, SubscriptRValue)
 {
 	Movable movable(Movable::Construction::INITIALIZED);
 	const unsigned int newSize = movable.size();
@@ -42,7 +39,7 @@ TEST_F(HashMapMovableTest, SubscriptRValue)
 	ASSERT_EQ(movable.data(), nullptr);
 }
 
-TEST_F(HashMapMovableTest, MoveConstruction)
+TEST_F(StaticHashMapMovableTest, MoveConstruction)
 {
 	Movable movable(Movable::Construction::INITIALIZED);
 	const unsigned int newSize = movable.size();
@@ -51,14 +48,14 @@ TEST_F(HashMapMovableTest, MoveConstruction)
 	hashmap_[0] = nctl::move(movable);
 	hashmap_[0].printAndAssert();
 	printf("Creating a new hashmap with move construction\n");
-	nctl::HashMap<int, Movable, nctl::FixedHashFunc<int> > newHashmap(nctl::move(hashmap_));
+	nctl::StaticHashMap<int, Movable, Capacity, nctl::FixedHashFunc<int> > newHashmap(nctl::move(hashmap_));
 	newHashmap[0].printAndAssert();
 
 	ASSERT_EQ(newHashmap[0].size(), newSize);
 	ASSERT_EQ(newHashmap[0].data(), newData);
 }
 
-TEST_F(HashMapMovableTest, MoveAssignmentOperator)
+TEST_F(StaticHashMapMovableTest, MoveAssignmentOperator)
 {
 	Movable movable(Movable::Construction::INITIALIZED);
 	const unsigned int newSize = movable.size();
@@ -67,7 +64,7 @@ TEST_F(HashMapMovableTest, MoveAssignmentOperator)
 	hashmap_[0] = nctl::move(movable);
 	hashmap_[0].printAndAssert();
 	printf("Creating a new hashmap with the move assignment operator\n");
-	nctl::HashMap<int, Movable, nctl::FixedHashFunc<int> > newHashmap(Capacity);
+	nctl::StaticHashMap<int, Movable, Capacity, nctl::FixedHashFunc<int> > newHashmap;
 	newHashmap = nctl::move(hashmap_);
 	newHashmap[0].printAndAssert();
 

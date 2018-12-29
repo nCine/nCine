@@ -1,6 +1,6 @@
 #include "GLShaderAttributes.h"
 #include "GLShaderProgram.h"
-#include "nctl/HashMapIterator.h"
+#include "nctl/StaticHashMapIterator.h"
 #include "RenderResources.h"
 
 namespace ncine {
@@ -16,12 +16,12 @@ GLVertexFormat::Attribute GLShaderAttributes::attributeNotFound_;
 ///////////////////////////////////////////////////////////
 
 GLShaderAttributes::GLShaderAttributes()
-	: shaderProgram_(nullptr), attributeLocations_(GLVertexFormat::MaxAttributes)
+	: shaderProgram_(nullptr)
 {
 }
 
 GLShaderAttributes::GLShaderAttributes(GLShaderProgram *shaderProgram)
-	: shaderProgram_(nullptr), attributeLocations_(GLVertexFormat::MaxAttributes)
+	: shaderProgram_(nullptr)
 {
 	setProgram(shaderProgram);
 }

@@ -1,9 +1,12 @@
 #ifndef CLASS_NCTL_HASHFUNCTIONS
 #define CLASS_NCTL_HASHFUNCTIONS
 
+#include <cstdint>
+
 namespace nctl {
 
-using hash_t = unsigned long int;
+using hash_t = uint32_t;
+const hash_t NullHash = static_cast<hash_t>(~0);
 
 /// Hash function returning always the first hashmap bucket, for debug purposes
 template <class K>
@@ -11,6 +14,14 @@ class FixedHashFunc
 {
   public:
 	hash_t operator()(const K &key) const { return static_cast<hash_t>(0); }
+};
+
+/// Hash function returning the modulo of the key, for debug purposes
+template <class K, unsigned int Value>
+class ModuloHashFunc
+{
+  public:
+	hash_t operator()(const K &key) const { return static_cast<hash_t>(key % Value); }
 };
 
 /// Hash function returning the key unchanged
@@ -110,6 +121,64 @@ class JenkinsHashFuncContainer
 		return hash;
 	}
 };
+
+/// Fowler-Noll-Vo Hash (FNV-1a)
+/*!
+* For more information: http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+*/
+template <class K>
+class FNV1aHashFunc
+{
+  public:
+	hash_t operator()(const K &key) const
+	{
+		const unsigned char *bytes = reinterpret_cast<const unsigned char *>(&key);
+		hash_t hash = static_cast<hash_t>(Seed);
+		for (unsigned int i = 0; i < sizeof(K); i++)
+			hash = fnv1a(bytes[i], hash);
+
+		return hash;
+	}
+  private:
+	static const hash_t Prime = 0x01000193; //   16777619
+	static const hash_t Seed  = 0x811C9DC5; // 2166136261
+
+	inline hash_t fnv1a(const unsigned char oneByte, hash_t hash = Seed) const
+	{
+		return (oneByte ^ hash) * Prime;
+	}
+};
+
+/// Fowler-Noll-Vo Hash (FNV-1a)
+/*!
+ * \note The key type should be a container exposing `length()` and `operator[]()` methods.
+ * Contained elements should be convertible to `hash_t`.
+ *
+* For more information: http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+ */
+template <class K>
+class FNV1aFuncHashContainer
+{
+  public:
+	hash_t operator()(const K &key) const
+	{
+		const unsigned char *bytes = reinterpret_cast<const unsigned char *>(&key);
+		hash_t hash = static_cast<hash_t>(Seed);
+		for (unsigned int i = 0; i < key.length(); i++)
+			hash = fnv1a(bytes[i], hash);
+
+		return hash;
+	}
+  private:
+	static const hash_t Prime = 0x01000193; //   16777619
+	static const hash_t Seed  = 0x811C9DC5; // 2166136261
+
+	inline hash_t fnv1a(unsigned char oneByte, hash_t hash = Seed) const
+	{
+		return (oneByte ^ hash) * Prime;
+	}
+};
+
 
 }
 

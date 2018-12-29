@@ -1,11 +1,11 @@
-#include "gtest_hashmap.h"
+#include "gtest_hashmaplist.h"
 
 namespace {
 
-class HashMapIteratorTest : public ::testing::Test
+class HashMapListIteratorTest : public ::testing::Test
 {
   public:
-	HashMapIteratorTest() : hashmap_(Capacity) { }
+	HashMapListIteratorTest() : hashmap_(Capacity) { }
 
   protected:
 	void SetUp() override { initHashMap(hashmap_); }
@@ -13,7 +13,7 @@ class HashMapIteratorTest : public ::testing::Test
 	HashMapTestType hashmap_;
 };
 
-TEST_F(HashMapIteratorTest, ForLoopIteration)
+TEST_F(HashMapListIteratorTest, ForLoopIteration)
 {
 	int n = 0;
 
@@ -28,7 +28,7 @@ TEST_F(HashMapIteratorTest, ForLoopIteration)
 	printf("\n");
 }
 
-TEST_F(HashMapIteratorTest, ForLoopEmptyIteration)
+TEST_F(HashMapListIteratorTest, ForLoopEmptyIteration)
 {
 	HashMapTestType newHashmap(Capacity);
 
@@ -38,7 +38,7 @@ TEST_F(HashMapIteratorTest, ForLoopEmptyIteration)
 	printf("\n");
 }
 
-TEST_F(HashMapIteratorTest, ReverseForLoopIteration)
+TEST_F(HashMapListIteratorTest, ReverseForLoopIteration)
 {
 	int n = Size - 1;
 
@@ -53,7 +53,7 @@ TEST_F(HashMapIteratorTest, ReverseForLoopIteration)
 	printf("\n");
 }
 
-TEST_F(HashMapIteratorTest, ReverseForLoopEmptyIteration)
+TEST_F(HashMapListIteratorTest, ReverseForLoopEmptyIteration)
 {
 	HashMapTestType newHashmap(Capacity);
 
@@ -63,7 +63,7 @@ TEST_F(HashMapIteratorTest, ReverseForLoopEmptyIteration)
 	printf("\n");
 }
 
-TEST_F(HashMapIteratorTest, WhileLoopIteration)
+TEST_F(HashMapListIteratorTest, WhileLoopIteration)
 {
 	int n = 0;
 
@@ -79,7 +79,7 @@ TEST_F(HashMapIteratorTest, WhileLoopIteration)
 	printf("\n");
 }
 
-TEST_F(HashMapIteratorTest, WhileLoopEmptyIteration)
+TEST_F(HashMapListIteratorTest, WhileLoopEmptyIteration)
 {
 	HashMapTestType newHashmap(Capacity);
 
@@ -93,7 +93,7 @@ TEST_F(HashMapIteratorTest, WhileLoopEmptyIteration)
 	printf("\n");
 }
 
-TEST_F(HashMapIteratorTest, ReverseWhileLoopIteration)
+TEST_F(HashMapListIteratorTest, ReverseWhileLoopIteration)
 {
 	int n = Size - 1;
 
@@ -109,7 +109,7 @@ TEST_F(HashMapIteratorTest, ReverseWhileLoopIteration)
 	printf("\n");
 }
 
-TEST_F(HashMapIteratorTest, ReverseWhileLoopEmptyIteration)
+TEST_F(HashMapListIteratorTest, ReverseWhileLoopEmptyIteration)
 {
 	HashMapTestType newHashmap(Capacity);
 

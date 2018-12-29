@@ -4,7 +4,8 @@
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
 #include "GLUniformCache.h"
-#include "nctl/HashMap.h"
+#include "nctl/StaticHashMap.h"
+#include "nctl/String.h"
 
 namespace ncine {
 
@@ -44,7 +45,7 @@ class GLUniformBlockCache
 	GLint usedSize_;
 
 	static const int UniformHashSize = 8;
-	nctl::StringHashMap<GLUniformCache> uniformCaches_;
+	nctl::StaticStringHashMap<GLUniformCache, UniformHashSize> uniformCaches_;
 };
 
 }

@@ -1,7 +1,8 @@
 #ifndef CLASS_NCINE_GLSHADERATTRIBUTES
 #define CLASS_NCINE_GLSHADERATTRIBUTES
 
-#include "nctl/HashMap.h"
+#include "nctl/StaticHashMap.h"
+#include "nctl/String.h"
 #include "GLVertexFormat.h"
 
 namespace ncine {
@@ -26,7 +27,7 @@ class GLShaderAttributes
 	GLShaderProgram *shaderProgram_;
 
 	static GLVertexFormat::Attribute attributeNotFound_;
-	nctl::StringHashMap<int> attributeLocations_;
+	nctl::StaticStringHashMap<int, GLVertexFormat::MaxAttributes> attributeLocations_;
 	GLVertexFormat vertexFormat_;
 
 	void importAttributes();

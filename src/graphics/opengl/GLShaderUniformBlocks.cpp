@@ -1,6 +1,6 @@
 #include "GLShaderUniformBlocks.h"
 #include "RenderResources.h"
-#include "nctl/HashMapIterator.h"
+#include "nctl/StaticHashMapIterator.h"
 #include <cstring> // for memcpy()
 
 namespace ncine {
@@ -16,8 +16,7 @@ GLUniformBlockCache GLShaderUniformBlocks::uniformBlockNotFound_;
 ///////////////////////////////////////////////////////////
 
 GLShaderUniformBlocks::GLShaderUniformBlocks()
-	: shaderProgram_(nullptr), dataPointer_(nullptr),
-	  uniformBlockCaches_(UniformBlockCachesHashSize)
+	: shaderProgram_(nullptr), dataPointer_(nullptr)
 {
 }
 

@@ -1,20 +1,17 @@
-#include "gtest_hashmap.h"
+#include "gtest_statichashmap.h"
 #include "test_functions.h"
 
 namespace {
 
-class HashMapAlgorithmsTest : public ::testing::Test
+class StaticHashMapAlgorithmsTest : public ::testing::Test
 {
-  public:
-	HashMapAlgorithmsTest() : hashmap_(Capacity) { }
-
   protected:
 	void SetUp() override { initHashMap(hashmap_); }
 
 	HashMapTestType hashmap_;
 };
 
-TEST_F(HashMapAlgorithmsTest, Minimum)
+TEST_F(StaticHashMapAlgorithmsTest, Minimum)
 {
 	const int minimum = *nctl::minElement(hashmap_.begin(), hashmap_.end());
 	printf("Minimum element: %d\n", minimum);
@@ -22,7 +19,7 @@ TEST_F(HashMapAlgorithmsTest, Minimum)
 	ASSERT_EQ(minimum, KeyValueDifference + 0);
 }
 
-TEST_F(HashMapAlgorithmsTest, Maximum)
+TEST_F(StaticHashMapAlgorithmsTest, Maximum)
 {
 	const int maximum = *nctl::maxElement(hashmap_.begin(), hashmap_.end());
 	printf("Maximum element: %d\n", maximum);
@@ -30,28 +27,28 @@ TEST_F(HashMapAlgorithmsTest, Maximum)
 	ASSERT_EQ(maximum, KeyValueDifference + Size - 1);
 }
 
-TEST_F(HashMapAlgorithmsTest, AllOfGreater)
+TEST_F(StaticHashMapAlgorithmsTest, AllOfGreater)
 {
 	const bool allOf = nctl::allOf(hashmap_.begin(), hashmap_.end(), nctl::IsGreaterThan<int>(-1));
 	printf("All bigger than -1: %d\n", allOf);
 	ASSERT_EQ(allOf, true);
 }
 
-TEST_F(HashMapAlgorithmsTest, NoneOfGreater)
+TEST_F(StaticHashMapAlgorithmsTest, NoneOfGreater)
 {
 	const bool noneOf = nctl::noneOf(hashmap_.begin(), hashmap_.end(), nctl::IsGreaterThan<int>(5));
 	printf("No one bigger than 5: %d\n", noneOf);
 	ASSERT_EQ(noneOf, false);
 }
 
-TEST_F(HashMapAlgorithmsTest, AnyOfGreater)
+TEST_F(StaticHashMapAlgorithmsTest, AnyOfGreater)
 {
 	const bool anyOf = nctl::anyOf(hashmap_.begin(), hashmap_.end(), nctl::IsGreaterThan<int>(5));
 	printf("Anyone bigger than 5: %d\n", anyOf);
 	ASSERT_EQ(anyOf, true);
 }
 
-TEST_F(HashMapAlgorithmsTest, AddValueForEach)
+TEST_F(StaticHashMapAlgorithmsTest, AddValueForEach)
 {
 	const int value = 10;
 	printf("Adding %d to each element of the hashmap\n", value);
@@ -68,45 +65,45 @@ TEST_F(HashMapAlgorithmsTest, AddValueForEach)
 	}
 }
 
-TEST_F(HashMapAlgorithmsTest, CountEqual)
+TEST_F(StaticHashMapAlgorithmsTest, CountEqual)
 {
 	const int counter = nctl::count(hashmap_.begin(), hashmap_.end(), 16);
 	printf("Number of elements equal to 16: %d\n", counter);
 	ASSERT_EQ(counter, 1);
 }
 
-TEST_F(HashMapAlgorithmsTest, CountElementsGreater)
+TEST_F(StaticHashMapAlgorithmsTest, CountElementsGreater)
 {
 	const int counter = nctl::countIf(hashmap_.begin(), hashmap_.end(), nctl::IsGreaterThan<int>(14));
 	printf("Number of elements bigger than 14: %d\n", counter);
 	ASSERT_EQ(counter, 5);
 }
 
-TEST_F(HashMapAlgorithmsTest, DistanceToFirstElementEqual)
+TEST_F(StaticHashMapAlgorithmsTest, DistanceToFirstElementEqual)
 {
 	const int position = nctl::distance(hashmap_.begin(), nctl::find(hashmap_.begin(), hashmap_.end(), 13));
 	printf("First element equal to 13 in position: %d\n", position);
 	ASSERT_EQ(position, 3);
 }
 
-TEST_F(HashMapAlgorithmsTest, DistanceToFirstElementBigger)
+TEST_F(StaticHashMapAlgorithmsTest, DistanceToFirstElementBigger)
 {
 	const int counter = nctl::distance(hashmap_.begin(), nctl::findIf(hashmap_.begin(), hashmap_.end(), nctl::IsGreaterThan<int>(13)));
 	printf("First element bigger than 13 in position: %d\n", counter);
 	ASSERT_EQ(counter, 4);
 }
 
-TEST_F(HashMapAlgorithmsTest, DistanceToFirstElementNotBigger)
+TEST_F(StaticHashMapAlgorithmsTest, DistanceToFirstElementNotBigger)
 {
 	const int counter = nctl::distance(hashmap_.begin(), nctl::findIfNot(hashmap_.begin(), hashmap_.end(), nctl::IsGreaterThan<int>(13)));
 	printf("First element not bigger than 13 in position: %d\n", counter);
 	ASSERT_EQ(counter, 0);
 }
 
-TEST_F(HashMapAlgorithmsTest, CheckEqual)
+TEST_F(StaticHashMapAlgorithmsTest, CheckEqual)
 {
 	printf("Copying the hashmap to a second one and check they are equal\n");
-	HashMapTestType newHashmap(Capacity);
+	HashMapTestType newHashmap;
 	newHashmap = hashmap_;
 	printHashMap(newHashmap);
 
@@ -114,7 +111,7 @@ TEST_F(HashMapAlgorithmsTest, CheckEqual)
 	assertHashMapsAreEqual(hashmap_, newHashmap);
 }
 
-TEST_F(HashMapAlgorithmsTest, FillNElements)
+TEST_F(StaticHashMapAlgorithmsTest, FillNElements)
 {
 	printf("Filling half hashmap with zeroes\n");
 	nctl::fillN(hashmap_.begin(), Size / 2, 0);
@@ -137,7 +134,7 @@ TEST_F(HashMapAlgorithmsTest, FillNElements)
 	}
 }
 
-TEST_F(HashMapAlgorithmsTest, FillWithIterators)
+TEST_F(StaticHashMapAlgorithmsTest, FillWithIterators)
 {
 	printf("Filling the whole hashmap with zeroes\n");
 	nctl::fill(hashmap_.begin(), hashmap_.end(), 0);
@@ -147,7 +144,7 @@ TEST_F(HashMapAlgorithmsTest, FillWithIterators)
 		ASSERT_EQ(*i, 0);
 }
 
-TEST_F(HashMapAlgorithmsTest, ClampElements)
+TEST_F(StaticHashMapAlgorithmsTest, ClampElements)
 {
 	const int minValue = 13;
 	const int maxValue = 16;
@@ -163,7 +160,7 @@ TEST_F(HashMapAlgorithmsTest, ClampElements)
 	}
 }
 
-TEST_F(HashMapAlgorithmsTest, Replace)
+TEST_F(StaticHashMapAlgorithmsTest, Replace)
 {
 	const int oldValue = 15;
 	const int newValue = 55;
@@ -176,7 +173,7 @@ TEST_F(HashMapAlgorithmsTest, Replace)
 		ASSERT_TRUE(*i != oldValue);
 }
 
-TEST_F(HashMapAlgorithmsTest, ReplaceIf)
+TEST_F(StaticHashMapAlgorithmsTest, ReplaceIf)
 {
 	const int refValue = 15;
 	const int newValue = 55;
@@ -189,7 +186,7 @@ TEST_F(HashMapAlgorithmsTest, ReplaceIf)
 		ASSERT_TRUE(*i != refValue);
 }
 
-TEST_F(HashMapAlgorithmsTest, Generate)
+TEST_F(StaticHashMapAlgorithmsTest, Generate)
 {
 	const int value = 1;
 	printf("Generating a sequence starting at %d and store it into the hashmap\n", value);
@@ -205,7 +202,7 @@ TEST_F(HashMapAlgorithmsTest, Generate)
 	}
 }
 
-TEST_F(HashMapAlgorithmsTest, GenerateN)
+TEST_F(StaticHashMapAlgorithmsTest, GenerateN)
 {
 	const int value = -4;
 	const int numElements = 5;

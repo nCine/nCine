@@ -4,7 +4,7 @@
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
 #include "GLUniform.h"
-#include "nctl/HashMap.h"
+#include "nctl/StaticHashMap.h"
 #include "nctl/String.h"
 
 namespace ncine {
@@ -38,7 +38,7 @@ class GLUniformBlock
 	static const int MaxNumBlockUniforms = 16;
 
 	static const int BlockUniformHashSize = 8;
-	nctl::StringHashMap<GLUniform> blockUniforms_;
+	nctl::StaticStringHashMap<GLUniform, BlockUniformHashSize> blockUniforms_;
 
 	GLuint program_;
 	GLuint index_;

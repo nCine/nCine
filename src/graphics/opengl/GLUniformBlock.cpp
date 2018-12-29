@@ -9,7 +9,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GLUniformBlock::GLUniformBlock()
-	: blockUniforms_(BlockUniformHashSize), program_(0), index_(0), size_(0), bindingIndex_(-1)
+	: program_(0), index_(0), size_(0), bindingIndex_(-1)
 {
 	name_[0] = '\0';
 }

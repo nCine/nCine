@@ -2,7 +2,7 @@
 #include "GLShaderProgram.h"
 #include "GLUniformCache.h"
 #include "RenderResources.h"
-#include "nctl/HashMapIterator.h"
+#include "nctl/StaticHashMapIterator.h"
 #include "nctl/algorithms.h"
 
 namespace ncine {
@@ -18,7 +18,7 @@ GLUniformCache GLShaderUniforms::uniformNotFound_;
 ///////////////////////////////////////////////////////////
 
 GLShaderUniforms::GLShaderUniforms()
-	: shaderProgram_(nullptr), uniformCaches_(UniformCachesHashSize)
+	: shaderProgram_(nullptr)
 {
 }
 

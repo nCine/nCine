@@ -1,19 +1,16 @@
-#include "gtest_hashmap.h"
+#include "gtest_statichashmap.h"
 
 namespace {
 
-class HashMapTest : public ::testing::Test
+class StaticHashMapTest : public ::testing::Test
 {
-  public:
-	HashMapTest() : hashmap_(Capacity) { }
-
   protected:
 	void SetUp() override { initHashMap(hashmap_); }
 
 	HashMapTestType hashmap_;
 };
 
-TEST_F(HashMapTest, Capacity)
+TEST_F(StaticHashMapTest, Capacity)
 {
 	const unsigned int capacity = hashmap_.capacity();
 	printf("Capacity: %u\n", capacity);
@@ -21,7 +18,7 @@ TEST_F(HashMapTest, Capacity)
 	ASSERT_EQ(capacity, Capacity);
 }
 
-TEST_F(HashMapTest, Size)
+TEST_F(StaticHashMapTest, Size)
 {
 	const unsigned int size = hashmap_.size();
 	printf("Size: %u\n", size);
@@ -30,7 +27,7 @@ TEST_F(HashMapTest, Size)
 	ASSERT_EQ(calcSize(hashmap_), Size);
 }
 
-TEST_F(HashMapTest, LoadFactor)
+TEST_F(StaticHashMapTest, LoadFactor)
 {
 	const float loadFactor = hashmap_.loadFactor();
 	printf("Size: %u, Capacity: %u, Load Factor: %f\n", Size, Capacity, loadFactor);
@@ -38,7 +35,7 @@ TEST_F(HashMapTest, LoadFactor)
 	ASSERT_FLOAT_EQ(loadFactor, Size / static_cast<float>(Capacity));
 }
 
-TEST_F(HashMapTest, Clear)
+TEST_F(StaticHashMapTest, Clear)
 {
 	ASSERT_FALSE(hashmap_.isEmpty());
 	hashmap_.clear();
@@ -48,7 +45,7 @@ TEST_F(HashMapTest, Clear)
 	ASSERT_EQ(hashmap_.capacity(), Capacity);
 }
 
-TEST_F(HashMapTest, RetrieveElements)
+TEST_F(StaticHashMapTest, RetrieveElements)
 {
 	printf("Retrieving the elements\n");
 	for (unsigned int i = 0; i < Size; i++)
@@ -61,7 +58,7 @@ TEST_F(HashMapTest, RetrieveElements)
 	ASSERT_EQ(calcSize(hashmap_), Size);
 }
 
-TEST_F(HashMapTest, RemoveElements)
+TEST_F(StaticHashMapTest, RemoveElements)
 {
 	printf("Original size: %u\n", hashmap_.size());
 	printf("Removing a couple elements\n");
@@ -77,7 +74,7 @@ TEST_F(HashMapTest, RemoveElements)
 	ASSERT_EQ(calcSize(hashmap_), Size - 2);
 }
 
-TEST_F(HashMapTest, CopyConstruction)
+TEST_F(StaticHashMapTest, CopyConstruction)
 {
 	printf("Creating a new hashmap with copy construction\n");
 	HashMapTestType newHashmap(hashmap_);
@@ -90,7 +87,7 @@ TEST_F(HashMapTest, CopyConstruction)
 	ASSERT_EQ(calcSize(newHashmap), Size);
 }
 
-TEST_F(HashMapTest, AssignmentOperator)
+TEST_F(StaticHashMapTest, AssignmentOperator)
 {
 	printf("Creating a new hashmap with the assignment operator\n");
 	HashMapTestType newHashmap = hashmap_;
@@ -103,7 +100,7 @@ TEST_F(HashMapTest, AssignmentOperator)
 	ASSERT_EQ(calcSize(newHashmap), Size);
 }
 
-TEST_F(HashMapTest, Contains)
+TEST_F(StaticHashMapTest, Contains)
 {
 	const int key = 1;
 	int value = 0;
@@ -114,7 +111,7 @@ TEST_F(HashMapTest, Contains)
 	ASSERT_EQ(value, key + KeyValueDifference);
 }
 
-TEST_F(HashMapTest, DoesNotContain)
+TEST_F(StaticHashMapTest, DoesNotContain)
 {
 	const int key = 10;
 	int value = 0;
@@ -124,7 +121,7 @@ TEST_F(HashMapTest, DoesNotContain)
 	ASSERT_FALSE(found);
 }
 
-TEST_F(HashMapTest, Find)
+TEST_F(StaticHashMapTest, Find)
 {
 	const int key = 1;
 	const int *value = hashmap_.find(key);
@@ -134,7 +131,7 @@ TEST_F(HashMapTest, Find)
 	ASSERT_EQ(*value, key + KeyValueDifference);
 }
 
-TEST_F(HashMapTest, ConstFind)
+TEST_F(StaticHashMapTest, ConstFind)
 {
 	const HashMapTestType &constHashmap = hashmap_;
 	const int key = 1;
@@ -145,7 +142,7 @@ TEST_F(HashMapTest, ConstFind)
 	ASSERT_EQ(*value, key + KeyValueDifference);
 }
 
-TEST_F(HashMapTest, CannotFind)
+TEST_F(StaticHashMapTest, CannotFind)
 {
 	const int key = 10;
 	const int *value = hashmap_.find(key);
@@ -154,10 +151,10 @@ TEST_F(HashMapTest, CannotFind)
 	ASSERT_FALSE(value != nullptr);
 }
 
-TEST_F(HashMapTest, FillCapacity)
+TEST_F(StaticHashMapTest, FillCapacity)
 {
 	printf("Creating a new hashmap to fill up to capacity (%u elements)\n", Capacity);
-	HashMapTestType newHashmap(Capacity);
+	HashMapTestType newHashmap;
 
 	for (unsigned int i = 0; i < Capacity; i++)
 		newHashmap[i] = i + KeyValueDifference;
@@ -167,10 +164,10 @@ TEST_F(HashMapTest, FillCapacity)
 		ASSERT_EQ(newHashmap[i], i + KeyValueDifference);
 }
 
-TEST_F(HashMapTest, RemoveAllFromFull)
+TEST_F(StaticHashMapTest, RemoveAllFromFull)
 {
 	printf("Creating a new hashmap to fill up to capacity (%u elements)\n", Capacity);
-	HashMapTestType newHashmap(Capacity);
+	HashMapTestType newHashmap;
 
 	for (unsigned int i = 0; i < Capacity; i++)
 		newHashmap[i] = i + KeyValueDifference;
@@ -185,11 +182,12 @@ TEST_F(HashMapTest, RemoveAllFromFull)
 
 const int BigCapacity = 512;
 const int LastElement = BigCapacity / 2;
+using HashMapStressTestType = nctl::StaticHashMap<int, int, BigCapacity, nctl::FNV1aHashFunc<int> >;
 
-TEST_F(HashMapTest, StressRemove)
+TEST_F(StaticHashMapTest, StressRemove)
 {
 	printf("Creating a new hashmap with a capacity of %u and filled up to %u elements\n", BigCapacity, LastElement);
-	HashMapTestType newHashmap(BigCapacity);
+	HashMapStressTestType newHashmap;
 
 	for (int i = 0; i < LastElement; i++)
 		newHashmap[i] = i + KeyValueDifference;
@@ -211,10 +209,10 @@ TEST_F(HashMapTest, StressRemove)
 	ASSERT_EQ(newHashmap.size(), 0);
 }
 
-TEST_F(HashMapTest, StressReverseRemove)
+TEST_F(StaticHashMapTest, StressReverseRemove)
 {
 	printf("Creating a new hashmap with a capacity of %u and filled up to %u elements\n", BigCapacity, LastElement);
-	HashMapTestType newHashmap(BigCapacity);
+	HashMapStressTestType newHashmap;
 
 	for (int i = 0; i < LastElement; i++)
 		newHashmap[i] = i + KeyValueDifference;

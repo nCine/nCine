@@ -11,6 +11,7 @@ namespace {
 const unsigned int Capacity = 32;
 const unsigned int Size = 10;
 const int KeyValueDifference = 10;
+using HashMapTestType = nctl::HashMap<int, int, nctl::FixedHashFunc<int> >;
 
 template <class HashFunc>
 void initHashMap(nctl::HashMap<int, int, HashFunc> &hashmap)
@@ -25,7 +26,7 @@ void printHashMap(const nctl::HashMap<int, int, HashFunc> &hashmap)
 	unsigned int n = 0;
 
 	for (typename nctl::HashMap<int, int, HashFunc>::ConstIterator i = hashmap.begin(); i != hashmap.end(); ++i)
-		printf("[%u] hash: %lu, key: %d, value: %d\n", n++, i.hash(), i.key(), i.value());
+		printf("[%u] hash: %u, key: %d, value: %d\n", n++, i.hash(), i.key(), i.value());
 	printf("\n");
 }
 

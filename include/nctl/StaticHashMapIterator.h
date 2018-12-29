@@ -1,38 +1,38 @@
-#ifndef CLASS_NCTL_HASHMAPITERATOR
-#define CLASS_NCTL_HASHMAPITERATOR
+#ifndef CLASS_NCTL_STATICHASHMAPITERATOR
+#define CLASS_NCTL_STATICHASHMAPITERATOR
 
-#include "HashMap.h"
+#include "StaticHashMap.h"
 #include "iterator.h"
 
 namespace nctl {
 
 /// Base helper structure for type traits used in the hashmap iterator
-template <class K, class T, class HashFunc, bool IsConst>
-struct HashMapHelperTraits { };
+template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
+struct StaticHashMapHelperTraits { };
 
 /// Helper structure providing type traits used in the non constant hashmap iterator
-template <class K, class T, class HashFunc>
-struct HashMapHelperTraits<K, T, HashFunc, false>
+template <class K, class T, class HashFunc, unsigned int Capacity>
+struct StaticHashMapHelperTraits<K, T, HashFunc, Capacity, false>
 {
-	using HashMapPtr = HashMap<K, T, HashFunc> *;
-	using NodeReference = typename HashMap<K, T, HashFunc>::Node &;
+	using HashMapPtr = StaticHashMap<K, T, Capacity, HashFunc> *;
+	using NodeReference = typename StaticHashMap<K, T, Capacity, HashFunc>::Node &;
 };
 
 /// Helper structure providing type traits used in the constant hashmap iterator
-template <class K, class T, class HashFunc>
-struct HashMapHelperTraits<K, T, HashFunc, true>
+template <class K, class T, class HashFunc, unsigned int Capacity>
+struct StaticHashMapHelperTraits<K, T, HashFunc, Capacity, true>
 {
-	using HashMapPtr = const HashMap<K, T, HashFunc> *;
-	using NodeReference = const typename HashMap<K, T, HashFunc>::Node &;
+	using HashMapPtr = const StaticHashMap<K, T, Capacity, HashFunc> *;
+	using NodeReference = const typename StaticHashMap<K, T, Capacity, HashFunc>::Node &;
 };
 
 /// A hashmap iterator
-template <class K, class T, class HashFunc, bool IsConst>
-class HashMapIterator
+template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
+class StaticHashMapIterator
 {
   public:
 	/// Reference type which respects iterator constness
-	using Reference = typename IteratorTraits<HashMapIterator>::Reference;
+	using Reference = typename IteratorTraits<StaticHashMapIterator>::Reference;
 
 	/// Sentinel tags to initialize the iterator at the beginning and end
 	enum class SentinelTagInit
@@ -43,30 +43,30 @@ class HashMapIterator
 		END
 	};
 
-	HashMapIterator(typename HashMapHelperTraits<K, T, HashFunc, IsConst>::HashMapPtr hashMap, unsigned int bucketIndex)
+	StaticHashMapIterator(typename StaticHashMapHelperTraits<K, T, HashFunc, Capacity, IsConst>::HashMapPtr hashMap, unsigned int bucketIndex)
 		: hashMap_(hashMap), bucketIndex_(bucketIndex), tag_(SentinelTag::REGULAR) { }
 
-	HashMapIterator(typename HashMapHelperTraits<K, T, HashFunc, IsConst>::HashMapPtr hashMap, SentinelTagInit tag);
+	StaticHashMapIterator(typename StaticHashMapHelperTraits<K, T, HashFunc, Capacity, IsConst>::HashMapPtr hashMap, SentinelTagInit tag);
 
 	/// Copy constructor to implicitly convert a non constant iterator to a constant one
-	HashMapIterator(const HashMapIterator<K, T, HashFunc, false> &it)
+	StaticHashMapIterator(const StaticHashMapIterator<K, T, HashFunc, Capacity, false> &it)
 		: hashMap_(it.hashMap_), bucketIndex_(it.bucketIndex_), tag_(SentinelTag(it.tag_)) { }
 
 	/// Deferencing operator
 	Reference operator*() const;
 
 	/// Iterates to the next element (prefix)
-	HashMapIterator &operator++();
+	StaticHashMapIterator &operator++();
 	/// Iterates to the next element (postfix)
-	HashMapIterator operator++(int);
+	StaticHashMapIterator operator++(int);
 
 	/// Iterates to the previous element (prefix)
-	HashMapIterator &operator--();
+	StaticHashMapIterator &operator--();
 	/// Iterates to the previous element (postfix)
-	HashMapIterator operator--(int);
+	StaticHashMapIterator operator--(int);
 
 	/// Equality operator
-	friend inline bool operator==(const HashMapIterator &lhs, const HashMapIterator &rhs)
+	friend inline bool operator==(const StaticHashMapIterator &lhs, const StaticHashMapIterator &rhs)
 	{
 		if (lhs.tag_ == SentinelTag::REGULAR && rhs.tag_ == SentinelTag::REGULAR)
 			return (lhs.hashMap_ == rhs.hashMap_ && lhs.bucketIndex_ == rhs.bucketIndex_);
@@ -75,7 +75,7 @@ class HashMapIterator
 	}
 
 	/// Inequality operator
-	friend inline bool operator!=(const HashMapIterator &lhs, const HashMapIterator &rhs)
+	friend inline bool operator!=(const StaticHashMapIterator &lhs, const StaticHashMapIterator &rhs)
 	{
 		if (lhs.tag_ == SentinelTag::REGULAR && rhs.tag_ == SentinelTag::REGULAR)
 			return (lhs.hashMap_ != rhs.hashMap_ || lhs.bucketIndex_ != rhs.bucketIndex_);
@@ -84,7 +84,7 @@ class HashMapIterator
 	}
 
 	/// Returns the hashmap node currently pointed by the iterator
-	typename HashMapHelperTraits<K, T, HashFunc, IsConst>::NodeReference node() const;
+	typename StaticHashMapHelperTraits<K, T, HashFunc, Capacity, IsConst>::NodeReference node() const;
 	/// Returns the value associated to the currently pointed node
 	const T &value() const;
 	/// Returns the key associated to the currently pointed node
@@ -104,7 +104,7 @@ class HashMapIterator
 		END
 	};
 
-	typename HashMapHelperTraits<K, T, HashFunc, IsConst>::HashMapPtr hashMap_;
+	typename StaticHashMapHelperTraits<K, T, HashFunc, Capacity, IsConst>::HashMapPtr hashMap_;
 	unsigned int bucketIndex_;
 	SentinelTag tag_;
 
@@ -118,12 +118,12 @@ class HashMapIterator
 	void findLastValid();
 
 	/// For non constant to constant iterator implicit conversion
-	friend class HashMapIterator<K, T, HashFunc, true>;
+	friend class StaticHashMapIterator<K, T, HashFunc, Capacity, true>;
 };
 
 /// Iterator traits structure specialization for `HashMapIterator` class
-template <class K, class T, class HashFunc>
-struct IteratorTraits<HashMapIterator<K, T, HashFunc, false> >
+template <class K, class T, class HashFunc, unsigned int Capacity>
+struct IteratorTraits<StaticHashMapIterator<K, T, HashFunc, Capacity, false> >
 {
 	/// Type of the values deferenced by the iterator
 	using ValueType = T;
@@ -136,8 +136,8 @@ struct IteratorTraits<HashMapIterator<K, T, HashFunc, false> >
 };
 
 /// Iterator traits structure specialization for constant `HashMapIterator` class
-template <class K, class T, class HashFunc>
-struct IteratorTraits<HashMapIterator<K, T, HashFunc, true> >
+template <class K, class T, class HashFunc, unsigned int Capacity>
+struct IteratorTraits<StaticHashMapIterator<K, T, HashFunc, Capacity, true> >
 {
 	/// Type of the values deferenced by the iterator (never const)
 	using ValueType = T;
@@ -149,8 +149,8 @@ struct IteratorTraits<HashMapIterator<K, T, HashFunc, true> >
 	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
 };
 
-template <class K, class T, class HashFunc, bool IsConst>
-HashMapIterator<K, T, HashFunc, IsConst>::HashMapIterator(typename HashMapHelperTraits<K, T, HashFunc, IsConst>::HashMapPtr hashMap, SentinelTagInit tag)
+template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
+StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst>::StaticHashMapIterator(typename StaticHashMapHelperTraits<K, T, HashFunc, Capacity, IsConst>::HashMapPtr hashMap, SentinelTagInit tag)
 	: hashMap_(hashMap), bucketIndex_(0)
 {
 	switch (tag)
@@ -160,70 +160,70 @@ HashMapIterator<K, T, HashFunc, IsConst>::HashMapIterator(typename HashMapHelper
 	}
 }
 
-template <class K, class T, class HashFunc, bool IsConst>
-typename HashMapIterator<K, T, HashFunc, IsConst>::Reference HashMapIterator<K, T, HashFunc, IsConst>::operator*() const
+template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
+typename StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst>::Reference StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst>::operator*() const
 {
 	return node().value;
 }
 
-template <class K, class T, class HashFunc, bool IsConst>
-HashMapIterator<K, T, HashFunc, IsConst> &HashMapIterator<K, T, HashFunc, IsConst>::operator++()
+template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
+StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst> &StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst>::operator++()
 {
 	next();
 	return *this;
 }
 
-template <class K, class T, class HashFunc, bool IsConst>
-HashMapIterator<K, T, HashFunc, IsConst> HashMapIterator<K, T, HashFunc, IsConst>::operator++(int)
+template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
+StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst> StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst>::operator++(int)
 {
 	// Create an unmodified copy to return
-	HashMapIterator<K, T, HashFunc, IsConst> iterator = *this;
+	StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst> iterator = *this;
 	next();
 	return iterator;
 }
 
-template <class K, class T, class HashFunc, bool IsConst>
-HashMapIterator<K, T, HashFunc, IsConst> &HashMapIterator<K, T, HashFunc, IsConst>::operator--()
+template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
+StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst> &StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst>::operator--()
 {
 	previous();
 	return *this;
 }
 
-template <class K, class T, class HashFunc, bool IsConst>
-HashMapIterator<K, T, HashFunc, IsConst> HashMapIterator<K, T, HashFunc, IsConst>::operator--(int)
+template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
+StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst> StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst>::operator--(int)
 {
 	// Create an unmodified copy to return
-	HashMapIterator<K, T, HashFunc, IsConst> iterator = *this;
+	StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst> iterator = *this;
 	previous();
 	return iterator;
 }
 
-template <class K, class T, class HashFunc, bool IsConst>
-typename HashMapHelperTraits<K, T, HashFunc, IsConst>::NodeReference HashMapIterator<K, T, HashFunc, IsConst>::node() const
+template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
+typename StaticHashMapHelperTraits<K, T, HashFunc, Capacity, IsConst>::NodeReference StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst>::node() const
 {
 	return hashMap_->nodes_[bucketIndex_];
 }
 
-template <class K, class T, class HashFunc, bool IsConst>
-const T &HashMapIterator<K, T, HashFunc, IsConst>::value() const
+template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
+const T &StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst>::value() const
 {
 	return node().value;
 }
 
-template <class K, class T, class HashFunc, bool IsConst>
-const K &HashMapIterator<K, T, HashFunc, IsConst>::key() const
+template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
+const K &StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst>::key() const
 {
 	return node().key;
 }
 
-template <class K, class T, class HashFunc, bool IsConst>
-hash_t HashMapIterator<K, T, HashFunc, IsConst>::hash() const
+template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
+hash_t StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst>::hash() const
 {
 	return hashMap_->hashes_[bucketIndex_];
 }
 
-template <class K, class T, class HashFunc, bool IsConst>
-void HashMapIterator<K, T, HashFunc, IsConst>::next()
+template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
+void StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst>::next()
 {
 	if (tag_ == SentinelTag::REGULAR)
 	{
@@ -251,8 +251,8 @@ void HashMapIterator<K, T, HashFunc, IsConst>::next()
 		tag_ = SentinelTag::END;
 }
 
-template <class K, class T, class HashFunc, bool IsConst>
-void HashMapIterator<K, T, HashFunc, IsConst>::previous()
+template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
+void StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst>::previous()
 {
 	if (tag_ == SentinelTag::REGULAR)
 	{
