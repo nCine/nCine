@@ -32,6 +32,7 @@ For additional information: https://ncine.github.io
 - Artistic Style and Uncrustify
 - Google Test and Gcovr
 - Tracy frame profiler
+- Google Benchmark
 
 ## Development
 

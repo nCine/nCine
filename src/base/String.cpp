@@ -380,4 +380,29 @@ String operator+(const char *cString, const String &string)
 	return result;
 }
 
+const char &String::at(unsigned int index) const
+{
+	FATAL_ASSERT_MSG_X(index < length_, "Index %u is out of bounds (length: %u)", index, length_);
+	return operator[](index);
+}
+
+char &String::at(unsigned int index)
+{
+	FATAL_ASSERT_MSG_X(index < length_, "Index %u is out of bounds (length: %u)", index, length_);
+	return operator[](index);
+}
+
+const char &String::operator[](unsigned int index) const
+{
+	ASSERT_MSG_X(index < length_, "Index %u is out of bounds (length: %u)", index, length_);
+	return data()[index];
+}
+
+char &String::operator[](unsigned int index)
+{
+	ASSERT_MSG_X(index < length_, "Index %u is out of bounds (size: %u)", index, length_);
+	return data()[index];
+}
+
+
 }

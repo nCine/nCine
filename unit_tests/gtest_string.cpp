@@ -78,22 +78,86 @@ TEST_F(StringTest, AppendOperator)
 	ASSERT_STREQ(string_.data(), "String1Append");
 }
 
-TEST_F(StringTest, AccessFirstCharacter)
+TEST_F(StringTest, SubscriptAccessFirstCharacter)
 {
 	printf("First character of the string: %c\n", string_[0]);
 	ASSERT_EQ(string_[0], 'S');
 }
 
-TEST_F(StringTest, AccessLastCharacter)
+TEST_F(StringTest, SubscriptAccessFirstConstCharacter)
+{
+	const nctl::String constSting = string_;
+	printf("First character of the constant string: %c\n", constSting[0]);
+	ASSERT_EQ(constSting[0], 'S');
+}
+
+TEST_F(StringTest, SubscriptAccessLastCharacter)
 {
 	printf("Last character of the string: %c\n", string_[string_.length() - 1]);
 	ASSERT_EQ(string_[string_.length() - 1], '1');
 }
 
-TEST_F(StringTest, AccessBeyondLastCharacter)
+TEST_F(StringTest, SubscriptAccessLastConstCharacter)
 {
-	printf("Accessing a character beyond the length of the third string: %c\n", string_[string_.length()]);
-	ASSERT_EQ(string_[string_.length()], '\0');
+	const nctl::String constSting = string_;
+	printf("Last character of the constant string: %c\n", constSting[constSting.length() - 1]);
+	ASSERT_EQ(constSting[constSting.length() - 1], '1');
+}
+
+TEST_F(StringTest, AccessAtFirstCharacter)
+{
+	printf("First character of the string: %c\n", string_.at(0));
+	ASSERT_EQ(string_.at(0), 'S');
+}
+
+TEST_F(StringTest, AccessAtFirstConstCharacter)
+{
+	const nctl::String constSting = string_;
+	printf("First character of the constant string: %c\n", constSting.at(0));
+	ASSERT_EQ(constSting.at(0), 'S');
+}
+
+TEST_F(StringTest, AccessAtLastCharacter)
+{
+	printf("Last character of the string: %c\n", string_.at(string_.length() - 1));
+	ASSERT_EQ(string_.at(string_.length() - 1), '1');
+}
+
+TEST_F(StringTest, AccessAtLastConstCharacter)
+{
+	const nctl::String constSting = string_;
+	printf("Last character of the constant string: %c\n", constSting.at(constSting.length() - 1));
+	ASSERT_EQ(constSting.at(constSting.length() - 1), '1');
+}
+
+#ifdef NCINE_DEBUG
+TEST(StringDeathTest, SubscriptAccessBeyondLastCharacter)
+{
+	nctl::String string("0");
+	printf("Accessing a character beyond the length of the string\n");
+	ASSERT_DEATH(string[5], "");
+}
+
+TEST(StringDeathTest, SubscriptAccessBeyondLastConstCharacter)
+{
+	const nctl::String string("0");
+	printf("Accessing a character beyond the length of the string\n");
+	ASSERT_DEATH(string[5], "");
+}
+#endif
+
+TEST(StringDeathTest, AccessAtBeyondLastCharacter)
+{
+	nctl::String string("0");
+	printf("Accessing a character beyond the length of the string\n");
+	ASSERT_DEATH(string.at(5), "");
+}
+
+TEST(StringDeathTest, AccessAtBeyondLastConstCharacter)
+{
+	const nctl::String string("0");
+	printf("Accessing a character beyond the length of the string\n");
+	ASSERT_DEATH(string.at(5), "");
 }
 
 }

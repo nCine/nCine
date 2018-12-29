@@ -10,6 +10,39 @@ class StaticArrayTest : public ::testing::Test
 	nctl::StaticArray<int, Capacity> array_;
 };
 
+#ifdef NCINE_DEBUG
+TEST(StaticArrayDeathTest, SubscriptAccessBeyondSize)
+{
+	printf("Trying to access an element within capacity but beyond size\n");
+	nctl::StaticArray<int, Capacity> array;
+	array[0] = 0;
+
+	ASSERT_DEATH(array[5] = 1, "");
+}
+
+TEST(StaticArrayDeathTest, SubscriptAccessConstBeyondSize)
+{
+	printf("Trying to access an element of a const array within capacity but beyond size\n");
+	nctl::StaticArray<int, Capacity> array;
+	array[0] = 0;
+
+	const nctl::StaticArray<int, Capacity> &constArray = array;
+
+	ASSERT_DEATH(constArray[5], "");
+}
+
+TEST(StaticArrayDeathTest, SubscriptAccessConstAtSize)
+{
+	printf("Trying to access an element of a const array within capacity but at size\n");
+	nctl::StaticArray<int, Capacity> array;
+	array[0] = 0;
+
+	const nctl::StaticArray<int, Capacity> &constArray = array;
+
+	ASSERT_DEATH(constArray[1], "");
+}
+#endif
+
 TEST(StaticArrayDeathTest, AccessBeyondSize)
 {
 	printf("Trying to access an element within capacity but beyond size\n");
@@ -17,6 +50,17 @@ TEST(StaticArrayDeathTest, AccessBeyondSize)
 	array[0] = 0;
 
 	ASSERT_DEATH(array.at(5) = 1, "");
+}
+
+TEST(StaticArrayDeathTest, AccessConstBeyondSize)
+{
+	printf("Trying to access an element of a const array within capacity but beyond size\n");
+	nctl::StaticArray<int, Capacity> array;
+	array[0] = 0;
+
+	const nctl::StaticArray<int, Capacity> &constArray = array;
+
+	ASSERT_DEATH(constArray.at(5), "");
 }
 
 TEST(StaticArrayDeathTest, AccessConstAtSize)
@@ -57,19 +101,6 @@ TEST_F(StaticArrayTest, AccessWithPointer)
 	int *ptr = array_.data();
 	for (unsigned int i = 0; i < Capacity; i++)
 		ASSERT_EQ(ptr[i], static_cast<int>(i));
-}
-
-TEST_F(StaticArrayTest, SubscriptAccessConstAtSize)
-{
-	nctl::StaticArray<int, Capacity> newArray;
-	newArray[0] = 0;
-
-	const nctl::StaticArray<int, Capacity> &constArray = newArray;
-	const int value = constArray[1];
-	printf("Trying to access an element of a const array at size: %d\n", value);
-
-	ASSERT_EQ(newArray.capacity(), Capacity);
-	ASSERT_EQ(newArray.size(), 1);
 }
 
 TEST_F(StaticArrayTest, SubscriptAccessEmptyWithinSize)

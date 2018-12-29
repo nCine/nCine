@@ -154,7 +154,14 @@ class DLL_PUBLIC String
 	inline bool operator>=(const char *cString) const { return compare(cString) >= 0; }
 	inline bool operator<=(const char *cString) const { return compare(cString) <= 0; }
 
-	char operator[](unsigned int index) const;
+	/// Read-only access to the specified element (with bounds checking)
+	const char &at(unsigned int index) const;
+	/// Access to the specified element (with bounds checking)
+	char &at(unsigned int index);
+	/// Read-only subscript operator
+	const char &operator[](unsigned int index) const;
+	/// Subscript operator
+	char &operator[](unsigned int index);
 
   private:
 	/// Size of the local buffer
@@ -171,14 +178,6 @@ class DLL_PUBLIC String
 	unsigned int length_;
 	unsigned int capacity_;
 };
-
-inline char String::operator[](unsigned int index) const
-{
-	if (index < length_)
-		return data()[index];
-	else
-		return '\0';
-}
 
 DLL_PUBLIC String operator+(const char *cString, const String &string);
 
