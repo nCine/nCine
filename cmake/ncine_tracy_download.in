@@ -5,7 +5,7 @@ project(tracy-download NONE)
 include(ExternalProject)
 ExternalProject_Add(tracy
 	GIT_REPOSITORY    https://bitbucket.org/wolfpld/tracy.git
-	GIT_TAG           "v0.4"
+	GIT_TAG           "v0.4.1"
 	SOURCE_DIR        "${CMAKE_BINARY_DIR}/tracy-src"
 	BINARY_DIR        "${CMAKE_BINARY_DIR}/tracy-build"
 	CONFIGURE_COMMAND ""

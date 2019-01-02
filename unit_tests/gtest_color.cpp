@@ -209,7 +209,6 @@ TEST_F(ColorTest, MultiplyScalarInPlace)
 TEST_F(ColorTest, MultiplyScalarInPlaceAndClamp)
 {
 	const float scalar = 10.0f;
-	const nc::Color oldCol1 = col1_;
 
 	printf("color1: "); printColor(col1_);
 	printf("Multiplying the first color by the scalar %.2f: ", scalar);

@@ -27,7 +27,7 @@
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.developer-tools</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright ©2011-2018 Angelo Theodorou</string>
+	<string>Copyright ©2011-2019 Angelo Theodorou</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
 </dict>

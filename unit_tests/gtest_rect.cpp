@@ -184,8 +184,6 @@ TEST_F(RectTest, SameRectOverlap)
 
 TEST_F(RectTest, RectAdjoining)
 {
-	const int diff = 5;
-
 	const nc::Recti newRect(X + Width + 1, Y, Width, Height);
 	printf("Constructing a new rectangle adjoining the first one: ");
 	printRect(newRect);

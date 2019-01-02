@@ -3,12 +3,17 @@ set(CMAKE_CXX_STANDARD 11)
 if(MSVC)
 	list(APPEND PRIVATE_COMPILE_DEFINITIONS $<$<CONFIG:Debug>:NCINE_DEBUG>)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /fp:fast")
+	# Extra optimizations in release
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /fp:fast /Ox /Qpar")
 
 	string(REGEX REPLACE "/Zm[0-9]*" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
-	if(NCINE_EXTRA_OPTIMIZATION)
-		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Ox /Qpar")
+	# Enabling Whole Program Optimization
+	if(NCINE_LINKTIME_OPTIMIZATION)
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL")
+		set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
+		set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
+		set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /LTCG")
 	endif()
 
 	if(NCINE_AUTOVECTORIZATION_REPORT)
@@ -31,6 +36,8 @@ if(MSVC)
 
 	if(WITH_TRACY)
 		set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG")
+		set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG")
+		set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /DEBUG")
 	endif()
 else() # GCC and LLVM
 	if(CMAKE_BUILD_TYPE MATCHES "Debug")
@@ -66,6 +73,7 @@ else() # GCC and LLVM
 	endif()
 
 	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=auto")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra -Wold-style-cast -Wno-long-long -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-variadic-macros")
 		
 		if(NCINE_DYNAMIC_LIBRARY)
@@ -77,35 +85,33 @@ else() # GCC and LLVM
 		endif()
 
 		if(CMAKE_BUILD_TYPE MATCHES "Release")
-			if(NCINE_EXTRA_OPTIMIZATION)
-				set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -funsafe-loop-optimizations -ftree-loop-if-convert-stores")
+			# Extra optimizations in release
+			set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast -funsafe-loop-optimizations -ftree-loop-if-convert-stores")
+
+			# Enabling Link Time Optimizations of GCC 4.9
+			if(NCINE_LINKTIME_OPTIMIZATION AND NOT (MINGW OR MSYS))
+				set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -flto=${NCINE_CORES}")
+				set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto=${NCINE_CORES}")
+				set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -flto=${NCINE_CORES}")
+				if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android")
+					set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -flto=${NCINE_CORES}")
+				endif()
 			endif()
 
 			if(NCINE_AUTOVECTORIZATION_REPORT)
 				set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fopt-info-vec-optimized")
 			endif()
-		endif()
-
-		if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9.0)
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=auto")
-
-			# Enabling Link Time Optimizations of GCC 4.9
-			if(CMAKE_BUILD_TYPE MATCHES "Release" AND NOT (MINGW OR MSYS))
-				set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -flto=${NCINE_CORES}")
-				set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -flto=${NCINE_CORES}")
-				set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -flto=${NCINE_CORES}")
-			endif()
 
 			# Enabling strong stack protector of GCC 4.9
-			if(NCINE_GCC_HARDENING AND CMAKE_BUILD_TYPE MATCHES "Release" AND NOT (MINGW OR MSYS))
+			if(NCINE_GCC_HARDENING AND NOT (MINGW OR MSYS))
 				set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fstack-protector-strong")
 				set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,relro -Wl,-z,now")
 				set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -Wl,-z,relro -Wl,-z,now")
 				set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_FORTIFY_SOURCE=2 -Wformat-security")
 			endif()
 		endif()
-
 	elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcolor-diagnostics")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra -Wold-style-cast -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-parameter -Wno-variadic-macros -Wno-c++11-long-long -Wno-missing-braces")
 		
 		if(NCINE_DYNAMIC_LIBRARY)
@@ -113,8 +119,17 @@ else() # GCC and LLVM
 		endif()
 
 		if(CMAKE_BUILD_TYPE MATCHES "Release")
-			if(NCINE_EXTRA_OPTIMIZATION)
-				set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
+			# Extra optimizations in release
+			set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
+
+			# Enabling ThinLTO of Clang 4
+			if(NCINE_LINKTIME_OPTIMIZATION AND NOT (MINGW OR MSYS))
+				set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -flto=thin")
+				set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto=thin")
+				set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -flto=thin")
+				if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android")
+					set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -flto=thin")
+				endif()
 			endif()
 
 			if(NCINE_AUTOVECTORIZATION_REPORT)

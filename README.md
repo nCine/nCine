@@ -1,6 +1,6 @@
 # nCine
 nCine is a multi-platform 2D game engine.  
-It is released under the MIT License, Copyright (c) 2011-2018 Angelo Theodorou.  
+It is released under the MIT License, Copyright (c) 2011-2019 Angelo Theodorou.  
 For additional information: https://ncine.github.io
 
 ## Information

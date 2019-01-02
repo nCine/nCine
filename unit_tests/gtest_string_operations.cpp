@@ -189,7 +189,6 @@ TEST_F(StringOperationTest, SetLengthExpand)
 
 TEST_F(StringOperationTest, SetLengthBeyondCapacity)
 {
-	const unsigned int length = string_.length();
 	const unsigned int newLength = string_.setLength(Capacity + 1);
 	printf("Appending a single character by accessing the data array: "); printString(string_);
 
