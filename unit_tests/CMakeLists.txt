@@ -49,6 +49,7 @@ list(APPEND TESTS
 	gtest_atomic32 gtest_atomic64
 	gtest_uniqueptr gtest_uniqueptr_array gtest_sharedptr
 	gtest_color gtest_colorf
+	gtest_random
 )
 
 foreach(TEST ${TESTS})

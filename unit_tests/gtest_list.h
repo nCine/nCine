@@ -3,7 +3,10 @@
 
 #include "nctl/algorithms.h"
 #include "nctl/List.h"
+#include "Random.h"
 #include "gtest/gtest.h"
+
+namespace nc = ncine;
 
 namespace {
 
@@ -47,7 +50,7 @@ void initListRandom(nctl::List<int> &list)
 	list.clear();
 
 	for (unsigned int i = 0; i < Length; i++)
-		list.pushBack(rand() % 100);
+		list.pushBack(nc::random().integer(0, 100));
 }
 
 bool isUnmodified(const nctl::List<int> &list)

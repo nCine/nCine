@@ -2,7 +2,10 @@
 #define GTEST_STATICARRAY_H
 
 #include "nctl/StaticArray.h"
+#include "Random.h"
 #include "gtest/gtest.h"
+
+namespace nc = ncine;
 
 namespace {
 
@@ -28,7 +31,7 @@ void initArray(nctl::StaticArray<int, Capacity> &array)
 void initArrayRandom(nctl::StaticArray<int, Capacity> &array)
 {
 	for (unsigned int i = 0; i < Capacity; i++)
-		array[i] = rand() % 100;
+		array[i] = nc::random().integer(0, 100);
 }
 
 bool isUnmodified(const nctl::StaticArray<int, Capacity> &array)

@@ -42,6 +42,7 @@ list(APPEND BENCHMARKS
 	gbench_std_list gbench_list
 	gbench_std_string gbench_string
 	gbench_std_unorderedmap gbench_hashmap gbench_statichashmap gbench_hashmaplist
+	gbench_std_rand gbench_random
 )
 
 foreach(BENCHMARK ${BENCHMARKS})

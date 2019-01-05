@@ -1,6 +1,6 @@
 #include "common_constants.h"
-#include "nctl/algorithms.h"
 #include "apptest_camera.h"
+#include "Random.h"
 #include "Application.h"
 #include "Texture.h"
 #include "Sprite.h"
@@ -102,8 +102,8 @@ void MyEventHandler::onInit()
 
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
-		const float randomX = nctl::randBetween(-ViewHalfWidth, ViewHalfWidth);
-		const float randomY = nctl::randBetween(-ViewHalfHeight, ViewHalfHeight);
+		const float randomX = nc::random().real(-ViewHalfWidth, ViewHalfWidth);
+		const float randomY = nc::random().real(-ViewHalfHeight, ViewHalfHeight);
 		sprites_[i] = nctl::makeUnique<nc::Sprite>(cameraNode_.get(), textures_[i % NumTextures].get(), randomX, randomY);
 		sprites_[i]->setScale(0.5f);
 		spritePos_[i].set(randomX, randomY);

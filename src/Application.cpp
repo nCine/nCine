@@ -1,5 +1,6 @@
 #include <ctime>
 #include "Application.h"
+#include "Random.h"
 #include "IAppEventHandler.h"
 #include "IFile.h"
 #include "ArrayIndexer.h"
@@ -125,9 +126,8 @@ void Application::initCommon()
 	else
 		RenderResources::createMinimal(); // some resources are still required for rendering
 
-	// HACK: Init of the random seed
-	// In the future there could be a random generator service
-	srand(static_cast<unsigned int>(time(nullptr)));
+	// Init of the static random egnerator seeds
+	random().init(static_cast<uint64_t>(time(nullptr)), reinterpret_cast<intptr_t>(frameTimer_.get()));
 
 	LOGI("Application initialized");
 

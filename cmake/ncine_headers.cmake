@@ -2,6 +2,7 @@ set(HEADERS
 	${NCINE_ROOT}/include/common_defines.h
 	${NCINE_ROOT}/include/common_constants.h
 	${NCINE_ROOT}/include/common_macros.h
+	${NCINE_ROOT}/include/Random.h
 	${NCINE_ROOT}/include/Rect.h
 	${NCINE_ROOT}/include/Color.h
 	${NCINE_ROOT}/include/Colorf.h

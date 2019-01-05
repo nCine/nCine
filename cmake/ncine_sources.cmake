@@ -1,4 +1,5 @@
 set(SOURCES
+	${NCINE_ROOT}/src/base/Random.cpp
 	${NCINE_ROOT}/src/base/Object.cpp
 	${NCINE_ROOT}/src/base/String.cpp
 	${NCINE_ROOT}/src/ServiceLocator.cpp

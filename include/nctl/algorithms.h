@@ -1,7 +1,6 @@
 #ifndef NCTL_ALGORITHMS
 #define NCTL_ALGORITHMS
 
-#include <cstdlib> // for rand()
 #include "iterator.h"
 #include "utility.h"
 
@@ -30,18 +29,6 @@ template <class T>
 inline const T &clamp(const T &value, const T &minValue, const T &maxValue)
 {
 	return min(max(value, minValue), maxValue);
-}
-
-/// Returns a random float between x0 and x1
-inline float randBetween(float x0, float x1)
-{
-	return x0 + (x1 - x0) * (rand() / static_cast<float>(RAND_MAX));
-}
-
-/// Returns a random integer between x0 and x1 included
-inline int randBetween(int x0, int x1)
-{
-	return x0 + rand() % (x1 - x0 + 1);
 }
 
 ///////////////////////////////////////////////////////////

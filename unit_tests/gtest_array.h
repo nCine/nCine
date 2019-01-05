@@ -3,7 +3,10 @@
 
 #include "nctl/algorithms.h"
 #include "nctl/Array.h"
+#include "Random.h"
 #include "gtest/gtest.h"
+
+namespace nc = ncine;
 
 namespace {
 
@@ -29,7 +32,7 @@ void initArray(nctl::Array<int> &array)
 void initArrayRandom(nctl::Array<int> &array)
 {
 	for (unsigned int i = 0; i < Capacity; i++)
-		array[i] = rand() % 100;
+		array[i] = nc::random().integer(0, 100);
 }
 
 bool isUnmodified(const nctl::Array<int> &array)

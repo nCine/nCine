@@ -1,5 +1,5 @@
-#include "nctl/algorithms.h"
 #include "ParticleSystem.h"
+#include "Random.h"
 #include "Vector2.h"
 #include "Particle.h"
 #include "ParticleInitializer.h"
@@ -55,7 +55,7 @@ void ParticleSystem::clearAffectors()
 void ParticleSystem::emitParticles(const ParticleInitializer &init)
 {
 	ZoneScoped;
-	const unsigned int amount = static_cast<unsigned int>(nctl::randBetween(init.rndAmount.x, init.rndAmount.y));
+	const unsigned int amount = static_cast<unsigned int>(random().real(init.rndAmount.x, init.rndAmount.y));
 #ifdef WITH_TRACY
 	tracyInfoString.format("Count: %d", amount);
 	ZoneText(tracyInfoString.data(), tracyInfoString.length());
@@ -69,11 +69,11 @@ void ParticleSystem::emitParticles(const ParticleInitializer &init)
 		if (poolTop_ < 0)
 			break;
 
-		const float life = nctl::randBetween(init.rndLife.x, init.rndLife.y);
-		position.x = nctl::randBetween(init.rndPositionX.x, init.rndPositionX.y);
-		position.y = nctl::randBetween(init.rndPositionY.x, init.rndPositionY.y);
-		velocity.x = nctl::randBetween(init.rndVelocityX.x, init.rndVelocityX.y);
-		velocity.y = nctl::randBetween(init.rndVelocityY.x, init.rndVelocityY.y);
+		const float life = random().real(init.rndLife.x, init.rndLife.y);
+		position.x = random().real(init.rndPositionX.x, init.rndPositionX.y);
+		position.y = random().real(init.rndPositionY.x, init.rndPositionY.y);
+		velocity.x = random().real(init.rndVelocityX.x, init.rndVelocityX.y);
+		velocity.y = random().real(init.rndVelocityY.x, init.rndVelocityY.y);
 
 		float rotation = 0.0f;
 		if (init.emitterRotation)
@@ -84,7 +84,7 @@ void ParticleSystem::emitParticles(const ParticleInitializer &init)
 				rotation += 360.0f;
 		}
 		else
-			rotation = nctl::randBetween(init.rndRotation.x, init.rndRotation.y);
+			rotation = random().real(init.rndRotation.x, init.rndRotation.y);
 
 		if (inLocalSpace_ == false)
 			position += absPosition();
