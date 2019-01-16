@@ -10,9 +10,7 @@
 	#include "LuaStatistics.h"
 #endif
 
-#ifdef WITH_GIT_VERSION
-	#include "version.h"
-#endif
+#include "version.h"
 
 namespace ncine {
 

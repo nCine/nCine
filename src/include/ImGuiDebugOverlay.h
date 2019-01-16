@@ -71,6 +71,7 @@ class ImGuiDebugOverlay : public IDebugOverlay
 
 	void guiWindow();
 	void guiConfigureGui();
+	void guiPreprocessorDefines();
 	void guiVersionStrings();
 	void guiInitTimes();
 	void guiLog();

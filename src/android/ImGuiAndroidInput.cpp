@@ -43,6 +43,7 @@ void ImGuiAndroidInput::init()
 	ImGui::CreateContext();
 
 	ImGuiIO& io = ImGui::GetIO();
+	io.BackendPlatformName = "nCine_Android";
 	io.DisplaySize = ImVec2(theApplication().width(), theApplication().height());
 	io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 

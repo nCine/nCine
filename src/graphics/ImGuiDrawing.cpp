@@ -34,6 +34,11 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 	  lastFrameWidth_(0), lastFrameHeight_(0)
 {
 	ImGuiIO& io = ImGui::GetIO();
+#ifndef __ANDROID__
+	io.BackendRendererName = "nCine_OpenGL";
+#else
+	io.BackendRendererName = "nCine_OpenGL_ES";
+#endif
 
 	unsigned char* pixels = nullptr;
 	int width, height;

@@ -56,6 +56,7 @@ void ImGuiGlfwInput::init(GLFWwindow *window)
 	ImGuiIO& io = ImGui::GetIO();
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
+	io.BackendPlatformName = "nCine_GLFW";
 
 	// Keyboard mapping. ImGui will use those indices to peek into the io.KeysDown[] array.
 	io.KeyMap[ImGuiKey_Tab] = GLFW_KEY_TAB;
@@ -94,6 +95,7 @@ void ImGuiGlfwInput::init(GLFWwindow *window)
 	mouseCursors_[ImGuiMouseCursor_ResizeEW] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
 	mouseCursors_[ImGuiMouseCursor_ResizeNESW] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);  // FIXME: GLFW doesn't have this.
 	mouseCursors_[ImGuiMouseCursor_ResizeNWSE] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);  // FIXME: GLFW doesn't have this.
+	mouseCursors_[ImGuiMouseCursor_Hand] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
 }
 
 void ImGuiGlfwInput::shutdown()

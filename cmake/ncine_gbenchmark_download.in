@@ -6,6 +6,7 @@ include(ExternalProject)
 ExternalProject_Add(googlebenchmark
 	GIT_REPOSITORY    https://github.com/google/benchmark.git
 	GIT_TAG            v1.4.1
+	GIT_SHALLOW       TRUE
 	SOURCE_DIR        "${CMAKE_BINARY_DIR}/googlebenchmark-src"
 	BINARY_DIR        "${CMAKE_BINARY_DIR}/googlebenchmark-build"
 	CONFIGURE_COMMAND ""

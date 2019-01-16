@@ -9,9 +9,7 @@
 	#include "LuaStatistics.h"
 #endif
 
-#ifdef WITH_GIT_VERSION
-	#include "version.h"
-#endif
+#include "version.h"
 
 namespace ncine {
 
@@ -165,6 +163,7 @@ void ImGuiDebugOverlay::guiWindow()
 			theApplication().quit();
 
 		guiConfigureGui();
+		guiPreprocessorDefines();
 		guiVersionStrings();
 		guiInitTimes();
 		guiLog();
@@ -285,6 +284,88 @@ void ImGuiDebugOverlay::guiConfigureGui()
 	}
 	else
 		numValues = 0;
+}
+
+void ImGuiDebugOverlay::guiPreprocessorDefines()
+{
+	if (ImGui::CollapsingHeader("Preprocessor Defines"))
+	{
+		if (ImGui::TreeNodeEx("System", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+		#ifdef __linux__
+			ImGui::Text("__linux__");
+		#endif
+		#ifdef _WIN32
+			ImGui::Text("_WIN32");
+		#endif
+		#ifdef _WIN64
+			ImGui::Text("_WIN64");
+		#endif
+		#ifdef __ANDROID__
+			ImGui::Text("__ANDROID__");
+		#endif
+		#ifdef __ANDROID_API__
+			ImGui::Text("__ANDROID_API__ = %d", static_cast<int>(__ANDROID_API__));
+		#endif
+		#ifdef __APPLE__
+			ImGui::Text("__APPLE__");
+		#endif
+		#ifdef _MSC_VER
+			ImGui::Text("_MSC_VER = %d", _MSC_VER);
+		#endif
+		#ifdef __MINGW32__
+			ImGui::Text("__MINGW32__");
+		#endif
+		#ifdef __MINGW64__
+			ImGui::Text("__MINGW64__");
+		#endif
+		#ifdef __GNUC__
+			ImGui::Text("__GNUC__ = %d", static_cast<int>(__GNUC__));
+		#endif
+		#ifdef __clang_version__
+			ImGui::Text("__clang_version__ = %s", __clang_version__);
+		#endif
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNodeEx("nCine", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+		#ifdef WITH_THREADS
+			ImGui::Text("WITH_THREADS");
+		#endif
+		#ifdef WITH_GLEW
+			ImGui::Text("WITH_GLEW");
+		#endif
+		#ifdef WITH_GLFW
+			ImGui::Text("WITH_GLFW");
+		#endif
+		#ifdef WITH_SDL
+			ImGui::Text("WITH_SDL");
+		#endif
+		#ifdef WITH_AUDIO
+			ImGui::Text("WITH_AUDIO");
+		#endif
+		#ifdef WITH_VORBIS
+			ImGui::Text("WITH_VORBIS");
+		#endif
+		#ifdef WITH_PNG
+			ImGui::Text("WITH_PNG");
+		#endif
+		#ifdef WITH_WEBP
+			ImGui::Text("WITH_WEBP");
+		#endif
+		#ifdef WITH_LUA
+			ImGui::Text("WITH_LUA");
+		#endif
+		#ifdef WITH_IMGUI
+			ImGui::Text("WITH_IMGUI");
+		#endif
+		#ifdef WITH_TRACY
+			ImGui::Text("WITH_TRACY");
+		#endif
+			ImGui::TreePop();
+		}
+	}
 }
 
 void ImGuiDebugOverlay::guiVersionStrings()
