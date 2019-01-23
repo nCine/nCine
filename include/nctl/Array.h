@@ -32,27 +32,28 @@ class Array
 	/// Reverse constant iterator type
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
-	/// Default capacity for objects created by the default constructor
-	static const unsigned int DefaultCapacity = 8;
-
-	/// Default constructor
+	/// Constructs an array without allocating memory
 	Array()
 		: array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
 	{
-		setCapacity(DefaultCapacity);
+
 	}
+
 	/// Constructs an array with explicit capacity
 	explicit Array(unsigned int capacity)
 		: array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
 	{
-		setCapacity(capacity);
+		if (capacity > 0)
+			setCapacity(capacity);
 	}
+
 	/// Constructs an array with explicit capacity and the option for it to be fixed
 	Array(unsigned int capacity, ArrayMode mode)
 		: array_(nullptr), size_(0), capacity_(0),
 		  fixedCapacity_(mode == ArrayMode::FIXED_CAPACITY)
 	{
-		setCapacity(capacity);
+		if (capacity > 0)
+			setCapacity(capacity);
 	}
 
 	~Array() { delete[] array_; }
@@ -203,8 +204,6 @@ Array<T> &Array<T>::operator=(Array<T> other)
 template <class T>
 void Array<T>::setCapacity(unsigned int newCapacity)
 {
-	FATAL_ASSERT_MSG(newCapacity > 0, "Zero is not a valid capacity");
-
 	// If the call does not come from the constructor
 	if (capacity_ != 0)
 	{
@@ -220,15 +219,15 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 			LOGW_X("Array capacity already equal to %u", capacity_);
 			return;
 		}
-		else if (newCapacity > capacity_)
-		{
-			// LOGW_X("Array capacity growing from %u to %u", capacity_, newCapacity);
-		}
 		else if (newCapacity < capacity_)
-			LOGW_X("Array capacity shrinking from %u to %u", capacity_, newCapacity);
+			LOGI_X("Array capacity shrinking from %u to %u", capacity_, newCapacity);
+		else if (newCapacity > capacity_)
+			LOGD_X("Array capacity growing from %u to %u", capacity_, newCapacity);
 	}
 
-	T *newArray = new T[newCapacity];
+	T *newArray = nullptr;
+	if (newCapacity > 0)
+		newArray = new T[newCapacity];
 
 	if (size_ > 0)
 	{
@@ -261,7 +260,8 @@ void Array<T>::setSize(unsigned int newSize)
 template <class T>
 void Array<T>::shrinkToFit()
 {
-	setCapacity(size_);
+	if (size_ > 0)
+		setCapacity(size_);
 }
 
 template <class T>
@@ -300,7 +300,10 @@ T *Array<T>::insertAt(unsigned int index, const T &element)
 	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
 
 	if (size_ + 1 > capacity_)
-		setCapacity(size_ * 2);
+	{
+		const unsigned int newCapacity = (size_ == 0) ? 1 : size_ * 2;
+		setCapacity(newCapacity);
+	}
 
 	// Backwards loop to account for overlapping areas
 	for(unsigned int i = size_ - index; i > 0; i--)
@@ -318,7 +321,10 @@ T *Array<T>::insertAt(unsigned int index, T &&element)
 	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
 
 	if (size_ + 1 > capacity_)
-		setCapacity(size_ * 2);
+	{
+		const unsigned int newCapacity = (size_ == 0) ? 1 : size_ * 2;
+		setCapacity(newCapacity);
+	}
 
 	// Backwards loop to account for overlapping areas
 	for(unsigned int i = size_ - index; i > 0; i--)
@@ -424,10 +430,10 @@ T &Array<T>::operator[](unsigned int index)
 		// Need growing
 		if (size_ == capacity_)
 		{
-			const unsigned int oldCapacity = capacity_;
-			setCapacity(oldCapacity * 2);
+			const unsigned int newCapacity = (capacity_ == 0) ? 1 : capacity_ * 2;
+			setCapacity(newCapacity);
 			// Extending size only if the capacity is not fixed
-			if (capacity_ == oldCapacity * 2)
+			if (capacity_ == newCapacity)
 				size_++;
 		}
 		else

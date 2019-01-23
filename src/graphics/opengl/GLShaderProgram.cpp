@@ -20,7 +20,8 @@ GLuint GLShaderProgram::boundProgram_ = 0;
 GLShaderProgram::GLShaderProgram()
 	: glHandle_(0), attachedShaders_(AttachedShadersInitialSize),
 	  status_(Status::NOT_LINKED), uniformsSize_(0), uniformBlocksSize_(0),
-	  uniforms_(UniformsInitialSize), attributes_(AttributesInitialSize)
+	  uniforms_(UniformsInitialSize), uniformBlocks_(UniformBlocksInitialSize),
+	  attributes_(AttributesInitialSize)
 {
 	glHandle_ = glCreateProgram();
 }

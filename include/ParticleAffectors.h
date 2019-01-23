@@ -9,6 +9,8 @@ namespace ncine {
 
 class Particle;
 
+const unsigned int StepsInitialSize = 4;
+
 /// Base class for particle affectors
 /*! Affectors modify particle properties depending on their remaining life */
 class DLL_PUBLIC ParticleAffector
@@ -34,7 +36,7 @@ class DLL_PUBLIC ColorAffector : public ParticleAffector
 		ColorStep(float newAge, const Colorf &newColor) : age(newAge), color(newColor) { }
 	};
 
-	ColorAffector() : colorSteps_(4) { }
+	ColorAffector() : colorSteps_(StepsInitialSize) { }
 
 	/// Affects the color of the specified particle
 	void affect(Particle *particle, float normalizedAge) override;
@@ -61,7 +63,7 @@ class DLL_PUBLIC SizeAffector : public ParticleAffector
 	};
 
 	/// Constructs a size affector with a base scale factor as a reference
-	explicit SizeAffector(float baseScale) : sizeSteps_(4), baseScale_(baseScale) { }
+	explicit SizeAffector(float baseScale) : sizeSteps_(StepsInitialSize), baseScale_(baseScale) { }
 
 	/// Affects the size of the specified particle
 	void affect(Particle *particle, float normalizedAge) override;
@@ -91,6 +93,8 @@ class DLL_PUBLIC RotationAffector : public ParticleAffector
 		RotationStep(float newAge, float newAngle) : age(newAge), angle(newAngle) { }
 	};
 
+	RotationAffector() : rotationSteps_(StepsInitialSize) { }
+
 	/// Affects the rotation of the specified particle
 	void affect(Particle *particle, float normalizedAge) override;
 	void addRotationStep(float age, float angle);
@@ -114,6 +118,8 @@ class DLL_PUBLIC PositionAffector : public ParticleAffector
 		PositionStep() : age(0.0f), position(0.0f, 0.0f) { }
 		PositionStep(float newAge, float newPositionX, float newPositionY) : age(newAge), position(newPositionX, newPositionY) { }
 	};
+
+	PositionAffector() : positionSteps_(StepsInitialSize) { }
 
 	/// Affects the position of the specified particle
 	void affect(Particle *particle, float normalizedAge) override;
@@ -139,6 +145,8 @@ class DLL_PUBLIC VelocityAffector : public ParticleAffector
 		VelocityStep() : age(0.0f), velocity(0.0f, 0.0f) { }
 		VelocityStep(float newAge, float newVelocityX, float newVelocityY) : age(newAge), velocity(newVelocityX, newVelocityY) { }
 	};
+
+	VelocityAffector() : velocitySteps_(StepsInitialSize) { }
 
 	/// Affects the velocity of the specified particle
 	void affect(Particle *particle, float normalizedAge) override;

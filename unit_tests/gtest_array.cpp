@@ -83,6 +83,7 @@ TEST_F(ArrayTest, AccessEmptyWithinSize)
 	nctl::Array<int> newArray(Capacity);
 	for (unsigned int i = 0; i < Capacity; i++)
 		newArray.at(i) = i;
+	printArray(newArray);
 
 	ASSERT_EQ(newArray.size(), Capacity);
 	for (unsigned int i = 0; i < Capacity; i++)
@@ -171,6 +172,16 @@ TEST_F(ArrayTest, SetHalfCapacity)
 	ASSERT_EQ(array_.size(), Capacity / 2);
 	for (unsigned int i = 0; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], i);
+}
+
+TEST_F(ArrayTest, SetZeroCapacity)
+{
+	printf("Freeing all memory of the array by setting the capacity to zero\n");
+	array_.setCapacity(0);
+	printArray(array_);
+
+	ASSERT_EQ(array_.capacity(), 0);
+	ASSERT_EQ(array_.size(), 0);
 }
 
 TEST_F(ArrayTest, WritingBeyondCapacity)
