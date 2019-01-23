@@ -97,6 +97,9 @@ class HashMapList
 	/// Removes a key from the hashmap, if it exists
 	bool remove(const K &key);
 
+	/// Sets the number of buckets to the new specified size and rehashes the container
+	void rehash(unsigned int count);
+
   private:
 	/// The template class for the node stored inside the hashmap
 	class Node
@@ -357,6 +360,8 @@ template <class K, class T, class HashFunc>
 HashMapList<K, T, HashFunc>::HashMapList(unsigned int capacity)
 	: buckets_(capacity, ArrayMode::FIXED_CAPACITY)
 {
+	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
+
 	for (unsigned int i = 0; i < capacity; i++)
 		buckets_[i] = HashBucket();
 }
@@ -418,6 +423,35 @@ bool HashMapList<K, T, HashFunc>::remove(const K &key)
 {
 	const hash_t hash = hashFunc_(key);
 	return retrieveBucket(hash).remove(hash, key);
+}
+
+template <class K, class T, class HashFunc>
+void HashMapList<K, T, HashFunc>::rehash(unsigned int count)
+{
+	const unsigned int totalSize = size();
+	if (totalSize == 0 || count < totalSize)
+		return;
+
+	HashMapList<K, T, HashFunc> hashMap(count);
+
+	unsigned int bucketIndex = 0;
+	HashBucket &bucket = buckets_[bucketIndex];
+	while (bucketIndex < buckets_.size() - 1)
+	{
+		while (bucketIndex < buckets_.size() - 1 && bucket.size() == 0)
+			bucket = buckets_[++bucketIndex];
+
+		if (bucket.size() > 0)
+		{
+			hashMap[bucket.firstNode_.key] = bucket.firstNode_.value;
+			for (typename List<Node>::ConstIterator i = bucket.collisionList_.begin(); i != bucket.collisionList_.end(); ++i)
+				hashMap[(*i).key] = (*i).value;
+
+			++bucketIndex;
+		}
+	}
+
+	*this = nctl::move(hashMap);
 }
 
 template <class K, class T, class HashFunc>

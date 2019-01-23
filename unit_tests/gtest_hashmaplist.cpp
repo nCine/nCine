@@ -13,6 +13,12 @@ class HashMapListTest : public ::testing::Test
 	HashMapTestType hashmap_;
 };
 
+TEST(HashMapListDeathTest, ZeroCapacity)
+{
+	printf("Creating an hashmap of zero capacity\n");
+	ASSERT_DEATH(HashMapTestType newHashmap(0), "");
+}
+
 TEST_F(HashMapListTest, Size)
 {
 	const unsigned int size = hashmap_.size();
@@ -95,6 +101,47 @@ TEST_F(HashMapListTest, RemoveElements)
 	ASSERT_FALSE(hashmap_.contains(7, value));
 	ASSERT_EQ(hashmap_.size(), Size - 2);
 	ASSERT_EQ(calcSize(hashmap_), Size - 2);
+}
+
+TEST_F(HashMapListTest, RehashExtend)
+{
+	const float loadFactor = hashmap_.loadFactor();
+	printf("Original size: %u, bucket amount: %u, load factor: %f\n", hashmap_.size(), hashmap_.bucketAmount(), hashmap_.loadFactor());
+	printHashMap(hashmap_);
+	ASSERT_EQ(hashmap_.bucketAmount(), Capacity);
+
+	printf("Doubling capacity by rehashing\n");
+	hashmap_.rehash(hashmap_.bucketAmount() * 2);
+	printf("New size: %u, bucket amount: %u, load factor: %f\n", hashmap_.size(), hashmap_.bucketAmount(), hashmap_.loadFactor());
+	printHashMap(hashmap_);
+
+	ASSERT_EQ(hashmap_.bucketAmount(), Capacity * 2);
+	ASSERT_EQ(hashmap_.size(), Size);
+	ASSERT_EQ(calcSize(hashmap_), Size);
+	ASSERT_FLOAT_EQ(hashmap_.loadFactor(), loadFactor * 0.5f);
+
+	for (unsigned int i = 0; i < Size; i++)
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
+}
+
+TEST_F(HashMapListTest, RehashShrink)
+{
+	printf("Original size: %u, bucket amount: %u, load factor: %f\n", hashmap_.size(), hashmap_.bucketAmount(), hashmap_.loadFactor());
+	printHashMap(hashmap_);
+	ASSERT_EQ(hashmap_.bucketAmount(), Capacity);
+
+	printf("Set capacity to current size by rehashing\n");
+	hashmap_.rehash(hashmap_.size());
+	printf("New size: %u, bucket amount: %u, load factor: %f\n", hashmap_.size(), hashmap_.bucketAmount(), hashmap_.loadFactor());
+	printHashMap(hashmap_);
+
+	ASSERT_EQ(hashmap_.bucketAmount(), Size);
+	ASSERT_EQ(hashmap_.size(), Size);
+	ASSERT_EQ(calcSize(hashmap_), Size);
+	ASSERT_FLOAT_EQ(hashmap_.loadFactor(), 1.0f);
+
+	for (unsigned int i = 0; i < Size; i++)
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
 }
 
 TEST_F(HashMapListTest, CopyConstruction)

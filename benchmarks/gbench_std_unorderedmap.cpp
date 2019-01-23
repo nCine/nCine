@@ -126,4 +126,22 @@ static void BM_StdUnorderedMapReverseErase(benchmark::State &state)
 }
 BENCHMARK(BM_StdUnorderedMapReverseErase)->Arg(Capacity / 4)->Arg(Capacity / 2)->Arg(Capacity / 4 * 3);
 
+static void BM_StdUnorderedMapRehashDoubleCapacity(benchmark::State &state)
+{
+	state.counters["Capacity"] = Capacity;
+	StdUnorderedMap initMap(Capacity);
+	for (unsigned int i = 0; i < state.range(0); i++)
+		initMap[i] = i * 2;
+
+	for (auto _ : state)
+	{
+		state.PauseTiming();
+		StdUnorderedMap map(initMap);
+		state.ResumeTiming();
+
+		map.rehash(Capacity * 2);
+	}
+}
+BENCHMARK(BM_StdUnorderedMapRehashDoubleCapacity)->Arg(Capacity / 4)->Arg(Capacity / 2)->Arg(Capacity / 4 * 3);
+
 BENCHMARK_MAIN();

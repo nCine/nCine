@@ -108,6 +108,9 @@ class HashMap
 	/// Removes a key from the hashmap, if it exists
 	bool remove(const K &key);
 
+	/// Sets the number of buckets to the new specified size and rehashes the container
+	void rehash(unsigned int count);
+
   private:
 	unsigned int size_;
 	unsigned int capacity_;
@@ -194,6 +197,8 @@ HashMap<K, T, HashFunc>::HashMap(unsigned int capacity)
 	: size_(0), capacity_(capacity), delta1_(nullptr),
 	  delta2_(nullptr), hashes_(nullptr), nodes_(nullptr)
 {
+	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
+
 	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
 	buffer_ = makeUnique<uint8_t []>(bytes);
 
@@ -394,6 +399,31 @@ bool HashMap<K, T, HashFunc>::remove(const K &key)
 	}
 
 	return found;
+}
+
+template <class K, class T, class HashFunc>
+void HashMap<K, T, HashFunc>::rehash(unsigned int count)
+{
+	if (size_ == 0 || count < size_)
+		return;
+
+	HashMap<K, T, HashFunc> hashMap(count);
+
+	unsigned int rehashedNodes = 0;
+	for (unsigned int i = 0; i < capacity_; i++)
+	{
+		if (hashes_[i] != NullHash)
+		{
+			const Node &node = nodes_[i];
+			hashMap[node.key] = node.value;
+
+			rehashedNodes++;
+			if (rehashedNodes == size_)
+				break;
+		}
+	}
+
+	*this = nctl::move(hashMap);
 }
 
 template <class K, class T, class HashFunc>

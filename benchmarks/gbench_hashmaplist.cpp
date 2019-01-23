@@ -129,4 +129,22 @@ static void BM_HashMapListReverseRemove(benchmark::State &state)
 }
 BENCHMARK(BM_HashMapListReverseRemove)->Arg(Capacity / 4)->Arg(Capacity / 2)->Arg(Capacity / 4 * 3);
 
+static void BM_HashMapListRehashDoubleCapacity(benchmark::State &state)
+{
+	state.counters["Capacity"] = Capacity;
+	HashMapTestType initMap(Capacity);
+	for (unsigned int i = 0; i < state.range(0); i++)
+		initMap[i] = i * 2;
+
+	for (auto _ : state)
+	{
+		state.PauseTiming();
+		HashMapTestType map(initMap);
+		state.ResumeTiming();
+
+		map.rehash(Capacity * 2);
+	}
+}
+BENCHMARK(BM_HashMapListRehashDoubleCapacity)->Arg(Capacity / 4)->Arg(Capacity / 2)->Arg(Capacity / 4 * 3);
+
 BENCHMARK_MAIN();
