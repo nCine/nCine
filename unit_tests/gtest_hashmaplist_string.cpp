@@ -75,7 +75,8 @@ TEST_F(HashMapListStringTest, MoveConstruction)
 TEST_F(HashMapListStringTest, AssignmentOperator)
 {
 	printf("Creating a new hashmap with the assignment operator\n");
-	nctl::StringHashMapList<nctl::String> newStrHashmap = strHashmap_;
+	nctl::StringHashMapList<nctl::String> newStrHashmap(Capacity);
+	newStrHashmap = strHashmap_;
 	printHashMap(newStrHashmap);
 
 	assertHashMapsAreEqual(strHashmap_, newStrHashmap);

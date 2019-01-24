@@ -49,7 +49,8 @@ TEST_F(ArrayOperationsTest, MoveConstruction)
 TEST_F(ArrayOperationsTest, AssignmentOperator)
 {
 	printf("Creating a new array with the assignment operator\n");
-	nctl::Array<int> newArray = array_;
+	nctl::Array<int> newArray;
+	newArray = array_;
 	printArray(newArray);
 
 	ASSERT_EQ(array_.size(), newArray.size());

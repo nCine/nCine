@@ -90,7 +90,8 @@ TEST_F(StaticHashMapTest, CopyConstruction)
 TEST_F(StaticHashMapTest, AssignmentOperator)
 {
 	printf("Creating a new hashmap with the assignment operator\n");
-	HashMapTestType newHashmap = hashmap_;
+	HashMapTestType newHashmap;
+	newHashmap = hashmap_;
 	printHashMap(newHashmap);
 
 	assertHashMapsAreEqual(hashmap_, newHashmap);

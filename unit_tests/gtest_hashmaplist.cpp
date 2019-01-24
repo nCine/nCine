@@ -172,7 +172,8 @@ TEST_F(HashMapListTest, MoveConstruction)
 TEST_F(HashMapListTest, AssignmentOperator)
 {
 	printf("Creating a new hashmap with the assignment operator\n");
-	HashMapTestType newHashmap = hashmap_;
+	HashMapTestType newHashmap(Capacity);
+	newHashmap = hashmap_;
 	printHashMap(newHashmap);
 
 	assertHashMapsAreEqual(hashmap_, newHashmap);

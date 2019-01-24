@@ -71,7 +71,8 @@ TEST_F(StringOperationTest, MoveConstruction)
 
 TEST_F(StringOperationTest, AssignmentOperator)
 {
-	nctl::String newString = string_;
+	nctl::String newString(Capacity);
+	newString = string_;
 	printf("Creating a new string with the assignment operator: "); printString(newString);
 
 	ASSERT_EQ(newString.capacity(), string_.capacity());

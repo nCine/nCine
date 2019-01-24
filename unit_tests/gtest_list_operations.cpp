@@ -78,7 +78,8 @@ TEST_F(ListOperationsTest, MoveConstructionFromEmpty)
 TEST_F(ListOperationsTest, AssignmentOperator)
 {
 	printf("Creating a new list with the assignment operator\n");
-	nctl::List<int> newList = list_;
+	nctl::List<int> newList;
+	newList = list_;
 	printList(newList);
 
 	assertListsAreEqual(list_, newList);

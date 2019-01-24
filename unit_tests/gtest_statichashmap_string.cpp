@@ -61,7 +61,8 @@ TEST_F(StaticHashMapStringTest, CopyConstruction)
 TEST_F(StaticHashMapStringTest, AssignmentOperator)
 {
 	printf("Creating a new hashmap with the assignment operator\n");
-	nctl::StaticStringHashMap<nctl::String, Capacity> newStrHashmap = strHashmap_;
+	nctl::StaticStringHashMap<nctl::String, Capacity> newStrHashmap;
+	newStrHashmap = strHashmap_;
 	printHashMap(newStrHashmap);
 
 	assertHashMapsAreEqual(strHashmap_, newStrHashmap);

@@ -46,7 +46,8 @@ TEST_F(StaticArrayOperationsTest, MoveConstruction)
 TEST_F(StaticArrayOperationsTest, AssignmentOperator)
 {
 	printf("Creating a new array with the assignment operator\n");
-	nctl::StaticArray<int, Capacity> newArray = array_;
+	nctl::StaticArray<int, Capacity> newArray;
+	newArray = array_;
 	printArray(newArray);
 
 	ASSERT_EQ(array_.size(), newArray.size());
