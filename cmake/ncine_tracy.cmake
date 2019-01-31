@@ -1,4 +1,4 @@
-if(WITH_TRACY)
+if(NCINE_WITH_TRACY)
 	# Download and unpack Tracy at configure time
 	configure_file(cmake/ncine_tracy_download.in tracy-download/CMakeLists.txt)
 
@@ -21,7 +21,7 @@ if(WITH_TRACY)
 	endif()
 	
 	if(TRACY_ERROR)
-		set(WITH_TRACY FALSE)
+		set(NCINE_WITH_TRACY FALSE)
 	else()
 		set(TRACY_SOURCE_DIR ${CMAKE_BINARY_DIR}/tracy-src)
 	endif()

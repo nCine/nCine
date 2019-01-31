@@ -1,4 +1,4 @@
-if(WITH_IMGUI)
+if(NCINE_WITH_IMGUI)
 	# Download and unpack ImGui at configure time
 	configure_file(cmake/ncine_imgui_download.in imgui-download/CMakeLists.txt)
 
@@ -21,7 +21,7 @@ if(WITH_IMGUI)
 	endif()
 	
 	if(IMGUI_ERROR)
-		set(WITH_IMGUI FALSE)
+		set(NCINE_WITH_IMGUI FALSE)
 	else()
 		execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			${CMAKE_SOURCE_DIR}/imconfig.h ${CMAKE_BINARY_DIR}/imgui-src)

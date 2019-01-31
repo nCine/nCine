@@ -8,6 +8,11 @@ option(NCINE_DYNAMIC_LIBRARY "Compile the engine as a dynamic library" ON)
 option(NCINE_BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
 option(NCINE_EMBED_SHADERS "Export shader files to C strings to be included in engine sources" ON)
 option(NCINE_BUILD_ANDROID "Build the Android version of the engine" ON)
+option(NCINE_WITH_IMGUI "Enable the integration with Dear ImGui" ON)
+option(NCINE_WITH_TRACY "Enable the integration with the Tracy frame profiler" OFF)
+
+set(NCINE_PREFERRED_BACKEND "GLFW" CACHE STRING "Specify the preferred backend on desktop")
+set_property(CACHE NCINE_PREFERRED_BACKEND PROPERTY STRINGS "GLFW;SDL2")
 
 set(NCINE_DATA_DIR "${PARENT_SOURCE_DIR}/nCine-data" CACHE PATH "Set the path to the engine data directory")
 set(NCINE_TESTS_DATA_DIR "" CACHE STRING "Set the path to the data directory that will be embedded in test executables")
@@ -65,6 +70,9 @@ if("${NCINE_OPTIONS_PRESETS}" STREQUAL "BinDist" OR "${NCINE_OPTIONS_PRESETS}" S
 	if(DEFINED NCINE_GCC_HARDENING)
 		set(NCINE_GCC_HARDENING ON)
 	endif()
+	set(NCINE_PREFERRED_BACKEND "GLFW")
+	set(NCINE_WITH_IMGUI ON)
+	set(NCINE_WITH_TRACY OFF)
 endif()
 
 if("${NCINE_OPTIONS_PRESETS}" STREQUAL "BinDist")
