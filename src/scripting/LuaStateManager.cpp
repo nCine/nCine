@@ -57,12 +57,12 @@ namespace LuaNames
 	static const char *GitLastCommitDate = "_GITLATCOMMITDATE";
 	static const char *GitBranch = "_GITBRANCH";
 
-	static const char *WINDOWS = "WINDOWS";
-	static const char *MACOS = "MACOS";
-	static const char *ANDROID = "ANDROID";
-	static const char *LINUX = "LINUX";
+	static const char *Windows = "WINDOWS";
+	static const char *macOS = "MACOS";
+	static const char *Android = "ANDROID";
+	static const char *Linux = "LINUX";
 
-	static const char *DEBUG = "DEBUG";
+	static const char *Debug = "DEBUG";
 }
 
 ///////////////////////////////////////////////////////////
@@ -373,18 +373,18 @@ void LuaStateManager::exposeConstants()
 
 	lua_pushboolean(L_, true);
 #if defined(_WIN32)
-	lua_setfield(L_, -2, LuaNames::WINDOWS);
+	lua_setfield(L_, -2, LuaNames::Windows);
 #elif defined(__APPLE__)
-	lua_setfield(L_, -2, LuaNames::MACOS);
+	lua_setfield(L_, -2, LuaNames::macOS);
 #elif defined(__ANDROID__)
-	lua_setfield(L_, -2, LuaNames::ANDROID);
+	lua_setfield(L_, -2, LuaNames::Android);
 #else
-	lua_setfield(L_, -2, LuaNames::LINUX);
+	lua_setfield(L_, -2, LuaNames::Linux);
 #endif
 
 #if NCINE_DEBUG
 	lua_pushboolean(L_, true);
-	lua_setfield(L_, -2, LuaNames::DEBUG);
+	lua_setfield(L_, -2, LuaNames::Debug);
 #endif
 }
 

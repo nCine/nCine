@@ -7,7 +7,7 @@ option(NCINE_AUTOVECTORIZATION_REPORT "Enable report generation from compiler au
 option(NCINE_DYNAMIC_LIBRARY "Compile the engine as a dynamic library" ON)
 option(NCINE_BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
 option(NCINE_EMBED_SHADERS "Export shader files to C strings to be included in engine sources" ON)
-option(NCINE_BUILD_ANDROID "Build the Android version of the engine" ON)
+option(NCINE_BUILD_ANDROID "Build the Android version of the engine" OFF)
 option(NCINE_WITH_IMGUI "Enable the integration with Dear ImGui" ON)
 option(NCINE_WITH_TRACY "Enable the integration with the Tracy frame profiler" OFF)
 
@@ -28,7 +28,7 @@ endif()
 
 if(NCINE_BUILD_ANDROID)
 	set(NDK_DIR "" CACHE PATH "Set the path to the Android NDK")
-	set(NCINE_NDK_ARCHITECTURES armeabi-v7a CACHE STRING "Set the NDK target architectures")
+	set(NCINE_NDK_ARCHITECTURES arm64-v8a CACHE STRING "Set the NDK target architectures")
 	option(NCINE_ASSEMBLE_APK "Assemble the Android APK of the startup test with Gradle" OFF)
 endif()
 

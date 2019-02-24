@@ -18,9 +18,8 @@ if(NCINE_BUILD_ANDROID)
 	endif()
 	message(STATUS "Android NDK directory: ${NDK_DIR}")
 
-	set(ANDROID_API_LEVEL 21)
-	set(ANDROID_TOOLCHAIN_VERSION clang)
-	set(ANDROID_STL_TYPE c++_static)
+	set(ANDROID_TOOLCHAIN clang)
+	set(ANDROID_STL c++_shared)
 
 	# Reset compilation flags that external tools might have set in environment variables
 	set(RESET_FLAGS_ARGS -DCMAKE_C_FLAGS="" -DCMAKE_CXX_FLAGS="" -DCMAKE_EXE_LINKER_FLAGS=""
@@ -31,9 +30,8 @@ if(NCINE_BUILD_ANDROID)
 		-DGENERATED_INCLUDE_DIR=${GENERATED_INCLUDE_DIR}
 		-DNCINE_WITH_IMGUI=${NCINE_WITH_IMGUI} -DIMGUI_SOURCE_DIR=${IMGUI_SOURCE_DIR}
 		-DNCINE_WITH_TRACY=${NCINE_WITH_TRACY} -DTRACY_SOURCE_DIR=${TRACY_SOURCE_DIR})
-	set(ANDROID_CMAKE_ARGS -DCMAKE_SYSTEM_NAME=Android -DCMAKE_SYSTEM_VERSION=${ANDROID_API_LEVEL}
-		-DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=${ANDROID_TOOLCHAIN_VERSION} -DCMAKE_ANDROID_STL_TYPE=${ANDROID_STL_TYPE})
-	set(ANDROID_ARM_ARGS -DCMAKE_ANDROID_ARM_MODE=ON -DCMAKE_ANDROID_ARM_NEON=ON)
+	set(ANDROID_CMAKE_ARGS -DANDROID_TOOLCHAIN=${ANDROID_TOOLCHAIN} -DANDROID_STL=${ANDROID_STL})
+	set(ANDROID_ARM_ARGS -DANDROID_ARM_MODE=thumb -DANDROID_ARM_NEON=ON)
 	set(ANDROID_DEVDIST_PASSTHROUGH_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DNCINE_STARTUP_TEST=${NCINE_STARTUP_TEST})
 
 	if(CMAKE_BUILD_TYPE MATCHES "Release")
@@ -59,12 +57,17 @@ if(NCINE_BUILD_ANDROID)
 	# Not added to Gradle arguments as it is handled by substituting `GRADLE_NDK_DIR`
 	list(APPEND ANDROID_CMAKE_ARGS -DCMAKE_ANDROID_NDK=${NDK_DIR})
 
-	set(GRADLE_BUILDTOOLS_VERSION 26.0.1)
-	set(GRADLE_COMPILESDK_VERSION 23)
-	set(GRADLE_MINSDK_VERSION 18)
-	set(GRADLE_TARGETSDK_VERSION 23)
+	set(GRADLE_BUILDTOOLS_VERSION 28.0.3)
+	set(GRADLE_COMPILESDK_VERSION 28)
+	set(GRADLE_MINSDK_VERSION 21)
+	set(GRADLE_TARGETSDK_VERSION 28)
 	set(GRADLE_VERSIONCODE 1)
 	set(GRADLE_VERSION ${NCINE_VERSION})
+
+	set(GRADLE_LIBCPP_SHARED "false")
+	if(ANDROID_STL STREQUAL "c++_shared")
+		set(GRADLE_LIBCPP_SHARED "true")
+	endif()
 
 	set(BUILD_GRADLE_IN ${CMAKE_SOURCE_DIR}/android/build.gradle.in)
 	set(BUILD_GRADLE ${CMAKE_BINARY_DIR}/android/build.gradle)
@@ -124,12 +127,14 @@ if(NCINE_BUILD_ANDROID)
 
 	foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
 		set(ANDROID_BINARY_DIR ${CMAKE_BINARY_DIR}/android/build/ncine/${ARCHITECTURE})
-		set(ANDROID_ARCH_ARGS -DCMAKE_ANDROID_ARCH_ABI=${ARCHITECTURE})
+		set(ANDROID_ARCH_ARGS -DANDROID_ABI=${ARCHITECTURE})
 		if("${ARCHITECTURE}" STREQUAL "armeabi-v7a")
 			list(APPEND ANDROID_ARCH_ARGS ${ANDROID_ARM_ARGS})
 		endif()
 		add_custom_command(OUTPUT ${ANDROID_BINARY_DIR}/${ANDROID_LIBNAME}
 			COMMAND ${CMAKE_COMMAND} -H${CMAKE_BINARY_DIR}/android/src/main/cpp/ -B${ANDROID_BINARY_DIR}
+				-DCMAKE_TOOLCHAIN_FILE=${NDK_DIR}/build/cmake/android.toolchain.cmake
+				-DANDROID_PLATFORM=android-${GRADLE_MINSDK_VERSION} -DANDROID_ABI=${ARCHITECTURE}
 				${RESET_FLAGS_ARGS} ${ANDROID_PASSTHROUGH_ARGS} ${ANDROID_CMAKE_ARGS} ${ANDROID_ARCH_ARGS}
 			COMMAND ${CMAKE_COMMAND} --build ${ANDROID_BINARY_DIR}
 			COMMENT "Compiling the Android library for ${ARCHITECTURE}")
@@ -148,22 +153,29 @@ if(NCINE_BUILD_ANDROID)
 	set_target_properties(ncine_ndkdir_include PROPERTIES FOLDER "Android")
 	add_dependencies(ncine_ndkdir_include ncine_android)
 
-	if (NCINE_ASSEMBLE_APK)
-		if(CMAKE_BUILD_TYPE MATCHES "Release")
-			set(GRADLE_TASK assembleRelease)
-			set(APK_NAME android-release-unsigned.apk)
-		else()
-			set(GRADLE_TASK assembleDebug)
-			set(APK_NAME android-debug.apk)
-		endif()
-
+	if(NCINE_ASSEMBLE_APK)
 		find_program(GRADLE_EXECUTABLE gradle $ENV{GRADLE_HOME}/bin)
-		if (GRADLE_EXECUTABLE)
+		if(GRADLE_EXECUTABLE)
 			message(STATUS "Gradle executable: ${GRADLE_EXECUTABLE}")
+
+			if(CMAKE_BUILD_TYPE MATCHES "Release")
+				set(GRADLE_TASK assembleRelease)
+				set(APK_BUILDTYPE_DIR release)
+				set(APK_FILE_SUFFIX release-unsigned)
+			else()
+				set(GRADLE_TASK assembleDebug)
+				set(APK_BUILDTYPE_DIR debug)
+				set(APK_FILE_SUFFIX debug)
+			endif()
+
+			foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
+				list(APPEND APK_FILES ${CMAKE_BINARY_DIR}/android/build/outputs/apk/${APK_BUILDTYPE_DIR}/android-${ARCHITECTURE}-${APK_FILE_SUFFIX}.apk)
+			endforeach()
+
 			# Invoking Gradle to create the Android APK of the startup test
-			add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/android/build/output/apks/${APK_NAME}
+			add_custom_command(OUTPUT ${APK_FILES}
 				COMMAND ${GRADLE_EXECUTABLE} -p android ${GRADLE_TASK})
-			add_custom_target(ncine_gradle_apk ALL DEPENDS ${CMAKE_BINARY_DIR}/android/build/output/apks/android-debug.apk)
+			add_custom_target(ncine_gradle_apk ALL DEPENDS ${APK_FILES})
 			set_target_properties(ncine_gradle_apk PROPERTIES FOLDER "Android")
 			add_dependencies(ncine_gradle_apk ncine_android)
 		else()

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.7)
-project(nCine-Android-${CMAKE_ANDROID_ARCH_ABI})
+project(nCine-Android-${ANDROID_ABI})
 
 find_library(ANDROID_LIBRARY android)
 find_library(EGL_LIBRARY EGL)
@@ -13,35 +13,35 @@ list(APPEND PRIVATE_LINK_LIBRARIES
 
 set(Threads_FOUND 1)
 
-if(EXISTS ${EXTERNAL_ANDROID_DIR}/png/${CMAKE_ANDROID_ARCH_ABI}/libpng16.a)
+if(EXISTS ${EXTERNAL_ANDROID_DIR}/png/${ANDROID_ABI}/libpng16.a)
 	set(PNG_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/png/include)
-	set(PNG_LIBRARY ${EXTERNAL_ANDROID_DIR}/png/${CMAKE_ANDROID_ARCH_ABI}/libpng16.a)
+	set(PNG_LIBRARY ${EXTERNAL_ANDROID_DIR}/png/${ANDROID_ABI}/libpng16.a)
 	set(PNG_FOUND 1)
 endif()
-if(EXISTS ${EXTERNAL_ANDROID_DIR}/webp/${CMAKE_ANDROID_ARCH_ABI}/libwebp.a)
+if(EXISTS ${EXTERNAL_ANDROID_DIR}/webp/${ANDROID_ABI}/libwebp.a)
 	set(WEBP_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/webp/include)
-	set(WEBP_LIBRARY ${EXTERNAL_ANDROID_DIR}/webp/${CMAKE_ANDROID_ARCH_ABI}/libwebp.a)
+	set(WEBP_LIBRARY ${EXTERNAL_ANDROID_DIR}/webp/${ANDROID_ABI}/libwebp.a)
 	set(WEBP_FOUND 1)
 endif()
-if(EXISTS ${EXTERNAL_ANDROID_DIR}/openal/${CMAKE_ANDROID_ARCH_ABI}/libopenal.so)
+if(EXISTS ${EXTERNAL_ANDROID_DIR}/openal/${ANDROID_ABI}/libopenal.so)
 	set(OPENAL_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/openal/include)
-	set(OPENAL_LIBRARY ${EXTERNAL_ANDROID_DIR}/openal/${CMAKE_ANDROID_ARCH_ABI}/libopenal.so)
+	set(OPENAL_LIBRARY ${EXTERNAL_ANDROID_DIR}/openal/${ANDROID_ABI}/libopenal.so)
 	set(OPENAL_FOUND 1)
 endif()
-if(EXISTS ${EXTERNAL_ANDROID_DIR}/vorbis/${CMAKE_ANDROID_ARCH_ABI}/libvorbisfile.a AND
-   EXISTS ${EXTERNAL_ANDROID_DIR}/vorbis/${CMAKE_ANDROID_ARCH_ABI}/libvorbis.a AND
-   EXISTS ${EXTERNAL_ANDROID_DIR}/ogg/${CMAKE_ANDROID_ARCH_ABI}/libogg.a)
+if(EXISTS ${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbisfile.a AND
+   EXISTS ${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbis.a AND
+   EXISTS ${EXTERNAL_ANDROID_DIR}/ogg/${ANDROID_ABI}/libogg.a)
 	set(OGG_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/ogg/include)
 	set(VORBIS_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/vorbis/include)
 	set(VORBISFILE_LIBRARY
-		${EXTERNAL_ANDROID_DIR}/vorbis/${CMAKE_ANDROID_ARCH_ABI}/libvorbisfile.a
-		${EXTERNAL_ANDROID_DIR}/vorbis/${CMAKE_ANDROID_ARCH_ABI}/libvorbis.a
-		${EXTERNAL_ANDROID_DIR}/ogg/${CMAKE_ANDROID_ARCH_ABI}/libogg.a)
+		${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbisfile.a
+		${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbis.a
+		${EXTERNAL_ANDROID_DIR}/ogg/${ANDROID_ABI}/libogg.a)
 	set(VORBIS_FOUND 1)
 endif()
-if(EXISTS ${EXTERNAL_ANDROID_DIR}/lua/${CMAKE_ANDROID_ARCH_ABI}/liblua.a)
+if(EXISTS ${EXTERNAL_ANDROID_DIR}/lua/${ANDROID_ABI}/liblua.a)
 	set(LUA_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/lua/include)
-	set(LUA_LIBRARY ${EXTERNAL_ANDROID_DIR}/lua/${CMAKE_ANDROID_ARCH_ABI}/liblua.a)
+	set(LUA_LIBRARY ${EXTERNAL_ANDROID_DIR}/lua/${ANDROID_ABI}/liblua.a)
 	set(LUA_FOUND 1)
 endif()
 
@@ -99,13 +99,13 @@ endif()
 
 list(APPEND PRIVATE_COMPILE_DEFINITIONS ${ANDROID_GENERATED_FLAGS})
 target_compile_definitions(ncine PRIVATE ${PRIVATE_COMPILE_DEFINITIONS})
-target_compile_definitions(ncine PRIVATE __ANDROID_API__=${CMAKE_SYSTEM_VERSION})
 target_link_libraries(ncine PRIVATE ${PRIVATE_LINK_LIBRARIES})
 
-add_library(native_app_glue STATIC ${CMAKE_ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
+add_library(native_app_glue STATIC ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
+target_link_libraries(native_app_glue PRIVATE android log)
 add_library(game SHARED main.cpp ${GAME_SOURCES})
 target_link_libraries(game PRIVATE ncine native_app_glue)
-target_include_directories(game PRIVATE ${CMAKE_ANDROID_NDK}/sources/android/native_app_glue)
+target_include_directories(game PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue)
 if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
 	target_include_directories(game PRIVATE ${GENERATED_INCLUDE_DIR}) # for ncine_config.h
 endif()
@@ -118,4 +118,4 @@ if(NCINE_WITH_TRACY)
 endif()
 
 # Export ANativeActivity_onCreate() - https://github.com/android-ndk/ndk/issues/381
-set_property(TARGET game APPEND_STRING PROPERTY LINK_FLAGS " -u ANativeActivity_onCreate")
+set_property(TARGET game APPEND_STRING PROPERTY LINK_FLAGS "-u ANativeActivity_onCreate")
