@@ -37,7 +37,7 @@ file(APPEND ${VERSION_CPP_FILE} "#include \"${VERSION_H_FILENAME}\"\n\n")
 file(APPEND ${VERSION_CPP_FILE} "namespace ncine {\n\n")
 
 if(GIT_EXECUTABLE)
-	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_GIT_VERSION")
+	target_compile_definitions(ncine PRIVATE "WITH_GIT_VERSION")
 	list(APPEND ANDROID_GENERATED_FLAGS WITH_GIT_VERSION)
 
 	file(APPEND ${VERSION_H_FILE} "\tstatic char const * const ${VERSION_STRING_NAME};\n")
@@ -102,7 +102,7 @@ if(NCINE_EMBED_SHADERS)
 
 	list(APPEND GENERATED_SOURCES ${SHADERS_H_FILE})
 	list(APPEND GENERATED_SOURCES ${SHADERS_CPP_FILE})
-	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_EMBEDDED_SHADERS")
+	target_compile_definitions(ncine PRIVATE "WITH_EMBEDDED_SHADERS")
 	list(APPEND ANDROID_GENERATED_FLAGS WITH_EMBEDDED_SHADERS)
 
 	# Don't need to add shader files to the library target if they are embedded

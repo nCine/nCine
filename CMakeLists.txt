@@ -1,10 +1,5 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.13)
 project(nCine)
-
-# On Linux FindOpenGL prefers GLVND by default when available
-if(POLICY CMP0072)
-	cmake_policy(SET CMP0072 OLD)
-endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 get_filename_component(PARENT_SOURCE_DIR ${CMAKE_SOURCE_DIR} DIRECTORY)
@@ -124,6 +119,13 @@ elseif(NOT SDL2_FOUND AND NCINE_PREFERRED_BACKEND STREQUAL "SDL2")
 	message(WARNING "SDL2, the preferred backend, has not been found: using GLFW")
 endif()
 
+if(NCINE_DYNAMIC_LIBRARY)
+	add_library(ncine SHARED)
+else()
+	add_library(ncine STATIC)
+	target_compile_definitions(ncine PUBLIC "NCINE_STATIC")
+endif()
+
 include(ncine_compiler_options)
 
 set(NCINE_ROOT ${CMAKE_SOURCE_DIR})
@@ -153,23 +155,12 @@ foreach(SOURCE_FILE ${GENERATED_SOURCES})
 	source_group("Generated" FILES ${SOURCE_FILE})
 endforeach()
 
-if(NCINE_DYNAMIC_LIBRARY)
-	add_library(ncine SHARED ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${NCTL_HEADERS} ${SHADER_FILES} ${GENERATED_SOURCES})
-else()
-	add_library(ncine STATIC ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${NCTL_HEADERS} ${SHADER_FILES} ${GENERATED_SOURCES})
-	target_compile_definitions(ncine PUBLIC "NCINE_STATIC")
-endif()
-
-if(CMAKE_BUILD_TYPE MATCHES "Debug" AND NCINE_CODE_COVERAGE AND CODE_COVERAGE_SUPPORTED)
-	set_target_properties(ncine PROPERTIES COMPILE_FLAGS "--coverage")
-	set_target_properties(ncine PROPERTIES LINK_FLAGS "--coverage")
-endif()
+target_link_libraries(ncine PRIVATE ${OPENGL_gl_LIBRARY})
+target_sources(ncine PRIVATE ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${NCTL_HEADERS} ${SHADER_FILES} ${GENERATED_SOURCES})
 
 set_target_properties(ncine PROPERTIES DEBUG_POSTFIX "")
 if(MSVC)
 	target_include_directories(ncine PRIVATE "${EXTERNAL_MSVC_DIR}/include")
-	# Suppress linker warning about templates
-	target_compile_options(ncine PUBLIC "/wd4251")
 else()
 	if(PNG_FOUND)
 		target_include_directories(ncine PRIVATE ${PNG_INCLUDE_DIR})
@@ -204,9 +195,6 @@ if(NCINE_TESTS_DATA_DIR)
 		string(CONCAT NCINE_TESTS_DATA_DIR ${NCINE_TESTS_DATA_DIR} "/")
 	endif()
 endif()
-
-target_compile_definitions(ncine PRIVATE ${PRIVATE_COMPILE_DEFINITIONS})
-target_link_libraries(ncine PRIVATE ${OPENGL_gl_LIBRARY} ${PRIVATE_LINK_LIBRARIES})
 
 if(WIN32)
 	if(NCINE_INSTALL_DEV_SUPPORT)

@@ -8,9 +8,6 @@ find_library(LOG_LIBRARY log)
 find_library(OPENSLES_LIBRARY OpenSLES)
 find_library(ZLIB_LIBRARY z)
 
-list(APPEND PRIVATE_LINK_LIBRARIES
-	${ANDROID_LIBRARY} ${EGL_LIBRARY} ${GLES3_LIBRARY} ${LOG_LIBRARY} ${ZLIB_LIBRARY})
-
 set(Threads_FOUND 1)
 
 if(EXISTS ${EXTERNAL_ANDROID_DIR}/png/${ANDROID_ABI}/libpng16.a)
@@ -45,6 +42,15 @@ if(EXISTS ${EXTERNAL_ANDROID_DIR}/lua/${ANDROID_ABI}/liblua.a)
 	set(LUA_FOUND 1)
 endif()
 
+if(NCINE_DYNAMIC_LIBRARY)
+	add_library(ncine SHARED)
+else()
+	add_library(ncine STATIC)
+	target_compile_definitions(ncine PUBLIC "NCINE_STATIC")
+endif()
+
+target_link_libraries(ncine PRIVATE ${ANDROID_LIBRARY} ${EGL_LIBRARY} ${GLES3_LIBRARY} ${LOG_LIBRARY} ${ZLIB_LIBRARY})
+
 include(ncine_compiler_options)
 
 include(ncine_headers)
@@ -56,12 +62,7 @@ include(ncine_extra_sources)
 string(REPLACE " " ";" GENERATED_SOURCES "${GENERATED_SOURCES}")
 string(REPLACE " " ";" ANDROID_GENERATED_FLAGS "${ANDROID_GENERATED_FLAGS}")
 
-if(NCINE_DYNAMIC_LIBRARY)
-	add_library(ncine SHARED ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${SHADER_FILES} ${GENERATED_SOURCES})
-else()
-	add_library(ncine STATIC ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${SHADER_FILES} ${GENERATED_SOURCES})
-	target_compile_definitions(ncine PUBLIC "NCINE_STATIC")
-endif()
+target_sources(ncine PRIVATE ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${NCTL_HEADERS} ${SHADER_FILES} ${GENERATED_SOURCES})
 
 target_include_directories(ncine PUBLIC ${NCINE_ROOT}/include PRIVATE ${NCINE_ROOT}/src/include)
 if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
@@ -92,18 +93,17 @@ if(NCINE_WITH_TRACY)
 	target_include_directories(ncine PUBLIC ${TRACY_SOURCE_DIR})
 endif()
 
-set(GAME_SOURCES ${NCINE_ROOT}/tests/${NCINE_STARTUP_TEST}.cpp)
-if(NCINE_WITH_TRACY AND NCINE_DYNAMIC_LIBRARY)
-	list(APPEND GAME_SOURCES ${TRACY_SOURCE_DIR}/TracyClientDLL.cpp)
-endif()
-
-list(APPEND PRIVATE_COMPILE_DEFINITIONS ${ANDROID_GENERATED_FLAGS})
-target_compile_definitions(ncine PRIVATE ${PRIVATE_COMPILE_DEFINITIONS})
+target_compile_definitions(ncine PRIVATE ${ANDROID_GENERATED_FLAGS})
 target_link_libraries(ncine PRIVATE ${PRIVATE_LINK_LIBRARIES})
 
 add_library(native_app_glue STATIC ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
 target_link_libraries(native_app_glue PRIVATE android log)
-add_library(game SHARED main.cpp ${GAME_SOURCES})
+
+add_library(game SHARED ${NCINE_ROOT}/tests/${NCINE_STARTUP_TEST}.cpp)
+if(NCINE_WITH_TRACY AND NCINE_DYNAMIC_LIBRARY)
+	target_sources(game PRIVATE ${TRACY_SOURCE_DIR}/TracyClientDLL.cpp)
+endif()
+
 target_link_libraries(game PRIVATE ncine native_app_glue)
 target_include_directories(game PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue)
 if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
@@ -111,7 +111,7 @@ if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
 endif()
 if(NOT NCINE_DYNAMIC_LIBRARY)
 	target_include_directories(game PRIVATE ${NCINE_ROOT}/src/include)
-	target_compile_definitions(game PRIVATE ${PRIVATE_COMPILE_DEFINITIONS})
+	target_compile_definitions(game PRIVATE ${ANDROID_GENERATED_FLAGS})
 endif()
 if(NCINE_WITH_TRACY)
 	target_compile_definitions(game PRIVATE TRACY_ENABLE)

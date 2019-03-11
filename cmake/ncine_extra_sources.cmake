@@ -6,13 +6,13 @@ if(GLEW_FOUND)
 	if (NOT WIN32)
 		message(STATUS "GLEW has been found")
 	endif()
-	list(APPEND PRIVATE_LINK_LIBRARIES ${GLEW_LIBRARY})
-	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_GLEW")
+	target_compile_definitions(ncine PRIVATE "WITH_GLEW")
+	target_link_libraries(ncine PRIVATE ${GLEW_LIBRARY})
 endif()
 
 if(GLFW_FOUND)
-	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_GLFW" "GLFW_NO_GLU")
-	list(APPEND PRIVATE_LINK_LIBRARIES ${GLFW_LIBRARY})
+	target_compile_definitions(ncine PRIVATE "WITH_GLFW" "GLFW_NO_GLU")
+	target_link_libraries(ncine PRIVATE ${GLFW_LIBRARY})
 
 	list(APPEND PRIVATE_HEADERS
 		${NCINE_ROOT}/src/include/GlfwInputManager.h
@@ -26,11 +26,11 @@ if(GLFW_FOUND)
 endif()
 
 if(SDL2_FOUND AND NOT GLFW_FOUND)
-	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_SDL")
+	target_compile_definitions(ncine PRIVATE "WITH_SDL")
 	if(${CMAKE_SYSTEM_NAME} MATCHES Darwin) # SDLmain on OS X
-		list(APPEND PRIVATE_LINK_LIBRARIES ${SDL2MAIN_LIBRARY})
+		target_link_libraries(ncine PRIVATE ${SDL2MAIN_LIBRARY})
 	endif()
-	list(APPEND PRIVATE_LINK_LIBRARIES ${SDL2_LIBRARY})
+	target_link_libraries(ncine PRIVATE ${SDL2_LIBRARY})
 
 	list(APPEND PRIVATE_HEADERS
 		${NCINE_ROOT}/src/include/SdlInputManager.h
@@ -44,11 +44,11 @@ if(SDL2_FOUND AND NOT GLFW_FOUND)
 endif()
 
 if(OPENAL_FOUND)
-	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_AUDIO")
-	list(APPEND PRIVATE_LINK_LIBRARIES ${OPENAL_LIBRARY})
+	target_compile_definitions(ncine PRIVATE "WITH_AUDIO")
+	target_link_libraries(ncine PRIVATE ${OPENAL_LIBRARY})
 	if(VORBIS_FOUND)
-		list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_VORBIS")
-		list(APPEND PRIVATE_LINK_LIBRARIES ${VORBISFILE_LIBRARY})
+		target_compile_definitions(ncine PRIVATE "WITH_VORBIS")
+		target_link_libraries(ncine PRIVATE ${VORBISFILE_LIBRARY})
 	endif()
 
 	list(APPEND HEADERS
@@ -84,23 +84,23 @@ if(OPENAL_FOUND)
 endif()
 
 if(PNG_FOUND)
-	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_PNG")
-	list(APPEND PRIVATE_LINK_LIBRARIES ${PNG_LIBRARY})
+	target_compile_definitions(ncine PRIVATE "WITH_PNG")
+	target_link_libraries(ncine PRIVATE ${PNG_LIBRARY})
 
 	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/TextureLoaderPng.h)
 	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/TextureLoaderPng.cpp)
 endif()
 if(WEBP_FOUND)
-	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_WEBP")
-	list(APPEND PRIVATE_LINK_LIBRARIES ${WEBP_LIBRARY})
+	target_compile_definitions(ncine PRIVATE "WITH_WEBP")
+	target_link_libraries(ncine PRIVATE ${WEBP_LIBRARY})
 
 	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/TextureLoaderWebP.h)
 	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/TextureLoaderWebP.cpp)
 endif()
 
 if(Threads_FOUND)
-	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_THREADS")
-	list(APPEND PRIVATE_LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+	target_compile_definitions(ncine PRIVATE "WITH_THREADS")
+	target_link_libraries(ncine PRIVATE ${CMAKE_THREAD_LIBS_INIT})
 
 	list(APPEND HEADERS
 		${NCINE_ROOT}/include/IThreadPool.h
@@ -129,8 +129,8 @@ if(Threads_FOUND)
 endif()
 
 if(LUA_FOUND)
-	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_LUA")
-	list(APPEND PRIVATE_LINK_LIBRARIES ${LUA_LIBRARY})
+	target_compile_definitions(ncine PRIVATE "WITH_LUA")
+	target_link_libraries(ncine PRIVATE ${LUA_LIBRARY})
 
 	list(APPEND HEADERS
 		${NCINE_ROOT}/include/LuaTypes.h
@@ -231,7 +231,7 @@ if(LUA_FOUND)
 endif()
 
 if(NCINE_WITH_IMGUI)
-	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_IMGUI")
+	target_compile_definitions(ncine PRIVATE "WITH_IMGUI")
 
 	list(APPEND HEADERS
 		${IMGUI_SOURCE_DIR}/imgui.h
@@ -285,11 +285,11 @@ else()
 endif()
 
 if(NCINE_WITH_TRACY)
-	list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_TRACY")
+	target_compile_definitions(ncine PRIVATE "WITH_TRACY")
 	if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android" AND NOT APPLE)
-		list(APPEND PRIVATE_COMPILE_DEFINITIONS "WITH_TRACY_OPENGL")
+		target_compile_definitions(ncine PRIVATE "WITH_TRACY_OPENGL")
 	endif()
-	list(APPEND PRIVATE_COMPILE_DEFINITIONS "TRACY_ENABLE")
+	target_compile_definitions(ncine PRIVATE "TRACY_ENABLE")
 
 	list(APPEND PRIVATE_HEADERS
 		${NCINE_ROOT}/src/include/tracy.h

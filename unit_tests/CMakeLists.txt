@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.13)
 project(nCine-unit_tests)
 
 if(WIN32)
@@ -54,22 +54,11 @@ list(APPEND TESTS
 
 foreach(TEST ${TESTS})
 	add_executable(${TEST} ${TEST}.cpp test_functions.h)
-	target_link_libraries(${TEST} ncine gtest_main)
+	target_link_libraries(${TEST} ncine gtest_main enable_coverage)
 	set_target_properties(${TEST} PROPERTIES FOLDER "UnitTests")
 	add_test(NAME Tests-${TEST} COMMAND ${TEST})
 
-	if(MSVC)
-		target_compile_definitions(${TEST} PRIVATE $<$<CONFIG:Debug>:NCINE_DEBUG>)
-	else()
-		if(CMAKE_BUILD_TYPE MATCHES "Debug")
-			target_compile_definitions(${TEST} PRIVATE NCINE_DEBUG)
-		endif()
-	endif()
-
-	if(CMAKE_BUILD_TYPE MATCHES "Debug" AND NCINE_CODE_COVERAGE AND CODE_COVERAGE_SUPPORTED)
-		set_target_properties(${TEST} PROPERTIES COMPILE_FLAGS "--coverage")
-		set_target_properties(${TEST} PROPERTIES LINK_FLAGS "--coverage")
-	endif()
+	target_compile_definitions(${TEST} PRIVATE "$<$<CONFIG:Debug>:NCINE_DEBUG>")
 
 	if(APPLE)
 		set_target_properties(${TEST} PROPERTIES INSTALL_RPATH "@executable_path/${RELPATH_TO_LIB}")
