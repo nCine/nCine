@@ -9,7 +9,7 @@
 	<key>CFBundleIconFile</key>
 	<string>@CPACK_BUNDLE_NAME@.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.encelo.ncine</string>
+	<string>io.github.ncine</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

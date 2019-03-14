@@ -5,15 +5,15 @@ if(NCINE_BUILD_ANDROID)
 		message(STATUS "nCine external Android libraries directory: ${EXTERNAL_ANDROID_DIR}")
 	endif()
 
-	if("${NDK_DIR}" STREQUAL "")
-		if(DEFINED ENV{ANDROID_NDK_HOME})
-			set(NDK_DIR $ENV{ANDROID_NDK_HOME})
-		elseif(DEFINED ENV{ANDROID_NDK_ROOT})
-			set(NDK_DIR $ENV{ANDROID_NDK_ROOT})
-		elseif(DEFINED ENV{ANDROID_NDK})
-			set(NDK_DIR $ENV{ANDROID_NDK})
-		else()
-			message(FATAL_ERROR "NDK_DIR is not set")
+	if(NOT IS_DIRECTORY ${NDK_DIR})
+		unset(NDK_DIR CACHE)
+		find_path(NDK_DIR
+			NAMES ndk-build ndk-build.cmd ndk-gdb ndk-gdb.cmd ndk-stack ndk-stack.cmd ndk-which ndk-which.cmd
+			PATHS $ENV{ANDROID_NDK_HOME} $ENV{ANDROID_NDK_ROOT} $ENV{ANDROID_NDK}
+			DOC "Path to the Android NDK directory")
+
+		if(NOT IS_DIRECTORY ${NDK_DIR})
+			message(FATAL_ERROR "Cannot find the Android NDK directory")
 		endif()
 	endif()
 	message(STATUS "Android NDK directory: ${NDK_DIR}")
@@ -131,14 +131,14 @@ if(NCINE_BUILD_ANDROID)
 		if("${ARCHITECTURE}" STREQUAL "armeabi-v7a")
 			list(APPEND ANDROID_ARCH_ARGS ${ANDROID_ARM_ARGS})
 		endif()
-		add_custom_command(OUTPUT ${ANDROID_BINARY_DIR}/${ANDROID_LIBNAME}
+		add_custom_command(OUTPUT ${ANDROID_BINARY_DIR}/${ANDROID_LIBNAME} ${ANDROID_BINARY_DIR}/libncine_main.a
 			COMMAND ${CMAKE_COMMAND} -H${CMAKE_BINARY_DIR}/android/src/main/cpp/ -B${ANDROID_BINARY_DIR}
 				-DCMAKE_TOOLCHAIN_FILE=${NDK_DIR}/build/cmake/android.toolchain.cmake
 				-DANDROID_PLATFORM=android-${GRADLE_MINSDK_VERSION} -DANDROID_ABI=${ARCHITECTURE}
 				${RESET_FLAGS_ARGS} ${ANDROID_PASSTHROUGH_ARGS} ${ANDROID_CMAKE_ARGS} ${ANDROID_ARCH_ARGS}
 			COMMAND ${CMAKE_COMMAND} --build ${ANDROID_BINARY_DIR}
 			COMMENT "Compiling the Android library for ${ARCHITECTURE}")
-		add_custom_target(ncine_android_${ARCHITECTURE} DEPENDS ${ANDROID_BINARY_DIR}/${ANDROID_LIBNAME})
+		add_custom_target(ncine_android_${ARCHITECTURE} DEPENDS ${ANDROID_BINARY_DIR}/${ANDROID_LIBNAME} ${ANDROID_BINARY_DIR}/libncine_main.a)
 		set_target_properties(ncine_android_${ARCHITECTURE} PROPERTIES FOLDER "Android")
 		add_dependencies(ncine_android ncine_android_${ARCHITECTURE})
 	endforeach()
@@ -196,8 +196,6 @@ if(NCINE_BUILD_ANDROID)
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/java/io/github/ncine COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/cpp/CMakeLists-devdist.txt
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp RENAME CMakeLists.txt COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/cpp/main.cpp
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/values/strings.xml
 			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/values COMPONENT android)
 		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-mdpi/ic_launcher.png
@@ -215,6 +213,8 @@ if(NCINE_BUILD_ANDROID)
 
 		foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
 			install(FILES ${CMAKE_BINARY_DIR}/android/build/ncine/${ARCHITECTURE}/${ANDROID_LIBNAME}
+				DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/${ARCHITECTURE}/ COMPONENT android)
+			install(FILES ${CMAKE_BINARY_DIR}/android/build/ncine/${ARCHITECTURE}/libncine_main.a
 				DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/${ARCHITECTURE}/ COMPONENT android)
 			install(FILES ${EXTERNAL_ANDROID_DIR}/openal/${ARCHITECTURE}/libopenal.so
 				DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/openal/${ARCHITECTURE}/ COMPONENT android)

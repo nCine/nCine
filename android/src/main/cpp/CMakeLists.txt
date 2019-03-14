@@ -8,37 +8,50 @@ find_library(LOG_LIBRARY log)
 find_library(OPENSLES_LIBRARY OpenSLES)
 find_library(ZLIB_LIBRARY z)
 
-set(Threads_FOUND 1)
+find_package(Threads)
 
 if(EXISTS ${EXTERNAL_ANDROID_DIR}/png/${ANDROID_ABI}/libpng16.a)
-	set(PNG_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/png/include)
-	set(PNG_LIBRARY ${EXTERNAL_ANDROID_DIR}/png/${ANDROID_ABI}/libpng16.a)
+	add_library(PNG::PNG STATIC IMPORTED)
+	set_target_properties(PNG::PNG PROPERTIES
+		IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+		IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/png/${ANDROID_ABI}/libpng16.a
+		INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/png/include"
+		INTERFACE_LINK_LIBRARIES ${ZLIB_LIBRARY})
 	set(PNG_FOUND 1)
 endif()
+
 if(EXISTS ${EXTERNAL_ANDROID_DIR}/webp/${ANDROID_ABI}/libwebp.a)
-	set(WEBP_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/webp/include)
-	set(WEBP_LIBRARY ${EXTERNAL_ANDROID_DIR}/webp/${ANDROID_ABI}/libwebp.a)
+	add_library(WebP::WebP STATIC IMPORTED)
+	set_target_properties(WebP::WebP PROPERTIES
+		IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/webp/${ANDROID_ABI}/libwebp.a
+		INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/webp/include")
 	set(WEBP_FOUND 1)
 endif()
+
 if(EXISTS ${EXTERNAL_ANDROID_DIR}/openal/${ANDROID_ABI}/libopenal.so)
-	set(OPENAL_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/openal/include)
-	set(OPENAL_LIBRARY ${EXTERNAL_ANDROID_DIR}/openal/${ANDROID_ABI}/libopenal.so)
+	add_library(OpenAL::AL SHARED IMPORTED)
+	set_target_properties(OpenAL::AL PROPERTIES
+		IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/openal/${ANDROID_ABI}/libopenal.so
+		INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/openal/include")
 	set(OPENAL_FOUND 1)
 endif()
+
 if(EXISTS ${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbisfile.a AND
    EXISTS ${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbis.a AND
    EXISTS ${EXTERNAL_ANDROID_DIR}/ogg/${ANDROID_ABI}/libogg.a)
-	set(OGG_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/ogg/include)
-	set(VORBIS_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/vorbis/include)
-	set(VORBISFILE_LIBRARY
-		${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbisfile.a
-		${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbis.a
-		${EXTERNAL_ANDROID_DIR}/ogg/${ANDROID_ABI}/libogg.a)
+	add_library(Vorbis::Vorbisfile STATIC IMPORTED)
+	set_target_properties(Vorbis::Vorbisfile PROPERTIES
+		IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbisfile.a
+		INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/vorbis/include;${EXTERNAL_ANDROID_DIR}/ogg/include"
+		INTERFACE_LINK_LIBRARIES "${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbis.a;${EXTERNAL_ANDROID_DIR}/ogg/${ANDROID_ABI}/libogg.a")
 	set(VORBIS_FOUND 1)
 endif()
+
 if(EXISTS ${EXTERNAL_ANDROID_DIR}/lua/${ANDROID_ABI}/liblua.a)
-	set(LUA_INCLUDE_DIR ${EXTERNAL_ANDROID_DIR}/lua/include)
-	set(LUA_LIBRARY ${EXTERNAL_ANDROID_DIR}/lua/${ANDROID_ABI}/liblua.a)
+	add_library(Lua::Lua STATIC IMPORTED)
+	set_target_properties(Lua::Lua PROPERTIES
+		IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/lua/${ANDROID_ABI}/liblua.a
+		INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/lua/include")
 	set(LUA_FOUND 1)
 endif()
 
@@ -48,8 +61,10 @@ else()
 	add_library(ncine STATIC)
 	target_compile_definitions(ncine PUBLIC "NCINE_STATIC")
 endif()
+add_library(ncine_main STATIC main.cpp)
 
-target_link_libraries(ncine PRIVATE ${ANDROID_LIBRARY} ${EGL_LIBRARY} ${GLES3_LIBRARY} ${LOG_LIBRARY} ${ZLIB_LIBRARY})
+target_link_libraries(ncine PRIVATE ${ANDROID_LIBRARY} ${EGL_LIBRARY} ${GLES3_LIBRARY} ${LOG_LIBRARY})
+target_link_libraries(ncine_main PRIVATE ncine)
 
 include(ncine_compiler_options)
 
@@ -65,27 +80,13 @@ string(REPLACE " " ";" ANDROID_GENERATED_FLAGS "${ANDROID_GENERATED_FLAGS}")
 target_sources(ncine PRIVATE ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${NCTL_HEADERS} ${SHADER_FILES} ${GENERATED_SOURCES})
 
 target_include_directories(ncine PUBLIC ${NCINE_ROOT}/include PRIVATE ${NCINE_ROOT}/src/include)
+target_include_directories(ncine_main PRIVATE ${NCINE_ROOT}/include)
 if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
 	target_include_directories(ncine PRIVATE ${GENERATED_INCLUDE_DIR})
 endif()
 
 target_include_directories(ncine PRIVATE ${CMAKE_ANDROID_NDK}/sources/android/native_app_glue)
-if(PNG_FOUND)
-	target_include_directories(ncine PRIVATE ${PNG_INCLUDE_DIR})
-endif()
-if(WEBP_FOUND)
-	target_include_directories(ncine PRIVATE ${WEBP_INCLUDE_DIR})
-endif()
-if(OPENAL_FOUND)
-	target_include_directories(ncine PRIVATE ${OPENAL_INCLUDE_DIR})
-endif()
-if(VORBIS_FOUND)
-	target_include_directories(ncine PRIVATE ${OGG_INCLUDE_DIR})
-	target_include_directories(ncine PRIVATE ${VORBIS_INCLUDE_DIR})
-endif()
-if(LUA_FOUND)
-	target_include_directories(ncine PRIVATE ${LUA_INCLUDE_DIR})
-endif()
+target_include_directories(ncine_main PRIVATE ${CMAKE_ANDROID_NDK}/sources/android/native_app_glue)
 if(NCINE_WITH_IMGUI)
 	target_include_directories(ncine PUBLIC ${IMGUI_SOURCE_DIR})
 endif()
@@ -104,7 +105,7 @@ if(NCINE_WITH_TRACY AND NCINE_DYNAMIC_LIBRARY)
 	target_sources(game PRIVATE ${TRACY_SOURCE_DIR}/TracyClientDLL.cpp)
 endif()
 
-target_link_libraries(game PRIVATE ncine native_app_glue)
+target_link_libraries(game PRIVATE native_app_glue ncine_main ncine)
 target_include_directories(game PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue)
 if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
 	target_include_directories(game PRIVATE ${GENERATED_INCLUDE_DIR}) # for ncine_config.h

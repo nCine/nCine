@@ -11,25 +11,11 @@ if(WIN32)
 	endif()
 
 	if(NCINE_DYNAMIC_LIBRARY)
-		if(MSVC)
-			set(NCINE_LIBRARY_NAME ncine.dll)
-		else()
-			set(NCINE_LIBRARY_NAME libncine.dll)
-		endif()
-
-		if(MSVC_IDE)
-			add_custom_target(copy_ncine_dll_tests ALL
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/$<CONFIGURATION>/${NCINE_LIBRARY_NAME} ${CMAKE_BINARY_DIR}/tests
-				DEPENDS ncine
-				COMMENT "Copying nCine DLL..."
-			)
-		else()
-			add_custom_target(copy_ncine_dll_tests ALL
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/${NCINE_LIBRARY_NAME} ${CMAKE_BINARY_DIR}/tests
-				DEPENDS ncine
-				COMMENT "Copying nCine DLL..."
-			)
-		endif()
+		add_custom_target(copy_ncine_dll_tests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:ncine> ${CMAKE_BINARY_DIR}/tests
+			DEPENDS ncine
+			COMMENT "Copying nCine DLL..."
+		)
 		set_target_properties(copy_ncine_dll_tests PROPERTIES FOLDER "CustomCopyTargets")
 	endif()
 elseif(APPLE)
@@ -52,7 +38,7 @@ if(PNG_FOUND)
 endif()
 
 foreach(APPTEST ${APPTESTS})
-	add_executable(${APPTEST} main.cpp apptest_datapath.h ${RESOURCE_RC_FILE})
+	add_executable(${APPTEST} apptest_datapath.h ${RESOURCE_RC_FILE})
 
 	if(DEFINED ${APPTEST}_SOURCES)
 		# More complex AppTests can define multiple sources (does not work on Android)
@@ -66,15 +52,12 @@ foreach(APPTEST ${APPTESTS})
 
 	if(NCINE_WITH_TRACY AND NCINE_DYNAMIC_LIBRARY)
 		target_sources(${APPTEST} PRIVATE ${TRACY_SOURCE_DIR}/TracyClientDLL.cpp)
+		target_link_libraries(${APPTEST} Threads::Threads)
 	endif()
 
-	target_link_libraries(${APPTEST} ncine)
+	target_link_libraries(${APPTEST} ncine_main ncine)
 	set_target_properties(${APPTEST} PROPERTIES FOLDER "AppTests")
 	target_compile_definitions(${APPTEST} PRIVATE "NCINE_TESTS_DATA_DIR=\"${NCINE_TESTS_DATA_DIR}\"")
-	if(NCINE_WITH_TRACY)
-		target_compile_definitions(${APPTEST} PRIVATE "TRACY_ENABLE")
-	endif()
-	target_include_directories(${APPTEST} PRIVATE ${GENERATED_INCLUDE_DIR}) # for ncine_config.h and for the Windows executable icon
 	if(APPLE)
 		set_target_properties(${APPTEST} PROPERTIES INSTALL_RPATH "@executable_path/${RELPATH_TO_LIB}")
 	endif()

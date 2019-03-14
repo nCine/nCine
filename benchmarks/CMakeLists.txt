@@ -11,25 +11,11 @@ if(WIN32)
 	endif()
 
 	if(NCINE_DYNAMIC_LIBRARY)
-		if(MSVC)
-			set(NCINE_LIBRARY_NAME ncine.dll)
-		else()
-			set(NCINE_LIBRARY_NAME libncine.dll)
-		endif()
-
-		if(MSVC_IDE)
-			add_custom_target(copy_ncine_dll_benchmarks ALL
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/$<CONFIGURATION>/${NCINE_LIBRARY_NAME} ${CMAKE_BINARY_DIR}/benchmarks
-				DEPENDS ncine
-				COMMENT "Copying nCine DLL..."
-			)
-		else()
-			add_custom_target(copy_ncine_dll_benchmarks ALL
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/${NCINE_LIBRARY_NAME} ${CMAKE_BINARY_DIR}/benchmarks
-				DEPENDS ncine
-				COMMENT "Copying nCine DLL..."
-			)
-		endif()
+		add_custom_target(copy_ncine_dll_benchmarks ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:ncine> ${CMAKE_BINARY_DIR}/benchmarks
+			DEPENDS ncine
+			COMMENT "Copying nCine DLL..."
+		)
 		set_target_properties(copy_ncine_dll_benchmarks PROPERTIES FOLDER "CustomCopyTargets")
 	endif()
 elseif(APPLE)
@@ -47,7 +33,7 @@ list(APPEND BENCHMARKS
 
 foreach(BENCHMARK ${BENCHMARKS})
 	add_executable(${BENCHMARK} ${BENCHMARK}.cpp)
-	target_link_libraries(${BENCHMARK} ncine benchmark ${CMAKE_THREAD_LIBS_INIT})
+	target_link_libraries(${BENCHMARK} ncine benchmark Threads::Threads)
 	set_target_properties(${BENCHMARK} PROPERTIES FOLDER "Benchmarks")
 
 	if(APPLE)

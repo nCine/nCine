@@ -1,26 +1,32 @@
 # - Config file for the nCine package
 # It defines the following variables
-#   NCINE_INCLUDE_DIR, the path where nCine headers are located
-#   NCINE_LIBRARY_DIR, folder in which the nCine library is located
-#   NCINE_LIBRARY, library to link against to use nCine
+#   NCINE_VERSION, the nCine version string
+#   NCINE_TESTS_DATA_DIR, the directory containing the data for the tests
+#   NCINE_ANDROID_DIR, the directory containing the Android library and additional files
+#   NCINE_EMBEDDED_SHADERS, set to true if shaders are embedded in the library
+#   NCINE_SHADERS_DIR, the directory containing the shaders if they are not embdedded
 
 set(NCINE_VERSION "@NCINE_VERSION@")
 @PACKAGE_INIT@
 
-if(MSVC AND NOT DEFINED ENV{NCINE_HOME})
-	get_filename_component(NCINE_PREFIX_DIR "[HKEY_LOCAL_MACHINE\\SOFTWARE\\nCine]" ABSOLUTE)
-else()
-	set(NCINE_PREFIX_DIR "@PACKAGE_CMAKE_INSTALL_PREFIX@")
+if(NOT TARGET ncine AND NOT TARGET ncine::ncine)
+	include("${CMAKE_CURRENT_LIST_DIR}/nCineTargets.cmake")
 endif()
 
-set_and_check(NCINE_INCLUDE_DIR "${NCINE_PREFIX_DIR}/include/ncine")
-set_and_check(NCINE_LIBRARY_DIR "${NCINE_PREFIX_DIR}/lib")
-set_and_check(NCINE_MAIN_CPP_DIR "${NCINE_PREFIX_DIR}/@MAIN_CPP_INSTALL_DESTINATION@")
+find_path(NCINE_TESTS_DATA_DIR
+	NAMES scripts/script.lua sounds/music.ogg textures/texture1.png
+	PATHS "${PACKAGE_PREFIX_DIR}/@DATA_INSTALL_DESTINATION@/" "${CMAKE_CURRENT_LIST_DIR}/../nCine-data/"
+	DOC "Path to the data directory for tests")
+
+find_path(NCINE_ANDROID_DIR
+	NAMES build.gradle gradle.properties
+	PATHS "${PACKAGE_PREFIX_DIR}/@ANDROID_INSTALL_DESTINATION@/" "${CMAKE_CURRENT_LIST_DIR}/android"
+	DOC "Path to the Android directory")
 
 set(NCINE_EMBEDDED_SHADERS @NCINE_EMBED_SHADERS@)
 if(NOT NCINE_EMBEDDED_SHADERS)
-	set_and_check(NCINE_SHADERS_DIR "${NCINE_PREFIX_DIR}/@SHADERS_INSTALL_DESTINATION@")
+	find_path(NCINE_SHADERS_DIR
+		NAMES sprite_vs.glsl textnode_vs.glsl
+		PATHS "${PACKAGE_PREFIX_DIR}/@SHADERS_INSTALL_DESTINATION@/" "${NCINE_TESTS_DATA_DIR}/shaders" "${CMAKE_CURRENT_LIST_DIR}/../nCine/src/shaders"
+		DOC "Path to the shaders directory")
 endif()
-
-find_library(NCINE_LIBRARY "ncine" HINTS ${NCINE_LIBRARY_DIR})
-find_file(NCINE_MAIN_CPP "main.cpp" HINTS ${NCINE_MAIN_CPP_DIR})

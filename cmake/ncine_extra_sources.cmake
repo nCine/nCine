@@ -7,12 +7,12 @@ if(GLEW_FOUND)
 		message(STATUS "GLEW has been found")
 	endif()
 	target_compile_definitions(ncine PRIVATE "WITH_GLEW")
-	target_link_libraries(ncine PRIVATE ${GLEW_LIBRARY})
+	target_link_libraries(ncine PRIVATE GLEW::GLEW)
 endif()
 
 if(GLFW_FOUND)
-	target_compile_definitions(ncine PRIVATE "WITH_GLFW" "GLFW_NO_GLU")
-	target_link_libraries(ncine PRIVATE ${GLFW_LIBRARY})
+	target_compile_definitions(ncine PRIVATE "WITH_GLFW")
+	target_link_libraries(ncine PRIVATE GLFW::GLFW)
 
 	list(APPEND PRIVATE_HEADERS
 		${NCINE_ROOT}/src/include/GlfwInputManager.h
@@ -27,10 +27,7 @@ endif()
 
 if(SDL2_FOUND AND NOT GLFW_FOUND)
 	target_compile_definitions(ncine PRIVATE "WITH_SDL")
-	if(${CMAKE_SYSTEM_NAME} MATCHES Darwin) # SDLmain on OS X
-		target_link_libraries(ncine PRIVATE ${SDL2MAIN_LIBRARY})
-	endif()
-	target_link_libraries(ncine PRIVATE ${SDL2_LIBRARY})
+	target_link_libraries(ncine PRIVATE SDL2::SDL2)
 
 	list(APPEND PRIVATE_HEADERS
 		${NCINE_ROOT}/src/include/SdlInputManager.h
@@ -45,10 +42,10 @@ endif()
 
 if(OPENAL_FOUND)
 	target_compile_definitions(ncine PRIVATE "WITH_AUDIO")
-	target_link_libraries(ncine PRIVATE ${OPENAL_LIBRARY})
+	target_link_libraries(ncine PRIVATE OpenAL::AL)
 	if(VORBIS_FOUND)
 		target_compile_definitions(ncine PRIVATE "WITH_VORBIS")
-		target_link_libraries(ncine PRIVATE ${VORBISFILE_LIBRARY})
+		target_link_libraries(ncine PRIVATE Vorbis::Vorbisfile)
 	endif()
 
 	list(APPEND HEADERS
@@ -85,14 +82,14 @@ endif()
 
 if(PNG_FOUND)
 	target_compile_definitions(ncine PRIVATE "WITH_PNG")
-	target_link_libraries(ncine PRIVATE ${PNG_LIBRARY})
+	target_link_libraries(ncine PRIVATE PNG::PNG)
 
 	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/TextureLoaderPng.h)
 	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/TextureLoaderPng.cpp)
 endif()
 if(WEBP_FOUND)
 	target_compile_definitions(ncine PRIVATE "WITH_WEBP")
-	target_link_libraries(ncine PRIVATE ${WEBP_LIBRARY})
+	target_link_libraries(ncine PRIVATE WebP::WebP)
 
 	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/TextureLoaderWebP.h)
 	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/TextureLoaderWebP.cpp)
@@ -100,7 +97,7 @@ endif()
 
 if(Threads_FOUND)
 	target_compile_definitions(ncine PRIVATE "WITH_THREADS")
-	target_link_libraries(ncine PRIVATE ${CMAKE_THREAD_LIBS_INIT})
+	target_link_libraries(ncine PRIVATE Threads::Threads)
 
 	list(APPEND HEADERS
 		${NCINE_ROOT}/include/IThreadPool.h
@@ -130,7 +127,7 @@ endif()
 
 if(LUA_FOUND)
 	target_compile_definitions(ncine PRIVATE "WITH_LUA")
-	target_link_libraries(ncine PRIVATE ${LUA_LIBRARY})
+	target_link_libraries(ncine PRIVATE Lua::Lua)
 
 	list(APPEND HEADERS
 		${NCINE_ROOT}/include/LuaTypes.h
@@ -289,7 +286,7 @@ if(NCINE_WITH_TRACY)
 	if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android" AND NOT APPLE)
 		target_compile_definitions(ncine PRIVATE "WITH_TRACY_OPENGL")
 	endif()
-	target_compile_definitions(ncine PRIVATE "TRACY_ENABLE")
+	target_compile_definitions(ncine PUBLIC "TRACY_ENABLE")
 
 	list(APPEND PRIVATE_HEADERS
 		${NCINE_ROOT}/src/include/tracy.h

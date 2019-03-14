@@ -41,13 +41,16 @@ if(NCINE_BUILD_TESTS)
 		if(TESTS_DATA_DIR_DIST)
 			if(MSVC OR APPLE)
 				# Relative path from tests to data on Windows and OS X, where the user can choose the installation directory
-				file(RELATIVE_PATH NCINE_TESTS_DATA_DIR ${CMAKE_INSTALL_PREFIX}/${RUNTIME_INSTALL_DESTINATION} ${CMAKE_INSTALL_PREFIX}/${DATA_INSTALL_DESTINATION})
+				file(RELATIVE_PATH NCINE_TESTS_DATA_DIR
+					${CMAKE_INSTALL_PREFIX}/${RUNTIME_INSTALL_DESTINATION}
+					${CMAKE_INSTALL_PREFIX}/${DATA_INSTALL_DESTINATION}) # Always strips trailing slash
 				set(NCINE_TESTS_DATA_DIR "${NCINE_TESTS_DATA_DIR}/")
 			else()
 				set(NCINE_TESTS_DATA_DIR "${CMAKE_INSTALL_PREFIX}/${DATA_INSTALL_DESTINATION}/")
 			endif()
 		elseif(NOT NCINE_TESTS_DATA_DIR)
-			set(NCINE_TESTS_DATA_DIR "${NCINE_DATA_DIR}/")
+			file(TO_CMAKE_PATH "${NCINE_DATA_DIR}" NCINE_TESTS_DATA_DIR) # Always strips trailing slash
+			set(NCINE_TESTS_DATA_DIR "${NCINE_TESTS_DATA_DIR}/")
 		endif()
 		message(STATUS "Data directory for tests: ${NCINE_TESTS_DATA_DIR}")
 
