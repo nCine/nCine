@@ -102,7 +102,7 @@ void LuaClassWrapper<T>::pushUntrackedUserData(lua_State *L, T *object)
 template <class T>
 void LuaClassWrapper<T>::pushUntrackedUserData(lua_State *L, const T *object)
 {
-	pushUntrackedUserData(L, object);
+	pushUntrackedUserData(L, const_cast<T*>(object));
 }
 
 template <class T>
@@ -115,7 +115,7 @@ void LuaClassWrapper<T>::pushFieldUntrackedUserData(lua_State *L, const char *na
 template <class T>
 void LuaClassWrapper<T>::pushFieldUntrackedUserData(lua_State *L, const char *name, const T *object)
 {
-	pushFieldUntrackedUserData(L, name, object);
+	pushFieldUntrackedUserData(L, name, const_cast<T*>(object));
 }
 
 template <class T>

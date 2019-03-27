@@ -3,6 +3,23 @@
 
 namespace ncine {
 
+namespace {
+
+const char *colorTypeString(int colorType)
+{
+	switch (colorType)
+	{
+		case PNG_COLOR_TYPE_GRAY: return "PNG_COLOR_TYPE_GRAY";
+		case PNG_COLOR_TYPE_PALETTE: return "PNG_COLOR_TYPE_PALETTE";
+		case PNG_COLOR_TYPE_RGB: return "PNG_COLOR_TYPE_RGB";
+		case PNG_COLOR_TYPE_RGB_ALPHA: return "PNG_COLOR_TYPE_RGB_ALPHA";
+		case PNG_COLOR_TYPE_GRAY_ALPHA: return "PNG_COLOR_TYPE_GRAY_ALPHA";
+		default: return "unknown";
+	}
+}
+
+}
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
@@ -64,7 +81,7 @@ TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
 	width_ = width;
 	height_ = height;
 	mipMapCount_ = 1; // No MIP Mapping
-	LOGI_X("Header found: w:%d h:%d bitDepth:%d colorType:%d", width_, height_, bitDepth, colorType);
+	LOGI_X("Header found: w:%d, h:%d, bitDepth:%d, colorType:%s", width_, height_, bitDepth, colorTypeString(colorType));
 
 	switch (colorType)
 	{
@@ -76,7 +93,20 @@ TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
 			texFormat_ = TextureFormat(GL_RGB8);
 			bpp_ = 3;
 			break;
+		case PNG_COLOR_TYPE_PALETTE:
+			png_set_palette_to_rgb(pngPtr);
+			texFormat_ = TextureFormat(GL_RGB8);
+			bpp_ = 3;
+			break;
+		case PNG_COLOR_TYPE_GRAY_ALPHA:
+			if (bitDepth < 8)
+				png_set_expand_gray_1_2_4_to_8(pngPtr);
+			texFormat_ = TextureFormat(GL_RG8);
+			bpp_ = 2;
+			break;
 		case PNG_COLOR_TYPE_GRAY:
+			if (bitDepth < 8)
+				png_set_expand_gray_1_2_4_to_8(pngPtr);
 			texFormat_ = TextureFormat(GL_R8);
 			bpp_ = 1;
 			break;
@@ -86,6 +116,15 @@ TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
 			break;
 	}
 
+	if (png_get_valid(pngPtr, infoPtr, PNG_INFO_tRNS))
+	{
+		png_set_tRNS_to_alpha(pngPtr);
+		texFormat_ = TextureFormat(GL_RGBA8);
+	}
+	if (bitDepth == 16)
+		png_set_strip_16(pngPtr);
+
+	png_read_update_info(pngPtr, infoPtr);
 	// Row size in bytes
 	const png_size_t bytesPerRow = png_get_rowbytes(pngPtr, infoPtr);
 

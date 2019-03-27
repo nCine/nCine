@@ -171,24 +171,24 @@ void ImGuiDrawing::setupRenderCmd(RenderCommand &cmd)
 
 void ImGuiDrawing::draw(RenderQueue &renderQueue)
 {
-	ImDrawData* draw_data = ImGui::GetDrawData();
+	ImDrawData* drawData = ImGui::GetDrawData();
 
 	const unsigned  int numElements = sizeof(ImDrawVert) / sizeof(GLfloat);
 
 	ImGuiIO& io = ImGui::GetIO();
-	const int fbWidth = static_cast<int>(draw_data->DisplaySize.x * io.DisplayFramebufferScale.x);
-	const int fbHeight = static_cast<int>(draw_data->DisplaySize.y * io.DisplayFramebufferScale.y);
+	const int fbWidth = static_cast<int>(drawData->DisplaySize.x * drawData->FramebufferScale.x);
+	const int fbHeight = static_cast<int>(drawData->DisplaySize.y * drawData->FramebufferScale.y);
 	if (fbWidth <= 0 || fbHeight <= 0)
 		return;
-	draw_data->ScaleClipRects(io.DisplayFramebufferScale);
+	drawData->ScaleClipRects(drawData->FramebufferScale);
 
 	resetCommandPool();
 
 	unsigned int numCmd = 0;
-	const ImVec2 pos = draw_data->DisplayPos;
-	for (int n = 0; n < draw_data->CmdListsCount; n++)
+	const ImVec2 pos = drawData->DisplayPos;
+	for (int n = 0; n < drawData->CmdListsCount; n++)
 	{
-		const ImDrawList* imCmdList = draw_data->CmdLists[n];
+		const ImDrawList* imCmdList = drawData->CmdLists[n];
 		GLushort firstIndex = 0;
 
 		RenderCommand &firstCmd = *retrieveCommandFromPool();
@@ -258,23 +258,23 @@ void ImGuiDrawing::setupBuffersAndShader()
 
 void ImGuiDrawing::draw()
 {
-	ImDrawData* draw_data = ImGui::GetDrawData();
+	ImDrawData* drawData = ImGui::GetDrawData();
 
 	ImGuiIO& io = ImGui::GetIO();
-	const int fbWidth = static_cast<int>(draw_data->DisplaySize.x * io.DisplayFramebufferScale.x);
-	const int fbHeight = static_cast<int>(draw_data->DisplaySize.y * io.DisplayFramebufferScale.y);
+	const int fbWidth = static_cast<int>(drawData->DisplaySize.x * drawData->FramebufferScale.x);
+	const int fbHeight = static_cast<int>(drawData->DisplaySize.y * drawData->FramebufferScale.y);
 	if (fbWidth <= 0 || fbHeight <= 0)
 		return;
-	draw_data->ScaleClipRects(io.DisplayFramebufferScale);
+	drawData->ScaleClipRects(drawData->FramebufferScale);
 
 	GLboolean blendWasEnabled = glIsEnabled(GL_BLEND);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	const ImVec2 pos = draw_data->DisplayPos;
-	for (int n = 0; n < draw_data->CmdListsCount; n++)
+	const ImVec2 pos = drawData->DisplayPos;
+	for (int n = 0; n < drawData->CmdListsCount; n++)
 	{
-		const ImDrawList* imCmdList = draw_data->CmdLists[n];
+		const ImDrawList* imCmdList = drawData->CmdLists[n];
 		const ImDrawIdx* firstIndex = nullptr;
 
 		vbo_->bufferData(static_cast<GLsizeiptr>(imCmdList->VtxBuffer.Size) * sizeof(ImDrawVert), static_cast<const GLvoid*>(imCmdList->VtxBuffer.Data), GL_STREAM_DRAW);
