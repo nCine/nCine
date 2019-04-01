@@ -122,7 +122,7 @@ int LuaBaseSprite::texRect(lua_State *L)
 int LuaBaseSprite::setTexRect(lua_State *L)
 {
 	int rectIndex = 0;
-	const Recti texRect = LuaRectiUtils::retrieve(L, -1, &rectIndex);
+	const Recti texRect = LuaRectiUtils::retrieve(L, -1, rectIndex);
 	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, rectIndex - 1);
 
 	sprite->setTexRect(texRect);

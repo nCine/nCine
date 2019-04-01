@@ -204,6 +204,7 @@ if(LUA_FOUND)
 
 	if(OPENAL_FOUND)
 		list(APPEND PRIVATE_HEADERS
+			${NCINE_ROOT}/src/include/LuaIAudioDevice.h
 			${NCINE_ROOT}/src/include/LuaIAudioPlayer.h
 			${NCINE_ROOT}/src/include/LuaAudioStreamPlayer.h
 			${NCINE_ROOT}/src/include/LuaAudioBuffer.h
@@ -211,6 +212,7 @@ if(LUA_FOUND)
 		)
 
 		list(APPEND SOURCES
+			${NCINE_ROOT}/src/scripting/LuaIAudioDevice.cpp
 			${NCINE_ROOT}/src/scripting/LuaIAudioPlayer.cpp
 			${NCINE_ROOT}/src/scripting/LuaAudioStreamPlayer.cpp
 			${NCINE_ROOT}/src/scripting/LuaAudioBuffer.cpp

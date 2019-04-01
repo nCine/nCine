@@ -27,6 +27,7 @@ class LuaApplication
 
 	static int isPaused(lua_State *L);
 	static int setPaused(lua_State *L);
+	static int togglePause(lua_State *L);
 
 	static int quit(lua_State *L);
 

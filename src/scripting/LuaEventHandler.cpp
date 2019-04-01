@@ -31,11 +31,26 @@ int start(lua_State *L)
 }
 
 extern "C" {
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
-	DLL_PUBLIC int luaopen_ncine(lua_State *L)
+
+#if (defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)) && !defined(__MINGW32__)
+
+#if NCINE_DEBUG
+	#define NCINE_LUAOPEN_NAME luaopen_ncine_d
 #else
-	DLL_PUBLIC int luaopen_libncine(lua_State *L)
+	#define NCINE_LUAOPEN_NAME luaopen_ncine
 #endif
+
+#else
+
+#if NCINE_DEBUG
+	#define NCINE_LUAOPEN_NAME luaopen_libncine_d
+#else
+	#define NCINE_LUAOPEN_NAME luaopen_libncine
+#endif
+
+#endif
+
+DLL_PUBLIC int NCINE_LUAOPEN_NAME(lua_State *L)
 	{
 		LuaEventHandler::luaState_ = new LuaStateManager(L, LuaStateManager::ApiType::FULL,
 		                                                 LuaStateManager::StatisticsTracking::ENABLED,

@@ -29,6 +29,7 @@ namespace Application
 
 	static const char *isPaused = "is_paused";
 	static const char *setPaused = "set_paused";
+	static const char *togglePause = "toggle_pause";
 
 	static const char *quit = "quit";
 
@@ -75,6 +76,7 @@ void LuaApplication::expose(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::Application::isPaused, isPaused);
 	LuaUtils::addFunction(L, LuaNames::Application::setPaused, setPaused);
+	LuaUtils::addFunction(L, LuaNames::Application::togglePause, togglePause);
 
 	LuaUtils::addFunction(L, LuaNames::Application::quit, quit);
 
@@ -187,6 +189,12 @@ int LuaApplication::setPaused(lua_State *L)
 {
 	const bool paused = LuaUtils::retrieve<bool>(L, -1);
 	theApplication().setPaused(paused);
+	return 0;
+}
+
+int LuaApplication::togglePause(lua_State *L)
+{
+	theApplication().togglePause();
 	return 0;
 }
 

@@ -5,6 +5,7 @@
 #include "LuaSceneNode.h"
 #include "LuaClassWrapper.h"
 #include "LuaUtils.h"
+#include "LuaVector2Utils.h"
 #include "DrawableNode.h"
 
 namespace ncine {
@@ -20,6 +21,7 @@ namespace DrawableNode
 
 	static const char *width = "get_width";
 	static const char *height = "get_height";
+	static const char *size = "get_size";
 	static const char *layer = "get_layer";
 	static const char *setLayer = "set_layer";
 }
@@ -51,6 +53,7 @@ void LuaDrawableNode::exposeFunctions(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::width, width);
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::height, height);
+	LuaUtils::addFunction(L, LuaNames::DrawableNode::size, size);
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::layer, layer);
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::setLayer, setLayer);
 }
@@ -71,6 +74,16 @@ int LuaDrawableNode::height(lua_State *L)
 
 	const float height = node->height();
 	LuaUtils::push(L, height);
+
+	return 1;
+}
+
+int LuaDrawableNode::size(lua_State *L)
+{
+	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -1);
+
+	const Vector2f size = node->size();
+	LuaVector2fUtils::push(L, size);
 
 	return 1;
 }

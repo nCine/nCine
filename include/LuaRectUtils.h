@@ -21,7 +21,7 @@ class LuaRectUtils
 {
   public:
 	static void push(lua_State *L, const Rect<T> &rect);
-	static Rect<T> retrieve(lua_State *L, int index, int *newIndex);
+	static Rect<T> retrieve(lua_State *L, int index, int &newIndex);
 	static Rect<T> retrieveTable(lua_State *L, int index);
 	static Rect<T> retrieveArray(lua_State *L, int index);
 	static Rect<T> retrieveParams(lua_State *L, int index);
@@ -43,18 +43,17 @@ void LuaRectUtils<T>::push(lua_State *L, const Rect<T> &rect)
 }
 
 template <class T>
-Rect<T> LuaRectUtils<T>::retrieve(lua_State *L, int index, int *newIndex)
+Rect<T> LuaRectUtils<T>::retrieve(lua_State *L, int index, int &newIndex)
 {
-	ASSERT(newIndex);
 	if (LuaUtils::isTable(L, index))
 	{
-		*newIndex = index;
+		newIndex = index;
 		return retrieveTable(L, index);
 	}
 	else
 	{
-		*newIndex = index - 1;
-		return retrieveParams(L, *newIndex);
+		newIndex = index - 1;
+		return retrieveParams(L, newIndex);
 	}
 }
 

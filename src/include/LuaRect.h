@@ -51,10 +51,10 @@ void LuaRect<T>::expose(lua_State *L)
 template <class T>
 int LuaRect<T>::create(lua_State *L)
 {
-	const T x = LuaUtils::retrieveField<T>(L, -4, LuaNames::Rect::x);
-	const T y = LuaUtils::retrieveField<T>(L, -3, LuaNames::Rect::y);
-	const T w = LuaUtils::retrieveField<T>(L, -2, LuaNames::Rect::w);
-	const T h = LuaUtils::retrieveField<T>(L, -1, LuaNames::Rect::h);
+	const T x = LuaUtils::retrieve<T>(L, -4);
+	const T y = LuaUtils::retrieve<T>(L, -3);
+	const T w = LuaUtils::retrieve<T>(L, -2);
+	const T h = LuaUtils::retrieve<T>(L, -1);
 
 	const Rect<T> rect(x, y, w, h);
 
@@ -66,10 +66,10 @@ int LuaRect<T>::create(lua_State *L)
 template <class T>
 int LuaRect<T>::fromCenterAndSize(lua_State *L)
 {
-	const T x = LuaUtils::retrieveField<T>(L, -4, LuaNames::Rect::x);
-	const T y = LuaUtils::retrieveField<T>(L, -3, LuaNames::Rect::y);
-	const T w = LuaUtils::retrieveField<T>(L, -2, LuaNames::Rect::w);
-	const T h = LuaUtils::retrieveField<T>(L, -1, LuaNames::Rect::h);
+	const T x = LuaUtils::retrieve<T>(L, -4);
+	const T y = LuaUtils::retrieve<T>(L, -3);
+	const T w = LuaUtils::retrieve<T>(L, -2);
+	const T h = LuaUtils::retrieve<T>(L, -1);
 
 	const Rect<T> rect = Rect<T>::fromCenterAndSize(x, y, w, h);
 

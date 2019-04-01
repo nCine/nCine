@@ -18,6 +18,7 @@ class LuaDrawableNode
 
 	static int width(lua_State *L);
 	static int height(lua_State *L);
+	static int size(lua_State *L);
 	static int layer(lua_State *L);
 	static int setLayer(lua_State *L);
 

@@ -97,9 +97,9 @@ void LuaIInputManager::exposeConstants(lua_State *L)
 
 	lua_createtable(L, 3, 0);
 
-	LuaUtils::pushField(L, LuaNames::IInputManager::LEFT_STICK, static_cast<int64_t>(IInputManager::LeftStickDeadZone));
-	LuaUtils::pushField(L, LuaNames::IInputManager::RIGHT_STICK, static_cast<int64_t>(IInputManager::RightStickDeadZone));
-	LuaUtils::pushField(L, LuaNames::IInputManager::TRIGGER, static_cast<int64_t>(IInputManager::TriggerDeadZone));
+	LuaUtils::pushField(L, LuaNames::IInputManager::LEFT_STICK, IInputManager::LeftStickDeadZone);
+	LuaUtils::pushField(L, LuaNames::IInputManager::RIGHT_STICK, IInputManager::RightStickDeadZone);
+	LuaUtils::pushField(L, LuaNames::IInputManager::TRIGGER, IInputManager::TriggerDeadZone);
 
 	lua_setfield(L, -2, LuaNames::IInputManager::DeadZone);
 }

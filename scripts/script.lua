@@ -146,7 +146,7 @@ function ncine.on_scroll_input(event)
 end
 
 function ncine.on_joymapped_button_released(event)
-	if event.button == nc.joy_axis.START then
+	if event.button == nc.joy_button.START then
 		nc.application.quit()
 	end
 end

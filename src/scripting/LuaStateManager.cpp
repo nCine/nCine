@@ -7,6 +7,7 @@
 #include "LuaStatistics.h"
 #include "LuaNames.h"
 
+#include "LuaRect.h"
 #include "LuaVector2.h"
 #include "LuaVector3.h"
 #include "LuaColor.h"
@@ -30,6 +31,7 @@
 #include "LuaParticleSystem.h"
 
 #ifdef WITH_AUDIO
+#include "LuaIAudioDevice.h"
 #include "LuaAudioBuffer.h"
 #include "LuaAudioBufferPlayer.h"
 #include "LuaAudioStreamPlayer.h"
@@ -58,6 +60,7 @@ namespace LuaNames
 	static const char *GitBranch = "_GITBRANCH";
 
 	static const char *Windows = "WINDOWS";
+	static const char *MinGW = "MINGW";
 	static const char *macOS = "MACOS";
 	static const char *Android = "ANDROID";
 	static const char *Linux = "LINUX";
@@ -311,6 +314,7 @@ void LuaStateManager::exposeApi()
 {
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
 
+	LuaRect<float>::expose(L_);
 	LuaVector2<float>::expose(L_);
 	LuaVector3<float>::expose(L_);
 	LuaColor::expose(L_);
@@ -334,6 +338,7 @@ void LuaStateManager::exposeApi()
 #ifdef WITH_AUDIO
 	if (appCfg.withAudio())
 	{
+		LuaIAudioDevice::expose(L_);
 		LuaAudioBuffer::expose(this);
 		LuaAudioBufferPlayer::expose(this);
 		LuaAudioStreamPlayer::expose(this);
@@ -353,9 +358,11 @@ void LuaStateManager::exposeConstants()
 
 	if (appCfg.withScenegraph())
 	{
+		LuaTexture::exposeConstants(L_);
 		LuaDrawableNode::exposeConstants(L_);
 		LuaRectAnimation::exposeConstants(L_);
 		LuaMeshSprite::exposeConstants(L_);
+		LuaTextNode::exposeConstants(L_);
 	}
 
 #ifdef WITH_GIT_VERSION
@@ -374,6 +381,9 @@ void LuaStateManager::exposeConstants()
 	lua_pushboolean(L_, true);
 #if defined(_WIN32)
 	lua_setfield(L_, -2, LuaNames::Windows);
+	#if defined(__MINGW32__)
+	lua_setfield(L_, -2, LuaNames::MinGW);
+	#endif
 #elif defined(__APPLE__)
 	lua_setfield(L_, -2, LuaNames::macOS);
 #elif defined(__ANDROID__)

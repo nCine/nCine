@@ -21,7 +21,7 @@ namespace Vector2
 	static const char *divide = "div";
 
 	static const char *length = "length";
-	static const char *sqrLength = "sqrLength";
+	static const char *sqrLength = "sqrlength";
 	static const char *normalized = "normalized";
 	static const char *dot = "dot";
 }}

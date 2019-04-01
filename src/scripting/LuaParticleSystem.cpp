@@ -469,7 +469,7 @@ int LuaParticleSystem::setTexture(lua_State *L)
 int LuaParticleSystem::setTexRect(lua_State *L)
 {
 	int rectIndex = 0;
-	const Recti texRect = LuaRectiUtils::retrieve(L, -1, &rectIndex);
+	const Recti texRect = LuaRectiUtils::retrieve(L, -1, rectIndex);
 	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, rectIndex - 1);
 
 	particleSys->setTexRect(texRect);
