@@ -43,7 +43,9 @@ class DLL_PUBLIC BaseSprite : public DrawableNode
 
   protected:
 	/// Protected construtor accessible only by derived sprite classes
-	BaseSprite(SceneNode *parent, Texture *texture, float x, float y);
+	BaseSprite(SceneNode *parent, Texture *texture, float xx, float yy);
+	/// Protected construtor accessible only by derived sprite classes
+	BaseSprite(SceneNode *parent, Texture *texture, const Vector2f &position);
 
 	/// The sprite texture
 	Texture *texture_;

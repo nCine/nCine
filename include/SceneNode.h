@@ -26,6 +26,8 @@ class DLL_PUBLIC SceneNode : public Object
 
 	/// Constructor for a node with a parent and a specified relative position
 	SceneNode(SceneNode *parent, float xx, float yy);
+	/// Constructor for a node with a parent and a specified relative position as a vector
+	SceneNode(SceneNode *parent, const Vector2f &position);
 	/// Constructor for a node with a parent and positioned in the relative origin
 	explicit SceneNode(SceneNode *parent);
 	/// Constructor for a node with no parent and positioned in the origin

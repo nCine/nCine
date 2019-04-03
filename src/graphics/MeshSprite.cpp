@@ -24,8 +24,8 @@ MeshSprite::MeshSprite(Texture *texture)
 }
 
 /*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
-MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, float x, float y)
-	: BaseSprite(parent, texture, x, y),
+MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, float xx, float yy)
+	: BaseSprite(parent, texture, xx, yy),
 	  interleavedVertices_(16), vertexDataPointer_(nullptr), numVertices_(0),
 	  indices_(16), indexDataPointer_(nullptr), numIndices_(0)
 {
@@ -48,11 +48,26 @@ MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, float x, float y)
 }
 
 /*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
-MeshSprite::MeshSprite(Texture *texture, float x, float y)
-	: MeshSprite(nullptr, texture, x, y)
+MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, const Vector2f &position)
+	: MeshSprite(parent, texture, position.x, position.y)
 {
 
 }
+
+/*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
+MeshSprite::MeshSprite(Texture *texture, float xx, float yy)
+	: MeshSprite(nullptr, texture, xx, yy)
+{
+
+}
+
+/*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
+MeshSprite::MeshSprite(Texture *texture, const Vector2f &position)
+	: MeshSprite(nullptr, texture, position.x, position.y)
+{
+
+}
+
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS

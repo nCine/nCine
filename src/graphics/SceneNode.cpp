@@ -23,6 +23,13 @@ SceneNode::SceneNode(SceneNode *parent, float xx, float yy)
 }
 
 /*! \param parent The parent can be `nullptr` */
+SceneNode::SceneNode(SceneNode *parent, const Vector2f &position)
+	: SceneNode(parent, position.x, position.y)
+{
+
+}
+
+/*! \param parent The parent can be `nullptr` */
 SceneNode::SceneNode(SceneNode *parent)
 	: SceneNode(parent, 0.0f, 0.0f)
 {

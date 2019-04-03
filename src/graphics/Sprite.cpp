@@ -23,8 +23,8 @@ Sprite::Sprite(Texture *texture)
 }
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
-Sprite::Sprite(SceneNode *parent, Texture *texture, float x, float y)
-	: BaseSprite(parent, texture, x, y)
+Sprite::Sprite(SceneNode *parent, Texture *texture, float xx, float yy)
+	: BaseSprite(parent, texture, xx, yy)
 {
 	ASSERT(texture);
 
@@ -43,8 +43,23 @@ Sprite::Sprite(SceneNode *parent, Texture *texture, float x, float y)
 }
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
-Sprite::Sprite(Texture *texture, float x, float y)
-	: Sprite(nullptr, texture, x, y)
+Sprite::Sprite(SceneNode *parent, Texture *texture, const Vector2f &position)
+	: Sprite(parent, texture, position.x, position.y)
+{
+
+}
+
+
+/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
+Sprite::Sprite(Texture *texture, float xx, float yy)
+	: Sprite(nullptr, texture, xx, yy)
+{
+
+}
+
+/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
+Sprite::Sprite(Texture *texture, const Vector2f &position)
+	: Sprite(nullptr, texture, position.x, position.y)
 {
 
 }

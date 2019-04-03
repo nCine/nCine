@@ -18,17 +18,30 @@ AnimatedSprite::AnimatedSprite(Texture *texture)
 
 }
 
-AnimatedSprite::AnimatedSprite(SceneNode *parent, Texture *texture, float x, float y)
-	: Sprite(parent, texture, x, y), anims_(4), currentAnim_(-1)
+AnimatedSprite::AnimatedSprite(SceneNode *parent, Texture *texture, float xx, float yy)
+	: Sprite(parent, texture, xx, yy), anims_(4), currentAnim_(-1)
 {
 
 }
 
-AnimatedSprite::AnimatedSprite(Texture *texture, float x, float y)
-	: AnimatedSprite(nullptr, texture, x, y)
+AnimatedSprite::AnimatedSprite(SceneNode *parent, Texture *texture, const Vector2f &position)
+	: AnimatedSprite(parent, texture, position.x, position.y)
 {
 
 }
+
+AnimatedSprite::AnimatedSprite(Texture *texture, float xx, float yy)
+	: AnimatedSprite(nullptr, texture, xx, yy)
+{
+
+}
+
+AnimatedSprite::AnimatedSprite(Texture *texture, const Vector2f &position)
+	: AnimatedSprite(nullptr, texture, position.x, position.y)
+{
+
+}
+
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS

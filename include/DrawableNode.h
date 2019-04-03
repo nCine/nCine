@@ -26,7 +26,9 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	};
 
 	/// Constructor for a drawable node with a parent and a specified relative position
-	DrawableNode(SceneNode *parent, float x, float y);
+	DrawableNode(SceneNode *parent, float xx, float yy);
+	/// Constructor for a drawable node with a parent and a specified relative position as a vector
+	DrawableNode(SceneNode *parent, const Vector2f &position);
 	/// Constructor for a drawable node with a parent and positioned in the relative origin
 	explicit DrawableNode(SceneNode *parent);
 	/// Constructor for a drawable node with no parent and positioned in the origin
