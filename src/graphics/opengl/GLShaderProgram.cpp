@@ -1,7 +1,7 @@
 #include "GLShaderProgram.h"
 #include "GLShader.h"
 #include "GLDebug.h"
-#include "nctl/String.h"
+#include <nctl/String.h>
 #include <cstring> // for strnlen()
 #include "tracy.h"
 

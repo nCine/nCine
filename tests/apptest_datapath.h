@@ -1,6 +1,6 @@
-#include "AppConfiguration.h"
+#include <ncine/AppConfiguration.h>
 
-inline void setDataPath(nc::AppConfiguration &config)
+inline void setDataPath(ncine::AppConfiguration &config)
 {
 #ifdef __ANDROID__
 	const char *extStorage = getenv("EXTERNAL_STORAGE");

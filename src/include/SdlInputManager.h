@@ -4,7 +4,7 @@
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_mouse.h>
 #include "IInputManager.h"
-#include "nctl/StaticArray.h"
+#include <nctl/StaticArray.h>
 
 namespace ncine {
 

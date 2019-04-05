@@ -2,7 +2,7 @@
 #define CLASS_NCINE_COLORF
 
 
-#include "nctl/StaticArray.h"
+#include <nctl/StaticArray.h>
 
 namespace ncine {
 

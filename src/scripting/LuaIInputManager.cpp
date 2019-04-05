@@ -9,7 +9,7 @@
 #include "IInputManager.h"
 #include "Application.h"
 
-#include "nctl/Array.h"
+#include <nctl/Array.h>
 
 namespace ncine {
 

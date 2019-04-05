@@ -4,7 +4,7 @@
 #include <cstdio>
 #include "IInputManager.h"
 #include "GlfwGfxDevice.h" // for WindowHandle()
-#include "nctl/StaticArray.h"
+#include <nctl/StaticArray.h>
 
 namespace ncine {
 

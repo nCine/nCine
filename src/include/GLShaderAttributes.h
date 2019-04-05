@@ -1,8 +1,8 @@
 #ifndef CLASS_NCINE_GLSHADERATTRIBUTES
 #define CLASS_NCINE_GLSHADERATTRIBUTES
 
-#include "nctl/StaticHashMap.h"
-#include "nctl/String.h"
+#include <nctl/StaticHashMap.h>
+#include <nctl/String.h>
 #include "GLVertexFormat.h"
 
 namespace ncine {

@@ -1,8 +1,8 @@
 #include "apptest_font.h"
-#include "Application.h"
-#include "IAppEventHandler.h"
-#include "TextNode.h"
-#include "IFile.h" // for dataPath()
+#include <ncine/Application.h>
+#include <ncine/IAppEventHandler.h>
+#include <ncine/TextNode.h>
+#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {

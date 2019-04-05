@@ -2,8 +2,8 @@
 #define CLASS_NCINE_DEBUGOVERLAY
 
 #include "IDebugOverlay.h"
-#include "nctl/UniquePtr.h"
-#include "nctl/String.h"
+#include <nctl/UniquePtr.h>
+#include <nctl/String.h>
 #include "ProfilePlotter.h" // for `~UniquePtr()`
 
 namespace ncine {

@@ -49,13 +49,13 @@ if(OPENAL_FOUND)
 	endif()
 
 	list(APPEND HEADERS
-		${NCINE_ROOT}/include/IAudioDevice.h
-		${NCINE_ROOT}/include/IAudioLoader.h
-		${NCINE_ROOT}/include/AudioBuffer.h
-		${NCINE_ROOT}/include/AudioStream.h
-		${NCINE_ROOT}/include/IAudioPlayer.h
-		${NCINE_ROOT}/include/AudioBufferPlayer.h
-		${NCINE_ROOT}/include/AudioStreamPlayer.h
+		${NCINE_ROOT}/include/ncine/IAudioDevice.h
+		${NCINE_ROOT}/include/ncine/IAudioLoader.h
+		${NCINE_ROOT}/include/ncine/AudioBuffer.h
+		${NCINE_ROOT}/include/ncine/AudioStream.h
+		${NCINE_ROOT}/include/ncine/IAudioPlayer.h
+		${NCINE_ROOT}/include/ncine/AudioBufferPlayer.h
+		${NCINE_ROOT}/include/ncine/AudioStreamPlayer.h
 	)
 
 	list(APPEND PRIVATE_HEADERS
@@ -100,8 +100,8 @@ if(Threads_FOUND)
 	target_link_libraries(ncine PRIVATE Threads::Threads)
 
 	list(APPEND HEADERS
-		${NCINE_ROOT}/include/IThreadPool.h
-		${NCINE_ROOT}/include/IThreadCommand.h
+		${NCINE_ROOT}/include/ncine/IThreadPool.h
+		${NCINE_ROOT}/include/ncine/IThreadCommand.h
 	)
 	list(APPEND PRIVATE_HEADERS
 		${NCINE_ROOT}/src/include/Thread.h
@@ -130,17 +130,17 @@ if(LUA_FOUND)
 	target_link_libraries(ncine PRIVATE Lua::Lua)
 
 	list(APPEND HEADERS
-		${NCINE_ROOT}/include/LuaTypes.h
-		${NCINE_ROOT}/include/LuaStateManager.h
-		${NCINE_ROOT}/include/LuaClassWrapper.h
-		${NCINE_ROOT}/include/LuaUtils.h
-		${NCINE_ROOT}/include/LuaDebug.h
-		${NCINE_ROOT}/include/LuaIAppEventHandler.h
-		${NCINE_ROOT}/include/LuaRectUtils.h
-		${NCINE_ROOT}/include/LuaVector2Utils.h
-		${NCINE_ROOT}/include/LuaVector3Utils.h
-		${NCINE_ROOT}/include/LuaColorUtils.h
-		${NCINE_ROOT}/include/LuaIInputEventHandler.h
+		${NCINE_ROOT}/include/ncine/LuaTypes.h
+		${NCINE_ROOT}/include/ncine/LuaStateManager.h
+		${NCINE_ROOT}/include/ncine/LuaClassWrapper.h
+		${NCINE_ROOT}/include/ncine/LuaUtils.h
+		${NCINE_ROOT}/include/ncine/LuaDebug.h
+		${NCINE_ROOT}/include/ncine/LuaIAppEventHandler.h
+		${NCINE_ROOT}/include/ncine/LuaRectUtils.h
+		${NCINE_ROOT}/include/ncine/LuaVector2Utils.h
+		${NCINE_ROOT}/include/ncine/LuaVector3Utils.h
+		${NCINE_ROOT}/include/ncine/LuaColorUtils.h
+		${NCINE_ROOT}/include/ncine/LuaIInputEventHandler.h
 	)
 
 	list(APPEND PRIVATE_HEADERS
@@ -232,9 +232,14 @@ endif()
 if(NCINE_WITH_IMGUI)
 	target_compile_definitions(ncine PRIVATE "WITH_IMGUI")
 
+	# For external projects compiling using an nCine build directory
+	set(IMGUI_INCLUDE_ONLY_DIR ${IMGUI_SOURCE_DIR}/include_only)
+	file(COPY ${IMGUI_SOURCE_DIR}/imgui.h DESTINATION ${IMGUI_INCLUDE_ONLY_DIR}/ncine)
+	file(COPY ${IMGUI_SOURCE_DIR}/imconfig.h DESTINATION ${IMGUI_INCLUDE_ONLY_DIR}/ncine)
+
 	list(APPEND HEADERS
-		${IMGUI_SOURCE_DIR}/imgui.h
-		${IMGUI_SOURCE_DIR}/imconfig.h
+		${IMGUI_INCLUDE_ONLY_DIR}/ncine/imgui.h
+		${IMGUI_INCLUDE_ONLY_DIR}/ncine/imconfig.h
 	)
 
 	list(APPEND PRIVATE_HEADERS
@@ -309,8 +314,8 @@ endif()
 
 if(NCINE_BUILD_ANDROID)
 	list(APPEND HEADERS
-		${NCINE_ROOT}/include/AndroidApplication.h
-		${NCINE_ROOT}/include/AssetFile.h
+		${NCINE_ROOT}/include/ncine/AndroidApplication.h
+		${NCINE_ROOT}/include/ncine/AssetFile.h
 	)
 endif()
 

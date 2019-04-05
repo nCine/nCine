@@ -1,9 +1,9 @@
 #ifndef GTEST_HASHMAP_H
 #define GTEST_HASHMAP_H
 
-#include "nctl/algorithms.h"
-#include "nctl/HashMap.h"
-#include "nctl/HashMapIterator.h"
+#include <nctl/algorithms.h>
+#include <nctl/HashMap.h>
+#include <nctl/HashMapIterator.h>
 #include "gtest/gtest.h"
 
 namespace {

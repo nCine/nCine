@@ -1,8 +1,8 @@
 #ifndef CLASS_NCINE_GLSHADERUNIFORMBLOCKS
 #define CLASS_NCINE_GLSHADERUNIFORMBLOCKS
 
-#include "nctl/StaticHashMap.h"
-#include "nctl/String.h"
+#include <nctl/StaticHashMap.h>
+#include <nctl/String.h>
 #include "GLUniformBlockCache.h"
 #include "RenderBuffersManager.h"
 

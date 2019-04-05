@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Vector4.h"
+#include <ncine/Vector4.h>
 
 #define IMGUI_API DLL_PUBLIC
 

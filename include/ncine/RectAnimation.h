@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_RECTANIMATION
 #define CLASS_NCINE_RECTANIMATION
 
-#include "nctl/Array.h"
+#include <nctl/Array.h>
 #include "Rect.h"
 
 namespace ncine {

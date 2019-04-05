@@ -1,7 +1,7 @@
 #ifndef GTEST_ATOMIC_H
 #define GTEST_ATOMIC_H
 
-#include "nctl/Atomic.h"
+#include <nctl/Atomic.h>
 #include "gtest/gtest.h"
 
 namespace {

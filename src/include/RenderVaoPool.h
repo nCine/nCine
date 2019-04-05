@@ -1,8 +1,8 @@
 #ifndef CLASS_NCINE_RENDERVAOPOOL
 #define CLASS_NCINE_RENDERVAOPOOL
 
-#include "nctl/Array.h"
-#include "nctl/UniquePtr.h"
+#include <nctl/Array.h>
+#include <nctl/UniquePtr.h>
 #include "GLVertexArrayObject.h"
 #include "GLVertexFormat.h"
 

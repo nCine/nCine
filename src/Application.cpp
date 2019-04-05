@@ -10,7 +10,7 @@
 #include "GLDebug.h"
 #include "FrameTimer.h"
 #include "SceneNode.h"
-#include "nctl/String.h"
+#include <nctl/String.h>
 #include "IInputManager.h"
 #include "JoyMapping.h"
 

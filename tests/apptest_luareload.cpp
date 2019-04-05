@@ -1,16 +1,15 @@
 ﻿#include "apptest_luareload.h"
-#include "Application.h"
-#include "Texture.h"
-#include "ParticleSystem.h"
-#include "ParticleInitializer.h"
-#include "Timer.h"
-#include "LuaStateManager.h"
-#include "LuaIAppEventHandler.h"
-#include "LuaIInputEventHandler.h"
-#include "LuaClassWrapper.h"
-#include "LuaUtils.h"
-#include "LuaColorUtils.h"
-#include "IFile.h" // for dataPath()
+#include <ncine/Application.h>
+#include <ncine/Texture.h>
+#include <ncine/ParticleSystem.h>
+#include <ncine/ParticleInitializer.h>
+#include <ncine/Timer.h>
+#include <ncine/LuaIAppEventHandler.h>
+#include <ncine/LuaIInputEventHandler.h>
+#include <ncine/LuaClassWrapper.h>
+#include <ncine/LuaUtils.h>
+#include <ncine/LuaColorUtils.h>
+#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {

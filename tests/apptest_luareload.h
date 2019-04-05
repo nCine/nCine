@@ -1,10 +1,10 @@
 #ifndef CLASS_MYEVENTHANDLER
 #define CLASS_MYEVENTHANDLER
 
-#include "IAppEventHandler.h"
-#include "IInputEventHandler.h"
+#include <ncine/IAppEventHandler.h>
+#include <ncine/IInputEventHandler.h>
 
-#include "LuaStateManager.h"
+#include <ncine/LuaStateManager.h>
 
 namespace ncine {
 

@@ -1,12 +1,12 @@
-#include "nctl/algorithms.h"
+#include <nctl/algorithms.h>
 #include "apptest_meshsprites.h"
-#include "Application.h"
-#include "Texture.h"
-#include "Sprite.h"
-#include "MeshSprite.h"
-#include "TextNode.h"
-#include "Timer.h"
-#include "IFile.h" // for dataPath()
+#include <ncine/Application.h>
+#include <ncine/Texture.h>
+#include <ncine/Sprite.h>
+#include <ncine/MeshSprite.h>
+#include <ncine/TextNode.h>
+#include <ncine/Timer.h>
+#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {

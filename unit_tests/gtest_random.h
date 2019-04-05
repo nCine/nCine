@@ -1,7 +1,7 @@
 #ifndef GTEST_RANDOM_H
 #define GTEST_RANDOM_H
 
-#include "Random.h"
+#include <ncine/Random.h>
 #include "gtest/gtest.h"
 
 namespace nc = ncine;

@@ -2,7 +2,7 @@
 #define CLASS_NCINE_SCENENODE
 
 #include "Object.h"
-#include "nctl/List.h"
+#include <nctl/List.h>
 #include "Vector2.h"
 #include "Matrix4x4.h"
 #include "Color.h"

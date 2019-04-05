@@ -4,7 +4,7 @@
 #include "IGfxDevice.h"
 #include "AppConfiguration.h"
 #include "IDebugOverlay.h"
-#include "nctl/UniquePtr.h"
+#include <nctl/UniquePtr.h>
 
 namespace ncine {
 

@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_LUASTATISTICS
 #define CLASS_NCINE_LUASTATISTICS
 
-#include "nctl/Array.h"
+#include <nctl/Array.h>
 #include "LuaTypes.h"
 #include "Timer.h"
 

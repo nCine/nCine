@@ -1,8 +1,8 @@
 #include "apptest_scene.h"
-#include "Application.h"
-#include "Texture.h"
-#include "Sprite.h"
-#include "IFile.h" // for dataPath()
+#include <ncine/Application.h>
+#include <ncine/Texture.h>
+#include <ncine/Sprite.h>
+#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {

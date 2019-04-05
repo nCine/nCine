@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_LUARECTANIMATION
 #define CLASS_NCINE_LUARECTANIMATION
 
-#include "nctl/UniquePtr.h"
+#include <nctl/UniquePtr.h>
 
 struct lua_State;
 

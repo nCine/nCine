@@ -2,8 +2,8 @@
 #define CLASS_NCINE_JOYMAPPING
 
 #include <cstdint>
-#include "nctl/Array.h"
-#include "nctl/StaticArray.h"
+#include <nctl/Array.h>
+#include <nctl/StaticArray.h>
 #include "InputEvents.h"
 
 namespace ncine {

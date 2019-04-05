@@ -1,8 +1,8 @@
 #ifndef GTEST_STATICARRAY_H
 #define GTEST_STATICARRAY_H
 
-#include "nctl/StaticArray.h"
-#include "Random.h"
+#include <nctl/StaticArray.h>
+#include <ncine/Random.h>
 #include "gtest/gtest.h"
 
 namespace nc = ncine;

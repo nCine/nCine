@@ -2,7 +2,7 @@
 #define NCTL_ATOMIC
 
 #include <cstdint>
-#include "common_macros.h"
+#include <ncine/common_macros.h>
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
 #include <Windows.h>

@@ -5,8 +5,8 @@
 #include "common_headers.h"
 
 #include "IAudioDevice.h"
-#include "nctl/List.h"
-#include "nctl/StaticArray.h"
+#include <nctl/List.h>
+#include <nctl/StaticArray.h>
 
 namespace ncine {
 

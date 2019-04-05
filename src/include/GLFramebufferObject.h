@@ -4,7 +4,7 @@
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
 #include "GLHashMap.h"
-#include "nctl/Array.h"
+#include <nctl/Array.h>
 
 namespace ncine {
 

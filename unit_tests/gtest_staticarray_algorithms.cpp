@@ -1,6 +1,6 @@
 #include "gtest_staticarray.h"
 #include "test_functions.h"
-#include "nctl/algorithms.h"
+#include <nctl/algorithms.h>
 
 namespace {
 

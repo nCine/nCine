@@ -1,5 +1,5 @@
 #include "benchmark/benchmark.h"
-#include "nctl/Array.h"
+#include <nctl/Array.h>
 
 const unsigned int Capacity = 1024;
 

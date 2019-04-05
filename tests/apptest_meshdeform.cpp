@@ -1,9 +1,9 @@
 #include "apptest_meshdeform.h"
-#include "Application.h"
-#include "Texture.h"
-#include "MeshSprite.h"
-#include "TextNode.h"
-#include "IFile.h" // for dataPath()
+#include <ncine/Application.h>
+#include <ncine/Texture.h>
+#include <ncine/MeshSprite.h>
+#include <ncine/TextNode.h>
+#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {

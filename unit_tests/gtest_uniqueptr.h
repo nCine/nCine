@@ -1,8 +1,8 @@
 #ifndef GTEST_UNIQUEPTR_H
 #define GTEST_UNIQUEPTR_H
 
-#include "nctl/UniquePtr.h"
-#include "nctl/SharedPtr.h"
+#include <nctl/UniquePtr.h>
+#include <nctl/SharedPtr.h>
 #include "gtest/gtest.h"
 
 namespace {

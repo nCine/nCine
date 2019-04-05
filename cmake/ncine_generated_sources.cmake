@@ -1,7 +1,7 @@
-# Has to be called after ncine_get_version.cmake
+# Has to be included after ncine_get_version.cmake
 
 set(GENERATED_SOURCE_DIR "${CMAKE_BINARY_DIR}/generated")
-set(GENERATED_INCLUDE_DIR "${GENERATED_SOURCE_DIR}/include")
+set(GENERATED_INCLUDE_DIR "${GENERATED_SOURCE_DIR}/include/ncine")
 
 # Version strings
 if(GIT_EXECUTABLE)
@@ -67,6 +67,10 @@ file(APPEND ${VERSION_CPP_FILE} "\n}\n")
 list(APPEND HEADERS ${VERSION_H_FILE})
 list(APPEND GENERATED_SOURCES ${VERSION_CPP_FILE})
 
+# Copy the header required by `version.h` to the generated include directory
+# for compiling external projects using an nCine build directory
+file(COPY ${CMAKE_SOURCE_DIR}/include/ncine/common_defines.h DESTINATION ${GENERATED_INCLUDE_DIR})
+
 # Shader strings
 file(GLOB SHADER_FILES "src/shaders/*.glsl")
 if(NCINE_EMBED_SHADERS)
@@ -113,13 +117,13 @@ if(MSVC AND EXISTS ${NCINE_DATA_DIR}/icons/nCine.ico)
 	message(STATUS "Writing a resource file for executables icon")
 
 	set(RESOURCE_RC_FILE "${GENERATED_SOURCE_DIR}/resource.rc")
-	file(WRITE ${RESOURCE_RC_FILE} "IDI_ICON1 ICON DISCARDABLE \"nCine.ico\"")
+	file(WRITE ${RESOURCE_RC_FILE} "IDI_ICON1 ICON DISCARDABLE \"ncine/nCine.ico\"")
 	file(COPY ${NCINE_DATA_DIR}/icons/nCine.ico DESTINATION ${GENERATED_INCLUDE_DIR})
 endif()
 
-if(EXISTS ${CMAKE_SOURCE_DIR}/ncine_config.h.in)
-	set(NCINE_CONFIG_H_IN ${CMAKE_SOURCE_DIR}/ncine_config.h.in)
-	set(NCINE_CONFIG_H ${GENERATED_INCLUDE_DIR}/ncine_config.h)
+if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.in)
+	set(CONFIG_H_IN ${CMAKE_SOURCE_DIR}/config.h.in)
+	set(CONFIG_H ${GENERATED_INCLUDE_DIR}/config.h)
 	set(NCINE_WITH_THREADS ${Threads_FOUND})
 	set(NCINE_WITH_GLEW ${GLEW_FOUND})
 	set(NCINE_WITH_GLFW ${GLFW_FOUND})
@@ -131,6 +135,6 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/ncine_config.h.in)
 	set(NCINE_WITH_PNG ${PNG_FOUND})
 	set(NCINE_WITH_WEBP ${WEBP_FOUND})
 	set(NCINE_WITH_LUA ${LUA_FOUND})
-	configure_file(${NCINE_CONFIG_H_IN} ${NCINE_CONFIG_H} @ONLY)
-	list(APPEND GENERATED_SOURCES ${NCINE_CONFIG_H})
+	configure_file(${CONFIG_H_IN} ${CONFIG_H} @ONLY)
+	list(APPEND GENERATED_SOURCES ${CONFIG_H})
 endif()

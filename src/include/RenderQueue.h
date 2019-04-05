@@ -3,9 +3,9 @@
 
 #include "RenderCommand.h"
 #include "RenderBatcher.h"
-#include "nctl/Array.h"
-#include "nctl/StaticArray.h"
-#include "nctl/UniquePtr.h"
+#include <nctl/Array.h>
+#include <nctl/StaticArray.h>
+#include <nctl/UniquePtr.h>
 
 namespace ncine {
 

@@ -1,10 +1,10 @@
 #include "apptest_particles.h"
-#include "Application.h"
-#include "Texture.h"
-#include "ParticleSystem.h"
-#include "ParticleInitializer.h"
-#include "Timer.h"
-#include "IFile.h" // for dataPath()
+#include <ncine/Application.h>
+#include <ncine/Texture.h>
+#include <ncine/ParticleSystem.h>
+#include <ncine/ParticleInitializer.h>
+#include <ncine/Timer.h>
+#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 #ifdef __ANDROID__

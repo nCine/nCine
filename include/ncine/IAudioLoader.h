@@ -2,7 +2,7 @@
 #define CLASS_NCINE_IAUDIOLOADER
 
 #include "IFile.h"
-#include "nctl/UniquePtr.h"
+#include <nctl/UniquePtr.h>
 
 namespace ncine {
 

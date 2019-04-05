@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_LUADEBUG
 #define CLASS_NCINE_LUADEBUG
 
-#include "nctl/String.h"
+#include <nctl/String.h>
 
 struct lua_State;
 

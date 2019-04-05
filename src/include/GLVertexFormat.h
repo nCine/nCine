@@ -4,7 +4,7 @@
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
 
-#include "nctl/StaticArray.h"
+#include <nctl/StaticArray.h>
 
 namespace ncine {
 

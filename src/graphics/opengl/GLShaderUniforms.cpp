@@ -2,8 +2,8 @@
 #include "GLShaderProgram.h"
 #include "GLUniformCache.h"
 #include "RenderResources.h"
-#include "nctl/StaticHashMapIterator.h"
-#include "nctl/algorithms.h"
+#include <nctl/StaticHashMapIterator.h>
+#include <nctl/algorithms.h>
 
 namespace ncine {
 

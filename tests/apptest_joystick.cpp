@@ -1,10 +1,10 @@
 #include "apptest_joystick.h"
-#include "Application.h"
-#include "nctl/String.h"
-#include "Texture.h"
-#include "Sprite.h"
-#include "TextNode.h"
-#include "IFile.h" // for dataPath()
+#include <ncine/Application.h>
+#include <nctl/String.h>
+#include <ncine/Texture.h>
+#include <ncine/Sprite.h>
+#include <ncine/TextNode.h>
+#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {

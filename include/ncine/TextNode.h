@@ -4,8 +4,8 @@
 #include "DrawableNode.h"
 #include "Font.h"
 #include "Color.h"
-#include "nctl/Array.h"
-#include "nctl/String.h"
+#include <nctl/Array.h>
+#include <nctl/String.h>
 
 namespace ncine {
 

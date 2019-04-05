@@ -1,7 +1,7 @@
 #ifndef CLASS_NCTL_STATICHASHMAP
 #define CLASS_NCTL_STATICHASHMAP
 
-#include "common_macros.h"
+#include <ncine/common_macros.h>
 #include "UniquePtr.h"
 #include "HashFunctions.h"
 #include "ReverseIterator.h"

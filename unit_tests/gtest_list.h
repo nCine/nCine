@@ -1,9 +1,9 @@
 #ifndef GTEST_LIST_H
 #define GTEST_LIST_H
 
-#include "nctl/algorithms.h"
-#include "nctl/List.h"
-#include "Random.h"
+#include <nctl/algorithms.h>
+#include <nctl/List.h>
+#include <ncine/Random.h>
 #include "gtest/gtest.h"
 
 namespace nc = ncine;

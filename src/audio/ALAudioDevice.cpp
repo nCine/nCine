@@ -2,7 +2,7 @@
 #include "ALAudioDevice.h"
 #include "AudioBufferPlayer.h"
 #include "AudioStreamPlayer.h"
-#include "nctl/algorithms.h"
+#include <nctl/algorithms.h>
 
 namespace ncine {
 

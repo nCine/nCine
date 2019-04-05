@@ -2,7 +2,7 @@
 #define CLASS_NCINE_LUATYPES
 
 #include "common_defines.h"
-#include "nctl/Array.h"
+#include <nctl/Array.h>
 
 struct lua_State;
 

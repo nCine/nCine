@@ -1,7 +1,7 @@
 #ifndef GTEST_RECT_H
 #define GTEST_RECT_H
 
-#include "Rect.h"
+#include <ncine/Rect.h>
 #include "gtest/gtest.h"
 
 namespace nc = ncine;

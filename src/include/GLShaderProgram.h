@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_GLSHADERPROGRAM
 #define CLASS_NCINE_GLSHADERPROGRAM
 
-#include "nctl/Array.h"
+#include <nctl/Array.h>
 #include "GLUniform.h"
 #include "GLUniformBlock.h"
 #include "GLAttribute.h"

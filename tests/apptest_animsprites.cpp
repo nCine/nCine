@@ -1,9 +1,9 @@
-#include "common_constants.h"
+#include <ncine/common_constants.h>
 #include "apptest_animsprites.h"
-#include "Application.h"
-#include "Texture.h"
-#include "AnimatedSprite.h"
-#include "IFile.h" // for dataPath()
+#include <ncine/Application.h>
+#include <ncine/Texture.h>
+#include <ncine/AnimatedSprite.h>
+#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {

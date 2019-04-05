@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_RENDERSTATISTICS
 #define CLASS_NCINE_RENDERSTATISTICS
 
-#include "nctl/String.h"
+#include <nctl/String.h>
 #include "RenderCommand.h"
 
 namespace ncine {

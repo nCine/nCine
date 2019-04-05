@@ -146,7 +146,7 @@ if(NCINE_BUILD_ANDROID)
 	# Creating an ncine directory inside cpp to allow building external Android applications without installing the engine
 	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include
 		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${NCINE_CONFIG_H} ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CONFIG_H} ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include
 		# Projects relying on a static and uninstalled version of the engine can use implementation headers
 		COMMAND ${COPY_SRCINCLUDE_COMMAND})
 	add_custom_target(ncine_ndkdir_include ALL DEPENDS ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include)

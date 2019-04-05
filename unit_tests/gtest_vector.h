@@ -1,9 +1,9 @@
 #ifndef GTEST_VECTOR_H
 #define GTEST_VECTOR_H
 
-#include "Vector2.h"
-#include "Vector3.h"
-#include "Vector4.h"
+#include <ncine/Vector2.h>
+#include <ncine/Vector3.h>
+#include <ncine/Vector4.h>
 #include "gtest/gtest.h"
 
 namespace nc = ncine;

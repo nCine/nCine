@@ -79,7 +79,7 @@ string(REPLACE " " ";" ANDROID_GENERATED_FLAGS "${ANDROID_GENERATED_FLAGS}")
 
 target_sources(ncine PRIVATE ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${NCTL_HEADERS} ${SHADER_FILES} ${GENERATED_SOURCES})
 
-target_include_directories(ncine PUBLIC ${NCINE_ROOT}/include PRIVATE ${NCINE_ROOT}/src/include)
+target_include_directories(ncine PUBLIC ${NCINE_ROOT}/include PRIVATE ${NCINE_ROOT}/include/ncine PRIVATE ${NCINE_ROOT}/src/include)
 target_include_directories(ncine_main PRIVATE ${NCINE_ROOT}/include)
 if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
 	target_include_directories(ncine PRIVATE ${GENERATED_INCLUDE_DIR})

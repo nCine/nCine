@@ -2,7 +2,7 @@
 #define CLASS_NCINE_ARRAYINDEXER
 
 #include "IIndexer.h"
-#include "nctl/Array.h"
+#include <nctl/Array.h>
 #include "Object.h"
 
 namespace ncine {

@@ -1,7 +1,7 @@
 #ifndef GTEST_QUATERNION_H
 #define GTEST_QUATERNION_H
 
-#include "Quaternion.h"
+#include <ncine/Quaternion.h>
 #include "gtest/gtest.h"
 
 namespace nc = ncine;

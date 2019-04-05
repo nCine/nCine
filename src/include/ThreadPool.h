@@ -2,9 +2,9 @@
 #define CLASS_NCINE_THREADPOOL
 
 #include "IThreadPool.h"
-#include "nctl/List.h"
+#include <nctl/List.h>
 #include "ThreadSync.h"
-#include "nctl/Array.h"
+#include <nctl/Array.h>
 #include "Thread.h"
 
 namespace ncine {

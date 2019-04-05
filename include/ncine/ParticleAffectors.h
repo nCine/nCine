@@ -3,7 +3,7 @@
 
 #include "Vector2.h"
 #include "Colorf.h"
-#include "nctl/Array.h"
+#include <nctl/Array.h>
 
 namespace ncine {
 

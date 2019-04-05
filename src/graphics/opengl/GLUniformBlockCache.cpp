@@ -1,7 +1,7 @@
 #include "common_macros.h"
 #include "GLUniformBlockCache.h"
 #include "GLUniformBlock.h"
-#include "nctl/StaticHashMapIterator.h"
+#include <nctl/StaticHashMapIterator.h>
 
 namespace ncine {
 

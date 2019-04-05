@@ -3,7 +3,7 @@
 
 #include "common_defines.h"
 #include "IThreadCommand.h"
-#include "nctl/UniquePtr.h"
+#include <nctl/UniquePtr.h>
 
 namespace ncine {
 

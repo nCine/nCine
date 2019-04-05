@@ -1,9 +1,8 @@
 #include "apptest_lua.h"
-#include "Application.h"
-#include "LuaStateManager.h"
-#include "LuaIAppEventHandler.h"
-#include "LuaIInputEventHandler.h"
-#include "IFile.h" // for dataPath()
+#include <ncine/Application.h>
+#include <ncine/LuaIAppEventHandler.h>
+#include <ncine/LuaIInputEventHandler.h>
+#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {

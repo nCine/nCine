@@ -1,6 +1,6 @@
 #include "Colorf.h"
 #include "Color.h"
-#include "nctl/algorithms.h"
+#include <nctl/algorithms.h>
 
 namespace ncine {
 

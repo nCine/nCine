@@ -2,7 +2,7 @@
 #define CLASS_NCINE_AUDIOSTREAM
 
 #include "IAudioLoader.h"
-#include "nctl/StaticArray.h"
+#include <nctl/StaticArray.h>
 
 namespace ncine {
 

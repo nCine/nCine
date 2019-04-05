@@ -1,7 +1,7 @@
 #ifndef CLASS_NCTL_ARRAYITERATOR
 #define CLASS_NCTL_ARRAYITERATOR
 
-#include "common_macros.h"
+#include <ncine/common_macros.h>
 #include "iterator.h"
 #include "ReverseIterator.h"
 

@@ -1,9 +1,9 @@
 #ifndef GTEST_STATICHASHMAP_H
 #define GTEST_STATICHASHMAP_H
 
-#include "nctl/algorithms.h"
-#include "nctl/StaticHashMap.h"
-#include "nctl/StaticHashMapIterator.h"
+#include <nctl/algorithms.h>
+#include <nctl/StaticHashMap.h>
+#include <nctl/StaticHashMapIterator.h>
 #include "gtest/gtest.h"
 
 namespace {

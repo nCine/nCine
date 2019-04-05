@@ -1,10 +1,10 @@
 #include "apptest_audio.h"
-#include "Application.h"
-#include "AudioBuffer.h"
-#include "AudioBufferPlayer.h"
-#include "AudioStream.h"
-#include "AudioStreamPlayer.h"
-#include "TextNode.h"
+#include <ncine/Application.h>
+#include <ncine/AudioBuffer.h>
+#include <ncine/AudioBufferPlayer.h>
+#include <ncine/AudioStream.h>
+#include <ncine/AudioStreamPlayer.h>
+#include <ncine/TextNode.h>
 #include "apptest_datapath.h"
 
 namespace {

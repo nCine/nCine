@@ -1,5 +1,5 @@
 #include "benchmark/benchmark.h"
-#include "nctl/HashMap.h"
+#include <nctl/HashMap.h>
 
 const unsigned int Capacity = 1024;
 const int KeyValueDifference = 10;

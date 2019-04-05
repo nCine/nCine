@@ -1,10 +1,10 @@
 #ifndef CLASS_MYEVENTHANDLER
 #define CLASS_MYEVENTHANDLER
 
-#include "IAppEventHandler.h"
-#include "IInputEventHandler.h"
-#include "Vector2.h"
-#include "nctl/UniquePtr.h"
+#include <ncine/IAppEventHandler.h>
+#include <ncine/IInputEventHandler.h>
+#include <ncine/Vector2.h>
+#include <nctl/UniquePtr.h>
 
 namespace ncine {
 

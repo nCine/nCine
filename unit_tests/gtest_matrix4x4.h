@@ -1,7 +1,7 @@
 #ifndef GTEST_MATRIX4X4_H
 #define GTEST_MATRIX4X4_H
 
-#include "Matrix4x4.h"
+#include <ncine/Matrix4x4.h>
 #include "gtest/gtest.h"
 
 namespace nc = ncine;

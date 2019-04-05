@@ -1,8 +1,8 @@
 #include <cstdio> // for vsnprintf()
 #include <cstring>
 #include "common_macros.h"
-#include "nctl/String.h"
-#include "nctl/algorithms.h"
+#include <nctl/String.h>
+#include <nctl/algorithms.h>
 
 namespace nctl {
 

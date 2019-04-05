@@ -1,9 +1,9 @@
 #ifndef GTEST_ARRAY_H
 #define GTEST_ARRAY_H
 
-#include "nctl/algorithms.h"
-#include "nctl/Array.h"
-#include "Random.h"
+#include <nctl/algorithms.h>
+#include <nctl/Array.h>
+#include <ncine/Random.h>
 #include "gtest/gtest.h"
 
 namespace nc = ncine;

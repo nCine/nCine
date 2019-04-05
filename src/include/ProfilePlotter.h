@@ -3,7 +3,7 @@
 
 #include "Rect.h"
 #include "Color.h"
-#include "nctl/Array.h"
+#include <nctl/Array.h>
 #include "DrawableNode.h"
 #include "PlottingVariable.h"
 

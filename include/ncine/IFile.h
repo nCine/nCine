@@ -3,8 +3,8 @@
 
 #include <cstdio> // for FILE
 #include <cstdint> // for endianness conversions
-#include "nctl/String.h"
-#include "nctl/UniquePtr.h"
+#include <nctl/String.h>
+#include <nctl/UniquePtr.h>
 
 namespace ncine {
 

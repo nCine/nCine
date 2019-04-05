@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_APPCONFIGURATION
 #define CLASS_NCINE_APPCONFIGURATION
 
-#include "nctl/String.h"
+#include <nctl/String.h>
 #include "ILogger.h"
 
 namespace ncine {

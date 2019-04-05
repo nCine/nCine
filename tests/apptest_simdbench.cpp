@@ -1,13 +1,13 @@
-#include "imgui.h"
+#include <ncine/imgui.h>
 
 #include "apptest_simdbench.h"
-#include "Application.h"
-#include "LuaStateManager.h"
-#include "LuaUtils.h"
-#include "IFile.h"
-#include "Timer.h"
-#include "Vector4.h"
-#include "Quaternion.h"
+#include <ncine/Application.h>
+#include <ncine/LuaStateManager.h>
+#include <ncine/LuaUtils.h>
+#include <ncine/IFile.h>
+#include <ncine/Timer.h>
+#include <ncine/Vector4.h>
+#include <ncine/Quaternion.h>
 
 namespace Names
 {

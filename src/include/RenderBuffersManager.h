@@ -2,8 +2,8 @@
 #define CLASS_NCINE_RENDERBUFFERSMANAGER
 
 #include "GLBufferObject.h"
-#include "nctl/Array.h"
-#include "nctl/UniquePtr.h"
+#include <nctl/Array.h>
+#include <nctl/UniquePtr.h>
 
 namespace ncine {
 

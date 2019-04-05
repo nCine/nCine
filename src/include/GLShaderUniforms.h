@@ -1,8 +1,8 @@
 #ifndef CLASS_NCINE_GLSHADERUNIFORMS
 #define CLASS_NCINE_GLSHADERUNIFORMS
 
-#include "nctl/StaticHashMap.h"
-#include "nctl/String.h"
+#include <nctl/StaticHashMap.h>
+#include <nctl/String.h>
 #include "GLUniformCache.h"
 
 namespace ncine {

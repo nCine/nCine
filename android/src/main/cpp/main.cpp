@@ -1,5 +1,5 @@
 #include <android_native_app_glue.h>
-#include "AndroidApplication.h"
+#include <ncine/AndroidApplication.h>
 
 namespace ncine {
 

@@ -1,5 +1,5 @@
 #include "benchmark/benchmark.h"
-#include "Random.h"
+#include <ncine/Random.h>
 
 namespace nc = ncine;
 const unsigned int Repetitions = 1024;

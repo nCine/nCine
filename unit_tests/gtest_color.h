@@ -1,8 +1,8 @@
 #ifndef GTEST_COLOR_H
 #define GTEST_COLOR_H
 
-#include "Color.h"
-#include "Colorf.h"
+#include <ncine/Color.h>
+#include <ncine/Colorf.h>
 #include "gtest/gtest.h"
 
 namespace nc = ncine;

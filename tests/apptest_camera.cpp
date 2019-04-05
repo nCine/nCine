@@ -1,12 +1,12 @@
-#include "common_constants.h"
+#include <ncine/common_constants.h>
 #include "apptest_camera.h"
-#include "Random.h"
-#include "Application.h"
-#include "Texture.h"
-#include "Sprite.h"
-#include "TextNode.h"
-#include "Timer.h"
-#include "IFile.h" // for dataPath()
+#include <ncine/Random.h>
+#include <ncine/Application.h>
+#include <ncine/Texture.h>
+#include <ncine/Sprite.h>
+#include <ncine/TextNode.h>
+#include <ncine/Timer.h>
+#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {

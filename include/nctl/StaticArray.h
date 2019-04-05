@@ -1,7 +1,7 @@
 #ifndef CLASS_NCTL_STATICARRAY
 #define CLASS_NCTL_STATICARRAY
 
-#include "common_macros.h"
+#include <ncine/common_macros.h>
 #include "ArrayIterator.h"
 #include "ReverseIterator.h"
 #include "utility.h"

@@ -1,6 +1,6 @@
 #include "GLShaderUniformBlocks.h"
 #include "RenderResources.h"
-#include "nctl/StaticHashMapIterator.h"
+#include <nctl/StaticHashMapIterator.h>
 #include <cstring> // for memcpy()
 
 namespace ncine {

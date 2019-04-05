@@ -5,8 +5,8 @@
 #include "GLShaderProgram.h"
 #include "RenderBuffersManager.h"
 #include "RenderVaoPool.h"
-#include "nctl/StaticArray.h"
-#include "nctl/UniquePtr.h"
+#include <nctl/StaticArray.h>
+#include <nctl/UniquePtr.h>
 #include "Matrix4x4.h"
 
 namespace ncine {

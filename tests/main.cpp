@@ -1,5 +1,5 @@
 #include <cstdlib> // for EXIT_SUCCESS
-#include "PCApplication.h"
+#include <ncine/PCApplication.h>
 
 #if defined(_WIN32) && defined(NO_INTEGRATED_GPU)
 extern "C"

@@ -2,7 +2,7 @@
 #define CLASS_NCINE_MESHSPRITE
 
 #include "BaseSprite.h"
-#include "nctl/Array.h"
+#include <nctl/Array.h>
 
 namespace ncine {
 

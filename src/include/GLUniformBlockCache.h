@@ -4,8 +4,8 @@
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
 #include "GLUniformCache.h"
-#include "nctl/StaticHashMap.h"
-#include "nctl/String.h"
+#include <nctl/StaticHashMap.h>
+#include <nctl/String.h>
 
 namespace ncine {
 

@@ -1,12 +1,12 @@
 #include "apptest_texformats.h"
-#include "ncine_config.h"
-#include "Application.h"
-#include "SceneNode.h"
-#include "Texture.h"
-#include "Sprite.h"
-#include "TextNode.h"
-#include "IGfxCapabilities.h"
-#include "IFile.h" // for dataPath()
+#include <ncine/config.h>
+#include <ncine/Application.h>
+#include <ncine/SceneNode.h>
+#include <ncine/Texture.h>
+#include <ncine/Sprite.h>
+#include <ncine/TextNode.h>
+#include <ncine/IGfxCapabilities.h>
+#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 #ifndef __ANDROID__

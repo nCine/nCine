@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_FONTGLYPH
 #define CLASS_NCINE_FONTGLYPH
 
-#include "nctl/Array.h"
+#include <nctl/Array.h>
 #include "Rect.h"
 
 namespace ncine {

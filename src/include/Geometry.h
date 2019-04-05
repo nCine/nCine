@@ -2,7 +2,7 @@
 #define CLASS_NCINE_GEOMETRY
 
 #include "GLBufferObject.h"
-#include "nctl/UniquePtr.h"
+#include <nctl/UniquePtr.h>
 #include "RenderBuffersManager.h"
 
 namespace ncine {
