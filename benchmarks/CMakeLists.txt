@@ -42,3 +42,5 @@ foreach(BENCHMARK ${BENCHMARKS})
 		target_link_libraries(${BENCHMARK} shlwapi)
 	endif()
 endforeach()
+
+include(ncine_strip_binaries)

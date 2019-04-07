@@ -120,3 +120,5 @@ endif()
 
 # Export ANativeActivity_onCreate() - https://github.com/android-ndk/ndk/issues/381
 set_property(TARGET game APPEND_STRING PROPERTY LINK_FLAGS "-u ANativeActivity_onCreate")
+
+include(ncine_strip_binaries)

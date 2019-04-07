@@ -1,0 +1,35 @@
+if(NCINE_STRIP_BINARIES AND CMAKE_BUILD_TYPE MATCHES "Release" AND EXISTS ${CMAKE_STRIP})
+	message(STATUS "Strip command: " ${CMAKE_STRIP})
+
+	get_directory_property(NCINE_BUILD_TARGETS ${CMAKE_BUILD_DIR} BUILDSYSTEM_TARGETS)
+	foreach(BUILD_TARGET ${NCINE_BUILD_TARGETS})
+		get_target_property(BUILD_TARGET_TYPE ${BUILD_TARGET} TYPE)
+		if(BUILD_TARGET_TYPE STREQUAL "STATIC_LIBRARY")
+			set(STRIP_MESSAGE "Stripping debug symbols from static library")
+			set(STRIP_ARGUMENTS "--strip-debug")
+			if(APPLE)
+				set(STRIP_ARGUMENTS "-S")
+			endif()
+		elseif(BUILD_TARGET_TYPE STREQUAL "SHARED_LIBRARY")
+			set(STRIP_MESSAGE "Stripping unneeded symbols from shared library")
+			set(STRIP_ARGUMENTS "--strip-unneeded")
+			if(APPLE)
+				set(STRIP_ARGUMENTS "-urS")
+			endif()
+
+		elseif(BUILD_TARGET_TYPE STREQUAL "EXECUTABLE")
+			set(STRIP_MESSAGE "Stripping all symbols from executable")
+			set(STRIP_ARGUMENTS "--strip-all")
+			if(APPLE)
+				set(STRIP_ARGUMENTS "-Sx")
+			endif()
+		endif()
+
+		if(BUILD_TARGET_TYPE STREQUAL "STATIC_LIBRARY" OR BUILD_TARGET_TYPE STREQUAL "SHARED_LIBRARY" OR
+		   BUILD_TARGET_TYPE STREQUAL "EXECUTABLE")
+			add_custom_command(TARGET ${BUILD_TARGET} POST_BUILD
+				COMMAND ${CMAKE_COMMAND} -E echo "${STRIP_MESSAGE} ${BUILD_TARGET}"
+				COMMAND ${CMAKE_STRIP} ${STRIP_ARGUMENTS} $<TARGET_FILE:${BUILD_TARGET}>)
+		endif()
+	endforeach()
+endif()

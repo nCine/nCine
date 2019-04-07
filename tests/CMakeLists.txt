@@ -73,3 +73,5 @@ if(STARTUP_TEST_INDEX GREATER -1)
 else()
 	message(FATAL_ERROR "Startup test target not found: \"${NCINE_STARTUP_TEST}\"")
 endif()
+
+include(ncine_strip_binaries)

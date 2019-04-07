@@ -35,3 +35,5 @@ if(WIN32)
 		target_include_directories(glapptest_fbo_cube PRIVATE "${EXTERNAL_MSVC_DIR}/include")
 	endif()
 endif()
+
+include(ncine_strip_binaries)

@@ -50,3 +50,5 @@ foreach(TEST ${TESTS})
 		set_target_properties(${TEST} PROPERTIES INSTALL_RPATH "@executable_path/${RELPATH_TO_LIB}")
 	endif()
 endforeach()
+
+include(ncine_strip_binaries)
