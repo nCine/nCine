@@ -29,6 +29,7 @@ class LuaEventHandler :
 
 	void onJoyButtonPressed(const JoyButtonEvent &event) override;
 	void onJoyButtonReleased(const JoyButtonEvent &event) override;
+	void onJoyHatMoved(const JoyHatEvent &event) override;
 	void onJoyAxisMoved(const JoyAxisEvent &event) override;
 
 	void onJoyMappedButtonPressed(const JoyMappedButtonEvent &event) override;

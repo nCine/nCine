@@ -26,6 +26,7 @@ class JoyMappedStateImpl : public JoyMappedState
 			buttons_[i] = false;
 		for (unsigned int i = 0; i < JoyMappedState::NumAxes; i++)
 			axesValues_[i] = 0.0f;
+		lastHatState_ = HatState::CENTERED;
 	}
 
 	bool isButtonPressed(ButtonName name) const override
@@ -45,8 +46,9 @@ class JoyMappedStateImpl : public JoyMappedState
 	}
 
   private:
-	bool buttons_[JoyMappedState::NumButtons];
+	unsigned char buttons_[JoyMappedState::NumButtons];
 	float axesValues_[JoyMappedState::NumAxes];
+	unsigned char lastHatState_;
 
 	friend class JoyMapping;
 };
@@ -67,6 +69,7 @@ class JoyMapping
 
 	void onJoyButtonPressed(const JoyButtonEvent &event);
 	void onJoyButtonReleased(const JoyButtonEvent &event);
+	void onJoyHatMoved(const JoyHatEvent &event);
 	void onJoyAxisMoved(const JoyAxisEvent &event);
 	bool onJoyConnected(const JoyConnectionEvent &event);
 	void onJoyDisconnected(const JoyConnectionEvent &event);
@@ -89,6 +92,7 @@ class JoyMapping
 
 		static const int MaxNumAxes = 16;
 		static const int MaxNumButtons = 16;
+		static const int MaxHatButtons = 4; // The four directions
 
 		class Guid
 		{
@@ -106,7 +110,7 @@ class JoyMapping
 		char name[MaxNameLength];
 		Axis axes[MaxNumAxes];
 		ButtonName buttons[MaxNumButtons];
-		int hats[MaxNumButtons];
+		ButtonName hats[MaxHatButtons];
 
 		MappedJoystick();
 	};
@@ -134,9 +138,11 @@ class JoyMapping
 	bool parsePlatformName(const char *start, const char *end) const;
 	int parseAxisName(const char *start, const char *end) const;
 	int parseButtonName(const char *start, const char *end) const;
-	int  parseAxisMapping(const char *start, const char *end, MappedJoystick::Axis &axis) const;
+	int parseAxisMapping(const char *start, const char *end, MappedJoystick::Axis &axis) const;
 	int parseButtonMapping(const char *start, const char *end) const;
 	int parseHatMapping(const char *start, const char *end) const;
+	int hatStateToIndex(unsigned char hatState) const;
+	void trimSpaces(const char **start, const char **end) const;
 };
 
 }

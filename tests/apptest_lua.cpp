@@ -125,6 +125,11 @@ void MyEventHandler::onJoyButtonReleased(const nc::JoyButtonEvent &event)
 	nc::LuaIInputEventHandler::onJoyButtonReleased(luaState_.state(), event);
 }
 
+void MyEventHandler::onJoyHatMoved(const nc::JoyHatEvent &event)
+{
+	nc::LuaIInputEventHandler::onJoyHatMoved(luaState_.state(), event);
+}
+
 void MyEventHandler::onJoyAxisMoved(const nc::JoyAxisEvent &event)
 {
 	nc::LuaIInputEventHandler::onJoyAxisMoved(luaState_.state(), event);

@@ -52,6 +52,8 @@ class DLL_PUBLIC IInputManager
 	virtual const char *joyGuid(int joyId) const = 0;
 	/// Returns the number of available buttons for the specified joystick
 	virtual int joyNumButtons(int joyId) const = 0;
+	/// Returns the number of available hats for the specified joystick
+	virtual int joyNumHats(int joyId) const = 0;
 	/// Returns the number of available axes for the specified joystick
 	virtual int joyNumAxes(int joyId) const = 0;
 	/// Returns the state of the joystick

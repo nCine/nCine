@@ -93,17 +93,20 @@ class GlfwJoystickState : public JoystickState
 {
   public:
 	GlfwJoystickState()
-		: numButtons_(0), numAxes_(0), buttons_(nullptr), axesValues_(nullptr) { }
+		: numButtons_(0), numHats_(0), numAxes_(0), buttons_(nullptr), hats_(nullptr), axesValues_(nullptr) { }
 
 	bool isButtonPressed(int buttonId) const override;
+	unsigned char hatState(int hatId) const override;
 	short int axisValue(int axisId) const override;
 	float axisNormValue(int axisId) const override;
 
   private:
 	int numButtons_;
+	int numHats_;
 	int numAxes_;
 
 	const unsigned char *buttons_;
+	const unsigned char *hats_;
 	const float *axesValues_;
 
 	friend class GlfwInputManager;
@@ -128,6 +131,7 @@ class GlfwInputManager : public IInputManager
 	const char *joyName(int joyId) const override;
 	const char *joyGuid(int joyId) const override;
 	int joyNumButtons(int joyId) const override;
+	int joyNumHats(int joyId) const override;
 	int joyNumAxes(int joyId) const override;
 	const JoystickState &joystickState(int joyId) const override;
 
@@ -142,16 +146,20 @@ class GlfwInputManager : public IInputManager
 		JoystickEventsSimulator();
 		void resetJoystickState(int joyId);
 		void simulateButtonsEvents(int joyId, int numButtons, const unsigned char *buttons);
+		void simulateHatsEvents(int joyId, int numHats, const unsigned char *hats);
 		void simulateAxesEvents(int joyId, int numAxes, const float *axesValues);
 
 	  private:
 		static const unsigned int MaxNumButtons = 16;
+		static const unsigned int MaxNumHats = 4;
 		static const unsigned int MaxNumAxes = 16;
 		/// Minimum difference between two axis readings in order to trigger an event
 		static const float AxisEventTolerance;
 
 		/// Old state used to simulate joystick buttons events
 		unsigned char buttonsState_[MaxNumJoysticks][MaxNumButtons];
+		/// Old state used to simulate joystick hats events
+		unsigned char hatsState_[MaxNumJoysticks][MaxNumHats];
 		/// Old state used to simulate joystick axes events
 		float axesValuesState_[MaxNumJoysticks][MaxNumAxes];
 	};
@@ -165,6 +173,7 @@ class GlfwInputManager : public IInputManager
 	static GlfwJoystickState nullJoystickState_;
 	static nctl::StaticArray<GlfwJoystickState, MaxNumJoysticks> joystickStates_;
 	static JoyButtonEvent joyButtonEvent_;
+	static JoyHatEvent joyHatEvent_;
 	static JoyAxisEvent joyAxisEvent_;
 	static JoyConnectionEvent joyConnectionEvent_;
 	static JoystickEventsSimulator joyEventsSimulator_;

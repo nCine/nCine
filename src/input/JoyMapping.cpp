@@ -48,8 +48,8 @@ JoyMapping::MappedJoystick::MappedJoystick()
 		axes[i].name = AxisName::UNKNOWN;
 	for (unsigned int i = 0; i < MaxNumButtons; i++)
 		buttons[i] = ButtonName::UNKNOWN;
-	for (unsigned int i = 0; i < MaxNumButtons; i++)
-		hats[i] = static_cast<int>(ButtonName::UNKNOWN);
+	for (unsigned int i = 0; i < MaxHatButtons; i++)
+		hats[i] = ButtonName::UNKNOWN;
 }
 
 JoyMapping::MappedJoystick::Guid::Guid()
@@ -234,6 +234,50 @@ void JoyMapping::onJoyButtonReleased(const JoyButtonEvent &event)
 	}
 }
 
+void JoyMapping::onJoyHatMoved(const JoyHatEvent &event)
+{
+	if (inputEventHandler_ == nullptr)
+		return;
+
+	const int idToIndex = mappingIndex_[event.joyId];
+	// Only the first gamepad hat is mapped
+	if (idToIndex != -1 && event.hatId == 0 &&
+	    mappedJoyStates_[event.joyId].lastHatState_ != event.hatState)
+	{
+		mappedButtonEvent_.joyId = event.joyId;
+
+		const unsigned char oldHatState = mappedJoyStates_[event.joyId].lastHatState_;
+		const unsigned char newHatState = event.hatState;
+
+		const unsigned char firstHatValue = HatState::UP;
+		const unsigned char lastHatValue = HatState::LEFT;
+		for (unsigned char hatValue = firstHatValue; hatValue <= lastHatValue; hatValue *= 2)
+		{
+			if ((oldHatState & hatValue) != (newHatState & hatValue))
+			{
+				int hatIndex = hatStateToIndex(hatValue);
+
+				mappedButtonEvent_.buttonName = mappings_[idToIndex].hats[hatIndex];
+				if (mappedButtonEvent_.buttonName != ButtonName::UNKNOWN)
+				{
+					const int buttonId = static_cast<int>(mappedButtonEvent_.buttonName);
+					if (newHatState & hatValue)
+					{
+						mappedJoyStates_[event.joyId].buttons_[buttonId] = true;
+						inputEventHandler_->onJoyMappedButtonPressed(mappedButtonEvent_);
+					}
+					else
+					{
+						mappedJoyStates_[event.joyId].buttons_[buttonId] = false;
+						inputEventHandler_->onJoyMappedButtonReleased(mappedButtonEvent_);
+					}
+				}
+			}
+			mappedJoyStates_[event.joyId].lastHatState_ = event.hatState;
+		}
+	}
+}
+
 void JoyMapping::onJoyAxisMoved(const JoyAxisEvent &event)
 {
 	if (inputEventHandler_ == nullptr)
@@ -392,9 +436,14 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 	}
 
 	const char *end = mappingString + strlen(mappingString);
-	const char *subStart = mappingString;
-	const char *subEnd = strchr(subStart, ',');
-	if (subEnd == nullptr)
+	const char *subStartUntrimmed = mappingString;
+	const char *subEndUntrimmed = strchr(subStartUntrimmed, ',');
+
+	const char *subStart = subStartUntrimmed;
+	const char *subEnd = subEndUntrimmed;
+	trimSpaces(&subStart, &subEnd);
+
+	if (subEndUntrimmed == nullptr)
 	{
 		LOGE("Invalid mapping string");
 		return false;
@@ -408,21 +457,27 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 	}
 	map.guid.fromString(subStart);
 
-	subStart += subLength + 1; // GUID plus the following  ',' character
-	subEnd = strchr(subStart, ',');
-	if (subEnd == nullptr)
+	subStartUntrimmed = subEndUntrimmed + 1; // GUID plus the following  ',' character
+	subEndUntrimmed = strchr(subStartUntrimmed, ',');
+	if (subEndUntrimmed == nullptr)
 	{
 		LOGE("Invalid mapping string");
 		return false;
 	}
+	subStart = subStartUntrimmed; subEnd = subEndUntrimmed;
+	trimSpaces(&subStart, &subEnd);
+
 	subLength = static_cast<unsigned int>(subEnd - subStart);
 	memcpy(map.name, subStart, nctl::min(subLength, MaxNameLength));
 	map.name[nctl::min(subLength, MaxNameLength)] = '\0';
 
-	subStart += subLength + 1; // name plus the following ',' character
-	subEnd = strchr(subStart, ',');
-	while (subStart < end && *subStart != '\n')
+	subStartUntrimmed = subEndUntrimmed + 1; // name plus the following ',' character
+	subEndUntrimmed = strchr(subStartUntrimmed, ',');
+	while (subStartUntrimmed < end && *subStartUntrimmed != '\n')
 	{
+		subStart = subStartUntrimmed; subEnd = subEndUntrimmed;
+		trimSpaces(&subStart, &subEnd);
+
 		const char *subMid = strchr(subStart, ':');
 		if (subMid == nullptr || subEnd == nullptr)
 		{
@@ -459,18 +514,19 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 					else
 					{
 						const int hatMapping = parseHatMapping(subMid + 1, subEnd);
-						map.hats[hatMapping] = static_cast<int>(buttonIndex);
+						if (hatMapping != -1 && hatMapping < MappedJoystick::MaxHatButtons)
+							map.hats[hatMapping] = static_cast<ButtonName>(buttonIndex);
 					}
 				}
 			}
 		}
 
-		subStart = subEnd + 1;
-		if (subStart < end)
+		subStartUntrimmed = subEndUntrimmed + 1;
+		if (subStartUntrimmed < end)
 		{
-			subEnd = strchr(subStart, ',');
-			if (subEnd == nullptr)
-				subEnd = end;
+			subEndUntrimmed = strchr(subStartUntrimmed, ',');
+			if (subEndUntrimmed == nullptr)
+				subEndUntrimmed = end;
 		}
 	}
 
@@ -596,10 +652,42 @@ int JoyMapping::parseHatMapping(const char *start, const char *end) const
 {
 	int hatMapping = -1;
 
+	int parsedHatMapping = -1;
 	if (end - start <= 4 && start[0] == 'h')
-		hatMapping = atoi(&start[3]);
+		parsedHatMapping = atoi(&start[3]);
+
+	// `h0.0` is not considered a valid mapping
+	if (parsedHatMapping > 0)
+		hatMapping = hatStateToIndex(parsedHatMapping);
 
 	return hatMapping;
+}
+
+int JoyMapping::hatStateToIndex(unsigned char hatState) const
+{
+	int hatIndex = -1;
+
+	switch (hatState)
+	{
+		case 1: hatIndex = 0; break;
+		case 2: hatIndex = 1; break;
+		case 4: hatIndex = 2; break;
+		case 8: hatIndex = 3; break;
+		default: hatIndex = -1; break;
+	}
+
+	return hatIndex;
+}
+
+void JoyMapping::trimSpaces(const char **start, const char **end) const
+{
+	while(**start == ' ')
+		(*start)++;
+
+	(*end)--;
+	while(**end == ' ')
+		(*end)--;
+	(*end)++;
 }
 
 }

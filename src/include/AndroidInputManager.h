@@ -90,6 +90,7 @@ class AndroidJoystickState : JoystickState
 	AndroidJoystickState();
 
 	bool isButtonPressed(int buttonId) const override;
+	unsigned char hatState(int hatId) const override;
 	short int axisValue(int axisId) const override;
 	float axisNormValue(int axisId) const override;
 
@@ -106,12 +107,15 @@ class AndroidJoystickState : JoystickState
 	char name_[MaxNameLength];
 
 	int numButtons_;
+	int numHats_;
 	int numAxes_;
 	bool hasDPad_;
+	bool hasHatAxes_;
 	short int buttonsMapping_[MaxButtons];
 	short int axesMapping_[MaxAxes];
 	bool buttons_[MaxButtons];
 	float axesValues_[MaxAxes];
+	unsigned char hatState_; // no more than one hat is supported
 
 	friend class AndroidInputManager;
 };
@@ -143,6 +147,7 @@ class AndroidInputManager : public IInputManager
 	const char *joyName(int joyId) const override;
 	const char *joyGuid(int joyId) const override;
 	int joyNumButtons(int joyId) const override;
+	int joyNumHats(int joyId) const override;
 	int joyNumAxes(int joyId) const override;
 	const JoystickState &joystickState(int joyId) const override;
 
@@ -169,6 +174,7 @@ class AndroidInputManager : public IInputManager
 	static AndroidJoystickState nullJoystickState_;
 	static AndroidJoystickState joystickStates_[MaxNumJoysticks];
 	static JoyButtonEvent joyButtonEvent_;
+	static JoyHatEvent joyHatEvent_;
 	static JoyAxisEvent joyAxisEvent_;
 	static JoyConnectionEvent joyConnectionEvent_;
 	/// Update rate of `updateJoystickConnections()` in seconds

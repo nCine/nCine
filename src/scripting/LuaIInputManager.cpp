@@ -23,6 +23,7 @@ namespace IInputManager
 	static const char *joyName = "joy_name";
 	static const char *joyGuid = "joy_guid";
 	static const char *joyNumButtons = "joy_num_buttons";
+	static const char *joyNumHats = "joy_num_hats";
 	static const char *joyNumAxes = "joy_num_axes";
 	static const char *joystickState = "joy_state";
 
@@ -69,6 +70,7 @@ void LuaIInputManager::expose(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::IInputManager::joyName, joyName);
 	LuaUtils::addFunction(L, LuaNames::IInputManager::joyGuid, joyGuid);
 	LuaUtils::addFunction(L, LuaNames::IInputManager::joyNumButtons, joyNumButtons);
+	LuaUtils::addFunction(L, LuaNames::IInputManager::joyNumHats, joyNumHats);
 	LuaUtils::addFunction(L, LuaNames::IInputManager::joyNumAxes, joyNumAxes);
 	LuaUtils::addFunction(L, LuaNames::IInputManager::joystickState, joystickState);
 
@@ -157,6 +159,16 @@ int LuaIInputManager::joyNumButtons(lua_State *L)
 
 	const int numButtons = theApplication().inputManager().joyNumButtons(joyId);
 	LuaUtils::push(L, numButtons);
+
+	return 1;
+}
+
+int LuaIInputManager::joyNumHats(lua_State *L)
+{
+	const int joyId = LuaUtils::retrieve<int32_t>(L, -1);
+
+	const int numHats = theApplication().inputManager().joyNumHats(joyId);
+	LuaUtils::push(L, numHats);
 
 	return 1;
 }

@@ -91,6 +91,7 @@ class SdlJoystickState : public JoystickState
 	SdlJoystickState() : sdlJoystick_(nullptr) { }
 
 	bool isButtonPressed(int buttonId) const override;
+	unsigned char hatState(int hatId) const override;
 	short int axisValue(int axisId) const override;
 	float axisNormValue(int axisId) const override;
 
@@ -123,12 +124,11 @@ class SdlInputManager : public IInputManager
 	const char *joyName(int joyId) const override;
 	const char *joyGuid(int joyId) const override;
 	int joyNumButtons(int joyId) const override;
+	int joyNumHats(int joyId) const override;
 	int joyNumAxes(int joyId) const override;
 	const JoystickState &joystickState(int joyId) const override;
 
 	void setMouseCursorMode(MouseCursorMode mode) override;
-
-	static short int hatEnumToAxisValue(unsigned char hatState, bool upDownAxis);
 
   private:
 	static const int MaxNumJoysticks = 16;
@@ -144,6 +144,7 @@ class SdlInputManager : public IInputManager
 	static SDL_Joystick *sdlJoysticks_[MaxNumJoysticks];
 	static nctl::StaticArray<SdlJoystickState, MaxNumJoysticks> joystickStates_;
 	static JoyButtonEvent joyButtonEvent_;
+	static JoyHatEvent joyHatEvent_;
 	static JoyAxisEvent joyAxisEvent_;
 	static JoyConnectionEvent joyConnectionEvent_;
 

@@ -38,6 +38,7 @@ int AndroidInputManager::simulatedMouseButtonState_ = 0;
 AndroidJoystickState AndroidInputManager::nullJoystickState_;
 AndroidJoystickState AndroidInputManager::joystickStates_[MaxNumJoysticks];
 JoyButtonEvent AndroidInputManager::joyButtonEvent_;
+JoyHatEvent AndroidInputManager::joyHatEvent_;
 JoyAxisEvent AndroidInputManager::joyAxisEvent_;
 JoyConnectionEvent AndroidInputManager::joyConnectionEvent_;
 const float AndroidInputManager::JoyCheckRate = 0.25f;
@@ -55,7 +56,8 @@ const int AndroidJoystickState::AxesToMap[AndroidJoystickState::NumAxesToMap] =
 ///////////////////////////////////////////////////////////
 
 AndroidJoystickState::AndroidJoystickState()
-	: deviceId_(-1), numButtons_(0), numAxes_(0), hasDPad_(false)
+	: deviceId_(-1), numButtons_(0), numAxes_(0),
+	  hasDPad_(false), hasHatAxes_(false), hatState_(HatState::CENTERED)
 {
 	guid_[0] = '\0';
 	name_[0] = '\0';
@@ -113,6 +115,14 @@ bool AndroidJoystickState::isButtonPressed(int buttonId) const
 	return isPressed;
 }
 
+unsigned char AndroidJoystickState::hatState(int hatId) const
+{
+	unsigned char hatState = HatState::CENTERED;
+	if (hatId >= 0 && hatId < numHats_)
+		hatState = hatState_;
+	return hatState;
+}
+
 short int AndroidJoystickState::axisValue(int axisId) const
 {
 	// If the joystick is not present the returned value is zero
@@ -128,7 +138,6 @@ float AndroidJoystickState::axisNormValue(int axisId) const
 		axisValue = axesValues_[axisId];
 	return axisValue;
 }
-
 
 /*! This method is called by `enableAccelerometer()` and when the application gains focus */
 void AndroidInputManager::enableAccelerometerSensor()
@@ -252,6 +261,16 @@ int AndroidInputManager::joyNumButtons(int joyId) const
 	return numButtons;
 }
 
+int AndroidInputManager::joyNumHats(int joyId) const
+{
+	int numHats = -1;
+
+	if (isJoyPresent(joyId))
+		numHats = joystickStates_[joyId].numHats_;
+
+	return numHats;
+}
+
 int AndroidInputManager::joyNumAxes(int joyId) const
 {
 	int numAxes = -1;
@@ -318,64 +337,79 @@ bool AndroidInputManager::processGamepadEvent(const AInputEvent *event)
 				}
 			}
 
-			// Handling a D-Pad button event as an axis value
 			if (keyCode >= AKEYCODE_DPAD_UP && keyCode < AKEYCODE_DPAD_CENTER)
 			{
-				int axisIndex = -1;
-				float axisValue = 1.0f;
+				joyHatEvent_.joyId = joyId;
+				joyHatEvent_.hatId = 0; // No more than one hat is supported
+
+				unsigned char hatState = joystickStates_[joyId].hatState_;
+				unsigned char hatValue = 0;
+
 				switch (keyCode)
 				{
 					case AKEYCODE_DPAD_UP:
-						axisIndex = joystickStates_[joyId].numAxes_ - 1;
-						axisValue = -1.0f;
+						hatValue = HatState::UP;
 						break;
 					case AKEYCODE_DPAD_DOWN:
-						axisIndex = joystickStates_[joyId].numAxes_ - 1;
-						axisValue = 1.0f;
+						hatValue = HatState::DOWN;
 						break;
 					case AKEYCODE_DPAD_LEFT:
-						axisIndex = joystickStates_[joyId].numAxes_ - 2;
-						axisValue = -1.0f;
+						hatValue = HatState::LEFT;
 						break;
 					case AKEYCODE_DPAD_RIGHT:
-						axisIndex = joystickStates_[joyId].numAxes_ - 2;
-						axisValue = 1.0f;
+						hatValue = HatState::RIGHT;
 						break;
 				}
-
 				if (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN)
-					joystickStates_[joyId].axesValues_[axisIndex] = axisValue;
+					hatState |= hatValue;
 				else
-					joystickStates_[joyId].axesValues_[axisIndex] = 0.0f;
+					hatState &= ~hatValue;
 
-				joyAxisEvent_.joyId = joyId;
-				joyAxisEvent_.axisId = axisIndex;
-				joyAxisEvent_.value = axisValue * MaxAxisValue;
-				joyAxisEvent_.normValue = axisValue;
-				joyMapping_.onJoyAxisMoved(joyAxisEvent_);
-				inputEventHandler_->onJoyAxisMoved(joyAxisEvent_);
+				if (joystickStates_[joyId].hatState_ != hatState)
+				{
+					joystickStates_[joyId].hatState_ = hatState;
+					joyHatEvent_.hatState = joystickStates_[joyId].hatState_;
+
+					joyMapping_.onJoyHatMoved(joyHatEvent_);
+					inputEventHandler_->onJoyHatMoved(joyHatEvent_);
+				}
 			}
 		}
 		else if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
 		{
 			joyAxisEvent_.joyId = joyId;
 
-			int numAxesNoDPad = joystickStates_[joyId].numAxes_;
-			if (joystickStates_[joyId].hasDPad_)
-			{
-				// numAxesNoDPad -= 2;
-
-				// D-Pad already handled as the two axes
-				// AMOTION_EVENT_AXIS_HAT_X and AMOTION_EVENT_AXIS_HAT_Y
-			}
-			for (int i = 0; i < numAxesNoDPad; i++)
+			unsigned char hatState = 0;
+			for (int i = 0; i < joystickStates_[joyId].numAxes_; i++)
 			{
 				const int axis = joystickStates_[joyId].axesMapping_[i];
 				const float axisValue = AMotionEvent_getAxisValue(event, axis, 0);
 				joystickStates_[joyId].axesValues_[i] = axisValue;
 
 				const float AxisThresholdValue = 0.01f;
-				if (axisValue > AxisThresholdValue || axisValue < -AxisThresholdValue)
+				const float HatThresholdValue = 0.99f;
+
+				if (axis == AMOTION_EVENT_AXIS_HAT_X || axis == AMOTION_EVENT_AXIS_HAT_Y)
+				{
+					joyHatEvent_.joyId = joyId;
+					joyHatEvent_.hatId = 0; // No more than one hat is supported
+
+					if (axis == AMOTION_EVENT_AXIS_HAT_X)
+					{
+						if (axisValue > HatThresholdValue)
+							hatState |= HatState::RIGHT;
+						else if (axisValue < -HatThresholdValue)
+							hatState |= HatState::LEFT;
+					}
+					else
+					{
+						if (axisValue > HatThresholdValue)
+							hatState |= HatState::DOWN;
+						else if (axisValue < -HatThresholdValue)
+							hatState |= HatState::UP;
+					}
+				}
+				else if (axisValue > AxisThresholdValue || axisValue < -AxisThresholdValue)
 				{
 					joyAxisEvent_.axisId = i;
 					joyAxisEvent_.value = axisValue * MaxAxisValue;
@@ -383,6 +417,15 @@ bool AndroidInputManager::processGamepadEvent(const AInputEvent *event)
 					joyMapping_.onJoyAxisMoved(joyAxisEvent_);
 					inputEventHandler_->onJoyAxisMoved(joyAxisEvent_);
 				}
+			}
+
+			if (joystickStates_[joyId].hatState_ != hatState)
+			{
+				joystickStates_[joyId].hatState_ = hatState;
+				joyHatEvent_.hatState = joystickStates_[joyId].hatState_;
+
+				joyMapping_.onJoyHatMoved(joyHatEvent_);
+				inputEventHandler_->onJoyHatMoved(joyHatEvent_);
 			}
 		}
 	}
@@ -718,7 +761,6 @@ void AndroidInputManager::deviceInfo(int deviceId, int joyId)
 			inputDevice.hasKeys(buttonsToCheck, maxButtons, checkedButtons);
 		}
 
-
 		memset(deviceInfoString, 0, MaxStringLength);
 		for (int i = 0; i < maxButtons; i++)
 		{
@@ -758,6 +800,7 @@ void AndroidInputManager::deviceInfo(int deviceId, int joyId)
 		}
 
 		memset(deviceInfoString, 0, MaxStringLength);
+		joystickStates_[joyId].hasHatAxes_ = true;
 		// InputDevice.getMotionRange()
 		int numAxes = 0;
 		for (int i = 0; i < AndroidJoystickState::NumAxesToMap; i++)
@@ -771,18 +814,22 @@ void AndroidInputManager::deviceInfo(int deviceId, int joyId)
 				sprintf(&deviceInfoString[strlen(deviceInfoString)], "%d:%d ", numAxes, axis);
 				numAxes++;
 			}
+			else
+			{
+				if ((axis == AMOTION_EVENT_AXIS_HAT_X || axis == AMOTION_EVENT_AXIS_HAT_Y) &&
+				    joystickStates_[joyId].hasHatAxes_ == true)
+				{
+					joystickStates_[joyId].hasHatAxes_ = false;
+					LOGV_X("device (%d, %d) - Axis hats not detected", deviceId, joyId);
+				}
+			}
 		}
 		LOGV_X("device (%d, %d) - Axes %s", deviceId, joyId, deviceInfoString);
-
 		joystickStates_[joyId].numAxes_ = numAxes;
-		// Taking into account the D-Pad
-		if (joystickStates_[joyId].hasDPad_)
-		{
-			// joystickStates_[joyId].numAxes_ += 2;
 
-			// D-Pad already handled as the two axes
-			// AMOTION_EVENT_AXIS_HAT_X and AMOTION_EVENT_AXIS_HAT_Y
-		}
+		joystickStates_[joyId].numHats_ = 0;
+		if (joystickStates_[joyId].hasDPad_ || joystickStates_[joyId].hasHatAxes_)
+			joystickStates_[joyId].numHats_ = 1; // No more than one hat is supported
 	}
 }
 

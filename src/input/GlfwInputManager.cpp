@@ -27,6 +27,7 @@ KeyboardEvent GlfwInputManager::keyboardEvent_;
 GlfwJoystickState GlfwInputManager::nullJoystickState_;
 nctl::StaticArray<GlfwJoystickState, GlfwInputManager::MaxNumJoysticks> GlfwInputManager::joystickStates_;
 JoyButtonEvent GlfwInputManager::joyButtonEvent_;
+JoyHatEvent GlfwInputManager::joyHatEvent_;
 JoyAxisEvent GlfwInputManager::joyAxisEvent_;
 JoyConnectionEvent GlfwInputManager::joyConnectionEvent_;
 const float GlfwInputManager::JoystickEventsSimulator::AxisEventTolerance = 0.001f;
@@ -74,6 +75,14 @@ bool GlfwJoystickState::isButtonPressed(int buttonId) const
 	return isPressed;
 }
 
+unsigned char GlfwJoystickState::hatState(int hatId) const
+{
+	unsigned char hatState = HatState::CENTERED;
+	if (hatId >= 0 && hatId < numHats_)
+		hatState = hats_[hatId];
+	return hatState;
+}
+
 short int GlfwJoystickState::axisValue(int axisId) const
 {
 	// If the joystick is not present the returned value is zero
@@ -108,9 +117,11 @@ void GlfwInputManager::updateJoystickStates()
 		if (glfwJoystickPresent(GLFW_JOYSTICK_1 + joyId))
 		{
 			joystickStates_[joyId].buttons_ = glfwGetJoystickButtons(joyId, &joystickStates_[joyId].numButtons_);
+			joystickStates_[joyId].hats_ = glfwGetJoystickHats(joyId, &joystickStates_[joyId].numHats_);
 			joystickStates_[joyId].axesValues_ = glfwGetJoystickAxes(joyId, &joystickStates_[joyId].numAxes_);
 
 			joyEventsSimulator_.simulateButtonsEvents(joyId, joystickStates_[joyId].numButtons_, joystickStates_[joyId].buttons_);
+			joyEventsSimulator_.simulateHatsEvents(joyId, joystickStates_[joyId].numHats_, joystickStates_[joyId].hats_);
 			joyEventsSimulator_.simulateAxesEvents(joyId, joystickStates_[joyId].numAxes_, joystickStates_[joyId].axesValues_);
 		}
 	}
@@ -152,6 +163,16 @@ int GlfwInputManager::joyNumButtons(int joyId) const
 		glfwGetJoystickButtons(GLFW_JOYSTICK_1 + joyId, &numButtons);
 
 	return numButtons;
+}
+
+int GlfwInputManager::joyNumHats(int joyId) const
+{
+	int numHats = -1;
+
+	if (isJoyPresent(joyId))
+		glfwGetJoystickHats(GLFW_JOYSTICK_1 + joyId, &numHats);
+
+	return numHats;
 }
 
 int GlfwInputManager::joyNumAxes(int joyId) const
@@ -288,18 +309,16 @@ void GlfwInputManager::joystickCallback(int joy, int event)
 	{
 		int numButtons = -1;
 		int numAxes = -1;
+		int numHats = -1;
 		glfwGetJoystickButtons(joy, &numButtons);
 		glfwGetJoystickAxes(joy, &numAxes);
+		glfwGetJoystickHats(joy, &numHats);
 		updateJoystickStates();
 
-	#if GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
 		const char *guid = glfwGetJoystickGUID(joy);
-	#else
-		const char *guid = nullptr;
-	#endif
 
-		LOGI_X("Joystick %d \"%s\" (%s) has been connected - %d axes, %d buttons",
-		       joyId, glfwGetJoystickName(joy), guid, numAxes, numButtons);
+		LOGI_X("Joystick %d \"%s\" (%s) has been connected - %d axes, %d buttons, %d hats",
+		       joyId, glfwGetJoystickName(joy), guid, numAxes, numButtons, numHats);
 		if (inputEventHandler_ != nullptr)
 		{
 			joyMapping_.onJoyConnected(joyConnectionEvent_);
@@ -353,6 +372,25 @@ void GlfwInputManager::JoystickEventsSimulator::simulateButtonsEvents(int joyId,
 
 	if (numButtons > 0)
 		memcpy(buttonsState_[joyId], buttons, sizeof(unsigned char) * numButtons);
+}
+
+void GlfwInputManager::JoystickEventsSimulator::simulateHatsEvents(int joyId, int numHats, const unsigned char *hats)
+{
+	for (int hatId = 0; hatId < numHats; hatId++)
+	{
+		if (inputEventHandler_ != nullptr && hatsState_[joyId][hatId] != hats[hatId])
+		{
+			joyHatEvent_.joyId = joyId;
+			joyHatEvent_.hatId = hatId;
+			joyHatEvent_.hatState = hats[hatId];
+
+			joyMapping_.onJoyHatMoved(joyHatEvent_);
+			inputEventHandler_->onJoyHatMoved(joyHatEvent_);
+		}
+	}
+
+	if (numHats > 0)
+		memcpy(hatsState_[joyId], hats, sizeof(unsigned char) * numHats);
 }
 
 void GlfwInputManager::JoystickEventsSimulator::simulateAxesEvents(int joyId, int numAxes, const float *axesValues)

@@ -20,6 +20,7 @@ class LuaIInputManager
 	static int joyName(lua_State *L);
 	static int joyGuid(lua_State *L);
 	static int joyNumButtons(lua_State *L);
+	static int joyNumHats(lua_State *L);
 	static int joyNumAxes(lua_State *L);
 	static int joystickState(lua_State *L);
 

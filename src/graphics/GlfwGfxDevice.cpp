@@ -84,6 +84,7 @@ void GlfwGfxDevice::setWindowIcon(const char *windowIconFilename)
 
 void GlfwGfxDevice::initGraphics()
 {
+	glfwInitHint(GLFW_JOYSTICK_HAT_BUTTONS, GLFW_FALSE);
 	glfwSetErrorCallback(errorCallback);
 	FATAL_ASSERT_MSG(glfwInit() == GL_TRUE, "glfwInit() failed");
 }

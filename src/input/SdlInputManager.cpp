@@ -32,6 +32,7 @@ KeyboardEvent SdlInputManager::keyboardEvent_;
 SDL_Joystick *SdlInputManager::sdlJoysticks_[MaxNumJoysticks];
 nctl::StaticArray<SdlJoystickState, SdlInputManager::MaxNumJoysticks> SdlInputManager::joystickStates_;
 JoyButtonEvent SdlInputManager::joyButtonEvent_;
+JoyHatEvent SdlInputManager::joyHatEvent_;
 JoyAxisEvent SdlInputManager::joyAxisEvent_;
 JoyConnectionEvent SdlInputManager::joyConnectionEvent_;
 
@@ -103,25 +104,20 @@ bool SdlJoystickState::isButtonPressed(int buttonId) const
 	return isPressed;
 }
 
+unsigned char SdlJoystickState::hatState(int hatId) const
+{
+	unsigned char hatState = 0;
+	if (sdlJoystick_ != nullptr)
+		hatState = SDL_JoystickGetHat(sdlJoystick_, hatId);
+
+	return hatState;
+}
+
 short int SdlJoystickState::axisValue(int axisId) const
 {
-	if (sdlJoystick_ == nullptr)
-		return 0;
-
 	short int axisValue = 0;
-
-	const int numAxes = SDL_JoystickNumAxes(sdlJoystick_);
-	if (axisId < numAxes) // axisId is an analog axis
+	if (sdlJoystick_ != nullptr)
 		axisValue = SDL_JoystickGetAxis(sdlJoystick_, axisId);
-	else // axisId is a digital d-pad
-	{
-		const int hatId = (axisId - numAxes) / 2;
-		const unsigned char hatState = SDL_JoystickGetHat(sdlJoystick_, hatId);
-		const bool upDownAxis = ((axisId - numAxes) % 2) != 0; // odd axis is left-right, even axis is down-up
-
-		axisValue = SdlInputManager::hatEnumToAxisValue(hatState, upDownAxis);
-	}
-
 	return axisValue;
 }
 
@@ -192,8 +188,9 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 			joyAxisEvent_.normValue = joyAxisEvent_.value / float(MaxAxisValue);
 			break;
 		case SDL_JOYHATMOTION:
-			joyAxisEvent_.joyId = joyInstanceIdToDeviceIndex(event.jhat.which);
-			joyAxisEvent_.axisId = SDL_JoystickNumAxes(sdlJoysticks_[joyAxisEvent_.joyId]) + event.jhat.hat;
+			joyHatEvent_.joyId = joyInstanceIdToDeviceIndex(event.jhat.which);
+			joyHatEvent_.hatId = event.jhat.hat;
+			joyHatEvent_.hatState = event.jhat.value;
 			break;
 		default:
 			break;
@@ -233,15 +230,8 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 			inputEventHandler_->onJoyAxisMoved(joyAxisEvent_);
 			break;
 		case SDL_JOYHATMOTION:
-			// HACK: Always splitting a hat event into two axis ones,
-			// even if the value of one of the two axes doesn't change
-			joyAxisEvent_.value = hatEnumToAxisValue(event.jhat.value, false);
-			joyAxisEvent_.normValue = joyAxisEvent_.value / float(MaxAxisValue);
-			inputEventHandler_->onJoyAxisMoved(joyAxisEvent_);
-			joyAxisEvent_.axisId++;
-			joyAxisEvent_.value = hatEnumToAxisValue(event.jhat.value, true);
-			joyAxisEvent_.normValue = joyAxisEvent_.value / float(MaxAxisValue);
-			inputEventHandler_->onJoyAxisMoved(joyAxisEvent_);
+			joyMapping_.onJoyHatMoved(joyHatEvent_);
+			inputEventHandler_->onJoyHatMoved(joyHatEvent_);
 			break;
 		default:
 			break;
@@ -289,12 +279,22 @@ int SdlInputManager::joyNumButtons(int joyId) const
 	return numButtons;
 }
 
+int SdlInputManager::joyNumHats(int joyId) const
+{
+	int numHats = -1;
+
+	if (isJoyPresent(joyId))
+		numHats = SDL_JoystickNumHats(sdlJoysticks_[joyId]);
+
+	return numHats;
+}
+
 int SdlInputManager::joyNumAxes(int joyId) const
 {
 	int numAxes = -1;
 
 	if (isJoyPresent(joyId))
-		numAxes = SDL_JoystickNumAxes(sdlJoysticks_[joyId]) + (SDL_JoystickNumHats(sdlJoysticks_[joyId]) * 2);
+		numAxes = SDL_JoystickNumAxes(sdlJoysticks_[joyId]);
 
 	return numAxes;
 }
@@ -327,28 +327,6 @@ void SdlInputManager::setMouseCursorMode(MouseCursorMode mode)
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 //////////////////////////////////////////////////////////
-
-short int SdlInputManager::hatEnumToAxisValue(unsigned char hatState, bool upDownAxis)
-{
-	short int axisValue = 0;
-
-	if (upDownAxis == false) // odd axis is left-right
-	{
-		if (hatState == SDL_HAT_LEFT || hatState == SDL_HAT_LEFTUP || hatState == SDL_HAT_LEFTDOWN)
-			axisValue = -MaxAxisValue;
-		else if (hatState == SDL_HAT_RIGHT || hatState == SDL_HAT_RIGHTDOWN || hatState == SDL_HAT_RIGHTUP)
-			axisValue = MaxAxisValue;
-	}
-	else // even axis is down-up
-	{
-		if (hatState == SDL_HAT_DOWN || hatState == SDL_HAT_RIGHTDOWN || hatState == SDL_HAT_LEFTDOWN)
-			axisValue = -MaxAxisValue;
-		else if (hatState == SDL_HAT_UP || hatState == SDL_HAT_RIGHTUP || hatState == SDL_HAT_LEFTUP)
-			axisValue = MaxAxisValue;
-	}
-
-	return axisValue;
-}
 
 void SdlInputManager::handleJoyDeviceEvent(const SDL_Event &event)
 {

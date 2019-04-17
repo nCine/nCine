@@ -39,6 +39,7 @@ class MyEventHandler :
 
 	void onJoyButtonPressed(const nc::JoyButtonEvent &event) override;
 	void onJoyButtonReleased(const nc::JoyButtonEvent &event) override;
+	void onJoyHatMoved(const nc::JoyHatEvent &event) override;
 	void onJoyAxisMoved(const nc::JoyAxisEvent &event) override;
 
 	void onJoyMappedButtonPressed(const nc::JoyMappedButtonEvent &event) override;

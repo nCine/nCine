@@ -30,6 +30,23 @@ const float startUnpressedSize = 0.13f;
 const float guidePressedSize = 0.33f;
 const float guideUnpressedSize = 0.3f;
 
+const char *hatStateToString(unsigned char hatState)
+{
+	switch (hatState)
+	{
+		case nc::HatState::CENTERED: return "centered";
+		case nc::HatState::UP: return "up";
+		case nc::HatState::RIGHT: return "right";
+		case nc::HatState::DOWN: return "down";
+		case nc::HatState::LEFT: return "left";
+		case nc::HatState::RIGHT_UP: return "right-up";
+		case nc::HatState::RIGHT_DOWN: return "right-down";
+		case nc::HatState::LEFT_UP: return "left-up";
+		case nc::HatState::LEFT_DOWN: return "left-down";
+		default: return "unknown";
+	}
+}
+
 }
 
 nc::IAppEventHandler *createAppEventHandler()
@@ -87,6 +104,15 @@ void MyEventHandler::onInit()
 	sprites_[11]->setScale(guideUnpressedSize);
 	sprites_[12]->setScale(startUnpressedSize);
 
+	sprites_[13]->setPosition(appWidth * (-triggerPosX * 0.25 - 0.02f), -appWidth * 0.075f); // D-Pad Left
+	sprites_[14]->setPosition(appWidth * -triggerPosX * 0.25f, -appWidth * (0.075f - 0.02f)); // D-Pad Up
+	sprites_[15]->setPosition(appWidth * -triggerPosX * 0.25f, -appWidth * (0.075f + 0.02f)); // D-Pad Down
+	sprites_[16]->setPosition(appWidth * (-triggerPosX * 0.25 + 0.02f), -appWidth * 0.075f); // D-Pad Right
+	sprites_[13]->setScale(buttonUnpressedSize);
+	sprites_[14]->setScale(buttonUnpressedSize);
+	sprites_[15]->setScale(buttonUnpressedSize);
+	sprites_[16]->setScale(buttonUnpressedSize);
+
 	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
 	                                   (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
 	textNode_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get(), unsigned(MaxNumChars));
@@ -96,10 +122,11 @@ void MyEventHandler::onInit()
 	{
 		if (nc::theApplication().inputManager().isJoyPresent(i))
 		{
-			LOGI_X("Joystick %d (%s) - %d axes, %d buttons", i,
+			LOGI_X("Joystick %d (%s) - %d axes, %d buttons, %d hats", i,
 			       nc::theApplication().inputManager().joyName(i),
 			       nc::theApplication().inputManager().joyNumAxes(i),
-			       nc::theApplication().inputManager().joyNumButtons(i));
+			       nc::theApplication().inputManager().joyNumButtons(i),
+			       nc::theApplication().inputManager().joyNumHats(i));
 		}
 	}
 }
@@ -129,9 +156,10 @@ void MyEventHandler::onFrameStart()
 				const char *joyName = nc::theApplication().inputManager().joyName(i);
 				int numAxes = nc::theApplication().inputManager().joyNumAxes(i);
 				int numButtons = nc::theApplication().inputManager().joyNumButtons(i);
+				int numHats = nc::theApplication().inputManager().joyNumHats(i);
 				bool isMapped = nc::theApplication().inputManager().isJoyMapped(i);
 
-				joyString_->formatAppend("Joystick %d is %s: \"%s\" (%d axes, %d buttons)\n", i, isMapped ? "mapped" : "unmapped", joyName, numAxes, numButtons);
+				joyString_->formatAppend("Joystick %d is %s: \"%s\" (%d axes, %d buttons, %d hats)\n", i, isMapped ? "mapped" : "unmapped", joyName, numAxes, numButtons, numHats);
 			}
 		}
 
@@ -139,6 +167,7 @@ void MyEventHandler::onFrameStart()
 		{
 			int numAxes = nc::theApplication().inputManager().joyNumAxes(firstJoy);
 			int numButtons = nc::theApplication().inputManager().joyNumButtons(firstJoy);
+			int numHats = nc::theApplication().inputManager().joyNumHats(firstJoy);
 			const nc::JoystickState &joyState = nc::theApplication().inputManager().joystickState(firstJoy);
 
 			*joyString_ += "Axes:";
@@ -152,6 +181,12 @@ void MyEventHandler::onFrameStart()
 			{
 				buttonStates_[i] = joyState.isButtonPressed(i);
 				joyString_->formatAppend("  %d: (%u)", i, buttonStates_[i]);
+			}
+			*joyString_ += "\nHats:";
+			for (int i = 0; i < numHats; i++)
+			{
+				hatStates_[i] = joyState.hatState(i);
+				joyString_->formatAppend("  %d: (%s)", i, hatStateToString(hatStates_[i]));
 			}
 		}
 	}
@@ -199,6 +234,15 @@ void MyEventHandler::onFrameStart()
 	sprites_[10]->setScale(backPressed ? startPressedSize : startUnpressedSize);
 	sprites_[11]->setScale(guidePressed ? guidePressedSize : guideUnpressedSize);
 	sprites_[12]->setScale(startPressed ? startPressedSize : startUnpressedSize);
+
+	const bool dpadLeftPressed = joyMappedState.isButtonPressed(nc::ButtonName::DPAD_LEFT);
+	const bool dpadUpPressed = joyMappedState.isButtonPressed(nc::ButtonName::DPAD_UP);
+	const bool dpadDownPressed = joyMappedState.isButtonPressed(nc::ButtonName::DPAD_DOWN);
+	const bool dpadRighgtPressed = joyMappedState.isButtonPressed(nc::ButtonName::DPAD_RIGHT);
+	sprites_[13]->setScale(dpadLeftPressed ? buttonPressedSize : buttonUnpressedSize);
+	sprites_[14]->setScale(dpadUpPressed ? buttonPressedSize : buttonUnpressedSize);
+	sprites_[15]->setScale(dpadDownPressed ? buttonPressedSize : buttonUnpressedSize);
+	sprites_[16]->setScale(dpadRighgtPressed ? buttonPressedSize : buttonUnpressedSize);
 }
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)

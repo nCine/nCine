@@ -12,6 +12,7 @@ class MouseEvent;
 class MouseState;
 class ScrollEvent;
 class JoyButtonEvent;
+class JoyHatEvent;
 class JoyAxisEvent;
 class JoyMappedButtonEvent;
 class JoyMappedAxisEvent;
@@ -42,6 +43,7 @@ class DLL_PUBLIC LuaIInputEventHandler
 
 	static void onJoyButtonPressed(lua_State *L, const JoyButtonEvent &event);
 	static void onJoyButtonReleased(lua_State *L, const JoyButtonEvent &event);
+	static void onJoyHatMoved(lua_State *L, const JoyHatEvent &event);
 	static void onJoyAxisMoved(lua_State *L, const JoyAxisEvent &event);
 
 	static void onJoyMappedButtonPressed(lua_State *L, const JoyMappedButtonEvent &event);

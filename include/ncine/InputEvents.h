@@ -117,6 +117,8 @@ class DLL_PUBLIC JoystickState
   public:
 	/// Returns 'true' if the specified button is pressed
 	virtual bool isButtonPressed(int buttonId) const = 0;
+	/// Returns the state of the specified hat
+	virtual unsigned char hatState(int hatId) const = 0;
 	/// Returns a value between -32768 and 32767 for a joystick axis
 	virtual short int axisValue(int axisId) const = 0;
 	/// Returns a normalized value between -1.0 and 1.0 for a joystick axis
@@ -131,6 +133,34 @@ class DLL_PUBLIC JoyButtonEvent
 	int joyId;
 	/// Button id
 	int buttonId;
+};
+
+struct HatState
+{
+	enum
+	{
+		CENTERED = 0,
+		UP = 1,
+		RIGHT = 2,
+		DOWN = 4,
+		LEFT = 8,
+		RIGHT_UP = RIGHT | UP,
+		RIGHT_DOWN = RIGHT | DOWN,
+		LEFT_UP = LEFT | UP,
+		LEFT_DOWN = LEFT | DOWN
+	};
+};
+
+/// Information about a joystick hat event
+class DLL_PUBLIC JoyHatEvent
+{
+  public:
+	/// Joystick id
+	int joyId;
+	/// Hat id
+	int hatId;
+	/// Hat position state
+	unsigned char hatState;
 };
 
 /// Information about a joystick axis event
@@ -155,7 +185,7 @@ class DLL_PUBLIC JoyConnectionEvent
 	int joyId;
 };
 
-enum class ButtonName
+enum class ButtonName : short int
 {
 	UNKNOWN = -1,
 	A = 0,
@@ -168,10 +198,14 @@ enum class ButtonName
 	LSTICK,
 	RSTICK,
 	LBUMPER,
-	RBUMPER
+	RBUMPER,
+	DPAD_UP,
+	DPAD_DOWN,
+	DPAD_LEFT,
+	DPAD_RIGHT
 };
 
-enum class AxisName
+enum class AxisName : short int
 {
 	UNKNOWN = -1,
 	LX = 0,
@@ -180,8 +214,6 @@ enum class AxisName
 	RY,
 	LTRIGGER,
 	RTRIGGER,
-	DPAD_RX,
-	DPAD_RY
 };
 
 /// Information about a mapped joystick state
@@ -192,6 +224,8 @@ class DLL_PUBLIC JoyMappedState
 	static const unsigned int NumButtons = 15;
 	/// The number of joystick axes with a mapping name
 	static const unsigned int NumAxes = 6;
+
+	virtual ~JoyMappedState() { }
 
 	/// Returns 'true' if the specified button is pressed
 	virtual bool isButtonPressed(ButtonName name) const = 0;

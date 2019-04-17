@@ -129,6 +129,11 @@ void LuaEventHandler::onJoyButtonReleased(const JoyButtonEvent &event)
 	LuaIInputEventHandler::onJoyButtonReleased(luaState_->state(), event);
 }
 
+void LuaEventHandler::onJoyHatMoved(const JoyHatEvent &event)
+{
+	LuaIInputEventHandler::onJoyHatMoved(luaState_->state(), event);
+}
+
 void LuaEventHandler::onJoyAxisMoved(const JoyAxisEvent &event)
 {
 	LuaIInputEventHandler::onJoyAxisMoved(luaState_->state(), event);

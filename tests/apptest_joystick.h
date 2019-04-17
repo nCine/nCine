@@ -42,12 +42,14 @@ class MyEventHandler :
 	nctl::StaticArray<float, MaxNumAxes> axisValues_;
 	static const unsigned int MaxNumButtons = 20;
 	nctl::StaticArray<unsigned char, MaxNumButtons> buttonStates_;
+	static const unsigned int MaxNumHats = 2;
+	nctl::StaticArray<unsigned char, MaxNumHats> hatStates_;
 	static const unsigned int MaxNumChars = 384;
 	nctl::UniquePtr<nctl::String> joyString_;
 
 	nctl::UniquePtr<nc::Texture> texture_;
 	nctl::UniquePtr<nc::SceneNode> joyNode_;
-	static const unsigned int NumSprites = 13;
+	static const unsigned int NumSprites = 17;
 	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumSprites> sprites_;
 	nctl::UniquePtr<nc::Font> font_;
 	nctl::UniquePtr<nc::TextNode> textNode_;

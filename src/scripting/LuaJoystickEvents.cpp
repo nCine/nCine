@@ -12,8 +12,20 @@ namespace LuaNames {
 namespace LuaJoystickEvents
 {
 	static const char *isButtonPressed = "joy_button_pressed";
+	static const char *joyHatState = "joy_hat_state";
 	static const char *axisValue = "joy_axis_value";
 	static const char *axisNormValue = "joy_axis_normvalue";
+
+	static const char *CENTERED = "CENTERED";
+	static const char *UP = "UP";
+	static const char *RIGHT = "RIGHT";
+	static const char *DOWN = "DOWN";
+	static const char *LEFT = "LEFT";
+	static const char *RIGHT_UP = "RIGHT_UP";
+	static const char *RIGHT_DOWN = "RIGHT_DOWN";
+	static const char *LEFT_UP = "LEFT_UP";
+	static const char *LEFT_DOWN = "LEFT_DOWN";
+	static const char *HatState = "joy_hat_state";
 
 	static const char *UNKNOWN = "UNKNOWN";
 	static const char *A = "A";
@@ -27,6 +39,10 @@ namespace LuaJoystickEvents
 	static const char *RSTICK = "RSTICK";
 	static const char *LBUMPER = "LBUMPER";
 	static const char *RBUMPER = "RBUMPER";
+	static const char *DPAD_UP = "DPAD_UP";
+	static const char *DPAD_DOWN = "DPAD_DOWN";
+	static const char *DPAD_LEFT = "DPAD_LEFT";
+	static const char *DPAD_RIGHT = "DPAD_RIGHT";
 	static const char *ButtonName = "joy_button";
 
 	static const char *LX = "LX";
@@ -35,12 +51,12 @@ namespace LuaJoystickEvents
 	static const char *RY = "RY";
 	static const char *LTRIGGER = "LTRIGGER";
 	static const char *RTRIGGER = "RTRIGGER";
-	static const char *DPAD_RX = "DPAD_RX";
-	static const char *DPAD_RY = "DPAD_RY";
 	static const char *AxisName = "joy_axis";
 
 	static const char *joyId = "joy_id";
 	static const char *buttonId = "button_id";
+	static const char *hatId = "hat_id";
+	static const char *hatState = "hat_state";
 	static const char *axisId = "axis_id";
 	static const char *value = "value";
 	static const char *normValue = "norm_value";
@@ -64,6 +80,7 @@ void LuaJoystickEvents::expose(lua_State *L)
 	}
 
 	LuaUtils::addFunction(L, LuaNames::LuaJoystickEvents::isButtonPressed, isButtonPressed);
+	LuaUtils::addFunction(L, LuaNames::LuaJoystickEvents::joyHatState, hatState);
 	LuaUtils::addFunction(L, LuaNames::LuaJoystickEvents::axisValue, axisValue);
 	LuaUtils::addFunction(L, LuaNames::LuaJoystickEvents::axisNormValue, axisNormValue);
 
@@ -72,7 +89,21 @@ void LuaJoystickEvents::expose(lua_State *L)
 
 void LuaJoystickEvents::exposeConstants(lua_State *L)
 {
-	lua_createtable(L, 12, 0);
+	lua_createtable(L, 9, 0);
+
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::CENTERED, static_cast<int64_t>(HatState::CENTERED));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::UP, static_cast<int64_t>(HatState::UP));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::RIGHT, static_cast<int64_t>(HatState::RIGHT));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::DOWN, static_cast<int64_t>(HatState::DOWN));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::LEFT, static_cast<int64_t>(HatState::LEFT));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::RIGHT_UP, static_cast<int64_t>(HatState::RIGHT_UP));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::RIGHT_DOWN, static_cast<int64_t>(HatState::RIGHT_DOWN));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::LEFT_UP, static_cast<int64_t>(HatState::LEFT_UP));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::LEFT_DOWN, static_cast<int64_t>(HatState::LEFT_DOWN));
+
+	lua_setfield(L, -2, LuaNames::LuaJoystickEvents::HatState);
+
+	lua_createtable(L, 16, 0);
 
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::UNKNOWN, static_cast<int64_t>(ButtonName::UNKNOWN));
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::A, static_cast<int64_t>(ButtonName::A));
@@ -86,10 +117,14 @@ void LuaJoystickEvents::exposeConstants(lua_State *L)
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::RSTICK, static_cast<int64_t>(ButtonName::RSTICK));
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::LBUMPER, static_cast<int64_t>(ButtonName::LBUMPER));
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::RBUMPER, static_cast<int64_t>(ButtonName::RBUMPER));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::DPAD_UP, static_cast<int64_t>(ButtonName::DPAD_UP));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::DPAD_DOWN, static_cast<int64_t>(ButtonName::DPAD_DOWN));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::DPAD_LEFT, static_cast<int64_t>(ButtonName::DPAD_LEFT));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::DPAD_RIGHT, static_cast<int64_t>(ButtonName::DPAD_RIGHT));
 
 	lua_setfield(L, -2, LuaNames::LuaJoystickEvents::ButtonName);
 
-	lua_createtable(L, 9, 0);
+	lua_createtable(L, 7, 0);
 
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::UNKNOWN, static_cast<int64_t>(AxisName::UNKNOWN));
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::LX, static_cast<int64_t>(AxisName::LX));
@@ -98,8 +133,6 @@ void LuaJoystickEvents::exposeConstants(lua_State *L)
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::RY, static_cast<int64_t>(AxisName::RY));
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::LTRIGGER, static_cast<int64_t>(AxisName::LTRIGGER));
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::RTRIGGER, static_cast<int64_t>(AxisName::RTRIGGER));
-	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::DPAD_RX, static_cast<int64_t>(AxisName::DPAD_RX));
-	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::DPAD_RY, static_cast<int64_t>(AxisName::DPAD_RY));
 
 	lua_setfield(L, -2, LuaNames::LuaJoystickEvents::AxisName);
 }
@@ -109,6 +142,14 @@ void LuaJoystickEvents::pushJoyButtonEvent(lua_State *L, const JoyButtonEvent &e
 	lua_createtable(L, 2, 0);
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::joyId, event.joyId);
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::buttonId, event.buttonId);
+}
+
+void LuaJoystickEvents::pushJoyHatEvent(lua_State *L, const JoyHatEvent &event)
+{
+	lua_createtable(L, 3, 0);
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::joyId, event.joyId);
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::hatId, event.hatId);
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::hatState, event.hatState);
 }
 
 void LuaJoystickEvents::pushJoyAxisEvent(lua_State *L, const JoyAxisEvent &event)
@@ -166,6 +207,25 @@ int LuaJoystickEvents::isButtonPressed(lua_State *L)
 		LuaDebug::traceError(L, "Expecting a JoystickState or a JoyMappedState object instead of %s", LuaTypes::wrapperToName(wrapper->type));
 
 	LuaUtils::push(L, isButtonPressed);
+
+	return 1;
+}
+
+int LuaJoystickEvents::hatState(lua_State *L)
+{
+	unsigned char hatState = HatState::CENTERED;
+
+	LuaStateManager::UserDataWrapper *wrapper = LuaUtils::retrieveUserData<LuaStateManager::UserDataWrapper>(L, -2);
+	if (wrapper->type == LuaTypes::JOYSTICKSTATE)
+	{
+		const JoystickState *state = LuaClassWrapper<JoystickState>::unwrapUserData(L, -2);
+		const int hatId = LuaUtils::retrieve<int32_t>(L, -1);
+		hatState = state->hatState(hatId);
+	}
+	else
+		LuaDebug::traceError(L, "Expecting a JoystickState object instead of %s", LuaTypes::wrapperToName(wrapper->type));
+
+	LuaUtils::push(L, hatState);
 
 	return 1;
 }

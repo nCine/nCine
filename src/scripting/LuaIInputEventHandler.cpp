@@ -38,6 +38,7 @@ namespace IInputEventHandler
 
 	static const char *onJoyButtonPressed = "on_joy_button_pressed";
 	static const char *onJoyButtonReleased = "on_joy_button_released";
+	static const char *onJoyHatMoved = "on_joy_hat_moved";
 	static const char *onJoyAxisMoved = "on_joy_axis_moved";
 	static const char *onJoyMappedButtonPressed = "on_joymapped_button_pressed";
 	static const char *onJoyMappedButtonReleased = "on_joymapped_button_released";
@@ -230,6 +231,19 @@ void LuaIInputEventHandler::onJoyButtonReleased(lua_State *L, const JoyButtonEve
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaJoystickEvents::pushJoyButtonEvent(L, event);
+		lua_call(L, 1, 0);
+	}
+}
+
+void LuaIInputEventHandler::onJoyHatMoved(lua_State *L, const JoyHatEvent &event)
+{
+	lua_getglobal(L, LuaNames::ncine);
+	const int type = lua_getfield(L, -1, LuaNames::IInputEventHandler::onJoyHatMoved);
+
+	if (type != LUA_TNIL)
+	{
+		ASSERT(type == LUA_TFUNCTION);
+		LuaJoystickEvents::pushJoyHatEvent(L, event);
 		lua_call(L, 1, 0);
 	}
 }

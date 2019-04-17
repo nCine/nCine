@@ -126,6 +126,10 @@ const char *mappedButtonNameToString(ButtonName name)
 		case ButtonName::RSTICK: return "RStick";
 		case ButtonName::LBUMPER: return "LBumper";
 		case ButtonName::RBUMPER: return "RBumper";
+		case ButtonName::DPAD_UP: return "DPad_Up";
+		case ButtonName::DPAD_DOWN: return "DPad_Down";
+		case ButtonName::DPAD_LEFT: return "DPad_Left";
+		case ButtonName::DPAD_RIGHT: return "DPad_Right";
 	}
 }
 
@@ -140,8 +144,6 @@ const char *mappedAxisNameToString(AxisName name)
 		case AxisName::RY: return "RY";
 		case AxisName::LTRIGGER: return "LTrigger";
 		case AxisName::RTRIGGER: return "RTrigger";
-		case AxisName::DPAD_RX: return "DPad_RX";
-		case AxisName::DPAD_RY: return "DPad_RY";
 	}
 }
 
@@ -625,6 +627,7 @@ void ImGuiDebugOverlay::guiInputState()
 						ImGui::Text("Name: %s", input.joyName(joyId));
 						ImGui::Text("GUID: %s", input.joyGuid(joyId));
 						ImGui::Text("Num Buttons: %d", input.joyNumButtons(joyId));
+						ImGui::Text("Num Hats: %d", input.joyNumHats(joyId));
 						ImGui::Text("Num Axes: %d", input.joyNumAxes(joyId));
 						ImGui::Separator();
 
@@ -637,12 +640,18 @@ void ImGuiDebugOverlay::guiInputState()
 						}
 						ImGui::Text("Pressed buttons: %s", pressedButtons.data());
 
+						for (int hatId = 0; hatId < input.joyNumHats(joyId); hatId++)
+						{
+							unsigned char hatState = joyState.hatState(hatId);
+							ImGui::Text("Hat %d: %u", hatId, hatState);
+						}
+
 						for (int axisId = 0; axisId < input.joyNumAxes(joyId); axisId++)
 						{
 							const float axisValue = joyState.axisNormValue(axisId);
 							ImGui::Text("Axis %d:", axisId);
 							ImGui::SameLine();
-							ImGui::PlotHistogram("", &axisValue, 1, 0, nullptr, -1.0f, 1.0f, ImVec2(16.0f, 0.0f));
+							ImGui::ProgressBar((axisValue + 1.0f) / 2.0f);
 							ImGui::SameLine();
 							ImGui::Text("%.2f", axisValue);
 						}
@@ -666,7 +675,7 @@ void ImGuiDebugOverlay::guiInputState()
 								const float axisValue = joyMappedState.axisValue(axisName);
 								ImGui::Text("Axis %s:", mappedAxisNameToString(axisName));
 								ImGui::SameLine();
-								ImGui::PlotHistogram("", &axisValue, 1, 0, nullptr, -1.0f, 1.0f, ImVec2(16.0f, 0.0f));
+								ImGui::ProgressBar((axisValue + 1.0f) / 2.0f);
 								ImGui::SameLine();
 								ImGui::Text("%.2f", axisValue);
 							}
