@@ -36,7 +36,7 @@ MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, float xx, float yy)
 	type_ = ObjectType::MESH_SPRITE;
 	setLayer(DrawableNode::LayerBase::SCENE);
 	renderCommand_->setType(RenderCommand::CommandTypes::MESH_SPRITE);
-	const Material::ShaderProgramType shaderProgramType = texture_->numChannels() == 4 ?
+	const Material::ShaderProgramType shaderProgramType = texture_->numChannels() >= 3 ?
 		Material::ShaderProgramType::MESH_SPRITE : Material::ShaderProgramType::MESH_SPRITE_GRAY;
 	renderCommand_->material().setShaderProgramType(shaderProgramType);
 	spriteBlock_ = renderCommand_->material().uniformBlock("MeshSpriteBlock");

@@ -2,7 +2,6 @@
 
 #define NCINE_INCLUDE_LUA
 #include "common_headers.h"
-#include "common_macros.h"
 
 #include "LuaUtils.h"
 #include "LuaDebug.h"
@@ -44,6 +43,16 @@ void LuaUtils::pop(lua_State *L)
 	lua_pop(L, 1);
 }
 
+int LuaUtils::getField(lua_State *L, int index, const char *name)
+{
+	return lua_getfield(L, index, name);
+}
+
+void LuaUtils::setField(lua_State *L, int index, const char *name)
+{
+	lua_setfield(L, index, name);
+}
+
 bool LuaUtils::isNil(lua_State *L, int index)
 {
 	return lua_isnil(L, index);
@@ -72,6 +81,16 @@ int LuaUtils::rawGeti(lua_State *L, int index, int64_t n)
 void LuaUtils::rawSeti(lua_State *L, int index, int64_t i)
 {
 	lua_rawseti(L, index, i);
+}
+
+void LuaUtils::getGlobal(lua_State *L, const char *name)
+{
+	lua_getglobal(L, name);
+}
+
+void LuaUtils::setGlobal(lua_State *L, const char *name)
+{
+	lua_setglobal(L, name);
 }
 
 ///////////////////////////////////////////////////////////
@@ -149,15 +168,9 @@ void *LuaUtils::retrieveUserData(lua_State *L, int index)
 	return lua_touserdata(L, index);
 }
 
-template <class T>
-void LuaUtils::retrieveArray(lua_State *L, int index, int arrayIndex, int length, T *array)
+void LuaUtils::assertArrayLength(lua_State *L, int index, int length)
 {
-	LuaDebug::assert(L, lua_rawlen(L, index) >= arrayIndex + length, "Expecting an array of a minimum length of %d", arrayIndex + length);
-	for (int i = 0; i < length; i++)
-	{
-		lua_rawgeti(L, index, arrayIndex + i);
-		array[i] = retrieve<T>(L, -1);
-	}
+	LuaDebug::assert(L, lua_rawlen(L, index) >= length, "Expecting an array of a minimum length of %d", length);
 }
 
 ///////////////////////////////////////////////////////////
@@ -294,18 +307,6 @@ void LuaUtils::retrieveFieldLightUserData(lua_State *L, int index, const char *n
 {
 	lua_getfield(L, index, name);
 	LuaDebug::assert(L, lua_islightuserdata(L, -1), "Cannot retrieve a light userdata in table field \"%s\"", name);
-}
-
-template <class T>
-void LuaUtils::retrieveFieldArray(lua_State *L, int index, const char *name, int arrayIndex, int length, T *array)
-{
-	lua_getfield(L, index, name);
-	LuaDebug::assert(L, lua_rawlen(L, index) >= arrayIndex + length, "Expecting an array of a minimum length of %d", arrayIndex + length);
-	for (int i = 0; i < length; i++)
-	{
-		lua_rawgeti(L, index, arrayIndex + i);
-		array[i] = retrieve<T>(L, -1);
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -464,18 +465,6 @@ bool LuaUtils::tryRetrieveFieldLightUserData(lua_State *L, int index, const char
 	return false;
 }
 
-template <class T>
-bool LuaUtils::tryRetrieveFieldArray(lua_State *L, int index, const char *name, int arrayIndex, int length, T *array)
-{
-	lua_getfield(L, index, name);
-	if (lua_istable(L, -1))
-	{
-		retrieveArray<T>(L, -1, arrayIndex, length, array);
-		return true;
-	}
-	return false;
-}
-
 ///////////////////////////////////////////////////////////
 // RETRIEVE GLOBAL FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -612,12 +601,9 @@ void LuaUtils::retrieveGlobalLightUserData(lua_State *L, const char *name)
 	LuaDebug::assert(L, lua_islightuserdata(L, -1), "Cannot retrieve a light userdata with global name \"%s\"", name);
 }
 
-template <class T>
-void LuaUtils::retrieveGlobalArray(lua_State *L, const char *name, int arrayIndex, int length, T *array)
+void LuaUtils::assertIsTable(lua_State *L, const char *name)
 {
-	lua_getglobal(L, name);
 	LuaDebug::assert(L, lua_istable(L, -1), "Cannot retrieve a table with global name \"%s\"", name);
-	retrieveArray<T>(L, -1, arrayIndex, length, array);
 }
 
 ///////////////////////////////////////////////////////////
@@ -776,18 +762,6 @@ bool LuaUtils::tryRetrieveGlobalLightUserData(lua_State *L, const char *name)
 	return false;
 }
 
-template <class T>
-bool LuaUtils::tryRetrieveGlobalArray(lua_State *L, const char *name, int arrayIndex, int length, T *array)
-{
-	lua_getglobal(L, name);
-	if (lua_istable(L, -1))
-	{
-		retrieveArray<T>(L, -1, arrayIndex, length, array);
-		return true;
-	}
-	return false;
-}
-
 ///////////////////////////////////////////////////////////
 // PUSH FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -845,16 +819,6 @@ void LuaUtils::push(lua_State *L, bool boolean)
 void LuaUtils::push(lua_State *L, void *lightuserdata)
 {
 	lua_pushlightuserdata(L, lightuserdata);
-}
-
-template <class T>
-void LuaUtils::pushArray(lua_State *L, int index, int arrayIndex, int length, T *array)
-{
-	for (int i = 0; i < length; i++)
-	{
-		push(L, array[i]);
-		lua_rawseti(L, index, arrayIndex + i);
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -927,14 +891,68 @@ void LuaUtils::pushField(lua_State *L, const char *name, void *lightuserdata)
 	lua_setfield(L, -2, name);
 }
 
-template <class T>
-void LuaUtils::pushArrayField(lua_State *L, const char *name, int arrayIndex, int length, T *array)
-{
-	const bool found = tryRetrieveFieldTable(L, -1, name);
-	if (found == false)
-		lua_createtable(L, length, 0);
-	pushArray<T>(L, -2, arrayIndex, length, array);
+///////////////////////////////////////////////////////////
+// SET GLOBAL FUNCTIONS
+///////////////////////////////////////////////////////////
 
+void LuaUtils::setGlobal(lua_State *L, const char *name, double number)
+{
+	lua_pushnumber(L, number);
+	lua_setglobal(L, name);
+}
+
+void LuaUtils::setGlobal(lua_State *L, const char *name, float number)
+{
+	lua_pushnumber(L, static_cast<lua_Number>(number));
+	lua_setglobal(L, name);
+}
+
+void LuaUtils::setGlobal(lua_State *L, const char *name, int64_t integer)
+{
+	lua_pushinteger(L, integer);
+	lua_setglobal(L, name);
+}
+
+void LuaUtils::setGlobal(lua_State *L, const char *name, uint64_t integer)
+{
+	lua_pushinteger(L, static_cast<lua_Integer>(integer));
+	lua_setglobal(L, name);
+}
+
+void LuaUtils::setGlobal(lua_State *L, const char *name, int32_t integer)
+{
+	lua_pushinteger(L, integer);
+	lua_setglobal(L, name);
+}
+
+void LuaUtils::setGlobal(lua_State *L, const char *name, uint32_t integer)
+{
+	lua_pushinteger(L, static_cast<lua_Integer>(integer));
+	lua_setglobal(L, name);
+}
+
+void LuaUtils::setGlobal(lua_State *L, const char *name, const char *string)
+{
+	lua_pushstring(L, string);
+	lua_setglobal(L, name);
+}
+
+void LuaUtils::setGlobal(lua_State *L, const char *name, int (*func) (lua_State *L))
+{
+	lua_pushcfunction(L, func);
+	lua_setglobal(L, name);
+}
+
+void LuaUtils::setGlobal(lua_State *L, const char *name, bool boolean)
+{
+	lua_pushboolean(L, boolean);
+	lua_setglobal(L, name);
+}
+
+void LuaUtils::setGlobal(lua_State *L, const char *name, void *lightuserdata)
+{
+	lua_pushlightuserdata(L, lightuserdata);
+	lua_setglobal(L, name);
 }
 
 }

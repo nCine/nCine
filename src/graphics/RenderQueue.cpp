@@ -93,6 +93,7 @@ void RenderQueue::draw()
 		{
 			opaqueRenderCommand->commitVertices();
 			opaqueRenderCommand->commitIndices();
+			opaqueRenderCommand->commitTransformation();
 			opaqueRenderCommand->commitUniformBlocks();
 		}
 	}
@@ -105,6 +106,7 @@ void RenderQueue::draw()
 		{
 			transparentRenderCommand->commitVertices();
 			transparentRenderCommand->commitIndices();
+			transparentRenderCommand->commitTransformation();
 			transparentRenderCommand->commitUniformBlocks();
 		}
 	}

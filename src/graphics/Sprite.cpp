@@ -33,7 +33,7 @@ Sprite::Sprite(SceneNode *parent, Texture *texture, float xx, float yy)
 	type_ = ObjectType::SPRITE;
 	setLayer(DrawableNode::LayerBase::SCENE);
 	renderCommand_->setType(RenderCommand::CommandTypes::SPRITE);
-	const Material::ShaderProgramType shaderProgramType = texture_->numChannels() == 4 ?
+	const Material::ShaderProgramType shaderProgramType = texture_->numChannels() >= 3 ?
 		Material::ShaderProgramType::SPRITE : Material::ShaderProgramType::SPRITE_GRAY;
 	renderCommand_->material().setShaderProgramType(shaderProgramType);
 	spriteBlock_ = renderCommand_->material().uniformBlock("SpriteBlock");

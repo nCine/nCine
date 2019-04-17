@@ -31,7 +31,7 @@ TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
 	setLayer(DrawableNode::LayerBase::HUD);
 	renderCommand_->setType(RenderCommand::CommandTypes::TEXT);
 	renderCommand_->material().setTransparent(true);
-	const Material::ShaderProgramType shaderProgramType = font_->texture()->numChannels() == 4 ?
+	const Material::ShaderProgramType shaderProgramType = font_->texture()->numChannels() >= 3 ?
 		Material::ShaderProgramType::TEXTNODE : Material::ShaderProgramType::TEXTNODE_GRAY;
 	renderCommand_->material().setShaderProgramType(shaderProgramType);
 	textnodeBlock_ = renderCommand_->material().uniformBlock("TextnodeBlock");

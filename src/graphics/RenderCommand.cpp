@@ -48,14 +48,10 @@ void RenderCommand::issue()
 		return;
 
 	material_.bind();
-	commitTransformation();
 	material_.commitUniforms();
-	commitUniformBlocks();
-	uniformBlocksCommitted_ = false;
 
-	commitVertices();
+	uniformBlocksCommitted_ = false;
 	verticesCommitted_ = false;
-	commitIndices();
 	indicesCommitted_ = false;
 
 	if (scissor_.width > 0 && scissor_.height > 0)
