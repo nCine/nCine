@@ -204,11 +204,7 @@ void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
-		nc::theApplication().quit();
-	else if (event.sym == nc::KeySym::SPACE)
-		nc::theApplication().togglePause();
-	else if (event.sym == nc::KeySym::D || event.sym == nc::KeySym::RIGHT)
+	if (event.sym == nc::KeySym::D || event.sym == nc::KeySym::RIGHT)
 		handleInput(Direction::RIGHT);
 	else if (event.sym == nc::KeySym::A || event.sym == nc::KeySym::LEFT)
 		handleInput(Direction::LEFT);
@@ -216,6 +212,13 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		handleInput(Direction::UP);
 	else if (event.sym == nc::KeySym::S || event.sym == nc::KeySym::DOWN)
 		handleInput(Direction::DOWN);
+	else if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
+		nc::theApplication().quit();
+	else if (event.sym == nc::KeySym::SPACE)
+	{
+		const bool isSuspended = nc::theApplication().isSuspended();
+		nc::theApplication().setSuspended(!isSuspended);
+	}
 }
 
 void MyEventHandler::handleInput(Direction direction)

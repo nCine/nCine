@@ -161,6 +161,10 @@ void ImGuiDebugOverlay::guiWindow()
 	{
 		ImGui::Checkbox("Disable app input events", &disableAppInputEvents_);
 		ImGui::SameLine();
+		bool disableAutoSuspension = !theApplication().autoSuspension();
+		ImGui::Checkbox("Disable auto-suspension", &disableAutoSuspension);
+		theApplication().setAutoSuspension(!disableAutoSuspension);
+		ImGui::SameLine();
 		if (ImGui::Button("Quit"))
 			theApplication().quit();
 

@@ -98,5 +98,8 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
 		nc::theApplication().quit();
 	else if (event.sym == nc::KeySym::SPACE)
-		nc::theApplication().togglePause();
+	{
+		const bool isSuspended = nc::theApplication().isSuspended();
+		nc::theApplication().setSuspended(!isSuspended);
+	}
 }

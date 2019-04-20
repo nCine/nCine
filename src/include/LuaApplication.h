@@ -25,9 +25,11 @@ class LuaApplication
 	static int height(lua_State *L);
 	static int screenDimensions(lua_State *L);
 
-	static int isPaused(lua_State *L);
-	static int setPaused(lua_State *L);
-	static int togglePause(lua_State *L);
+	static int isSuspended(lua_State *L);
+	static int setSuspended(lua_State *L);
+
+	static int autoSuspension(lua_State *L);
+	static int setAutoSuspension(lua_State *L);
 
 	static int quit(lua_State *L);
 

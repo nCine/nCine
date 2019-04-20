@@ -48,20 +48,14 @@ float Application::interval() const
 	return frameTimer_->interval();
 }
 
-void Application::setPaused(bool paused)
+void Application::setSuspended(bool suspended)
 {
-	isPaused_ = paused;
-	if (isPaused_ == false)
+	isSuspended_ = suspended;
+	if (isSuspended_ == false)
 	{
 		frameTimer_->start();
 		profileTimer_->start();
 	}
-}
-
-void Application::togglePause()
-{
-	const bool paused = !isPaused_;
-	setPaused(paused);
 }
 
 ///////////////////////////////////////////////////////////
@@ -288,6 +282,11 @@ void Application::setFocus(bool hasFocus)
 			profileTimer_->start();
 		}
 	}
+}
+
+bool Application::shouldSuspend()
+{
+	return (!hasFocus_ && autoSuspension_) || isSuspended_;
 }
 
 }

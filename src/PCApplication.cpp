@@ -107,7 +107,7 @@ void PCApplication::run()
 						break;
 				}
 
-				if (!hasFocus_ || isPaused_)
+				if (shouldSuspend())
 				{
 					SDL_WaitEvent(&event);
 					SDL_PushEvent(&event);
@@ -115,7 +115,7 @@ void PCApplication::run()
 			}
 #elif defined(WITH_GLFW)
 			setFocus(GlfwInputManager::hasFocus());
-			if (!hasFocus_ || isPaused_)
+			if (shouldSuspend())
 				glfwWaitEvents();
 			else
 				glfwPollEvents();
@@ -123,7 +123,7 @@ void PCApplication::run()
 #endif
 		}
 
-		if (hasFocus_ && !isPaused_)
+		if (shouldSuspend() == false)
 			step();
 	}
 }

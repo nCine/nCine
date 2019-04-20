@@ -90,12 +90,17 @@ class DLL_PUBLIC Application
 	/// Returns the screen height as an integer number
 	inline int heightInt() const { return gfxDevice_->height(); }
 
-	/// Returns the value of the pause flag
-	inline bool isPaused() const { return isPaused_; }
-	/// Sets the pause flag value
-	void setPaused(bool paused);
-	/// Toggles the pause flag on and off
-	void togglePause();
+	/// Returns the value of the suspension flag
+	/*! If `true` the application is suspended, it will neither update nor receive events */
+	inline bool isSuspended() const { return isSuspended_; }
+	/// Sets the suspension flag value
+	void setSuspended(bool suspended);
+
+	/// Returns the value of the auto-suspension flag
+	/*! If `true` the application will be suspended when it loses focus */
+	inline bool autoSuspension() const { return autoSuspension_; }
+	/// Sets the auto-suspension flag value
+	inline void setAutoSuspension(bool autoSuspension) { autoSuspension_ = autoSuspension; }
 
 	/// Raises the quit flag
 	inline void quit() { shouldQuit_ = true; }
@@ -109,7 +114,8 @@ class DLL_PUBLIC Application
 	/// Maximum length for the information strings
 	static const unsigned int MaxTextLength = 256;
 
-	bool isPaused_;
+	bool isSuspended_;
+	bool autoSuspension_;
 	bool hasFocus_;
 	bool shouldQuit_;
 	AppConfiguration appCfg_;
@@ -129,7 +135,7 @@ class DLL_PUBLIC Application
 	nctl::UniquePtr<ImGuiDrawing> imguiDrawing_;
 #endif
 
-	Application() : isPaused_(false), hasFocus_(true), shouldQuit_(false) { }
+	Application() : isSuspended_(false), autoSuspension_(true), hasFocus_(true), shouldQuit_(false) { }
 
 	/// Must be called before giving control to the application
 	void initCommon();
@@ -146,6 +152,8 @@ class DLL_PUBLIC Application
 	Application(const Application &) = delete;
 	/// Deleted assignment operator
 	Application &operator=(const Application &) = delete;
+
+	bool shouldSuspend();
 
 	friend class PCApplication;
 	friend class AndroidApplication;

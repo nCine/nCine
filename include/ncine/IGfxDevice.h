@@ -54,8 +54,6 @@ class DLL_PUBLIC IGfxDevice
 	inline bool isFullScreen() const { return isFullScreen_; }
 	/// Sets the full screen flag of the window
 	virtual void setFullScreen(bool fullScreen) = 0;
-	/// Toggles between full screen and windowed mode
-	inline void toggleFullScreen() { bool fullScreen = !isFullScreen_; setFullScreen(fullScreen); }
 
 	/// Returns true if the window is resizable
 	inline bool isResizable() const { return isResizable_; }

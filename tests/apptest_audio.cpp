@@ -125,9 +125,7 @@ void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
-		nc::theApplication().quit();
-	else if (event.sym == nc::KeySym::M)
+	if (event.sym == nc::KeySym::M)
 		toggleMusic();
 	else if (event.sym == nc::KeySym::SPACE)
 		toggleSound();
@@ -171,6 +169,8 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		xPos_ = DefaultXPos;
 	else if (event.sym == nc::KeySym::KP3)
 		xPos_ += 0.1f;
+	else if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
+		nc::theApplication().quit();
 }
 
 void MyEventHandler::toggleMusic()

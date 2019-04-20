@@ -27,9 +27,11 @@ namespace Application
 	static const char *height = "get_height";
 	static const char *screenDimensions = "screen_dimensions";
 
-	static const char *isPaused = "is_paused";
-	static const char *setPaused = "set_paused";
-	static const char *togglePause = "toggle_pause";
+	static const char *isSuspended = "is_suspended";
+	static const char *setSuspended = "set_suspended";
+
+	static const char *autoSuspension = "get_auto_suspension";
+	static const char *setAutoSuspension = "set_auto_suspension";
 
 	static const char *quit = "quit";
 
@@ -74,9 +76,11 @@ void LuaApplication::expose(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::Application::height, height);
 	LuaUtils::addFunction(L, LuaNames::Application::screenDimensions, screenDimensions);
 
-	LuaUtils::addFunction(L, LuaNames::Application::isPaused, isPaused);
-	LuaUtils::addFunction(L, LuaNames::Application::setPaused, setPaused);
-	LuaUtils::addFunction(L, LuaNames::Application::togglePause, togglePause);
+	LuaUtils::addFunction(L, LuaNames::Application::isSuspended, isSuspended);
+	LuaUtils::addFunction(L, LuaNames::Application::setSuspended, setSuspended);
+
+	LuaUtils::addFunction(L, LuaNames::Application::autoSuspension, autoSuspension);
+	LuaUtils::addFunction(L, LuaNames::Application::setAutoSuspension, setAutoSuspension);
 
 	LuaUtils::addFunction(L, LuaNames::Application::quit, quit);
 
@@ -179,22 +183,29 @@ int LuaApplication::screenDimensions(lua_State *L)
 	return 1;
 }
 
-int LuaApplication::isPaused(lua_State *L)
+int LuaApplication::isSuspended(lua_State *L)
 {
-	LuaUtils::push(L, theApplication().isPaused());
+	LuaUtils::push(L, theApplication().isSuspended());
 	return 1;
 }
 
-int LuaApplication::setPaused(lua_State *L)
+int LuaApplication::setSuspended(lua_State *L)
 {
-	const bool paused = LuaUtils::retrieve<bool>(L, -1);
-	theApplication().setPaused(paused);
+	const bool suspended = LuaUtils::retrieve<bool>(L, -1);
+	theApplication().setSuspended(suspended);
 	return 0;
 }
 
-int LuaApplication::togglePause(lua_State *L)
+int LuaApplication::autoSuspension(lua_State *L)
 {
-	theApplication().togglePause();
+	LuaUtils::push(L, theApplication().autoSuspension());
+	return 1;
+}
+
+int LuaApplication::setAutoSuspension(lua_State *L)
+{
+	const bool autoSuspension = LuaUtils::retrieve<bool>(L, -1);
+	theApplication().setAutoSuspension(autoSuspension);
 	return 0;
 }
 
