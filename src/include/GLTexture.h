@@ -54,6 +54,7 @@ class GLTexture
 
 	friend class GLFramebufferObject;
 	friend class ImGuiDrawing;
+	friend class NuklearDrawing;
 };
 
 }

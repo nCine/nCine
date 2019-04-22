@@ -246,7 +246,7 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 				currCmd.geometry().setNumIndices(imCmd->ElemCount);
 				currCmd.geometry().setFirstIndex(imCmd->IdxOffset);
 				currCmd.geometry().setFirstVertex(imCmd->VtxOffset);
-				currCmd.setLayer(DrawableNode::LayerBase::HUD + numCmd);
+				currCmd.setLayer(DrawableNode::imGuiLayer() + numCmd);
 				currCmd.material().setTexture(reinterpret_cast<GLTexture *>(imCmd->TextureId));
 
 				renderQueue.addCommand(&currCmd);

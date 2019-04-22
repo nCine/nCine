@@ -5,6 +5,9 @@
 #if defined(WITH_SDL)
 	#include "SdlGfxDevice.h"
 	#include "SdlInputManager.h"
+	#if WITH_NUKLEAR
+		#include "NuklearSdlInput.h"
+	#endif
 #elif defined(WITH_GLFW)
 	#include "GlfwGfxDevice.h"
 	#include "GlfwInputManager.h"
@@ -112,6 +115,9 @@ void PCApplication::processEvents()
 #if defined(WITH_SDL)
 	SDL_Event event;
 
+	#if WITH_NUKLEAR
+	NuklearSdlInput::inputBegin();
+	#endif
 	while (SDL_PollEvent(&event))
 	{
 		switch (event.type)
@@ -144,6 +150,10 @@ void PCApplication::processEvents()
 		}
 	#endif
 	}
+	#if WITH_NUKLEAR
+	NuklearSdlInput::inputEnd();
+	#endif
+
 #elif defined(WITH_GLFW)
 	setFocus(GlfwInputManager::hasFocus());
 	if (shouldSuspend())

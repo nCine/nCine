@@ -22,6 +22,7 @@ endif()
 
 include(ncine_imported_targets)
 include(ncine_imgui)
+include(ncine_nuklear)
 include(ncine_tracy)
 
 if(NOT SDL2_FOUND AND NOT GLFW_FOUND)
@@ -80,6 +81,11 @@ if(NCINE_WITH_IMGUI)
 	target_include_directories(ncine
 		INTERFACE $<BUILD_INTERFACE:${IMGUI_INCLUDE_ONLY_DIR}>
 		PRIVATE $<BUILD_INTERFACE:${IMGUI_INCLUDE_ONLY_DIR}/ncine>)
+endif()
+if(NCINE_WITH_NUKLEAR)
+	target_include_directories(ncine
+		INTERFACE $<BUILD_INTERFACE:${NUKLEAR_INCLUDE_ONLY_DIR}>
+		PRIVATE $<BUILD_INTERFACE:${NUKLEAR_INCLUDE_ONLY_DIR}/ncine>)
 endif()
 if(NCINE_WITH_TRACY)
 	target_include_directories(ncine

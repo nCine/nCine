@@ -31,6 +31,10 @@
 	#include "ImGuiDebugOverlay.h"
 #endif
 
+#ifdef WITH_NUKLEAR
+	#include "NuklearDrawing.h"
+#endif
+
 #include "tracy_opengl.h"
 
 #ifdef WITH_RENDERDOC
@@ -122,6 +126,9 @@ void Application::initCommon()
 #ifdef WITH_IMGUI
 	imguiDrawing_ = nctl::makeUnique<ImGuiDrawing>(appCfg_.withScenegraph);
 #endif
+#ifdef WITH_NUKLEAR
+	nuklearDrawing_ = nctl::makeUnique<NuklearDrawing>(appCfg_.withScenegraph);
+#endif
 
 	if (appCfg_.withScenegraph)
 	{
@@ -183,6 +190,15 @@ void Application::step()
 	}
 #endif
 
+#ifdef WITH_NUKLEAR
+	{
+		ZoneScopedN("Nuklear newFrame");
+		profileStartTime_ = TimeStamp::now();
+		nuklearDrawing_->newFrame();
+		timings_[Timings::NUKLEAR] = profileStartTime_.secondsSince();
+	}
+#endif
+
 #ifdef WITH_LUA
 	LuaStatistics::update();
 #endif
@@ -239,6 +255,18 @@ void Application::step()
 	}
 #endif
 
+#ifdef WITH_NUKLEAR
+	{
+		ZoneScopedN("Nuklear endFrame");
+		profileStartTime_ = TimeStamp::now();
+		if (appCfg_.withScenegraph)
+			nuklearDrawing_->endFrame(*renderQueue_);
+		else
+			nuklearDrawing_->endFrame();
+		timings_[Timings::NUKLEAR] += profileStartTime_.secondsSince();
+	}
+#endif
+
 	gfxDevice_->update();
 	FrameMark;
 	TracyGpuCollect;
@@ -271,6 +299,9 @@ void Application::shutdownCommon()
 		appEventHandler_.reset(nullptr);
 	}
 
+#ifdef WITH_NUKLEAR
+	nuklearDrawing_.reset(nullptr);
+#endif
 #ifdef WITH_IMGUI
 	imguiDrawing_.reset(nullptr);
 #endif

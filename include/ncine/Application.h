@@ -15,6 +15,7 @@ class RenderQueue;
 class IInputManager;
 class IAppEventHandler;
 class ImGuiDrawing;
+class NuklearDrawing;
 
 /// Main entry point and handler for nCine applications
 class DLL_PUBLIC Application
@@ -52,6 +53,7 @@ class DLL_PUBLIC Application
 			VISIT,
 			DRAW,
 			IMGUI,
+			NUKLEAR,
 			FRAME_END,
 
 			COUNT
@@ -136,6 +138,9 @@ class DLL_PUBLIC Application
 	nctl::UniquePtr<IAppEventHandler> appEventHandler_;
 #ifdef WITH_IMGUI
 	nctl::UniquePtr<ImGuiDrawing> imguiDrawing_;
+#endif
+#ifdef WITH_NUKLEAR
+	nctl::UniquePtr<NuklearDrawing> nuklearDrawing_;
 #endif
 
 	Application();

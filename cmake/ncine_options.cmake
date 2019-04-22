@@ -28,6 +28,7 @@ option(NCINE_WITH_VORBIS "Enable Ogg Vorbis audio file loading" ON)
 option(NCINE_WITH_LUA "Enable Lua scripting integration" ON)
 
 option(NCINE_WITH_IMGUI "Enable the integration with Dear ImGui" ON)
+option(NCINE_WITH_NUKLEAR "Enable the integration with Nuklear" OFF)
 option(NCINE_WITH_TRACY "Enable the integration with the Tracy frame profiler" OFF)
 option(NCINE_WITH_RENDERDOC "Enable the integration with RenderDoc" OFF)
 

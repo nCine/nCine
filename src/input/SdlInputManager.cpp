@@ -13,6 +13,11 @@
 	#include "ImGuiSdlInput.h"
 #endif
 
+#ifdef WITH_NUKLEAR
+	#include "SdlGfxDevice.h"
+	#include "NuklearSdlInput.h"
+#endif
+
 namespace ncine {
 
 #ifdef __EMSCRIPTEN__
@@ -90,10 +95,18 @@ SdlInputManager::SdlInputManager()
 #ifdef WITH_IMGUI
 	ImGuiSdlInput::init(SdlGfxDevice::windowHandle());
 #endif
+
+#ifdef WITH_NUKLEAR
+	NuklearSdlInput::init(SdlGfxDevice::windowHandle());
+#endif
 }
 
 SdlInputManager::~SdlInputManager()
 {
+#ifdef WITH_NUKLEAR
+	NuklearSdlInput::shutdown();
+#endif
+
 #ifdef WITH_IMGUI
 	ImGuiSdlInput::shutdown();
 #endif
@@ -150,6 +163,10 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 {
 #ifdef WITH_IMGUI
 	ImGuiSdlInput::processEvent(&event);
+#endif
+
+#ifdef WITH_NUKLEAR
+	NuklearSdlInput::processEvent(&event);
 #endif
 
 	if (inputEventHandler_ == nullptr)

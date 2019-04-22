@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 2.8.2)
+
+project(nuklear-download NONE)
+
+include(ExternalProject)
+ExternalProject_Add(nuklear
+	GIT_REPOSITORY    https://github.com/vurtun/nuklear
+	GIT_SHALLOW       TRUE
+	SOURCE_DIR        "${CMAKE_BINARY_DIR}/nuklear-src"
+	CONFIGURE_COMMAND ""
+	BUILD_COMMAND     ""
+	INSTALL_COMMAND   ""
+	TEST_COMMAND      ""
+)

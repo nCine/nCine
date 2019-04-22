@@ -110,6 +110,9 @@ void ImGuiDebugOverlay::updateFrameTimings()
 		plotValues_[ValuesType::FRAME_TIME][index_] = theApplication().interval();
 		plotValues_[ValuesType::FRAME_START][index_] = timings[Application::Timings::FRAME_START];
 		plotValues_[ValuesType::IMGUI][index_] = timings[Application::Timings::IMGUI];
+#ifdef WITH_NUKLEAR
+		plotValues_[ValuesType::NUKLEAR][index_] = timings[Application::Timings::NUKLEAR];
+#endif
 		plotValues_[ValuesType::FRAME_END][index_] = timings[Application::Timings::FRAME_END];
 
 		if (appCfg.withScenegraph)
@@ -439,6 +442,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #endif
 #ifdef WITH_IMGUI
 			ImGui::Text("WITH_IMGUI");
+#endif
+#ifdef WITH_NUKLEAR
+			ImGui::Text("WITH_NUKLEAR");
 #endif
 #ifdef WITH_TRACY
 			ImGui::Text("WITH_TRACY");
@@ -1015,6 +1021,9 @@ void ImGuiDebugOverlay::guiTopRight()
 			const RenderStatistics::Commands &particleCommands = RenderStatistics::commands(RenderCommand::CommandTypes::PARTICLE);
 			const RenderStatistics::Commands &textCommands = RenderStatistics::commands(RenderCommand::CommandTypes::TEXT);
 			const RenderStatistics::Commands &imguiCommands = RenderStatistics::commands(RenderCommand::CommandTypes::IMGUI);
+#ifdef WITH_NUKLEAR
+			const RenderStatistics::Commands &nuklearCommands = RenderStatistics::commands(RenderCommand::CommandTypes::NUKLEAR);
+#endif
 			const RenderStatistics::Commands &allCommands = RenderStatistics::allCommands();
 
 			ImGui::Text("Sprites: %uV, %uDC (%u Tr), %uI/%uB", spriteCommands.vertices, spriteCommands.commands, spriteCommands.transparents, spriteCommands.instances, spriteCommands.batchSize);
@@ -1051,6 +1060,15 @@ void ImGuiDebugOverlay::guiTopRight()
 				ImGui::SameLine();
 				ImGui::PlotLines("", plotValues_[ValuesType::IMGUI_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
 			}
+
+#ifdef WITH_NUKLEAR
+			ImGui::Text("Nuklear: %uV, %uDC (%u Tr), %uI/%u", nuklearCommands.vertices, nuklearCommands.commands, nuklearCommands.transparents, nuklearCommands.instances, nuklearCommands.batchSize);
+			if (plotOverlayValues_)
+			{
+				ImGui::SameLine();
+				ImGui::PlotLines("", plotValues_[ValuesType::NUKLEAR_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
+			}
+#endif
 
 			ImGui::Text("Total: %uV, %uDC (%u Tr), %uI/%uB", allCommands.vertices, allCommands.commands, allCommands.transparents, allCommands.instances, allCommands.batchSize);
 			if (plotOverlayValues_)
@@ -1172,6 +1190,9 @@ void ImGuiDebugOverlay::guiPlots()
 			ImGui::PlotLines("onFrameStart", plotValues_[ValuesType::FRAME_START].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
 			ImGui::PlotLines("onFrameEnd", plotValues_[ValuesType::FRAME_END].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
 			ImGui::PlotLines("ImGui", plotValues_[ValuesType::IMGUI].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
+#ifdef WITH_NUKLEAR
+			ImGui::PlotLines("Nuklear", plotValues_[ValuesType::NUKLEAR].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
+#endif
 		}
 	}
 	ImGui::End();
@@ -1199,6 +1220,9 @@ void ImGuiDebugOverlay::updateOverlayTimings()
 	const RenderStatistics::Commands &particleCommands = RenderStatistics::commands(RenderCommand::CommandTypes::PARTICLE);
 	const RenderStatistics::Commands &textCommands = RenderStatistics::commands(RenderCommand::CommandTypes::TEXT);
 	const RenderStatistics::Commands &imguiCommands = RenderStatistics::commands(RenderCommand::CommandTypes::IMGUI);
+#ifdef WITH_NUKLEAR
+	const RenderStatistics::Commands &nuklearCommands = RenderStatistics::commands(RenderCommand::CommandTypes::NUKLEAR);
+#endif
 	const RenderStatistics::Commands &allCommands = RenderStatistics::allCommands();
 
 	plotValues_[ValuesType::CULLED_NODES][index_] = static_cast<float>(RenderStatistics::culled());
@@ -1211,6 +1235,9 @@ void ImGuiDebugOverlay::updateOverlayTimings()
 	plotValues_[ValuesType::PARTICLE_VERTICES][index_] = static_cast<float>(particleCommands.vertices);
 	plotValues_[ValuesType::TEXT_VERTICES][index_] = static_cast<float>(textCommands.vertices);
 	plotValues_[ValuesType::IMGUI_VERTICES][index_] = static_cast<float>(imguiCommands.vertices);
+#ifdef WITH_NUKLEAR
+	plotValues_[ValuesType::NUKLEAR_VERTICES][index_] = static_cast<float>(nuklearCommands.vertices);
+#endif
 	plotValues_[ValuesType::TOTAL_VERTICES][index_] = static_cast<float>(allCommands.vertices);
 
 #ifdef WITH_LUA

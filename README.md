@@ -15,6 +15,7 @@ For additional information: https://ncine.github.io
 - libogg, libvorbis, libvorbisfile
 - Lua 5.3
 - Dear ImGui
+- Nuklear
 
 ### Supported Platforms and Compilers
 - Windows (MSVC, MinGW-w64 on MSYS2)

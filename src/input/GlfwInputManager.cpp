@@ -9,6 +9,10 @@
 	#include "ImGuiGlfwInput.h"
 #endif
 
+#ifdef WITH_NUKLEAR
+	#include "NuklearGlfwInput.h"
+#endif
+
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
@@ -54,10 +58,18 @@ GlfwInputManager::GlfwInputManager()
 #ifdef WITH_IMGUI
 	ImGuiGlfwInput::init(GlfwGfxDevice::windowHandle());
 #endif
+
+#ifdef WITH_NUKLEAR
+	NuklearGlfwInput::init(GlfwGfxDevice::windowHandle());
+#endif
 }
 
 GlfwInputManager::~GlfwInputManager()
 {
+#ifdef WITH_NUKLEAR
+	NuklearGlfwInput::shutdown();
+#endif
+
 #ifdef WITH_IMGUI
 	ImGuiGlfwInput::shutdown();
 #endif
@@ -264,6 +276,10 @@ void GlfwInputManager::charCallback(GLFWwindow *window, unsigned int c)
 #ifdef WITH_IMGUI
 	ImGuiGlfwInput::charCallback(window, c);
 #endif
+
+#ifdef WITH_NUKLEAR
+	NuklearGlfwInput::charCallback(window, c);
+#endif
 }
 
 void GlfwInputManager::cursorPosCallback(GLFWwindow *window, double x, double y)
@@ -280,6 +296,10 @@ void GlfwInputManager::mouseButtonCallback(GLFWwindow *window, int button, int a
 {
 #ifdef WITH_IMGUI
 	ImGuiGlfwInput::mouseButtonCallback(window, button, action, mods);
+#endif
+
+#ifdef WITH_NUKLEAR
+	NuklearGlfwInput::mouseButtonCallback(window, button, action, mods);
 #endif
 
 	if (inputEventHandler_ == nullptr)
@@ -301,6 +321,10 @@ void GlfwInputManager::scrollCallback(GLFWwindow *window, double xoffset, double
 {
 #ifdef WITH_IMGUI
 	ImGuiGlfwInput::scrollCallback(window, xoffset, yoffset);
+#endif
+
+#ifdef WITH_NUKLEAR
+	NuklearGlfwInput::scrollCallback(window, xoffset, yoffset);
 #endif
 
 	if (inputEventHandler_ == nullptr)

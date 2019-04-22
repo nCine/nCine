@@ -54,6 +54,9 @@ namespace {
 #ifdef WITH_IMGUI
 			case RenderCommand::CommandTypes::IMGUI: return "imgui";
 #endif
+#ifdef WITH_NUKLEAR
+			case RenderCommand::CommandTypes::NUKLEAR: return "nuklear";
+#endif
 			default: return "unknown";
 		}
 	}

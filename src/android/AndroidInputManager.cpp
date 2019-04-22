@@ -14,6 +14,10 @@
 	#include "ImGuiAndroidInput.h"
 #endif
 
+#ifdef WITH_NUKLEAR
+	#include "NuklearAndroidInput.h"
+#endif
+
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
@@ -81,10 +85,18 @@ AndroidInputManager::AndroidInputManager(struct android_app *state)
 #ifdef WITH_IMGUI
 	ImGuiAndroidInput::init();
 #endif
+
+#ifdef WITH_NUKLEAR
+	NuklearAndroidInput::init();
+#endif
 }
 
 AndroidInputManager::~AndroidInputManager()
 {
+#ifdef WITH_NUKLEAR
+	NuklearAndroidInput::shutdown();
+#endif
+
 #ifdef WITH_IMGUI
 	ImGuiAndroidInput::shutdown();
 #endif
@@ -228,6 +240,10 @@ bool AndroidInputManager::parseEvent(const AInputEvent *event)
 
 #ifdef WITH_IMGUI
 	ImGuiAndroidInput::processEvent(event);
+#endif
+
+#ifdef WITH_NUKLEAR
+	NuklearAndroidInput::processEvent(event);
 #endif
 
 	bool isEventHandled = false;

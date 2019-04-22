@@ -17,6 +17,8 @@
 
 #cmakedefine01 NCINE_WITH_IMGUI
 
+#cmakedefine01 NCINE_WITH_NUKLEAR
+
 #cmakedefine01 NCINE_WITH_TRACY
 
 #cmakedefine01 NCINE_WITH_RENDERDOC

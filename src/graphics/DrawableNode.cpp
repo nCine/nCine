@@ -7,6 +7,13 @@
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
+unsigned short DrawableNode::imguiLayer_ = LayerBase::HIGHEST - 1024;
+unsigned short DrawableNode::nuklearLayer_ = LayerBase::HIGHEST - 512;
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
@@ -60,13 +67,13 @@ void DrawableNode::draw(RenderQueue &renderQueue)
 	}
 }
 
-unsigned int DrawableNode::layer() const
+unsigned short DrawableNode::layer() const
 {
 	return renderCommand_->layer();
 }
 
 /*! \note The maximum admissible value for `layer` is 65535. */
-void DrawableNode::setLayer(unsigned int layer)
+void DrawableNode::setLayer(unsigned short layer)
 {
 	renderCommand_->setLayer(layer);
 }

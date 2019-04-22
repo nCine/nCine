@@ -29,15 +29,13 @@ class RenderCommand
 #ifdef WITH_IMGUI
 			IMGUI,
 #endif
+#ifdef WITH_NUKLEAR
+			NUKLEAR,
+#endif
 
 			COUNT
 		};
 	};
-
-	/// Bottom rendering layer limit
-	static const unsigned int BottomLayer = 0;
-	/// Top rendering layer limit
-	static const unsigned int TopLayer = 65535;
 
 	explicit RenderCommand(CommandTypes::Enum profilingType);
 	RenderCommand();
@@ -48,13 +46,9 @@ class RenderCommand
 	inline void setProfilingType(CommandTypes::Enum profilingType) { profilingType_ = profilingType; }
 
 	/// Returns the rendering layer
-	inline unsigned int layer() const { return layer_; }
+	inline unsigned short layer() const { return layer_; }
 	/// Sets the rendering layer
-	inline void setLayer(unsigned int layer)
-	{
-		ASSERT(layer <= TopLayer);
-		layer_ = layer;
-	}
+	inline void setLayer(unsigned short layer) { layer_ = layer; }
 
 	/// Returns the number of instances collected in the command or zero if instancing is not used
 	inline int numInstances() const { return numInstances_; }
@@ -115,7 +109,7 @@ class RenderCommand
 	};
 
 	unsigned long int sortKey_;
-	unsigned int layer_;
+	unsigned short layer_;
 	int numInstances_;
 	int batchSize_;
 	bool uniformBlocksCommitted_;

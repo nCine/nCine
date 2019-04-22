@@ -1,6 +1,7 @@
 #include "RenderCommand.h"
 #include "GLShaderProgram.h"
 #include "GLScissorTest.h"
+#include "DrawableNode.h"
 
 namespace ncine {
 
@@ -9,7 +10,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 RenderCommand::RenderCommand(CommandTypes::Enum profilingType)
-    : sortKey_(0), layer_(BottomLayer), numInstances_(0), batchSize_(0),
+    : sortKey_(0), layer_(DrawableNode::LayerBase::LOWEST), numInstances_(0), batchSize_(0),
       uniformBlocksCommitted_(false), verticesCommitted_(false), indicesCommitted_(false),
       profilingType_(profilingType), modelView_(Matrix4x4f::Identity)
 {
@@ -35,7 +36,7 @@ void RenderCommand::commitUniformBlocks()
 
 void RenderCommand::calculateSortKey()
 {
-	const unsigned long int upper = layer_ << 16;
+	const unsigned long int upper = static_cast<unsigned long>(layer_ << 16);
 	const unsigned int lower = material_.sortKey();
 	sortKey_ = upper + lower;
 }
@@ -83,7 +84,7 @@ void RenderCommand::commitTransformation()
 	const float far = 1.0f;
 
 	// The layer translates to depth, from near to far
-	const float layerStep = 1.0f / static_cast<float>(TopLayer);
+	const float layerStep = 1.0f / static_cast<float>(DrawableNode::LayerBase::HIGHEST);
 	modelView_[3][2] = near + layerStep + (far - near - layerStep) * (layer_ * layerStep);
 
 	if (material_.shaderProgram_ && material_.shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)

@@ -34,6 +34,9 @@ class ImGuiDebugOverlay : public IDebugOverlay
 			VISIT,
 			DRAW,
 			IMGUI,
+#ifdef WITH_NUKLEAR
+			NUKLEAR,
+#endif
 			FRAME_END,
 			CULLED_NODES,
 			VBO_USED,
@@ -44,6 +47,9 @@ class ImGuiDebugOverlay : public IDebugOverlay
 			PARTICLE_VERTICES,
 			TEXT_VERTICES,
 			IMGUI_VERTICES,
+#ifdef WITH_NUKLEAR
+			NUKLEAR_VERTICES,
+#endif
 			TOTAL_VERTICES,
 #ifdef WITH_LUA
 			LUA_USED,

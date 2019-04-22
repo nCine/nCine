@@ -16,12 +16,12 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	/// Drawing layers from back to front
 	struct LayerBase
 	{
-		enum
+		enum : unsigned short
 		{
 			LOWEST = 0,
 			SCENE = 0,
 			HUD = 32767,
-			HIGHEST = 65535
+			HIGHEST = 65535,
 		};
 	};
 
@@ -53,9 +53,15 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	inline Vector2f absSize() const { return Vector2f(absWidth(), absHeight()); }
 
 	/// Returns the node rendering layer
-	unsigned int layer() const;
+	unsigned short layer() const;
 	/// Sets the node rendering layer
-	void setLayer(unsigned int layer);
+	void setLayer(unsigned short layer);
+
+	inline static unsigned short imGuiLayer() { return imguiLayer_; }
+	inline static void setImGuiLayer(unsigned short layer) { imguiLayer_ = layer; }
+
+	inline static unsigned short nuklearLayer() { return nuklearLayer_; }
+	inline static void setNuklearLayer(unsigned short layer) { nuklearLayer_ = layer; }
 
   protected:
 	/// Node width in pixel
@@ -75,6 +81,9 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	virtual void updateRenderCommand() = 0;
 
   private:
+	static unsigned short imguiLayer_;
+	static unsigned short nuklearLayer_;
+
 	/// Deleted copy constructor
 	DrawableNode(const DrawableNode &) = delete;
 	/// Deleted assignment operator

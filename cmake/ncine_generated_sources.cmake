@@ -183,6 +183,16 @@ END")
 	list(APPEND GENERATED_SOURCES ${VERSION_RC_FILE})
 endif()
 
+# Generate Nuklear implementation file
+if(NCINE_WITH_NUKLEAR)
+	set(NUKLEAR_CPP_FILE "${GENERATED_SOURCE_DIR}/nuklear.cpp")
+	file(WRITE ${NUKLEAR_CPP_FILE} "#define NK_IMPLEMENTATION\n")
+	file(APPEND ${NUKLEAR_CPP_FILE} "#include \"NuklearContext.h\"\n")
+	file(APPEND ${NUKLEAR_CPP_FILE} "#include \"nuklear.h\"\n")
+
+	list(APPEND GENERATED_SOURCES ${NUKLEAR_CPP_FILE})
+endif()
+
 if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.in)
 	set(CONFIG_H_IN ${CMAKE_SOURCE_DIR}/config.h.in)
 	set(CONFIG_H ${GENERATED_INCLUDE_DIR}/config.h)

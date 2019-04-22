@@ -281,6 +281,39 @@ if(NCINE_WITH_IMGUI)
 	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/ImGuiDebugOverlay.cpp)
 endif()
 
+if(NCINE_WITH_NUKLEAR)
+	target_compile_definitions(ncine PRIVATE "WITH_NUKLEAR")
+
+	# For external projects compiling using an nCine build directory
+	set(NUKLEAR_INCLUDE_ONLY_DIR ${NUKLEAR_SOURCE_DIR}/include_only)
+	file(COPY ${NUKLEAR_SOURCE_DIR}/nuklear.h DESTINATION ${NUKLEAR_INCLUDE_ONLY_DIR}/ncine)
+
+	list(APPEND HEADERS
+		${NUKLEAR_INCLUDE_ONLY_DIR}/ncine/nuklear.h
+		${NCINE_ROOT}/include/ncine/NuklearContext.h
+	)
+
+	list(APPEND PRIVATE_HEADERS
+		${NCINE_ROOT}/src/include/NuklearDrawing.h
+	)
+
+	list(APPEND SOURCES
+		${NCINE_ROOT}/src/NuklearContext.cpp
+		${NCINE_ROOT}/src/graphics/NuklearDrawing.cpp
+	)
+
+	if(GLFW_FOUND)
+		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/NuklearGlfwInput.h)
+		list(APPEND SOURCES ${NCINE_ROOT}/src/input/NuklearGlfwInput.cpp)
+	elseif(SDL2_FOUND)
+		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/NuklearSdlInput.h)
+		list(APPEND SOURCES ${NCINE_ROOT}/src/input/NuklearSdlInput.cpp)
+	elseif(ANDROID)
+		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/NuklearAndroidInput.h)
+		list(APPEND SOURCES ${NCINE_ROOT}/src/android/NuklearAndroidInput.cpp)
+	endif()
+endif()
+
 if(NCINE_WITH_TRACY)
 	target_compile_definitions(ncine PRIVATE "WITH_TRACY")
 	if(NOT ANDROID AND NOT APPLE AND NOT EMSCRIPTEN)

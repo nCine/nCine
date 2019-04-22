@@ -9,6 +9,10 @@
 #include "AndroidJniHelper.h"
 #include "tracy.h"
 
+#if WITH_NUKLEAR
+	#include "NuklearAndroidInput.h"
+#endif
+
 namespace nc = ncine;
 
 /// Processes the next application command
@@ -51,6 +55,10 @@ void AndroidApplication::start(struct android_app *state, IAppEventHandler *(*cr
 		int events;
 		struct android_poll_source *source;
 
+#if WITH_NUKLEAR
+		NuklearAndroidInput::inputBegin();
+#endif
+
 		while ((ident = ALooper_pollAll(!theApplication().isSuspended() ? 0 : -1, nullptr, &events, reinterpret_cast<void **>(&source))) >= 0)
 		{
 			if (source != nullptr)
@@ -65,6 +73,10 @@ void AndroidApplication::start(struct android_app *state, IAppEventHandler *(*cr
 				theApplication().quit();
 			}
 		}
+
+#if WITH_NUKLEAR
+		NuklearAndroidInput::inputEnd();
+#endif
 
 		if (theAndroidApplication().isInitialized() &&
 		    theApplication().shouldSuspend() == false)
