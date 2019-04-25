@@ -25,7 +25,7 @@ ImGuiDebugOverlay::ImGuiDebugOverlay(const AppConfiguration &appCfg)
 	  numValues_(128), maxFrameTime_(0.0f), maxUpdateVisitDraw_(0.0f),
 	  index_(0), plotAdditionalFrameValues_(false), plotOverlayValues_(false)
 {
-	if (appCfg.withProfilerGraphs())
+	if (appCfg.withProfilerGraphs)
 		initPlotValues();
 }
 
@@ -50,7 +50,7 @@ void ImGuiDebugOverlay::update()
 
 	guiWindow();
 
-	if (appCfg.withInfoText() && settings_.showInfoText)
+	if (appCfg.withInfoText && settings_.showInfoText)
 	{
 		guiTopLeft();
 		guiTopRight();
@@ -58,7 +58,7 @@ void ImGuiDebugOverlay::update()
 		guiBottomRight();
 	}
 
-	if (appCfg.withProfilerGraphs() && settings_.showProfilerGraphs)
+	if (appCfg.withProfilerGraphs && settings_.showProfilerGraphs)
 		guiPlots();
 }
 
@@ -191,7 +191,7 @@ void ImGuiDebugOverlay::guiConfigureGui()
 		const AppConfiguration &appCfg = theApplication().appConfiguration();
 
 		ImGui::Checkbox("Show interface", &settings_.showInterface);
-		if (appCfg.withInfoText())
+		if (appCfg.withInfoText)
 		{
 			if (ImGui::TreeNodeEx("Overlays", ImGuiTreeNodeFlags_DefaultOpen))
 			{
@@ -208,7 +208,7 @@ void ImGuiDebugOverlay::guiConfigureGui()
 				ImGui::TreePop();
 			}
 		}
-		if (appCfg.withProfilerGraphs())
+		if (appCfg.withProfilerGraphs)
 		{
 			if (ImGui::TreeNodeEx("Profiling Graphs", ImGuiTreeNodeFlags_DefaultOpen))
 			{
@@ -471,38 +471,37 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("OpenGL Forward: %s", appCfg.glForwardCompatible() ? "true" : "false");
 		ImGui::Text("OpenGL Major: %d", appCfg.glMajorVersion());
 		ImGui::Text("OpenGL Minor: %d", appCfg.glMinorVersion());
-		ImGui::Text("OpenGL Debug: %s", appCfg.glDebugContext() ? "true" : "false");
 
 		ImGui::Separator();
 		ImGui::Text("Data path: %s", appCfg.dataPath().data());
-		ImGui::Text("Log file: %s", appCfg.logFile().data());
-		ImGui::Text("Console log level: %d", static_cast<int>(appCfg.consoleLogLevel()));
-		ImGui::Text("File log level: %d", static_cast<int>(appCfg.fileLogLevel()));
-		ImGui::Text("Frametimer Log interval: %f", appCfg.frameTimerLogInterval());
+		ImGui::Text("Log file: %s", appCfg.logFile.data());
+		ImGui::Text("Console log level: %d", static_cast<int>(appCfg.consoleLogLevel));
+		ImGui::Text("File log level: %d", static_cast<int>(appCfg.fileLogLevel));
+		ImGui::Text("Frametimer Log interval: %f", appCfg.frameTimerLogInterval);
 		ImGui::Text("Text update time: %f", appCfg.profileTextUpdateTime());
-		ImGui::Text("Resolution: %u x %u", appCfg.xResolution(), appCfg.yResolution());
-		ImGui::Text("Full Screen: %s", appCfg.inFullscreen() ? "true" : "false");
-		ImGui::Text("Resizable: %s", appCfg.isResizable() ? "true" : "false");
+		ImGui::Text("Resolution: %u x %u", appCfg.xResolution, appCfg.yResolution);
+		ImGui::Text("Full Screen: %s", appCfg.inFullscreen ? "true" : "false");
+		ImGui::Text("Resizable: %s", appCfg.isResizable ? "true" : "false");
 
 		ImGui::Separator();
-		ImGui::Text("Window title: %s", appCfg.windowTitle().data());
-		ImGui::Text("Window icon: %s", appCfg.windowIconFilename().data());
-		ImGui::Text("Font texture: %s", appCfg.fontTexFilename().data());
-		ImGui::Text("Font Fnt file: %s", appCfg.fontFntFilename().data());
+		ImGui::Text("Window title: %s", appCfg.windowTitle.data());
+		ImGui::Text("Window icon: %s", appCfg.windowIconFilename.data());
+		ImGui::Text("Font texture: %s", appCfg.fontTexFilename.data());
+		ImGui::Text("Font Fnt file: %s", appCfg.fontFntFilename.data());
 
 		ImGui::Separator();
-		ImGui::Text("VBO size: %u", appCfg.vboSize());
-		ImGui::Text("IBO size: %u", appCfg.iboSize());
-		ImGui::Text("Vao pool size: %u", appCfg.vaoPoolSize());
+		ImGui::Text("VBO size: %u", appCfg.vboSize);
+		ImGui::Text("IBO size: %u", appCfg.iboSize);
+		ImGui::Text("Vao pool size: %u", appCfg.vaoPoolSize);
 
 		ImGui::Separator();
-		ImGui::Text("Profiler graphs: %s", appCfg.withProfilerGraphs() ? "true" : "false");
-		ImGui::Text("Information text: %s", appCfg.withInfoText() ? "true" : "false");
-		ImGui::Text("Audio: %s", appCfg.withAudio() ? "true" : "false");
-		ImGui::Text("Threads: %s", appCfg.withThreads() ? "true" : "false");
-		ImGui::Text("Scenegraph: %s", appCfg.withScenegraph() ? "true" : "false");
-		ImGui::Text("VSync: %s", appCfg.withVSync() ? "true" : "false");
-		ImGui::Text("Requested GL Debug: %s", appCfg.withGlDebug() ? "true" : "false");
+		ImGui::Text("Profiler graphs: %s", appCfg.withProfilerGraphs ? "true" : "false");
+		ImGui::Text("Information text: %s", appCfg.withInfoText ? "true" : "false");
+		ImGui::Text("Audio: %s", appCfg.withAudio ? "true" : "false");
+		ImGui::Text("Threads: %s", appCfg.withThreads ? "true" : "false");
+		ImGui::Text("Scenegraph: %s", appCfg.withScenegraph ? "true" : "false");
+		ImGui::Text("VSync: %s", appCfg.withVSync ? "true" : "false");
+		ImGui::Text("OpenGL Debug Context: %s", appCfg.withGlDebugContext ? "true" : "false");
 	}
 }
 
@@ -546,9 +545,9 @@ void ImGuiDebugOverlay::guiWindowSettings()
 		ImGui::SameLine();
 		if (ImGui::Button("Reset"))
 		{
-			resolution[0] = theApplication().appConfiguration().xResolution();
-			resolution[1] = theApplication().appConfiguration().yResolution();
-			fullScreen = theApplication().appConfiguration().inFullscreen();
+			resolution[0] = theApplication().appConfiguration().xResolution;
+			resolution[1] = theApplication().appConfiguration().yResolution;
+			fullScreen = theApplication().appConfiguration().inFullscreen;
 			theApplication().gfxDevice().setResolution(resolution[0], resolution[1]);
 			theApplication().gfxDevice().setFullScreen(fullScreen);
 		}

@@ -324,7 +324,7 @@ void LuaStateManager::exposeApi()
 	LuaJoystickEvents::expose(L_);
 
 	LuaApplication::expose(L_);
-	if (appCfg.withScenegraph())
+	if (appCfg.withScenegraph)
 	{
 		LuaTexture::expose(this);
 		LuaSprite::expose(this);
@@ -336,7 +336,7 @@ void LuaStateManager::exposeApi()
 	}
 
 #ifdef WITH_AUDIO
-	if (appCfg.withAudio())
+	if (appCfg.withAudio)
 	{
 		LuaIAudioDevice::expose(L_);
 		LuaAudioBuffer::expose(this);
@@ -356,7 +356,7 @@ void LuaStateManager::exposeConstants()
 	LuaIInputManager::exposeConstants(L_);
 	LuaILogger::exposeConstants(L_);
 
-	if (appCfg.withScenegraph())
+	if (appCfg.withScenegraph)
 	{
 		LuaTexture::exposeConstants(L_);
 		LuaDrawableNode::exposeConstants(L_);

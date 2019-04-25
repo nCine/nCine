@@ -93,10 +93,10 @@ nc::IAppEventHandler *createAppEventHandler()
 
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
-	config.enableScenegraph(false);
-	config.enableAudio(false);
-	config.enableThreads(false);
-	config.setVaoPoolSize(2);
+	config.withScenegraph = false;
+	config.withAudio = false;
+	config.withThreads = false;
+	config.vaoPoolSize = 2;
 
 	setDataPath(config);
 }

@@ -33,7 +33,7 @@ class DLL_PUBLIC IGfxDevice
 		GLContextInfo(const AppConfiguration &appCfg)
 			: majorVersion(appCfg.glMajorVersion()), minorVersion(appCfg.glMinorVersion()),
 			  coreProfile(appCfg.glCoreProfile()), forwardCompatible(appCfg.glForwardCompatible()),
-			  debugContext(appCfg.glDebugContext()) { }
+			  debugContext(appCfg.withGlDebugContext) { }
 
 		unsigned int majorVersion;
 		unsigned int minorVersion;

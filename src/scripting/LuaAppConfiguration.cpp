@@ -37,7 +37,7 @@ namespace AppConfiguration
 	static const char *withThreads = "threads";
 	static const char *withScenegraph = "scenegraph";
 	static const char *withVSync = "vsync";
-	static const char *withGlDebug = "gldebug";
+	static const char *withGlDebugContext = "gl_debug_context";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -49,32 +49,32 @@ void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 	lua_createtable(L, 22, 0);
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::dataPath, appCfg.dataPath().data());
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::logFile, appCfg.logFile().data());
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::consoleLogLevel, static_cast<int64_t>(appCfg.consoleLogLevel()));
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::fileLogLevel, static_cast<int64_t>(appCfg.fileLogLevel()));
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::frameTimerLogInterval, appCfg.frameTimerLogInterval());
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::logFile, appCfg.logFile.data());
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::consoleLogLevel, static_cast<int64_t>(appCfg.consoleLogLevel));
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::fileLogLevel, static_cast<int64_t>(appCfg.fileLogLevel));
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::frameTimerLogInterval, appCfg.frameTimerLogInterval);
 
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::xResolution, appCfg.xResolution());
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::yResolution, appCfg.yResolution());
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::inFullscreen, appCfg.inFullscreen());
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::xResolution, appCfg.xResolution);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::yResolution, appCfg.yResolution);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::inFullscreen, appCfg.inFullscreen);
 
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::windowTitle, appCfg.windowTitle().data());
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::windowIconFilename, appCfg.windowIconFilename().data());
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::windowTitle, appCfg.windowTitle.data());
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::windowIconFilename, appCfg.windowIconFilename.data());
 
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::fontTexFilename, appCfg.fontTexFilename().data());
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::fontFntFilename, appCfg.fontFntFilename().data());
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::fontTexFilename, appCfg.fontTexFilename.data());
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::fontFntFilename, appCfg.fontFntFilename.data());
 
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::vboSize, static_cast<int64_t>(appCfg.vboSize()));
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::iboSize, static_cast<int64_t>(appCfg.iboSize()));
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::vaoPoolSize, appCfg.vaoPoolSize());
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::vboSize, static_cast<int64_t>(appCfg.vboSize));
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::iboSize, static_cast<int64_t>(appCfg.iboSize));
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::vaoPoolSize, appCfg.vaoPoolSize);
 
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::withProfilerGraphs, appCfg.withProfilerGraphs());
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::withInfoText, appCfg.withInfoText());
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::withAudio, appCfg.withAudio());
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::withThreads, appCfg.withThreads());
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::withScenegraph, appCfg.withScenegraph());
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::withVSync, appCfg.withVSync());
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::withGlDebug, appCfg.withGlDebug());
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::withProfilerGraphs, appCfg.withProfilerGraphs);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::withInfoText, appCfg.withInfoText);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::withAudio, appCfg.withAudio);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::withThreads, appCfg.withThreads);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::withScenegraph, appCfg.withScenegraph);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::withVSync, appCfg.withVSync);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::withGlDebugContext, appCfg.withGlDebugContext);
 }
 
 void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
@@ -83,53 +83,53 @@ void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
 		luaL_argerror(L, -1, "Expecting a table");
 
 	const char *dataPath = LuaUtils::retrieveField<const char *>(L, -1, LuaNames::AppConfiguration::dataPath);
-	appCfg.setDataPath(dataPath);
+	appCfg.dataPath() = dataPath;
 	const char *logFile = LuaUtils::retrieveField<const char *>(L, -1, LuaNames::AppConfiguration::logFile);
-	appCfg.setLogFile(logFile);
+	appCfg.logFile = logFile;
 	const ILogger::LogLevel consoleLogLevel = static_cast<ILogger::LogLevel>(LuaUtils::retrieveField<int64_t>(L, -1, LuaNames::AppConfiguration::consoleLogLevel));
-	appCfg.setConsoleLogLevel(consoleLogLevel);
+	appCfg.consoleLogLevel = consoleLogLevel;
 	const ILogger::LogLevel fileLogLevel = static_cast<ILogger::LogLevel>(LuaUtils::retrieveField<int64_t>(L, -1, LuaNames::AppConfiguration::fileLogLevel));
-	appCfg.setFileLogLevel(fileLogLevel);
+	appCfg.fileLogLevel = fileLogLevel;
 	const float logInterval = LuaUtils::retrieveField<float>(L, -1, LuaNames::AppConfiguration::frameTimerLogInterval);
-	appCfg.setFrameTimerLogInterval(logInterval);
+	appCfg.frameTimerLogInterval = logInterval;
 
 	const unsigned int xRes = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::xResolution);
 	const unsigned int yRes = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::yResolution);
 	appCfg.setResolution(xRes, yRes);
 	const bool inFullscreen = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::inFullscreen);
-	appCfg.setFullScreen(inFullscreen);
+	appCfg.inFullscreen = inFullscreen;
 
 	const char *windowTitle = LuaUtils::retrieveField<const char *>(L, -1, LuaNames::AppConfiguration::windowTitle);
-	appCfg.setWindowTitle(windowTitle);
+	appCfg.windowTitle = windowTitle;
 	const char *windowIconFilename = LuaUtils::retrieveField<const char *>(L, -1, LuaNames::AppConfiguration::windowIconFilename);
-	appCfg.setWindowIconFilename(windowIconFilename);
+	appCfg.windowIconFilename = windowIconFilename;
 
 	const char *fontTexFilename = LuaUtils::retrieveField<const char *>(L, -1, LuaNames::AppConfiguration::fontTexFilename);
-	appCfg.setFontTexFilename(fontTexFilename);
+	appCfg.fontTexFilename = fontTexFilename;
 	const char *fontFntFilename = LuaUtils::retrieveField<const char *>(L, -1, LuaNames::AppConfiguration::fontFntFilename);
-	appCfg.setFontFntFilename(fontFntFilename);
+	appCfg.fontFntFilename = fontFntFilename;
 
 	const unsigned long vboSize = LuaUtils::retrieveField<uint64_t>(L, -1, LuaNames::AppConfiguration::vboSize);
-	appCfg.setVboSize(vboSize);
+	appCfg.vboSize = vboSize;
 	const unsigned long iboSize = LuaUtils::retrieveField<uint64_t>(L, -1, LuaNames::AppConfiguration::iboSize);
-	appCfg.setIboSize(iboSize);
+	appCfg.iboSize = iboSize;
 	const unsigned int vaoPoolSize = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::vaoPoolSize);
-	appCfg.setVaoPoolSize(vaoPoolSize);
+	appCfg.vaoPoolSize = vaoPoolSize;
 
 	const bool withProfilerGraphs = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withProfilerGraphs);
-	appCfg.enableProfilerGraphs(withProfilerGraphs);
+	appCfg.withProfilerGraphs = withProfilerGraphs;
 	const bool withInfoText = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withInfoText);
-	appCfg.enableInfoText(withInfoText);
+	appCfg.withInfoText = withInfoText;
 	const bool withAudio = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withAudio);
-	appCfg.enableAudio(withAudio);
+	appCfg.withAudio = withAudio;
 	const bool withThreads = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withThreads);
-	appCfg.enableThreads(withThreads);
+	appCfg.withThreads = withThreads;
 	const bool withScenegraph = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withScenegraph);
-	appCfg.enableScenegraph(withScenegraph);
+	appCfg.withScenegraph = withScenegraph;
 	const bool withVSync = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withVSync);
-	appCfg.enableVSync(withVSync);
-	const bool withGlDebug = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withGlDebug);
-	appCfg.enableGlDebug(withGlDebug);
+	appCfg.withVSync = withVSync;
+	const bool withGlDebugContext = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withGlDebugContext);
+	appCfg.withGlDebugContext = withGlDebugContext;
 }
 
 }

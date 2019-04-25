@@ -438,13 +438,13 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 	nctl::String dataPath;
 	dataPath = extStorage ? extStorage : "/sdcard";
 	dataPath += "/ncine/";
-	config.setDataPath(dataPath);
+	config.dataPath() = dataPath;
 #endif
 
-	config.enableAudio(false);
-	config.enableInfoText(false);
-	config.enableProfilerGraphs(false);
-	config.enableThreads(false);
+	config.withAudio = false;
+	config.withInfoText = false;
+	config.withProfilerGraphs = false;
+	config.withThreads = false;
 }
 
 void MyEventHandler::onInit()

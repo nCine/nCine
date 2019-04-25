@@ -67,7 +67,7 @@ DLL_PUBLIC int NCINE_LUAOPEN_NAME(lua_State *L)
 void LuaEventHandler::onPreInit(AppConfiguration &config)
 {
 #ifdef NCINE_TESTS_DATA_DIR
-	config.setDataPath(NCINE_TESTS_DATA_DIR);
+	config.dataPath() = NCINE_TESTS_DATA_DIR;
 #endif
 
 	LuaIAppEventHandler::onPreInit(luaState_->state(), config);

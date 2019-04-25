@@ -118,7 +118,7 @@ class DLL_PUBLIC Application
 	bool autoSuspension_;
 	bool hasFocus_;
 	bool shouldQuit_;
-	AppConfiguration appCfg_;
+	const AppConfiguration appCfg_;
 	RenderingSettings renderingSettings_;
 	float timings_[Timings::COUNT];
 	IDebugOverlay::DisplaySettings debugOverlayNullSettings_;

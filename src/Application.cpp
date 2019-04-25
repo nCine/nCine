@@ -77,11 +77,11 @@ void Application::initCommon()
 
 	theServiceLocator().registerIndexer(nctl::makeUnique<ArrayIndexer>());
 #ifdef WITH_AUDIO
-	if (appCfg_.withAudio())
+	if (appCfg_.withAudio)
 		theServiceLocator().registerAudioDevice(nctl::makeUnique<ALAudioDevice>());
 #endif
 #ifdef WITH_THREADS
-	if (appCfg_.withThreads())
+	if (appCfg_.withThreads)
 		theServiceLocator().registerThreadPool(nctl::makeUnique<ThreadPool>());
 #endif
 	theServiceLocator().registerGfxCapabilities(nctl::makeUnique<GfxCapabilities>());
@@ -95,20 +95,20 @@ void Application::initCommon()
 	FrameMark;
 	TracyGpuCollect;
 
-	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.frameTimerLogInterval(), appCfg_.profileTextUpdateTime());
+	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.frameTimerLogInterval, appCfg_.profileTextUpdateTime());
 
 #ifdef WITH_IMGUI
-	imguiDrawing_ = nctl::makeUnique<ImGuiDrawing>(appCfg_.withScenegraph());
+	imguiDrawing_ = nctl::makeUnique<ImGuiDrawing>(appCfg_.withScenegraph);
 #endif
 
-	if (appCfg_.withScenegraph())
+	if (appCfg_.withScenegraph)
 	{
 		gfxDevice_->setupGL();
 		RenderResources::create();
 		renderQueue_ = nctl::makeUnique<RenderQueue>();
 		rootNode_ = nctl::makeUnique<SceneNode>();
 
-		if (appCfg_.withProfilerGraphs() || appCfg_.withInfoText())
+		if (appCfg_.withProfilerGraphs || appCfg_.withInfoText)
 		{
 #ifdef WITH_IMGUI
 			debugOverlay_ = nctl::makeUnique<ImGuiDebugOverlay>(appCfg_);
@@ -145,7 +145,7 @@ void Application::step()
 {
 	ZoneScoped;
 	frameTimer_->addFrame();
-	if (appCfg_.withScenegraph())
+	if (appCfg_.withScenegraph)
 	{
 		TracyGpuZone("Clear");
 		gfxDevice_->clear();
@@ -208,7 +208,7 @@ void Application::step()
 	{
 		ZoneScopedN("ImGui endFrame");
 		profileTimer_->start();
-		if (appCfg_.withScenegraph())
+		if (appCfg_.withScenegraph)
 			imguiDrawing_->endFrame(*renderQueue_);
 		else
 			imguiDrawing_->endFrame();
@@ -227,7 +227,7 @@ void Application::step()
 		timings_[Timings::FRAME_END] = profileTimer_->interval();
 	}
 
-	if (debugOverlay_ && appCfg_.withProfilerGraphs())
+	if (debugOverlay_ && appCfg_.withProfilerGraphs)
 		debugOverlay_->updateFrameTimings();
 }
 

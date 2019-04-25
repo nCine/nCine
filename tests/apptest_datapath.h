@@ -7,10 +7,10 @@ inline void setDataPath(ncine::AppConfiguration &config)
 	nctl::String dataPath;
 	dataPath = extStorage ? extStorage : "/sdcard";
 	dataPath += "/ncine/";
-	config.setDataPath(dataPath);
+	config.dataPath() = dataPath;
 #else
 	#ifdef NCINE_TESTS_DATA_DIR
-	config.setDataPath(NCINE_TESTS_DATA_DIR);
+	config.dataPath() = NCINE_TESTS_DATA_DIR;
 	#endif
 #endif
 }

@@ -12,7 +12,7 @@ nc::IAppEventHandler *createAppEventHandler()
 
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
-	config.enableThreads(true);
+	config.withThreads = true;
 }
 
 void MyEventHandler::onInit()

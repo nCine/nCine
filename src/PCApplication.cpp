@@ -46,16 +46,18 @@ void PCApplication::init(IAppEventHandler * (*createAppEventHandler)())
 	profileTimer_->start();
 
 	appEventHandler_ = nctl::UniquePtr<IAppEventHandler>(createAppEventHandler());
-	appEventHandler_->onPreInit(appCfg_);
+	// Only `onPreInit()` can modify the application configuration
+	AppConfiguration &modifiableAppCfg = const_cast<AppConfiguration &>(appCfg_);
+	appEventHandler_->onPreInit(modifiableAppCfg);
 
 	// Registering the logger as early as possible
-	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(appCfg_.logFile().data(), appCfg_.consoleLogLevel(), appCfg_.fileLogLevel()));
+	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(appCfg_.logFile.data(), appCfg_.consoleLogLevel, appCfg_.fileLogLevel));
 	// Graphics device should always be created before the input manager!
 	IGfxDevice::GLContextInfo glContextInfo(appCfg_);
-	const DisplayMode::VSync vSyncMode = appCfg_.withVSync() ? DisplayMode::VSync::ENABLED : DisplayMode::VSync::DISABLED;
+	const DisplayMode::VSync vSyncMode = appCfg_.withVSync ? DisplayMode::VSync::ENABLED : DisplayMode::VSync::DISABLED;
 	DisplayMode displayMode(8, 8, 8, 8, 24, 8, DisplayMode::DoubleBuffering::ENABLED, vSyncMode);
 
-	const IGfxDevice::WindowMode windowMode(appCfg_.xResolution(), appCfg_.yResolution(), appCfg_.inFullscreen(), appCfg_.isResizable());
+	const IGfxDevice::WindowMode windowMode(appCfg_.xResolution, appCfg_.yResolution, appCfg_.inFullscreen, appCfg_.isResizable);
 #if defined(WITH_SDL)
 	gfxDevice_ = nctl::makeUnique<SdlGfxDevice>(windowMode, glContextInfo, displayMode);
 	inputManager_ = nctl::makeUnique<SdlInputManager>();
@@ -63,8 +65,8 @@ void PCApplication::init(IAppEventHandler * (*createAppEventHandler)())
 	gfxDevice_ = nctl::makeUnique<GlfwGfxDevice>(windowMode, glContextInfo, displayMode);
 	inputManager_ = nctl::makeUnique<GlfwInputManager>();
 #endif
-	gfxDevice_->setWindowTitle(appCfg_.windowTitle().data());
-	nctl::String windowIconFilePath = IFile::dataPath() + appCfg_.windowIconFilename();
+	gfxDevice_->setWindowTitle(appCfg_.windowTitle.data());
+	nctl::String windowIconFilePath = IFile::dataPath() + appCfg_.windowIconFilename;
 	if (IFile::access(windowIconFilePath.data(), IFile::AccessMode::EXISTS))
 		gfxDevice_->setWindowIcon(windowIconFilePath.data());
 

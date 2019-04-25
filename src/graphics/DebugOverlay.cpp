@@ -23,9 +23,9 @@ DebugOverlay::DebugOverlay(const AppConfiguration &appCfg)
 	  infoStringTopLeft_(MaxTextLength), infoStringTopRight_(MaxTextLength),
 	  infoStringBottomRight_(MaxTextLength)
 {
-	if (appCfg.withProfilerGraphs())
+	if (appCfg.withProfilerGraphs)
 		initPlotter();
-	if (appCfg.withInfoText())
+	if (appCfg.withInfoText)
 		initInfoText();
 }
 
@@ -114,8 +114,8 @@ void DebugOverlay::initInfoText()
 	SceneNode *rootNode = &theApplication().rootNode();
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
 
-	nctl::String fontTexFilePath = IFile::dataPath() + appCfg.fontTexFilename();
-	nctl::String fontFntFilePath = IFile::dataPath() + appCfg.fontFntFilename();
+	nctl::String fontTexFilePath = IFile::dataPath() + appCfg.fontTexFilename;
+	nctl::String fontFntFilePath = IFile::dataPath() + appCfg.fontFntFilename;
 	if (IFile::access(fontTexFilePath.data(), IFile::AccessMode::EXISTS) == false)
 		LOGW_X("Cannot access font texture file \"%s\" to enable information text", fontTexFilePath.data());
 	else if (IFile::access(fontFntFilePath.data(), IFile::AccessMode::EXISTS) == false)
