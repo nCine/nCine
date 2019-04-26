@@ -6,18 +6,17 @@ class Matrix4x4OperationsTest : public ::testing::Test
 {
   public:
 	Matrix4x4OperationsTest()
-		: m1_(nc::Matrix4x4f::rotationX(60))
-	{ }
+	    : m1_(nc::Matrix4x4f::rotationX(60))
+	{}
 
 	nc::Matrix4x4f m1_;
 };
 
 TEST_F(Matrix4x4OperationsTest, Transposed)
 {
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 	const nc::Matrix4x4f tr = m1_.transposed();
-	printf("Matrix transposition:\n");
-	printMatrix(tr);
+	printMatrix("Matrix transposition:\n", tr);
 
 	assertVectorsAreEqual(tr[0], m1_[0].x, m1_[1].x, m1_[2].x, m1_[3].x);
 	assertVectorsAreEqual(tr[1], m1_[0].y, m1_[1].y, m1_[2].y, m1_[3].y);
@@ -29,10 +28,9 @@ TEST_F(Matrix4x4OperationsTest, TransposeInPlace)
 {
 	const nc::Matrix4x4f oldM1 = m1_;
 
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 	m1_.transpose();
-	printf("Transposing the matrix:\n");
-	printMatrix(m1_);
+	printMatrix("Transposing the matrix:\n", m1_);
 
 	assertVectorsAreEqual(m1_[0], oldM1[0].x, oldM1[1].x, oldM1[2].x, oldM1[3].x);
 	assertVectorsAreEqual(m1_[1], oldM1[0].y, oldM1[1].y, oldM1[2].y, oldM1[3].y);
@@ -43,7 +41,7 @@ TEST_F(Matrix4x4OperationsTest, TransposeInPlace)
 TEST_F(Matrix4x4OperationsTest, UniformScaleIdentity)
 {
 	const float sc = 0.5f;
-	printf("The identity matrix:\n"); printMatrix(nc::Matrix4x4f::Identity);
+	printMatrix("The identity matrix:\n", nc::Matrix4x4f::Identity);
 	const nc::Matrix4x4f newMatrix = nc::Matrix4x4f::Identity.scale(sc);
 	printf("Scaling the identity matrix by the scalar %.2f:\n", sc);
 	printMatrix(newMatrix);
@@ -57,7 +55,7 @@ TEST_F(Matrix4x4OperationsTest, UniformScaleIdentity)
 TEST_F(Matrix4x4OperationsTest, ScaleIdentity)
 {
 	const nc::Vector3f sc(2.0f, 0.5, 0.75f);
-	printf("The identity matrix:\n"); printMatrix(nc::Matrix4x4f::Identity);
+	printMatrix("The identity matrix:\n", nc::Matrix4x4f::Identity);
 	const nc::Matrix4x4f newMatrix = nc::Matrix4x4f::Identity.scale(sc);
 	printf("Scaling the identity matrix by <%.2f, %.2f, %.2f>:\n", sc.x, sc.y, sc.z);
 	printMatrix(newMatrix);
@@ -71,7 +69,7 @@ TEST_F(Matrix4x4OperationsTest, ScaleIdentity)
 TEST_F(Matrix4x4OperationsTest, TranslateIdentity)
 {
 	const nc::Vector3f tr(1.0f, 0.5, 0.75f);
-	printf("The identity matrix:\n"); printMatrix(nc::Matrix4x4f::Identity);
+	printMatrix("The identity matrix:\n", nc::Matrix4x4f::Identity);
 	const nc::Matrix4x4f newMatrix = nc::Matrix4x4f::Identity.translation(tr);
 	printf("Translating the identity matrix by <%.2f, %.2f, %.2f>:\n", tr.x, tr.y, tr.z);
 	printMatrix(newMatrix);
@@ -85,7 +83,7 @@ TEST_F(Matrix4x4OperationsTest, TranslateIdentity)
 TEST_F(Matrix4x4OperationsTest, RotateXIdentity)
 {
 	const float deg = 90.0f;
-	printf("The identity matrix:\n"); printMatrix(nc::Matrix4x4f::Identity);
+	printMatrix("The identity matrix:\n", nc::Matrix4x4f::Identity);
 	const nc::Matrix4x4f newMatrix = nc::Matrix4x4f::Identity.rotationX(deg);
 	printf("Rotating the identity matrix by %.2f degrees around X:\n", deg);
 	printMatrix(newMatrix);
@@ -99,7 +97,7 @@ TEST_F(Matrix4x4OperationsTest, RotateXIdentity)
 TEST_F(Matrix4x4OperationsTest, RotateYIdentity)
 {
 	const float deg = 90.0f;
-	printf("The identity matrix:\n"); printMatrix(nc::Matrix4x4f::Identity);
+	printMatrix("The identity matrix:\n", nc::Matrix4x4f::Identity);
 	const nc::Matrix4x4f newMatrix = nc::Matrix4x4f::Identity.rotationY(deg);
 	printf("Rotating the identity matrix by %.2f degrees around Y:\n", deg);
 	printMatrix(newMatrix);
@@ -113,7 +111,7 @@ TEST_F(Matrix4x4OperationsTest, RotateYIdentity)
 TEST_F(Matrix4x4OperationsTest, RotateZIdentity)
 {
 	const float deg = 90.0f;
-	printf("The identity matrix:\n"); printMatrix(nc::Matrix4x4f::Identity);
+	printMatrix("The identity matrix:\n", nc::Matrix4x4f::Identity);
 	const nc::Matrix4x4f newMatrix = nc::Matrix4x4f::Identity.rotationZ(deg);
 	printf("Rotating the identity matrix by %.2f degrees around Z:\n", deg);
 	printMatrix(newMatrix);
@@ -126,10 +124,9 @@ TEST_F(Matrix4x4OperationsTest, RotateZIdentity)
 
 TEST_F(Matrix4x4OperationsTest, InvertIdentity)
 {
-	printf("The identity matrix:\n"); printMatrix(nc::Matrix4x4f::Identity);
+	printMatrix("The identity matrix:\n", nc::Matrix4x4f::Identity);
 	const nc::Matrix4x4f newMatrix = nc::Matrix4x4f::Identity.inverse();
-	printf("Inverting the identity matrix:\n");
-	printMatrix(newMatrix);
+	printMatrix("Inverting the identity matrix:\n", newMatrix);
 
 	assertVectorsAreEqual(newMatrix[0], nc::Matrix4x4f::Identity[0]);
 	assertVectorsAreEqual(newMatrix[1], nc::Matrix4x4f::Identity[1]);
@@ -139,11 +136,11 @@ TEST_F(Matrix4x4OperationsTest, InvertIdentity)
 
 TEST_F(Matrix4x4OperationsTest, InvertOrthogonal)
 {
-	printf("m1 is orthogonal:\n"); printMatrix(m1_);
+	printMatrix("m1 is orthogonal:\n", m1_);
 	const nc::Matrix4x4f tr = m1_.transposed();
-	printf("Creating a new matrix as the transpose of the first one:\n"); printMatrix(tr);
+	printMatrix("Creating a new matrix as the transpose of the first one:\n", tr);
 	const nc::Matrix4x4f inv = m1_.inverse();
-	printf("Creating a new matrix as the inverse of the first one:\n"); printMatrix(inv);
+	printMatrix("Creating a new matrix as the inverse of the first one:\n", inv);
 
 	printf("The transpose and the inverse are equal: %d\n", tr == inv);
 
@@ -156,7 +153,7 @@ TEST_F(Matrix4x4OperationsTest, InvertOrthogonal)
 
 TEST_F(Matrix4x4OperationsTest, TransformVector4)
 {
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 
 	const nc::Vector4f v1 = nc::Vector4f(0.5f, 1.0f, 0.75f, 1.0f).normalize();
 	printf("v1: <%.2f, %.2f, %.2f, %.2f> (length: %.2f)\n", v1.x, v1.y, v1.z, v1.w, v1.length());
@@ -173,7 +170,7 @@ TEST_F(Matrix4x4OperationsTest, TransformVector4)
 
 TEST_F(Matrix4x4OperationsTest, TransformVector3)
 {
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 
 	const nc::Vector3f v1 = nc::Vector3f(0.5f, 1.0f, 0.75f).normalize();
 	printf("v1: <%.2f, %.2f, %.2f> (length: %.2f)\n", v1.x, v1.y, v1.z, v1.length());
@@ -190,7 +187,7 @@ TEST_F(Matrix4x4OperationsTest, TransformVector3)
 TEST_F(Matrix4x4OperationsTest, Ortho)
 {
 	const nc::Matrix4x4f orthoMat = nc::Matrix4x4f::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
-	printf("Build an orthographic matrix to be equal to identity:\n"); printMatrix(orthoMat);
+	printMatrix("Build an orthographic matrix to be equal to identity:\n", orthoMat);
 
 	assertVectorsAreEqual(orthoMat[0], nc::Matrix4x4f::Identity[0]);
 	assertVectorsAreEqual(orthoMat[1], nc::Matrix4x4f::Identity[1]);
@@ -201,7 +198,7 @@ TEST_F(Matrix4x4OperationsTest, Ortho)
 TEST_F(Matrix4x4OperationsTest, Frustum)
 {
 	const nc::Matrix4x4f frustumMat = nc::Matrix4x4f::frustum(1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
-	printf("Build a simple frustum matrix:\n"); printMatrix(frustumMat);
+	printMatrix("Build a simple frustum matrix:\n", frustumMat);
 
 	assertVectorsAreEqual(frustumMat[0], nc::Matrix4x4f::Identity[0]);
 	assertVectorsAreEqual(frustumMat[1], nc::Matrix4x4f::Identity[1]);
@@ -212,7 +209,7 @@ TEST_F(Matrix4x4OperationsTest, Frustum)
 TEST_F(Matrix4x4OperationsTest, Perspective)
 {
 	const nc::Matrix4x4f perspMat = nc::Matrix4x4f::perspective(90.0f, 1.0f, -1.0f, 1.0f);
-	printf("Build a simple perspective matrix:\n"); printMatrix(perspMat);
+	printMatrix("Build a simple perspective matrix:\n", perspMat);
 
 	assertVectorsAreEqual(perspMat[0], nc::Matrix4x4f::Identity[0]);
 	assertVectorsAreEqual(perspMat[1], nc::Matrix4x4f::Identity[1]);

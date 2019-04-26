@@ -91,7 +91,7 @@ class RWLock
 	RWLock &operator=(const RWLock &) = delete;
 };
 
-#if !defined(__ANDROID__) && !defined(__APPLE__)
+	#if !defined(__ANDROID__) && !defined(__APPLE__)
 
 /// Barrier class (threads synchronization)
 class Barrier
@@ -113,7 +113,7 @@ class Barrier
 	Barrier &operator=(const Barrier &) = delete;
 };
 
-#endif
+	#endif
 #endif
 
 }

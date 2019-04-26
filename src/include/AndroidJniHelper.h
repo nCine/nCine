@@ -39,8 +39,10 @@ class AndroidJniHelper
 class AndroidJniClass
 {
   public:
-	AndroidJniClass() :  javaObject_(nullptr) { }
-	explicit AndroidJniClass(jobject javaObject) : javaObject_(javaObject) { }
+	AndroidJniClass()
+	    : javaObject_(nullptr) {}
+	explicit AndroidJniClass(jobject javaObject)
+	    : javaObject_(javaObject) {}
 	virtual ~AndroidJniClass()
 	{
 		if (javaObject_)
@@ -83,7 +85,7 @@ class AndroidJniClass_InputDevice : public AndroidJniClass
   public:
 	static void init();
 	explicit AndroidJniClass_InputDevice(jobject javaObject)
-		: AndroidJniClass(javaObject) { }
+	    : AndroidJniClass(javaObject) {}
 	static AndroidJniClass_InputDevice getDevice(int deviceId);
 	static int getDeviceIds(int *destination, int maxSize);
 	void getName(char *destination, int maxStringSize) const;
@@ -111,7 +113,7 @@ class AndroidJniClass_KeyCharacterMap : public AndroidJniClass
   public:
 	static void init();
 	explicit AndroidJniClass_KeyCharacterMap(jobject javaObject)
-		: AndroidJniClass(javaObject) { }
+	    : AndroidJniClass(javaObject) {}
 	static bool deviceHasKey(int button);
 
   private:

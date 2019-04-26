@@ -14,10 +14,9 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 RenderQueue::RenderQueue()
-	: debugGroupString_(64),
-	  opaqueQueue_(16), opaqueBatchedQueue_(16), transparentQueue_(16), transparentBatchedQueue_(16)
+    : debugGroupString_(64),
+      opaqueQueue_(16), opaqueBatchedQueue_(16), transparentQueue_(16), transparentBatchedQueue_(16)
 {
-
 }
 
 ///////////////////////////////////////////////////////////
@@ -37,25 +36,25 @@ void RenderQueue::addCommand(RenderCommand *command)
 
 namespace {
 
-bool descendingOrder(const RenderCommand *a, const RenderCommand *b) { return a->sortKey() > b->sortKey(); }
-bool ascendingOrder(const RenderCommand *a, const RenderCommand *b) { return a->sortKey() < b->sortKey(); }
+	bool descendingOrder(const RenderCommand *a, const RenderCommand *b) { return a->sortKey() > b->sortKey(); }
+	bool ascendingOrder(const RenderCommand *a, const RenderCommand *b) { return a->sortKey() < b->sortKey(); }
 
-const char *commandTypeString(const RenderCommand &command)
-{
-	switch (command.type())
+	const char *commandTypeString(const RenderCommand &command)
 	{
-		case RenderCommand::CommandTypes::UNSPECIFIED: return "unspecified";
-		case RenderCommand::CommandTypes::PLOTTER: return "plotter";
-		case RenderCommand::CommandTypes::SPRITE: return "sprite";
-		case RenderCommand::CommandTypes::MESH_SPRITE: return "mesh sprite";
-		case RenderCommand::CommandTypes::PARTICLE: return "particle";
-		case RenderCommand::CommandTypes::TEXT: return "text";
+		switch (command.type())
+		{
+			case RenderCommand::CommandTypes::UNSPECIFIED: return "unspecified";
+			case RenderCommand::CommandTypes::PLOTTER: return "plotter";
+			case RenderCommand::CommandTypes::SPRITE: return "sprite";
+			case RenderCommand::CommandTypes::MESH_SPRITE: return "mesh sprite";
+			case RenderCommand::CommandTypes::PARTICLE: return "particle";
+			case RenderCommand::CommandTypes::TEXT: return "text";
 #ifdef WITH_IMGUI
-		case RenderCommand::CommandTypes::IMGUI: return "imgui";
+			case RenderCommand::CommandTypes::IMGUI: return "imgui";
 #endif
-		default: return "unknown";
+			default: return "unknown";
+		}
 	}
-}
 
 }
 
@@ -123,13 +122,13 @@ void RenderQueue::draw()
 		const int batchSize = opaqueRenderCommand->batchSize();
 		if (numInstances > 0)
 			debugGroupString_.format("Opaque %u (%d %s on layer %u)",
-				commandIndex, numInstances, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
+			                         commandIndex, numInstances, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
 		else if (batchSize > 0)
 			debugGroupString_.format("Opaque %u (%d %s on layer %u)",
-				commandIndex, batchSize, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
+			                         commandIndex, batchSize, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
 		else
 			debugGroupString_.format("Opaque %u (%s on layer %u)",
-				commandIndex, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
+			                         commandIndex, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
 
 		GLDebug::ScopedGroup scoped(debugGroupString_.data());
 		commandIndex++;
@@ -148,13 +147,13 @@ void RenderQueue::draw()
 		const int batchSize = transparentRenderCommand->batchSize();
 		if (numInstances > 0)
 			debugGroupString_.format("Transparent %u (%d %s on layer %u)",
-				commandIndex, numInstances, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
+			                         commandIndex, numInstances, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
 		else if (batchSize > 0)
 			debugGroupString_.format("Transparent %u (%d %s on layer %u)",
-				commandIndex, batchSize, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
+			                         commandIndex, batchSize, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
 		else
 			debugGroupString_.format("Transparent %u (%s on layer %u)",
-				commandIndex, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
+			                         commandIndex, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
 
 		GLDebug::ScopedGroup scoped(debugGroupString_.data());
 		commandIndex++;

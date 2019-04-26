@@ -22,7 +22,11 @@ class ThreadAffinityMask
 {
   public:
 	ThreadAffinityMask() { zero(); }
-	ThreadAffinityMask(int cpuNum) { zero(); set(cpuNum); }
+	ThreadAffinityMask(int cpuNum)
+	{
+		zero();
+		set(cpuNum);
+	}
 
 	/// Clears the CPU set
 	void zero();
@@ -34,13 +38,13 @@ class ThreadAffinityMask
 	bool isSet(int cpuNum);
 
   private:
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+	#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
 	DWORD_PTR affinityMask_;
-#elif __APPLE__
+	#elif __APPLE__
 	integer_t affinityTag_;
-#else
+	#else
 	cpu_set_t cpuSet_;
-#endif
+	#endif
 
 	friend class Thread;
 };
@@ -87,7 +91,8 @@ class Thread
 	/// The structure wrapping the information for thread creation
 	struct ThreadInfo
 	{
-		ThreadInfo() : startFunction(nullptr), threadArg(nullptr) { }
+		ThreadInfo()
+		    : startFunction(nullptr), threadArg(nullptr) {}
 		ThreadFunctionPtr startFunction;
 		void *threadArg;
 	};
@@ -101,11 +106,11 @@ class Thread
 	ThreadInfo threadInfo_;
 	/// The wrapper start function for thread creation
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
-#ifdef __GNUC__ // MinGW
-	static unsigned int(__attribute__((__stdcall__)) wrapperFunction) (void *arg);
-#else // MSVC
+	#ifdef __GNUC__ // MinGW
+	static unsigned int(__attribute__((__stdcall__)) wrapperFunction)(void *arg);
+	#else // MSVC
 	static unsigned int __stdcall wrapperFunction(void *arg);
-#endif
+	#endif
 #else
 	static void *wrapperFunction(void *arg);
 #endif

@@ -8,7 +8,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 LineVariable::LineVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f &worldMatrix)
-	: PlottingVariable(numValues, rejectDelay, worldMatrix)
+    : PlottingVariable(numValues, rejectDelay, worldMatrix)
 {
 	valuesCmd_.material().setShaderProgramType(Material::ShaderProgramType::COLOR);
 	valuesCmd_.geometry().setDrawParameters(GL_LINE_STRIP, 2, variable_.numValues());
@@ -73,8 +73,10 @@ void LinePlotter::updateAllVertices(float x, float y, float w, float h)
 
 	const float normalizedRefValue = normBetweenRefValue(commonMin, commonMax);
 	GLfloat *refValueVertices = refValueCmd_.geometry().acquireVertexPointer(4);
-	refValueVertices[0] = x;		refValueVertices[1] = y + h * normalizedRefValue;
-	refValueVertices[2] = x + w;	refValueVertices[3] = y + h * normalizedRefValue;
+	refValueVertices[0] = x;
+	refValueVertices[1] = y + h * normalizedRefValue;
+	refValueVertices[2] = x + w;
+	refValueVertices[3] = y + h * normalizedRefValue;
 	refValueCmd_.geometry().releaseVertexPointer();
 
 	for (nctl::UniquePtr<PlottingVariable> &variable : variables_)
@@ -88,8 +90,10 @@ void LinePlotter::updateAllVertices(float x, float y, float w, float h)
 
 		const float normalizedMean = profVariable->normBetweenMean(commonMin, commonMax);
 		// Variable mean vertices
-		vertices[0] = x;			vertices[1] = y + h * normalizedMean;
-		vertices[2] = x + w;		vertices[3] = y + h * normalizedMean;
+		vertices[0] = x;
+		vertices[1] = y + h * normalizedMean;
+		vertices[2] = x + w;
+		vertices[3] = y + h * normalizedMean;
 
 		const unsigned int nextIndex = profVariable->nextIndex();
 

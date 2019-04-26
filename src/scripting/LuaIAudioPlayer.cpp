@@ -7,8 +7,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace IAudioPlayer
-{
+namespace IAudioPlayer {
 	static const char *play = "play";
 	static const char *pause = "pause";
 	static const char *stop = "stop";

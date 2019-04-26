@@ -10,7 +10,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 RenderBuffersManager::RenderBuffersManager(unsigned long vboMaxSize, unsigned long iboMaxSize)
-	: buffers_(4)
+    : buffers_(4)
 {
 	BufferSpecifications &vboSpecs = specs_[BufferTypes::ARRAY];
 	vboSpecs.type = BufferTypes::ARRAY;
@@ -51,24 +51,24 @@ RenderBuffersManager::RenderBuffersManager(unsigned long vboMaxSize, unsigned lo
 
 namespace {
 
-const char *bufferTypeToString(RenderBuffersManager::BufferTypes::Enum type)
-{
-	switch (type)
+	const char *bufferTypeToString(RenderBuffersManager::BufferTypes::Enum type)
 	{
-		case RenderBuffersManager::BufferTypes::Enum::ARRAY: return "Array";
-		case RenderBuffersManager::BufferTypes::Enum::ELEMENT_ARRAY: return "Element Array";
-		case RenderBuffersManager::BufferTypes::Enum::UNIFORM: return "Uniform";
-		case RenderBuffersManager::BufferTypes::Enum::COUNT: return "";
-	}
+		switch (type)
+		{
+			case RenderBuffersManager::BufferTypes::Enum::ARRAY: return "Array";
+			case RenderBuffersManager::BufferTypes::Enum::ELEMENT_ARRAY: return "Element Array";
+			case RenderBuffersManager::BufferTypes::Enum::UNIFORM: return "Uniform";
+			case RenderBuffersManager::BufferTypes::Enum::COUNT: return "";
+		}
 
-	return "";
-}
+		return "";
+	}
 
 }
 
 RenderBuffersManager::Parameters RenderBuffersManager::acquireMemory(BufferTypes::Enum type, unsigned long bytes, unsigned int alignment)
 {
-	FATAL_ASSERT_MSG_X(bytes <= specs_[type].maxSize,"Trying to acquire %lu bytes when the maximum for buffer type \"%s\" is %lu",
+	FATAL_ASSERT_MSG_X(bytes <= specs_[type].maxSize, "Trying to acquire %lu bytes when the maximum for buffer type \"%s\" is %lu",
 	                   bytes, bufferTypeToString(type), specs_[type].maxSize);
 
 	// Accepting a custom alignment only if it is a multiple of the specification one
@@ -177,7 +177,7 @@ void RenderBuffersManager::createBuffer(const BufferSpecifications &specs)
 
 	if (specs.mapFlags == 0)
 	{
-		managedBuffer.hostBuffer = nctl::makeUnique<GLubyte []>(specs.maxSize);
+		managedBuffer.hostBuffer = nctl::makeUnique<GLubyte[]>(specs.maxSize);
 		managedBuffer.mapBase = managedBuffer.hostBuffer.get();
 	}
 	else

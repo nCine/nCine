@@ -5,7 +5,8 @@ namespace {
 class HashMapListIteratorTest : public ::testing::Test
 {
   public:
-	HashMapListIteratorTest() : hashmap_(Capacity) { }
+	HashMapListIteratorTest()
+	    : hashmap_(Capacity) {}
 
   protected:
 	void SetUp() override { initHashMap(hashmap_); }
@@ -74,7 +75,8 @@ TEST_F(HashMapListIteratorTest, WhileLoopIteration)
 		printf(" [%d] hash: %u, key: %d, value: %d\n", n, i.hash(), i.key(), i.value());
 		ASSERT_EQ(i.key(), n);
 		ASSERT_EQ(*i, KeyValueDifference + n);
-		++i; ++n;
+		++i;
+		++n;
 	}
 	printf("\n");
 }
@@ -104,7 +106,8 @@ TEST_F(HashMapListIteratorTest, ReverseWhileLoopIteration)
 		printf(" [%d] hash: %u, key: %d, value: %d\n", n, r.base().hash(), r.base().key(), r.base().value());
 		ASSERT_EQ(r.base().key(), n);
 		ASSERT_EQ(*r, KeyValueDifference + n);
-		++r; --n;
+		++r;
+		--n;
 	}
 	printf("\n");
 }

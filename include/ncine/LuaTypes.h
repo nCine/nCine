@@ -28,8 +28,7 @@ class AudioStreamPlayer;
 class ParticleSystem;
 
 /// The userdata types wrapped by Lua
-namespace LuaTypes
-{
+namespace LuaTypes {
 	enum UserDataType
 	{
 		KEYBOARDSTATE = 0,
@@ -98,7 +97,7 @@ namespace LuaTypes
 
 	inline const char *wrapperToName(LuaTypes::UserDataType type)
 	{
-		switch(type)
+		switch (type)
 		{
 			case LuaTypes::UserDataType::UNKNOWN: return "unknown";
 

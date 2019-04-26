@@ -7,7 +7,7 @@
 #include "tracy.h"
 #ifdef WITH_TRACY
 	#include "Texture.h"
-	static nctl::String tracyInfoString(128);
+static nctl::String tracyInfoString(128);
 #endif
 
 namespace ncine {
@@ -17,10 +17,10 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ParticleSystem::ParticleSystem(SceneNode *parent, unsigned int count, Texture *texture, Recti texRect)
-	: SceneNode(parent, 0, 0), poolSize_(count), poolTop_(count - 1),
-	  particlePool_(poolSize_, nctl::ArrayMode::FIXED_CAPACITY),
-	  particleArray_(poolSize_, nctl::ArrayMode::FIXED_CAPACITY),
-	  affectors_(4), inLocalSpace_(false)
+    : SceneNode(parent, 0, 0), poolSize_(count), poolTop_(count - 1),
+      particlePool_(poolSize_, nctl::ArrayMode::FIXED_CAPACITY),
+      particleArray_(poolSize_, nctl::ArrayMode::FIXED_CAPACITY),
+      affectors_(4), inLocalSpace_(false)
 {
 	ZoneScoped;
 	ZoneText(texture->name().data(), texture->name().length());

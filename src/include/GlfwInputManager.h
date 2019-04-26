@@ -49,7 +49,8 @@ class GlfwMouseState : public MouseState
 class GlfwMouseEvent : public MouseEvent
 {
   public:
-	GlfwMouseEvent() : button_(0) { }
+	GlfwMouseEvent()
+	    : button_(0) {}
 
 	inline bool isLeftButton() const override { return button_ == GLFW_MOUSE_BUTTON_LEFT; }
 	inline bool isMiddleButton() const override { return button_ == GLFW_MOUSE_BUTTON_MIDDLE; }
@@ -67,7 +68,7 @@ class GlfwMouseEvent : public MouseEvent
 class GlfwScrollEvent : public ScrollEvent
 {
   public:
-	GlfwScrollEvent() { }
+	GlfwScrollEvent() {}
 
 	friend class GlfwInputManager;
 };
@@ -93,7 +94,7 @@ class GlfwJoystickState : public JoystickState
 {
   public:
 	GlfwJoystickState()
-		: numButtons_(0), numHats_(0), numAxes_(0), buttons_(nullptr), hats_(nullptr), axesValues_(nullptr) { }
+	    : numButtons_(0), numHats_(0), numAxes_(0), buttons_(nullptr), hats_(nullptr), axesValues_(nullptr) {}
 
 	bool isButtonPressed(int buttonId) const override;
 	unsigned char hatState(int hatId) const override;
@@ -182,7 +183,7 @@ class GlfwInputManager : public IInputManager
 	static void windowSizeCallback(GLFWwindow *window, int width, int height);
 	static void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 	static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
-	static void charCallback(GLFWwindow* window, unsigned int c);
+	static void charCallback(GLFWwindow *window, unsigned int c);
 	static void cursorPosCallback(GLFWwindow *window, double x, double y);
 	static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
 	static void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
@@ -198,7 +199,8 @@ inline const MouseState &GlfwInputManager::mouseState() const
 	double xCursor, yCursor;
 
 	glfwGetCursorPos(GlfwGfxDevice::windowHandle(), &xCursor, &yCursor);
-	mouseState_.x = int(xCursor); mouseState_.y = int(yCursor);
+	mouseState_.x = int(xCursor);
+	mouseState_.y = int(yCursor);
 
 	return mouseState_;
 }

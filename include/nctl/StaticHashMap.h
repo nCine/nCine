@@ -26,7 +26,8 @@ class StaticHashMap
 	/// Reverse constant iterator type
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
-	StaticHashMap() : size_(0) { clear(); }
+	StaticHashMap()
+	    : size_(0) { clear(); }
 
 	/// Copy constructor
 	StaticHashMap(const StaticHashMap &other);
@@ -177,7 +178,7 @@ typename StaticHashMap<K, T, Capacity, HashFunc>::ConstReverseIterator StaticHas
 
 template <class K, class T, unsigned int Capacity, class HashFunc>
 StaticHashMap<K, T, Capacity, HashFunc>::StaticHashMap(const StaticHashMap<K, T, Capacity, HashFunc> &other)
-	: size_(other.size_)
+    : size_(other.size_)
 {
 	for (unsigned int i = 0; i < Capacity; i++)
 	{
@@ -190,7 +191,7 @@ StaticHashMap<K, T, Capacity, HashFunc>::StaticHashMap(const StaticHashMap<K, T,
 
 template <class K, class T, unsigned int Capacity, class HashFunc>
 StaticHashMap<K, T, Capacity, HashFunc>::StaticHashMap(StaticHashMap<K, T, Capacity, HashFunc> &&other)
-	: size_(other.size_)
+    : size_(other.size_)
 {
 	for (unsigned int i = 0; i < Capacity; i++)
 	{
@@ -364,7 +365,7 @@ bool StaticHashMap<K, T, Capacity, HashFunc>::remove(const K &key)
 			if (bucketIndex != lastBucketIndex)
 			{
 				nodes_[bucketIndex].key = nctl::move(nodes_[lastBucketIndex].key);
-				nodes_[bucketIndex].value =  nctl::move(nodes_[lastBucketIndex].value);
+				nodes_[bucketIndex].value = nctl::move(nodes_[lastBucketIndex].value);
 				hashes_[bucketIndex] = hashes_[lastBucketIndex];
 			}
 
@@ -521,7 +522,7 @@ T &StaticHashMap<K, T, Capacity, HashFunc>::addNode(unsigned int index, hash_t h
 }
 
 template <class T, unsigned int Capacity>
-using StaticStringHashMap = StaticHashMap<String, T, Capacity, FNV1aFuncHashContainer<String> >;
+using StaticStringHashMap = StaticHashMap<String, T, Capacity, FNV1aFuncHashContainer<String>>;
 
 }
 

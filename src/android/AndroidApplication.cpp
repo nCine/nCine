@@ -35,7 +35,7 @@ Application &theApplication()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void AndroidApplication::start(struct android_app *state, IAppEventHandler * (*createAppEventHandler)())
+void AndroidApplication::start(struct android_app *state, IAppEventHandler *(*createAppEventHandler)())
 {
 	ASSERT(state);
 	ASSERT(createAppEventHandler);

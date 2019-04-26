@@ -20,13 +20,13 @@ class TextureLoaderPkm : public ITextureLoader
 	 */
 	struct PkmHeader
 	{
-		uint32_t	magicId;
-		uint16_t	version;
-		uint16_t	dataType;
-		uint16_t	extendedWidth;
-		uint16_t	extendedHeight;
-		uint16_t	width;
-		uint16_t	height;
+		uint32_t magicId;
+		uint16_t version;
+		uint16_t dataType;
+		uint16_t extendedWidth;
+		uint16_t extendedHeight;
+		uint16_t width;
+		uint16_t height;
 	};
 };
 

@@ -50,7 +50,11 @@ class RenderCommand
 	/// Returns the rendering layer
 	inline unsigned int layer() const { return layer_; }
 	/// Sets the rendering layer
-	inline void setLayer(unsigned int layer) { ASSERT(layer <= TopLayer); layer_ = layer; }
+	inline void setLayer(unsigned int layer)
+	{
+		ASSERT(layer <= TopLayer);
+		layer_ = layer;
+	}
 
 	/// Returns the number of instances collected in the command or zero if instancing is not used
 	inline int numInstances() const { return numInstances_; }
@@ -101,7 +105,8 @@ class RenderCommand
   private:
 	struct ScissorState
 	{
-		ScissorState() : x(0), y(0), width(0), height(0) { }
+		ScissorState()
+		    : x(0), y(0), width(0), height(0) {}
 
 		GLint x;
 		GLint y;

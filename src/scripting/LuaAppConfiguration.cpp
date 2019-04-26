@@ -9,8 +9,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace AppConfiguration
-{
+namespace AppConfiguration {
 	static const char *dataPath = "data_path";
 	static const char *logFile = "log_file";
 	static const char *consoleLogLevel = "console_log_level";
@@ -28,7 +27,7 @@ namespace AppConfiguration
 	static const char *fontFntFilename = "font_fntfile";
 
 	static const char *vboSize = "vbo_size";
-	static const char *iboSize ="ibo_size";
+	static const char *iboSize = "ibo_size";
 	static const char *vaoPoolSize = "vao_pool_size";
 
 	static const char *withProfilerGraphs = "profiler_graphs";

@@ -30,9 +30,9 @@ nctl::String IFile::savePath_(MaxFilenameLength);
 ///////////////////////////////////////////////////////////
 
 IFile::IFile(const char *filename)
-	: type_(FileType::BASE), filename_(filename), extension_(MaxExtensionLength),
-	  fileDescriptor_(-1), filePointer_(nullptr), shouldCloseOnDestruction_(true),
-	  shouldExitOnFailToOpen_(true), fileSize_(0)
+    : type_(FileType::BASE), filename_(filename), extension_(MaxExtensionLength),
+      fileDescriptor_(-1), filePointer_(nullptr), shouldCloseOnDestruction_(true),
+      shouldExitOnFailToOpen_(true), fileSize_(0)
 {
 	ASSERT(filename);
 

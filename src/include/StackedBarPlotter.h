@@ -20,7 +20,8 @@ class StackedBarVariable : public PlottingVariable
 class StackedBarPlotter : public ProfilePlotter
 {
   public:
-	StackedBarPlotter(SceneNode *parent, Rectf rect) : ProfilePlotter(parent, rect) { }
+	StackedBarPlotter(SceneNode *parent, Rectf rect)
+	    : ProfilePlotter(parent, rect) {}
 
 	unsigned int addVariable(unsigned int numValues, float rejectDelay) override;
 	void draw(RenderQueue &renderQueue) override;

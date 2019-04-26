@@ -11,7 +11,7 @@ namespace {
 const unsigned int Capacity = 32;
 const unsigned int Size = 10;
 const int KeyValueDifference = 10;
-using HashMapTestType = nctl::HashMapList<int, int, nctl::FixedHashFunc<int> >;
+using HashMapTestType = nctl::HashMapList<int, int, nctl::FixedHashFunc<int>>;
 
 template <class HashFunc>
 void initHashMap(nctl::HashMapList<int, int, HashFunc> &hashmap)

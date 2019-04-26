@@ -9,13 +9,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GLShader::GLShader(GLenum type)
-	: glHandle_(0)
+    : glHandle_(0)
 {
 	glHandle_ = glCreateShader(type);
 }
 
 GLShader::GLShader(GLenum type, const char *filename)
-	: glHandle_(0)
+    : glHandle_(0)
 {
 	glHandle_ = glCreateShader(type);
 	loadFromFile(filename);
@@ -54,13 +54,13 @@ void GLShader::loadFromFile(const char *filename)
 		nctl::String source(length);
 		fileHandle->read(source.data(), length);
 
-	#if defined(__ANDROID__) && GL_ES_VERSION_3_0
+#if defined(__ANDROID__) && GL_ES_VERSION_3_0
 		const char *versionLine = "#version 300 es\n";
 		const GLint lengths[2] = { 16, length };
-	#else
+#else
 		const char *versionLine = "#version 330\n";
 		const GLint lengths[2] = { 13, length };
-	#endif
+#endif
 		const GLchar *source_lines[2] = { versionLine, source.data() };
 		glShaderSource(glHandle_, 2, source_lines, lengths);
 	}

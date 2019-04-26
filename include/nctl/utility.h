@@ -13,17 +13,17 @@ inline typename removeReference<T>::type &&move(T &&arg)
 }
 
 //// Forwards lvalues as either lvalues or as rvalues, depending on T
-template<typename T>
-inline constexpr T&& forward(typename removeReference<T>::type &arg)
+template <typename T>
+inline constexpr T &&forward(typename removeReference<T>::type &arg)
 {
-	return static_cast<T&&>(arg);
+	return static_cast<T &&>(arg);
 }
 
-template<typename T>
-inline constexpr T&& forward(typename removeReference<T>::type &&arg)
+template <typename T>
+inline constexpr T &&forward(typename removeReference<T>::type &&arg)
 {
 	static_assert(!isLValueReference<T>::value, "Invalid lvalue to rvalue conversion");
-	return static_cast<T&&>(arg);
+	return static_cast<T &&>(arg);
 }
 
 /// Swaps the content of two objects of the same type

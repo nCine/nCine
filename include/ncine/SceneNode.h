@@ -55,7 +55,7 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Draws the node and visits its children
 	virtual void visit(RenderQueue &renderQueue);
 	/// Renders the node
-	virtual void draw(RenderQueue &renderQueue) { }
+	virtual void draw(RenderQueue &renderQueue) {}
 
 	/// Returns true if the node is updating
 	inline bool updateEnabled() const { return updateEnabled_; }
@@ -68,7 +68,7 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Returns true if the node is both updating and drawing
 	inline bool enabled() const { return (updateEnabled_ == true && drawEnabled_ == true); }
 	/// Enables or disables both node updating and drawing
-	inline void setEnabled(bool enabled) { updateEnabled_ = enabled; drawEnabled_ = enabled; }
+	void setEnabled(bool enabled);
 
 	/// Returns node position relative to its parent
 	inline Vector2f position() const { return Vector2f(x, y); }
@@ -79,13 +79,13 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Returns absolute node position
 	inline Vector2f absPosition() const { return Vector2f(absX_, absY_); }
 	/// Sets the node position through two coordinates
-	inline void setPosition(float xx, float yy) { x = xx; y = yy; }
+	void setPosition(float xx, float yy);
 	/// Sets the node position through a vector
-	inline void setPosition(const Vector2f &pos) { x = pos.x; y = pos.y; }
+	void setPosition(const Vector2f &pos);
 	/// Moves a node based on two offsets
-	inline void move(float xx, float yy) { x += xx; y += yy; }
+	void move(float xx, float yy);
 	/// Adds a move vector to the node current position
-	inline void move(const Vector2f &pos) { x += pos.x; y += pos.y; }
+	void move(const Vector2f &pos);
 
 	/// Gets the node scale factor
 	inline float scale() const { return scaleFactor_; }
@@ -166,6 +166,36 @@ class DLL_PUBLIC SceneNode : public Object
 
 	virtual void transform();
 };
+
+inline void SceneNode::setEnabled(bool enabled)
+{
+	updateEnabled_ = enabled;
+	drawEnabled_ = enabled;
+}
+
+inline void SceneNode::setPosition(float xx, float yy)
+{
+	x = xx;
+	y = yy;
+}
+
+inline void SceneNode::setPosition(const Vector2f &pos)
+{
+	x = pos.x;
+	y = pos.y;
+}
+
+inline void SceneNode::move(float xx, float yy)
+{
+	x += xx;
+	y += yy;
+}
+
+inline void SceneNode::move(const Vector2f &pos)
+{
+	x += pos.x;
+	y += pos.y;
+}
 
 inline void SceneNode::setRotation(float rotation)
 {

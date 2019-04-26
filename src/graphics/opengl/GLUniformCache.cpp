@@ -10,13 +10,12 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GLUniformCache::GLUniformCache()
-	: uniform_(nullptr), dataPointer_(nullptr), isDirty_(false)
+    : uniform_(nullptr), dataPointer_(nullptr), isDirty_(false)
 {
-
 }
 
 GLUniformCache::GLUniformCache(const GLUniform *uniform)
-	: uniform_(uniform), dataPointer_(nullptr), isDirty_(false)
+    : uniform_(uniform), dataPointer_(nullptr), isDirty_(false)
 {
 	ASSERT(uniform);
 }

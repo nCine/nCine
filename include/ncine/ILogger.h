@@ -37,8 +37,7 @@ class DLL_PUBLIC ILogger
 	virtual unsigned int logStringCapacity() const = 0;
 };
 
-inline ILogger::~ILogger() { }
-
+inline ILogger::~ILogger() {}
 
 /// A fake logger which doesn't log anything
 class DLL_PUBLIC NullLogger : public ILogger
@@ -46,7 +45,7 @@ class DLL_PUBLIC NullLogger : public ILogger
   public:
 	inline unsigned int write(LogLevel level, const char *fmt, ...) override { return 0; }
 	inline const char *logString() const override { return nullptr; }
-	inline void clearLogString() override { }
+	inline void clearLogString() override {}
 	inline unsigned int logStringLength() const override { return 0; }
 	inline unsigned int logStringCapacity() const override { return 0; }
 };

@@ -10,7 +10,8 @@ class RectTest : public ::testing::Test
 	const int Width = 200;
 	const int Height = 75;
 
-	RectTest() : rect_(X, Y, Width, Height) { }
+	RectTest()
+	    : rect_(X, Y, Width, Height) {}
 
 	nc::Recti rect_;
 };

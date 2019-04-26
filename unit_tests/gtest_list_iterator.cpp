@@ -5,7 +5,7 @@ namespace {
 class ListIteratorTest : public ::testing::Test
 {
   public:
-	ListIteratorTest() { }
+	ListIteratorTest() {}
 
   protected:
 	void SetUp() override { initList(list_); }
@@ -115,7 +115,8 @@ TEST_F(ListIteratorTest, WhileLoopIteration)
 	{
 		printf(" %d", *i);
 		ASSERT_EQ(*i, n);
-		++i; ++n;
+		++i;
+		++n;
 	}
 	printf("\n");
 }
@@ -144,7 +145,8 @@ TEST_F(ListIteratorTest, ReverseWhileLoopIteration)
 	{
 		printf(" %d", *r);
 		ASSERT_EQ(*r, n);
-		++r; --n;
+		++r;
+		--n;
 	}
 	printf("\n");
 }

@@ -6,7 +6,8 @@ namespace {
 class HashMapAlgorithmsTest : public ::testing::Test
 {
   public:
-	HashMapAlgorithmsTest() : hashmap_(Capacity) { }
+	HashMapAlgorithmsTest()
+	    : hashmap_(Capacity) {}
 
   protected:
 	void SetUp() override { initHashMap(hashmap_); }

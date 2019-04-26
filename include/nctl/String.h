@@ -87,8 +87,7 @@ class DLL_PUBLIC String
 	inline unsigned int capacity() const { return capacity_; }
 
 	/// Clears the string
-	/*! Length will be zero but capacity remains unmodified. */
-	inline void clear() { length_ = 0; data()[0] = '\0'; }
+	void clear();
 
 	/// Returns a pointer to the internal array
 	inline char *data() { return (capacity_ > SmallBufferSize) ? array_.begin_ : array_.local_; }

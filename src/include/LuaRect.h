@@ -9,8 +9,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace Rect
-{
+namespace Rect {
 	static const char *Rect = "rect";
 
 	static const char *create = "create";

@@ -9,13 +9,12 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GLVertexFormat::GLVertexFormat()
-	: attributes_(nctl::StaticArrayMode::EXTEND_SIZE), ibo_(nullptr)
+    : attributes_(nctl::StaticArrayMode::EXTEND_SIZE), ibo_(nullptr)
 {
-
 }
 
 GLVertexFormat::GLVertexFormat(const GLVertexFormat &other)
-	: GLVertexFormat()
+    : GLVertexFormat()
 {
 	for (unsigned int i = 0; i < MaxAttributes; i++)
 	{
@@ -43,13 +42,13 @@ bool GLVertexFormat::Attribute::operator==(const Attribute &other) const
 	return ((other.enabled_ == false && enabled_ == false) ||
 	        ((other.enabled_ == true && enabled_ == true) &&
 	         (other.vbo_ && vbo_ && other.vbo_->glHandle() == vbo_->glHandle()) &&
-	          other.index_ == index_ &&
-	          other.size_ == size_ &&
-	          other.type_ == type_ &&
-	          other.normalized_ == normalized_ &&
-	          other.stride_ == stride_ &&
-	          other.pointer_ == pointer_ &&
-	          other.baseOffset_ == baseOffset_));
+	         other.index_ == index_ &&
+	         other.size_ == size_ &&
+	         other.type_ == type_ &&
+	         other.normalized_ == normalized_ &&
+	         other.stride_ == stride_ &&
+	         other.pointer_ == pointer_ &&
+	         other.baseOffset_ == baseOffset_));
 }
 
 bool GLVertexFormat::Attribute::operator!=(const Attribute &other) const

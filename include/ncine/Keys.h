@@ -7,7 +7,7 @@ enum class KeySym
 {
 	UNKNOWN = -1,
 
-// Common keysyms
+	// Common keysyms
 	BACKSPACE,
 	TAB,
 	RETURN,
@@ -122,7 +122,7 @@ enum class KeySym
 	PAUSE,
 	MENU,
 
-// SDL only keysyms
+	// SDL only keysyms
 	CLEAR, // Android too
 	EXCLAIM,
 	QUOTEDBL,
@@ -147,11 +147,11 @@ enum class KeySym
 	POWER, // Android too
 	UNDO,
 
-// GLFW only keysyms
+	// GLFW only keysyms
 	WORLD1,
 	WORLD2,
 
-// Android only keysyms
+	// Android only keysyms
 	SOFT_LEFT,
 	SOFT_RIGHT,
 	BACK,
@@ -255,6 +255,7 @@ enum class KeySym
 
 enum KeyMod
 {
+	// clang-format off
 	NONE	= 0x0000,
 
 	LSHIFT	= 0x0001,
@@ -276,6 +277,7 @@ enum KeyMod
 	SUPER	= (LSUPER | RSUPER),
 
 	COUNT
+	// clang-format on
 };
 
 }

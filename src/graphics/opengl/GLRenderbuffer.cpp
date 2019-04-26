@@ -13,7 +13,7 @@ GLuint GLRenderbuffer::boundBuffer_ = 0;
 ///////////////////////////////////////////////////////////
 
 GLRenderbuffer::GLRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height)
-	: glHandle_(0)
+    : glHandle_(0)
 {
 	glGenRenderbuffers(1, &glHandle_);
 	storage(internalFormat, width, height);

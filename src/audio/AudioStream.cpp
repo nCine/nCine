@@ -13,12 +13,12 @@ namespace ncine {
 
 /*! Private constructor called only by `AudioStreamPlayer`. */
 AudioStream::AudioStream(const char *filename)
-	: nextAvailALBuffer_(0), frequency_(0)
+    : nextAvailALBuffer_(0), frequency_(0)
 {
 	ZoneScoped;
 	ZoneText(filename, strnlen(filename, 256));
 	alGenBuffers(NumBuffers, alBuffers_.data());
-	memBuffer_ = nctl::makeUnique<char []>(BufferSize);
+	memBuffer_ = nctl::makeUnique<char[]>(BufferSize);
 
 	audioLoader_ = IAudioLoader::createFromFile(filename);
 	frequency_ = audioLoader_->frequency();
@@ -59,7 +59,6 @@ bool AudioStream::enqueue(unsigned int source, bool looping)
 		numProcessedBuffers--;
 	}
 
-
 	// Queueing
 	if (nextAvailALBuffer_ < NumBuffers)
 	{
@@ -93,7 +92,6 @@ bool AudioStream::enqueue(unsigned int source, bool looping)
 			stop(source);
 		}
 	}
-
 
 	ALenum state;
 	alGetSourcei(source, AL_SOURCE_STATE, &state);

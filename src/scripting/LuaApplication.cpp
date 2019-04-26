@@ -10,8 +10,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace Application
-{
+namespace Application {
 	static const char *Application = "application";
 
 	static const char *renderingSettings = "get_rendering_settings";
@@ -23,7 +22,7 @@ namespace Application
 	static const char *rootNode = "rootnode";
 	static const char *interval = "interval";
 
-	static const char * width = "get_width";
+	static const char *width = "get_width";
 	static const char *height = "get_height";
 	static const char *screenDimensions = "screen_dimensions";
 
@@ -38,8 +37,7 @@ namespace Application
 	static const char *datapath = "datapath";
 	static const char *savepath = "savepath";
 
-	namespace RenderingSettings
-	{
+	namespace RenderingSettings {
 		static const char *batchingEnabled = "batching";
 		static const char *batchingWithIndices = "batching_with_indices";
 		static const char *cullingEnabled = "culling";
@@ -47,8 +45,7 @@ namespace Application
 		static const char *maxBatchSize = "max_batch_size";
 	}
 
-	namespace DebugOverlaySettings
-	{
+	namespace DebugOverlaySettings {
 		static const char *showProfilerGraphs = "profiler_graphs";
 		static const char *showInfoText = "info_text";
 		static const char *showInterface = "interface";

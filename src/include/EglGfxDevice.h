@@ -20,15 +20,15 @@ class EglGfxDevice : public IGfxDevice
 	EglGfxDevice(struct android_app *state, const GLContextInfo &glContextInfo, const DisplayMode &displayMode);
 	~EglGfxDevice() override;
 
-	void setResolution(int width, int height) override { }
-	void setResolution(Vector2i size) override { }
+	void setResolution(int width, int height) override {}
+	void setResolution(Vector2i size) override {}
 
-	void setFullScreen(bool fullScreen) override { }
+	void setFullScreen(bool fullScreen) override {}
 
 	inline void update() override { eglSwapBuffers(display_, surface_); }
 
-	void setWindowTitle(const char *windowTitle) override { }
-	void setWindowIcon(const char *windowIconFilename) override { }
+	void setWindowTitle(const char *windowTitle) override {}
+	void setWindowIcon(const char *windowIconFilename) override {}
 
 	/// Recreates a surface from a native window
 	void createSurface(struct android_app *state);

@@ -6,7 +6,7 @@ namespace {
 class ListAlgorithmsTest : public ::testing::Test
 {
   public:
-	ListAlgorithmsTest() { }
+	ListAlgorithmsTest() {}
 
   protected:
 	void SetUp() override { initList(list_); }
@@ -161,7 +161,6 @@ TEST_F(ListAlgorithmsTest, ClampElements)
 		ASSERT_TRUE(*i <= maxValue);
 	}
 }
-
 
 TEST_F(ListAlgorithmsTest, Replace)
 {

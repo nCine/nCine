@@ -10,8 +10,8 @@ namespace nctl {
 template <bool IsConst> class StringIterator;
 
 /// Iterator traits structure specialization for `StringIterator` class
-template < >
-struct IteratorTraits<StringIterator<false> >
+template <>
+struct IteratorTraits<StringIterator<false>>
 {
 	/// Type of the values deferenced by the iterator
 	using ValueType = char;
@@ -24,8 +24,8 @@ struct IteratorTraits<StringIterator<false> >
 };
 
 /// Iterator traits structure specialization for constant `StringIterator` class
-template < >
-struct IteratorTraits<StringIterator<true> >
+template <>
+struct IteratorTraits<StringIterator<true>>
 {
 	/// Type of the values deferenced by the iterator (never const)
 	using ValueType = char;
@@ -45,14 +45,14 @@ class StringIterator
 	/// Pointer type which respects iterator constness
 	using Pointer = typename IteratorTraits<StringIterator>::Pointer;
 	/// Reference type which respects iterator constness
-	using Reference =  typename IteratorTraits<StringIterator>::Reference;
+	using Reference = typename IteratorTraits<StringIterator>::Reference;
 
 	explicit StringIterator(Pointer c)
-		: charPtr_(c) { }
+	    : charPtr_(c) {}
 
 	/// Copy constructor to implicitly convert a non constant iterator to a constant one
 	StringIterator(const StringIterator<false> &it)
-		: charPtr_(it.charPtr_) { }
+	    : charPtr_(it.charPtr_) {}
 
 	/// Deferencing operator
 	Reference operator*() const;
@@ -76,7 +76,7 @@ class StringIterator
 	/// Subtraction operator
 	StringIterator operator-(int n) const;
 	/// Pointer subtraction operator
-	friend inline int operator-(const StringIterator &lhs, const StringIterator &rhs)	{ return (lhs.charPtr_ - rhs.charPtr_); }
+	friend inline int operator-(const StringIterator &lhs, const StringIterator &rhs) { return (lhs.charPtr_ - rhs.charPtr_); }
 
 	/// Subscript operator
 	Reference operator[](int n) const;

@@ -10,8 +10,8 @@ class LuaStateManager;
 
 /// The Lua event handler
 class LuaEventHandler :
-	public IAppEventHandler,
-	public IInputEventHandler
+    public IAppEventHandler,
+    public IInputEventHandler
 {
   public:
 	void onPreInit(AppConfiguration &config) override;

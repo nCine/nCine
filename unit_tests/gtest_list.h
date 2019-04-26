@@ -27,6 +27,12 @@ void printList(const nctl::List<int> &list)
 	printf("\n");
 }
 
+void printList(const char *message, const nctl::List<int> &list)
+{
+	printf("%s ", message);
+	printList(list);
+}
+
 void initList(nctl::List<int> &list)
 {
 	list.clear();
@@ -65,7 +71,7 @@ bool isUnmodified(const nctl::List<int> &list)
 		value++;
 	}
 
-		return true;
+	return true;
 }
 
 unsigned int calcLength(const nctl::List<int> &list)
@@ -116,7 +122,7 @@ bool isSorted(const nctl::List<int> &list)
 		nextNode++;
 	}
 
-		return true;
+	return true;
 }
 
 bool isReverseSorted(const nctl::List<int> &list)
@@ -133,11 +139,18 @@ bool isReverseSorted(const nctl::List<int> &list)
 		nextNode++;
 	}
 
-		return true;
+	return true;
 }
 
-bool isOdd(int n) { return (n % 2 != 0); }
-bool isEven(int n) { return (n % 2 == 0); }
+bool isOdd(int n)
+{
+	return (n % 2 != 0);
+}
+
+bool isEven(int n)
+{
+	return (n % 2 == 0);
+}
 
 }
 

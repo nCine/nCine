@@ -9,8 +9,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace LuaJoystickEvents
-{
+namespace LuaJoystickEvents {
 	static const char *isButtonPressed = "joy_button_pressed";
 	static const char *joyHatState = "joy_hat_state";
 	static const char *axisValue = "joy_axis_value";

@@ -12,13 +12,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AudioBuffer::AudioBuffer()
-	: Object(ObjectType::AUDIOBUFFER), numChannels_(0), frequency_(0)
+    : Object(ObjectType::AUDIOBUFFER), numChannels_(0), frequency_(0)
 {
 	alGenBuffers(1, &bufferId_);
 }
 
 AudioBuffer::AudioBuffer(const char *filename)
-	: Object(ObjectType::AUDIOBUFFER, filename), numChannels_(0), frequency_(0)
+    : Object(ObjectType::AUDIOBUFFER, filename), numChannels_(0), frequency_(0)
 {
 	ZoneScoped;
 	ZoneText(filename, strnlen(filename, 256));
@@ -53,7 +53,7 @@ void AudioBuffer::load(const IAudioLoader *audioLoader)
 
 	// Buffer size calculated as samples * channels * 16bit
 	const unsigned long int bufferSize = audioLoader->bufferSize();
-	nctl::UniquePtr<char []> buffer = nctl::makeUnique<char []>(bufferSize);
+	nctl::UniquePtr<char[]> buffer = nctl::makeUnique<char[]>(bufferSize);
 
 	audioLoader->read(buffer.get(), bufferSize);
 	// On iOS alBufferDataStatic could be used instead

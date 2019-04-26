@@ -5,7 +5,8 @@ namespace {
 class StringReverseIteratorTest : public ::testing::Test
 {
   public:
-	StringReverseIteratorTest() : string_(Capacity) { }
+	StringReverseIteratorTest()
+	    : string_(Capacity) {}
 
   protected:
 	void SetUp() override { string_ = "String1String2"; }
@@ -69,7 +70,8 @@ TEST_F(StringReverseIteratorTest, WhileLoopIteration)
 	{
 		printf(" %c", *r);
 		ASSERT_EQ(*r, string_[n]);
-		++r; --n;
+		++r;
+		--n;
 	}
 	printf("\n");
 }

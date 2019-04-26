@@ -14,6 +14,12 @@ void printString(const nctl::String &string)
 	printf("\"%s\" (capacity %u, length %u)\n", string.data(), string.capacity(), string.length());
 }
 
+void printString(const char *message, const nctl::String &string)
+{
+	printf("%s", message);
+	printString(string);
+}
+
 int findFirstCharacter(const char *string, unsigned int length, char character)
 {
 	int position = -1;

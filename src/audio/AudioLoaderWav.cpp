@@ -9,13 +9,12 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AudioLoaderWav::AudioLoaderWav(const char *filename)
-	: AudioLoaderWav(IFile::createFileHandle(filename))
+    : AudioLoaderWav(IFile::createFileHandle(filename))
 {
-
 }
 
 AudioLoaderWav::AudioLoaderWav(nctl::UniquePtr<IFile> fileHandle)
-	: IAudioLoader(nctl::move(fileHandle))
+    : IAudioLoader(nctl::move(fileHandle))
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
@@ -61,8 +60,7 @@ unsigned long int AudioLoaderWav::read(char *buffer, unsigned long int bufferSiz
 		bytes = fileHandle_->read(buffer, bufferSize);
 		FATAL_ASSERT_MSG(bytes > 0, "Zero bytes read from file");
 		bufferSeek += bytes;
-	}
-	while (bytes > 0 && bufferSize - bufferSeek > 0);
+	} while (bytes > 0 && bufferSize - bufferSeek > 0);
 
 	return bufferSeek;
 }

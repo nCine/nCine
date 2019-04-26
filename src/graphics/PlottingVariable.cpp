@@ -7,9 +7,9 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 PlottingVariable::PlottingVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f &worldMatrix)
-	: shouldPlotMean_(true), graphColor_(255, 255, 255), meanColor_(255, 255, 255),
-	  variable_(numValues, rejectDelay), worldMatrix_(worldMatrix),
-	  valuesColorBlock_(nullptr), meanColorBlock_(nullptr)
+    : shouldPlotMean_(true), graphColor_(255, 255, 255), meanColor_(255, 255, 255),
+      variable_(numValues, rejectDelay), worldMatrix_(worldMatrix),
+      valuesColorBlock_(nullptr), meanColorBlock_(nullptr)
 {
 	// One more than the profile plotter background
 	valuesCmd_.setLayer(DrawableNode::LayerBase::HUD + 1);

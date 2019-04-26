@@ -38,7 +38,8 @@ class GLBufferObject
 
 	struct BufferRange
 	{
-		BufferRange() : glHandle(0), offset(0), ptrsize(0) { }
+		BufferRange()
+		    : glHandle(0), offset(0), ptrsize(0) {}
 
 		GLuint glHandle;
 		GLintptr offset;

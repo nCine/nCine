@@ -17,18 +17,18 @@ class DLL_PUBLIC IAppEventHandler
 	/// Called once before initialization to setup the application
 	/*! \warning At this stage it is only safe to modify the `config` object.
 	 *  No other engine API calls should be made. */
-	virtual void onPreInit(AppConfiguration &config) { }
+	virtual void onPreInit(AppConfiguration &config) {}
 	/// Called once on application initialization
-	virtual void onInit() { }
+	virtual void onInit() {}
 	/// Called every time a frame is about to be rendered
-	virtual void onFrameStart() { }
+	virtual void onFrameStart() {}
 	/// Called every time after a frame has been rendered
-	virtual void onFrameEnd() { }
+	virtual void onFrameEnd() {}
 	/// Called once on application shutdown
-	virtual void onShutdown() { }
+	virtual void onShutdown() {}
 };
 
-inline IAppEventHandler::~IAppEventHandler() { }
+inline IAppEventHandler::~IAppEventHandler() {}
 
 }
 

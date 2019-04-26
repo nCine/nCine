@@ -17,11 +17,10 @@ nc::IAppEventHandler *createAppEventHandler()
 }
 
 MyEventHandler::MyEventHandler()
-	: luaState_(nc::LuaStateManager::ApiType::FULL,
-	            nc::LuaStateManager::StatisticsTracking::ENABLED,
+    : luaState_(nc::LuaStateManager::ApiType::FULL,
+                nc::LuaStateManager::StatisticsTracking::ENABLED,
                 nc::LuaStateManager::StandardLibraries::LOADED)
 {
-
 }
 
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)
@@ -162,4 +161,3 @@ void MyEventHandler::onJoyDisconnected(const nc::JoyConnectionEvent &event)
 {
 	nc::LuaIInputEventHandler::onJoyDisconnected(luaState_.state(), event);
 }
-

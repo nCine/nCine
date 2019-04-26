@@ -10,18 +10,19 @@ class DLL_PUBLIC PCApplication : public Application
 {
   public:
 	/// Entry point method to be called in the `main()` function
-	static void start(IAppEventHandler * (*createAppEventHandler)());
+	static void start(IAppEventHandler *(*createAppEventHandler)());
 
   private:
 	/// Must be called at the beginning to initialize the application
-	void init(IAppEventHandler * (*createAppEventHandler)());
+	void init(IAppEventHandler *(*createAppEventHandler)());
 	/// The main game loop, handling events and rendering
 	void run();
 
 	/// Private constructor
-	PCApplication() : Application() { }
+	PCApplication()
+	    : Application() {}
 	/// Private destructor
-	~PCApplication() { }
+	~PCApplication() {}
 	/// Deleted copy constructor
 	PCApplication(const PCApplication &) = delete;
 	/// Deleted assignment operator

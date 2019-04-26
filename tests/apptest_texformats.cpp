@@ -121,7 +121,6 @@ void MyEventHandler::onInit()
 	filenames_.pushBack("texture_512_RGB_888_MIP.ktx");
 #endif
 
-
 #if WITH_ETC1_FORMAT
 	if (gfxCaps.hasExtension(nc::IGfxCapabilities::GLExtensions::OES_COMPRESSED_ETC1_RGB8_TEXTURE))
 	{

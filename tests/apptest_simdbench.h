@@ -14,8 +14,8 @@ namespace nc = ncine;
 
 /// My nCine event handler
 class MyEventHandler :
-	public nc::IAppEventHandler,
-	public nc::IInputEventHandler
+    public nc::IAppEventHandler,
+    public nc::IInputEventHandler
 {
   public:
 	void onPreInit(nc::AppConfiguration &config) override;

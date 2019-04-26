@@ -62,7 +62,7 @@ class ImGuiDebugOverlay : public IDebugOverlay
 	bool showBottomRightOverlay_;
 
 	unsigned int numValues_;
-	nctl::UniquePtr<float []> plotValues_[ValuesType::COUNT];
+	nctl::UniquePtr<float[]> plotValues_[ValuesType::COUNT];
 	float maxFrameTime_;
 	float maxUpdateVisitDraw_;
 	unsigned int index_;

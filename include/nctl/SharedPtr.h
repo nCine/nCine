@@ -12,7 +12,8 @@ template <class T>
 class SharedPtr
 {
   public:
-	SharedPtr() : ptr_(nullptr), ctrlBlock_(nullptr) { }
+	SharedPtr()
+	    : ptr_(nullptr), ctrlBlock_(nullptr) {}
 	explicit SharedPtr(T *ptr);
 	explicit SharedPtr(UniquePtr<T> &&unique);
 	~SharedPtr();
@@ -46,9 +47,11 @@ class SharedPtr
 	/// The shared pointer control block with an atomic counter
 	struct ControlBlock
 	{
-		ControlBlock() : counter_(0) { }
-		ControlBlock(int32_t count) : counter_(count) { }
-		virtual ~ControlBlock() { }
+		ControlBlock()
+		    : counter_(0) {}
+		ControlBlock(int32_t count)
+		    : counter_(count) {}
+		virtual ~ControlBlock() {}
 		virtual void dispose() = 0;
 		virtual void reset(T *ptr) = 0;
 		virtual void reset(nullptr_t) = 0;
@@ -59,8 +62,10 @@ class SharedPtr
 	/// A control block that also stores a pointer to the object
 	struct ControlBlockAndPointer : public ControlBlock
 	{
-		ControlBlockAndPointer() : ptr_(nullptr) { }
-		ControlBlockAndPointer(T *ptr) : ControlBlock(1), ptr_(ptr) { FATAL_ASSERT(ptr); }
+		ControlBlockAndPointer()
+		    : ptr_(nullptr) {}
+		ControlBlockAndPointer(T *ptr)
+		    : ControlBlock(1), ptr_(ptr) { FATAL_ASSERT(ptr); }
 		~ControlBlockAndPointer() override { dispose(); }
 		void dispose() override { delete ptr_; }
 		void reset(T *ptr) override { ptr_ = ptr; }
@@ -72,9 +77,10 @@ class SharedPtr
 	/// A control block that also stores the pointed object
 	struct ControlBlockAndObject : public ControlBlock
 	{
-		template<class ... Args>
-		ControlBlockAndObject(Args&& ...args) : ControlBlock(1), object_(nctl::forward<Args>(args)...) { }
-		void dispose() override { }
+		template <class... Args>
+		ControlBlockAndObject(Args &&... args)
+		    : ControlBlock(1), object_(nctl::forward<Args>(args)...) {}
+		void dispose() override {}
 		void reset(T *) override { FATAL_MSG("Can't reset a control block that stores the object"); }
 		void reset(nullptr_t) override { FATAL_MSG("Can't reset a control block that stores the object"); }
 
@@ -84,21 +90,20 @@ class SharedPtr
 	T *ptr_;
 	ControlBlock *ctrlBlock_;
 
-	template<class S, class ... Args> friend SharedPtr<S> makeShared(Args&& ... args);
+	template <class S, class... Args>
+	friend SharedPtr<S> makeShared(Args &&... args);
 };
 
 template <class T>
 SharedPtr<T>::SharedPtr(T *ptr)
-	: ptr_(ptr), ctrlBlock_(new ControlBlockAndPointer(ptr_))
+    : ptr_(ptr), ctrlBlock_(new ControlBlockAndPointer(ptr_))
 {
-
 }
 
 template <class T>
 SharedPtr<T>::SharedPtr(UniquePtr<T> &&unique)
-	: ptr_(unique.release()), ctrlBlock_(new ControlBlockAndPointer(ptr_))
+    : ptr_(unique.release()), ctrlBlock_(new ControlBlockAndPointer(ptr_))
 {
-
 }
 
 template <class T>
@@ -114,9 +119,9 @@ SharedPtr<T>::~SharedPtr()
 
 template <class T>
 SharedPtr<T>::SharedPtr(const SharedPtr &other)
-	: ptr_(other.ptr_), ctrlBlock_(other.ctrlBlock_)
+    : ptr_(other.ptr_), ctrlBlock_(other.ctrlBlock_)
 {
-		ctrlBlock_->counter_++;
+	ctrlBlock_->counter_++;
 }
 
 template <class T>
@@ -129,7 +134,7 @@ SharedPtr<T> &SharedPtr<T>::operator=(SharedPtr other)
 
 template <class T>
 SharedPtr<T>::SharedPtr(SharedPtr &&other)
-	: ptr_(nullptr), ctrlBlock_(nullptr)
+    : ptr_(nullptr), ctrlBlock_(nullptr)
 {
 	nctl::swap(ptr_, other.ptr_);
 	nctl::swap(ctrlBlock_, other.ctrlBlock_);
@@ -169,8 +174,8 @@ void SharedPtr<T>::reset(nullptr_t)
 	ctrlBlock_->counter_ = 0;
 }
 
-template<class T, class ... Args>
-SharedPtr<T> makeShared(Args&& ... args)
+template <class T, class... Args>
+SharedPtr<T> makeShared(Args &&... args)
 {
 	SharedPtr<T> ptr;
 	auto ctrlBlock = new typename SharedPtr<T>::ControlBlockAndObject(args...);

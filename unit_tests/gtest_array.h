@@ -47,7 +47,7 @@ bool isUnmodified(const nctl::Array<int> &array)
 		value++;
 	}
 
-		return true;
+	return true;
 }
 
 bool isSorted(const nctl::Array<int> &array)
@@ -58,7 +58,7 @@ bool isSorted(const nctl::Array<int> &array)
 			return false;
 	}
 
-		return true;
+	return true;
 }
 
 bool isReverseSorted(const nctl::Array<int> &array)
@@ -69,7 +69,7 @@ bool isReverseSorted(const nctl::Array<int> &array)
 			return false;
 	}
 
-		return true;
+	return true;
 }
 
 }

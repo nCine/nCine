@@ -7,7 +7,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ArrayIndexer::ArrayIndexer()
-	: numObjects_(0), nextId_(0), pointers_(16)
+    : numObjects_(0), nextId_(0), pointers_(16)
 {
 	// First element reserved
 	pointers_.pushBack(nullptr);
@@ -66,6 +66,7 @@ void ArrayIndexer::logReport() const
 			Object *objPtr = object(i);
 
 			nctl::String typeName(Object::MaxNameLength);
+			// clang-format off
 			switch (objPtr->type())
 			{
 				case Object::ObjectType::BASE:					typeName = "Base"; break;
@@ -82,6 +83,7 @@ void ArrayIndexer::logReport() const
 				case Object::ObjectType::AUDIOSTREAM_PLAYER:	typeName = "AudioStreamPlayer"; break;
 				default:										typeName = "Unknown"; break;
 			}
+			// clang-format on
 
 			LOGI_X("Object %u - type: %s - name: \"%s\"", objPtr->id(), typeName.data(), objPtr->name().data());
 		}

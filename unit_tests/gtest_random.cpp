@@ -20,7 +20,7 @@ TEST_F(RandomTest, GenerateBoundedInteger)
 	{
 		const uint32_t num = rnd_.integer(min, max);
 		printf("Number %u is: %u\n", i, num);
-		ASSERT_TRUE(num >= min);;
+		ASSERT_TRUE(num >= min);
 		ASSERT_TRUE(num < max);
 
 		if (num == min && minGenerated == false)
@@ -54,7 +54,7 @@ TEST_F(RandomTest, FastGenerateBoundedInteger)
 	{
 		const uint32_t num = rnd_.fastInteger(min, max);
 		printf("Number %u is: %u\n", i, num);
-		ASSERT_TRUE(num >= min);;
+		ASSERT_TRUE(num >= min);
 		ASSERT_TRUE(num < max);
 
 		if (num == min && minGenerated == false)

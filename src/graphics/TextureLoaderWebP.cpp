@@ -8,20 +8,19 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 TextureLoaderWebP::TextureLoaderWebP(const char *filename)
-	: TextureLoaderWebP(IFile::createFileHandle(filename))
+    : TextureLoaderWebP(IFile::createFileHandle(filename))
 {
-
 }
 
 TextureLoaderWebP::TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
-	: ITextureLoader(nctl::move(fileHandle))
+    : ITextureLoader(nctl::move(fileHandle))
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 
 	// Loading the whole file in memory
 	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 	const long int fileSize = fileHandle_->size();
-	nctl::UniquePtr<unsigned char []> fileBuffer = nctl::makeUnique<unsigned char []>(fileSize);
+	nctl::UniquePtr<unsigned char[]> fileBuffer = nctl::makeUnique<unsigned char[]>(fileSize);
 	fileHandle_->read(fileBuffer.get(), fileSize);
 
 	if (WebPGetInfo(fileBuffer.get(), fileSize, &width_, &height_) == 0)
@@ -46,7 +45,7 @@ TextureLoaderWebP::TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
 	texFormat_ = features.has_alpha ? TextureFormat(GL_RGBA8) : TextureFormat(GL_RGB8);
 	bpp_ = features.has_alpha ? 4 : 3;
 	dataSize_ = width_ * height_ * bpp_;
-	pixels_ = nctl::makeUnique<unsigned char []>(dataSize_);
+	pixels_ = nctl::makeUnique<unsigned char[]>(dataSize_);
 
 	if (features.has_alpha)
 	{

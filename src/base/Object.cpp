@@ -7,12 +7,14 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-Object::Object(ObjectType type) : type_(type), id_(0), name_(MaxNameLength)
+Object::Object(ObjectType type)
+    : type_(type), id_(0), name_(MaxNameLength)
 {
 	id_ = theServiceLocator().indexer().addObject(this);
 }
 
-Object::Object(ObjectType type, const char *name) : type_(type), id_(0), name_(name)
+Object::Object(ObjectType type, const char *name)
+    : type_(type), id_(0), name_(name)
 {
 	id_ = theServiceLocator().indexer().addObject(this);
 }

@@ -7,10 +7,9 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 RectAnimation::RectAnimation(float frameTime, LoopMode loopMode, RewindMode rewindMode)
-	: rects_(4), currentFrame_(0), frameTime_(frameTime), elapsedFrameTime_(0.0f), goingForward_(true),
-	  isLooping_(loopMode == LoopMode::ENABLED), backward_(rewindMode == RewindMode::BACKWARD), isPaused_(true)
+    : rects_(4), currentFrame_(0), frameTime_(frameTime), elapsedFrameTime_(0.0f), goingForward_(true),
+      isLooping_(loopMode == LoopMode::ENABLED), backward_(rewindMode == RewindMode::BACKWARD), isPaused_(true)
 {
-
 }
 
 ///////////////////////////////////////////////////////////

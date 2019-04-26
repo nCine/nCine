@@ -8,8 +8,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace AudioStreamPlayer
-{
+namespace AudioStreamPlayer {
 	static const char *AudioStreamPlayer = "audiostream_player";
 }}
 

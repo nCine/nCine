@@ -19,38 +19,38 @@ namespace ncine {
 
 void ThreadAffinityMask::zero()
 {
-#ifdef __APPLE__
+	#ifdef __APPLE__
 	affinityTag_ = THREAD_AFFINITY_TAG_NULL;
-#else
+	#else
 	CPU_ZERO(&cpuSet_);
-#endif
+	#endif
 }
 
 void ThreadAffinityMask::set(int cpuNum)
 {
-#ifdef __APPLE__
+	#ifdef __APPLE__
 	affinityTag_ |= 1 << cpuNum;
-#else
+	#else
 	CPU_SET(cpuNum, &cpuSet_);
-#endif
+	#endif
 }
 
 void ThreadAffinityMask::clear(int cpuNum)
 {
-#ifdef __APPLE__
+	#ifdef __APPLE__
 	affinityTag_ &= ~(1 << cpuNum);
-#else
+	#else
 	CPU_CLR(cpuNum, &cpuSet_);
-#endif
+	#endif
 }
 
 bool ThreadAffinityMask::isSet(int cpuNum)
 {
-#ifdef __APPLE__
+	#ifdef __APPLE__
 	return ((affinityTag_ >> cpuNum) & 1) != 0;
-#else
+	#else
 	return CPU_ISSET(cpuNum, &cpuSet_) != 0;
-#endif
+	#endif
 }
 
 #endif
@@ -60,13 +60,12 @@ bool ThreadAffinityMask::isSet(int cpuNum)
 ///////////////////////////////////////////////////////////
 
 Thread::Thread()
-	: tid_(0)
+    : tid_(0)
 {
-
 }
 
 Thread::Thread(ThreadFunctionPtr startFunction, void *arg)
-	: tid_(0)
+    : tid_(0)
 {
 	run(startFunction, arg);
 }
@@ -143,16 +142,16 @@ ThreadAffinityMask Thread::affinityMask() const
 
 	if (tid_ != 0)
 	{
-#ifdef __APPLE__
+	#ifdef __APPLE__
 		thread_affinity_policy_data_t threadAffinityPolicy;
 		thread_port_t threadPort = pthread_mach_thread_np(tid_);
 		mach_msg_type_number_t policyCount = THREAD_AFFINITY_POLICY_COUNT;
 		boolean_t getDefault = FALSE;
 		thread_policy_get(threadPort, THREAD_AFFINITY_POLICY, reinterpret_cast<thread_policy_t>(&threadAffinityPolicy), &policyCount, &getDefault);
 		affinityMask.affinityTag_ = threadAffinityPolicy.affinity_tag;
-#else
+	#else
 		pthread_getaffinity_np(tid_, sizeof(cpu_set_t), &affinityMask.cpuSet_);
-#endif
+	#endif
 	}
 	else
 		LOGW("Cannot get the affinity for a thread that has not been created yet");
@@ -164,13 +163,13 @@ void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
 {
 	if (tid_ != 0)
 	{
-#ifdef __APPLE__
+	#ifdef __APPLE__
 		thread_affinity_policy_data_t threadAffinityPolicy = { affinityMask.affinityTag_ };
 		thread_port_t threadPort = pthread_mach_thread_np(tid_);
 		thread_policy_set(threadPort, THREAD_AFFINITY_POLICY, reinterpret_cast<thread_policy_t>(&threadAffinityPolicy), THREAD_AFFINITY_POLICY_COUNT);
-#else
+	#else
 		pthread_setaffinity_np(tid_, sizeof(cpu_set_t), &affinityMask.cpuSet_);
-#endif
+	#endif
 	}
 	else
 		LOGW("Cannot set the affinity mask for a not yet created thread");

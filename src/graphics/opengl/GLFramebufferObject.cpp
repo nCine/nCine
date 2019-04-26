@@ -16,7 +16,7 @@ GLHashMap<GLFramebufferMappingFunc::Size, GLFramebufferMappingFunc> GLFramebuffe
 ///////////////////////////////////////////////////////////
 
 GLFramebufferObject::GLFramebufferObject()
-	: attachedRenderbuffers_(4), glHandle_(0), target_(GL_FRAMEBUFFER)
+    : attachedRenderbuffers_(4), glHandle_(0), target_(GL_FRAMEBUFFER)
 {
 	glGenFramebuffers(1, &glHandle_);
 }

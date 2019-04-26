@@ -45,27 +45,26 @@ class DLL_PUBLIC IAudioDevice
 	virtual void updatePlayers() = 0;
 };
 
-inline IAudioDevice::~IAudioDevice() { }
-
+inline IAudioDevice::~IAudioDevice() {}
 
 /// A fake audio device which doesn't play anything
 class DLL_PUBLIC NullAudioDevice : public IAudioDevice
 {
   public:
 	float gain() override { return 1.0f; }
-	void setGain(float gain) override { }
+	void setGain(float gain) override {}
 
-	void stopPlayers() override { }
-	void pausePlayers() override { }
-	void stopPlayers(PlayerType playerType) override { }
-	void pausePlayers(PlayerType playerType) override { }
+	void stopPlayers() override {}
+	void pausePlayers() override {}
+	void stopPlayers(PlayerType playerType) override {}
+	void pausePlayers(PlayerType playerType) override {}
 
-	void freezePlayers() override { }
-	void unfreezePlayers() override { }
+	void freezePlayers() override {}
+	void unfreezePlayers() override {}
 
 	int nextAvailableSource() override { return -1; }
-	void registerPlayer(IAudioPlayer *player) override { }
-	void updatePlayers() override { }
+	void registerPlayer(IAudioPlayer *player) override {}
+	void updatePlayers() override {}
 };
 
 }

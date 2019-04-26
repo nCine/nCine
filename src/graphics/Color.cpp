@@ -24,9 +24,8 @@ Color::Color()
 }
 
 Color::Color(unsigned int red, unsigned int green, unsigned int blue)
-	: Color(red, green, blue, 255)
+    : Color(red, green, blue, 255)
 {
-
 }
 
 Color::Color(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha)
@@ -143,4 +142,3 @@ Color Color::operator*(float scalar) const
 }
 
 }
-

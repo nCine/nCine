@@ -7,8 +7,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace IAudioDevice
-{
+namespace IAudioDevice {
 	static const char *IAudioDevice = "audio_device";
 
 	static const char *gain = "get_gain";

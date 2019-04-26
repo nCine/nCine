@@ -10,8 +10,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace Color
-{
+namespace Color {
 	static const char *Color = "color";
 
 	static const char *create = "create";

@@ -24,9 +24,24 @@ const unsigned int NumIndices = GridSize * 2 * (GridSize - 1) + 2 * (GridSize - 
 unsigned short indices[NumIndices];
 nc::Vector2f restVertices[GridSize * GridSize];
 
-enum Deformations { NO_DEFORMATION = 0, DEFORMATION_A, DEFORMATION_B, DEFORMATION_C, DEFORMATION_COUNT };
+enum Deformations
+{
+	NO_DEFORMATION = 0,
+	DEFORMATION_A,
+	DEFORMATION_B,
+	DEFORMATION_C,
+	DEFORMATION_COUNT
+};
 unsigned int currentDeformation = DEFORMATION_A;
-enum Animations { NO_ANIMATION = 0, ANIMATION_A, ANIMATION_B, ANIMATION_C, ANIMATION_COUNT };
+
+enum Animations
+{
+	NO_ANIMATION = 0,
+	ANIMATION_A,
+	ANIMATION_B,
+	ANIMATION_C,
+	ANIMATION_COUNT
+};
 unsigned int currentAnimation = ANIMATION_A;
 
 }
@@ -66,7 +81,7 @@ void MyEventHandler::onInit()
 			nc::MeshSprite::Vertex &v = vertices[i * GridSize + j];
 			v.x = dist * static_cast<float>(j) - 0.5f;
 			v.y = dist * static_cast<float>(i) - 0.5f;
-			v.u =  dist * static_cast<float>(j);
+			v.u = dist * static_cast<float>(j);
 			v.v = 1.0f - dist * static_cast<float>(i);
 
 			restVertices[i * GridSize + j].set(v.x, v.y);
@@ -112,8 +127,8 @@ void MyEventHandler::onFrameStart()
 		angle_ += 20.0f * interval;
 
 	nc::Vector2f force;
-	force.x =  0.5f * (scrollMove_.x / nc::theApplication().width() - 0.5f);
-	force.y =  0.5f * (scrollMove_.y / nc::theApplication().height() - 0.5f);
+	force.x = 0.5f * (scrollMove_.x / nc::theApplication().width() - 0.5f);
+	force.y = 0.5f * (scrollMove_.y / nc::theApplication().height() - 0.5f);
 
 	if (joyVectorRight_.length() > nc::IInputManager::RightStickDeadZone)
 	{

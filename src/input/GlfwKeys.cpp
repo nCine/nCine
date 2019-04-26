@@ -4,6 +4,7 @@ namespace ncine {
 
 KeySym GlfwKeys::keySymValueToEnum(int keysym)
 {
+	// clang-format off
 	switch (keysym)
 	{
 		case GLFW_KEY_UNKNOWN:			return KeySym::UNKNOWN;
@@ -126,6 +127,7 @@ KeySym GlfwKeys::keySymValueToEnum(int keysym)
 
 		default:						return KeySym::UNKNOWN;
 	}
+	// clang-format on
 }
 
 int GlfwKeys::keyModMaskToEnumMask(int keymod)
@@ -145,6 +147,7 @@ int GlfwKeys::keyModMaskToEnumMask(int keymod)
 
 int GlfwKeys::enumToKeySymValue(KeySym keysym)
 {
+	// clang-format off
 	switch (keysym)
 	{
 		case KeySym::UNKNOWN:				return GLFW_KEY_UNKNOWN;
@@ -267,6 +270,7 @@ int GlfwKeys::enumToKeySymValue(KeySym keysym)
 
 		default:							return GLFW_KEY_UNKNOWN;
 	}
+	// clang-format on
 }
 
 }

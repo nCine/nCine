@@ -18,12 +18,12 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ImGuiDebugOverlay::ImGuiDebugOverlay(const AppConfiguration &appCfg)
-	: IDebugOverlay(appCfg), disableAppInputEvents_(false),
-	  appInputHandler_(nullptr), lockOverlayPositions_(true),
-	  showTopLeftOverlay_(true), showTopRightOverlay_(true),
-	  showBottomLeftOverlay_(true), showBottomRightOverlay_(true),
-	  numValues_(128), maxFrameTime_(0.0f), maxUpdateVisitDraw_(0.0f),
-	  index_(0), plotAdditionalFrameValues_(false), plotOverlayValues_(false)
+    : IDebugOverlay(appCfg), disableAppInputEvents_(false),
+      appInputHandler_(nullptr), lockOverlayPositions_(true),
+      showTopLeftOverlay_(true), showTopRightOverlay_(true),
+      showBottomLeftOverlay_(true), showBottomRightOverlay_(true),
+      numValues_(128), maxFrameTime_(0.0f), maxUpdateVisitDraw_(0.0f),
+      index_(0), plotAdditionalFrameValues_(false), plotOverlayValues_(false)
 {
 	if (appCfg.withProfilerGraphs)
 		initPlotValues();
@@ -100,52 +100,52 @@ void ImGuiDebugOverlay::updateFrameTimings()
 
 namespace {
 
-const char *mouseCursorModeToString(IInputManager::MouseCursorMode mode)
-{
-	switch (mode)
+	const char *mouseCursorModeToString(IInputManager::MouseCursorMode mode)
 	{
-		case IInputManager::MouseCursorMode::NORMAL: return "Normal";
-		case IInputManager::MouseCursorMode::HIDDEN: return "Hidden";
-		case IInputManager::MouseCursorMode::DISABLED: return "Disabled";
+		switch (mode)
+		{
+			case IInputManager::MouseCursorMode::NORMAL: return "Normal";
+			case IInputManager::MouseCursorMode::HIDDEN: return "Hidden";
+			case IInputManager::MouseCursorMode::DISABLED: return "Disabled";
+		}
 	}
-}
 
-const char *mappedButtonNameToString(ButtonName name)
-{
-	switch (name)
+	const char *mappedButtonNameToString(ButtonName name)
 	{
-		case ButtonName::UNKNOWN: return "Unknown";
-		case ButtonName::A: return "A";
-		case ButtonName::B: return "B";
-		case ButtonName::X: return "X";
-		case ButtonName::Y: return "Y";
-		case ButtonName::BACK: return "Back";
-		case ButtonName::GUIDE: return "Guide";
-		case ButtonName::START: return "Start";
-		case ButtonName::LSTICK: return "LStick";
-		case ButtonName::RSTICK: return "RStick";
-		case ButtonName::LBUMPER: return "LBumper";
-		case ButtonName::RBUMPER: return "RBumper";
-		case ButtonName::DPAD_UP: return "DPad_Up";
-		case ButtonName::DPAD_DOWN: return "DPad_Down";
-		case ButtonName::DPAD_LEFT: return "DPad_Left";
-		case ButtonName::DPAD_RIGHT: return "DPad_Right";
+		switch (name)
+		{
+			case ButtonName::UNKNOWN: return "Unknown";
+			case ButtonName::A: return "A";
+			case ButtonName::B: return "B";
+			case ButtonName::X: return "X";
+			case ButtonName::Y: return "Y";
+			case ButtonName::BACK: return "Back";
+			case ButtonName::GUIDE: return "Guide";
+			case ButtonName::START: return "Start";
+			case ButtonName::LSTICK: return "LStick";
+			case ButtonName::RSTICK: return "RStick";
+			case ButtonName::LBUMPER: return "LBumper";
+			case ButtonName::RBUMPER: return "RBumper";
+			case ButtonName::DPAD_UP: return "DPad_Up";
+			case ButtonName::DPAD_DOWN: return "DPad_Down";
+			case ButtonName::DPAD_LEFT: return "DPad_Left";
+			case ButtonName::DPAD_RIGHT: return "DPad_Right";
+		}
 	}
-}
 
-const char *mappedAxisNameToString(AxisName name)
-{
-	switch (name)
+	const char *mappedAxisNameToString(AxisName name)
 	{
-		case AxisName::UNKNOWN: return "Unknown";
-		case AxisName::LX: return "LX";
-		case AxisName::LY: return "LY";
-		case AxisName::RX: return "RX";
-		case AxisName::RY: return "RY";
-		case AxisName::LTRIGGER: return "LTrigger";
-		case AxisName::RTRIGGER: return "RTrigger";
+		switch (name)
+		{
+			case AxisName::UNKNOWN: return "Unknown";
+			case AxisName::LX: return "LX";
+			case AxisName::LY: return "LY";
+			case AxisName::RX: return "RX";
+			case AxisName::RY: return "RY";
+			case AxisName::LTRIGGER: return "LTrigger";
+			case AxisName::RTRIGGER: return "RTrigger";
+		}
 	}
-}
 
 }
 
@@ -157,7 +157,7 @@ void ImGuiDebugOverlay::guiWindow()
 	const ImVec2 windowPos = ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y - 0.5f);
 	const ImVec2 windowPosPivot = ImVec2(0.5f, 0.5f);
 	ImGui::SetNextWindowPos(windowPos, ImGuiCond_FirstUseEver, windowPosPivot);
-	if	(ImGui::Begin("Debug Overlay", &settings_.showInterface))
+	if (ImGui::Begin("Debug Overlay", &settings_.showInterface))
 	{
 		ImGui::Checkbox("Disable app input events", &disableAppInputEvents_);
 		ImGui::SameLine();
@@ -201,10 +201,10 @@ void ImGuiDebugOverlay::guiConfigureGui()
 				ImGui::SameLine();
 				ImGui::Checkbox("Show Top-Right", &showTopRightOverlay_);
 				ImGui::Checkbox("Show Bottom-Left", &showBottomLeftOverlay_);
-			#ifdef WITH_LUA
+#ifdef WITH_LUA
 				ImGui::SameLine();
 				ImGui::Checkbox("Show Bottom-Right", &showBottomRightOverlay_);
-			#endif
+#endif
 				ImGui::TreePop();
 			}
 		}
@@ -247,12 +247,12 @@ void ImGuiDebugOverlay::guiConfigureGui()
 
 			const float MinFrameRounding = 0.0f;
 			const float MaxFrameRounding = 12.0f;
-			ImGuiStyle &style =  ImGui::GetStyle();
+			ImGuiStyle &style = ImGui::GetStyle();
 			ImGui::SliderFloat("Frame Rounding", &style.FrameRounding, MinFrameRounding, MaxFrameRounding, "%.0f");
 
 			if (style.FrameRounding < MinFrameRounding)
 				style.FrameRounding = MinFrameRounding;
-			else if (style.FrameRounding >MaxFrameRounding)
+			else if (style.FrameRounding > MaxFrameRounding)
 				style.FrameRounding = MaxFrameRounding;
 			// Make `GrabRounding` always the same value as `FrameRounding`
 			style.GrabRounding = style.FrameRounding;
@@ -298,77 +298,77 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 	{
 		if (ImGui::TreeNodeEx("System", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-		#ifdef __linux__
+#ifdef __linux__
 			ImGui::Text("__linux__");
-		#endif
-		#ifdef _WIN32
+#endif
+#ifdef _WIN32
 			ImGui::Text("_WIN32");
-		#endif
-		#ifdef _WIN64
+#endif
+#ifdef _WIN64
 			ImGui::Text("_WIN64");
-		#endif
-		#ifdef __ANDROID__
+#endif
+#ifdef __ANDROID__
 			ImGui::Text("__ANDROID__");
-		#endif
-		#ifdef __ANDROID_API__
+#endif
+#ifdef __ANDROID_API__
 			ImGui::Text("__ANDROID_API__ = %d", static_cast<int>(__ANDROID_API__));
-		#endif
-		#ifdef __APPLE__
+#endif
+#ifdef __APPLE__
 			ImGui::Text("__APPLE__");
-		#endif
-		#ifdef _MSC_VER
+#endif
+#ifdef _MSC_VER
 			ImGui::Text("_MSC_VER = %d", _MSC_VER);
-		#endif
-		#ifdef __MINGW32__
+#endif
+#ifdef __MINGW32__
 			ImGui::Text("__MINGW32__");
-		#endif
-		#ifdef __MINGW64__
+#endif
+#ifdef __MINGW64__
 			ImGui::Text("__MINGW64__");
-		#endif
-		#ifdef __GNUC__
+#endif
+#ifdef __GNUC__
 			ImGui::Text("__GNUC__ = %d", static_cast<int>(__GNUC__));
-		#endif
-		#ifdef __clang_version__
+#endif
+#ifdef __clang_version__
 			ImGui::Text("__clang_version__ = %s", __clang_version__);
-		#endif
+#endif
 			ImGui::TreePop();
 		}
 
 		if (ImGui::TreeNodeEx("nCine", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-		#ifdef WITH_THREADS
+#ifdef WITH_THREADS
 			ImGui::Text("WITH_THREADS");
-		#endif
-		#ifdef WITH_GLEW
+#endif
+#ifdef WITH_GLEW
 			ImGui::Text("WITH_GLEW");
-		#endif
-		#ifdef WITH_GLFW
+#endif
+#ifdef WITH_GLFW
 			ImGui::Text("WITH_GLFW");
-		#endif
-		#ifdef WITH_SDL
+#endif
+#ifdef WITH_SDL
 			ImGui::Text("WITH_SDL");
-		#endif
-		#ifdef WITH_AUDIO
+#endif
+#ifdef WITH_AUDIO
 			ImGui::Text("WITH_AUDIO");
-		#endif
-		#ifdef WITH_VORBIS
+#endif
+#ifdef WITH_VORBIS
 			ImGui::Text("WITH_VORBIS");
-		#endif
-		#ifdef WITH_PNG
+#endif
+#ifdef WITH_PNG
 			ImGui::Text("WITH_PNG");
-		#endif
-		#ifdef WITH_WEBP
+#endif
+#ifdef WITH_WEBP
 			ImGui::Text("WITH_WEBP");
-		#endif
-		#ifdef WITH_LUA
+#endif
+#ifdef WITH_LUA
 			ImGui::Text("WITH_LUA");
-		#endif
-		#ifdef WITH_IMGUI
+#endif
+#ifdef WITH_IMGUI
 			ImGui::Text("WITH_IMGUI");
-		#endif
-		#ifdef WITH_TRACY
+#endif
+#ifdef WITH_TRACY
 			ImGui::Text("WITH_TRACY");
-		#endif
+#endif
 			ImGui::TreePop();
 		}
 	}
@@ -378,13 +378,13 @@ void ImGuiDebugOverlay::guiVersionStrings()
 {
 	if (ImGui::CollapsingHeader("Version Strings"))
 	{
-		#ifdef WITH_GIT_VERSION
+#ifdef WITH_GIT_VERSION
 		ImGui::Text("Version: %s", VersionStrings::Version);
 		ImGui::Text("Git revision count: %s", VersionStrings::GitRevCount);
 		ImGui::Text("Git short hash: %s", VersionStrings::GitShortHash);
 		ImGui::Text("Git last commit date: %s", VersionStrings::GitLastCommitDate);
 		ImGui::Text("Git branch: %s", VersionStrings::GitBranch);
-		#endif
+#endif
 		ImGui::Text("Compilation date: %s", VersionStrings::CompilationDate);
 		ImGui::Text("Compilation time: %s", VersionStrings::CompilationTime);
 	}
@@ -823,11 +823,11 @@ void ImGuiDebugOverlay::guiBottomLeft()
 		windowFlags |= ImGuiWindowFlags_NoMove;
 	if (showBottomLeftOverlay_ && ImGui::Begin("###Bottom-Left", nullptr, windowFlags))
 	{
-	#ifdef WITH_GIT_VERSION
+#ifdef WITH_GIT_VERSION
 		ImGui::Text("%s (%s)", VersionStrings::Version, VersionStrings::GitBranch);
-	#else
+#else
 		ImGui::Text("%s at %s", VersionStrings::CompilationDate, VersionStrings::CompilationTime);
-	#endif
+#endif
 		ImGui::End();
 	}
 }
@@ -924,7 +924,7 @@ void ImGuiDebugOverlay::initPlotValues()
 {
 	for (unsigned int type = 0; type < ValuesType::COUNT; type++)
 	{
-		plotValues_[type] = nctl::makeUnique<float []>(numValues_);
+		plotValues_[type] = nctl::makeUnique<float[]>(numValues_);
 
 		for (unsigned int i = index_; i < numValues_; i++)
 			plotValues_[type][i] = 0.0f;

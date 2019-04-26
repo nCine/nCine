@@ -34,14 +34,13 @@ class Array
 
 	/// Constructs an array without allocating memory
 	Array()
-		: array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
+	    : array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
 	{
-
 	}
 
 	/// Constructs an array with explicit capacity
 	explicit Array(unsigned int capacity)
-		: array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
+	    : array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
 	{
 		if (capacity > 0)
 			setCapacity(capacity);
@@ -49,8 +48,8 @@ class Array
 
 	/// Constructs an array with explicit capacity and the option for it to be fixed
 	Array(unsigned int capacity, ArrayMode mode)
-		: array_(nullptr), size_(0), capacity_(0),
-		  fixedCapacity_(mode == ArrayMode::FIXED_CAPACITY)
+	    : array_(nullptr), size_(0), capacity_(0),
+	      fixedCapacity_(mode == ArrayMode::FIXED_CAPACITY)
 	{
 		if (capacity > 0)
 			setCapacity(capacity);
@@ -178,7 +177,7 @@ class Array
 
 template <class T>
 Array<T>::Array(const Array<T> &other)
-	: array_(nullptr), size_(other.size_), capacity_(other.capacity_), fixedCapacity_(other.fixedCapacity_)
+    : array_(nullptr), size_(other.size_), capacity_(other.capacity_), fixedCapacity_(other.fixedCapacity_)
 {
 	array_ = new T[capacity_];
 	// copying all elements invoking their copy constructor
@@ -188,7 +187,7 @@ Array<T>::Array(const Array<T> &other)
 
 template <class T>
 Array<T>::Array(Array<T> &&other)
-	: array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
+    : array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
 {
 	swap(*this, other);
 }
@@ -280,13 +279,13 @@ T *Array<T>::insertRange(unsigned int index, const T *firstPtr, const T *lastPtr
 
 	const unsigned int numElements = static_cast<unsigned int>(lastPtr - firstPtr);
 
-	if(size_ + numElements > capacity_)
+	if (size_ + numElements > capacity_)
 		setCapacity((size_ + numElements) * 2);
 
 	// Backwards loop to account for overlapping areas
-	for(unsigned int i =size_ - index; i > 0; i--)
+	for (unsigned int i = size_ - index; i > 0; i--)
 		array_[index + numElements + i - 1] = nctl::move(array_[index + i - 1]);
-	for(unsigned int i =0; i < numElements; i++)
+	for (unsigned int i = 0; i < numElements; i++)
 		array_[index + i] = firstPtr[i];
 	size_ += numElements;
 
@@ -306,7 +305,7 @@ T *Array<T>::insertAt(unsigned int index, const T &element)
 	}
 
 	// Backwards loop to account for overlapping areas
-	for(unsigned int i = size_ - index; i > 0; i--)
+	for (unsigned int i = size_ - index; i > 0; i--)
 		array_[index + i] = nctl::move(array_[index + i - 1]);
 	array_[index] = element;
 	size_++;
@@ -327,7 +326,7 @@ T *Array<T>::insertAt(unsigned int index, T &&element)
 	}
 
 	// Backwards loop to account for overlapping areas
-	for(unsigned int i = size_ - index; i > 0; i--)
+	for (unsigned int i = size_ - index; i > 0; i--)
 		array_[index + i] = nctl::move(array_[index + i - 1]);
 	array_[index] = nctl::move(element);
 	size_++;
@@ -372,7 +371,7 @@ T *Array<T>::removeRange(unsigned int firstIndex, unsigned int lastIndex)
 	FATAL_ASSERT_MSG_X(lastIndex <= size_, "Last index %u out of size range", lastIndex);
 	FATAL_ASSERT_MSG_X(firstIndex <= lastIndex, "First index %u should precede or be equal to the last one %u", firstIndex, lastIndex);
 
-	for(unsigned int i =0; i < size_ - lastIndex; i++)
+	for (unsigned int i = 0; i < size_ - lastIndex; i++)
 		array_[firstIndex + i] = nctl::move(array_[lastIndex + i]);
 	size_ -= (lastIndex - firstIndex);
 

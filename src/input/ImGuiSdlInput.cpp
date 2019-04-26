@@ -8,11 +8,11 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 #if defined(__APPLE__)
-#include "TargetConditionals.h"
+	#include "TargetConditionals.h"
 #endif
 
-#define SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE    SDL_VERSION_ATLEAST(2,0,4)
-#define SDL_HAS_VULKAN                      SDL_VERSION_ATLEAST(2,0,6)
+#define SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE SDL_VERSION_ATLEAST(2, 0, 4)
+#define SDL_HAS_VULKAN SDL_VERSION_ATLEAST(2, 0, 6)
 #if !SDL_HAS_VULKAN
 static const Uint32 SDL_WINDOW_VULKAN = 0x10000000;
 #endif
@@ -34,7 +34,7 @@ char *ImGuiSdlInput::clipboardTextData_ = nullptr;
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-const char* ImGuiSdlInput::clipboardText(void *userData)
+const char *ImGuiSdlInput::clipboardText(void *userData)
 {
 	if (clipboardTextData_)
 		SDL_free(clipboardTextData_);
@@ -44,10 +44,10 @@ const char* ImGuiSdlInput::clipboardText(void *userData)
 
 namespace {
 
-void setClipboardText(void *userData, const char *text)
-{
-	SDL_SetClipboardText(text);
-}
+	void setClipboardText(void *userData, const char *text)
+	{
+		SDL_SetClipboardText(text);
+	}
 
 }
 
@@ -58,7 +58,7 @@ void ImGuiSdlInput::init(SDL_Window *window)
 	ImGui::CreateContext();
 
 	// Setup back-end capabilities flags
-	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIO &io = ImGui::GetIO();
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
 	io.BackendPlatformName = "nCine_SDL";
@@ -128,7 +128,7 @@ void ImGuiSdlInput::shutdown()
 
 void ImGuiSdlInput::newFrame()
 {
-	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIO &io = ImGui::GetIO();
 	IM_ASSERT(io.Fonts->IsBuilt()); // Font atlas needs to be built, call renderer _NewFrame() function e.g. ImGui_ImplOpenGL3_NewFrame()
 
 	// Setup display size (every frame to accommodate for window resizing)
@@ -163,22 +163,29 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 	if (inputEnabled_ == false)
 		return false;
 
-	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIO &io = ImGui::GetIO();
 	switch (event->type)
 	{
 		case SDL_MOUSEWHEEL:
 		{
-			if (event->wheel.x > 0) io.MouseWheelH += 1;
-			if (event->wheel.x < 0) io.MouseWheelH -= 1;
-			if (event->wheel.y > 0) io.MouseWheel += 1;
-			if (event->wheel.y < 0) io.MouseWheel -= 1;
+			if (event->wheel.x > 0)
+				io.MouseWheelH += 1;
+			if (event->wheel.x < 0)
+				io.MouseWheelH -= 1;
+			if (event->wheel.y > 0)
+				io.MouseWheel += 1;
+			if (event->wheel.y < 0)
+				io.MouseWheel -= 1;
 			return true;
 		}
 		case SDL_MOUSEBUTTONDOWN:
 		{
-			if (event->button.button == SDL_BUTTON_LEFT) mousePressed_[0] = true;
-			if (event->button.button == SDL_BUTTON_RIGHT) mousePressed_[1] = true;
-			if (event->button.button == SDL_BUTTON_MIDDLE) mousePressed_[2] = true;
+			if (event->button.button == SDL_BUTTON_LEFT)
+				mousePressed_[0] = true;
+			if (event->button.button == SDL_BUTTON_RIGHT)
+				mousePressed_[1] = true;
+			if (event->button.button == SDL_BUTTON_MIDDLE)
+				mousePressed_[2] = true;
 			return true;
 		}
 		case SDL_TEXTINPUT:
@@ -208,7 +215,7 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 
 void ImGuiSdlInput::updateMousePosAndButtons()
 {
-	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIO &io = ImGui::GetIO();
 	const ImVec2 mousePosBackup = io.MousePos;
 	io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
 
@@ -251,7 +258,7 @@ void ImGuiSdlInput::updateMousePosAndButtons()
 
 void ImGuiSdlInput::updateMouseCursor()
 {
-	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIO &io = ImGui::GetIO();
 	if (io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange)
 		return;
 

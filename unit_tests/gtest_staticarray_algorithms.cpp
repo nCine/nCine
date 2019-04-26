@@ -57,7 +57,7 @@ TEST_F(StaticArrayAlgorithmsTest, AddValueForEach)
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity);
-	for(unsigned int i = 0; i < array_.size(); i++)
+	for (unsigned int i = 0; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], i + value);
 }
 
@@ -105,7 +105,7 @@ TEST_F(StaticArrayAlgorithmsTest, CheckEqual)
 
 	ASSERT_TRUE(nctl::equal(array_.begin(), array_.end(), newArray.begin()));
 	ASSERT_EQ(array_.size(), newArray.size());
-	for(unsigned int i = 0; i < newArray.size(); i++)
+	for (unsigned int i = 0; i < newArray.size(); i++)
 		ASSERT_EQ(array_[i], newArray[i]);
 }
 
@@ -117,9 +117,9 @@ TEST_F(StaticArrayAlgorithmsTest, FillNElements)
 
 	ASSERT_EQ(array_.size(), Capacity);
 	const unsigned int halfSize = array_.size() / 2;
-	for(unsigned int i = 0; i < halfSize; i++)
+	for (unsigned int i = 0; i < halfSize; i++)
 		ASSERT_EQ(array_[i], 0);
-	for(unsigned int i = halfSize + 1; i < array_.size(); i++)
+	for (unsigned int i = halfSize + 1; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], i);
 }
 
@@ -130,7 +130,7 @@ TEST_F(StaticArrayAlgorithmsTest, FillWithIterators)
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity);
-	for(unsigned int i = 0; i < array_.size(); i++)
+	for (unsigned int i = 0; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], 0);
 }
 
@@ -143,7 +143,7 @@ TEST_F(StaticArrayAlgorithmsTest, CopyToArray)
 	printArray(newArray);
 
 	ASSERT_EQ(array_.size(), newArray.size());
-	for(unsigned int i = 0; i < newArray.size(); i++)
+	for (unsigned int i = 0; i < newArray.size(); i++)
 		ASSERT_EQ(array_[i], newArray[i]);
 }
 
@@ -156,7 +156,7 @@ TEST_F(StaticArrayAlgorithmsTest, CopyNToArray)
 	printArray(newArray);
 
 	ASSERT_EQ(newArray.size(), Capacity / 2);
-	for(unsigned int i = 0; i < newArray.size(); i++)
+	for (unsigned int i = 0; i < newArray.size(); i++)
 		ASSERT_EQ(array_[i], newArray[i]);
 }
 
@@ -169,7 +169,7 @@ TEST_F(StaticArrayAlgorithmsTest, CopyIfToArray)
 	printArray(newArray);
 
 	ASSERT_EQ(newArray.size(), Capacity / 2);
-	for(unsigned int i = 0; i < newArray.size(); i++)
+	for (unsigned int i = 0; i < newArray.size(); i++)
 		ASSERT_EQ(array_[i], newArray[i]);
 }
 
@@ -185,7 +185,7 @@ TEST_F(StaticArrayAlgorithmsTest, CopyTransformed)
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity);
-	for(unsigned int i = 0; i < array_.size(); i++)
+	for (unsigned int i = 0; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], newArray[i] + 10);
 }
 
@@ -205,7 +205,7 @@ TEST_F(StaticArrayAlgorithmsTest, CopyBinaryTransformed)
 	printArray(thirdArray);
 
 	ASSERT_EQ(thirdArray.size(), Capacity);
-	for(unsigned int i = 0; i < thirdArray.size(); i++)
+	for (unsigned int i = 0; i < thirdArray.size(); i++)
 		ASSERT_EQ(thirdArray[i], array_[i] + secondArray[i]);
 }
 
@@ -219,7 +219,7 @@ TEST_F(StaticArrayAlgorithmsTest, ClampElements)
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity);
-	for(unsigned int i = 0; i < array_.size(); i++)
+	for (unsigned int i = 0; i < array_.size(); i++)
 	{
 		ASSERT_TRUE(array_[i] >= minValue);
 		ASSERT_TRUE(array_[i] <= maxValue);
@@ -296,7 +296,7 @@ TEST_F(StaticArrayAlgorithmsTest, Generate)
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity);
-	for(unsigned int i = 0; i < array_.size(); i++)
+	for (unsigned int i = 0; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], i + value);
 }
 
@@ -309,9 +309,9 @@ TEST_F(StaticArrayAlgorithmsTest, GenerateN)
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity);
-	for(unsigned int i = 0; i < numElements; i++)
+	for (unsigned int i = 0; i < numElements; i++)
 		ASSERT_EQ(array_[i], i + value);
-	for(unsigned int i = numElements; i < array_.size(); i++)
+	for (unsigned int i = numElements; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], i);
 }
 
@@ -386,7 +386,7 @@ TEST_F(StaticArrayAlgorithmsTest, Reverse)
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity);
-	for(unsigned int i = 0; i < array_.size(); i++)
+	for (unsigned int i = 0; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], array_.size() - 1 - i);
 }
 
@@ -400,7 +400,7 @@ TEST_F(StaticArrayAlgorithmsTest, ReverseCopy)
 	printArray(newArray);
 
 	ASSERT_EQ(newArray.size(), Capacity);
-	for(unsigned int i = 0; i < newArray.size(); i++)
+	for (unsigned int i = 0; i < newArray.size(); i++)
 		ASSERT_EQ(newArray[i], newArray.size() - 1 - i);
 }
 

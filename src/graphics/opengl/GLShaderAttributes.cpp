@@ -16,12 +16,12 @@ GLVertexFormat::Attribute GLShaderAttributes::attributeNotFound_;
 ///////////////////////////////////////////////////////////
 
 GLShaderAttributes::GLShaderAttributes()
-	: shaderProgram_(nullptr)
+    : shaderProgram_(nullptr)
 {
 }
 
 GLShaderAttributes::GLShaderAttributes(GLShaderProgram *shaderProgram)
-	: shaderProgram_(nullptr)
+    : shaderProgram_(nullptr)
 {
 	setProgram(shaderProgram);
 }

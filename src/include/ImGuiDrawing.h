@@ -32,8 +32,8 @@ class ImGuiDrawing
 	nctl::UniquePtr<GLTexture> texture_;
 	nctl::UniquePtr<GLShaderProgram> imguiShaderProgram_;
 
-	nctl::Array<nctl::UniquePtr<RenderCommand> > freeCommandsPool_;
-	nctl::Array<nctl::UniquePtr<RenderCommand> > usedCommandsPool_;
+	nctl::Array<nctl::UniquePtr<RenderCommand>> freeCommandsPool_;
+	nctl::Array<nctl::UniquePtr<RenderCommand>> usedCommandsPool_;
 
 	nctl::UniquePtr<GLBufferObject> vbo_;
 	nctl::UniquePtr<GLBufferObject> ibo_;

@@ -11,9 +11,7 @@
 namespace ncine {
 
 namespace LuaNames {
-
-namespace ParticleSystem
-{
+namespace ParticleSystem {
 	static const char *ParticleSystem = "particle_system";
 
 	static const char *addColorAffector = "add_color_affector";
@@ -33,19 +31,17 @@ namespace ParticleSystem
 
 	static const char *setTexture = "set_texture";
 	static const char *setTexRect = "set_texture_rect";
-}
+}}
 
-namespace ParticleInitializer
-{
+namespace LuaNames {
+namespace ParticleInitializer {
 	static const char *amount = "amount";
 	static const char *life = "life";
 	static const char *position = "position";
 	static const char *velocity = "velocity";
 	static const char *rotation = "rotation";
 	static const char *emitterRotation = "emitter_rotation";
-}
-
-}
+}}
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -97,233 +93,233 @@ void LuaParticleSystem::release(void *object)
 
 namespace {
 
-nctl::UniquePtr<ColorAffector> retrieveColorSteps(lua_State *L, int index)
-{
-	const unsigned int numSteps = lua_rawlen(L, index);
-
-	nctl::UniquePtr<ColorAffector> affector = nctl::makeUnique<ColorAffector>();
-
-	for (unsigned int i = 0; i < numSteps; i++)
+	nctl::UniquePtr<ColorAffector> retrieveColorSteps(lua_State *L, int index)
 	{
-		const int type = lua_rawgeti(L, index, i + 1);
-		if (type != LUA_TTABLE)
+		const unsigned int numSteps = lua_rawlen(L, index);
+
+		nctl::UniquePtr<ColorAffector> affector = nctl::makeUnique<ColorAffector>();
+
+		for (unsigned int i = 0; i < numSteps; i++)
+		{
+			const int type = lua_rawgeti(L, index, i + 1);
+			if (type != LUA_TTABLE)
+				luaL_argerror(L, -1, "Expecting a table");
+
+			lua_rawgeti(L, -1, 1);
+			const float age = LuaUtils::retrieve<float>(L, -1);
+			lua_pop(L, 1);
+			lua_rawgeti(L, -1, 2);
+			const Colorf color = LuaColorUtils::retrieveTable(L, -1);
+			lua_pop(L, 1);
+
+			lua_pop(L, 1);
+			affector->addColorStep(age, color);
+		}
+
+		return nctl::move(affector);
+	}
+
+	nctl::UniquePtr<SizeAffector> retrieveSizeSteps(lua_State *L, int index, float baseScale)
+	{
+		const unsigned int numSteps = lua_rawlen(L, index);
+
+		nctl::UniquePtr<SizeAffector> affector = nctl::makeUnique<SizeAffector>(baseScale);
+
+		for (unsigned int i = 0; i < numSteps; i++)
+		{
+			const int type = lua_rawgeti(L, index, i + 1);
+			if (type != LUA_TTABLE)
+				luaL_argerror(L, -1, "Expecting a table");
+
+			lua_rawgeti(L, -1, 1);
+			const float age = LuaUtils::retrieve<float>(L, -1);
+			lua_pop(L, 1);
+			lua_rawgeti(L, -1, 2);
+			const float scale = LuaUtils::retrieve<float>(L, -1);
+			lua_pop(L, 1);
+
+			lua_pop(L, 1);
+			affector->addSizeStep(age, scale);
+		}
+
+		return nctl::move(affector);
+	}
+
+	nctl::UniquePtr<RotationAffector> retrieveRotationSteps(lua_State *L, int index)
+	{
+		const unsigned int numSteps = lua_rawlen(L, index);
+
+		nctl::UniquePtr<RotationAffector> affector = nctl::makeUnique<RotationAffector>();
+
+		for (unsigned int i = 0; i < numSteps; i++)
+		{
+			const int type = lua_rawgeti(L, index, i + 1);
+			if (type != LUA_TTABLE)
+				luaL_argerror(L, -1, "Expecting a table");
+
+			lua_rawgeti(L, -1, 1);
+			const float age = LuaUtils::retrieve<float>(L, -1);
+			lua_pop(L, 1);
+			lua_rawgeti(L, -1, 2);
+			const float angle = LuaUtils::retrieve<float>(L, -1);
+			lua_pop(L, 1);
+
+			lua_pop(L, 1);
+			affector->addRotationStep(age, angle);
+		}
+
+		return nctl::move(affector);
+	}
+
+	nctl::UniquePtr<PositionAffector> retrievePositionSteps(lua_State *L, int index)
+	{
+		const unsigned int numSteps = lua_rawlen(L, index);
+
+		nctl::UniquePtr<PositionAffector> affector = nctl::makeUnique<PositionAffector>();
+
+		for (unsigned int i = 0; i < numSteps; i++)
+		{
+			const int type = lua_rawgeti(L, index, i + 1);
+			if (type != LUA_TTABLE)
+				luaL_argerror(L, -1, "Expecting a table");
+
+			lua_rawgeti(L, -1, 1);
+			const float age = LuaUtils::retrieve<float>(L, -1);
+			lua_pop(L, 1);
+			lua_rawgeti(L, -1, 2);
+			const Vector2f position = LuaVector2fUtils::retrieveTable(L, -1);
+			lua_pop(L, 1);
+
+			lua_pop(L, 1);
+			affector->addPositionStep(age, position);
+		}
+
+		return nctl::move(affector);
+	}
+
+	nctl::UniquePtr<VelocityAffector> retrieveVelocitySteps(lua_State *L, int index)
+	{
+		const unsigned int numSteps = lua_rawlen(L, index);
+
+		nctl::UniquePtr<VelocityAffector> affector = nctl::makeUnique<VelocityAffector>();
+
+		for (unsigned int i = 0; i < numSteps; i++)
+		{
+			const int type = lua_rawgeti(L, index, i + 1);
+			if (type != LUA_TTABLE)
+				luaL_argerror(L, -1, "Expecting a table");
+
+			lua_rawgeti(L, -1, 1);
+			const float age = LuaUtils::retrieve<float>(L, -1);
+			lua_pop(L, 1);
+			lua_rawgeti(L, -1, 2);
+			const Vector2f velocity = LuaVector2fUtils::retrieveTable(L, -1);
+			lua_pop(L, 1);
+
+			lua_pop(L, 1);
+			affector->addVelocityStep(age, velocity);
+		}
+
+		return nctl::move(affector);
+	}
+
+	void retrieveParticleInitializer(lua_State *L, int index, ParticleInitializer &init)
+	{
+		if (lua_istable(L, index) == false)
 			luaL_argerror(L, -1, "Expecting a table");
 
-		lua_rawgeti(L, -1, 1);
-		const float age = LuaUtils::retrieve<float>(L, -1);
-		lua_pop(L, 1);
-		lua_rawgeti(L, -1, 2);
-		const Colorf color = LuaColorUtils::retrieveTable(L, -1);
+		lua_getfield(L, index, LuaNames::ParticleInitializer::amount);
+		if (lua_isinteger(L, -1))
+		{
+			const int amount = LuaUtils::retrieve<int32_t>(L, -1);
+			init.setAmount(amount);
+		}
+		else if (lua_istable(L, -1))
+		{
+			lua_rawgeti(L, -1, 1);
+			const int minAmount = LuaUtils::retrieve<int32_t>(L, -1);
+			lua_pop(L, 1);
+			lua_rawgeti(L, -1, 2);
+			const int maxAmount = LuaUtils::retrieve<int32_t>(L, -1);
+			lua_pop(L, 1);
+			init.setAmount(minAmount, maxAmount);
+		}
 		lua_pop(L, 1);
 
+		lua_getfield(L, index, LuaNames::ParticleInitializer::life);
+		if (lua_isnumber(L, -1))
+		{
+			const float life = LuaUtils::retrieve<float>(L, -1);
+			init.setLife(life);
+		}
+		else if (lua_istable(L, -1))
+		{
+			lua_rawgeti(L, -1, 1);
+			const float minLife = LuaUtils::retrieve<float>(L, -1);
+			lua_pop(L, 1);
+			lua_rawgeti(L, -1, 2);
+			const float maxLife = LuaUtils::retrieve<float>(L, -1);
+			lua_pop(L, 1);
+			init.setLife(minLife, maxLife);
+		}
 		lua_pop(L, 1);
-		affector->addColorStep(age, color);
+
+		lua_getfield(L, index, LuaNames::ParticleInitializer::position);
+		if (lua_istable(L, -1) && lua_rawlen(L, -1) == 0)
+		{
+			const Vector2f position = LuaVector2fUtils::retrieveTable(L, -1);
+			init.setPosition(position);
+		}
+		else if (lua_istable(L, -1) && lua_rawlen(L, -1) == 2)
+		{
+			lua_rawgeti(L, -1, 1);
+			const Vector2f minPosition = LuaVector2fUtils::retrieveTable(L, -1);
+			lua_pop(L, 1);
+			lua_rawgeti(L, -1, 2);
+			const Vector2f maxPosition = LuaVector2fUtils::retrieveTable(L, -1);
+			lua_pop(L, 1);
+			init.setPosition(minPosition, maxPosition);
+		}
+		lua_pop(L, 1);
+
+		lua_getfield(L, index, LuaNames::ParticleInitializer::velocity);
+		if (lua_istable(L, -1) && lua_rawlen(L, -1) == 0)
+		{
+			const Vector2f velocity = LuaVector2fUtils::retrieveTable(L, -1);
+			init.setVelocity(velocity);
+		}
+		else if (lua_istable(L, -1) && lua_rawlen(L, -1) == 2)
+		{
+			lua_rawgeti(L, -1, 1);
+			const Vector2f minVelocity = LuaVector2fUtils::retrieveTable(L, -1);
+			lua_pop(L, 1);
+			lua_rawgeti(L, -1, 2);
+			const Vector2f maxVelocity = LuaVector2fUtils::retrieveTable(L, -1);
+			lua_pop(L, 1);
+			init.setVelocity(minVelocity, maxVelocity);
+		}
+		lua_pop(L, 1);
+
+		lua_getfield(L, index, LuaNames::ParticleInitializer::rotation);
+		if (lua_isnumber(L, -1))
+		{
+			const float rotation = LuaUtils::retrieve<float>(L, -1);
+			init.setRotation(rotation);
+		}
+		else if (lua_istable(L, -1))
+		{
+			lua_rawgeti(L, -1, 1);
+			const float minRotation = LuaUtils::retrieve<float>(L, -1);
+			lua_pop(L, 1);
+			lua_rawgeti(L, -1, 2);
+			const float maxRotation = LuaUtils::retrieve<float>(L, -1);
+			lua_pop(L, 1);
+			init.setRotation(minRotation, maxRotation);
+		}
+		lua_pop(L, 1);
+
+		LuaUtils::tryRetrieveField<bool>(L, -1, LuaNames::ParticleInitializer::emitterRotation, init.emitterRotation);
 	}
-
-	return nctl::move(affector);
-}
-
-nctl::UniquePtr<SizeAffector> retrieveSizeSteps(lua_State *L, int index, float baseScale)
-{
-	const unsigned int numSteps = lua_rawlen(L, index);
-
-	nctl::UniquePtr<SizeAffector> affector = nctl::makeUnique<SizeAffector>(baseScale);
-
-	for (unsigned int i = 0; i < numSteps; i++)
-	{
-		const int type = lua_rawgeti(L, index, i + 1);
-		if (type != LUA_TTABLE)
-			luaL_argerror(L, -1, "Expecting a table");
-
-		lua_rawgeti(L, -1, 1);
-		const float age = LuaUtils::retrieve<float>(L, -1);
-		lua_pop(L, 1);
-		lua_rawgeti(L, -1, 2);
-		const float scale = LuaUtils::retrieve<float>(L, -1);
-		lua_pop(L, 1);
-
-		lua_pop(L, 1);
-		affector->addSizeStep(age, scale);
-	}
-
-	return nctl::move(affector);
-}
-
-nctl::UniquePtr<RotationAffector> retrieveRotationSteps(lua_State *L, int index)
-{
-	const unsigned int numSteps = lua_rawlen(L, index);
-
-	nctl::UniquePtr<RotationAffector> affector = nctl::makeUnique<RotationAffector>();
-
-	for (unsigned int i = 0; i < numSteps; i++)
-	{
-		const int type = lua_rawgeti(L, index, i + 1);
-		if (type != LUA_TTABLE)
-			luaL_argerror(L, -1, "Expecting a table");
-
-		lua_rawgeti(L, -1, 1);
-		const float age = LuaUtils::retrieve<float>(L, -1);
-		lua_pop(L, 1);
-		lua_rawgeti(L, -1, 2);
-		const float angle = LuaUtils::retrieve<float>(L, -1);
-		lua_pop(L, 1);
-
-		lua_pop(L, 1);
-		affector->addRotationStep(age, angle);
-	}
-
-	return nctl::move(affector);
-}
-
-nctl::UniquePtr<PositionAffector> retrievePositionSteps(lua_State *L, int index)
-{
-	const unsigned int numSteps = lua_rawlen(L, index);
-
-	nctl::UniquePtr<PositionAffector> affector = nctl::makeUnique<PositionAffector>();
-
-	for (unsigned int i = 0; i < numSteps; i++)
-	{
-		const int type = lua_rawgeti(L, index, i + 1);
-		if (type != LUA_TTABLE)
-			luaL_argerror(L, -1, "Expecting a table");
-
-		lua_rawgeti(L, -1, 1);
-		const float age = LuaUtils::retrieve<float>(L, -1);
-		lua_pop(L, 1);
-		lua_rawgeti(L, -1, 2);
-		const Vector2f position = LuaVector2fUtils::retrieveTable(L, -1);
-		lua_pop(L, 1);
-
-		lua_pop(L, 1);
-		affector->addPositionStep(age, position);
-	}
-
-	return nctl::move(affector);
-}
-
-nctl::UniquePtr<VelocityAffector> retrieveVelocitySteps(lua_State *L, int index)
-{
-	const unsigned int numSteps = lua_rawlen(L, index);
-
-	nctl::UniquePtr<VelocityAffector> affector = nctl::makeUnique<VelocityAffector>();
-
-	for (unsigned int i = 0; i < numSteps; i++)
-	{
-		const int type = lua_rawgeti(L, index, i + 1);
-		if (type != LUA_TTABLE)
-			luaL_argerror(L, -1, "Expecting a table");
-
-		lua_rawgeti(L, -1, 1);
-		const float age = LuaUtils::retrieve<float>(L, -1);
-		lua_pop(L, 1);
-		lua_rawgeti(L, -1, 2);
-		const Vector2f velocity = LuaVector2fUtils::retrieveTable(L, -1);
-		lua_pop(L, 1);
-
-		lua_pop(L, 1);
-		affector->addVelocityStep(age, velocity);
-	}
-
-	return nctl::move(affector);
-}
-
-void retrieveParticleInitializer(lua_State *L, int index, ParticleInitializer &init)
-{
-	if (lua_istable(L, index) == false)
-		luaL_argerror(L, -1, "Expecting a table");
-
-	lua_getfield(L, index, LuaNames::ParticleInitializer::amount);
-	if (lua_isinteger(L, -1))
-	{
-		const int amount = LuaUtils::retrieve<int32_t>(L, -1);
-		init.setAmount(amount);
-	}
-	else if (lua_istable(L, -1))
-	{
-		lua_rawgeti(L, -1, 1);
-		const int minAmount = LuaUtils::retrieve<int32_t>(L, -1);
-		lua_pop(L, 1);
-		lua_rawgeti(L, -1, 2);
-		const int maxAmount = LuaUtils::retrieve<int32_t>(L, -1);
-		lua_pop(L, 1);
-		init.setAmount(minAmount, maxAmount);
-	}
-	lua_pop(L, 1);
-
-	lua_getfield(L, index, LuaNames::ParticleInitializer::life);
-	if (lua_isnumber(L, -1))
-	{
-		const float life = LuaUtils::retrieve<float>(L, -1);
-		init.setLife(life);
-	}
-	else if (lua_istable(L, -1))
-	{
-		lua_rawgeti(L, -1, 1);
-		const float minLife = LuaUtils::retrieve<float>(L, -1);
-		lua_pop(L, 1);
-		lua_rawgeti(L, -1, 2);
-		const float maxLife = LuaUtils::retrieve<float>(L, -1);
-		lua_pop(L, 1);
-		init.setLife(minLife, maxLife);
-	}
-	lua_pop(L, 1);
-
-	lua_getfield(L, index, LuaNames::ParticleInitializer::position);
-	if (lua_istable(L ,-1) && lua_rawlen(L, -1) == 0)
-	{
-		const Vector2f position = LuaVector2fUtils::retrieveTable(L, -1);
-		init.setPosition(position);
-	}
-	else if (lua_istable(L, -1) && lua_rawlen(L, -1) == 2)
-	{
-		lua_rawgeti(L, -1, 1);
-		const Vector2f minPosition = LuaVector2fUtils::retrieveTable(L, -1);
-		lua_pop(L, 1);
-		lua_rawgeti(L, -1, 2);
-		const Vector2f maxPosition = LuaVector2fUtils::retrieveTable(L, -1);
-		lua_pop(L, 1);
-		init.setPosition(minPosition, maxPosition);
-	}
-	lua_pop(L, 1);
-
-	lua_getfield(L, index, LuaNames::ParticleInitializer::velocity);
-	if (lua_istable(L ,-1) && lua_rawlen(L, -1) == 0)
-	{
-		const Vector2f velocity = LuaVector2fUtils::retrieveTable(L, -1);
-		init.setVelocity(velocity);
-	}
-	else if (lua_istable(L, -1) && lua_rawlen(L, -1) == 2)
-	{
-		lua_rawgeti(L, -1, 1);
-		const Vector2f minVelocity = LuaVector2fUtils::retrieveTable(L, -1);
-		lua_pop(L, 1);
-		lua_rawgeti(L, -1, 2);
-		const Vector2f maxVelocity = LuaVector2fUtils::retrieveTable(L, -1);
-		lua_pop(L, 1);
-		init.setVelocity(minVelocity, maxVelocity);
-	}
-	lua_pop(L, 1);
-
-	lua_getfield(L, index, LuaNames::ParticleInitializer::rotation);
-	if (lua_isnumber(L, -1))
-	{
-		const float rotation = LuaUtils::retrieve<float>(L, -1);
-		init.setRotation(rotation);
-	}
-	else if (lua_istable(L, -1))
-	{
-		lua_rawgeti(L, -1, 1);
-		const float minRotation = LuaUtils::retrieve<float>(L, -1);
-		lua_pop(L, 1);
-		lua_rawgeti(L, -1, 2);
-		const float maxRotation = LuaUtils::retrieve<float>(L, -1);
-		lua_pop(L, 1);
-		init.setRotation(minRotation, maxRotation);
-	}
-	lua_pop(L, 1);
-
-	LuaUtils::tryRetrieveField<bool>(L, -1, LuaNames::ParticleInitializer::emitterRotation, init.emitterRotation);
-}
 
 }
 

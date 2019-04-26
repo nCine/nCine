@@ -11,29 +11,24 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 DrawableNode::DrawableNode(SceneNode *parent, float xx, float yy)
-	: SceneNode(parent, xx, yy), width_(0.0f), height_(0.0f),
-	  renderCommand_(nctl::makeUnique<RenderCommand>())
+    : SceneNode(parent, xx, yy), width_(0.0f), height_(0.0f),
+      renderCommand_(nctl::makeUnique<RenderCommand>())
 {
-
 }
 
 DrawableNode::DrawableNode(SceneNode *parent, const Vector2f &position)
-	: DrawableNode(parent, position.x, position.y)
+    : DrawableNode(parent, position.x, position.y)
 {
-
 }
 
-
 DrawableNode::DrawableNode(SceneNode *parent)
-	: DrawableNode(parent, 0.0f, 0.0f)
+    : DrawableNode(parent, 0.0f, 0.0f)
 {
-
 }
 
 DrawableNode::DrawableNode()
-	: DrawableNode(nullptr, 0.0f, 0.0f)
+    : DrawableNode(nullptr, 0.0f, 0.0f)
 {
-
 }
 
 ///////////////////////////////////////////////////////////

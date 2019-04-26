@@ -2,7 +2,7 @@
 #include "AudioLoaderOgg.h"
 
 #ifdef __ANDROID__
-#include "AssetFile.h" // for AssetFile::sType()
+	#include "AssetFile.h" // for AssetFile::sType()
 
 using ncine::AssetFile;
 
@@ -41,13 +41,12 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AudioLoaderOgg::AudioLoaderOgg(const char *filename)
-	: AudioLoaderOgg(IFile::createFileHandle(filename))
+    : AudioLoaderOgg(IFile::createFileHandle(filename))
 {
-
 }
 
 AudioLoaderOgg::AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle)
-	: IAudioLoader(nctl::move(fileHandle))
+    : IAudioLoader(nctl::move(fileHandle))
 {
 	vorbis_info *info;
 
@@ -132,8 +131,7 @@ unsigned long int AudioLoaderOgg::read(char *buffer, unsigned long int bufferSiz
 			bitStream = 0;
 
 		bufferSeek += bytes;
-	}
-	while (bytes > 0 && bufferSize - bufferSeek > 0);
+	} while (bytes > 0 && bufferSize - bufferSeek > 0);
 
 	return bufferSeek;
 }

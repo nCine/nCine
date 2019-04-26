@@ -7,7 +7,8 @@ namespace ncine {
 
 class IInputEventHandler;
 class JoyMapping;
-template <class T> class Vector2;
+template <class T>
+class Vector2;
 using Vector2f = Vector2<float>;
 
 /// The interface class for parsing and dispatching input events
@@ -32,8 +33,8 @@ class DLL_PUBLIC IInputManager
 	static const float RightStickDeadZone;
 	static const float TriggerDeadZone;
 
-	IInputManager() { }
-	virtual ~IInputManager() { }
+	IInputManager() {}
+	virtual ~IInputManager() {}
 	/// Gets the current input event handler for the manager
 	static inline IInputEventHandler *handler() { return inputEventHandler_; }
 	/// Sets the input event handler for the manager

@@ -14,15 +14,14 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Texture::Texture(const char *filename)
-	: Texture(filename, 0, 0)
+    : Texture(filename, 0, 0)
 {
-
 }
 
 Texture::Texture(const char *filename, int width, int height)
-	: Object(ObjectType::TEXTURE, filename), glTexture_(nctl::makeUnique<GLTexture>(GL_TEXTURE_2D)),
-	  width_(0), height_(0), mipMapLevels_(1), isCompressed_(false), numChannels_(0), dataSize_(0),
-	  minFiltering_(Filtering::NEAREST), magFiltering_(Filtering::NEAREST), wrapMode_(Wrap::CLAMP_TO_EDGE)
+    : Object(ObjectType::TEXTURE, filename), glTexture_(nctl::makeUnique<GLTexture>(GL_TEXTURE_2D)),
+      width_(0), height_(0), mipMapLevels_(1), isCompressed_(false), numChannels_(0), dataSize_(0),
+      minFiltering_(Filtering::NEAREST), magFiltering_(Filtering::NEAREST), wrapMode_(Wrap::CLAMP_TO_EDGE)
 {
 	ZoneScoped;
 	ZoneText(filename, strnlen(filename, 256));
@@ -36,9 +35,8 @@ Texture::Texture(const char *filename, int width, int height)
 }
 
 Texture::Texture(const char *filename, Vector2i size)
-	: Texture(filename, size.x, size.y)
+    : Texture(filename, size.x, size.y)
 {
-
 }
 
 Texture::~Texture()
@@ -53,16 +51,18 @@ Texture::~Texture()
 void Texture::setMinFiltering(Filtering filter)
 {
 	GLenum glFilter = GL_NEAREST;
+	// clang-format off
 	switch (filter)
 	{
-		case Filtering::NEAREST:					glFilter = GL_NEAREST; break;
-		case Filtering::LINEAR:						glFilter = GL_LINEAR; break;
-		case Filtering::NEAREST_MIPMAP_NEAREST:		glFilter = GL_NEAREST_MIPMAP_NEAREST; break;
-		case Filtering::LINEAR_MIPMAP_NEAREST:		glFilter = GL_LINEAR_MIPMAP_NEAREST; break;
-		case Filtering::NEAREST_MIPMAP_LINEAR:		glFilter = GL_NEAREST_MIPMAP_LINEAR; break;
-		case Filtering::LINEAR_MIPMAP_LINEAR:		glFilter = GL_LINEAR_MIPMAP_LINEAR; break;
-		default:									glFilter = GL_NEAREST; break;
+		case Filtering::NEAREST:				glFilter = GL_NEAREST; break;
+		case Filtering::LINEAR:					glFilter = GL_LINEAR; break;
+		case Filtering::NEAREST_MIPMAP_NEAREST:	glFilter = GL_NEAREST_MIPMAP_NEAREST; break;
+		case Filtering::LINEAR_MIPMAP_NEAREST:	glFilter = GL_LINEAR_MIPMAP_NEAREST; break;
+		case Filtering::NEAREST_MIPMAP_LINEAR:	glFilter = GL_NEAREST_MIPMAP_LINEAR; break;
+		case Filtering::LINEAR_MIPMAP_LINEAR:	glFilter = GL_LINEAR_MIPMAP_LINEAR; break;
+		default:								glFilter = GL_NEAREST; break;
 	}
+	// clang-format on
 
 	glTexture_->bind();
 	glTexture_->texParameteri(GL_TEXTURE_MIN_FILTER, glFilter);
@@ -72,12 +72,14 @@ void Texture::setMinFiltering(Filtering filter)
 void Texture::setMagFiltering(Filtering filter)
 {
 	GLenum glFilter = GL_NEAREST;
+	// clang-format off
 	switch (filter)
 	{
-		case Filtering::NEAREST:					glFilter = GL_NEAREST; break;
-		case Filtering::LINEAR:						glFilter = GL_LINEAR; break;
-		default:									glFilter = GL_NEAREST; break;
+		case Filtering::NEAREST:				glFilter = GL_NEAREST; break;
+		case Filtering::LINEAR:					glFilter = GL_LINEAR; break;
+		default:								glFilter = GL_NEAREST; break;
 	}
+	// clang-format on
 
 	glTexture_->bind();
 	glTexture_->texParameteri(GL_TEXTURE_MAG_FILTER, glFilter);
@@ -87,13 +89,15 @@ void Texture::setMagFiltering(Filtering filter)
 void Texture::setWrap(Wrap wrapMode)
 {
 	GLenum glWrap = GL_CLAMP_TO_EDGE;
+	// clang-format off
 	switch (wrapMode)
 	{
-		case Wrap::CLAMP_TO_EDGE:			glWrap = GL_CLAMP_TO_EDGE; break;
-		case Wrap::MIRRORED_REPEAT:			glWrap = GL_MIRRORED_REPEAT; break;
-		case Wrap::REPEAT:					glWrap = GL_REPEAT; break;
-		default:							glWrap = GL_CLAMP_TO_EDGE; break;
+		case Wrap::CLAMP_TO_EDGE:				glWrap = GL_CLAMP_TO_EDGE; break;
+		case Wrap::MIRRORED_REPEAT:				glWrap = GL_MIRRORED_REPEAT; break;
+		case Wrap::REPEAT:						glWrap = GL_REPEAT; break;
+		default:								glWrap = GL_CLAMP_TO_EDGE; break;
 	}
+	// clang-format on
 
 	glTexture_->bind();
 	glTexture_->texParameteri(GL_TEXTURE_WRAP_S, glWrap);

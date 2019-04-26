@@ -5,7 +5,7 @@ namespace {
 class ListTest : public ::testing::Test
 {
   public:
-	ListTest() { }
+	ListTest() {}
 
   protected:
 	void SetUp() override { initList(list_); }

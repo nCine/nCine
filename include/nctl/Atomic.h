@@ -5,9 +5,9 @@
 #include <ncine/common_macros.h>
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
-#include <Windows.h>
+	#include <Windows.h>
 #elif defined(__APPLE__)
-#include <atomic>
+	#include <atomic>
 #endif
 
 namespace nctl {
@@ -24,8 +24,10 @@ class Atomic32
 		SEQ_CST
 	};
 
-	Atomic32() : value_(0) { }
-	explicit Atomic32(int32_t value) : value_(value) { }
+	Atomic32()
+	    : value_(0) {}
+	explicit Atomic32(int32_t value)
+	    : value_(value) {}
 	~Atomic32() = default;
 
 	int32_t load(MemoryModel memModel);
@@ -40,7 +42,11 @@ class Atomic32
 	bool cmpExchange(int32_t newValue, int32_t cmpValue, MemoryModel memModel);
 	inline bool cmpExchange(int32_t newValue, int32_t cmpValue) { return cmpExchange(newValue, cmpValue, MemoryModel::SEQ_CST); }
 
-	int32_t operator=(int32_t value) { store(value); return value_; }
+	int32_t operator=(int32_t value)
+	{
+		store(value);
+		return value_;
+	}
 
 	operator int32_t() { return load(); }
 
@@ -67,7 +73,7 @@ class Atomic32
 /// An atomic `int64_t` class
 class Atomic64
 {
-public:
+  public:
 	enum class MemoryModel
 	{
 		RELAXED,
@@ -76,8 +82,10 @@ public:
 		SEQ_CST
 	};
 
-	Atomic64() : value_(0) { }
-	explicit Atomic64(int64_t value) : value_(value) { }
+	Atomic64()
+	    : value_(0) {}
+	explicit Atomic64(int64_t value)
+	    : value_(value) {}
 	~Atomic64() = default;
 
 	int64_t load(MemoryModel memModel);
@@ -92,7 +100,11 @@ public:
 	bool cmpExchange(int64_t newValue, int64_t cmpValue, MemoryModel memModel);
 	inline bool cmpExchange(int64_t newValue, int64_t cmpValue) { return cmpExchange(newValue, cmpValue, MemoryModel::SEQ_CST); }
 
-	int64_t operator=(int64_t value) { store(value); return value_; }
+	inline int64_t operator=(int64_t value)
+	{
+		store(value);
+		return value_;
+	}
 
 	operator int64_t() { return load(); }
 
@@ -101,7 +113,7 @@ public:
 	inline int64_t operator--() { return fetchSub(1) - 1; }
 	inline int64_t operator--(int) { return fetchSub(1); }
 
-private:
+  private:
 #ifdef __APPLE__
 	std::atomic<int64_t> value_;
 #else
@@ -117,11 +129,11 @@ private:
 };
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
-#include "WindowsAtomic.inl"
+	#include "WindowsAtomic.inl"
 #elif defined(__APPLE__)
-#include "StdAtomic.inl"
+	#include "StdAtomic.inl"
 #else
-#include "GccAtomic.inl"
+	#include "GccAtomic.inl"
 #endif
 
 }

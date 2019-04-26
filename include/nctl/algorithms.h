@@ -40,7 +40,8 @@ template <class T>
 class IsEqualTo
 {
   public:
-	explicit IsEqualTo(T refValue) : refValue_(refValue) { }
+	explicit IsEqualTo(T refValue)
+	    : refValue_(refValue) {}
 	inline bool operator()(T value) const { return value == refValue_; }
 
   private:
@@ -52,7 +53,8 @@ template <class T>
 class IsNotEqualTo
 {
   public:
-	explicit IsNotEqualTo(T refValue) : refValue_(refValue) { }
+	explicit IsNotEqualTo(T refValue)
+	    : refValue_(refValue) {}
 	inline bool operator()(T value) const { return !(value == refValue_); }
 
   private:
@@ -64,7 +66,8 @@ template <class T>
 class IsGreaterThan
 {
   public:
-	explicit IsGreaterThan(T refValue) : refValue_(refValue) { }
+	explicit IsGreaterThan(T refValue)
+	    : refValue_(refValue) {}
 	inline bool operator()(T value) const { return value > refValue_; }
 
   private:
@@ -76,7 +79,8 @@ template <class T>
 class IsNotGreaterThan
 {
   public:
-	explicit IsNotGreaterThan(T refValue) : refValue_(refValue) { }
+	explicit IsNotGreaterThan(T refValue)
+	    : refValue_(refValue) {}
 	inline bool operator()(T value) const { return !(value > refValue_); }
 
   private:
@@ -88,7 +92,8 @@ template <class T>
 class IsLessThan
 {
   public:
-	explicit IsLessThan(T refValue) : refValue_(refValue) { }
+	explicit IsLessThan(T refValue)
+	    : refValue_(refValue) {}
 	inline bool operator()(T value) const { return value < refValue_; }
 
   private:
@@ -100,7 +105,8 @@ template <class T>
 class IsNotLessThan
 {
   public:
-	explicit IsNotLessThan(T refValue) : refValue_(refValue) { }
+	explicit IsNotLessThan(T refValue)
+	    : refValue_(refValue) {}
 	inline bool operator()(T value) const { return !(value < refValue_); }
 
   private:
@@ -112,57 +118,102 @@ class IsNotLessThan
 ///////////////////////////////////////////////////////////
 
 template <class T>
-inline bool IsEqual(const T &a, const T &b) { return a == b; }
+inline bool IsEqual(const T &a, const T &b)
+{
+	return a == b;
+}
 
 template <class T>
-inline bool IsNotEqual(const T &a, const T &b) { return !(a == b); }
+inline bool IsNotEqual(const T &a, const T &b)
+{
+	return !(a == b);
+}
 
 template <class T>
-inline bool IsGreater(const T &a, const T &b) { return a > b; }
+inline bool IsGreater(const T &a, const T &b)
+{
+	return a > b;
+}
 
 template <class T>
-inline bool IsNotGreater(const T &a, const T &b) { return !(a > b); }
+inline bool IsNotGreater(const T &a, const T &b)
+{
+	return !(a > b);
+}
 
 template <class T>
-inline bool IsLess(const T &a, const T &b) { return a < b; }
+inline bool IsLess(const T &a, const T &b)
+{
+	return a < b;
+}
 
 template <class T>
-inline bool IsNotLess(const T &a, const T &b) { return !(a < b); }
+inline bool IsNotLess(const T &a, const T &b)
+{
+	return !(a < b);
+}
 
 ///////////////////////////////////////////////////////////
 // ARITHMETIC OPERATIONS
 ///////////////////////////////////////////////////////////
 
 template <class T>
-inline T Plus(const T &a, const T &b) { return a + b; }
+inline T Plus(const T &a, const T &b)
+{
+	return a + b;
+}
 
 template <class T>
-inline T Minus(const T &a, const T &b) { return a - b; }
+inline T Minus(const T &a, const T &b)
+{
+	return a - b;
+}
 
 template <class T>
-inline T Multiplies(const T &a, const T &b) { return a * b; }
+inline T Multiplies(const T &a, const T &b)
+{
+	return a * b;
+}
 
 template <class T>
-inline T Divides(const T &a, const T &b) { return a / b; }
+inline T Divides(const T &a, const T &b)
+{
+	return a / b;
+}
 
 template <class T>
-inline T Modulus(const T &a, const T &b) { return a % b; }
+inline T Modulus(const T &a, const T &b)
+{
+	return a % b;
+}
 
 template <class T>
-inline T Negate(const T &a) { return -a; }
+inline T Negate(const T &a)
+{
+	return -a;
+}
 
 ///////////////////////////////////////////////////////////
 // LOGICAL OPERATIONS
 ///////////////////////////////////////////////////////////
 
 template <class T>
-inline T LogicalAnd(const T &a, const T &b) { return a && b; }
+inline T LogicalAnd(const T &a, const T &b)
+{
+	return a && b;
+}
 
 template <class T>
-inline T LogicalOr(const T &a, const T &b) { return a || b; }
+inline T LogicalOr(const T &a, const T &b)
+{
+	return a || b;
+}
 
 template <class T>
-inline T LogicalNot(const T &a) { return !a; }
+inline T LogicalNot(const T &a)
+{
+	return !a;
+}
 
 ///////////////////////////////////////////////////////////
 // TEMPLATE FUNCTIONS WITH ITERATORS (non-modifying)
@@ -294,7 +345,8 @@ inline bool equal(Iterator1 first1, const Iterator1 last1, Iterator2 first2)
 	{
 		if (*first1 != *first2)
 			return false;
-		++first1; ++first2;
+		++first1;
+		++first2;
 	}
 
 	return true;
@@ -363,7 +415,8 @@ inline IteratorOut copy(IteratorIn first, const IteratorIn last, IteratorOut res
 	while (first != last)
 	{
 		*result = *first;
-		++result; ++first;
+		++result;
+		++first;
 	}
 
 	return result;
@@ -376,7 +429,8 @@ inline IteratorOut copyN(IteratorIn first, unsigned int n, IteratorOut result)
 	while (n > 0)
 	{
 		*result = *first;
-		++result; ++first;
+		++result;
+		++first;
 		--n;
 	}
 
@@ -407,7 +461,8 @@ inline IteratorOut transform(IteratorIn first1, const IteratorIn last1, Iterator
 	while (first1 != last1)
 	{
 		*result = op(*first1);
-		++result; ++first1;
+		++result;
+		++first1;
 	}
 
 	return result;
@@ -421,7 +476,8 @@ inline IteratorOut transform(IteratorIn1 first1, const IteratorIn1 last1, Iterat
 	while (first1 != last1)
 	{
 		*result = binaryOp(*first1, *first2++);
-		++result; ++first1;
+		++result;
+		++first1;
 	}
 
 	return result;
@@ -458,7 +514,8 @@ inline IteratorOut replaceCopy(IteratorIn first, const IteratorIn last, Iterator
 	while (first != last)
 	{
 		*result = (*first == oldValue) ? newValue : *first;
-		++first; ++result;
+		++first;
+		++result;
 	}
 
 	return result;
@@ -471,7 +528,8 @@ inline IteratorOut replaceCopyIf(IteratorIn first, const IteratorIn last, Iterat
 	while (first != last)
 	{
 		*result = (pred(*first)) ? newValue : *first;
-		++first; ++result;
+		++first;
+		++result;
 	}
 
 	return result;
@@ -511,7 +569,8 @@ inline void generateN(Iterator first, unsigned int n, Generator gen)
 	while (n > 0)
 	{
 		*first = gen();
-		++first; --n;
+		++first;
+		--n;
 	}
 }
 
@@ -670,8 +729,7 @@ inline Iterator partition(Iterator first, Iterator last, Compare comp)
 			--last;
 			if (first == last)
 				return first;
-		}
-		while (!comp(*last, pivot));
+		} while (!comp(*last, pivot));
 
 		swap(*first, *last);
 		++first;
@@ -682,36 +740,36 @@ inline Iterator partition(Iterator first, Iterator last, Compare comp)
 
 namespace {
 
-/// Quicksort implementation with random access iterators and custom compare function
-template <class Iterator, class Compare>
-inline void quicksort(Iterator first, Iterator last, RandomAccessIteratorTag, Compare comp)
-{
-	int size = distance(first, last);
-	if (size > 1)
+	/// Quicksort implementation with random access iterators and custom compare function
+	template <class Iterator, class Compare>
+	inline void quicksort(Iterator first, Iterator last, RandomAccessIteratorTag, Compare comp)
 	{
-		Iterator p = prev(last);
-		swap(*next(first, size / 2), *p);
-		Iterator q = partition(first, p, comp);
-		swap(*q, *p);
-		quicksort(first, q, RandomAccessIteratorTag(), comp);
-		quicksort(next(q), last, RandomAccessIteratorTag(), comp);
+		int size = distance(first, last);
+		if (size > 1)
+		{
+			Iterator p = prev(last);
+			swap(*next(first, size / 2), *p);
+			Iterator q = partition(first, p, comp);
+			swap(*q, *p);
+			quicksort(first, q, RandomAccessIteratorTag(), comp);
+			quicksort(next(q), last, RandomAccessIteratorTag(), comp);
+		}
 	}
-}
 
-/// Quicksort implementation with bidirectional iterators and custom compare function
-template <class Iterator, class Compare>
-inline void quicksort(Iterator first, Iterator last, BidirectionalIteratorTag, Compare comp)
-{
-	if (first != last)
+	/// Quicksort implementation with bidirectional iterators and custom compare function
+	template <class Iterator, class Compare>
+	inline void quicksort(Iterator first, Iterator last, BidirectionalIteratorTag, Compare comp)
 	{
-		Iterator p = prev(last);
-		swap(*first, *p);
-		Iterator q = partition(first, p, comp);
-		swap(*q, *p);
-		quicksort(first, q, BidirectionalIteratorTag());
-		quicksort(next(q), last, BidirectionalIteratorTag());
+		if (first != last)
+		{
+			Iterator p = prev(last);
+			swap(*first, *p);
+			Iterator q = partition(first, p, comp);
+			swap(*q, *p);
+			quicksort(first, q, BidirectionalIteratorTag());
+			quicksort(next(q), last, BidirectionalIteratorTag());
+		}
 	}
-}
 
 }
 

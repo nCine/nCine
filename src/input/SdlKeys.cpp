@@ -4,6 +4,7 @@ namespace ncine {
 
 KeySym SdlKeys::keySymValueToEnum(int keysym)
 {
+	// clang-format off
 	switch (keysym)
 	{
 		case SDLK_UNKNOWN:			return KeySym::UNKNOWN;
@@ -147,6 +148,7 @@ KeySym SdlKeys::keySymValueToEnum(int keysym)
 
 		default:					return KeySym::UNKNOWN;
 	}
+	// clang-format on
 }
 
 int SdlKeys::keyModMaskToEnumMask(int keymod)
@@ -173,6 +175,7 @@ int SdlKeys::keyModMaskToEnumMask(int keymod)
 
 int SdlKeys::enumToKeySymValue(KeySym keysym)
 {
+	// clang-format off
 	switch (keysym)
 	{
 		case KeySym::UNKNOWN:			return SDLK_UNKNOWN;
@@ -316,10 +319,12 @@ int SdlKeys::enumToKeySymValue(KeySym keysym)
 
 		default:						return SDLK_UNKNOWN;
 	}
+	// clang-format on
 }
 
 int SdlKeys::enumToScancode(KeySym keysym)
 {
+	// clang-format off
 	switch (keysym)
 	{
 		case KeySym::UNKNOWN:			return SDL_SCANCODE_UNKNOWN;
@@ -463,6 +468,7 @@ int SdlKeys::enumToScancode(KeySym keysym)
 
 		default:						return SDL_SCANCODE_UNKNOWN;
 	}
+	// clang-format on
 }
 
 }

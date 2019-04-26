@@ -53,7 +53,7 @@ class DLL_PUBLIC Font : public Object
 	/// Maximum number of glyphs in a font
 	static const unsigned int MaxGlyphs = 256;
 	/// Array of font glyphs
-	nctl::UniquePtr<FontGlyph []> glyphs_;
+	nctl::UniquePtr<FontGlyph[]> glyphs_;
 
 	/// Deleted copy constructor
 	Font(const Font &) = delete;

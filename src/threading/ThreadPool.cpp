@@ -7,13 +7,12 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ThreadPool::ThreadPool()
-	: ThreadPool(Thread::numProcessors())
+    : ThreadPool(Thread::numProcessors())
 {
-
 }
 
 ThreadPool::ThreadPool(unsigned int numThreads)
-	: threads_(numThreads, nctl::ArrayMode::FIXED_CAPACITY), numThreads_(numThreads)
+    : threads_(numThreads, nctl::ArrayMode::FIXED_CAPACITY), numThreads_(numThreads)
 {
 	threadStruct_.queue = &queue_;
 	threadStruct_.queueMutex = &queueMutex_;

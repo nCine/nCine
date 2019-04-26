@@ -11,13 +11,13 @@ namespace nctl {
 ///////////////////////////////////////////////////////////
 
 String::String()
-	: length_(0), capacity_(SmallBufferSize)
+    : length_(0), capacity_(SmallBufferSize)
 {
 	array_.local_[0] = '\0';
 }
 
 String::String(unsigned int capacity)
-	: length_(0), capacity_(capacity)
+    : length_(0), capacity_(capacity)
 {
 	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
 
@@ -30,7 +30,7 @@ String::String(unsigned int capacity)
 }
 
 String::String(const char *cString)
-	: length_(0), capacity_(0)
+    : length_(0), capacity_(0)
 {
 	ASSERT(cString);
 #if defined(_WIN32) && !defined(__MINGW32__)
@@ -62,7 +62,7 @@ String::~String()
 }
 
 String::String(const String &other)
-	: length_(other.length_), capacity_(other.capacity_)
+    : length_(other.length_), capacity_(other.capacity_)
 {
 	const char *src = other.array_.local_;
 	char *dest = array_.local_;
@@ -82,7 +82,7 @@ String::String(const String &other)
 }
 
 String::String(String &&other)
-	: length_(0), capacity_(0)
+    : length_(0), capacity_(0)
 {
 	swap(*this, other);
 }
@@ -132,6 +132,13 @@ unsigned int String::setLength(unsigned int length)
 {
 	length_ = (length > capacity_ - 1) ? capacity_ - 1 : length;
 	return length_;
+}
+
+/*! Length will be zero but capacity remains unmodified. */
+void String::clear()
+{
+	length_ = 0;
+	data()[0] = '\0';
 }
 
 /*! The method returns the number of characters copied, to allow truncation. */
@@ -403,6 +410,5 @@ char &String::operator[](unsigned int index)
 	ASSERT_MSG_X(index < length_, "Index %u is out of bounds (size: %u)", index, length_);
 	return data()[index];
 }
-
 
 }

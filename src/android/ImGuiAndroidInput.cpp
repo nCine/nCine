@@ -23,18 +23,18 @@ unsigned int ImGuiAndroidInput::pointerCount_ = 0;
 
 namespace {
 
-static const int MaxClipboardLength = 256;
-static char clipboard[MaxClipboardLength];
+	static const int MaxClipboardLength = 256;
+	static char clipboard[MaxClipboardLength];
 
-const char *clipboardText(void *userData)
-{
-	return clipboard;
-}
+	const char *clipboardText(void *userData)
+	{
+		return clipboard;
+	}
 
-void setClipboardText(void *userData, const char *text)
-{
-	strncpy(clipboard, text, MaxClipboardLength);
-}
+	void setClipboardText(void *userData, const char *text)
+	{
+		strncpy(clipboard, text, MaxClipboardLength);
+	}
 
 }
 
@@ -42,7 +42,7 @@ void ImGuiAndroidInput::init()
 {
 	ImGui::CreateContext();
 
-	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIO &io = ImGui::GetIO();
 	io.BackendPlatformName = "nCine_Android";
 	io.DisplaySize = ImVec2(theApplication().width(), theApplication().height());
 	io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
@@ -82,7 +82,7 @@ void ImGuiAndroidInput::shutdown()
 
 void ImGuiAndroidInput::newFrame()
 {
-	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIO &io = ImGui::GetIO();
 	IM_ASSERT(io.Fonts->IsBuilt()); // Font atlas needs to be built, call renderer _NewFrame() function e.g. ImGui_ImplOpenGL3_NewFrame()
 
 	io.DeltaTime = theApplication().interval();
@@ -100,12 +100,12 @@ bool ImGuiAndroidInput::processEvent(const AInputEvent *event)
 	if (inputEnabled_ == false)
 		return false;
 
-	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIO &io = ImGui::GetIO();
 	if (pointerCount_ == 0 && io.ConfigFlags & ImGuiConfigFlags_IsTouchScreen)
 		io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
 
 	if ((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD &&
-	     AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
+	    AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
 	{
 		int key = AKeyEvent_getKeyCode(event);
 		IM_ASSERT(key >= 0 && key < IM_ARRAYSIZE(io.KeysDown));
@@ -205,7 +205,7 @@ bool ImGuiAndroidInput::processEvent(const AInputEvent *event)
 
 void ImGuiAndroidInput::updateMouseButtons()
 {
-	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIO &io = ImGui::GetIO();
 	if (pointerCount_ > 0)
 	{
 		io.MouseDown[0] = (pointerCount_ == 1);

@@ -18,16 +18,16 @@ GLuint GLShaderProgram::boundProgram_ = 0;
 ///////////////////////////////////////////////////////////
 
 GLShaderProgram::GLShaderProgram()
-	: glHandle_(0), attachedShaders_(AttachedShadersInitialSize),
-	  status_(Status::NOT_LINKED), uniformsSize_(0), uniformBlocksSize_(0),
-	  uniforms_(UniformsInitialSize), uniformBlocks_(UniformBlocksInitialSize),
-	  attributes_(AttributesInitialSize)
+    : glHandle_(0), attachedShaders_(AttachedShadersInitialSize),
+      status_(Status::NOT_LINKED), uniformsSize_(0), uniformBlocksSize_(0),
+      uniforms_(UniformsInitialSize), uniformBlocks_(UniformBlocksInitialSize),
+      attributes_(AttributesInitialSize)
 {
 	glHandle_ = glCreateProgram();
 }
 
 GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFile, Introspection introspection)
-	: GLShaderProgram()
+    : GLShaderProgram()
 {
 	glHandle_ = glCreateProgram();
 	attachShader(GL_VERTEX_SHADER, vertexFile);
@@ -36,9 +36,8 @@ GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFil
 }
 
 GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFile)
-	: GLShaderProgram(vertexFile, fragmentFile, Introspection::ENABLED)
+    : GLShaderProgram(vertexFile, fragmentFile, Introspection::ENABLED)
 {
-
 }
 
 GLShaderProgram::~GLShaderProgram()
@@ -103,8 +102,9 @@ bool GLShaderProgram::link(Introspection introspection)
 
 	if (introspection != Introspection::DISABLED)
 	{
-		const GLUniformBlock::DiscoverUniforms discover = (introspection == Introspection::NO_UNIFORMS_IN_BLOCKS) ?
-			GLUniformBlock::DiscoverUniforms::DISBLED : GLUniformBlock::DiscoverUniforms::ENABLED;
+		const GLUniformBlock::DiscoverUniforms discover = (introspection == Introspection::NO_UNIFORMS_IN_BLOCKS)
+		                                                      ? GLUniformBlock::DiscoverUniforms::DISBLED
+		                                                      : GLUniformBlock::DiscoverUniforms::ENABLED;
 
 		discoverUniforms();
 		discoverUniformBlocks(discover);

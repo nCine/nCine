@@ -8,53 +8,54 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AppConfiguration::AppConfiguration()
-	: logFile(128)
+    : logFile(128),
 #ifdef NCINE_DEBUG
-	, consoleLogLevel(ILogger::LogLevel::INFO)
+      consoleLogLevel(ILogger::LogLevel::INFO),
 #else
-	, consoleLogLevel(ILogger::LogLevel::ERROR)
+      consoleLogLevel(ILogger::LogLevel::ERROR),
 #endif
-	, fileLogLevel(ILogger::LogLevel::OFF)
-	, frameTimerLogInterval(5.0f)
-	, xResolution(1280), yResolution(720)
-	, inFullscreen(false)
-	, isResizable(false)
-	, windowTitle(128)
-	, windowIconFilename(128)
-	, fontTexFilename(128)
-	, fontFntFilename(128)
+      fileLogLevel(ILogger::LogLevel::OFF),
+      frameTimerLogInterval(5.0f),
+      xResolution(1280),
+      yResolution(720),
+      inFullscreen(false),
+      isResizable(false),
+      windowTitle(128),
+      windowIconFilename(128),
+      fontTexFilename(128),
+      fontFntFilename(128),
 #ifdef WITH_IMGUI
-	, vboSize(512 * 1024)
-	, iboSize(128 * 1024)
+      vboSize(512 * 1024),
+      iboSize(128 * 1024),
 #else
-	, vboSize(64 * 1024)
-	, iboSize(8 * 1024)
+      vboSize(64 * 1024),
+      iboSize(8 * 1024),
 #endif
-	, vaoPoolSize(16)
+      vaoPoolSize(16),
 #ifdef NCINE_DEBUG
-	, withProfilerGraphs(true)
-	, withInfoText(true)
+      withProfilerGraphs(true),
+      withInfoText(true),
 #else
-	, withProfilerGraphs(false)
-	, withInfoText(false)
+      withProfilerGraphs(false),
+      withInfoText(false),
 #endif
-	, withAudio(true)
-	, withThreads(false)
-	, withScenegraph(true)
-	, withVSync(true)
-	, withGlDebugContext(false)
+      withAudio(true),
+      withThreads(false),
+      withScenegraph(true),
+      withVSync(true),
+      withGlDebugContext(false),
 
-	// Compile-time variables
-	, glCoreProfile_(true)
-	, glForwardCompatible_(true)
+      // Compile-time variables
+      glCoreProfile_(true),
+      glForwardCompatible_(true),
 #ifdef __ANDROID__
-	, glMajorVersion_(3)
-	, glMinorVersion_(0)
+      glMajorVersion_(3),
+      glMinorVersion_(0),
 #else
-	, glMajorVersion_(3)
-	, glMinorVersion_(3)
+      glMajorVersion_(3),
+      glMinorVersion_(3),
 #endif
-	, profileTextUpdateTime_(0.2f)
+      profileTextUpdateTime_(0.2f)
 {
 	logFile = "ncine_log.txt";
 #ifdef __ANDROID__

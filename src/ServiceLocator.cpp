@@ -13,11 +13,10 @@ ServiceLocator &theServiceLocator()
 ///////////////////////////////////////////////////////////
 
 ServiceLocator::ServiceLocator()
-	: indexerService_(&nullIndexer_), loggerService_(&nullLogger_),
-	  audioDevice_(&nullAudioDevice_), threadPool_(&nullThreadPool_),
-	  gfxCapabilities_(&nullGfxCapabilities_)
+    : indexerService_(&nullIndexer_), loggerService_(&nullLogger_),
+      audioDevice_(&nullAudioDevice_), threadPool_(&nullThreadPool_),
+      gfxCapabilities_(&nullGfxCapabilities_)
 {
-
 }
 
 ///////////////////////////////////////////////////////////

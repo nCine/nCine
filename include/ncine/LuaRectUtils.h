@@ -7,8 +7,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace Rect
-{
+namespace Rect {
 	static const char *x = "x";
 	static const char *y = "y";
 	static const char *w = "w";
@@ -88,7 +87,6 @@ Rect<T> LuaRectUtils<T>::retrieveArray(lua_State *L, int index)
 
 	return Rect<T>(x, y, w, h);
 }
-
 
 template <class T>
 Rect<T> LuaRectUtils<T>::retrieveParams(lua_State *L, int index)

@@ -35,8 +35,8 @@ void MyEventHandler::onInit()
 	texture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + TextureFile).data());
 	animSprite_ = nctl::makeUnique<nc::AnimatedSprite>(&rootNode, texture_.get());
 	// Down
-	nctl::UniquePtr<nc::RectAnimation> animation = nctl::makeUnique<nc::RectAnimation>
-		(0.12f, nc::RectAnimation::LoopMode::ENABLED, nc::RectAnimation::RewindMode::FROM_START);
+	nctl::UniquePtr<nc::RectAnimation> animation =
+	    nctl::makeUnique<nc::RectAnimation>(0.12f, nc::RectAnimation::LoopMode::ENABLED, nc::RectAnimation::RewindMode::FROM_START);
 	animation->addRect(0, 0, 48, 48);
 	animation->addRect(48, 0, 48, 48);
 	animation->addRect(96, 0, 48, 48);

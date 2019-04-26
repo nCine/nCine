@@ -8,7 +8,8 @@ namespace nctl {
 
 /// Base helper structure for type traits used in the hashmap iterator
 template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
-struct StaticHashMapHelperTraits { };
+struct StaticHashMapHelperTraits
+{};
 
 /// Helper structure providing type traits used in the non constant hashmap iterator
 template <class K, class T, class HashFunc, unsigned int Capacity>
@@ -44,13 +45,13 @@ class StaticHashMapIterator
 	};
 
 	StaticHashMapIterator(typename StaticHashMapHelperTraits<K, T, HashFunc, Capacity, IsConst>::HashMapPtr hashMap, unsigned int bucketIndex)
-		: hashMap_(hashMap), bucketIndex_(bucketIndex), tag_(SentinelTag::REGULAR) { }
+	    : hashMap_(hashMap), bucketIndex_(bucketIndex), tag_(SentinelTag::REGULAR) {}
 
 	StaticHashMapIterator(typename StaticHashMapHelperTraits<K, T, HashFunc, Capacity, IsConst>::HashMapPtr hashMap, SentinelTagInit tag);
 
 	/// Copy constructor to implicitly convert a non constant iterator to a constant one
 	StaticHashMapIterator(const StaticHashMapIterator<K, T, HashFunc, Capacity, false> &it)
-		: hashMap_(it.hashMap_), bucketIndex_(it.bucketIndex_), tag_(SentinelTag(it.tag_)) { }
+	    : hashMap_(it.hashMap_), bucketIndex_(it.bucketIndex_), tag_(SentinelTag(it.tag_)) {}
 
 	/// Deferencing operator
 	Reference operator*() const;
@@ -123,7 +124,7 @@ class StaticHashMapIterator
 
 /// Iterator traits structure specialization for `HashMapIterator` class
 template <class K, class T, class HashFunc, unsigned int Capacity>
-struct IteratorTraits<StaticHashMapIterator<K, T, HashFunc, Capacity, false> >
+struct IteratorTraits<StaticHashMapIterator<K, T, HashFunc, Capacity, false>>
 {
 	/// Type of the values deferenced by the iterator
 	using ValueType = T;
@@ -137,7 +138,7 @@ struct IteratorTraits<StaticHashMapIterator<K, T, HashFunc, Capacity, false> >
 
 /// Iterator traits structure specialization for constant `HashMapIterator` class
 template <class K, class T, class HashFunc, unsigned int Capacity>
-struct IteratorTraits<StaticHashMapIterator<K, T, HashFunc, Capacity, true> >
+struct IteratorTraits<StaticHashMapIterator<K, T, HashFunc, Capacity, true>>
 {
 	/// Type of the values deferenced by the iterator (never const)
 	using ValueType = T;
@@ -151,7 +152,7 @@ struct IteratorTraits<StaticHashMapIterator<K, T, HashFunc, Capacity, true> >
 
 template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
 StaticHashMapIterator<K, T, HashFunc, Capacity, IsConst>::StaticHashMapIterator(typename StaticHashMapHelperTraits<K, T, HashFunc, Capacity, IsConst>::HashMapPtr hashMap, SentinelTagInit tag)
-	: hashMap_(hashMap), bucketIndex_(0)
+    : hashMap_(hashMap), bucketIndex_(0)
 {
 	switch (tag)
 	{

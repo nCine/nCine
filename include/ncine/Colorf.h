@@ -1,7 +1,6 @@
 #ifndef CLASS_NCINE_COLORF
 #define CLASS_NCINE_COLORF
 
-
 #include <nctl/StaticArray.h>
 
 namespace ncine {

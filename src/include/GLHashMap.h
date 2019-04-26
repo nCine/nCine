@@ -105,7 +105,7 @@ class GLTextureMappingFunc
 				break;
 #endif
 			case GL_TEXTURE_2D:
-				value =  1;
+				value = 1;
 				break;
 #ifndef __ANDROID__ // available in OpenGL ES 3.0
 			case GL_TEXTURE_3D:

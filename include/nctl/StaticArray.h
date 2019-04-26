@@ -33,10 +33,11 @@ class StaticArray
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
 	/// Constructs an empty array with fixed capacity
-	StaticArray() : size_(0), capacity_(C) { }
+	StaticArray()
+	    : size_(0), capacity_(C) {}
 	/// Constructs an array with the option for it to have the size match its capacity
 	explicit StaticArray(StaticArrayMode mode)
-		: size_(0), capacity_(C)
+	    : size_(0), capacity_(C)
 	{
 		if (mode == StaticArrayMode::EXTEND_SIZE)
 			size_ = capacity_;
@@ -126,7 +127,7 @@ class StaticArray
 
 template <class T, unsigned int C>
 StaticArray<T, C>::StaticArray(const StaticArray<T, C> &other)
-	: size_(other.size_), capacity_(other.capacity_)
+    : size_(other.size_), capacity_(other.capacity_)
 {
 	// copying all elements invoking their copy constructor
 	for (unsigned int i = 0; i < other.size_; i++)
@@ -135,7 +136,7 @@ StaticArray<T, C>::StaticArray(const StaticArray<T, C> &other)
 
 template <class T, unsigned int C>
 StaticArray<T, C>::StaticArray(StaticArray<T, C> &&other)
-	: size_(other.size_), capacity_(other.capacity_)
+    : size_(other.size_), capacity_(other.capacity_)
 {
 	// moving all elements invoking their move constructor
 	for (unsigned int i = 0; i < other.size_; i++)

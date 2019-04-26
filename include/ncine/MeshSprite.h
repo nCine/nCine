@@ -88,7 +88,6 @@ class DLL_PUBLIC MeshSprite : public BaseSprite
 	unsigned int numIndices_;
 };
 
-
 }
 
 #endif

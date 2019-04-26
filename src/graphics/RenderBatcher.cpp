@@ -16,7 +16,7 @@ unsigned int RenderBatcher::MaxUniformBlockSize = 0;
 ///////////////////////////////////////////////////////////
 
 RenderBatcher::RenderBatcher()
-	: buffers_(1), freeCommandsPool_(16), usedCommandsPool_(16)
+    : buffers_(1), freeCommandsPool_(16), usedCommandsPool_(16)
 {
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
 	MaxUniformBlockSize = gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE);
@@ -31,33 +31,33 @@ RenderBatcher::RenderBatcher()
 
 namespace {
 
-bool isSupportedType(Material::ShaderProgramType type)
-{
-	return (type == Material::ShaderProgramType::SPRITE ||
-	        type == Material::ShaderProgramType::SPRITE_GRAY ||
-	        type == Material::ShaderProgramType::MESH_SPRITE ||
-	        type == Material::ShaderProgramType::MESH_SPRITE_GRAY ||
-	        type == Material::ShaderProgramType::TEXTNODE ||
-	        type == Material::ShaderProgramType::TEXTNODE_GRAY);
-}
+	bool isSupportedType(Material::ShaderProgramType type)
+	{
+		return (type == Material::ShaderProgramType::SPRITE ||
+		        type == Material::ShaderProgramType::SPRITE_GRAY ||
+		        type == Material::ShaderProgramType::MESH_SPRITE ||
+		        type == Material::ShaderProgramType::MESH_SPRITE_GRAY ||
+		        type == Material::ShaderProgramType::TEXTNODE ||
+		        type == Material::ShaderProgramType::TEXTNODE_GRAY);
+	}
 
-bool isBatchedSprite(Material::ShaderProgramType type)
-{
-	return (type == Material::ShaderProgramType::BATCHED_SPRITES ||
-	        type == Material::ShaderProgramType::BATCHED_SPRITES_GRAY);
-}
+	bool isBatchedSprite(Material::ShaderProgramType type)
+	{
+		return (type == Material::ShaderProgramType::BATCHED_SPRITES ||
+		        type == Material::ShaderProgramType::BATCHED_SPRITES_GRAY);
+	}
 
-bool isBatchedMeshSprite(Material::ShaderProgramType type)
-{
-	return (type == Material::ShaderProgramType::BATCHED_MESH_SPRITES ||
-	        type == Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY);
-}
+	bool isBatchedMeshSprite(Material::ShaderProgramType type)
+	{
+		return (type == Material::ShaderProgramType::BATCHED_MESH_SPRITES ||
+		        type == Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY);
+	}
 
-bool isBatchedTextnode(Material::ShaderProgramType type)
-{
-	return (type == Material::ShaderProgramType::BATCHED_TEXTNODES ||
-	        type == Material::ShaderProgramType::BATCHED_TEXTNODES_GRAY);
-}
+	bool isBatchedTextnode(Material::ShaderProgramType type)
+	{
+		return (type == Material::ShaderProgramType::BATCHED_TEXTNODES ||
+		        type == Material::ShaderProgramType::BATCHED_TEXTNODES_GRAY);
+	}
 
 }
 
@@ -139,9 +139,9 @@ void RenderBatcher::reset()
 ///////////////////////////////////////////////////////////
 
 RenderCommand *RenderBatcher::collectCommands(
-	nctl::Array<RenderCommand *>::ConstIterator start,
-	nctl::Array<RenderCommand *>::ConstIterator end,
-	nctl::Array<RenderCommand *>::ConstIterator &nextStart)
+    nctl::Array<RenderCommand *>::ConstIterator start,
+    nctl::Array<RenderCommand *>::ConstIterator end,
+    nctl::Array<RenderCommand *>::ConstIterator &nextStart)
 {
 	ASSERT(end > start);
 
@@ -193,7 +193,7 @@ RenderCommand *RenderBatcher::collectCommands(
 	instancesBlockSize += batchCommand->material().shaderProgram()->uniformsSize();
 
 	// Set to true if at least one command in the batch has indices or forced by a rendering settings
-	bool batchingWithIndices =  theApplication().renderingSettings().batchingWithIndices;
+	bool batchingWithIndices = theApplication().renderingSettings().batchingWithIndices;
 	// Sum the amount of UBO memory required by the batch and determine if indices are needed
 	nctl::Array<RenderCommand *>::ConstIterator it = start;
 	while (it != end)
@@ -229,13 +229,13 @@ RenderCommand *RenderBatcher::collectCommands(
 			vertexDataSize = numVertices * numElementsPerVertex * sizeof(GLfloat);
 
 			if (batchingWithIndices)
-				numIndices = (numIndices > 0) ? numIndices + 2 :  numVertices + 2;
+				numIndices = (numIndices > 0) ? numIndices + 2 : numVertices + 2;
 		}
 
 		// Don't request more bytes than a common VBO or IBO can hold
 		if (instancesVertexDataSize + vertexDataSize > maxVertexDataSize ||
-			(instancesIndicesAmount + numIndices) * sizeof(GLushort) > maxIndexDataSize ||
-			instancesIndicesAmount + numIndices > 65535)
+		    (instancesIndicesAmount + numIndices) * sizeof(GLushort) > maxIndexDataSize ||
+		    instancesIndicesAmount + numIndices > 65535)
 			break;
 		else
 		{
@@ -325,7 +325,7 @@ RenderCommand *RenderBatcher::collectCommands(
 			unsigned short vertexId = 0;
 			if (instancesIndicesAmount > 0)
 			{
-				const unsigned int numIndices =  command->geometry().numIndices() ? command->geometry().numIndices() : numVertices;
+				const unsigned int numIndices = command->geometry().numIndices() ? command->geometry().numIndices() : numVertices;
 				const GLushort *srcIdx = command->geometry().hostIndexPointer();
 
 				// Index of a degenerate triangle, if not a starting element and there are more than one in the batch
@@ -347,7 +347,7 @@ RenderCommand *RenderBatcher::collectCommands(
 				{
 					if (srcIdx)
 						srcIdx--;
-					*destIdx = batchFirstVertexId + (srcIdx ? *srcIdx : vertexId-1);
+					*destIdx = batchFirstVertexId + (srcIdx ? *srcIdx : vertexId - 1);
 					destIdx++;
 				}
 
@@ -444,7 +444,7 @@ void RenderBatcher::createBuffer(unsigned int size)
 	ManagedBuffer managedBuffer;
 	managedBuffer.size = size;
 	managedBuffer.freeSpace = size;
-	managedBuffer.buffer = nctl::makeUnique<unsigned char []>(size);
+	managedBuffer.buffer = nctl::makeUnique<unsigned char[]>(size);
 
 	buffers_.pushBack(nctl::move(managedBuffer));
 }

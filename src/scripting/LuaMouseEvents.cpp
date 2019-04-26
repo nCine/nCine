@@ -8,8 +8,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace LuaMouseEvents
-{
+namespace LuaMouseEvents {
 	static const char *LEFT = "LEFT";
 	static const char *MIDDLE = "MIDDLE";
 	static const char *RIGHT = "RIGHT";
@@ -33,14 +32,14 @@ namespace LuaMouseEvents
 
 namespace {
 
-enum class MouseButton
-{
-	LEFT = 0,
-	MIDDLE,
-	RIGHT,
-	FOURTH,
-	FIFTH
-};
+	enum class MouseButton
+	{
+		LEFT = 0,
+		MIDDLE,
+		RIGHT,
+		FOURTH,
+		FIFTH
+	};
 
 }
 

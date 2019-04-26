@@ -29,8 +29,8 @@ namespace nc = ncine;
 
 /// My nCine event handler
 class MyEventHandler :
-	public nc::IAppEventHandler,
-	public nc::IInputEventHandler
+    public nc::IAppEventHandler,
+    public nc::IInputEventHandler
 {
   public:
 	static const unsigned int NumTextures = 4;

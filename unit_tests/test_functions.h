@@ -11,15 +11,22 @@ class AddValue
 };
 
 template <int value>
-inline void addValue(int &n) { n += value; }
+inline void addValue(int &n)
+{
+	n += value;
+}
 
 template <int value>
-inline int copyAddValue(const int &n) { return n + value; }
+inline int copyAddValue(const int &n)
+{
+	return n + value;
+}
 
 class GenerateSequenceFrom
 {
   public:
-	explicit GenerateSequenceFrom(int n) : value_(n) { }
+	explicit GenerateSequenceFrom(int n)
+	    : value_(n) {}
 	inline int operator()() { return value_++; }
 
   private:

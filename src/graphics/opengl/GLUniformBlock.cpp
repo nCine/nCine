@@ -9,13 +9,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GLUniformBlock::GLUniformBlock()
-	: program_(0), index_(0), size_(0), bindingIndex_(-1)
+    : program_(0), index_(0), size_(0), bindingIndex_(-1)
 {
 	name_[0] = '\0';
 }
 
 GLUniformBlock::GLUniformBlock(GLuint program, GLuint index, DiscoverUniforms discover)
-	: GLUniformBlock()
+    : GLUniformBlock()
 {
 	GLint nameLength;
 	GLint uniformCount;
@@ -75,9 +75,8 @@ GLUniformBlock::GLUniformBlock(GLuint program, GLuint index, DiscoverUniforms di
 }
 
 GLUniformBlock::GLUniformBlock(GLuint program, GLuint index)
-	: GLUniformBlock(program, index, DiscoverUniforms::ENABLED)
+    : GLUniformBlock(program, index, DiscoverUniforms::ENABLED)
 {
-
 }
 
 ///////////////////////////////////////////////////////////

@@ -8,8 +8,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace BaseSprite
-{
+namespace BaseSprite {
 	static const char *setWidth = "set_width";
 	static const char *setHeight = "set_height";
 	static const char *setSize = "set_size";

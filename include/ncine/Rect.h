@@ -20,13 +20,14 @@ class Rect
 	T h;
 
 	/// Default constructor, all zeros
-	Rect() : x(0), y(0), w(0), h(0) { }
+	Rect()
+	    : x(0), y(0), w(0), h(0) {}
 	/// Constructs from elements
 	Rect(T xx, T yy, T ww, T hh)
-		: x(xx), y(yy), w(ww), h(hh) { }
+	    : x(xx), y(yy), w(ww), h(hh) {}
 	/// Constructs from base classes
 	Rect(const Vector2<T> &p1, const Vector2<T> &p2)
-		: x(p1.x), y(p1.y), w(p2.x), h(p2.y) { }
+	    : x(p1.x), y(p1.y), w(p2.x), h(p2.y) {}
 
 	/// Creates a rectangle from center and size
 	static Rect fromCenterAndSize(T xx, T yy, T ww, T hh);

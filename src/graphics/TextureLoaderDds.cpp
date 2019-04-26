@@ -8,13 +8,12 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 TextureLoaderDds::TextureLoaderDds(const char *filename)
-	: TextureLoaderDds(IFile::createFileHandle(filename))
+    : TextureLoaderDds(IFile::createFileHandle(filename))
 {
-
 }
 
 TextureLoaderDds::TextureLoaderDds(nctl::UniquePtr<IFile> fileHandle)
-	: ITextureLoader(nctl::move(fileHandle))
+    : ITextureLoader(nctl::move(fileHandle))
 {
 	DdsHeader header;
 
@@ -122,22 +121,24 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 			{
 				internalFormat = GL_RGBA8;
 			}
+#if 0
 			// 16 bits uncompressed DDS data is not compatbile with OpenGL color channels order
-//			else if (redMask == 0xF800 && greenMask == 0x07E0 && blueMask == 0x001F) // 565
-//			{
-//				internalFormat = GL_RGB565;
-//				type = GL_UNSIGNED_SHORT_5_6_5;
-//			}
-//			else if (alphaMask == 0x8000 && redMask == 0x7C00 && greenMask == 0x03E0 && blueMask == 0x001F) // 5551
-//			{
-//				internalFormat = GL_RGB5_A1;
-//				type = GL_UNSIGNED_SHORT_5_5_5_1;
-//			}
-//			else if (alphaMask == 0xF000 && redMask == 0x0F00 && greenMask == 0x00F0 && blueMask == 0x000F) // 4444
-//			{
-//				internalFormat = GL_RGBA4;
-//				type = GL_UNSIGNED_SHORT_4_4_4_4;
-//			}
+			else if (redMask == 0xF800 && greenMask == 0x07E0 && blueMask == 0x001F) // 565
+			{
+				internalFormat = GL_RGB565;
+				type = GL_UNSIGNED_SHORT_5_6_5;
+			}
+			else if (alphaMask == 0x8000 && redMask == 0x7C00 && greenMask == 0x03E0 && blueMask == 0x001F) // 5551
+			{
+				internalFormat = GL_RGB5_A1;
+				type = GL_UNSIGNED_SHORT_5_5_5_1;
+			}
+			else if (alphaMask == 0xF000 && redMask == 0x0F00 && greenMask == 0x00F0 && blueMask == 0x000F) // 4444
+			{
+				internalFormat = GL_RGBA4;
+				type = GL_UNSIGNED_SHORT_4_4_4_4;
+			}
+#endif
 			else
 				FATAL_MSG("Unsupported DDPF_RGB pixel format");
 		}
@@ -164,8 +165,8 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 	if (mipMapCount_ > 1)
 	{
 		LOGI_X("MIP Maps: %d", mipMapCount_);
-		mipDataOffsets_ = nctl::makeUnique<unsigned long []>(mipMapCount_);
-		mipDataSizes_ = nctl::makeUnique<unsigned long []>(mipMapCount_);
+		mipDataOffsets_ = nctl::makeUnique<unsigned long[]>(mipMapCount_);
+		mipDataSizes_ = nctl::makeUnique<unsigned long[]>(mipMapCount_);
 		unsigned long dataSizesSum = TextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_.get(), mipDataSizes_.get());
 		if (dataSizesSum != dataSize_)
 			LOGW_X("The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);

@@ -8,8 +8,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace MeshSprite
-{
+namespace MeshSprite {
 	static const char *MeshSprite = "mesh_sprite";
 
 	static const char *numVertices = "num_vertices";
@@ -82,67 +81,67 @@ void LuaMeshSprite::release(void *object)
 
 namespace {
 
-void retrieveVertexTable(lua_State *L, int index, MeshSprite::Vertex &vertex)
-{
-	vertex.x = LuaUtils::retrieveField<float>(L, index, LuaNames::MeshSprite::x);
-	vertex.y = LuaUtils::retrieveField<float>(L, index, LuaNames::MeshSprite::y);
-	vertex.u = LuaUtils::retrieveField<float>(L, index, LuaNames::MeshSprite::u);
-	vertex.v = LuaUtils::retrieveField<float>(L, index, LuaNames::MeshSprite::v);
-}
-
-nctl::UniquePtr<MeshSprite::Vertex []> retrieveVertices(lua_State *L, int index, unsigned int &length)
-{
-	length = lua_rawlen(L, index);
-
-	nctl::UniquePtr<MeshSprite::Vertex []> vertices = nctl::makeUnique<MeshSprite::Vertex []>(length);
-
-	for (unsigned int i = 0; i < length; i++)
+	void retrieveVertexTable(lua_State *L, int index, MeshSprite::Vertex &vertex)
 	{
-		const int type = lua_rawgeti(L, index, i + 1);
-		if (type != LUA_TTABLE)
-			luaL_argerror(L, -1, "Expecting a table");
-
-		retrieveVertexTable(L, -1, vertices[i]);
-		lua_pop(L, 1);
+		vertex.x = LuaUtils::retrieveField<float>(L, index, LuaNames::MeshSprite::x);
+		vertex.y = LuaUtils::retrieveField<float>(L, index, LuaNames::MeshSprite::y);
+		vertex.u = LuaUtils::retrieveField<float>(L, index, LuaNames::MeshSprite::u);
+		vertex.v = LuaUtils::retrieveField<float>(L, index, LuaNames::MeshSprite::v);
 	}
 
-	return nctl::move(vertices);
-}
-
-nctl::UniquePtr<Vector2f []> retrieveTexels(lua_State *L, int index, unsigned int &length)
-{
-	length = lua_rawlen(L, index);
-
-	nctl::UniquePtr<Vector2f []> vertices = nctl::makeUnique<Vector2f []>(length);
-
-	for (unsigned int i = 0; i < length; i++)
+	nctl::UniquePtr<MeshSprite::Vertex[]> retrieveVertices(lua_State *L, int index, unsigned int &length)
 	{
-		const int type = lua_rawgeti(L, index, i + 1);
-		if (type != LUA_TTABLE)
-			luaL_argerror(L, -1, "Expecting a table");
+		length = lua_rawlen(L, index);
 
-		vertices[i] = LuaVector2fUtils::retrieveTable(L, -1);
-		lua_pop(L, 1);
+		nctl::UniquePtr<MeshSprite::Vertex[]> vertices = nctl::makeUnique<MeshSprite::Vertex[]>(length);
+
+		for (unsigned int i = 0; i < length; i++)
+		{
+			const int type = lua_rawgeti(L, index, i + 1);
+			if (type != LUA_TTABLE)
+				luaL_argerror(L, -1, "Expecting a table");
+
+			retrieveVertexTable(L, -1, vertices[i]);
+			lua_pop(L, 1);
+		}
+
+		return nctl::move(vertices);
 	}
 
-	return nctl::move(vertices);
-}
-
-nctl::UniquePtr<unsigned short []> retrieveIndices(lua_State *L, unsigned int &length)
-{
-	length = lua_rawlen(L, -1);
-
-	nctl::UniquePtr<unsigned short []> indices = nctl::makeUnique<unsigned short []>(length);
-
-	for (unsigned int i = 0; i < length; i++)
+	nctl::UniquePtr<Vector2f[]> retrieveTexels(lua_State *L, int index, unsigned int &length)
 	{
-		lua_rawgeti(L, -1, i + 1);
-		indices[i] = static_cast<unsigned short>(LuaUtils::retrieve<uint32_t>(L, -1));
-		lua_pop(L, 1);
+		length = lua_rawlen(L, index);
+
+		nctl::UniquePtr<Vector2f[]> vertices = nctl::makeUnique<Vector2f[]>(length);
+
+		for (unsigned int i = 0; i < length; i++)
+		{
+			const int type = lua_rawgeti(L, index, i + 1);
+			if (type != LUA_TTABLE)
+				luaL_argerror(L, -1, "Expecting a table");
+
+			vertices[i] = LuaVector2fUtils::retrieveTable(L, -1);
+			lua_pop(L, 1);
+		}
+
+		return nctl::move(vertices);
 	}
 
-	return nctl::move(indices);
-}
+	nctl::UniquePtr<unsigned short[]> retrieveIndices(lua_State *L, unsigned int &length)
+	{
+		length = lua_rawlen(L, -1);
+
+		nctl::UniquePtr<unsigned short[]> indices = nctl::makeUnique<unsigned short[]>(length);
+
+		for (unsigned int i = 0; i < length; i++)
+		{
+			lua_rawgeti(L, -1, i + 1);
+			indices[i] = static_cast<unsigned short>(LuaUtils::retrieve<uint32_t>(L, -1));
+			lua_pop(L, 1);
+		}
+
+		return nctl::move(indices);
+	}
 
 }
 
@@ -176,7 +175,7 @@ int LuaMeshSprite::copyVertices(lua_State *L)
 
 	unsigned int numVertices = 0;
 	MeshSprite *sprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -2);
-	nctl::UniquePtr<MeshSprite::Vertex []> vertices = retrieveVertices(L, -1, numVertices);
+	nctl::UniquePtr<MeshSprite::Vertex[]> vertices = retrieveVertices(L, -1, numVertices);
 
 	sprite->copyVertices(numVertices, vertices.get());
 
@@ -200,7 +199,7 @@ int LuaMeshSprite::createVerticesFromTexels(lua_State *L)
 
 	unsigned int numVertices = 0;
 	MeshSprite *sprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -3);
-	nctl::UniquePtr<Vector2f []> texels = retrieveTexels(L, -2, numVertices);
+	nctl::UniquePtr<Vector2f[]> texels = retrieveTexels(L, -2, numVertices);
 	const MeshSprite::TextureCutMode cutMode = static_cast<MeshSprite::TextureCutMode>(LuaUtils::retrieve<int64_t>(L, -1));
 
 	sprite->createVerticesFromTexels(numVertices, texels.get(), cutMode);
@@ -225,7 +224,7 @@ int LuaMeshSprite::copyIndices(lua_State *L)
 
 	unsigned int numIndices = 0;
 	MeshSprite *sprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -2);
-	nctl::UniquePtr<unsigned short []> indices = retrieveIndices(L, numIndices);
+	nctl::UniquePtr<unsigned short[]> indices = retrieveIndices(L, numIndices);
 
 	sprite->copyIndices(numIndices, indices.get());
 

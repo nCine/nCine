@@ -88,7 +88,6 @@ SdlInputManager::~SdlInputManager()
 			SDL_JoystickClose(sdlJoysticks_[i]);
 			sdlJoysticks_[i] = nullptr;
 		}
-
 	}
 }
 
@@ -315,9 +314,17 @@ void SdlInputManager::setMouseCursorMode(MouseCursorMode mode)
 	{
 		switch (mode)
 		{
-			case MouseCursorMode::NORMAL: SDL_ShowCursor(SDL_ENABLE); SDL_SetRelativeMouseMode(SDL_FALSE); break;
-			case MouseCursorMode::HIDDEN: SDL_ShowCursor(SDL_DISABLE); SDL_SetRelativeMouseMode(SDL_FALSE); break;
-			case MouseCursorMode::DISABLED: SDL_SetRelativeMouseMode(SDL_TRUE); break;
+			case MouseCursorMode::NORMAL:
+				SDL_ShowCursor(SDL_ENABLE);
+				SDL_SetRelativeMouseMode(SDL_FALSE);
+				break;
+			case MouseCursorMode::HIDDEN:
+				SDL_ShowCursor(SDL_DISABLE);
+				SDL_SetRelativeMouseMode(SDL_FALSE);
+				break;
+			case MouseCursorMode::DISABLED:
+				SDL_SetRelativeMouseMode(SDL_TRUE);
+				break;
 		}
 
 		mouseCursorMode_ = mode;

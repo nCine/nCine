@@ -35,7 +35,8 @@ class RenderBuffersManager
 
 	struct Parameters
 	{
-		Parameters() : object(nullptr), size(0), offset(0), mapBase(nullptr) { }
+		Parameters()
+		    : object(nullptr), size(0), offset(0), mapBase(nullptr) {}
 
 		GLBufferObject *object;
 		unsigned long size;
@@ -58,14 +59,14 @@ class RenderBuffersManager
 	struct ManagedBuffer
 	{
 		ManagedBuffer()
-			: size(0), freeSpace(0), mapBase(nullptr) { }
+		    : size(0), freeSpace(0), mapBase(nullptr) {}
 
 		BufferTypes::Enum type;
 		nctl::UniquePtr<GLBufferObject> object;
 		unsigned long size;
 		unsigned long freeSpace;
 		GLubyte *mapBase;
-		nctl::UniquePtr<GLubyte []> hostBuffer;
+		nctl::UniquePtr<GLubyte[]> hostBuffer;
 	};
 
 	nctl::Array<ManagedBuffer> buffers_;

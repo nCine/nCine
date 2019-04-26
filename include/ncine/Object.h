@@ -50,7 +50,8 @@ class DLL_PUBLIC Object
 	inline void setName(const nctl::String &name) { name_ = name; }
 
 	/// Returns a casted pointer to the object with the specified id, if any exists
-	template <class T> static T *fromId(unsigned int id);
+	template <class T>
+	static T *fromId(unsigned int id);
 
   protected:
 	/// Object type

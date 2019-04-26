@@ -139,9 +139,10 @@ class FNV1aHashFunc
 
 		return hash;
 	}
+
   private:
 	static const hash_t Prime = 0x01000193; //   16777619
-	static const hash_t Seed  = 0x811C9DC5; // 2166136261
+	static const hash_t Seed = 0x811C9DC5; // 2166136261
 
 	inline hash_t fnv1a(const unsigned char oneByte, hash_t hash = Seed) const
 	{
@@ -169,16 +170,16 @@ class FNV1aFuncHashContainer
 
 		return hash;
 	}
+
   private:
 	static const hash_t Prime = 0x01000193; //   16777619
-	static const hash_t Seed  = 0x811C9DC5; // 2166136261
+	static const hash_t Seed = 0x811C9DC5; // 2166136261
 
 	inline hash_t fnv1a(unsigned char oneByte, hash_t hash = Seed) const
 	{
 		return (oneByte ^ hash) * Prime;
 	}
 };
-
 
 }
 

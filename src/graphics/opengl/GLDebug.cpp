@@ -30,10 +30,10 @@
 	#define GL_DEBUG_TYPE_POP_GROUP GL_DEBUG_TYPE_POP_GROUP_KHR
 	#define GL_DEBUG_TYPE_OTHER GL_DEBUG_TYPE_OTHER_KHR
 
-	#define  GL_DEBUG_SEVERITY_NOTIFICATION GL_DEBUG_SEVERITY_NOTIFICATION_KHR
-	#define  GL_DEBUG_SEVERITY_LOW GL_DEBUG_SEVERITY_LOW_KHR
-	#define  GL_DEBUG_SEVERITY_MEDIUM GL_DEBUG_SEVERITY_MEDIUM_KHR
-	#define  GL_DEBUG_SEVERITY_HIGH GL_DEBUG_SEVERITY_HIGH_KHR
+	#define GL_DEBUG_SEVERITY_NOTIFICATION GL_DEBUG_SEVERITY_NOTIFICATION_KHR
+	#define GL_DEBUG_SEVERITY_LOW GL_DEBUG_SEVERITY_LOW_KHR
+	#define GL_DEBUG_SEVERITY_MEDIUM GL_DEBUG_SEVERITY_MEDIUM_KHR
+	#define GL_DEBUG_SEVERITY_HIGH GL_DEBUG_SEVERITY_HIGH_KHR
 #endif
 
 namespace ncine {
@@ -54,7 +54,7 @@ void GLDebug::init(const IGfxCapabilities &gfxCaps)
 {
 #if (!defined(__ANDROID__) && !defined(__APPLE__)) || (GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21)
 	debugAvailable_ = gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::KHR_DEBUG) &&
-		theApplication().gfxDevice().glContextInfo().debugContext;
+	                  theApplication().gfxDevice().glContextInfo().debugContext;
 
 	glGetIntegerv(GL_MAX_LABEL_LENGTH, &maxLabelLength_);
 

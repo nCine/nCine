@@ -8,8 +8,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace TextNode
-{
+namespace TextNode {
 	static const char *TextNode = "textnode";
 
 	static const char *width = "get_width";

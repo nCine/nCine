@@ -15,8 +15,7 @@ TEST(QuaternionOperationsTest, RotationXToMatrix)
 	printMatrix(mat);
 
 	const nc::Matrix4x4f fromQuat = newQuat.toMatrix4x4();
-	printf("Creating a matrix the quaternion:\n");
-	printMatrix(fromQuat);
+	printMatrix("Creating a matrix from the quaternion:\n", fromQuat);
 
 	assertVectorsAreEqual(mat[0], fromQuat[0]);
 	assertVectorsAreEqual(mat[1], fromQuat[1]);
@@ -36,8 +35,7 @@ TEST(QuaternionOperationsTest, RotationYToMatrix)
 	printMatrix(mat);
 
 	const nc::Matrix4x4f fromQuat = newQuat.toMatrix4x4();
-	printf("Creating a matrix the quaternion:\n");
-	printMatrix(fromQuat);
+	printMatrix("Creating a matrix from the quaternion:\n", fromQuat);
 
 	assertVectorsAreEqual(mat[0], fromQuat[0]);
 	assertVectorsAreEqual(mat[1], fromQuat[1]);
@@ -57,8 +55,7 @@ TEST(QuaternionOperationsTest, RotationZToMatrix)
 	printMatrix(mat);
 
 	const nc::Matrix4x4f fromQuat = newQuat.toMatrix4x4();
-	printf("Creating a matrix the quaternion:\n");
-	printMatrix(fromQuat);
+	printMatrix("Creating a matrix from the quaternion:\n", fromQuat);
 
 	assertVectorsAreEqual(mat[0], fromQuat[0]);
 	assertVectorsAreEqual(mat[1], fromQuat[1]);
@@ -79,8 +76,7 @@ TEST(QuaternionOperationsTest, RotationAxisXToMatrix)
 	printMatrix(mat);
 
 	const nc::Matrix4x4f fromQuat = newQuat.toMatrix4x4();
-	printf("Creating a matrix the quaternion:\n");
-	printMatrix(fromQuat);
+	printMatrix("Creating a matrix from the quaternion:\n", fromQuat);
 
 	assertVectorsAreEqual(mat[0], fromQuat[0]);
 	assertVectorsAreEqual(mat[1], fromQuat[1]);
@@ -101,8 +97,7 @@ TEST(QuaternionOperationsTest, RotationAxisYToMatrix)
 	printMatrix(mat);
 
 	const nc::Matrix4x4f fromQuat = newQuat.toMatrix4x4();
-	printf("Creating a matrix the quaternion:\n");
-	printMatrix(fromQuat);
+	printMatrix("Creating a matrix from the quaternion:\n", fromQuat);
 
 	assertVectorsAreEqual(mat[0], fromQuat[0]);
 	assertVectorsAreEqual(mat[1], fromQuat[1]);
@@ -123,8 +118,7 @@ TEST(QuaternionOperationsTest, RotationAxisZToMatrix)
 	printMatrix(mat);
 
 	const nc::Matrix4x4f fromQuat = newQuat.toMatrix4x4();
-	printf("Creating a matrix the quaternion:\n");
-	printMatrix(fromQuat);
+	printMatrix("Creating a matrix from the quaternion:\n", fromQuat);
 
 	assertVectorsAreEqual(mat[0], fromQuat[0]);
 	assertVectorsAreEqual(mat[1], fromQuat[1]);

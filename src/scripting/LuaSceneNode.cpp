@@ -7,8 +7,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace SceneNode
-{
+namespace SceneNode {
 	static const char *parentNode = "get_parent";
 	static const char *addChildNode = "add_child";
 	static const char *removeChildNode = "remove_child";

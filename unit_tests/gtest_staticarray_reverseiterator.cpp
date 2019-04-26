@@ -66,7 +66,8 @@ TEST_F(StaticArrayReverseIteratorTest, WhileLoopIteration)
 	{
 		printf(" %d", *r);
 		ASSERT_EQ(*r, n);
-		++r; --n;
+		++r;
+		--n;
 	}
 	printf("\n");
 }

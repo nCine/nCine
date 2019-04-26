@@ -9,19 +9,20 @@
 #include <ncine/Vector4.h>
 #include <ncine/Quaternion.h>
 
-namespace Names
-{
-	const char *testSet = "test_set";
-	const char *testSystem = "system";
-	const char *testName = "name";
-	const char *testIterations = "iterations";
-	const char *testTimings = "timings";
-	const char *testTotalTime = "total_time";
-	const char *testMaxTime = "max_time";
-	const char *testMinTime = "min_time";
-	const char *testAverage = "average";
-	const char *testStdDeviation = "standard_deviation";
-	const char *testRelStdDeviation = "relative_standard_deviation";
+namespace Names {
+
+const char *testSet = "test_set";
+const char *testSystem = "system";
+const char *testName = "name";
+const char *testIterations = "iterations";
+const char *testTimings = "timings";
+const char *testTotalTime = "total_time";
+const char *testMaxTime = "max_time";
+const char *testMinTime = "min_time";
+const char *testAverage = "average";
+const char *testStdDeviation = "standard_deviation";
+const char *testRelStdDeviation = "relative_standard_deviation";
+
 };
 
 namespace {
@@ -52,9 +53,9 @@ const unsigned int MaxIterations = 10000000;
 struct TestInfo
 {
 	TestInfo()
-		: name(nctl::String(128)), func(nullptr), totalTime(0.0f),
-		  maxTime(0.0f), minTime(0.0f), average(0.0f), stdDeviation(0.0f),
-		  numRepetitions(0), numIterations(0) { }
+	    : name(nctl::String(128)), func(nullptr), totalTime(0.0f),
+	      maxTime(0.0f), minTime(0.0f), average(0.0f), stdDeviation(0.0f),
+	      numRepetitions(0), numIterations(0) {}
 
 	nctl::String name;
 	TestFunction func;
@@ -158,7 +159,7 @@ void runTest(TestInfo &t, unsigned int numRepetitions, unsigned int numIteration
 
 void resetVecs(unsigned int iterations)
 {
-	for (unsigned int i = 0 ; i < iterations; i++)
+	for (unsigned int i = 0; i < iterations; i++)
 	{
 		nums[i] = i;
 		vecsA[i].set(i, i, i, i);
@@ -169,13 +170,13 @@ void resetVecs(unsigned int iterations)
 
 void resetQuats(unsigned int iterations)
 {
-	for (unsigned int i = 0 ; i < iterations; i++)
+	for (unsigned int i = 0; i < iterations; i++)
 		quats[i].set(i, i, i, i);
 }
 
 void resetMats(unsigned int iterations)
 {
-	for (unsigned int i = 0 ; i < iterations; i++)
+	for (unsigned int i = 0; i < iterations; i++)
 	{
 		mats[i][0].set(i, i, i, i);
 		mats[i][1].set(i, i, i, i);
@@ -278,7 +279,7 @@ float benchQuaternionMult(unsigned int iterations)
 
 	timer.start();
 	for (unsigned int i = 0; i < iterations - 1; i++)
-		quats[i] = quats[i] * quats[i+1];
+		quats[i] = quats[i] * quats[i + 1];
 
 	return timer.interval();
 }
@@ -289,7 +290,7 @@ float benchMatrixMult(unsigned int iterations)
 
 	timer.start();
 	for (unsigned int i = 0; i < iterations - 1; i++)
-		mats[i] = mats[i] * mats[i+1];
+		mats[i] = mats[i] * mats[i + 1];
 
 	return timer.interval();
 }
@@ -317,19 +318,21 @@ float benchMatrixVecMult(unsigned int iterations)
 	return timer.interval();
 }
 
-void indent(nctl::String &string, int amount)
+nctl::String &indent(nctl::String &string, int amount)
 {
 	FATAL_ASSERT(amount >= 0);
 	for (int i = 0; i < amount; i++)
 		string.append("\t");
+
+	return string;
 }
 
 bool loadTestRun(const char *filename, unsigned int index)
 {
 	nc::LuaStateManager luaState(
-		nc::LuaStateManager::ApiType::NONE,
-		nc::LuaStateManager::StatisticsTracking::DISABLED,
-		nc::LuaStateManager::StandardLibraries::NOT_LOADED);
+	    nc::LuaStateManager::ApiType::NONE,
+	    nc::LuaStateManager::StatisticsTracking::DISABLED,
+	    nc::LuaStateManager::StandardLibraries::NOT_LOADED);
 
 	if (luaState.run(filename) == false)
 	{
@@ -373,17 +376,17 @@ bool loadTestRun(const char *filename, unsigned int index)
 void saveTestRun(const char *filename, bool includeStatistics)
 {
 	nc::LuaStateManager luaState(
-		nc::LuaStateManager::ApiType::NONE,
-		nc::LuaStateManager::StatisticsTracking::DISABLED,
-		nc::LuaStateManager::StandardLibraries::NOT_LOADED);
+	    nc::LuaStateManager::ApiType::NONE,
+	    nc::LuaStateManager::StatisticsTracking::DISABLED,
+	    nc::LuaStateManager::StandardLibraries::NOT_LOADED);
 
 	nctl::String file(8192);
 	int amount = 0;
 
-	indent(file, amount); file.formatAppend("%s = {\n", Names::testSet);
+	indent(file, amount).formatAppend("%s = {\n", Names::testSet);
 
 	amount++;
-	indent(file, amount); file.formatAppend("%s = \"%s\",\n", Names::testSystem, system());
+	indent(file, amount).formatAppend("%s = \"%s\",\n", Names::testSystem, system());
 
 	for (unsigned int testIndex = 0; testIndex < Tests::Count; testIndex++)
 	{
@@ -391,32 +394,32 @@ void saveTestRun(const char *filename, bool includeStatistics)
 			continue;
 
 		const TestInfo &t = testInfos[testIndex];
-		indent(file, amount); file.append("{\n");
+		indent(file, amount).append("{\n");
 
 		amount++;
-		indent(file, amount); file.formatAppend("%s = \"%s\",\n", Names::testName, t.name.data());
-		indent(file, amount); file.formatAppend("%s = %d,\n", Names::testIterations, t.numIterations);
-		indent(file, amount); file.formatAppend("%s = {", Names::testTimings);
+		indent(file, amount).formatAppend("%s = \"%s\",\n", Names::testName, t.name.data());
+		indent(file, amount).formatAppend("%s = %d,\n", Names::testIterations, t.numIterations);
+		indent(file, amount).formatAppend("%s = {", Names::testTimings);
 		for (unsigned int i = 0; i < t.numRepetitions; i++)
 			file.formatAppend(" %f%s", t.times[i], (i < t.numRepetitions - 1) ? "," : " ");
 		file.formatAppend("}%s\n", includeStatistics ? "," : "");
 
 		if (includeStatistics)
 		{
-			indent(file, amount); file.formatAppend("%s = %f,\n", Names::testTotalTime, t.totalTime);
-			indent(file, amount); file.formatAppend("%s = %f,\n", Names::testMaxTime, t.maxTime);
-			indent(file, amount); file.formatAppend("%s = %f,\n", Names::testMinTime, t.minTime);
-			indent(file, amount); file.formatAppend("%s = %f,\n", Names::testAverage, t.average);
-			indent(file, amount); file.formatAppend("%s = %f,\n", Names::testStdDeviation, t.stdDeviation);
-			indent(file, amount); file.formatAppend("%s = %f\n", Names::testRelStdDeviation, t.average > 0.0f ? 100.0f * t.stdDeviation / t.average : 0.0f);
+			indent(file, amount).formatAppend("%s = %f,\n", Names::testTotalTime, t.totalTime);
+			indent(file, amount).formatAppend("%s = %f,\n", Names::testMaxTime, t.maxTime);
+			indent(file, amount).formatAppend("%s = %f,\n", Names::testMinTime, t.minTime);
+			indent(file, amount).formatAppend("%s = %f,\n", Names::testAverage, t.average);
+			indent(file, amount).formatAppend("%s = %f,\n", Names::testStdDeviation, t.stdDeviation);
+			indent(file, amount).formatAppend("%s = %f\n", Names::testRelStdDeviation, t.average > 0.0f ? 100.0f * t.stdDeviation / t.average : 0.0f);
 		}
 
 		amount--;
-		indent(file, amount); file.formatAppend("}%s\n", (testIndex < Tests::Count - 1) ? "," : "");
+		indent(file, amount).formatAppend("}%s\n", (testIndex < Tests::Count - 1) ? "," : "");
 	}
 
 	amount--;
-	indent(file, amount); file.append("}\n");
+	indent(file, amount).append("}\n");
 
 	nctl::UniquePtr<nc::IFile> fileHandle = nc::IFile::createFileHandle(filename);
 	fileHandle->open(nc::IFile::OpenMode::WRITE | nc::IFile::OpenMode::BINARY);
@@ -449,7 +452,7 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 
 void MyEventHandler::onInit()
 {
-	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIO &io = ImGui::GetIO();
 #ifdef __ANDROID__
 	io.FontGlobalScale = 3.0f;
 #endif
@@ -549,7 +552,7 @@ void MyEventHandler::onFrameStart()
 		{
 			const float progress = (allTestsIndex + 1) / static_cast<float>(Tests::Count);
 			progressMsg.format("%u / %u", allTestsIndex + 1, Tests::Count);
-			ImGui::ProgressBar(progress, ImVec2(0.0f,0.0f), progressMsg.data());
+			ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f), progressMsg.data());
 			ImGui::NewLine();
 		}
 		else

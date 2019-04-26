@@ -2,10 +2,10 @@
 #define TEST_THREAD_FUNCTIONS
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
-#include <windows.h>
-#include <process.h>
+	#include <windows.h>
+	#include <process.h>
 #else
-#include <pthread.h>
+	#include <pthread.h>
 #endif
 
 namespace {
@@ -14,8 +14,10 @@ template <unsigned int NumThreads>
 class ThreadRunner
 {
   public:
-	ThreadRunner() : ptr_(nullptr) { }
-	ThreadRunner(void *ptr) : ptr_(ptr) { }
+	ThreadRunner()
+	    : ptr_(nullptr) {}
+	ThreadRunner(void *ptr)
+	    : ptr_(ptr) {}
 	void setPointer(void *ptr) { ptr_ = ptr; }
 
 #ifdef _WIN32

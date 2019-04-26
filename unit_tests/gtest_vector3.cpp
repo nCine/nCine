@@ -5,7 +5,8 @@ namespace {
 class Vector3Test : public ::testing::Test
 {
   public:
-	Vector3Test() : v1_(2.5f, 2.0f, 0.5f), v2_(1.0f, 1.5f, 1.0f) { }
+	Vector3Test()
+	    : v1_(2.5f, 2.0f, 0.5f), v2_(1.0f, 1.5f, 1.0f) {}
 
 	nc::Vector3f v1_;
 	nc::Vector3f v2_;
@@ -63,7 +64,7 @@ TEST_F(Vector3Test, AssignmentOperator)
 TEST_F(Vector3Test, SetComponents)
 {
 	const float scalar = 0.0f;
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	v1_.set(scalar, scalar, scalar);
 	printf("Setting all vector components to %.2f: ", scalar);
 	printVector(v1_);
@@ -75,11 +76,10 @@ TEST_F(Vector3Test, SetComponents)
 
 TEST_F(Vector3Test, Addition)
 {
-	printf("v1: "); printVector(v1_);
-	printf("v2: "); printVector(v2_);
+	printVector("v1: ", v1_);
+	printVector("v2: ", v2_);
 	const nc::Vector3f sum = v1_ + v2_;
-	printf("Vector addition: ");
-	printVector(sum);
+	printVector("Vector addition: ", sum);
 
 	ASSERT_FLOAT_EQ(sum.x, v1_.x + v2_.x);
 	ASSERT_FLOAT_EQ(sum.y, v1_.y + v2_.y);
@@ -88,11 +88,10 @@ TEST_F(Vector3Test, Addition)
 
 TEST_F(Vector3Test, Subtraction)
 {
-	printf("v1: "); printVector(v1_);
-	printf("v2: "); printVector(v2_);
+	printVector("v1: ", v1_);
+	printVector("v2: ", v2_);
 	const nc::Vector3f sub = v1_ - v2_;
-	printf("Vector subtraction: ");
-	printVector(sub);
+	printVector("Vector subtraction: ", sub);
 
 	ASSERT_FLOAT_EQ(sub.x, v1_.x - v2_.x);
 	ASSERT_FLOAT_EQ(sub.y, v1_.y - v2_.y);
@@ -101,11 +100,10 @@ TEST_F(Vector3Test, Subtraction)
 
 TEST_F(Vector3Test, Multiplication)
 {
-	printf("v1: "); printVector(v1_);
-	printf("v2: "); printVector(v2_);
+	printVector("v1: ", v1_);
+	printVector("v2: ", v2_);
 	const nc::Vector3f mul = v1_ * v2_;
-	printf("Vector multiplication: ");
-	printVector(mul);
+	printVector("Vector multiplication: ", mul);
 
 	ASSERT_FLOAT_EQ(mul.x, v1_.x * v2_.x);
 	ASSERT_FLOAT_EQ(mul.y, v1_.y * v2_.y);
@@ -114,11 +112,10 @@ TEST_F(Vector3Test, Multiplication)
 
 TEST_F(Vector3Test, Division)
 {
-	printf("v1: "); printVector(v1_);
-	printf("v2: "); printVector(v2_);
+	printVector("v1: ", v1_);
+	printVector("v2: ", v2_);
 	const nc::Vector3f div = v1_ / v2_;
-	printf("Vector division: ");
-	printVector(div);
+	printVector("Vector division: ", div);
 
 	ASSERT_FLOAT_EQ(div.x, v1_.x / v2_.x);
 	ASSERT_FLOAT_EQ(div.y, v1_.y / v2_.y);
@@ -129,10 +126,9 @@ TEST_F(Vector3Test, AdditionInPlace)
 {
 	const nc::Vector3f oldV1 = v1_;
 
-	printf("v1: "); printVector(v1_);
-	printf("v2: "); printVector(v2_);
-	printf("Adding the second vector to the first: ");
-	printVector(v1_ += v2_);
+	printVector("v1: ", v1_);
+	printVector("v2: ", v2_);
+	printVector("Adding the second vector to the first: ", v1_ += v2_);
 
 	ASSERT_FLOAT_EQ(v1_.x, oldV1.x + v2_.x);
 	ASSERT_FLOAT_EQ(v1_.y, oldV1.y + v2_.y);
@@ -143,10 +139,9 @@ TEST_F(Vector3Test, SubtractionInPlace)
 {
 	const nc::Vector3f oldV1 = v1_;
 
-	printf("v1: "); printVector(v1_);
-	printf("v2: "); printVector(v2_);
-	printf("Subtracting the second vector from the first: ");
-	printVector(v1_ -= v2_);
+	printVector("v1: ", v1_);
+	printVector("v2: ", v2_);
+	printVector("Subtracting the second vector from the first: ", v1_ -= v2_);
 
 	ASSERT_FLOAT_EQ(v1_.x, oldV1.x - v2_.x);
 	ASSERT_FLOAT_EQ(v1_.y, oldV1.y - v2_.y);
@@ -157,10 +152,9 @@ TEST_F(Vector3Test, MultiplicationInPlace)
 {
 	const nc::Vector3f oldV1 = v1_;
 
-	printf("v1: "); printVector(v1_);
-	printf("v2: "); printVector(v2_);
-	printf("Multiplying the first vector by the second: ");
-	printVector(v1_ *= v2_);
+	printVector("v1: ", v1_);
+	printVector("v2: ", v2_);
+	printVector("Multiplying the first vector by the second: ", v1_ *= v2_);
 
 	ASSERT_FLOAT_EQ(v1_.x, oldV1.x * v2_.x);
 	ASSERT_FLOAT_EQ(v1_.y, oldV1.y * v2_.y);
@@ -171,10 +165,9 @@ TEST_F(Vector3Test, DivisionInPlace)
 {
 	const nc::Vector3f oldV1 = v1_;
 
-	printf("v1: "); printVector(v1_);
-	printf("v2: "); printVector(v2_);
-	printf("Dividing the first vector by the second: ");
-	printVector(v1_ /= v2_);
+	printVector("v1: ", v1_);
+	printVector("v2: ", v2_);
+	printVector("Dividing the first vector by the second: ", v1_ /= v2_);
 
 	ASSERT_FLOAT_EQ(v1_.x, oldV1.x / v2_.x);
 	ASSERT_FLOAT_EQ(v1_.y, oldV1.y / v2_.y);
@@ -184,7 +177,7 @@ TEST_F(Vector3Test, DivisionInPlace)
 TEST_F(Vector3Test, AddScalar)
 {
 	const float scalar = 1.0f;
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	const nc::Vector3f add = v1_ + scalar;
 	printf("Addition of scalar %.2f: ", scalar);
 	printVector(add);
@@ -197,7 +190,7 @@ TEST_F(Vector3Test, AddScalar)
 TEST_F(Vector3Test, SubtractScalar)
 {
 	const float scalar = 1.0f;
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	const nc::Vector3f sub = v1_ - scalar;
 	printf("Subtraction of scalar %.2f: ", scalar);
 	printVector(sub);
@@ -210,7 +203,7 @@ TEST_F(Vector3Test, SubtractScalar)
 TEST_F(Vector3Test, MultiplyScalar)
 {
 	const float scalar = 2.0f;
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	const nc::Vector3f mul = v1_ * scalar;
 	printf("Multiplication by scalar %.2f: ", scalar);
 	printVector(mul);
@@ -223,7 +216,7 @@ TEST_F(Vector3Test, MultiplyScalar)
 TEST_F(Vector3Test, DivideScalar)
 {
 	const float scalar = 2.0f;
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	const nc::Vector3f div = v1_ / scalar;
 	printf("Division by scalar %.2f: ", scalar);
 	printVector(div);
@@ -238,7 +231,7 @@ TEST_F(Vector3Test, AddScalarInPlace)
 	const float scalar = 1.0f;
 	const nc::Vector3f oldV1 = v1_;
 
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	printf("Adding the scalar %.2f to the first vector: ", scalar);
 	printVector(v1_ += scalar);
 
@@ -252,7 +245,7 @@ TEST_F(Vector3Test, SubtractScalarInPlace)
 	const float scalar = 1.0f;
 	const nc::Vector3f oldV1 = v1_;
 
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	printf("Subtracting the scalar %.2f to the first vector: ", scalar);
 	printVector(v1_ -= scalar);
 
@@ -266,7 +259,7 @@ TEST_F(Vector3Test, MultiplyScalarInPlace)
 	const float scalar = 2.0f;
 	const nc::Vector3f oldV1 = v1_;
 
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	printf("Multiplying the first vector by the scalar %.2f: ", scalar);
 	printVector(v1_ *= scalar);
 
@@ -280,7 +273,7 @@ TEST_F(Vector3Test, DivideScalarInPlace)
 	const float scalar = 2.0f;
 	const nc::Vector3f oldV1 = v1_;
 
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	printf("Dividing the first vector by the scalar %.2f: ", scalar);
 	printVector(v1_ /= scalar);
 
@@ -292,7 +285,7 @@ TEST_F(Vector3Test, DivideScalarInPlace)
 TEST_F(Vector3Test, MultiplyScalarAsFirst)
 {
 	const float scalar = 2.0f;
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	const nc::Vector3f mul = scalar * v1_;
 	printf("Multiplication by scalar %.2f: ", scalar);
 	printVector(mul);
@@ -304,8 +297,8 @@ TEST_F(Vector3Test, MultiplyScalarAsFirst)
 
 TEST_F(Vector3Test, DotProduct)
 {
-	printf("v1: "); printVector(v1_);
-	printf("v2: "); printVector(v2_);
+	printVector("v1: ", v1_);
+	printVector("v2: ", v2_);
 	const float result = nc::dot(v1_, v2_);
 	printf("Dot product: %.2f\n", result);
 
@@ -314,10 +307,11 @@ TEST_F(Vector3Test, DotProduct)
 
 TEST_F(Vector3Test, CrossProduct)
 {
-	printf("v1: "); printVector(v1_);
-	printf("v2: "); printVector(v2_);
+	printVector("v1: ", v1_);
+	printVector("v2: ", v2_);
 	const nc::Vector3f crossVector = nc::cross(v1_, v2_);
-	printf("Cross product: "); printVector(crossVector);
+	printf("Cross product: ");
+	printVector(crossVector);
 
 	ASSERT_FLOAT_EQ(crossVector.x, v1_.y * v2_.z - v1_.z * v2_.y);
 	ASSERT_FLOAT_EQ(crossVector.y, v1_.z * v2_.x - v1_.x * v2_.z);
@@ -328,9 +322,8 @@ TEST_F(Vector3Test, Normalize)
 {
 	const nc::Vector3f oldV1 = v1_;
 
-	printf("v1: "); printVector(v1_);
-	printf("Normalizing the first vector: ");
-	printVector(v1_.normalize());
+	printVector("v1: ", v1_);
+	printVector("Normalizing the first vector: ", v1_.normalize());
 
 	const float length = sqrt(oldV1.x * oldV1.x + oldV1.y * oldV1.y + oldV1.z * oldV1.z);
 	ASSERT_FLOAT_EQ(v1_.x, oldV1.x / length);
@@ -340,10 +333,9 @@ TEST_F(Vector3Test, Normalize)
 
 TEST_F(Vector3Test, Normalized)
 {
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	const nc::Vector3f newVector = v1_.normalized();
-	printf("Creating a new vector as the normalized version of the first one: ");
-	printVector(v1_.normalize());
+	printVector("Creating a new vector as the normalized version of the first one: ", v1_.normalize());
 
 	const float length = sqrt(v1_.x * v1_.x + v1_.y * v1_.y + v1_.z * v1_.z);
 	ASSERT_FLOAT_EQ(newVector.x, v1_.x / length);
@@ -353,7 +345,7 @@ TEST_F(Vector3Test, Normalized)
 
 TEST_F(Vector3Test, Length)
 {
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	printf("Length of the first vector: %.2f\n", v1_.length());
 
 	const float length = sqrt(v1_.x * v1_.x + v1_.y * v1_.y + v1_.z * v1_.z);
@@ -362,7 +354,7 @@ TEST_F(Vector3Test, Length)
 
 TEST_F(Vector3Test, SqrLength)
 {
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	printf("Squared length of the first vector: %.2f\n", v1_.sqrLength());
 
 	const float sqrLength = v1_.x * v1_.x + v1_.y * v1_.y + v1_.z * v1_.z;
@@ -371,9 +363,9 @@ TEST_F(Vector3Test, SqrLength)
 
 TEST_F(Vector3Test, ToVector2)
 {
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	const nc::Vector2f newVector = v1_.toVector2();
-	printf("First vector converted to a 2 components one: "); printVector(newVector);
+	printVector("First vector converted to a 2 components one: ", newVector);
 
 	ASSERT_FLOAT_EQ(v1_.x, newVector.x);
 	ASSERT_FLOAT_EQ(v1_.y, newVector.y);
@@ -395,9 +387,9 @@ TEST_F(Vector3Test, AddConstantVectors)
 
 TEST_F(Vector3Test, EqualityOperator)
 {
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	const nc::Vector3f newVector = v1_;
-	printf("Creating a new vector as a copy of the first one: "); printVector(newVector);
+	printVector("Creating a new vector as a copy of the first one: ", newVector);
 
 	printf("The first vector components are equal to the new one: %d", v1_ == newVector);
 
@@ -409,9 +401,9 @@ TEST_F(Vector3Test, EqualityOperator)
 
 TEST_F(Vector3Test, Negation)
 {
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	const nc::Vector3f newVector = -v1_;
-	printf("Creating a new vector as the negation of the first one: "); printVector(newVector);
+	printVector("Creating a new vector as the negation of the first one: ", newVector);
 
 	ASSERT_FLOAT_EQ(v1_.x, -newVector.x);
 	ASSERT_FLOAT_EQ(v1_.y, -newVector.y);
@@ -420,10 +412,10 @@ TEST_F(Vector3Test, Negation)
 
 TEST_F(Vector3Test, PointerAccess)
 {
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	const float *ptr = v1_.data();
 	printf("Components: ");
-	for(unsigned int i = 0; i < 3; i++)
+	for (unsigned int i = 0; i < 3; i++)
 		printf("[%u]:%.2f ", i, ptr[i]);
 	printf("\n");
 
@@ -434,9 +426,9 @@ TEST_F(Vector3Test, PointerAccess)
 
 TEST_F(Vector3Test, SubscriptOperator)
 {
-	printf("v1: "); printVector(v1_);
+	printVector("v1: ", v1_);
 	printf("Components: ");
-	for(unsigned int i = 0; i < 3; i++)
+	for (unsigned int i = 0; i < 3; i++)
 		printf("[%u]:%.2f ", i, v1_[i]);
 	printf("\n");
 

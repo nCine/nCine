@@ -19,10 +19,18 @@ class RenderStatistics
 		unsigned int instances;
 		unsigned int batchSize;
 
-		Commands() : vertices(0), commands(0), transparents(0), instances(0), batchSize(0) { }
+		Commands()
+		    : vertices(0), commands(0), transparents(0), instances(0), batchSize(0) {}
 
 	  private:
-		void reset() { vertices = 0; commands = 0; transparents = 0; instances = 0; batchSize = 0; }
+		void reset()
+		{
+			vertices = 0;
+			commands = 0;
+			transparents = 0;
+			instances = 0;
+			batchSize = 0;
+		}
 		friend RenderStatistics;
 	};
 
@@ -33,10 +41,16 @@ class RenderStatistics
 		unsigned long size;
 		unsigned long usedSpace;
 
-		Buffers() : count(0), size(0), usedSpace(0) { }
+		Buffers()
+		    : count(0), size(0), usedSpace(0) {}
 
 	  private:
-		void reset() { count = 0; size = 0; usedSpace = 0; }
+		void reset()
+		{
+			count = 0;
+			size = 0;
+			usedSpace = 0;
+		}
 		friend RenderStatistics;
 	};
 
@@ -46,10 +60,15 @@ class RenderStatistics
 		unsigned int count;
 		unsigned long dataSize;
 
-		Textures() : count(0), dataSize(0) { }
+		Textures()
+		    : count(0), dataSize(0) {}
 
 	  private:
-		void reset() { count = 0; dataSize = 0; }
+		void reset()
+		{
+			count = 0;
+			dataSize = 0;
+		}
 		friend RenderStatistics;
 	};
 
@@ -59,10 +78,15 @@ class RenderStatistics
 		unsigned int count;
 		unsigned long dataSize;
 
-		CustomBuffers() : count(0), dataSize(0) { }
+		CustomBuffers()
+		    : count(0), dataSize(0) {}
 
 	  private:
-		void reset() { count = 0; dataSize = 0; }
+		void reset()
+		{
+			count = 0;
+			dataSize = 0;
+		}
 		friend RenderStatistics;
 	};
 
@@ -74,10 +98,17 @@ class RenderStatistics
 		unsigned int reuses;
 		unsigned int bindings;
 
-		VaoPool() : size(0), capacity(0), reuses(0), bindings(0) { }
+		VaoPool()
+		    : size(0), capacity(0), reuses(0), bindings(0) {}
 
 	  private:
-		void reset() { size = 0; capacity = 0; reuses = 0; bindings = 0; }
+		void reset()
+		{
+			size = 0;
+			capacity = 0;
+			reuses = 0;
+			bindings = 0;
+		}
 		friend RenderStatistics;
 	};
 
@@ -121,13 +152,41 @@ class RenderStatistics
 	static void reset();
 	static void gatherStatistics(const RenderCommand &command);
 	static void gatherStatistics(const RenderBuffersManager::ManagedBuffer &buffer);
-	static inline void gatherVaoPoolStatistics(unsigned int poolSize, unsigned int poolCapacity) { vaoPool_.size = poolSize; vaoPool_.capacity = poolCapacity; }
-	static inline void addTexture(unsigned long datasize) { textures_.count++; textures_.dataSize += datasize; }
-	static inline void removeTexture(unsigned long datasize) { textures_.count--; textures_.dataSize -= datasize; }
-	static inline void addCustomVbo(unsigned long datasize) { customVbos_.count++; customVbos_.dataSize += datasize; }
-	static inline void removeCustomVbo(unsigned long datasize) { customVbos_.count--; customVbos_.dataSize -= datasize; }
-	static inline void addCustomIbo(unsigned long datasize) { customIbos_.count++; customIbos_.dataSize += datasize; }
-	static inline void removeCustomIbo(unsigned long datasize) { customIbos_.count--; customIbos_.dataSize -= datasize; }
+	static inline void gatherVaoPoolStatistics(unsigned int poolSize, unsigned int poolCapacity)
+	{
+		vaoPool_.size = poolSize;
+		vaoPool_.capacity = poolCapacity;
+	}
+	static inline void addTexture(unsigned long datasize)
+	{
+		textures_.count++;
+		textures_.dataSize += datasize;
+	}
+	static inline void removeTexture(unsigned long datasize)
+	{
+		textures_.count--;
+		textures_.dataSize -= datasize;
+	}
+	static inline void addCustomVbo(unsigned long datasize)
+	{
+		customVbos_.count++;
+		customVbos_.dataSize += datasize;
+	}
+	static inline void removeCustomVbo(unsigned long datasize)
+	{
+		customVbos_.count--;
+		customVbos_.dataSize -= datasize;
+	}
+	static inline void addCustomIbo(unsigned long datasize)
+	{
+		customIbos_.count++;
+		customIbos_.dataSize += datasize;
+	}
+	static inline void removeCustomIbo(unsigned long datasize)
+	{
+		customIbos_.count--;
+		customIbos_.dataSize -= datasize;
+	}
 	static inline void addCulledNode() { culledNodes_[index_]++; }
 	static inline void addVaoPoolReuse() { vaoPool_.reuses++; }
 	static inline void addVaoPoolBinding() { vaoPool_.bindings++; }

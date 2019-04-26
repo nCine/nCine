@@ -16,12 +16,12 @@ class ReverseIterator
 	using Reference = typename IteratorTraits<Iterator>::Reference;
 
 	explicit ReverseIterator(Iterator it)
-		: it_(it) { }
+	    : it_(it) {}
 
 	/// Converting constructor between compatible reverse iterators
 	template <typename Iter>
 	ReverseIterator(const ReverseIterator<Iter> &reverseIt)
-		: it_(reverseIt.base()) { }
+	    : it_(reverseIt.base()) {}
 
 	/// Deferencing operator
 	Reference operator*() const;
@@ -95,7 +95,7 @@ class ReverseIterator
 
 /// Iterator traits structure specialization for `ReverseIterator` class
 template <class Iterator>
-struct IteratorTraits<ReverseIterator<Iterator> >
+struct IteratorTraits<ReverseIterator<Iterator>>
 {
 	/// Type of the values deferenced by the iterator
 	using ValueType = typename Iterator::ValueType;

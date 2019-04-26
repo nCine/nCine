@@ -248,7 +248,7 @@ void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, in
 		inputEventHandler_->onKeyReleased(keyboardEvent_);
 }
 
-void GlfwInputManager::charCallback(GLFWwindow* window, unsigned int c)
+void GlfwInputManager::charCallback(GLFWwindow *window, unsigned int c)
 {
 #ifdef WITH_IMGUI
 	ImGuiGlfwInput::charCallback(window, c);

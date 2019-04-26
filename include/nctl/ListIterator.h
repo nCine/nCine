@@ -18,11 +18,11 @@ class ListIterator
 	using Reference = typename IteratorTraits<ListIterator>::Reference;
 
 	explicit ListIterator(ListNode<T> *node)
-		: node_(node) { }
+	    : node_(node) {}
 
 	/// Copy constructor to implicitly convert a non constant iterator to a constant one
 	ListIterator(const ListIterator<T, false> &it)
-		: node_(it.node_) { }
+	    : node_(it.node_) {}
 
 	/// Deferencing operator
 	Reference operator*() const;
@@ -53,7 +53,7 @@ class ListIterator
 
 /// Iterator traits structure specialization for `ListIterator` class
 template <class T>
-struct IteratorTraits<ListIterator<T, false> >
+struct IteratorTraits<ListIterator<T, false>>
 {
 	/// Type of the values deferenced by the iterator
 	using ValueType = T;
@@ -67,7 +67,7 @@ struct IteratorTraits<ListIterator<T, false> >
 
 /// Iterator traits structure specialization for constant `ListIterator` class
 template <class T>
-struct IteratorTraits<ListIterator<T, true> >
+struct IteratorTraits<ListIterator<T, true>>
 {
 	/// Type of the values deferenced by the iterator (never const)
 	using ValueType = T;

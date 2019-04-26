@@ -11,7 +11,8 @@ class StandardFile : public IFile
   public:
 	/// Constructs a standard file object
 	/*! \param filename File name including its path */
-	explicit StandardFile(const char *filename) : IFile(filename) { type_ = FileType::STANDARD; }
+	explicit StandardFile(const char *filename)
+	    : IFile(filename) { type_ = FileType::STANDARD; }
 	~StandardFile() override;
 
 	/// Static method to return class type

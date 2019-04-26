@@ -8,7 +8,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 StackedBarVariable::StackedBarVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f &worldMatrix)
-	: PlottingVariable(numValues, rejectDelay, worldMatrix)
+    : PlottingVariable(numValues, rejectDelay, worldMatrix)
 {
 	valuesCmd_.material().setShaderProgramType(Material::ShaderProgramType::COLOR);
 	valuesCmd_.geometry().setDrawParameters(GL_TRIANGLES, 2, variable_.numValues() * 6);
@@ -84,8 +84,10 @@ void StackedBarPlotter::updateAllVertices(float x, float y, float w, float h)
 
 	const float normalizedRefValue = normBetweenRefValue(minSum, maxSum);
 	GLfloat *refValueVertices = refValueCmd_.geometry().acquireVertexPointer(4);
-	refValueVertices[0] = x;			refValueVertices[1] = y + h * normalizedRefValue;
-	refValueVertices[2] = x + w;		refValueVertices[3] = y + h * normalizedRefValue;
+	refValueVertices[0] = x;
+	refValueVertices[1] = y + h * normalizedRefValue;
+	refValueVertices[2] = x + w;
+	refValueVertices[3] = y + h * normalizedRefValue;
 	refValueCmd_.geometry().releaseVertexPointer();
 
 	// Each variable should be normalized against its "slice" of the sum
@@ -118,8 +120,10 @@ void StackedBarPlotter::updateAllVertices(float x, float y, float w, float h)
 
 		float normalizedMean = profVariable->normBetweenMean(minSum, maxSum);
 		// Variable mean vertices
-		vertices[0] = x;			vertices[1] = y + scaledH * (meanVerticalOffset + normalizedMean);
-		vertices[2] = x + w;		vertices[3] = y + scaledH * (meanVerticalOffset + normalizedMean);
+		vertices[0] = x;
+		vertices[1] = y + scaledH * (meanVerticalOffset + normalizedMean);
+		vertices[2] = x + w;
+		vertices[3] = y + scaledH * (meanVerticalOffset + normalizedMean);
 		meanVerticalOffset += normalizedMean;
 
 		const float step = (float(w) / float(numValues)) * 0.5f;

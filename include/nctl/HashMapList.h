@@ -12,7 +12,7 @@ template <class K, class T, class HashFunc, bool IsConst> struct HashMapListHelp
 class String;
 
 /// A template based hashmap implementation with separate chaining and list head cell
-template <class K, class T, class HashFunc = FNV1aHashFunc<K> >
+template <class K, class T, class HashFunc = FNV1aHashFunc<K>>
 class HashMapList
 {
   public:
@@ -109,15 +109,18 @@ class HashMapList
 		K key;
 		T value;
 
-		Node() : hash(NullHash) { }
-		Node(hash_t hh, const K &kk) : hash(hh), key(kk) { }
+		Node()
+		    : hash(NullHash) {}
+		Node(hash_t hh, const K &kk)
+		    : hash(hh), key(kk) {}
 	};
 
 	/// The bucket class for the hashmap, with separate chaining and list head cell
 	class HashBucket
 	{
 	  public:
-		HashBucket() : size_(0) { }
+		HashBucket()
+		    : size_(0) {}
 		unsigned int size() const { return size_; }
 		void clear();
 		bool contains(hash_t hash, const K &key, T &returnedValue) const;
@@ -358,7 +361,7 @@ const typename HashMapList<K, T, HashFunc>::Node *HashMapList<K, T, HashFunc>::H
 
 template <class K, class T, class HashFunc>
 HashMapList<K, T, HashFunc>::HashMapList(unsigned int capacity)
-	: buckets_(capacity, ArrayMode::FIXED_CAPACITY)
+    : buckets_(capacity, ArrayMode::FIXED_CAPACITY)
 {
 	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
 
@@ -368,16 +371,14 @@ HashMapList<K, T, HashFunc>::HashMapList(unsigned int capacity)
 
 template <class K, class T, class HashFunc>
 HashMapList<K, T, HashFunc>::HashMapList(const HashMapList<K, T, HashFunc> &other)
-	: buckets_(other.buckets_)
+    : buckets_(other.buckets_)
 {
-
 }
 
 template <class K, class T, class HashFunc>
 HashMapList<K, T, HashFunc>::HashMapList(HashMapList<K, T, HashFunc> &&other)
-	: buckets_(nctl::move(other.buckets_))
+    : buckets_(nctl::move(other.buckets_))
 {
-
 }
 
 /*! \note The parameter should be passed by value for the idiom to work. */
@@ -486,7 +487,7 @@ const typename HashMapList<K, T, HashFunc>::HashBucket &HashMapList<K, T, HashFu
 }
 
 template <class T>
-using StringHashMapList = HashMapList<String, T, FNV1aFuncHashContainer<String> >;
+using StringHashMapList = HashMapList<String, T, FNV1aFuncHashContainer<String>>;
 
 }
 

@@ -31,7 +31,7 @@ class DLL_PUBLIC AudioStream
 	/// Size in bytes of each streaming buffer
 	static const int BufferSize = 16 * 1024;
 	/// Memory buffer to feed OpenAL ones
-	nctl::UniquePtr<char []> memBuffer_;
+	nctl::UniquePtr<char[]> memBuffer_;
 
 	/// Samples frequency
 	int frequency_;

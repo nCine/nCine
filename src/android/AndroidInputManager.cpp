@@ -43,12 +43,11 @@ JoyAxisEvent AndroidInputManager::joyAxisEvent_;
 JoyConnectionEvent AndroidInputManager::joyConnectionEvent_;
 const float AndroidInputManager::JoyCheckRate = 0.25f;
 Timer AndroidInputManager::joyCheckTimer_;
-const int AndroidJoystickState::AxesToMap[AndroidJoystickState::NumAxesToMap] =
-{
-	AMOTION_EVENT_AXIS_X,			AMOTION_EVENT_AXIS_Y,
-	AMOTION_EVENT_AXIS_Z,			AMOTION_EVENT_AXIS_RZ,
-	AMOTION_EVENT_AXIS_LTRIGGER,	AMOTION_EVENT_AXIS_RTRIGGER,
-	AMOTION_EVENT_AXIS_HAT_X,		AMOTION_EVENT_AXIS_HAT_Y
+const int AndroidJoystickState::AxesToMap[AndroidJoystickState::NumAxesToMap] = {
+	AMOTION_EVENT_AXIS_X, AMOTION_EVENT_AXIS_Y,
+	AMOTION_EVENT_AXIS_Z, AMOTION_EVENT_AXIS_RZ,
+	AMOTION_EVENT_AXIS_LTRIGGER, AMOTION_EVENT_AXIS_RTRIGGER,
+	AMOTION_EVENT_AXIS_HAT_X, AMOTION_EVENT_AXIS_HAT_Y
 };
 
 ///////////////////////////////////////////////////////////
@@ -56,8 +55,8 @@ const int AndroidJoystickState::AxesToMap[AndroidJoystickState::NumAxesToMap] =
 ///////////////////////////////////////////////////////////
 
 AndroidJoystickState::AndroidJoystickState()
-	: deviceId_(-1), numButtons_(0), numAxes_(0),
-	  hasDPad_(false), hasHatAxes_(false), hatState_(HatState::CENTERED)
+    : deviceId_(-1), numButtons_(0), numAxes_(0),
+      hasDPad_(false), hasHatAxes_(false), hatState_(HatState::CENTERED)
 {
 	guid_[0] = '\0';
 	name_[0] = '\0';
@@ -95,17 +94,55 @@ AndroidInputManager::~AndroidInputManager()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-bool AndroidMouseState::isLeftButtonDown() const { return (buttonState_ & AMOTION_EVENT_BUTTON_PRIMARY) != 0; }
-bool AndroidMouseState::isMiddleButtonDown() const { return (buttonState_ & AMOTION_EVENT_BUTTON_TERTIARY) != 0; }
-bool AndroidMouseState::isRightButtonDown() const { return (buttonState_ & AMOTION_EVENT_BUTTON_SECONDARY) != 0; }
-bool AndroidMouseState::isFourthButtonDown() const { return (buttonState_ & AMOTION_EVENT_BUTTON_BACK) != 0; }
-bool AndroidMouseState::isFifthButtonDown() const { return (buttonState_ & AMOTION_EVENT_BUTTON_FORWARD) != 0; }
+bool AndroidMouseState::isLeftButtonDown() const
+{
+	return (buttonState_ & AMOTION_EVENT_BUTTON_PRIMARY) != 0;
+}
 
-bool AndroidMouseEvent::isLeftButton() const { return (button_ & AMOTION_EVENT_BUTTON_PRIMARY) != 0; }
-bool AndroidMouseEvent::isMiddleButton() const { return (button_ & AMOTION_EVENT_BUTTON_TERTIARY) != 0; }
-bool AndroidMouseEvent::isRightButton() const { return (button_ & AMOTION_EVENT_BUTTON_SECONDARY) != 0; }
-bool AndroidMouseEvent::isFourthButton() const { return (button_ & AMOTION_EVENT_BUTTON_BACK) != 0; }
-bool AndroidMouseEvent::isFifthButton() const { return (button_ & AMOTION_EVENT_BUTTON_FORWARD) != 0; }
+bool AndroidMouseState::isMiddleButtonDown() const
+{
+	return (buttonState_ & AMOTION_EVENT_BUTTON_TERTIARY) != 0;
+}
+
+bool AndroidMouseState::isRightButtonDown() const
+{
+	return (buttonState_ & AMOTION_EVENT_BUTTON_SECONDARY) != 0;
+}
+
+bool AndroidMouseState::isFourthButtonDown() const
+{
+	return (buttonState_ & AMOTION_EVENT_BUTTON_BACK) != 0;
+}
+
+bool AndroidMouseState::isFifthButtonDown() const
+{
+	return (buttonState_ & AMOTION_EVENT_BUTTON_FORWARD) != 0;
+}
+
+bool AndroidMouseEvent::isLeftButton() const
+{
+	return (button_ & AMOTION_EVENT_BUTTON_PRIMARY) != 0;
+}
+
+bool AndroidMouseEvent::isMiddleButton() const
+{
+	return (button_ & AMOTION_EVENT_BUTTON_TERTIARY) != 0;
+}
+
+bool AndroidMouseEvent::isRightButton() const
+{
+	return (button_ & AMOTION_EVENT_BUTTON_SECONDARY) != 0;
+}
+
+bool AndroidMouseEvent::isFourthButton() const
+{
+	return (button_ & AMOTION_EVENT_BUTTON_BACK) != 0;
+}
+
+bool AndroidMouseEvent::isFifthButton() const
+{
+	return (button_ & AMOTION_EVENT_BUTTON_FORWARD) != 0;
+}
 
 bool AndroidJoystickState::isButtonPressed(int buttonId) const
 {
@@ -729,7 +766,7 @@ void AndroidInputManager::deviceInfo(int deviceId, int joyId)
 		if (vendorId > 0 && productId > 0)
 		{
 			// GUID calculated concatenating the vendorId and the productId
-			snprintf(joystickStates_[joyId].guid_, 33, "%04x%04x" "000000000000000000000000", vendorId, productId);
+			snprintf(joystickStates_[joyId].guid_, 33, "%04x%04x000000000000000000000000", vendorId, productId);
 		}
 		else
 		{

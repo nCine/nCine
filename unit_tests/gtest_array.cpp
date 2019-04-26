@@ -5,7 +5,8 @@ namespace {
 class ArrayTest : public ::testing::Test
 {
   public:
-	ArrayTest() : array_(Capacity) { }
+	ArrayTest()
+	    : array_(Capacity) {}
 
   protected:
 	void SetUp() override { initArray(array_); }

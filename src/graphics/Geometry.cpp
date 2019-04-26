@@ -10,12 +10,11 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Geometry::Geometry()
-	: primitiveType_(GL_TRIANGLES), firstVertex_(0), numVertices_(0),
-	  numElementsPerVertex_(2), firstIndex_(0), numIndices_(0),
-	  hostVertexPointer_(nullptr), hostIndexPointer_(nullptr),
-	  sharedVboParams_(nullptr), sharedIboParams_(nullptr)
+    : primitiveType_(GL_TRIANGLES), firstVertex_(0), numVertices_(0),
+      numElementsPerVertex_(2), firstIndex_(0), numIndices_(0),
+      hostVertexPointer_(nullptr), hostIndexPointer_(nullptr),
+      sharedVboParams_(nullptr), sharedIboParams_(nullptr)
 {
-
 }
 
 Geometry::~Geometry()
@@ -228,6 +227,5 @@ void Geometry::commitIndices()
 		releaseIndexPointer();
 	}
 }
-
 
 }

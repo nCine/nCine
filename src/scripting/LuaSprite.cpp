@@ -8,8 +8,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace Sprite
-{
+namespace Sprite {
 	static const char *Sprite = "sprite";
 }}
 

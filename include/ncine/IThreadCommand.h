@@ -9,7 +9,7 @@ namespace ncine {
 class DLL_PUBLIC IThreadCommand
 {
   public:
-	virtual ~IThreadCommand() { }
+	virtual ~IThreadCommand() {}
 
 	/// Executes the command on a worker thread
 	virtual void execute() = 0;

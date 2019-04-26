@@ -4,9 +4,9 @@
 const unsigned int Capacity = 1024;
 const int KeyValueDifference = 10;
 
-using SaxHashMap = nctl::HashMap<unsigned int, unsigned int, nctl::SaxHashFunc<unsigned int> >;
-using JenkinsHashMap = nctl::HashMap<unsigned int, unsigned int, nctl::JenkinsHashFunc<unsigned int> >;
-using FNV1aHashMap = nctl::HashMap<unsigned int, unsigned int, nctl::FNV1aHashFunc<unsigned int> >;
+using SaxHashMap = nctl::HashMap<unsigned int, unsigned int, nctl::SaxHashFunc<unsigned int>>;
+using JenkinsHashMap = nctl::HashMap<unsigned int, unsigned int, nctl::JenkinsHashFunc<unsigned int>>;
+using FNV1aHashMap = nctl::HashMap<unsigned int, unsigned int, nctl::FNV1aHashFunc<unsigned int>>;
 using HashMapTestType = FNV1aHashMap;
 
 static void BM_HashMapCreation(benchmark::State &state)

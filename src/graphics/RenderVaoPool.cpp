@@ -11,7 +11,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 RenderVaoPool::RenderVaoPool(unsigned int vaoPoolSize)
-	: vaoPool_(vaoPoolSize, nctl::ArrayMode::FIXED_CAPACITY)
+    : vaoPool_(vaoPoolSize, nctl::ArrayMode::FIXED_CAPACITY)
 {
 	// Start with a VAO bound to the OpenGL context
 	GLVertexFormat format;

@@ -9,7 +9,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AudioStreamPlayer::AudioStreamPlayer(const char *filename)
-	: audioStream_(filename)
+    : audioStream_(filename)
 {
 	type_ = ObjectType::AUDIOSTREAM_PLAYER;
 	setName(filename);

@@ -8,8 +8,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace ILogger
-{
+namespace ILogger {
 	static const char *ILogger = "log";
 
 	static const char *logVerbose = "verbose";

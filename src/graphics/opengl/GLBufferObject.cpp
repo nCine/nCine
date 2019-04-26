@@ -16,7 +16,7 @@ GLBufferObject::BufferRange GLBufferObject::boundBufferRange_[MaxIndexBufferRang
 ///////////////////////////////////////////////////////////
 
 GLBufferObject::GLBufferObject(GLenum target)
-	: glHandle_(0), target_(target), size_(0), mapped_(false)
+    : glHandle_(0), target_(target), size_(0), mapped_(false)
 {
 	for (unsigned int i = 0; i < MaxIndexBufferRange; i++)
 		boundIndexBase_[i] = 0;

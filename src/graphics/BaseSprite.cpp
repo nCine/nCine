@@ -9,18 +9,15 @@ namespace ncine {
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 BaseSprite::BaseSprite(SceneNode *parent, Texture *texture, float xx, float yy)
-	: DrawableNode(parent, xx, yy), texture_(texture), texRect_(0, 0, 0, 0), opaqueTexture_(false), spriteBlock_(nullptr)
+    : DrawableNode(parent, xx, yy), texture_(texture), texRect_(0, 0, 0, 0), opaqueTexture_(false), spriteBlock_(nullptr)
 {
-
 }
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 BaseSprite::BaseSprite(SceneNode *parent, Texture *texture, const Vector2f &position)
-	: BaseSprite(parent, texture, position.x, position.y)
+    : BaseSprite(parent, texture, position.x, position.y)
 {
-
 }
-
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -68,7 +65,7 @@ void BaseSprite::updateRenderCommand()
 
 	spriteBlock_->uniform("color")->setFloatVector(Colorf(absColor()).data());
 	const bool isTransparent = absColor().a() < 255 || texture()->numChannels() == 1 ||
-		(texture()->numChannels() == 4 && opaqueTexture_ == false);
+	                           (texture()->numChannels() == 4 && opaqueTexture_ == false);
 	renderCommand_->material().setTransparent(isTransparent);
 
 	const Vector2i texSize = texture_->size();

@@ -7,8 +7,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace Vector2
-{
+namespace Vector2 {
 	static const char *x = "x";
 	static const char *y = "y";
 }}

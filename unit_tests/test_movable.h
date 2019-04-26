@@ -7,19 +7,23 @@ class Movable
 {
   public:
 	const unsigned int Size = 10;
-	enum class Construction { INITIALIZED };
+	enum class Construction
+	{
+		INITIALIZED
+	};
 
-	Movable() : size_(0), array_(nullptr) { }
+	Movable()
+	    : size_(0), array_(nullptr) {}
 
 	Movable(Construction mode)
-		: size_(Size), array_(new int[Size])
+	    : size_(Size), array_(new int[Size])
 	{
 		for (unsigned int i = 0; i < size_; i++)
 			array_[i] = i;
 	}
 
 	Movable(Movable &&other)
-		: size_(other.size_), array_(other.array_)
+	    : size_(other.size_), array_(other.array_)
 	{
 		other.size_ = 0;
 		other.array_ = nullptr;
@@ -39,7 +43,7 @@ class Movable
 	Movable &operator=(const Movable &other) = delete;
 #else
 	Movable(const Movable &other)
-		: size_(other.size_), array_(new int[Size])
+	    : size_(other.size_), array_(new int[Size])
 	{
 		for (unsigned int i = 0; i < size_; i++)
 			array_[i] = other.array_[i];
@@ -61,7 +65,10 @@ class Movable
 	}
 #endif
 
-	unsigned int size() const { return size_; }
+	unsigned int size() const
+	{
+		return size_;
+	}
 	const int *data() const { return array_; }
 	const int &operator[](unsigned int index) const { return array_[index]; }
 

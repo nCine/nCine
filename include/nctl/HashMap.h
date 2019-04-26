@@ -115,11 +115,11 @@ class HashMap
 	unsigned int size_;
 	unsigned int capacity_;
 	/// Single allocated buffer for all the hashmap per-node data
-	UniquePtr<uint8_t []> buffer_;
+	UniquePtr<uint8_t[]> buffer_;
 	uint8_t *delta1_;
 	uint8_t *delta2_;
 	hash_t *hashes_;
-	UniquePtr<Node []> nodes_;
+	UniquePtr<Node[]> nodes_;
 	HashFunc hashFunc_;
 
 	bool findBucketIndex(K key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const;
@@ -194,13 +194,13 @@ typename HashMap<K, T, HashFunc>::ConstReverseIterator HashMap<K, T, HashFunc>::
 
 template <class K, class T, class HashFunc>
 HashMap<K, T, HashFunc>::HashMap(unsigned int capacity)
-	: size_(0), capacity_(capacity), delta1_(nullptr),
-	  delta2_(nullptr), hashes_(nullptr), nodes_(nullptr)
+    : size_(0), capacity_(capacity), delta1_(nullptr),
+      delta2_(nullptr), hashes_(nullptr), nodes_(nullptr)
 {
 	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
 
 	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
-	buffer_ = makeUnique<uint8_t []>(bytes);
+	buffer_ = makeUnique<uint8_t[]>(bytes);
 
 	uint8_t *pointer = buffer_.get();
 	delta1_ = pointer;
@@ -210,17 +210,17 @@ HashMap<K, T, HashFunc>::HashMap(unsigned int capacity)
 	hashes_ = reinterpret_cast<hash_t *>(pointer);
 	FATAL_ASSERT(pointer + sizeof(hash_t) * capacity_ == buffer_.get() + bytes);
 
-	nodes_ = makeUnique<Node []>(capacity);
+	nodes_ = makeUnique<Node[]>(capacity);
 
 	clear();
 }
 
 template <class K, class T, class HashFunc>
 HashMap<K, T, HashFunc>::HashMap(const HashMap<K, T, HashFunc> &other)
-	: size_(other.size_), capacity_(other.capacity_)
+    : size_(other.size_), capacity_(other.capacity_)
 {
 	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
-	buffer_ = makeUnique<uint8_t []>(bytes);
+	buffer_ = makeUnique<uint8_t[]>(bytes);
 	memcpy(buffer_.get(), other.buffer_.get(), bytes);
 
 	uint8_t *pointer = buffer_.get();
@@ -231,15 +231,15 @@ HashMap<K, T, HashFunc>::HashMap(const HashMap<K, T, HashFunc> &other)
 	hashes_ = reinterpret_cast<hash_t *>(pointer);
 	FATAL_ASSERT(pointer + sizeof(hash_t) * capacity_ == buffer_.get() + bytes);
 
-	nodes_ = makeUnique<Node []>(capacity_);
-	for (unsigned int i =0; i < capacity_; i++)
+	nodes_ = makeUnique<Node[]>(capacity_);
+	for (unsigned int i = 0; i < capacity_; i++)
 		nodes_[i] = other.nodes_[i];
 }
 
 template <class K, class T, class HashFunc>
 HashMap<K, T, HashFunc>::HashMap(HashMap<K, T, HashFunc> &&other)
-	: size_(other.size_), capacity_(other.capacity_), buffer_(nctl::move(other.buffer_)),
-	  delta1_(other.delta1_), delta2_(other.delta2_), hashes_(other.hashes_), nodes_(nctl::move(other.nodes_))
+    : size_(other.size_), capacity_(other.capacity_), buffer_(nctl::move(other.buffer_)),
+      delta1_(other.delta1_), delta2_(other.delta2_), hashes_(other.hashes_), nodes_(nctl::move(other.nodes_))
 {
 	other.size_ = 0;
 	other.capacity_ = 0;
@@ -387,7 +387,7 @@ bool HashMap<K, T, HashFunc>::remove(const K &key)
 			if (bucketIndex != lastBucketIndex)
 			{
 				nodes_[bucketIndex].key = nctl::move(nodes_[lastBucketIndex].key);
-				nodes_[bucketIndex].value =  nctl::move(nodes_[lastBucketIndex].value);
+				nodes_[bucketIndex].value = nctl::move(nodes_[lastBucketIndex].value);
 				hashes_[bucketIndex] = hashes_[lastBucketIndex];
 			}
 
@@ -569,7 +569,7 @@ T &HashMap<K, T, HashFunc>::addNode(unsigned int index, hash_t hash, K key)
 }
 
 template <class T>
-using StringHashMap = HashMap<String, T, FNV1aFuncHashContainer<String> >;
+using StringHashMap = HashMap<String, T, FNV1aFuncHashContainer<String>>;
 
 }
 

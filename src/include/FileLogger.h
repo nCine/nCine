@@ -23,7 +23,7 @@ class FileLogger : public ILogger
 	inline unsigned int logStringCapacity() const override { return logString_.capacity(); }
 #else
 	inline const char *logString() const override { return nullptr; }
-	inline void clearLogString() override { }
+	inline void clearLogString() override {}
 	inline unsigned int logStringLength() const override { return 0; }
 	inline unsigned int logStringCapacity() const override { return 0; }
 #endif

@@ -8,9 +8,9 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ProfilePlotter::ProfilePlotter(SceneNode *parent, Rectf rect)
-	: DrawableNode(parent, rect.x, rect.y), variables_(2), shouldPlotRefValue_(false),
-	  refValueColor_(255, 255,255), refValue_(0.0f),
-	  backgroundColorBlock_(nullptr), refValueColorBlock_(nullptr)
+    : DrawableNode(parent, rect.x, rect.y), variables_(2), shouldPlotRefValue_(false),
+      refValueColor_(255, 255, 255), refValue_(0.0f),
+      backgroundColorBlock_(nullptr), refValueColorBlock_(nullptr)
 {
 	width_ = rect.w;
 	height_ = rect.h;
@@ -73,11 +73,15 @@ float ProfilePlotter::normBetweenRefValue(float min, float max) const
 void ProfilePlotter::setBackgroundVertices(GLfloat *vertices)
 {
 	// Graph background vertices
-	vertices[0] = 0.0f;			vertices[1] = 0.0f;
-	vertices[2] = width_;		vertices[3] = 0.0f;
-	vertices[4] = 0.0f;			vertices[5] = height_;
+	vertices[0] = 0.0f;
+	vertices[1] = 0.0f;
+	vertices[2] = width_;
+	vertices[3] = 0.0f;
+	vertices[4] = 0.0f;
+	vertices[5] = height_;
 
-	vertices[6] = width_;		vertices[7] = height_;
+	vertices[6] = width_;
+	vertices[7] = height_;
 }
 
 void ProfilePlotter::updateRenderCommand()

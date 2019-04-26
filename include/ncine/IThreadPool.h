@@ -17,14 +17,13 @@ class DLL_PUBLIC IThreadPool
 	virtual void enqueueCommand(nctl::UniquePtr<IThreadCommand> threadCommand) = 0;
 };
 
-inline IThreadPool::~IThreadPool() { }
-
+inline IThreadPool::~IThreadPool() {}
 
 /// A fake thread pool which doesn't create any thread
 class DLL_PUBLIC NullThreadPool : public IThreadPool
 {
   public:
-	void enqueueCommand(nctl::UniquePtr<IThreadCommand> threadCommand) override { }
+	void enqueueCommand(nctl::UniquePtr<IThreadCommand> threadCommand) override {}
 };
 
 }

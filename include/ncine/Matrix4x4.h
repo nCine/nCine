@@ -11,7 +11,7 @@ template <class T>
 class Matrix4x4
 {
   public:
-	Matrix4x4() { }
+	Matrix4x4() {}
 	Matrix4x4(const Vector4<T> &v0, const Vector4<T> &v1, const Vector4<T> &v2, const Vector4<T> &v3);
 
 	void set(const Vector4<T> &v0, const Vector4<T> &v1, const Vector4<T> &v2, const Vector4<T> &v3);
@@ -48,7 +48,8 @@ class Matrix4x4
 	Matrix4x4 operator*(T s) const;
 	Matrix4x4 operator/(T s) const;
 
-	template <class S> friend Matrix4x4<S> operator*(S s, const Matrix4x4<S> &m);
+	template <class S>
+	friend Matrix4x4<S> operator*(S s, const Matrix4x4<S> &m);
 
 	Matrix4x4 transposed() const;
 	Matrix4x4 &transpose();
@@ -356,12 +357,14 @@ Matrix4x4<T> &Matrix4x4<T>::transpose()
 	Matrix4x4 &m = *this;
 	T x;
 
+	// clang-format off
 	x = m[0][1]; m[0][1] = m[1][0]; m[1][0] = x;
 	x = m[0][2]; m[0][2] = m[2][0]; m[2][0] = x;
 	x = m[0][3]; m[0][3] = m[3][0]; m[3][0] = x;
 	x = m[1][2]; m[1][2] = m[2][1]; m[2][1] = x;
 	x = m[1][3]; m[1][3] = m[3][1]; m[3][1] = x;
 	x = m[2][3]; m[2][3] = m[3][2]; m[3][2] = x;
+	// clang-format on
 
 	return *this;
 }
@@ -524,8 +527,10 @@ inline Matrix4x4<T> Matrix4x4<T>::perspective(T fovY, T aspect, T near, T far)
 	return frustum(xMin, xMax, yMin, yMax, near, far);
 }
 
-template <class T> const Matrix4x4<T> Matrix4x4<T>::Zero(Vector4<T>(0, 0, 0, 0), Vector4<T>(0, 0, 0, 0), Vector4<T>(0, 0, 0, 0), Vector4<T>(0, 0, 0, 0));
-template <class T> const Matrix4x4<T> Matrix4x4<T>::Identity(Vector4<T>(1, 0, 0, 0), Vector4<T>(0, 1, 0, 0), Vector4<T>(0, 0, 1, 0), Vector4<T>(0, 0, 0, 1));
+template <class T>
+const Matrix4x4<T> Matrix4x4<T>::Zero(Vector4<T>(0, 0, 0, 0), Vector4<T>(0, 0, 0, 0), Vector4<T>(0, 0, 0, 0), Vector4<T>(0, 0, 0, 0));
+template <class T>
+const Matrix4x4<T> Matrix4x4<T>::Identity(Vector4<T>(1, 0, 0, 0), Vector4<T>(0, 1, 0, 0), Vector4<T>(0, 0, 1, 0), Vector4<T>(0, 0, 0, 1));
 
 }
 

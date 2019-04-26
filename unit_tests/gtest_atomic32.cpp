@@ -8,7 +8,8 @@ namespace {
 class AtomicTest32 : public ::testing::Test
 {
   public:
-	AtomicTest32() : nonAtom_(0), tr_(this) { }
+	AtomicTest32()
+	    : nonAtom_(0), tr_(this) {}
 
 	nctl::Atomic32 atom_;
 	nctl::Atomic32 lock_;
@@ -18,8 +19,7 @@ class AtomicTest32 : public ::testing::Test
 
 TEST_F(AtomicTest32, Increment)
 {
-	tr_.runThreads([](void *arg) -> ThreadRunner<NumThreads>::threadFuncRet
-	{
+	tr_.runThreads([](void *arg) -> ThreadRunner<NumThreads>::threadFuncRet {
 		AtomicTest32 *obj = static_cast<AtomicTest32 *>(arg);
 		for (unsigned int i = 0; i < NumIterations; i++)
 		{
@@ -38,8 +38,7 @@ TEST_F(AtomicTest32, Increment)
 
 TEST_F(AtomicTest32, Decrement)
 {
-	tr_.runThreads([](void *arg) -> ThreadRunner<NumThreads>::threadFuncRet
-	{
+	tr_.runThreads([](void *arg) -> ThreadRunner<NumThreads>::threadFuncRet {
 		AtomicTest32 *obj = static_cast<AtomicTest32 *>(arg);
 		for (unsigned int i = 0; i < NumIterations; i++)
 		{
@@ -58,13 +57,11 @@ TEST_F(AtomicTest32, Decrement)
 
 TEST_F(AtomicTest32, CompareAndExchange)
 {
-	tr_.runThreads([](void *arg) -> ThreadRunner<NumThreads>::threadFuncRet
-	{
+	tr_.runThreads([](void *arg) -> ThreadRunner<NumThreads>::threadFuncRet {
 		AtomicTest32 *obj = static_cast<AtomicTest32 *>(arg);
 		for (unsigned int i = 0; i < NumIterations; i++)
 		{
-			while (!obj->lock_.cmpExchange(1, 0)) { }
-
+			while (!obj->lock_.cmpExchange(1, 0)) {}
 
 			int32_t value = obj->atom_;
 			value++;

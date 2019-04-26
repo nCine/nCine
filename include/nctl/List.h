@@ -19,12 +19,13 @@ class BaseListNode
 	BaseListNode *next_;
 
   protected:
-	BaseListNode() : previous_(this), next_(this) { }
+	BaseListNode()
+	    : previous_(this), next_(this) {}
 
 	BaseListNode(BaseListNode *previous, BaseListNode *next)
-		: previous_(previous), next_(next) { }
+	    : previous_(previous), next_(next) {}
 
-	template<class T>
+	template <class T>
 	friend class List;
 };
 
@@ -38,9 +39,9 @@ class ListNode : public BaseListNode
 
   private:
 	ListNode(const T &data, BaseListNode *previous, BaseListNode *next)
-		: BaseListNode(previous, next), data_(data) { }
+	    : BaseListNode(previous, next), data_(data) {}
 	ListNode(T &&data, BaseListNode *previous, BaseListNode *next)
-		: BaseListNode(previous, next), data_(nctl::move(data)) { }
+	    : BaseListNode(previous, next), data_(nctl::move(data)) {}
 
 	friend class List<T>;
 };
@@ -59,7 +60,8 @@ class List
 	/// Reverse constant iterator type
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
-	List() : size_(0) { }
+	List()
+	    : size_(0) {}
 	~List() { clear(); }
 
 	/// Copy constructor
@@ -111,13 +113,13 @@ class List
 	/// Clears the list
 	void clear();
 	/// Returns a constant reference to the first element in constant time
-	inline const T &front() const { ASSERT(sentinel_.next_ != &sentinel_); return static_cast<ListNode<T> *>(sentinel_.next_)->data_; }
+	const T &front() const;
 	/// Returns a reference to the first element in constant time
-	inline T &front() { ASSERT(sentinel_.next_ != &sentinel_); return static_cast<ListNode<T> *>(sentinel_.next_)->data_; }
+	T &front();
 	/// Returns a constant reference to the last element in constant time
-	inline const T &back() const { ASSERT(sentinel_.previous_ != &sentinel_); return static_cast<ListNode<T> *>(sentinel_.previous_)->data_; }
+	const T &back() const;
 	/// Returns a reference to the last element in constant time
-	inline T &back() { ASSERT(sentinel_.previous_ != &sentinel_); return static_cast<ListNode<T> *>(sentinel_.previous_)->data_; }
+	T &back();
 	/// Inserts a new element as the first, in constant time
 	inline void pushFront(const T &element) { insertBeforeNode(static_cast<ListNode<T> *>(sentinel_.next_), element); }
 	/// Move inserts a new element as the first, in constant time
@@ -147,7 +149,8 @@ class List
 	/// Removes a specified element in linear time
 	void remove(const T &element);
 	/// Removes all the elements that fulfill the condition
-	template <class Predicate> void removeIf(Predicate pred);
+	template <class Predicate>
+	void removeIf(Predicate pred);
 	/// Transfers all the elements from the source list in front of `position`
 	void splice(Iterator position, List &source);
 	/// Transfers one element at `it` from the source list in front of `position`
@@ -177,7 +180,7 @@ class List
 
 template <class T>
 List<T>::List(const List<T> &other)
-	: size_(0)
+    : size_(0)
 {
 	for (List<T>::ConstIterator i = other.begin(); i != other.end(); ++i)
 		pushBack(*i);
@@ -185,7 +188,7 @@ List<T>::List(const List<T> &other)
 
 template <class T>
 List<T>::List(List<T> &&other)
-	: size_(other.size_)
+    : size_(other.size_)
 {
 	if (other.size_ > 0)
 	{
@@ -240,6 +243,34 @@ void List<T>::clear()
 
 	sentinel_.previous_ = &sentinel_;
 	size_ = 0;
+}
+
+template <class T>
+const T &List<T>::front() const
+{
+	ASSERT(sentinel_.next_ != &sentinel_);
+	return static_cast<ListNode<T> *>(sentinel_.next_)->data_;
+}
+
+template <class T>
+T &List<T>::front()
+{
+	ASSERT(sentinel_.next_ != &sentinel_);
+	return static_cast<ListNode<T> *>(sentinel_.next_)->data_;
+}
+
+template <class T>
+const T &List<T>::back() const
+{
+	ASSERT(sentinel_.previous_ != &sentinel_);
+	return static_cast<ListNode<T> *>(sentinel_.previous_)->data_;
+}
+
+template <class T>
+T &List<T>::back()
+{
+	ASSERT(sentinel_.previous_ != &sentinel_);
+	return static_cast<ListNode<T> *>(sentinel_.previous_)->data_;
 }
 
 template <class T>
@@ -313,7 +344,8 @@ void List<T>::remove(const T &element)
 	}
 }
 
-template <class T> template <class Predicate>
+template <class T>
+template <class Predicate>
 void List<T>::removeIf(Predicate pred)
 {
 	ConstIterator i = begin();

@@ -13,7 +13,7 @@ class DLL_PUBLIC IDebugOverlay
 	struct DisplaySettings
 	{
 		DisplaySettings()
-			: showProfilerGraphs(true), showInfoText(true), showInterface(false) { }
+		    : showProfilerGraphs(true), showInfoText(true), showInterface(false) {}
 
 		/// True if showing the profiler graphs
 		bool showProfilerGraphs;
@@ -42,14 +42,13 @@ class DLL_PUBLIC IDebugOverlay
 };
 
 inline IDebugOverlay::IDebugOverlay(const AppConfiguration &appCfg)
-	: updateTime_(appCfg.profileTextUpdateTime())
+    : updateTime_(appCfg.profileTextUpdateTime())
 {
 	updateTimer_.start();
 }
 
 inline IDebugOverlay::~IDebugOverlay()
 {
-
 }
 
 }

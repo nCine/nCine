@@ -7,41 +7,34 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AnimatedSprite::AnimatedSprite(SceneNode *parent, Texture *texture)
-	: AnimatedSprite(parent, texture, 0.0f, 0.0f)
+    : AnimatedSprite(parent, texture, 0.0f, 0.0f)
 {
-
 }
 
 AnimatedSprite::AnimatedSprite(Texture *texture)
-	: AnimatedSprite(nullptr, texture, 0.0f, 0.0f)
+    : AnimatedSprite(nullptr, texture, 0.0f, 0.0f)
 {
-
 }
 
 AnimatedSprite::AnimatedSprite(SceneNode *parent, Texture *texture, float xx, float yy)
-	: Sprite(parent, texture, xx, yy), anims_(4), currentAnim_(-1)
+    : Sprite(parent, texture, xx, yy), anims_(4), currentAnim_(-1)
 {
-
 }
 
 AnimatedSprite::AnimatedSprite(SceneNode *parent, Texture *texture, const Vector2f &position)
-	: AnimatedSprite(parent, texture, position.x, position.y)
+    : AnimatedSprite(parent, texture, position.x, position.y)
 {
-
 }
 
 AnimatedSprite::AnimatedSprite(Texture *texture, float xx, float yy)
-	: AnimatedSprite(nullptr, texture, xx, yy)
+    : AnimatedSprite(nullptr, texture, xx, yy)
 {
-
 }
 
 AnimatedSprite::AnimatedSprite(Texture *texture, const Vector2f &position)
-	: AnimatedSprite(nullptr, texture, position.x, position.y)
+    : AnimatedSprite(nullptr, texture, position.x, position.y)
 {
-
 }
-
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS

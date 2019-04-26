@@ -6,7 +6,7 @@ namespace ncine {
 
 bool imGuiJoyMappedInput()
 {
-	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIO &io = ImGui::GetIO();
 
 	if (theApplication().inputManager().isJoyMapped(0))
 	{

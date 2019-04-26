@@ -16,12 +16,12 @@ GLUniformBlockCache GLShaderUniformBlocks::uniformBlockNotFound_;
 ///////////////////////////////////////////////////////////
 
 GLShaderUniformBlocks::GLShaderUniformBlocks()
-	: shaderProgram_(nullptr), dataPointer_(nullptr)
+    : shaderProgram_(nullptr), dataPointer_(nullptr)
 {
 }
 
 GLShaderUniformBlocks::GLShaderUniformBlocks(GLShaderProgram *shaderProgram)
-	: GLShaderUniformBlocks()
+    : GLShaderUniformBlocks()
 {
 	setProgram(shaderProgram);
 }

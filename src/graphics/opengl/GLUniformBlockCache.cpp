@@ -10,13 +10,12 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GLUniformBlockCache::GLUniformBlockCache()
-	: uniformBlock_(nullptr), dataPointer_(nullptr), usedSize_(0)
+    : uniformBlock_(nullptr), dataPointer_(nullptr), usedSize_(0)
 {
-
 }
 
 GLUniformBlockCache::GLUniformBlockCache(GLUniformBlock *uniformBlock)
-	: uniformBlock_(uniformBlock), dataPointer_(nullptr), usedSize_(0)
+    : uniformBlock_(uniformBlock), dataPointer_(nullptr), usedSize_(0)
 {
 	ASSERT(uniformBlock);
 	usedSize_ = uniformBlock->size();

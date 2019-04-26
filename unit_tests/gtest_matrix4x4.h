@@ -22,6 +22,12 @@ void printMatrix(const nc::Matrix4x4f &mat)
 	printf(")\n");
 }
 
+void printMatrix(const char *message, const nc::Matrix4x4f &mat)
+{
+	printf("%s", message);
+	printMatrix(mat);
+}
+
 void assertVectorsAreEqual(const nc::Vector4f &v1, const nc::Vector4f &v2)
 {
 	ASSERT_FLOAT_EQ(v1.x, v2.x);

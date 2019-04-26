@@ -4,14 +4,19 @@
 namespace nctl {
 
 /// Dispatching tag for iterators that can only move forward, one element at a time
-struct ForwardIteratorTag { };
+struct ForwardIteratorTag
+{};
 /// Dispatching tag for iterators that can move both ways, one element at a time
-struct BidirectionalIteratorTag : public ForwardIteratorTag { };
+struct BidirectionalIteratorTag : public ForwardIteratorTag
+{};
 /// Dispatching tag for iterators that can jump arbitrary distances in both ways
-struct RandomAccessIteratorTag : public BidirectionalIteratorTag { };
+struct RandomAccessIteratorTag : public BidirectionalIteratorTag
+{};
 
 /// Base iterator traits structure
-template <class Iterator> struct IteratorTraits { };
+template <class Iterator>
+struct IteratorTraits
+{};
 
 ///////////////////////////////////////////////////////////
 // OPERATIONS
@@ -19,39 +24,39 @@ template <class Iterator> struct IteratorTraits { };
 
 namespace {
 
-/// Increments an iterator by n elements, for random access iterators
-template <class Iterator>
-inline void advance(Iterator &it, int n, RandomAccessIteratorTag)
-{
-	it += n;
-}
+	/// Increments an iterator by n elements, for random access iterators
+	template <class Iterator>
+	inline void advance(Iterator &it, int n, RandomAccessIteratorTag)
+	{
+		it += n;
+	}
 
-/// Increments an iterator by n elements, for bidirectional iterators
-template <class Iterator>
-inline void advance(Iterator &it, int n, BidirectionalIteratorTag)
-{
-	if (n < 0)
+	/// Increments an iterator by n elements, for bidirectional iterators
+	template <class Iterator>
+	inline void advance(Iterator &it, int n, BidirectionalIteratorTag)
 	{
-		while (n++)
-			--it;
+		if (n < 0)
+		{
+			while (n++)
+				--it;
+		}
+		else
+		{
+			while (n--)
+				++it;
+		}
 	}
-	else
-	{
-		while (n--)
-			++it;
-	}
-}
 
-/// Increments an iterator by n elements, for forward iterators
-template <class Iterator>
-inline void advance(Iterator &it, int n, ForwardIteratorTag)
-{
-	if (n > 0)
+	/// Increments an iterator by n elements, for forward iterators
+	template <class Iterator>
+	inline void advance(Iterator &it, int n, ForwardIteratorTag)
 	{
-		while (n--)
-			++it;
+		if (n > 0)
+		{
+			while (n--)
+				++it;
+		}
 	}
-}
 
 }
 
@@ -96,24 +101,24 @@ inline Iterator prev(Iterator it)
 
 namespace {
 
-/// Returns the distance between two random access iterators with a pointer subtraction
-template <class RandomAccessIterator>
-inline int distance(RandomAccessIterator &first, const RandomAccessIterator &last, RandomAccessIteratorTag)
-{
-	return last - first;
-}
+	/// Returns the distance between two random access iterators with a pointer subtraction
+	template <class RandomAccessIterator>
+	inline int distance(RandomAccessIterator &first, const RandomAccessIterator &last, RandomAccessIteratorTag)
+	{
+		return last - first;
+	}
 
-/// Returns the distance in number of increments between two forward iterators
-template <class ForwardIterator>
-inline int distance(ForwardIterator &first, const ForwardIterator &last, ForwardIteratorTag)
-{
-	int counter = 0;
+	/// Returns the distance in number of increments between two forward iterators
+	template <class ForwardIterator>
+	inline int distance(ForwardIterator &first, const ForwardIterator &last, ForwardIteratorTag)
+	{
+		int counter = 0;
 
-	for (; first != last; ++first)
-		counter++;
+		for (; first != last; ++first)
+			counter++;
 
-	return counter;
-}
+		return counter;
+	}
 
 }
 
@@ -129,7 +134,10 @@ inline int distance(Iterator first, const Iterator last)
 ///////////////////////////////////////////////////////////
 
 template <class T>
-struct ReversionWrapper { T &iterable; };
+struct ReversionWrapper
+{
+	T &iterable;
+};
 
 template <class T>
 auto begin(ReversionWrapper<T> c) -> decltype(rBegin(c.iterable))
@@ -144,7 +152,10 @@ auto end(ReversionWrapper<T> c) -> decltype(rEnd(c.iterable))
 }
 
 template <class T>
-ReversionWrapper<T> reverse(T&& iterable) { return { iterable }; }
+ReversionWrapper<T> reverse(T &&iterable)
+{
+	return { iterable };
+}
 
 ///////////////////////////////////////////////////////////
 // RANGE

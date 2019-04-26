@@ -8,13 +8,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GLAttribute::GLAttribute()
-	: location_(-1), size_(0), type_(GL_FLOAT)
+    : location_(-1), size_(0), type_(GL_FLOAT)
 {
 	name_[0] = '\0';
 }
 
 GLAttribute::GLAttribute(GLuint program, GLuint index)
-	: location_(-1), size_(0), type_(GL_FLOAT)
+    : location_(-1), size_(0), type_(GL_FLOAT)
 {
 	GLsizei length;
 	glGetActiveAttrib(program, index, MaxNameLength, &length, &size_, &type_, name_);

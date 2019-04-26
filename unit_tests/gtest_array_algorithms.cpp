@@ -6,7 +6,8 @@ namespace {
 class ArrayAlgorithmsTest : public ::testing::Test
 {
   public:
-	ArrayAlgorithmsTest() : array_(Capacity) { }
+	ArrayAlgorithmsTest()
+	    : array_(Capacity) {}
 
   protected:
 	void SetUp() override { initArray(array_); }
@@ -59,7 +60,7 @@ TEST_F(ArrayAlgorithmsTest, AddValueForEach)
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity);
-	for(unsigned int i = 0; i < array_.size(); i++)
+	for (unsigned int i = 0; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], i + value);
 }
 
@@ -107,7 +108,7 @@ TEST_F(ArrayAlgorithmsTest, CheckEqual)
 
 	ASSERT_TRUE(nctl::equal(array_.begin(), array_.end(), newArray.begin()));
 	ASSERT_EQ(array_.size(), newArray.size());
-	for(unsigned int i = 0; i < newArray.size(); i++)
+	for (unsigned int i = 0; i < newArray.size(); i++)
 		ASSERT_EQ(array_[i], newArray[i]);
 }
 
@@ -119,9 +120,9 @@ TEST_F(ArrayAlgorithmsTest, FillNElements)
 
 	ASSERT_EQ(array_.size(), Capacity);
 	const unsigned int halfSize = array_.size() / 2;
-	for(unsigned int i = 0; i < halfSize; i++)
+	for (unsigned int i = 0; i < halfSize; i++)
 		ASSERT_EQ(array_[i], 0);
-	for(unsigned int i = halfSize + 1; i < array_.size(); i++)
+	for (unsigned int i = halfSize + 1; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], i);
 }
 
@@ -132,7 +133,7 @@ TEST_F(ArrayAlgorithmsTest, FillWithIterators)
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity);
-	for(unsigned int i = 0; i < array_.size(); i++)
+	for (unsigned int i = 0; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], 0);
 }
 
@@ -145,7 +146,7 @@ TEST_F(ArrayAlgorithmsTest, CopyToArray)
 	printArray(newArray);
 
 	ASSERT_EQ(array_.size(), newArray.size());
-	for(unsigned int i = 0; i < newArray.size(); i++)
+	for (unsigned int i = 0; i < newArray.size(); i++)
 		ASSERT_EQ(array_[i], newArray[i]);
 }
 
@@ -158,7 +159,7 @@ TEST_F(ArrayAlgorithmsTest, CopyNToArray)
 	printArray(newArray);
 
 	ASSERT_EQ(newArray.size(), Capacity / 2);
-	for(unsigned int i = 0; i < newArray.size(); i++)
+	for (unsigned int i = 0; i < newArray.size(); i++)
 		ASSERT_EQ(array_[i], newArray[i]);
 }
 
@@ -171,7 +172,7 @@ TEST_F(ArrayAlgorithmsTest, CopyIfToArray)
 	printArray(newArray);
 
 	ASSERT_EQ(newArray.size(), Capacity / 2);
-	for(unsigned int i = 0; i < newArray.size(); i++)
+	for (unsigned int i = 0; i < newArray.size(); i++)
 		ASSERT_EQ(array_[i], newArray[i]);
 }
 
@@ -187,7 +188,7 @@ TEST_F(ArrayAlgorithmsTest, CopyTransformed)
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity);
-	for(unsigned int i = 0; i < array_.size(); i++)
+	for (unsigned int i = 0; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], newArray[i] + 10);
 }
 
@@ -207,7 +208,7 @@ TEST_F(ArrayAlgorithmsTest, CopyBinaryTransformed)
 	printArray(thirdArray);
 
 	ASSERT_EQ(thirdArray.size(), Capacity);
-	for(unsigned int i = 0; i < thirdArray.size(); i++)
+	for (unsigned int i = 0; i < thirdArray.size(); i++)
 		ASSERT_EQ(thirdArray[i], array_[i] + secondArray[i]);
 }
 
@@ -221,7 +222,7 @@ TEST_F(ArrayAlgorithmsTest, ClampElements)
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity);
-	for(unsigned int i = 0; i < array_.size(); i++)
+	for (unsigned int i = 0; i < array_.size(); i++)
 	{
 		ASSERT_TRUE(array_[i] >= minValue);
 		ASSERT_TRUE(array_[i] <= maxValue);
@@ -298,7 +299,7 @@ TEST_F(ArrayAlgorithmsTest, Generate)
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity);
-	for(unsigned int i = 0; i < array_.size(); i++)
+	for (unsigned int i = 0; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], i + value);
 }
 
@@ -311,9 +312,9 @@ TEST_F(ArrayAlgorithmsTest, GenerateN)
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity);
-	for(unsigned int i = 0; i < numElements; i++)
+	for (unsigned int i = 0; i < numElements; i++)
 		ASSERT_EQ(array_[i], i + value);
-	for(unsigned int i = numElements; i < array_.size(); i++)
+	for (unsigned int i = numElements; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], i);
 }
 
@@ -388,7 +389,7 @@ TEST_F(ArrayAlgorithmsTest, Reverse)
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity);
-	for(unsigned int i = 0; i < array_.size(); i++)
+	for (unsigned int i = 0; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], array_.size() - 1 - i);
 }
 
@@ -402,7 +403,7 @@ TEST_F(ArrayAlgorithmsTest, ReverseCopy)
 	printArray(newArray);
 
 	ASSERT_EQ(newArray.size(), Capacity);
-	for(unsigned int i = 0; i < newArray.size(); i++)
+	for (unsigned int i = 0; i < newArray.size(); i++)
 		ASSERT_EQ(newArray[i], newArray.size() - 1 - i);
 }
 
@@ -414,10 +415,10 @@ TEST_F(ArrayAlgorithmsTest, Remove)
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity - 1);
-	for(unsigned int i = 0; i < value; i++)
+	for (unsigned int i = 0; i < value; i++)
 		ASSERT_EQ(array_[i], i);
-	for(unsigned int i = value; i < array_.size(); i++)
-		ASSERT_EQ(array_[i], i+1);
+	for (unsigned int i = value; i < array_.size(); i++)
+		ASSERT_EQ(array_[i], i + 1);
 }
 
 TEST_F(ArrayAlgorithmsTest, RemoveIf)
@@ -427,7 +428,7 @@ TEST_F(ArrayAlgorithmsTest, RemoveIf)
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity / 2);
-	for(unsigned int i = 0; i < array_.size(); i++)
+	for (unsigned int i = 0; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], i);
 }
 

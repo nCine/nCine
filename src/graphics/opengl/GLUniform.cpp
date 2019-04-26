@@ -8,13 +8,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GLUniform::GLUniform()
-	: index_(0), blockIndex_(-1), location_(-1), size_(0), type_(GL_FLOAT), offset_(0)
+    : index_(0), blockIndex_(-1), location_(-1), size_(0), type_(GL_FLOAT), offset_(0)
 {
 	name_[0] = '\0';
 }
 
 GLUniform::GLUniform(GLuint program, GLuint index)
-	: GLUniform()
+    : GLUniform()
 {
 	GLsizei length;
 	glGetActiveUniform(program, index, MaxNameLength, &length, &size_, &type_, name_);

@@ -266,7 +266,7 @@ bool AndroidJniClass_KeyCharacterMap::deviceHasKey(int button)
 }
 
 AndroidJniClass_MotionRange::AndroidJniClass_MotionRange(jobject javaObject)
-	: AndroidJniClass(javaObject)
+    : AndroidJniClass(javaObject)
 {
 	if (javaClass_ == nullptr)
 	{

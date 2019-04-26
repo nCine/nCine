@@ -9,8 +9,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace Font
-{
+namespace Font {
 	static const char *Font = "font";
 
 	static const char *texture = "texture";

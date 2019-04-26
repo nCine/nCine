@@ -19,7 +19,7 @@ class GLTexture
 	inline GLenum target() const { return target_; }
 
 	inline void getObjectLabel(int bufSize, int *length, char *label) const { GLDebug::getObjectLabel(GLDebug::LabelTypes::TEXTURE, glHandle_, bufSize, length, label); }
-	inline void setObjectLabel(const char *label) { GLDebug::objectLabel(GLDebug::LabelTypes::TEXTURE, glHandle_, label);}
+	inline void setObjectLabel(const char *label) { GLDebug::objectLabel(GLDebug::LabelTypes::TEXTURE, glHandle_, label); }
 
 	void bind(unsigned int textureUnit) const;
 	void bind() const;

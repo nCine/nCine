@@ -15,7 +15,7 @@ GLFWwindow *GlfwGfxDevice::windowHandle_ = nullptr;
 ///////////////////////////////////////////////////////////
 
 GlfwGfxDevice::GlfwGfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode)
-	: IGfxDevice(windowMode, glContextInfo, displayMode)
+    : IGfxDevice(windowMode, glContextInfo, displayMode)
 {
 	initGraphics();
 	initDevice();
@@ -42,7 +42,7 @@ void GlfwGfxDevice::setResolution(int width, int height)
 	if (width == 0 || height == 0)
 	{
 		GLFWmonitor *primaryMonitor = glfwGetPrimaryMonitor();
-		const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+		const GLFWvidmode *mode = glfwGetVideoMode(primaryMonitor);
 		width_ = mode->width;
 		height_ = mode->height;
 		isFullScreen_ = true;

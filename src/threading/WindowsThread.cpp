@@ -32,13 +32,12 @@ bool ThreadAffinityMask::isSet(int cpuNum)
 ///////////////////////////////////////////////////////////
 
 Thread::Thread()
-	: handle_(0)
+    : handle_(0)
 {
-
 }
 
 Thread::Thread(ThreadFunctionPtr startFunction, void *arg)
-	: handle_(0)
+    : handle_(0)
 {
 	run(startFunction, arg);
 }

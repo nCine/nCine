@@ -13,11 +13,14 @@ class Vector2
   public:
 	T x, y;
 
-	Vector2() { }
-	explicit Vector2(T s) : x(s), y(s) { }
-	Vector2(T xx, T yy) : x(xx), y(yy) { }
-	Vector2(const Vector2 &other) : x(other.x), y(other.y) { }
-	Vector2& operator=(const Vector2 &other);
+	Vector2() {}
+	explicit Vector2(T s)
+	    : x(s), y(s) {}
+	Vector2(T xx, T yy)
+	    : x(xx), y(yy) {}
+	Vector2(const Vector2 &other)
+	    : x(other.x), y(other.y) {}
+	Vector2 &operator=(const Vector2 &other);
 
 	void set(T xx, T yy);
 
@@ -50,14 +53,16 @@ class Vector2
 	Vector2 operator*(T s) const;
 	Vector2 operator/(T s) const;
 
-	template <class S> friend Vector2<S> operator*(S s, const Vector2<S> &v);
+	template <class S>
+	friend Vector2<S> operator*(S s, const Vector2<S> &v);
 
 	T length() const;
 	T sqrLength() const;
 	Vector2 normalized() const;
 	Vector2 &normalize();
 
-	template <class S> friend S dot(const Vector2<S> &v1, const Vector2<S> &v2);
+	template <class S>
+	friend S dot(const Vector2<S> &v1, const Vector2<S> &v2);
 
 	/// A vector with all zero elements
 	static const Vector2 Zero;
@@ -296,9 +301,12 @@ inline S dot(const Vector2<S> &v1, const Vector2<S> &v2)
 	                      v1.y * v2.y);
 }
 
-template <class T> const Vector2<T> Vector2<T>::Zero(0, 0);
-template <class T> const Vector2<T> Vector2<T>::XAxis(1, 0);
-template <class T> const Vector2<T> Vector2<T>::YAxis(0, 1);
+template <class T>
+const Vector2<T> Vector2<T>::Zero(0, 0);
+template <class T>
+const Vector2<T> Vector2<T>::XAxis(1, 0);
+template <class T>
+const Vector2<T> Vector2<T>::YAxis(0, 1);
 
 }
 

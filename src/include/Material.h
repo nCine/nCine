@@ -84,7 +84,7 @@ class Material
 	const GLTexture *texture_;
 
 	/// Memory buffer with uniform values to be sent to the GPU
-	nctl::UniquePtr<GLubyte []> uniformsHostBuffer_;
+	nctl::UniquePtr<GLubyte[]> uniformsHostBuffer_;
 
 	void bind();
 	/// Wrapper around `GLShaderUniforms::commitUniforms()`

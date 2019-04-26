@@ -18,10 +18,10 @@ class ImGuiGlfwInput
 
 	static inline void setInputEnabled(bool inputEnabled) { inputEnabled_ = inputEnabled; }
 
-	static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-	static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-	static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-	static void charCallback(GLFWwindow* window, unsigned int c);
+	static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
+	static void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
+	static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+	static void charCallback(GLFWwindow *window, unsigned int c);
 
   private:
 	static bool inputEnabled_;

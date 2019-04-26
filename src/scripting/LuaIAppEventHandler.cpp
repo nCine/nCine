@@ -13,8 +13,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace LuaIAppEventHandler
-{
+namespace LuaIAppEventHandler {
 	static const char *onPreInit = "on_pre_init";
 	static const char *onInit = "on_init";
 	static const char *onFrameStart = "on_frame_start";

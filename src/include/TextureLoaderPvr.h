@@ -17,18 +17,18 @@ class TextureLoaderPvr : public ITextureLoader
 	/// Header for the PVR3 format
 	struct Pvr3Header
 	{
-		uint32_t	version;
-		uint32_t	flags;
-		uint64_t	pixelFormat;
-		uint32_t	colourSpace;
-		uint32_t	channelType;
-		uint32_t	height;
-		uint32_t	width;
-		uint32_t	depth;
-		uint32_t	numSurfaces;
-		uint32_t	numFaces;
-		uint32_t	numMipmaps;
-		uint32_t	metaDataSize;
+		uint32_t version;
+		uint32_t flags;
+		uint64_t pixelFormat;
+		uint32_t colourSpace;
+		uint32_t channelType;
+		uint32_t height;
+		uint32_t width;
+		uint32_t depth;
+		uint32_t numSurfaces;
+		uint32_t numFaces;
+		uint32_t numMipmaps;
+		uint32_t metaDataSize;
 	};
 
 	static const uint64_t FMT_PVRTC_2BPP_RGB = 0;

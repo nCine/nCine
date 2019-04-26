@@ -22,7 +22,8 @@ class SdlKeys
 class SdlMouseState : public MouseState
 {
   public:
-	SdlMouseState() : buttons_(0) { }
+	SdlMouseState()
+	    : buttons_(0) {}
 
 	inline bool isLeftButtonDown() const override { return (buttons_ & SDL_BUTTON_LMASK) != 0; }
 	inline bool isMiddleButtonDown() const override { return (buttons_ & SDL_BUTTON_MMASK) != 0; }
@@ -40,7 +41,8 @@ class SdlMouseState : public MouseState
 class SdlMouseEvent : public MouseEvent
 {
   public:
-	SdlMouseEvent() : button_(0) { }
+	SdlMouseEvent()
+	    : button_(0) {}
 
 	inline bool isLeftButton() const override { return button_ == SDL_BUTTON_LEFT; }
 	inline bool isMiddleButton() const override { return button_ == SDL_BUTTON_MIDDLE; }
@@ -58,7 +60,7 @@ class SdlMouseEvent : public MouseEvent
 class SdlScrollEvent : public ScrollEvent
 {
   public:
-	SdlScrollEvent() { }
+	SdlScrollEvent() {}
 
 	friend class SdlInputManager;
 };
@@ -88,7 +90,8 @@ class SdlKeyboardState : public KeyboardState
 class SdlJoystickState : public JoystickState
 {
   public:
-	SdlJoystickState() : sdlJoystick_(nullptr) { }
+	SdlJoystickState()
+	    : sdlJoystick_(nullptr) {}
 
 	bool isButtonPressed(int buttonId) const override;
 	unsigned char hatState(int hatId) const override;

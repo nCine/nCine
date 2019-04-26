@@ -25,9 +25,9 @@ class DLL_PUBLIC IFile
 	{
 		enum
 		{
-		#if !(defined(_WIN32) && !defined(__MINGW32__))
+#if !(defined(_WIN32) && !defined(__MINGW32__))
 			FD = 1,
-		#endif
+#endif
 			READ = 2,
 			WRITE = 4,
 			BINARY = 8
@@ -48,7 +48,7 @@ class DLL_PUBLIC IFile
 	/// Constructs a base file object
 	/*! \param filename File name including its path */
 	explicit IFile(const char *filename);
-	virtual ~IFile() { }
+	virtual ~IFile() {}
 
 	/// Returns the file type (RTTI)
 	FileType type() const { return type_; }

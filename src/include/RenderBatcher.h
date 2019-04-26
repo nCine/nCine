@@ -22,17 +22,18 @@ class RenderBatcher
 
 	struct ManagedBuffer
 	{
-		ManagedBuffer() : size(0), freeSpace(0) { }
+		ManagedBuffer()
+		    : size(0), freeSpace(0) {}
 
 		unsigned int size;
 		unsigned int freeSpace;
-		nctl::UniquePtr<unsigned char []> buffer;
+		nctl::UniquePtr<unsigned char[]> buffer;
 	};
 
 	nctl::Array<ManagedBuffer> buffers_;
 
-	nctl::Array<nctl::UniquePtr<RenderCommand> > freeCommandsPool_;
-	nctl::Array<nctl::UniquePtr<RenderCommand> > usedCommandsPool_;
+	nctl::Array<nctl::UniquePtr<RenderCommand>> freeCommandsPool_;
+	nctl::Array<nctl::UniquePtr<RenderCommand>> usedCommandsPool_;
 
 	RenderCommand *collectCommands(nctl::Array<RenderCommand *>::ConstIterator start, nctl::Array<RenderCommand *>::ConstIterator end, nctl::Array<RenderCommand *>::ConstIterator &nextStart);
 	RenderCommand *retrieveCommandFromPool(Material::ShaderProgramType shaderProgramType);

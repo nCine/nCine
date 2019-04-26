@@ -31,10 +31,10 @@
 #include "LuaParticleSystem.h"
 
 #ifdef WITH_AUDIO
-#include "LuaIAudioDevice.h"
-#include "LuaAudioBuffer.h"
-#include "LuaAudioBufferPlayer.h"
-#include "LuaAudioStreamPlayer.h"
+	#include "LuaIAudioDevice.h"
+	#include "LuaAudioBuffer.h"
+	#include "LuaAudioBufferPlayer.h"
+	#include "LuaAudioStreamPlayer.h"
 #endif
 
 #include "Application.h"
@@ -51,8 +51,7 @@
 
 namespace ncine {
 
-namespace LuaNames
-{
+namespace LuaNames {
 	static const char *Version = "_VERSION";
 	static const char *GitRevCount = "_GITREVCOUNT";
 	static const char *GitShortHash = "_GITSHORTHASH";
@@ -79,17 +78,16 @@ nctl::Array<LuaStateManager::StateToManager> LuaStateManager::managers_(2);
 ///////////////////////////////////////////////////////////
 
 LuaStateManager::LuaStateManager(ApiType apiType, StatisticsTracking statsTracking, StandardLibraries stdLibraries)
-	: LuaStateManager(lua_newstate(statsTracking == StatisticsTracking::ENABLED ?
-	                  luaAllocatorWithStatistics : luaAllocator, nullptr),
-	  apiType, statsTracking, stdLibraries)
+    : LuaStateManager(lua_newstate(statsTracking == StatisticsTracking::ENABLED ? luaAllocatorWithStatistics : luaAllocator, nullptr),
+                      apiType, statsTracking, stdLibraries)
 {
 	closeOnDestruction_ = true;
 }
 
 LuaStateManager::LuaStateManager(lua_State *L, ApiType apiType, StatisticsTracking statsTracking, StandardLibraries stdLibraries)
-	: L_(L), apiType_(apiType), statsTracking_(statsTracking), stdLibraries_(stdLibraries),
-	  trackedUserDatas_(apiType == ApiType::FULL ? 16 : 1),
-	  untrackedUserDatas_(16), closeOnDestruction_(false)
+    : L_(L), apiType_(apiType), statsTracking_(statsTracking), stdLibraries_(stdLibraries),
+      trackedUserDatas_(apiType == ApiType::FULL ? 16 : 1),
+      untrackedUserDatas_(16), closeOnDestruction_(false)
 {
 	ASSERT(L_);
 	if (stdLibraries == StandardLibraries::LOADED)
@@ -229,7 +227,7 @@ bool LuaStateManager::run(const char *filename)
 
 	fileHandle->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 	unsigned long fileSize = fileHandle->size();
-	nctl::UniquePtr<char []> buffer = nctl::makeUnique<char []>(fileSize);
+	nctl::UniquePtr<char[]> buffer = nctl::makeUnique<char[]>(fileSize);
 	fileHandle->read(buffer.get(), fileSize);
 	const char *bufferRead = buffer.get();
 

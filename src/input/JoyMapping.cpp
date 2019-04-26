@@ -21,14 +21,31 @@ namespace {
 
 const unsigned int JoyMapping::MaxNameLength;
 
-const char *JoyMapping::AxesStrings[JoyMappedState::NumAxes] =
-{ "leftx", "lefty", "rightx", "righty", "lefttrigger", "righttrigger" };
+const char *JoyMapping::AxesStrings[JoyMappedState::NumAxes] = {
+	"leftx",
+	"lefty",
+	"rightx",
+	"righty",
+	"lefttrigger",
+	"righttrigger"
+};
 
-const char *JoyMapping::ButtonsStrings[JoyMappedState::NumButtons] =
-{
-	"a", "b", "x", "y", "back", "guide", "start",
-	"leftstick", "rightstick", "leftshoulder", "rightshoulder",
-	"dpup", "dpdown", "dpleft", "dpright",
+const char *JoyMapping::ButtonsStrings[JoyMappedState::NumButtons] = {
+	"a",
+	"b",
+	"x",
+	"y",
+	"back",
+	"guide",
+	"start",
+	"leftstick",
+	"rightstick",
+	"leftshoulder",
+	"rightshoulder",
+	"dpup",
+	"dpdown",
+	"dpleft",
+	"dpright"
 };
 
 JoyMappedStateImpl JoyMapping::nullMappedJoyState_;
@@ -59,7 +76,7 @@ JoyMapping::MappedJoystick::Guid::Guid()
 }
 
 JoyMapping::JoyMapping()
-	: mappings_(256), inputManager_(nullptr), inputEventHandler_(nullptr)
+    : mappings_(256), inputManager_(nullptr), inputEventHandler_(nullptr)
 {
 	for (unsigned int i = 0; i < MaxNumJoysticks; i++)
 		mappingIndex_[i] = -1;
@@ -161,7 +178,7 @@ void JoyMapping::addMappingsFromFile(const char *filename)
 	const long int fileSize = fileHandle->size();
 	unsigned int fileLine = 0;
 
-	nctl::UniquePtr<char []> fileBuffer = nctl::makeUnique<char []>(fileSize + 1);
+	nctl::UniquePtr<char[]> fileBuffer = nctl::makeUnique<char[]>(fileSize + 1);
 	fileHandle->read(fileBuffer.get(), fileSize);
 	fileHandle.reset(nullptr);
 	fileBuffer[fileSize] = '\0';
@@ -184,8 +201,7 @@ void JoyMapping::addMappingsFromFile(const char *filename)
 			mappings_[index] = newMapping;
 		}
 
-	}
-	while (strchr(buffer, '\n') && (buffer = strchr(buffer, '\n') + 1) < fileBuffer.get() + fileSize);
+	} while (strchr(buffer, '\n') && (buffer = strchr(buffer, '\n') + 1) < fileBuffer.get() + fileSize);
 
 	LOGI_X("Joystick mapping file parsed: %u mappings in %u lines", numParsed, fileLine);
 
@@ -464,7 +480,8 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 		LOGE("Invalid mapping string");
 		return false;
 	}
-	subStart = subStartUntrimmed; subEnd = subEndUntrimmed;
+	subStart = subStartUntrimmed;
+	subEnd = subEndUntrimmed;
 	trimSpaces(&subStart, &subEnd);
 
 	subLength = static_cast<unsigned int>(subEnd - subStart);
@@ -475,7 +492,8 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 	subEndUntrimmed = strchr(subStartUntrimmed, ',');
 	while (subStartUntrimmed < end && *subStartUntrimmed != '\n')
 	{
-		subStart = subStartUntrimmed; subEnd = subEndUntrimmed;
+		subStart = subStartUntrimmed;
+		subEnd = subEndUntrimmed;
 		trimSpaces(&subStart, &subEnd);
 
 		const char *subMid = strchr(subStart, ':');
@@ -681,11 +699,11 @@ int JoyMapping::hatStateToIndex(unsigned char hatState) const
 
 void JoyMapping::trimSpaces(const char **start, const char **end) const
 {
-	while(**start == ' ')
+	while (**start == ' ')
 		(*start)++;
 
 	(*end)--;
-	while(**end == ' ')
+	while (**end == ' ')
 		(*end)--;
 	(*end)++;
 }

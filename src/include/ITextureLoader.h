@@ -11,7 +11,7 @@ namespace ncine {
 class ITextureLoader
 {
   public:
-	virtual ~ITextureLoader() { }
+	virtual ~ITextureLoader() {}
 
 	/// Returns texture width
 	inline int width() const { return width_; }
@@ -47,10 +47,10 @@ class ITextureLoader
 	int headerSize_;
 	unsigned long dataSize_;
 	int mipMapCount_;
-	nctl::UniquePtr<unsigned long []> mipDataOffsets_;
-	nctl::UniquePtr<unsigned long []> mipDataSizes_;
+	nctl::UniquePtr<unsigned long[]> mipDataOffsets_;
+	nctl::UniquePtr<unsigned long[]> mipDataSizes_;
 	TextureFormat texFormat_;
-	nctl::UniquePtr<GLubyte []> pixels_;
+	nctl::UniquePtr<GLubyte[]> pixels_;
 
 	explicit ITextureLoader(const char *filename);
 	explicit ITextureLoader(nctl::UniquePtr<IFile> fileHandle);

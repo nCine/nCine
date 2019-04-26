@@ -20,7 +20,7 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	};
 
 	IAudioPlayer();
-	~IAudioPlayer()  override { }
+	~IAudioPlayer() override {}
 
 	/// Starts playing
 	virtual void play() = 0;

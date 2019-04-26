@@ -18,12 +18,12 @@ GLUniformCache GLShaderUniforms::uniformNotFound_;
 ///////////////////////////////////////////////////////////
 
 GLShaderUniforms::GLShaderUniforms()
-	: shaderProgram_(nullptr)
+    : shaderProgram_(nullptr)
 {
 }
 
 GLShaderUniforms::GLShaderUniforms(GLShaderProgram *shaderProgram)
-	: GLShaderUniforms()
+    : GLShaderUniforms()
 {
 	setProgram(shaderProgram);
 }
@@ -87,7 +87,7 @@ void GLShaderUniforms::commitUniforms()
 		if (shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
 		{
 			shaderProgram_->use();
-			forEach(uniformCaches_.begin(), uniformCaches_.end(), [](GLUniformCache &uniform){ uniform.commitValue(); });
+			forEach(uniformCaches_.begin(), uniformCaches_.end(), [](GLUniformCache &uniform) { uniform.commitValue(); });
 		}
 	}
 	else

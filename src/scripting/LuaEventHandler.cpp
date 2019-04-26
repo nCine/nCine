@@ -12,8 +12,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace LuaEventHandler
-{
+namespace LuaEventHandler {
 	static const char *start = "start";
 }}
 
@@ -30,27 +29,28 @@ int start(lua_State *L)
 	return 0;
 }
 
-extern "C" {
+extern "C"
+{
 
 #if (defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)) && !defined(__MINGW32__)
 
-#if NCINE_DEBUG
-	#define NCINE_LUAOPEN_NAME luaopen_ncine_d
-#else
-	#define NCINE_LUAOPEN_NAME luaopen_ncine
-#endif
+	#if NCINE_DEBUG
+		#define NCINE_LUAOPEN_NAME luaopen_ncine_d
+	#else
+		#define NCINE_LUAOPEN_NAME luaopen_ncine
+	#endif
 
 #else
 
-#if NCINE_DEBUG
-	#define NCINE_LUAOPEN_NAME luaopen_libncine_d
-#else
-	#define NCINE_LUAOPEN_NAME luaopen_libncine
-#endif
+	#if NCINE_DEBUG
+		#define NCINE_LUAOPEN_NAME luaopen_libncine_d
+	#else
+		#define NCINE_LUAOPEN_NAME luaopen_libncine
+	#endif
 
 #endif
 
-DLL_PUBLIC int NCINE_LUAOPEN_NAME(lua_State *L)
+	DLL_PUBLIC int NCINE_LUAOPEN_NAME(lua_State *L)
 	{
 		LuaEventHandler::luaState_ = new LuaStateManager(L, LuaStateManager::ApiType::FULL,
 		                                                 LuaStateManager::StatisticsTracking::ENABLED,

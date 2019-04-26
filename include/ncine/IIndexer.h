@@ -31,15 +31,14 @@ class DLL_PUBLIC IIndexer
 	virtual void logReport() const = 0;
 };
 
-inline IIndexer::~IIndexer() { }
-
+inline IIndexer::~IIndexer() {}
 
 /// Fake indexer, always returning `nullptr` and a zero index
 class DLL_PUBLIC NullIndexer : public IIndexer
 {
   public:
 	unsigned int addObject(Object *object) override { return 0U; }
-	void removeObject(unsigned int id) override { }
+	void removeObject(unsigned int id) override {}
 
 	Object *object(unsigned int id) const override { return nullptr; }
 
@@ -47,7 +46,7 @@ class DLL_PUBLIC NullIndexer : public IIndexer
 
 	unsigned int size() const override { return 0U; }
 
-	void logReport() const override { }
+	void logReport() const override {}
 };
 
 }

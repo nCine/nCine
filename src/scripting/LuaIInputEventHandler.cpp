@@ -17,8 +17,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace IInputEventHandler
-{
+namespace IInputEventHandler {
 	static const char *onKeyPressed = "on_key_pressed";
 	static const char *onKeyReleased = "on_key_released";
 

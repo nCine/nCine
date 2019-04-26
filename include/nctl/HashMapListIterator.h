@@ -8,7 +8,8 @@ namespace nctl {
 
 /// Base helper structure for type traits used in the hashmap iterator
 template <class K, class T, class HashFunc, bool IsConst>
-struct HashMapListHelperTraits { };
+struct HashMapListHelperTraits
+{};
 
 /// Helper structure providing type traits used in the non constant hashmap iterator
 template <class K, class T, class HashFunc>
@@ -51,13 +52,13 @@ class HashMapListIterator
 
 	HashMapListIterator(typename HashMapListHelperTraits<K, T, HashFunc, IsConst>::HashMapListPtr hashMap, unsigned int bucketIndex,
 	                    typename HashMapListHelperTraits<K, T, HashFunc, IsConst>::ListIteratorType listIterator, bool atFirstNode)
-		: hashMap_(hashMap), bucketIndex_(bucketIndex), listIterator_(listIterator), atFirstNode_(atFirstNode), tag_(SentinelTag::REGULAR) { }
+	    : hashMap_(hashMap), bucketIndex_(bucketIndex), listIterator_(listIterator), atFirstNode_(atFirstNode), tag_(SentinelTag::REGULAR) {}
 
 	HashMapListIterator(typename HashMapListHelperTraits<K, T, HashFunc, IsConst>::HashMapListPtr hashMap, SentinelTagInit tag);
 
 	/// Copy constructor to implicitly convert a non constant iterator to a constant one
 	HashMapListIterator(const HashMapListIterator<K, T, HashFunc, false> &it)
-		: hashMap_(it.hashMap_), bucketIndex_(it.bucketIndex_), listIterator_(it.listIterator_), atFirstNode_(it.atFirstNode_), tag_(SentinelTag(it.tag_)) { }
+	    : hashMap_(it.hashMap_), bucketIndex_(it.bucketIndex_), listIterator_(it.listIterator_), atFirstNode_(it.atFirstNode_), tag_(SentinelTag(it.tag_)) {}
 
 	/// Deferencing operator
 	Reference operator*() const;
@@ -138,7 +139,7 @@ class HashMapListIterator
 
 /// Iterator traits structure specialization for `HashMapListIterator` class
 template <class K, class T, class HashFunc>
-struct IteratorTraits<HashMapListIterator<K, T, HashFunc, false> >
+struct IteratorTraits<HashMapListIterator<K, T, HashFunc, false>>
 {
 	/// Type of the values deferenced by the iterator
 	using ValueType = T;
@@ -152,7 +153,7 @@ struct IteratorTraits<HashMapListIterator<K, T, HashFunc, false> >
 
 /// Iterator traits structure specialization for constant `HashMapListIterator` class
 template <class K, class T, class HashFunc>
-struct IteratorTraits<HashMapListIterator<K, T, HashFunc, true> >
+struct IteratorTraits<HashMapListIterator<K, T, HashFunc, true>>
 {
 	/// Type of the values deferenced by the iterator (never const)
 	using ValueType = T;
@@ -166,7 +167,7 @@ struct IteratorTraits<HashMapListIterator<K, T, HashFunc, true> >
 
 template <class K, class T, class HashFunc, bool IsConst>
 HashMapListIterator<K, T, HashFunc, IsConst>::HashMapListIterator(typename HashMapListHelperTraits<K, T, HashFunc, IsConst>::HashMapListPtr hashMap, SentinelTagInit tag)
-	: hashMap_(hashMap), bucketIndex_(0), listIterator_(nullptr), atFirstNode_(true)
+    : hashMap_(hashMap), bucketIndex_(0), listIterator_(nullptr), atFirstNode_(true)
 {
 	switch (tag)
 	{
@@ -268,7 +269,8 @@ void HashMapListIterator<K, T, HashFunc, IsConst>::next()
 			tag_ = SentinelTag::END;
 		else
 		{
-			do {
+			do
+			{
 				bucket = &(hashMap_->buckets_[++bucketIndex_]);
 			} while (bucketIndex_ < hashMap_->buckets_.size() - 1 && bucket->size() == 0);
 		}
@@ -299,7 +301,8 @@ void HashMapListIterator<K, T, HashFunc, IsConst>::previous()
 			tag_ = SentinelTag::BEGINNING;
 		else
 		{
-			do {
+			do
+			{
 				bucket = &(hashMap_->buckets_[--bucketIndex_]);
 			} while (bucketIndex_ > 0 && bucket->size() == 0);
 		}

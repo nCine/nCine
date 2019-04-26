@@ -17,7 +17,7 @@ AAssetManager *AssetFile::assetManager_ = nullptr;
 ///////////////////////////////////////////////////////////
 
 AssetFile::AssetFile(const char *filename)
-	: IFile(filename), asset_(nullptr), startOffset_(0L)
+    : IFile(filename), asset_(nullptr), startOffset_(0L)
 {
 	type_ = FileType::ASSET;
 
@@ -54,7 +54,6 @@ void AssetFile::open(unsigned char mode)
 			openAsset(mode);
 	}
 }
-
 
 /*! This method will close a file both normally opened or fopened */
 void AssetFile::close()
@@ -116,7 +115,6 @@ long int AssetFile::tell() const
 	return tellValue;
 }
 
-
 unsigned long int AssetFile::read(void *buffer, unsigned long int bytes) const
 {
 	ASSERT(buffer);
@@ -129,7 +127,7 @@ unsigned long int AssetFile::read(void *buffer, unsigned long int bytes) const
 
 		const long int seekValue = lseek(fileDescriptor_, 0L, SEEK_CUR);
 
-		if (seekValue >=  startOffset_ + fileSize_)
+		if (seekValue >= startOffset_ + fileSize_)
 			bytesToRead = 0; // simulating EOF
 		else if (seekValue + static_cast<long int>(bytes) > startOffset_ + fileSize_)
 			bytesToRead = (startOffset_ + fileSize_) - seekValue;

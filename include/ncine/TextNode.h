@@ -70,8 +70,9 @@ class DLL_PUBLIC TextNode : public DrawableNode
 		float x, y;
 		float u, v;
 
-		Vertex() { }
-		Vertex(float xx, float yy, float uu, float vv) : x(xx), y(yy), u(uu), v(vv) { }
+		Vertex() {}
+		Vertex(float xx, float yy, float uu, float vv)
+		    : x(xx), y(yy), u(uu), v(vv) {}
 	};
 
 	/// Position of degenerate vertices in glyph quad

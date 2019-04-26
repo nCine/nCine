@@ -24,9 +24,8 @@ Colorf::Colorf()
 }
 
 Colorf::Colorf(float red, float green, float blue)
-	: Colorf(red, green, blue, 1.0f)
+    : Colorf(red, green, blue, 1.0f)
 {
-
 }
 
 Colorf::Colorf(float red, float green, float blue, float alpha)
@@ -135,4 +134,3 @@ Colorf Colorf::operator*(float scalar) const
 }
 
 }
-

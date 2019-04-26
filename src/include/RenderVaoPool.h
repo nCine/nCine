@@ -20,7 +20,8 @@ class RenderVaoPool
   private:
 	struct VaoBinding
 	{
-		VaoBinding() : lastBindTime(0) { }
+		VaoBinding()
+		    : lastBindTime(0) {}
 
 		nctl::UniquePtr<GLVertexArrayObject> object;
 		GLVertexFormat format;

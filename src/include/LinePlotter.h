@@ -22,7 +22,8 @@ class LineVariable : public PlottingVariable
 class LinePlotter : public ProfilePlotter
 {
   public:
-	LinePlotter(SceneNode *parent, Rectf rect) : ProfilePlotter(parent, rect) { }
+	LinePlotter(SceneNode *parent, Rectf rect)
+	    : ProfilePlotter(parent, rect) {}
 
 	unsigned int addVariable(unsigned int numValues, float rejectDelay) override;
 

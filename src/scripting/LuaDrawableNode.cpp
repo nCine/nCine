@@ -11,8 +11,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace DrawableNode
-{
+namespace DrawableNode {
 	static const char *LOWEST = "LOWEST";
 	static const char *SCENE = "SCENE";
 	static const char *HUD = "HUD";
@@ -24,8 +23,7 @@ namespace DrawableNode
 	static const char *size = "get_size";
 	static const char *layer = "get_layer";
 	static const char *setLayer = "set_layer";
-}
-}
+}}
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS

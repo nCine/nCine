@@ -5,6 +5,7 @@ namespace ncine {
 
 KeySym AndroidKeys::keySymValueToEnum(int keysym)
 {
+	// clang-format off
 	switch (keysym)
 	{
 		case AKEYCODE_UNKNOWN:				return KeySym::UNKNOWN;
@@ -213,9 +214,9 @@ KeySym AndroidKeys::keySymValueToEnum(int keysym)
 		case AKEYCODE_BUTTON_15:			return KeySym::BUTTON_15;
 		case AKEYCODE_BUTTON_16:			return KeySym::BUTTON_16;
 #endif
-
 		default:							return KeySym::UNKNOWN;
 	}
+	// clang-format on
 }
 
 int AndroidKeys::keyModMaskToEnumMask(int keymod)

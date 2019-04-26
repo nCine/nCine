@@ -6,16 +6,16 @@ class Matrix4x4Test : public ::testing::Test
 {
   public:
 	Matrix4x4Test()
-		: m1_(nc::Vector4f(2.5f, 2.0f, 0.5f, 1.0),
+	    : m1_(nc::Vector4f(2.5f, 2.0f, 0.5f, 1.0),
 	          nc::Vector4f(2.5f, 2.0f, 0.5f, 1.0),
 	          nc::Vector4f(2.5f, 2.0f, 0.5f, 1.0),
 	          nc::Vector4f(2.5f, 2.0f, 0.5f, 1.0)),
 
-		  m2_(nc::Vector4f(1.0f, 1.5f, 1.0f, 2.0),
+	      m2_(nc::Vector4f(1.0f, 1.5f, 1.0f, 2.0),
 	          nc::Vector4f(1.0f, 1.5f, 1.0f, 2.0),
 	          nc::Vector4f(1.0f, 1.5f, 1.0f, 2.0),
 	          nc::Vector4f(1.0f, 1.5f, 1.0f, 2.0))
-	{ }
+	{}
 
 	nc::Matrix4x4f m1_;
 	nc::Matrix4x4f m2_;
@@ -23,7 +23,7 @@ class Matrix4x4Test : public ::testing::Test
 
 TEST_F(Matrix4x4Test, SetVectors)
 {
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 
 	const nc::Vector4f v1(0.0f, 0.0f, 0.0f, 0.0f);
 	const nc::Vector4f v2(0.0f, 0.0f, 0.0f, 0.0f);
@@ -31,7 +31,7 @@ TEST_F(Matrix4x4Test, SetVectors)
 	const nc::Vector4f v4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	m1_.set(v1, v2, v3, v4);
-	printf("Setting matrix vectors:\n"); printMatrix(m1_);
+	printMatrix("Setting matrix vectors:\n", m1_);
 
 	assertVectorsAreEqual(m1_[0], v1);
 	assertVectorsAreEqual(m1_[1], v2);
@@ -41,11 +41,10 @@ TEST_F(Matrix4x4Test, SetVectors)
 
 TEST_F(Matrix4x4Test, Addition)
 {
-	printf("m1:\n"); printMatrix(m1_);
-	printf("m2:\n"); printMatrix(m2_);
+	printMatrix("m1:\n", m1_);
+	printMatrix("m2:\n", m2_);
 	const nc::Matrix4x4f sum = m1_ + m2_;
-	printf("Matrix addition:\n");
-	printMatrix(sum);
+	printMatrix("Matrix addition:\n", sum);
 
 	assertVectorsAreEqual(sum[0], m1_[0] + m2_[0]);
 	assertVectorsAreEqual(sum[1], m1_[1] + m2_[1]);
@@ -55,11 +54,10 @@ TEST_F(Matrix4x4Test, Addition)
 
 TEST_F(Matrix4x4Test, Subtraction)
 {
-	printf("m1:\n"); printMatrix(m1_);
-	printf("m2:\n"); printMatrix(m2_);
+	printMatrix("m1:\n", m1_);
+	printMatrix("m2:\n", m2_);
 	const nc::Matrix4x4f sub = m1_ - m2_;
-	printf("Matrix subtraction:\n");
-	printMatrix(sub);
+	printMatrix("Matrix subtraction:\n", sub);
 
 	assertVectorsAreEqual(sub[0], m1_[0] - m2_[0]);
 	assertVectorsAreEqual(sub[1], m1_[1] - m2_[1]);
@@ -69,11 +67,10 @@ TEST_F(Matrix4x4Test, Subtraction)
 
 TEST_F(Matrix4x4Test, Multiplication)
 {
-	printf("m1:\n"); printMatrix(m1_);
-	printf("m2:\n"); printMatrix(m2_);
+	printMatrix("m1:\n", m1_);
+	printMatrix("m2:\n", m2_);
 	const nc::Matrix4x4f mul = m1_ * m2_;
-	printf("Matrix multiplication:\n");
-	printMatrix(mul);
+	printMatrix("Matrix multiplication:\n", mul);
 
 	assertVectorsAreEqual(mul[0], m1_[0] * m2_[0][0] + m1_[1] * m2_[0][1] + m1_[2] * m2_[0][2] + m1_[3] * m2_[0][3]);
 	assertVectorsAreEqual(mul[1], m1_[0] * m2_[1][0] + m1_[1] * m2_[1][1] + m1_[2] * m2_[1][2] + m1_[3] * m2_[1][3]);
@@ -83,11 +80,10 @@ TEST_F(Matrix4x4Test, Multiplication)
 
 TEST_F(Matrix4x4Test, Division)
 {
-	printf("m1:\n"); printMatrix(m1_);
-	printf("m2:\n"); printMatrix(m2_);
+	printMatrix("m1:\n", m1_);
+	printMatrix("m2:\n", m2_);
 	const nc::Matrix4x4f div = m1_ / m2_;
-	printf("Matrix division:\n");
-	printMatrix(div);
+	printMatrix("Matrix division:\n", div);
 
 	assertVectorsAreEqual(div[0], m1_[0] / m2_[0]);
 	assertVectorsAreEqual(div[1], m1_[1] / m2_[1]);
@@ -99,10 +95,9 @@ TEST_F(Matrix4x4Test, AdditionInPlace)
 {
 	const nc::Matrix4x4f oldM1 = m1_;
 
-	printf("m1:\n"); printMatrix(m1_);
-	printf("m2:\n"); printMatrix(m2_);
-	printf("Adding the second matrix to the first:\n");
-	printMatrix(m1_ += m2_);
+	printMatrix("m1:\n", m1_);
+	printMatrix("m2:\n", m2_);
+	printMatrix("Adding the second matrix to the first:\n", m1_ += m2_);
 
 	assertVectorsAreEqual(m1_[0], oldM1[0] + m2_[0]);
 	assertVectorsAreEqual(m1_[1], oldM1[1] + m2_[1]);
@@ -114,10 +109,9 @@ TEST_F(Matrix4x4Test, SubtractionInPlace)
 {
 	const nc::Matrix4x4f oldM1 = m1_;
 
-	printf("m1:\n"); printMatrix(m1_);
-	printf("m2:\n"); printMatrix(m2_);
-	printf("Subtracting the second matrix from the first:\n");
-	printMatrix(m1_ -= m2_);
+	printMatrix("m1:\n", m1_);
+	printMatrix("m2:\n", m2_);
+	printMatrix("Subtracting the second matrix from the first:\n", m1_ -= m2_);
 
 	assertVectorsAreEqual(m1_[0], oldM1[0] - m2_[0]);
 	assertVectorsAreEqual(m1_[1], oldM1[1] - m2_[1]);
@@ -129,10 +123,9 @@ TEST_F(Matrix4x4Test, MultiplicationInPlace)
 {
 	const nc::Matrix4x4f oldM1 = m1_;
 
-	printf("m1:\n"); printMatrix(m1_);
-	printf("m2:\n"); printMatrix(m2_);
-	printf("Multiplying the first matrix by the second:\n");
-	printMatrix(m1_ *= m2_);
+	printMatrix("m1:\n", m1_);
+	printMatrix("m2:\n", m2_);
+	printMatrix("Multiplying the first matrix by the second:\n", m1_ *= m2_);
 
 	assertVectorsAreEqual(m1_[0], oldM1[0] * m2_[0][0] + oldM1[1] * m2_[0][1] + oldM1[2] * m2_[0][2] + oldM1[3] * m2_[0][3]);
 	assertVectorsAreEqual(m1_[1], oldM1[0] * m2_[1][0] + oldM1[1] * m2_[1][1] + oldM1[2] * m2_[1][2] + oldM1[3] * m2_[1][3]);
@@ -144,10 +137,9 @@ TEST_F(Matrix4x4Test, DivisionInPlace)
 {
 	const nc::Matrix4x4f oldM1 = m1_;
 
-	printf("m1:\n"); printMatrix(m1_);
-	printf("m2:\n"); printMatrix(m2_);
-	printf("Dividing the first matrix by the second:\n");
-	printMatrix(m1_ /= m2_);
+	printMatrix("m1:\n", m1_);
+	printMatrix("m2:\n", m2_);
+	printMatrix("Dividing the first matrix by the second:\n", m1_ /= m2_);
 
 	assertVectorsAreEqual(m1_[0], oldM1[0] / m2_[0]);
 	assertVectorsAreEqual(m1_[1], oldM1[1] / m2_[1]);
@@ -158,7 +150,7 @@ TEST_F(Matrix4x4Test, DivisionInPlace)
 TEST_F(Matrix4x4Test, AddScalar)
 {
 	const float scalar = 1.0f;
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 	const nc::Matrix4x4f add = m1_ + scalar;
 	printf("Addition of scalar %.2f:\n", scalar);
 	printMatrix(add);
@@ -172,7 +164,7 @@ TEST_F(Matrix4x4Test, AddScalar)
 TEST_F(Matrix4x4Test, SubtractScalar)
 {
 	const float scalar = 1.0f;
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 	const nc::Matrix4x4f sub = m1_ - scalar;
 	printf("Subtraction of scalar %.2f:\n", scalar);
 	printMatrix(sub);
@@ -186,7 +178,7 @@ TEST_F(Matrix4x4Test, SubtractScalar)
 TEST_F(Matrix4x4Test, MultiplyScalar)
 {
 	const float scalar = 2.0f;
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 	const nc::Matrix4x4f mul = m1_ * scalar;
 	printf("Multiplication by scalar %.2f:\n", scalar);
 	printMatrix(mul);
@@ -200,7 +192,7 @@ TEST_F(Matrix4x4Test, MultiplyScalar)
 TEST_F(Matrix4x4Test, DivideScalar)
 {
 	const float scalar = 2.0f;
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 	const nc::Matrix4x4f div = m1_ / scalar;
 	printf("Division by scalar %.2f:\n", scalar);
 	printMatrix(div);
@@ -216,7 +208,7 @@ TEST_F(Matrix4x4Test, AddScalarInPlace)
 	const float scalar = 1.0f;
 	const nc::Matrix4x4f oldM1 = m1_;
 
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 	printf("Adding the scalar %.2f to the first matrix:\n", scalar);
 	printMatrix(m1_ += scalar);
 
@@ -231,7 +223,7 @@ TEST_F(Matrix4x4Test, SubtractScalarInPlace)
 	const float scalar = 1.0f;
 	const nc::Matrix4x4f oldM1 = m1_;
 
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 	printf("Subtracting the scalar %.2f to the first matrix:\n", scalar);
 	printMatrix(m1_ -= scalar);
 
@@ -246,7 +238,7 @@ TEST_F(Matrix4x4Test, MultiplyScalarInPlace)
 	const float scalar = 2.0f;
 	const nc::Matrix4x4f oldM1 = m1_;
 
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 	printf("Multiplying the first matrix by the scalar %.2f:\n", scalar);
 	printMatrix(m1_ *= scalar);
 
@@ -261,7 +253,7 @@ TEST_F(Matrix4x4Test, DivideScalarInPlace)
 	const float scalar = 2.0f;
 	const nc::Matrix4x4f oldM1 = m1_;
 
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 	printf("Dividing the first matrix by the scalar %.2f:\n", scalar);
 	printMatrix(m1_ /= scalar);
 
@@ -274,7 +266,7 @@ TEST_F(Matrix4x4Test, DivideScalarInPlace)
 TEST_F(Matrix4x4Test, MultiplyScalarAsFirst)
 {
 	const float scalar = 2.0f;
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 	const nc::Matrix4x4f mul = scalar * m1_;
 	printf("Multiplication by scalar %.2f:\n", scalar);
 	printMatrix(mul);
@@ -284,7 +276,6 @@ TEST_F(Matrix4x4Test, MultiplyScalarAsFirst)
 	assertVectorsAreEqual(mul[2], scalar * m1_[2]);
 	assertVectorsAreEqual(mul[3], scalar * m1_[3]);
 }
-
 
 TEST_F(Matrix4x4Test, AddConstantVectors)
 {
@@ -300,9 +291,9 @@ TEST_F(Matrix4x4Test, AddConstantVectors)
 
 TEST_F(Matrix4x4Test, EqualityOperator)
 {
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 	const nc::Matrix4x4f newMatrix = m1_;
-	printf("Creating a new matrix as a copy of the first one:\n"); printMatrix(newMatrix);
+	printMatrix("Creating a new matrix as a copy of the first one:\n", newMatrix);
 
 	printf("The first matrix vectors are equal to the new one: %d", m1_ == newMatrix);
 
@@ -315,9 +306,9 @@ TEST_F(Matrix4x4Test, EqualityOperator)
 
 TEST_F(Matrix4x4Test, Negation)
 {
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 	const nc::Matrix4x4f newMatrix = -m1_;
-	printf("Creating a new matrix as the negation of the first one:\n"); printMatrix(newMatrix);
+	printMatrix("Creating a new matrix as the negation of the first one:\n", newMatrix);
 
 	assertVectorsAreEqual(m1_[0], -newMatrix[0]);
 	assertVectorsAreEqual(m1_[1], -newMatrix[1]);
@@ -327,11 +318,11 @@ TEST_F(Matrix4x4Test, Negation)
 
 TEST_F(Matrix4x4Test, PointerAccess)
 {
-	printf("m1:\n"); printMatrix(m1_);
+	printMatrix("m1:\n", m1_);
 	const float *ptr = m1_.data();
 	printf("Vectors:\n");
-	for(unsigned int i = 0; i < 16; i += 4)
-		printf("[%u] : <%.2f, %.2f, %.2f, %.2f> \n", i/4, ptr[i], ptr[i + 1], ptr[i + 2], ptr[i + 3]);
+	for (unsigned int i = 0; i < 16; i += 4)
+		printf("[%u] : <%.2f, %.2f, %.2f, %.2f> \n", i / 4, ptr[i], ptr[i + 1], ptr[i + 2], ptr[i + 3]);
 	printf("\n");
 
 	assertVectorsAreEqual(m1_[0], ptr[0], ptr[1], ptr[2], ptr[3]);

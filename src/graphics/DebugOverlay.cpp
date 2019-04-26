@@ -19,9 +19,9 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 DebugOverlay::DebugOverlay(const AppConfiguration &appCfg)
-	: IDebugOverlay(appCfg), plotterInitialized_(false), infoTextInitialized_(false),
-	  infoStringTopLeft_(MaxTextLength), infoStringTopRight_(MaxTextLength),
-	  infoStringBottomRight_(MaxTextLength)
+    : IDebugOverlay(appCfg), plotterInitialized_(false), infoTextInitialized_(false),
+      infoStringTopLeft_(MaxTextLength), infoStringTopRight_(MaxTextLength),
+      infoStringBottomRight_(MaxTextLength)
 {
 	if (appCfg.withProfilerGraphs)
 		initPlotter();
@@ -145,11 +145,11 @@ void DebugOverlay::initInfoText()
 		infoLineBottomRight_->setScale(0.75f);
 
 		nctl::String infoStringBottomLeft(MaxTextLength);
-		#ifdef WITH_GIT_VERSION
+#ifdef WITH_GIT_VERSION
 		infoStringBottomLeft.format("%s (%s)", VersionStrings::Version, VersionStrings::GitBranch);
-		#else
+#else
 		infoStringBottomLeft.format("%s at %s", VersionStrings::CompilationDate, VersionStrings::CompilationTime);
-		#endif
+#endif
 		infoLineBottomLeft_->setString(infoStringBottomLeft);
 		infoLineBottomLeft_->setPosition(infoLineBottomLeft_->width() * 0.5f, infoLineBottomLeft_->height() * 0.5f + infoLineBottomLeft_->fontBase() * 0.25f);
 	}
@@ -170,24 +170,24 @@ void DebugOverlay::appendRenderCommandsStatistics(nctl::String &string)
 	const RenderStatistics::Commands &allCommands = RenderStatistics::allCommands();
 
 	string.formatAppend(
-		"Sprites: %uV, %uDC (%u Tr), %uI/%uB\n"\
-		"Mesh Sprites: %uV, %uDC (%u Tr), %uI/%uB\n"\
-		"Particles: %uV, %uDC (%u Tr), %uI/%uB\n"\
-		"Text: %uV, %uDC (%u Tr), %uI/%uB\n"\
-		"Plotter: %uV, %uDC (%u Tr), %uI/%uB\n"
+	    "Sprites: %uV, %uDC (%u Tr), %uI/%uB\n"
+	    "Mesh Sprites: %uV, %uDC (%u Tr), %uI/%uB\n"
+	    "Particles: %uV, %uDC (%u Tr), %uI/%uB\n"
+	    "Text: %uV, %uDC (%u Tr), %uI/%uB\n"
+	    "Plotter: %uV, %uDC (%u Tr), %uI/%uB\n"
 #ifdef WITH_IMGUI
-		"ImGui: %uV, %uDC (%u Tr), %uI/%uB\n"
+	    "ImGui: %uV, %uDC (%u Tr), %uI/%uB\n"
 #endif
-		"Total: %uV, %uDC (%u Tr), %uI/%uB\n",
-		spriteCommands.vertices, spriteCommands.commands, spriteCommands.transparents, spriteCommands.instances, spriteCommands.batchSize,
-		meshspriteCommands.vertices, meshspriteCommands.commands, meshspriteCommands.transparents, meshspriteCommands.instances, meshspriteCommands.batchSize,
-		particleCommands.vertices, particleCommands.commands, particleCommands.transparents, particleCommands.instances, particleCommands.batchSize,
-		textCommands.vertices, textCommands.commands, textCommands.transparents, textCommands.instances, textCommands.batchSize,
-		plotterCommands.vertices, plotterCommands.commands, plotterCommands.transparents, plotterCommands.instances, plotterCommands.batchSize,
+	    "Total: %uV, %uDC (%u Tr), %uI/%uB\n",
+	    spriteCommands.vertices, spriteCommands.commands, spriteCommands.transparents, spriteCommands.instances, spriteCommands.batchSize,
+	    meshspriteCommands.vertices, meshspriteCommands.commands, meshspriteCommands.transparents, meshspriteCommands.instances, meshspriteCommands.batchSize,
+	    particleCommands.vertices, particleCommands.commands, particleCommands.transparents, particleCommands.instances, particleCommands.batchSize,
+	    textCommands.vertices, textCommands.commands, textCommands.transparents, textCommands.instances, textCommands.batchSize,
+	    plotterCommands.vertices, plotterCommands.commands, plotterCommands.transparents, plotterCommands.instances, plotterCommands.batchSize,
 #ifdef WITH_IMGUI
-		imguiCommands.vertices, imguiCommands.commands, imguiCommands.transparents, imguiCommands.instances, imguiCommands.batchSize,
+	    imguiCommands.vertices, imguiCommands.commands, imguiCommands.transparents, imguiCommands.instances, imguiCommands.batchSize,
 #endif
-		allCommands.vertices, allCommands.commands, allCommands.transparents, allCommands.instances, allCommands.batchSize);
+	    allCommands.vertices, allCommands.commands, allCommands.transparents, allCommands.instances, allCommands.batchSize);
 }
 
 void DebugOverlay::appendMoreRenderCommandsStatistics(nctl::String &string)
@@ -201,22 +201,22 @@ void DebugOverlay::appendMoreRenderCommandsStatistics(nctl::String &string)
 	const RenderStatistics::Buffers &uboBuffers = RenderStatistics::buffers(RenderBuffersManager::BufferTypes::UNIFORM);
 
 	string.formatAppend(
-		"Culled nodes: %u\n"\
-		"%u/%u VAOs (%u reuses, %u bindings)\n"\
-		"%.2f Kb in %u Texture(s)\n"\
-		"%.2f Kb in %u custom VBO(s)\n"\
-		"%.2f Kb in %u custom IBO(s)\n"\
-		"%.2f/%lu Kb in %u VBO(s)\n"\
-		"%.2f/%lu Kb in %u IBO(s)\n"\
-		"%.2f/%lu Kb in %u UBO(s)\n",
-		RenderStatistics::culled(),
-		vaoPool.size, vaoPool.capacity, vaoPool.reuses, vaoPool.bindings,
-		textures.dataSize / 1024.0f, textures.count,
-		customVbos.dataSize / 1024.0f, customVbos.count,
-		customIbos.dataSize / 1024.0f, customIbos.count,
-		vboBuffers.usedSpace / 1024.0f, vboBuffers.size / 1024, vboBuffers.count,
-		iboBuffers.usedSpace / 1024.0f, iboBuffers.size / 1024, iboBuffers.count,
-		uboBuffers.usedSpace / 1024.0f, uboBuffers.size / 1024, uboBuffers.count);
+	    "Culled nodes: %u\n"
+	    "%u/%u VAOs (%u reuses, %u bindings)\n"
+	    "%.2f Kb in %u Texture(s)\n"
+	    "%.2f Kb in %u custom VBO(s)\n"
+	    "%.2f Kb in %u custom IBO(s)\n"
+	    "%.2f/%lu Kb in %u VBO(s)\n"
+	    "%.2f/%lu Kb in %u IBO(s)\n"
+	    "%.2f/%lu Kb in %u UBO(s)\n",
+	    RenderStatistics::culled(),
+	    vaoPool.size, vaoPool.capacity, vaoPool.reuses, vaoPool.bindings,
+	    textures.dataSize / 1024.0f, textures.count,
+	    customVbos.dataSize / 1024.0f, customVbos.count,
+	    customIbos.dataSize / 1024.0f, customIbos.count,
+	    vboBuffers.usedSpace / 1024.0f, vboBuffers.size / 1024, vboBuffers.count,
+	    iboBuffers.usedSpace / 1024.0f, iboBuffers.size / 1024, iboBuffers.count,
+	    uboBuffers.usedSpace / 1024.0f, uboBuffers.size / 1024, uboBuffers.count);
 }
 
 #ifdef WITH_LUA
@@ -227,24 +227,24 @@ void DebugOverlay::appendLuaStatistics(nctl::String &string)
 		return;
 
 	string.formatAppend(
-		"%u Lua state(s) with %u tracked userdata\n"\
-		"%zu Kb memory used, %d ops/s\n"\
-		"Textures: %u, Sprites: %u, Mesh sprites: %u\n"\
-		"Animated sprites: %u, Fonts: %u, Textnodes: %u\n"\
-		"Audio buffers: %u, Buffer players: %u\n"\
-		"Stream players: %u, Particle systems: %u",
-		LuaStatistics::numRegistered(), LuaStatistics::numTrackedUserDatas(),
-		LuaStatistics::usedMemory() / 1024, LuaStatistics::operations(),
-		LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::TEXTURE),
-		LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::SPRITE),
-		LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::MESH_SPRITE),
-		LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::ANIMATED_SPRITE),
-		LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::FONT),
-		LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::TEXTNODE),
-		LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::AUDIOBUFFER),
-		LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::AUDIOBUFFER_PLAYER),
-		LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::AUDIOSTREAM_PLAYER),
-		LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::PARTICLE_SYSTEM));
+	    "%u Lua state(s) with %u tracked userdata\n"
+	    "%zu Kb memory used, %d ops/s\n"
+	    "Textures: %u, Sprites: %u, Mesh sprites: %u\n"
+	    "Animated sprites: %u, Fonts: %u, Textnodes: %u\n"
+	    "Audio buffers: %u, Buffer players: %u\n"
+	    "Stream players: %u, Particle systems: %u",
+	    LuaStatistics::numRegistered(), LuaStatistics::numTrackedUserDatas(),
+	    LuaStatistics::usedMemory() / 1024, LuaStatistics::operations(),
+	    LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::TEXTURE),
+	    LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::SPRITE),
+	    LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::MESH_SPRITE),
+	    LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::ANIMATED_SPRITE),
+	    LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::FONT),
+	    LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::TEXTNODE),
+	    LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::AUDIOBUFFER),
+	    LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::AUDIOBUFFER_PLAYER),
+	    LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::AUDIOSTREAM_PLAYER),
+	    LuaStatistics::numTypedUserDatas(LuaTypes::UserDataType::PARTICLE_SYSTEM));
 }
 #endif
 

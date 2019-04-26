@@ -25,7 +25,7 @@ Application &theApplication()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void PCApplication::start(IAppEventHandler * (*createAppEventHandler)())
+void PCApplication::start(IAppEventHandler *(*createAppEventHandler)())
 {
 	ASSERT(createAppEventHandler);
 	PCApplication &app = static_cast<PCApplication &>(theApplication());
@@ -39,7 +39,7 @@ void PCApplication::start(IAppEventHandler * (*createAppEventHandler)())
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void PCApplication::init(IAppEventHandler * (*createAppEventHandler)())
+void PCApplication::init(IAppEventHandler *(*createAppEventHandler)())
 {
 	ZoneScoped;
 	profileTimer_ = nctl::makeUnique<Timer>();
@@ -86,7 +86,6 @@ void PCApplication::run()
 
 			while (SDL_PollEvent(&event))
 			{
-
 				switch (event.type)
 				{
 					case SDL_QUIT:

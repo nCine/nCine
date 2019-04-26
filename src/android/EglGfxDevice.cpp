@@ -9,7 +9,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 EglGfxDevice::EglGfxDevice(struct android_app *state, const GLContextInfo &glContextInfo, const DisplayMode &displayMode)
-	: IGfxDevice(WindowMode(0, 0, true, false), glContextInfo, displayMode)
+    : IGfxDevice(WindowMode(0, 0, true, false), glContextInfo, displayMode)
 {
 	initDevice(state);
 }
@@ -69,16 +69,15 @@ bool EglGfxDevice::isModeSupported(struct android_app *state, const GLContextInf
 {
 	const EGLint renderableTypeBit = (glContextInfo.majorVersion == 3) ? EGL_OPENGL_ES3_BIT_KHR : EGL_OPENGL_ES2_BIT;
 
-	const EGLint attribs[] =
-	{
-		EGL_SURFACE_TYPE,		EGL_WINDOW_BIT,
-		EGL_RENDERABLE_TYPE,	renderableTypeBit,
-		EGL_BLUE_SIZE,			static_cast<int>(mode.blueBits()),
-		EGL_GREEN_SIZE,			static_cast<int>(mode.greenBits()),
-		EGL_RED_SIZE,			static_cast<int>(mode.redBits()),
-		EGL_ALPHA_SIZE,			static_cast<int>(mode.alphaBits()),
-		EGL_DEPTH_SIZE,			static_cast<int>(mode.depthBits()),
-		EGL_STENCIL_SIZE,		static_cast<int>(mode.stencilBits()),
+	const EGLint attribs[] = {
+		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+		EGL_RENDERABLE_TYPE, renderableTypeBit,
+		EGL_BLUE_SIZE, static_cast<int>(mode.blueBits()),
+		EGL_GREEN_SIZE, static_cast<int>(mode.greenBits()),
+		EGL_RED_SIZE, static_cast<int>(mode.redBits()),
+		EGL_ALPHA_SIZE, static_cast<int>(mode.alphaBits()),
+		EGL_DEPTH_SIZE, static_cast<int>(mode.depthBits()),
+		EGL_STENCIL_SIZE, static_cast<int>(mode.stencilBits()),
 		EGL_NONE
 	};
 
@@ -115,24 +114,22 @@ void EglGfxDevice::initDevice(struct android_app *state)
 {
 	const EGLint renderableTypeBit = (glContextInfo_.majorVersion == 3) ? EGL_OPENGL_ES3_BIT_KHR : EGL_OPENGL_ES2_BIT;
 
-	const EGLint attribs[] =
-	{
-		EGL_SURFACE_TYPE,		EGL_WINDOW_BIT,
-		EGL_RENDERABLE_TYPE,	renderableTypeBit,
-		EGL_BLUE_SIZE,			static_cast<int>(displayMode_.blueBits()),
-		EGL_GREEN_SIZE,			static_cast<int>(displayMode_.greenBits()),
-		EGL_RED_SIZE,			static_cast<int>(displayMode_.redBits()),
-		EGL_ALPHA_SIZE,			static_cast<int>(displayMode_.alphaBits()),
-		EGL_DEPTH_SIZE,			static_cast<int>(displayMode_.depthBits()),
-		EGL_STENCIL_SIZE,		static_cast<int>(displayMode_.stencilBits()),
+	const EGLint attribs[] = {
+		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+		EGL_RENDERABLE_TYPE, renderableTypeBit,
+		EGL_BLUE_SIZE, static_cast<int>(displayMode_.blueBits()),
+		EGL_GREEN_SIZE, static_cast<int>(displayMode_.greenBits()),
+		EGL_RED_SIZE, static_cast<int>(displayMode_.redBits()),
+		EGL_ALPHA_SIZE, static_cast<int>(displayMode_.alphaBits()),
+		EGL_DEPTH_SIZE, static_cast<int>(displayMode_.depthBits()),
+		EGL_STENCIL_SIZE, static_cast<int>(displayMode_.stencilBits()),
 		EGL_NONE
 	};
 
 	//const EGLint glProfileMaskBit = glContextInfo_.coreProfile ? EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR :
 	//	EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT_KHR; // disabled
 
-	EGLint attribList[] =
-	{
+	EGLint attribList[] = {
 		EGL_CONTEXT_MAJOR_VERSION_KHR, static_cast<EGLint>(glContextInfo_.majorVersion),
 		EGL_CONTEXT_MINOR_VERSION_KHR, static_cast<EGLint>(glContextInfo_.minorVersion),
 		//EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR, glProfileMaskBit, // disabled

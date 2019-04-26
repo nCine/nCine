@@ -14,8 +14,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace IInputManager
-{
+namespace IInputManager {
 	static const char *mouseState = "mouse_state";
 	static const char *keyboardState = "key_state";
 

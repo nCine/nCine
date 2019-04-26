@@ -11,7 +11,7 @@ class TextureFormat
 {
   public:
 	TextureFormat()
-		: internalFormat_(-1), format_(-1), type_(-1), isCompressed_(false) { }
+	    : internalFormat_(-1), format_(-1), type_(-1), isCompressed_(false) {}
 	explicit TextureFormat(GLenum internalFormat);
 	TextureFormat(GLenum internalFormat, GLenum type);
 

@@ -3,8 +3,7 @@
 
 namespace ncine {
 
-namespace LuaNames
-{
+namespace LuaNames {
 	static const char *ncine = "ncine";
 
 	static const char *newObject = "new";
@@ -16,4 +15,3 @@ namespace LuaNames
 }
 
 #endif
-

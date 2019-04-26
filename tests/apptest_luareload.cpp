@@ -25,12 +25,11 @@ nc::IAppEventHandler *createAppEventHandler()
 }
 
 MyEventHandler::MyEventHandler()
-	: luaState_(nc::LuaStateManager::ApiType::EDIT_ONLY,
-	            nc::LuaStateManager::StatisticsTracking::DISABLED,
-	            nc::LuaStateManager::StandardLibraries::LOADED),
-	  variationIndex_(0)
+    : luaState_(nc::LuaStateManager::ApiType::EDIT_ONLY,
+                nc::LuaStateManager::StatisticsTracking::DISABLED,
+                nc::LuaStateManager::StandardLibraries::LOADED),
+      variationIndex_(0)
 {
-
 }
 
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)

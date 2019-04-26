@@ -40,18 +40,22 @@ const float DoubleClickDelay = 0.3f;
 
 const int NumTexelPoints[MyEventHandler::NumTextures] = { 3, 4, 5, 4 };
 const nc::Vector2f TexelPoints[] = {
+	// clang-format off
 	{4.0f, 2.0f}, {124.0f, 2.0f}, {64.0f, 122.0f},
 	{13.0f, 13.0f}, {115.0f, 13.0f}, {13.0f, 115.0f}, {115.0f, 115.0f},
 	{3.0f, 79.0f}, {26.0f, 2.0f}, {64.0f, 125.0f}, {102.0f, 2.0f}, {125.0f, 79.0f},
 	{20.0f, 20.0f}, {107.0f, 20.0f}, {20.0f, 107.0f}, {107.0f, 107.0f},
+	// clang-format on
 };
 
 const int NumTranspTexelPoints[MyEventHandler::NumTextures] = { 8, 10, 12, 10 };
 const nc::Vector2f TranspTexelPoints[] = {
+	// clang-format off
 	{0.0f, 0.0f}, {4.0f, 2.0f}, {64.0f, 122.0f}, {64.0f, 128.0f}, {124.0f, 2.0f}, {128.0f, 0.0f}, {4.0f, 2.0f}, {0.0f, 0.0f},
 	{0.0f, 0.0f}, {13.0f, 13.0f}, {0.0f, 128.0f}, {13.0f, 115.0f}, {128.0f, 128.0f}, {115.0f, 115.0f}, {128.0f, 0.0f}, {115.0f, 13.0f}, {0.0f, 0.0f}, {13.0f, 13.0f},
 	{24.0f, 0.0f}, {26.0f, 2.0f}, {0.0f, 79.0f}, {3.0f, 79.0f}, {64.0f, 128.0f}, {64.0f, 125.0f}, {128.0f, 79.0f}, {125.0f, 79.0f}, {102.0f, 2.0f}, {104.0f, 0.0f}, {26.0f, 2.0f}, {24.0f, 0.0f},
 	{0.0f, 0.0f}, {20.0f, 20.0f}, {0.0f, 128.0f}, {20.0f, 107.0f}, {128.0f, 128.0f}, {107.0f, 107.0f}, {128.0f, 0.0f}, {107.0f, 20.0f}, {0.0f, 0.0f}, {20.0f, 20.0f},
+	// clang-format on
 };
 
 }

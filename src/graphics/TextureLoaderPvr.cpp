@@ -8,13 +8,12 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 TextureLoaderPvr::TextureLoaderPvr(const char *filename)
-	: TextureLoaderPvr(IFile::createFileHandle(filename))
+    : TextureLoaderPvr(IFile::createFileHandle(filename))
 {
-
 }
 
 TextureLoaderPvr::TextureLoaderPvr(nctl::UniquePtr<IFile> fileHandle)
-	: ITextureLoader(nctl::move(fileHandle))
+    : ITextureLoader(nctl::move(fileHandle))
 {
 	Pvr3Header header;
 
@@ -103,7 +102,7 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 			case FMT_EAC_RG11:
 				internalFormat = GL_COMPRESSED_RG11_EAC;
 				break;
-#if __ANDROID_API__ >= 21
+	#if __ANDROID_API__ >= 21
 			case FMT_ASTC_4x4:
 				internalFormat = GL_COMPRESSED_RGBA_ASTC_4x4_KHR;
 				break;
@@ -146,7 +145,7 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 			case FMT_ASTC_12x12:
 				internalFormat = GL_COMPRESSED_RGBA_ASTC_12x12_KHR;
 				break;
-#endif
+	#endif
 #endif
 			default:
 				FATAL_MSG_X("Unsupported PVR3 compressed format: 0x%llx", pixelFormat);
@@ -213,8 +212,8 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 	if (mipMapCount_ > 1)
 	{
 		LOGI_X("MIP Maps: %d", mipMapCount_);
-		mipDataOffsets_ = nctl::makeUnique<unsigned long []>(mipMapCount_);
-		mipDataSizes_ = nctl::makeUnique<unsigned long []>(mipMapCount_);
+		mipDataOffsets_ = nctl::makeUnique<unsigned long[]>(mipMapCount_);
+		mipDataSizes_ = nctl::makeUnique<unsigned long[]>(mipMapCount_);
 		unsigned long dataSizesSum = TextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_.get(), mipDataSizes_.get());
 		if (dataSizesSum != dataSize_)
 			LOGW_X("The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);

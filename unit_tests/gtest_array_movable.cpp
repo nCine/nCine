@@ -6,7 +6,8 @@ namespace {
 class ArrayMovableTest : public ::testing::Test
 {
   public:
-	ArrayMovableTest() : array_(Capacity) { }
+	ArrayMovableTest()
+	    : array_(Capacity) {}
 
   protected:
 	nctl::Array<Movable> array_;

@@ -59,7 +59,7 @@ static void BM_StringIterate(benchmark::State &state)
 
 	for (auto _ : state)
 	{
-		for (char c: string)
+		for (char c : string)
 		{
 			char value = c;
 			benchmark::DoNotOptimize(value);

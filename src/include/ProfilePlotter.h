@@ -53,7 +53,7 @@ class ProfilePlotter : public DrawableNode
 	/// Background color
 	Color backgroundColor_;
 	/// The array of variables
-	nctl::Array<nctl::UniquePtr<PlottingVariable> > variables_;
+	nctl::Array<nctl::UniquePtr<PlottingVariable>> variables_;
 
 	/// Reference value drawing flag
 	bool shouldPlotRefValue_;

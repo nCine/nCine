@@ -12,9 +12,9 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GfxCapabilities::GfxCapabilities()
-	: glMajorVersion_(0),
-	  glMinorVersion_(0),
-	  glReleaseVersion_(0)
+    : glMajorVersion_(0),
+      glMinorVersion_(0),
+      glReleaseVersion_(0)
 {
 	for (unsigned int i = 0; i < GLIntValues::COUNT; i++)
 		glIntValues_[i] = 0;
@@ -33,9 +33,9 @@ int GfxCapabilities::glVersion(IGfxCapabilities::GLVersion version) const
 {
 	switch (version)
 	{
-		case GLVersion::MAJOR:		return glMajorVersion_;
-		case GLVersion::MINOR:		return glMinorVersion_;
-		case GLVersion::RELEASE:	return glReleaseVersion_;
+		case GLVersion::MAJOR: return glMajorVersion_;
+		case GLVersion::MINOR: return glMinorVersion_;
+		case GLVersion::RELEASE: return glReleaseVersion_;
 
 		default: return 0;
 	}

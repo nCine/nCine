@@ -46,7 +46,7 @@ bool isUnmodified(const nctl::StaticArray<int, Capacity> &array)
 		value++;
 	}
 
-		return true;
+	return true;
 }
 
 bool isSorted(const nctl::StaticArray<int, Capacity> &array)
@@ -57,7 +57,7 @@ bool isSorted(const nctl::StaticArray<int, Capacity> &array)
 			return false;
 	}
 
-		return true;
+	return true;
 }
 
 bool isReverseSorted(const nctl::StaticArray<int, Capacity> &array)
@@ -68,7 +68,7 @@ bool isReverseSorted(const nctl::StaticArray<int, Capacity> &array)
 			return false;
 	}
 
-		return true;
+	return true;
 }
 
 }

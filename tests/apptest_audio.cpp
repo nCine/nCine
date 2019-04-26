@@ -77,7 +77,6 @@ void MyEventHandler::onFrameStart()
 			break;
 		default:
 			break;
-
 	}
 	textString_->append(" (press M)\n");
 
@@ -95,7 +94,6 @@ void MyEventHandler::onFrameStart()
 			break;
 		default:
 			break;
-
 	}
 	textString_->append(" (press A/S/D)\n");
 

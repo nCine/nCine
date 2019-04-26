@@ -13,15 +13,14 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Material::Material()
-	: isTransparent_(false), shaderProgramType_(ShaderProgramType::CUSTOM),
-	  shaderProgram_(nullptr), texture_(nullptr)
+    : isTransparent_(false), shaderProgramType_(ShaderProgramType::CUSTOM),
+      shaderProgram_(nullptr), texture_(nullptr)
 {
-
 }
 
 Material::Material(GLShaderProgram *program, GLTexture *texture)
-	: isTransparent_(false), shaderProgramType_(ShaderProgramType::CUSTOM),
-	  shaderProgram_(program), texture_(texture)
+    : isTransparent_(false), shaderProgramType_(ShaderProgramType::CUSTOM),
+      shaderProgram_(program), texture_(texture)
 {
 	setShaderProgram(program);
 }
@@ -76,7 +75,6 @@ void Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 		case ShaderProgramType::CUSTOM:
 			break;
 	}
-
 
 	switch (shaderProgramType)
 	{
@@ -150,7 +148,7 @@ void Material::setUniformsDataPointer(GLubyte *dataPointer)
 	{
 		// Total memory size for all uniforms and uniform blocks
 		const unsigned int uniformsSize = shaderProgram_->uniformsSize() + shaderProgram_->uniformBlocksSize();
-		uniformsHostBuffer_ = nctl::makeUnique<GLubyte []>(uniformsSize);
+		uniformsHostBuffer_ = nctl::makeUnique<GLubyte[]>(uniformsSize);
 		dataPointer = uniformsHostBuffer_.get();
 	}
 

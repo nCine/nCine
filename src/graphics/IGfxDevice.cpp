@@ -12,11 +12,10 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 IGfxDevice::IGfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode)
-	: width_(windowMode.width), height_(windowMode.height),
-	  isFullScreen_(windowMode.isFullScreen), isResizable_(windowMode.isResizable),
-	  glContextInfo_(glContextInfo), displayMode_(displayMode)
+    : width_(windowMode.width), height_(windowMode.height),
+      isFullScreen_(windowMode.isFullScreen), isResizable_(windowMode.isResizable),
+      glContextInfo_(glContextInfo), displayMode_(displayMode)
 {
-
 }
 
 ///////////////////////////////////////////////////////////

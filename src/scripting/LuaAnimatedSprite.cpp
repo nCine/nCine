@@ -9,8 +9,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace AnimatedSprite
-{
+namespace AnimatedSprite {
 	static const char *AnimatedSprite = "animated_sprite";
 
 	static const char *addAnimation = "add_animation";

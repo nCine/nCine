@@ -13,11 +13,14 @@ class Vector4
   public:
 	T x, y, z, w;
 
-	Vector4() { }
-	explicit Vector4(T s) : x(s), y(s), z(s), w(s) { }
-	Vector4(T xx, T yy, T zz, T ww) : x(xx), y(yy), z(zz), w(ww) { }
-	Vector4(const Vector4 &other) : x(other.x), y(other.y), z(other.z), w(other.w) { }
-	Vector4& operator=(const Vector4 &other);
+	Vector4() {}
+	explicit Vector4(T s)
+	    : x(s), y(s), z(s), w(s) {}
+	Vector4(T xx, T yy, T zz, T ww)
+	    : x(xx), y(yy), z(zz), w(ww) {}
+	Vector4(const Vector4 &other)
+	    : x(other.x), y(other.y), z(other.z), w(other.w) {}
+	Vector4 &operator=(const Vector4 &other);
 
 	void set(T xx, T yy, T zz, T ww);
 
@@ -50,7 +53,8 @@ class Vector4
 	Vector4 operator*(T s) const;
 	Vector4 operator/(T s) const;
 
-	template <class S> friend Vector4<S> operator*(S s, const Vector4<S> &v);
+	template <class S>
+	friend Vector4<S> operator*(S s, const Vector4<S> &v);
 
 	T length() const;
 	T sqrLength() const;
@@ -60,7 +64,8 @@ class Vector4
 	Vector2<T> toVector2() const;
 	Vector3<T> toVector3() const;
 
-	template <class S> friend S dot(const Vector4<S> &v1, const Vector4<S> &v2);
+	template <class S>
+	friend S dot(const Vector4<S> &v1, const Vector4<S> &v2);
 
 	/// A vector with all zero elements
 	static const Vector4 Zero;
@@ -357,11 +362,16 @@ inline S dot(const Vector4<S> &v1, const Vector4<S> &v2)
 	                      v1.w * v2.w);
 }
 
-template <class T> const Vector4<T> Vector4<T>::Zero(0, 0, 0, 0);
-template <class T> const Vector4<T> Vector4<T>::XAxis(1, 0, 0, 0);
-template <class T> const Vector4<T> Vector4<T>::YAxis(0, 1, 0, 0);
-template <class T> const Vector4<T> Vector4<T>::ZAxis(0, 0, 1, 0);
-template <class T> const Vector4<T> Vector4<T>::WAxis(0, 0, 0, 1);
+template <class T>
+const Vector4<T> Vector4<T>::Zero(0, 0, 0, 0);
+template <class T>
+const Vector4<T> Vector4<T>::XAxis(1, 0, 0, 0);
+template <class T>
+const Vector4<T> Vector4<T>::YAxis(0, 1, 0, 0);
+template <class T>
+const Vector4<T> Vector4<T>::ZAxis(0, 0, 1, 0);
+template <class T>
+const Vector4<T> Vector4<T>::WAxis(0, 0, 0, 1);
 
 }
 

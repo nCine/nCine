@@ -10,7 +10,7 @@ namespace ncine {
 class DLL_PUBLIC IAudioLoader
 {
   public:
-	virtual ~IAudioLoader() { }
+	virtual ~IAudioLoader() {}
 
 	/// Decodes audio data in a specified buffer
 	/*!

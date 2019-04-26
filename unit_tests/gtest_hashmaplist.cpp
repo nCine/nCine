@@ -5,7 +5,8 @@ namespace {
 class HashMapListTest : public ::testing::Test
 {
   public:
-	HashMapListTest() : hashmap_(Capacity) { }
+	HashMapListTest()
+	    : hashmap_(Capacity) {}
 
   protected:
 	void SetUp() override { initHashMap(hashmap_); }

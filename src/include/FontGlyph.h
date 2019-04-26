@@ -39,7 +39,8 @@ class FontGlyph
 		unsigned int secondGlyph_;
 		int amount_;
 
-		Kerning() : secondGlyph_(0), amount_(0) { }
+		Kerning()
+		    : secondGlyph_(0), amount_(0) {}
 		Kerning(unsigned int secondGlyph, int amount)
 		{
 			secondGlyph_ = secondGlyph;

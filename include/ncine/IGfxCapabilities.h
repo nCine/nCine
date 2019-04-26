@@ -72,8 +72,7 @@ class DLL_PUBLIC IGfxCapabilities
 	virtual bool hasExtension(GLExtensions::Enum extensionName) const = 0;
 };
 
-inline IGfxCapabilities::~IGfxCapabilities() { }
-
+inline IGfxCapabilities::~IGfxCapabilities() {}
 
 /// A fake graphics capabilities class that reports no available capabilities
 class DLL_PUBLIC NullGfxCapabilities : public IGfxCapabilities

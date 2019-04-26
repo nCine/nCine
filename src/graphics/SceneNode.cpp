@@ -14,9 +14,9 @@ const float SceneNode::MinRotation = 0.5f;
 
 /*! \param parent The parent can be `nullptr` */
 SceneNode::SceneNode(SceneNode *parent, float xx, float yy)
-	: Object(ObjectType::SCENENODE), x(xx), y(yy), updateEnabled_(true), drawEnabled_(true), parent_(nullptr),
-	  scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
-	  worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
+    : Object(ObjectType::SCENENODE), x(xx), y(yy), updateEnabled_(true), drawEnabled_(true), parent_(nullptr),
+      scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
+      worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {
 	if (parent)
 		parent->addChildNode(this);
@@ -24,28 +24,25 @@ SceneNode::SceneNode(SceneNode *parent, float xx, float yy)
 
 /*! \param parent The parent can be `nullptr` */
 SceneNode::SceneNode(SceneNode *parent, const Vector2f &position)
-	: SceneNode(parent, position.x, position.y)
+    : SceneNode(parent, position.x, position.y)
 {
-
 }
 
 /*! \param parent The parent can be `nullptr` */
 SceneNode::SceneNode(SceneNode *parent)
-	: SceneNode(parent, 0.0f, 0.0f)
+    : SceneNode(parent, 0.0f, 0.0f)
 {
-
 }
 
 SceneNode::SceneNode()
-	: SceneNode(nullptr, 0.0f, 0.0f)
+    : SceneNode(nullptr, 0.0f, 0.0f)
 {
-
 }
 
 SceneNode::~SceneNode()
 {
 	for (SceneNode *child : children_)
-		delete(child);
+		delete child;
 
 	if (parent_)
 	{

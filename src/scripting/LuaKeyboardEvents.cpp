@@ -9,8 +9,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace LuaKeyboardEvents
-{
+namespace LuaKeyboardEvents {
 	static const char *isKeyDown = "key_down";
 
 	static const char *scancode = "scancode";

@@ -178,12 +178,12 @@ TEST_F(StaticHashMapTest, RemoveAllFromFull)
 		newHashmap.remove(i);
 
 	ASSERT_EQ(newHashmap.size(), 0);
-	ASSERT_EQ(calcSize(newHashmap),0);
+	ASSERT_EQ(calcSize(newHashmap), 0);
 }
 
 const int BigCapacity = 512;
 const int LastElement = BigCapacity / 2;
-using HashMapStressTestType = nctl::StaticHashMap<int, int, BigCapacity, nctl::FNV1aHashFunc<int> >;
+using HashMapStressTestType = nctl::StaticHashMap<int, int, BigCapacity, nctl::FNV1aHashFunc<int>>;
 
 TEST_F(StaticHashMapTest, StressRemove)
 {

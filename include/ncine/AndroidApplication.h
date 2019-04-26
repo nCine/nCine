@@ -13,7 +13,7 @@ class DLL_PUBLIC AndroidApplication : public Application
 {
   public:
 	/// Entry point method to be called in the `android_main()` function
-	static void start(struct android_app *state, IAppEventHandler * (*createAppEventHandler)());
+	static void start(struct android_app *state, IAppEventHandler *(*createAppEventHandler)());
 
 	/// Processes an Android application command
 	static void processCommand(struct android_app *state, int32_t cmd);
@@ -48,9 +48,10 @@ class DLL_PUBLIC AndroidApplication : public Application
 	void setFocus(bool hasFocus) override;
 
 	/// Private constructor
-	AndroidApplication() : Application(),  isInitialized_(false), packageName_(128), state_(nullptr), createAppEventHandler_(nullptr) { }
+	AndroidApplication()
+	    : Application(), isInitialized_(false), packageName_(128), state_(nullptr), createAppEventHandler_(nullptr) {}
 	/// Private destructor
-	~AndroidApplication() { }
+	~AndroidApplication() {}
 	/// Deleted copy constructor
 	AndroidApplication(const AndroidApplication &) = delete;
 	/// Deleted assignment operator

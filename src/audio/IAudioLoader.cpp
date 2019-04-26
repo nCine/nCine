@@ -13,13 +13,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 IAudioLoader::IAudioLoader(const char *filename)
-	: IAudioLoader(IFile::createFileHandle(filename))
+    : IAudioLoader(IFile::createFileHandle(filename))
 {
 	// Warning: Cannot call a virtual init() here, in the base constructor
 }
 
 IAudioLoader::IAudioLoader(nctl::UniquePtr<IFile> fileHandle)
-	: fileHandle_(nctl::move(fileHandle)), bytesPerSample_(0), numChannels_(0), frequency_(0), numSamples_(0L), duration_(0.0f)
+    : fileHandle_(nctl::move(fileHandle)), bytesPerSample_(0), numChannels_(0), frequency_(0), numSamples_(0L), duration_(0.0f)
 {
 	// Warning: Cannot call a virtual init() here, in the base constructor
 }

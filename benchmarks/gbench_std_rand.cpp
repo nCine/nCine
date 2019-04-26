@@ -51,5 +51,4 @@ static void BM_FastGenerateBoundedReal(benchmark::State &state)
 }
 BENCHMARK(BM_FastGenerateBoundedReal)->Arg(Repetitions);
 
-
 BENCHMARK_MAIN();

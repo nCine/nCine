@@ -51,7 +51,8 @@ class AndroidKeyboardState : public KeyboardState
 class AndroidMouseState : public MouseState
 {
   public:
-	AndroidMouseState() : buttonState_(0) { }
+	AndroidMouseState()
+	    : buttonState_(0) {}
 
 	bool isLeftButtonDown() const override;
 	bool isMiddleButtonDown() const override;
@@ -69,7 +70,8 @@ class AndroidMouseState : public MouseState
 class AndroidMouseEvent : public MouseEvent
 {
   public:
-	AndroidMouseEvent() : button_(0) { }
+	AndroidMouseEvent()
+	    : button_(0) {}
 
 	bool isLeftButton() const override;
 	bool isMiddleButton() const override;

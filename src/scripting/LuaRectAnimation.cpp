@@ -8,8 +8,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace RectAnimation
-{
+namespace RectAnimation {
 	static const char *DISABLED = "DISABLED";
 	static const char *ENABLED = "ENABLED";
 	static const char *LoopMode = "loop_mode";

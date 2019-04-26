@@ -12,17 +12,16 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 TextNode::TextNode(SceneNode *parent, Font *font)
-	: TextNode(parent, font, DefaultStringLength)
+    : TextNode(parent, font, DefaultStringLength)
 {
-
 }
 
 TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
-	: DrawableNode(parent, 0.0f, 0.0f), string_(maxStringLength), dirtyDraw_(true),
-	  dirtyBoundaries_(true), withKerning_(true), font_(font),
-	  interleavedVertices_(maxStringLength * 4 + (maxStringLength - 1) * 2),
-	  xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f),
-	  lineLengths_(4), alignment_(Alignment::LEFT), textnodeBlock_(nullptr)
+    : DrawableNode(parent, 0.0f, 0.0f), string_(maxStringLength), dirtyDraw_(true),
+      dirtyBoundaries_(true), withKerning_(true), font_(font),
+      interleavedVertices_(maxStringLength * 4 + (maxStringLength - 1) * 2),
+      xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f),
+      lineLengths_(4), alignment_(Alignment::LEFT), textnodeBlock_(nullptr)
 {
 	ASSERT(font);
 	ASSERT(maxStringLength > 0);
@@ -31,8 +30,9 @@ TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
 	setLayer(DrawableNode::LayerBase::HUD);
 	renderCommand_->setType(RenderCommand::CommandTypes::TEXT);
 	renderCommand_->material().setTransparent(true);
-	const Material::ShaderProgramType shaderProgramType = font_->texture()->numChannels() >= 3 ?
-		Material::ShaderProgramType::TEXTNODE : Material::ShaderProgramType::TEXTNODE_GRAY;
+	const Material::ShaderProgramType shaderProgramType = font_->texture()->numChannels() >= 3
+	                                                          ? Material::ShaderProgramType::TEXTNODE
+	                                                          : Material::ShaderProgramType::TEXTNODE_GRAY;
 	renderCommand_->material().setShaderProgramType(shaderProgramType);
 	textnodeBlock_ = renderCommand_->material().uniformBlock("TextnodeBlock");
 	renderCommand_->material().setTexture(*font_->texture());

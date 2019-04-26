@@ -25,13 +25,13 @@ class ThreadPool : public IThreadPool
   private:
 	struct ThreadStruct
 	{
-		nctl::List<nctl::UniquePtr<IThreadCommand> > *queue;
+		nctl::List<nctl::UniquePtr<IThreadCommand>> *queue;
 		Mutex *queueMutex;
 		CondVariable *queueCV;
 		bool shouldQuit;
 	};
 
-	nctl::List<nctl::UniquePtr<IThreadCommand> > queue_;
+	nctl::List<nctl::UniquePtr<IThreadCommand>> queue_;
 	nctl::Array<Thread> threads_;
 	Mutex queueMutex_;
 	CondVariable queueCV_;

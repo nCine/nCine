@@ -12,11 +12,14 @@ class Vector3
   public:
 	T x, y, z;
 
-	Vector3() { }
-	explicit Vector3(T s) : x(s), y(s), z(s) { }
-	Vector3(T xx, T yy, T zz) : x(xx), y(yy), z(zz) { }
-	Vector3(const Vector3 &other) : x(other.x), y(other.y), z(other.z) { }
-	Vector3& operator=(const Vector3 &other);
+	Vector3() {}
+	explicit Vector3(T s)
+	    : x(s), y(s), z(s) {}
+	Vector3(T xx, T yy, T zz)
+	    : x(xx), y(yy), z(zz) {}
+	Vector3(const Vector3 &other)
+	    : x(other.x), y(other.y), z(other.z) {}
+	Vector3 &operator=(const Vector3 &other);
 
 	void set(T xx, T yy, T zz);
 
@@ -49,7 +52,8 @@ class Vector3
 	Vector3 operator*(T s) const;
 	Vector3 operator/(T s) const;
 
-	template <class S> friend Vector3<S> operator*(S s, const Vector3<S> &v);
+	template <class S>
+	friend Vector3<S> operator*(S s, const Vector3<S> &v);
 
 	T length() const;
 	T sqrLength() const;
@@ -58,8 +62,10 @@ class Vector3
 
 	Vector2<T> toVector2() const;
 
-	template <class S> friend S dot(const Vector3<S> &v1, const Vector3<S> &v2);
-	template <class S> friend Vector3<S> cross(const Vector3<S> &v1, const Vector3<S> &v2);
+	template <class S>
+	friend S dot(const Vector3<S> &v1, const Vector3<S> &v2);
+	template <class S>
+	friend Vector3<S> cross(const Vector3<S> &v1, const Vector3<S> &v2);
 
 	/// A vector with all zero elements
 	static const Vector3 Zero;
@@ -335,10 +341,14 @@ inline Vector3<S> cross(const Vector3<S> &v1, const Vector3<S> &v2)
 	                  v1.x * v2.y - v1.y * v2.x);
 }
 
-template <class T> const Vector3<T> Vector3<T>::Zero(0, 0, 0);
-template <class T> const Vector3<T> Vector3<T>::XAxis(1, 0, 0);
-template <class T> const Vector3<T> Vector3<T>::YAxis(0, 1, 0);
-template <class T> const Vector3<T> Vector3<T>::ZAxis(0, 0, 1);
+template <class T>
+const Vector3<T> Vector3<T>::Zero(0, 0, 0);
+template <class T>
+const Vector3<T> Vector3<T>::XAxis(1, 0, 0);
+template <class T>
+const Vector3<T> Vector3<T>::YAxis(0, 1, 0);
+template <class T>
+const Vector3<T> Vector3<T>::ZAxis(0, 0, 1);
 
 }
 

@@ -5,7 +5,8 @@ namespace {
 class ArrayZeroCapacityTest : public ::testing::Test
 {
   public:
-	ArrayZeroCapacityTest() : array_(0) { }
+	ArrayZeroCapacityTest()
+	    : array_(0) {}
 
 	nctl::Array<int> array_;
 };

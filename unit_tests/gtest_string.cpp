@@ -5,7 +5,8 @@ namespace {
 class StringTest : public ::testing::Test
 {
   public:
-	StringTest() : string_(Capacity) { }
+	StringTest()
+	    : string_(Capacity) {}
 
   protected:
 	void SetUp() override { string_ = "String1"; }
@@ -16,7 +17,7 @@ class StringTest : public ::testing::Test
 TEST_F(StringTest, EmptyString)
 {
 	nctl::String newString(Capacity);
-	printf("Creating an empty string: "); printString(newString);
+	printString("Creating an empty string: ", newString);
 
 	ASSERT_EQ(newString.capacity(), Capacity);
 	ASSERT_EQ(newString.length(), 0);
@@ -26,7 +27,7 @@ TEST_F(StringTest, AssignCString)
 {
 	nctl::String newString(Capacity);
 	newString = "String1";
-	printf("Assigning a C-style string to an empty one: "); printString(newString);
+	printString("Assigning a C-style string to an empty one: ", newString);
 
 	ASSERT_EQ(newString.capacity(), Capacity);
 	ASSERT_EQ(newString.length(), strnlen("String1", Capacity));
@@ -71,7 +72,7 @@ TEST_F(StringTest, GreaterThanOperator)
 TEST_F(StringTest, AppendOperator)
 {
 	string_ += "Append";
-	printf("Appending a C-style string to the first one: "); printString(string_);
+	printString("Appending a C-style string to the first one: ", string_);
 
 	ASSERT_EQ(string_.capacity(), Capacity);
 	ASSERT_EQ(string_.length(), strnlen("String1Append", Capacity));

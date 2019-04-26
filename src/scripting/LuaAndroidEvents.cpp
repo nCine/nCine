@@ -8,8 +8,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace LuaAndroidEvents
-{
+namespace LuaAndroidEvents {
 	static const char *count = "count";
 	static const char *actionIndex = "action_index";
 	static const char *id = "id";
@@ -18,7 +17,6 @@ namespace LuaAndroidEvents
 	static const char *y = "y";
 	static const char *z = "z";
 }}
-
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS

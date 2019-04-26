@@ -36,8 +36,10 @@ class DLL_PUBLIC LuaStateManager
 
 	struct StateToManager
 	{
-		StateToManager() : luaState(nullptr), stateManager(nullptr) { }
-		StateToManager(lua_State *L, LuaStateManager *manager) : luaState(L), stateManager(manager) { }
+		StateToManager()
+		    : luaState(nullptr), stateManager(nullptr) {}
+		StateToManager(lua_State *L, LuaStateManager *manager)
+		    : luaState(L), stateManager(manager) {}
 
 		lua_State *luaState;
 		LuaStateManager *stateManager;
@@ -45,7 +47,8 @@ class DLL_PUBLIC LuaStateManager
 
 	struct UserDataWrapper
 	{
-		UserDataWrapper() : object(nullptr), type(LuaTypes::UNKNOWN), arrayIndex(0) { }
+		UserDataWrapper()
+		    : object(nullptr), type(LuaTypes::UNKNOWN), arrayIndex(0) {}
 
 		void *object;
 		enum LuaTypes::UserDataType type;

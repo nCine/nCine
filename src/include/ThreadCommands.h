@@ -10,7 +10,8 @@ namespace ncine {
 class DummyCommand : public IThreadCommand
 {
   public:
-	explicit DummyCommand(unsigned int requestCode) : requestCode_(requestCode) { }
+	explicit DummyCommand(unsigned int requestCode)
+	    : requestCode_(requestCode) {}
 
 	inline void execute() override { LOGI_X("worker thread got request code %u", requestCode_); }
 

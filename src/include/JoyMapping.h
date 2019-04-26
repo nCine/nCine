@@ -57,7 +57,7 @@ class JoyMapping
 {
   public:
 	JoyMapping();
-	~JoyMapping() { }
+	~JoyMapping() {}
 
 	void init(const IInputManager *inputManager);
 	inline void setHandler(IInputEventHandler *inputEventHandler) { inputEventHandler_ = inputEventHandler; }

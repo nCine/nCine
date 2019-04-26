@@ -16,9 +16,21 @@ void printPointer(const int *ptr)
 	printf("address: %p, value: %d\n", static_cast<const int *>(ptr), ptr ? *ptr : 0);
 }
 
+void printPointer(const char *message, const int *ptr)
+{
+	printf("%s", message);
+	printPointer(ptr);
+}
+
 void printPointer(const nctl::UniquePtr<int> &ptr)
 {
 	printf("address: %p, value: %d\n", static_cast<const int *>(ptr.get()), ptr ? *ptr : 0);
+}
+
+void printPointer(const char *message, const nctl::UniquePtr<int> &ptr)
+{
+	printf("%s", message);
+	printPointer(ptr);
 }
 
 void printPointer(const nctl::UniquePtr<int[]> &ptr)
@@ -26,9 +38,21 @@ void printPointer(const nctl::UniquePtr<int[]> &ptr)
 	printf("address: %p, first value: %d\n", static_cast<const int *>(ptr.get()), ptr ? ptr[0] : 0);
 }
 
+void printPointer(const char *message, const nctl::UniquePtr<int[]> &ptr)
+{
+	printf("%s", message);
+	printPointer(ptr);
+}
+
 void printPointer(const nctl::SharedPtr<int> &ptr)
 {
 	printf("address: %p, counter: %d, value: %d\n", static_cast<const int *>(ptr.get()), ptr.useCount(), ptr ? *ptr : 0);
+}
+
+void printPointer(const char *message, const nctl::SharedPtr<int> &ptr)
+{
+	printf("%s", message);
+	printPointer(ptr);
 }
 
 void initPtrArray(int *ptr, unsigned int size)
@@ -43,14 +67,14 @@ class Base
 {
   public:
 	virtual bool isBase() const { return true; }
-	virtual const char* name() const { return "base"; }
+	virtual const char *name() const { return "base"; }
 };
 
 class Derived : public Base
 {
   public:
 	bool isBase() const override { return false; }
-	const char* name() const override { return "derived"; }
+	const char *name() const override { return "derived"; }
 };
 
 }

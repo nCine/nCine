@@ -17,9 +17,10 @@ class DLL_PUBLIC IGfxDevice
 	/// A structure used to initialize window properties
 	struct WindowMode
 	{
-		WindowMode() : width(0), height(0), isFullScreen(false), isResizable(false) { }
+		WindowMode()
+		    : width(0), height(0), isFullScreen(false), isResizable(false) {}
 		WindowMode(unsigned int w, unsigned int h, bool fullscreen, bool resizable)
-			: width(w), height(h), isFullScreen(fullscreen), isResizable(resizable) { }
+		    : width(w), height(h), isFullScreen(fullscreen), isResizable(resizable) {}
 
 		unsigned int width;
 		unsigned int height;
@@ -31,9 +32,9 @@ class DLL_PUBLIC IGfxDevice
 	struct GLContextInfo
 	{
 		GLContextInfo(const AppConfiguration &appCfg)
-			: majorVersion(appCfg.glMajorVersion()), minorVersion(appCfg.glMinorVersion()),
-			  coreProfile(appCfg.glCoreProfile()), forwardCompatible(appCfg.glForwardCompatible()),
-			  debugContext(appCfg.withGlDebugContext) { }
+		    : majorVersion(appCfg.glMajorVersion()), minorVersion(appCfg.glMinorVersion()),
+		      coreProfile(appCfg.glCoreProfile()), forwardCompatible(appCfg.glForwardCompatible()),
+		      debugContext(appCfg.withGlDebugContext) {}
 
 		unsigned int majorVersion;
 		unsigned int minorVersion;
@@ -43,7 +44,7 @@ class DLL_PUBLIC IGfxDevice
 	};
 
 	IGfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode);
-	virtual ~IGfxDevice() { }
+	virtual ~IGfxDevice() {}
 
 	/// Sets screen resolution with two integers
 	virtual void setResolution(int width, int height) = 0;

@@ -39,7 +39,6 @@ int Mutex::tryLock()
 	return TryEnterCriticalSection(&handle_);
 }
 
-
 ///////////////////////////////////////////////////////////
 // CondVariable CLASS
 ///////////////////////////////////////////////////////////
@@ -49,7 +48,7 @@ int Mutex::tryLock()
 ///////////////////////////////////////////////////////////
 
 CondVariable::CondVariable()
-	: waitersCount_(0)
+    : waitersCount_(0)
 {
 	events_[0] = CreateEvent(nullptr, FALSE, FALSE, nullptr); // Signal
 	events_[1] = CreateEvent(nullptr, TRUE, FALSE, nullptr); // Broadcast

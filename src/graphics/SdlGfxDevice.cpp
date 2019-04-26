@@ -19,7 +19,7 @@ SDL_Window *SdlGfxDevice::windowHandle_ = nullptr;
 ///////////////////////////////////////////////////////////
 
 SdlGfxDevice::SdlGfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode)
-	: IGfxDevice(windowMode, glContextInfo, displayMode)
+    : IGfxDevice(windowMode, glContextInfo, displayMode)
 {
 	initGraphics();
 	initDevice();
@@ -118,8 +118,9 @@ void SdlGfxDevice::initDevice()
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, displayMode_.stencilBits());
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, glContextInfo_.majorVersion);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, glContextInfo_.minorVersion);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, glContextInfo_.coreProfile ?
-	                    SDL_GL_CONTEXT_PROFILE_CORE : SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, glContextInfo_.coreProfile
+	                                                     ? SDL_GL_CONTEXT_PROFILE_CORE
+	                                                     : SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
 	if (glContextInfo_.forwardCompatible == false)
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 	if (glContextInfo_.debugContext)

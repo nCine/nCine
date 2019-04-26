@@ -5,7 +5,8 @@ namespace {
 class ColorfTest : public ::testing::Test
 {
   public:
-	ColorfTest() : col1_(0.25f, 0.5f, 0.25f, 0.5f), col2_(0.5f, 0.5f, 0.5f, 0.5f) { }
+	ColorfTest()
+	    : col1_(0.25f, 0.5f, 0.25f, 0.5f), col2_(0.5f, 0.5f, 0.5f, 0.5f) {}
 
 	nc::Colorf col1_;
 	nc::Colorf col2_;
@@ -19,8 +20,7 @@ const float alpha = 0.0f;
 TEST_F(ColorfTest, DefaultConstructor)
 {
 	const nc::Colorf color;
-	printf("Constructing a new color with the default white constructor: ");
-	printColor(color);
+	printColor("Constructing a new color with the default white constructor: ", color);
 
 	ASSERT_FLOAT_EQ(color.data()[0], 1.0f);
 	ASSERT_FLOAT_EQ(color.data()[1], 1.0f);
@@ -31,8 +31,7 @@ TEST_F(ColorfTest, DefaultConstructor)
 TEST_F(ColorfTest, ConstructFromThreeComponents)
 {
 	const nc::Colorf color(red, green, blue);
-	printf("Constructing a new color from three components: ");
-	printColor(color);
+	printColor("Constructing a new color from three components: ", color);
 
 	ASSERT_FLOAT_EQ(color.data()[0], red);
 	ASSERT_FLOAT_EQ(color.data()[1], green);
@@ -43,8 +42,7 @@ TEST_F(ColorfTest, ConstructFromThreeComponents)
 TEST_F(ColorfTest, ConstructFromFourComponents)
 {
 	const nc::Colorf color(red, green, blue, alpha);
-	printf("Constructing a new color from four components: ");
-	printColor(color);
+	printColor("Constructing a new color from four components: ", color);
 
 	ASSERT_FLOAT_EQ(color.data()[0], red);
 	ASSERT_FLOAT_EQ(color.data()[1], green);
@@ -56,8 +54,7 @@ TEST_F(ColorfTest, ConstructFromFourComponentsAndClamp)
 {
 	const float unclamped = 5.0f;
 	const nc::Colorf color(unclamped, unclamped, unclamped, unclamped);
-	printf("Constructing a new color from four unclamped components: ");
-	printColor(color);
+	printColor("Constructing a new color from four unclamped components: ", color);
 
 	ASSERT_FLOAT_EQ(color.data()[0], 1.0f);
 	ASSERT_FLOAT_EQ(color.data()[1], 1.0f);
@@ -67,10 +64,9 @@ TEST_F(ColorfTest, ConstructFromFourComponentsAndClamp)
 
 TEST_F(ColorfTest, ConstructFromArray)
 {
-	const float vec[4] = {red, green, blue, alpha};
+	const float vec[4] = { red, green, blue, alpha };
 	const nc::Colorf color(vec);
-	printf("Constructing a new color from an array: ");
-	printColor(color);
+	printColor("Constructing a new color from an array: ", color);
 
 	ASSERT_FLOAT_EQ(color.data()[0], vec[0]);
 	ASSERT_FLOAT_EQ(color.data()[1], vec[1]);
@@ -81,8 +77,7 @@ TEST_F(ColorfTest, ConstructFromArray)
 TEST_F(ColorfTest, ConstructFromNonFloatColor)
 {
 	nc::Colorf color(nc::Color::Black);
-	printf("Constructing a new color from an unsigned char one: ");
-	printColor(color);
+	printColor("Constructing a new color from an unsigned char one: ", color);
 
 	ASSERT_FLOAT_EQ(color.r(), 0.0f);
 	ASSERT_FLOAT_EQ(color.g(), 0.0f);
@@ -93,8 +88,7 @@ TEST_F(ColorfTest, ConstructFromNonFloatColor)
 TEST_F(ColorfTest, Getters)
 {
 	const nc::Colorf color(red, green, blue, alpha);
-	printf("Constructing a new color and testing its getters: ");
-	printColor(color);
+	printColor("Constructing a new color and testing its getters: ", color);
 
 	ASSERT_FLOAT_EQ(color.r(), red);
 	ASSERT_FLOAT_EQ(color.g(), green);
@@ -106,8 +100,7 @@ TEST_F(ColorfTest, SetThreeComponents)
 {
 	nc::Colorf color;
 	color.set(red, green, blue);
-	printf("Constructing a new color and setting three components: ");
-	printColor(color);
+	printColor("Constructing a new color and setting three components: ", color);
 
 	ASSERT_FLOAT_EQ(color.r(), red);
 	ASSERT_FLOAT_EQ(color.g(), green);
@@ -119,8 +112,7 @@ TEST_F(ColorfTest, SetFourComponents)
 {
 	nc::Colorf color;
 	color.set(red, green, blue, alpha);
-	printf("Constructing a new color and setting four components: ");
-	printColor(color);
+	printColor("Constructing a new color and setting four components: ", color);
 
 	ASSERT_FLOAT_EQ(color.r(), red);
 	ASSERT_FLOAT_EQ(color.g(), green);
@@ -130,11 +122,10 @@ TEST_F(ColorfTest, SetFourComponents)
 
 TEST_F(ColorfTest, SetArray)
 {
-	const float vec[4] = {red, green, blue, alpha};
+	const float vec[4] = { red, green, blue, alpha };
 	nc::Colorf color;
 	color.setVec(vec);
-	printf("Constructing a new color and setting components from an array: ");
-	printColor(color);
+	printColor("Constructing a new color and setting components from an array: ", color);
 
 	ASSERT_FLOAT_EQ(color.data()[0], vec[0]);
 	ASSERT_FLOAT_EQ(color.data()[1], vec[1]);
@@ -146,8 +137,7 @@ TEST_F(ColorfTest, SetAlpha)
 {
 	nc::Colorf color;
 	color.setAlpha(alpha);
-	printf("Constructing a new color and setting the alpha component: ");
-	printColor(color);
+	printColor("Constructing a new color and setting the alpha component: ", color);
 
 	ASSERT_FLOAT_EQ(color.r(), 1.0f);
 	ASSERT_FLOAT_EQ(color.g(), 1.0f);
@@ -159,8 +149,7 @@ TEST_F(ColorfTest, AssignNonFloatColor)
 {
 	nc::Colorf color;
 	color = nc::Color::Black;
-	printf("Assigning a new color from an unsigned char one: ");
-	printColor(color);
+	printColor("Assigning a new color from an unsigned char one: ", color);
 
 	ASSERT_FLOAT_EQ(color.r(), 0.0f);
 	ASSERT_FLOAT_EQ(color.g(), 0.0f);
@@ -180,10 +169,9 @@ TEST_F(ColorfTest, MultiplicationInPlace)
 {
 	const nc::Colorf oldCol1 = col1_;
 
-	printf("color1: "); printColor(col1_);
-	printf("color2: "); printColor(col2_);
-	printf("Multiplying the first color by the second: ");
-	printColor(col1_ *= col2_);
+	printColor("color1: ", col1_);
+	printColor("color2: ", col2_);
+	printColor("Multiplying the first color by the second: ", col1_ *= col2_);
 
 	ASSERT_FLOAT_EQ(col1_.r(), oldCol1.r() * col2_.r());
 	ASSERT_FLOAT_EQ(col1_.g(), oldCol1.g() * col2_.g());
@@ -196,7 +184,7 @@ TEST_F(ColorfTest, MultiplyScalarInPlace)
 	const float scalar = 0.5f;
 	const nc::Colorf oldCol1 = col1_;
 
-	printf("color1: "); printColor(col1_);
+	printColor("color1: ", col1_);
 	printf("Multiplying the first color by the scalar %.2f: ", scalar);
 	printColor(col1_ *= scalar);
 
@@ -210,7 +198,7 @@ TEST_F(ColorfTest, MultiplyScalarInPlaceAndClamp)
 {
 	const float scalar = 10.0f;
 
-	printf("color1: "); printColor(col1_);
+	printColor("color1: ", col1_);
 	printf("Multiplying the first color by the scalar %.2f: ", scalar);
 	printColor(col1_ *= scalar);
 
@@ -222,11 +210,10 @@ TEST_F(ColorfTest, MultiplyScalarInPlaceAndClamp)
 
 TEST_F(ColorfTest, Multiplication)
 {
-	printf("color1: "); printColor(col1_);
-	printf("color2: "); printColor(col2_);
+	printColor("color1: ", col1_);
+	printColor("color2: ", col2_);
 	const nc::Colorf mul = col1_ * col2_;
-	printf("Color multiplication: ");
-	printColor(mul);
+	printColor("Color multiplication: ", mul);
 
 	ASSERT_FLOAT_EQ(mul.r(), col1_.r() * col2_.r());
 	ASSERT_FLOAT_EQ(mul.g(), col1_.g() * col2_.g());
@@ -237,7 +224,7 @@ TEST_F(ColorfTest, Multiplication)
 TEST_F(ColorfTest, MultiplyScalar)
 {
 	const float scalar = 0.5f;
-	printf("color1: "); printColor(col1_);
+	printColor("color1: ", col1_);
 	const nc::Colorf mul = col1_ * scalar;
 	printf("Multiplication by scalar %.2f: ", scalar);
 	printColor(mul);
@@ -251,7 +238,7 @@ TEST_F(ColorfTest, MultiplyScalar)
 TEST_F(ColorfTest, MultiplyScalarAndClamp)
 {
 	const float scalar = 10.0f;
-	printf("color1: "); printColor(col1_);
+	printColor("color1: ", col1_);
 	const nc::Colorf mul = col1_ * scalar;
 	printf("Multiplication by scalar %.2f: ", scalar);
 	printColor(mul);

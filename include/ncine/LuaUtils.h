@@ -8,9 +8,8 @@ struct lua_State;
 
 namespace ncine {
 
-namespace LuaUtils
-{
-	DLL_PUBLIC void addFunction(lua_State *L, const char *name, int (*func) (lua_State *L));
+namespace LuaUtils {
+	DLL_PUBLIC void addFunction(lua_State *L, const char *name, int (*func)(lua_State *L));
 	DLL_PUBLIC void createTable(lua_State *L, int narr, int nrec);
 	DLL_PUBLIC void newTable(lua_State *L);
 	DLL_PUBLIC void call(lua_State *L, int nargs, int nresults);
@@ -30,7 +29,7 @@ namespace LuaUtils
 	DLL_PUBLIC void getGlobal(lua_State *L, const char *name);
 	DLL_PUBLIC void setGlobal(lua_State *L, const char *name);
 
-	template <class T> T retrieve(lua_State *L, int index) { }
+	template <class T> T retrieve(lua_State *L, int index) {}
 	template <> DLL_PUBLIC double retrieve<double>(lua_State *L, int index);
 	template <> DLL_PUBLIC float retrieve<float>(lua_State *L, int index);
 	template <> DLL_PUBLIC int64_t retrieve<int64_t>(lua_State *L, int index);
@@ -40,7 +39,7 @@ namespace LuaUtils
 	template <> DLL_PUBLIC const char *retrieve<const char *>(lua_State *L, int index);
 	template <> DLL_PUBLIC bool retrieve<bool>(lua_State *L, int index);
 	void *retrieveUserData(lua_State *L, int index); // not DLL_PUBLIC
-	template <class T> T *retrieveUserData(lua_State *L, int index) { return static_cast<T*>(retrieveUserData(L, index)); }
+	template <class T> T *retrieveUserData(lua_State *L, int index) { return static_cast<T *>(retrieveUserData(L, index)); }
 	void assertArrayLength(lua_State *L, int index, int length); // utility function, not DLL_PUBLIC
 
 	template <class T>
@@ -59,7 +58,7 @@ namespace LuaUtils
 		retrieveArray(L, index, 1, length, array);
 	}
 
-	template <class T> T retrieveField(lua_State *L, int index, const char *name) { }
+	template <class T> T retrieveField(lua_State *L, int index, const char *name) {}
 	template <> DLL_PUBLIC double retrieveField<double>(lua_State *L, int index, const char *name);
 	template <> DLL_PUBLIC float retrieveField<float>(lua_State *L, int index, const char *name);
 	template <> DLL_PUBLIC int64_t retrieveField<int64_t>(lua_State *L, int index, const char *name);
@@ -122,13 +121,13 @@ namespace LuaUtils
 		return tryRetrieveFieldArray(L, index, name, 1, length, array);
 	}
 
-	template <class T> T retrieveGlobal(lua_State *L, const char *name) { }
-	template <> DLL_PUBLIC double retrieveGlobal<double>(lua_State *L,  const char *name);
+	template <class T> T retrieveGlobal(lua_State *L, const char *name) {}
+	template <> DLL_PUBLIC double retrieveGlobal<double>(lua_State *L, const char *name);
 	template <> DLL_PUBLIC float retrieveGlobal<float>(lua_State *L, const char *name);
 	template <> DLL_PUBLIC int64_t retrieveGlobal<int64_t>(lua_State *L, const char *name);
 	template <> DLL_PUBLIC uint64_t retrieveGlobal<uint64_t>(lua_State *L, const char *name);
 	template <> DLL_PUBLIC int32_t retrieveGlobal<int32_t>(lua_State *L, const char *name);
-	template <> DLL_PUBLIC uint32_t retrieveGlobal<uint32_t>(lua_State *L,  const char *name);
+	template <> DLL_PUBLIC uint32_t retrieveGlobal<uint32_t>(lua_State *L, const char *name);
 	template <> DLL_PUBLIC const char *retrieveGlobal<const char *>(lua_State *L, const char *name);
 	DLL_PUBLIC void retrieveGlobal(lua_State *L, const char *name, char *dest, size_t *length);
 	template <> DLL_PUBLIC bool retrieveGlobal<bool>(lua_State *L, const char *name);
@@ -156,7 +155,7 @@ namespace LuaUtils
 	template <> DLL_PUBLIC bool tryRetrieveGlobal<float>(lua_State *L, const char *name, float &value);
 	template <> DLL_PUBLIC bool tryRetrieveGlobal<int64_t>(lua_State *L, const char *name, int64_t &value);
 	template <> DLL_PUBLIC bool tryRetrieveGlobal<uint64_t>(lua_State *L, const char *name, uint64_t &value);
-	template <> DLL_PUBLIC bool tryRetrieveGlobal<int32_t>(lua_State *L,  const char *name, int32_t &value);
+	template <> DLL_PUBLIC bool tryRetrieveGlobal<int32_t>(lua_State *L, const char *name, int32_t &value);
 	template <> DLL_PUBLIC bool tryRetrieveGlobal<uint32_t>(lua_State *L, const char *name, uint32_t &value);
 	DLL_PUBLIC bool tryRetrieveGlobal(lua_State *L, const char *name, const char *value);
 	template <> DLL_PUBLIC bool tryRetrieveGlobal<bool>(lua_State *L, const char *name, bool &value);
@@ -190,7 +189,7 @@ namespace LuaUtils
 	DLL_PUBLIC void push(lua_State *L, int32_t integer);
 	DLL_PUBLIC void push(lua_State *L, uint32_t integer);
 	DLL_PUBLIC void push(lua_State *L, const char *string);
-	DLL_PUBLIC void push(lua_State *L, int (*func) (lua_State *L));
+	DLL_PUBLIC void push(lua_State *L, int (*func)(lua_State *L));
 	DLL_PUBLIC void push(lua_State *L, bool boolean);
 	DLL_PUBLIC void push(lua_State *L, void *lightuserdata);
 
@@ -218,7 +217,7 @@ namespace LuaUtils
 	DLL_PUBLIC void pushField(lua_State *L, const char *name, int32_t integer);
 	DLL_PUBLIC void pushField(lua_State *L, const char *name, uint32_t integer);
 	DLL_PUBLIC void pushField(lua_State *L, const char *name, const char *string);
-	DLL_PUBLIC void pushField(lua_State *L, const char *name, int (*func) (lua_State *L));
+	DLL_PUBLIC void pushField(lua_State *L, const char *name, int (*func)(lua_State *L));
 	DLL_PUBLIC void pushField(lua_State *L, const char *name, bool boolean);
 	DLL_PUBLIC void pushField(lua_State *L, const char *name, void *lightuserdata);
 
@@ -244,7 +243,7 @@ namespace LuaUtils
 	DLL_PUBLIC void setGlobal(lua_State *L, const char *name, int32_t integer);
 	DLL_PUBLIC void setGlobal(lua_State *L, const char *name, uint32_t integer);
 	DLL_PUBLIC void setGlobal(lua_State *L, const char *name, const char *string);
-	DLL_PUBLIC void setGlobal(lua_State *L, const char *name, int (*func) (lua_State *L));
+	DLL_PUBLIC void setGlobal(lua_State *L, const char *name, int (*func)(lua_State *L));
 	DLL_PUBLIC void setGlobal(lua_State *L, const char *name, bool boolean);
 	DLL_PUBLIC void setGlobal(lua_State *L, const char *name, void *lightuserdata);
 

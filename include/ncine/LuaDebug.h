@@ -7,8 +7,8 @@ struct lua_State;
 
 namespace ncine {
 
-namespace LuaDebug
-{
+namespace LuaDebug {
+
 	DLL_PUBLIC void traceError(lua_State *L, const char *errorMsg);
 	DLL_PUBLIC void assert(lua_State *L, bool condition, const char *errorMsg);
 
@@ -30,9 +30,9 @@ namespace LuaDebug
 
 	const char *errorToSting(int value);
 	void printStackValue(lua_State *L, int index);
+
 }
 
 }
 
 #endif
-

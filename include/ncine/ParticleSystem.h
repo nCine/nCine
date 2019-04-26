@@ -60,10 +60,10 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	/// The pool containing available particles (only dead ones)
 	nctl::Array<Particle *> particlePool_;
 	/// The array containing every particle (dead or alive)
-	nctl::Array<nctl::UniquePtr<Particle> > particleArray_;
+	nctl::Array<nctl::UniquePtr<Particle>> particleArray_;
 
 	/// The array of particle affectors
-	nctl::Array<nctl::UniquePtr<ParticleAffector> > affectors_;
+	nctl::Array<nctl::UniquePtr<ParticleAffector>> affectors_;
 
 	/// A flag indicating whether the system should be simulated in local space
 	bool inLocalSpace_;

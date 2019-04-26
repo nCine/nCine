@@ -17,7 +17,8 @@ class DLL_PUBLIC TouchEvent
 		float x, y;
 	};
 
-	TouchEvent() : count(0) { }
+	TouchEvent()
+	    : count(0) {}
 
 	unsigned int count;
 	int actionIndex;
@@ -41,7 +42,8 @@ class DLL_PUBLIC TouchEvent
 class DLL_PUBLIC AccelerometerEvent
 {
   public:
-	AccelerometerEvent() : x(0.0f), y(0.0f), z(0.0f) { }
+	AccelerometerEvent()
+	    : x(0.0f), y(0.0f), z(0.0f) {}
 
 	float x, y, z;
 };
@@ -108,7 +110,8 @@ class DLL_PUBLIC KeyboardEvent
 	/// Key modifiers mask
 	int mod;
 
-	KeyboardEvent() : scancode(0), sym(KeySym::UNKNOWN), mod(0) { }
+	KeyboardEvent()
+	    : scancode(0), sym(KeySym::UNKNOWN), mod(0) {}
 };
 
 /// Information about the joystick state
@@ -225,7 +228,7 @@ class DLL_PUBLIC JoyMappedState
 	/// The number of joystick axes with a mapping name
 	static const unsigned int NumAxes = 6;
 
-	virtual ~JoyMappedState() { }
+	virtual ~JoyMappedState() {}
 
 	/// Returns 'true' if the specified button is pressed
 	virtual bool isButtonPressed(ButtonName name) const = 0;

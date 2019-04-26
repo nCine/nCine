@@ -16,7 +16,7 @@ class PlottingVariable
 {
   public:
 	PlottingVariable(unsigned int numValues, float rejectDelay, const Matrix4x4f &worldMatrix);
-	virtual ~PlottingVariable() { }
+	virtual ~PlottingVariable() {}
 
 	/// Returns the number of value for the variable
 	inline unsigned int numValues() const { return variable_.numValues(); }

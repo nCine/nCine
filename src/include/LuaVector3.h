@@ -10,8 +10,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace Vector3
-{
+namespace Vector3 {
 	static const char *Vector3 = "vec3";
 	static const char *create = "create";
 
@@ -90,37 +89,37 @@ int LuaVector3<T>::create(lua_State *L)
 
 namespace {
 
-template <class T>
-bool retrieveVectorsOrScalar(lua_State *L, Vector3<T> &first, Vector3<T> &second, T &scalar)
-{
-	bool scalarOp = true;
+	template <class T>
+	bool retrieveVectorsOrScalar(lua_State *L, Vector3<T> &first, Vector3<T> &second, T &scalar)
+	{
+		bool scalarOp = true;
 
-	if (lua_isnumber(L, -2) && lua_isnumber(L, -1))
-		LuaDebug::traceError(L, "Expecting two vec3 tables or a vec3 table and a number");
-	else if (lua_isnumber(L, -2) && lua_istable(L, -1))
-	{
-		scalar = LuaUtils::retrieve<T>(L, -2);
-		first = LuaVector3Utils<T>::retrieveTable(L, -1);
-	}
-	else if (lua_istable(L, -2) && lua_isnumber(L, -1))
-	{
-		scalar = LuaUtils::retrieve<T>(L, -1);
-		lua_pop(L, 1);
-		first = LuaVector3Utils<T>::retrieveTable(L, -1);
-	}
-	else if (lua_istable(L, -2) && lua_istable(L, -1))
-	{
-		second = LuaVector3Utils<T>::retrieveTable(L, -1);
-		lua_pop(L, 1);
-		first = LuaVector3Utils<T>::retrieveTable(L, -1);
-		lua_pop(L, 1);
-		scalarOp = false;
-	}
-	else
-		LuaDebug::traceError(L, "Expecting two vec3 tables or a vec3 table and a number");
+		if (lua_isnumber(L, -2) && lua_isnumber(L, -1))
+			LuaDebug::traceError(L, "Expecting two vec3 tables or a vec3 table and a number");
+		else if (lua_isnumber(L, -2) && lua_istable(L, -1))
+		{
+			scalar = LuaUtils::retrieve<T>(L, -2);
+			first = LuaVector3Utils<T>::retrieveTable(L, -1);
+		}
+		else if (lua_istable(L, -2) && lua_isnumber(L, -1))
+		{
+			scalar = LuaUtils::retrieve<T>(L, -1);
+			lua_pop(L, 1);
+			first = LuaVector3Utils<T>::retrieveTable(L, -1);
+		}
+		else if (lua_istable(L, -2) && lua_istable(L, -1))
+		{
+			second = LuaVector3Utils<T>::retrieveTable(L, -1);
+			lua_pop(L, 1);
+			first = LuaVector3Utils<T>::retrieveTable(L, -1);
+			lua_pop(L, 1);
+			scalarOp = false;
+		}
+		else
+			LuaDebug::traceError(L, "Expecting two vec3 tables or a vec3 table and a number");
 
-	return scalarOp;
-}
+		return scalarOp;
+	}
 
 }
 

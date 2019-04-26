@@ -29,7 +29,7 @@ class ImGuiSdlInput
 	static SDL_Cursor *mouseCursors_[ImGuiMouseCursor_COUNT];
 	static char *clipboardTextData_;
 
-	static const char *clipboardText(void* userData);
+	static const char *clipboardText(void *userData);
 	static void updateMousePosAndButtons();
 	static void updateMouseCursor();
 };

@@ -5,18 +5,18 @@ namespace ncine {
 
 namespace {
 
-const char *colorTypeString(int colorType)
-{
-	switch (colorType)
+	const char *colorTypeString(int colorType)
 	{
-		case PNG_COLOR_TYPE_GRAY: return "PNG_COLOR_TYPE_GRAY";
-		case PNG_COLOR_TYPE_PALETTE: return "PNG_COLOR_TYPE_PALETTE";
-		case PNG_COLOR_TYPE_RGB: return "PNG_COLOR_TYPE_RGB";
-		case PNG_COLOR_TYPE_RGB_ALPHA: return "PNG_COLOR_TYPE_RGB_ALPHA";
-		case PNG_COLOR_TYPE_GRAY_ALPHA: return "PNG_COLOR_TYPE_GRAY_ALPHA";
-		default: return "unknown";
+		switch (colorType)
+		{
+			case PNG_COLOR_TYPE_GRAY: return "PNG_COLOR_TYPE_GRAY";
+			case PNG_COLOR_TYPE_PALETTE: return "PNG_COLOR_TYPE_PALETTE";
+			case PNG_COLOR_TYPE_RGB: return "PNG_COLOR_TYPE_RGB";
+			case PNG_COLOR_TYPE_RGB_ALPHA: return "PNG_COLOR_TYPE_RGB_ALPHA";
+			case PNG_COLOR_TYPE_GRAY_ALPHA: return "PNG_COLOR_TYPE_GRAY_ALPHA";
+			default: return "unknown";
+		}
 	}
-}
 
 }
 
@@ -25,13 +25,12 @@ const char *colorTypeString(int colorType)
 ///////////////////////////////////////////////////////////
 
 TextureLoaderPng::TextureLoaderPng(const char *filename)
-	: TextureLoaderPng(IFile::createFileHandle(filename))
+    : TextureLoaderPng(IFile::createFileHandle(filename))
 {
-
 }
 
 TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
-	: ITextureLoader(nctl::move(fileHandle))
+    : ITextureLoader(nctl::move(fileHandle))
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 
@@ -129,9 +128,9 @@ TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
 	const png_size_t bytesPerRow = png_get_rowbytes(pngPtr, infoPtr);
 
 	dataSize_ = bytesPerRow * height_;
-	pixels_ = nctl::makeUnique<unsigned char []>(static_cast<unsigned long>(dataSize_));
+	pixels_ = nctl::makeUnique<unsigned char[]>(static_cast<unsigned long>(dataSize_));
 
-	nctl::UniquePtr<png_bytep []> rowPointers = nctl::makeUnique<png_bytep []>(height_);
+	nctl::UniquePtr<png_bytep[]> rowPointers = nctl::makeUnique<png_bytep[]>(height_);
 	for (int i = 0; i < height_; i++)
 		rowPointers[i] = pixels_.get() + i * bytesPerRow;
 

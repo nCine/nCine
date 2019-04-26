@@ -11,23 +11,21 @@ namespace ncine {
 
 /*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
 MeshSprite::MeshSprite(SceneNode *parent, Texture *texture)
-	: MeshSprite(parent, texture, 0.0f, 0.0f)
+    : MeshSprite(parent, texture, 0.0f, 0.0f)
 {
-
 }
 
 /*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
 MeshSprite::MeshSprite(Texture *texture)
-	: MeshSprite(nullptr, texture, 0.0f, 0.0f)
+    : MeshSprite(nullptr, texture, 0.0f, 0.0f)
 {
-
 }
 
 /*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
 MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, float xx, float yy)
-	: BaseSprite(parent, texture, xx, yy),
-	  interleavedVertices_(16), vertexDataPointer_(nullptr), numVertices_(0),
-	  indices_(16), indexDataPointer_(nullptr), numIndices_(0)
+    : BaseSprite(parent, texture, xx, yy),
+      interleavedVertices_(16), vertexDataPointer_(nullptr), numVertices_(0),
+      indices_(16), indexDataPointer_(nullptr), numIndices_(0)
 {
 	ASSERT(texture);
 
@@ -36,8 +34,9 @@ MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, float xx, float yy)
 	type_ = ObjectType::MESH_SPRITE;
 	setLayer(DrawableNode::LayerBase::SCENE);
 	renderCommand_->setType(RenderCommand::CommandTypes::MESH_SPRITE);
-	const Material::ShaderProgramType shaderProgramType = texture_->numChannels() >= 3 ?
-		Material::ShaderProgramType::MESH_SPRITE : Material::ShaderProgramType::MESH_SPRITE_GRAY;
+	const Material::ShaderProgramType shaderProgramType = texture_->numChannels() >= 3
+	                                                          ? Material::ShaderProgramType::MESH_SPRITE
+	                                                          : Material::ShaderProgramType::MESH_SPRITE_GRAY;
 	renderCommand_->material().setShaderProgramType(shaderProgramType);
 	spriteBlock_ = renderCommand_->material().uniformBlock("MeshSpriteBlock");
 	renderCommand_->geometry().setPrimitiveType(GL_TRIANGLE_STRIP);
@@ -49,25 +48,21 @@ MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, float xx, float yy)
 
 /*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
 MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, const Vector2f &position)
-	: MeshSprite(parent, texture, position.x, position.y)
+    : MeshSprite(parent, texture, position.x, position.y)
 {
-
 }
 
 /*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
 MeshSprite::MeshSprite(Texture *texture, float xx, float yy)
-	: MeshSprite(nullptr, texture, xx, yy)
+    : MeshSprite(nullptr, texture, xx, yy)
 {
-
 }
 
 /*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
 MeshSprite::MeshSprite(Texture *texture, const Vector2f &position)
-	: MeshSprite(nullptr, texture, position.x, position.y)
+    : MeshSprite(nullptr, texture, position.x, position.y)
 {
-
 }
-
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS

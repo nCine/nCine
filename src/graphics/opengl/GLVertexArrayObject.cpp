@@ -13,7 +13,7 @@ unsigned int GLVertexArrayObject::boundVAO_ = 0;
 ///////////////////////////////////////////////////////////
 
 GLVertexArrayObject::GLVertexArrayObject()
-	: glHandle_(0)
+    : glHandle_(0)
 {
 	glGenVertexArrays(1, &glHandle_);
 }

@@ -50,13 +50,13 @@ void RenderResources::createMinimal()
 
 namespace {
 
-struct ShaderLoad
-{
-	nctl::UniquePtr<GLShaderProgram> &shaderProgram;
-	const char *vertexShader;
-	const char *fragmentShader;
-	GLShaderProgram::Introspection introspection;
-};
+	struct ShaderLoad
+	{
+		nctl::UniquePtr<GLShaderProgram> &shaderProgram;
+		const char *vertexShader;
+		const char *fragmentShader;
+		GLShaderProgram::Introspection introspection;
+	};
 
 }
 
@@ -68,8 +68,7 @@ void RenderResources::create()
 	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.vboSize, appCfg.iboSize);
 	vaoPool_ = nctl::makeUnique<RenderVaoPool>(appCfg.vaoPoolSize);
 
-	ShaderLoad shadersToLoad[] =
-	{
+	ShaderLoad shadersToLoad[] = {
 #ifndef WITH_EMBEDDED_SHADERS
 		{ RenderResources::spriteShaderProgram_, "sprite_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::ENABLED },
 		{ RenderResources::spriteGrayShaderProgram_, "sprite_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::ENABLED },
@@ -101,19 +100,19 @@ void RenderResources::create()
 #endif
 	};
 
-	const unsigned int numShaderToLoad = (sizeof(shadersToLoad)/sizeof(*shadersToLoad));
+	const unsigned int numShaderToLoad = (sizeof(shadersToLoad) / sizeof(*shadersToLoad));
 	for (unsigned int i = 0; i < numShaderToLoad; i++)
 	{
 		const ShaderLoad &shaderToLoad = shadersToLoad[i];
 
 		shaderToLoad.shaderProgram = nctl::makeUnique<GLShaderProgram>();
-	#ifndef WITH_EMBEDDED_SHADERS
+#ifndef WITH_EMBEDDED_SHADERS
 		shaderToLoad.shaderProgram->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/" + shaderToLoad.vertexShader).data());
 		shaderToLoad.shaderProgram->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/" + shaderToLoad.fragmentShader).data());
-	#else
+#else
 		shaderToLoad.shaderProgram->attachShaderFromString(GL_VERTEX_SHADER, shaderToLoad.vertexShader);
 		shaderToLoad.shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, shaderToLoad.fragmentShader);
-	#endif
+#endif
 		shaderToLoad.shaderProgram->link(shaderToLoad.introspection);
 	}
 

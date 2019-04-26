@@ -15,7 +15,6 @@
 	#endif
 #endif
 
-
 #if defined(NCINE_INCLUDE_OPENAL)
 	#ifdef __APPLE__
 		#include <OpenAL/al.h>
@@ -23,7 +22,6 @@
 		#include <AL/al.h>
 	#endif
 #endif
-
 
 #if defined(NCINE_INCLUDE_OPENALC)
 	#ifdef __APPLE__
@@ -35,9 +33,9 @@
 	#endif
 #endif
 
-
 #if defined(NCINE_INCLUDE_LUA)
-extern "C" {
+extern "C"
+{
 	#include "lauxlib.h"
 	#include "lua.h"
 	#include "lualib.h"

@@ -11,7 +11,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ALAudioDevice::ALAudioDevice()
-	: device_(nullptr), context_(nullptr), gain_(1.0f)
+    : device_(nullptr), context_(nullptr), gain_(1.0f)
 {
 	device_ = alcOpenDevice(nullptr);
 	FATAL_ASSERT_MSG_X(device_ != nullptr, "alcOpenDevice failed: %x", alGetError());
@@ -47,7 +47,6 @@ ALAudioDevice::~ALAudioDevice()
 	FATAL_ASSERT_MSG_X(result, "alcCloseDevice failed: %d", alGetError());
 }
 
-
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -60,13 +59,13 @@ void ALAudioDevice::setGain(ALfloat gain)
 
 void ALAudioDevice::stopPlayers()
 {
-	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player){ player->stop(); });
+	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player) { player->stop(); });
 	players_.clear();
 }
 
 void ALAudioDevice::pausePlayers()
 {
-	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player){ player->pause(); });
+	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player) { player->pause(); });
 	players_.clear();
 }
 
@@ -110,13 +109,13 @@ void ALAudioDevice::pausePlayers(PlayerType playerType)
 
 void ALAudioDevice::freezePlayers()
 {
-	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player){ player->pause(); });
+	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player) { player->pause(); });
 	// The player list is not cleared at this point, it is needed as-is by the unfreeze method
 }
 
 void ALAudioDevice::unfreezePlayers()
 {
-	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player){ player->play(); });
+	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player) { player->play(); });
 }
 
 int ALAudioDevice::nextAvailableSource()

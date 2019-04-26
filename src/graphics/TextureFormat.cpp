@@ -11,16 +11,16 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 TextureFormat::TextureFormat(GLenum internalFormat)
-	: internalFormat_(internalFormat), format_(-1),
-	  type_(-1), isCompressed_(false)
+    : internalFormat_(internalFormat), format_(-1),
+      type_(-1), isCompressed_(false)
 {
 	findExternalFormat();
 	checkFormatSupport();
 }
 
 TextureFormat::TextureFormat(GLenum internalFormat, GLenum type)
-	: internalFormat_(internalFormat), format_(-1),
-	  type_(-1), isCompressed_(false)
+    : internalFormat_(internalFormat), format_(-1),
+      type_(-1), isCompressed_(false)
 {
 	findExternalFormat();
 	checkFormatSupport();
@@ -140,60 +140,88 @@ unsigned long TextureFormat::calculateMipSizes(GLenum internalFormat, int width,
 			break;
 	#if __ANDROID_API__ >= 21
 		case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
-			blockWidth = 4; blockHeight = 4;
-			blockSize = 16; minDataSize = 16;
+			blockWidth = 4;
+			blockHeight = 4;
+			blockSize = 16;
+			minDataSize = 16;
 			break;
 		case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
-			blockWidth = 5; blockHeight = 4;
-			blockSize = 16; minDataSize = 16;
+			blockWidth = 5;
+			blockHeight = 4;
+			blockSize = 16;
+			minDataSize = 16;
 			break;
 		case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:
-			blockWidth = 5; blockHeight = 5;
-			blockSize = 16; minDataSize = 16;
+			blockWidth = 5;
+			blockHeight = 5;
+			blockSize = 16;
+			minDataSize = 16;
 			break;
 		case GL_COMPRESSED_RGBA_ASTC_6x5_KHR:
-			blockWidth = 6; blockHeight = 5;
-			blockSize = 16; minDataSize = 16;
+			blockWidth = 6;
+			blockHeight = 5;
+			blockSize = 16;
+			minDataSize = 16;
 			break;
 		case GL_COMPRESSED_RGBA_ASTC_6x6_KHR:
-			blockWidth = 6; blockHeight = 6;
-			blockSize = 16; minDataSize = 16;
+			blockWidth = 6;
+			blockHeight = 6;
+			blockSize = 16;
+			minDataSize = 16;
 			break;
 		case GL_COMPRESSED_RGBA_ASTC_8x5_KHR:
-			blockWidth = 8; blockHeight = 5;
-			blockSize = 16; minDataSize = 16;
+			blockWidth = 8;
+			blockHeight = 5;
+			blockSize = 16;
+			minDataSize = 16;
 			break;
 		case GL_COMPRESSED_RGBA_ASTC_8x6_KHR:
-			blockWidth = 8; blockHeight = 6;
-			blockSize = 16; minDataSize = 16;
+			blockWidth = 8;
+			blockHeight = 6;
+			blockSize = 16;
+			minDataSize = 16;
 			break;
 		case GL_COMPRESSED_RGBA_ASTC_8x8_KHR:
-			blockWidth = 8; blockHeight = 8;
-			blockSize = 16; minDataSize = 16;
+			blockWidth = 8;
+			blockHeight = 8;
+			blockSize = 16;
+			minDataSize = 16;
 			break;
 		case GL_COMPRESSED_RGBA_ASTC_10x5_KHR:
-			blockWidth = 10; blockHeight = 5;
-			blockSize = 16; minDataSize = 16;
+			blockWidth = 10;
+			blockHeight = 5;
+			blockSize = 16;
+			minDataSize = 16;
 			break;
 		case GL_COMPRESSED_RGBA_ASTC_10x6_KHR:
-			blockWidth = 10; blockHeight = 6;
-			blockSize = 16; minDataSize = 16;
+			blockWidth = 10;
+			blockHeight = 6;
+			blockSize = 16;
+			minDataSize = 16;
 			break;
 		case GL_COMPRESSED_RGBA_ASTC_10x8_KHR:
-			blockWidth = 10; blockHeight = 8;
-			blockSize = 16; minDataSize = 16;
+			blockWidth = 10;
+			blockHeight = 8;
+			blockSize = 16;
+			minDataSize = 16;
 			break;
 		case GL_COMPRESSED_RGBA_ASTC_10x10_KHR:
-			blockWidth = 10; blockHeight = 10;
-			blockSize = 16; minDataSize = 16;
+			blockWidth = 10;
+			blockHeight = 10;
+			blockSize = 16;
+			minDataSize = 16;
 			break;
 		case GL_COMPRESSED_RGBA_ASTC_12x10_KHR:
-			blockWidth = 12; blockHeight = 10;
-			blockSize = 16; minDataSize = 16;
+			blockWidth = 12;
+			blockHeight = 10;
+			blockSize = 16;
+			minDataSize = 16;
 			break;
 		case GL_COMPRESSED_RGBA_ASTC_12x12_KHR:
-			blockWidth = 12; blockHeight = 12;
-			blockSize = 16; minDataSize = 16;
+			blockWidth = 12;
+			blockHeight = 12;
+			blockSize = 16;
+			minDataSize = 16;
 			break;
 	#endif
 #endif
@@ -212,9 +240,9 @@ unsigned long TextureFormat::calculateMipSizes(GLenum internalFormat, int width,
 	for (int i = 0; i < mipMapCount; i++)
 	{
 		mipDataOffsets[i] = dataSizesSum;
-		mipDataSizes[i] = (blockSize > 0) ?
-		                  (levelWidth / blockWidth) * (levelHeight / blockHeight) * blockSize :
-		                  (levelWidth / blockWidth) * (levelHeight / blockHeight) * ((blockWidth * blockHeight  * bpp) / 8);
+		mipDataSizes[i] = (blockSize > 0)
+		                      ? (levelWidth / blockWidth) * (levelHeight / blockHeight) * blockSize
+		                      : (levelWidth / blockWidth) * (levelHeight / blockHeight) * ((blockWidth * blockHeight * bpp) / 8);
 
 		// Clamping to the minimum valid size
 		if (mipDataSizes[i] < minDataSize)
@@ -388,7 +416,7 @@ bool TextureFormat::oesCompressedFormat()
 		case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
 		case GL_COMPRESSED_RGBA8_ETC2_EAC:
 		case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
-#if __ANDROID_API__ >= 21
+	#if __ANDROID_API__ >= 21
 		case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
 		case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
 		case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:
@@ -403,7 +431,7 @@ bool TextureFormat::oesCompressedFormat()
 		case GL_COMPRESSED_RGBA_ASTC_10x10_KHR:
 		case GL_COMPRESSED_RGBA_ASTC_12x10_KHR:
 		case GL_COMPRESSED_RGBA_ASTC_12x12_KHR:
-#endif
+	#endif
 			format_ = GL_RGBA;
 			break;
 		case GL_ETC1_RGB8_OES:

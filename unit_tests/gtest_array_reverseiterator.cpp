@@ -5,7 +5,8 @@ namespace {
 class ArrayReverseIteratorTest : public ::testing::Test
 {
   public:
-	ArrayReverseIteratorTest() : array_(Capacity) { }
+	ArrayReverseIteratorTest()
+	    : array_(Capacity) {}
 
   protected:
 	void SetUp() override { initArray(array_); }
@@ -69,7 +70,8 @@ TEST_F(ArrayReverseIteratorTest, WhileLoopIteration)
 	{
 		printf(" %d", *r);
 		ASSERT_EQ(*r, n);
-		++r; --n;
+		++r;
+		--n;
 	}
 	printf("\n");
 }

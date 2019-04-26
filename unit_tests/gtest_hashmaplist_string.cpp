@@ -5,7 +5,8 @@ namespace {
 class HashMapListStringTest : public ::testing::Test
 {
   public:
-	HashMapListStringTest() : strHashmap_(Capacity) { }
+	HashMapListStringTest()
+	    : strHashmap_(Capacity) {}
 
   protected:
 	void SetUp() override { initHashMap(strHashmap_); }

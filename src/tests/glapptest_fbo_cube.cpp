@@ -30,15 +30,16 @@ struct VertexFormatTex
 	GLfloat texcoords[2];
 };
 
-const VertexFormatCol triVertices[] =
-{
+const VertexFormatCol triVertices[] = {
+	// clang-format off
 	{{ 0.0f,  0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
 	{{-0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
 	{{ 0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}
+	// clang-format on
 };
 
-const VertexFormatTex cubeVertices[] =
-{
+const VertexFormatTex cubeVertices[] = {
+	// clang-format off
 	{{ 1.0f,  1.0f, -1.0f}, {0.0f, 0.0f}},
 	{{ 1.0f, -1.0f, -1.0f}, {1.0f, 0.0f}},
 	{{-1.0f, -1.0f, -1.0f}, {1.0f, 1.0f}},
@@ -66,10 +67,11 @@ const VertexFormatTex cubeVertices[] =
 	{{-1.0f,  1.0f, -1.0f}, {1.0f, 1.0f}},
 	{{-1.0f, -1.0f,  1.0f}, {1.0f, 1.0f}},
 	{{-1.0f, -1.0f,  1.0f}, {0.0f, 1.0f}}
+	// clang-format on
 };
 
-const GLushort cubeIndices[] =
-{
+const GLushort cubeIndices[] = {
+	// clang-format off
 	 0,  1,  2,
 	 3,  4,  5,
 	 0,  6,  7,
@@ -82,6 +84,7 @@ const GLushort cubeIndices[] =
 	 4, 19,  5,
 	16, 11, 13,
 	 9, 20, 10
+	// clang-format on
 };
 
 }

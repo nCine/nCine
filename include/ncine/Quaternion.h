@@ -12,11 +12,14 @@ class Quaternion
   public:
 	T x, y, z, w;
 
-	Quaternion() { }
-	Quaternion(T xx, T yy, T zz, T ww) : x(xx), y(yy), z(zz), w(ww) { }
-	explicit Quaternion(const Vector4<T> &v) : x(v.x), y(v.y), z(v.z), w(v.w) { }
-	Quaternion(const Quaternion &other) : x(other.x), y(other.y), z(other.z), w(other.w) { }
-	Quaternion& operator=(const Quaternion &other);
+	Quaternion() {}
+	Quaternion(T xx, T yy, T zz, T ww)
+	    : x(xx), y(yy), z(zz), w(ww) {}
+	explicit Quaternion(const Vector4<T> &v)
+	    : x(v.x), y(v.y), z(v.z), w(v.w) {}
+	Quaternion(const Quaternion &other)
+	    : x(other.x), y(other.y), z(other.z), w(other.w) {}
+	Quaternion &operator=(const Quaternion &other);
 
 	void set(T xx, T yy, T zz, T ww);
 
@@ -336,8 +339,10 @@ inline Quaternion<T> Quaternion<T>::fromZAxisAngle(T degrees)
 	return Quaternion<T>(0, 0, sin(halfRadians), cos(halfRadians));
 }
 
-template <class T> const Quaternion<T> Quaternion<T>::Zero(0, 0, 0, 0);
-template <class T> const Quaternion<T> Quaternion<T>::Identity(0, 0, 0, 1);
+template <class T>
+const Quaternion<T> Quaternion<T>::Zero(0, 0, 0, 0);
+template <class T>
+const Quaternion<T> Quaternion<T>::Identity(0, 0, 0, 1);
 
 }
 

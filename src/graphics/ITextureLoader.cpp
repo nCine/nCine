@@ -20,16 +20,14 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ITextureLoader::ITextureLoader(const char *filename)
-	: ITextureLoader(IFile::createFileHandle(filename))
+    : ITextureLoader(IFile::createFileHandle(filename))
 {
-
 }
 
 ITextureLoader::ITextureLoader(nctl::UniquePtr<IFile> fileHandle)
-	: fileHandle_(nctl::move(fileHandle)), width_(0), height_(0),
-	  bpp_(0), headerSize_(0), dataSize_(0), mipMapCount_(1)
+    : fileHandle_(nctl::move(fileHandle)), width_(0), height_(0),
+      bpp_(0), headerSize_(0), dataSize_(0), mipMapCount_(1)
 {
-
 }
 
 ///////////////////////////////////////////////////////////
@@ -116,7 +114,7 @@ void ITextureLoader::loadPixels(GLenum internalFormat, GLenum type)
 	dataSize_ = fileHandle_->size() - headerSize_;
 	fileHandle_->seek(headerSize_, SEEK_SET);
 
-	pixels_ =  nctl::makeUnique<unsigned char []>(dataSize_);
+	pixels_ = nctl::makeUnique<unsigned char[]>(dataSize_);
 	fileHandle_->read(pixels_.get(), dataSize_);
 }
 

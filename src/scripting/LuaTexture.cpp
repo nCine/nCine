@@ -7,8 +7,7 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace Texture
-{
+namespace Texture {
 	static const char *Texture = "texture";
 
 	static const char *width = "get_width";

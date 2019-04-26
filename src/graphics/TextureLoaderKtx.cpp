@@ -7,21 +7,21 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-uint8_t TextureLoaderKtx::fileIdentifier_[] =
-{ 0xAB, 0x4B, 0x54, 0x58, 0x20, 0x31, 0x31, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A }; // "«KTX 11»\r\n\x1A\n"};
+uint8_t TextureLoaderKtx::fileIdentifier_[] = {
+	0xAB, 0x4B, 0x54, 0x58, 0x20, 0x31, 0x31, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A
+}; // "«KTX 11»\r\n\x1A\n"};
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 TextureLoaderKtx::TextureLoaderKtx(const char *filename)
-	: TextureLoaderKtx(IFile::createFileHandle(filename))
+    : TextureLoaderKtx(IFile::createFileHandle(filename))
 {
-
 }
 
 TextureLoaderKtx::TextureLoaderKtx(nctl::UniquePtr<IFile> fileHandle)
-	: ITextureLoader(nctl::move(fileHandle))
+    : ITextureLoader(nctl::move(fileHandle))
 {
 	KtxHeader header;
 
@@ -68,8 +68,8 @@ void TextureLoaderKtx::parseFormat(const KtxHeader &header)
 	if (mipMapCount_ > 1)
 	{
 		LOGI_X("MIP Maps: %d", mipMapCount_);
-		mipDataOffsets_ = nctl::makeUnique<unsigned long []>(mipMapCount_);
-		mipDataSizes_ = nctl::makeUnique<unsigned long []>(mipMapCount_);
+		mipDataOffsets_ = nctl::makeUnique<unsigned long[]>(mipMapCount_);
+		mipDataSizes_ = nctl::makeUnique<unsigned long[]>(mipMapCount_);
 		unsigned long dataSizesSum = TextureFormat::calculateMipSizes(internalFormat, width_, height_, mipMapCount_, mipDataOffsets_.get(), mipDataSizes_.get());
 
 		// HACK: accounting for `UInt32 imageSize` on top of each MIP level

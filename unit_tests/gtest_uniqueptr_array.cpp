@@ -5,7 +5,8 @@ namespace {
 class UniquePtrArrayTest : public ::testing::Test
 {
   public:
-	UniquePtrArrayTest() : ptr_(new int[Size]) { }
+	UniquePtrArrayTest()
+	    : ptr_(new int[Size]) {}
 
   protected:
 	void SetUp() override { initPtrArray(ptr_.get(), Size); }
@@ -17,13 +18,13 @@ TEST_F(UniquePtrArrayTest, Reset)
 {
 	const int newValue = 3;
 	int *raw = new int[Size];
-	int const * const oldRaw = raw;
+	int const *const oldRaw = raw;
 	raw[0] = newValue;
 	printf("Creating a raw pointer to an array of ints, address: 0x%p, first value: %d\n", static_cast<const int *>(raw), *raw);
 
 	ptr_.reset(raw);
 	raw = nullptr;
-	printf("Resetting the unique pointer to the raw one, "); printPointer(ptr_);
+	printPointer("Resetting the unique pointer to the raw one, ", ptr_);
 
 	ASSERT_EQ(ptr_[0], newValue);
 	ASSERT_EQ(ptr_.get(), oldRaw);
@@ -31,11 +32,11 @@ TEST_F(UniquePtrArrayTest, Reset)
 
 TEST_F(UniquePtrArrayTest, SelfReset)
 {
-	int * const raw = ptr_.get();
-	printf("Creating a raw pointer to an array of ints, "); printPointer(raw);
+	int *const raw = ptr_.get();
+	printPointer("Creating a raw pointer to an array of ints, ", raw);
 
 	ptr_.reset(raw);
-	printf("Resetting the unique pointer to itself, "); printPointer(ptr_);
+	printPointer("Resetting the unique pointer to itself, ", ptr_);
 
 	ASSERT_EQ(ptr_[0], FirstElement);
 	ASSERT_EQ(ptr_.get(), raw);
@@ -44,7 +45,7 @@ TEST_F(UniquePtrArrayTest, SelfReset)
 TEST_F(UniquePtrArrayTest, ResetNull)
 {
 	ptr_.reset(nullptr);
-	printf("Resetting the unique pointer to `nullptr`, "); printPointer(ptr_);
+	printPointer("Resetting the unique pointer to `nullptr`, ", ptr_);
 
 	ASSERT_EQ(ptr_, nullptr);
 }
@@ -52,9 +53,9 @@ TEST_F(UniquePtrArrayTest, ResetNull)
 TEST_F(UniquePtrArrayTest, Release)
 {
 	const int *raw = nullptr;
-	int const * const oldPtr = ptr_.get();
+	int const *const oldPtr = ptr_.get();
 	raw = ptr_.release();
-	printf("Releasing the unique pointer to the raw one, address: %p, value: %d\n", static_cast<const int *>(raw), *raw);
+	printPointer("Releasing the unique pointer to the raw one, ", raw);
 
 	ASSERT_EQ(ptr_.get(), nullptr);
 	ASSERT_EQ(raw, oldPtr);
@@ -65,9 +66,9 @@ TEST_F(UniquePtrArrayTest, Release)
 
 TEST_F(UniquePtrArrayTest, MoveConstructor)
 {
-	int const * const oldPtr = ptr_.get();
+	int const *const oldPtr = ptr_.get();
 	nctl::UniquePtr<int[]> newPtr(nctl::move(ptr_));
-	printf("Creating a new unique pointer moving from the first one, "); printPointer(newPtr);
+	printPointer("Creating a new unique pointer moving from the first one, ", newPtr);
 
 	const int num = newPtr[0];
 	newPtr[0] = num + 1;
@@ -80,10 +81,10 @@ TEST_F(UniquePtrArrayTest, MoveConstructor)
 
 TEST_F(UniquePtrArrayTest, MoveAssignment)
 {
-	int const * const oldPtr = ptr_.get();
+	int const *const oldPtr = ptr_.get();
 	nctl::UniquePtr<int[]> newPtr;
 	newPtr = nctl::move(ptr_);
-	printf("Assigning to a new unique pointer moving from first, "); printPointer(newPtr);
+	printPointer("Assigning to a new unique pointer moving from first, ", newPtr);
 
 	const int num = newPtr[0];
 	newPtr[0] = num + 1;
@@ -111,7 +112,7 @@ TEST_F(UniquePtrArrayTest, Subscript)
 
 TEST_F(UniquePtrArrayTest, MakeUnique)
 {
-	auto arrayPtr = nctl::makeUnique<int []>(Size);
+	auto arrayPtr = nctl::makeUnique<int[]>(Size);
 	printf("Creating a unique pointer to array of %u elements with `makeUnique()`, address: %p\n", Size, static_cast<const int *>(arrayPtr.get()));
 	initPtrArray(arrayPtr.get(), Size);
 

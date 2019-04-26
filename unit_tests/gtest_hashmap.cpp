@@ -5,7 +5,8 @@ namespace {
 class HashMapTest : public ::testing::Test
 {
   public:
-	HashMapTest() : hashmap_(Capacity) { }
+	HashMapTest()
+	    : hashmap_(Capacity) {}
 
   protected:
 	void SetUp() override { initHashMap(hashmap_); }
@@ -228,7 +229,7 @@ TEST_F(HashMapTest, RemoveAllFromFull)
 		newHashmap.remove(i);
 
 	ASSERT_EQ(newHashmap.size(), 0);
-	ASSERT_EQ(calcSize(newHashmap),0);
+	ASSERT_EQ(calcSize(newHashmap), 0);
 }
 
 const int BigCapacity = 512;

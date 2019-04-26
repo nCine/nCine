@@ -69,8 +69,8 @@ void Application::initCommon()
 	profileTimer_->start();
 
 #ifdef WITH_GIT_VERSION
-	LOGI_X("nCine %s (%s) compiled on %s at %s" , VersionStrings::Version, VersionStrings::GitBranch,
-		VersionStrings::CompilationDate, VersionStrings::CompilationTime);
+	LOGI_X("nCine %s (%s) compiled on %s at %s", VersionStrings::Version, VersionStrings::GitBranch,
+	       VersionStrings::CompilationDate, VersionStrings::CompilationTime);
 #else
 	LOGI_X("nCine compiled on %s at %s", VersionStrings::CompilationDate, VersionStrings::CompilationTime);
 #endif

@@ -23,9 +23,9 @@ class DLL_PUBLIC Application
 	/// Rendering settings that can be changed at run-time
 	struct RenderingSettings
 	{
-		RenderingSettings() :
-			batchingEnabled(true), batchingWithIndices(false),
-			cullingEnabled(true), minBatchSize(4), maxBatchSize(500) { }
+		RenderingSettings()
+		    : batchingEnabled(true), batchingWithIndices(false),
+		      cullingEnabled(true), minBatchSize(4), maxBatchSize(500) {}
 
 		/// True if batching is enabled
 		bool batchingEnabled;
@@ -41,7 +41,8 @@ class DLL_PUBLIC Application
 
 	struct Timings
 	{
-		enum {
+		enum
+		{
 			PRE_INIT,
 			INIT_COMMON,
 			APP_INIT,
@@ -135,7 +136,9 @@ class DLL_PUBLIC Application
 	nctl::UniquePtr<ImGuiDrawing> imguiDrawing_;
 #endif
 
-	Application() : isSuspended_(false), autoSuspension_(true), hasFocus_(true), shouldQuit_(false) { }
+	Application()
+	    : isSuspended_(false), autoSuspension_(true), hasFocus_(true), shouldQuit_(false)
+	{}
 
 	/// Must be called before giving control to the application
 	void initCommon();

@@ -29,18 +29,18 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
-	: withSceneGraph_(withSceneGraph),
-	  freeCommandsPool_(16), usedCommandsPool_(16),
-	  lastFrameWidth_(0), lastFrameHeight_(0)
+    : withSceneGraph_(withSceneGraph),
+      freeCommandsPool_(16), usedCommandsPool_(16),
+      lastFrameWidth_(0), lastFrameHeight_(0)
 {
-	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIO &io = ImGui::GetIO();
 #ifndef __ANDROID__
 	io.BackendRendererName = "nCine_OpenGL";
 #else
 	io.BackendRendererName = "nCine_OpenGL_ES";
 #endif
 
-	unsigned char* pixels = nullptr;
+	unsigned char *pixels = nullptr;
 	int width, height;
 	io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 
@@ -78,7 +78,7 @@ void ImGuiDrawing::newFrame()
 	ImGuiAndroidInput::newFrame();
 #endif
 
-	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIO &io = ImGui::GetIO();
 
 	if (lastFrameWidth_ != io.DisplaySize.x || lastFrameHeight_ != io.DisplaySize.y)
 	{
@@ -171,11 +171,11 @@ void ImGuiDrawing::setupRenderCmd(RenderCommand &cmd)
 
 void ImGuiDrawing::draw(RenderQueue &renderQueue)
 {
-	ImDrawData* drawData = ImGui::GetDrawData();
+	ImDrawData *drawData = ImGui::GetDrawData();
 
-	const unsigned  int numElements = sizeof(ImDrawVert) / sizeof(GLfloat);
+	const unsigned int numElements = sizeof(ImDrawVert) / sizeof(GLfloat);
 
-	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIO &io = ImGui::GetIO();
 	const int fbWidth = static_cast<int>(drawData->DisplaySize.x * drawData->FramebufferScale.x);
 	const int fbHeight = static_cast<int>(drawData->DisplaySize.y * drawData->FramebufferScale.y);
 	if (fbWidth <= 0 || fbHeight <= 0)
@@ -188,7 +188,7 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 	const ImVec2 pos = drawData->DisplayPos;
 	for (int n = 0; n < drawData->CmdListsCount; n++)
 	{
-		const ImDrawList* imCmdList = drawData->CmdLists[n];
+		const ImDrawList *imCmdList = drawData->CmdLists[n];
 		GLushort firstIndex = 0;
 
 		RenderCommand &firstCmd = *retrieveCommandFromPool();
@@ -200,8 +200,8 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 		}
 
 		firstCmd.geometry().shareVbo(nullptr);
-		GLfloat *vertices =  firstCmd.geometry().acquireVertexPointer(imCmdList->VtxBuffer.Size * numElements, numElements);
-		memcpy(vertices, imCmdList->VtxBuffer.Data, imCmdList->VtxBuffer.Size  * numElements * sizeof(GLfloat));
+		GLfloat *vertices = firstCmd.geometry().acquireVertexPointer(imCmdList->VtxBuffer.Size * numElements, numElements);
+		memcpy(vertices, imCmdList->VtxBuffer.Data, imCmdList->VtxBuffer.Size * numElements * sizeof(GLfloat));
 		firstCmd.geometry().releaseVertexPointer();
 
 		firstCmd.geometry().shareIbo(nullptr);
@@ -258,9 +258,9 @@ void ImGuiDrawing::setupBuffersAndShader()
 
 void ImGuiDrawing::draw()
 {
-	ImDrawData* drawData = ImGui::GetDrawData();
+	ImDrawData *drawData = ImGui::GetDrawData();
 
-	ImGuiIO& io = ImGui::GetIO();
+	ImGuiIO &io = ImGui::GetIO();
 	const int fbWidth = static_cast<int>(drawData->DisplaySize.x * drawData->FramebufferScale.x);
 	const int fbHeight = static_cast<int>(drawData->DisplaySize.y * drawData->FramebufferScale.y);
 	if (fbWidth <= 0 || fbHeight <= 0)
@@ -274,11 +274,11 @@ void ImGuiDrawing::draw()
 	const ImVec2 pos = drawData->DisplayPos;
 	for (int n = 0; n < drawData->CmdListsCount; n++)
 	{
-		const ImDrawList* imCmdList = drawData->CmdLists[n];
-		const ImDrawIdx* firstIndex = nullptr;
+		const ImDrawList *imCmdList = drawData->CmdLists[n];
+		const ImDrawIdx *firstIndex = nullptr;
 
-		vbo_->bufferData(static_cast<GLsizeiptr>(imCmdList->VtxBuffer.Size) * sizeof(ImDrawVert), static_cast<const GLvoid*>(imCmdList->VtxBuffer.Data), GL_STREAM_DRAW);
-		ibo_->bufferData(static_cast<GLsizeiptr>(imCmdList->IdxBuffer.Size) * sizeof(ImDrawIdx), static_cast<const GLvoid*>(imCmdList->IdxBuffer.Data), GL_STREAM_DRAW);
+		vbo_->bufferData(static_cast<GLsizeiptr>(imCmdList->VtxBuffer.Size) * sizeof(ImDrawVert), static_cast<const GLvoid *>(imCmdList->VtxBuffer.Data), GL_STREAM_DRAW);
+		ibo_->bufferData(static_cast<GLsizeiptr>(imCmdList->IdxBuffer.Size) * sizeof(ImDrawIdx), static_cast<const GLvoid *>(imCmdList->IdxBuffer.Data), GL_STREAM_DRAW);
 		imguiShaderProgram_->use();
 		imguiShaderAttributes_->defineVertexFormat(vbo_.get(), ibo_.get());
 

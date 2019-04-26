@@ -20,20 +20,20 @@ class TextureLoaderKtx : public ITextureLoader
 	/// Header for the KTX format
 	struct KtxHeader
 	{
-		uint8_t		identifier[KtxIdentifierLength];
-		uint32_t	endianess;
-		uint32_t	glType;
-		uint32_t	glTypeSize;
-		uint32_t	glFormat;
-		uint32_t	glInternalFormat;
-		uint32_t	glBaseInternalFormat;
-		uint32_t	pixelWidth;
-		uint32_t	pixelHeight;
-		uint32_t	pixelDepth;
-		uint32_t	numberOfArrayElements;
-		uint32_t	numberOfFaces;
-		uint32_t	numberOfMipmapLevels;
-		uint32_t	bytesOfKeyValueData;
+		uint8_t identifier[KtxIdentifierLength];
+		uint32_t endianess;
+		uint32_t glType;
+		uint32_t glTypeSize;
+		uint32_t glFormat;
+		uint32_t glInternalFormat;
+		uint32_t glBaseInternalFormat;
+		uint32_t pixelWidth;
+		uint32_t pixelHeight;
+		uint32_t pixelDepth;
+		uint32_t numberOfArrayElements;
+		uint32_t numberOfFaces;
+		uint32_t numberOfMipmapLevels;
+		uint32_t bytesOfKeyValueData;
 	};
 
 	/// Reads the KTX header and fills the corresponding structure

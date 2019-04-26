@@ -14,9 +14,10 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 FileLogger::FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fileLevel)
-	: consoleLevel_(consoleLevel), fileLevel_(fileLevel)
+    : consoleLevel_(consoleLevel), fileLevel_(fileLevel)
 #ifdef WITH_IMGUI
-	, logString_(LogStringCapacity)
+      ,
+      logString_(LogStringCapacity)
 #endif
 {
 	fileHandle_ = IFile::createFileHandle(filename);
@@ -86,7 +87,7 @@ unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 	length += vsnprintf(logEntry_ + length, MaxEntryLength - length - 1, fmt, args);
 	va_end(args);
 
-	if (length < MaxEntryLength -2)
+	if (length < MaxEntryLength - 2)
 	{
 		logEntry_[length++] = '\n';
 		logEntry_[length] = '\0';
@@ -99,25 +100,27 @@ unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 			fputs(logEntry_, stderr);
 		else
 			fputs(logEntry_, stdout);
-		
-#ifdef _WIN32
-	writeOutputDebug(logEntry_);
-#endif
-		
+
+	#ifdef _WIN32
+		writeOutputDebug(logEntry_);
+	#endif
+
 #else
 		android_LogPriority priority;
 
+		// clang-format off
 		switch (level)
 		{
-			case LogLevel::FATAL:		priority = ANDROID_LOG_FATAL;	break;
-			case LogLevel::ERROR:		priority = ANDROID_LOG_ERROR;	break;
+			case LogLevel::FATAL:		priority = ANDROID_LOG_FATAL; break;
+			case LogLevel::ERROR:		priority = ANDROID_LOG_ERROR; break;
 			case LogLevel::WARN:		priority = ANDROID_LOG_WARN; break;
 			case LogLevel::INFO:		priority = ANDROID_LOG_INFO; break;
-			case LogLevel::DEBUG:		priority = ANDROID_LOG_DEBUG;	break;
+			case LogLevel::DEBUG:		priority = ANDROID_LOG_DEBUG; break;
 			case LogLevel::VERBOSE:		priority = ANDROID_LOG_VERBOSE; break;
 			case LogLevel::UNKNOWN:		priority = ANDROID_LOG_UNKNOWN; break;
 			default:					priority = ANDROID_LOG_UNKNOWN; break;
 		}
+		// clang-format on
 
 		__android_log_write(priority, "nCine", logEntry_);
 #endif

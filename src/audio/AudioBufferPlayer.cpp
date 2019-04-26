@@ -10,7 +10,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AudioBufferPlayer::AudioBufferPlayer(AudioBuffer *audioBuffer)
-	: audioBuffer_(audioBuffer)
+    : audioBuffer_(audioBuffer)
 {
 	ASSERT(audioBuffer);
 	type_ = ObjectType::AUDIOBUFFER_PLAYER;

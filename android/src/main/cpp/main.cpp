@@ -7,9 +7,9 @@ class IAppEventHandler;
 
 }
 
-ncine::IAppEventHandler* createAppEventHandler();
+ncine::IAppEventHandler *createAppEventHandler();
 
-void android_main(struct android_app* state)
+void android_main(struct android_app *state)
 {
 	ncine::AndroidApplication::start(state, createAppEventHandler);
 }

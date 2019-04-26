@@ -5,14 +5,12 @@
 namespace ncine {
 
 namespace LuaNames {
-namespace Color
-{
+namespace Color {
 	static const char *r = "r";
 	static const char *g = "g";
 	static const char *b = "b";
 	static const char *a = "a";
 }}
-
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS

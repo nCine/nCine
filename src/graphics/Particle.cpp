@@ -8,8 +8,8 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Particle::Particle(SceneNode *parent, Texture *texture)
-	: Sprite(parent, texture), life_(0.0f), startingLife(0.0f),
-	  startingRotation(0.0f), inLocalSpace_(false)
+    : Sprite(parent, texture), life_(0.0f), startingLife(0.0f),
+      startingRotation(0.0f), inLocalSpace_(false)
 {
 	renderCommand_->setType(RenderCommand::CommandTypes::PARTICLE);
 	setEnabled(false);

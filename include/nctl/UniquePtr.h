@@ -12,9 +12,13 @@ template <class T>
 class UniquePtr
 {
   public:
-	UniquePtr() : ptr_(nullptr) { }
-	explicit UniquePtr(T *ptr) : ptr_(ptr) { }
-	template <class U> explicit UniquePtr(U *ptr) : ptr_(ptr) { }
+	UniquePtr()
+	    : ptr_(nullptr) {}
+	explicit UniquePtr(T *ptr)
+	    : ptr_(ptr) {}
+	template <class U>
+	explicit UniquePtr(U *ptr)
+	    : ptr_(ptr) {}
 	~UniquePtr() { delete ptr_; }
 
 	UniquePtr(UniquePtr &&other);
@@ -54,7 +58,7 @@ class UniquePtr
 
 template <class T>
 UniquePtr<T>::UniquePtr(UniquePtr &&other)
-	: ptr_(other.ptr_)
+    : ptr_(other.ptr_)
 {
 	other.ptr_ = nullptr;
 }
@@ -62,9 +66,8 @@ UniquePtr<T>::UniquePtr(UniquePtr &&other)
 template <class T>
 template <class U>
 UniquePtr<T>::UniquePtr(UniquePtr<U> &&other)
-	: ptr_(other.release())
+    : ptr_(other.release())
 {
-
 }
 
 template <class T>
@@ -115,8 +118,10 @@ template <class T>
 class UniquePtr<T[]>
 {
   public:
-	UniquePtr() : ptr_(nullptr) { }
-	explicit UniquePtr(T *ptr) : ptr_(ptr) { }
+	UniquePtr()
+	    : ptr_(nullptr) {}
+	explicit UniquePtr(T *ptr)
+	    : ptr_(ptr) {}
 	~UniquePtr() { delete[] ptr_; }
 
 	UniquePtr(UniquePtr &&other);
@@ -151,7 +156,7 @@ class UniquePtr<T[]>
 
 template <class T>
 UniquePtr<T[]>::UniquePtr(UniquePtr &&other)
-	: ptr_(other.ptr_)
+    : ptr_(other.ptr_)
 {
 	other.ptr_ = nullptr;
 }
@@ -190,32 +195,42 @@ void UniquePtr<T[]>::reset(nullptr_t)
 	ptr_ = nullptr;
 }
 
-template<class T>
-struct MakeUniqueReturn { typedef UniquePtr<T> singleObject; };
+template <class T>
+struct MakeUniqueReturn
+{
+	typedef UniquePtr<T> singleObject;
+};
 
-template<class T>
-struct MakeUniqueReturn<T[]> { typedef UniquePtr<T[]> array; };
+template <class T>
+struct MakeUniqueReturn<T[]>
+{
+	typedef UniquePtr<T[]> array;
+};
 
-template<class T, unsigned long int size>
-struct MakeUniqueReturn<T[size]> { struct invalid { }; };
+template <class T, unsigned long int size>
+struct MakeUniqueReturn<T[size]>
+{
+	struct invalid
+	{};
+};
 
 /// `makeUnique()` for single objects
-template<class T, typename... Args>
-typename MakeUniqueReturn<T>::singleObject makeUnique(Args&&... args)
+template <class T, typename... Args>
+typename MakeUniqueReturn<T>::singleObject makeUnique(Args &&... args)
 {
 	return UniquePtr<T>(new T(nctl::forward<Args>(args)...));
 }
 
 /// `makeUnique()` for arrays of unknown bound
-template<class T>
+template <class T>
 typename MakeUniqueReturn<T>::array makeUnique(unsigned long int size)
 {
 	return UniquePtr<T>(new nctl::removeExtentT<T>[size]());
 }
 
 /// Disable `makeUnique()` for arrays of known bound
-template<class T, typename... Args>
-typename MakeUniqueReturn<T>::invalid makeUnique(Args&&...) = delete;
+template <class T, typename... Args>
+typename MakeUniqueReturn<T>::invalid makeUnique(Args &&...) = delete;
 
 }
 

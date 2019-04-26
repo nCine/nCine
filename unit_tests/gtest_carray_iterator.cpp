@@ -41,7 +41,7 @@ TEST_F(CArrayIteratorTest, ReverseForLoopIteration)
 	int n = Capacity - 1;
 
 	printf("Reverse iterating through elements with for loop:");
-	for (nctl::ReverseIterator<nctl::ArrayIterator<int, true> > r = nctl::crBegin(array_); r != nctl::crEnd(array_); ++r)
+	for (nctl::ReverseIterator<nctl::ArrayIterator<int, true>> r = nctl::crBegin(array_); r != nctl::crEnd(array_); ++r)
 	{
 		printf(" %d", *r);
 		ASSERT_EQ(*r, n--);
@@ -59,7 +59,8 @@ TEST_F(CArrayIteratorTest, WhileLoopIteration)
 	{
 		printf(" %d", *i);
 		ASSERT_EQ(*i, n);
-		++i; ++n;
+		++i;
+		++n;
 	}
 	printf("\n");
 }
@@ -69,12 +70,13 @@ TEST_F(CArrayIteratorTest, ReverseWhileLoopIteration)
 	int n = Capacity - 1;
 
 	printf("Reverse iterating through elements with while loop:");
-	nctl::ReverseIterator<nctl::ArrayIterator<int, true> > r = nctl::crBegin(array_);
+	nctl::ReverseIterator<nctl::ArrayIterator<int, true>> r = nctl::crBegin(array_);
 	while (r != nctl::crEnd(array_))
 	{
 		printf(" %d", *r);
 		ASSERT_EQ(*r, n);
-		++r; --n;
+		++r;
+		--n;
 	}
 	printf("\n");
 }

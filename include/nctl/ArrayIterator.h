@@ -18,11 +18,11 @@ class ArrayIterator
 	using Reference = typename IteratorTraits<ArrayIterator>::Reference;
 
 	explicit ArrayIterator(T *elementPtr)
-		: elementPtr_(elementPtr) { }
+	    : elementPtr_(elementPtr) {}
 
 	/// Copy constructor to implicitly convert a non constant iterator to a constant one
 	ArrayIterator(const ArrayIterator<T, false> &it)
-		: elementPtr_(it.elementPtr_) { }
+	    : elementPtr_(it.elementPtr_) {}
 
 	/// Deferencing operator
 	Reference operator*() const;
@@ -75,7 +75,7 @@ class ArrayIterator
 
 /// Iterator traits structure specialization for `ArrayIterator` class
 template <class T>
-struct IteratorTraits<ArrayIterator<T, false> >
+struct IteratorTraits<ArrayIterator<T, false>>
 {
 	/// Type of the values deferenced by the iterator
 	using ValueType = T;
@@ -89,7 +89,7 @@ struct IteratorTraits<ArrayIterator<T, false> >
 
 /// Iterator traits structure specialization for constant `ArrayIterator` class
 template <class T>
-struct IteratorTraits<ArrayIterator<T, true> >
+struct IteratorTraits<ArrayIterator<T, true>>
 {
 	/// Type of the values deferenced by the iterator (never const)
 	using ValueType = T;
@@ -197,9 +197,9 @@ ArrayIterator<T, false> begin(T (&array)[N])
 }
 
 template <class T, unsigned int N>
-ReverseIterator<ArrayIterator<T, false> > rBegin(T (&array)[N])
+ReverseIterator<ArrayIterator<T, false>> rBegin(T (&array)[N])
 {
-	return ReverseIterator<ArrayIterator<T, false> >(ArrayIterator<T, false>(array + N - 1));
+	return ReverseIterator<ArrayIterator<T, false>>(ArrayIterator<T, false>(array + N - 1));
 }
 
 template <class T, unsigned int N>
@@ -209,9 +209,9 @@ const ArrayIterator<T, true> cBegin(T (&array)[N])
 }
 
 template <class T, unsigned int N>
-const ReverseIterator<ArrayIterator<T, true> > crBegin(T (&array)[N])
+const ReverseIterator<ArrayIterator<T, true>> crBegin(T (&array)[N])
 {
-	return ReverseIterator<ArrayIterator<T, true> >(ArrayIterator<T, true>(array + N - 1));
+	return ReverseIterator<ArrayIterator<T, true>>(ArrayIterator<T, true>(array + N - 1));
 }
 
 template <class T, unsigned int N>
@@ -221,9 +221,9 @@ ArrayIterator<T, false> end(T (&array)[N])
 }
 
 template <class T, unsigned int N>
-ReverseIterator<ArrayIterator<T, false> > rEnd(T (&array)[N])
+ReverseIterator<ArrayIterator<T, false>> rEnd(T (&array)[N])
 {
-	return ReverseIterator<ArrayIterator<T, false> >(ArrayIterator<T, false>(array - 1));
+	return ReverseIterator<ArrayIterator<T, false>>(ArrayIterator<T, false>(array - 1));
 }
 
 template <class T, unsigned int N>
@@ -233,9 +233,9 @@ const ArrayIterator<T, true> cEnd(T (&array)[N])
 }
 
 template <class T, unsigned int N>
-const ReverseIterator<ArrayIterator<T, true> > crEnd(T (&array)[N])
+const ReverseIterator<ArrayIterator<T, true>> crEnd(T (&array)[N])
 {
-	return ReverseIterator<ArrayIterator<T, true> >(ArrayIterator<T, true>(array - 1));
+	return ReverseIterator<ArrayIterator<T, true>>(ArrayIterator<T, true>(array - 1));
 }
 
 }

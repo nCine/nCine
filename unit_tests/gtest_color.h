@@ -9,14 +9,26 @@ namespace nc = ncine;
 
 namespace {
 
-void printColor(const nc::Color &col)
+void printColor(const nc::Color &color)
 {
-	printf("<%u, %u, %u, %u>\n", col.r(), col.g(), col.b(), col.a());
+	printf("<%u, %u, %u, %u>\n", color.r(), color.g(), color.b(), color.a());
 }
 
-void printColor(const nc::Colorf &col)
+void printColor(const char *message, const nc::Color &color)
 {
-	printf("<%.2f, %.2f, %.2f, %.2f>\n", col.r(), col.g(), col.b(), col.a());
+	printf("%s ", message);
+	printColor(color);
+}
+
+void printColor(const nc::Colorf &color)
+{
+	printf("<%.2f, %.2f, %.2f, %.2f>\n", color.r(), color.g(), color.b(), color.a());
+}
+
+void printColor(const char *message, const nc::Colorf &color)
+{
+	printf("%s ", message);
+	printColor(color);
 }
 
 }
