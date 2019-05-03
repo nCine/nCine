@@ -41,6 +41,56 @@ TEST_F(HashMapStringTest, RetrieveElements)
 	}
 }
 
+TEST_F(HashMapStringTest, InsertElements)
+{
+	printf("Inserting elements\n");
+	nctl::String newKey(32);
+	nctl::String newValue(32);
+	for (unsigned int i = Size; i < Size * 2; i++)
+	{
+		newKey.format("%s_2", Keys[i % Size]);
+		newValue.format("%s_2", Values[i % Size]);
+		strHashmap_.insert(newKey, newValue);
+	}
+
+	for (unsigned int i = 0; i < Size; i++)
+		ASSERT_STREQ(strHashmap_[Keys[i]].data(), Values[i]);
+	for (unsigned int i = Size; i < Size * 2; i++)
+	{
+		newKey.format("%s_2", Keys[i % Size]);
+		newValue.format("%s_2", Values[i % Size]);
+		ASSERT_STREQ(strHashmap_[newKey].data(), newValue.data());
+	}
+
+	ASSERT_EQ(strHashmap_.size(), Size * 2);
+	ASSERT_EQ(calcSize(strHashmap_), Size * 2);
+}
+
+TEST_F(HashMapStringTest, EmplaceElements)
+{
+	printf("Emplacing elements\n");
+	nctl::String newKey(32);
+	nctl::String newValue(32);
+	for (unsigned int i = Size; i < Size * 2; i++)
+	{
+		newKey.format("%s_2", Keys[i % Size]);
+		newValue.format("%s_2", Values[i % Size]);
+		strHashmap_.emplace(newKey, newValue);
+	}
+
+	for (unsigned int i = 0; i < Size; i++)
+		ASSERT_STREQ(strHashmap_[Keys[i]].data(), Values[i]);
+	for (unsigned int i = Size; i < Size * 2; i++)
+	{
+		newKey.format("%s_2", Keys[i % Size]);
+		newValue.format("%s_2", Values[i % Size]);
+		ASSERT_STREQ(strHashmap_[newKey].data(), newValue.data());
+	}
+
+	ASSERT_EQ(strHashmap_.size(), Size * 2);
+	ASSERT_EQ(calcSize(strHashmap_), Size * 2);
+}
+
 TEST_F(HashMapStringTest, RemoveElements)
 {
 	printf("Removing a couple elements\n");
@@ -62,6 +112,18 @@ TEST_F(HashMapStringTest, CopyConstruction)
 	assertHashMapsAreEqual(strHashmap_, newStrHashmap);
 }
 
+TEST_F(HashMapStringTest, MoveConstruction)
+{
+	printf("Creating a new hashmap with move construction\n");
+	nctl::StringHashMap<nctl::String> newStrHashmap = nctl::move(strHashmap_);
+	printHashMap(newStrHashmap);
+
+	ASSERT_EQ(strHashmap_.size(), 0);
+	ASSERT_EQ(newStrHashmap.capacity(), Capacity);
+	ASSERT_EQ(newStrHashmap.size(), Size);
+	ASSERT_EQ(calcSize(newStrHashmap), Size);
+}
+
 TEST_F(HashMapStringTest, AssignmentOperator)
 {
 	printf("Creating a new hashmap with the assignment operator\n");
@@ -70,6 +132,19 @@ TEST_F(HashMapStringTest, AssignmentOperator)
 	printHashMap(newStrHashmap);
 
 	assertHashMapsAreEqual(strHashmap_, newStrHashmap);
+}
+
+TEST_F(HashMapStringTest, MoveAssignmentOperator)
+{
+	printf("Creating a new hashmap with the move assignment operator\n");
+	nctl::StringHashMap<nctl::String> newStrHashmap(Capacity);
+	newStrHashmap = nctl::move(strHashmap_);
+	printHashMap(newStrHashmap);
+
+	ASSERT_EQ(strHashmap_.size(), 0);
+	ASSERT_EQ(newStrHashmap.capacity(), Capacity);
+	ASSERT_EQ(newStrHashmap.size(), Size);
+	ASSERT_EQ(calcSize(newStrHashmap), Size);
 }
 
 TEST_F(HashMapStringTest, Contains)

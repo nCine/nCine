@@ -22,7 +22,9 @@ String::String(unsigned int capacity)
 	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
 
 	array_.local_[0] = '\0';
-	if (capacity > SmallBufferSize)
+	if (capacity_ <= SmallBufferSize)
+		capacity_ = SmallBufferSize;
+	else
 	{
 		array_.begin_ = new char[capacity_];
 		array_.begin_[0] = '\0';
@@ -41,7 +43,9 @@ String::String(const char *cString)
 	length_ = capacity_ - 1;
 
 	char *dest = array_.local_;
-	if (capacity_ > SmallBufferSize)
+	if (capacity_ <= SmallBufferSize)
+		capacity_ = SmallBufferSize;
+	else
 	{
 		array_.begin_ = new char[capacity_];
 		dest = array_.begin_;
@@ -162,7 +166,7 @@ unsigned int String::copy(String &dest, unsigned int srcChar, unsigned int numCh
 #else
 		strncpy(destStart, srcStart, charsToCopy);
 #endif
-		// Source string length can only grow, truncation has to be performed by the calling function using the return value
+		// Destination string length can only grow, truncation has to be performed by the calling function using the return value
 		dest.length_ = max(dest.length_, static_cast<unsigned int>(destStart - dest.data()) + charsToCopy);
 		dest.data()[dest.length_] = '\0';
 	}

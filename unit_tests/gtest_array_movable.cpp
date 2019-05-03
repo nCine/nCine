@@ -13,6 +13,7 @@ class ArrayMovableTest : public ::testing::Test
 	nctl::Array<Movable> array_;
 };
 
+#if !TEST_MOVABLE_ONLY
 TEST_F(ArrayMovableTest, PushBackLValue)
 {
 	Movable movable(Movable::Construction::INITIALIZED);
@@ -24,6 +25,7 @@ TEST_F(ArrayMovableTest, PushBackLValue)
 	ASSERT_EQ(movable.size(), array_[0].size());
 	ASSERT_NE(movable.data(), nullptr);
 }
+#endif
 
 TEST_F(ArrayMovableTest, PushBackRValue)
 {
@@ -37,6 +39,16 @@ TEST_F(ArrayMovableTest, PushBackRValue)
 	ASSERT_EQ(movable.data(), nullptr);
 }
 
+TEST_F(ArrayMovableTest, EmplaceBack)
+{
+	printf("Emplacing a complex object at the back\n");
+	array_.emplaceBack(Movable::Construction::INITIALIZED);
+
+	array_[0].printAndAssert();
+	ASSERT_EQ(array_.size(), 1);
+}
+
+#if !TEST_MOVABLE_ONLY
 TEST_F(ArrayMovableTest, InsertLValue)
 {
 	Movable movable(Movable::Construction::INITIALIZED);
@@ -48,6 +60,7 @@ TEST_F(ArrayMovableTest, InsertLValue)
 	ASSERT_EQ(movable.size(), array_[0].size());
 	ASSERT_NE(movable.data(), nullptr);
 }
+#endif
 
 TEST_F(ArrayMovableTest, InsertRValue)
 {
@@ -61,6 +74,19 @@ TEST_F(ArrayMovableTest, InsertRValue)
 	ASSERT_EQ(movable.data(), nullptr);
 }
 
+TEST_F(ArrayMovableTest, EmplaceAt)
+{
+	Movable movable(Movable::Construction::INITIALIZED);
+	printf("Emplacing a complex object at the back\n");
+	array_.emplaceAt(0, Movable::Construction::INITIALIZED);
+
+	array_[0].printAndAssert();
+	ASSERT_EQ(array_.size(), 1);
+	ASSERT_EQ(movable.size(), array_[0].size());
+	ASSERT_NE(movable.data(), nullptr);
+}
+
+#if !TEST_MOVABLE_ONLY
 TEST_F(ArrayMovableTest, InsertLValueAtBackWithIterator)
 {
 	Movable movable(Movable::Construction::INITIALIZED);
@@ -72,6 +98,7 @@ TEST_F(ArrayMovableTest, InsertLValueAtBackWithIterator)
 	ASSERT_EQ(movable.size(), array_[0].size());
 	ASSERT_NE(movable.data(), nullptr);
 }
+#endif
 
 TEST_F(ArrayMovableTest, InsertRValueAtBackWithIterator)
 {
@@ -83,6 +110,43 @@ TEST_F(ArrayMovableTest, InsertRValueAtBackWithIterator)
 	ASSERT_EQ(array_.size(), 1);
 	ASSERT_EQ(movable.size(), 0);
 	ASSERT_EQ(movable.data(), nullptr);
+}
+
+TEST_F(ArrayMovableTest, EmplaceAtBackWithIterator)
+{
+	Movable movable(Movable::Construction::INITIALIZED);
+	printf("Emplacing a complex object at the back\n");
+	array_.emplace(array_.end(), Movable::Construction::INITIALIZED);
+
+	array_[0].printAndAssert();
+	ASSERT_EQ(array_.size(), 1);
+	ASSERT_EQ(movable.size(), array_[0].size());
+	ASSERT_NE(movable.data(), nullptr);
+}
+
+TEST_F(ArrayMovableTest, MoveConstruction)
+{
+	Movable movable(Movable::Construction::INITIALIZED);
+	array_.pushBack(nctl::move(movable));
+	printf("Creating a new array with move construction\n");
+	nctl::Array<Movable> newArray(nctl::move(array_));
+
+	newArray[0].printAndAssert();
+	ASSERT_EQ(array_.size(), 0);
+	ASSERT_EQ(newArray.size(), 1);
+}
+
+TEST_F(ArrayMovableTest, MoveAssignmentOperator)
+{
+	Movable movable(Movable::Construction::INITIALIZED);
+	array_.pushBack(nctl::move(movable));
+	printf("Creating a new array with the move assignment operator\n");
+	nctl::Array<Movable> newArray;
+	newArray = nctl::move(array_);
+
+	newArray[0].printAndAssert();
+	ASSERT_EQ(array_.size(), 0);
+	ASSERT_EQ(newArray.size(), 1);
 }
 
 }

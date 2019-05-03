@@ -130,6 +130,8 @@ class Array
 	inline void pushBack(const T &element) { operator[](size_) = element; }
 	/// Appends a new element in constant time, the element is moved into the array
 	inline void pushBack(T &&element) { operator[](size_) = nctl::move(element); }
+	/// Constructs a new element at the end of the array
+	template <typename... Args> void emplaceBack(Args &&... args);
 	/// Removes the last element in constant time
 	void popBack();
 	/// Inserts new elements at the specified position from a source range, last not included (shifting elements around)
@@ -138,12 +140,16 @@ class Array
 	T *insertAt(unsigned int index, const T &element);
 	/// Move inserts a new element at a specified position (shifting elements around)
 	T *insertAt(unsigned int index, T &&element);
+	/// Constructs a new element at the position specified by the index
+	template <typename... Args> T *emplaceAt(unsigned int index, Args &&... args);
 	/// Inserts a new element at the position specified by the iterator (shifting elements around)
 	Iterator insert(Iterator position, const T &value);
 	/// Move inserts a new element at the position specified by the iterator (shifting elements around)
 	Iterator insert(Iterator position, T &&value);
 	/// Inserts new elements from a source at the position specified by the iterator (shifting elements around)
 	Iterator insert(Iterator position, Iterator first, Iterator last);
+	/// Constructs a new element at the position specified by the iterator
+	template <typename... Args> Iterator emplace(Iterator position, Args &&... args);
 	/// Removes the specified range of elements, last not included (shifting elements around)
 	T *removeRange(unsigned int firstIndex, unsigned int lastIndex);
 	/// Removes an element at a specified position (shifting elements around)
@@ -264,6 +270,13 @@ void Array<T>::shrinkToFit()
 }
 
 template <class T>
+template <typename... Args>
+void Array<T>::emplaceBack(Args &&... args)
+{
+	new (&operator[](size_)) T(nctl::forward<Args>(args)...);
+}
+
+template <class T>
 void Array<T>::popBack()
 {
 	if (size_ > 0)
@@ -335,6 +348,28 @@ T *Array<T>::insertAt(unsigned int index, T &&element)
 }
 
 template <class T>
+template <typename... Args>
+T *Array<T>::emplaceAt(unsigned int index, Args &&... args)
+{
+	// Cannot emplace at more than one position after the last element
+	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
+
+	if (size_ + 1 > capacity_)
+	{
+		const unsigned int newCapacity = (size_ == 0) ? 1 : size_ * 2;
+		setCapacity(newCapacity);
+	}
+
+	// Backwards loop to account for overlapping areas
+	for (unsigned int i = size_ - index; i > 0; i--)
+		array_[index + i] = nctl::move(array_[index + i - 1]);
+	new (&array_[index]) T(nctl::forward<Args>(args)...);
+	size_++;
+
+	return (array_ + index + 1);
+}
+
+template <class T>
 typename Array<T>::Iterator Array<T>::insert(Iterator position, const T &value)
 {
 	const unsigned int index = &(*position) - array_;
@@ -359,6 +394,16 @@ typename Array<T>::Iterator Array<T>::insert(Iterator position, Iterator first, 
 	const T *firstPtr = &(*first);
 	const T *lastPtr = &(*last);
 	T *nextElement = insertRange(index, firstPtr, lastPtr);
+
+	return Iterator(nextElement);
+}
+
+template <class T>
+template <typename... Args>
+typename Array<T>::Iterator Array<T>::emplace(Iterator position, Args &&... args)
+{
+	const unsigned int index = &(*position) - array_;
+	T *nextElement = emplaceAt(index, nctl::forward<Args>(args)...);
 
 	return Iterator(nextElement);
 }

@@ -70,6 +70,12 @@ class HashMapList
 
 	/// Subscript operator
 	T &operator[](const K &key);
+	/// Inserts an element if no other has the same key
+	bool insert(const K &key, const T &value);
+	/// Moves an element if no other has the same key
+	bool insert(const K &key, T &&value);
+	/// Constructs an element if no other has the same key
+	template <typename... Args> bool emplace(const K &key, Args &&... args);
 
 	/// Returns true if the hashmap is empty
 	inline bool isEmpty() const { return size() == 0; }
@@ -113,6 +119,13 @@ class HashMapList
 		    : hash(NullHash) {}
 		Node(hash_t hh, const K &kk)
 		    : hash(hh), key(kk) {}
+		Node(hash_t hh, const K &kk, const T &vv)
+		    : hash(hh), key(kk), value(vv) {}
+		Node(hash_t hh, const K &kk, T &&vv)
+		    : hash(hh), key(kk), value(nctl::move(vv)) {}
+		template <typename... Args>
+		Node(hash_t hh, const K &kk, Args &&... args)
+		    : hash(hh), key(kk), value(nctl::forward<Args>(args)...) {}
 	};
 
 	/// The bucket class for the hashmap, with separate chaining and list head cell
@@ -126,7 +139,10 @@ class HashMapList
 		bool contains(hash_t hash, const K &key, T &returnedValue) const;
 		T *find(hash_t hash, const K &key);
 		const T *find(hash_t hash, const K &key) const;
-		T &findOrAdd(hash_t hash, const K &key);
+		T &findOrInsert(hash_t hash, const K &key);
+		bool insert(hash_t hash, const K &key, const T &value);
+		bool insert(hash_t hash, const K &key, T &&value);
+		template <typename... Args> bool emplace(hash_t hash, const K &key, Args &&... args);
 		bool remove(hash_t hash, const K &key);
 
 	  private:
@@ -252,7 +268,7 @@ const T *HashMapList<K, T, HashFunc>::HashBucket::find(hash_t hash, const K &key
 }
 
 template <class K, class T, class HashFunc>
-T &HashMapList<K, T, HashFunc>::HashBucket::findOrAdd(hash_t hash, const K &key)
+T &HashMapList<K, T, HashFunc>::HashBucket::findOrInsert(hash_t hash, const K &key)
 {
 	if (size_ == 0)
 	{
@@ -270,7 +286,77 @@ T &HashMapList<K, T, HashFunc>::HashBucket::findOrAdd(hash_t hash, const K &key)
 	// The item has not been found, a new entry is created at the end of the list
 	size_++;
 	collisionList_.pushBack(Node(hash, key));
-	return (*collisionList_.rBegin()).value;
+	return collisionList_.back().value;
+}
+
+template <class K, class T, class HashFunc>
+bool HashMapList<K, T, HashFunc>::HashBucket::insert(hash_t hash, const K &key, const T &value)
+{
+	if (size_ == 0)
+	{
+		// Early-out if the bucket is empty
+		firstNode_.hash = hash;
+		firstNode_.key = key;
+		firstNode_.value = value;
+		size_++;
+		return true;
+	}
+
+	Node *node = findNode(hash, key);
+	if (node)
+		return false;
+
+	// The item has not been found, a new entry is created at the end of the list
+	size_++;
+	collisionList_.pushBack(Node(hash, key, value));
+	return true;
+}
+
+template <class K, class T, class HashFunc>
+bool HashMapList<K, T, HashFunc>::HashBucket::insert(hash_t hash, const K &key, T &&value)
+{
+	if (size_ == 0)
+	{
+		// Early-out if the bucket is empty
+		firstNode_.hash = hash;
+		firstNode_.key = key;
+		firstNode_.value = nctl::move(value);
+		size_++;
+		return true;
+	}
+
+	Node *node = findNode(hash, key);
+	if (node)
+		return false;
+
+	// The item has not been found, a new entry is created at the end of the list
+	size_++;
+	collisionList_.pushBack(Node(hash, key, nctl::move(value)));
+	return true;
+}
+
+template <class K, class T, class HashFunc>
+template <typename... Args>
+bool HashMapList<K, T, HashFunc>::HashBucket::emplace(hash_t hash, const K &key, Args &&... args)
+{
+	if (size_ == 0)
+	{
+		// Early-out if the bucket is empty
+		firstNode_.hash = hash;
+		firstNode_.key = key;
+		new (&firstNode_.value) T(nctl::forward<Args>(args)...);
+		size_++;
+		return true;
+	}
+
+	Node *node = findNode(hash, key);
+	if (node)
+		return false;
+
+	// The item has not been found, a new entry is created at the end of the list
+	size_++;
+	collisionList_.emplaceBack(hash, key, nctl::forward<Args>(args)...);
+	return true;
 }
 
 /*! \return True if the element has been found and removed */
@@ -393,7 +479,49 @@ template <class K, class T, class HashFunc>
 T &HashMapList<K, T, HashFunc>::operator[](const K &key)
 {
 	const hash_t hash = hashFunc_(key);
-	return retrieveBucket(hash).findOrAdd(hash, key);
+	return retrieveBucket(hash).findOrInsert(hash, key);
+}
+
+/*! \return True if the element has been inserted */
+template <class K, class T, class HashFunc>
+bool HashMapList<K, T, HashFunc>::insert(const K &key, const T &value)
+{
+	const hash_t hash = hashFunc_(key);
+	return retrieveBucket(hash).insert(hash, key, value);
+}
+
+/*! \return True if the element has been inserted */
+template <class K, class T, class HashFunc>
+bool HashMapList<K, T, HashFunc>::insert(const K &key, T &&value)
+{
+	const hash_t hash = hashFunc_(key);
+	return retrieveBucket(hash).insert(hash, key, nctl::move(value));
+}
+
+/*! \return True if the element has been emplaced */
+template <class K, class T, class HashFunc>
+template <typename... Args>
+bool HashMapList<K, T, HashFunc>::emplace(const K &key, Args &&... args)
+{
+	const hash_t hash = hashFunc_(key);
+	return retrieveBucket(hash).emplace(hash, key, nctl::forward<Args>(args)...);
+}
+
+template <class K, class T, class HashFunc>
+unsigned int HashMapList<K, T, HashFunc>::size() const
+{
+	unsigned int totalSize = 0;
+	for (unsigned int i = 0; i < buckets_.size(); i++)
+		totalSize += buckets_[i].size();
+
+	return totalSize;
+}
+
+template <class K, class T, class HashFunc>
+void HashMapList<K, T, HashFunc>::clear()
+{
+	for (unsigned int i = 0; i < buckets_.size(); i++)
+		buckets_[i].clear();
 }
 
 template <class K, class T, class HashFunc>
@@ -453,23 +581,6 @@ void HashMapList<K, T, HashFunc>::rehash(unsigned int count)
 	}
 
 	*this = nctl::move(hashMap);
-}
-
-template <class K, class T, class HashFunc>
-unsigned int HashMapList<K, T, HashFunc>::size() const
-{
-	unsigned int totalSize = 0;
-	for (unsigned int i = 0; i < buckets_.size(); i++)
-		totalSize += buckets_[i].size();
-
-	return totalSize;
-}
-
-template <class K, class T, class HashFunc>
-void HashMapList<K, T, HashFunc>::clear()
-{
-	for (unsigned int i = 0; i < buckets_.size(); i++)
-		buckets_[i].clear();
 }
 
 template <class K, class T, class HashFunc>

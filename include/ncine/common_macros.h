@@ -4,6 +4,10 @@
 #include <cstdlib> // for abort()
 #include "ServiceLocator.h"
 
+#ifdef NCINE_DEBUG
+	#define NCINE_ASSERT_BREAK
+#endif
+
 #ifdef __GNUC__
 	#define FUNCTION __PRETTY_FUNCTION__
 #elif _MSC_VER
@@ -26,7 +30,7 @@
 #define LOGE(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LogLevel::ERROR, static_cast<const char *>("%s -> " fmt), FUNCTION)
 #define LOGF(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LogLevel::FATAL, static_cast<const char *>("%s -> " fmt), FUNCTION)
 
-#ifdef NCINE_DEBUG
+#ifdef NCINE_ASSERT_BREAK
 	#ifdef _MSC_VER
 		#define BREAK() __debugbreak()
 	#else
@@ -97,7 +101,7 @@
 	} while (false)
 
 // Non-fatal assert macros
-#ifdef NCINE_DEBUG
+#ifdef NCINE_ASSERT_BREAK
 	#define ASSERT_MSG_X(x, fmt, ...) \
 		do \
 		{ \

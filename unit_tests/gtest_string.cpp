@@ -23,6 +23,16 @@ TEST_F(StringTest, EmptyString)
 	ASSERT_EQ(newString.length(), 0);
 }
 
+TEST_F(StringTest, EmptyStringShort)
+{
+	nctl::String newString(Capacity - 4);
+	printString("Creating an empty string: ", newString);
+
+	// Capacity can't be smaller than `SmallBufferSize`
+	ASSERT_EQ(newString.capacity(), Capacity);
+	ASSERT_EQ(newString.length(), 0);
+}
+
 TEST_F(StringTest, AssignCString)
 {
 	nctl::String newString(Capacity);

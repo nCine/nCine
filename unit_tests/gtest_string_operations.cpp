@@ -36,16 +36,28 @@ TEST_F(StringOperationTest, Clear)
 	ASSERT_EQ(string_.length(), 0u);
 }
 
-TEST_F(StringOperationTest, ImplicitCStringConstructor)
+TEST_F(StringOperationTest, ImplicitCStringConstructorShort)
 {
 	nctl::String newString = "String2";
 	printString("Creating a new string from a C-style string assignment: ", newString);
 
 	// Termination character is taken into account for capacity
-	ASSERT_EQ(newString.length() + 1, newString.capacity());
-	ASSERT_EQ(newString.capacity(), strnlen("String2", Capacity) + 1);
+	ASSERT_EQ(newString.capacity(), Capacity);
 	ASSERT_EQ(newString.length(), strnlen("String2", Capacity));
 	ASSERT_STREQ(newString.data(), "String2");
+}
+
+TEST_F(StringOperationTest, ImplicitCStringConstructorLong)
+{
+	// The string is longer than `SmallBufferSize`
+	nctl::String newString = "String2...String2";
+	printString("Creating a new string from a C-style string assignment: ", newString);
+
+	// Termination character is taken into account for capacity
+	ASSERT_EQ(newString.length() + 1, newString.capacity());
+	ASSERT_EQ(newString.capacity(), strnlen("String2...String2", 18) + 1);
+	ASSERT_EQ(newString.length(), strnlen("String2...String2", 18));
+	ASSERT_STREQ(newString.data(), "String2...String2");
 }
 
 TEST_F(StringOperationTest, CopyConstruction)
@@ -96,7 +108,8 @@ TEST_F(StringOperationTest, MoveAssignmentOperator)
 
 TEST_F(StringOperationTest, ConstructByConcatenation)
 {
-	nctl::String secondString = "String2";
+	// The string is longer than `SmallBufferSize`
+	nctl::String secondString = "String2...String2";
 	printString("Creating a second string: ", secondString);
 
 	nctl::String thirdString = secondString + string_;
@@ -104,14 +117,15 @@ TEST_F(StringOperationTest, ConstructByConcatenation)
 
 	// Termination character is taken into account for capacity
 	ASSERT_EQ(thirdString.length() + 1, thirdString.capacity());
-	ASSERT_EQ(thirdString.capacity(), strnlen("String2String1", Capacity) + 1);
-	ASSERT_EQ(thirdString.length(), strnlen("String2String1", Capacity));
-	ASSERT_STREQ(thirdString.data(), "String2String1");
+	ASSERT_EQ(thirdString.capacity(), strnlen("String2...String2String1", 25) + 1);
+	ASSERT_EQ(thirdString.length(), strnlen("String2...String2String1", 25));
+	ASSERT_STREQ(thirdString.data(), "String2...String2String1");
 }
 
 TEST_F(StringOperationTest, ConstructByConcatenationWithCStringAsFirst)
 {
-	const char *secondString = "String2";
+	// The string is longer than `SmallBufferSize`
+	const char *secondString = "String2...String2";
 	printf("Creating a second string: %s", secondString);
 
 	// using `friend String operator+(const char *cString, const String &string)`
@@ -120,14 +134,15 @@ TEST_F(StringOperationTest, ConstructByConcatenationWithCStringAsFirst)
 
 	// Termination character is taken into account for capacity
 	ASSERT_EQ(thirdString.length() + 1, thirdString.capacity());
-	ASSERT_EQ(thirdString.capacity(), strnlen("String2String1", Capacity) + 1);
-	ASSERT_EQ(thirdString.length(), strnlen("String2String1", Capacity));
-	ASSERT_STREQ(thirdString.data(), "String2String1");
+	ASSERT_EQ(thirdString.capacity(), strnlen("String2...String2String1", 25) + 1);
+	ASSERT_EQ(thirdString.length(), strnlen("String2...String2String1", 25));
+	ASSERT_STREQ(thirdString.data(), "String2...String2String1");
 }
 
 TEST_F(StringOperationTest, ConstructByConcatenationWithCStringAsSecond)
 {
-	const char *secondString = "String2";
+	// The string is longer than `SmallBufferSize`
+	const char *secondString = "String2...String2";
 	printf("Creating a second string: %s", secondString);
 
 	// using `String String::operator+(const char *cString) const`
@@ -136,9 +151,9 @@ TEST_F(StringOperationTest, ConstructByConcatenationWithCStringAsSecond)
 
 	// Termination character is taken into account for capacity
 	ASSERT_EQ(thirdString.length() + 1, thirdString.capacity());
-	ASSERT_EQ(thirdString.capacity(), strnlen("String1String2", Capacity) + 1);
-	ASSERT_EQ(thirdString.length(), strnlen("String1String2", Capacity));
-	ASSERT_STREQ(thirdString.data(), "String1String2");
+	ASSERT_EQ(thirdString.capacity(), strnlen("String1String2...String2", 25) + 1);
+	ASSERT_EQ(thirdString.length(), strnlen("String1String2...String2", 25));
+	ASSERT_STREQ(thirdString.data(), "String1String2...String2");
 }
 
 TEST_F(StringOperationTest, Format)
@@ -400,13 +415,13 @@ TEST_F(StringOperationTest, CopyCharactersToBeyondEnd)
 {
 	nctl::String srcString = "0123456";
 	printString("Creating a new source string: ", srcString);
-	nctl::String destString = "abcdefg";
+	nctl::String destString = "abcdefghilmn";
 	printString("Creating a new destination string: ", destString);
 
 	const unsigned int numAvailable = destString.capacity() - destString.length() - 1;
 
 	const unsigned int srcChar = 0;
-	const unsigned int numChar = 2; // more than available in destination
+	const unsigned int numChar = 6; // more than available in destination
 	const unsigned int destChar = destString.length() + 1; // beyond the end of destination
 	const unsigned int numCopied = srcString.copy(destString, srcChar, numChar, destChar);
 	printString("Trying to copy a character from the source string to beyond the end of the destination one: ", destString);

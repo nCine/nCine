@@ -230,6 +230,17 @@ TEST_F(ArrayTest, PushBack)
 	ASSERT_EQ(array_.capacity(), Capacity * 2);
 }
 
+TEST_F(ArrayTest, EmplaceBack)
+{
+	printf("Emplacing at the back\n");
+	array_.emplaceBack(Capacity + 1);
+	printArray(array_);
+
+	ASSERT_TRUE(isUnmodified(array_));
+	ASSERT_EQ(array_.size(), Capacity + 1);
+	ASSERT_EQ(array_.capacity(), Capacity * 2);
+}
+
 TEST_F(ArrayTest, PopBack)
 {
 	printf("Removing at the back\n");
@@ -264,6 +275,19 @@ TEST_F(ArrayTest, InsertMiddle)
 	ASSERT_EQ(array_.capacity(), Capacity * 2);
 }
 
+TEST_F(ArrayTest, EmplaceMiddle)
+{
+	printf("Emplacing in the middle\n");
+	array_.emplaceAt(3, 22);
+	printArray(array_);
+
+	ASSERT_EQ(array_[2], 2);
+	ASSERT_EQ(array_[3], 22);
+	ASSERT_EQ(array_[4], 3);
+	ASSERT_EQ(array_.size(), Capacity + 1);
+	ASSERT_EQ(array_.capacity(), Capacity * 2);
+}
+
 TEST_F(ArrayTest, RemoveMiddle)
 {
 	printf("Removing from the middle\n");
@@ -281,6 +305,22 @@ TEST_F(ArrayTest, InsertFirstAndLast)
 	printf("Inserting as first and last\n");
 	array_.insertAt(0, -1);
 	array_.insertAt(array_.size(), 10);
+	printArray(array_);
+
+	ASSERT_EQ(array_[0], -1);
+	ASSERT_EQ(array_[1], 0);
+	ASSERT_EQ(array_[9], 8);
+	ASSERT_EQ(array_[10], 9);
+	ASSERT_EQ(array_[11], 10);
+	ASSERT_EQ(array_.size(), Capacity + 2);
+	ASSERT_EQ(array_.capacity(), Capacity * 2);
+}
+
+TEST_F(ArrayTest, EmplaceFirstAndLast)
+{
+	printf("Emplacing as first and last\n");
+	array_.emplaceAt(0, -1);
+	array_.emplaceAt(array_.size(), 10);
 	printArray(array_);
 
 	ASSERT_EQ(array_[0], -1);

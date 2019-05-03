@@ -61,11 +61,67 @@ TEST_F(HashMapTest, RetrieveElements)
 	for (unsigned int i = 0; i < Size; i++)
 	{
 		printf("key: %u, value: %d\n", i, hashmap_[i]);
-		ASSERT_EQ(hashmap_[i], KeyValueDifference + i);
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
 	}
 
 	ASSERT_EQ(hashmap_.size(), Size);
 	ASSERT_EQ(calcSize(hashmap_), Size);
+}
+
+TEST_F(HashMapTest, InsertElements)
+{
+	printf("Inserting elements\n");
+	for (unsigned int i = Size; i < Size * 2; i++)
+		hashmap_.insert(i, i + KeyValueDifference);
+
+	for (unsigned int i = 0; i < Size * 2; i++)
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
+
+	ASSERT_EQ(hashmap_.size(), Size * 2);
+	ASSERT_EQ(calcSize(hashmap_), Size * 2);
+}
+
+TEST_F(HashMapTest, FailInsertElements)
+{
+	printf("Trying to insert elements already in the hashmap\n");
+	for (unsigned int i = 0; i < Size * 2; i++)
+		hashmap_.insert(i, i + 2 * KeyValueDifference);
+
+	for (unsigned int i = 0; i < Size; i++)
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
+	for (unsigned int i = Size; i < Size * 2; i++)
+		ASSERT_EQ(hashmap_[i], i + 2 * KeyValueDifference);
+
+	ASSERT_EQ(hashmap_.size(), Size * 2);
+	ASSERT_EQ(calcSize(hashmap_), Size * 2);
+}
+
+TEST_F(HashMapTest, EmplaceElements)
+{
+	printf("Emplacing elements\n");
+	for (unsigned int i = Size; i < Size * 2; i++)
+		hashmap_.emplace(i, i + KeyValueDifference);
+
+	for (unsigned int i = 0; i < Size * 2; i++)
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
+
+	ASSERT_EQ(hashmap_.size(), Size * 2);
+	ASSERT_EQ(calcSize(hashmap_), Size * 2);
+}
+
+TEST_F(HashMapTest, FailEmplaceElements)
+{
+	printf("Trying to emplace elements already in the hashmap\n");
+	for (unsigned int i = 0; i < Size * 2; i++)
+		hashmap_.emplace(i, i + 2 * KeyValueDifference);
+
+	for (unsigned int i = 0; i < Size; i++)
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
+	for (unsigned int i = Size; i < Size * 2; i++)
+		ASSERT_EQ(hashmap_[i], i + 2 * KeyValueDifference);
+
+	ASSERT_EQ(hashmap_.size(), Size * 2);
+	ASSERT_EQ(calcSize(hashmap_), Size * 2);
 }
 
 TEST_F(HashMapTest, RemoveElements)
@@ -138,6 +194,18 @@ TEST_F(HashMapTest, CopyConstruction)
 	ASSERT_EQ(calcSize(newHashmap), Size);
 }
 
+TEST_F(HashMapTest, MoveConstruction)
+{
+	printf("Creating a new hashmap with move construction\n");
+	HashMapTestType newHashmap = nctl::move(hashmap_);
+	printHashMap(newHashmap);
+
+	ASSERT_EQ(hashmap_.size(), 0);
+	ASSERT_EQ(newHashmap.capacity(), Capacity);
+	ASSERT_EQ(newHashmap.size(), Size);
+	ASSERT_EQ(calcSize(newHashmap), Size);
+}
+
 TEST_F(HashMapTest, AssignmentOperator)
 {
 	printf("Creating a new hashmap with the assignment operator\n");
@@ -148,6 +216,19 @@ TEST_F(HashMapTest, AssignmentOperator)
 	assertHashMapsAreEqual(hashmap_, newHashmap);
 	ASSERT_EQ(hashmap_.size(), Size);
 	ASSERT_EQ(calcSize(hashmap_), Size);
+	ASSERT_EQ(newHashmap.size(), Size);
+	ASSERT_EQ(calcSize(newHashmap), Size);
+}
+
+TEST_F(HashMapTest, MoveAssignmentOperator)
+{
+	printf("Creating a new hashmap with the move assignment operator\n");
+	HashMapTestType newHashmap(Capacity);
+	newHashmap = nctl::move(hashmap_);
+	printHashMap(newHashmap);
+
+	ASSERT_EQ(hashmap_.size(), 0);
+	ASSERT_EQ(newHashmap.capacity(), Capacity);
 	ASSERT_EQ(newHashmap.size(), Size);
 	ASSERT_EQ(calcSize(newHashmap), Size);
 }

@@ -113,10 +113,6 @@ class HashMapIterator
 	void next();
 	/// Makes the iterator point to the previous element in the hashmap
 	void previous();
-	/// Find the first valid element in the hashmap
-	void findFirstValid();
-	/// Find the last valid element in the hashmap
-	void findLastValid();
 
 	/// For non constant to constant iterator implicit conversion
 	friend class HashMapIterator<K, T, HashFunc, true>;

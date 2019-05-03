@@ -38,10 +38,13 @@ class ListNode : public BaseListNode
 	T data_;
 
   private:
-	ListNode(const T &data, BaseListNode *previous, BaseListNode *next)
+	ListNode(BaseListNode *previous, BaseListNode *next, const T &data)
 	    : BaseListNode(previous, next), data_(data) {}
-	ListNode(T &&data, BaseListNode *previous, BaseListNode *next)
+	ListNode(BaseListNode *previous, BaseListNode *next, T &&data)
 	    : BaseListNode(previous, next), data_(nctl::move(data)) {}
+	template <typename... Args>
+	ListNode(BaseListNode *previous, BaseListNode *next, Args &&... args)
+	    : BaseListNode(previous, next), data_(nctl::forward<Args>(args)...) {}
 
 	friend class List<T>;
 };
@@ -124,10 +127,14 @@ class List
 	inline void pushFront(const T &element) { insertBeforeNode(static_cast<ListNode<T> *>(sentinel_.next_), element); }
 	/// Move inserts a new element as the first, in constant time
 	inline void pushFront(T &&element) { insertBeforeNode(static_cast<ListNode<T> *>(sentinel_.next_), nctl::move(element)); }
+	/// Constructs a new element as the first, in constant time
+	template <typename... Args> void emplaceFront(Args &&... args) { emplaceBeforeNode(static_cast<ListNode<T> *>(sentinel_.next_), nctl::forward<Args>(args)...); }
 	/// Inserts a new element as the last, in constant time
 	inline void pushBack(const T &element) { insertAfterNode(static_cast<ListNode<T> *>(sentinel_.previous_), element); }
 	/// Move inserts a new element as the last, in constant time
 	inline void pushBack(T &&element) { insertAfterNode(static_cast<ListNode<T> *>(sentinel_.previous_), nctl::move(element)); }
+	/// Constructs a new element as the last, in constant time
+	template <typename... Args> void emplaceBack(Args &&... args) { emplaceAfterNode(static_cast<ListNode<T> *>(sentinel_.previous_), nctl::forward<Args>(args)...); }
 	/// Removes the first element in constant time
 	inline void popFront() { removeNode(sentinel_.next_); }
 	/// Removes the last element in constant time
@@ -136,10 +143,14 @@ class List
 	ConstIterator insertAfter(const Iterator position, const T &element);
 	/// Move inserts a new element after the node pointed by the constant iterator
 	ConstIterator insertAfter(const Iterator position, T &&element);
+	/// Constructs a new element after the node pointed by the constant iterator
+	template <typename... Args> ConstIterator emplaceAfter(const Iterator position, Args &&... args);
 	/// Inserts a new element before the node pointed by the constant iterator
 	ConstIterator insertBefore(const Iterator position, const T &element);
 	/// Move inserts a new element before the node pointed by the constant iterator
 	ConstIterator insertBefore(const Iterator position, T &&element);
+	/// Constructs a new element before the node pointed by the constant iterator
+	template <typename... Args> ConstIterator emplaceBefore(const Iterator position, Args &&... args);
 	/// Inserts new elements from a source range after the node pointed by the constant iterator, last not included
 	ConstIterator insert(const Iterator position, Iterator first, const Iterator last);
 	/// Removes the node pointed by the constant iterator in constant time
@@ -168,10 +179,14 @@ class List
 	ListNode<T> *insertAfterNode(ListNode<T> *node, const T &element);
 	/// Move inserts a new element after a specified node
 	ListNode<T> *insertAfterNode(ListNode<T> *node, T &&element);
+	/// Constructs a new element after a specified node
+	template <typename... Args> ListNode<T> *emplaceAfterNode(ListNode<T> *node, Args &&... args);
 	/// Inserts a new element before a specified node
 	ListNode<T> *insertBeforeNode(ListNode<T> *node, const T &element);
 	/// Move inserts a new element before a specified node
 	ListNode<T> *insertBeforeNode(ListNode<T> *node, T &&element);
+	/// Constructs a new element before a specified node
+	template <typename... Args> ListNode<T> *emplaceBeforeNode(ListNode<T> *node, Args &&... args);
 	/// Removes a specified node in constant time
 	ListNode<T> *removeNode(BaseListNode *node);
 	/// Removes a range of nodes in constant time, last not included
@@ -286,6 +301,13 @@ inline typename List<T>::ConstIterator List<T>::insertAfter(const Iterator posit
 }
 
 template <class T>
+template <typename... Args>
+inline typename List<T>::ConstIterator List<T>::emplaceAfter(const Iterator position, Args &&... args)
+{
+	return ConstIterator(emplaceAfterNode(position.node_, nctl::forward<Args>(args)...));
+}
+
+template <class T>
 inline typename List<T>::ConstIterator List<T>::insertBefore(const Iterator position, const T &element)
 {
 	return ConstIterator(insertBeforeNode(position.node_, element));
@@ -295,6 +317,13 @@ template <class T>
 inline typename List<T>::ConstIterator List<T>::insertBefore(const Iterator position, T &&element)
 {
 	return ConstIterator(insertBeforeNode(position.node_, nctl::move(element)));
+}
+
+template <class T>
+template <typename... Args>
+inline typename List<T>::ConstIterator List<T>::emplaceBefore(const Iterator position, Args &&... args)
+{
+	return ConstIterator(emplaceBeforeNode(position.node_, nctl::forward<Args>(args)...));
 }
 
 template <class T>
@@ -414,7 +443,7 @@ void List<T>::splice(Iterator position, List &source, Iterator first, Iterator l
 template <class T>
 ListNode<T> *List<T>::insertAfterNode(ListNode<T> *node, const T &element)
 {
-	ListNode<T> *newNode = new ListNode<T>(element, node, node->next_);
+	ListNode<T> *newNode = new ListNode<T>(node, node->next_, element);
 
 	// it also works if `node->next_` is the sentinel
 	node->next_->previous_ = newNode;
@@ -427,7 +456,21 @@ ListNode<T> *List<T>::insertAfterNode(ListNode<T> *node, const T &element)
 template <class T>
 ListNode<T> *List<T>::insertAfterNode(ListNode<T> *node, T &&element)
 {
-	ListNode<T> *newNode = new ListNode<T>(nctl::move(element), node, node->next_);
+	ListNode<T> *newNode = new ListNode<T>(node, node->next_, nctl::move(element));
+
+	// it also works if `node->next_` is the sentinel
+	node->next_->previous_ = newNode;
+	node->next_ = newNode;
+	size_++;
+
+	return newNode;
+}
+
+template <class T>
+template <typename... Args>
+ListNode<T> *List<T>::emplaceAfterNode(ListNode<T> *node, Args &&... args)
+{
+	ListNode<T> *newNode = new ListNode<T>(node, node->next_, nctl::forward<Args>(args)...);
 
 	// it also works if `node->next_` is the sentinel
 	node->next_->previous_ = newNode;
@@ -440,7 +483,7 @@ ListNode<T> *List<T>::insertAfterNode(ListNode<T> *node, T &&element)
 template <class T>
 ListNode<T> *List<T>::insertBeforeNode(ListNode<T> *node, const T &element)
 {
-	ListNode<T> *newNode = new ListNode<T>(element, node->previous_, node);
+	ListNode<T> *newNode = new ListNode<T>(node->previous_, node, element);
 
 	// it also works if `node->previous_` is the sentinel
 	node->previous_->next_ = newNode;
@@ -453,7 +496,21 @@ ListNode<T> *List<T>::insertBeforeNode(ListNode<T> *node, const T &element)
 template <class T>
 ListNode<T> *List<T>::insertBeforeNode(ListNode<T> *node, T &&element)
 {
-	ListNode<T> *newNode = new ListNode<T>(nctl::move(element), node->previous_, node);
+	ListNode<T> *newNode = new ListNode<T>(node->previous_, node, nctl::move(element));
+
+	// it also works if `node->previous_` is the sentinel
+	node->previous_->next_ = newNode;
+	node->previous_ = newNode;
+	size_++;
+
+	return newNode;
+}
+
+template <class T>
+template <typename... Args>
+ListNode<T> *List<T>::emplaceBeforeNode(ListNode<T> *node, Args &&... args)
+{
+	ListNode<T> *newNode = new ListNode<T>(node->previous_, node, nctl::forward<Args>(args)...);
 
 	// it also works if `node->previous_` is the sentinel
 	node->previous_->next_ = newNode;

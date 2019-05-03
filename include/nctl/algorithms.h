@@ -713,11 +713,11 @@ inline const Iterator isSortedUntil(Iterator first, const Iterator last, Compare
 template <class Iterator, class Compare>
 inline Iterator partition(Iterator first, Iterator last, Compare comp)
 {
-	typename IteratorTraits<Iterator>::ValueType pivot = *last;
+	Iterator pivot = last;
 
 	while (first != last)
 	{
-		while (comp(*first, pivot))
+		while (comp(*first, *pivot))
 		{
 			++first;
 			if (first == last)
@@ -729,7 +729,7 @@ inline Iterator partition(Iterator first, Iterator last, Compare comp)
 			--last;
 			if (first == last)
 				return first;
-		} while (!comp(*last, pivot));
+		} while (!comp(*last, *pivot));
 
 		swap(*first, *last);
 		++first;

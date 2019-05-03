@@ -13,6 +13,36 @@ class ListTest : public ::testing::Test
 	nctl::List<int> list_;
 };
 
+TEST_F(ListTest, PushFront)
+{
+	printf("Clearing the list\n");
+	list_.clear();
+
+	printf("Inserting some nodes to the front\n");
+	for (int i = LastElement; i > -1; i--)
+		list_.pushFront(i);
+	printList(list_);
+
+	ASSERT_FALSE(list_.isEmpty());
+	ASSERT_EQ(list_.size(), Length);
+	ASSERT_TRUE(isUnmodified(list_));
+}
+
+TEST_F(ListTest, EmplaceFront)
+{
+	printf("Clearing the list\n");
+	list_.clear();
+
+	printf("Emplacing some nodes to the front\n");
+	for (int i = LastElement; i > -1; i--)
+		list_.emplaceFront(i);
+	printList(list_);
+
+	ASSERT_FALSE(list_.isEmpty());
+	ASSERT_EQ(list_.size(), Length);
+	ASSERT_TRUE(isUnmodified(list_));
+}
+
 TEST_F(ListTest, PushBack)
 {
 	printf("Clearing the list\n");
@@ -28,14 +58,14 @@ TEST_F(ListTest, PushBack)
 	ASSERT_TRUE(isUnmodified(list_));
 }
 
-TEST_F(ListTest, PushFront)
+TEST_F(ListTest, EmplaceBack)
 {
 	printf("Clearing the list\n");
 	list_.clear();
 
-	printf("Inserting some nodes to the front\n");
-	for (int i = LastElement; i > -1; i--)
-		list_.pushFront(i);
+	printf("Emplacing some nodes to the back\n");
+	for (unsigned int i = 0; i < Length; i++)
+		list_.emplaceBack(i);
 	printList(list_);
 
 	ASSERT_FALSE(list_.isEmpty());
@@ -65,6 +95,17 @@ TEST_F(ListTest, PushFrontAndBack)
 	printf("Inserting one node at the front and one at the back\n");
 	list_.pushFront(-1);
 	list_.pushBack(-1);
+	printList(list_);
+
+	ASSERT_FALSE(list_.isEmpty());
+	ASSERT_EQ(list_.size(), Length + 2);
+}
+
+TEST_F(ListTest, EmplaceFrontAndBack)
+{
+	printf("Emplacing one node at the front and one at the back\n");
+	list_.emplaceFront(-1);
+	list_.emplaceBack(-1);
 	printList(list_);
 
 	ASSERT_FALSE(list_.isEmpty());
@@ -168,10 +209,36 @@ TEST_F(ListTest, InsertAfterBeginning)
 	assertListMatchesArray(list_, array);
 }
 
+TEST_F(ListTest, EmplaceAfterBeginning)
+{
+	printf("Emplace a node after the beginning of the list\n");
+	list_.emplaceAfter(list_.begin(), 11);
+	printList(list_);
+
+	ASSERT_EQ(list_.size(), Length + 1);
+	ASSERT_EQ(list_.size(), calcLength(list_));
+
+	int array[Length + 1] = { 0, 11, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(list_, array);
+}
+
 TEST_F(ListTest, InsertBeforeBeginning)
 {
 	printf("Insert a node before the beginning of the list\n");
 	list_.insertBefore(list_.begin(), -1);
+	printList(list_);
+
+	ASSERT_EQ(list_.size(), Length + 1);
+	ASSERT_EQ(list_.size(), calcLength(list_));
+
+	int array[Length + 1] = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(list_, array);
+}
+
+TEST_F(ListTest, EmplaceBeforeBeginning)
+{
+	printf("Emplace a node before the beginning of the list\n");
+	list_.emplaceBefore(list_.begin(), -1);
 	printList(list_);
 
 	ASSERT_EQ(list_.size(), Length + 1);
@@ -194,10 +261,36 @@ TEST_F(ListTest, InsertAfterEnd)
 	assertListMatchesArray(list_, array);
 }
 
+TEST_F(ListTest, EmplaceAfterEnd)
+{
+	printf("Emplace a node after the end of the list\n");
+	list_.emplaceAfter(list_.end(), -1);
+	printList(list_);
+
+	ASSERT_EQ(list_.size(), Length + 1);
+	ASSERT_EQ(list_.size(), calcLength(list_));
+
+	int array[Length + 1] = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(list_, array);
+}
+
 TEST_F(ListTest, InsertBeforeEnd)
 {
 	printf("Insert a node before the end of the list\n");
 	list_.insertBefore(list_.end(), 11);
+	printList(list_);
+
+	ASSERT_EQ(list_.size(), Length + 1);
+	ASSERT_EQ(list_.size(), calcLength(list_));
+
+	int array[Length + 1] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+	assertListMatchesArray(list_, array);
+}
+
+TEST_F(ListTest, EmplaceBeforeEnd)
+{
+	printf("Emplace a node before the end of the list\n");
+	list_.emplaceBefore(list_.end(), 11);
 	printList(list_);
 
 	ASSERT_EQ(list_.size(), Length + 1);

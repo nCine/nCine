@@ -163,10 +163,9 @@ class FNV1aFuncHashContainer
   public:
 	hash_t operator()(const K &key) const
 	{
-		const unsigned char *bytes = reinterpret_cast<const unsigned char *>(&key);
 		hash_t hash = static_cast<hash_t>(Seed);
 		for (unsigned int i = 0; i < key.length(); i++)
-			hash = fnv1a(bytes[i], hash);
+			hash = fnv1a(static_cast<hash_t>(key[i]), hash);
 
 		return hash;
 	}

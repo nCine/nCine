@@ -37,6 +37,56 @@ TEST_F(StaticHashMapStringTest, RetrieveElements)
 	}
 }
 
+TEST_F(StaticHashMapStringTest, InsertElements)
+{
+	printf("Inserting elements\n");
+	nctl::String newKey(32);
+	nctl::String newValue(32);
+	for (unsigned int i = Size; i < Size * 2; i++)
+	{
+		newKey.format("%s_2", Keys[i % Size]);
+		newValue.format("%s_2", Values[i % Size]);
+		strHashmap_.insert(newKey, newValue);
+	}
+
+	for (unsigned int i = 0; i < Size; i++)
+		ASSERT_STREQ(strHashmap_[Keys[i]].data(), Values[i]);
+	for (unsigned int i = Size; i < Size * 2; i++)
+	{
+		newKey.format("%s_2", Keys[i % Size]);
+		newValue.format("%s_2", Values[i % Size]);
+		ASSERT_STREQ(strHashmap_[newKey].data(), newValue.data());
+	}
+
+	ASSERT_EQ(strHashmap_.size(), Size * 2);
+	ASSERT_EQ(calcSize(strHashmap_), Size * 2);
+}
+
+TEST_F(StaticHashMapStringTest, EmplaceElements)
+{
+	printf("Emplacing elements\n");
+	nctl::String newKey(32);
+	nctl::String newValue(32);
+	for (unsigned int i = Size; i < Size * 2; i++)
+	{
+		newKey.format("%s_2", Keys[i % Size]);
+		newValue.format("%s_2", Values[i % Size]);
+		strHashmap_.emplace(newKey, newValue);
+	}
+
+	for (unsigned int i = 0; i < Size; i++)
+		ASSERT_STREQ(strHashmap_[Keys[i]].data(), Values[i]);
+	for (unsigned int i = Size; i < Size * 2; i++)
+	{
+		newKey.format("%s_2", Keys[i % Size]);
+		newValue.format("%s_2", Values[i % Size]);
+		ASSERT_STREQ(strHashmap_[newKey].data(), newValue.data());
+	}
+
+	ASSERT_EQ(strHashmap_.size(), Size * 2);
+	ASSERT_EQ(calcSize(strHashmap_), Size * 2);
+}
+
 TEST_F(StaticHashMapStringTest, RemoveElements)
 {
 	printf("Removing a couple elements\n");
@@ -58,6 +108,18 @@ TEST_F(StaticHashMapStringTest, CopyConstruction)
 	assertHashMapsAreEqual(strHashmap_, newStrHashmap);
 }
 
+TEST_F(StaticHashMapStringTest, MoveConstruction)
+{
+	printf("Creating a new hashmap with move construction\n");
+	nctl::StaticStringHashMap<nctl::String, Capacity> newStrHashmap = nctl::move(strHashmap_);
+	printHashMap(newStrHashmap);
+
+	ASSERT_EQ(strHashmap_.size(), Size); // Elements are not stolen
+	ASSERT_EQ(newStrHashmap.capacity(), Capacity);
+	ASSERT_EQ(newStrHashmap.size(), Size);
+	ASSERT_EQ(calcSize(newStrHashmap), Size);
+}
+
 TEST_F(StaticHashMapStringTest, AssignmentOperator)
 {
 	printf("Creating a new hashmap with the assignment operator\n");
@@ -66,6 +128,19 @@ TEST_F(StaticHashMapStringTest, AssignmentOperator)
 	printHashMap(newStrHashmap);
 
 	assertHashMapsAreEqual(strHashmap_, newStrHashmap);
+}
+
+TEST_F(StaticHashMapStringTest, MoveAssignmentOperator)
+{
+	printf("Creating a new hashmap with the move assignment operator\n");
+	nctl::StaticStringHashMap<nctl::String, Capacity> newStrHashmap;
+	newStrHashmap = nctl::move(strHashmap_);
+	printHashMap(newStrHashmap);
+
+	ASSERT_EQ(strHashmap_.size(), Size); // Elements are not stolen
+	ASSERT_EQ(newStrHashmap.capacity(), Capacity);
+	ASSERT_EQ(newStrHashmap.size(), Size);
+	ASSERT_EQ(calcSize(newStrHashmap), Size);
 }
 
 TEST_F(StaticHashMapStringTest, Contains)

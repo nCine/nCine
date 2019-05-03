@@ -18,14 +18,6 @@ template <class K, class T, class HashFunc = FNV1aHashFunc<K>>
 class HashMap
 {
   public:
-	/// The template class for the node stored inside the hashmap
-	class Node
-	{
-	  public:
-		K key;
-		T value;
-	};
-
 	/// Iterator type
 	using Iterator = HashMapIterator<K, T, HashFunc, false>;
 	/// Constant iterator type
@@ -85,6 +77,12 @@ class HashMap
 
 	/// Subscript operator
 	T &operator[](const K &key);
+	/// Inserts an element if no other has the same key
+	bool insert(const K &key, const T &value);
+	/// Moves an element if no other has the same key
+	bool insert(const K &key, T &&value);
+	/// Constructs an element if no other has the same key
+	template <typename... Args> bool emplace(const K &key, Args &&... args);
 
 	/// Returns the capacity of the hashmap
 	inline unsigned int capacity() const { return capacity_; }
@@ -112,6 +110,14 @@ class HashMap
 	void rehash(unsigned int count);
 
   private:
+	/// The template class for the node stored inside the hashmap
+	class Node
+	{
+	  public:
+		K key;
+		T value;
+	};
+
 	unsigned int size_;
 	unsigned int capacity_;
 	/// Single allocated buffer for all the hashmap per-node data
@@ -122,15 +128,18 @@ class HashMap
 	UniquePtr<Node[]> nodes_;
 	HashFunc hashFunc_;
 
-	bool findBucketIndex(K key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const;
-	inline bool findBucketIndex(K key, unsigned int &foundIndex) const;
+	bool findBucketIndex(const K &key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const;
+	inline bool findBucketIndex(const K &key, unsigned int &foundIndex) const;
 	unsigned int addDelta1(unsigned int bucketIndex) const;
 	unsigned int addDelta2(unsigned int bucketIndex) const;
 	unsigned int calcNewDelta(unsigned int bucketIndex, unsigned int newIndex) const;
-	unsigned int linearSearch(unsigned int index, hash_t hash, K key) const;
-	bool bucketFoundOrEmpty(unsigned int index, hash_t hash, K key) const;
-	bool bucketFound(unsigned int index, hash_t hash, K key) const;
-	T &addNode(unsigned int index, hash_t hash, K key);
+	unsigned int linearSearch(unsigned int index, hash_t hash, const K &key) const;
+	bool bucketFoundOrEmpty(unsigned int index, hash_t hash, const K &key) const;
+	bool bucketFound(unsigned int index, hash_t hash, const K &key) const;
+	T &addNode(unsigned int index, hash_t hash, const K &key);
+	void insertNode(unsigned int index, hash_t hash, const K &key, const T &value);
+	void insertNode(unsigned int index, hash_t hash, const K &key, T &&value);
+	template <typename... Args> void emplaceNode(unsigned int index, hash_t hash, const K &key, Args &&... args);
 
 	friend class HashMapIterator<K, T, HashFunc, false>;
 	friend class HashMapIterator<K, T, HashFunc, true>;
@@ -208,7 +217,8 @@ HashMap<K, T, HashFunc>::HashMap(unsigned int capacity)
 	delta2_ = pointer;
 	pointer += sizeof(uint8_t) * capacity_;
 	hashes_ = reinterpret_cast<hash_t *>(pointer);
-	FATAL_ASSERT(pointer + sizeof(hash_t) * capacity_ == buffer_.get() + bytes);
+	pointer += sizeof(hash_t) * capacity_;
+	FATAL_ASSERT(pointer == buffer_.get() + bytes);
 
 	nodes_ = makeUnique<Node[]>(capacity);
 
@@ -229,7 +239,8 @@ HashMap<K, T, HashFunc>::HashMap(const HashMap<K, T, HashFunc> &other)
 	delta2_ = pointer;
 	pointer += sizeof(uint8_t) * capacity_;
 	hashes_ = reinterpret_cast<hash_t *>(pointer);
-	FATAL_ASSERT(pointer + sizeof(hash_t) * capacity_ == buffer_.get() + bytes);
+	pointer += sizeof(hash_t) * capacity_;
+	FATAL_ASSERT(pointer == buffer_.get() + bytes);
 
 	nodes_ = makeUnique<Node[]>(capacity_);
 	for (unsigned int i = 0; i < capacity_; i++)
@@ -304,6 +315,187 @@ T &HashMap<K, T, HashFunc>::operator[](const K &key)
 		else
 			return nodes_[bucketIndex].value;
 	}
+}
+
+/*! \return True if the element has been inserted */
+template <class K, class T, class HashFunc>
+bool HashMap<K, T, HashFunc>::insert(const K &key, const T &value)
+{
+	const hash_t hash = hashFunc_(key);
+	int unsigned bucketIndex = hash % capacity_;
+
+	if (bucketFoundOrEmpty(bucketIndex, hash, key) == false)
+	{
+		if (delta1_[bucketIndex] != 0)
+		{
+			bucketIndex = addDelta1(bucketIndex);
+			if (bucketFound(bucketIndex, hash, key) == false)
+			{
+				while (delta2_[bucketIndex] != 0)
+				{
+					bucketIndex = addDelta2(bucketIndex);
+					// Found at ideal index + delta1 + (n * delta2)
+					if (bucketFound(bucketIndex, hash, key))
+						return false;
+				}
+
+				// Adding at ideal index + delta1 + (n * delta2)
+				const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
+				delta2_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
+				insertNode(newIndex, hash, key, value);
+				return true;
+			}
+			else
+			{
+				// Found at ideal index + delta1
+				return false;
+			}
+		}
+		else
+		{
+			// Adding at ideal index + delta1
+			const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
+			delta1_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
+			insertNode(newIndex, hash, key, value);
+			return true;
+		}
+	}
+	else
+	{
+		// Using the ideal bucket index for the node
+		if (hashes_[bucketIndex] == NullHash)
+		{
+			insertNode(bucketIndex, hash, key, value);
+			return true;
+		}
+		else
+			return false;
+	}
+}
+
+/*! \return True if the element has been inserted */
+template <class K, class T, class HashFunc>
+bool HashMap<K, T, HashFunc>::insert(const K &key, T &&value)
+{
+	const hash_t hash = hashFunc_(key);
+	int unsigned bucketIndex = hash % capacity_;
+
+	if (bucketFoundOrEmpty(bucketIndex, hash, key) == false)
+	{
+		if (delta1_[bucketIndex] != 0)
+		{
+			bucketIndex = addDelta1(bucketIndex);
+			if (bucketFound(bucketIndex, hash, key) == false)
+			{
+				while (delta2_[bucketIndex] != 0)
+				{
+					bucketIndex = addDelta2(bucketIndex);
+					// Found at ideal index + delta1 + (n * delta2)
+					if (bucketFound(bucketIndex, hash, key))
+						return false;
+				}
+
+				// Adding at ideal index + delta1 + (n * delta2)
+				const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
+				delta2_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
+				insertNode(newIndex, hash, key, nctl::move(value));
+				return true;
+			}
+			else
+			{
+				// Found at ideal index + delta1
+				return false;
+			}
+		}
+		else
+		{
+			// Adding at ideal index + delta1
+			const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
+			delta1_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
+			insertNode(newIndex, hash, key, nctl::move(value));
+			return true;
+		}
+	}
+	else
+	{
+		// Using the ideal bucket index for the node
+		if (hashes_[bucketIndex] == NullHash)
+		{
+			insertNode(bucketIndex, hash, key, nctl::move(value));
+			return true;
+		}
+		else
+			return false;
+	}
+}
+
+/*! \return True if the element has been emplaced */
+template <class K, class T, class HashFunc>
+template <typename... Args>
+bool HashMap<K, T, HashFunc>::emplace(const K &key, Args &&... args)
+{
+	const hash_t hash = hashFunc_(key);
+	int unsigned bucketIndex = hash % capacity_;
+
+	if (bucketFoundOrEmpty(bucketIndex, hash, key) == false)
+	{
+		if (delta1_[bucketIndex] != 0)
+		{
+			bucketIndex = addDelta1(bucketIndex);
+			if (bucketFound(bucketIndex, hash, key) == false)
+			{
+				while (delta2_[bucketIndex] != 0)
+				{
+					bucketIndex = addDelta2(bucketIndex);
+					// Found at ideal index + delta1 + (n * delta2)
+					if (bucketFound(bucketIndex, hash, key))
+						return false;
+				}
+
+				// Adding at ideal index + delta1 + (n * delta2)
+				const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
+				delta2_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
+				emplaceNode(newIndex, hash, key, nctl::forward<Args>(args)...);
+				return true;
+			}
+			else
+			{
+				// Found at ideal index + delta1
+				return false;
+			}
+		}
+		else
+		{
+			// Adding at ideal index + delta1
+			const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
+			delta1_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
+			emplaceNode(newIndex, hash, key, nctl::forward<Args>(args)...);
+			return true;
+		}
+	}
+	else
+	{
+		// Using the ideal bucket index for the node
+		if (hashes_[bucketIndex] == NullHash)
+		{
+			emplaceNode(bucketIndex, hash, key, nctl::forward<Args>(args)...);
+			return true;
+		}
+		else
+			return false;
+	}
+}
+
+template <class K, class T, class HashFunc>
+void HashMap<K, T, HashFunc>::clear()
+{
+	for (unsigned int i = 0; i < capacity_; i++)
+		delta1_[i] = 0;
+	for (unsigned int i = 0; i < capacity_; i++)
+		delta2_[i] = 0;
+	for (unsigned int i = 0; i < capacity_; i++)
+		hashes_[i] = NullHash;
+	size_ = 0;
 }
 
 template <class K, class T, class HashFunc>
@@ -427,19 +619,7 @@ void HashMap<K, T, HashFunc>::rehash(unsigned int count)
 }
 
 template <class K, class T, class HashFunc>
-void HashMap<K, T, HashFunc>::clear()
-{
-	for (unsigned int i = 0; i < capacity_; i++)
-		delta1_[i] = 0;
-	for (unsigned int i = 0; i < capacity_; i++)
-		delta2_[i] = 0;
-	for (unsigned int i = 0; i < capacity_; i++)
-		hashes_[i] = NullHash;
-	size_ = 0;
-}
-
-template <class K, class T, class HashFunc>
-bool HashMap<K, T, HashFunc>::findBucketIndex(K key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const
+bool HashMap<K, T, HashFunc>::findBucketIndex(const K &key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const
 {
 	if (size_ == 0)
 		return false;
@@ -489,7 +669,7 @@ bool HashMap<K, T, HashFunc>::findBucketIndex(K key, unsigned int &foundIndex, u
 }
 
 template <class K, class T, class HashFunc>
-bool HashMap<K, T, HashFunc>::findBucketIndex(K key, unsigned int &foundIndex) const
+bool HashMap<K, T, HashFunc>::findBucketIndex(const K &key, unsigned int &foundIndex) const
 {
 	unsigned int prevFoundIndex = 0;
 	return findBucketIndex(key, foundIndex, prevFoundIndex);
@@ -527,7 +707,7 @@ unsigned int HashMap<K, T, HashFunc>::calcNewDelta(unsigned int bucketIndex, uns
 }
 
 template <class K, class T, class HashFunc>
-unsigned int HashMap<K, T, HashFunc>::linearSearch(unsigned int index, hash_t hash, K key) const
+unsigned int HashMap<K, T, HashFunc>::linearSearch(unsigned int index, hash_t hash, const K &key) const
 {
 	for (unsigned int i = index; i < capacity_; i++)
 	{
@@ -545,19 +725,19 @@ unsigned int HashMap<K, T, HashFunc>::linearSearch(unsigned int index, hash_t ha
 }
 
 template <class K, class T, class HashFunc>
-bool HashMap<K, T, HashFunc>::bucketFoundOrEmpty(unsigned int index, hash_t hash, K key) const
+bool HashMap<K, T, HashFunc>::bucketFoundOrEmpty(unsigned int index, hash_t hash, const K &key) const
 {
 	return (hashes_[index] == NullHash || (hashes_[index] == hash && nodes_[index].key == key));
 }
 
 template <class K, class T, class HashFunc>
-bool HashMap<K, T, HashFunc>::bucketFound(unsigned int index, hash_t hash, K key) const
+bool HashMap<K, T, HashFunc>::bucketFound(unsigned int index, hash_t hash, const K &key) const
 {
 	return (hashes_[index] == hash && nodes_[index].key == key);
 }
 
 template <class K, class T, class HashFunc>
-T &HashMap<K, T, HashFunc>::addNode(unsigned int index, hash_t hash, K key)
+T &HashMap<K, T, HashFunc>::addNode(unsigned int index, hash_t hash, const K &key)
 {
 	FATAL_ASSERT(size_ < capacity_);
 	FATAL_ASSERT(hashes_[index] == NullHash);
@@ -566,6 +746,43 @@ T &HashMap<K, T, HashFunc>::addNode(unsigned int index, hash_t hash, K key)
 	hashes_[index] = hash;
 	nodes_[index].key = key;
 	return nodes_[index].value;
+}
+
+template <class K, class T, class HashFunc>
+void HashMap<K, T, HashFunc>::insertNode(unsigned int index, hash_t hash, const K &key, const T &value)
+{
+	FATAL_ASSERT(size_ < capacity_);
+	FATAL_ASSERT(hashes_[index] == NullHash);
+
+	size_++;
+	hashes_[index] = hash;
+	nodes_[index].key = key;
+	nodes_[index].value = value;
+}
+
+template <class K, class T, class HashFunc>
+void HashMap<K, T, HashFunc>::insertNode(unsigned int index, hash_t hash, const K &key, T &&value)
+{
+	FATAL_ASSERT(size_ < capacity_);
+	FATAL_ASSERT(hashes_[index] == NullHash);
+
+	size_++;
+	hashes_[index] = hash;
+	nodes_[index].key = key;
+	nodes_[index].value = nctl::move(value);
+}
+
+template <class K, class T, class HashFunc>
+template <typename... Args>
+void HashMap<K, T, HashFunc>::emplaceNode(unsigned int index, hash_t hash, const K &key, Args &&... args)
+{
+	FATAL_ASSERT(size_ < capacity_);
+	FATAL_ASSERT(hashes_[index] == NullHash);
+
+	size_++;
+	hashes_[index] = hash;
+	nodes_[index].key = key;
+	new (&nodes_[index].value) T(nctl::forward<Args>(args)...);
 }
 
 template <class T>

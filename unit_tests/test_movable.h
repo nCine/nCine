@@ -1,12 +1,14 @@
 #ifndef TEST_MOVABLE_H
 #define TEST_MOVABLE_H
 
+#define TEST_MOVABLE_ONLY (0)
+
 namespace {
 
 class Movable
 {
   public:
-	const unsigned int Size = 10;
+	static const unsigned int Size = 10;
 	enum class Construction
 	{
 		INITIALIZED
@@ -38,7 +40,7 @@ class Movable
 		return *this;
 	}
 
-#ifdef TEST_MOVABLE_ONLY
+#if TEST_MOVABLE_ONLY
 	Movable(const Movable &other) = delete;
 	Movable &operator=(const Movable &other) = delete;
 #else
