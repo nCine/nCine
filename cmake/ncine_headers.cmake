@@ -77,6 +77,8 @@ set(NCTL_HEADERS
 	${NCINE_ROOT}/include/nctl/StaticHashSetIterator.h
 	${NCINE_ROOT}/include/nctl/HashSetList.h
 	${NCINE_ROOT}/include/nctl/HashSetListIterator.h
+	${NCINE_ROOT}/include/nctl/SparseSet.h
+	${NCINE_ROOT}/include/nctl/SparseSetIterator.h
 	${NCINE_ROOT}/include/nctl/ReverseIterator.h
 	${NCINE_ROOT}/include/nctl/Atomic.h
 	${NCINE_ROOT}/include/nctl/UniquePtr.h

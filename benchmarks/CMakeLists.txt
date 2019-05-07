@@ -35,6 +35,7 @@ list(APPEND BENCHMARKS
 	gbench_statichashmap gbench_hashmaplist
 	gbench_statichashset gbench_hashsetlist
 	gbench_bighashmaplist
+	gbench_sparseset
 	gbench_std_rand gbench_random
 )
 
