@@ -31,7 +31,9 @@ list(APPEND BENCHMARKS
 	gbench_std_string gbench_string
 	gbench_std_unorderedmap gbench_hashmap
 	gbench_std_bigunorderedmap gbench_bighashmap
+	gbench_std_unorderedset gbench_hashset
 	gbench_statichashmap gbench_hashmaplist
+	gbench_statichashset gbench_hashsetlist
 	gbench_bighashmaplist
 	gbench_std_rand gbench_random
 )

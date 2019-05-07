@@ -71,6 +71,13 @@ class Movable
 	{
 		return size_;
 	}
+
+	// Needed by container hash functions
+	unsigned int length() const
+	{
+		return size_;
+	}
+
 	const int *data() const { return array_; }
 	const int &operator[](unsigned int index) const { return array_[index]; }
 
@@ -82,6 +89,25 @@ class Movable
 			ASSERT_EQ(array_[i], i);
 		}
 		printf("\n");
+	}
+
+	friend inline bool operator==(const Movable &lhs, const Movable &rhs)
+	{
+		bool result = (lhs.size_ == rhs.size_);
+
+		if (result)
+		{
+			for (unsigned int i = 0; i < lhs.size_; i++)
+			{
+				if (lhs.array_[i] != rhs.array_[i])
+				{
+					result = false;
+					break;
+				}
+			}
+		}
+
+		return result;
 	}
 
   private:
