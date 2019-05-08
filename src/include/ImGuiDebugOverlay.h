@@ -69,6 +69,16 @@ class ImGuiDebugOverlay : public IDebugOverlay
 	bool plotAdditionalFrameValues_;
 	bool plotOverlayValues_;
 
+#ifdef WITH_RENDERDOC
+	const unsigned int MaxRenderDocPathLength = 128;
+	const unsigned int MaxRenderDocCommentsLength = 512;
+
+	nctl::String renderDocPathTemplate_;
+	nctl::String renderDocFileComments_;
+	nctl::String renderDocCapturePath_;
+	unsigned int renderDocLastNumCaptures_;
+#endif
+
 	void guiWindow();
 	void guiConfigureGui();
 	void guiPreprocessorDefines();
@@ -80,6 +90,7 @@ class ImGuiDebugOverlay : public IDebugOverlay
 	void guiRenderingSettings();
 	void guiWindowSettings();
 	void guiInputState();
+	void guiRenderDoc();
 
 	void guiTopLeft();
 	void guiTopRight();

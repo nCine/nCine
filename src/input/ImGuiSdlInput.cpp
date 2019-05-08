@@ -147,11 +147,7 @@ void ImGuiSdlInput::newFrame()
 
 	updateMousePosAndButtons();
 	updateMouseCursor();
-
-	// Gamepad navigation mapping [BETA]
-	memset(io.NavInputs, 0, sizeof(io.NavInputs));
-	if (io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad)
-		imGuiJoyMappedInput();
+	updateGamepads();
 }
 
 // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -273,6 +269,64 @@ void ImGuiSdlInput::updateMouseCursor()
 		// Show OS mouse cursor
 		SDL_SetCursor(mouseCursors_[imguiCursor] ? mouseCursors_[imguiCursor] : mouseCursors_[ImGuiMouseCursor_Arrow]);
 		SDL_ShowCursor(SDL_TRUE);
+	}
+}
+
+void ImGuiSdlInput::updateGamepads()
+{
+	ImGuiIO &io = ImGui::GetIO();
+	memset(io.NavInputs, 0, sizeof(io.NavInputs));
+	if ((io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) == 0)
+		return;
+
+	const bool joyMappedInput = imGuiJoyMappedInput();
+
+	if (joyMappedInput == false)
+	{
+		// Get gamepad
+		SDL_GameController *game_controller = SDL_GameControllerOpen(0);
+		if (!game_controller)
+		{
+			io.BackendFlags &= ~ImGuiBackendFlags_HasGamepad;
+			return;
+		}
+
+		// Update gamepad inputs
+#define MAP_BUTTON(NAV_NO, BUTTON_NO) \
+	{ \
+		io.NavInputs[NAV_NO] = (SDL_GameControllerGetButton(game_controller, BUTTON_NO) != 0) ? 1.0f : 0.0f; \
+	}
+
+#define MAP_ANALOG(NAV_NO, AXIS_NO, V0, V1) \
+	{ \
+		float vn = (float)(SDL_GameControllerGetAxis(game_controller, AXIS_NO) - V0) / (float)(V1 - V0); \
+		if (vn > 1.0f) \
+			vn = 1.0f; \
+		if (vn > 0.0f && io.NavInputs[NAV_NO] < vn) \
+			io.NavInputs[NAV_NO] = vn; \
+	}
+
+		const int thumb_dead_zone = 8000; // SDL_gamecontroller.h suggests using this value.
+		MAP_BUTTON(ImGuiNavInput_Activate, SDL_CONTROLLER_BUTTON_A); // Cross / A
+		MAP_BUTTON(ImGuiNavInput_Cancel, SDL_CONTROLLER_BUTTON_B); // Circle / B
+		MAP_BUTTON(ImGuiNavInput_Menu, SDL_CONTROLLER_BUTTON_X); // Square / X
+		MAP_BUTTON(ImGuiNavInput_Input, SDL_CONTROLLER_BUTTON_Y); // Triangle / Y
+		MAP_BUTTON(ImGuiNavInput_DpadLeft, SDL_CONTROLLER_BUTTON_DPAD_LEFT); // D-Pad Left
+		MAP_BUTTON(ImGuiNavInput_DpadRight, SDL_CONTROLLER_BUTTON_DPAD_RIGHT); // D-Pad Right
+		MAP_BUTTON(ImGuiNavInput_DpadUp, SDL_CONTROLLER_BUTTON_DPAD_UP); // D-Pad Up
+		MAP_BUTTON(ImGuiNavInput_DpadDown, SDL_CONTROLLER_BUTTON_DPAD_DOWN); // D-Pad Down
+		MAP_BUTTON(ImGuiNavInput_FocusPrev, SDL_CONTROLLER_BUTTON_LEFTSHOULDER); // L1 / LB
+		MAP_BUTTON(ImGuiNavInput_FocusNext, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER); // R1 / RB
+		MAP_BUTTON(ImGuiNavInput_TweakSlow, SDL_CONTROLLER_BUTTON_LEFTSHOULDER); // L1 / LB
+		MAP_BUTTON(ImGuiNavInput_TweakFast, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER); // R1 / RB
+		MAP_ANALOG(ImGuiNavInput_LStickLeft, SDL_CONTROLLER_AXIS_LEFTX, -thumb_dead_zone, -32768);
+		MAP_ANALOG(ImGuiNavInput_LStickRight, SDL_CONTROLLER_AXIS_LEFTX, +thumb_dead_zone, +32767);
+		MAP_ANALOG(ImGuiNavInput_LStickUp, SDL_CONTROLLER_AXIS_LEFTY, -thumb_dead_zone, -32767);
+		MAP_ANALOG(ImGuiNavInput_LStickDown, SDL_CONTROLLER_AXIS_LEFTY, +thumb_dead_zone, +32767);
+
+		io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
+#undef MAP_BUTTON
+#undef MAP_ANALOG
 	}
 }
 

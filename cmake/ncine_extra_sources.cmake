@@ -312,6 +312,33 @@ if(NCINE_WITH_TRACY)
 	)
 endif()
 
+if(NCINE_WITH_RENDERDOC AND NOT APPLE)
+	find_file(RENDERDOC_API_H
+		NAMES renderdoc.h renderdoc_app.h
+		PATHS "$ENV{ProgramW6432}/RenderDoc"
+			"$ENV{ProgramFiles}/RenderDoc"
+			"$ENV{ProgramFiles\(x86\)}/RenderDoc"
+			${RENDERDOC_DIR}
+		PATH_SUFFIXES "include"
+		DOC "Path to the RenderDoc header file")
+
+	if(NOT EXISTS ${RENDERDOC_API_H})
+		message(FATAL_ERROR "RenderDoc header file not found")
+	endif()
+
+	get_filename_component(RENDERDOC_INCLUDE_DIR ${RENDERDOC_API_H} DIRECTORY)
+	target_include_directories(ncine PRIVATE ${RENDERDOC_INCLUDE_DIR})
+
+	target_compile_definitions(ncine PRIVATE "WITH_RENDERDOC")
+	if(UNIX)
+		target_link_libraries(ncine PRIVATE dl)
+	endif()
+
+	list(APPEND HEADERS ${NCINE_ROOT}/include/ncine/RenderDocCapture.h)
+	list(APPEND PRIVATE_HEADERS ${RENDERDOC_API_H})
+	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/RenderDocCapture.cpp)
+endif()
+
 if(NCINE_BUILD_ANDROID)
 	list(APPEND HEADERS
 		${NCINE_ROOT}/include/ncine/AndroidApplication.h

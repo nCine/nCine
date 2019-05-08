@@ -33,6 +33,7 @@ class ImGuiGlfwInput
 
 	static void updateMousePosAndButtons();
 	static void updateMouseCursor();
+	static void updateGamepads();
 };
 
 }

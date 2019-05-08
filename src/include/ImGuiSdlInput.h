@@ -32,6 +32,7 @@ class ImGuiSdlInput
 	static const char *clipboardText(void *userData);
 	static void updateMousePosAndButtons();
 	static void updateMouseCursor();
+	static void updateGamepads();
 };
 
 }

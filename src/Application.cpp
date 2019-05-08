@@ -35,6 +35,10 @@
 
 #include "tracy_opengl.h"
 
+#ifdef WITH_RENDERDOC
+	#include "RenderDocCapture.h"
+#endif
+
 #include "version.h"
 
 namespace ncine {
@@ -89,6 +93,10 @@ void Application::initCommon()
 
 	LOGI_X("Data path: \"%s\"", IFile::dataPath().data());
 	LOGI_X("Save path: \"%s\"", IFile::savePath().data());
+
+#ifdef WITH_RENDERDOC
+	RenderDocCapture::init();
+#endif
 
 	// Swapping frame now for a cleaner API trace capture when debugging
 	gfxDevice_->update();
@@ -243,6 +251,10 @@ void Application::shutdownCommon()
 
 #ifdef WITH_IMGUI
 	imguiDrawing_.reset(nullptr);
+#endif
+
+#ifdef WITH_RENDERDOC
+	RenderDocCapture::shutdown();
 #endif
 
 	debugOverlay_.reset(nullptr);

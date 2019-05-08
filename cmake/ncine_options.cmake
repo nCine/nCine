@@ -11,6 +11,7 @@ option(NCINE_BUILD_ANDROID "Build the Android version of the engine" OFF)
 option(NCINE_STRIP_BINARIES "Enable symbols stripping from libraries and executables when in release" OFF)
 option(NCINE_WITH_IMGUI "Enable the integration with Dear ImGui" ON)
 option(NCINE_WITH_TRACY "Enable the integration with the Tracy frame profiler" OFF)
+option(NCINE_WITH_RENDERDOC "Enable the integration with RenderDoc" OFF)
 
 set(NCINE_PREFERRED_BACKEND "GLFW" CACHE STRING "Specify the preferred backend on desktop")
 set_property(CACHE NCINE_PREFERRED_BACKEND PROPERTY STRINGS "GLFW;SDL2")
@@ -31,6 +32,10 @@ if(NCINE_BUILD_ANDROID)
 	set(NDK_DIR "" CACHE PATH "Set the path to the Android NDK")
 	set(NCINE_NDK_ARCHITECTURES arm64-v8a CACHE STRING "Set the NDK target architectures")
 	option(NCINE_ASSEMBLE_APK "Assemble the Android APK of the startup test with Gradle" OFF)
+endif()
+
+if(NCINE_WITH_RENDERDOC)
+	set(RENDERDOC_DIR "" CACHE PATH "Set the path to the RenderDoc directory")
 endif()
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -75,6 +80,7 @@ if("${NCINE_OPTIONS_PRESETS}" STREQUAL "BinDist" OR "${NCINE_OPTIONS_PRESETS}" S
 	set(NCINE_STRIP_BINARIES ON)
 	set(NCINE_WITH_IMGUI ON)
 	set(NCINE_WITH_TRACY OFF)
+	set(NCINE_WITH_RENDERDOC OFF)
 endif()
 
 if("${NCINE_OPTIONS_PRESETS}" STREQUAL "BinDist")

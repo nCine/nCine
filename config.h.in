@@ -19,4 +19,6 @@
 
 #cmakedefine01 NCINE_WITH_TRACY
 
+#cmakedefine01 NCINE_WITH_RENDERDOC
+
 #endif

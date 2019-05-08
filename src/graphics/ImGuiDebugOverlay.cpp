@@ -9,9 +9,30 @@
 	#include "LuaStatistics.h"
 #endif
 
+#ifdef WITH_RENDERDOC
+	#include "RenderDocCapture.h"
+#endif
+
 #include "version.h"
 
 namespace ncine {
+
+namespace {
+
+	int inputTextCallback(ImGuiInputTextCallbackData *data)
+	{
+		nctl::String *string = reinterpret_cast<nctl::String *>(data->UserData);
+		if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
+		{
+			// Resize string callback
+			ASSERT(data->Buf == string->data());
+			string->setLength(data->BufTextLen);
+			data->Buf = string->data();
+		}
+		return 0;
+	}
+
+}
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS AND DESTRUCTOR
@@ -24,6 +45,13 @@ ImGuiDebugOverlay::ImGuiDebugOverlay(const AppConfiguration &appCfg)
       showBottomLeftOverlay_(true), showBottomRightOverlay_(true),
       numValues_(128), maxFrameTime_(0.0f), maxUpdateVisitDraw_(0.0f),
       index_(0), plotAdditionalFrameValues_(false), plotOverlayValues_(false)
+#ifdef WITH_RENDERDOC
+      ,
+      renderDocPathTemplate_(MaxRenderDocPathLength),
+      renderDocFileComments_(MaxRenderDocCommentsLength),
+      renderDocCapturePath_(MaxRenderDocPathLength),
+      renderDocLastNumCaptures_(0)
+#endif
 {
 	if (appCfg.withProfilerGraphs)
 		initPlotValues();
@@ -178,6 +206,7 @@ void ImGuiDebugOverlay::guiWindow()
 		guiRenderingSettings();
 		guiWindowSettings();
 		guiInputState();
+		guiRenderDoc();
 	}
 	ImGui::End();
 }
@@ -272,9 +301,8 @@ void ImGuiDebugOverlay::guiConfigureGui()
 			const float MinScaling = 0.5f;
 			const float MaxScaling = 2.0f;
 			static float scaling = 1.0f;
-			ImGui::PushItemWidth(100);
+			ImGui::SetNextItemWidth(100);
 			ImGui::DragFloat("Scaling", &scaling, 0.005f, MinScaling, MaxScaling, "%.1f");
-			ImGui::PopItemWidth();
 			ImGui::SameLine();
 			if (ImGui::Button("Reset"))
 				scaling = 1.0f;
@@ -368,6 +396,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #endif
 #ifdef WITH_TRACY
 			ImGui::Text("WITH_TRACY");
+#endif
+#ifdef WITH_RENDERDOC
+			ImGui::Text("WITH_RENDERDOC");
 #endif
 			ImGui::TreePop();
 		}
@@ -692,6 +723,89 @@ void ImGuiDebugOverlay::guiInputState()
 		else
 			ImGui::Text("No joysticks connected");
 	}
+}
+
+void ImGuiDebugOverlay::guiRenderDoc()
+{
+#ifdef WITH_RENDERDOC
+	if (RenderDocCapture::isAvailable() == false)
+		return;
+
+	if (RenderDocCapture::numCaptures() > renderDocLastNumCaptures_)
+	{
+		unsigned int pathLength = 0;
+		uint64_t timestamp = 0;
+		RenderDocCapture::captureInfo(RenderDocCapture::numCaptures() - 1, renderDocCapturePath_.data(), &pathLength, &timestamp);
+		renderDocCapturePath_.setLength(pathLength);
+		RenderDocCapture::setCaptureFileComments(renderDocCapturePath_.data(), renderDocFileComments_.data());
+		renderDocLastNumCaptures_ = RenderDocCapture::numCaptures();
+		LOGI_X("RenderDoc capture %d: %s (%lu)", RenderDocCapture::numCaptures() - 1, renderDocCapturePath_.data(), timestamp);
+	}
+
+	if (ImGui::CollapsingHeader("RenderDoc"))
+	{
+		int major, minor, patch;
+		RenderDocCapture::apiVersion(&major, &minor, &patch);
+		ImGui::Text("RenderDoc API: %d.%d.%d", major, minor, patch);
+		ImGui::Text("Target control connected: %s", RenderDocCapture::isTargetControlConnected() ? "true" : "false");
+		ImGui::Text("Number of captures: %u", RenderDocCapture::numCaptures());
+		if (renderDocCapturePath_.isEmpty())
+			ImGui::Text("Last capture path: (no capture has been made yet)");
+		else
+			ImGui::Text("Last capture path: %s", renderDocCapturePath_.data());
+		ImGui::Separator();
+
+		renderDocPathTemplate_ = RenderDocCapture::captureFilePathTemplate();
+		if (ImGui::InputText("File path template", renderDocPathTemplate_.data(), MaxRenderDocPathLength,
+		                     ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackResize,
+		                     inputTextCallback, &renderDocPathTemplate_))
+		{
+			RenderDocCapture::setCaptureFilePathTemplate(renderDocPathTemplate_.data());
+		}
+
+		ImGui::InputTextMultiline("File comments", renderDocFileComments_.data(), MaxRenderDocCommentsLength,
+		                          ImVec2(0, 0), ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackResize,
+		                          inputTextCallback, &renderDocFileComments_);
+
+		static bool overlayEnabled = RenderDocCapture::isOverlayEnabled();
+		ImGui::Checkbox("Enable overlay", &overlayEnabled);
+		RenderDocCapture::enableOverlay(overlayEnabled);
+
+		if (RenderDocCapture::isFrameCapturing())
+			ImGui::Text("Capturing a frame...");
+		else
+		{
+			static int numFrames = 1;
+			ImGui::SetNextItemWidth(80.0f);
+			ImGui::InputInt("Frames", &numFrames);
+			if (numFrames < 1)
+				numFrames = 1;
+			ImGui::SameLine();
+			if (ImGui::Button("Capture"))
+				RenderDocCapture::triggerMultiFrameCapture(numFrames);
+		}
+
+		if (RenderDocCapture::isTargetControlConnected())
+			ImGui::Text("Replay UI is connected");
+		else
+		{
+			if (ImGui::Button("Launch Replay UI"))
+				RenderDocCapture::launchReplayUI(1, nullptr);
+		}
+
+		static bool crashHandlerLoaded = true;
+		if (crashHandlerLoaded)
+		{
+			if (ImGui::Button("Unload crash handler"))
+			{
+				RenderDocCapture::unloadCrashHandler();
+				crashHandlerLoaded = false;
+			}
+		}
+		else
+			ImGui::Text("Crash handler not loaded");
+	}
+#endif
 }
 
 void ImGuiDebugOverlay::guiTopLeft()

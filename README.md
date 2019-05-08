@@ -33,6 +33,7 @@ For additional information: https://ncine.github.io
 - Google Test and Gcovr
 - Tracy frame profiler
 - Google Benchmark
+- RenderDoc graphics debugger
 
 ## Development
 
