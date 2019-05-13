@@ -13,6 +13,7 @@ Geometry::Geometry()
     : primitiveType_(GL_TRIANGLES), firstVertex_(0), numVertices_(0),
       numElementsPerVertex_(2), firstIndex_(0), numIndices_(0),
       hostVertexPointer_(nullptr), hostIndexPointer_(nullptr),
+      vboUsageFlags_(0), iboUsageFlags_(0),
       sharedVboParams_(nullptr), sharedIboParams_(nullptr)
 {
 }
@@ -42,6 +43,7 @@ void Geometry::createCustomVbo(unsigned int numFloats, GLenum usage)
 	vbo_ = nctl::makeUnique<GLBufferObject>(GL_ARRAY_BUFFER);
 	vbo_->bufferData(numFloats * sizeof(GLfloat), nullptr, usage);
 
+	vboUsageFlags_ = usage;
 	vboParams_.object = vbo_.get();
 	vboParams_.size = vbo_->size();
 	vboParams_.offset = 0;
@@ -66,6 +68,7 @@ GLfloat *Geometry::acquireVertexPointer(unsigned int numFloats, unsigned int num
 	return reinterpret_cast<GLfloat *>(vboParams_.mapBase + vboParams_.offset);
 }
 
+/*! This method can only be used when mapping of OpenGL buffers is available */
 GLfloat *Geometry::acquireVertexPointer()
 {
 	ASSERT(vbo_);
@@ -73,6 +76,7 @@ GLfloat *Geometry::acquireVertexPointer()
 	if (vboParams_.mapBase == nullptr)
 	{
 		const GLenum mapFlags = RenderResources::buffersManager().specs(RenderBuffersManager::BufferTypes::ARRAY).mapFlags;
+		FATAL_ASSERT_MSG(mapFlags, "Mapping of OpenGL buffers is not available");
 		vboParams_.mapBase = static_cast<GLubyte *>(vbo_->mapBufferRange(0, vbo_->size(), mapFlags));
 	}
 
@@ -106,6 +110,7 @@ void Geometry::createCustomIbo(unsigned int numIndices, GLenum usage)
 	ibo_ = nctl::makeUnique<GLBufferObject>(GL_ELEMENT_ARRAY_BUFFER);
 	ibo_->bufferData(numIndices * sizeof(GLushort), nullptr, usage);
 
+	iboUsageFlags_ = usage;
 	iboParams_.object = ibo_.get();
 	iboParams_.size = ibo_->size();
 	iboParams_.offset = 0;
@@ -130,6 +135,7 @@ GLushort *Geometry::acquireIndexPointer(unsigned int numIndices)
 	return reinterpret_cast<GLushort *>(iboParams_.mapBase + iboParams_.offset);
 }
 
+/*! This method can only be used when mapping of OpenGL buffers is available */
 GLushort *Geometry::acquireIndexPointer()
 {
 	ASSERT(ibo_);
@@ -137,6 +143,7 @@ GLushort *Geometry::acquireIndexPointer()
 	if (iboParams_.mapBase == nullptr)
 	{
 		const GLenum mapFlags = RenderResources::buffersManager().specs(RenderBuffersManager::BufferTypes::ELEMENT_ARRAY).mapFlags;
+		FATAL_ASSERT_MSG(mapFlags, "Mapping of OpenGL buffers is not available");
 		iboParams_.mapBase = static_cast<GLubyte *>(ibo_->mapBufferRange(0, ibo_->size(), mapFlags));
 	}
 
@@ -211,10 +218,22 @@ void Geometry::commitVertices()
 {
 	if (hostVertexPointer_)
 	{
+		// Checking if the common VBO is allowed to use mapping and do the same for the custom one
+		const GLenum mapFlags = RenderResources::buffersManager().specs(RenderBuffersManager::BufferTypes::ARRAY).mapFlags;
 		const unsigned int numFloats = numVertices_ * numElementsPerVertex_;
-		GLfloat *vertices = acquireVertexPointer(numFloats, numElementsPerVertex_);
-		memcpy(vertices, hostVertexPointer_, numFloats * sizeof(GLfloat));
-		releaseVertexPointer();
+
+		if (mapFlags == 0 && vbo_)
+		{
+			// Using buffer orphaning + `glBufferSubData()` when having a custom VBO with no mapping available
+			vbo_->bufferData(vboParams_.size, nullptr, vboUsageFlags_);
+			vbo_->bufferSubData(vboParams_.offset, vboParams_.size, hostVertexPointer_);
+		}
+		else
+		{
+			GLfloat *vertices = vbo_ ? acquireVertexPointer() : acquireVertexPointer(numFloats, numElementsPerVertex_);
+			memcpy(vertices, hostVertexPointer_, numFloats * sizeof(GLfloat));
+			releaseVertexPointer();
+		}
 	}
 }
 
@@ -222,9 +241,21 @@ void Geometry::commitIndices()
 {
 	if (hostIndexPointer_)
 	{
-		GLushort *indices = acquireIndexPointer(numIndices_);
-		memcpy(indices, hostIndexPointer_, numIndices_ * sizeof(GLushort));
-		releaseIndexPointer();
+		// Checking if the common IBO is allowed to use mapping and do the same for the custom one
+		const GLenum mapFlags = RenderResources::buffersManager().specs(RenderBuffersManager::BufferTypes::ELEMENT_ARRAY).mapFlags;
+
+		if (mapFlags == 0 && ibo_)
+		{
+			// Using buffer orphaning + `glBufferSubData()` when having a custom IBO with no mapping available
+			ibo_->bufferData(iboParams_.size, nullptr, iboUsageFlags_);
+			ibo_->bufferSubData(iboParams_.offset, iboParams_.size, hostIndexPointer_);
+		}
+		else
+		{
+			GLushort *indices = ibo_ ? acquireIndexPointer() : acquireIndexPointer(numIndices_);
+			memcpy(indices, hostIndexPointer_, numIndices_ * sizeof(GLushort));
+			releaseIndexPointer();
+		}
 	}
 }
 

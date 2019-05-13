@@ -521,6 +521,7 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("Font Fnt file: %s", appCfg.fontFntFilename.data());
 
 		ImGui::Separator();
+		ImGui::Text("Buffer mapping: %s", appCfg.useBufferMapping ? "true" : "false");
 		ImGui::Text("VBO size: %u", appCfg.vboSize);
 		ImGui::Text("IBO size: %u", appCfg.iboSize);
 		ImGui::Text("Vao pool size: %u", appCfg.vaoPoolSize);

@@ -9,13 +9,13 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-RenderBuffersManager::RenderBuffersManager(unsigned long vboMaxSize, unsigned long iboMaxSize)
+RenderBuffersManager::RenderBuffersManager(bool useBufferMapping, unsigned long vboMaxSize, unsigned long iboMaxSize)
     : buffers_(4)
 {
 	BufferSpecifications &vboSpecs = specs_[BufferTypes::ARRAY];
 	vboSpecs.type = BufferTypes::ARRAY;
 	vboSpecs.target = GL_ARRAY_BUFFER;
-	vboSpecs.mapFlags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT;
+	vboSpecs.mapFlags = useBufferMapping ? GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT : 0;
 	vboSpecs.usageFlags = GL_STREAM_DRAW;
 	vboSpecs.maxSize = vboMaxSize;
 	vboSpecs.alignment = sizeof(GLfloat);
@@ -23,7 +23,7 @@ RenderBuffersManager::RenderBuffersManager(unsigned long vboMaxSize, unsigned lo
 	BufferSpecifications &iboSpecs = specs_[BufferTypes::ELEMENT_ARRAY];
 	iboSpecs.type = BufferTypes::ELEMENT_ARRAY;
 	iboSpecs.target = GL_ELEMENT_ARRAY_BUFFER;
-	iboSpecs.mapFlags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT;
+	iboSpecs.mapFlags = useBufferMapping ? GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT : 0;
 	iboSpecs.usageFlags = GL_STREAM_DRAW;
 	iboSpecs.maxSize = iboMaxSize;
 	iboSpecs.alignment = sizeof(GLushort);
@@ -35,7 +35,7 @@ RenderBuffersManager::RenderBuffersManager(unsigned long vboMaxSize, unsigned lo
 	BufferSpecifications &uboSpecs = specs_[BufferTypes::UNIFORM];
 	uboSpecs.type = BufferTypes::UNIFORM;
 	uboSpecs.target = GL_UNIFORM_BUFFER;
-	uboSpecs.mapFlags = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT;
+	uboSpecs.mapFlags = useBufferMapping ? GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT : 0;
 	uboSpecs.usageFlags = GL_STREAM_DRAW;
 	uboSpecs.maxSize = static_cast<unsigned int>(maxUniformBlockSize);
 	uboSpecs.alignment = static_cast<unsigned int>(offsetAlignment);
@@ -128,10 +128,7 @@ void RenderBuffersManager::flushUnmap()
 		if (specs_[buffer.type].mapFlags == 0)
 		{
 			if (usedSize > 0)
-			{
 				buffer.object->bufferSubData(0, usedSize, buffer.hostBuffer.get());
-				buffer.object->bufferData(buffer.size, nullptr, specs_[buffer.type].usageFlags);
-			}
 		}
 		else
 		{
@@ -155,7 +152,10 @@ void RenderBuffersManager::remap()
 		ASSERT(buffer.mapBase == nullptr);
 
 		if (specs_[buffer.type].mapFlags == 0)
+		{
+			buffer.object->bufferData(buffer.size, nullptr, specs_[buffer.type].usageFlags);
 			buffer.mapBase = buffer.hostBuffer.get();
+		}
 		else
 			buffer.mapBase = static_cast<GLubyte *>(buffer.object->mapBufferRange(0, buffer.size, specs_[buffer.type].mapFlags));
 

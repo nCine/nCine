@@ -44,7 +44,7 @@ class RenderBuffersManager
 		GLubyte *mapBase;
 	};
 
-	RenderBuffersManager(unsigned long vboMaxSize, unsigned long iboMaxSize);
+	RenderBuffersManager(bool useBufferMapping, unsigned long vboMaxSize, unsigned long iboMaxSize);
 
 	/// Returns the specifications for a buffer of the specified type
 	inline const BufferSpecifications &specs(BufferTypes::Enum type) const { return specs_[type]; }

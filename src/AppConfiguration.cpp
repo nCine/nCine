@@ -24,6 +24,7 @@ AppConfiguration::AppConfiguration()
       windowIconFilename(128),
       fontTexFilename(128),
       fontFntFilename(128),
+      useBufferMapping(false),
 #ifdef WITH_IMGUI
       vboSize(512 * 1024),
       iboSize(128 * 1024),

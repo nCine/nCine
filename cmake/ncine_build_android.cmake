@@ -219,7 +219,9 @@ if(NCINE_BUILD_ANDROID)
 			install(FILES ${EXTERNAL_ANDROID_DIR}/openal/${ARCHITECTURE}/libopenal.so
 				DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/openal/${ARCHITECTURE}/ COMPONENT android)
 		endforeach()
-		install(DIRECTORY include/ DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/include COMPONENT android FILES_MATCHING PATTERN "*.h")
+		install(FILES ${HEADERS} DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/include/ncine COMPONENT android)
+		install(FILES ${NCTL_HEADERS} DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/include/nctl COMPONENT android)
+		install(FILES ${CONFIG_H} DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/include/ncine COMPONENT android)
 		file(GLOB APPTEST_SOURCES "tests/apptest*.h" "tests/apptest*.cpp")
 		install(FILES ${APPTEST_SOURCES} DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/tests COMPONENT android)
 

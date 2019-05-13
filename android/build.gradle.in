@@ -4,7 +4,7 @@ buildscript {
 		jcenter()
 	}
 	dependencies {
-		classpath 'com.android.tools.build:gradle:3.3.1'
+		classpath 'com.android.tools.build:gradle:3.4.0'
 	}
 }
 allprojects {
@@ -89,7 +89,7 @@ android {
 	}
 
 	sourceSets.main {
-		jniLibs.srcDirs = [@GRADLE_JNILIBS_DIRS@, cmakeBuildDir]
+		jniLibs.srcDirs = [cmakeBuildDir, @GRADLE_JNILIBS_DIRS@]
 		jni.srcDirs = [] // disable automatic ndk-build call
 	}
 

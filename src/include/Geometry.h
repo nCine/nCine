@@ -88,10 +88,12 @@ class Geometry
 	const GLushort *hostIndexPointer_;
 
 	nctl::UniquePtr<GLBufferObject> vbo_;
+	GLenum vboUsageFlags_;
 	RenderBuffersManager::Parameters vboParams_;
 	const RenderBuffersManager::Parameters *sharedVboParams_;
 
 	nctl::UniquePtr<GLBufferObject> ibo_;
+	GLenum iboUsageFlags_;
 	RenderBuffersManager::Parameters iboParams_;
 	const RenderBuffersManager::Parameters *sharedIboParams_;
 

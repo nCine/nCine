@@ -204,6 +204,7 @@ void MyEventHandler::onFrameStart()
 		camScale_ = MaxCameraScale;
 	else if (camScale_ < MinCameraScale)
 		camScale_ = MinCameraScale;
+	activeSpritesFloat_ = nctl::clamp(activeSpritesFloat_, 0.0f, static_cast<float>(NumSprites));
 
 	const nc::Application::RenderingSettings settings = nc::theApplication().renderingSettings();
 	debugString_->clear();
@@ -223,7 +224,6 @@ void MyEventHandler::onFrameStart()
 
 	if (updateActiveSprites_)
 	{
-		activeSpritesFloat_ = nctl::clamp(activeSpritesFloat_, 0.0f, static_cast<float>(NumSprites));
 		updateEnabledSprites();
 		updateActiveSprites_ = false;
 	}

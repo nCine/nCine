@@ -38,7 +38,7 @@ void RenderResources::createMinimal()
 	LOGI("Creating a minimal set of rendering resources...");
 
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
-	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.vboSize, appCfg.iboSize);
+	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.useBufferMapping, appCfg.vboSize, appCfg.iboSize);
 	vaoPool_ = nctl::makeUnique<RenderVaoPool>(appCfg.vaoPoolSize);
 
 	LOGI("Minimal rendering resources created");
@@ -65,7 +65,7 @@ void RenderResources::create()
 	LOGI("Creating rendering resources...");
 
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
-	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.vboSize, appCfg.iboSize);
+	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.useBufferMapping, appCfg.vboSize, appCfg.iboSize);
 	vaoPool_ = nctl::makeUnique<RenderVaoPool>(appCfg.vaoPoolSize);
 
 	ShaderLoad shadersToLoad[] = {

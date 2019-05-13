@@ -42,6 +42,8 @@ class DLL_PUBLIC AppConfiguration
 	/// The font FNT filename for profiler information text
 	nctl::String fontFntFilename;
 
+	/// The flag is `true` if mapping is used to update OpenGL buffers
+	bool useBufferMapping;
 	/// The maximum size in bytes for each VBO collecting geometry data
 	unsigned long vboSize;
 	/// The maximum size in bytes for each IBO collecting index data
