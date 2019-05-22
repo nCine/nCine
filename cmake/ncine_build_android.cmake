@@ -118,7 +118,7 @@ if(NCINE_BUILD_ANDROID)
 		set(ANDROID_LIBNAME libncine.so)
 	else()
 		set(ANDROID_LIBNAME libncine.a)
-		set(COPY_SRCINCLUDE_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/include ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include)
+		set(COPY_SRCINCLUDE_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/include ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include/ncine)
 	endif()
 
 	add_custom_target(ncine_android ALL)
@@ -146,7 +146,7 @@ if(NCINE_BUILD_ANDROID)
 	# Creating an ncine directory inside cpp to allow building external Android applications without installing the engine
 	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include
 		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CONFIG_H} ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CONFIG_H} ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include/ncine/
 		# Projects relying on a static and uninstalled version of the engine can use implementation headers
 		COMMAND ${COPY_SRCINCLUDE_COMMAND})
 	add_custom_target(ncine_ndkdir_include ALL DEPENDS ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include)
@@ -222,6 +222,9 @@ if(NCINE_BUILD_ANDROID)
 		install(FILES ${HEADERS} DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/include/ncine COMPONENT android)
 		install(FILES ${NCTL_HEADERS} DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/include/nctl COMPONENT android)
 		install(FILES ${CONFIG_H} DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/include/ncine COMPONENT android)
+		if(NOT NCINE_DYNAMIC_LIBRARY)
+			install(FILES ${PRIVATE_HEADERS} DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/include/ncine COMPONENT android)
+		endif()
 		file(GLOB APPTEST_SOURCES "tests/apptest*.h" "tests/apptest*.cpp")
 		install(FILES ${APPTEST_SOURCES} DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/tests COMPONENT android)
 

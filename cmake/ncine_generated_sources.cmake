@@ -3,6 +3,12 @@
 set(GENERATED_SOURCE_DIR "${CMAKE_BINARY_DIR}/generated")
 set(GENERATED_INCLUDE_DIR "${GENERATED_SOURCE_DIR}/include/ncine")
 
+if(NOT NCINE_DYNAMIC_LIBRARY)
+	foreach(PRIVATE_HEADER ${PRIVATE_HEADERS})
+		file(COPY ${PRIVATE_HEADER} DESTINATION ${GENERATED_INCLUDE_DIR})
+	endforeach()
+endif()
+
 # Version strings
 if(GIT_EXECUTABLE)
 	message(STATUS "Exporting git version information to C strings")

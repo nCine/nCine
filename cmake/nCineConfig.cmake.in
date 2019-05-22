@@ -1,6 +1,7 @@
 # - Config file for the nCine package
 # It defines the following variables
 #   NCINE_VERSION, the nCine version string
+#   NCINE_DYNAMIC_LIBRARY, set to true if the nCine library is compiled as dynamic
 #   NCINE_TESTS_DATA_DIR, the directory containing the data for the tests
 #   NCINE_ANDROID_DIR, the directory containing the Android library and additional files
 #   NCINE_EMBEDDED_SHADERS, set to true if shaders are embedded in the library
@@ -12,6 +13,8 @@ set(NCINE_VERSION "@NCINE_VERSION@")
 if(NOT TARGET ncine AND NOT TARGET ncine::ncine)
 	include("${CMAKE_CURRENT_LIST_DIR}/nCineTargets.cmake")
 endif()
+
+set(NCINE_DYNAMIC_LIBRARY @NCINE_DYNAMIC_LIBRARY@)
 
 find_path(NCINE_TESTS_DATA_DIR
 	NAMES scripts/script.lua sounds/music.ogg textures/texture1.png

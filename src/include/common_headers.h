@@ -6,8 +6,8 @@
 	#elif defined(WITH_GLEW)
 		#include <GL/glew.h>
 	#elif defined(__APPLE__)
-		#include <OpenGL/gl.h>
-		#include <OpenGL/glext.h>
+		#include <OpenGL/gl3.h>
+		#include <OpenGL/gl3ext.h>
 	#else
 		#define GL_GLEXT_PROTOTYPES
 		#include <GL/gl.h>

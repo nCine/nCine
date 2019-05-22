@@ -1,4 +1,99 @@
+find_package(Threads)
 if(MSVC)
+	set(EXTERNAL_MSVC_DIR "${PARENT_SOURCE_DIR}/nCine-external" CACHE PATH "Set the path to the MSVC libraries directory")
+	if(NOT IS_DIRECTORY ${EXTERNAL_MSVC_DIR})
+		message(FATAL_ERROR "nCine external MSVC libraries directory not found at: ${EXTERNAL_MSVC_DIR}")
+	else()
+		message(STATUS "nCine external MSVC libraries directory: ${EXTERNAL_MSVC_DIR}")
+	endif()
+
+	if(MSVC_C_ARCHITECTURE_ID MATCHES 64 OR MSVC_CXX_ARCHITECTURE_ID MATCHES 64)
+		set(LIBDIR "${EXTERNAL_MSVC_DIR}/lib/x64")
+		set(BINDIR "${EXTERNAL_MSVC_DIR}/bin/x64")
+	else()
+		set(LIBDIR "${EXTERNAL_MSVC_DIR}/lib/x86")
+		set(BINDIR "${EXTERNAL_MSVC_DIR}/bin/x86")
+	endif()
+elseif(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android") # GCC and LLVM
+	if(APPLE)
+		set(CMAKE_FRAMEWORK_PATH "${PARENT_SOURCE_DIR}/nCine-external")
+		set(CMAKE_MACOSX_RPATH ON)
+
+		if(NOT IS_DIRECTORY ${CMAKE_FRAMEWORK_PATH})
+			message(FATAL_ERROR "nCine external OS X frameworks directory not found at: ${CMAKE_FRAMEWORK_PATH}")
+		else()
+			message(STATUS "nCine external OS X frameworks directory: ${CMAKE_FRAMEWORK_PATH}")
+		endif()
+	endif()
+
+	if(WIN32)
+		find_package(GLEW REQUIRED)
+	else()
+		find_package(GLEW)
+	endif()
+	find_package(OpenGL REQUIRED)
+	find_package(GLFW)
+	find_package(SDL2)
+	find_package(PNG)
+	find_package(OpenAL)
+	find_package(WebP)
+	find_package(Vorbis)
+	find_package(Lua)
+endif()
+
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Android")
+	find_library(ANDROID_LIBRARY android)
+	find_library(EGL_LIBRARY EGL)
+	find_library(GLES3_LIBRARY GLESv3)
+	find_library(LOG_LIBRARY log)
+	find_library(OPENSLES_LIBRARY OpenSLES)
+	find_library(ZLIB_LIBRARY z)
+
+	if(EXISTS ${EXTERNAL_ANDROID_DIR}/png/${ANDROID_ABI}/libpng16.a)
+		add_library(PNG::PNG STATIC IMPORTED)
+		set_target_properties(PNG::PNG PROPERTIES
+			IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+			IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/png/${ANDROID_ABI}/libpng16.a
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/png/include"
+			INTERFACE_LINK_LIBRARIES ${ZLIB_LIBRARY})
+		set(PNG_FOUND 1)
+	endif()
+
+	if(EXISTS ${EXTERNAL_ANDROID_DIR}/webp/${ANDROID_ABI}/libwebp.a)
+		add_library(WebP::WebP STATIC IMPORTED)
+		set_target_properties(WebP::WebP PROPERTIES
+			IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/webp/${ANDROID_ABI}/libwebp.a
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/webp/include")
+		set(WEBP_FOUND 1)
+	endif()
+
+	if(EXISTS ${EXTERNAL_ANDROID_DIR}/openal/${ANDROID_ABI}/libopenal.so)
+		add_library(OpenAL::AL SHARED IMPORTED)
+		set_target_properties(OpenAL::AL PROPERTIES
+			IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/openal/${ANDROID_ABI}/libopenal.so
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/openal/include")
+		set(OPENAL_FOUND 1)
+	endif()
+
+	if(EXISTS ${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbisfile.a AND
+	   EXISTS ${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbis.a AND
+	   EXISTS ${EXTERNAL_ANDROID_DIR}/ogg/${ANDROID_ABI}/libogg.a)
+		add_library(Vorbis::Vorbisfile STATIC IMPORTED)
+		set_target_properties(Vorbis::Vorbisfile PROPERTIES
+			IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbisfile.a
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/vorbis/include;${EXTERNAL_ANDROID_DIR}/ogg/include"
+			INTERFACE_LINK_LIBRARIES "${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbis.a;${EXTERNAL_ANDROID_DIR}/ogg/${ANDROID_ABI}/libogg.a")
+		set(VORBIS_FOUND 1)
+	endif()
+
+	if(EXISTS ${EXTERNAL_ANDROID_DIR}/lua/${ANDROID_ABI}/liblua.a)
+		add_library(Lua::Lua STATIC IMPORTED)
+		set_target_properties(Lua::Lua PROPERTIES
+			IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/lua/${ANDROID_ABI}/liblua.a
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/lua/include")
+		set(LUA_FOUND 1)
+	endif()
+elseif(MSVC)
 	if(EXISTS ${LIBDIR}/glew32.lib AND EXISTS ${BINDIR}/glew32.dll)
 		add_library(GLEW::GLEW SHARED IMPORTED)
 		set_target_properties(GLEW::GLEW PROPERTIES
@@ -237,6 +332,7 @@ else() # GCC and LLVM
 		if(GLEW_FOUND)
 			get_target_property(GLEW_LIBRARY_RELEASE GLEW::GLEW IMPORTED_LOCATION_RELEASE)
 			set_target_properties(GLEW::GLEW PROPERTIES
+				IMPORTED_LOCATION ${GLEW_LIBRARY_RELEASE}/glew
 				IMPORTED_LOCATION_RELEASE ${GLEW_LIBRARY_RELEASE}/glew
 				IMPORTED_LOCATION_DEBUG ${GLEW_LIBRARY_RELEASE}/glew)
 		endif()
@@ -263,10 +359,12 @@ else() # GCC and LLVM
 		if(PNG_FOUND)
 			get_target_property(ZLIB_LIBRARY_RELEASE ZLIB::ZLIB IMPORTED_LOCATION_RELEASE)
 			set_target_properties(ZLIB::ZLIB PROPERTIES
+				IMPORTED_LOCATION ${ZLIB_LIBRARY_RELEASE}/zlib
 				IMPORTED_LOCATION_RELEASE ${ZLIB_LIBRARY_RELEASE}/zlib
 				IMPORTED_LOCATION_DEBUG ${ZLIB_LIBRARY_RELEASE}/zlib)
 			get_target_property(PNG_LIBRARY_RELEASE PNG::PNG IMPORTED_LOCATION_RELEASE)
 			set_target_properties(PNG::PNG PROPERTIES
+				IMPORTED_LOCATION ${PNG_LIBRARY_RELEASE}/png
 				IMPORTED_LOCATION_RELEASE ${PNG_LIBRARY_RELEASE}/png
 				IMPORTED_LOCATION_DEBUG ${PNG_LIBRARY_RELEASE}/png)
 		endif()

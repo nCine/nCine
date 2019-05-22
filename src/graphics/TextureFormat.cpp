@@ -65,9 +65,7 @@ unsigned long TextureFormat::calculateMipSizes(GLenum internalFormat, int width,
 			bpp = 24;
 			break;
 		case GL_RG8:
-#ifndef __APPLE__
 		case GL_RGB565:
-#endif
 		case GL_RGB5_A1:
 		case GL_RGBA4:
 			bpp = 16;
@@ -333,12 +331,10 @@ bool TextureFormat::nonIntegerFormat()
 			format_ = GL_RGBA;
 			type_ = GL_UNSIGNED_SHORT_4_4_4_4;
 			break;
-#ifndef __APPLE__
 		case GL_RGB565:
 			format_ = GL_RGB;
 			type_ = GL_UNSIGNED_SHORT_5_6_5;
 			break;
-#endif
 		default:
 			found = false;
 			break;

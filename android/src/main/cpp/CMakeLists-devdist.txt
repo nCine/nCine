@@ -1,10 +1,18 @@
 cmake_minimum_required(VERSION 3.7)
 project(nCine-Android-${ANDROID_ABI})
 
-add_library(ncine SHARED IMPORTED)
-set_target_properties(ncine PROPERTIES
-	IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/ncine/${ANDROID_ABI}/libncine.so"
-	INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/ncine/include")
+if(NCINE_DYNAMIC_LIBRARY)
+	add_library(ncine SHARED IMPORTED)
+	set_target_properties(ncine PROPERTIES
+		IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/ncine/${ANDROID_ABI}/libncine.so"
+		INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/ncine/include")
+else()
+	add_library(ncine STATIC IMPORTED)
+	set_target_properties(ncine PROPERTIES
+		IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/ncine/${ANDROID_ABI}/libncine.a"
+		INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/ncine/include")
+	target_compile_definitions(ncine INTERFACE "NCINE_STATIC")
+endif()
 
 add_library(ncine_main STATIC IMPORTED)
 set_target_properties(ncine_main PROPERTIES
@@ -16,6 +24,13 @@ target_link_libraries(native_app_glue PRIVATE android log)
 add_library(game SHARED tests/${NCINE_STARTUP_TEST}.cpp)
 target_link_libraries(game PRIVATE native_app_glue ncine_main ncine)
 target_include_directories(game PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue)
+
+if(NOT NCINE_DYNAMIC_LIBRARY)
+	include(ncine_imported_targets)
+	target_link_libraries(game PRIVATE
+		${EGL_LIBRARY} ${GLES3_LIBRARY} ${OPENSLES_LIBRARY} ${ZLIB_LIBRARY}
+		PNG::PNG WebP::WebP OpenAL::AL Vorbis::Vorbisfile Lua::Lua)
+endif()
 
 # Export ANativeActivity_onCreate() - https://github.com/android-ndk/ndk/issues/381
 set_property(TARGET game APPEND_STRING PROPERTY LINK_FLAGS "-u ANativeActivity_onCreate")

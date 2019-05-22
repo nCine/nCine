@@ -20,9 +20,6 @@ set(NCINE_DATA_DIR "${PARENT_SOURCE_DIR}/nCine-data" CACHE PATH "Set the path to
 set(NCINE_TESTS_DATA_DIR "" CACHE STRING "Set the path to the data directory that will be embedded in test executables")
 # The external Android dir is set regardless of the status of build Android flag, so that presets work even when the flag is off
 set(EXTERNAL_ANDROID_DIR "${PARENT_SOURCE_DIR}/nCine-android-external" CACHE PATH "Set the path to the Android libraries directory")
-if(MSVC)
-	set(EXTERNAL_MSVC_DIR "${PARENT_SOURCE_DIR}/nCine-external" CACHE PATH "Set the path to the MSVC libraries directory")
-endif()
 
 if(NCINE_BUILD_DOCUMENTATION)
 	option(NCINE_IMPLEMENTATION_DOCUMENTATION "Include implementation classes in the documentation" OFF)
