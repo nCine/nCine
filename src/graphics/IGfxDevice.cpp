@@ -4,6 +4,8 @@
 #include "IGfxDevice.h"
 #include "Colorf.h"
 #include "RenderResources.h"
+#include "GLDepthTest.h"
+#include "GLBlending.h"
 
 namespace ncine {
 
@@ -51,8 +53,8 @@ void IGfxDevice::setViewport(const Vector2i &size)
 void IGfxDevice::setupGL()
 {
 	glDisable(GL_DITHER);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_DEPTH_TEST);
+	GLBlending::blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GLDepthTest::enable();
 }
 
 void IGfxDevice::clear()

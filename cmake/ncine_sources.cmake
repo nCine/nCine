@@ -63,6 +63,8 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/opengl/GLUniformBlockCache.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLShaderUniformBlocks.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLScissorTest.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLDepthTest.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLBlending.cpp
 	${NCINE_ROOT}/src/graphics/RenderBuffersManager.cpp
 	${NCINE_ROOT}/src/graphics/RenderBatcher.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLDebug.cpp

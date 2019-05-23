@@ -37,6 +37,8 @@ set(PRIVATE_HEADERS
 	${NCINE_ROOT}/src/include/GLUniformBlockCache.h
 	${NCINE_ROOT}/src/include/GLShaderUniformBlocks.h
 	${NCINE_ROOT}/src/include/GLScissorTest.h
+	${NCINE_ROOT}/src/include/GLDepthTest.h
+	${NCINE_ROOT}/src/include/GLBlending.h
 	${NCINE_ROOT}/src/include/RenderBuffersManager.h
 	${NCINE_ROOT}/src/include/RenderBatcher.h
 	${NCINE_ROOT}/src/include/GLDebug.h

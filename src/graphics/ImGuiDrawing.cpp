@@ -4,6 +4,7 @@
 #include "GLTexture.h"
 #include "GLShaderProgram.h"
 #include "GLScissorTest.h"
+#include "GLBlending.h"
 #include "RenderQueue.h"
 #include "DrawableNode.h"
 #include "Application.h"
@@ -260,16 +261,15 @@ void ImGuiDrawing::draw()
 {
 	ImDrawData *drawData = ImGui::GetDrawData();
 
-	ImGuiIO &io = ImGui::GetIO();
 	const int fbWidth = static_cast<int>(drawData->DisplaySize.x * drawData->FramebufferScale.x);
 	const int fbHeight = static_cast<int>(drawData->DisplaySize.y * drawData->FramebufferScale.y);
 	if (fbWidth <= 0 || fbHeight <= 0)
 		return;
 	drawData->ScaleClipRects(drawData->FramebufferScale);
 
-	GLboolean blendWasEnabled = glIsEnabled(GL_BLEND);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GLBlending::pushState();
+	GLBlending::enable();
+	GLBlending::blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	const ImVec2 pos = drawData->DisplayPos;
 	for (int n = 0; n < drawData->CmdListsCount; n++)
@@ -299,8 +299,7 @@ void ImGuiDrawing::draw()
 	}
 
 	GLScissorTest::disable();
-	if (blendWasEnabled == false)
-		glDisable(GL_BLEND);
+	GLBlending::popState();
 }
 
 }

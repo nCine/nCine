@@ -5,6 +5,8 @@
 #include "GLDebug.h"
 #include "Application.h"
 #include "GLScissorTest.h"
+#include "GLDepthTest.h"
+#include "GLBlending.h"
 #include "tracy_opengl.h"
 
 namespace ncine {
@@ -137,8 +139,8 @@ void RenderQueue::draw()
 		opaqueRenderCommand->issue();
 	}
 
-	glEnable(GL_BLEND);
-	glDepthMask(GL_FALSE);
+	GLBlending::enable();
+	GLDepthTest::disableDepthMask();
 	// Rendering transparent nodes back to front
 	for (RenderCommand *transparentRenderCommand : *transparents)
 	{
@@ -161,10 +163,10 @@ void RenderQueue::draw()
 		RenderStatistics::gatherStatistics(*transparentRenderCommand);
 		transparentRenderCommand->issue();
 	}
-	// Has to be enabled again before exiting this method
+	// Depth mask has to be enabled again before exiting this method
 	// or glClear(GL_DEPTH_BUFFER_BIT) won't have any effect
-	glDepthMask(GL_TRUE);
-	glDisable(GL_BLEND);
+	GLDepthTest::enableDepthMask();
+	GLBlending::disable();
 
 	GLScissorTest::disable();
 

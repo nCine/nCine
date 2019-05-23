@@ -13,6 +13,13 @@ GLint GLScissorTest::y_ = 0;
 GLsizei GLScissorTest::width_ = 0;
 GLsizei GLScissorTest::height_ = 0;
 
+bool GLScissorTest::stateSaved_ = false;
+bool GLScissorTest::wasEnabled_ = false;
+GLint GLScissorTest::oldX_ = 0;
+GLint GLScissorTest::oldY_ = 0;
+GLsizei GLScissorTest::oldWidth_ = 0;
+GLsizei GLScissorTest::oldHeight_ = 0;
+
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -53,6 +60,31 @@ void GLScissorTest::disable()
 		glDisable(GL_SCISSOR_TEST);
 		enabled_ = false;
 	}
+}
+
+void GLScissorTest::pushState()
+{
+	ASSERT(stateSaved_ == false);
+
+	wasEnabled_ = enabled_;
+	oldX_ = x_;
+	oldY_ = y_;
+	oldWidth_ = width_;
+	oldHeight_ = height_;
+
+	stateSaved_ = true;
+}
+
+void GLScissorTest::popState()
+{
+	ASSERT(stateSaved_ == true);
+
+	if (wasEnabled_)
+		enable(oldX_, oldY_, oldWidth_, oldHeight_);
+	else
+		disable();
+
+	stateSaved_ = false;
 }
 
 }
