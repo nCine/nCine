@@ -20,6 +20,7 @@ AppConfiguration::AppConfiguration()
       yResolution(720),
       inFullscreen(false),
       isResizable(false),
+      frameLimit(0),
       windowTitle(128),
       windowIconFilename(128),
       fontTexFilename(128),

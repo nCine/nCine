@@ -32,6 +32,8 @@ class DLL_PUBLIC AppConfiguration
 	bool inFullscreen;
 	/// The flag is `true` if the window is going to be resizable
 	bool isResizable;
+	/// The maximum number of frames to render per second or 0 for no limit
+	unsigned int frameLimit;
 
 	/// The window title
 	nctl::String windowTitle;

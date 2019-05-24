@@ -19,6 +19,8 @@ namespace AppConfiguration {
 	static const char *xResolution = "x_res";
 	static const char *yResolution = "y_res";
 	static const char *inFullscreen = "fullscreen";
+	static const char *isResizable = "resizable";
+	static const char *frameLimit = "frame_limit";
 
 	static const char *windowTitle = "window_title";
 	static const char *windowIconFilename = "window_icon";
@@ -46,7 +48,7 @@ namespace AppConfiguration {
 
 void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 {
-	lua_createtable(L, 22, 0);
+	lua_createtable(L, 25, 0);
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::dataPath, appCfg.dataPath().data());
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::logFile, appCfg.logFile.data());
@@ -57,6 +59,8 @@ void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::xResolution, appCfg.xResolution);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::yResolution, appCfg.yResolution);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::inFullscreen, appCfg.inFullscreen);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::isResizable, appCfg.isResizable);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::frameLimit, appCfg.frameLimit);
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::windowTitle, appCfg.windowTitle.data());
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::windowIconFilename, appCfg.windowIconFilename.data());
@@ -99,6 +103,10 @@ void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
 	appCfg.setResolution(xRes, yRes);
 	const bool inFullscreen = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::inFullscreen);
 	appCfg.inFullscreen = inFullscreen;
+	const bool isResizable = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::isResizable);
+	appCfg.isResizable = isResizable;
+	const unsigned int frameLimit = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::frameLimit);
+	appCfg.frameLimit = frameLimit;
 
 	const char *windowTitle = LuaUtils::retrieveField<const char *>(L, -1, LuaNames::AppConfiguration::windowTitle);
 	appCfg.windowTitle = windowTitle;

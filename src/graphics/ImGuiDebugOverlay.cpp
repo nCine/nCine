@@ -513,6 +513,7 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("Resolution: %u x %u", appCfg.xResolution, appCfg.yResolution);
 		ImGui::Text("Full Screen: %s", appCfg.inFullscreen ? "true" : "false");
 		ImGui::Text("Resizable: %s", appCfg.isResizable ? "true" : "false");
+		ImGui::Text("Frame Limit: %u", appCfg.frameLimit);
 
 		ImGui::Separator();
 		ImGui::Text("Window title: %s", appCfg.windowTitle.data());
@@ -522,8 +523,8 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 
 		ImGui::Separator();
 		ImGui::Text("Buffer mapping: %s", appCfg.useBufferMapping ? "true" : "false");
-		ImGui::Text("VBO size: %u", appCfg.vboSize);
-		ImGui::Text("IBO size: %u", appCfg.iboSize);
+		ImGui::Text("VBO size: %lu", appCfg.vboSize);
+		ImGui::Text("IBO size: %lu", appCfg.iboSize);
 		ImGui::Text("Vao pool size: %u", appCfg.vaoPoolSize);
 
 		ImGui::Separator();
@@ -882,6 +883,7 @@ void ImGuiDebugOverlay::guiTopRight()
 	if (showTopRightOverlay_ && ImGui::Begin("###Top-Right", nullptr, windowFlags))
 	{
 		ImGui::Text("FPS: %.0f (%.2fms)", 1.0f / theApplication().interval(), theApplication().interval() * 1000.0f);
+		ImGui::Text("Num Frames: %lu", theApplication().numFrames());
 		ImGui::Text("Sprites: %uV, %uDC (%u Tr), %uI/%uB", spriteCommands.vertices, spriteCommands.commands, spriteCommands.transparents, spriteCommands.instances, spriteCommands.batchSize);
 		if (plotOverlayValues_)
 		{

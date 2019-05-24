@@ -11,8 +11,8 @@ namespace ncine {
 /*! Constructs a timer which calculates average FPS every `avgInterval`
  *  seconds and prints in the log every `logInterval` seconds. */
 FrameTimer::FrameTimer(float logInterval, float avgInterval)
-    : logInterval_(logInterval), avgInterval_(avgInterval),
-      frameInterval_(0.0f), avgNumFrames_(0L), logNumFrames_(0L),
+    : logInterval_(logInterval), avgInterval_(avgInterval), frameInterval_(0.0f),
+      totNumFrames_(0L), avgNumFrames_(0L), logNumFrames_(0L),
       lastAvgUpdate_(0.0f), lastLogUpdate_(0.0f), fps_(0.0f)
 {
 	// To prevent the overflow of Interval() on the very first call of AddFrame()
@@ -25,8 +25,12 @@ FrameTimer::FrameTimer(float logInterval, float avgInterval)
 
 void FrameTimer::addFrame()
 {
-	frameInterval_ = Timer::interval();
+	frameInterval_ = interval();
 
+	// Start counting for the next frame interval
+	start();
+
+	totNumFrames_++;
 	avgNumFrames_++;
 	logNumFrames_++;
 
@@ -49,9 +53,6 @@ void FrameTimer::addFrame()
 		logNumFrames_ = 0L;
 		lastLogUpdate_ = now();
 	}
-
-	// Start counting for the next frame interval
-	start();
 }
 
 }

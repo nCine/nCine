@@ -78,6 +78,8 @@ class DLL_PUBLIC Application
 	/// Returns the input manager instance
 	inline IInputManager &inputManager() { return *inputManager_; }
 
+	/// Returns the total number of frames already rendered
+	unsigned long int numFrames() const;
 	/// Returns the elapsed time since the end of the previous frame in milliseconds
 	float interval() const;
 

@@ -47,9 +47,14 @@ namespace ncine {
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+unsigned long int Application::numFrames() const
+{
+	return frameTimer_->totalNumberFrames();
+}
+
 float Application::interval() const
 {
-	return frameTimer_->interval();
+	return frameTimer_->frameInterval();
 }
 
 void Application::setSuspended(bool suspended)
@@ -188,7 +193,7 @@ void Application::step()
 		{
 			ZoneScopedN("Update");
 			profileTimer_->start();
-			rootNode_->update(frameTimer_->interval());
+			rootNode_->update(frameTimer_->frameInterval());
 			timings_[Timings::UPDATE] = profileTimer_->interval();
 		}
 
@@ -223,6 +228,13 @@ void Application::step()
 		timings_[Timings::IMGUI] += profileTimer_->interval();
 	}
 #endif
+
+	if (appCfg_.frameLimit > 0)
+	{
+		const float frameTimeDuration = 1.0f / static_cast<float>(appCfg_.frameLimit);
+		while (frameTimer_->interval() < frameTimeDuration)
+			Timer::sleep(0.0f);
+	}
 
 	gfxDevice_->update();
 	FrameMark;

@@ -14,8 +14,10 @@ class FrameTimer : public Timer
 
 	/// Adds a frame to the counter and calculates the interval since the previous one
 	void addFrame();
+	/// Returns the total number of frames counted
+	inline unsigned long int totalNumberFrames() const { return totNumFrames_; }
 	/// Returns the interval between two subsequent calls to `addFrame()`
-	inline float interval() const { return frameInterval_; }
+	inline float frameInterval() const { return frameInterval_; }
 	/// Returns the average FPS during the update interval
 	inline float averageFps() const { return fps_; }
 
@@ -28,6 +30,8 @@ class FrameTimer : public Timer
 	/// Seconds elapsed since previous frame
 	float frameInterval_;
 
+	/// Total number of frames counted
+	unsigned long int totNumFrames_;
 	/// Frame counter for average FPS calculation
 	unsigned long int avgNumFrames_;
 	/// Frame counter for logging

@@ -54,6 +54,7 @@ void DebugOverlay::update()
 		infoLineTopLeft_->setPosition(infoLineTopLeft_->width() * 0.5f, theApplication().height() - infoLineTopLeft_->height() * 0.5f);
 
 		infoStringTopRight_.format("FPS: %.0f (%.2fms)\n", 1.0f / theApplication().interval(), theApplication().interval() * 1000.0f);
+		infoStringTopRight_.formatAppend("Num Frames: %lu\n", theApplication().numFrames());
 		appendRenderCommandsStatistics(infoStringTopRight_);
 		infoLineTopRight_->setString(infoStringTopRight_);
 		infoLineTopRight_->setPosition(theApplication().width() - infoLineTopRight_->width() * 0.5f, theApplication().height() - infoLineTopRight_->height() * 0.5f);
