@@ -21,12 +21,17 @@ if(NCINE_BUILD_BENCHMARKS)
 	endif()
 
 	if(NOT GBENCHMARK_ERROR)
-		set(BENCHMARK_ENABLE_TESTING OFF)
-		set(BENCHMARK_ENABLE_GTEST_TESTS OFF)
+		option(BENCHMARK_ENABLE_TESTING "" OFF)
+		option(BENCHMARK_ENABLE_GTEST_TESTS "" OFF)
 		add_subdirectory(${CMAKE_BINARY_DIR}/googlebenchmark-src
 			${CMAKE_BINARY_DIR}/googlebenchmark-build
 			EXCLUDE_FROM_ALL
 		)
+		if(MSVC)
+			# Always use the non debug version of the runtime library
+			target_compile_options(benchmark PUBLIC /MD)
+		endif()
+
 		add_subdirectory(benchmarks)
 	endif()
 endif()

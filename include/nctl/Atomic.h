@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <ncine/common_macros.h>
 
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+#if defined(_WIN32) && !defined(__MINGW32__)
 	#include <Windows.h>
 #elif defined(__APPLE__)
 	#include <atomic>
@@ -128,7 +128,7 @@ class Atomic64
 	Atomic64 &operator=(const Atomic64 &) = delete;
 };
 
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+#if defined(_WIN32) && !defined(__MINGW32__)
 	#include "WindowsAtomic.inl"
 #elif defined(__APPLE__)
 	#include "StdAtomic.inl"

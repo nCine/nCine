@@ -1,4 +1,5 @@
 #include "benchmark/benchmark.h"
+#include <ctime>
 #include <cstdlib>
 
 const unsigned int Repetitions = 1024;

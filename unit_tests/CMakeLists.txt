@@ -44,7 +44,10 @@ list(APPEND TESTS
 
 foreach(TEST ${TESTS})
 	add_executable(${TEST} ${TEST}.cpp test_functions.h)
-	target_link_libraries(${TEST} ncine gtest_main enable_coverage)
+	target_link_libraries(${TEST} ncine gtest_main)
+	if(NOT MSVC)
+		target_link_libraries(${TEST} enable_coverage)
+	endif()
 	set_target_properties(${TEST} PROPERTIES FOLDER "UnitTests")
 	add_test(NAME Tests-${TEST} COMMAND ${TEST})
 

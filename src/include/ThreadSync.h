@@ -3,6 +3,7 @@
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
 	#define NOGDI
+	#define NOMINMAX
 	#include <windows.h>
 	#include <process.h>
 #else

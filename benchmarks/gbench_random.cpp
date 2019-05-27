@@ -1,4 +1,5 @@
 #include "benchmark/benchmark.h"
+#include <ctime>
 #include <ncine/Random.h>
 
 namespace nc = ncine;

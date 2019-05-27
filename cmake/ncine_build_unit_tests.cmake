@@ -30,6 +30,10 @@ if(NCINE_BUILD_UNIT_TESTS)
 		${CMAKE_BINARY_DIR}/googletest-build
 		EXCLUDE_FROM_ALL
 	)
+	if(MSVC)
+		# Always use the non debug version of the runtime library
+		target_compile_options(gtest PUBLIC /MD)
+	endif()
 
 	# The gtest/gtest_main targets carry header search path
 	# dependencies automatically when using CMake 2.8.11 or

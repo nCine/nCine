@@ -32,8 +32,10 @@ TEST_F(AtomicTest64, Increment)
 	const int64_t value = atom_;
 	printf("Incrementing the atomic with %u threads and %u iterations: %ld\n", NumThreads, NumIterations, value);
 	ASSERT_EQ(value, NumThreads * NumIterations);
+#if 0
 	printf("Incrementing the non-atomic with %u threads and %u iterations: %ld\n", NumThreads, NumIterations, nonAtom_);
 	EXPECT_NE(nonAtom_, NumThreads * NumIterations);
+#endif
 }
 
 TEST_F(AtomicTest64, Decrement)
@@ -51,8 +53,10 @@ TEST_F(AtomicTest64, Decrement)
 	const int64_t value = atom_;
 	printf("Decrementing the atomic with %u threads and %u iterations: %ld\n", NumThreads, NumIterations, value);
 	ASSERT_EQ(value, -(NumThreads * NumIterations));
+#if 0
 	printf("Decrementing the non-atomic with %u threads and %u iterations: %ld\n", NumThreads, NumIterations, nonAtom_);
 	EXPECT_NE(nonAtom_, -(NumThreads * NumIterations));
+#endif
 }
 
 TEST_F(AtomicTest64, CompareAndExchange)

@@ -474,7 +474,7 @@ TEST_F(StringOperationTest, CopyCharactersToCString)
 	char destString[stringLength] = "abc";
 
 	const unsigned int srcChar = 0;
-	const unsigned int numChar = stringLength;
+	const unsigned int numChar = stringLength - 1;
 	const unsigned int numCopied = srcString.copy(destString, srcChar, numChar);
 	printf("Copying %u characters from the string into an array of %u characters: \"%s\"\n", numChar, stringLength, destString);
 

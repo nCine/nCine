@@ -306,10 +306,10 @@ if(NCINE_WITH_TRACY)
 		list(APPEND PRIVATE_HEADERS ${TRACY_SOURCE_DIR}/TracyLua.hpp)
 	endif()
 
-	list(APPEND SOURCES
-		${NCINE_ROOT}/src/tracy_memory.cpp
-		${TRACY_SOURCE_DIR}/TracyClient.cpp
-	)
+	list(APPEND SOURCES ${TRACY_SOURCE_DIR}/TracyClient.cpp)
+	if(NOT APPLE)
+		list(APPEND SOURCES ${NCINE_ROOT}/src/tracy_memory.cpp)
+	endif()
 endif()
 
 if(NCINE_WITH_RENDERDOC AND NOT APPLE)
