@@ -89,6 +89,42 @@ void SdlGfxDevice::setWindowIcon(const char *windowIconFilename)
 	SDL_FreeSurface(surface);
 }
 
+const IGfxDevice::VideoMode &SdlGfxDevice::currentVideoMode() const
+{
+	SDL_DisplayMode mode;
+	SDL_GetCurrentDisplayMode(0, &mode);
+	convertVideoModeInfo(mode, currentVideoMode_);
+
+	return currentVideoMode_;
+}
+
+bool SdlGfxDevice::setVideoMode(unsigned int index)
+{
+	ASSERT(index < numVideoModes_);
+
+	int modeIndex = index;
+	if (index >= numVideoModes_)
+		modeIndex = 0;
+
+	SDL_DisplayMode mode;
+	SDL_GetDisplayMode(0, modeIndex, &mode);
+
+	return SDL_SetWindowDisplayMode(windowHandle_, &mode);
+}
+
+void SdlGfxDevice::updateVideoModes()
+{
+	const int count = SDL_GetNumDisplayModes(0);
+	numVideoModes_ = (count < MaxVideoModes) ? count : MaxVideoModes;
+
+	SDL_DisplayMode mode;
+	for (unsigned int i = 0; i < numVideoModes_; i++)
+	{
+		SDL_GetDisplayMode(0, i, &mode);
+		convertVideoModeInfo(mode, videoModes_[i]);
+	}
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -152,6 +188,69 @@ void SdlGfxDevice::initDevice()
 	const GLenum err = glewInit();
 	FATAL_ASSERT_MSG_X(err == GLEW_OK, "GLEW error: %s", glewGetErrorString(err));
 #endif
+
+	updateVideoModes();
+}
+
+void SdlGfxDevice::convertVideoModeInfo(const SDL_DisplayMode &sdlVideoMode, IGfxDevice::VideoMode &videoMode) const
+{
+	videoMode.width = static_cast<unsigned int>(sdlVideoMode.w);
+	videoMode.height = static_cast<unsigned int>(sdlVideoMode.h);
+	videoMode.refreshRate = static_cast<unsigned int>(sdlVideoMode.refresh_rate);
+
+	switch (sdlVideoMode.format)
+	{
+		case SDL_PIXELFORMAT_RGB332:
+			videoMode.redBits = 3;
+			videoMode.greenBits = 3;
+			videoMode.blueBits = 2;
+			break;
+		case SDL_PIXELFORMAT_RGB444:
+		case SDL_PIXELFORMAT_ARGB4444:
+		case SDL_PIXELFORMAT_RGBA4444:
+		case SDL_PIXELFORMAT_ABGR4444:
+		case SDL_PIXELFORMAT_BGRA4444:
+			videoMode.redBits = 4;
+			videoMode.greenBits = 4;
+			videoMode.blueBits = 4;
+			break;
+		case SDL_PIXELFORMAT_RGB555:
+		case SDL_PIXELFORMAT_BGR555:
+		case SDL_PIXELFORMAT_ARGB1555:
+		case SDL_PIXELFORMAT_RGBA5551:
+		case SDL_PIXELFORMAT_ABGR1555:
+		case SDL_PIXELFORMAT_BGRA5551:
+			videoMode.redBits = 5;
+			videoMode.greenBits = 5;
+			videoMode.blueBits = 5;
+			break;
+		case SDL_PIXELFORMAT_RGB565:
+		case SDL_PIXELFORMAT_BGR565:
+			videoMode.redBits = 5;
+			videoMode.greenBits = 6;
+			videoMode.blueBits = 5;
+			break;
+		case SDL_PIXELFORMAT_RGB24:
+		case SDL_PIXELFORMAT_BGR24:
+		case SDL_PIXELFORMAT_RGB888:
+		case SDL_PIXELFORMAT_RGBX8888:
+		case SDL_PIXELFORMAT_BGR888:
+		case SDL_PIXELFORMAT_BGRX8888:
+		case SDL_PIXELFORMAT_ARGB8888:
+		case SDL_PIXELFORMAT_RGBA8888:
+		case SDL_PIXELFORMAT_ABGR8888:
+		case SDL_PIXELFORMAT_BGRA8888:
+		default:
+			videoMode.redBits = 8;
+			videoMode.greenBits = 8;
+			videoMode.blueBits = 8;
+			break;
+		case SDL_PIXELFORMAT_ARGB2101010:
+			videoMode.redBits = 10;
+			videoMode.greenBits = 10;
+			videoMode.blueBits = 10;
+			break;
+	}
 }
 
 }

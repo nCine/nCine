@@ -29,6 +29,10 @@ class GlfwGfxDevice : public IGfxDevice
 	inline void setWindowTitle(const char *windowTitle) override { glfwSetWindowTitle(windowHandle_, windowTitle); }
 	void setWindowIcon(const char *windowIconFilename) override;
 
+	const VideoMode &currentVideoMode() const override;
+	bool setVideoMode(unsigned int index) override;
+	void updateVideoModes() override;
+
   private:
 	/// GLFW3 window handle
 	static GLFWwindow *windowHandle_;
@@ -42,6 +46,8 @@ class GlfwGfxDevice : public IGfxDevice
 	void initGraphics();
 	/// Initilizes the OpenGL graphic context
 	void initDevice();
+
+	void convertVideoModeInfo(const GLFWvidmode &glfwVideoMode, IGfxDevice::VideoMode &videoMode) const;
 
 	/// Returns the window handle used by GLFW3
 	static GLFWwindow *windowHandle() { return windowHandle_; }

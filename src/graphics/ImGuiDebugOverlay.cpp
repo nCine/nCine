@@ -39,12 +39,11 @@ namespace {
 ///////////////////////////////////////////////////////////
 
 ImGuiDebugOverlay::ImGuiDebugOverlay(const AppConfiguration &appCfg)
-    : IDebugOverlay(appCfg), disableAppInputEvents_(false),
-      appInputHandler_(nullptr), lockOverlayPositions_(true),
-      showTopLeftOverlay_(true), showTopRightOverlay_(true),
-      showBottomLeftOverlay_(true), showBottomRightOverlay_(true),
-      numValues_(128), maxFrameTime_(0.0f), maxUpdateVisitDraw_(0.0f),
-      index_(0), plotAdditionalFrameValues_(false), plotOverlayValues_(false)
+    : IDebugOverlay(appCfg), disableAppInputEvents_(false), appInputHandler_(nullptr),
+      lockOverlayPositions_(true), showTopLeftOverlay_(true), showTopRightOverlay_(true),
+      showBottomLeftOverlay_(true), showBottomRightOverlay_(true), numValues_(128),
+      maxFrameTime_(0.0f), maxUpdateVisitDraw_(0.0f), index_(0),
+      plotAdditionalFrameValues_(false), plotOverlayValues_(false), comboVideoModes_(4096)
 #ifdef WITH_RENDERDOC
       ,
       renderDocPathTemplate_(MaxRenderDocPathLength),
@@ -564,16 +563,50 @@ void ImGuiDebugOverlay::guiWindowSettings()
 	if (ImGui::CollapsingHeader("Window Settings"))
 	{
 		static int resolution[2] = { theApplication().widthInt(), theApplication().heightInt() };
-		ImGui::InputInt2("Resolution", resolution);
-
 		static bool fullScreen = theApplication().gfxDevice().isFullScreen();
+
+		static int selectedVideoMode = -1;
+		const IGfxDevice::VideoMode currentVideoMode = theApplication().gfxDevice().currentVideoMode();
+		if (fullScreen == false)
+		{
+			ImGui::InputInt2("Resolution", resolution);
+			selectedVideoMode = -1;
+		}
+		else
+		{
+			unsigned int currentVideoModeIndex = 0;
+			const unsigned int numVideoModes = theApplication().gfxDevice().numVideoModes();
+			comboVideoModes_.clear();
+			for (unsigned int i = 0; i < numVideoModes; i++)
+			{
+				const IGfxDevice::VideoMode &mode = theApplication().gfxDevice().videoMode(i);
+				comboVideoModes_.formatAppend("%ux%u, %uHz", mode.width, mode.height, mode.refreshRate);
+				comboVideoModes_.setLength(comboVideoModes_.length() + 1);
+
+				if (mode == currentVideoMode)
+					currentVideoModeIndex = i;
+			}
+			comboVideoModes_.setLength(comboVideoModes_.length() + 1);
+			// Append a second '\0' to signal the end of the combo item list
+			comboVideoModes_[comboVideoModes_.length() - 1] = '\0';
+
+			if (selectedVideoMode < 0)
+				selectedVideoMode = currentVideoModeIndex;
+
+			ImGui::Combo("Video Mode", &selectedVideoMode, comboVideoModes_.data());
+			resolution[0] = theApplication().gfxDevice().videoMode(selectedVideoMode).width;
+			resolution[1] = theApplication().gfxDevice().videoMode(selectedVideoMode).height;
+		}
 		ImGui::Checkbox("Full Screen", &fullScreen);
 
 		ImGui::SameLine();
 		if (ImGui::Button("Apply"))
 		{
-			theApplication().gfxDevice().setResolution(resolution[0], resolution[1]);
 			theApplication().gfxDevice().setFullScreen(fullScreen);
+			if (fullScreen == false)
+				theApplication().gfxDevice().setResolution(resolution[0], resolution[1]);
+			else
+				theApplication().gfxDevice().setVideoMode(selectedVideoMode);
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Reset"))
@@ -590,6 +623,7 @@ void ImGuiDebugOverlay::guiWindowSettings()
 			resolution[0] = theApplication().widthInt();
 			resolution[1] = theApplication().heightInt();
 			fullScreen = theApplication().gfxDevice().isFullScreen();
+			selectedVideoMode = -1;
 		}
 
 		ImGui::Text("Resizable: %s", theApplication().gfxDevice().isResizable() ? "true" : "false");

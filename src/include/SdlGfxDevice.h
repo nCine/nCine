@@ -26,6 +26,10 @@ class SdlGfxDevice : public IGfxDevice
 	inline void setWindowTitle(const char *windowTitle) override { SDL_SetWindowTitle(windowHandle_, windowTitle); }
 	void setWindowIcon(const char *windowIconFilename) override;
 
+	const VideoMode &currentVideoMode() const override;
+	bool setVideoMode(unsigned int index) override;
+	void updateVideoModes() override;
+
 	static inline SDL_Window *windowHandle() { return windowHandle_; }
 
   private:
@@ -43,6 +47,8 @@ class SdlGfxDevice : public IGfxDevice
 	void initGraphics();
 	/// Initilizes the OpenGL graphic context
 	void initDevice();
+
+	void convertVideoModeInfo(const SDL_DisplayMode &sdlVideoMode, IGfxDevice::VideoMode &videoMode) const;
 
 	friend class SdlInputManager;
 };

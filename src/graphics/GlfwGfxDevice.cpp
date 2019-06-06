@@ -78,6 +78,42 @@ void GlfwGfxDevice::setWindowIcon(const char *windowIconFilename)
 	glfwSetWindowIcon(windowHandle_, 1, &glfwImage);
 }
 
+const IGfxDevice::VideoMode &GlfwGfxDevice::currentVideoMode() const
+{
+	const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	convertVideoModeInfo(*mode, currentVideoMode_);
+
+	return currentVideoMode_;
+}
+
+bool GlfwGfxDevice::setVideoMode(unsigned int index)
+{
+	ASSERT(index < numVideoModes_);
+
+	int modeIndex = index;
+	if (index >= numVideoModes_)
+		modeIndex = 0;
+
+	glfwSetWindowMonitor(windowHandle_, glfwGetPrimaryMonitor(), 0, 0,
+	                     videoModes_[modeIndex].width, videoModes_[modeIndex].height, videoModes_[modeIndex].refreshRate);
+
+	return true;
+}
+
+void GlfwGfxDevice::updateVideoModes()
+{
+	int count;
+	const GLFWvidmode *modes = glfwGetVideoModes(glfwGetPrimaryMonitor(), &count);
+	numVideoModes_ = (count < MaxVideoModes) ? count : MaxVideoModes;
+
+	for (unsigned int i = 0; i < numVideoModes_; i++)
+	{
+		// Reverse GLFW video mode array to be consistent with SDL
+		const int srcIndex = count - 1 - i;
+		convertVideoModeInfo(modes[srcIndex], videoModes_[i]);
+	}
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -131,6 +167,18 @@ void GlfwGfxDevice::initDevice()
 
 	glContextInfo_.debugContext = glContextInfo_.debugContext && glewIsSupported("GL_ARB_debug_output");
 #endif
+
+	updateVideoModes();
+}
+
+void GlfwGfxDevice::convertVideoModeInfo(const GLFWvidmode &glfwVideoMode, IGfxDevice::VideoMode &videoMode) const
+{
+	videoMode.width = static_cast<unsigned int>(glfwVideoMode.width);
+	videoMode.height = static_cast<unsigned int>(glfwVideoMode.height);
+	videoMode.redBits = static_cast<unsigned int>(glfwVideoMode.redBits);
+	videoMode.greenBits = static_cast<unsigned int>(glfwVideoMode.greenBits);
+	videoMode.blueBits = static_cast<unsigned int>(glfwVideoMode.blueBits);
+	videoMode.refreshRate = static_cast<unsigned int>(glfwVideoMode.refreshRate);
 }
 
 void GlfwGfxDevice::errorCallback(int error, const char *description)

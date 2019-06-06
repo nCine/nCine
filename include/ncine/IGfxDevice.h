@@ -28,6 +28,27 @@ class DLL_PUBLIC IGfxDevice
 		bool isResizable;
 	};
 
+	/// A structure representing a supported monitor video mode
+	struct VideoMode
+	{
+		VideoMode()
+		    : width(0), height(0), redBits(8), greenBits(8), blueBits(8), refreshRate(60) {}
+		inline bool operator==(const VideoMode &mode) const
+		{
+			return (width == mode.width && height == mode.height &&
+			        redBits == mode.redBits && greenBits == mode.greenBits &&
+			        blueBits == mode.blueBits && refreshRate == mode.refreshRate);
+		}
+		inline bool operator!=(const VideoMode &mode) const { return !operator==(mode); }
+
+		unsigned int width;
+		unsigned int height;
+		unsigned int redBits;
+		unsigned int greenBits;
+		unsigned int blueBits;
+		unsigned int refreshRate;
+	};
+
 	/// Contains the attributes to create an OpenGL context
 	struct GLContextInfo
 	{
@@ -90,6 +111,17 @@ class DLL_PUBLIC IGfxDevice
 	/// Returns display mode
 	inline const DisplayMode &displayMode() const { return displayMode_; }
 
+	/// Returns the current monitor video mode
+	virtual const VideoMode &currentVideoMode() const { return currentVideoMode_; }
+	/// Returns the number of video modes supported by the monitor
+	inline unsigned int numVideoModes() const { return numVideoModes_; }
+	/// Returns the specified monitor video mode
+	const VideoMode &videoMode(unsigned int index) const;
+	/// Sets the specified monitor video mode
+	virtual bool setVideoMode(unsigned int index) { return true; }
+	/// Updates the array of supported monitor video modes
+	virtual void updateVideoModes() {}
+
   protected:
 	/// Device width
 	int width_;
@@ -103,6 +135,15 @@ class DLL_PUBLIC IGfxDevice
 	GLContextInfo glContextInfo_;
 	/// Display properties
 	DisplayMode displayMode_;
+
+#ifdef __ANDROID__
+	static const int MaxVideoModes = 1;
+#else
+	static const int MaxVideoModes = 128;
+#endif
+	VideoMode videoModes_[MaxVideoModes];
+	unsigned int numVideoModes_;
+	mutable VideoMode currentVideoMode_;
 
   private:
 	/// Sets up the initial OpenGL state for the scenegraph

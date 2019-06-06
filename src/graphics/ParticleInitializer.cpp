@@ -45,6 +45,7 @@ void ParticleInitializer::setPosition(float minX, float minY, float maxX, float 
 
 void ParticleInitializer::setPositionAndRadius(float x, float y, float radius)
 {
+	ASSERT(radius >= 0.0f);
 	rndPositionX.set(x - radius, x + radius);
 	rndPositionY.set(y - radius, y + radius);
 }
@@ -84,14 +85,21 @@ void ParticleInitializer::setVelocity(float minX, float minY, float maxX, float 
 
 void ParticleInitializer::setVelocityAndRadius(float x, float y, float radius)
 {
+	ASSERT(radius >= 0.0f);
 	rndVelocityX.set(x - radius, x + radius);
 	rndVelocityY.set(y - radius, y + radius);
 }
 
 void ParticleInitializer::setVelocityAndScale(float x, float y, float minScale, float maxScale)
 {
+	ASSERT(minScale <= maxScale);
 	rndVelocityX.set(x * minScale, x * maxScale);
 	rndVelocityY.set(y * minScale, y * maxScale);
+
+	if (rndVelocityX.x > rndVelocityX.y)
+		nctl::swap(rndVelocityX.x, rndVelocityX.y);
+	if (rndVelocityY.x > rndVelocityY.y)
+		nctl::swap(rndVelocityY.x, rndVelocityY.y);
 }
 
 void ParticleInitializer::setVelocityAndAngle(float x, float y, float angle)
@@ -103,6 +111,11 @@ void ParticleInitializer::setVelocityAndAngle(float x, float y, float angle)
 	rndVelocityX.y = x * cosAngle - y * -sinAngle;
 	rndVelocityY.x = x * sinAngle + y * cosAngle;
 	rndVelocityY.y = x * -sinAngle + y * cosAngle;
+
+	if (rndVelocityX.x > rndVelocityX.y)
+		nctl::swap(rndVelocityX.x, rndVelocityX.y);
+	if (rndVelocityY.x > rndVelocityY.y)
+		nctl::swap(rndVelocityY.x, rndVelocityY.y);
 }
 
 void ParticleInitializer::setVelocity(const Vector2f &vel)

@@ -68,6 +68,7 @@ class ImGuiDebugOverlay : public IDebugOverlay
 	unsigned int index_;
 	bool plotAdditionalFrameValues_;
 	bool plotOverlayValues_;
+	nctl::String comboVideoModes_;
 
 #ifdef WITH_RENDERDOC
 	const unsigned int MaxRenderDocPathLength = 128;
