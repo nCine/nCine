@@ -138,9 +138,8 @@ class DLL_PUBLIC Application
 	nctl::UniquePtr<ImGuiDrawing> imguiDrawing_;
 #endif
 
-	Application()
-	    : isSuspended_(false), autoSuspension_(true), hasFocus_(true), shouldQuit_(false)
-	{}
+	Application();
+	~Application();
 
 	/// Must be called before giving control to the application
 	void initCommon();

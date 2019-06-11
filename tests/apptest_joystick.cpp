@@ -104,10 +104,10 @@ void MyEventHandler::onInit()
 	sprites_[11]->setScale(guideUnpressedSize);
 	sprites_[12]->setScale(startUnpressedSize);
 
-	sprites_[13]->setPosition(appWidth * (-triggerPosX * 0.25 - 0.02f), -appWidth * 0.075f); // D-Pad Left
+	sprites_[13]->setPosition(appWidth * (-triggerPosX * 0.25f - 0.02f), -appWidth * 0.075f); // D-Pad Left
 	sprites_[14]->setPosition(appWidth * -triggerPosX * 0.25f, -appWidth * (0.075f - 0.02f)); // D-Pad Up
 	sprites_[15]->setPosition(appWidth * -triggerPosX * 0.25f, -appWidth * (0.075f + 0.02f)); // D-Pad Down
-	sprites_[16]->setPosition(appWidth * (-triggerPosX * 0.25 + 0.02f), -appWidth * 0.075f); // D-Pad Right
+	sprites_[16]->setPosition(appWidth * (-triggerPosX * 0.25f + 0.02f), -appWidth * 0.075f); // D-Pad Right
 	sprites_[13]->setScale(buttonUnpressedSize);
 	sprites_[14]->setScale(buttonUnpressedSize);
 	sprites_[15]->setScale(buttonUnpressedSize);

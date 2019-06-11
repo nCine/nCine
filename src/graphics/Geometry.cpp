@@ -13,8 +13,8 @@ Geometry::Geometry()
     : primitiveType_(GL_TRIANGLES), firstVertex_(0), numVertices_(0),
       numElementsPerVertex_(2), firstIndex_(0), numIndices_(0),
       hostVertexPointer_(nullptr), hostIndexPointer_(nullptr),
-      vboUsageFlags_(0), iboUsageFlags_(0),
-      sharedVboParams_(nullptr), sharedIboParams_(nullptr)
+      vboUsageFlags_(0), sharedVboParams_(nullptr),
+      iboUsageFlags_(0), sharedIboParams_(nullptr)
 {
 }
 

@@ -40,7 +40,7 @@ namespace LuaUtils {
 	template <> DLL_PUBLIC bool retrieve<bool>(lua_State *L, int index);
 	void *retrieveUserData(lua_State *L, int index); // not DLL_PUBLIC
 	template <class T> T *retrieveUserData(lua_State *L, int index) { return static_cast<T *>(retrieveUserData(L, index)); }
-	void assertArrayLength(lua_State *L, int index, int length); // utility function, not DLL_PUBLIC
+	void assertArrayLength(lua_State *L, int index, unsigned int length); // utility function, not DLL_PUBLIC
 
 	template <class T>
 	void retrieveArray(lua_State *L, int index, int arrayIndex, int length, T *array)

@@ -161,27 +161,32 @@ void resetVecs(unsigned int iterations)
 {
 	for (unsigned int i = 0; i < iterations; i++)
 	{
-		nums[i] = i;
-		vecsA[i].set(i, i, i, i);
-		vecsB[i].set(i, i, i, i);
-		vecsC[i].set(i, i, i, i);
+		const float f = static_cast<float>(i);
+		nums[i] = f;
+		vecsA[i].set(f, f, f, f);
+		vecsB[i].set(f, f, f, f);
+		vecsC[i].set(f, f, f, f);
 	}
 }
 
 void resetQuats(unsigned int iterations)
 {
 	for (unsigned int i = 0; i < iterations; i++)
-		quats[i].set(i, i, i, i);
+	{
+		const float f = static_cast<float>(i);
+		quats[i].set(f, f, f, f);
+	}
 }
 
 void resetMats(unsigned int iterations)
 {
 	for (unsigned int i = 0; i < iterations; i++)
 	{
-		mats[i][0].set(i, i, i, i);
-		mats[i][1].set(i, i, i, i);
-		mats[i][2].set(i, i, i, i);
-		mats[i][3].set(i, i, i, i);
+		const float f = static_cast<float>(i);
+		mats[i][0].set(f, f, f, f);
+		mats[i][1].set(f, f, f, f);
+		mats[i][2].set(f, f, f, f);
+		mats[i][3].set(f, f, f, f);
 	}
 }
 

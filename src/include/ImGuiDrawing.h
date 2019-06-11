@@ -20,6 +20,7 @@ class ImGuiDrawing
 {
   public:
 	ImGuiDrawing(bool withSceneGraph);
+	~ImGuiDrawing();
 
 	void newFrame();
 	/// Renders ImGui with render commands

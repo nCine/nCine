@@ -176,9 +176,9 @@ void *LuaUtils::retrieveUserData(lua_State *L, int index)
 	return lua_touserdata(L, index);
 }
 
-void LuaUtils::assertArrayLength(lua_State *L, int index, int length)
+void LuaUtils::assertArrayLength(lua_State *L, int index, unsigned int length)
 {
-	LuaDebug::assert(L, lua_rawlen(L, index) >= length, "Expecting an array of a minimum length of %d", length);
+	LuaDebug::assert(L, lua_rawlen(L, index) >= length, "Expecting an array of a minimum length of %u", length);
 }
 
 ///////////////////////////////////////////////////////////

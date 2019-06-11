@@ -52,19 +52,31 @@
 namespace ncine {
 
 namespace LuaNames {
+#ifdef WITH_GIT_VERSION
 	static const char *Version = "_VERSION";
 	static const char *GitRevCount = "_GITREVCOUNT";
 	static const char *GitShortHash = "_GITSHORTHASH";
 	static const char *GitLastCommitDate = "_GITLATCOMMITDATE";
 	static const char *GitBranch = "_GITBRANCH";
+#endif
 
-	static const char *Windows = "WINDOWS";
+#if defined(_WIN32)
+	#if defined(__MINGW32__)
 	static const char *MinGW = "MINGW";
+	#else
+	static const char *Windows = "WINDOWS";
+	#endif
+#elif defined(__APPLE__)
 	static const char *macOS = "MACOS";
+#elif defined(__ANDROID__)
 	static const char *Android = "ANDROID";
+#else
 	static const char *Linux = "LINUX";
+#endif
 
+#ifdef NCINE_DEBUG
 	static const char *Debug = "DEBUG";
+#endif
 }
 
 ///////////////////////////////////////////////////////////
@@ -378,9 +390,10 @@ void LuaStateManager::exposeConstants()
 
 	lua_pushboolean(L_, true);
 #if defined(_WIN32)
-	lua_setfield(L_, -2, LuaNames::Windows);
 	#if defined(__MINGW32__)
 	lua_setfield(L_, -2, LuaNames::MinGW);
+	#else
+	lua_setfield(L_, -2, LuaNames::Windows);
 	#endif
 #elif defined(__APPLE__)
 	lua_setfield(L_, -2, LuaNames::macOS);
@@ -390,7 +403,7 @@ void LuaStateManager::exposeConstants()
 	lua_setfield(L_, -2, LuaNames::Linux);
 #endif
 
-#if NCINE_DEBUG
+#ifdef NCINE_DEBUG
 	lua_pushboolean(L_, true);
 	lua_setfield(L_, -2, LuaNames::Debug);
 #endif

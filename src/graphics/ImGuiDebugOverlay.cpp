@@ -19,6 +19,7 @@ namespace ncine {
 
 namespace {
 
+#ifdef WITH_RENDERDOC
 	int inputTextCallback(ImGuiInputTextCallbackData *data)
 	{
 		nctl::String *string = reinterpret_cast<nctl::String *>(data->UserData);
@@ -31,6 +32,7 @@ namespace {
 		}
 		return 0;
 	}
+#endif
 
 }
 
@@ -135,6 +137,8 @@ namespace {
 			case IInputManager::MouseCursorMode::HIDDEN: return "Hidden";
 			case IInputManager::MouseCursorMode::DISABLED: return "Disabled";
 		}
+
+		return "Unknown";
 	}
 
 	const char *mappedButtonNameToString(ButtonName name)
@@ -158,6 +162,8 @@ namespace {
 			case ButtonName::DPAD_LEFT: return "DPad_Left";
 			case ButtonName::DPAD_RIGHT: return "DPad_Right";
 		}
+
+		return "Unknown";
 	}
 
 	const char *mappedAxisNameToString(AxisName name)
@@ -172,6 +178,8 @@ namespace {
 			case AxisName::LTRIGGER: return "LTrigger";
 			case AxisName::RTRIGGER: return "RTrigger";
 		}
+
+		return "Unknown";
 	}
 
 }
