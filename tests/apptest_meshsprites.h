@@ -5,7 +5,6 @@
 #include <ncine/IInputEventHandler.h>
 #include <nctl/StaticArray.h>
 #include <ncine/Vector2.h>
-#include <nctl/UniquePtr.h>
 
 namespace nctl {
 

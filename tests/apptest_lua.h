@@ -3,7 +3,6 @@
 
 #include <ncine/IAppEventHandler.h>
 #include <ncine/IInputEventHandler.h>
-
 #include <ncine/LuaStateManager.h>
 
 namespace nc = ncine;
