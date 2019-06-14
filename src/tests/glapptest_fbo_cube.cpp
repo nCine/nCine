@@ -1,15 +1,15 @@
 #include <stddef.h> // for offsetof()
 #include "glapptest_fbo_cube.h"
-#include "Application.h"
-#include "AppConfiguration.h"
-#include "GLShaderProgram.h"
-#include "GLShaderUniforms.h"
-#include "GLShaderAttributes.h"
-#include "GLTexture.h"
-#include "GLFramebufferObject.h"
-#include "GLVertexArrayObject.h"
-#include "GLBufferObject.h"
-#include "IFile.h" // for dataPath()
+#include <ncine/Application.h>
+#include <ncine/AppConfiguration.h>
+#include <ncine/GLShaderProgram.h>
+#include <ncine/GLShaderUniforms.h>
+#include <ncine/GLShaderAttributes.h>
+#include <ncine/GLTexture.h>
+#include <ncine/GLFramebufferObject.h>
+#include <ncine/GLVertexArrayObject.h>
+#include <ncine/GLBufferObject.h>
+#include <ncine/IFile.h> // for dataPath()
 #include "../../tests/apptest_datapath.h"
 
 #ifdef WITH_EMBEDDED_SHADERS

@@ -1,9 +1,9 @@
 #include "apptest_threadpool.h"
-#include "IThreadPool.h"
-#include "ThreadCommands.h"
-#include "Application.h"
-#include "AppConfiguration.h"
-#include "Timer.h"
+#include <ncine/IThreadPool.h>
+#include <ncine/ThreadCommands.h>
+#include <ncine/Application.h>
+#include <ncine/AppConfiguration.h>
+#include <ncine/Timer.h>
 
 nc::IAppEventHandler *createAppEventHandler()
 {

@@ -1,8 +1,8 @@
-#include "common_macros.h"
 #include "apptest_threads.h"
-#include "Application.h"
-#include "Thread.h" // after Application.h to compile on MSVC
-#include "Timer.h"
+#include <ncine/common_macros.h>
+#include <ncine/Application.h>
+#include <ncine/Thread.h> // after Application.h to compile on MSVC
+#include <ncine/Timer.h>
 
 namespace {
 
