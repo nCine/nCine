@@ -4,7 +4,7 @@
 #include "ImGuiSdlInput.h"
 #include "ImGuiJoyMappedInput.h"
 
-// The multi-viewports feature requires SDL features supported from SDL 2.0.5+
+// SDL
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 #if defined(__APPLE__)
@@ -13,9 +13,6 @@
 
 #define SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE SDL_VERSION_ATLEAST(2, 0, 4)
 #define SDL_HAS_VULKAN SDL_VERSION_ATLEAST(2, 0, 6)
-#if !SDL_HAS_VULKAN
-static const Uint32 SDL_WINDOW_VULKAN = 0x10000000;
-#endif
 
 namespace ncine {
 
@@ -55,6 +52,7 @@ void ImGuiSdlInput::init(SDL_Window *window)
 {
 	window_ = window;
 
+	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
 	// Setup back-end capabilities flags
@@ -129,7 +127,7 @@ void ImGuiSdlInput::shutdown()
 void ImGuiSdlInput::newFrame()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	IM_ASSERT(io.Fonts->IsBuilt()); // Font atlas needs to be built, call renderer _NewFrame() function e.g. ImGui_ImplOpenGL3_NewFrame()
+	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end. Missing call to renderer _NewFrame() function? e.g. ImGui_ImplOpenGL3_NewFrame().");
 
 	// Setup display size (every frame to accommodate for window resizing)
 	int w, h;
@@ -137,7 +135,8 @@ void ImGuiSdlInput::newFrame()
 	SDL_GetWindowSize(window_, &w, &h);
 	SDL_GL_GetDrawableSize(window_, &displayW, &displayH);
 	io.DisplaySize = ImVec2(static_cast<float>(w), static_cast<float>(h));
-	io.DisplayFramebufferScale = ImVec2(w > 0 ? (static_cast<float>(displayW) / w) : 0, h > 0 ? (static_cast<float>(displayH) / h) : 0);
+	if (w > 0 && h > 0)
+		io.DisplayFramebufferScale = ImVec2(static_cast<float>(displayW) / w, static_cast<float>(displayH) / h);
 
 	// Setup time step (we don't use SDL_GetTicks() because it is using millisecond resolution)
 	static Uint64 frequency = SDL_GetPerformanceFrequency();
@@ -147,6 +146,8 @@ void ImGuiSdlInput::newFrame()
 
 	updateMousePosAndButtons();
 	updateMouseCursor();
+
+	// Update game controllers (if enabled and available)
 	updateGamepads();
 }
 
@@ -154,6 +155,7 @@ void ImGuiSdlInput::newFrame()
 // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
 // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
 // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+// If you have multiple SDL events and some of them are not meant to be used by dear imgui, you may need to filter events based on their windowID field.
 bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 {
 	if (inputEnabled_ == false)
@@ -242,10 +244,10 @@ void ImGuiSdlInput::updateMousePosAndButtons()
 
 	// SDL_CaptureMouse() let the OS know e.g. that our imgui drag outside the SDL window boundaries shouldn't e.g. trigger the OS window resize cursor.
 	// The function is only supported from SDL 2.0.4 (released Jan 2016)
-	bool anyMouseButtonDown = ImGui::IsAnyMouseDown();
+	const bool anyMouseButtonDown = ImGui::IsAnyMouseDown();
 	SDL_CaptureMouse(anyMouseButtonDown ? SDL_TRUE : SDL_FALSE);
 #else
-	if (SDL_GetWindowFlags(g_Window) & SDL_WINDOW_INPUT_FOCUS)
+	if (SDL_GetWindowFlags(window_) & SDL_WINDOW_INPUT_FOCUS)
 		io.MousePos = ImVec2(static_cast<float>(mx), static_cast<float>(my));
 #endif
 }
@@ -297,7 +299,7 @@ void ImGuiSdlInput::updateGamepads()
 
 #define MAP_ANALOG(NAV_NO, AXIS_NO, V0, V1) \
 	{ \
-		float vn = (float)(SDL_GameControllerGetAxis(game_controller, AXIS_NO) - V0) / (float)(V1 - V0); \
+		float vn = static_cast<float>(SDL_GameControllerGetAxis(game_controller, AXIS_NO) - V0) / static_cast<float>(V1 - V0); \
 		if (vn > 1.0f) \
 			vn = 1.0f; \
 		if (vn > 0.0f && io.NavInputs[NAV_NO] < vn) \
@@ -323,6 +325,7 @@ void ImGuiSdlInput::updateGamepads()
 		MAP_ANALOG(ImGuiNavInput_LStickDown, SDL_CONTROLLER_AXIS_LEFTY, +thumb_dead_zone, +32767)
 
 		io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
+
 #undef MAP_BUTTON
 #undef MAP_ANALOG
 	}

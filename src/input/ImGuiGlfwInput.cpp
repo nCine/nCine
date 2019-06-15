@@ -53,6 +53,7 @@ void ImGuiGlfwInput::init(GLFWwindow *window)
 	window_ = window;
 	time_ = 0.0;
 
+	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
 	// Setup back-end capabilities flags
@@ -115,15 +116,16 @@ void ImGuiGlfwInput::shutdown()
 void ImGuiGlfwInput::newFrame()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	IM_ASSERT(io.Fonts->IsBuilt()); // Font atlas needs to be built, call renderer _NewFrame() function e.g. ImGui_ImplOpenGL3_NewFrame()
+	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end. Missing call to renderer _NewFrame() function? e.g. ImGui_ImplOpenGL3_NewFrame().");
 
-	// Setup display size
+	// Setup display size (every frame to accommodate for window resizing)
 	int w, h;
 	int displayW, displayH;
 	glfwGetWindowSize(window_, &w, &h);
 	glfwGetFramebufferSize(window_, &displayW, &displayH);
 	io.DisplaySize = ImVec2(static_cast<float>(w), static_cast<float>(h));
-	io.DisplayFramebufferScale = ImVec2(w > 0 ? (static_cast<float>(displayW) / w) : 0, h > 0 ? (static_cast<float>(displayH) / h) : 0);
+	if (w > 0 && h > 0)
+		io.DisplayFramebufferScale = ImVec2(static_cast<float>(displayW) / w, static_cast<float>(displayH) / h);
 
 	// Setup time step
 	double currentTime = glfwGetTime();
@@ -180,8 +182,7 @@ void ImGuiGlfwInput::charCallback(GLFWwindow *, unsigned int c)
 		return;
 
 	ImGuiIO &io = ImGui::GetIO();
-	if (c > 0 && c < 0x10000)
-		io.AddInputCharacter(static_cast<unsigned short>(c));
+	io.AddInputCharacter(c);
 }
 
 ///////////////////////////////////////////////////////////

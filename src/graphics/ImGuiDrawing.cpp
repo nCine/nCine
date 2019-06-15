@@ -41,14 +41,18 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 	io.BackendRendererName = "nCine_OpenGL_ES";
 #endif
 
+#if !(defined(__ANDROID__) && !GL_ES_VERSION_3_2)
+	io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; // We can honor the ImDrawCmd::VtxOffset field, allowing for large meshes.
+#endif
+
 	unsigned char *pixels = nullptr;
 	int width, height;
 	io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 
 	texture_ = nctl::makeUnique<GLTexture>(GL_TEXTURE_2D);
-	texture_->texImage2D(0, GL_RGBA, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 	texture_->texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	texture_->texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	texture_->texImage2D(0, GL_RGBA, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 	io.Fonts->TexID = reinterpret_cast<void *>(texture_.get());
 
 	imguiShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
@@ -65,7 +69,11 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 		setupBuffersAndShader();
 }
 
-ImGuiDrawing::~ImGuiDrawing() = default;
+ImGuiDrawing::~ImGuiDrawing()
+{
+	ImGuiIO &io = ImGui::GetIO();
+	io.Fonts->TexID = nullptr;
+}
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -192,7 +200,6 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 	for (int n = 0; n < drawData->CmdListsCount; n++)
 	{
 		const ImDrawList *imCmdList = drawData->CmdLists[n];
-		GLushort firstIndex = 0;
 
 		RenderCommand &firstCmd = *retrieveCommandFromPool();
 		if (lastFrameWidth_ != io.DisplaySize.x || lastFrameHeight_ != io.DisplaySize.y)
@@ -230,13 +237,13 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 				}
 
 				currCmd.geometry().setNumIndices(imCmd->ElemCount);
-				currCmd.geometry().setFirstIndex(firstIndex);
+				currCmd.geometry().setFirstIndex(imCmd->IdxOffset);
+				currCmd.geometry().setFirstVertex(imCmd->VtxOffset);
 				currCmd.setLayer(DrawableNode::LayerBase::HUD + numCmd);
 				currCmd.material().setTexture(reinterpret_cast<GLTexture *>(imCmd->TextureId));
 
 				renderQueue.addCommand(&currCmd);
 			}
-			firstIndex += imCmd->ElemCount;
 			numCmd++;
 		}
 	}
@@ -294,7 +301,12 @@ void ImGuiDrawing::draw()
 				GLScissorTest::enable(static_cast<GLint>(clipRect.x), static_cast<GLint>(fbHeight - clipRect.w),
 				                      static_cast<GLsizei>(clipRect.z - clipRect.x), static_cast<GLsizei>(clipRect.w - clipRect.y));
 				glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLTexture *>(imCmd->TextureId)->glHandle());
+#if defined(__ANDROID__) && !GL_ES_VERSION_3_2
 				glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, firstIndex);
+#else
+				glDrawElementsBaseVertex(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
+				                         reinterpret_cast<void *>(static_cast<intptr_t>(imCmd->IdxOffset * sizeof(ImDrawIdx))), static_cast<GLint>(imCmd->VtxOffset));
+#endif
 			}
 			firstIndex += imCmd->ElemCount;
 		}

@@ -19,7 +19,7 @@ class RenderQueue;
 class ImGuiDrawing
 {
   public:
-	ImGuiDrawing(bool withSceneGraph);
+	explicit ImGuiDrawing(bool withSceneGraph);
 	~ImGuiDrawing();
 
 	void newFrame();

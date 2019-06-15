@@ -40,6 +40,7 @@ namespace {
 
 void ImGuiAndroidInput::init()
 {
+	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
 	ImGuiIO &io = ImGui::GetIO();
@@ -83,13 +84,12 @@ void ImGuiAndroidInput::shutdown()
 void ImGuiAndroidInput::newFrame()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	IM_ASSERT(io.Fonts->IsBuilt()); // Font atlas needs to be built, call renderer _NewFrame() function e.g. ImGui_ImplOpenGL3_NewFrame()
-
+	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end. Missing call to renderer _NewFrame() function? e.g. ImGui_ImplOpenGL3_NewFrame().");
 	io.DeltaTime = theApplication().interval();
 
 	updateMouseButtons();
 
-	// Gamepad navigation mapping [BETA]
+	// Update game controllers (if enabled and available)
 	memset(io.NavInputs, 0, sizeof(io.NavInputs));
 	if (io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad)
 		imGuiJoyMappedInput();
