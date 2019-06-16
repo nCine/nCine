@@ -1,8 +1,6 @@
 #ifndef CLASS_NCINE_GLVERTEXARRAYOBJECT
 #define CLASS_NCINE_GLVERTEXARRAYOBJECT
 
-#define NCINE_INCLUDE_OPENGL
-#include "common_headers.h"
 #include "GLHashMap.h"
 
 namespace ncine {

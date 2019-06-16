@@ -32,32 +32,21 @@ GLTexture::~GLTexture()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void GLTexture::bind() const
-{
-	if (boundTextures_[boundUnit_][target_] != glHandle_)
-	{
-		glBindTexture(target_, glHandle_);
-		boundTextures_[boundUnit_][target_] = glHandle_;
-		textureUnit_ = boundUnit_;
-	}
-}
-
 void GLTexture::bind(unsigned int textureUnit) const
 {
-	if (textureUnit < MaxTextureUnits)
-	{
-		if (boundUnit_ != textureUnit)
-		{
-			glActiveTexture(GL_TEXTURE0 + textureUnit);
-			boundUnit_ = textureUnit;
-			textureUnit_ = textureUnit;
-		}
+	FATAL_ASSERT(textureUnit < MaxTextureUnits);
 
-		if (boundTextures_[textureUnit][target_] != glHandle_)
-		{
-			glBindTexture(target_, glHandle_);
-			boundTextures_[textureUnit][target_] = glHandle_;
-		}
+	if (boundUnit_ != textureUnit)
+	{
+		glActiveTexture(GL_TEXTURE0 + textureUnit);
+		boundUnit_ = textureUnit;
+		textureUnit_ = textureUnit;
+	}
+
+	if (boundTextures_[textureUnit][target_] != glHandle_)
+	{
+		glBindTexture(target_, glHandle_);
+		boundTextures_[textureUnit][target_] = glHandle_;
 	}
 }
 
@@ -121,6 +110,29 @@ void GLTexture::texParameteri(GLenum pname, GLint param)
 {
 	bind();
 	glTexParameteri(target_, pname, param);
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+bool GLTexture::bindHandle(GLenum target, GLuint glHandle, unsigned int textureUnit)
+{
+	FATAL_ASSERT(textureUnit < MaxTextureUnits);
+
+	if (boundUnit_ != textureUnit)
+	{
+		glActiveTexture(GL_TEXTURE0 + textureUnit);
+		boundUnit_ = textureUnit;
+	}
+
+	if (boundTextures_[textureUnit][target] != glHandle)
+	{
+		glBindTexture(target, glHandle);
+		boundTextures_[textureUnit][target] = glHandle;
+		return true;
+	}
+	return false;
 }
 
 }

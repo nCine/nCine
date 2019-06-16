@@ -217,10 +217,15 @@ void GLUniformCache::commitValue()
 		case GL_FLOAT_MAT4:
 			glUniformMatrix4fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(dataPointer_));
 			break;
+#ifndef __ANDROID__ // not available in OpenGL ES
+		case GL_SAMPLER_1D:
+#endif
 		case GL_SAMPLER_2D:
-			glUniform1iv(location, 1, reinterpret_cast<const GLint *>(dataPointer_));
-			break;
+		case GL_SAMPLER_3D:
 		case GL_SAMPLER_CUBE:
+#if !defined(__ANDROID__) || (defined(__ANDROID__) && GL_ES_VERSION_3_2)
+		case GL_SAMPLER_BUFFER:
+#endif
 			glUniform1iv(location, 1, reinterpret_cast<const GLint *>(dataPointer_));
 			break;
 		default:
@@ -243,8 +248,18 @@ void GLUniformCache::checkFloat()
 
 void GLUniformCache::checkInt()
 {
-	if (uniform_->basicType() != GL_INT && uniform_->basicType() != GL_BOOL &&
-	    uniform_->basicType() != GL_SAMPLER_2D && uniform_->basicType() != GL_SAMPLER_CUBE)
+	if (uniform_->basicType() != GL_INT &&
+	    uniform_->basicType() != GL_BOOL &&
+#ifndef __ANDROID__ // not available in OpenGL ES
+	    uniform_->basicType() != GL_SAMPLER_1D &&
+#endif
+	    uniform_->basicType() != GL_SAMPLER_2D &&
+	    uniform_->basicType() != GL_SAMPLER_3D &&
+	    uniform_->basicType() != GL_SAMPLER_CUBE
+#if !defined(__ANDROID__) || (defined(__ANDROID__) && GL_ES_VERSION_3_2)
+	    && uniform_->basicType() != GL_SAMPLER_BUFFER
+#endif
+	)
 	{
 		LOGE_X("Uniform \"%s\" is not integer", uniform_->name());
 	}

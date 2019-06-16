@@ -1,6 +1,8 @@
 #ifndef CLASS_NCINE_GLHASHMAP
 #define CLASS_NCINE_GLHASHMAP
 
+#define NCINE_INCLUDE_OPENGL
+#include "common_headers.h"
 #include "common_macros.h"
 
 namespace ncine {
@@ -40,7 +42,7 @@ inline value_t &GLHashMap<S, MappingFunc>::operator[](key_t key)
 class GLBufferObjectMappingFunc
 {
   public:
-	static const unsigned int Size = 3;
+	static const unsigned int Size = 6;
 	inline unsigned int operator()(key_t key) const
 	{
 		unsigned int value = 0;
@@ -56,6 +58,17 @@ class GLBufferObjectMappingFunc
 			case GL_UNIFORM_BUFFER:
 				value = 2;
 				break;
+			case GL_PIXEL_PACK_BUFFER:
+				value = 3;
+				break;
+			case GL_PIXEL_UNPACK_BUFFER:
+				value = 4;
+				break;
+#if !defined(__ANDROID__) || (defined(__ANDROID__) && GL_ES_VERSION_3_2)
+			case GL_TEXTURE_BUFFER:
+				value = 5;
+				break;
+#endif
 			default:
 				FATAL_MSG_X("No available case to handle key: %u", key);
 				break;
@@ -92,7 +105,7 @@ class GLFramebufferMappingFunc
 class GLTextureMappingFunc
 {
   public:
-	static const unsigned int Size = 3;
+	static const unsigned int Size = 4;
 	inline unsigned int operator()(key_t key) const
 	{
 		unsigned int value = 0;
@@ -107,9 +120,12 @@ class GLTextureMappingFunc
 			case GL_TEXTURE_2D:
 				value = 1;
 				break;
-#ifndef __ANDROID__ // available in OpenGL ES 3.0
 			case GL_TEXTURE_3D:
 				value = 2;
+				break;
+#if !defined(__ANDROID__) || (defined(__ANDROID__) && GL_ES_VERSION_3_2)
+			case GL_TEXTURE_BUFFER:
+				value = 3;
 				break;
 #endif
 			default:

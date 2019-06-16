@@ -142,6 +142,14 @@ GLboolean GLBufferObject::unmap()
 	return glUnmapBuffer(target_);
 }
 
+#if !defined(__ANDROID__) || (defined(__ANDROID__) && GL_ES_VERSION_3_2)
+void GLBufferObject::texBuffer(GLenum internalformat)
+{
+	FATAL_ASSERT(target_ == GL_TEXTURE_BUFFER);
+	glTexBuffer(GL_TEXTURE_BUFFER, internalformat, glHandle_);
+}
+#endif
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////

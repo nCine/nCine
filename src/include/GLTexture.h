@@ -1,8 +1,6 @@
 #ifndef CLASS_NCINE_GLTEXTURE
 #define CLASS_NCINE_GLTEXTURE
 
-#define NCINE_INCLUDE_OPENGL
-#include "common_headers.h"
 #include "GLHashMap.h"
 #include "GLDebug.h"
 
@@ -22,7 +20,7 @@ class GLTexture
 	inline void setObjectLabel(const char *label) { GLDebug::objectLabel(GLDebug::LabelTypes::TEXTURE, glHandle_, label); }
 
 	void bind(unsigned int textureUnit) const;
-	void bind() const;
+	inline void bind() const { bind(0); }
 	void unbind() const;
 
 	void texImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data);
@@ -51,7 +49,11 @@ class GLTexture
 	/// Deleted assignment operator
 	GLTexture &operator=(const GLTexture &) = delete;
 
+	static bool bindHandle(GLenum target, GLuint glHandle, unsigned int textureUnit);
+	static bool bindHandle(GLenum target, GLuint glHandle) { return bindHandle(target, glHandle, 0); }
+
 	friend class GLFramebufferObject;
+	friend class ImGuiDrawing;
 };
 
 }

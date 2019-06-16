@@ -49,9 +49,15 @@ GLenum GLUniform::basicType() const
 		case GL_FLOAT_MAT3:
 		case GL_FLOAT_MAT4:
 			return GL_FLOAT;
+#ifndef __ANDROID__ // not available in OpenGL ES
+		case GL_SAMPLER_1D:
+#endif
 		case GL_SAMPLER_2D:
-			return GL_INT;
+		case GL_SAMPLER_3D:
 		case GL_SAMPLER_CUBE:
+#if !defined(__ANDROID__) || (defined(__ANDROID__) && GL_ES_VERSION_3_2)
+		case GL_SAMPLER_BUFFER:
+#endif
 			return GL_INT;
 		default:
 			LOGW_X("No available case to handle type: %u", type_);
@@ -85,9 +91,15 @@ unsigned int GLUniform::numComponents() const
 			return 9;
 		case GL_FLOAT_MAT4:
 			return 16;
+#ifndef __ANDROID__ // not available in OpenGL ES
+		case GL_SAMPLER_1D:
+#endif
 		case GL_SAMPLER_2D:
-			return 1;
+		case GL_SAMPLER_3D:
 		case GL_SAMPLER_CUBE:
+#if !defined(__ANDROID__) || (defined(__ANDROID__) && GL_ES_VERSION_3_2)
+		case GL_SAMPLER_BUFFER:
+#endif
 			return 1;
 		default:
 			LOGW_X("No available case to handle type: %u", type_);

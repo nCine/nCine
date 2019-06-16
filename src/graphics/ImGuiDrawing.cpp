@@ -300,7 +300,7 @@ void ImGuiDrawing::draw()
 			{
 				GLScissorTest::enable(static_cast<GLint>(clipRect.x), static_cast<GLint>(fbHeight - clipRect.w),
 				                      static_cast<GLsizei>(clipRect.z - clipRect.x), static_cast<GLsizei>(clipRect.w - clipRect.y));
-				glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLTexture *>(imCmd->TextureId)->glHandle());
+				GLTexture::bindHandle(GL_TEXTURE_2D, reinterpret_cast<GLTexture *>(imCmd->TextureId)->glHandle());
 #if defined(__ANDROID__) && !GL_ES_VERSION_3_2
 				glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, firstIndex);
 #else

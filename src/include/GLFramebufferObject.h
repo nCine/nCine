@@ -1,8 +1,6 @@
 #ifndef CLASS_NCINE_GLFRAMEBUFFEROBJECT
 #define CLASS_NCINE_GLFRAMEBUFFEROBJECT
 
-#define NCINE_INCLUDE_OPENGL
-#include "common_headers.h"
 #include "GLHashMap.h"
 #include <nctl/Array.h>
 

@@ -1,8 +1,6 @@
 #ifndef CLASS_NCINE_GLBUFFEROBJECT
 #define CLASS_NCINE_GLBUFFEROBJECT
 
-#define NCINE_INCLUDE_OPENGL
-#include "common_headers.h"
 #include "GLHashMap.h"
 
 namespace ncine {
@@ -32,6 +30,9 @@ class GLBufferObject
 	void *mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access);
 	void flushMappedBufferRange(GLintptr offset, GLsizeiptr length);
 	GLboolean unmap();
+#if !defined(__ANDROID__) || (defined(__ANDROID__) && GL_ES_VERSION_3_2)
+	void texBuffer(GLenum internalformat);
+#endif
 
   private:
 	static class GLHashMap<GLBufferObjectMappingFunc::Size, GLBufferObjectMappingFunc> boundBuffers_;
