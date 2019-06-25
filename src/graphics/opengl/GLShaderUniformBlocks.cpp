@@ -48,7 +48,10 @@ void GLShaderUniformBlocks::bind()
 
 void GLShaderUniformBlocks::setProgram(GLShaderProgram *shaderProgram)
 {
+	ASSERT(shaderProgram);
+
 	shaderProgram_ = shaderProgram;
+	shaderProgram_->deferredQueries();
 	uniformBlockCaches_.clear();
 
 	if (shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)

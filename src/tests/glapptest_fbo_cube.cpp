@@ -106,7 +106,7 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 
 void MyEventHandler::onInit()
 {
-	colorProgram_ = nctl::makeUnique<nc::GLShaderProgram>();
+	colorProgram_ = nctl::makeUnique<nc::GLShaderProgram>(nc::GLShaderProgram::QueryPhase::DEFERRED);
 #ifndef WITH_EMBEDDED_SHADERS
 	colorProgram_->attachShader(GL_VERTEX_SHADER, (nc::IFile::dataPath() + "shaders/vcolor_vs.glsl").data());
 	colorProgram_->attachShader(GL_FRAGMENT_SHADER, (nc::IFile::dataPath() + "shaders/vcolor_fs.glsl").data());
@@ -114,13 +114,12 @@ void MyEventHandler::onInit()
 	colorProgram_->attachShaderFromString(GL_VERTEX_SHADER, nc::ShaderStrings::vcolor_vs);
 	colorProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, nc::ShaderStrings::vcolor_fs);
 #endif
-	colorProgram_->link();
-	colorProgram_->use();
+	colorProgram_->link(nc::GLShaderProgram::Introspection::ENABLED);
 	colorUniforms_ = nctl::makeUnique<nc::GLShaderUniforms>(colorProgram_.get());
 	colorUniforms_->setUniformsDataPointer(uniformsBuffer_);
 	colorAttributes_ = nctl::makeUnique<nc::GLShaderAttributes>(colorProgram_.get());
 
-	texProgram_ = nctl::makeUnique<nc::GLShaderProgram>();
+	texProgram_ = nctl::makeUnique<nc::GLShaderProgram>(nc::GLShaderProgram::QueryPhase::DEFERRED);
 #ifndef WITH_EMBEDDED_SHADERS
 	texProgram_->attachShader(GL_VERTEX_SHADER, (nc::IFile::dataPath() + "shaders/texture_vs.glsl").data());
 	texProgram_->attachShader(GL_FRAGMENT_SHADER, (nc::IFile::dataPath() + "shaders/texture_fs.glsl").data());
@@ -128,8 +127,7 @@ void MyEventHandler::onInit()
 	texProgram_->attachShaderFromString(GL_VERTEX_SHADER, nc::ShaderStrings::texture_vs);
 	texProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, nc::ShaderStrings::texture_fs);
 #endif
-	texProgram_->link();
-	texProgram_->use();
+	texProgram_->link(nc::GLShaderProgram::Introspection::ENABLED);
 	texUniforms_ = nctl::makeUnique<nc::GLShaderUniforms>(texProgram_.get());
 	texUniforms_->setUniformsDataPointer(&uniformsBuffer_[colorProgram_->uniformsSize()]);
 	texUniforms_->uniform("uTexture")->setIntValue(0);

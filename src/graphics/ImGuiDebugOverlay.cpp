@@ -530,6 +530,7 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 
 		ImGui::Separator();
 		ImGui::Text("Buffer mapping: %s", appCfg.useBufferMapping ? "true" : "false");
+		ImGui::Text("Defer shader queries: %s", appCfg.deferShaderQueries ? "true" : "false");
 		ImGui::Text("VBO size: %lu", appCfg.vboSize);
 		ImGui::Text("IBO size: %lu", appCfg.iboSize);
 		ImGui::Text("Vao pool size: %u", appCfg.vaoPoolSize);

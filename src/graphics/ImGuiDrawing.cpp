@@ -55,7 +55,10 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 	texture_->texImage2D(0, GL_RGBA, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 	io.Fonts->TexID = reinterpret_cast<void *>(texture_.get());
 
-	imguiShaderProgram_ = nctl::makeUnique<GLShaderProgram>();
+	const AppConfiguration &appCfg = theApplication().appConfiguration();
+	const GLShaderProgram::QueryPhase queryPhase = appCfg.deferShaderQueries ? GLShaderProgram::QueryPhase::DEFERRED : GLShaderProgram::QueryPhase::IMMEDIATE;
+
+	imguiShaderProgram_ = nctl::makeUnique<GLShaderProgram>(queryPhase);
 #ifndef WITH_EMBEDDED_SHADERS
 	imguiShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/imgui_vs.glsl").data());
 	imguiShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/imgui_fs.glsl").data());
@@ -63,7 +66,8 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 	imguiShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::imgui_vs);
 	imguiShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::imgui_fs);
 #endif
-	imguiShaderProgram_->link();
+	imguiShaderProgram_->link(GLShaderProgram::Introspection::ENABLED);
+	FATAL_ASSERT(imguiShaderProgram_->status() != GLShaderProgram::Status::LINKING_FAILED);
 
 	if (withSceneGraph == false)
 		setupBuffersAndShader();

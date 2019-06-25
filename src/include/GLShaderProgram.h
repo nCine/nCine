@@ -26,16 +26,27 @@ class GLShaderProgram
 		NOT_LINKED,
 		LINKING_FAILED,
 		LINKED,
+		LINKED_WITH_DEFERRED_QUERIES,
 		LINKED_WITH_INTROSPECTION
 	};
 
+	enum class QueryPhase
+	{
+		IMMEDIATE,
+		DEFERRED
+	};
+
 	GLShaderProgram();
+	explicit GLShaderProgram(QueryPhase queryPhase);
+	GLShaderProgram(const char *vertexFile, const char *fragmentFile, Introspection introspection, QueryPhase queryPhase);
 	GLShaderProgram(const char *vertexFile, const char *fragmentFile, Introspection introspection);
 	GLShaderProgram(const char *vertexFile, const char *fragmentFile);
 	~GLShaderProgram();
 
 	inline GLuint glHandle() const { return glHandle_; }
 	inline Status status() const { return status_; }
+	inline Introspection introspection() const { return introspection_; }
+	inline QueryPhase queryPhase() const { return queryPhase_; }
 
 	/// Returns the total memory needed for all uniforms outside of blocks
 	inline unsigned int uniformsSize() const { return uniformsSize_; }
@@ -44,8 +55,7 @@ class GLShaderProgram
 
 	void attachShader(GLenum type, const char *filename);
 	void attachShaderFromString(GLenum type, const char *string);
-	bool link(Introspection introspection);
-	inline bool link() { return link(Introspection::ENABLED); }
+	void link(Introspection introspection);
 	void use();
 
   private:
@@ -58,6 +68,8 @@ class GLShaderProgram
 	static const int AttachedShadersInitialSize = 4;
 	nctl::Array<GLShader *> attachedShaders_;
 	Status status_;
+	Introspection introspection_;
+	QueryPhase queryPhase_;
 
 	unsigned int uniformsSize_;
 	unsigned int uniformBlocksSize_;
@@ -68,6 +80,10 @@ class GLShaderProgram
 	nctl::Array<GLUniformBlock> uniformBlocks_;
 	static const int AttributesInitialSize = 4;
 	nctl::Array<GLAttribute> attributes_;
+
+	void deferredQueries();
+	bool checkLinking();
+	void performIntrospection();
 
 	void discoverUniforms();
 	void discoverUniformBlocks(GLUniformBlock::DiscoverUniforms discover);

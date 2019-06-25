@@ -26,6 +26,7 @@ AppConfiguration::AppConfiguration()
       fontTexFilename(128),
       fontFntFilename(128),
       useBufferMapping(false),
+      deferShaderQueries(true),
 #ifdef WITH_IMGUI
       vboSize(512 * 1024),
       iboSize(128 * 1024),

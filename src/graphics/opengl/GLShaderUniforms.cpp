@@ -37,6 +37,7 @@ void GLShaderUniforms::setProgram(GLShaderProgram *shaderProgram)
 	ASSERT(shaderProgram);
 
 	shaderProgram_ = shaderProgram;
+	shaderProgram_->deferredQueries();
 	uniformCaches_.clear();
 
 	if (shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)

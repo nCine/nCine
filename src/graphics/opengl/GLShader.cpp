@@ -9,15 +9,14 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GLShader::GLShader(GLenum type)
-    : glHandle_(0)
+    : glHandle_(0), status_(Status::NOT_COMPILED)
 {
 	glHandle_ = glCreateShader(type);
 }
 
 GLShader::GLShader(GLenum type, const char *filename)
-    : glHandle_(0)
+    : GLShader(type)
 {
-	glHandle_ = glCreateShader(type);
 	loadFromFile(filename);
 }
 
@@ -66,9 +65,24 @@ void GLShader::loadFromFile(const char *filename)
 	}
 }
 
-bool GLShader::compile()
+void GLShader::compile(ErrorChecking errorChecking)
 {
 	glCompileShader(glHandle_);
+
+	if (errorChecking == ErrorChecking::IMMEDIATE)
+		checkCompilation();
+	else
+		status_ = Status::COMPILED_WITH_DEFERRED_CHECKS;
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+bool GLShader::checkCompilation()
+{
+	if (status_ == Status::COMPILED)
+		return true;
 
 	GLint status = 0;
 	glGetShaderiv(glHandle_, GL_COMPILE_STATUS, &status);
@@ -84,9 +98,11 @@ bool GLShader::compile()
 			LOGW_X("%s", infoLog.data());
 		}
 
+		status_ = Status::COMPILATION_FAILED;
 		return false;
 	}
 
+	status_ = Status::COMPILED;
 	return true;
 }
 

@@ -100,12 +100,13 @@ void RenderResources::create()
 #endif
 	};
 
+	const GLShaderProgram::QueryPhase queryPhase = appCfg.deferShaderQueries ? GLShaderProgram::QueryPhase::DEFERRED : GLShaderProgram::QueryPhase::IMMEDIATE;
 	const unsigned int numShaderToLoad = (sizeof(shadersToLoad) / sizeof(*shadersToLoad));
 	for (unsigned int i = 0; i < numShaderToLoad; i++)
 	{
 		const ShaderLoad &shaderToLoad = shadersToLoad[i];
 
-		shaderToLoad.shaderProgram = nctl::makeUnique<GLShaderProgram>();
+		shaderToLoad.shaderProgram = nctl::makeUnique<GLShaderProgram>(queryPhase);
 #ifndef WITH_EMBEDDED_SHADERS
 		shaderToLoad.shaderProgram->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/" + shaderToLoad.vertexShader).data());
 		shaderToLoad.shaderProgram->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/" + shaderToLoad.fragmentShader).data());
@@ -114,6 +115,7 @@ void RenderResources::create()
 		shaderToLoad.shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, shaderToLoad.fragmentShader);
 #endif
 		shaderToLoad.shaderProgram->link(shaderToLoad.introspection);
+		FATAL_ASSERT(shaderToLoad.shaderProgram->status() != GLShaderProgram::Status::LINKING_FAILED);
 	}
 
 	// Calculating a common projection matrix for all shader programs

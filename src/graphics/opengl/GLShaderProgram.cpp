@@ -19,24 +19,34 @@ GLuint GLShaderProgram::boundProgram_ = 0;
 
 GLShaderProgram::GLShaderProgram()
     : glHandle_(0), attachedShaders_(AttachedShadersInitialSize),
-      status_(Status::NOT_LINKED), uniformsSize_(0), uniformBlocksSize_(0),
-      uniforms_(UniformsInitialSize), uniformBlocks_(UniformBlocksInitialSize),
-      attributes_(AttributesInitialSize)
+      status_(Status::NOT_LINKED), queryPhase_(QueryPhase::IMMEDIATE),
+      uniformsSize_(0), uniformBlocksSize_(0), uniforms_(UniformsInitialSize),
+      uniformBlocks_(UniformBlocksInitialSize), attributes_(AttributesInitialSize)
 {
 	glHandle_ = glCreateProgram();
 }
 
-GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFile, Introspection introspection)
+GLShaderProgram::GLShaderProgram(QueryPhase queryPhase)
     : GLShaderProgram()
 {
-	glHandle_ = glCreateProgram();
+	queryPhase_ = queryPhase;
+}
+
+GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFile, Introspection introspection, QueryPhase queryPhase)
+    : GLShaderProgram(queryPhase)
+{
 	attachShader(GL_VERTEX_SHADER, vertexFile);
 	attachShader(GL_FRAGMENT_SHADER, fragmentFile);
 	link(introspection);
 }
 
+GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFile, Introspection introspection)
+    : GLShaderProgram(vertexFile, fragmentFile, introspection, QueryPhase::IMMEDIATE)
+{
+}
+
 GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFile)
-    : GLShaderProgram(vertexFile, fragmentFile, Introspection::ENABLED)
+    : GLShaderProgram(vertexFile, fragmentFile, Introspection::ENABLED, QueryPhase::IMMEDIATE)
 {
 }
 
@@ -56,7 +66,12 @@ void GLShaderProgram::attachShader(GLenum type, const char *filename)
 {
 	GLShader *shader = new GLShader(type, filename);
 	glAttachShader(glHandle_, shader->glHandle_);
-	shader->compile();
+
+	const GLShader::ErrorChecking errorChecking = (queryPhase_ == GLShaderProgram::QueryPhase::IMMEDIATE)
+	                                                  ? GLShader::ErrorChecking::IMMEDIATE
+	                                                  : GLShader::ErrorChecking::DEFERRED;
+	shader->compile(errorChecking);
+	FATAL_ASSERT(shader->status() != GLShader::Status::COMPILATION_FAILED);
 
 	const size_t length = strnlen(filename, GLDebug::maxLabelLength());
 	GLDebug::objectLabel(GLDebug::LabelTypes::SHADER, shader->glHandle_, length, filename);
@@ -69,14 +84,72 @@ void GLShaderProgram::attachShaderFromString(GLenum type, const char *string)
 	GLShader *shader = new GLShader(type);
 	shader->loadFromString(string);
 	glAttachShader(glHandle_, shader->glHandle_);
-	shader->compile();
+
+	const GLShader::ErrorChecking errorChecking = (queryPhase_ == GLShaderProgram::QueryPhase::IMMEDIATE)
+	                                                  ? GLShader::ErrorChecking::IMMEDIATE
+	                                                  : GLShader::ErrorChecking::DEFERRED;
+	shader->compile(errorChecking);
+	FATAL_ASSERT(shader->status() != GLShader::Status::COMPILATION_FAILED);
 
 	attachedShaders_.pushBack(shader);
 }
 
-bool GLShaderProgram::link(Introspection introspection)
+void GLShaderProgram::link(Introspection introspection)
 {
+	introspection_ = introspection;
 	glLinkProgram(glHandle_);
+
+	if (queryPhase_ == QueryPhase::IMMEDIATE)
+	{
+		checkLinking();
+
+		// After linking, shader objects are not needed anymore
+		for (GLShader *attachedShader : attachedShaders_)
+			delete attachedShader;
+
+		performIntrospection();
+	}
+	else
+		status_ = GLShaderProgram::Status::LINKED_WITH_DEFERRED_QUERIES;
+}
+
+void GLShaderProgram::use()
+{
+	if (boundProgram_ != glHandle_)
+	{
+		deferredQueries();
+		glUseProgram(glHandle_);
+		boundProgram_ = glHandle_;
+	}
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void GLShaderProgram::deferredQueries()
+{
+	if (status_ == GLShaderProgram::Status::LINKED_WITH_DEFERRED_QUERIES)
+	{
+		for (GLShader *attachedShader : attachedShaders_)
+			FATAL_ASSERT(attachedShader->checkCompilation());
+
+		const bool linkCheck = checkLinking();
+		FATAL_ASSERT(linkCheck);
+
+		// After linking, shader objects are not needed anymore
+		for (GLShader *attachedShader : attachedShaders_)
+			delete attachedShader;
+
+		if (introspection_ != GLShaderProgram::Introspection::DISABLED)
+			performIntrospection();
+	}
+}
+
+bool GLShaderProgram::checkLinking()
+{
+	if (status_ == Status::LINKED || status_ == Status::LINKED_WITH_INTROSPECTION)
+		return true;
 
 	GLint status;
 	glGetProgramiv(glHandle_, GL_LINK_STATUS, &status);
@@ -96,13 +169,15 @@ bool GLShaderProgram::link(Introspection introspection)
 		return false;
 	}
 
-	// After linking, shader objects are not needed anymore
-	for (GLShader *attachedShader : attachedShaders_)
-		delete attachedShader;
+	status_ = Status::LINKED;
+	return true;
+}
 
-	if (introspection != Introspection::DISABLED)
+void GLShaderProgram::performIntrospection()
+{
+	if (introspection_ != Introspection::DISABLED && status_ != Status::LINKED_WITH_INTROSPECTION)
 	{
-		const GLUniformBlock::DiscoverUniforms discover = (introspection == Introspection::NO_UNIFORMS_IN_BLOCKS)
+		const GLUniformBlock::DiscoverUniforms discover = (introspection_ == Introspection::NO_UNIFORMS_IN_BLOCKS)
 		                                                      ? GLUniformBlock::DiscoverUniforms::DISBLED
 		                                                      : GLUniformBlock::DiscoverUniforms::ENABLED;
 
@@ -111,24 +186,7 @@ bool GLShaderProgram::link(Introspection introspection)
 		discoverAttributes();
 		status_ = Status::LINKED_WITH_INTROSPECTION;
 	}
-	else
-		status_ = Status::LINKED;
-
-	return true;
 }
-
-void GLShaderProgram::use()
-{
-	if (boundProgram_ != glHandle_)
-	{
-		glUseProgram(glHandle_);
-		boundProgram_ = glHandle_;
-	}
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
 
 void GLShaderProgram::discoverUniforms()
 {
