@@ -3,6 +3,51 @@ set_target_properties(ncine PROPERTIES CXX_EXTENSIONS OFF)
 
 target_compile_definitions(ncine PRIVATE "$<$<CONFIG:Debug>:NCINE_DEBUG>")
 
+if(EMSCRIPTEN)
+	target_compile_options(ncine PUBLIC
+		"SHELL:-s WASM=1"
+		"SHELL:-s BINARYEN_TRAP_MODE=clamp"
+		"SHELL:-s DISABLE_EXCEPTION_CATCHING=1"
+		"SHELL:-s FORCE_FILESYSTEM=1"
+		"SHELL:-s ALLOW_MEMORY_GROWTH=1"
+	)
+
+	target_link_options(ncine PUBLIC
+		"SHELL:-s WASM=1"
+		"SHELL:-s BINARYEN_TRAP_MODE=clamp"
+		"SHELL:-s DISABLE_EXCEPTION_CATCHING=1"
+		"SHELL:-s FORCE_FILESYSTEM=1"
+		"SHELL:-s ALLOW_MEMORY_GROWTH=1"
+	)
+
+	target_compile_options(ncine PUBLIC "$<$<CONFIG:Debug>:SHELL:-s ASSERTIONS=1;SHELL:-s SAFE_HEAP=1;SHELL:--profiling-funcs;SHELL:-s DEMANGLE_SUPPORT=1>")
+	target_link_options(ncine PUBLIC "$<$<CONFIG:Debug>:SHELL:-s ASSERTIONS=1;SHELL:-s SAFE_HEAP=1;SHELL:--profiling-funcs;SHELL:-s DEMANGLE_SUPPORT=1>")
+
+	if(Threads_FOUND)
+		target_link_libraries(ncine PUBLIC Threads::Threads)
+	endif()
+
+	if(OPENGL_FOUND)
+		target_link_libraries(ncine PUBLIC OpenGL::GL)
+	endif()
+
+	if(GLFW_FOUND)
+		target_link_libraries(ncine PUBLIC GLFW::GLFW)
+	endif()
+
+	if(SDL2_FOUND)
+		target_link_libraries(ncine PUBLIC SDL2::SDL2)
+	endif()
+
+	if(PNG_FOUND)
+		target_link_libraries(ncine PUBLIC PNG::PNG)
+	endif()
+
+	if(VORBIS_FOUND)
+		target_link_libraries(ncine PUBLIC Vorbis::Vorbisfile)
+	endif()
+endif()
+
 if(MSVC)
 	# Build with Multiple Processes
 	target_compile_options(ncine PRIVATE /MP)
@@ -42,8 +87,8 @@ else() # GCC and LLVM
 	# Only in debug
 	if(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND NOT (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8.0)) OR
 	  (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") AND NOT (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.0)) AND
-	   NCINE_ADDRESS_SANITIZER)
-		target_compile_options(ncine PRIVATE $<$<CONFIG:Debug>:-O1 -ggdb -fsanitize=address -fsanitize-address-use-after-scope -fno-optimize-sibling-calls -fno-common -fno-omit-frame-pointer -rdynamic>)
+	   NOT EMSCRIPTEN AND NCINE_ADDRESS_SANITIZER)
+		target_compile_options(ncine PRIVATE $<$<CONFIG:Debug>:-O1 -g -fsanitize=address -fsanitize-address-use-after-scope -fno-optimize-sibling-calls -fno-common -fno-omit-frame-pointer -rdynamic>)
 		target_link_options(ncine PRIVATE $<$<CONFIG:Debug>:-fsanitize=address>)
 	endif()
 
@@ -62,7 +107,7 @@ else() # GCC and LLVM
 	endif()
 
 	if(NCINE_WITH_TRACY)
-		target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-ggdb>)
+		target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-g>)
 		if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android" AND NOT APPLE)
 			target_link_libraries(ncine PRIVATE dl)
 		endif()
@@ -105,12 +150,19 @@ else() # GCC and LLVM
 		endif()
 
 		# Extra optimizations in release
-		target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-Ofast>)
+		if(NOT EMSCRIPTEN)
+			target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-Ofast>)
+		endif()
 
 		# Enabling ThinLTO of Clang 4
-		if(NCINE_LINKTIME_OPTIMIZATION AND NOT (MINGW OR MSYS OR "${CMAKE_SYSTEM_NAME}" STREQUAL "Android"))
-			target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-flto=thin>)
-			target_link_options(ncine PRIVATE $<$<CONFIG:Release>:-flto=thin>)
+		if(NCINE_LINKTIME_OPTIMIZATION)
+			if(EMSCRIPTEN)
+				target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:--llvm-lto 1>)
+				target_link_options(ncine PRIVATE $<$<CONFIG:Release>:--llvm-lto 1>)
+			elseif(NOT (MINGW OR MSYS OR "${CMAKE_SYSTEM_NAME}" STREQUAL "Android"))
+				target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-flto=thin>)
+				target_link_options(ncine PRIVATE $<$<CONFIG:Release>:-flto=thin>)
+			endif()
 		endif()
 
 		if(NCINE_AUTOVECTORIZATION_REPORT)

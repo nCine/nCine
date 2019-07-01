@@ -380,6 +380,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #ifdef __MINGW64__
 			ImGui::Text("__MINGW64__");
 #endif
+#ifdef __EMSCRIPTEN__
+			ImGui::Text("__EMSCRIPTEN__");
+#endif
 #ifdef __GNUC__
 			ImGui::Text("__GNUC__ = %d", static_cast<int>(__GNUC__));
 #endif

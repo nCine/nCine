@@ -16,6 +16,11 @@ option(NCINE_WITH_RENDERDOC "Enable the integration with RenderDoc" OFF)
 set(NCINE_PREFERRED_BACKEND "GLFW" CACHE STRING "Specify the preferred backend on desktop")
 set_property(CACHE NCINE_PREFERRED_BACKEND PROPERTY STRINGS "GLFW;SDL2")
 
+if(EMSCRIPTEN)
+	set(NCINE_DYNAMIC_LIBRARY OFF)
+	option(NCINE_EMSCRIPTEN_THREADS "Enable the Emscripten Pthreads support" OFF)
+endif()
+
 set(NCINE_DATA_DIR "${PARENT_SOURCE_DIR}/nCine-data" CACHE PATH "Set the path to the engine data directory")
 set(NCINE_TESTS_DATA_DIR "" CACHE STRING "Set the path to the data directory that will be embedded in test executables")
 # The external Android dir is set regardless of the status of build Android flag, so that presets work even when the flag is off
@@ -89,5 +94,12 @@ if("${NCINE_OPTIONS_PRESETS}" STREQUAL "BinDist" OR "${NCINE_OPTIONS_PRESETS}" S
 		set(NCINE_ASSEMBLE_APK OFF)
 		set(NCINE_NDK_ARCHITECTURES armeabi-v7a arm64-v8a x86_64)
 		set(NCINE_BUILD_DOCUMENTATION ON)
+	endif()
+
+	if(EMSCRIPTEN)
+		set(NCINE_DYNAMIC_LIBRARY OFF)
+		set(NCINE_IMPLEMENTATION_DOCUMENTATION ON)
+		set(NCINE_BUILD_ANDROID OFF)
+		set(NCINE_STRIP_BINARIES OFF)
 	endif()
 endif()

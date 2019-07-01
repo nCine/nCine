@@ -10,7 +10,11 @@ struct MeshSpriteInstance
 
 layout (std140) uniform InstancesBlock
 {
+#ifdef OUT_OF_BOUNDS_ACCESS
+	MeshSpriteInstance[1] instances;
+#else
 	MeshSpriteInstance[585] instances;
+#endif
 } block;
 
 in vec2 aPosition;

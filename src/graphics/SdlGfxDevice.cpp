@@ -154,9 +154,13 @@ void SdlGfxDevice::initDevice()
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, displayMode_.stencilBits());
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, glContextInfo_.majorVersion);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, glContextInfo_.minorVersion);
+#ifndef __EMSCRIPTEN__
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, glContextInfo_.coreProfile
 	                                                     ? SDL_GL_CONTEXT_PROFILE_CORE
 	                                                     : SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+#else
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+#endif
 	if (glContextInfo_.forwardCompatible == false)
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 	if (glContextInfo_.debugContext)

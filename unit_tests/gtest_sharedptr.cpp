@@ -231,6 +231,7 @@ TEST_F(SharedPtrTest, MakeSharedMoveAssignment)
 	ASSERT_EQ(newPtr2.get(), oldPtr);
 }
 
+#ifndef __EMSCRIPTEN__
 TEST(SharedPtrDeathTest, MakeSharedReset)
 {
 	const int newValue = 3;
@@ -244,5 +245,6 @@ TEST(SharedPtrDeathTest, MakeSharedResetNull)
 	auto newPtr = nctl::makeShared<int>(newValue);
 	ASSERT_DEATH(newPtr.reset(nullptr), "");
 }
+#endif
 
 }

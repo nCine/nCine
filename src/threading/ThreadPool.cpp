@@ -24,7 +24,7 @@ ThreadPool::ThreadPool(unsigned int numThreads)
 	for (unsigned int i = 0; i < numThreads_; i++)
 	{
 		threads_[i].run(workerFunction, &threadStruct_);
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
 		threads_[i].setAffinityMask(ThreadAffinityMask(i));
 #endif
 	}

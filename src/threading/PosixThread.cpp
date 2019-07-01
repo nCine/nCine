@@ -15,7 +15,7 @@ namespace ncine {
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
 
 void ThreadAffinityMask::zero()
 {
@@ -136,22 +136,23 @@ void Thread::cancel()
 	pthread_cancel(tid_);
 }
 
+	#ifndef __EMSCRIPTEN__
 ThreadAffinityMask Thread::affinityMask() const
 {
 	ThreadAffinityMask affinityMask;
 
 	if (tid_ != 0)
 	{
-	#ifdef __APPLE__
+		#ifdef __APPLE__
 		thread_affinity_policy_data_t threadAffinityPolicy;
 		thread_port_t threadPort = pthread_mach_thread_np(tid_);
 		mach_msg_type_number_t policyCount = THREAD_AFFINITY_POLICY_COUNT;
 		boolean_t getDefault = FALSE;
 		thread_policy_get(threadPort, THREAD_AFFINITY_POLICY, reinterpret_cast<thread_policy_t>(&threadAffinityPolicy), &policyCount, &getDefault);
 		affinityMask.affinityTag_ = threadAffinityPolicy.affinity_tag;
-	#else
+		#else
 		pthread_getaffinity_np(tid_, sizeof(cpu_set_t), &affinityMask.cpuSet_);
-	#endif
+		#endif
 	}
 	else
 		LOGW("Cannot get the affinity for a thread that has not been created yet");
@@ -163,17 +164,18 @@ void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
 {
 	if (tid_ != 0)
 	{
-	#ifdef __APPLE__
+		#ifdef __APPLE__
 		thread_affinity_policy_data_t threadAffinityPolicy = { affinityMask.affinityTag_ };
 		thread_port_t threadPort = pthread_mach_thread_np(tid_);
 		thread_policy_set(threadPort, THREAD_AFFINITY_POLICY, reinterpret_cast<thread_policy_t>(&threadAffinityPolicy), THREAD_AFFINITY_POLICY_COUNT);
-	#else
+		#else
 		pthread_setaffinity_np(tid_, sizeof(cpu_set_t), &affinityMask.cpuSet_);
-	#endif
+		#endif
 	}
 	else
 		LOGW("Cannot set the affinity mask for a not yet created thread");
 }
+	#endif
 #endif
 
 ///////////////////////////////////////////////////////////

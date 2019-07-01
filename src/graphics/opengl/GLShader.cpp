@@ -1,8 +1,11 @@
 #include "common_macros.h"
 #include "GLShader.h"
 #include "IFile.h"
+#include <nctl/String.h>
 
 namespace ncine {
+
+static nctl::String patchLines(64);
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -11,6 +14,21 @@ namespace ncine {
 GLShader::GLShader(GLenum type)
     : glHandle_(0), status_(Status::NOT_COMPILED)
 {
+	if (patchLines.isEmpty())
+	{
+#if (defined(__ANDROID__) && GL_ES_VERSION_3_0) || defined(__EMSCRIPTEN__)
+		patchLines.append("#version 300 es\n");
+#else
+		patchLines.append("#version 330\n");
+#endif
+
+#if defined(__EMSCRIPTEN__)
+		// Adding the definition on Emscripten even if batching is disabled.
+		// It will shrink arrays and make compilation on ANGLE a lot faster.
+		patchLines.append("#define OUT_OF_BOUNDS_ACCESS\n");
+#endif
+	}
+
 	glHandle_ = glCreateShader(type);
 }
 
@@ -33,12 +51,7 @@ void GLShader::loadFromString(const char *string)
 {
 	ASSERT(string);
 
-#if defined(__ANDROID__) && GL_ES_VERSION_3_0
-	const char *versionLine = "#version 300 es\n";
-#else
-	const char *versionLine = "#version 330\n";
-#endif
-	const GLchar *source_lines[2] = { versionLine, string };
+	const GLchar *source_lines[2] = { patchLines.data(), string };
 	glShaderSource(glHandle_, 2, source_lines, nullptr);
 }
 
@@ -53,14 +66,8 @@ void GLShader::loadFromFile(const char *filename)
 		nctl::String source(length);
 		fileHandle->read(source.data(), length);
 
-#if defined(__ANDROID__) && GL_ES_VERSION_3_0
-		const char *versionLine = "#version 300 es\n";
-		const GLint lengths[2] = { 16, length };
-#else
-		const char *versionLine = "#version 330\n";
-		const GLint lengths[2] = { 13, length };
-#endif
-		const GLchar *source_lines[2] = { versionLine, source.data() };
+		const GLchar *source_lines[2] = { patchLines.data(), source.data() };
+		const GLint lengths[2] = { static_cast<GLint>(patchLines.length()), length };
 		glShaderSource(glHandle_, 2, source_lines, lengths);
 	}
 }

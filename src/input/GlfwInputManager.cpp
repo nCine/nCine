@@ -117,7 +117,11 @@ void GlfwInputManager::updateJoystickStates()
 		if (glfwJoystickPresent(GLFW_JOYSTICK_1 + joyId))
 		{
 			joystickStates_[joyId].buttons_ = glfwGetJoystickButtons(joyId, &joystickStates_[joyId].numButtons_);
+#if GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
 			joystickStates_[joyId].hats_ = glfwGetJoystickHats(joyId, &joystickStates_[joyId].numHats_);
+#else
+			joystickStates_[joyId].hats_ = 0;
+#endif
 			joystickStates_[joyId].axesValues_ = glfwGetJoystickAxes(joyId, &joystickStates_[joyId].numAxes_);
 
 			joyEventsSimulator_.simulateButtonsEvents(joyId, joystickStates_[joyId].numButtons_, joystickStates_[joyId].buttons_);
@@ -145,7 +149,10 @@ const char *GlfwInputManager::joyName(int joyId) const
 
 const char *GlfwInputManager::joyGuid(int joyId) const
 {
-#if GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
+#ifdef __EMSCRIPTEN__
+	static const char *joyGuidString = "default";
+	return joyGuidString;
+#elif GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
 	if (isJoyPresent(joyId))
 		return glfwGetJoystickGUID(joyId);
 	else
@@ -170,7 +177,11 @@ int GlfwInputManager::joyNumHats(int joyId) const
 	int numHats = -1;
 
 	if (isJoyPresent(joyId))
+#if GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
 		glfwGetJoystickHats(GLFW_JOYSTICK_1 + joyId, &numHats);
+#else
+		numHats = 0;
+#endif
 
 	return numHats;
 }
@@ -311,11 +322,18 @@ void GlfwInputManager::joystickCallback(int joy, int event)
 		int numAxes = -1;
 		int numHats = -1;
 		glfwGetJoystickButtons(joy, &numButtons);
-		glfwGetJoystickAxes(joy, &numAxes);
+#ifdef __EMSCRIPTEN__
+		numHats = 0;
+		const char *guid = "default";
+#elif GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
 		glfwGetJoystickHats(joy, &numHats);
-		updateJoystickStates();
-
 		const char *guid = glfwGetJoystickGUID(joy);
+#else
+		numHats = 0;
+		const char *guid = nullptr;
+#endif
+		glfwGetJoystickAxes(joy, &numAxes);
+		updateJoystickStates();
 
 		LOGI_X("Joystick %d \"%s\" (%s) has been connected - %d axes, %d buttons, %d hats",
 		       joyId, glfwGetJoystickName(joy), guid, numAxes, numButtons, numHats);

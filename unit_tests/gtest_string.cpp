@@ -141,7 +141,8 @@ TEST_F(StringTest, AccessAtLastConstCharacter)
 	ASSERT_EQ(constSting.at(constSting.length() - 1), '1');
 }
 
-#ifdef NCINE_DEBUG
+#ifndef __EMSCRIPTEN__
+	#ifdef NCINE_DEBUG
 TEST(StringDeathTest, SubscriptAccessBeyondLastCharacter)
 {
 	nctl::String string("0");
@@ -155,7 +156,7 @@ TEST(StringDeathTest, SubscriptAccessBeyondLastConstCharacter)
 	printf("Accessing a character beyond the length of the string\n");
 	ASSERT_DEATH(string[5], "");
 }
-#endif
+	#endif
 
 TEST(StringDeathTest, AccessAtBeyondLastCharacter)
 {
@@ -170,5 +171,6 @@ TEST(StringDeathTest, AccessAtBeyondLastConstCharacter)
 	printf("Accessing a character beyond the length of the string\n");
 	ASSERT_DEATH(string.at(5), "");
 }
+#endif
 
 }

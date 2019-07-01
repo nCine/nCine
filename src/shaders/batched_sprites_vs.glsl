@@ -10,7 +10,11 @@ struct SpriteInstance
 
 layout (std140) uniform InstancesBlock
 {
+#ifdef OUT_OF_BOUNDS_ACCESS
+	SpriteInstance[1] instances;
+#else
 	SpriteInstance[585] instances;
+#endif
 } block;
 
 out vec2 vTexCoords;

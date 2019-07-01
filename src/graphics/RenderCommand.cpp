@@ -58,7 +58,7 @@ void RenderCommand::issue()
 		GLScissorTest::disable();
 
 	unsigned int offset = 0;
-#if defined(__ANDROID__) && !GL_ES_VERSION_3_2
+#if (defined(__ANDROID__) && !GL_ES_VERSION_3_2) || defined(__EMSCRIPTEN__)
 	// Simulating missing `glDrawElementsBaseVertex()` on OpenGL ES 3.0
 	if (geometry_.numIndices_ > 0)
 		offset = geometry_.vboParams().offset + (geometry_.firstVertex_ * geometry_.numElementsPerVertex_ * sizeof(GLfloat));

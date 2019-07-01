@@ -466,9 +466,14 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 	}
 	unsigned int subLength = static_cast<unsigned int>(subEnd - subStart);
 
-	if (subLength != 32)
+#ifndef __EMSCRIPTEN__
+	const unsigned int GuidNumCharacters = 32;
+#else
+	const unsigned int GuidNumCharacters = 7; // "default"
+#endif
+	if (subLength != GuidNumCharacters)
 	{
-		LOGE_X("GUID length is %u instead of 32 characters", subLength);
+		LOGE_X("GUID length is %u instead of %u characters", subLength, GuidNumCharacters);
 		return false;
 	}
 	map.guid.fromString(subStart);

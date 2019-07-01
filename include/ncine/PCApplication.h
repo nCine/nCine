@@ -15,8 +15,13 @@ class DLL_PUBLIC PCApplication : public Application
   private:
 	/// Must be called at the beginning to initialize the application
 	void init(IAppEventHandler *(*createAppEventHandler)());
-	/// The main game loop, handling events and rendering
+	/// The main game loop
 	void run();
+	/// Processes events inside the game loop
+	void processEvents();
+#ifdef __EMSCRIPTEN__
+	static void emscriptenStep();
+#endif
 
 	/// Private constructor
 	PCApplication()

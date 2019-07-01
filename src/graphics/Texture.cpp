@@ -154,7 +154,7 @@ void Texture::load(const ITextureLoader &texLoader, int width, int height)
 	int levelWidth = width;
 	int levelHeight = height;
 
-#if defined(__ANDROID__) && GL_ES_VERSION_3_0
+#if (defined(__ANDROID__) && GL_ES_VERSION_3_0) || defined(__EMSCRIPTEN__)
 	const bool withTexStorage = true;
 #else
 	const bool withTexStorage = gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::ARB_TEXTURE_STORAGE);

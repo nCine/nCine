@@ -222,6 +222,148 @@ jobs:
     env:
       MAPPED_GH_TOKEN: $(GH_TOKEN)
 
+- job: Emscripten
+  displayName: Emscripten
+
+  strategy:
+    matrix:
+      Emscripten Debug:
+        imageName: 'ubuntu-16.04'
+        OS: emscripten
+        CC: emcc
+        BuildType: Debug
+
+      Emscripten Release:
+        imageName: 'ubuntu-16.04'
+        OS: emscripten
+        CC: emcc
+        BuildType: Release
+
+      Emscripten DevDist:
+        imageName: 'ubuntu-16.04'
+        OS: emscripten
+        CC: emcc
+        BuildType: DevDist
+
+  pool:
+    vmImage: $(imageName)
+
+  steps:
+  - script: |
+      sudo apt-get update
+      sudo apt-get install -y doxygen graphviz
+
+    displayName: 'Install Build Dependencies on Linux'
+    condition: and( eq( variables['BuildType'], 'DevDist' ), eq( variables['Agent.OS'], 'Linux' ) )
+
+  - script: |
+      curl -fsSL https://cmake.org/files/v3.14/cmake-3.14.5-Linux-x86_64.sh -o cmakeinstall.sh && \
+      chmod +x cmakeinstall.sh && \
+      sudo ./cmakeinstall.sh --prefix=/usr/local --exclude-subdir && \
+      rm cmakeinstall.sh
+
+    displayName: 'Install Latest CMake on Linux'
+    condition: eq( variables['Agent.OS'], 'Linux' )
+
+  - script: |
+      cd ..
+      git clone https://github.com/emscripten-core/emsdk.git
+      cd emsdk
+      ./emsdk install latest
+      ./emsdk activate latest
+
+    displayName: 'Install Emscripten SDK'
+
+  - script: |
+      git fetch --unshallow || true
+
+    displayName: 'Unshallow Git Repository for Versioning'
+    condition: eq( variables['BuildType'], 'DevDist' )
+
+  - script: |
+      export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/OS/'"$OS"'/'`
+      export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/COMPILER/'"$CC"'/'`
+
+      cd ..
+      git clone https://github.com/nCine/nCine-libraries-artifacts.git
+      cd nCine-libraries-artifacts
+      git checkout $LIBRARIES_BRANCH
+      LIBRARIES_FILE=$(ls -t | head -n 1) && tar xpzf $LIBRARIES_FILE
+      mv nCine-external-emscripten ..
+      cd ..
+      rm -rf nCine-libraries-artifacts
+
+      git clone https://github.com/nCine/nCine-data.git
+
+    displayName: 'Download nCine-libraries Artifacts and nCine-data'
+
+  - script: |
+      source ../emsdk/emsdk_env.sh
+
+      emcmake cmake -B ../nCine-buildtests-$(BuildType) -D CMAKE_BUILD_TYPE=$(BuildType) -D NCINE_BUILD_UNIT_TESTS=ON -D NCINE_BUILD_TESTS=OFF -D NCINE_WITH_IMGUI=OFF -D CMAKE_CROSSCOMPILING_EMULATOR=node
+
+      # Apply fix conversion patch to compile Google Test for Emscripten
+      cd ../nCine-buildtests-$(BuildType)/googletest-src
+      curl https://github.com/google/googletest/commit/f1b334d4c08627f712c3d388490817ca57bd73ff.patch -o fix-conv.patch
+      git config --global user.email "pipelines@azure.com"
+      git config --global user.name "Azure Pipelines"
+      git am fix-conv.patch
+      cd $(Build.SourcesDirectory)
+
+      make -j2 -C ../nCine-buildtests-$(BuildType)
+      cd ../nCine-buildtests-$(BuildType)
+      ctest -j2 --build-config $(BuildType)
+
+    displayName: 'CMake Configuration, Make and Test'
+    condition: ne( variables['BuildType'], 'DevDist' )
+
+  - script: |
+      source ../emsdk/emsdk_env.sh
+
+      if [[ "$(BuildType)" == "DevDist" ]]; then
+        export CMAKE_ARGS="-B ../nCine-build-$(BuildType) -D NCINE_OPTIONS_PRESETS=$(BuildType)"
+      else
+        export CMAKE_ARGS="-B ../nCine-build-$(BuildType) -D CMAKE_BUILD_TYPE=$(BuildType)"
+      fi
+
+      emcmake cmake $CMAKE_ARGS
+
+    displayName: 'CMake Configuration'
+
+  - script: |
+      make -j2 -C ../nCine-build-$(BuildType)
+
+    displayName: 'Make'
+
+  - script: |
+      make package -C ../nCine-build-$(BuildType)
+
+    displayName: 'Package'
+    condition: eq( variables['BuildType'], 'DevDist' )
+
+  - script: |
+      git config --global user.email "pipelines@azure.com"
+      git config --global user.name "Azure Pipelines"
+
+      cd ..
+      export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/BRANCHNAME/'"$(Build.SourceBranchName)"'/'`
+      export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/OS/'"$OS"'/'`
+      export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/COMPILER/'"$CC"'/'`
+      git clone https://$MAPPED_GH_TOKEN@github.com/nCine/nCine-artifacts.git >/dev/null 2>&1
+      cd nCine-artifacts
+      git checkout $DEPLOY_BRANCH || git checkout --orphan $DEPLOY_BRANCH
+      git reset
+      git rm *
+      mv -f ../nCine-build-$(BuildType)/*.tar.gz .
+      git add *.tar.gz
+      git commit --amend -m "$(DEPLOY_MESSAGE)" || git commit -m "$(DEPLOY_MESSAGE)"
+      git push --force || git push --set-upstream origin $DEPLOY_BRANCH
+
+    displayName: 'Push Artifacts'
+    condition: and( eq( variables['BuildType'], 'DevDist' ), succeeded() )
+    env:
+      MAPPED_GH_TOKEN: $(GH_TOKEN)
+
 - job: Windows_MinGW
   displayName: Windows and MinGW
 

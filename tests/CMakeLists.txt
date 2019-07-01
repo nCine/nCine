@@ -62,7 +62,55 @@ foreach(APPTEST ${APPTESTS})
 		set_target_properties(${APPTEST} PROPERTIES INSTALL_RPATH "@executable_path/${RELPATH_TO_LIB}")
 	endif()
 	install(TARGETS ${APPTEST} RUNTIME DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
+
+	if(EMSCRIPTEN)
+		set(EMSCRIPTEN_PAGE_TITLE ${APPTEST})
+		list(APPEND EMSCRIPTEN_SCRIPT_NAMES nCine-data.js ${APPTEST}.js)
+		foreach(EMSCRIPTEN_SCRIPT_NAME ${EMSCRIPTEN_SCRIPT_NAMES})
+			set(EMSCRIPTEN_SCRIPTS "${EMSCRIPTEN_SCRIPTS}\n    <script type='text/javascript' src='${EMSCRIPTEN_SCRIPT_NAME}'></script>")
+		endforeach()
+
+		configure_file(${CMAKE_SOURCE_DIR}/emscripten_shell.html.in ${CMAKE_BINARY_DIR}/tests/${APPTEST}.html @ONLY)
+		install(FILES ${CMAKE_BINARY_DIR}/tests/${APPTEST}.html DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
+		install(FILES ${CMAKE_BINARY_DIR}/tests/${APPTEST}.wasm DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
+
+		unset(EMSCRIPTEN_SCRIPTS)
+		unset(EMSCRIPTEN_SCRIPT_NAMES)
+		unset(EMSCRIPTEN_PAGE_TITLE)
+	endif()
 endforeach()
+
+if(EMSCRIPTEN)
+	if(EXISTS ${NCINE_DATA_DIR}/icons/nCine.ico)
+		file(COPY ${NCINE_DATA_DIR}/icons/nCine.ico DESTINATION ${CMAKE_BINARY_DIR})
+		file(RENAME ${CMAKE_BINARY_DIR}/nCine.ico ${CMAKE_BINARY_DIR}/favicon.ico)
+		install(FILES ${CMAKE_BINARY_DIR}/favicon.ico DESTINATION ${RUNTIME_INSTALL_DESTINATION})
+	endif()
+
+	find_program(EMSCRIPTEN_PACKAGER_SCRIPT file_packager.py
+		PATHS $ENV{EMSDK}
+		PATH_SUFFIXES fastcomp/emscripten/tools/
+		DOC "The Emscripten file packager Python script")
+
+	if(EMSCRIPTEN_PACKAGER_SCRIPT)
+		message(STATUS "Emscripten file packager script: ${EMSCRIPTEN_PACKAGER_SCRIPT}")
+		add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/tests/nCine-data.js ${CMAKE_BINARY_DIR}/tests/nCine-data.data
+			COMMAND python ${EMSCRIPTEN_PACKAGER_SCRIPT}
+				${CMAKE_BINARY_DIR}/tests/nCine-data.data
+				--preload ${NCINE_DATA_DIR}/fonts@fonts
+				--preload ${CMAKE_SOURCE_DIR}/scripts@scripts
+				--preload ${NCINE_DATA_DIR}/sounds@sounds
+				--preload ${NCINE_DATA_DIR}/textures@textures
+				--js-output=${CMAKE_BINARY_DIR}/tests/nCine-data.js
+				--no-heap-copy)
+		add_custom_target(ncine_emscripten_data ALL DEPENDS ${CMAKE_BINARY_DIR}/tests/nCine-data.js ${CMAKE_BINARY_DIR}/tests/nCine-data.data)
+		set_target_properties(ncine_emscripten_data PROPERTIES FOLDER "Emscripten")
+		add_dependencies(ncine_emscripten_data ncine)
+
+		install(FILES ${CMAKE_BINARY_DIR}/tests/nCine-data.js DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
+		install(FILES ${CMAKE_BINARY_DIR}/tests/nCine-data.data DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
+	endif()
+endif()
 
 list(FIND APPTESTS ${NCINE_STARTUP_TEST} STARTUP_TEST_INDEX)
 if(STARTUP_TEST_INDEX GREATER -1)

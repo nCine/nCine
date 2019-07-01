@@ -45,7 +45,9 @@ GLUniformBlock::GLUniformBlock(GLuint program, GLuint index, DiscoverUniforms di
 		glGetActiveUniformsiv(program, uniformCount, uniformIndices, GL_UNIFORM_TYPE, uniformTypes);
 		glGetActiveUniformsiv(program, uniformCount, uniformIndices, GL_UNIFORM_SIZE, uniformSizes);
 		glGetActiveUniformsiv(program, uniformCount, uniformIndices, GL_UNIFORM_OFFSET, uniformOffsets);
+#ifndef __EMSCRIPTEN__
 		glGetActiveUniformsiv(program, uniformCount, uniformIndices, GL_UNIFORM_NAME_LENGTH, uniformNameLengths);
+#endif
 
 		for (int i = 0; i < uniformCount; i++)
 		{
@@ -56,8 +58,11 @@ GLUniformBlock::GLUniformBlock(GLuint program, GLuint index, DiscoverUniforms di
 			blockUniform.size_ = uniformSizes[i];
 			blockUniform.offset_ = uniformOffsets[i];
 
-			ASSERT(uniformNameLengths[i] <= GLUniform::MaxNameLength);
-#ifndef __ANDROID__
+#ifndef __EMSCRIPTEN__
+			ASSERT_MSG_X(uniformNameLengths[i] <= GLUniform::MaxNameLength, "Uniform %d name length is %d, which is more than %d", i, uniformNameLengths[i], GLUniform::MaxNameLength);
+#endif
+
+#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
 			glGetActiveUniformName(program, uniformIndices[i], MaxNameLength, &uniformNameLengths[i], blockUniform.name_);
 #else
 			// Some drivers do not accept a `nullptr` for size and type

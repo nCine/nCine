@@ -8,7 +8,11 @@ struct TextnodeInstance
 
 layout (std140) uniform InstancesBlock
 {
+#ifdef OUT_OF_BOUNDS_ACCESS
+	TextnodeInstance[1] instances;
+#else
 	TextnodeInstance[819] instances;
+#endif
 } block;
 
 in vec2 aPosition;

@@ -1,3 +1,71 @@
+if(EMSCRIPTEN)
+	set(EXTERNAL_EMSCRIPTEN_DIR "${PARENT_SOURCE_DIR}/nCine-external-emscripten" CACHE PATH "Set the path to the Emscripten libraries directory")
+	if(NOT IS_DIRECTORY ${EXTERNAL_EMSCRIPTEN_DIR})
+		message(FATAL_ERROR "nCine external Emscripten libraries directory not found at: ${EXTERNAL_EMSCRIPTEN_DIR}")
+	else()
+		message(STATUS "nCine external Emscripten libraries directory: ${EXTERNAL_EMSCRIPTEN_DIR}")
+	endif()
+
+	if(NCINE_EMSCRIPTEN_THREADS)
+		add_library(Threads::Threads INTERFACE IMPORTED)
+		set_target_properties(Threads::Threads PROPERTIES
+			INTERFACE_COMPILE_OPTIONS "SHELL:-s USE_PTHREADS=1 -s WASM_MEM_MAX=128MB"
+			INTERFACE_LINK_OPTIONS "SHELL:-s USE_PTHREADS=1 -s WASM_MEM_MAX=128MB")
+		set(Threads_FOUND 1)
+	endif()
+
+	add_library(OpenGL::GL INTERFACE IMPORTED)
+	set_target_properties(OpenGL::GL PROPERTIES
+		INTERFACE_COMPILE_OPTIONS "SHELL:-s USE_WEBGL2=1 -s FULL_ES3=1"
+		INTERFACE_LINK_OPTIONS "SHELL:-s USE_WEBGL2=1 -s FULL_ES3=1")
+	set(OPENGL_FOUND 1)
+
+	if(NCINE_PREFERRED_BACKEND STREQUAL "GLFW")
+		add_library(GLFW::GLFW INTERFACE IMPORTED)
+		set_target_properties(GLFW::GLFW PROPERTIES
+			INTERFACE_COMPILE_OPTIONS "SHELL:-s USE_GLFW=3"
+			INTERFACE_LINK_OPTIONS "SHELL:-s USE_GLFW=3")
+		set(GLFW_FOUND 1)
+	elseif(NCINE_PREFERRED_BACKEND STREQUAL "SDL2")
+		add_library(SDL2::SDL2 INTERFACE IMPORTED)
+		set_target_properties(SDL2::SDL2 PROPERTIES
+			INTERFACE_COMPILE_OPTIONS "SHELL:-s USE_SDL=2"
+			INTERFACE_LINK_OPTIONS "SHELL:-s USE_SDL=2")
+		set(SDL2_FOUND 1)
+	endif()
+
+	add_library(OpenAL::AL INTERFACE IMPORTED)
+	set_target_properties(OpenAL::AL PROPERTIES
+		INTERFACE_LINK_OPTIONS "SHELL:-lopenal")
+	set(OPENAL_FOUND 1)
+
+	add_library(PNG::PNG INTERFACE IMPORTED)
+	set_target_properties(PNG::PNG PROPERTIES
+		INTERFACE_COMPILE_OPTIONS "SHELL:-s USE_LIBPNG=1"
+		INTERFACE_LINK_OPTIONS "SHELL:-s USE_LIBPNG=1")
+	set(PNG_FOUND 1)
+
+	add_library(WebP::WebP STATIC IMPORTED)
+	set_target_properties(WebP::WebP PROPERTIES
+		IMPORTED_LOCATION ${EXTERNAL_EMSCRIPTEN_DIR}/lib/libwebp.a
+		INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_EMSCRIPTEN_DIR}/include")
+	set(WEBP_FOUND 1)
+
+	add_library(Vorbis::Vorbisfile INTERFACE IMPORTED)
+	set_target_properties(Vorbis::Vorbisfile PROPERTIES
+		INTERFACE_COMPILE_OPTIONS "SHELL:-s USE_VORBIS=1"
+		INTERFACE_LINK_OPTIONS "SHELL:-s USE_VORBIS=1")
+	set(VORBIS_FOUND 1)
+
+	add_library(Lua::Lua STATIC IMPORTED)
+	set_target_properties(Lua::Lua PROPERTIES
+		IMPORTED_LOCATION ${EXTERNAL_EMSCRIPTEN_DIR}/lib/liblua.a
+		INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_EMSCRIPTEN_DIR}/include")
+	set(LUA_FOUND 1)
+
+	return()
+endif()
+
 find_package(Threads)
 if(MSVC)
 	set(EXTERNAL_MSVC_DIR "${PARENT_SOURCE_DIR}/nCine-external" CACHE PATH "Set the path to the MSVC libraries directory")

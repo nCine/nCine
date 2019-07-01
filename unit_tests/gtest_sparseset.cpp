@@ -14,6 +14,7 @@ class SparseSetTest : public ::testing::Test
 	SparseSetTestType sparseset_;
 };
 
+#ifndef __EMSCRIPTEN__
 TEST(SparseSetDeathTest, ZeroCapacity)
 {
 	printf("Creating a sparseset of zero capacity\n");
@@ -25,6 +26,7 @@ TEST(SparseSetDeathTest, MaximumValueSmallerThanCapacity)
 	printf("Creating a sparseset with a maximum value smaller than capacity\n");
 	ASSERT_DEATH(SparseSetTestType newSparseset(Capacity, Capacity / 2), "");
 }
+#endif
 
 TEST_F(SparseSetTest, MaxValue)
 {

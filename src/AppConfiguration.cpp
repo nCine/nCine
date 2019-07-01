@@ -51,7 +51,7 @@ AppConfiguration::AppConfiguration()
       // Compile-time variables
       glCoreProfile_(true),
       glForwardCompatible_(true),
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__EMSCRIPTEN__)
       glMajorVersion_(3),
       glMinorVersion_(0),
 #else
@@ -69,6 +69,11 @@ AppConfiguration::AppConfiguration()
 	fontTexFilename = "fonts/DroidSans32_256.png";
 #endif
 	fontFntFilename = "fonts/DroidSans32_256.fnt";
+
+#ifdef __EMSCRIPTEN__
+	// Always disable mapping on Emscripten as it is not supported by WebGL 2
+	useBufferMapping = false;
+#endif
 }
 
 ///////////////////////////////////////////////////////////

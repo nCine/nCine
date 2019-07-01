@@ -70,6 +70,8 @@ namespace LuaNames {
 	static const char *macOS = "MACOS";
 #elif defined(__ANDROID__)
 	static const char *Android = "ANDROID";
+#elif defined(__EMSCRIPTEN__)
+	static const char *Emscripten = "EMSCRIPTEN";
 #else
 	static const char *Linux = "LINUX";
 #endif
@@ -399,6 +401,8 @@ void LuaStateManager::exposeConstants()
 	lua_setfield(L_, -2, LuaNames::macOS);
 #elif defined(__ANDROID__)
 	lua_setfield(L_, -2, LuaNames::Android);
+#elif defined(__EMSCRIPTEN__)
+	lua_setfield(L_, -2, LuaNames::Emscripten);
 #else
 	lua_setfield(L_, -2, LuaNames::Linux);
 #endif

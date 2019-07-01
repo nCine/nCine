@@ -1,5 +1,9 @@
 #define SDL_JOYSTICK_XINPUT (1)
 
+#ifdef __EMSCRIPTEN__
+	#define SDL_JOYSTICK_EMSCRIPTEN
+#endif
+
 static const char *ControllerMappings[] = {
 
 // Default joystick mappings

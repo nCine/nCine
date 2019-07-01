@@ -87,16 +87,22 @@ void GfxCapabilities::init()
 	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &glIntValues_[GLIntValues::MAX_FRAGMENT_UNIFORM_BLOCKS]);
 	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &glIntValues_[GLIntValues::UNIFORM_BUFFER_OFFSET_ALIGNMENT]);
 
-	const unsigned int NumExtensionsToCheck = 7;
-	const char *extensionNames[NumExtensionsToCheck] = {
+#ifndef __EMSCRIPTEN__
+	const char *extensionNames[GLExtensions::COUNT] = {
 		"GL_KHR_debug", "GL_ARB_texture_storage", "GL_EXT_texture_compression_s3tc", "GL_OES_compressed_ETC1_RGB8_texture",
 		"GL_AMD_compressed_ATC_texture", "GL_IMG_texture_compression_pvrtc", "GL_KHR_texture_compression_astc_ldr"
 	};
+#else
+	const char *extensionNames[GLExtensions::COUNT] = {
+		"GL_KHR_debug", "GL_ARB_texture_storage", "WEBGL_compressed_texture_s3tc", "WEBGL_compressed_texture_etc1",
+		"WEBGL_compressed_texture_atc", "WEBGL_compressed_texture_pvrtc", "WEBGL_compressed_texture_astc"
+	};
+#endif
 
-	for (unsigned int i = 0; i < NumExtensionsToCheck; i++)
+	for (unsigned int i = 0; i < GLExtensions::COUNT; i++)
 		glExtensions_[i] = false;
 
-	checkGLExtensions(extensionNames, glExtensions_, NumExtensionsToCheck);
+	checkGLExtensions(extensionNames, glExtensions_, GLExtensions::COUNT);
 }
 
 void GfxCapabilities::logGLInfo()

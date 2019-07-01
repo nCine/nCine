@@ -15,7 +15,7 @@
 
 namespace ncine {
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
 
 /// A class representing the CPU affinity mask for a thread
 class ThreadAffinityMask
@@ -81,10 +81,12 @@ class Thread
 	/// Asks the thread for termination
 	void cancel();
 
+	#ifndef __EMSCRIPTEN__
 	/// Gets the thread affinity mask
 	ThreadAffinityMask affinityMask() const;
 	/// Sets the thread affinity mask
 	void setAffinityMask(ThreadAffinityMask affinityMask);
+	#endif
 #endif
 
   private:

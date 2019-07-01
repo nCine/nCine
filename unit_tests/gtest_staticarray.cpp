@@ -10,7 +10,8 @@ class StaticArrayTest : public ::testing::Test
 	nctl::StaticArray<int, Capacity> array_;
 };
 
-#ifdef NCINE_DEBUG
+#ifndef __EMSCRIPTEN__
+	#ifdef NCINE_DEBUG
 TEST(StaticArrayDeathTest, SubscriptAccessBeyondSize)
 {
 	printf("Trying to access an element within capacity but beyond size\n");
@@ -41,7 +42,7 @@ TEST(StaticArrayDeathTest, SubscriptAccessConstAtSize)
 
 	ASSERT_DEATH(constArray[1], "");
 }
-#endif
+	#endif
 
 TEST(StaticArrayDeathTest, AccessBeyondSize)
 {
@@ -73,6 +74,7 @@ TEST(StaticArrayDeathTest, AccessConstAtSize)
 
 	ASSERT_DEATH(constArray.at(1), "");
 }
+#endif
 
 TEST_F(StaticArrayTest, AccessEmptyWithinSize)
 {

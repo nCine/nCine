@@ -171,6 +171,10 @@ void Application::step()
 	frameTimer_->addFrame();
 	if (appCfg_.withScenegraph)
 	{
+#ifdef __EMSCRIPTEN__
+		// Always disable batching on Emscripten as it does not work currently
+		renderingSettings_.batchingEnabled = false;
+#endif
 		TracyGpuZone("Clear");
 		gfxDevice_->clear();
 	}

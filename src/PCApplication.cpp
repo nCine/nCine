@@ -11,6 +11,10 @@
 	#include "GlfwInputManager.h"
 #endif
 
+#ifdef __EMSCRIPTEN__
+	#include "emscripten.h"
+#endif
+
 #include "tracy.h"
 
 namespace ncine {
@@ -31,7 +35,12 @@ void PCApplication::start(IAppEventHandler *(*createAppEventHandler)())
 	PCApplication &app = static_cast<PCApplication &>(theApplication());
 
 	app.init(createAppEventHandler);
+#ifndef __EMSCRIPTEN__
 	app.run();
+#else
+	emscripten_set_main_loop(PCApplication::emscriptenStep, 0, 1);
+	emscripten_set_main_loop_timing(EM_TIMING_RAF, 1);
+#endif
 	app.shutdownCommon();
 }
 
@@ -77,56 +86,72 @@ void PCApplication::init(IAppEventHandler *(*createAppEventHandler)())
 
 void PCApplication::run()
 {
+#ifndef __EMSCRIPTEN__
 	while (!shouldQuit_)
 	{
-		{
-			ZoneScopedN("Poll events");
-#if defined(WITH_SDL)
-			SDL_Event event;
-
-			while (SDL_PollEvent(&event))
-			{
-				switch (event.type)
-				{
-					case SDL_QUIT:
-						shouldQuit_ = true;
-						break;
-					case SDL_WINDOWEVENT:
-						if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
-							setFocus(true);
-						else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
-							setFocus(false);
-						else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-						{
-							gfxDevice_->width_ = event.window.data1;
-							gfxDevice_->height_ = event.window.data2;
-							gfxDevice_->setViewport(event.window.data1, event.window.data2);
-						}
-						break;
-					default:
-						SdlInputManager::parseEvent(event);
-						break;
-				}
-
-				if (shouldSuspend())
-				{
-					SDL_WaitEvent(&event);
-					SDL_PushEvent(&event);
-				}
-			}
-#elif defined(WITH_GLFW)
-			setFocus(GlfwInputManager::hasFocus());
-			if (shouldSuspend())
-				glfwWaitEvents();
-			else
-				glfwPollEvents();
-			GlfwInputManager::updateJoystickStates();
 #endif
-		}
+		processEvents();
 
 		if (shouldSuspend() == false)
 			step();
+#ifndef __EMSCRIPTEN__
 	}
+#endif
 }
+
+void PCApplication::processEvents()
+{
+	ZoneScopedN("Poll events");
+#if defined(WITH_SDL)
+	SDL_Event event;
+
+	while (SDL_PollEvent(&event))
+	{
+		switch (event.type)
+		{
+			case SDL_QUIT:
+				shouldQuit_ = true;
+				break;
+			case SDL_WINDOWEVENT:
+				if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
+					setFocus(true);
+				else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+					setFocus(false);
+				else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+				{
+					gfxDevice_->width_ = event.window.data1;
+					gfxDevice_->height_ = event.window.data2;
+					gfxDevice_->setViewport(event.window.data1, event.window.data2);
+				}
+				break;
+			default:
+				SdlInputManager::parseEvent(event);
+				break;
+		}
+
+	#ifndef __EMSCRIPTEN__
+		if (shouldSuspend())
+		{
+			SDL_WaitEvent(&event);
+			SDL_PushEvent(&event);
+		}
+	#endif
+	}
+#elif defined(WITH_GLFW)
+	setFocus(GlfwInputManager::hasFocus());
+	if (shouldSuspend())
+		glfwWaitEvents();
+	else
+		glfwPollEvents();
+	GlfwInputManager::updateJoystickStates();
+#endif
+}
+
+#ifdef __EMSCRIPTEN__
+void PCApplication::emscriptenStep()
+{
+	reinterpret_cast<PCApplication &>(theApplication()).run();
+}
+#endif
 
 }

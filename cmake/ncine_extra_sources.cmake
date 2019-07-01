@@ -285,7 +285,7 @@ endif()
 
 if(NCINE_WITH_TRACY)
 	target_compile_definitions(ncine PRIVATE "WITH_TRACY")
-	if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android" AND NOT APPLE)
+	if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android" AND NOT APPLE AND NOT EMSCRIPTEN)
 		target_compile_definitions(ncine PRIVATE "WITH_TRACY_OPENGL")
 	endif()
 	target_compile_definitions(ncine PUBLIC "TRACY_ENABLE")

@@ -49,6 +49,8 @@ typedef float (*TestFunction)(unsigned int);
 const unsigned int MaxTestRuns = 3;
 const unsigned int MaxRepetitions = 32;
 const unsigned int MaxIterations = 10000000;
+const unsigned int MaxDataElements = 512;
+static_assert(MaxDataElements <= MaxIterations, "It's useless to have more elements than iterations");
 
 struct TestInfo
 {
@@ -86,12 +88,12 @@ char savingFilename[MaxStringLength] = "timings.lua";
 bool includeStatsWhenSaving = false;
 
 static nc::Timer timer;
-float nums[MaxIterations];
-nc::Vector4f vecsA[MaxIterations];
-nc::Vector4f vecsB[MaxIterations];
-nc::Vector4f vecsC[MaxIterations];
-nc::Quaternionf quats[MaxIterations];
-nc::Matrix4x4f mats[MaxIterations];
+nctl::UniquePtr<float[]> nums;
+nctl::UniquePtr<nc::Vector4f[]> vecsA;
+nctl::UniquePtr<nc::Vector4f[]> vecsB;
+nctl::UniquePtr<nc::Vector4f[]> vecsC;
+nctl::UniquePtr<nc::Quaternionf[]> quats;
+nctl::UniquePtr<nc::Matrix4x4f[]> mats;
 
 int currentTest = 0;
 int numIterations = MaxIterations / 5;
@@ -111,6 +113,8 @@ const char *system()
 	return "macOS";
 #elif defined(__ANDROID__)
 	return "Android";
+#elif defined(__EMSCRIPTEN__)
+	return "Emscripten";
 #else
 	return "Linux";
 #endif
@@ -159,7 +163,9 @@ void runTest(TestInfo &t, unsigned int numRepetitions, unsigned int numIteration
 
 void resetVecs(unsigned int iterations)
 {
-	for (unsigned int i = 0; i < iterations; i++)
+	const unsigned int n = (iterations < MaxDataElements) ? iterations : MaxDataElements;
+
+	for (unsigned int i = 0; i < n; i++)
 	{
 		const float f = static_cast<float>(i);
 		nums[i] = f;
@@ -171,7 +177,9 @@ void resetVecs(unsigned int iterations)
 
 void resetQuats(unsigned int iterations)
 {
-	for (unsigned int i = 0; i < iterations; i++)
+	const unsigned int n = (iterations < MaxDataElements) ? iterations : MaxDataElements;
+
+	for (unsigned int i = 0; i < n; i++)
 	{
 		const float f = static_cast<float>(i);
 		quats[i].set(f, f, f, f);
@@ -180,7 +188,9 @@ void resetQuats(unsigned int iterations)
 
 void resetMats(unsigned int iterations)
 {
-	for (unsigned int i = 0; i < iterations; i++)
+	const unsigned int n = (iterations < MaxDataElements) ? iterations : MaxDataElements;
+
+	for (unsigned int i = 0; i < n; i++)
 	{
 		const float f = static_cast<float>(i);
 		mats[i][0].set(f, f, f, f);
@@ -196,7 +206,10 @@ float benchVector4Add(unsigned int iterations)
 
 	timer.start();
 	for (unsigned int i = 0; i < iterations - 1; i++)
-		vecsC[i] = vecsA[i] + vecsB[i];
+	{
+		const unsigned int index = i % MaxDataElements;
+		vecsC[index] = vecsA[index] + vecsB[index];
+	}
 
 	return timer.interval();
 }
@@ -207,7 +220,10 @@ float benchVector4Sub(unsigned int iterations)
 
 	timer.start();
 	for (unsigned int i = 0; i < iterations - 1; i++)
-		vecsC[i] = vecsA[i] - vecsB[i];
+	{
+		const unsigned int index = i % MaxDataElements;
+		vecsC[index] = vecsA[index] - vecsB[index];
+	}
 
 	return timer.interval();
 }
@@ -218,7 +234,10 @@ float benchVector4Mul(unsigned int iterations)
 
 	timer.start();
 	for (unsigned int i = 0; i < iterations - 1; i++)
-		vecsC[i] = vecsA[i] * vecsB[i];
+	{
+		const unsigned int index = i % MaxDataElements;
+		vecsC[index] = vecsA[index] * vecsB[index];
+	}
 
 	return timer.interval();
 }
@@ -229,7 +248,10 @@ float benchVector4Div(unsigned int iterations)
 
 	timer.start();
 	for (unsigned int i = 0; i < iterations - 1; i++)
-		vecsC[i] = vecsA[i] / vecsB[i];
+	{
+		const unsigned int index = i % MaxDataElements;
+		vecsC[index] = vecsA[index] / vecsB[index];
+	}
 
 	return timer.interval();
 }
@@ -240,7 +262,10 @@ float benchVector4Length(unsigned int iterations)
 
 	timer.start();
 	for (unsigned int i = 0; i < iterations; i++)
-		nums[i] = vecsA[i].length();
+	{
+		const unsigned int index = i % MaxDataElements;
+		nums[index] = vecsA[index].length();
+	}
 
 	return timer.interval();
 }
@@ -251,7 +276,10 @@ float benchVector4SqrLength(unsigned int iterations)
 
 	timer.start();
 	for (unsigned int i = 0; i < iterations; i++)
-		nums[i] = vecsA[i].sqrLength();
+	{
+		const unsigned int index = i % MaxDataElements;
+		nums[index] = vecsA[index].sqrLength();
+	}
 
 	return timer.interval();
 }
@@ -262,7 +290,10 @@ float benchVector4Normalize(unsigned int iterations)
 
 	timer.start();
 	for (unsigned int i = 0; i < iterations; i++)
-		vecsC[i] = vecsA[i].normalize();
+	{
+		const unsigned int index = i % MaxDataElements;
+		vecsC[index] = vecsA[index].normalize();
+	}
 
 	return timer.interval();
 }
@@ -273,7 +304,10 @@ float benchVector4Dot(unsigned int iterations)
 
 	timer.start();
 	for (unsigned int i = 0; i < iterations - 1; i++)
-		nums[i] = nc::dot(vecsA[i], vecsB[i]);
+	{
+		const unsigned int index = i % MaxDataElements;
+		nums[index] = nc::dot(vecsA[index], vecsB[index]);
+	}
 
 	return timer.interval();
 }
@@ -284,7 +318,10 @@ float benchQuaternionMult(unsigned int iterations)
 
 	timer.start();
 	for (unsigned int i = 0; i < iterations - 1; i++)
-		quats[i] = quats[i] * quats[i + 1];
+	{
+		const unsigned int index = i % MaxDataElements;
+		quats[index] = quats[index] * quats[index + 1];
+	}
 
 	return timer.interval();
 }
@@ -295,7 +332,10 @@ float benchMatrixMult(unsigned int iterations)
 
 	timer.start();
 	for (unsigned int i = 0; i < iterations - 1; i++)
-		mats[i] = mats[i] * mats[i + 1];
+	{
+		const unsigned int index = i % MaxDataElements;
+		mats[index] = mats[index] * mats[index + 1];
+	}
 
 	return timer.interval();
 }
@@ -306,7 +346,10 @@ float benchMatrixTrans(unsigned int iterations)
 
 	timer.start();
 	for (unsigned int i = 0; i < iterations; i++)
-		mats[i] = mats[i].transpose();
+	{
+		const unsigned int index = i % MaxDataElements;
+		mats[index] = mats[index].transpose();
+	}
 
 	return timer.interval();
 }
@@ -318,7 +361,10 @@ float benchMatrixVecMult(unsigned int iterations)
 
 	timer.start();
 	for (unsigned int i = 0; i < iterations; i++)
-		vecsC[i] = mats[i] * vecsA[i];
+	{
+		const unsigned int index = i % MaxDataElements;
+		vecsC[index] = mats[index] * vecsA[index];
+	}
 
 	return timer.interval();
 }
@@ -457,10 +503,17 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 
 void MyEventHandler::onInit()
 {
-	ImGuiIO &io = ImGui::GetIO();
 #ifdef __ANDROID__
+	ImGuiIO &io = ImGui::GetIO();
 	io.FontGlobalScale = 3.0f;
 #endif
+
+	nums = nctl::makeUnique<float[]>(MaxDataElements);
+	vecsA = nctl::makeUnique<nc::Vector4f[]>(MaxDataElements);
+	vecsB = nctl::makeUnique<nc::Vector4f[]>(MaxDataElements);
+	vecsC = nctl::makeUnique<nc::Vector4f[]>(MaxDataElements);
+	quats = nctl::makeUnique<nc::Quaternionf[]>(MaxDataElements);
+	mats = nctl::makeUnique<nc::Matrix4x4f[]>(MaxDataElements);
 
 	testInfos[Tests::Vector4Add].func = benchVector4Add;
 	testInfos[Tests::Vector4Add].name = "Vector4 Add";
@@ -599,7 +652,7 @@ void MyEventHandler::onFrameStart()
 		const bool canCompare = (tri.totalTime > 0.0f && t.totalTime > 0.0f);
 
 		ImGui::Text("Iterations: %u", t.numIterations);
-		if (tri.numIterations != t.numIterations)
+		if (canCompare && tri.numIterations != t.numIterations)
 		{
 			ImGui::SameLine();
 

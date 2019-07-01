@@ -11,7 +11,8 @@ class ArrayZeroCapacityTest : public ::testing::Test
 	nctl::Array<int> array_;
 };
 
-#ifdef NCINE_DEBUG
+#ifndef __EMSCRIPTEN__
+	#ifdef NCINE_DEBUG
 TEST(ArrayZeroCapacityDeathTest, SubscriptAccessBeyondSize)
 {
 	printf("Trying to access an element of an array with zero capacity\n");
@@ -29,7 +30,7 @@ TEST(ArrayZeroCapacityDeathTest, SubscriptAccessConstBeyondSize)
 
 	ASSERT_DEATH(constArray[1], "");
 }
-#endif
+	#endif
 
 TEST(ArrayZeroCapacityDeathTest, AccessBeyondSize)
 {
@@ -58,6 +59,7 @@ TEST(ArrayZeroCapacityDeathTest, AccessConstAtSize)
 
 	ASSERT_DEATH(constArray.at(0), "");
 }
+#endif
 
 TEST_F(ArrayZeroCapacityTest, AccessEmptyWithinSize)
 {

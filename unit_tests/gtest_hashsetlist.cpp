@@ -14,11 +14,13 @@ class HashSetListTest : public ::testing::Test
 	HashSetTestType hashset_;
 };
 
+#ifndef __EMSCRIPTEN__
 TEST(HashSetListDeathTest, ZeroCapacity)
 {
 	printf("Creating an hashset of zero capacity\n");
 	ASSERT_DEATH(HashSetTestType newHashset(0), "");
 }
+#endif
 
 TEST_F(HashSetListTest, Size)
 {

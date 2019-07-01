@@ -14,11 +14,13 @@ class HashMapTest : public ::testing::Test
 	HashMapTestType hashmap_;
 };
 
+#ifndef __EMSCRIPTEN__
 TEST(HashMapDeathTest, ZeroCapacity)
 {
 	printf("Creating an hashmap of zero capacity\n");
 	ASSERT_DEATH(HashMapTestType newHashmap(0), "");
 }
+#endif
 
 TEST_F(HashMapTest, Capacity)
 {

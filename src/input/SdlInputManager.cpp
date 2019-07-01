@@ -15,6 +15,24 @@
 
 namespace ncine {
 
+#ifdef __EMSCRIPTEN__
+namespace {
+
+	void setEmscriptenJoyGuidString(char *joyGuidString)
+	{
+		memset(joyGuidString, '\0', 33);
+		joyGuidString[0] = 'd';
+		joyGuidString[1] = 'e';
+		joyGuidString[2] = 'f';
+		joyGuidString[3] = 'a';
+		joyGuidString[4] = 'u';
+		joyGuidString[5] = 'l';
+		joyGuidString[6] = 't';
+	}
+
+}
+#endif
+
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
@@ -260,8 +278,12 @@ const char *SdlInputManager::joyGuid(int joyId) const
 {
 	if (isJoyPresent(joyId))
 	{
+#ifndef __EMSCRIPTEN__
 		const SDL_JoystickGUID joystickGuid = SDL_JoystickGetGUID(sdlJoysticks_[joyId]);
 		SDL_JoystickGetGUIDString(joystickGuid, joyGuidString_, 33);
+#else
+		setEmscriptenJoyGuidString(joyGuidString_);
+#endif
 		return joyGuidString_;
 	}
 	else
@@ -344,8 +366,14 @@ void SdlInputManager::handleJoyDeviceEvent(const SDL_Event &event)
 		sdlJoysticks_[deviceIndex] = SDL_JoystickOpen(deviceIndex);
 
 		SDL_Joystick *joy = sdlJoysticks_[deviceIndex];
+
+#ifndef __EMSCRIPTEN__
 		const SDL_JoystickGUID joystickGuid = SDL_JoystickGetGUID(joy);
 		SDL_JoystickGetGUIDString(joystickGuid, joyGuidString_, 33);
+#else
+		setEmscriptenJoyGuidString(joyGuidString_);
+#endif
+
 		LOGI_X("Joystick %d \"%s\" (%s) has been connected - %d hats, %d axes, %d buttons, %d balls",
 		       deviceIndex, SDL_JoystickName(joy), joyGuidString_, SDL_JoystickNumHats(joy), SDL_JoystickNumAxes(joy), SDL_JoystickNumButtons(joy), SDL_JoystickNumBalls(joy));
 		joyMapping_.onJoyConnected(joyConnectionEvent_);
