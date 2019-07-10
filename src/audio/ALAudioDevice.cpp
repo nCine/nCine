@@ -11,10 +11,12 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ALAudioDevice::ALAudioDevice()
-    : device_(nullptr), context_(nullptr), gain_(1.0f)
+    : device_(nullptr), context_(nullptr), gain_(1.0f),
+      sources_(nctl::StaticArrayMode::EXTEND_SIZE), deviceName_(nullptr)
 {
 	device_ = alcOpenDevice(nullptr);
 	FATAL_ASSERT_MSG_X(device_ != nullptr, "alcOpenDevice failed: %x", alGetError());
+	deviceName_ = alcGetString(device_, ALC_DEVICE_SPECIFIER);
 
 	context_ = alcCreateContext(device_, nullptr);
 	if (context_ == nullptr)
@@ -30,15 +32,19 @@ ALAudioDevice::ALAudioDevice()
 		FATAL_MSG_X("alcMakeContextCurrent failed: %x", alGetError());
 	}
 
+	alGetError();
 	alGenSources(MaxSources, sources_.data());
+	const ALenum error = alGetError();
+	ASSERT_MSG_X(error == AL_NO_ERROR, "alGenSources failed: %x", error);
+
 	alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
 	alListenerf(AL_GAIN, gain_);
 }
 
 ALAudioDevice::~ALAudioDevice()
 {
-	for (unsigned int i = 0; i < MaxSources; i++)
-		alSourcei(sources_[i], AL_BUFFER, AL_NONE);
+	for (ALuint sourceId : sources_)
+		alSourcei(sourceId, AL_BUFFER, AL_NONE);
 	alDeleteSources(MaxSources, sources_.data());
 
 	alcDestroyContext(context_);
@@ -57,6 +63,14 @@ void ALAudioDevice::setGain(ALfloat gain)
 	alListenerf(AL_GAIN, gain_);
 }
 
+const IAudioPlayer *ALAudioDevice::player(unsigned int index) const
+{
+	if (index < players_.size())
+		return players_[index];
+
+	return nullptr;
+}
+
 void ALAudioDevice::stopPlayers()
 {
 	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player) { player->stop(); });
@@ -71,46 +85,40 @@ void ALAudioDevice::pausePlayers()
 
 void ALAudioDevice::stopPlayers(PlayerType playerType)
 {
-	Object::ObjectType objectType = AudioBufferPlayer::sType();
-	if (playerType == PlayerType::AUDIOSTREAM)
-		objectType = AudioStreamPlayer::sType();
+	const Object::ObjectType objectType = (playerType == PlayerType::BUFFER)
+	                                          ? AudioBufferPlayer::sType()
+	                                          : AudioStreamPlayer::sType();
 
-	nctl::List<IAudioPlayer *>::ConstIterator i = players_.begin();
-	while (i != players_.end())
+	for (int i = players_.size() - 1; i >= 0; i--)
 	{
-		if ((*i)->type() == objectType)
+		if (players_[i]->type() == objectType)
 		{
-			(*i)->stop();
-			i = players_.erase(i);
+			players_[i]->stop();
+			removePlayer(i);
 		}
-		else
-			++i;
 	}
 }
 
 void ALAudioDevice::pausePlayers(PlayerType playerType)
 {
-	Object::ObjectType objectType = AudioBufferPlayer::sType();
-	if (playerType == PlayerType::AUDIOSTREAM)
-		objectType = AudioStreamPlayer::sType();
+	const Object::ObjectType objectType = (playerType == PlayerType::BUFFER)
+	                                          ? AudioBufferPlayer::sType()
+	                                          : AudioStreamPlayer::sType();
 
-	nctl::List<IAudioPlayer *>::ConstIterator i = players_.begin();
-	while (i != players_.end())
+	for (int i = players_.size() - 1; i >= 0; i--)
 	{
-		if ((*i)->type() == objectType)
+		if (players_[i]->type() == objectType)
 		{
-			(*i)->pause();
-			i = players_.erase(i);
+			players_[i]->pause();
+			removePlayer(i);
 		}
-		else
-			++i;
 	}
 }
 
 void ALAudioDevice::freezePlayers()
 {
 	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player) { player->pause(); });
-	// The player list is not cleared at this point, it is needed as-is by the unfreeze method
+	// The players array is not cleared at this point, it is needed as-is by the unfreeze method
 }
 
 void ALAudioDevice::unfreezePlayers()
@@ -118,18 +126,18 @@ void ALAudioDevice::unfreezePlayers()
 	forEach(players_.begin(), players_.end(), [](IAudioPlayer *player) { player->play(); });
 }
 
-int ALAudioDevice::nextAvailableSource()
+unsigned int ALAudioDevice::nextAvailableSource()
 {
 	ALint sourceState;
 
-	for (unsigned int i = 0; i < MaxSources; i++)
+	for (ALuint sourceId : sources_)
 	{
-		alGetSourcei(sources_[i], AL_SOURCE_STATE, &sourceState);
+		alGetSourcei(sourceId, AL_SOURCE_STATE, &sourceState);
 		if (sourceState != AL_PLAYING && sourceState != AL_PAUSED)
-			return sources_[i];
+			return sourceId;
 	}
 
-	return -1;
+	return UnavailableSource;
 }
 
 void ALAudioDevice::registerPlayer(IAudioPlayer *player)
@@ -140,17 +148,24 @@ void ALAudioDevice::registerPlayer(IAudioPlayer *player)
 
 void ALAudioDevice::updatePlayers()
 {
-	nctl::List<IAudioPlayer *>::ConstIterator i = players_.begin();
-	while (i != players_.end())
+	for (int i = players_.size() - 1; i >= 0; i--)
 	{
-		if ((*i)->isPlaying())
-		{
-			(*i)->updateState();
-			++i;
-		}
+		if (players_[i]->isPlaying())
+			players_[i]->updateState();
 		else
-			i = players_.erase(i);
+			removePlayer(i);
 	}
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void ALAudioDevice::removePlayer(int index)
+{
+	const unsigned int newSize = players_.size() - 1;
+	players_[index] = players_[newSize];
+	players_.setSize(newSize);
 }
 
 }

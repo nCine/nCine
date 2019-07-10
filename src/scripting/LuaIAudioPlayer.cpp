@@ -8,6 +8,12 @@ namespace ncine {
 
 namespace LuaNames {
 namespace IAudioPlayer {
+	static const char *sourceId = "source_id";
+	static const char *bufferId = "buffer_id";
+	static const char *numChannels = "num_channels";
+	static const char *frequency = "frequency";
+	static const char *bufferSize = "buffer_size";
+
 	static const char *play = "play";
 	static const char *pause = "pause";
 	static const char *stop = "stop";
@@ -33,6 +39,12 @@ namespace IAudioPlayer {
 
 void LuaIAudioPlayer::exposeFunctions(lua_State *L)
 {
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::sourceId, sourceId);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::bufferId, bufferId);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::numChannels, numChannels);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::frequency, frequency);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::bufferSize, bufferSize);
+
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::play, play);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::pause, pause);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::stop, stop);
@@ -50,6 +62,56 @@ void LuaIAudioPlayer::exposeFunctions(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setPitch, setPitch);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::position, position);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setPosition, setPosition);
+}
+
+int LuaIAudioPlayer::sourceId(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+
+	const unsigned int sourceId = audioPlayer->sourceId();
+	LuaUtils::push(L, sourceId);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::bufferId(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+
+	const unsigned int bufferId = audioPlayer->bufferId();
+	LuaUtils::push(L, bufferId);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::numChannels(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+
+	const int numChannels = audioPlayer->numChannels();
+	LuaUtils::push(L, numChannels);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::frequency(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+
+	const int frequency = audioPlayer->frequency();
+	LuaUtils::push(L, frequency);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::bufferSize(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+
+	const unsigned long bufferSize = audioPlayer->bufferSize();
+	LuaUtils::push(L, static_cast<uint64_t>(bufferSize));
+
+	return 1;
 }
 
 int LuaIAudioPlayer::play(lua_State *L)

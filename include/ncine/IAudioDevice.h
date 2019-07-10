@@ -11,17 +11,26 @@ class IAudioPlayer;
 class DLL_PUBLIC IAudioDevice
 {
   public:
+	static const unsigned int UnavailableSource = ~0U;
+
 	enum class PlayerType
 	{
 		BUFFER,
 		AUDIOSTREAM
 	};
 
+	virtual const char *name() const = 0;
+
 	virtual ~IAudioDevice() = 0;
 	/// Returns the listener gain value
-	virtual float gain() = 0;
+	virtual float gain() const = 0;
 	/// Sets the listener gain value
 	virtual void setGain(float gain) = 0;
+
+	/// Returns the number of active players
+	virtual unsigned int numPlayers() const = 0;
+	/// Returns the specified running player object
+	virtual const IAudioPlayer *player(unsigned int index) const = 0;
 
 	/// Stops every player currently playing
 	virtual void stopPlayers() = 0;
@@ -38,7 +47,7 @@ class DLL_PUBLIC IAudioDevice
 	virtual void unfreezePlayers() = 0;
 
 	/// Returns the next available source index available for playing
-	virtual int nextAvailableSource() = 0;
+	virtual unsigned int nextAvailableSource() = 0;
 	/// Registers a new stream player for buffer update
 	virtual void registerPlayer(IAudioPlayer *player) = 0;
 	/// Updates players state (and buffer queue in the case of stream players)
@@ -51,8 +60,13 @@ inline IAudioDevice::~IAudioDevice() {}
 class DLL_PUBLIC NullAudioDevice : public IAudioDevice
 {
   public:
-	float gain() override { return 1.0f; }
+	const char *name() const override { return "NullAudioDevice"; }
+
+	float gain() const override { return 1.0f; }
 	void setGain(float gain) override {}
+
+	unsigned int numPlayers() const override { return 0; }
+	const IAudioPlayer *player(unsigned int index) const override { return nullptr; }
 
 	void stopPlayers() override {}
 	void pausePlayers() override {}
@@ -62,7 +76,7 @@ class DLL_PUBLIC NullAudioDevice : public IAudioDevice
 	void freezePlayers() override {}
 	void unfreezePlayers() override {}
 
-	int nextAvailableSource() override { return -1; }
+	unsigned int nextAvailableSource() override { return UnavailableSource; }
 	void registerPlayer(IAudioPlayer *player) override {}
 	void updatePlayers() override {}
 };

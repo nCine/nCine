@@ -13,6 +13,7 @@ namespace AudioBuffer {
 	static const char *bufferId = "buffer_id";
 	static const char *numChannels = "num_channels";
 	static const char *frequency = "frequency";
+	static const char *bufferSize = "buffer_size";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -33,6 +34,7 @@ void LuaAudioBuffer::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::AudioBuffer::bufferId, bufferId);
 	LuaUtils::addFunction(L, LuaNames::AudioBuffer::numChannels, numChannels);
 	LuaUtils::addFunction(L, LuaNames::AudioBuffer::frequency, frequency);
+	LuaUtils::addFunction(L, LuaNames::AudioBuffer::bufferSize, bufferSize);
 
 	lua_setfield(L, -2, LuaNames::AudioBuffer::AudioBuffer);
 }
@@ -75,6 +77,13 @@ int LuaAudioBuffer::frequency(lua_State *L)
 {
 	AudioBuffer *audioBuffer = LuaClassWrapper<AudioBuffer>::unwrapUserData(L, -1);
 	LuaUtils::push(L, audioBuffer->frequency());
+	return 1;
+}
+
+int LuaAudioBuffer::bufferSize(lua_State *L)
+{
+	AudioBuffer *audioBuffer = LuaClassWrapper<AudioBuffer>::unwrapUserData(L, -1);
+	LuaUtils::push(L, static_cast<uint64_t>(audioBuffer->bufferSize()));
 	return 1;
 }
 

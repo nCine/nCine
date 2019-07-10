@@ -16,6 +16,11 @@ class DLL_PUBLIC AudioBufferPlayer : public IAudioPlayer
 	explicit AudioBufferPlayer(AudioBuffer *audioBuffer);
 	~AudioBufferPlayer() override { stop(); }
 
+	unsigned int bufferId() const override;
+	int numChannels() const override;
+	int frequency() const override;
+	unsigned long bufferSize() const override;
+
 	void play() override;
 	void pause() override;
 	void stop() override;

@@ -17,8 +17,13 @@ class ALAudioDevice : public IAudioDevice
 	ALAudioDevice();
 	~ALAudioDevice() override;
 
-	float gain() override { return gain_; }
+	inline const char *name() const override { return deviceName_; }
+
+	float gain() const override { return gain_; }
 	void setGain(float gain) override;
+
+	inline unsigned int numPlayers() const override { return players_.size(); }
+	const IAudioPlayer *player(unsigned int index) const override;
 
 	void stopPlayers() override;
 	void pausePlayers() override;
@@ -28,7 +33,7 @@ class ALAudioDevice : public IAudioDevice
 	void freezePlayers() override;
 	void unfreezePlayers() override;
 
-	int nextAvailableSource() override;
+	unsigned int nextAvailableSource() override;
 	void registerPlayer(IAudioPlayer *player) override;
 	void updatePlayers() override;
 
@@ -44,9 +49,13 @@ class ALAudioDevice : public IAudioDevice
 	ALfloat gain_;
 	/// The sources pool
 	nctl::StaticArray<ALuint, MaxSources> sources_;
+	/// The array of currently active audio players
+	nctl::StaticArray<IAudioPlayer *, MaxSources> players_;
 
-	/// A list of active audio players
-	nctl::List<IAudioPlayer *> players_;
+	/// The OpenAL device name string
+	const char *deviceName_;
+
+	void removePlayer(int index);
 
 	/// Deleted copy constructor
 	ALAudioDevice(const ALAudioDevice &) = delete;

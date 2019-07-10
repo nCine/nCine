@@ -22,6 +22,17 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	IAudioPlayer();
 	~IAudioPlayer() override {}
 
+	/// Returns the OpenAL id of the player source
+	inline unsigned int sourceId() const { return sourceId_; }
+	/// Returns the OpenAL id of the currently playing buffer
+	virtual unsigned int bufferId() const = 0;
+	/// Returns the number of audio channels of the currently playing buffer
+	virtual int numChannels() const = 0;
+	/// Returns the samples frequency of the currently playing buffer
+	virtual int frequency() const = 0;
+	/// Returns the size of the currently playing buffer in bytes
+	virtual unsigned long bufferSize() const = 0;
+
 	/// Starts playing
 	virtual void play() = 0;
 	/// Pauses playing
@@ -29,6 +40,17 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	/// Stops playing and rewind
 	virtual void stop() = 0;
 
+	/// Returns the state of the player
+	inline PlayerState state() const { return state_; }
+	/// Queries the playing state of the player
+	inline bool isPlaying() const { return state_ == PlayerState::PLAYING; }
+	/// Queries the paused state of the player
+	inline bool isPaused() const { return state_ == PlayerState::PAUSED; }
+	/// Queries the stopped state of the player
+	inline bool isStopped() const { return state_ == PlayerState::STOPPED; }
+
+	/// Queries the looping property of the player
+	inline bool isLooping() const { return isLooping_; }
 	/// Sets player looping property
 	inline void setLooping(bool isLooping) { isLooping_ = isLooping; }
 
@@ -46,17 +68,6 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	void setPosition(const Vector3f &position);
 	/// Sets player position value through components
 	void setPosition(float x, float y, float z);
-
-	/// Returns the state of the player
-	inline PlayerState state() const { return state_; }
-	/// Queries the playing state of the player
-	inline bool isPlaying() const { return state_ == PlayerState::PLAYING; }
-	/// Queries the paused state of the player
-	inline bool isPaused() const { return state_ == PlayerState::PAUSED; }
-	/// Queries the stopped state of the player
-	inline bool isStopped() const { return state_ == PlayerState::STOPPED; }
-	/// Queries the looping property of the player
-	inline bool isLooping() const { return isLooping_; }
 
   protected:
 	/// The OpenAL source id

@@ -4,6 +4,10 @@
 #include "IInputManager.h"
 #include "InputEvents.h"
 
+#ifdef WITH_AUDIO
+	#include "IAudioPlayer.h"
+#endif
+
 #include "RenderStatistics.h"
 #ifdef WITH_LUA
 	#include "LuaStatistics.h"
@@ -129,6 +133,21 @@ void ImGuiDebugOverlay::updateFrameTimings()
 
 namespace {
 
+#ifdef WITH_AUDIO
+	const char *audioPlayerStateToString(IAudioPlayer::PlayerState state)
+	{
+		switch (state)
+		{
+			case IAudioPlayer::PlayerState::INITIAL: return "Initial";
+			case IAudioPlayer::PlayerState::PLAYING: return "Playing";
+			case IAudioPlayer::PlayerState::PAUSED: return "Paused";
+			case IAudioPlayer::PlayerState::STOPPED: return "Stopped";
+		}
+
+		return "Unknown";
+	}
+#endif
+
 	const char *mouseCursorModeToString(IInputManager::MouseCursorMode mode)
 	{
 		switch (mode)
@@ -212,6 +231,7 @@ void ImGuiDebugOverlay::guiWindow()
 		guiApplicationConfiguration();
 		guiRenderingSettings();
 		guiWindowSettings();
+		guiAudioPlayers();
 		guiInputState();
 		guiRenderDoc();
 	}
@@ -636,6 +656,56 @@ void ImGuiDebugOverlay::guiWindowSettings()
 		}
 
 		ImGui::Text("Resizable: %s", theApplication().gfxDevice().isResizable() ? "true" : "false");
+	}
+#endif
+}
+
+void ImGuiDebugOverlay::guiAudioPlayers()
+{
+#ifdef WITH_AUDIO
+	if (ImGui::CollapsingHeader("Audio Players"))
+	{
+		ImGui::Text("Device Name: %s", theServiceLocator().audioDevice().name());
+		ImGui::Text("Listener Gain: %f", theServiceLocator().audioDevice().gain());
+
+		unsigned int numPlayers = theServiceLocator().audioDevice().numPlayers();
+		ImGui::Text("Active Players: %d", numPlayers);
+
+		if (numPlayers > 0)
+		{
+			if (ImGui::Button("Stop"))
+				theServiceLocator().audioDevice().stopPlayers();
+			ImGui::SameLine();
+			if (ImGui::Button("Pause"))
+				theServiceLocator().audioDevice().pausePlayers();
+		}
+
+		// Stopping or pausing players change the number of active ones
+		numPlayers = theServiceLocator().audioDevice().numPlayers();
+		for (unsigned int i = 0; i < numPlayers; i++)
+		{
+			const IAudioPlayer *player = theServiceLocator().audioDevice().player(i);
+			nctl::String widgetName;
+			widgetName.format("Player %d", i);
+			if (ImGui::TreeNode(widgetName.data()))
+			{
+				ImGui::Text("Source Id: %u", player->sourceId());
+				ImGui::Text("Buffer Id: %u", player->bufferId());
+				ImGui::Text("Channels: %d", player->numChannels());
+				ImGui::Text("Frequency: %dHz", player->frequency());
+				ImGui::Text("Buffer Size: %lu bytes", player->bufferSize());
+				ImGui::NewLine();
+
+				ImGui::Text("State: %s", audioPlayerStateToString(player->state()));
+				ImGui::Text("Looping: %s", player->isLooping() ? "true" : "false");
+				ImGui::Text("Gain: %f", player->gain());
+				ImGui::Text("Pitch: %f", player->pitch());
+				const Vector3f &pos = player->position();
+				ImGui::Text("Position: <%f, %f, %f>", pos.x, pos.y, pos.z);
+
+				ImGui::TreePop();
+			}
+		}
 	}
 #endif
 }

@@ -90,6 +90,7 @@ class ImGuiDebugOverlay : public IDebugOverlay
 	void guiApplicationConfiguration();
 	void guiRenderingSettings();
 	void guiWindowSettings();
+	void guiAudioPlayers();
 	void guiInputState();
 	void guiRenderDoc();
 

@@ -15,6 +15,11 @@ class DLL_PUBLIC AudioStreamPlayer : public IAudioPlayer
 	explicit AudioStreamPlayer(const char *filename);
 	~AudioStreamPlayer() override;
 
+	inline unsigned int bufferId() const override { return audioStream_.bufferId(); }
+	inline int numChannels() const override { return audioStream_.numChannels(); }
+	inline int frequency() const override { return audioStream_.frequency(); }
+	unsigned long bufferSize() const override { return audioStream_.bufferSize(); }
+
 	void play() override;
 	void pause() override;
 	void stop() override;

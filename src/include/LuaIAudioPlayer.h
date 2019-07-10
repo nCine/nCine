@@ -11,6 +11,12 @@ class LuaIAudioPlayer
   private:
 	static void exposeFunctions(lua_State *L);
 
+	static int sourceId(lua_State *L);
+	static int bufferId(lua_State *L);
+	static int numChannels(lua_State *L);
+	static int frequency(lua_State *L);
+	static int bufferSize(lua_State *L);
+
 	static int play(lua_State *L);
 	static int pause(lua_State *L);
 	static int stop(lua_State *L);

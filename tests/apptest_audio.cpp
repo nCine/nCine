@@ -21,6 +21,19 @@ const char *FontTextureFile = "DroidSans32_256.png";
 #endif
 const char *FontFntFile = "DroidSans32_256.fnt";
 
+const char *audioPlayerStateToString(nc::IAudioPlayer::PlayerState state)
+{
+	switch (state)
+	{
+		case nc::IAudioPlayer::PlayerState::INITIAL: return "Initial";
+		case nc::IAudioPlayer::PlayerState::PLAYING: return "Playing";
+		case nc::IAudioPlayer::PlayerState::PAUSED: return "Paused";
+		case nc::IAudioPlayer::PlayerState::STOPPED: return "Stopped";
+	}
+
+	return "Unknown";
+}
+
 }
 
 nc::IAppEventHandler *createAppEventHandler()
@@ -38,7 +51,7 @@ void MyEventHandler::onInit()
 	gain_ = DefaultGain;
 	pitch_ = DefaultPitch;
 	xPos_ = DefaultXPos;
-	isLooping_ = true;
+	isLooping_ = false;
 
 	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
 	                                   (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
@@ -63,39 +76,8 @@ void MyEventHandler::onFrameStart()
 
 	textString_->clear();
 
-	textString_->append("Music: ");
-	switch (musicPlayer_->state())
-	{
-		case nc::IAudioPlayer::PlayerState::PLAYING:
-			textString_->append("playing");
-			break;
-		case nc::IAudioPlayer::PlayerState::PAUSED:
-			textString_->append("paused");
-			break;
-		case nc::IAudioPlayer::PlayerState::STOPPED:
-			textString_->append("stopped");
-			break;
-		default:
-			break;
-	}
-	textString_->append(" (press M)\n");
-
-	textString_->append("Sound: ");
-	switch (soundPlayer_->state())
-	{
-		case nc::IAudioPlayer::PlayerState::PLAYING:
-			textString_->append("playing");
-			break;
-		case nc::IAudioPlayer::PlayerState::PAUSED:
-			textString_->append("paused");
-			break;
-		case nc::IAudioPlayer::PlayerState::STOPPED:
-			textString_->append("stopped");
-			break;
-		default:
-			break;
-	}
-	textString_->append(" (press A/S/D)\n");
+	textString_->formatAppend("Music: %s (press M)\n", audioPlayerStateToString(musicPlayer_->state()));
+	textString_->formatAppend("Sound: %s (press A/S/D)\n", audioPlayerStateToString(soundPlayer_->state()));
 
 	if (soundPlayer_->isLooping())
 		textString_->append("Sound is looping");

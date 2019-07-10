@@ -20,10 +20,12 @@ class DLL_PUBLIC AudioBuffer : public Object
 
 	/// Returns the OpenAL buffer id
 	inline unsigned int bufferId() const { return bufferId_; }
-	/// Returns number of audio channels
+	/// Returns the number of audio channels
 	inline int numChannels() const { return numChannels_; }
-	/// Returns samples frequency
+	/// Returns the samples frequency
 	inline int frequency() const { return frequency_; }
+	/// Returns the size of the buffer in bytes
+	inline unsigned long bufferSize() const { return bufferSize_; }
 
 	inline static ObjectType sType() { return ObjectType::AUDIOBUFFER; }
 
@@ -34,6 +36,8 @@ class DLL_PUBLIC AudioBuffer : public Object
 	int numChannels_;
 	/// Samples frequency
 	int frequency_;
+	/// Buffer size in bytes
+	unsigned long bufferSize_;
 
 	/// Deleted copy constructor
 	AudioBuffer(const AudioBuffer &) = delete;

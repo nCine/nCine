@@ -20,6 +20,7 @@ class LuaAudioBuffer
 	static int bufferId(lua_State *L);
 	static int numChannels(lua_State *L);
 	static int frequency(lua_State *L);
+	static int bufferSize(lua_State *L);
 };
 
 }

@@ -13,27 +13,28 @@ namespace ncine {
 
 /*! Private constructor called only by `AudioStreamPlayer`. */
 AudioStream::AudioStream(const char *filename)
-    : nextAvailALBuffer_(0), frequency_(0)
+    : nextAvailableBufferIndex_(0), currentBufferId_(0), frequency_(0)
 {
 	ZoneScoped;
 	ZoneText(filename, strnlen(filename, 256));
-	alGenBuffers(NumBuffers, alBuffers_.data());
+
+	alGetError();
+	alGenBuffers(NumBuffers, buffersIds_.data());
+	const ALenum error = alGetError();
+	ASSERT_MSG_X(error == AL_NO_ERROR, "alGenBuffers failed: %x", error);
 	memBuffer_ = nctl::makeUnique<char[]>(BufferSize);
 
 	audioLoader_ = IAudioLoader::createFromFile(filename);
+	numChannels_ = audioLoader_->numChannels();
 	frequency_ = audioLoader_->frequency();
-	const int numChannels = audioLoader_->numChannels();
 
-	FATAL_ASSERT_MSG_X(numChannels == 1 || numChannels == 2, "Unsupported number of channels: %d", numChannels);
-	if (numChannels == 1)
-		format_ = AL_FORMAT_MONO16;
-	else
-		format_ = AL_FORMAT_STEREO16;
+	FATAL_ASSERT_MSG_X(numChannels_ == 1 || numChannels_ == 2, "Unsupported number of channels: %d", numChannels_);
+	format_ = (numChannels_ == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
 }
 
 AudioStream::~AudioStream()
 {
-	alDeleteBuffers(NumBuffers, alBuffers_.data());
+	alDeleteBuffers(NumBuffers, buffersIds_.data());
 }
 
 ///////////////////////////////////////////////////////////
@@ -54,17 +55,17 @@ bool AudioStream::enqueue(unsigned int source, bool looping)
 	{
 		ALuint unqueuedAlBuffer;
 		alSourceUnqueueBuffers(source, 1, &unqueuedAlBuffer);
-		nextAvailALBuffer_--;
-		alBuffers_[nextAvailALBuffer_] = unqueuedAlBuffer;
+		nextAvailableBufferIndex_--;
+		buffersIds_[nextAvailableBufferIndex_] = unqueuedAlBuffer;
 		numProcessedBuffers--;
 	}
 
 	// Queueing
-	if (nextAvailALBuffer_ < NumBuffers)
+	if (nextAvailableBufferIndex_ < NumBuffers)
 	{
-		ALuint currentBuffer = alBuffers_[nextAvailALBuffer_];
+		currentBufferId_ = buffersIds_[nextAvailableBufferIndex_];
 
-		long bytes = audioLoader_->read(memBuffer_.get(), BufferSize);
+		unsigned long bytes = audioLoader_->read(memBuffer_.get(), BufferSize);
 
 		// EOF reached
 		if (bytes < BufferSize)
@@ -72,21 +73,21 @@ bool AudioStream::enqueue(unsigned int source, bool looping)
 			if (looping)
 			{
 				audioLoader_->rewind();
-				long moreBytes = audioLoader_->read(memBuffer_.get() + bytes, BufferSize - bytes);
+				const unsigned long moreBytes = audioLoader_->read(memBuffer_.get() + bytes, BufferSize - bytes);
 				bytes += moreBytes;
 			}
 		}
 
-		// If still decoding data then enqueue
+		// If it is still decoding data then enqueue
 		if (bytes > 0)
 		{
-			// On iOS alBufferDataStatic could be used instead
-			alBufferData(currentBuffer, format_, memBuffer_.get(), bytes, frequency_);
-			alSourceQueueBuffers(source, 1, &currentBuffer);
-			nextAvailALBuffer_++;
+			// On iOS `alBufferDataStatic()` could be used instead
+			alBufferData(currentBufferId_, format_, memBuffer_.get(), bytes, frequency_);
+			alSourceQueueBuffers(source, 1, &currentBufferId_);
+			nextAvailableBufferIndex_++;
 		}
-		// If it has no more data to decode and the queue is empty
-		else if (nextAvailALBuffer_ == 0)
+		// If there is no more data left to decode and the queue is empty
+		else if (nextAvailableBufferIndex_ == 0)
 		{
 			shouldKeepPlaying = false;
 			stop(source);
@@ -122,14 +123,15 @@ void AudioStream::stop(unsigned int source)
 	// Unqueueing
 	while (numProcessedBuffers > 0)
 	{
-		ALuint uuqueuedAlBuffer;
-		alSourceUnqueueBuffers(source, 1, &uuqueuedAlBuffer);
-		nextAvailALBuffer_--;
-		alBuffers_[nextAvailALBuffer_] = uuqueuedAlBuffer;
+		ALuint unqueuedAlBuffer;
+		alSourceUnqueueBuffers(source, 1, &unqueuedAlBuffer);
+		nextAvailableBufferIndex_--;
+		buffersIds_[nextAvailableBufferIndex_] = unqueuedAlBuffer;
 		numProcessedBuffers--;
 	}
 
 	audioLoader_->rewind();
+	currentBufferId_ = 0;
 }
 
 }

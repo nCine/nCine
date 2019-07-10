@@ -32,16 +32,16 @@ void AudioStreamPlayer::play()
 		case PlayerState::INITIAL:
 		case PlayerState::STOPPED:
 		{
-			// source is a signed integer in order to check for unavailble source return value.
-			// It is then converted to an OpenAL unsigned integer to be used as a valid source.
-			int source = theServiceLocator().audioDevice().nextAvailableSource();
-			// No sources available
-			if (source < 0)
+			const unsigned int source = theServiceLocator().audioDevice().nextAvailableSource();
+			if (source == IAudioDevice::UnavailableSource)
 			{
 				LOGW("No more available audio sources for playing");
 				return;
 			}
 			sourceId_ = source;
+
+			// Streams looping is not handled at enqueued buffer level
+			alSourcei(sourceId_, AL_LOOPING, AL_FALSE);
 
 			alSourcef(sourceId_, AL_GAIN, gain_);
 			alSourcef(sourceId_, AL_PITCH, pitch_);
@@ -92,15 +92,17 @@ void AudioStreamPlayer::stop()
 		case PlayerState::STOPPED:
 			break;
 		case PlayerState::PLAYING:
+		case PlayerState::PAUSED:
 		{
 			// Stop the source then unqueue every buffer
 			audioStream_.stop(sourceId_);
+			// Detach the buffer from source
+			alSourcei(sourceId_, AL_BUFFER, 0);
 
+			sourceId_ = 0;
 			state_ = PlayerState::STOPPED;
 			break;
 		}
-		case PlayerState::PAUSED:
-			break;
 	}
 }
 

@@ -12,8 +12,13 @@ class LuaIAudioDevice
 	static void expose(lua_State *L);
 
   private:
+	static int name(lua_State *L);
+
 	static int gain(lua_State *L);
 	static int setGain(lua_State *L);
+
+	static int numPlayers(lua_State *L);
+	static int player(lua_State *L);
 
 	static int stopPlayers(lua_State *L);
 	static int pausePlayers(lua_State *L);

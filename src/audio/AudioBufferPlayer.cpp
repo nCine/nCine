@@ -20,6 +20,27 @@ AudioBufferPlayer::AudioBufferPlayer(AudioBuffer *audioBuffer)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+unsigned int AudioBufferPlayer::bufferId() const
+{
+	const unsigned int bufferId = audioBuffer_ ? audioBuffer_->bufferId() : 0U;
+	return (state_ != PlayerState::INITIAL && state_ != PlayerState::STOPPED) ? bufferId : 0U;
+}
+
+int AudioBufferPlayer::numChannels() const
+{
+	return (audioBuffer_ ? audioBuffer_->numChannels() : 0);
+}
+
+int AudioBufferPlayer::frequency() const
+{
+	return (audioBuffer_ ? audioBuffer_->frequency() : 0);
+}
+
+unsigned long AudioBufferPlayer::bufferSize() const
+{
+	return (audioBuffer_ ? audioBuffer_->bufferSize() : 0UL);
+}
+
 void AudioBufferPlayer::play()
 {
 	switch (state_)
@@ -27,11 +48,8 @@ void AudioBufferPlayer::play()
 		case PlayerState::INITIAL:
 		case PlayerState::STOPPED:
 		{
-			// source is a signed integer in order to check for unavailble source return value.
-			// It is then converted to an OpenAL unsigned integer to be used as a valid source.
-			int source = theServiceLocator().audioDevice().nextAvailableSource();
-			// No sources available
-			if (source < 0)
+			const unsigned int source = theServiceLocator().audioDevice().nextAvailableSource();
+			if (source == IAudioDevice::UnavailableSource)
 			{
 				LOGW("No more available audio sources for playing");
 				return;
@@ -94,13 +112,16 @@ void AudioBufferPlayer::stop()
 		case PlayerState::STOPPED:
 			break;
 		case PlayerState::PLAYING:
+		case PlayerState::PAUSED:
 		{
 			alSourceStop(sourceId_);
+			// Detach the buffer from source
+			alSourcei(sourceId_, AL_BUFFER, 0);
+
+			sourceId_ = 0;
 			state_ = PlayerState::STOPPED;
 			break;
 		}
-		case PlayerState::PAUSED:
-			break;
 	}
 }
 
@@ -108,11 +129,13 @@ void AudioBufferPlayer::updateState()
 {
 	if (state_ == PlayerState::PLAYING)
 	{
-		ALenum eALState;
-		alGetSourcei(sourceId_, AL_SOURCE_STATE, &eALState);
+		ALenum alState;
+		alGetSourcei(sourceId_, AL_SOURCE_STATE, &alState);
 
-		if (eALState != AL_PLAYING)
+		if (alState != AL_PLAYING)
 			state_ = PlayerState::STOPPED;
+		else
+			alSourcei(sourceId_, AL_LOOPING, isLooping_);
 	}
 }
 
