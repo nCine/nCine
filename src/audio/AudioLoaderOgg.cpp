@@ -1,40 +1,41 @@
-#include "common_macros.h"
 #include "AudioLoaderOgg.h"
 
 #ifdef __ANDROID__
-	#include "AssetFile.h" // for AssetFile::sType()
-
-using ncine::AssetFile;
-
-size_t asset_read(void *ptr, size_t size, size_t nmemb, void *datasource)
-{
-	AssetFile *assetFile = static_cast<AssetFile *>(datasource);
-	return assetFile->read(ptr, size * nmemb);
-}
-
-int asset_seek(void *datasource, ogg_int64_t offset, int whence)
-{
-	AssetFile *assetFile = static_cast<AssetFile *>(datasource);
-	return assetFile->seek(offset, whence);
-}
-
-int asset_close(void *datasource)
-{
-	AssetFile *assetFile = static_cast<AssetFile *>(datasource);
-	assetFile->close();
-	return 0;
-}
-
-long asset_tell(void *datasource)
-{
-	AssetFile *assetFile = static_cast<AssetFile *>(datasource);
-	return assetFile->tell();
-}
-
-ov_callbacks oggCallbacks = { asset_read, asset_seek, asset_close, asset_tell };
+	#include "AssetFile.h" // for `AssetFile::sType()`
 #endif
 
 namespace ncine {
+
+#ifdef __ANDROID__
+namespace {
+	size_t asset_read(void *ptr, size_t size, size_t nmemb, void *datasource)
+	{
+		AssetFile *assetFile = static_cast<AssetFile *>(datasource);
+		return assetFile->read(ptr, size * nmemb);
+	}
+
+	int asset_seek(void *datasource, ogg_int64_t offset, int whence)
+	{
+		AssetFile *assetFile = static_cast<AssetFile *>(datasource);
+		return assetFile->seek(offset, whence);
+	}
+
+	int asset_close(void *datasource)
+	{
+		AssetFile *assetFile = static_cast<AssetFile *>(datasource);
+		assetFile->close();
+		return 0;
+	}
+
+	long asset_tell(void *datasource)
+	{
+		AssetFile *assetFile = static_cast<AssetFile *>(datasource);
+		return assetFile->tell();
+	}
+
+	const ov_callbacks oggCallbacks = { asset_read, asset_seek, asset_close, asset_tell };
+}
+#endif
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -48,11 +49,9 @@ AudioLoaderOgg::AudioLoaderOgg(const char *filename)
 AudioLoaderOgg::AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle)
     : IAudioLoader(nctl::move(fileHandle))
 {
-	vorbis_info *info;
-
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 
-	// File is closed by ov_clear()
+	// File is closed by `ov_clear()`
 	fileHandle_->setCloseOnDestruction(false);
 
 #ifdef __ANDROID__
@@ -84,7 +83,7 @@ AudioLoaderOgg::AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle)
 #endif
 
 	// Get some information about the OGG file
-	info = ov_info(&oggFile_, -1);
+	const vorbis_info *info = ov_info(&oggFile_, -1);
 
 	bytesPerSample_ = 2; // Ogg is always 16 bits
 	numChannels_ = info->channels;
@@ -93,7 +92,7 @@ AudioLoaderOgg::AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle)
 	numSamples_ = static_cast<unsigned long int>(ov_pcm_total(&oggFile_, -1));
 	duration_ = float(ov_time_total(&oggFile_, -1));
 
-	LOGI_X("duration: %.2f, channels: %d, frequency: %d", duration_, numChannels_, frequency_);
+	LOGI_X("duration: %.2fs, channels: %d, frequency: %dHz", duration_, numChannels_, frequency_);
 }
 
 AudioLoaderOgg::~AudioLoaderOgg()
@@ -112,7 +111,7 @@ unsigned long int AudioLoaderOgg::read(char *buffer, unsigned long int bufferSiz
 
 	static int bitStream = 0;
 	long bytes = 0;
-	long int bufferSeek = 0;
+	unsigned long int bufferSeek = 0;
 
 	do
 	{

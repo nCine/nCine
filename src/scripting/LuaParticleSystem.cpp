@@ -26,8 +26,8 @@ namespace ParticleSystem {
 	static const char *inLocalSpace = "get_in_local_space";
 	static const char *setInLocalSpace = "set_in_local_space";
 
-	static const char *numParticles = "get_num_particles";
-	static const char *numAliveParticles = "get_num_alive_particles";
+	static const char *numParticles = "num_particles";
+	static const char *numAliveParticles = "num_alive_particles";
 
 	static const char *setTexture = "set_texture";
 	static const char *setTexRect = "set_texture_rect";

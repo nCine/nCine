@@ -1,4 +1,3 @@
-#include "common_macros.h"
 #include "IAudioLoader.h"
 #include "AudioLoaderWav.h"
 #ifdef WITH_VORBIS
@@ -15,13 +14,13 @@ namespace ncine {
 IAudioLoader::IAudioLoader(const char *filename)
     : IAudioLoader(IFile::createFileHandle(filename))
 {
-	// Warning: Cannot call a virtual init() here, in the base constructor
+	// Warning: Cannot call a virtual `init()` here, in the base constructor
 }
 
 IAudioLoader::IAudioLoader(nctl::UniquePtr<IFile> fileHandle)
     : fileHandle_(nctl::move(fileHandle)), bytesPerSample_(0), numChannels_(0), frequency_(0), numSamples_(0L), duration_(0.0f)
 {
-	// Warning: Cannot call a virtual init() here, in the base constructor
+	// Warning: Cannot call a virtual `init()` here, in the base constructor
 }
 
 ///////////////////////////////////////////////////////////
@@ -41,7 +40,7 @@ nctl::UniquePtr<IAudioLoader> IAudioLoader::createFromFile(const char *filename)
 #endif
 	else
 	{
-		LOGF_X("Extension unknown \"%s\"", fileHandle->extension());
+		LOGF_X("Extension unknown: \"%s\"", fileHandle->extension());
 		fileHandle.reset(nullptr);
 		exit(EXIT_FAILURE);
 	}

@@ -20,7 +20,6 @@ set(HEADERS
 	${NCINE_ROOT}/include/ncine/Quaternion.h
 	${NCINE_ROOT}/include/ncine/IIndexer.h
 	${NCINE_ROOT}/include/ncine/ILogger.h
-	${NCINE_ROOT}/include/ncine/IAudioDevice.h
 	${NCINE_ROOT}/include/ncine/IThreadPool.h
 	${NCINE_ROOT}/include/ncine/IGfxCapabilities.h
 	${NCINE_ROOT}/include/ncine/ServiceLocator.h
@@ -28,12 +27,6 @@ set(HEADERS
 	${NCINE_ROOT}/include/ncine/Timer.h
 	${NCINE_ROOT}/include/ncine/Font.h
 	${NCINE_ROOT}/include/ncine/IFile.h
-	${NCINE_ROOT}/include/ncine/IAudioLoader.h
-	${NCINE_ROOT}/include/ncine/IAudioPlayer.h
-	${NCINE_ROOT}/include/ncine/AudioBuffer.h
-	${NCINE_ROOT}/include/ncine/AudioBufferPlayer.h
-	${NCINE_ROOT}/include/ncine/AudioStream.h
-	${NCINE_ROOT}/include/ncine/AudioStreamPlayer.h
 	${NCINE_ROOT}/include/ncine/IGfxDevice.h
 	${NCINE_ROOT}/include/ncine/Texture.h
 	${NCINE_ROOT}/include/ncine/SceneNode.h

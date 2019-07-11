@@ -31,7 +31,7 @@ class DLL_PUBLIC IAudioLoader
 	/// Returns number of channels
 	inline int numChannels() const { return numChannels_; }
 	/// Returns samples frequency
-	inline unsigned long int frequency() const { return frequency_; }
+	inline int frequency() const { return frequency_; }
 
 	/// Returns the decoded buffer size in bytes
 	inline unsigned long int bufferSize() const { return numSamples_ * numChannels_ * bytesPerSample_; }

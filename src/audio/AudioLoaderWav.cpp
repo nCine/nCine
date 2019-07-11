@@ -1,5 +1,4 @@
 #include <cstring>
-#include "common_macros.h"
 #include "AudioLoaderWav.h"
 
 namespace ncine {
@@ -22,9 +21,7 @@ AudioLoaderWav::AudioLoaderWav(nctl::UniquePtr<IFile> fileHandle)
 	WavHeader header;
 	fileHandle_->read(&header, sizeof(WavHeader));
 
-	if (strncmp(header.chunkId, "RIFF", 4) != 0)
-		FATAL_MSG_X("\"%s\" is not a WAV file", fileHandle_->filename());
-	if (strncmp(header.format, "WAVE", 4) != 0)
+	if (strncmp(header.chunkId, "RIFF", 4) != 0 || strncmp(header.format, "WAVE", 4) != 0)
 		FATAL_MSG_X("\"%s\" is not a WAV file", fileHandle_->filename());
 	if (strncmp(header.subchunk1Id, "fmt ", 4) != 0)
 		FATAL_MSG_X("\"%s\" is an invalid WAV file", fileHandle_->filename());
@@ -39,7 +36,7 @@ AudioLoaderWav::AudioLoaderWav(nctl::UniquePtr<IFile> fileHandle)
 	numSamples_ = IFile::int32FromLE(header.subchunk2Size) / (numChannels_ * bytesPerSample_);
 	duration_ = float(numSamples_) / frequency_;
 
-	LOGI_X("duration: %.2f, channels: %d, frequency: %d", duration_, numChannels_, frequency_);
+	LOGI_X("duration: %.2fs, channels: %d, frequency: %dHz", duration_, numChannels_, frequency_);
 }
 
 ///////////////////////////////////////////////////////////
@@ -51,8 +48,8 @@ unsigned long int AudioLoaderWav::read(char *buffer, unsigned long int bufferSiz
 	ASSERT(buffer);
 	ASSERT(bufferSize > 0);
 
-	long bytes = 0;
-	long int bufferSeek = 0;
+	unsigned long int bytes = 0;
+	unsigned long int bufferSeek = 0;
 
 	do
 	{

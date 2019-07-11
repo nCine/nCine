@@ -82,8 +82,7 @@ int LuaBaseSprite::texture(lua_State *L)
 {
 	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -1);
 
-	const Texture *texture = sprite->texture();
-	LuaUtils::push(L, texture);
+	LuaClassWrapper<Texture>::pushUntrackedUserData(L, sprite->texture());
 
 	return 1;
 }
