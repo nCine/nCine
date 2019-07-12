@@ -7,13 +7,13 @@ if(MSVC)
 		message(STATUS "nCine external MSVC libraries directory: ${EXTERNAL_MSVC_DIR}")
 	endif()
 
+	set(MSVC_ARCH_SUFFIX "x86")
 	if(MSVC_C_ARCHITECTURE_ID MATCHES 64 OR MSVC_CXX_ARCHITECTURE_ID MATCHES 64)
-		set(LIBDIR "${EXTERNAL_MSVC_DIR}/lib/x64")
-		set(BINDIR "${EXTERNAL_MSVC_DIR}/bin/x64")
-	else()
-		set(LIBDIR "${EXTERNAL_MSVC_DIR}/lib/x86")
-		set(BINDIR "${EXTERNAL_MSVC_DIR}/bin/x86")
+		set(MSVC_ARCH_SUFFIX "x64")
 	endif()
+
+	set(MSVC_LIBDIR "${EXTERNAL_MSVC_DIR}/lib/${MSVC_ARCH_SUFFIX}")
+	set(MSVC_BINDIR "${EXTERNAL_MSVC_DIR}/bin/${MSVC_ARCH_SUFFIX}")
 elseif(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android") # GCC and LLVM
 	if(APPLE)
 		set(CMAKE_FRAMEWORK_PATH "${PARENT_SOURCE_DIR}/nCine-external")
@@ -94,11 +94,11 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Android")
 		set(LUA_FOUND 1)
 	endif()
 elseif(MSVC)
-	if(EXISTS ${LIBDIR}/glew32.lib AND EXISTS ${BINDIR}/glew32.dll)
+	if(EXISTS ${MSVC_LIBDIR}/glew32.lib AND EXISTS ${MSVC_BINDIR}/glew32.dll)
 		add_library(GLEW::GLEW SHARED IMPORTED)
 		set_target_properties(GLEW::GLEW PROPERTIES
-			IMPORTED_IMPLIB ${LIBDIR}/glew32.lib
-			IMPORTED_LOCATION ${BINDIR}/glew32.dll
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/glew32.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/glew32.dll
 			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
 		set(GLEW_FOUND 1)
 	endif()
@@ -109,72 +109,72 @@ elseif(MSVC)
 			IMPORTED_LOCATION opengl32.dll)
 	set(OPENGL_FOUND 1)
 
-	if(EXISTS ${LIBDIR}/glfw3dll.lib AND EXISTS ${BINDIR}/glfw3.dll)
+	if(EXISTS ${MSVC_LIBDIR}/glfw3dll.lib AND EXISTS ${MSVC_BINDIR}/glfw3.dll)
 		add_library(GLFW::GLFW SHARED IMPORTED)
 		set_target_properties(GLFW::GLFW PROPERTIES
-			IMPORTED_IMPLIB ${LIBDIR}/glfw3dll.lib
-			IMPORTED_LOCATION ${BINDIR}/glfw3.dll
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/glfw3dll.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/glfw3.dll
 			INTERFACE_COMPILE_DEFINITIONS "GLFW_NO_GLU"
 			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
 		set(GLFW_FOUND 1)
 	endif()
 
-	if(EXISTS ${LIBDIR}/SDL2.lib AND EXISTS ${LIBDIR}/SDL2main.lib AND EXISTS ${BINDIR}/SDL2.dll)
+	if(EXISTS ${MSVC_LIBDIR}/SDL2.lib AND EXISTS ${MSVC_LIBDIR}/SDL2main.lib AND EXISTS ${MSVC_BINDIR}/SDL2.dll)
 		add_library(SDL2::SDL2 SHARED IMPORTED)
 		set_target_properties(SDL2::SDL2 PROPERTIES
-			IMPORTED_IMPLIB ${LIBDIR}/SDL2.lib
-			IMPORTED_LOCATION ${BINDIR}/SDL2.dll
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/SDL2.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/SDL2.dll
 			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include"
-			INTERFACE_LINK_LIBRARIES ${LIBDIR}/SDL2main.lib)
+			INTERFACE_LINK_LIBRARIES ${MSVC_LIBDIR}/SDL2main.lib)
 		set(SDL2_FOUND 1)
 	endif()
 
-	if(EXISTS ${LIBDIR}/libpng16.lib AND EXISTS ${LIBDIR}/zlib.lib AND
-	   EXISTS ${BINDIR}/libpng16.dll AND EXISTS ${BINDIR}/zlib.dll)
+	if(EXISTS ${MSVC_LIBDIR}/libpng16.lib AND EXISTS ${MSVC_LIBDIR}/zlib.lib AND
+	   EXISTS ${MSVC_BINDIR}/libpng16.dll AND EXISTS ${MSVC_BINDIR}/zlib.dll)
 		add_library(PNG::PNG SHARED IMPORTED)
 		set_target_properties(PNG::PNG PROPERTIES
 			IMPORTED_LINK_INTERFACE_LANGUAGES "C"
-			IMPORTED_IMPLIB ${LIBDIR}/libpng16.lib
-			IMPORTED_LOCATION ${BINDIR}/libpng16.dll
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libpng16.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/libpng16.dll
 			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include"
-			INTERFACE_LINK_LIBRARIES ${LIBDIR}/zlib.lib)
+			INTERFACE_LINK_LIBRARIES ${MSVC_LIBDIR}/zlib.lib)
 		set(PNG_FOUND 1)
 	endif()
 
-	if(EXISTS ${LIBDIR}/OpenAL32.lib AND EXISTS ${BINDIR}/OpenAL32.dll)
+	if(EXISTS ${MSVC_LIBDIR}/OpenAL32.lib AND EXISTS ${MSVC_BINDIR}/OpenAL32.dll)
 		add_library(OpenAL::AL SHARED IMPORTED)
 		set_target_properties(OpenAL::AL PROPERTIES
-			IMPORTED_IMPLIB ${LIBDIR}/OpenAL32.lib
-			IMPORTED_LOCATION ${BINDIR}/OpenAL32.dll
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/OpenAL32.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/OpenAL32.dll
 			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
 		set(OPENAL_FOUND 1)
 	endif()
 
-	if(EXISTS ${LIBDIR}/libwebp_dll.lib AND EXISTS ${BINDIR}/libwebp.dll AND EXISTS ${BINDIR}/libwebpdecoder.dll)
+	if(EXISTS ${MSVC_LIBDIR}/libwebp_dll.lib AND EXISTS ${MSVC_BINDIR}/libwebp.dll AND EXISTS ${MSVC_BINDIR}/libwebpdecoder.dll)
 		add_library(WebP::WebP SHARED IMPORTED)
 		set_target_properties(WebP::WebP PROPERTIES
-			IMPORTED_IMPLIB ${LIBDIR}/libwebp_dll.lib
-			IMPORTED_LOCATION ${BINDIR}/libwebp.dll
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libwebp_dll.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/libwebp.dll
 			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
 		set(WEBP_FOUND 1)
 	endif()
 
-	if(EXISTS ${LIBDIR}/libogg.lib AND EXISTS ${LIBDIR}/libvorbis.lib AND EXISTS ${LIBDIR}/libvorbisfile.lib AND
-	   EXISTS ${BINDIR}/libogg.dll AND EXISTS ${BINDIR}/libvorbis.dll AND EXISTS ${BINDIR}/libvorbisfile.dll)
+	if(EXISTS ${MSVC_LIBDIR}/libogg.lib AND EXISTS ${MSVC_LIBDIR}/libvorbis.lib AND EXISTS ${MSVC_LIBDIR}/libvorbisfile.lib AND
+	   EXISTS ${MSVC_BINDIR}/libogg.dll AND EXISTS ${MSVC_BINDIR}/libvorbis.dll AND EXISTS ${MSVC_BINDIR}/libvorbisfile.dll)
 		add_library(Vorbis::Vorbisfile SHARED IMPORTED)
 		set_target_properties(Vorbis::Vorbisfile PROPERTIES
-			IMPORTED_IMPLIB ${LIBDIR}/libvorbisfile.lib
-			IMPORTED_LOCATION ${BINDIR}/libvorbisfile.dll
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libvorbisfile.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/libvorbisfile.dll
 			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include"
-			INTERFACE_LINK_LIBRARIES "${LIBDIR}/libvorbis.lib;${LIBDIR}/libogg.lib")
+			INTERFACE_LINK_LIBRARIES "${MSVC_LIBDIR}/libvorbis.lib;${MSVC_LIBDIR}/libogg.lib")
 		set(VORBIS_FOUND 1)
 	endif()
 
-	if(EXISTS ${LIBDIR}/lua53.lib AND EXISTS ${BINDIR}/lua53.dll)
+	if(EXISTS ${MSVC_LIBDIR}/lua53.lib AND EXISTS ${MSVC_BINDIR}/lua53.dll)
 		add_library(Lua::Lua SHARED IMPORTED)
 		set_target_properties(Lua::Lua PROPERTIES
-			IMPORTED_IMPLIB ${LIBDIR}/lua53.lib
-			IMPORTED_LOCATION ${BINDIR}/lua53.dll
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/lua53.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/lua53.dll
 			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
 		set(LUA_FOUND 1)
 	endif()

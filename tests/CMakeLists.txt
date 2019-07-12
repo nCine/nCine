@@ -4,7 +4,7 @@ project(nCine-tests)
 if(WIN32)
 	if(MSVC)
 		add_custom_target(copy_dlls_tests ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/tests
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${MSVC_BINDIR} ${CMAKE_BINARY_DIR}/tests
 			COMMENT "Copying DLLs to tests..."
 		)
 		set_target_properties(copy_dlls_tests PROPERTIES FOLDER "CustomCopyTargets")
@@ -52,10 +52,10 @@ foreach(APPTEST ${APPTESTS})
 
 	if(NCINE_WITH_TRACY AND NCINE_DYNAMIC_LIBRARY)
 		target_sources(${APPTEST} PRIVATE ${TRACY_SOURCE_DIR}/TracyClientDLL.cpp)
-		target_link_libraries(${APPTEST} Threads::Threads)
+		target_link_libraries(${APPTEST} PRIVATE Threads::Threads)
 	endif()
 
-	target_link_libraries(${APPTEST} ncine_main ncine)
+	target_link_libraries(${APPTEST} PRIVATE ncine_main ncine)
 	set_target_properties(${APPTEST} PROPERTIES FOLDER "AppTests")
 	target_compile_definitions(${APPTEST} PRIVATE "NCINE_TESTS_DATA_DIR=\"${NCINE_TESTS_DATA_DIR}\"")
 	if(APPLE)

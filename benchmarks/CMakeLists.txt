@@ -4,7 +4,7 @@ project(nCine-benchmarks)
 if(WIN32)
 	if(MSVC)
 		add_custom_target(copy_dlls_benchmarks ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/benchmarks
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${MSVC_BINDIR} ${CMAKE_BINARY_DIR}/benchmarks
 			COMMENT "Copying DLLs to tests..."
 		)
 		set_target_properties(copy_dlls_benchmarks PROPERTIES FOLDER "CustomCopyTargets")
@@ -22,32 +22,34 @@ elseif(APPLE)
 	file(RELATIVE_PATH RELPATH_TO_LIB ${CMAKE_INSTALL_PREFIX}/${RUNTIME_INSTALL_DESTINATION} ${CMAKE_INSTALL_PREFIX}/${LIBRARY_INSTALL_DESTINATION})
 endif()
 
-list(APPEND BENCHMARKS
-	gbench_std_vector gbench_array
-	gbench_std_bigvector gbench_bigarray
-	gbench_std_array gbench_staticarray
-	gbench_std_list gbench_list
-	gbench_std_biglist gbench_biglist
-	gbench_std_string gbench_string
-	gbench_std_unorderedmap gbench_hashmap
-	gbench_std_bigunorderedmap gbench_bighashmap
-	gbench_std_unorderedset gbench_hashset
-	gbench_statichashmap gbench_hashmaplist
-	gbench_statichashset gbench_hashsetlist
-	gbench_bighashmaplist
-	gbench_sparseset
-	gbench_std_rand gbench_random
-)
+if(Threads_FOUND)
+	list(APPEND BENCHMARKS
+		gbench_std_vector gbench_array
+		gbench_std_bigvector gbench_bigarray
+		gbench_std_array gbench_staticarray
+		gbench_std_list gbench_list
+		gbench_std_biglist gbench_biglist
+		gbench_std_string gbench_string
+		gbench_std_unorderedmap gbench_hashmap
+		gbench_std_bigunorderedmap gbench_bighashmap
+		gbench_std_unorderedset gbench_hashset
+		gbench_statichashmap gbench_hashmaplist
+		gbench_statichashset gbench_hashsetlist
+		gbench_bighashmaplist
+		gbench_sparseset
+		gbench_std_rand gbench_random
+	)
+endif()
 
 foreach(BENCHMARK ${BENCHMARKS})
 	add_executable(${BENCHMARK} ${BENCHMARK}.cpp)
-	target_link_libraries(${BENCHMARK} ncine benchmark Threads::Threads)
+	target_link_libraries(${BENCHMARK} PRIVATE ncine benchmark Threads::Threads)
 	set_target_properties(${BENCHMARK} PROPERTIES FOLDER "Benchmarks")
 
 	if(APPLE)
 		set_target_properties(${BENCHMARK} PROPERTIES INSTALL_RPATH "@executable_path/${RELPATH_TO_LIB}")
 	elseif(MINGW OR MSYS)
-		target_link_libraries(${BENCHMARK} shlwapi)
+		target_link_libraries(${BENCHMARK} PRIVATE shlwapi)
 	endif()
 endforeach()
 

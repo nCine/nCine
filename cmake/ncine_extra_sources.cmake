@@ -49,7 +49,6 @@ if(OPENAL_FOUND)
 	endif()
 
 	list(APPEND HEADERS
-		${NCINE_ROOT}/include/ncine/IAudioDevice.h
 		${NCINE_ROOT}/include/ncine/IAudioLoader.h
 		${NCINE_ROOT}/include/ncine/AudioBuffer.h
 		${NCINE_ROOT}/include/ncine/AudioStream.h
@@ -99,10 +98,6 @@ if(Threads_FOUND)
 	target_compile_definitions(ncine PRIVATE "WITH_THREADS")
 	target_link_libraries(ncine PRIVATE Threads::Threads)
 
-	list(APPEND HEADERS
-		${NCINE_ROOT}/include/ncine/IThreadPool.h
-		${NCINE_ROOT}/include/ncine/IThreadCommand.h
-	)
 	list(APPEND PRIVATE_HEADERS
 		${NCINE_ROOT}/src/include/Thread.h
 		${NCINE_ROOT}/src/include/ThreadSync.h

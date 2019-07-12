@@ -1,19 +1,14 @@
 #include "gtest_uniqueptr.h"
-#include "test_thread_functions.h"
 
 namespace {
-
-const int NumThreads = 100;
-const int NumIterations = 1000;
 
 class SharedPtrTest : public ::testing::Test
 {
   public:
 	SharedPtrTest()
-	    : ptr_(new int(Value)), tr_(this) {}
+	    : ptr_(new int(Value)) {}
 
 	nctl::SharedPtr<int> ptr_;
-	ThreadRunner<NumThreads> tr_;
 };
 
 TEST_F(SharedPtrTest, NullPtr)
@@ -184,21 +179,6 @@ TEST_F(SharedPtrTest, ShareAssignment)
 	}
 
 	printPointer("Letting all new shared pointer go out of scope, ", ptr_);
-	ASSERT_EQ(ptr_.useCount(), 1);
-}
-
-TEST_F(SharedPtrTest, ShareAssignmentMultithread)
-{
-	tr_.runThreads([](void *arg) -> ThreadRunner<NumThreads>::threadFuncRet {
-		SharedPtrTest *obj = static_cast<SharedPtrTest *>(arg);
-		for (unsigned int i = 0; i < NumIterations; i++)
-		{
-			nctl::SharedPtr<int> newPtr(obj->ptr_);
-		}
-		return static_cast<SharedPtrTest *>(arg)->tr_.retFunc();
-	});
-
-	printPointer("Letting all threads join and new shared pointer go out of scope, ", ptr_);
 	ASSERT_EQ(ptr_.useCount(), 1);
 }
 

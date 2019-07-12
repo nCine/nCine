@@ -42,21 +42,21 @@ get_target_property(NCINE_MAIN_LOCATION ncine::ncine_main IMPORTED_LOCATION_${NC
 message(STATUS "nCine main.cpp: ${NCINE_MAIN_LOCATION}")
 
 if(MSVC)
-	set(ARCH_SUFFIX "x86")
+	set(MSVC_ARCH_SUFFIX "x86")
 	if(MSVC_C_ARCHITECTURE_ID MATCHES 64 OR MSVC_CXX_ARCHITECTURE_ID MATCHES 64)
-		set(ARCH_SUFFIX "x64")
+		set(MSVC_ARCH_SUFFIX "x64")
 	endif()
 		
 	get_filename_component(NCINE_LOCATION_DIR ${NCINE_LOCATION} DIRECTORY)
 	get_filename_component(PARENT_SOURCE_DIR ${CMAKE_SOURCE_DIR} DIRECTORY)
 	get_filename_component(PARENT_BINARY_DIR ${CMAKE_BINARY_DIR} DIRECTORY)
-	find_path(BINDIR
+	find_path(MSVC_BINDIR
 		NAMES libpng16.dll libogg.dll libvorbis.dll
 		PATHS ${NCINE_LOCATION_DIR} ${PARENT_SOURCE_DIR}/nCine-external ${PARENT_BINARY_DIR}/nCine-external
-		PATH_SUFFIXES bin/${ARCH_SUFFIX}
+		PATH_SUFFIXES bin/${MSVC_ARCH_SUFFIX}
 		DOC "Path to the nCine external libraries directory")
 		
-	file(GLOB MSVC_DLL_FILES ${BINDIR}/*.dll)
+	file(GLOB MSVC_DLL_FILES ${MSVC_BINDIR}/*.dll)
 	add_custom_target(copy_dlls_tests ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MSVC_DLL_FILES} ${CMAKE_BINARY_DIR}
 		COMMENT "Copying DLLs to tests..."
@@ -80,6 +80,6 @@ foreach(APPTEST ${APPTESTS})
 	endif()
 
 	target_compile_definitions(${APPTEST} PRIVATE "NCINE_TESTS_DATA_DIR=\"${NCINE_TESTS_DATA_DIR}/\"")
-	target_link_libraries(${APPTEST} ncine::ncine_main ncine::ncine)
+	target_link_libraries(${APPTEST} PRIVATE ncine::ncine_main ncine::ncine)
 	set_target_properties(${APPTEST} PROPERTIES FOLDER "AppTests")
 endforeach()

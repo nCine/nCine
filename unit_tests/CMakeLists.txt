@@ -4,7 +4,7 @@ project(nCine-unit_tests)
 if(WIN32)
 	if(MSVC)
 		add_custom_target(copy_dlls_unit_tests ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_directory ${BINDIR} ${CMAKE_BINARY_DIR}/unit_tests
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${MSVC_BINDIR} ${CMAKE_BINARY_DIR}/unit_tests
 			COMMENT "Copying DLLs to tests..."
 		)
 		set_target_properties(copy_dlls_unit_tests PROPERTIES FOLDER "CustomCopyTargets")
@@ -36,17 +36,23 @@ list(APPEND TESTS
 	gtest_sparseset gtest_sparseset_iterator gtest_sparseset_algorithms
 	gtest_vector2 gtest_vector3 gtest_vector4 gtest_rect
 	gtest_matrix4x4 gtest_matrix4x4_operations gtest_quaternion gtest_quaternion_operations
-	gtest_atomic32 gtest_atomic64
 	gtest_uniqueptr gtest_uniqueptr_array gtest_sharedptr
 	gtest_color gtest_colorf
 	gtest_random
 )
 
+if(Threads_FOUND)
+	list(APPEND TESTS
+		gtest_atomic32 gtest_atomic64
+		gtest_sharedptr_threads
+	)
+endif()
+
 foreach(TEST ${TESTS})
 	add_executable(${TEST} ${TEST}.cpp test_functions.h)
-	target_link_libraries(${TEST} ncine gtest_main)
+	target_link_libraries(${TEST} PRIVATE ncine gtest_main)
 	if(NOT MSVC)
-		target_link_libraries(${TEST} enable_coverage)
+		target_link_libraries(${TEST} PRIVATE enable_coverage)
 	endif()
 	set_target_properties(${TEST} PROPERTIES FOLDER "UnitTests")
 	add_test(NAME Tests-${TEST} COMMAND ${TEST})
