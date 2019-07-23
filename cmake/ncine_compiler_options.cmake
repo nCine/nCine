@@ -88,22 +88,17 @@ else() # GCC and LLVM
 	if(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND NOT (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8.0)) OR
 	  (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") AND NOT (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.0)) AND
 	   NOT EMSCRIPTEN AND NCINE_ADDRESS_SANITIZER)
-		target_compile_options(ncine PRIVATE $<$<CONFIG:Debug>:-O1 -g -fsanitize=address -fsanitize-address-use-after-scope -fno-optimize-sibling-calls -fno-common -fno-omit-frame-pointer -rdynamic>)
-		target_link_options(ncine PRIVATE $<$<CONFIG:Debug>:-fsanitize=address>)
+		# Add ASan options as public so that targets linking the library will also use them
+		target_compile_options(ncine PUBLIC $<$<CONFIG:Debug>:-O1 -g -fsanitize=address -fsanitize-address-use-after-scope -fno-optimize-sibling-calls -fno-common -fno-omit-frame-pointer -rdynamic>)
+		target_link_options(ncine PUBLIC $<$<CONFIG:Debug>:-fsanitize=address>)
 	endif()
-
-	# Interface library pseudo target for unit tests
-	add_library(enable_coverage INTERFACE)
 
 	# Only in debug
 	if(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") AND
 	   NCINE_CODE_COVERAGE)
-		target_compile_options(ncine PRIVATE $<$<CONFIG:Debug>:--coverage>)
-		target_link_options(ncine PRIVATE $<$<CONFIG:Debug>:--coverage>)
-
-		# Add code coverage options to the interface library for unit tests
-		target_compile_options(enable_coverage INTERFACE $<$<CONFIG:Debug>:--coverage>)
-		target_link_options(enable_coverage INTERFACE $<$<CONFIG:Debug>:--coverage>)
+		# Add code coverage options as public so that targets linking the library will also use them
+		target_compile_options(ncine PUBLIC $<$<CONFIG:Debug>:--coverage>)
+		target_link_options(ncine PUBLIC $<$<CONFIG:Debug>:--coverage>)
 	endif()
 
 	if(NCINE_WITH_TRACY)

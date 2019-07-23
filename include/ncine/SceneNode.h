@@ -37,8 +37,12 @@ class DLL_PUBLIC SceneNode : public Object
 
 	inline static ObjectType sType() { return ObjectType::SCENENODE; }
 
+	/// Returns the parent as a constant node, if there is any
+	inline const SceneNode *parent() const { return parent_; }
 	/// Returns the parent node, if there is any
-	inline const SceneNode *parentNode() const { return parent_; }
+	inline SceneNode *parent() { return parent_; }
+	/// Sets the parent node
+	void setParent(SceneNode *parentNode);
 	/// Returns a list of child nodes
 	inline const nctl::List<SceneNode *> &children() const { return children_; }
 	/// Adds a node as a child of this one

@@ -8,7 +8,8 @@ namespace ncine {
 
 namespace LuaNames {
 namespace SceneNode {
-	static const char *parentNode = "get_parent";
+	static const char *parent = "get_parent";
+	static const char *setParent = "set_parent";
 	static const char *addChildNode = "add_child";
 	static const char *removeChildNode = "remove_child";
 	static const char *unlinkChildNode = "unlink_child";
@@ -33,7 +34,8 @@ namespace SceneNode {
 
 void LuaSceneNode::exposeFunctions(lua_State *L)
 {
-	LuaUtils::addFunction(L, LuaNames::SceneNode::parentNode, parentNode);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::parent, parent);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::setParent, setParent);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::addChildNode, addChildNode);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::removeChildNode, removeChildNode);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::unlinkChildNode, unlinkChildNode);
@@ -52,14 +54,24 @@ void LuaSceneNode::exposeFunctions(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::SceneNode::setColor, setColor);
 }
 
-int LuaSceneNode::parentNode(lua_State *L)
+int LuaSceneNode::parent(lua_State *L)
 {
 	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
 
-	const SceneNode *parent = node->parentNode();
+	const SceneNode *parent = node->parent();
 	LuaUtils::push(L, parent);
 
 	return 1;
+}
+
+int LuaSceneNode::setParent(lua_State *L)
+{
+	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
+	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+
+	node->setParent(parent);
+
+	return 0;
 }
 
 int LuaSceneNode::addChildNode(lua_State *L)

@@ -18,8 +18,7 @@ SceneNode::SceneNode(SceneNode *parent, float xx, float yy)
       scaleFactor_(1.0f), rotation_(0.0f), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
       worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {
-	if (parent)
-		parent->addChildNode(this);
+	setParent(parent);
 }
 
 /*! \param parent The parent can be `nullptr` */
@@ -44,32 +43,41 @@ SceneNode::~SceneNode()
 	for (SceneNode *child : children_)
 		delete child;
 
-	if (parent_)
-	{
-		parent_->removeChildNode(this);
-		parent_ = nullptr;
-	}
+	setParent(nullptr);
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+void SceneNode::setParent(SceneNode *parentNode)
+{
+	ASSERT(parentNode != this);
+
+	if (parent_)
+		parent_->children_.remove(this);
+	if (parentNode)
+		parentNode->children_.pushBack(this);
+	parent_ = parentNode;
+}
+
 void SceneNode::addChildNode(SceneNode *childNode)
 {
 	ASSERT(childNode);
+	ASSERT(childNode != this);
 
 	if (childNode->parent_)
 		childNode->parent_->removeChildNode(childNode);
 
-	childNode->parent_ = this;
 	children_.pushBack(childNode);
+	childNode->parent_ = this;
 }
 
 /*!	\return True if the node has been removed */
 bool SceneNode::removeChildNode(SceneNode *childNode)
 {
 	ASSERT(childNode);
+	ASSERT(childNode != this);
 	bool hasBeenRemoved = false;
 
 	if (!children_.isEmpty() && // avoid checking if this node has no children
@@ -89,6 +97,7 @@ bool SceneNode::removeChildNode(SceneNode *childNode)
  */
 bool SceneNode::removeChildNode(nctl::List<SceneNode *>::ConstIterator it)
 {
+	ASSERT(*it != this);
 	bool hasBeenRemoved = false;
 
 	if (*it && // cannot pass a `nullptr`
@@ -107,6 +116,7 @@ bool SceneNode::removeChildNode(nctl::List<SceneNode *>::ConstIterator it)
 bool SceneNode::unlinkChildNode(SceneNode *childNode)
 {
 	ASSERT(childNode);
+	ASSERT(childNode != this);
 	bool hasBeenUnlinked = false;
 
 	if (!children_.isEmpty() && // avoid checking if this node has no children

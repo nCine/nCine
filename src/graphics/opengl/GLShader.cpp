@@ -82,10 +82,6 @@ void GLShader::compile(ErrorChecking errorChecking)
 		status_ = Status::COMPILED_WITH_DEFERRED_CHECKS;
 }
 
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
 bool GLShader::checkCompilation()
 {
 	if (status_ == Status::COMPILED)

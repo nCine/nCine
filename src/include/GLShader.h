@@ -24,6 +24,10 @@ class GLShader
 		DEFERRED
 	};
 
+	explicit GLShader(GLenum type);
+	GLShader(GLenum type, const char *filename);
+	~GLShader();
+
 	inline GLuint glHandle() const { return glHandle_; }
 	inline Status status() const { return status_; }
 
@@ -31,22 +35,16 @@ class GLShader
 	void loadFromFile(const char *filename);
 	void compile(ErrorChecking errorChecking);
 
+	bool checkCompilation();
+
   private:
 	GLuint glHandle_;
 	Status status_;
-
-	explicit GLShader(GLenum type);
-	GLShader(GLenum type, const char *filename);
-	~GLShader();
-
-	bool checkCompilation();
 
 	/// Deleted copy constructor
 	GLShader(const GLShader &) = delete;
 	/// Deleted assignment operator
 	GLShader &operator=(const GLShader &) = delete;
-
-	friend class GLShaderProgram;
 };
 
 }

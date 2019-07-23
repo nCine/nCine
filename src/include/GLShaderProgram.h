@@ -66,7 +66,7 @@ class GLShaderProgram
 
 	GLuint glHandle_;
 	static const int AttachedShadersInitialSize = 4;
-	nctl::Array<GLShader *> attachedShaders_;
+	nctl::Array<nctl::UniquePtr<GLShader>> attachedShaders_;
 	Status status_;
 	Introspection introspection_;
 	QueryPhase queryPhase_;
