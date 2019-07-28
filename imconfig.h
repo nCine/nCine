@@ -6,6 +6,7 @@
 
 #define IMGUI_DISABLE_OBSOLETE_FUNCTIONS
 #define IMGUI_DISABLE_DEMO_WINDOWS
+#define IMGUI_DISABLE_METRICS_WINDOW
 
 #define IM_VEC2_CLASS_EXTRA \
 	ImVec2(const ncine::Vector2f &f) \

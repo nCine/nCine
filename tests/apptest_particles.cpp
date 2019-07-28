@@ -69,6 +69,8 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
+	const float interval = nc::theApplication().interval();
+
 	if (emitTimer_->interval() > 0.085f)
 	{
 		nc::ParticleInitializer init;
@@ -81,28 +83,28 @@ void MyEventHandler::onFrameStart()
 		particleSystem_->emitParticles(init);
 	}
 
-	particleSystem_->move(joyVectorLeft_ * JoySpeed * nc::theApplication().interval());
-	emitVector_ += joyVectorRight_ * JoySpeed * nc::theApplication().interval();
+	particleSystem_->move(joyVectorLeft_ * JoySpeed * interval);
+	emitVector_ += joyVectorRight_ * interval;
 
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
 	if (keyState.isKeyDown(nc::KeySym::D))
-		particleSystem_->x += KeySpeed * nc::theApplication().interval();
+		particleSystem_->x += KeySpeed * interval;
 	else if (keyState.isKeyDown(nc::KeySym::A))
-		particleSystem_->x -= KeySpeed * nc::theApplication().interval();
+		particleSystem_->x -= KeySpeed * interval;
 	if (keyState.isKeyDown(nc::KeySym::W))
-		particleSystem_->y += KeySpeed * nc::theApplication().interval();
+		particleSystem_->y += KeySpeed * interval;
 	else if (keyState.isKeyDown(nc::KeySym::S))
-		particleSystem_->y -= KeySpeed * nc::theApplication().interval();
+		particleSystem_->y -= KeySpeed * interval;
 
 	if (keyState.isKeyDown(nc::KeySym::RIGHT))
-		emitVector_.x += KeySpeed * nc::theApplication().interval();
+		emitVector_.x += KeySpeed * interval;
 	else if (keyState.isKeyDown(nc::KeySym::LEFT))
-		emitVector_.x -= KeySpeed * nc::theApplication().interval();
+		emitVector_.x -= KeySpeed * interval;
 	if (keyState.isKeyDown(nc::KeySym::UP))
-		emitVector_.y += KeySpeed * nc::theApplication().interval();
+		emitVector_.y += KeySpeed * interval;
 	else if (keyState.isKeyDown(nc::KeySym::DOWN))
-		emitVector_.y -= KeySpeed * nc::theApplication().interval();
+		emitVector_.y -= KeySpeed * interval;
 }
 
 #ifdef __ANDROID__
