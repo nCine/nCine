@@ -119,12 +119,12 @@ if(NCINE_EMBED_SHADERS)
 	set(SHADER_FILES "")
 endif()
 
-if(MSVC AND EXISTS ${NCINE_DATA_DIR}/icons/nCine.ico)
+if(MSVC AND EXISTS ${NCINE_DATA_DIR}/icons/icon.ico)
 	message(STATUS "Writing a resource file for executables icon")
 
 	set(RESOURCE_RC_FILE "${GENERATED_SOURCE_DIR}/resource.rc")
-	file(WRITE ${RESOURCE_RC_FILE} "IDI_ICON1 ICON DISCARDABLE \"ncine/nCine.ico\"")
-	file(COPY ${NCINE_DATA_DIR}/icons/nCine.ico DESTINATION ${GENERATED_INCLUDE_DIR})
+	file(WRITE ${RESOURCE_RC_FILE} "IDI_ICON1 ICON DISCARDABLE \"ncine/icon.ico\"")
+	file(COPY ${NCINE_DATA_DIR}/icons/icon.ico DESTINATION ${GENERATED_INCLUDE_DIR})
 endif()
 
 if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.in)
