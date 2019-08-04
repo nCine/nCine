@@ -39,10 +39,6 @@ class DLL_PUBLIC AppConfiguration
 	nctl::String windowTitle;
 	/// The window icon filename
 	nctl::String windowIconFilename;
-	/// The font texture filename for profiler information text
-	nctl::String fontTexFilename;
-	/// The font FNT filename for profiler information text
-	nctl::String fontFntFilename;
 
 	/// The flag is `true` if mapping is used to update OpenGL buffers
 	bool useBufferMapping;
@@ -56,10 +52,8 @@ class DLL_PUBLIC AppConfiguration
 	/// The maximum size for the pool of VAOs
 	unsigned int vaoPoolSize;
 
-	/// The flag is `true` if the profiler graphs are enabled
-	bool withProfilerGraphs;
-	/// The flag is `true` if the information text is enabled
-	bool withInfoText;
+	/// The flag is `true` if the debug overlay is enabled
+	bool withDebugOverlay;
 	/// The flag is `true` if the audio subsystem is enabled
 	bool withAudio;
 	/// The flag is `true` if the threading subsystem is enabled

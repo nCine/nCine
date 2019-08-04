@@ -14,10 +14,10 @@ class IInputEventHandler;
 class ImGuiDebugOverlay : public IDebugOverlay
 {
   public:
-	ImGuiDebugOverlay(const AppConfiguration &appCfg);
+	explicit ImGuiDebugOverlay(float profileTextUpdateTime);
 
-	void update();
-	void updateFrameTimings();
+	void update() override;
+	void updateFrameTimings() override;
 
   private:
 	const float Margin = 10.0f;

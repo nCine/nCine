@@ -7,7 +7,6 @@ set(SOURCES
 	${NCINE_ROOT}/src/ArrayIndexer.cpp
 	${NCINE_ROOT}/src/Timer.cpp
 	${NCINE_ROOT}/src/FrameTimer.cpp
-	${NCINE_ROOT}/src/ProfileVariable.cpp
 	${NCINE_ROOT}/src/Font.cpp
 	${NCINE_ROOT}/src/FontGlyph.cpp
 	${NCINE_ROOT}/src/IFile.cpp
@@ -29,10 +28,6 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/TextureLoaderPvr.cpp
 	${NCINE_ROOT}/src/graphics/TextureLoaderKtx.cpp
 	${NCINE_ROOT}/src/graphics/Texture.cpp
-	${NCINE_ROOT}/src/graphics/ProfilePlotter.cpp
-	${NCINE_ROOT}/src/graphics/PlottingVariable.cpp
-	${NCINE_ROOT}/src/graphics/LinePlotter.cpp
-	${NCINE_ROOT}/src/graphics/StackedBarPlotter.cpp
 	${NCINE_ROOT}/src/graphics/DrawableNode.cpp
 	${NCINE_ROOT}/src/graphics/SceneNode.cpp
 	${NCINE_ROOT}/src/graphics/BaseSprite.cpp

@@ -1,7 +1,6 @@
 #ifndef CLASS_NCINE_IDEBUGOVERLAY
 #define CLASS_NCINE_IDEBUGOVERLAY
 
-#include "AppConfiguration.h"
 #include "Timer.h"
 
 namespace ncine {
@@ -19,11 +18,11 @@ class DLL_PUBLIC IDebugOverlay
 		bool showProfilerGraphs;
 		/// True if showing the information text
 		bool showInfoText;
-		/// True if showing the debug interface (ImGui only)
+		/// True if showing the debug interface
 		bool showInterface;
 	};
 
-	IDebugOverlay(const AppConfiguration &appCfg);
+	explicit IDebugOverlay(float profileTextUpdateTime);
 	virtual ~IDebugOverlay();
 
 	inline DisplaySettings &settings() { return settings_; }
@@ -41,8 +40,8 @@ class DLL_PUBLIC IDebugOverlay
 	IDebugOverlay &operator=(const IDebugOverlay &) = delete;
 };
 
-inline IDebugOverlay::IDebugOverlay(const AppConfiguration &appCfg)
-    : updateTime_(appCfg.profileTextUpdateTime())
+inline IDebugOverlay::IDebugOverlay(float profileTextUpdateTime)
+    : updateTime_(profileTextUpdateTime)
 {
 	updateTimer_.start();
 }

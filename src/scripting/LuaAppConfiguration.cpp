@@ -25,17 +25,13 @@ namespace AppConfiguration {
 	static const char *windowTitle = "window_title";
 	static const char *windowIconFilename = "window_icon";
 
-	static const char *fontTexFilename = "font_texture";
-	static const char *fontFntFilename = "font_fntfile";
-
 	static const char *useBufferMapping = "buffer_mapping";
 	static const char *deferShaderQueries = "defer_shader_queries";
 	static const char *vboSize = "vbo_size";
 	static const char *iboSize = "ibo_size";
 	static const char *vaoPoolSize = "vao_pool_size";
 
-	static const char *withProfilerGraphs = "profiler_graphs";
-	static const char *withInfoText = "info_text";
+	static const char *withDebugOverlay = "debug_overlay";
 	static const char *withAudio = "audio";
 	static const char *withThreads = "threads";
 	static const char *withScenegraph = "scenegraph";
@@ -66,17 +62,13 @@ void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::windowTitle, appCfg.windowTitle.data());
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::windowIconFilename, appCfg.windowIconFilename.data());
 
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::fontTexFilename, appCfg.fontTexFilename.data());
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::fontFntFilename, appCfg.fontFntFilename.data());
-
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::useBufferMapping, appCfg.useBufferMapping);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::deferShaderQueries, appCfg.deferShaderQueries);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::vboSize, static_cast<int64_t>(appCfg.vboSize));
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::iboSize, static_cast<int64_t>(appCfg.iboSize));
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::vaoPoolSize, appCfg.vaoPoolSize);
 
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::withProfilerGraphs, appCfg.withProfilerGraphs);
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::withInfoText, appCfg.withInfoText);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::withDebugOverlay, appCfg.withDebugOverlay);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withAudio, appCfg.withAudio);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withThreads, appCfg.withThreads);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withScenegraph, appCfg.withScenegraph);
@@ -115,11 +107,6 @@ void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
 	const char *windowIconFilename = LuaUtils::retrieveField<const char *>(L, -1, LuaNames::AppConfiguration::windowIconFilename);
 	appCfg.windowIconFilename = windowIconFilename;
 
-	const char *fontTexFilename = LuaUtils::retrieveField<const char *>(L, -1, LuaNames::AppConfiguration::fontTexFilename);
-	appCfg.fontTexFilename = fontTexFilename;
-	const char *fontFntFilename = LuaUtils::retrieveField<const char *>(L, -1, LuaNames::AppConfiguration::fontFntFilename);
-	appCfg.fontFntFilename = fontFntFilename;
-
 	const bool useBufferMapping = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::useBufferMapping);
 	appCfg.useBufferMapping = useBufferMapping;
 	const bool deferShaderQueries = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::deferShaderQueries);
@@ -131,10 +118,8 @@ void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
 	const unsigned int vaoPoolSize = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::vaoPoolSize);
 	appCfg.vaoPoolSize = vaoPoolSize;
 
-	const bool withProfilerGraphs = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withProfilerGraphs);
-	appCfg.withProfilerGraphs = withProfilerGraphs;
-	const bool withInfoText = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withInfoText);
-	appCfg.withInfoText = withInfoText;
+	const bool withDebugOverlay = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withDebugOverlay);
+	appCfg.withDebugOverlay = withDebugOverlay;
 	const bool withAudio = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withAudio);
 	appCfg.withAudio = withAudio;
 	const bool withThreads = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withThreads);

@@ -20,7 +20,6 @@ nctl::UniquePtr<GLShaderProgram> RenderResources::meshSpriteShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::meshSpriteGrayShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::textnodeShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::textnodeGrayShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::colorShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedSpritesShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedSpritesGrayShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedMeshSpritesShaderProgram_;
@@ -76,7 +75,6 @@ void RenderResources::create()
 		{ RenderResources::meshSpriteGrayShaderProgram_, "meshsprite_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::ENABLED },
 		{ RenderResources::textnodeShaderProgram_, "textnode_vs.glsl", "textnode_fs.glsl", GLShaderProgram::Introspection::ENABLED },
 		{ RenderResources::textnodeGrayShaderProgram_, "textnode_vs.glsl", "textnode_gray_fs.glsl", GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::colorShaderProgram_, "color_vs.glsl", "color_fs.glsl", GLShaderProgram::Introspection::ENABLED },
 		{ RenderResources::batchedSpritesShaderProgram_, "batched_sprites_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
 		{ RenderResources::batchedSpritesGrayShaderProgram_, "batched_sprites_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
 		{ RenderResources::batchedMeshSpritesShaderProgram_, "batched_meshsprites_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
@@ -90,7 +88,6 @@ void RenderResources::create()
 		{ RenderResources::meshSpriteGrayShaderProgram_, ShaderStrings::meshsprite_vs, ShaderStrings::sprite_gray_fs, GLShaderProgram::Introspection::ENABLED },
 		{ RenderResources::textnodeShaderProgram_, ShaderStrings::textnode_vs, ShaderStrings::textnode_fs, GLShaderProgram::Introspection::ENABLED },
 		{ RenderResources::textnodeGrayShaderProgram_, ShaderStrings::textnode_vs, ShaderStrings::textnode_gray_fs, GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::colorShaderProgram_, ShaderStrings::color_vs, ShaderStrings::color_fs, GLShaderProgram::Introspection::ENABLED },
 		{ RenderResources::batchedSpritesShaderProgram_, ShaderStrings::batched_sprites_vs, ShaderStrings::sprite_fs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
 		{ RenderResources::batchedSpritesGrayShaderProgram_, ShaderStrings::batched_sprites_vs, ShaderStrings::sprite_gray_fs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
 		{ RenderResources::batchedMeshSpritesShaderProgram_, ShaderStrings::batched_meshsprites_vs, ShaderStrings::sprite_fs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
@@ -138,7 +135,6 @@ void RenderResources::dispose()
 	batchedMeshSpritesShaderProgram_.reset(nullptr);
 	batchedSpritesGrayShaderProgram_.reset(nullptr);
 	batchedSpritesShaderProgram_.reset(nullptr);
-	colorShaderProgram_.reset(nullptr);
 	textnodeGrayShaderProgram_.reset(nullptr);
 	textnodeShaderProgram_.reset(nullptr);
 	meshSpriteGrayShaderProgram_.reset(nullptr);

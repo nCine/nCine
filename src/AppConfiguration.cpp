@@ -23,8 +23,6 @@ AppConfiguration::AppConfiguration()
       frameLimit(0),
       windowTitle(128),
       windowIconFilename(128),
-      fontTexFilename(128),
-      fontFntFilename(128),
       useBufferMapping(false),
       deferShaderQueries(true),
 #ifdef WITH_IMGUI
@@ -35,13 +33,7 @@ AppConfiguration::AppConfiguration()
       iboSize(8 * 1024),
 #endif
       vaoPoolSize(16),
-#ifdef NCINE_DEBUG
-      withProfilerGraphs(true),
-      withInfoText(true),
-#else
-      withProfilerGraphs(false),
-      withInfoText(false),
-#endif
+      withDebugOverlay(false),
       withAudio(true),
       withThreads(false),
       withScenegraph(true),
@@ -61,14 +53,8 @@ AppConfiguration::AppConfiguration()
       profileTextUpdateTime_(0.2f)
 {
 	logFile = "ncine_log.txt";
-#ifdef __ANDROID__
-	fontTexFilename = "fonts/DroidSans32_256_ETC2.ktx";
-#else
 	windowTitle = "nCine";
 	windowIconFilename = "icons/icon48.png";
-	fontTexFilename = "fonts/DroidSans32_256.png";
-#endif
-	fontFntFilename = "fonts/DroidSans32_256.fnt";
 
 #ifdef __EMSCRIPTEN__
 	// Always disable mapping on Emscripten as it is not supported by WebGL 2

@@ -5,6 +5,7 @@
 #include "GLShaderProgram.h"
 #include "GLScissorTest.h"
 #include "GLBlending.h"
+#include "GLDepthTest.h"
 #include "RenderQueue.h"
 #include "DrawableNode.h"
 #include "Application.h"
@@ -283,6 +284,8 @@ void ImGuiDrawing::draw()
 	GLBlending::pushState();
 	GLBlending::enable();
 	GLBlending::blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GLDepthTest::pushState();
+	GLDepthTest::disable();
 
 	const ImVec2 pos = drawData->DisplayPos;
 	for (int n = 0; n < drawData->CmdListsCount; n++)
@@ -317,6 +320,7 @@ void ImGuiDrawing::draw()
 	}
 
 	GLScissorTest::disable();
+	GLDepthTest::popState();
 	GLBlending::popState();
 }
 

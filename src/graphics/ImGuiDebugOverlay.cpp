@@ -44,8 +44,8 @@ namespace {
 // CONSTRUCTORS AND DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ImGuiDebugOverlay::ImGuiDebugOverlay(const AppConfiguration &appCfg)
-    : IDebugOverlay(appCfg), disableAppInputEvents_(false), appInputHandler_(nullptr),
+ImGuiDebugOverlay::ImGuiDebugOverlay(float profileTextUpdateTime)
+    : IDebugOverlay(profileTextUpdateTime), disableAppInputEvents_(false), appInputHandler_(nullptr),
       lockOverlayPositions_(true), showTopLeftOverlay_(true), showTopRightOverlay_(true),
       showBottomLeftOverlay_(true), showBottomRightOverlay_(true), numValues_(128),
       maxFrameTime_(0.0f), maxUpdateVisitDraw_(0.0f), index_(0),
@@ -58,8 +58,7 @@ ImGuiDebugOverlay::ImGuiDebugOverlay(const AppConfiguration &appCfg)
       renderDocLastNumCaptures_(0)
 #endif
 {
-	if (appCfg.withProfilerGraphs)
-		initPlotValues();
+	initPlotValues();
 }
 
 ///////////////////////////////////////////////////////////
@@ -68,6 +67,10 @@ ImGuiDebugOverlay::ImGuiDebugOverlay(const AppConfiguration &appCfg)
 
 void ImGuiDebugOverlay::update()
 {
+	// Application events cannot stay disabled after the interface is hidden
+	if (settings_.showInterface == false)
+		disableAppInputEvents_ = false;
+
 	if (disableAppInputEvents_ && appInputHandler_ == nullptr)
 	{
 		appInputHandler_ = IInputManager::handler();
@@ -79,19 +82,21 @@ void ImGuiDebugOverlay::update()
 		appInputHandler_ = nullptr;
 	}
 
-	const AppConfiguration &appCfg = theApplication().appConfiguration();
-
 	guiWindow();
 
-	if (appCfg.withInfoText && settings_.showInfoText)
+	if (settings_.showInfoText)
 	{
-		guiTopLeft();
+		const AppConfiguration &appCfg = theApplication().appConfiguration();
+		if (appCfg.withScenegraph)
+		{
+			guiTopLeft();
+			guiBottomRight();
+		}
 		guiTopRight();
 		guiBottomLeft();
-		guiBottomRight();
 	}
 
-	if (appCfg.withProfilerGraphs && settings_.showProfilerGraphs)
+	if (settings_.showProfilerGraphs)
 		guiPlots();
 }
 
@@ -99,28 +104,34 @@ void ImGuiDebugOverlay::updateFrameTimings()
 {
 	if (updateTimer_.interval() > updateTime_)
 	{
+		const AppConfiguration &appCfg = theApplication().appConfiguration();
 		const float *timings = theApplication().timings();
 
 		plotValues_[ValuesType::FRAME_TIME][index_] = theApplication().interval();
 		plotValues_[ValuesType::FRAME_START][index_] = timings[Application::Timings::FRAME_START];
-		plotValues_[ValuesType::UPDATE_VISIT_DRAW][index_] = timings[Application::Timings::UPDATE] +
-		                                                     timings[Application::Timings::VISIT] +
-		                                                     timings[Application::Timings::DRAW];
-		plotValues_[ValuesType::UPDATE][index_] = timings[Application::Timings::UPDATE];
-		plotValues_[ValuesType::VISIT][index_] = timings[Application::Timings::VISIT];
-		plotValues_[ValuesType::DRAW][index_] = timings[Application::Timings::DRAW];
 		plotValues_[ValuesType::IMGUI][index_] = timings[Application::Timings::IMGUI];
 		plotValues_[ValuesType::FRAME_END][index_] = timings[Application::Timings::FRAME_END];
+
+		if (appCfg.withScenegraph)
+		{
+			plotValues_[ValuesType::UPDATE_VISIT_DRAW][index_] = timings[Application::Timings::UPDATE] +
+			                                                     timings[Application::Timings::VISIT] +
+			                                                     timings[Application::Timings::DRAW];
+			plotValues_[ValuesType::UPDATE][index_] = timings[Application::Timings::UPDATE];
+			plotValues_[ValuesType::VISIT][index_] = timings[Application::Timings::VISIT];
+			plotValues_[ValuesType::DRAW][index_] = timings[Application::Timings::DRAW];
+		}
 
 		for (unsigned int i = 0; i < index_; i++)
 		{
 			if (plotValues_[ValuesType::FRAME_TIME][i] > maxFrameTime_)
 				maxFrameTime_ = plotValues_[ValuesType::FRAME_TIME][i];
-			if (plotValues_[ValuesType::UPDATE_VISIT_DRAW][i] > maxUpdateVisitDraw_)
+			if (appCfg.withScenegraph && plotValues_[ValuesType::UPDATE_VISIT_DRAW][i] > maxUpdateVisitDraw_)
 				maxUpdateVisitDraw_ = plotValues_[ValuesType::UPDATE_VISIT_DRAW][i];
 		}
 
-		updateOverlayTimings();
+		if (appCfg.withScenegraph)
+			updateOverlayTimings();
 
 		index_ = (index_ + 1) % numValues_;
 		updateTimer_.start();
@@ -213,6 +224,8 @@ void ImGuiDebugOverlay::guiWindow()
 	ImGui::SetNextWindowPos(windowPos, ImGuiCond_FirstUseEver, windowPosPivot);
 	if (ImGui::Begin("Debug Overlay", &settings_.showInterface))
 	{
+		const AppConfiguration &appCfg = theApplication().appConfiguration();
+
 		ImGui::Checkbox("Disable app input events", &disableAppInputEvents_);
 		ImGui::SameLine();
 		bool disableAutoSuspension = !theApplication().autoSuspension();
@@ -229,7 +242,8 @@ void ImGuiDebugOverlay::guiWindow()
 		guiLog();
 		guiGraphicsCapabilities();
 		guiApplicationConfiguration();
-		guiRenderingSettings();
+		if (appCfg.withScenegraph)
+			guiRenderingSettings();
 		guiWindowSettings();
 		guiAudioPlayers();
 		guiInputState();
@@ -247,41 +261,43 @@ void ImGuiDebugOverlay::guiConfigureGui()
 		const AppConfiguration &appCfg = theApplication().appConfiguration();
 
 		ImGui::Checkbox("Show interface", &settings_.showInterface);
-		if (appCfg.withInfoText)
+		if (ImGui::TreeNodeEx("Overlays", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			if (ImGui::TreeNodeEx("Overlays", ImGuiTreeNodeFlags_DefaultOpen))
+			ImGui::Checkbox("Show overlays", &settings_.showInfoText);
+			ImGui::Checkbox("Lock overlay positions", &lockOverlayPositions_);
+			if (appCfg.withScenegraph)
 			{
-				ImGui::Checkbox("Show overlays", &settings_.showInfoText);
-				ImGui::Checkbox("Lock overlay positions", &lockOverlayPositions_);
 				ImGui::Checkbox("Show Top-Left", &showTopLeftOverlay_);
 				ImGui::SameLine();
-				ImGui::Checkbox("Show Top-Right", &showTopRightOverlay_);
-				ImGui::Checkbox("Show Bottom-Left", &showBottomLeftOverlay_);
+			}
+			ImGui::Checkbox("Show Top-Right", &showTopRightOverlay_);
+			ImGui::Checkbox("Show Bottom-Left", &showBottomLeftOverlay_);
 #ifdef WITH_LUA
+			if (appCfg.withScenegraph)
+			{
 				ImGui::SameLine();
 				ImGui::Checkbox("Show Bottom-Right", &showBottomRightOverlay_);
+			}
 #endif
-				ImGui::TreePop();
-			}
+			ImGui::TreePop();
 		}
-		if (appCfg.withProfilerGraphs)
+
+		if (ImGui::TreeNodeEx("Profiling Graphs", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			if (ImGui::TreeNodeEx("Profiling Graphs", ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				ImGui::Checkbox("Show profiling graphs", &settings_.showProfilerGraphs);
-				ImGui::Checkbox("Plot additional frame values", &plotAdditionalFrameValues_);
+			ImGui::Checkbox("Show profiling graphs", &settings_.showProfilerGraphs);
+			ImGui::Checkbox("Plot additional frame values", &plotAdditionalFrameValues_);
+			if (appCfg.withScenegraph)
 				ImGui::Checkbox("Plot overlay values", &plotOverlayValues_);
-				ImGui::SliderFloat("Graphs update time", &updateTime_, 0.0f, 1.0f, "%.2fs");
-				numValues = (numValues == 0) ? static_cast<int>(numValues_) : numValues;
-				ImGui::SliderInt("Number of values", &numValues, 16, 512);
-				ImGui::SameLine();
-				if (ImGui::Button("Apply") && numValues_ != static_cast<unsigned int>(numValues))
-				{
-					numValues_ = static_cast<unsigned int>(numValues);
-					initPlotValues();
-				}
-				ImGui::TreePop();
+			ImGui::SliderFloat("Graphs update time", &updateTime_, 0.0f, 1.0f, "%.2fs");
+			numValues = (numValues == 0) ? static_cast<int>(numValues_) : numValues;
+			ImGui::SliderInt("Number of values", &numValues, 16, 512);
+			ImGui::SameLine();
+			if (ImGui::Button("Apply") && numValues_ != static_cast<unsigned int>(numValues))
+			{
+				numValues_ = static_cast<unsigned int>(numValues);
+				initPlotValues();
 			}
+			ImGui::TreePop();
 		}
 
 		if (ImGui::TreeNode("GUI Style"))
@@ -539,7 +555,7 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("Console log level: %d", static_cast<int>(appCfg.consoleLogLevel));
 		ImGui::Text("File log level: %d", static_cast<int>(appCfg.fileLogLevel));
 		ImGui::Text("Frametimer Log interval: %f", appCfg.frameTimerLogInterval);
-		ImGui::Text("Text update time: %f", appCfg.profileTextUpdateTime());
+		ImGui::Text("Profile text update time: %f", appCfg.profileTextUpdateTime());
 		ImGui::Text("Resolution: %u x %u", appCfg.xResolution, appCfg.yResolution);
 		ImGui::Text("Full Screen: %s", appCfg.inFullscreen ? "true" : "false");
 		ImGui::Text("Resizable: %s", appCfg.isResizable ? "true" : "false");
@@ -548,8 +564,6 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Separator();
 		ImGui::Text("Window title: %s", appCfg.windowTitle.data());
 		ImGui::Text("Window icon: %s", appCfg.windowIconFilename.data());
-		ImGui::Text("Font texture: %s", appCfg.fontTexFilename.data());
-		ImGui::Text("Font Fnt file: %s", appCfg.fontFntFilename.data());
 
 		ImGui::Separator();
 		ImGui::Text("Buffer mapping: %s", appCfg.useBufferMapping ? "true" : "false");
@@ -559,8 +573,7 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("Vao pool size: %u", appCfg.vaoPoolSize);
 
 		ImGui::Separator();
-		ImGui::Text("Profiler graphs: %s", appCfg.withProfilerGraphs ? "true" : "false");
-		ImGui::Text("Information text: %s", appCfg.withInfoText ? "true" : "false");
+		ImGui::Text("Debug Overlay: %s", appCfg.withDebugOverlay ? "true" : "false");
 		ImGui::Text("Audio: %s", appCfg.withAudio ? "true" : "false");
 		ImGui::Text("Threads: %s", appCfg.withThreads ? "true" : "false");
 		ImGui::Text("Scenegraph: %s", appCfg.withScenegraph ? "true" : "false");
@@ -982,13 +995,6 @@ void ImGuiDebugOverlay::guiTopLeft()
 
 void ImGuiDebugOverlay::guiTopRight()
 {
-	const RenderStatistics::Commands &spriteCommands = RenderStatistics::commands(RenderCommand::CommandTypes::SPRITE);
-	const RenderStatistics::Commands &meshspriteCommands = RenderStatistics::commands(RenderCommand::CommandTypes::MESH_SPRITE);
-	const RenderStatistics::Commands &particleCommands = RenderStatistics::commands(RenderCommand::CommandTypes::PARTICLE);
-	const RenderStatistics::Commands &textCommands = RenderStatistics::commands(RenderCommand::CommandTypes::TEXT);
-	const RenderStatistics::Commands &imguiCommands = RenderStatistics::commands(RenderCommand::CommandTypes::IMGUI);
-	const RenderStatistics::Commands &allCommands = RenderStatistics::allCommands();
-
 	const ImVec2 windowPos = ImVec2(ImGui::GetIO().DisplaySize.x - Margin, Margin);
 	const ImVec2 windowPosPivot = ImVec2(1.0f, 0.0f);
 	ImGui::SetNextWindowPos(windowPos, ImGuiCond_FirstUseEver, windowPosPivot);
@@ -1000,46 +1006,58 @@ void ImGuiDebugOverlay::guiTopRight()
 	{
 		ImGui::Text("FPS: %.0f (%.2fms)", 1.0f / theApplication().interval(), theApplication().interval() * 1000.0f);
 		ImGui::Text("Num Frames: %lu", theApplication().numFrames());
-		ImGui::Text("Sprites: %uV, %uDC (%u Tr), %uI/%uB", spriteCommands.vertices, spriteCommands.commands, spriteCommands.transparents, spriteCommands.instances, spriteCommands.batchSize);
-		if (plotOverlayValues_)
-		{
-			ImGui::SameLine();
-			ImGui::PlotLines("", plotValues_[ValuesType::SPRITE_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
-		}
 
-		ImGui::Text("Mesh Sprites: %uV, %uDC (%u Tr), %uI/%uB", meshspriteCommands.vertices, meshspriteCommands.commands, meshspriteCommands.transparents, meshspriteCommands.instances, meshspriteCommands.batchSize);
-		if (plotOverlayValues_)
+		const AppConfiguration &appCfg = theApplication().appConfiguration();
+		if (appCfg.withScenegraph)
 		{
-			ImGui::SameLine();
-			ImGui::PlotLines("", plotValues_[ValuesType::MESHSPRITE_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
-		}
+			const RenderStatistics::Commands &spriteCommands = RenderStatistics::commands(RenderCommand::CommandTypes::SPRITE);
+			const RenderStatistics::Commands &meshspriteCommands = RenderStatistics::commands(RenderCommand::CommandTypes::MESH_SPRITE);
+			const RenderStatistics::Commands &particleCommands = RenderStatistics::commands(RenderCommand::CommandTypes::PARTICLE);
+			const RenderStatistics::Commands &textCommands = RenderStatistics::commands(RenderCommand::CommandTypes::TEXT);
+			const RenderStatistics::Commands &imguiCommands = RenderStatistics::commands(RenderCommand::CommandTypes::IMGUI);
+			const RenderStatistics::Commands &allCommands = RenderStatistics::allCommands();
 
-		ImGui::Text("Particles: %uV, %uDC (%u Tr), %uI/%uB\n", particleCommands.vertices, particleCommands.commands, particleCommands.transparents, particleCommands.instances, particleCommands.batchSize);
-		if (plotOverlayValues_)
-		{
-			ImGui::SameLine();
-			ImGui::PlotLines("", plotValues_[ValuesType::PARTICLE_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
-		}
+			ImGui::Text("Sprites: %uV, %uDC (%u Tr), %uI/%uB", spriteCommands.vertices, spriteCommands.commands, spriteCommands.transparents, spriteCommands.instances, spriteCommands.batchSize);
+			if (plotOverlayValues_)
+			{
+				ImGui::SameLine();
+				ImGui::PlotLines("", plotValues_[ValuesType::SPRITE_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
+			}
 
-		ImGui::Text("Text: %uV, %uDC (%u Tr), %uI/%uB", textCommands.vertices, textCommands.commands, textCommands.transparents, textCommands.instances, textCommands.batchSize);
-		if (plotOverlayValues_)
-		{
-			ImGui::SameLine();
-			ImGui::PlotLines("", plotValues_[ValuesType::TEXT_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
-		}
+			ImGui::Text("Mesh Sprites: %uV, %uDC (%u Tr), %uI/%uB", meshspriteCommands.vertices, meshspriteCommands.commands, meshspriteCommands.transparents, meshspriteCommands.instances, meshspriteCommands.batchSize);
+			if (plotOverlayValues_)
+			{
+				ImGui::SameLine();
+				ImGui::PlotLines("", plotValues_[ValuesType::MESHSPRITE_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
+			}
 
-		ImGui::Text("ImGui: %uV, %uDC (%u Tr), %uI/%u", imguiCommands.vertices, imguiCommands.commands, imguiCommands.transparents, imguiCommands.instances, imguiCommands.batchSize);
-		if (plotOverlayValues_)
-		{
-			ImGui::SameLine();
-			ImGui::PlotLines("", plotValues_[ValuesType::IMGUI_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
-		}
+			ImGui::Text("Particles: %uV, %uDC (%u Tr), %uI/%uB\n", particleCommands.vertices, particleCommands.commands, particleCommands.transparents, particleCommands.instances, particleCommands.batchSize);
+			if (plotOverlayValues_)
+			{
+				ImGui::SameLine();
+				ImGui::PlotLines("", plotValues_[ValuesType::PARTICLE_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
+			}
 
-		ImGui::Text("Total: %uV, %uDC (%u Tr), %uI/%uB", allCommands.vertices, allCommands.commands, allCommands.transparents, allCommands.instances, allCommands.batchSize);
-		if (plotOverlayValues_)
-		{
-			ImGui::SameLine();
-			ImGui::PlotLines("", plotValues_[ValuesType::TOTAL_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
+			ImGui::Text("Text: %uV, %uDC (%u Tr), %uI/%uB", textCommands.vertices, textCommands.commands, textCommands.transparents, textCommands.instances, textCommands.batchSize);
+			if (plotOverlayValues_)
+			{
+				ImGui::SameLine();
+				ImGui::PlotLines("", plotValues_[ValuesType::TEXT_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
+			}
+
+			ImGui::Text("ImGui: %uV, %uDC (%u Tr), %uI/%u", imguiCommands.vertices, imguiCommands.commands, imguiCommands.transparents, imguiCommands.instances, imguiCommands.batchSize);
+			if (plotOverlayValues_)
+			{
+				ImGui::SameLine();
+				ImGui::PlotLines("", plotValues_[ValuesType::IMGUI_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
+			}
+
+			ImGui::Text("Total: %uV, %uDC (%u Tr), %uI/%uB", allCommands.vertices, allCommands.commands, allCommands.transparents, allCommands.instances, allCommands.batchSize);
+			if (plotOverlayValues_)
+			{
+				ImGui::SameLine();
+				ImGui::PlotLines("", plotValues_[ValuesType::TOTAL_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
+			}
 		}
 		ImGui::End();
 	}
@@ -1129,26 +1147,32 @@ void ImGuiDebugOverlay::guiPlots()
 	if (ImGui::Begin("###Plots", nullptr, windowFlags))
 	{
 		ImGui::PlotLines("Frame time", plotValues_[ValuesType::FRAME_TIME].get(), numValues_, 0, nullptr, 0.0f, maxFrameTime_, ImVec2(appWidth * 0.33f, 0.0f));
-		ImGui::Separator();
+
+		const AppConfiguration &appCfg = theApplication().appConfiguration();
+		if (appCfg.withScenegraph)
+		{
+			ImGui::Separator();
+			ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+			ImGui::PlotLines("Update", plotValues_[ValuesType::UPDATE].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
+			ImGui::PopStyleColor();
+			ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
+			ImGui::PlotLines("Visit", plotValues_[ValuesType::VISIT].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
+			ImGui::PopStyleColor();
+			ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
+			ImGui::PlotLines("Draw", plotValues_[ValuesType::DRAW].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
+			ImGui::PopStyleColor();
+			ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+			ImGui::PlotLines("Aggregated", plotValues_[ValuesType::UPDATE_VISIT_DRAW].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
+			ImGui::PopStyleColor();
+		}
+
 		if (plotAdditionalFrameValues_)
 		{
+			ImGui::Separator();
 			ImGui::PlotLines("onFrameStart", plotValues_[ValuesType::FRAME_START].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
 			ImGui::PlotLines("onFrameEnd", plotValues_[ValuesType::FRAME_END].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
-		}
-		ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
-		ImGui::PlotLines("Update", plotValues_[ValuesType::UPDATE].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
-		ImGui::PopStyleColor();
-		ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
-		ImGui::PlotLines("Visit", plotValues_[ValuesType::VISIT].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
-		ImGui::PopStyleColor();
-		ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
-		ImGui::PlotLines("Draw", plotValues_[ValuesType::DRAW].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
-		ImGui::PopStyleColor();
-		ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-		ImGui::PlotLines("Aggregated", plotValues_[ValuesType::UPDATE_VISIT_DRAW].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
-		ImGui::PopStyleColor();
-		if (plotAdditionalFrameValues_)
 			ImGui::PlotLines("ImGui", plotValues_[ValuesType::IMGUI].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
+		}
 	}
 	ImGui::End();
 }

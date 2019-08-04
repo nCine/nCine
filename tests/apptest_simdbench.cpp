@@ -496,8 +496,7 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 #endif
 
 	config.withAudio = false;
-	config.withInfoText = false;
-	config.withProfilerGraphs = false;
+	config.withDebugOverlay = false;
 	config.withThreads = false;
 }
 

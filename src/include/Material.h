@@ -32,8 +32,6 @@ class Material
 		TEXTNODE,
 		/// Shader program for TextNode classes with grayscale font texture
 		TEXTNODE_GRAY,
-		/// Shader program for ProfilePlotter
-		COLOR,
 		/// Shader program for a batch of Sprite classes
 		BATCHED_SPRITES,
 		/// Shader program for a batch of Sprite classes with grayscale font texture

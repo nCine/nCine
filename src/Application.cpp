@@ -29,8 +29,6 @@
 #ifdef WITH_IMGUI
 	#include "ImGuiDrawing.h"
 	#include "ImGuiDebugOverlay.h"
-#else
-	#include "DebugOverlay.h"
 #endif
 
 #include "tracy_opengl.h"
@@ -131,18 +129,15 @@ void Application::initCommon()
 		RenderResources::create();
 		renderQueue_ = nctl::makeUnique<RenderQueue>();
 		rootNode_ = nctl::makeUnique<SceneNode>();
-
-		if (appCfg_.withProfilerGraphs || appCfg_.withInfoText)
-		{
-#ifdef WITH_IMGUI
-			debugOverlay_ = nctl::makeUnique<ImGuiDebugOverlay>(appCfg_);
-#else
-			debugOverlay_ = nctl::makeUnique<DebugOverlay>(appCfg_);
-#endif
-		}
 	}
 	else
 		RenderResources::createMinimal(); // some resources are still required for rendering
+
+#ifdef WITH_IMGUI
+	// Debug overlay is available even when scenegraph is not
+	if (appCfg_.withDebugOverlay)
+		debugOverlay_ = nctl::makeUnique<ImGuiDebugOverlay>(appCfg_.profileTextUpdateTime());
+#endif
 
 	// Init of the static random egnerator seeds
 	random().init(static_cast<uint64_t>(time(nullptr)), reinterpret_cast<intptr_t>(frameTimer_.get()));
@@ -262,7 +257,7 @@ void Application::step()
 		timings_[Timings::FRAME_END] = profileTimer_->interval();
 	}
 
-	if (debugOverlay_ && appCfg_.withProfilerGraphs)
+	if (debugOverlay_)
 		debugOverlay_->updateFrameTimings();
 }
 

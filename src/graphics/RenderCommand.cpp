@@ -96,8 +96,6 @@ void RenderCommand::commitTransformation()
 		else if (shaderProgramType == Material::ShaderProgramType::MESH_SPRITE ||
 		         shaderProgramType == Material::ShaderProgramType::MESH_SPRITE_GRAY)
 			material_.uniformBlock("MeshSpriteBlock")->uniform("modelView")->setFloatVector(modelView_.data());
-		else if (shaderProgramType == Material::ShaderProgramType::COLOR)
-			material_.uniformBlock("ColorBlock")->uniform("modelView")->setFloatVector(modelView_.data());
 		else if (shaderProgramType == Material::ShaderProgramType::TEXTNODE ||
 		         shaderProgramType == Material::ShaderProgramType::TEXTNODE_GRAY)
 			material_.uniformBlock("TextnodeBlock")->uniform("modelView")->setFloatVector(modelView_.data());

@@ -51,9 +51,6 @@ void Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 		case ShaderProgramType::TEXTNODE_GRAY:
 			setShaderProgram(RenderResources::textnodeGrayShaderProgram());
 			break;
-		case ShaderProgramType::COLOR:
-			setShaderProgram(RenderResources::colorShaderProgram());
-			break;
 		case ShaderProgramType::BATCHED_SPRITES:
 			setShaderProgram(RenderResources::batchedSpritesShaderProgram());
 			break;
@@ -96,10 +93,6 @@ void Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 			uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
 			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
-			break;
-		case ShaderProgramType::COLOR:
-			setUniformsDataPointer(nullptr);
-			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2, position)));
 			break;
 		case ShaderProgramType::BATCHED_SPRITES:
 		case ShaderProgramType::BATCHED_SPRITES_GRAY:

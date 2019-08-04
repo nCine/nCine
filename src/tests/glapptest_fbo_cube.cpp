@@ -9,6 +9,7 @@
 #include <ncine/GLFramebufferObject.h>
 #include <ncine/GLVertexArrayObject.h>
 #include <ncine/GLBufferObject.h>
+#include <ncine/GLDepthTest.h>
 #include <ncine/IFile.h> // for dataPath()
 #include "../../tests/apptest_datapath.h"
 
@@ -162,7 +163,7 @@ void MyEventHandler::onInit()
 	width_ = nc::theApplication().widthInt();
 	height_ = nc::theApplication().heightInt();
 	glViewport(0, 0, width_, height_);
-	glEnable(GL_DEPTH_TEST);
+	nc::GLDepthTest::enable();
 
 	angleTri_ = 0.0f;
 	angleCube_ = 0.0f;

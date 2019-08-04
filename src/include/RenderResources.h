@@ -44,7 +44,6 @@ class RenderResources
 	static inline GLShaderProgram *meshSpriteGrayShaderProgram() { return meshSpriteGrayShaderProgram_.get(); }
 	static inline GLShaderProgram *textnodeShaderProgram() { return textnodeShaderProgram_.get(); }
 	static inline GLShaderProgram *textnodeGrayShaderProgram() { return textnodeGrayShaderProgram_.get(); }
-	static inline GLShaderProgram *colorShaderProgram() { return colorShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedSpritesShaderProgram() { return batchedSpritesShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedSpritesGrayShaderProgram() { return batchedSpritesGrayShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedMeshSpritesShaderProgram() { return batchedMeshSpritesShaderProgram_.get(); }
@@ -64,7 +63,6 @@ class RenderResources
 	static nctl::UniquePtr<GLShaderProgram> meshSpriteGrayShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> textnodeShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> textnodeGrayShaderProgram_;
-	static nctl::UniquePtr<GLShaderProgram> colorShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedSpritesShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedSpritesGrayShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedMeshSpritesShaderProgram_;
