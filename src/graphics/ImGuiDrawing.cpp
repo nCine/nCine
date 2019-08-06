@@ -6,6 +6,7 @@
 #include "GLScissorTest.h"
 #include "GLBlending.h"
 #include "GLDepthTest.h"
+#include "GLCullFace.h"
 #include "RenderQueue.h"
 #include "DrawableNode.h"
 #include "Application.h"
@@ -284,6 +285,8 @@ void ImGuiDrawing::draw()
 	GLBlending::pushState();
 	GLBlending::enable();
 	GLBlending::blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GLCullFace::pushState();
+	GLCullFace::disable();
 	GLDepthTest::pushState();
 	GLDepthTest::disable();
 
@@ -321,6 +324,7 @@ void ImGuiDrawing::draw()
 
 	GLScissorTest::disable();
 	GLDepthTest::popState();
+	GLCullFace::popState();
 	GLBlending::popState();
 }
 

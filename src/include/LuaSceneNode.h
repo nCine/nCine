@@ -34,8 +34,11 @@ class LuaSceneNode
 	static int setScale(lua_State *L);
 	static int rotation(lua_State *L);
 	static int setRotation(lua_State *L);
+
 	static int color(lua_State *L);
 	static int setColor(lua_State *L);
+	static int alpha(lua_State *L);
+	static int setAlpha(lua_State *L);
 
 	friend class LuaDrawableNode;
 	friend class LuaParticleSystem;

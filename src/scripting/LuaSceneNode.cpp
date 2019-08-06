@@ -26,6 +26,8 @@ namespace SceneNode {
 
 	static const char *color = "get_color";
 	static const char *setColor = "set_color";
+	static const char *alpha = "get_alpha";
+	static const char *setAlpha = "set_alpha";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -52,6 +54,8 @@ void LuaSceneNode::exposeFunctions(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::SceneNode::color, color);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::setColor, setColor);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::alpha, alpha);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::setAlpha, setAlpha);
 }
 
 int LuaSceneNode::parent(lua_State *L)
@@ -204,6 +208,26 @@ int LuaSceneNode::setColor(lua_State *L)
 	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, colorIndex - 1);
 
 	node->setColor(nodeColor);
+
+	return 0;
+}
+
+int LuaSceneNode::alpha(lua_State *L)
+{
+	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+
+	const float nodeAlpha = node->alpha();
+	LuaUtils::push(L, nodeAlpha);
+
+	return 1;
+}
+
+int LuaSceneNode::setAlpha(lua_State *L)
+{
+	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, 1);
+	const float nodeAlpha = LuaUtils::retrieve<float>(L, 2);
+
+	node->setAlphaF(nodeAlpha);
 
 	return 0;
 }

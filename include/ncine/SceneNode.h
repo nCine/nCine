@@ -117,6 +117,10 @@ class DLL_PUBLIC SceneNode : public Object
 	inline void setColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha) { color_.set(red, green, blue, alpha); }
 	/// Sets the node color through float components
 	inline void setColorF(float red, float green, float blue, float alpha) { color_ = Colorf(red, green, blue, alpha); }
+	/// Gets the node alpha
+	inline float alpha() const { return color_.a(); }
+	/// Gets the node absolute alpha
+	inline float absAlpha() const { return absColor_.a(); }
 	/// Sets the node alpha through an unsigned char component
 	inline void setAlpha(unsigned char alpha) { color_.setAlpha(alpha); }
 	/// Sets the node alpha through a float component
