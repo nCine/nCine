@@ -6,6 +6,38 @@
 
 namespace nctl {
 
+namespace {
+
+	size_t wrappedStrnlen(const char *str, size_t maxLen)
+	{
+#if defined(_WIN32) && !defined(__MINGW32__)
+		return strnlen_s(str, maxLen);
+#else
+		return strnlen(str, maxLen);
+#endif
+	}
+
+	char *wrappedStrncpy(char *dest, size_t elements, const char *source, size_t count)
+	{
+#if defined(_WIN32) && !defined(__MINGW32__)
+		strncpy_s(dest, elements, source, count);
+		return dest;
+#else
+		return strncpy(dest, source, count);
+#endif
+	}
+
+	int wrappedVsnprintf(char *str, size_t maxLen, const char *format, va_list arg)
+	{
+#if defined(_WIN32) && !defined(__MINGW32__)
+		return vsnprintf_s(str, maxLen, maxLen - 1, format, arg);
+#else
+		return vsnprintf(str, maxLen, format, arg);
+#endif
+	}
+
+}
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
@@ -35,11 +67,8 @@ String::String(const char *cString)
     : length_(0), capacity_(0)
 {
 	ASSERT(cString);
-#if defined(_WIN32) && !defined(__MINGW32__)
-	capacity_ = static_cast<unsigned int>(strnlen_s(cString, MaxCStringLength)) + 1;
-#else
-	capacity_ = static_cast<unsigned int>(strnlen(cString, MaxCStringLength)) + 1;
-#endif
+
+	capacity_ = static_cast<unsigned int>(wrappedStrnlen(cString, MaxCStringLength)) + 1;
 	length_ = capacity_ - 1;
 
 	char *dest = array_.local_;
@@ -51,11 +80,7 @@ String::String(const char *cString)
 		dest = array_.begin_;
 	}
 
-#if defined(_WIN32) && !defined(__MINGW32__)
-	strncpy_s(dest, capacity_, cString, length_);
-#else
-	strncpy(dest, cString, length_);
-#endif
+	wrappedStrncpy(dest, capacity_, cString, length_);
 	dest[length_] = '\0';
 }
 
@@ -77,11 +102,7 @@ String::String(const String &other)
 		dest = array_.begin_;
 	}
 
-#if defined(_WIN32) && !defined(__MINGW32__)
-	strncpy_s(dest, capacity_, src, length_);
-#else
-	strncpy(dest, src, length_);
-#endif
+	wrappedStrncpy(dest, capacity_, src, length_);
 	dest[length_] = '\0';
 }
 
@@ -101,7 +122,7 @@ String &String::operator=(const String &other)
 	if (this != &other)
 	{
 		// copy and truncate
-		const unsigned int copiedChars = other.copy(*this);
+		const unsigned int copiedChars = assign(other);
 		length_ = copiedChars;
 		data()[length_] = '\0';
 	}
@@ -119,13 +140,8 @@ String &String::operator=(const char *cString)
 {
 	ASSERT(cString);
 
-#if defined(_WIN32) && !defined(__MINGW32__)
-	length_ = static_cast<unsigned int>(strnlen_s(cString, capacity_));
-	strncpy_s(data(), capacity_, cString, length_);
-#else
-	length_ = static_cast<unsigned int>(strnlen(cString, capacity_));
-	strncpy(data(), cString, length_);
-#endif
+	length_ = static_cast<unsigned int>(wrappedStrnlen(cString, capacity_));
+	wrappedStrncpy(data(), capacity_, cString, length_);
 
 	data()[length_] = '\0';
 	return *this;
@@ -146,42 +162,64 @@ void String::clear()
 }
 
 /*! The method returns the number of characters copied, to allow truncation. */
-unsigned int String::copy(String &dest, unsigned int srcChar, unsigned int numChar, unsigned int destChar) const
+unsigned int String::assign(const String &source, unsigned int srcChar, unsigned int numChar, unsigned int destChar)
 {
 	// Clamping parameters to string lengths and capacities
 
 	// Cannot copy from beyond the end of the source string
-	const unsigned int clampedSrcChar = min(srcChar, length_);
-	const char *srcStart = data() + clampedSrcChar;
+	const unsigned int clampedSrcChar = min(srcChar, source.length_);
+	const char *srcStart = source.data() + clampedSrcChar;
 	// It is possible to write beyond the end of the destination string, but without creating holes
-	const unsigned int clampedDestChar = min(destChar, dest.length_);
-	char *destStart = dest.data() + clampedDestChar;
+	const unsigned int clampedDestChar = min(destChar, length_);
+	char *destStart = data() + clampedDestChar;
 	// Cannot copy more characters than the source has left until its length or more than the destination has until its capacity
-	const unsigned int charsToCopy = min(min(numChar, length_ - clampedSrcChar), dest.capacity_ - clampedDestChar - 1);
+	const unsigned int charsToCopy = min(min(numChar, source.length_ - clampedSrcChar), capacity_ - clampedDestChar - 1);
 
 	if (charsToCopy > 0)
 	{
-#if defined(_WIN32) && !defined(__MINGW32__)
-		strncpy_s(destStart, dest.capacity_ - clampedDestChar, srcStart, charsToCopy);
-#else
-		strncpy(destStart, srcStart, charsToCopy);
-#endif
+		wrappedStrncpy(destStart, capacity_ - clampedDestChar, srcStart, charsToCopy);
 		// Destination string length can only grow, truncation has to be performed by the calling function using the return value
-		dest.length_ = max(dest.length_, static_cast<unsigned int>(destStart - dest.data()) + charsToCopy);
-		dest.data()[dest.length_] = '\0';
+		length_ = max(length_, static_cast<unsigned int>(destStart - data()) + charsToCopy);
+		data()[length_] = '\0';
 	}
 
 	return charsToCopy;
 }
 
-unsigned int String::copy(String &dest, unsigned int srcChar, unsigned int numChar) const
+unsigned int String::assign(const String &source, unsigned int srcChar, unsigned int numChar)
 {
-	return copy(dest, srcChar, numChar, 0);
+	return assign(source, srcChar, numChar, 0);
 }
 
-unsigned int String::copy(String &dest) const
+unsigned int String::assign(const String &source)
 {
-	return copy(dest, 0, length_, 0);
+	return assign(source, 0, source.length_, 0);
+}
+
+unsigned int String::assign(const char *source, unsigned int numChar, unsigned int destChar)
+{
+	ASSERT(source);
+
+	// It is possible to write beyond the end of the destination string, but without creating holes
+	const unsigned int clampedDestChar = min(destChar, length_);
+	char *destStart = data() + clampedDestChar;
+	// Cannot copy more characters than the destination has until its capacity
+	const unsigned int charsToCopy = min(numChar, capacity_ - clampedDestChar - 1);
+
+	if (charsToCopy > 0)
+	{
+		wrappedStrncpy(destStart, capacity_ - clampedDestChar, source, charsToCopy);
+		// Destination string length can only grow, truncation has to be performed by the calling function using the return value
+		length_ = max(length_, static_cast<unsigned int>(destStart - data()) + charsToCopy);
+		data()[length_] = '\0';
+	}
+
+	return charsToCopy;
+}
+
+unsigned int String::assign(const char *source, unsigned int numChar)
+{
+	return assign(source, numChar, 0);
 }
 
 unsigned int String::copy(char *dest, unsigned int srcChar, unsigned int numChar) const
@@ -197,19 +235,21 @@ unsigned int String::copy(char *dest, unsigned int srcChar, unsigned int numChar
 	// Always assuming that the destination is big enough
 	if (charsToCopy > 0)
 	{
-#if defined(_WIN32) && !defined(__MINGW32__)
-		strncpy_s(dest, charsToCopy + 1, srcStart, charsToCopy);
-#else
-		strncpy(dest, srcStart, charsToCopy);
-#endif
+		wrappedStrncpy(dest, charsToCopy + 1, srcStart, charsToCopy);
+		dest[charsToCopy] = '\0';
 	}
 
 	return charsToCopy;
 }
 
+unsigned int String::copy(char *dest) const
+{
+	return copy(dest, 0, length_);
+}
+
 unsigned int String::append(const String &source)
 {
-	return source.copy(*this, 0, source.length_, length_);
+	return assign(source, 0, source.length_, length_);
 }
 
 int String::compare(const String &other) const
@@ -284,11 +324,7 @@ String &String::format(const char *fmt, ...)
 
 	va_list args;
 	va_start(args, fmt);
-#if defined(_WIN32) && !defined(__MINGW32__)
-	const int formattedLength = vsnprintf_s(data(), capacity_, capacity_ - 1, fmt, args);
-#else
-	const int formattedLength = vsnprintf(data(), capacity_, fmt, args);
-#endif
+	const int formattedLength = wrappedVsnprintf(data(), capacity_, fmt, args);
 	va_end(args);
 
 	if (formattedLength > 0)
@@ -306,11 +342,7 @@ String &String::formatAppend(const char *fmt, ...)
 
 	va_list args;
 	va_start(args, fmt);
-#if defined(_WIN32) && !defined(__MINGW32__)
-	const int formattedLength = vsnprintf_s(data() + length_, capacity_ - length_, capacity_ - length_ - 1, fmt, args);
-#else
-	const int formattedLength = vsnprintf(data() + length_, capacity_ - length_, fmt, args);
-#endif
+	const int formattedLength = wrappedVsnprintf(data() + length_, capacity_ - length_, fmt, args);
 	va_end(args);
 
 	if (formattedLength > 0)
@@ -327,11 +359,7 @@ String &String::operator+=(const String &other)
 	const unsigned int availCapacity = capacity_ - length_ - 1;
 	const unsigned int minLength = min(other.length_, availCapacity);
 
-#if defined(_WIN32) && !defined(__MINGW32__)
-	strncpy_s(data() + length_, capacity_ - length_, other.data(), minLength);
-#else
-	strncpy(data() + length_, other.data(), minLength);
-#endif
+	wrappedStrncpy(data() + length_, capacity_ - length_, other.data(), minLength);
 	length_ += minLength;
 
 	data()[length_] = '\0';
@@ -343,13 +371,8 @@ String &String::operator+=(const char *cString)
 	ASSERT(cString);
 	const unsigned int availCapacity = capacity_ - length_ - 1;
 
-#if defined(_WIN32) && !defined(__MINGW32__)
-	const unsigned int cLength = static_cast<unsigned int>(strnlen_s(cString, availCapacity));
-	strncpy_s(data() + length_, capacity_ - length_, cString, cLength);
-#else
-	const unsigned int cLength = static_cast<unsigned int>(strnlen(cString, availCapacity));
-	strncpy(data() + length_, cString, cLength);
-#endif
+	const unsigned int cLength = static_cast<unsigned int>(wrappedStrnlen(cString, availCapacity));
+	wrappedStrncpy(data() + length_, capacity_ - length_, cString, cLength);
 	length_ += cLength;
 
 	data()[length_] = '\0';

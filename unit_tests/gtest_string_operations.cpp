@@ -354,7 +354,7 @@ TEST_F(StringOperationTest, CopyCharacters)
 	const unsigned int srcChar = 4;
 	const unsigned int numChar = 3;
 	const unsigned int destChar = 2;
-	const unsigned int numCopied = srcString.copy(destString, srcChar, numChar, destChar);
+	const unsigned int numCopied = destString.assign(srcString, srcChar, numChar, destChar);
 	printf("Copying %u characters from position %u of the source string to position %u of the destination one: ", numChar, srcChar, destChar);
 	printString(destString);
 
@@ -371,7 +371,7 @@ TEST_F(StringOperationTest, CopyCharactersToBeginning)
 
 	const unsigned int srcChar = 4;
 	const unsigned int numChar = 3;
-	const unsigned int numCopied = srcString.copy(destString, srcChar, numChar);
+	const unsigned int numCopied = destString.assign(srcString, srcChar, numChar);
 	printf("Copying %u characters from position %u of the source string to position 0 of the destination one: ", numChar, srcChar);
 	printString(destString);
 
@@ -386,7 +386,7 @@ TEST_F(StringOperationTest, CopyAllCharactersToBeginning)
 	nctl::String destString = "abcdefg";
 	printString("Creating a new destination string: ", destString);
 
-	const unsigned int numCopied = srcString.copy(destString);
+	const unsigned int numCopied = destString.assign(srcString);
 	printf("Copying %u characters from position 0 of the source string to position 0 of the destination one: ", srcString.length());
 	printString(destString);
 
@@ -404,7 +404,7 @@ TEST_F(StringOperationTest, CopyCharactersFromBeyondEnd)
 	const unsigned int srcChar = srcString.length() + 1; // beyond the end of source
 	const unsigned int numChar = 2;
 	const unsigned int destChar = 0;
-	const unsigned int numCopied = srcString.copy(destString, srcChar, numChar, destChar);
+	const unsigned int numCopied = destString.assign(srcString, srcChar, numChar, destChar);
 	printString("Trying to copy a character from beyond the end of the source string into the destination one: ", destString);
 
 	ASSERT_EQ(numCopied, 0u);
@@ -423,7 +423,7 @@ TEST_F(StringOperationTest, CopyCharactersToBeyondEnd)
 	const unsigned int srcChar = 0;
 	const unsigned int numChar = 6; // more than available in destination
 	const unsigned int destChar = destString.length() + 1; // beyond the end of destination
-	const unsigned int numCopied = srcString.copy(destString, srcChar, numChar, destChar);
+	const unsigned int numCopied = destString.assign(srcString, srcChar, numChar, destChar);
 	printString("Trying to copy a character from the source string to beyond the end of the destination one: ", destString);
 
 	ASSERT_EQ(numCopied, numAvailable);
@@ -440,7 +440,7 @@ TEST_F(StringOperationTest, CopyMoreCharactersThanSourceLength)
 	const unsigned int srcChar = 0;
 	const unsigned int numChar = srcString.length() + 1; // more than available in source
 	const unsigned int destChar = 0;
-	const unsigned int numCopied = srcString.copy(destString, srcChar, numChar, destChar);
+	const unsigned int numCopied = destString.assign(srcString, srcChar, numChar, destChar);
 	printString("Trying to copy from the source string to the destination one more than source length: ", destString);
 
 	ASSERT_EQ(numCopied, srcString.length());
@@ -458,7 +458,7 @@ TEST_F(StringOperationTest, CopyMoreCharactersThanDestinationLength)
 	const unsigned int srcChar = 0;
 	const unsigned int numChar = destString.capacity() + 1; // more than available in destination
 	const unsigned int destChar = 0;
-	const unsigned int numCopied = srcString.copy(destString, srcChar, numChar, destChar);
+	const unsigned int numCopied = destString.assign(srcString, srcChar, numChar, destChar);
 	printString("Trying to copy from the source string to the destination one more than destination length: ", destString);
 
 	ASSERT_EQ(numCopied, destString.length());
@@ -466,17 +466,63 @@ TEST_F(StringOperationTest, CopyMoreCharactersThanDestinationLength)
 	ASSERT_TRUE(charactersInStringsAreEqual(srcString.data(), destString.data(), srcChar, numCopied, destChar));
 }
 
+TEST_F(StringOperationTest, CopyCharactersFromCString)
+{
+	const unsigned int stringLength = 4;
+	char srcString[stringLength] = "abc";
+	nctl::String destString = "0123456";
+	printString("Creating a new destination string: ", destString);
+
+	const unsigned int destChar = 0;
+	const unsigned int numChar = stringLength - 1;
+	const unsigned int numCopied = destString.assign(srcString, numChar, destChar);
+	printf("Copying %u characters from an array of %u characters to the string: \"%s\"\n", numChar, stringLength, destString.data());
+
+	ASSERT_EQ(numCopied, numChar);
+	ASSERT_TRUE(charactersInStringsAreEqual(srcString, destString.data(), 0, numCopied, 0));
+}
+
+TEST_F(StringOperationTest, CopyCharactersFromCStringBeginning)
+{
+	const unsigned int stringLength = 4;
+	char srcString[stringLength] = "abc";
+	nctl::String destString = "0123456";
+	printString("Creating a new destination string: ", destString);
+
+	const unsigned int numChar = stringLength - 1;
+	const unsigned int numCopied = destString.assign(srcString, numChar);
+	printf("Copying %u characters from an array of %u characters to the beginning of the string: \"%s\"\n", numChar, stringLength, destString.data());
+
+	ASSERT_EQ(numCopied, numChar);
+	ASSERT_TRUE(charactersInStringsAreEqual(srcString, destString.data(), 0, numCopied, 0));
+}
+
 TEST_F(StringOperationTest, CopyCharactersToCString)
 {
-	nctl::String srcString = "0123456";
+	nctl::String srcString = "abc";
 	printString("Creating a new source string: ", srcString);
-	const unsigned int stringLength = 4;
-	char destString[stringLength] = "abc";
+	const unsigned int stringLength = 8;
+	char destString[stringLength] = "0123456";
 
 	const unsigned int srcChar = 0;
-	const unsigned int numChar = stringLength - 1;
+	const unsigned int numChar = srcString.length();
 	const unsigned int numCopied = srcString.copy(destString, srcChar, numChar);
 	printf("Copying %u characters from the string into an array of %u characters: \"%s\"\n", numChar, stringLength, destString);
+
+	ASSERT_EQ(numCopied, numChar);
+	ASSERT_TRUE(charactersInStringsAreEqual(srcString.data(), destString, srcChar, numCopied, 0));
+}
+
+TEST_F(StringOperationTest, CopyAllCharactersToCString)
+{
+	nctl::String srcString = "abc";
+	printString("Creating a new source string: ", srcString);
+	const unsigned int stringLength = 8;
+	char destString[stringLength] = "0123456";
+
+	const unsigned int numChar = srcString.length();
+	const unsigned int numCopied = srcString.copy(destString);
+	printf("Copying %u characters from the beginning of the string into an array of %u characters: \"%s\"\n", numChar, stringLength, destString);
 
 	ASSERT_EQ(numCopied, numChar);
 	ASSERT_TRUE(charactersInStringsAreEqual(srcString.data(), destString, 0, numCopied, 0));

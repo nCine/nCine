@@ -94,14 +94,22 @@ class DLL_PUBLIC String
 	/// Returns a constant pointer to the internal array
 	inline const char *data() const { return (capacity_ > SmallBufferSize) ? array_.begin_ : array_.local_; }
 
-	/// Copies characters from somewhere in the source to somewhere in the destination
-	unsigned int copy(String &dest, unsigned int srcChar, unsigned int numChar, unsigned int destChar) const;
-	/// Copies characters from somewhere in the source to the beginning of the destination
-	unsigned int copy(String &dest, unsigned int srcChar, unsigned int numChar) const;
-	/// Copies all the characters from the source to the beginning of the destination
-	unsigned int copy(String &dest) const;
-	/// Copies characters from the source string to a C string
+	/// Copies characters from somewhere in the other string to somewhere in this one
+	unsigned int assign(const String &source, unsigned int srcChar, unsigned int numChar, unsigned int destChar);
+	/// Copies characters from somewhere in the other string to the beginning of this one
+	unsigned int assign(const String &source, unsigned int srcChar, unsigned int numChar);
+	/// Copies all characters from the other string to the beginning of this one
+	unsigned int assign(const String &source);
+	/// Copies characters from a C string to somewhere in this one
+	unsigned int assign(const char *source, unsigned int numChar, unsigned int destChar);
+	/// Copies characters from a C string to the beginning of this one
+	unsigned int assign(const char *source, unsigned int numChar);
+
+	/// Copies characters from somewhere in this string to a C string
 	unsigned int copy(char *dest, unsigned int srcChar, unsigned int numChar) const;
+	/// Copies all characters from this string to a C string
+	unsigned int copy(char *dest) const;
+
 	/// Appends all the characters from the source to the end of the destination
 	unsigned int append(const String &source);
 

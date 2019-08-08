@@ -39,7 +39,7 @@ IFile::IFile(const char *filename)
 	int dotChar = filename_.findLastChar('.');
 	// A dot followed by at least three extension characters
 	if (dotChar && (filename_.length() - dotChar) >= 4)
-		filename_.copy(extension_, dotChar + 1, filename_.length() - dotChar - 1);
+		extension_.assign(filename_, dotChar + 1, filename_.length() - dotChar - 1);
 }
 
 ///////////////////////////////////////////////////////////

@@ -26,7 +26,7 @@ AssetFile::AssetFile(const char *filename)
 	const int lastDotChar = filename_.findLastChar('.');
 	const int extLength = lastDotChar - firstDotChar - 1;
 	if (extLength >= 3 && extLength <= 4)
-		extension_.copy(filename_, firstDotChar + 1, extLength, 0);
+		extension_.assign(filename_, firstDotChar + 1, extLength);
 }
 
 AssetFile::~AssetFile()
