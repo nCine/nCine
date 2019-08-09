@@ -47,8 +47,8 @@ void MyEventHandler::onInit()
 	}
 #endif
 
-	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
-	                                   (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
+	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontFntFile).data(),
+	                                   (nc::IFile::dataPath() + "fonts/" + FontTextureFile).data());
 	textNode_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get(), unsigned(MaxNumChars));
 	textNode_->setScale(0.85f);
 

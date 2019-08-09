@@ -61,8 +61,8 @@ void MyEventHandler::onInit()
 	textures_[2] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture3File).data());
 	textures_[3] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture4File).data());
 
-	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
-	                                   (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
+	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontFntFile).data(),
+	                                   (nc::IFile::dataPath() + "fonts/" + FontTextureFile).data());
 
 	cameraNode_ = nctl::makeUnique<nc::SceneNode>(&rootNode);
 

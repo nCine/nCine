@@ -65,8 +65,8 @@ void MyEventHandler::onInit()
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 	nctl::String texPath = nc::IFile::dataPath() + "textures/testformats/";
-	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontTextureFile).data(),
-	                                   (nc::IFile::dataPath() + "fonts/" + FontFntFile).data());
+	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontFntFile).data(),
+	                                   (nc::IFile::dataPath() + "fonts/" + FontTextureFile).data());
 
 	const nc::IGfxCapabilities &gfxCaps = nc::theServiceLocator().gfxCapabilities();
 	const int maxTextureSize = gfxCaps.value(nc::IGfxCapabilities::GLIntValues::MAX_TEXTURE_SIZE);

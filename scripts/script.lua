@@ -36,8 +36,8 @@ function ncine.on_init()
 	pos_ = {x = screen.x * 0.5, y = screen.y * 0.5}
 	angle_ = 0
 
-	font_ = nc.font.new(nc.application.datapath().."fonts/"..font_tex_file,
-	                    nc.application.datapath().."fonts/DroidSans32_256.fnt")
+	font_ = nc.font.new(nc.application.datapath().."fonts/DroidSans32_256.fnt",
+	                    nc.application.datapath().."fonts/"..font_tex_file)
 	textnode_ = nc.textnode.new(rootnode, font_, 256)
 	nc.textnode.set_string(textnode_, "apptest_lua")
 	nc.textnode.set_layer(textnode_, 100)

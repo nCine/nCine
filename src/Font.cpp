@@ -40,7 +40,7 @@ Font::Font(const char *fntFilename)
 }
 
 /*! \note The specified texture will override the one in the FNT file */
-Font::Font(const char *texFilename, const char *fntFilename)
+Font::Font(const char *fntFilename, const char *texFilename)
     : Object(ObjectType::FONT, fntFilename),
       texture_(nctl::makeUnique<Texture>(texFilename)),
       lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_(0), numKernings_(0),

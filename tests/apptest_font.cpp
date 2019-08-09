@@ -36,12 +36,12 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	fonts_[0] = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + Font1TextureFile).data(),
-	                                       (nc::IFile::dataPath() + "fonts/" + Font1FntFile).data());
-	fonts_[1] = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + Font2TextureFile).data(),
-	                                       (nc::IFile::dataPath() + "fonts/" + Font2FntFile).data());
-	fonts_[2] = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + Font3TextureFile).data(),
-	                                       (nc::IFile::dataPath() + "fonts/" + Font3FntFile).data());
+	fonts_[0] = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + Font1FntFile).data(),
+	                                       (nc::IFile::dataPath() + "fonts/" + Font1TextureFile).data());
+	fonts_[1] = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + Font2FntFile).data(),
+	                                       (nc::IFile::dataPath() + "fonts/" + Font2TextureFile).data());
+	fonts_[2] = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + Font3FntFile).data(),
+	                                       (nc::IFile::dataPath() + "fonts/" + Font3TextureFile).data());
 
 	const char testString[] = "WAY.P.ATAV";
 	float textHeight = nc::theApplication().height() * 0.8f;

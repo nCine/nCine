@@ -23,8 +23,8 @@ class DLL_PUBLIC Font : public Object
 
 	/// Constructs the object from an AngelCode's `FNT` file
 	explicit Font(const char *fntFilename);
-	/// Constructs the object from a texture and an AngelCode's `FNT` file
-	Font(const char *texFilename, const char *fntFilename);
+	/// Constructs the object from an AngelCode's `FNT` file and a texture
+	Font(const char *fntFilename, const char *texFilename);
 	~Font() override;
 
 	/// Gets the texture object
