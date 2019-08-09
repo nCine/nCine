@@ -9,6 +9,6 @@ out vec4 fragColor;
 
 void main()
 {
-	fragColor = texture(uTexture, vTexCoords).rrrr;
-	fragColor *= vColor;
+	fragColor = vColor;
+	fragColor.a *= texture(uTexture, vTexCoords).a;
 }

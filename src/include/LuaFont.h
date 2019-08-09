@@ -23,6 +23,7 @@ class LuaFont
 	static int base(lua_State *L);
 	static int textureSize(lua_State *L);
 	static int numGlyphs(lua_State *L);
+	static int numKernings(lua_State *L);
 };
 
 }

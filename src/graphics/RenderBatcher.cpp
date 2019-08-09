@@ -37,8 +37,8 @@ namespace {
 		        type == Material::ShaderProgramType::SPRITE_GRAY ||
 		        type == Material::ShaderProgramType::MESH_SPRITE ||
 		        type == Material::ShaderProgramType::MESH_SPRITE_GRAY ||
-		        type == Material::ShaderProgramType::TEXTNODE ||
-		        type == Material::ShaderProgramType::TEXTNODE_GRAY);
+		        type == Material::ShaderProgramType::TEXTNODE_ALPHA ||
+		        type == Material::ShaderProgramType::TEXTNODE_RED);
 	}
 
 	bool isBatchedSprite(Material::ShaderProgramType type)
@@ -55,8 +55,8 @@ namespace {
 
 	bool isBatchedTextnode(Material::ShaderProgramType type)
 	{
-		return (type == Material::ShaderProgramType::BATCHED_TEXTNODES ||
-		        type == Material::ShaderProgramType::BATCHED_TEXTNODES_GRAY);
+		return (type == Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA ||
+		        type == Material::ShaderProgramType::BATCHED_TEXTNODES_RED);
 	}
 
 }
@@ -175,14 +175,14 @@ RenderCommand *RenderBatcher::collectCommands(
 		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("MeshSpriteBlock")->size();
 	}
-	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::TEXTNODE)
+	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::TEXTNODE_ALPHA)
 	{
-		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_TEXTNODES);
+		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("TextnodeBlock")->size();
 	}
-	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::TEXTNODE_GRAY)
+	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::TEXTNODE_RED)
 	{
-		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_TEXTNODES_GRAY);
+		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_TEXTNODES_RED);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("TextnodeBlock")->size();
 	}
 	else

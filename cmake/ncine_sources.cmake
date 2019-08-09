@@ -8,6 +8,7 @@ set(SOURCES
 	${NCINE_ROOT}/src/Timer.cpp
 	${NCINE_ROOT}/src/FrameTimer.cpp
 	${NCINE_ROOT}/src/Font.cpp
+	${NCINE_ROOT}/src/FntParser.cpp
 	${NCINE_ROOT}/src/FontGlyph.cpp
 	${NCINE_ROOT}/src/IFile.cpp
 	${NCINE_ROOT}/src/StandardFile.cpp

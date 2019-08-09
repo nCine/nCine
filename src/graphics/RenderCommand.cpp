@@ -96,15 +96,15 @@ void RenderCommand::commitTransformation()
 		else if (shaderProgramType == Material::ShaderProgramType::MESH_SPRITE ||
 		         shaderProgramType == Material::ShaderProgramType::MESH_SPRITE_GRAY)
 			material_.uniformBlock("MeshSpriteBlock")->uniform("modelView")->setFloatVector(modelView_.data());
-		else if (shaderProgramType == Material::ShaderProgramType::TEXTNODE ||
-		         shaderProgramType == Material::ShaderProgramType::TEXTNODE_GRAY)
+		else if (shaderProgramType == Material::ShaderProgramType::TEXTNODE_ALPHA ||
+		         shaderProgramType == Material::ShaderProgramType::TEXTNODE_RED)
 			material_.uniformBlock("TextnodeBlock")->uniform("modelView")->setFloatVector(modelView_.data());
 		else if (shaderProgramType != Material::ShaderProgramType::BATCHED_SPRITES &&
 		         shaderProgramType != Material::ShaderProgramType::BATCHED_SPRITES_GRAY &&
 		         shaderProgramType != Material::ShaderProgramType::BATCHED_MESH_SPRITES &&
 		         shaderProgramType != Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY &&
-		         shaderProgramType != Material::ShaderProgramType::BATCHED_TEXTNODES &&
-		         shaderProgramType != Material::ShaderProgramType::BATCHED_TEXTNODES_GRAY &&
+		         shaderProgramType != Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA &&
+		         shaderProgramType != Material::ShaderProgramType::BATCHED_TEXTNODES_RED &&
 		         shaderProgramType != Material::ShaderProgramType::CUSTOM)
 			material_.uniform("modelView")->setFloatVector(modelView_.data());
 	}

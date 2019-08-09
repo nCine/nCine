@@ -1,8 +1,8 @@
-#include <cstring>
+#include <cstring> // for `strrchr()`
 #include "common_macros.h"
 #include "Font.h"
+#include "FntParser.h"
 #include "FontGlyph.h"
-#include "IFile.h"
 #include "Texture.h"
 #include "tracy.h"
 
@@ -12,17 +12,46 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-Font::Font(const char *texFilename, const char *fntFilename)
+/*! \note The texture specified by the FNT file will be automatically loaded */
+Font::Font(const char *fntFilename)
     : Object(ObjectType::FONT, fntFilename),
-      texture_(nctl::makeUnique<Texture>(texFilename)), lineHeight_(0), base_(0), width_(0), height_(0),
-      numGlyphs_(0), numKernings_(0), glyphs_(nctl::makeUnique<FontGlyph[]>(MaxGlyphs))
+      lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_(0), numKernings_(0),
+      glyphs_(nctl::makeUnique<FontGlyph[]>(MaxGlyphs)), renderMode_(RenderMode::GLYPH_IN_RED)
 {
 	ZoneScoped;
 	ZoneText(fntFilename, strnlen(fntFilename, 256));
 
-	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(fntFilename);
-	fileHandle->open(IFile::OpenMode::READ);
-	parseFntFile(fileHandle.get());
+	fntParser_ = nctl::makeUnique<FntParser>(fntFilename);
+	retrieveInfoFromFnt();
+
+	// TODO: add general path manipulation functions
+	const char *path = strrchr(fntFilename, '\\');
+	if (path == nullptr)
+		path = strrchr(fntFilename, '/');
+
+	// Path length is zero when the FNT file is in the current directory
+	const unsigned int pathLength = path ? path - fntFilename + 1 : 0;
+	nctl::String texFilename(pathLength + fntParser_->pageTag(0).file.length() + 1);
+	texFilename.assign(fntFilename, pathLength);
+	texFilename.append(fntParser_->pageTag(0).file);
+
+	texture_ = nctl::makeUnique<Texture>(texFilename.data());
+	checkFntInformation();
+}
+
+/*! \note The specified texture will override the one in the FNT file */
+Font::Font(const char *texFilename, const char *fntFilename)
+    : Object(ObjectType::FONT, fntFilename),
+      texture_(nctl::makeUnique<Texture>(texFilename)),
+      lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_(0), numKernings_(0),
+      glyphs_(nctl::makeUnique<FontGlyph[]>(MaxGlyphs)), renderMode_(RenderMode::GLYPH_IN_RED)
+{
+	ZoneScoped;
+	ZoneText(fntFilename, strnlen(fntFilename, 256));
+
+	fntParser_ = nctl::makeUnique<FntParser>(fntFilename);
+	retrieveInfoFromFnt();
+	checkFntInformation();
 }
 
 Font::~Font()
@@ -43,69 +72,82 @@ const FontGlyph *Font::glyph(unsigned int glyphId) const
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void Font::parseFntFile(IFile *fileHandle)
+void Font::retrieveInfoFromFnt()
 {
-	int fileLine = 0;
+	const FntParser::CommonTag &commonTag = fntParser_->commonTag();
 
-	unsigned int glyphId;
-	unsigned int x, y, width, height;
-	int xOffset, yOffset;
-	int xAdvance;
-	unsigned int secondGlyphId;
-	int kerningAmount;
+	lineHeight_ = static_cast<unsigned int>(commonTag.lineHeight);
+	base_ = static_cast<unsigned int>(commonTag.base);
+	width_ = static_cast<unsigned int>(commonTag.scaleW);
+	height_ = static_cast<unsigned int>(commonTag.scaleH);
 
-	nctl::UniquePtr<char[]> fileBuffer = nctl::makeUnique<char[]>(fileHandle->size());
-	fileHandle->read(fileBuffer.get(), fileHandle->size());
-
-	const char *buffer = fileBuffer.get();
-	do
+	const int numChars = (fntParser_->numCharTags() < MaxGlyphs) ? fntParser_->numCharTags() : MaxGlyphs;
+	for (unsigned int i = 0; i < numChars; i++)
 	{
-		fileLine++;
-
-		// skipping entirely the "info" line
-		if (strncmp(buffer, "info", 4) == 0)
-			continue;
-		else if (strncmp(buffer, "common", 6) == 0)
+		const FntParser::CharTag &charTag = fntParser_->charTag(i);
+		if (charTag.id < MaxGlyphs)
 		{
-			sscanf(buffer, "common lineHeight=%u base=%u scaleW=%u scaleH=%u", &lineHeight_, &base_, &width_, &height_);
-
-			FATAL_ASSERT_MSG_X(static_cast<int>(width_) == texture_->width(), "FNT texture has a different width: %u", width_);
-			FATAL_ASSERT_MSG_X(static_cast<int>(height_) == texture_->height(), "FNT texture has a different height: %u", height_);
+			glyphs_[charTag.id].set(charTag.x, charTag.y, charTag.width, charTag.height, charTag.xoffset, charTag.yoffset, charTag.xadvance);
+			numGlyphs_++;
 		}
-		// skipping entirely the "page" line
-		else if (strncmp(buffer, "page", 4) == 0)
-			continue;
-		else if (strncmp(buffer, "chars", 5) == 0)
-			sscanf(buffer, "chars count=%u", &numGlyphs_);
-		else if (strncmp(buffer, "char", 4) == 0)
+		else
+			LOGW_X("Skipping character id #%u because bigger than glyph array size (%u)", charTag.id, MaxGlyphs);
+	}
+
+	for (unsigned int i = 0; i < fntParser_->numKerningTags(); i++)
+	{
+		const FntParser::KerningTag &kerningTag = fntParser_->kerningTag(i);
+		if (kerningTag.first < MaxGlyphs && kerningTag.second < MaxGlyphs)
 		{
-			sscanf(buffer, "char id=%u x=%u y=%u width=%u height=%u xoffset=%d yoffset=%d xadvance=%d", &glyphId, &x, &y, &width, &height, &xOffset, &yOffset, &xAdvance);
-			if (glyphId < MaxGlyphs)
-				glyphs_[glyphId].set(x, y, width, height, xOffset, yOffset, xAdvance);
+			glyphs_[kerningTag.first].addKerning(kerningTag.second, kerningTag.amount);
+			numKernings_++;
+		}
+		else
+			LOGW_X("Skipping kerning couple (#%u, #%u) because bigger than glyph array size (%u)", kerningTag.first, kerningTag.second, MaxGlyphs);
+	}
+
+	LOGI_X("FNT file information retrieved: %u glyphs and %u kernings", numGlyphs_, numKernings_);
+}
+
+void Font::checkFntInformation()
+{
+	const FntParser::InfoTag &infoTag = fntParser_->infoTag();
+	FATAL_ASSERT_MSG_X(infoTag.outline == 0, "Font outline is not supported");
+
+	const FntParser::CommonTag &commonTag = fntParser_->commonTag();
+	FATAL_ASSERT_MSG_X(commonTag.pages == 1, "Multiple texture pages are not supported (pages: %d)", commonTag.pages);
+	FATAL_ASSERT_MSG(commonTag.packed == false, "Characters packed into each of the texture channels are not supported");
+
+	if (texture_)
+	{
+		FATAL_ASSERT_MSG_X(commonTag.scaleW == texture_->width(), "Texture width is different than FNT scale width: %u instead of %u", texture_->width(), commonTag.scaleW);
+		FATAL_ASSERT_MSG_X(commonTag.scaleH == texture_->height(), "Texture height is different than FNT scale height: %u instead of %u", texture_->height(), commonTag.scaleH);
+
+		if (texture_->numChannels() == 1)
+		{
+			FATAL_ASSERT_MSG(commonTag.alphaChnl == FntParser::ChannelData::GLYPH ||
+			                 commonTag.alphaChnl == FntParser::ChannelData::OUTLINE ||
+			                 commonTag.alphaChnl == FntParser::ChannelData::MISSING,
+			                 "Texture has one channel only but it does not contain glyph data");
+			// One channel textures have only the red channel in OpenGL
+			renderMode_ = RenderMode::GLYPH_IN_RED;
+		}
+		else if (texture_->numChannels() == 4)
+		{
+			if (commonTag.redChnl == FntParser::ChannelData::MISSING && commonTag.alphaChnl == FntParser::ChannelData::MISSING)
+				renderMode_ = RenderMode::GLYPH_IN_ALPHA;
 			else
 			{
-				LOGW_X("Skipping character id #%u because bigger than glyph array size (%u)", glyphId, MaxGlyphs);
-				numGlyphs_--;
-				continue;
-			}
-		}
-		else if (strncmp(buffer, "kernings", 8) == 0)
-			sscanf(buffer, "kernings count=%u", &numKernings_);
-		else if (strncmp(buffer, "kerning", 7) == 0)
-		{
-			sscanf(buffer, "kerning first=%u second=%u amount=%d ", &glyphId, &secondGlyphId, &kerningAmount);
-			if (glyphId < MaxGlyphs && secondGlyphId < MaxGlyphs)
-				glyphs_[glyphId].addKerning(secondGlyphId, kerningAmount);
-			else
-			{
-				LOGW_X("Skipping kerning couple (#%u, #%u) because bigger than glyph array size (%u)", glyphId, secondGlyphId, MaxGlyphs);
-				numKernings_--;
-				continue;
-			}
-		}
-	} while (strchr(buffer, '\n') && (buffer = strchr(buffer, '\n') + 1) < fileBuffer.get() + fileHandle->size());
+				FATAL_ASSERT_MSG(commonTag.redChnl == FntParser::ChannelData::GLYPH || commonTag.alphaChnl == FntParser::ChannelData::GLYPH,
+				                 "Texture has four channels but neither red nor alpha channel contain glyph data");
 
-	LOGI_X("FNT file parsed: %u glyphs and %u kernings", numGlyphs_, numKernings_);
+				if (commonTag.redChnl == FntParser::ChannelData::GLYPH)
+					renderMode_ = RenderMode::GLYPH_IN_RED;
+				else if (commonTag.alphaChnl == FntParser::ChannelData::GLYPH)
+					renderMode_ = RenderMode::GLYPH_IN_ALPHA;
+			}
+		}
+	}
 }
 
 }

@@ -42,14 +42,14 @@ class RenderResources
 	static inline GLShaderProgram *spriteGrayShaderProgram() { return spriteGrayShaderProgram_.get(); }
 	static inline GLShaderProgram *meshSpriteShaderProgram() { return meshSpriteShaderProgram_.get(); }
 	static inline GLShaderProgram *meshSpriteGrayShaderProgram() { return meshSpriteGrayShaderProgram_.get(); }
-	static inline GLShaderProgram *textnodeShaderProgram() { return textnodeShaderProgram_.get(); }
-	static inline GLShaderProgram *textnodeGrayShaderProgram() { return textnodeGrayShaderProgram_.get(); }
+	static inline GLShaderProgram *textnodeAlphaShaderProgram() { return textnodeAlphaShaderProgram_.get(); }
+	static inline GLShaderProgram *textnodeRedShaderProgram() { return textnodeRedShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedSpritesShaderProgram() { return batchedSpritesShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedSpritesGrayShaderProgram() { return batchedSpritesGrayShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedMeshSpritesShaderProgram() { return batchedMeshSpritesShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedMeshSpritesGrayShaderProgram() { return batchedMeshSpritesGrayShaderProgram_.get(); }
-	static inline GLShaderProgram *batchedTextnodesShaderProgram() { return batchedTextnodesShaderProgram_.get(); }
-	static inline GLShaderProgram *batchedTextnodesGrayShaderProgram() { return batchedTextnodesGrayShaderProgram_.get(); }
+	static inline GLShaderProgram *batchedTextnodesAlphaShaderProgram() { return batchedTextnodesAlphaShaderProgram_.get(); }
+	static inline GLShaderProgram *batchedTextnodesRedShaderProgram() { return batchedTextnodesRedShaderProgram_.get(); }
 	static inline const Matrix4x4f &projectionMatrix() { return projectionMatrix_; }
 
 	static void createMinimal();
@@ -61,14 +61,14 @@ class RenderResources
 	static nctl::UniquePtr<GLShaderProgram> spriteGrayShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> meshSpriteShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> meshSpriteGrayShaderProgram_;
-	static nctl::UniquePtr<GLShaderProgram> textnodeShaderProgram_;
-	static nctl::UniquePtr<GLShaderProgram> textnodeGrayShaderProgram_;
+	static nctl::UniquePtr<GLShaderProgram> textnodeAlphaShaderProgram_;
+	static nctl::UniquePtr<GLShaderProgram> textnodeRedShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedSpritesShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedSpritesGrayShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedMeshSpritesShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedMeshSpritesGrayShaderProgram_;
-	static nctl::UniquePtr<GLShaderProgram> batchedTextnodesGrayShaderProgram_;
-	static nctl::UniquePtr<GLShaderProgram> batchedTextnodesShaderProgram_;
+	static nctl::UniquePtr<GLShaderProgram> batchedTextnodesAlphaShaderProgram_;
+	static nctl::UniquePtr<GLShaderProgram> batchedTextnodesRedShaderProgram_;
 
 	static Matrix4x4f projectionMatrix_;
 

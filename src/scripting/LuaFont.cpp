@@ -18,6 +18,7 @@ namespace Font {
 	static const char *base = "base";
 	static const char *textureSize = "texture_size";
 	static const char *numGlyphs = "num_glyphs";
+	static const char *numKernings = "num_kernings";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -41,6 +42,7 @@ void LuaFont::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::Font::base, base);
 	LuaUtils::addFunction(L, LuaNames::Font::textureSize, textureSize);
 	LuaUtils::addFunction(L, LuaNames::Font::numGlyphs, numGlyphs);
+	LuaUtils::addFunction(L, LuaNames::Font::numKernings, numKernings);
 
 	lua_setfield(L, -2, LuaNames::Font::Font);
 }
@@ -60,7 +62,7 @@ int LuaFont::newObject(lua_State *L)
 	const char *texFilename = LuaUtils::retrieve<const char *>(L, -2);
 	const char *fntFilename = LuaUtils::retrieve<const char *>(L, -1);
 
-	Font *font = new Font(texFilename, fntFilename);
+	Font *font = (*texFilename == '\n') ? new Font(texFilename, fntFilename) : new Font(fntFilename);
 	LuaClassTracker<Font>::wrapTrackedUserData(L, font);
 
 	return 1;
@@ -98,6 +100,13 @@ int LuaFont::numGlyphs(lua_State *L)
 {
 	Font *font = LuaClassWrapper<Font>::unwrapUserData(L, -1);
 	LuaUtils::push(L, font->numGlyphs());
+	return 1;
+}
+
+int LuaFont::numKernings(lua_State *L)
+{
+	Font *font = LuaClassWrapper<Font>::unwrapUserData(L, -1);
+	LuaUtils::push(L, font->numKernings());
 	return 1;
 }
 

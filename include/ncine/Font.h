@@ -6,15 +6,24 @@
 
 namespace ncine {
 
+class FntParser;
 class FontGlyph;
 class Texture;
-class IFile;
 
 /// A class holding every information needed to correctly render text
 class DLL_PUBLIC Font : public Object
 {
   public:
-	/// Constructs the object from a texture and a `FNT` file (from <em>AngelCode's Bitmap Font Generator</em>)
+	/// Depending on the glyph channel a different shader will be used
+	enum RenderMode
+	{
+		GLYPH_IN_RED,
+		GLYPH_IN_ALPHA
+	};
+
+	/// Constructs the object from an AngelCode's `FNT` file
+	explicit Font(const char *fntFilename);
+	/// Constructs the object from a texture and an AngelCode's `FNT` file
 	Font(const char *texFilename, const char *fntFilename);
 	~Font() override;
 
@@ -29,12 +38,19 @@ class DLL_PUBLIC Font : public Object
 	inline Vector2i textureSize() const { return Vector2i(width_, height_); }
 	/// Returns number of glyphs
 	inline unsigned int numGlyphs() const { return numGlyphs_; }
+	/// Returns number of kerning pairs
+	inline unsigned int numKernings() const { return numKernings_; }
 	/// Returns a constant pointer to a glyph
 	const FontGlyph *glyph(unsigned int glyphId) const;
+
+	inline RenderMode renderMode() const { return renderMode_; }
 
 	inline static ObjectType sType() { return ObjectType::FONT; }
 
   private:
+	/// The FNT file parser associated with this font
+	nctl::UniquePtr<FntParser> fntParser_;
+
 	/// The font texture
 	nctl::UniquePtr<Texture> texture_;
 	/// Font line height
@@ -55,13 +71,18 @@ class DLL_PUBLIC Font : public Object
 	/// Array of font glyphs
 	nctl::UniquePtr<FontGlyph[]> glyphs_;
 
+	RenderMode renderMode_;
+
 	/// Deleted copy constructor
 	Font(const Font &) = delete;
 	/// Deleted assignment operator
 	Font &operator=(const Font &) = delete;
 
-	/// Loads an <em>AngelCode's</em> `FNT` file in a memory buffer then parses it
-	void parseFntFile(IFile *fileHandle);
+	/// Retrieves font information from the FNT parser
+	void retrieveInfoFromFnt();
+
+	/// Checks whether the FNT information are compatible with rendering or not
+	void checkFntInformation();
 };
 
 }
