@@ -556,7 +556,7 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("File log level: %d", static_cast<int>(appCfg.fileLogLevel));
 		ImGui::Text("Frametimer Log interval: %f", appCfg.frameTimerLogInterval);
 		ImGui::Text("Profile text update time: %f", appCfg.profileTextUpdateTime());
-		ImGui::Text("Resolution: %u x %u", appCfg.xResolution, appCfg.yResolution);
+		ImGui::Text("Resolution: %u x %u", appCfg.resolution.x, appCfg.resolution.y);
 		ImGui::Text("Full Screen: %s", appCfg.inFullscreen ? "true" : "false");
 		ImGui::Text("Resizable: %s", appCfg.isResizable ? "true" : "false");
 		ImGui::Text("Frame Limit: %u", appCfg.frameLimit);
@@ -656,8 +656,8 @@ void ImGuiDebugOverlay::guiWindowSettings()
 		ImGui::SameLine();
 		if (ImGui::Button("Reset"))
 		{
-			resolution[0] = theApplication().appConfiguration().xResolution;
-			resolution[1] = theApplication().appConfiguration().yResolution;
+			resolution[0] = theApplication().appConfiguration().resolution.x;
+			resolution[1] = theApplication().appConfiguration().resolution.y;
 			fullScreen = theApplication().appConfiguration().inFullscreen;
 			theApplication().gfxDevice().setResolution(resolution[0], resolution[1]);
 			theApplication().gfxDevice().setFullScreen(fullScreen);

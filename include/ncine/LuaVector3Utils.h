@@ -19,6 +19,7 @@ class LuaVector3Utils
 {
   public:
 	static void push(lua_State *L, const Vector3<T> &v);
+	static void pushField(lua_State *L, const char *name, const Vector3<T> &v);
 	static Vector3<T> retrieve(lua_State *L, int index, int &newIndex);
 	static Vector3<T> retrieveTable(lua_State *L, int index);
 	static Vector3<T> retrieveArray(lua_State *L, int index);
@@ -37,6 +38,13 @@ void LuaVector3Utils<T>::push(lua_State *L, const Vector3<T> &v)
 	LuaUtils::pushField(L, LuaNames::Vector3::x, v.x);
 	LuaUtils::pushField(L, LuaNames::Vector3::y, v.y);
 	LuaUtils::pushField(L, LuaNames::Vector3::z, v.z);
+}
+
+template <class T>
+void LuaVector3Utils<T>::pushField(lua_State *L, const char *name, const Vector3<T> &v)
+{
+	push(L, v);
+	LuaUtils::setField(L, -2, name);
 }
 
 template <class T>

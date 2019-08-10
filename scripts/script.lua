@@ -8,8 +8,7 @@ end
 nc = ncine
 
 function ncine.on_pre_init(cfg)
-	cfg.x_res = 1280
-	cfg.y_res = 720
+	cfg.resolution = {x = 1280, y = 720}
 	cfg.window_title = "nCine Lua test"
 
 	--cfg.console_log_level = nc.log_level.OFF

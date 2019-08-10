@@ -66,7 +66,7 @@ void PCApplication::init(IAppEventHandler *(*createAppEventHandler)())
 	const DisplayMode::VSync vSyncMode = appCfg_.withVSync ? DisplayMode::VSync::ENABLED : DisplayMode::VSync::DISABLED;
 	DisplayMode displayMode(8, 8, 8, 8, 24, 8, DisplayMode::DoubleBuffering::ENABLED, vSyncMode);
 
-	const IGfxDevice::WindowMode windowMode(appCfg_.xResolution, appCfg_.yResolution, appCfg_.inFullscreen, appCfg_.isResizable);
+	const IGfxDevice::WindowMode windowMode(appCfg_.resolution.x, appCfg_.resolution.y, appCfg_.inFullscreen, appCfg_.isResizable);
 #if defined(WITH_SDL)
 	gfxDevice_ = nctl::makeUnique<SdlGfxDevice>(windowMode, glContextInfo, displayMode);
 	inputManager_ = nctl::makeUnique<SdlInputManager>();

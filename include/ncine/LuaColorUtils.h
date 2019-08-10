@@ -14,6 +14,7 @@ class DLL_PUBLIC LuaColorUtils
 {
   public:
 	static void push(lua_State *L, const Colorf &color);
+	static void pushField(lua_State *L, const char *name, const Colorf &color);
 	static Colorf retrieve(lua_State *L, int index, int &newIndex);
 	static Colorf retrieveTable(lua_State *L, int index);
 	static Colorf retrieveArray(lua_State *L, int index);

@@ -20,6 +20,7 @@ class LuaRectUtils
 {
   public:
 	static void push(lua_State *L, const Rect<T> &rect);
+	static void pushField(lua_State *L, const char *name, const Rect<T> &rect);
 	static Rect<T> retrieve(lua_State *L, int index, int &newIndex);
 	static Rect<T> retrieveTable(lua_State *L, int index);
 	static Rect<T> retrieveArray(lua_State *L, int index);
@@ -39,6 +40,13 @@ void LuaRectUtils<T>::push(lua_State *L, const Rect<T> &rect)
 	LuaUtils::pushField(L, LuaNames::Rect::y, rect.y);
 	LuaUtils::pushField(L, LuaNames::Rect::w, rect.w);
 	LuaUtils::pushField(L, LuaNames::Rect::h, rect.h);
+}
+
+template <class T>
+void LuaRectUtils<T>::pushField(lua_State *L, const char *name, const Rect<T> &rect)
+{
+	push(L, rect);
+	LuaUtils::setField(L, -2, name);
 }
 
 template <class T>

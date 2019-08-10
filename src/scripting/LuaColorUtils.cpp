@@ -25,6 +25,12 @@ void LuaColorUtils::push(lua_State *L, const Colorf &color)
 	LuaUtils::pushField(L, LuaNames::Color::a, color.a());
 }
 
+void LuaColorUtils::pushField(lua_State *L, const char *name, const Colorf &color)
+{
+	push(L, color);
+	LuaUtils::setField(L, -2, name);
+}
+
 Colorf LuaColorUtils::retrieve(lua_State *L, int index, int &newIndex)
 {
 	if (LuaUtils::isTable(L, index))

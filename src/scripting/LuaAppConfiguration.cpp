@@ -4,6 +4,7 @@
 #include "LuaAppConfiguration.h"
 #include "LuaClassWrapper.h"
 #include "LuaUtils.h"
+#include "LuaVector2Utils.h"
 #include "AppConfiguration.h"
 
 namespace ncine {
@@ -16,8 +17,7 @@ namespace AppConfiguration {
 	static const char *fileLogLevel = "file_log_level";
 	static const char *frameTimerLogInterval = "log_interval";
 
-	static const char *xResolution = "x_res";
-	static const char *yResolution = "y_res";
+	static const char *resolution = "resolution";
 	static const char *inFullscreen = "fullscreen";
 	static const char *isResizable = "resizable";
 	static const char *frameLimit = "frame_limit";
@@ -45,7 +45,7 @@ namespace AppConfiguration {
 
 void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 {
-	lua_createtable(L, 25, 0);
+	lua_createtable(L, 24, 0);
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::dataPath, appCfg.dataPath().data());
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::logFile, appCfg.logFile.data());
@@ -53,8 +53,7 @@ void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::fileLogLevel, static_cast<int64_t>(appCfg.fileLogLevel));
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::frameTimerLogInterval, appCfg.frameTimerLogInterval);
 
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::xResolution, appCfg.xResolution);
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::yResolution, appCfg.yResolution);
+	LuaVector2iUtils::pushField(L, LuaNames::AppConfiguration::resolution, appCfg.resolution);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::inFullscreen, appCfg.inFullscreen);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::isResizable, appCfg.isResizable);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::frameLimit, appCfg.frameLimit);
@@ -92,9 +91,8 @@ void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
 	const float logInterval = LuaUtils::retrieveField<float>(L, -1, LuaNames::AppConfiguration::frameTimerLogInterval);
 	appCfg.frameTimerLogInterval = logInterval;
 
-	const unsigned int xRes = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::xResolution);
-	const unsigned int yRes = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::yResolution);
-	appCfg.setResolution(xRes, yRes);
+	const Vector2i resolution = LuaVector2iUtils::retrieveTableField(L, -1, LuaNames::AppConfiguration::resolution);
+	appCfg.resolution = resolution;
 	const bool inFullscreen = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::inFullscreen);
 	appCfg.inFullscreen = inFullscreen;
 	const bool isResizable = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::isResizable);

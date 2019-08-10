@@ -16,8 +16,7 @@ AppConfiguration::AppConfiguration()
 #endif
       fileLogLevel(ILogger::LogLevel::OFF),
       frameTimerLogInterval(5.0f),
-      xResolution(1280),
-      yResolution(720),
+      resolution(1280, 720),
       inFullscreen(false),
       isResizable(false),
       frameLimit(0),
@@ -75,12 +74,6 @@ const nctl::String &AppConfiguration::dataPath() const
 nctl::String &AppConfiguration::dataPath()
 {
 	return IFile::dataPath_;
-}
-
-void AppConfiguration::setResolution(unsigned int x, unsigned int y)
-{
-	xResolution = x;
-	yResolution = y;
 }
 
 }

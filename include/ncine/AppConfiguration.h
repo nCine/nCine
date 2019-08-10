@@ -3,6 +3,7 @@
 
 #include <nctl/String.h>
 #include "ILogger.h"
+#include "Vector2.h"
 
 namespace ncine {
 
@@ -24,10 +25,9 @@ class DLL_PUBLIC AppConfiguration
 	/// The interval for frame timer accumulation average and log
 	float frameTimerLogInterval;
 
-	/// The screen width
-	unsigned int xResolution;
-	/// The screen height
-	unsigned int yResolution;
+	/// The screen resolution
+	/*! \note If either `x` or `y` are zero then the screen resolution will not be changed. */
+	Vector2i resolution;
 	/// The flag is `true` if the screen is going to be in fullscreen mode
 	bool inFullscreen;
 	/// The flag is `true` if the window is going to be resizable
@@ -69,10 +69,6 @@ class DLL_PUBLIC AppConfiguration
 	const nctl::String &dataPath() const;
 	/// \returns The path for the application to load data from
 	nctl::String &dataPath();
-
-	/// Sets the screen resolution
-	/*! \note If either \p x or \p y are zero then the screen resolution will not be changed. */
-	void setResolution(unsigned int x, unsigned int y);
 
 	/// \returns True if the OpenGL profile is going to be core
 	inline bool glCoreProfile() const { return glCoreProfile_; }
