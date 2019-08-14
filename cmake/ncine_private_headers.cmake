@@ -1,5 +1,6 @@
 set(PRIVATE_HEADERS
 	${NCINE_ROOT}/src/include/common_headers.h
+	${NCINE_ROOT}/src/include/Clock.h
 	${NCINE_ROOT}/src/include/ArrayIndexer.h
 	${NCINE_ROOT}/src/include/FrameTimer.h
 	${NCINE_ROOT}/src/include/StandardFile.h

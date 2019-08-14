@@ -3,7 +3,7 @@
 
 #include <nctl/Array.h>
 #include "LuaTypes.h"
-#include "Timer.h"
+#include "TimeStamp.h"
 
 namespace nctl {
 
@@ -34,7 +34,7 @@ class LuaStatistics
 	static unsigned int numTrackedUserDatas_;
 	static unsigned int numTypedUserDatas_[LuaTypes::UserDataType::UNKNOWN + 1];
 	static size_t usedMemory_;
-	static Timer timer_;
+	static TimeStamp lastOpsUpdateTime_;
 	static unsigned int index_;
 	static int operations_[2];
 

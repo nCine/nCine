@@ -3,6 +3,7 @@
 
 #include <nctl/Array.h>
 #include <nctl/UniquePtr.h>
+#include <TimeStamp.h>
 #include "GLVertexArrayObject.h"
 #include "GLVertexFormat.h"
 
@@ -20,12 +21,9 @@ class RenderVaoPool
   private:
 	struct VaoBinding
 	{
-		VaoBinding()
-		    : lastBindTime(0) {}
-
 		nctl::UniquePtr<GLVertexArrayObject> object;
 		GLVertexFormat format;
-		float lastBindTime;
+		TimeStamp lastBindTime;
 	};
 
 	nctl::Array<VaoBinding> vaoPool_;

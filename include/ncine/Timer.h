@@ -1,6 +1,7 @@
 #ifndef CLASS_NCINE_TIMER
 #define CLASS_NCINE_TIMER
 
+#include <cstdint>
 #include "common_defines.h"
 
 namespace ncine {
@@ -9,46 +10,32 @@ namespace ncine {
 class DLL_PUBLIC Timer
 {
   public:
-	/// Default constructor
 	Timer();
+
 	/// Starts the timer
-	inline void start() { startTime_ = counter(); }
-	/// Returns elapsed time in seconds since starting the timer
+	void start();
+	/// Stops the timer
+	void stop();
+	/// Resets the accumulated time
+	inline void reset() { accumulatedTime_ = 0ULL; }
+	/// Returns `true` if the timer is running
+	inline bool isRunning() const { return isRunning_; }
+
+	/// Returns elapsed time in seconds since last starting the timer
 	float interval() const;
-	/// Returns elapsed time in seconds since base time
-	static float now();
+	/// Returns total accumulated time in seconds
+	float total() const;
+
 	/// Puts the current thread to sleep for the specified number of seconds
 	static void sleep(float seconds);
 
-  protected:
-	/// Start time mark
-	unsigned long long int startTime_;
-
   private:
-#ifdef _WIN32
-	static bool hasPerfCounter_;
-#elif !defined(__APPLE__)
-	static bool hasMonotonicClock_;
-#endif
-
-	/// A flag indicating whether the static fields have been initialized
-	static bool isInitialized_;
-	/// Counter frequency in counts per second
-	static unsigned long int frequency_;
-	/// Counter value at initialization time
-	static unsigned long long int baseCount_;
-
-	/// Initializes the static fields
-	static void init();
-
-	/// Returns current value of the counter
-	static unsigned long long int counter();
+	bool isRunning_;
+	/// Start time mark
+	uint64_t startTime_;
+	/// Accumulated time ticks over multiple start and stop
+	uint64_t accumulatedTime_;
 };
-
-inline float Timer::interval() const
-{
-	return float(counter() - startTime_) / frequency_;
-}
 
 }
 

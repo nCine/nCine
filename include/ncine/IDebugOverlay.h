@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_IDEBUGOVERLAY
 #define CLASS_NCINE_IDEBUGOVERLAY
 
-#include "Timer.h"
+#include "TimeStamp.h"
 
 namespace ncine {
 
@@ -31,7 +31,7 @@ class DLL_PUBLIC IDebugOverlay
 
   protected:
 	DisplaySettings settings_;
-	Timer updateTimer_;
+	TimeStamp lastUpdateTime_;
 	float updateTime_;
 
 	/// Deleted copy constructor
@@ -41,14 +41,9 @@ class DLL_PUBLIC IDebugOverlay
 };
 
 inline IDebugOverlay::IDebugOverlay(float profileTextUpdateTime)
-    : updateTime_(profileTextUpdateTime)
-{
-	updateTimer_.start();
-}
+    : updateTime_(profileTextUpdateTime) {}
 
-inline IDebugOverlay::~IDebugOverlay()
-{
-}
+inline IDebugOverlay::~IDebugOverlay() {}
 
 }
 

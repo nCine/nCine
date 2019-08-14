@@ -102,7 +102,7 @@ void ImGuiDebugOverlay::update()
 
 void ImGuiDebugOverlay::updateFrameTimings()
 {
-	if (updateTimer_.interval() > updateTime_)
+	if (lastUpdateTime_.secondsSince() > updateTime_)
 	{
 		const AppConfiguration &appCfg = theApplication().appConfiguration();
 		const float *timings = theApplication().timings();
@@ -134,7 +134,7 @@ void ImGuiDebugOverlay::updateFrameTimings()
 			updateOverlayTimings();
 
 		index_ = (index_ + 1) % numValues_;
-		updateTimer_.start();
+		lastUpdateTime_ = TimeStamp::now();
 	}
 }
 

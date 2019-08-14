@@ -4,12 +4,12 @@
 #include "IGfxDevice.h"
 #include "AppConfiguration.h"
 #include "IDebugOverlay.h"
+#include "TimeStamp.h"
 #include <nctl/UniquePtr.h>
 
 namespace ncine {
 
 class FrameTimer;
-class Timer;
 class SceneNode;
 class RenderQueue;
 class IInputManager;
@@ -126,7 +126,7 @@ class DLL_PUBLIC Application
 	float timings_[Timings::COUNT];
 	IDebugOverlay::DisplaySettings debugOverlayNullSettings_;
 
-	nctl::UniquePtr<Timer> profileTimer_;
+	TimeStamp profileStartTime_;
 	nctl::UniquePtr<FrameTimer> frameTimer_;
 	nctl::UniquePtr<IGfxDevice> gfxDevice_;
 	nctl::UniquePtr<RenderQueue> renderQueue_;

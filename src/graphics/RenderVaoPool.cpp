@@ -1,7 +1,6 @@
 #include "RenderVaoPool.h"
 #include "GLVertexArrayObject.h"
 #include "RenderStatistics.h"
-#include "Timer.h"
 #include "GLDebug.h"
 
 namespace ncine {
@@ -43,7 +42,7 @@ void RenderVaoPool::bindVao(const GLVertexFormat &vertexFormat)
 				// The VAO was already bound but it is not known if the bound element array buffer changed in the meantime
 				GLBufferObject::bindHandle(GL_ELEMENT_ARRAY_BUFFER, iboHandle);
 			}
-			binding.lastBindTime = Timer::now();
+			binding.lastBindTime = TimeStamp::now();
 			RenderStatistics::addVaoPoolBinding();
 			break;
 		}
@@ -61,7 +60,7 @@ void RenderVaoPool::bindVao(const GLVertexFormat &vertexFormat)
 		else
 		{
 			// Find the least recently used VAO
-			float time = vaoPool_[0].lastBindTime;
+			TimeStamp time = vaoPool_[0].lastBindTime;
 			for (unsigned int i = 1; i < vaoPool_.size(); i++)
 			{
 				if (vaoPool_[i].lastBindTime < time)
@@ -76,13 +75,13 @@ void RenderVaoPool::bindVao(const GLVertexFormat &vertexFormat)
 		}
 
 		const bool bindChanged = vaoPool_[index].object->bind();
-		ASSERT(bindChanged == true);
+		ASSERT(bindChanged == true || vaoPool_.size() == 1);
 		// Binding a VAO changes the current bound element array buffer
 		const GLuint oldIboHandle = vaoPool_[index].format.ibo() ? vaoPool_[index].format.ibo()->glHandle() : 0;
 		GLBufferObject::setBoundHandle(GL_ELEMENT_ARRAY_BUFFER, oldIboHandle);
 		vaoPool_[index].format = vertexFormat;
 		vaoPool_[index].format.define();
-		vaoPool_[index].lastBindTime = Timer::now();
+		vaoPool_[index].lastBindTime = TimeStamp::now();
 		RenderStatistics::addVaoPoolBinding();
 	}
 	GLDebug::popGroup();

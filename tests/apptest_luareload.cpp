@@ -3,7 +3,6 @@
 #include <ncine/Texture.h>
 #include <ncine/ParticleSystem.h>
 #include <ncine/ParticleInitializer.h>
-#include <ncine/Timer.h>
 #include <ncine/LuaIAppEventHandler.h>
 #include <ncine/LuaIInputEventHandler.h>
 #include <ncine/LuaClassWrapper.h>
@@ -60,15 +59,14 @@ void MyEventHandler::onInit()
 	particleSystem_ = nctl::makeUnique<nc::ParticleSystem>(&rootNode, count, texture_.get(), texture_->rect());
 	particleSystem_->setPosition(xPos, yPos);
 
-	emitTimer_ = nctl::makeUnique<nc::Timer>();
-	emitTimer_->start();
+	lastEmissionTime_ = nc::TimeStamp::now();
 
 	runScript();
 }
 
 void MyEventHandler::onFrameStart()
 {
-	if (emitTimer_->interval() > 0.085f)
+	if (lastEmissionTime_.secondsSince() > 0.085f)
 	{
 		nc::ParticleInitializer init;
 		init.setAmount(16);
@@ -76,7 +74,7 @@ void MyEventHandler::onFrameStart()
 		init.setPositionAndRadius(nc::Vector2f::Zero, 5.0f);
 		init.setVelocity(-10.0f, 200.0f, 10.0f, 200.0f);
 
-		emitTimer_->start();
+		lastEmissionTime_ = nc::TimeStamp::now();
 		particleSystem_->emitParticles(init);
 	}
 }

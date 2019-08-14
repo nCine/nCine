@@ -203,8 +203,7 @@ const char *AndroidApplication::obbPath() const
 
 void AndroidApplication::preInit()
 {
-	profileTimer_ = nctl::makeUnique<Timer>();
-	profileTimer_->start();
+	profileStartTime_ = TimeStamp::now();
 
 	appEventHandler_ = nctl::UniquePtr<IAppEventHandler>(createAppEventHandler_());
 	// Only `onPreInit()` can modify the application configuration
@@ -238,7 +237,7 @@ void AndroidApplication::init()
 	inputManager_ = nctl::makeUnique<AndroidInputManager>(state_);
 	AssetFile::initAssetManager(state_);
 
-	timings_[Timings::PRE_INIT] = profileTimer_->interval();
+	timings_[Timings::PRE_INIT] = profileStartTime_.secondsSince();
 
 	Application::initCommon();
 

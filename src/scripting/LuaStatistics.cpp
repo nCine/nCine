@@ -13,7 +13,7 @@ nctl::Array<LuaStateManager *> LuaStatistics::managers_(2);
 unsigned int LuaStatistics::numTrackedUserDatas_;
 unsigned int LuaStatistics::numTypedUserDatas_[LuaTypes::UserDataType::UNKNOWN + 1];
 size_t LuaStatistics::usedMemory_ = 0;
-Timer LuaStatistics::timer_;
+TimeStamp LuaStatistics::lastOpsUpdateTime_;
 unsigned int LuaStatistics::index_ = 0;
 int LuaStatistics::operations_[2] = { 0, 0 };
 
@@ -43,7 +43,7 @@ void LuaStatistics::registerState(LuaStateManager *stateManager)
 {
 	managers_.pushBack(stateManager);
 	if (managers_.size() == 1)
-		timer_.start();
+		lastOpsUpdateTime_ = TimeStamp::now();
 }
 
 void LuaStatistics::unregisterState(LuaStateManager *stateManager)
@@ -71,11 +71,13 @@ void LuaStatistics::unregisterState(LuaStateManager *stateManager)
 void LuaStatistics::countOperations()
 {
 	operations_[index_] += OperationsCount;
-	if (timer_.interval() >= 1.0f)
+
+	const float secsSinceLastUpdate = lastOpsUpdateTime_.secondsSince();
+	if (secsSinceLastUpdate >= 1.0f)
 	{
-		operations_[index_] = int(float(operations_[index_]) / timer_.interval());
+		operations_[index_] = int(float(operations_[index_]) / secsSinceLastUpdate);
 		TracyPlot("Lua Ops", static_cast<int64_t>(operations_[index_]));
-		timer_.start();
+		lastOpsUpdateTime_ = TimeStamp::now();
 
 		// Ping pong index for last and current measurement
 		index_ = (index_ + 1) % 2;

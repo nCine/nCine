@@ -2,7 +2,7 @@
 #include <ncine/common_macros.h>
 #include <ncine/Application.h>
 #include <ncine/Thread.h> // after Application.h to compile on MSVC
-#include <ncine/Timer.h>
+#include <ncine/TimeStamp.h>
 
 namespace {
 
@@ -49,7 +49,7 @@ void MyEventHandler::onInit()
 
 	globalArray = new float[NumFloats];
 
-	float startTime = nc::Timer::now();
+	nc::TimeStamp startTime;
 	for (int i = 0; i < NumThreads; i++)
 	{
 		threadNums[i] = i;
@@ -59,8 +59,7 @@ void MyEventHandler::onInit()
 	for (int i = 0; i < NumThreads; i++)
 		threads[i].join();
 
-	float endTime = nc::Timer::now();
-	LOGI_X("APPTEST_THREADS: total time %fms", (endTime - startTime) * 1000.0f);
+	LOGI_X("APPTEST_THREADS: total time %fms", startTime.millisecondsSince());
 
 	delete[] globalArray;
 }

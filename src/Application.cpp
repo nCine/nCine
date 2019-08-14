@@ -1,4 +1,3 @@
-#include <ctime>
 #include "Application.h"
 #include "Random.h"
 #include "IAppEventHandler.h"
@@ -8,6 +7,7 @@
 #include "RenderResources.h"
 #include "RenderQueue.h"
 #include "GLDebug.h"
+#include "Timer.h" // for `sleep()`
 #include "FrameTimer.h"
 #include "SceneNode.h"
 #include <nctl/String.h>
@@ -63,7 +63,7 @@ unsigned long int Application::numFrames() const
 
 float Application::interval() const
 {
-	return frameTimer_->frameInterval();
+	return frameTimer_->lastFrameInterval();
 }
 
 void Application::setSuspended(bool suspended)
@@ -72,7 +72,7 @@ void Application::setSuspended(bool suspended)
 	if (isSuspended_ == false)
 	{
 		frameTimer_->start();
-		profileTimer_->start();
+		profileStartTime_ = TimeStamp::now();
 	}
 }
 
@@ -84,7 +84,7 @@ void Application::initCommon()
 {
 	TracyGpuContext;
 	ZoneScoped;
-	profileTimer_->start();
+	profileStartTime_ = TimeStamp::now();
 
 #ifdef WITH_GIT_VERSION
 	LOGI_X("nCine %s (%s) compiled on %s at %s", VersionStrings::Version, VersionStrings::GitBranch,
@@ -139,18 +139,18 @@ void Application::initCommon()
 		debugOverlay_ = nctl::makeUnique<ImGuiDebugOverlay>(appCfg_.profileTextUpdateTime());
 #endif
 
-	// Init of the static random egnerator seeds
-	random().init(static_cast<uint64_t>(time(nullptr)), reinterpret_cast<intptr_t>(frameTimer_.get()));
+	// Initialization of the static random generator seeds
+	random().init(static_cast<uint64_t>(TimeStamp::now().ticks()), static_cast<uint64_t>(profileStartTime_.ticks()));
 
 	LOGI("Application initialized");
 
-	timings_[Timings::INIT_COMMON] = profileTimer_->interval();
+	timings_[Timings::INIT_COMMON] = profileStartTime_.secondsSince();
 
 	{
 		ZoneScopedN("onInit");
-		profileTimer_->start();
+		profileStartTime_ = TimeStamp::now();
 		appEventHandler_->onInit();
-		timings_[Timings::APP_INIT] = profileTimer_->interval();
+		timings_[Timings::APP_INIT] = profileStartTime_.secondsSince();
 		LOGI("IAppEventHandler::OnInit() invoked");
 	}
 
@@ -177,9 +177,9 @@ void Application::step()
 #ifdef WITH_IMGUI
 	{
 		ZoneScopedN("ImGui newFrame");
-		profileTimer_->start();
+		profileStartTime_ = TimeStamp::now();
 		imguiDrawing_->newFrame();
-		timings_[Timings::IMGUI] = profileTimer_->interval();
+		timings_[Timings::IMGUI] = profileStartTime_.secondsSince();
 	}
 #endif
 
@@ -189,9 +189,9 @@ void Application::step()
 
 	{
 		ZoneScopedN("onFrameStart");
-		profileTimer_->start();
+		profileStartTime_ = TimeStamp::now();
 		appEventHandler_->onFrameStart();
-		timings_[Timings::FRAME_START] = profileTimer_->interval();
+		timings_[Timings::FRAME_START] = profileStartTime_.secondsSince();
 	}
 
 	if (debugOverlay_)
@@ -202,23 +202,23 @@ void Application::step()
 		ZoneScopedN("SceneGraph");
 		{
 			ZoneScopedN("Update");
-			profileTimer_->start();
-			rootNode_->update(frameTimer_->frameInterval());
-			timings_[Timings::UPDATE] = profileTimer_->interval();
+			profileStartTime_ = TimeStamp::now();
+			rootNode_->update(frameTimer_->lastFrameInterval());
+			timings_[Timings::UPDATE] = profileStartTime_.secondsSince();
 		}
 
 		{
 			ZoneScopedN("Visit");
-			profileTimer_->start();
+			profileStartTime_ = TimeStamp::now();
 			rootNode_->visit(*renderQueue_);
-			timings_[Timings::VISIT] = profileTimer_->interval();
+			timings_[Timings::VISIT] = profileStartTime_.secondsSince();
 		}
 
 		{
 			ZoneScopedN("Draw");
-			profileTimer_->start();
+			profileStartTime_ = TimeStamp::now();
 			renderQueue_->draw();
-			timings_[Timings::DRAW] = profileTimer_->interval();
+			timings_[Timings::DRAW] = profileStartTime_.secondsSince();
 		}
 	}
 
@@ -230,21 +230,14 @@ void Application::step()
 #ifdef WITH_IMGUI
 	{
 		ZoneScopedN("ImGui endFrame");
-		profileTimer_->start();
+		profileStartTime_ = TimeStamp::now();
 		if (appCfg_.withScenegraph)
 			imguiDrawing_->endFrame(*renderQueue_);
 		else
 			imguiDrawing_->endFrame();
-		timings_[Timings::IMGUI] += profileTimer_->interval();
+		timings_[Timings::IMGUI] += profileStartTime_.secondsSince();
 	}
 #endif
-
-	if (appCfg_.frameLimit > 0)
-	{
-		const float frameTimeDuration = 1.0f / static_cast<float>(appCfg_.frameLimit);
-		while (frameTimer_->interval() < frameTimeDuration)
-			Timer::sleep(0.0f);
-	}
 
 	gfxDevice_->update();
 	FrameMark;
@@ -252,13 +245,20 @@ void Application::step()
 
 	{
 		ZoneScopedN("onFrameEnd");
-		profileTimer_->start();
+		profileStartTime_ = TimeStamp::now();
 		appEventHandler_->onFrameEnd();
-		timings_[Timings::FRAME_END] = profileTimer_->interval();
+		timings_[Timings::FRAME_END] = profileStartTime_.secondsSince();
 	}
 
 	if (debugOverlay_)
 		debugOverlay_->updateFrameTimings();
+
+	if (appCfg_.frameLimit > 0)
+	{
+		const float frameTimeDuration = 1.0f / static_cast<float>(appCfg_.frameLimit);
+		while (frameTimer_->frameInterval() < frameTimeDuration)
+			Timer::sleep(0.0f);
+	}
 }
 
 void Application::shutdownCommon()
@@ -286,7 +286,6 @@ void Application::shutdownCommon()
 	frameTimer_.reset(nullptr);
 	inputManager_.reset(nullptr);
 	gfxDevice_.reset(nullptr);
-	profileTimer_.reset(nullptr);
 
 	if (theServiceLocator().indexer().isEmpty() == false)
 	{
@@ -313,10 +312,14 @@ void Application::setFocus(bool hasFocus)
 		if (hasFocus == true)
 		{
 			frameTimer_->start();
-			profileTimer_->start();
+			profileStartTime_ = TimeStamp::now();
 		}
 	}
 }
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
 
 bool Application::shouldSuspend()
 {

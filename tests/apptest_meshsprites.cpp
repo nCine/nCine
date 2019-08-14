@@ -5,7 +5,6 @@
 #include <ncine/Sprite.h>
 #include <ncine/MeshSprite.h>
 #include <ncine/TextNode.h>
-#include <ncine/Timer.h>
 #include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
@@ -156,7 +155,6 @@ void MyEventHandler::onInit()
 
 	scrollOrigin_ = nc::Vector2f::Zero;
 	scrollMove_ = nc::Vector2f::Zero;
-	lastClick_ = 0.0f;
 	joyVectorRight_ = nc::Vector2f::Zero;
 }
 
@@ -247,9 +245,9 @@ void MyEventHandler::onTouchMove(const nc::TouchEvent &event)
 
 void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 {
-	if (nc::Timer::now() - lastClick_ < DoubleClickDelay)
+	if (lastClickTime_.secondsSince() < DoubleClickDelay)
 		resetCamera();
-	lastClick_ = nc::Timer::now();
+	lastClickTime_ = nc::TimeStamp::now();
 }
 #endif
 
@@ -302,9 +300,9 @@ void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
 	{
-		if (nc::Timer::now() - lastClick_ < DoubleClickDelay)
+		if (lastClickTime_.secondsSince() < DoubleClickDelay)
 			resetCamera();
-		lastClick_ = nc::Timer::now();
+		lastClickTime_ = nc::TimeStamp::now();
 	}
 }
 

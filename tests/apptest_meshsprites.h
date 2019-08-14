@@ -5,6 +5,7 @@
 #include <ncine/IInputEventHandler.h>
 #include <nctl/StaticArray.h>
 #include <ncine/Vector2.h>
+#include <ncine/TimeStamp.h>
 
 namespace nctl {
 
@@ -69,7 +70,7 @@ class MyEventHandler :
 
 	nc::Vector2f scrollOrigin_;
 	nc::Vector2f scrollMove_;
-	float lastClick_;
+	nc::TimeStamp lastClickTime_;
 	nc::Vector2f joyVectorRight_;
 
 	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, NumTextures> textures_;

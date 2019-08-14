@@ -1,39 +1,20 @@
 #include "Timer.h"
+#include "Clock.h"
 
-#ifdef _WIN32
+#if defined(_WIN32)
 	#include <winsync.h>
-	#include <profileapi.h>
-#elif __APPLE__
-	#include <mach/mach_time.h>
-	#include <unistd.h>
 #else
-	#include <time.h> // for clock_gettime()
-	#include <sys/time.h> // for gettimeofday()
 	#include <unistd.h>
 #endif
 
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
-// STATIC DEFINITIONS
-///////////////////////////////////////////////////////////
-
-#ifdef _WIN32
-bool Timer::hasPerfCounter_ = false;
-#elif !defined(__APPLE__)
-bool Timer::hasMonotonicClock_ = false;
-#endif
-
-bool Timer::isInitialized_ = false;
-unsigned long int Timer::frequency_ = 0L;
-unsigned long long int Timer::baseCount_ = 0LL;
-
-///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 Timer::Timer()
-    : startTime_(0LL)
+    : isRunning_(false), startTime_(clock().now()), accumulatedTime_(0ULL)
 {
 }
 
@@ -41,85 +22,39 @@ Timer::Timer()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-float Timer::now()
+void Timer::start()
 {
-	return float(counter() - baseCount_) / frequency_;
+	isRunning_ = true;
+	startTime_ = clock().counter();
+}
+
+void Timer::stop()
+{
+	accumulatedTime_ += clock().counter() - startTime_;
+	isRunning_ = false;
+}
+
+float Timer::interval() const
+{
+	return static_cast<float>(clock().counter() - startTime_) / clock().frequency();
+}
+
+float Timer::total() const
+{
+	return (isRunning_)
+	           ? static_cast<float>(accumulatedTime_ + clock().counter() - startTime_) / clock().frequency()
+	           : static_cast<float>(accumulatedTime_) / clock().frequency();
 }
 
 void Timer::sleep(float seconds)
 {
-	// From seconds to milliseconds
-	const unsigned int milliseconds = static_cast<unsigned int>(seconds) * 1000;
-
 #if defined(_WIN32)
+	const unsigned int milliseconds = static_cast<unsigned int>(seconds) * 1000;
 	SleepEx(milliseconds, FALSE);
 #else
-	usleep(milliseconds);
+	const unsigned int microseconds = static_cast<unsigned int>(seconds) * 1000000;
+	usleep(microseconds);
 #endif
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void Timer::init()
-{
-#ifdef _WIN32
-	if (QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER *>(&frequency_)))
-		hasPerfCounter_ = true;
-	else
-		frequency_ = 1000L;
-#elif __APPLE__
-	mach_timebase_info_data_t info;
-	mach_timebase_info(&info);
-
-	frequency_ = (info.denom * 1.0e9L) / info.numer;
-#else
-	struct timespec resolution;
-	if (clock_getres(CLOCK_MONOTONIC, &resolution) == 0)
-	{
-		frequency_ = 1.0e9L;
-		hasMonotonicClock_ = true;
-	}
-	else
-		frequency_ = 1.0e6L;
-#endif
-
-	// Counter() must be called after setting the flag
-	isInitialized_ = true;
-	baseCount_ = counter();
-}
-
-unsigned long long int Timer::counter()
-{
-	if (isInitialized_ == false)
-		init();
-
-	unsigned long long int counter = 0LL;
-
-#ifdef _WIN32
-	if (hasPerfCounter_)
-		QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER *>(&counter));
-	else
-		counter = GetTickCount();
-#elif __APPLE__
-	counter = mach_absolute_time();
-#else
-	if (hasMonotonicClock_)
-	{
-		struct timespec now;
-		clock_gettime(CLOCK_MONOTONIC, &now);
-		counter = static_cast<unsigned long long int>(now.tv_sec) * frequency_ + static_cast<unsigned long long int>(now.tv_nsec);
-	}
-	else
-	{
-		struct timeval now;
-		gettimeofday(&now, nullptr);
-		counter = now.tv_sec * frequency_ + now.tv_usec;
-	}
-#endif
-
-	return counter;
 }
 
 }

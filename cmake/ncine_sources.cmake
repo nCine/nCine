@@ -2,9 +2,11 @@ set(SOURCES
 	${NCINE_ROOT}/src/base/Random.cpp
 	${NCINE_ROOT}/src/base/Object.cpp
 	${NCINE_ROOT}/src/base/String.cpp
+	${NCINE_ROOT}/src/base/Clock.cpp
 	${NCINE_ROOT}/src/ServiceLocator.cpp
 	${NCINE_ROOT}/src/FileLogger.cpp
 	${NCINE_ROOT}/src/ArrayIndexer.cpp
+	${NCINE_ROOT}/src/TimeStamp.cpp
 	${NCINE_ROOT}/src/Timer.cpp
 	${NCINE_ROOT}/src/FrameTimer.cpp
 	${NCINE_ROOT}/src/Font.cpp

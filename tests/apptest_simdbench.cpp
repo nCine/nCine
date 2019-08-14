@@ -5,7 +5,7 @@
 #include <ncine/LuaStateManager.h>
 #include <ncine/LuaUtils.h>
 #include <ncine/IFile.h>
-#include <ncine/Timer.h>
+#include <ncine/TimeStamp.h>
 #include <ncine/Vector4.h>
 #include <ncine/Quaternion.h>
 
@@ -87,7 +87,7 @@ char loadingFilename[MaxStringLength] = "timings.lua";
 char savingFilename[MaxStringLength] = "timings.lua";
 bool includeStatsWhenSaving = false;
 
-static nc::Timer timer;
+static nc::TimeStamp testStartTime;
 nctl::UniquePtr<float[]> nums;
 nctl::UniquePtr<nc::Vector4f[]> vecsA;
 nctl::UniquePtr<nc::Vector4f[]> vecsB;
@@ -204,154 +204,154 @@ float benchVector4Add(unsigned int iterations)
 {
 	resetVecs(iterations);
 
-	timer.start();
+	testStartTime = nc::TimeStamp::now();
 	for (unsigned int i = 0; i < iterations - 1; i++)
 	{
 		const unsigned int index = i % MaxDataElements;
 		vecsC[index] = vecsA[index] + vecsB[index];
 	}
 
-	return timer.interval();
+	return testStartTime.secondsSince();
 }
 
 float benchVector4Sub(unsigned int iterations)
 {
 	resetVecs(iterations);
 
-	timer.start();
+	testStartTime = nc::TimeStamp::now();
 	for (unsigned int i = 0; i < iterations - 1; i++)
 	{
 		const unsigned int index = i % MaxDataElements;
 		vecsC[index] = vecsA[index] - vecsB[index];
 	}
 
-	return timer.interval();
+	return testStartTime.secondsSince();
 }
 
 float benchVector4Mul(unsigned int iterations)
 {
 	resetVecs(iterations);
 
-	timer.start();
+	testStartTime = nc::TimeStamp::now();
 	for (unsigned int i = 0; i < iterations - 1; i++)
 	{
 		const unsigned int index = i % MaxDataElements;
 		vecsC[index] = vecsA[index] * vecsB[index];
 	}
 
-	return timer.interval();
+	return testStartTime.secondsSince();
 }
 
 float benchVector4Div(unsigned int iterations)
 {
 	resetVecs(iterations);
 
-	timer.start();
+	testStartTime = nc::TimeStamp::now();
 	for (unsigned int i = 0; i < iterations - 1; i++)
 	{
 		const unsigned int index = i % MaxDataElements;
 		vecsC[index] = vecsA[index] / vecsB[index];
 	}
 
-	return timer.interval();
+	return testStartTime.secondsSince();
 }
 
 float benchVector4Length(unsigned int iterations)
 {
 	resetVecs(iterations);
 
-	timer.start();
+	testStartTime = nc::TimeStamp::now();
 	for (unsigned int i = 0; i < iterations; i++)
 	{
 		const unsigned int index = i % MaxDataElements;
 		nums[index] = vecsA[index].length();
 	}
 
-	return timer.interval();
+	return testStartTime.secondsSince();
 }
 
 float benchVector4SqrLength(unsigned int iterations)
 {
 	resetVecs(iterations);
 
-	timer.start();
+	testStartTime = nc::TimeStamp::now();
 	for (unsigned int i = 0; i < iterations; i++)
 	{
 		const unsigned int index = i % MaxDataElements;
 		nums[index] = vecsA[index].sqrLength();
 	}
 
-	return timer.interval();
+	return testStartTime.secondsSince();
 }
 
 float benchVector4Normalize(unsigned int iterations)
 {
 	resetVecs(iterations);
 
-	timer.start();
+	testStartTime = nc::TimeStamp::now();
 	for (unsigned int i = 0; i < iterations; i++)
 	{
 		const unsigned int index = i % MaxDataElements;
 		vecsC[index] = vecsA[index].normalize();
 	}
 
-	return timer.interval();
+	return testStartTime.secondsSince();
 }
 
 float benchVector4Dot(unsigned int iterations)
 {
 	resetVecs(iterations);
 
-	timer.start();
+	testStartTime = nc::TimeStamp::now();
 	for (unsigned int i = 0; i < iterations - 1; i++)
 	{
 		const unsigned int index = i % MaxDataElements;
 		nums[index] = nc::dot(vecsA[index], vecsB[index]);
 	}
 
-	return timer.interval();
+	return testStartTime.secondsSince();
 }
 
 float benchQuaternionMult(unsigned int iterations)
 {
 	resetQuats(iterations);
 
-	timer.start();
+	testStartTime = nc::TimeStamp::now();
 	for (unsigned int i = 0; i < iterations - 1; i++)
 	{
 		const unsigned int index = i % MaxDataElements;
 		quats[index] = quats[index] * quats[index + 1];
 	}
 
-	return timer.interval();
+	return testStartTime.secondsSince();
 }
 
 float benchMatrixMult(unsigned int iterations)
 {
 	resetMats(iterations);
 
-	timer.start();
+	testStartTime = nc::TimeStamp::now();
 	for (unsigned int i = 0; i < iterations - 1; i++)
 	{
 		const unsigned int index = i % MaxDataElements;
 		mats[index] = mats[index] * mats[index + 1];
 	}
 
-	return timer.interval();
+	return testStartTime.secondsSince();
 }
 
 float benchMatrixTrans(unsigned int iterations)
 {
 	resetMats(iterations);
 
-	timer.start();
+	testStartTime = nc::TimeStamp::now();
 	for (unsigned int i = 0; i < iterations; i++)
 	{
 		const unsigned int index = i % MaxDataElements;
 		mats[index] = mats[index].transpose();
 	}
 
-	return timer.interval();
+	return testStartTime.secondsSince();
 }
 
 float benchMatrixVecMult(unsigned int iterations)
@@ -359,14 +359,14 @@ float benchMatrixVecMult(unsigned int iterations)
 	resetVecs(iterations);
 	resetMats(iterations);
 
-	timer.start();
+	testStartTime = nc::TimeStamp::now();
 	for (unsigned int i = 0; i < iterations; i++)
 	{
 		const unsigned int index = i % MaxDataElements;
 		vecsC[index] = mats[index] * vecsA[index];
 	}
 
-	return timer.interval();
+	return testStartTime.secondsSince();
 }
 
 nctl::String &indent(nctl::String &string, int amount)

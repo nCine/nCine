@@ -3,7 +3,6 @@
 #include <ncine/Texture.h>
 #include <ncine/ParticleSystem.h>
 #include <ncine/ParticleInitializer.h>
-#include <ncine/Timer.h>
 #include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
@@ -60,8 +59,7 @@ void MyEventHandler::onInit()
 	particleSystem_->addAffector(nctl::move(sizeAffector));
 	emitVector_.set(0.0f, 350.0f);
 
-	emitTimer_ = nctl::makeUnique<nc::Timer>();
-	emitTimer_->start();
+	lastEmissionTime_ = nc::TimeStamp::now();
 
 	joyVectorLeft_ = nc::Vector2f::Zero;
 	joyVectorRight_ = nc::Vector2f::Zero;
@@ -71,7 +69,7 @@ void MyEventHandler::onFrameStart()
 {
 	const float interval = nc::theApplication().interval();
 
-	if (emitTimer_->interval() > 0.085f)
+	if (lastEmissionTime_.secondsSince() > 0.085f)
 	{
 		nc::ParticleInitializer init;
 		init.setAmount(3);
@@ -79,7 +77,7 @@ void MyEventHandler::onFrameStart()
 		init.setPositionAndRadius(nc::Vector2f::Zero, 10.0f);
 		init.setVelocityAndScale(emitVector_, 0.8f, 1.0f);
 
-		emitTimer_->start();
+		lastEmissionTime_ = nc::TimeStamp::now();
 		particleSystem_->emitParticles(init);
 	}
 

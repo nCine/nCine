@@ -1,12 +1,12 @@
 #ifndef CLASS_NCINE_FRAMETIMER
 #define CLASS_NCINE_FRAMETIMER
 
-#include "Timer.h"
+#include "TimeStamp.h"
 
 namespace ncine {
 
 /// Frame interval and average FPS calculator class
-class FrameTimer : public Timer
+class FrameTimer
 {
   public:
 	/// Constructor
@@ -14,10 +14,14 @@ class FrameTimer : public Timer
 
 	/// Adds a frame to the counter and calculates the interval since the previous one
 	void addFrame();
+	/// Resets the time stamp for the beginning of a frame
+	void start() { frameStart_ = TimeStamp::now(); }
 	/// Returns the total number of frames counted
 	inline unsigned long int totalNumberFrames() const { return totNumFrames_; }
-	/// Returns the interval between two subsequent calls to `addFrame()`
-	inline float frameInterval() const { return frameInterval_; }
+	/// Returns the interval in seconds between the last two subsequent calls to `addFrame()`
+	inline float lastFrameInterval() const { return frameInterval_; }
+	/// Returns the interval in seconds since the last call to `addFrame()`
+	inline float frameInterval() const { return frameStart_.secondsSince(); }
 	/// Returns the average FPS during the update interval
 	inline float averageFps() const { return fps_; }
 
@@ -27,6 +31,8 @@ class FrameTimer : public Timer
 	/// Number of seconds between two average FPS calculations (user defined)
 	float avgInterval_;
 
+	/// Time stamp at the beginning of a frame
+	TimeStamp frameStart_;
 	/// Seconds elapsed since previous frame
 	float frameInterval_;
 
@@ -37,10 +43,10 @@ class FrameTimer : public Timer
 	/// Frame counter for logging
 	unsigned long int logNumFrames_;
 
-	/// Number of seconds since last average FPS calculation
-	float lastAvgUpdate_;
-	/// Number of seconds since last log event
-	float lastLogUpdate_;
+	/// Time stamp at last average FPS calculation
+	TimeStamp lastAvgUpdate_;
+	/// Time stamp at last log event
+	TimeStamp lastLogUpdate_;
 
 	/// Average FPS calulated during the specified interval
 	float fps_;

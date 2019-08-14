@@ -19,6 +19,7 @@
 #include "LuaKeys.h"
 #include "LuaJoystickEvents.h"
 
+#include "LuaTimeStamp.h"
 #include "LuaApplication.h"
 #include "LuaTexture.h"
 #include "LuaSprite.h"
@@ -335,6 +336,7 @@ void LuaStateManager::exposeApi()
 	LuaKeyboardEvents::expose(L_);
 	LuaJoystickEvents::expose(L_);
 
+	LuaTimeStamp::expose(L_);
 	LuaApplication::expose(L_);
 	if (appCfg.withScenegraph)
 	{

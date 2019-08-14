@@ -4,13 +4,13 @@
 #include <ncine/IAppEventHandler.h>
 #include <ncine/IInputEventHandler.h>
 #include <ncine/Vector2.h>
+#include <ncine/TimeStamp.h>
 
 namespace ncine {
 
 class AppConfiguration;
 class Texture;
 class ParticleSystem;
-class Timer;
 
 }
 
@@ -43,7 +43,7 @@ class MyEventHandler :
 
 	nctl::UniquePtr<nc::Texture> texture_;
 	nctl::UniquePtr<nc::ParticleSystem> particleSystem_;
-	nctl::UniquePtr<nc::Timer> emitTimer_;
+	nc::TimeStamp lastEmissionTime_;
 	nc::Vector2f emitVector_;
 
 	nc::Vector2f joyVectorLeft_;

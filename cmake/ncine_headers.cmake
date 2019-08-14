@@ -26,6 +26,7 @@ set(HEADERS
 	${NCINE_ROOT}/include/ncine/IGfxCapabilities.h
 	${NCINE_ROOT}/include/ncine/ServiceLocator.h
 	${NCINE_ROOT}/include/ncine/DisplayMode.h
+	${NCINE_ROOT}/include/ncine/TimeStamp.h
 	${NCINE_ROOT}/include/ncine/Timer.h
 	${NCINE_ROOT}/include/ncine/Font.h
 	${NCINE_ROOT}/include/ncine/IFile.h
