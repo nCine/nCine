@@ -59,6 +59,7 @@ namespace LuaNames {
 	static const char *GitShortHash = "_GITSHORTHASH";
 	static const char *GitLastCommitDate = "_GITLATCOMMITDATE";
 	static const char *GitBranch = "_GITBRANCH";
+	static const char *GitTag = "_GITTAG";
 #endif
 
 #if defined(_WIN32)
@@ -390,6 +391,8 @@ void LuaStateManager::exposeConstants()
 	lua_setfield(L_, -2, LuaNames::GitLastCommitDate);
 	lua_pushstring(L_, VersionStrings::GitBranch);
 	lua_setfield(L_, -2, LuaNames::GitBranch);
+	lua_pushstring(L_, VersionStrings::GitTag);
+	lua_setfield(L_, -2, LuaNames::GitTag);
 #endif
 
 	lua_pushboolean(L_, true);
