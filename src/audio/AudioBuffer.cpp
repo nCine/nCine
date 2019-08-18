@@ -26,7 +26,7 @@ AudioBuffer::AudioBuffer(const char *filename)
       numChannels_(0), frequency_(0), bufferSize_(0)
 {
 	ZoneScoped;
-	ZoneText(filename, strnlen(filename, 256));
+	ZoneText(filename, strnlen(filename, nctl::String::MaxCStringLength));
 
 	alGetError();
 	alGenBuffers(1, &bufferId_);

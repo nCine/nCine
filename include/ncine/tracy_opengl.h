@@ -29,4 +29,16 @@
 	#define TracyGpuZoneS(x, y)
 	#define TracyGpuZoneCS(x, y, z)
 
+namespace tracy {
+
+struct SourceLocationData;
+class GpuCtxScope
+{
+  public:
+	explicit GpuCtxScope(const SourceLocationData *) {}
+	GpuCtxScope(const SourceLocationData *, int depth) {}
+};
+
+}
+
 #endif

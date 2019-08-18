@@ -25,6 +25,11 @@ add_library(game SHARED tests/${NCINE_STARTUP_TEST}.cpp)
 target_link_libraries(game PRIVATE native_app_glue ncine_main ncine)
 target_include_directories(game PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue)
 
+if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/ncine/include/tracy)
+	target_include_directories(game PRIVATE ${CMAKE_SOURCE_DIR}/ncine/include/tracy)
+	target_compile_definitions(game PRIVATE "TRACY_ENABLE")
+endif()
+
 if(NOT NCINE_DYNAMIC_LIBRARY)
 	include(ncine_imported_targets)
 	target_link_libraries(game PRIVATE

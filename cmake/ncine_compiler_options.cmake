@@ -103,7 +103,9 @@ else() # GCC and LLVM
 
 	if(NCINE_WITH_TRACY)
 		target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-g>)
-		if(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android" AND NOT APPLE)
+		if(MINGW OR MSYS)
+			target_link_libraries(ncine PRIVATE ws2_32 dbghelp)
+		elseif(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android" AND NOT APPLE)
 			target_link_libraries(ncine PRIVATE dl)
 		endif()
 	endif()

@@ -19,7 +19,7 @@ Font::Font(const char *fntFilename)
       glyphs_(nctl::makeUnique<FontGlyph[]>(MaxGlyphs)), renderMode_(RenderMode::GLYPH_IN_RED)
 {
 	ZoneScoped;
-	ZoneText(fntFilename, strnlen(fntFilename, 256));
+	ZoneText(fntFilename, strnlen(fntFilename, nctl::String::MaxCStringLength));
 
 	fntParser_ = nctl::makeUnique<FntParser>(fntFilename);
 	retrieveInfoFromFnt();
@@ -47,7 +47,7 @@ Font::Font(const char *fntFilename, const char *texFilename)
       glyphs_(nctl::makeUnique<FontGlyph[]>(MaxGlyphs)), renderMode_(RenderMode::GLYPH_IN_RED)
 {
 	ZoneScoped;
-	ZoneText(fntFilename, strnlen(fntFilename, 256));
+	ZoneText(fntFilename, strnlen(fntFilename, nctl::String::MaxCStringLength));
 
 	fntParser_ = nctl::makeUnique<FntParser>(fntFilename);
 	retrieveInfoFromFnt();

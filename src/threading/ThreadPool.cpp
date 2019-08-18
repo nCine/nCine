@@ -1,4 +1,5 @@
 #include "ThreadPool.h"
+#include <nctl/String.h>
 
 namespace ncine {
 
@@ -21,11 +22,18 @@ ThreadPool::ThreadPool(unsigned int numThreads)
 
 	quitMutex_.lock();
 
+	nctl::String threadName;
 	for (unsigned int i = 0; i < numThreads_; i++)
 	{
 		threads_[i].run(workerFunction, &threadStruct_);
-#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
+#if !defined(__EMSCRIPTEN__)
+	#if !defined(__APPLE__)
+		threadName.format("WorkerThread#%02d", i);
+		threads_[i].setName(threadName.data());
+	#endif
+	#if !defined(__ANDROID__)
 		threads_[i].setAffinityMask(ThreadAffinityMask(i));
+	#endif
 #endif
 	}
 }

@@ -1,7 +1,67 @@
 #include "common_macros.h"
 #include "Thread.h"
 
+#ifdef WITH_TRACY
+	#include "common/TracySystem.hpp"
+#endif
+
 namespace ncine {
+
+namespace {
+
+#ifdef WITH_TRACY
+	void setThreadName(HANDLE handle, const char *name)
+	{
+	#if !defined(__MINGW32__)
+		tracy::SetThreadName(handle, name);
+	#else
+		tracy::SetThreadName(reinterpret_cast<unsigned long long>(handle), name);
+	#endif
+	}
+#elif !defined PTW32_VERSION && !defined __WINPTHREADS_VERSION
+	const unsigned int MaxThreadNameLength = 256;
+
+	void setThreadName(HANDLE handle, const char *name)
+	{
+		if (handle == 0)
+			return;
+	#if defined(NTDDI_WIN10_RS2) && NTDDI_VERSION >= NTDDI_WIN10_RS2
+		wchar_t buffer[MaxThreadNameLength];
+		mbstowcs(buffer, name, MaxThreadNameLength);
+		const HANDLE threadHandle = (handle != reinterpret_cast<HANDLE>(-1)) ? handle : GetCurrentThread();
+		SetThreadDescription(threadHandle, buffer);
+	#elif !defined(__MINGW32__)
+		const DWORD MS_VC_EXCEPTION = 0x406D1388;
+
+		#pragma pack(push, 8)
+		struct THREADNAME_INFO
+		{
+			DWORD dwType;
+			LPCSTR szName;
+			DWORD dwThreadID;
+			DWORD dwFlags;
+		};
+		#pragma pack(pop)
+
+		const DWORD threadId = (handle != reinterpret_cast<HANDLE>(-1)) ? GetThreadId(handle) : GetCurrentThreadId();
+		THREADNAME_INFO info;
+		info.dwType = 0x1000;
+		info.szName = name;
+		info.dwThreadID = threadId;
+		info.dwFlags = 0;
+
+		__try
+		{
+			RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), reinterpret_cast<ULONG_PTR *>(&info));
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+		}
+	#endif
+	}
+#endif
+
+}
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -73,7 +133,29 @@ void Thread::run(ThreadFunctionPtr startFunction, void *arg)
 void *Thread::join()
 {
 	WaitForSingleObject(handle_, INFINITE);
+	handle_ = 0;
 	return nullptr;
+}
+
+void Thread::setName(const char *name)
+{
+	setThreadName(handle_, name);
+}
+
+void Thread::setSelfName(const char *name)
+{
+	setThreadName(reinterpret_cast<HANDLE>(-1), name);
+}
+
+int Thread::priority() const
+{
+	return (handle_ != 0) ? GetThreadPriority(handle_) : 0;
+}
+
+void Thread::setPriority(int priority)
+{
+	if (handle_ != 0)
+		SetThreadPriority(handle_, priority);
 }
 
 long int Thread::self()
@@ -81,7 +163,7 @@ long int Thread::self()
 	return GetCurrentThreadId();
 }
 
-void Thread::exit(void *retVal)
+[[noreturn]] void Thread::exit(void *retVal)
 {
 	_endthreadex(0);
 	*static_cast<unsigned int *>(retVal) = 0;
@@ -95,6 +177,7 @@ void Thread::yieldExecution()
 void Thread::cancel()
 {
 	TerminateThread(handle_, 0);
+	handle_ = 0;
 }
 
 ThreadAffinityMask Thread::affinityMask() const

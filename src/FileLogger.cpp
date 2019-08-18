@@ -6,6 +6,7 @@
 #endif
 #include <ctime>
 #include "FileLogger.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -139,6 +140,28 @@ unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 			logString_.clear();
 
 		logString_.append(logEntry_);
+	}
+#endif
+
+#ifdef WITH_TRACY
+	if (levelInt >= consoleLevelInt || levelInt >= fileLevelInt)
+	{
+		uint32_t color = 0x999999;
+		// clang-format off
+		switch (level)
+		{
+			case LogLevel::FATAL:		color = 0xec3e40; break;
+			case LogLevel::ERROR:		color = 0xff9b2b; break;
+			case LogLevel::WARN:		color = 0xf5d800; break;
+			case LogLevel::INFO:		color = 0x01a46d; break;
+			case LogLevel::DEBUG:		color = 0x377fc7; break;
+			case LogLevel::VERBOSE:		color = 0x73A5D7; break;
+			case LogLevel::UNKNOWN:		color = 0x999999; break;
+			default:					color = 0x999999; break;
+		}
+		// clang-format on
+
+		TracyMessageC(logEntry_, length, color);
 	}
 #endif
 

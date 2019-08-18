@@ -70,10 +70,25 @@ class Thread
 	/// Joins the thread
 	void *join();
 
+#ifndef __EMSCRIPTEN__
+	#ifndef __APPLE__
+	/// Sets the thread name
+	void setName(const char *name);
+	#endif
+
+	/// Sets the calling thread name
+	static void setSelfName(const char *name);
+#endif
+
+	/// Gets the thread priority
+	int priority() const;
+	/// Sets the thread priority
+	void setPriority(int priority);
+
 	/// Returns the calling thread id
 	static long int self();
 	/// Terminates the calling thread
-	static void exit(void *retVal);
+	[[noreturn]] static void exit(void *retVal);
 	/// Yields the calling thread in favour of another one with the same priority
 	static void yieldExecution();
 
@@ -108,9 +123,9 @@ class Thread
 	ThreadInfo threadInfo_;
 	/// The wrapper start function for thread creation
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
-	#ifdef __GNUC__ // MinGW
+	#ifdef __MINGW32__
 	static unsigned int(__attribute__((__stdcall__)) wrapperFunction)(void *arg);
-	#else // MSVC
+	#else
 	static unsigned int __stdcall wrapperFunction(void *arg);
 	#endif
 #else

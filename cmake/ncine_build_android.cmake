@@ -120,6 +120,9 @@ if(NCINE_BUILD_ANDROID)
 		set(ANDROID_LIBNAME libncine.a)
 		set(COPY_SRCINCLUDE_COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PRIVATE_HEADERS} ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include/ncine)
 	endif()
+	if(NCINE_WITH_TRACY)
+		set(COPY_TRACYINCLUDE_COMMAND ${CMAKE_COMMAND} -E copy_directory ${TRACY_INCLUDE_ONLY_DIR}/tracy ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include/tracy)
+	endif()
 
 	add_custom_target(ncine_android ALL)
 	set_target_properties(ncine_android PROPERTIES FOLDER "Android")
@@ -150,7 +153,10 @@ if(NCINE_BUILD_ANDROID)
 		COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include/nctl/
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${NCTL_HEADERS} ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include/nctl/
 		# Projects relying on a static and uninstalled version of the engine can use implementation headers
-		COMMAND ${COPY_SRCINCLUDE_COMMAND})
+		COMMAND ${COPY_SRCINCLUDE_COMMAND}
+		# If Tracy integration is enabled then projects relying on an uninstalled version of the engine can use its headers
+		COMMAND ${COPY_TRACYINCLUDE_COMMAND}
+		)
 	add_custom_target(ncine_ndkdir_include ALL DEPENDS ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include)
 	set_target_properties(ncine_ndkdir_include PROPERTIES FOLDER "Android")
 	add_dependencies(ncine_ndkdir_include ncine_android)
@@ -226,6 +232,9 @@ if(NCINE_BUILD_ANDROID)
 		install(FILES ${NCTL_HEADERS} DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/include/nctl COMPONENT android)
 		if(NOT NCINE_DYNAMIC_LIBRARY)
 			install(FILES ${PRIVATE_HEADERS} DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/include/ncine COMPONENT android)
+		endif()
+		if(NCINE_WITH_TRACY)
+			install(DIRECTORY ${TRACY_INCLUDE_ONLY_DIR}/tracy DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/include/ COMPONENT android)
 		endif()
 
 		file(GLOB APPTEST_SOURCES "tests/apptest*.h" "tests/apptest*.cpp")

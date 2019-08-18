@@ -40,7 +40,6 @@ if(NCINE_WITH_IMGUI)
 endif()
 if(NCINE_WITH_TRACY)
 	target_include_directories(ncine PUBLIC ${TRACY_SOURCE_DIR})
-	target_compile_definitions(ncine PUBLIC "TRACY_ENABLE")
 endif()
 
 target_compile_definitions(ncine PRIVATE ${ANDROID_GENERATED_FLAGS})
@@ -50,10 +49,6 @@ add_library(native_app_glue STATIC ${ANDROID_NDK}/sources/android/native_app_glu
 target_link_libraries(native_app_glue PRIVATE android log)
 
 add_library(game SHARED ${NCINE_ROOT}/tests/${NCINE_STARTUP_TEST}.cpp)
-if(NCINE_WITH_TRACY AND NCINE_DYNAMIC_LIBRARY)
-	target_sources(game PRIVATE ${TRACY_SOURCE_DIR}/TracyClientDLL.cpp)
-endif()
-
 target_link_libraries(game PRIVATE native_app_glue ncine_main ncine)
 target_include_directories(game PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue)
 if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})

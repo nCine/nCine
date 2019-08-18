@@ -24,7 +24,7 @@ Texture::Texture(const char *filename, int width, int height)
       minFiltering_(Filtering::NEAREST), magFiltering_(Filtering::NEAREST), wrapMode_(Wrap::CLAMP_TO_EDGE)
 {
 	ZoneScoped;
-	ZoneText(filename, strnlen(filename, 256));
+	ZoneText(filename, strnlen(filename, nctl::String::MaxCStringLength));
 	glTexture_->bind();
 	setGLTextureLabel(filename);
 

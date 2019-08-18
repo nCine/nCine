@@ -50,11 +50,6 @@ foreach(APPTEST ${APPTESTS})
 		target_sources(${APPTEST} PRIVATE ${APPTEST}.cpp ${APPTEST}.h)
 	endif()
 
-	if(NCINE_WITH_TRACY AND NCINE_DYNAMIC_LIBRARY)
-		target_sources(${APPTEST} PRIVATE ${TRACY_SOURCE_DIR}/TracyClientDLL.cpp)
-		target_link_libraries(${APPTEST} PRIVATE Threads::Threads)
-	endif()
-
 	target_link_libraries(${APPTEST} PRIVATE ncine_main ncine)
 	set_target_properties(${APPTEST} PROPERTIES FOLDER "AppTests")
 	target_compile_definitions(${APPTEST} PRIVATE "NCINE_TESTS_DATA_DIR=\"${NCINE_TESTS_DATA_DIR}\"")

@@ -23,6 +23,10 @@ class Mutex
 	void unlock();
 	int tryLock();
 
+#ifdef WITH_TRACY
+	inline int try_lock() { return tryLock(); }
+#endif
+
   private:
 #if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
 	CRITICAL_SECTION handle_;

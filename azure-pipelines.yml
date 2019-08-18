@@ -598,10 +598,14 @@ jobs:
       $env:PATH = "C:\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem"
       $env:MSYSTEM = "MINGW64"
 
+      $EnableTracy = 'ON'
+      if ($env:CC -eq "clang")
+        { $EnableTracy = 'OFF' }
+
       if ($env:BuildType -eq "DevDist")
         { C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-build-$(BuildType) -D NCINE_OPTIONS_PRESETS=$(BuildType)' }
       else
-        { C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-build-$(BuildType) -D CMAKE_BUILD_TYPE=$(BuildType) -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$PWD/../RenderDoc' }
+        { C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-build-$(BuildType) -D CMAKE_BUILD_TYPE=$(BuildType) -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=$EnableTracy -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$PWD/../RenderDoc' }
 
     displayName: 'CMake Configuration on MinGW'
     condition: eq( variables['Compiler'], 'mingw64' )

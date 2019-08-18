@@ -1,5 +1,6 @@
 #include <unistd.h> // for sysconf()
 #include <sched.h> // for sched_yield()
+#include <cstring>
 
 #ifdef __APPLE__
 	#include <mach/thread_act.h>
@@ -9,7 +10,15 @@
 #include "common_macros.h"
 #include "Thread.h"
 
+#ifdef WITH_TRACY
+	#include "common/TracySystem.hpp"
+#endif
+
 namespace ncine {
+
+namespace {
+	const unsigned int MaxThreadNameLength = 16;
+}
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -108,7 +117,81 @@ void *Thread::join()
 {
 	void *pRetVal = nullptr;
 	pthread_join(tid_, &pRetVal);
+	tid_ = 0;
 	return pRetVal;
+}
+
+#ifndef __EMSCRIPTEN__
+	#ifndef __APPLE__
+void Thread::setName(const char *name)
+{
+		#ifdef WITH_TRACY
+	tracy::SetThreadName(tid_, name);
+		#else
+	if (tid_ == 0)
+		return;
+
+	const auto nameLength = strnlen(name, MaxThreadNameLength);
+	if (nameLength <= MaxThreadNameLength - 1)
+		pthread_setname_np(tid_, name);
+	else
+	{
+		char buffer[MaxThreadNameLength];
+		memcpy(buffer, name, MaxThreadNameLength - 1);
+		buffer[MaxThreadNameLength - 1] = '\0';
+		pthread_setname_np(tid_, name);
+	}
+		#endif
+}
+	#endif
+
+void Thread::setSelfName(const char *name)
+{
+	const auto nameLength = strnlen(name, MaxThreadNameLength);
+	if (nameLength <= MaxThreadNameLength - 1)
+	{
+	#ifndef __APPLE__
+		pthread_setname_np(pthread_self(), name);
+	#else
+		pthread_setname_np(name);
+	#endif
+	}
+	else
+	{
+		char buffer[MaxThreadNameLength];
+		memcpy(buffer, name, MaxThreadNameLength - 1);
+		buffer[MaxThreadNameLength - 1] = '\0';
+	#ifndef __APPLE__
+		pthread_setname_np(pthread_self(), name);
+	#else
+		pthread_setname_np(name);
+	#endif
+	}
+}
+#endif
+
+int Thread::priority() const
+{
+	if (tid_ == 0)
+		return 0;
+
+	int policy;
+	struct sched_param param;
+	pthread_getschedparam(tid_, &policy, &param);
+	return param.sched_priority;
+}
+
+void Thread::setPriority(int priority)
+{
+	if (tid_ != 0)
+	{
+		int policy;
+		struct sched_param param;
+		pthread_getschedparam(tid_, &policy, &param);
+
+		param.sched_priority = priority;
+		pthread_setschedparam(tid_, policy, &param);
+	}
 }
 
 long int Thread::self()
@@ -120,7 +203,7 @@ long int Thread::self()
 #endif
 }
 
-void Thread::exit(void *retVal)
+[[noreturn]] void Thread::exit(void *retVal)
 {
 	pthread_exit(retVal);
 }
@@ -134,6 +217,7 @@ void Thread::yieldExecution()
 void Thread::cancel()
 {
 	pthread_cancel(tid_);
+	tid_ = 0;
 }
 
 	#ifndef __EMSCRIPTEN__

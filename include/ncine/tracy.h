@@ -22,6 +22,8 @@
 	#define FrameMarkStart(x)
 	#define FrameMarkEnd(x)
 
+	#define FrameImage(x, y, z, w, a)
+
 	#define TracyLockable(type, varname) type varname;
 	#define TracyLockableN(type, varname, desc) type varname;
 	#define TracySharedLockable(type, varname) type varname;
@@ -34,6 +36,9 @@
 
 	#define TracyMessage(x, y)
 	#define TracyMessageL(x)
+	#define TracyMessageC(x, y, z)
+	#define TracyMessageLC(x, y)
+	#define TracyAppInfo(x, y)
 
 	#define TracyAlloc(x, y)
 	#define TracyFree(x)

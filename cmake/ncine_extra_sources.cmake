@@ -279,21 +279,27 @@ if(NCINE_WITH_TRACY)
 	endif()
 	target_compile_definitions(ncine PUBLIC "TRACY_ENABLE")
 
-	list(APPEND PRIVATE_HEADERS
-		${NCINE_ROOT}/src/include/tracy.h
-		${NCINE_ROOT}/src/include/tracy_opengl.h
-		${TRACY_SOURCE_DIR}/Tracy.hpp
-		${TRACY_SOURCE_DIR}/TracyOpenGL.hpp
+	# For external projects compiling using an nCine build directory
+	set(TRACY_INCLUDE_ONLY_DIR ${TRACY_SOURCE_DIR}/include_only)
+	file(GLOB TRACY_ROOT_HPP "${TRACY_SOURCE_DIR}/*.hpp" "${TRACY_SOURCE_DIR}/*.h")
+	file(COPY ${TRACY_ROOT_HPP} DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy)
+	file(COPY "${TRACY_SOURCE_DIR}/TracyClientDLL.cpp" DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy)
+	file(GLOB TRACY_COMMON_HPP "${TRACY_SOURCE_DIR}/common/*.hpp" "${TRACY_SOURCE_DIR}/common/*.h")
+	file(COPY ${TRACY_COMMON_HPP} DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy/common)
+	file(COPY "${TRACY_SOURCE_DIR}/common/TracySystem.cpp" DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy/common)
+	file(GLOB TRACY_CLIENT_HPP "${TRACY_SOURCE_DIR}/client/*.hpp" "${TRACY_SOURCE_DIR}/client/*.h")
+	file(COPY ${TRACY_CLIENT_HPP} DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy/client)
+	file(COPY "${TRACY_SOURCE_DIR}/LICENSE" DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy)
+
+	list(APPEND HEADERS
+		${NCINE_ROOT}/include/ncine/tracy.h
+		${NCINE_ROOT}/include/ncine/tracy_opengl.h
 	)
 
-	if(WITH_LUA)
-		list(APPEND PRIVATE_HEADERS ${TRACY_SOURCE_DIR}/TracyLua.hpp)
-	endif()
-
-	list(APPEND SOURCES ${TRACY_SOURCE_DIR}/TracyClient.cpp)
-	if(NOT APPLE)
-		list(APPEND SOURCES ${NCINE_ROOT}/src/tracy_memory.cpp)
-	endif()
+	list(APPEND SOURCES
+		${NCINE_ROOT}/src/tracy_memory.cpp
+		${TRACY_SOURCE_DIR}/TracyClient.cpp
+	)
 endif()
 
 if(NCINE_WITH_RENDERDOC AND NOT APPLE)
