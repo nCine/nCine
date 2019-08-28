@@ -8,7 +8,6 @@ ExternalProject_Add(tracy
 	GIT_TAG           "v0.5"
 	GIT_SHALLOW       TRUE
 	SOURCE_DIR        "${CMAKE_BINARY_DIR}/tracy-src"
-	BINARY_DIR        "${CMAKE_BINARY_DIR}/tracy-build"
 	CONFIGURE_COMMAND ""
 	BUILD_COMMAND     ""
 	INSTALL_COMMAND   ""

@@ -82,7 +82,7 @@ if(MSVC)
 
 	set(MSVC_LIBDIR "${EXTERNAL_MSVC_DIR}/lib/${MSVC_ARCH_SUFFIX}")
 	set(MSVC_BINDIR "${EXTERNAL_MSVC_DIR}/bin/${MSVC_ARCH_SUFFIX}")
-elseif(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android") # GCC and LLVM
+elseif(NOT ANDROID) # GCC and LLVM
 	if(APPLE)
 		set(CMAKE_FRAMEWORK_PATH "${PARENT_SOURCE_DIR}/nCine-external")
 		set(CMAKE_MACOSX_RPATH ON)
@@ -109,7 +109,7 @@ elseif(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android") # GCC and LLVM
 	find_package(Lua)
 endif()
 
-if("${CMAKE_SYSTEM_NAME}" STREQUAL "Android")
+if(ANDROID)
 	find_library(ANDROID_LIBRARY android)
 	find_library(EGL_LIBRARY EGL)
 	find_library(GLES3_LIBRARY GLESv3)

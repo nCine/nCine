@@ -8,7 +8,6 @@ ExternalProject_Add(imgui
 	GIT_TAG           "v1.72b"
 	GIT_SHALLOW       TRUE
 	SOURCE_DIR        "${CMAKE_BINARY_DIR}/imgui-src"
-	BINARY_DIR        "${CMAKE_BINARY_DIR}/imgui-build"
 	CONFIGURE_COMMAND ""
 	BUILD_COMMAND     ""
 	INSTALL_COMMAND   ""

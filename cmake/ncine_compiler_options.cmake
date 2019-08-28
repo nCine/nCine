@@ -105,7 +105,7 @@ else() # GCC and LLVM
 		target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-g>)
 		if(MINGW OR MSYS)
 			target_link_libraries(ncine PRIVATE ws2_32 dbghelp)
-		elseif(NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Android" AND NOT APPLE)
+		elseif(NOT ANDROID AND NOT APPLE)
 			target_link_libraries(ncine PRIVATE dl)
 		endif()
 	endif()
@@ -123,7 +123,7 @@ else() # GCC and LLVM
 		# Extra optimizations in release
 		target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-Ofast -funsafe-loop-optimizations -ftree-loop-if-convert-stores>)
 
-		if(NCINE_LINKTIME_OPTIMIZATION AND NOT (MINGW OR MSYS OR "${CMAKE_SYSTEM_NAME}" STREQUAL "Android"))
+		if(NCINE_LINKTIME_OPTIMIZATION AND NOT (MINGW OR MSYS OR ANDROID))
 			target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-flto=${NCINE_CORES}>)
 			target_link_options(ncine PRIVATE $<$<CONFIG:Release>:-flto=${NCINE_CORES}>)
 		endif()
@@ -156,7 +156,7 @@ else() # GCC and LLVM
 			if(EMSCRIPTEN)
 				target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:--llvm-lto 1>)
 				target_link_options(ncine PRIVATE $<$<CONFIG:Release>:--llvm-lto 1>)
-			elseif(NOT (MINGW OR MSYS OR "${CMAKE_SYSTEM_NAME}" STREQUAL "Android"))
+			elseif(NOT (MINGW OR MSYS OR ANDROID))
 				target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-flto=thin>)
 				target_link_options(ncine PRIVATE $<$<CONFIG:Release>:-flto=thin>)
 			endif()
