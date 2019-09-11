@@ -28,7 +28,7 @@ Application &theApplication()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void PCApplication::start(IAppEventHandler *(*createAppEventHandler)())
+int PCApplication::start(IAppEventHandler *(*createAppEventHandler)())
 {
 	ASSERT(createAppEventHandler);
 	PCApplication &app = static_cast<PCApplication &>(theApplication());
@@ -41,6 +41,8 @@ void PCApplication::start(IAppEventHandler *(*createAppEventHandler)())
 	emscripten_set_main_loop_timing(EM_TIMING_RAF, 1);
 #endif
 	app.shutdownCommon();
+
+	return EXIT_SUCCESS;
 }
 
 ///////////////////////////////////////////////////////////

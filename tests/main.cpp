@@ -1,5 +1,9 @@
-#include <cstdlib> // for EXIT_SUCCESS
 #include <ncine/PCApplication.h>
+
+#ifdef _WIN32
+	#include <ncine/common_windefines.h>
+	#include <windef.h>
+#endif
 
 #if defined(_WIN32) && defined(NO_INTEGRATED_GPU)
 extern "C"
@@ -19,6 +23,12 @@ ncine::IAppEventHandler *createAppEventHandler();
 
 int main(int argc, char **argv)
 {
-	ncine::PCApplication::start(createAppEventHandler);
-	return EXIT_SUCCESS;
+	return ncine::PCApplication::start(createAppEventHandler);
 }
+
+#ifdef _WIN32
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
+{
+	return ncine::PCApplication::start(createAppEventHandler);
+}
+#endif

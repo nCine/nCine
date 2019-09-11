@@ -10,7 +10,7 @@ class DLL_PUBLIC PCApplication : public Application
 {
   public:
 	/// Entry point method to be called in the `main()` function
-	static void start(IAppEventHandler *(*createAppEventHandler)());
+	static int start(IAppEventHandler *(*createAppEventHandler)());
 
   private:
 	/// Must be called at the beginning to initialize the application

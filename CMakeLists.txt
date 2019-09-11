@@ -50,6 +50,8 @@ endif()
 
 add_library(ncine_main STATIC ${CMAKE_SOURCE_DIR}/tests/main.cpp)
 target_link_libraries(ncine_main PRIVATE ncine)
+set_target_properties(ncine PROPERTIES DEBUG_POSTFIX "_d")
+set_target_properties(ncine_main PROPERTIES DEBUG_POSTFIX "_d")
 
 include(ncine_compiler_options)
 
@@ -82,8 +84,6 @@ endforeach()
 
 target_link_libraries(ncine PRIVATE OpenGL::GL)
 target_sources(ncine PRIVATE ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${NCTL_HEADERS} ${SHADER_FILES} ${GENERATED_SOURCES})
-set_target_properties(ncine PROPERTIES DEBUG_POSTFIX "_d")
-set_target_properties(ncine_main PROPERTIES DEBUG_POSTFIX "_d")
 
 if(NCINE_WITH_IMGUI)
 	target_include_directories(ncine

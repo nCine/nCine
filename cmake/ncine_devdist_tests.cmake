@@ -46,7 +46,7 @@ if(MSVC)
 	if(MSVC_C_ARCHITECTURE_ID MATCHES 64 OR MSVC_CXX_ARCHITECTURE_ID MATCHES 64)
 		set(MSVC_ARCH_SUFFIX "x64")
 	endif()
-		
+
 	get_filename_component(NCINE_LOCATION_DIR ${NCINE_LOCATION} DIRECTORY)
 	get_filename_component(PARENT_SOURCE_DIR ${CMAKE_SOURCE_DIR} DIRECTORY)
 	get_filename_component(PARENT_BINARY_DIR ${CMAKE_BINARY_DIR} DIRECTORY)
@@ -55,7 +55,7 @@ if(MSVC)
 		PATHS ${NCINE_LOCATION_DIR} ${PARENT_SOURCE_DIR}/nCine-external ${PARENT_BINARY_DIR}/nCine-external
 		PATH_SUFFIXES bin/${MSVC_ARCH_SUFFIX}
 		DOC "Path to the nCine external libraries directory")
-		
+
 	file(GLOB MSVC_DLL_FILES ${MSVC_BINDIR}/*.dll)
 	add_custom_target(copy_dlls_tests ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MSVC_DLL_FILES} ${CMAKE_BINARY_DIR}
@@ -69,14 +69,16 @@ list(APPEND APPTESTS apptest_texformats apptest_joystick apptest_rotozoom apptes
 	apptest_meshsprites apptest_meshdeform apptest_sinescroller apptest_lua apptest_luareload)
 
 foreach(APPTEST ${APPTESTS})
+	add_executable(${APPTEST} WIN32 apptest_datapath.h)
+
 	if(DEFINED ${APPTEST}_SOURCES)
-		# More complex AppTests can define multiple sources
+		# More complex AppTests can define multiple sources (does not work on Android)
 		list(LENGTH ${APPTEST}_SOURCES NUM_SOURCES)
 		if(NUM_SOURCES GREATER 0)
-			add_executable(${APPTEST} ${${APPTEST}_SOURCES} apptest_datapath.h)
+			target_sources(${APPTEST} PRIVATE ${${APPTEST}_SOURCES})
 		endif()
 	else()
-		add_executable(${APPTEST} ${APPTEST}.cpp ${APPTEST}.h apptest_datapath.h)
+		target_sources(${APPTEST} PRIVATE ${APPTEST}.cpp ${APPTEST}.h)
 	endif()
 
 	target_compile_definitions(${APPTEST} PRIVATE "NCINE_TESTS_DATA_DIR=\"${NCINE_TESTS_DATA_DIR}/\"")

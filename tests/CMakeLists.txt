@@ -38,7 +38,7 @@ if(PNG_FOUND)
 endif()
 
 foreach(APPTEST ${APPTESTS})
-	add_executable(${APPTEST} apptest_datapath.h ${RESOURCE_RC_FILE})
+	add_executable(${APPTEST} WIN32 apptest_datapath.h ${RESOURCE_RC_FILE})
 
 	if(DEFINED ${APPTEST}_SOURCES)
 		# More complex AppTests can define multiple sources (does not work on Android)

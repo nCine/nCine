@@ -15,7 +15,7 @@ if(Threads_FOUND)
 endif()
 
 foreach(SRCAPPTEST ${SRCAPPTESTS})
-	add_executable(${SRCAPPTEST} ${SRCAPPTEST}.cpp)
+	add_executable(${SRCAPPTEST} WIN32 ${SRCAPPTEST}.cpp ${RESOURCE_RC_FILE})
 	target_link_libraries(${SRCAPPTEST} PRIVATE ncine_main ncine)
 	target_include_directories(${SRCAPPTEST} PRIVATE ${CMAKE_SOURCE_DIR}/include/ncine ${CMAKE_SOURCE_DIR}/src/include)
 

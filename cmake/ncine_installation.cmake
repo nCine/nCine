@@ -41,9 +41,9 @@ if(MSVC)
 	set(CPACK_NSIS_MENU_LINKS ${CPACK_PACKAGE_HOMEPAGE_URL} "nCine Website")
 	if(NCINE_INSTALL_DEV_SUPPORT)
 		if(NCINE_BUILD_DOCUMENTATION)
-			set(CPACK_NSIS_MENU_LINKS "${CPACK_NSIS_MENU_LINKS};${DOCUMENTATION_INSTALL_DESTINATION}/index.html;nCine Documentation")
+			list(APPEND CPACK_NSIS_MENU_LINKS "${DOCUMENTATION_INSTALL_DESTINATION}/index.html;nCine Documentation")
 		else()
-			set(CPACK_NSIS_MENU_LINKS "${CPACK_NSIS_MENU_LINKS};${CPACK_PACKAGE_HOMEPAGE_URL}/docs/index.html;nCine Documentation")
+			list(APPEND CPACK_NSIS_MENU_LINKS "${CPACK_PACKAGE_HOMEPAGE_URL}/docs/index.html;nCine Documentation")
 		endif()
 	endif()
 	if(NCINE_BUILD_TESTS)
@@ -51,12 +51,14 @@ if(MSVC)
 		set(CPACK_NSIS_CREATE_ICONS_EXTRA
 			"SetOutPath '$INSTDIR\\\\bin'
 			CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\nCine Test.lnk' '$INSTDIR\\\\bin\\\\${NCINE_STARTUP_TEST}.exe'
+			CreateShortCut '$DESKTOP\\\\nCine Test.lnk' '$INSTDIR\\\\bin\\\\${NCINE_STARTUP_TEST}.exe'
 			SetOutPath '$INSTDIR'")
-		set(CPACK_NSIS_DELETE_ICONS_EXTRA "Delete '$SMPROGRAMS\\\\$MUI_TEMP\\\\nCine Test.lnk'")
+		set(CPACK_NSIS_DELETE_ICONS_EXTRA
+			"Delete '$SMPROGRAMS\\\\$MUI_TEMP\\\\nCine Test.lnk'
+			Delete '$DESKTOP\\\\nCine Test.lnk'")
 	endif()
 	set(CPACK_NSIS_COMPRESSOR "/SOLID lzma")
 	set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
-	set(CPACK_NSIS_MODIFY_PATH ON)
 
 	set(NCINE_SYSTEM_NAME "Win64")
 	if("${CMAKE_GENERATOR}" STREQUAL "Visual Studio 16 2019")
