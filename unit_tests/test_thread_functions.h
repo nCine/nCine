@@ -1,7 +1,7 @@
 #ifndef TEST_THREAD_FUNCTIONS
 #define TEST_THREAD_FUNCTIONS
 
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+#if defined(_WIN32)
 	#include <windows.h>
 	#include <process.h>
 #else

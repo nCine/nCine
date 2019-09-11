@@ -2,7 +2,8 @@
 #include "Clock.h"
 
 #if defined(_WIN32)
-	#include <winsync.h>
+	#include "common_windefines.h"
+	#include <synchapi.h>
 #else
 	#include <unistd.h>
 #endif

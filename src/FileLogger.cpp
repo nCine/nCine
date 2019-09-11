@@ -6,6 +6,7 @@
 #endif
 #include <ctime>
 #include "FileLogger.h"
+#include "common_macros.h"
 #include "tracy.h"
 
 namespace ncine {

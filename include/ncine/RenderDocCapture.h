@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_RENDERDOCCAPTURE
 #define CLASS_NCINE_RENDERDOCCAPTURE
 
-#include <ncine/common_defines.h>
+#include "common_defines.h"
 
 namespace ncine {
 

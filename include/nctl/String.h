@@ -1,6 +1,7 @@
 #ifndef CLASS_NCTL_STRING
 #define CLASS_NCTL_STRING
 
+#include <ncine/common_macros.h>
 #include "StringIterator.h"
 #include "ReverseIterator.h"
 #include "utility.h"

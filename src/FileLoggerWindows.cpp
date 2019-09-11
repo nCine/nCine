@@ -1,5 +1,6 @@
 #define _WIN32_WINNT 0x0400
-#include <Windows.h>
+#include "common_windefines.h"
+#include <debugapi.h>
 
 namespace ncine {
 

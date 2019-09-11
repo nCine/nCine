@@ -2,8 +2,8 @@
 	#include <dlfcn.h>
 	#include "renderdoc.h"
 #else
-	#define NOGDI
-	#include <windows.h>
+	#include "common_windefines.h"
+	#include <libloaderapi.h>
 	#include "renderdoc_app.h"
 #endif
 

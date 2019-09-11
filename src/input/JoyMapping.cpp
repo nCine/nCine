@@ -570,7 +570,7 @@ bool JoyMapping::parsePlatformName(const char *start, const char *end) const
 {
 	bool thisPlatform = false;
 
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+#if defined(_WIN32)
 	const char *platformName = "Windows";
 #elif defined(__APPLE__)
 	const char *platformName = "Mac OS X";

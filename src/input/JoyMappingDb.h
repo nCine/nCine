@@ -8,7 +8,7 @@
 static const char *ControllerMappings[] = {
 
 // Default joystick mappings
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+#if defined(_WIN32)
 	#if defined(WITH_SDL)
 	"030000005e0400008e02000000007801,Xbox 360 Controller,platform:Windows,a:b0,b:b1,x:b2,y:b3,start:b7,guide:b10,back:b6,leftstick:b8,rightstick:b9,leftshoulder:b4,rightshoulder:b5,leftx:a0,lefty:a1,rightx:a3,righty:a4,lefttrigger:a2,righttrigger:a5",
 	#elif defined(WITH_GLFW) // only tested on GLFW 3.2
@@ -26,7 +26,7 @@ static const char *ControllerMappings[] = {
 #endif
 
 // From `gamecontrollerdb.txt`
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+#if defined(_WIN32)
 	// # Windows - DINPUT
 	"8f0e1200000000000000504944564944,Acme,platform:Windows,x:b2,a:b0,b:b1,y:b3,back:b8,start:b9,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,dpup:h0.1,leftshoulder:b4,lefttrigger:b5,rightshoulder:b6,righttrigger:b7,leftstick:b10,rightstick:b11,leftx:a0,lefty:a1,rightx:a3,righty:a2",
 	"341a3608000000000000504944564944,Afterglow PS3 Controller,a:b1,b:b2,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b12,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b0,y:b3,platform:Windows",
@@ -206,7 +206,7 @@ static const char *ControllerMappings[] = {
 #endif
 
 // SDL2 mappings from `SDL2-2.0.10/src/joystick/SDL_gamecontrollerdb.h`
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+#if defined(_WIN32)
 	#if SDL_JOYSTICK_XINPUT
 	"xinput,XInput Controller,a:b0,b:b1,back:b6,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b10,leftshoulder:b4,leftstick:b8,lefttrigger:a2,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b9,righttrigger:a5,rightx:a3,righty:a4,start:b7,x:b2,y:b3,",
 	#endif

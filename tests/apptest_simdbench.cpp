@@ -107,7 +107,7 @@ const ImVec4 Red = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
 
 const char *system()
 {
-#if defined(__WIN32)
+#if defined(_WIN32)
 	return "Windows";
 #elif defined(__APPLE__)
 	return "macOS";

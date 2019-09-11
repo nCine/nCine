@@ -2,7 +2,7 @@
 #define NCINE_COMMON_DEFINES
 
 #ifndef NCINE_STATIC
-	#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__) || defined(__CYGWIN__)
+	#if defined(_WIN32) || defined(__CYGWIN__)
 		#ifdef ncine_EXPORTS // automatically defined by CMake
 			#if defined(__GNUC__) || defined(__llvm__)
 				#define DLL_PUBLIC __attribute__((dllexport))

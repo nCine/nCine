@@ -32,7 +32,7 @@ int start(lua_State *L)
 extern "C"
 {
 
-#if (defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)) && !defined(__MINGW32__)
+#if defined(_WIN32) && !defined(__MINGW32__)
 
 	#if NCINE_DEBUG
 		#define NCINE_LUAOPEN_NAME luaopen_ncine_d

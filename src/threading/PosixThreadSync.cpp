@@ -84,8 +84,6 @@ void CondVariable::broadcast()
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-#if !defined(_WIN32) && !defined(__WIN32__) && !defined(__WINDOWS__)
-
 RWLock::RWLock()
 {
 	pthread_rwlock_init(&rwlock_, nullptr);
@@ -95,8 +93,6 @@ RWLock::~RWLock()
 {
 	pthread_rwlock_destroy(&rwlock_);
 }
-
-#endif
 
 ///////////////////////////////////////////////////////////
 // Barrier CLASS

@@ -1,11 +1,10 @@
 #ifndef CLASS_NCINE_THREADSYNC
 #define CLASS_NCINE_THREADSYNC
 
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
-	#define NOGDI
-	#define NOMINMAX
-	#include <windows.h>
-	#include <process.h>
+#if defined(_WIN32)
+	#include "common_windefines.h"
+	#include <windef.h>
+	#include <winbase.h>
 #else
 	#include <pthread.h>
 #endif
@@ -28,7 +27,7 @@ class Mutex
 #endif
 
   private:
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+#if defined(_WIN32)
 	CRITICAL_SECTION handle_;
 #else
 	pthread_mutex_t mutex_;
@@ -56,7 +55,7 @@ class CondVariable
 	void broadcast();
 
   private:
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+#if defined(_WIN32)
 	HANDLE events_[2];
 	unsigned int waitersCount_;
 	CRITICAL_SECTION waitersCountLock_;
@@ -72,7 +71,7 @@ class CondVariable
 	CondVariable &operator=(const CondVariable &) = delete;
 };
 
-#if !defined(_WIN32) && !defined(__WIN32__) && !defined(__WINDOWS__)
+#if !defined(_WIN32)
 
 /// Read/write lock class (threads synchronization)
 class RWLock

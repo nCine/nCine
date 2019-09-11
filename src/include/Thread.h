@@ -1,10 +1,12 @@
 #ifndef CLASS_NCINE_THREAD
 #define CLASS_NCINE_THREAD
 
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
-	#define NOGDI
-	#include <windows.h>
+#if defined(_WIN32)
+	#include "common_windefines.h"
+	#include <windef.h>
+	#include <winbase.h>
 	#include <process.h>
+	#include <processthreadsapi.h>
 #else
 	#include <pthread.h>
 #endif
@@ -38,7 +40,7 @@ class ThreadAffinityMask
 	bool isSet(int cpuNum);
 
   private:
-	#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+	#if defined(_WIN32)
 	DWORD_PTR affinityMask_;
 	#elif __APPLE__
 	integer_t affinityTag_;
@@ -114,7 +116,7 @@ class Thread
 		void *threadArg;
 	};
 
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+#if defined(_WIN32)
 	HANDLE handle_;
 #else
 	pthread_t tid_;
@@ -122,7 +124,7 @@ class Thread
 
 	ThreadInfo threadInfo_;
 	/// The wrapper start function for thread creation
-#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+#if defined(_WIN32)
 	#ifdef __MINGW32__
 	static unsigned int(__attribute__((__stdcall__)) wrapperFunction)(void *arg);
 	#else

@@ -5,7 +5,8 @@
 #include <ncine/common_macros.h>
 
 #if defined(_WIN32) && !defined(__MINGW32__)
-	#include <Windows.h>
+	#include <ncine/common_windefines.h>
+	#include <windef.h>
 #elif defined(__APPLE__)
 	#include <atomic>
 #endif

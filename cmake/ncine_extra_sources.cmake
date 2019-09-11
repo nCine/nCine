@@ -1,4 +1,5 @@
 if(WIN32)
+	list(APPEND HEADERS ${NCINE_ROOT}/include/ncine/common_windefines.h)
 	list(APPEND SOURCES ${NCINE_ROOT}/src/FileLoggerWindows.cpp)
 endif()
 

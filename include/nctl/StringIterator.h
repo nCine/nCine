@@ -1,8 +1,6 @@
 #ifndef CLASS_NCTL_STRINGITERATOR
 #define CLASS_NCTL_STRINGITERATOR
 
-#include <ncine/common_defines.h>
-#include <ncine/common_macros.h>
 #include "iterator.h"
 
 namespace nctl {
