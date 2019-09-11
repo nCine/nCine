@@ -4,17 +4,14 @@
 #include <cstdint>
 #include <ncine/common_macros.h>
 
-#if defined(_WIN32) && !defined(__MINGW32__)
-	#include <ncine/common_windefines.h>
-	#include <windef.h>
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
 	#include <atomic>
 #endif
 
 namespace nctl {
 
 /// An atomic `int32_t` class
-class Atomic32
+class DLL_PUBLIC Atomic32
 {
   public:
 	enum class MemoryModel
@@ -72,7 +69,7 @@ class Atomic32
 };
 
 /// An atomic `int64_t` class
-class Atomic64
+class DLL_PUBLIC Atomic64
 {
   public:
 	enum class MemoryModel
@@ -128,14 +125,6 @@ class Atomic64
 	/// Deleted assignment operator
 	Atomic64 &operator=(const Atomic64 &) = delete;
 };
-
-#if defined(_WIN32) && !defined(__MINGW32__)
-	#include "WindowsAtomic.inl"
-#elif defined(__APPLE__)
-	#include "StdAtomic.inl"
-#else
-	#include "GccAtomic.inl"
-#endif
 
 }
 

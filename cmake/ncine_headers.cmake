@@ -80,11 +80,3 @@ set(NCTL_HEADERS
 	${NCINE_ROOT}/include/nctl/UniquePtr.h
 	${NCINE_ROOT}/include/nctl/SharedPtr.h
 )
-
-if(WIN32)
-	list(APPEND NCTL_HEADERS ${NCINE_ROOT}/include/nctl/WindowsAtomic.inl)
-elseif(APPLE)
-	list(APPEND NCTL_HEADERS ${NCINE_ROOT}/include/nctl/StdAtomic.inl)
-else()
-	list(APPEND NCTL_HEADERS ${NCINE_ROOT}/include/nctl/GccAtomic.inl)
-endif()

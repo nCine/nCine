@@ -1,3 +1,10 @@
+#include <ncine/common_macros.h>
+#include <nctl/Atomic.h>
+#include <ncine/common_windefines.h>
+#include <windef.h>
+
+namespace nctl {
+
 ///////////////////////////////////////////////////////////
 // Atomic32
 ///////////////////////////////////////////////////////////
@@ -174,4 +181,6 @@ bool Atomic64::cmpExchange(int64_t newValue, int64_t cmpValue, MemoryModel memMo
 		default:
 			return InterlockedCompareExchange64(reinterpret_cast<volatile LONG64 *>(&value_), newValue, cmpValue) == cmpValue;
 	}
+}
+
 }

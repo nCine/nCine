@@ -1,8 +1,6 @@
 #include "gtest_atomic.h"
 #include "test_thread_functions.h"
 
-namespace nc = ncine;
-
 namespace {
 
 class AtomicTest32 : public ::testing::Test

@@ -1,5 +1,5 @@
-#ifndef NCINE_UNIQUEPTR
-#define NCINE_UNIQUEPTR
+#ifndef CLASS_NCTL_UNIQUEPTR
+#define CLASS_NCTL_UNIQUEPTR
 
 #include "utility.h"
 

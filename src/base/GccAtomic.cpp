@@ -1,3 +1,8 @@
+#include <ncine/common_macros.h>
+#include <nctl/Atomic.h>
+
+namespace nctl {
+
 ///////////////////////////////////////////////////////////
 // Atomic32
 ///////////////////////////////////////////////////////////
@@ -178,4 +183,6 @@ bool Atomic64::cmpExchange(int64_t newValue, int64_t cmpValue, MemoryModel memMo
 		default:
 			return __atomic_compare_exchange_n(&value_, &cmpValue, newValue, false, __ATOMIC_SEQ_CST, __ATOMIC_RELAXED);
 	}
+}
+
 }

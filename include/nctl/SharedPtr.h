@@ -1,5 +1,5 @@
-#ifndef NCINE_SHAREDPTR
-#define NCINE_SHAREDPTR
+#ifndef CLASS_NCTL_SHAREDPTR
+#define CLASS_NCTL_SHAREDPTR
 
 #include "UniquePtr.h"
 #include "Atomic.h"
