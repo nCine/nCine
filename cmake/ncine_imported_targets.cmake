@@ -6,7 +6,7 @@ if(EMSCRIPTEN)
 		message(STATUS "nCine external Emscripten libraries directory: ${EXTERNAL_EMSCRIPTEN_DIR}")
 	endif()
 
-	if(NCINE_EMSCRIPTEN_THREADS)
+	if(NCINE_WITH_THREADS)
 		add_library(Threads::Threads INTERFACE IMPORTED)
 		set_target_properties(Threads::Threads PROPERTIES
 			INTERFACE_COMPILE_OPTIONS "SHELL:-s USE_PTHREADS=1 -s WASM_MEM_MAX=128MB"
@@ -34,39 +34,51 @@ if(EMSCRIPTEN)
 		set(SDL2_FOUND 1)
 	endif()
 
-	add_library(OpenAL::AL INTERFACE IMPORTED)
-	set_target_properties(OpenAL::AL PROPERTIES
-		INTERFACE_LINK_OPTIONS "SHELL:-lopenal")
-	set(OPENAL_FOUND 1)
+	if(NCINE_WITH_PNG)
+		add_library(PNG::PNG INTERFACE IMPORTED)
+		set_target_properties(PNG::PNG PROPERTIES
+			INTERFACE_COMPILE_OPTIONS "SHELL:-s USE_LIBPNG=1"
+			INTERFACE_LINK_OPTIONS "SHELL:-s USE_LIBPNG=1")
+		set(PNG_FOUND 1)
+	endif()
 
-	add_library(PNG::PNG INTERFACE IMPORTED)
-	set_target_properties(PNG::PNG PROPERTIES
-		INTERFACE_COMPILE_OPTIONS "SHELL:-s USE_LIBPNG=1"
-		INTERFACE_LINK_OPTIONS "SHELL:-s USE_LIBPNG=1")
-	set(PNG_FOUND 1)
+	if(NCINE_WITH_WEBP)
+		add_library(WebP::WebP STATIC IMPORTED)
+		set_target_properties(WebP::WebP PROPERTIES
+			IMPORTED_LOCATION ${EXTERNAL_EMSCRIPTEN_DIR}/lib/libwebp.a
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_EMSCRIPTEN_DIR}/include")
+		set(WEBP_FOUND 1)
+	endif()
 
-	add_library(WebP::WebP STATIC IMPORTED)
-	set_target_properties(WebP::WebP PROPERTIES
-		IMPORTED_LOCATION ${EXTERNAL_EMSCRIPTEN_DIR}/lib/libwebp.a
-		INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_EMSCRIPTEN_DIR}/include")
-	set(WEBP_FOUND 1)
+	if(NCINE_WITH_AUDIO)
+		add_library(OpenAL::AL INTERFACE IMPORTED)
+		set_target_properties(OpenAL::AL PROPERTIES
+			INTERFACE_LINK_OPTIONS "SHELL:-lopenal")
+		set(OPENAL_FOUND 1)
 
-	add_library(Vorbis::Vorbisfile INTERFACE IMPORTED)
-	set_target_properties(Vorbis::Vorbisfile PROPERTIES
-		INTERFACE_COMPILE_OPTIONS "SHELL:-s USE_VORBIS=1"
-		INTERFACE_LINK_OPTIONS "SHELL:-s USE_VORBIS=1")
-	set(VORBIS_FOUND 1)
+		if(NCINE_WITH_VORBIS)
+			add_library(Vorbis::Vorbisfile INTERFACE IMPORTED)
+			set_target_properties(Vorbis::Vorbisfile PROPERTIES
+				INTERFACE_COMPILE_OPTIONS "SHELL:-s USE_VORBIS=1"
+				INTERFACE_LINK_OPTIONS "SHELL:-s USE_VORBIS=1")
+			set(VORBIS_FOUND 1)
+		endif()
+	endif()
 
-	add_library(Lua::Lua STATIC IMPORTED)
-	set_target_properties(Lua::Lua PROPERTIES
-		IMPORTED_LOCATION ${EXTERNAL_EMSCRIPTEN_DIR}/lib/liblua.a
-		INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_EMSCRIPTEN_DIR}/include")
-	set(LUA_FOUND 1)
+	if(NCINE_WITH_LUA)
+		add_library(Lua::Lua STATIC IMPORTED)
+		set_target_properties(Lua::Lua PROPERTIES
+			IMPORTED_LOCATION ${EXTERNAL_EMSCRIPTEN_DIR}/lib/liblua.a
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_EMSCRIPTEN_DIR}/include")
+		set(LUA_FOUND 1)
+	endif()
 
 	return()
 endif()
 
-find_package(Threads)
+if(NCINE_WITH_THREADS)
+	find_package(Threads)
+endif()
 if(MSVC)
 	set(EXTERNAL_MSVC_DIR "${PARENT_SOURCE_DIR}/nCine-external" CACHE PATH "Set the path to the MSVC libraries directory")
 	if(NOT IS_DIRECTORY ${EXTERNAL_MSVC_DIR})
@@ -97,16 +109,31 @@ elseif(NOT ANDROID) # GCC and LLVM
 	if(WIN32)
 		find_package(GLEW REQUIRED)
 	else()
-		find_package(GLEW)
+		if(NCINE_WITH_GLEW)
+			find_package(GLEW)
+		endif()
 	endif()
 	find_package(OpenGL REQUIRED)
-	find_package(GLFW)
-	find_package(SDL2)
-	find_package(PNG)
-	find_package(OpenAL)
-	find_package(WebP)
-	find_package(Vorbis)
-	find_package(Lua)
+	if(NCINE_PREFERRED_BACKEND STREQUAL "GLFW")
+		find_package(GLFW)
+	elseif(NCINE_PREFERRED_BACKEND STREQUAL "SDL2")
+		find_package(SDL2)
+	endif()
+	if(NCINE_WITH_PNG)
+		find_package(PNG)
+	endif()
+	if(NCINE_WITH_WEBP)
+		find_package(WebP)
+	endif()
+	if(NCINE_WITH_AUDIO)
+		find_package(OpenAL)
+		if(NCINE_WITH_VORBIS)
+			find_package(Vorbis)
+		endif()
+	endif()
+	if(NCINE_WITH_LUA)
+		find_package(Lua)
+	endif()
 endif()
 
 if(ANDROID)
@@ -117,7 +144,7 @@ if(ANDROID)
 	find_library(OPENSLES_LIBRARY OpenSLES)
 	find_library(ZLIB_LIBRARY z)
 
-	if(EXISTS ${EXTERNAL_ANDROID_DIR}/png/${ANDROID_ABI}/libpng16.a)
+	if(NCINE_WITH_PNG AND EXISTS ${EXTERNAL_ANDROID_DIR}/png/${ANDROID_ABI}/libpng16.a)
 		add_library(PNG::PNG STATIC IMPORTED)
 		set_target_properties(PNG::PNG PROPERTIES
 			IMPORTED_LINK_INTERFACE_LANGUAGES "C"
@@ -127,7 +154,7 @@ if(ANDROID)
 		set(PNG_FOUND 1)
 	endif()
 
-	if(EXISTS ${EXTERNAL_ANDROID_DIR}/webp/${ANDROID_ABI}/libwebp.a)
+	if(NCINE_WITH_WEBP AND EXISTS ${EXTERNAL_ANDROID_DIR}/webp/${ANDROID_ABI}/libwebp.a)
 		add_library(WebP::WebP STATIC IMPORTED)
 		set_target_properties(WebP::WebP PROPERTIES
 			IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/webp/${ANDROID_ABI}/libwebp.a
@@ -135,26 +162,37 @@ if(ANDROID)
 		set(WEBP_FOUND 1)
 	endif()
 
-	if(EXISTS ${EXTERNAL_ANDROID_DIR}/openal/${ANDROID_ABI}/libopenal.so)
+	if(NCINE_WITH_AUDIO AND EXISTS ${EXTERNAL_ANDROID_DIR}/openal/${ANDROID_ABI}/libopenal.so)
 		add_library(OpenAL::AL SHARED IMPORTED)
 		set_target_properties(OpenAL::AL PROPERTIES
 			IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/openal/${ANDROID_ABI}/libopenal.so
 			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/openal/include")
 		set(OPENAL_FOUND 1)
+
+		if(NCINE_WITH_VORBIS AND
+		   EXISTS ${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbisfile.a AND
+		   EXISTS ${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbis.a AND
+		   EXISTS ${EXTERNAL_ANDROID_DIR}/ogg/${ANDROID_ABI}/libogg.a)
+			add_library(Ogg::Ogg STATIC IMPORTED)
+			set_target_properties(Ogg::Ogg PROPERTIES
+				IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/ogg/${ANDROID_ABI}/libogg.a
+				INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/ogg/include")
+
+			add_library(Vorbis::Vorbis STATIC IMPORTED)
+			set_target_properties(Vorbis::Vorbis PROPERTIES
+				IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbis.a
+				INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/vorbis/include"
+				INTERFACE_LINK_LIBRARIES Ogg::Ogg)
+
+			add_library(Vorbis::Vorbisfile STATIC IMPORTED)
+			set_target_properties(Vorbis::Vorbisfile PROPERTIES
+				IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbisfile.a
+				INTERFACE_LINK_LIBRARIES Vorbis::Vorbis)
+			set(VORBIS_FOUND 1)
+		endif()
 	endif()
 
-	if(EXISTS ${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbisfile.a AND
-	   EXISTS ${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbis.a AND
-	   EXISTS ${EXTERNAL_ANDROID_DIR}/ogg/${ANDROID_ABI}/libogg.a)
-		add_library(Vorbis::Vorbisfile STATIC IMPORTED)
-		set_target_properties(Vorbis::Vorbisfile PROPERTIES
-			IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbisfile.a
-			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/vorbis/include;${EXTERNAL_ANDROID_DIR}/ogg/include"
-			INTERFACE_LINK_LIBRARIES "${EXTERNAL_ANDROID_DIR}/vorbis/${ANDROID_ABI}/libvorbis.a;${EXTERNAL_ANDROID_DIR}/ogg/${ANDROID_ABI}/libogg.a")
-		set(VORBIS_FOUND 1)
-	endif()
-
-	if(EXISTS ${EXTERNAL_ANDROID_DIR}/lua/${ANDROID_ABI}/liblua.a)
+	if(NCINE_WITH_LUA AND EXISTS ${EXTERNAL_ANDROID_DIR}/lua/${ANDROID_ABI}/liblua.a)
 		add_library(Lua::Lua STATIC IMPORTED)
 		set_target_properties(Lua::Lua PROPERTIES
 			IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/lua/${ANDROID_ABI}/liblua.a
@@ -177,7 +215,8 @@ elseif(MSVC)
 			IMPORTED_LOCATION opengl32.dll)
 	set(OPENGL_FOUND 1)
 
-	if(EXISTS ${MSVC_LIBDIR}/glfw3dll.lib AND EXISTS ${MSVC_BINDIR}/glfw3.dll)
+	if(NCINE_PREFERRED_BACKEND STREQUAL "GLFW" AND
+	    EXISTS ${MSVC_LIBDIR}/glfw3dll.lib AND EXISTS ${MSVC_BINDIR}/glfw3.dll)
 		add_library(GLFW::GLFW SHARED IMPORTED)
 		set_target_properties(GLFW::GLFW PROPERTIES
 			IMPORTED_IMPLIB ${MSVC_LIBDIR}/glfw3dll.lib
@@ -187,7 +226,9 @@ elseif(MSVC)
 		set(GLFW_FOUND 1)
 	endif()
 
-	if(EXISTS ${MSVC_LIBDIR}/SDL2.lib AND EXISTS ${MSVC_LIBDIR}/SDL2main.lib AND EXISTS ${MSVC_BINDIR}/SDL2.dll)
+	if(NCINE_PREFERRED_BACKEND STREQUAL "SDL2" AND
+	    EXISTS ${MSVC_LIBDIR}/SDL2.lib AND EXISTS ${MSVC_LIBDIR}/SDL2main.lib AND
+		EXISTS ${MSVC_BINDIR}/SDL2.dll)
 		add_library(SDL2::SDL2 SHARED IMPORTED)
 		set_target_properties(SDL2::SDL2 PROPERTIES
 			IMPORTED_IMPLIB ${MSVC_LIBDIR}/SDL2.lib
@@ -197,28 +238,25 @@ elseif(MSVC)
 		set(SDL2_FOUND 1)
 	endif()
 
-	if(EXISTS ${MSVC_LIBDIR}/libpng16.lib AND EXISTS ${MSVC_LIBDIR}/zlib.lib AND
-	   EXISTS ${MSVC_BINDIR}/libpng16.dll AND EXISTS ${MSVC_BINDIR}/zlib.dll)
+	if(NCINE_WITH_PNG AND
+	    EXISTS ${MSVC_LIBDIR}/libpng16.lib AND EXISTS ${MSVC_LIBDIR}/zlib.lib AND
+	    EXISTS ${MSVC_BINDIR}/libpng16.dll AND EXISTS ${MSVC_BINDIR}/zlib.dll)
+		add_library(ZLIB::ZLIB SHARED IMPORTED)
+		set_target_properties(ZLIB::ZLIB PROPERTIES
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/zlib.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/zlib.dll)
 		add_library(PNG::PNG SHARED IMPORTED)
 		set_target_properties(PNG::PNG PROPERTIES
 			IMPORTED_LINK_INTERFACE_LANGUAGES "C"
 			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libpng16.lib
 			IMPORTED_LOCATION ${MSVC_BINDIR}/libpng16.dll
 			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include"
-			INTERFACE_LINK_LIBRARIES ${MSVC_LIBDIR}/zlib.lib)
+			INTERFACE_LINK_LIBRARIES ZLIB::ZLIB)
 		set(PNG_FOUND 1)
 	endif()
 
-	if(EXISTS ${MSVC_LIBDIR}/OpenAL32.lib AND EXISTS ${MSVC_BINDIR}/OpenAL32.dll)
-		add_library(OpenAL::AL SHARED IMPORTED)
-		set_target_properties(OpenAL::AL PROPERTIES
-			IMPORTED_IMPLIB ${MSVC_LIBDIR}/OpenAL32.lib
-			IMPORTED_LOCATION ${MSVC_BINDIR}/OpenAL32.dll
-			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
-		set(OPENAL_FOUND 1)
-	endif()
-
-	if(EXISTS ${MSVC_LIBDIR}/libwebp_dll.lib AND EXISTS ${MSVC_BINDIR}/libwebp.dll AND EXISTS ${MSVC_BINDIR}/libwebpdecoder.dll)
+	if(NCINE_WITH_WEBP AND
+	    EXISTS ${MSVC_LIBDIR}/libwebp_dll.lib AND EXISTS ${MSVC_BINDIR}/libwebp.dll)
 		add_library(WebP::WebP SHARED IMPORTED)
 		set_target_properties(WebP::WebP PROPERTIES
 			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libwebp_dll.lib
@@ -227,18 +265,39 @@ elseif(MSVC)
 		set(WEBP_FOUND 1)
 	endif()
 
-	if(EXISTS ${MSVC_LIBDIR}/libogg.lib AND EXISTS ${MSVC_LIBDIR}/libvorbis.lib AND EXISTS ${MSVC_LIBDIR}/libvorbisfile.lib AND
-	   EXISTS ${MSVC_BINDIR}/libogg.dll AND EXISTS ${MSVC_BINDIR}/libvorbis.dll AND EXISTS ${MSVC_BINDIR}/libvorbisfile.dll)
-		add_library(Vorbis::Vorbisfile SHARED IMPORTED)
-		set_target_properties(Vorbis::Vorbisfile PROPERTIES
-			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libvorbisfile.lib
-			IMPORTED_LOCATION ${MSVC_BINDIR}/libvorbisfile.dll
-			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include"
-			INTERFACE_LINK_LIBRARIES "${MSVC_LIBDIR}/libvorbis.lib;${MSVC_LIBDIR}/libogg.lib")
-		set(VORBIS_FOUND 1)
+	if(NCINE_WITH_AUDIO AND EXISTS ${MSVC_LIBDIR}/OpenAL32.lib AND EXISTS ${MSVC_BINDIR}/OpenAL32.dll)
+		add_library(OpenAL::AL SHARED IMPORTED)
+		set_target_properties(OpenAL::AL PROPERTIES
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/OpenAL32.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/OpenAL32.dll
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
+		set(OPENAL_FOUND 1)
+
+		if(NCINE_WITH_VORBIS AND
+		    EXISTS ${MSVC_LIBDIR}/libogg.lib AND EXISTS ${MSVC_LIBDIR}/libvorbis.lib AND EXISTS ${MSVC_LIBDIR}/libvorbisfile.lib AND
+		    EXISTS ${MSVC_BINDIR}/libogg.dll AND EXISTS ${MSVC_BINDIR}/libvorbis.dll AND EXISTS ${MSVC_BINDIR}/libvorbisfile.dll)
+			add_library(Ogg::Ogg SHARED IMPORTED)
+			set_target_properties(Ogg::Ogg PROPERTIES
+				IMPORTED_IMPLIB ${MSVC_LIBDIR}/libogg.lib
+				IMPORTED_LOCATION ${MSVC_BINDIR}/libogg.dll)
+
+			add_library(Vorbis::Vorbis SHARED IMPORTED)
+			set_target_properties(Vorbis::Vorbis PROPERTIES
+				IMPORTED_IMPLIB ${MSVC_LIBDIR}/libvorbis.lib
+				IMPORTED_LOCATION ${MSVC_BINDIR}/libvorbis.dll
+				INTERFACE_LINK_LIBRARIES Ogg::Ogg)
+
+			add_library(Vorbis::Vorbisfile SHARED IMPORTED)
+			set_target_properties(Vorbis::Vorbisfile PROPERTIES
+				IMPORTED_IMPLIB ${MSVC_LIBDIR}/libvorbisfile.lib
+				IMPORTED_LOCATION ${MSVC_BINDIR}/libvorbisfile.dll
+				INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include"
+				INTERFACE_LINK_LIBRARIES Vorbis::Vorbis)
+			set(VORBIS_FOUND 1)
+		endif()
 	endif()
 
-	if(EXISTS ${MSVC_LIBDIR}/lua53.lib AND EXISTS ${MSVC_BINDIR}/lua53.dll)
+	if(NCINE_WITH_LUA AND EXISTS ${MSVC_LIBDIR}/lua53.lib AND EXISTS ${MSVC_BINDIR}/lua53.dll)
 		add_library(Lua::Lua SHARED IMPORTED)
 		set_target_properties(Lua::Lua PROPERTIES
 			IMPORTED_IMPLIB ${MSVC_LIBDIR}/lua53.lib
@@ -285,16 +344,6 @@ elseif(MINGW OR MSYS)
 			INTERFACE_LINK_LIBRARIES ${SDL2MAIN_LIBRARY})
 	endif()
 
-	if(OPENAL_FOUND)
-		set_msys_dll(OPENAL libopenal-1)
-		add_library(OpenAL::AL SHARED IMPORTED)
-		set_target_properties(OpenAL::AL PROPERTIES
-			IMPORTED_IMPLIB ${OPENAL_LIBRARY}
-			IMPORTED_LOCATION ${OPENAL_DLL_LIBRARY}
-			IMPORTED_LOCATION ${OPENAL_LIB_PATH}/${OPENAL_LIB_NAME}.dll
-			INTERFACE_INCLUDE_DIRECTORIES ${OPENAL_INCLUDE_DIR})
-	endif()
-
 	if(WEBP_FOUND)
 		set_msys_dll(WEBP libwebp-7)
 		add_library(WebP::WebP SHARED IMPORTED)
@@ -304,14 +353,24 @@ elseif(MINGW OR MSYS)
 			INTERFACE_INCLUDE_DIRECTORIES ${WEBP_INCLUDE_DIR})
 	endif()
 
-	if(VORBIS_FOUND)
-		set_msys_dll(VORBISFILE libvorbisfile-3)
-		add_library(Vorbis::Vorbisfile SHARED IMPORTED)
-		set_target_properties(Vorbis::Vorbisfile PROPERTIES
-			IMPORTED_IMPLIB ${VORBISFILE_LIBRARY}
-			IMPORTED_LOCATION ${VORBISFILE_DLL_LIBRARY}
-			INTERFACE_INCLUDE_DIRECTORIES ${VORBIS_INCLUDE_DIR}
-			INTERFACE_LINK_LIBRARIES "${VORBIS_LIBRARY};${OGG_LIBRARY}")
+	if(OPENAL_FOUND)
+		set_msys_dll(OPENAL libopenal-1)
+		add_library(OpenAL::AL SHARED IMPORTED)
+		set_target_properties(OpenAL::AL PROPERTIES
+			IMPORTED_IMPLIB ${OPENAL_LIBRARY}
+			IMPORTED_LOCATION ${OPENAL_DLL_LIBRARY}
+			IMPORTED_LOCATION ${OPENAL_LIB_PATH}/${OPENAL_LIB_NAME}.dll
+			INTERFACE_INCLUDE_DIRECTORIES ${OPENAL_INCLUDE_DIR})
+
+		if(VORBIS_FOUND)
+			set_msys_dll(VORBISFILE libvorbisfile-3)
+			add_library(Vorbis::Vorbisfile SHARED IMPORTED)
+			set_target_properties(Vorbis::Vorbisfile PROPERTIES
+				IMPORTED_IMPLIB ${VORBISFILE_LIBRARY}
+				IMPORTED_LOCATION ${VORBISFILE_DLL_LIBRARY}
+				INTERFACE_INCLUDE_DIRECTORIES ${VORBIS_INCLUDE_DIR}
+				INTERFACE_LINK_LIBRARIES "${VORBIS_LIBRARY};${OGG_LIBRARY}")
+		endif()
 	endif()
 
 	if(LUA_FOUND)
@@ -354,13 +413,6 @@ else() # GCC and LLVM
 			INTERFACE_LINK_LIBRARIES "${SDL2_EXTRA_LIBRARIES}")
 	endif()
 
-	if(OPENAL_FOUND)
-		add_library(OpenAL::AL SHARED IMPORTED)
-		set_target_properties(OpenAL::AL PROPERTIES
-			IMPORTED_LOCATION ${OPENAL_LIBRARY}
-			INTERFACE_INCLUDE_DIRECTORIES ${OPENAL_INCLUDE_DIR})
-	endif()
-
 	if(WEBP_FOUND)
 		add_library(WebP::WebP SHARED IMPORTED)
 		set_target_properties(WebP::WebP PROPERTIES
@@ -368,12 +420,19 @@ else() # GCC and LLVM
 			INTERFACE_INCLUDE_DIRECTORIES ${WEBP_INCLUDE_DIR})
 	endif()
 
-	if(VORBIS_FOUND)
-		add_library(Vorbis::Vorbisfile SHARED IMPORTED)
-		set_target_properties(Vorbis::Vorbisfile PROPERTIES
-			IMPORTED_LOCATION ${VORBISFILE_LIBRARY}
-			INTERFACE_INCLUDE_DIRECTORIES ${VORBIS_INCLUDE_DIR}
-			INTERFACE_LINK_LIBRARIES "${VORBIS_LIBRARY};${OGG_LIBRARY}")
+	if(OPENAL_FOUND)
+		add_library(OpenAL::AL SHARED IMPORTED)
+		set_target_properties(OpenAL::AL PROPERTIES
+			IMPORTED_LOCATION ${OPENAL_LIBRARY}
+			INTERFACE_INCLUDE_DIRECTORIES ${OPENAL_INCLUDE_DIR})
+
+		if(VORBIS_FOUND)
+			add_library(Vorbis::Vorbisfile SHARED IMPORTED)
+			set_target_properties(Vorbis::Vorbisfile PROPERTIES
+				IMPORTED_LOCATION ${VORBISFILE_LIBRARY}
+				INTERFACE_INCLUDE_DIRECTORIES ${VORBIS_INCLUDE_DIR}
+				INTERFACE_LINK_LIBRARIES "${VORBIS_LIBRARY};${OGG_LIBRARY}")
+		endif()
 	endif()
 
 	if(LUA_FOUND)
@@ -419,11 +478,6 @@ else() # GCC and LLVM
 				INTERFACE_LINK_LIBRARIES ${SDL2_FRAMEWORK_LINKS})
 		endif()
 
-		if(OPENAL_FOUND)
-			set_target_properties(OpenAL::AL PROPERTIES
-				IMPORTED_LOCATION ${OPENAL_LIBRARY}/openal)
-		endif()
-
 		if(PNG_FOUND)
 			get_target_property(ZLIB_LIBRARY_RELEASE ZLIB::ZLIB IMPORTED_LOCATION_RELEASE)
 			set_target_properties(ZLIB::ZLIB PROPERTIES
@@ -442,9 +496,14 @@ else() # GCC and LLVM
 				IMPORTED_LOCATION ${WEBP_LIBRARY}/webp)
 		endif()
 
-		if(VORBIS_FOUND)
-			set_target_properties(Vorbis::Vorbisfile PROPERTIES
-				IMPORTED_LOCATION ${VORBISFILE_LIBRARY}/vorbisfile)
+		if(OPENAL_FOUND)
+			set_target_properties(OpenAL::AL PROPERTIES
+				IMPORTED_LOCATION ${OPENAL_LIBRARY}/openal)
+
+			if(VORBIS_FOUND)
+				set_target_properties(Vorbis::Vorbisfile PROPERTIES
+					IMPORTED_LOCATION ${VORBISFILE_LIBRARY}/vorbisfile)
+			endif()
 		endif()
 
 		if(LUA_FOUND)

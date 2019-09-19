@@ -28,6 +28,9 @@ if(NCINE_BUILD_ANDROID)
 		-DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH} -DNCINE_DYNAMIC_LIBRARY=${NCINE_DYNAMIC_LIBRARY}
 		-DNCINE_STARTUP_TEST=${NCINE_STARTUP_TEST} -DEXTERNAL_ANDROID_DIR=${EXTERNAL_ANDROID_DIR}
 		-DGENERATED_INCLUDE_DIR=${GENERATED_INCLUDE_DIR} -DNCINE_STRIP_BINARIES=${NCINE_STRIP_BINARIES}
+		-DNCINE_WITH_PNG=${NCINE_WITH_PNG} -DNCINE_WITH_WEBP=${NCINE_WITH_WEBP}
+		-DNCINE_WITH_AUDIO=${NCINE_WITH_AUDIO} -DNCINE_WITH_VORBIS=${NCINE_WITH_VORBIS}
+		-DNCINE_WITH_THREADS=${NCINE_WITH_THREADS} -DNCINE_WITH_LUA=${NCINE_WITH_LUA}
 		-DNCINE_WITH_IMGUI=${NCINE_WITH_IMGUI} -DIMGUI_SOURCE_DIR=${IMGUI_SOURCE_DIR}
 		-DNCINE_WITH_TRACY=${NCINE_WITH_TRACY} -DTRACY_SOURCE_DIR=${TRACY_SOURCE_DIR})
 	set(ANDROID_CMAKE_ARGS -DANDROID_TOOLCHAIN=${ANDROID_TOOLCHAIN} -DANDROID_STL=${ANDROID_STL})
@@ -71,7 +74,9 @@ if(NCINE_BUILD_ANDROID)
 
 	set(BUILD_GRADLE_IN ${CMAKE_SOURCE_DIR}/android/build.gradle.in)
 	set(BUILD_GRADLE ${CMAKE_BINARY_DIR}/android/build.gradle)
-	set(GRADLE_JNILIBS_DIRS "'${EXTERNAL_ANDROID_DIR}/openal'")
+	if(NCINE_WITH_AUDIO)
+		set(GRADLE_JNILIBS_DIRS "'${EXTERNAL_ANDROID_DIR}/openal'")
+	endif()
 	configure_file(${BUILD_GRADLE_IN} ${BUILD_GRADLE} @ONLY)
 	set(GRADLE_PROPERTIES_IN ${CMAKE_SOURCE_DIR}/android/gradle.properties.in)
 	set(GRADLE_PROPERTIES ${CMAKE_BINARY_DIR}/android/gradle.properties)
@@ -81,7 +86,10 @@ if(NCINE_BUILD_ANDROID)
 
 	set(BUILD_DEVDIST_GRADLE ${CMAKE_BINARY_DIR}/android/build-devdist.gradle)
 	set(GRADLE_PASSTHROUGH_ARGS ${GRADLE_DEVDIST_PASSTHROUGH_ARGS})
-	set(GRADLE_JNILIBS_DIRS "'src/main/cpp/ncine', 'src/main/cpp/openal'")
+	set(GRADLE_JNILIBS_DIRS "'src/main/cpp/ncine'")
+	if(NCINE_WITH_AUDIO)
+		set(GRADLE_JNILIBS_DIRS "${GRADLE_JNILIBS_DIRS}, 'src/main/cpp/openal'")
+	endif()
 	configure_file(${BUILD_GRADLE_IN} ${BUILD_DEVDIST_GRADLE} @ONLY)
 
 	set(MANIFEST_PERMISSIONS "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />")
@@ -146,6 +154,19 @@ if(NCINE_BUILD_ANDROID)
 		add_dependencies(ncine_android ncine_android_${ARCHITECTURE})
 	endforeach()
 
+	if(NCINE_WITH_AUDIO)
+		foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
+			set(ANDROID_OPENAL_SRC_BINARY_DIR ${EXTERNAL_ANDROID_DIR}/openal/${ARCHITECTURE})
+			set(ANDROID_OPENAL_DEST_BINARY_DIR ${CMAKE_BINARY_DIR}/android/src/main/cpp/openal/${ARCHITECTURE})
+			add_custom_command(OUTPUT ${ANDROID_OPENAL_DEST_BINARY_DIR}/libopenal.so
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ANDROID_OPENAL_SRC_BINARY_DIR}/libopenal.so ${ANDROID_OPENAL_DEST_BINARY_DIR}/libopenal.so
+				COMMENT "Copying OpenAL library for ${ARCHITECTURE}")
+			add_custom_target(ncine_android_openal_${ARCHITECTURE} DEPENDS ${ANDROID_OPENAL_DEST_BINARY_DIR}/libopenal.so)
+			set_target_properties(ncine_android_openal_${ARCHITECTURE} PROPERTIES FOLDER "Android")
+			add_dependencies(ncine_android ncine_android_openal_${ARCHITECTURE})
+		endforeach()
+	endif()
+
 	# Creating an ncine directory inside cpp to allow building external Android applications without installing the engine
 	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include
 		COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include/ncine/
@@ -156,7 +177,7 @@ if(NCINE_BUILD_ANDROID)
 		COMMAND ${COPY_SRCINCLUDE_COMMAND}
 		# If Tracy integration is enabled then projects relying on an uninstalled version of the engine can use its headers
 		COMMAND ${COPY_TRACYINCLUDE_COMMAND}
-		)
+		COMMENT "Copying Android header files")
 	add_custom_target(ncine_ndkdir_include ALL DEPENDS ${CMAKE_BINARY_DIR}/android/src/main/cpp/ncine/include)
 	set_target_properties(ncine_ndkdir_include PROPERTIES FOLDER "Android")
 	add_dependencies(ncine_ndkdir_include ncine_android)
@@ -224,8 +245,10 @@ if(NCINE_BUILD_ANDROID)
 				DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/${ARCHITECTURE}/ COMPONENT android)
 			install(FILES ${CMAKE_BINARY_DIR}/android/build/ncine/${ARCHITECTURE}/libncine_main.a
 				DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/${ARCHITECTURE}/ COMPONENT android)
-			install(FILES ${EXTERNAL_ANDROID_DIR}/openal/${ARCHITECTURE}/libopenal.so
-				DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/openal/${ARCHITECTURE}/ COMPONENT android)
+			if(NCINE_WITH_AUDIO)
+				install(FILES ${EXTERNAL_ANDROID_DIR}/openal/${ARCHITECTURE}/libopenal.so
+					DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/openal/${ARCHITECTURE}/ COMPONENT android)
+			endif()
 		endforeach()
 
 		install(FILES ${HEADERS} DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/include/ncine COMPONENT android)

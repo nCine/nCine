@@ -7,13 +7,13 @@ import android.view.View;
 public class LoadLibrariesTV extends NativeActivity {
 
 	static {
-		System.loadLibrary("openal");
-
 		try {
-			System.loadLibrary("ncine");
+			System.loadLibrary("openal");
 		} catch (UnsatisfiedLinkError e) {
 			System.err.println("Caught UnsatisfiedLinkError: " + e.getMessage());
 		}
+
+		System.loadLibrary("ncine");
 	}
 
 }

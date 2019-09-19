@@ -53,10 +53,6 @@ endif()
 if(OPENAL_FOUND)
 	target_compile_definitions(ncine PRIVATE "WITH_AUDIO")
 	target_link_libraries(ncine PRIVATE OpenAL::AL)
-	if(VORBIS_FOUND)
-		target_compile_definitions(ncine PRIVATE "WITH_VORBIS")
-		target_link_libraries(ncine PRIVATE Vorbis::Vorbisfile)
-	endif()
 
 	list(APPEND HEADERS
 		${NCINE_ROOT}/include/ncine/IAudioLoader.h
@@ -84,6 +80,9 @@ if(OPENAL_FOUND)
 	)
 
 	if(VORBIS_FOUND)
+		target_compile_definitions(ncine PRIVATE "WITH_VORBIS")
+		target_link_libraries(ncine PRIVATE Vorbis::Vorbisfile)
+
 		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/AudioLoaderOgg.h)
 		list(APPEND SOURCES ${NCINE_ROOT}/src/audio/AudioLoaderOgg.cpp)
 	endif()
