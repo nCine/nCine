@@ -45,13 +45,7 @@ void IGfxDevice::setClearColor(const Colorf &color)
 void IGfxDevice::setViewport(int width, int height)
 {
 	glViewport(0, 0, width, height);
-	RenderResources::projectionMatrix_ = Matrix4x4f::ortho(0.0f, width, 0.0f, height, -1.0f, 1.0f);
-}
-
-void IGfxDevice::setViewport(const Vector2i &size)
-{
-	glViewport(0, 0, size.x, size.y);
-	RenderResources::projectionMatrix_ = Matrix4x4f::ortho(0.0f, size.x, 0.0f, size.y, -1.0f, 1.0f);
+	RenderResources::projectionMatrix_ = Matrix4x4f::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height), -1.0f, 1.0f);
 }
 
 const IGfxDevice::VideoMode &IGfxDevice::videoMode(unsigned int index) const

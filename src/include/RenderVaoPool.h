@@ -15,7 +15,7 @@ class GLVertexArrayObject;
 class RenderVaoPool
 {
   public:
-	RenderVaoPool(unsigned int vaoPoolSize);
+	explicit RenderVaoPool(unsigned int vaoPoolSize);
 	void bindVao(const GLVertexFormat &vertexFormat);
 
   private:

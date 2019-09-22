@@ -13,26 +13,6 @@ GLVertexFormat::GLVertexFormat()
 {
 }
 
-GLVertexFormat::GLVertexFormat(const GLVertexFormat &other)
-    : GLVertexFormat()
-{
-	for (unsigned int i = 0; i < MaxAttributes; i++)
-	{
-		attributes_[i].enabled_ = other.attributes_[i].enabled_;
-		if (attributes_[i].enabled_)
-		{
-			attributes_[i].vbo_ = other.attributes_[i].vbo_;
-			attributes_[i].index_ = other.attributes_[i].index_;
-			attributes_[i].size_ = other.attributes_[i].size_;
-			attributes_[i].type_ = other.attributes_[i].type_;
-			attributes_[i].stride_ = other.attributes_[i].stride_;
-			attributes_[i].pointer_ = other.attributes_[i].pointer_;
-			attributes_[i].baseOffset_ = other.attributes_[i].baseOffset_;
-		}
-	}
-	ibo_ = other.ibo_;
-}
-
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////

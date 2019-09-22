@@ -52,7 +52,7 @@ class DLL_PUBLIC IGfxDevice
 	/// Contains the attributes to create an OpenGL context
 	struct GLContextInfo
 	{
-		GLContextInfo(const AppConfiguration &appCfg)
+		explicit GLContextInfo(const AppConfiguration &appCfg)
 		    : majorVersion(appCfg.glMajorVersion()), minorVersion(appCfg.glMinorVersion()),
 		      coreProfile(appCfg.glCoreProfile()), forwardCompatible(appCfg.glForwardCompatible()),
 		      debugContext(appCfg.withGlDebugContext) {}
@@ -104,7 +104,7 @@ class DLL_PUBLIC IGfxDevice
 	/// Resizes the OpenGL viewport
 	void setViewport(int width, int height);
 	/// Resizes the OpenGL viewport through a `Vector2i` object
-	void setViewport(const Vector2i &size);
+	inline void setViewport(const Vector2i &size) { setViewport(size.x, size.y); }
 
 	/// Returns the OpenGL context creation attributes
 	inline const GLContextInfo &glContextInfo() const { return glContextInfo_; }

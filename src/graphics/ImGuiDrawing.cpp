@@ -208,11 +208,12 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 		const ImDrawList *imCmdList = drawData->CmdLists[n];
 
 		RenderCommand &firstCmd = *retrieveCommandFromPool();
-		if (lastFrameWidth_ != io.DisplaySize.x || lastFrameHeight_ != io.DisplaySize.y)
+		if (lastFrameWidth_ != static_cast<int>(io.DisplaySize.x) ||
+		    lastFrameHeight_ != static_cast<int>(io.DisplaySize.y))
 		{
 			firstCmd.material().uniform("projection")->setFloatVector(projectionMatrix_.data());
-			lastFrameWidth_ = io.DisplaySize.x;
-			lastFrameHeight_ = io.DisplaySize.y;
+			lastFrameWidth_ = static_cast<int>(io.DisplaySize.x);
+			lastFrameHeight_ = static_cast<int>(io.DisplaySize.y);
 		}
 
 		firstCmd.geometry().shareVbo(nullptr);

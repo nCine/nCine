@@ -55,7 +55,7 @@ void ParticleSystem::clearAffectors()
 void ParticleSystem::emitParticles(const ParticleInitializer &init)
 {
 	ZoneScoped;
-	const unsigned int amount = static_cast<unsigned int>(random().real(init.rndAmount.x, init.rndAmount.y));
+	const unsigned int amount = static_cast<unsigned int>(random().integer(init.rndAmount.x, init.rndAmount.y));
 #ifdef WITH_TRACY
 	tracyInfoString.format("Count: %d", amount);
 	ZoneText(tracyInfoString.data(), tracyInfoString.length());

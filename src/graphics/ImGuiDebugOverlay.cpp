@@ -1201,21 +1201,21 @@ void ImGuiDebugOverlay::updateOverlayTimings()
 	const RenderStatistics::Commands &imguiCommands = RenderStatistics::commands(RenderCommand::CommandTypes::IMGUI);
 	const RenderStatistics::Commands &allCommands = RenderStatistics::allCommands();
 
-	plotValues_[ValuesType::CULLED_NODES][index_] = RenderStatistics::culled();
+	plotValues_[ValuesType::CULLED_NODES][index_] = static_cast<float>(RenderStatistics::culled());
 	plotValues_[ValuesType::VBO_USED][index_] = vboBuffers.usedSpace / 1024.0f;
 	plotValues_[ValuesType::IBO_USED][index_] = iboBuffers.usedSpace / 1024.0f;
 	plotValues_[ValuesType::UBO_USED][index_] = uboBuffers.usedSpace / 1024.0f;
 
-	plotValues_[ValuesType::SPRITE_VERTICES][index_] = spriteCommands.vertices;
-	plotValues_[ValuesType::MESHSPRITE_VERTICES][index_] = meshspriteCommands.vertices;
-	plotValues_[ValuesType::PARTICLE_VERTICES][index_] = particleCommands.vertices;
-	plotValues_[ValuesType::TEXT_VERTICES][index_] = textCommands.vertices;
-	plotValues_[ValuesType::IMGUI_VERTICES][index_] = imguiCommands.vertices;
-	plotValues_[ValuesType::TOTAL_VERTICES][index_] = allCommands.vertices;
+	plotValues_[ValuesType::SPRITE_VERTICES][index_] = static_cast<float>(spriteCommands.vertices);
+	plotValues_[ValuesType::MESHSPRITE_VERTICES][index_] = static_cast<float>(meshspriteCommands.vertices);
+	plotValues_[ValuesType::PARTICLE_VERTICES][index_] = static_cast<float>(particleCommands.vertices);
+	plotValues_[ValuesType::TEXT_VERTICES][index_] = static_cast<float>(textCommands.vertices);
+	plotValues_[ValuesType::IMGUI_VERTICES][index_] = static_cast<float>(imguiCommands.vertices);
+	plotValues_[ValuesType::TOTAL_VERTICES][index_] = static_cast<float>(allCommands.vertices);
 
 #ifdef WITH_LUA
 	plotValues_[ValuesType::LUA_USED][index_] = LuaStatistics::usedMemory() / 1024.0f;
-	plotValues_[ValuesType::LUA_OPERATIONS][index_] = LuaStatistics::operations();
+	plotValues_[ValuesType::LUA_OPERATIONS][index_] = static_cast<float>(LuaStatistics::operations());
 #endif
 }
 

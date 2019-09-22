@@ -39,7 +39,7 @@ class RenderCommand
 	/// Top rendering layer limit
 	static const unsigned int TopLayer = 65535;
 
-	RenderCommand(CommandTypes::Enum profilingType);
+	explicit RenderCommand(CommandTypes::Enum profilingType);
 	RenderCommand();
 
 	/// Returns the command type for profiling counter

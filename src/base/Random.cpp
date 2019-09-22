@@ -13,8 +13,8 @@ namespace {
 	{
 		const uint64_t oldState = state;
 		state = oldState * 6364136223846793005ULL + increment;
-		const uint32_t xorShifted = ((oldState >> 18u) ^ oldState) >> 27u;
-		const uint32_t rotation = oldState >> 59u;
+		const uint32_t xorShifted = static_cast<uint32_t>(((oldState >> 18u) ^ oldState) >> 27u);
+		const uint32_t rotation = static_cast<uint32_t>(oldState >> 59u);
 		return (xorShifted >> rotation) | (xorShifted << ((-rotation) & 31));
 	}
 
@@ -73,13 +73,21 @@ uint32_t Random::integer()
 uint32_t Random::integer(uint32_t min, uint32_t max)
 {
 	ASSERT(min <= max);
-	return min + boundRandom(state_, increment_, max - min);
+
+	if (min == max)
+		return min;
+	else
+		return min + boundRandom(state_, increment_, max - min);
 }
 
 uint32_t Random::fastInteger(uint32_t min, uint32_t max)
 {
 	ASSERT(min <= max);
-	return min + random(state_, increment_) % (max - min);
+
+	if (min == max)
+		return min;
+	else
+		return min + random(state_, increment_) % (max - min);
 }
 
 float Random::real()

@@ -55,7 +55,8 @@ class GLVertexFormat
 	};
 
 	GLVertexFormat();
-	GLVertexFormat(const GLVertexFormat &other);
+	GLVertexFormat(const GLVertexFormat &other) = default;
+	GLVertexFormat &operator=(const ncine::GLVertexFormat &other) = default;
 
 	inline const GLBufferObject *ibo() const { return ibo_; }
 	inline void setIbo(const GLBufferObject *ibo) { ibo_ = ibo; }
