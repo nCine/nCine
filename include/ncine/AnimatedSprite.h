@@ -34,16 +34,29 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	void addAnimation(nctl::UniquePtr<RectAnimation> anim);
 	/// Deletes all animations
 	void clearAnimations();
-	/// Sets the current animation and its frame number
-	void setAnimation(int animNum);
-	/// Sets the current animation to a specified frame number
+
+	/// Returns the number of animations
+	inline unsigned int numAnimations() { return anims_.size(); }
+	/// Returns the array of all animations
+	inline nctl::Array<nctl::UniquePtr<RectAnimation>> &animations() { return anims_; }
+	/// Returns the constant array of all animations
+	inline const nctl::Array<nctl::UniquePtr<RectAnimation>> &animations() const { return anims_; }
+
+	/// Returns the index of the current animation
+	unsigned int animationIndex() const { return currentAnimIndex_; }
+	/// Sets current animation index and its frame number
+	void setAnimationIndex(unsigned int animIndex);
+
+	/// Returns the frame number of current animation
+	unsigned int frame() const;
+	/// Sets current animation to a specified frame number
 	void setFrame(unsigned int frameNum);
 
 	inline static ObjectType sType() { return ObjectType::ANIMATED_SPRITE; }
 
   private:
 	nctl::Array<nctl::UniquePtr<RectAnimation>> anims_;
-	int currentAnim_;
+	unsigned int currentAnimIndex_;
 
 	/// Deleted copy constructor
 	AnimatedSprite(const AnimatedSprite &) = delete;

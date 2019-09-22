@@ -48,7 +48,7 @@ void MyEventHandler::onInit()
 	animSprite_->addAnimation(nctl::move(animation));
 
 	animSprite_->setPosition(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
-	animSprite_->setAnimation(0);
+	animSprite_->setAnimationIndex(0);
 	animSprite_->setFrame(0);
 	animSprite_->setPaused(true);
 	destVector_ = animSprite_->position();

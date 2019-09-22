@@ -17,7 +17,7 @@ AnimatedSprite::AnimatedSprite(Texture *texture)
 }
 
 AnimatedSprite::AnimatedSprite(SceneNode *parent, Texture *texture, float xx, float yy)
-    : Sprite(parent, texture, xx, yy), anims_(4), currentAnim_(-1)
+    : Sprite(parent, texture, xx, yy), anims_(4), currentAnimIndex_(0)
 {
 }
 
@@ -43,26 +43,26 @@ AnimatedSprite::AnimatedSprite(Texture *texture, const Vector2f &position)
 bool AnimatedSprite::isPaused() const
 {
 	ASSERT(!anims_.isEmpty());
-	const bool isPaused = anims_[currentAnim_]->isPaused();
+	const bool isPaused = anims_[currentAnimIndex_]->isPaused();
 	return isPaused;
 }
 
 void AnimatedSprite::setPaused(bool isPaused)
 {
 	ASSERT(!anims_.isEmpty());
-	anims_[currentAnim_]->setPaused(isPaused);
+	anims_[currentAnimIndex_]->setPaused(isPaused);
 }
 
 void AnimatedSprite::update(float interval)
 {
 	ASSERT(!anims_.isEmpty());
 
-	const unsigned int previousFrame = anims_[currentAnim_]->frame();
-	anims_[currentAnim_]->updateFrame(interval);
+	const unsigned int previousFrame = anims_[currentAnimIndex_]->frame();
+	anims_[currentAnimIndex_]->updateFrame(interval);
 
 	// Updating sprite texture rectangle only on change
-	if (previousFrame != anims_[currentAnim_]->frame())
-		setTexRect(anims_[currentAnim_]->rect());
+	if (previousFrame != anims_[currentAnimIndex_]->frame())
+		setTexRect(anims_[currentAnimIndex_]->rect());
 
 	Sprite::update(interval);
 }
@@ -72,8 +72,8 @@ void AnimatedSprite::addAnimation(nctl::UniquePtr<RectAnimation> anim)
 	ASSERT(anim);
 
 	anims_.pushBack(nctl::move(anim));
-	currentAnim_ = anims_.size() - 1;
-	setTexRect(anims_[currentAnim_]->rect());
+	currentAnimIndex_ = anims_.size() - 1;
+	setTexRect(anims_[currentAnimIndex_]->rect());
 }
 
 void AnimatedSprite::clearAnimations()
@@ -83,21 +83,26 @@ void AnimatedSprite::clearAnimations()
 	anims_.clear();
 }
 
-void AnimatedSprite::setAnimation(int animNum)
+void AnimatedSprite::setAnimationIndex(unsigned int animIndex)
 {
 	ASSERT(!anims_.isEmpty());
-	ASSERT(animNum >= 0);
-	ASSERT(static_cast<unsigned int>(animNum) < anims_.size());
+	ASSERT(animIndex < anims_.size());
 
-	currentAnim_ = animNum;
-	setTexRect(anims_[currentAnim_]->rect());
+	currentAnimIndex_ = animIndex;
+	setTexRect(anims_[currentAnimIndex_]->rect());
+}
+
+unsigned int AnimatedSprite::frame() const
+{
+	ASSERT(!anims_.isEmpty());
+	return anims_[currentAnimIndex_]->frame();
 }
 
 void AnimatedSprite::setFrame(unsigned int frameNum)
 {
 	ASSERT(!anims_.isEmpty());
-	anims_[currentAnim_]->setFrame(frameNum);
-	setTexRect(anims_[currentAnim_]->rect());
+	anims_[currentAnimIndex_]->setFrame(frameNum);
+	setTexRect(anims_[currentAnimIndex_]->rect());
 }
 
 }

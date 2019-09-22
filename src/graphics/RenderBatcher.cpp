@@ -9,7 +9,7 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-unsigned int RenderBatcher::MaxUniformBlockSize = 0;
+unsigned int RenderBatcher::UboMaxSize = 0;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -19,10 +19,13 @@ RenderBatcher::RenderBatcher()
     : buffers_(1), freeCommandsPool_(16), usedCommandsPool_(16)
 {
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
-	MaxUniformBlockSize = gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE);
+	const int maxUniformBlockSize = gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE);
+
+	// Clamping the value as some drivers report a maximum size similar to SSBO one
+	UboMaxSize = maxUniformBlockSize <= 64 * 1024 ? maxUniformBlockSize : 64 * 1024;
 
 	// Create the first buffer right away
-	createBuffer(MaxUniformBlockSize);
+	createBuffer(UboMaxSize);
 }
 
 ///////////////////////////////////////////////////////////
@@ -202,7 +205,7 @@ RenderCommand *RenderBatcher::collectCommands(
 			batchingWithIndices = true;
 
 		// Don't request more bytes than a UBO can hold
-		if (instancesBlockSize + singleInstanceBlockSize > MaxUniformBlockSize)
+		if (instancesBlockSize + singleInstanceBlockSize > UboMaxSize)
 			break;
 		else
 			instancesBlockSize += singleInstanceBlockSize;
@@ -414,7 +417,7 @@ RenderCommand *RenderBatcher::retrieveCommandFromPool(Material::ShaderProgramTyp
 
 unsigned char *RenderBatcher::acquireMemory(unsigned int bytes)
 {
-	FATAL_ASSERT(bytes <= MaxUniformBlockSize);
+	FATAL_ASSERT(bytes <= UboMaxSize);
 
 	unsigned char *ptr = nullptr;
 
@@ -431,7 +434,7 @@ unsigned char *RenderBatcher::acquireMemory(unsigned int bytes)
 
 	if (ptr == nullptr)
 	{
-		createBuffer(MaxUniformBlockSize);
+		createBuffer(UboMaxSize);
 		ptr = buffers_.back().buffer.get();
 		buffers_.back().freeSpace -= bytes;
 	}

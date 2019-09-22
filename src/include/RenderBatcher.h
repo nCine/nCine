@@ -18,7 +18,7 @@ class RenderBatcher
 	void reset();
 
   private:
-	static unsigned int MaxUniformBlockSize;
+	static unsigned int UboMaxSize;
 
 	struct ManagedBuffer
 	{

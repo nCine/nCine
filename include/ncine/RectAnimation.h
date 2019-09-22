@@ -26,12 +26,22 @@ class DLL_PUBLIC RectAnimation
 		BACKWARD
 	};
 
+	/// Constructor for an animation with a specified frame time, loop and rewind mode
 	RectAnimation(float frameTime, LoopMode loopMode, RewindMode rewindMode);
+
+	/// Returns true if the animation is paused
+	inline bool isPaused() const { return isPaused_; }
+	/// Sets the pause flag
+	inline void setPaused(bool isPaused) { isPaused_ = isPaused; }
+
+	/// Updates current frame based on time passed
+	void updateFrame(float interval);
 
 	/// Returns current frame
 	inline unsigned int frame() const { return currentFrame_; }
 	/// Sets current frame
 	void setFrame(unsigned int frameNum);
+
 	/// Returns frame time
 	float frameTime() const { return frameTime_; }
 	/// Sets frame time
@@ -44,29 +54,29 @@ class DLL_PUBLIC RectAnimation
 	/// Returns the current rectangle
 	inline const Recti &rect() const { return rects_[currentFrame_]; }
 
-	/// Updates current frame based on time passed
-	void updateFrame(float interval);
-
-	/// Returns true if the animation is paused
-	inline bool isPaused() const { return isPaused_; }
-	/// Sets the pause flag
-	inline void setPaused(bool isPaused) { isPaused_ = isPaused; }
+	/// Returns the number of rectangles
+	inline unsigned int numRectangles() { return rects_.size(); }
+	/// Returns the array of all rectangles
+	inline nctl::Array<Recti> &rectangles() { return rects_; }
+	/// Returns the constant array of all rectangles
+	inline const nctl::Array<Recti> &rectangles() const { return rects_; }
 
   private:
+	/// The time until the next frame change
+	float frameTime_;
+	/// The looping mode (on or off)
+	LoopMode loopMode_;
+	/// The rewind mode (ping-pong or not)
+	RewindMode rewindMode_;
+
 	/// The rectangles array
 	nctl::Array<Recti> rects_;
 	/// Current frame
 	unsigned int currentFrame_;
-	/// The time until the next frame change
-	float frameTime_;
 	/// Elapsed time since the last frame change
 	float elapsedFrameTime_;
 	/// The flag about the frame advance direction
 	bool goingForward_;
-	/// The looping flag
-	bool isLooping_;
-	/// The ping-pong loop flag
-	bool backward_;
 	/// The pause flag
 	bool isPaused_;
 };

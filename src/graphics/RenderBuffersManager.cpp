@@ -32,12 +32,15 @@ RenderBuffersManager::RenderBuffersManager(bool useBufferMapping, unsigned long 
 	const int maxUniformBlockSize = gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE);
 	const int offsetAlignment = gfxCaps.value(IGfxCapabilities::GLIntValues::UNIFORM_BUFFER_OFFSET_ALIGNMENT);
 
+	// Clamping the value as some drivers report a maximum size similar to SSBO one
+	const int uboMaxSize = maxUniformBlockSize <= 64 * 1024 ? maxUniformBlockSize : 64 * 1024;
+
 	BufferSpecifications &uboSpecs = specs_[BufferTypes::UNIFORM];
 	uboSpecs.type = BufferTypes::UNIFORM;
 	uboSpecs.target = GL_UNIFORM_BUFFER;
 	uboSpecs.mapFlags = useBufferMapping ? GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT : 0;
 	uboSpecs.usageFlags = GL_STREAM_DRAW;
-	uboSpecs.maxSize = static_cast<unsigned int>(maxUniformBlockSize);
+	uboSpecs.maxSize = static_cast<unsigned int>(uboMaxSize);
 	uboSpecs.alignment = static_cast<unsigned int>(offsetAlignment);
 
 	// Create the first buffer for each type right away

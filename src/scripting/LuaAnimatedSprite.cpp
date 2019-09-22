@@ -12,13 +12,17 @@ namespace LuaNames {
 namespace AnimatedSprite {
 	static const char *AnimatedSprite = "animated_sprite";
 
-	static const char *addAnimation = "add_animation";
-	static const char *clearAnimations = "clear_animations";
-
 	static const char *isPaused = "is_paused";
 	static const char *setPaused = "set_paused";
 
-	static const char *setAnimation = "set_animation";
+	static const char *addAnimation = "add_animation";
+	static const char *clearAnimations = "clear_animations";
+
+	static const char *numAnimations = "num_animations";
+	static const char *animationIndex = "animation_index";
+	static const char *setAnimationIndex = "set_animation_index";
+
+	static const char *frame = "frame";
 	static const char *setFrame = "set_frame";
 }}
 
@@ -37,13 +41,17 @@ void LuaAnimatedSprite::expose(LuaStateManager *stateManager)
 		LuaUtils::addFunction(L, LuaNames::newObject, newObject);
 	}
 
-	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::addAnimation, addAnimation);
-	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::clearAnimations, clearAnimations);
-
 	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::isPaused, isPaused);
 	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::setPaused, setPaused);
 
-	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::setAnimation, setAnimation);
+	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::addAnimation, addAnimation);
+	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::clearAnimations, clearAnimations);
+
+	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::numAnimations, numAnimations);
+	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::animationIndex, animationIndex);
+	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::setAnimationIndex, setAnimationIndex);
+
+	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::frame, frame);
 	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::setFrame, setFrame);
 
 	LuaSprite::exposeFunctions(L);
@@ -111,14 +119,35 @@ int LuaAnimatedSprite::clearAnimations(lua_State *L)
 	return 0;
 }
 
-int LuaAnimatedSprite::setAnimation(lua_State *L)
+int LuaAnimatedSprite::numAnimations(lua_State *L)
+{
+	AnimatedSprite *sprite = LuaClassWrapper<AnimatedSprite>::unwrapUserData(L, -1);
+	LuaUtils::push(L, sprite->numAnimations());
+	return 1;
+}
+
+int LuaAnimatedSprite::animationIndex(lua_State *L)
+{
+	AnimatedSprite *sprite = LuaClassWrapper<AnimatedSprite>::unwrapUserData(L, -1);
+	LuaUtils::push(L, sprite->animationIndex());
+	return 1;
+}
+
+int LuaAnimatedSprite::setAnimationIndex(lua_State *L)
 {
 	AnimatedSprite *sprite = LuaClassWrapper<AnimatedSprite>::unwrapUserData(L, -2);
-	const int animNum = LuaUtils::retrieve<int32_t>(L, -1);
+	const unsigned int animIndex = LuaUtils::retrieve<uint32_t>(L, -1);
 
-	sprite->setAnimation(animNum);
+	sprite->setAnimationIndex(animIndex);
 
 	return 0;
+}
+
+int LuaAnimatedSprite::frame(lua_State *L)
+{
+	AnimatedSprite *sprite = LuaClassWrapper<AnimatedSprite>::unwrapUserData(L, -1);
+	LuaUtils::push(L, sprite->frame());
+	return 1;
 }
 
 int LuaAnimatedSprite::setFrame(lua_State *L)

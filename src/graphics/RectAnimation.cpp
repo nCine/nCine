@@ -7,20 +7,14 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 RectAnimation::RectAnimation(float frameTime, LoopMode loopMode, RewindMode rewindMode)
-    : rects_(4), currentFrame_(0), frameTime_(frameTime), elapsedFrameTime_(0.0f), goingForward_(true),
-      isLooping_(loopMode == LoopMode::ENABLED), backward_(rewindMode == RewindMode::BACKWARD), isPaused_(true)
+    : frameTime_(frameTime), loopMode_(loopMode), rewindMode_(rewindMode), rects_(4),
+      currentFrame_(0), elapsedFrameTime_(0.0f), goingForward_(true), isPaused_(true)
 {
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
-
-void RectAnimation::setFrame(unsigned int frameNum)
-{
-	ASSERT(frameNum < rects_.size());
-	currentFrame_ = frameNum;
-}
 
 void RectAnimation::updateFrame(float interval)
 {
@@ -38,14 +32,14 @@ void RectAnimation::updateFrame(float interval)
 		{
 			if (currentFrame_ == rects_.size() - 1)
 			{
-				if (backward_)
+				if (rewindMode_ == RewindMode::BACKWARD)
 				{
 					goingForward_ = false;
 					currentFrame_--;
 				}
 				else
 				{
-					if (isLooping_ == false)
+					if (loopMode_ == LoopMode::DISABLED)
 						isPaused_ = true;
 					else
 						currentFrame_ = 0;
@@ -58,7 +52,7 @@ void RectAnimation::updateFrame(float interval)
 		{
 			if (currentFrame_ == 0)
 			{
-				if (isLooping_ == false)
+				if (loopMode_ == LoopMode::DISABLED)
 					isPaused_ = true;
 				else
 				{
@@ -70,6 +64,12 @@ void RectAnimation::updateFrame(float interval)
 				currentFrame_--;
 		}
 	}
+}
+
+void RectAnimation::setFrame(unsigned int frameNum)
+{
+	ASSERT(frameNum < rects_.size());
+	currentFrame_ = frameNum;
 }
 
 }
