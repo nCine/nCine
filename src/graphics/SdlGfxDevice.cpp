@@ -1,4 +1,5 @@
 #ifdef WITH_GLEW
+	#define GLEW_NO_GLU
 	#include <GL/glew.h>
 #endif
 

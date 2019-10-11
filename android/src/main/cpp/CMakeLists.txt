@@ -36,10 +36,14 @@ endif()
 target_include_directories(ncine PRIVATE ${CMAKE_ANDROID_NDK}/sources/android/native_app_glue)
 target_include_directories(ncine_main PRIVATE ${CMAKE_ANDROID_NDK}/sources/android/native_app_glue)
 if(NCINE_WITH_IMGUI)
-	target_include_directories(ncine PUBLIC ${IMGUI_SOURCE_DIR})
+	target_include_directories(ncine
+		INTERFACE $<BUILD_INTERFACE:${IMGUI_INCLUDE_ONLY_DIR}>
+		PRIVATE $<BUILD_INTERFACE:${IMGUI_INCLUDE_ONLY_DIR}/ncine>)
 endif()
 if(NCINE_WITH_TRACY)
-	target_include_directories(ncine PUBLIC ${TRACY_SOURCE_DIR})
+	target_include_directories(ncine
+		PUBLIC $<BUILD_INTERFACE:${TRACY_INCLUDE_ONLY_DIR}/tracy>
+		PUBLIC $<INSTALL_INTERFACE:include/tracy>)
 endif()
 
 target_compile_definitions(ncine PRIVATE ${ANDROID_GENERATED_FLAGS})

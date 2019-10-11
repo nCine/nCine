@@ -2,6 +2,7 @@
 #define CLASS_NCINE_GLFWGFXDEVICE
 
 #ifdef WITH_GLEW
+	#define GLEW_NO_GLU
 	#include <GL/glew.h>
 #endif
 #include <GLFW/glfw3.h>

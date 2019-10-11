@@ -4,6 +4,7 @@
 		#include <GLES3/gl3.h>
 		#include <GLES2/gl2ext.h>
 	#elif defined(WITH_GLEW)
+		#define GLEW_NO_GLU
 		#include <GL/glew.h>
 	#elif defined(__APPLE__)
 		#include <OpenGL/gl3.h>

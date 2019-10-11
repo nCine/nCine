@@ -10,8 +10,6 @@
 #include "RenderQueue.h"
 #include "DrawableNode.h"
 #include "Application.h"
-#include "IInputManager.h"
-#include "IFile.h" // for dataPath()
 
 #ifdef WITH_GLFW
 	#include "ImGuiGlfwInput.h"
@@ -23,6 +21,8 @@
 
 #ifdef WITH_EMBEDDED_SHADERS
 	#include "shader_strings.h"
+#else
+	#include "IFile.h" // for dataPath()
 #endif
 
 namespace ncine {

@@ -18,18 +18,17 @@ GLuint GLShaderProgram::boundProgram_ = 0;
 ///////////////////////////////////////////////////////////
 
 GLShaderProgram::GLShaderProgram()
+    : GLShaderProgram(QueryPhase::IMMEDIATE)
+{
+}
+
+GLShaderProgram::GLShaderProgram(QueryPhase queryPhase)
     : glHandle_(0), attachedShaders_(AttachedShadersInitialSize),
-      status_(Status::NOT_LINKED), queryPhase_(QueryPhase::IMMEDIATE),
+      status_(Status::NOT_LINKED), queryPhase_(queryPhase),
       uniformsSize_(0), uniformBlocksSize_(0), uniforms_(UniformsInitialSize),
       uniformBlocks_(UniformBlocksInitialSize), attributes_(AttributesInitialSize)
 {
 	glHandle_ = glCreateProgram();
-}
-
-GLShaderProgram::GLShaderProgram(QueryPhase queryPhase)
-    : GLShaderProgram()
-{
-	queryPhase_ = queryPhase;
 }
 
 GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFile, Introspection introspection, QueryPhase queryPhase)

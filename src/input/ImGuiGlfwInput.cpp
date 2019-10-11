@@ -140,7 +140,7 @@ void ImGuiGlfwInput::newFrame()
 	updateGamepads();
 }
 
-void ImGuiGlfwInput::mouseButtonCallback(GLFWwindow *, int button, int action, int /*mods*/)
+void ImGuiGlfwInput::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
 	if (inputEnabled_ == false)
 		return;
@@ -159,7 +159,7 @@ void ImGuiGlfwInput::scrollCallback(GLFWwindow *window, double xoffset, double y
 	io.MouseWheel += static_cast<float>(yoffset);
 }
 
-void ImGuiGlfwInput::keyCallback(GLFWwindow *, int key, int scancode, int action, int mods)
+void ImGuiGlfwInput::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
 	if (inputEnabled_ == false)
 		return;

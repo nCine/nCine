@@ -67,10 +67,13 @@ jobs:
   steps:
   - script: |
       sudo apt-get update
-      sudo apt-get install -y doxygen graphviz
+      sudo apt-get install -y libgl1-mesa-dev
+      if [ "$(BuildType)" == "DevDist" ]; then
+        sudo apt-get install -y doxygen graphviz
+      fi
 
     displayName: 'Install Build Dependencies on Linux'
-    condition: and( eq( variables['BuildType'], 'DevDist' ), eq( variables['Agent.OS'], 'Linux' ) )
+    condition: eq( variables['Agent.OS'], 'Linux' )
 
   - script: |
       curl -fsSL https://cmake.org/files/v3.14/cmake-3.14.5-Linux-x86_64.sh -o cmakeinstall.sh && \
