@@ -15,35 +15,22 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-FileLogger::FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fileLevel)
+FileLogger::FileLogger(LogLevel consoleLevel)
+    : FileLogger(consoleLevel, LogLevel::OFF, nullptr)
+{
+}
+
+FileLogger::FileLogger(LogLevel consoleLevel, LogLevel fileLevel, const char *filename)
     : consoleLevel_(consoleLevel), fileLevel_(fileLevel)
 #ifdef WITH_IMGUI
       ,
       logString_(LogStringCapacity)
 #endif
 {
-	fileHandle_ = IFile::createFileHandle(filename);
+	if (filename != nullptr)
+		openLogFile(filename);
 
-	if (fileLevel_ != LogLevel::OFF)
-	{
-		fileHandle_->setExitOnFailToOpen(false);
-		fileHandle_->open(IFile::OpenMode::WRITE);
-
-		if (fileHandle_->isOpened() == false)
-		{
-			if (consoleLevel_ > fileLevel_)
-			{
-				// Promoting console level logging to file level logging
-				consoleLevel_ = fileLevel_;
-			}
-
-			// Disabling file logging if the log file cannot be opened
-			fileLevel_ = LogLevel::OFF;
-		}
-	}
-
-	if (consoleLevel_ != LogLevel::OFF)
-		setvbuf(stdout, nullptr, _IONBF, 0);
+	setvbuf(stdout, nullptr, _IONBF, 0);
 }
 
 FileLogger::~FileLogger()
@@ -54,6 +41,31 @@ FileLogger::~FileLogger()
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+bool FileLogger::openLogFile(const char *filename)
+{
+	ASSERT(filename);
+
+	fileHandle_ = IFile::createFileHandle(filename);
+	fileHandle_->setExitOnFailToOpen(false);
+	fileHandle_->open(IFile::OpenMode::WRITE);
+
+	if (fileHandle_->isOpened() == false)
+	{
+		if (consoleLevel_ > fileLevel_)
+		{
+			// Promoting console level logging to file level logging
+			consoleLevel_ = fileLevel_;
+		}
+
+		// Disabling file logging if the log file cannot be opened
+		fileLevel_ = LogLevel::OFF;
+
+		return false;
+	}
+
+	return true;
+}
 
 #ifdef _WIN32
 void writeOutputDebug(const char *logEntry);

@@ -205,14 +205,21 @@ void AndroidApplication::preInit()
 {
 	profileStartTime_ = TimeStamp::now();
 
+	// Registering the logger as early as possible
+	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(appCfg_.consoleLogLevel));
+
 	appEventHandler_ = nctl::UniquePtr<IAppEventHandler>(createAppEventHandler_());
 	// Only `onPreInit()` can modify the application configuration
 	AppConfiguration &modifiableAppCfg = const_cast<AppConfiguration &>(appCfg_);
 	appEventHandler_->onPreInit(modifiableAppCfg);
+	LOGI("IAppEventHandler::onPreInit() invoked");
 
-	// Registering the logger as early as possible
+	// Setting log levels and filename based on application configuration
 	const nctl::String logFilePath = IFile::dataPath() + appCfg_.logFile;
-	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(logFilePath.data(), appCfg_.consoleLogLevel, appCfg_.fileLogLevel));
+	FileLogger &fileLogger = static_cast<FileLogger &>(theServiceLocator().logger());
+	fileLogger.setConsoleLevel(appCfg_.consoleLogLevel);
+	fileLogger.setFileLevel(appCfg_.fileLogLevel);
+	fileLogger.openLogFile(logFilePath.data());
 }
 
 void AndroidApplication::init()

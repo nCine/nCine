@@ -11,8 +11,13 @@ namespace ncine {
 class FileLogger : public ILogger
 {
   public:
-	FileLogger(const char *filename, LogLevel consoleLevel, LogLevel fileLevel);
+	FileLogger(LogLevel consoleLevel);
+	FileLogger(LogLevel consoleLevel, LogLevel fileLevel, const char *filename);
 	~FileLogger() override;
+
+	inline void setConsoleLevel(LogLevel consoleLevel) { consoleLevel_ = consoleLevel; }
+	inline void setFileLevel(LogLevel fileLevel) { fileLevel_ = fileLevel; }
+	bool openLogFile(const char *filename);
 
 	unsigned int write(LogLevel level, const char *fmt, ...) override;
 

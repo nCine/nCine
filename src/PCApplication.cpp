@@ -54,13 +54,20 @@ void PCApplication::init(IAppEventHandler *(*createAppEventHandler)())
 	ZoneScoped;
 	profileStartTime_ = TimeStamp::now();
 
+	// Registering the logger as early as possible
+	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(appCfg_.consoleLogLevel));
+
 	appEventHandler_ = nctl::UniquePtr<IAppEventHandler>(createAppEventHandler());
 	// Only `onPreInit()` can modify the application configuration
 	AppConfiguration &modifiableAppCfg = const_cast<AppConfiguration &>(appCfg_);
 	appEventHandler_->onPreInit(modifiableAppCfg);
+	LOGI("IAppEventHandler::onPreInit() invoked");
 
-	// Registering the logger as early as possible
-	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(appCfg_.logFile.data(), appCfg_.consoleLogLevel, appCfg_.fileLogLevel));
+	// Setting log levels and filename based on application configuration
+	FileLogger &fileLogger = static_cast<FileLogger &>(theServiceLocator().logger());
+	fileLogger.setConsoleLevel(appCfg_.consoleLogLevel);
+	fileLogger.setFileLevel(appCfg_.fileLogLevel);
+	fileLogger.openLogFile(appCfg_.logFile.data());
 	// Graphics device should always be created before the input manager!
 	IGfxDevice::GLContextInfo glContextInfo(appCfg_);
 	const DisplayMode::VSync vSyncMode = appCfg_.withVSync ? DisplayMode::VSync::ENABLED : DisplayMode::VSync::DISABLED;
