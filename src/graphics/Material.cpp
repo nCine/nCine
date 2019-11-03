@@ -119,7 +119,7 @@ void Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 	// Should be assigned after calling `setShaderProgram()`
 	shaderProgramType_ = shaderProgramType;
 
-	if (uniform("projection")->dataPointer() != nullptr && shaderProgramType_ != ShaderProgramType::CUSTOM)
+	if (uniform("projection")->dataPointer() != nullptr && shaderProgramType != Material::ShaderProgramType::CUSTOM)
 		uniform("projection")->setFloatVector(RenderResources::projectionMatrix().data());
 }
 

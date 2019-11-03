@@ -178,6 +178,7 @@ void RenderQueue::draw()
 	transparentQueue_.clear();
 	transparentBatchedQueue_.clear();
 
+	RenderResources::clearDirtyProjectionFlag(batchingEnabled);
 	RenderResources::buffersManager().remap();
 	batcher_.reset();
 	GLDebug::reset();

@@ -84,7 +84,7 @@ if(EMSCRIPTEN)
 
 	find_program(EMSCRIPTEN_PACKAGER_SCRIPT file_packager.py
 		PATHS $ENV{EMSDK}
-		PATH_SUFFIXES fastcomp/emscripten/tools/
+		PATH_SUFFIXES upstream/emscripten/tools fastcomp/emscripten/tools
 		DOC "The Emscripten file packager Python script")
 
 	if(EMSCRIPTEN_PACKAGER_SCRIPT)

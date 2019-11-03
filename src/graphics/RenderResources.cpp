@@ -26,11 +26,21 @@ nctl::UniquePtr<GLShaderProgram> RenderResources::batchedMeshSpritesShaderProgra
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedMeshSpritesGrayShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedTextnodesRedShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedTextnodesAlphaShaderProgram_;
-Matrix4x4f RenderResources::projectionMatrix_;
+Matrix4x4f RenderResources::projectionMatrix_ = Matrix4x4f::Identity;
+bool RenderResources::projectionHasChanged_ = false;
+bool RenderResources::projectionHasChangedBatching_ = false;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+void RenderResources::clearDirtyProjectionFlag(bool batchingEnabled)
+{
+	if (batchingEnabled)
+		projectionHasChangedBatching_ = false;
+	else
+		projectionHasChanged_ = false;
+}
 
 void RenderResources::createMinimal()
 {
@@ -57,6 +67,13 @@ namespace {
 		GLShaderProgram::Introspection introspection;
 	};
 
+}
+
+void RenderResources::setProjectionMatrix(const Matrix4x4f &projectionMatrix)
+{
+	projectionMatrix_ = projectionMatrix;
+	projectionHasChanged_ = true;
+	projectionHasChangedBatching_ = true;
 }
 
 void RenderResources::create()
@@ -122,7 +139,7 @@ void RenderResources::create()
 	const float far = 1.0f;
 
 	// TODO: Projection matrix is hard-coded, should it go in a camera class? (Y-axis points downward)
-	projectionMatrix_ = Matrix4x4f::ortho(0.0f, width, 0.0f, height, near, far);
+	setProjectionMatrix(Matrix4x4f::ortho(0.0f, width, 0.0f, height, near, far));
 
 	LOGI("Rendering resources created");
 }

@@ -4,24 +4,29 @@ set_target_properties(ncine PROPERTIES CXX_EXTENSIONS OFF)
 target_compile_definitions(ncine PRIVATE "$<$<CONFIG:Debug>:NCINE_DEBUG>")
 
 if(EMSCRIPTEN)
-	target_compile_options(ncine PUBLIC
+	set(EMSCRIPTEN_COMPILER_OPTIONS
 		"SHELL:-s WASM=1"
-		"SHELL:-s BINARYEN_TRAP_MODE=clamp"
 		"SHELL:-s DISABLE_EXCEPTION_CATCHING=1"
 		"SHELL:-s FORCE_FILESYSTEM=1"
-		"SHELL:-s ALLOW_MEMORY_GROWTH=1"
-	)
+		"SHELL:-s ALLOW_MEMORY_GROWTH=1")
 
-	target_link_options(ncine PUBLIC
-		"SHELL:-s WASM=1"
-		"SHELL:-s BINARYEN_TRAP_MODE=clamp"
-		"SHELL:-s DISABLE_EXCEPTION_CATCHING=1"
-		"SHELL:-s FORCE_FILESYSTEM=1"
-		"SHELL:-s ALLOW_MEMORY_GROWTH=1"
-	)
+	set(EMSCRIPTEN_COMPILER_OPTIONS_DEBUG
+		"SHELL:-s ASSERTIONS=1"
+		"SHELL:-s SAFE_HEAP=1"
+		"SHELL:--profiling-funcs"
+		"SHELL:-s DEMANGLE_SUPPORT=1")
 
-	target_compile_options(ncine PUBLIC "$<$<CONFIG:Debug>:SHELL:-s ASSERTIONS=1;SHELL:-s SAFE_HEAP=1;SHELL:--profiling-funcs;SHELL:-s DEMANGLE_SUPPORT=1>")
-	target_link_options(ncine PUBLIC "$<$<CONFIG:Debug>:SHELL:-s ASSERTIONS=1;SHELL:-s SAFE_HEAP=1;SHELL:--profiling-funcs;SHELL:-s DEMANGLE_SUPPORT=1>")
+	string(FIND ${CMAKE_CXX_COMPILER} "fastcomp" EMSCRIPTEN_FASTCOMP_POS)
+	if(EMSCRIPTEN_FASTCOMP_POS GREATER -1)
+		list(APPEND EMSCRIPTEN_COMPILER_OPTIONS "SHELL:-s BINARYEN_TRAP_MODE=clamp")
+	else()
+		list(APPEND EMSCRIPTEN_COMPILER_OPTIONS "SHELL:-mnontrapping-fptoint")
+	endif()
+
+	target_compile_options(ncine PUBLIC ${EMSCRIPTEN_COMPILER_OPTIONS})
+	target_link_options(ncine PUBLIC ${EMSCRIPTEN_COMPILER_OPTIONS})
+	target_compile_options(ncine PUBLIC "$<$<CONFIG:Debug>:${EMSCRIPTEN_COMPILER_OPTIONS_DEBUG}>")
+	target_link_options(ncine PUBLIC "$<$<CONFIG:Debug>:${EMSCRIPTEN_COMPILER_OPTIONS_DEBUG}>")
 
 	if(Threads_FOUND)
 		target_link_libraries(ncine PUBLIC Threads::Threads)

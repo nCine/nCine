@@ -155,7 +155,11 @@ void PCApplication::processEvents()
 	#endif
 
 #elif defined(WITH_GLFW)
+	// GLFW does not seem to correctly handle Emscripten focus and blur events
+	#ifndef __EMSCRIPTEN__
 	setFocus(GlfwInputManager::hasFocus());
+	#endif
+
 	if (shouldSuspend())
 		glfwWaitEvents();
 	else

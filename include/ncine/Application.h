@@ -166,6 +166,9 @@ class DLL_PUBLIC Application
 
 	friend class PCApplication;
 	friend class AndroidApplication;
+#ifdef __EMSCRIPTEN__
+	friend class IGfxDevice;
+#endif
 };
 
 // Meyers' Singleton

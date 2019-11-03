@@ -51,6 +51,8 @@ class RenderResources
 	static inline GLShaderProgram *batchedTextnodesAlphaShaderProgram() { return batchedTextnodesAlphaShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedTextnodesRedShaderProgram() { return batchedTextnodesRedShaderProgram_.get(); }
 	static inline const Matrix4x4f &projectionMatrix() { return projectionMatrix_; }
+	static inline bool hasProjectionChanged(bool batchingEnabled) { return (batchingEnabled) ? projectionHasChangedBatching_ : projectionHasChanged_; }
+	static void clearDirtyProjectionFlag(bool batchingEnabled);
 
 	static void createMinimal();
 
@@ -71,7 +73,10 @@ class RenderResources
 	static nctl::UniquePtr<GLShaderProgram> batchedTextnodesRedShaderProgram_;
 
 	static Matrix4x4f projectionMatrix_;
+	static bool projectionHasChanged_;
+	static bool projectionHasChangedBatching_;
 
+	static void setProjectionMatrix(const Matrix4x4f &projectionMatrix);
 	static void create();
 	static void dispose();
 

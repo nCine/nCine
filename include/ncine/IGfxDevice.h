@@ -6,6 +6,12 @@
 #include "DisplayMode.h"
 #include "AppConfiguration.h"
 
+#ifdef __EMSCRIPTEN__
+class EmscriptenUiEvent;
+class EmscriptenFullscreenChangeEvent;
+class EmscriptenFocusEvent;
+#endif
+
 namespace ncine {
 
 class Colorf;
@@ -157,6 +163,12 @@ class DLL_PUBLIC IGfxDevice
 	friend class Application;
 #if defined(WITH_SDL)
 	friend class PCApplication;
+#endif
+
+#ifdef __EMSCRIPTEN__
+	static int resize_callback(int eventType, const EmscriptenUiEvent *event, void *userData);
+	static int fullscreenchange_callback(int eventType, const EmscriptenFullscreenChangeEvent *event, void *userData);
+	static int focus_callback(int eventType, const EmscriptenFocusEvent *event, void *userData);
 #endif
 };
 

@@ -2,8 +2,23 @@
 #include "GLShaderProgram.h"
 #include "GLScissorTest.h"
 #include "DrawableNode.h"
+#include "RenderResources.h"
 
 namespace ncine {
+
+namespace {
+
+	bool isBatchedType(Material::ShaderProgramType type)
+	{
+		return (type == Material::ShaderProgramType::BATCHED_SPRITES ||
+		        type == Material::ShaderProgramType::BATCHED_SPRITES_GRAY ||
+		        type == Material::ShaderProgramType::BATCHED_MESH_SPRITES ||
+		        type == Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY ||
+		        type == Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA ||
+		        type == Material::ShaderProgramType::BATCHED_TEXTNODES_RED);
+	}
+
+}
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -100,14 +115,14 @@ void RenderCommand::commitTransformation()
 		else if (shaderProgramType == Material::ShaderProgramType::TEXTNODE_ALPHA ||
 		         shaderProgramType == Material::ShaderProgramType::TEXTNODE_RED)
 			material_.uniformBlock("TextnodeBlock")->uniform("modelView")->setFloatVector(modelView_.data());
-		else if (shaderProgramType != Material::ShaderProgramType::BATCHED_SPRITES &&
-		         shaderProgramType != Material::ShaderProgramType::BATCHED_SPRITES_GRAY &&
-		         shaderProgramType != Material::ShaderProgramType::BATCHED_MESH_SPRITES &&
-		         shaderProgramType != Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY &&
-		         shaderProgramType != Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA &&
-		         shaderProgramType != Material::ShaderProgramType::BATCHED_TEXTNODES_RED &&
-		         shaderProgramType != Material::ShaderProgramType::CUSTOM)
+		else if (!isBatchedType(shaderProgramType) && shaderProgramType != Material::ShaderProgramType::CUSTOM)
 			material_.uniform("modelView")->setFloatVector(modelView_.data());
+
+		if (material_.uniform("projection")->dataPointer() != nullptr && shaderProgramType != Material::ShaderProgramType::CUSTOM)
+		{
+			if (RenderResources::hasProjectionChanged(isBatchedType(shaderProgramType)))
+				material_.uniform("projection")->setFloatVector(RenderResources::projectionMatrix().data());
+		}
 	}
 }
 
