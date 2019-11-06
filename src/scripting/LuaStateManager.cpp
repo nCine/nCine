@@ -235,9 +235,6 @@ void LuaStateManager::exposeScriptApi()
 
 bool LuaStateManager::run(const char *filename)
 {
-	releaseTrackedMemory();
-	untrackedUserDatas_.clear();
-
 	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
 	LOGI_X("Loading file: \"%s\"", fileHandle->filename());
 
@@ -245,16 +242,25 @@ bool LuaStateManager::run(const char *filename)
 	unsigned long fileSize = fileHandle->size();
 	nctl::UniquePtr<char[]> buffer = nctl::makeUnique<char[]>(fileSize);
 	fileHandle->read(buffer.get(), fileSize);
-	const char *bufferRead = buffer.get();
+
+	return runFromMemory(buffer.get(), fileSize, filename);
+}
+
+bool LuaStateManager::runFromMemory(const char *buffer, unsigned long size, const char *filename)
+{
+	releaseTrackedMemory();
+	untrackedUserDatas_.clear();
+
+	const char *bufferRead = buffer;
 
 	// Skip shebang as `luaL_loadfile` does
 	if (bufferRead[0] == '#')
 	{
-		bufferRead = static_cast<const char *>(memchr(bufferRead, '\n', fileSize)) + 1;
-		fileSize -= bufferRead - buffer.get();
+		bufferRead = static_cast<const char *>(memchr(bufferRead, '\n', size)) + 1;
+		size -= bufferRead - buffer;
 	}
 
-	const int loadError = luaL_loadbufferx(L_, bufferRead, fileSize, filename, "bt");
+	const int loadError = luaL_loadbufferx(L_, bufferRead, size, filename, "bt");
 	if (loadError != LUA_OK)
 	{
 		LOGE_X("Cannot load \"%s\" script: %s", filename, LuaDebug::errorToSting(loadError));

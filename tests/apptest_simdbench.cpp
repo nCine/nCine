@@ -9,6 +9,10 @@
 #include <ncine/Vector4.h>
 #include <ncine/Quaternion.h>
 
+#ifdef __EMSCRIPTEN__
+	#include <ncine/EmscriptenLocalFile.h>
+#endif
+
 namespace Names {
 
 const char *testSet = "test_set";
@@ -86,6 +90,9 @@ const unsigned int MaxStringLength = 128;
 char loadingFilename[MaxStringLength] = "timings.lua";
 char savingFilename[MaxStringLength] = "timings.lua";
 bool includeStatsWhenSaving = false;
+#ifdef __EMSCRIPTEN__
+nc::EmscriptenLocalFile localFileLoad;
+#endif
 
 static nc::TimeStamp testStartTime;
 nctl::UniquePtr<float[]> nums;
@@ -385,7 +392,11 @@ bool loadTestRun(const char *filename, unsigned int index)
 	    nc::LuaStateManager::StatisticsTracking::DISABLED,
 	    nc::LuaStateManager::StandardLibraries::NOT_LOADED);
 
+#ifndef __EMSCRIPTEN__
 	if (luaState.run(filename) == false)
+#else
+	if (luaState.runFromMemory(localFileLoad.data(), localFileLoad.size(), localFileLoad.filename()) == false)
+#endif
 	{
 		LOGW_X("Cannot run script \"%s\" for index %u", filename, index);
 		return false;
@@ -472,10 +483,16 @@ void saveTestRun(const char *filename, bool includeStatistics)
 	amount--;
 	indent(file, amount).append("}\n");
 
+#ifndef __EMSCRIPTEN__
 	nctl::UniquePtr<nc::IFile> fileHandle = nc::IFile::createFileHandle(filename);
 	fileHandle->open(nc::IFile::OpenMode::WRITE | nc::IFile::OpenMode::BINARY);
 	fileHandle->write(file.data(), file.length());
 	fileHandle->close();
+#else
+	nc::EmscriptenLocalFile localFileSave;
+	localFileSave.write(file.data(), file.length());
+	localFileSave.save(filename);
+#endif
 }
 
 }
@@ -544,6 +561,13 @@ void MyEventHandler::onInit()
 
 	for (unsigned int i = 0; i < Tests::Count; i++)
 		testNames[i] = testInfos[i].name.data();
+
+#ifdef __EMSCRIPTEN__
+	localFileLoad.setLoadedCallback([](const nc::EmscriptenLocalFile &localFile, void *userData) {
+		if (localFile.size() > 0)
+			loadTestRun(localFile.filename(), currentTestRun);
+	});
+#endif
 }
 
 void MyEventHandler::onFrameStart()
@@ -579,6 +603,7 @@ void MyEventHandler::onFrameStart()
 		ImGui::SameLine();
 		ImGui::Text("Index: %d", currentTestRun);
 
+#ifndef __EMSCRIPTEN__
 		ImGui::InputText("##Loading", loadingFilename, MaxStringLength);
 		ImGui::SameLine();
 		if (ImGui::Button("Load"))
@@ -589,6 +614,15 @@ void MyEventHandler::onFrameStart()
 			else
 				LOGW_X("Cannot load file \"%s\" for index %u", filepath.data(), currentTestRun);
 		}
+#else
+		if (localFileLoad.isLoading())
+			ImGui::Text("Loading file...");
+		else
+		{
+			if (ImGui::Button("Load"))
+				localFileLoad.load(".lua");
+		}
+#endif
 
 		const TestRun &tr = testRuns[currentTestRun];
 		const bool notLoaded = tr.filename.isEmpty();

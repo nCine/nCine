@@ -12,6 +12,11 @@ else()
 	list(APPEND SOURCES ${NCINE_ROOT}/src/base/GccAtomic.cpp)
 endif()
 
+if(EMSCRIPTEN)
+	list(APPEND HEADERS ${NCINE_ROOT}/include/ncine/EmscriptenLocalFile.h)
+	list(APPEND SOURCES ${NCINE_ROOT}/src/EmscriptenLocalFile.cpp)
+endif()
+
 if(GLEW_FOUND)
 	if (NOT WIN32)
 		message(STATUS "GLEW has been found")
