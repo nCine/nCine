@@ -67,7 +67,16 @@ NuklearDrawing::NuklearDrawing(bool withSceneGraph)
 	nk_buffer_init_default(&NuklearContext::cmds_);
 	nk_font_atlas_init_default(&NuklearContext::atlas_);
 	nk_font_atlas_begin(&NuklearContext::atlas_);
+	int w, h;
+	nk_font_atlas_bake(&NuklearContext::atlas_, &w, &h, NK_FONT_ATLAS_RGBA32);
+}
 
+///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
+
+bool NuklearDrawing::bakeFonts()
+{
 	const void *image;
 	int w, h;
 	image = nk_font_atlas_bake(&NuklearContext::atlas_, &w, &h, NK_FONT_ATLAS_RGBA32);
@@ -80,6 +89,7 @@ NuklearDrawing::NuklearDrawing(bool withSceneGraph)
 	if (NuklearContext::atlas_.default_font)
 		nk_style_set_font(&NuklearContext::ctx_, &NuklearContext::atlas_.default_font->handle);
 
+	// Setting the convert configuration after the atlas is baked
 	static const struct nk_draw_vertex_layout_element vertex_layout[] = {
 		{ NK_VERTEX_POSITION, NK_FORMAT_FLOAT, offsetof(nk_vertex, pos) },
 		{ NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, offsetof(nk_vertex, uv) },
@@ -97,11 +107,9 @@ NuklearDrawing::NuklearDrawing(bool withSceneGraph)
 	config_.global_alpha = 1.0f;
 	config_.shape_AA = NK_ANTI_ALIASING_ON;
 	config_.line_AA = NK_ANTI_ALIASING_ON;
-}
 
-///////////////////////////////////////////////////////////
-// PUBLIC FUNCTIONS
-///////////////////////////////////////////////////////////
+	return (image != nullptr);
+}
 
 void NuklearDrawing::newFrame()
 {

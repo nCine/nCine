@@ -22,6 +22,7 @@ class DLL_PUBLIC NuklearContext
 {
   public:
 	static struct nk_context *context();
+	static struct nk_font_atlas *atlas();
 
   private:
 	static int lastFrameWidth_;

@@ -21,6 +21,9 @@ class ImGuiDrawing
 	explicit ImGuiDrawing(bool withSceneGraph);
 	~ImGuiDrawing();
 
+	/// Builds the ImGui font atlas and uploads it to a texture
+	bool buildFonts();
+
 	void newFrame();
 	/// Renders ImGui with render commands
 	void endFrame(RenderQueue &renderQueue);

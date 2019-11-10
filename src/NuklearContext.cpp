@@ -29,4 +29,9 @@ struct nk_context *NuklearContext::context()
 	return &ctx_;
 }
 
+struct nk_font_atlas *NuklearContext::atlas()
+{
+	return &atlas_;
+}
+
 }

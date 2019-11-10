@@ -23,6 +23,9 @@ class NuklearDrawing
   public:
 	explicit NuklearDrawing(bool withSceneGraph);
 
+	/// Bakes the Nuklear font atlas and uploads it to a texture
+	bool bakeFonts();
+
 	void newFrame();
 	/// Renders Nuklear with render commands
 	void endFrame(RenderQueue &renderQueue);

@@ -161,6 +161,14 @@ void Application::initCommon()
 		LOGI("IAppEventHandler::OnInit() invoked");
 	}
 
+	// Give user code a chance to add custom GUI fonts
+#ifdef WITH_IMGUI
+	imguiDrawing_->buildFonts();
+#endif
+#ifdef WITH_NUKLEAR
+	nuklearDrawing_->bakeFonts();
+#endif
+
 	// Swapping frame now for a cleaner API trace capture when debugging
 	gfxDevice_->update();
 	FrameMark;

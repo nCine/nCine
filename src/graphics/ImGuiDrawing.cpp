@@ -47,16 +47,6 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 	io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; // We can honor the ImDrawCmd::VtxOffset field, allowing for large meshes.
 #endif
 
-	unsigned char *pixels = nullptr;
-	int width, height;
-	io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-
-	texture_ = nctl::makeUnique<GLTexture>(GL_TEXTURE_2D);
-	texture_->texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	texture_->texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	texture_->texImage2D(0, GL_RGBA, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-	io.Fonts->TexID = reinterpret_cast<void *>(texture_.get());
-
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
 	const GLShaderProgram::QueryPhase queryPhase = appCfg.deferShaderQueries ? GLShaderProgram::QueryPhase::DEFERRED : GLShaderProgram::QueryPhase::IMMEDIATE;
 
@@ -73,6 +63,10 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 
 	if (withSceneGraph == false)
 		setupBuffersAndShader();
+
+	unsigned char *pixels = nullptr;
+	int width, height;
+	io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 }
 
 ImGuiDrawing::~ImGuiDrawing()
@@ -84,6 +78,23 @@ ImGuiDrawing::~ImGuiDrawing()
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+bool ImGuiDrawing::buildFonts()
+{
+	ImGuiIO &io = ImGui::GetIO();
+
+	unsigned char *pixels = nullptr;
+	int width, height;
+	io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+
+	texture_ = nctl::makeUnique<GLTexture>(GL_TEXTURE_2D);
+	texture_->texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	texture_->texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	texture_->texImage2D(0, GL_RGBA, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	io.Fonts->TexID = reinterpret_cast<ImTextureID>(texture_.get());
+
+	return (pixels != nullptr);
+}
 
 void ImGuiDrawing::newFrame()
 {
