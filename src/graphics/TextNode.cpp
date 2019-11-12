@@ -20,8 +20,8 @@ TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
     : DrawableNode(parent, 0.0f, 0.0f), string_(maxStringLength), dirtyDraw_(true),
       dirtyBoundaries_(true), withKerning_(true), font_(font),
       interleavedVertices_(maxStringLength * 4 + (maxStringLength - 1) * 2),
-      xAdvance_(0.0f), xAdvanceSum_(0.0f), yAdvance_(0.0f), yAdvanceSum_(0.0f),
-      lineLengths_(4), alignment_(Alignment::LEFT), textnodeBlock_(nullptr)
+      xAdvance_(0.0f), yAdvance_(0.0f), lineLengths_(4),
+      alignment_(Alignment::LEFT), textnodeBlock_(nullptr)
 {
 	ASSERT(font);
 	ASSERT(maxStringLength > 0);
@@ -47,25 +47,25 @@ TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
 float TextNode::width() const
 {
 	calculateBoundaries();
-	return xAdvanceSum_ * scaleFactor_;
+	return width_ * scaleFactor_;
 }
 
 float TextNode::height() const
 {
 	calculateBoundaries();
-	return yAdvanceSum_ * scaleFactor_;
+	return height_ * scaleFactor_;
 }
 
 float TextNode::absWidth() const
 {
 	calculateBoundaries();
-	return xAdvanceSum_ * absScaleFactor_;
+	return width_ * absScaleFactor_;
 }
 
 float TextNode::absHeight() const
 {
 	calculateBoundaries();
-	return yAdvanceSum_ * absScaleFactor_;
+	return height_ * absScaleFactor_;
 }
 
 void TextNode::enableKerning(bool withKerning)
@@ -115,15 +115,15 @@ void TextNode::draw(RenderQueue &renderQueue)
 		interleavedVertices_.clear();
 
 		unsigned int currentLine = 0;
-		xAdvance_ = calculateAlignment(currentLine) - xAdvanceSum_ * 0.5f;
-		yAdvance_ = 0.0f - yAdvanceSum_ * 0.5f;
+		xAdvance_ = calculateAlignment(currentLine) - width_ * 0.5f;
+		yAdvance_ = 0.0f - height_ * 0.5f;
 		const unsigned int length = string_.length();
 		for (unsigned int i = 0; i < length; i++)
 		{
 			if (string_[i] == '\n')
 			{
 				currentLine++;
-				xAdvance_ = calculateAlignment(currentLine) - xAdvanceSum_ * 0.5f;
+				xAdvance_ = calculateAlignment(currentLine) - width_ * 0.5f;
 				yAdvance_ += font_->base();
 			}
 			else
@@ -147,7 +147,7 @@ void TextNode::draw(RenderQueue &renderQueue)
 					{
 						// font kerning
 						if (i < length - 1)
-							xAdvance_ += glyph->kerning(int(string_[i + 1]));
+							xAdvance_ += glyph->kerning(static_cast<unsigned int>(string_[i + 1]));
 					}
 				}
 			}
@@ -156,10 +156,10 @@ void TextNode::draw(RenderQueue &renderQueue)
 		// Vertices are updated only if the string changes
 		renderCommand_->geometry().setNumVertices(interleavedVertices_.size());
 		renderCommand_->geometry().setHostVertexPointer(reinterpret_cast<const float *>(interleavedVertices_.data()));
+		dirtyDraw_ = false;
 	}
 
 	DrawableNode::draw(renderQueue);
-	dirtyDraw_ = false;
 }
 
 ///////////////////////////////////////////////////////////
@@ -171,6 +171,9 @@ void TextNode::calculateBoundaries() const
 	if (dirtyBoundaries_)
 	{
 		ZoneScoped;
+		const float oldWidth = width_;
+		const float oldHeight = height_;
+
 		lineLengths_.clear();
 		float xAdvanceMax = 0.0f; // longest line
 		xAdvance_ = 0.0f;
@@ -195,7 +198,7 @@ void TextNode::calculateBoundaries() const
 					{
 						// font kerning
 						if (i < string_.length() - 1)
-							xAdvance_ += glyph->kerning(int(string_[i + 1]));
+							xAdvance_ += glyph->kerning(static_cast<unsigned int>(string_[i + 1]));
 					}
 				}
 			}
@@ -210,8 +213,18 @@ void TextNode::calculateBoundaries() const
 		if (xAdvance_ > xAdvanceMax)
 			xAdvanceMax = xAdvance_;
 
-		xAdvanceSum_ = xAdvanceMax;
-		yAdvanceSum_ = yAdvance_;
+		// Update node size and anchor points
+		TextNode *mutableNode = const_cast<TextNode *>(this);
+		// Total advance on the X-axis for the longest line (horizontal boundary)
+		mutableNode->width_ = xAdvanceMax;
+		// Total advance on the Y-axis for the entire string (vertical boundary)
+		mutableNode->height_ = yAdvance_;
+
+		if (oldWidth > 0.0f && oldHeight > 0.0f)
+		{
+			mutableNode->anchorPoint_.x = (anchorPoint_.x / oldWidth) * width_;
+			mutableNode->anchorPoint_.y = (anchorPoint_.y / oldHeight) * height_;
+		}
 
 		dirtyBoundaries_ = false;
 	}
@@ -227,10 +240,10 @@ float TextNode::calculateAlignment(unsigned int lineIndex) const
 			alignOffset = 0.0f;
 			break;
 		case Alignment::CENTER:
-			alignOffset = (xAdvanceSum_ - lineLengths_[lineIndex]) * 0.5f;
+			alignOffset = (width_ - lineLengths_[lineIndex]) * 0.5f;
 			break;
 		case Alignment::RIGHT:
-			alignOffset = xAdvanceSum_ - lineLengths_[lineIndex];
+			alignOffset = width_ - lineLengths_[lineIndex];
 			break;
 	}
 

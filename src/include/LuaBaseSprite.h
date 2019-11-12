@@ -22,6 +22,9 @@ class LuaBaseSprite
 	static int texRect(lua_State *L);
 	static int setTexRect(lua_State *L);
 
+	static int anchorPoint(lua_State *L);
+	static int setAnchorPoint(lua_State *L);
+
 	static int flipX(lua_State *L);
 	static int flipY(lua_State *L);
 

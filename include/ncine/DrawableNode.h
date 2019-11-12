@@ -25,6 +25,13 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 		};
 	};
 
+	// Notable anchor points for a drawable node
+	static const Vector2f AnchorCenter;
+	static const Vector2f AnchorBottomLeft;
+	static const Vector2f AnchorTopLeft;
+	static const Vector2f AnchorBottomRight;
+	static const Vector2f AnchorTopRight;
+
 	/// Constructor for a drawable node with a parent and a specified relative position
 	DrawableNode(SceneNode *parent, float xx, float yy);
 	/// Constructor for a drawable node with a parent and a specified relative position as a vector
@@ -51,6 +58,13 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	inline virtual float absHeight() const { return height_ * absScaleFactor_; }
 	/// Returns the absolute size of the node area
 	inline Vector2f absSize() const { return Vector2f(absWidth(), absHeight()); }
+
+	/// Gets the transformation anchor point
+	inline Vector2f anchorPoint() const { return (anchorPoint_ / size()) + 0.5f; }
+	/// Sets the transformation anchor point
+	void setAnchorPoint(float xx, float yy);
+	/// Sets the transformation anchor point with a `Vector2f`
+	inline void setAnchorPoint(const Vector2f &point) { setAnchorPoint(point.x, point.y); }
 
 	/// Returns the node rendering layer
 	unsigned short layer() const;

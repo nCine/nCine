@@ -25,21 +25,20 @@ BaseSprite::BaseSprite(SceneNode *parent, Texture *texture, const Vector2f &posi
 
 void BaseSprite::setSize(float width, float height)
 {
+	// Update anchor points when size changes
+	if (anchorPoint_.x != 0.0f)
+		anchorPoint_.x = (anchorPoint_.x / width_) * width;
+	if (anchorPoint_.y != 0.0f)
+		anchorPoint_.y = (anchorPoint_.y / height_) * height;
+
 	width_ = width;
 	height_ = height;
-}
-
-void BaseSprite::setSize(const Vector2f &size)
-{
-	width_ = size.x;
-	height_ = size.y;
 }
 
 void BaseSprite::setTexRect(const Recti &rect)
 {
 	texRect_ = rect;
-	height_ = static_cast<float>(rect.h);
-	width_ = static_cast<float>(rect.w);
+	setSize(static_cast<float>(rect.w), static_cast<float>(rect.h));
 }
 
 void BaseSprite::flipX()

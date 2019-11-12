@@ -1,3 +1,4 @@
+#include <nctl/algorithms.h>
 #include "DrawableNode.h"
 #include "RenderQueue.h"
 #include "RenderCommand.h"
@@ -9,6 +10,12 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
+
+const Vector2f DrawableNode::AnchorCenter(0.5f, 0.5f);
+const Vector2f DrawableNode::AnchorBottomLeft(0.0f, 0.0f);
+const Vector2f DrawableNode::AnchorTopLeft(0.0f, 1.0f);
+const Vector2f DrawableNode::AnchorBottomRight(1.0f, 0.0f);
+const Vector2f DrawableNode::AnchorTopRight(1.0f, 1.0f);
 
 unsigned short DrawableNode::imguiLayer_ = LayerBase::HIGHEST - 1024;
 unsigned short DrawableNode::nuklearLayer_ = LayerBase::HIGHEST - 512;
@@ -65,6 +72,13 @@ void DrawableNode::draw(RenderQueue &renderQueue)
 		updateRenderCommand();
 		renderQueue.addCommand(renderCommand_.get());
 	}
+}
+
+void DrawableNode::setAnchorPoint(float xx, float yy)
+{
+	const float clampedX = nctl::clamp(xx, 0.0f, 1.0f);
+	const float clampedY = nctl::clamp(yy, 0.0f, 1.0f);
+	anchorPoint_.set((clampedX - 0.5f) * width(), (clampedY - 0.5f) * height());
 }
 
 unsigned short DrawableNode::layer() const

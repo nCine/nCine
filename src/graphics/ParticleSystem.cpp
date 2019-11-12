@@ -126,10 +126,22 @@ void ParticleSystem::setTexRect(const Recti &rect)
 		particle->setTexRect(rect);
 }
 
-void ParticleSystem::setLayer(unsigned int layer)
+void ParticleSystem::setLayer(unsigned short layer)
 {
 	for (nctl::UniquePtr<Particle> &particle : particleArray_)
 		particle->setLayer(layer);
+}
+
+void ParticleSystem::setAnchorPoint(float xx, float yy)
+{
+	for (nctl::UniquePtr<Particle> &particle : particleArray_)
+		particle->setAnchorPoint(xx, yy);
+}
+
+void ParticleSystem::setAnchorPoint(const Vector2f &point)
+{
+	for (nctl::UniquePtr<Particle> &particle : particleArray_)
+		particle->setAnchorPoint(point);
 }
 
 void ParticleSystem::update(float interval)

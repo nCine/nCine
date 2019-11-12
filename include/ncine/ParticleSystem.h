@@ -6,6 +6,7 @@
 #include "Rect.h"
 #include "SceneNode.h"
 #include "ParticleAffectors.h"
+#include "BaseSprite.h"
 
 namespace ncine {
 
@@ -36,17 +37,22 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	inline void setInLocalSpace(bool inLocalSpace) { inLocalSpace_ = inLocalSpace; }
 
 	/// Returns the total number of particles in the system
-	unsigned int numParticles() const { return particleArray_.size(); }
+	inline unsigned int numParticles() const { return particleArray_.size(); }
 	/// Returns the number of particles currently alive
-	unsigned int numAliveParticles() const { return particleArray_.size() - poolTop_ - 1; }
+	inline unsigned int numAliveParticles() const { return particleArray_.size() - poolTop_ - 1; }
 
 	/// Sets the texture object for every particle
 	void setTexture(Texture *texture);
 	/// Sets the texture source rectangle for every particle
 	void setTexRect(const Recti &rect);
 
+	/// Sets the transformation anchor point for every particle
+	void setAnchorPoint(float xx, float yy);
+	/// Sets the transformation anchor point for every particle with a `Vector2f`
+	void setAnchorPoint(const Vector2f &point);
+
 	/// Sets the rendering layer for every particle
-	void setLayer(unsigned int layer);
+	void setLayer(unsigned short layer);
 
 	void update(float interval) override;
 

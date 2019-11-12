@@ -91,6 +91,13 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Adds a move vector to the node current position
 	void move(const Vector2f &pos);
 
+	/// Gets the transformation anchor point in pixels
+	inline Vector2f absAnchorPoint() const { return anchorPoint_; }
+	/// Sets the transformation anchor point in pixels
+	inline void setAbsAnchorPoint(float xx, float yy) { anchorPoint_.set(xx, yy); }
+	/// Sets the transformation anchor point in pixels with a `Vector2f`
+	inline void setAbsAnchorPoint(const Vector2f &point) { anchorPoint_ = point; }
+
 	/// Gets the node scale factor
 	inline float scale() const { return scaleFactor_; }
 	/// Gets the node absolute scale factor
@@ -140,6 +147,9 @@ class DLL_PUBLIC SceneNode : public Object
 	/// The list of child nodes
 	nctl::List<SceneNode *> children_;
 
+	/// The anchor point for transformations, in pixels
+	/// \note The default point is the center
+	Vector2f anchorPoint_;
 	/// Scale factor for node size
 	float scaleFactor_;
 	/// Degrees for clock-wise node rotation in degrees

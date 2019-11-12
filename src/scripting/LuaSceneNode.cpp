@@ -19,6 +19,8 @@ namespace SceneNode {
 
 	static const char *position = "get_position";
 	static const char *setPosition = "set_position";
+	static const char *absAnchorPoint = "get_abs_anchor_point";
+	static const char *setAbsAnchorPoint = "set_abs_anchor_point";
 	static const char *scale = "get_scale";
 	static const char *setScale = "set_scale";
 	static const char *rotation = "get_rotation";
@@ -47,6 +49,8 @@ void LuaSceneNode::exposeFunctions(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::SceneNode::position, position);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::setPosition, setPosition);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::absAnchorPoint, absAnchorPoint);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::setAbsAnchorPoint, setAbsAnchorPoint);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::scale, scale);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::setScale, setScale);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::rotation, rotation);
@@ -147,6 +151,27 @@ int LuaSceneNode::setPosition(lua_State *L)
 	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, vectorIndex - 1);
 
 	node->setPosition(pos);
+
+	return 0;
+}
+
+int LuaSceneNode::absAnchorPoint(lua_State *L)
+{
+	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+
+	const Vector2f &absAnchorPoint = node->absAnchorPoint();
+	LuaVector2fUtils::push(L, absAnchorPoint);
+
+	return 1;
+}
+
+int LuaSceneNode::setAbsAnchorPoint(lua_State *L)
+{
+	int vectorIndex = 0;
+	const Vector2f &absAnchorPoint = LuaVector2fUtils::retrieve(L, -1, vectorIndex);
+	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, vectorIndex - 1);
+
+	node->setAbsAnchorPoint(absAnchorPoint);
 
 	return 0;
 }

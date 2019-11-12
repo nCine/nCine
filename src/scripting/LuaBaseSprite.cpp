@@ -1,7 +1,8 @@
 #include "LuaBaseSprite.h"
 #include "LuaClassWrapper.h"
 #include "LuaDrawableNode.h"
-#include "LuaRect.h"
+#include "LuaRectUtils.h"
+#include "LuaVector2Utils.h"
 #include "LuaUtils.h"
 #include "BaseSprite.h"
 
@@ -19,6 +20,9 @@ namespace BaseSprite {
 
 	static const char *texRect = "get_texrect";
 	static const char *setTexRect = "set_texrect";
+
+	static const char *anchorPoint = "get_anchor_point";
+	static const char *setAnchorPoint = "set_anchor_point";
 
 	static const char *flipX = "flip_x";
 	static const char *flipY = "flip_y";
@@ -42,6 +46,9 @@ void LuaBaseSprite::exposeFunctions(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::texRect, texRect);
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::setTexRect, setTexRect);
+
+	LuaUtils::addFunction(L, LuaNames::BaseSprite::anchorPoint, anchorPoint);
+	LuaUtils::addFunction(L, LuaNames::BaseSprite::setAnchorPoint, setAnchorPoint);
 
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::flipX, flipX);
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::flipY, flipY);
@@ -124,6 +131,27 @@ int LuaBaseSprite::setTexRect(lua_State *L)
 	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, rectIndex - 1);
 
 	sprite->setTexRect(texRect);
+
+	return 0;
+}
+
+int LuaBaseSprite::anchorPoint(lua_State *L)
+{
+	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -1);
+
+	const Vector2f anchorPoint = sprite->anchorPoint();
+	LuaVector2fUtils::push(L, anchorPoint);
+
+	return 1;
+}
+
+int LuaBaseSprite::setAnchorPoint(lua_State *L)
+{
+	int vectorIndex = 0;
+	const Vector2f anchorPoint = LuaVector2fUtils::retrieve(L, -1, vectorIndex);
+	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, vectorIndex - 1);
+
+	sprite->setAnchorPoint(anchorPoint);
 
 	return 0;
 }

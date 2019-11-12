@@ -20,8 +20,8 @@ class DLL_PUBLIC BaseSprite : public DrawableNode
 	inline void setHeight(float height) { height_ = height; }
 	/// Sets sprite size
 	void setSize(float width, float height);
-	/// Sets sprite size with a Vector2f
-	void setSize(const Vector2f &size);
+	/// Sets sprite size with a `Vector2f`
+	inline void setSize(const Vector2f &size) { setSize(size.x, size.y); }
 
 	/// Gets the texture object
 	inline const Texture *texture() const { return texture_; }

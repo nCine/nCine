@@ -31,6 +31,8 @@ namespace ParticleSystem {
 
 	static const char *setTexture = "set_texture";
 	static const char *setTexRect = "set_texture_rect";
+	static const char *setAnchorPoint = "set_anchor_point";
+	static const char *setLayer = "set_layer";
 }}
 
 namespace LuaNames {
@@ -75,6 +77,8 @@ void LuaParticleSystem::expose(LuaStateManager *stateManager)
 
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setTexture, setTexture);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setTexRect, setTexRect);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setAnchorPoint, setAnchorPoint);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setLayer, setLayer);
 
 	LuaSceneNode::exposeFunctions(L);
 
@@ -469,6 +473,27 @@ int LuaParticleSystem::setTexRect(lua_State *L)
 	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, rectIndex - 1);
 
 	particleSys->setTexRect(texRect);
+
+	return 0;
+}
+
+int LuaParticleSystem::setAnchorPoint(lua_State *L)
+{
+	int vectorIndex = 0;
+	const Vector2f anchorPoint = LuaVector2fUtils::retrieve(L, -1, vectorIndex);
+	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, vectorIndex - 1);
+
+	particleSys->setAnchorPoint(anchorPoint);
+
+	return 0;
+}
+
+int LuaParticleSystem::setLayer(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	const uint32_t layer = LuaUtils::retrieve<uint32_t>(L, -1);
+
+	particleSys->setLayer(layer);
 
 	return 0;
 }

@@ -33,7 +33,7 @@ if(PNG_FOUND)
 		list(APPEND APPTESTS apptest_lua apptest_luareload)
 	endif()
 	if(LUA_FOUND AND NCINE_WITH_IMGUI)
-		list(APPEND APPTESTS apptest_simdbench)
+		list(APPEND APPTESTS apptest_simdbench apptest_anchor)
 	endif()
 endif()
 

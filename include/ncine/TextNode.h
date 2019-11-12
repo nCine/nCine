@@ -99,12 +99,8 @@ class DLL_PUBLIC TextNode : public DrawableNode
 
 	/// Advance on the X-axis for the next processed glyph
 	mutable float xAdvance_;
-	/// Total advance on the X-axis for the longest line (horizontal boundary)
-	mutable float xAdvanceSum_;
 	/// Advance on the Y-axis for the next processed glyph
 	mutable float yAdvance_;
-	/// Total advance on the Y-axis for the entire string (vertical boundary)
-	mutable float yAdvanceSum_;
 	/// Text width for each line of text
 	mutable nctl::Array<float> lineLengths_;
 	/// Horizontal text alignment of multiple lines

@@ -21,6 +21,8 @@ namespace DrawableNode {
 	static const char *width = "get_width";
 	static const char *height = "get_height";
 	static const char *size = "get_size";
+	static const char *anchorPoint = "get_anchor_point";
+	static const char *setAnchorPoint = "set_anchor_point";
 	static const char *layer = "get_layer";
 	static const char *setLayer = "set_layer";
 }}
@@ -52,6 +54,8 @@ void LuaDrawableNode::exposeFunctions(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::width, width);
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::height, height);
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::size, size);
+	LuaUtils::addFunction(L, LuaNames::DrawableNode::anchorPoint, anchorPoint);
+	LuaUtils::addFunction(L, LuaNames::DrawableNode::setAnchorPoint, setAnchorPoint);
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::layer, layer);
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::setLayer, setLayer);
 }
@@ -86,6 +90,27 @@ int LuaDrawableNode::size(lua_State *L)
 	return 1;
 }
 
+int LuaDrawableNode::anchorPoint(lua_State *L)
+{
+	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -1);
+
+	const Vector2f &anchorPoint = node->anchorPoint();
+	LuaVector2fUtils::push(L, anchorPoint);
+
+	return 1;
+}
+
+int LuaDrawableNode::setAnchorPoint(lua_State *L)
+{
+	int vectorIndex = 0;
+	const Vector2f &anchorPoint = LuaVector2fUtils::retrieve(L, -1, vectorIndex);
+	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, vectorIndex - 1);
+
+	node->setAnchorPoint(anchorPoint);
+
+	return 0;
+}
+
 int LuaDrawableNode::layer(lua_State *L)
 {
 	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -1);
@@ -99,7 +124,7 @@ int LuaDrawableNode::layer(lua_State *L)
 int LuaDrawableNode::setLayer(lua_State *L)
 {
 	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -2);
-	const int32_t layer = LuaUtils::retrieve<int32_t>(L, -1);
+	const uint32_t layer = LuaUtils::retrieve<uint32_t>(L, -1);
 
 	node->setLayer(layer);
 
