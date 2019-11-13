@@ -15,8 +15,8 @@ const float SceneNode::MinRotation = 0.5f;
 /*! \param parent The parent can be `nullptr` */
 SceneNode::SceneNode(SceneNode *parent, float xx, float yy)
     : Object(ObjectType::SCENENODE), x(xx), y(yy), updateEnabled_(true), drawEnabled_(true), parent_(nullptr),
-      anchorPoint_(0.0f, 0.0f), scaleFactor_(1.0f), rotation_(0.0f),
-      absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f), absRotation_(0.0f),
+      anchorPoint_(0.0f, 0.0f), scaleFactor_(1.0f, 1.0f), rotation_(0.0f),
+      absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f, 1.0f), absRotation_(0.0f),
       worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
 {
 	setParent(parent);
@@ -174,7 +174,7 @@ void SceneNode::transform()
 	localMatrix_ = Matrix4x4f::Identity;
 	localMatrix_ *= Matrix4x4f::translation(x, y, 0.0f);
 	localMatrix_ *= Matrix4x4f::rotationZ(rotation_);
-	localMatrix_ *= Matrix4x4f::scale(scaleFactor_, scaleFactor_, 1.0f);
+	localMatrix_ *= Matrix4x4f::scale(scaleFactor_.x, scaleFactor_.y, 1.0f);
 	localMatrix_ *= Matrix4x4f::translation(-anchorPoint_.x, -anchorPoint_.y, 0.0f);
 
 	absScaleFactor_ = scaleFactor_;

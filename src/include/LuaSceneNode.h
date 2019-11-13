@@ -33,6 +33,8 @@ class LuaSceneNode
 	static int absAnchorPoint(lua_State *L);
 	static int setAbsAnchorPoint(lua_State *L);
 	static int scale(lua_State *L);
+	static int setScaleX(lua_State *L);
+	static int setScaleY(lua_State *L);
 	static int setScale(lua_State *L);
 	static int rotation(lua_State *L);
 	static int setRotation(lua_State *L);

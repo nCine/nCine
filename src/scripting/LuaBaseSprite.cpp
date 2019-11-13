@@ -24,8 +24,10 @@ namespace BaseSprite {
 	static const char *anchorPoint = "get_anchor_point";
 	static const char *setAnchorPoint = "set_anchor_point";
 
-	static const char *flipX = "flip_x";
-	static const char *flipY = "flip_y";
+	static const char *isFlippedX = "is_flipped_x";
+	static const char *setFlippedX = "set_flipped_x";
+	static const char *isFlippedY = "is_flipped_y";
+	static const char *setFlippedY = "set_flipped_y";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -50,8 +52,10 @@ void LuaBaseSprite::exposeFunctions(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::anchorPoint, anchorPoint);
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::setAnchorPoint, setAnchorPoint);
 
-	LuaUtils::addFunction(L, LuaNames::BaseSprite::flipX, flipX);
-	LuaUtils::addFunction(L, LuaNames::BaseSprite::flipY, flipY);
+	LuaUtils::addFunction(L, LuaNames::BaseSprite::isFlippedX, isFlippedX);
+	LuaUtils::addFunction(L, LuaNames::BaseSprite::setFlippedX, setFlippedX);
+	LuaUtils::addFunction(L, LuaNames::BaseSprite::isFlippedY, isFlippedY);
+	LuaUtils::addFunction(L, LuaNames::BaseSprite::setFlippedY, setFlippedY);
 }
 
 int LuaBaseSprite::setWidth(lua_State *L)
@@ -156,20 +160,42 @@ int LuaBaseSprite::setAnchorPoint(lua_State *L)
 	return 0;
 }
 
-int LuaBaseSprite::flipX(lua_State *L)
+int LuaBaseSprite::isFlippedX(lua_State *L)
 {
 	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -1);
 
-	sprite->flipX();
+	const bool result = sprite->isFlippedX();
+	LuaUtils::push(L, result);
+
+	return 1;
+}
+
+int LuaBaseSprite::setFlippedX(lua_State *L)
+{
+	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -1);
+	const bool flippedX = LuaUtils::retrieve<bool>(L, -1);
+
+	sprite->setFlippedX(flippedX);
 
 	return 0;
 }
 
-int LuaBaseSprite::flipY(lua_State *L)
+int LuaBaseSprite::isFlippedY(lua_State *L)
 {
 	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -1);
 
-	sprite->flipY();
+	const bool result = sprite->isFlippedY();
+	LuaUtils::push(L, result);
+
+	return 1;
+}
+
+int LuaBaseSprite::setFlippedY(lua_State *L)
+{
+	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -1);
+	const bool flippedY = LuaUtils::retrieve<bool>(L, -1);
+
+	sprite->setFlippedY(flippedY);
 
 	return 0;
 }

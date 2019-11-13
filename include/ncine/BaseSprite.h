@@ -36,17 +36,16 @@ class DLL_PUBLIC BaseSprite : public DrawableNode
 	/// Sets the texture source rectangle for blitting
 	void setTexRect(const Recti &rect);
 
-	/// Flips the texture rect along the X coordinate
-	void flipX();
-	/// Flips the texture rect along the Y coordinate
-	void flipY();
+	/// Returns `true` if the sprite is horizontally flipped
+	inline bool isFlippedX() const { return flippedX_; }
+	/// Flips the texture rect horizontally
+	void setFlippedX(bool flippedX);
+	/// Returns `true` if the sprite is vertically flipped
+	inline bool isFlippedY() const { return flippedY_; }
+	/// Flips the texture rect vertically
+	void setFlippedY(bool flippedY);
 
   protected:
-	/// Protected construtor accessible only by derived sprite classes
-	BaseSprite(SceneNode *parent, Texture *texture, float xx, float yy);
-	/// Protected construtor accessible only by derived sprite classes
-	BaseSprite(SceneNode *parent, Texture *texture, const Vector2f &position);
-
 	/// The sprite texture
 	Texture *texture_;
 	/// The texture source rectangle
@@ -54,7 +53,17 @@ class DLL_PUBLIC BaseSprite : public DrawableNode
 	/// The opaque texture flag
 	bool opaqueTexture_;
 
+	/// A flag indicating if the sprite is horizontally flipped
+	bool flippedX_;
+	/// A flag indicating if the sprite is vertically flipped
+	bool flippedY_;
+
 	GLUniformBlockCache *spriteBlock_;
+
+	/// Protected construtor accessible only by derived sprite classes
+	BaseSprite(SceneNode *parent, Texture *texture, float xx, float yy);
+	/// Protected construtor accessible only by derived sprite classes
+	BaseSprite(SceneNode *parent, Texture *texture, const Vector2f &position);
 
 	void updateRenderCommand() override;
 };

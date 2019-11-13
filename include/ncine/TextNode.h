@@ -52,10 +52,10 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Sets the horizontal text alignment of multiple lines
 	void setAlignment(Alignment alignment);
 
-	/// Gets the font base scaled by the scale factor
-	inline float fontBase() const { return font_->base() * scaleFactor_; }
-	/// Gets the font line height scaled by the scale factor
-	inline float fontLineHeight() const { return font_->lineHeight() * scaleFactor_; }
+	/// Gets the font base scaled by the vertical scale factor
+	inline float fontBase() const { return font_->base() * scaleFactor_.y; }
+	/// Gets the font line height scaled by the vertical scale factor
+	inline float fontLineHeight() const { return font_->lineHeight() * scaleFactor_.y; }
 	/// Sets the string to render
 	void setString(const nctl::String &string);
 

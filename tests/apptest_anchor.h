@@ -53,7 +53,10 @@ class MyEventHandler :
 	nc::Vector2f anchorPoint_;
 	nc::Vector2f position_;
 	float angle_;
-	float scale_;
+	nc::Vector2f scale_;
+	bool lockScale_;
+	bool flippedX_;
+	bool flippedY_;
 
 	nctl::UniquePtr<nc::Font> font_;
 	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, NumTextures> textures_;

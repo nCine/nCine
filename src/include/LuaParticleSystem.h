@@ -35,6 +35,8 @@ class LuaParticleSystem
 	static int setTexture(lua_State *L);
 	static int setTexRect(lua_State *L);
 	static int setAnchorPoint(lua_State *L);
+	static int setFlippedX(lua_State *L);
+	static int setFlippedY(lua_State *L);
 	static int setLayer(lua_State *L);
 };
 

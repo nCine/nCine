@@ -144,6 +144,18 @@ void ParticleSystem::setAnchorPoint(const Vector2f &point)
 		particle->setAnchorPoint(point);
 }
 
+void ParticleSystem::setFlippedX(bool flippedX)
+{
+	for (nctl::UniquePtr<Particle> &particle : particleArray_)
+		particle->setFlippedX(flippedX);
+}
+
+void ParticleSystem::setFlippedY(bool flippedY)
+{
+	for (nctl::UniquePtr<Particle> &particle : particleArray_)
+		particle->setFlippedY(flippedY);
+}
+
 void ParticleSystem::update(float interval)
 {
 	ZoneScoped;

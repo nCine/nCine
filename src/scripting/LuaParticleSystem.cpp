@@ -32,6 +32,8 @@ namespace ParticleSystem {
 	static const char *setTexture = "set_texture";
 	static const char *setTexRect = "set_texture_rect";
 	static const char *setAnchorPoint = "set_anchor_point";
+	static const char *setFlippedX = "set_flipped_x";
+	static const char *setFlippedY = "set_flipped_y";
 	static const char *setLayer = "set_layer";
 }}
 
@@ -78,6 +80,8 @@ void LuaParticleSystem::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setTexture, setTexture);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setTexRect, setTexRect);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setAnchorPoint, setAnchorPoint);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setFlippedX, setFlippedX);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setFlippedY, setFlippedY);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setLayer, setLayer);
 
 	LuaSceneNode::exposeFunctions(L);
@@ -484,6 +488,26 @@ int LuaParticleSystem::setAnchorPoint(lua_State *L)
 	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, vectorIndex - 1);
 
 	particleSys->setAnchorPoint(anchorPoint);
+
+	return 0;
+}
+
+int LuaParticleSystem::setFlippedX(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	const bool flippedX = LuaUtils::retrieve<bool>(L, -1);
+
+	particleSys->setFlippedX(flippedX);
+
+	return 0;
+}
+
+int LuaParticleSystem::setFlippedY(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	const bool flippedY = LuaUtils::retrieve<bool>(L, -1);
+
+	particleSys->setFlippedY(flippedY);
 
 	return 0;
 }

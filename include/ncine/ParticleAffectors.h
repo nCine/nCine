@@ -59,31 +59,52 @@ class DLL_PUBLIC SizeAffector : public ParticleAffector
 	struct SizeStep
 	{
 		float age;
-		float scale;
+		Vector2f scale;
 
 		SizeStep()
-		    : age(0.0f), scale(1.0f) {}
+		    : age(0.0f), scale(1.0f, 1.0f) {}
 		SizeStep(float newAge, float newScale)
+		    : age(newAge), scale(newScale, newScale) {}
+		SizeStep(float newAge, float newScaleX, float newScaleY)
+		    : age(newAge), scale(newScaleX, newScaleY) {}
+		SizeStep(float newAge, const Vector2f &newScale)
 		    : age(newAge), scale(newScale) {}
 	};
 
+	/// Constructs a size affector with a default base scale factor
+	SizeAffector()
+	    : sizeSteps_(StepsInitialSize), baseScale_(1.0f, 1.0f) {}
 	/// Constructs a size affector with a base scale factor as a reference
 	explicit SizeAffector(float baseScale)
+	    : sizeSteps_(StepsInitialSize), baseScale_(baseScale, baseScale) {}
+	/// Constructs a size affector with a horizontal and a vertical base scale factor as a reference
+	SizeAffector(float baseScaleX, float baseScaleY)
+	    : sizeSteps_(StepsInitialSize), baseScale_(baseScaleX, baseScaleY) {}
+	/// Constructs a size affector with a vector base scale factor as a reference
+	explicit SizeAffector(const Vector2f &baseScale)
 	    : sizeSteps_(StepsInitialSize), baseScale_(baseScale) {}
 
 	/// Affects the size of the specified particle
 	void affect(Particle *particle, float normalizedAge) override;
-	void addSizeStep(float age, float scale);
+	inline void addSizeStep(float age, float scale) { addSizeStep(age, scale, scale); }
+	void addSizeStep(float age, float scaleX, float scaleY);
+	inline void addSizeStep(float age, const Vector2f &scale) { addSizeStep(age, scale.x, scale.y); }
 
 	inline nctl::Array<SizeStep> &steps() { return sizeSteps_; }
 	inline const nctl::Array<SizeStep> &steps() const { return sizeSteps_; }
 
-	inline float baseScale() const { return baseScale_; }
-	inline void setBaseScale(float baseScale) { baseScale_ = baseScale; }
+	inline float baseScaleX() const { return baseScale_.x; }
+	inline void setBaseScaleX(float baseScaleX) { baseScale_.x = baseScaleX; }
+	inline float baseScaleY() const { return baseScale_.y; }
+	inline void setBaseScaleY(float baseScaleY) { baseScale_.y = baseScaleY; }
+
+	inline const Vector2f &baseScale() const { return baseScale_; }
+	inline void setBaseScale(float baseScale) { baseScale_.set(baseScale, baseScale); }
+	inline void setBaseScale(const Vector2f &baseScale) { baseScale_ = baseScale; }
 
   private:
 	nctl::Array<SizeStep> sizeSteps_;
-	float baseScale_;
+	Vector2f baseScale_;
 };
 
 /// Particle rotation affector

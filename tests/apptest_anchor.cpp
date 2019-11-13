@@ -50,7 +50,9 @@ nc::IAppEventHandler *createAppEventHandler()
 
 MyEventHandler::MyEventHandler()
     : currentType_(0), anchorPoint_(0.5f, 0.5f),
-      position_(0.0f, 0.0f), angle_(0.0f), scale_(1.0f)
+      position_(0.0f, 0.0f), angle_(0.0f),
+      scale_(1.0f, 1.0f), lockScale_(true),
+      flippedX_(false), flippedY_(false)
 {
 }
 
@@ -157,10 +159,35 @@ void MyEventHandler::onFrameStart()
 	ImGui::SameLine();
 	if (ImGui::Button("Reset##Rotation"))
 		angle_ = 0.0f;
-	ImGui::SliderFloat("Scale", &scale_, 0.5f, 2.0f);
+	if (lockScale_)
+	{
+		ImGui::SliderFloat("Scale", &scale_.x, 0.5f, 2.0f);
+		scale_.y = scale_.x;
+		ImGui::SameLine();
+		ImGui::Checkbox("Lock", &lockScale_);
+	}
+	else
+	{
+		ImGui::SliderFloat("Scale X", &scale_.x, 0.5f, 2.0f);
+		ImGui::SameLine();
+		ImGui::Checkbox("Lock", &lockScale_);
+		ImGui::SliderFloat("Scale Y", &scale_.y, 0.5f, 2.0f);
+	}
 	ImGui::SameLine();
 	if (ImGui::Button("Reset##Scale"))
-		scale_ = 1.0f;
+		scale_.set(1.0f, 1.0f);
+	if (currentType_ != Type::TEXT_NODE)
+	{
+		ImGui::Checkbox("Flipped X", &flippedX_);
+		ImGui::SameLine();
+		ImGui::Checkbox("Flipped Y", &flippedY_);
+		ImGui::SameLine();
+		if (ImGui::Button("Reset##Flip"))
+		{
+			flippedX_ = false;
+			flippedY_ = false;
+		}
+	}
 	ImGui::Checkbox("Culling", &settings.cullingEnabled);
 	ImGui::SameLine();
 	ImGui::Checkbox("Batching", &settings.batchingEnabled);
@@ -175,6 +202,8 @@ void MyEventHandler::onFrameStart()
 			sprites_[i]->y = position_.y + (height * 0.5f);
 			sprites_[i]->setRotation(angle_);
 			sprites_[i]->setScale(scale_);
+			sprites_[i]->setFlippedX(flippedX_);
+			sprites_[i]->setFlippedY(flippedY_);
 		}
 		else if (currentType_ == Type::MESH_SPRITE)
 		{
@@ -183,6 +212,8 @@ void MyEventHandler::onFrameStart()
 			meshSprites_[i]->y = position_.y + (height * 0.5f);
 			meshSprites_[i]->setRotation(angle_);
 			meshSprites_[i]->setScale(scale_);
+			meshSprites_[i]->setFlippedX(flippedX_);
+			meshSprites_[i]->setFlippedY(flippedY_);
 		}
 		else if (currentType_ == Type::TEXT_NODE)
 		{
@@ -199,6 +230,8 @@ void MyEventHandler::onFrameStart()
 			particleSystems_[i]->y = position_.y + (height * 0.5f);
 			rotationAffectors_[i]->steps()[1].angle = angle_;
 			sizeAffectors_[i]->setBaseScale(scale_);
+			particleSystems_[i]->setFlippedX(flippedX_);
+			particleSystems_[i]->setFlippedY(flippedY_);
 		}
 
 		sprites_[i]->setEnabled(currentType_ == Type::SPRITE);

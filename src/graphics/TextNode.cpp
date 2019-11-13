@@ -47,25 +47,25 @@ TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
 float TextNode::width() const
 {
 	calculateBoundaries();
-	return width_ * scaleFactor_;
+	return width_ * scaleFactor_.x;
 }
 
 float TextNode::height() const
 {
 	calculateBoundaries();
-	return height_ * scaleFactor_;
+	return height_ * scaleFactor_.y;
 }
 
 float TextNode::absWidth() const
 {
 	calculateBoundaries();
-	return width_ * absScaleFactor_;
+	return width_ * absScaleFactor_.x;
 }
 
 float TextNode::absHeight() const
 {
 	calculateBoundaries();
-	return height_ * absScaleFactor_;
+	return height_ * absScaleFactor_.y;
 }
 
 void TextNode::enableKerning(bool withKerning)

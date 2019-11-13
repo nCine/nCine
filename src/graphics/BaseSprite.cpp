@@ -9,7 +9,8 @@ namespace ncine {
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 BaseSprite::BaseSprite(SceneNode *parent, Texture *texture, float xx, float yy)
-    : DrawableNode(parent, xx, yy), texture_(texture), texRect_(0, 0, 0, 0), opaqueTexture_(false), spriteBlock_(nullptr)
+    : DrawableNode(parent, xx, yy), texture_(texture), texRect_(0, 0, 0, 0),
+      opaqueTexture_(false), flippedX_(false), flippedY_(false), spriteBlock_(nullptr)
 {
 }
 
@@ -39,18 +40,38 @@ void BaseSprite::setTexRect(const Recti &rect)
 {
 	texRect_ = rect;
 	setSize(static_cast<float>(rect.w), static_cast<float>(rect.h));
+
+	if (flippedX_)
+	{
+		texRect_.x += texRect_.w;
+		texRect_.w *= -1;
+	}
+
+	if (flippedY_)
+	{
+		texRect_.y += texRect_.h;
+		texRect_.h *= -1;
+	}
 }
 
-void BaseSprite::flipX()
+void BaseSprite::setFlippedX(bool flippedX)
 {
-	texRect_.x += texRect_.w;
-	texRect_.w *= -1;
+	if (flippedX_ != flippedX)
+	{
+		texRect_.x += texRect_.w;
+		texRect_.w *= -1;
+		flippedX_ = flippedX;
+	}
 }
 
-void BaseSprite::flipY()
+void BaseSprite::setFlippedY(bool flippedY)
 {
-	texRect_.y += texRect_.h;
-	texRect_.h *= -1;
+	if (flippedY_ != flippedY)
+	{
+		texRect_.y += texRect_.h;
+		texRect_.h *= -1;
+		flippedY_ = flippedY;
+	}
 }
 
 ///////////////////////////////////////////////////////////

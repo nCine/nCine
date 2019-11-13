@@ -98,12 +98,16 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Sets the transformation anchor point in pixels with a `Vector2f`
 	inline void setAbsAnchorPoint(const Vector2f &point) { anchorPoint_ = point; }
 
-	/// Gets the node scale factor
-	inline float scale() const { return scaleFactor_; }
-	/// Gets the node absolute scale factor
-	inline float absScale() const { return absScaleFactor_; }
-	/// Scales the node size
-	inline void setScale(float scaleFactor) { scaleFactor_ = scaleFactor; }
+	/// Gets the node scale factors
+	inline const Vector2f &scale() const { return scaleFactor_; }
+	/// Gets the node absolute scale factors
+	inline const Vector2f &absScale() const { return absScaleFactor_; }
+	/// Scales the node size both horizontally and vertically
+	inline void setScale(float scaleFactor) { scaleFactor_.set(scaleFactor, scaleFactor); }
+	/// Scales the node size both horizontally and vertically
+	inline void setScale(float scaleFactorX, float scaleFactorY) { scaleFactor_.set(scaleFactorX, scaleFactorY); }
+	/// Scales the node size both horizontally and vertically with a `Vector2f`
+	inline void setScale(const Vector2f &scaleFactor) { scaleFactor_ = scaleFactor; }
 
 	/// Gets the node rotation in degrees
 	inline float rotation() const { return rotation_; }
@@ -150,8 +154,8 @@ class DLL_PUBLIC SceneNode : public Object
 	/// The anchor point for transformations, in pixels
 	/// \note The default point is the center
 	Vector2f anchorPoint_;
-	/// Scale factor for node size
-	float scaleFactor_;
+	/// Horizontal and vertical scale factors for node size
+	Vector2f scaleFactor_;
 	/// Degrees for clock-wise node rotation in degrees
 	float rotation_;
 
@@ -164,8 +168,8 @@ class DLL_PUBLIC SceneNode : public Object
 	float absX_;
 	/// Absolute Y coordinate as calculated by the `transform()` function
 	float absY_;
-	/// Absolute scale factor as calculated by the `transform()` function
-	float absScaleFactor_;
+	/// Absolute horizontal and vertical scale factors as calculated by the `transform()` function
+	Vector2f absScaleFactor_;
 	/// Absolute node rotation as calculated by the `transform()` function
 	float absRotation_;
 

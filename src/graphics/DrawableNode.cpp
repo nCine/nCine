@@ -98,15 +98,17 @@ void DrawableNode::setLayer(unsigned short layer)
 
 void DrawableNode::updateAabb()
 {
-	float rotatedWidth = absWidth();
-	float rotatedHeight = absHeight();
+	const float width = (absScale().x > 0.0f) ? absWidth() : -absWidth();
+	const float height = (absScale().y > 0.0f) ? absHeight() : -absHeight();
+	float rotatedWidth = width;
+	float rotatedHeight = height;
 
 	if (absRotation_ > MinRotation || absRotation_ < -MinRotation)
 	{
-		float sinRot = sinf(absRotation_ * fDegToRad);
-		float cosRot = cosf(absRotation_ * fDegToRad);
-		rotatedWidth = fabsf(absHeight() * sinRot) + fabsf(absWidth() * cosRot);
-		rotatedHeight = fabsf(absWidth() * sinRot) + fabsf(absHeight() * cosRot);
+		const float sinRot = sinf(absRotation_ * fDegToRad);
+		const float cosRot = cosf(absRotation_ * fDegToRad);
+		rotatedWidth = fabsf(width * cosRot) + fabsf(height * sinRot);
+		rotatedHeight = fabsf(width * sinRot) + fabsf(height * cosRot);
 	}
 
 	aabb_ = Rectf::fromCenterAndSize(absX_, absY_, rotatedWidth, rotatedHeight);

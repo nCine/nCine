@@ -22,6 +22,8 @@ namespace SceneNode {
 	static const char *absAnchorPoint = "get_abs_anchor_point";
 	static const char *setAbsAnchorPoint = "set_abs_anchor_point";
 	static const char *scale = "get_scale";
+	static const char *setScaleX = "set_scale_x";
+	static const char *setScaleY = "set_scale_y";
 	static const char *setScale = "set_scale";
 	static const char *rotation = "get_rotation";
 	static const char *setRotation = "set_rotation";
@@ -52,6 +54,8 @@ void LuaSceneNode::exposeFunctions(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::SceneNode::absAnchorPoint, absAnchorPoint);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::setAbsAnchorPoint, setAbsAnchorPoint);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::scale, scale);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::setScaleX, setScaleX);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::setScaleY, setScaleY);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::setScale, setScale);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::rotation, rotation);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::setRotation, setRotation);
@@ -138,7 +142,7 @@ int LuaSceneNode::position(lua_State *L)
 {
 	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
 
-	const Vector2f pos = node->position();
+	const Vector2f &pos = node->position();
 	LuaVector2fUtils::push(L, pos);
 
 	return 1;
@@ -147,7 +151,7 @@ int LuaSceneNode::position(lua_State *L)
 int LuaSceneNode::setPosition(lua_State *L)
 {
 	int vectorIndex = 0;
-	const Vector2f pos = LuaVector2fUtils::retrieve(L, -1, vectorIndex);
+	const Vector2f &pos = LuaVector2fUtils::retrieve(L, -1, vectorIndex);
 	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, vectorIndex - 1);
 
 	node->setPosition(pos);
@@ -180,10 +184,30 @@ int LuaSceneNode::scale(lua_State *L)
 {
 	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
 
-	const float scale = node->scale();
-	LuaUtils::push(L, scale);
+	const Vector2f &scale = node->scale();
+	LuaVector2fUtils::push(L, scale);
 
 	return 1;
+}
+
+int LuaSceneNode::setScaleX(lua_State *L)
+{
+	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
+	const float scaleX = LuaUtils::retrieve<float>(L, -1);
+
+	node->setScale(scaleX, node->scale().y);
+
+	return 0;
+}
+
+int LuaSceneNode::setScaleY(lua_State *L)
+{
+	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
+	const float scaleY = LuaUtils::retrieve<float>(L, -1);
+
+	node->setScale(node->scale().x, scaleY);
+
+	return 0;
 }
 
 int LuaSceneNode::setScale(lua_State *L)

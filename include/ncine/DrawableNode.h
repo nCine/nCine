@@ -46,16 +46,16 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	void draw(RenderQueue &renderQueue) override;
 
 	/// Returns the width of the node area
-	inline virtual float width() const { return width_ * scaleFactor_; }
+	inline virtual float width() const { return width_ * scaleFactor_.x; }
 	/// Returns the height of the node area
-	inline virtual float height() const { return height_ * scaleFactor_; }
+	inline virtual float height() const { return height_ * scaleFactor_.y; }
 	/// Returns the size of the node area
 	inline Vector2f size() const { return Vector2f(width(), height()); }
 
 	/// Returns the absolute width of the node area
-	inline virtual float absWidth() const { return width_ * absScaleFactor_; }
+	inline virtual float absWidth() const { return width_ * absScaleFactor_.x; }
 	/// Returns the absolute height of the node area
-	inline virtual float absHeight() const { return height_ * absScaleFactor_; }
+	inline virtual float absHeight() const { return height_ * absScaleFactor_.y; }
 	/// Returns the absolute size of the node area
 	inline Vector2f absSize() const { return Vector2f(absWidth(), absHeight()); }
 

@@ -51,6 +51,11 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	/// Sets the transformation anchor point for every particle with a `Vector2f`
 	void setAnchorPoint(const Vector2f &point);
 
+	/// Flips the texture rect horizontally for every particle
+	void setFlippedX(bool flippedX);
+	/// Flips the texture rect vertically for every particle
+	void setFlippedY(bool flippedY);
+
 	/// Sets the rendering layer for every particle
 	void setLayer(unsigned short layer);
 

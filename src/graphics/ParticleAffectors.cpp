@@ -69,10 +69,10 @@ void ColorAffector::affect(Particle *particle, float normalizedAge)
 // SIZE AFFECTOR
 ///////////////////////////////////////////////////////////
 
-void SizeAffector::addSizeStep(float age, float scale)
+void SizeAffector::addSizeStep(float age, float scaleX, float scaleY)
 {
 	if (sizeSteps_.isEmpty() || age > sizeSteps_[sizeSteps_.size() - 1].age)
-		sizeSteps_.pushBack(SizeStep(age, scale));
+		sizeSteps_.pushBack(SizeStep(age, scaleX, scaleY));
 	else
 		LOGW("Out of order step not added");
 }
@@ -112,7 +112,7 @@ void SizeAffector::affect(Particle *particle, float normalizedAge)
 	const SizeStep &nextStep = sizeSteps_[index];
 
 	const float factor = (normalizedAge - prevStep.age) / (nextStep.age - prevStep.age);
-	const float newScale = prevStep.scale + (nextStep.scale - prevStep.scale) * factor;
+	const Vector2f newScale = prevStep.scale + (nextStep.scale - prevStep.scale) * factor;
 
 	particle->setScale(baseScale_ * newScale);
 }
