@@ -204,7 +204,7 @@ void MyEventHandler::onFrameStart()
 		camScale_ = MinCameraScale;
 	activeSpritesFloat_ = nctl::clamp(activeSpritesFloat_, 0.0f, static_cast<float>(NumSprites));
 
-	const nc::Application::RenderingSettings settings = nc::theApplication().renderingSettings();
+	const nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 	debugString_->clear();
 	debugString_->format("%s sprites: %d, scale: %.2f", meshSpritesEnabled_ ? "Mesh" : "Regular", static_cast<int>(activeSpritesFloat_), -camScale_);
 	debugString_->formatAppend("\nbatching: %s, culling: %s, texture atlas: %s", settings.batchingEnabled ? "on" : "off", settings.cullingEnabled ? "on" : "off", withAtlas_ ? "on" : "off");

@@ -6,6 +6,7 @@ set(HEADERS
 	${NCINE_ROOT}/include/ncine/Rect.h
 	${NCINE_ROOT}/include/ncine/Color.h
 	${NCINE_ROOT}/include/ncine/Colorf.h
+	${NCINE_ROOT}/include/ncine/ColorHdr.h
 	${NCINE_ROOT}/include/ncine/Object.h
 	${NCINE_ROOT}/include/ncine/DrawableNode.h
 	${NCINE_ROOT}/include/ncine/IAppEventHandler.h

@@ -11,6 +11,13 @@ class Colorf;
 class DLL_PUBLIC Color
 {
   public:
+	static const int NumChannels = 4;
+	static const Color Black;
+	static const Color White;
+	static const Color Red;
+	static const Color Green;
+	static const Color Blue;
+
 	/// Default constructor (white color)
 	Color();
 	/// Three channels constructor
@@ -18,7 +25,7 @@ class DLL_PUBLIC Color
 	/// Four channels constructor
 	Color(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha);
 	/// Four channels constructor from an array
-	Color(const unsigned int channels[]);
+	explicit Color(const unsigned int channels[NumChannels]);
 	/// Construtor taking a normalized float color
 	explicit Color(const Colorf &color);
 
@@ -40,7 +47,7 @@ class DLL_PUBLIC Color
 	/// Sets three color channels
 	void set(unsigned int red, unsigned int green, unsigned int blue);
 	/// Sets four color channels from an array
-	void setVec(const unsigned int channels[]);
+	void setVec(const unsigned int channels[NumChannels]);
 
 	/// Sets the alpha channel
 	void setAlpha(unsigned int alpha);
@@ -51,23 +58,23 @@ class DLL_PUBLIC Color
 	/// Equality operator
 	bool operator==(const Color &color) const;
 
+	Color &operator+=(const Color &v);
+	Color &operator-=(const Color &v);
+
 	Color &operator*=(const Color &color);
 	/// Multiplication by a constant scalar
 	Color &operator*=(float scalar);
+
+	Color operator+(const Color &color) const;
+	Color operator-(const Color &color) const;
 
 	Color operator*(const Color &color) const;
 	/// Multiplication by a constant scalar
 	Color operator*(float scalar) const;
 
-	static const Color Black;
-	static const Color White;
-	static const Color Red;
-	static const Color Green;
-	static const Color Blue;
-
   private:
 	/// The four unsigned byte color channels
-	nctl::StaticArray<unsigned char, 4> channels_;
+	nctl::StaticArray<unsigned char, NumChannels> channels_;
 };
 
 }

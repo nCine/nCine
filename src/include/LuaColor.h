@@ -16,6 +16,8 @@ class LuaColor
   private:
 	static int create(lua_State *L);
 
+	static int add(lua_State *L);
+	static int subtract(lua_State *L);
 	static int multiply(lua_State *L);
 };
 

@@ -6,7 +6,7 @@ class ColorTest : public ::testing::Test
 {
   public:
 	ColorTest()
-	    : col1_(64, 128, 64, 128), col2_(128, 128, 128, 128) {}
+	    : col1_(128, 128, 128, 128), col2_(64, 85, 64, 127) {}
 
 	nc::Color col1_;
 	nc::Color col2_;
@@ -64,7 +64,7 @@ TEST_F(ColorTest, ConstructFromFourComponentsAndClamp)
 
 TEST_F(ColorTest, ConstructFromArray)
 {
-	const unsigned int vec[4] = { red, green, blue, alpha };
+	const unsigned int vec[nc::Color::NumChannels] = { red, green, blue, alpha };
 	const nc::Color color(vec);
 	printColor("Constructing a new color from an array: ", color);
 
@@ -122,7 +122,7 @@ TEST_F(ColorTest, SetFourComponents)
 
 TEST_F(ColorTest, SetArray)
 {
-	const unsigned int vec[4] = { red, green, blue, alpha };
+	const unsigned int vec[nc::Color::NumChannels] = { red, green, blue, alpha };
 	nc::Color color;
 	color.setVec(vec);
 	printColor("Constructing a new color and setting components from an array: ", color);
@@ -163,6 +163,34 @@ TEST_F(ColorTest, EqualityOperator)
 	const nc::Color color2 = nc::Color::Red;
 
 	ASSERT(color1 == color2);
+}
+
+TEST_F(ColorTest, AdditionInPlace)
+{
+	const nc::Color oldCol1 = col1_;
+
+	printColor("color1: ", col1_);
+	printColor("color2: ", col2_);
+	printColor("Adding the second color to the first: ", col1_ += col2_);
+
+	ASSERT_EQ(col1_.r(), static_cast<unsigned char>(oldCol1.r() + col2_.r()));
+	ASSERT_EQ(col1_.g(), static_cast<unsigned char>(oldCol1.g() + col2_.g()));
+	ASSERT_EQ(col1_.b(), static_cast<unsigned char>(oldCol1.b() + col2_.b()));
+	ASSERT_EQ(col1_.a(), static_cast<unsigned char>(oldCol1.a() + col2_.a()));
+}
+
+TEST_F(ColorTest, SubtractionInPlace)
+{
+	const nc::Color oldCol1 = col1_;
+
+	printColor("color1: ", col1_);
+	printColor("color2: ", col2_);
+	printColor("Subtracting the second color from the first: ", col1_ -= col2_);
+
+	ASSERT_EQ(col1_.r(), static_cast<unsigned char>(oldCol1.r() - col2_.r()));
+	ASSERT_EQ(col1_.g(), static_cast<unsigned char>(oldCol1.g() - col2_.g()));
+	ASSERT_EQ(col1_.b(), static_cast<unsigned char>(oldCol1.b() - col2_.b()));
+	ASSERT_EQ(col1_.a(), static_cast<unsigned char>(oldCol1.a() - col2_.a()));
 }
 
 TEST_F(ColorTest, MultiplicationInPlace)
@@ -206,6 +234,32 @@ TEST_F(ColorTest, MultiplyScalarInPlaceAndClamp)
 	ASSERT_EQ(col1_.g(), 255);
 	ASSERT_EQ(col1_.b(), 255);
 	ASSERT_EQ(col1_.a(), 255);
+}
+
+TEST_F(ColorTest, Addition)
+{
+	printColor("color1: ", col1_);
+	printColor("color2: ", col2_);
+	const nc::Color add = col1_ + col2_;
+	printColor("Color addition: ", add);
+
+	ASSERT_EQ(add.r(), static_cast<unsigned char>(col1_.r() + col2_.r()));
+	ASSERT_EQ(add.g(), static_cast<unsigned char>(col1_.g() + col2_.g()));
+	ASSERT_EQ(add.b(), static_cast<unsigned char>(col1_.b() + col2_.b()));
+	ASSERT_EQ(add.a(), static_cast<unsigned char>(col1_.a() + col2_.a()));
+}
+
+TEST_F(ColorTest, Subtraction)
+{
+	printColor("color1: ", col1_);
+	printColor("color2: ", col2_);
+	const nc::Color sub = col1_ - col2_;
+	printColor("Color subtraction: ", sub);
+
+	ASSERT_EQ(sub.r(), static_cast<unsigned char>(col1_.r() - col2_.r()));
+	ASSERT_EQ(sub.g(), static_cast<unsigned char>(col1_.g() - col2_.g()));
+	ASSERT_EQ(sub.b(), static_cast<unsigned char>(col1_.b() - col2_.b()));
+	ASSERT_EQ(sub.a(), static_cast<unsigned char>(col1_.a() - col2_.a()));
 }
 
 TEST_F(ColorTest, Multiplication)

@@ -136,7 +136,7 @@ void MyEventHandler::onFrameStart()
 		force = joyVectorRight_ * 0.25f;
 	}
 
-	const nc::Application::RenderingSettings settings = nc::theApplication().renderingSettings();
+	const nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 	debugString_->clear();
 	debugString_->format("deformation: %u, animation: %u", currentDeformation, currentAnimation);
 	debugString_->formatAppend("\nbatching: %s, culling: %s", settings.batchingEnabled ? "on" : "off", settings.cullingEnabled ? "on" : "off");

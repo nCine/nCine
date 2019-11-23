@@ -14,6 +14,8 @@ namespace Color {
 	static const char *Color = "color";
 
 	static const char *create = "create";
+	static const char *add = "add";
+	static const char *subtract = "sub";
 	static const char *multiply = "mul";
 }}
 
@@ -26,6 +28,8 @@ void LuaColor::expose(lua_State *L)
 	lua_newtable(L);
 
 	LuaUtils::addFunction(L, LuaNames::Color::create, create);
+	LuaUtils::addFunction(L, LuaNames::Color::add, add);
+	LuaUtils::addFunction(L, LuaNames::Color::subtract, subtract);
 	LuaUtils::addFunction(L, LuaNames::Color::multiply, multiply);
 
 	lua_setfield(L, -2, LuaNames::Color::Color);
@@ -44,6 +48,50 @@ int LuaColor::create(lua_State *L)
 	const Colorf color(r, g, b, a);
 
 	LuaColorUtils::push(L, color);
+
+	return 1;
+}
+
+int LuaColor::add(lua_State *L)
+{
+	Colorf first(1.0f, 1.0f, 1.0f, 1.0f);
+	Colorf second(1.0f, 1.0f, 1.0f, 1.0f);
+
+	if (lua_istable(L, -2) && lua_istable(L, -1))
+	{
+		second = LuaColorUtils::retrieveTable(L, -1);
+		lua_pop(L, 1);
+		first = LuaColorUtils::retrieveTable(L, -1);
+		lua_pop(L, 1);
+	}
+	else
+		LuaDebug::traceError(L, "Expecting two color tables");
+
+	first += second;
+
+	LuaColorUtils::push(L, first);
+
+	return 1;
+}
+
+int LuaColor::subtract(lua_State *L)
+{
+	Colorf first(1.0f, 1.0f, 1.0f, 1.0f);
+	Colorf second(1.0f, 1.0f, 1.0f, 1.0f);
+
+	if (lua_istable(L, -2) && lua_istable(L, -1))
+	{
+		second = LuaColorUtils::retrieveTable(L, -1);
+		lua_pop(L, 1);
+		first = LuaColorUtils::retrieveTable(L, -1);
+		lua_pop(L, 1);
+	}
+	else
+		LuaDebug::traceError(L, "Expecting two color tables");
+
+	first -= second;
+
+	LuaColorUtils::push(L, first);
 
 	return 1;
 }

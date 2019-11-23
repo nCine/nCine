@@ -33,7 +33,7 @@ Color::Color(unsigned int red, unsigned int green, unsigned int blue, unsigned i
 	set(red, green, blue, alpha);
 }
 
-Color::Color(const unsigned int channels[4])
+Color::Color(const unsigned int channels[NumChannels])
 {
 	setVec(channels);
 }
@@ -60,10 +60,12 @@ void Color::set(unsigned int red, unsigned int green, unsigned int blue, unsigne
 
 void Color::set(unsigned int red, unsigned int green, unsigned int blue)
 {
-	set(red, green, blue, 255);
+	channels_[0] = static_cast<unsigned char>(red);
+	channels_[1] = static_cast<unsigned char>(green);
+	channels_[2] = static_cast<unsigned char>(blue);
 }
 
-void Color::setVec(const unsigned int channels[])
+void Color::setVec(const unsigned int channels[NumChannels])
 {
 	set(channels[0], channels[1], channels[2], channels[3]);
 }
@@ -75,10 +77,10 @@ void Color::setAlpha(unsigned int alpha)
 
 Color &Color::operator=(const Colorf &color)
 {
-	channels_[0] = static_cast<unsigned char>(color.r() * 255);
-	channels_[1] = static_cast<unsigned char>(color.g() * 255);
-	channels_[2] = static_cast<unsigned char>(color.b() * 255);
-	channels_[3] = static_cast<unsigned char>(color.a() * 255);
+	channels_[0] = static_cast<unsigned char>(color.r() * 255.0f);
+	channels_[1] = static_cast<unsigned char>(color.g() * 255.0f);
+	channels_[2] = static_cast<unsigned char>(color.b() * 255.0f);
+	channels_[3] = static_cast<unsigned char>(color.a() * 255.0f);
 
 	return *this;
 }
@@ -89,11 +91,35 @@ bool Color::operator==(const Color &color) const
 	        b() == color.b() && a() == color.a());
 }
 
+Color &Color::operator+=(const Color &color)
+{
+	for (unsigned int i = 0; i < NumChannels; i++)
+	{
+		unsigned int channelValue = channels_[i] + color.channels_[i];
+		channelValue = nctl::clamp(channelValue, 0U, 255U);
+		channels_[i] = static_cast<unsigned char>(channelValue);
+	}
+
+	return *this;
+}
+
+Color &Color::operator-=(const Color &color)
+{
+	for (unsigned int i = 0; i < NumChannels; i++)
+	{
+		unsigned int channelValue = channels_[i] - color.channels_[i];
+		channelValue = nctl::clamp(channelValue, 0U, 255U);
+		channels_[i] = static_cast<unsigned char>(channelValue);
+	}
+
+	return *this;
+}
+
 Color &Color::operator*=(const Color &color)
 {
-	for (unsigned int i = 0; i < 4; i++)
+	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		float channelValue = (color.channels_[i] / 255.0f) * channels_[i];
+		float channelValue = channels_[i] * (color.channels_[i] / 255.0f);
 		channelValue = nctl::clamp(channelValue, 0.0f, 255.0f);
 		channels_[i] = static_cast<unsigned char>(channelValue);
 	}
@@ -103,9 +129,9 @@ Color &Color::operator*=(const Color &color)
 
 Color &Color::operator*=(float scalar)
 {
-	for (unsigned int i = 0; i < 4; i++)
+	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		float channelValue = scalar * channels_[i];
+		float channelValue = channels_[i] * scalar;
 		channelValue = nctl::clamp(channelValue, 0.0f, 255.0f);
 		channels_[i] = static_cast<unsigned char>(channelValue);
 	}
@@ -113,13 +139,41 @@ Color &Color::operator*=(float scalar)
 	return *this;
 }
 
+Color Color::operator+(const Color &color) const
+{
+	Color result;
+
+	for (unsigned int i = 0; i < NumChannels; i++)
+	{
+		unsigned int channelValue = channels_[i] + color.channels_[i];
+		channelValue = nctl::clamp(channelValue, 0U, 255U);
+		result.channels_[i] = static_cast<unsigned char>(channelValue);
+	}
+
+	return result;
+}
+
+Color Color::operator-(const Color &color) const
+{
+	Color result;
+
+	for (unsigned int i = 0; i < NumChannels; i++)
+	{
+		unsigned int channelValue = channels_[i] - color.channels_[i];
+		channelValue = nctl::clamp(channelValue, 0U, 255U);
+		result.channels_[i] = static_cast<unsigned char>(channelValue);
+	}
+
+	return result;
+}
+
 Color Color::operator*(const Color &color) const
 {
 	Color result;
 
-	for (unsigned int i = 0; i < 4; i++)
+	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		float channelValue = (color.channels_[i] / 255.0f) * channels_[i];
+		float channelValue = channels_[i] * (color.channels_[i] / 255.0f);
 		channelValue = nctl::clamp(channelValue, 0.0f, 255.0f);
 		result.channels_[i] = static_cast<unsigned char>(channelValue);
 	}
@@ -131,9 +185,9 @@ Color Color::operator*(float scalar) const
 {
 	Color result;
 
-	for (unsigned int i = 0; i < 4; i++)
+	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		float channelValue = scalar * channels_[i];
+		float channelValue = channels_[i] * scalar;
 		channelValue = nctl::clamp(channelValue, 0.0f, 255.0f);
 		result.channels_[i] = static_cast<unsigned char>(channelValue);
 	}

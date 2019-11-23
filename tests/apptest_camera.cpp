@@ -210,7 +210,7 @@ void MyEventHandler::onFrameStart()
 	if (camPos_.y < minY)
 		camPos_.y = minY;
 
-	const nc::Application::RenderingSettings settings = nc::theApplication().renderingSettings();
+	const nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 	debugString_->clear();
 	debugString_->format("x: %.2f, y: %.2f, scale: %.2f, angle: %.2f", -camPos_.x, -camPos_.y, camScale_, camRot_);
 	debugString_->formatAppend("\nbatching: %s, culling: %s, texture atlas: %s", settings.batchingEnabled ? "on" : "off", settings.cullingEnabled ? "on" : "off", withAtlas_ ? "on" : "off");

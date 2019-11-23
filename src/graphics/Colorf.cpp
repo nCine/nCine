@@ -1,5 +1,6 @@
 #include "Colorf.h"
 #include "Color.h"
+#include "ColorHdr.h"
 #include <nctl/algorithms.h>
 
 namespace ncine {
@@ -33,7 +34,7 @@ Colorf::Colorf(float red, float green, float blue, float alpha)
 	set(red, green, blue, alpha);
 }
 
-Colorf::Colorf(const float channels[4])
+Colorf::Colorf(const float channels[NumChannels])
 {
 	setVec(channels);
 }
@@ -45,6 +46,11 @@ Colorf::Colorf(const Color &color)
 	channels_[1] = static_cast<float>(color.g() * inv);
 	channels_[2] = static_cast<float>(color.b() * inv);
 	channels_[3] = static_cast<float>(color.a() * inv);
+}
+
+Colorf::Colorf(const ColorHdr &color)
+{
+	set(color.r(), color.g(), color.b(), 1.0f);
 }
 
 ///////////////////////////////////////////////////////////
@@ -61,10 +67,12 @@ void Colorf::set(float red, float green, float blue, float alpha)
 
 void Colorf::set(float red, float green, float blue)
 {
-	set(red, green, blue, 1.0f);
+	channels_[0] = nctl::clamp(red, 0.0f, 1.0f);
+	channels_[1] = nctl::clamp(green, 0.0f, 1.0f);
+	channels_[2] = nctl::clamp(blue, 0.0f, 1.0f);
 }
 
-void Colorf::setVec(const float channels[])
+void Colorf::setVec(const float channels[NumChannels])
 {
 	set(channels[0], channels[1], channels[2], channels[3]);
 }
@@ -85,11 +93,33 @@ Colorf &Colorf::operator=(const Color &color)
 	return *this;
 }
 
+Colorf &Colorf::operator+=(const Colorf &color)
+{
+	for (unsigned int i = 0; i < NumChannels; i++)
+	{
+		const float channelValue = channels_[i] + color.channels_[i];
+		channels_[i] = nctl::clamp(channelValue, 0.0f, 1.0f);
+	}
+
+	return *this;
+}
+
+Colorf &Colorf::operator-=(const Colorf &color)
+{
+	for (unsigned int i = 0; i < NumChannels; i++)
+	{
+		const float channelValue = channels_[i] - color.channels_[i];
+		channels_[i] = nctl::clamp(channelValue, 0.0f, 1.0f);
+	}
+
+	return *this;
+}
+
 Colorf &Colorf::operator*=(const Colorf &color)
 {
-	for (unsigned int i = 0; i < 4; i++)
+	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		const float channelValue = color.channels_[i] * channels_[i];
+		const float channelValue = channels_[i] * color.channels_[i];
 		channels_[i] = nctl::clamp(channelValue, 0.0f, 1.0f);
 	}
 
@@ -98,22 +128,48 @@ Colorf &Colorf::operator*=(const Colorf &color)
 
 Colorf &Colorf::operator*=(float scalar)
 {
-	for (unsigned int i = 0; i < 4; i++)
+	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		const float channelValue = scalar * channels_[i];
+		const float channelValue = channels_[i] * scalar;
 		channels_[i] = nctl::clamp(channelValue, 0.0f, 1.0f);
 	}
 
 	return *this;
 }
 
+Colorf Colorf::operator+(const Colorf &color) const
+{
+	Colorf result;
+
+	for (unsigned int i = 0; i < NumChannels; i++)
+	{
+		const float channelValue = channels_[i] + color.channels_[i];
+		result.channels_[i] = nctl::clamp(channelValue, 0.0f, 1.0f);
+	}
+
+	return result;
+}
+
+Colorf Colorf::operator-(const Colorf &color) const
+{
+	Colorf result;
+
+	for (unsigned int i = 0; i < NumChannels; i++)
+	{
+		const float channelValue = channels_[i] - color.channels_[i];
+		result.channels_[i] = nctl::clamp(channelValue, 0.0f, 1.0f);
+	}
+
+	return result;
+}
+
 Colorf Colorf::operator*(const Colorf &color) const
 {
 	Colorf result;
 
-	for (unsigned int i = 0; i < 4; i++)
+	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		const float channelValue = color.channels_[i] * channels_[i];
+		const float channelValue = channels_[i] * color.channels_[i];
 		result.channels_[i] = nctl::clamp(channelValue, 0.0f, 1.0f);
 	}
 
@@ -124,9 +180,9 @@ Colorf Colorf::operator*(float scalar) const
 {
 	Colorf result;
 
-	for (unsigned int i = 0; i < 4; i++)
+	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		const float channelValue = scalar * channels_[i];
+		const float channelValue = channels_[i] * scalar;
 		result.channels_[i] = nctl::clamp(channelValue, 0.0f, 1.0f);
 	}
 

@@ -65,7 +65,7 @@ void MyEventHandler::onFrameStart()
 	if (!pause_)
 		angle_ += 2.0f * interval;
 
-	const nc::Application::RenderingSettings settings = nc::theApplication().renderingSettings();
+	const nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 	debugString_->clear();
 	debugString_->formatAppend("batching: %s, batching with indices: %s", settings.batchingEnabled ? "on" : "off", settings.batchingWithIndices ? "on" : "off");
 	debugText_->setString(*debugString_);

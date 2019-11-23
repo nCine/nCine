@@ -3,6 +3,7 @@
 
 #include <ncine/Color.h>
 #include <ncine/Colorf.h>
+#include <ncine/ColorHdr.h>
 #include "gtest/gtest.h"
 
 namespace nc = ncine;
@@ -26,6 +27,17 @@ void printColor(const nc::Colorf &color)
 }
 
 void printColor(const char *message, const nc::Colorf &color)
+{
+	printf("%s ", message);
+	printColor(color);
+}
+
+void printColor(const nc::ColorHdr &color)
+{
+	printf("<%.2f, %.2f, %.2f>\n", color.r(), color.g(), color.b());
+}
+
+void printColor(const char *message, const nc::ColorHdr &color)
 {
 	printf("%s ", message);
 	printColor(color);

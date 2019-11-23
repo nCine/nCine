@@ -6,7 +6,7 @@ class ColorfTest : public ::testing::Test
 {
   public:
 	ColorfTest()
-	    : col1_(0.25f, 0.5f, 0.25f, 0.5f), col2_(0.5f, 0.5f, 0.5f, 0.5f) {}
+	    : col1_(0.5f, 0.5f, 0.5f, 0.5f), col2_(0.25f, 0.33f, 0.25f, 0.5f) {}
 
 	nc::Colorf col1_;
 	nc::Colorf col2_;
@@ -64,7 +64,7 @@ TEST_F(ColorfTest, ConstructFromFourComponentsAndClamp)
 
 TEST_F(ColorfTest, ConstructFromArray)
 {
-	const float vec[4] = { red, green, blue, alpha };
+	const float vec[nc::Colorf::NumChannels] = { red, green, blue, alpha };
 	const nc::Colorf color(vec);
 	printColor("Constructing a new color from an array: ", color);
 
@@ -122,7 +122,7 @@ TEST_F(ColorfTest, SetFourComponents)
 
 TEST_F(ColorfTest, SetArray)
 {
-	const float vec[4] = { red, green, blue, alpha };
+	const float vec[nc::Colorf::NumChannels] = { red, green, blue, alpha };
 	nc::Colorf color;
 	color.setVec(vec);
 	printColor("Constructing a new color and setting components from an array: ", color);
@@ -159,10 +159,38 @@ TEST_F(ColorfTest, AssignNonFloatColor)
 
 TEST_F(ColorfTest, EqualityOperatorAfterConversion)
 {
-	const nc::Colorf color1 = nc::Colorf::Red;
-	const nc::Colorf color2 = nc::Colorf::Red;
+	const nc::Color color1 = nc::Color(nc::Colorf::Red);
+	const nc::Color color2 = nc::Color(nc::Colorf::Red);
 
-	ASSERT(nc::Color(color1) == nc::Color(color2));
+	ASSERT(color1 == color2);
+}
+
+TEST_F(ColorfTest, AdditionInPlace)
+{
+	const nc::Colorf oldCol1 = col1_;
+
+	printColor("color1: ", col1_);
+	printColor("color2: ", col2_);
+	printColor("Adding the second color to the first: ", col1_ += col2_);
+
+	ASSERT_EQ(col1_.r(), oldCol1.r() + col2_.r());
+	ASSERT_EQ(col1_.g(), oldCol1.g() + col2_.g());
+	ASSERT_EQ(col1_.b(), oldCol1.b() + col2_.b());
+	ASSERT_EQ(col1_.a(), oldCol1.a() + col2_.a());
+}
+
+TEST_F(ColorfTest, SubtractionInPlace)
+{
+	const nc::Colorf oldCol1 = col1_;
+
+	printColor("color1: ", col1_);
+	printColor("color2: ", col2_);
+	printColor("Subtracting the second color from the first: ", col1_ -= col2_);
+
+	ASSERT_EQ(col1_.r(), oldCol1.r() - col2_.r());
+	ASSERT_EQ(col1_.g(), oldCol1.g() - col2_.g());
+	ASSERT_EQ(col1_.b(), oldCol1.b() - col2_.b());
+	ASSERT_EQ(col1_.a(), oldCol1.a() - col2_.a());
 }
 
 TEST_F(ColorfTest, MultiplicationInPlace)
@@ -206,6 +234,32 @@ TEST_F(ColorfTest, MultiplyScalarInPlaceAndClamp)
 	ASSERT_FLOAT_EQ(col1_.g(), 1.0f);
 	ASSERT_FLOAT_EQ(col1_.b(), 1.0f);
 	ASSERT_FLOAT_EQ(col1_.a(), 1.0f);
+}
+
+TEST_F(ColorfTest, Addition)
+{
+	printColor("color1: ", col1_);
+	printColor("color2: ", col2_);
+	const nc::Colorf add = col1_ + col2_;
+	printColor("Color addition: ", add);
+
+	ASSERT_EQ(add.r(), col1_.r() + col2_.r());
+	ASSERT_EQ(add.g(), col1_.g() + col2_.g());
+	ASSERT_EQ(add.b(), col1_.b() + col2_.b());
+	ASSERT_EQ(add.a(), col1_.a() + col2_.a());
+}
+
+TEST_F(ColorfTest, Subtraction)
+{
+	printColor("color1: ", col1_);
+	printColor("color2: ", col2_);
+	const nc::Colorf sub = col1_ - col2_;
+	printColor("Color subtraction: ", sub);
+
+	ASSERT_EQ(sub.r(), col1_.r() - col2_.r());
+	ASSERT_EQ(sub.g(), col1_.g() - col2_.g());
+	ASSERT_EQ(sub.b(), col1_.b() - col2_.b());
+	ASSERT_EQ(sub.a(), col1_.a() - col2_.a());
 }
 
 TEST_F(ColorfTest, Multiplication)

@@ -6,11 +6,19 @@
 namespace ncine {
 
 class Color;
+class ColorHdr;
 
 /// A four channels normalized float color
 class DLL_PUBLIC Colorf
 {
   public:
+	static const int NumChannels = 4;
+	static const Colorf Black;
+	static const Colorf White;
+	static const Colorf Red;
+	static const Colorf Green;
+	static const Colorf Blue;
+
 	/// Default constructor (white color)
 	Colorf();
 	/// Three channels constructor
@@ -18,9 +26,11 @@ class DLL_PUBLIC Colorf
 	/// Four channels constructor
 	Colorf(float red, float green, float blue, float alpha);
 	/// Four channels constructor from an array
-	Colorf(const float channels[4]);
+	explicit Colorf(const float channels[NumChannels]);
 	/// Constructor taking an unsigned char color
 	explicit Colorf(const Color &color);
+	/// Constructor taking an unclamped float color
+	explicit Colorf(const ColorHdr &color);
 
 	/// Gets the red channel of the color
 	inline float r() const { return channels_[0]; }
@@ -40,30 +50,30 @@ class DLL_PUBLIC Colorf
 	/// Sets three color channels
 	void set(float red, float green, float blue);
 	/// Sets four color channels from an array
-	void setVec(const float channels[4]);
+	void setVec(const float channels[NumChannels]);
 	/// Sets the alpha channel
 	void setAlpha(float alpha);
 
 	/// Assignment operator from an unsigned char color
 	Colorf &operator=(const Color &color);
 
+	Colorf &operator+=(const Colorf &v);
+	Colorf &operator-=(const Colorf &v);
+
 	Colorf &operator*=(const Colorf &color);
 	/// Multiplication by a constant scalar
 	Colorf &operator*=(float scalar);
+
+	Colorf operator+(const Colorf &color) const;
+	Colorf operator-(const Colorf &color) const;
 
 	Colorf operator*(const Colorf &color) const;
 	/// Multiplication by a constant scalar
 	Colorf operator*(float scalar) const;
 
-	static const Colorf Black;
-	static const Colorf White;
-	static const Colorf Red;
-	static const Colorf Green;
-	static const Colorf Blue;
-
   private:
 	/// The four float color channels
-	nctl::StaticArray<float, 4> channels_;
+	nctl::StaticArray<float, NumChannels> channels_;
 };
 
 }
