@@ -9,16 +9,7 @@ namespace ncine {
 
 namespace {
 
-#ifdef WITH_TRACY
-	void setThreadName(HANDLE handle, const char *name)
-	{
-	#if !defined(__MINGW32__)
-		tracy::SetThreadName(handle, name);
-	#else
-		tracy::SetThreadName(reinterpret_cast<unsigned long long>(handle), name);
-	#endif
-	}
-#elif !defined PTW32_VERSION && !defined __WINPTHREADS_VERSION
+#if !defined PTW32_VERSION && !defined __WINPTHREADS_VERSION
 	const unsigned int MaxThreadNameLength = 256;
 
 	void setThreadName(HANDLE handle, const char *name)
@@ -144,7 +135,11 @@ void Thread::setName(const char *name)
 
 void Thread::setSelfName(const char *name)
 {
+#ifdef WITH_TRACY
+	tracy::SetThreadName(name);
+#else
 	setThreadName(reinterpret_cast<HANDLE>(-1), name);
+#endif
 }
 
 int Thread::priority() const

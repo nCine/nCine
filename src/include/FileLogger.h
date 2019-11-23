@@ -11,7 +11,7 @@ namespace ncine {
 class FileLogger : public ILogger
 {
   public:
-	FileLogger(LogLevel consoleLevel);
+	explicit FileLogger(LogLevel consoleLevel);
 	FileLogger(LogLevel consoleLevel, LogLevel fileLevel, const char *filename);
 	~FileLogger() override;
 
@@ -34,7 +34,6 @@ class FileLogger : public ILogger
 #endif
 
   private:
-	nctl::UniquePtr<IFile> fileHandle_;
 	LogLevel consoleLevel_;
 	LogLevel fileLevel_;
 
@@ -45,6 +44,9 @@ class FileLogger : public ILogger
 	static const unsigned int LogStringCapacity = 16 * 1024;
 	nctl::String logString_;
 #endif
+
+	// Declared at the end to prevent a `heap-use-after-free` AddressSanitizer error
+	nctl::UniquePtr<IFile> fileHandle_;
 
 	/// Deleted copy constructor
 	FileLogger(const FileLogger &) = delete;

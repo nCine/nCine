@@ -168,7 +168,7 @@ unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 			case LogLevel::WARN:		color = 0xf5d800; break;
 			case LogLevel::INFO:		color = 0x01a46d; break;
 			case LogLevel::DEBUG:		color = 0x377fc7; break;
-			case LogLevel::VERBOSE:		color = 0x73A5D7; break;
+			case LogLevel::VERBOSE:		color = 0x73a5d7; break;
 			case LogLevel::UNKNOWN:		color = 0x999999; break;
 			default:					color = 0x999999; break;
 		}

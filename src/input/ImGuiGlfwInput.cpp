@@ -28,7 +28,7 @@ bool ImGuiGlfwInput::inputEnabled_ = true;
 GLFWwindow *ImGuiGlfwInput::window_ = nullptr;
 double ImGuiGlfwInput::time_ = 0.0;
 bool ImGuiGlfwInput::mouseJustPressed_[5] = { false, false, false, false, false };
-GLFWcursor *ImGuiGlfwInput::mouseCursors_[ImGuiMouseCursor_COUNT] = { nullptr };
+GLFWcursor *ImGuiGlfwInput::mouseCursors_[ImGuiMouseCursor_COUNT] = {};
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS

@@ -24,7 +24,7 @@ bool ImGuiSdlInput::inputEnabled_ = true;
 SDL_Window *ImGuiSdlInput::window_ = nullptr;
 double ImGuiSdlInput::time_ = 0.0;
 bool ImGuiSdlInput::mousePressed_[3] = { false, false, false };
-SDL_Cursor *ImGuiSdlInput::mouseCursors_[ImGuiMouseCursor_COUNT] = { nullptr };
+SDL_Cursor *ImGuiSdlInput::mouseCursors_[ImGuiMouseCursor_COUNT] = {};
 char *ImGuiSdlInput::clipboardTextData_ = nullptr;
 
 ///////////////////////////////////////////////////////////

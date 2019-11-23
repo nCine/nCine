@@ -125,9 +125,6 @@ void *Thread::join()
 	#ifndef __APPLE__
 void Thread::setName(const char *name)
 {
-		#ifdef WITH_TRACY
-	tracy::SetThreadName(tid_, name);
-		#else
 	if (tid_ == 0)
 		return;
 
@@ -141,32 +138,35 @@ void Thread::setName(const char *name)
 		buffer[MaxThreadNameLength - 1] = '\0';
 		pthread_setname_np(tid_, name);
 	}
-		#endif
 }
 	#endif
 
 void Thread::setSelfName(const char *name)
 {
+	#ifdef WITH_TRACY
+	tracy::SetThreadName(name);
+	#else
 	const auto nameLength = strnlen(name, MaxThreadNameLength);
 	if (nameLength <= MaxThreadNameLength - 1)
 	{
-	#ifndef __APPLE__
+		#ifndef __APPLE__
 		pthread_setname_np(pthread_self(), name);
-	#else
+		#else
 		pthread_setname_np(name);
-	#endif
+		#endif
 	}
 	else
 	{
 		char buffer[MaxThreadNameLength];
 		memcpy(buffer, name, MaxThreadNameLength - 1);
 		buffer[MaxThreadNameLength - 1] = '\0';
-	#ifndef __APPLE__
+		#ifndef __APPLE__
 		pthread_setname_np(pthread_self(), name);
-	#else
+		#else
 		pthread_setname_np(name);
-	#endif
+		#endif
 	}
+	#endif
 }
 #endif
 
