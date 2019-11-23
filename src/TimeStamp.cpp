@@ -28,6 +28,19 @@ bool TimeStamp::operator<(const TimeStamp &other) const
 	return counter_ < other.counter_;
 }
 
+TimeStamp &TimeStamp::operator+=(const TimeStamp &other)
+{
+	counter_ += other.counter_;
+	return *this;
+}
+
+TimeStamp &TimeStamp::operator-=(const TimeStamp &other)
+{
+	ASSERT(counter_ > other.counter_);
+	counter_ -= other.counter_;
+	return *this;
+}
+
 TimeStamp TimeStamp::operator+(const TimeStamp &other) const
 {
 	return TimeStamp(counter_ + other.counter_);

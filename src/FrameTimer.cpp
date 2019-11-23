@@ -53,4 +53,19 @@ void FrameTimer::addFrame()
 	}
 }
 
+void FrameTimer::suspend()
+{
+	suspensionStart_ = TimeStamp::now();
+}
+
+TimeStamp FrameTimer::resume()
+{
+	const TimeStamp suspensionDuration = suspensionStart_.timeSince();
+	frameStart_ += suspensionDuration;
+	lastAvgUpdate_ += suspensionDuration;
+	lastLogUpdate_ += suspensionDuration;
+
+	return suspensionDuration;
+}
+
 }

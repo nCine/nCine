@@ -70,16 +70,6 @@ float Application::interval() const
 	return frameTimer_->lastFrameInterval();
 }
 
-void Application::setSuspended(bool suspended)
-{
-	isSuspended_ = suspended;
-	if (isSuspended_ == false)
-	{
-		frameTimer_->start();
-		profileStartTime_ = TimeStamp::now();
-	}
-}
-
 ///////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -158,7 +148,7 @@ void Application::initCommon()
 		profileStartTime_ = TimeStamp::now();
 		appEventHandler_->onInit();
 		timings_[Timings::APP_INIT] = profileStartTime_.secondsSince();
-		LOGI("IAppEventHandler::OnInit() invoked");
+		LOGI("IAppEventHandler::onInit() invoked");
 	}
 
 	// Give user code a chance to add custom GUI fonts
@@ -343,17 +333,27 @@ void Application::setFocus(bool hasFocus)
 	hasFocus = true;
 #endif
 
-	// Check if a focus event has occurred
-	if (hasFocus_ != hasFocus)
-	{
-		hasFocus_ = hasFocus;
-		// Check if focus has been gained
-		if (hasFocus == true)
-		{
-			frameTimer_->start();
-			profileStartTime_ = TimeStamp::now();
-		}
-	}
+	hasFocus_ = hasFocus;
+}
+
+void Application::suspend()
+{
+	ZoneScopedN("onSuspend");
+	frameTimer_->suspend();
+	if (appEventHandler_)
+		appEventHandler_->onSuspend();
+	LOGI("IAppEventHandler::onSuspend() invoked");
+}
+
+void Application::resume()
+{
+	ZoneScopedN("onResume");
+	if (appEventHandler_)
+		appEventHandler_->onResume();
+	const TimeStamp suspensionDuration = frameTimer_->resume();
+	LOGV_X("Suspended for %.3f seconds", suspensionDuration.seconds());
+	profileStartTime_ += suspensionDuration;
+	LOGI("IAppEventHandler::onResume() invoked");
 }
 
 ///////////////////////////////////////////////////////////

@@ -17,6 +17,8 @@ class DLL_PUBLIC LuaIAppEventHandler
 	static void onInit(lua_State *L);
 	static void onFrameStart(lua_State *L);
 	static void onShutdown(lua_State *L);
+	static void onSuspend(lua_State *L);
+	static void onResume(lua_State *L);
 };
 
 }

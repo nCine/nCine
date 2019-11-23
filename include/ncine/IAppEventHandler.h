@@ -26,6 +26,10 @@ class DLL_PUBLIC IAppEventHandler
 	virtual void onFrameEnd() {}
 	/// Called once on application shutdown
 	virtual void onShutdown() {}
+	/// Called every time the applications needs to be suspended
+	virtual void onSuspend() {}
+	/// Called every time the applications resumes from suspension
+	virtual void onResume() {}
 };
 
 inline IAppEventHandler::~IAppEventHandler() {}

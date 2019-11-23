@@ -18,6 +18,8 @@ class LuaEventHandler :
 	void onInit() override;
 	void onFrameStart() override;
 	void onShutdown() override;
+	void onSuspend() override;
+	void onResume() override;
 
 	void onKeyPressed(const KeyboardEvent &event) override;
 	void onKeyReleased(const KeyboardEvent &event) override;

@@ -142,6 +142,10 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Gets the node local matrix
 	inline const Matrix4x4f &localMatrix() const { return localMatrix_; }
 
+	/// Sets the delete children on destruction flag
+	/*! If the flag is true the children are deleted upon node destruction. */
+	inline void setDeleteChildrenOnDestruction(bool shouldDeleteChildrenOnDestruction) { shouldDeleteChildrenOnDestruction_ = shouldDeleteChildrenOnDestruction; }
+
   protected:
 	bool updateEnabled_;
 	bool drawEnabled_;
@@ -180,6 +184,9 @@ class DLL_PUBLIC SceneNode : public Object
 	Matrix4x4f worldMatrix_;
 	/// Local transformation matrix
 	Matrix4x4f localMatrix_;
+
+	/// A flag indicating whether the destructor should also delete all children
+	bool shouldDeleteChildrenOnDestruction_;
 
 	/// Protected copy constructor
 	SceneNode(const SceneNode &);

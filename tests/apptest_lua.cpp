@@ -47,6 +47,16 @@ void MyEventHandler::onShutdown()
 	nc::LuaIAppEventHandler::onShutdown(luaState_.state());
 }
 
+void MyEventHandler::onSuspend()
+{
+	nc::LuaIAppEventHandler::onSuspend(luaState_.state());
+}
+
+void MyEventHandler::onResume()
+{
+	nc::LuaIAppEventHandler::onResume(luaState_.state());
+}
+
 void MyEventHandler::onKeyPressed(const nc::KeyboardEvent &event)
 {
 	nc::LuaIInputEventHandler::onKeyPressed(luaState_.state(), event);

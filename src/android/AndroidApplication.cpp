@@ -93,6 +93,8 @@ void AndroidApplication::start(struct android_app *state, IAppEventHandler *(*cr
 void AndroidApplication::processCommand(struct android_app *state, int32_t cmd)
 {
 	static EglGfxDevice *eglGfxDevice = nullptr;
+	// A flag to avoid resuming if the application has not been suspended first
+	static bool isPaused = false;
 
 	switch (cmd)
 	{
@@ -159,13 +161,18 @@ void AndroidApplication::processCommand(struct android_app *state, int32_t cmd)
 			LOGI("APP_CMD_START event received");
 			break;
 		case APP_CMD_RESUME:
-			LOGW("APP_CMD_RESUME event received (not handled)");
+			LOGW("APP_CMD_RESUME event received");
+			if (isPaused)
+				theAndroidApplication().resume();
+			isPaused = false;
 			break;
 		case APP_CMD_SAVE_STATE:
 			LOGW("APP_CMD_SAVE_STATE event received (not handled)");
 			break;
 		case APP_CMD_PAUSE:
-			LOGW("APP_CMD_PAUSE event received (not handled)");
+			LOGW("APP_CMD_PAUSE event received");
+			theAndroidApplication().suspend();
+			isPaused = true;
 			break;
 		case APP_CMD_STOP:
 			LOGW("APP_CMD_STOP event received (not handled)");

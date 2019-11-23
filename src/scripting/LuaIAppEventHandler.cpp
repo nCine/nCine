@@ -18,6 +18,8 @@ namespace LuaIAppEventHandler {
 	static const char *onInit = "on_init";
 	static const char *onFrameStart = "on_frame_start";
 	static const char *onShutdown = "on_shutdown";
+	static const char *onSuspend = "on_suspend";
+	static const char *onResume = "on_resume";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -37,7 +39,7 @@ void LuaIAppEventHandler::onPreInit(lua_State *L, AppConfiguration &config)
 		LuaAppConfiguration::retrieveAndSet(L, config);
 	}
 	else
-		LOGW("Cannot find the Lua function");
+		LOGW_X("Cannot find the Lua \"%s\" function", LuaNames::LuaIAppEventHandler::onPreInit);
 }
 
 void LuaIAppEventHandler::onInit(lua_State *L)
@@ -52,7 +54,7 @@ void LuaIAppEventHandler::onInit(lua_State *L)
 		lua_call(L, 0, 0);
 	}
 	else
-		LOGW("Cannot find the Lua function");
+		LOGW_X("Cannot find the Lua \"%s\" function", LuaNames::LuaIAppEventHandler::onInit);
 }
 
 void LuaIAppEventHandler::onFrameStart(lua_State *L)
@@ -80,7 +82,37 @@ void LuaIAppEventHandler::onShutdown(lua_State *L)
 		lua_call(L, 0, 0);
 	}
 	else
-		LOGW("Cannot find the Lua function");
+		LOGW_X("Cannot find the Lua \"%s\" function", LuaNames::LuaIAppEventHandler::onShutdown);
+}
+
+void LuaIAppEventHandler::onSuspend(lua_State *L)
+{
+	lua_getglobal(L, LuaNames::ncine);
+	const int type = lua_getfield(L, -1, LuaNames::LuaIAppEventHandler::onSuspend);
+
+	if (type != LUA_TNIL)
+	{
+		ZoneScopedN("Lua onSuspend");
+		ASSERT(type == LUA_TFUNCTION);
+		lua_call(L, 0, 0);
+	}
+	else
+		LOGW_X("Cannot find the Lua \"%s\" function", LuaNames::LuaIAppEventHandler::onSuspend);
+}
+
+void LuaIAppEventHandler::onResume(lua_State *L)
+{
+	lua_getglobal(L, LuaNames::ncine);
+	const int type = lua_getfield(L, -1, LuaNames::LuaIAppEventHandler::onResume);
+
+	if (type != LUA_TNIL)
+	{
+		ZoneScopedN("Lua onResume");
+		ASSERT(type == LUA_TFUNCTION);
+		lua_call(L, 0, 0);
+	}
+	else
+		LOGW_X("Cannot find the Lua \"%s\" function", LuaNames::LuaIAppEventHandler::onResume);
 }
 
 }

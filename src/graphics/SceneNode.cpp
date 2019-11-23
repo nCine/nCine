@@ -17,7 +17,8 @@ SceneNode::SceneNode(SceneNode *parent, float xx, float yy)
     : Object(ObjectType::SCENENODE), x(xx), y(yy), updateEnabled_(true), drawEnabled_(true), parent_(nullptr),
       anchorPoint_(0.0f, 0.0f), scaleFactor_(1.0f, 1.0f), rotation_(0.0f),
       absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f, 1.0f), absRotation_(0.0f),
-      worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity)
+      worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity),
+      shouldDeleteChildrenOnDestruction_(true)
 {
 	setParent(parent);
 }
@@ -41,8 +42,16 @@ SceneNode::SceneNode()
 
 SceneNode::~SceneNode()
 {
-	for (SceneNode *child : children_)
-		delete child;
+	if (shouldDeleteChildrenOnDestruction_)
+	{
+		for (SceneNode *child : children_)
+			delete child;
+	}
+	else
+	{
+		for (SceneNode *child : children_)
+			child->parent_ = nullptr;
+	}
 
 	setParent(nullptr);
 }
@@ -144,8 +153,8 @@ void SceneNode::update(float interval)
 	{
 		if (child->updateEnabled_)
 		{
-			child->update(interval);
 			child->transform();
+			child->update(interval);
 		}
 	}
 }

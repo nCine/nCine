@@ -14,8 +14,13 @@ class FrameTimer
 
 	/// Adds a frame to the counter and calculates the interval since the previous one
 	void addFrame();
-	/// Resets the time stamp for the beginning of a frame
-	void start() { frameStart_ = TimeStamp::now(); }
+
+	/// Starts counting the suspension time
+	void suspend();
+	/// Drifts timers by the duration of last suspension
+	/*! \return A timestamp with last suspension duration */
+	TimeStamp resume();
+
 	/// Returns the total number of frames counted
 	inline unsigned long int totalNumberFrames() const { return totNumFrames_; }
 	/// Returns the interval in seconds between the last two subsequent calls to `addFrame()`
@@ -35,6 +40,8 @@ class FrameTimer
 	TimeStamp frameStart_;
 	/// Seconds elapsed since previous frame
 	float frameInterval_;
+	/// Time stamp at the begininng of application suspension
+	TimeStamp suspensionStart_;
 
 	/// Total number of frames counted
 	unsigned long int totNumFrames_;

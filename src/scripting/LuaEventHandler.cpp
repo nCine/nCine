@@ -89,6 +89,16 @@ void LuaEventHandler::onShutdown()
 	delete luaState_;
 }
 
+void LuaEventHandler::onSuspend()
+{
+	LuaIAppEventHandler::onSuspend(luaState_->state());
+}
+
+void LuaEventHandler::onResume()
+{
+	LuaIAppEventHandler::onResume(luaState_->state());
+}
+
 void LuaEventHandler::onKeyPressed(const KeyboardEvent &event)
 {
 	LuaIInputEventHandler::onKeyPressed(luaState_->state(), event);

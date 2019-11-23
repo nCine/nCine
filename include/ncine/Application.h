@@ -99,7 +99,7 @@ class DLL_PUBLIC Application
 	/*! If `true` the application is suspended, it will neither update nor receive events */
 	inline bool isSuspended() const { return isSuspended_; }
 	/// Sets the suspension flag value
-	void setSuspended(bool suspended);
+	inline void setSuspended(bool suspended) { isSuspended_ = suspended; }
 
 	/// Returns the value of the auto-suspension flag
 	/*! If `true` the application will be suspended when it loses focus */
@@ -152,6 +152,11 @@ class DLL_PUBLIC Application
 	void step();
 	/// Must be called before exiting to shut down the application
 	void shutdownCommon();
+
+	/// Called when the application gets suspended
+	void suspend();
+	/// Called when the application resumes execution
+	void resume();
 
 	/// Sets the focus flag
 	virtual void setFocus(bool hasFocus);

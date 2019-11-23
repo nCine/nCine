@@ -17,6 +17,8 @@ class DLL_PUBLIC TimeStamp
 
 	bool operator>(const TimeStamp &other) const;
 	bool operator<(const TimeStamp &other) const;
+	TimeStamp &operator+=(const TimeStamp &other);
+	TimeStamp &operator-=(const TimeStamp &other);
 	TimeStamp operator+(const TimeStamp &other) const;
 	TimeStamp operator-(const TimeStamp &other) const;
 

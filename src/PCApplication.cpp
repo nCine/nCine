@@ -56,6 +56,7 @@ void PCApplication::init(IAppEventHandler *(*createAppEventHandler)())
 {
 	ZoneScoped;
 	profileStartTime_ = TimeStamp::now();
+	wasSuspended_ = shouldSuspend();
 
 	// Registering the logger as early as possible
 	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(appCfg_.consoleLogLevel));
@@ -102,7 +103,17 @@ void PCApplication::run()
 #endif
 		processEvents();
 
-		if (shouldSuspend() == false)
+		const bool suspended = shouldSuspend();
+		if (wasSuspended_ != suspended)
+		{
+			if (suspended)
+				suspend();
+			else
+				resume();
+			wasSuspended_ = suspended;
+		}
+
+		if (suspended == false)
 			step();
 #ifndef __EMSCRIPTEN__
 	}

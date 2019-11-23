@@ -13,6 +13,9 @@ class DLL_PUBLIC PCApplication : public Application
 	static int start(IAppEventHandler *(*createAppEventHandler)());
 
   private:
+	/// Suspension state from last frame
+	bool wasSuspended_;
+
 	/// Must be called at the beginning to initialize the application
 	void init(IAppEventHandler *(*createAppEventHandler)());
 	/// The main game loop

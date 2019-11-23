@@ -18,6 +18,8 @@ class MyEventHandler :
 	void onInit() override;
 	void onFrameStart() override;
 	void onShutdown() override;
+	void onSuspend() override;
+	void onResume() override;
 
 	void onKeyPressed(const nc::KeyboardEvent &event) override;
 	void onKeyReleased(const nc::KeyboardEvent &event) override;
