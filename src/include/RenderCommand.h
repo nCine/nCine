@@ -64,7 +64,7 @@ class RenderCommand
 	void commitUniformBlocks();
 
 	/// Returns the queue sort key
-	inline unsigned long int sortKey() const { return sortKey_; }
+	inline uint64_t sortKey() const { return sortKey_; }
 	/// Calculates a sort key for the queue
 	void calculateSortKey();
 	/// Issues the render command
@@ -108,7 +108,7 @@ class RenderCommand
 		GLsizei height;
 	};
 
-	unsigned long int sortKey_;
+	uint64_t sortKey_;
 	unsigned short layer_;
 	int numInstances_;
 	int batchSize_;

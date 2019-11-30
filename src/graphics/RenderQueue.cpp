@@ -30,7 +30,7 @@ void RenderQueue::addCommand(RenderCommand *command)
 	// Calculating a sorting key before adding the command to the queue
 	command->calculateSortKey();
 
-	if (command->material().isTransparent() == false)
+	if (command->material().isBlendingEnabled() == false)
 		opaqueQueue_.pushBack(command);
 	else
 		transparentQueue_.pushBack(command);
@@ -164,6 +164,7 @@ void RenderQueue::draw()
 		commandIndex++;
 
 		RenderStatistics::gatherStatistics(*transparentRenderCommand);
+		GLBlending::blendFunc(transparentRenderCommand->material().srcBlendingFactor(), transparentRenderCommand->material().destBlendingFactor());
 		transparentRenderCommand->issue();
 	}
 	// Depth mask has to be enabled again before exiting this method

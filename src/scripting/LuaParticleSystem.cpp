@@ -34,6 +34,8 @@ namespace ParticleSystem {
 	static const char *setAnchorPoint = "set_anchor_point";
 	static const char *setFlippedX = "set_flipped_x";
 	static const char *setFlippedY = "set_flipped_y";
+	static const char *setBlendingPreset = "set_blending_preset";
+	static const char *setBlendingFactors = "set_blending_factors";
 	static const char *setLayer = "set_layer";
 }}
 
@@ -82,6 +84,8 @@ void LuaParticleSystem::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setAnchorPoint, setAnchorPoint);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setFlippedX, setFlippedX);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setFlippedY, setFlippedY);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setBlendingPreset, setBlendingPreset);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setBlendingFactors, setBlendingFactors);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setLayer, setLayer);
 
 	LuaSceneNode::exposeFunctions(L);
@@ -508,6 +512,27 @@ int LuaParticleSystem::setFlippedY(lua_State *L)
 	const bool flippedY = LuaUtils::retrieve<bool>(L, -1);
 
 	particleSys->setFlippedY(flippedY);
+
+	return 0;
+}
+
+int LuaParticleSystem::setBlendingPreset(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	const DrawableNode::BlendingPreset blendingPreset = static_cast<DrawableNode::BlendingPreset>(LuaUtils::retrieve<int64_t>(L, -1));
+
+	particleSys->setBlendingPreset(blendingPreset);
+
+	return 0;
+}
+
+int LuaParticleSystem::setBlendingFactors(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -3);
+	const DrawableNode::BlendingFactor srcBlendingFactor = static_cast<DrawableNode::BlendingFactor>(LuaUtils::retrieve<int64_t>(L, -2));
+	const DrawableNode::BlendingFactor destBlendingFactor = static_cast<DrawableNode::BlendingFactor>(LuaUtils::retrieve<int64_t>(L, -1));
+
+	particleSys->setBlendingFactors(srcBlendingFactor, destBlendingFactor);
 
 	return 0;
 }

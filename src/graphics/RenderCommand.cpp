@@ -51,8 +51,8 @@ void RenderCommand::commitUniformBlocks()
 
 void RenderCommand::calculateSortKey()
 {
-	const unsigned long int upper = static_cast<unsigned long>(layer_ << 16);
-	const unsigned int lower = material_.sortKey();
+	const uint64_t upper = static_cast<uint64_t>(layer_) << 32;
+	const uint32_t lower = material_.sortKey();
 	sortKey_ = upper + lower;
 }
 

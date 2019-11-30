@@ -32,6 +32,36 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	static const Vector2f AnchorBottomRight;
 	static const Vector2f AnchorTopRight;
 
+	/// Presets for blending factors
+	enum class BlendingPreset
+	{
+		DISABLED, ///< uses `GL_ONE` and `GL_ZERO`
+		ALPHA, ///< uses `GL_SRC_ALPHA` and `GL_ONE_MINUS_SRC_ALPHA`
+		PREMULTIPLIED_ALPHA, ///< uses `GL_ONE` and `GL_ONE_MINUS_SRC_ALPHA`
+		ADDITIVE, ///< uses `GL_SRC_ALPHA` and `GL_ONE`
+		MULTIPLY ///< uses `GL_DST_COLOR` and `GL_ZERO`
+	};
+
+	/// OpenGL blending factors
+	enum class BlendingFactor
+	{
+		ZERO,
+		ONE,
+		SRC_COLOR,
+		ONE_MINUS_SRC_COLOR,
+		DST_COLOR,
+		ONE_MINUS_DST_COLOR,
+		SRC_ALPHA,
+		ONE_MINUS_SRC_ALPHA,
+		DST_ALPHA,
+		ONE_MINUS_DST_ALPHA,
+		CONSTANT_COLOR,
+		ONE_MINUS_CONSTANT_COLOR,
+		CONSTANT_ALPHA,
+		ONE_MINUS_CONSTANT_ALPHA,
+		SRC_ALPHA_SATURATE,
+	};
+
 	/// Constructor for a drawable node with a parent and a specified relative position
 	DrawableNode(SceneNode *parent, float xx, float yy);
 	/// Constructor for a drawable node with a parent and a specified relative position as a vector
@@ -65,6 +95,21 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	void setAnchorPoint(float xx, float yy);
 	/// Sets the transformation anchor point with a `Vector2f`
 	inline void setAnchorPoint(const Vector2f &point) { setAnchorPoint(point.x, point.y); }
+
+	/// Returns true if the node renders with blending enabled
+	bool isBlendingEnabled() const;
+	/// Sets the blending state for node rendering
+	void setBlendingEnabled(bool blendingEnabled);
+
+	/// Returns the source blending factor
+	BlendingFactor srcBlendingFactor() const;
+	/// Returns the destination blending factor
+	BlendingFactor destBlendingFactor() const;
+
+	/// Sets a blending preset for source and destination blending factors
+	void setBlendingPreset(BlendingPreset blendingPreset);
+	/// Sets a specific source and destination blending factors
+	void setBlendingFactors(BlendingFactor srcBlendingFactor, BlendingFactor destBlendingFactor);
 
 	/// Returns the node rendering layer
 	unsigned short layer() const;

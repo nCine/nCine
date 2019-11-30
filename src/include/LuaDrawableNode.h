@@ -21,6 +21,14 @@ class LuaDrawableNode
 	static int size(lua_State *L);
 	static int anchorPoint(lua_State *L);
 	static int setAnchorPoint(lua_State *L);
+
+	static int isBlendingEnabled(lua_State *L);
+	static int setBlendingEnabled(lua_State *L);
+	static int srcBlendingFactor(lua_State *L);
+	static int destBlendingFactor(lua_State *L);
+	static int setBlendingPreset(lua_State *L);
+	static int setBlendingFactors(lua_State *L);
+
 	static int layer(lua_State *L);
 	static int setLayer(lua_State *L);
 

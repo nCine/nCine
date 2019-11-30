@@ -37,6 +37,8 @@ class LuaParticleSystem
 	static int setAnchorPoint(lua_State *L);
 	static int setFlippedX(lua_State *L);
 	static int setFlippedY(lua_State *L);
+	static int setBlendingPreset(lua_State *L);
+	static int setBlendingFactors(lua_State *L);
 	static int setLayer(lua_State *L);
 };
 

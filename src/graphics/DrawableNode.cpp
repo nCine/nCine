@@ -7,6 +7,56 @@
 
 namespace ncine {
 
+namespace {
+
+	GLenum toGlBlendingFactor(DrawableNode::BlendingFactor blendingFactor)
+	{
+		switch (blendingFactor)
+		{
+			case DrawableNode::BlendingFactor::ZERO: return GL_ZERO;
+			case DrawableNode::BlendingFactor::ONE: return GL_ONE;
+			case DrawableNode::BlendingFactor::SRC_COLOR: return GL_SRC_COLOR;
+			case DrawableNode::BlendingFactor::ONE_MINUS_SRC_COLOR: return GL_ONE_MINUS_SRC_COLOR;
+			case DrawableNode::BlendingFactor::DST_COLOR: return GL_DST_COLOR;
+			case DrawableNode::BlendingFactor::ONE_MINUS_DST_COLOR: return GL_ONE_MINUS_DST_COLOR;
+			case DrawableNode::BlendingFactor::SRC_ALPHA: return GL_SRC_ALPHA;
+			case DrawableNode::BlendingFactor::ONE_MINUS_SRC_ALPHA: return GL_ONE_MINUS_SRC_ALPHA;
+			case DrawableNode::BlendingFactor::DST_ALPHA: return GL_DST_ALPHA;
+			case DrawableNode::BlendingFactor::ONE_MINUS_DST_ALPHA: return GL_ONE_MINUS_DST_ALPHA;
+			case DrawableNode::BlendingFactor::CONSTANT_COLOR: return GL_CONSTANT_COLOR;
+			case DrawableNode::BlendingFactor::ONE_MINUS_CONSTANT_COLOR: return GL_ONE_MINUS_CONSTANT_COLOR;
+			case DrawableNode::BlendingFactor::CONSTANT_ALPHA: return GL_CONSTANT_ALPHA;
+			case DrawableNode::BlendingFactor::ONE_MINUS_CONSTANT_ALPHA: return GL_ONE_MINUS_CONSTANT_ALPHA;
+			case DrawableNode::BlendingFactor::SRC_ALPHA_SATURATE: return GL_SRC_ALPHA_SATURATE;
+		}
+		return GL_ZERO;
+	}
+
+	DrawableNode::BlendingFactor fromGlBlendingFactor(GLenum blendingFactor)
+	{
+		switch (blendingFactor)
+		{
+			case GL_ZERO: return DrawableNode::BlendingFactor::ZERO;
+			case GL_ONE: return DrawableNode::BlendingFactor::ONE;
+			case GL_SRC_COLOR: return DrawableNode::BlendingFactor::SRC_COLOR;
+			case GL_ONE_MINUS_SRC_COLOR: return DrawableNode::BlendingFactor::ONE_MINUS_SRC_COLOR;
+			case GL_DST_COLOR: return DrawableNode::BlendingFactor::DST_COLOR;
+			case GL_ONE_MINUS_DST_COLOR: return DrawableNode::BlendingFactor::ONE_MINUS_DST_COLOR;
+			case GL_SRC_ALPHA: return DrawableNode::BlendingFactor::SRC_ALPHA;
+			case GL_ONE_MINUS_SRC_ALPHA: return DrawableNode::BlendingFactor::ONE_MINUS_SRC_ALPHA;
+			case GL_DST_ALPHA: return DrawableNode::BlendingFactor::DST_ALPHA;
+			case GL_ONE_MINUS_DST_ALPHA: return DrawableNode::BlendingFactor::ONE_MINUS_DST_ALPHA;
+			case GL_CONSTANT_COLOR: return DrawableNode::BlendingFactor::CONSTANT_COLOR;
+			case GL_ONE_MINUS_CONSTANT_COLOR: return DrawableNode::BlendingFactor::ONE_MINUS_CONSTANT_COLOR;
+			case GL_CONSTANT_ALPHA: return DrawableNode::BlendingFactor::CONSTANT_ALPHA;
+			case GL_ONE_MINUS_CONSTANT_ALPHA: return DrawableNode::BlendingFactor::ONE_MINUS_CONSTANT_ALPHA;
+			case GL_SRC_ALPHA_SATURATE: return DrawableNode::BlendingFactor::SRC_ALPHA_SATURATE;
+		}
+		return DrawableNode::BlendingFactor::ZERO;
+	}
+
+}
+
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
@@ -79,6 +129,53 @@ void DrawableNode::setAnchorPoint(float xx, float yy)
 	const float clampedX = nctl::clamp(xx, 0.0f, 1.0f);
 	const float clampedY = nctl::clamp(yy, 0.0f, 1.0f);
 	anchorPoint_.set((clampedX - 0.5f) * width(), (clampedY - 0.5f) * height());
+}
+
+bool DrawableNode::isBlendingEnabled() const
+{
+	return renderCommand_->material().isBlendingEnabled();
+}
+
+void DrawableNode::setBlendingEnabled(bool blendingEnabled)
+{
+	renderCommand_->material().setBlendingEnabled(blendingEnabled);
+}
+
+DrawableNode::BlendingFactor DrawableNode::srcBlendingFactor() const
+{
+	return fromGlBlendingFactor(renderCommand_->material().srcBlendingFactor());
+}
+
+DrawableNode::BlendingFactor DrawableNode::destBlendingFactor() const
+{
+	return fromGlBlendingFactor(renderCommand_->material().destBlendingFactor());
+}
+
+void DrawableNode::setBlendingPreset(BlendingPreset blendingPreset)
+{
+	switch (blendingPreset)
+	{
+		case BlendingPreset::DISABLED:
+			renderCommand_->material().setBlendingFactors(toGlBlendingFactor(BlendingFactor::ONE), toGlBlendingFactor(BlendingFactor::ZERO));
+			break;
+		case BlendingPreset::ALPHA:
+			renderCommand_->material().setBlendingFactors(toGlBlendingFactor(BlendingFactor::SRC_ALPHA), toGlBlendingFactor(BlendingFactor::ONE_MINUS_SRC_ALPHA));
+			break;
+		case BlendingPreset::PREMULTIPLIED_ALPHA:
+			renderCommand_->material().setBlendingFactors(toGlBlendingFactor(BlendingFactor::ONE), toGlBlendingFactor(BlendingFactor::ONE_MINUS_SRC_ALPHA));
+			break;
+		case BlendingPreset::ADDITIVE:
+			renderCommand_->material().setBlendingFactors(toGlBlendingFactor(BlendingFactor::SRC_ALPHA), toGlBlendingFactor(BlendingFactor::ONE));
+			break;
+		case BlendingPreset::MULTIPLY:
+			renderCommand_->material().setBlendingFactors(toGlBlendingFactor(BlendingFactor::DST_COLOR), toGlBlendingFactor(BlendingFactor::ZERO));
+			break;
+	}
+}
+
+void DrawableNode::setBlendingFactors(BlendingFactor srcBlendingFactor, BlendingFactor destBlendingFactor)
+{
+	renderCommand_->material().setBlendingFactors(toGlBlendingFactor(srcBlendingFactor), toGlBlendingFactor(destBlendingFactor));
 }
 
 unsigned short DrawableNode::layer() const

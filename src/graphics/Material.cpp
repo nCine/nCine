@@ -13,14 +13,14 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Material::Material()
-    : isTransparent_(false), shaderProgramType_(ShaderProgramType::CUSTOM),
-      shaderProgram_(nullptr), texture_(nullptr)
+    : isBlendingEnabled_(false), srcBlendingFactor_(GL_SRC_ALPHA), destBlendingFactor_(GL_ONE_MINUS_SRC_ALPHA),
+      shaderProgramType_(ShaderProgramType::CUSTOM), shaderProgram_(nullptr), texture_(nullptr)
 {
 }
 
 Material::Material(GLShaderProgram *program, GLTexture *texture)
-    : isTransparent_(false), shaderProgramType_(ShaderProgramType::CUSTOM),
-      shaderProgram_(program), texture_(texture)
+    : isBlendingEnabled_(false), srcBlendingFactor_(GL_SRC_ALPHA), destBlendingFactor_(GL_ONE_MINUS_SRC_ALPHA),
+      shaderProgramType_(ShaderProgramType::CUSTOM), shaderProgram_(program), texture_(texture)
 {
 	setShaderProgram(program);
 }
@@ -28,6 +28,12 @@ Material::Material(GLShaderProgram *program, GLTexture *texture)
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+void Material::setBlendingFactors(GLenum srcBlendingFactor, GLenum destBlendingFactor)
+{
+	srcBlendingFactor_ = srcBlendingFactor;
+	destBlendingFactor_ = destBlendingFactor;
+}
 
 void Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 {
@@ -175,18 +181,51 @@ void Material::defineVertexFormat(const GLBufferObject *vbo, const GLBufferObjec
 	shaderAttributes_.defineVertexFormat(vbo, ibo, vboOffset);
 }
 
-unsigned int Material::sortKey()
+namespace {
+
+	uint8_t glBlendingFactorToInt(GLenum blendingFactor)
+	{
+		switch (blendingFactor)
+		{
+			case GL_ZERO: return 0;
+			case GL_ONE: return 1;
+			case GL_SRC_COLOR: return 2;
+			case GL_ONE_MINUS_SRC_COLOR: return 3;
+			case GL_DST_COLOR: return 4;
+			case GL_ONE_MINUS_DST_COLOR: return 5;
+			case GL_SRC_ALPHA: return 6;
+			case GL_ONE_MINUS_SRC_ALPHA: return 7;
+			case GL_DST_ALPHA: return 8;
+			case GL_ONE_MINUS_DST_ALPHA: return 9;
+			case GL_CONSTANT_COLOR: return 10;
+			case GL_ONE_MINUS_CONSTANT_COLOR: return 11;
+			case GL_CONSTANT_ALPHA: return 12;
+			case GL_ONE_MINUS_CONSTANT_ALPHA: return 13;
+			case GL_SRC_ALPHA_SATURATE: return 14;
+		}
+		return 0;
+	}
+
+}
+uint32_t Material::sortKey()
 {
-	unsigned char lower = 0;
-	unsigned int upper = 0;
+	uint16_t lower = 0;
+	uint32_t middle = 0;
+	uint32_t upper = 0;
 
 	if (texture_)
-		lower = static_cast<unsigned char>(texture_->glHandle());
+		lower = static_cast<uint16_t>(texture_->glHandle());
 
 	if (shaderProgram_)
-		upper = shaderProgram_->glHandle() << 8;
+		middle = shaderProgram_->glHandle() << 16;
 
-	return upper + lower;
+	if (isBlendingEnabled_)
+	{
+		upper = glBlendingFactorToInt(srcBlendingFactor_) * 16 + glBlendingFactorToInt(destBlendingFactor_);
+		upper = upper << 24;
+	}
+
+	return upper + middle + lower;
 }
 
 }

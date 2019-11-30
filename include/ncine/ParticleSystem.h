@@ -56,6 +56,11 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	/// Flips the texture rect vertically for every particle
 	void setFlippedY(bool flippedY);
 
+	/// Sets the blending factors preset for every particle
+	void setBlendingPreset(DrawableNode::BlendingPreset blendingPreset);
+	/// Sets the source and destination blending factors for every particle
+	void setBlendingFactors(DrawableNode::BlendingFactor srcBlendingFactor, DrawableNode::BlendingFactor destBlendingFactor);
+
 	/// Sets the rendering layer for every particle
 	void setLayer(unsigned short layer);
 

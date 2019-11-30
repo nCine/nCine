@@ -106,7 +106,7 @@ void MyEventHandler::onInit()
 		sprites_[i]->setScale(SpriteScale);
 		sprites_[i]->setEnabled(!meshSpritesEnabled_);
 		meshSprites_[i] = nctl::makeUnique<nc::MeshSprite>(cameraNode_.get(), textures_[i % NumTextures].get(), pos.x, pos.y);
-		meshSprites_[i]->setOpaqueTexture(true);
+		meshSprites_[i]->setBlendingEnabled(false);
 		meshSprites_[i]->setScale(SpriteScale);
 		meshSprites_[i]->setEnabled(meshSpritesEnabled_);
 		transpMeshSprites_[i] = nctl::makeUnique<nc::MeshSprite>(cameraNode_.get(), textures_[i % NumTextures].get(), pos.x, pos.y);

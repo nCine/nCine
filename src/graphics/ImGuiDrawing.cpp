@@ -191,7 +191,8 @@ void ImGuiDrawing::setupRenderCmd(RenderCommand &cmd)
 	material.attribute("aColor")->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, col)));
 	material.attribute("aColor")->setType(GL_UNSIGNED_BYTE);
 	material.attribute("aColor")->setNormalized(true);
-	material.setTransparent(true);
+	material.setBlendingEnabled(true);
+	material.setBlendingFactors(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	cmd.geometry().setNumElementsPerVertex(sizeof(ImDrawVert) / sizeof(GLfloat));
 	cmd.geometry().setDrawParameters(GL_TRIANGLES, 0, 0);

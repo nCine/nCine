@@ -76,15 +76,25 @@ void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, 
 		const RenderCommand *command = srcQueue[i];
 		const Material::ShaderProgramType type = command->material().shaderProgramType();
 		const GLTexture *texture = command->material().texture();
+		const bool isBlendingEnabled = command->material().isBlendingEnabled();
+		const GLenum srcBlendingFactor = command->material().srcBlendingFactor();
+		const GLenum destBlendingFactor = command->material().destBlendingFactor();
 		const GLenum primitive = command->geometry().primitiveType();
 
 		const RenderCommand *prevCommand = srcQueue[i - 1];
 		const Material::ShaderProgramType prevType = prevCommand->material().shaderProgramType();
 		const GLTexture *prevTexture = prevCommand->material().texture();
+		const bool prevIsBlendingEnabled = prevCommand->material().isBlendingEnabled();
+		const GLenum prevSrcBlendingFactor = prevCommand->material().srcBlendingFactor();
+		const GLenum prevDestBlendingFactor = prevCommand->material().destBlendingFactor();
 		const GLenum prevPrimitive = prevCommand->geometry().primitiveType();
 
-		// Should split if the shader differs or if it's the same but texture or primitive type aren't
-		const bool shouldSplit = prevType != type || prevTexture != texture || prevPrimitive != primitive;
+		// Always false for the opaque queue as blending is not enabled for any of the commands
+		const bool blendingDiffers = isBlendingEnabled && prevIsBlendingEnabled &&
+		                             (prevSrcBlendingFactor != srcBlendingFactor || prevDestBlendingFactor != destBlendingFactor);
+
+		// Should split if the shader differs or if it's the same but texture, blending or primitive type aren't
+		const bool shouldSplit = prevType != type || prevTexture != texture || prevPrimitive != primitive || blendingDiffers;
 
 		// Also collect the very last command if it can be batched with the previous one
 		unsigned int endSplit = (i == srcQueue.size() - 1 && !shouldSplit) ? i + 1 : i;
@@ -369,7 +379,8 @@ RenderCommand *RenderBatcher::collectCommands(
 	}
 
 	batchCommand->material().setTexture(refCommand->material().texture());
-	batchCommand->material().setTransparent(refCommand->material().isTransparent());
+	batchCommand->material().setBlendingEnabled(refCommand->material().isBlendingEnabled());
+	batchCommand->material().setBlendingFactors(refCommand->material().srcBlendingFactor(), refCommand->material().destBlendingFactor());
 	batchCommand->setBatchSize(nextStart - start);
 	batchCommand->material().uniformBlock("InstancesBlock")->setUsedSize(instancesBlockOffset);
 

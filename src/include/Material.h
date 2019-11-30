@@ -52,8 +52,12 @@ class Material
 	Material();
 	Material(GLShaderProgram *program, GLTexture *texture);
 
-	inline bool isTransparent() const { return isTransparent_; }
-	inline void setTransparent(bool isTransparent) { isTransparent_ = isTransparent; }
+	inline bool isBlendingEnabled() const { return isBlendingEnabled_; }
+	inline void setBlendingEnabled(bool blendingEnabled) { isBlendingEnabled_ = blendingEnabled; }
+
+	inline GLenum srcBlendingFactor() const { return srcBlendingFactor_; }
+	inline GLenum destBlendingFactor() const { return destBlendingFactor_; }
+	void setBlendingFactors(GLenum srcBlendingFactor, GLenum destBlendingFactor);
 
 	inline ShaderProgramType shaderProgramType() const { return shaderProgramType_; }
 	void setShaderProgramType(ShaderProgramType shaderProgramType);
@@ -72,7 +76,9 @@ class Material
 	void setTexture(const Texture &texture);
 
   private:
-	bool isTransparent_;
+	bool isBlendingEnabled_;
+	GLenum srcBlendingFactor_;
+	GLenum destBlendingFactor_;
 
 	ShaderProgramType shaderProgramType_;
 	GLShaderProgram *shaderProgram_;
@@ -91,7 +97,7 @@ class Material
 	inline void commitUniformBlocks() { shaderUniformBlocks_.commitUniformBlocks(); }
 	/// Wrapper around `GLShaderAttributes::defineVertexPointers()`
 	void defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo, unsigned int vboOffset);
-	unsigned int sortKey();
+	uint32_t sortKey();
 
 	friend class RenderCommand;
 };

@@ -40,6 +40,7 @@ const nc::Vector2f TexelPoints[] = {
 
 const char *TypeLables[] = { "Sprites", "Mesh Sprites", "Text Nodes", "Particle Systems" };
 const char *AnchorPoints[] = { "Center", "Bottom Left", "Top Left", "Bottom Right", "Top Right" };
+const char *BlendingPresets[] = { "Disabled", "Alpha", "Pre-multiplied Alpha", "Additive", "Multiply" };
 
 }
 
@@ -49,10 +50,13 @@ nc::IAppEventHandler *createAppEventHandler()
 }
 
 MyEventHandler::MyEventHandler()
-    : currentType_(0), anchorPoint_(0.5f, 0.5f),
+    : background_(nc::Colorf::Black),
+      currentType_(0), anchorPoint_(0.5f, 0.5f),
       position_(0.0f, 0.0f), angle_(0.0f),
       scale_(1.0f, 1.0f), lockScale_(true),
-      flippedX_(false), flippedY_(false)
+      flippedX_(false), flippedY_(false),
+      color_(nc::Colorf::White), blendingEnabled_(true),
+      blendingPreset_(nc::DrawableNode::BlendingPreset::ALPHA)
 {
 }
 
@@ -188,6 +192,18 @@ void MyEventHandler::onFrameStart()
 			flippedY_ = false;
 		}
 	}
+	ImGui::ColorEdit4("Color", color_.data());
+	static int currentBlendingSelection = 1;
+	if (ImGui::Combo("Blending", &currentBlendingSelection, BlendingPresets, IM_ARRAYSIZE(BlendingPresets)))
+		blendingPreset_ = static_cast<nc::DrawableNode::BlendingPreset>(currentBlendingSelection);
+	if (currentType_ != Type::PARTICLE_SYSTEM)
+	{
+		ImGui::SameLine();
+		ImGui::Checkbox("Enabled", &blendingEnabled_);
+	}
+
+	ImGui::ColorEdit4("Background Color", background_.data(), ImGuiColorEditFlags_NoAlpha);
+	nc::theApplication().gfxDevice().setClearColor(background_);
 	ImGui::Checkbox("Culling", &settings.cullingEnabled);
 	ImGui::SameLine();
 	ImGui::Checkbox("Batching", &settings.batchingEnabled);
@@ -204,6 +220,9 @@ void MyEventHandler::onFrameStart()
 			sprites_[i]->setScale(scale_);
 			sprites_[i]->setFlippedX(flippedX_);
 			sprites_[i]->setFlippedY(flippedY_);
+			sprites_[i]->setColor(color_);
+			sprites_[i]->setBlendingEnabled(blendingEnabled_);
+			sprites_[i]->setBlendingPreset(blendingPreset_);
 		}
 		else if (currentType_ == Type::MESH_SPRITE)
 		{
@@ -214,6 +233,9 @@ void MyEventHandler::onFrameStart()
 			meshSprites_[i]->setScale(scale_);
 			meshSprites_[i]->setFlippedX(flippedX_);
 			meshSprites_[i]->setFlippedY(flippedY_);
+			meshSprites_[i]->setColor(color_);
+			meshSprites_[i]->setBlendingEnabled(blendingEnabled_);
+			meshSprites_[i]->setBlendingPreset(blendingPreset_);
 		}
 		else if (currentType_ == Type::TEXT_NODE)
 		{
@@ -222,6 +244,9 @@ void MyEventHandler::onFrameStart()
 			textNodes_[i]->y = position_.y + (height * 0.5f);
 			textNodes_[i]->setRotation(angle_);
 			textNodes_[i]->setScale(scale_);
+			textNodes_[i]->setColor(color_);
+			textNodes_[i]->setBlendingEnabled(blendingEnabled_);
+			textNodes_[i]->setBlendingPreset(blendingPreset_);
 		}
 		else if (currentType_ == Type::PARTICLE_SYSTEM)
 		{
@@ -232,6 +257,8 @@ void MyEventHandler::onFrameStart()
 			sizeAffectors_[i]->setBaseScale(scale_);
 			particleSystems_[i]->setFlippedX(flippedX_);
 			particleSystems_[i]->setFlippedY(flippedY_);
+			particleSystems_[i]->setColor(color_);
+			particleSystems_[i]->setBlendingPreset(blendingPreset_);
 		}
 
 		sprites_[i]->setEnabled(currentType_ == Type::SPRITE);

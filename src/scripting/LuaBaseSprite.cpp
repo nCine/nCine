@@ -1,3 +1,6 @@
+#define NCINE_INCLUDE_LUA
+#include "common_headers.h"
+
 #include "LuaBaseSprite.h"
 #include "LuaClassWrapper.h"
 #include "LuaDrawableNode.h"
@@ -16,7 +19,6 @@ namespace BaseSprite {
 
 	static const char *texture = "get_texture";
 	static const char *setTexture = "set_texture";
-	static const char *setOpaqueTexture = "set_opaque_texture";
 
 	static const char *texRect = "get_texrect";
 	static const char *setTexRect = "set_texrect";
@@ -44,7 +46,6 @@ void LuaBaseSprite::exposeFunctions(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::texture, texture);
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::setTexture, setTexture);
-	LuaUtils::addFunction(L, LuaNames::BaseSprite::setOpaqueTexture, setOpaqueTexture);
 
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::texRect, texRect);
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::setTexRect, setTexRect);
@@ -104,16 +105,6 @@ int LuaBaseSprite::setTexture(lua_State *L)
 	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
 
 	sprite->setTexture(texture);
-
-	return 0;
-}
-
-int LuaBaseSprite::setOpaqueTexture(lua_State *L)
-{
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -2);
-	const bool opaqueTexture = LuaUtils::retrieve<bool>(L, -1);
-
-	sprite->setOpaqueTexture(opaqueTexture);
 
 	return 0;
 }

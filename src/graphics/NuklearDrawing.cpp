@@ -196,7 +196,8 @@ void NuklearDrawing::setupRenderCmd(RenderCommand &cmd)
 	material.attribute("aColor")->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, col)));
 	material.attribute("aColor")->setType(GL_UNSIGNED_BYTE);
 	material.attribute("aColor")->setNormalized(true);
-	material.setTransparent(true);
+	material.setBlendingEnabled(true);
+	material.setBlendingFactors(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	cmd.geometry().setNumElementsPerVertex(sizeof(nk_vertex) / sizeof(GLfloat));
 	cmd.geometry().setDrawParameters(GL_TRIANGLES, 0, 0);

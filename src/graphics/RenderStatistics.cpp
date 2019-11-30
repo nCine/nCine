@@ -58,13 +58,13 @@ void RenderStatistics::gatherStatistics(const RenderCommand &command)
 	const unsigned int typeIndex = command.type();
 	typedCommands_[typeIndex].vertices += verticesToCount;
 	typedCommands_[typeIndex].commands++;
-	typedCommands_[typeIndex].transparents += (command.material().isTransparent()) ? 1 : 0;
+	typedCommands_[typeIndex].transparents += (command.material().isBlendingEnabled()) ? 1 : 0;
 	typedCommands_[typeIndex].instances += command.numInstances();
 	typedCommands_[typeIndex].batchSize += command.batchSize();
 
 	allCommands_.vertices += verticesToCount;
 	allCommands_.commands++;
-	allCommands_.transparents += (command.material().isTransparent()) ? 1 : 0;
+	allCommands_.transparents += (command.material().isBlendingEnabled()) ? 1 : 0;
 	allCommands_.instances += command.numInstances();
 	allCommands_.batchSize += command.batchSize();
 }

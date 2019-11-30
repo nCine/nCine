@@ -156,6 +156,18 @@ void ParticleSystem::setFlippedY(bool flippedY)
 		particle->setFlippedY(flippedY);
 }
 
+void ParticleSystem::setBlendingPreset(DrawableNode::BlendingPreset blendingPreset)
+{
+	for (nctl::UniquePtr<Particle> &particle : particleArray_)
+		particle->setBlendingPreset(blendingPreset);
+}
+
+void ParticleSystem::setBlendingFactors(DrawableNode::BlendingFactor srcBlendingFactor, DrawableNode::BlendingFactor destBlendingFactor)
+{
+	for (nctl::UniquePtr<Particle> &particle : particleArray_)
+		particle->setBlendingFactors(srcBlendingFactor, destBlendingFactor);
+}
+
 void ParticleSystem::update(float interval)
 {
 	ZoneScoped;
