@@ -17,8 +17,14 @@ namespace ncine {
 #ifdef __EMSCRIPTEN__
 EM_BOOL IGfxDevice::resize_callback(int eventType, const EmscriptenUiEvent *event, void *userData)
 {
-	IGfxDevice *gfxDevice = reinterpret_cast<IGfxDevice *>(userData);
-	gfxDevice->setResolution(event->windowInnerWidth, event->windowInnerHeight);
+	// Change resolution only if the canvas fills all the available space and does not scroll
+	if (event->documentBodyClientWidth == 0 || event->documentBodyClientHeight == 0 ||
+	    event->scrollTop != 0 || event->scrollLeft != 0)
+	{
+		IGfxDevice *gfxDevice = reinterpret_cast<IGfxDevice *>(userData);
+		gfxDevice->setResolution(event->windowInnerWidth, event->windowInnerHeight);
+	}
+
 	return 1;
 }
 

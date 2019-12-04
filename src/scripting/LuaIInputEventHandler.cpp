@@ -61,6 +61,8 @@ void LuaIInputEventHandler::onKeyPressed(lua_State *L, const KeyboardEvent &even
 		LuaKeyboardEvents::pushKeyboardEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onKeyReleased(lua_State *L, const KeyboardEvent &event)
@@ -74,6 +76,8 @@ void LuaIInputEventHandler::onKeyReleased(lua_State *L, const KeyboardEvent &eve
 		LuaKeyboardEvents::pushKeyboardEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 #ifdef __ANDROID__
@@ -88,6 +92,8 @@ void LuaIInputEventHandler::onTouchDown(lua_State *L, const TouchEvent &event)
 		LuaAndroidEvents::pushTouchEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onTouchUp(lua_State *L, const TouchEvent &event)
@@ -101,6 +107,8 @@ void LuaIInputEventHandler::onTouchUp(lua_State *L, const TouchEvent &event)
 		LuaAndroidEvents::pushTouchEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onTouchMove(lua_State *L, const TouchEvent &event)
@@ -114,6 +122,8 @@ void LuaIInputEventHandler::onTouchMove(lua_State *L, const TouchEvent &event)
 		LuaAndroidEvents::pushTouchEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onPointerDown(lua_State *L, const TouchEvent &event)
@@ -127,6 +137,8 @@ void LuaIInputEventHandler::onPointerDown(lua_State *L, const TouchEvent &event)
 		LuaAndroidEvents::pushTouchEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onPointerUp(lua_State *L, const TouchEvent &event)
@@ -140,6 +152,8 @@ void LuaIInputEventHandler::onPointerUp(lua_State *L, const TouchEvent &event)
 		LuaAndroidEvents::pushTouchEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onAcceleration(lua_State *L, const AccelerometerEvent &event)
@@ -153,6 +167,8 @@ void LuaIInputEventHandler::onAcceleration(lua_State *L, const AccelerometerEven
 		LuaAndroidEvents::pushAccelerometerEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 #endif
 
@@ -167,6 +183,8 @@ void LuaIInputEventHandler::onMouseButtonPressed(lua_State *L, const MouseEvent 
 		LuaMouseEvents::pushMouseEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onMouseButtonReleased(lua_State *L, const MouseEvent &event)
@@ -180,6 +198,8 @@ void LuaIInputEventHandler::onMouseButtonReleased(lua_State *L, const MouseEvent
 		LuaMouseEvents::pushMouseEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onMouseMoved(lua_State *L, const MouseState &state)
@@ -193,6 +213,8 @@ void LuaIInputEventHandler::onMouseMoved(lua_State *L, const MouseState &state)
 		LuaMouseEvents::pushMouseState(L, state);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onScrollInput(lua_State *L, const ScrollEvent &event)
@@ -206,6 +228,8 @@ void LuaIInputEventHandler::onScrollInput(lua_State *L, const ScrollEvent &event
 		LuaMouseEvents::pushScrollEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onJoyButtonPressed(lua_State *L, const JoyButtonEvent &event)
@@ -219,6 +243,8 @@ void LuaIInputEventHandler::onJoyButtonPressed(lua_State *L, const JoyButtonEven
 		LuaJoystickEvents::pushJoyButtonEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onJoyButtonReleased(lua_State *L, const JoyButtonEvent &event)
@@ -232,6 +258,8 @@ void LuaIInputEventHandler::onJoyButtonReleased(lua_State *L, const JoyButtonEve
 		LuaJoystickEvents::pushJoyButtonEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onJoyHatMoved(lua_State *L, const JoyHatEvent &event)
@@ -245,6 +273,8 @@ void LuaIInputEventHandler::onJoyHatMoved(lua_State *L, const JoyHatEvent &event
 		LuaJoystickEvents::pushJoyHatEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onJoyAxisMoved(lua_State *L, const JoyAxisEvent &event)
@@ -258,6 +288,8 @@ void LuaIInputEventHandler::onJoyAxisMoved(lua_State *L, const JoyAxisEvent &eve
 		LuaJoystickEvents::pushJoyAxisEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onJoyMappedButtonPressed(lua_State *L, const JoyMappedButtonEvent &event)
@@ -271,6 +303,8 @@ void LuaIInputEventHandler::onJoyMappedButtonPressed(lua_State *L, const JoyMapp
 		LuaJoystickEvents::pushJoyMappedButtonEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onJoyMappedButtonReleased(lua_State *L, const JoyMappedButtonEvent &event)
@@ -284,6 +318,8 @@ void LuaIInputEventHandler::onJoyMappedButtonReleased(lua_State *L, const JoyMap
 		LuaJoystickEvents::pushJoyMappedButtonEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onJoyMappedAxisMoved(lua_State *L, const JoyMappedAxisEvent &event)
@@ -297,6 +333,8 @@ void LuaIInputEventHandler::onJoyMappedAxisMoved(lua_State *L, const JoyMappedAx
 		LuaJoystickEvents::pushJoyMappedAxisEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onJoyConnected(lua_State *L, const JoyConnectionEvent &event)
@@ -310,6 +348,8 @@ void LuaIInputEventHandler::onJoyConnected(lua_State *L, const JoyConnectionEven
 		LuaJoystickEvents::pushJoyConnectionEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 void LuaIInputEventHandler::onJoyDisconnected(lua_State *L, const JoyConnectionEvent &event)
@@ -323,6 +363,8 @@ void LuaIInputEventHandler::onJoyDisconnected(lua_State *L, const JoyConnectionE
 		LuaJoystickEvents::pushJoyConnectionEvent(L, event);
 		lua_call(L, 1, 0);
 	}
+	else
+		lua_pop(L, 2);
 }
 
 }
