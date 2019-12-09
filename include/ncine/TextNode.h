@@ -59,6 +59,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Sets the string to render
 	void setString(const nctl::String &string);
 
+	void transform() override;
 	void draw(RenderQueue &renderQueue) override;
 
 	inline static ObjectType sType() { return ObjectType::TEXTNODE; }

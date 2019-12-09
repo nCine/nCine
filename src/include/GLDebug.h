@@ -68,7 +68,7 @@ class GLDebug
 	static void objectLabel(LabelTypes identifier, GLuint name, GLsizei length, const char *label);
 	static void getObjectLabel(LabelTypes identifier, GLuint name, GLsizei bufSize, GLsizei *length, char *label);
 
-	static inline unsigned int maxLabelLength() { return maxLabelLength_; }
+	static inline int maxLabelLength() { return maxLabelLength_; }
 
   private:
 	static bool debugAvailable_;

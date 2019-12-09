@@ -106,6 +106,19 @@ TEST_F(StringOperationTest, MoveAssignmentOperator)
 	ASSERT_EQ(string_.length(), 0);
 }
 
+TEST_F(StringOperationTest, AssignLongCStringAndTruncate)
+{
+	nctl::String newString;
+	// The C-style string is longer than string capacity
+	newString = "String2...String2";
+	printString("Creating a new string with the assignment operator from a C-style string: ", newString);
+
+	// Termination character is taken into account for capacity
+	ASSERT_EQ(newString.capacity(), Capacity);
+	ASSERT_EQ(newString.length() + 1, Capacity);
+	ASSERT_STREQ(newString.data(), "String2...Strin");
+}
+
 TEST_F(StringOperationTest, ConstructByConcatenation)
 {
 	// The string is longer than `SmallBufferSize`
@@ -166,6 +179,16 @@ TEST_F(StringOperationTest, Format)
 	ASSERT_STREQ(string_.data(), "String2");
 }
 
+TEST_F(StringOperationTest, FormatAndTruncate)
+{
+	string_.format("VeryLongStringFormatting%d", 2);
+	printString("Resetting the string to a long formatted one with truncation: ", string_);
+
+	ASSERT_EQ(string_.capacity(), Capacity);
+	ASSERT_EQ(string_.length(), strnlen("VeryLongStringF", Capacity));
+	ASSERT_STREQ(string_.data(), "VeryLongStringF");
+}
+
 TEST_F(StringOperationTest, FormatAppend)
 {
 	string_.formatAppend("String%d", 2);
@@ -174,6 +197,16 @@ TEST_F(StringOperationTest, FormatAppend)
 	ASSERT_EQ(string_.capacity(), Capacity);
 	ASSERT_EQ(string_.length(), strnlen("String1String2", Capacity));
 	ASSERT_STREQ(string_.data(), "String1String2");
+}
+
+TEST_F(StringOperationTest, FormatAppendAndTruncate)
+{
+	string_.formatAppend("VeryLongStringFormatting%d", 2);
+	printString("Appending a long formatted string to the first one with truncation: ", string_);
+
+	ASSERT_EQ(string_.capacity(), Capacity);
+	ASSERT_EQ(string_.length(), strnlen("String1VeryLong", Capacity));
+	ASSERT_STREQ(string_.data(), "String1VeryLong");
 }
 
 TEST_F(StringOperationTest, SetLengthShrink)

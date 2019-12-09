@@ -30,7 +30,8 @@ namespace {
 	int wrappedVsnprintf(char *str, size_t maxLen, const char *format, va_list arg)
 	{
 #if defined(_WIN32) && !defined(__MINGW32__)
-		return vsnprintf_s(str, maxLen, maxLen - 1, format, arg);
+		const int writtenChars = vsnprintf_s(str, maxLen, maxLen - 1, format, arg);
+		return (writtenChars > -1) ? writtenChars : maxLen - 1;
 #else
 		return vsnprintf(str, maxLen, format, arg);
 #endif
@@ -140,7 +141,7 @@ String &String::operator=(const char *cString)
 {
 	ASSERT(cString);
 
-	length_ = static_cast<unsigned int>(wrappedStrnlen(cString, capacity_));
+	length_ = static_cast<unsigned int>(wrappedStrnlen(cString, capacity_ - 1));
 	wrappedStrncpy(data(), capacity_, cString, length_);
 
 	data()[length_] = '\0';
@@ -329,7 +330,7 @@ String &String::format(const char *fmt, ...)
 
 	if (formattedLength > 0)
 	{
-		length_ = nctl::min(capacity_, static_cast<unsigned int>(formattedLength));
+		length_ = nctl::min(capacity_ - 1, static_cast<unsigned int>(formattedLength));
 		data()[length_] = '\0';
 	}
 
@@ -347,7 +348,7 @@ String &String::formatAppend(const char *fmt, ...)
 
 	if (formattedLength > 0)
 	{
-		length_ += min(capacity_ - length_, static_cast<unsigned int>(formattedLength));
+		length_ += min(capacity_ - length_ - 1, static_cast<unsigned int>(formattedLength));
 		data()[length_] = '\0';
 	}
 

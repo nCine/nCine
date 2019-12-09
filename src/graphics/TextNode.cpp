@@ -98,14 +98,18 @@ void TextNode::setString(const nctl::String &string)
 	}
 }
 
+void TextNode::transform()
+{
+	// Precalculate boundaries for horizontal alignment
+	calculateBoundaries();
+	SceneNode::transform();
+}
+
 void TextNode::draw(RenderQueue &renderQueue)
 {
 	// Early-out if the string is empty
 	if (string_.isEmpty())
 		return;
-
-	// Precalculate boundaries for horizontal alignment
-	calculateBoundaries();
 
 	if (dirtyDraw_)
 	{
