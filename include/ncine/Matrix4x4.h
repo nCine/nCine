@@ -55,14 +55,23 @@ class Matrix4x4
 	Matrix4x4 &transpose();
 	Matrix4x4 inverse() const;
 
+	Matrix4x4 &translate(T xx, T yy, T zz);
+	Matrix4x4 &translate(const Vector3<T> &v);
+	Matrix4x4 &rotateX(T degrees);
+	Matrix4x4 &rotateY(T degrees);
+	Matrix4x4 &rotateZ(T degrees);
+	Matrix4x4 &scale(T xx, T yy, T zz);
+	Matrix4x4 &scale(const Vector3<T> &v);
+	Matrix4x4 &scale(T s);
+
 	static Matrix4x4 translation(T xx, T yy, T zz);
 	static Matrix4x4 translation(const Vector3<T> &v);
 	static Matrix4x4 rotationX(T degrees);
 	static Matrix4x4 rotationY(T degrees);
 	static Matrix4x4 rotationZ(T degrees);
-	static Matrix4x4 scale(T xx, T yy, T zz);
-	static Matrix4x4 scale(const Vector3<T> &v);
-	static Matrix4x4 scale(T s);
+	static Matrix4x4 scaling(T xx, T yy, T zz);
+	static Matrix4x4 scaling(const Vector3<T> &v);
+	static Matrix4x4 scaling(T s);
 
 	static Matrix4x4 ortho(T left, T right, T bottom, T top, T near, T far);
 	static Matrix4x4 frustum(T left, T right, T bottom, T top, T near, T far);
@@ -95,13 +104,13 @@ inline void Matrix4x4<T>::set(const Vector4<T> &v0, const Vector4<T> &v1, const 
 }
 
 template <class T>
-T *Matrix4x4<T>::data()
+inline T *Matrix4x4<T>::data()
 {
 	return &vecs_[0][0];
 }
 
 template <class T>
-const T *Matrix4x4<T>::data() const
+inline const T *Matrix4x4<T>::data() const
 {
 	return &vecs_[0][0];
 }
@@ -323,7 +332,7 @@ inline Matrix4x4<S> operator*(S s, const Matrix4x4<S> &m)
 }
 
 template <class T>
-Matrix4x4<T> Matrix4x4<T>::transposed() const
+inline Matrix4x4<T> Matrix4x4<T>::transposed() const
 {
 	const Matrix4x4 &m = *this;
 	Matrix4x4 result;
@@ -352,7 +361,7 @@ Matrix4x4<T> Matrix4x4<T>::transposed() const
 }
 
 template <class T>
-Matrix4x4<T> &Matrix4x4<T>::transpose()
+inline Matrix4x4<T> &Matrix4x4<T>::transpose()
 {
 	Matrix4x4 &m = *this;
 	T x;
@@ -370,7 +379,7 @@ Matrix4x4<T> &Matrix4x4<T>::transpose()
 }
 
 template <class T>
-Matrix4x4<T> Matrix4x4<T>::inverse() const
+inline Matrix4x4<T> Matrix4x4<T>::inverse() const
 {
 	const Matrix4x4 &m = *this;
 
@@ -430,6 +439,146 @@ Matrix4x4<T> Matrix4x4<T>::inverse() const
 }
 
 template <class T>
+inline Matrix4x4<T> &Matrix4x4<T>::translate(T xx, T yy, T zz)
+{
+	Matrix4x4 &m = *this;
+
+	m[3][0] += xx * m[0][0] + yy * m[1][0] + zz * m[2][0];
+	m[3][1] += xx * m[0][1] + yy * m[1][1] + zz * m[2][1];
+	m[3][2] += xx * m[0][2] + yy * m[1][2] + zz * m[2][2];
+
+	return *this;
+}
+
+template <class T>
+inline Matrix4x4<T> &Matrix4x4<T>::translate(const Vector3<T> &v)
+{
+	return translate(v.x, v.y, v.z);
+}
+
+template <class T>
+inline Matrix4x4<T> &Matrix4x4<T>::rotateX(T degrees)
+{
+	Matrix4x4 &m = *this;
+	const T m10 = m[1][0];
+	const T m20 = m[2][0];
+	const T m11 = m[1][1];
+	const T m21 = m[2][1];
+	const T m12 = m[1][2];
+	const T m22 = m[2][2];
+	const T m13 = m[1][3];
+	const T m23 = m[2][3];
+
+	const T radians = degrees * (static_cast<T>(Pi) / 180);
+	const T c = cos(radians);
+	const T s = sin(radians);
+
+	m[1][0] = c * m10 + s * m20;
+	m[1][1] = c * m11 + s * m21;
+	m[1][2] = c * m12 + s * m22;
+	m[1][3] = c * m13 + s * m23;
+
+	m[2][0] = -s * m10 + c * m20;
+	m[2][1] = -s * m11 + c * m21;
+	m[2][2] = -s * m12 + c * m22;
+	m[2][3] = -s * m13 + c * m23;
+
+	return *this;
+}
+
+template <class T>
+inline Matrix4x4<T> &Matrix4x4<T>::rotateY(T degrees)
+{
+	Matrix4x4 &m = *this;
+	const T m00 = m[0][0];
+	const T m20 = m[2][0];
+	const T m01 = m[0][1];
+	const T m21 = m[2][1];
+	const T m02 = m[0][2];
+	const T m22 = m[2][2];
+	const T m03 = m[0][3];
+	const T m23 = m[2][3];
+
+	const T radians = degrees * (static_cast<T>(Pi) / 180);
+	const T c = cos(radians);
+	const T s = sin(radians);
+
+	m[0][0] = c * m00 - s * m20;
+	m[0][1] = c * m01 - s * m21;
+	m[0][2] = c * m02 - s * m22;
+	m[0][3] = c * m03 - s * m23;
+
+	m[2][0] = s * m00 + c * m20;
+	m[2][1] = s * m01 + c * m21;
+	m[2][2] = s * m02 + c * m22;
+	m[2][3] = s * m03 + c * m23;
+
+	return *this;
+}
+
+template <class T>
+inline Matrix4x4<T> &Matrix4x4<T>::rotateZ(T degrees)
+{
+	Matrix4x4 &m = *this;
+	const T m00 = m[0][0];
+	const T m10 = m[1][0];
+	const T m01 = m[0][1];
+	const T m11 = m[1][1];
+	const T m02 = m[0][2];
+	const T m12 = m[1][2];
+	const T m03 = m[0][3];
+	const T m13 = m[1][3];
+
+	const T radians = degrees * (static_cast<T>(Pi) / 180);
+	const T c = cos(radians);
+	const T s = sin(radians);
+
+	m[0][0] = c * m00 + s * m10;
+	m[0][1] = c * m01 + s * m11;
+	m[0][2] = c * m02 + s * m12;
+	m[0][3] = c * m03 + s * m13;
+
+	m[1][0] = -s * m00 + c * m10;
+	m[1][1] = -s * m01 + c * m11;
+	m[1][2] = -s * m02 + c * m12;
+	m[1][3] = -s * m03 + c * m13;
+
+	return *this;
+}
+
+template <class T>
+inline Matrix4x4<T> &Matrix4x4<T>::scale(T xx, T yy, T zz)
+{
+	Matrix4x4 &m = *this;
+
+	m[0][0] *= xx;
+	m[0][1] *= xx;
+	m[0][2] *= xx;
+
+	m[1][0] *= yy;
+	m[1][1] *= yy;
+	m[1][2] *= yy;
+
+	m[2][0] *= zz;
+	m[2][1] *= zz;
+	m[2][2] *= zz;
+
+	return *this;
+}
+
+template <class T>
+inline Matrix4x4<T> &Matrix4x4<T>::scale(const Vector3<T> &v)
+{
+	return scale(v.x, v.y, v.z);
+}
+
+template <class T>
+inline Matrix4x4<T> &Matrix4x4<T>::scale(T s)
+{
+	return scale(s, s, s);
+}
+
+template <class T>
 inline Matrix4x4<T> Matrix4x4<T>::translation(T xx, T yy, T zz)
 {
 	return Matrix4x4(Vector4<T>(1, 0, 0, 0),
@@ -447,38 +596,44 @@ inline Matrix4x4<T> Matrix4x4<T>::translation(const Vector3<T> &v)
 template <class T>
 inline Matrix4x4<T> Matrix4x4<T>::rotationX(T degrees)
 {
-	T radians = degrees * (static_cast<T>(Pi) / 180);
+	const T radians = degrees * (static_cast<T>(Pi) / 180);
+	const T c = cos(radians);
+	const T s = sin(radians);
 
 	return Matrix4x4(Vector4<T>(1, 0, 0, 0),
-	                 Vector4<T>(0, cos(radians), sin(radians), 0),
-	                 Vector4<T>(0, -sin(radians), cos(radians), 0),
+	                 Vector4<T>(0, c, s, 0),
+	                 Vector4<T>(0, -s, c, 0),
 	                 Vector4<T>(0, 0, 0, 1));
 }
 
 template <class T>
 inline Matrix4x4<T> Matrix4x4<T>::rotationY(T degrees)
 {
-	T radians = degrees * (static_cast<T>(Pi) / 180);
+	const T radians = degrees * (static_cast<T>(Pi) / 180);
+	const T c = cos(radians);
+	const T s = sin(radians);
 
-	return Matrix4x4(Vector4<T>(cos(radians), 0, -sin(radians), 0),
+	return Matrix4x4(Vector4<T>(c, 0, -s, 0),
 	                 Vector4<T>(0, 1, 0, 0),
-	                 Vector4<T>(sin(radians), 0, cos(radians), 0),
+	                 Vector4<T>(s, 0, c, 0),
 	                 Vector4<T>(0, 0, 0, 1));
 }
 
 template <class T>
 inline Matrix4x4<T> Matrix4x4<T>::rotationZ(T degrees)
 {
-	T radians = degrees * (static_cast<T>(Pi) / 180);
+	const T radians = degrees * (static_cast<T>(Pi) / 180);
+	const T c = cos(radians);
+	const T s = sin(radians);
 
-	return Matrix4x4(Vector4<T>(cos(radians), sin(radians), 0, 0),
-	                 Vector4<T>(-sin(radians), cos(radians), 0, 0),
+	return Matrix4x4(Vector4<T>(c, s, 0, 0),
+	                 Vector4<T>(-s, c, 0, 0),
 	                 Vector4<T>(0, 0, 1, 0),
 	                 Vector4<T>(0, 0, 0, 1));
 }
 
 template <class T>
-inline Matrix4x4<T> Matrix4x4<T>::scale(T xx, T yy, T zz)
+inline Matrix4x4<T> Matrix4x4<T>::scaling(T xx, T yy, T zz)
 {
 	return Matrix4x4(Vector4<T>(xx, 0, 0, 0),
 	                 Vector4<T>(0, yy, 0, 0),
@@ -487,15 +642,15 @@ inline Matrix4x4<T> Matrix4x4<T>::scale(T xx, T yy, T zz)
 }
 
 template <class T>
-inline Matrix4x4<T> Matrix4x4<T>::scale(const Vector3<T> &v)
+inline Matrix4x4<T> Matrix4x4<T>::scaling(const Vector3<T> &v)
 {
-	return scale(v.x, v.y, v.z);
+	return scaling(v.x, v.y, v.z);
 }
 
 template <class T>
-inline Matrix4x4<T> Matrix4x4<T>::scale(T s)
+inline Matrix4x4<T> Matrix4x4<T>::scaling(T s)
 {
-	return scale(s, s, s);
+	return scaling(s, s, s);
 }
 
 template <class T>

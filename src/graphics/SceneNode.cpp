@@ -180,11 +180,10 @@ void SceneNode::visit(RenderQueue &renderQueue)
 void SceneNode::transform()
 {
 	// Calculating world and local matrices
-	localMatrix_ = Matrix4x4f::Identity;
-	localMatrix_ *= Matrix4x4f::translation(x, y, 0.0f);
-	localMatrix_ *= Matrix4x4f::rotationZ(rotation_);
-	localMatrix_ *= Matrix4x4f::scale(scaleFactor_.x, scaleFactor_.y, 1.0f);
-	localMatrix_ *= Matrix4x4f::translation(-anchorPoint_.x, -anchorPoint_.y, 0.0f);
+	localMatrix_ = Matrix4x4f::translation(x, y, 0.0f);
+	localMatrix_.rotateZ(rotation_);
+	localMatrix_.scale(scaleFactor_.x, scaleFactor_.y, 1.0f);
+	localMatrix_.translate(-anchorPoint_.x, -anchorPoint_.y, 0.0f);
 
 	absScaleFactor_ = scaleFactor_;
 	absRotation_ = rotation_;

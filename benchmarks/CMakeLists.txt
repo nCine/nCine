@@ -38,6 +38,7 @@ if(Threads_FOUND)
 		gbench_bighashmaplist
 		gbench_sparseset
 		gbench_std_rand gbench_random
+		gbench_matrix4x4f
 	)
 endif()
 
