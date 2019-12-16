@@ -27,8 +27,8 @@ RenderQueue::RenderQueue()
 
 void RenderQueue::addCommand(RenderCommand *command)
 {
-	// Calculating a sorting key before adding the command to the queue
-	command->calculateSortKey();
+	// Calculating the material sorting key before adding the command to the queue
+	command->calculateMaterialSortKey();
 
 	if (command->material().isBlendingEnabled() == false)
 		opaqueQueue_.pushBack(command);
@@ -38,8 +38,19 @@ void RenderQueue::addCommand(RenderCommand *command)
 
 namespace {
 
-	bool descendingOrder(const RenderCommand *a, const RenderCommand *b) { return a->sortKey() > b->sortKey(); }
-	bool ascendingOrder(const RenderCommand *a, const RenderCommand *b) { return a->sortKey() < b->sortKey(); }
+	bool descendingOrder(const RenderCommand *a, const RenderCommand *b)
+	{
+		return (a->materialSortKey() != b->materialSortKey())
+		           ? a->materialSortKey() > b->materialSortKey()
+		           : a->idSortKey() > b->idSortKey();
+	}
+
+	bool ascendingOrder(const RenderCommand *a, const RenderCommand *b)
+	{
+		return (a->materialSortKey() != b->materialSortKey())
+		           ? a->materialSortKey() < b->materialSortKey()
+		           : a->idSortKey() < b->idSortKey();
+	}
 
 	const char *commandTypeString(const RenderCommand &command)
 	{

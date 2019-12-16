@@ -3,9 +3,13 @@
 #include "IFile.h"
 #include <nctl/String.h>
 
+#if defined(__EMSCRIPTEN__)
+	#include "Application.h"
+#endif
+
 namespace ncine {
 
-static nctl::String patchLines(64);
+static nctl::String patchLines(128);
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -23,9 +27,10 @@ GLShader::GLShader(GLenum type)
 #endif
 
 #if defined(__EMSCRIPTEN__)
-		// Adding the definition on Emscripten even if batching is disabled.
-		// It will shrink arrays and make compilation on ANGLE a lot faster.
-		patchLines.append("#define OUT_OF_BOUNDS_ACCESS\n");
+		// ANGLE does not seem capable of handling large arrays that are not entirely filled.
+		// A small array size will also make shader compilation a lot faster.
+		patchLines.append("#define WITH_FIXED_BATCH_SIZE\n");
+		patchLines.formatAppend("#define BATCH_SIZE (%u)\n", theApplication().appConfiguration().fixedBatchSize);
 #endif
 	}
 

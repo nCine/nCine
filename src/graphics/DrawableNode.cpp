@@ -78,6 +78,7 @@ DrawableNode::DrawableNode(SceneNode *parent, float xx, float yy)
     : SceneNode(parent, xx, yy), width_(0.0f), height_(0.0f),
       renderCommand_(nctl::makeUnique<RenderCommand>())
 {
+	renderCommand_->setIdSortKey(id());
 }
 
 DrawableNode::DrawableNode(SceneNode *parent, const Vector2f &position)

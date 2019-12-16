@@ -25,7 +25,7 @@ namespace {
 ///////////////////////////////////////////////////////////
 
 RenderCommand::RenderCommand(CommandTypes::Enum profilingType)
-    : sortKey_(0), layer_(DrawableNode::LayerBase::LOWEST), numInstances_(0), batchSize_(0),
+    : materialSortKey_(0), layer_(DrawableNode::LayerBase::LOWEST), numInstances_(0), batchSize_(0),
       uniformBlocksCommitted_(false), verticesCommitted_(false), indicesCommitted_(false),
       profilingType_(profilingType), modelView_(Matrix4x4f::Identity)
 {
@@ -49,11 +49,11 @@ void RenderCommand::commitUniformBlocks()
 	}
 }
 
-void RenderCommand::calculateSortKey()
+void RenderCommand::calculateMaterialSortKey()
 {
 	const uint64_t upper = static_cast<uint64_t>(layer_) << 32;
 	const uint32_t lower = material_.sortKey();
-	sortKey_ = upper + lower;
+	materialSortKey_ = upper + lower;
 }
 
 void RenderCommand::issue()

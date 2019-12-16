@@ -8,8 +8,8 @@ struct TextnodeInstance
 
 layout (std140) uniform InstancesBlock
 {
-#ifdef OUT_OF_BOUNDS_ACCESS
-	TextnodeInstance[1] instances;
+#ifdef WITH_FIXED_BATCH_SIZE
+	TextnodeInstance[BATCH_SIZE] instances;
 #else
 	TextnodeInstance[819] instances;
 #endif
@@ -17,7 +17,7 @@ layout (std140) uniform InstancesBlock
 
 in vec2 aPosition;
 in vec2 aTexCoords;
-in int aMeshIndex;
+in uint aMeshIndex;
 out vec2 vTexCoords;
 out vec4 vColor;
 

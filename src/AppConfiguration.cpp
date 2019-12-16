@@ -24,6 +24,7 @@ AppConfiguration::AppConfiguration()
       windowIconFilename(128),
       useBufferMapping(false),
       deferShaderQueries(true),
+      fixedBatchSize(10),
 #if defined(WITH_IMGUI) || defined(WITH_NUKLEAR)
       vboSize(512 * 1024),
       iboSize(128 * 1024),

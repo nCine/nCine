@@ -63,10 +63,15 @@ class RenderCommand
 	/// Commits all the uniform blocks of command's shader program
 	void commitUniformBlocks();
 
-	/// Returns the queue sort key
-	inline uint64_t sortKey() const { return sortKey_; }
-	/// Calculates a sort key for the queue
-	void calculateSortKey();
+	/// Returns the material sort key for the queue
+	inline uint64_t materialSortKey() const { return materialSortKey_; }
+	/// Calculates a material sort key for the queue
+	void calculateMaterialSortKey();
+	/// Returns the id based secondary sort key for the queue
+	inline unsigned int idSortKey() const { return idSortKey_; }
+	/// Sets the id based secondary sort key for the queue
+	void setIdSortKey(unsigned int idSortKey) { idSortKey_ = idSortKey; }
+
 	/// Issues the render command
 	void issue();
 
@@ -108,7 +113,10 @@ class RenderCommand
 		GLsizei height;
 	};
 
-	uint64_t sortKey_;
+	/// The material sort key minimizes state changes when rendering commands
+	uint64_t materialSortKey_;
+	/// The id based secondary sort key stabilizes render commands sorting
+	unsigned int idSortKey_;
 	unsigned short layer_;
 	int numInstances_;
 	int batchSize_;

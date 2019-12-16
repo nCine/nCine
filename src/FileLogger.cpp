@@ -27,9 +27,7 @@ FileLogger::FileLogger(LogLevel consoleLevel, LogLevel fileLevel, const char *fi
       logString_(LogStringCapacity)
 #endif
 {
-	if (filename != nullptr)
-		openLogFile(filename);
-
+	openLogFile(filename);
 	setvbuf(stdout, nullptr, _IONBF, 0);
 }
 
@@ -44,7 +42,8 @@ FileLogger::~FileLogger()
 
 bool FileLogger::openLogFile(const char *filename)
 {
-	ASSERT(filename);
+	if (fileLevel_ == LogLevel::OFF || filename == nullptr)
+		return false;
 
 	fileHandle_ = IFile::createFileHandle(filename);
 	fileHandle_->setExitOnFailToOpen(false);
@@ -140,7 +139,8 @@ unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 #endif
 	}
 
-	if (fileLevel_ != LogLevel::OFF && levelInt >= fileLevelInt)
+	if (fileLevel_ != LogLevel::OFF && levelInt >= fileLevelInt &&
+	    fileHandle_ != nullptr && fileHandle_->isOpened())
 	{
 		fprintf(fileHandle_->ptr(), "%s", logEntry_);
 		fflush(fileHandle_->ptr());

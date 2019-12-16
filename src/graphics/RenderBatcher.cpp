@@ -66,8 +66,13 @@ namespace {
 
 void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, nctl::Array<RenderCommand *> &destQueue)
 {
+#ifdef __EMSCRIPTEN__
+	const unsigned int minBatchSize = theApplication().appConfiguration().fixedBatchSize;
+	const unsigned int maxBatchSize = theApplication().appConfiguration().fixedBatchSize;
+#else
 	const unsigned int minBatchSize = theApplication().renderingSettings().minBatchSize;
 	const unsigned int maxBatchSize = theApplication().renderingSettings().maxBatchSize;
+#endif
 
 	unsigned int lastSplit = 0;
 
@@ -101,7 +106,7 @@ void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, 
 
 		const unsigned int batchSize = endSplit - lastSplit;
 		// Split point if last command or split condition
-		if (i == srcQueue.size() - 1 || shouldSplit || batchSize > maxBatchSize)
+		if (i == srcQueue.size() - 1 || shouldSplit || batchSize > maxBatchSize - 1)
 		{
 			if (isSupportedType(prevType) && batchSize >= minBatchSize)
 			{

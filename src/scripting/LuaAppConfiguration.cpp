@@ -27,6 +27,7 @@ namespace AppConfiguration {
 
 	static const char *useBufferMapping = "buffer_mapping";
 	static const char *deferShaderQueries = "defer_shader_queries";
+	static const char *fixedBatchSize = "fixed_batch_size";
 	static const char *vboSize = "vbo_size";
 	static const char *iboSize = "ibo_size";
 	static const char *vaoPoolSize = "vao_pool_size";
@@ -63,6 +64,7 @@ void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::useBufferMapping, appCfg.useBufferMapping);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::deferShaderQueries, appCfg.deferShaderQueries);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::fixedBatchSize, appCfg.fixedBatchSize);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::vboSize, static_cast<int64_t>(appCfg.vboSize));
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::iboSize, static_cast<int64_t>(appCfg.iboSize));
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::vaoPoolSize, appCfg.vaoPoolSize);
@@ -109,6 +111,8 @@ void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
 	appCfg.useBufferMapping = useBufferMapping;
 	const bool deferShaderQueries = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::deferShaderQueries);
 	appCfg.deferShaderQueries = deferShaderQueries;
+	const unsigned int fixedBatchSize = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::fixedBatchSize);
+	appCfg.fixedBatchSize = fixedBatchSize;
 	const unsigned long vboSize = LuaUtils::retrieveField<uint64_t>(L, -1, LuaNames::AppConfiguration::vboSize);
 	appCfg.vboSize = vboSize;
 	const unsigned long iboSize = LuaUtils::retrieveField<uint64_t>(L, -1, LuaNames::AppConfiguration::iboSize);

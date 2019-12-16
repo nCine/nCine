@@ -40,7 +40,7 @@ RenderBuffersManager::RenderBuffersManager(bool useBufferMapping, unsigned long 
 	uboSpecs.target = GL_UNIFORM_BUFFER;
 	uboSpecs.mapFlags = useBufferMapping ? GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_FLUSH_EXPLICIT_BIT : 0;
 	uboSpecs.usageFlags = GL_STREAM_DRAW;
-	uboSpecs.maxSize = static_cast<unsigned int>(uboMaxSize);
+	uboSpecs.maxSize = static_cast<unsigned long>(uboMaxSize);
 	uboSpecs.alignment = static_cast<unsigned int>(offsetAlignment);
 
 	// Create the first buffer for each type right away

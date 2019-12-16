@@ -10,8 +10,8 @@ struct SpriteInstance
 
 layout (std140) uniform InstancesBlock
 {
-#ifdef OUT_OF_BOUNDS_ACCESS
-	SpriteInstance[1] instances;
+#ifdef WITH_FIXED_BATCH_SIZE
+	SpriteInstance[BATCH_SIZE] instances;
 #else
 	SpriteInstance[585] instances;
 #endif

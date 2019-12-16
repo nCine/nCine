@@ -81,7 +81,7 @@ void Font::retrieveInfoFromFnt()
 	width_ = static_cast<unsigned int>(commonTag.scaleW);
 	height_ = static_cast<unsigned int>(commonTag.scaleH);
 
-	const int numChars = (fntParser_->numCharTags() < MaxGlyphs) ? fntParser_->numCharTags() : MaxGlyphs;
+	const unsigned int numChars = (fntParser_->numCharTags() < MaxGlyphs) ? fntParser_->numCharTags() : MaxGlyphs;
 	for (unsigned int i = 0; i < numChars; i++)
 	{
 		const FntParser::CharTag &charTag = fntParser_->charTag(i);

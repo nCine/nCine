@@ -59,7 +59,7 @@ class RenderBuffersManager
 	struct ManagedBuffer
 	{
 		ManagedBuffer()
-		    : size(0), freeSpace(0), mapBase(nullptr) {}
+		    : type(BufferTypes::ARRAY), size(0), freeSpace(0), mapBase(nullptr) {}
 
 		BufferTypes::Enum type;
 		nctl::UniquePtr<GLBufferObject> object;
