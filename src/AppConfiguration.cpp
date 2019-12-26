@@ -43,7 +43,7 @@ AppConfiguration::AppConfiguration()
       // Compile-time variables
       glCoreProfile_(true),
       glForwardCompatible_(true),
-#if defined(__ANDROID__) || defined(__EMSCRIPTEN__)
+#if defined(__ANDROID__) || defined(WITH_ANGLE) || defined(__EMSCRIPTEN__)
       glMajorVersion_(3),
       glMinorVersion_(0),
 #else

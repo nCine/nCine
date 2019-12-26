@@ -7,6 +7,17 @@ if(MSVC)
 		COMMENT "Copying DLLs to src/tests..."
 	)
 	set_target_properties(copy_dlls_srctests PROPERTIES FOLDER "CustomCopyTargets")
+
+	if(ANGLE_FOUND)
+		get_target_property(EGL_IMPORTED_LOCATION EGL::EGL IMPORTED_LOCATION)
+		get_target_property(GLES_IMPORTED_LOCATION OpenGLES::GLES IMPORTED_LOCATION)
+		add_custom_target(copy_angle_dll_srctests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${EGL_IMPORTED_LOCATION} ${CMAKE_BINARY_DIR}/src/tests
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GLES_IMPORTED_LOCATION} ${CMAKE_BINARY_DIR}/src/tests
+			COMMENT "Copying ANGLE DLLs to src/tests..."
+		)
+		set_target_properties(copy_angle_dll_tests PROPERTIES FOLDER "CustomCopyTargets")
+	endif()
 endif()
 
 list(APPEND SRCAPPTESTS glapptest_fbo_cube)

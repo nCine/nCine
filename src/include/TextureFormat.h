@@ -68,7 +68,7 @@ inline unsigned int TextureFormat::numChannels() const
 		case GL_RGB:
 			return 3;
 		case GL_RGBA:
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(WITH_ANGLE)
 		case GL_BGRA:
 #else
 		case GL_BGRA_EXT:

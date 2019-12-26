@@ -21,7 +21,7 @@ class GLBufferObject
 
 	void bufferData(GLsizeiptr size, const GLvoid *data, GLenum usage);
 	void bufferSubData(GLintptr offset, GLsizeiptr size, const GLvoid *data);
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(WITH_ANGLE)
 	void bufferStorage(GLsizeiptr size, const GLvoid *data, GLbitfield flags);
 #endif
 
@@ -30,7 +30,7 @@ class GLBufferObject
 	void *mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access);
 	void flushMappedBufferRange(GLintptr offset, GLsizeiptr length);
 	GLboolean unmap();
-#if !defined(__ANDROID__) || (defined(__ANDROID__) && GL_ES_VERSION_3_2)
+#if (!defined(__ANDROID__) && !defined(WITH_ANGLE)) || (defined(__ANDROID__) && GL_ES_VERSION_3_2)
 	void texBuffer(GLenum internalformat);
 #endif
 

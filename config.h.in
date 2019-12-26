@@ -3,6 +3,8 @@
 
 #cmakedefine01 NCINE_WITH_THREADS
 
+#cmakedefine01 NCINE_WITH_ANGLE
+
 #cmakedefine01 NCINE_WITH_GLEW
 #cmakedefine01 NCINE_WITH_GLFW
 #cmakedefine01 NCINE_WITH_SDL

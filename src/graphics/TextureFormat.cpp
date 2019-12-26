@@ -36,13 +36,13 @@ void TextureFormat::bgrFormat()
 {
 	if (format_ == GL_RGBA)
 	{
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(WITH_ANGLE)
 		format_ = GL_BGRA;
 #else
 		format_ = GL_BGRA_EXT;
 #endif
 	}
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(WITH_ANGLE)
 	else if (format_ == GL_RGB)
 		format_ = GL_BGR;
 #endif

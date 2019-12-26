@@ -43,7 +43,7 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 	io.BackendRendererName = "nCine_OpenGL_ES";
 #endif
 
-#if !(defined(__ANDROID__) && !GL_ES_VERSION_3_2) && !defined(__EMSCRIPTEN__)
+#if !(defined(__ANDROID__) && !GL_ES_VERSION_3_2) && !defined(WITH_ANGLE) && !defined(__EMSCRIPTEN__)
 	io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; // We can honor the ImDrawCmd::VtxOffset field, allowing for large meshes.
 #endif
 
@@ -324,7 +324,7 @@ void ImGuiDrawing::draw()
 				GLScissorTest::enable(static_cast<GLint>(clipRect.x), static_cast<GLint>(fbHeight - clipRect.w),
 				                      static_cast<GLsizei>(clipRect.z - clipRect.x), static_cast<GLsizei>(clipRect.w - clipRect.y));
 				GLTexture::bindHandle(GL_TEXTURE_2D, reinterpret_cast<GLTexture *>(imCmd->TextureId)->glHandle());
-#if (defined(__ANDROID__) && !GL_ES_VERSION_3_2) || defined(__EMSCRIPTEN__)
+#if (defined(__ANDROID__) && !GL_ES_VERSION_3_2) || defined(WITH_ANGLE) || defined(__EMSCRIPTEN__)
 				glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, firstIndex);
 #else
 				glDrawElementsBaseVertex(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,

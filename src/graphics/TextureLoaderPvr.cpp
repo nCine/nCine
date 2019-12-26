@@ -168,7 +168,7 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 		switch (pixelFormat)
 		{
 			case FMT_BGRA_8888:
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(WITH_ANGLE)
 				internalFormat = GL_BGRA;
 #else
 				internalFormat = GL_BGRA_EXT;

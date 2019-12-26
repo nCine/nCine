@@ -66,9 +66,10 @@ namespace {
 
 void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, nctl::Array<RenderCommand *> &destQueue)
 {
-#ifdef __EMSCRIPTEN__
-	const unsigned int minBatchSize = theApplication().appConfiguration().fixedBatchSize;
-	const unsigned int maxBatchSize = theApplication().appConfiguration().fixedBatchSize;
+#if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
+	const unsigned int fixedBatchSize = theApplication().appConfiguration().fixedBatchSize;
+	const unsigned int minBatchSize = (fixedBatchSize > 0) ? fixedBatchSize : theApplication().renderingSettings().minBatchSize;
+	const unsigned int maxBatchSize = (fixedBatchSize > 0) ? fixedBatchSize : theApplication().renderingSettings().maxBatchSize;
 #else
 	const unsigned int minBatchSize = theApplication().renderingSettings().minBatchSize;
 	const unsigned int maxBatchSize = theApplication().renderingSettings().maxBatchSize;

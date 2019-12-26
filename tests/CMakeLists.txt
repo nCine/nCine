@@ -14,9 +14,20 @@ if(WIN32)
 		add_custom_target(copy_ncine_dll_tests ALL
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:ncine> ${CMAKE_BINARY_DIR}/tests
 			DEPENDS ncine
-			COMMENT "Copying nCine DLL..."
+			COMMENT "Copying nCine DLL to tests..."
 		)
 		set_target_properties(copy_ncine_dll_tests PROPERTIES FOLDER "CustomCopyTargets")
+	endif()
+
+	if(ANGLE_FOUND)
+		get_target_property(EGL_IMPORTED_LOCATION EGL::EGL IMPORTED_LOCATION)
+		get_target_property(GLES_IMPORTED_LOCATION OpenGLES::GLES IMPORTED_LOCATION)
+		add_custom_target(copy_angle_dll_tests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${EGL_IMPORTED_LOCATION} ${CMAKE_BINARY_DIR}/tests
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GLES_IMPORTED_LOCATION} ${CMAKE_BINARY_DIR}/tests
+			COMMENT "Copying ANGLE DLLs to tests..."
+		)
+		set_target_properties(copy_angle_dll_tests PROPERTIES FOLDER "CustomCopyTargets")
 	endif()
 elseif(APPLE)
 	file(RELATIVE_PATH RELPATH_TO_LIB ${CMAKE_INSTALL_PREFIX}/${RUNTIME_INSTALL_DESTINATION} ${CMAKE_INSTALL_PREFIX}/${LIBRARY_INSTALL_DESTINATION})

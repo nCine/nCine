@@ -17,6 +17,12 @@ if(EMSCRIPTEN)
 	list(APPEND SOURCES ${NCINE_ROOT}/src/EmscriptenLocalFile.cpp)
 endif()
 
+if(ANGLE_FOUND)
+	message(STATUS "ANGLE has been found")
+	target_compile_definitions(ncine PRIVATE "WITH_ANGLE")
+	target_link_libraries(ncine PRIVATE EGL::EGL OpenGLES::GLES)
+endif()
+
 if(GLEW_FOUND)
 	if (NOT WIN32)
 		message(STATUS "GLEW has been found")

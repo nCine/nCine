@@ -74,7 +74,9 @@ foreach(SOURCE_FILE ${GENERATED_SOURCES})
 	source_group("Generated" FILES ${SOURCE_FILE})
 endforeach()
 
-target_link_libraries(ncine PRIVATE OpenGL::GL)
+if(OPENGL_FOUND)
+	target_link_libraries(ncine PRIVATE OpenGL::GL)
+endif()
 target_sources(ncine PRIVATE ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${NCTL_HEADERS} ${SHADER_FILES} ${GENERATED_SOURCES})
 
 if(NCINE_WITH_IMGUI)

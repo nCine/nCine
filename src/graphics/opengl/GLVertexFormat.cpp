@@ -58,7 +58,7 @@ void GLVertexFormat::define()
 			attributes_[i].vbo_->bind();
 			glEnableVertexAttribArray(attributes_[i].index_);
 
-#if (defined(__ANDROID__) && !GL_ES_VERSION_3_2) || defined(__EMSCRIPTEN__)
+#if (defined(__ANDROID__) && !GL_ES_VERSION_3_2) || defined(WITH_ANGLE) || defined(__EMSCRIPTEN__)
 			const GLubyte *initialPointer = reinterpret_cast<const GLubyte *>(attributes_[i].pointer_);
 			const GLvoid *pointer = reinterpret_cast<const GLvoid *>(initialPointer + attributes_[i].baseOffset_);
 #else

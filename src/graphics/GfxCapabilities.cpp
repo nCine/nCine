@@ -68,7 +68,7 @@ bool GfxCapabilities::hasExtension(GLExtensions::Enum extensionName) const
 void GfxCapabilities::init()
 {
 	const char *pVersion = reinterpret_cast<const char *>(glGetString(GL_VERSION));
-#if defined(__ANDROID__) || defined(__EMSCRIPTEN__)
+#if defined(__ANDROID__) || defined(WITH_ANGLE) || defined(__EMSCRIPTEN__)
 	sscanf(pVersion, "OpenGL ES %2d.%2d", &glMajorVersion_, &glMinorVersion_);
 #else
 	sscanf(pVersion, "%2d.%2d.%2d", &glMajorVersion_, &glMinorVersion_, &glReleaseVersion_);

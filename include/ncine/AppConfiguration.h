@@ -45,8 +45,9 @@ class DLL_PUBLIC AppConfiguration
 	/// The flag is `true` when error checking and introspection of shader programs are deferred to first use
 	/*! \note The value is only taken into account when the scenegraph is being used */
 	bool deferShaderQueries;
-	/// Fixed size of render commands to be collected for batching on Emscripten
-	/*! \note Increasing this value too much might negatively affect batching shaders compilation time */
+	/// Fixed size of render commands to be collected for batching on Emscripten and ANGLE
+	/*! \note Increasing this value too much might negatively affect batching shaders compilation time.
+	A value of zero restores the default behavior of non fixed size for batches. */
 	unsigned int fixedBatchSize;
 	/// The maximum size in bytes for each VBO collecting geometry data
 	unsigned long vboSize;

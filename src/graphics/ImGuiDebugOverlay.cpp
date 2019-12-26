@@ -416,6 +416,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #ifdef WITH_THREADS
 			ImGui::Text("WITH_THREADS");
 #endif
+#ifdef WITH_ANGLE
+			ImGui::Text("WITH_ANGLE");
+#endif
 #ifdef WITH_GLEW
 			ImGui::Text("WITH_GLEW");
 #endif

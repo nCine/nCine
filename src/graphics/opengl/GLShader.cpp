@@ -3,7 +3,7 @@
 #include "IFile.h"
 #include <nctl/String.h>
 
-#if defined(__EMSCRIPTEN__)
+#if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
 	#include "Application.h"
 #endif
 
@@ -20,17 +20,20 @@ GLShader::GLShader(GLenum type)
 {
 	if (patchLines.isEmpty())
 	{
-#if (defined(__ANDROID__) && GL_ES_VERSION_3_0) || defined(__EMSCRIPTEN__)
+#if (defined(__ANDROID__) && GL_ES_VERSION_3_0) || defined(WITH_ANGLE) || defined(__EMSCRIPTEN__)
 		patchLines.append("#version 300 es\n");
 #else
 		patchLines.append("#version 330\n");
 #endif
 
-#if defined(__EMSCRIPTEN__)
+#if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
 		// ANGLE does not seem capable of handling large arrays that are not entirely filled.
 		// A small array size will also make shader compilation a lot faster.
-		patchLines.append("#define WITH_FIXED_BATCH_SIZE\n");
-		patchLines.formatAppend("#define BATCH_SIZE (%u)\n", theApplication().appConfiguration().fixedBatchSize);
+		if (theApplication().appConfiguration().fixedBatchSize > 0)
+		{
+			patchLines.append("#define WITH_FIXED_BATCH_SIZE\n");
+			patchLines.formatAppend("#define BATCH_SIZE (%u)\n", theApplication().appConfiguration().fixedBatchSize);
+		}
 #endif
 	}
 
