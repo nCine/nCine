@@ -5,7 +5,7 @@ variables:
 
      - nCine artifact from branch '$(Build.SourceBranchName)' with commit id $(Build.SourceVersion)"
   deploy_branch: nCine-BRANCHNAME-OS-COMPILER
-  ndk_version: r20
+  ndk_version: r20b
 
 jobs:
 - job: Linux_macOS
@@ -76,7 +76,7 @@ jobs:
     condition: eq( variables['Agent.OS'], 'Linux' )
 
   - script: |
-      curl -fsSL https://cmake.org/files/v3.14/cmake-3.14.5-Linux-x86_64.sh -o cmakeinstall.sh && \
+      curl -fsSL https://cmake.org/files/v3.16/cmake-3.16.2-Linux-x86_64.sh -o cmakeinstall.sh && \
       chmod +x cmakeinstall.sh && \
       sudo ./cmakeinstall.sh --prefix=/usr/local --exclude-subdir && \
       rm cmakeinstall.sh
