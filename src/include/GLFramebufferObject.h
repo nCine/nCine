@@ -17,10 +17,12 @@ class GLFramebufferObject
 	~GLFramebufferObject();
 
 	inline GLuint glHandle() const { return glHandle_; }
-	inline GLenum target() const { return target_; }
+
+	bool bind() const;
+	bool unbind() const;
 
 	bool bind(GLenum target) const;
-	bool unbind() const;
+	bool unbind(GLenum target) const;
 
 	void attachRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height, GLenum attachment);
 	void attachTexture(GLTexture &texture, GLenum attachment);
@@ -29,14 +31,12 @@ class GLFramebufferObject
 	bool isStatusComplete();
 
   private:
-	static class GLHashMap<GLFramebufferMappingFunc::Size, GLFramebufferMappingFunc> boundBuffers_;
+	static unsigned int readBoundBuffer_;
+	static unsigned int drawBoundBuffer_;
 
 	nctl::Array<GLRenderbuffer *> attachedRenderbuffers_;
 
 	GLuint glHandle_;
-	/// The target is mutable in order for constant FBO objects to be bound
-	/*! The FBO binding can change to become the target for read, write or both operations. */
-	mutable GLenum target_;
 
 	/// Deleted copy constructor
 	GLFramebufferObject(const GLFramebufferObject &) = delete;

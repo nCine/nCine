@@ -78,29 +78,6 @@ class GLBufferObjectMappingFunc
 	}
 };
 
-/// A class to perform a mapping between OpenGL framebuffer object targets and array indices
-class GLFramebufferMappingFunc
-{
-  public:
-	static const unsigned int Size = 1;
-	inline unsigned int operator()(key_t key) const
-	{
-		unsigned int value = 0;
-
-		switch (key)
-		{
-			case GL_FRAMEBUFFER:
-				value = 0;
-				break;
-			default:
-				FATAL_MSG_X("No available case to handle key: %u", key);
-				break;
-		}
-
-		return value;
-	}
-};
-
 /// A class to perform a mapping between OpenGL texture targets and array indices
 class GLTextureMappingFunc
 {

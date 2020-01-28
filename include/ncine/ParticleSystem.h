@@ -18,7 +18,9 @@ struct ParticleInitializer;
 class DLL_PUBLIC ParticleSystem : public SceneNode
 {
   public:
-	/// Constructs a particle system made of the specified maximum amount of particles
+	/// Constructs a particle system with the specified maximum amount of particles
+	ParticleSystem(SceneNode *parent, unsigned int count, Texture *texture);
+	/// Constructs a particle system with the specified maximum amount of particles and the specified texture rectangle
 	ParticleSystem(SceneNode *parent, unsigned int count, Texture *texture, Recti texRect);
 	~ParticleSystem() override;
 

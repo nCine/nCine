@@ -3,11 +3,11 @@
 #include "Vector2.h"
 #include "Particle.h"
 #include "ParticleInitializer.h"
+#include "Texture.h"
 
 #include "tracy.h"
 #ifdef WITH_TRACY
-	#include "Texture.h"
-static nctl::String tracyInfoString(128);
+	static nctl::String tracyInfoString(128);
 #endif
 
 namespace ncine {
@@ -15,6 +15,9 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
+
+ParticleSystem::ParticleSystem(SceneNode *parent, unsigned int count, Texture *texture)
+    : ParticleSystem(parent, count, texture, Recti(0, 0, texture->width(), texture->height())) {}
 
 ParticleSystem::ParticleSystem(SceneNode *parent, unsigned int count, Texture *texture, Recti texRect)
     : SceneNode(parent, 0, 0), poolSize_(count), poolTop_(count - 1),

@@ -62,7 +62,9 @@ SceneNode::~SceneNode()
 
 void SceneNode::setParent(SceneNode *parentNode)
 {
-	ASSERT(parentNode != this);
+	// Can't set yourself or your parent as parent
+	if (parentNode == this || parentNode == parent_)
+		return;
 
 	if (parent_)
 		parent_->children_.remove(this);
@@ -73,8 +75,9 @@ void SceneNode::setParent(SceneNode *parentNode)
 
 void SceneNode::addChildNode(SceneNode *childNode)
 {
-	ASSERT(childNode);
-	ASSERT(childNode != this);
+	// Can't add yourself or one of your children as a child
+	if (childNode == this || (childNode != nullptr && childNode->parent_ == this))
+		return;
 
 	if (childNode->parent_)
 		childNode->parent_->removeChildNode(childNode);
@@ -86,8 +89,10 @@ void SceneNode::addChildNode(SceneNode *childNode)
 /*!	\return True if the node has been removed */
 bool SceneNode::removeChildNode(SceneNode *childNode)
 {
-	ASSERT(childNode);
-	ASSERT(childNode != this);
+	// Can't remove yourself or a `nullptr` from your children
+	if (childNode == this || childNode == nullptr)
+		return false;
+
 	bool hasBeenRemoved = false;
 
 	if (!children_.isEmpty() && // avoid checking if this node has no children
@@ -107,11 +112,13 @@ bool SceneNode::removeChildNode(SceneNode *childNode)
  */
 bool SceneNode::removeChildNode(nctl::List<SceneNode *>::ConstIterator it)
 {
-	ASSERT(*it != this);
+	// Can't remove yourself or a `nullptr` from your children
+	if (*it == this || *it == nullptr)
+		return false;
+
 	bool hasBeenRemoved = false;
 
-	if (*it && // cannot pass a `nullptr`
-	    !children_.isEmpty() && // avoid checking if this node has no children
+	if (!children_.isEmpty() && // avoid checking if this node has no children
 	    (*it)->parent_ == this) // avoid checking the child doesn't belong to this one
 	{
 		(*it)->parent_ = nullptr;
@@ -125,8 +132,10 @@ bool SceneNode::removeChildNode(nctl::List<SceneNode *>::ConstIterator it)
 /*!	\return True if the node has been unlinked */
 bool SceneNode::unlinkChildNode(SceneNode *childNode)
 {
-	ASSERT(childNode);
-	ASSERT(childNode != this);
+	// Can't unlink yourself or a `nullptr` from your children
+	if (childNode == this || childNode == nullptr)
+		return false;
+
 	bool hasBeenUnlinked = false;
 
 	if (!children_.isEmpty() && // avoid checking if this node has no children

@@ -12,14 +12,14 @@ class Matrix4x4OperationsTest : public ::testing::Test
 	nc::Matrix4x4f m1_;
 };
 
-TEST_F(Matrix4x4OperationsTest, TransformVector4)
+TEST_F(Matrix4x4OperationsTest, MultiplyVector4Right)
 {
 	printMatrix("m1:\n", m1_);
 
 	const nc::Vector4f v1 = nc::Vector4f(0.5f, 1.0f, 0.75f, 1.0f).normalize();
 	printf("v1: <%.2f, %.2f, %.2f, %.2f> (length: %.2f)\n", v1.x, v1.y, v1.z, v1.w, v1.length());
 	const nc::Vector4f tr = m1_ * v1;
-	printf("Transforming the vector by the matrix: <%.2f, %.2f, %.2f, %.2f> (length: %.2f)\n", tr.x, tr.y, tr.z, tr.w, tr.length());
+	printf("Multiplying the matrix (left) by the vector (right): <%.2f, %.2f, %.2f, %.2f> (length: %.2f)\n", tr.x, tr.y, tr.z, tr.w, tr.length());
 
 	ASSERT_FLOAT_EQ(v1.length(), 1.0f);
 	ASSERT_FLOAT_EQ(tr.length(), 1.0f);
@@ -29,20 +29,74 @@ TEST_F(Matrix4x4OperationsTest, TransformVector4)
 	ASSERT_FLOAT_EQ(tr.w, nc::dot(m1_[3], v1));
 }
 
-TEST_F(Matrix4x4OperationsTest, TransformVector3)
+TEST_F(Matrix4x4OperationsTest, MultilpyVector3Right)
 {
 	printMatrix("m1:\n", m1_);
 
 	const nc::Vector3f v1 = nc::Vector3f(0.5f, 1.0f, 0.75f).normalize();
 	printf("v1: <%.2f, %.2f, %.2f> (length: %.2f)\n", v1.x, v1.y, v1.z, v1.length());
 	const nc::Vector3f tr = m1_ * v1;
-	printf("Transforming the vector by the matrix: <%.2f, %.2f, %.2f> (length: %.2f)\n", tr.x, tr.y, tr.z, tr.length());
+	printf("Multiplying the matrix (left) by the vector (right): <%.2f, %.2f, %.2f> (length: %.2f)\n", tr.x, tr.y, tr.z, tr.length());
 
 	ASSERT_FLOAT_EQ(v1.length(), 1.0f);
 	ASSERT_FLOAT_EQ(tr.length(), 1.0f);
 	ASSERT_FLOAT_EQ(tr.x, nc::dot(m1_[0].toVector3(), v1));
 	ASSERT_FLOAT_EQ(tr.y, nc::dot(m1_[1].toVector3(), v1));
 	ASSERT_FLOAT_EQ(tr.z, nc::dot(m1_[2].toVector3(), v1));
+}
+
+TEST_F(Matrix4x4OperationsTest, MultiplyVector4LeftTranslate)
+{
+	const float x = 10.0f;
+	const float y = 15.0f;
+	const float z = 5.0f;
+	m1_ = nc::Matrix4x4f::translation(-x, -y, -z);
+	printMatrix("m1:\n", m1_);
+
+	const nc::Vector4f v1 = nc::Vector4f(x, y, z, 1.0f);
+	printf("v1: <%.2f, %.2f, %.2f, %.2f>\n", v1.x, v1.y, v1.z, v1.w);
+	const nc::Vector4f tr = v1 * m1_;
+	printf("Multiplying the vector (left) by the matrix (right): <%.2f, %.2f, %.2f, %.2f>\n", tr.x, tr.y, tr.z, tr.w);
+
+	ASSERT_FLOAT_EQ(tr.x, 0.0f);
+	ASSERT_FLOAT_EQ(tr.y, 0.0f);
+	ASSERT_FLOAT_EQ(tr.z, 0.0f);
+	ASSERT_FLOAT_EQ(tr.w, 1.0f);
+}
+
+TEST_F(Matrix4x4OperationsTest, MultiplyVector4LeftRotate)
+{
+	const float x = 10.0f;
+	m1_ = nc::Matrix4x4f::rotationZ(90.0f);
+	printMatrix("m1:\n", m1_);
+
+	const nc::Vector4f v1 = nc::Vector4f(x, 0.0f, 0.0f, 1.0f);
+	printf("v1: <%.2f, %.2f, %.2f, %.2f>\n", v1.x, v1.y, v1.z, v1.w);
+	const nc::Vector4f tr = v1 * m1_;
+	printf("Multiplying the vector (left) by the matrix (right): <%.2f, %.2f, %.2f, %.2f>\n", tr.x, tr.y, tr.z, tr.w);
+
+	ASSERT_FLOAT_EQ(v1.length(), tr.length());
+	ASSERT_NEAR(tr.x, 0.0f, 1e-6f);
+	ASSERT_FLOAT_EQ(tr.y, x);
+	ASSERT_FLOAT_EQ(tr.z, 0.0f);
+	ASSERT_FLOAT_EQ(tr.w, 1.0f);
+}
+
+TEST_F(Matrix4x4OperationsTest, MultiplyVector3LeftRotate)
+{
+	const float x = 10.0f;
+	m1_ = nc::Matrix4x4f::rotationZ(90.0f);
+	printMatrix("m1:\n", m1_);
+
+	const nc::Vector3f v1 = nc::Vector3f(x, 0.0, 0.0f);
+	printf("v1: <%.2f, %.2f, %.2f>\n", v1.x, v1.y, v1.z);
+	const nc::Vector3f tr = v1 * m1_;
+	printf("Multiplying the vector (left) by the matrix (right): <%.2f, %.2f, %.2f>\n", tr.x, tr.y, tr.z);
+
+	ASSERT_FLOAT_EQ(v1.length(), tr.length());
+	ASSERT_NEAR(tr.x, 0.0f, 1e-6f);
+	ASSERT_FLOAT_EQ(tr.y, x);
+	ASSERT_FLOAT_EQ(tr.z, 0.0f);
 }
 
 TEST_F(Matrix4x4OperationsTest, Transposed)

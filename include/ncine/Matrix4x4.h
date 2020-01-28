@@ -38,6 +38,11 @@ class Matrix4x4
 	Vector4<T> operator*(const Vector4<T> &v) const;
 	Vector3<T> operator*(const Vector3<T> &v) const;
 
+	template <class S>
+	friend Vector4<S> operator*(const Vector4<S> &v, const Matrix4x4<S> &m);
+	template <class S>
+	friend Vector3<S> operator*(const Vector3<S> &v, const Matrix4x4<S> &m);
+
 	Matrix4x4 operator+(const Matrix4x4 &m) const;
 	Matrix4x4 operator-(const Matrix4x4 &m) const;
 	Matrix4x4 operator*(const Matrix4x4 &m) const;
@@ -243,6 +248,23 @@ inline Vector3<T> Matrix4x4<T>::operator*(const Vector3<T> &v) const
 	return Vector3<T>(m[0][0] * v[0] + m[0][1] * v[1] + m[0][2] * v[2],
 	                  m[1][0] * v[0] + m[1][1] * v[1] + m[1][2] * v[2],
 	                  m[2][0] * v[0] + m[2][1] * v[1] + m[2][2] * v[2]);
+}
+
+template <class S>
+inline Vector4<S> operator*(const Vector4<S> &v, const Matrix4x4<S> &m)
+{
+	return Vector4<S>(m[0][0] * v[0] + m[1][0] * v[1] + m[2][0] * v[2] + m[3][0] * v[3],
+	                  m[0][1] * v[0] + m[1][1] * v[1] + m[2][1] * v[2] + m[3][1] * v[3],
+	                  m[0][2] * v[0] + m[1][2] * v[1] + m[2][2] * v[2] + m[3][2] * v[3],
+	                  m[0][3] * v[0] + m[1][3] * v[1] + m[2][3] * v[2] + m[3][3] * v[3]);
+}
+
+template <class S>
+inline Vector3<S> operator*(const Vector3<S> &v, const Matrix4x4<S> &m)
+{
+	return Vector3<S>(m[0][0] * v[0] + m[1][0] * v[1] + m[2][0] * v[2],
+	                  m[0][1] * v[0] + m[1][1] * v[1] + m[2][1] * v[2],
+	                  m[0][2] * v[0] + m[1][2] * v[1] + m[2][2] * v[2]);
 }
 
 template <class T>

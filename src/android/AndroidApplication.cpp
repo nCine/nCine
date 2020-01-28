@@ -227,6 +227,9 @@ void AndroidApplication::preInit()
 	// Registering the logger as early as possible
 	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(appCfg_.consoleLogLevel));
 
+	AndroidJniHelper::attachJVM(state_);
+	AssetFile::initAssetManager(state_);
+
 	appEventHandler_ = nctl::UniquePtr<IAppEventHandler>(createAppEventHandler_());
 	// Only `onPreInit()` can modify the application configuration
 	AppConfiguration &modifiableAppCfg = const_cast<AppConfiguration &>(appCfg_);
@@ -258,10 +261,7 @@ void AndroidApplication::init()
 		LOGF("Cannot find a suitable EGL configuration, graphics device not created");
 		exit(EXIT_FAILURE);
 	}
-
-	AndroidJniHelper::attachJVM(state_);
 	inputManager_ = nctl::makeUnique<AndroidInputManager>(state_);
-	AssetFile::initAssetManager(state_);
 
 	timings_[Timings::PRE_INIT] = profileStartTime_.secondsSince();
 

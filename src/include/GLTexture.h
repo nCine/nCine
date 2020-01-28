@@ -29,6 +29,8 @@ class GLTexture
 	void compressedTexSubImage2D(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const void *data);
 	void texStorage2D(GLsizei levels, GLint internalFormat, GLsizei width, GLsizei height);
 
+	void getTexImage(GLint level, GLenum format, GLenum type, void *pixels);
+
 	void texParameterf(GLenum pname, GLfloat param);
 	void texParameteri(GLenum pname, GLint param);
 

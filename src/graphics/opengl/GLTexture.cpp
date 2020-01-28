@@ -100,6 +100,15 @@ void GLTexture::texStorage2D(GLsizei levels, GLint internalFormat, GLsizei width
 	glTexStorage2D(target_, levels, internalFormat, width, height);
 }
 
+#if !defined(__ANDROID__) && !defined(WITH_ANGLE)
+void GLTexture::getTexImage(GLint level, GLenum format, GLenum type, void *pixels)
+{
+	TracyGpuZone("glGetTexImage");
+	bind();
+	glGetTexImage(target_, level, format, type, pixels);
+}
+#endif
+
 void GLTexture::texParameterf(GLenum pname, GLfloat param)
 {
 	bind();
