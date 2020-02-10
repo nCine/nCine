@@ -6,7 +6,7 @@ namespace {
 class StaticHashSetMovableTest : public ::testing::Test
 {
   protected:
-	nctl::StaticHashSet<Movable, Capacity, nctl::FNV1aFuncHashContainer<Movable>> hashset_;
+	nctl::StaticHashSet<Movable, Capacity, nctl::FNV1aHashFuncContainer<Movable>> hashset_;
 };
 
 #if !TEST_MOVABLE_ONLY
@@ -90,7 +90,7 @@ TEST_F(StaticHashSetMovableTest, MoveConstruction)
 	const Movable *m = hashset_.find(refMovable);
 	m->printAndAssert();
 	printf("Creating a new hashset with move construction\n");
-	nctl::StaticHashSet<Movable, Capacity, nctl::FNV1aFuncHashContainer<Movable>> newHashset(nctl::move(hashset_));
+	nctl::StaticHashSet<Movable, Capacity, nctl::FNV1aHashFuncContainer<Movable>> newHashset(nctl::move(hashset_));
 	m = newHashset.find(refMovable);
 	m->printAndAssert();
 
@@ -109,7 +109,7 @@ TEST_F(StaticHashSetMovableTest, MoveAssignmentOperator)
 	const Movable *m = hashset_.find(refMovable);
 	m->printAndAssert();
 	printf("Creating a new hashset with the move assignment operator\n");
-	nctl::StaticHashSet<Movable, Capacity, nctl::FNV1aFuncHashContainer<Movable>> newHashset;
+	nctl::StaticHashSet<Movable, Capacity, nctl::FNV1aHashFuncContainer<Movable>> newHashset;
 	newHashset = nctl::move(hashset_);
 	m = newHashset.find(refMovable);
 	m->printAndAssert();

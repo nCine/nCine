@@ -727,13 +727,13 @@ unsigned int HashMap<K, T, HashFunc>::linearSearch(unsigned int index, hash_t ha
 template <class K, class T, class HashFunc>
 bool HashMap<K, T, HashFunc>::bucketFoundOrEmpty(unsigned int index, hash_t hash, const K &key) const
 {
-	return (hashes_[index] == NullHash || (hashes_[index] == hash && nodes_[index].key == key));
+	return (hashes_[index] == NullHash || (hashes_[index] == hash && equalTo(nodes_[index].key, key)));
 }
 
 template <class K, class T, class HashFunc>
 bool HashMap<K, T, HashFunc>::bucketFound(unsigned int index, hash_t hash, const K &key) const
 {
-	return (hashes_[index] == hash && nodes_[index].key == key);
+	return (hashes_[index] == hash && equalTo(nodes_[index].key, key));
 }
 
 template <class K, class T, class HashFunc>
@@ -786,7 +786,10 @@ void HashMap<K, T, HashFunc>::emplaceNode(unsigned int index, hash_t hash, const
 }
 
 template <class T>
-using StringHashMap = HashMap<String, T, FNV1aFuncHashContainer<String>>;
+using StringHashMap = HashMap<String, T, FNV1aHashFuncContainer<String>>;
+
+template <class T>
+using CStringHashMap = HashMap<const char *, T, FNV1aHashFunc<const char *>>;
 
 }
 

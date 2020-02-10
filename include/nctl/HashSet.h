@@ -598,13 +598,13 @@ unsigned int HashSet<K, HashFunc>::linearSearch(unsigned int index, hash_t hash,
 template <class K, class HashFunc>
 bool HashSet<K, HashFunc>::bucketFoundOrEmpty(unsigned int index, hash_t hash, const K &key) const
 {
-	return (hashes_[index] == NullHash || (hashes_[index] == hash && keys_[index] == key));
+	return (hashes_[index] == NullHash || (hashes_[index] == hash && equalTo(keys_[index], key)));
 }
 
 template <class K, class HashFunc>
 bool HashSet<K, HashFunc>::bucketFound(unsigned int index, hash_t hash, const K &key) const
 {
-	return (hashes_[index] == hash && keys_[index] == key);
+	return (hashes_[index] == hash && equalTo(keys_[index], key));
 }
 
 template <class K, class HashFunc>
@@ -629,7 +629,8 @@ void HashSet<K, HashFunc>::insertKey(unsigned int index, hash_t hash, K &&key)
 	keys_[index] = nctl::move(key);
 }
 
-using StringHashSet = HashSet<String, FNV1aFuncHashContainer<String>>;
+using StringHashSet = HashSet<String, FNV1aHashFuncContainer<String>>;
+using CStringHashSet = HashSet<const char *, FNV1aHashFunc<const char *>>;
 
 }
 

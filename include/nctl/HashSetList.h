@@ -324,7 +324,7 @@ bool HashSetList<K, HashFunc>::HashBucket::remove(hash_t hash, const K &key)
 		return false;
 
 	bool found = false;
-	if (firstNode_.hash == hash && firstNode_.key == key)
+	if (firstNode_.hash == hash && equalTo(firstNode_.key, key))
 	{
 		// The item has been found in the direct access node
 		found = true;
@@ -341,7 +341,7 @@ bool HashSetList<K, HashFunc>::HashBucket::remove(hash_t hash, const K &key)
 	{
 		for (typename List<Node>::ConstIterator i = collisionList_.begin(); i != collisionList_.end(); ++i)
 		{
-			if ((*i).hash == hash && (*i).key == key)
+			if ((*i).hash == hash && equalTo((*i).key, key))
 			{
 				// The item has been found in the list
 				found = true;
@@ -363,7 +363,7 @@ typename HashSetList<K, HashFunc>::Node *HashSetList<K, HashFunc>::HashBucket::f
 	if (size_ == 0)
 		return nullptr;
 
-	if (firstNode_.hash == hash && firstNode_.key == key)
+	if (firstNode_.hash == hash && equalTo(firstNode_.key, key))
 		// The item has been found in the direct access node
 		return &firstNode_;
 	else
@@ -371,7 +371,7 @@ typename HashSetList<K, HashFunc>::Node *HashSetList<K, HashFunc>::HashBucket::f
 		for (typename List<Node>::Iterator i = collisionList_.begin(); i != collisionList_.end(); ++i)
 		{
 			// The item has been found in the list
-			if ((*i).hash == hash && (*i).key == key)
+			if ((*i).hash == hash && equalTo((*i).key, key))
 				return &(*i);
 		}
 	}
@@ -385,7 +385,7 @@ const typename HashSetList<K, HashFunc>::Node *HashSetList<K, HashFunc>::HashBuc
 	if (size_ == 0)
 		return nullptr;
 
-	if (firstNode_.hash == hash && firstNode_.key == key)
+	if (firstNode_.hash == hash && equalTo(firstNode_.key, key))
 		// The item has been found in the direct access node
 		return &firstNode_;
 	else
@@ -393,7 +393,7 @@ const typename HashSetList<K, HashFunc>::Node *HashSetList<K, HashFunc>::HashBuc
 		for (typename List<Node>::ConstIterator i = collisionList_.begin(); i != collisionList_.end(); ++i)
 		{
 			// The item has been found in the list
-			if ((*i).hash == hash && (*i).key == key)
+			if ((*i).hash == hash && equalTo((*i).key, key))
 				return &(*i);
 		}
 	}
@@ -537,7 +537,8 @@ const typename HashSetList<K, HashFunc>::HashBucket &HashSetList<K, HashFunc>::r
 	return buckets_[index];
 }
 
-using StringHashSetList = HashSetList<String, FNV1aFuncHashContainer<String>>;
+using StringHashSetList = HashSetList<String, FNV1aHashFuncContainer<String>>;
+using CStringHashSetList = HashSetList<const char *, FNV1aHashFunc<const char *>>;
 
 }
 

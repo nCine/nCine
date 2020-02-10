@@ -2,6 +2,7 @@
 #define CLASS_NCTL_HASHFUNCTIONS
 
 #include <cstdint>
+#include <cstring>
 
 namespace nctl {
 
@@ -44,6 +45,25 @@ class SaxHashFunc
 		hash_t hash = static_cast<hash_t>(0);
 		for (unsigned int i = 0; i < sizeof(K); i++)
 			hash ^= (hash << 5) + (hash >> 2) + static_cast<hash_t>(bytes[i]);
+
+		return hash;
+	}
+};
+
+/// Shift-Add-XOR hash function
+/*!
+ * \note Specialized version of the function for C-style strings
+ */
+template <>
+class SaxHashFunc<const char *>
+{
+  public:
+	hash_t operator()(const char *key) const
+	{
+		const unsigned int length = strlen(key);
+		hash_t hash = static_cast<hash_t>(0);
+		for (unsigned int i = 0; i < length; i++)
+			hash ^= (hash << 5) + (hash >> 2) + static_cast<hash_t>(key[i]);
 
 		return hash;
 	}
@@ -96,6 +116,34 @@ class JenkinsHashFunc
 
 /// Jenkins hash function
 /*!
+ * \note Specialized version of the function for C-style strings
+ *
+ * For more information: http://en.wikipedia.org/wiki/Jenkins_hash_function
+ */
+template <>
+class JenkinsHashFunc<const char *>
+{
+  public:
+	hash_t operator()(const char *key) const
+	{
+		const unsigned int length = strlen(key);
+		hash_t hash = static_cast<hash_t>(0);
+		for (unsigned int i = 0; i < length; i++)
+		{
+			hash += static_cast<hash_t>(key[i]);
+			hash += (hash << 10);
+			hash ^= (hash >> 6);
+		}
+		hash += (hash << 3);
+		hash ^= (hash >> 11);
+		hash += (hash << 15);
+
+		return hash;
+	}
+};
+
+/// Jenkins hash function
+/*!
  * \note The key type should be a container exposing `length()` and `operator[]()` methods.
  * Contained elements should be convertible to `hash_t`.
  *
@@ -124,8 +172,8 @@ class JenkinsHashFuncContainer
 
 /// Fowler-Noll-Vo Hash (FNV-1a)
 /*!
-* For more information: http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
-*/
+ * For more information: http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+ */
 template <class K>
 class FNV1aHashFunc
 {
@@ -141,10 +189,39 @@ class FNV1aHashFunc
 	}
 
   private:
-	static const hash_t Prime = 0x01000193; //   16777619
+	static const hash_t Prime = 0x01000193; //  16777619
 	static const hash_t Seed = 0x811C9DC5; // 2166136261
 
 	inline hash_t fnv1a(const unsigned char oneByte, hash_t hash = Seed) const
+	{
+		return (oneByte ^ hash) * Prime;
+	}
+};
+
+/*!
+ * \note Specialized version of the function for C-style strings
+ *
+ * For more information: http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+ */
+template <>
+class FNV1aHashFunc<const char *>
+{
+  public:
+	hash_t operator()(const char *key) const
+	{
+		const unsigned int length = strlen(key);
+		hash_t hash = static_cast<hash_t>(Seed);
+		for (unsigned int i = 0; i < length; i++)
+			hash = fnv1a(key[i], hash);
+
+		return hash;
+	}
+
+  private:
+	static const hash_t Prime = 0x01000193; //  16777619
+	static const hash_t Seed = 0x811C9DC5; // 2166136261
+
+	inline hash_t fnv1a(const char oneByte, hash_t hash = Seed) const
 	{
 		return (oneByte ^ hash) * Prime;
 	}
@@ -155,10 +232,10 @@ class FNV1aHashFunc
  * \note The key type should be a container exposing `length()` and `operator[]()` methods.
  * Contained elements should be convertible to `hash_t`.
  *
-* For more information: http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+ * For more information: http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
  */
 template <class K>
-class FNV1aFuncHashContainer
+class FNV1aHashFuncContainer
 {
   public:
 	hash_t operator()(const K &key) const
@@ -171,7 +248,7 @@ class FNV1aFuncHashContainer
 	}
 
   private:
-	static const hash_t Prime = 0x01000193; //   16777619
+	static const hash_t Prime = 0x01000193; //  16777619
 	static const hash_t Seed = 0x811C9DC5; // 2166136261
 
 	inline hash_t fnv1a(unsigned char oneByte, hash_t hash = Seed) const

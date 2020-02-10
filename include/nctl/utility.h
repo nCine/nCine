@@ -35,6 +35,35 @@ inline void swap(T &a, T &b)
 	b = nctl::move(temp);
 }
 
+/// Compare two objects of the same type
+template <class T>
+inline bool equalTo(const T &a, const T &b)
+{
+	return (a == b);
+}
+
+/// Compare two objects of the same type
+template <class T>
+inline bool equalTo(const T *a, const T *b)
+{
+	return (a == b);
+}
+
+template <>
+inline bool equalTo<char>(const char *a, const char *b)
+{
+	// `strcmp` reimplementation to avoid additional dependencies
+	while (*a && (*a == *b))
+	{
+		a++;
+		b++;
+	}
+	const unsigned char result = *reinterpret_cast<const unsigned char *>(a) -
+	                             *reinterpret_cast<const unsigned char *>(b);
+
+	return (result == 0);
+}
+
 }
 
 #endif

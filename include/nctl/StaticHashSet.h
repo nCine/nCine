@@ -549,13 +549,13 @@ unsigned int StaticHashSet<K, Capacity, HashFunc>::linearSearch(unsigned int ind
 template <class K, unsigned int Capacity, class HashFunc>
 bool StaticHashSet<K, Capacity, HashFunc>::bucketFoundOrEmpty(unsigned int index, hash_t hash, const K &key) const
 {
-	return (hashes_[index] == NullHash || (hashes_[index] == hash && keys_[index] == key));
+	return (hashes_[index] == NullHash || (hashes_[index] == hash && equalTo(keys_[index], key)));
 }
 
 template <class K, unsigned int Capacity, class HashFunc>
 bool StaticHashSet<K, Capacity, HashFunc>::bucketFound(unsigned int index, hash_t hash, const K &key) const
 {
-	return (hashes_[index] == hash && keys_[index] == key);
+	return (hashes_[index] == hash && equalTo(keys_[index], key));
 }
 
 template <class K, unsigned int Capacity, class HashFunc>
@@ -581,7 +581,10 @@ void StaticHashSet<K, Capacity, HashFunc>::insertKey(unsigned int index, hash_t 
 }
 
 template <unsigned int Capacity>
-using StaticStringHashSet = StaticHashSet<String, Capacity, FNV1aFuncHashContainer<String>>;
+using StaticStringHashSet = StaticHashSet<String, Capacity, FNV1aHashFuncContainer<String>>;
+
+template <unsigned int Capacity>
+using StaticCStringHashSet = StaticHashSet<const char *, Capacity, FNV1aHashFunc<const char *>>;
 
 }
 

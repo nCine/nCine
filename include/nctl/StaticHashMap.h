@@ -678,13 +678,13 @@ unsigned int StaticHashMap<K, T, Capacity, HashFunc>::linearSearch(unsigned int 
 template <class K, class T, unsigned int Capacity, class HashFunc>
 bool StaticHashMap<K, T, Capacity, HashFunc>::bucketFoundOrEmpty(unsigned int index, hash_t hash, const K &key) const
 {
-	return (hashes_[index] == NullHash || (hashes_[index] == hash && nodes_[index].key == key));
+	return (hashes_[index] == NullHash || (hashes_[index] == hash && equalTo(nodes_[index].key, key)));
 }
 
 template <class K, class T, unsigned int Capacity, class HashFunc>
 bool StaticHashMap<K, T, Capacity, HashFunc>::bucketFound(unsigned int index, hash_t hash, const K &key) const
 {
-	return (hashes_[index] == hash && nodes_[index].key == key);
+	return (hashes_[index] == hash && equalTo(nodes_[index].key, key));
 }
 
 template <class K, class T, unsigned int Capacity, class HashFunc>
@@ -737,7 +737,10 @@ void StaticHashMap<K, T, Capacity, HashFunc>::emplaceNode(unsigned int index, ha
 }
 
 template <class T, unsigned int Capacity>
-using StaticStringHashMap = StaticHashMap<String, T, Capacity, FNV1aFuncHashContainer<String>>;
+using StaticStringHashMap = StaticHashMap<String, T, Capacity, FNV1aHashFuncContainer<String>>;
+
+template <class T, unsigned int Capacity>
+using StaticCStringHashMap = StaticHashMap<const char *, T, Capacity, FNV1aHashFunc<const char *>>;
 
 }
 
