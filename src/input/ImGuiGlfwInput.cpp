@@ -16,6 +16,7 @@
 #define GLFW_HAS_WINDOW_ALPHA          (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300) // 3.3+ glfwSetWindowOpacity
 #define GLFW_HAS_PER_MONITOR_DPI       (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300) // 3.3+ glfwGetMonitorContentScale
 #define GLFW_HAS_VULKAN                (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3200) // 3.2+ glfwCreateWindowSurface
+#define GLFW_HAS_NEW_CURSORS           (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3400) // 3.4+ GLFW_RESIZE_ALL_CURSOR, GLFW_RESIZE_NESW_CURSOR, GLFW_RESIZE_NWSE_CURSOR, GLFW_NOT_ALLOWED_CURSOR
 // clang-format on
 
 namespace ncine {
@@ -89,18 +90,37 @@ void ImGuiGlfwInput::init(GLFWwindow *window)
 	io.SetClipboardTextFn = setClipboardText;
 	io.GetClipboardTextFn = clipboardText;
 	io.ClipboardUserData = window_;
+
+#if IMGUI_HAS_DOCK
+	// Our mouse update function expect PlatformHandle to be filled for the main viewport
+	ImGuiViewport *main_viewport = ImGui::GetMainViewport();
+	main_viewport->PlatformHandle = (void *)window;
+#endif
+
 #if defined(_WIN32)
-	io.ImeWindowHandle = reinterpret_cast<void *>(glfwGetWin32Window(window_));
+	#if IMGUI_HAS_DOCK
+	main_viewport->PlatformHandleRaw = glfwGetWin32Window(window);
+	#else
+	io.ImeWindowHandle = reinterpret_cast<void *>(glfwGetWin32Window(window));
+	#endif
 #endif
 
 	mouseCursors_[ImGuiMouseCursor_Arrow] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
 	mouseCursors_[ImGuiMouseCursor_TextInput] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
-	mouseCursors_[ImGuiMouseCursor_ResizeAll] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR); // FIXME: GLFW doesn't have this.
 	mouseCursors_[ImGuiMouseCursor_ResizeNS] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
 	mouseCursors_[ImGuiMouseCursor_ResizeEW] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
-	mouseCursors_[ImGuiMouseCursor_ResizeNESW] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR); // FIXME: GLFW doesn't have this.
-	mouseCursors_[ImGuiMouseCursor_ResizeNWSE] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR); // FIXME: GLFW doesn't have this.
 	mouseCursors_[ImGuiMouseCursor_Hand] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+#if GLFW_HAS_NEW_CURSORS
+	mouseCursors_[ImGuiMouseCursor_ResizeAll] = glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR);
+	mouseCursors_[ImGuiMouseCursor_ResizeNESW] = glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR);
+	mouseCursors_[ImGuiMouseCursor_ResizeNWSE] = glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR);
+	mouseCursors_[ImGuiMouseCursor_NotAllowed] = glfwCreateStandardCursor(GLFW_NOT_ALLOWED_CURSOR);
+#else
+	mouseCursors_[ImGuiMouseCursor_ResizeAll] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+	mouseCursors_[ImGuiMouseCursor_ResizeNESW] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+	mouseCursors_[ImGuiMouseCursor_ResizeNWSE] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+	mouseCursors_[ImGuiMouseCursor_NotAllowed] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+#endif
 }
 
 void ImGuiGlfwInput::shutdown()
@@ -174,7 +194,11 @@ void ImGuiGlfwInput::keyCallback(GLFWwindow *window, int key, int scancode, int 
 	io.KeyCtrl = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
 	io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
 	io.KeyAlt = io.KeysDown[GLFW_KEY_LEFT_ALT] || io.KeysDown[GLFW_KEY_RIGHT_ALT];
+#ifdef _WIN32
+	io.KeySuper = false;
+#else
 	io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];
+#endif
 }
 
 void ImGuiGlfwInput::charCallback(GLFWwindow *, unsigned int c)

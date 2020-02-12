@@ -21,6 +21,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 bool ImGuiSdlInput::inputEnabled_ = true;
+bool ImGuiSdlInput::mouseCanUseGlobalState_ = true;
 SDL_Window *ImGuiSdlInput::window_ = nullptr;
 double ImGuiSdlInput::time_ = 0.0;
 bool ImGuiSdlInput::mousePressed_[3] = { false, false, false };
@@ -97,12 +98,26 @@ void ImGuiSdlInput::init(SDL_Window *window)
 	mouseCursors_[ImGuiMouseCursor_ResizeNESW] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW);
 	mouseCursors_[ImGuiMouseCursor_ResizeNWSE] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
 	mouseCursors_[ImGuiMouseCursor_Hand] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
+	mouseCursors_[ImGuiMouseCursor_NotAllowed] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NO);
+
+	// Check and store if we are on Wayland
+	mouseCanUseGlobalState_ = strncmp(SDL_GetCurrentVideoDriver(), "wayland", 7) != 0;
+
+#if IMGUI_HAS_DOCK
+	// Our mouse update function expect PlatformHandle to be filled for the main viewport
+	ImGuiViewport *main_viewport = ImGui::GetMainViewport();
+	main_viewport->PlatformHandle = (void *)window;
+#endif
 
 #ifdef _WIN32
 	SDL_SysWMinfo wmInfo;
 	SDL_VERSION(&wmInfo.version);
 	SDL_GetWindowWMInfo(window, &wmInfo);
+	#if IMGUI_HAS_DOCK
+	main_viewport->PlatformHandleRaw = wmInfo.info.win.window;
+	#else
 	io.ImeWindowHandle = wmInfo.info.win.window;
+	#endif
 #else
 	(void)window;
 #endif
@@ -201,7 +216,11 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 			io.KeyShift = ((SDL_GetModState() & KMOD_SHIFT) != 0);
 			io.KeyCtrl = ((SDL_GetModState() & KMOD_CTRL) != 0);
 			io.KeyAlt = ((SDL_GetModState() & KMOD_ALT) != 0);
+#ifdef _WIN32
+			io.KeySuper = false;
+#else
 			io.KeySuper = ((SDL_GetModState() & KMOD_GUI) != 0);
+#endif
 			return true;
 		}
 	}
@@ -233,13 +252,17 @@ void ImGuiSdlInput::updateMousePosAndButtons()
 	SDL_Window *focusedWindow = SDL_GetKeyboardFocus();
 	if (window_ == focusedWindow)
 	{
-		// SDL_GetMouseState() gives mouse position seemingly based on the last window entered/focused(?)
-		// The creation of a new windows at runtime and SDL_CaptureMouse both seems to severely mess up with that, so we retrieve that position globally.
-		int wx, wy;
-		SDL_GetWindowPosition(focusedWindow, &wx, &wy);
-		SDL_GetGlobalMouseState(&mx, &my);
-		mx -= wx;
-		my -= wy;
+		if (mouseCanUseGlobalState_)
+		{
+			// SDL_GetMouseState() gives mouse position seemingly based on the last window entered/focused(?)
+			// The creation of a new windows at runtime and SDL_CaptureMouse both seems to severely mess up with that, so we retrieve that position globally.
+			// Won't use this workaround when on Wayland, as there is no global mouse position.
+			int wx, wy;
+			SDL_GetWindowPosition(focusedWindow, &wx, &wy);
+			SDL_GetGlobalMouseState(&mx, &my);
+			mx -= wx;
+			my -= wy;
+		}
 		io.MousePos = ImVec2(static_cast<float>(mx), static_cast<float>(my));
 	}
 

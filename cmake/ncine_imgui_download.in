@@ -5,7 +5,7 @@ project(imgui-download NONE)
 include(ExternalProject)
 ExternalProject_Add(imgui
 	GIT_REPOSITORY    https://github.com/ocornut/imgui.git
-	GIT_TAG           "v1.74"
+	GIT_TAG           "v1.75"
 	GIT_SHALLOW       TRUE
 	SOURCE_DIR        "${CMAKE_BINARY_DIR}/imgui-src"
 	CONFIGURE_COMMAND ""

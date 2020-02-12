@@ -28,7 +28,6 @@ if(EMSCRIPTEN)
 	target_link_options(ncine PUBLIC ${EMSCRIPTEN_COMPILER_OPTIONS})
 	target_compile_options(ncine PUBLIC "$<$<CONFIG:Debug>:${EMSCRIPTEN_COMPILER_OPTIONS_DEBUG}>")
 	target_link_options(ncine PUBLIC "$<$<CONFIG:Debug>:${EMSCRIPTEN_COMPILER_OPTIONS_DEBUG}>")
-	target_compile_definitions(ncine PUBLIC -DIMGUI_DISABLE_FILE_FUNCTIONS)
 
 	if(Threads_FOUND)
 		target_link_libraries(ncine PUBLIC Threads::Threads)

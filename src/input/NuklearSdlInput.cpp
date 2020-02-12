@@ -46,9 +46,9 @@ void NuklearSdlInput::init(SDL_Window *window)
 
 void NuklearSdlInput::shutdown()
 {
-	nk_font_atlas_clear(&NuklearContext::atlas);
+	nk_font_atlas_clear(&NuklearContext::atlas_);
 	nk_free(&NuklearContext::ctx_);
-	nk_buffer_free(&NuklearContext::cmds);
+	nk_buffer_free(&NuklearContext::cmds_);
 
 	window_ = nullptr;
 }
@@ -58,8 +58,8 @@ void NuklearSdlInput::newFrame()
 	SDL_GetWindowSize(window_, &NuklearContext::width_, &NuklearContext::height_);
 	SDL_GL_GetDrawableSize(window_, &NuklearContext::displayWidth_, &NuklearContext::displayHeight_);
 
-	NuklearContext::fbScale.x = static_cast<float>(NuklearContext::displayWidth_) / static_cast<float>(NuklearContext::width_);
-	NuklearContext::fbScale.y = static_cast<float>(NuklearContext::displayHeight_) / static_cast<float>(NuklearContext::height_);
+	NuklearContext::fbScale_.x = static_cast<float>(NuklearContext::displayWidth_) / static_cast<float>(NuklearContext::width_);
+	NuklearContext::fbScale_.y = static_cast<float>(NuklearContext::displayHeight_) / static_cast<float>(NuklearContext::height_);
 }
 
 void NuklearSdlInput::inputBegin()
