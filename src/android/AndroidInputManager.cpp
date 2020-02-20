@@ -531,6 +531,7 @@ bool AndroidInputManager::processTouchEvent(const AInputEvent *event)
 		pointer.id = AMotionEvent_getPointerId(event, i);
 		pointer.x = AMotionEvent_getX(event, i);
 		pointer.y = theApplication().height() - AMotionEvent_getY(event, i);
+		pointer.pressure = AMotionEvent_getPressure(event, i);
 	}
 
 	switch (action & AMOTION_EVENT_ACTION_MASK)

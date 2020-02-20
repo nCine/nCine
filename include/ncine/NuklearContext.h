@@ -41,6 +41,7 @@ class DLL_PUBLIC NuklearContext
 	friend class NuklearDrawing;
 	friend class NuklearGlfwInput;
 	friend class NuklearSdlInput;
+	friend class NuklearQt5Input;
 	friend class NuklearAndroidInput;
 };
 

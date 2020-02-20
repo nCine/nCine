@@ -46,6 +46,7 @@ const int IInputManager::MaxNumJoysticks = 16;
 
 SDL_Window *SdlInputManager::windowHandle_ = nullptr;
 
+TouchEvent SdlInputManager::touchEvent_;
 SdlMouseState SdlInputManager::mouseState_;
 SdlMouseEvent SdlInputManager::mouseEvent_;
 SdlScrollEvent SdlInputManager::scrollEvent_;
@@ -226,6 +227,20 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 			joyHatEvent_.hatId = event.jhat.hat;
 			joyHatEvent_.hatState = event.jhat.value;
 			break;
+		case SDL_FINGERDOWN:
+		case SDL_FINGERMOTION:
+		case SDL_FINGERUP:
+			touchEvent_.count = SDL_GetNumTouchFingers(event.tfinger.touchId);
+			for (unsigned int i = 0; i < touchEvent_.count; i++)
+			{
+				SDL_Finger *finger = SDL_GetTouchFinger(event.tfinger.touchId, i);
+				TouchEvent::Pointer &pointer = touchEvent_.pointers[i];
+				pointer.id = static_cast<int>(finger->id);
+				pointer.x = theApplication().width() * finger->x;
+				pointer.y = theApplication().height() * (1.0f - finger->y);
+				pointer.pressure = finger->pressure;
+			}
+			break;
 		default:
 			break;
 	}
@@ -266,6 +281,21 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 		case SDL_JOYHATMOTION:
 			joyMapping_.onJoyHatMoved(joyHatEvent_);
 			inputEventHandler_->onJoyHatMoved(joyHatEvent_);
+			break;
+		case SDL_FINGERDOWN:
+			if (touchEvent_.count == 0)
+				inputEventHandler_->onTouchDown(touchEvent_);
+			else
+				inputEventHandler_->onPointerDown(touchEvent_);
+			break;
+		case SDL_FINGERMOTION:
+			inputEventHandler_->onTouchMove(touchEvent_);
+			break;
+		case SDL_FINGERUP:
+			if (touchEvent_.count == 0)
+				inputEventHandler_->onTouchUp(touchEvent_);
+			else
+				inputEventHandler_->onPointerUp(touchEvent_);
 			break;
 		default:
 			break;

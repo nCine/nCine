@@ -5,6 +5,8 @@
 
 namespace ncine {
 
+class Qt5Widget;
+
 /// Handler class for nCine applications on PC
 class DLL_PUBLIC PCApplication : public Application
 {
@@ -15,6 +17,10 @@ class DLL_PUBLIC PCApplication : public Application
   private:
 	/// Suspension state from last frame
 	bool wasSuspended_;
+
+#ifdef WITH_QT5
+	Qt5Widget *widget_;
+#endif
 
 	/// Must be called at the beginning to initialize the application
 	void init(IAppEventHandler *(*createAppEventHandler)());
@@ -37,6 +43,7 @@ class DLL_PUBLIC PCApplication : public Application
 	PCApplication &operator=(const PCApplication &) = delete;
 
 	friend DLL_PUBLIC Application &theApplication();
+	friend class Qt5Widget;
 };
 
 /// Meyers' Singleton

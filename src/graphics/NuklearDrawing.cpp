@@ -1,4 +1,5 @@
 #include <cstring> // for `memset()`
+#include <cstddef> // for `offsetof()`
 #include "NuklearDrawing.h"
 
 #include "GLTexture.h"
@@ -11,11 +12,13 @@
 #include "DrawableNode.h"
 #include "Application.h"
 
-#ifdef WITH_GLFW
+#if defined(WITH_GLFW)
 	#include "NuklearGlfwInput.h"
-#elif WITH_SDL
+#elif defined(WITH_SDL)
 	#include "NuklearSdlInput.h"
-#elif __ANDROID__
+#elif defined(WITH_QT5)
+	#include "NuklearQt5Input.h"
+#elif defined(__ANDROID__)
 	#include "NuklearAndroidInput.h"
 #endif
 
@@ -113,11 +116,13 @@ bool NuklearDrawing::bakeFonts()
 
 void NuklearDrawing::newFrame()
 {
-#ifdef WITH_GLFW
+#if defined(WITH_GLFW)
 	NuklearGlfwInput::newFrame();
-#elif WITH_SDL
+#elif defined(WITH_SDL)
 	NuklearSdlInput::newFrame();
-#elif __ANDROID__
+#elif defined(WITH_QT5)
+	NuklearQt5Input::newFrame();
+#elif defined(__ANDROID__)
 	NuklearAndroidInput::newFrame();
 #endif
 

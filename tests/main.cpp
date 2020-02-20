@@ -1,6 +1,11 @@
+#ifdef WITH_QT5
+	#include <QApplication>
+	#include <ncine/Qt5Widget.h>
+#endif
+
 #include <ncine/PCApplication.h>
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(WITH_QT5)
 	#include <ncine/common_windefines.h>
 	#include <windef.h>
 #endif
@@ -21,14 +26,18 @@ class IAppEventHandler;
 
 ncine::IAppEventHandler *createAppEventHandler();
 
-int main(int argc, char **argv)
-{
-	return ncine::PCApplication::start(createAppEventHandler);
-}
-
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(WITH_QT5)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
-{
-	return ncine::PCApplication::start(createAppEventHandler);
-}
+#else
+int main(int argc, char **argv)
 #endif
+{
+#ifdef WITH_QT5
+	QApplication app(argc, argv);
+	ncine::Qt5Widget *ncWidget = new ncine::Qt5Widget(createAppEventHandler);
+	ncWidget->show();
+	return app.exec();
+#else
+	return ncine::PCApplication::start(createAppEventHandler);
+#endif
+}

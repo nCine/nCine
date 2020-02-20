@@ -11,11 +11,13 @@
 #include "DrawableNode.h"
 #include "Application.h"
 
-#ifdef WITH_GLFW
+#if defined(WITH_GLFW)
 	#include "ImGuiGlfwInput.h"
-#elif WITH_SDL
+#elif defined(WITH_SDL)
 	#include "ImGuiSdlInput.h"
-#elif __ANDROID__
+#elif defined(WITH_QT5)
+	#include "ImGuiQt5Input.h"
+#elif defined(__ANDROID__)
 	#include "ImGuiAndroidInput.h"
 #endif
 
@@ -98,11 +100,13 @@ bool ImGuiDrawing::buildFonts()
 
 void ImGuiDrawing::newFrame()
 {
-#ifdef WITH_GLFW
+#if defined(WITH_GLFW)
 	ImGuiGlfwInput::newFrame();
-#elif WITH_SDL
+#elif defined(WITH_SDL)
 	ImGuiSdlInput::newFrame();
-#elif __ANDROID__
+#elif defined(WITH_QT5)
+	ImGuiQt5Input::newFrame();
+#elif defined(__ANDROID__)
 	ImGuiAndroidInput::newFrame();
 #endif
 

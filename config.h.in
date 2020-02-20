@@ -8,6 +8,7 @@
 #cmakedefine01 NCINE_WITH_GLEW
 #cmakedefine01 NCINE_WITH_GLFW
 #cmakedefine01 NCINE_WITH_SDL
+#cmakedefine01 NCINE_WITH_QT5
 
 #cmakedefine01 NCINE_WITH_AUDIO
 #cmakedefine01 NCINE_WITH_VORBIS

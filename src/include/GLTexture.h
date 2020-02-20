@@ -55,6 +55,7 @@ class GLTexture
 	static bool bindHandle(GLenum target, GLuint glHandle) { return bindHandle(target, glHandle, 0); }
 
 	friend class GLFramebufferObject;
+	friend class Qt5GfxDevice;
 	friend class ImGuiDrawing;
 	friend class NuklearDrawing;
 };

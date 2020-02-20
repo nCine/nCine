@@ -136,6 +136,12 @@ elseif(NOT ANDROID) # GCC and LLVM
 	endif()
 endif()
 
+if(NOT ANDROID AND NOT EMSCRIPTEN AND
+   NCINE_PREFERRED_BACKEND STREQUAL "QT5")
+	find_package(Qt5 COMPONENTS Widgets REQUIRED)
+	find_package(Qt5Gamepad)
+endif()
+
 if(ANDROID)
 	find_library(ANDROID_LIBRARY android)
 	find_library(EGL_LIBRARY EGL)

@@ -37,7 +37,6 @@ class MyEventHandler :
 	static const unsigned int NumTextures = 4;
 	static const unsigned int NumSprites = 8;
 
-	bool pause_;
 	float angle_;
 	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, NumTextures> textures_;
 	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumSprites> sprites_;

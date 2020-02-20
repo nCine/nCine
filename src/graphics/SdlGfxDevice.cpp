@@ -195,6 +195,8 @@ void SdlGfxDevice::initDevice()
 #ifdef WITH_GLEW
 	const GLenum err = glewInit();
 	FATAL_ASSERT_MSG_X(err == GLEW_OK, "GLEW error: %s", glewGetErrorString(err));
+
+	glContextInfo_.debugContext = glContextInfo_.debugContext && glewIsSupported("GL_ARB_debug_output");
 #endif
 
 	updateVideoModes();

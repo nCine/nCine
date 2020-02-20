@@ -428,6 +428,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #ifdef WITH_SDL
 			ImGui::Text("WITH_SDL");
 #endif
+#ifdef WITH_QT5
+			ImGui::Text("WITH_QT5");
+#endif
 #ifdef WITH_AUDIO
 			ImGui::Text("WITH_AUDIO");
 #endif

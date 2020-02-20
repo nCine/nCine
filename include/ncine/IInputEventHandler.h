@@ -16,7 +16,6 @@ class DLL_PUBLIC IInputEventHandler
 	inline virtual void onKeyPressed(const KeyboardEvent &event) {}
 	/// Callback function called every time a key is released
 	inline virtual void onKeyReleased(const KeyboardEvent &event) {}
-#ifdef __ANDROID__
 	/// Callback function called every time the first screen touch is made
 	inline virtual void onTouchDown(const TouchEvent &event) {}
 	/// Callback function called every time the last screen touch is released
@@ -27,6 +26,7 @@ class DLL_PUBLIC IInputEventHandler
 	inline virtual void onPointerDown(const TouchEvent &event) {}
 	/// Callback function called every time a screen touch different than the last one is released
 	inline virtual void onPointerUp(const TouchEvent &event) {}
+#ifdef __ANDROID__
 	/// Callback function called at fixed time with the updated reading from the accelerometer sensor
 	inline virtual void onAcceleration(const AccelerometerEvent &event) {}
 #endif

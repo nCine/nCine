@@ -61,6 +61,12 @@ foreach(APPTEST ${APPTESTS})
 		target_sources(${APPTEST} PRIVATE ${APPTEST}.cpp ${APPTEST}.h)
 	endif()
 
+	if(WIN32 AND Qt5_FOUND AND NCINE_PREFERRED_BACKEND STREQUAL "QT5")
+		target_link_libraries(${APPTEST} PRIVATE Qt5::WinMain)
+	elseif(MINGW)
+		target_link_libraries(${APPTEST} PRIVATE mingw32)
+	endif()
+
 	target_link_libraries(${APPTEST} PRIVATE ncine_main ncine)
 	set_target_properties(${APPTEST} PROPERTIES FOLDER "AppTests")
 	target_compile_definitions(${APPTEST} PRIVATE "NCINE_TESTS_DATA_DIR=\"${NCINE_TESTS_DATA_DIR}\"")

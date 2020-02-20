@@ -138,6 +138,7 @@ class SdlInputManager : public IInputManager
 
 	static SDL_Window *windowHandle_;
 
+	static TouchEvent touchEvent_;
 	static SdlMouseState mouseState_;
 	static SdlMouseEvent mouseEvent_;
 	static SdlScrollEvent scrollEvent_;

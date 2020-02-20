@@ -6,7 +6,6 @@
 
 namespace ncine {
 
-#ifdef __ANDROID__
 class DLL_PUBLIC TouchEvent
 {
   public:
@@ -15,10 +14,11 @@ class DLL_PUBLIC TouchEvent
 	{
 		int id;
 		float x, y;
+		float pressure;
 	};
 
 	TouchEvent()
-	    : count(0) {}
+	    : count(0), actionIndex(-1) {}
 
 	unsigned int count;
 	int actionIndex;
@@ -39,6 +39,7 @@ class DLL_PUBLIC TouchEvent
 	}
 };
 
+#ifdef __ANDROID__
 class DLL_PUBLIC AccelerometerEvent
 {
   public:

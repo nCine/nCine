@@ -11,7 +11,7 @@ option(NCINE_BUILD_ANDROID "Build the Android version of the engine" OFF)
 option(NCINE_STRIP_BINARIES "Enable symbols stripping from libraries and executables when in release" OFF)
 
 set(NCINE_PREFERRED_BACKEND "GLFW" CACHE STRING "Specify the preferred backend on desktop")
-set_property(CACHE NCINE_PREFERRED_BACKEND PROPERTY STRINGS "GLFW;SDL2")
+set_property(CACHE NCINE_PREFERRED_BACKEND PROPERTY STRINGS "GLFW;SDL2;QT5")
 
 if(EMSCRIPTEN)
 	option(NCINE_WITH_THREADS "Enable the Emscripten Pthreads support" OFF)

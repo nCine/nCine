@@ -11,6 +11,9 @@
 #elif defined(WITH_GLFW)
 	#include "GlfwGfxDevice.h"
 	#include "GlfwInputManager.h"
+#elif defined(WITH_QT5)
+	#include "Qt5GfxDevice.h"
+	#include "Qt5InputManager.h"
 #endif
 
 #ifdef __EMSCRIPTEN__
@@ -84,6 +87,10 @@ void PCApplication::init(IAppEventHandler *(*createAppEventHandler)())
 #elif defined(WITH_GLFW)
 	gfxDevice_ = nctl::makeUnique<GlfwGfxDevice>(windowMode, glContextInfo, displayMode);
 	inputManager_ = nctl::makeUnique<GlfwInputManager>();
+#elif defined(WITH_QT5)
+	FATAL_ASSERT(widget_);
+	gfxDevice_ = nctl::makeUnique<Qt5GfxDevice>(windowMode, glContextInfo, displayMode, *widget_);
+	inputManager_ = nctl::makeUnique<Qt5InputManager>(*widget_);
 #endif
 	gfxDevice_->setWindowTitle(appCfg_.windowTitle.data());
 	nctl::String windowIconFilePath = IFile::dataPath() + appCfg_.windowIconFilename;
@@ -92,16 +99,24 @@ void PCApplication::init(IAppEventHandler *(*createAppEventHandler)())
 
 	timings_[Timings::PRE_INIT] = profileStartTime_.secondsSince();
 
+#ifndef WITH_QT5
+	// Common initialization on Qt5 is performed later, when OpenGL can be used
 	initCommon();
+#endif
 }
 
 void PCApplication::run()
 {
-#ifndef __EMSCRIPTEN__
+#if !defined(__EMSCRIPTEN__) && !defined(WITH_QT5)
 	while (!shouldQuit_)
 	{
 #endif
+
+#if !defined(WITH_QT5)
 		processEvents();
+#elif defined(WITH_QT5GAMEPAD)
+		static_cast<Qt5InputManager &>(*inputManager_).updateJoystickStates();
+#endif
 
 		const bool suspended = shouldSuspend();
 		if (wasSuspended_ != suspended)
@@ -115,7 +130,7 @@ void PCApplication::run()
 
 		if (suspended == false)
 			step();
-#ifndef __EMSCRIPTEN__
+#if !defined(__EMSCRIPTEN__) && !defined(WITH_QT5)
 	}
 #endif
 }

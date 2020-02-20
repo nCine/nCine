@@ -1,6 +1,5 @@
 // Based on imgui/examples/imgui_impl_sdl.cpp
 
-#include "imgui.h"
 #include "ImGuiSdlInput.h"
 #include "ImGuiJoyMappedInput.h"
 
