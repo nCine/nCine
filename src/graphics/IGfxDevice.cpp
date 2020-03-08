@@ -17,9 +17,8 @@ namespace ncine {
 #ifdef __EMSCRIPTEN__
 EM_BOOL IGfxDevice::resize_callback(int eventType, const EmscriptenUiEvent *event, void *userData)
 {
-	// Change resolution only if the canvas fills all the available space and does not scroll
-	if (event->documentBodyClientWidth == 0 || event->documentBodyClientHeight == 0 ||
-	    event->scrollTop != 0 || event->scrollLeft != 0)
+	// Change resolution only if the canvas fills all the available space
+	if (event->documentBodyClientWidth == 0 || event->documentBodyClientHeight == 0)
 	{
 		IGfxDevice *gfxDevice = reinterpret_cast<IGfxDevice *>(userData);
 		gfxDevice->setResolution(event->windowInnerWidth, event->windowInnerHeight);
@@ -59,7 +58,8 @@ IGfxDevice::IGfxDevice(const WindowMode &windowMode, const GLContextInfo &glCont
 #ifdef __EMSCRIPTEN__
 	double cssWidth = 0.0;
 	double cssHeight = 0.0;
-	emscripten_get_element_css_size(nullptr, &cssWidth, &cssHeight);
+	// Referring to the first element of type <canvas> in the DOM
+	emscripten_get_element_css_size("canvas", &cssWidth, &cssHeight);
 
 	EmscriptenFullscreenChangeEvent fsce;
 	emscripten_get_fullscreen_status(&fsce);
@@ -69,13 +69,13 @@ IGfxDevice::IGfxDevice(const WindowMode &windowMode, const GLContextInfo &glCont
 	isFullScreen_ = fsce.isFullscreen;
 	isResizable_ = true;
 
-	emscripten_set_resize_callback(nullptr, this, true, IGfxDevice::resize_callback);
-	emscripten_set_fullscreenchange_callback(nullptr, this, true, IGfxDevice::fullscreenchange_callback);
+	emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, true, IGfxDevice::resize_callback);
+	emscripten_set_fullscreenchange_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, true, IGfxDevice::fullscreenchange_callback);
 
 	// GLFW does not seem to correctly handle Emscripten focus and blur events
 	#ifdef WITH_GLFW
-	emscripten_set_blur_callback(nullptr, nullptr, true, IGfxDevice::focus_callback);
-	emscripten_set_focus_callback(nullptr, nullptr, true, IGfxDevice::focus_callback);
+	emscripten_set_blur_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, nullptr, true, IGfxDevice::focus_callback);
+	emscripten_set_focus_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, nullptr, true, IGfxDevice::focus_callback);
 	#endif
 #endif
 

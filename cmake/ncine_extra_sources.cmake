@@ -127,15 +127,23 @@ if(PNG_FOUND)
 	target_compile_definitions(ncine PRIVATE "WITH_PNG")
 	target_link_libraries(ncine PRIVATE PNG::PNG)
 
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/TextureLoaderPng.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/TextureLoaderPng.cpp)
+	list(APPEND PRIVATE_HEADERS
+		${NCINE_ROOT}/src/include/TextureLoaderPng.h
+		${NCINE_ROOT}/src/include/TextureSaverPng.h)
+	list(APPEND SOURCES
+		${NCINE_ROOT}/src/graphics/TextureLoaderPng.cpp
+		${NCINE_ROOT}/src/graphics/TextureSaverPng.cpp)
 endif()
 if(WEBP_FOUND)
 	target_compile_definitions(ncine PRIVATE "WITH_WEBP")
 	target_link_libraries(ncine PRIVATE WebP::WebP)
 
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/TextureLoaderWebP.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/TextureLoaderWebP.cpp)
+	list(APPEND PRIVATE_HEADERS
+		${NCINE_ROOT}/src/include/TextureLoaderWebP.h
+		${NCINE_ROOT}/src/include/TextureSaverWebP.h)
+	list(APPEND SOURCES
+		${NCINE_ROOT}/src/graphics/TextureLoaderWebP.cpp
+		${NCINE_ROOT}/src/graphics/TextureSaverWebP.cpp)
 endif()
 
 if(Threads_FOUND)

@@ -21,6 +21,7 @@ set(PRIVATE_HEADERS
 	${NCINE_ROOT}/src/include/TextureLoaderDds.h
 	${NCINE_ROOT}/src/include/TextureLoaderPvr.h
 	${NCINE_ROOT}/src/include/TextureLoaderKtx.h
+	${NCINE_ROOT}/src/include/ITextureSaver.h
 	${NCINE_ROOT}/src/include/GLHashMap.h
 	${NCINE_ROOT}/src/include/GLBufferObject.h
 	${NCINE_ROOT}/src/include/GLBufferObject.h

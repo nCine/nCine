@@ -164,6 +164,8 @@ class DLL_PUBLIC IFile
 
 	/// The `AppConfiguration` class needs to call `IFile::setDataPath()`
 	friend class AppConfiguration;
+	/// The `TextureSaverPng` class needs to access the `filePointer_`
+	friend class TextureSaverPng;
 };
 
 }
