@@ -6,7 +6,6 @@
 #include <ncine/Sprite.h>
 #include <ncine/TextNode.h>
 #include <ncine/IGfxCapabilities.h>
-#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 #ifndef __ANDROID__
@@ -64,9 +63,9 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	nctl::String texPath = nc::IFile::dataPath() + "textures/testformats/";
-	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontFntFile).data(),
-	                                   (nc::IFile::dataPath() + "fonts/" + FontTextureFile).data());
+	nctl::String texPath = nc::fs::joinPath(nc::fs::dataPath(), "textures/testformats");
+	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
+	                                   (prefixDataPath("fonts", FontTextureFile)).data());
 
 	const nc::IGfxCapabilities &gfxCaps = nc::theServiceLocator().gfxCapabilities();
 	const int maxTextureSize = gfxCaps.value(nc::IGfxCapabilities::GLIntValues::MAX_TEXTURE_SIZE);
@@ -178,7 +177,7 @@ void MyEventHandler::onInit()
 
 	for (unsigned int i = 0; i < filenames_.size(); i++)
 	{
-		textures_[i] = nctl::makeUnique<nc::Texture>((texPath + filenames_[i]).data());
+		textures_[i] = nctl::makeUnique<nc::Texture>((nc::fs::absoluteJoinPath(texPath, filenames_[i])).data());
 		sprites_[i] = nctl::makeUnique<nc::Sprite>(dummy_.get(), textures_[i].get());
 		sprites_[i]->setEnabled(false);
 	}

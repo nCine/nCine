@@ -2,7 +2,6 @@
 #include <ncine/Application.h>
 #include <ncine/LuaIAppEventHandler.h>
 #include <ncine/LuaIInputEventHandler.h>
-#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {
@@ -28,7 +27,7 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 	setDataPath(config);
 
 	luaState_.exposeScriptApi();
-	luaState_.run((nc::IFile::dataPath() + "scripts/" + ScriptFile).data());
+	luaState_.run(prefixDataPath("scripts", ScriptFile).data());
 	nc::LuaIAppEventHandler::onPreInit(luaState_.state(), config);
 }
 

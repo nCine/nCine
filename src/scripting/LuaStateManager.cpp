@@ -20,6 +20,7 @@
 #include "LuaJoystickEvents.h"
 
 #include "LuaTimeStamp.h"
+#include "LuaFileSystem.h"
 #include "LuaApplication.h"
 #include "LuaTexture.h"
 #include "LuaSprite.h"
@@ -344,6 +345,7 @@ void LuaStateManager::exposeApi()
 	LuaJoystickEvents::expose(L_);
 
 	LuaTimeStamp::expose(L_);
+	LuaFileSystem::expose(L_);
 	LuaApplication::expose(L_);
 	if (appCfg.withScenegraph)
 	{
@@ -377,6 +379,7 @@ void LuaStateManager::exposeConstants()
 	LuaIInputManager::exposeConstants(L_);
 	LuaILogger::exposeConstants(L_);
 
+	LuaFileSystem::exposeConstants(L_);
 	if (appCfg.withScenegraph)
 	{
 		LuaTexture::exposeConstants(L_);

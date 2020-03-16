@@ -37,11 +37,6 @@ class StandardFile : public IFile
 	void openFD(unsigned char mode);
 	/// Opens the file with `fopen()`
 	void openStream(unsigned char mode);
-
-	/// Checks if a file can be accessed with specified mode
-	static bool access(const char *filename, unsigned char mode);
-
-	friend bool IFile::access(const char *filename, unsigned char mode);
 };
 
 }

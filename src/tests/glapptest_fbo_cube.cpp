@@ -10,11 +10,12 @@
 #include <ncine/GLVertexArrayObject.h>
 #include <ncine/GLBufferObject.h>
 #include <ncine/GLDepthTest.h>
-#include <ncine/IFile.h> // for dataPath()
 #include "../../tests/apptest_datapath.h"
 
 #ifdef WITH_EMBEDDED_SHADERS
 	#include "shader_strings.h"
+#else
+	#include "FileSystem.h" // for dataPath()
 #endif
 
 namespace {
@@ -109,8 +110,8 @@ void MyEventHandler::onInit()
 {
 	colorProgram_ = nctl::makeUnique<nc::GLShaderProgram>(nc::GLShaderProgram::QueryPhase::DEFERRED);
 #ifndef WITH_EMBEDDED_SHADERS
-	colorProgram_->attachShader(GL_VERTEX_SHADER, (nc::IFile::dataPath() + "shaders/vcolor_vs.glsl").data());
-	colorProgram_->attachShader(GL_FRAGMENT_SHADER, (nc::IFile::dataPath() + "shaders/vcolor_fs.glsl").data());
+	colorProgram_->attachShader(GL_VERTEX_SHADER, (nc::fs::dataPath() + "shaders/vcolor_vs.glsl").data());
+	colorProgram_->attachShader(GL_FRAGMENT_SHADER, (nc::fs::dataPath() + "shaders/vcolor_fs.glsl").data());
 #else
 	colorProgram_->attachShaderFromString(GL_VERTEX_SHADER, nc::ShaderStrings::vcolor_vs);
 	colorProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, nc::ShaderStrings::vcolor_fs);
@@ -122,8 +123,8 @@ void MyEventHandler::onInit()
 
 	texProgram_ = nctl::makeUnique<nc::GLShaderProgram>(nc::GLShaderProgram::QueryPhase::DEFERRED);
 #ifndef WITH_EMBEDDED_SHADERS
-	texProgram_->attachShader(GL_VERTEX_SHADER, (nc::IFile::dataPath() + "shaders/texture_vs.glsl").data());
-	texProgram_->attachShader(GL_FRAGMENT_SHADER, (nc::IFile::dataPath() + "shaders/texture_fs.glsl").data());
+	texProgram_->attachShader(GL_VERTEX_SHADER, (nc::IFile::fs() + "shaders/texture_vs.glsl").data());
+	texProgram_->attachShader(GL_FRAGMENT_SHADER, (nc::IFile::fs() + "shaders/texture_fs.glsl").data());
 #else
 	texProgram_->attachShaderFromString(GL_VERTEX_SHADER, nc::ShaderStrings::texture_vs);
 	texProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, nc::ShaderStrings::texture_fs);

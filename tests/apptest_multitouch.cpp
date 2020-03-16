@@ -4,7 +4,6 @@
 #include <ncine/Texture.h>
 #include <ncine/Sprite.h>
 #include <ncine/TextNode.h>
-#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {
@@ -42,13 +41,13 @@ void MyEventHandler::onInit()
 
 	multitouchString_ = nctl::makeUnique<nctl::String>(LongNumChars);
 
-	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontFntFile).data(),
-	                                   (nc::IFile::dataPath() + "fonts/" + FontTextureFile).data());
+	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
+	                                   (prefixDataPath("fonts", FontTextureFile)).data());
 	textNode_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get(), LongNumChars);
 	textNode_->setScale(0.85f);
 
 #if HAS_TOUCH
-	texture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + TextureFile).data());
+	texture_ = nctl::makeUnique<nc::Texture>(prefixDataPath("textures", TextureFile).data());
 	for (unsigned int i = 0; i < nc::TouchEvent::MaxPointers; i++)
 	{
 		sprites_[i] = nctl::makeUnique<nc::Sprite>(&rootNode, texture_.get());

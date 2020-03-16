@@ -12,6 +12,7 @@ set(SOURCES
 	${NCINE_ROOT}/src/Font.cpp
 	${NCINE_ROOT}/src/FntParser.cpp
 	${NCINE_ROOT}/src/FontGlyph.cpp
+	${NCINE_ROOT}/src/FileSystem.cpp
 	${NCINE_ROOT}/src/IFile.cpp
 	${NCINE_ROOT}/src/StandardFile.cpp
 	${NCINE_ROOT}/src/input/IInputManager.cpp

@@ -3,7 +3,7 @@
 #ifdef WITH_VORBIS
 	#include "AudioLoaderOgg.h"
 #endif
-#include "IFile.h"
+#include "FileSystem.h"
 
 namespace ncine {
 
@@ -32,15 +32,15 @@ nctl::UniquePtr<IAudioLoader> IAudioLoader::createFromFile(const char *filename)
 	// Creating a handle from IFile static method to detect assets file
 	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
 
-	if (fileHandle->hasExtension("wav"))
+	if (fs::hasExtension(filename, "wav"))
 		return nctl::makeUnique<AudioLoaderWav>(nctl::move(fileHandle));
 #ifdef WITH_VORBIS
-	else if (fileHandle->hasExtension("ogg"))
+	else if (fs::hasExtension(filename, "ogg"))
 		return nctl::makeUnique<AudioLoaderOgg>(nctl::move(fileHandle));
 #endif
 	else
 	{
-		LOGF_X("Extension unknown: \"%s\"", fileHandle->extension());
+		LOGF_X("Extension unknown: \"%s\"", fs::extension(filename));
 		fileHandle.reset(nullptr);
 		exit(EXIT_FAILURE);
 	}

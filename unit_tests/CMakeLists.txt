@@ -39,6 +39,7 @@ list(APPEND TESTS
 	gtest_uniqueptr gtest_uniqueptr_array gtest_sharedptr
 	gtest_color gtest_colorf gtest_colorhdr
 	gtest_random
+	gtest_filesystem
 )
 
 if(Threads_FOUND)

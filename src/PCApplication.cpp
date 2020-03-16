@@ -1,6 +1,7 @@
 #include "PCApplication.h"
 #include "IAppEventHandler.h"
 #include "FileLogger.h"
+#include "FileSystem.h"
 
 #if defined(WITH_SDL)
 	#include "SdlGfxDevice.h"
@@ -93,8 +94,8 @@ void PCApplication::init(IAppEventHandler *(*createAppEventHandler)())
 	inputManager_ = nctl::makeUnique<Qt5InputManager>(*widget_);
 #endif
 	gfxDevice_->setWindowTitle(appCfg_.windowTitle.data());
-	nctl::String windowIconFilePath = IFile::dataPath() + appCfg_.windowIconFilename;
-	if (IFile::access(windowIconFilePath.data(), IFile::AccessMode::EXISTS))
+	nctl::String windowIconFilePath = fs::joinPath(fs::dataPath(), appCfg_.windowIconFilename);
+	if (fs::isReadableFile(windowIconFilePath.data()))
 		gfxDevice_->setWindowIcon(windowIconFilePath.data());
 
 	timings_[Timings::PRE_INIT] = profileStartTime_.secondsSince();

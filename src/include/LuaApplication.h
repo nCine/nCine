@@ -32,9 +32,6 @@ class LuaApplication
 	static int setAutoSuspension(lua_State *L);
 
 	static int quit(lua_State *L);
-
-	static int datapath(lua_State *L);
-	static int savepath(lua_State *L);
 };
 
 }

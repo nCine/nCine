@@ -205,6 +205,7 @@ if(LUA_FOUND)
 		${NCINE_ROOT}/src/include/LuaKeyboardEvents.h
 		${NCINE_ROOT}/src/include/LuaJoystickEvents.h
 		${NCINE_ROOT}/src/include/LuaTimeStamp.h
+		${NCINE_ROOT}/src/include/LuaFileSystem.h
 		${NCINE_ROOT}/src/include/LuaApplication.h
 		${NCINE_ROOT}/src/include/LuaAppConfiguration.h
 		${NCINE_ROOT}/src/include/LuaSceneNode.h
@@ -236,6 +237,7 @@ if(LUA_FOUND)
 		${NCINE_ROOT}/src/scripting/LuaKeyboardEvents.cpp
 		${NCINE_ROOT}/src/scripting/LuaJoystickEvents.cpp
 		${NCINE_ROOT}/src/scripting/LuaTimeStamp.cpp
+		${NCINE_ROOT}/src/scripting/LuaFileSystem.cpp
 		${NCINE_ROOT}/src/scripting/LuaApplication.cpp
 		${NCINE_ROOT}/src/scripting/LuaAppConfiguration.cpp
 		${NCINE_ROOT}/src/scripting/LuaSceneNode.cpp

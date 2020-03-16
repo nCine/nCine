@@ -8,7 +8,6 @@
 #include <ncine/TextNode.h>
 #include <ncine/ParticleSystem.h>
 #include <ncine/ParticleInitializer.h>
-#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {
@@ -69,13 +68,13 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontFntFile).data(),
-	                                   (nc::IFile::dataPath() + "fonts/" + FontTextureFile).data());
+	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
+	                                   (prefixDataPath("fonts", FontTextureFile)).data());
 
-	textures_[0] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture1File).data());
-	textures_[1] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture2File).data());
-	textures_[2] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture3File).data());
-	textures_[3] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture4File).data());
+	textures_[0] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data());
+	textures_[1] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture2File)).data());
+	textures_[2] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture3File)).data());
+	textures_[3] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture4File)).data());
 
 	const float width = nc::theApplication().width();
 	const float height = nc::theApplication().height();

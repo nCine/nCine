@@ -7,6 +7,8 @@
 
 namespace ncine {
 
+class IFile;
+
 /// Texture loader interface class
 class ITextureLoader
 {

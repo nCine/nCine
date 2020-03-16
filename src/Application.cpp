@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "Random.h"
 #include "IAppEventHandler.h"
+#include "FileSystem.h"
 #include "IFile.h"
 #include "ArrayIndexer.h"
 #include "GfxCapabilities.h"
@@ -99,8 +100,8 @@ void Application::initCommon()
 	theServiceLocator().registerGfxCapabilities(nctl::makeUnique<GfxCapabilities>());
 	GLDebug::init(theServiceLocator().gfxCapabilities());
 
-	LOGI_X("Data path: \"%s\"", IFile::dataPath().data());
-	LOGI_X("Save path: \"%s\"", IFile::savePath().data());
+	LOGI_X("Data path: \"%s\"", fs::dataPath().data());
+	LOGI_X("Save path: \"%s\"", fs::savePath().data());
 
 #ifdef WITH_RENDERDOC
 	RenderDocCapture::init();

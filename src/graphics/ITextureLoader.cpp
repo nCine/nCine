@@ -12,6 +12,7 @@
 #ifdef __ANDROID__
 	#include "TextureLoaderPkm.h"
 #endif
+#include "FileSystem.h"
 
 namespace ncine {
 
@@ -64,27 +65,27 @@ nctl::UniquePtr<ITextureLoader> ITextureLoader::createFromFile(const char *filen
 	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
 	LOGI_X("Loading file: \"%s\"", fileHandle->filename());
 
-	if (fileHandle->hasExtension("dds"))
+	if (fs::hasExtension(filename, "dds"))
 		return nctl::makeUnique<TextureLoaderDds>(nctl::move(fileHandle));
-	else if (fileHandle->hasExtension("pvr"))
+	else if (fs::hasExtension(filename, "pvr"))
 		return nctl::makeUnique<TextureLoaderPvr>(nctl::move(fileHandle));
-	else if (fileHandle->hasExtension("ktx"))
+	else if (fs::hasExtension(filename, "ktx"))
 		return nctl::makeUnique<TextureLoaderKtx>(nctl::move(fileHandle));
 #ifdef WITH_PNG
-	else if (fileHandle->hasExtension("png"))
+	else if (fs::hasExtension(filename, "png"))
 		return nctl::makeUnique<TextureLoaderPng>(nctl::move(fileHandle));
 #endif
 #ifdef WITH_WEBP
-	else if (fileHandle->hasExtension("webp"))
+	else if (fs::hasExtension(filename, "webp"))
 		return nctl::makeUnique<TextureLoaderWebP>(nctl::move(fileHandle));
 #endif
 #ifdef __ANDROID__
-	else if (fileHandle->hasExtension("pkm"))
+	else if (fs::hasExtension(filename, "pkm"))
 		return nctl::makeUnique<TextureLoaderPkm>(nctl::move(fileHandle));
 #endif
 	else
 	{
-		LOGF_X("Extension unknown: \"%s\"", fileHandle->extension());
+		LOGF_X("Extension unknown: \"%s\"", fs::extension(filename));
 		fileHandle.reset(nullptr);
 		exit(EXIT_FAILURE);
 	}

@@ -1,5 +1,5 @@
 #include "AppConfiguration.h"
-#include "IFile.h"
+#include "FileSystem.h"
 
 namespace ncine {
 
@@ -68,13 +68,13 @@ AppConfiguration::AppConfiguration()
 
 const nctl::String &AppConfiguration::dataPath() const
 {
-	return IFile::dataPath_;
+	return fs::dataPath_;
 }
 
-/*! Allows to set the value of the static field `IFile::dataPath_`. */
+/*! Allows to set the value of the static field `FileSystem::dataPath_`. */
 nctl::String &AppConfiguration::dataPath()
 {
-	return IFile::dataPath_;
+	return fs::dataPath_;
 }
 
 }

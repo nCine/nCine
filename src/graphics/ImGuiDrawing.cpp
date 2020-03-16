@@ -24,7 +24,7 @@
 #ifdef WITH_EMBEDDED_SHADERS
 	#include "shader_strings.h"
 #else
-	#include "IFile.h" // for dataPath()
+	#include "FileSystem.h" // for dataPath()
 #endif
 
 namespace ncine {
@@ -54,8 +54,8 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 
 	imguiShaderProgram_ = nctl::makeUnique<GLShaderProgram>(queryPhase);
 #ifndef WITH_EMBEDDED_SHADERS
-	imguiShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/imgui_vs.glsl").data());
-	imguiShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/imgui_fs.glsl").data());
+	imguiShaderProgram_->attachShader(GL_VERTEX_SHADER, (fs::dataPath() + "shaders/imgui_vs.glsl").data());
+	imguiShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/imgui_fs.glsl").data());
 #else
 	imguiShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::imgui_vs);
 	imguiShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::imgui_fs);

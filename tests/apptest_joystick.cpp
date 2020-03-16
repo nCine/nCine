@@ -4,7 +4,6 @@
 #include <ncine/Texture.h>
 #include <ncine/Sprite.h>
 #include <ncine/TextNode.h>
-#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {
@@ -64,7 +63,8 @@ void MyEventHandler::onInit()
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 	joyString_ = nctl::makeUnique<nctl::String>(unsigned(MaxNumChars));
-	texture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + TextureFile).data());
+
+	texture_ = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", TextureFile)).data());
 
 	const float appWidth = nc::theApplication().width();
 	const float appHeight = nc::theApplication().height();
@@ -113,8 +113,8 @@ void MyEventHandler::onInit()
 	sprites_[15]->setScale(buttonUnpressedSize);
 	sprites_[16]->setScale(buttonUnpressedSize);
 
-	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontFntFile).data(),
-	                                   (nc::IFile::dataPath() + "fonts/" + FontTextureFile).data());
+	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
+	                                   (prefixDataPath("fonts", FontTextureFile)).data());
 	textNode_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get(), unsigned(MaxNumChars));
 	textNode_->setScale(0.85f);
 

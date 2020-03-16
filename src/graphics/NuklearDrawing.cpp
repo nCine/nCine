@@ -25,7 +25,7 @@
 #ifdef WITH_EMBEDDED_SHADERS
 	#include "shader_strings.h"
 #else
-	#include "IFile.h" // for dataPath()
+	#include "FileSystem.h" // for dataPath()
 #endif
 
 namespace ncine {
@@ -56,8 +56,8 @@ NuklearDrawing::NuklearDrawing(bool withSceneGraph)
 	// Nuklear shaders are the same as ImGui
 	nuklearShaderProgram_ = nctl::makeUnique<GLShaderProgram>(queryPhase);
 #ifndef WITH_EMBEDDED_SHADERS
-	nuklearShaderProgram_->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/imgui_vs.glsl").data());
-	nuklearShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/imgui_fs.glsl").data());
+	nuklearShaderProgram_->attachShader(GL_VERTEX_SHADER, (fs::dataPath() + "shaders/imgui_vs.glsl").data());
+	nuklearShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/imgui_fs.glsl").data());
 #else
 	nuklearShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::imgui_vs);
 	nuklearShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::imgui_fs);

@@ -5,7 +5,7 @@
 #include "LuaClassWrapper.h"
 #include "LuaVector2Utils.h"
 #include "Application.h"
-#include "IFile.h"
+#include "FileSystem.h"
 
 namespace ncine {
 
@@ -16,7 +16,7 @@ namespace Application {
 	static const char *renderingSettings = "get_rendering_settings";
 	static const char *setRenderingSettings = "set_rendering_settings";
 
-	static const char *debugOVerlaySettings = "get_debugoverlay_settings";
+	static const char *debugOverlaySettings = "get_debugoverlay_settings";
 	static const char *setDebugOverlaySettings = "set_debugoverlay_settings";
 
 	static const char *rootNode = "rootnode";
@@ -33,9 +33,6 @@ namespace Application {
 	static const char *setAutoSuspension = "set_auto_suspension";
 
 	static const char *quit = "quit";
-
-	static const char *datapath = "datapath";
-	static const char *savepath = "savepath";
 
 	namespace RenderingSettings {
 		static const char *batchingEnabled = "batching";
@@ -63,7 +60,7 @@ void LuaApplication::expose(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::Application::renderingSettings, renderingSettings);
 	LuaUtils::addFunction(L, LuaNames::Application::setRenderingSettings, setRenderingSettings);
 
-	LuaUtils::addFunction(L, LuaNames::Application::debugOVerlaySettings, debugOverlaySettings);
+	LuaUtils::addFunction(L, LuaNames::Application::debugOverlaySettings, debugOverlaySettings);
 	LuaUtils::addFunction(L, LuaNames::Application::setDebugOverlaySettings, setDebugOverlaySettings);
 
 	LuaUtils::addFunction(L, LuaNames::Application::rootNode, rootNode);
@@ -80,10 +77,6 @@ void LuaApplication::expose(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::Application::setAutoSuspension, setAutoSuspension);
 
 	LuaUtils::addFunction(L, LuaNames::Application::quit, quit);
-
-	// `IFile` static functions exposed as part of `application`
-	LuaUtils::addFunction(L, LuaNames::Application::datapath, datapath);
-	LuaUtils::addFunction(L, LuaNames::Application::savepath, savepath);
 
 	lua_setfield(L, -2, LuaNames::Application::Application);
 }
@@ -210,18 +203,6 @@ int LuaApplication::quit(lua_State *L)
 {
 	theApplication().quit();
 	return 0;
-}
-
-int LuaApplication::datapath(lua_State *L)
-{
-	LuaUtils::push(L, IFile::dataPath().data());
-	return 1;
-}
-
-int LuaApplication::savepath(lua_State *L)
-{
-	LuaUtils::push(L, IFile::savePath().data());
-	return 1;
 }
 
 }

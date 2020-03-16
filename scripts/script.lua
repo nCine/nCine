@@ -35,8 +35,8 @@ function ncine.on_init()
 	pos_ = {x = screen.x * 0.5, y = screen.y * 0.5}
 	angle_ = 0
 
-	font_ = nc.font.new(nc.application.datapath().."fonts/DroidSans32_256.fnt",
-	                    nc.application.datapath().."fonts/"..font_tex_file)
+	font_ = nc.font.new(nc.fs.get_datapath().."fonts/DroidSans32_256.fnt",
+	                    nc.fs.get_datapath().."fonts/"..font_tex_file)
 	textnode_ = nc.textnode.new(rootnode, font_, 256)
 	nc.textnode.set_string(textnode_, "apptest_lua")
 	nc.textnode.set_layer(textnode_, 100)
@@ -47,9 +47,9 @@ function ncine.on_init()
 	color.b = 1.0
 	nc.textnode.set_color(textnode_, color)
 
-	texture_ = nc.texture.new(nc.application.datapath().."textures/"..texture_file)
-	texture2_ = nc.texture.new(nc.application.datapath().."textures/"..texture2_file)
-	texture3_ = nc.texture.new(nc.application.datapath().."textures/"..texture3_file)
+	texture_ = nc.texture.new(nc.fs.get_datapath().."textures/"..texture_file)
+	texture2_ = nc.texture.new(nc.fs.get_datapath().."textures/"..texture2_file)
+	texture3_ = nc.texture.new(nc.fs.get_datapath().."textures/"..texture3_file)
 
 	sprite_ = nc.sprite.new(rootnode, texture2_, screen.x * 0.2, screen.y * 0.5)
 	meshsprite_ = nc.mesh_sprite.new(rootnode, texture_, screen.x * 0.8, screen.y * 0.5)

@@ -2,7 +2,6 @@
 #include <ncine/Application.h>
 #include <ncine/IAppEventHandler.h>
 #include <ncine/TextNode.h>
-#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {
@@ -36,12 +35,12 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	fonts_[0] = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + Font1FntFile).data(),
-	                                       (nc::IFile::dataPath() + "fonts/" + Font1TextureFile).data());
-	fonts_[1] = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + Font2FntFile).data(),
-	                                       (nc::IFile::dataPath() + "fonts/" + Font2TextureFile).data());
-	fonts_[2] = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + Font3FntFile).data(),
-	                                       (nc::IFile::dataPath() + "fonts/" + Font3TextureFile).data());
+	fonts_[0] = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", Font1FntFile)).data(),
+	                                       (prefixDataPath("fonts", Font1TextureFile)).data());
+	fonts_[1] = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", Font2FntFile)).data(),
+	                                       (prefixDataPath("fonts", Font2TextureFile)).data());
+	fonts_[2] = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", Font3FntFile)).data(),
+	                                       (prefixDataPath("fonts", Font3TextureFile)).data());
 
 	const char testString[] = "WAY.P.ATAV";
 	float textHeight = nc::theApplication().height() * 0.8f;

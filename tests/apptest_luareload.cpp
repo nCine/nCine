@@ -8,7 +8,6 @@
 #include <ncine/LuaClassWrapper.h>
 #include <ncine/LuaUtils.h>
 #include <ncine/LuaColorUtils.h>
-#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {
@@ -44,7 +43,7 @@ void MyEventHandler::onInit()
 {
 	lua_State *L = luaState_.state();
 
-	luaState_.run((nc::IFile::dataPath() + "scripts/" + InitScriptFile).data());
+	luaState_.run(prefixDataPath("scripts", InitScriptFile).data());
 	nc::LuaUtils::retrieveGlobalFunction(L, "load");
 	nc::LuaUtils::call(L, 0, 1);
 
@@ -55,7 +54,7 @@ void MyEventHandler::onInit()
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	texture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + textureFile).data());
+	texture_ = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", textureFile)).data());
 	particleSystem_ = nctl::makeUnique<nc::ParticleSystem>(&rootNode, count, texture_.get(), texture_->rect());
 	particleSystem_->setPosition(xPos, yPos);
 
@@ -131,7 +130,7 @@ void MyEventHandler::runScript()
 
 	lua_State *L = luaState_.state();
 
-	luaState_.run((nc::IFile::dataPath() + "scripts/" + ReloadScriptFile).data());
+	luaState_.run(prefixDataPath("scripts", ReloadScriptFile).data());
 	nc::LuaUtils::retrieveGlobalFunction(L, "execute");
 	nc::LuaUtils::createTable(L, 1, 0);
 	nc::LuaClassWrapper<nc::ParticleSystem>::pushFieldUntrackedUserData(L, "particlesys", particleSystem_.get());

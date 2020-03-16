@@ -5,6 +5,7 @@
 #include "FileLogger.h"
 #include "EglGfxDevice.h"
 #include "AndroidInputManager.h"
+#include "FileSystem.h"
 #include "AssetFile.h"
 #include "AndroidJniHelper.h"
 #include "tracy.h"
@@ -237,7 +238,7 @@ void AndroidApplication::preInit()
 	LOGI("IAppEventHandler::onPreInit() invoked");
 
 	// Setting log levels and filename based on application configuration
-	const nctl::String logFilePath = IFile::dataPath() + appCfg_.logFile;
+	const nctl::String logFilePath = fs::joinPath(fs::dataPath(), appCfg_.logFile);
 	FileLogger &fileLogger = static_cast<FileLogger &>(theServiceLocator().logger());
 	fileLogger.setConsoleLevel(appCfg_.consoleLogLevel);
 	fileLogger.setFileLevel(appCfg_.fileLogLevel);

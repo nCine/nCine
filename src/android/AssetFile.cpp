@@ -20,13 +20,6 @@ AssetFile::AssetFile(const char *filename)
     : IFile(filename), asset_(nullptr), startOffset_(0L)
 {
 	type_ = FileType::ASSET;
-
-	// Detect fake second extension added to prevent compression
-	const int firstDotChar = filename_.findFirstChar('.');
-	const int lastDotChar = filename_.findLastChar('.');
-	const int extLength = lastDotChar - firstDotChar - 1;
-	if (extLength >= 3 && extLength <= 4)
-		extension_.assign(filename_, firstDotChar + 1, extLength);
 }
 
 AssetFile::~AssetFile()
@@ -148,6 +141,20 @@ bool AssetFile::isOpened() const
 		return false;
 }
 
+bool AssetFile::tryOpen(const char *filename)
+{
+	ASSERT(filename);
+
+	AAsset *asset = AAssetManager_open(assetManager_, filename, AASSET_MODE_UNKNOWN);
+	if (asset)
+	{
+		AAsset_close(asset);
+		return true;
+	}
+
+	return false;
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -224,30 +231,6 @@ void AssetFile::openAsset(unsigned char mode)
 	}
 	else
 		LOGE_X("Cannot open the file \"%s\", wrong open mode", filename_.data());
-}
-
-/*! This method is called by `IFile::access()` */
-bool AssetFile::access(const char *filename, unsigned char mode)
-{
-	ASSERT(filename);
-
-	bool isAccessible = false;
-
-	if (mode == IFile::AccessMode::EXISTS || mode == IFile::AccessMode::READABLE)
-	{
-		AAsset *asset = AAssetManager_open(assetManager_, filename, AASSET_MODE_UNKNOWN);
-		if (asset)
-		{
-			isAccessible = true;
-			AAsset_close(asset);
-		}
-	}
-	else if (mode & AccessMode::WRITABLE)
-		LOGE_X("Cannot access the file \"%s\", an asset can only be read", filename);
-	else
-		LOGE_X("Cannot access the file \"%s\", wrong access mode", filename);
-
-	return isAccessible;
 }
 
 }

@@ -34,17 +34,6 @@ class DLL_PUBLIC IFile
 		};
 	};
 
-	/// Access mode bitmask
-	struct AccessMode
-	{
-		enum
-		{
-			EXISTS = 0,
-			READABLE = 2,
-			WRITABLE = 4
-		};
-	};
-
 	/// Constructs a base file object
 	/*! \param filename File name including its path */
 	explicit IFile(const char *filename);
@@ -79,10 +68,6 @@ class DLL_PUBLIC IFile
 
 	/// Returns file name with path
 	const char *filename() const { return filename_.data(); }
-	/// Returns file extension
-	const char *extension() const { return extension_.data(); }
-	/// Checks if file extension matches
-	bool hasExtension(const char *extension) const;
 
 	/// Returns file descriptor
 	inline int fd() const { return fileDescriptor_; }
@@ -117,13 +102,6 @@ class DLL_PUBLIC IFile
 
 	/// Returns the proper file handle according to prepended tags
 	static nctl::UniquePtr<IFile> createFileHandle(const char *filename);
-	/// Checks if a file can be accessed with the specified mode
-	static bool access(const char *filename, unsigned char mode);
-
-	/// Returns the base directory for data loading
-	static const nctl::String &dataPath() { return dataPath_; }
-	/// Returns the writable directory for saving data
-	static const nctl::String &savePath();
 
   protected:
 	/// File type
@@ -133,11 +111,6 @@ class DLL_PUBLIC IFile
 	static const unsigned int MaxFilenameLength = 256;
 	/// File name with path
 	nctl::String filename_;
-
-	/// Maximum number of characters for a file extension, plus '\0'
-	static const unsigned int MaxExtensionLength = 5;
-	/// File extension
-	nctl::String extension_;
 
 	/// File descriptor for `open()` and `close()`
 	int fileDescriptor_;
@@ -154,16 +127,6 @@ class DLL_PUBLIC IFile
 	long int fileSize_;
 
   private:
-	/// The path for the application to load files from
-	static nctl::String dataPath_;
-	/// The path for the application to write files into
-	static nctl::String savePath_;
-
-	/// Determines the correct save path based on the platform
-	static void initSavePath();
-
-	/// The `AppConfiguration` class needs to call `IFile::setDataPath()`
-	friend class AppConfiguration;
 	/// The `TextureSaverPng` class needs to access the `filePointer_`
 	friend class TextureSaverPng;
 };

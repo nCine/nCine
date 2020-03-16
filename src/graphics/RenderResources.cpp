@@ -1,9 +1,10 @@
 #include "RenderResources.h"
 #include "Application.h"
-#include "IFile.h" // for dataPath()
 
 #ifdef WITH_EMBEDDED_SHADERS
 	#include "shader_strings.h"
+#else
+	#include "FileSystem.h" // for dataPath()
 #endif
 
 namespace ncine {
@@ -122,8 +123,8 @@ void RenderResources::create()
 
 		shaderToLoad.shaderProgram = nctl::makeUnique<GLShaderProgram>(queryPhase);
 #ifndef WITH_EMBEDDED_SHADERS
-		shaderToLoad.shaderProgram->attachShader(GL_VERTEX_SHADER, (IFile::dataPath() + "shaders/" + shaderToLoad.vertexShader).data());
-		shaderToLoad.shaderProgram->attachShader(GL_FRAGMENT_SHADER, (IFile::dataPath() + "shaders/" + shaderToLoad.fragmentShader).data());
+		shaderToLoad.shaderProgram->attachShader(GL_VERTEX_SHADER, (fs::dataPath() + "shaders/" + shaderToLoad.vertexShader).data());
+		shaderToLoad.shaderProgram->attachShader(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/" + shaderToLoad.fragmentShader).data());
 #else
 		shaderToLoad.shaderProgram->attachShaderFromString(GL_VERTEX_SHADER, shaderToLoad.vertexShader);
 		shaderToLoad.shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, shaderToLoad.fragmentShader);

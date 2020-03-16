@@ -3,7 +3,6 @@
 #include <ncine/Application.h>
 #include <ncine/Texture.h>
 #include <ncine/AnimatedSprite.h>
-#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {
@@ -32,7 +31,7 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	texture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + TextureFile).data());
+	texture_ = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", TextureFile)).data());
 	animSprite_ = nctl::makeUnique<nc::AnimatedSprite>(&rootNode, texture_.get());
 	// Down
 	nctl::UniquePtr<nc::RectAnimation> animation =

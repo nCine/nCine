@@ -3,7 +3,6 @@
 #include <ncine/Texture.h>
 #include <ncine/MeshSprite.h>
 #include <ncine/TextNode.h>
-#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {
@@ -60,10 +59,10 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	texture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + TextureFile).data());
+	texture_ = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", TextureFile)).data());
 
-	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontFntFile).data(),
-	                                   (nc::IFile::dataPath() + "fonts/" + FontTextureFile).data());
+	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
+	                                   (prefixDataPath("fonts", FontTextureFile)).data());
 
 	debugString_ = nctl::makeUnique<nctl::String>(128);
 	debugText_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get());

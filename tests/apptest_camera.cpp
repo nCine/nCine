@@ -5,7 +5,6 @@
 #include <ncine/Texture.h>
 #include <ncine/Sprite.h>
 #include <ncine/TextNode.h>
-#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {
@@ -54,14 +53,14 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	megaTexture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + MegaTextureFile).data());
-	textures_[0] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture1File).data());
-	textures_[1] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture2File).data());
-	textures_[2] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture3File).data());
-	textures_[3] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture4File).data());
+	megaTexture_ = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", MegaTextureFile)).data());
+	textures_[0] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data());
+	textures_[1] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture2File)).data());
+	textures_[2] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture3File)).data());
+	textures_[3] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture4File)).data());
 
-	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontFntFile).data(),
-	                                   (nc::IFile::dataPath() + "fonts/" + FontTextureFile).data());
+	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
+	                                   (prefixDataPath("fonts", FontTextureFile)).data());
 
 	cameraNode_ = nctl::makeUnique<nc::SceneNode>(&rootNode);
 

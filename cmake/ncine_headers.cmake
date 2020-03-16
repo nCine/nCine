@@ -30,6 +30,7 @@ set(HEADERS
 	${NCINE_ROOT}/include/ncine/TimeStamp.h
 	${NCINE_ROOT}/include/ncine/Timer.h
 	${NCINE_ROOT}/include/ncine/Font.h
+	${NCINE_ROOT}/include/ncine/FileSystem.h
 	${NCINE_ROOT}/include/ncine/IFile.h
 	${NCINE_ROOT}/include/ncine/IGfxDevice.h
 	${NCINE_ROOT}/include/ncine/Texture.h

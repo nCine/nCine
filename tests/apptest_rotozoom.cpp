@@ -3,7 +3,6 @@
 #include <ncine/SceneNode.h>
 #include <ncine/Texture.h>
 #include <ncine/Sprite.h>
-#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 namespace {
@@ -34,7 +33,8 @@ void MyEventHandler::onInit()
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	megaTexture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + TextureFile).data());
+	megaTexture_ = nctl::makeUnique<nc::Texture>(prefixDataPath("textures", TextureFile).data());
+
 	texRects[0] = nc::Recti(0, 0, 128, 128);
 	texRects[1] = nc::Recti(128, 0, 128, 128);
 	texRects[2] = nc::Recti(0, 128, 128, 128);

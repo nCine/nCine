@@ -53,10 +53,10 @@ void MyEventHandler::onInit()
 	xPos_ = DefaultXPos;
 	isLooping_ = false;
 
-	font_ = nctl::makeUnique<nc::Font>((nc::IFile::dataPath() + "fonts/" + FontFntFile).data(),
-	                                   (nc::IFile::dataPath() + "fonts/" + FontTextureFile).data());
-	musicPlayer_ = nctl::makeUnique<nc::AudioStreamPlayer>((nc::IFile::dataPath() + "sounds/music.ogg").data());
-	audioBuffer_ = nctl::makeUnique<nc::AudioBuffer>((nc::IFile::dataPath() + "sounds/bomb.wav").data());
+	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
+	                                   (prefixDataPath("fonts", FontTextureFile)).data());
+	musicPlayer_ = nctl::makeUnique<nc::AudioStreamPlayer>(prefixDataPath("sounds", "music.ogg").data());
+	audioBuffer_ = nctl::makeUnique<nc::AudioBuffer>(prefixDataPath("sounds", "bomb.wav").data());
 	soundPlayer_ = nctl::makeUnique<nc::AudioBufferPlayer>(audioBuffer_.get());
 	soundPlayer_->play();
 

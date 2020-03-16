@@ -4,6 +4,7 @@
 #include "FntParser.h"
 #include "FontGlyph.h"
 #include "Texture.h"
+#include "FileSystem.h"
 #include "tracy.h"
 
 namespace ncine {
@@ -24,17 +25,8 @@ Font::Font(const char *fntFilename)
 	fntParser_ = nctl::makeUnique<FntParser>(fntFilename);
 	retrieveInfoFromFnt();
 
-	// TODO: add general path manipulation functions
-	const char *path = strrchr(fntFilename, '\\');
-	if (path == nullptr)
-		path = strrchr(fntFilename, '/');
-
-	// Path length is zero when the FNT file is in the current directory
-	const unsigned int pathLength = path ? path - fntFilename + 1 : 0;
-	nctl::String texFilename(pathLength + fntParser_->pageTag(0).file.length() + 1);
-	texFilename.assign(fntFilename, pathLength);
-	texFilename.append(fntParser_->pageTag(0).file);
-
+	nctl::String dirName = fs::dirName(fntFilename);
+	nctl::String texFilename = fs::absoluteJoinPath(dirName, fntParser_->pageTag(0).file);
 	texture_ = nctl::makeUnique<Texture>(texFilename.data());
 	checkFntInformation();
 }

@@ -3,7 +3,6 @@
 #include <ncine/Texture.h>
 #include <ncine/ParticleSystem.h>
 #include <ncine/ParticleInitializer.h>
-#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 #ifdef __ANDROID__
@@ -42,7 +41,7 @@ void MyEventHandler::onInit()
 	application.enableAccelerometer(true);
 #endif
 
-	texture_ = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + TextureFile).data());
+	texture_ = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", TextureFile)).data());
 	particleSystem_ = nctl::makeUnique<nc::ParticleSystem>(&rootNode, unsigned(NumParticles), texture_.get(), texture_->rect());
 	particleSystem_->setPosition(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.33f);
 

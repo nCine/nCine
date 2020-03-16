@@ -32,6 +32,9 @@ class DLL_PUBLIC AssetFile : public IFile
 	/// Sets the global pointer to the AAssetManager
 	static void initAssetManager(struct android_app *state) { assetManager_ = state->activity->assetManager; }
 
+	/// Checks if an asset file exists and can be opened
+	static bool tryOpen(const char *filename);
+
   private:
 	static AAssetManager *assetManager_;
 	AAsset *asset_;
@@ -41,11 +44,6 @@ class DLL_PUBLIC AssetFile : public IFile
 	void openFD(unsigned char mode);
 	/// Opens the file with `AAssetManager_open()` only
 	void openAsset(unsigned char mode);
-
-	/// Checks if a file can be accessed with specified mode
-	static bool access(const char *filename, unsigned char mode);
-
-	friend bool IFile::access(const char *filename, unsigned char mode);
 };
 
 }

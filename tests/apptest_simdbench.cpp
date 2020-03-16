@@ -8,6 +8,7 @@
 #include <ncine/TimeStamp.h>
 #include <ncine/Vector4.h>
 #include <ncine/Quaternion.h>
+#include "apptest_datapath.h"
 
 #ifdef __EMSCRIPTEN__
 	#include <ncine/EmscriptenLocalFile.h>
@@ -504,13 +505,7 @@ nc::IAppEventHandler *createAppEventHandler()
 
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
-#ifdef __ANDROID__
-	const char *extStorage = getenv("EXTERNAL_STORAGE");
-	nctl::String dataPath;
-	dataPath = extStorage ? extStorage : "/sdcard";
-	dataPath += "/ncine/";
-	config.dataPath() = dataPath;
-#endif
+	setDataPath(config);
 
 	config.withAudio = false;
 	config.withDebugOverlay = false;
@@ -608,8 +603,8 @@ void MyEventHandler::onFrameStart()
 		ImGui::SameLine();
 		if (ImGui::Button("Load"))
 		{
-			nctl::String filepath = nc::IFile::dataPath() + loadingFilename;
-			if (nc::IFile::access(filepath.data(), nc::IFile::AccessMode::READABLE))
+			nctl::String filepath = nc::fs::joinPath(nc::fs::dataPath(), loadingFilename);
+			if (nc::fs::isReadableFile(filepath.data()))
 				loadTestRun(filepath.data(), currentTestRun);
 			else
 				LOGW_X("Cannot load file \"%s\" for index %u", filepath.data(), currentTestRun);
@@ -659,7 +654,7 @@ void MyEventHandler::onFrameStart()
 			ImGui::SameLine();
 			if (ImGui::Button("Save"))
 			{
-				nctl::String filepath = nc::IFile::dataPath() + savingFilename;
+				nctl::String filepath = nc::fs::joinPath(nc::fs::dataPath(), savingFilename);
 				saveTestRun(filepath.data(), includeStatsWhenSaving);
 			}
 			ImGui::Checkbox("Include Statistics", &includeStatsWhenSaving);

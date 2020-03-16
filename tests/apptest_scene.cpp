@@ -2,7 +2,6 @@
 #include <ncine/Application.h>
 #include <ncine/Texture.h>
 #include <ncine/Sprite.h>
-#include <ncine/IFile.h> // for dataPath()
 #include "apptest_datapath.h"
 
 #include <ncine/config.h>
@@ -135,10 +134,10 @@ void MyEventHandler::onInit()
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	textures_[0] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture1File).data());
-	textures_[1] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture2File).data());
-	textures_[2] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture3File).data());
-	textures_[3] = nctl::makeUnique<nc::Texture>((nc::IFile::dataPath() + "textures/" + Texture4File).data());
+	textures_[0] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data());
+	textures_[1] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture2File)).data());
+	textures_[2] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture3File)).data());
+	textures_[3] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture4File)).data());
 
 	const float width = nc::theApplication().width();
 	for (unsigned int i = 0; i < NumSprites; i++)
@@ -397,7 +396,7 @@ int main(int argc, char **argv)
 	const nc::AppConfiguration appCfg = nc::theApplication().appConfiguration();
 	QWidget window;
 	window.setWindowTitle(appCfg.windowTitle.data());
-	window.setWindowIcon(QIcon((nc::IFile::dataPath() + appCfg.windowIconFilename).data()));
+	window.setWindowIcon(QIcon((nc::fs::dataPath() + appCfg.windowIconFilename).data()));
 
 	QHBoxLayout *hLayout = new QHBoxLayout;
 	hLayout->addLayout(vLayout);
