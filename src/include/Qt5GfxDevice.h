@@ -15,6 +15,8 @@ class Qt5GfxDevice : public IGfxDevice
   public:
 	Qt5GfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode, Qt5Widget &widget);
 
+	void setSwapInterval(int interval) override;
+
 	void setResolution(int width, int height) override;
 	inline void setResolution(Vector2i size) override { setResolution(size.x, size.y); }
 

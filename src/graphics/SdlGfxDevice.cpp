@@ -39,6 +39,11 @@ SdlGfxDevice::~SdlGfxDevice()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+void SdlGfxDevice::setSwapInterval(int interval)
+{
+	SDL_GL_SetSwapInterval(interval);
+}
+
 void SdlGfxDevice::setResolution(int width, int height)
 {
 	// change resolution only in the case it really changes

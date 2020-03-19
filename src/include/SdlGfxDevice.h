@@ -16,6 +16,8 @@ class SdlGfxDevice : public IGfxDevice
 	SdlGfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode);
 	~SdlGfxDevice() override;
 
+	void setSwapInterval(int interval) override;
+
 	void setResolution(int width, int height) override;
 	inline void setResolution(Vector2i size) override { setResolution(size.x, size.y); }
 

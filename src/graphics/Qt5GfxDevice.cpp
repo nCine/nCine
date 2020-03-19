@@ -29,6 +29,11 @@ Qt5GfxDevice::Qt5GfxDevice(const WindowMode &windowMode, const GLContextInfo &gl
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+void Qt5GfxDevice::setSwapInterval(int interval)
+{
+	widget_.format().setSwapInterval(interval);
+}
+
 void Qt5GfxDevice::setResolution(int width, int height)
 {
 	width_ = width;

@@ -73,6 +73,10 @@ class DLL_PUBLIC IGfxDevice
 	IGfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode);
 	virtual ~IGfxDevice() {}
 
+	/// Sets the number of vertical blanks to occur before a buffer swap
+	/*! An interval of `-1` will enable adaptive v-sync if available */
+	virtual void setSwapInterval(int interval) = 0;
+
 	/// Sets screen resolution with two integers
 	virtual void setResolution(int width, int height) = 0;
 	/// Sets screen resolution with a `Vector2<int>` object

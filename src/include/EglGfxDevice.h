@@ -20,6 +20,8 @@ class EglGfxDevice : public IGfxDevice
 	EglGfxDevice(struct android_app *state, const GLContextInfo &glContextInfo, const DisplayMode &displayMode);
 	~EglGfxDevice() override;
 
+	void setSwapInterval(int interval) override {}
+
 	void setResolution(int width, int height) override {}
 	void setResolution(Vector2i size) override {}
 

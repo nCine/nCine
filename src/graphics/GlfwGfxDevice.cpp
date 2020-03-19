@@ -32,6 +32,11 @@ GlfwGfxDevice::~GlfwGfxDevice()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+void GlfwGfxDevice::setSwapInterval(int interval)
+{
+	glfwSwapInterval(interval);
+}
+
 void GlfwGfxDevice::setResolution(int width, int height)
 {
 	// change resolution only in the case it really changes
