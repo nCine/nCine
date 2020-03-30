@@ -30,6 +30,7 @@ ParticleSystem::ParticleSystem(SceneNode *parent, unsigned int count, Texture *t
 
 	type_ = ObjectType::PARTICLE_SYSTEM;
 
+	children_.setCapacity(poolSize_);
 	for (unsigned int i = 0; i < poolSize_; i++)
 	{
 		particleArray_[i] = nctl::UniquePtr<Particle>(new Particle(nullptr, texture));
@@ -101,9 +102,9 @@ void ParticleSystem::emitParticles(const ParticleInitializer &init)
 
 void ParticleSystem::killParticles()
 {
-	for (nctl::List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
+	for (int i = children_.size() - 1; i >= 0; i--)
 	{
-		Particle *particle = static_cast<Particle *>(*i);
+		Particle *particle = static_cast<Particle *>(children_[i]);
 
 		if (particle->isAlive())
 		{
@@ -112,7 +113,7 @@ void ParticleSystem::killParticles()
 
 			poolTop_++;
 			particlePool_[poolTop_] = particle;
-			removeChildNode(i++);
+			removeChildNodeAt(i);
 		}
 	}
 }
@@ -174,9 +175,9 @@ void ParticleSystem::setBlendingFactors(DrawableNode::BlendingFactor srcBlending
 void ParticleSystem::update(float interval)
 {
 	ZoneScoped;
-	for (nctl::List<SceneNode *>::ConstIterator i = children_.begin(); i != children_.end(); ++i)
+	for (int i = children_.size() - 1; i >= 0; i--)
 	{
-		Particle *particle = static_cast<Particle *>(*i);
+		Particle *particle = static_cast<Particle *>(children_[i]);
 
 		// Update the particle if it's alive
 		if (particle->isAlive())
@@ -193,7 +194,7 @@ void ParticleSystem::update(float interval)
 			{
 				poolTop_++;
 				particlePool_[poolTop_] = particle;
-				removeChildNode(i++);
+				removeChildNodeAt(i);
 				continue;
 			}
 

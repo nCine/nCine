@@ -111,8 +111,10 @@ class DLL_PUBLIC String
 	/// Copies all characters from this string to a C string
 	unsigned int copy(char *dest) const;
 
-	/// Appends all the characters from the source to the end of the destination
-	unsigned int append(const String &source);
+	/// Appends all the characters from the other string to the end of this one
+	unsigned int append(const String &other);
+	/// Appends all the characters from the C string to the end of this one
+	unsigned int append(const char *cString);
 
 	/// Compares the string with another one in lexicographical order
 	int compare(const String &other) const;

@@ -57,7 +57,6 @@ namespace {
 		switch (command.type())
 		{
 			case RenderCommand::CommandTypes::UNSPECIFIED: return "unspecified";
-			case RenderCommand::CommandTypes::PLOTTER: return "plotter";
 			case RenderCommand::CommandTypes::SPRITE: return "sprite";
 			case RenderCommand::CommandTypes::MESH_SPRITE: return "mesh sprite";
 			case RenderCommand::CommandTypes::PARTICLE: return "particle";

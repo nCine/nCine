@@ -21,7 +21,6 @@ class RenderCommand
 		enum Enum
 		{
 			UNSPECIFIED = 0,
-			PLOTTER,
 			SPRITE,
 			MESH_SPRITE,
 			PARTICLE,

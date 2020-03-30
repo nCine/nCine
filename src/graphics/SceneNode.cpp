@@ -14,7 +14,8 @@ const float SceneNode::MinRotation = 0.5f;
 
 /*! \param parent The parent can be `nullptr` */
 SceneNode::SceneNode(SceneNode *parent, float xx, float yy)
-    : Object(ObjectType::SCENENODE), x(xx), y(yy), updateEnabled_(true), drawEnabled_(true), parent_(nullptr),
+    : Object(ObjectType::SCENENODE), x(xx), y(yy),
+      updateEnabled_(true), drawEnabled_(true), parent_(nullptr), children_(4),
       anchorPoint_(0.0f, 0.0f), scaleFactor_(1.0f, 1.0f), rotation_(0.0f),
       absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f, 1.0f), absRotation_(0.0f),
       worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity),
@@ -67,7 +68,7 @@ void SceneNode::setParent(SceneNode *parentNode)
 		return;
 
 	if (parent_)
-		parent_->children_.remove(this);
+		parent_->removeChildNode(this);
 	if (parentNode)
 		parentNode->children_.pushBack(this);
 	parent_ = parentNode;
@@ -86,7 +87,7 @@ void SceneNode::addChildNode(SceneNode *childNode)
 	childNode->parent_ = this;
 }
 
-/*!	\return True if the node has been removed */
+/*! \return True if the node has been removed */
 bool SceneNode::removeChildNode(SceneNode *childNode)
 {
 	// Can't remove yourself or a `nullptr` from your children
@@ -98,35 +99,32 @@ bool SceneNode::removeChildNode(SceneNode *childNode)
 	if (!children_.isEmpty() && // avoid checking if this node has no children
 	    childNode->parent_ == this) // avoid checking if the child doesn't belong to this node
 	{
-		childNode->parent_ = nullptr;
-		children_.remove(childNode);
-		hasBeenRemoved = true;
+		for (unsigned int i = 0; i < children_.size(); i++)
+		{
+			if (children_[i] == childNode)
+			{
+				hasBeenRemoved = removeChildNodeAt(i);
+				break;
+			}
+		}
 	}
 
 	return hasBeenRemoved;
 }
 
-/*!
- * It is faster to remove through an iterator than with a linear search for a specific node.
- * \return True if the node has been removed
- */
-bool SceneNode::removeChildNode(nctl::List<SceneNode *>::ConstIterator it)
+/*! \return True if the node has been removed */
+bool SceneNode::removeChildNodeAt(unsigned int index)
 {
-	// Can't remove yourself or a `nullptr` from your children
-	if (*it == this || *it == nullptr)
+	const unsigned int size = children_.size();
+	// Can't remove at an index past the number of children
+	if (children_.isEmpty() || index > size - 1)
 		return false;
 
-	bool hasBeenRemoved = false;
-
-	if (!children_.isEmpty() && // avoid checking if this node has no children
-	    (*it)->parent_ == this) // avoid checking the child doesn't belong to this one
-	{
-		(*it)->parent_ = nullptr;
-		children_.erase(it);
-		hasBeenRemoved = true;
-	}
-
-	return hasBeenRemoved;
+	children_[index]->parent_ = nullptr;
+	// Fast removal without preserving the order
+	children_[index] = nctl::move(children_[size - 1]);
+	children_.setSize(size - 1);
+	return true;
 }
 
 /*!	\return True if the node has been unlinked */
@@ -141,8 +139,7 @@ bool SceneNode::unlinkChildNode(SceneNode *childNode)
 	if (!children_.isEmpty() && // avoid checking if this node has no children
 	    childNode->parent_ == this) // avoid checking if the child doesn't belong to this node
 	{
-		childNode->parent_ = nullptr;
-		children_.remove(childNode);
+		removeChildNode(childNode);
 
 		// Nephews reparenting
 		for (SceneNode *child : childNode->children_)

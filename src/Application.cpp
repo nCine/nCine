@@ -290,7 +290,7 @@ void Application::shutdownCommon()
 	{
 		ZoneScopedN("onShutdown");
 		appEventHandler_->onShutdown();
-		LOGI("IAppEventHandler::OnShutdown() invoked");
+		LOGI("IAppEventHandler::onShutdown() invoked");
 		appEventHandler_.reset(nullptr);
 	}
 

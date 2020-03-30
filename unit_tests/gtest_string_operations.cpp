@@ -27,6 +27,19 @@ TEST_F(StringOperationTest, AppendString)
 	ASSERT_STREQ(string_.data(), "String1Append");
 }
 
+TEST_F(StringOperationTest, AppendCString)
+{
+	const char *newString = "Append";
+	printf("Creating a new C string: %s\n", newString);
+
+	string_.append(newString);
+	printString("Appending a C string to the first one: ", string_);
+
+	ASSERT_EQ(string_.capacity(), Capacity);
+	ASSERT_EQ(string_.length(), strnlen("String1Append", Capacity));
+	ASSERT_STREQ(string_.data(), "String1Append");
+}
+
 TEST_F(StringOperationTest, Clear)
 {
 	string_.clear();
@@ -139,7 +152,7 @@ TEST_F(StringOperationTest, ConstructByConcatenationWithCStringAsFirst)
 {
 	// The string is longer than `SmallBufferSize`
 	const char *secondString = "String2...String2";
-	printf("Creating a second string: %s", secondString);
+	printf("Creating a second string: %s\n", secondString);
 
 	// using `friend String operator+(const char *cString, const String &string)`
 	nctl::String thirdString = secondString + string_;
@@ -156,7 +169,7 @@ TEST_F(StringOperationTest, ConstructByConcatenationWithCStringAsSecond)
 {
 	// The string is longer than `SmallBufferSize`
 	const char *secondString = "String2...String2";
-	printf("Creating a second string: %s", secondString);
+	printf("Creating a second string: %s\n", secondString);
 
 	// using `String String::operator+(const char *cString) const`
 	nctl::String thirdString = string_ + secondString;
@@ -358,7 +371,7 @@ TEST_F(StringOperationTest, FindCString)
 	const unsigned int oldLength = string_.length();
 
 	const char *newString = "String2";
-	printf("Creating a new string: %s", newString);
+	printf("Creating a new string: %s\n", newString);
 	string_ += newString;
 	printString("Appending the new string to the first one: ", string_);
 
@@ -370,7 +383,7 @@ TEST_F(StringOperationTest, FindCString)
 TEST_F(StringOperationTest, FindNonExistentCString)
 {
 	const char *newString = "String2";
-	printf("Creating a new string: %s", newString);
+	printf("Creating a new string: %s\n", newString);
 
 	const int position = string_.find(newString);
 	printf("Position of sub-string \"%s\" inside string \"%s\": %d\n", newString, string_.data(), position);

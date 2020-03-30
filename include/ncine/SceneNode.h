@@ -2,7 +2,7 @@
 #define CLASS_NCINE_SCENENODE
 
 #include "Object.h"
-#include <nctl/List.h>
+#include <nctl/Array.h>
 #include "Vector2.h"
 #include "Matrix4x4.h"
 #include "Color.h"
@@ -43,14 +43,16 @@ class DLL_PUBLIC SceneNode : public Object
 	inline SceneNode *parent() { return parent_; }
 	/// Sets the parent node
 	void setParent(SceneNode *parentNode);
-	/// Returns a list of child nodes
-	inline const nctl::List<SceneNode *> &children() const { return children_; }
+	/// Returns the array of child nodes
+	inline const nctl::Array<SceneNode *> &children() { return children_; }
+	/// Returns an array of constant child nodes
+	const nctl::Array<const SceneNode *> &children() const;
 	/// Adds a node as a child of this one
 	void addChildNode(SceneNode *childNode);
 	/// Removes a child of this node, without reparenting nephews
 	bool removeChildNode(SceneNode *childNode);
-	/// Removes a child of this node while iterating on children, without reparenting nephews
-	bool removeChildNode(nctl::List<SceneNode *>::ConstIterator it);
+	/// Removes the child at the specified index, without reparenting nephews
+	bool removeChildNodeAt(unsigned int index);
 	/// Removes a child of this node reparenting nephews as children
 	bool unlinkChildNode(SceneNode *childNode);
 
@@ -152,8 +154,8 @@ class DLL_PUBLIC SceneNode : public Object
 
 	/// A pointer to the parent node
 	SceneNode *parent_;
-	/// The list of child nodes
-	nctl::List<SceneNode *> children_;
+	/// The array of child nodes
+	nctl::Array<SceneNode *> children_;
 
 	/// The anchor point for transformations, in pixels
 	/// \note The default point is the center
@@ -195,6 +197,11 @@ class DLL_PUBLIC SceneNode : public Object
 
 	virtual void transform();
 };
+
+inline const nctl::Array<const SceneNode *> &SceneNode::children() const
+{
+	return reinterpret_cast<const nctl::Array<const SceneNode *> &>(children_);
+}
 
 inline void SceneNode::setEnabled(bool enabled)
 {

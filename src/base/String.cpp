@@ -248,9 +248,14 @@ unsigned int String::copy(char *dest) const
 	return copy(dest, 0, length_);
 }
 
-unsigned int String::append(const String &source)
+unsigned int String::append(const String &other)
 {
-	return assign(source, 0, source.length_, length_);
+	return assign(other, 0, other.length_, length_);
+}
+
+unsigned int String::append(const char *cString)
+{
+	return assign(cString, static_cast<unsigned int>(wrappedStrnlen(cString, MaxCStringLength)), length_);
 }
 
 int String::compare(const String &other) const
