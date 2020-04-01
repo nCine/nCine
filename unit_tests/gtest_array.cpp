@@ -302,6 +302,18 @@ TEST_F(ArrayTest, RemoveMiddle)
 	ASSERT_EQ(array_.size(), Capacity - 1);
 }
 
+TEST_F(ArrayTest, UnorderedRemoveMiddle)
+{
+	printf("Removing from the middle (unordered)\n");
+	array_.unorderedRemoveAt(3);
+	printArray(array_);
+
+	ASSERT_EQ(array_[2], 2);
+	ASSERT_EQ(array_[3], 9);
+	ASSERT_EQ(array_[4], 4);
+	ASSERT_EQ(array_.size(), Capacity - 1);
+}
+
 TEST_F(ArrayTest, InsertFirstAndLast)
 {
 	printf("Inserting as first and last\n");
@@ -346,6 +358,21 @@ TEST_F(ArrayTest, RemoveFirstAndTwiceLast)
 	ASSERT_EQ(array_[1], 2);
 	ASSERT_EQ(array_[5], 6);
 	ASSERT_EQ(array_[6], 7);
+	ASSERT_EQ(array_.size(), Capacity - 3);
+}
+
+TEST_F(ArrayTest, UnorderedRemoveFirstAndTwiceLast)
+{
+	printf("Removing the first and twice the last (unordered)\n");
+	array_.unorderedRemoveAt(0);
+	array_.unorderedRemoveAt(array_.size() - 1);
+	array_.unorderedRemoveAt(array_.size() - 1);
+	printArray(array_);
+
+	ASSERT_EQ(array_[0], 9);
+	ASSERT_EQ(array_[1], 1);
+	ASSERT_EQ(array_[5], 5);
+	ASSERT_EQ(array_[6], 6);
 	ASSERT_EQ(array_.size(), Capacity - 3);
 }
 

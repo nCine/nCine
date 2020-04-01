@@ -105,6 +105,9 @@ class StaticArray
 	/// Move inserts a new element as the last one in constant time
 	inline void pushBack(T &&element) { operator[](size_) = nctl::move(element); }
 
+	/// Removes an element at a specified position (moving the last element in place)
+	int unorderedRemoveAt(unsigned int index);
+
 	/// Read-only access to the specified element (with bounds checking)
 	const T &at(unsigned int index) const;
 	/// Access to the specified element (with bounds checking)
@@ -181,6 +184,18 @@ void StaticArray<T, C>::setSize(unsigned int newSize)
 	}
 
 	size_ = newSize;
+}
+
+template <class T, unsigned int C>
+int StaticArray<T, C>::unorderedRemoveAt(unsigned int index)
+{
+	// Cannot remove past the last element
+	FATAL_ASSERT_MSG_X(index < size_, "Index %u out of size range", index);
+	if (index < size_ - 1)
+		array_[index] = nctl::move(array_[size_ - 1]);
+	size_--;
+
+	return index + 1;
 }
 
 template <class T, unsigned int C>

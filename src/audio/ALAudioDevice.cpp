@@ -94,7 +94,7 @@ void ALAudioDevice::stopPlayers(PlayerType playerType)
 		if (players_[i]->type() == objectType)
 		{
 			players_[i]->stop();
-			removePlayer(i);
+			players_.unorderedRemoveAt(i);
 		}
 	}
 }
@@ -110,7 +110,7 @@ void ALAudioDevice::pausePlayers(PlayerType playerType)
 		if (players_[i]->type() == objectType)
 		{
 			players_[i]->pause();
-			removePlayer(i);
+			players_.unorderedRemoveAt(i);
 		}
 	}
 }
@@ -153,19 +153,8 @@ void ALAudioDevice::updatePlayers()
 		if (players_[i]->isPlaying())
 			players_[i]->updateState();
 		else
-			removePlayer(i);
+			players_.unorderedRemoveAt(i);
 	}
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void ALAudioDevice::removePlayer(int index)
-{
-	const unsigned int newSize = players_.size() - 1;
-	players_[index] = players_[newSize];
-	players_.setSize(newSize);
 }
 
 }

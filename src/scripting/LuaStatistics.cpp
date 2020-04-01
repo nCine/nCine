@@ -61,11 +61,7 @@ void LuaStatistics::unregisterState(LuaStateManager *stateManager)
 
 	ASSERT(index != -1);
 	if (index != -1)
-	{
-		const unsigned int newSize = managers_.size() - 1;
-		managers_[index] = managers_[newSize];
-		managers_.setSize(newSize);
-	}
+		managers_.unorderedRemoveAt(index);
 }
 
 void LuaStatistics::countOperations()

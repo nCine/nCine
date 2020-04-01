@@ -3,7 +3,6 @@
 
 #include <ncine/IAppEventHandler.h>
 #include <ncine/IInputEventHandler.h>
-#include <nctl/StaticArray.h>
 #include <ncine/Vector2.h>
 
 namespace nctl {

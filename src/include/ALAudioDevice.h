@@ -55,8 +55,6 @@ class ALAudioDevice : public IAudioDevice
 	/// The OpenAL device name string
 	const char *deviceName_;
 
-	void removePlayer(int index);
-
 	/// Deleted copy constructor
 	ALAudioDevice(const ALAudioDevice &) = delete;
 	/// Deleted assignment operator

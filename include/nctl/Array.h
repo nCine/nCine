@@ -150,6 +150,7 @@ class Array
 	Iterator insert(Iterator position, Iterator first, Iterator last);
 	/// Constructs a new element at the position specified by the iterator
 	template <typename... Args> Iterator emplace(Iterator position, Args &&... args);
+
 	/// Removes the specified range of elements, last not included (shifting elements around)
 	T *removeRange(unsigned int firstIndex, unsigned int lastIndex);
 	/// Removes an element at a specified position (shifting elements around)
@@ -158,6 +159,15 @@ class Array
 	Iterator erase(Iterator position);
 	/// Removes the elements in the range, last not included (shifting elements around)
 	Iterator erase(Iterator first, const Iterator last);
+
+	/// Removes the specified range of elements, last not included (moving tail elements in place)
+	T *unorderedRemoveRange(unsigned int firstIndex, unsigned int lastIndex);
+	/// Removes an element at a specified position (moving the last element in place)
+	inline Iterator unorderedRemoveAt(unsigned int index) { return Iterator(unorderedRemoveRange(index, index + 1)); }
+	/// Removes the element pointed by the iterator (moving the last element in place)
+	Iterator unorderedErase(Iterator position);
+	/// Removes the elements in the range, last not included (moving tail elements in place)
+	Iterator unorderedErase(Iterator first, const Iterator last);
 
 	/// Read-only access to the specified element (with bounds checking)
 	const T &at(unsigned int index) const;
@@ -436,6 +446,41 @@ typename Array<T>::Iterator Array<T>::erase(Iterator first, const Iterator last)
 	const unsigned int firstIndex = static_cast<unsigned int>(&(*first) - array_);
 	const unsigned int lastIndex = static_cast<unsigned int>(&(*last) - array_);
 	T *nextElement = removeRange(firstIndex, lastIndex);
+
+	return Iterator(nextElement);
+}
+
+/*! \note This method is faster than `removeRange()` but it will not preserve the array order */
+template <class T>
+T *Array<T>::unorderedRemoveRange(unsigned int firstIndex, unsigned int lastIndex)
+{
+	// Cannot remove past the last element
+	FATAL_ASSERT_MSG_X(firstIndex < size_, "First index %u out of size range", firstIndex);
+	FATAL_ASSERT_MSG_X(lastIndex <= size_, "Last index %u out of size range", lastIndex);
+	FATAL_ASSERT_MSG_X(firstIndex <= lastIndex, "First index %u should precede or be equal to the last one %u", firstIndex, lastIndex);
+
+	for (unsigned int i = 0; i < lastIndex - firstIndex; i++)
+		array_[firstIndex + i] = nctl::move(array_[size_ - i - 1]);
+	size_ -= (lastIndex - firstIndex);
+
+	return (array_ + firstIndex + 1);
+}
+
+/*! \note This method is faster than `erase()` but it will not preserve the array order */
+template <class T>
+typename Array<T>::Iterator Array<T>::unorderedErase(Iterator position)
+{
+	const unsigned int index = static_cast<unsigned int>(&(*position) - array_);
+	return unorderedRemoveAt(index);
+}
+
+/*! \note This method is faster than `erase()` but it will not preserve the array order */
+template <class T>
+typename Array<T>::Iterator Array<T>::unorderedErase(Iterator first, const Iterator last)
+{
+	const unsigned int firstIndex = static_cast<unsigned int>(&(*first) - array_);
+	const unsigned int lastIndex = static_cast<unsigned int>(&(*last) - array_);
+	T *nextElement = unorderedRemoveRange(firstIndex, lastIndex);
 
 	return Iterator(nextElement);
 }

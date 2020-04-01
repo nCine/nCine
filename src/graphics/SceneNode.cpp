@@ -115,15 +115,13 @@ bool SceneNode::removeChildNode(SceneNode *childNode)
 /*! \return True if the node has been removed */
 bool SceneNode::removeChildNodeAt(unsigned int index)
 {
-	const unsigned int size = children_.size();
 	// Can't remove at an index past the number of children
-	if (children_.isEmpty() || index > size - 1)
+	if (children_.isEmpty() || index > children_.size() - 1)
 		return false;
 
 	children_[index]->parent_ = nullptr;
 	// Fast removal without preserving the order
-	children_[index] = nctl::move(children_[size - 1]);
-	children_.setSize(size - 1);
+	children_.unorderedRemoveAt(index);
 	return true;
 }
 

@@ -14,6 +14,28 @@ class ArrayOperationsTest : public ::testing::Test
 	nctl::Array<int> array_;
 };
 
+#ifndef __EMSCRIPTEN__
+	#ifdef NCINE_DEBUG
+TEST(ArrayOperationsDeathTest, UnorderedRemoveRangeBeyondSize)
+{
+	printf("Trying to remove a range beyond size\n");
+	nctl::Array<int> array(Capacity);
+	array[0] = 0;
+
+	ASSERT_DEATH(array.unorderedRemoveRange(1, 5), "");
+}
+
+TEST(ArrayOperationsDeathTest, UnorderedRemoveAtBeyondSize)
+{
+	printf("Trying to remove an element beyond size\n");
+	nctl::Array<int> array(Capacity);
+	array[0] = 0;
+
+	ASSERT_DEATH(array.unorderedRemoveAt(5), "");
+}
+	#endif
+#endif
+
 TEST_F(ArrayOperationsTest, Clear)
 {
 	ASSERT_FALSE(array_.isEmpty());
@@ -82,10 +104,30 @@ TEST_F(ArrayOperationsTest, RemoveFirstWithIterator)
 	ASSERT_EQ(array_[0], 1);
 }
 
+TEST_F(ArrayOperationsTest, UnorderedRemoveFirstWithIterator)
+{
+	printf("Removing the first element with an iterator (unordered)\n");
+	array_.unorderedErase(array_.begin());
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity - 1);
+	ASSERT_EQ(array_[0], 9);
+}
+
 TEST_F(ArrayOperationsTest, RemoveLastWithIterator)
 {
 	printf("Removing the last element with an iterator\n");
 	array_.erase(array_.end() - 1);
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity - 1);
+	ASSERT_EQ(array_[array_.size() - 1], 8);
+}
+
+TEST_F(ArrayOperationsTest, UnorderedRemoveLastWithIterator)
+{
+	printf("Removing the last element with an iterator (unordered)\n");
+	array_.unorderedErase(array_.end() - 1);
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity - 1);
@@ -103,6 +145,17 @@ TEST_F(ArrayOperationsTest, RemoveFirstHalfWithIterator)
 	ASSERT_EQ(array_[array_.size() - 1], 9);
 }
 
+TEST_F(ArrayOperationsTest, UnorderedRemoveFirstHalfWithIterator)
+{
+	printf("Removing the first half of the array (unordered)\n");
+	array_.unorderedErase(array_.begin(), array_.begin() + array_.size() / 2);
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity / 2);
+	ASSERT_EQ(array_[0], 9);
+	ASSERT_EQ(array_[array_.size() - 1], 5);
+}
+
 TEST_F(ArrayOperationsTest, RemoveSecondHalfWithIterator)
 {
 	printf("Removing the second half of the array\n");
@@ -114,10 +167,38 @@ TEST_F(ArrayOperationsTest, RemoveSecondHalfWithIterator)
 	ASSERT_EQ(array_[array_.size() - 1], 4);
 }
 
+TEST_F(ArrayOperationsTest, UnorderedRemoveSecondHalfWithIterator)
+{
+	printf("Removing the second half of the array (unordered)\n");
+	array_.unorderedErase(array_.begin() + array_.size() / 2, array_.end());
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity / 2);
+	ASSERT_EQ(array_[0], 0);
+	ASSERT_EQ(array_[array_.size() - 1], 4);
+}
+
 TEST_F(ArrayOperationsTest, RemoveHalfThenShrink)
 {
 	printf("Removing the second half of the array\n");
 	array_.erase(array_.begin() + array_.size() / 2, array_.end());
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity / 2);
+	ASSERT_EQ(array_.capacity(), Capacity);
+	ASSERT_EQ(array_[0], 0);
+	ASSERT_EQ(array_[array_.size() - 1], 4);
+
+	printf("Shrinking the array capacity to match its size\n");
+	array_.shrinkToFit();
+	ASSERT_EQ(array_.size(), Capacity / 2);
+	ASSERT_EQ(array_.capacity(), Capacity / 2);
+}
+
+TEST_F(ArrayOperationsTest, UnorderedRemoveHalfThenShrink)
+{
+	printf("Removing the second half of the array (unordered)\n");
+	array_.unorderedErase(array_.begin() + array_.size() / 2, array_.end());
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity / 2);
@@ -145,6 +226,20 @@ TEST_F(ArrayOperationsTest, RemoveFirstHalfWithReturnedIterator)
 	ASSERT_EQ(array_[array_.size() - 1], 9);
 }
 
+TEST_F(ArrayOperationsTest, UnorderedRemoveFirstHalfWithReturnedIterator)
+{
+	nctl::Array<int>::Iterator it = array_.begin();
+
+	printf("Removing the first half of the array with the returned iterator (unordered)\n");
+	for (unsigned int i = 0; i < Capacity / 2; i++)
+		it = array_.unorderedErase(it);
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity / 2);
+	ASSERT_EQ(array_[0], 9);
+	ASSERT_EQ(array_[array_.size() - 1], 5);
+}
+
 TEST_F(ArrayOperationsTest, RemoveRangeWithReturnedIterator)
 {
 	nctl::Array<int>::Iterator it = array_.begin();
@@ -159,6 +254,20 @@ TEST_F(ArrayOperationsTest, RemoveRangeWithReturnedIterator)
 	ASSERT_EQ(array_[array_.size() - 1], 9);
 }
 
+TEST_F(ArrayOperationsTest, UnorderedRemoveRangeWithReturnedIterator)
+{
+	nctl::Array<int>::Iterator it = array_.begin();
+
+	printf("Removing a range of elements of the array with the returned iterator (unordered)\n");
+	for (unsigned int i = 0; i < Capacity / 2; i++)
+		it = array_.unorderedErase(it, it + 1);
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity / 2);
+	ASSERT_EQ(array_[0], 9);
+	ASSERT_EQ(array_[array_.size() - 1], 5);
+}
+
 TEST_F(ArrayOperationsTest, RemoveEmptyBeginRange)
 {
 	printf("Removing an empty begin-to-begin range of the array\n");
@@ -169,10 +278,30 @@ TEST_F(ArrayOperationsTest, RemoveEmptyBeginRange)
 	ASSERT_TRUE(isUnmodified(array_));
 }
 
+TEST_F(ArrayOperationsTest, UnorderedRemoveEmptyBeginRange)
+{
+	printf("Removing an empty begin-to-begin range of the array (unordered)\n");
+	array_.unorderedErase(array_.begin(), array_.begin());
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity);
+	ASSERT_TRUE(isUnmodified(array_));
+}
+
 TEST_F(ArrayOperationsTest, RemoveEmptyEndRange)
 {
 	printf("Removing an empty end-to-end range of the array\n");
 	array_.erase(array_.end() - 1, array_.end() - 1);
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity);
+	ASSERT_TRUE(isUnmodified(array_));
+}
+
+TEST_F(ArrayOperationsTest, UnorderedRemoveEmptyEndRange)
+{
+	printf("Removing an empty end-to-end range of the array (unordered)\n");
+	array_.unorderedErase(array_.end() - 1, array_.end() - 1);
 	printArray(array_);
 
 	ASSERT_EQ(array_.size(), Capacity);

@@ -10,6 +10,19 @@ class StaticArrayOperationsTest : public ::testing::Test
 	nctl::StaticArray<int, Capacity> array_;
 };
 
+#ifndef __EMSCRIPTEN__
+	#ifdef NCINE_DEBUG
+TEST(StaticArrayOperationsDeathTest, UnorderedRemoveBeyondSize)
+{
+	printf("Trying to remove an element beyond size\n");
+	nctl::StaticArray<int, Capacity> array;
+	array[0] = 0;
+
+	ASSERT_DEATH(array.unorderedRemoveAt(5), "");
+}
+	#endif
+#endif
+
 TEST_F(StaticArrayOperationsTest, Clear)
 {
 	ASSERT_FALSE(array_.isEmpty());
@@ -80,6 +93,40 @@ TEST_F(StaticArrayOperationsTest, PushBack)
 	ASSERT_EQ(newArray.size(), 2);
 	ASSERT_EQ(newArray[0], 1);
 	ASSERT_EQ(newArray[1], 2);
+}
+
+TEST_F(StaticArrayOperationsTest, UnorderedRemoveFirst)
+{
+	printf("Removing the first element (unordered)\n");
+	array_.unorderedRemoveAt(0);
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity - 1);
+	ASSERT_EQ(array_[0], 9);
+}
+
+TEST_F(StaticArrayOperationsTest, UnorderedRemoveLast)
+{
+	printf("Removing the last element (unordered)\n");
+	array_.unorderedRemoveAt(array_.size() - 1);
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity - 1);
+	ASSERT_EQ(array_[array_.size() - 1], 8);
+}
+
+TEST_F(StaticArrayOperationsTest, UnorderedRemoveFirstHalfWithReturnedIndex)
+{
+	int index = 0;
+
+	printf("Removing the first half of the array with the returned index (unordered)\n");
+	for (unsigned int i = 0; i < Capacity / 2; i++)
+		index = array_.unorderedRemoveAt(index);
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity / 2);
+	ASSERT_EQ(array_[0], 9);
+	ASSERT_EQ(array_[array_.size() - 1], 5);
 }
 
 }
