@@ -31,6 +31,10 @@ target_include_directories(ncine PUBLIC ${NCINE_ROOT}/include PRIVATE ${NCINE_RO
 target_include_directories(ncine_main PRIVATE ${NCINE_ROOT}/include)
 if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
 	target_include_directories(ncine PRIVATE ${GENERATED_INCLUDE_DIR})
+	# Internal sources can access a generated header with or without the parent directory
+	get_filename_component(PARENT_GENERATED_INCLUDE_DIR ${GENERATED_INCLUDE_DIR} DIRECTORY)
+	target_include_directories(ncine PRIVATE ${PARENT_GENERATED_INCLUDE_DIR})
+	target_include_directories(ncine_main PRIVATE ${PARENT_GENERATED_INCLUDE_DIR})
 endif()
 
 target_include_directories(ncine PRIVATE ${CMAKE_ANDROID_NDK}/sources/android/native_app_glue)

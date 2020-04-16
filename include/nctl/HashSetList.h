@@ -5,6 +5,12 @@
 #include "List.h"
 #include "HashFunctions.h"
 
+#include <ncine/config.h>
+#if NCINE_WITH_ALLOCATORS
+	#include "AllocManager.h"
+	#include "IAllocator.h"
+#endif
+
 namespace nctl {
 
 template <class K, class HashFunc> class HashSetListIterator;
@@ -26,20 +32,19 @@ class HashSetList
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
 	explicit HashSetList(unsigned int capacity);
+#if NCINE_WITH_ALLOCATORS
+	HashSetList(unsigned int capacity, IAllocator &alloc);
+#endif
 	~HashSetList() { clear(); }
 
 	/// Copy constructor
 	HashSetList(const HashSetList &other);
 	/// Move constructor
 	HashSetList(HashSetList &&other);
-	/// Copy-and-swap assignment operator
-	HashSetList &operator=(HashSetList other);
-
-	/// Swaps two hashSets without copying their data
-	inline void swap(HashSetList &first, HashSetList &second)
-	{
-		nctl::swap(first.buckets_, second.buckets_);
-	}
+	/// Assignment operator
+	HashSetList &operator=(const HashSetList &other);
+	/// Move assignment operator
+	HashSetList &operator=(HashSetList &&other);
 
 	/// Returns an iterator to the first element
 	Iterator begin();
@@ -122,12 +127,21 @@ class HashSetList
 	class HashBucket
 	{
 	  public:
+#if !NCINE_WITH_ALLOCATORS
 		HashBucket()
 		    : size_(0) {}
+#else
+		HashBucket()
+		    : alloc_(theDefaultAllocator()), size_(0), collisionList_(theDefaultAllocator()) {}
+		HashBucket(IAllocator &alloc)
+		    : alloc_(alloc), size_(0), collisionList_(alloc) {}
+#endif
 		inline ~HashBucket() { clear(); }
 
 		HashBucket(const HashBucket &other);
+		HashBucket(HashBucket &&other);
 		HashBucket &operator=(const HashBucket &other);
+		HashBucket &operator=(HashBucket &&other);
 
 		unsigned int size() const { return size_; }
 		void clear();
@@ -140,6 +154,10 @@ class HashSetList
 		bool remove(hash_t hash, const K &key);
 
 	  private:
+#if NCINE_WITH_ALLOCATORS
+		/// The custom memory allocator for the hashset
+		IAllocator &alloc_;
+#endif
 		/// Number of nodes in this bucket
 		unsigned int size_;
 		unsigned char firstNodeBuffer_[sizeof(Node)];
@@ -221,10 +239,27 @@ typename HashSetList<K, HashFunc>::ConstReverseIterator HashSetList<K, HashFunc>
 
 template <class K, class HashFunc>
 HashSetList<K, HashFunc>::HashBucket::HashBucket(const HashBucket &other)
-    : size_(other.size_), collisionList_(other.collisionList_)
+    :
+#if NCINE_WITH_ALLOCATORS
+      alloc_(other.alloc_),
+#endif
+      size_(other.size_), collisionList_(other.collisionList_)
 {
 	if (other.size_ > 0)
 		new (&firstNode_) Node(other.firstNode_.hash, other.firstNode_.key);
+}
+
+template <class K, class HashFunc>
+HashSetList<K, HashFunc>::HashBucket::HashBucket(HashBucket &&other)
+    :
+#if NCINE_WITH_ALLOCATORS
+      alloc_(other.alloc_),
+#endif
+      size_(other.size_), collisionList_(nctl::move(other.collisionList_))
+{
+	if (other.size_ > 0)
+		new (&firstNode_) Node(nctl::move(other.firstNode_));
+	other.clear();
 }
 
 template <class K, class HashFunc>
@@ -239,6 +274,25 @@ typename HashSetList<K, HashFunc>::HashBucket &HashSetList<K, HashFunc>::HashBuc
 
 	collisionList_ = other.collisionList_;
 	size_ = other.size_;
+	return *this;
+}
+
+template <class K, class HashFunc>
+typename HashSetList<K, HashFunc>::HashBucket &HashSetList<K, HashFunc>::HashBucket::operator=(HashBucket &&other)
+{
+#if NCINE_WITH_ALLOCATORS
+	alloc_ = other.alloc_;
+#endif
+	if (other.size_ > 0 && size_ > 0)
+		firstNode_ = nctl::move(other.firstNode_);
+	else if (other.size_ > 0 && size_ == 0)
+		new (&firstNode_) Node(nctl::move(other.firstNode_));
+	else if (size_ > 0 && other.size_ == 0)
+		destructObject(&firstNode_);
+
+	collisionList_ = nctl::move(other.collisionList_);
+	size_ = other.size_;
+	other.clear();
 	return *this;
 }
 
@@ -431,6 +485,7 @@ const typename HashSetList<K, HashFunc>::Node *HashSetList<K, HashFunc>::HashBuc
 	return nullptr;
 }
 
+#if !NCINE_WITH_ALLOCATORS
 template <class K, class HashFunc>
 HashSetList<K, HashFunc>::HashSetList(unsigned int capacity)
     : buckets_(capacity, ArrayMode::FIXED_CAPACITY)
@@ -440,6 +495,27 @@ HashSetList<K, HashFunc>::HashSetList(unsigned int capacity)
 	for (unsigned int i = 0; i < capacity; i++)
 		buckets_.emplaceBack(HashBucket());
 }
+#else
+template <class K, class HashFunc>
+HashSetList<K, HashFunc>::HashSetList(unsigned int capacity)
+    : buckets_(capacity, ArrayMode::FIXED_CAPACITY, theDefaultAllocator())
+{
+	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
+
+	for (unsigned int i = 0; i < capacity; i++)
+		buckets_.emplaceBack(theDefaultAllocator());
+}
+
+template <class K, class HashFunc>
+HashSetList<K, HashFunc>::HashSetList(unsigned int capacity, IAllocator &alloc)
+    : buckets_(capacity, ArrayMode::FIXED_CAPACITY, alloc)
+{
+	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
+
+	for (unsigned int i = 0; i < capacity; i++)
+		buckets_.emplaceBack(alloc);
+}
+#endif
 
 template <class K, class HashFunc>
 HashSetList<K, HashFunc>::HashSetList(const HashSetList<K, HashFunc> &other)
@@ -453,11 +529,19 @@ HashSetList<K, HashFunc>::HashSetList(HashSetList<K, HashFunc> &&other)
 {
 }
 
-/*! \note The parameter should be passed by value for the idiom to work. */
 template <class K, class HashFunc>
-HashSetList<K, HashFunc> &HashSetList<K, HashFunc>::operator=(HashSetList<K, HashFunc> other)
+HashSetList<K, HashFunc> &HashSetList<K, HashFunc>::operator=(const HashSetList<K, HashFunc> &other)
 {
-	swap(*this, other);
+	if (this != &other)
+		buckets_ = other.buckets_;
+	return *this;
+}
+
+template <class K, class HashFunc>
+HashSetList<K, HashFunc> &HashSetList<K, HashFunc>::operator=(HashSetList<K, HashFunc> &&other)
+{
+	if (this != &other)
+		buckets_ = nctl::move(other.buckets_);
 	return *this;
 }
 

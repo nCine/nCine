@@ -110,6 +110,8 @@ if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
 	get_filename_component(PARENT_GENERATED_INCLUDE_DIR ${GENERATED_INCLUDE_DIR} DIRECTORY)
 	target_include_directories(ncine
 		INTERFACE $<BUILD_INTERFACE:${PARENT_GENERATED_INCLUDE_DIR}>
+		# Internal sources can access a generated header with or without the parent directory
+		PRIVATE $<BUILD_INTERFACE:${PARENT_GENERATED_INCLUDE_DIR}>
 		PRIVATE $<BUILD_INTERFACE:${GENERATED_INCLUDE_DIR}>)
 endif()
 

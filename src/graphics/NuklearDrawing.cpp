@@ -2,7 +2,6 @@
 #include <cstddef> // for `offsetof()`
 #include "NuklearDrawing.h"
 
-#include "GLTexture.h"
 #include "GLShaderProgram.h"
 #include "GLScissorTest.h"
 #include "GLBlending.h"
@@ -67,11 +66,7 @@ NuklearDrawing::NuklearDrawing(bool withSceneGraph)
 	if (withSceneGraph == false)
 		setupBuffersAndShader();
 
-	nk_buffer_init_default(&NuklearContext::cmds_);
-	nk_font_atlas_init_default(&NuklearContext::atlas_);
 	nk_font_atlas_begin(&NuklearContext::atlas_);
-	int w, h;
-	nk_font_atlas_bake(&NuklearContext::atlas_, &w, &h, NK_FONT_ATLAS_RGBA32);
 }
 
 ///////////////////////////////////////////////////////////
@@ -276,6 +271,7 @@ void NuklearDrawing::draw(RenderQueue &renderQueue)
 		cmdIdx++;
 	}
 	nk_clear(&NuklearContext::ctx_);
+	nk_buffer_clear(&NuklearContext::cmds_);
 }
 
 void NuklearDrawing::setupBuffersAndShader()
@@ -344,6 +340,7 @@ void NuklearDrawing::draw()
 		offset += cmd->elem_count;
 	}
 	nk_clear(&NuklearContext::ctx_);
+	nk_buffer_clear(&NuklearContext::cmds_);
 
 	GLScissorTest::disable();
 	GLDepthTest::popState();

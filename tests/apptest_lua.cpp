@@ -10,9 +10,9 @@ const char *ScriptFile = "script.lua";
 
 }
 
-nc::IAppEventHandler *createAppEventHandler()
+nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 {
-	return new MyEventHandler;
+	return nctl::makeUnique<MyEventHandler>();
 }
 
 MyEventHandler::MyEventHandler()

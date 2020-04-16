@@ -13,7 +13,7 @@ class DLL_PUBLIC AndroidApplication : public Application
 {
   public:
 	/// Entry point method to be called in the `android_main()` function
-	static void start(struct android_app *state, IAppEventHandler *(*createAppEventHandler)());
+	static void start(struct android_app *state, nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)());
 
 	/// Processes an Android application command
 	static void processCommand(struct android_app *state, int32_t cmd);
@@ -38,7 +38,7 @@ class DLL_PUBLIC AndroidApplication : public Application
 	nctl::String packageName_;
 
 	struct android_app *state_;
-	IAppEventHandler *(*createAppEventHandler_)();
+	nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler_)();
 	void preInit();
 	/// Must be called at the beginning to initialize the application
 	void init();

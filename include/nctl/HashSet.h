@@ -6,6 +6,12 @@
 #include "ReverseIterator.h"
 #include <cstring> // for memcpy()
 
+#include <ncine/config.h>
+#if NCINE_WITH_ALLOCATORS
+	#include "AllocManager.h"
+	#include "IAllocator.h"
+#endif
+
 namespace nctl {
 
 template <class K, class HashFunc> class HashSetIterator;
@@ -28,18 +34,26 @@ class HashSet
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
 	explicit HashSet(unsigned int capacity);
+#if NCINE_WITH_ALLOCATORS
+	HashSet(unsigned int capacity, IAllocator &alloc);
+#endif
 	~HashSet();
 
 	/// Copy constructor
 	HashSet(const HashSet &other);
 	/// Move constructor
 	HashSet(HashSet &&other);
-	/// Copy-and-swap assignment operator
-	HashSet &operator=(HashSet other);
+	/// Assignment operator
+	HashSet &operator=(const HashSet &other);
+	/// Move assignment operator
+	HashSet &operator=(HashSet &&other);
 
 	/// Swaps two hashsets without copying their data
 	inline void swap(HashSet &first, HashSet &second)
 	{
+#if NCINE_WITH_ALLOCATORS
+		nctl::swap(first.alloc_, second.alloc_);
+#endif
 		nctl::swap(first.size_, second.size_);
 		nctl::swap(first.capacity_, second.capacity_);
 		nctl::swap(first.buffer_, second.buffer_);
@@ -107,6 +121,10 @@ class HashSet
 	void rehash(unsigned int count);
 
   private:
+#if NCINE_WITH_ALLOCATORS
+	/// The custom memory allocator for the hashset
+	IAllocator &alloc_;
+#endif
 	unsigned int size_;
 	unsigned int capacity_;
 	/// Single allocated buffer for all the hashset per-node data
@@ -117,8 +135,10 @@ class HashSet
 	K *keys_;
 	HashFunc hashFunc_;
 
-	void init();
+	void initPointers();
+	void initValues();
 	void destructKeys();
+	void deallocate();
 	bool findBucketIndex(const K &key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const;
 	inline bool findBucketIndex(const K &key, unsigned int &foundIndex) const;
 	unsigned int addDelta1(unsigned int bucketIndex) const;
@@ -190,55 +210,71 @@ typename HashSet<K, HashFunc>::ConstReverseIterator HashSet<K, HashFunc>::rEnd()
 
 template <class K, class HashFunc>
 HashSet<K, HashFunc>::HashSet(unsigned int capacity)
-    : size_(0), capacity_(capacity), buffer_(nullptr),
+    :
+#if NCINE_WITH_ALLOCATORS
+      alloc_(theDefaultAllocator()),
+#endif
+      size_(0), capacity_(capacity), buffer_(nullptr),
       delta1_(nullptr), delta2_(nullptr), hashes_(nullptr), keys_(nullptr)
 {
 	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
 
 	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
+#if !NCINE_WITH_ALLOCATORS
 	buffer_ = static_cast<uint8_t *>(::operator new(bytes));
-
-	uint8_t *pointer = buffer_;
-	delta1_ = pointer;
-	pointer += sizeof(uint8_t) * capacity_;
-	delta2_ = pointer;
-	pointer += sizeof(uint8_t) * capacity_;
-	hashes_ = reinterpret_cast<hash_t *>(pointer);
-	pointer += sizeof(hash_t) * capacity_;
-	FATAL_ASSERT(pointer == buffer_ + bytes);
-
 	keys_ = static_cast<K *>(::operator new(sizeof(K) * capacity_));
+#else
+	buffer_ = static_cast<uint8_t *>(alloc_.allocate(bytes));
+	keys_ = static_cast<K *>(alloc_.allocate(sizeof(K) * capacity_));
+#endif
 
-	init();
+	initPointers();
+	initValues();
 }
+
+#if NCINE_WITH_ALLOCATORS
+template <class K, class HashFunc>
+HashSet<K, HashFunc>::HashSet(unsigned int capacity, IAllocator &alloc)
+    : alloc_(alloc), size_(0), capacity_(capacity), buffer_(nullptr),
+      delta1_(nullptr), delta2_(nullptr), hashes_(nullptr), keys_(nullptr)
+{
+	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
+
+	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
+	buffer_ = static_cast<uint8_t *>(alloc_.allocate(bytes));
+	keys_ = static_cast<K *>(alloc_.allocate(sizeof(K) * capacity_));
+
+	initPointers();
+	initValues();
+}
+#endif
 
 template <class K, class HashFunc>
 HashSet<K, HashFunc>::~HashSet()
 {
 	destructKeys();
-	::operator delete(buffer_);
-	::operator delete(keys_);
+	deallocate();
 }
 
 template <class K, class HashFunc>
 HashSet<K, HashFunc>::HashSet(const HashSet<K, HashFunc> &other)
-    : size_(other.size_), capacity_(other.capacity_), buffer_(nullptr),
+    :
+#if NCINE_WITH_ALLOCATORS
+      alloc_(other.alloc_),
+#endif
+      size_(other.size_), capacity_(other.capacity_), buffer_(nullptr),
       delta1_(nullptr), delta2_(nullptr), hashes_(nullptr), keys_(nullptr)
 {
 	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
+#if !NCINE_WITH_ALLOCATORS
 	buffer_ = static_cast<uint8_t *>(::operator new(bytes));
-	memcpy(buffer_, other.buffer_, bytes);
-
-	uint8_t *pointer = buffer_;
-	delta1_ = pointer;
-	pointer += sizeof(uint8_t) * capacity_;
-	delta2_ = pointer;
-	pointer += sizeof(uint8_t) * capacity_;
-	hashes_ = reinterpret_cast<hash_t *>(pointer);
-	pointer += sizeof(hash_t) * capacity_;
-	FATAL_ASSERT(pointer == buffer_ + bytes);
-
 	keys_ = static_cast<K *>(::operator new(sizeof(K) * capacity_));
+#else
+	buffer_ = static_cast<uint8_t *>(alloc_.allocate(bytes));
+	keys_ = static_cast<K *>(alloc_.allocate(sizeof(K) * capacity_));
+#endif
+	memcpy(buffer_, other.buffer_, bytes);
+	initPointers();
 
 	for (unsigned int i = 0; i < capacity_; i++)
 	{
@@ -249,7 +285,11 @@ HashSet<K, HashFunc>::HashSet(const HashSet<K, HashFunc> &other)
 
 template <class K, class HashFunc>
 HashSet<K, HashFunc>::HashSet(HashSet<K, HashFunc> &&other)
-    : size_(other.size_), capacity_(other.capacity_), buffer_(other.buffer_),
+    :
+#if NCINE_WITH_ALLOCATORS
+      alloc_(other.alloc_),
+#endif
+      size_(other.size_), capacity_(other.capacity_), buffer_(other.buffer_),
       delta1_(other.delta1_), delta2_(other.delta2_), hashes_(other.hashes_), keys_(other.keys_)
 {
 	other.size_ = 0;
@@ -261,11 +301,58 @@ HashSet<K, HashFunc>::HashSet(HashSet<K, HashFunc> &&other)
 	other.keys_ = nullptr;
 }
 
-/*! \note The parameter should be passed by value for the idiom to work. */
 template <class K, class HashFunc>
-HashSet<K, HashFunc> &HashSet<K, HashFunc>::operator=(HashSet<K, HashFunc> other)
+HashSet<K, HashFunc> &HashSet<K, HashFunc>::operator=(const HashSet<K, HashFunc> &other)
 {
-	swap(*this, other);
+	if (this == &other)
+		return *this;
+
+	if (other.size_ > capacity_)
+	{
+		destructKeys();
+		deallocate();
+
+		capacity_ = other.capacity_;
+		const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
+#if !NCINE_WITH_ALLOCATORS
+		buffer_ = static_cast<uint8_t *>(::operator new(bytes));
+		keys_ = static_cast<K *>(::operator new(sizeof(K) * capacity_));
+#else
+		buffer_ = static_cast<uint8_t *>(alloc_.allocate(bytes));
+		keys_ = static_cast<K *>(alloc_.allocate(sizeof(K) * capacity_));
+#endif
+		initPointers();
+	}
+
+	for (unsigned int i = 0; i < capacity_; i++)
+	{
+		if (other.hashes_[i] != NullHash)
+		{
+			if (hashes_[i] != NullHash)
+				keys_[i] = other.keys_[i];
+			else
+				new (keys_ + i) K(other.keys_[i]);
+		}
+		else if (hashes_[i] != NullHash)
+			destructObject(keys_ + i);
+
+		delta1_[i] = other.delta1_[i];
+		delta2_[i] = other.delta2_[i];
+		hashes_[i] = other.hashes_[i];
+	}
+	size_ = other.size_;
+
+	return *this;
+}
+
+template <class K, class HashFunc>
+HashSet<K, HashFunc> &HashSet<K, HashFunc>::operator=(HashSet<K, HashFunc> &&other)
+{
+	if (this != &other)
+	{
+		swap(*this, other);
+		other.clear();
+	}
 	return *this;
 }
 
@@ -385,7 +472,7 @@ template <class K, class HashFunc>
 void HashSet<K, HashFunc>::clear()
 {
 	destructKeys();
-	init();
+	initValues();
 }
 
 template <class K, class HashFunc>
@@ -503,7 +590,22 @@ void HashSet<K, HashFunc>::rehash(unsigned int count)
 }
 
 template <class K, class HashFunc>
-void HashSet<K, HashFunc>::init()
+void HashSet<K, HashFunc>::initPointers()
+{
+	uint8_t *pointer = buffer_;
+	delta1_ = pointer;
+	pointer += sizeof(uint8_t) * capacity_;
+	delta2_ = pointer;
+	pointer += sizeof(uint8_t) * capacity_;
+	hashes_ = reinterpret_cast<hash_t *>(pointer);
+	pointer += sizeof(hash_t) * capacity_;
+
+	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
+	FATAL_ASSERT(pointer == buffer_ + bytes);
+}
+
+template <class K, class HashFunc>
+void HashSet<K, HashFunc>::initValues()
 {
 	for (unsigned int i = 0; i < capacity_; i++)
 		delta1_[i] = 0;
@@ -525,6 +627,18 @@ void HashSet<K, HashFunc>::destructKeys()
 		}
 	}
 	size_ = 0;
+}
+
+template <class K, class HashFunc>
+void HashSet<K, HashFunc>::deallocate()
+{
+#if !NCINE_WITH_ALLOCATORS
+	::operator delete(buffer_);
+	::operator delete(keys_);
+#else
+	alloc_.deallocate(buffer_);
+	alloc_.deallocate(keys_);
+#endif
 }
 
 template <class K, class HashFunc>

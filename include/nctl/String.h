@@ -44,7 +44,7 @@ class DLL_PUBLIC String
 	String &operator=(const char *cString);
 
 	/// Swaps two strings without copying their data
-	void swap(String &first, String &second)
+	inline void swap(String &first, String &second)
 	{
 		nctl::swap(first.array_, second.array_);
 		nctl::swap(first.length_, second.length_);

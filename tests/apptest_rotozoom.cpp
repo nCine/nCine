@@ -15,9 +15,9 @@ const char *TextureFile = "megatexture_256.png";
 
 }
 
-nc::IAppEventHandler *createAppEventHandler()
+nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 {
-	return new MyEventHandler;
+	return nctl::makeUnique<MyEventHandler>();
 }
 
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)

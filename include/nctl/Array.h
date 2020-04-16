@@ -7,6 +7,12 @@
 #include "ReverseIterator.h"
 #include "utility.h"
 
+#include <ncine/config.h>
+#if NCINE_WITH_ALLOCATORS
+	#include "AllocManager.h"
+	#include "IAllocator.h"
+#endif
+
 namespace nctl {
 
 /// Construction modes for the `Array` class
@@ -39,20 +45,36 @@ class Array
 	/// Constructs an array with explicit capacity
 	explicit Array(unsigned int capacity)
 	    : Array(capacity, ArrayMode::GROWING_CAPACITY) {}
+#if !NCINE_WITH_ALLOCATORS
 	/// Constructs an array with explicit capacity and the option for it to be fixed
 	Array(unsigned int capacity, ArrayMode mode);
+#else
+	/// Constructs an array with explicit capacity and the option for it to be fixed
+	Array(unsigned int capacity, ArrayMode mode)
+	    : Array(capacity, mode, theDefaultAllocator()) {}
+	/// Constructs an array with explicit capacity and a custom allocator
+	Array(unsigned int capacity, IAllocator &alloc)
+	    : Array(capacity, ArrayMode::GROWING_CAPACITY, alloc) {}
+	/// Constructs an array with explicit capacity, the option for it to be fixed, and a custom allocator
+	Array(unsigned int capacity, ArrayMode mode, IAllocator &alloc);
+#endif
 	~Array();
 
 	/// Copy constructor
 	Array(const Array &other);
 	/// Move constructor
 	Array(Array &&other);
-	/// Copy-and-swap assignment operator
-	Array &operator=(Array other);
+	/// Assignment operator
+	Array &operator=(const Array &other);
+	/// Move assignment operator
+	Array &operator=(Array &&other);
 
 	/// Swaps two arrays without copying their data
-	void swap(Array &first, Array &second)
+	inline void swap(Array &first, Array &second)
 	{
+#if NCINE_WITH_ALLOCATORS
+		nctl::swap(first.alloc_, second.alloc_);
+#endif
 		nctl::swap(first.array_, second.array_);
 		nctl::swap(first.size_, second.size_);
 		nctl::swap(first.capacity_, second.capacity_);
@@ -170,6 +192,10 @@ class Array
 	inline T *data() { return array_; }
 
   private:
+#if NCINE_WITH_ALLOCATORS
+	/// The custom memory allocator for the array
+	IAllocator &alloc_;
+#endif
 	T *array_;
 	unsigned int size_;
 	unsigned int capacity_;
@@ -179,6 +205,7 @@ class Array
 	T *extendOne();
 };
 
+#if !NCINE_WITH_ALLOCATORS
 template <class T>
 Array<T>::Array(unsigned int capacity, ArrayMode mode)
     : array_(nullptr), size_(0), capacity_(0), fixedCapacity_(mode == ArrayMode::FIXED_CAPACITY)
@@ -186,34 +213,87 @@ Array<T>::Array(unsigned int capacity, ArrayMode mode)
 	if (capacity > 0)
 		setCapacity(capacity);
 }
+#else
+template <class T>
+Array<T>::Array(unsigned int capacity, ArrayMode mode, IAllocator &alloc)
+    : alloc_(alloc), array_(nullptr), size_(0), capacity_(0),
+      fixedCapacity_(mode == ArrayMode::FIXED_CAPACITY)
+{
+	if (capacity > 0)
+		setCapacity(capacity);
+}
+#endif
 
 template <class T>
 Array<T>::~Array()
 {
 	destructArray(array_, size_);
+#if !NCINE_WITH_ALLOCATORS
 	::operator delete(array_);
+#else
+	alloc_.deallocate(array_);
+#endif
 }
 
 template <class T>
 Array<T>::Array(const Array<T> &other)
-    : array_(nullptr), size_(other.size_), capacity_(other.capacity_), fixedCapacity_(other.fixedCapacity_)
+    :
+#if NCINE_WITH_ALLOCATORS
+      alloc_(other.alloc_),
+#endif
+      array_(nullptr), size_(other.size_), capacity_(other.capacity_), fixedCapacity_(other.fixedCapacity_)
 {
+#if !NCINE_WITH_ALLOCATORS
 	array_ = static_cast<T *>(::operator new(capacity_ * sizeof(T)));
+#else
+	array_ = static_cast<T *>(alloc_.allocate(capacity_ * sizeof(T)));
+#endif
 	copyConstructArray(array_, other.array_, size_);
 }
 
 template <class T>
 Array<T>::Array(Array<T> &&other)
-    : array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
+    :
+#if NCINE_WITH_ALLOCATORS
+      alloc_(other.alloc_),
+#endif
+      array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
 {
 	swap(*this, other);
 }
 
-/*! \note The parameter should be passed by value for the idiom to work. */
 template <class T>
-Array<T> &Array<T>::operator=(Array<T> other)
+Array<T> &Array<T>::operator=(const Array<T> &other)
 {
-	swap(*this, other);
+	if (this == &other)
+		return *this;
+
+	if (other.size_ > capacity_)
+		setCapacity(other.size_);
+
+	if (other.size_ > 0 && other.size_ >= size_)
+	{
+		copyAssignArray(array_, other.array_, size_);
+		copyConstructArray(array_ + size_, other.array_ + size_, other.size_ - size_);
+	}
+	else if (size_ > 0 && size_ >= other.size_)
+	{
+		copyAssignArray(array_, other.array_, other.size_);
+		destructArray(array_ + other.size_, size_ - other.size_);
+	}
+
+	size_ = other.size_;
+	return *this;
+}
+
+template <class T>
+Array<T> &Array<T>::operator=(Array<T> &&other)
+{
+	if (this != &other)
+	{
+		swap(*this, other);
+		other.clear();
+	}
 	return *this;
 }
 
@@ -243,7 +323,13 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 
 	T *newArray = nullptr;
 	if (newCapacity > 0)
+	{
+#if !NCINE_WITH_ALLOCATORS
 		newArray = static_cast<T *>(::operator new(newCapacity * sizeof(T)));
+#else
+		newArray = static_cast<T *>(alloc_.allocate(newCapacity * sizeof(T)));
+#endif
+	}
 
 	if (size_ > 0)
 	{
@@ -255,7 +341,11 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 		destructArray(array_, oldSize);
 	}
 
+#if !NCINE_WITH_ALLOCATORS
 	::operator delete(array_);
+#else
+	alloc_.deallocate(array_);
+#endif
 	array_ = newArray;
 	capacity_ = newCapacity;
 }

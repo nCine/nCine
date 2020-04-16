@@ -101,6 +101,7 @@ class ImGuiDebugOverlay : public IDebugOverlay
 	void guiAudioPlayers();
 	void guiInputState();
 	void guiRenderDoc();
+	void guiAllocators();
 	void guiRescursiveChildrenNodes(SceneNode *node, unsigned int childId);
 	void guiNodeInspector();
 

@@ -17,9 +17,9 @@ const float SpriteSpeed = 100.0f;
 
 }
 
-nc::IAppEventHandler *createAppEventHandler()
+nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 {
-	return new MyEventHandler;
+	return nctl::makeUnique<MyEventHandler>();
 }
 
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)

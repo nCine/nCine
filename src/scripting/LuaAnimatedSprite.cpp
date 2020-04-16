@@ -76,8 +76,7 @@ int LuaAnimatedSprite::newObject(lua_State *L)
 	const float x = LuaUtils::retrieve<float>(L, -2);
 	const float y = LuaUtils::retrieve<float>(L, -1);
 
-	AnimatedSprite *sprite = new AnimatedSprite(parent, texture, x, y);
-	LuaClassTracker<AnimatedSprite>::wrapTrackedUserData(L, sprite);
+	LuaClassTracker<AnimatedSprite>::newObject(L, parent, texture, x, y);
 
 	return 1;
 }

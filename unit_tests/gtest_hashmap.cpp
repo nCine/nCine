@@ -269,6 +269,16 @@ TEST_F(HashMapTest, MoveAssignmentOperator)
 	ASSERT_EQ(calcSize(newHashmap), Size);
 }
 
+TEST_F(HashMapTest, SelfAssignment)
+{
+	printf("Assigning the hashmap to itself with the assignment operator\n");
+	hashmap_ = hashmap_;
+	printHashMap(hashmap_);
+
+	ASSERT_EQ(hashmap_.size(), Size);
+	ASSERT_EQ(calcSize(hashmap_), Size);
+}
+
 TEST_F(HashMapTest, Contains)
 {
 	const int key = 1;

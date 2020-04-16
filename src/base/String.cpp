@@ -4,6 +4,12 @@
 #include <nctl/String.h>
 #include <nctl/algorithms.h>
 
+#include <ncine/config.h>
+#if NCINE_WITH_ALLOCATORS
+	#include <nctl/AllocManager.h>
+	#include <nctl/IAllocator.h>
+#endif
+
 namespace nctl {
 
 namespace {
@@ -59,7 +65,11 @@ String::String(unsigned int capacity)
 		capacity_ = SmallBufferSize;
 	else
 	{
+#if !NCINE_WITH_ALLOCATORS
 		array_.begin_ = new char[capacity_];
+#else
+		array_.begin_ = theStringAllocator().newArray<char>(capacity_);
+#endif
 		array_.begin_[0] = '\0';
 	}
 }
@@ -77,7 +87,11 @@ String::String(const char *cString)
 		capacity_ = SmallBufferSize;
 	else
 	{
+#if !NCINE_WITH_ALLOCATORS
 		array_.begin_ = new char[capacity_];
+#else
+		array_.begin_ = theStringAllocator().newArray<char>(capacity_);
+#endif
 		dest = array_.begin_;
 	}
 
@@ -88,7 +102,13 @@ String::String(const char *cString)
 String::~String()
 {
 	if (capacity_ > SmallBufferSize)
+	{
+#if !NCINE_WITH_ALLOCATORS
 		delete[] array_.begin_;
+#else
+		theStringAllocator().deleteArray<char>(array_.begin_);
+#endif
+	}
 }
 
 String::String(const String &other)
@@ -98,7 +118,11 @@ String::String(const String &other)
 	char *dest = array_.local_;
 	if (capacity_ > SmallBufferSize)
 	{
+#if !NCINE_WITH_ALLOCATORS
 		array_.begin_ = new char[capacity_];
+#else
+		array_.begin_ = theStringAllocator().newArray<char>(capacity_);
+#endif
 		src = other.array_.begin_;
 		dest = array_.begin_;
 	}
@@ -133,7 +157,8 @@ String &String::operator=(const String &other)
 
 String &String::operator=(String &&other)
 {
-	swap(*this, other);
+	if (this != &other)
+		swap(*this, other);
 	return *this;
 }
 

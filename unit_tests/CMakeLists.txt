@@ -38,14 +38,24 @@ list(APPEND TESTS
 	gtest_matrix4x4 gtest_matrix4x4_operations gtest_quaternion gtest_quaternion_operations
 	gtest_uniqueptr gtest_uniqueptr_array gtest_sharedptr
 	gtest_color gtest_colorf gtest_colorhdr
-	gtest_random
-	gtest_filesystem
+	gtest_random gtest_filesystem gtest_pointermath
 )
 
 if(Threads_FOUND)
 	list(APPEND TESTS
 		gtest_atomic32 gtest_atomic64
 		gtest_sharedptr_threads
+	)
+endif()
+
+if(NCINE_WITH_ALLOCATORS)
+	list(APPEND TESTS
+		gtest_allocator_malloc
+		gtest_allocator_linear
+		gtest_allocator_stack
+		gtest_allocator_pool
+		gtest_allocator_freelist
+		gtest_allocator_containers
 	)
 endif()
 

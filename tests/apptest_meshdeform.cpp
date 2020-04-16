@@ -45,9 +45,9 @@ unsigned int currentAnimation = ANIMATION_A;
 
 }
 
-nc::IAppEventHandler *createAppEventHandler()
+nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 {
-	return new MyEventHandler;
+	return nctl::makeUnique<MyEventHandler>();
 }
 
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)

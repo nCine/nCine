@@ -42,7 +42,7 @@ class LuaStatistics
 	static void unregisterState(LuaStateManager *manager);
 
 	static inline void allocMemory(size_t bytes) { usedMemory_ += bytes; }
-	static inline void freeMemory(size_t bytes) { usedMemory_ -= (usedMemory_ >= bytes) ? bytes : usedMemory_; }
+	static inline void freeMemory(size_t bytes) { ASSERT(usedMemory_ >= bytes); usedMemory_ -= bytes; }
 	static void countOperations();
 
 	friend class LuaStateManager;

@@ -7,7 +7,7 @@ class IAppEventHandler;
 
 }
 
-ncine::IAppEventHandler *createAppEventHandler();
+nctl::UniquePtr<ncine::IAppEventHandler> createAppEventHandler();
 
 void android_main(struct android_app *state)
 {

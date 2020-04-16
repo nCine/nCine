@@ -6,7 +6,7 @@ class UniquePtrArrayTest : public ::testing::Test
 {
   public:
 	UniquePtrArrayTest()
-	    : ptr_(new int[Size]) {}
+	    : ptr_(newArray<int>(Size)) {}
 
   protected:
 	void SetUp() override { initPtrArray(ptr_.get(), Size); }
@@ -14,10 +14,16 @@ class UniquePtrArrayTest : public ::testing::Test
 	nctl::UniquePtr<int[]> ptr_;
 };
 
+TEST_F(UniquePtrArrayTest, PointerSize)
+{
+	printf("Size of a unique pointer instance: %lu (raw poiner: %lu)\n", sizeof(ptr_), sizeof(int *));
+	ASSERT_EQ(sizeof(ptr_), sizeof(int *));
+}
+
 TEST_F(UniquePtrArrayTest, Reset)
 {
 	const int newValue = 3;
-	int *raw = new int[Size];
+	int *raw = newArray<int>(Size);
 	int const *const oldRaw = raw;
 	raw[0] = newValue;
 	printf("Creating a raw pointer to an array of ints, address: 0x%p, first value: %d\n", static_cast<const int *>(raw), *raw);
@@ -52,7 +58,7 @@ TEST_F(UniquePtrArrayTest, ResetNull)
 
 TEST_F(UniquePtrArrayTest, Release)
 {
-	const int *raw = nullptr;
+	int *raw = nullptr;
 	int const *const oldPtr = ptr_.get();
 	raw = ptr_.release();
 	printPointer("Releasing the unique pointer to the raw one, ", raw);
@@ -61,7 +67,7 @@ TEST_F(UniquePtrArrayTest, Release)
 	ASSERT_EQ(raw, oldPtr);
 	ASSERT_EQ(*raw, FirstElement);
 	ASSERT_EQ(raw[0], FirstElement);
-	delete[] raw;
+	deleteArray(raw);
 }
 
 TEST_F(UniquePtrArrayTest, MoveConstructor)
@@ -97,7 +103,7 @@ TEST_F(UniquePtrArrayTest, MoveAssignment)
 
 TEST_F(UniquePtrArrayTest, Subscript)
 {
-	nctl::UniquePtr<int[]> arrayPtr(new int[Size]);
+	nctl::UniquePtr<int[]> arrayPtr(newArray<int>(Size));
 	printf("Creating a unique pointer to array of %u elements, address: %p\n", Size, static_cast<const int *>(arrayPtr.get()));
 	initPtrArray(arrayPtr.get(), Size);
 
@@ -112,7 +118,7 @@ TEST_F(UniquePtrArrayTest, Subscript)
 
 TEST_F(UniquePtrArrayTest, MakeUnique)
 {
-	auto arrayPtr = nctl::makeUnique<int[]>(Size);
+	nctl::UniquePtr<int[]> arrayPtr = nctl::makeUnique<int[]>(Size);
 	printf("Creating a unique pointer to array of %u elements with `makeUnique()`, address: %p\n", Size, static_cast<const int *>(arrayPtr.get()));
 	initPtrArray(arrayPtr.get(), Size);
 
@@ -124,5 +130,84 @@ TEST_F(UniquePtrArrayTest, MakeUnique)
 	}
 	printf("\n");
 }
+
+#if NCINE_WITH_ALLOCATORS
+namespace {
+
+	const size_t BufferSize = 32;
+	uint8_t buffer1[BufferSize];
+	uint8_t buffer2[BufferSize];
+	nctl::StackAllocator stackAllocator1(BufferSize, &buffer1);
+	nctl::StackAllocator stackAllocator2(BufferSize, &buffer2);
+
+}
+
+TEST_F(UniquePtrArrayTest, PointerSizeWithAllocator)
+{
+	auto arrayPtr = nctl::allocateUnique<int[]>(nctl::theDefaultAllocator(), Value);
+	printf("Size of a unique pointer instance with a custom allocator deleter: %lu (raw poiner: %lu)\n", sizeof(arrayPtr), sizeof(int *));
+	ASSERT_EQ(sizeof(arrayPtr), sizeof(int *) * 2);
+}
+
+TEST_F(UniquePtrArrayTest, AllocateUnique)
+{
+	auto arrayPtr = nctl::allocateUnique<int[]>(stackAllocator1, 2);
+	printf("Creating a unique pointer to array of %u elements with `allocateUnique()`, address: %p\n", 2, static_cast<const int *>(arrayPtr.get()));
+	initPtrArray(arrayPtr.get(), 2);
+
+	printf("Elements in the array:");
+	for (unsigned int i = 0; i < 2; i++)
+	{
+		printf(" %d", arrayPtr[i]);
+		ASSERT_EQ(arrayPtr[i], static_cast<int>(i));
+	}
+	printf("\n");
+
+	printf("Releasing the unique pointer to free memory from the custom allocator\n");
+	arrayPtr.reset(nullptr);
+	ASSERT_EQ(stackAllocator1.numAllocations(), 0);
+}
+
+TEST_F(UniquePtrArrayTest, MoveConstructorWithAllocator)
+{
+	printf("Creating a unique pointer with a custom allocator\n");
+	auto arrayPtr1 = nctl::allocateUnique<int[]>(stackAllocator1, 2);
+	arrayPtr1[0] = Value;
+	ASSERT_EQ(arrayPtr1[0], Value);
+
+	printf("Creating a second unique pointer with move construction\n");
+	auto arrayPtr2(nctl::move(arrayPtr1));
+	ASSERT_EQ(arrayPtr2[0], Value);
+	ASSERT_EQ(arrayPtr1.get(), nullptr);
+	ASSERT_EQ(stackAllocator1.numAllocations(), 1);
+
+	printf("Releasing the unique pointer to free memory from the custom allocator\n");
+	arrayPtr2.reset(nullptr);
+	ASSERT_EQ(stackAllocator1.numAllocations(), 0);
+}
+
+TEST_F(UniquePtrArrayTest, MoveAssignmentWithAllocator)
+{
+	printf("Creating a unique pointer with a custom allocator\n");
+	auto arrayPtr1 = nctl::allocateUnique<int[]>(stackAllocator1, 2);
+	arrayPtr1[0] = Value;
+	ASSERT_EQ(arrayPtr1[0], Value);
+
+	printf("Creating a second unique pointer with a different custom allocator\n");
+	auto arrayPtr2 = nctl::allocateUnique<int[]>(stackAllocator2, 2);
+	arrayPtr2[0] = Value + 1;
+	ASSERT_EQ(arrayPtr2[0], Value + 1);
+
+	printf("Move assign the first unique pointer to the second\n");
+	arrayPtr2 = nctl::move(arrayPtr1);
+	ASSERT_EQ(arrayPtr2[0], Value);
+	ASSERT_EQ(arrayPtr1.get(), nullptr);
+	ASSERT_EQ(stackAllocator2.numAllocations(), 0);
+
+	printf("Releasing the second unique pointer to free memory from the custom allocator\n");
+	arrayPtr2.reset(nullptr);
+	ASSERT_EQ(stackAllocator1.numAllocations(), 0);
+}
+#endif
 
 }

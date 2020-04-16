@@ -54,8 +54,7 @@ int LuaSprite::newObject(lua_State *L)
 	const float x = LuaUtils::retrieve<float>(L, -2);
 	const float y = LuaUtils::retrieve<float>(L, -1);
 
-	Sprite *sprite = new Sprite(parent, texture, x, y);
-	LuaClassTracker<Sprite>::wrapTrackedUserData(L, sprite);
+	LuaClassTracker<Sprite>::newObject(L, parent, texture, x, y);
 
 	return 1;
 }

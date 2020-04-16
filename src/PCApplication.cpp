@@ -35,7 +35,7 @@ Application &theApplication()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-int PCApplication::start(IAppEventHandler *(*createAppEventHandler)())
+int PCApplication::start(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)())
 {
 	ASSERT(createAppEventHandler);
 	PCApplication &app = static_cast<PCApplication &>(theApplication());
@@ -56,7 +56,7 @@ int PCApplication::start(IAppEventHandler *(*createAppEventHandler)())
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void PCApplication::init(IAppEventHandler *(*createAppEventHandler)())
+void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)())
 {
 	ZoneScoped;
 	profileStartTime_ = TimeStamp::now();
@@ -65,7 +65,7 @@ void PCApplication::init(IAppEventHandler *(*createAppEventHandler)())
 	// Registering the logger as early as possible
 	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(appCfg_.consoleLogLevel));
 
-	appEventHandler_ = nctl::UniquePtr<IAppEventHandler>(createAppEventHandler());
+	appEventHandler_ = createAppEventHandler();
 	// Only `onPreInit()` can modify the application configuration
 	AppConfiguration &modifiableAppCfg = const_cast<AppConfiguration &>(appCfg_);
 	appEventHandler_->onPreInit(modifiableAppCfg);

@@ -119,6 +119,16 @@ TEST_F(StringOperationTest, MoveAssignmentOperator)
 	ASSERT_EQ(string_.length(), 0);
 }
 
+TEST_F(StringOperationTest, SelfAssignment)
+{
+	string_ = string_;
+	printString("Assigning the string to itself with the assignment operator: ", string_);
+
+	ASSERT_EQ(string_.capacity(), Capacity);
+	ASSERT_EQ(string_.length(), strnlen("String1", Capacity));
+	ASSERT_STREQ(string_.data(), "String1");
+}
+
 TEST_F(StringOperationTest, AssignLongCStringAndTruncate)
 {
 	nctl::String newString;

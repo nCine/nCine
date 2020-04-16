@@ -10,7 +10,7 @@ class SharedPtrThreadsTest : public ::testing::Test
 {
   public:
 	SharedPtrThreadsTest()
-	    : ptr_(new int(Value)), tr_(this) {}
+	    : ptr_(newObject<int>(Value)), tr_(this) {}
 
 	nctl::SharedPtr<int> ptr_;
 	ThreadRunner<NumThreads> tr_;

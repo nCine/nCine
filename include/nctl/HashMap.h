@@ -6,6 +6,12 @@
 #include "ReverseIterator.h"
 #include <cstring> // for memcpy()
 
+#include <ncine/config.h>
+#if NCINE_WITH_ALLOCATORS
+	#include "AllocManager.h"
+	#include "IAllocator.h"
+#endif
+
 namespace nctl {
 
 template <class K, class T, class HashFunc, bool IsConst> class HashMapIterator;
@@ -27,18 +33,26 @@ class HashMap
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
 	explicit HashMap(unsigned int capacity);
+#if NCINE_WITH_ALLOCATORS
+	HashMap(unsigned int capacity, IAllocator &alloc);
+#endif
 	~HashMap();
 
 	/// Copy constructor
 	HashMap(const HashMap &other);
 	/// Move constructor
 	HashMap(HashMap &&other);
-	/// Copy-and-swap assignment operator
-	HashMap &operator=(HashMap other);
+	/// Assignment operator
+	HashMap &operator=(const HashMap &other);
+	/// Move assignment operator
+	HashMap &operator=(HashMap &&other);
 
 	/// Swaps two hashmaps without copying their data
 	inline void swap(HashMap &first, HashMap &second)
 	{
+#if NCINE_WITH_ALLOCATORS
+		nctl::swap(first.alloc_, second.alloc_);
+#endif
 		nctl::swap(first.size_, second.size_);
 		nctl::swap(first.capacity_, second.capacity_);
 		nctl::swap(first.buffer_, second.buffer_);
@@ -129,6 +143,10 @@ class HashMap
 		    : key(kk), value(nctl::forward<Args>(args)...) {}
 	};
 
+#if NCINE_WITH_ALLOCATORS
+	/// The custom memory allocator for the hashmap
+	IAllocator &alloc_;
+#endif
 	unsigned int size_;
 	unsigned int capacity_;
 	/// Single allocated buffer for all the hashmap per-node data
@@ -139,8 +157,10 @@ class HashMap
 	Node *nodes_;
 	HashFunc hashFunc_;
 
-	void init();
+	void initPointers();
+	void initValues();
 	void destructNodes();
+	void deallocate();
 	bool findBucketIndex(const K &key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const;
 	inline bool findBucketIndex(const K &key, unsigned int &foundIndex) const;
 	unsigned int addDelta1(unsigned int bucketIndex) const;
@@ -216,13 +236,23 @@ typename HashMap<K, T, HashFunc>::ConstReverseIterator HashMap<K, T, HashFunc>::
 
 template <class K, class T, class HashFunc>
 HashMap<K, T, HashFunc>::HashMap(unsigned int capacity)
-    : size_(0), capacity_(capacity), buffer_(nullptr),
+    :
+#if NCINE_WITH_ALLOCATORS
+      alloc_(theDefaultAllocator()),
+#endif
+      size_(0), capacity_(capacity), buffer_(nullptr),
       delta1_(nullptr), delta2_(nullptr), hashes_(nullptr), nodes_(nullptr)
 {
 	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
 
 	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
+#if !NCINE_WITH_ALLOCATORS
 	buffer_ = static_cast<uint8_t *>(::operator new(bytes));
+	nodes_ = static_cast<Node *>(::operator new(sizeof(Node) * capacity_));
+#else
+	buffer_ = static_cast<uint8_t *>(alloc_.allocate(bytes));
+	nodes_ = static_cast<Node *>(alloc_.allocate(sizeof(Node) * capacity_));
+#endif
 
 	uint8_t *pointer = buffer_;
 	delta1_ = pointer;
@@ -233,38 +263,52 @@ HashMap<K, T, HashFunc>::HashMap(unsigned int capacity)
 	pointer += sizeof(hash_t) * capacity_;
 	FATAL_ASSERT(pointer == buffer_ + bytes);
 
-	nodes_ = static_cast<Node *>(::operator new(sizeof(Node) * capacity_));
-
-	init();
+	initValues();
 }
+
+#if NCINE_WITH_ALLOCATORS
+template <class K, class T, class HashFunc>
+HashMap<K, T, HashFunc>::HashMap(unsigned int capacity, IAllocator &alloc)
+    : alloc_(alloc), size_(0), capacity_(capacity), buffer_(nullptr),
+      delta1_(nullptr), delta2_(nullptr), hashes_(nullptr), nodes_(nullptr)
+{
+	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
+
+	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
+	buffer_ = static_cast<uint8_t *>(alloc_.allocate(bytes));
+	nodes_ = static_cast<Node *>(alloc_.allocate(sizeof(Node) * capacity_));
+
+	initPointers();
+	initValues();
+}
+#endif
 
 template <class K, class T, class HashFunc>
 HashMap<K, T, HashFunc>::~HashMap()
 {
 	destructNodes();
-	::operator delete(buffer_);
-	::operator delete(nodes_);
+	deallocate();
 }
 
 template <class K, class T, class HashFunc>
 HashMap<K, T, HashFunc>::HashMap(const HashMap<K, T, HashFunc> &other)
-    : size_(other.size_), capacity_(other.capacity_), buffer_(nullptr),
+    :
+#if NCINE_WITH_ALLOCATORS
+      alloc_(other.alloc_),
+#endif
+      size_(other.size_), capacity_(other.capacity_), buffer_(nullptr),
       delta1_(nullptr), delta2_(nullptr), hashes_(nullptr), nodes_(nullptr)
 {
 	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
+#if !NCINE_WITH_ALLOCATORS
 	buffer_ = static_cast<uint8_t *>(::operator new(bytes));
-	memcpy(buffer_, other.buffer_, bytes);
-
-	uint8_t *pointer = buffer_;
-	delta1_ = pointer;
-	pointer += sizeof(uint8_t) * capacity_;
-	delta2_ = pointer;
-	pointer += sizeof(uint8_t) * capacity_;
-	hashes_ = reinterpret_cast<hash_t *>(pointer);
-	pointer += sizeof(hash_t) * capacity_;
-	FATAL_ASSERT(pointer == buffer_ + bytes);
-
 	nodes_ = static_cast<Node *>(::operator new(sizeof(Node) * capacity_));
+#else
+	buffer_ = static_cast<uint8_t *>(alloc_.allocate(bytes));
+	nodes_ = static_cast<Node *>(alloc_.allocate(sizeof(Node) * capacity_));
+#endif
+	memcpy(buffer_, other.buffer_, bytes);
+	initPointers();
 
 	for (unsigned int i = 0; i < capacity_; i++)
 	{
@@ -275,7 +319,11 @@ HashMap<K, T, HashFunc>::HashMap(const HashMap<K, T, HashFunc> &other)
 
 template <class K, class T, class HashFunc>
 HashMap<K, T, HashFunc>::HashMap(HashMap<K, T, HashFunc> &&other)
-    : size_(other.size_), capacity_(other.capacity_), buffer_(other.buffer_),
+    :
+#if NCINE_WITH_ALLOCATORS
+      alloc_(other.alloc_),
+#endif
+      size_(other.size_), capacity_(other.capacity_), buffer_(other.buffer_),
       delta1_(other.delta1_), delta2_(other.delta2_), hashes_(other.hashes_), nodes_(other.nodes_)
 {
 	other.size_ = 0;
@@ -287,11 +335,58 @@ HashMap<K, T, HashFunc>::HashMap(HashMap<K, T, HashFunc> &&other)
 	other.nodes_ = nullptr;
 }
 
-/*! \note The parameter should be passed by value for the idiom to work. */
 template <class K, class T, class HashFunc>
-HashMap<K, T, HashFunc> &HashMap<K, T, HashFunc>::operator=(HashMap<K, T, HashFunc> other)
+HashMap<K, T, HashFunc> &HashMap<K, T, HashFunc>::operator=(const HashMap<K, T, HashFunc> &other)
 {
-	swap(*this, other);
+	if (this == &other)
+		return *this;
+
+	if (other.size_ > capacity_)
+	{
+		destructNodes();
+		deallocate();
+
+		capacity_ = other.capacity_;
+		const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
+#if !NCINE_WITH_ALLOCATORS
+		buffer_ = static_cast<uint8_t *>(::operator new(bytes));
+		nodes_ = static_cast<Node *>(::operator new(sizeof(Node) * capacity_));
+#else
+		buffer_ = static_cast<uint8_t *>(alloc_.allocate(bytes));
+		nodes_ = static_cast<Node *>(alloc_.allocate(sizeof(Node) * capacity_));
+#endif
+		initPointers();
+	}
+
+	for (unsigned int i = 0; i < capacity_; i++)
+	{
+		if (other.hashes_[i] != NullHash)
+		{
+			if (hashes_[i] != NullHash)
+				nodes_[i] = other.nodes_[i];
+			else
+				new (nodes_ + i) Node(other.nodes_[i]);
+		}
+		else if (hashes_[i] != NullHash)
+			destructObject(nodes_ + i);
+
+		delta1_[i] = other.delta1_[i];
+		delta2_[i] = other.delta2_[i];
+		hashes_[i] = other.hashes_[i];
+	}
+	size_ = other.size_;
+
+	return *this;
+}
+
+template <class K, class T, class HashFunc>
+HashMap<K, T, HashFunc> &HashMap<K, T, HashFunc>::operator=(HashMap<K, T, HashFunc> &&other)
+{
+	if (this != &other)
+	{
+		swap(*this, other);
+		other.clear();
+	}
 	return *this;
 }
 
@@ -518,7 +613,7 @@ template <class K, class T, class HashFunc>
 void HashMap<K, T, HashFunc>::clear()
 {
 	destructNodes();
-	init();
+	initValues();
 }
 
 template <class K, class T, class HashFunc>
@@ -643,7 +738,22 @@ void HashMap<K, T, HashFunc>::rehash(unsigned int count)
 }
 
 template <class K, class T, class HashFunc>
-void HashMap<K, T, HashFunc>::init()
+void HashMap<K, T, HashFunc>::initPointers()
+{
+	uint8_t *pointer = buffer_;
+	delta1_ = pointer;
+	pointer += sizeof(uint8_t) * capacity_;
+	delta2_ = pointer;
+	pointer += sizeof(uint8_t) * capacity_;
+	hashes_ = reinterpret_cast<hash_t *>(pointer);
+	pointer += sizeof(hash_t) * capacity_;
+
+	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
+	FATAL_ASSERT(pointer == buffer_ + bytes);
+}
+
+template <class K, class T, class HashFunc>
+void HashMap<K, T, HashFunc>::initValues()
 {
 	for (unsigned int i = 0; i < capacity_; i++)
 		delta1_[i] = 0;
@@ -665,6 +775,18 @@ void HashMap<K, T, HashFunc>::destructNodes()
 		}
 	}
 	size_ = 0;
+}
+
+template <class K, class T, class HashFunc>
+void HashMap<K, T, HashFunc>::deallocate()
+{
+#if !NCINE_WITH_ALLOCATORS
+	::operator delete(buffer_);
+	::operator delete(nodes_);
+#else
+	alloc_.deallocate(buffer_);
+	alloc_.deallocate(nodes_);
+#endif
 }
 
 template <class K, class T, class HashFunc>

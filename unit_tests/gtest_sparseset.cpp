@@ -205,6 +205,17 @@ TEST_F(SparseSetTest, MoveAssignmentOperator)
 	ASSERT_EQ(calcSize(newSparseset), Size);
 }
 
+TEST_F(SparseSetTest, SelfAssignment)
+{
+	printf("Assigning the sparseset to itself with the assignment operator\n");
+	sparseset_ = sparseset_;
+	printSparseSet(sparseset_);
+
+	ASSERT_EQ(sparseset_.size(), Size);
+	ASSERT_EQ(calcSize(sparseset_), Size);
+	ASSERT_EQ(sparseset_.capacity(), Capacity);
+}
+
 TEST_F(SparseSetTest, Contains)
 {
 	const int key = 1;

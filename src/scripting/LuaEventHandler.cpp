@@ -18,9 +18,9 @@ namespace LuaEventHandler {
 
 LuaStateManager *LuaEventHandler::luaState_ = nullptr;
 
-IAppEventHandler *createAppEventHandler()
+nctl::UniquePtr<IAppEventHandler> createAppEventHandler()
 {
-	return new LuaEventHandler;
+	return nctl::makeUnique<LuaEventHandler>();
 }
 
 int start(lua_State *L)

@@ -238,9 +238,20 @@ TEST_F(HashSetListTest, MoveAssignmentOperator)
 	printHashSet(newHashset);
 
 	ASSERT_EQ(hashset_.bucketAmount(), 0);
+	ASSERT_EQ(hashset_.size(), 0);
 	ASSERT_EQ(newHashset.bucketAmount(), Capacity);
 	ASSERT_EQ(newHashset.size(), Size);
 	ASSERT_EQ(calcSize(newHashset), Size);
+}
+
+TEST_F(HashSetListTest, SelfAssignment)
+{
+	printf("Assigning the hashset to itself with the assignment operator\n");
+	hashset_ = hashset_;
+	printHashSet(hashset_);
+
+	ASSERT_EQ(hashset_.size(), Size);
+	ASSERT_EQ(calcSize(hashset_), Size);
 }
 
 TEST_F(HashSetListTest, Contains)

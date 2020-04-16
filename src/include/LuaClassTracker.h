@@ -8,6 +8,12 @@
 #include "LuaStateManager.h"
 #include "LuaNames.h"
 
+#include <ncine/config.h>
+#if NCINE_WITH_ALLOCATORS
+	#include <nctl/AllocManager.h>
+	#include <nctl/IAllocator.h>
+#endif
+
 namespace ncine {
 
 /// Common methods to track a C++ class in Lua
@@ -15,9 +21,13 @@ template <class T>
 class LuaClassTracker
 {
   public:
-	static void exposeDelete(lua_State *L);
-	static int deleteObject(lua_State *L);
+	static inline void exposeDelete(lua_State *L);
 
+	template <typename... Args>
+	static inline void newObject(lua_State *L, Args &&... args);
+	static inline int deleteObject(lua_State *L);
+
+  private:
 	static inline void wrapTrackedUserData(lua_State *L, T *object);
 };
 
@@ -26,6 +36,18 @@ void LuaClassTracker<T>::exposeDelete(lua_State *L)
 {
 	lua_pushcfunction(L, deleteObject);
 	lua_setfield(L, -2, LuaNames::deleteObject);
+}
+
+template <class T>
+template <typename... Args>
+void LuaClassTracker<T>::newObject(lua_State *L, Args &&... args)
+{
+#if !NCINE_WITH_ALLOCATORS
+	T *ptr = new T(nctl::forward<Args>(args)...);
+#else
+	T *ptr = new (nctl::theLuaAllocator().allocate(sizeof(T))) T(nctl::forward<Args>(args)...);
+#endif
+	wrapTrackedUserData(L, ptr);
 }
 
 template <class T>
@@ -51,7 +73,11 @@ int LuaClassTracker<T>::deleteObject(lua_State *L)
 	}
 
 	array.setSize(newSize);
+#if !NCINE_WITH_ALLOCATORS
 	delete object;
+#else
+	nctl::theLuaAllocator().deleteObject(object);
+#endif
 
 	return 0;
 }

@@ -106,8 +106,7 @@ int LuaTexture::newObject(lua_State *L)
 {
 	const char *filename = LuaUtils::retrieve<const char *>(L, -1);
 
-	Texture *texture = new Texture(filename);
-	LuaClassTracker<Texture>::wrapTrackedUserData(L, texture);
+	LuaClassTracker<Texture>::newObject(L, filename);
 
 	return 1;
 }

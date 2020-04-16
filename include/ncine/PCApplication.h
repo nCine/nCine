@@ -12,7 +12,7 @@ class DLL_PUBLIC PCApplication : public Application
 {
   public:
 	/// Entry point method to be called in the `main()` function
-	static int start(IAppEventHandler *(*createAppEventHandler)());
+	static int start(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)());
 
   private:
 	/// Suspension state from last frame
@@ -23,7 +23,7 @@ class DLL_PUBLIC PCApplication : public Application
 #endif
 
 	/// Must be called at the beginning to initialize the application
-	void init(IAppEventHandler *(*createAppEventHandler)());
+	void init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)());
 	/// The main game loop
 	void run();
 	/// Processes events inside the game loop

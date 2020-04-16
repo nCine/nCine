@@ -141,7 +141,9 @@ TEST_F(HashMapListStringTest, MoveAssignmentOperator)
 	printHashMap(newStrHashmap);
 
 	ASSERT_EQ(strHashmap_.bucketAmount(), 0);
+	ASSERT_EQ(strHashmap_.size(), 0);
 	ASSERT_EQ(newStrHashmap.bucketAmount(), Capacity);
+	ASSERT_EQ(newStrHashmap.size(), Size);
 	ASSERT_EQ(calcSize(newStrHashmap), Size);
 }
 

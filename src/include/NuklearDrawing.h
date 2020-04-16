@@ -6,11 +6,11 @@
 
 #include <nctl/UniquePtr.h>
 #include "RenderCommand.h"
+#include "GLTexture.h"
 #include "Matrix4x4.h"
 
 namespace ncine {
 
-class GLTexture;
 class GLShaderProgram;
 class GLShaderUniforms;
 class GLShaderAttributes;

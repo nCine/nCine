@@ -89,6 +89,16 @@ TEST_F(StaticArrayOperationsTest, MoveAssignmentOperator)
 		ASSERT_EQ(newArray[i], i);
 }
 
+TEST_F(StaticArrayOperationsTest, SelfAssignment)
+{
+	printf("Assigning the array to itself with the assignment operator\n");
+	array_ = array_;
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity);
+	ASSERT_TRUE(isUnmodified(array_));
+}
+
 TEST_F(StaticArrayOperationsTest, RemoveFirstWithIterator)
 {
 	printf("Removing the first element with an iterator\n");

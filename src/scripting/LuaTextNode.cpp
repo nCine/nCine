@@ -96,8 +96,7 @@ int LuaTextNode::newObject(lua_State *L)
 	Font *font = LuaClassWrapper<Font>::unwrapUserData(L, -2);
 	const unsigned int maxStringLength = LuaUtils::retrieve<uint32_t>(L, -1);
 
-	TextNode *textnode = new TextNode(parent, font, maxStringLength);
-	LuaClassTracker<TextNode>::wrapTrackedUserData(L, textnode);
+	LuaClassTracker<TextNode>::newObject(L, parent, font, maxStringLength);
 
 	return 1;
 }

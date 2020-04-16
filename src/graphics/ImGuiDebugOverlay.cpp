@@ -22,6 +22,10 @@
 	#include "RenderDocCapture.h"
 #endif
 
+#ifdef WITH_ALLOCATORS
+	#include "allocators_config.h"
+#endif
+
 #include "version.h"
 
 namespace ncine {
@@ -268,6 +272,7 @@ void ImGuiDebugOverlay::guiWindow()
 		guiAudioPlayers();
 		guiInputState();
 		guiRenderDoc();
+		guiAllocators();
 		guiNodeInspector();
 	}
 	ImGui::End();
@@ -463,6 +468,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #endif
 #ifdef WITH_LUA
 			ImGui::Text("WITH_LUA");
+#endif
+#ifdef WITH_ALLOCATORS
+			ImGui::Text("WITH_ALLOCATORS");
 #endif
 #ifdef WITH_IMGUI
 			ImGui::Text("WITH_IMGUI");
@@ -964,6 +972,133 @@ void ImGuiDebugOverlay::guiRenderDoc()
 		else
 			ImGui::Text("Crash handler not loaded");
 	}
+#endif
+}
+
+#ifdef RECORD_ALLOCATIONS
+void guiAllocator(nctl::IAllocator &alloc)
+{
+	ImGui::Text("Allocations - Recorded: %lu, Active: %lu, Used Memory: %lu",
+	            alloc.numEntries(), alloc.numAllocations(), alloc.usedMemory());
+	ImGui::NewLine();
+
+	ImGui::Columns(6, "allocationEntries", true);
+	ImGui::Text("Entry");
+	ImGui::NextColumn();
+	ImGui::Text("Time");
+	ImGui::NextColumn();
+	ImGui::Text("Pointer");
+	ImGui::NextColumn();
+	ImGui::Text("Bytes");
+	ImGui::NextColumn();
+	ImGui::Text("Alignment");
+	ImGui::NextColumn();
+	ImGui::Text("State");
+	ImGui::NextColumn();
+	ImGui::Separator();
+	for (unsigned int i = 0; i < alloc.numEntries(); i++)
+	{
+		const nctl::IAllocator::Entry &e = alloc.entry(i);
+		const unsigned int deallocationIndex = alloc.findDeallocation(i);
+
+		ImGui::Text("#%u", i);
+		ImGui::NextColumn();
+		ImGui::Text("%fs", e.timestamp.seconds());
+		ImGui::NextColumn();
+		ImGui::Text("0x%lx", uintptr_t(e.ptr));
+		ImGui::NextColumn();
+		ImGui::Text("%lu", e.bytes);
+		ImGui::NextColumn();
+		ImGui::Text("%u", e.alignment);
+		ImGui::NextColumn();
+		if (deallocationIndex > 0)
+		{
+			const TimeStamp diffStamp = alloc.entry(deallocationIndex).timestamp - e.timestamp;
+			ImGui::Text("Freed by #%u after %fs", deallocationIndex, diffStamp.seconds());
+		}
+		else
+			ImGui::Text("Active");
+		ImGui::NextColumn();
+	}
+	ImGui::Columns(1);
+}
+#endif
+
+void ImGuiDebugOverlay::guiAllocators()
+{
+#ifdef WITH_ALLOCATORS
+	if (ImGui::CollapsingHeader("Memory Allocators"))
+	{
+		widgetName_.format("Default Allocator (%d allocations, %lu bytes)",
+		                   nctl::theDefaultAllocator().numAllocations(), nctl::theDefaultAllocator().usedMemory());
+	#ifndef RECORD_ALLOCATIONS
+		ImGui::BulletText("%s", widgetName_.data());
+	#else
+		widgetName_.append("###DefaultAllocator");
+		if (ImGui::TreeNode(widgetName_.data()))
+		{
+			guiAllocator(nctl::theDefaultAllocator());
+			ImGui::TreePop();
+		}
+	#endif
+
+		if (&nctl::theStringAllocator() != &nctl::theDefaultAllocator())
+		{
+			widgetName_.format("String Allocator (%d allocations, %lu bytes)",
+			                   nctl::theStringAllocator().numAllocations(), nctl::theStringAllocator().usedMemory());
+	#ifndef RECORD_ALLOCATIONS
+			ImGui::BulletText("%s", widgetName_.data());
+	#else
+			widgetName_.append("###StringAllocator");
+			if (ImGui::TreeNode(widgetName_.data()))
+			{
+				guiAllocator(nctl::theStringAllocator());
+				ImGui::TreePop();
+			}
+	#endif
+		}
+		else
+			ImGui::Text("The string allocator is the default one");
+
+		if (&nctl::theImGuiAllocator() != &nctl::theDefaultAllocator())
+		{
+			widgetName_.format("ImGui Allocator (%d allocations, %lu bytes)",
+			                   nctl::theImGuiAllocator().numAllocations(), nctl::theImGuiAllocator().usedMemory());
+	#ifndef RECORD_ALLOCATIONS
+			ImGui::BulletText("%s", widgetName_.data());
+	#else
+			widgetName_.append("###ImGuiAllocator");
+			if (ImGui::TreeNode(widgetName_.data()))
+			{
+				guiAllocator(nctl::theImGuiAllocator());
+				ImGui::TreePop();
+			}
+	#endif
+		}
+		else
+			ImGui::Text("The ImGui allocator is the default one");
+
+	#ifdef WITH_LUA
+		if (&nctl::theLuaAllocator() != &nctl::theDefaultAllocator())
+		{
+			widgetName_.format("Lua Allocator (%d allocations, %lu bytes)",
+			                   nctl::theLuaAllocator().numAllocations(), nctl::theLuaAllocator().usedMemory());
+		#ifndef RECORD_ALLOCATIONS
+			ImGui::BulletText("%s", widgetName_.data());
+		#else
+			widgetName_.append("###LuaAllocator");
+			if (ImGui::TreeNode(widgetName_.data()))
+			{
+				guiAllocator(nctl::theLuaAllocator());
+				ImGui::TreePop();
+			}
+		#endif
+		}
+		else
+			ImGui::Text("The Lua allocator is the default one");
+	#endif
+	}
+
 #endif
 }
 

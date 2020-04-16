@@ -152,8 +152,7 @@ int LuaMeshSprite::newObject(lua_State *L)
 	const float x = LuaUtils::retrieve<float>(L, -2);
 	const float y = LuaUtils::retrieve<float>(L, -1);
 
-	MeshSprite *sprite = new MeshSprite(parent, texture, x, y);
-	LuaClassTracker<MeshSprite>::wrapTrackedUserData(L, sprite);
+	LuaClassTracker<MeshSprite>::newObject(L, parent, texture, x, y);
 
 	return 1;
 }

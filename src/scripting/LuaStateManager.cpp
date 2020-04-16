@@ -43,6 +43,12 @@
 #include <cstring> // for memchr()
 #include "IFile.h"
 
+#include <ncine/config.h>
+#if NCINE_WITH_ALLOCATORS
+	#include <nctl/AllocManager.h>
+	#include <nctl/IAllocator.h>
+#endif
+
 #ifdef WITH_TRACY
 	#include "TracyLua.hpp"
 #endif
@@ -303,11 +309,21 @@ void *LuaStateManager::luaAllocator(void *ud, void *ptr, size_t osize, size_t ns
 {
 	if (nsize == 0)
 	{
+#if !NCINE_WITH_ALLOCATORS
 		free(ptr);
+#else
+		nctl::theLuaAllocator().deallocate(ptr);
+#endif
 		return nullptr;
 	}
 	else
+	{
+#if !NCINE_WITH_ALLOCATORS
 		return realloc(ptr, nsize);
+#else
+		return nctl::theLuaAllocator().reallocate(ptr, nsize);
+#endif
+	}
 }
 
 void *LuaStateManager::luaAllocatorWithStatistics(void *ud, void *ptr, size_t osize, size_t nsize)
@@ -315,13 +331,21 @@ void *LuaStateManager::luaAllocatorWithStatistics(void *ud, void *ptr, size_t os
 	if (nsize == 0)
 	{
 		LuaStatistics::freeMemory(osize);
+#if !NCINE_WITH_ALLOCATORS
 		free(ptr);
+#else
+		nctl::theLuaAllocator().deallocate(ptr);
+#endif
 		return nullptr;
 	}
 	else
 	{
-		LuaStatistics::allocMemory(nsize - osize);
+		LuaStatistics::allocMemory(ptr != nullptr ? (nsize - osize) : nsize);
+#if !NCINE_WITH_ALLOCATORS
 		return realloc(ptr, nsize);
+#else
+		return nctl::theLuaAllocator().reallocate(ptr, nsize);
+#endif
 	}
 }
 

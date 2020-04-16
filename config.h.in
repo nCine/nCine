@@ -18,6 +18,8 @@
 
 #cmakedefine01 NCINE_WITH_LUA
 
+#cmakedefine01 NCINE_WITH_ALLOCATORS
+
 #cmakedefine01 NCINE_WITH_IMGUI
 
 #cmakedefine01 NCINE_WITH_NUKLEAR

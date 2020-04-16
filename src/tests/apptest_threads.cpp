@@ -8,7 +8,7 @@ namespace {
 
 const int NumThreads = 2;
 const int NumFloats = 100000000;
-float *globalArray = nullptr;
+nctl::UniquePtr<float[]> globalArray;
 
 void threadFunction(void *arg)
 {
@@ -35,9 +35,9 @@ void threadFunction(void *arg)
 
 }
 
-nc::IAppEventHandler *createAppEventHandler()
+nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 {
-	return new MyEventHandler;
+	return nctl::makeUnique<MyEventHandler>();
 }
 
 void MyEventHandler::onInit()
@@ -47,7 +47,7 @@ void MyEventHandler::onInit()
 	nc::Thread threads[NumThreads];
 	int threadNums[NumThreads];
 
-	globalArray = new float[NumFloats];
+	globalArray = nctl::makeUnique<float[]>(NumFloats);
 
 	nc::TimeStamp startTime;
 	for (int i = 0; i < NumThreads; i++)
@@ -61,7 +61,7 @@ void MyEventHandler::onInit()
 
 	LOGI_X("APPTEST_THREADS: total time %fms", startTime.millisecondsSince());
 
-	delete[] globalArray;
+	globalArray.reset(nullptr);
 }
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)

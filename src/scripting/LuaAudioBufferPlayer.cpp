@@ -46,8 +46,7 @@ int LuaAudioBufferPlayer::newObject(lua_State *L)
 {
 	AudioBuffer *audioBuffer = LuaClassWrapper<AudioBuffer>::unwrapUserData(L, -1);
 
-	AudioBufferPlayer *audioBufferPlayer = new AudioBufferPlayer(audioBuffer);
-	LuaClassTracker<AudioBufferPlayer>::wrapTrackedUserData(L, audioBufferPlayer);
+	LuaClassTracker<AudioBufferPlayer>::newObject(L, audioBuffer);
 
 	return 1;
 }

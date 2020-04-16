@@ -11,18 +11,6 @@ namespace ncine {
 
 namespace {
 
-	void *nuklearAlloc(nk_handle usr, void *old, nk_size size)
-	{
-		unsigned char *ptr = new unsigned char[size];
-		return reinterpret_cast<void *>(ptr);
-	}
-
-	void nuklearFree(nk_handle usr, void *old)
-	{
-		unsigned char *ptr = reinterpret_cast<unsigned char *>(old);
-		delete[] ptr;
-	}
-
 	static const int MaxClipboardLength = 256;
 	static char clipboard[MaxClipboardLength];
 
@@ -58,8 +46,7 @@ unsigned int NuklearAndroidInput::pointerCount_ = 0;
 
 void NuklearAndroidInput::init()
 {
-	nk_allocator allocator{ { nullptr }, nuklearAlloc, nuklearFree };
-	nk_init(&NuklearContext::ctx_, &allocator, nullptr);
+	NuklearContext::init();
 	NuklearContext::ctx_.clip.copy = clipboardCopy;
 	NuklearContext::ctx_.clip.paste = clipboardPaste;
 	NuklearContext::ctx_.clip.userdata = nk_handle_ptr(nullptr);
@@ -72,9 +59,7 @@ void NuklearAndroidInput::init()
 
 void NuklearAndroidInput::shutdown()
 {
-	nk_font_atlas_clear(&NuklearContext::atlas_);
-	nk_free(&NuklearContext::ctx_);
-	nk_buffer_free(&NuklearContext::cmds_);
+	NuklearContext::shutdown();
 }
 
 void NuklearAndroidInput::newFrame()

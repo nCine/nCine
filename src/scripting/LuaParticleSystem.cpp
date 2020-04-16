@@ -342,8 +342,7 @@ int LuaParticleSystem::newObject(lua_State *L)
 	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -2);
 	const Recti texRect = LuaRectiUtils::retrieveTable(L, -1);
 
-	ParticleSystem *particleSys = new ParticleSystem(parent, count, texture, texRect);
-	LuaClassTracker<ParticleSystem>::wrapTrackedUserData(L, particleSys);
+	LuaClassTracker<ParticleSystem>::newObject(L, parent, count, texture, texRect);
 
 	return 1;
 }

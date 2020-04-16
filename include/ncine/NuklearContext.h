@@ -21,6 +21,9 @@ namespace ncine {
 class DLL_PUBLIC NuklearContext
 {
   public:
+	static void init();
+	static void shutdown();
+
 	static struct nk_context *context();
 	static struct nk_font_atlas *atlas();
 

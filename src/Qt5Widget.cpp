@@ -14,7 +14,7 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-Qt5Widget::Qt5Widget(QWidget *parent, IAppEventHandler *(*createAppEventHandler)())
+Qt5Widget::Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)())
     : QOpenGLWidget(parent),
       application_(static_cast<PCApplication &>(theApplication())),
       createAppEventHandler_(createAppEventHandler), isInitialized_(false)

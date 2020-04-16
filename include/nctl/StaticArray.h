@@ -186,6 +186,9 @@ StaticArray<T, C>::StaticArray(StaticArray<T, C> &&other)
 template <class T, unsigned int C>
 StaticArray<T, C> &StaticArray<T, C>::operator=(const StaticArray<T, C> &other)
 {
+	if (this == &other)
+		return *this;
+
 	if (other.size_ > 0 && other.size_ >= size_)
 	{
 		copyAssignArray(array_, other.array_, size_);
@@ -204,6 +207,9 @@ StaticArray<T, C> &StaticArray<T, C>::operator=(const StaticArray<T, C> &other)
 template <class T, unsigned int C>
 StaticArray<T, C> &StaticArray<T, C>::operator=(StaticArray<T, C> &&other)
 {
+	if (this == &other)
+		return *this;
+
 	if (other.size_ > 0 && other.size_ >= size_)
 	{
 		moveAssignArray(array_, other.array_, size_);

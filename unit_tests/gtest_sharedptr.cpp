@@ -6,7 +6,7 @@ class SharedPtrTest : public ::testing::Test
 {
   public:
 	SharedPtrTest()
-	    : ptr_(new int(Value)) {}
+	    : ptr_(newObject<int>(Value)) {}
 
 	nctl::SharedPtr<int> ptr_;
 };
@@ -34,9 +34,9 @@ TEST_F(SharedPtrTest, MemberAccess)
 		int number;
 	};
 
-	nctl::SharedPtr<St> newPtr(new St);
+	nctl::SharedPtr<St> newPtr(newObject<St>());
 	newPtr->number = Value;
-	printf("Dereferencing a shared pointer to a struct: number = %d, ", newPtr->number);
+	printf("Dereferencing a shared pointer to a struct: number: %d\n", newPtr->number);
 
 	ASSERT_EQ(newPtr->number, Value);
 }
@@ -44,7 +44,7 @@ TEST_F(SharedPtrTest, MemberAccess)
 TEST_F(SharedPtrTest, Reset)
 {
 	const int newValue = 3;
-	int *raw = new int(newValue);
+	int *raw = newObject<int>(newValue);
 	int const *const oldRaw = raw;
 	printPointer("Creating a raw pointer to int, ", raw);
 
@@ -236,7 +236,7 @@ TEST(SharedPtrDeathTest, MakeSharedReset)
 {
 	const int newValue = 3;
 	auto newPtr = nctl::makeShared<int>(newValue);
-	ASSERT_DEATH(newPtr.reset(new int(0)), "");
+	ASSERT_DEATH(newPtr.reset(newObject<int>(0)), "");
 }
 
 TEST(SharedPtrDeathTest, MakeSharedResetNull)
@@ -244,6 +244,36 @@ TEST(SharedPtrDeathTest, MakeSharedResetNull)
 	const int newValue = 3;
 	auto newPtr = nctl::makeShared<int>(newValue);
 	ASSERT_DEATH(newPtr.reset(nullptr), "");
+}
+#endif
+
+#if NCINE_WITH_ALLOCATORS
+namespace {
+
+	const size_t BufferSize = 128;
+	uint8_t buffer[BufferSize];
+	nctl::StackAllocator stackAllocator(BufferSize, &buffer);
+	nctl::FreeListAllocator freelistAllocator(BufferSize, &buffer);
+
+}
+
+TEST_F(SharedPtrTest, ConstructWithAllocator)
+{
+	int *newValue = freelistAllocator.newObject<int>(Value);
+	auto newPtr = nctl::SharedPtr<int>(newValue, freelistAllocator);
+	printPointer("Creating a shared pointer with a custom allocator, ", newPtr);
+
+	ASSERT_EQ(*newPtr, Value);
+	ASSERT_EQ(newPtr.useCount(), 1);
+}
+
+TEST_F(SharedPtrTest, AllocateShared)
+{
+	auto newPtr = nctl::allocateShared<int>(stackAllocator, Value);
+	printPointer("Creating a shared pointer with `allocateShared()`, ", newPtr);
+
+	ASSERT_EQ(*newPtr, Value);
+	ASSERT_EQ(newPtr.useCount(), 1);
 }
 #endif
 

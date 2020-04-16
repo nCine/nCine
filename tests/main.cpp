@@ -24,7 +24,7 @@ class IAppEventHandler;
 
 }
 
-ncine::IAppEventHandler *createAppEventHandler();
+nctl::UniquePtr<ncine::IAppEventHandler> createAppEventHandler();
 
 #if defined(_WIN32) && !defined(WITH_QT5)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)

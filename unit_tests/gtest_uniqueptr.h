@@ -5,7 +5,52 @@
 #include <nctl/SharedPtr.h>
 #include "gtest/gtest.h"
 
+#if NCINE_WITH_ALLOCATORS
+	#include <nctl/StackAllocator.h>
+	#include <nctl/FreeListAllocator.h>
+#endif
+
 namespace {
+
+template <class T, typename... Args>
+inline T *newObject(Args &&... args)
+{
+#if !NCINE_WITH_ALLOCATORS
+	return new T(nctl::forward<Args>(args)...);
+#else
+	return nctl::theDefaultAllocator().newObject<T>(nctl::forward<Args>(args)...);
+#endif
+}
+
+template <class T>
+inline void deleteObject(T *ptr)
+{
+#if !NCINE_WITH_ALLOCATORS
+	delete ptr;
+#else
+	nctl::theDefaultAllocator().deleteObject<T>(ptr);
+#endif
+}
+
+template <class T>
+inline T *newArray(size_t numElements)
+{
+#if !NCINE_WITH_ALLOCATORS
+	return new T[numElements];
+#else
+	return nctl::theDefaultAllocator().newArray<T>(numElements);
+#endif
+}
+
+template <class T>
+inline void deleteArray(T *ptr)
+{
+#if !NCINE_WITH_ALLOCATORS
+	delete[] ptr;
+#else
+	nctl::theDefaultAllocator().deleteArray<T>(ptr);
+#endif
+}
 
 const int Value = 5;
 const unsigned int Size = 10;

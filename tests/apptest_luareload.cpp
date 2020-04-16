@@ -17,9 +17,9 @@ const char *ReloadScriptFile = "reload.lua";
 
 }
 
-nc::IAppEventHandler *createAppEventHandler()
+nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 {
-	return new MyEventHandler;
+	return nctl::makeUnique<MyEventHandler>();
 }
 
 MyEventHandler::MyEventHandler()

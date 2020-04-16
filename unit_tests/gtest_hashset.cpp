@@ -223,6 +223,16 @@ TEST_F(HashSetTest, MoveAssignmentOperator)
 	ASSERT_EQ(calcSize(newHashset), Size);
 }
 
+TEST_F(HashSetTest, SelfAssignment)
+{
+	printf("Assigning the hashset to itself with the assignment operator\n");
+	hashset_ = hashset_;
+	printHashSet(hashset_);
+
+	ASSERT_EQ(hashset_.size(), Size);
+	ASSERT_EQ(calcSize(hashset_), Size);
+}
+
 TEST_F(HashSetTest, Contains)
 {
 	const int key = 1;

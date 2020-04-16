@@ -83,6 +83,12 @@ struct addRValueReference : decltype(detail::tryAddRValueReference<T>(0))
 template <class T>
 typename addRValueReference<T>::type declVal();
 
+template <class T>
+struct isEmpty
+{
+	static constexpr bool value = __is_empty(T);
+};
+
 template <class T, typename = void>
 struct isClass
 {

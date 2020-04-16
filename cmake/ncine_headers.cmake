@@ -55,6 +55,7 @@ set(NCTL_HEADERS
 	${NCINE_ROOT}/include/nctl/iterator.h
 	${NCINE_ROOT}/include/nctl/type_traits.h
 	${NCINE_ROOT}/include/nctl/utility.h
+	${NCINE_ROOT}/include/nctl/PointerMath.h
 	${NCINE_ROOT}/include/nctl/Array.h
 	${NCINE_ROOT}/include/nctl/ArrayIterator.h
 	${NCINE_ROOT}/include/nctl/StaticArray.h

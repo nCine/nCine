@@ -43,9 +43,9 @@ const char *BlendingPresets[] = { "Disabled", "Alpha", "Pre-multiplied Alpha", "
 
 }
 
-nc::IAppEventHandler *createAppEventHandler()
+nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 {
-	return new MyEventHandler;
+	return nctl::makeUnique<MyEventHandler>();
 }
 
 MyEventHandler::MyEventHandler()

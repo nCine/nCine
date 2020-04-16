@@ -62,8 +62,10 @@ int LuaFont::newObject(lua_State *L)
 	const char *fntFilename = LuaUtils::retrieve<const char *>(L, -2);
 	const char *texFilename = LuaUtils::retrieve<const char *>(L, -1);
 
-	Font *font = (*texFilename == '\n') ? new Font(fntFilename, texFilename) : new Font(fntFilename);
-	LuaClassTracker<Font>::wrapTrackedUserData(L, font);
+	if (*texFilename == '\n')
+		LuaClassTracker<Font>::newObject(L, fntFilename, texFilename);
+	else
+		LuaClassTracker<Font>::newObject(L, fntFilename);
 
 	return 1;
 }

@@ -25,9 +25,9 @@ class DLL_PUBLIC Qt5Widget : public QOpenGLWidget
 	Q_OBJECT
 
   public:
-	Qt5Widget(IAppEventHandler *(*createAppEventHandler)())
+	Qt5Widget(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)())
 	    : Qt5Widget(nullptr, createAppEventHandler) {}
-	Qt5Widget(QWidget *parent, IAppEventHandler *(*createAppEventHandler)());
+	Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)());
 	~Qt5Widget();
 
 	IAppEventHandler &appEventHandler();
@@ -37,7 +37,7 @@ class DLL_PUBLIC Qt5Widget : public QOpenGLWidget
 
   private:
 	PCApplication &application_;
-	IAppEventHandler *(*createAppEventHandler_)();
+	nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler_)();
 	bool isInitialized_;
 
 	void initializeGL() override;

@@ -39,8 +39,13 @@ if(Threads_FOUND)
 		gbench_bighashmaplist
 		gbench_sparseset
 		gbench_std_rand gbench_random
-		gbench_matrix4x4f
-	)
+		gbench_matrix4x4f)
+
+	if(NCINE_WITH_ALLOCATORS)
+		list(APPEND BENCHMARKS
+			gbench_fixed_allocations gbench_random_allocations
+			gbench_array_allocators)
+	endif()
 endif()
 
 foreach(BENCHMARK ${BENCHMARKS})

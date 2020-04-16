@@ -53,8 +53,7 @@ int LuaAudioBuffer::newObject(lua_State *L)
 {
 	const char *filename = LuaUtils::retrieve<const char *>(L, -1);
 
-	AudioBuffer *audioBuffer = new AudioBuffer(filename);
-	LuaClassTracker<AudioBuffer>::wrapTrackedUserData(L, audioBuffer);
+	LuaClassTracker<AudioBuffer>::newObject(L, filename);
 
 	return 1;
 }

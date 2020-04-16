@@ -284,9 +284,20 @@ TEST_F(HashMapListTest, MoveAssignmentOperator)
 	printHashMap(newHashmap);
 
 	ASSERT_EQ(hashmap_.bucketAmount(), 0);
+	ASSERT_EQ(hashmap_.size(), 0);
 	ASSERT_EQ(newHashmap.bucketAmount(), Capacity);
 	ASSERT_EQ(newHashmap.size(), Size);
 	ASSERT_EQ(calcSize(newHashmap), Size);
+}
+
+TEST_F(HashMapListTest, SelfAssignment)
+{
+	printf("Assigning the hashmap to itself with the assignment operator\n");
+	hashmap_ = hashmap_;
+	printHashMap(hashmap_);
+
+	ASSERT_EQ(hashmap_.size(), Size);
+	ASSERT_EQ(calcSize(hashmap_), Size);
 }
 
 TEST_F(HashMapListTest, Contains)

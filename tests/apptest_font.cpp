@@ -21,9 +21,9 @@ const char *Font3FntFile = "Roboto-Regular32_256.fnt";
 
 }
 
-nc::IAppEventHandler *createAppEventHandler()
+nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 {
-	return new MyEventHandler;
+	return nctl::makeUnique<MyEventHandler>();
 }
 
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)

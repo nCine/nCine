@@ -46,8 +46,7 @@ int LuaAudioStreamPlayer::newObject(lua_State *L)
 {
 	const char *filename = LuaUtils::retrieve<const char *>(L, -1);
 
-	AudioStreamPlayer *audioStreamPlayer = new AudioStreamPlayer(filename);
-	LuaClassTracker<AudioStreamPlayer>::wrapTrackedUserData(L, audioStreamPlayer);
+	LuaClassTracker<AudioStreamPlayer>::newObject(L, filename);
 
 	return 1;
 }

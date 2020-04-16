@@ -5,6 +5,12 @@
 #include "ReverseIterator.h"
 #include "utility.h"
 
+#include <ncine/config.h>
+#if NCINE_WITH_ALLOCATORS
+	#include "AllocManager.h"
+	#include "IAllocator.h"
+#endif
+
 namespace nctl {
 
 template <class T> class List;
@@ -47,6 +53,9 @@ class ListNode : public BaseListNode
 	    : BaseListNode(previous, next), data_(nctl::forward<Args>(args)...) {}
 
 	friend class List<T>;
+#if NCINE_WITH_ALLOCATORS
+	friend struct detail::allocHelpers<false>;
+#endif
 };
 
 /// A double linked list based on templates
@@ -63,20 +72,33 @@ class List
 	/// Reverse constant iterator type
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
+#if !NCINE_WITH_ALLOCATORS
 	List()
 	    : size_(0) {}
+#else
+	List()
+	    : List(theDefaultAllocator()) {}
+
+	explicit List(IAllocator &alloc)
+	    : alloc_(alloc), size_(0) {}
+#endif
 	~List() { clear(); }
 
 	/// Copy constructor
 	List(const List &other);
 	/// Move constructor
 	List(List &&other);
-	/// Copy-and-swap assignment operator
-	List &operator=(List other);
+	/// Assignment operator
+	List &operator=(const List &other);
+	/// Move assignment operator
+	List &operator=(List &&other);
 
 	/// Swaps two lists without copying their data
-	void swap(List &first, List &second)
+	inline void swap(List &first, List &second)
 	{
+#if NCINE_WITH_ALLOCATORS
+		nctl::swap(first.alloc_, second.alloc_);
+#endif
 		nctl::swap(first.size_, second.size_);
 		nctl::swap(first.sentinel_.previous_, second.sentinel_.previous_);
 		nctl::swap(first.sentinel_.next_, second.sentinel_.next_);
@@ -170,6 +192,10 @@ class List
 	void splice(Iterator position, List &source, Iterator first, Iterator last);
 
   private:
+#if NCINE_WITH_ALLOCATORS
+	/// The custom memory allocator for the list
+	IAllocator &alloc_;
+#endif
 	/// Number of elements in the list
 	unsigned int size_;
 	/// The sentinel node
@@ -195,7 +221,11 @@ class List
 
 template <class T>
 List<T>::List(const List<T> &other)
-    : size_(0)
+    :
+#if NCINE_WITH_ALLOCATORS
+      alloc_(other.alloc_),
+#endif
+      size_(0)
 {
 	for (List<T>::ConstIterator i = other.begin(); i != other.end(); ++i)
 		pushBack(*i);
@@ -203,7 +233,11 @@ List<T>::List(const List<T> &other)
 
 template <class T>
 List<T>::List(List<T> &&other)
-    : size_(other.size_)
+    :
+#if NCINE_WITH_ALLOCATORS
+      alloc_(other.alloc_),
+#endif
+      size_(other.size_)
 {
 	if (other.size_ > 0)
 	{
@@ -218,10 +252,26 @@ List<T>::List(List<T> &&other)
 	}
 }
 
-/*! \note The parameter should be passed by value for the idiom to work. */
 template <class T>
-List<T> &List<T>::operator=(List<T> other)
+List<T> &List<T>::operator=(const List<T> &other)
 {
+	if (this != &other)
+	{
+		clear();
+		for (List<T>::ConstIterator i = other.begin(); i != other.end(); ++i)
+			pushBack(*i);
+	}
+
+	return *this;
+}
+
+template <class T>
+List<T> &List<T>::operator=(List<T> &&other)
+{
+	if (this == &other)
+		return *this;
+
+	clear();
 	if (size_ == 0)
 	{
 		sentinel_.previous_ = &other.sentinel_;
@@ -252,7 +302,11 @@ void List<T>::clear()
 	{
 		nextNode = nextNode->next_;
 		// Cast is needed to prevent memory leaking
+#if !NCINE_WITH_ALLOCATORS
 		delete static_cast<ListNode<T> *>(sentinel_.next_);
+#else
+		alloc_.deleteObject(static_cast<ListNode<T> *>(sentinel_.next_));
+#endif
 		sentinel_.next_ = nextNode;
 	}
 
@@ -443,7 +497,11 @@ void List<T>::splice(Iterator position, List &source, Iterator first, Iterator l
 template <class T>
 ListNode<T> *List<T>::insertAfterNode(ListNode<T> *node, const T &element)
 {
+#if !NCINE_WITH_ALLOCATORS
 	ListNode<T> *newNode = new ListNode<T>(node, node->next_, element);
+#else
+	ListNode<T> *newNode = alloc_.newObject<ListNode<T>>(node, node->next_, element);
+#endif
 
 	// it also works if `node->next_` is the sentinel
 	node->next_->previous_ = newNode;
@@ -456,7 +514,11 @@ ListNode<T> *List<T>::insertAfterNode(ListNode<T> *node, const T &element)
 template <class T>
 ListNode<T> *List<T>::insertAfterNode(ListNode<T> *node, T &&element)
 {
+#if !NCINE_WITH_ALLOCATORS
 	ListNode<T> *newNode = new ListNode<T>(node, node->next_, nctl::move(element));
+#else
+	ListNode<T> *newNode = alloc_.newObject<ListNode<T>>(node, node->next_, nctl::move(element));
+#endif
 
 	// it also works if `node->next_` is the sentinel
 	node->next_->previous_ = newNode;
@@ -470,7 +532,11 @@ template <class T>
 template <typename... Args>
 ListNode<T> *List<T>::emplaceAfterNode(ListNode<T> *node, Args &&... args)
 {
+#if !NCINE_WITH_ALLOCATORS
 	ListNode<T> *newNode = new ListNode<T>(node, node->next_, nctl::forward<Args>(args)...);
+#else
+	ListNode<T> *newNode = alloc_.newObject<ListNode<T>>(node, node->next_, nctl::forward<Args>(args)...);
+#endif
 
 	// it also works if `node->next_` is the sentinel
 	node->next_->previous_ = newNode;
@@ -483,7 +549,11 @@ ListNode<T> *List<T>::emplaceAfterNode(ListNode<T> *node, Args &&... args)
 template <class T>
 ListNode<T> *List<T>::insertBeforeNode(ListNode<T> *node, const T &element)
 {
+#if !NCINE_WITH_ALLOCATORS
 	ListNode<T> *newNode = new ListNode<T>(node->previous_, node, element);
+#else
+	ListNode<T> *newNode = alloc_.newObject<ListNode<T>>(node->previous_, node, element);
+#endif
 
 	// it also works if `node->previous_` is the sentinel
 	node->previous_->next_ = newNode;
@@ -496,7 +566,11 @@ ListNode<T> *List<T>::insertBeforeNode(ListNode<T> *node, const T &element)
 template <class T>
 ListNode<T> *List<T>::insertBeforeNode(ListNode<T> *node, T &&element)
 {
+#if !NCINE_WITH_ALLOCATORS
 	ListNode<T> *newNode = new ListNode<T>(node->previous_, node, nctl::move(element));
+#else
+	ListNode<T> *newNode = alloc_.newObject<ListNode<T>>(node->previous_, node, nctl::move(element));
+#endif
 
 	// it also works if `node->previous_` is the sentinel
 	node->previous_->next_ = newNode;
@@ -510,7 +584,12 @@ template <class T>
 template <typename... Args>
 ListNode<T> *List<T>::emplaceBeforeNode(ListNode<T> *node, Args &&... args)
 {
+#if !NCINE_WITH_ALLOCATORS
 	ListNode<T> *newNode = new ListNode<T>(node->previous_, node, nctl::forward<Args>(args)...);
+#else
+	ListNode<T> *newNode = alloc_.newObject<ListNode<T>>(node->previous_, node, nctl::forward<Args>(args)...);
+
+#endif
 
 	// it also works if `node->previous_` is the sentinel
 	node->previous_->next_ = newNode;
@@ -538,7 +617,11 @@ ListNode<T> *List<T>::removeRange(ListNode<T> *firstNode, ListNode<T> *lastNode)
 	{
 		next = current->next_;
 		// Cast is needed to prevent memory leaking
+#if !NCINE_WITH_ALLOCATORS
 		delete static_cast<ListNode<T> *>(current);
+#else
+		alloc_.deleteObject(static_cast<ListNode<T> *>(current));
+#endif
 		size_--;
 		current = next;
 	}
