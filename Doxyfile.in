@@ -1,4 +1,4 @@
-# Doxyfile 1.8.16
+# Doxyfile 1.8.18
 
 #---------------------------------------------------------------------------
 # Project related configuration options
@@ -6,7 +6,7 @@
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = @CMAKE_PROJECT_NAME@
 PROJECT_NUMBER         = @NCINE_VERSION@
-PROJECT_BRIEF          = "A multi-platform 2d game engine"
+PROJECT_BRIEF          = "A cross-platform 2D game engine"
 PROJECT_LOGO           = @DOXYGEN_PROJECT_LOGO@
 OUTPUT_DIRECTORY       = @DOXYGEN_OUTPUT_DIR@
 CREATE_SUBDIRS         = NO
@@ -40,7 +40,6 @@ INHERIT_DOCS           = YES
 SEPARATE_MEMBER_PAGES  = NO
 TAB_SIZE               = 8
 ALIASES                =
-TCL_SUBST              =
 OPTIMIZE_OUTPUT_FOR_C  = NO
 OPTIMIZE_OUTPUT_JAVA   = NO
 OPTIMIZE_FOR_FORTRAN   = NO
@@ -228,8 +227,10 @@ GENERATE_TREEVIEW      = NO
 ENUM_VALUES_PER_LINE   = 4
 TREEVIEW_WIDTH         = 250
 EXT_LINKS_IN_WINDOW    = NO
+HTML_FORMULA_FORMAT    = png
 FORMULA_FONTSIZE       = 10
 FORMULA_TRANSPARENT    = YES
+FORMULA_MACROFILE      =
 USE_MATHJAX            = NO
 MATHJAX_FORMAT         = HTML-CSS
 MATHJAX_RELPATH        = http://www.mathjax.org/mathjax

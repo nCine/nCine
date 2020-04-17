@@ -4,6 +4,11 @@
 #include "IInputManager.h"
 #include "InputEvents.h"
 
+#include "DrawableNode.h"
+#include "MeshSprite.h"
+#include "ParticleSystem.h"
+#include "TextNode.h"
+
 #ifdef WITH_AUDIO
 	#include "IAudioPlayer.h"
 #endif
@@ -23,7 +28,6 @@ namespace ncine {
 
 namespace {
 
-#ifdef WITH_RENDERDOC
 	int inputTextCallback(ImGuiInputTextCallbackData *data)
 	{
 		nctl::String *string = reinterpret_cast<nctl::String *>(data->UserData);
@@ -36,7 +40,20 @@ namespace {
 		}
 		return 0;
 	}
-#endif
+
+	const char *nodeTypeToString(Object::ObjectType type)
+	{
+		switch (type)
+		{
+			case Object::ObjectType::SCENENODE: return "SceneNode";
+			case Object::ObjectType::SPRITE: return "Sprite";
+			case Object::ObjectType::MESH_SPRITE: return "MeshSprite";
+			case Object::ObjectType::ANIMATED_SPRITE: return "AnimatedSprite";
+			case Object::ObjectType::PARTICLE_SYSTEM: return "ParticleSystem";
+			case Object::ObjectType::TEXTNODE: return "TextNode";
+			default: return "N/A";
+		}
+	}
 
 }
 
@@ -48,7 +65,7 @@ ImGuiDebugOverlay::ImGuiDebugOverlay(float profileTextUpdateTime)
     : IDebugOverlay(profileTextUpdateTime), disableAppInputEvents_(false), appInputHandler_(nullptr),
       lockOverlayPositions_(true), showTopLeftOverlay_(true), showTopRightOverlay_(true),
       showBottomLeftOverlay_(true), showBottomRightOverlay_(true), numValues_(128),
-      maxFrameTime_(0.0f), maxUpdateVisitDraw_(0.0f), index_(0),
+      maxFrameTime_(0.0f), maxUpdateVisitDraw_(0.0f), index_(0), widgetName_(256),
       plotAdditionalFrameValues_(false), plotOverlayValues_(false), comboVideoModes_(4096)
 #ifdef WITH_RENDERDOC
       ,
@@ -251,6 +268,7 @@ void ImGuiDebugOverlay::guiWindow()
 		guiAudioPlayers();
 		guiInputState();
 		guiRenderDoc();
+		guiNodeInspector();
 	}
 	ImGui::End();
 }
@@ -713,9 +731,8 @@ void ImGuiDebugOverlay::guiAudioPlayers()
 		for (unsigned int i = 0; i < numPlayers; i++)
 		{
 			const IAudioPlayer *player = theServiceLocator().audioDevice().player(i);
-			nctl::String widgetName;
-			widgetName.format("Player %d", i);
-			if (ImGui::TreeNode(widgetName.data()))
+			widgetName_.format("Player %d", i);
+			if (ImGui::TreeNode(widgetName_.data()))
 			{
 				ImGui::Text("Source Id: %u", player->sourceId());
 				ImGui::Text("Buffer Id: %u", player->bufferId());
@@ -787,9 +804,8 @@ void ImGuiDebugOverlay::guiInputState()
 		}
 		if (numConnectedJoysticks > 0)
 		{
-			nctl::String widgetName;
-			widgetName.format("%d Joystick(s)", numConnectedJoysticks);
-			if (ImGui::TreeNode(widgetName.data()))
+			widgetName_.format("%d Joystick(s)", numConnectedJoysticks);
+			if (ImGui::TreeNode(widgetName_.data()))
 			{
 				ImGui::Text("Joystick mappings: %u", input.numJoyMappings());
 
@@ -798,8 +814,8 @@ void ImGuiDebugOverlay::guiInputState()
 					if (input.isJoyPresent(joyId) == false)
 						continue;
 
-					widgetName.format("Joystick %d", joyId);
-					if (ImGui::TreeNode(widgetName.data()))
+					widgetName_.format("Joystick %d", joyId);
+					if (ImGui::TreeNode(widgetName_.data()))
 					{
 						ImGui::Text("Name: %s", input.joyName(joyId));
 						ImGui::Text("GUID: %s", input.joyGuid(joyId));
@@ -949,6 +965,208 @@ void ImGuiDebugOverlay::guiRenderDoc()
 			ImGui::Text("Crash handler not loaded");
 	}
 #endif
+}
+
+void ImGuiDebugOverlay::guiRescursiveChildrenNodes(SceneNode *node, unsigned int childId)
+{
+	DrawableNode *drawable = nullptr;
+	if (node->type() != Object::ObjectType::SCENENODE &&
+	    node->type() != Object::ObjectType::PARTICLE_SYSTEM)
+	{
+		drawable = reinterpret_cast<DrawableNode *>(node);
+	}
+
+	BaseSprite *baseSprite = nullptr;
+	if (node->type() == Object::ObjectType::SPRITE ||
+	    node->type() == Object::ObjectType::MESH_SPRITE ||
+	    node->type() == Object::ObjectType::ANIMATED_SPRITE)
+	{
+		baseSprite = reinterpret_cast<BaseSprite *>(node);
+	}
+
+	MeshSprite *meshSprite = nullptr;
+	if (node->type() == Object::ObjectType::MESH_SPRITE)
+		meshSprite = reinterpret_cast<MeshSprite *>(node);
+
+	ParticleSystem *particleSys = nullptr;
+	if (node->type() == Object::ObjectType::PARTICLE_SYSTEM)
+		particleSys = reinterpret_cast<ParticleSystem *>(node);
+
+	TextNode *textnode = nullptr;
+	if (node->type() == Object::ObjectType::TEXTNODE)
+		textnode = reinterpret_cast<TextNode *>(node);
+
+	widgetName_.format("#%u ", childId);
+	if (node->name().isEmpty() == false)
+		widgetName_.formatAppend("\"%s\" ", node->name().data());
+	widgetName_.formatAppend("%s", nodeTypeToString(node->type()));
+	const unsigned int numChildren = node->children().size();
+	if (numChildren > 0)
+		widgetName_.formatAppend(" (%u children)", node->children().size());
+	widgetName_.formatAppend(" - position: %.1f x %.1f", node->position().x, node->position().y);
+	if (drawable)
+		widgetName_.formatAppend(" - size: %.1f x %.1f", drawable->width(), drawable->height());
+	widgetName_.formatAppend("###0x%x", node);
+
+	if (ImGui::TreeNode(widgetName_.data()))
+	{
+		ImGui::PushID(reinterpret_cast<void *>(node));
+		Colorf nodeColor(node->color());
+		ImGui::SliderFloat2("Position", node->position().data(), 0.0f, theApplication().width());
+		if (drawable)
+		{
+			Vector2f nodeAnchorPoint = drawable->anchorPoint();
+			ImGui::SliderFloat2("Anchor", nodeAnchorPoint.data(), 0.0f, 1.0f);
+			ImGui::SameLine();
+			if (ImGui::Button("Reset##Anchor"))
+				nodeAnchorPoint = DrawableNode::AnchorCenter;
+			drawable->setAnchorPoint(nodeAnchorPoint);
+		}
+		Vector2f nodeScale = node->scale();
+		ImGui::SliderFloat2("Scale", nodeScale.data(), 0.01f, 3.0f);
+		ImGui::SameLine();
+		if (ImGui::Button("Reset##Scale"))
+			nodeScale.set(1.0f, 1.0f);
+		node->setScale(nodeScale);
+		float nodeRotation = node->rotation();
+		ImGui::SliderFloat("Rotation", &nodeRotation, 0.0f, 360.0f);
+		ImGui::SameLine();
+		if (ImGui::Button("Reset##Rotation"))
+			nodeRotation = 0.0f;
+		node->setRotation(nodeRotation);
+		ImGui::ColorEdit4("Color", nodeColor.data());
+		ImGui::SameLine();
+		if (ImGui::Button("Reset##Color"))
+			nodeColor.set(1.0f, 1.0f, 1.0f, 1.0f);
+		node->setColor(nodeColor);
+
+		if (drawable)
+		{
+			int layer = drawable->layer();
+			ImGui::PushItemWidth(100.0f);
+			ImGui::InputInt("Layer", &layer);
+			ImGui::PopItemWidth();
+			if (layer < DrawableNode::LayerBase::LOWEST)
+				layer = DrawableNode::LayerBase::LOWEST;
+			else if (layer > DrawableNode::LayerBase::HIGHEST)
+				layer = DrawableNode::LayerBase::HIGHEST;
+			drawable->setLayer(static_cast<unsigned short>(layer));
+
+			ImGui::SameLine();
+			bool isBlendingEnabled = drawable->isBlendingEnabled();
+			ImGui::Checkbox("Blending", &isBlendingEnabled);
+			drawable->setBlendingEnabled(isBlendingEnabled);
+		}
+
+		if (baseSprite)
+		{
+			ImGui::Text("Texture: \"%s\" (%d x %d)", baseSprite->texture()->name().data(),
+			            baseSprite->texture()->width(), baseSprite->texture()->height());
+
+			bool isFlippedX = baseSprite->isFlippedX();
+			ImGui::Checkbox("Flipped X", &isFlippedX);
+			baseSprite->setFlippedX(isFlippedX);
+			ImGui::SameLine();
+			bool isFlippedY = baseSprite->isFlippedY();
+			ImGui::Checkbox("Flipped Y", &isFlippedY);
+			baseSprite->setFlippedY(isFlippedY);
+
+			const Texture *tex = baseSprite->texture();
+			Recti texRect = baseSprite->texRect();
+			int minX = texRect.x;
+			int maxX = minX + texRect.w;
+			ImGui::DragIntRange2("Rect X", &minX, &maxX, 1.0f, 0, tex->width());
+
+			int minY = texRect.y;
+			int maxY = minY + texRect.h;
+			ImGui::DragIntRange2("Rect Y", &minY, &maxY, 1.0f, 0, tex->height());
+
+			texRect.x = minX;
+			texRect.w = maxX - minX;
+			texRect.y = minY;
+			texRect.h = maxY - minY;
+			const Recti oldRect = baseSprite->texRect();
+			if (oldRect.x != texRect.x || oldRect.y != texRect.y ||
+			    oldRect.w != texRect.w || oldRect.h != texRect.h)
+			{
+				baseSprite->setTexRect(texRect);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Reset##TexRect"))
+				texRect = Recti(0, 0, tex->width(), tex->height());
+		}
+
+		if (meshSprite)
+			ImGui::Text("Vertices: %u, Indices: %u", meshSprite->numVertices(), meshSprite->numIndices());
+		else if (particleSys)
+		{
+			const float aliveFraction = particleSys->numAliveParticles() / static_cast<float>(particleSys->numParticles());
+			widgetName_.format("%u / %u", particleSys->numAliveParticles(), particleSys->numParticles());
+			ImGui::ProgressBar(aliveFraction, ImVec2(0.0f, 0.0f), widgetName_.data());
+			ImGui::SameLine();
+			if (ImGui::Button("Kill All##Particles"))
+				particleSys->killParticles();
+		}
+		if (textnode)
+		{
+			nctl::String textnodeString(textnode->string().capacity());
+			textnodeString.assign(textnode->string());
+			if (ImGui::InputTextMultiline("String", textnodeString.data(), textnodeString.capacity(),
+			                              ImVec2(0.0f, 3.0f * ImGui::GetTextLineHeightWithSpacing()),
+			                              ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackResize,
+			                              inputTextCallback, &textnodeString))
+			{
+				textnode->setString(textnodeString);
+			}
+		}
+
+		bool updateEnabled = node->updateEnabled();
+		ImGui::Checkbox("Update", &updateEnabled);
+		node->setUpdateEnabled(updateEnabled);
+		ImGui::SameLine();
+		bool drawEnabled = node->drawEnabled();
+		ImGui::Checkbox("Draw", &drawEnabled);
+		node->setDrawEnabled(drawEnabled);
+		ImGui::SameLine();
+		bool deleteChildrenOnDestruction = node->deleteChildrenOnDestruction();
+		ImGui::Checkbox("Delete Children on Destruction", &deleteChildrenOnDestruction);
+		node->setDeleteChildrenOnDestruction(deleteChildrenOnDestruction);
+
+		if (ImGui::TreeNode("Absolute Measures"))
+		{
+			if (drawable)
+				ImGui::Text("Absolute Size: %.1f x %.1f", drawable->absWidth(), drawable->absHeight());
+			ImGui::Text("Absolute Position: %.1f, %.1f", node->absPosition().x, node->absPosition().y);
+			ImGui::Text("Absolute Anchor Points: %.1f, %.1f", node->absAnchorPoint().x, node->absAnchorPoint().y);
+			ImGui::Text("Absolute Scale Factors: %.1f, %.1f", node->absScale().x, node->absScale().y);
+			ImGui::Text("Absolute Rotation: %.1f", node->absRotation());
+
+			ImGui::TreePop();
+		}
+
+		if (numChildren > 0)
+		{
+			if (ImGui::TreeNode("Child Nodes"))
+			{
+				const nctl::Array<SceneNode *> &children = node->children();
+				for (unsigned int i = 0; i < children.size(); i++)
+					guiRescursiveChildrenNodes(children[i], i);
+				ImGui::TreePop();
+			}
+		}
+
+		ImGui::PopID();
+		ImGui::TreePop();
+	}
+}
+
+void ImGuiDebugOverlay::guiNodeInspector()
+{
+	if (theApplication().appConfiguration().withScenegraph)
+	{
+		if (ImGui::CollapsingHeader("Node Inspector"))
+			guiRescursiveChildrenNodes(&theApplication().rootNode(), 0);
+	}
 }
 
 void ImGuiDebugOverlay::guiTopLeft()

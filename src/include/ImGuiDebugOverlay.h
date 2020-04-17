@@ -9,6 +9,7 @@ namespace ncine {
 
 class AppConfiguration;
 class IInputEventHandler;
+class SceneNode;
 
 /// Overlay debug ImGui interface
 class ImGuiDebugOverlay : public IDebugOverlay
@@ -72,6 +73,7 @@ class ImGuiDebugOverlay : public IDebugOverlay
 	float maxFrameTime_;
 	float maxUpdateVisitDraw_;
 	unsigned int index_;
+	nctl::String widgetName_;
 	bool plotAdditionalFrameValues_;
 	bool plotOverlayValues_;
 	nctl::String comboVideoModes_;
@@ -99,6 +101,8 @@ class ImGuiDebugOverlay : public IDebugOverlay
 	void guiAudioPlayers();
 	void guiInputState();
 	void guiRenderDoc();
+	void guiRescursiveChildrenNodes(SceneNode *node, unsigned int childId);
+	void guiNodeInspector();
 
 	void guiTopLeft();
 	void guiTopRight();

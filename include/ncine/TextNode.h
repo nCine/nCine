@@ -56,6 +56,9 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	inline float fontBase() const { return font_->base() * scaleFactor_.y; }
 	/// Gets the font line height scaled by the vertical scale factor
 	inline float fontLineHeight() const { return font_->lineHeight() * scaleFactor_.y; }
+
+	/// Gets the string to render
+	inline const nctl::String &string() const { return string_; }
 	/// Sets the string to render
 	void setString(const nctl::String &string);
 

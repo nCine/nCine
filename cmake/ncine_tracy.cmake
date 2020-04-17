@@ -2,6 +2,8 @@ if(NCINE_WITH_TRACY)
 	# Download and unpack Tracy at configure time
 	configure_file(cmake/ncine_tracy_download.in tracy-download/CMakeLists.txt)
 
+	execute_process(
+		COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/tracy-src/include_only)
 	execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
 		RESULT_VARIABLE result
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tracy-download

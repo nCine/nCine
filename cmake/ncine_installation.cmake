@@ -23,7 +23,7 @@ endif()
 
 set(CPACK_PACKAGE_NAME "nCine")
 set(CPACK_PACKAGE_VENDOR "Angelo Theodorou")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A multi-platform 2D game engine")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A cross-platform 2D game engine")
 set(CPACK_PACKAGE_DESCRIPTION "nCine is a 2D game engine for Linux, Windows, macOS, Android and Emscripten")
 set(CPACK_PACKAGE_HOMEPAGE_URL "https://ncine.github.io")
 set(CPACK_PACKAGE_CONTACT "encelo@gmail.com")

@@ -1,5 +1,5 @@
 # nCine
-nCine is a multi-platform 2D game engine.  
+nCine is a cross-platform 2D game engine.  
 It is released under the MIT License, Copyright (c) 2011-2020 Angelo Theodorou.
 For additional information: https://ncine.github.io
 
@@ -19,9 +19,10 @@ For additional information: https://ncine.github.io
 
 ### Supported Platforms and Compilers
 - Windows (MSVC, MinGW-w64 on MSYS2)
-- Mac Os X (Clang)
+- macOS (Clang)
 - Linux (GCC, Clang)
 - Android (GCC, Clang)
+- Emscripten
 
 ### Development Tools
 - git
@@ -30,7 +31,7 @@ For additional information: https://ncine.github.io
 - Doxygen with GraphViz
 - Valgrind
 - Cppcheck
-- Artistic Style and Uncrustify
+- clang-format
 - Google Test and Gcovr
 - Tracy frame profiler
 - Google Benchmark

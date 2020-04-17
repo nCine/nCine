@@ -144,8 +144,10 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Gets the node local matrix
 	inline const Matrix4x4f &localMatrix() const { return localMatrix_; }
 
-	/// Sets the delete children on destruction flag
+	/// Gets the delete children on destruction flag
 	/*! If the flag is true the children are deleted upon node destruction. */
+	inline bool deleteChildrenOnDestruction() const { return shouldDeleteChildrenOnDestruction_; }
+	/// Sets the delete children on destruction flag
 	inline void setDeleteChildrenOnDestruction(bool shouldDeleteChildrenOnDestruction) { shouldDeleteChildrenOnDestruction_ = shouldDeleteChildrenOnDestruction; }
 
   protected:
