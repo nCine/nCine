@@ -114,7 +114,7 @@ TEST_F(StaticHashMapStringTest, MoveConstruction)
 	nctl::StaticStringHashMap<nctl::String, Capacity> newStrHashmap = nctl::move(strHashmap_);
 	printHashMap(newStrHashmap);
 
-	ASSERT_EQ(strHashmap_.size(), Size); // Elements are not stolen
+	ASSERT_EQ(strHashmap_.size(), 0);
 	ASSERT_EQ(newStrHashmap.capacity(), Capacity);
 	ASSERT_EQ(newStrHashmap.size(), Size);
 	ASSERT_EQ(calcSize(newStrHashmap), Size);
@@ -137,7 +137,7 @@ TEST_F(StaticHashMapStringTest, MoveAssignmentOperator)
 	newStrHashmap = nctl::move(strHashmap_);
 	printHashMap(newStrHashmap);
 
-	ASSERT_EQ(strHashmap_.size(), Size); // Elements are not stolen
+	ASSERT_EQ(strHashmap_.size(), 0);
 	ASSERT_EQ(newStrHashmap.capacity(), Capacity);
 	ASSERT_EQ(newStrHashmap.size(), Size);
 	ASSERT_EQ(calcSize(newStrHashmap), Size);

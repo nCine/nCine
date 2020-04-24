@@ -105,7 +105,7 @@ TEST_F(StaticHashSetTest, MoveConstruction)
 	HashSetTestType newHashset = nctl::move(hashset_);
 	printHashSet(newHashset);
 
-	ASSERT_EQ(hashset_.size(), Size); // Elements are not stolen
+	ASSERT_EQ(hashset_.size(), 0);
 	ASSERT_EQ(newHashset.capacity(), Capacity);
 	ASSERT_EQ(newHashset.size(), Size);
 	ASSERT_EQ(calcSize(newHashset), Size);
@@ -132,7 +132,7 @@ TEST_F(StaticHashSetTest, MoveAssignmentOperator)
 	newHashset = nctl::move(hashset_);
 	printHashSet(newHashset);
 
-	ASSERT_EQ(hashset_.size(), Size); // Elements are not stolen
+	ASSERT_EQ(hashset_.size(), 0);
 	ASSERT_EQ(newHashset.capacity(), Capacity);
 	ASSERT_EQ(newHashset.size(), Size);
 	ASSERT_EQ(calcSize(newHashset), Size);

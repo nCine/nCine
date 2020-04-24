@@ -7,6 +7,17 @@ const int KeyValueDifference = 10;
 
 using StdUnorderedMap = std::unordered_map<unsigned int, Movable>;
 
+static void BM_StdUnorderedMapCreation(benchmark::State &state)
+{
+	state.counters["Capacity"] = Capacity;
+	for (auto _ : state)
+	{
+		StdUnorderedMap map(Capacity);
+		benchmark::DoNotOptimize(map);
+	}
+}
+BENCHMARK(BM_StdUnorderedMapCreation);
+
 static void BM_BigStdUnorderedMapCopy(benchmark::State &state)
 {
 	state.counters["Capacity"] = Capacity;

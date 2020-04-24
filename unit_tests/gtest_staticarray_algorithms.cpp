@@ -404,4 +404,29 @@ TEST_F(StaticArrayAlgorithmsTest, ReverseCopy)
 		ASSERT_EQ(newArray[i], newArray.size() - 1 - i);
 }
 
+TEST_F(StaticArrayAlgorithmsTest, Remove)
+{
+	const int value = 4;
+	printf("Removing all the elements equal to %d from the array\n", value);
+	array_.erase(nctl::remove(array_.begin(), array_.end(), value));
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity - 1);
+	for (unsigned int i = 0; i < value; i++)
+		ASSERT_EQ(array_[i], i);
+	for (unsigned int i = value; i < array_.size(); i++)
+		ASSERT_EQ(array_[i], i + 1);
+}
+
+TEST_F(StaticArrayAlgorithmsTest, RemoveIf)
+{
+	printf("Removing all the elements greater than 4 from the array\n");
+	array_.erase(nctl::removeIf(array_.begin(), array_.end(), nctl::IsGreaterThan<int>(4)), array_.end());
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity / 2);
+	for (unsigned int i = 0; i < array_.size(); i++)
+		ASSERT_EQ(array_[i], i);
+}
+
 }

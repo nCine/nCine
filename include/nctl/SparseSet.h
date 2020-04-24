@@ -2,7 +2,6 @@
 #define CLASS_NCTL_SPARSESET
 
 #include <ncine/common_macros.h>
-#include "UniquePtr.h"
 #include "ReverseIterator.h"
 #include <cstring> // for memcpy()
 
@@ -27,7 +26,8 @@ class SparseSet
 	/// Reverse constant iterator type
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
-	explicit SparseSet(unsigned int capacity, unsigned int maxValue);
+	SparseSet(unsigned int capacity, unsigned int maxValue);
+	~SparseSet();
 
 	/// Copy constructor
 	SparseSet(const SparseSet &other);
@@ -103,8 +103,8 @@ class SparseSet
 	unsigned int size_;
 	unsigned int capacity_;
 	T maxValue_;
-	UniquePtr<T[]> sparse_;
-	UniquePtr<T[]> dense_;
+	T *sparse_;
+	T *dense_;
 
 	friend class SparseSetIterator<T>;
 };
@@ -168,34 +168,42 @@ SparseSet<T>::SparseSet(unsigned int capacity, unsigned int maxValue)
     : size_(0), capacity_(capacity), maxValue_(maxValue),
       sparse_(nullptr), dense_(nullptr)
 {
+	static_assert(nctl::isIntegral<T>::value, "Integral type is required");
 	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
 	FATAL_ASSERT(maxValue + 1 >= capacity);
 
-	sparse_ = makeUnique<T[]>(maxValue_ + 1);
-	dense_ = makeUnique<T[]>(capacity_);
+	sparse_ = new T[maxValue_ + 1];
+	dense_ = new T[capacity_];
+}
+
+template <class T>
+SparseSet<T>::~SparseSet()
+{
+	delete[] sparse_;
+	delete[] dense_;
 }
 
 template <class T>
 SparseSet<T>::SparseSet(const SparseSet<T> &other)
     : size_(other.size_), capacity_(other.capacity_), maxValue_(other.maxValue_)
 {
-	sparse_ = makeUnique<T[]>(maxValue_ + 1);
-	dense_ = makeUnique<T[]>(capacity_);
+	sparse_ = new T[maxValue_ + 1];
+	dense_ = new T[capacity_];
 
-	memcpy(sparse_.get(), other.sparse_.get(), maxValue_ * sizeof(T));
-	memcpy(dense_.get(), other.dense_.get(), capacity_ * sizeof(T));
+	memcpy(sparse_, other.sparse_, maxValue_ * sizeof(T));
+	memcpy(dense_, other.dense_, capacity_ * sizeof(T));
 }
 
 template <class T>
 SparseSet<T>::SparseSet(SparseSet<T> &&other)
     : size_(other.size_), capacity_(other.capacity_), maxValue_(other.maxValue_),
-      sparse_(nctl::move(other.sparse_)), dense_(nctl::move(other.dense_))
+      sparse_(other.sparse_), dense_(other.dense_)
 {
 	other.size_ = 0;
 	other.capacity_ = 0;
 	other.maxValue_ = 0;
-	other.sparse_.reset(nullptr);
-	other.dense_.reset(nullptr);
+	other.sparse_ = nullptr;
+	other.dense_ = nullptr;
 }
 
 /*! \note The parameter should be passed by value for the idiom to work. */

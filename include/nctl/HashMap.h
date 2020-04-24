@@ -2,7 +2,6 @@
 #define CLASS_NCTL_HASHMAP
 
 #include <ncine/common_macros.h>
-#include "UniquePtr.h"
 #include "HashFunctions.h"
 #include "ReverseIterator.h"
 #include <cstring> // for memcpy()
@@ -28,6 +27,7 @@ class HashMap
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
 	explicit HashMap(unsigned int capacity);
+	~HashMap();
 
 	/// Copy constructor
 	HashMap(const HashMap &other);
@@ -116,18 +116,31 @@ class HashMap
 	  public:
 		K key;
 		T value;
+
+		Node() {}
+		explicit Node(K kk)
+		    : key(kk) {}
+		Node(K kk, const T &vv)
+		    : key(kk), value(vv) {}
+		Node(K kk, T &&vv)
+		    : key(kk), value(nctl::move(vv)) {}
+		template <typename... Args>
+		Node(K kk, Args &&... args)
+		    : key(kk), value(nctl::forward<Args>(args)...) {}
 	};
 
 	unsigned int size_;
 	unsigned int capacity_;
 	/// Single allocated buffer for all the hashmap per-node data
-	UniquePtr<uint8_t[]> buffer_;
+	uint8_t *buffer_;
 	uint8_t *delta1_;
 	uint8_t *delta2_;
 	hash_t *hashes_;
-	UniquePtr<Node[]> nodes_;
+	Node *nodes_;
 	HashFunc hashFunc_;
 
+	void init();
+	void destructNodes();
 	bool findBucketIndex(const K &key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const;
 	inline bool findBucketIndex(const K &key, unsigned int &foundIndex) const;
 	unsigned int addDelta1(unsigned int bucketIndex) const;
@@ -203,60 +216,75 @@ typename HashMap<K, T, HashFunc>::ConstReverseIterator HashMap<K, T, HashFunc>::
 
 template <class K, class T, class HashFunc>
 HashMap<K, T, HashFunc>::HashMap(unsigned int capacity)
-    : size_(0), capacity_(capacity), delta1_(nullptr),
-      delta2_(nullptr), hashes_(nullptr), nodes_(nullptr)
+    : size_(0), capacity_(capacity), buffer_(nullptr),
+      delta1_(nullptr), delta2_(nullptr), hashes_(nullptr), nodes_(nullptr)
 {
 	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
 
 	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
-	buffer_ = makeUnique<uint8_t[]>(bytes);
+	buffer_ = static_cast<uint8_t *>(::operator new(bytes));
 
-	uint8_t *pointer = buffer_.get();
+	uint8_t *pointer = buffer_;
 	delta1_ = pointer;
 	pointer += sizeof(uint8_t) * capacity_;
 	delta2_ = pointer;
 	pointer += sizeof(uint8_t) * capacity_;
 	hashes_ = reinterpret_cast<hash_t *>(pointer);
 	pointer += sizeof(hash_t) * capacity_;
-	FATAL_ASSERT(pointer == buffer_.get() + bytes);
+	FATAL_ASSERT(pointer == buffer_ + bytes);
 
-	nodes_ = makeUnique<Node[]>(capacity);
+	nodes_ = static_cast<Node *>(::operator new(sizeof(Node) * capacity_));
 
-	clear();
+	init();
+}
+
+template <class K, class T, class HashFunc>
+HashMap<K, T, HashFunc>::~HashMap()
+{
+	destructNodes();
+	::operator delete(buffer_);
+	::operator delete(nodes_);
 }
 
 template <class K, class T, class HashFunc>
 HashMap<K, T, HashFunc>::HashMap(const HashMap<K, T, HashFunc> &other)
-    : size_(other.size_), capacity_(other.capacity_)
+    : size_(other.size_), capacity_(other.capacity_), buffer_(nullptr),
+      delta1_(nullptr), delta2_(nullptr), hashes_(nullptr), nodes_(nullptr)
 {
 	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
-	buffer_ = makeUnique<uint8_t[]>(bytes);
-	memcpy(buffer_.get(), other.buffer_.get(), bytes);
+	buffer_ = static_cast<uint8_t *>(::operator new(bytes));
+	memcpy(buffer_, other.buffer_, bytes);
 
-	uint8_t *pointer = buffer_.get();
+	uint8_t *pointer = buffer_;
 	delta1_ = pointer;
 	pointer += sizeof(uint8_t) * capacity_;
 	delta2_ = pointer;
 	pointer += sizeof(uint8_t) * capacity_;
 	hashes_ = reinterpret_cast<hash_t *>(pointer);
 	pointer += sizeof(hash_t) * capacity_;
-	FATAL_ASSERT(pointer == buffer_.get() + bytes);
+	FATAL_ASSERT(pointer == buffer_ + bytes);
 
-	nodes_ = makeUnique<Node[]>(capacity_);
+	nodes_ = static_cast<Node *>(::operator new(sizeof(Node) * capacity_));
+
 	for (unsigned int i = 0; i < capacity_; i++)
-		nodes_[i] = other.nodes_[i];
+	{
+		if (other.hashes_[i] != NullHash)
+			new (nodes_ + i) Node(other.nodes_[i]);
+	}
 }
 
 template <class K, class T, class HashFunc>
 HashMap<K, T, HashFunc>::HashMap(HashMap<K, T, HashFunc> &&other)
-    : size_(other.size_), capacity_(other.capacity_), buffer_(nctl::move(other.buffer_)),
-      delta1_(other.delta1_), delta2_(other.delta2_), hashes_(other.hashes_), nodes_(nctl::move(other.nodes_))
+    : size_(other.size_), capacity_(other.capacity_), buffer_(other.buffer_),
+      delta1_(other.delta1_), delta2_(other.delta2_), hashes_(other.hashes_), nodes_(other.nodes_)
 {
 	other.size_ = 0;
 	other.capacity_ = 0;
+	other.buffer_ = nullptr;
 	other.delta1_ = nullptr;
 	other.delta2_ = nullptr;
 	other.hashes_ = nullptr;
+	other.nodes_ = nullptr;
 }
 
 /*! \note The parameter should be passed by value for the idiom to work. */
@@ -489,13 +517,8 @@ bool HashMap<K, T, HashFunc>::emplace(const K &key, Args &&... args)
 template <class K, class T, class HashFunc>
 void HashMap<K, T, HashFunc>::clear()
 {
-	for (unsigned int i = 0; i < capacity_; i++)
-		delta1_[i] = 0;
-	for (unsigned int i = 0; i < capacity_; i++)
-		delta2_[i] = 0;
-	for (unsigned int i = 0; i < capacity_; i++)
-		hashes_[i] = NullHash;
-	size_ = 0;
+	destructNodes();
+	init();
 }
 
 template <class K, class T, class HashFunc>
@@ -587,6 +610,7 @@ bool HashMap<K, T, HashFunc>::remove(const K &key)
 		}
 
 		hashes_[bucketIndex] = NullHash;
+		destructObject(nodes_ + bucketIndex);
 		size_--;
 	}
 
@@ -616,6 +640,31 @@ void HashMap<K, T, HashFunc>::rehash(unsigned int count)
 	}
 
 	*this = nctl::move(hashMap);
+}
+
+template <class K, class T, class HashFunc>
+void HashMap<K, T, HashFunc>::init()
+{
+	for (unsigned int i = 0; i < capacity_; i++)
+		delta1_[i] = 0;
+	for (unsigned int i = 0; i < capacity_; i++)
+		delta2_[i] = 0;
+	for (unsigned int i = 0; i < capacity_; i++)
+		hashes_[i] = NullHash;
+}
+
+template <class K, class T, class HashFunc>
+void HashMap<K, T, HashFunc>::destructNodes()
+{
+	for (unsigned int i = 0; i < capacity_; i++)
+	{
+		if (hashes_[i] != NullHash)
+		{
+			destructObject(nodes_ + i);
+			hashes_[i] = NullHash;
+		}
+	}
+	size_ = 0;
 }
 
 template <class K, class T, class HashFunc>
@@ -744,7 +793,8 @@ T &HashMap<K, T, HashFunc>::addNode(unsigned int index, hash_t hash, const K &ke
 
 	size_++;
 	hashes_[index] = hash;
-	nodes_[index].key = key;
+	new (nodes_ + index) Node(key);
+
 	return nodes_[index].value;
 }
 
@@ -756,8 +806,7 @@ void HashMap<K, T, HashFunc>::insertNode(unsigned int index, hash_t hash, const 
 
 	size_++;
 	hashes_[index] = hash;
-	nodes_[index].key = key;
-	nodes_[index].value = value;
+	new (nodes_ + index) Node(key, value);
 }
 
 template <class K, class T, class HashFunc>
@@ -768,8 +817,7 @@ void HashMap<K, T, HashFunc>::insertNode(unsigned int index, hash_t hash, const 
 
 	size_++;
 	hashes_[index] = hash;
-	nodes_[index].key = key;
-	nodes_[index].value = nctl::move(value);
+	new (nodes_ + index) Node(key, nctl::move(value));
 }
 
 template <class K, class T, class HashFunc>
@@ -781,8 +829,7 @@ void HashMap<K, T, HashFunc>::emplaceNode(unsigned int index, hash_t hash, const
 
 	size_++;
 	hashes_[index] = hash;
-	nodes_[index].key = key;
-	new (&nodes_[index].value) T(nctl::forward<Args>(args)...);
+	new (nodes_ + index) Node(key, nctl::forward<Args>(args)...);
 }
 
 template <class T>

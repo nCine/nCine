@@ -33,9 +33,10 @@ ParticleSystem::ParticleSystem(SceneNode *parent, unsigned int count, Texture *t
 	children_.setCapacity(poolSize_);
 	for (unsigned int i = 0; i < poolSize_; i++)
 	{
-		particleArray_[i] = nctl::UniquePtr<Particle>(new Particle(nullptr, texture));
-		particleArray_[i]->setTexRect(texRect);
-		particlePool_[i] = particleArray_[i].get();
+		nctl::UniquePtr<Particle> particle = nctl::makeUnique<Particle>(nullptr, texture);
+		particle->setTexRect(texRect);
+		particlePool_.pushBack(particle.get());
+		particleArray_.pushBack(nctl::move(particle));
 	}
 }
 

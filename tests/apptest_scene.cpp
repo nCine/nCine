@@ -134,16 +134,16 @@ void MyEventHandler::onInit()
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	textures_[0] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data());
-	textures_[1] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture2File)).data());
-	textures_[2] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture3File)).data());
-	textures_[3] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture4File)).data());
+	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data()));
+	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture2File)).data()));
+	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture3File)).data()));
+	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture4File)).data()));
 
 	const float width = nc::theApplication().width();
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
-		sprites_[i] = nctl::makeUnique<nc::Sprite>(&rootNode, textures_[i % NumTextures].get(), width * 0.15f + width * 0.1f * i, 0.0f);
-		sprites_[i]->setScale(0.5f);
+		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(&rootNode, textures_[i % NumTextures].get(), width * 0.15f + width * 0.1f * i, 0.0f));
+		sprites_.back()->setScale(0.5f);
 	}
 }
 

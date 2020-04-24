@@ -25,14 +25,14 @@ ThreadPool::ThreadPool(unsigned int numThreads)
 	nctl::String threadName;
 	for (unsigned int i = 0; i < numThreads_; i++)
 	{
-		threads_[i].run(workerFunction, &threadStruct_);
+		threads_.emplaceBack(workerFunction, &threadStruct_);
 #if !defined(__EMSCRIPTEN__)
 	#if !defined(__APPLE__)
 		threadName.format("WorkerThread#%02d", i);
-		threads_[i].setName(threadName.data());
+		threads_.back().setName(threadName.data());
 	#endif
 	#if !defined(__ANDROID__)
-		threads_[i].setAffinityMask(ThreadAffinityMask(i));
+		threads_.back().setAffinityMask(ThreadAffinityMask(i));
 	#endif
 #endif
 	}

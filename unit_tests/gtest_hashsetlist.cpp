@@ -90,11 +90,43 @@ TEST_F(HashSetListTest, InsertElements)
 	ASSERT_EQ(calcSize(hashset_), Size * 2);
 }
 
+TEST_F(HashSetListTest, InsertConstElements)
+{
+	printf("Inserting const elements\n");
+	for (unsigned int i = Size; i < Size * 2; i++)
+	{
+		const int key = i;
+		hashset_.insert(key);
+	}
+
+	for (unsigned int i = 0; i < Size * 2; i++)
+		ASSERT_TRUE(hashset_.contains(i));
+
+	ASSERT_EQ(hashset_.size(), Size * 2);
+	ASSERT_EQ(calcSize(hashset_), Size * 2);
+}
+
 TEST_F(HashSetListTest, FailInsertElements)
 {
 	printf("Trying to insert elements already in the hashset\n");
 	for (unsigned int i = 0; i < Size * 2; i++)
 		hashset_.insert(i);
+
+	for (unsigned int i = 0; i < Size * 2; i++)
+		ASSERT_TRUE(hashset_.contains(i));
+
+	ASSERT_EQ(hashset_.size(), Size * 2);
+	ASSERT_EQ(calcSize(hashset_), Size * 2);
+}
+
+TEST_F(HashSetListTest, FailInsertConstElements)
+{
+	printf("Trying to insert const elements already in the hashset\n");
+	for (unsigned int i = 0; i < Size * 2; i++)
+	{
+		const int key = i;
+		hashset_.insert(key);
+	}
 
 	for (unsigned int i = 0; i < Size * 2; i++)
 		ASSERT_TRUE(hashset_.contains(i));

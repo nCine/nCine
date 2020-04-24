@@ -177,9 +177,9 @@ void MyEventHandler::onInit()
 
 	for (unsigned int i = 0; i < filenames_.size(); i++)
 	{
-		textures_[i] = nctl::makeUnique<nc::Texture>((nc::fs::absoluteJoinPath(texPath, filenames_[i])).data());
-		sprites_[i] = nctl::makeUnique<nc::Sprite>(dummy_.get(), textures_[i].get());
-		sprites_[i]->setEnabled(false);
+		textures_.pushBack(nctl::makeUnique<nc::Texture>((nc::fs::absoluteJoinPath(texPath, filenames_[i])).data()));
+		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(dummy_.get(), textures_[i].get()));
+		sprites_.back()->setEnabled(false);
 	}
 
 	sprites_[selected_]->setEnabled(true);

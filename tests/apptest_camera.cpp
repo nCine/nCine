@@ -54,10 +54,10 @@ void MyEventHandler::onInit()
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 	megaTexture_ = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", MegaTextureFile)).data());
-	textures_[0] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data());
-	textures_[1] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture2File)).data());
-	textures_[2] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture3File)).data());
-	textures_[3] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture4File)).data());
+	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data()));
+	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture2File)).data()));
+	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture3File)).data()));
+	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture4File)).data()));
 
 	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
 	                                   (prefixDataPath("fonts", FontTextureFile)).data());
@@ -73,9 +73,9 @@ void MyEventHandler::onInit()
 
 	for (unsigned int i = 0; i < NumTexts; i++)
 	{
-		texts_[i] = nctl::makeUnique<nc::TextNode>(cameraNode_.get(), font_.get());
-		texts_[i]->setScale(1.5f);
-		texts_[i]->setColor(0, 0, 255, 255);
+		texts_.pushBack(nctl::makeUnique<nc::TextNode>(cameraNode_.get(), font_.get()));
+		texts_.back()->setScale(1.5f);
+		texts_.back()->setColor(0, 0, 255, 255);
 	}
 
 	nctl::String textString(16);
@@ -102,10 +102,10 @@ void MyEventHandler::onInit()
 	{
 		const float randomX = nc::random().real(-ViewHalfWidth, ViewHalfWidth);
 		const float randomY = nc::random().real(-ViewHalfHeight, ViewHalfHeight);
-		sprites_[i] = nctl::makeUnique<nc::Sprite>(cameraNode_.get(), textures_[i % NumTextures].get(), randomX, randomY);
-		sprites_[i]->setScale(0.5f);
-		spritePos_[i].set(randomX, randomY);
-		// sprites_[i]->setLayer(i); // Fixes Z-fighting at the expense of batching
+		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(cameraNode_.get(), textures_[i % NumTextures].get(), randomX, randomY));
+		sprites_.back()->setScale(0.5f);
+		spritePos_.emplaceBack(randomX, randomY);
+		// sprites_.back()->setLayer(i); // Fixes Z-fighting at the expense of batching
 	}
 
 	withAtlas_ = false;

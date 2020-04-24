@@ -4,6 +4,16 @@
 
 const unsigned int Capacity = 1024;
 
+static void BM_BigVectorCreation(benchmark::State &state)
+{
+	for (auto _ : state)
+	{
+		std::vector<Movable> vector(state.range(0));
+		benchmark::DoNotOptimize(vector);
+	}
+}
+BENCHMARK(BM_BigVectorCreation)->Arg(Capacity / 4)->Arg(Capacity / 2)->Arg(Capacity);
+
 static void BM_BigVectorCopy(benchmark::State &state)
 {
 	std::vector<Movable> initVector(state.range(0));
@@ -101,5 +111,58 @@ static void BM_BigVectorEmplaceBack(benchmark::State &state)
 	}
 }
 BENCHMARK(BM_BigVectorEmplaceBack)->Arg(Capacity / 4)->Arg(Capacity / 2)->Arg(Capacity);
+
+static void BM_BigVectorClear(benchmark::State &state)
+{
+	std::vector<Movable> initVector(state.range(0));
+	for (unsigned int i = 0; i < state.range(0); i++)
+		initVector.push_back(Movable(Movable::Construction::INITIALIZED));
+
+	for (auto _ : state)
+	{
+		state.PauseTiming();
+		std::vector<Movable> vector(initVector);
+		state.ResumeTiming();
+
+		vector.clear();
+	}
+}
+BENCHMARK(BM_BigVectorClear)->Arg(Capacity / 4)->Arg(Capacity / 2)->Arg(Capacity);
+
+static void BM_BigVectorErase(benchmark::State &state)
+{
+	std::vector<Movable> initVector(state.range(0));
+	for (unsigned int i = 0; i < state.range(0); i++)
+		initVector.push_back(Movable(Movable::Construction::INITIALIZED));
+
+	for (auto _ : state)
+	{
+		state.PauseTiming();
+		std::vector<Movable> vector(initVector);
+		state.ResumeTiming();
+
+		for (unsigned int i = 0; i < state.range(0); i++)
+			benchmark::DoNotOptimize(vector.erase(vector.end() - 1));
+	}
+}
+BENCHMARK(BM_BigVectorErase)->Arg(Capacity / 4)->Arg(Capacity / 2)->Arg(Capacity);
+
+static void BM_BigVectorReverseErase(benchmark::State &state)
+{
+	std::vector<Movable> initVector(state.range(0));
+	for (unsigned int i = 0; i < state.range(0); i++)
+		initVector.push_back(Movable(Movable::Construction::INITIALIZED));
+
+	for (auto _ : state)
+	{
+		state.PauseTiming();
+		std::vector<Movable> vector(initVector);
+		state.ResumeTiming();
+
+		for (int i = state.range(0) - 1; i >= 0; i--)
+			benchmark::DoNotOptimize(vector.erase(vector.begin()));
+	}
+}
+BENCHMARK(BM_BigVectorReverseErase)->Arg(Capacity / 4)->Arg(Capacity / 2)->Arg(Capacity);
 
 BENCHMARK_MAIN();

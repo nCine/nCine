@@ -24,6 +24,7 @@ endif()
 
 if(Threads_FOUND)
 	list(APPEND BENCHMARKS
+		gbench_copy_int gbench_copy_trivial gbench_copy_movable
 		gbench_std_vector gbench_array
 		gbench_std_bigvector gbench_bigarray
 		gbench_std_array gbench_staticarray

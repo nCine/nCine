@@ -20,7 +20,7 @@ TEST(ArrayOperationsDeathTest, UnorderedRemoveRangeBeyondSize)
 {
 	printf("Trying to remove a range beyond size\n");
 	nctl::Array<int> array(Capacity);
-	array[0] = 0;
+	array.pushBack(0);
 
 	ASSERT_DEATH(array.unorderedRemoveRange(1, 5), "");
 }
@@ -29,7 +29,7 @@ TEST(ArrayOperationsDeathTest, UnorderedRemoveAtBeyondSize)
 {
 	printf("Trying to remove an element beyond size\n");
 	nctl::Array<int> array(Capacity);
-	array[0] = 0;
+	array.pushBack(0);
 
 	ASSERT_DEATH(array.unorderedRemoveAt(5), "");
 }
@@ -308,6 +308,36 @@ TEST_F(ArrayOperationsTest, UnorderedRemoveEmptyEndRange)
 	ASSERT_TRUE(isUnmodified(array_));
 }
 
+TEST_F(ArrayOperationsTest, RemoveNestedArray)
+{
+	struct Element
+	{
+		nctl::Array<int> a;
+	};
+	nctl::Array<Element> array;
+
+	array.pushBack(Element());
+	printf("Removing the first and only element of the array\n");
+	array.removeAt(0);
+
+	ASSERT_EQ(array.size(), 0);
+}
+
+TEST_F(ArrayOperationsTest, UnorderedRemoveNestedArray)
+{
+	struct Element
+	{
+		nctl::Array<int> a;
+	};
+	nctl::Array<Element> array;
+
+	array.pushBack(Element());
+	printf("Removing the first and only element of the array\n");
+	array.unorderedRemoveAt(0);
+
+	ASSERT_EQ(array.size(), 0);
+}
+
 TEST_F(ArrayOperationsTest, InsertValueAtFrontWithIterator)
 {
 	printf("Inserting a single value at the beginning of the array\n");
@@ -406,6 +436,41 @@ TEST_F(ArrayOperationsTest, InsertEmptyEndRangeAtBackWithIterator)
 
 	ASSERT_EQ(array_.size(), Capacity);
 	ASSERT_TRUE(isUnmodified(array_));
+}
+
+TEST_F(ArrayOperationsTest, InsertAtFrontAndExtendCapacity)
+{
+	nctl::Array<int> newArray(1);
+
+	printf("Inserting three elements at front and extend array capacity\n");
+	newArray.insertAt(0, 2);
+	newArray.insertAt(0, 1);
+	newArray.insertAt(0, 0);
+	printArray(newArray);
+
+	ASSERT_EQ(newArray.size(), 3);
+	ASSERT_EQ(newArray.capacity(), 4);
+	for (unsigned int i = 0; i < newArray.size(); i++)
+		ASSERT_EQ(newArray[i], static_cast<int>(i));
+}
+
+TEST_F(ArrayOperationsTest, InsertAtConstFrontAndExtendCapacity)
+{
+	nctl::Array<int> newArray(1);
+
+	printf("Inserting three constant elements at front and extend array capacity\n");
+	const int first = 2;
+	const int second = 1;
+	const int third = 0;
+	newArray.insertAt(0, first);
+	newArray.insertAt(0, second);
+	newArray.insertAt(0, third);
+	printArray(newArray);
+
+	ASSERT_EQ(newArray.size(), 3);
+	ASSERT_EQ(newArray.capacity(), 4);
+	for (unsigned int i = 0; i < newArray.size(); i++)
+		ASSERT_EQ(newArray[i], static_cast<int>(i));
 }
 
 }

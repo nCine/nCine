@@ -71,10 +71,10 @@ void MyEventHandler::onInit()
 	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
 	                                   (prefixDataPath("fonts", FontTextureFile)).data());
 
-	textures_[0] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data());
-	textures_[1] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture2File)).data());
-	textures_[2] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture3File)).data());
-	textures_[3] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture4File)).data());
+	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data()));
+	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture2File)).data()));
+	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture3File)).data()));
+	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture4File)).data()));
 
 	const float width = nc::theApplication().width();
 	const float height = nc::theApplication().height();
@@ -85,35 +85,35 @@ void MyEventHandler::onInit()
 		nc::Texture *texture = textures_[i % NumTextures].get();
 		const nc::Vector2f position(width / (NumSprites + 3) * (i + 2), height * 0.5f);
 
-		sprites_[i] = nctl::makeUnique<nc::Sprite>(&rootNode, texture, position);
-		sprites_[i]->setEnabled(false);
+		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(&rootNode, texture, position));
+		sprites_.back()->setEnabled(false);
 
-		meshSprites_[i] = nctl::makeUnique<nc::MeshSprite>(&rootNode, texture, position);
-		meshSprites_[i]->createVerticesFromTexels(NumTexelPoints[i % NumTextures], &TexelPoints[texelStartIndex]);
+		meshSprites_.pushBack(nctl::makeUnique<nc::MeshSprite>(&rootNode, texture, position));
+		meshSprites_.back()->createVerticesFromTexels(NumTexelPoints[i % NumTextures], &TexelPoints[texelStartIndex]);
 		texelStartIndex += NumTexelPoints[i % NumTextures];
 		if (texelStartIndex >= static_cast<int>(sizeof(TexelPoints) / sizeof(*TexelPoints)))
 			texelStartIndex = 0;
 
-		textNodes_[i] = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get());
+		textNodes_.pushBack(nctl::makeUnique<nc::TextNode>(&rootNode, font_.get()));
 		textNodeString.format("This is\nTextNode #%u", i);
-		textNodes_[i]->setString(textNodeString);
-		textNodes_[i]->setAlignment(static_cast<nc::TextNode::Alignment>(i % 3));
+		textNodes_.back()->setString(textNodeString);
+		textNodes_.back()->setAlignment(static_cast<nc::TextNode::Alignment>(i % 3));
 
-		particleSystems_[i] = nctl::makeUnique<nc::ParticleSystem>(&rootNode, 16, texture, texture->rect());
-		particleSystems_[i]->setPosition(position);
+		particleSystems_.pushBack(nctl::makeUnique<nc::ParticleSystem>(&rootNode, 16, texture, texture->rect()));
+		particleSystems_.back()->setPosition(position);
 
 		nctl::UniquePtr<nc::ColorAffector> colAffector = nctl::makeUnique<nc::ColorAffector>();
 		colAffector->addColorStep(0.0f, nc::Colorf(1.0f, 1.0f, 1.0f, 1.0f));
 		colAffector->addColorStep(1.0f, nc::Colorf(1.0f, 1.0f, 1.0f, 0.0f));
-		particleSystems_[i]->addAffector(nctl::move(colAffector));
+		particleSystems_.back()->addAffector(nctl::move(colAffector));
 		nctl::UniquePtr<nc::SizeAffector> sizeAffector = nctl::makeUnique<nc::SizeAffector>(1.0f);
-		sizeAffectors_[i] = sizeAffector.get();
-		particleSystems_[i]->addAffector(nctl::move(sizeAffector));
+		sizeAffectors_.pushBack(sizeAffector.get());
+		particleSystems_.back()->addAffector(nctl::move(sizeAffector));
 		nctl::UniquePtr<nc::RotationAffector> rotationAffector = nctl::makeUnique<nc::RotationAffector>();
 		rotationAffector->addRotationStep(0.0f, 0.0f);
 		rotationAffector->addRotationStep(1.0f, 0.0f);
-		rotationAffectors_[i] = rotationAffector.get();
-		particleSystems_[i]->addAffector(nctl::move(rotationAffector));
+		rotationAffectors_.pushBack(rotationAffector.get());
+		particleSystems_.back()->addAffector(nctl::move(rotationAffector));
 	}
 }
 

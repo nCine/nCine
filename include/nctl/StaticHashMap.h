@@ -1,8 +1,8 @@
 #ifndef CLASS_NCTL_STATICHASHMAP
 #define CLASS_NCTL_STATICHASHMAP
 
+#include <new>
 #include <ncine/common_macros.h>
-#include "UniquePtr.h"
 #include "HashFunctions.h"
 #include "ReverseIterator.h"
 
@@ -26,8 +26,9 @@ class StaticHashMap
 	/// Reverse constant iterator type
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
-	StaticHashMap()
-	    : size_(0) { clear(); }
+	inline StaticHashMap()
+	    : size_(0) { init(); }
+	inline ~StaticHashMap() { destructNodes(); }
 
 	/// Copy constructor
 	StaticHashMap(const StaticHashMap &other);
@@ -103,15 +104,29 @@ class StaticHashMap
 	  public:
 		K key;
 		T value;
+
+		Node() {}
+		explicit Node(K kk)
+		    : key(kk) {}
+		Node(K kk, const T &vv)
+		    : key(kk), value(vv) {}
+		Node(K kk, T &&vv)
+		    : key(kk), value(nctl::move(vv)) {}
+		template <typename... Args>
+		Node(K kk, Args &&... args)
+		    : key(kk), value(nctl::forward<Args>(args)...) {}
 	};
 
 	unsigned int size_;
 	uint8_t delta1_[Capacity];
 	uint8_t delta2_[Capacity];
 	hash_t hashes_[Capacity];
-	Node nodes_[Capacity];
+	uint8_t nodesBuffer_[Capacity * sizeof(Node)];
+	Node *nodes_ = reinterpret_cast<Node *>(nodesBuffer_);
 	HashFunc hashFunc_;
 
+	void init();
+	void destructNodes();
 	bool findBucketIndex(const K &key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const;
 	inline bool findBucketIndex(const K &key, unsigned int &foundIndex) const;
 	unsigned int addDelta1(unsigned int bucketIndex) const;
@@ -191,10 +206,12 @@ StaticHashMap<K, T, Capacity, HashFunc>::StaticHashMap(const StaticHashMap<K, T,
 {
 	for (unsigned int i = 0; i < Capacity; i++)
 	{
+		if (other.hashes_[i] != NullHash)
+			new (nodes_ + i) Node(other.nodes_[i]);
+
 		delta1_[i] = other.delta1_[i];
 		delta2_[i] = other.delta2_[i];
 		hashes_[i] = other.hashes_[i];
-		nodes_[i] = other.nodes_[i];
 	}
 }
 
@@ -204,25 +221,36 @@ StaticHashMap<K, T, Capacity, HashFunc>::StaticHashMap(StaticHashMap<K, T, Capac
 {
 	for (unsigned int i = 0; i < Capacity; i++)
 	{
+		if (other.hashes_[i] != NullHash)
+			new (nodes_ + i) Node(nctl::move(other.nodes_[i]));
+
 		delta1_[i] = other.delta1_[i];
 		delta2_[i] = other.delta2_[i];
 		hashes_[i] = other.hashes_[i];
-		nodes_[i] = nctl::move(other.nodes_[i]);
 	}
+	other.destructNodes();
 }
 
 template <class K, class T, unsigned int Capacity, class HashFunc>
 StaticHashMap<K, T, Capacity, HashFunc> &StaticHashMap<K, T, Capacity, HashFunc>::operator=(const StaticHashMap<K, T, Capacity, HashFunc> &other)
 {
-	size_ = other.size_;
-
 	for (unsigned int i = 0; i < Capacity; i++)
 	{
+		if (other.hashes_[i] != NullHash)
+		{
+			if (hashes_[i] != NullHash)
+				nodes_[i] = other.nodes_[i];
+			else
+				new (nodes_ + i) Node(other.nodes_[i]);
+		}
+		else if (hashes_[i] != NullHash)
+			destructObject(nodes_ + i);
+
 		delta1_[i] = other.delta1_[i];
 		delta2_[i] = other.delta2_[i];
 		hashes_[i] = other.hashes_[i];
-		nodes_[i] = other.nodes_[i];
 	}
+	size_ = other.size_;
 
 	return *this;
 }
@@ -230,15 +258,24 @@ StaticHashMap<K, T, Capacity, HashFunc> &StaticHashMap<K, T, Capacity, HashFunc>
 template <class K, class T, unsigned int Capacity, class HashFunc>
 StaticHashMap<K, T, Capacity, HashFunc> &StaticHashMap<K, T, Capacity, HashFunc>::operator=(StaticHashMap<K, T, Capacity, HashFunc> &&other)
 {
-	size_ = other.size_;
-
 	for (unsigned int i = 0; i < Capacity; i++)
 	{
+		if (other.hashes_[i] != NullHash)
+		{
+			if (hashes_[i] != NullHash)
+				nodes_[i] = nctl::move(other.nodes_[i]);
+			else
+				new (nodes_ + i) Node(nctl::move(other.nodes_[i]));
+		}
+		else if (hashes_[i] != NullHash)
+			destructObject(nodes_ + i);
+
 		delta1_[i] = other.delta1_[i];
 		delta2_[i] = other.delta2_[i];
 		hashes_[i] = other.hashes_[i];
-		nodes_[i] = nctl::move(other.nodes_[i]);
 	}
+	size_ = other.size_;
+	other.destructNodes();
 
 	return *this;
 }
@@ -465,13 +502,8 @@ bool StaticHashMap<K, T, Capacity, HashFunc>::emplace(const K &key, Args &&... a
 template <class K, class T, unsigned int Capacity, class HashFunc>
 void StaticHashMap<K, T, Capacity, HashFunc>::clear()
 {
-	for (unsigned int i = 0; i < Capacity; i++)
-		delta1_[i] = 0;
-	for (unsigned int i = 0; i < Capacity; i++)
-		delta2_[i] = 0;
-	for (unsigned int i = 0; i < Capacity; i++)
-		hashes_[i] = NullHash;
-	size_ = 0;
+	destructNodes();
+	init();
 }
 
 template <class K, class T, unsigned int Capacity, class HashFunc>
@@ -563,10 +595,36 @@ bool StaticHashMap<K, T, Capacity, HashFunc>::remove(const K &key)
 		}
 
 		hashes_[bucketIndex] = NullHash;
+		destructObject(nodes_ + bucketIndex);
 		size_--;
 	}
 
 	return found;
+}
+
+template <class K, class T, unsigned int Capacity, class HashFunc>
+void StaticHashMap<K, T, Capacity, HashFunc>::init()
+{
+	for (unsigned int i = 0; i < Capacity; i++)
+		delta1_[i] = 0;
+	for (unsigned int i = 0; i < Capacity; i++)
+		delta2_[i] = 0;
+	for (unsigned int i = 0; i < Capacity; i++)
+		hashes_[i] = NullHash;
+}
+
+template <class K, class T, unsigned int Capacity, class HashFunc>
+void StaticHashMap<K, T, Capacity, HashFunc>::destructNodes()
+{
+	for (unsigned int i = 0; i < Capacity; i++)
+	{
+		if (hashes_[i] != NullHash)
+		{
+			destructObject(nodes_ + i);
+			hashes_[i] = NullHash;
+		}
+	}
+	size_ = 0;
 }
 
 template <class K, class T, unsigned int Capacity, class HashFunc>
@@ -695,7 +753,8 @@ T &StaticHashMap<K, T, Capacity, HashFunc>::addNode(unsigned int index, hash_t h
 
 	size_++;
 	hashes_[index] = hash;
-	nodes_[index].key = key;
+	new (nodes_ + index) Node(key);
+
 	return nodes_[index].value;
 }
 
@@ -707,8 +766,7 @@ void StaticHashMap<K, T, Capacity, HashFunc>::insertNode(unsigned int index, has
 
 	size_++;
 	hashes_[index] = hash;
-	nodes_[index].key = key;
-	nodes_[index].value = value;
+	new (nodes_ + index) Node(key, value);
 }
 
 template <class K, class T, unsigned int Capacity, class HashFunc>
@@ -719,8 +777,7 @@ void StaticHashMap<K, T, Capacity, HashFunc>::insertNode(unsigned int index, has
 
 	size_++;
 	hashes_[index] = hash;
-	nodes_[index].key = key;
-	nodes_[index].value = nctl::move(value);
+	new (nodes_ + index) Node(key, nctl::move(value));
 }
 
 template <class K, class T, unsigned int Capacity, class HashFunc>
@@ -732,8 +789,7 @@ void StaticHashMap<K, T, Capacity, HashFunc>::emplaceNode(unsigned int index, ha
 
 	size_++;
 	hashes_[index] = hash;
-	nodes_[index].key = key;
-	new (&nodes_[index].value) T(nctl::forward<Args>(args)...);
+	new (nodes_ + index) Node(key, nctl::forward<Args>(args)...);
 }
 
 template <class T, unsigned int Capacity>

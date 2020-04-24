@@ -12,6 +12,7 @@ class Movable
 	static const unsigned int Size = 128;
 	enum class Construction
 	{
+		ALLOCATED,
 		INITIALIZED
 	};
 
@@ -21,8 +22,11 @@ class Movable
 	Movable(Construction mode)
 	    : size_(Size), array_(new int[Size])
 	{
-		for (unsigned int i = 0; i < size_; i++)
-			array_[i] = i;
+		if (mode == Construction::INITIALIZED)
+		{
+			for (unsigned int i = 0; i < size_; i++)
+				array_[i] = i;
+		}
 	}
 
 	Movable(const Movable &other)
@@ -68,6 +72,10 @@ class Movable
 		return *this;
 	}
 
+	inline unsigned int size() const { return size_; }
+	inline const int *data() const { return array_; }
+	inline int *data() { return array_; }
+
   private:
 	unsigned int size_;
 	int *array_;
@@ -79,6 +87,7 @@ class Movable
 	static const unsigned int Size = 128;
 	enum class Construction
 	{
+		ALLOCATED, // Added for code compatibility
 		INITIALIZED
 	};
 
@@ -108,6 +117,10 @@ class Movable
 
 		return *this;
 	}
+
+	inline unsigned int size() const { return Size; }
+	inline const int *data() const { return array_; }
+	inline int *data() { return array_; }
 
   private:
 	int array_[Size];

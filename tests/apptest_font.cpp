@@ -35,24 +35,24 @@ void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-	fonts_[0] = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", Font1FntFile)).data(),
-	                                       (prefixDataPath("fonts", Font1TextureFile)).data());
-	fonts_[1] = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", Font2FntFile)).data(),
-	                                       (prefixDataPath("fonts", Font2TextureFile)).data());
-	fonts_[2] = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", Font3FntFile)).data(),
-	                                       (prefixDataPath("fonts", Font3TextureFile)).data());
+	fonts_.pushBack(nctl::makeUnique<nc::Font>((prefixDataPath("fonts", Font1FntFile)).data(),
+	                                           (prefixDataPath("fonts", Font1TextureFile)).data()));
+	fonts_.pushBack(nctl::makeUnique<nc::Font>((prefixDataPath("fonts", Font2FntFile)).data(),
+	                                           (prefixDataPath("fonts", Font2TextureFile)).data()));
+	fonts_.pushBack(nctl::makeUnique<nc::Font>((prefixDataPath("fonts", Font3FntFile)).data(),
+	                                           (prefixDataPath("fonts", Font3TextureFile)).data()));
 
 	const char testString[] = "WAY.P.ATAV";
 	float textHeight = nc::theApplication().height() * 0.8f;
 	const float screenWidth = nc::theApplication().width();
-	texts_[0] = nctl::makeUnique<nc::TextNode>(&rootNode, fonts_[0].get());
+	texts_.pushBack(nctl::makeUnique<nc::TextNode>(&rootNode, fonts_[0].get()));
 	texts_[0]->setScale(2.0f);
 	texts_[0]->setString(testString);
 	textHeight -= texts_[0]->height() * 0.5f;
 	texts_[0]->setPosition(screenWidth * 0.5f, textHeight);
 	texts_[0]->setColor(255, 0, 0, 255);
 
-	texts_[1] = nctl::makeUnique<nc::TextNode>(&rootNode, fonts_[0].get());
+	texts_.pushBack(nctl::makeUnique<nc::TextNode>(&rootNode, fonts_[0].get()));
 	texts_[1]->setScale(2.0f);
 	texts_[1]->setString(testString);
 	textHeight -= texts_[0]->height();
@@ -60,14 +60,14 @@ void MyEventHandler::onInit()
 	texts_[1]->enableKerning(false);
 	texts_[1]->setColor(255, 0, 0, 128);
 
-	texts_[2] = nctl::makeUnique<nc::TextNode>(&rootNode, fonts_[1].get());
+	texts_.pushBack(nctl::makeUnique<nc::TextNode>(&rootNode, fonts_[1].get()));
 	texts_[2]->setScale(2.0f);
 	texts_[2]->setString(testString);
 	textHeight -= texts_[1]->height();
 	texts_[2]->setPosition(screenWidth * 0.5f, textHeight);
 	texts_[2]->setColor(0, 255, 0, 255);
 
-	texts_[3] = nctl::makeUnique<nc::TextNode>(&rootNode, fonts_[1].get());
+	texts_.pushBack(nctl::makeUnique<nc::TextNode>(&rootNode, fonts_[1].get()));
 	texts_[3]->setScale(2.0f);
 	texts_[3]->setString(testString);
 	textHeight -= texts_[2]->height();
@@ -75,14 +75,14 @@ void MyEventHandler::onInit()
 	texts_[3]->enableKerning(false);
 	texts_[3]->setColor(0, 255, 0, 128);
 
-	texts_[4] = nctl::makeUnique<nc::TextNode>(&rootNode, fonts_[2].get());
+	texts_.pushBack(nctl::makeUnique<nc::TextNode>(&rootNode, fonts_[2].get()));
 	texts_[4]->setScale(2.0f);
 	texts_[4]->setString(testString);
 	textHeight -= texts_[3]->height();
 	texts_[4]->setPosition(screenWidth * 0.5f, textHeight);
 	texts_[4]->setColor(0, 0, 255, 255);
 
-	texts_[5] = nctl::makeUnique<nc::TextNode>(&rootNode, fonts_[2].get());
+	texts_.pushBack(nctl::makeUnique<nc::TextNode>(&rootNode, fonts_[2].get()));
 	texts_[5]->setScale(2.0f);
 	texts_[5]->setString(testString);
 	textHeight -= texts_[4]->height();

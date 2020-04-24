@@ -35,10 +35,10 @@ void MyEventHandler::onInit()
 
 	megaTexture_ = nctl::makeUnique<nc::Texture>(prefixDataPath("textures", TextureFile).data());
 
-	texRects[0] = nc::Recti(0, 0, 128, 128);
-	texRects[1] = nc::Recti(128, 0, 128, 128);
-	texRects[2] = nc::Recti(0, 128, 128, 128);
-	texRects[3] = nc::Recti(128, 128, 128, 128);
+	texRects.pushBack(nc::Recti(0, 0, 128, 128));
+	texRects.pushBack(nc::Recti(128, 0, 128, 128));
+	texRects.pushBack(nc::Recti(0, 128, 128, 128));
+	texRects.pushBack(nc::Recti(128, 128, 128, 128));
 
 	dummy_ = nctl::makeUnique<nc::SceneNode>(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	dummy_->setScale(0.75f);
@@ -48,9 +48,9 @@ void MyEventHandler::onInit()
 	{
 		for (int j = static_cast<int>(-NumColSprites * 0.5f); j < static_cast<int>(NumColSprites * 0.5f); j++)
 		{
-			sprites_[index] = nctl::makeUnique<nc::Sprite>(dummy_.get(), megaTexture_.get(), i * 128.0f, j * 128.0f);
-			sprites_[index]->setTexRect(texRects[index % NumTextures]);
-			sprites_[index]->setScale(0.75f);
+			sprites_.pushBack(nctl::makeUnique<nc::Sprite>(dummy_.get(), megaTexture_.get(), i * 128.0f, j * 128.0f));
+			sprites_.back()->setTexRect(texRects[index % NumTextures]);
+			sprites_.back()->setScale(0.75f);
 			index++;
 		}
 	}

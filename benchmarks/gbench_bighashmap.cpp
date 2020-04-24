@@ -11,6 +11,17 @@ using JenkinsHashMap = nctl::HashMap<unsigned int, Movable, nctl::JenkinsHashFun
 using FNV1aHashMap = nctl::HashMap<unsigned int, Movable, nctl::FNV1aHashFunc<unsigned int>>;
 using HashMapTestType = FNV1aHashMap;
 
+static void BM_BigHashMapCreation(benchmark::State &state)
+{
+	state.counters["Capacity"] = Capacity;
+	for (auto _ : state)
+	{
+		HashMapTestType map(Capacity);
+		benchmark::DoNotOptimize(map);
+	}
+}
+BENCHMARK(BM_BigHashMapCreation);
+
 static void BM_BigHashMapCopy(benchmark::State &state)
 {
 	state.counters["Capacity"] = Capacity;

@@ -149,7 +149,7 @@ TEST_F(StaticHashMapTest, MoveConstruction)
 	HashMapTestType newHashmap = nctl::move(hashmap_);
 	printHashMap(newHashmap);
 
-	ASSERT_EQ(hashmap_.size(), Size); // Elements are not stolen
+	ASSERT_EQ(hashmap_.size(), 0);
 	ASSERT_EQ(newHashmap.capacity(), Capacity);
 	ASSERT_EQ(newHashmap.size(), Size);
 	ASSERT_EQ(calcSize(newHashmap), Size);
@@ -176,7 +176,7 @@ TEST_F(StaticHashMapTest, MoveAssignmentOperator)
 	newHashmap = nctl::move(hashmap_);
 	printHashMap(newHashmap);
 
-	ASSERT_EQ(hashmap_.size(), Size); // Elements are not stolen
+	ASSERT_EQ(hashmap_.size(), 0);
 	ASSERT_EQ(newHashmap.capacity(), Capacity);
 	ASSERT_EQ(newHashmap.size(), Size);
 	ASSERT_EQ(calcSize(newHashmap), Size);

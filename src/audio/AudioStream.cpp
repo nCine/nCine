@@ -13,7 +13,8 @@ namespace ncine {
 
 /*! Private constructor called only by `AudioStreamPlayer`. */
 AudioStream::AudioStream(const char *filename)
-    : nextAvailableBufferIndex_(0), currentBufferId_(0), frequency_(0)
+    : buffersIds_(nctl::StaticArrayMode::EXTEND_SIZE),
+      nextAvailableBufferIndex_(0), currentBufferId_(0), frequency_(0)
 {
 	ZoneScoped;
 	ZoneText(filename, strnlen(filename, nctl::String::MaxCStringLength));

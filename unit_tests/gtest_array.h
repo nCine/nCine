@@ -26,13 +26,13 @@ void initArray(nctl::Array<int> &array)
 	int value = FirstElement;
 
 	for (unsigned int i = 0; i < Capacity; i++)
-		array[i] = value++;
+		array.pushBack(value++);
 }
 
 void initArrayRandom(nctl::Array<int> &array)
 {
 	for (unsigned int i = 0; i < Capacity; i++)
-		array[i] = nc::random().integer(0, 100);
+		array.pushBack(nc::random().integer(0, 100));
 }
 
 bool isUnmodified(const nctl::Array<int> &array)

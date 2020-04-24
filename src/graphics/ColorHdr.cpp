@@ -18,25 +18,25 @@ const ColorHdr ColorHdr::Blue(0.0f, 0.0f, 1.0f);
 ///////////////////////////////////////////////////////////
 
 ColorHdr::ColorHdr()
+    : ColorHdr(1.0f, 1.0f, 1.0f)
 {
-	set(1.0f, 1.0f, 1.0f);
 }
 
 ColorHdr::ColorHdr(float red, float green, float blue)
+    : channels_(nctl::StaticArrayMode::EXTEND_SIZE)
 {
 	set(red, green, blue);
 }
 
 ColorHdr::ColorHdr(const float channels[NumChannels])
+    : channels_(nctl::StaticArrayMode::EXTEND_SIZE)
 {
 	setVec(channels);
 }
 
 ColorHdr::ColorHdr(const Colorf &color)
+    : ColorHdr(color.r(), color.g(), color.b())
 {
-	channels_[0] = color.r();
-	channels_[1] = color.g();
-	channels_[2] = color.b();
 }
 
 ///////////////////////////////////////////////////////////

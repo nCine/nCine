@@ -72,7 +72,7 @@ void MyEventHandler::onInit()
 	joyNode_ = nctl::makeUnique<nc::SceneNode>(&rootNode, appWidth * 0.5f, appHeight * 0.65f);
 	joyNode_->setScale(1.33f);
 	for (unsigned int i = 0; i < NumSprites; i++)
-		sprites_[i] = nctl::makeUnique<nc::Sprite>(joyNode_.get(), texture_.get());
+		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(joyNode_.get(), texture_.get()));
 
 	sprites_[0]->setPosition(appWidth * -triggerPosX, 0.0f); // Left stick
 	sprites_[1]->setPosition(appWidth * triggerPosX * 0.5f, -appWidth * 0.075f); // Right stick

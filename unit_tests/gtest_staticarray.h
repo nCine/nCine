@@ -25,13 +25,13 @@ void initArray(nctl::StaticArray<int, Capacity> &array)
 	int value = FirstElement;
 
 	for (unsigned int i = 0; i < Capacity; i++)
-		array[i] = value++;
+		array.pushBack(value++);
 }
 
 void initArrayRandom(nctl::StaticArray<int, Capacity> &array)
 {
 	for (unsigned int i = 0; i < Capacity; i++)
-		array[i] = nc::random().integer(0, 100);
+		array.pushBack(nc::random().integer(0, 100));
 }
 
 bool isUnmodified(const nctl::StaticArray<int, Capacity> &array)

@@ -69,6 +69,7 @@ JoyMapping::MappedJoystick::Guid::Guid()
 JoyMapping::JoyMapping()
     : mappings_(1), inputManager_(nullptr), inputEventHandler_(nullptr)
 {
+	mappings_.emplaceBack();
 	mappings_[0].axes[0].name = AxisName::LX;
 	mappings_[0].axes[0].min = -1.0f;
 	mappings_[0].axes[0].max = 1.0f;

@@ -2,7 +2,6 @@
 #define CLASS_NCTL_HASHSET
 
 #include <ncine/common_macros.h>
-#include "UniquePtr.h"
 #include "HashFunctions.h"
 #include "ReverseIterator.h"
 #include <cstring> // for memcpy()
@@ -29,6 +28,7 @@ class HashSet
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
 	explicit HashSet(unsigned int capacity);
+	~HashSet();
 
 	/// Copy constructor
 	HashSet(const HashSet &other);
@@ -110,13 +110,15 @@ class HashSet
 	unsigned int size_;
 	unsigned int capacity_;
 	/// Single allocated buffer for all the hashset per-node data
-	UniquePtr<uint8_t[]> buffer_;
+	uint8_t *buffer_;
 	uint8_t *delta1_;
 	uint8_t *delta2_;
 	hash_t *hashes_;
-	UniquePtr<K[]> keys_;
+	K *keys_;
 	HashFunc hashFunc_;
 
+	void init();
+	void destructKeys();
 	bool findBucketIndex(const K &key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const;
 	inline bool findBucketIndex(const K &key, unsigned int &foundIndex) const;
 	unsigned int addDelta1(unsigned int bucketIndex) const;
@@ -188,60 +190,75 @@ typename HashSet<K, HashFunc>::ConstReverseIterator HashSet<K, HashFunc>::rEnd()
 
 template <class K, class HashFunc>
 HashSet<K, HashFunc>::HashSet(unsigned int capacity)
-    : size_(0), capacity_(capacity), delta1_(nullptr),
-      delta2_(nullptr), hashes_(nullptr), keys_(nullptr)
+    : size_(0), capacity_(capacity), buffer_(nullptr),
+      delta1_(nullptr), delta2_(nullptr), hashes_(nullptr), keys_(nullptr)
 {
 	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
 
 	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
-	buffer_ = makeUnique<uint8_t[]>(bytes);
+	buffer_ = static_cast<uint8_t *>(::operator new(bytes));
 
-	uint8_t *pointer = buffer_.get();
+	uint8_t *pointer = buffer_;
 	delta1_ = pointer;
 	pointer += sizeof(uint8_t) * capacity_;
 	delta2_ = pointer;
 	pointer += sizeof(uint8_t) * capacity_;
 	hashes_ = reinterpret_cast<hash_t *>(pointer);
 	pointer += sizeof(hash_t) * capacity_;
-	FATAL_ASSERT(pointer == buffer_.get() + bytes);
+	FATAL_ASSERT(pointer == buffer_ + bytes);
 
-	keys_ = makeUnique<K[]>(capacity);
+	keys_ = static_cast<K *>(::operator new(sizeof(K) * capacity_));
 
-	clear();
+	init();
+}
+
+template <class K, class HashFunc>
+HashSet<K, HashFunc>::~HashSet()
+{
+	destructKeys();
+	::operator delete(buffer_);
+	::operator delete(keys_);
 }
 
 template <class K, class HashFunc>
 HashSet<K, HashFunc>::HashSet(const HashSet<K, HashFunc> &other)
-    : size_(other.size_), capacity_(other.capacity_)
+    : size_(other.size_), capacity_(other.capacity_), buffer_(nullptr),
+      delta1_(nullptr), delta2_(nullptr), hashes_(nullptr), keys_(nullptr)
 {
 	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
-	buffer_ = makeUnique<uint8_t[]>(bytes);
-	memcpy(buffer_.get(), other.buffer_.get(), bytes);
+	buffer_ = static_cast<uint8_t *>(::operator new(bytes));
+	memcpy(buffer_, other.buffer_, bytes);
 
-	uint8_t *pointer = buffer_.get();
+	uint8_t *pointer = buffer_;
 	delta1_ = pointer;
 	pointer += sizeof(uint8_t) * capacity_;
 	delta2_ = pointer;
 	pointer += sizeof(uint8_t) * capacity_;
 	hashes_ = reinterpret_cast<hash_t *>(pointer);
 	pointer += sizeof(hash_t) * capacity_;
-	FATAL_ASSERT(pointer == buffer_.get() + bytes);
+	FATAL_ASSERT(pointer == buffer_ + bytes);
 
-	keys_ = makeUnique<K[]>(capacity_);
+	keys_ = static_cast<K *>(::operator new(sizeof(K) * capacity_));
+
 	for (unsigned int i = 0; i < capacity_; i++)
-		keys_[i] = other.keys_[i];
+	{
+		if (other.hashes_[i] != NullHash)
+			new (keys_ + i) K(other.keys_[i]);
+	}
 }
 
 template <class K, class HashFunc>
 HashSet<K, HashFunc>::HashSet(HashSet<K, HashFunc> &&other)
-    : size_(other.size_), capacity_(other.capacity_), buffer_(nctl::move(other.buffer_)),
-      delta1_(other.delta1_), delta2_(other.delta2_), hashes_(other.hashes_), keys_(nctl::move(other.keys_))
+    : size_(other.size_), capacity_(other.capacity_), buffer_(other.buffer_),
+      delta1_(other.delta1_), delta2_(other.delta2_), hashes_(other.hashes_), keys_(other.keys_)
 {
 	other.size_ = 0;
 	other.capacity_ = 0;
+	other.buffer_ = nullptr;
 	other.delta1_ = nullptr;
 	other.delta2_ = nullptr;
 	other.hashes_ = nullptr;
+	other.keys_ = nullptr;
 }
 
 /*! \note The parameter should be passed by value for the idiom to work. */
@@ -367,13 +384,8 @@ bool HashSet<K, HashFunc>::insert(K &&key)
 template <class K, class HashFunc>
 void HashSet<K, HashFunc>::clear()
 {
-	for (unsigned int i = 0; i < capacity_; i++)
-		delta1_[i] = 0;
-	for (unsigned int i = 0; i < capacity_; i++)
-		delta2_[i] = 0;
-	for (unsigned int i = 0; i < capacity_; i++)
-		hashes_[i] = NullHash;
-	size_ = 0;
+	destructKeys();
+	init();
 }
 
 template <class K, class HashFunc>
@@ -459,6 +471,7 @@ bool HashSet<K, HashFunc>::remove(const K &key)
 		}
 
 		hashes_[bucketIndex] = NullHash;
+		destructObject(keys_ + bucketIndex);
 		size_--;
 	}
 
@@ -487,6 +500,31 @@ void HashSet<K, HashFunc>::rehash(unsigned int count)
 	}
 
 	*this = nctl::move(hashSet);
+}
+
+template <class K, class HashFunc>
+void HashSet<K, HashFunc>::init()
+{
+	for (unsigned int i = 0; i < capacity_; i++)
+		delta1_[i] = 0;
+	for (unsigned int i = 0; i < capacity_; i++)
+		delta2_[i] = 0;
+	for (unsigned int i = 0; i < capacity_; i++)
+		hashes_[i] = NullHash;
+}
+
+template <class K, class HashFunc>
+void HashSet<K, HashFunc>::destructKeys()
+{
+	for (unsigned int i = 0; i < capacity_; i++)
+	{
+		if (hashes_[i] != NullHash)
+		{
+			destructObject(keys_ + i);
+			hashes_[i] = NullHash;
+		}
+	}
+	size_ = 0;
 }
 
 template <class K, class HashFunc>
@@ -615,7 +653,7 @@ void HashSet<K, HashFunc>::insertKey(unsigned int index, hash_t hash, const K &k
 
 	size_++;
 	hashes_[index] = hash;
-	keys_[index] = key;
+	new (keys_ + index) K(key);
 }
 
 template <class K, class HashFunc>
@@ -626,7 +664,7 @@ void HashSet<K, HashFunc>::insertKey(unsigned int index, hash_t hash, K &&key)
 
 	size_++;
 	hashes_[index] = hash;
-	keys_[index] = nctl::move(key);
+	new (keys_ + index) K(nctl::move(key));
 }
 
 using StringHashSet = HashSet<String, FNV1aHashFuncContainer<String>>;

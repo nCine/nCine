@@ -54,8 +54,9 @@ void RenderVaoPool::bindVao(const GLVertexFormat &vertexFormat)
 		if (vaoPool_.size() < vaoPool_.capacity())
 		{
 			GLDebug::pushGroup("Create and define VAO");
-			index = vaoPool_.size();
-			vaoPool_[index].object = nctl::makeUnique<GLVertexArrayObject>();
+			vaoPool_.emplaceBack();
+			vaoPool_.back().object = nctl::makeUnique<GLVertexArrayObject>();
+			index = vaoPool_.size() - 1;
 		}
 		else
 		{

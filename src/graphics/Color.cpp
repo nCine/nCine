@@ -19,8 +19,8 @@ const Color Color::Blue(0, 0, 255, 255);
 ///////////////////////////////////////////////////////////
 
 Color::Color()
+    : Color(255, 255, 255, 255)
 {
-	set(255, 255, 255, 255);
 }
 
 Color::Color(unsigned int red, unsigned int green, unsigned int blue)
@@ -29,16 +29,19 @@ Color::Color(unsigned int red, unsigned int green, unsigned int blue)
 }
 
 Color::Color(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha)
+    : channels_(nctl::StaticArrayMode::EXTEND_SIZE)
 {
 	set(red, green, blue, alpha);
 }
 
 Color::Color(const unsigned int channels[NumChannels])
+    : channels_(nctl::StaticArrayMode::EXTEND_SIZE)
 {
 	setVec(channels);
 }
 
 Color::Color(const Colorf &color)
+    : channels_(nctl::StaticArrayMode::EXTEND_SIZE)
 {
 	channels_[0] = static_cast<unsigned char>(color.r() * 255);
 	channels_[1] = static_cast<unsigned char>(color.g() * 255);

@@ -73,10 +73,10 @@ void MyEventHandler::onInit()
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 	megaTexture_ = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", MegaTextureFile)).data());
-	textures_[0] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data());
-	textures_[1] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture2File)).data());
-	textures_[2] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture3File)).data());
-	textures_[3] = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture4File)).data());
+	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data()));
+	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture2File)).data()));
+	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture3File)).data()));
+	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture4File)).data()));
 
 	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
 	                                   (prefixDataPath("fonts", FontTextureFile)).data());
@@ -101,16 +101,16 @@ void MyEventHandler::onInit()
 	int transpTexelStartIndex = 0;
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
-		sprites_[i] = nctl::makeUnique<nc::Sprite>(cameraNode_.get(), textures_[i % NumTextures].get(), pos.x, pos.y);
-		sprites_[i]->setScale(SpriteScale);
-		sprites_[i]->setEnabled(!meshSpritesEnabled_);
-		meshSprites_[i] = nctl::makeUnique<nc::MeshSprite>(cameraNode_.get(), textures_[i % NumTextures].get(), pos.x, pos.y);
-		meshSprites_[i]->setBlendingEnabled(false);
-		meshSprites_[i]->setScale(SpriteScale);
-		meshSprites_[i]->setEnabled(meshSpritesEnabled_);
-		transpMeshSprites_[i] = nctl::makeUnique<nc::MeshSprite>(cameraNode_.get(), textures_[i % NumTextures].get(), pos.x, pos.y);
-		transpMeshSprites_[i]->setScale(SpriteScale);
-		transpMeshSprites_[i]->setEnabled(meshSpritesEnabled_);
+		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(cameraNode_.get(), textures_[i % NumTextures].get(), pos.x, pos.y));
+		sprites_.back()->setScale(SpriteScale);
+		sprites_.back()->setEnabled(!meshSpritesEnabled_);
+		meshSprites_.pushBack(nctl::makeUnique<nc::MeshSprite>(cameraNode_.get(), textures_[i % NumTextures].get(), pos.x, pos.y));
+		meshSprites_.back()->setBlendingEnabled(false);
+		meshSprites_.back()->setScale(SpriteScale);
+		meshSprites_.back()->setEnabled(meshSpritesEnabled_);
+		transpMeshSprites_.pushBack(nctl::makeUnique<nc::MeshSprite>(cameraNode_.get(), textures_[i % NumTextures].get(), pos.x, pos.y));
+		transpMeshSprites_.back()->setScale(SpriteScale);
+		transpMeshSprites_.back()->setEnabled(meshSpritesEnabled_);
 
 		// Setting mesh vertices
 		if (i < NumTextures)

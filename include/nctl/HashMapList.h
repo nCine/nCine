@@ -132,8 +132,13 @@ class HashMapList
 	class HashBucket
 	{
 	  public:
-		HashBucket()
+		inline HashBucket()
 		    : size_(0) {}
+		inline ~HashBucket() { clear(); }
+
+		HashBucket(const HashBucket &other);
+		HashBucket &operator=(const HashBucket &other);
+
 		unsigned int size() const { return size_; }
 		void clear();
 		bool contains(hash_t hash, const K &key, T &returnedValue) const;
@@ -148,8 +153,9 @@ class HashMapList
 	  private:
 		/// Number of nodes in this bucket
 		unsigned int size_;
+		unsigned char firstNodeBuffer_[sizeof(Node)];
 		/// Separate chaining with head cell
-		Node firstNode_;
+		Node &firstNode_ = reinterpret_cast<Node &>(firstNodeBuffer_);
 		/// Separate chaining with a linked list
 		List<Node> collisionList_;
 
@@ -228,9 +234,41 @@ typename HashMapList<K, T, HashFunc>::ConstReverseIterator HashMapList<K, T, Has
 }
 
 template <class K, class T, class HashFunc>
+HashMapList<K, T, HashFunc>::HashBucket::HashBucket(const HashBucket &other)
+    : size_(other.size_), collisionList_(other.collisionList_)
+{
+	if (other.size_ > 0)
+	{
+		const Node &srcNode = other.firstNode_;
+		new (&firstNode_) Node(srcNode.hash, srcNode.key, srcNode.value);
+	}
+}
+
+template <class K, class T, class HashFunc>
+typename HashMapList<K, T, HashFunc>::HashBucket &HashMapList<K, T, HashFunc>::HashBucket::operator=(const HashBucket &other)
+{
+	if (other.size_ > 0 && size_ > 0)
+		firstNode_ = other.firstNode_;
+	else if (other.size_ > 0 && size_ == 0)
+	{
+		const Node &srcNode = other.firstNode_;
+		new (&firstNode_) Node(srcNode.hash, srcNode.key, srcNode.value);
+	}
+	else if (size_ > 0 && other.size_ == 0)
+		destructObject(&firstNode_);
+
+	collisionList_ = other.collisionList_;
+	size_ = other.size_;
+	return *this;
+}
+
+template <class K, class T, class HashFunc>
 void HashMapList<K, T, HashFunc>::HashBucket::clear()
 {
-	collisionList_.clear();
+	if (size_ > 1)
+		collisionList_.clear();
+	if (size_ > 0)
+		destructObject(&firstNode_);
 	size_ = 0;
 }
 
@@ -273,8 +311,7 @@ T &HashMapList<K, T, HashFunc>::HashBucket::findOrInsert(hash_t hash, const K &k
 	if (size_ == 0)
 	{
 		// Early-out if the bucket is empty
-		firstNode_.hash = hash;
-		firstNode_.key = key;
+		new (&firstNode_) Node(hash, key);
 		size_++;
 		return firstNode_.value;
 	}
@@ -295,9 +332,7 @@ bool HashMapList<K, T, HashFunc>::HashBucket::insert(hash_t hash, const K &key, 
 	if (size_ == 0)
 	{
 		// Early-out if the bucket is empty
-		firstNode_.hash = hash;
-		firstNode_.key = key;
-		firstNode_.value = value;
+		new (&firstNode_) Node(hash, key, value);
 		size_++;
 		return true;
 	}
@@ -318,9 +353,7 @@ bool HashMapList<K, T, HashFunc>::HashBucket::insert(hash_t hash, const K &key, 
 	if (size_ == 0)
 	{
 		// Early-out if the bucket is empty
-		firstNode_.hash = hash;
-		firstNode_.key = key;
-		firstNode_.value = nctl::move(value);
+		new (&firstNode_) Node(hash, key, nctl::move(value));
 		size_++;
 		return true;
 	}
@@ -342,9 +375,7 @@ bool HashMapList<K, T, HashFunc>::HashBucket::emplace(hash_t hash, const K &key,
 	if (size_ == 0)
 	{
 		// Early-out if the bucket is empty
-		firstNode_.hash = hash;
-		firstNode_.key = key;
-		new (&firstNode_.value) T(nctl::forward<Args>(args)...);
+		new (&firstNode_) Node(hash, key, nctl::forward<Args>(args)...);
 		size_++;
 		return true;
 	}
@@ -372,11 +403,12 @@ bool HashMapList<K, T, HashFunc>::HashBucket::remove(hash_t hash, const K &key)
 	{
 		// The item has been found in the direct access node
 		found = true;
+		destructObject(&firstNode_);
 
 		// Bring the first element of the list, if any, as direct access node
 		if (collisionList_.isEmpty() == false)
 		{
-			firstNode_ = collisionList_.front();
+			new (&firstNode_) Node(collisionList_.front());
 			collisionList_.popFront();
 		}
 		size_--;
@@ -452,7 +484,7 @@ HashMapList<K, T, HashFunc>::HashMapList(unsigned int capacity)
 	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
 
 	for (unsigned int i = 0; i < capacity; i++)
-		buckets_[i] = HashBucket();
+		buckets_.emplaceBack(HashBucket());
 }
 
 template <class K, class T, class HashFunc>

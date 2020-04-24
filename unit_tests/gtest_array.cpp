@@ -20,7 +20,7 @@ TEST(ArrayDeathTest, SubscriptAccessBeyondSize)
 {
 	printf("Trying to access an element within capacity but beyond size\n");
 	nctl::Array<int> array(Capacity);
-	array[0] = 0;
+	array.pushBack(0);
 
 	ASSERT_DEATH(array[5] = 1, "");
 }
@@ -29,7 +29,7 @@ TEST(ArrayDeathTest, SubscriptAccessConstBeyondSize)
 {
 	printf("Trying to access an element of a const array within capacity but beyond size\n");
 	nctl::Array<int> array(Capacity);
-	array[0] = 0;
+	array.pushBack(0);
 
 	const nctl::Array<int> &constArray = array;
 
@@ -40,7 +40,7 @@ TEST(ArrayDeathTest, SubscriptAccessConstAtSize)
 {
 	printf("Trying to access an element of a const array within capacity but at size\n");
 	nctl::Array<int> array(Capacity);
-	array[0] = 0;
+	array.pushBack(0);
 
 	const nctl::Array<int> &constArray = array;
 
@@ -52,7 +52,7 @@ TEST(ArrayDeathTest, AccessBeyondSize)
 {
 	printf("Trying to access an element within capacity but beyond size\n");
 	nctl::Array<int> array(Capacity);
-	array[0] = 0;
+	array.pushBack(0);
 
 	ASSERT_DEATH(array.at(5) = 1, "");
 }
@@ -61,7 +61,7 @@ TEST(ArrayDeathTest, AccessConstBeyondSize)
 {
 	printf("Trying to access an element of a const array within capacity but beyond size\n");
 	nctl::Array<int> array(Capacity);
-	array[0] = 0;
+	array.pushBack(0);
 
 	const nctl::Array<int> &constArray = array;
 
@@ -72,7 +72,7 @@ TEST(ArrayDeathTest, AccessConstAtSize)
 {
 	printf("Trying to access an element of a const array at size\n");
 	nctl::Array<int> array(Capacity);
-	array[0] = 0;
+	array.pushBack(0);
 
 	const nctl::Array<int> &constArray = array;
 
@@ -80,25 +80,21 @@ TEST(ArrayDeathTest, AccessConstAtSize)
 }
 #endif
 
-TEST_F(ArrayTest, AccessEmptyWithinSize)
-{
-	printf("Accessing at array size to add elements\n");
-	nctl::Array<int> newArray(Capacity);
-	for (unsigned int i = 0; i < Capacity; i++)
-		newArray.at(i) = i;
-	printArray(newArray);
-
-	ASSERT_EQ(newArray.size(), Capacity);
-	for (unsigned int i = 0; i < Capacity; i++)
-		ASSERT_EQ(newArray.at(i), static_cast<int>(i));
-}
-
 TEST_F(ArrayTest, AccessWithinSize)
 {
 	printf("Accessing an element within the array size\n");
 
 	for (unsigned int i = 0; i < Capacity; i++)
 		ASSERT_EQ(array_.at(i), static_cast<int>(i));
+}
+
+TEST_F(ArrayTest, AccessConstWithinSize)
+{
+	printf("Accessing an element within the const array size\n");
+
+	const nctl::Array<int> &constArray = array_;
+	for (unsigned int i = 0; i < Capacity; i++)
+		ASSERT_EQ(constArray.at(i), static_cast<int>(i));
 }
 
 TEST_F(ArrayTest, AccessWithPointer)
@@ -110,35 +106,11 @@ TEST_F(ArrayTest, AccessWithPointer)
 		ASSERT_EQ(ptr[i], static_cast<int>(i));
 }
 
-TEST_F(ArrayTest, SubscriptAccessEmptyWithinSize)
-{
-	printf("Accessing at array size to add elements\n");
-	nctl::Array<int> newArray(Capacity);
-	for (unsigned int i = 0; i < Capacity; i++)
-		newArray[i] = static_cast<int>(i);
-	printArray(newArray);
-
-	ASSERT_EQ(newArray.size(), Capacity);
-	for (unsigned int i = 0; i < Capacity; i++)
-		ASSERT_EQ(newArray.at(i), static_cast<int>(i));
-}
-
-TEST_F(ArrayTest, SubscriptAccessNotGrowing)
-{
-	printf("Trying to access an element beyond the capacity of a fixed capacity array\n");
-	nctl::Array<int> array(1, nctl::ArrayMode::FIXED_CAPACITY);
-	array[0] = 0;
-	array[1] = 1;
-
-	ASSERT_EQ(array.capacity(), 1);
-	ASSERT_EQ(array.size(), 1);
-}
-
 TEST_F(ArrayTest, SetSizeOnFixed)
 {
 	printf("Trying to extend the size of a fixed capacity array\n");
 	nctl::Array<int> array(1, nctl::ArrayMode::FIXED_CAPACITY);
-	array[0] = 0;
+	array.pushBack(0);
 	array_.setSize(Capacity);
 
 	ASSERT_EQ(array.capacity(), 1);
@@ -190,7 +162,7 @@ TEST_F(ArrayTest, SetZeroCapacity)
 TEST_F(ArrayTest, WritingBeyondCapacity)
 {
 	printf("Writing beyond capacity\n");
-	array_[Capacity] = static_cast<int>(Capacity);
+	array_.pushBack(Capacity);
 	printArray(array_);
 
 	ASSERT_TRUE(isUnmodified(array_));
@@ -210,6 +182,18 @@ TEST_F(ArrayTest, FrontElement)
 	ASSERT_EQ(front, array_[0]);
 }
 
+TEST_F(ArrayTest, FrontConstElement)
+{
+	const nctl::Array<int> &constArray = array_;
+	const int front = constArray.front();
+	printf("Retrieving the front element from a const array: %d\n", front);
+
+	ASSERT_TRUE(isUnmodified(constArray));
+	ASSERT_EQ(constArray.size(), Capacity);
+	ASSERT_EQ(constArray.capacity(), Capacity);
+	ASSERT_EQ(front, constArray[0]);
+}
+
 TEST_F(ArrayTest, BackElement)
 {
 	const int back = array_.back();
@@ -219,6 +203,18 @@ TEST_F(ArrayTest, BackElement)
 	ASSERT_EQ(array_.size(), Capacity);
 	ASSERT_EQ(array_.capacity(), Capacity);
 	ASSERT_EQ(back, array_[array_.size() - 1]);
+}
+
+TEST_F(ArrayTest, BackConstElement)
+{
+	const nctl::Array<int> &constArray = array_;
+	const int back = constArray.back();
+	printf("Retrieving the back element from a const array: %d\n", back);
+
+	ASSERT_TRUE(isUnmodified(constArray));
+	ASSERT_EQ(constArray.size(), Capacity);
+	ASSERT_EQ(constArray.capacity(), Capacity);
+	ASSERT_EQ(back, constArray[constArray.size() - 1]);
 }
 
 TEST_F(ArrayTest, PushBack)
@@ -232,6 +228,17 @@ TEST_F(ArrayTest, PushBack)
 	ASSERT_EQ(array_.capacity(), Capacity * 2);
 }
 
+TEST_F(ArrayTest, PushBackNotGrowing)
+{
+	printf("Trying to push back an element beyond the capacity of a fixed capacity array\n");
+	nctl::Array<int> array(1, nctl::ArrayMode::FIXED_CAPACITY);
+	array.pushBack(0);
+	array.pushBack(1);
+
+	ASSERT_EQ(array.capacity(), 1);
+	ASSERT_EQ(array.size(), 1);
+}
+
 TEST_F(ArrayTest, EmplaceBack)
 {
 	printf("Emplacing at the back\n");
@@ -241,6 +248,17 @@ TEST_F(ArrayTest, EmplaceBack)
 	ASSERT_TRUE(isUnmodified(array_));
 	ASSERT_EQ(array_.size(), Capacity + 1);
 	ASSERT_EQ(array_.capacity(), Capacity * 2);
+}
+
+TEST_F(ArrayTest, EmplaceBackNotGrowing)
+{
+	printf("Trying to emplace back an element beyond the capacity of a fixed capacity array\n");
+	nctl::Array<int> array(1, nctl::ArrayMode::FIXED_CAPACITY);
+	array.emplaceBack(0);
+	array.emplaceBack(1);
+
+	ASSERT_EQ(array.capacity(), 1);
+	ASSERT_EQ(array.size(), 1);
 }
 
 TEST_F(ArrayTest, PopBack)
@@ -381,9 +399,8 @@ TEST_F(ArrayTest, ExtendAndShrinkSize)
 	printf("Extending the size by two elements\n");
 	const unsigned int oldSize = array_.size();
 	array_.setSize(oldSize + 2);
-	// No "hole" when setting this element
-	array_[oldSize + 1] = 55;
 	array_[oldSize] = 44;
+	array_[oldSize + 1] = 55;
 	printArray(array_);
 	ASSERT_TRUE(isUnmodified(array_));
 	ASSERT_EQ(array_.size(), oldSize + 2);

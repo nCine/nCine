@@ -61,33 +61,11 @@ TEST(ArrayZeroCapacityDeathTest, AccessConstAtSize)
 }
 #endif
 
-TEST_F(ArrayZeroCapacityTest, AccessEmptyWithinSize)
+TEST_F(ArrayZeroCapacityTest, PushBackOnceOnFixed)
 {
-	printf("Accessing at array size to add elements\n");
-	array_.at(0) = 0;
-	printArray(array_);
-
-	ASSERT_EQ(array_.capacity(), 1);
-	ASSERT_EQ(array_.size(), 1);
-	ASSERT_EQ(array_.at(0), 0);
-}
-
-TEST_F(ArrayZeroCapacityTest, SubscriptAccessEmptyWithinSize)
-{
-	printf("Accessing at array size to add elements\n");
-	array_[0] = 0;
-	printArray(array_);
-
-	ASSERT_EQ(array_.capacity(), 1);
-	ASSERT_EQ(array_.size(), 1);
-	ASSERT_EQ(array_[0], 0);
-}
-
-TEST_F(ArrayZeroCapacityTest, SubscriptAccessNotGrowing)
-{
-	printf("Trying to access an element beyond the capacity of zero capacity array\n");
+	printf("Pushing back an element to set the capacity of a fixed capacity array with zero initial capacity\n");
 	nctl::Array<int> array(0, nctl::ArrayMode::FIXED_CAPACITY);
-	array[0] = 0;
+	array.pushBack(0);
 
 	ASSERT_EQ(array.capacity(), 1);
 	ASSERT_EQ(array.size(), 1);
@@ -96,9 +74,9 @@ TEST_F(ArrayZeroCapacityTest, SubscriptAccessNotGrowing)
 
 TEST_F(ArrayZeroCapacityTest, SetSizeOnFixed)
 {
-	printf("Setting the size of a fixed capacity array with zero capacity\n");
+	printf("Setting the size of a fixed capacity array with zero initial capacity\n");
 	nctl::Array<int> array(0, nctl::ArrayMode::FIXED_CAPACITY);
-	array_.setSize(1);
+	array.setSize(1);
 	array[0] = 0;
 
 	printf("Trying to extend the size of a fixed capacity array\n");
@@ -110,7 +88,7 @@ TEST_F(ArrayZeroCapacityTest, SetSizeOnFixed)
 
 TEST_F(ArrayZeroCapacityTest, SetCapacityOnFixed)
 {
-	printf("Setting a new capacity for a fixed capacity array with zero capacity\n");
+	printf("Setting a new capacity for a fixed capacity array with zero initial capacity\n");
 	nctl::Array<int> array(0, nctl::ArrayMode::FIXED_CAPACITY);
 	array.setCapacity(Capacity);
 

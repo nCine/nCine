@@ -85,13 +85,13 @@ JoyMapping::JoyMapping()
 
 	// Add mappings from the database, without searching for duplicates
 	const char **mappingStrings = ControllerMappings;
+	MappedJoystick mapping;
 	while (*mappingStrings)
 	{
 		numStrings++;
-		const unsigned int size = mappings_.size();
-		const bool parsed = parseMappingFromString(*mappingStrings, mappings_[size]);
-		if (parsed == false)
-			mappings_.setSize(size);
+		const bool parsed = parseMappingFromString(*mappingStrings, mapping);
+		if (parsed)
+			mappings_.pushBack(mapping);
 		mappingStrings++;
 	}
 

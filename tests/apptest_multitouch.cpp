@@ -50,11 +50,11 @@ void MyEventHandler::onInit()
 	texture_ = nctl::makeUnique<nc::Texture>(prefixDataPath("textures", TextureFile).data());
 	for (unsigned int i = 0; i < nc::TouchEvent::MaxPointers; i++)
 	{
-		sprites_[i] = nctl::makeUnique<nc::Sprite>(&rootNode, texture_.get());
-		sprites_[i]->setScale(SpriteScale);
-		sprites_[i]->setEnabled(false);
-		spriteTexts_[i] = nctl::makeUnique<nc::TextNode>(sprites_[i].get(), font_.get(), ShortNumChars);
-		spriteTexts_[i]->setPosition(0.0f, sprites_[i]->height() * 1.25f);
+		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(&rootNode, texture_.get()));
+		sprites_.back()->setScale(SpriteScale);
+		sprites_.back()->setEnabled(false);
+		spriteTexts_.pushBack(nctl::makeUnique<nc::TextNode>(sprites_[i].get(), font_.get(), ShortNumChars));
+		spriteTexts_.back()->setPosition(0.0f, sprites_[i]->height() * 1.25f);
 	}
 #endif
 

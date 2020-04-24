@@ -159,7 +159,7 @@ RenderCommand *ImGuiDrawing::retrieveCommandFromPool()
 			retrievedCommand = command.get();
 			usedCommandsPool_.pushBack(nctl::move(command));
 			command = nctl::move(freeCommandsPool_[poolSize - 1]);
-			freeCommandsPool_.setSize(poolSize - 1);
+			freeCommandsPool_.popBack();
 			break;
 		}
 	}

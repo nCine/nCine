@@ -29,7 +29,7 @@ GlfwKeyboardState GlfwInputManager::keyboardState_;
 KeyboardEvent GlfwInputManager::keyboardEvent_;
 
 GlfwJoystickState GlfwInputManager::nullJoystickState_;
-nctl::StaticArray<GlfwJoystickState, GlfwInputManager::MaxNumJoysticks> GlfwInputManager::joystickStates_;
+nctl::StaticArray<GlfwJoystickState, GlfwInputManager::MaxNumJoysticks> GlfwInputManager::joystickStates_(nctl::StaticArrayMode::EXTEND_SIZE);
 JoyButtonEvent GlfwInputManager::joyButtonEvent_;
 JoyHatEvent GlfwInputManager::joyHatEvent_;
 JoyAxisEvent GlfwInputManager::joyAxisEvent_;

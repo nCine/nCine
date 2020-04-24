@@ -2,7 +2,6 @@
 #define CLASS_NCTL_STATICHASHSET
 
 #include <ncine/common_macros.h>
-#include "UniquePtr.h"
 #include "HashFunctions.h"
 #include "ReverseIterator.h"
 
@@ -26,8 +25,9 @@ class StaticHashSet
 	/// Reverse constant iterator type
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
-	StaticHashSet()
-	    : size_(0) { clear(); }
+	inline StaticHashSet()
+	    : size_(0) { init(); }
+	inline ~StaticHashSet() { destructKeys(); }
 
 	/// Copy constructor
 	StaticHashSet(const StaticHashSet &other);
@@ -97,9 +97,12 @@ class StaticHashSet
 	uint8_t delta1_[Capacity];
 	uint8_t delta2_[Capacity];
 	hash_t hashes_[Capacity];
-	K keys_[Capacity];
+	uint8_t keysBuffer_[Capacity * sizeof(K)];
+	K *keys_ = reinterpret_cast<K *>(keysBuffer_);
 	HashFunc hashFunc_;
 
+	void init();
+	void destructKeys();
 	bool findBucketIndex(const K &key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const;
 	inline bool findBucketIndex(const K &key, unsigned int &foundIndex) const;
 	unsigned int addDelta1(unsigned int bucketIndex) const;
@@ -175,10 +178,12 @@ StaticHashSet<K, Capacity, HashFunc>::StaticHashSet(const StaticHashSet<K, Capac
 {
 	for (unsigned int i = 0; i < Capacity; i++)
 	{
+		if (other.hashes_[i] != NullHash)
+			new (keys_ + i) K(other.keys_[i]);
+
 		delta1_[i] = other.delta1_[i];
 		delta2_[i] = other.delta2_[i];
 		hashes_[i] = other.hashes_[i];
-		keys_[i] = other.keys_[i];
 	}
 }
 
@@ -188,25 +193,36 @@ StaticHashSet<K, Capacity, HashFunc>::StaticHashSet(StaticHashSet<K, Capacity, H
 {
 	for (unsigned int i = 0; i < Capacity; i++)
 	{
+		if (other.hashes_[i] != NullHash)
+			new (keys_ + i) K(nctl::move(other.keys_[i]));
+
 		delta1_[i] = other.delta1_[i];
 		delta2_[i] = other.delta2_[i];
 		hashes_[i] = other.hashes_[i];
-		keys_[i] = nctl::move(other.keys_[i]);
 	}
+	other.destructKeys();
 }
 
 template <class K, unsigned int Capacity, class HashFunc>
 StaticHashSet<K, Capacity, HashFunc> &StaticHashSet<K, Capacity, HashFunc>::operator=(const StaticHashSet<K, Capacity, HashFunc> &other)
 {
-	size_ = other.size_;
-
 	for (unsigned int i = 0; i < Capacity; i++)
 	{
+		if (other.hashes_[i] != NullHash)
+		{
+			if (hashes_[i] != NullHash)
+				keys_[i] = other.keys_[i];
+			else
+				new (keys_ + i) K(other.keys_[i]);
+		}
+		else if (hashes_[i] != NullHash)
+			destructObject(keys_ + i);
+
 		delta1_[i] = other.delta1_[i];
 		delta2_[i] = other.delta2_[i];
 		hashes_[i] = other.hashes_[i];
-		keys_[i] = other.keys_[i];
 	}
+	size_ = other.size_;
 
 	return *this;
 }
@@ -214,15 +230,24 @@ StaticHashSet<K, Capacity, HashFunc> &StaticHashSet<K, Capacity, HashFunc>::oper
 template <class K, unsigned int Capacity, class HashFunc>
 StaticHashSet<K, Capacity, HashFunc> &StaticHashSet<K, Capacity, HashFunc>::operator=(StaticHashSet<K, Capacity, HashFunc> &&other)
 {
-	size_ = other.size_;
-
 	for (unsigned int i = 0; i < Capacity; i++)
 	{
+		if (other.hashes_[i] != NullHash)
+		{
+			if (hashes_[i] != NullHash)
+				keys_[i] = nctl::move(other.keys_[i]);
+			else
+				new (keys_ + i) K(nctl::move(other.keys_[i]));
+		}
+		else if (hashes_[i] != NullHash)
+			destructObject(keys_ + i);
+
 		delta1_[i] = other.delta1_[i];
 		delta2_[i] = other.delta2_[i];
 		hashes_[i] = other.hashes_[i];
-		keys_[i] = nctl::move(other.keys_[i]);
 	}
+	size_ = other.size_;
+	other.destructKeys();
 
 	return *this;
 }
@@ -342,13 +367,8 @@ bool StaticHashSet<K, Capacity, HashFunc>::insert(K &&key)
 template <class K, unsigned int Capacity, class HashFunc>
 void StaticHashSet<K, Capacity, HashFunc>::clear()
 {
-	for (unsigned int i = 0; i < Capacity; i++)
-		delta1_[i] = 0;
-	for (unsigned int i = 0; i < Capacity; i++)
-		delta2_[i] = 0;
-	for (unsigned int i = 0; i < Capacity; i++)
-		hashes_[i] = NullHash;
-	size_ = 0;
+	destructKeys();
+	init();
 }
 
 template <class K, unsigned int Capacity, class HashFunc>
@@ -434,10 +454,36 @@ bool StaticHashSet<K, Capacity, HashFunc>::remove(const K &key)
 		}
 
 		hashes_[bucketIndex] = NullHash;
+		destructObject(keys_ + bucketIndex);
 		size_--;
 	}
 
 	return found;
+}
+
+template <class K, unsigned int Capacity, class HashFunc>
+void StaticHashSet<K, Capacity, HashFunc>::init()
+{
+	for (unsigned int i = 0; i < Capacity; i++)
+		delta1_[i] = 0;
+	for (unsigned int i = 0; i < Capacity; i++)
+		delta2_[i] = 0;
+	for (unsigned int i = 0; i < Capacity; i++)
+		hashes_[i] = NullHash;
+}
+
+template <class K, unsigned int Capacity, class HashFunc>
+void StaticHashSet<K, Capacity, HashFunc>::destructKeys()
+{
+	for (unsigned int i = 0; i < Capacity; i++)
+	{
+		if (hashes_[i] != NullHash)
+		{
+			destructObject(keys_ + i);
+			hashes_[i] = NullHash;
+		}
+	}
+	size_ = 0;
 }
 
 template <class K, unsigned int Capacity, class HashFunc>
@@ -566,7 +612,7 @@ void StaticHashSet<K, Capacity, HashFunc>::insertKey(unsigned int index, hash_t 
 
 	size_++;
 	hashes_[index] = hash;
-	keys_[index] = key;
+	new (keys_ + index) K(key);
 }
 
 template <class K, unsigned int Capacity, class HashFunc>
@@ -577,7 +623,7 @@ void StaticHashSet<K, Capacity, HashFunc>::insertKey(unsigned int index, hash_t 
 
 	size_++;
 	hashes_[index] = hash;
-	keys_[index] = nctl::move(key);
+	new (keys_ + index) K(nctl::move(key));
 }
 
 template <unsigned int Capacity>

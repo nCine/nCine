@@ -124,6 +124,11 @@ class HashSetList
 	  public:
 		HashBucket()
 		    : size_(0) {}
+		inline ~HashBucket() { clear(); }
+
+		HashBucket(const HashBucket &other);
+		HashBucket &operator=(const HashBucket &other);
+
 		unsigned int size() const { return size_; }
 		void clear();
 		bool contains(hash_t hash, const K &key) const;
@@ -137,8 +142,9 @@ class HashSetList
 	  private:
 		/// Number of nodes in this bucket
 		unsigned int size_;
+		unsigned char firstNodeBuffer_[sizeof(Node)];
 		/// Separate chaining with head cell
-		Node firstNode_;
+		Node &firstNode_ = reinterpret_cast<Node &>(firstNodeBuffer_);
 		/// Separate chaining with a linked list
 		List<Node> collisionList_;
 
@@ -214,9 +220,35 @@ typename HashSetList<K, HashFunc>::ConstReverseIterator HashSetList<K, HashFunc>
 }
 
 template <class K, class HashFunc>
+HashSetList<K, HashFunc>::HashBucket::HashBucket(const HashBucket &other)
+    : size_(other.size_), collisionList_(other.collisionList_)
+{
+	if (other.size_ > 0)
+		new (&firstNode_) Node(other.firstNode_.hash, other.firstNode_.key);
+}
+
+template <class K, class HashFunc>
+typename HashSetList<K, HashFunc>::HashBucket &HashSetList<K, HashFunc>::HashBucket::operator=(const HashBucket &other)
+{
+	if (other.size_ > 0 && size_ > 0)
+		firstNode_ = other.firstNode_;
+	else if (other.size_ > 0 && size_ == 0)
+		new (&firstNode_) Node(other.firstNode_.hash, other.firstNode_.key);
+	else if (size_ > 0 && other.size_ == 0)
+		destructObject(&firstNode_);
+
+	collisionList_ = other.collisionList_;
+	size_ = other.size_;
+	return *this;
+}
+
+template <class K, class HashFunc>
 void HashSetList<K, HashFunc>::HashBucket::clear()
 {
-	collisionList_.clear();
+	if (size_ > 1)
+		collisionList_.clear();
+	if (size_ > 0)
+		destructObject(&firstNode_);
 	size_ = 0;
 }
 
@@ -255,8 +287,7 @@ K &HashSetList<K, HashFunc>::HashBucket::findOrInsert(hash_t hash, const K &key)
 	if (size_ == 0)
 	{
 		// Early-out if the bucket is empty
-		firstNode_.hash = hash;
-		firstNode_.key = key;
+		new (&firstNode_) Node(hash, key);
 		size_++;
 		return firstNode_.key;
 	}
@@ -277,8 +308,7 @@ bool HashSetList<K, HashFunc>::HashBucket::insert(hash_t hash, const K &key)
 	if (size_ == 0)
 	{
 		// Early-out if the bucket is empty
-		firstNode_.hash = hash;
-		firstNode_.key = key;
+		new (&firstNode_) Node(hash, key);
 		size_++;
 		return true;
 	}
@@ -299,8 +329,7 @@ bool HashSetList<K, HashFunc>::HashBucket::insert(hash_t hash, K &&key)
 	if (size_ == 0)
 	{
 		// Early-out if the bucket is empty
-		firstNode_.hash = hash;
-		firstNode_.key = nctl::move(key);
+		new (&firstNode_) Node(hash, nctl::move(key));
 		size_++;
 		return true;
 	}
@@ -328,6 +357,7 @@ bool HashSetList<K, HashFunc>::HashBucket::remove(hash_t hash, const K &key)
 	{
 		// The item has been found in the direct access node
 		found = true;
+		destructObject(&firstNode_);
 
 		// Bring the first element of the list, if any, as direct access node
 		if (collisionList_.isEmpty() == false)
@@ -408,7 +438,7 @@ HashSetList<K, HashFunc>::HashSetList(unsigned int capacity)
 	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
 
 	for (unsigned int i = 0; i < capacity; i++)
-		buckets_[i] = HashBucket();
+		buckets_.emplaceBack(HashBucket());
 }
 
 template <class K, class HashFunc>

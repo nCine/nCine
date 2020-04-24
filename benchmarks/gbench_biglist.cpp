@@ -5,6 +5,16 @@
 
 const unsigned int Length = 256;
 
+static void BM_BigListCreation(benchmark::State &state)
+{
+	for (auto _ : state)
+	{
+		nctl::List<Movable> list;
+		benchmark::DoNotOptimize(list);
+	}
+}
+BENCHMARK(BM_BigListCreation);
+
 static void BM_BigListCopy(benchmark::State &state)
 {
 	nctl::List<Movable> initList;

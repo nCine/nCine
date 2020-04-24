@@ -24,13 +24,11 @@ class Particle : public Sprite
 	/// A flag indicating if particle transformations are in local space or not
 	bool inLocalSpace_;
 
+	Particle(SceneNode *parent, Texture *texture);
 	/// Returns true if the particle is still alive
 	inline bool isAlive() const { return life_ > 0.0f; }
 
   private:
-	/// Private constructor accessible only by `ParticleSystem`
-	Particle(SceneNode *parent, Texture *texture);
-
 	/// Initializes a particle with initial life, position, velocity and rotation
 	void init(float life, Vector2f pos, Vector2f vel, float rot, bool inLocalSpace);
 	/// Updates particle data after the specified amount of seconds has passed

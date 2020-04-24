@@ -50,11 +50,11 @@ void MyEventHandler::onInit()
 	for (unsigned int i = 0; i < NumChars; i++)
 	{
 		singleChar[0] = string[i % strLength];
-		characters_[i] = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get(), 2);
-		characters_[i]->setScale(CharScale);
-		characters_[i]->enableKerning(false);
-		characters_[i]->setString(singleChar);
-		characters_[i]->setColorF((NumChars - i) * numCharsInv, 0.25f, (i + 1) * numCharsInv, 1.0f);
+		characters_.pushBack(nctl::makeUnique<nc::TextNode>(&rootNode, font_.get(), 2));
+		characters_.back()->setScale(CharScale);
+		characters_.back()->enableKerning(false);
+		characters_.back()->setString(singleChar);
+		characters_.back()->setColorF((NumChars - i) * numCharsInv, 0.25f, (i + 1) * numCharsInv, 1.0f);
 	}
 }
 

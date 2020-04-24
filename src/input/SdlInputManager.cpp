@@ -54,7 +54,7 @@ SdlKeyboardState SdlInputManager::keyboardState_;
 KeyboardEvent SdlInputManager::keyboardEvent_;
 
 SDL_Joystick *SdlInputManager::sdlJoysticks_[MaxNumJoysticks];
-nctl::StaticArray<SdlJoystickState, SdlInputManager::MaxNumJoysticks> SdlInputManager::joystickStates_;
+nctl::StaticArray<SdlJoystickState, SdlInputManager::MaxNumJoysticks> SdlInputManager::joystickStates_(nctl::StaticArrayMode::EXTEND_SIZE);
 JoyButtonEvent SdlInputManager::joyButtonEvent_;
 JoyHatEvent SdlInputManager::joyHatEvent_;
 JoyAxisEvent SdlInputManager::joyAxisEvent_;

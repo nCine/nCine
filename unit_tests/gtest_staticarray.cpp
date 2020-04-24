@@ -16,7 +16,7 @@ TEST(StaticArrayDeathTest, SubscriptAccessBeyondSize)
 {
 	printf("Trying to access an element within capacity but beyond size\n");
 	nctl::StaticArray<int, Capacity> array;
-	array[0] = 0;
+	array.pushBack(0);
 
 	ASSERT_DEATH(array[5] = 1, "");
 }
@@ -25,7 +25,7 @@ TEST(StaticArrayDeathTest, SubscriptAccessConstBeyondSize)
 {
 	printf("Trying to access an element of a const array within capacity but beyond size\n");
 	nctl::StaticArray<int, Capacity> array;
-	array[0] = 0;
+	array.pushBack(0);
 
 	const nctl::StaticArray<int, Capacity> &constArray = array;
 
@@ -36,7 +36,7 @@ TEST(StaticArrayDeathTest, SubscriptAccessConstAtSize)
 {
 	printf("Trying to access an element of a const array within capacity but at size\n");
 	nctl::StaticArray<int, Capacity> array;
-	array[0] = 0;
+	array.pushBack(0);
 
 	const nctl::StaticArray<int, Capacity> &constArray = array;
 
@@ -48,7 +48,7 @@ TEST(StaticArrayDeathTest, AccessBeyondSize)
 {
 	printf("Trying to access an element within capacity but beyond size\n");
 	nctl::StaticArray<int, Capacity> array;
-	array[0] = 0;
+	array.pushBack(0);
 
 	ASSERT_DEATH(array.at(5) = 1, "");
 }
@@ -57,7 +57,7 @@ TEST(StaticArrayDeathTest, AccessConstBeyondSize)
 {
 	printf("Trying to access an element of a const array within capacity but beyond size\n");
 	nctl::StaticArray<int, Capacity> array;
-	array[0] = 0;
+	array.pushBack(0);
 
 	const nctl::StaticArray<int, Capacity> &constArray = array;
 
@@ -68,7 +68,7 @@ TEST(StaticArrayDeathTest, AccessConstAtSize)
 {
 	printf("Trying to access an element of a const array at size\n");
 	nctl::StaticArray<int, Capacity> array;
-	array[0] = 0;
+	array.pushBack(0);
 
 	const nctl::StaticArray<int, Capacity> &constArray = array;
 
@@ -76,24 +76,21 @@ TEST(StaticArrayDeathTest, AccessConstAtSize)
 }
 #endif
 
-TEST_F(StaticArrayTest, AccessEmptyWithinSize)
-{
-	printf("Accessing at array size to add elements\n");
-	nctl::StaticArray<int, Capacity> newArray;
-	for (unsigned int i = 0; i < Capacity; i++)
-		newArray.at(i) = i;
-
-	ASSERT_EQ(newArray.size(), Capacity);
-	for (unsigned int i = 0; i < Capacity; i++)
-		ASSERT_EQ(newArray.at(i), static_cast<int>(i));
-}
-
 TEST_F(StaticArrayTest, AccessWithinSize)
 {
 	printf("Accessing an element within the array size\n");
 
 	for (unsigned int i = 0; i < Capacity; i++)
 		ASSERT_EQ(array_.at(i), static_cast<int>(i));
+}
+
+TEST_F(StaticArrayTest, AccessConstWithinSize)
+{
+	printf("Accessing an element within the const array size\n");
+
+	const nctl::StaticArray<int, Capacity> &constArray = array_;
+	for (unsigned int i = 0; i < Capacity; i++)
+		ASSERT_EQ(constArray.at(i), static_cast<int>(i));
 }
 
 TEST_F(StaticArrayTest, AccessWithPointer)
@@ -105,34 +102,12 @@ TEST_F(StaticArrayTest, AccessWithPointer)
 		ASSERT_EQ(ptr[i], static_cast<int>(i));
 }
 
-TEST_F(StaticArrayTest, SubscriptAccessEmptyWithinSize)
-{
-	printf("Accessing at array size to add elements\n");
-	nctl::StaticArray<int, Capacity> newArray;
-	for (unsigned int i = 0; i < Capacity; i++)
-		newArray[i] = static_cast<int>(i);
-	printArray(newArray);
-
-	ASSERT_EQ(newArray.size(), Capacity);
-	for (unsigned int i = 0; i < Capacity; i++)
-		ASSERT_EQ(newArray.at(i), static_cast<int>(i));
-}
-
-TEST_F(StaticArrayTest, SubscriptAccessNotGrowing)
-{
-	printf("Trying to access an element beyond the capacity of a static array\n");
-	array_[Capacity] = Capacity;
-
-	ASSERT_EQ(array_.capacity(), Capacity);
-	ASSERT_EQ(array_.size(), Capacity);
-}
-
 TEST_F(StaticArrayTest, SetSizeOnStatic)
 {
 	printf("Trying to extend the size of a static array\n");
 	nctl::StaticArray<int, 1> array;
-	array[0] = 0;
-	array_.setSize(Capacity);
+	array.pushBack(0);
+	array.setSize(Capacity);
 
 	ASSERT_EQ(array.capacity(), 1);
 	ASSERT_EQ(array.size(), 1);
@@ -145,8 +120,18 @@ TEST_F(StaticArrayTest, FrontElement)
 
 	ASSERT_TRUE(isUnmodified(array_));
 	ASSERT_EQ(array_.size(), Capacity);
-	ASSERT_EQ(array_.capacity(), Capacity);
 	ASSERT_EQ(front, array_[0]);
+}
+
+TEST_F(StaticArrayTest, FrontConstElement)
+{
+	const nctl::StaticArray<int, Capacity> &constArray = array_;
+	const int front = constArray.front();
+	printf("Retrieving the front element from a const array: %d\n", front);
+
+	ASSERT_TRUE(isUnmodified(constArray));
+	ASSERT_EQ(constArray.size(), Capacity);
+	ASSERT_EQ(front, constArray[0]);
 }
 
 TEST_F(StaticArrayTest, BackElement)
@@ -156,8 +141,76 @@ TEST_F(StaticArrayTest, BackElement)
 
 	ASSERT_TRUE(isUnmodified(array_));
 	ASSERT_EQ(array_.size(), Capacity);
-	ASSERT_EQ(array_.capacity(), Capacity);
 	ASSERT_EQ(back, array_[array_.size() - 1]);
+}
+
+TEST_F(StaticArrayTest, BackConstElement)
+{
+	const nctl::StaticArray<int, Capacity> &constArray = array_;
+	const int back = constArray.back();
+	printf("Retrieving the back element from a const array: %d\n", back);
+
+	ASSERT_TRUE(isUnmodified(constArray));
+	ASSERT_EQ(constArray.size(), Capacity);
+	ASSERT_EQ(back, constArray[constArray.size() - 1]);
+}
+
+TEST_F(StaticArrayTest, PushBack)
+{
+	nctl::StaticArray<int, Capacity> newArray;
+
+	printf("Inserting twice at the back\n");
+	newArray.pushBack(0);
+	newArray.pushBack(1);
+	printArray(newArray);
+
+	ASSERT_EQ(newArray.size(), 2);
+	ASSERT_EQ(newArray[0], 0);
+	ASSERT_EQ(newArray[1], 1);
+}
+
+TEST_F(StaticArrayTest, PushBackNotGrowing)
+{
+	printf("Trying to push back an element beyond the capacity of a static array\n");
+	array_.pushBack(Capacity);
+
+	ASSERT_EQ(array_.capacity(), Capacity);
+	ASSERT_EQ(array_.size(), Capacity);
+}
+
+TEST_F(StaticArrayTest, EmplaceBack)
+{
+	nctl::StaticArray<int, Capacity> newArray;
+
+	printf("Emplacing twice at the back\n");
+	newArray.emplaceBack(0);
+	newArray.emplaceBack(1);
+	printArray(newArray);
+
+	ASSERT_EQ(newArray.size(), 2);
+	ASSERT_EQ(newArray[0], 0);
+	ASSERT_EQ(newArray[1], 1);
+}
+
+TEST_F(StaticArrayTest, EmplaceBackNotGrowing)
+{
+	printf("Trying to emplace back an element beyond the capacity of a static array\n");
+	nctl::StaticArray<int, 1> array;
+	array.emplaceBack(0);
+	array.emplaceBack(1);
+
+	ASSERT_EQ(array.capacity(), 1);
+	ASSERT_EQ(array.size(), 1);
+}
+
+TEST_F(StaticArrayTest, PopBack)
+{
+	printf("Removing at the back\n");
+	array_.popBack();
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity - 1);
+	ASSERT_EQ(array_[array_.size() - 1], 8);
 }
 
 TEST_F(StaticArrayTest, OverwriteMiddle)
@@ -168,6 +221,122 @@ TEST_F(StaticArrayTest, OverwriteMiddle)
 
 	ASSERT_EQ(array_[2], 22);
 	ASSERT_EQ(array_.size(), Capacity);
+}
+
+TEST_F(StaticArrayTest, InsertMiddle)
+{
+	// Making space for the element to insert
+	array_.popBack();
+	printf("Inserting in the middle\n");
+	array_.insertAt(3, 22);
+	printArray(array_);
+
+	ASSERT_EQ(array_[2], 2);
+	ASSERT_EQ(array_[3], 22);
+	ASSERT_EQ(array_[4], 3);
+	ASSERT_EQ(array_.size(), Capacity);
+}
+
+TEST_F(StaticArrayTest, EmplaceMiddle)
+{
+	// Making space for the element to emplace
+	array_.popBack();
+	printf("Emplacing in the middle\n");
+	array_.emplaceAt(3, 22);
+	printArray(array_);
+
+	ASSERT_EQ(array_[2], 2);
+	ASSERT_EQ(array_[3], 22);
+	ASSERT_EQ(array_[4], 3);
+	ASSERT_EQ(array_.size(), Capacity);
+}
+
+TEST_F(StaticArrayTest, RemoveMiddle)
+{
+	printf("Removing from the middle\n");
+	array_.removeAt(3);
+	printArray(array_);
+
+	ASSERT_EQ(array_[2], 2);
+	ASSERT_EQ(array_[3], 4);
+	ASSERT_EQ(array_[4], 5);
+	ASSERT_EQ(array_.size(), Capacity - 1);
+}
+
+TEST_F(StaticArrayTest, UnorderedRemoveMiddle)
+{
+	printf("Removing from the middle (unordered)\n");
+	array_.unorderedRemoveAt(3);
+	printArray(array_);
+
+	ASSERT_EQ(array_[2], 2);
+	ASSERT_EQ(array_[3], 9);
+	ASSERT_EQ(array_[4], 4);
+	ASSERT_EQ(array_.size(), Capacity - 1);
+}
+
+TEST_F(StaticArrayTest, InsertFirstAndLast)
+{
+	// Making space for the elements to insert
+	array_.popBack();
+	array_.popBack();
+	printf("Inserting as first and last\n");
+	array_.insertAt(0, -1);
+	array_.insertAt(array_.size(), 8);
+	printArray(array_);
+
+	ASSERT_EQ(array_[0], -1);
+	ASSERT_EQ(array_[1], 0);
+	ASSERT_EQ(array_[8], 7);
+	ASSERT_EQ(array_[9], 8);
+	ASSERT_EQ(array_.size(), Capacity);
+}
+
+TEST_F(StaticArrayTest, EmplaceFirstAndLast)
+{
+	// Making space for the elements to insert
+	array_.popBack();
+	array_.popBack();
+	printf("Emplacing as first and last\n");
+	array_.emplaceAt(0, -1);
+	array_.emplaceAt(array_.size(), 8);
+	printArray(array_);
+
+	ASSERT_EQ(array_[0], -1);
+	ASSERT_EQ(array_[1], 0);
+	ASSERT_EQ(array_[8], 7);
+	ASSERT_EQ(array_[9], 8);
+	ASSERT_EQ(array_.size(), Capacity);
+}
+
+TEST_F(StaticArrayTest, RemoveFirstAndTwiceLast)
+{
+	printf("Removing the first and twice the last\n");
+	array_.removeAt(0);
+	array_.removeAt(array_.size() - 1);
+	array_.removeAt(array_.size() - 1);
+	printArray(array_);
+
+	ASSERT_EQ(array_[0], 1);
+	ASSERT_EQ(array_[1], 2);
+	ASSERT_EQ(array_[5], 6);
+	ASSERT_EQ(array_[6], 7);
+	ASSERT_EQ(array_.size(), Capacity - 3);
+}
+
+TEST_F(StaticArrayTest, UnorderedRemoveFirstAndTwiceLast)
+{
+	printf("Removing the first and twice the last (unordered)\n");
+	array_.unorderedRemoveAt(0);
+	array_.unorderedRemoveAt(array_.size() - 1);
+	array_.unorderedRemoveAt(array_.size() - 1);
+	printArray(array_);
+
+	ASSERT_EQ(array_[0], 9);
+	ASSERT_EQ(array_[1], 1);
+	ASSERT_EQ(array_[5], 5);
+	ASSERT_EQ(array_[6], 6);
+	ASSERT_EQ(array_.size(), Capacity - 3);
 }
 
 TEST_F(StaticArrayTest, ShrinkAndExtendSize)

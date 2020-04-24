@@ -31,7 +31,7 @@ unsigned int ArrayIndexer::addObject(Object *object)
 
 	numObjects_++;
 
-	pointers_[nextId_] = object;
+	pointers_.pushBack(object);
 	nextId_++;
 
 	return nextId_ - 1;

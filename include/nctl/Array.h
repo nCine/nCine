@@ -1,6 +1,7 @@
 #ifndef CLASS_NCTL_ARRAY
 #define CLASS_NCTL_ARRAY
 
+#include <new>
 #include <ncine/common_macros.h>
 #include "ArrayIterator.h"
 #include "ReverseIterator.h"
@@ -34,28 +35,13 @@ class Array
 
 	/// Constructs an array without allocating memory
 	Array()
-	    : array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
-	{
-	}
-
+	    : Array(0, ArrayMode::GROWING_CAPACITY) {}
 	/// Constructs an array with explicit capacity
 	explicit Array(unsigned int capacity)
-	    : array_(nullptr), size_(0), capacity_(0), fixedCapacity_(false)
-	{
-		if (capacity > 0)
-			setCapacity(capacity);
-	}
-
+	    : Array(capacity, ArrayMode::GROWING_CAPACITY) {}
 	/// Constructs an array with explicit capacity and the option for it to be fixed
-	Array(unsigned int capacity, ArrayMode mode)
-	    : array_(nullptr), size_(0), capacity_(0),
-	      fixedCapacity_(mode == ArrayMode::FIXED_CAPACITY)
-	{
-		if (capacity > 0)
-			setCapacity(capacity);
-	}
-
-	~Array() { delete[] array_; }
+	Array(unsigned int capacity, ArrayMode mode);
+	~Array();
 
 	/// Copy constructor
 	Array(const Array &other);
@@ -116,8 +102,7 @@ class Array
 	void shrinkToFit();
 
 	/// Clears the array
-	/*! Size will be set to zero but capacity remains unmodified. */
-	inline void clear() { size_ = 0; }
+	void clear();
 	/// Returns a constant reference to the first element in constant time
 	inline const T &front() const { return array_[0]; }
 	/// Returns a reference to the first element in constant time
@@ -127,9 +112,9 @@ class Array
 	/// Returns a reference to the last element in constant time
 	inline T &back() { return array_[size_ - 1]; }
 	/// Appends a new element in constant time, the element is copied into the array
-	inline void pushBack(const T &element) { operator[](size_) = element; }
+	inline void pushBack(const T &element) { new (extendOne()) T(element); }
 	/// Appends a new element in constant time, the element is moved into the array
-	inline void pushBack(T &&element) { operator[](size_) = nctl::move(element); }
+	inline void pushBack(T &&element) { new (extendOne()) T(nctl::move(element)); }
 	/// Constructs a new element at the end of the array
 	template <typename... Args> void emplaceBack(Args &&... args);
 	/// Removes the last element in constant time
@@ -189,16 +174,32 @@ class Array
 	unsigned int size_;
 	unsigned int capacity_;
 	bool fixedCapacity_;
+
+	/// Grows the array size by one and returns a pointer to the new element
+	T *extendOne();
 };
+
+template <class T>
+Array<T>::Array(unsigned int capacity, ArrayMode mode)
+    : array_(nullptr), size_(0), capacity_(0), fixedCapacity_(mode == ArrayMode::FIXED_CAPACITY)
+{
+	if (capacity > 0)
+		setCapacity(capacity);
+}
+
+template <class T>
+Array<T>::~Array()
+{
+	destructArray(array_, size_);
+	::operator delete(array_);
+}
 
 template <class T>
 Array<T>::Array(const Array<T> &other)
     : array_(nullptr), size_(other.size_), capacity_(other.capacity_), fixedCapacity_(other.fixedCapacity_)
 {
-	array_ = new T[capacity_];
-	// copying all elements invoking their copy constructor
-	for (unsigned int i = 0; i < size_; i++)
-		array_[i] = other.array_[i];
+	array_ = static_cast<T *>(::operator new(capacity_ * sizeof(T)));
+	copyConstructArray(array_, other.array_, size_);
 }
 
 template <class T>
@@ -242,18 +243,19 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 
 	T *newArray = nullptr;
 	if (newCapacity > 0)
-		newArray = new T[newCapacity];
+		newArray = static_cast<T *>(::operator new(newCapacity * sizeof(T)));
 
 	if (size_ > 0)
 	{
+		const unsigned int oldSize = size_;
 		if (newCapacity < size_) // shrinking
 			size_ = newCapacity; // cropping last elements
 
-		for (unsigned int i = 0; i < size_; i++)
-			newArray[i] = nctl::move(array_[i]);
+		moveConstructArray(newArray, array_, size_);
+		destructArray(array_, oldSize);
 	}
 
-	delete[] array_;
+	::operator delete(array_);
 	array_ = newArray;
 	capacity_ = newCapacity;
 }
@@ -261,6 +263,11 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 template <class T>
 void Array<T>::setSize(unsigned int newSize)
 {
+	const int newElements = newSize - size_;
+
+	if (newElements < 0)
+		destructArray(array_ + size_ + newElements, -newElements);
+
 	if (newSize > capacity_)
 	{
 		setCapacity(newSize);
@@ -279,18 +286,29 @@ void Array<T>::shrinkToFit()
 		setCapacity(size_);
 }
 
+/*! Size will be set to zero but capacity remains unmodified. */
+template <class T>
+void Array<T>::clear()
+{
+	destructArray(array_, size_);
+	size_ = 0;
+}
+
 template <class T>
 template <typename... Args>
 void Array<T>::emplaceBack(Args &&... args)
 {
-	new (&operator[](size_)) T(nctl::forward<Args>(args)...);
+	new (extendOne()) T(nctl::forward<Args>(args)...);
 }
 
 template <class T>
 void Array<T>::popBack()
 {
 	if (size_ > 0)
+	{
+		destructObject(array_ + size_ - 1);
 		size_--;
+	}
 }
 
 template <class T>
@@ -308,8 +326,7 @@ T *Array<T>::insertRange(unsigned int index, const T *firstPtr, const T *lastPtr
 	// Backwards loop to account for overlapping areas
 	for (unsigned int i = size_ - index; i > 0; i--)
 		array_[index + numElements + i - 1] = nctl::move(array_[index + i - 1]);
-	for (unsigned int i = 0; i < numElements; i++)
-		array_[index + i] = firstPtr[i];
+	copyConstructArray(array_ + index, firstPtr, numElements);
 	size_ += numElements;
 
 	return (array_ + index + numElements);
@@ -327,10 +344,17 @@ T *Array<T>::insertAt(unsigned int index, const T &element)
 		setCapacity(newCapacity);
 	}
 
-	// Backwards loop to account for overlapping areas
-	for (unsigned int i = size_ - index; i > 0; i--)
-		array_[index + i] = nctl::move(array_[index + i - 1]);
-	array_[index] = element;
+	if (index < size_)
+	{
+		// Constructing a new element by moving the last one
+		new (array_ + size_) T(nctl::move(array_[size_ - 1]));
+		// Backwards loop to account for overlapping areas
+		for (unsigned int i = size_ - index - 1; i > 0; i--)
+			array_[index + i] = nctl::move(array_[index + i - 1]);
+		array_[index] = element;
+	}
+	else
+		new (array_ + size_) T(element);
 	size_++;
 
 	return (array_ + index + 1);
@@ -348,10 +372,17 @@ T *Array<T>::insertAt(unsigned int index, T &&element)
 		setCapacity(newCapacity);
 	}
 
-	// Backwards loop to account for overlapping areas
-	for (unsigned int i = size_ - index; i > 0; i--)
-		array_[index + i] = nctl::move(array_[index + i - 1]);
-	array_[index] = nctl::move(element);
+	if (index < size_)
+	{
+		// Constructing a new element by moving the last one
+		new (array_ + size_) T(nctl::move(array_[size_ - 1]));
+		// Backwards loop to account for overlapping areas
+		for (unsigned int i = size_ - index - 1; i > 0; i--)
+			array_[index + i] = nctl::move(array_[index + i - 1]);
+		array_[index] = nctl::move(element);
+	}
+	else
+		new (array_ + size_) T(nctl::move(element));
 	size_++;
 
 	return (array_ + index + 1);
@@ -370,10 +401,16 @@ T *Array<T>::emplaceAt(unsigned int index, Args &&... args)
 		setCapacity(newCapacity);
 	}
 
-	// Backwards loop to account for overlapping areas
-	for (unsigned int i = size_ - index; i > 0; i--)
-		array_[index + i] = nctl::move(array_[index + i - 1]);
-	new (&array_[index]) T(nctl::forward<Args>(args)...);
+	if (index < size_)
+	{
+		// Constructing a new element by moving the last one
+		new (array_ + size_) T(nctl::move(array_[size_ - 1]));
+		// Backwards loop to account for overlapping areas
+		for (unsigned int i = size_ - index - 1; i > 0; i--)
+			array_[index + i] = nctl::move(array_[index + i - 1]);
+		destructObject(array_ + index);
+	}
+	new (array_ + index) T(nctl::forward<Args>(args)...);
 	size_++;
 
 	return (array_ + index + 1);
@@ -426,9 +463,10 @@ T *Array<T>::removeRange(unsigned int firstIndex, unsigned int lastIndex)
 	FATAL_ASSERT_MSG_X(lastIndex <= size_, "Last index %u out of size range", lastIndex);
 	FATAL_ASSERT_MSG_X(firstIndex <= lastIndex, "First index %u should precede or be equal to the last one %u", firstIndex, lastIndex);
 
-	for (unsigned int i = 0; i < size_ - lastIndex; i++)
-		array_[firstIndex + i] = nctl::move(array_[lastIndex + i]);
-	size_ -= (lastIndex - firstIndex);
+	const unsigned int numElements = lastIndex - firstIndex;
+	moveAssignArray(array_ + firstIndex, array_ + lastIndex, size_ - lastIndex);
+	destructArray(array_ + size_ - numElements, numElements);
+	size_ -= numElements;
 
 	return (array_ + firstIndex);
 }
@@ -459,9 +497,11 @@ T *Array<T>::unorderedRemoveRange(unsigned int firstIndex, unsigned int lastInde
 	FATAL_ASSERT_MSG_X(lastIndex <= size_, "Last index %u out of size range", lastIndex);
 	FATAL_ASSERT_MSG_X(firstIndex <= lastIndex, "First index %u should precede or be equal to the last one %u", firstIndex, lastIndex);
 
-	for (unsigned int i = 0; i < lastIndex - firstIndex; i++)
+	const unsigned int numElements = lastIndex - firstIndex;
+	for (unsigned int i = 0; i < numElements; i++)
 		array_[firstIndex + i] = nctl::move(array_[size_ - i - 1]);
-	size_ -= (lastIndex - firstIndex);
+	destructArray(array_ + size_ - numElements, numElements);
+	size_ -= numElements;
 
 	return (array_ + firstIndex + 1);
 }
@@ -495,8 +535,7 @@ const T &Array<T>::at(unsigned int index) const
 template <class T>
 T &Array<T>::at(unsigned int index)
 {
-	// Avoid creating "holes" into the array
-	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
+	FATAL_ASSERT_MSG_X(index < size_, "Index %u is out of bounds (size: %u)", index, size_);
 	return operator[](index);
 }
 
@@ -510,26 +549,26 @@ const T &Array<T>::operator[](unsigned int index) const
 template <class T>
 T &Array<T>::operator[](unsigned int index)
 {
-	// Avoid creating "holes" into the array
-	ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
+	ASSERT_MSG_X(index < size_, "Index %u is out of bounds (size: %u)", index, size_);
+	return array_[index];
+}
 
-	// Adding an element at the back of the array
-	if (index == size_)
+template <class T>
+T *Array<T>::extendOne()
+{
+	// Need growing
+	if (size_ == capacity_)
 	{
-		// Need growing
-		if (size_ == capacity_)
-		{
-			const unsigned int newCapacity = (capacity_ == 0) ? 1 : capacity_ * 2;
-			setCapacity(newCapacity);
-			// Extending size only if the capacity is not fixed
-			if (capacity_ == newCapacity)
-				size_++;
-		}
-		else
+		const unsigned int newCapacity = (capacity_ == 0) ? 1 : capacity_ * 2;
+		setCapacity(newCapacity);
+		// Extending size only if the capacity is not fixed
+		if (capacity_ == newCapacity)
 			size_++;
 	}
+	else
+		size_++;
 
-	return array_[index];
+	return array_ + size_ - 1;
 }
 
 }

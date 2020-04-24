@@ -74,7 +74,7 @@ TEST_F(StaticHashSetStringTest, MoveConstruction)
 	nctl::StaticStringHashSet<Capacity> newStrHashset = nctl::move(strHashset_);
 	printHashSet(newStrHashset);
 
-	ASSERT_EQ(strHashset_.size(), Size); // Elements are not stolen
+	ASSERT_EQ(strHashset_.size(), 0);
 	ASSERT_EQ(newStrHashset.capacity(), Capacity);
 	ASSERT_EQ(newStrHashset.size(), Size);
 	ASSERT_EQ(calcSize(newStrHashset), Size);
@@ -97,7 +97,7 @@ TEST_F(StaticHashSetStringTest, MoveAssignmentOperator)
 	newStrHashset = nctl::move(strHashset_);
 	printHashSet(newStrHashset);
 
-	ASSERT_EQ(strHashset_.size(), Size); // Elements are not stolen
+	ASSERT_EQ(strHashset_.size(), 0);
 	ASSERT_EQ(newStrHashset.capacity(), Capacity);
 	ASSERT_EQ(newStrHashset.size(), Size);
 	ASSERT_EQ(calcSize(newStrHashset), Size);

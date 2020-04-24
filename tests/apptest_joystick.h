@@ -30,6 +30,12 @@ class MyEventHandler :
     public nc::IInputEventHandler
 {
   public:
+	MyEventHandler()
+	    : axisValues_(nctl::StaticArrayMode::EXTEND_SIZE),
+	      buttonStates_(nctl::StaticArrayMode::EXTEND_SIZE),
+	      hatStates_(nctl::StaticArrayMode::EXTEND_SIZE)
+	{}
+
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;

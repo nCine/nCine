@@ -20,8 +20,8 @@ const Colorf Colorf::Blue(0.0f, 0.0f, 1.0f, 1.0f);
 ///////////////////////////////////////////////////////////
 
 Colorf::Colorf()
+    : Colorf(1.0f, 1.0f, 1.0f, 1.0f)
 {
-	set(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 Colorf::Colorf(float red, float green, float blue)
@@ -30,16 +30,19 @@ Colorf::Colorf(float red, float green, float blue)
 }
 
 Colorf::Colorf(float red, float green, float blue, float alpha)
+    : channels_(nctl::StaticArrayMode::EXTEND_SIZE)
 {
 	set(red, green, blue, alpha);
 }
 
 Colorf::Colorf(const float channels[NumChannels])
+    : channels_(nctl::StaticArrayMode::EXTEND_SIZE)
 {
 	setVec(channels);
 }
 
 Colorf::Colorf(const Color &color)
+    : channels_(nctl::StaticArrayMode::EXTEND_SIZE)
 {
 	const float inv = 1.0f / 255.0f;
 	channels_[0] = static_cast<float>(color.r() * inv);
@@ -49,8 +52,8 @@ Colorf::Colorf(const Color &color)
 }
 
 Colorf::Colorf(const ColorHdr &color)
+    : Colorf(color.r(), color.g(), color.b(), 1.0f)
 {
-	set(color.r(), color.g(), color.b(), 1.0f);
 }
 
 ///////////////////////////////////////////////////////////

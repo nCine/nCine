@@ -83,11 +83,45 @@ TEST_F(HashMapTest, InsertElements)
 	ASSERT_EQ(calcSize(hashmap_), Size * 2);
 }
 
+TEST_F(HashMapTest, InsertConstElements)
+{
+	printf("Inserting const elements\n");
+	for (unsigned int i = Size; i < Size * 2; i++)
+	{
+		const int value = i + KeyValueDifference;
+		hashmap_.insert(i, value);
+	}
+
+	for (unsigned int i = 0; i < Size * 2; i++)
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
+
+	ASSERT_EQ(hashmap_.size(), Size * 2);
+	ASSERT_EQ(calcSize(hashmap_), Size * 2);
+}
+
 TEST_F(HashMapTest, FailInsertElements)
 {
 	printf("Trying to insert elements already in the hashmap\n");
 	for (unsigned int i = 0; i < Size * 2; i++)
 		hashmap_.insert(i, i + 2 * KeyValueDifference);
+
+	for (unsigned int i = 0; i < Size; i++)
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
+	for (unsigned int i = Size; i < Size * 2; i++)
+		ASSERT_EQ(hashmap_[i], i + 2 * KeyValueDifference);
+
+	ASSERT_EQ(hashmap_.size(), Size * 2);
+	ASSERT_EQ(calcSize(hashmap_), Size * 2);
+}
+
+TEST_F(HashMapTest, FailInsertConstElements)
+{
+	printf("Trying to insert const elements already in the hashmap\n");
+	for (unsigned int i = 0; i < Size * 2; i++)
+	{
+		const int value = i + 2 * KeyValueDifference;
+		hashmap_.insert(i, value);
+	}
 
 	for (unsigned int i = 0; i < Size; i++)
 		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
