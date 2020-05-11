@@ -5,7 +5,7 @@ variables:
 
      - nCine artifact from branch '$(Build.SourceBranchName)' with commit id $(Build.SourceVersion)"
   deploy_branch: nCine-BRANCHNAME-OS-COMPILER
-  ndk_version: r20b
+  ndk_version: r21b
 
 jobs:
 - job: Linux_macOS
@@ -303,14 +303,11 @@ jobs:
   - script: |
       source ../emsdk/emsdk_env.sh
 
-      emcmake cmake -B ../nCine-buildtests-$(BuildType) -D CMAKE_BUILD_TYPE=$(BuildType) -D NCINE_BUILD_UNIT_TESTS=ON -D NCINE_BUILD_TESTS=OFF -D NCINE_WITH_IMGUI=OFF -D CMAKE_CROSSCOMPILING_EMULATOR=node
+      # Not using emcmake to avoid issue #10028 with CMAKE_CROSSCOMPILING_EMULATOR path
+      cmake -B ../nCine-buildtests-$(BuildType) -D CMAKE_BUILD_TYPE=$(BuildType) -D NCINE_BUILD_UNIT_TESTS=ON -D NCINE_BUILD_TESTS=OFF -D NCINE_WITH_IMGUI=OFF -D CMAKE_CROSSCOMPILING_EMULATOR=$EMSDK_NODE -D CMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
 
-      # Apply fix conversion patch to compile Google Test for Emscripten
-      cd ../nCine-buildtests-$(BuildType)/googletest-src
-      curl https://github.com/google/googletest/commit/f1b334d4c08627f712c3d388490817ca57bd73ff.patch -o fix-conv.patch
       git config --global user.email "pipelines@azure.com"
       git config --global user.name "Azure Pipelines"
-      git am fix-conv.patch
       cd $(Build.SourcesDirectory)
 
       make -j2 -C ../nCine-buildtests-$(BuildType)
