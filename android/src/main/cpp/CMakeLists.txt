@@ -70,8 +70,8 @@ if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
 endif()
 if(NOT NCINE_DYNAMIC_LIBRARY)
 	target_include_directories(game PRIVATE ${NCINE_ROOT}/include/ncine)
-	target_compile_definitions(game PRIVATE ${ANDROID_GENERATED_FLAGS})
 endif()
+target_compile_definitions(game PRIVATE ${ANDROID_GENERATED_FLAGS})
 
 # Export ANativeActivity_onCreate() - https://github.com/android-ndk/ndk/issues/381
 set_property(TARGET game APPEND_STRING PROPERTY LINK_FLAGS "-u ANativeActivity_onCreate")

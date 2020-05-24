@@ -10,6 +10,7 @@ typedef void *HANDLE;
 	#include <dirent.h>
 #elif defined(__ANDROID__)
 using DIR = struct DIR;
+using AAssetDir = struct AAssetDir;
 #else
 struct __dirstream;
 using DIR = struct __dirstream;
@@ -63,6 +64,9 @@ class DLL_PUBLIC FileSystem
 		HANDLE hFindFile_ = NULL;
 		char fileName_[260];
 #else
+	#ifdef __ANDROID__
+		AAssetDir *assetDir_ = nullptr;
+	#endif
 		DIR *dirStream_ = nullptr;
 #endif
 	};
@@ -98,6 +102,10 @@ class DLL_PUBLIC FileSystem
 	static bool setCurrentDir(const char *path);
 	/// Returns the path of the user home directory
 	static nctl::String homeDir();
+#ifdef __ANDROID__
+	/// Returns the path of the Android external storage directory
+	static nctl::String externalStorageDir();
+#endif
 
 	/// Returns true if the specified path is a directory
 	static bool isDirectory(const char *path);

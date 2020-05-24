@@ -140,9 +140,9 @@ else() # GCC and LLVM
 
 		# Enabling strong stack protector of GCC 4.9
 		if(NCINE_GCC_HARDENING AND NOT (MINGW OR MSYS))
-			target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-Wformat-security -fstack-protector-strong>)
-			target_compile_definitions(ncine PRIVATE "$<$<CONFIG:Release>:_FORTIFY_SOURCE=2>")
-			target_link_options(ncine PRIVATE $<$<CONFIG:Release>:-Wl,-z,relro -Wl,-z,now>)
+			target_compile_options(ncine PUBLIC $<$<CONFIG:Release>:-Wformat -Wformat-security -fstack-protector-strong -fPIE>)
+			target_compile_definitions(ncine PUBLIC "$<$<CONFIG:Release>:_FORTIFY_SOURCE=2>")
+			target_link_options(ncine PUBLIC $<$<CONFIG:Release>:-Wl,-z,relro -Wl,-z,now -pie>)
 		endif()
 	elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
 		target_compile_options(ncine PRIVATE -fcolor-diagnostics)

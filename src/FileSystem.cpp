@@ -27,6 +27,7 @@
 
 #ifdef __ANDROID__
 	#include "AndroidApplication.h"
+	#include "AssetFile.h"
 #endif
 
 namespace ncine {
@@ -202,6 +203,12 @@ bool FileSystem::Directory::open(const char *path)
 	}
 	return (hFindFile_ != NULL && hFindFile_ != INVALID_HANDLE_VALUE);
 #else
+	#ifdef __ANDROID__
+	const char *assetPath = AssetFile::assetPath(path);
+	if (assetPath)
+		assetDir_ = AssetFile::openDir(assetPath);
+	else
+	#endif
 	if (path)
 		dirStream_ = opendir(path);
 	return (dirStream_ != nullptr);
@@ -217,6 +224,14 @@ void FileSystem::Directory::close()
 		hFindFile_ = NULL;
 	}
 #else
+	#ifdef __ANDROID__
+	if (assetDir_)
+	{
+		AssetFile::closeDir(assetDir_);
+		assetDir_ = nullptr;
+	}
+	else
+	#endif
 	if (dirStream_)
 	{
 		closedir(dirStream_);
@@ -248,6 +263,11 @@ const char *FileSystem::Directory::readNext()
 		return nullptr;
 	}
 #else
+	#ifdef __ANDROID__
+	// It does not return directory names
+	if (assetDir_)
+		return AssetFile::nextFileName(assetDir_);
+	#endif
 	if (dirStream_ == nullptr)
 		return nullptr;
 
@@ -283,6 +303,11 @@ nctl::String FileSystem::joinPath(const nctl::String &first, const nctl::String 
 
 	const bool firstHasSeparator = first[first.length() - 1] == '/' || first[first.length() - 1] == '\\';
 	const bool secondHasSeparator = second[0] == '/' || second[0] == '\\';
+
+#ifdef __ANDROID__
+	if (first == "asset::")
+		return first + second;
+#endif
 
 	// One path has a trailing or leading separator, the other has not
 	if (firstHasSeparator != secondHasSeparator)
@@ -468,6 +493,17 @@ nctl::String FileSystem::homeDir()
 #endif
 }
 
+#ifdef __ANDROID__
+nctl::String FileSystem::externalStorageDir()
+{
+	const char *extStorage = getenv("EXTERNAL_STORAGE");
+
+	if (extStorage == nullptr || extStorage[0] == '\0')
+		return nctl::String("/scard");
+	return nctl::String(extStorage);
+}
+#endif
+
 bool FileSystem::isDirectory(const char *path)
 {
 	if (path == nullptr)
@@ -477,6 +513,11 @@ bool FileSystem::isDirectory(const char *path)
 	const DWORD attrs = GetFileAttributesA(path);
 	return (attrs != INVALID_FILE_ATTRIBUTES && attrs & FILE_ATTRIBUTE_DIRECTORY);
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return AssetFile::tryOpenDirectory(path);
+	#endif
+
 	struct stat sb;
 	const bool statCalled = callStat(path, sb);
 	if (statCalled)
@@ -494,6 +535,11 @@ bool FileSystem::isFile(const char *path)
 	const DWORD attrs = GetFileAttributesA(path);
 	return (attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY) == 0);
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return AssetFile::tryOpenFile(path);
+	#endif
+
 	struct stat sb;
 	const bool statCalled = callStat(path, sb);
 	if (statCalled)
@@ -511,6 +557,11 @@ bool FileSystem::exists(const char *path)
 	const DWORD attrs = GetFileAttributesA(path);
 	return !(attrs == INVALID_FILE_ATTRIBUTES && GetLastError() == ERROR_FILE_NOT_FOUND);
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return AssetFile::tryOpen(path);
+	#endif
+
 	struct stat sb;
 	const bool statCalled = callStat(path, sb);
 	return statCalled;
@@ -527,6 +578,11 @@ bool FileSystem::isReadable(const char *path)
 	const DWORD attrs = GetFileAttributesA(path);
 	return !(attrs == INVALID_FILE_ATTRIBUTES && GetLastError() == ERROR_FILE_NOT_FOUND);
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return AssetFile::tryOpen(path);
+	#endif
+
 	struct stat sb;
 	const bool statCalled = callStat(path, sb);
 	if (statCalled)
@@ -544,6 +600,11 @@ bool FileSystem::isWritable(const char *path)
 	const DWORD attrs = GetFileAttributesA(path);
 	return (attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_READONLY) == 0);
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return false;
+	#endif
+
 	struct stat sb;
 	const bool statCalled = callStat(path, sb);
 	if (statCalled)
@@ -570,6 +631,11 @@ bool FileSystem::isExecutable(const char *path)
 	else
 		return false;
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return AssetFile::tryOpenDirectory(path);
+	#endif
+
 	return (::access(path, X_OK) == 0);
 #endif
 }
@@ -583,6 +649,11 @@ bool FileSystem::isReadableFile(const char *path)
 	const DWORD attrs = GetFileAttributesA(path);
 	return (attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY) == 0);
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return AssetFile::tryOpenFile(path);
+	#endif
+
 	struct stat sb;
 	const bool statCalled = callStat(path, sb);
 	if (statCalled)
@@ -602,6 +673,11 @@ bool FileSystem::isWritableFile(const char *path)
 	        (attrs & FILE_ATTRIBUTE_READONLY) == 0 &&
 	        (attrs & FILE_ATTRIBUTE_DIRECTORY) == 0);
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return false;
+	#endif
+
 	struct stat sb;
 	const bool statCalled = callStat(path, sb);
 	if (statCalled)
@@ -619,6 +695,11 @@ bool FileSystem::isHidden(const char *path)
 	const DWORD attrs = GetFileAttributesA(path);
 	return (attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_HIDDEN));
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return false;
+	#endif
+
 	strncpy(buffer, path, MaxPathLength - 1);
 	const char *baseName = ::basename(buffer);
 	return (baseName && baseName[0] == '.');
@@ -648,6 +729,11 @@ bool FileSystem::setHidden(const char *path, bool hidden)
 		return (status != 0);
 	}
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return false;
+	#endif
+
 	strncpy(buffer, path, MaxPathLength - 1);
 	const char *baseName = ::basename(buffer);
 	if (hidden && baseName && baseName[0] != '.')
@@ -684,6 +770,11 @@ bool FileSystem::createDir(const char *path)
 	const int status = CreateDirectoryA(path, NULL);
 	return (status != 0);
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return false;
+	#endif
+
 	const int status = ::mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	return (status == 0);
 #endif
@@ -698,6 +789,11 @@ bool FileSystem::deleteEmptyDir(const char *path)
 	const int status = RemoveDirectoryA(path);
 	return (status != 0);
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return false;
+	#endif
+
 	const int status = ::rmdir(path);
 	return (status == 0);
 #endif
@@ -712,6 +808,11 @@ bool FileSystem::deleteFile(const char *path)
 	const int status = DeleteFileA(path);
 	return (status != 0);
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return false;
+	#endif
+
 	const int status = ::unlink(path);
 	return (status == 0);
 #endif
@@ -726,6 +827,11 @@ bool FileSystem::rename(const char *oldPath, const char *newPath)
 	const int status = MoveFile(oldPath, newPath);
 	return (status != 0);
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(oldPath))
+		return false;
+	#endif
+
 	const int status = ::rename(oldPath, newPath);
 	return (status == 0);
 #endif
@@ -740,6 +846,11 @@ bool FileSystem::copy(const char *oldPath, const char *newPath)
 	const int status = CopyFile(oldPath, newPath, TRUE);
 	return (status != 0);
 #elif defined(__linux__)
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(oldPath))
+		return false;
+	#endif
+
 	int source, dest;
 	off_t bytes = 0;
 	struct stat sb;
@@ -801,6 +912,11 @@ long int FileSystem::fileSize(const char *path)
 	const int closed = CloseHandle(hFile);
 	return (status != 0 && closed != 0) ? static_cast<long int>(fileSize.QuadPart) : -1;
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return AssetFile::length(path);
+	#endif
+
 	struct stat sb;
 	const bool statCalled = callStat(path, sb);
 	if (statCalled == false)
@@ -827,6 +943,11 @@ FileSystem::FileDate FileSystem::lastModificationTime(const char *path)
 	}
 	const int closed = CloseHandle(hFile);
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return date;
+	#endif
+
 	struct stat sb;
 	const bool statCalled = callStat(path, sb);
 	if (statCalled)
@@ -853,6 +974,11 @@ FileSystem::FileDate FileSystem::lastAccessTime(const char *path)
 	}
 	const int closed = CloseHandle(hFile);
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return date;
+	#endif
+
 	struct stat sb;
 	const bool statCalled = callStat(path, sb);
 	if (statCalled)
@@ -875,6 +1001,16 @@ int FileSystem::permissions(const char *path)
 		mode += Permission::WRITE;
 	return mode;
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+	{
+		if (AssetFile::tryOpenDirectory(path))
+			return (Permission::READ + Permission::EXECUTE);
+		else if (AssetFile::tryOpenFile(path))
+			return Permission::READ;
+	}
+	#endif
+
 	struct stat sb;
 	const bool statCalled = callStat(path, sb);
 	if (statCalled == false)
@@ -911,6 +1047,11 @@ bool FileSystem::changePermissions(const char *path, int mode)
 	}
 	return false;
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return false;
+	#endif
+
 	struct stat sb;
 	const bool statCalled = callStat(path, sb);
 	if (statCalled == false)
@@ -946,6 +1087,11 @@ bool FileSystem::addPermissions(const char *path, int mode)
 	}
 	return false;
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return false;
+	#endif
+
 	struct stat sb;
 	const bool statCalled = callStat(path, sb);
 	if (statCalled == false)
@@ -978,6 +1124,11 @@ bool FileSystem::removePermissions(const char *path, int mode)
 	}
 	return false;
 #else
+	#ifdef __ANDROID__
+	if (AssetFile::assetPath(path))
+		return false;
+	#endif
+
 	struct stat sb;
 	const bool statCalled = callStat(path, sb);
 	if (statCalled == false)
@@ -1010,11 +1161,14 @@ void FileSystem::initSavePath()
 	// Get the internal data path from the Android application
 	savePath_ = application.internalDataPath();
 
-	// Trying to create the data directory
-	if (createDir(savePath_.data()) == false)
+	if (fs::isDirectory(savePath_.data()) == false)
 	{
-		LOGE_X("Cannot create directory: %s", savePath_.data());
-		savePath_.clear();
+		// Trying to create the data directory
+		if (createDir(savePath_.data()) == false)
+		{
+			LOGE_X("Cannot create directory: %s", savePath_.data());
+			savePath_.clear();
+		}
 	}
 #elif defined(_WIN32)
 	const char *userProfileEnv = getenv("USERPROFILE");

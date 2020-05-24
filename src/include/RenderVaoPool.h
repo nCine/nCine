@@ -3,7 +3,7 @@
 
 #include <nctl/Array.h>
 #include <nctl/UniquePtr.h>
-#include <TimeStamp.h>
+#include "TimeStamp.h"
 #include "GLVertexArrayObject.h"
 #include "GLVertexFormat.h"
 

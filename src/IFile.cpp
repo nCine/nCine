@@ -36,12 +36,9 @@ nctl::UniquePtr<IFile> IFile::createFileHandle(const char *filename)
 {
 	ASSERT(filename);
 #ifdef __ANDROID__
-	if (strncmp(filename, static_cast<const char *>("asset::"), 7) == 0)
-	{
-		// Skip leading path separator character
-		const char *assetFilename = (filename[7] == '/') ? filename + 8 : filename + 7;
+	const char *assetFilename = AssetFile::assetPath(filename);
+	if (assetFilename)
 		return nctl::makeUnique<AssetFile>(assetFilename);
-	}
 	else
 #endif
 		return nctl::makeUnique<StandardFile>(filename);

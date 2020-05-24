@@ -70,6 +70,7 @@ foreach(APPTEST ${APPTESTS})
 	if(WIN32 AND Qt5_FOUND AND NCINE_PREFERRED_BACKEND STREQUAL "QT5")
 		target_link_libraries(${APPTEST} PRIVATE Qt5::WinMain)
 	elseif(MINGW)
+		# Should be linked before `ncine_main`
 		target_link_libraries(${APPTEST} PRIVATE mingw32)
 	endif()
 

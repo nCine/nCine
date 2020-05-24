@@ -74,6 +74,27 @@ if(NCINE_BUILD_ANDROID)
 		set(GRADLE_LIBCPP_SHARED "true")
 	endif()
 
+	set(JAVA_SYSTEM_LOADLIBRARY
+		"try {
+			System.loadLibrary(\"JAVA_NATIVE_LIBRARY_NAME\")\;
+		} catch (UnsatisfiedLinkError e) {
+			System.err.println(\"Caught UnsatisfiedLinkError: \" + e.getMessage())\;
+		}"
+	)
+	if(NCINE_WITH_AUDIO)
+		string(REPLACE "JAVA_NATIVE_LIBRARY_NAME" "openal" JAVA_SYSTEM_LOADLIBRARY_OPENAL ${JAVA_SYSTEM_LOADLIBRARY})
+	endif()
+	if(NCINE_DYNAMIC_LIBRARY)
+		string(REPLACE "JAVA_NATIVE_LIBRARY_NAME" "ncine" JAVA_SYSTEM_LOADLIBRARY_NCINE ${JAVA_SYSTEM_LOADLIBRARY})
+	endif()
+
+	set(LOAD_LIBRARIES_JAVA_IN ${CMAKE_SOURCE_DIR}/android/src/main/java/io/github/ncine/LoadLibraries.java.in)
+	set(LOAD_LIBRARIES_JAVA ${CMAKE_BINARY_DIR}/android/src/main/java/io/github/ncine/LoadLibraries.java)
+	configure_file(${LOAD_LIBRARIES_JAVA_IN} ${LOAD_LIBRARIES_JAVA} @ONLY)
+	set(LOAD_LIBRARIES_TV_JAVA_IN ${CMAKE_SOURCE_DIR}/android/src/main/java/io/github/ncine/LoadLibrariesTV.java.in)
+	set(LOAD_LIBRARIES_TV_JAVA ${CMAKE_BINARY_DIR}/android/src/main/java/io/github/ncine/LoadLibrariesTV.java)
+	configure_file(${LOAD_LIBRARIES_TV_JAVA_IN} ${LOAD_LIBRARIES_TV_JAVA} @ONLY)
+
 	set(BUILD_GRADLE_IN ${CMAKE_SOURCE_DIR}/android/build.gradle.in)
 	set(BUILD_GRADLE ${CMAKE_BINARY_DIR}/android/build.gradle)
 	if(NCINE_WITH_AUDIO)
@@ -105,8 +126,6 @@ if(NCINE_BUILD_ANDROID)
 	configure_file(${ANDROID_MANIFEST_XML_IN} ${ANDROID_MANIFEST_XML} @ONLY)
 
 	file(COPY android/gradle-devdist.properties DESTINATION android)
-	file(COPY android/src/main/java/io/github/ncine/LoadLibraries.java DESTINATION android/src/main/java/io/github/ncine)
-	file(COPY android/src/main/java/io/github/ncine/LoadLibrariesTV.java DESTINATION android/src/main/java/io/github/ncine)
 	file(COPY android/src/main/cpp/main.cpp DESTINATION android/src/main/cpp)
 	file(COPY android/src/main/cpp/CMakeLists.txt DESTINATION android/src/main/cpp)
 	file(COPY android/src/main/cpp/CMakeLists-devdist.txt DESTINATION android/src/main/cpp)

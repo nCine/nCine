@@ -32,8 +32,22 @@ class DLL_PUBLIC AssetFile : public IFile
 	/// Sets the global pointer to the AAssetManager
 	static void initAssetManager(struct android_app *state) { assetManager_ = state->activity->assetManager; }
 
-	/// Checks if an asset file exists and can be opened
-	static bool tryOpen(const char *filename);
+	/// Returns the path of an Android asset without the `asset::` prefix
+	static const char *assetPath(const char *path);
+
+	/// Checks if an asset path exists as a file or as a directory and can be opened
+	static bool tryOpen(const char *path);
+	/// Checks if an asset path exists and can be opened as a file
+	static bool tryOpenFile(const char *path);
+	/// Checks if an asset path exists and can be opened as a directory
+	static bool tryOpenDirectory(const char *path);
+	/// Returns the total size of the asset data
+	static off_t length(const char *path);
+
+	static AAssetDir *openDir(const char *dirName);
+	static void closeDir(AAssetDir *assetDir);
+	static void rewindDir(AAssetDir *assetDir);
+	static const char *nextFileName(AAssetDir *assetDir);
 
   private:
 	static AAssetManager *assetManager_;

@@ -141,11 +141,31 @@ bool AssetFile::isOpened() const
 		return false;
 }
 
-bool AssetFile::tryOpen(const char *filename)
+const char *AssetFile::assetPath(const char *path)
 {
-	ASSERT(filename);
+	ASSERT(path);
+	if (strncmp(path, static_cast<const char *>("asset::"), 7) == 0)
+	{
+		// Skip leading path separator character
+		return (path[7] == '/') ? path + 8 : path + 7;
+	}
+	return nullptr;
+}
 
-	AAsset *asset = AAssetManager_open(assetManager_, filename, AASSET_MODE_UNKNOWN);
+bool AssetFile::tryOpen(const char *path)
+{
+	ASSERT(path);
+	return (tryOpenFile(path) || tryOpenDirectory(path));
+}
+
+bool AssetFile::tryOpenFile(const char *path)
+{
+	ASSERT(path);
+	const char *strippedPath = assetPath(path);
+	if (strippedPath == nullptr)
+		return false;
+
+	AAsset *asset = AAssetManager_open(assetManager_, strippedPath, AASSET_MODE_UNKNOWN);
 	if (asset)
 	{
 		AAsset_close(asset);
@@ -153,6 +173,73 @@ bool AssetFile::tryOpen(const char *filename)
 	}
 
 	return false;
+}
+
+bool AssetFile::tryOpenDirectory(const char *path)
+{
+	ASSERT(path);
+	const char *strippedPath = assetPath(path);
+	if (strippedPath == nullptr)
+		return false;
+
+	AAsset *asset = AAssetManager_open(assetManager_, strippedPath, AASSET_MODE_UNKNOWN);
+	if (asset)
+	{
+		AAsset_close(asset);
+		return false;
+	}
+
+	AAssetDir *assetDir = AAssetManager_openDir(assetManager_, strippedPath);
+	if (assetDir)
+	{
+		AAssetDir_close(assetDir);
+		return true;
+	}
+
+	return false;
+}
+
+off_t AssetFile::length(const char *path)
+{
+	ASSERT(path);
+
+	off_t assetLength = 0;
+	const char *strippedPath = assetPath(path);
+	if (strippedPath == nullptr)
+		return assetLength;
+
+	AAsset *asset = AAssetManager_open(assetManager_, strippedPath, AASSET_MODE_UNKNOWN);
+	if (asset)
+	{
+		assetLength = AAsset_getLength(asset);
+		AAsset_close(asset);
+	}
+
+	return assetLength;
+}
+
+AAssetDir *AssetFile::openDir(const char *dirName)
+{
+	ASSERT(dirName);
+	return AAssetManager_openDir(assetManager_, dirName);
+}
+
+void AssetFile::closeDir(AAssetDir *assetDir)
+{
+	ASSERT(assetDir);
+	AAssetDir_close(assetDir);
+}
+
+void AssetFile::rewindDir(AAssetDir *assetDir)
+{
+	ASSERT(assetDir);
+	AAssetDir_rewind(assetDir);
+}
+
+const char *AssetFile::nextFileName(AAssetDir *assetDir)
+{
+	ASSERT(assetDir);
+	return AAssetDir_getNextFileName(assetDir);
 }
 
 ///////////////////////////////////////////////////////////

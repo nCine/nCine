@@ -27,11 +27,6 @@ endif()
 
 foreach(SRCAPPTEST ${SRCAPPTESTS})
 	add_executable(${SRCAPPTEST} WIN32 ${SRCAPPTEST}.cpp ${RESOURCE_RC_FILE})
-	target_link_libraries(${SRCAPPTEST} PRIVATE ncine_main ncine)
-	target_include_directories(${SRCAPPTEST} PRIVATE ${CMAKE_SOURCE_DIR}/include/ncine ${CMAKE_SOURCE_DIR}/src/include)
-
-	set_target_properties(${SRCAPPTEST} PROPERTIES FOLDER "SrcTests")
-	install(TARGETS ${SRCAPPTEST} RUNTIME DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
 
 	if(NCINE_EMBED_SHADERS)
 		target_compile_definitions(${SRCAPPTEST} PRIVATE "WITH_EMBEDDED_SHADERS")
@@ -45,9 +40,15 @@ foreach(SRCAPPTEST ${SRCAPPTESTS})
 		if(Qt5_FOUND AND NCINE_PREFERRED_BACKEND STREQUAL "QT5")
 			target_link_libraries(${SRCAPPTEST} PRIVATE Qt5::WinMain)
 		elseif(MINGW)
-			target_link_libraries(${APPTEST} PRIVATE mingw32)
+			# Should be linked before `ncine_main`
+			target_link_libraries(${SRCAPPTEST} PRIVATE mingw32)
 		endif()
 	endif()
+
+	target_include_directories(${SRCAPPTEST} PRIVATE ${CMAKE_SOURCE_DIR}/include/ncine ${CMAKE_SOURCE_DIR}/src/include)
+	target_link_libraries(${SRCAPPTEST} PRIVATE ncine_main ncine)
+	set_target_properties(${SRCAPPTEST} PROPERTIES FOLDER "SrcTests")
+	install(TARGETS ${SRCAPPTEST} RUNTIME DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
 
 	if(EMSCRIPTEN)
 		set(EMSCRIPTEN_PAGE_TITLE ${SRCAPPTEST})
