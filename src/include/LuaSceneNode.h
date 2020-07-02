@@ -25,7 +25,7 @@ class LuaSceneNode
 	static int removeChildNode(lua_State *L);
 	static int unlinkChildNode(lua_State *L);
 
-	static int enabled(lua_State *L);
+	static int isEnabled(lua_State *L);
 	static int setEnabled(lua_State *L);
 
 	static int position(lua_State *L);

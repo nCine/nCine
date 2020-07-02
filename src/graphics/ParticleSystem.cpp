@@ -6,11 +6,14 @@
 #include "Texture.h"
 
 #include "tracy.h"
-#ifdef WITH_TRACY
-	static nctl::String tracyInfoString(128);
-#endif
 
 namespace ncine {
+
+namespace {
+#ifdef WITH_TRACY
+	nctl::String tracyInfoString(128);
+#endif
+}
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -59,6 +62,9 @@ void ParticleSystem::clearAffectors()
 
 void ParticleSystem::emitParticles(const ParticleInitializer &init)
 {
+	if (updateEnabled_ == false)
+		return;
+
 	ZoneScoped;
 	const unsigned int amount = static_cast<unsigned int>(random().integer(init.rndAmount.x, init.rndAmount.y));
 #ifdef WITH_TRACY
@@ -175,7 +181,13 @@ void ParticleSystem::setBlendingFactors(DrawableNode::BlendingFactor srcBlending
 
 void ParticleSystem::update(float interval)
 {
+	if (updateEnabled_ == false)
+		return;
+
 	ZoneScoped;
+	// Overridden `update()` method should call `transform` like `SceneNode::update()` does
+	transform();
+
 	for (int i = children_.size() - 1; i >= 0; i--)
 	{
 		Particle *particle = static_cast<Particle *>(children_[i]);

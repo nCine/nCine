@@ -28,7 +28,7 @@ namespace LuaDebug {
 			traceError(L, fmt, args...);
 	}
 
-	const char *errorToSting(int value);
+	const char *errorToString(int value);
 	void printStackValue(lua_State *L, int index);
 
 }

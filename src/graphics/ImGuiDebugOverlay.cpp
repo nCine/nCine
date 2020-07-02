@@ -1255,11 +1255,11 @@ void ImGuiDebugOverlay::guiRescursiveChildrenNodes(SceneNode *node, unsigned int
 			}
 		}
 
-		bool updateEnabled = node->updateEnabled();
+		bool updateEnabled = node->isUpdateEnabled();
 		ImGui::Checkbox("Update", &updateEnabled);
 		node->setUpdateEnabled(updateEnabled);
 		ImGui::SameLine();
-		bool drawEnabled = node->drawEnabled();
+		bool drawEnabled = node->isDrawEnabled();
 		ImGui::Checkbox("Draw", &drawEnabled);
 		node->setDrawEnabled(drawEnabled);
 		ImGui::SameLine();

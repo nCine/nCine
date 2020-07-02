@@ -28,7 +28,7 @@ namespace ncine {
 bool ImGuiGlfwInput::inputEnabled_ = true;
 GLFWwindow *ImGuiGlfwInput::window_ = nullptr;
 double ImGuiGlfwInput::time_ = 0.0;
-bool ImGuiGlfwInput::mouseJustPressed_[5] = { false, false, false, false, false };
+bool ImGuiGlfwInput::mouseJustPressed_[ImGuiMouseButton_COUNT] = {};
 GLFWcursor *ImGuiGlfwInput::mouseCursors_[ImGuiMouseCursor_COUNT] = {};
 
 ///////////////////////////////////////////////////////////

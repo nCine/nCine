@@ -270,14 +270,14 @@ bool LuaStateManager::runFromMemory(const char *buffer, unsigned long size, cons
 	const int loadError = luaL_loadbufferx(L_, bufferRead, size, filename, "bt");
 	if (loadError != LUA_OK)
 	{
-		LOGE_X("Cannot load \"%s\" script: %s", filename, LuaDebug::errorToSting(loadError));
+		LOGE_X("Cannot load \"%s\" script: %s", filename, LuaDebug::errorToString(loadError));
 		return false;
 	}
 
 	const int callError = lua_pcall(L_, 0, LUA_MULTRET, 0);
 	if (callError != LUA_OK)
 	{
-		LOGE_X("Cannot run \"%s\" script: %s", filename, LuaDebug::errorToSting(callError));
+		LOGE_X("Cannot run \"%s\" script: %s", filename, LuaDebug::errorToString(callError));
 		return false;
 	}
 

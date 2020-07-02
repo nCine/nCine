@@ -14,7 +14,7 @@ namespace SceneNode {
 	static const char *removeChildNode = "remove_child";
 	static const char *unlinkChildNode = "unlink_child";
 
-	static const char *enabled = "is_enabled";
+	static const char *isEnabled = "is_enabled";
 	static const char *setEnabled = "set_enabled";
 
 	static const char *position = "get_position";
@@ -46,7 +46,7 @@ void LuaSceneNode::exposeFunctions(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::SceneNode::removeChildNode, removeChildNode);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::unlinkChildNode, unlinkChildNode);
 
-	LuaUtils::addFunction(L, LuaNames::SceneNode::enabled, enabled);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::isEnabled, isEnabled);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::setEnabled, setEnabled);
 
 	LuaUtils::addFunction(L, LuaNames::SceneNode::position, position);
@@ -118,11 +118,11 @@ int LuaSceneNode::unlinkChildNode(lua_State *L)
 	return 1;
 }
 
-int LuaSceneNode::enabled(lua_State *L)
+int LuaSceneNode::isEnabled(lua_State *L)
 {
 	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
 
-	const bool result = node->enabled();
+	const bool result = node->isEnabled();
 	LuaUtils::push(L, result);
 
 	return 1;

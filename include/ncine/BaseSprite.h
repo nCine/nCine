@@ -14,10 +14,6 @@ class GLUniformBlockCache;
 class DLL_PUBLIC BaseSprite : public DrawableNode
 {
   public:
-	/// Sets sprite width
-	inline void setWidth(float width) { width_ = width; }
-	/// Sets sprite height
-	inline void setHeight(float height) { height_ = height; }
 	/// Sets sprite size
 	void setSize(float width, float height);
 	/// Sets sprite size with a `Vector2f`

@@ -11,8 +11,6 @@ class LuaBaseSprite
   private:
 	static void exposeFunctions(lua_State *L);
 
-	static int setWidth(lua_State *L);
-	static int setHeight(lua_State *L);
 	static int setSize(lua_State *L);
 
 	static int texture(lua_State *L);

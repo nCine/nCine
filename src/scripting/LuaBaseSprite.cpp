@@ -13,8 +13,6 @@ namespace ncine {
 
 namespace LuaNames {
 namespace BaseSprite {
-	static const char *setWidth = "set_width";
-	static const char *setHeight = "set_height";
 	static const char *setSize = "set_size";
 
 	static const char *texture = "get_texture";
@@ -40,8 +38,6 @@ void LuaBaseSprite::exposeFunctions(lua_State *L)
 {
 	LuaDrawableNode::exposeFunctions(L);
 
-	LuaUtils::addFunction(L, LuaNames::BaseSprite::setWidth, setWidth);
-	LuaUtils::addFunction(L, LuaNames::BaseSprite::setHeight, setHeight);
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::setSize, setSize);
 
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::texture, texture);
@@ -57,26 +53,6 @@ void LuaBaseSprite::exposeFunctions(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::setFlippedX, setFlippedX);
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::isFlippedY, isFlippedY);
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::setFlippedY, setFlippedY);
-}
-
-int LuaBaseSprite::setWidth(lua_State *L)
-{
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -2);
-	const float width = LuaUtils::retrieve<float>(L, -1);
-
-	sprite->setWidth(width);
-
-	return 0;
-}
-
-int LuaBaseSprite::setHeight(lua_State *L)
-{
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -2);
-	const float height = LuaUtils::retrieve<float>(L, -1);
-
-	sprite->setHeight(height);
-
-	return 0;
 }
 
 int LuaBaseSprite::setSize(lua_State *L)

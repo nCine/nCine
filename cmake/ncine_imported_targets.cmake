@@ -132,7 +132,11 @@ elseif(NOT ANDROID) # GCC and LLVM
 		endif()
 	endif()
 	if(NCINE_WITH_LUA)
-		find_package(Lua)
+		if(NOT MINGW AND NOT MSYS)
+			# Older CMake versions do not support Lua 5.4 if not set explicitly
+			set(LUA_REQUIRED_VERSION "5.4")
+		endif()
+		find_package(Lua ${LUA_REQUIRED_VERSION})
 	endif()
 endif()
 
@@ -321,11 +325,11 @@ elseif(MSVC)
 		endif()
 	endif()
 
-	if(NCINE_WITH_LUA AND EXISTS ${MSVC_LIBDIR}/lua53.lib AND EXISTS ${MSVC_BINDIR}/lua53.dll)
+	if(NCINE_WITH_LUA AND EXISTS ${MSVC_LIBDIR}/lua54.lib AND EXISTS ${MSVC_BINDIR}/lua54.dll)
 		add_library(Lua::Lua SHARED IMPORTED)
 		set_target_properties(Lua::Lua PROPERTIES
-			IMPORTED_IMPLIB ${MSVC_LIBDIR}/lua53.lib
-			IMPORTED_LOCATION ${MSVC_BINDIR}/lua53.dll
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/lua54.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/lua54.dll
 			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
 		set(LUA_FOUND 1)
 	endif()
@@ -398,7 +402,7 @@ elseif(MINGW OR MSYS)
 	endif()
 
 	if(LUA_FOUND)
-		set_msys_dll(LUA lua53)
+		set_msys_dll(LUA lua53) # MSYS2 has not updated Lua yet
 		add_library(Lua::Lua SHARED IMPORTED)
 		set_target_properties(Lua::Lua PROPERTIES
 			IMPORTED_IMPLIB ${LUA_LIBRARY}

@@ -148,6 +148,8 @@ void ImGuiSdlInput::newFrame()
 	int w, h;
 	int displayW, displayH;
 	SDL_GetWindowSize(window_, &w, &h);
+	if (SDL_GetWindowFlags(window_) & SDL_WINDOW_MINIMIZED)
+		w = h = 0;
 	SDL_GL_GetDrawableSize(window_, &displayW, &displayH);
 	io.DisplaySize = ImVec2(static_cast<float>(w), static_cast<float>(h));
 	if (w > 0 && h > 0)

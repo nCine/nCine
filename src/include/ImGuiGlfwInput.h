@@ -28,7 +28,7 @@ class ImGuiGlfwInput
 
 	static GLFWwindow *window_;
 	static double time_;
-	static bool mouseJustPressed_[5];
+	static bool mouseJustPressed_[ImGuiMouseButton_COUNT];
 	static GLFWcursor *mouseCursors_[ImGuiMouseCursor_COUNT];
 
 	static void updateMousePosAndButtons();

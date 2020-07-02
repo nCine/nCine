@@ -24,7 +24,7 @@ void LuaDebug::assert(lua_State *L, bool condition, const char *errorMsg)
 	}
 }
 
-const char *LuaDebug::errorToSting(int value)
+const char *LuaDebug::errorToString(int value)
 {
 	switch (value)
 	{
@@ -33,7 +33,9 @@ const char *LuaDebug::errorToSting(int value)
 		case LUA_ERRRUN: return "Run-time error (LUA_ERRRUN)";
 		case LUA_ERRSYNTAX: return "Syntax error during precompilation (LUA_ERRSYNTAX)";
 		case LUA_ERRMEM: return "Memory allocation error (LUA_ERRMEM)";
+#if LUA_VERSION_NUM <= 503
 		case LUA_ERRGCMM: return "Error while running a __gc metamethod (LUA_ERRGCMM)";
+#endif
 		case LUA_ERRERR: return "Error while running the message handler (LUA_ERRERR)";
 		default:
 			return "No error";

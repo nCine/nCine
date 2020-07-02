@@ -153,13 +153,11 @@ void SceneNode::update(float interval)
 {
 	// Early return not needed, the first call to this method is on the root node
 
-	for (SceneNode *child : children_)
+	if (updateEnabled_)
 	{
-		if (child->updateEnabled_)
-		{
-			child->transform();
+		transform();
+		for (SceneNode *child : children_)
 			child->update(interval);
-		}
 	}
 }
 
@@ -167,13 +165,11 @@ void SceneNode::visit(RenderQueue &renderQueue)
 {
 	// Early return not needed, the first call to this method is on the root node
 
-	for (SceneNode *child : children_)
+	if (drawEnabled_)
 	{
-		if (child->drawEnabled_)
-		{
-			child->draw(renderQueue);
+		draw(renderQueue);
+		for (SceneNode *child : children_)
 			child->visit(renderQueue);
-		}
 	}
 }
 
