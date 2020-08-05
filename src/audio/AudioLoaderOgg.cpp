@@ -1,41 +1,35 @@
 #include "AudioLoaderOgg.h"
 
-#ifdef __ANDROID__
-	#include "AssetFile.h" // for `AssetFile::sType()`
-#endif
-
 namespace ncine {
 
-#ifdef __ANDROID__
 namespace {
-	size_t asset_read(void *ptr, size_t size, size_t nmemb, void *datasource)
+	size_t fileRead(void *ptr, size_t size, size_t nmemb, void *datasource)
 	{
-		AssetFile *assetFile = static_cast<AssetFile *>(datasource);
-		return assetFile->read(ptr, size * nmemb);
+		IFile *file = static_cast<IFile *>(datasource);
+		return file->read(ptr, size * nmemb);
 	}
 
-	int asset_seek(void *datasource, ogg_int64_t offset, int whence)
+	int fileSeek(void *datasource, ogg_int64_t offset, int whence)
 	{
-		AssetFile *assetFile = static_cast<AssetFile *>(datasource);
-		return assetFile->seek(offset, whence);
+		IFile *file = static_cast<IFile *>(datasource);
+		return file->seek(offset, whence);
 	}
 
-	int asset_close(void *datasource)
+	int fileClose(void *datasource)
 	{
-		AssetFile *assetFile = static_cast<AssetFile *>(datasource);
-		assetFile->close();
+		IFile *file = static_cast<IFile *>(datasource);
+		file->close();
 		return 0;
 	}
 
-	long asset_tell(void *datasource)
+	long fileTell(void *datasource)
 	{
-		AssetFile *assetFile = static_cast<AssetFile *>(datasource);
-		return assetFile->tell();
+		IFile *file = static_cast<IFile *>(datasource);
+		return file->tell();
 	}
 
-	const ov_callbacks oggCallbacks = { asset_read, asset_seek, asset_close, asset_tell };
+	const ov_callbacks fileCallbacks = { fileRead, fileSeek, fileClose, fileTell };
 }
-#endif
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -55,32 +49,18 @@ AudioLoaderOgg::AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle)
 	fileHandle_->setCloseOnDestruction(false);
 
 #ifdef __ANDROID__
-	if (fileHandle_->type() == AssetFile::sType())
-	{
+	if (fileHandle_->type() == IFile::FileType::ASSET)
 		fileHandle_->open(IFile::OpenMode::FD | IFile::OpenMode::READ);
-
-		if (ov_open_callbacks(fileHandle_.get(), &oggFile_, nullptr, 0, oggCallbacks) != 0)
-		{
-			LOGF_X("Cannot open \"%s\" with ov_open_callbacks()", fileHandle_->filename());
-			fileHandle_->close();
-			exit(EXIT_FAILURE);
-		}
-	}
 	else
-	{
+#endif
 		fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
 
-		if (ov_open(fileHandle_->ptr(), &oggFile_, nullptr, 0) != 0)
-		{
-			LOGF_X("Cannot open \"%s\" with ov_open()", fileHandle_->filename());
-			fileHandle_->close();
-			exit(EXIT_FAILURE);
-		}
+	if (ov_open_callbacks(fileHandle_.get(), &oggFile_, nullptr, 0, fileCallbacks) != 0)
+	{
+		LOGF_X("Cannot open \"%s\" with ov_open_callbacks()", fileHandle_->filename());
+		fileHandle_->close();
+		exit(EXIT_FAILURE);
 	}
-#else
-	const int err = ov_fopen(fileHandle_->filename(), &oggFile_);
-	FATAL_ASSERT_MSG_X(err == 0, "Cannot open \"%s\" with ov_fopen()", fileHandle_->filename());
-#endif
 
 	// Get some information about the OGG file
 	const vorbis_info *info = ov_info(&oggFile_, -1);

@@ -21,10 +21,17 @@ class DLL_PUBLIC Font : public Object
 		GLYPH_IN_ALPHA
 	};
 
+	/// Constructs the object from an AngelCode's `FNT` memory buffer and a texture
+	Font(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize, const char *texFilename);
+	/// Constructs the object from an AngelCode's `FNT` memory buffer and a texture memory buffer
+	Font(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize,
+	     const char *texBufferName, const unsigned char *texBufferPtr, unsigned long int texBufferSize);
+
 	/// Constructs the object from an AngelCode's `FNT` file
 	explicit Font(const char *fntFilename);
-	/// Constructs the object from an AngelCode's `FNT` file and a texture
+	/// Constructs the object from an AngelCode's `FNT` file and a texture file
 	Font(const char *fntFilename, const char *texFilename);
+
 	~Font() override;
 
 	/// Gets the texture object

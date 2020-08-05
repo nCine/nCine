@@ -250,34 +250,34 @@ bool LuaStateManager::run(const char *filename)
 	nctl::UniquePtr<char[]> buffer = nctl::makeUnique<char[]>(fileSize);
 	fileHandle->read(buffer.get(), fileSize);
 
-	return runFromMemory(buffer.get(), fileSize, filename);
+	return runFromMemory(filename, buffer.get(), fileSize);
 }
 
-bool LuaStateManager::runFromMemory(const char *buffer, unsigned long size, const char *filename)
+bool LuaStateManager::runFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize)
 {
 	releaseTrackedMemory();
 	untrackedUserDatas_.clear();
 
-	const char *bufferRead = buffer;
+	const char *bufferRead = bufferPtr;
 
 	// Skip shebang as `luaL_loadfile` does
 	if (bufferRead[0] == '#')
 	{
-		bufferRead = static_cast<const char *>(memchr(bufferRead, '\n', size)) + 1;
-		size -= bufferRead - buffer;
+		bufferRead = static_cast<const char *>(memchr(bufferRead, '\n', bufferSize)) + 1;
+		bufferSize -= bufferRead - bufferPtr;
 	}
 
-	const int loadError = luaL_loadbufferx(L_, bufferRead, size, filename, "bt");
+	const int loadError = luaL_loadbufferx(L_, bufferRead, bufferSize, bufferName, "bt");
 	if (loadError != LUA_OK)
 	{
-		LOGE_X("Cannot load \"%s\" script: %s", filename, LuaDebug::errorToString(loadError));
+		LOGE_X("Cannot load \"%s\" script: %s", bufferName, LuaDebug::errorToString(loadError));
 		return false;
 	}
 
 	const int callError = lua_pcall(L_, 0, LUA_MULTRET, 0);
 	if (callError != LUA_OK)
 	{
-		LOGE_X("Cannot run \"%s\" script: %s", filename, LuaDebug::errorToString(callError));
+		LOGE_X("Cannot run \"%s\" script: %s", bufferName, LuaDebug::errorToString(callError));
 		return false;
 	}
 

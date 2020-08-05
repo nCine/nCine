@@ -266,7 +266,12 @@ void AssetFile::openFD(unsigned char mode)
 			}
 		}
 
-		fileDescriptor_ = AAsset_openFileDescriptor(asset_, &startOffset_, &fileSize_);
+		off_t outStart = 0;
+		off_t outLength = 0;
+		fileDescriptor_ = AAsset_openFileDescriptor(asset_, &outStart, &outLength);
+		startOffset_ = outStart;
+		fileSize_ = outLength;
+
 		lseek(fileDescriptor_, startOffset_, SEEK_SET);
 		AAsset_close(asset_);
 		asset_ = nullptr;

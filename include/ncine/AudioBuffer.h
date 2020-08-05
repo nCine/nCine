@@ -14,6 +14,8 @@ class DLL_PUBLIC AudioBuffer : public Object
 {
   public:
 	AudioBuffer();
+	/// A constructor creating a buffer from memory
+	AudioBuffer(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	/// A constructor creating a buffer from a file
 	explicit AudioBuffer(const char *filename);
 	~AudioBuffer() override;

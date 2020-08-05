@@ -36,6 +36,8 @@ class DLL_PUBLIC IAudioLoader
 	/// Returns the decoded buffer size in bytes
 	inline unsigned long int bufferSize() const { return numSamples_ * numChannels_ * bytesPerSample_; }
 
+	/// Returns the proper audio loader according to the memory buffer name extension
+	static nctl::UniquePtr<IAudioLoader> createFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	/// Returns the proper audio loader according to the file extension
 	static nctl::UniquePtr<IAudioLoader> createFromFile(const char *filename);
 
@@ -57,6 +59,8 @@ class DLL_PUBLIC IAudioLoader
 
 	explicit IAudioLoader(const char *filename);
 	explicit IAudioLoader(nctl::UniquePtr<IFile> fileHandle);
+
+	static nctl::UniquePtr<IAudioLoader> createLoader(nctl::UniquePtr<IFile> fileHandle, const char *filename);
 };
 
 }

@@ -14,6 +14,7 @@ set(SOURCES
 	${NCINE_ROOT}/src/FontGlyph.cpp
 	${NCINE_ROOT}/src/FileSystem.cpp
 	${NCINE_ROOT}/src/IFile.cpp
+	${NCINE_ROOT}/src/MemoryFile.cpp
 	${NCINE_ROOT}/src/StandardFile.cpp
 	${NCINE_ROOT}/src/input/IInputManager.cpp
 	${NCINE_ROOT}/src/input/JoyMapping.cpp

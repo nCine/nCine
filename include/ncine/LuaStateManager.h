@@ -63,7 +63,7 @@ class DLL_PUBLIC LuaStateManager
 	void exposeModuleApi();
 	void exposeScriptApi();
 	bool run(const char *filename);
-	bool runFromMemory(const char *buffer, unsigned long size, const char *filename);
+	bool runFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize);
 
 	inline lua_State *state() { return L_; }
 	inline ApiType apiType() const { return apiType_; }

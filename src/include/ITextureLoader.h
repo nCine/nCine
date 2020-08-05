@@ -36,6 +36,8 @@ class ITextureLoader
 	/// Returns the pointer to pixel data for the specified MIP map level
 	const GLubyte *pixels(unsigned int mipMapLevel) const;
 
+	/// Returns the proper texture loader according to the memory buffer name extension
+	static nctl::UniquePtr<ITextureLoader> createFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	/// Returns the proper texture loader according to the file extension
 	static nctl::UniquePtr<ITextureLoader> createFromFile(const char *filename);
 
@@ -57,6 +59,7 @@ class ITextureLoader
 	explicit ITextureLoader(const char *filename);
 	explicit ITextureLoader(nctl::UniquePtr<IFile> fileHandle);
 
+	static nctl::UniquePtr<ITextureLoader> createLoader(nctl::UniquePtr<IFile> fileHandle, const char *filename);
 	/// Loads pixel data from a texture file holding either compressed or uncompressed data
 	void loadPixels(GLenum internalFormat);
 	/// Loads pixel data from a texture file holding either compressed or uncompressed data, overriding pixel type

@@ -50,6 +50,8 @@ class DLL_PUBLIC AudioStream
 	/// The associated loader to continuosly stream decoded data
 	nctl::UniquePtr<IAudioLoader> audioLoader_;
 
+	/// Constructor creating an audio stream from a named memory buffer
+	AudioStream(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	/// Constructor creating an audio stream from an audio file
 	explicit AudioStream(const char *filename);
 	/// Deleted copy constructor

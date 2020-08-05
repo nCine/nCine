@@ -16,8 +16,6 @@ class DLL_PUBLIC AssetFile : public IFile
 	explicit AssetFile(const char *filename);
 	~AssetFile() override;
 
-	inline static FileType sType() { return FileType::ASSET; }
-
 	/// Tries to open the asset file
 	void open(unsigned char mode) override;
 	/// Closes the asset file
@@ -52,7 +50,7 @@ class DLL_PUBLIC AssetFile : public IFile
   private:
 	static AAssetManager *assetManager_;
 	AAsset *asset_;
-	long int startOffset_;
+	unsigned long int startOffset_;
 
 	/// Opens the file with `AAsset_openFileDescriptor()`
 	void openFD(unsigned char mode);

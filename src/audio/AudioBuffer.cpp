@@ -21,6 +21,22 @@ AudioBuffer::AudioBuffer()
 	ASSERT_MSG_X(error == AL_NO_ERROR, "alGenBuffers failed: %x", error);
 }
 
+AudioBuffer::AudioBuffer(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
+    : Object(ObjectType::AUDIOBUFFER, bufferName),
+      numChannels_(0), frequency_(0), bufferSize_(0)
+{
+	ZoneScoped;
+	ZoneText(bufferName, strnlen(bufferName, nctl::String::MaxCStringLength));
+
+	alGetError();
+	alGenBuffers(1, &bufferId_);
+	const ALenum error = alGetError();
+	ASSERT_MSG_X(error == AL_NO_ERROR, "alGenBuffers failed: %x", error);
+
+	nctl::UniquePtr<IAudioLoader> audioLoader = IAudioLoader::createFromMemory(bufferName, bufferPtr, bufferSize);
+	load(audioLoader.get());
+}
+
 AudioBuffer::AudioBuffer(const char *filename)
     : Object(ObjectType::AUDIOBUFFER, filename),
       numChannels_(0), frequency_(0), bufferSize_(0)

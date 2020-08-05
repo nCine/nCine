@@ -1,5 +1,6 @@
 #include "common_macros.h"
 #include "IFile.h"
+#include "MemoryFile.h"
 #include "StandardFile.h"
 
 #ifdef __ANDROID__
@@ -30,6 +31,36 @@ bool IFile::isOpened() const
 		return true;
 	else
 		return false;
+}
+
+nctl::UniquePtr<IFile> IFile::createFromMemory(const char *bufferName, unsigned char *bufferPtr, unsigned long int bufferSize)
+{
+	ASSERT(bufferName);
+	ASSERT(bufferPtr);
+	ASSERT(bufferSize > 0);
+	return nctl::makeUnique<MemoryFile>(bufferName, bufferPtr, bufferSize);
+}
+
+nctl::UniquePtr<IFile> IFile::createFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
+{
+	ASSERT(bufferName);
+	ASSERT(bufferPtr);
+	ASSERT(bufferSize > 0);
+	return nctl::makeUnique<MemoryFile>(bufferName, bufferPtr, bufferSize);
+}
+
+nctl::UniquePtr<IFile> IFile::createFromMemory(unsigned char *bufferPtr, unsigned long int bufferSize)
+{
+	ASSERT(bufferPtr);
+	ASSERT(bufferSize > 0);
+	return nctl::makeUnique<MemoryFile>(bufferPtr, bufferSize);
+}
+
+nctl::UniquePtr<IFile> IFile::createFromMemory(const unsigned char *bufferPtr, unsigned long int bufferSize)
+{
+	ASSERT(bufferPtr);
+	ASSERT(bufferSize > 0);
+	return nctl::makeUnique<MemoryFile>(bufferPtr, bufferSize);
 }
 
 nctl::UniquePtr<IFile> IFile::createFileHandle(const char *filename)

@@ -396,7 +396,7 @@ bool loadTestRun(const char *filename, unsigned int index)
 #ifndef __EMSCRIPTEN__
 	if (luaState.run(filename) == false)
 #else
-	if (luaState.runFromMemory(localFileLoad.data(), localFileLoad.size(), localFileLoad.filename()) == false)
+	if (luaState.runFromMemory(localFileLoad.filename(), localFileLoad.data(), localFileLoad.size()) == false)
 #endif
 	{
 		LOGW_X("Cannot run script \"%s\" for index %u", filename, index);

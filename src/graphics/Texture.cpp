@@ -13,6 +13,32 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+Texture::Texture(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
+    : Texture(bufferName, bufferPtr, bufferSize, 0, 0)
+{
+}
+
+Texture::Texture(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize, int width, int height)
+    : Object(ObjectType::TEXTURE, bufferName), glTexture_(nctl::makeUnique<GLTexture>(GL_TEXTURE_2D)),
+      width_(0), height_(0), mipMapLevels_(1), isCompressed_(false), numChannels_(0), dataSize_(0),
+      minFiltering_(Filtering::NEAREST), magFiltering_(Filtering::NEAREST), wrapMode_(Wrap::CLAMP_TO_EDGE)
+{
+	ZoneScoped;
+	ZoneText(bufferName, strnlen(bufferName, nctl::String::MaxCStringLength));
+	glTexture_->bind();
+	setGLTextureLabel(bufferName);
+
+	nctl::UniquePtr<ITextureLoader> texLoader = ITextureLoader::createFromMemory(bufferName, bufferPtr, bufferSize);
+	load(*texLoader.get(), width, height);
+
+	RenderStatistics::addTexture(dataSize_);
+}
+
+Texture::Texture(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize, Vector2i size)
+    : Texture(bufferName, bufferPtr, bufferSize, size.x, size.y)
+{
+}
+
 Texture::Texture(const char *filename)
     : Texture(filename, 0, 0)
 {

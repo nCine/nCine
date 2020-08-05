@@ -32,9 +32,14 @@ class DLL_PUBLIC Texture : public Object
 		REPEAT
 	};
 
+	Texture(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
+	Texture(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize, int width, int height);
+	Texture(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize, Vector2i size);
+
 	explicit Texture(const char *filename);
 	Texture(const char *filename, int width, int height);
 	Texture(const char *filename, Vector2i size);
+
 	~Texture() override;
 
 	/// Returns texture width

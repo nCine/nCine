@@ -15,9 +15,6 @@ class StandardFile : public IFile
 	    : IFile(filename) { type_ = FileType::STANDARD; }
 	~StandardFile() override;
 
-	/// Static method to return class type
-	inline static FileType sType() { return FileType::STANDARD; }
-
 	/// Tries to open the standard file
 	void open(unsigned char mode) override;
 	/// Closes the standard file

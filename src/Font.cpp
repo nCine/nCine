@@ -13,6 +13,37 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+/*! \note The specified texture will override the one in the FNT file */
+Font::Font(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize, const char *texFilename)
+    : Object(ObjectType::FONT, fntBufferName),
+      texture_(nctl::makeUnique<Texture>(texFilename)),
+      lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_(0), numKernings_(0),
+      glyphs_(nctl::makeUnique<FontGlyph[]>(MaxGlyphs)), renderMode_(RenderMode::GLYPH_IN_RED)
+{
+	ZoneScoped;
+	ZoneText(fntBufferName, strnlen(fntBufferName, nctl::String::MaxCStringLength));
+
+	fntParser_ = nctl::makeUnique<FntParser>(reinterpret_cast<const char *>(fntBufferPtr), fntBufferSize);
+	retrieveInfoFromFnt();
+	checkFntInformation();
+}
+
+/*! \note The specified texture will override the one in the FNT file */
+Font::Font(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize,
+           const char *texBufferName, const unsigned char *texBufferPtr, unsigned long int texBufferSize)
+    : Object(ObjectType::FONT, fntBufferName),
+      texture_(nctl::makeUnique<Texture>(texBufferName, texBufferPtr, texBufferSize)),
+      lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_(0), numKernings_(0),
+      glyphs_(nctl::makeUnique<FontGlyph[]>(MaxGlyphs)), renderMode_(RenderMode::GLYPH_IN_RED)
+{
+	ZoneScoped;
+	ZoneText(fntBufferName, strnlen(fntBufferName, nctl::String::MaxCStringLength));
+
+	fntParser_ = nctl::makeUnique<FntParser>(reinterpret_cast<const char *>(fntBufferPtr), fntBufferSize);
+	retrieveInfoFromFnt();
+	checkFntInformation();
+}
+
 /*! \note The texture specified by the FNT file will be automatically loaded */
 Font::Font(const char *fntFilename)
     : Object(ObjectType::FONT, fntFilename),

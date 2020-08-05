@@ -16,6 +16,7 @@ class DLL_PUBLIC IFile
 	enum class FileType
 	{
 		BASE = 0,
+		MEMORY,
 		STANDARD,
 		ASSET
 	};
@@ -100,6 +101,15 @@ class DLL_PUBLIC IFile
 		       ((number >> 24) & 0x0000000000FF0000ULL) | ((number >> 40) & 0x000000000000FF00ULL) | (number << 56);
 	}
 
+	/// Returns a memory file with the specified name
+	static nctl::UniquePtr<IFile> createFromMemory(const char *bufferName, unsigned char *bufferPtr, unsigned long int bufferSize);
+	/// Returns a read-only memory file with the specified name
+	static nctl::UniquePtr<IFile> createFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
+	/// Returns a memory file
+	static nctl::UniquePtr<IFile> createFromMemory(unsigned char *bufferPtr, unsigned long int bufferSize);
+	/// Returns a read-only memory file
+	static nctl::UniquePtr<IFile> createFromMemory(const unsigned char *bufferPtr, unsigned long int bufferSize);
+
 	/// Returns the proper file handle according to prepended tags
 	static nctl::UniquePtr<IFile> createFileHandle(const char *filename);
 
@@ -124,7 +134,7 @@ class DLL_PUBLIC IFile
 	bool shouldExitOnFailToOpen_;
 
 	/// File size in bytes
-	long int fileSize_;
+	unsigned long int fileSize_;
 
   private:
 	/// The `TextureSaverPng` class needs to access the `filePointer_`

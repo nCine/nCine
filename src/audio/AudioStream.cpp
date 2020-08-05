@@ -12,6 +12,28 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 /*! Private constructor called only by `AudioStreamPlayer`. */
+AudioStream::AudioStream(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
+    : buffersIds_(nctl::StaticArrayMode::EXTEND_SIZE),
+      nextAvailableBufferIndex_(0), currentBufferId_(0), frequency_(0)
+{
+	ZoneScoped;
+	ZoneText(bufferName, strnlen(bufferName, nctl::String::MaxCStringLength));
+
+	alGetError();
+	alGenBuffers(NumBuffers, buffersIds_.data());
+	const ALenum error = alGetError();
+	ASSERT_MSG_X(error == AL_NO_ERROR, "alGenBuffers failed: %x", error);
+	memBuffer_ = nctl::makeUnique<char[]>(BufferSize);
+
+	audioLoader_ = IAudioLoader::createFromMemory(bufferName, bufferPtr, bufferSize);
+	numChannels_ = audioLoader_->numChannels();
+	frequency_ = audioLoader_->frequency();
+
+	FATAL_ASSERT_MSG_X(numChannels_ == 1 || numChannels_ == 2, "Unsupported number of channels: %d", numChannels_);
+	format_ = (numChannels_ == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
+}
+
+/*! Private constructor called only by `AudioStreamPlayer`. */
 AudioStream::AudioStream(const char *filename)
     : buffersIds_(nctl::StaticArrayMode::EXTEND_SIZE),
       nextAvailableBufferIndex_(0), currentBufferId_(0), frequency_(0)

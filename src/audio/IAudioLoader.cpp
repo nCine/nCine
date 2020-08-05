@@ -27,11 +27,27 @@ IAudioLoader::IAudioLoader(nctl::UniquePtr<IFile> fileHandle)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+nctl::UniquePtr<IAudioLoader> IAudioLoader::createFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
+{
+	nctl::UniquePtr<IFile> fileHandle = IFile::createFromMemory(bufferName, bufferPtr, bufferSize);
+	LOGI_X("Loading memory file: \"%s\" (0x%lx, %lu bytes)", fileHandle->filename(), bufferPtr, bufferSize);
+	return createLoader(nctl::move(fileHandle), bufferName);
+}
+
 nctl::UniquePtr<IAudioLoader> IAudioLoader::createFromFile(const char *filename)
 {
 	// Creating a handle from IFile static method to detect assets file
 	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
+	LOGI_X("Loading file: \"%s\"", fileHandle->filename());
+	return createLoader(nctl::move(fileHandle), filename);
+}
 
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+nctl::UniquePtr<IAudioLoader> IAudioLoader::createLoader(nctl::UniquePtr<IFile> fileHandle, const char *filename)
+{
 	if (fs::hasExtension(filename, "wav"))
 		return nctl::makeUnique<AudioLoaderWav>(nctl::move(fileHandle));
 #ifdef WITH_VORBIS

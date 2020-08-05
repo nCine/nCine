@@ -8,6 +8,13 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+AudioStreamPlayer::AudioStreamPlayer(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
+    : audioStream_(bufferName, bufferPtr, bufferSize)
+{
+	type_ = ObjectType::AUDIOSTREAM_PLAYER;
+	setName(bufferName);
+}
+
 AudioStreamPlayer::AudioStreamPlayer(const char *filename)
     : audioStream_(filename)
 {

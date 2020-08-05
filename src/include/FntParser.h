@@ -106,10 +106,10 @@ class DLL_PUBLIC FntParser
 		int amount = 0;
 	};
 
+	/// Parses a FNT file from a memory buffer of the specified size
+	FntParser(const char *bufferPtr, unsigned long int bufferSize);
 	/// Loads a FNT file in a memory buffer then parses it
 	explicit FntParser(const char *fntFilename);
-	/// Parses a FNT file from a memory buffer of the specified size
-	FntParser(const char *buffer, long int size);
 
 	/// Returns the "info" tag structure from a parsed FNT file
 	const InfoTag &infoTag() const { return infoTag_; }
@@ -171,7 +171,7 @@ class DLL_PUBLIC FntParser
 	/// Loads a FNT file in a memory buffer then parses it
 	void parseFntFile(IFile *fileHandle);
 	/// Parses a FNT file from a memory buffer of the specified size
-	void parseFntBuffer(const char *buffer, long int size);
+	void parseFntBuffer(const char *buffer, unsigned long int size);
 
 	void parseInfoTag(const char *buffer);
 	void parseCommonTag(const char *buffer);
