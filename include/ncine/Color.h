@@ -17,6 +17,9 @@ class DLL_PUBLIC Color
 	static const Color Red;
 	static const Color Green;
 	static const Color Blue;
+	static const Color Yellow;
+	static const Color Magenta;
+	static const Color Cyan;
 
 	/// Default constructor (white color)
 	Color();
@@ -24,6 +27,8 @@ class DLL_PUBLIC Color
 	Color(unsigned int red, unsigned int green, unsigned int blue);
 	/// Four channels constructor
 	Color(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha);
+	/// Three channels constructor from a hexadecimal code
+	Color(unsigned int hex);
 	/// Four channels constructor from an array
 	explicit Color(const unsigned int channels[NumChannels]);
 	/// Construtor taking a normalized float color
@@ -46,6 +51,8 @@ class DLL_PUBLIC Color
 	void set(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha);
 	/// Sets three color channels
 	void set(unsigned int red, unsigned int green, unsigned int blue);
+	/// Sets three color channels from a hexadecimal code
+	void set(unsigned int hex);
 	/// Sets four color channels from an array
 	void setVec(const unsigned int channels[NumChannels]);
 

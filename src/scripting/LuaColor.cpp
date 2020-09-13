@@ -17,6 +17,17 @@ namespace Color {
 	static const char *add = "add";
 	static const char *subtract = "sub";
 	static const char *multiply = "mul";
+
+	static const char *BLACK = "BLACK";
+	static const char *WHITE = "WHITE";
+	static const char *RED = "RED";
+	static const char *GREEN = "GREEN";
+	static const char *BLUE = "BLUE";
+	static const char *YELLOW = "YELLOW";
+	static const char *MAGENTA = "MAGENTA";
+	static const char *CYAN = "CYAN";
+
+	static const char *Colors = "colors";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -33,6 +44,22 @@ void LuaColor::expose(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::Color::multiply, multiply);
 
 	lua_setfield(L, -2, LuaNames::Color::Color);
+}
+
+void LuaColor::exposeConstants(lua_State *L)
+{
+	lua_createtable(L, 8, 0);
+
+	LuaColorUtils::pushField(L, LuaNames::Color::BLACK, Colorf::Black);
+	LuaColorUtils::pushField(L, LuaNames::Color::WHITE, Colorf::White);
+	LuaColorUtils::pushField(L, LuaNames::Color::RED, Colorf::Red);
+	LuaColorUtils::pushField(L, LuaNames::Color::GREEN, Colorf::Green);
+	LuaColorUtils::pushField(L, LuaNames::Color::BLUE, Colorf::Blue);
+	LuaColorUtils::pushField(L, LuaNames::Color::YELLOW, Colorf::Yellow);
+	LuaColorUtils::pushField(L, LuaNames::Color::MAGENTA, Colorf::Magenta);
+	LuaColorUtils::pushField(L, LuaNames::Color::CYAN, Colorf::Cyan);
+
+	lua_setfield(L, -2, LuaNames::Color::Colors);
 }
 
 ///////////////////////////////////////////////////////////

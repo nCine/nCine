@@ -18,6 +18,9 @@ class DLL_PUBLIC Colorf
 	static const Colorf Red;
 	static const Colorf Green;
 	static const Colorf Blue;
+	static const Colorf Yellow;
+	static const Colorf Magenta;
+	static const Colorf Cyan;
 
 	/// Default constructor (white color)
 	Colorf();

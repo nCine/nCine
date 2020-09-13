@@ -130,8 +130,8 @@ else() # GCC and LLVM
 		target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-Ofast -funsafe-loop-optimizations -ftree-loop-if-convert-stores>)
 
 		if(NCINE_LINKTIME_OPTIMIZATION AND NOT (MINGW OR MSYS OR ANDROID))
-			target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-flto=${NCINE_CORES}>)
-			target_link_options(ncine PRIVATE $<$<CONFIG:Release>:-flto=${NCINE_CORES}>)
+			target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-flto=auto>)
+			target_link_options(ncine PRIVATE $<$<CONFIG:Release>:-flto=auto>)
 		endif()
 
 		if(NCINE_AUTOVECTORIZATION_REPORT)
@@ -160,8 +160,8 @@ else() # GCC and LLVM
 		# Enabling ThinLTO of Clang 4
 		if(NCINE_LINKTIME_OPTIMIZATION)
 			if(EMSCRIPTEN)
-				target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:--llvm-lto 1>)
-				target_link_options(ncine PRIVATE $<$<CONFIG:Release>:--llvm-lto 1>)
+				target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-flto>)
+				target_link_options(ncine PRIVATE $<$<CONFIG:Release>:-flto>)
 			elseif(NOT (MINGW OR MSYS OR ANDROID))
 				target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-flto=thin>)
 				target_link_options(ncine PRIVATE $<$<CONFIG:Release>:-flto=thin>)

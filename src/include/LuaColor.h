@@ -12,6 +12,7 @@ class LuaColor
 {
   public:
 	static void expose(lua_State *L);
+	static void exposeConstants(lua_State *L);
 
   private:
 	static int create(lua_State *L);

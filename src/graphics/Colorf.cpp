@@ -14,6 +14,9 @@ const Colorf Colorf::White(1.0f, 1.0f, 1.0f, 1.0f);
 const Colorf Colorf::Red(1.0f, 0.0f, 0.0f, 1.0f);
 const Colorf Colorf::Green(0.0f, 1.0f, 0.0f, 1.0f);
 const Colorf Colorf::Blue(0.0f, 0.0f, 1.0f, 1.0f);
+const Colorf Colorf::Yellow(1.0f, 1.0f, 0.0f, 1.0f);
+const Colorf Colorf::Magenta(1.0f, 0.0f, 1.0f, 1.0f);
+const Colorf Colorf::Cyan(0.0f, 1.0f, 1.0f, 1.0f);
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR

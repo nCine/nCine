@@ -100,18 +100,19 @@ void RenderResources::create()
 		{ RenderResources::batchedTextnodesAlphaShaderProgram_, "batched_textnodes_vs.glsl", "textnode_alpha_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
 		{ RenderResources::batchedTextnodesRedShaderProgram_, "batched_textnodes_vs.glsl", "textnode_red_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS }
 #else
-		{ RenderResources::spriteShaderProgram_, ShaderStrings::sprite_vs, ShaderStrings::sprite_fs, GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::spriteGrayShaderProgram_, ShaderStrings::sprite_vs, ShaderStrings::sprite_gray_fs, GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::meshSpriteShaderProgram_, ShaderStrings::meshsprite_vs, ShaderStrings::sprite_fs, GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::meshSpriteGrayShaderProgram_, ShaderStrings::meshsprite_vs, ShaderStrings::sprite_gray_fs, GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::textnodeAlphaShaderProgram_, ShaderStrings::textnode_vs, ShaderStrings::textnode_alpha_fs, GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::textnodeRedShaderProgram_, ShaderStrings::textnode_vs, ShaderStrings::textnode_red_fs, GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::batchedSpritesShaderProgram_, ShaderStrings::batched_sprites_vs, ShaderStrings::sprite_fs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedSpritesGrayShaderProgram_, ShaderStrings::batched_sprites_vs, ShaderStrings::sprite_gray_fs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedMeshSpritesShaderProgram_, ShaderStrings::batched_meshsprites_vs, ShaderStrings::sprite_fs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedMeshSpritesGrayShaderProgram_, ShaderStrings::batched_meshsprites_vs, ShaderStrings::sprite_gray_fs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedTextnodesAlphaShaderProgram_, ShaderStrings::batched_textnodes_vs, ShaderStrings::textnode_alpha_fs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedTextnodesRedShaderProgram_, ShaderStrings::batched_textnodes_vs, ShaderStrings::textnode_red_fs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS }
+		// Skipping the initial new line character of the raw string literal
+		{ RenderResources::spriteShaderProgram_, ShaderStrings::sprite_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::spriteGrayShaderProgram_, ShaderStrings::sprite_vs + 1, ShaderStrings::sprite_gray_fs + 1, GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::meshSpriteShaderProgram_, ShaderStrings::meshsprite_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::meshSpriteGrayShaderProgram_, ShaderStrings::meshsprite_vs + 1, ShaderStrings::sprite_gray_fs + 1, GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::textnodeAlphaShaderProgram_, ShaderStrings::textnode_vs + 1, ShaderStrings::textnode_alpha_fs + 1, GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::textnodeRedShaderProgram_, ShaderStrings::textnode_vs + 1, ShaderStrings::textnode_red_fs + 1, GLShaderProgram::Introspection::ENABLED },
+		{ RenderResources::batchedSpritesShaderProgram_, ShaderStrings::batched_sprites_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
+		{ RenderResources::batchedSpritesGrayShaderProgram_, ShaderStrings::batched_sprites_vs + 1, ShaderStrings::sprite_gray_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
+		{ RenderResources::batchedMeshSpritesShaderProgram_, ShaderStrings::batched_meshsprites_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
+		{ RenderResources::batchedMeshSpritesGrayShaderProgram_, ShaderStrings::batched_meshsprites_vs + 1, ShaderStrings::sprite_gray_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
+		{ RenderResources::batchedTextnodesAlphaShaderProgram_, ShaderStrings::batched_textnodes_vs + 1, ShaderStrings::textnode_alpha_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
+		{ RenderResources::batchedTextnodesRedShaderProgram_, ShaderStrings::batched_textnodes_vs + 1, ShaderStrings::textnode_red_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS }
 #endif
 	};
 

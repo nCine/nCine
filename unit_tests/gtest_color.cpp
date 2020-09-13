@@ -16,6 +16,7 @@ const unsigned char red = 64;
 const unsigned char green = 64 * 2;
 const unsigned char blue = 64 * 3;
 const unsigned char alpha = 0;
+const unsigned int hex = 0x4080C0;
 
 TEST_F(ColorTest, DefaultConstructor)
 {
@@ -59,6 +60,17 @@ TEST_F(ColorTest, ConstructFromFourComponentsAndClamp)
 	ASSERT_EQ(color.data()[0], 255);
 	ASSERT_EQ(color.data()[1], 255);
 	ASSERT_EQ(color.data()[2], 255);
+	ASSERT_EQ(color.data()[3], 255);
+}
+
+TEST_F(ColorTest, ConstructFromHexadecimalCode)
+{
+	const nc::Color color(hex);
+	printColor("Constructing a new color from a hexadecimal code: ", color);
+
+	ASSERT_EQ(color.data()[0], red);
+	ASSERT_EQ(color.data()[1], green);
+	ASSERT_EQ(color.data()[2], blue);
 	ASSERT_EQ(color.data()[3], 255);
 }
 
@@ -118,6 +130,18 @@ TEST_F(ColorTest, SetFourComponents)
 	ASSERT_EQ(color.g(), green);
 	ASSERT_EQ(color.b(), blue);
 	ASSERT_EQ(color.a(), alpha);
+}
+
+TEST_F(ColorTest, SetHexadecimalCode)
+{
+	nc::Color color;
+	color.set(hex);
+	printColor("Constructing a new color and setting three components from a hexadecimal code: ", color);
+
+	ASSERT_EQ(color.r(), red);
+	ASSERT_EQ(color.g(), green);
+	ASSERT_EQ(color.b(), blue);
+	ASSERT_EQ(color.a(), 255);
 }
 
 TEST_F(ColorTest, SetArray)

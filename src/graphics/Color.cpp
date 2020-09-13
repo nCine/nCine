@@ -13,6 +13,9 @@ const Color Color::White(255, 255, 255, 255);
 const Color Color::Red(255, 0, 0, 255);
 const Color Color::Green(0, 255, 0, 255);
 const Color Color::Blue(0, 0, 255, 255);
+const Color Color::Yellow(255, 255, 0, 255);
+const Color Color::Magenta(255, 0, 255, 255);
+const Color Color::Cyan(0, 255, 255, 255);
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -32,6 +35,13 @@ Color::Color(unsigned int red, unsigned int green, unsigned int blue, unsigned i
     : channels_(nctl::StaticArrayMode::EXTEND_SIZE)
 {
 	set(red, green, blue, alpha);
+}
+
+Color::Color(unsigned int hex)
+    : channels_(nctl::StaticArrayMode::EXTEND_SIZE)
+{
+	set(hex);
+	setAlpha(255);
 }
 
 Color::Color(const unsigned int channels[NumChannels])
@@ -66,6 +76,13 @@ void Color::set(unsigned int red, unsigned int green, unsigned int blue)
 	channels_[0] = static_cast<unsigned char>(red);
 	channels_[1] = static_cast<unsigned char>(green);
 	channels_[2] = static_cast<unsigned char>(blue);
+}
+
+void Color::set(unsigned int hex)
+{
+	channels_[0] = static_cast<unsigned char>((hex & 0xFF0000) >> 16);
+	channels_[1] = static_cast<unsigned char>((hex & 0xFF00) >> 8);
+	channels_[2] = static_cast<unsigned char>(hex & 0xFF);
 }
 
 void Color::setVec(const unsigned int channels[NumChannels])

@@ -13,13 +13,6 @@ else()
 endif()
 
 include(ncine_get_version)
-
-include(ProcessorCount)
-ProcessorCount(NCINE_CORES)
-if(NCINE_CORES EQUAL 0)
-	set(NCINE_CORES 1)
-endif()
-
 include(ncine_imported_targets)
 include(ncine_imgui)
 include(ncine_nuklear)

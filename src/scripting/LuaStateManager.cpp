@@ -397,6 +397,7 @@ void LuaStateManager::exposeConstants()
 {
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
 
+	LuaColor::exposeConstants(L_);
 	LuaMouseEvents::exposeConstants(L_);
 	LuaKeys::exposeConstants(L_);
 	LuaJoystickEvents::exposeConstants(L_);
