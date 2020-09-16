@@ -77,7 +77,7 @@ class DLL_PUBLIC IInputManager
 	/// Returns current mouse cursor mode
 	inline MouseCursorMode mouseCursorMode() const { return mouseCursorMode_; }
 	/// Sets the mouse cursor mode
-	virtual void setMouseCursorMode(MouseCursorMode mode) = 0;
+	virtual void setMouseCursorMode(MouseCursorMode mode);
 
   protected:
 	static IInputEventHandler *inputEventHandler_;

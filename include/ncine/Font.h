@@ -3,6 +3,7 @@
 
 #include "Object.h"
 #include "Vector2.h"
+#include <nctl/HashMap.h>
 
 namespace ncine {
 
@@ -73,10 +74,14 @@ class DLL_PUBLIC Font : public Object
 	/// Number of kernings for this font
 	unsigned int numKernings_;
 
-	/// Maximum number of glyphs in a font
-	static const unsigned int MaxGlyphs = 256;
-	/// Array of font glyphs
-	nctl::UniquePtr<FontGlyph[]> glyphs_;
+	/// Maximum number of font glyphs stored in the array (single byte UTF-8 characters)
+	static const unsigned int GlyphArraySize = 256;
+	/// Array of font glyphs encoded in a single UTF-8 code unit
+	nctl::UniquePtr<FontGlyph[]> glyphArray_;
+	/// Maximum number of font glyphs stored in the hashmap (multi-byte UTF-8 characters)
+	static const unsigned int GlyphHashmapSize = 1024;
+	/// Hashmap of font glyphs encoded in more than one UTF-8 code unit
+	nctl::HashMap<unsigned short int, FontGlyph> glyphHashMap_;
 
 	RenderMode renderMode_;
 

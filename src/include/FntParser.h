@@ -146,8 +146,8 @@ class DLL_PUBLIC FntParser
 
   private:
 	static const int MaxPageTags = 1;
-	static const int MaxCharTags = 256;
-	static const int MaxKerningTags = 512;
+	static const int MaxCharTags = 1024;
+	static const int MaxKerningTags = 2048;
 
 	/// Parsed "info" tag from the FNT file
 	InfoTag infoTag_;

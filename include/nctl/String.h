@@ -24,6 +24,11 @@ class DLL_PUBLIC String
 	/// Maximum length when creating an object from C-style strings
 	static const unsigned int MaxCStringLength = 512 - 1;
 
+	/// Unicode replacement character used as an invalid code point
+	static const unsigned int InvalidUnicode = 0xfffd;
+	/// UTF-8 encoded version of the Unicode replacement character
+	static const unsigned int InvalidUtf8 = 0xefbfbd;
+
 	/// Default constructor
 	String();
 	/// Constructs an empty string with explicit size
@@ -172,6 +177,21 @@ class DLL_PUBLIC String
 	const char &operator[](unsigned int index) const;
 	/// Subscript operator
 	char &operator[](unsigned int index);
+
+	/// Retrieves the Unicode code point and the UTF-8 code units from the UTF-8 substring starting at the specified position
+	/*! \returns The number of code units used by UTF-8 to encode the Unicode code point */
+	int utf8ToCodePoint(unsigned int position, unsigned int &codePoint, unsigned int *codeUnits) const;
+
+	/// Retrieves the Unicode code point from the UTF-8 substring starting at the specified position
+	/*! \returns The number of code units used by UTF-8 to encode the Unicode code point */
+	int utf8ToCodePoint(unsigned int position, unsigned int &codePoint) const;
+
+	/// Retrieves the Unicode code point and the UTF-8 code units from the UTF-8 C substring
+	/*! \returns A pointer to the C substring following the decoded UTF-8 code units */
+	static const char *utf8ToCodePoint(const char *substring, unsigned int &codePoint, unsigned int *codeUnits);
+	/// Retrieves the Unicode code point from the UTF-8 C substring
+	/*! \returns A pointer to the C substring following the decoded UTF-8 code units */
+	static const char *utf8ToCodePoint(const char *substring, unsigned int &codePoint);
 
   private:
 	/// Size of the local buffer

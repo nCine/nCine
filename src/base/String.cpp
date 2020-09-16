@@ -317,7 +317,7 @@ int String::findLastChar(char c) const
 
 int String::findFirstCharAfterIndex(char c, unsigned int index) const
 {
-	if (index >= length_ - 1)
+	if (length_ == 0 || index >= length_ - 1)
 		return -1;
 
 	const char *foundPtr = strchr(data() + index + 1, c);
@@ -467,6 +467,111 @@ char &String::operator[](unsigned int index)
 {
 	ASSERT_MSG_X(index < length_, "Index %u is out of bounds (size: %u)", index, length_);
 	return data()[index];
+}
+
+int String::utf8ToCodePoint(unsigned int position, unsigned int &codePoint, unsigned int *codeUnits) const
+{
+	if (position + 1 > length_)
+	{
+		codePoint = InvalidUnicode;
+		if (codeUnits)
+			*codeUnits = InvalidUtf8;
+		return 0;
+	}
+
+	const char *subString = utf8ToCodePoint(&operator[](position), codePoint, codeUnits);
+	return (subString - data() - position);
+}
+
+int String::utf8ToCodePoint(unsigned int position, unsigned int &codePoint) const
+{
+	return utf8ToCodePoint(position, codePoint, nullptr);
+}
+
+const char *String::utf8ToCodePoint(const char *substring, unsigned int &codePoint, unsigned int *codeUnits)
+{
+	if (*substring == '\0')
+		return substring;
+
+	unsigned char sequence[4] = { '\0', '\0', '\0', '\0' };
+	sequence[0] = *substring;
+	if (sequence[0] < 0x80)
+	{
+		codePoint = sequence[0];
+		if (codeUnits)
+			*codeUnits = sequence[0];
+		return substring + 1;
+	}
+
+	// Four code units sequence
+	if (sequence[0] >= 0xf0)
+	{
+		for (unsigned int i = 1; i < 4; i++)
+		{
+			sequence[i] = substring[i];
+			if (sequence[i] < 0x80)
+			{
+				codePoint = InvalidUnicode;
+				if (codeUnits)
+					*codeUnits = InvalidUtf8;
+				return substring + i;
+			}
+		}
+
+		codePoint = ((sequence[0] - 0xf0) << 18) | ((sequence[1] - 0x80) << 12) | ((sequence[2] - 0x80) << 6) | (sequence[3] - 0x80);
+		if (codeUnits)
+			*codeUnits = (sequence[0] << 24) | (sequence[1] << 16) | (sequence[2] << 8) | sequence[3];
+		return substring + 4;
+	}
+	// Three code units sequence
+	else if (sequence[0] >= 0xe0)
+	{
+		for (unsigned int i = 1; i < 3; i++)
+		{
+			sequence[i] = substring[i];
+			if (sequence[i] < 0x80)
+			{
+				codePoint = InvalidUnicode;
+				if (codeUnits)
+					*codeUnits = InvalidUtf8;
+				return substring + i;
+			}
+		}
+
+		codePoint = ((sequence[0] - 0xe0) << 12) | ((sequence[1] - 0x80) << 6) | (sequence[2] - 0x80);
+		if (codeUnits)
+			*codeUnits = (sequence[0] << 16) | (sequence[1] << 8) | sequence[2];
+		return substring + 3;
+	}
+	// Two code units sequence
+	else if (sequence[0] >= 0xc0)
+	{
+		sequence[1] = substring[1];
+		if (sequence[1] < 0x80)
+		{
+			codePoint = InvalidUnicode;
+			if (codeUnits)
+				*codeUnits = InvalidUtf8;
+			return substring + 1;
+		}
+
+		codePoint = ((sequence[0] - 0xc0) << 6) | (sequence[1] - 0x80);
+		if (codeUnits)
+			*codeUnits = (sequence[0] << 8) | sequence[1];
+		return substring + 2;
+	}
+	else
+	{
+		codePoint = InvalidUnicode;
+		if (codeUnits)
+			*codeUnits = InvalidUtf8;
+		return substring + 1;
+	}
+}
+
+const char *String::utf8ToCodePoint(const char *substring, unsigned int &codePoint)
+{
+	return utf8ToCodePoint(substring, codePoint, nullptr);
 }
 
 }

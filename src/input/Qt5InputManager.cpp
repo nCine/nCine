@@ -473,6 +473,9 @@ void Qt5InputManager::setMouseCursorMode(MouseCursorMode mode)
 				break;
 		}
 
+		// Handling ImGui cursor changes
+		IInputManager::setMouseCursorMode(mode);
+
 		mouseCursorMode_ = mode;
 	}
 }

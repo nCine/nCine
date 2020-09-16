@@ -18,7 +18,8 @@ Font::Font(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigne
     : Object(ObjectType::FONT, fntBufferName),
       texture_(nctl::makeUnique<Texture>(texFilename)),
       lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_(0), numKernings_(0),
-      glyphs_(nctl::makeUnique<FontGlyph[]>(MaxGlyphs)), renderMode_(RenderMode::GLYPH_IN_RED)
+      glyphArray_(nctl::makeUnique<FontGlyph[]>(GlyphArraySize)),
+      glyphHashMap_(GlyphHashmapSize), renderMode_(RenderMode::GLYPH_IN_RED)
 {
 	ZoneScoped;
 	ZoneText(fntBufferName, strnlen(fntBufferName, nctl::String::MaxCStringLength));
@@ -34,7 +35,8 @@ Font::Font(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigne
     : Object(ObjectType::FONT, fntBufferName),
       texture_(nctl::makeUnique<Texture>(texBufferName, texBufferPtr, texBufferSize)),
       lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_(0), numKernings_(0),
-      glyphs_(nctl::makeUnique<FontGlyph[]>(MaxGlyphs)), renderMode_(RenderMode::GLYPH_IN_RED)
+      glyphArray_(nctl::makeUnique<FontGlyph[]>(GlyphArraySize)),
+      glyphHashMap_(GlyphHashmapSize), renderMode_(RenderMode::GLYPH_IN_RED)
 {
 	ZoneScoped;
 	ZoneText(fntBufferName, strnlen(fntBufferName, nctl::String::MaxCStringLength));
@@ -48,7 +50,8 @@ Font::Font(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigne
 Font::Font(const char *fntFilename)
     : Object(ObjectType::FONT, fntFilename),
       lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_(0), numKernings_(0),
-      glyphs_(nctl::makeUnique<FontGlyph[]>(MaxGlyphs)), renderMode_(RenderMode::GLYPH_IN_RED)
+      glyphArray_(nctl::makeUnique<FontGlyph[]>(GlyphArraySize)),
+      glyphHashMap_(GlyphHashmapSize), renderMode_(RenderMode::GLYPH_IN_RED)
 {
 	ZoneScoped;
 	ZoneText(fntFilename, strnlen(fntFilename, nctl::String::MaxCStringLength));
@@ -67,7 +70,8 @@ Font::Font(const char *fntFilename, const char *texFilename)
     : Object(ObjectType::FONT, fntFilename),
       texture_(nctl::makeUnique<Texture>(texFilename)),
       lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_(0), numKernings_(0),
-      glyphs_(nctl::makeUnique<FontGlyph[]>(MaxGlyphs)), renderMode_(RenderMode::GLYPH_IN_RED)
+      glyphArray_(nctl::makeUnique<FontGlyph[]>(GlyphArraySize)),
+      glyphHashMap_(GlyphHashmapSize), renderMode_(RenderMode::GLYPH_IN_RED)
 {
 	ZoneScoped;
 	ZoneText(fntFilename, strnlen(fntFilename, nctl::String::MaxCStringLength));
@@ -87,8 +91,10 @@ Font::~Font()
 
 const FontGlyph *Font::glyph(unsigned int glyphId) const
 {
-	ASSERT(glyphId < MaxGlyphs);
-	return &glyphs_[glyphId];
+	if (glyphId < GlyphArraySize)
+		return &glyphArray_[glyphId];
+	else
+		return glyphHashMap_.find(glyphId);
 }
 
 ///////////////////////////////////////////////////////////
@@ -104,29 +110,25 @@ void Font::retrieveInfoFromFnt()
 	width_ = static_cast<unsigned int>(commonTag.scaleW);
 	height_ = static_cast<unsigned int>(commonTag.scaleH);
 
-	const unsigned int numChars = (fntParser_->numCharTags() < MaxGlyphs) ? fntParser_->numCharTags() : MaxGlyphs;
+	const unsigned int numChars = (fntParser_->numCharTags() < GlyphArraySize + GlyphHashmapSize) ? fntParser_->numCharTags() : GlyphArraySize + GlyphHashmapSize;
 	for (unsigned int i = 0; i < numChars; i++)
 	{
 		const FntParser::CharTag &charTag = fntParser_->charTag(i);
-		if (charTag.id < MaxGlyphs)
-		{
-			glyphs_[charTag.id].set(charTag.x, charTag.y, charTag.width, charTag.height, charTag.xoffset, charTag.yoffset, charTag.xadvance);
-			numGlyphs_++;
-		}
+		if (charTag.id < static_cast<int>(GlyphArraySize))
+			glyphArray_[charTag.id].set(charTag.x, charTag.y, charTag.width, charTag.height, charTag.xoffset, charTag.yoffset, charTag.xadvance);
 		else
-			LOGW_X("Skipping character id #%u because bigger than glyph array size (%u)", charTag.id, MaxGlyphs);
+			glyphHashMap_.emplace(charTag.id, charTag.x, charTag.y, charTag.width, charTag.height, charTag.xoffset, charTag.yoffset, charTag.xadvance);
+		numGlyphs_++;
 	}
 
 	for (unsigned int i = 0; i < fntParser_->numKerningTags(); i++)
 	{
 		const FntParser::KerningTag &kerningTag = fntParser_->kerningTag(i);
-		if (kerningTag.first < MaxGlyphs && kerningTag.second < MaxGlyphs)
-		{
-			glyphs_[kerningTag.first].addKerning(kerningTag.second, kerningTag.amount);
-			numKernings_++;
-		}
+		if (kerningTag.first < static_cast<int>(GlyphArraySize))
+			glyphArray_[kerningTag.first].addKerning(kerningTag.second, kerningTag.amount);
 		else
-			LOGW_X("Skipping kerning couple (#%u, #%u) because bigger than glyph array size (%u)", kerningTag.first, kerningTag.second, MaxGlyphs);
+			glyphHashMap_[kerningTag.first].addKerning(kerningTag.second, kerningTag.amount);
+		numKernings_++;
 	}
 
 	LOGI_X("FNT file information retrieved: %u glyphs and %u kernings", numGlyphs_, numKernings_);

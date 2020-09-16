@@ -227,6 +227,9 @@ void GlfwInputManager::setMouseCursorMode(MouseCursorMode mode)
 			case MouseCursorMode::DISABLED: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED); break;
 		}
 
+		// Handling ImGui cursor changes
+		IInputManager::setMouseCursorMode(mode);
+
 		mouseCursorMode_ = mode;
 	}
 }

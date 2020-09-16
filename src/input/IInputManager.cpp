@@ -1,6 +1,10 @@
 #include "IInputManager.h"
 #include "JoyMapping.h"
 
+#ifdef WITH_IMGUI
+	#include "imgui.h"
+#endif
+
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
@@ -55,6 +59,17 @@ void IInputManager::addJoyMappingsFromStrings(const char **mappingStrings)
 unsigned int IInputManager::numJoyMappings() const
 {
 	return joyMapping_.numMappings();
+}
+
+void IInputManager::setMouseCursorMode(MouseCursorMode mode)
+{
+#ifdef WITH_IMGUI
+	ImGuiIO &io = ImGui::GetIO();
+	if (mode != MouseCursorMode::NORMAL)
+		io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+	else
+		io.ConfigFlags &= ~ImGuiConfigFlags_NoMouseCursorChange;
+#endif
 }
 
 }
