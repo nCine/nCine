@@ -238,15 +238,15 @@ bool AndroidInputManager::parseEvent(const AInputEvent *event)
 	if (inputEventHandler_ == nullptr)
 		return false;
 
+	bool isEventHandled = false;
+
 #ifdef WITH_IMGUI
-	ImGuiAndroidInput::processEvent(event);
+	isEventHandled |= ImGuiAndroidInput::processEvent(event);
 #endif
 
 #ifdef WITH_NUKLEAR
-	NuklearAndroidInput::processEvent(event);
+	isEventHandled |= NuklearAndroidInput::processEvent(event);
 #endif
-
-	bool isEventHandled = false;
 
 	// Checking for gamepad events first
 	if (((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD ||
@@ -255,7 +255,8 @@ bool AndroidInputManager::parseEvent(const AInputEvent *event)
 	{
 		isEventHandled = processGamepadEvent(event);
 	}
-	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD &&
+	else if (((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD ||
+	          (AKeyEvent_getFlags(event) & AKEY_EVENT_FLAG_SOFT_KEYBOARD) == AKEY_EVENT_FLAG_SOFT_KEYBOARD) &&
 	         AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
 	{
 		isEventHandled = processKeyboardEvent(event);

@@ -206,7 +206,6 @@ void LuaKeys::exposeConstants(lua_State *L)
 	LuaUtils::pushField(L, "BUTTON_SELECT", static_cast<int64_t>(KeySym::BUTTON_SELECT));
 	LuaUtils::pushField(L, "BUTTON_MODE", static_cast<int64_t>(KeySym::BUTTON_MODE));
 	// From API level 13
-	LuaUtils::pushField(L, "FORWARD_DEL", static_cast<int64_t>(KeySym::FORWARD_DEL));
 	LuaUtils::pushField(L, "FUNCTION_KEY", static_cast<int64_t>(KeySym::FUNCTION_KEY));
 	LuaUtils::pushField(L, "MOVE_HOME", static_cast<int64_t>(KeySym::MOVE_HOME));
 	LuaUtils::pushField(L, "MOVE_END", static_cast<int64_t>(KeySym::MOVE_END));

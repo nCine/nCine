@@ -196,7 +196,6 @@ enum class KeySym
 	BUTTON_SELECT,
 	BUTTON_MODE,
 	// From API level 13
-	FORWARD_DEL,
 	FUNCTION_KEY,
 	MOVE_HOME,
 	MOVE_END,

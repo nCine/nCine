@@ -5,6 +5,7 @@
 #include "ImGuiAndroidInput.h"
 #include "ImGuiJoyMappedInput.h"
 #include "Application.h"
+#include "AndroidJniHelper.h"
 
 namespace ncine {
 
@@ -13,6 +14,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 bool ImGuiAndroidInput::inputEnabled_ = true;
+int ImGuiAndroidInput::simulatedSoftKeyReleased_ = 0;
 int ImGuiAndroidInput::simulatedMouseButtonState_ = 0;
 int ImGuiAndroidInput::mouseButtonState_ = 0;
 unsigned int ImGuiAndroidInput::pointerCount_ = 0;
@@ -95,6 +97,16 @@ void ImGuiAndroidInput::newFrame()
 		imGuiJoyMappedInput();
 }
 
+void ImGuiAndroidInput::postNewFrame()
+{
+	if (simulatedSoftKeyReleased_ != 0)
+	{
+		ImGuiIO &io = ImGui::GetIO();
+		io.KeysDown[simulatedSoftKeyReleased_] = false;
+		simulatedSoftKeyReleased_ = 0;
+	}
+}
+
 bool ImGuiAndroidInput::processEvent(const AInputEvent *event)
 {
 	if (inputEnabled_ == false)
@@ -104,16 +116,41 @@ bool ImGuiAndroidInput::processEvent(const AInputEvent *event)
 	if (pointerCount_ == 0 && io.ConfigFlags & ImGuiConfigFlags_IsTouchScreen)
 		io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
 
-	if ((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD &&
+	if (((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD ||
+	     (AKeyEvent_getFlags(event) & AKEY_EVENT_FLAG_SOFT_KEYBOARD) == AKEY_EVENT_FLAG_SOFT_KEYBOARD) &&
 	    AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
 	{
-		int key = AKeyEvent_getKeyCode(event);
-		IM_ASSERT(key >= 0 && key < IM_ARRAYSIZE(io.KeysDown));
-		io.KeysDown[key] = (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN);
+		const int keyCode = AKeyEvent_getKeyCode(event);
+		IM_ASSERT(keyCode >= 0 && keyCode < IM_ARRAYSIZE(io.KeysDown));
+		io.KeysDown[keyCode] = (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN);
 		io.KeyShift = ((AKeyEvent_getMetaState(event) & AMETA_SHIFT_ON) != 0);
 		io.KeyCtrl = ((AKeyEvent_getMetaState(event) & AMETA_CTRL_ON) != 0);
 		io.KeyAlt = ((AKeyEvent_getMetaState(event) & AMETA_ALT_ON) != 0);
 		io.KeySuper = ((AKeyEvent_getMetaState(event) & AMETA_META_ON) != 0);
+
+		// With the software keyboard the press and release events might happen on the same frame
+		if ((AKeyEvent_getFlags(event) & AKEY_EVENT_FLAG_SOFT_KEYBOARD) == AKEY_EVENT_FLAG_SOFT_KEYBOARD)
+		{
+			static unsigned long int frameNum = 0;
+			if (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN)
+				frameNum = theApplication().numFrames();
+			else if (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_UP && theApplication().numFrames() == frameNum)
+			{
+				io.KeysDown[keyCode] = true;
+				simulatedSoftKeyReleased_ = keyCode;
+			}
+		}
+
+		if (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN &&
+		    (AKeyEvent_getMetaState(event) & AMETA_CTRL_ON) == 0)
+		{
+			AndroidJniClass_KeyEvent keyEvent(AInputEvent_getType(event), keyCode);
+			if (keyEvent.isPrintingKey())
+			{
+				const int unicodeKey = keyEvent.getUnicodeChar(AKeyEvent_getMetaState(event));
+				io.AddInputCharacter(unicodeKey);
+			}
+		}
 
 		return true;
 	}

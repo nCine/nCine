@@ -48,7 +48,7 @@ class AndroidJniClass
 		if (javaObject_)
 			jniEnv_->DeleteLocalRef(javaObject_);
 	}
-	bool isNull() const { return javaObject_ == nullptr; }
+	inline bool isNull() const { return javaObject_ == nullptr; }
 
   protected:
 	static JNIEnv *jniEnv_;
@@ -119,6 +119,41 @@ class AndroidJniClass_KeyCharacterMap : public AndroidJniClass
   private:
 	static jclass javaClass_;
 	static jmethodID midDeviceHasKey_;
+};
+
+/// A class to handle JNI requests to `android.view.KeyEvent`
+class AndroidJniClass_KeyEvent : public AndroidJniClass
+{
+  public:
+	static void init();
+
+	AndroidJniClass_KeyEvent(int action, int code);
+	int getUnicodeChar(int metaState);
+	inline int getUnicodeChar() { return getUnicodeChar(0); }
+	bool isPrintingKey();
+
+  private:
+	static jclass javaClass_;
+	static jmethodID midConstructor_;
+	static jmethodID midGetUnicodeCharMetaState_;
+	static jmethodID midGetUnicodeChar_;
+	static jmethodID midIsPrintingKey_;
+};
+
+/// A class to handle JNI requests to `android.view.inputmethod.InputMethodManager`
+class AndroidJniWrap_InputMethodManager
+{
+  public:
+	static void init(JNIEnv *jniEnv, struct android_app *state);
+	static void toggleSoftInput();
+
+  private:
+	static JNIEnv *jniEnv_;
+	static jobject inputMethodManagerObject_;
+	static jmethodID midToggleSoftInput_;
+
+	static const int SHOW_IMPLICIT = 1;
+	static const int HIDE_IMPLICIT_ONLY = 1;
 };
 
 }

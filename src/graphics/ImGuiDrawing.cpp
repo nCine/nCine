@@ -124,6 +124,9 @@ void ImGuiDrawing::newFrame()
 	}
 
 	ImGui::NewFrame();
+#if defined(__ANDROID__)
+	ImGuiAndroidInput::postNewFrame();
+#endif
 }
 
 void ImGuiDrawing::endFrame(RenderQueue &renderQueue)

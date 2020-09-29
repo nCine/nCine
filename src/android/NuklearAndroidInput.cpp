@@ -6,6 +6,7 @@
 #include "nuklear.h"
 #include "NuklearAndroidInput.h"
 #include "Application.h"
+#include "AndroidJniHelper.h"
 
 namespace ncine {
 
@@ -84,64 +85,76 @@ bool NuklearAndroidInput::processEvent(const AInputEvent *event)
 		return false;
 
 	nk_context *ctx = NuklearContext::context();
-	if ((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD &&
+	if (((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD ||
+	     (AKeyEvent_getFlags(event) & AKEY_EVENT_FLAG_SOFT_KEYBOARD) == AKEY_EVENT_FLAG_SOFT_KEYBOARD) &&
 	    AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
 	{
-		int key = AKeyEvent_getKeyCode(event);
+		const int keyCode = AKeyEvent_getKeyCode(event);
 		const int down = (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN);
 		const int shiftDown = ((AKeyEvent_getMetaState(event) & AMETA_SHIFT_ON) != 0);
 		const int ctrlDown = ((AKeyEvent_getMetaState(event) & AMETA_CTRL_LEFT_ON) != 0);
 
+		if (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN &&
+		    (AKeyEvent_getMetaState(event) & AMETA_CTRL_ON) == 0)
+		{
+			AndroidJniClass_KeyEvent keyEvent(AInputEvent_getType(event), keyCode);
+			if (keyEvent.isPrintingKey())
+			{
+				const int unicodeKey = keyEvent.getUnicodeChar(AKeyEvent_getMetaState(event));
+				nk_input_char(ctx, unicodeKey);
+			}
+		}
+
 		nk_input_key(ctx, NK_KEY_SHIFT, shiftDown);
 
-		if (key == AKEYCODE_FORWARD_DEL)
+		if (keyCode == AKEYCODE_FORWARD_DEL)
 			nk_input_key(ctx, NK_KEY_DEL, down);
-		else if (key == AKEYCODE_ENTER)
+		else if (keyCode == AKEYCODE_ENTER)
 			nk_input_key(ctx, NK_KEY_ENTER, down);
-		else if (key == AKEYCODE_TAB)
+		else if (keyCode == AKEYCODE_TAB)
 			nk_input_key(ctx, NK_KEY_TAB, down);
-		else if (key == AKEYCODE_DEL)
+		else if (keyCode == AKEYCODE_DEL)
 			nk_input_key(ctx, NK_KEY_BACKSPACE, down);
-		else if (key == AKEYCODE_HOME)
+		else if (keyCode == AKEYCODE_HOME)
 		{
 			nk_input_key(ctx, NK_KEY_TEXT_START, down);
 			nk_input_key(ctx, NK_KEY_SCROLL_START, down);
 		}
-		else if (key == AKEYCODE_MOVE_END)
+		else if (keyCode == AKEYCODE_MOVE_END)
 		{
 			nk_input_key(ctx, NK_KEY_TEXT_END, down);
 			nk_input_key(ctx, NK_KEY_SCROLL_END, down);
 		}
-		else if (key == AKEYCODE_PAGE_DOWN)
+		else if (keyCode == AKEYCODE_PAGE_DOWN)
 			nk_input_key(ctx, NK_KEY_SCROLL_DOWN, down);
-		else if (key == AKEYCODE_PAGE_UP)
+		else if (keyCode == AKEYCODE_PAGE_UP)
 			nk_input_key(ctx, NK_KEY_SCROLL_UP, down);
-		else if (key == AKEYCODE_Z)
+		else if (keyCode == AKEYCODE_Z)
 			nk_input_key(ctx, NK_KEY_TEXT_UNDO, down && ctrlDown);
-		else if (key == AKEYCODE_R)
+		else if (keyCode == AKEYCODE_R)
 			nk_input_key(ctx, NK_KEY_TEXT_REDO, down && ctrlDown);
-		else if (key == AKEYCODE_C)
+		else if (keyCode == AKEYCODE_C)
 			nk_input_key(ctx, NK_KEY_COPY, down && ctrlDown);
-		else if (key == AKEYCODE_V)
+		else if (keyCode == AKEYCODE_V)
 			nk_input_key(ctx, NK_KEY_PASTE, down && ctrlDown);
-		else if (key == AKEYCODE_X)
+		else if (keyCode == AKEYCODE_X)
 			nk_input_key(ctx, NK_KEY_CUT, down && ctrlDown);
-		else if (key == AKEYCODE_B)
+		else if (keyCode == AKEYCODE_B)
 			nk_input_key(ctx, NK_KEY_TEXT_LINE_START, down && ctrlDown);
-		else if (key == AKEYCODE_E)
+		else if (keyCode == AKEYCODE_E)
 			nk_input_key(ctx, NK_KEY_TEXT_LINE_END, down && ctrlDown);
-		else if (key == AKEYCODE_DPAD_UP)
+		else if (keyCode == AKEYCODE_DPAD_UP)
 			nk_input_key(ctx, NK_KEY_UP, down);
-		else if (key == AKEYCODE_DPAD_DOWN)
+		else if (keyCode == AKEYCODE_DPAD_DOWN)
 			nk_input_key(ctx, NK_KEY_DOWN, down);
-		else if (key == AKEYCODE_DPAD_LEFT)
+		else if (keyCode == AKEYCODE_DPAD_LEFT)
 		{
 			if (ctrlDown)
 				nk_input_key(ctx, NK_KEY_TEXT_WORD_LEFT, down);
 			else
 				nk_input_key(ctx, NK_KEY_LEFT, down);
 		}
-		else if (key == AKEYCODE_DPAD_RIGHT)
+		else if (keyCode == AKEYCODE_DPAD_RIGHT)
 		{
 			if (ctrlDown)
 				nk_input_key(ctx, NK_KEY_TEXT_WORD_RIGHT, down);

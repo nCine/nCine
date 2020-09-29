@@ -6,6 +6,13 @@
 
 #include <ncine/config.h>
 
+#if (NCINE_WITH_IMGUI || NCINE_WITH_NUKLEAR || NCINE_WITH_QT5)
+	#define HAS_GUI (1)
+	#ifdef __ANDROID__
+		#include <ncine/AndroidApplication.h>
+	#endif
+#endif
+
 #if NCINE_WITH_IMGUI
 	#include <ncine/imgui.h>
 #endif
@@ -43,10 +50,6 @@ const char *Texture3File = "texture3.png";
 const char *Texture4File = "texture4.png";
 #endif
 
-#if NCINE_WITH_IMGUI || NCINE_WITH_NUKLEAR || NCINE_WITH_QT5
-	#define HAS_GUI (1)
-#endif
-
 bool paused = false;
 #ifdef HAS_GUI
 enum
@@ -55,6 +58,10 @@ enum
 	FAST
 };
 
+	#ifdef __ANDROID__
+bool softInputPreviousState = false;
+bool softInputState = false;
+	#endif
 int speed = SLOW;
 const float MinSpriteScale = 0.25f;
 const float MaxSpriteScale = 2.0f;
@@ -176,6 +183,10 @@ void MyEventHandler::onFrameStart()
 			nc::theApplication().quit();
 		ImGui::SameLine();
 		ImGui::Checkbox("Paused", &paused);
+	#ifdef __ANDROID__
+		ImGui::SameLine();
+		ImGui::Checkbox("Soft Input", &softInputState);
+	#endif
 
 		ImGui::RadioButton("Slow", &speed, SLOW);
 		ImGui::SameLine();
@@ -199,13 +210,22 @@ void MyEventHandler::onFrameStart()
 	if (nk_begin(ctx, "Nuklear Interface", nk_rect(150, 50, 230, 275),
 	             NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
 	{
+	#ifndef __ANDROID__
 		nk_layout_row_static(ctx, 30, 80, 2);
+	#else
+		nk_layout_row_static(ctx, 30, 85, 3);
+	#endif
 		if (nk_button_label(ctx, "Quit"))
 			nc::theApplication().quit();
 
 		int intPaused = paused;
 		nk_checkbox_label(ctx, "Paused", &intPaused);
 		paused = intPaused;
+	#ifdef __ANDROID__
+		int intSoftInputState = softInputState;
+		nk_checkbox_label(ctx, "Soft Input", &intSoftInputState);
+		softInputState = intSoftInputState;
+	#endif
 
 		nk_layout_row_dynamic(ctx, 30, 2);
 		if (nk_option_label(ctx, "Slow", speed == SLOW))
@@ -280,6 +300,14 @@ void MyEventHandler::onFrameStart()
 #ifdef HAS_GUI
 	if (paused == false && speed == FAST)
 		angle_ += 1.0f * nc::theApplication().interval();
+
+	#ifdef __ANDROID__
+	if (softInputState != softInputPreviousState)
+	{
+		static_cast<nc::AndroidApplication &>(nc::theApplication()).toggleSoftInput();
+		softInputPreviousState = softInputState;
+	}
+	#endif
 
 	for (unsigned int i = 0; i < NumSprites; i++)
 		sprites_[i]->setScale(spriteScale);

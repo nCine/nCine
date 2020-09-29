@@ -217,6 +217,12 @@ const char *AndroidApplication::obbPath() const
 	return state_->activity->obbPath;
 }
 
+void AndroidApplication::toggleSoftInput()
+{
+	if (isInitialized_)
+		AndroidJniWrap_InputMethodManager::toggleSoftInput();
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////

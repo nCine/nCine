@@ -33,6 +33,9 @@ class DLL_PUBLIC AndroidApplication : public Application
 	/// Returns the path to the OBB directory from the native activity
 	const char *obbPath() const;
 
+	/// Toggles the software keyboard
+	void toggleSoftInput();
+
   private:
 	bool isInitialized_;
 	nctl::String packageName_;

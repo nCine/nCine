@@ -27,6 +27,15 @@ jmethodID AndroidJniClass_InputDevice::midHasKeys_ = nullptr;
 jclass AndroidJniClass_KeyCharacterMap::javaClass_ = nullptr;
 jmethodID AndroidJniClass_KeyCharacterMap::midDeviceHasKey_ = nullptr;
 jclass AndroidJniClass_MotionRange::javaClass_ = nullptr;
+jclass AndroidJniClass_KeyEvent::javaClass_ = nullptr;
+jmethodID AndroidJniClass_KeyEvent::midConstructor_ = nullptr;
+jmethodID AndroidJniClass_KeyEvent::midGetUnicodeCharMetaState_ = nullptr;
+jmethodID AndroidJniClass_KeyEvent::midGetUnicodeChar_ = nullptr;
+jmethodID AndroidJniClass_KeyEvent::midIsPrintingKey_ = nullptr;
+
+JNIEnv *AndroidJniWrap_InputMethodManager::jniEnv_ = nullptr;
+jobject AndroidJniWrap_InputMethodManager::inputMethodManagerObject_ = nullptr;
+jmethodID AndroidJniWrap_InputMethodManager::midToggleSoftInput_ = nullptr;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -61,6 +70,7 @@ void AndroidJniHelper::attachJVM(struct android_app *state)
 			// Every JNI class will access the Java environment through this static pointer
 			AndroidJniClass::jniEnv_ = jniEnv_;
 			initClasses();
+			AndroidJniWrap_InputMethodManager::init(jniEnv_, state);
 
 			// Cache the value of SDK version to avoid going through JNI in the future
 			sdkVersion_ = AndroidJniClass_Version::sdkInt();
@@ -75,6 +85,7 @@ void AndroidJniHelper::detachJVM()
 	{
 		javaVM_->DetachCurrentThread();
 		LOGI("Thread detached");
+		AndroidJniClass::jniEnv_ = nullptr;
 		javaVM_ = nullptr;
 		jniEnv_ = nullptr;
 	}
@@ -85,6 +96,7 @@ void AndroidJniHelper::initClasses()
 	AndroidJniClass_Version::init();
 	AndroidJniClass_InputDevice::init();
 	AndroidJniClass_KeyCharacterMap::init();
+	AndroidJniClass_KeyEvent::init();
 }
 
 void AndroidJniClass_Version::init()
@@ -274,6 +286,82 @@ AndroidJniClass_MotionRange::AndroidJniClass_MotionRange(jobject javaObject)
 		if (javaClass_ == nullptr)
 			LOGE("Cannot find class");
 	}
+}
+
+void AndroidJniClass_KeyEvent::init()
+{
+	if (javaClass_ == nullptr)
+	{
+		javaClass_ = jniEnv_->FindClass("android/view/KeyEvent");
+		if (javaClass_ == nullptr)
+			LOGE("Cannot find class");
+		else
+		{
+			midConstructor_ = jniEnv_->GetMethodID(javaClass_, "<init>", "(II)V");
+			if (midConstructor_ == nullptr)
+				LOGE("Cannot find KeyEvent(int, int) constructor");
+
+			midGetUnicodeCharMetaState_ = jniEnv_->GetMethodID(javaClass_, "getUnicodeChar", "(I)I");
+			if (midGetUnicodeCharMetaState_ == nullptr)
+				LOGE("Cannot find method getUnicodeChar(int)");
+
+			midGetUnicodeChar_ = jniEnv_->GetMethodID(javaClass_, "getUnicodeChar", "()I");
+			if (midGetUnicodeChar_ == nullptr)
+				LOGE("Cannot find method getUnicodeChar()");
+
+			midIsPrintingKey_ = jniEnv_->GetMethodID(javaClass_, "isPrintingKey", "()Z");
+			if (midIsPrintingKey_ == nullptr)
+				LOGE("Cannot find method isPrintingKey()");
+		}
+	}
+}
+
+AndroidJniClass_KeyEvent::AndroidJniClass_KeyEvent(int action, int code)
+{
+	javaObject_ = jniEnv_->NewObject(javaClass_, midConstructor_, action, code);
+}
+
+int AndroidJniClass_KeyEvent::getUnicodeChar(int metaState)
+{
+	if (metaState != 0)
+		return jniEnv_->CallIntMethod(javaObject_, midGetUnicodeCharMetaState_, metaState);
+	else
+		return jniEnv_->CallIntMethod(javaObject_, midGetUnicodeChar_);
+}
+
+bool AndroidJniClass_KeyEvent::isPrintingKey()
+{
+	return jniEnv_->CallBooleanMethod(javaObject_, midIsPrintingKey_);
+}
+
+void AndroidJniWrap_InputMethodManager::init(JNIEnv *jniEnv, struct android_app *state)
+{
+	jniEnv_ = jniEnv;
+
+	// Retrieve `NativeActivity`
+	jobject nativeActivityObject = state->activity->clazz;
+	jclass nativeActivityClass = jniEnv->GetObjectClass(nativeActivityObject);
+
+	// Retrieve `Context.INPUT_METHOD_SERVICE`
+	jclass contextClass = jniEnv->FindClass("android/content/Context");
+	jfieldID fidInputMethodService = jniEnv->GetStaticFieldID(contextClass, "INPUT_METHOD_SERVICE", "Ljava/lang/String;");
+	jobject inputMethodServiceObject = jniEnv->GetStaticObjectField(contextClass, fidInputMethodService);
+
+	// Run `getSystemService(Context.INPUT_METHOD_SERVICE)`
+	jclass inputMethodManagerClass = jniEnv->FindClass("android/view/inputmethod/InputMethodManager");
+	if (inputMethodManagerClass == nullptr)
+		LOGE("Cannot find class");
+	jmethodID midGetSystemService = jniEnv->GetMethodID(nativeActivityClass, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;");
+	inputMethodManagerObject_ = jniEnv->CallObjectMethod(nativeActivityObject, midGetSystemService, inputMethodServiceObject);
+
+	midToggleSoftInput_ = jniEnv->GetMethodID(inputMethodManagerClass, "toggleSoftInput", "(II)V");
+	if (midToggleSoftInput_ == nullptr)
+		LOGE("Cannot find method toggleSoftInput()");
+}
+
+void AndroidJniWrap_InputMethodManager::toggleSoftInput()
+{
+	jniEnv_->CallVoidMethod(inputMethodManagerObject_, midToggleSoftInput_, SHOW_IMPLICIT, HIDE_IMPLICIT_ONLY);
 }
 
 }

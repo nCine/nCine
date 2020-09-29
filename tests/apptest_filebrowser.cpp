@@ -7,6 +7,10 @@
 #include <ncine/FileSystem.h>
 #include "apptest_datapath.h"
 
+#ifdef __ANDROID__
+	#include <ncine/AndroidApplication.h>
+#endif
+
 namespace {
 
 int inputTextCallback(ImGuiInputTextCallbackData *data)
@@ -393,6 +397,17 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 		if (config.modalPopup)
 			ImGui::CloseCurrentPopup();
 	}
+#ifdef __ANDROID__
+	static bool softInputPreviousState = false;
+	static bool softInputState = false;
+	ImGui::SameLine();
+	ImGui::Checkbox("Soft Input", &softInputState);
+	if (softInputState != softInputPreviousState)
+	{
+		static_cast<nc::AndroidApplication &>(nc::theApplication()).toggleSoftInput();
+		softInputPreviousState = softInputState;
+	}
+#endif
 
 	if (config.modalPopup)
 		ImGui::EndPopup();
