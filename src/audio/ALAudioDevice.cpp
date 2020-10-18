@@ -15,27 +15,27 @@ ALAudioDevice::ALAudioDevice()
       sources_(nctl::StaticArrayMode::EXTEND_SIZE), deviceName_(nullptr)
 {
 	device_ = alcOpenDevice(nullptr);
-	FATAL_ASSERT_MSG_X(device_ != nullptr, "alcOpenDevice failed: %x", alGetError());
+	FATAL_ASSERT_MSG_X(device_ != nullptr, "alcOpenDevice failed: 0x%x", alGetError());
 	deviceName_ = alcGetString(device_, ALC_DEVICE_SPECIFIER);
 
 	context_ = alcCreateContext(device_, nullptr);
 	if (context_ == nullptr)
 	{
 		alcCloseDevice(device_);
-		FATAL_MSG_X("alcCreateContext failed: %x", alGetError());
+		FATAL_MSG_X("alcCreateContext failed: 0x%x", alGetError());
 	}
 
 	if (!alcMakeContextCurrent(context_))
 	{
 		alcDestroyContext(context_);
 		alcCloseDevice(device_);
-		FATAL_MSG_X("alcMakeContextCurrent failed: %x", alGetError());
+		FATAL_MSG_X("alcMakeContextCurrent failed: 0x%x", alGetError());
 	}
 
 	alGetError();
 	alGenSources(MaxSources, sources_.data());
 	const ALenum error = alGetError();
-	ASSERT_MSG_X(error == AL_NO_ERROR, "alGenSources failed: %x", error);
+	ASSERT_MSG_X(error == AL_NO_ERROR, "alGenSources failed: 0x%x", error);
 
 	alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
 	alListenerf(AL_GAIN, gain_);

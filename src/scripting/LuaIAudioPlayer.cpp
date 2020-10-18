@@ -10,9 +10,18 @@ namespace LuaNames {
 namespace IAudioPlayer {
 	static const char *sourceId = "source_id";
 	static const char *bufferId = "buffer_id";
+
+	static const char *bytesPerSample = "bytes_per_sample";
 	static const char *numChannels = "num_channels";
 	static const char *frequency = "frequency";
+
+	static const char *numSamples = "num_samples";
+	static const char *duration = "duration";
+
 	static const char *bufferSize = "buffer_size";
+
+	static const char *sampleOffset = "get_sample_offset";
+	static const char *setSampleOffset = "set_sample_offset";
 
 	static const char *play = "play";
 	static const char *pause = "pause";
@@ -41,9 +50,18 @@ void LuaIAudioPlayer::exposeFunctions(lua_State *L)
 {
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::sourceId, sourceId);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::bufferId, bufferId);
+
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::bytesPerSample, bytesPerSample);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::numChannels, numChannels);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::frequency, frequency);
+
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::numSamples, numSamples);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::duration, duration);
+
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::bufferSize, bufferSize);
+
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::sampleOffset, sampleOffset);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setSampleOffset, setSampleOffset);
 
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::play, play);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::pause, pause);
@@ -84,6 +102,16 @@ int LuaIAudioPlayer::bufferId(lua_State *L)
 	return 1;
 }
 
+int LuaIAudioPlayer::bytesPerSample(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+
+	const int bytesPerSample = audioPlayer->numChannels();
+	LuaUtils::push(L, bytesPerSample);
+
+	return 1;
+}
+
 int LuaIAudioPlayer::numChannels(lua_State *L)
 {
 	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
@@ -104,6 +132,26 @@ int LuaIAudioPlayer::frequency(lua_State *L)
 	return 1;
 }
 
+int LuaIAudioPlayer::numSamples(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+
+	const unsigned long numSamples = audioPlayer->numSamples();
+	LuaUtils::push(L, static_cast<uint64_t>(numSamples));
+
+	return 1;
+}
+
+int LuaIAudioPlayer::duration(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+
+	const float duration = audioPlayer->duration();
+	LuaUtils::push(L, duration);
+
+	return 1;
+}
+
 int LuaIAudioPlayer::bufferSize(lua_State *L)
 {
 	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
@@ -112,6 +160,26 @@ int LuaIAudioPlayer::bufferSize(lua_State *L)
 	LuaUtils::push(L, static_cast<uint64_t>(bufferSize));
 
 	return 1;
+}
+
+int LuaIAudioPlayer::sampleOffset(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+
+	const int sampleOffset = audioPlayer->sampleOffset();
+	LuaUtils::push(L, sampleOffset);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::setSampleOffset(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -2);
+	const int sampleOffset = LuaUtils::retrieve<int>(L, -1);
+
+	audioPlayer->setSampleOffset(sampleOffset);
+
+	return 0;
 }
 
 int LuaIAudioPlayer::play(lua_State *L)

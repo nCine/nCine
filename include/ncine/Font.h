@@ -56,9 +56,6 @@ class DLL_PUBLIC Font : public Object
 	inline static ObjectType sType() { return ObjectType::FONT; }
 
   private:
-	/// The FNT file parser associated with this font
-	nctl::UniquePtr<FntParser> fntParser_;
-
 	/// The font texture
 	nctl::UniquePtr<Texture> texture_;
 	/// Font line height
@@ -91,10 +88,10 @@ class DLL_PUBLIC Font : public Object
 	Font &operator=(const Font &) = delete;
 
 	/// Retrieves font information from the FNT parser
-	void retrieveInfoFromFnt();
+	void retrieveInfoFromFnt(const FntParser &fntParser);
 
 	/// Checks whether the FNT information are compatible with rendering or not
-	void checkFntInformation();
+	void checkFntInformation(const FntParser &fntParser);
 };
 
 }

@@ -11,6 +11,8 @@ namespace ncine {
 class DLL_PUBLIC AssetFile : public IFile
 {
   public:
+	static const char *Prefix;
+
 	/// Constructs an asset file object
 	/*! \param filename File name including path relative to the assets directory */
 	explicit AssetFile(const char *filename);
@@ -30,7 +32,7 @@ class DLL_PUBLIC AssetFile : public IFile
 	/// Sets the global pointer to the AAssetManager
 	static void initAssetManager(struct android_app *state) { assetManager_ = state->activity->assetManager; }
 
-	/// Returns the path of an Android asset without the `asset::` prefix
+	/// Returns the path of an Android asset without the prefix
 	static const char *assetPath(const char *path);
 
 	/// Checks if an asset path exists as a file or as a directory and can be opened

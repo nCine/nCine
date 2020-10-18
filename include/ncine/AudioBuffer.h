@@ -13,7 +13,6 @@ class IAudioLoader;
 class DLL_PUBLIC AudioBuffer : public Object
 {
   public:
-	AudioBuffer();
 	/// A constructor creating a buffer from memory
 	AudioBuffer(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	/// A constructor creating a buffer from a file
@@ -22,32 +21,47 @@ class DLL_PUBLIC AudioBuffer : public Object
 
 	/// Returns the OpenAL buffer id
 	inline unsigned int bufferId() const { return bufferId_; }
+
+	/// Returns the number of bytes per sample
+	inline int bytesPerSample() const { return bytesPerSample_; }
 	/// Returns the number of audio channels
 	inline int numChannels() const { return numChannels_; }
 	/// Returns the samples frequency
 	inline int frequency() const { return frequency_; }
+
+	/// Returns number of samples
+	inline unsigned long int numSamples() const { return numSamples_; }
+	/// Returns the duration in seconds
+	inline float duration() const { return duration_; }
+
 	/// Returns the size of the buffer in bytes
-	inline unsigned long bufferSize() const { return bufferSize_; }
+	inline unsigned long bufferSize() const { return numSamples_ * numChannels_ * bytesPerSample_; }
 
 	inline static ObjectType sType() { return ObjectType::AUDIOBUFFER; }
 
   private:
 	/// The OpenAL buffer id
 	unsigned int bufferId_;
+
+	/// Number of bytes per sample
+	int bytesPerSample_;
 	/// Number of channels
 	int numChannels_;
 	/// Samples frequency
 	int frequency_;
-	/// Buffer size in bytes
-	unsigned long bufferSize_;
+
+	/// Number of samples
+	unsigned long int numSamples_;
+	/// Duration in seconds
+	float duration_;
+
+	/// Loads audio samples based on information from the audio loader and reader
+	void load(IAudioLoader &audioLoader);
 
 	/// Deleted copy constructor
 	AudioBuffer(const AudioBuffer &) = delete;
 	/// Deleted assignment operator
 	AudioBuffer &operator=(const AudioBuffer &) = delete;
-
-	/// Loads audio samples based on information from the audio loader
-	void load(const IAudioLoader *audioLoader);
 };
 
 }

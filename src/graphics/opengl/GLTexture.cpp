@@ -15,7 +15,7 @@ unsigned int GLTexture::boundUnit_ = 0;
 ///////////////////////////////////////////////////////////
 
 GLTexture::GLTexture(GLenum target)
-    : glHandle_(0), target_(target), textureUnit_(0), imageFormat_(GL_RGBA)
+    : glHandle_(0), target_(target), textureUnit_(0)
 {
 	glGenTextures(1, &glHandle_);
 }

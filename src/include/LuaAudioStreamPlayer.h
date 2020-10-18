@@ -16,6 +16,9 @@ class LuaAudioStreamPlayer
 
   private:
 	static int newObject(lua_State *L);
+
+	static int numStreamSamples(lua_State *L);
+	static int streamBufferSize(lua_State *L);
 };
 
 }

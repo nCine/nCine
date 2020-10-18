@@ -90,7 +90,6 @@ if(OPENAL_FOUND)
 	target_link_libraries(ncine PRIVATE OpenAL::AL)
 
 	list(APPEND HEADERS
-		${NCINE_ROOT}/include/ncine/IAudioLoader.h
 		${NCINE_ROOT}/include/ncine/AudioBuffer.h
 		${NCINE_ROOT}/include/ncine/AudioStream.h
 		${NCINE_ROOT}/include/ncine/IAudioPlayer.h
@@ -100,13 +99,17 @@ if(OPENAL_FOUND)
 
 	list(APPEND PRIVATE_HEADERS
 		${NCINE_ROOT}/src/include/ALAudioDevice.h
+		${NCINE_ROOT}/src/include/IAudioLoader.h
 		${NCINE_ROOT}/src/include/AudioLoaderWav.h
+		${NCINE_ROOT}/src/include/AudioReaderWav.h
+		${NCINE_ROOT}/src/include/IAudioReader.h
 	)
 
 	list(APPEND SOURCES
 		${NCINE_ROOT}/src/audio/ALAudioDevice.cpp
 		${NCINE_ROOT}/src/audio/IAudioLoader.cpp
 		${NCINE_ROOT}/src/audio/AudioLoaderWav.cpp
+		${NCINE_ROOT}/src/audio/AudioReaderWav.cpp
 		${NCINE_ROOT}/src/audio/AudioBuffer.cpp
 		${NCINE_ROOT}/src/audio/AudioStream.cpp
 		${NCINE_ROOT}/src/audio/IAudioPlayer.cpp
@@ -118,8 +121,13 @@ if(OPENAL_FOUND)
 		target_compile_definitions(ncine PRIVATE "WITH_VORBIS")
 		target_link_libraries(ncine PRIVATE Vorbis::Vorbisfile)
 
-		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/AudioLoaderOgg.h)
-		list(APPEND SOURCES ${NCINE_ROOT}/src/audio/AudioLoaderOgg.cpp)
+		list(APPEND PRIVATE_HEADERS
+			${NCINE_ROOT}/src/include/AudioLoaderOgg.h
+			${NCINE_ROOT}/src/include/AudioReaderOgg.h)
+
+		list(APPEND SOURCES
+			${NCINE_ROOT}/src/audio/AudioLoaderOgg.cpp
+			${NCINE_ROOT}/src/audio/AudioReaderOgg.cpp)
 	endif()
 endif()
 

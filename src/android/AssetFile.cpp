@@ -11,6 +11,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AAssetManager *AssetFile::assetManager_ = nullptr;
+const char *AssetFile::Prefix = "asset::";
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -144,7 +145,7 @@ bool AssetFile::isOpened() const
 const char *AssetFile::assetPath(const char *path)
 {
 	ASSERT(path);
-	if (strncmp(path, static_cast<const char *>("asset::"), 7) == 0)
+	if (strncmp(path, Prefix, strlen(Prefix)) == 0)
 	{
 		// Skip leading path separator character
 		return (path[7] == '/') ? path + 8 : path + 7;

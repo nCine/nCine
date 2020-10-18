@@ -61,17 +61,15 @@ const GLubyte *ITextureLoader::pixels(unsigned int mipMapLevel) const
 
 nctl::UniquePtr<ITextureLoader> ITextureLoader::createFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
 {
-	nctl::UniquePtr<IFile> fileHandle = IFile::createFromMemory(bufferName, bufferPtr, bufferSize);
-	LOGI_X("Loading memory file: \"%s\" (0x%lx, %lu bytes)", fileHandle->filename(), bufferPtr, bufferSize);
-	return createLoader(nctl::move(fileHandle), bufferName);
+	LOGI_X("Loading memory file: \"%s\" (0x%lx, %lu bytes)", bufferName, bufferPtr, bufferSize);
+	return createLoader(nctl::move(IFile::createFromMemory(bufferName, bufferPtr, bufferSize)), bufferName);
 }
 
 nctl::UniquePtr<ITextureLoader> ITextureLoader::createFromFile(const char *filename)
 {
+	LOGI_X("Loading file: \"%s\"", filename);
 	// Creating a handle from IFile static method to detect assets file
-	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
-	LOGI_X("Loading file: \"%s\"", fileHandle->filename());
-	return createLoader(nctl::move(fileHandle), filename);
+	return createLoader(nctl::move(IFile::createFileHandle(filename)), filename);
 }
 
 ///////////////////////////////////////////////////////////

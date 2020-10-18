@@ -14,12 +14,18 @@ class DLL_PUBLIC AudioBufferPlayer : public IAudioPlayer
   public:
 	/// A constructor creating a player from a shared buffer
 	explicit AudioBufferPlayer(AudioBuffer *audioBuffer);
-	~AudioBufferPlayer() override { stop(); }
+	inline ~AudioBufferPlayer() override { stop(); }
 
 	unsigned int bufferId() const override;
+
+	int bytesPerSample() const override;
 	int numChannels() const override;
 	int frequency() const override;
-	unsigned long bufferSize() const override;
+
+	unsigned long int numSamples() const override;
+	float duration() const override;
+
+	unsigned long int bufferSize() const override;
 
 	void play() override;
 	void pause() override;

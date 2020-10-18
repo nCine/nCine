@@ -10,10 +10,11 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AudioBufferPlayer::AudioBufferPlayer(AudioBuffer *audioBuffer)
-    : audioBuffer_(audioBuffer)
+    : IAudioPlayer(ObjectType::AUDIOBUFFER_PLAYER), audioBuffer_(audioBuffer)
 {
 	ASSERT(audioBuffer);
-	type_ = ObjectType::AUDIOBUFFER_PLAYER;
+	if (audioBuffer)
+		setName(audioBuffer->name());
 }
 
 ///////////////////////////////////////////////////////////
@@ -26,6 +27,11 @@ unsigned int AudioBufferPlayer::bufferId() const
 	return (state_ != PlayerState::INITIAL && state_ != PlayerState::STOPPED) ? bufferId : 0U;
 }
 
+int AudioBufferPlayer::bytesPerSample() const
+{
+	return (audioBuffer_ ? audioBuffer_->bytesPerSample() : 0);
+}
+
 int AudioBufferPlayer::numChannels() const
 {
 	return (audioBuffer_ ? audioBuffer_->numChannels() : 0);
@@ -36,7 +42,17 @@ int AudioBufferPlayer::frequency() const
 	return (audioBuffer_ ? audioBuffer_->frequency() : 0);
 }
 
-unsigned long AudioBufferPlayer::bufferSize() const
+unsigned long int AudioBufferPlayer::numSamples() const
+{
+	return (audioBuffer_ ? audioBuffer_->numSamples() : 0UL);
+}
+
+float AudioBufferPlayer::duration() const
+{
+	return (audioBuffer_ ? audioBuffer_->duration() : 0.0f);
+}
+
+unsigned long int AudioBufferPlayer::bufferSize() const
 {
 	return (audioBuffer_ ? audioBuffer_->bufferSize() : 0UL);
 }
@@ -133,7 +149,12 @@ void AudioBufferPlayer::updateState()
 		alGetSourcei(sourceId_, AL_SOURCE_STATE, &alState);
 
 		if (alState != AL_PLAYING)
+		{
+			// Detach the buffer from source
+			alSourcei(sourceId_, AL_BUFFER, 0);
+			sourceId_ = 0;
 			state_ = PlayerState::STOPPED;
+		}
 		else
 			alSourcei(sourceId_, AL_LOOPING, isLooping_);
 	}

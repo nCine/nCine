@@ -44,7 +44,6 @@ class GLTexture
 	/// The texture unit is mutable in order for constant texture objects to be bound
 	/*! A texture can be bound to a specific texture unit. */
 	mutable unsigned int textureUnit_;
-	GLenum imageFormat_;
 
 	/// Deleted copy constructor
 	GLTexture(const GLTexture &) = delete;

@@ -9,17 +9,13 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 AudioStreamPlayer::AudioStreamPlayer(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
-    : audioStream_(bufferName, bufferPtr, bufferSize)
+    : IAudioPlayer(ObjectType::AUDIOSTREAM_PLAYER, bufferName), audioStream_(bufferName, bufferPtr, bufferSize)
 {
-	type_ = ObjectType::AUDIOSTREAM_PLAYER;
-	setName(bufferName);
 }
 
 AudioStreamPlayer::AudioStreamPlayer(const char *filename)
-    : audioStream_(filename)
+    : IAudioPlayer(ObjectType::AUDIOSTREAM_PLAYER, filename), audioStream_(filename)
 {
-	type_ = ObjectType::AUDIOSTREAM_PLAYER;
-	setName(filename);
 }
 
 AudioStreamPlayer::~AudioStreamPlayer()
@@ -119,7 +115,12 @@ void AudioStreamPlayer::updateState()
 	{
 		const bool shouldStillPlay = audioStream_.enqueue(sourceId_, isLooping_);
 		if (shouldStillPlay == false)
+		{
+			// Detach the buffer from source
+			alSourcei(sourceId_, AL_BUFFER, 0);
+			sourceId_ = 0;
 			state_ = PlayerState::STOPPED;
+		}
 	}
 }
 

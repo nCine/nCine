@@ -24,9 +24,9 @@ Font::Font(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigne
 	ZoneScoped;
 	ZoneText(fntBufferName, strnlen(fntBufferName, nctl::String::MaxCStringLength));
 
-	fntParser_ = nctl::makeUnique<FntParser>(reinterpret_cast<const char *>(fntBufferPtr), fntBufferSize);
-	retrieveInfoFromFnt();
-	checkFntInformation();
+	FntParser fntParser(reinterpret_cast<const char *>(fntBufferPtr), fntBufferSize);
+	retrieveInfoFromFnt(fntParser);
+	checkFntInformation(fntParser);
 }
 
 /*! \note The specified texture will override the one in the FNT file */
@@ -41,9 +41,9 @@ Font::Font(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigne
 	ZoneScoped;
 	ZoneText(fntBufferName, strnlen(fntBufferName, nctl::String::MaxCStringLength));
 
-	fntParser_ = nctl::makeUnique<FntParser>(reinterpret_cast<const char *>(fntBufferPtr), fntBufferSize);
-	retrieveInfoFromFnt();
-	checkFntInformation();
+	FntParser fntParser(reinterpret_cast<const char *>(fntBufferPtr), fntBufferSize);
+	retrieveInfoFromFnt(fntParser);
+	checkFntInformation(fntParser);
 }
 
 /*! \note The texture specified by the FNT file will be automatically loaded */
@@ -56,13 +56,13 @@ Font::Font(const char *fntFilename)
 	ZoneScoped;
 	ZoneText(fntFilename, strnlen(fntFilename, nctl::String::MaxCStringLength));
 
-	fntParser_ = nctl::makeUnique<FntParser>(fntFilename);
-	retrieveInfoFromFnt();
+	FntParser fntParser(fntFilename);
+	retrieveInfoFromFnt(fntParser);
 
 	nctl::String dirName = fs::dirName(fntFilename);
-	nctl::String texFilename = fs::absoluteJoinPath(dirName, fntParser_->pageTag(0).file);
+	nctl::String texFilename = fs::absoluteJoinPath(dirName, fntParser.pageTag(0).file);
 	texture_ = nctl::makeUnique<Texture>(texFilename.data());
-	checkFntInformation();
+	checkFntInformation(fntParser);
 }
 
 /*! \note The specified texture will override the one in the FNT file */
@@ -76,9 +76,9 @@ Font::Font(const char *fntFilename, const char *texFilename)
 	ZoneScoped;
 	ZoneText(fntFilename, strnlen(fntFilename, nctl::String::MaxCStringLength));
 
-	fntParser_ = nctl::makeUnique<FntParser>(fntFilename);
-	retrieveInfoFromFnt();
-	checkFntInformation();
+	FntParser fntParser(fntFilename);
+	retrieveInfoFromFnt(fntParser);
+	checkFntInformation(fntParser);
 }
 
 Font::~Font()
@@ -101,19 +101,19 @@ const FontGlyph *Font::glyph(unsigned int glyphId) const
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void Font::retrieveInfoFromFnt()
+void Font::retrieveInfoFromFnt(const FntParser &fntParser)
 {
-	const FntParser::CommonTag &commonTag = fntParser_->commonTag();
+	const FntParser::CommonTag &commonTag = fntParser.commonTag();
 
 	lineHeight_ = static_cast<unsigned int>(commonTag.lineHeight);
 	base_ = static_cast<unsigned int>(commonTag.base);
 	width_ = static_cast<unsigned int>(commonTag.scaleW);
 	height_ = static_cast<unsigned int>(commonTag.scaleH);
 
-	const unsigned int numChars = (fntParser_->numCharTags() < GlyphArraySize + GlyphHashmapSize) ? fntParser_->numCharTags() : GlyphArraySize + GlyphHashmapSize;
+	const unsigned int numChars = (fntParser.numCharTags() < GlyphArraySize + GlyphHashmapSize) ? fntParser.numCharTags() : GlyphArraySize + GlyphHashmapSize;
 	for (unsigned int i = 0; i < numChars; i++)
 	{
-		const FntParser::CharTag &charTag = fntParser_->charTag(i);
+		const FntParser::CharTag &charTag = fntParser.charTag(i);
 		if (charTag.id < static_cast<int>(GlyphArraySize))
 			glyphArray_[charTag.id].set(charTag.x, charTag.y, charTag.width, charTag.height, charTag.xoffset, charTag.yoffset, charTag.xadvance);
 		else
@@ -121,9 +121,9 @@ void Font::retrieveInfoFromFnt()
 		numGlyphs_++;
 	}
 
-	for (unsigned int i = 0; i < fntParser_->numKerningTags(); i++)
+	for (unsigned int i = 0; i < fntParser.numKerningTags(); i++)
 	{
-		const FntParser::KerningTag &kerningTag = fntParser_->kerningTag(i);
+		const FntParser::KerningTag &kerningTag = fntParser.kerningTag(i);
 		if (kerningTag.first < static_cast<int>(GlyphArraySize))
 			glyphArray_[kerningTag.first].addKerning(kerningTag.second, kerningTag.amount);
 		else
@@ -134,12 +134,12 @@ void Font::retrieveInfoFromFnt()
 	LOGI_X("FNT file information retrieved: %u glyphs and %u kernings", numGlyphs_, numKernings_);
 }
 
-void Font::checkFntInformation()
+void Font::checkFntInformation(const FntParser &fntParser)
 {
-	const FntParser::InfoTag &infoTag = fntParser_->infoTag();
+	const FntParser::InfoTag &infoTag = fntParser.infoTag();
 	FATAL_ASSERT_MSG_X(infoTag.outline == 0, "Font outline is not supported");
 
-	const FntParser::CommonTag &commonTag = fntParser_->commonTag();
+	const FntParser::CommonTag &commonTag = fntParser.commonTag();
 	FATAL_ASSERT_MSG_X(commonTag.pages == 1, "Multiple texture pages are not supported (pages: %d)", commonTag.pages);
 	FATAL_ASSERT_MSG(commonTag.packed == false, "Characters packed into each of the texture channels are not supported");
 

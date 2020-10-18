@@ -3,6 +3,7 @@
 #include "common_macros.h"
 #include "AudioStream.h"
 #include "IAudioLoader.h"
+#include "IAudioReader.h"
 #include "tracy.h"
 
 namespace ncine {
@@ -13,8 +14,9 @@ namespace ncine {
 
 /*! Private constructor called only by `AudioStreamPlayer`. */
 AudioStream::AudioStream(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
-    : buffersIds_(nctl::StaticArrayMode::EXTEND_SIZE),
-      nextAvailableBufferIndex_(0), currentBufferId_(0), frequency_(0)
+    : buffersIds_(nctl::StaticArrayMode::EXTEND_SIZE), nextAvailableBufferIndex_(0),
+      currentBufferId_(0), bytesPerSample_(0), numChannels_(0),
+      frequency_(0), numSamples_(0), duration_(0.0f)
 {
 	ZoneScoped;
 	ZoneText(bufferName, strnlen(bufferName, nctl::String::MaxCStringLength));
@@ -22,15 +24,17 @@ AudioStream::AudioStream(const char *bufferName, const unsigned char *bufferPtr,
 	alGetError();
 	alGenBuffers(NumBuffers, buffersIds_.data());
 	const ALenum error = alGetError();
-	ASSERT_MSG_X(error == AL_NO_ERROR, "alGenBuffers failed: %x", error);
+	ASSERT_MSG_X(error == AL_NO_ERROR, "alGenBuffers failed: 0x%x", error);
 	memBuffer_ = nctl::makeUnique<char[]>(BufferSize);
 
-	audioLoader_ = IAudioLoader::createFromMemory(bufferName, bufferPtr, bufferSize);
-	numChannels_ = audioLoader_->numChannels();
-	frequency_ = audioLoader_->frequency();
+	nctl::UniquePtr<IAudioLoader> audioLoader = IAudioLoader::createFromMemory(bufferName, bufferPtr, bufferSize);
+	numChannels_ = audioLoader->numChannels();
+	frequency_ = audioLoader->frequency();
 
 	FATAL_ASSERT_MSG_X(numChannels_ == 1 || numChannels_ == 2, "Unsupported number of channels: %d", numChannels_);
 	format_ = (numChannels_ == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
+
+	audioReader_ = audioLoader->createReader();
 }
 
 /*! Private constructor called only by `AudioStreamPlayer`. */
@@ -44,15 +48,17 @@ AudioStream::AudioStream(const char *filename)
 	alGetError();
 	alGenBuffers(NumBuffers, buffersIds_.data());
 	const ALenum error = alGetError();
-	ASSERT_MSG_X(error == AL_NO_ERROR, "alGenBuffers failed: %x", error);
+	ASSERT_MSG_X(error == AL_NO_ERROR, "alGenBuffers failed: 0x%x", error);
 	memBuffer_ = nctl::makeUnique<char[]>(BufferSize);
 
-	audioLoader_ = IAudioLoader::createFromFile(filename);
-	numChannels_ = audioLoader_->numChannels();
-	frequency_ = audioLoader_->frequency();
+	nctl::UniquePtr<IAudioLoader> audioLoader = IAudioLoader::createFromFile(filename);
+	numChannels_ = audioLoader->numChannels();
+	frequency_ = audioLoader->frequency();
 
 	FATAL_ASSERT_MSG_X(numChannels_ == 1 || numChannels_ == 2, "Unsupported number of channels: %d", numChannels_);
 	format_ = (numChannels_ == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
+
+	audioReader_ = audioLoader->createReader();
 }
 
 AudioStream::~AudioStream()
@@ -63,6 +69,13 @@ AudioStream::~AudioStream()
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+unsigned long int AudioStream::numStreamSamples() const
+{
+	if (numChannels_ * bytesPerSample_ > 0)
+		return BufferSize / (numChannels_ * bytesPerSample_);
+	return 0UL;
+}
 
 /*! \return A flag indicating whether the stream has been entirely decoded and played or not. */
 bool AudioStream::enqueue(unsigned int source, bool looping)
@@ -88,15 +101,15 @@ bool AudioStream::enqueue(unsigned int source, bool looping)
 	{
 		currentBufferId_ = buffersIds_[nextAvailableBufferIndex_];
 
-		unsigned long bytes = audioLoader_->read(memBuffer_.get(), BufferSize);
+		unsigned long bytes = audioReader_->read(memBuffer_.get(), BufferSize);
 
 		// EOF reached
 		if (bytes < BufferSize)
 		{
 			if (looping)
 			{
-				audioLoader_->rewind();
-				const unsigned long moreBytes = audioLoader_->read(memBuffer_.get() + bytes, BufferSize - bytes);
+				audioReader_->rewind();
+				const unsigned long moreBytes = audioReader_->read(memBuffer_.get() + bytes, BufferSize - bytes);
 				bytes += moreBytes;
 			}
 		}
@@ -153,7 +166,7 @@ void AudioStream::stop(unsigned int source)
 		numProcessedBuffers--;
 	}
 
-	audioLoader_->rewind();
+	audioReader_->rewind();
 	currentBufferId_ = 0;
 }
 

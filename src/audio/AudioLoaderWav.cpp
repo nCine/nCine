@@ -1,5 +1,5 @@
-#include <cstring>
 #include "AudioLoaderWav.h"
+#include "AudioReaderWav.h"
 
 namespace ncine {
 
@@ -17,6 +17,7 @@ AudioLoaderWav::AudioLoaderWav(nctl::UniquePtr<IFile> fileHandle)
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
+	FATAL_ASSERT_MSG_X(fileHandle_->isOpened(), "File \"%s\" cannot be opened", fileHandle_->filename());
 
 	WavHeader header;
 	fileHandle_->read(&header, sizeof(WavHeader));
@@ -36,6 +37,7 @@ AudioLoaderWav::AudioLoaderWav(nctl::UniquePtr<IFile> fileHandle)
 	numSamples_ = IFile::int32FromLE(header.subchunk2Size) / (numChannels_ * bytesPerSample_);
 	duration_ = float(numSamples_) / frequency_;
 
+	FATAL_ASSERT_MSG_X(numChannels_ == 1 || numChannels_ == 2, "Unsupported number of channels: %d", numChannels_);
 	LOGI_X("duration: %.2fs, channels: %d, frequency: %dHz", duration_, numChannels_, frequency_);
 }
 
@@ -43,29 +45,9 @@ AudioLoaderWav::AudioLoaderWav(nctl::UniquePtr<IFile> fileHandle)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-unsigned long int AudioLoaderWav::read(char *buffer, unsigned long int bufferSize) const
+nctl::UniquePtr<IAudioReader> AudioLoaderWav::createReader()
 {
-	ASSERT(buffer);
-	ASSERT(bufferSize > 0);
-
-	unsigned long int bytes = 0;
-	unsigned long int bufferSeek = 0;
-
-	do
-	{
-		// Read up to a buffer's worth of decoded sound data
-		bytes = fileHandle_->read(buffer, bufferSize);
-		FATAL_ASSERT_MSG(bytes > 0, "Zero bytes read from file");
-		bufferSeek += bytes;
-	} while (bytes > 0 && bufferSize - bufferSeek > 0);
-
-	return bufferSeek;
-}
-
-void AudioLoaderWav::rewind() const
-{
-	clearerr(fileHandle_->ptr());
-	fileHandle_->seek(sizeof(WavHeader), SEEK_SET);
+	return nctl::makeUnique<AudioReaderWav>(nctl::move(fileHandle_));
 }
 
 }

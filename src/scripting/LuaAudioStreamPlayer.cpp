@@ -10,6 +10,9 @@ namespace ncine {
 namespace LuaNames {
 namespace AudioStreamPlayer {
 	static const char *AudioStreamPlayer = "audiostream_player";
+
+	static const char *numStreamSamples = "num_stream_samples";
+	static const char *streamBufferSize = "stream_bufferSize";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -26,6 +29,9 @@ void LuaAudioStreamPlayer::expose(LuaStateManager *stateManager)
 		LuaClassTracker<AudioStreamPlayer>::exposeDelete(L);
 		LuaUtils::addFunction(L, LuaNames::newObject, newObject);
 	}
+
+	LuaUtils::addFunction(L, LuaNames::AudioStreamPlayer::numStreamSamples, numStreamSamples);
+	LuaUtils::addFunction(L, LuaNames::AudioStreamPlayer::streamBufferSize, streamBufferSize);
 
 	LuaIAudioPlayer::exposeFunctions(L);
 
@@ -48,6 +54,20 @@ int LuaAudioStreamPlayer::newObject(lua_State *L)
 
 	LuaClassTracker<AudioStreamPlayer>::newObject(L, filename);
 
+	return 1;
+}
+
+int LuaAudioStreamPlayer::numStreamSamples(lua_State *L)
+{
+	AudioStreamPlayer *audioStreamPlayer = LuaClassWrapper<AudioStreamPlayer>::unwrapUserData(L, -1);
+	LuaUtils::push(L, static_cast<uint64_t>(audioStreamPlayer->numStreamSamples()));
+	return 1;
+}
+
+int LuaAudioStreamPlayer::streamBufferSize(lua_State *L)
+{
+	AudioStreamPlayer *audioStreamPlayer = LuaClassWrapper<AudioStreamPlayer>::unwrapUserData(L, -1);
+	LuaUtils::push(L, audioStreamPlayer->streamBufferSize());
 	return 1;
 }
 

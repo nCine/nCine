@@ -76,6 +76,11 @@ void MyEventHandler::onFrameStart()
 
 	textString_->clear();
 
+	textString_->formatAppend("Music at sample %d/%d\nState: %s (press M)\n\n", musicPlayer_->sampleOffset(),
+	                          static_cast<nc::AudioStreamPlayer *>(musicPlayer_.get())->numStreamSamples(), audioPlayerStateToString(musicPlayer_->state()));
+	textString_->formatAppend("Sound at sample %d/%d\nState: %s (press A/S/D)\n\n", soundPlayer_->sampleOffset(),
+	                          soundPlayer_->numSamples(), audioPlayerStateToString(soundPlayer_->state()));
+
 	textString_->formatAppend("Music: %s (press M)\n", audioPlayerStateToString(musicPlayer_->state()));
 	textString_->formatAppend("Sound: %s (press A/S/D)\n", audioPlayerStateToString(soundPlayer_->state()));
 

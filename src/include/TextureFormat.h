@@ -57,27 +57,6 @@ class TextureFormat
 	void checkFormatSupport() const;
 };
 
-inline unsigned int TextureFormat::numChannels() const
-{
-	switch (format_)
-	{
-		case GL_RED:
-			return 1;
-		case GL_RG:
-			return 2;
-		case GL_RGB:
-			return 3;
-		case GL_RGBA:
-#if !defined(__ANDROID__) && !defined(WITH_ANGLE)
-		case GL_BGRA:
-#else
-		case GL_BGRA_EXT:
-#endif
-		default:
-			return 4;
-	}
-}
-
 }
 
 #endif

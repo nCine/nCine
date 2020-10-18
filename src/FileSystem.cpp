@@ -305,7 +305,7 @@ nctl::String FileSystem::joinPath(const nctl::String &first, const nctl::String 
 	const bool secondHasSeparator = second[0] == '/' || second[0] == '\\';
 
 #ifdef __ANDROID__
-	if (first == "asset::")
+	if (first == AssetFile::Prefix)
 		return first + second;
 #endif
 

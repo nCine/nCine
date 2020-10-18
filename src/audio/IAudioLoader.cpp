@@ -18,7 +18,8 @@ IAudioLoader::IAudioLoader(const char *filename)
 }
 
 IAudioLoader::IAudioLoader(nctl::UniquePtr<IFile> fileHandle)
-    : fileHandle_(nctl::move(fileHandle)), bytesPerSample_(0), numChannels_(0), frequency_(0), numSamples_(0L), duration_(0.0f)
+    : fileHandle_(nctl::move(fileHandle)), bytesPerSample_(0),
+      numChannels_(0), frequency_(0), numSamples_(0L), duration_(0.0f)
 {
 	// Warning: Cannot call a virtual `init()` here, in the base constructor
 }
@@ -29,17 +30,15 @@ IAudioLoader::IAudioLoader(nctl::UniquePtr<IFile> fileHandle)
 
 nctl::UniquePtr<IAudioLoader> IAudioLoader::createFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
 {
-	nctl::UniquePtr<IFile> fileHandle = IFile::createFromMemory(bufferName, bufferPtr, bufferSize);
-	LOGI_X("Loading memory file: \"%s\" (0x%lx, %lu bytes)", fileHandle->filename(), bufferPtr, bufferSize);
-	return createLoader(nctl::move(fileHandle), bufferName);
+	LOGI_X("Loading memory file: \"%s\" (0x%lx, %lu bytes)", bufferName, bufferPtr, bufferSize);
+	return createLoader(nctl::move(IFile::createFromMemory(bufferName, bufferPtr, bufferSize)), bufferName);
 }
 
 nctl::UniquePtr<IAudioLoader> IAudioLoader::createFromFile(const char *filename)
 {
+	LOGI_X("Loading file: \"%s\"", filename);
 	// Creating a handle from IFile static method to detect assets file
-	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
-	LOGI_X("Loading file: \"%s\"", fileHandle->filename());
-	return createLoader(nctl::move(fileHandle), filename);
+	return createLoader(nctl::move(IFile::createFileHandle(filename)), filename);
 }
 
 ///////////////////////////////////////////////////////////
