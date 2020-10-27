@@ -59,6 +59,9 @@ if(MSVC)
 	target_compile_options(ncine PRIVATE /MP)
 	# Always use the non debug version of the runtime library
 	target_compile_options(ncine PUBLIC /MD)
+	# Disabling exceptions
+	target_compile_definitions(ncine PRIVATE "_HAS_EXCEPTIONS=0")
+	target_compile_options(ncine PRIVATE /EHsc)
 	# Extra optimizations in release
 	target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:/fp:fast /Ox /Qpar>)
 
@@ -84,6 +87,7 @@ if(MSVC)
 		target_link_options(ncine PRIVATE $<$<CONFIG:Release>:/DEBUG>)
 	endif()
 else() # GCC and LLVM
+	target_compile_options(ncine PRIVATE -fno-exceptions)
 	target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-ffast-math>)
 
 	if(NCINE_DYNAMIC_LIBRARY)

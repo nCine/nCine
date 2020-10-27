@@ -1,8 +1,8 @@
 #include "GLShaderProgram.h"
 #include "GLShader.h"
 #include "GLDebug.h"
+#include <nctl/CString.h>
 #include <nctl/String.h>
-#include <cstring> // for strnlen()
 #include "tracy.h"
 
 namespace ncine {
@@ -72,7 +72,7 @@ void GLShaderProgram::attachShader(GLenum type, const char *filename)
 	shader->compile(errorChecking);
 	FATAL_ASSERT(shader->status() != GLShader::Status::COMPILATION_FAILED);
 
-	const size_t length = strnlen(filename, GLDebug::maxLabelLength());
+	const size_t length = nctl::strnlen(filename, GLDebug::maxLabelLength());
 	GLDebug::objectLabel(GLDebug::LabelTypes::SHADER, shader->glHandle(), length, filename);
 
 	attachedShaders_.pushBack(nctl::move(shader));

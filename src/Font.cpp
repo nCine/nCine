@@ -1,5 +1,5 @@
-#include <cstring> // for `strrchr()`
 #include "common_macros.h"
+#include <nctl/CString.h>
 #include "Font.h"
 #include "FntParser.h"
 #include "FontGlyph.h"
@@ -22,7 +22,7 @@ Font::Font(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigne
       glyphHashMap_(GlyphHashmapSize), renderMode_(RenderMode::GLYPH_IN_RED)
 {
 	ZoneScoped;
-	ZoneText(fntBufferName, strnlen(fntBufferName, nctl::String::MaxCStringLength));
+	ZoneText(fntBufferName, nctl::strnlen(fntBufferName, nctl::String::MaxCStringLength));
 
 	FntParser fntParser(reinterpret_cast<const char *>(fntBufferPtr), fntBufferSize);
 	retrieveInfoFromFnt(fntParser);
@@ -39,7 +39,7 @@ Font::Font(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigne
       glyphHashMap_(GlyphHashmapSize), renderMode_(RenderMode::GLYPH_IN_RED)
 {
 	ZoneScoped;
-	ZoneText(fntBufferName, strnlen(fntBufferName, nctl::String::MaxCStringLength));
+	ZoneText(fntBufferName, nctl::strnlen(fntBufferName, nctl::String::MaxCStringLength));
 
 	FntParser fntParser(reinterpret_cast<const char *>(fntBufferPtr), fntBufferSize);
 	retrieveInfoFromFnt(fntParser);
@@ -54,7 +54,7 @@ Font::Font(const char *fntFilename)
       glyphHashMap_(GlyphHashmapSize), renderMode_(RenderMode::GLYPH_IN_RED)
 {
 	ZoneScoped;
-	ZoneText(fntFilename, strnlen(fntFilename, nctl::String::MaxCStringLength));
+	ZoneText(fntFilename, nctl::strnlen(fntFilename, nctl::String::MaxCStringLength));
 
 	FntParser fntParser(fntFilename);
 	retrieveInfoFromFnt(fntParser);
@@ -74,7 +74,7 @@ Font::Font(const char *fntFilename, const char *texFilename)
       glyphHashMap_(GlyphHashmapSize), renderMode_(RenderMode::GLYPH_IN_RED)
 {
 	ZoneScoped;
-	ZoneText(fntFilename, strnlen(fntFilename, nctl::String::MaxCStringLength));
+	ZoneText(fntFilename, nctl::strnlen(fntFilename, nctl::String::MaxCStringLength));
 
 	FntParser fntParser(fntFilename);
 	retrieveInfoFromFnt(fntParser);

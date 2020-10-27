@@ -13,7 +13,7 @@ For additional information: https://ncine.github.io
 - libwebp
 - OpenAL-soft
 - libogg, libvorbis, libvorbisfile
-- Lua 5.3
+- Lua 5.4
 - Dear ImGui
 - Nuklear
 

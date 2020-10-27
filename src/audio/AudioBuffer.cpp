@@ -1,6 +1,7 @@
 #define NCINE_INCLUDE_OPENAL
 #include "common_headers.h"
 #include "common_macros.h"
+#include <nctl/CString.h>
 #include "AudioBuffer.h"
 #include "IAudioLoader.h"
 #include "tracy.h"
@@ -16,7 +17,7 @@ AudioBuffer::AudioBuffer(const char *bufferName, const unsigned char *bufferPtr,
       bytesPerSample_(0), numChannels_(0), frequency_(0), numSamples_(0), duration_(0.0f)
 {
 	ZoneScoped;
-	ZoneText(bufferName, strnlen(bufferName, nctl::String::MaxCStringLength));
+	ZoneText(bufferName, nctl::strnlen(bufferName, nctl::String::MaxCStringLength));
 
 	alGetError();
 	alGenBuffers(1, &bufferId_);
@@ -32,7 +33,7 @@ AudioBuffer::AudioBuffer(const char *filename)
       bytesPerSample_(0), numChannels_(0), frequency_(0), numSamples_(0), duration_(0.0f)
 {
 	ZoneScoped;
-	ZoneText(filename, strnlen(filename, nctl::String::MaxCStringLength));
+	ZoneText(filename, nctl::strnlen(filename, nctl::String::MaxCStringLength));
 
 	alGetError();
 	alGenBuffers(1, &bufferId_);

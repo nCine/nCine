@@ -61,6 +61,7 @@ set(NCTL_HEADERS
 	${NCINE_ROOT}/include/nctl/StaticArray.h
 	${NCINE_ROOT}/include/nctl/List.h
 	${NCINE_ROOT}/include/nctl/ListIterator.h
+	${NCINE_ROOT}/include/nctl/CString.h
 	${NCINE_ROOT}/include/nctl/String.h
 	${NCINE_ROOT}/include/nctl/StringIterator.h
 	${NCINE_ROOT}/include/nctl/HashFunctions.h

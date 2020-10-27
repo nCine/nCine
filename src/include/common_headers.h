@@ -7,6 +7,7 @@
 		#define GLEW_NO_GLU
 		#include <GL/glew.h>
 	#elif defined(__APPLE__)
+		#define GL_SILENCE_DEPRECATION
 		#include <OpenGL/gl3.h>
 		#include <OpenGL/gl3ext.h>
 	#else

@@ -1,4 +1,5 @@
 #include "FileSystem.h"
+#include <nctl/CString.h>
 
 #ifdef _WIN32
 	#include "common_windefines.h"
@@ -108,35 +109,6 @@ namespace {
 		return date;
 	}
 #else
-	size_t wrappedStrnlen(const char *str, size_t maxLen)
-	{
-	#if defined(_WIN32) && !defined(__MINGW32__)
-		return strnlen_s(str, maxLen);
-	#else
-		return strnlen(str, maxLen);
-	#endif
-	}
-
-	char *wrappedStrncpy(char *dest, size_t elements, const char *source, size_t count)
-	{
-	#if defined(_WIN32) && !defined(__MINGW32__)
-		strncpy_s(dest, elements, source, count);
-		return dest;
-	#else
-		return strncpy(dest, source, count);
-	#endif
-	}
-
-	char *wrappedStrncat(char *dest, size_t elements, const char *source, size_t count)
-	{
-	#if defined(_WIN32) && !defined(__MINGW32__)
-		strncat_s(dest, elements, source, count);
-		return dest;
-	#else
-		return strncat(dest, source, count);
-	#endif
-	}
-
 	FileSystem::FileDate nativeTimeToFileDate(const SYSTEMTIME *sysTime)
 	{
 		FileSystem::FileDate date = {};
@@ -186,8 +158,8 @@ bool FileSystem::Directory::open(const char *path)
 	{
 		WIN32_FIND_DATA findFileData;
 		firstFile_ = true;
-		strncpy_s(buffer, path, MaxPathLength);
-		const unsigned long pathLength = wrappedStrnlen(buffer, MaxPathLength);
+		nctl::strncpy(buffer, path, MaxPathLength - 1);
+		const unsigned long pathLength = nctl::strnlen(buffer, MaxPathLength);
 
 		if (pathLength + 2 <= MaxPathLength)
 		{
@@ -198,7 +170,7 @@ bool FileSystem::Directory::open(const char *path)
 
 			hFindFile_ = FindFirstFileA(buffer, &findFileData);
 			if (hFindFile_)
-				strncpy_s(fileName_, findFileData.cFileName, MaxPathLength);
+				nctl::strncpy(fileName_, findFileData.cFileName, MaxPathLength - 1);
 		}
 	}
 	return (hFindFile_ != NULL && hFindFile_ != INVALID_HANDLE_VALUE);
@@ -340,9 +312,9 @@ nctl::String FileSystem::dirName(const char *path)
 
 	_splitpath_s(path, drive, _MAX_DRIVE, dir, _MAX_DIR, nullptr, 0, nullptr, 0);
 
-	wrappedStrncpy(buffer, MaxPathLength, drive, _MAX_DRIVE);
-	wrappedStrncat(buffer, MaxPathLength, dir, _MAX_DIR);
-	const unsigned long pathLength = wrappedStrnlen(buffer, MaxPathLength);
+	nctl::strncpy(buffer, MaxPathLength, drive, _MAX_DRIVE);
+	nctl::strncat(buffer, MaxPathLength, dir, _MAX_DIR);
+	const unsigned long pathLength = nctl::strnlen(buffer, MaxPathLength);
 	// If the path only contains the drive letter the trailing separator is retained
 	if (pathLength > 0 && (buffer[pathLength - 1] == '/' || buffer[pathLength - 1] == '\\') &&
 	    (pathLength < 3 || (pathLength == 3 && buffer[1] != ':') || pathLength > 3))
@@ -368,8 +340,8 @@ nctl::String FileSystem::baseName(const char *path)
 
 	_splitpath_s(path, nullptr, 0, nullptr, 0, fname, _MAX_FNAME, ext, _MAX_EXT);
 
-	wrappedStrncpy(buffer, MaxPathLength, fname, _MAX_FNAME);
-	wrappedStrncat(buffer, MaxPathLength, ext, _MAX_EXT);
+	nctl::strncpy(buffer, MaxPathLength, fname, _MAX_FNAME);
+	nctl::strncat(buffer, MaxPathLength, ext, _MAX_EXT);
 	return nctl::String(buffer);
 #else
 	strncpy(buffer, path, MaxPathLength - 1);
@@ -401,7 +373,7 @@ const char *FileSystem::extension(const char *path)
 	const char *subStr = strrchr(path, '.');
 	if (subStr != nullptr)
 	{
-		const unsigned long pathLength = strnlen(path, MaxPathLength);
+		const unsigned long pathLength = nctl::strnlen(path, MaxPathLength);
 		const long extensionLength = path + pathLength - subStr - 1;
 
 		// The extension is valid if it is 3 or 4 characters long without any space in it
@@ -1181,7 +1153,7 @@ void FileSystem::initSavePath()
 		    (homePathEnv == nullptr || strlen(homePathEnv) == 0))
 		{
 			const char *homeEnv = getenv("HOME");
-			if (homeEnv && wrappedStrnlen(homeEnv, MaxPathLength))
+			if (homeEnv && nctl::strnlen(homeEnv, MaxPathLength))
 				savePath_ = homeEnv;
 		}
 		else

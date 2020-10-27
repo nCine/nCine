@@ -1,6 +1,5 @@
-#include <cstdio> // for vsnprintf()
-#include <cstring>
 #include "common_macros.h"
+#include <nctl/CString.h>
 #include <nctl/String.h>
 #include <nctl/algorithms.h>
 
@@ -11,39 +10,6 @@
 #endif
 
 namespace nctl {
-
-namespace {
-
-	size_t wrappedStrnlen(const char *str, size_t maxLen)
-	{
-#if defined(_WIN32) && !defined(__MINGW32__)
-		return strnlen_s(str, maxLen);
-#else
-		return strnlen(str, maxLen);
-#endif
-	}
-
-	char *wrappedStrncpy(char *dest, size_t elements, const char *source, size_t count)
-	{
-#if defined(_WIN32) && !defined(__MINGW32__)
-		strncpy_s(dest, elements, source, count);
-		return dest;
-#else
-		return strncpy(dest, source, count);
-#endif
-	}
-
-	int wrappedVsnprintf(char *str, size_t maxLen, const char *format, va_list arg)
-	{
-#if defined(_WIN32) && !defined(__MINGW32__)
-		const int writtenChars = vsnprintf_s(str, maxLen, maxLen - 1, format, arg);
-		return (writtenChars > -1) ? writtenChars : maxLen - 1;
-#else
-		return vsnprintf(str, maxLen, format, arg);
-#endif
-	}
-
-}
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -79,7 +45,7 @@ String::String(const char *cString)
 {
 	ASSERT(cString);
 
-	capacity_ = static_cast<unsigned int>(wrappedStrnlen(cString, MaxCStringLength)) + 1;
+	capacity_ = static_cast<unsigned int>(nctl::strnlen(cString, MaxCStringLength)) + 1;
 	length_ = capacity_ - 1;
 
 	char *dest = array_.local_;
@@ -95,7 +61,7 @@ String::String(const char *cString)
 		dest = array_.begin_;
 	}
 
-	wrappedStrncpy(dest, capacity_, cString, length_);
+	nctl::strncpy(dest, capacity_, cString, length_);
 	dest[length_] = '\0';
 }
 
@@ -127,7 +93,7 @@ String::String(const String &other)
 		dest = array_.begin_;
 	}
 
-	wrappedStrncpy(dest, capacity_, src, length_);
+	nctl::strncpy(dest, capacity_, src, length_);
 	dest[length_] = '\0';
 }
 
@@ -166,8 +132,8 @@ String &String::operator=(const char *cString)
 {
 	ASSERT(cString);
 
-	length_ = static_cast<unsigned int>(wrappedStrnlen(cString, capacity_ - 1));
-	wrappedStrncpy(data(), capacity_, cString, length_);
+	length_ = static_cast<unsigned int>(nctl::strnlen(cString, capacity_ - 1));
+	nctl::strncpy(data(), capacity_, cString, length_);
 
 	data()[length_] = '\0';
 	return *this;
@@ -203,7 +169,7 @@ unsigned int String::assign(const String &source, unsigned int srcChar, unsigned
 
 	if (charsToCopy > 0)
 	{
-		wrappedStrncpy(destStart, capacity_ - clampedDestChar, srcStart, charsToCopy);
+		nctl::strncpy(destStart, capacity_ - clampedDestChar, srcStart, charsToCopy);
 		// Destination string length can only grow, truncation has to be performed by the calling function using the return value
 		length_ = max(length_, static_cast<unsigned int>(destStart - data()) + charsToCopy);
 		data()[length_] = '\0';
@@ -234,7 +200,7 @@ unsigned int String::assign(const char *source, unsigned int numChar, unsigned i
 
 	if (charsToCopy > 0)
 	{
-		wrappedStrncpy(destStart, capacity_ - clampedDestChar, source, charsToCopy);
+		nctl::strncpy(destStart, capacity_ - clampedDestChar, source, charsToCopy);
 		// Destination string length can only grow, truncation has to be performed by the calling function using the return value
 		length_ = max(length_, static_cast<unsigned int>(destStart - data()) + charsToCopy);
 		data()[length_] = '\0';
@@ -261,7 +227,7 @@ unsigned int String::copy(char *dest, unsigned int srcChar, unsigned int numChar
 	// Always assuming that the destination is big enough
 	if (charsToCopy > 0)
 	{
-		wrappedStrncpy(dest, charsToCopy + 1, srcStart, charsToCopy);
+		nctl::strncpy(dest, srcStart, charsToCopy);
 		dest[charsToCopy] = '\0';
 	}
 
@@ -280,7 +246,7 @@ unsigned int String::append(const String &other)
 
 unsigned int String::append(const char *cString)
 {
-	return assign(cString, static_cast<unsigned int>(wrappedStrnlen(cString, MaxCStringLength)), length_);
+	return assign(cString, static_cast<unsigned int>(nctl::strnlen(cString, MaxCStringLength)), length_);
 }
 
 int String::compare(const String &other) const
@@ -355,7 +321,7 @@ String &String::format(const char *fmt, ...)
 
 	va_list args;
 	va_start(args, fmt);
-	const int formattedLength = wrappedVsnprintf(data(), capacity_, fmt, args);
+	const int formattedLength = nctl::vsnprintf(data(), capacity_, fmt, args);
 	va_end(args);
 
 	if (formattedLength > 0)
@@ -373,7 +339,7 @@ String &String::formatAppend(const char *fmt, ...)
 
 	va_list args;
 	va_start(args, fmt);
-	const int formattedLength = wrappedVsnprintf(data() + length_, capacity_ - length_, fmt, args);
+	const int formattedLength = nctl::vsnprintf(data() + length_, capacity_ - length_, fmt, args);
 	va_end(args);
 
 	if (formattedLength > 0)
@@ -390,7 +356,7 @@ String &String::operator+=(const String &other)
 	const unsigned int availCapacity = capacity_ - length_ - 1;
 	const unsigned int minLength = min(other.length_, availCapacity);
 
-	wrappedStrncpy(data() + length_, capacity_ - length_, other.data(), minLength);
+	nctl::strncpy(data() + length_, capacity_ - length_, other.data(), minLength);
 	length_ += minLength;
 
 	data()[length_] = '\0';
@@ -402,8 +368,8 @@ String &String::operator+=(const char *cString)
 	ASSERT(cString);
 	const unsigned int availCapacity = capacity_ - length_ - 1;
 
-	const unsigned int cLength = static_cast<unsigned int>(wrappedStrnlen(cString, availCapacity));
-	wrappedStrncpy(data() + length_, capacity_ - length_, cString, cLength);
+	const unsigned int cLength = static_cast<unsigned int>(nctl::strnlen(cString, availCapacity));
+	nctl::strncpy(data() + length_, capacity_ - length_, cString, cLength);
 	length_ += cLength;
 
 	data()[length_] = '\0';
