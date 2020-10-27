@@ -46,6 +46,10 @@
 
 namespace ncine {
 
+namespace {
+	static nctl::String appInfoString(256);
+}
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
@@ -82,10 +86,14 @@ void Application::initCommon()
 	profileStartTime_ = TimeStamp::now();
 
 #ifdef WITH_GIT_VERSION
-	LOGI_X("nCine %s (%s) compiled on %s at %s", VersionStrings::Version, VersionStrings::GitBranch,
-	       VersionStrings::CompilationDate, VersionStrings::CompilationTime);
+	appInfoString.format("nCine %s (%s) compiled on %s at %s", VersionStrings::Version, VersionStrings::GitBranch,
+	                     VersionStrings::CompilationDate, VersionStrings::CompilationTime);
 #else
-	LOGI_X("nCine compiled on %s at %s", VersionStrings::CompilationDate, VersionStrings::CompilationTime);
+	appInfoString.format("nCine compiled on %s at %s", VersionStrings::CompilationDate, VersionStrings::CompilationTime);
+#endif
+	LOGI_X("%s", appInfoString.data());
+#ifdef WITH_TRACY
+	TracyAppInfo(appInfoString.data(), appInfoString.length());
 #endif
 
 	theServiceLocator().registerIndexer(nctl::makeUnique<ArrayIndexer>());

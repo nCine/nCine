@@ -9,7 +9,9 @@ namespace nctl {
 class DLL_PUBLIC MallocAllocator : public IAllocator
 {
   public:
-	MallocAllocator();
+	MallocAllocator()
+	    : MallocAllocator("Malloc") {}
+	explicit MallocAllocator(const char *name);
 	~MallocAllocator();
 
   private:

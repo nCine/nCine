@@ -1029,8 +1029,8 @@ void ImGuiDebugOverlay::guiAllocators()
 #ifdef WITH_ALLOCATORS
 	if (ImGui::CollapsingHeader("Memory Allocators"))
 	{
-		widgetName_.format("Default Allocator (%d allocations, %lu bytes)",
-		                   nctl::theDefaultAllocator().numAllocations(), nctl::theDefaultAllocator().usedMemory());
+		widgetName_.format("Default Allocator \"%s\" (%d allocations, %lu bytes)",
+		                   nctl::theDefaultAllocator().name(), nctl::theDefaultAllocator().numAllocations(), nctl::theDefaultAllocator().usedMemory());
 	#ifndef RECORD_ALLOCATIONS
 		ImGui::BulletText("%s", widgetName_.data());
 	#else
@@ -1044,8 +1044,8 @@ void ImGuiDebugOverlay::guiAllocators()
 
 		if (&nctl::theStringAllocator() != &nctl::theDefaultAllocator())
 		{
-			widgetName_.format("String Allocator (%d allocations, %lu bytes)",
-			                   nctl::theStringAllocator().numAllocations(), nctl::theStringAllocator().usedMemory());
+			widgetName_.format("String Allocator \"%s\" (%d allocations, %lu bytes)",
+			                   nctl::theStringAllocator().name(), nctl::theStringAllocator().numAllocations(), nctl::theStringAllocator().usedMemory());
 	#ifndef RECORD_ALLOCATIONS
 			ImGui::BulletText("%s", widgetName_.data());
 	#else
@@ -1062,8 +1062,8 @@ void ImGuiDebugOverlay::guiAllocators()
 
 		if (&nctl::theImGuiAllocator() != &nctl::theDefaultAllocator())
 		{
-			widgetName_.format("ImGui Allocator (%d allocations, %lu bytes)",
-			                   nctl::theImGuiAllocator().numAllocations(), nctl::theImGuiAllocator().usedMemory());
+			widgetName_.format("ImGui Allocator \"%s\" (%d allocations, %lu bytes)",
+			                   nctl::theImGuiAllocator().name(), nctl::theImGuiAllocator().numAllocations(), nctl::theImGuiAllocator().usedMemory());
 	#ifndef RECORD_ALLOCATIONS
 			ImGui::BulletText("%s", widgetName_.data());
 	#else
@@ -1078,11 +1078,31 @@ void ImGuiDebugOverlay::guiAllocators()
 		else
 			ImGui::Text("The ImGui allocator is the default one");
 
+	#ifdef WITH_NUKLEAR
+		if (&nctl::theNuklearAllocator() != &nctl::theDefaultAllocator())
+		{
+			widgetName_.format("Nuklear Allocator \"%s\" (%d allocations, %lu bytes)",
+			                   nctl::theNuklearAllocator().name(), nctl::theNuklearAllocator().numAllocations(), nctl::theNuklearAllocator().usedMemory());
+		#ifndef RECORD_ALLOCATIONS
+			ImGui::BulletText("%s", widgetName_.data());
+		#else
+			widgetName_.append("###NuklearAllocator");
+			if (ImGui::TreeNode(widgetName_.data()))
+			{
+				guiAllocator(nctl::theNuklearAllocator());
+				ImGui::TreePop();
+			}
+		#endif
+		}
+		else
+			ImGui::Text("The Nuklear allocator is the default one");
+	#endif
+
 	#ifdef WITH_LUA
 		if (&nctl::theLuaAllocator() != &nctl::theDefaultAllocator())
 		{
-			widgetName_.format("Lua Allocator (%d allocations, %lu bytes)",
-			                   nctl::theLuaAllocator().numAllocations(), nctl::theLuaAllocator().usedMemory());
+			widgetName_.format("Lua Allocator \"%s\" (%d allocations, %lu bytes)",
+			                   nctl::theLuaAllocator().name(), nctl::theLuaAllocator().numAllocations(), nctl::theLuaAllocator().usedMemory());
 		#ifndef RECORD_ALLOCATIONS
 			ImGui::BulletText("%s", widgetName_.data());
 		#else

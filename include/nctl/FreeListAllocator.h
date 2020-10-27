@@ -23,10 +23,16 @@ class DLL_PUBLIC FreeListAllocator : public IAllocator
 		Block *next;
 	};
 
-	FreeListAllocator();
+	FreeListAllocator()
+	    : FreeListAllocator("FreeList") {}
+	explicit FreeListAllocator(const char *name);
 	FreeListAllocator(size_t size, void *base)
-	    : FreeListAllocator(size, base, true) {}
-	FreeListAllocator(size_t size, void *base, bool defragOnDeallocation);
+	    : FreeListAllocator("FreeList", size, base, true) {}
+	FreeListAllocator(const char *name, size_t size, void *base)
+	    : FreeListAllocator(name, size, base, true) {}
+	FreeListAllocator(size_t size, void *base, bool defragOnDeallocation)
+	    : FreeListAllocator("FreeList", size, base, defragOnDeallocation) {}
+	FreeListAllocator(const char *name, size_t size, void *base, bool defragOnDeallocation);
 	~FreeListAllocator();
 
 	void init(size_t size, void *base);

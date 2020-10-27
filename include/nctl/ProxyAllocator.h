@@ -9,7 +9,9 @@ namespace nctl {
 class DLL_PUBLIC ProxyAllocator : public IAllocator
 {
   public:
-	ProxyAllocator(IAllocator &allocator);
+	explicit ProxyAllocator(IAllocator &allocator)
+	    : ProxyAllocator("Proxy", allocator) {}
+	ProxyAllocator(const char *name, IAllocator &allocator);
 	~ProxyAllocator();
 
   private:

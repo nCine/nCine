@@ -7,8 +7,8 @@ namespace nctl {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ProxyAllocator::ProxyAllocator(IAllocator &allocator)
-    : IAllocator(allocateImpl, reallocateImpl, deallocateImpl, 0, nullptr),
+ProxyAllocator::ProxyAllocator(const char *name, IAllocator &allocator)
+    : IAllocator(name, allocateImpl, reallocateImpl, deallocateImpl, 0, nullptr),
       allocator_(allocator)
 {
 }

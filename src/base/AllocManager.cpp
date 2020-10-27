@@ -117,7 +117,7 @@ AllocManager::AllocManager()
     : defaultAllocator_(nullptr), stringAllocator_(nullptr)
 {
 #ifdef USE_FREELIST
-	new (&freelistAllocator) FreeListAllocator(FreeListSize, freelistMemory);
+	new (&freelistAllocator) FreeListAllocator("Default", FreeListSize, freelistMemory);
 	mainAllocator = &freelistAllocator;
 #else
 	new (&mallocAllocator) MallocAllocator();
@@ -128,14 +128,14 @@ AllocManager::AllocManager()
 	stringAllocator_ = mainAllocator;
 
 #ifdef WITH_IMGUI
-	new (&imguiAllocator) ProxyAllocator(*mainAllocator);
+	new (&imguiAllocator) ProxyAllocator("ImGui", *mainAllocator);
 	ImGui::SetAllocatorFunctions(imguiAllocate, imguiDeallocate);
 #endif
 #ifdef WITH_NUKLEAR
-	new (&nuklearAllocator) ProxyAllocator(*mainAllocator);
+	new (&nuklearAllocator) ProxyAllocator("Nuklear", *mainAllocator);
 #endif
 #ifdef WITH_LUA
-	new (&luaAllocator) ProxyAllocator(*mainAllocator);
+	new (&luaAllocator) ProxyAllocator("Lua", *mainAllocator);
 #endif
 }
 

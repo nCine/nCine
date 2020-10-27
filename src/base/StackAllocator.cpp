@@ -8,8 +8,8 @@ namespace nctl {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-StackAllocator::StackAllocator()
-    : IAllocator(allocateImpl, reallocateImpl, deallocateImpl),
+StackAllocator::StackAllocator(const char *name)
+    : IAllocator(name, allocateImpl, reallocateImpl, deallocateImpl),
       current_(nullptr)
 {
 #if STACK_DEBUG
@@ -17,8 +17,8 @@ StackAllocator::StackAllocator()
 #endif
 }
 
-StackAllocator::StackAllocator(size_t size, void *base)
-    : IAllocator(allocateImpl, reallocateImpl, deallocateImpl, size, base),
+StackAllocator::StackAllocator(const char *name, size_t size, void *base)
+    : IAllocator(name, allocateImpl, reallocateImpl, deallocateImpl, size, base),
       current_(base)
 {
 #if STACK_DEBUG

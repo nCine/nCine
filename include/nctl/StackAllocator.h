@@ -10,8 +10,12 @@ namespace nctl {
 class DLL_PUBLIC StackAllocator : public IAllocator
 {
   public:
-	StackAllocator();
-	StackAllocator(size_t size, void *base);
+	StackAllocator()
+	    : StackAllocator("Stack") {}
+	explicit StackAllocator(const char *name);
+	StackAllocator(size_t size, void *base)
+	    : StackAllocator("Stack", size, base) {}
+	StackAllocator(const char *name, size_t size, void *base);
 	~StackAllocator();
 
 	void init(size_t size, void *base);

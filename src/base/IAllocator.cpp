@@ -1,9 +1,12 @@
-#include <nctl/IAllocator.h>
 #include <ncine/common_macros.h>
+#include <nctl/IAllocator.h>
+#include <nctl/CString.h>
 
 #ifdef RECORD_ALLOCATIONS
 	#include <cstdio>
 #endif
+
+#include "tracy.h"
 
 namespace nctl {
 
@@ -11,16 +14,22 @@ namespace nctl {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-IAllocator::IAllocator(AllocateFunction allocFunc, ReallocateFunction reallocFunc, DeallocateFunction deallocFunc, size_t size, void *base)
-#ifndef RECORD_ALLOCATIONS
+IAllocator::IAllocator(const char *name, AllocateFunction allocFunc, ReallocateFunction reallocFunc, DeallocateFunction deallocFunc, size_t size, void *base)
+
+#if !defined(RECORD_ALLOCATIONS) && !defined(WITH_TRACY)
     : allocateFunc_(allocFunc), reallocateFunc_(reallocFunc), deallocateFunc_(deallocFunc),
-      copyOnReallocation_(true), size_(size), base_(base), usedMemory_(0), numAllocations_(0)
+      size_(size), base_(base), usedMemory_(0), numAllocations_(0), copyOnReallocation_(true)
 #else
-    : allocateFunc_(recordAllocate), reallocateFunc_(recordReallocate), deallocateFunc_(recordDeallocate), recordAllocations_(true),
-      copyOnReallocation_(true), size_(size), base_(base), usedMemory_(0), numAllocations_(0),
-      realAllocateFunc_(allocFunc), realReallocateFunc_(reallocFunc), realDeallocateFunc_(deallocFunc), numEntries_(0)
+    : allocateFunc_(wrapAllocate), reallocateFunc_(wrapReallocate), deallocateFunc_(wrapDeallocate),
+      size_(size), base_(base), usedMemory_(0), numAllocations_(0), copyOnReallocation_(true),
+      realAllocateFunc_(allocFunc), realReallocateFunc_(reallocFunc), realDeallocateFunc_(deallocFunc)
+#endif
+#if defined(RECORD_ALLOCATIONS)
+      ,
+      recordAllocations_(true), numEntries_(0)
 #endif
 {
+	nctl::strncpy(name_, MaxNameLength, name, MaxNameLength - 1);
 }
 
 ///////////////////////////////////////////////////////////
@@ -178,12 +187,17 @@ void *IAllocator::reallocate(void *ptr, size_t bytes, uint8_t alignment)
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-#ifdef RECORD_ALLOCATIONS
+#if defined(RECORD_ALLOCATIONS) || defined(WITH_TRACY)
 
-void *IAllocator::recordAllocate(IAllocator *allocator, size_t bytes, uint8_t alignment)
+void *IAllocator::wrapAllocate(IAllocator *allocator, size_t bytes, uint8_t alignment)
 {
 	void *ptr = (*allocator->realAllocateFunc_)(allocator, bytes, alignment);
+	#ifdef WITH_TRACY
+	if (ptr)
+		TracyAllocNS(ptr, bytes, 5, allocator->name_);
+	#endif
 
+	#ifdef RECORD_ALLOCATIONS
 	if (allocator->recordAllocations_ && allocator->numEntries_ < MaxEntries && ptr != nullptr && bytes > 0)
 	{
 		Entry &entry = allocator->entries_[allocator->numEntries_];
@@ -195,13 +209,23 @@ void *IAllocator::recordAllocate(IAllocator *allocator, size_t bytes, uint8_t al
 		entry.numAllocations = allocator->numAllocations_;
 		allocator->numEntries_++;
 	}
+	#endif
 
 	return ptr;
 }
 
-void *IAllocator::recordReallocate(IAllocator *allocator, void *ptr, size_t bytes, uint8_t alignment, size_t &oldSize)
+void *IAllocator::wrapReallocate(IAllocator *allocator, void *ptr, size_t bytes, uint8_t alignment, size_t &oldSize)
 {
 	void *newPtr = (*allocator->realReallocateFunc_)(allocator, ptr, bytes, alignment, oldSize);
+	#ifdef WITH_TRACY
+	if (newPtr)
+	{
+		TracyFreeNS(ptr, 5, allocator->name_);
+		TracyAllocNS(newPtr, bytes, 5, allocator->name_);
+	}
+	#endif
+
+	#ifdef RECORD_ALLOCATIONS
 	if (allocator->recordAllocations_ && newPtr != nullptr)
 	{
 		for (size_t i = 0; i < allocator->numEntries_; i++)
@@ -219,15 +243,24 @@ void *IAllocator::recordReallocate(IAllocator *allocator, void *ptr, size_t byte
 			}
 		}
 	}
+	#endif
 
 	return newPtr;
 }
 
-void IAllocator::recordDeallocate(IAllocator *allocator, void *ptr)
+void IAllocator::wrapDeallocate(IAllocator *allocator, void *ptr)
 {
+	#ifdef RECORD_ALLOCATIONS
 	const size_t memoryUsedBefore = allocator->usedMemory();
+	#endif
 	(*allocator->realDeallocateFunc_)(allocator, ptr);
 
+	#ifdef WITH_TRACY
+	if (ptr)
+		TracyFreeNS(ptr, 5, allocator->name_);
+	#endif
+
+	#ifdef RECORD_ALLOCATIONS
 	if (allocator->recordAllocations_ && allocator->numEntries_ < MaxEntries && ptr != nullptr)
 	{
 		Entry &entry = allocator->entries_[allocator->numEntries_];
@@ -239,6 +272,7 @@ void IAllocator::recordDeallocate(IAllocator *allocator, void *ptr)
 		entry.numAllocations = allocator->numAllocations_;
 		allocator->numEntries_++;
 	}
+	#endif
 }
 
 #endif

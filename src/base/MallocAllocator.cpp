@@ -1,6 +1,5 @@
 #include <ncine/common_macros.h>
 #include <nctl/MallocAllocator.h>
-#include <ncine/tracy.h>
 
 namespace nctl {
 
@@ -8,8 +7,8 @@ namespace nctl {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-MallocAllocator::MallocAllocator()
-    : IAllocator(allocateImpl, reallocateImpl, deallocateImpl, 1, nullptr)
+MallocAllocator::MallocAllocator(const char *name)
+    : IAllocator(name, allocateImpl, reallocateImpl, deallocateImpl, 1, nullptr)
 {
 }
 
@@ -32,7 +31,6 @@ void *MallocAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8_t
 	MallocAllocator *allocatorImpl = static_cast<MallocAllocator *>(allocator);
 
 	void *ptr = malloc(bytes);
-	TracyAllocS(ptr, bytes, 5);
 
 	if (ptr != nullptr)
 		allocatorImpl->numAllocations_++;
@@ -70,7 +68,6 @@ void MallocAllocator::deallocateImpl(IAllocator *allocator, void *ptr)
 	FATAL_ASSERT(allocatorImpl->numAllocations_ > 0);
 	allocatorImpl->numAllocations_--;
 
-	TracyFreeS(ptr, 5);
 	free(ptr);
 }
 

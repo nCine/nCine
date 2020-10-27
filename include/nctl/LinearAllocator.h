@@ -9,8 +9,12 @@ namespace nctl {
 class DLL_PUBLIC LinearAllocator : public IAllocator
 {
   public:
-	LinearAllocator();
-	LinearAllocator(size_t size, void *base);
+	LinearAllocator()
+	    : LinearAllocator("Linear") {}
+	explicit LinearAllocator(const char *name);
+	LinearAllocator(size_t size, void *base)
+	    : LinearAllocator("Linear", size, base) {}
+	LinearAllocator(const char *name, size_t size, void *base);
 	~LinearAllocator();
 
 	void init(size_t size, void *base);

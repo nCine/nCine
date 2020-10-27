@@ -9,10 +9,16 @@ namespace nctl {
 class DLL_PUBLIC PoolAllocator : public IAllocator
 {
   public:
-	PoolAllocator();
+	PoolAllocator()
+	    : PoolAllocator("Pool") {}
+	explicit PoolAllocator(const char *name);
 	PoolAllocator(size_t elementSize, size_t size, void *base)
-	    : PoolAllocator(elementSize, DefaultAlignment, size, base) {}
-	PoolAllocator(size_t elementSize, uint8_t elementAlignment, size_t size, void *base);
+	    : PoolAllocator("Pool", elementSize, DefaultAlignment, size, base) {}
+	PoolAllocator(const char *name, size_t elementSize, size_t size, void *base)
+	    : PoolAllocator(name, elementSize, DefaultAlignment, size, base) {}
+	PoolAllocator(size_t elementSize, uint8_t elementAlignment, size_t size, void *base)
+	    : PoolAllocator("Pool", elementSize, elementAlignment, size, base) {}
+	PoolAllocator(const char *name, size_t elementSize, uint8_t elementAlignment, size_t size, void *base);
 	~PoolAllocator();
 
 	inline void init(size_t elementSize, size_t size, void *base) { init(elementSize, DefaultAlignment, size, base); }

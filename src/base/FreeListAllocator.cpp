@@ -7,14 +7,14 @@ namespace nctl {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-FreeListAllocator::FreeListAllocator()
-    : IAllocator(allocateImpl, reallocateImpl, deallocateImpl),
+FreeListAllocator::FreeListAllocator(const char *name)
+    : IAllocator(name, allocateImpl, reallocateImpl, deallocateImpl),
       freeBlocks_(nullptr), fitStrategy_(FitStrategy::BEST_FIT)
 {
 }
 
-FreeListAllocator::FreeListAllocator(size_t size, void *base, bool defragOnDeallocation)
-    : IAllocator(allocateImpl, reallocateImpl, deallocateImpl, size, base),
+FreeListAllocator::FreeListAllocator(const char *name, size_t size, void *base, bool defragOnDeallocation)
+    : IAllocator(name, allocateImpl, reallocateImpl, deallocateImpl, size, base),
       freeBlocks_(reinterpret_cast<Block *>(base)), fitStrategy_(FitStrategy::BEST_FIT),
       defragOnDeallocation_(defragOnDeallocation)
 {

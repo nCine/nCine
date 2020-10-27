@@ -8,14 +8,14 @@ namespace nctl {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-LinearAllocator::LinearAllocator()
-    : IAllocator(allocateImpl, reallocateImpl, deallocateImpl),
+LinearAllocator::LinearAllocator(const char *name)
+    : IAllocator(name, allocateImpl, reallocateImpl, deallocateImpl),
       current_(nullptr)
 {
 }
 
-LinearAllocator::LinearAllocator(size_t size, void *base)
-    : IAllocator(allocateImpl, reallocateImpl, deallocateImpl, size, base),
+LinearAllocator::LinearAllocator(const char *name, size_t size, void *base)
+    : IAllocator(name, allocateImpl, reallocateImpl, deallocateImpl, size, base),
       current_(base)
 {
 }

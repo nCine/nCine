@@ -116,9 +116,6 @@ class DLL_PUBLIC Application
 	inline bool hasFocus() const { return hasFocus_; }
 
   protected:
-	/// Maximum length for the information strings
-	static const unsigned int MaxTextLength = 256;
-
 	bool isSuspended_;
 	bool autoSuspension_;
 	bool hasFocus_;

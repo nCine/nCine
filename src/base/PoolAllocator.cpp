@@ -8,14 +8,14 @@ namespace nctl {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-PoolAllocator::PoolAllocator()
-    : IAllocator(allocateImpl, reallocateImpl, deallocateImpl),
+PoolAllocator::PoolAllocator(const char *name)
+    : IAllocator(name, allocateImpl, reallocateImpl, deallocateImpl),
       elementSize_(0), elementAlignment_(0), freeList_(nullptr)
 {
 }
 
-PoolAllocator::PoolAllocator(size_t elementSize, uint8_t elementAlignment, size_t size, void *base)
-    : IAllocator(allocateImpl, reallocateImpl, deallocateImpl, size, base),
+PoolAllocator::PoolAllocator(const char *name, size_t elementSize, uint8_t elementAlignment, size_t size, void *base)
+    : IAllocator(name, allocateImpl, reallocateImpl, deallocateImpl, size, base),
       elementSize_(elementSize), elementAlignment_(elementAlignment), freeList_(nullptr)
 {
 	internalInit();

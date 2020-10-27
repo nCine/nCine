@@ -20,6 +20,9 @@ class DLL_PUBLIC IAllocator
 	/// 16 bytes default alignment on 64bit and 8 bytes on 32bit
 	static const uint8_t DefaultAlignment = 2 * sizeof(void *);
 
+	/// Maximum length for the allocator name string
+	static const unsigned int MaxNameLength = 64;
+
 #ifdef RECORD_ALLOCATIONS
 	struct Entry
 	{
@@ -49,9 +52,9 @@ class DLL_PUBLIC IAllocator
 	using ReallocateFunction = void *(*)(IAllocator *allocator, void *, size_t, uint8_t, size_t &);
 	using DeallocateFunction = void (*)(IAllocator *allocator, void *);
 
-	IAllocator(AllocateFunction allocFunc, ReallocateFunction reallocFunc, DeallocateFunction deallocFunc)
-	    : IAllocator(allocFunc, reallocFunc, deallocFunc, 0, nullptr) {}
-	IAllocator(AllocateFunction allocFunc, ReallocateFunction reallocFunc, DeallocateFunction deallocFunc, size_t size, void *base);
+	IAllocator(const char *name, AllocateFunction allocFunc, ReallocateFunction reallocFunc, DeallocateFunction deallocFunc)
+	    : IAllocator(name, allocFunc, reallocFunc, deallocFunc, 0, nullptr) {}
+	IAllocator(const char *name, AllocateFunction allocFunc, ReallocateFunction reallocFunc, DeallocateFunction deallocFunc, size_t size, void *base);
 
 	/// Tries to allocate the specified amount of memory with the specified alignment requirement
 	inline void *allocate(size_t bytes, uint8_t alignment) { return (*allocateFunc_)(this, bytes, alignment); }
@@ -62,6 +65,8 @@ class DLL_PUBLIC IAllocator
 	/// Deallocates the allocation at the specified pointer
 	inline void deallocate(void *ptr) { (*deallocateFunc_)(this, ptr); }
 
+	/// Returns the name of the allocator
+	inline const char *name() const { return name_; }
 	/// Returns the size of the buffer used for allocations
 	inline size_t size() const { return size_; }
 	/// Returns the address of the buffer used for allocations
@@ -90,25 +95,29 @@ class DLL_PUBLIC IAllocator
 	AllocateFunction allocateFunc_;
 	ReallocateFunction reallocateFunc_;
 	DeallocateFunction deallocateFunc_;
-	bool copyOnReallocation_;
+
+	char name_[MaxNameLength];
 	size_t size_;
 	void *base_;
 	size_t usedMemory_;
 	size_t numAllocations_;
+	bool copyOnReallocation_;
 
-#ifdef RECORD_ALLOCATIONS
+#if defined(RECORD_ALLOCATIONS) || defined(WITH_TRACY) || 1
 	AllocateFunction realAllocateFunc_;
 	ReallocateFunction realReallocateFunc_;
 	DeallocateFunction realDeallocateFunc_;
-	bool recordAllocations_;
 
+	static void *wrapAllocate(IAllocator *allocator, size_t bytes, uint8_t alignment);
+	static void *wrapReallocate(IAllocator *allocator, void *ptr, size_t bytes, uint8_t alignment, size_t &oldSize);
+	static void wrapDeallocate(IAllocator *allocator, void *ptr);
+#endif
+
+#ifdef RECORD_ALLOCATIONS
+	bool recordAllocations_;
 	static const unsigned int MaxEntries = 100 * 1000;
 	Entry entries_[MaxEntries];
 	size_t numEntries_;
-
-	static void *recordAllocate(IAllocator *allocator, size_t bytes, uint8_t alignment);
-	static void *recordReallocate(IAllocator *allocator, void *ptr, size_t bytes, uint8_t alignment, size_t &oldSize);
-	static void recordDeallocate(IAllocator *allocator, void *ptr);
 #endif
 
 	friend class ProxyAllocator;
