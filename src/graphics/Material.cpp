@@ -37,6 +37,9 @@ void Material::setBlendingFactors(GLenum srcBlendingFactor, GLenum destBlendingF
 
 void Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 {
+	if (shaderProgramType_ == shaderProgramType)
+		return;
+
 	switch (shaderProgramType)
 	{
 		case ShaderProgramType::SPRITE:

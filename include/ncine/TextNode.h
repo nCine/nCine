@@ -43,6 +43,11 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Returns the absolute height of rendered text
 	float absHeight() const override;
 
+	/// Gets the font object
+	inline const Font *font() const { return font_; }
+	/// Sets the font object
+	void setFont(Font *font);
+
 	/// Returns true if kerning is enabled for this node rendering
 	inline bool withKerning() const { return withKerning_; }
 	/// Sets the kerning flag for this node rendering
@@ -52,10 +57,12 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Sets the horizontal text alignment of multiple lines
 	void setAlignment(Alignment alignment);
 
-	/// Gets the font base scaled by the vertical scale factor
-	inline float fontBase() const { return font_->base() * scaleFactor_.y; }
-	/// Gets the font line height scaled by the vertical scale factor
-	inline float fontLineHeight() const { return font_->lineHeight() * scaleFactor_.y; }
+	/// Gets the text node line height
+	inline float lineHeight() const { return lineHeight_; }
+	/// Gets the text node line height multiplied by the absolute vertical scale factor
+	inline float absLineHeight() const { return lineHeight_ * absScaleFactor_.y; }
+	/// Sets the text node line height
+	inline void setLineHeight(float lineHeight) { lineHeight_ = lineHeight; }
 
 	/// Gets the string to render
 	inline const nctl::String &string() const { return string_; }
@@ -109,6 +116,8 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	mutable nctl::Array<float> lineLengths_;
 	/// Horizontal text alignment of multiple lines
 	Alignment alignment_;
+	/// The line height for the text node
+	float lineHeight_;
 
 	GLUniformBlockCache *textnodeBlock_;
 

@@ -20,8 +20,8 @@ TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
     : DrawableNode(parent, 0.0f, 0.0f), string_(maxStringLength), dirtyDraw_(true),
       dirtyBoundaries_(true), withKerning_(true), font_(font),
       interleavedVertices_(maxStringLength * 4 + (maxStringLength - 1) * 2),
-      xAdvance_(0.0f), yAdvance_(0.0f), lineLengths_(4),
-      alignment_(Alignment::LEFT), textnodeBlock_(nullptr)
+      xAdvance_(0.0f), yAdvance_(0.0f), lineLengths_(4), alignment_(Alignment::LEFT),
+      lineHeight_(font ? font->lineHeight() : 0.0f), textnodeBlock_(nullptr)
 {
 	ASSERT(font);
 	ASSERT(maxStringLength > 0);
@@ -66,6 +66,25 @@ float TextNode::absHeight() const
 {
 	calculateBoundaries();
 	return height_ * absScaleFactor_.y;
+}
+
+void TextNode::setFont(Font *font)
+{
+	if (font && font != font_)
+	{
+		// Keep the ratio between text node lineHeight and font one
+		lineHeight_ = (lineHeight_ / font_->lineHeight()) * font->lineHeight();
+
+		font_ = font;
+		const Material::ShaderProgramType shaderProgramType = font_->renderMode() == Font::RenderMode::GLYPH_IN_RED
+		                                                          ? Material::ShaderProgramType::TEXTNODE_RED
+		                                                          : Material::ShaderProgramType::TEXTNODE_ALPHA;
+		renderCommand_->material().setShaderProgramType(shaderProgramType);
+		renderCommand_->material().setTexture(*font_->texture());
+
+		dirtyDraw_ = true;
+		dirtyBoundaries_ = true;
+	}
 }
 
 void TextNode::enableKerning(bool withKerning)
@@ -128,7 +147,7 @@ void TextNode::draw(RenderQueue &renderQueue)
 			{
 				currentLine++;
 				xAdvance_ = calculateAlignment(currentLine) - width_ * 0.5f;
-				yAdvance_ += font_->base();
+				yAdvance_ += lineHeight_;
 				i++; // manual increment as newline character is not decoded
 			}
 			else
@@ -199,7 +218,7 @@ void TextNode::calculateBoundaries() const
 				if (xAdvance_ > xAdvanceMax)
 					xAdvanceMax = xAdvance_;
 				xAdvance_ = 0.0f;
-				yAdvance_ += font_->base();
+				yAdvance_ += lineHeight_;
 				i++; // manual increment as newline character is not decoded
 			}
 			else
@@ -228,7 +247,7 @@ void TextNode::calculateBoundaries() const
 		// If the string does not end with a new line character,
 		// last line height has not been taken into account before
 		if (!string_.isEmpty() && string_[string_.length() - 1] != '\n')
-			yAdvance_ += font_->base();
+			yAdvance_ += lineHeight_;
 
 		lineLengths_.pushBack(xAdvance_);
 		if (xAdvance_ > xAdvanceMax)

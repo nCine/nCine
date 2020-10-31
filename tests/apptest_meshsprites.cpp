@@ -86,7 +86,7 @@ void MyEventHandler::onInit()
 	debugString_ = nctl::makeUnique<nctl::String>(128);
 	debugText_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get());
 	debugText_->setPosition((nc::theApplication().width() - debugText_->width()) * 0.5f,
-	                        nc::theApplication().height() - debugText_->fontLineHeight() * 0.5f * 2.0f);
+	                        nc::theApplication().height() - debugText_->lineHeight() * 0.5f * 2.0f);
 	debugText_->setColor(255, 255, 0, 255);
 	debugText_->setAlignment(nc::TextNode::Alignment::CENTER);
 

@@ -16,14 +16,18 @@ namespace TextNode {
 	static const char *absWidth = "get_abswidth";
 	static const char *absHeight = "get_absheight";
 
+	static const char *font = "get_font";
+	static const char *setFont = "set_font";
+
 	static const char *withKerning = "get_kerning";
 	static const char *enableKerning = "set_kerning";
 
 	static const char *alignment = "get_alignment";
 	static const char *setAlignment = "set_alignment";
 
-	static const char *fontBase = "get_fontbase";
-	static const char *fontLineHeight = "get_fontlineheight";
+	static const char *lineHeight = "get_lineheight";
+	static const char *absLineHeight = "get_abslineheight";
+	static const char *setLineHeight = "set_lineheight";
 
 	static const char *setString = "set_string";
 
@@ -53,14 +57,18 @@ void LuaTextNode::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::TextNode::absWidth, absWidth);
 	LuaUtils::addFunction(L, LuaNames::TextNode::absHeight, absHeight);
 
+	LuaUtils::addFunction(L, LuaNames::TextNode::font, font);
+	LuaUtils::addFunction(L, LuaNames::TextNode::setFont, setFont);
+
 	LuaUtils::addFunction(L, LuaNames::TextNode::withKerning, withKerning);
 	LuaUtils::addFunction(L, LuaNames::TextNode::enableKerning, enableKerning);
 
 	LuaUtils::addFunction(L, LuaNames::TextNode::alignment, alignment);
 	LuaUtils::addFunction(L, LuaNames::TextNode::setAlignment, setAlignment);
 
-	LuaUtils::addFunction(L, LuaNames::TextNode::fontBase, fontBase);
-	LuaUtils::addFunction(L, LuaNames::TextNode::fontLineHeight, fontLineHeight);
+	LuaUtils::addFunction(L, LuaNames::TextNode::lineHeight, lineHeight);
+	LuaUtils::addFunction(L, LuaNames::TextNode::absLineHeight, absLineHeight);
+	LuaUtils::addFunction(L, LuaNames::TextNode::setLineHeight, setLineHeight);
 
 	LuaUtils::addFunction(L, LuaNames::TextNode::setString, setString);
 
@@ -137,6 +145,25 @@ int LuaTextNode::absHeight(lua_State *L)
 	return 1;
 }
 
+int LuaTextNode::font(lua_State *L)
+{
+	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
+
+	LuaClassWrapper<Font>::pushUntrackedUserData(L, textnode->font());
+
+	return 1;
+}
+
+int LuaTextNode::setFont(lua_State *L)
+{
+	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -2);
+	Font *font = LuaClassWrapper<Font>::unwrapUserData(L, -1);
+
+	textnode->setFont(font);
+
+	return 0;
+}
+
 int LuaTextNode::withKerning(lua_State *L)
 {
 	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
@@ -175,22 +202,32 @@ int LuaTextNode::setAlignment(lua_State *L)
 	return 0;
 }
 
-int LuaTextNode::fontBase(lua_State *L)
+int LuaTextNode::lineHeight(lua_State *L)
 {
 	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
 
-	LuaUtils::push(L, textnode->fontBase());
+	LuaUtils::push(L, textnode->lineHeight());
 
 	return 1;
 }
 
-int LuaTextNode::fontLineHeight(lua_State *L)
+int LuaTextNode::absLineHeight(lua_State *L)
 {
 	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
 
-	LuaUtils::push(L, textnode->fontLineHeight());
+	LuaUtils::push(L, textnode->absLineHeight());
 
 	return 1;
+}
+
+int LuaTextNode::setLineHeight(lua_State *L)
+{
+	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -2);
+	const float lineHeight = LuaUtils::retrieve<float>(L, -1);
+
+	textnode->setLineHeight(lineHeight);
+
+	return 0;
 }
 
 int LuaTextNode::setString(lua_State *L)

@@ -37,6 +37,12 @@ void BaseSprite::setSize(float width, float height)
 	height_ = height;
 }
 
+void BaseSprite::setTexture(Texture *texture)
+{
+	if (texture)
+		texture_ = texture;
+}
+
 void BaseSprite::setTexRect(const Recti &rect)
 {
 	texRect_ = rect;

@@ -22,7 +22,7 @@ class DLL_PUBLIC BaseSprite : public DrawableNode
 	/// Gets the texture object
 	inline const Texture *texture() const { return texture_; }
 	/// Sets the texture object
-	inline void setTexture(Texture *texture) { texture_ = texture; }
+	void setTexture(Texture *texture);
 
 	/// Gets the texture source rectangle for blitting
 	inline Recti texRect() const { return texRect_; }
