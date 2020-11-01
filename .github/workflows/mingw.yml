@@ -1,0 +1,200 @@
+name: 'MinGW'
+
+env:
+  LIBRARIES_BRANCH: libraries-OS-COMPILER
+  DEPLOY_MESSAGE:
+    "Push artifact from GitHub Actions build ${{ github.run_number }} with id ${{ github.run_id }}
+
+     - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
+  DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
+  NDK_VERSION: r21d
+
+on: [push, workflow_dispatch]
+
+jobs:
+  MinGW:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - BuildType: Debug
+          CC: gcc
+          CXX: g++
+
+        - BuildType: Release
+          CC: gcc
+          CXX: g++
+
+        - BuildType: DevDist
+          CC: gcc
+          CXX: g++
+
+        - BuildType: Debug
+          CC: clang
+          CXX: clang++
+
+        - BuildType: Release
+          CC: clang
+          CXX: clang++
+
+        - BuildType: DevDist
+          CC: clang
+          CXX: clang++
+
+    runs-on: 'windows-2019'
+
+    steps:
+    - name: 'Checkout Code'
+      uses: actions/checkout@v2
+
+    - name: 'Install and Update MSYS2'
+      run: |
+        choco install --no-progress msys2 --params="/InstallDir:C:\msys64 /NoUpdate /NoPath"
+        C:\msys64\usr\bin\pacman --noconfirm -Syy
+
+    - name: 'Install Build Dependencies'
+      run: |
+        C:\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-SDL2 mingw-w64-x86_64-openal mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libwebp mingw-w64-x86_64-lua cmake
+
+        if ("${{ matrix.BuildType }}" -eq "DevDist") { C:\msys64\usr\bin\pacman --noconfirm -S doxygen }
+
+        if ("${{ matrix.CC }}" -eq "gcc") { C:\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-gcc }
+        else { C:\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-clang }
+
+        C:\msys64\usr\bin\pacman --noconfirm -Scc
+
+    - name: 'Unshallow Git Repository for Versioning'
+      if: matrix.BuildType == 'DevDist'
+      run: |
+        $env:GIT_REDIRECT_STDERR = '2>&1'
+        git fetch --unshallow; if (-not $?) { return }
+
+    - name: 'Download nCine-libraries Artifacts and nCine-data'
+      run: |
+        $env:GIT_REDIRECT_STDERR = '2>&1'
+
+        cd ..
+        git clone https://github.com/nCine/nCine-libraries-artifacts.git
+        cd nCine-libraries-artifacts
+
+        git checkout android-libraries-armeabi-v7a
+        $env:LIBRARIES_FILE = Get-ChildItem -Path $(pwd) -Filter *.gz -Name -File | Select-Object -First 1
+        7z x $env:LIBRARIES_FILE
+        $env:LIBRARIES_FILE = $env:LIBRARIES_FILE -replace ".gz",""
+        7z x $env:LIBRARIES_FILE -aos
+
+        git checkout android-libraries-arm64-v8a
+        $env:LIBRARIES_FILE = Get-ChildItem -Path $(pwd) -Filter *.gz -Name -File | Select-Object -First 1
+        7z x $env:LIBRARIES_FILE
+        $env:LIBRARIES_FILE = $env:LIBRARIES_FILE -replace ".gz",""
+        7z x $env:LIBRARIES_FILE -aos
+
+        git checkout android-libraries-x86_64
+        $env:LIBRARIES_FILE = Get-ChildItem -Path $(pwd) -Filter *.gz -Name -File | Select-Object -First 1
+        7z x $env:LIBRARIES_FILE
+        $env:LIBRARIES_FILE = $env:LIBRARIES_FILE -replace ".gz",""
+        7z x $env:LIBRARIES_FILE -aos
+
+        Move-Item -Path nCine-android-external -Destination ..
+        cd ..
+        Remove-Item nCine-libraries-artifacts -Recurse -Force
+
+        git clone https://github.com/nCine/nCine-data.git
+
+    - name: 'Download Android NDK'
+      if: matrix.BuildType == 'DevDist'
+      run: |
+        cd ..
+        curl -fsSL https://dl.google.com/android/repository/android-ndk-$env:NDK_VERSION-windows-x86_64.zip -o ndk.zip
+        7z x ndk.zip
+        Remove-Item ndk.zip
+
+    - name: 'Download RenderDoc API Header'
+      if: matrix.BuildType != 'DevDist'
+      run: |
+        mkdir ..\RenderDoc
+        cd ..\RenderDoc
+        curl -fsSL https://raw.githubusercontent.com/baldurk/renderdoc/v1.x/renderdoc/api/app/renderdoc_app.h -o renderdoc_app.h
+
+    - name: 'CMake Configuration, Make and Test'
+      if: matrix.BuildType != 'DevDist'
+      env:
+        CHERE_INVOKING: on
+      run: |
+        $env:CC = "${{ matrix.CC }}"
+        $env:CXX = "${{ matrix.CXX }}"
+        $env:PATH = "C:\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem"
+        $env:MSYSTEM = "MINGW64"
+
+        C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_UNIT_TESTS=ON -D NCINE_BUILD_TESTS=OFF -D NCINE_WITH_IMGUI=OFF'
+        C:\msys64\usr\bin\bash.exe -lc 'make -j2 -C ../nCine-buildtests-${{ matrix.BuildType }}'
+        cd ..\nCine-buildtests-${{ matrix.BuildType }}
+        C:\msys64\usr\bin\bash.exe -lc 'ctest -j2 --build-config ${{ matrix.BuildType }}'
+
+    - name: 'CMake Configuration'
+      env:
+        CHERE_INVOKING: on
+      run: |
+        $env:CC = "${{ matrix.CC }}"
+        $env:CXX = "${{ matrix.CXX }}"
+        $env:ANDROID_NDK_HOME = "$(pwd)/../android-ndk-$env:NDK_VERSION"
+
+        $env:PATH = "C:\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem"
+        $env:MSYSTEM = "MINGW64"
+
+        $EnableTracy = 'ON'
+        if ("${{ matrix.CC }}" -eq "clang")
+          { $EnableTracy = 'OFF' }
+
+        if ("${{ matrix.BuildType }}" -eq "DevDist")
+          { C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }}' }
+        else
+          { C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=$EnableTracy -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$PWD/../RenderDoc' }
+
+    - name: 'Make'
+      env:
+        CHERE_INVOKING: on
+      run: |
+        $env:PATH = "C:\msys64\x86_64\bin;C:\msys64\usr\bin;$env:PATH"
+        $env:MSYSTEM = "MINGW64"
+        C:\msys64\usr\bin\bash.exe -lc 'make -j2 -C ../nCine-build-${{ matrix.BuildType }}'
+
+    - name: 'Package'
+      if: matrix.BuildType == 'DevDist'
+      env:
+        CHERE_INVOKING: on
+      run: |
+        $env:PATH = "C:\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem"
+        $env:MSYSTEM = "MINGW64"
+
+        C:\msys64\usr\bin\bash.exe -lc 'make package -C ../nCine-build-${{ matrix.BuildType }}'
+
+    - name: 'Push Artifacts'
+      if: matrix.BuildType == 'DevDist'
+      env:
+        PUBLIC_REPO_TOKEN: ${{ secrets.PUBLIC_REPO_TOKEN }}
+      run: |
+        git config --global user.email "actions@github.com"
+        git config --global user.name "GitHub Actions"
+        $env:GIT_REDIRECT_STDERR = '2>&1'
+
+        $env:branch_name = git describe --tags --exact-match; if (-not $?) { $env:branch_name = git symbolic-ref -q --short HEAD }; if (-not $?) { $env:branch_name = git rev-parse --short HEAD }
+        $env:DEPLOY_MESSAGE = $env:DEPLOY_MESSAGE -replace "BRANCH_NAME",$env:branch_name
+
+        $env:CC = "${{ matrix.CC }}"
+        $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "BRANCH_NAME",$env:branch_name
+        $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "OS","mingw64" -replace "COMPILER",$env:CC
+
+        cd ..
+        git clone https://$env:PUBLIC_REPO_TOKEN@github.com/nCine/nCine-artifacts.git 2>&1>$null
+        cd nCine-artifacts
+        git checkout $env:DEPLOY_BRANCH; if (-not $?) { git checkout --orphan $env:DEPLOY_BRANCH }
+        git reset
+        git clean -f
+        git rm *
+
+        Move-Item -Path ..\nCine-build-${{ matrix.BuildType }}\*.tar.gz -Destination .
+        git add *.tar.gz
+
+        git commit --amend -m "$env:DEPLOY_MESSAGE"; if (-not $?) { git commit -m "$env:DEPLOY_MESSAGE" }
+        git push --force; if (-not $?) { git push --set-upstream origin $env:DEPLOY_BRANCH }

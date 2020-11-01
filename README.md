@@ -1,6 +1,13 @@
+[![Linux](https://github.com/nCine/nCine/workflows/Linux/badge.svg)](https://github.com/nCine/nCine/actions?workflow=Linux)
+[![macOS](https://github.com/nCine/nCine/workflows/macOS/badge.svg)](https://github.com/nCine/nCine/actions?workflow=macOS)
+[![Windows](https://github.com/nCine/nCine/workflows/Windows/badge.svg)](https://github.com/nCine/nCine/actions?workflow=Windows)
+[![MinGW](https://github.com/nCine/nCine/workflows/MinGW/badge.svg)](https://github.com/nCine/nCine/actions?workflow=MinGW)
+[![Emscripten](https://github.com/nCine/nCine/workflows/Emscripten/badge.svg)](https://github.com/nCine/nCine/actions?workflow=Emscripten)
+[![CodeQL](https://github.com/nCine/nCine/workflows/CodeQL/badge.svg)](https://github.com/nCine/nCine/actions?workflow=CodeQL)
+
 # nCine
 nCine is a cross-platform 2D game engine.  
-It is released under the MIT License, Copyright (c) 2011-2020 Angelo Theodorou.
+It is released under the MIT License, Copyright (c) 2011-2020 Angelo Theodorou.  
 For additional information: https://ncine.github.io
 
 ## Information

@@ -1,0 +1,170 @@
+name: 'Linux'
+
+env:
+  LIBRARIES_BRANCH: libraries-OS-COMPILER
+  DEPLOY_MESSAGE:
+    "Push artifact from GitHub Actions build ${{ github.run_number }} with id ${{ github.run_id }}
+
+     - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
+  DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
+  NDK_VERSION: r21d
+
+on: [push, workflow_dispatch]
+
+jobs:
+  Linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - BuildType: Debug
+          CC: gcc
+          CXX: g++
+
+        - BuildType: Release
+          CC: gcc
+          CXX: g++
+
+        - BuildType: DevDist
+          CC: gcc
+          CXX: g++
+
+        - BuildType: Debug
+          CC: clang
+          CXX: clang++
+
+        - BuildType: Release
+          CC: clang
+          CXX: clang++
+
+        - BuildType: DevDist
+          CC: clang
+          CXX: clang++
+
+    runs-on: 'ubuntu-18.04'
+
+    steps:
+    - name: 'Checkout Code'
+      uses: actions/checkout@v2
+
+    - name: 'Install Build Dependencies'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev
+        if [ "${{ matrix.BuildType }}" == "DevDist" ]; then
+          sudo apt-get install -y doxygen graphviz
+        fi
+
+    - name: 'Unshallow Git Repository for Versioning'
+      if: matrix.BuildType == 'DevDist'
+      run: |
+        git fetch --unshallow || true
+
+    - name: 'Download nCine-libraries Artifacts and nCine-data'
+      run: |
+        export OS=linux
+        export CC=${{ matrix.CC }}
+
+        export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/OS/'"$OS"'/'`
+        export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/COMPILER/'"$CC"'/'`
+
+        cd ..
+        git clone https://github.com/nCine/nCine-libraries-artifacts.git
+        cd nCine-libraries-artifacts
+        git checkout $LIBRARIES_BRANCH
+        LIBRARIES_FILE=$(ls -t | head -n 1) && tar xpzf $LIBRARIES_FILE
+        mv nCine-external ..
+        git checkout android-libraries-armeabi-v7a
+        LIBRARIES_FILE=$(ls -t | head -n 1) && tar xpzf $LIBRARIES_FILE
+        git checkout android-libraries-arm64-v8a
+        LIBRARIES_FILE=$(ls -t | head -n 1) && tar xpzf $LIBRARIES_FILE
+        git checkout android-libraries-x86_64
+        LIBRARIES_FILE=$(ls -t | head -n 1) && tar xpzf $LIBRARIES_FILE
+        mv nCine-android-external ..
+        cd ..
+        rm -rf nCine-libraries-artifacts
+
+        git clone https://github.com/nCine/nCine-data.git
+
+    - name: 'Download Android NDK'
+      if: matrix.BuildType == 'DevDist'
+      run: |
+        export NDK_URL=https://dl.google.com/android/repository/android-ndk-$NDK_VERSION-linux-x86_64.zip
+
+        cd ..
+        curl -fsSL $NDK_URL -o ndk.zip
+        unzip -q ndk.zip && rm -f ndk.zip
+
+    - name: 'Download RenderDoc API Header'
+      if: matrix.BuildType != 'DevDist'
+      run: |
+        mkdir ../RenderDoc
+        cd ../RenderDoc
+        curl -fsSL https://raw.githubusercontent.com/baldurk/renderdoc/v1.x/renderdoc/api/app/renderdoc_app.h -o renderdoc.h
+
+    - name: 'CMake Configuration, Make and Test'
+      if: matrix.BuildType != 'DevDist'
+      run: |
+        export CC=${{ matrix.CC }}
+        export CXX=${{ matrix.CXX }}
+
+        export CMAKE_ARGS="-B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_UNIT_TESTS=ON -D NCINE_BUILD_TESTS=OFF -D NCINE_WITH_IMGUI=OFF -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external"
+
+        cmake $CMAKE_ARGS
+        make -j2 -C ../nCine-buildtests-${{ matrix.BuildType }}
+        cd ../nCine-buildtests-${{ matrix.BuildType }}
+        ctest -j2 --build-config ${{ matrix.BuildType }}
+
+    - name: 'CMake Configuration'
+      run: |
+        export CC=${{ matrix.CC }}
+        export CXX=${{ matrix.CXX }}
+        export ANDROID_NDK_HOME=$(pwd)/../android-ndk-$NDK_VERSION
+
+        if [[ "${{ matrix.BuildType }}" == "DevDist" ]]; then
+          export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }}"
+        else
+          export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=ON"
+        fi
+        export CMAKE_ARGS="$CMAKE_ARGS -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$(pwd)/../RenderDoc -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external"
+
+         cmake $CMAKE_ARGS
+
+    - name: 'Make'
+      run: |
+        make -j2 -C ../nCine-build-${{ matrix.BuildType }}
+
+    - name: 'Package'
+      if: matrix.BuildType == 'DevDist'
+      run: |
+        make package -C ../nCine-build-${{ matrix.BuildType }}
+
+    - name: 'Push Artifacts'
+      if: matrix.BuildType == 'DevDist'
+      env:
+        PUBLIC_REPO_TOKEN: ${{ secrets.PUBLIC_REPO_TOKEN }}
+      run: |
+        git config --global user.email "actions@github.com"
+        git config --global user.name "GitHub Actions"
+
+        export BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
+        export DEPLOY_MESSAGE=`sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/' <<< "$DEPLOY_MESSAGE"`
+
+        export OS=linux
+        export CC=${{ matrix.CC }}
+        export PACKAGE_EXT=tar.gz
+
+        cd ..
+        export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/'`
+        export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/OS/'"$OS"'/'`
+        export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/COMPILER/'"$CC"'/'`
+        git clone https://$PUBLIC_REPO_TOKEN@github.com/nCine/nCine-artifacts.git >/dev/null 2>&1
+        cd nCine-artifacts
+        git checkout $DEPLOY_BRANCH || git checkout --orphan $DEPLOY_BRANCH
+        git reset
+        git clean -f
+        git rm * || true
+        mv -f ../nCine-build-${{ matrix.BuildType }}/*.$PACKAGE_EXT .
+        git add *.$PACKAGE_EXT
+        git commit --amend -m "$DEPLOY_MESSAGE" || git commit -m "$DEPLOY_MESSAGE"
+        git push --force || git push --set-upstream origin $DEPLOY_BRANCH

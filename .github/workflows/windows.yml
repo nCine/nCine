@@ -1,0 +1,174 @@
+name: 'Windows'
+
+env:
+  LIBRARIES_BRANCH: libraries-OS-COMPILER
+  DEPLOY_MESSAGE:
+    "Push artifact from GitHub Actions build ${{ github.run_number }} with id ${{ github.run_id }}
+
+     - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
+  DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
+  NDK_VERSION: r21d
+
+on: [push, workflow_dispatch]
+
+jobs:
+  Windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2016, windows-2019]
+        BuildType: [Debug, Release, DevDist]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: 'Checkout Code'
+      uses: actions/checkout@v2
+
+    - name: 'Install Build Dependencies'
+      if: matrix.BuildType == 'DevDist'
+      run: |
+        choco install -y --no-progress doxygen.install
+        choco install -y --no-progress graphviz
+
+    - name: 'Unshallow Git Repository for Versioning'
+      if: matrix.BuildType == 'DevDist'
+      run: |
+        $env:GIT_REDIRECT_STDERR = '2>&1'
+        git fetch --unshallow; if (-not $?) { return }
+
+    - name: 'Download nCine-libraries Artifacts and nCine-data'
+      run: |
+        $env:GIT_REDIRECT_STDERR = '2>&1'
+        $env:vsversion = switch ("${{ matrix.os }}")
+        {
+          "windows-2019" {"vs2019"}
+          "windows-2016" {"vs2017"}
+        }
+
+        cd ..
+        git clone https://github.com/nCine/nCine-libraries-artifacts.git
+        cd nCine-libraries-artifacts
+
+        $env:LIBRARIES_BRANCH = $env:LIBRARIES_BRANCH -replace "OS","windows" -replace "COMPILER",$env:vsversion
+        git checkout $env:LIBRARIES_BRANCH
+        $env:LIBRARIES_FILE = Get-ChildItem -Path $(pwd) -Name -File | Select-Object -First 1
+        7z x $env:LIBRARIES_FILE
+
+        Move-Item -Path nCine-external -Destination ..
+
+        git checkout android-libraries-armeabi-v7a
+        $env:LIBRARIES_FILE = Get-ChildItem -Path $(pwd) -Filter *.gz -Name -File | Select-Object -First 1
+        7z x $env:LIBRARIES_FILE
+        $env:LIBRARIES_FILE = $env:LIBRARIES_FILE -replace ".gz",""
+        7z x $env:LIBRARIES_FILE -aos
+
+        git checkout android-libraries-arm64-v8a
+        $env:LIBRARIES_FILE = Get-ChildItem -Path $(pwd) -Filter *.gz -Name -File | Select-Object -First 1
+        7z x $env:LIBRARIES_FILE
+        $env:LIBRARIES_FILE = $env:LIBRARIES_FILE -replace ".gz",""
+          7z x $env:LIBRARIES_FILE -aos
+
+        git checkout android-libraries-x86_64
+        $env:LIBRARIES_FILE = Get-ChildItem -Path $(pwd) -Filter *.gz -Name -File | Select-Object -First 1
+        7z x $env:LIBRARIES_FILE
+        $env:LIBRARIES_FILE = $env:LIBRARIES_FILE -replace ".gz",""
+        7z x $env:LIBRARIES_FILE -aos
+
+        Move-Item -Path nCine-android-external -Destination ..
+        cd ..
+        Remove-Item nCine-libraries-artifacts -Recurse -Force
+
+        git clone https://github.com/nCine/nCine-data.git
+
+    - name: 'Download Android NDK'
+      if: matrix.BuildType == 'DevDist'
+      run: |
+        cd ..
+        curl -fsSL https://dl.google.com/android/repository/android-ndk-$env:NDK_VERSION-windows-x86_64.zip -o ndk.zip
+        7z x ndk.zip
+        Remove-Item ndk.zip
+
+    - name: 'Download RenderDoc API Header'
+      if: matrix.BuildType != 'DevDist'
+      run: |
+        mkdir ..\RenderDoc
+        cd ..\RenderDoc
+        curl -fsSL https://raw.githubusercontent.com/baldurk/renderdoc/v1.x/renderdoc/api/app/renderdoc_app.h -o renderdoc_app.h
+
+    - name: 'CMake Configuration, Build and Test'
+      if: matrix.BuildType != 'DevDist'
+      run: |
+        $env:generator = switch ("${{ matrix.os }}")
+        {
+          "windows-2019" {"Visual Studio 16 2019"}
+          "windows-2016" {"Visual Studio 15 2017"}
+        }
+
+        cmake -G "$env:generator" -A x64 -B ../nCine-buildtests-${{ matrix.BuildType }} -D NCINE_BUILD_UNIT_TESTS=ON -D NCINE_BUILD_TESTS=OFF -D NCINE_WITH_IMGUI=OFF
+        cmake --build ../nCine-buildtests-${{ matrix.BuildType }} --config ${{ matrix.BuildType }}
+        cd ../nCine-buildtests-${{ matrix.BuildType }}
+        ctest -j2 --build-config ${{ matrix.BuildType }}
+
+    - name: 'CMake Configuration'
+      run: |
+        $env:ANDROID_NDK_HOME = "$(pwd)/../android-ndk-$env:NDK_VERSION"
+
+        $env:generator = switch ("${{ matrix.os }}")
+        {
+          "windows-2019" {"Visual Studio 16 2019"}
+          "windows-2016" {"Visual Studio 15 2017"}
+        }
+
+        if ("${{ matrix.BuildType }}" -eq "DevDist")
+          { cmake -G "$env:generator" -A x64 -B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} }
+        else
+          { cmake -G "$env:generator" -A x64 -B ../nCine-build-${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=ON -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$(pwd)/../RenderDoc }
+
+    - name: 'CMake Build'
+      run: |
+        if ("${{ matrix.BuildType }}" -eq "DevDist")
+          { cmake --build ../nCine-build-${{ matrix.BuildType }} --config Release }
+        else
+          { cmake --build ../nCine-build-${{ matrix.BuildType }} --config ${{ matrix.BuildType }} }
+
+    - name: 'Package'
+      if: matrix.BuildType == 'DevDist'
+      run: |
+        cmake --build ../nCine-build-${{ matrix.BuildType }} --config Release --target package
+
+    - name: 'Push Artifacts'
+      if: matrix.BuildType == 'DevDist'
+      env:
+        PUBLIC_REPO_TOKEN: ${{ secrets.PUBLIC_REPO_TOKEN }}
+      run: |
+        git config --global user.email "actions@github.com"
+        git config --global user.name "GitHub Actions"
+        $env:GIT_REDIRECT_STDERR = '2>&1'
+
+        $env:branch_name = git describe --tags --exact-match; if (-not $?) { $env:branch_name = git symbolic-ref -q --short HEAD }; if (-not $?) { $env:branch_name = git rev-parse --short HEAD }
+        $env:DEPLOY_MESSAGE = $env:DEPLOY_MESSAGE -replace "BRANCH_NAME",$env:branch_name
+
+        $env:vsversion = switch ("${{ matrix.os }}")
+        {
+          "windows-2019" {"vs2019"}
+          "windows-2016" {"vs2017"}
+        }
+
+        $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "BRANCH_NAME",$env:branch_name
+        $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "OS","windows" -replace "COMPILER",$env:vsversion
+
+        cd ..
+        git clone https://$env:PUBLIC_REPO_TOKEN@github.com/nCine/nCine-artifacts.git 2>&1>$null
+        cd nCine-artifacts
+        git checkout $env:DEPLOY_BRANCH; if (-not $?) { git checkout --orphan $env:DEPLOY_BRANCH }
+        git reset
+        git clean -f
+        git rm *
+
+        Move-Item -Path ..\nCine-build-${{ matrix.BuildType }}\*.exe -Destination .
+        Move-Item -Path ..\nCine-build-${{ matrix.BuildType }}\*.zip -Destination .
+        git add *.exe *.zip
+
+        git commit --amend -m "$env:DEPLOY_MESSAGE"; if (-not $?) { git commit -m "$env:DEPLOY_MESSAGE" }
+        git push --force; if (-not $?) { git push --set-upstream origin $env:DEPLOY_BRANCH }

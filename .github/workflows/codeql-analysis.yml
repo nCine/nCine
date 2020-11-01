@@ -1,0 +1,65 @@
+name: 'CodeQL'
+
+env:
+  LIBRARIES_BRANCH: libraries-OS-COMPILER
+
+on: [push, workflow_dispatch]
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-18.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'cpp' ]
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        languages: ${{ matrix.language }}
+
+    - run: |
+        # Install Build Dependencies on Linux
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev
+
+        # Download nCine-libraries Artifacts and nCine-data
+        export OS=linux
+        export CC=gcc
+
+        export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/OS/'"$OS"'/'`
+        export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/COMPILER/'"$CC"'/'`
+
+        cd ..
+        git clone https://github.com/nCine/nCine-libraries-artifacts.git
+        cd nCine-libraries-artifacts
+        git checkout $LIBRARIES_BRANCH
+        LIBRARIES_FILE=$(ls -t | head -n 1) && tar xpzf $LIBRARIES_FILE
+        mv nCine-external ..
+        git checkout android-libraries-armeabi-v7a
+        LIBRARIES_FILE=$(ls -t | head -n 1) && tar xpzf $LIBRARIES_FILE
+        git checkout android-libraries-arm64-v8a
+        LIBRARIES_FILE=$(ls -t | head -n 1) && tar xpzf $LIBRARIES_FILE
+        git checkout android-libraries-x86_64
+        LIBRARIES_FILE=$(ls -t | head -n 1) && tar xpzf $LIBRARIES_FILE
+        mv nCine-android-external ..
+        cd ..
+        rm -rf nCine-libraries-artifacts
+
+        git clone https://github.com/nCine/nCine-data.git
+
+        # CMake Configuration and Make
+        export BuildType=Debug
+
+        cd nCine
+        cmake -B ../nCine-build-$BuildType -D CMAKE_BUILD_TYPE=$BuildType -D NCINE_BUILD_UNIT_TESTS=ON -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external
+        make -j2 -C ../nCine-build-$BuildType
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1
