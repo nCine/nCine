@@ -13,11 +13,29 @@ class IAudioLoader;
 class DLL_PUBLIC AudioBuffer : public Object
 {
   public:
+	enum class Format
+	{
+		MONO8,
+		STEREO8,
+		MONO16,
+		STEREO16
+	};
+
+	/// Creates an OpenAL buffer name
+	AudioBuffer();
 	/// A constructor creating a buffer from memory
 	AudioBuffer(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	/// A constructor creating a buffer from a file
 	explicit AudioBuffer(const char *filename);
 	~AudioBuffer() override;
+
+	/// Initializes an empty buffer with the specified format and frequency
+	void init(const char *name, Format format, int frequency);
+
+	bool loadFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
+	bool loadFromFile(const char *filename);
+	/// Loads samples in raw PCM format from a memory buffer
+	bool loadFromSamples(const unsigned char *bufferPtr, unsigned long int bufferSize);
 
 	/// Returns the OpenAL buffer id
 	inline unsigned int bufferId() const { return bufferId_; }
@@ -56,7 +74,7 @@ class DLL_PUBLIC AudioBuffer : public Object
 	float duration_;
 
 	/// Loads audio samples based on information from the audio loader and reader
-	void load(IAudioLoader &audioLoader);
+	bool load(IAudioLoader &audioLoader);
 
 	/// Deleted copy constructor
 	AudioBuffer(const AudioBuffer &) = delete;

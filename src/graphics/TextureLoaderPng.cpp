@@ -1,4 +1,4 @@
-#include "common_macros.h"
+#include "return_macros.h"
 #include "TextureLoaderPng.h"
 
 namespace ncine {
@@ -24,11 +24,6 @@ namespace {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-TextureLoaderPng::TextureLoaderPng(const char *filename)
-    : TextureLoaderPng(IFile::createFileHandle(filename))
-{
-}
-
 TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
     : ITextureLoader(nctl::move(fileHandle))
 {
@@ -37,16 +32,17 @@ TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
 	const int SignatureLength = 8;
 	unsigned char signature[SignatureLength];
 	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
+	RETURN_ASSERT_MSG_X(fileHandle_->isOpened(), "File \"%s\" cannot be opened", fileHandle_->filename());
 	fileHandle_->read(signature, SignatureLength);
 
 	// Checking PNG signature
 	const int isValid = png_check_sig(signature, SignatureLength);
-	FATAL_ASSERT_MSG(isValid, "PNG signature check failed");
+	RETURN_ASSERT_MSG(isValid, "PNG signature check failed");
 
 	// Get PNG file info struct (memory is allocated by libpng)
 	png_structp pngPtr = nullptr;
 	pngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
-	FATAL_ASSERT_MSG(pngPtr, "Cannot create png read structure");
+	RETURN_ASSERT_MSG(pngPtr, "Cannot create png read structure");
 
 	// Get PNG image data info struct (memory is allocated by libpng)
 	png_infop infoPtr = nullptr;
@@ -55,7 +51,7 @@ TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
 	if (infoPtr == nullptr)
 	{
 		png_destroy_read_struct(&pngPtr, nullptr, nullptr);
-		FATAL_MSG("Cannot create png info structure");
+		RETURN_MSG("Cannot create png info structure");
 	}
 
 	// Setting custom read function that uses an IFile as input
@@ -74,7 +70,7 @@ TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
 	if (retVal != 1)
 	{
 		png_destroy_read_struct(&pngPtr, &infoPtr, nullptr);
-		FATAL_MSG("Cannot create png info structure");
+		RETURN_MSG("Cannot create png info structure");
 	}
 
 	width_ = width;
@@ -111,7 +107,7 @@ TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
 			break;
 		default:
 			png_destroy_read_struct(&pngPtr, &infoPtr, nullptr);
-			FATAL_MSG_X("Color type not supported: %d", colorType);
+			RETURN_MSG_X("Color type not supported: %d", colorType);
 			break;
 	}
 
@@ -138,6 +134,7 @@ TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
 	png_read_image(pngPtr, rowPointers.get());
 
 	png_destroy_read_struct(&pngPtr, &infoPtr, nullptr);
+	hasLoaded_ = true;
 }
 
 ///////////////////////////////////////////////////////////

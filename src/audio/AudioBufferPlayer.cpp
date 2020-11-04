@@ -14,7 +14,7 @@ AudioBufferPlayer::AudioBufferPlayer(AudioBuffer *audioBuffer)
 {
 	ASSERT(audioBuffer);
 	if (audioBuffer)
-		setName(audioBuffer->name());
+		setName(audioBuffer->name().data());
 }
 
 ///////////////////////////////////////////////////////////

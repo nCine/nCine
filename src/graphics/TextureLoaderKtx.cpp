@@ -1,4 +1,4 @@
-#include "common_macros.h"
+#include "return_macros.h"
 #include "TextureLoaderKtx.h"
 
 namespace ncine {
@@ -15,26 +15,26 @@ uint8_t TextureLoaderKtx::fileIdentifier_[] = {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-TextureLoaderKtx::TextureLoaderKtx(const char *filename)
-    : TextureLoaderKtx(IFile::createFileHandle(filename))
-{
-}
-
 TextureLoaderKtx::TextureLoaderKtx(nctl::UniquePtr<IFile> fileHandle)
     : ITextureLoader(nctl::move(fileHandle))
 {
 	KtxHeader header;
 
 	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
-	readHeader(header);
-	parseFormat(header);
+	RETURN_ASSERT_MSG_X(fileHandle_->isOpened(), "File \"%s\" cannot be opened", fileHandle_->filename());
+	const bool headerRead = readHeader(header);
+	RETURN_ASSERT_MSG(headerRead, "KTX header cannot be read");
+	const bool formatParsed = parseFormat(header);
+	RETURN_ASSERT_MSG(formatParsed, "KTX format cannot be parsed");
+
+	hasLoaded_ = true;
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void TextureLoaderKtx::readHeader(KtxHeader &header)
+bool TextureLoaderKtx::readHeader(KtxHeader &header)
 {
 	bool checkPassed = true;
 
@@ -47,18 +47,20 @@ void TextureLoaderKtx::readHeader(KtxHeader &header)
 			checkPassed = false;
 	}
 
-	FATAL_ASSERT_MSG(checkPassed, "Not a KTX file");
+	RETURNF_ASSERT_MSG(checkPassed, "Not a KTX file");
 	// Checking for the header identifier
-	FATAL_ASSERT_MSG(header.endianess != 0x01020304, "File endianess doesn't match machine one");
+	RETURNF_ASSERT_MSG(header.endianess != 0x01020304, "File endianess doesn't match machine one");
 
 	// Accounting for key-value data and `UInt32 imageSize` from first MIP level
 	headerSize_ = 64 + IFile::int32FromLE(header.bytesOfKeyValueData) + 4;
 	width_ = IFile::int32FromLE(header.pixelWidth);
 	height_ = IFile::int32FromLE(header.pixelHeight);
 	mipMapCount_ = IFile::int32FromLE(header.numberOfMipmapLevels);
+
+	return true;
 }
 
-void TextureLoaderKtx::parseFormat(const KtxHeader &header)
+bool TextureLoaderKtx::parseFormat(const KtxHeader &header)
 {
 	const GLenum internalFormat = IFile::int32FromLE(header.glInternalFormat);
 	const GLenum type = IFile::int32FromLE(header.glType);
@@ -81,6 +83,8 @@ void TextureLoaderKtx::parseFormat(const KtxHeader &header)
 		if (dataSizesSum != dataSize_)
 			LOGW_X("The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
 	}
+
+	return true;
 }
 
 }

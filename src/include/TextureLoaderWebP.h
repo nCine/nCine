@@ -10,7 +10,6 @@ namespace ncine {
 class TextureLoaderWebP : public ITextureLoader
 {
   public:
-	explicit TextureLoaderWebP(const char *filename);
 	explicit TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle);
 };
 

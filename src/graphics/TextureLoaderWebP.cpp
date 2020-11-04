@@ -1,4 +1,4 @@
-#include "common_macros.h"
+#include "return_macros.h"
 #include "TextureLoaderWebP.h"
 
 namespace ncine {
@@ -7,11 +7,6 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-TextureLoaderWebP::TextureLoaderWebP(const char *filename)
-    : TextureLoaderWebP(IFile::createFileHandle(filename))
-{
-}
-
 TextureLoaderWebP::TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
     : ITextureLoader(nctl::move(fileHandle))
 {
@@ -19,6 +14,7 @@ TextureLoaderWebP::TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
 
 	// Loading the whole file in memory
 	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
+	RETURN_ASSERT_MSG_X(fileHandle_->isOpened(), "File \"%s\" cannot be opened", fileHandle_->filename());
 	const long int fileSize = fileHandle_->size();
 	nctl::UniquePtr<unsigned char[]> fileBuffer = nctl::makeUnique<unsigned char[]>(fileSize);
 	fileHandle_->read(fileBuffer.get(), fileSize);
@@ -26,7 +22,7 @@ TextureLoaderWebP::TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
 	if (WebPGetInfo(fileBuffer.get(), fileSize, &width_, &height_) == 0)
 	{
 		fileBuffer.reset(nullptr);
-		FATAL_MSG("Cannot read WebP header");
+		RETURN_MSG("Cannot read WebP header");
 	}
 
 	LOGI_X("Header found: w:%d h:%d", width_, height_);
@@ -35,7 +31,7 @@ TextureLoaderWebP::TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
 	if (WebPGetFeatures(fileBuffer.get(), fileSize, &features) != VP8_STATUS_OK)
 	{
 		fileBuffer.reset(nullptr);
-		FATAL_MSG("Cannot retrieve WebP features from headers");
+		RETURN_MSG("Cannot retrieve WebP features from headers");
 	}
 
 	LOGI_X("Bitstream features found: alpha:%d animation:%d format:%d",
@@ -53,7 +49,7 @@ TextureLoaderWebP::TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
 		{
 			fileBuffer.reset(nullptr);
 			pixels_.reset(nullptr);
-			FATAL_MSG("Cannot decode RGBA WebP image");
+			RETURN_MSG("Cannot decode RGBA WebP image");
 		}
 	}
 	else
@@ -62,9 +58,11 @@ TextureLoaderWebP::TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
 		{
 			fileBuffer.reset(nullptr);
 			pixels_.reset(nullptr);
-			FATAL_MSG("Cannot decode RGB WebP image");
+			RETURN_MSG("Cannot decode RGB WebP image");
 		}
 	}
+
+	hasLoaded_ = true;
 }
 
 }

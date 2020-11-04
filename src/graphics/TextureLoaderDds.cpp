@@ -1,4 +1,4 @@
-#include "common_macros.h"
+#include "return_macros.h"
 #include "TextureLoaderDds.h"
 
 namespace ncine {
@@ -7,26 +7,26 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-TextureLoaderDds::TextureLoaderDds(const char *filename)
-    : TextureLoaderDds(IFile::createFileHandle(filename))
-{
-}
-
 TextureLoaderDds::TextureLoaderDds(nctl::UniquePtr<IFile> fileHandle)
     : ITextureLoader(nctl::move(fileHandle))
 {
 	DdsHeader header;
 
 	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
-	readHeader(header);
-	parseFormat(header);
+	RETURN_ASSERT_MSG_X(fileHandle_->isOpened(), "File \"%s\" cannot be opened", fileHandle_->filename());
+	const bool headerRead = readHeader(header);
+	RETURN_ASSERT_MSG(headerRead, "DDS header cannot be read");
+	const bool formatParsed = parseFormat(header);
+	RETURN_ASSERT_MSG(formatParsed, "DDS format cannot be parsed");
+
+	hasLoaded_ = true;
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void TextureLoaderDds::readHeader(DdsHeader &header)
+bool TextureLoaderDds::readHeader(DdsHeader &header)
 {
 	// DDS header is 128 bytes long
 	fileHandle_->read(&header, 128);
@@ -43,10 +43,12 @@ void TextureLoaderDds::readHeader(DdsHeader &header)
 			mipMapCount_ = 1;
 	}
 	else
-		FATAL_MSG("Not a DDS file");
+		RETURNF_MSG("Not a DDS file");
+
+	return true;
 }
 
-void TextureLoaderDds::parseFormat(const DdsHeader &header)
+bool TextureLoaderDds::parseFormat(const DdsHeader &header)
 {
 	GLenum internalFormat = GL_RGB; // to suppress uninitialized variable warning
 
@@ -88,7 +90,7 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 				break;
 #endif
 			default:
-				FATAL_MSG_X("Unsupported FourCC compression code: %u", fourCC);
+				RETURNF_MSG_X("Unsupported FourCC compression code: %u", fourCC);
 				break;
 		}
 
@@ -140,7 +142,7 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 			}
 #endif
 			else
-				FATAL_MSG("Unsupported DDPF_RGB pixel format");
+				RETURNF_MSG("Unsupported DDPF_RGB pixel format");
 		}
 		// Used in some older DDS files for single channel color uncompressed data
 		// dwRGBBitCount contains the luminance channel bit count; dwRBitMask contains the channel mask
@@ -154,7 +156,7 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 		else if (flags & DDPF_ALPHA)
 			internalFormat = GL_R8;
 		else
-			FATAL_MSG_X("Unsupported DDS uncompressed pixel format: %u", flags);
+			RETURNF_MSG_X("Unsupported DDS uncompressed pixel format: %u", flags);
 
 		loadPixels(internalFormat, type);
 
@@ -171,6 +173,8 @@ void TextureLoaderDds::parseFormat(const DdsHeader &header)
 		if (dataSizesSum != dataSize_)
 			LOGW_X("The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
 	}
+
+	return true;
 }
 
 }

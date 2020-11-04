@@ -10,7 +10,6 @@ namespace ncine {
 class TextureLoaderPkm : public ITextureLoader
 {
   public:
-	explicit TextureLoaderPkm(const char *filename);
 	explicit TextureLoaderPkm(nctl::UniquePtr<IFile> fileHandle);
 
   private:

@@ -1,4 +1,4 @@
-#include "common_macros.h"
+#include "return_macros.h"
 #include "TextureLoaderPvr.h"
 
 namespace ncine {
@@ -7,32 +7,32 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-TextureLoaderPvr::TextureLoaderPvr(const char *filename)
-    : TextureLoaderPvr(IFile::createFileHandle(filename))
-{
-}
-
 TextureLoaderPvr::TextureLoaderPvr(nctl::UniquePtr<IFile> fileHandle)
     : ITextureLoader(nctl::move(fileHandle))
 {
 	Pvr3Header header;
 
 	fileHandle_->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
-	readHeader(header);
-	parseFormat(header);
+	RETURN_ASSERT_MSG_X(fileHandle_->isOpened(), "File \"%s\" cannot be opened", fileHandle_->filename());
+	const bool headerRead = readHeader(header);
+	RETURN_ASSERT_MSG(headerRead, "PVR header cannot be read");
+	const bool formatParsed = parseFormat(header);
+	RETURN_ASSERT_MSG(formatParsed, "PVR format cannot be parsed");
+
+	hasLoaded_ = true;
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void TextureLoaderPvr::readHeader(Pvr3Header &header)
+bool TextureLoaderPvr::readHeader(Pvr3Header &header)
 {
 	// PVR3 header is 52 bytes long
 	fileHandle_->read(&header, 52);
 
 	// Checking for the header presence ("PVR"03)
-	FATAL_ASSERT_MSG(IFile::int32FromLE(header.version) == 0x03525650, "Not a PVR3 file");
+	RETURNF_ASSERT_MSG(IFile::int32FromLE(header.version) == 0x03525650, "Not a PVR3 file");
 
 	headerSize_ = 52 + IFile::int32FromLE(header.metaDataSize);
 	width_ = IFile::int32FromLE(header.width);
@@ -41,9 +41,11 @@ void TextureLoaderPvr::readHeader(Pvr3Header &header)
 
 	if (mipMapCount_ == 0)
 		mipMapCount_ = 1;
+
+	return true;
 }
 
-void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
+bool TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 {
 	GLenum internalFormat = GL_RGB8; // to suppress uninitialized variable warning
 
@@ -148,7 +150,7 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 	#endif
 #endif
 			default:
-				FATAL_MSG_X("Unsupported PVR3 compressed format: 0x%llx", pixelFormat);
+				RETURNF_MSG_X("Unsupported PVR3 compressed format: 0x%llx", pixelFormat);
 				break;
 		}
 
@@ -202,7 +204,7 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 				internalFormat = GL_R8;
 				break;
 			default:
-				FATAL_MSG_X("Unsupported PVR3 uncompressed format: 0x%llx", pixelFormat);
+				RETURNF_MSG_X("Unsupported PVR3 uncompressed format: 0x%llx", pixelFormat);
 				break;
 		}
 
@@ -218,6 +220,8 @@ void TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 		if (dataSizesSum != dataSize_)
 			LOGW_X("The sum of MIP maps size (%ld) is different than texture total data (%ld)", dataSizesSum, dataSize_);
 	}
+
+	return true;
 }
 
 }

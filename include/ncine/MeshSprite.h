@@ -86,6 +86,8 @@ class DLL_PUBLIC MeshSprite : public BaseSprite
 	const unsigned short *indexDataPointer_;
 	/// The number of indices, either shared or not, that composes the mesh
 	unsigned int numIndices_;
+
+	void textureHasChanged(Texture *newTexture) override;
 };
 
 }

@@ -31,6 +31,7 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/Geometry.cpp
 	${NCINE_ROOT}/src/graphics/TextureFormat.cpp
 	${NCINE_ROOT}/src/graphics/ITextureLoader.cpp
+	${NCINE_ROOT}/src/graphics/TextureLoaderRaw.cpp
 	${NCINE_ROOT}/src/graphics/TextureLoaderDds.cpp
 	${NCINE_ROOT}/src/graphics/TextureLoaderPvr.cpp
 	${NCINE_ROOT}/src/graphics/TextureLoaderKtx.cpp

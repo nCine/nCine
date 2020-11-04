@@ -3,20 +3,17 @@
 
 #include <ncine/IAppEventHandler.h>
 #include <ncine/IInputEventHandler.h>
-#include <nctl/UniquePtr.h>
-
-namespace nctl {
-
-class String;
-
-}
+#include <nctl/StaticArray.h>
+#include <ncine/Vector2.h>
 
 namespace ncine {
 
 class AppConfiguration;
+class Texture;
+class Sprite;
 class AudioBuffer;
-class IAudioPlayer;
-class SceneNode;
+class AudioBufferPlayer;
+class AudioStreamPlayer;
 class Font;
 class TextNode;
 
@@ -30,33 +27,27 @@ class MyEventHandler :
     public nc::IInputEventHandler
 {
   public:
+	static const int NumTextures = 4;
+	static const int NumSounds = 5;
+	static const int NumFonts = 5;
+
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;
-
-#ifdef __ANDROID__
-	void onTouchUp(const nc::TouchEvent &event) override;
-#endif
 	void onKeyReleased(const nc::KeyboardEvent &event) override;
 
   private:
-	const int MaxStringLength = 384;
+	static const unsigned int NumSprites = 4;
 
-	float gain_;
-	float pitch_;
-	float xPos_;
-	bool isLooping_;
+	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, NumTextures> textures_;
+	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumSprites> sprites_;
 
 	nctl::UniquePtr<nc::AudioBuffer> audioBuffer_;
-	nctl::UniquePtr<nc::IAudioPlayer> soundPlayer_;
-	nctl::UniquePtr<nc::IAudioPlayer> musicPlayer_;
-	nctl::UniquePtr<nc::SceneNode> dummy_;
+	nctl::UniquePtr<nc::AudioBufferPlayer> bufferPlayer_;
+	nctl::UniquePtr<nc::AudioStreamPlayer> streamPlayer_;
+
 	nctl::UniquePtr<nc::Font> font_;
 	nctl::UniquePtr<nc::TextNode> textNode_;
-	nctl::UniquePtr<nctl::String> textString_;
-
-	void toggleMusic();
-	void toggleSound();
 };
 
 #endif

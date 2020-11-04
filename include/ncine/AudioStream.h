@@ -6,6 +6,7 @@
 namespace ncine {
 
 class IAudioReader;
+class IAudioLoader;
 
 /// Audio stream class
 class DLL_PUBLIC AudioStream
@@ -74,10 +75,18 @@ class DLL_PUBLIC AudioStream
 	/// The associated reader to continuosly stream decoded data
 	nctl::UniquePtr<IAudioReader> audioReader_;
 
+	/// Default constructor
+	AudioStream();
 	/// Constructor creating an audio stream from a named memory buffer
 	AudioStream(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	/// Constructor creating an audio stream from an audio file
 	explicit AudioStream(const char *filename);
+
+	bool loadFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
+	bool loadFromFile(const char *filename);
+
+	void createReader(IAudioLoader &audioLoader);
+
 	/// Deleted copy constructor
 	AudioStream(const AudioStream &) = delete;
 	/// Deleted assignment operator

@@ -27,7 +27,7 @@ class DLL_PUBLIC Object
 	};
 
 	/// Maximum length for an object name
-	static const unsigned int MaxNameLength = 128;
+	static const unsigned int MaxNameLength = 256;
 
 	/// Constructs an object with a specified type and adds it to the index
 	explicit Object(ObjectType type);
@@ -47,7 +47,7 @@ class DLL_PUBLIC Object
 	/// Returns the object name
 	inline const nctl::String &name() const { return name_; }
 	/// Sets the object name
-	inline void setName(const nctl::String &name) { name_ = name; }
+	inline void setName(const char *name) { name_ = name; }
 
 	/// Returns a casted pointer to the object with the specified id, if any exists
 	template <class T>

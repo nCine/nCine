@@ -9,7 +9,6 @@ namespace ncine {
 class AudioLoaderWav : public IAudioLoader
 {
   public:
-	explicit AudioLoaderWav(const char *filename);
 	explicit AudioLoaderWav(nctl::UniquePtr<IFile> fileHandle);
 
 	nctl::UniquePtr<IAudioReader> createReader() override;

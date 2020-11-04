@@ -13,6 +13,9 @@ class IAudioLoader
   public:
 	virtual ~IAudioLoader() {}
 
+	/// Returns true if the audio has been correctly loaded
+	inline bool hasLoaded() const { return hasLoaded_; }
+
 	/// Returns number of bytes per sample
 	inline int bytesPerSample() const { return bytesPerSample_; }
 	/// Returns number of channels
@@ -37,6 +40,8 @@ class IAudioLoader
 	virtual nctl::UniquePtr<IAudioReader> createReader() = 0;
 
   protected:
+	/// A flag indicating if the loading process has been successful
+	bool hasLoaded_;
 	/// Audio file handle
 	nctl::UniquePtr<IFile> fileHandle_;
 
@@ -52,10 +57,19 @@ class IAudioLoader
 	/// Duration in seconds
 	float duration_;
 
-	explicit IAudioLoader(const char *filename);
 	explicit IAudioLoader(nctl::UniquePtr<IFile> fileHandle);
 
 	static nctl::UniquePtr<IAudioLoader> createLoader(nctl::UniquePtr<IFile> fileHandle, const char *filename);
+};
+
+/// A class created when the audio file extension is not recognized
+class InvalidAudioLoader : IAudioLoader
+{
+  public:
+	explicit InvalidAudioLoader(nctl::UniquePtr<IFile> fileHandle)
+	    : IAudioLoader(nctl::move(fileHandle)) {}
+
+	nctl::UniquePtr<IAudioReader> createReader() override { return nctl::makeUnique<InvalidAudioReader>(); }
 };
 
 }

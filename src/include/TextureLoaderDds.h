@@ -10,7 +10,6 @@ namespace ncine {
 class TextureLoaderDds : public ITextureLoader
 {
   public:
-	explicit TextureLoaderDds(const char *filename);
 	explicit TextureLoaderDds(nctl::UniquePtr<IFile> fileHandle);
 
   private:
@@ -68,9 +67,9 @@ class TextureLoaderDds : public ITextureLoader
 	static const uint32_t DDS_ATCI = 0x49435441; // "ATCI"
 
 	/// Reads the DDS header and fills the corresponding structure
-	void readHeader(DdsHeader &header);
+	bool readHeader(DdsHeader &header);
 	/// Parses the DDS header to determine its format
-	void parseFormat(const DdsHeader &header);
+	bool parseFormat(const DdsHeader &header);
 };
 
 }

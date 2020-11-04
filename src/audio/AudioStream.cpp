@@ -14,52 +14,34 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 /*! Private constructor called only by `AudioStreamPlayer`. */
-AudioStream::AudioStream(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
+AudioStream::AudioStream()
     : buffersIds_(nctl::StaticArrayMode::EXTEND_SIZE), nextAvailableBufferIndex_(0),
       currentBufferId_(0), bytesPerSample_(0), numChannels_(0),
       frequency_(0), numSamples_(0), duration_(0.0f)
 {
-	ZoneScoped;
-	ZoneText(bufferName, nctl::strnlen(bufferName, nctl::String::MaxCStringLength));
-
 	alGetError();
 	alGenBuffers(NumBuffers, buffersIds_.data());
 	const ALenum error = alGetError();
 	ASSERT_MSG_X(error == AL_NO_ERROR, "alGenBuffers failed: 0x%x", error);
 	memBuffer_ = nctl::makeUnique<char[]>(BufferSize);
+}
 
-	nctl::UniquePtr<IAudioLoader> audioLoader = IAudioLoader::createFromMemory(bufferName, bufferPtr, bufferSize);
-	numChannels_ = audioLoader->numChannels();
-	frequency_ = audioLoader->frequency();
-
-	FATAL_ASSERT_MSG_X(numChannels_ == 1 || numChannels_ == 2, "Unsupported number of channels: %d", numChannels_);
-	format_ = (numChannels_ == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
-
-	audioReader_ = audioLoader->createReader();
+/*! Private constructor called only by `AudioStreamPlayer`. */
+AudioStream::AudioStream(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
+    : AudioStream()
+{
+	const bool hasLoaded = loadFromMemory(bufferName, bufferPtr, bufferSize);
+	if (hasLoaded == false)
+		LOGE_X("Audio buffer \"%s\" cannot be loaded", bufferName);
 }
 
 /*! Private constructor called only by `AudioStreamPlayer`. */
 AudioStream::AudioStream(const char *filename)
-    : buffersIds_(nctl::StaticArrayMode::EXTEND_SIZE),
-      nextAvailableBufferIndex_(0), currentBufferId_(0), frequency_(0)
+    : AudioStream()
 {
-	ZoneScoped;
-	ZoneText(filename, nctl::strnlen(filename, nctl::String::MaxCStringLength));
-
-	alGetError();
-	alGenBuffers(NumBuffers, buffersIds_.data());
-	const ALenum error = alGetError();
-	ASSERT_MSG_X(error == AL_NO_ERROR, "alGenBuffers failed: 0x%x", error);
-	memBuffer_ = nctl::makeUnique<char[]>(BufferSize);
-
-	nctl::UniquePtr<IAudioLoader> audioLoader = IAudioLoader::createFromFile(filename);
-	numChannels_ = audioLoader->numChannels();
-	frequency_ = audioLoader->frequency();
-
-	FATAL_ASSERT_MSG_X(numChannels_ == 1 || numChannels_ == 2, "Unsupported number of channels: %d", numChannels_);
-	format_ = (numChannels_ == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
-
-	audioReader_ = audioLoader->createReader();
+	const bool hasLoaded = loadFromFile(filename);
+	if (hasLoaded == false)
+		LOGE_X("Audio file \"%s\" cannot be loaded", filename);
 }
 
 AudioStream::~AudioStream()
@@ -81,6 +63,9 @@ unsigned long int AudioStream::numStreamSamples() const
 /*! \return A flag indicating whether the stream has been entirely decoded and played or not. */
 bool AudioStream::enqueue(unsigned int source, bool looping)
 {
+	if (audioReader_ == nullptr)
+		return false;
+
 	// Set to false when the queue is empty and there is no more data to decode
 	bool shouldKeepPlaying = true;
 
@@ -169,6 +154,48 @@ void AudioStream::stop(unsigned int source)
 
 	audioReader_->rewind();
 	currentBufferId_ = 0;
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+bool AudioStream::loadFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
+{
+	ZoneScoped;
+	ZoneText(bufferName, nctl::strnlen(bufferName, nctl::String::MaxCStringLength));
+
+	nctl::UniquePtr<IAudioLoader> audioLoader = IAudioLoader::createFromMemory(bufferName, bufferPtr, bufferSize);
+	if (audioLoader->hasLoaded() == false)
+		return false;
+
+	createReader(*audioLoader);
+	return true;
+}
+
+bool AudioStream::loadFromFile(const char *filename)
+{
+	ZoneScoped;
+	ZoneText(filename, nctl::strnlen(filename, nctl::String::MaxCStringLength));
+
+	nctl::UniquePtr<IAudioLoader> audioLoader = IAudioLoader::createFromFile(filename);
+	if (audioLoader->hasLoaded() == false)
+		return false;
+
+	createReader(*audioLoader);
+	return true;
+}
+
+void AudioStream::createReader(IAudioLoader &audioLoader)
+{
+	bytesPerSample_ = audioLoader.bytesPerSample();
+	numChannels_ = audioLoader.numChannels();
+	frequency_ = audioLoader.frequency();
+	numSamples_ = audioLoader.numSamples();
+	duration_ = float(numSamples_) / frequency_;
+	format_ = (numChannels_ == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
+
+	audioReader_ = audioLoader.createReader();
 }
 
 }

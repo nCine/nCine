@@ -59,4 +59,27 @@ Sprite::Sprite(Texture *texture, const Vector2f &position)
 {
 }
 
+void Sprite::textureHasChanged(Texture *newTexture)
+{
+	if (renderCommand_->material().shaderProgramType() != Material::ShaderProgramType::CUSTOM)
+	{
+		const Material::ShaderProgramType shaderProgramType = newTexture->numChannels() >= 3
+		                                                          ? Material::ShaderProgramType::SPRITE
+		                                                          : Material::ShaderProgramType::SPRITE_GRAY;
+		renderCommand_->material().setShaderProgramType(shaderProgramType);
+	}
+
+	if (texture_ != newTexture)
+	{
+		Recti texRect = texRect_;
+		texRect.x = (texRect.x / float(texture_->width())) * float(newTexture->width());
+		texRect.y = (texRect.y / float(texture_->height())) * float(newTexture->width());
+		texRect.w = (texRect.w / float(texture_->width())) * float(newTexture->width());
+		texRect.h = (texRect.h / float(texture_->height())) * float(newTexture->width());
+		setTexRect(texRect); // it also sets width_ and height_
+	}
+	else
+		setTexRect(Recti(0, 0, newTexture->width(), newTexture->height()));
+}
+
 }

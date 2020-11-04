@@ -23,6 +23,9 @@ class DLL_PUBLIC Sprite : public BaseSprite
 	Sprite(Texture *texture, const Vector2f &position);
 
 	inline static ObjectType sType() { return ObjectType::SPRITE; }
+
+  private:
+	void textureHasChanged(Texture *newTexture) override;
 };
 
 }

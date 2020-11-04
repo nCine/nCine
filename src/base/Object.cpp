@@ -14,9 +14,10 @@ Object::Object(ObjectType type)
 }
 
 Object::Object(ObjectType type, const char *name)
-    : type_(type), id_(0), name_(name)
+    : type_(type), id_(0), name_(MaxNameLength)
 {
 	id_ = theServiceLocator().indexer().addObject(this);
+	name_ = name;
 }
 
 Object::~Object()

@@ -57,6 +57,9 @@ class DLL_PUBLIC BaseSprite : public DrawableNode
 	BaseSprite(SceneNode *parent, Texture *texture, const Vector2f &position);
 
 	void updateRenderCommand() override;
+
+	/// Performs the required tasks upon a change in the texture
+	virtual void textureHasChanged(Texture *newTexture) = 0;
 };
 
 }

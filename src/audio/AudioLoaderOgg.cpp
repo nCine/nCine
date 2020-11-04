@@ -1,3 +1,4 @@
+#include "return_macros.h"
 #include "AudioLoaderOgg.h"
 #include "AudioReaderOgg.h"
 
@@ -36,11 +37,6 @@ namespace {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-AudioLoaderOgg::AudioLoaderOgg(const char *filename)
-    : AudioLoaderOgg(IFile::createFileHandle(filename))
-{
-}
-
 AudioLoaderOgg::AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle)
     : IAudioLoader(nctl::move(fileHandle))
 {
@@ -60,7 +56,7 @@ AudioLoaderOgg::AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle)
 	{
 		LOGF_X("Cannot open \"%s\" with ov_open_callbacks()", fileHandle_->filename());
 		fileHandle_->close();
-		exit(EXIT_FAILURE);
+		return;
 	}
 
 	// Get some information about the Ogg file
@@ -73,8 +69,10 @@ AudioLoaderOgg::AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle)
 	numSamples_ = static_cast<unsigned long int>(ov_pcm_total(&oggFile_, -1));
 	duration_ = float(ov_time_total(&oggFile_, -1));
 
-	FATAL_ASSERT_MSG_X(numChannels_ == 1 || numChannels_ == 2, "Unsupported number of channels: %d", numChannels_);
+	RETURN_ASSERT_MSG_X(numChannels_ == 1 || numChannels_ == 2, "Unsupported number of channels: %d", numChannels_);
 	LOGI_X("duration: %.2fs, channels: %d, frequency: %dHz", duration_, numChannels_, frequency_);
+
+	hasLoaded_ = true;
 }
 
 AudioLoaderOgg::~AudioLoaderOgg()

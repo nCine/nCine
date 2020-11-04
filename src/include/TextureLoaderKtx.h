@@ -10,7 +10,6 @@ namespace ncine {
 class TextureLoaderKtx : public ITextureLoader
 {
   public:
-	explicit TextureLoaderKtx(const char *filename);
 	explicit TextureLoaderKtx(nctl::UniquePtr<IFile> fileHandle);
 
   private:
@@ -37,9 +36,9 @@ class TextureLoaderKtx : public ITextureLoader
 	};
 
 	/// Reads the KTX header and fills the corresponding structure
-	void readHeader(KtxHeader &header);
+	bool readHeader(KtxHeader &header);
 	/// Parses the KTX header to determine its format
-	void parseFormat(const KtxHeader &header);
+	bool parseFormat(const KtxHeader &header);
 };
 
 }

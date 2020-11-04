@@ -22,6 +22,9 @@ class DLL_PUBLIC Font : public Object
 		GLYPH_IN_ALPHA
 	};
 
+	/// Constructs an empty font object with no glyphs nor kerning pairs
+	Font();
+
 	/// Constructs the object from an AngelCode's `FNT` memory buffer and a texture
 	Font(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize, const char *texFilename);
 	/// Constructs the object from an AngelCode's `FNT` memory buffer and a texture memory buffer
@@ -34,6 +37,12 @@ class DLL_PUBLIC Font : public Object
 	Font(const char *fntFilename, const char *texFilename);
 
 	~Font() override;
+
+	bool loadFromMemory(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize, const char *texFilename);
+	bool loadFromMemory(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize,
+	                    const char *texBufferName, const unsigned char *texBufferPtr, unsigned long int texBufferSize);
+	bool loadFromFile(const char *fntFilename);
+	bool loadFromFile(const char *fntFilename, const char *texFilename);
 
 	/// Gets the texture object
 	inline const Texture *texture() const { return texture_.get(); }
@@ -87,11 +96,13 @@ class DLL_PUBLIC Font : public Object
 	/// Deleted assignment operator
 	Font &operator=(const Font &) = delete;
 
+	/// Checks whether the FNT information are compatible with rendering or not
+	bool checkFntInformation(const FntParser &fntParser);
+
+	/// Determines the render mode based on the FNT information
+	void determineRenderMode(const FntParser &fntParser);
 	/// Retrieves font information from the FNT parser
 	void retrieveInfoFromFnt(const FntParser &fntParser);
-
-	/// Checks whether the FNT information are compatible with rendering or not
-	void checkFntInformation(const FntParser &fntParser);
 };
 
 }

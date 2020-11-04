@@ -85,6 +85,7 @@ void MeshSprite::copyVertices(const MeshSprite &meshSprite)
 	copyVertices(meshSprite.numVertices_, meshSprite.vertexDataPointer_);
 	width_ = meshSprite.width_;
 	height_ = meshSprite.height_;
+	texRect_ = meshSprite.texRect_;
 }
 
 void MeshSprite::setVertices(unsigned int numVertices, const Vertex *vertices)
@@ -191,6 +192,33 @@ void MeshSprite::setIndices(unsigned int numIndices, const unsigned short *indic
 void MeshSprite::setIndices(const MeshSprite &meshSprite)
 {
 	setIndices(meshSprite.numIndices_, meshSprite.indexDataPointer_);
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void MeshSprite::textureHasChanged(Texture *newTexture)
+{
+	if (renderCommand_->material().shaderProgramType() != Material::ShaderProgramType::CUSTOM)
+	{
+		const Material::ShaderProgramType shaderProgramType = newTexture->numChannels() >= 3
+		                                                          ? Material::ShaderProgramType::MESH_SPRITE
+		                                                          : Material::ShaderProgramType::MESH_SPRITE_GRAY;
+		renderCommand_->material().setShaderProgramType(shaderProgramType);
+	}
+
+	if (texture_ != newTexture)
+	{
+		Recti texRect = texRect_;
+		texRect.x = (texRect.x / float(texture_->width())) * float(newTexture->width());
+		texRect.y = (texRect.y / float(texture_->height())) * float(newTexture->width());
+		texRect.w = (texRect.w / float(texture_->width())) * float(newTexture->width());
+		texRect.h = (texRect.h / float(texture_->height())) * float(newTexture->width());
+		setTexRect(texRect); // it also sets width_ and height_
+	}
+	else
+		setTexRect(Recti(0, 0, newTexture->width(), newTexture->height()));
 }
 
 }

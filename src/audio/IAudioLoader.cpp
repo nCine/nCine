@@ -11,14 +11,8 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-IAudioLoader::IAudioLoader(const char *filename)
-    : IAudioLoader(IFile::createFileHandle(filename))
-{
-	// Warning: Cannot call a virtual `init()` here, in the base constructor
-}
-
 IAudioLoader::IAudioLoader(nctl::UniquePtr<IFile> fileHandle)
-    : fileHandle_(nctl::move(fileHandle)), bytesPerSample_(0),
+    : hasLoaded_(false), fileHandle_(nctl::move(fileHandle)), bytesPerSample_(0),
       numChannels_(0), frequency_(0), numSamples_(0L), duration_(0.0f)
 {
 	// Warning: Cannot call a virtual `init()` here, in the base constructor
@@ -47,6 +41,8 @@ nctl::UniquePtr<IAudioLoader> IAudioLoader::createFromFile(const char *filename)
 
 nctl::UniquePtr<IAudioLoader> IAudioLoader::createLoader(nctl::UniquePtr<IFile> fileHandle, const char *filename)
 {
+	fileHandle->setExitOnFailToOpen(false);
+
 	if (fs::hasExtension(filename, "wav"))
 		return nctl::makeUnique<AudioLoaderWav>(nctl::move(fileHandle));
 #ifdef WITH_VORBIS
@@ -57,7 +53,7 @@ nctl::UniquePtr<IAudioLoader> IAudioLoader::createLoader(nctl::UniquePtr<IFile> 
 	{
 		LOGF_X("Extension unknown: \"%s\"", fs::extension(filename));
 		fileHandle.reset(nullptr);
-		exit(EXIT_FAILURE);
+		return nctl::makeUnique<InvalidAudioLoader>(nctl::move(fileHandle));
 	}
 }
 

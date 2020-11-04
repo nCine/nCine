@@ -20,14 +20,15 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ITextureLoader::ITextureLoader(const char *filename)
-    : ITextureLoader(IFile::createFileHandle(filename))
+ITextureLoader::ITextureLoader()
+    : hasLoaded_(false), width_(0), height_(0),
+      bpp_(0), headerSize_(0), dataSize_(0), mipMapCount_(1)
 {
 }
 
 ITextureLoader::ITextureLoader(nctl::UniquePtr<IFile> fileHandle)
-    : fileHandle_(nctl::move(fileHandle)), width_(0), height_(0),
-      bpp_(0), headerSize_(0), dataSize_(0), mipMapCount_(1)
+    : hasLoaded_(false), fileHandle_(nctl::move(fileHandle)), width_(0),
+      height_(0), bpp_(0), headerSize_(0), dataSize_(0), mipMapCount_(1)
 {
 }
 
@@ -51,10 +52,13 @@ const GLubyte *ITextureLoader::pixels(unsigned int mipMapLevel) const
 {
 	const GLubyte *pixels = nullptr;
 
-	if (mipMapCount_ > 1 && int(mipMapLevel) < mipMapCount_)
-		pixels = pixels_.get() + mipDataOffsets_[mipMapLevel];
-	else if (mipMapLevel == 0)
-		pixels = pixels_.get();
+	if (pixels_ != nullptr)
+	{
+		if (mipMapCount_ > 1 && int(mipMapLevel) < mipMapCount_)
+			pixels = pixels_.get() + mipDataOffsets_[mipMapLevel];
+		else if (mipMapLevel == 0)
+			pixels = pixels_.get();
+	}
 
 	return pixels;
 }
@@ -78,6 +82,8 @@ nctl::UniquePtr<ITextureLoader> ITextureLoader::createFromFile(const char *filen
 
 nctl::UniquePtr<ITextureLoader> ITextureLoader::createLoader(nctl::UniquePtr<IFile> fileHandle, const char *filename)
 {
+	fileHandle->setExitOnFailToOpen(false);
+
 	if (fs::hasExtension(filename, "dds"))
 		return nctl::makeUnique<TextureLoaderDds>(nctl::move(fileHandle));
 	else if (fs::hasExtension(filename, "pvr"))
@@ -100,7 +106,7 @@ nctl::UniquePtr<ITextureLoader> ITextureLoader::createLoader(nctl::UniquePtr<IFi
 	{
 		LOGF_X("Extension unknown: \"%s\"", fs::extension(filename));
 		fileHandle.reset(nullptr);
-		exit(EXIT_FAILURE);
+		return nctl::makeUnique<InvalidTextureLoader>(nctl::move(fileHandle));
 	}
 }
 

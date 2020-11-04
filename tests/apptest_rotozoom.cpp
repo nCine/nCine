@@ -5,12 +5,6 @@
 #include <ncine/Sprite.h>
 #include "apptest_datapath.h"
 
-#define LOAD_FROM_MEMORY (0)
-
-#if LOAD_FROM_MEMORY
-	#include <ncine/IFile.h>
-#endif
-
 namespace {
 
 #ifdef __ANDROID__
@@ -39,19 +33,7 @@ void MyEventHandler::onInit()
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-#if LOAD_FROM_MEMORY
-	nctl::UniquePtr<nc::IFile> megaTextureFile = nc::IFile::createFileHandle(prefixDataPath("textures", TextureFile).data());
-	uint8_t megaTextureBuffer[24 * 1024];
-	megaTextureFile->open(nc::IFile::OpenMode::READ);
-	const unsigned long int megaTextureBufferSize = megaTextureFile->size();
-	FATAL_ASSERT(megaTextureBufferSize <= sizeof(megaTextureBuffer));
-	megaTextureFile->read(megaTextureBuffer, megaTextureBufferSize);
-	megaTextureFile->close();
-
-	megaTexture_ = nctl::makeUnique<nc::Texture>(TextureFile, megaTextureBuffer, megaTextureBufferSize);
-#else
 	megaTexture_ = nctl::makeUnique<nc::Texture>(prefixDataPath("textures", TextureFile).data());
-#endif
 
 	texRects.pushBack(nc::Recti(0, 0, 128, 128));
 	texRects.pushBack(nc::Recti(128, 0, 128, 128));

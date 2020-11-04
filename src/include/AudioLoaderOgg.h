@@ -12,7 +12,6 @@ namespace ncine {
 class AudioLoaderOgg : public IAudioLoader
 {
   public:
-	explicit AudioLoaderOgg(const char *filename);
 	explicit AudioLoaderOgg(nctl::UniquePtr<IFile> fileHandle);
 	~AudioLoaderOgg() override;
 

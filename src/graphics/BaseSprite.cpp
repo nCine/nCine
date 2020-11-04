@@ -37,10 +37,15 @@ void BaseSprite::setSize(float width, float height)
 	height_ = height;
 }
 
+/*! This method should be also called if just the content of a texture changes */
 void BaseSprite::setTexture(Texture *texture)
 {
 	if (texture)
+	{
+		// Allow self-assignment to take into account the case where the texture stays the same but it loads new data
+		textureHasChanged(texture);
 		texture_ = texture;
+	}
 }
 
 void BaseSprite::setTexRect(const Recti &rect)

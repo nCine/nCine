@@ -10,7 +10,6 @@ namespace ncine {
 class TextureLoaderPvr : public ITextureLoader
 {
   public:
-	explicit TextureLoaderPvr(const char *filename);
 	explicit TextureLoaderPvr(nctl::UniquePtr<IFile> fileHandle);
 
   private:
@@ -73,9 +72,9 @@ class TextureLoaderPvr : public ITextureLoader
 	static const uint64_t FMT_A_8 = 0x0000000800000061ULL;
 
 	/// Reads the PVR3 header and fills the corresponding structure
-	void readHeader(Pvr3Header &header);
+	bool readHeader(Pvr3Header &header);
 	/// Parses the PVR3 header to determine its format
-	void parseFormat(const Pvr3Header &header);
+	bool parseFormat(const Pvr3Header &header);
 };
 
 }

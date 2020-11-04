@@ -11,11 +11,16 @@ namespace ncine {
 class DLL_PUBLIC AudioStreamPlayer : public IAudioPlayer
 {
   public:
+	/// Default constructor
+	AudioStreamPlayer();
 	/// A constructor creating a player from a named memory buffer
 	AudioStreamPlayer(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	/// A constructor creating a player from a file
 	explicit AudioStreamPlayer(const char *filename);
 	~AudioStreamPlayer() override;
+
+	bool loadFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
+	bool loadFromFile(const char *filename);
 
 	inline unsigned int bufferId() const override { return audioStream_.bufferId(); }
 

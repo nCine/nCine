@@ -14,6 +14,11 @@ const float DefaultPitch = 1.0f;
 const float DefaultXPos = 0.0f;
 const float VerticalTextPos = 0.45f;
 
+const char *MusicFiles[2] = { "c64.ogg", "chiptune_loop.ogg" };
+const char *SoundFiles[3] = { "coins.wav", "explode.wav", "waterdrop.wav" };
+int selectedMusicFile = 0;
+int selectedSoundFile = 0;
+
 #ifdef __ANDROID__
 const char *FontTextureFile = "DroidSans32_256_ETC2.ktx";
 #else
@@ -55,16 +60,16 @@ void MyEventHandler::onInit()
 
 	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
 	                                   (prefixDataPath("fonts", FontTextureFile)).data());
-	musicPlayer_ = nctl::makeUnique<nc::AudioStreamPlayer>(prefixDataPath("sounds", "music.ogg").data());
-	audioBuffer_ = nctl::makeUnique<nc::AudioBuffer>(prefixDataPath("sounds", "bomb.wav").data());
+	musicPlayer_ = nctl::makeUnique<nc::AudioStreamPlayer>(prefixDataPath("sounds", MusicFiles[0]).data());
+	audioBuffer_ = nctl::makeUnique<nc::AudioBuffer>(prefixDataPath("sounds", SoundFiles[0]).data());
 	soundPlayer_ = nctl::makeUnique<nc::AudioBufferPlayer>(audioBuffer_.get());
 	soundPlayer_->play();
 
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 	dummy_ = nctl::makeUnique<nc::SceneNode>(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
-	textNode_ = nctl::makeUnique<nc::TextNode>(dummy_.get(), font_.get());
+	textNode_ = nctl::makeUnique<nc::TextNode>(dummy_.get(), font_.get(), MaxStringLength);
 	textNode_->setAlignment(nc::TextNode::Alignment::LEFT);
-	textString_ = nctl::makeUnique<nctl::String>(256);
+	textString_ = nctl::makeUnique<nctl::String>(MaxStringLength);
 }
 
 void MyEventHandler::onFrameStart()
@@ -76,13 +81,10 @@ void MyEventHandler::onFrameStart()
 
 	textString_->clear();
 
-	textString_->formatAppend("Music at sample %d/%d\nState: %s (press M)\n\n", musicPlayer_->sampleOffset(),
-	                          static_cast<nc::AudioStreamPlayer *>(musicPlayer_.get())->numStreamSamples(), audioPlayerStateToString(musicPlayer_->state()));
-	textString_->formatAppend("Sound at sample %d/%d\nState: %s (press A/S/D)\n\n", soundPlayer_->sampleOffset(),
-	                          soundPlayer_->numSamples(), audioPlayerStateToString(soundPlayer_->state()));
-
-	textString_->formatAppend("Music: %s (press M)\n", audioPlayerStateToString(musicPlayer_->state()));
-	textString_->formatAppend("Sound: %s (press A/S/D)\n", audioPlayerStateToString(soundPlayer_->state()));
+	textString_->formatAppend("Music \"%s\" (press 1/2)\nSample seek position: %d/%d\nState: %s (press M)\n\n", MusicFiles[selectedMusicFile],
+	                          musicPlayer_->sampleOffset(), static_cast<nc::AudioStreamPlayer *>(musicPlayer_.get())->numStreamSamples(), audioPlayerStateToString(musicPlayer_->state()));
+	textString_->formatAppend("Sound \"%s\" (press 3/4/5)\nSample seek position: %d/%d\nState: %s (press A/S/D)\n\n", SoundFiles[selectedSoundFile],
+	                          soundPlayer_->sampleOffset(), soundPlayer_->numSamples(), audioPlayerStateToString(soundPlayer_->state()));
 
 	if (soundPlayer_->isLooping())
 		textString_->append("Sound is looping");
@@ -154,6 +156,34 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		xPos_ = DefaultXPos;
 	else if (event.sym == nc::KeySym::KP3)
 		xPos_ += 0.1f;
+	else if (event.sym == nc::KeySym::N1)
+	{
+		selectedMusicFile = 0;
+		static_cast<nc::AudioStreamPlayer *>(musicPlayer_.get())->loadFromFile(prefixDataPath("sounds", MusicFiles[selectedMusicFile]).data());
+	}
+	else if (event.sym == nc::KeySym::N2)
+	{
+		selectedMusicFile = 1;
+		static_cast<nc::AudioStreamPlayer *>(musicPlayer_.get())->loadFromFile(prefixDataPath("sounds", MusicFiles[selectedMusicFile]).data());
+	}
+	else if (event.sym == nc::KeySym::N3)
+	{
+		selectedSoundFile = 0;
+		soundPlayer_->stop();
+		audioBuffer_->loadFromFile(prefixDataPath("sounds", SoundFiles[selectedSoundFile]).data());
+	}
+	else if (event.sym == nc::KeySym::N4)
+	{
+		selectedSoundFile = 1;
+		soundPlayer_->stop();
+		audioBuffer_->loadFromFile(prefixDataPath("sounds", SoundFiles[selectedSoundFile]).data());
+	}
+	else if (event.sym == nc::KeySym::N5)
+	{
+		selectedSoundFile = 2;
+		soundPlayer_->stop();
+		audioBuffer_->loadFromFile(prefixDataPath("sounds", SoundFiles[selectedSoundFile]).data());
+	}
 	else if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
 		nc::theApplication().quit();
 }

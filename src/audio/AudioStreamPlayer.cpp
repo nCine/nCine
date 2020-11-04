@@ -8,6 +8,11 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+AudioStreamPlayer::AudioStreamPlayer()
+    : IAudioPlayer(ObjectType::AUDIOSTREAM_PLAYER), audioStream_()
+{
+}
+
 AudioStreamPlayer::AudioStreamPlayer(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
     : IAudioPlayer(ObjectType::AUDIOSTREAM_PLAYER, bufferName), audioStream_(bufferName, bufferPtr, bufferSize)
 {
@@ -27,6 +32,32 @@ AudioStreamPlayer::~AudioStreamPlayer()
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+bool AudioStreamPlayer::loadFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
+{
+	if (state_ != PlayerState::STOPPED)
+		audioStream_.stop(sourceId_);
+
+	const bool hasLoaded = audioStream_.loadFromMemory(bufferName, bufferPtr, bufferSize);
+	if (hasLoaded == false)
+		return false;
+
+	setName(bufferName);
+	return true;
+}
+
+bool AudioStreamPlayer::loadFromFile(const char *filename)
+{
+	if (state_ != PlayerState::STOPPED)
+		audioStream_.stop(sourceId_);
+
+	const bool hasLoaded = audioStream_.loadFromFile(filename);
+	if (hasLoaded == false)
+		return false;
+
+	setName(filename);
+	return true;
+}
 
 void AudioStreamPlayer::play()
 {
