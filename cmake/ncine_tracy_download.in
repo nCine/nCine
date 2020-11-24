@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 2.8.2)
+cmake_minimum_required(VERSION 2.8.12)
 
 project(tracy-download NONE)
 
 include(ExternalProject)
 ExternalProject_Add(tracy
 	GIT_REPOSITORY    https://bitbucket.org/wolfpld/tracy.git
-	GIT_TAG           "v0.7.3"
+	GIT_TAG           "v0.7.4"
 	GIT_SHALLOW       TRUE
 	SOURCE_DIR        "${CMAKE_BINARY_DIR}/tracy-src"
 	CONFIGURE_COMMAND ""
