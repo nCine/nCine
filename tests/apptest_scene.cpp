@@ -177,30 +177,29 @@ void MyEventHandler::onFrameStart()
 
 	ImGui::SetWindowPos(ImVec2(650, 50), ImGuiCond_FirstUseEver);
 	ImGui::SetWindowSize(ImVec2(325, 200), ImGuiCond_FirstUseEver);
-	if (ImGui::Begin("ImGui Interface"))
-	{
-		if (ImGui::Button("Quit"))
-			nc::theApplication().quit();
-		ImGui::SameLine();
-		ImGui::Checkbox("Paused", &paused);
+	ImGui::Begin("ImGui Interface");
+
+	if (ImGui::Button("Quit"))
+		nc::theApplication().quit();
+	ImGui::SameLine();
+	ImGui::Checkbox("Paused", &paused);
 	#ifdef __ANDROID__
-		ImGui::SameLine();
-		ImGui::Checkbox("Soft Input", &softInputState);
+	ImGui::SameLine();
+	ImGui::Checkbox("Soft Input", &softInputState);
 	#endif
 
-		ImGui::RadioButton("Slow", &speed, SLOW);
-		ImGui::SameLine();
-		ImGui::RadioButton("Fast", &speed, FAST);
-		auxString.format("Angle: %.0f", angle_);
-		ImGui::ProgressBar(angle_ / 360.0f, ImVec2(0.0f, 0.0f), auxString.data());
+	ImGui::RadioButton("Slow", &speed, SLOW);
+	ImGui::SameLine();
+	ImGui::RadioButton("Fast", &speed, FAST);
+	auxString.format("Angle: %.0f", angle_);
+	ImGui::ProgressBar(angle_ / 360.0f, ImVec2(0.0f, 0.0f), auxString.data());
 
-		ImGui::SliderFloat("Sprite Scale", &spriteScale, MinSpriteScale, MaxSpriteScale);
-		ImGui::ColorEdit3("Background", bgColor.data());
-		ImGui::InputText("Text Input", textBuffer, MaxBufferLength);
-		ImGui::InputText("Unlinked Input", imguiTextInput, MaxBufferLength);
+	ImGui::SliderFloat("Sprite Scale", &spriteScale, MinSpriteScale, MaxSpriteScale);
+	ImGui::ColorEdit3("Background", bgColor.data());
+	ImGui::InputText("Text Input", textBuffer, MaxBufferLength);
+	ImGui::InputText("Unlinked Input", imguiTextInput, MaxBufferLength);
 
-		ImGui::End();
-	}
+	ImGui::End();
 #endif
 
 #if NCINE_WITH_NUKLEAR

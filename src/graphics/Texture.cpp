@@ -42,6 +42,25 @@ GLenum channelsToFormat(int numChannels)
 	}
 }
 
+uint32_t *chromaKeyPixels(uint32_t *destBuffer, const unsigned char *srcBuffer, unsigned int numPixels, const Color &chromaKeyColor)
+{
+	// The alpha value is masked out to perform the comparison
+	const uint32_t chromaKeyColorNoAlpha = chromaKeyColor.abgr() & 0x00FFFFFF;
+
+	for (unsigned int i = 0; i < numPixels; i++)
+	{
+		const unsigned char r = srcBuffer[i * 3 + 0];
+		const unsigned char g = srcBuffer[i * 3 + 1];
+		const unsigned char b = srcBuffer[i * 3 + 2];
+		const uint32_t originalPixel = (b << 16) + (g << 8) + r;
+		if (originalPixel == chromaKeyColorNoAlpha)
+			destBuffer[i] = 0x00000000;
+		else
+			destBuffer[i] = 0xFF000000 + originalPixel;
+	}
+	return destBuffer;
+}
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
@@ -49,7 +68,8 @@ GLenum channelsToFormat(int numChannels)
 Texture::Texture()
     : Object(ObjectType::TEXTURE), glTexture_(nctl::makeUnique<GLTexture>(GL_TEXTURE_2D)),
       width_(0), height_(0), mipMapLevels_(0), isCompressed_(false), numChannels_(0), dataSize_(0),
-      minFiltering_(Filtering::NEAREST), magFiltering_(Filtering::NEAREST), wrapMode_(Wrap::CLAMP_TO_EDGE)
+      minFiltering_(Filtering::NEAREST), magFiltering_(Filtering::NEAREST), wrapMode_(Wrap::CLAMP_TO_EDGE),
+      isChromaKeyEnabled_(false), chromaKeyColor_(Color::Magenta)
 {
 }
 
@@ -172,9 +192,21 @@ bool Texture::loadFromTexels(const unsigned char *bufferPtr, Recti region)
 
 bool Texture::loadFromTexels(const unsigned char *bufferPtr, unsigned int level, unsigned int x, unsigned int y, unsigned int width, unsigned int height)
 {
-	const GLenum format = channelsToFormat(numChannels_);
+	const unsigned char *data = bufferPtr;
+	nctl::UniquePtr<uint32_t[]> chromaPixels;
+
+	if (numChannels_ == 3 && isChromaKeyEnabled_)
+	{
+		numChannels_ = 4;
+		const unsigned int numPixels = width * height - (y * width + x);
+		chromaPixels = nctl::makeUnique<uint32_t[]>(numPixels);
+		chromaKeyPixels(chromaPixels.get(), bufferPtr, numPixels, chromaKeyColor_);
+		data = reinterpret_cast<const unsigned char *>(chromaPixels.get());
+	}
+
+	GLenum format = channelsToFormat(numChannels_);
 	glGetError();
-	glTexture_->texSubImage2D(level, x, y, width, height, format, GL_UNSIGNED_BYTE, bufferPtr);
+	glTexture_->texSubImage2D(level, x, y, width, height, format, GL_UNSIGNED_BYTE, data);
 	const GLenum error = glGetError();
 
 	return (error == GL_NO_ERROR);
@@ -280,6 +312,17 @@ void Texture::initialize(const ITextureLoader &texLoader)
 	}
 
 	const TextureFormat &texFormat = texLoader.texFormat();
+	unsigned int numChannels = texFormat.numChannels();
+	GLenum internalFormat = texFormat.internalFormat();
+	GLenum format = texFormat.format();
+	unsigned long dataSize = texLoader.dataSize();
+	if (texFormat.isCompressed() == false && numChannels == 3 && isChromaKeyEnabled_)
+	{
+		numChannels = 4;
+		internalFormat = GL_RGBA8;
+		format = GL_RGBA;
+		dataSize = texLoader.width() * texLoader.height() * 4;
+	}
 
 #if (defined(__ANDROID__) && GL_ES_VERSION_3_0) || defined(WITH_ANGLE) || defined(__EMSCRIPTEN__)
 	const bool withTexStorage = true;
@@ -288,14 +331,14 @@ void Texture::initialize(const ITextureLoader &texLoader)
 #endif
 
 	if (withTexStorage && dataSize_ > 0 &&
-	    (width_ != texLoader.width() || height_ != texLoader.height() || numChannels_ != texFormat.numChannels()))
+	    (width_ != texLoader.width() || height_ != texLoader.height() || numChannels_ != numChannels))
 	{
 		// The OpenGL texture needs to be recreated as its storage is immutable
 		glTexture_ = nctl::makeUnique<GLTexture>(GL_TEXTURE_2D);
 	}
 
 	if (withTexStorage)
-		glTexture_->texStorage2D(texLoader.mipMapCount(), texFormat.internalFormat(), texLoader.width(), texLoader.height());
+		glTexture_->texStorage2D(texLoader.mipMapCount(), internalFormat, texLoader.width(), texLoader.height());
 	else if (texFormat.isCompressed() == false)
 	{
 		int levelWidth = texLoader.width();
@@ -303,7 +346,7 @@ void Texture::initialize(const ITextureLoader &texLoader)
 
 		for (int i = 0; i < texLoader.mipMapCount(); i++)
 		{
-			glTexture_->texImage2D(i, texFormat.internalFormat(), levelWidth, levelHeight, texFormat.format(), texFormat.type(), nullptr);
+			glTexture_->texImage2D(i, internalFormat, levelWidth, levelHeight, format, texFormat.type(), nullptr);
 			levelWidth /= 2;
 			levelHeight /= 2;
 		}
@@ -313,8 +356,8 @@ void Texture::initialize(const ITextureLoader &texLoader)
 	height_ = texLoader.height();
 	mipMapLevels_ = texLoader.mipMapCount();
 	isCompressed_ = texFormat.isCompressed();
-	numChannels_ = texFormat.numChannels();
-	dataSize_ = texLoader.dataSize();
+	numChannels_ = numChannels;
+	dataSize_ = dataSize;
 }
 
 void Texture::load(const ITextureLoader &texLoader)
@@ -330,18 +373,31 @@ void Texture::load(const ITextureLoader &texLoader)
 	int levelWidth = width_;
 	int levelHeight = height_;
 
-	for (int i = 0; i < texLoader.mipMapCount(); i++)
+	GLenum format = texFormat.format();
+	nctl::UniquePtr<uint32_t[]> chromaPixels;
+
+	for (int mipIdx = 0; mipIdx < texLoader.mipMapCount(); mipIdx++)
 	{
+		const unsigned char *data = texLoader.pixels(mipIdx);
+		if (texFormat.isCompressed() == false && texFormat.numChannels() == 3 && isChromaKeyEnabled_)
+		{
+			format = GL_RGBA;
+			const unsigned int numPixels = levelWidth * levelHeight;
+			chromaPixels = nctl::makeUnique<uint32_t[]>(numPixels);
+			chromaKeyPixels(chromaPixels.get(), texLoader.pixels(mipIdx), numPixels, chromaKeyColor_);
+			data = reinterpret_cast<const unsigned char *>(chromaPixels.get());
+		}
+
 		if (texFormat.isCompressed())
 		{
 			if (withTexStorage)
-				glTexture_->compressedTexSubImage2D(i, 0, 0, levelWidth, levelHeight, texFormat.internalFormat(), texLoader.dataSize(i), texLoader.pixels(i));
+				glTexture_->compressedTexSubImage2D(mipIdx, 0, 0, levelWidth, levelHeight, texFormat.internalFormat(), texLoader.dataSize(mipIdx), texLoader.pixels(mipIdx));
 			else
-				glTexture_->compressedTexImage2D(i, texFormat.internalFormat(), levelWidth, levelHeight, texLoader.dataSize(i), texLoader.pixels(i));
+				glTexture_->compressedTexImage2D(mipIdx, texFormat.internalFormat(), levelWidth, levelHeight, texLoader.dataSize(mipIdx), texLoader.pixels(mipIdx));
 		}
 		else
 			// Storage has already been created at this point
-			glTexture_->texSubImage2D(i, 0, 0, levelWidth, levelHeight, texFormat.format(), texFormat.type(), texLoader.pixels(i));
+			glTexture_->texSubImage2D(mipIdx, 0, 0, levelWidth, levelHeight, format, texFormat.type(), data);
 
 		levelWidth /= 2;
 		levelHeight /= 2;

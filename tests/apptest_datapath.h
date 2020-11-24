@@ -7,9 +7,7 @@ inline void setDataPath(ncine::AppConfiguration &config)
 	nctl::String dataPath = ncine::fs::externalStorageDir();
 	dataPath += "/ncine/";
 	config.dataPath() = dataPath;
-#elif defined(__EMSCRIPTEN__)
-	config.dataPath() = "/";
-#else
+#elif !defined(__EMSCRIPTEN__)
 	#ifdef NCINE_TESTS_DATA_DIR
 	config.dataPath() = NCINE_TESTS_DATA_DIR;
 	#endif

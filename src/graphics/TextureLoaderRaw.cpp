@@ -13,12 +13,12 @@ TextureLoaderRaw::TextureLoaderRaw(int width, int height, int mipMapCount, GLenu
 	height_ = height;
 	mipMapCount_ = mipMapCount;
 	texFormat_ = TextureFormat(internalFormat);
-	bpp_ = texFormat_.numChannels();
 
 	unsigned int numPixels = width * height;
+	const unsigned int bytesPerPixel = texFormat_.numChannels();
 	for (int i = 0; i < mipMapCount_; i++)
 	{
-		dataSize_ += numPixels * bpp_;
+		dataSize_ += numPixels * bytesPerPixel;
 		numPixels /= 2;
 	}
 

@@ -31,6 +31,11 @@ class LuaTexture
 	static int setMinFiltering(lua_State *L);
 	static int setMagFiltering(lua_State *L);
 	static int setWrap(lua_State *L);
+
+	static int isChromaKeyEnabled(lua_State *L);
+	static int chromaKeyColor(lua_State *L);
+	static int setChromaKeyEnabled(lua_State *L);
+	static int setChromaKeyColor(lua_State *L);
 };
 
 }

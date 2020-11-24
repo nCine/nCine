@@ -24,8 +24,6 @@ class ITextureLoader
 	inline int height() const { return height_; }
 	/// Returns texture size as a `Vector2<int>` class
 	inline Vector2i size() const { return Vector2i(width_, height_); }
-	/// Returns texture bytes per pixel
-	inline int bpp() const { return bpp_; }
 	/// Returns the number of MIP maps stored in the texture file
 	inline int mipMapCount() const { return mipMapCount_; }
 	/// Returns texture data size in bytes
@@ -52,7 +50,6 @@ class ITextureLoader
 
 	int width_;
 	int height_;
-	int bpp_;
 	int headerSize_;
 	unsigned long dataSize_;
 	int mipMapCount_;

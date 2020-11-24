@@ -42,6 +42,16 @@ class DLL_PUBLIC Color
 	inline unsigned char b() const { return channels_[2]; }
 	/// Gets the alpha channel of the color
 	inline unsigned char a() const { return channels_[3]; }
+
+	/// Returns the color as a single RGBA unsigned integer
+	unsigned int rgba() const;
+	/// Returns the color as a single RGBA unsigned integer
+	unsigned int argb() const;
+	/// Returns the color as a single ABGR unsigned integer
+	unsigned int abgr() const;
+	/// Returns the color as a single BGRA unsigned integer
+	unsigned int bgra() const;
+
 	/// Gets the color array
 	inline const unsigned char *data() const { return channels_.data(); }
 	/// Gets the color array

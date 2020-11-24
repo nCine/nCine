@@ -239,10 +239,10 @@ void Font::determineRenderMode(const FntParser &fntParser)
 				renderMode_ = RenderMode::GLYPH_IN_ALPHA;
 			else
 			{
-				if (commonTag.redChnl == FntParser::ChannelData::GLYPH)
-					renderMode_ = RenderMode::GLYPH_IN_RED;
-				else if (commonTag.alphaChnl == FntParser::ChannelData::GLYPH)
+				if (commonTag.alphaChnl == FntParser::ChannelData::GLYPH)
 					renderMode_ = RenderMode::GLYPH_IN_ALPHA;
+				else if (commonTag.redChnl == FntParser::ChannelData::GLYPH)
+					renderMode_ = RenderMode::GLYPH_IN_RED;
 			}
 		}
 	}

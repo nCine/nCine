@@ -39,13 +39,12 @@ TextureLoaderWebP::TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
 
 	mipMapCount_ = 1; // No MIP Mapping
 	texFormat_ = features.has_alpha ? TextureFormat(GL_RGBA8) : TextureFormat(GL_RGB8);
-	bpp_ = features.has_alpha ? 4 : 3;
-	dataSize_ = width_ * height_ * bpp_;
+	dataSize_ = width_ * height_ * texFormat_.numChannels();
 	pixels_ = nctl::makeUnique<unsigned char[]>(dataSize_);
 
 	if (features.has_alpha)
 	{
-		if (WebPDecodeRGBAInto(fileBuffer.get(), fileSize, pixels_.get(), dataSize_, width_ * bpp_) == nullptr)
+		if (WebPDecodeRGBAInto(fileBuffer.get(), fileSize, pixels_.get(), dataSize_, width_ * 4) == nullptr)
 		{
 			fileBuffer.reset(nullptr);
 			pixels_.reset(nullptr);
@@ -54,7 +53,7 @@ TextureLoaderWebP::TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
 	}
 	else
 	{
-		if (WebPDecodeRGBInto(fileBuffer.get(), fileSize, pixels_.get(), dataSize_, width_ * bpp_) == nullptr)
+		if (WebPDecodeRGBInto(fileBuffer.get(), fileSize, pixels_.get(), dataSize_, width_ * 3) == nullptr)
 		{
 			fileBuffer.reset(nullptr);
 			pixels_.reset(nullptr);

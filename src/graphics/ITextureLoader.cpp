@@ -22,13 +22,13 @@ namespace ncine {
 
 ITextureLoader::ITextureLoader()
     : hasLoaded_(false), width_(0), height_(0),
-      bpp_(0), headerSize_(0), dataSize_(0), mipMapCount_(1)
+      headerSize_(0), dataSize_(0), mipMapCount_(1)
 {
 }
 
 ITextureLoader::ITextureLoader(nctl::UniquePtr<IFile> fileHandle)
-    : hasLoaded_(false), fileHandle_(nctl::move(fileHandle)), width_(0),
-      height_(0), bpp_(0), headerSize_(0), dataSize_(0), mipMapCount_(1)
+    : hasLoaded_(false), fileHandle_(nctl::move(fileHandle)),
+      width_(0), height_(0), headerSize_(0), dataSize_(0), mipMapCount_(1)
 {
 }
 

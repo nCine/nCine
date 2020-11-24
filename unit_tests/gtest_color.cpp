@@ -15,8 +15,9 @@ class ColorTest : public ::testing::Test
 const unsigned char red = 64;
 const unsigned char green = 64 * 2;
 const unsigned char blue = 64 * 3;
-const unsigned char alpha = 0;
-const unsigned int hex = 0x4080C0;
+const unsigned char alpha = 32;
+const unsigned int hex3 = 0x4080C0;
+const unsigned int hex4 = 0x204080C0;
 
 TEST_F(ColorTest, DefaultConstructor)
 {
@@ -63,15 +64,26 @@ TEST_F(ColorTest, ConstructFromFourComponentsAndClamp)
 	ASSERT_EQ(color.data()[3], 255);
 }
 
-TEST_F(ColorTest, ConstructFromHexadecimalCode)
+TEST_F(ColorTest, ConstructFromHexadecimalCodeRGB)
 {
-	const nc::Color color(hex);
-	printColor("Constructing a new color from a hexadecimal code: ", color);
+	const nc::Color color(hex3);
+	printColor("Constructing a new color from a three components hexadecimal code: ", color);
 
 	ASSERT_EQ(color.data()[0], red);
 	ASSERT_EQ(color.data()[1], green);
 	ASSERT_EQ(color.data()[2], blue);
 	ASSERT_EQ(color.data()[3], 255);
+}
+
+TEST_F(ColorTest, ConstructFromHexadecimalCodeRGBA)
+{
+	const nc::Color color(hex4);
+	printColor("Constructing a new color from a four components hexadecimal code: ", color);
+
+	ASSERT_EQ(color.data()[0], red);
+	ASSERT_EQ(color.data()[1], green);
+	ASSERT_EQ(color.data()[2], blue);
+	ASSERT_EQ(color.data()[3], alpha);
 }
 
 TEST_F(ColorTest, ConstructFromArray)
@@ -108,6 +120,38 @@ TEST_F(ColorTest, Getters)
 	ASSERT_EQ(color.a(), alpha);
 }
 
+TEST_F(ColorTest, GetRGBA)
+{
+	const nc::Color color(red, green, blue, alpha);
+	printColor("Constructing a new color and testing the RGBA getter: ", color);
+
+	ASSERT_EQ(color.rgba(), (red << 24) + (green << 16) + (blue << 8) + alpha);
+}
+
+TEST_F(ColorTest, GetARGB)
+{
+	const nc::Color color(red, green, blue, alpha);
+	printColor("Constructing a new color and testing the ARGB getter: ", color);
+
+	ASSERT_EQ(color.argb(), (alpha << 24) + (red << 16) + (green << 8) + blue);
+}
+
+TEST_F(ColorTest, GetABGR)
+{
+	const nc::Color color(red, green, blue, alpha);
+	printColor("Constructing a new color and testing the ABGR getter: ", color);
+
+	ASSERT_EQ(color.abgr(), (alpha << 24) + (blue << 16) + (green << 8) + red);
+}
+
+TEST_F(ColorTest, GetBGRA)
+{
+	const nc::Color color(red, green, blue, alpha);
+	printColor("Constructing a new color and testing the BGRA getter: ", color);
+
+	ASSERT_EQ(color.bgra(), (blue << 24) + (green << 16) + (red << 8) + alpha);
+}
+
 TEST_F(ColorTest, SetThreeComponents)
 {
 	nc::Color color;
@@ -132,16 +176,28 @@ TEST_F(ColorTest, SetFourComponents)
 	ASSERT_EQ(color.a(), alpha);
 }
 
-TEST_F(ColorTest, SetHexadecimalCode)
+TEST_F(ColorTest, SetHexadecimalCodeRGB)
 {
 	nc::Color color;
-	color.set(hex);
+	color.set(hex3);
 	printColor("Constructing a new color and setting three components from a hexadecimal code: ", color);
 
 	ASSERT_EQ(color.r(), red);
 	ASSERT_EQ(color.g(), green);
 	ASSERT_EQ(color.b(), blue);
 	ASSERT_EQ(color.a(), 255);
+}
+
+TEST_F(ColorTest, SetHexadecimalCodeRGBA)
+{
+	nc::Color color;
+	color.set(hex4);
+	printColor("Constructing a new color and setting four components from a hexadecimal code: ", color);
+
+	ASSERT_EQ(color.r(), red);
+	ASSERT_EQ(color.g(), green);
+	ASSERT_EQ(color.b(), blue);
+	ASSERT_EQ(color.a(), alpha);
 }
 
 TEST_F(ColorTest, SetArray)

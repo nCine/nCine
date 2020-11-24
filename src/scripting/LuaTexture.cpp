@@ -1,6 +1,7 @@
 #include "LuaTexture.h"
 #include "LuaClassWrapper.h"
 #include "LuaClassTracker.h"
+#include "LuaColorUtils.h"
 #include "LuaUtils.h"
 #include "Texture.h"
 
@@ -31,6 +32,11 @@ namespace Texture {
 	static const char *NEAREST_MIPMAP_LINEAR = "NEAREST_MIPMAP_LINEAR";
 	static const char *LINEAR_MIPMAP_LINEAR = "LINEAR_MIPMAP_LINEAR";
 	static const char *Filtering = "tex_filtering";
+
+	static const char *isChromaKeyEnabled = "is_chromakey_enabled";
+	static const char *chromaKeyColor = "get_chromakey_color";
+	static const char *setChromaKeyEnabled = "set_chromakey_enabled";
+	static const char *setChromaKeyColor = "set_chromakey_color";
 
 	static const char *CLAMP_TO_EDGE = "CLAMP_TO_EDGE";
 	static const char *MIRRORED_REPEAT = "MIRRORED_REPEAT";
@@ -66,6 +72,11 @@ void LuaTexture::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::Texture::setMinFiltering, setMinFiltering);
 	LuaUtils::addFunction(L, LuaNames::Texture::setMagFiltering, setMagFiltering);
 	LuaUtils::addFunction(L, LuaNames::Texture::setWrap, setWrap);
+
+	LuaUtils::addFunction(L, LuaNames::Texture::isChromaKeyEnabled, isChromaKeyEnabled);
+	LuaUtils::addFunction(L, LuaNames::Texture::chromaKeyColor, chromaKeyColor);
+	LuaUtils::addFunction(L, LuaNames::Texture::setChromaKeyEnabled, setChromaKeyEnabled);
+	LuaUtils::addFunction(L, LuaNames::Texture::setChromaKeyColor, setChromaKeyColor);
 
 	lua_setfield(L, -2, LuaNames::Texture::Texture);
 }
@@ -224,6 +235,47 @@ int LuaTexture::setWrap(lua_State *L)
 	const Texture::Wrap wrapMode = static_cast<Texture::Wrap>(LuaUtils::retrieve<int64_t>(L, -1));
 
 	texture->setWrap(wrapMode);
+
+	return 0;
+}
+
+int LuaTexture::isChromaKeyEnabled(lua_State *L)
+{
+	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+
+	const bool isChromaKeyEnabled = texture->isChromaKeyEnabled();
+	LuaUtils::push(L, isChromaKeyEnabled);
+
+	return 1;
+}
+
+int LuaTexture::chromaKeyColor(lua_State *L)
+{
+	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+
+	const Colorf chromaKeyColor(texture->chromaKeyColor());
+	LuaColorUtils::push(L, chromaKeyColor);
+
+	return 1;
+}
+
+int LuaTexture::setChromaKeyEnabled(lua_State *L)
+{
+	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -2);
+	const bool chromaKeyEnabled = LuaUtils::retrieve<bool>(L, -1);
+
+	texture->setChromaKeyEnabled(chromaKeyEnabled);
+
+	return 0;
+}
+
+int LuaTexture::setChromaKeyColor(lua_State *L)
+{
+	int colorIndex = 0;
+	const Colorf chromaKeyColor = LuaColorUtils::retrieve(L, -1, colorIndex);
+	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, colorIndex - 1);
+
+	texture->setChromaKeyColor(chromaKeyColor);
 
 	return 0;
 }

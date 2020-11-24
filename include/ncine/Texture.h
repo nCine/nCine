@@ -3,6 +3,8 @@
 
 #include "Object.h"
 #include "Rect.h"
+#include "Color.h"
+#include "Colorf.h"
 
 namespace ncine {
 
@@ -103,6 +105,18 @@ class DLL_PUBLIC Texture : public Object
 	/// Sets texture wrap for both `s` and `t` coordinates
 	void setWrap(Wrap wrapMode);
 
+	/// Returns true is chroma key transparency will be used when loading
+	inline bool isChromaKeyEnabled() const { return isChromaKeyEnabled_; }
+	/// Returns the color treated as transparent when loading a texture
+	inline Color chromaKeyColor() const { return chromaKeyColor_; }
+
+	/// Sets the chroma key transparency state to use when loading
+	inline void setChromaKeyEnabled(bool chromaKeyEnabled) { isChromaKeyEnabled_ = chromaKeyEnabled; }
+	/// Sets the color to be treated as transparent when loading a texture
+	inline void setChromaKeyColor(const Color chromaKeyColor) { chromaKeyColor_ = chromaKeyColor; }
+	/// Sets the color to be treated as transparent when loading a texture, using a `Colorf`
+	inline void setChromaKeyColor(const Colorf chromaKeyColor) { chromaKeyColor_ = chromaKeyColor; }
+
 	/// Returns the user data opaque pointer for ImGui's ImTextureID
 	void *imguiTexId();
 
@@ -120,6 +134,9 @@ class DLL_PUBLIC Texture : public Object
 	Filtering minFiltering_;
 	Filtering magFiltering_;
 	Wrap wrapMode_;
+
+	bool isChromaKeyEnabled_;
+	Color chromaKeyColor_;
 
 	/// Deleted copy constructor
 	Texture(const Texture &) = delete;

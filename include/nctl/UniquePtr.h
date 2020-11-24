@@ -38,7 +38,7 @@ namespace detail {
 	{
 		T1 first;
 
-		PairImpl(T1 ff)
+		explicit PairImpl(T1 ff)
 		    : first(ff) {}
 		PairImpl(T1 ff, T2 ss)
 		    : first(ff) {}

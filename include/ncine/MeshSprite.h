@@ -15,6 +15,11 @@ class DLL_PUBLIC MeshSprite : public BaseSprite
 	{
 		float x, y;
 		float u, v;
+
+		Vertex()
+		    : x(0.0f), y(0.0f), u(0.0f), v(0.0f) {}
+		Vertex(float xx, float yy, float uu, float vv)
+		    : x(xx), y(yy), u(uu), v(vv) {}
 	};
 
 	enum class TextureCutMode

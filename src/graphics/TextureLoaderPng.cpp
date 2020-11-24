@@ -82,28 +82,23 @@ TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
 	{
 		case PNG_COLOR_TYPE_RGB_ALPHA:
 			texFormat_ = TextureFormat(GL_RGBA8);
-			bpp_ = 4;
 			break;
 		case PNG_COLOR_TYPE_RGB:
 			texFormat_ = TextureFormat(GL_RGB8);
-			bpp_ = 3;
 			break;
 		case PNG_COLOR_TYPE_PALETTE:
 			png_set_palette_to_rgb(pngPtr);
 			texFormat_ = TextureFormat(GL_RGB8);
-			bpp_ = 3;
 			break;
 		case PNG_COLOR_TYPE_GRAY_ALPHA:
 			if (bitDepth < 8)
 				png_set_expand_gray_1_2_4_to_8(pngPtr);
 			texFormat_ = TextureFormat(GL_RG8);
-			bpp_ = 2;
 			break;
 		case PNG_COLOR_TYPE_GRAY:
 			if (bitDepth < 8)
 				png_set_expand_gray_1_2_4_to_8(pngPtr);
 			texFormat_ = TextureFormat(GL_R8);
-			bpp_ = 1;
 			break;
 		default:
 			png_destroy_read_struct(&pngPtr, &infoPtr, nullptr);

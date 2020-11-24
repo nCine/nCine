@@ -56,7 +56,10 @@ AppConfiguration::AppConfiguration()
 	windowTitle = "nCine";
 	windowIconFilename = "icons/icon48.png";
 
-#ifdef __EMSCRIPTEN__
+#if defined(__ANDROID__)
+	dataPath() = "asset::";
+#elif defined(__EMSCRIPTEN__)
+	dataPath() = "/";
 	// Always disable mapping on Emscripten as it is not supported by WebGL 2
 	useBufferMapping = false;
 #endif
