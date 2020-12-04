@@ -148,7 +148,7 @@ namespace {
 int LuaMeshSprite::newObject(lua_State *L)
 {
 	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserDataOrNil(L, -4);
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -3);
+	Texture *texture = LuaClassWrapper<Texture>::unwrapUserDataOrNil(L, -3);
 	const float x = LuaUtils::retrieve<float>(L, -2);
 	const float y = LuaUtils::retrieve<float>(L, -1);
 

@@ -6,6 +6,11 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+AnimatedSprite::AnimatedSprite()
+    : AnimatedSprite(nullptr, nullptr, 0.0f, 0.0f)
+{
+}
+
 AnimatedSprite::AnimatedSprite(SceneNode *parent, Texture *texture)
     : AnimatedSprite(parent, texture, 0.0f, 0.0f)
 {

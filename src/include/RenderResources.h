@@ -27,6 +27,13 @@ class RenderResources
 		GLfloat texcoords[2];
 	};
 
+	/// A vertex format structure for vertices with positions and draw indices
+	struct VertexFormatPos2Index
+	{
+		GLfloat position[2];
+		int drawindex;
+	};
+
 	/// A vertex format structure for vertices with positions, texture coordinates and draw indices
 	struct VertexFormatPos2Tex2Index
 	{
@@ -39,14 +46,18 @@ class RenderResources
 	static inline RenderVaoPool &vaoPool() { return *vaoPool_; }
 	static inline GLShaderProgram *spriteShaderProgram() { return spriteShaderProgram_.get(); }
 	static inline GLShaderProgram *spriteGrayShaderProgram() { return spriteGrayShaderProgram_.get(); }
+	static inline GLShaderProgram *spriteNoTextureShaderProgram() { return spriteNoTextureShaderProgram_.get(); }
 	static inline GLShaderProgram *meshSpriteShaderProgram() { return meshSpriteShaderProgram_.get(); }
 	static inline GLShaderProgram *meshSpriteGrayShaderProgram() { return meshSpriteGrayShaderProgram_.get(); }
+	static inline GLShaderProgram *meshSpriteNoTextureShaderProgram() { return meshSpriteNoTextureShaderProgram_.get(); }
 	static inline GLShaderProgram *textnodeAlphaShaderProgram() { return textnodeAlphaShaderProgram_.get(); }
 	static inline GLShaderProgram *textnodeRedShaderProgram() { return textnodeRedShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedSpritesShaderProgram() { return batchedSpritesShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedSpritesGrayShaderProgram() { return batchedSpritesGrayShaderProgram_.get(); }
+	static inline GLShaderProgram *batchedSpritesNoTextureShaderProgram() { return batchedSpritesNoTextureShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedMeshSpritesShaderProgram() { return batchedMeshSpritesShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedMeshSpritesGrayShaderProgram() { return batchedMeshSpritesGrayShaderProgram_.get(); }
+	static inline GLShaderProgram *batchedMeshSpritesNoTextureShaderProgram() { return batchedMeshSpritesNoTextureShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedTextnodesAlphaShaderProgram() { return batchedTextnodesAlphaShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedTextnodesRedShaderProgram() { return batchedTextnodesRedShaderProgram_.get(); }
 	static inline const Matrix4x4f &projectionMatrix() { return projectionMatrix_; }
@@ -60,14 +71,18 @@ class RenderResources
 	static nctl::UniquePtr<RenderVaoPool> vaoPool_;
 	static nctl::UniquePtr<GLShaderProgram> spriteShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> spriteGrayShaderProgram_;
+	static nctl::UniquePtr<GLShaderProgram> spriteNoTextureShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> meshSpriteShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> meshSpriteGrayShaderProgram_;
+	static nctl::UniquePtr<GLShaderProgram> meshSpriteNoTextureShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> textnodeAlphaShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> textnodeRedShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedSpritesShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedSpritesGrayShaderProgram_;
+	static nctl::UniquePtr<GLShaderProgram> batchedSpritesNoTextureShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedMeshSpritesShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedMeshSpritesGrayShaderProgram_;
+	static nctl::UniquePtr<GLShaderProgram> batchedMeshSpritesNoTextureShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedTextnodesAlphaShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedTextnodesRedShaderProgram_;
 

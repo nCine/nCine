@@ -40,12 +40,9 @@ void BaseSprite::setSize(float width, float height)
 /*! This method should be also called if just the content of a texture changes */
 void BaseSprite::setTexture(Texture *texture)
 {
-	if (texture)
-	{
-		// Allow self-assignment to take into account the case where the texture stays the same but it loads new data
-		textureHasChanged(texture);
-		texture_ = texture;
-	}
+	// Allow self-assignment to take into account the case where the texture stays the same but it loads new data
+	textureHasChanged(texture);
+	texture_ = texture;
 }
 
 void BaseSprite::setTexRect(const Recti &rect)
@@ -93,18 +90,23 @@ void BaseSprite::setFlippedY(bool flippedY)
 void BaseSprite::updateRenderCommand()
 {
 	renderCommand_->transformation() = worldMatrix_;
-	renderCommand_->material().setTexture(*texture_);
-
 	spriteBlock_->uniform("color")->setFloatVector(Colorf(absColor()).data());
-
-	const Vector2i texSize = texture_->size();
-	const float texScaleX = texRect_.w / float(texSize.x);
-	const float texBiasX = texRect_.x / float(texSize.x);
-	const float texScaleY = texRect_.h / float(texSize.y);
-	const float texBiasY = texRect_.y / float(texSize.y);
-
-	spriteBlock_->uniform("texRect")->setFloatValue(texScaleX, texBiasX, texScaleY, texBiasY);
 	spriteBlock_->uniform("spriteSize")->setFloatValue(width_, height_);
+
+	if (texture_)
+	{
+		renderCommand_->material().setTexture(*texture_);
+
+		const Vector2i texSize = texture_->size();
+		const float texScaleX = texRect_.w / float(texSize.x);
+		const float texBiasX = texRect_.x / float(texSize.x);
+		const float texScaleY = texRect_.h / float(texSize.y);
+		const float texBiasY = texRect_.y / float(texSize.y);
+
+		spriteBlock_->uniform("texRect")->setFloatValue(texScaleX, texBiasX, texScaleY, texBiasY);
+	}
+	else
+		renderCommand_->material().setTexture(nullptr);
 }
 
 }

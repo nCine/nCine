@@ -9,10 +9,14 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+AudioBufferPlayer::AudioBufferPlayer()
+    : IAudioPlayer(ObjectType::AUDIOBUFFER_PLAYER), audioBuffer_(nullptr)
+{
+}
+
 AudioBufferPlayer::AudioBufferPlayer(AudioBuffer *audioBuffer)
     : IAudioPlayer(ObjectType::AUDIOBUFFER_PLAYER), audioBuffer_(audioBuffer)
 {
-	ASSERT(audioBuffer);
 	if (audioBuffer)
 		setName(audioBuffer->name().data());
 }
@@ -57,6 +61,12 @@ unsigned long int AudioBufferPlayer::bufferSize() const
 	return (audioBuffer_ ? audioBuffer_->bufferSize() : 0UL);
 }
 
+void AudioBufferPlayer::setAudioBuffer(AudioBuffer *audioBuffer)
+{
+	stop();
+	audioBuffer_ = audioBuffer;
+}
+
 void AudioBufferPlayer::play()
 {
 	switch (state_)
@@ -64,6 +74,9 @@ void AudioBufferPlayer::play()
 		case PlayerState::INITIAL:
 		case PlayerState::STOPPED:
 		{
+			if (audioBuffer_ == nullptr)
+				break;
+
 			const unsigned int source = theServiceLocator().audioDevice().nextAvailableSource();
 			if (source == IAudioDevice::UnavailableSource)
 			{
@@ -72,12 +85,9 @@ void AudioBufferPlayer::play()
 			}
 			sourceId_ = source;
 
-			if (audioBuffer_)
-			{
-				alSourcei(sourceId_, AL_BUFFER, audioBuffer_->bufferId());
-				// Setting OpenAL source looping only if not streaming
-				alSourcei(sourceId_, AL_LOOPING, isLooping_);
-			}
+			alSourcei(sourceId_, AL_BUFFER, audioBuffer_->bufferId());
+			// Setting OpenAL source looping only if not streaming
+			alSourcei(sourceId_, AL_LOOPING, isLooping_);
 
 			alSourcef(sourceId_, AL_GAIN, gain_);
 			alSourcef(sourceId_, AL_PITCH, pitch_);

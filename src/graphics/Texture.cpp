@@ -91,7 +91,8 @@ Texture::Texture(const char *filename)
 
 Texture::~Texture()
 {
-	RenderStatistics::removeTexture(dataSize_);
+	if (dataSize_ > 0)
+		RenderStatistics::removeTexture(dataSize_);
 }
 
 ///////////////////////////////////////////////////////////

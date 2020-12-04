@@ -16,6 +16,9 @@ class LuaAudioBufferPlayer
 
   private:
 	static int newObject(lua_State *L);
+
+	static int audioBuffer(lua_State *L);
+	static int setAudioBuffer(lua_State *L);
 };
 
 }

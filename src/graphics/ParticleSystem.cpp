@@ -20,7 +20,9 @@ namespace {
 ///////////////////////////////////////////////////////////
 
 ParticleSystem::ParticleSystem(SceneNode *parent, unsigned int count, Texture *texture)
-    : ParticleSystem(parent, count, texture, Recti(0, 0, texture->width(), texture->height())) {}
+    : ParticleSystem(parent, count, texture, Recti(0, 0, texture->width(), texture->height()))
+{
+}
 
 ParticleSystem::ParticleSystem(SceneNode *parent, unsigned int count, Texture *texture, Recti texRect)
     : SceneNode(parent, 0, 0), poolSize_(count), poolTop_(count - 1),
@@ -29,7 +31,11 @@ ParticleSystem::ParticleSystem(SceneNode *parent, unsigned int count, Texture *t
       affectors_(4), inLocalSpace_(false)
 {
 	ZoneScoped;
-	ZoneText(texture->name().data(), texture->name().length());
+	if (texture)
+	{
+		// When Tracy is disabled the statement body is empty and braces are needed
+		ZoneText(texture->name().data(), texture->name().length());
+	}
 
 	type_ = ObjectType::PARTICLE_SYSTEM;
 

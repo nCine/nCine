@@ -11,6 +11,16 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+TextNode::TextNode()
+    : TextNode(nullptr, nullptr, DefaultStringLength)
+{
+}
+
+TextNode::TextNode(unsigned int maxStringLength)
+    : TextNode(nullptr, nullptr, maxStringLength)
+{
+}
+
 TextNode::TextNode(SceneNode *parent, Font *font)
     : TextNode(parent, font, DefaultStringLength)
 {
@@ -23,19 +33,28 @@ TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
       xAdvance_(0.0f), yAdvance_(0.0f), lineLengths_(4), alignment_(Alignment::LEFT),
       lineHeight_(font ? font->lineHeight() : 0.0f), textnodeBlock_(nullptr)
 {
-	ASSERT(font);
 	ASSERT(maxStringLength > 0);
 
 	type_ = ObjectType::TEXTNODE;
 	setLayer(DrawableNode::LayerBase::HUD);
 	renderCommand_->setType(RenderCommand::CommandTypes::TEXT);
 	renderCommand_->material().setBlendingEnabled(true);
-	const Material::ShaderProgramType shaderProgramType = font_->renderMode() == Font::RenderMode::GLYPH_IN_RED
-	                                                          ? Material::ShaderProgramType::TEXTNODE_RED
-	                                                          : Material::ShaderProgramType::TEXTNODE_ALPHA;
+
+	const Material::ShaderProgramType shaderProgramType = [](Font *font)
+	{
+		if (font)
+			return (font->renderMode() == Font::RenderMode::GLYPH_IN_RED)
+			        ? Material::ShaderProgramType::TEXTNODE_RED
+			        : Material::ShaderProgramType::TEXTNODE_ALPHA;
+		else
+			return Material::ShaderProgramType::TEXTNODE_ALPHA;
+	}(font);
 	renderCommand_->material().setShaderProgramType(shaderProgramType);
 	textnodeBlock_ = renderCommand_->material().uniformBlock("TextnodeBlock");
-	renderCommand_->material().setTexture(*font_->texture());
+
+	if (font)
+		renderCommand_->material().setTexture(*font_->texture());
+
 	renderCommand_->geometry().setPrimitiveType(GL_TRIANGLE_STRIP);
 	renderCommand_->geometry().setNumElementsPerVertex(sizeof(Vertex) / sizeof(float));
 }
@@ -70,23 +89,31 @@ float TextNode::absHeight() const
 
 void TextNode::setFont(Font *font)
 {
-	if (font == nullptr)
-		return;
-
 	// Allow self-assignment to take into account the case where the font stays the same but it loads new data
 
-	// Keep the ratio between text node lineHeight and font one
-	lineHeight_ = (lineHeight_ / font_->lineHeight()) * font->lineHeight();
+	if (font_ && font)
+	{
+		// Keep the ratio between text node lineHeight and font one
+		lineHeight_ = (lineHeight_ / font_->lineHeight()) * font->lineHeight();
+	}
+	else if (font_ == nullptr && font)
+	{
+		// Assigning a font when there wasn't any
+		lineHeight_ = font->lineHeight();
+	}
 
 	font_ = font;
-	const Material::ShaderProgramType shaderProgramType = font_->renderMode() == Font::RenderMode::GLYPH_IN_RED
-	                                                          ? Material::ShaderProgramType::TEXTNODE_RED
-	                                                          : Material::ShaderProgramType::TEXTNODE_ALPHA;
-	renderCommand_->material().setShaderProgramType(shaderProgramType);
-	renderCommand_->material().setTexture(*font_->texture());
+	if (font_)
+	{
+		const Material::ShaderProgramType shaderProgramType = font_->renderMode() == Font::RenderMode::GLYPH_IN_RED
+		                                                          ? Material::ShaderProgramType::TEXTNODE_RED
+		                                                          : Material::ShaderProgramType::TEXTNODE_ALPHA;
+		renderCommand_->material().setShaderProgramType(shaderProgramType);
+		renderCommand_->material().setTexture(*font_->texture());
 
-	dirtyDraw_ = true;
-	dirtyBoundaries_ = true;
+		dirtyDraw_ = true;
+		dirtyBoundaries_ = true;
+	}
 }
 
 void TextNode::enableKerning(bool withKerning)
@@ -132,7 +159,7 @@ void TextNode::draw(RenderQueue &renderQueue)
 	if (string_.isEmpty())
 		return;
 
-	if (dirtyDraw_)
+	if (font_ && dirtyDraw_)
 	{
 		GLDebug::ScopedGroup scoped("Processing TextNode glyphs");
 
@@ -201,7 +228,7 @@ void TextNode::draw(RenderQueue &renderQueue)
 
 void TextNode::calculateBoundaries() const
 {
-	if (dirtyBoundaries_)
+	if (font_ && dirtyBoundaries_)
 	{
 		ZoneScoped;
 		const float oldWidth = width_;

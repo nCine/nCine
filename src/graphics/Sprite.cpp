@@ -9,6 +9,12 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
+Sprite::Sprite()
+    : Sprite(nullptr, nullptr, 0.0f, 0.0f)
+{
+}
+
+/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(SceneNode *parent, Texture *texture)
     : Sprite(parent, texture, 0.0f, 0.0f)
 {
@@ -24,21 +30,31 @@ Sprite::Sprite(Texture *texture)
 Sprite::Sprite(SceneNode *parent, Texture *texture, float xx, float yy)
     : BaseSprite(parent, texture, xx, yy)
 {
-	ASSERT(texture);
-
 	ZoneScoped;
-	ZoneText(texture->name().data(), texture->name().length());
+	if (texture)
+	{
+		// When Tracy is disabled the statement body is empty and braces are needed
+		ZoneText(texture->name().data(), texture->name().length());
+	}
+
 	type_ = ObjectType::SPRITE;
 	setLayer(DrawableNode::LayerBase::SCENE);
 	renderCommand_->setType(RenderCommand::CommandTypes::SPRITE);
-	const Material::ShaderProgramType shaderProgramType = texture_->numChannels() >= 3
-	                                                          ? Material::ShaderProgramType::SPRITE
-	                                                          : Material::ShaderProgramType::SPRITE_GRAY;
+
+	const Material::ShaderProgramType shaderProgramType = [](Texture *texture)
+	{
+		if (texture)
+			return (texture->numChannels() >= 3) ? Material::ShaderProgramType::SPRITE
+			                                     : Material::ShaderProgramType::SPRITE_GRAY;
+		else
+			return Material::ShaderProgramType::SPRITE_NO_TEXTURE;
+	}(texture);
 	renderCommand_->material().setShaderProgramType(shaderProgramType);
 	spriteBlock_ = renderCommand_->material().uniformBlock("SpriteBlock");
 	renderCommand_->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, 4);
 
-	setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
+	if (texture_)
+		setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
 }
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
@@ -63,13 +79,18 @@ void Sprite::textureHasChanged(Texture *newTexture)
 {
 	if (renderCommand_->material().shaderProgramType() != Material::ShaderProgramType::CUSTOM)
 	{
-		const Material::ShaderProgramType shaderProgramType = newTexture->numChannels() >= 3
-		                                                          ? Material::ShaderProgramType::SPRITE
-		                                                          : Material::ShaderProgramType::SPRITE_GRAY;
+		const Material::ShaderProgramType shaderProgramType = [](Texture *texture)
+		{
+			if (texture)
+				return (texture->numChannels() >= 3) ? Material::ShaderProgramType::SPRITE
+				                                     : Material::ShaderProgramType::SPRITE_GRAY;
+			else
+				return Material::ShaderProgramType::SPRITE_NO_TEXTURE;
+		}(newTexture);
 		renderCommand_->material().setShaderProgramType(shaderProgramType);
 	}
 
-	if (texture_ != newTexture)
+	if (texture_ && newTexture && texture_ != newTexture)
 	{
 		Recti texRect = texRect_;
 		texRect.x = (texRect.x / float(texture_->width())) * float(newTexture->width());
@@ -78,8 +99,11 @@ void Sprite::textureHasChanged(Texture *newTexture)
 		texRect.h = (texRect.h / float(texture_->height())) * float(newTexture->width());
 		setTexRect(texRect); // it also sets width_ and height_
 	}
-	else
+	else if (texture_ == nullptr && newTexture)
+	{
+		// Assigning a texture when there wasn't any
 		setTexRect(Recti(0, 0, newTexture->width(), newTexture->height()));
+	}
 }
 
 }

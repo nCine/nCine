@@ -10,6 +10,8 @@ namespace ncine {
 class DLL_PUBLIC AnimatedSprite : public Sprite
 {
   public:
+	/// Default constructor for an animated sprite with no parent and no texture, positioned in the origin
+	AnimatedSprite();
 	/// Constructor for an animated sprite with a parent and texture, positioned in the relative origin
 	AnimatedSprite(SceneNode *parent, Texture *texture);
 	/// Constructor for an animated sprite with a texture but no parent, positioned in the origin

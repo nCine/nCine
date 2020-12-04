@@ -9,6 +9,8 @@ namespace ncine {
 class DLL_PUBLIC Sprite : public BaseSprite
 {
   public:
+	/// Default constructor for a sprite with no parent and no texture, positioned in the origin
+	Sprite();
 	/// Constructor for a sprite with a parent and texture, positioned in the relative origin
 	Sprite(SceneNode *parent, Texture *texture);
 	/// Constructor for a sprite with a texture but no parent, positioned in the origin

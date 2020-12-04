@@ -12,6 +12,8 @@ class AudioBuffer;
 class DLL_PUBLIC AudioBufferPlayer : public IAudioPlayer
 {
   public:
+	/// Default constructor
+	AudioBufferPlayer();
 	/// A constructor creating a player from a shared buffer
 	explicit AudioBufferPlayer(AudioBuffer *audioBuffer);
 	inline ~AudioBufferPlayer() override { stop(); }
@@ -26,6 +28,11 @@ class DLL_PUBLIC AudioBufferPlayer : public IAudioPlayer
 	float duration() const override;
 
 	unsigned long int bufferSize() const override;
+
+	/// Gets the audio buffer used for playing
+	inline const AudioBuffer *audioBuffer() const { return audioBuffer_; }
+	/// Sets the audio buffer used for playing
+	void setAudioBuffer(AudioBuffer *audioBuffer);
 
 	void play() override;
 	void pause() override;

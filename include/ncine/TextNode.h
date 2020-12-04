@@ -31,6 +31,8 @@ class DLL_PUBLIC TextNode : public DrawableNode
 		RIGHT
 	};
 
+	TextNode();
+	TextNode(unsigned int maxStringLength);
 	TextNode(SceneNode *parent, Font *font);
 	TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength);
 

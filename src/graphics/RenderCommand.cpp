@@ -12,8 +12,10 @@ namespace {
 	{
 		return (type == Material::ShaderProgramType::BATCHED_SPRITES ||
 		        type == Material::ShaderProgramType::BATCHED_SPRITES_GRAY ||
+		        type == Material::ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE ||
 		        type == Material::ShaderProgramType::BATCHED_MESH_SPRITES ||
 		        type == Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY ||
+		        type == Material::ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE ||
 		        type == Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA ||
 		        type == Material::ShaderProgramType::BATCHED_TEXTNODES_RED);
 	}
@@ -107,10 +109,12 @@ void RenderCommand::commitTransformation()
 		const Material::ShaderProgramType shaderProgramType = material_.shaderProgramType();
 
 		if (shaderProgramType == Material::ShaderProgramType::SPRITE ||
-		    shaderProgramType == Material::ShaderProgramType::SPRITE_GRAY)
+		    shaderProgramType == Material::ShaderProgramType::SPRITE_GRAY ||
+		    shaderProgramType == Material::ShaderProgramType::SPRITE_NO_TEXTURE)
 			material_.uniformBlock("SpriteBlock")->uniform("modelView")->setFloatVector(modelView_.data());
 		else if (shaderProgramType == Material::ShaderProgramType::MESH_SPRITE ||
-		         shaderProgramType == Material::ShaderProgramType::MESH_SPRITE_GRAY)
+		         shaderProgramType == Material::ShaderProgramType::MESH_SPRITE_GRAY ||
+		         shaderProgramType == Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)
 			material_.uniformBlock("MeshSpriteBlock")->uniform("modelView")->setFloatVector(modelView_.data());
 		else if (shaderProgramType == Material::ShaderProgramType::TEXTNODE_ALPHA ||
 		         shaderProgramType == Material::ShaderProgramType::TEXTNODE_RED)
