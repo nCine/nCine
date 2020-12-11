@@ -117,8 +117,8 @@ class DLL_PUBLIC Texture : public Object
 	/// Sets the color to be treated as transparent when loading a texture, using a `Colorf`
 	inline void setChromaKeyColor(const Colorf chromaKeyColor) { chromaKeyColor_ = chromaKeyColor; }
 
-	/// Returns the user data opaque pointer for ImGui's ImTextureID
-	void *imguiTexId();
+	/// Returns the user data opaque pointer for ImGui's `ImTextureID` or Nuklear's texture handle
+	void *guiTexId();
 
 	inline static ObjectType sType() { return ObjectType::TEXTURE; }
 

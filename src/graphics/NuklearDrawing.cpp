@@ -83,7 +83,7 @@ bool NuklearDrawing::bakeFonts()
 	fontTex_->texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	fontTex_->texImage2D(0, GL_RGBA8, w, h, GL_RGBA, GL_UNSIGNED_BYTE, image);
 
-	nk_font_atlas_end(&NuklearContext::atlas_, nk_handle_id(static_cast<int>(fontTex_->glHandle())), &null_);
+	nk_font_atlas_end(&NuklearContext::atlas_, nk_handle_ptr(fontTex_.get()), &null_);
 	if (NuklearContext::atlas_.default_font)
 		nk_style_set_font(&NuklearContext::ctx_, &NuklearContext::atlas_.default_font->handle);
 
@@ -263,7 +263,7 @@ void NuklearDrawing::draw(RenderQueue &renderQueue)
 		currCmd.geometry().setNumIndices(cmd->elem_count);
 		currCmd.geometry().setFirstIndex(firstIndex);
 		currCmd.setLayer(DrawableNode::nuklearLayer() + cmdIdx);
-		currCmd.material().setTexture(fontTex_.get());
+		currCmd.material().setTexture(reinterpret_cast<GLTexture *>(cmd->texture.ptr));
 
 		renderQueue.addCommand(&currCmd);
 
@@ -335,7 +335,7 @@ void NuklearDrawing::draw()
 		                      static_cast<GLsizei>(cmd->clip_rect.w * NuklearContext::fbScale_.x),
 		                      static_cast<GLsizei>(cmd->clip_rect.h * NuklearContext::fbScale_.y));
 
-		GLTexture::bindHandle(GL_TEXTURE_2D, static_cast<GLuint>(cmd->texture.id));
+		GLTexture::bindHandle(GL_TEXTURE_2D, reinterpret_cast<GLTexture *>(cmd->texture.ptr)->glHandle());
 		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(cmd->elem_count), GL_UNSIGNED_SHORT, offset);
 		offset += cmd->elem_count;
 	}

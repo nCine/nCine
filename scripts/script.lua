@@ -82,8 +82,6 @@ function ncine.on_frame_start()
 	local newpos = {x = 0, y = 0}
 	newpos.x = pos_.x + 200 * math.sin(math.rad(angle_))
 	newpos.y = pos_.y + 100 * math.sin(math.rad(angle_ + 90))
-
-	nc.sprite.set_position(meshsprite_, newpos.x, newpos.y)
 	nc.sprite.set_position(meshsprite_, newpos)
 
 	local initParticles = {amount = 16, life = {0.25, 0.35},

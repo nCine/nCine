@@ -356,14 +356,17 @@ void ImGuiDebugOverlay::guiConfigureGui()
 			style.GrabRounding = style.FrameRounding;
 
 			static bool windowBorder = true;
+			windowBorder = (style.WindowBorderSize > 0.0f);
 			ImGui::Checkbox("Window Border", &windowBorder);
 			style.WindowBorderSize = windowBorder ? 1.0f : 0.0f;
 			ImGui::SameLine();
 			static bool frameBorder = true;
+			frameBorder = (style.FrameBorderSize > 0.0f);
 			ImGui::Checkbox("Frame Border", &frameBorder);
 			style.FrameBorderSize = frameBorder ? 1.0f : 0.0f;
 			ImGui::SameLine();
 			static bool popupBorder = true;
+			popupBorder = (style.PopupBorderSize > 0.0f);
 			ImGui::Checkbox("Popup Border", &popupBorder);
 			style.PopupBorderSize = popupBorder ? 1.0f : 0.0f;
 

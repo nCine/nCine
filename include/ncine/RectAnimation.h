@@ -26,8 +26,8 @@ class DLL_PUBLIC RectAnimation
 		BACKWARD
 	};
 
-	/// Constructor for an animation with a specified frame time, loop and rewind mode
-	RectAnimation(float frameTime, LoopMode loopMode, RewindMode rewindMode);
+	/// Constructor for an animation with a specified default frame duration, loop and rewind mode
+	RectAnimation(float defaultFrameDuration, LoopMode loopMode, RewindMode rewindMode);
 
 	/// Returns true if the animation is paused
 	inline bool isPaused() const { return isPaused_; }
@@ -42,28 +42,39 @@ class DLL_PUBLIC RectAnimation
 	/// Sets current frame
 	void setFrame(unsigned int frameNum);
 
-	/// Returns frame time
-	float frameTime() const { return frameTime_; }
-	/// Sets frame time
-	inline void setFrameTime(float frameTime) { frameTime_ = frameTime; }
+	/// Returns the default frame duration in seconds
+	float defaultFrameDuration() const { return defaultFrameDuration_; }
+	/// Sets the default frame duration in seconds
+	inline void setDefaultFrameDuration(float defaultFrameDuration) { defaultFrameDuration_ = defaultFrameDuration; }
 
-	/// Adds a rectangle to the array
-	inline void addRect(const Recti &rect) { rects_.pushBack(rect); }
-	/// Creates a rectangle from origin and size and then adds it to the array
-	inline void addRect(int x, int y, int w, int h) { rects_.pushBack(Recti(x, y, w, h)); }
+	/// Adds a rectangle to the array specifying the frame duration
+	void addRect(const Recti &rect, float frameTime);
+	/// Creates a rectangle from origin and size and then adds it to the array, specifying the frame duration
+	void addRect(int x, int y, int w, int h, float frameTime);
+
+	/// Adds a rectangle to the array with the default frame duration
+	inline void addRect(const Recti &rect) { addRect(rect, defaultFrameDuration_); }
+	/// Creates a rectangle from origin and size and then adds it to the array, with the default frame duration
+	inline void addRect(int x, int y, int w, int h) { addRect(x, y, w, h, defaultFrameDuration_); }
+
 	/// Returns the current rectangle
 	inline const Recti &rect() const { return rects_[currentFrame_]; }
+	/// Returns the current frame duration in seconds
+	inline float frameDuration() const { return frameDurations_[currentFrame_]; }
 
-	/// Returns the number of rectangles
-	inline unsigned int numRectangles() { return rects_.size(); }
 	/// Returns the array of all rectangles
 	inline nctl::Array<Recti> &rectangles() { return rects_; }
 	/// Returns the constant array of all rectangles
 	inline const nctl::Array<Recti> &rectangles() const { return rects_; }
 
+	/// Returns the array of all frame durations
+	inline nctl::Array<float> &frameDurations() { return frameDurations_; }
+	/// Returns the constant array of all frame durations
+	inline const nctl::Array<float> &frameDurations() const { return frameDurations_; }
+
   private:
-	/// The time until the next frame change
-	float frameTime_;
+	/// The default frame duratin if a custom one is not specified when adding a rectangle
+	float defaultFrameDuration_;
 	/// The looping mode (on or off)
 	LoopMode loopMode_;
 	/// The rewind mode (ping-pong or not)
@@ -71,6 +82,8 @@ class DLL_PUBLIC RectAnimation
 
 	/// The rectangles array
 	nctl::Array<Recti> rects_;
+	/// The frame durations array
+	nctl::Array<float> frameDurations_;
 	/// Current frame
 	unsigned int currentFrame_;
 	/// Elapsed time since the last frame change

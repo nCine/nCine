@@ -216,12 +216,12 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 	const int fbHeight = static_cast<int>(drawData->DisplaySize.y * drawData->FramebufferScale.y);
 	if (fbWidth <= 0 || fbHeight <= 0)
 		return;
-	drawData->ScaleClipRects(drawData->FramebufferScale);
+	const ImVec2 clipOff = drawData->DisplayPos;
+	const ImVec2 clipScale = drawData->FramebufferScale;
 
 	resetCommandPool();
 
 	unsigned int numCmd = 0;
-	const ImVec2 pos = drawData->DisplayPos;
 	for (int n = 0; n < drawData->CmdListsCount; n++)
 	{
 		const ImDrawList *imCmdList = drawData->CmdLists[n];
@@ -250,7 +250,11 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 			const ImDrawCmd *imCmd = &imCmdList->CmdBuffer[cmdIdx];
 			RenderCommand &currCmd = (cmdIdx == 0) ? firstCmd : *retrieveCommandFromPool();
 
-			const ImVec4 clipRect = ImVec4(imCmd->ClipRect.x - pos.x, imCmd->ClipRect.y - pos.y, imCmd->ClipRect.z - pos.x, imCmd->ClipRect.w - pos.y);
+			const ImVec4 clipRect = ImVec4((imCmd->ClipRect.x - clipOff.x) * clipScale.x,
+			                                (imCmd->ClipRect.y - clipOff.y) * clipScale.y,
+			                                (imCmd->ClipRect.z - clipOff.x) * clipScale.x,
+			                                (imCmd->ClipRect.w - clipOff.y) * clipScale.y);
+
 			if (clipRect.x < fbWidth && clipRect.y < fbHeight && clipRect.z >= 0.0f && clipRect.w >= 0.0f)
 			{
 				currCmd.setScissor(static_cast<GLint>(clipRect.x), static_cast<GLint>(fbHeight - clipRect.w),
@@ -300,7 +304,8 @@ void ImGuiDrawing::draw()
 	const int fbHeight = static_cast<int>(drawData->DisplaySize.y * drawData->FramebufferScale.y);
 	if (fbWidth <= 0 || fbHeight <= 0)
 		return;
-	drawData->ScaleClipRects(drawData->FramebufferScale);
+	const ImVec2 clipOff = drawData->DisplayPos;
+	const ImVec2 clipScale = drawData->FramebufferScale;
 
 	GLBlending::pushState();
 	GLBlending::enable();
@@ -310,7 +315,6 @@ void ImGuiDrawing::draw()
 	GLDepthTest::pushState();
 	GLDepthTest::disable();
 
-	const ImVec2 pos = drawData->DisplayPos;
 	for (int n = 0; n < drawData->CmdListsCount; n++)
 	{
 		const ImDrawList *imCmdList = drawData->CmdLists[n];
@@ -325,7 +329,11 @@ void ImGuiDrawing::draw()
 		{
 			const ImDrawCmd *imCmd = &imCmdList->CmdBuffer[cmdIdx];
 
-			const ImVec4 clipRect = ImVec4(imCmd->ClipRect.x - pos.x, imCmd->ClipRect.y - pos.y, imCmd->ClipRect.z - pos.x, imCmd->ClipRect.w - pos.y);
+			const ImVec4 clipRect = ImVec4((imCmd->ClipRect.x - clipOff.x) * clipScale.x,
+			                                (imCmd->ClipRect.y - clipOff.y) * clipScale.y,
+			                                (imCmd->ClipRect.z - clipOff.x) * clipScale.x,
+			                                (imCmd->ClipRect.w - clipOff.y) * clipScale.y);
+
 			if (clipRect.x < fbWidth && clipRect.y < fbHeight && clipRect.z >= 0.0f && clipRect.w >= 0.0f)
 			{
 				GLScissorTest::enable(static_cast<GLint>(clipRect.x), static_cast<GLint>(fbHeight - clipRect.w),

@@ -70,7 +70,7 @@ class GLBufferObjectMappingFunc
 				break;
 #endif
 			default:
-				FATAL_MSG_X("No available case to handle key: %u", key);
+				FATAL_MSG_X("No available case to handle buffer object target: 0x%x", key);
 				break;
 		}
 
@@ -106,7 +106,7 @@ class GLTextureMappingFunc
 				break;
 #endif
 			default:
-				FATAL_MSG_X("No available case to handle key: %u", key);
+				FATAL_MSG_X("No available case to handle texture target: 0x%x", key);
 				break;
 		}
 

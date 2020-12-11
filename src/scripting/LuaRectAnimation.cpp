@@ -17,7 +17,7 @@ namespace RectAnimation {
 	static const char *BACKWARD = "BACKWARD";
 	static const char *RewindMode = "rewind_mode";
 
-	static const char *frameTime = "frame_time";
+	static const char *frameDuration = "frame_duration";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -43,12 +43,13 @@ void LuaRectAnimation::exposeConstants(lua_State *L)
 
 nctl::UniquePtr<RectAnimation> LuaRectAnimation::retrieveTable(lua_State *L, int index)
 {
-	const float frameTime = LuaUtils::retrieveField<float>(L, index, LuaNames::RectAnimation::frameTime);
+	const float defaultFrameDuration = LuaUtils::retrieveField<float>(L, index, LuaNames::RectAnimation::frameDuration);
 	const RectAnimation::LoopMode loopMode = static_cast<RectAnimation::LoopMode>(LuaUtils::retrieveField<int64_t>(L, index, LuaNames::RectAnimation::LoopMode));
 	const RectAnimation::RewindMode rewindMode = static_cast<RectAnimation::RewindMode>(LuaUtils::retrieveField<int64_t>(L, index, LuaNames::RectAnimation::RewindMode));
 
-	nctl::UniquePtr<RectAnimation> animation = nctl::makeUnique<RectAnimation>(frameTime, loopMode, rewindMode);
+	nctl::UniquePtr<RectAnimation> animation = nctl::makeUnique<RectAnimation>(defaultFrameDuration, loopMode, rewindMode);
 
+	// It is not possible to specify custom frame durations with the Lua API
 	const unsigned int length = lua_rawlen(L, index);
 	for (unsigned int i = 0; i < length; i++)
 	{
@@ -56,7 +57,7 @@ nctl::UniquePtr<RectAnimation> LuaRectAnimation::retrieveTable(lua_State *L, int
 		if (type != LUA_TTABLE)
 			luaL_argerror(L, -1, "Expecting a table");
 
-		Recti rect = LuaRectiUtils::retrieveTable(L, -1);
+		const Recti rect = LuaRectiUtils::retrieveTable(L, -1);
 		animation->addRect(rect);
 		lua_pop(L, 1);
 	}

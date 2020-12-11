@@ -6,9 +6,10 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-RectAnimation::RectAnimation(float frameTime, LoopMode loopMode, RewindMode rewindMode)
-    : frameTime_(frameTime), loopMode_(loopMode), rewindMode_(rewindMode), rects_(4),
-      currentFrame_(0), elapsedFrameTime_(0.0f), goingForward_(true), isPaused_(true)
+RectAnimation::RectAnimation(float defaultFrameDuration, LoopMode loopMode, RewindMode rewindMode)
+    : defaultFrameDuration_(defaultFrameDuration), loopMode_(loopMode), rewindMode_(rewindMode),
+      rects_(4), frameDurations_(4), currentFrame_(0), elapsedFrameTime_(0.0f),
+      goingForward_(true), isPaused_(true)
 {
 }
 
@@ -23,10 +24,10 @@ void RectAnimation::updateFrame(float interval)
 		return;
 
 	elapsedFrameTime_ += interval;
-	// A NEXT frame rectangle should be determined
-	if (elapsedFrameTime_ >= frameTime_)
+	// Determine the next frame rectangle
+	while (elapsedFrameTime_ >= frameDurations_[currentFrame_])
 	{
-		elapsedFrameTime_ = 0.0f;
+		elapsedFrameTime_ -= frameDurations_[currentFrame_];
 
 		if (goingForward_)
 		{
@@ -70,6 +71,18 @@ void RectAnimation::setFrame(unsigned int frameNum)
 {
 	ASSERT(frameNum < rects_.size());
 	currentFrame_ = frameNum;
+}
+
+void RectAnimation::addRect(const Recti &rect, float frameDuration)
+{
+	rects_.pushBack(rect);
+	frameDurations_.pushBack(frameDuration);
+}
+
+void RectAnimation::addRect(int x, int y, int w, int h, float frameDuration)
+{
+	rects_.pushBack(Recti(x, y, w, h));
+	frameDurations_.pushBack(frameDuration);
 }
 
 }

@@ -275,7 +275,7 @@ void Texture::setWrap(Wrap wrapMode)
 	wrapMode_ = wrapMode;
 }
 
-void *Texture::imguiTexId()
+void *Texture::guiTexId()
 {
 	return reinterpret_cast<void *>(glTexture_.get());
 }
