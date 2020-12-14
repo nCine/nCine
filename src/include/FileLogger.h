@@ -36,9 +36,11 @@ class FileLogger : public ILogger
   private:
 	LogLevel consoleLevel_;
 	LogLevel fileLevel_;
+	bool canUseColors_;
 
 	static const unsigned int MaxEntryLength = 512;
 	char logEntry_[MaxEntryLength];
+	char logEntryWithColors_[MaxEntryLength];
 
 #ifdef WITH_IMGUI
 	static const unsigned int LogStringCapacity = 16 * 1024;
@@ -47,6 +49,8 @@ class FileLogger : public ILogger
 
 	// Declared at the end to prevent a `heap-use-after-free` AddressSanitizer error
 	nctl::UniquePtr<IFile> fileHandle_;
+
+	unsigned int writeWithColors(LogLevel level, const char *timeMsg, unsigned int timeMsgLength, const char *logMsg, unsigned int logMsgLength);
 
 	/// Deleted copy constructor
 	FileLogger(const FileLogger &) = delete;

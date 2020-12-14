@@ -4,12 +4,35 @@
 #else
 	#include <cstdarg>
 #endif
+
 #include <ctime>
 #include "FileLogger.h"
 #include "common_macros.h"
+#include <nctl/CString.h>
+#include "Application.h"
 #include "tracy.h"
 
+namespace {
+
+const char *Reset = "\033[0m";
+const char *Bold = "\033[1m";
+const char *Faint = "\033[2m";
+const char *Black = "\033[30m";
+const char *BrightRed = "\033[91m";
+const char *BrightGreen = "\033[92m";
+const char *BrightYellow = "\033[93m";
+const char *BrightRedBg = "\033[101m";
+
+}
+
 namespace ncine {
+
+#ifdef _WIN32
+bool createConsole(bool hasTermEnv);
+void destroyConsole(bool hasTermEnv);
+bool enableVirtualTerminalProcessing();
+void writeOutputDebug(const char *logEntry);
+#endif
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -21,19 +44,40 @@ FileLogger::FileLogger(LogLevel consoleLevel)
 }
 
 FileLogger::FileLogger(LogLevel consoleLevel, LogLevel fileLevel, const char *filename)
-    : consoleLevel_(consoleLevel), fileLevel_(fileLevel)
+    : consoleLevel_(consoleLevel), fileLevel_(fileLevel), canUseColors_(true)
 #ifdef WITH_IMGUI
       ,
       logString_(LogStringCapacity)
 #endif
 {
+#ifdef _WIN32
+	if (consoleLevel != LogLevel::OFF)
+	{
+		const char *termEnv = getenv("TERM");
+		createConsole(termEnv);
+
+		const bool hasVTProcessing = enableVirtualTerminalProcessing();
+		// mintty supports color sequences but not the Windows console API calls
+		canUseColors_ = (hasVTProcessing || termEnv);
+	}
+#endif
+
+	canUseColors_ &= theApplication().appConfiguration().withConsoleColors;
+
 	openLogFile(filename);
 	setvbuf(stdout, nullptr, _IONBF, 0);
+	setvbuf(stderr, nullptr, _IONBF, 0);
 }
 
 FileLogger::~FileLogger()
 {
 	write(LogLevel::VERBOSE, "FileLogger::~FileLogger -> End of the log");
+
+#ifdef _WIN32
+	const char *termEnv = getenv("TERM");
+	// mintty does not need to send the "Enter" key
+	destroyConsole(termEnv);
+#endif
 }
 
 ///////////////////////////////////////////////////////////
@@ -66,10 +110,6 @@ bool FileLogger::openLogFile(const char *filename)
 	return true;
 }
 
-#ifdef _WIN32
-void writeOutputDebug(const char *logEntry);
-#endif
-
 unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 {
 	// Early-out if logging is completely disabled
@@ -91,14 +131,18 @@ unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 	logEntry_[MaxEntryLength - 1] = '\0';
 	unsigned int length = 0;
 
-	//length += strftime(logEntry_ + length, MaxEntryLength - length - 1, "- %a %Y-%m-%d %H:%M:%S %Z ", ts);
-	length += strftime(logEntry_ + length, MaxEntryLength - length - 1, "- %H:%M:%S ", ts);
+	const unsigned int timeMsgStart = length;
+	const unsigned int timeMsgLength = strftime(logEntry_ + length, MaxEntryLength - length - 1, "- %H:%M:%S ", ts);
+	length += timeMsgLength;
+
 	length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "[L%d] - ", levelInt);
 
+	const unsigned int logMsgStart = length;
 	va_list args;
 	va_start(args, fmt);
-	length += vsnprintf(logEntry_ + length, MaxEntryLength - length - 1, fmt, args);
+	const unsigned int logMsgLength = vsnprintf(logEntry_ + length, MaxEntryLength - length - 1, fmt, args);
 	va_end(args);
+	length += logMsgLength;
 
 	if (length < MaxEntryLength - 2)
 	{
@@ -106,13 +150,20 @@ unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 		logEntry_[length] = '\0';
 	}
 
+	const char *consoleLogEntry = logEntry_;
+	if (canUseColors_)
+	{
+		writeWithColors(level, logEntry_ + timeMsgStart, timeMsgLength, logEntry_ + logMsgStart, logMsgLength);
+		consoleLogEntry = logEntryWithColors_;
+	}
+
 	if (consoleLevel_ != LogLevel::OFF && levelInt >= consoleLevelInt)
 	{
 #ifndef __ANDROID__
 		if (level == LogLevel::ERROR || level == LogLevel::FATAL)
-			fputs(logEntry_, stderr);
+			fputs(consoleLogEntry, stderr);
 		else
-			fputs(logEntry_, stdout);
+			fputs(consoleLogEntry, stdout);
 
 	#ifdef _WIN32
 		writeOutputDebug(logEntry_);
@@ -181,4 +232,74 @@ unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 	return length;
 }
 
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+unsigned int FileLogger::writeWithColors(LogLevel level, const char *timeMsg, unsigned int timeMsgLength, const char *logMsg, unsigned int logMsgLength)
+{
+	const int levelInt = static_cast<int>(level);
+
+	logEntryWithColors_[0] = '\0';
+	logEntryWithColors_[MaxEntryLength - 1] = '\0';
+	unsigned int length = 0;
+
+	length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", Faint);
+
+	nctl::strncpy(logEntryWithColors_ + length, timeMsg, timeMsgLength);
+	length += timeMsgLength;
+
+	length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, " %s", Reset);
+
+	const char *levelColor = BrightGreen;
+	switch (level)
+	{
+
+		case LogLevel::WARN:
+			levelColor = BrightYellow;
+			break;
+		case LogLevel::ERROR:
+			levelColor = BrightRed;
+			break;
+		case LogLevel::FATAL:
+			levelColor = Black;
+			break;
+		default:
+			levelColor = BrightGreen;
+			break;
+	}
+
+	if (level == LogLevel::FATAL)
+		length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", BrightRedBg);
+
+	length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s[L%d]%s", levelColor, levelInt, Reset);
+	length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, " %s- ", Faint);
+
+	unsigned int logMsgFuncLength = 0;
+	while (logMsg[logMsgFuncLength] != '>' && logMsg[logMsgFuncLength] != '\0')
+		logMsgFuncLength++;
+	logMsgFuncLength++; // skip '>' character
+
+	nctl::strncpy(logEntryWithColors_ + length, logMsg, logMsgFuncLength);
+	length += logMsgFuncLength;
+
+	length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", Reset);
+
+	if (level == LogLevel::WARN || level == LogLevel::ERROR || level == LogLevel::FATAL)
+		length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", Bold);
+
+	nctl::strncpy(logEntryWithColors_ + length, logMsg + logMsgFuncLength, logMsgLength - logMsgFuncLength);
+	length += logMsgLength - logMsgFuncLength;
+
+	if (level == LogLevel::WARN || level == LogLevel::ERROR || level == LogLevel::FATAL)
+		length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", Reset);
+
+	if (length < MaxEntryLength - 2)
+	{
+		logEntryWithColors_[length++] = '\n';
+		logEntryWithColors_[length] = '\0';
+	}
+
+	return length;
+}
 }

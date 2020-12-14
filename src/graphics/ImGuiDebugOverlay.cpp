@@ -620,6 +620,7 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("Scenegraph: %s", appCfg.withScenegraph ? "true" : "false");
 		ImGui::Text("VSync: %s", appCfg.withVSync ? "true" : "false");
 		ImGui::Text("OpenGL Debug Context: %s", appCfg.withGlDebugContext ? "true" : "false");
+		ImGui::Text("Console Colors: %s", appCfg.withConsoleColors ? "true" : "false");
 	}
 }
 

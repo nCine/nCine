@@ -38,6 +38,7 @@ namespace AppConfiguration {
 	static const char *withScenegraph = "scenegraph";
 	static const char *withVSync = "vsync";
 	static const char *withGlDebugContext = "gl_debug_context";
+	static const char *withConsoleColors = "console_colors";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -75,6 +76,7 @@ void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withScenegraph, appCfg.withScenegraph);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withVSync, appCfg.withVSync);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withGlDebugContext, appCfg.withGlDebugContext);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::withConsoleColors, appCfg.withConsoleColors);
 }
 
 void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
@@ -132,6 +134,8 @@ void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
 	appCfg.withVSync = withVSync;
 	const bool withGlDebugContext = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withGlDebugContext);
 	appCfg.withGlDebugContext = withGlDebugContext;
+	const bool withConsoleColors = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withConsoleColors);
+	appCfg.withConsoleColors = withConsoleColors;
 }
 
 }

@@ -12,7 +12,12 @@ AppConfiguration::AppConfiguration()
 #ifdef NCINE_DEBUG
       consoleLogLevel(ILogger::LogLevel::INFO),
 #else
+	#ifdef _WIN32
+      // Disable console logging on Windows to avoid allocating a console
+      consoleLogLevel(ILogger::LogLevel::OFF),
+	#else
       consoleLogLevel(ILogger::LogLevel::ERROR),
+	#endif
 #endif
       fileLogLevel(ILogger::LogLevel::OFF),
       frameTimerLogInterval(5.0f),
@@ -39,6 +44,7 @@ AppConfiguration::AppConfiguration()
       withScenegraph(true),
       withVSync(true),
       withGlDebugContext(false),
+      withConsoleColors(true),
 
       // Compile-time variables
       glCoreProfile_(true),

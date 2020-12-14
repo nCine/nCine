@@ -68,6 +68,8 @@ class DLL_PUBLIC AppConfiguration
 	bool withVSync;
 	/// The flag is `true` if the OpenGL debug context is enabled
 	bool withGlDebugContext;
+	/// The flag is `true` if console log messages should use colors
+	bool withConsoleColors;
 
 	/// \returns The path for the application to load data from
 	const nctl::String &dataPath() const;
