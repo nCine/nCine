@@ -364,6 +364,51 @@ TEST_F(ArrayRefCountedTest, SetHalfSize)
 	ASSERT_EQ(RefCounted::counter(), Capacity / 2);
 }
 
+TEST_F(ArrayRefCountedTest, SetDoubleSize)
+{
+	ASSERT_EQ(RefCounted::counter(), 0);
+	printf("Fill half the array (%u elements)\n", Capacity / 2);
+	for (unsigned int i = 0; i < Capacity / 2; i++)
+		array_.pushBack(RefCounted());
+	printRefCounters();
+	ASSERT_EQ(RefCounted::counter(), Capacity / 2);
+
+	printf("Extend the array to double its size\n");
+	array_.setSize(Capacity);
+	printRefCounters();
+	ASSERT_EQ(RefCounted::counter(), Capacity);
+}
+
+TEST_F(ArrayRefCountedTest, SetHalfCapacity)
+{
+	ASSERT_EQ(RefCounted::counter(), 0);
+	printf("Fill the whole array up to capacity (%u elements)\n", Capacity);
+	for (unsigned int i = 0; i < Capacity; i++)
+		array_.pushBack(RefCounted());
+	printRefCounters();
+	ASSERT_EQ(RefCounted::counter(), Capacity);
+
+	printf("Shrink the array to half its capacity\n");
+	array_.setCapacity(Capacity / 2);
+	printRefCounters();
+	ASSERT_EQ(RefCounted::counter(), Capacity / 2);
+}
+
+TEST_F(ArrayRefCountedTest, SetDoubleCapacity)
+{
+	ASSERT_EQ(RefCounted::counter(), 0);
+	printf("Fill the whole array up to capacity (%u elements)\n", Capacity);
+	for (unsigned int i = 0; i < Capacity; i++)
+		array_.pushBack(RefCounted());
+	printRefCounters();
+	ASSERT_EQ(RefCounted::counter(), Capacity);
+
+	printf("Extend the array to double its capacity\n");
+	array_.setCapacity(Capacity * 2);
+	printRefCounters();
+	ASSERT_EQ(RefCounted::counter(), Capacity);
+}
+
 #if TEST_STL
 TEST_F(ArrayRefCountedTest, StdVector_PushBackLValue)
 {
@@ -668,6 +713,67 @@ TEST_F(ArrayRefCountedTest, StdVector_RemoveSecondHalfWithIterator)
 	printRefCounters();
 	ASSERT_EQ(RefCounted::counter(), Capacity / 2);
 }
+
+TEST_F(ArrayRefCountedTest, StdVector_ResizeHalf)
+{
+	ASSERT_EQ(RefCounted::counter(), 0);
+	printf("Fill the whole array up to capacity (%u elements)\n", Capacity);
+	for (unsigned int i = 0; i < Capacity; i++)
+		stdvec_.push_back(RefCounted());
+	printRefCounters();
+	ASSERT_EQ(RefCounted::counter(), Capacity);
+
+	printf("Shrink the array to half its size\n");
+	stdvec_.resize(Capacity / 2);
+	printRefCounters();
+	ASSERT_EQ(RefCounted::counter(), Capacity / 2);
+}
+
+TEST_F(ArrayRefCountedTest, StdVector_ResizeDouble)
+{
+	ASSERT_EQ(RefCounted::counter(), 0);
+	printf("Fill half the array (%u elements)\n", Capacity / 2);
+	for (unsigned int i = 0; i < Capacity / 2; i++)
+		stdvec_.push_back(RefCounted());
+	printRefCounters();
+	ASSERT_EQ(RefCounted::counter(), Capacity / 2);
+
+	printf("Extend the array to double its size\n");
+	stdvec_.resize(Capacity);
+	printRefCounters();
+	ASSERT_EQ(RefCounted::counter(), Capacity);
+}
+
+TEST_F(ArrayRefCountedTest, StdVector_ShrinkToFit)
+{
+	ASSERT_EQ(RefCounted::counter(), 0);
+	printf("Fill half the array (%u elements)\n", Capacity / 2);
+	for (unsigned int i = 0; i < Capacity / 2; i++)
+		stdvec_.push_back(RefCounted());
+	printRefCounters();
+	ASSERT_EQ(RefCounted::counter(), Capacity / 2);
+
+	printf("Shrink the array to its size\n");
+	stdvec_.shrink_to_fit();
+	printRefCounters();
+	ASSERT_EQ(RefCounted::counter(), Capacity / 2);
+}
+
+TEST_F(ArrayRefCountedTest, StdVector_ReserveDouble)
+{
+	ASSERT_EQ(RefCounted::counter(), 0);
+	printf("Fill the whole array up to capacity (%u elements)\n", Capacity);
+	for (unsigned int i = 0; i < Capacity; i++)
+		stdvec_.push_back(RefCounted());
+	printRefCounters();
+	ASSERT_EQ(RefCounted::counter(), Capacity);
+
+	printf("Extend the array to double its capacity\n");
+	stdvec_.reserve(Capacity * 2);
+	printRefCounters();
+	ASSERT_EQ(RefCounted::counter(), Capacity);
+}
+
 #endif
 
 }

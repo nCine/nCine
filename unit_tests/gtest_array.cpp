@@ -111,10 +111,32 @@ TEST_F(ArrayTest, SetSizeOnFixed)
 	printf("Trying to extend the size of a fixed capacity array\n");
 	nctl::Array<int> array(1, nctl::ArrayMode::FIXED_CAPACITY);
 	array.pushBack(0);
-	array_.setSize(Capacity);
+	array.setSize(Capacity);
 
 	ASSERT_EQ(array.capacity(), 1);
 	ASSERT_EQ(array.size(), 1);
+}
+
+TEST_F(ArrayTest, SetSizeToShrink)
+{
+	nctl::Array<int> array(Capacity);
+	array.pushBack(0);
+	array.pushBack(1);
+	printf("Trying to shrink the size of an array\n");
+	array.setSize(1);
+
+	ASSERT_EQ(array.capacity(), Capacity);
+	ASSERT_EQ(array.size(), 1);
+}
+
+TEST_F(ArrayTest, SetSizeAsCapacity)
+{
+	printf("Trying to extend the size of an array to its capacity\n");
+	nctl::Array<int> array(Capacity);
+	array.setSize(Capacity);
+
+	ASSERT_EQ(array.capacity(), Capacity);
+	ASSERT_EQ(array.size(), Capacity);
 }
 
 TEST_F(ArrayTest, SetCapacityOnFixed)

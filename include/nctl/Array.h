@@ -355,18 +355,19 @@ void Array<T>::setSize(unsigned int newSize)
 {
 	const int newElements = newSize - size_;
 
-	if (newElements < 0)
-		destructArray(array_ + size_ + newElements, -newElements);
-
 	if (newSize > capacity_)
 	{
 		setCapacity(newSize);
-		// Extending size only if the capacity is not fixed
-		if (capacity_ == newSize)
-			size_ = newSize;
+		// Modifying size only if the capacity is not fixed
+		if (capacity_ < newSize)
+			return;
 	}
-	else
-		size_ = newSize;
+
+	if (newElements > 0)
+		constructArray(array_ + size_, newElements);
+	else if (newElements < 0)
+		destructArray(array_ + size_ + newElements, -newElements);
+	size_ += newElements;
 }
 
 template <class T>

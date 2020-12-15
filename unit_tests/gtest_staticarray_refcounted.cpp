@@ -355,4 +355,19 @@ TEST_F(StaticArrayRefCountedTest, SetHalfSize)
 	ASSERT_EQ(RefCounted::counter(), Capacity / 2);
 }
 
+TEST_F(StaticArrayRefCountedTest, SetDoubleSize)
+{
+	ASSERT_EQ(RefCounted::counter(), 0);
+	printf("Fill half the array (%u elements)\n", Capacity / 2);
+	for (unsigned int i = 0; i < Capacity / 2; i++)
+		array_.pushBack(RefCounted());
+	printRefCounters();
+	ASSERT_EQ(RefCounted::counter(), Capacity / 2);
+
+	printf("Extend the array to double its size\n");
+	array_.setSize(Capacity);
+	printRefCounters();
+	ASSERT_EQ(RefCounted::counter(), Capacity);
+}
+
 }

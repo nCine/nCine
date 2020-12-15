@@ -113,6 +113,28 @@ TEST_F(StaticArrayTest, SetSizeOnStatic)
 	ASSERT_EQ(array.size(), 1);
 }
 
+TEST_F(StaticArrayTest, SetSizeToShrink)
+{
+	nctl::StaticArray<int, Capacity> array;
+	array.pushBack(0);
+	array.pushBack(1);
+	printf("Trying to shrink the size of a static array\n");
+	array.setSize(1);
+
+	ASSERT_EQ(array.capacity(), Capacity);
+	ASSERT_EQ(array.size(), 1);
+}
+
+TEST_F(StaticArrayTest, SetSizeAsCapacity)
+{
+	printf("Trying to extend the size of a static array to its capacity\n");
+	nctl::StaticArray<int, Capacity> array;
+	array.setSize(Capacity);
+
+	ASSERT_EQ(array.capacity(), Capacity);
+	ASSERT_EQ(array.size(), Capacity);
+}
+
 TEST_F(StaticArrayTest, FrontElement)
 {
 	const int front = array_.front();
