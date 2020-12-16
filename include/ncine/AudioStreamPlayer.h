@@ -19,6 +19,11 @@ class DLL_PUBLIC AudioStreamPlayer : public IAudioPlayer
 	explicit AudioStreamPlayer(const char *filename);
 	~AudioStreamPlayer() override;
 
+	/// Default move constructor
+	AudioStreamPlayer(AudioStreamPlayer &&) = default;
+	/// Default move assignment operator
+	AudioStreamPlayer &operator=(AudioStreamPlayer &&) = default;
+
 	bool loadFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	bool loadFromFile(const char *filename);
 

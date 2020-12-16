@@ -29,6 +29,11 @@ class DLL_PUBLIC AudioBuffer : public Object
 	explicit AudioBuffer(const char *filename);
 	~AudioBuffer() override;
 
+	/// Move constructor
+	AudioBuffer(AudioBuffer &&other);
+	/// Move assignment operator
+	AudioBuffer &operator=(AudioBuffer &&other);
+
 	/// Initializes an empty buffer with the specified format and frequency
 	void init(const char *name, Format format, int frequency);
 

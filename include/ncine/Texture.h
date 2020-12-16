@@ -51,6 +51,11 @@ class DLL_PUBLIC Texture : public Object
 
 	~Texture() override;
 
+	/// Default move constructor
+	Texture(Texture &&);
+	/// Default move assignment operator
+	Texture &operator=(Texture &&);
+
 	/// Initializes an empty texture with the specified format, MIP levels, and size
 	void init(const char *name, Format format, int mipMapCount, int width, int height);
 	/// Initializes an empty texture with the specified format, MIP levels, and size using a vector

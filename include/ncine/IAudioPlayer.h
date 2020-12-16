@@ -23,6 +23,11 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	IAudioPlayer(ObjectType type);
 	~IAudioPlayer() override {}
 
+	/// Default move constructor
+	IAudioPlayer(IAudioPlayer &&) = default;
+	/// Default move assignment operator
+	IAudioPlayer &operator=(IAudioPlayer &&) = default;
+
 	/// Returns the OpenAL id of the player source
 	inline unsigned int sourceId() const { return sourceId_; }
 	/// Returns the OpenAL id of the currently playing buffer

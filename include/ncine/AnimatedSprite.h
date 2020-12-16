@@ -25,6 +25,11 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	/// Constructor for an animated sprite with a texture and a specified position as a vector but no parent
 	AnimatedSprite(Texture *texture, const Vector2f &position);
 
+	/// Default move constructor
+	AnimatedSprite(AnimatedSprite &&) = default;
+	/// Default move assignment operator
+	AnimatedSprite &operator=(AnimatedSprite &&) = default;
+
 	/// Returns true if the current animation is paused
 	bool isPaused() const;
 	/// Sets the pause state for the animation

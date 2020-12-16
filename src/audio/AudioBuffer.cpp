@@ -30,7 +30,7 @@ namespace {
 ///////////////////////////////////////////////////////////
 
 AudioBuffer::AudioBuffer()
-    : Object(ObjectType::AUDIOBUFFER),
+    : Object(ObjectType::AUDIOBUFFER), bufferId_(0),
       bytesPerSample_(0), numChannels_(0), frequency_(0), numSamples_(0), duration_(0.0f)
 {
 	alGetError();
@@ -57,7 +57,31 @@ AudioBuffer::AudioBuffer(const char *filename)
 
 AudioBuffer::~AudioBuffer()
 {
+	// Moved out objects have their buffer id set to zero
 	alDeleteBuffers(1, &bufferId_);
+}
+
+AudioBuffer::AudioBuffer(AudioBuffer &&other)
+    : Object(nctl::move(other)), bufferId_(other.bufferId_),
+      bytesPerSample_(other.bytesPerSample_), numChannels_(other.numChannels_),
+      frequency_(other.frequency_), numSamples_(other.numSamples_), duration_(other.duration_)
+{
+	other.bufferId_ = 0;
+}
+
+AudioBuffer& AudioBuffer::operator=(AudioBuffer &&other)
+{
+	Object::operator=(nctl::move(other));
+
+	bufferId_ = other.bufferId_;
+	bytesPerSample_ = other.bytesPerSample_;
+	numChannels_ = other.numChannels_;
+	frequency_ = other.frequency_;
+	numSamples_ = other.numSamples_;
+	duration_ = other.duration_;
+
+	other.bufferId_ = 0;
+	return *this;
 }
 
 ///////////////////////////////////////////////////////////

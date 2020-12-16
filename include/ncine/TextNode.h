@@ -9,9 +9,8 @@
 
 namespace ncine {
 
-class FontGlyph;
-
 class GLUniformBlockCache;
+class FontGlyph;
 
 /// A scene node to draw a text label
 class DLL_PUBLIC TextNode : public DrawableNode
@@ -35,6 +34,11 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	TextNode(unsigned int maxStringLength);
 	TextNode(SceneNode *parent, Font *font);
 	TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength);
+
+	/// Default move constructor
+	TextNode(TextNode &&) = default;
+	/// Default move assignment operator
+	TextNode &operator=(TextNode &&) = default;
 
 	/// Returns the width of rendered text
 	float width() const override;

@@ -72,6 +72,11 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	DrawableNode();
 	~DrawableNode() override;
 
+	/// Default move constructor
+	DrawableNode(DrawableNode &&);
+	/// Default move assignment operator
+	DrawableNode &operator=(DrawableNode &&);
+
 	/// Updates the draw command and adds it to the queue
 	void draw(RenderQueue &renderQueue) override;
 

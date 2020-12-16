@@ -98,6 +98,10 @@ DrawableNode::DrawableNode()
 
 DrawableNode::~DrawableNode() = default;
 
+DrawableNode::DrawableNode(DrawableNode &&) = default;
+
+DrawableNode &DrawableNode::operator=(DrawableNode &&) = default;
+
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////

@@ -15,9 +15,10 @@ class ArrayIndexer : public IIndexer
 	~ArrayIndexer() override;
 
 	unsigned int addObject(Object *object) override;
-	void removeObject(unsigned int id) override;
+	bool removeObject(unsigned int id) override;
 
 	Object *object(unsigned int id) const override;
+	bool setObject(unsigned int id, Object *object) override;
 
 	bool isEmpty() const override { return numObjects_ == 0; }
 	unsigned int size() const override { return numObjects_; }

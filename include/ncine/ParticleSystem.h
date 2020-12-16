@@ -24,6 +24,11 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	ParticleSystem(SceneNode *parent, unsigned int count, Texture *texture, Recti texRect);
 	~ParticleSystem() override;
 
+	/// Default move constructor
+	ParticleSystem(ParticleSystem &&);
+	/// Default move assignment operator
+	ParticleSystem &operator=(ParticleSystem &&);
+
 	/// Adds a particle affector
 	inline void addAffector(nctl::UniquePtr<ParticleAffector> affector) { affectors_.pushBack(nctl::move(affector)); }
 	/// Deletes all particle affectors

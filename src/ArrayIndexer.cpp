@@ -2,6 +2,28 @@
 
 namespace ncine {
 
+const char *objectTypeToString(Object::ObjectType type)
+{
+	// clang-format off
+	switch (type)
+	{
+		case Object::ObjectType::BASE:					return "Base"; break;
+		case Object::ObjectType::TEXTURE:				return "Texture"; break;
+		case Object::ObjectType::SCENENODE:				return "SceneNode"; break;
+		case Object::ObjectType::SPRITE:				return "Sprite"; break;
+		case Object::ObjectType::MESH_SPRITE:			return "MeshSprite"; break;
+		case Object::ObjectType::ANIMATED_SPRITE:		return "AnimatedSprite"; break;
+		case Object::ObjectType::PARTICLE_SYSTEM:		return "ParticleSystem"; break;
+		case Object::ObjectType::FONT:					return "Font"; break;
+		case Object::ObjectType::TEXTNODE:				return "TextNode"; break;
+		case Object::ObjectType::AUDIOBUFFER:			return "AudioBuffer"; break;
+		case Object::ObjectType::AUDIOBUFFER_PLAYER:	return "AudioBufferPlayer"; break;
+		case Object::ObjectType::AUDIOSTREAM_PLAYER:	return "AudioStreamPlayer"; break;
+		default:										return "Unknown"; break;
+	}
+	// clang-format on
+}
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
@@ -37,14 +59,16 @@ unsigned int ArrayIndexer::addObject(Object *object)
 	return nextId_ - 1;
 }
 
-void ArrayIndexer::removeObject(unsigned int id)
+bool ArrayIndexer::removeObject(unsigned int id)
 {
 	// setting to `nullptr` instead of physically removing
 	if (id < pointers_.size() && pointers_[id] != nullptr)
 	{
 		pointers_[id] = nullptr;
 		numObjects_--;
+		return true;
 	}
+	return false;
 }
 
 Object *ArrayIndexer::object(unsigned int id) const
@@ -57,35 +81,24 @@ Object *ArrayIndexer::object(unsigned int id) const
 	return objPtr;
 }
 
+bool ArrayIndexer::setObject(unsigned int id, Object *object)
+{
+	if (id < pointers_.size())
+	{
+		pointers_[id] = object;
+		return true;
+	}
+	return false;
+}
+
 void ArrayIndexer::logReport() const
 {
 	for (unsigned int i = 0; i < pointers_.size(); i++)
 	{
 		if (pointers_[i])
 		{
-			Object *objPtr = object(i);
-
-			nctl::String typeName(Object::MaxNameLength);
-			// clang-format off
-			switch (objPtr->type())
-			{
-				case Object::ObjectType::BASE:					typeName = "Base"; break;
-				case Object::ObjectType::TEXTURE:				typeName = "Texture"; break;
-				case Object::ObjectType::SCENENODE:				typeName = "SceneNode"; break;
-				case Object::ObjectType::SPRITE:				typeName = "Sprite"; break;
-				case Object::ObjectType::MESH_SPRITE:			typeName = "MeshSprite"; break;
-				case Object::ObjectType::ANIMATED_SPRITE:		typeName = "AnimatedSprite"; break;
-				case Object::ObjectType::PARTICLE_SYSTEM:		typeName = "ParticleSystem"; break;
-				case Object::ObjectType::FONT:					typeName = "Font"; break;
-				case Object::ObjectType::TEXTNODE:				typeName = "TextNode"; break;
-				case Object::ObjectType::AUDIOBUFFER:			typeName = "AudioBuffer"; break;
-				case Object::ObjectType::AUDIOBUFFER_PLAYER:	typeName = "AudioBufferPlayer"; break;
-				case Object::ObjectType::AUDIOSTREAM_PLAYER:	typeName = "AudioStreamPlayer"; break;
-				default:										typeName = "Unknown"; break;
-			}
-			// clang-format on
-
-			LOGI_X("Object %u - type: %s - name: \"%s\"", objPtr->id(), typeName.data(), objPtr->name().data());
+			const Object *objPtr = object(i);
+			LOGI_X("%s object (id %u, 0x%x): \"%s\"", objectTypeToString(objPtr->type()), objPtr->id(), pointers_[i], objPtr->name().data());
 		}
 	}
 }

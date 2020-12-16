@@ -57,6 +57,42 @@ SceneNode::~SceneNode()
 	setParent(nullptr);
 }
 
+SceneNode::SceneNode(SceneNode &&other)
+    : Object(nctl::move(other)), x(other.x), y(other.y),
+      updateEnabled_(other.updateEnabled_), drawEnabled_(other.drawEnabled_),
+      parent_(other.parent_), children_(nctl::move(other.children_)),
+      anchorPoint_(other.anchorPoint_), scaleFactor_(other.scaleFactor_),
+      rotation_(other.rotation_), color_(other.color_),
+      shouldDeleteChildrenOnDestruction_(other.shouldDeleteChildrenOnDestruction_)
+{
+	swapChildPointer(this, &other);
+	for (SceneNode *child : children_)
+		child->parent_ = this;
+}
+
+SceneNode &SceneNode::operator=(SceneNode &&other)
+{
+	Object::operator=(nctl::move(other));
+
+	x = other.x;
+	y = other.y;
+	updateEnabled_ = other.updateEnabled_;
+	drawEnabled_ = other.drawEnabled_;
+	parent_ = other.parent_;
+	children_ = nctl::move(other.children_);
+	anchorPoint_ = other.anchorPoint_;
+	scaleFactor_ = other.scaleFactor_;
+	rotation_ = other.rotation_;
+	color_ = other.color_;
+	shouldDeleteChildrenOnDestruction_ = other.shouldDeleteChildrenOnDestruction_;
+
+	swapChildPointer(this, &other);
+	for (SceneNode *child : children_)
+		child->parent_ = this;
+
+	return *this;
+}
+
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -176,6 +212,26 @@ void SceneNode::visit(RenderQueue &renderQueue)
 ///////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+/*! \note It is faster than calling `setParent()` on the first child and `removeChildNode()` on the second one */
+void SceneNode::swapChildPointer(SceneNode *first, SceneNode *second)
+{
+	ASSERT(first->parent_ == second->parent_);
+
+	SceneNode *parent = first->parent_;
+	if (parent)
+	{
+		for (unsigned int i = 0; i < parent->children_.size(); i++)
+		{
+			if (parent->children_[i] == second)
+			{
+				parent->children_[i] = this;
+				second->parent_ = nullptr;
+				break;
+			}
+		}
+	}
+}
 
 void SceneNode::transform()
 {

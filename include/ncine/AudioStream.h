@@ -12,7 +12,7 @@ class IAudioLoader;
 class DLL_PUBLIC AudioStream
 {
   public:
-	virtual ~AudioStream();
+	~AudioStream();
 
 	/// Returns the OpenAL id of the currently playing buffer, or 0 if not
 	inline unsigned int bufferId() const { return currentBufferId_; }
@@ -81,6 +81,11 @@ class DLL_PUBLIC AudioStream
 	AudioStream(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	/// Constructor creating an audio stream from an audio file
 	explicit AudioStream(const char *filename);
+
+	/// Default move constructor
+	AudioStream(AudioStream &&);
+	/// Default move assignment operator
+	AudioStream &operator=(AudioStream &&);
 
 	bool loadFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	bool loadFromFile(const char *filename);

@@ -46,8 +46,15 @@ AudioStream::AudioStream(const char *filename)
 
 AudioStream::~AudioStream()
 {
-	alDeleteBuffers(NumBuffers, buffersIds_.data());
+	// Don't delete buffers if this is a moved out object
+	if (buffersIds_.size() == NumBuffers)
+		alDeleteBuffers(NumBuffers, buffersIds_.data());
 }
+
+
+AudioStream::AudioStream(AudioStream &&) = default;
+
+AudioStream &AudioStream::operator=(AudioStream &&) = default;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS

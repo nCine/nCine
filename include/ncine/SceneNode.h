@@ -35,6 +35,11 @@ class DLL_PUBLIC SceneNode : public Object
 	/// The destructor will delete every child node
 	~SceneNode() override;
 
+	/// Move constructor
+	SceneNode(SceneNode &&other);
+	/// Move assignment operator
+	SceneNode &operator=(SceneNode &&other);
+
 	inline static ObjectType sType() { return ObjectType::SCENENODE; }
 
 	/// Returns the parent as a constant node, if there is any
@@ -192,10 +197,13 @@ class DLL_PUBLIC SceneNode : public Object
 	/// A flag indicating whether the destructor should also delete all children
 	bool shouldDeleteChildrenOnDestruction_;
 
-	/// Protected copy constructor
-	SceneNode(const SceneNode &);
-	/// Protected assignment operator
-	SceneNode &operator=(const SceneNode &);
+	/// Deleted copy constructor
+	SceneNode(const SceneNode &) = delete;
+	/// Deleted assignment operator
+	SceneNode &operator=(const SceneNode &) = delete;
+
+	/// Swaps the child pointer of a parent when moving an object
+	void swapChildPointer(SceneNode *first, SceneNode *second);
 
 	virtual void transform();
 };

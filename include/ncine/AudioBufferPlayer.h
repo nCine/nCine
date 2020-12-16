@@ -18,6 +18,11 @@ class DLL_PUBLIC AudioBufferPlayer : public IAudioPlayer
 	explicit AudioBufferPlayer(AudioBuffer *audioBuffer);
 	inline ~AudioBufferPlayer() override { stop(); }
 
+	/// Default move constructor
+	AudioBufferPlayer(AudioBufferPlayer &&) = default;
+	/// Default move assignment operator
+	AudioBufferPlayer &operator=(AudioBufferPlayer &&) = default;
+
 	unsigned int bufferId() const override;
 
 	int bytesPerSample() const override;

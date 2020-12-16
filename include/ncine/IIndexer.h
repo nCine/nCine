@@ -16,10 +16,12 @@ class DLL_PUBLIC IIndexer
 	/// Adds an object to the index
 	virtual unsigned int addObject(Object *object) = 0;
 	/// Removes an object from the index
-	virtual void removeObject(unsigned int id) = 0;
+	virtual bool removeObject(unsigned int id) = 0;
 
 	/// Returns the object with the specified object id, if any
 	virtual Object *object(unsigned int id) const = 0;
+	/// Sets the object pointer for the specified id
+	virtual bool setObject(unsigned int id, Object *object) = 0;
 
 	/// Returns true if the index is empty
 	virtual bool isEmpty() const = 0;
@@ -38,9 +40,10 @@ class DLL_PUBLIC NullIndexer : public IIndexer
 {
   public:
 	unsigned int addObject(Object *object) override { return 0U; }
-	void removeObject(unsigned int id) override {}
+	bool removeObject(unsigned int id) override { return true; }
 
 	Object *object(unsigned int id) const override { return nullptr; }
+	bool setObject(unsigned int id, Object *object) override { return true; };
 
 	bool isEmpty() const override { return true; }
 

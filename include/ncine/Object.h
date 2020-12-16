@@ -36,6 +36,11 @@ class DLL_PUBLIC Object
 	/// Removes an object from the index and then destroys it
 	virtual ~Object();
 
+	/// Move constructor
+	Object(Object &&other);
+	/// Move assignment operator
+	Object &operator=(Object &&other);
+
 	/// Returns the object identification number
 	inline unsigned int id() const { return id_; }
 
@@ -50,8 +55,7 @@ class DLL_PUBLIC Object
 	inline void setName(const char *name) { name_ = name; }
 
 	/// Returns a casted pointer to the object with the specified id, if any exists
-	template <class T>
-	static T *fromId(unsigned int id);
+	template <class T> static T *fromId(unsigned int id);
 
   protected:
 	/// Object type

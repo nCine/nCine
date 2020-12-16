@@ -22,7 +22,27 @@ Object::Object(ObjectType type, const char *name)
 
 Object::~Object()
 {
+	// Don't remove the object id from indexer if this is a moved out object
+	if (id_ > 0)
+		theServiceLocator().indexer().removeObject(id_);
+}
+
+Object::Object(Object &&other)
+    : type_(other.type_), id_(other.id_), name_(nctl::move(other.name_))
+{
+	theServiceLocator().indexer().setObject(id_, this);
+	other.id_ = 0;
+}
+
+Object& Object::operator=(Object &&other)
+{
+	type_ = other.type_;
 	theServiceLocator().indexer().removeObject(id_);
+	id_ = other.id_;
+	name_ = nctl::move(other.name_);
+
+	other.id_ = 0;
+	return *this;
 }
 
 ///////////////////////////////////////////////////////////

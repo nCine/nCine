@@ -91,9 +91,14 @@ Texture::Texture(const char *filename)
 
 Texture::~Texture()
 {
-	if (dataSize_ > 0)
+	// Don't remove data from statistics if this is a moved out object
+	if (dataSize_ > 0 && glTexture_)
 		RenderStatistics::removeTexture(dataSize_);
 }
+
+Texture::Texture(Texture &&) = default;
+
+Texture &Texture::operator=(Texture &&) = default;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS

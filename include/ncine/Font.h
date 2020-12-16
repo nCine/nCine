@@ -38,6 +38,11 @@ class DLL_PUBLIC Font : public Object
 
 	~Font() override;
 
+	/// Default move constructor
+	Font(Font &&);
+	/// Default move assignment operator
+	Font &operator=(Font &&);
+
 	bool loadFromMemory(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize, const char *texFilename);
 	bool loadFromMemory(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize,
 	                    const char *texBufferName, const unsigned char *texBufferPtr, unsigned long int texBufferSize);

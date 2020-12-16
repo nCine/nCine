@@ -58,6 +58,11 @@ class DLL_PUBLIC MeshSprite : public BaseSprite
 	/// Constructor for a sprite with a texture and a specified position as a vector but no parent
 	MeshSprite(Texture *texture, const Vector2f &position);
 
+	/// Default move constructor
+	MeshSprite(MeshSprite &&) = default;
+	/// Default move assignment operator
+	MeshSprite &operator=(MeshSprite &&) = default;
+
 	/// Returns the number of vertices of the sprite mesh
 	inline unsigned int numVertices() const { return numVertices_; }
 	/// Returns the vertices data of the sprite mesh

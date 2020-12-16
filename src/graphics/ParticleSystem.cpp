@@ -55,6 +55,10 @@ ParticleSystem::~ParticleSystem()
 	children_.clear();
 }
 
+ParticleSystem::ParticleSystem(ParticleSystem &&) = default;
+
+ParticleSystem &ParticleSystem::operator=(ParticleSystem &&) = default;
+
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
