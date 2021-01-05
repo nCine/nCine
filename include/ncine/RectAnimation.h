@@ -26,6 +26,9 @@ class DLL_PUBLIC RectAnimation
 		BACKWARD
 	};
 
+	/// Default constructor
+	RectAnimation()
+	    : RectAnimation(1.0f / 60.0f, LoopMode::DISABLED, RewindMode::FROM_START) {}
 	/// Constructor for an animation with a specified default frame duration, loop and rewind mode
 	RectAnimation(float defaultFrameDuration, LoopMode loopMode, RewindMode rewindMode);
 
@@ -46,6 +49,16 @@ class DLL_PUBLIC RectAnimation
 	float defaultFrameDuration() const { return defaultFrameDuration_; }
 	/// Sets the default frame duration in seconds
 	inline void setDefaultFrameDuration(float defaultFrameDuration) { defaultFrameDuration_ = defaultFrameDuration; }
+
+	/// Returns the loop mode
+	LoopMode loopMode() const { return loopMode_; }
+	/// Sets the loop mode
+	inline void setLoopMode(LoopMode loopMode) { loopMode_ = loopMode; }
+
+	/// Returns the rewind mode
+	RewindMode rewindMode() const { return rewindMode_; }
+	/// Sets the rewind mode
+	inline void setRewindMode(RewindMode rewindMode) { rewindMode_ = rewindMode; }
 
 	/// Adds a rectangle to the array specifying the frame duration
 	void addRect(const Recti &rect, float frameTime);

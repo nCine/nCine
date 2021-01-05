@@ -114,7 +114,7 @@ int LuaAnimatedSprite::addAnimation(lua_State *L)
 		luaL_argerror(L, -1, "Expecting a table");
 
 	AnimatedSprite *sprite = LuaClassWrapper<AnimatedSprite>::unwrapUserData(L, -2);
-	nctl::UniquePtr<RectAnimation> anim = LuaRectAnimation::retrieveTable(L, -1);
+	RectAnimation anim = LuaRectAnimation::retrieveTable(L, -1);
 
 	sprite->addAnimation(nctl::move(anim));
 

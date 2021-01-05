@@ -15,7 +15,7 @@ class LuaRectAnimation
   public:
 	static void exposeConstants(lua_State *L);
 
-	static nctl::UniquePtr<RectAnimation> retrieveTable(lua_State *L, int index);
+	static RectAnimation retrieveTable(lua_State *L, int index);
 };
 
 }

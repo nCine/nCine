@@ -41,13 +41,13 @@ void LuaRectAnimation::exposeConstants(lua_State *L)
 	lua_setfield(L, -2, LuaNames::RectAnimation::RewindMode);
 }
 
-nctl::UniquePtr<RectAnimation> LuaRectAnimation::retrieveTable(lua_State *L, int index)
+RectAnimation LuaRectAnimation::retrieveTable(lua_State *L, int index)
 {
 	const float defaultFrameDuration = LuaUtils::retrieveField<float>(L, index, LuaNames::RectAnimation::frameDuration);
 	const RectAnimation::LoopMode loopMode = static_cast<RectAnimation::LoopMode>(LuaUtils::retrieveField<int64_t>(L, index, LuaNames::RectAnimation::LoopMode));
 	const RectAnimation::RewindMode rewindMode = static_cast<RectAnimation::RewindMode>(LuaUtils::retrieveField<int64_t>(L, index, LuaNames::RectAnimation::RewindMode));
 
-	nctl::UniquePtr<RectAnimation> animation = nctl::makeUnique<RectAnimation>(defaultFrameDuration, loopMode, rewindMode);
+	RectAnimation animation(defaultFrameDuration, loopMode, rewindMode);
 
 	// It is not possible to specify custom frame durations with the Lua API
 	const unsigned int length = lua_rawlen(L, index);
@@ -58,11 +58,11 @@ nctl::UniquePtr<RectAnimation> LuaRectAnimation::retrieveTable(lua_State *L, int
 			luaL_argerror(L, -1, "Expecting a table");
 
 		const Recti rect = LuaRectiUtils::retrieveTable(L, -1);
-		animation->addRect(rect);
+		animation.addRect(rect);
 		lua_pop(L, 1);
 	}
 
-	return nctl::move(animation);
+	return animation;
 }
 
 }

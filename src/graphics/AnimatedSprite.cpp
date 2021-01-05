@@ -49,8 +49,7 @@ AnimatedSprite AnimatedSprite::clone(SceneNode *parent) const
 {
 	AnimatedSprite newSprite(parent, texture_, x, y);
 	BaseSprite::cloneInto(newSprite);
-	for (const nctl::UniquePtr<RectAnimation> &anim : anims_)
-		newSprite.addAnimation(nctl::makeUnique<RectAnimation>(*anim));
+	newSprite.anims_ = anims_;
 
 	newSprite.setAnimationIndex(animationIndex());
 	newSprite.setFrame(frame());
@@ -61,43 +60,46 @@ AnimatedSprite AnimatedSprite::clone(SceneNode *parent) const
 bool AnimatedSprite::isPaused() const
 {
 	ASSERT(!anims_.isEmpty());
-	const bool isPaused = anims_[currentAnimIndex_]->isPaused();
+	const bool isPaused = anims_[currentAnimIndex_].isPaused();
 	return isPaused;
 }
 
 void AnimatedSprite::setPaused(bool isPaused)
 {
 	ASSERT(!anims_.isEmpty());
-	anims_[currentAnimIndex_]->setPaused(isPaused);
+	anims_[currentAnimIndex_].setPaused(isPaused);
 }
 
 void AnimatedSprite::update(float interval)
 {
 	ASSERT(!anims_.isEmpty());
 
-	const unsigned int previousFrame = anims_[currentAnimIndex_]->frame();
-	anims_[currentAnimIndex_]->updateFrame(interval);
+	const unsigned int previousFrame = anims_[currentAnimIndex_].frame();
+	anims_[currentAnimIndex_].updateFrame(interval);
 
 	// Updating sprite texture rectangle only on change
-	if (previousFrame != anims_[currentAnimIndex_]->frame())
-		setTexRect(anims_[currentAnimIndex_]->rect());
+	if (previousFrame != anims_[currentAnimIndex_].frame())
+		setTexRect(anims_[currentAnimIndex_].rect());
 
 	Sprite::update(interval);
 }
 
-void AnimatedSprite::addAnimation(nctl::UniquePtr<RectAnimation> anim)
+void AnimatedSprite::addAnimation(const RectAnimation &anim)
 {
-	ASSERT(anim);
+	anims_.pushBack(anim);
+	currentAnimIndex_ = anims_.size() - 1;
+	setTexRect(anims_[currentAnimIndex_].rect());
+}
 
+void AnimatedSprite::addAnimation(RectAnimation &&anim)
+{
 	anims_.pushBack(nctl::move(anim));
 	currentAnimIndex_ = anims_.size() - 1;
-	setTexRect(anims_[currentAnimIndex_]->rect());
+	setTexRect(anims_[currentAnimIndex_].rect());
 }
 
 void AnimatedSprite::clearAnimations()
 {
-	for (nctl::UniquePtr<RectAnimation> &anim : anims_)
-		anim.reset(nullptr);
 	anims_.clear();
 }
 
@@ -107,20 +109,20 @@ void AnimatedSprite::setAnimationIndex(unsigned int animIndex)
 	ASSERT(animIndex < anims_.size());
 
 	currentAnimIndex_ = animIndex;
-	setTexRect(anims_[currentAnimIndex_]->rect());
+	setTexRect(anims_[currentAnimIndex_].rect());
 }
 
 unsigned int AnimatedSprite::frame() const
 {
 	ASSERT(!anims_.isEmpty());
-	return anims_[currentAnimIndex_]->frame();
+	return anims_[currentAnimIndex_].frame();
 }
 
 void AnimatedSprite::setFrame(unsigned int frameNum)
 {
 	ASSERT(!anims_.isEmpty());
-	anims_[currentAnimIndex_]->setFrame(frameNum);
-	setTexRect(anims_[currentAnimIndex_]->rect());
+	anims_[currentAnimIndex_].setFrame(frameNum);
+	setTexRect(anims_[currentAnimIndex_].rect());
 }
 
 }

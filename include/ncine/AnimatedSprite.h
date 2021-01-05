@@ -43,16 +43,18 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	void update(float interval) override;
 
 	/// Adds a new animation
-	void addAnimation(nctl::UniquePtr<RectAnimation> anim);
+	void addAnimation(const RectAnimation &anim);
+	/// Adds a new animation with move semantics
+	void addAnimation(RectAnimation &&anim);
 	/// Deletes all animations
 	void clearAnimations();
 
 	/// Returns the number of animations
 	inline unsigned int numAnimations() { return anims_.size(); }
 	/// Returns the array of all animations
-	inline nctl::Array<nctl::UniquePtr<RectAnimation>> &animations() { return anims_; }
+	inline nctl::Array<RectAnimation> &animations() { return anims_; }
 	/// Returns the constant array of all animations
-	inline const nctl::Array<nctl::UniquePtr<RectAnimation>> &animations() const { return anims_; }
+	inline const nctl::Array<RectAnimation> &animations() const { return anims_; }
 
 	/// Returns the index of the current animation
 	unsigned int animationIndex() const { return currentAnimIndex_; }
@@ -67,7 +69,7 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	inline static ObjectType sType() { return ObjectType::ANIMATED_SPRITE; }
 
   private:
-	nctl::Array<nctl::UniquePtr<RectAnimation>> anims_;
+	nctl::Array<RectAnimation> anims_;
 	unsigned int currentAnimIndex_;
 
 	/// Deleted copy constructor
