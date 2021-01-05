@@ -29,6 +29,11 @@ class DLL_PUBLIC Sprite : public BaseSprite
 	/// Default move assignment operator
 	Sprite &operator=(Sprite &&) = default;
 
+	/// Returns a copy of this object, with the specified parent
+	Sprite clone(SceneNode *parent) const;
+	/// Returns a copy of this object
+	inline Sprite clone() const { return clone(parent_); }
+
 	inline static ObjectType sType() { return ObjectType::SPRITE; }
 
   private:

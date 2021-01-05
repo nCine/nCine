@@ -85,6 +85,17 @@ MeshSprite::MeshSprite(Texture *texture, const Vector2f &position)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+MeshSprite MeshSprite::clone(SceneNode *parent) const
+{
+	MeshSprite newSprite(parent, texture_, x, y);
+	BaseSprite::cloneInto(newSprite);
+
+	newSprite.copyVertices(numVertices_, vertices_.data());
+	newSprite.copyIndices(numIndices_, indices_.data());
+
+	return newSprite;
+}
+
 void MeshSprite::copyVertices(unsigned int numVertices, const float *vertices)
 {
 	const unsigned int numBytes = texture_ ? sizeof(Vertex) : sizeof(VertexNoTexture);

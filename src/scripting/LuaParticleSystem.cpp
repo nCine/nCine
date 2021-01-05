@@ -62,6 +62,7 @@ void LuaParticleSystem::expose(LuaStateManager *stateManager)
 	{
 		LuaClassTracker<ParticleSystem>::exposeDelete(L);
 		LuaUtils::addFunction(L, LuaNames::newObject, newObject);
+		LuaUtils::addFunction(L, LuaNames::cloneNode, cloneNode);
 	}
 
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::addColorAffector, addColorAffector);
@@ -343,6 +344,15 @@ int LuaParticleSystem::newObject(lua_State *L)
 	const Recti texRect = LuaRectiUtils::retrieveTable(L, -1);
 
 	LuaClassTracker<ParticleSystem>::newObject(L, parent, count, texture, texRect);
+
+	return 1;
+}
+
+int LuaParticleSystem::cloneNode(lua_State *L)
+{
+	const ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -1);
+
+	LuaClassTracker<ParticleSystem>::cloneNode(L, *particleSys);
 
 	return 1;
 }

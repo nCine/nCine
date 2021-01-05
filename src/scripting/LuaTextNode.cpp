@@ -50,6 +50,7 @@ void LuaTextNode::expose(LuaStateManager *stateManager)
 	{
 		LuaClassTracker<TextNode>::exposeDelete(L);
 		LuaUtils::addFunction(L, LuaNames::newObject, newObject);
+		LuaUtils::addFunction(L, LuaNames::cloneNode, cloneNode);
 	}
 
 	LuaUtils::addFunction(L, LuaNames::TextNode::width, width);
@@ -105,6 +106,15 @@ int LuaTextNode::newObject(lua_State *L)
 	const unsigned int maxStringLength = LuaUtils::retrieve<uint32_t>(L, -1);
 
 	LuaClassTracker<TextNode>::newObject(L, parent, font, maxStringLength);
+
+	return 1;
+}
+
+int LuaTextNode::cloneNode(lua_State *L)
+{
+	const TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
+
+	LuaClassTracker<TextNode>::cloneNode(L, *textnode);
 
 	return 1;
 }

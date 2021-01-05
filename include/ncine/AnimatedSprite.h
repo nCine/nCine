@@ -30,6 +30,11 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	/// Default move assignment operator
 	AnimatedSprite &operator=(AnimatedSprite &&) = default;
 
+	/// Returns a copy of this object, with the specified parent
+	AnimatedSprite clone(SceneNode *parent) const;
+	/// Returns a copy of this object
+	inline AnimatedSprite clone() const { return clone(parent_); }
+
 	/// Returns true if the current animation is paused
 	bool isPaused() const;
 	/// Sets the pause state for the animation

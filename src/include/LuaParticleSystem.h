@@ -16,6 +16,7 @@ class LuaParticleSystem
 
   private:
 	static int newObject(lua_State *L);
+	static int cloneNode(lua_State *L);
 
 	static int addColorAffector(lua_State *L);
 	static int addSizeAffector(lua_State *L);

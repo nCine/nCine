@@ -29,6 +29,11 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	/// Default move assignment operator
 	ParticleSystem &operator=(ParticleSystem &&);
 
+	/// Returns a copy of this object, with the specified parent
+	ParticleSystem clone(SceneNode *parent) const;
+	/// Returns a copy of this object
+	inline ParticleSystem clone() const { return clone(parent_); }
+
 	/// Adds a particle affector
 	inline void addAffector(nctl::UniquePtr<ParticleAffector> affector) { affectors_.pushBack(nctl::move(affector)); }
 	/// Deletes all particle affectors

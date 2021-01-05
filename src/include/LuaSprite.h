@@ -16,7 +16,9 @@ class LuaSprite
 
   private:
 	static void exposeFunctions(lua_State *L);
+
 	static int newObject(lua_State *L);
+	static int cloneNode(lua_State *L);
 
 	friend class LuaAnimatedSprite;
 };

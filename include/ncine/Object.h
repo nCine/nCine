@@ -61,6 +61,8 @@ class DLL_PUBLIC Object
 	/// Object type
 	ObjectType type_;
 
+	void cloneInto(Object &other) const;
+
   private:
 	/// Object identification in the indexer
 	unsigned int id_;

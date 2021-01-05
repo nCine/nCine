@@ -23,6 +23,7 @@
 #include "LuaFileSystem.h"
 #include "LuaApplication.h"
 #include "LuaTexture.h"
+#include "LuaSceneNode.h"
 #include "LuaSprite.h"
 #include "LuaMeshSprite.h"
 #include "LuaAnimatedSprite.h"
@@ -164,6 +165,11 @@ void LuaStateManager::releaseTrackedMemory()
 			case LuaTypes::FONT:
 			{
 				LuaFont::release(wrapper.object);
+				break;
+			}
+			case LuaTypes::SCENENODE:
+			{
+				LuaSceneNode::release(wrapper.object);
 				break;
 			}
 			case LuaTypes::SPRITE:
@@ -374,6 +380,7 @@ void LuaStateManager::exposeApi()
 	if (appCfg.withScenegraph)
 	{
 		LuaTexture::expose(this);
+		LuaSceneNode::expose(this);
 		LuaSprite::expose(this);
 		LuaMeshSprite::expose(this);
 		LuaAnimatedSprite::expose(this);

@@ -75,6 +75,22 @@ Sprite::Sprite(Texture *texture, const Vector2f &position)
 {
 }
 
+///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
+
+Sprite Sprite::clone(SceneNode *parent) const
+{
+	Sprite newSprite(parent, texture_, x, y);
+	BaseSprite::cloneInto(newSprite);
+
+	return newSprite;
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
 void Sprite::textureHasChanged(Texture *newTexture)
 {
 	if (renderCommand_->material().shaderProgramType() != Material::ShaderProgramType::CUSTOM)

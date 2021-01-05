@@ -63,6 +63,11 @@ class DLL_PUBLIC MeshSprite : public BaseSprite
 	/// Default move assignment operator
 	MeshSprite &operator=(MeshSprite &&) = default;
 
+	/// Returns a copy of this object, with the specified parent
+	MeshSprite clone(SceneNode *parent) const;
+	/// Returns a copy of this object
+	inline MeshSprite clone() const { return clone(parent_); }
+
 	/// Returns the number of vertices of the sprite mesh
 	inline unsigned int numVertices() const { return numVertices_; }
 	/// Returns the vertices data of the sprite mesh

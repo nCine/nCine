@@ -56,6 +56,8 @@ class DLL_PUBLIC BaseSprite : public DrawableNode
 	/// Protected construtor accessible only by derived sprite classes
 	BaseSprite(SceneNode *parent, Texture *texture, const Vector2f &position);
 
+	void cloneInto(BaseSprite &other) const;
+
 	void updateRenderCommand() override;
 
 	/// Performs the required tasks upon a change in the texture

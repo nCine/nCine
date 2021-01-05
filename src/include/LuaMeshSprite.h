@@ -17,6 +17,7 @@ class LuaMeshSprite
 
   private:
 	static int newObject(lua_State *L);
+	static int cloneNode(lua_State *L);
 
 	static int numVertices(lua_State *L);
 	static int copyVertices(lua_State *L);

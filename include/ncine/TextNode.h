@@ -40,6 +40,11 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Default move assignment operator
 	TextNode &operator=(TextNode &&) = default;
 
+	/// Returns a copy of this object, with the specified parent
+	TextNode clone(SceneNode *parent) const;
+	/// Returns a copy of this object
+	inline TextNode clone() const { return clone(parent_); }
+
 	/// Returns the width of rendered text
 	float width() const override;
 	/// Returns the height of rendered text

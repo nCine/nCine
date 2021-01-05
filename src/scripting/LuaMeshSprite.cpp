@@ -43,6 +43,7 @@ void LuaMeshSprite::expose(LuaStateManager *stateManager)
 	{
 		LuaClassTracker<MeshSprite>::exposeDelete(L);
 		LuaUtils::addFunction(L, LuaNames::newObject, newObject);
+		LuaUtils::addFunction(L, LuaNames::cloneNode, cloneNode);
 	}
 
 	LuaUtils::addFunction(L, LuaNames::MeshSprite::numVertices, numVertices);
@@ -153,6 +154,15 @@ int LuaMeshSprite::newObject(lua_State *L)
 	const float y = LuaUtils::retrieve<float>(L, -1);
 
 	LuaClassTracker<MeshSprite>::newObject(L, parent, texture, x, y);
+
+	return 1;
+}
+
+int LuaMeshSprite::cloneNode(lua_State *L)
+{
+	const MeshSprite *sprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -1);
+
+	LuaClassTracker<MeshSprite>::cloneNode(L, *sprite);
 
 	return 1;
 }

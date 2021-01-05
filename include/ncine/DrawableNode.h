@@ -141,6 +141,8 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	/// Calculates updated values for the AABB
 	virtual void updateAabb();
 
+	void cloneInto(DrawableNode &other) const;
+
 	/// Updates the render command
 	virtual void updateRenderCommand() = 0;
 

@@ -16,6 +16,7 @@ class LuaAnimatedSprite
 
   private:
 	static int newObject(lua_State *L);
+	static int cloneNode(lua_State *L);
 
 	static int isPaused(lua_State *L);
 	static int setPaused(lua_State *L);

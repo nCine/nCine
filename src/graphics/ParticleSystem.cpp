@@ -63,6 +63,21 @@ ParticleSystem &ParticleSystem::operator=(ParticleSystem &&) = default;
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+ParticleSystem ParticleSystem::clone(SceneNode *parent) const
+{
+	const Particle &particle = *particlePool_.front();
+	ParticleSystem newSystem(parent, poolSize_, particle.texture_, particle.texRect());
+	newSystem.setInLocalSpace(inLocalSpace_);
+
+	newSystem.setAnchorPoint(particle.anchorPoint());
+	newSystem.setFlippedX(particle.isFlippedX());
+	newSystem.setFlippedY(particle.isFlippedY());
+	newSystem.setBlendingFactors(particle.srcBlendingFactor(), particle.destBlendingFactor());
+	newSystem.setLayer(particle.layer());
+
+	return newSystem;
+}
+
 void ParticleSystem::clearAffectors()
 {
 	for (nctl::UniquePtr<ParticleAffector> &affector : affectors_)

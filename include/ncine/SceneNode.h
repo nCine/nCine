@@ -40,6 +40,11 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Move assignment operator
 	SceneNode &operator=(SceneNode &&other);
 
+	/// Returns a copy of this object, with the specified parent
+	SceneNode clone(SceneNode *parent) const;
+	/// Returns a copy of this object
+	inline SceneNode clone() const { return clone(parent_); }
+
 	inline static ObjectType sType() { return ObjectType::SCENENODE; }
 
 	/// Returns the parent as a constant node, if there is any
@@ -201,6 +206,8 @@ class DLL_PUBLIC SceneNode : public Object
 	SceneNode(const SceneNode &) = delete;
 	/// Deleted assignment operator
 	SceneNode &operator=(const SceneNode &) = delete;
+
+	void cloneInto(SceneNode &node) const;
 
 	/// Swaps the child pointer of a parent when moving an object
 	void swapChildPointer(SceneNode *first, SceneNode *second);

@@ -71,4 +71,14 @@ T *Object::fromId(unsigned int id)
 	}
 }
 
+///////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void Object::cloneInto(Object &other) const
+{
+	// `type_` and `id_` variables are already initialized by the constructor of the derived class
+	other.name_.assign(name_);
+}
+
 }

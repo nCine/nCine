@@ -8,6 +8,7 @@ namespace LuaNames {
 
 	static const char *newObject = "new";
 	static const char *deleteObject = "delete";
+	static const char *cloneNode = "clone";
 
 	static const char *input = "input";
 }

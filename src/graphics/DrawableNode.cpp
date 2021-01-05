@@ -216,4 +216,15 @@ void DrawableNode::updateAabb()
 	aabb_ = Rectf::fromCenterAndSize(absX_, absY_, rotatedWidth, rotatedHeight);
 }
 
+void DrawableNode::cloneInto(DrawableNode &other) const
+{
+	SceneNode::cloneInto(other);
+	other.width_ = width_;
+	other.height_ = height_;
+
+	other.setBlendingEnabled(isBlendingEnabled());
+	other.setBlendingFactors(srcBlendingFactor(), destBlendingFactor());
+	other.setLayer(layer());
+}
+
 }

@@ -45,6 +45,19 @@ AnimatedSprite::AnimatedSprite(Texture *texture, const Vector2f &position)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+AnimatedSprite AnimatedSprite::clone(SceneNode *parent) const
+{
+	AnimatedSprite newSprite(parent, texture_, x, y);
+	BaseSprite::cloneInto(newSprite);
+	for (const nctl::UniquePtr<RectAnimation> &anim : anims_)
+		newSprite.addAnimation(nctl::makeUnique<RectAnimation>(*anim));
+
+	newSprite.setAnimationIndex(animationIndex());
+	newSprite.setFrame(frame());
+
+	return newSprite;
+}
+
 bool AnimatedSprite::isPaused() const
 {
 	ASSERT(!anims_.isEmpty());

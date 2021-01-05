@@ -26,6 +26,7 @@ class LuaClassTracker
 	template <typename... Args>
 	static inline void newObject(lua_State *L, Args &&... args);
 	static inline int deleteObject(lua_State *L);
+	static inline void cloneNode(lua_State *L, const T &other);
 
   private:
 	static inline void wrapTrackedUserData(lua_State *L, T *object);
@@ -80,6 +81,17 @@ int LuaClassTracker<T>::deleteObject(lua_State *L)
 #endif
 
 	return 0;
+}
+
+template <class T>
+void LuaClassTracker<T>::cloneNode(lua_State *L, const T &other)
+{
+#if !NCINE_WITH_ALLOCATORS
+	T *ptr = new T(nctl::move(other.clone()));
+#else
+	T *ptr = new (nctl::theLuaAllocator().allocate(sizeof(T))) T(nctl::move(other.clone()));
+#endif
+	wrapTrackedUserData(L, ptr);
 }
 
 template <class T>

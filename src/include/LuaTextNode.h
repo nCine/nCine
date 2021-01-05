@@ -17,6 +17,7 @@ class LuaTextNode
 
   private:
 	static int newObject(lua_State *L);
+	static int cloneNode(lua_State *L);
 
 	static int width(lua_State *L);
 	static int height(lua_State *L);

@@ -63,6 +63,20 @@ TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+TextNode TextNode::clone(SceneNode *parent) const
+{
+	TextNode newNode(parent, font_, string_.capacity());
+	DrawableNode::cloneInto(newNode);
+
+	newNode.string_.assign(string_);
+	newNode.withKerning_ = withKerning_;
+	// Font and dirty flags are assigned by the constructor
+	newNode.alignment_ = alignment_;
+	newNode.lineHeight_ = lineHeight_;
+
+	return newNode;
+}
+
 float TextNode::width() const
 {
 	calculateBoundaries();

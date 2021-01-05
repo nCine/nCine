@@ -1,5 +1,6 @@
 #include "LuaSceneNode.h"
 #include "LuaClassWrapper.h"
+#include "LuaClassTracker.h"
 #include "LuaColorUtils.h"
 #include "LuaVector2Utils.h"
 #include "SceneNode.h"
@@ -8,6 +9,8 @@ namespace ncine {
 
 namespace LuaNames {
 namespace SceneNode {
+	static const char *SceneNode = "scenenode";
+
 	static const char *parent = "get_parent";
 	static const char *setParent = "set_parent";
 	static const char *addChildNode = "add_child";
@@ -33,6 +36,33 @@ namespace SceneNode {
 	static const char *alpha = "get_alpha";
 	static const char *setAlpha = "set_alpha";
 }}
+
+///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void LuaSceneNode::expose(LuaStateManager *stateManager)
+{
+	lua_State *L = stateManager->state();
+	lua_newtable(L);
+
+	if (stateManager->apiType() == LuaStateManager::ApiType::FULL)
+	{
+		LuaClassTracker<SceneNode>::exposeDelete(L);
+		LuaUtils::addFunction(L, LuaNames::newObject, newObject);
+		LuaUtils::addFunction(L, LuaNames::cloneNode, cloneNode);
+	}
+
+	exposeFunctions(L);
+
+	lua_setfield(L, -2, LuaNames::SceneNode::SceneNode);
+}
+
+void LuaSceneNode::release(void *object)
+{
+	SceneNode *node = reinterpret_cast<SceneNode *>(object);
+	delete node;
+}
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
@@ -64,6 +94,26 @@ void LuaSceneNode::exposeFunctions(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::SceneNode::setColor, setColor);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::alpha, alpha);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::setAlpha, setAlpha);
+}
+
+int LuaSceneNode::newObject(lua_State *L)
+{
+	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserDataOrNil(L, -3);
+	const float x = LuaUtils::retrieve<float>(L, -2);
+	const float y = LuaUtils::retrieve<float>(L, -1);
+
+	LuaClassTracker<SceneNode>::newObject(L, parent, x, y);
+
+	return 1;
+}
+
+int LuaSceneNode::cloneNode(lua_State *L)
+{
+	const SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+
+	LuaClassTracker<SceneNode>::cloneNode(L, *node);
+
+	return 1;
 }
 
 int LuaSceneNode::parent(lua_State *L)

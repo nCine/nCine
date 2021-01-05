@@ -25,6 +25,7 @@ void LuaSprite::expose(LuaStateManager *stateManager)
 	{
 		LuaClassTracker<Sprite>::exposeDelete(L);
 		LuaUtils::addFunction(L, LuaNames::newObject, newObject);
+		LuaUtils::addFunction(L, LuaNames::cloneNode, cloneNode);
 	}
 
 	exposeFunctions(L);
@@ -55,6 +56,15 @@ int LuaSprite::newObject(lua_State *L)
 	const float y = LuaUtils::retrieve<float>(L, -1);
 
 	LuaClassTracker<Sprite>::newObject(L, parent, texture, x, y);
+
+	return 1;
+}
+
+int LuaSprite::cloneNode(lua_State *L)
+{
+	const Sprite *sprite = LuaClassWrapper<Sprite>::unwrapUserData(L, -1);
+
+	LuaClassTracker<Sprite>::cloneNode(L, *sprite);
 
 	return 1;
 }

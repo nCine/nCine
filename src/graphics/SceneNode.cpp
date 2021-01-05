@@ -97,6 +97,14 @@ SceneNode &SceneNode::operator=(SceneNode &&other)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+SceneNode SceneNode::clone(SceneNode *parent) const
+{
+	SceneNode newNode(parent, x, y);
+	cloneInto(newNode);
+
+	return newNode;
+}
+
 void SceneNode::setParent(SceneNode *parentNode)
 {
 	// Can't set yourself or your parent as parent
@@ -212,6 +220,23 @@ void SceneNode::visit(RenderQueue &renderQueue)
 ///////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+void SceneNode::cloneInto(SceneNode &other) const
+{
+	Object::cloneInto(other);
+	// The x, y, and parent_ members are initialized by the other object constructor
+	other.updateEnabled_ = updateEnabled_;
+	other.drawEnabled_ = drawEnabled_;
+
+	// Children are not copied
+	other.anchorPoint_ = anchorPoint_;
+	other.scaleFactor_ = scaleFactor_;
+	other.rotation_ = rotation_;
+	other.color_ = color_;
+
+	// Absolute transformations and matrices are calculated and not copied
+	other.shouldDeleteChildrenOnDestruction_ = shouldDeleteChildrenOnDestruction_;
+}
 
 /*! \note It is faster than calling `setParent()` on the first child and `removeChildNode()` on the second one */
 void SceneNode::swapChildPointer(SceneNode *first, SceneNode *second)
