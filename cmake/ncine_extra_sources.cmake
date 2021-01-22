@@ -338,9 +338,10 @@ if(NCINE_WITH_IMGUI)
 
 	list(APPEND SOURCES
 		${IMGUI_SOURCE_DIR}/imgui.cpp
-		${IMGUI_SOURCE_DIR}/imgui_draw.cpp
-		${IMGUI_SOURCE_DIR}/imgui_widgets.cpp
 		${IMGUI_SOURCE_DIR}/imgui_demo.cpp
+		${IMGUI_SOURCE_DIR}/imgui_draw.cpp
+		${IMGUI_SOURCE_DIR}/imgui_tables.cpp
+		${IMGUI_SOURCE_DIR}/imgui_widgets.cpp
 		${NCINE_ROOT}/src/graphics/ImGuiDrawing.cpp
 		${NCINE_ROOT}/src/input/ImGuiJoyMappedInput.cpp
 	)

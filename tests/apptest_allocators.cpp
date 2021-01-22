@@ -138,86 +138,86 @@ void MyEventHandler::onFrameStart()
 		}
 		ImGui::Separator();
 
-		ImGui::Columns(8, "allocatorEntries", true);
-		ImGui::Text("Entry");
-		ImGui::NextColumn();
-		ImGui::Text("Pointer");
-		ImGui::NextColumn();
-		ImGui::Text("Type");
-		ImGui::NextColumn();
-		ImGui::Text("Size");
-		ImGui::NextColumn();
-		ImGui::Text("Used");
-		ImGui::NextColumn();
-		ImGui::Text("Allocations");
-		ImGui::NextColumn();
-		ImGui::Text("Base Address");
-		ImGui::NextColumn();
-		ImGui::Text("Actions");
-		ImGui::NextColumn();
-		ImGui::Separator();
-		for (unsigned int i = 0; i < allocators.size(); i++)
+		if (ImGui::BeginTable("allocatorEntries", 8, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
+		                      ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp))
 		{
-			const AllocatorType type = allocators[i].type;
-			nctl::IAllocator &alloc = *allocators[i].allocator;
-			ImGui::Text("#%u", i);
-			ImGui::NextColumn();
-			ImGui::Text("0x%lx", uintptr_t(&alloc));
-			ImGui::NextColumn();
-			ImGui::Text("%s", typeStrings[static_cast<int>(allocators[i].type)]);
-			ImGui::NextColumn();
-			ImGui::Text("%lu", alloc.size());
-			ImGui::NextColumn();
-			const float usedFraction = alloc.usedMemory() / static_cast<float>(alloc.size());
-			widgetName_.format("%lu / %lu", alloc.usedMemory(), alloc.size());
-			ImGui::ProgressBar(usedFraction, ImVec2(0.0f, 0.0f), widgetName_.data());
-			ImGui::NextColumn();
-			ImGui::Text("%lu", alloc.numAllocations());
-			ImGui::NextColumn();
-			ImGui::Text("0x%lx", uintptr_t(alloc.base()));
-			ImGui::NextColumn();
-			if (type == AllocatorType::LINEAR && alloc.numAllocations() > 0)
+			ImGui::TableSetupScrollFreeze(0, 1);
+			ImGui::TableSetupColumn("Entry", ImGuiTableColumnFlags_NoReorder | ImGuiTableColumnFlags_NoHide);
+			ImGui::TableSetupColumn("Pointer");
+			ImGui::TableSetupColumn("Type");
+			ImGui::TableSetupColumn("Size");
+			ImGui::TableSetupColumn("Used");
+			ImGui::TableSetupColumn("Allocations");
+			ImGui::TableSetupColumn("Base Address");
+			ImGui::TableSetupColumn("Actions");
+			ImGui::TableHeadersRow();
+
+			for (unsigned int i = 0; i < allocators.size(); i++)
 			{
-				widgetName_.format("Clear##0x%lx", &alloc);
-				if (ImGui::Button(widgetName_.data()))
+				const AllocatorType type = allocators[i].type;
+				nctl::IAllocator &alloc = *allocators[i].allocator;
+
+				ImGui::TableNextRow();
+				ImGui::TableNextColumn();
+				ImGui::Text("#%u", i);
+				ImGui::TableNextColumn();
+				ImGui::Text("0x%lx", uintptr_t(&alloc));
+				ImGui::TableNextColumn();
+				ImGui::Text("%s", typeStrings[static_cast<int>(allocators[i].type)]);
+				ImGui::TableNextColumn();
+				ImGui::Text("%lu", alloc.size());
+				ImGui::TableNextColumn();
+				const float usedFraction = alloc.usedMemory() / static_cast<float>(alloc.size());
+				widgetName_.format("%lu / %lu", alloc.usedMemory(), alloc.size());
+				ImGui::ProgressBar(usedFraction, ImVec2(0.0f, 0.0f), widgetName_.data());
+				ImGui::TableNextColumn();
+				ImGui::Text("%lu", alloc.numAllocations());
+				ImGui::TableNextColumn();
+				ImGui::Text("0x%lx", uintptr_t(alloc.base()));
+				ImGui::TableNextColumn();
+				if (type == AllocatorType::LINEAR && alloc.numAllocations() > 0)
 				{
-					allocators[i].allocations.clear();
-					static_cast<nctl::LinearAllocator &>(alloc).clear();
-				}
-				ImGui::SameLine();
-			}
-			else if (type == AllocatorType::FREELIST)
-			{
-				nctl::FreeListAllocator &flAlloc = static_cast<nctl::FreeListAllocator &>(alloc);
-				if (flAlloc.defragOnDeallocation() == false)
-				{
-					widgetName_.format("Defrag##0x%lx", &alloc);
+					widgetName_.format("Clear##0x%lx", &alloc);
 					if (ImGui::Button(widgetName_.data()))
 					{
-						nc::TimeStamp timestamp = nc::TimeStamp::now();
-						flAlloc.defrag();
-						LOGI_X("FreeList allocator derfagged in %f ms", timestamp.millisecondsSince());
+						allocators[i].allocations.clear();
+						static_cast<nctl::LinearAllocator &>(alloc).clear();
 					}
-					if (alloc.numAllocations() == 0)
-						ImGui::SameLine();
+					ImGui::SameLine();
 				}
+				else if (type == AllocatorType::FREELIST)
+				{
+					nctl::FreeListAllocator &flAlloc = static_cast<nctl::FreeListAllocator &>(alloc);
+					if (flAlloc.defragOnDeallocation() == false)
+					{
+						widgetName_.format("Defrag##0x%lx", &alloc);
+						if (ImGui::Button(widgetName_.data()))
+						{
+							nc::TimeStamp timestamp = nc::TimeStamp::now();
+							flAlloc.defrag();
+							LOGI_X("FreeList allocator derfagged in %f ms", timestamp.millisecondsSince());
+						}
+						if (alloc.numAllocations() == 0)
+							ImGui::SameLine();
+					}
+				}
+
+				if (alloc.numAllocations() == 0)
+				{
+					widgetName_.format("Delete##0x%lx", &alloc);
+					if (ImGui::Button(widgetName_.data()))
+					{
+						allocators.removeAt(i);
+						if (currentComboAllocatorEntry > allocators.size() - 1)
+							currentComboAllocatorEntry = allocators.size() - 1;
+					}
+				}
+				else if (type == AllocatorType::STACK || type == AllocatorType::POOL)
+					ImGui::Text("Pending allocations");
 			}
 
-			if (alloc.numAllocations() == 0)
-			{
-				widgetName_.format("Delete##0x%lx", &alloc);
-				if (ImGui::Button(widgetName_.data()))
-				{
-					allocators.removeAt(i);
-					if (currentComboAllocatorEntry > allocators.size() - 1)
-						currentComboAllocatorEntry = allocators.size() - 1;
-				}
-			}
-			else if (type == AllocatorType::STACK || type == AllocatorType::POOL)
-				ImGui::Text("Pending allocations");
-			ImGui::NextColumn();
+			ImGui::EndTable();
 		}
-		ImGui::Columns(1);
 
 		ImGui::TreePop();
 	}
@@ -350,28 +350,31 @@ void MyEventHandler::onFrameStart()
 			nctl::FreeListAllocator &flAlloc = static_cast<nctl::FreeListAllocator &>(selectedAlloc);
 			const nctl::FreeListAllocator::Block *block = flAlloc.freeBlock();
 
-			ImGui::Columns(3, "freelistEntries", true);
-			ImGui::Text("Entry");
-			ImGui::NextColumn();
-			ImGui::Text("Pointer");
-			ImGui::NextColumn();
-			ImGui::Text("Size");
-			ImGui::NextColumn();
-			ImGui::Separator();
-			unsigned int i = 0;
-			while (block != nullptr)
+			if (ImGui::BeginTable("freelistEntries", 3, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
+			                      ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp))
 			{
-				ImGui::Text("#%u", i);
-				ImGui::NextColumn();
-				ImGui::Text("0x%lx (+%lu)", uintptr_t(block), uintptr_t(block) - uintptr_t(flAlloc.base()));
-				ImGui::NextColumn();
-				ImGui::Text("%lu", block->size);
-				ImGui::NextColumn();
+				ImGui::TableSetupScrollFreeze(0, 1);
+				ImGui::TableSetupColumn("Entry", ImGuiTableColumnFlags_NoReorder | ImGuiTableColumnFlags_NoHide);
+				ImGui::TableSetupColumn("Pointer");
+				ImGui::TableSetupColumn("Size");
+				ImGui::TableHeadersRow();
 
-				i++;
-				block = block->next;
+				unsigned int i = 0;
+				while (block != nullptr)
+				{
+					ImGui::TableNextRow();
+					ImGui::TableNextColumn();
+					ImGui::Text("#%u", i);
+					ImGui::TableNextColumn();
+					ImGui::Text("0x%lx (+%lu)", uintptr_t(block), uintptr_t(block) - uintptr_t(flAlloc.base()));
+					ImGui::TableNextColumn();
+					ImGui::Text("%lu", block->size);
+
+					i++;
+					block = block->next;
+				}
+				ImGui::EndTable();
 			}
-			ImGui::Columns(1);
 		}
 
 		ImGui::TreePop();
@@ -455,77 +458,76 @@ void MyEventHandler::onFrameStart()
 		}
 		ImGui::Separator();
 
-		ImGui::Columns(7, "allocationEntries", true);
-		ImGui::Text("Entry");
-		ImGui::NextColumn();
-		ImGui::Text("Timestamp");
-		ImGui::NextColumn();
-		ImGui::Text("Address");
-		ImGui::NextColumn();
-		ImGui::Text("Size");
-		ImGui::NextColumn();
-		ImGui::Text("Alignment");
-		ImGui::NextColumn();
-		ImGui::Text("Realloc");
-		ImGui::NextColumn();
-		ImGui::Text("Free");
-		ImGui::NextColumn();
-		ImGui::Separator();
-		for (unsigned int i = 0; i < allocations.size(); i++)
+		if (ImGui::BeginTable("allocatorEntries", 7, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
+		                      ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp))
 		{
-			const Allocation &e = allocations[i];
+			ImGui::TableSetupScrollFreeze(0, 1);
+			ImGui::TableSetupColumn("Entry", ImGuiTableColumnFlags_NoReorder | ImGuiTableColumnFlags_NoHide);
+			ImGui::TableSetupColumn("Timestamp");
+			ImGui::TableSetupColumn("Address");
+			ImGui::TableSetupColumn("Size");
+			ImGui::TableSetupColumn("Alignment");
+			ImGui::TableSetupColumn("Realloc");
+			ImGui::TableSetupColumn("Free");
+			ImGui::TableHeadersRow();
 
-			ImGui::Text("#%u", i);
-			ImGui::NextColumn();
-			ImGui::Text("%fs", e.timestamp.seconds());
-			ImGui::NextColumn();
-			const int baseOffset = uintptr_t(e.ptr) - uintptr_t(selectedAlloc.base());
-			ImGui::Text("0x%lx (%+d)", uintptr_t(e.ptr), baseOffset);
-			ImGui::NextColumn();
-			ImGui::Text("%lu", e.size);
-			ImGui::NextColumn();
-			ImGui::Text("%u", e.alignment);
-			ImGui::NextColumn();
-
-			if (selectedType == AllocatorType::LINEAR)
-				ImGui::Text("Linear cannot reallocate");
-			else if (selectedType == AllocatorType::STACK && i != allocations.size() - 1)
-				ImGui::Text("Stack can only reallocate last one");
-			else if (selectedType == AllocatorType::POOL)
-				ImGui::Text("Pool cannot reallocate");
-			else
+			for (unsigned int i = 0; i < allocations.size(); i++)
 			{
-				widgetName_.format("Realloc##0x%lx", e.ptr);
-				if (ImGui::Button(widgetName_.data()))
+				const Allocation &e = allocations[i];
+
+				ImGui::TableNextRow();
+				ImGui::TableNextColumn();
+				ImGui::Text("#%u", i);
+				ImGui::TableNextColumn();
+				ImGui::Text("%fs", e.timestamp.seconds());
+				ImGui::TableNextColumn();
+				const int baseOffset = uintptr_t(e.ptr) - uintptr_t(selectedAlloc.base());
+				ImGui::Text("0x%lx (%+d)", uintptr_t(e.ptr), baseOffset);
+				ImGui::TableNextColumn();
+				ImGui::Text("%lu", e.size);
+				ImGui::TableNextColumn();
+				ImGui::Text("%u", e.alignment);
+				ImGui::TableNextColumn();
+
+				if (selectedType == AllocatorType::LINEAR)
+					ImGui::Text("Linear cannot reallocate");
+				else if (selectedType == AllocatorType::STACK && i != allocations.size() - 1)
+					ImGui::Text("Stack can only reallocate last one");
+				else if (selectedType == AllocatorType::POOL)
+					ImGui::Text("Pool cannot reallocate");
+				else
 				{
-					void *ptr = selectedAlloc.reallocate(e.ptr, size);
-					if (ptr != nullptr)
+					widgetName_.format("Realloc##0x%lx", e.ptr);
+					if (ImGui::Button(widgetName_.data()))
 					{
-						allocations[i].ptr = ptr;
-						allocations[i].size = size;
+						void *ptr = selectedAlloc.reallocate(e.ptr, size);
+						if (ptr != nullptr)
+						{
+							allocations[i].ptr = ptr;
+							allocations[i].size = size;
+						}
+						else
+							LOGW_X("Could not reallocate 0x%lx from %lu to %lu bytes", allocations[i].ptr, allocations[i].size, size);
 					}
-					else
-						LOGW_X("Could not reallocate 0x%lx from %lu to %lu bytes", allocations[i].ptr, allocations[i].size, size);
 				}
-			}
-			ImGui::NextColumn();
+				ImGui::TableNextColumn();
 
-			if (selectedType == AllocatorType::LINEAR)
-				ImGui::Text("Linear cannot free");
-			else if (selectedType == AllocatorType::STACK && i != allocations.size() - 1)
-				ImGui::Text("Stack can only free last one");
-			else
-			{
-				widgetName_.format("Free##0x%lx", e.ptr);
-				if (ImGui::Button(widgetName_.data()))
+				if (selectedType == AllocatorType::LINEAR)
+					ImGui::Text("Linear cannot free");
+				else if (selectedType == AllocatorType::STACK && i != allocations.size() - 1)
+					ImGui::Text("Stack can only free last one");
+				else
 				{
-					selectedAlloc.deallocate(e.ptr);
-					allocations.removeAt(i);
+					widgetName_.format("Free##0x%lx", e.ptr);
+					if (ImGui::Button(widgetName_.data()))
+					{
+						selectedAlloc.deallocate(e.ptr);
+						allocations.removeAt(i);
+					}
 				}
 			}
-			ImGui::NextColumn();
+			ImGui::EndTable();
 		}
-		ImGui::Columns(1);
 
 		ImGui::TreePop();
 	}

@@ -1,4 +1,4 @@
-// Based on imgui/examples/imgui_impl_glfw.cpp
+// Based on imgui/backends/imgui_impl_glfw.cpp
 
 #include "ImGuiGlfwInput.h"
 #include "ImGuiJoyMappedInput.h"
@@ -57,7 +57,7 @@ void ImGuiGlfwInput::init(GLFWwindow *window)
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
-	// Setup back-end capabilities flags
+	// Setup backend capabilities flags
 	ImGuiIO &io = ImGui::GetIO();
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
@@ -91,14 +91,14 @@ void ImGuiGlfwInput::init(GLFWwindow *window)
 	io.GetClipboardTextFn = clipboardText;
 	io.ClipboardUserData = window_;
 
-#if IMGUI_HAS_DOCK
+#ifdef IMGUI_HAS_DOCK
 	// Our mouse update function expect PlatformHandle to be filled for the main viewport
 	ImGuiViewport *main_viewport = ImGui::GetMainViewport();
 	main_viewport->PlatformHandle = (void *)window;
 #endif
 
 #if defined(_WIN32)
-	#if IMGUI_HAS_DOCK
+	#ifdef IMGUI_HAS_DOCK
 	main_viewport->PlatformHandleRaw = glfwGetWin32Window(window);
 	#else
 	io.ImeWindowHandle = reinterpret_cast<void *>(glfwGetWin32Window(window));
@@ -137,7 +137,7 @@ void ImGuiGlfwInput::shutdown()
 void ImGuiGlfwInput::newFrame()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end. Missing call to renderer _NewFrame() function? e.g. ImGui_ImplOpenGL3_NewFrame().");
+	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! Missing call to ImGuiDrawing::buildFonts() function?");
 
 	// Setup display size (every frame to accommodate for window resizing)
 	int w, h;

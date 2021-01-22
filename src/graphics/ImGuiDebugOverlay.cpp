@@ -986,45 +986,47 @@ void guiAllocator(nctl::IAllocator &alloc)
 	            alloc.numEntries(), alloc.numAllocations(), alloc.usedMemory());
 	ImGui::NewLine();
 
-	ImGui::Columns(6, "allocationEntries", true);
-	ImGui::Text("Entry");
-	ImGui::NextColumn();
-	ImGui::Text("Time");
-	ImGui::NextColumn();
-	ImGui::Text("Pointer");
-	ImGui::NextColumn();
-	ImGui::Text("Bytes");
-	ImGui::NextColumn();
-	ImGui::Text("Alignment");
-	ImGui::NextColumn();
-	ImGui::Text("State");
-	ImGui::NextColumn();
-	ImGui::Separator();
-	for (unsigned int i = 0; i < alloc.numEntries(); i++)
+	const int tableNumRows = alloc.numEntries() > 32 ? 32 : alloc.numEntries();
+	if (ImGui::BeginTable("allocatorEntries", 6, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders |
+	                      ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_ScrollY, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * tableNumRows)))
 	{
-		const nctl::IAllocator::Entry &e = alloc.entry(i);
-		const unsigned int deallocationIndex = alloc.findDeallocation(i);
+		ImGui::TableSetupScrollFreeze(0, 1);
+		ImGui::TableSetupColumn("Entry", ImGuiTableColumnFlags_NoReorder | ImGuiTableColumnFlags_NoHide);
+		ImGui::TableSetupColumn("Time");
+		ImGui::TableSetupColumn("Pointer");
+		ImGui::TableSetupColumn("Bytes");
+		ImGui::TableSetupColumn("Alignment");
+		ImGui::TableSetupColumn("State");
+		ImGui::TableHeadersRow();
 
-		ImGui::Text("#%u", i);
-		ImGui::NextColumn();
-		ImGui::Text("%fs", e.timestamp.seconds());
-		ImGui::NextColumn();
-		ImGui::Text("0x%lx", uintptr_t(e.ptr));
-		ImGui::NextColumn();
-		ImGui::Text("%lu", e.bytes);
-		ImGui::NextColumn();
-		ImGui::Text("%u", e.alignment);
-		ImGui::NextColumn();
-		if (deallocationIndex > 0)
+		for (unsigned int i = 0; i < alloc.numEntries(); i++)
 		{
-			const TimeStamp diffStamp = alloc.entry(deallocationIndex).timestamp - e.timestamp;
-			ImGui::Text("Freed by #%u after %fs", deallocationIndex, diffStamp.seconds());
+			const nctl::IAllocator::Entry &e = alloc.entry(i);
+			const unsigned int deallocationIndex = alloc.findDeallocation(i);
+
+			ImGui::TableNextRow();
+			ImGui::TableNextColumn();
+			ImGui::Text("#%u", i);
+			ImGui::TableNextColumn();
+			ImGui::Text("%fs", e.timestamp.seconds());
+			ImGui::TableNextColumn();
+			ImGui::Text("0x%lx", uintptr_t(e.ptr));
+			ImGui::TableNextColumn();
+			ImGui::Text("%lu", e.bytes);
+			ImGui::TableNextColumn();
+			ImGui::Text("%u", e.alignment);
+			ImGui::TableNextColumn();
+			if (deallocationIndex > 0)
+			{
+				const TimeStamp diffStamp = alloc.entry(deallocationIndex).timestamp - e.timestamp;
+				ImGui::Text("Freed by #%u after %fs", deallocationIndex, diffStamp.seconds());
+			}
+			else
+				ImGui::Text("Active");
 		}
-		else
-			ImGui::Text("Active");
-		ImGui::NextColumn();
+
+		ImGui::EndTable();
 	}
-	ImGui::Columns(1);
 }
 #endif
 

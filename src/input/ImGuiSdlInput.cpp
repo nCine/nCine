@@ -1,4 +1,4 @@
-// Based on imgui/examples/imgui_impl_sdl.cpp
+// Based on imgui/backends/imgui_impl_sdl.cpp
 
 #include "ImGuiSdlInput.h"
 #include "ImGuiJoyMappedInput.h"
@@ -55,7 +55,7 @@ void ImGuiSdlInput::init(SDL_Window *window)
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
-	// Setup back-end capabilities flags
+	// Setup backend capabilities flags
 	ImGuiIO &io = ImGui::GetIO();
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
@@ -102,7 +102,7 @@ void ImGuiSdlInput::init(SDL_Window *window)
 	// Check and store if we are on Wayland
 	mouseCanUseGlobalState_ = strncmp(SDL_GetCurrentVideoDriver(), "wayland", 7) != 0;
 
-#if IMGUI_HAS_DOCK
+#ifdef IMGUI_HAS_DOCK
 	// Our mouse update function expect PlatformHandle to be filled for the main viewport
 	ImGuiViewport *main_viewport = ImGui::GetMainViewport();
 	main_viewport->PlatformHandle = (void *)window;
@@ -112,7 +112,7 @@ void ImGuiSdlInput::init(SDL_Window *window)
 	SDL_SysWMinfo wmInfo;
 	SDL_VERSION(&wmInfo.version);
 	SDL_GetWindowWMInfo(window, &wmInfo);
-	#if IMGUI_HAS_DOCK
+	#ifdef IMGUI_HAS_DOCK
 	main_viewport->PlatformHandleRaw = wmInfo.info.win.window;
 	#else
 	io.ImeWindowHandle = wmInfo.info.win.window;
@@ -142,7 +142,7 @@ void ImGuiSdlInput::shutdown()
 void ImGuiSdlInput::newFrame()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end. Missing call to renderer _NewFrame() function? e.g. ImGui_ImplOpenGL3_NewFrame().");
+	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! Missing call to ImGuiDrawing::buildFonts() function?");
 
 	// Setup display size (every frame to accommodate for window resizing)
 	int w, h;
