@@ -1,8 +1,8 @@
 #ifndef CLASS_NCINE_SDLINPUTMANAGER
 #define CLASS_NCINE_SDLINPUTMANAGER
 
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_mouse.h>
+#include <SDL_events.h>
+#include <SDL_mouse.h>
 #include "IInputManager.h"
 #include <nctl/StaticArray.h>
 

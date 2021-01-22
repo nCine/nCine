@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_SDLGFXDEVICE
 #define CLASS_NCINE_SDLGFXDEVICE
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "IGfxDevice.h"
 #include "Vector2.h"

@@ -1,5 +1,5 @@
 #include <cstring> // for memset()
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "common_macros.h"
 #include "SdlInputManager.h"
