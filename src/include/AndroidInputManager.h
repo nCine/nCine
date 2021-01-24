@@ -167,6 +167,7 @@ class AndroidInputManager : public IInputManager
 	static TouchEvent touchEvent_;
 	static AndroidKeyboardState keyboardState_;
 	static KeyboardEvent keyboardEvent_;
+	static TextInputEvent textInputEvent_;
 	static AndroidMouseState mouseState_;
 	static AndroidMouseEvent mouseEvent_;
 	static ScrollEvent scrollEvent_;

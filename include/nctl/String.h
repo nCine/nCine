@@ -193,6 +193,10 @@ class DLL_PUBLIC String
 	/*! \returns A pointer to the C substring following the decoded UTF-8 code units */
 	static const char *utf8ToCodePoint(const char *substring, unsigned int &codePoint);
 
+	/// Encodes a Unicode code point to a UTF-8 C substring and code units
+	/*! \returns The number of characters used to encode a valid code point */
+	static int codePointToUtf8(unsigned int codePoint, char *substring, unsigned int *codeUnits);
+
   private:
 	/// Size of the local buffer
 	static const unsigned int SmallBufferSize = 16;

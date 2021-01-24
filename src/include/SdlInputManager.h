@@ -144,6 +144,7 @@ class SdlInputManager : public IInputManager
 	static SdlScrollEvent scrollEvent_;
 	static SdlKeyboardState keyboardState_;
 	static KeyboardEvent keyboardEvent_;
+	static TextInputEvent textInputEvent_;
 
 	static SDL_Joystick *sdlJoysticks_[MaxNumJoysticks];
 	static nctl::StaticArray<SdlJoystickState, MaxNumJoysticks> joystickStates_;

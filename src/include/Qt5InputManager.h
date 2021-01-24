@@ -202,6 +202,7 @@ class Qt5InputManager : public IInputManager
 	static Qt5ScrollEvent scrollEvent_;
 	static Qt5KeyboardState keyboardState_;
 	static KeyboardEvent keyboardEvent_;
+	static TextInputEvent textInputEvent_;
 	static Qt5JoystickState nullJoystickState_;
 #ifdef WITH_QT5GAMEPAD
 	static Qt5JoystickState joystickStates_[MaxNumJoysticks];

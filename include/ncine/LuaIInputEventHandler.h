@@ -8,6 +8,7 @@ struct lua_State;
 namespace ncine {
 
 class KeyboardEvent;
+class TextInputEvent;
 class MouseEvent;
 class MouseState;
 class ScrollEvent;
@@ -26,6 +27,7 @@ class DLL_PUBLIC LuaIInputEventHandler
   public:
 	static void onKeyPressed(lua_State *L, const KeyboardEvent &event);
 	static void onKeyReleased(lua_State *L, const KeyboardEvent &event);
+	static void onTextInput(lua_State *L, const TextInputEvent &event);
 
 #ifdef __ANDROID__
 	static void onTouchDown(lua_State *L, const TouchEvent &event);

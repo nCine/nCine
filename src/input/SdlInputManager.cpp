@@ -1,5 +1,6 @@
 #include <cstring> // for memset()
 #include <SDL.h>
+#include <nctl/CString.h>
 
 #include "common_macros.h"
 #include "SdlInputManager.h"
@@ -52,6 +53,7 @@ SdlMouseEvent SdlInputManager::mouseEvent_;
 SdlScrollEvent SdlInputManager::scrollEvent_;
 SdlKeyboardState SdlInputManager::keyboardState_;
 KeyboardEvent SdlInputManager::keyboardEvent_;
+TextInputEvent SdlInputManager::textInputEvent_;
 
 SDL_Joystick *SdlInputManager::sdlJoysticks_[MaxNumJoysticks];
 nctl::StaticArray<SdlJoystickState, SdlInputManager::MaxNumJoysticks> SdlInputManager::joystickStates_(nctl::StaticArrayMode::EXTEND_SIZE);
@@ -188,6 +190,9 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 			keyboardEvent_.sym = SdlKeys::keySymValueToEnum(event.key.keysym.sym);
 			keyboardEvent_.mod = SdlKeys::keyModMaskToEnumMask(event.key.keysym.mod);
 			break;
+		case SDL_TEXTINPUT:
+			nctl::strncpy(textInputEvent_.text, event.text.text, 4);
+			break;
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
 			mouseEvent_.x = event.button.x;
@@ -253,6 +258,9 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 			break;
 		case SDL_KEYUP:
 			inputEventHandler_->onKeyReleased(keyboardEvent_);
+			break;
+		case SDL_TEXTINPUT:
+			inputEventHandler_->onTextInput(textInputEvent_);
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 			inputEventHandler_->onMouseButtonPressed(mouseEvent_);

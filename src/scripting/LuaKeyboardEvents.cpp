@@ -15,6 +15,8 @@ namespace LuaKeyboardEvents {
 	static const char *scancode = "scancode";
 	static const char *sym = "sym";
 	static const char *mod = "mod";
+
+	static const char *text = "text";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -43,6 +45,12 @@ void LuaKeyboardEvents::pushKeyboardEvent(lua_State *L, const KeyboardEvent &eve
 	LuaUtils::pushField(L, LuaNames::LuaKeyboardEvents::scancode, event.scancode);
 	LuaUtils::pushField(L, LuaNames::LuaKeyboardEvents::sym, static_cast<int64_t>(event.sym));
 	LuaUtils::pushField(L, LuaNames::LuaKeyboardEvents::mod, event.mod);
+}
+
+void LuaKeyboardEvents::pushTextInputEvent(lua_State *L, const TextInputEvent &event)
+{
+	lua_createtable(L, 1, 0);
+	LuaUtils::pushField(L, LuaNames::LuaKeyboardEvents::text, event.text);
 }
 
 ///////////////////////////////////////////////////////////

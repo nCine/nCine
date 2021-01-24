@@ -23,6 +23,7 @@ class MyEventHandler :
 
 	void onKeyPressed(const nc::KeyboardEvent &event) override;
 	void onKeyReleased(const nc::KeyboardEvent &event) override;
+	void onTextInput(const nc::TextInputEvent &event) override;
 
 #ifdef __ANDROID__
 	void onTouchDown(const nc::TouchEvent &event) override;

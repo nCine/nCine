@@ -171,6 +171,7 @@ class GlfwInputManager : public IInputManager
 	static GlfwScrollEvent scrollEvent_;
 	static GlfwKeyboardState keyboardState_;
 	static KeyboardEvent keyboardEvent_;
+	static TextInputEvent textInputEvent_;
 	static GlfwJoystickState nullJoystickState_;
 	static nctl::StaticArray<GlfwJoystickState, MaxNumJoysticks> joystickStates_;
 	static JoyButtonEvent joyButtonEvent_;

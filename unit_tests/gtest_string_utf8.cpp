@@ -12,10 +12,36 @@ class StringUTF8Test : public ::testing::Test
 	nctl::String string_;
 };
 
-TEST_F(StringUTF8Test, Utf8CodePoints)
+TEST_F(StringUTF8Test, Utf8ToCodePointNullString)
 {
-	const unsigned int codepoints[3] = { 0x3a9, 0x204b, 0x1d11e };
-	const unsigned int codeUnits[3] = { 0xcea9, 0xe2818b, 0xf09d849e };
+	unsigned int codePoint = nctl::String::InvalidUnicode;
+	unsigned int codeUnit = 0;
+	printf("Trying to decode a string with a `nullptr` address\n");
+	const char *substring = nctl::String::utf8ToCodePoint(nullptr, codePoint, &codeUnit);
+
+	ASSERT_TRUE(codePoint == nctl::String::InvalidUnicode);
+	ASSERT_EQ(codeUnit, 0);
+	ASSERT_EQ(substring, nullptr);
+}
+
+TEST_F(StringUTF8Test, Utf8ToCodePointEmptyString)
+{
+	unsigned int codePoint = nctl::String::InvalidUnicode;
+	unsigned int codeUnit = 0;
+	const char utf8String[1] = { '\0' };
+	printf("Trying to decode an empty string\n");
+	const char *substring = nctl::String::utf8ToCodePoint(utf8String, codePoint, &codeUnit);
+
+	ASSERT_TRUE(codePoint == nctl::String::InvalidUnicode);
+	ASSERT_EQ(codeUnit, 0);
+	ASSERT_EQ(utf8String, substring);
+}
+
+TEST_F(StringUTF8Test, Utf8ToCodePoints)
+{
+	const int NumCodePoints = 3;
+	const unsigned int codePoints[NumCodePoints] = { 0x3a9, 0x204b, 0x1d11e };
+	const unsigned int codeUnits[NumCodePoints] = { 0xcea9, 0xe2818b, 0xf09d849e };
 	string_ = "Ω⁋𝄞";
 	printString("The UTF-8 encoded string: ", string_);
 
@@ -26,7 +52,7 @@ TEST_F(StringUTF8Test, Utf8CodePoints)
 		unsigned int utf8Encoded = nctl::String::InvalidUtf8;
 		i += string_.utf8ToCodePoint(i, codePoint, &utf8Encoded);
 		printf("Character %u at string position %u has code point 0x%x encoded as 0x%x\n", decodeCount, i, codePoint, utf8Encoded);
-		ASSERT_EQ(codePoint, codepoints[decodeCount]);
+		ASSERT_EQ(codePoint, codePoints[decodeCount]);
 		ASSERT_EQ(utf8Encoded, codeUnits[decodeCount]);
 		decodeCount += (codePoint != nctl::String::InvalidUnicode) ? 1 : 0;
 	}
@@ -34,10 +60,36 @@ TEST_F(StringUTF8Test, Utf8CodePoints)
 	ASSERT_EQ(decodeCount, 3);
 }
 
-TEST_F(StringUTF8Test, Utf8CodePointsWithASCIIString)
+TEST_F(StringUTF8Test, CodePointsToUtf8)
 {
-	const unsigned int codepoints[3] = { 0x61, 0x62, 0x63 };
-	const unsigned int codeUnits[3] = { 0x61, 0x62, 0x63 };
+	const int NumCodePoints = 3;
+	const unsigned int codePoints[NumCodePoints] = { 0x3a9, 0x204b, 0x1d11e };
+	const unsigned int codeUnits[NumCodePoints] = { 0xcea9, 0xe2818b, 0xf09d849e };
+	string_ = "Ω⁋𝄞";
+	printString("The UTF-8 encoded string: ", string_);
+
+	char utf8String[5];
+	unsigned int codeUnit;
+	unsigned int encodeCount = 0;
+	for (unsigned int i = 0; i < NumCodePoints; i++)
+	{
+		const unsigned int encodedChars = nctl::String::codePointToUtf8(codePoints[i], utf8String, &codeUnit);
+		ASSERT_EQ(codeUnit, codeUnits[i]);
+		for (unsigned int j = 0; j < encodedChars; j++)
+			ASSERT_EQ(string_[encodeCount + j], utf8String[j]);
+
+		printf("Code point 0x%x has been encoded to the 0x%x code unit and as the %s string\n", codePoints[i], codeUnit, utf8String);
+		encodeCount += encodedChars;
+	}
+
+	ASSERT_EQ(encodeCount, string_.length());
+}
+
+TEST_F(StringUTF8Test, Utf8ToCodePointsWithASCIIString)
+{
+	const int NumCodePoints = 3;
+	const unsigned int codePoints[NumCodePoints] = { 0x61, 0x62, 0x63 };
+	const unsigned int codeUnits[NumCodePoints] = { 0x61, 0x62, 0x63 };
 	string_ = "abc";
 	printString("The ASCII string: ", string_);
 
@@ -48,12 +100,37 @@ TEST_F(StringUTF8Test, Utf8CodePointsWithASCIIString)
 		unsigned int utf8Encoded = nctl::String::InvalidUtf8;
 		i += string_.utf8ToCodePoint(i, codePoint, &utf8Encoded);
 		printf("Character %u at string position %u has code point 0x%x encoded as 0x%x\n", decodeCount, i, codePoint, utf8Encoded);
-		ASSERT_EQ(codePoint, codepoints[decodeCount]);
+		ASSERT_EQ(codePoint, codePoints[decodeCount]);
 		ASSERT_EQ(utf8Encoded, codeUnits[decodeCount]);
 		decodeCount += (codePoint != nctl::String::InvalidUnicode) ? 1 : 0;
 	}
 
 	ASSERT_EQ(decodeCount, 3);
+}
+
+TEST_F(StringUTF8Test, CodePointsToUtf8WithASCIIString)
+{
+	const int NumCodePoints = 3;
+	const unsigned int codePoints[NumCodePoints] = { 0x61, 0x62, 0x63 };
+	const unsigned int codeUnits[NumCodePoints] = { 0x61, 0x62, 0x63 };
+	string_ = "abc";
+	printString("The ASCII string: ", string_);
+
+	char utf8String[5];
+	unsigned int codeUnit;
+	unsigned int encodeCount = 0;
+	for (unsigned int i = 0; i < NumCodePoints; i++)
+	{
+		const unsigned int encodedChars = nctl::String::codePointToUtf8(codePoints[i], utf8String, &codeUnit);
+		ASSERT_EQ(codeUnit, codeUnits[i]);
+		for (unsigned int j = 0; j < encodedChars; j++)
+			ASSERT_EQ(string_[encodeCount + j], utf8String[j]);
+
+		printf("Code point 0x%x has been encoded to the 0x%x code unit and as the %s string\n", codePoints[i], codeUnit, utf8String);
+		encodeCount += encodedChars;
+	}
+
+	ASSERT_EQ(encodeCount, string_.length());
 }
 
 TEST_F(StringUTF8Test, Utf8InvalidSequenceTwo)

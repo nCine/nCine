@@ -27,6 +27,7 @@ GlfwMouseEvent GlfwInputManager::mouseEvent_;
 GlfwScrollEvent GlfwInputManager::scrollEvent_;
 GlfwKeyboardState GlfwInputManager::keyboardState_;
 KeyboardEvent GlfwInputManager::keyboardEvent_;
+TextInputEvent GlfwInputManager::textInputEvent_;
 
 GlfwJoystickState GlfwInputManager::nullJoystickState_;
 nctl::StaticArray<GlfwJoystickState, GlfwInputManager::MaxNumJoysticks> GlfwInputManager::joystickStates_(nctl::StaticArrayMode::EXTEND_SIZE);
@@ -283,6 +284,13 @@ void GlfwInputManager::charCallback(GLFWwindow *window, unsigned int c)
 #ifdef WITH_NUKLEAR
 	NuklearGlfwInput::charCallback(window, c);
 #endif
+
+	if (inputEventHandler_ == nullptr)
+		return;
+
+	// Current GLFW version does not return an UTF-8 string (https://github.com/glfw/glfw/issues/837)
+	nctl::String::codePointToUtf8(c, textInputEvent_.text, nullptr);
+	inputEventHandler_->onTextInput(textInputEvent_);
 }
 
 void GlfwInputManager::cursorPosCallback(GLFWwindow *window, double x, double y)

@@ -16,6 +16,8 @@ class DLL_PUBLIC IInputEventHandler
 	inline virtual void onKeyPressed(const KeyboardEvent &event) {}
 	/// Callback function called every time a key is released
 	inline virtual void onKeyReleased(const KeyboardEvent &event) {}
+	/// Callback function called every time a text input is generated
+	inline virtual void onTextInput(const TextInputEvent &event) {}
 	/// Callback function called every time the first screen touch is made
 	inline virtual void onTouchDown(const TouchEvent &event) {}
 	/// Callback function called every time the last screen touch is released

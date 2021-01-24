@@ -34,6 +34,7 @@ AccelerometerEvent AndroidInputManager::accelerometerEvent_;
 TouchEvent AndroidInputManager::touchEvent_;
 AndroidKeyboardState AndroidInputManager::keyboardState_;
 KeyboardEvent AndroidInputManager::keyboardEvent_;
+TextInputEvent AndroidInputManager::textInputEvent_;
 AndroidMouseState AndroidInputManager::mouseState_;
 AndroidMouseEvent AndroidInputManager::mouseEvent_;
 ScrollEvent AndroidInputManager::scrollEvent_;
@@ -505,16 +506,30 @@ bool AndroidInputManager::processKeyboardEvent(const AInputEvent *event)
 	switch (AKeyEvent_getAction(event))
 	{
 		case AKEY_EVENT_ACTION_DOWN:
-			keyboardState_.keys_[keySym] = 1;
+			if (keyboardEvent_.sym != KeySym::UNKNOWN)
+				keyboardState_.keys_[keySym] = 1;
 			inputEventHandler_->onKeyPressed(keyboardEvent_);
 			break;
 		case AKEY_EVENT_ACTION_UP:
-			keyboardState_.keys_[keySym] = 0;
+			if (keyboardEvent_.sym != KeySym::UNKNOWN)
+				keyboardState_.keys_[keySym] = 0;
 			inputEventHandler_->onKeyReleased(keyboardEvent_);
 			break;
 		case AKEY_EVENT_ACTION_MULTIPLE:
 			inputEventHandler_->onKeyPressed(keyboardEvent_);
 			break;
+	}
+
+	if (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN &&
+	    (AKeyEvent_getMetaState(event) & AMETA_CTRL_ON) == 0)
+	{
+		AndroidJniClass_KeyEvent keyEvent(AInputEvent_getType(event), keyCode);
+		if (keyEvent.isPrintingKey())
+		{
+			const int unicodeKey = keyEvent.getUnicodeChar(AKeyEvent_getMetaState(event));
+			nctl::String::codePointToUtf8(unicodeKey, textInputEvent_.text, nullptr);
+			inputEventHandler_->onTextInput(textInputEvent_);
+		}
 	}
 
 	return true;

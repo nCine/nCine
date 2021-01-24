@@ -115,6 +115,19 @@ class DLL_PUBLIC KeyboardEvent
 	    : scancode(0), sym(KeySym::UNKNOWN), mod(0) {}
 };
 
+/// Information about a text input event
+class DLL_PUBLIC TextInputEvent
+{
+  public:
+	/// Unicode code point encoded in UTF-8
+	char text[5];
+
+	TextInputEvent()
+	{
+		text[0] = '\0';
+	}
+};
+
 /// Information about the joystick state
 class DLL_PUBLIC JoystickState
 {

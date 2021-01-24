@@ -456,11 +456,12 @@ int String::utf8ToCodePoint(unsigned int position, unsigned int &codePoint) cons
 
 const char *String::utf8ToCodePoint(const char *substring, unsigned int &codePoint, unsigned int *codeUnits)
 {
-	if (*substring == '\0')
+	if (substring == nullptr || *substring == '\0')
 		return substring;
 
 	unsigned char sequence[4] = { '\0', '\0', '\0', '\0' };
 	sequence[0] = *substring;
+	// Plain ASCII
 	if (sequence[0] < 0x80)
 	{
 		codePoint = sequence[0];
@@ -538,6 +539,76 @@ const char *String::utf8ToCodePoint(const char *substring, unsigned int &codePoi
 const char *String::utf8ToCodePoint(const char *substring, unsigned int &codePoint)
 {
 	return utf8ToCodePoint(substring, codePoint, nullptr);
+}
+
+int String::codePointToUtf8(unsigned int codePoint, char *substring, unsigned int *codeUnits)
+{
+	if (substring == nullptr)
+		return 0;
+
+	// Plain ASCII
+	if (codePoint <= 0x7F)
+	{
+		substring[0] = static_cast<char>(codePoint);
+		substring[1] = '\0';
+		if (codeUnits)
+			*codeUnits = substring[0];
+		return 1;
+	}
+	// Two code units sequence
+	else if (codePoint <= 0x07ff)
+	{
+		substring[0] = static_cast<char>(((codePoint >> 6) & 0x1f) | 0xc0);
+		substring[1] = static_cast<char>(((codePoint >> 0) & 0x3f) | 0x80);
+		substring[2] = '\0';
+
+		if (codeUnits)
+			*codeUnits = (static_cast<unsigned char>(substring[0]) << 8) | static_cast<unsigned char>(substring[1]);
+		return 2;
+	}
+	// Three code units sequence
+	else if (codePoint <= 0xffff)
+	{
+		substring[0] = static_cast<char>(((codePoint >> 12) & 0x0f) | 0xe0);
+		substring[1] = static_cast<char>(((codePoint >>  6) & 0x3f) | 0x80);
+		substring[2] = static_cast<char>(((codePoint >>  0) & 0x3f) | 0x80);
+		substring[3] = '\0';
+		if (codeUnits)
+		{
+			*codeUnits = (static_cast<unsigned char>(substring[0]) << 16) | (static_cast<unsigned char>(substring[1]) << 8) |
+			             static_cast<unsigned char>(substring[2]);
+		}
+		return 3;
+	}
+	// Four code units sequence
+	else if (codePoint <= 0x10ffff)
+	{
+		substring[0] = static_cast<char>(((codePoint >> 18) & 0x07) | 0xf0);
+		substring[1] = static_cast<char>(((codePoint >> 12) & 0x3f) | 0x80);
+		substring[2] = static_cast<char>(((codePoint >>  6) & 0x3f) | 0x80);
+		substring[3] = static_cast<char>(((codePoint >>  0) & 0x3f) | 0x80);
+		substring[4] = '\0';
+		if (codeUnits)
+		{
+			*codeUnits = (static_cast<unsigned char>(substring[0]) << 24) | (static_cast<unsigned char>(substring[1]) << 16) |
+			             (static_cast<unsigned char>(substring[2]) << 8) | static_cast<unsigned char>(substring[3]);
+		}
+		return 4;
+	}
+	// Invalid code point, returning the replacement character
+	else
+	{
+		substring[0] = static_cast<char>(0xef);
+		substring[1] = static_cast<char>(0xbf);
+		substring[2] = static_cast<char>(0xbd);
+		substring[3] = '\0';
+		if (codeUnits)
+		{
+			*codeUnits = (static_cast<unsigned char>(substring[0]) << 16) | (static_cast<unsigned char>(substring[1]) << 8) |
+			             static_cast<unsigned char>(substring[2]);
+		}
+		return 0;
+	}
 }
 
 }

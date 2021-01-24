@@ -144,7 +144,7 @@ bool ImGuiQt5Input::event(QEvent *event)
 		{
 			QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
 			if (event->type() == QEvent::KeyPress && keyEvent->text().length() > 0)
-				io.AddInputCharactersUTF8(keyEvent->text().toStdString().c_str());
+				io.AddInputCharactersUTF8(keyEvent->text().toUtf8().constData());
 
 			int key = keyEvent->key();
 			if (key >= Qt::Key_Escape)

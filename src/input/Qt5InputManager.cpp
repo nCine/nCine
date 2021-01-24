@@ -1,4 +1,5 @@
 #include "common_macros.h"
+#include <nctl/CString.h>
 #include "Qt5InputManager.h"
 #include "Qt5Widget.h"
 #include "IInputEventHandler.h"
@@ -36,6 +37,7 @@ Qt5MouseEvent Qt5InputManager::mouseEvent_;
 Qt5ScrollEvent Qt5InputManager::scrollEvent_;
 Qt5KeyboardState Qt5InputManager::keyboardState_;
 KeyboardEvent Qt5InputManager::keyboardEvent_;
+TextInputEvent Qt5InputManager::textInputEvent_;
 Qt5JoystickState Qt5InputManager::nullJoystickState_;
 
 #ifdef WITH_QT5GAMEPAD
@@ -334,9 +336,18 @@ void Qt5InputManager::keyPressEvent(QKeyEvent *event)
 		keyboardEvent_.scancode = static_cast<int>(event->nativeScanCode());
 		keyboardEvent_.sym = Qt5Keys::keySymValueToEnum(event->key());
 		keyboardEvent_.mod = Qt5Keys::keyModMaskToEnumMask(event->modifiers());
-		const unsigned int keySym = static_cast<unsigned int>(keyboardEvent_.sym);
-		keyboardState_.keys_[keySym] = 1;
+		if (keyboardEvent_.sym != KeySym::UNKNOWN)
+		{
+			const unsigned int keySym = static_cast<unsigned int>(keyboardEvent_.sym);
+			keyboardState_.keys_[keySym] = 1;
+		}
 		inputEventHandler_->onKeyPressed(keyboardEvent_);
+
+		if (event->text().length() > 0)
+		{
+			nctl::strncpy(textInputEvent_.text, event->text().toUtf8().constData(), 4);
+			inputEventHandler_->onTextInput(textInputEvent_);
+		}
 	}
 }
 
@@ -347,8 +358,11 @@ void Qt5InputManager::keyReleaseEvent(QKeyEvent *event)
 		keyboardEvent_.scancode = static_cast<int>(event->nativeScanCode());
 		keyboardEvent_.sym = Qt5Keys::keySymValueToEnum(event->key());
 		keyboardEvent_.mod = Qt5Keys::keyModMaskToEnumMask(event->modifiers());
-		const unsigned int keySym = static_cast<unsigned int>(keyboardEvent_.sym);
-		keyboardState_.keys_[keySym] = 0;
+		if (keyboardEvent_.sym != KeySym::UNKNOWN)
+		{
+			const unsigned int keySym = static_cast<unsigned int>(keyboardEvent_.sym);
+			keyboardState_.keys_[keySym] = 0;
+		}
 		inputEventHandler_->onKeyReleased(keyboardEvent_);
 	}
 }

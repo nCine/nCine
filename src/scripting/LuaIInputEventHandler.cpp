@@ -20,6 +20,7 @@ namespace LuaNames {
 namespace IInputEventHandler {
 	static const char *onKeyPressed = "on_key_pressed";
 	static const char *onKeyReleased = "on_key_released";
+	static const char *onTextInput = "on_text_input";
 
 #ifdef __ANDROID__
 	static const char *onTouchDown = "on_touch_down";
@@ -74,6 +75,21 @@ void LuaIInputEventHandler::onKeyReleased(lua_State *L, const KeyboardEvent &eve
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaKeyboardEvents::pushKeyboardEvent(L, event);
+		lua_call(L, 1, 0);
+	}
+	else
+		lua_pop(L, 2);
+}
+
+void LuaIInputEventHandler::onTextInput(lua_State *L, const TextInputEvent &event)
+{
+	lua_getglobal(L, LuaNames::ncine);
+	const int type = lua_getfield(L, -1, LuaNames::IInputEventHandler::onTextInput);
+
+	if (type != LUA_TNIL)
+	{
+		ASSERT(type == LUA_TFUNCTION);
+		LuaKeyboardEvents::pushTextInputEvent(L, event);
 		lua_call(L, 1, 0);
 	}
 	else

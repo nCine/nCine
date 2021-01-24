@@ -74,6 +74,11 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 	}
 }
 
+void MyEventHandler::onTextInput(const nc::TextInputEvent &event)
+{
+	nc::LuaIInputEventHandler::onTextInput(luaState_.state(), event);
+}
+
 #ifdef __ANDROID__
 void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 {
