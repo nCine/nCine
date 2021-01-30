@@ -51,7 +51,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y libgl1-mesa-dev
-        if [ "${{ matrix.BuildType }}" == "DevDist" ]; then
+        if [[ "${{ matrix.BuildType }}" == "DevDist" && "${{ matrix.CC }}" == "gcc" ]]; then
           sudo apt-get install -y doxygen graphviz
         fi
 
@@ -138,6 +138,39 @@ jobs:
       if: matrix.BuildType == 'DevDist'
       run: |
         make package -C ../nCine-build-${{ matrix.BuildType }}
+
+    - name: 'Generate and Push Documentation'
+      if: matrix.BuildType == 'DevDist' && matrix.CC == 'gcc'
+      env:
+        PUBLIC_REPO_TOKEN: ${{ secrets.PUBLIC_REPO_TOKEN }}
+      run: |
+        git config --global user.email "actions@github.com"
+        git config --global user.name "GitHub Actions"
+        export BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
+
+        cd ../nCine-build-${{ matrix.BuildType }}
+        doxygen
+
+        LD_LIBRARY_PATH=../nCine-external/lib ../nCine-external/bin/lua ../nCine/scripts/export_lua_api.lua
+        export GEM_HOME=~/.gem
+        export GEM_PATH=~/.gem
+        gem install asciidoctor
+        export PATH=$GEM_HOME/bin:$PATH
+        asciidoctor nCine_Lua_API.adoc
+
+        cd ..
+        git clone https://$PUBLIC_REPO_TOKEN@github.com/nCine/docs.git >/dev/null 2>&1
+        cd docs
+        git rm -r $BRANCH_NAME >/dev/null 2>&1
+        cp -Rp ../nCine-build-${{ matrix.BuildType }}/docs/html $BRANCH_NAME
+        git add $BRANCH_NAME
+
+        git rm lua_api_${BRANCH_NAME}.html
+        cp -p ../nCine-build-${{ matrix.BuildType }}/nCine_Lua_API.html lua_api_${BRANCH_NAME}.html
+        git add lua_api_${BRANCH_NAME}.html
+
+        git commit --amend -m "Initial commit" || git commit -m "Initial commit"
+        git push --force || git push --set-upstream origin master
 
     - name: 'Push Artifacts'
       if: matrix.BuildType == 'DevDist'

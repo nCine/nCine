@@ -6,6 +6,7 @@
 
 namespace ncine {
 
+/// Information about a screen touch event
 class DLL_PUBLIC TouchEvent
 {
   public:
@@ -40,6 +41,7 @@ class DLL_PUBLIC TouchEvent
 };
 
 #ifdef __ANDROID__
+/// Information about an accelerometer event
 class DLL_PUBLIC AccelerometerEvent
 {
   public:
@@ -152,6 +154,7 @@ class DLL_PUBLIC JoyButtonEvent
 	int buttonId;
 };
 
+/// A structure containing joystick hat values
 struct HatState
 {
 	enum

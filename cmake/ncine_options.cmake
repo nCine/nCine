@@ -6,6 +6,7 @@ option(NCINE_LINKTIME_OPTIMIZATION "Compile the engine with link time optimizati
 option(NCINE_AUTOVECTORIZATION_REPORT "Enable report generation from compiler auto-vectorization" OFF)
 option(NCINE_DYNAMIC_LIBRARY "Compile the engine as a dynamic library" ON)
 option(NCINE_BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
+option(NCINE_IMPLEMENTATION_DOCUMENTATION "Include implementation classes in the documentation" OFF)
 option(NCINE_EMBED_SHADERS "Export shader files to C strings to be included in engine sources" ON)
 option(NCINE_BUILD_ANDROID "Build the Android version of the engine" OFF)
 option(NCINE_STRIP_BINARIES "Enable symbols stripping from libraries and executables when in release" OFF)
@@ -44,10 +45,6 @@ set(NCINE_DATA_DIR "${PARENT_SOURCE_DIR}/nCine-data" CACHE PATH "Set the path to
 set(NCINE_TESTS_DATA_DIR "" CACHE STRING "Set the path to the data directory that will be embedded in test executables")
 # The external Android dir is set regardless of the status of build Android flag, so that presets work even when the flag is off
 set(EXTERNAL_ANDROID_DIR "${PARENT_SOURCE_DIR}/nCine-android-external" CACHE PATH "Set the path to the Android libraries directory")
-
-if(NCINE_BUILD_DOCUMENTATION)
-	option(NCINE_IMPLEMENTATION_DOCUMENTATION "Include implementation classes in the documentation" OFF)
-endif()
 
 if(NCINE_BUILD_ANDROID)
 	set(NDK_DIR "" CACHE PATH "Set the path to the Android NDK")
@@ -119,7 +116,7 @@ if("${NCINE_OPTIONS_PRESETS}" STREQUAL "BinDist" OR "${NCINE_OPTIONS_PRESETS}" S
 		set(NCINE_BUILD_ANDROID ON)
 		set(NCINE_ASSEMBLE_APK OFF)
 		set(NCINE_NDK_ARCHITECTURES armeabi-v7a arm64-v8a x86_64)
-		set(NCINE_BUILD_DOCUMENTATION ON)
+		set(NCINE_BUILD_DOCUMENTATION OFF)
 	endif()
 
 	if(EMSCRIPTEN)

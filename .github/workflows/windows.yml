@@ -25,12 +25,6 @@ jobs:
     - name: 'Checkout Code'
       uses: actions/checkout@v2
 
-    - name: 'Install Build Dependencies'
-      if: matrix.BuildType == 'DevDist'
-      run: |
-        choco install -y --no-progress doxygen.install
-        choco install -y --no-progress graphviz
-
     - name: 'Unshallow Git Repository for Versioning'
       if: matrix.BuildType == 'DevDist'
       run: |

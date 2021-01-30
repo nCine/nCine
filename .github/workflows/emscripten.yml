@@ -24,12 +24,6 @@ jobs:
     - name: 'Checkout Code'
       uses: actions/checkout@v2
 
-    - name: 'Install Build Dependencies on Linux'
-      if: runner.os == 'Linux' && matrix.BuildType == 'DevDist'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y doxygen graphviz
-
     - name: 'Install Emscripten SDK'
       run: |
         sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
