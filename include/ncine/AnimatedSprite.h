@@ -30,10 +30,8 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	/// Default move assignment operator
 	AnimatedSprite &operator=(AnimatedSprite &&) = default;
 
-	/// Returns a copy of this object, with the specified parent
-	AnimatedSprite clone(SceneNode *parent) const;
 	/// Returns a copy of this object
-	inline AnimatedSprite clone() const { return clone(parent_); }
+	inline AnimatedSprite clone() const { return AnimatedSprite(*this); }
 
 	/// Returns true if the current animation is paused
 	bool isPaused() const;
@@ -68,12 +66,14 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 
 	inline static ObjectType sType() { return ObjectType::ANIMATED_SPRITE; }
 
+  protected:
+	/// Protected copy constructor used to clone objects
+	AnimatedSprite(const AnimatedSprite &other);
+
   private:
 	nctl::Array<RectAnimation> anims_;
 	unsigned int currentAnimIndex_;
 
-	/// Deleted copy constructor
-	AnimatedSprite(const AnimatedSprite &) = delete;
 	/// Deleted assignment operator
 	AnimatedSprite &operator=(const AnimatedSprite &) = delete;
 };

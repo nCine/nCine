@@ -63,21 +63,6 @@ ParticleSystem &ParticleSystem::operator=(ParticleSystem &&) = default;
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-ParticleSystem ParticleSystem::clone(SceneNode *parent) const
-{
-	const Particle &particle = *particlePool_.front();
-	ParticleSystem newSystem(parent, poolSize_, particle.texture_, particle.texRect());
-	newSystem.setInLocalSpace(inLocalSpace_);
-
-	newSystem.setAnchorPoint(particle.anchorPoint());
-	newSystem.setFlippedX(particle.isFlippedX());
-	newSystem.setFlippedY(particle.isFlippedY());
-	newSystem.setBlendingFactors(particle.srcBlendingFactor(), particle.destBlendingFactor());
-	newSystem.setLayer(particle.layer());
-
-	return newSystem;
-}
-
 void ParticleSystem::clearAffectors()
 {
 	for (nctl::UniquePtr<ParticleAffector> &affector : affectors_)
@@ -211,7 +196,7 @@ void ParticleSystem::update(float interval)
 
 	ZoneScoped;
 	// Overridden `update()` method should call `transform` like `SceneNode::update()` does
-	transform();
+	SceneNode::transform();
 
 	for (int i = children_.size() - 1; i >= 0; i--)
 	{
@@ -245,6 +230,61 @@ void ParticleSystem::update(float interval)
 	tracyInfoString.format("Alive: %d", numAliveParticles());
 	ZoneText(tracyInfoString.data(), tracyInfoString.length());
 #endif
+}
+
+///////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+///////////////////////////////////////////////////////////
+
+ParticleSystem::ParticleSystem(const ParticleSystem &other)
+    : SceneNode(other), poolSize_(other.poolSize_), poolTop_(other.poolSize_ - 1),
+      particlePool_(other.poolSize_, nctl::ArrayMode::FIXED_CAPACITY),
+      particleArray_(other.poolSize_, nctl::ArrayMode::FIXED_CAPACITY),
+      affectors_(4), inLocalSpace_(other.inLocalSpace_)
+{
+	ZoneScoped;
+	type_ = ObjectType::PARTICLE_SYSTEM;
+
+	for (unsigned int i = 0; i < other.affectors_.size(); i++)
+	{
+		const ParticleAffector &affector = *other.affectors_[i];
+		switch (affector.type())
+		{
+			case ParticleAffector::Type::COLOR:
+				affectors_.pushBack(nctl::makeUnique<ColorAffector>(static_cast<const ColorAffector &>(affector).clone()));
+				break;
+			case ParticleAffector::Type::SIZE:
+				affectors_.pushBack(nctl::makeUnique<SizeAffector>(static_cast<const SizeAffector &>(affector).clone()));
+				break;
+			case ParticleAffector::Type::ROTATION:
+				affectors_.pushBack(nctl::makeUnique<RotationAffector>(static_cast<const RotationAffector &>(affector).clone()));
+				break;
+			case ParticleAffector::Type::POSITION:
+				affectors_.pushBack(nctl::makeUnique<PositionAffector>(static_cast<const PositionAffector &>(affector).clone()));
+				break;
+			case ParticleAffector::Type::VELOCITY:
+				affectors_.pushBack(nctl::makeUnique<VelocityAffector>(static_cast<const VelocityAffector &>(affector).clone()));
+				break;
+		}
+	}
+
+	children_.setCapacity(poolSize_);
+	if (poolSize_ > 0)
+	{
+		const Particle &otherParticle = *other.particlePool_.front();
+		if (otherParticle.texture())
+		{
+			// When Tracy is disabled the statement body is empty and braces are needed
+			ZoneText(otherParticle.texture()->name().data(), otherParticle.texture()->name().length());
+		}
+
+		for (unsigned int i = 0; i < poolSize_; i++)
+		{
+			nctl::UniquePtr<Particle> particle = nctl::makeUnique<Particle>(otherParticle.clone());
+			particlePool_.pushBack(particle.get());
+			particleArray_.pushBack(nctl::move(particle));
+		}
+	}
 }
 
 }

@@ -31,7 +31,7 @@ class DLL_PUBLIC Color
 	Color(unsigned int hex);
 	/// Four channels constructor from an array
 	explicit Color(const unsigned int channels[NumChannels]);
-	/// Construtor taking a normalized float color
+	/// Constructor taking a normalized float color
 	explicit Color(const Colorf &color);
 
 	/// Gets the red channel of the color

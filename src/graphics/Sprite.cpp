@@ -30,31 +30,7 @@ Sprite::Sprite(Texture *texture)
 Sprite::Sprite(SceneNode *parent, Texture *texture, float xx, float yy)
     : BaseSprite(parent, texture, xx, yy)
 {
-	ZoneScoped;
-	if (texture)
-	{
-		// When Tracy is disabled the statement body is empty and braces are needed
-		ZoneText(texture->name().data(), texture->name().length());
-	}
-
-	type_ = ObjectType::SPRITE;
-	setLayer(DrawableNode::LayerBase::SCENE);
-	renderCommand_->setType(RenderCommand::CommandTypes::SPRITE);
-
-	const Material::ShaderProgramType shaderProgramType = [](Texture *texture)
-	{
-		if (texture)
-			return (texture->numChannels() >= 3) ? Material::ShaderProgramType::SPRITE
-			                                     : Material::ShaderProgramType::SPRITE_GRAY;
-		else
-			return Material::ShaderProgramType::SPRITE_NO_TEXTURE;
-	}(texture);
-	renderCommand_->material().setShaderProgramType(shaderProgramType);
-	spriteBlock_ = renderCommand_->material().uniformBlock("SpriteBlock");
-	renderCommand_->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, 4);
-
-	if (texture_)
-		setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
+	init();
 }
 
 /*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
@@ -76,20 +52,49 @@ Sprite::Sprite(Texture *texture, const Vector2f &position)
 }
 
 ///////////////////////////////////////////////////////////
-// PUBLIC FUNCTIONS
+// PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-Sprite Sprite::clone(SceneNode *parent) const
+Sprite::Sprite(const Sprite &other)
+    : BaseSprite(other)
 {
-	Sprite newSprite(parent, texture_, x, y);
-	BaseSprite::cloneInto(newSprite);
-
-	return newSprite;
+	init();
+	setLayer(other.layer());
+	setTexRect(other.texRect_);
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+void Sprite::init()
+{
+	ZoneScoped;
+	if (texture_)
+	{
+		// When Tracy is disabled the statement body is empty and braces are needed
+		ZoneText(texture_->name().data(), texture_->name().length());
+	}
+
+	type_ = ObjectType::SPRITE;
+	setLayer(DrawableNode::LayerBase::SCENE);
+	renderCommand_->setType(RenderCommand::CommandTypes::SPRITE);
+
+	const Material::ShaderProgramType shaderProgramType = [](Texture *texture)
+	{
+		if (texture)
+			return (texture->numChannels() >= 3) ? Material::ShaderProgramType::SPRITE
+			                                     : Material::ShaderProgramType::SPRITE_GRAY;
+		else
+			return Material::ShaderProgramType::SPRITE_NO_TEXTURE;
+	}(texture_);
+	renderCommand_->material().setShaderProgramType(shaderProgramType);
+	spriteBlock_ = renderCommand_->material().uniformBlock("SpriteBlock");
+	renderCommand_->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, 4);
+
+	if (texture_)
+		setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
+}
 
 void Sprite::textureHasChanged(Texture *newTexture)
 {

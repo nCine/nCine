@@ -24,9 +24,24 @@ class Particle : public Sprite
 	/// A flag indicating if particle transformations are in local space or not
 	bool inLocalSpace_;
 
+	/// Constructor for a particle with a parent and texture, positioned in the relative origin
 	Particle(SceneNode *parent, Texture *texture);
+
+	/// Default move constructor
+	Particle(Particle &&) = default;
+	/// Default move assignment operator
+	Particle &operator=(Particle &&) = default;
+
 	/// Returns true if the particle is still alive
 	inline bool isAlive() const { return life_ > 0.0f; }
+
+  protected:
+	/// Returns a copy of this object
+	/*! \note This method is protected as it should only be called by a `ParticleSystem` */
+	inline Particle clone() const { return Particle(*this); }
+
+	/// Protected copy constructor used to clone objects
+	Particle(const Particle &other);
 
   private:
 	/// Initializes a particle with initial life, position, velocity and rotation
@@ -35,6 +50,9 @@ class Particle : public Sprite
 	void update(float interval) override;
 	/// Custom transform method to allow independent position from parent
 	void transform() override;
+
+	/// Deleted assignment operator
+	Particle &operator=(const Particle &) = delete;
 
 	friend class ParticleSystem;
 };

@@ -34,7 +34,7 @@ Object::Object(Object &&other)
 	other.id_ = 0;
 }
 
-Object& Object::operator=(Object &&other)
+Object &Object::operator=(Object &&other)
 {
 	type_ = other.type_;
 	theServiceLocator().indexer().removeObject(id_);
@@ -75,10 +75,10 @@ T *Object::fromId(unsigned int id)
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void Object::cloneInto(Object &other) const
+Object::Object(const Object &other)
+    : type_(other.type_), id_(0), name_(other.name_)
 {
-	// `type_` and `id_` variables are already initialized by the constructor of the derived class
-	other.name_.assign(name_);
+	id_ = theServiceLocator().indexer().addObject(this);
 }
 
 }

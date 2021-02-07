@@ -33,34 +33,7 @@ MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, float xx, float yy)
       vertices_(16), vertexDataPointer_(nullptr), numVertices_(0),
       indices_(16), indexDataPointer_(nullptr), numIndices_(0)
 {
-	ZoneScoped;
-	if (texture)
-	{
-		// When Tracy is disabled the statement body is empty and braces are needed
-		ZoneText(texture->name().data(), texture->name().length());
-	}
-
-	type_ = ObjectType::MESH_SPRITE;
-	setLayer(DrawableNode::LayerBase::SCENE);
-	renderCommand_->setType(RenderCommand::CommandTypes::MESH_SPRITE);
-
-	const Material::ShaderProgramType shaderProgramType = [](Texture *texture)
-	{
-		if (texture)
-			return (texture->numChannels() >= 3) ? Material::ShaderProgramType::MESH_SPRITE
-			                                     : Material::ShaderProgramType::MESH_SPRITE_GRAY;
-		else
-			return Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE;
-	}(texture);
-	renderCommand_->material().setShaderProgramType(shaderProgramType);
-
-	spriteBlock_ = renderCommand_->material().uniformBlock("MeshSpriteBlock");
-	renderCommand_->geometry().setPrimitiveType(GL_TRIANGLE_STRIP);
-	renderCommand_->geometry().setNumElementsPerVertex(texture_ ? VertexFloats : VertexNoTextureFloats);
-	renderCommand_->geometry().setHostVertexPointer(vertexDataPointer_);
-
-	if (texture_)
-		setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
+	init();
 }
 
 /*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
@@ -84,17 +57,6 @@ MeshSprite::MeshSprite(Texture *texture, const Vector2f &position)
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
-
-MeshSprite MeshSprite::clone(SceneNode *parent) const
-{
-	MeshSprite newSprite(parent, texture_, x, y);
-	BaseSprite::cloneInto(newSprite);
-
-	newSprite.copyVertices(numVertices_, vertices_.data());
-	newSprite.copyIndices(numIndices_, indices_.data());
-
-	return newSprite;
-}
 
 void MeshSprite::copyVertices(unsigned int numVertices, const float *vertices)
 {
@@ -196,7 +158,7 @@ void MeshSprite::createVerticesFromTexels(unsigned int numVertices, const Vector
 	{
 		if (texture_)
 		{
-			Vertex &v = reinterpret_cast<Vertex&>(vertices_[i * VertexFloats]);
+			Vertex &v = reinterpret_cast<Vertex &>(vertices_[i * VertexFloats]);
 			v.x = (points[i].x - min.x - halfWidth) / width_; // from -0.5 to 0.5
 			v.y = (points[i].y - min.y - halfHeight) / height_; // from -0.5 to 0.5
 			v.u = points[i].x / (texRect_.w - texRect_.x);
@@ -204,7 +166,7 @@ void MeshSprite::createVerticesFromTexels(unsigned int numVertices, const Vector
 		}
 		else
 		{
-			VertexNoTexture &v = reinterpret_cast<VertexNoTexture&>(vertices_[i * VertexNoTextureFloats]);
+			VertexNoTexture &v = reinterpret_cast<VertexNoTexture &>(vertices_[i * VertexNoTextureFloats]);
 			v.x = (points[i].x - min.x - halfWidth) / width_; // from -0.5 to 0.5
 			v.y = (points[i].y - min.y - halfHeight) / height_; // from -0.5 to 0.5
 		}
@@ -253,8 +215,54 @@ void MeshSprite::setIndices(const MeshSprite &meshSprite)
 }
 
 ///////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+///////////////////////////////////////////////////////////
+
+MeshSprite::MeshSprite(const MeshSprite &other)
+    : BaseSprite(other)
+{
+	init();
+	setLayer(other.layer());
+	setTexRect(other.texRect_);
+	copyVertices(other.numVertices_, other.vertices_.data());
+	copyIndices(other.numIndices_, other.indices_.data());
+}
+
+///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+void MeshSprite::init()
+{
+	ZoneScoped;
+	if (texture_)
+	{
+		// When Tracy is disabled the statement body is empty and braces are needed
+		ZoneText(texture_->name().data(), texture_->name().length());
+	}
+
+	type_ = ObjectType::MESH_SPRITE;
+	setLayer(DrawableNode::LayerBase::SCENE);
+	renderCommand_->setType(RenderCommand::CommandTypes::MESH_SPRITE);
+
+	const Material::ShaderProgramType shaderProgramType = [](Texture *texture)
+	{
+		if (texture)
+			return (texture->numChannels() >= 3) ? Material::ShaderProgramType::MESH_SPRITE
+			                                     : Material::ShaderProgramType::MESH_SPRITE_GRAY;
+		else
+			return Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE;
+	}(texture_);
+	renderCommand_->material().setShaderProgramType(shaderProgramType);
+
+	spriteBlock_ = renderCommand_->material().uniformBlock("MeshSpriteBlock");
+	renderCommand_->geometry().setPrimitiveType(GL_TRIANGLE_STRIP);
+	renderCommand_->geometry().setNumElementsPerVertex(texture_ ? VertexFloats : VertexNoTextureFloats);
+	renderCommand_->geometry().setHostVertexPointer(vertexDataPointer_);
+
+	if (texture_)
+		setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
+}
 
 void MeshSprite::textureHasChanged(Texture *newTexture)
 {

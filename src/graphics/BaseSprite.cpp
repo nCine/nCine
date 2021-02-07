@@ -87,12 +87,10 @@ void BaseSprite::setFlippedY(bool flippedY)
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void BaseSprite::cloneInto(BaseSprite &other) const
+BaseSprite::BaseSprite(const BaseSprite &other)
+    : DrawableNode(other), texture_(other.texture_), texRect_(other.texRect_),
+      flippedX_(other.flippedX_), flippedY_(other.flippedY_), spriteBlock_(nullptr)
 {
-	DrawableNode::cloneInto(other);
-	other.texRect_ = texRect_;
-	other.flippedX_ = flippedX_;
-	other.flippedY_ = flippedY_;
 }
 
 ///////////////////////////////////////////////////////////

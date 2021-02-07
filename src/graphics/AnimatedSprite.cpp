@@ -24,6 +24,7 @@ AnimatedSprite::AnimatedSprite(Texture *texture)
 AnimatedSprite::AnimatedSprite(SceneNode *parent, Texture *texture, float xx, float yy)
     : Sprite(parent, texture, xx, yy), anims_(4), currentAnimIndex_(0)
 {
+	type_ = ObjectType::ANIMATED_SPRITE;
 }
 
 AnimatedSprite::AnimatedSprite(SceneNode *parent, Texture *texture, const Vector2f &position)
@@ -44,18 +45,6 @@ AnimatedSprite::AnimatedSprite(Texture *texture, const Vector2f &position)
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
-
-AnimatedSprite AnimatedSprite::clone(SceneNode *parent) const
-{
-	AnimatedSprite newSprite(parent, texture_, x, y);
-	BaseSprite::cloneInto(newSprite);
-	newSprite.anims_ = anims_;
-
-	newSprite.setAnimationIndex(animationIndex());
-	newSprite.setFrame(frame());
-
-	return newSprite;
-}
 
 bool AnimatedSprite::isPaused() const
 {
@@ -123,6 +112,18 @@ void AnimatedSprite::setFrame(unsigned int frameNum)
 	ASSERT(!anims_.isEmpty());
 	anims_[currentAnimIndex_].setFrame(frameNum);
 	setTexRect(anims_[currentAnimIndex_].rect());
+}
+
+///////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+///////////////////////////////////////////////////////////
+
+AnimatedSprite::AnimatedSprite(const AnimatedSprite &other)
+    : Sprite(other), anims_(other.anims_), currentAnimIndex_(other.currentAnimIndex_)
+{
+	type_ = ObjectType::ANIMATED_SPRITE;
+	setLayer(other.layer());
+	setFrame(other.frame());
 }
 
 }

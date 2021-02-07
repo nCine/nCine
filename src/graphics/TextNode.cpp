@@ -34,48 +34,12 @@ TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
       lineHeight_(font ? font->lineHeight() : 0.0f), textnodeBlock_(nullptr)
 {
 	ASSERT(maxStringLength > 0);
-
-	type_ = ObjectType::TEXTNODE;
-	setLayer(DrawableNode::LayerBase::HUD);
-	renderCommand_->setType(RenderCommand::CommandTypes::TEXT);
-	renderCommand_->material().setBlendingEnabled(true);
-
-	const Material::ShaderProgramType shaderProgramType = [](Font *font)
-	{
-		if (font)
-			return (font->renderMode() == Font::RenderMode::GLYPH_IN_RED)
-			        ? Material::ShaderProgramType::TEXTNODE_RED
-			        : Material::ShaderProgramType::TEXTNODE_ALPHA;
-		else
-			return Material::ShaderProgramType::TEXTNODE_ALPHA;
-	}(font);
-	renderCommand_->material().setShaderProgramType(shaderProgramType);
-	textnodeBlock_ = renderCommand_->material().uniformBlock("TextnodeBlock");
-
-	if (font)
-		renderCommand_->material().setTexture(*font_->texture());
-
-	renderCommand_->geometry().setPrimitiveType(GL_TRIANGLE_STRIP);
-	renderCommand_->geometry().setNumElementsPerVertex(sizeof(Vertex) / sizeof(float));
+	init();
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
-
-TextNode TextNode::clone(SceneNode *parent) const
-{
-	TextNode newNode(parent, font_, string_.capacity());
-	DrawableNode::cloneInto(newNode);
-
-	newNode.string_.assign(string_);
-	newNode.withKerning_ = withKerning_;
-	// Font and dirty flags are assigned by the constructor
-	newNode.alignment_ = alignment_;
-	newNode.lineHeight_ = lineHeight_;
-
-	return newNode;
-}
 
 float TextNode::width() const
 {
@@ -237,8 +201,58 @@ void TextNode::draw(RenderQueue &renderQueue)
 }
 
 ///////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+///////////////////////////////////////////////////////////
+
+TextNode::TextNode(const TextNode &other)
+    : DrawableNode(other),
+      string_(other.string_), dirtyDraw_(true), dirtyBoundaries_(true),
+      withKerning_(other.withKerning_), font_(other.font_),
+      interleavedVertices_(string_.capacity() * 4 + (string_.capacity() - 1) * 2),
+      xAdvance_(0.0f), yAdvance_(0.0f), lineLengths_(4), alignment_(other.alignment_),
+      lineHeight_(font_ ? font_->lineHeight() : 0.0f), textnodeBlock_(nullptr)
+{
+	init();
+	setLayer(other.layer());
+	setBlendingEnabled(other.isBlendingEnabled());
+}
+
+///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+void TextNode::init()
+{
+	ZoneScoped;
+	if (font_ && font_->texture())
+	{
+		// When Tracy is disabled the statement body is empty and braces are needed
+		ZoneText(font_->texture()->name().data(), font_->texture()->name().length());
+	}
+
+	type_ = ObjectType::TEXTNODE;
+	setLayer(DrawableNode::LayerBase::HUD);
+	renderCommand_->setType(RenderCommand::CommandTypes::TEXT);
+	renderCommand_->material().setBlendingEnabled(true);
+
+	const Material::ShaderProgramType shaderProgramType = [](Font *font)
+	{
+		if (font)
+			return (font->renderMode() == Font::RenderMode::GLYPH_IN_RED)
+			        ? Material::ShaderProgramType::TEXTNODE_RED
+			        : Material::ShaderProgramType::TEXTNODE_ALPHA;
+		else
+			return Material::ShaderProgramType::TEXTNODE_ALPHA;
+	}(font_);
+	renderCommand_->material().setShaderProgramType(shaderProgramType);
+	textnodeBlock_ = renderCommand_->material().uniformBlock("TextnodeBlock");
+
+	if (font_)
+		renderCommand_->material().setTexture(*font_->texture());
+
+	renderCommand_->geometry().setPrimitiveType(GL_TRIANGLE_STRIP);
+	renderCommand_->geometry().setNumElementsPerVertex(sizeof(Vertex) / sizeof(float));
+}
 
 void TextNode::calculateBoundaries() const
 {

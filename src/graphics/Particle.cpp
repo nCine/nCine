@@ -16,6 +16,17 @@ Particle::Particle(SceneNode *parent, Texture *texture)
 }
 
 ///////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+///////////////////////////////////////////////////////////
+
+Particle::Particle(const Particle &other)
+    : Sprite(other), life_(other.life_), startingLife(other.startingLife),
+      startingRotation(other.startingRotation), inLocalSpace_(other.inLocalSpace_)
+{
+	renderCommand_->setType(RenderCommand::CommandTypes::PARTICLE);
+}
+
+///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 

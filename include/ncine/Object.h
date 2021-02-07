@@ -61,7 +61,8 @@ class DLL_PUBLIC Object
 	/// Object type
 	ObjectType type_;
 
-	void cloneInto(Object &other) const;
+	/// Protected copy constructor used to clone objects
+	Object(const Object &other);
 
   private:
 	/// Object identification in the indexer
@@ -72,8 +73,6 @@ class DLL_PUBLIC Object
 	 *  as there is still no string hashing based search. */
 	nctl::String name_;
 
-	/// Deleted copy constructor
-	Object(const Object &) = delete;
 	/// Deleted assignment operator
 	Object &operator=(const Object &) = delete;
 };

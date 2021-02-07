@@ -29,10 +29,8 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	/// Default move assignment operator
 	ParticleSystem &operator=(ParticleSystem &&);
 
-	/// Returns a copy of this object, with the specified parent
-	ParticleSystem clone(SceneNode *parent) const;
 	/// Returns a copy of this object
-	inline ParticleSystem clone() const { return clone(parent_); }
+	inline ParticleSystem clone() const { return ParticleSystem(*this); }
 
 	/// Adds a particle affector
 	inline void addAffector(nctl::UniquePtr<ParticleAffector> affector) { affectors_.pushBack(nctl::move(affector)); }
@@ -80,6 +78,10 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 
 	inline static ObjectType sType() { return ObjectType::PARTICLE_SYSTEM; }
 
+  protected:
+	/// Protected copy constructor used to clone objects
+	ParticleSystem(const ParticleSystem &other);
+
   private:
 	/// The particle pool size
 	unsigned int poolSize_;
@@ -96,8 +98,6 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	/// A flag indicating whether the system should be simulated in local space
 	bool inLocalSpace_;
 
-	/// Deleted copy constructor
-	ParticleSystem(const ParticleSystem &) = delete;
 	/// Deleted assignment operator
 	ParticleSystem &operator=(const ParticleSystem &) = delete;
 };

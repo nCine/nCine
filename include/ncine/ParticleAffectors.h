@@ -16,11 +16,33 @@ const unsigned int StepsInitialSize = 4;
 class DLL_PUBLIC ParticleAffector
 {
   public:
+	enum class Type
+	{
+		COLOR,
+		SIZE,
+		ROTATION,
+		POSITION,
+		VELOCITY
+	};
+
+	ParticleAffector(Type type)
+	    : type_(type) {}
 	virtual ~ParticleAffector() {}
+
 	/// Affects a property of the specified particle
 	void affect(Particle *particle);
 	/// Affects a property of the specified particle, without calculating the normalized age
 	virtual void affect(Particle *particle, float normalizedAge) = 0;
+
+	/// Returns the object type (RTTI)
+	inline Type type() const { return type_; }
+
+  protected:
+	/// Affector type
+	Type type_;
+
+	/// Protected default copy constructor used to clone objects
+	ParticleAffector(const ParticleAffector &other) = default;
 };
 
 /// Particle color affector
@@ -39,7 +61,15 @@ class DLL_PUBLIC ColorAffector : public ParticleAffector
 	};
 
 	ColorAffector()
-	    : colorSteps_(StepsInitialSize) {}
+	    : ParticleAffector(Type::COLOR), colorSteps_(StepsInitialSize) {}
+
+	/// Default move constructor
+	ColorAffector(ColorAffector &&) = default;
+	/// Default move assignment operator
+	ColorAffector &operator=(ColorAffector &&) = default;
+
+	/// Returns a copy of this object
+	inline ColorAffector clone() const { return ColorAffector(*this); }
 
 	/// Affects the color of the specified particle
 	void affect(Particle *particle, float normalizedAge) override;
@@ -47,6 +77,10 @@ class DLL_PUBLIC ColorAffector : public ParticleAffector
 
 	inline nctl::Array<ColorStep> &steps() { return colorSteps_; }
 	inline const nctl::Array<ColorStep> &steps() const { return colorSteps_; }
+
+  protected:
+	/// Protected default copy constructor used to clone objects
+	ColorAffector(const ColorAffector &other) = default;
 
   private:
 	nctl::Array<ColorStep> colorSteps_;
@@ -73,16 +107,24 @@ class DLL_PUBLIC SizeAffector : public ParticleAffector
 
 	/// Constructs a size affector with a default base scale factor
 	SizeAffector()
-	    : sizeSteps_(StepsInitialSize), baseScale_(1.0f, 1.0f) {}
+	    : SizeAffector(1.0f, 1.0f) {}
 	/// Constructs a size affector with a base scale factor as a reference
 	explicit SizeAffector(float baseScale)
-	    : sizeSteps_(StepsInitialSize), baseScale_(baseScale, baseScale) {}
+	    : SizeAffector(baseScale, baseScale) {}
 	/// Constructs a size affector with a horizontal and a vertical base scale factor as a reference
 	SizeAffector(float baseScaleX, float baseScaleY)
-	    : sizeSteps_(StepsInitialSize), baseScale_(baseScaleX, baseScaleY) {}
+	    : ParticleAffector(Type::SIZE), sizeSteps_(StepsInitialSize), baseScale_(baseScaleX, baseScaleY) {}
 	/// Constructs a size affector with a vector base scale factor as a reference
 	explicit SizeAffector(const Vector2f &baseScale)
-	    : sizeSteps_(StepsInitialSize), baseScale_(baseScale) {}
+	    : SizeAffector(baseScale.x, baseScale.y) {}
+
+	/// Default move constructor
+	SizeAffector(SizeAffector &&) = default;
+	/// Default move assignment operator
+	SizeAffector &operator=(SizeAffector &&) = default;
+
+	/// Returns a copy of this object
+	inline SizeAffector clone() const { return SizeAffector(*this); }
 
 	/// Affects the size of the specified particle
 	void affect(Particle *particle, float normalizedAge) override;
@@ -101,6 +143,10 @@ class DLL_PUBLIC SizeAffector : public ParticleAffector
 	inline const Vector2f &baseScale() const { return baseScale_; }
 	inline void setBaseScale(float baseScale) { baseScale_.set(baseScale, baseScale); }
 	inline void setBaseScale(const Vector2f &baseScale) { baseScale_ = baseScale; }
+
+  protected:
+	/// Protected default copy constructor used to clone objects
+	SizeAffector(const SizeAffector &other) = default;
 
   private:
 	nctl::Array<SizeStep> sizeSteps_;
@@ -123,7 +169,15 @@ class DLL_PUBLIC RotationAffector : public ParticleAffector
 	};
 
 	RotationAffector()
-	    : rotationSteps_(StepsInitialSize) {}
+	    : ParticleAffector(Type::ROTATION), rotationSteps_(StepsInitialSize) {}
+
+	/// Default move constructor
+	RotationAffector(RotationAffector &&) = default;
+	/// Default move assignment operator
+	RotationAffector &operator=(RotationAffector &&) = default;
+
+	/// Returns a copy of this object
+	inline RotationAffector clone() const { return RotationAffector(*this); }
 
 	/// Affects the rotation of the specified particle
 	void affect(Particle *particle, float normalizedAge) override;
@@ -131,6 +185,10 @@ class DLL_PUBLIC RotationAffector : public ParticleAffector
 
 	inline nctl::Array<RotationStep> &steps() { return rotationSteps_; }
 	inline const nctl::Array<RotationStep> &steps() const { return rotationSteps_; }
+
+  protected:
+	/// Protected default copy constructor used to clone objects
+	RotationAffector(const RotationAffector &other) = default;
 
   private:
 	nctl::Array<RotationStep> rotationSteps_;
@@ -152,7 +210,15 @@ class DLL_PUBLIC PositionAffector : public ParticleAffector
 	};
 
 	PositionAffector()
-	    : positionSteps_(StepsInitialSize) {}
+	    : ParticleAffector(Type::POSITION), positionSteps_(StepsInitialSize) {}
+
+	/// Default move constructor
+	PositionAffector(PositionAffector &&) = default;
+	/// Default move assignment operator
+	PositionAffector &operator=(PositionAffector &&) = default;
+
+	/// Returns a copy of this object
+	inline PositionAffector clone() const { return PositionAffector(*this); }
 
 	/// Affects the position of the specified particle
 	void affect(Particle *particle, float normalizedAge) override;
@@ -161,6 +227,10 @@ class DLL_PUBLIC PositionAffector : public ParticleAffector
 
 	inline nctl::Array<PositionStep> &steps() { return positionSteps_; }
 	inline const nctl::Array<PositionStep> &steps() const { return positionSteps_; }
+
+  protected:
+	/// Protected default copy constructor used to clone objects
+	PositionAffector(const PositionAffector &other) = default;
 
   private:
 	nctl::Array<PositionStep> positionSteps_;
@@ -182,7 +252,15 @@ class DLL_PUBLIC VelocityAffector : public ParticleAffector
 	};
 
 	VelocityAffector()
-	    : velocitySteps_(StepsInitialSize) {}
+	    : ParticleAffector(Type::VELOCITY), velocitySteps_(StepsInitialSize) {}
+
+	/// Default move constructor
+	VelocityAffector(VelocityAffector &&) = default;
+	/// Default move assignment operator
+	VelocityAffector &operator=(VelocityAffector &&) = default;
+
+	/// Returns a copy of this object
+	inline VelocityAffector clone() const { return VelocityAffector(*this); }
 
 	/// Affects the velocity of the specified particle
 	void affect(Particle *particle, float normalizedAge) override;
@@ -191,6 +269,10 @@ class DLL_PUBLIC VelocityAffector : public ParticleAffector
 
 	inline nctl::Array<VelocityStep> &steps() { return velocitySteps_; }
 	inline const nctl::Array<VelocityStep> &steps() const { return velocitySteps_; }
+
+  protected:
+	/// Protected default copy constructor used to clone objects
+	VelocityAffector(const VelocityAffector &other) = default;
 
   private:
 	nctl::Array<VelocityStep> velocitySteps_;

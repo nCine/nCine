@@ -14,6 +14,11 @@ class GLUniformBlockCache;
 class DLL_PUBLIC BaseSprite : public DrawableNode
 {
   public:
+	/// Default move constructor
+	BaseSprite(BaseSprite &&) = default;
+	/// Default move assignment operator
+	BaseSprite &operator=(BaseSprite &&) = default;
+
 	/// Sets sprite size
 	void setSize(float width, float height);
 	/// Sets sprite size with a `Vector2f`
@@ -51,14 +56,18 @@ class DLL_PUBLIC BaseSprite : public DrawableNode
 
 	GLUniformBlockCache *spriteBlock_;
 
-	/// Protected construtor accessible only by derived sprite classes
+	/// Protected constructor accessible only by derived sprite classes
 	BaseSprite(SceneNode *parent, Texture *texture, float xx, float yy);
-	/// Protected construtor accessible only by derived sprite classes
+	/// Protected constructor accessible only by derived sprite classes
 	BaseSprite(SceneNode *parent, Texture *texture, const Vector2f &position);
 
-	void cloneInto(BaseSprite &other) const;
+	/// Protected copy constructor used to clone objects
+	BaseSprite(const BaseSprite &other);
 
 	void updateRenderCommand() override;
+
+	/// Deleted assignment operator
+	BaseSprite &operator=(const BaseSprite &) = delete;
 
 	/// Performs the required tasks upon a change in the texture
 	virtual void textureHasChanged(Texture *newTexture) = 0;

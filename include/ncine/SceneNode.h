@@ -40,10 +40,8 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Move assignment operator
 	SceneNode &operator=(SceneNode &&other);
 
-	/// Returns a copy of this object, with the specified parent
-	SceneNode clone(SceneNode *parent) const;
 	/// Returns a copy of this object
-	inline SceneNode clone() const { return clone(parent_); }
+	inline SceneNode clone() const { return SceneNode(*this); }
 
 	inline static ObjectType sType() { return ObjectType::SCENENODE; }
 
@@ -202,12 +200,11 @@ class DLL_PUBLIC SceneNode : public Object
 	/// A flag indicating whether the destructor should also delete all children
 	bool shouldDeleteChildrenOnDestruction_;
 
-	/// Deleted copy constructor
-	SceneNode(const SceneNode &) = delete;
 	/// Deleted assignment operator
 	SceneNode &operator=(const SceneNode &) = delete;
 
-	void cloneInto(SceneNode &node) const;
+	/// Protected copy constructor used to clone objects
+	SceneNode(const SceneNode &other);
 
 	/// Swaps the child pointer of a parent when moving an object
 	void swapChildPointer(SceneNode *first, SceneNode *second);

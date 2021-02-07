@@ -63,10 +63,8 @@ class DLL_PUBLIC MeshSprite : public BaseSprite
 	/// Default move assignment operator
 	MeshSprite &operator=(MeshSprite &&) = default;
 
-	/// Returns a copy of this object, with the specified parent
-	MeshSprite clone(SceneNode *parent) const;
 	/// Returns a copy of this object
-	inline MeshSprite clone() const { return clone(parent_); }
+	inline MeshSprite clone() const { return MeshSprite(*this); }
 
 	/// Returns the number of vertices of the sprite mesh
 	inline unsigned int numVertices() const { return numVertices_; }
@@ -115,6 +113,10 @@ class DLL_PUBLIC MeshSprite : public BaseSprite
 
 	inline static ObjectType sType() { return ObjectType::MESH_SPRITE; }
 
+  protected:
+	/// Protected copy constructor used to clone objects
+	MeshSprite(const MeshSprite &other);
+
   private:
 	/// The array of vertex positions, interleaved with texture coordinates when a texture is attached
 	nctl::Array<float> vertices_;
@@ -129,6 +131,12 @@ class DLL_PUBLIC MeshSprite : public BaseSprite
 	const unsigned short *indexDataPointer_;
 	/// The number of indices, either shared or not, that composes the mesh
 	unsigned int numIndices_;
+
+	/// Deleted assignment operator
+	MeshSprite &operator=(const MeshSprite &) = delete;
+
+	/// Initializer method for constructors and the copy constructor
+	void init();
 
 	void textureHasChanged(Texture *newTexture) override;
 };

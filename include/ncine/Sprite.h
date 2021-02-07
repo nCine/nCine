@@ -29,14 +29,22 @@ class DLL_PUBLIC Sprite : public BaseSprite
 	/// Default move assignment operator
 	Sprite &operator=(Sprite &&) = default;
 
-	/// Returns a copy of this object, with the specified parent
-	Sprite clone(SceneNode *parent) const;
 	/// Returns a copy of this object
-	inline Sprite clone() const { return clone(parent_); }
+	inline Sprite clone() const { return Sprite(*this); }
 
 	inline static ObjectType sType() { return ObjectType::SPRITE; }
 
+  protected:
+	/// Protected copy constructor used to clone objects
+	Sprite(const Sprite &other);
+
   private:
+	/// Deleted assignment operator
+	Sprite &operator=(const Sprite &) = delete;
+
+	/// Initializer method for constructors and the copy constructor
+	void init();
+
 	void textureHasChanged(Texture *newTexture) override;
 };
 

@@ -141,7 +141,8 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	/// Calculates updated values for the AABB
 	virtual void updateAabb();
 
-	void cloneInto(DrawableNode &other) const;
+	/// Protected copy constructor used to clone objects
+	DrawableNode(const DrawableNode &other);
 
 	/// Updates the render command
 	virtual void updateRenderCommand() = 0;
@@ -150,8 +151,6 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	static unsigned short imguiLayer_;
 	static unsigned short nuklearLayer_;
 
-	/// Deleted copy constructor
-	DrawableNode(const DrawableNode &) = delete;
 	/// Deleted assignment operator
 	DrawableNode &operator=(const DrawableNode &) = delete;
 };

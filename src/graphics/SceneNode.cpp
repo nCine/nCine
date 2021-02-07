@@ -97,14 +97,6 @@ SceneNode &SceneNode::operator=(SceneNode &&other)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-SceneNode SceneNode::clone(SceneNode *parent) const
-{
-	SceneNode newNode(parent, x, y);
-	cloneInto(newNode);
-
-	return newNode;
-}
-
 void SceneNode::setParent(SceneNode *parentNode)
 {
 	// Can't set yourself or your parent as parent
@@ -221,21 +213,15 @@ void SceneNode::visit(RenderQueue &renderQueue)
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void SceneNode::cloneInto(SceneNode &other) const
+SceneNode::SceneNode(const SceneNode &other)
+    : Object(other), x(other.x), y(other.y), updateEnabled_(other.updateEnabled_),
+      drawEnabled_(other.drawEnabled_), parent_(nullptr), children_(4),
+      anchorPoint_(other.anchorPoint_), scaleFactor_(other.scaleFactor_), rotation_(other.rotation_),
+      color_(other.color_), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f, 1.0f), absRotation_(0.0f),
+      worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity),
+      shouldDeleteChildrenOnDestruction_(other.shouldDeleteChildrenOnDestruction_)
 {
-	Object::cloneInto(other);
-	// The x, y, and parent_ members are initialized by the other object constructor
-	other.updateEnabled_ = updateEnabled_;
-	other.drawEnabled_ = drawEnabled_;
-
-	// Children are not copied
-	other.anchorPoint_ = anchorPoint_;
-	other.scaleFactor_ = scaleFactor_;
-	other.rotation_ = rotation_;
-	other.color_ = color_;
-
-	// Absolute transformations and matrices are calculated and not copied
-	other.shouldDeleteChildrenOnDestruction_ = shouldDeleteChildrenOnDestruction_;
+	setParent(other.parent_);
 }
 
 /*! \note It is faster than calling `setParent()` on the first child and `removeChildNode()` on the second one */

@@ -216,15 +216,15 @@ void DrawableNode::updateAabb()
 	aabb_ = Rectf::fromCenterAndSize(absX_, absY_, rotatedWidth, rotatedHeight);
 }
 
-void DrawableNode::cloneInto(DrawableNode &other) const
+DrawableNode::DrawableNode(const DrawableNode &other)
+    : SceneNode(other),
+      width_(other.width_), height_(other.height_),
+      renderCommand_(nctl::makeUnique<RenderCommand>())
 {
-	SceneNode::cloneInto(other);
-	other.width_ = width_;
-	other.height_ = height_;
-
-	other.setBlendingEnabled(isBlendingEnabled());
-	other.setBlendingFactors(srcBlendingFactor(), destBlendingFactor());
-	other.setLayer(layer());
+	renderCommand_->setIdSortKey(id());
+	setBlendingEnabled(other.isBlendingEnabled());
+	setBlendingFactors(other.srcBlendingFactor(), other.destBlendingFactor());
+	setLayer(other.layer());
 }
 
 }

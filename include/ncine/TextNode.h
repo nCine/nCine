@@ -40,10 +40,8 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Default move assignment operator
 	TextNode &operator=(TextNode &&) = default;
 
-	/// Returns a copy of this object, with the specified parent
-	TextNode clone(SceneNode *parent) const;
 	/// Returns a copy of this object
-	inline TextNode clone() const { return clone(parent_); }
+	inline TextNode clone() const { return TextNode(*this); }
 
 	/// Returns the width of rendered text
 	float width() const override;
@@ -84,6 +82,10 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	void draw(RenderQueue &renderQueue) override;
 
 	inline static ObjectType sType() { return ObjectType::TEXTNODE; }
+
+  protected:
+	/// Protected copy constructor used to clone objects
+	TextNode(const TextNode &other);
 
   private:
 	/// Vertex data for the glyphs
@@ -131,6 +133,12 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	float lineHeight_;
 
 	GLUniformBlockCache *textnodeBlock_;
+
+	/// Deleted assignment operator
+	TextNode &operator=(const TextNode &) = delete;
+
+	/// Initializer method for constructors and the copy constructor
+	void init();
 
 	/// Calculates rectangle boundaries for the rendered text
 	void calculateBoundaries() const;
