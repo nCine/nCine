@@ -74,7 +74,7 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 ImGuiDrawing::~ImGuiDrawing()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	io.Fonts->TexID = nullptr;
+	io.Fonts->SetTexID(nullptr);
 }
 
 ///////////////////////////////////////////////////////////

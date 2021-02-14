@@ -5,6 +5,7 @@ project(nuklear-download NONE)
 include(ExternalProject)
 ExternalProject_Add(nuklear
 	GIT_REPOSITORY    https://github.com/Immediate-Mode-UI/Nuklear.git
+	GIT_TAG           "${NUKLEAR_VERSION_TAG}"
 	GIT_SHALLOW       TRUE
 	SOURCE_DIR        "${CMAKE_BINARY_DIR}/nuklear-src"
 	CONFIGURE_COMMAND ""

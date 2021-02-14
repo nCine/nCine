@@ -105,7 +105,7 @@ void ImGuiSdlInput::init(SDL_Window *window)
 #ifdef IMGUI_HAS_DOCK
 	// Our mouse update function expect PlatformHandle to be filled for the main viewport
 	ImGuiViewport *main_viewport = ImGui::GetMainViewport();
-	main_viewport->PlatformHandle = (void *)window;
+	main_viewport->PlatformHandle = reinterpret_cast<void *>(window);
 #endif
 
 #ifdef _WIN32

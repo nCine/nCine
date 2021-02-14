@@ -48,27 +48,29 @@ AnimatedSprite::AnimatedSprite(Texture *texture, const Vector2f &position)
 
 bool AnimatedSprite::isPaused() const
 {
-	ASSERT(!anims_.isEmpty());
-	const bool isPaused = anims_[currentAnimIndex_].isPaused();
+	bool isPaused = true;
+	if (anims_.isEmpty() == false)
+		isPaused = anims_[currentAnimIndex_].isPaused();
 	return isPaused;
 }
 
 void AnimatedSprite::setPaused(bool isPaused)
 {
-	ASSERT(!anims_.isEmpty());
-	anims_[currentAnimIndex_].setPaused(isPaused);
+	if (anims_.isEmpty() == false)
+		anims_[currentAnimIndex_].setPaused(isPaused);
 }
 
 void AnimatedSprite::update(float interval)
 {
-	ASSERT(!anims_.isEmpty());
+	if (anims_.isEmpty() == false)
+	{
+		const unsigned int previousFrame = anims_[currentAnimIndex_].frame();
+		anims_[currentAnimIndex_].updateFrame(interval);
 
-	const unsigned int previousFrame = anims_[currentAnimIndex_].frame();
-	anims_[currentAnimIndex_].updateFrame(interval);
-
-	// Updating sprite texture rectangle only on change
-	if (previousFrame != anims_[currentAnimIndex_].frame())
-		setTexRect(anims_[currentAnimIndex_].rect());
+		// Updating sprite texture rectangle only on change
+		if (previousFrame != anims_[currentAnimIndex_].frame())
+			setTexRect(anims_[currentAnimIndex_].rect());
+	}
 
 	Sprite::update(interval);
 }
@@ -94,24 +96,29 @@ void AnimatedSprite::clearAnimations()
 
 void AnimatedSprite::setAnimationIndex(unsigned int animIndex)
 {
-	ASSERT(!anims_.isEmpty());
-	ASSERT(animIndex < anims_.size());
-
-	currentAnimIndex_ = animIndex;
-	setTexRect(anims_[currentAnimIndex_].rect());
+	if (anims_.isEmpty() == false)
+	{
+		ASSERT(animIndex < anims_.size());
+		currentAnimIndex_ = animIndex;
+		setTexRect(anims_[currentAnimIndex_].rect());
+	}
 }
 
 unsigned int AnimatedSprite::frame() const
 {
-	ASSERT(!anims_.isEmpty());
-	return anims_[currentAnimIndex_].frame();
+	unsigned int frame = 0;
+	if (anims_.isEmpty() == false)
+		frame = anims_[currentAnimIndex_].frame();
+	return frame;
 }
 
 void AnimatedSprite::setFrame(unsigned int frameNum)
 {
-	ASSERT(!anims_.isEmpty());
-	anims_[currentAnimIndex_].setFrame(frameNum);
-	setTexRect(anims_[currentAnimIndex_].rect());
+	if (anims_.isEmpty() == false)
+	{
+		anims_[currentAnimIndex_].setFrame(frameNum);
+		setTexRect(anims_[currentAnimIndex_].rect());
+	}
 }
 
 ///////////////////////////////////////////////////////////
