@@ -406,9 +406,7 @@ if(NCINE_WITH_TRACY)
 		target_compile_definitions(ncine PRIVATE "WITH_TRACY_OPENGL")
 	endif()
 	target_compile_definitions(ncine PUBLIC "TRACY_ENABLE")
-	if(Qt5_FOUND AND NCINE_PREFERRED_BACKEND STREQUAL "QT5")
-		target_compile_definitions(ncine PRIVATE "TRACY_DELAYED_INIT")
-	endif()
+	target_compile_definitions(ncine PRIVATE "TRACY_DELAYED_INIT")
 
 	# For external projects compiling using an nCine build directory
 	set(TRACY_INCLUDE_ONLY_DIR ${TRACY_SOURCE_DIR}/include_only)

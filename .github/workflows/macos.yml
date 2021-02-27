@@ -7,7 +7,6 @@ env:
 
      - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
   DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
-  NDK_VERSION: r21d
 
 on: [push, workflow_dispatch]
 
@@ -55,15 +54,6 @@ jobs:
 
         git clone https://github.com/nCine/nCine-data.git
 
-    - name: 'Download Android NDK'
-      if: matrix.BuildType == 'DevDist'
-      run: |
-        export NDK_URL=https://dl.google.com/android/repository/android-ndk-$NDK_VERSION-darwin-x86_64.zip
-
-        cd ..
-        curl -fsSL $NDK_URL -o ndk.zip
-        unzip -q ndk.zip && rm -f ndk.zip
-
     - name: 'CMake Configuration, Make and Test'
       if: matrix.BuildType != 'DevDist'
       run: |
@@ -76,8 +66,6 @@ jobs:
 
     - name: 'CMake Configuration'
       run: |
-        export ANDROID_NDK_HOME=$(pwd)/../android-ndk-$NDK_VERSION
-
         if [[ "${{ matrix.BuildType }}" == "DevDist" ]]; then
           export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }}"
         else

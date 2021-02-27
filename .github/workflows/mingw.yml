@@ -7,7 +7,6 @@ env:
 
      - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
   DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
-  NDK_VERSION: r21d
 
 on: [push, workflow_dispatch]
 
@@ -99,14 +98,6 @@ jobs:
 
         git clone https://github.com/nCine/nCine-data.git
 
-    - name: 'Download Android NDK'
-      if: matrix.BuildType == 'DevDist'
-      run: |
-        cd ..
-        curl -fsSL https://dl.google.com/android/repository/android-ndk-$env:NDK_VERSION-windows-x86_64.zip -o ndk.zip
-        7z x ndk.zip
-        Remove-Item ndk.zip
-
     - name: 'Download RenderDoc API Header'
       if: matrix.BuildType != 'DevDist'
       run: |
@@ -135,7 +126,6 @@ jobs:
       run: |
         $env:CC = "${{ matrix.CC }}"
         $env:CXX = "${{ matrix.CXX }}"
-        $env:ANDROID_NDK_HOME = "$(pwd)/../android-ndk-$env:NDK_VERSION"
 
         $env:PATH = "C:\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem"
         $env:MSYSTEM = "MINGW64"
