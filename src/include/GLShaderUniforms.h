@@ -25,7 +25,7 @@ class GLShaderUniforms
 	GLShaderProgram *shaderProgram_;
 
 	static const int UniformCachesHashSize = 16;
-	nctl::StaticStringHashMap<GLUniformCache, UniformCachesHashSize> uniformCaches_;
+	nctl::StaticHashMap<nctl::String, GLUniformCache, UniformCachesHashSize> uniformCaches_;
 	/// A dummy uniform cache returned when a uniform is not found in the hashmap
 	static GLUniformCache uniformNotFound_;
 

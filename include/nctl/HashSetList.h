@@ -651,9 +651,6 @@ const typename HashSetList<K, HashFunc>::HashBucket &HashSetList<K, HashFunc>::r
 	return buckets_[index];
 }
 
-using StringHashSetList = HashSetList<String, FNV1aHashFuncContainer<String>>;
-using CStringHashSetList = HashSetList<const char *, FNV1aHashFunc<const char *>>;
-
 }
 
 #endif

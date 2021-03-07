@@ -45,7 +45,7 @@ class GLUniformBlockCache
 	GLint usedSize_;
 
 	static const int UniformHashSize = 8;
-	nctl::StaticStringHashMap<GLUniformCache, UniformHashSize> uniformCaches_;
+	nctl::StaticHashMap<nctl::String, GLUniformCache, UniformHashSize> uniformCaches_;
 };
 
 }

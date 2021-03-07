@@ -7,7 +7,7 @@ class StaticHashMapStringTest : public ::testing::Test
   protected:
 	void SetUp() override { initHashMap(strHashmap_); }
 
-	nctl::StaticStringHashMap<nctl::String, Capacity> strHashmap_;
+	nctl::StaticHashMap<nctl::String, nctl::String, Capacity> strHashmap_;
 };
 
 TEST_F(StaticHashMapStringTest, Capacity)
@@ -102,7 +102,7 @@ TEST_F(StaticHashMapStringTest, RemoveElements)
 TEST_F(StaticHashMapStringTest, CopyConstruction)
 {
 	printf("Creating a new hashmap with copy construction\n");
-	nctl::StaticStringHashMap<nctl::String, Capacity> newStrHashmap(strHashmap_);
+	nctl::StaticHashMap<nctl::String, nctl::String, Capacity> newStrHashmap(strHashmap_);
 	printHashMap(newStrHashmap);
 
 	assertHashMapsAreEqual(strHashmap_, newStrHashmap);
@@ -111,7 +111,7 @@ TEST_F(StaticHashMapStringTest, CopyConstruction)
 TEST_F(StaticHashMapStringTest, MoveConstruction)
 {
 	printf("Creating a new hashmap with move construction\n");
-	nctl::StaticStringHashMap<nctl::String, Capacity> newStrHashmap = nctl::move(strHashmap_);
+	nctl::StaticHashMap<nctl::String, nctl::String, Capacity> newStrHashmap = nctl::move(strHashmap_);
 	printHashMap(newStrHashmap);
 
 	ASSERT_EQ(strHashmap_.size(), 0);
@@ -123,7 +123,7 @@ TEST_F(StaticHashMapStringTest, MoveConstruction)
 TEST_F(StaticHashMapStringTest, AssignmentOperator)
 {
 	printf("Creating a new hashmap with the assignment operator\n");
-	nctl::StaticStringHashMap<nctl::String, Capacity> newStrHashmap;
+	nctl::StaticHashMap<nctl::String, nctl::String, Capacity> newStrHashmap;
 	newStrHashmap = strHashmap_;
 	printHashMap(newStrHashmap);
 
@@ -133,7 +133,7 @@ TEST_F(StaticHashMapStringTest, AssignmentOperator)
 TEST_F(StaticHashMapStringTest, MoveAssignmentOperator)
 {
 	printf("Creating a new hashmap with the move assignment operator\n");
-	nctl::StaticStringHashMap<nctl::String, Capacity> newStrHashmap;
+	nctl::StaticHashMap<nctl::String, nctl::String, Capacity> newStrHashmap;
 	newStrHashmap = nctl::move(strHashmap_);
 	printHashMap(newStrHashmap);
 
@@ -161,6 +161,24 @@ TEST_F(StaticHashMapStringTest, DoesNotContain)
 	printf("Key %s is in the hashmap: %d - Value: %s\n", key, found, value.data());
 
 	ASSERT_FALSE(found);
+}
+
+TEST_F(StaticHashMapStringTest, Find)
+{
+	const nctl::String *value = strHashmap_.find(Keys[0]);
+	printf("Key %s is in the hashmap: %d - Value: %s\n", Keys[0], value != nullptr, value->data());
+
+	ASSERT_TRUE(value != nullptr);
+	ASSERT_STREQ(value->data(), Values[0]);
+}
+
+TEST_F(StaticHashMapStringTest, CannotFind)
+{
+	const char *key = "Z";
+	const nctl::String *value = strHashmap_.find(key);
+	printf("Key %s is in the hashmap: %d\n", key, value != nullptr);
+
+	ASSERT_FALSE(value != nullptr);
 }
 
 }

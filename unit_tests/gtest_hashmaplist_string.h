@@ -13,35 +13,35 @@ const unsigned int Size = 6;
 const char *Keys[Size] = { "A", "a", "B", "C", "AB", "BA" };
 const char *Values[Size] = { "AAAA", "aaaa", "BBBB", "CCCC", "ABABABAB", "BABABABA" };
 
-void initHashMap(nctl::StringHashMapList<nctl::String> &strHashmap)
+void initHashMap(nctl::HashMapList<nctl::String, nctl::String> &strHashmap)
 {
 	for (unsigned int i = 0; i < Size; i++)
 		strHashmap[Keys[i]] = Values[i];
 }
 
-void printHashMap(nctl::StringHashMapList<nctl::String> &strHashmap)
+void printHashMap(nctl::HashMapList<nctl::String, nctl::String> &strHashmap)
 {
 	unsigned int n = 0;
 
-	for (nctl::StringHashMapList<nctl::String>::ConstIterator i = strHashmap.begin(); i != strHashmap.end(); ++i)
+	for (nctl::HashMapList<nctl::String, nctl::String>::ConstIterator i = strHashmap.begin(); i != strHashmap.end(); ++i)
 		printf("[%u] hash: %u, key: %s, value: %s\n", n++, i.hash(), i.key().data(), i.value().data());
 	printf("\n");
 }
 
-unsigned int calcSize(const nctl::StringHashMapList<nctl::String> &strHashmap)
+unsigned int calcSize(const nctl::HashMapList<nctl::String, nctl::String> &strHashmap)
 {
 	unsigned int length = 0;
 
-	for (typename nctl::StringHashMapList<nctl::String>::ConstIterator i = strHashmap.begin(); i != strHashmap.end(); ++i)
+	for (typename nctl::HashMapList<nctl::String, nctl::String>::ConstIterator i = strHashmap.begin(); i != strHashmap.end(); ++i)
 		length++;
 
 	return length;
 }
 
-void assertHashMapsAreEqual(const nctl::StringHashMapList<nctl::String> &strHashmap1, const nctl::StringHashMapList<nctl::String> &strHashmap2)
+void assertHashMapsAreEqual(const nctl::HashMapList<nctl::String, nctl::String> &strHashmap1, const nctl::HashMapList<nctl::String, nctl::String> &strHashmap2)
 {
-	nctl::StringHashMapList<nctl::String>::ConstIterator strHashmap1It = strHashmap1.begin();
-	nctl::StringHashMapList<nctl::String>::ConstIterator strHashmap2It = strHashmap2.begin();
+	nctl::HashMapList<nctl::String, nctl::String>::ConstIterator strHashmap1It = strHashmap1.begin();
+	nctl::HashMapList<nctl::String, nctl::String>::ConstIterator strHashmap2It = strHashmap2.begin();
 	while (strHashmap1It != strHashmap1.end())
 	{
 		ASSERT_EQ(strHashmap1It.key(), strHashmap2It.key());

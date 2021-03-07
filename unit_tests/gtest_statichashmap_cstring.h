@@ -16,7 +16,7 @@ const char *Values[Size] = { "AAAA", "aaaa", "BBBB", "CCCC", "ABABABAB", "BABABA
 const unsigned int MaxLength = 3;
 char KeysCopy[Size][MaxLength];
 
-void initHashMap(nctl::StaticCStringHashMap<const char *, Capacity> &cstrHashmap)
+void initHashMap(nctl::StaticHashMap<const char *, const char *, Capacity> &cstrHashmap)
 {
 	for (unsigned int i = 0; i < Size; i++)
 	{
@@ -25,20 +25,20 @@ void initHashMap(nctl::StaticCStringHashMap<const char *, Capacity> &cstrHashmap
 	}
 }
 
-void printHashMap(nctl::StaticCStringHashMap<const char *, Capacity> &cstrHashmap)
+void printHashMap(nctl::StaticHashMap<const char *, const char *, Capacity> &cstrHashmap)
 {
 	unsigned int n = 0;
 
-	for (nctl::StaticCStringHashMap<const char *, Capacity>::ConstIterator i = cstrHashmap.begin(); i != cstrHashmap.end(); ++i)
+	for (nctl::StaticHashMap<const char *, const char *, Capacity>::ConstIterator i = cstrHashmap.begin(); i != cstrHashmap.end(); ++i)
 		printf("[%u] hash: %u, key: %s, value: %s\n", n++, i.hash(), i.key(), i.value());
 	printf("\n");
 }
 
-unsigned int calcSize(const nctl::StaticCStringHashMap<const char *, Capacity> &cstrHashmap)
+unsigned int calcSize(const nctl::StaticHashMap<const char *, const char *, Capacity> &cstrHashmap)
 {
 	unsigned int length = 0;
 
-	for (typename nctl::StaticCStringHashMap<const char *, Capacity>::ConstIterator i = cstrHashmap.begin(); i != cstrHashmap.end(); ++i)
+	for (typename nctl::StaticHashMap<const char *, const char *, Capacity>::ConstIterator i = cstrHashmap.begin(); i != cstrHashmap.end(); ++i)
 		length++;
 
 	return length;

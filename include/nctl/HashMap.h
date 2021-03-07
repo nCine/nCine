@@ -954,12 +954,6 @@ void HashMap<K, T, HashFunc>::emplaceNode(unsigned int index, hash_t hash, const
 	new (nodes_ + index) Node(key, nctl::forward<Args>(args)...);
 }
 
-template <class T>
-using StringHashMap = HashMap<String, T, FNV1aHashFuncContainer<String>>;
-
-template <class T>
-using CStringHashMap = HashMap<const char *, T, FNV1aHashFunc<const char *>>;
-
 }
 
 #endif

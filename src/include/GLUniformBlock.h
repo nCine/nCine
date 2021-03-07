@@ -38,7 +38,7 @@ class GLUniformBlock
 	static const int MaxNumBlockUniforms = 16;
 
 	static const int BlockUniformHashSize = 8;
-	nctl::StaticStringHashMap<GLUniform, BlockUniformHashSize> blockUniforms_;
+	nctl::StaticHashMap<nctl::String, GLUniform, BlockUniformHashSize> blockUniforms_;
 
 	GLuint program_;
 	GLuint index_;

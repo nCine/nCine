@@ -7,7 +7,7 @@ class StaticHashSetCStringTest : public ::testing::Test
   protected:
 	void SetUp() override { initHashSet(cstrHashset_); }
 
-	nctl::StaticCStringHashSet<Capacity> cstrHashset_;
+	nctl::StaticHashSet<const char *, Capacity> cstrHashset_;
 };
 
 TEST_F(StaticHashSetCStringTest, InsertElements)
@@ -49,6 +49,32 @@ TEST_F(StaticHashSetCStringTest, Contains)
 	printf("Key %s is in the hashset: %d\n", KeysCopy[0], found);
 
 	ASSERT_TRUE(found);
+}
+
+TEST_F(StaticHashSetCStringTest, DoesNotContain)
+{
+	const char *key = "Z";
+	const bool found = cstrHashset_.contains(key);
+	printf("Key %s is in the hashset: %d\n", key, found);
+
+	ASSERT_FALSE(found);
+}
+
+TEST_F(StaticHashSetCStringTest, Find)
+{
+	const char **value = cstrHashset_.find(KeysCopy[0]);
+	printf("Key %s is in the hashset: %d\n", KeysCopy[0], value != nullptr);
+
+	ASSERT_TRUE(value != nullptr);
+}
+
+TEST_F(StaticHashSetCStringTest, CannotFind)
+{
+	const char *key = "Z";
+	const char **value = cstrHashset_.find(key);
+	printf("Key %s is in the hashset: %d\n", key, value != nullptr);
+
+	ASSERT_FALSE(value != nullptr);
 }
 
 }

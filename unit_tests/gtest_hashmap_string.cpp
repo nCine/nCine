@@ -11,7 +11,7 @@ class HashMapStringTest : public ::testing::Test
   protected:
 	void SetUp() override { initHashMap(strHashmap_); }
 
-	nctl::StringHashMap<nctl::String> strHashmap_;
+	nctl::HashMap<nctl::String, nctl::String> strHashmap_;
 };
 
 TEST_F(HashMapStringTest, Capacity)
@@ -106,7 +106,7 @@ TEST_F(HashMapStringTest, RemoveElements)
 TEST_F(HashMapStringTest, CopyConstruction)
 {
 	printf("Creating a new hashmap with copy construction\n");
-	nctl::StringHashMap<nctl::String> newStrHashmap(strHashmap_);
+	nctl::HashMap<nctl::String, nctl::String> newStrHashmap(strHashmap_);
 	printHashMap(newStrHashmap);
 
 	assertHashMapsAreEqual(strHashmap_, newStrHashmap);
@@ -115,7 +115,7 @@ TEST_F(HashMapStringTest, CopyConstruction)
 TEST_F(HashMapStringTest, MoveConstruction)
 {
 	printf("Creating a new hashmap with move construction\n");
-	nctl::StringHashMap<nctl::String> newStrHashmap = nctl::move(strHashmap_);
+	nctl::HashMap<nctl::String, nctl::String> newStrHashmap = nctl::move(strHashmap_);
 	printHashMap(newStrHashmap);
 
 	ASSERT_EQ(strHashmap_.size(), 0);
@@ -127,7 +127,7 @@ TEST_F(HashMapStringTest, MoveConstruction)
 TEST_F(HashMapStringTest, AssignmentOperator)
 {
 	printf("Creating a new hashmap with the assignment operator\n");
-	nctl::StringHashMap<nctl::String> newStrHashmap(Capacity);
+	nctl::HashMap<nctl::String, nctl::String> newStrHashmap(Capacity);
 	newStrHashmap = strHashmap_;
 	printHashMap(newStrHashmap);
 
@@ -137,7 +137,7 @@ TEST_F(HashMapStringTest, AssignmentOperator)
 TEST_F(HashMapStringTest, MoveAssignmentOperator)
 {
 	printf("Creating a new hashmap with the move assignment operator\n");
-	nctl::StringHashMap<nctl::String> newStrHashmap(Capacity);
+	nctl::HashMap<nctl::String, nctl::String> newStrHashmap(Capacity);
 	newStrHashmap = nctl::move(strHashmap_);
 	printHashMap(newStrHashmap);
 
@@ -165,6 +165,24 @@ TEST_F(HashMapStringTest, DoesNotContain)
 	printf("Key %s is in the hashmap: %d - Value: %s\n", key, found, value.data());
 
 	ASSERT_FALSE(found);
+}
+
+TEST_F(HashMapStringTest, Find)
+{
+	const nctl::String *value = strHashmap_.find(Keys[0]);
+	printf("Key %s is in the hashmap: %d - Value: %s\n", Keys[0], value != nullptr, value->data());
+
+	ASSERT_TRUE(value != nullptr);
+	ASSERT_STREQ(value->data(), Values[0]);
+}
+
+TEST_F(HashMapStringTest, CannotFind)
+{
+	const char *key = "Z";
+	const nctl::String *value = strHashmap_.find(key);
+	printf("Key %s is in the hashmap: %d\n", key, value != nullptr);
+
+	ASSERT_FALSE(value != nullptr);
 }
 
 }

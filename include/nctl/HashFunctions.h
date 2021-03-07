@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include "String.h"
 
 namespace nctl {
 
@@ -71,18 +72,18 @@ class SaxHashFunc<const char *>
 
 /// Shift-Add-XOR hash function
 /*!
- * \note The key type should be a container exposing `length()` and `operator[]()` methods.
- * Contained elements should be convertible to `hash_t`.
+ * \note Specialized version of the function for String objects
  */
-template <class K>
-class SaxHashFuncContainer
+template <>
+class SaxHashFunc<String>
 {
   public:
-	hash_t operator()(const K &key) const
+	hash_t operator()(const String &string) const
 	{
+		const unsigned int length = string.length();
 		hash_t hash = static_cast<hash_t>(0);
-		for (unsigned int i = 0; i < key.length(); i++)
-			hash ^= (hash << 5) + (hash >> 2) + static_cast<hash_t>(key[i]);
+		for (unsigned int i = 0; i < length; i++)
+			hash ^= (hash << 5) + (hash >> 2) + static_cast<hash_t>(string[i]);
 
 		return hash;
 	}
@@ -144,21 +145,21 @@ class JenkinsHashFunc<const char *>
 
 /// Jenkins hash function
 /*!
- * \note The key type should be a container exposing `length()` and `operator[]()` methods.
- * Contained elements should be convertible to `hash_t`.
+ * \note Specialized version of the function for String objects
  *
  * For more information: http://en.wikipedia.org/wiki/Jenkins_hash_function
  */
-template <class K>
-class JenkinsHashFuncContainer
+template <>
+class JenkinsHashFunc<String>
 {
   public:
-	hash_t operator()(const K &key) const
+	hash_t operator()(const String &string) const
 	{
+		const unsigned int length = string.length();
 		hash_t hash = static_cast<hash_t>(0);
-		for (unsigned int i = 0; i < key.length(); i++)
+		for (unsigned int i = 0; i < length; i++)
 		{
-			hash += static_cast<hash_t>(key[i]);
+			hash += static_cast<hash_t>(string[i]);
 			hash += (hash << 10);
 			hash ^= (hash >> 6);
 		}
@@ -229,20 +230,20 @@ class FNV1aHashFunc<const char *>
 
 /// Fowler-Noll-Vo Hash (FNV-1a)
 /*!
- * \note The key type should be a container exposing `length()` and `operator[]()` methods.
- * Contained elements should be convertible to `hash_t`.
+ * \note Specialized version of the function for String objects
  *
  * For more information: http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
  */
-template <class K>
-class FNV1aHashFuncContainer
+template <>
+class FNV1aHashFunc<String>
 {
   public:
-	hash_t operator()(const K &key) const
+	hash_t operator()(const String &string) const
 	{
+		const unsigned int length = string.length();
 		hash_t hash = static_cast<hash_t>(Seed);
-		for (unsigned int i = 0; i < key.length(); i++)
-			hash = fnv1a(static_cast<hash_t>(key[i]), hash);
+		for (unsigned int i = 0; i < length; i++)
+			hash = fnv1a(static_cast<hash_t>(string[i]), hash);
 
 		return hash;
 	}

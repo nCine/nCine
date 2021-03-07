@@ -781,9 +781,6 @@ void HashSet<K, HashFunc>::insertKey(unsigned int index, hash_t hash, K &&key)
 	new (keys_ + index) K(nctl::move(key));
 }
 
-using StringHashSet = HashSet<String, FNV1aHashFuncContainer<String>>;
-using CStringHashSet = HashSet<const char *, FNV1aHashFunc<const char *>>;
-
 }
 
 #endif

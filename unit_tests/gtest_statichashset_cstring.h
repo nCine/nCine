@@ -15,7 +15,7 @@ const char *Keys[Size] = { "A", "a", "B", "C", "AB", "BA" };
 const unsigned int MaxLength = 3;
 char KeysCopy[Size][MaxLength];
 
-void initHashSet(nctl::StaticCStringHashSet<Capacity> &cstrHashset)
+void initHashSet(nctl::StaticHashSet<const char *, Capacity> &cstrHashset)
 {
 	for (unsigned int i = 0; i < Size; i++)
 	{
@@ -24,20 +24,20 @@ void initHashSet(nctl::StaticCStringHashSet<Capacity> &cstrHashset)
 	}
 }
 
-void printHashSet(nctl::StaticCStringHashSet<Capacity> &cstrHashset)
+void printHashSet(nctl::StaticHashSet<const char *, Capacity> &cstrHashset)
 {
 	unsigned int n = 0;
 
-	for (nctl::StaticCStringHashSet<Capacity>::ConstIterator i = cstrHashset.begin(); i != cstrHashset.end(); ++i)
+	for (nctl::StaticHashSet<const char *, Capacity>::ConstIterator i = cstrHashset.begin(); i != cstrHashset.end(); ++i)
 		printf("[%u] hash: %u, key: %s\n", n++, i.hash(), i.key());
 	printf("\n");
 }
 
-unsigned int calcSize(const nctl::StaticCStringHashSet<Capacity> &cstrHashset)
+unsigned int calcSize(const nctl::StaticHashSet<const char *, Capacity> &cstrHashset)
 {
 	unsigned int length = 0;
 
-	for (typename nctl::StaticCStringHashSet<Capacity>::ConstIterator i = cstrHashset.begin(); i != cstrHashset.end(); ++i)
+	for (typename nctl::StaticHashSet<const char *, Capacity>::ConstIterator i = cstrHashset.begin(); i != cstrHashset.end(); ++i)
 		length++;
 
 	return length;

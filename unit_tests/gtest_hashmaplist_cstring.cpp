@@ -11,7 +11,7 @@ class HashMapListCStringTest : public ::testing::Test
   protected:
 	void SetUp() override { initHashMap(cstrHashmap_); }
 
-	nctl::CStringHashMapList<const char *> cstrHashmap_;
+	nctl::HashMapList<const char *, const char *> cstrHashmap_;
 };
 
 TEST_F(HashMapListCStringTest, RetrieveElements)
@@ -95,6 +95,34 @@ TEST_F(HashMapListCStringTest, Contains)
 
 	ASSERT_TRUE(found);
 	ASSERT_STREQ(value, Values[0]);
+}
+
+TEST_F(HashMapListCStringTest, DoesNotContain)
+{
+	const char *key = "Z";
+	const char *value = nullptr;
+	const bool found = cstrHashmap_.contains(key, value);
+	printf("Key %s is in the hashmap: %d - Value: %s\n", key, found, value);
+
+	ASSERT_FALSE(found);
+}
+
+TEST_F(HashMapListCStringTest, Find)
+{
+	const char **value = cstrHashmap_.find(KeysCopy[0]);
+	printf("Key %s is in the hashmap: %d - Value: %s\n", KeysCopy[0], value != nullptr, *value);
+
+	ASSERT_TRUE(value != nullptr);
+	ASSERT_STREQ(*value, Values[0]);
+}
+
+TEST_F(HashMapListCStringTest, CannotFind)
+{
+	const char *key = "Z";
+	const char **value = cstrHashmap_.find(key);
+	printf("Key %s is in the hashmap: %d\n", key, value != nullptr);
+
+	ASSERT_FALSE(value != nullptr);
 }
 
 }
