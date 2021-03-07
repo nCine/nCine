@@ -11,7 +11,7 @@ class HashSetListStringTest : public ::testing::Test
   protected:
 	void SetUp() override { initHashSet(strHashset_); }
 
-	nctl::StringHashSetList strHashset_;
+	nctl::HashSetList<nctl::String> strHashset_;
 };
 
 TEST_F(HashSetListStringTest, BucketAmount)
@@ -66,7 +66,7 @@ TEST_F(HashSetListStringTest, RemoveElements)
 TEST_F(HashSetListStringTest, CopyConstruction)
 {
 	printf("Creating a new hashset with copy construction\n");
-	nctl::StringHashSetList newStrHashset(strHashset_);
+	nctl::HashSetList<nctl::String> newStrHashset(strHashset_);
 	printHashSet(newStrHashset);
 
 	assertHashSetsAreEqual(strHashset_, newStrHashset);
@@ -75,7 +75,7 @@ TEST_F(HashSetListStringTest, CopyConstruction)
 TEST_F(HashSetListStringTest, MoveConstruction)
 {
 	printf("Creating a new hashset with move construction\n");
-	nctl::StringHashSetList newStrHashset = nctl::move(strHashset_);
+	nctl::HashSetList<nctl::String> newStrHashset = nctl::move(strHashset_);
 	printHashSet(newStrHashset);
 
 	ASSERT_EQ(strHashset_.bucketAmount(), 0);
@@ -86,7 +86,7 @@ TEST_F(HashSetListStringTest, MoveConstruction)
 TEST_F(HashSetListStringTest, AssignmentOperator)
 {
 	printf("Creating a new hashset with the assignment operator\n");
-	nctl::StringHashSetList newStrHashset(Capacity);
+	nctl::HashSetList<nctl::String> newStrHashset(Capacity);
 	newStrHashset = strHashset_;
 	printHashSet(newStrHashset);
 
@@ -96,7 +96,7 @@ TEST_F(HashSetListStringTest, AssignmentOperator)
 TEST_F(HashSetListStringTest, MoveAssignmentOperator)
 {
 	printf("Creating a new hashset with the move assignment operator\n");
-	nctl::StringHashSetList newStrHashset(Capacity);
+	nctl::HashSetList<nctl::String> newStrHashset(Capacity);
 	newStrHashset = nctl::move(strHashset_);
 	printHashSet(newStrHashset);
 
@@ -120,6 +120,23 @@ TEST_F(HashSetListStringTest, DoesNotContain)
 	printf("Key %s is in the hashset: %d\n", key, found);
 
 	ASSERT_FALSE(found);
+}
+
+TEST_F(HashSetListStringTest, Find)
+{
+	const nctl::String *value = strHashset_.find(Keys[0]);
+	printf("Key %s is in the hashset: %d\n", Keys[0], value != nullptr);
+
+	ASSERT_TRUE(value != nullptr);
+}
+
+TEST_F(HashSetListStringTest, CannotFind)
+{
+	const char *key = "Z";
+	const nctl::String *value = strHashset_.find(key);
+	printf("Key %s is in the hashset: %d\n", key, value != nullptr);
+
+	ASSERT_FALSE(value != nullptr);
 }
 
 }

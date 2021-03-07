@@ -10,7 +10,7 @@ class HashSetListMovableTest : public ::testing::Test
 	    : hashset_(Capacity) {}
 
   protected:
-	nctl::HashSetList<Movable, nctl::FNV1aHashFuncContainer<Movable>> hashset_;
+	nctl::HashSetList<Movable> hashset_;
 };
 
 #if !TEST_MOVABLE_ONLY
@@ -94,7 +94,7 @@ TEST_F(HashSetListMovableTest, MoveConstruction)
 	const Movable *m = hashset_.find(refMovable);
 	m->printAndAssert();
 	printf("Creating a new hashset with move construction\n");
-	nctl::HashSetList<Movable, nctl::FNV1aHashFuncContainer<Movable>> newHashset(nctl::move(hashset_));
+	nctl::HashSetList<Movable> newHashset(nctl::move(hashset_));
 	m = newHashset.find(refMovable);
 	m->printAndAssert();
 
@@ -113,7 +113,7 @@ TEST_F(HashSetListMovableTest, MoveAssignmentOperator)
 	const Movable *m = hashset_.find(refMovable);
 	m->printAndAssert();
 	printf("Creating a new hashset with the move assignment operator\n");
-	nctl::HashSetList<Movable, nctl::FNV1aHashFuncContainer<Movable>> newHashset(Capacity);
+	nctl::HashSetList<Movable> newHashset(Capacity);
 	newHashset = nctl::move(hashset_);
 	m = newHashset.find(refMovable);
 	m->printAndAssert();

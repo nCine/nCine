@@ -3,6 +3,8 @@
 
 #define TEST_MOVABLE_ONLY (0)
 
+#include <nctl/HashFunctions.h>
+
 namespace {
 
 class Movable
@@ -113,6 +115,40 @@ class Movable
   private:
 	unsigned int size_;
 	int *array_;
+};
+
+}
+
+namespace nctl {
+
+/// Fowler-Noll-Vo Hash (FNV-1a)
+/*!
+ * \note Specialized version of the function for Movable objects
+ *
+ * For more information: http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+ */
+template <>
+class FNV1aHashFunc<Movable>
+{
+  public:
+	hash_t operator()(const Movable &key) const
+	{
+		const unsigned int length = key.length();
+		hash_t hash = static_cast<hash_t>(Seed);
+		for (unsigned int i = 0; i < length; i++)
+			hash = fnv1a(static_cast<hash_t>(key[i]), hash);
+
+		return hash;
+	}
+
+  private:
+	static const hash_t Prime = 0x01000193; //  16777619
+	static const hash_t Seed = 0x811C9DC5; // 2166136261
+
+	inline hash_t fnv1a(unsigned char oneByte, hash_t hash = Seed) const
+	{
+		return (oneByte ^ hash) * Prime;
+	}
 };
 
 }

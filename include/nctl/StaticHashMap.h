@@ -792,12 +792,6 @@ void StaticHashMap<K, T, Capacity, HashFunc>::emplaceNode(unsigned int index, ha
 	new (nodes_ + index) Node(key, nctl::forward<Args>(args)...);
 }
 
-template <class T, unsigned int Capacity>
-using StaticStringHashMap = StaticHashMap<String, T, Capacity, FNV1aHashFuncContainer<String>>;
-
-template <class T, unsigned int Capacity>
-using StaticCStringHashMap = StaticHashMap<const char *, T, Capacity, FNV1aHashFunc<const char *>>;
-
 }
 
 #endif

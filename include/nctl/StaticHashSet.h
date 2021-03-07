@@ -626,12 +626,6 @@ void StaticHashSet<K, Capacity, HashFunc>::insertKey(unsigned int index, hash_t 
 	new (keys_ + index) K(nctl::move(key));
 }
 
-template <unsigned int Capacity>
-using StaticStringHashSet = StaticHashSet<String, Capacity, FNV1aHashFuncContainer<String>>;
-
-template <unsigned int Capacity>
-using StaticCStringHashSet = StaticHashSet<const char *, Capacity, FNV1aHashFunc<const char *>>;
-
 }
 
 #endif

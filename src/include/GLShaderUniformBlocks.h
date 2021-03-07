@@ -34,7 +34,7 @@ class GLShaderUniformBlocks
 	RenderBuffersManager::Parameters uboParams_;
 
 	static const int UniformBlockCachesHashSize = 4;
-	nctl::StaticStringHashMap<GLUniformBlockCache, UniformBlockCachesHashSize> uniformBlockCaches_;
+	nctl::StaticHashMap<nctl::String, GLUniformBlockCache, UniformBlockCachesHashSize> uniformBlockCaches_;
 	/// A dummy uniform block cache returned when a uniform block is not found in the hashmap
 	static GLUniformBlockCache uniformBlockNotFound_;
 

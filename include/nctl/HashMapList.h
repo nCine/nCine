@@ -715,12 +715,6 @@ const typename HashMapList<K, T, HashFunc>::HashBucket &HashMapList<K, T, HashFu
 	return buckets_[index];
 }
 
-template <class T>
-using StringHashMapList = HashMapList<String, T, FNV1aHashFuncContainer<String>>;
-
-template <class T>
-using CStringHashMapList = HashMapList<const char *, T, FNV1aHashFunc<const char *>>;
-
 }
 
 #endif

@@ -11,7 +11,7 @@ class HashSetCStringTest : public ::testing::Test
   protected:
 	void SetUp() override { initHashSet(cstrHashset_); }
 
-	nctl::CStringHashSet cstrHashset_;
+	nctl::HashSet<const char *> cstrHashset_;
 };
 
 TEST_F(HashSetCStringTest, InsertElements)
@@ -53,6 +53,32 @@ TEST_F(HashSetCStringTest, Contains)
 	printf("Key %s is in the hashset: %d\n", KeysCopy[0], found);
 
 	ASSERT_TRUE(found);
+}
+
+TEST_F(HashSetCStringTest, DoesNotContain)
+{
+	const char *key = "Z";
+	const bool found = cstrHashset_.contains(key);
+	printf("Key %s is in the hashset: %d\n", key, found);
+
+	ASSERT_FALSE(found);
+}
+
+TEST_F(HashSetCStringTest, Find)
+{
+	const char **value = cstrHashset_.find(KeysCopy[0]);
+	printf("Key %s is in the hashset: %d\n", KeysCopy[0], value != nullptr);
+
+	ASSERT_TRUE(value != nullptr);
+}
+
+TEST_F(HashSetCStringTest, CannotFind)
+{
+	const char *key = "Z";
+	const char **value = cstrHashset_.find(key);
+	printf("Key %s is in the hashset: %d\n", key, value != nullptr);
+
+	ASSERT_FALSE(value != nullptr);
 }
 
 }

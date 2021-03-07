@@ -7,7 +7,7 @@ class StaticHashMapCStringTest : public ::testing::Test
   protected:
 	void SetUp() override { initHashMap(cstrHashmap_); }
 
-	nctl::StaticCStringHashMap<const char *, Capacity> cstrHashmap_;
+	nctl::StaticHashMap<const char *, const char *, Capacity> cstrHashmap_;
 };
 
 TEST_F(StaticHashMapCStringTest, RetrieveElements)
@@ -91,6 +91,34 @@ TEST_F(StaticHashMapCStringTest, Contains)
 
 	ASSERT_TRUE(found);
 	ASSERT_STREQ(value, Values[0]);
+}
+
+TEST_F(StaticHashMapCStringTest, DoesNotContain)
+{
+	const char *key = "Z";
+	const char *value = nullptr;
+	const bool found = cstrHashmap_.contains(key, value);
+	printf("Key %s is in the hashmap: %d\n", key, found);
+
+	ASSERT_FALSE(found);
+}
+
+TEST_F(StaticHashMapCStringTest, Find)
+{
+	const char **value = cstrHashmap_.find(KeysCopy[0]);
+	printf("Key %s is in the hashmap: %d - Value: %s\n", KeysCopy[0], value != nullptr, *value);
+
+	ASSERT_TRUE(value != nullptr);
+	ASSERT_STREQ(*value, Values[0]);
+}
+
+TEST_F(StaticHashMapCStringTest, CannotFind)
+{
+	const char *key = "Z";
+	const char **value = cstrHashmap_.find(key);
+	printf("Key %s is in the hashmap: %d\n", key, value != nullptr);
+
+	ASSERT_FALSE(value != nullptr);
 }
 
 }

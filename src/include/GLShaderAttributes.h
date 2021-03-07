@@ -27,7 +27,7 @@ class GLShaderAttributes
 	GLShaderProgram *shaderProgram_;
 
 	static GLVertexFormat::Attribute attributeNotFound_;
-	nctl::StaticStringHashMap<int, GLVertexFormat::MaxAttributes> attributeLocations_;
+	nctl::StaticHashMap<nctl::String, int, GLVertexFormat::MaxAttributes> attributeLocations_;
 	GLVertexFormat vertexFormat_;
 
 	void importAttributes();
