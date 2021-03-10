@@ -1,4 +1,5 @@
 #include "apptest_joystick.h"
+#include <nctl/algorithms.h>
 #include <ncine/Application.h>
 #include <nctl/String.h>
 #include <ncine/Texture.h>
@@ -154,10 +155,10 @@ void MyEventHandler::onFrameStart()
 			if (nc::theApplication().inputManager().isJoyPresent(i))
 			{
 				const char *joyName = nc::theApplication().inputManager().joyName(i);
-				int numAxes = nc::theApplication().inputManager().joyNumAxes(i);
-				int numButtons = nc::theApplication().inputManager().joyNumButtons(i);
-				int numHats = nc::theApplication().inputManager().joyNumHats(i);
-				bool isMapped = nc::theApplication().inputManager().isJoyMapped(i);
+				const int numAxes = nc::theApplication().inputManager().joyNumAxes(i);
+				const int numButtons = nc::theApplication().inputManager().joyNumButtons(i);
+				const int numHats = nc::theApplication().inputManager().joyNumHats(i);
+				const bool isMapped = nc::theApplication().inputManager().isJoyMapped(i);
 
 				joyString_->formatAppend("Joystick %d is %s: \"%s\" (%d axes, %d buttons, %d hats)\n", i, isMapped ? "mapped" : "unmapped", joyName, numAxes, numButtons, numHats);
 			}
@@ -165,9 +166,9 @@ void MyEventHandler::onFrameStart()
 
 		if (nc::theApplication().inputManager().isJoyPresent(firstJoy))
 		{
-			int numAxes = nc::theApplication().inputManager().joyNumAxes(firstJoy);
-			int numButtons = nc::theApplication().inputManager().joyNumButtons(firstJoy);
-			int numHats = nc::theApplication().inputManager().joyNumHats(firstJoy);
+			const int numAxes = nctl::min(nc::theApplication().inputManager().joyNumAxes(firstJoy), static_cast<int>(MaxNumAxes));
+			const int numButtons = nctl::min(nc::theApplication().inputManager().joyNumButtons(firstJoy), static_cast<int>(MaxNumButtons));
+			const int numHats = nctl::min(nc::theApplication().inputManager().joyNumHats(firstJoy), static_cast<int>(MaxNumHats));
 			const nc::JoystickState &joyState = nc::theApplication().inputManager().joystickState(firstJoy);
 
 			*joyString_ += "Axes:";

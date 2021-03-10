@@ -8,6 +8,7 @@
 #include <ctime>
 #include "FileLogger.h"
 #include "common_macros.h"
+#include <nctl/algorithms.h>
 #include <nctl/CString.h>
 #include "Application.h"
 #include "tracy.h"
@@ -280,7 +281,7 @@ unsigned int FileLogger::writeWithColors(LogLevel level, const char *timeMsg, un
 		logMsgFuncLength++;
 	logMsgFuncLength++; // skip '>' character
 
-	nctl::strncpy(logEntryWithColors_ + length, logMsg, logMsgFuncLength);
+	nctl::strncpy(logEntryWithColors_ + length, logMsg, nctl::min(logMsgFuncLength, MaxEntryLength - length - 1));
 	length += logMsgFuncLength;
 
 	length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", Reset);
@@ -288,7 +289,7 @@ unsigned int FileLogger::writeWithColors(LogLevel level, const char *timeMsg, un
 	if (level == LogLevel::WARN || level == LogLevel::ERROR || level == LogLevel::FATAL)
 		length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", Bold);
 
-	nctl::strncpy(logEntryWithColors_ + length, logMsg + logMsgFuncLength, logMsgLength - logMsgFuncLength);
+	nctl::strncpy(logEntryWithColors_ + length, logMsg + logMsgFuncLength, nctl::min(logMsgLength - logMsgFuncLength, MaxEntryLength - length - 1));
 	length += logMsgLength - logMsgFuncLength;
 
 	if (level == LogLevel::WARN || level == LogLevel::ERROR || level == LogLevel::FATAL)

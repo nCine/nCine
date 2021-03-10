@@ -123,7 +123,7 @@ class DLL_PUBLIC Texture : public Object
 	inline void setChromaKeyColor(const Colorf chromaKeyColor) { chromaKeyColor_ = chromaKeyColor; }
 
 	/// Returns the user data opaque pointer for ImGui's `ImTextureID` or Nuklear's texture handle
-	void *guiTexId();
+	void *guiTexId() const;
 
 	inline static ObjectType sType() { return ObjectType::TEXTURE; }
 
