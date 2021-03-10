@@ -61,6 +61,8 @@ class DLL_PUBLIC SceneNode : public Object
 	bool removeChildNode(SceneNode *childNode);
 	/// Removes the child at the specified index, without reparenting nephews
 	bool removeChildNodeAt(unsigned int index);
+	/// Removes all children, without reparenting nephews
+	bool removeAllChildrenNodes();
 	/// Removes a child of this node reparenting nephews as children
 	bool unlinkChildNode(SceneNode *childNode);
 

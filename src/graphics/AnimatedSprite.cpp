@@ -104,6 +104,22 @@ void AnimatedSprite::setAnimationIndex(unsigned int animIndex)
 	}
 }
 
+RectAnimation *AnimatedSprite::currentAnimation()
+{
+	RectAnimation *currentAnim = nullptr;
+	if (anims_.isEmpty() == false)
+		currentAnim = &anims_[currentAnimIndex_];
+	return currentAnim;
+}
+
+const RectAnimation *AnimatedSprite::currentAnimation() const
+{
+	const RectAnimation *currentAnim = nullptr;
+	if (anims_.isEmpty() == false)
+		currentAnim = &anims_[currentAnimIndex_];
+	return currentAnim;
+}
+
 unsigned int AnimatedSprite::frame() const
 {
 	unsigned int frame = 0;

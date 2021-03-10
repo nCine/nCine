@@ -198,7 +198,7 @@ const FontGlyph *Font::glyph(unsigned int glyphId) const
 bool Font::checkFntInformation(const FntParser &fntParser)
 {
 	const FntParser::InfoTag &infoTag = fntParser.infoTag();
-	RETURNF_ASSERT_MSG_X(infoTag.outline == 0, "Font outline is not supported");
+	RETURNF_ASSERT_MSG(infoTag.outline == 0, "Font outline is not supported");
 
 	const FntParser::CommonTag &commonTag = fntParser.commonTag();
 	RETURNF_ASSERT_MSG_X(commonTag.pages == 1, "Multiple texture pages are not supported (pages: %d)", commonTag.pages);

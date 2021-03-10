@@ -161,6 +161,19 @@ bool SceneNode::removeChildNodeAt(unsigned int index)
 	return true;
 }
 
+/*! \return True if there were at least one node to remove */
+bool SceneNode::removeAllChildrenNodes()
+{
+	if (children_.isEmpty())
+		return false;
+
+	for (unsigned int i = 0; i < children_.size(); i++)
+		children_[i]->parent_ = nullptr;
+	children_.clear();
+
+	return true;
+}
+
 /*!	\return True if the node has been unlinked */
 bool SceneNode::unlinkChildNode(SceneNode *childNode)
 {

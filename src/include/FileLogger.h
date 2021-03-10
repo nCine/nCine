@@ -38,7 +38,7 @@ class FileLogger : public ILogger
 	LogLevel fileLevel_;
 	bool canUseColors_;
 
-	static const unsigned int MaxEntryLength = 512;
+	static const unsigned int MaxEntryLength = 1024;
 	char logEntry_[MaxEntryLength];
 	char logEntryWithColors_[MaxEntryLength];
 

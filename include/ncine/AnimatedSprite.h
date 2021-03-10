@@ -59,6 +59,11 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	/// Sets current animation index and its frame number
 	void setAnimationIndex(unsigned int animIndex);
 
+	/// Returns the current animation, if any
+	RectAnimation *currentAnimation();
+	/// Returns the constant version of current animation, if any
+	const RectAnimation *currentAnimation() const;
+
 	/// Returns the frame number of current animation
 	unsigned int frame() const;
 	/// Sets current animation to a specified frame number

@@ -280,9 +280,11 @@ void Texture::setWrap(Wrap wrapMode)
 	wrapMode_ = wrapMode;
 }
 
-void *Texture::guiTexId()
+/*! The pointer is an opaque handle to be used only by ImGui or Nuklear.
+ *  It is considered immutable from an user point of view and thus retrievable by a constant method. */
+void *Texture::guiTexId() const
 {
-	return reinterpret_cast<void *>(glTexture_.get());
+	return const_cast<void *>(reinterpret_cast<const void*>(glTexture_.get()));
 }
 
 ///////////////////////////////////////////////////////////

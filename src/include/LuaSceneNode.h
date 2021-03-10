@@ -24,6 +24,7 @@ class LuaSceneNode
 	static int setParent(lua_State *L);
 	static int addChildNode(lua_State *L);
 	static int removeChildNode(lua_State *L);
+	static int removeAllChildrenNodes(lua_State *L);
 	static int unlinkChildNode(lua_State *L);
 
 	static int isEnabled(lua_State *L);
