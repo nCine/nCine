@@ -60,7 +60,12 @@ void LuaIInputEventHandler::onKeyPressed(lua_State *L, const KeyboardEvent &even
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaKeyboardEvents::pushKeyboardEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onKeyPressed, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -75,7 +80,12 @@ void LuaIInputEventHandler::onKeyReleased(lua_State *L, const KeyboardEvent &eve
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaKeyboardEvents::pushKeyboardEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onKeyReleased, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -90,7 +100,12 @@ void LuaIInputEventHandler::onTextInput(lua_State *L, const TextInputEvent &even
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaKeyboardEvents::pushTextInputEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onTextInput, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -106,7 +121,12 @@ void LuaIInputEventHandler::onTouchDown(lua_State *L, const TouchEvent &event)
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaAndroidEvents::pushTouchEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onTouchDown, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -121,7 +141,12 @@ void LuaIInputEventHandler::onTouchUp(lua_State *L, const TouchEvent &event)
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaAndroidEvents::pushTouchEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onTouchUp, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -136,7 +161,12 @@ void LuaIInputEventHandler::onTouchMove(lua_State *L, const TouchEvent &event)
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaAndroidEvents::pushTouchEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onTouchMove, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -151,7 +181,12 @@ void LuaIInputEventHandler::onPointerDown(lua_State *L, const TouchEvent &event)
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaAndroidEvents::pushTouchEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onPointerDown, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -166,7 +201,12 @@ void LuaIInputEventHandler::onPointerUp(lua_State *L, const TouchEvent &event)
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaAndroidEvents::pushTouchEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onPointerUp, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -181,7 +221,12 @@ void LuaIInputEventHandler::onAcceleration(lua_State *L, const AccelerometerEven
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaAndroidEvents::pushAccelerometerEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onAcceleration, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -197,7 +242,12 @@ void LuaIInputEventHandler::onMouseButtonPressed(lua_State *L, const MouseEvent 
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaMouseEvents::pushMouseEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onMouseButtonPressed, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -212,7 +262,12 @@ void LuaIInputEventHandler::onMouseButtonReleased(lua_State *L, const MouseEvent
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaMouseEvents::pushMouseEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onMouseButtonReleased, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -227,7 +282,12 @@ void LuaIInputEventHandler::onMouseMoved(lua_State *L, const MouseState &state)
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaMouseEvents::pushMouseState(L, state);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onMouseMoved, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -242,7 +302,12 @@ void LuaIInputEventHandler::onScrollInput(lua_State *L, const ScrollEvent &event
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaMouseEvents::pushScrollEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onScrollInput, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -257,7 +322,12 @@ void LuaIInputEventHandler::onJoyButtonPressed(lua_State *L, const JoyButtonEven
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaJoystickEvents::pushJoyButtonEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onJoyButtonPressed, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -272,7 +342,12 @@ void LuaIInputEventHandler::onJoyButtonReleased(lua_State *L, const JoyButtonEve
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaJoystickEvents::pushJoyButtonEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onJoyButtonReleased, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -287,7 +362,12 @@ void LuaIInputEventHandler::onJoyHatMoved(lua_State *L, const JoyHatEvent &event
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaJoystickEvents::pushJoyHatEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onJoyHatMoved, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -302,7 +382,12 @@ void LuaIInputEventHandler::onJoyAxisMoved(lua_State *L, const JoyAxisEvent &eve
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaJoystickEvents::pushJoyAxisEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onJoyAxisMoved, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -317,7 +402,12 @@ void LuaIInputEventHandler::onJoyMappedButtonPressed(lua_State *L, const JoyMapp
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaJoystickEvents::pushJoyMappedButtonEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onJoyMappedButtonPressed, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -332,7 +422,12 @@ void LuaIInputEventHandler::onJoyMappedButtonReleased(lua_State *L, const JoyMap
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaJoystickEvents::pushJoyMappedButtonEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onJoyMappedButtonReleased, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -347,7 +442,12 @@ void LuaIInputEventHandler::onJoyMappedAxisMoved(lua_State *L, const JoyMappedAx
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaJoystickEvents::pushJoyMappedAxisEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onJoyMappedAxisMoved, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -362,7 +462,12 @@ void LuaIInputEventHandler::onJoyConnected(lua_State *L, const JoyConnectionEven
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaJoystickEvents::pushJoyConnectionEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onJoyConnected, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);
@@ -377,7 +482,12 @@ void LuaIInputEventHandler::onJoyDisconnected(lua_State *L, const JoyConnectionE
 	{
 		ASSERT(type == LUA_TFUNCTION);
 		LuaJoystickEvents::pushJoyConnectionEvent(L, event);
-		lua_call(L, 1, 0);
+		const int status = LuaUtils::pcall(L, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onJoyDisconnected, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LuaUtils::pop(L);
+		}
 	}
 	else
 		lua_pop(L, 2);

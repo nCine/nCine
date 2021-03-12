@@ -3,6 +3,7 @@
 #define NCINE_INCLUDE_LUA
 #include "common_headers.h"
 
+#include <nctl/CString.h>
 #include "LuaUtils.h"
 #include "LuaDebug.h"
 
@@ -11,6 +12,39 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+const char *LuaUtils::RunInfo::DebugInfo::whatTypeToString(WhatType type) const
+{
+	switch (type)
+	{
+		case WhatType::LUA: return "Lua";
+		case WhatType::C: return "C";
+		case WhatType::MAIN: return "main";
+		default:
+			return "Unknown";
+	}
+}
+
+const char *LuaUtils::RunInfo::DebugInfo::nameWhatTypeToString(NameWhatType type) const
+{
+	switch (type)
+	{
+		case NameWhatType::GLOBAL: return "global";
+		case NameWhatType::LOCAL: return "local";
+		case NameWhatType::METHOD: return "method";
+		case NameWhatType::FIELD: return "field";
+		case NameWhatType::UPVALUE: return "upvalue";
+		case NameWhatType::EMPTY: return "empty";
+		default:
+			return "Unknown";
+	}
+}
+
+const LuaUtils::RunInfo::DebugInfo &LuaUtils::RunInfo::debugInfo(unsigned int level) const
+{
+	ASSERT(level >= 0 && level < numLevels_);
+	return debugInfo_[level];
+}
 
 void LuaUtils::addFunction(lua_State *L, const char *name, int (*func)(lua_State *L))
 {
@@ -28,9 +62,59 @@ void LuaUtils::newTable(lua_State *L)
 	lua_createtable(L, 0, 0);
 }
 
+int LuaUtils::loadBuffer(lua_State *L, const char *buff, size_t sz, const char *name, LoadInfo *loadInfo)
+{
+	const int loadStatus = luaL_loadbufferx(L, buff, sz, name, "bt");
+	if (loadInfo)
+	{
+		loadInfo->errorMsg_[0] = '\0';
+
+		if (loadStatus != LUA_OK)
+			nctl::strncpy(loadInfo->errorMsg_, lua_tostring(L, -1), LoadInfo::MaxErrorLength);
+	}
+
+	return loadStatus;
+}
+
+int LuaUtils::loadBuffer(lua_State *L, const char *buff, size_t sz, const char *name)
+{
+	return loadBuffer(L, buff, sz, name, nullptr);
+}
+
 void LuaUtils::call(lua_State *L, int nargs, int nresults)
 {
 	lua_call(L, nargs, nresults);
+}
+
+int LuaUtils::pcall(lua_State *L, int nargs, int nresults, RunInfo *runInfo)
+{
+	// Calculate stack position for message handler
+	const int hpos = lua_gettop(L) - nargs;
+
+	if (runInfo)
+	{
+		runInfo->errorMsg_[0] = '\0';
+		LuaDebug::DebugInfoHandler::setRunInfo(runInfo);
+		lua_pushcfunction(L, LuaDebug::DebugInfoHandler::messageHandler);
+	}
+	else
+		lua_pushcfunction(L, LuaDebug::traceMessageHandler);
+
+	lua_insert(L, hpos);
+	const int status = lua_pcall(L, nargs, nresults, hpos);
+	lua_remove(L, hpos);
+
+	return status;
+}
+
+int LuaUtils::pcall(lua_State *L, int nargs, int nresults, int msgh)
+{
+	return lua_pcall(L, nargs, nresults, msgh);
+}
+
+int LuaUtils::pcall(lua_State *L, int nargs, int nresults)
+{
+	return lua_pcall(L, nargs, nresults, 0);
 }
 
 void LuaUtils::pop(lua_State *L, int n)
@@ -51,6 +135,16 @@ int LuaUtils::getField(lua_State *L, int index, const char *name)
 void LuaUtils::setField(lua_State *L, int index, const char *name)
 {
 	lua_setfield(L, index, name);
+}
+
+const char *LuaUtils::toString(lua_State *L, int index, size_t *length)
+{
+	return lua_tolstring(L, index, length);
+}
+
+const char *LuaUtils::toString(lua_State *L, int index)
+{
+	return lua_tolstring(L, index, nullptr);
 }
 
 bool LuaUtils::isNil(lua_State *L, int index)
@@ -193,6 +287,7 @@ namespace {
 	template <>
 	void getFieldAndCheckType<lua_Number>(lua_State *L, int index, const char *name)
 	{
+		LuaDebug::assert(L, lua_istable(L, index), "No table at index %d", index);
 		lua_getfield(L, index, name);
 		LuaDebug::assert(L, lua_isnumber(L, -1), "Cannot retrieve a number in table field \"%s\"", name);
 	}
@@ -200,6 +295,7 @@ namespace {
 	template <>
 	void getFieldAndCheckType<lua_Integer>(lua_State *L, int index, const char *name)
 	{
+		LuaDebug::assert(L, lua_istable(L, index), "No table at index %d", index);
 		lua_getfield(L, index, name);
 		LuaDebug::assert(L, lua_isinteger(L, -1), "Cannot retrieve an integer in table field \"%s\"", name);
 	}
@@ -207,6 +303,7 @@ namespace {
 	template <>
 	void getFieldAndCheckType<const char *>(lua_State *L, int index, const char *name)
 	{
+		LuaDebug::assert(L, lua_istable(L, index), "No table at index %d", index);
 		lua_getfield(L, index, name);
 		LuaDebug::assert(L, lua_isstring(L, -1), "Cannot retrieve a string in table field \"%s\"", name);
 	}
@@ -341,6 +438,9 @@ namespace {
 	template <>
 	bool tryGetField<lua_Number>(lua_State *L, int index, const char *name, lua_Number &value)
 	{
+		if (lua_istable(L, index) == false)
+			return false;
+
 		lua_getfield(L, index, name);
 		if (lua_isnumber(L, -1))
 		{
@@ -354,6 +454,9 @@ namespace {
 	template <>
 	bool tryGetField<lua_Integer>(lua_State *L, int index, const char *name, lua_Integer &value)
 	{
+		if (lua_istable(L, index) == false)
+			return false;
+
 		lua_getfield(L, index, name);
 		if (lua_isinteger(L, -1))
 		{
@@ -448,6 +551,9 @@ bool LuaUtils::tryRetrieveField(lua_State *L, int index, const char *name, const
 {
 	ASSERT(value);
 
+	if (lua_istable(L, index) == false)
+		return false;
+
 	lua_getfield(L, index, name);
 	if (lua_isstring(L, -1))
 	{
@@ -461,6 +567,9 @@ bool LuaUtils::tryRetrieveField(lua_State *L, int index, const char *name, const
 template <>
 bool LuaUtils::tryRetrieveField<bool>(lua_State *L, int index, const char *name, bool &value)
 {
+	if (lua_istable(L, index) == false)
+		return false;
+
 	lua_getfield(L, index, name);
 	if (lua_isboolean(L, -1))
 	{
@@ -473,6 +582,9 @@ bool LuaUtils::tryRetrieveField<bool>(lua_State *L, int index, const char *name,
 
 bool LuaUtils::tryRetrieveFieldTable(lua_State *L, int index, const char *name)
 {
+	if (lua_istable(L, index) == false)
+		return false;
+
 	lua_getfield(L, index, name);
 	if (lua_istable(L, -1))
 		return true;
@@ -481,6 +593,9 @@ bool LuaUtils::tryRetrieveFieldTable(lua_State *L, int index, const char *name)
 
 bool LuaUtils::tryRetrieveFieldFunction(lua_State *L, int index, const char *name)
 {
+	if (lua_istable(L, index) == false)
+		return false;
+
 	lua_getfield(L, index, name);
 	if (lua_isfunction(L, -1))
 		return true;
@@ -489,6 +604,9 @@ bool LuaUtils::tryRetrieveFieldFunction(lua_State *L, int index, const char *nam
 
 bool LuaUtils::tryRetrieveFieldLightUserData(lua_State *L, int index, const char *name)
 {
+	if (lua_istable(L, index) == false)
+		return false;
+
 	lua_getfield(L, index, name);
 	if (lua_islightuserdata(L, -1))
 		return true;

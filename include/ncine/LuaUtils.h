@@ -8,15 +8,99 @@ struct lua_State;
 
 namespace ncine {
 
+namespace LuaDebug {
+	class DebugInfoHandler;
+}
+
 namespace LuaUtils {
+
+	/// A class that collects additional status information when loading Lua scripts
+	class DLL_PUBLIC LoadInfo
+	{
+	  public:
+		static const int MaxErrorLength = 256;
+		inline const char *errorMsg() const { return errorMsg_; }
+
+	  private:
+		char errorMsg_[MaxErrorLength];
+
+		friend DLL_PUBLIC int loadBuffer(lua_State *L, const char *buff, size_t sz, const char *name, LoadInfo *loadInfo);
+	};
+
+	/// A class that collects additional status information when running Lua scripts
+	class DLL_PUBLIC RunInfo
+	{
+	  public:
+		struct DebugInfo
+		{
+			enum class WhatType
+			{
+				LUA,
+				C,
+				MAIN
+			};
+
+			enum class NameWhatType
+			{
+				GLOBAL,
+				LOCAL,
+				METHOD,
+				FIELD,
+				UPVALUE,
+				EMPTY
+			};
+
+			static const int MaxShortSrcLength = 64;
+
+			const char *source;
+			size_t srcLen;
+			char shortSrc[MaxShortSrcLength];
+			int lineDefined;
+			int lastLineDefined;
+			WhatType what;
+			int currentLine;
+			const char *name;
+			NameWhatType nameWhat;
+			bool isTailCall;
+			int nUps;
+			int nParams;
+			bool isVarArg;
+
+			const char *whatTypeToString(WhatType type) const;
+			const char *nameWhatTypeToString(DebugInfo::NameWhatType type) const;
+		};
+
+		static const int MaxErrorLength = 256;
+		static const unsigned int MaxLevels = 8;
+
+		inline const char *errorMsg() const { return errorMsg_; }
+		inline unsigned int numLevels() const { return numLevels_; }
+		const DebugInfo &debugInfo(unsigned int level) const;
+
+	  private:
+		char errorMsg_[MaxErrorLength];
+		unsigned int numLevels_;
+		DebugInfo debugInfo_[MaxLevels];
+
+		friend DLL_PUBLIC int pcall(lua_State *L, int nargs, int nresults, RunInfo *runInfo);
+		friend class LuaDebug::DebugInfoHandler;
+	};
+
 	DLL_PUBLIC void addFunction(lua_State *L, const char *name, int (*func)(lua_State *L));
 	DLL_PUBLIC void createTable(lua_State *L, int narr, int nrec);
 	DLL_PUBLIC void newTable(lua_State *L);
+	DLL_PUBLIC int loadBuffer(lua_State *L, const char *buff, size_t sz, const char *name, LoadInfo *loadInfo);
+	DLL_PUBLIC int loadBuffer(lua_State *L, const char *buff, size_t sz, const char *name);
 	DLL_PUBLIC void call(lua_State *L, int nargs, int nresults);
+	DLL_PUBLIC int pcall(lua_State *L, int nargs, int nresults, RunInfo *runInfo);
+	DLL_PUBLIC int pcall(lua_State *L, int nargs, int nresults, int msgh);
+	DLL_PUBLIC int pcall(lua_State *L, int nargs, int nresults);
 	DLL_PUBLIC void pop(lua_State *L, int n);
 	DLL_PUBLIC void pop(lua_State *L);
 	DLL_PUBLIC int getField(lua_State *L, int index, const char *name);
 	DLL_PUBLIC void setField(lua_State *L, int index, const char *name);
+	DLL_PUBLIC const char *toString(lua_State *L, int index, size_t *length);
+	DLL_PUBLIC const char *toString(lua_State *L, int index);
 
 	DLL_PUBLIC bool isNil(lua_State *L, int index);
 	DLL_PUBLIC bool isTable(int type);

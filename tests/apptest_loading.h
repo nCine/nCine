@@ -16,6 +16,7 @@ class AudioBufferPlayer;
 class AudioStreamPlayer;
 class Font;
 class TextNode;
+class LuaStateManager;
 
 }
 
@@ -30,6 +31,7 @@ class MyEventHandler :
 	static const int NumTextures = 4;
 	static const int NumSounds = 5;
 	static const int NumFonts = 5;
+	static const int NumScripts = 3;
 
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
@@ -48,6 +50,8 @@ class MyEventHandler :
 
 	nctl::UniquePtr<nc::Font> font_;
 	nctl::UniquePtr<nc::TextNode> textNode_;
+
+	nctl::UniquePtr<nc::LuaStateManager> luaState_;
 };
 
 #endif

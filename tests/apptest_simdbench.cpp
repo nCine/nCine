@@ -394,7 +394,7 @@ bool loadTestRun(const char *filename, unsigned int index)
 	    nc::LuaStateManager::StandardLibraries::NOT_LOADED);
 
 #ifndef __EMSCRIPTEN__
-	if (luaState.run(filename) == false)
+	if (luaState.runFromFile(filename) == false)
 #else
 	if (luaState.runFromMemory(localFileLoad.filename(), localFileLoad.data(), localFileLoad.size()) == false)
 #endif

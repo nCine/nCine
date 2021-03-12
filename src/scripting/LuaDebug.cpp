@@ -1,9 +1,17 @@
 #define NCINE_INCLUDE_LUA
 #include "common_headers.h"
 
+#include <nctl/CString.h>
 #include "LuaDebug.h"
+#include "LuaUtils.h"
 
 namespace ncine {
+
+///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
+LuaUtils::RunInfo *LuaDebug::DebugInfoHandler::runInfo_ = nullptr;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -12,7 +20,8 @@ namespace ncine {
 void LuaDebug::traceError(lua_State *L, const char *errorMsg)
 {
 	luaL_traceback(L, L, errorMsg, 0);
-	lua_error(L);
+	LOGE_X("Lua trace error: %s", lua_tostring(L, -1));
+	lua_pop(L, 1);
 }
 
 void LuaDebug::assert(lua_State *L, bool condition, const char *errorMsg)
@@ -20,13 +29,32 @@ void LuaDebug::assert(lua_State *L, bool condition, const char *errorMsg)
 	if (condition == false)
 	{
 		luaL_traceback(L, L, errorMsg, 0);
-		lua_error(L);
+		LOGE_X("Lua assert: %s", lua_tostring(L, -1));
+		lua_pop(L, 1);
 	}
 }
 
-const char *LuaDebug::errorToString(int value)
+const char *LuaDebug::statusToString(int status)
 {
-	switch (value)
+	switch (status)
+	{
+		case LUA_OK: return "LUA_OK";
+		case LUA_YIELD: return "LUA_YIELD";
+		case LUA_ERRRUN: return "LUA_ERRRUN";
+		case LUA_ERRSYNTAX: return "LUA_ERRSYNTAX";
+		case LUA_ERRMEM: return "LUA_ERRMEM";
+#if LUA_VERSION_NUM <= 503
+		case LUA_ERRGCMM: return "LUA_ERRGCMM";
+#endif
+		case LUA_ERRERR: return "LUA_ERRERR";
+		default:
+			return "No error";
+	}
+}
+
+const char *LuaDebug::statusToDescription(int status)
+{
+	switch (status)
 	{
 		case LUA_OK: return "Success (LUA_OK)";
 		case LUA_YIELD: return "Thread is suspended (LUA_YIELD)";
@@ -84,6 +112,71 @@ void LuaDebug::printStackValue(lua_State *L, int index)
 		default:
 			break;
 	}
+}
+
+int LuaDebug::traceMessageHandler(lua_State *L)
+{
+	const char *msg = lua_tostring(L, -1);
+	luaL_traceback(L, L, msg, 1);
+	return 1;
+}
+
+int LuaDebug::DebugInfoHandler::messageHandler(lua_State *L)
+{
+	ASSERT(runInfo_);
+
+	nctl::strncpy(runInfo_->errorMsg_, lua_tostring(L, -1), LuaUtils::RunInfo::MaxErrorLength);
+
+	lua_Debug ar;
+	unsigned int &numLevels = runInfo_->numLevels_;
+	numLevels = 0;
+	while (lua_getstack(L, numLevels + 1, &ar) && numLevels < LuaUtils::RunInfo::MaxLevels)
+	{
+		lua_getinfo(L, "nSltu", &ar);
+		LuaUtils::RunInfo::DebugInfo &debugInfo = runInfo_->debugInfo_[numLevels];
+
+		debugInfo.source = ar.source;
+#if LUA_VERSION_NUM <= 503
+		debugInfo.srcLen = 0;
+#else
+		debugInfo.srcLen = ar.srclen;
+#endif
+		nctl::strncpy(debugInfo.shortSrc, ar.short_src, LuaUtils::RunInfo::DebugInfo::MaxShortSrcLength);
+		debugInfo.lineDefined = ar.linedefined;
+		debugInfo.lastLineDefined = ar.lastlinedefined;
+
+		if (strncmp(ar.what, "Lua", 3) == 0)
+			debugInfo.what = LuaUtils::RunInfo::DebugInfo::WhatType::LUA;
+		else if (strncmp(ar.what, "C", 1) == 0)
+			debugInfo.what = LuaUtils::RunInfo::DebugInfo::WhatType::C;
+		else if (strncmp(ar.what, "main", 4) == 0)
+			debugInfo.what = LuaUtils::RunInfo::DebugInfo::WhatType::MAIN;
+
+		debugInfo.currentLine = ar.currentline;
+		debugInfo.name = ar.name;
+
+		if (strncmp(ar.namewhat, "global", 6) == 0)
+			debugInfo.nameWhat = LuaUtils::RunInfo::DebugInfo::NameWhatType::GLOBAL;
+		else if (strncmp(ar.namewhat, "local", 5) == 0)
+			debugInfo.nameWhat = LuaUtils::RunInfo::DebugInfo::NameWhatType::LOCAL;
+		else if (strncmp(ar.namewhat, "method", 6) == 0)
+			debugInfo.nameWhat = LuaUtils::RunInfo::DebugInfo::NameWhatType::METHOD;
+		else if (strncmp(ar.namewhat, "field", 5) == 0)
+			debugInfo.nameWhat = LuaUtils::RunInfo::DebugInfo::NameWhatType::FIELD;
+		else if (strncmp(ar.namewhat, "upvalue", 7) == 0)
+			debugInfo.nameWhat = LuaUtils::RunInfo::DebugInfo::NameWhatType::UPVALUE;
+		else if (*ar.namewhat == '\0')
+			debugInfo.nameWhat = LuaUtils::RunInfo::DebugInfo::NameWhatType::EMPTY;
+
+		debugInfo.isTailCall = ar.istailcall;
+		debugInfo.nUps = ar.nups;
+		debugInfo.nParams = ar.nparams;
+		debugInfo.isVarArg = ar.isvararg;
+
+		numLevels++;
+	}
+
+	return 1;
 }
 
 }

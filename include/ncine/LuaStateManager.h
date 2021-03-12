@@ -10,24 +10,36 @@ struct lua_Debug;
 
 namespace ncine {
 
+namespace LuaUtils {
+	class LoadInfo;
+	class RunInfo;
+}
+
 /// The Lua scripting state manager
 class DLL_PUBLIC LuaStateManager
 {
   public:
+	/// The Lua API type to enable
 	enum class ApiType
 	{
+		/// All API methods
 		FULL,
+		/// All API methods except the ones that create or destroy objects
 		EDIT_ONLY,
+		/// Only constants, without methods
 		CONSTANTS_ONLY,
+		/// No Lua API
 		NONE
 	};
 
+	/// To enable or not memory and instruction count statistics
 	enum class StatisticsTracking
 	{
 		ENABLED,
 		DISABLED
 	};
 
+	/// To load or not standard Lua system libraries
 	enum class StandardLibraries
 	{
 		LOADED,
@@ -62,7 +74,27 @@ class DLL_PUBLIC LuaStateManager
 	void releaseTrackedMemory();
 	void exposeModuleApi();
 	void exposeScriptApi();
-	bool run(const char *filename);
+
+	/// Loads (without running) a script from a file, with the specified chunk name (used for debug) and an optional information object
+	bool loadFromFile(const char *filename, const char *chunkName, LuaUtils::LoadInfo *loadInfo);
+	/// Loads (without running) a script from a file, with the specified chunk name (used for debug)
+	bool loadFromFile(const char *filename, const char *chunkName);
+	/// Loads (without running) a script from a file
+	bool loadFromFile(const char *filename);
+	/// Loads (without running) a script from a memory buffer, with an optional information object
+	bool loadFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize, LuaUtils::LoadInfo *loadInfo);
+	/// Loads (without running) a script from a memory buffer
+	bool loadFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize);
+
+	/// Loads and then runs a script from a file, with the specified chunk name (used for debug) and optional information objects
+	bool runFromFile(const char *filename, const char *chunkName, LuaUtils::LoadInfo *loadInfo, LuaUtils::RunInfo *runInfo);
+	/// Loads and then runs a script from a file, with the specified chunk name (used for debug)
+	bool runFromFile(const char *filename, const char *chunkName);
+	/// Loads and then runs a script from a file
+	bool runFromFile(const char *filename);
+	/// Loads and then runs a script from a memory buffer, with optional information objects
+	bool runFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize, LuaUtils::LoadInfo *loadInfo, LuaUtils::RunInfo *runInfo);
+	/// Loads and then runs a script from a memory buffer
 	bool runFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize);
 
 	inline lua_State *state() { return L_; }

@@ -1,6 +1,7 @@
 #define NCINE_INCLUDE_LUA
 #include "common_headers.h"
 #include "common_macros.h"
+#include <nctl/CString.h>
 
 #include "LuaStateManager.h"
 #include "LuaDebug.h"
@@ -246,20 +247,34 @@ void LuaStateManager::exposeScriptApi()
 	}
 }
 
-bool LuaStateManager::run(const char *filename)
+bool LuaStateManager::loadFromFile(const char *filename, const char *chunkName, LuaUtils::LoadInfo *loadInfo)
 {
 	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
+	fileHandle->setExitOnFailToOpen(false);
 	LOGI_X("Loading file: \"%s\"", fileHandle->filename());
 
 	fileHandle->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
-	unsigned long fileSize = fileHandle->size();
+	if (fileHandle->isOpened() == false)
+		return false;
+
+	const unsigned long fileSize = fileHandle->size();
 	nctl::UniquePtr<char[]> buffer = nctl::makeUnique<char[]>(fileSize);
 	fileHandle->read(buffer.get(), fileSize);
 
-	return runFromMemory(filename, buffer.get(), fileSize);
+	return loadFromMemory(chunkName, buffer.get(), fileSize, loadInfo);
 }
 
-bool LuaStateManager::runFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize)
+bool LuaStateManager::loadFromFile(const char *filename, const char *chunkName)
+{
+	return loadFromFile(filename, chunkName, nullptr);
+}
+
+bool LuaStateManager::loadFromFile(const char *filename)
+{
+	return loadFromFile(filename, filename, nullptr);
+}
+
+bool LuaStateManager::loadFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize, LuaUtils::LoadInfo *loadInfo)
 {
 	releaseTrackedMemory();
 	untrackedUserDatas_.clear();
@@ -273,21 +288,69 @@ bool LuaStateManager::runFromMemory(const char *bufferName, const char *bufferPt
 		bufferSize -= bufferRead - bufferPtr;
 	}
 
-	const int loadError = luaL_loadbufferx(L_, bufferRead, bufferSize, bufferName, "bt");
-	if (loadError != LUA_OK)
+	const int loadStatus = LuaUtils::loadBuffer(L_, bufferRead, bufferSize, bufferName, loadInfo);
+	if (loadStatus != LUA_OK)
 	{
-		LOGE_X("Cannot load \"%s\" script: %s", bufferName, LuaDebug::errorToString(loadError));
-		return false;
-	}
-
-	const int callError = lua_pcall(L_, 0, LUA_MULTRET, 0);
-	if (callError != LUA_OK)
-	{
-		LOGE_X("Cannot run \"%s\" script: %s", bufferName, LuaDebug::errorToString(callError));
+		LOGE_X("Error loading Lua script \"%s\" (%s):\n%s", bufferName, LuaDebug::statusToString(loadStatus), lua_tostring(L_, -1));
+		LuaUtils::pop(L_);
 		return false;
 	}
 
 	return true;
+}
+
+bool LuaStateManager::loadFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize)
+{
+	return loadFromMemory(bufferName, bufferPtr, bufferSize, nullptr);
+}
+
+bool LuaStateManager::runFromFile(const char *filename, const char *chunkName, LuaUtils::LoadInfo *loadInfo, LuaUtils::RunInfo *runInfo)
+{
+	const bool hasLoaded = loadFromFile(filename, chunkName, loadInfo);
+	if (hasLoaded == false)
+		return false;
+
+	const int callStatus = LuaUtils::pcall(L_, 0, LUA_MULTRET, runInfo);
+	if (callStatus != LUA_OK)
+	{
+		LOGE_X("Error running Lua script \"%s\" (%s):\n%s", filename, LuaDebug::statusToString(callStatus), lua_tostring(L_, -1));
+		LuaUtils::pop(L_);
+		return false;
+	}
+
+	return true;
+}
+
+bool LuaStateManager::runFromFile(const char *filename, const char *chunkName)
+{
+	return runFromFile(filename, chunkName, nullptr, nullptr);
+}
+
+bool LuaStateManager::runFromFile(const char *filename)
+{
+	return runFromFile(filename, filename, nullptr, nullptr);
+}
+
+bool LuaStateManager::runFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize, LuaUtils::LoadInfo *loadInfo, LuaUtils::RunInfo *runInfo)
+{
+	const bool hasLoaded = loadFromMemory(bufferName, bufferPtr, bufferSize, loadInfo);
+	if (hasLoaded == false)
+		return false;
+
+	const int callStatus = LuaUtils::pcall(L_, 0, LUA_MULTRET, runInfo);
+	if (callStatus != LUA_OK)
+	{
+		LOGE_X("Error running Lua script \"%s\" (%s):\n%s", bufferName, LuaDebug::statusToString(callStatus), lua_tostring(L_, -1));
+		LuaUtils::pop(L_);
+		return false;
+	}
+
+	return true;
+}
+
+bool LuaStateManager::runFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize)
+{
+	return runFromMemory(bufferName, bufferPtr, bufferSize, nullptr, nullptr);
 }
 
 LuaStateManager *LuaStateManager::manager(lua_State *L)

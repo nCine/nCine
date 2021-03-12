@@ -43,7 +43,7 @@ class MyEventHandler :
 	nctl::UniquePtr<nc::ParticleSystem> particleSystem_;
 	nc::TimeStamp lastEmissionTime_;
 
-	void runScript();
+	bool runScript();
 };
 
 #endif
