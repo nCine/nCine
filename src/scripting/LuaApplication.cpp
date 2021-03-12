@@ -102,7 +102,10 @@ int LuaApplication::renderingSettings(lua_State *L)
 int LuaApplication::setRenderingSettings(lua_State *L)
 {
 	if (lua_istable(L, -1) == false)
-		luaL_argerror(L, -1, "Expecting a table");
+	{
+		LOGW("Expecting a table at index -1");
+		return 0;
+	}
 
 	Application::RenderingSettings &settings = theApplication().renderingSettings();
 
@@ -130,7 +133,10 @@ int LuaApplication::debugOverlaySettings(lua_State *L)
 int LuaApplication::setDebugOverlaySettings(lua_State *L)
 {
 	if (lua_istable(L, -1) == false)
-		luaL_argerror(L, -1, "Expecting a table");
+	{
+		LOGW("Expecting a table at index -1");
+		return 0;
+	}
 
 	IDebugOverlay::DisplaySettings &settings = theApplication().debugOverlaySettings();
 

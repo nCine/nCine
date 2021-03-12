@@ -9,6 +9,7 @@
 #include <ncine/AudioBufferPlayer.h>
 #include <ncine/AudioStreamPlayer.h>
 #include <ncine/TextNode.h>
+#include <ncine/LuaStateManager.h>
 #include <ncine/IFile.h>
 #include <ncine/Colorf.h>
 #include "apptest_datapath.h"
@@ -31,6 +32,10 @@ const char *FontTexFiles[MyEventHandler::NumFonts] = { "DroidSans32_256.png", "N
 nctl::StaticArray<nctl::UniquePtr<uint8_t[]>, MyEventHandler::NumFonts> fontBuffers;
 nctl::StaticArray<unsigned long int, MyEventHandler::NumFonts> fontBufferSizes;
 
+const char *ScriptFiles[MyEventHandler::NumScripts] = { "init.lua", "reload.lua", "script.lua" };
+nctl::StaticArray<nctl::UniquePtr<char[]>, MyEventHandler::NumScripts> scriptBuffers;
+nctl::StaticArray<unsigned long int, MyEventHandler::NumScripts> scriptBufferSizes;
+
 #if LOADING_FAILURES
 const unsigned long int randomBufferLength = 1024;
 uint8_t randomBuffer[randomBufferLength];
@@ -47,6 +52,9 @@ int sineWaveFrequency = 440;
 float sineWaveDuration = 2.0f;
 
 int selectedFont = -1;
+
+int selectedScript = -1;
+int loadedScript = -1;
 
 const char *audioPlayerStateToString(nc::IAudioPlayer::PlayerState state)
 {
@@ -107,6 +115,16 @@ void MyEventHandler::onInit()
 		fontFile->close();
 	}
 
+	for (unsigned int i = 0; i < NumScripts; i++)
+	{
+		nctl::UniquePtr<nc::IFile> scriptFile = nc::IFile::createFileHandle(prefixDataPath("scripts", ScriptFiles[i]).data());
+		scriptFile->open(nc::IFile::OpenMode::READ);
+		scriptBufferSizes.pushBack(scriptFile->size());
+		scriptBuffers.pushBack(nctl::makeUnique<char[]>(scriptBufferSizes[i]));
+		scriptFile->read(scriptBuffers[i].get(), scriptBufferSizes[i]);
+		scriptFile->close();
+	}
+
 #if DEFAULT_CONSTRUCTORS
 	for (unsigned int i = 0; i < NumTextures; i++)
 		textures_.pushBack(nctl::makeUnique<nc::Texture>());
@@ -120,6 +138,9 @@ void MyEventHandler::onInit()
 	streamPlayer_ = nctl::makeUnique<nc::AudioStreamPlayer>((prefixDataPath("sounds", SoundFiles[3])).data());
 	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFiles[0])).data());
 #endif
+	luaState_ = nctl::makeUnique<nc::LuaStateManager>(nc::LuaStateManager::ApiType::EDIT_ONLY,
+	                                                  nc::LuaStateManager::StatisticsTracking::DISABLED,
+	                                                  nc::LuaStateManager::StandardLibraries::NOT_LOADED);
 
 #if LOADING_FAILURES
 	// Loading from non-existent files
@@ -128,6 +149,7 @@ void MyEventHandler::onInit()
 	audioBuffer_->loadFromFile("NonExistent.wav");
 	streamPlayer_->loadFromFile("NonExistent.ogg");
 	font_->loadFromFile("NonExistent.fnt");
+	luaState_->loadFromFile("NonExistent.lua");
 
 	// Loading from uninitialized memory buffers
 	for (unsigned int i = 0; i < NumTextures; i++)
@@ -135,6 +157,7 @@ void MyEventHandler::onInit()
 	audioBuffer_->loadFromMemory("NonExistent.wav", randomBuffer, randomBufferLength);
 	streamPlayer_->loadFromMemory("NonExistent.ogg", randomBuffer, randomBufferLength);
 	font_->loadFromMemory("NonExistent.fnt", randomBuffer, randomBufferLength, "NonExistent.png");
+	luaState_->loadFromMemory("NonExistent.lua", reinterpret_cast<const char *>(randomBuffer), randomBufferLength);
 #endif
 
 	const float width = nc::theApplication().width();
@@ -517,6 +540,52 @@ void MyEventHandler::onFrameStart()
 
 		if (fontHasChanged)
 			textNode_->setFont(font_.get());
+	}
+
+	if (ImGui::CollapsingHeader("Lua Script"))
+	{
+		if (loadedScript >= 0 && loadedScript < NumScripts)
+			ImGui::Text("Name: \"%s\"", ScriptFiles[loadedScript]);
+		else
+			ImGui::Text("No script loaded");
+
+		bool scriptHasChanged = false;
+		if (ImGui::TreeNode("Load from File or Memory"))
+		{
+			for (int i = 0; i < NumScripts; i++)
+			{
+				ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+				if (i == selectedScript)
+					nodeFlags |= ImGuiTreeNodeFlags_Selected;
+				ImGui::TreeNodeEx(ScriptFiles[i], nodeFlags);
+				if (ImGui::IsItemClicked())
+					selectedScript = i;
+			}
+			if (ImGui::Button("Load from File") && selectedScript >= 0 && selectedScript < NumScripts)
+			{
+				const bool hasLoaded = luaState_->loadFromFile((prefixDataPath("scripts", ScriptFiles[selectedScript])).data(), ScriptFiles[selectedScript]);
+				if (hasLoaded == false)
+					LOGW_X("Cannot load from file \"%s\"", ScriptFiles[selectedScript]);
+				scriptHasChanged = hasLoaded;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Load from Memory") && selectedScript >= 0 && selectedScript < NumScripts)
+			{
+				const bool hasLoaded = luaState_->loadFromMemory(ScriptFiles[selectedScript], scriptBuffers[selectedScript].get(), scriptBufferSizes[selectedScript]);
+				if (hasLoaded == false)
+					LOGW_X("Cannot load from memory \"%s\"", ScriptFiles[selectedScript]);
+				scriptHasChanged = hasLoaded;
+			}
+			ImGui::TreePop();
+		}
+
+		if (scriptHasChanged)
+		{
+			loadedScript = selectedScript;
+			luaState_ = nctl::makeUnique<nc::LuaStateManager>(nc::LuaStateManager::ApiType::EDIT_ONLY,
+			                                                  nc::LuaStateManager::StatisticsTracking::DISABLED,
+			                                                  nc::LuaStateManager::StandardLibraries::NOT_LOADED);
+		}
 	}
 
 	ImGui::End();

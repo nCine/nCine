@@ -55,7 +55,10 @@ RectAnimation LuaRectAnimation::retrieveTable(lua_State *L, int index)
 	{
 		const int type = lua_rawgeti(L, index, i + 1);
 		if (type != LUA_TTABLE)
-			luaL_argerror(L, -1, "Expecting a table");
+		{
+			LOGW_X("Expecting a table at index %u of table at index %d", i + 1, index);
+			continue;
+		}
 
 		const Recti rect = LuaRectiUtils::retrieveTable(L, -1);
 		animation.addRect(rect);

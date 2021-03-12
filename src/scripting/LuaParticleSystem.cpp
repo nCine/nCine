@@ -116,7 +116,10 @@ namespace {
 		{
 			const int type = lua_rawgeti(L, index, i + 1);
 			if (type != LUA_TTABLE)
-				luaL_argerror(L, -1, "Expecting a table");
+			{
+				LOGW_X("Expecting a table at index %u of table at index %d", i + 1, index);
+				continue;
+			}
 
 			lua_rawgeti(L, -1, 1);
 			const float age = LuaUtils::retrieve<float>(L, -1);
@@ -142,7 +145,10 @@ namespace {
 		{
 			const int type = lua_rawgeti(L, index, i + 1);
 			if (type != LUA_TTABLE)
-				luaL_argerror(L, -1, "Expecting a table");
+			{
+				LOGW_X("Expecting a table at index %u of table at index %d", i + 1, index);
+				continue;
+			}
 
 			lua_rawgeti(L, -1, 1);
 			const float age = LuaUtils::retrieve<float>(L, -1);
@@ -168,7 +174,10 @@ namespace {
 		{
 			const int type = lua_rawgeti(L, index, i + 1);
 			if (type != LUA_TTABLE)
-				luaL_argerror(L, -1, "Expecting a table");
+			{
+				LOGW_X("Expecting a table at index %u of table at index %d", i + 1, index);
+				continue;
+			}
 
 			lua_rawgeti(L, -1, 1);
 			const float age = LuaUtils::retrieve<float>(L, -1);
@@ -194,7 +203,10 @@ namespace {
 		{
 			const int type = lua_rawgeti(L, index, i + 1);
 			if (type != LUA_TTABLE)
-				luaL_argerror(L, -1, "Expecting a table");
+			{
+				LOGW_X("Expecting a table at index %u of table at index %d", i + 1, index);
+				continue;
+			}
 
 			lua_rawgeti(L, -1, 1);
 			const float age = LuaUtils::retrieve<float>(L, -1);
@@ -220,7 +232,10 @@ namespace {
 		{
 			const int type = lua_rawgeti(L, index, i + 1);
 			if (type != LUA_TTABLE)
-				luaL_argerror(L, -1, "Expecting a table");
+			{
+				LOGW_X("Expecting a table at index %u of table at index %d", i + 1, index);
+				continue;
+			}
 
 			lua_rawgeti(L, -1, 1);
 			const float age = LuaUtils::retrieve<float>(L, -1);
@@ -239,7 +254,10 @@ namespace {
 	void retrieveParticleInitializer(lua_State *L, int index, ParticleInitializer &init)
 	{
 		if (lua_istable(L, index) == false)
-			luaL_argerror(L, -1, "Expecting a table");
+		{
+			LOGW_X("Expecting a table at index %d", index);
+			return;
+		}
 
 		lua_getfield(L, index, LuaNames::ParticleInitializer::amount);
 		if (lua_isinteger(L, -1))

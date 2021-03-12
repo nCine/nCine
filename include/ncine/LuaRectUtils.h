@@ -59,7 +59,7 @@ Rect<T> LuaRectUtils<T>::retrieve(lua_State *L, int index, int &newIndex)
 	}
 	else
 	{
-		newIndex = index - 1;
+		newIndex = index - 3;
 		return retrieveParams(L, newIndex);
 	}
 }

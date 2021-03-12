@@ -34,8 +34,7 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
 	setDataPath(config);
 
-	luaState_.exposeScriptApi();
-	luaState_.run((config.dataPath() + "scripts/" + InitScriptFile).data());
+	luaState_.runFromFile((config.dataPath() + "scripts/" + InitScriptFile).data(), InitScriptFile);
 	nc::LuaIAppEventHandler::onPreInit(luaState_.state(), config);
 }
 
@@ -43,9 +42,18 @@ void MyEventHandler::onInit()
 {
 	lua_State *L = luaState_.state();
 
-	luaState_.run(prefixDataPath("scripts", InitScriptFile).data());
-	nc::LuaUtils::retrieveGlobalFunction(L, "load");
-	nc::LuaUtils::call(L, 0, 1);
+	const bool canRetrieve = nc::LuaUtils::tryRetrieveGlobalFunction(L, "load");
+	if (canRetrieve == false)
+		LOGE_X("Cannot retrieve the Lua \"load\" function");
+
+	const int status = nc::LuaUtils::pcall(L, 0, 1);
+	if (nc::LuaUtils::isStatusOk(status) == false)
+	{
+		LOGE_X("Error running Lua function \"load\" (%s):\n%s", nc::LuaDebug::statusToString(status), nc::LuaUtils::retrieve<const char *>(L, -1));
+		nc::LuaUtils::pop(L);
+		nc::theApplication().quit();
+		return;
+	}
 
 	const char *textureFile = nc::LuaUtils::retrieveField<const char *>(L, -1, "texture");
 	const unsigned int count = nc::LuaUtils::retrieveField<uint32_t>(L, -1, "count");
@@ -123,17 +131,35 @@ void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 	}
 }
 
-void MyEventHandler::runScript()
+bool MyEventHandler::runScript()
 {
 	variationIndex_++;
 	variationIndex_ %= 3;
 
 	lua_State *L = luaState_.state();
 
-	luaState_.run(prefixDataPath("scripts", ReloadScriptFile).data());
-	nc::LuaUtils::retrieveGlobalFunction(L, "execute");
+	const bool canRun = luaState_.runFromFile(prefixDataPath("scripts", ReloadScriptFile).data(), ReloadScriptFile);
+	if (canRun == false)
+		return false;
+
+	const bool canRetrieve = nc::LuaUtils::tryRetrieveGlobalFunction(L, "execute");
+	if (canRetrieve == false)
+	{
+		LOGE_X("Cannot retrieve the Lua \"execute\" function");
+		return false;
+	}
+
 	nc::LuaUtils::createTable(L, 1, 0);
 	nc::LuaClassWrapper<nc::ParticleSystem>::pushFieldUntrackedUserData(L, "particlesys", particleSystem_.get());
 	nc::LuaUtils::push(L, variationIndex_);
-	nc::LuaUtils::call(L, 2, 0);
+
+	const int status = nc::LuaUtils::pcall(L, 2, 0);
+	if (nc::LuaUtils::isStatusOk(status) == false)
+	{
+		LOGE_X("Error running Lua function \"execute\" (%s):\n%s", nc::LuaDebug::statusToString(status), nc::LuaUtils::retrieve<const char *>(L, -1));
+		nc::LuaUtils::pop(L);
+		return false;
+	}
+
+	return true;
 }

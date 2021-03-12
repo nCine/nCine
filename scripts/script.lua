@@ -16,7 +16,6 @@ function ncine.on_pre_init(cfg)
 end
 
 function ncine.on_init()
-
 	if nc.ANDROID then
 		font_tex_file = "DroidSans32_256_ETC2.ktx"
 		texture_file = "texture2_ETC2.ktx"

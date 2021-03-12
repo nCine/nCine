@@ -111,7 +111,10 @@ int LuaAnimatedSprite::setPaused(lua_State *L)
 int LuaAnimatedSprite::addAnimation(lua_State *L)
 {
 	if (lua_istable(L, -1) == false)
-		luaL_argerror(L, -1, "Expecting a table");
+	{
+		LOGW("Expecting a table at index -1");
+		return 0;
+	}
 
 	AnimatedSprite *sprite = LuaClassWrapper<AnimatedSprite>::unwrapUserData(L, -2);
 	RectAnimation anim = LuaRectAnimation::retrieveTable(L, -1);

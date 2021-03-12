@@ -7,6 +7,10 @@ struct lua_State;
 
 namespace ncine {
 
+namespace LuaUtils {
+	class RunInfo;
+}
+
 namespace LuaDebug {
 
 	DLL_PUBLIC void traceError(lua_State *L, const char *errorMsg);
@@ -28,9 +32,15 @@ namespace LuaDebug {
 			traceError(L, fmt, args...);
 	}
 
-	const char *errorToString(int value);
+	DLL_PUBLIC const char *statusToString(int status);
+	DLL_PUBLIC const char *statusToDescription(int status);
 	void printStackValue(lua_State *L, int index);
 
+	int traceMessageHandler(lua_State *L);
+	int debugInfoMessageHandler(lua_State *L);
+
+	LuaUtils::RunInfo *retrieveRunInfo(lua_State *L);
+	void pushRunInfo(lua_State *L, LuaUtils::RunInfo *runInfo);
 }
 
 }

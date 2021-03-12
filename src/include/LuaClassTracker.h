@@ -58,27 +58,30 @@ int LuaClassTracker<T>::deleteObject(lua_State *L)
 
 	LuaStateManager::UserDataWrapper *wrapper = reinterpret_cast<LuaStateManager::UserDataWrapper *>(lua_touserdata(L, -1));
 
-	T *object = reinterpret_cast<T *>(wrapper->object);
-	FATAL_ASSERT(object);
-	FATAL_ASSERT(wrapper->type == LuaTypes::classToUserDataType(object));
-
-	nctl::Array<LuaStateManager::UserDataWrapper> &array = stateManager->trackedUserDatas();
-	const unsigned int newSize = array.size() - 1;
-
-	// If not deleting the last element of the array
-	if (wrapper->arrayIndex != newSize)
+	if (wrapper != nullptr)
 	{
-		array[wrapper->arrayIndex].object = array[newSize].object;
-		array[wrapper->arrayIndex].type = array[newSize].type;
-		// The `arrayIndex` should not be copied
-	}
+		T *object = reinterpret_cast<T *>(wrapper->object);
+		FATAL_ASSERT(object);
+		FATAL_ASSERT(wrapper->type == LuaTypes::classToUserDataType(object));
 
-	array.setSize(newSize);
+		nctl::Array<LuaStateManager::UserDataWrapper> &array = stateManager->trackedUserDatas();
+		const unsigned int newSize = array.size() - 1;
+
+		// If not deleting the last element of the array
+		if (wrapper->arrayIndex != newSize)
+		{
+			array[wrapper->arrayIndex].object = array[newSize].object;
+			array[wrapper->arrayIndex].type = array[newSize].type;
+			// The `arrayIndex` should not be copied
+		}
+
+		array.setSize(newSize);
 #if !NCINE_WITH_ALLOCATORS
-	delete object;
+		delete object;
 #else
-	nctl::theLuaAllocator().deleteObject(object);
+		nctl::theLuaAllocator().deleteObject(object);
 #endif
+	}
 
 	return 0;
 }

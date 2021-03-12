@@ -3,6 +3,7 @@
 
 #include "LuaEventHandler.h"
 
+#include "LuaNames.h"
 #include "LuaStateManager.h"
 #include "LuaIAppEventHandler.h"
 #include "LuaIInputEventHandler.h"
@@ -55,7 +56,7 @@ extern "C"
 		LuaEventHandler::luaState_ = new LuaStateManager(L, LuaStateManager::ApiType::FULL,
 		                                                 LuaStateManager::StatisticsTracking::ENABLED,
 		                                                 LuaStateManager::StandardLibraries::LOADED);
-		LuaEventHandler::luaState_->exposeModuleApi();
+		lua_getglobal(L, LuaNames::ncine);
 
 		lua_pushcfunction(L, start);
 		lua_setfield(L, -2, LuaNames::LuaEventHandler::start);

@@ -1,8 +1,7 @@
-#include <cstring>
-
 #define NCINE_INCLUDE_LUA
 #include "common_headers.h"
 
+#include <nctl/CString.h>
 #include "LuaUtils.h"
 #include "LuaDebug.h"
 
@@ -12,10 +11,49 @@ namespace ncine {
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+const char *LuaUtils::RunInfo::DebugInfo::whatTypeToString(WhatType type) const
+{
+	switch (type)
+	{
+		case WhatType::LUA: return "Lua";
+		case WhatType::C: return "C";
+		case WhatType::MAIN: return "main";
+		default:
+			return "Unknown";
+	}
+}
+
+const char *LuaUtils::RunInfo::DebugInfo::nameWhatTypeToString(NameWhatType type) const
+{
+	switch (type)
+	{
+		case NameWhatType::GLOBAL: return "global";
+		case NameWhatType::LOCAL: return "local";
+		case NameWhatType::METHOD: return "method";
+		case NameWhatType::FIELD: return "field";
+		case NameWhatType::UPVALUE: return "upvalue";
+		case NameWhatType::EMPTY: return "empty";
+		default:
+			return "Unknown";
+	}
+}
+
+const LuaUtils::RunInfo::DebugInfo &LuaUtils::RunInfo::debugInfo(unsigned int level) const
+{
+	ASSERT(level >= 0 && level < numLevels_);
+	return debugInfo_[level];
+}
+
 void LuaUtils::addFunction(lua_State *L, const char *name, int (*func)(lua_State *L))
 {
 	lua_pushcfunction(L, func);
 	lua_setfield(L, -2, name);
+}
+
+void LuaUtils::addGlobalFunction(lua_State *L, const char *name, int (*func)(lua_State *L))
+{
+	lua_pushcfunction(L, func);
+	lua_setglobal(L, name);
 }
 
 void LuaUtils::createTable(lua_State *L, int narr, int nrec)
@@ -33,6 +71,36 @@ void LuaUtils::call(lua_State *L, int nargs, int nresults)
 	lua_call(L, nargs, nresults);
 }
 
+int LuaUtils::pcall(lua_State *L, int nargs, int nresults, RunInfo *runInfo)
+{
+	// Calculate stack position for message handler
+	const int hpos = lua_gettop(L) - nargs;
+
+	if (runInfo)
+	{
+		LuaDebug::pushRunInfo(L, runInfo);
+		lua_pushcfunction(L, LuaDebug::debugInfoMessageHandler);
+	}
+	else
+		lua_pushcfunction(L, LuaDebug::traceMessageHandler);
+
+	lua_insert(L, hpos);
+	const int status = lua_pcall(L, nargs, nresults, hpos);
+	lua_remove(L, hpos);
+
+	return status;
+}
+
+int LuaUtils::pcall(lua_State *L, int nargs, int nresults, int msgh)
+{
+	return lua_pcall(L, nargs, nresults, msgh);
+}
+
+int LuaUtils::pcall(lua_State *L, int nargs, int nresults)
+{
+	return lua_pcall(L, nargs, nresults, 0);
+}
+
 void LuaUtils::pop(lua_State *L, int n)
 {
 	lua_pop(L, n);
@@ -41,6 +109,21 @@ void LuaUtils::pop(lua_State *L, int n)
 void LuaUtils::pop(lua_State *L)
 {
 	lua_pop(L, 1);
+}
+
+int LuaUtils::registryIndex()
+{
+	return LUA_REGISTRYINDEX;
+}
+
+int LuaUtils::getTable(lua_State *L, int index)
+{
+	return lua_gettable(L, index);
+}
+
+void LuaUtils::setTable(lua_State *L, int index)
+{
+	lua_settable(L, index);
 }
 
 int LuaUtils::getField(lua_State *L, int index, const char *name)
@@ -53,9 +136,93 @@ void LuaUtils::setField(lua_State *L, int index, const char *name)
 	lua_setfield(L, index, name);
 }
 
+bool LuaUtils::isStatusOk(int status)
+{
+	return (status == LUA_OK);
+}
+
+bool LuaUtils::isStatusYield(int status)
+{
+	return (status == LUA_YIELD);
+}
+
+bool LuaUtils::isStatusErrRun(int status)
+{
+	return (status == LUA_ERRRUN);
+}
+
+bool LuaUtils::isStatusErrSyntax(int status)
+{
+	return (status == LUA_ERRSYNTAX);
+}
+
+bool LuaUtils::isStatusErrGcmm(int status)
+{
+#if LUA_VERSION_NUM <= 503
+	return (status == LUA_ERRGCMM);
+#else
+	return false;
+#endif
+}
+
+bool LuaUtils::isStatusErrMem(int status)
+{
+	return (status == LUA_ERRMEM);
+}
+
+bool LuaUtils::isStatusErrErr(int status)
+{
+	return (status == LUA_ERRERR);
+}
+
+bool LuaUtils::isNil(int type)
+{
+	return (type == LUA_TNIL);
+}
+
 bool LuaUtils::isNil(lua_State *L, int index)
 {
 	return lua_isnil(L, index);
+}
+
+bool LuaUtils::isBoolean(int type)
+{
+	return (type == LUA_TBOOLEAN);
+}
+
+bool LuaUtils::isBoolean(lua_State *L, int index)
+{
+	return lua_isboolean(L, index);
+}
+
+bool LuaUtils::isLightUserData(int type)
+{
+	return (type == LUA_TLIGHTUSERDATA);
+}
+
+bool LuaUtils::isLightUserData(lua_State *L, int index)
+{
+	return lua_islightuserdata(L, index);
+}
+
+bool LuaUtils::isNumber(int type)
+{
+	return (type == LUA_TNUMBER);
+}
+
+bool LuaUtils::isNumber(lua_State *L, int index)
+{
+	return lua_isnumber(L, index);
+}
+
+bool LuaUtils::isString(int type)
+{
+	return (type == LUA_TSTRING);
+}
+
+bool LuaUtils::isString(lua_State *L, int index)
+{
+	return lua_isstring(L, index);
 }
 
 bool LuaUtils::isTable(int type)
@@ -66,6 +233,36 @@ bool LuaUtils::isTable(int type)
 bool LuaUtils::isTable(lua_State *L, int index)
 {
 	return lua_istable(L, index);
+}
+
+bool LuaUtils::isFunction(int type)
+{
+	return (type == LUA_TFUNCTION);
+}
+
+bool LuaUtils::isFunction(lua_State *L, int index)
+{
+	return lua_isfunction(L, index);
+}
+
+bool LuaUtils::isUserData(int type)
+{
+	return (type == LUA_TUSERDATA);
+}
+
+bool LuaUtils::isUserData(lua_State *L, int index)
+{
+	return lua_isuserdata(L, index);
+}
+
+bool LuaUtils::isThread(int type)
+{
+	return (type == LUA_TTHREAD);
+}
+
+bool LuaUtils::isThread(lua_State *L, int index)
+{
+	return lua_isthread(L, index);
 }
 
 size_t LuaUtils::rawLen(lua_State *L, int index)
@@ -83,9 +280,9 @@ void LuaUtils::rawSeti(lua_State *L, int index, int64_t i)
 	lua_rawseti(L, index, i);
 }
 
-void LuaUtils::getGlobal(lua_State *L, const char *name)
+int LuaUtils::getGlobal(lua_State *L, const char *name)
 {
-	lua_getglobal(L, name);
+	return lua_getglobal(L, name);
 }
 
 void LuaUtils::setGlobal(lua_State *L, const char *name)
@@ -101,7 +298,7 @@ template <>
 double LuaUtils::retrieve<double>(lua_State *L, int index)
 {
 	if (lua_isnumber(L, index) == false)
-		luaL_argerror(L, index, "Expecting a number");
+		LOGW_X("Expecting a number at index %d", index);
 	return static_cast<double>(lua_tonumber(L, index));
 }
 
@@ -109,7 +306,7 @@ template <>
 float LuaUtils::retrieve<float>(lua_State *L, int index)
 {
 	if (lua_isnumber(L, index) == false)
-		luaL_argerror(L, index, "Expecting a number");
+		LOGW_X("Expecting a number at index %d", index);
 	return static_cast<float>(lua_tonumber(L, index));
 }
 
@@ -117,7 +314,7 @@ template <>
 int64_t LuaUtils::retrieve<int64_t>(lua_State *L, int index)
 {
 	if (lua_isinteger(L, index) == false)
-		luaL_argerror(L, index, "Expecting an integer");
+		LOGW_X("Expecting an integer at index %d", index);
 	return static_cast<int64_t>(lua_tointeger(L, index));
 }
 
@@ -125,7 +322,7 @@ template <>
 uint64_t LuaUtils::retrieve<uint64_t>(lua_State *L, int index)
 {
 	if (lua_isinteger(L, index) == false)
-		luaL_argerror(L, index, "Expecting an integer");
+		LOGW_X("Expecting an integer at index %d", index);
 
 	lua_Integer luaInteger = lua_tointeger(L, index);
 	LuaDebug::assert(L, luaInteger >= 0, "Integer number cannot be negative");
@@ -137,7 +334,7 @@ template <>
 int32_t LuaUtils::retrieve<int32_t>(lua_State *L, int index)
 {
 	if (lua_isinteger(L, index) == false)
-		luaL_argerror(L, index, "Expecting an integer");
+		LOGW_X("Expecting an integer at index %d", index);
 	return static_cast<int32_t>(lua_tointeger(L, index));
 }
 
@@ -145,7 +342,7 @@ template <>
 uint32_t LuaUtils::retrieve<uint32_t>(lua_State *L, int index)
 {
 	if (lua_isinteger(L, index) == false)
-		luaL_argerror(L, index, "Expecting an integer");
+		LOGW_X("Expecting an integer at index %d", index);
 
 	lua_Integer luaInteger = lua_tointeger(L, index);
 	LuaDebug::assert(L, luaInteger >= 0, "Integer number cannot be negative");
@@ -157,7 +354,7 @@ template <>
 const char *LuaUtils::retrieve<const char *>(lua_State *L, int index)
 {
 	if (lua_isstring(L, index) == false)
-		luaL_argerror(L, index, "Expecting a string");
+		LOGW_X("Expecting a string at index %d", index);
 	return static_cast<const char *>(lua_tostring(L, index));
 }
 
@@ -165,14 +362,14 @@ template <>
 bool LuaUtils::retrieve<bool>(lua_State *L, int index)
 {
 	if (lua_isboolean(L, index) == false)
-		luaL_argerror(L, index, "Expecting a boolean");
+		LOGW_X("Expecting a boolean at index %d", index);
 	return static_cast<bool>(lua_toboolean(L, index));
 }
 
 void *LuaUtils::retrieveUserData(lua_State *L, int index)
 {
 	if (lua_islightuserdata(L, index) == false)
-		luaL_argerror(L, index, "Expecting a light userdata");
+		LOGW_X("Expecting a light userdata at index %d", index);
 	return lua_touserdata(L, index);
 }
 
@@ -193,6 +390,7 @@ namespace {
 	template <>
 	void getFieldAndCheckType<lua_Number>(lua_State *L, int index, const char *name)
 	{
+		LuaDebug::assert(L, lua_istable(L, index), "No table at index %d", index);
 		lua_getfield(L, index, name);
 		LuaDebug::assert(L, lua_isnumber(L, -1), "Cannot retrieve a number in table field \"%s\"", name);
 	}
@@ -200,6 +398,7 @@ namespace {
 	template <>
 	void getFieldAndCheckType<lua_Integer>(lua_State *L, int index, const char *name)
 	{
+		LuaDebug::assert(L, lua_istable(L, index), "No table at index %d", index);
 		lua_getfield(L, index, name);
 		LuaDebug::assert(L, lua_isinteger(L, -1), "Cannot retrieve an integer in table field \"%s\"", name);
 	}
@@ -207,6 +406,7 @@ namespace {
 	template <>
 	void getFieldAndCheckType<const char *>(lua_State *L, int index, const char *name)
 	{
+		LuaDebug::assert(L, lua_istable(L, index), "No table at index %d", index);
 		lua_getfield(L, index, name);
 		LuaDebug::assert(L, lua_isstring(L, -1), "Cannot retrieve a string in table field \"%s\"", name);
 	}
@@ -341,6 +541,9 @@ namespace {
 	template <>
 	bool tryGetField<lua_Number>(lua_State *L, int index, const char *name, lua_Number &value)
 	{
+		if (lua_istable(L, index) == false)
+			return false;
+
 		lua_getfield(L, index, name);
 		if (lua_isnumber(L, -1))
 		{
@@ -354,6 +557,9 @@ namespace {
 	template <>
 	bool tryGetField<lua_Integer>(lua_State *L, int index, const char *name, lua_Integer &value)
 	{
+		if (lua_istable(L, index) == false)
+			return false;
+
 		lua_getfield(L, index, name);
 		if (lua_isinteger(L, -1))
 		{
@@ -448,6 +654,9 @@ bool LuaUtils::tryRetrieveField(lua_State *L, int index, const char *name, const
 {
 	ASSERT(value);
 
+	if (lua_istable(L, index) == false)
+		return false;
+
 	lua_getfield(L, index, name);
 	if (lua_isstring(L, -1))
 	{
@@ -461,6 +670,9 @@ bool LuaUtils::tryRetrieveField(lua_State *L, int index, const char *name, const
 template <>
 bool LuaUtils::tryRetrieveField<bool>(lua_State *L, int index, const char *name, bool &value)
 {
+	if (lua_istable(L, index) == false)
+		return false;
+
 	lua_getfield(L, index, name);
 	if (lua_isboolean(L, -1))
 	{
@@ -473,6 +685,9 @@ bool LuaUtils::tryRetrieveField<bool>(lua_State *L, int index, const char *name,
 
 bool LuaUtils::tryRetrieveFieldTable(lua_State *L, int index, const char *name)
 {
+	if (lua_istable(L, index) == false)
+		return false;
+
 	lua_getfield(L, index, name);
 	if (lua_istable(L, -1))
 		return true;
@@ -481,6 +696,9 @@ bool LuaUtils::tryRetrieveFieldTable(lua_State *L, int index, const char *name)
 
 bool LuaUtils::tryRetrieveFieldFunction(lua_State *L, int index, const char *name)
 {
+	if (lua_istable(L, index) == false)
+		return false;
+
 	lua_getfield(L, index, name);
 	if (lua_isfunction(L, -1))
 		return true;
@@ -489,6 +707,9 @@ bool LuaUtils::tryRetrieveFieldFunction(lua_State *L, int index, const char *nam
 
 bool LuaUtils::tryRetrieveFieldLightUserData(lua_State *L, int index, const char *name)
 {
+	if (lua_istable(L, index) == false)
+		return false;
+
 	lua_getfield(L, index, name);
 	if (lua_islightuserdata(L, -1))
 		return true;

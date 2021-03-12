@@ -26,8 +26,7 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
 	setDataPath(config);
 
-	luaState_.exposeScriptApi();
-	luaState_.run(prefixDataPath("scripts", ScriptFile).data());
+	luaState_.runFromFile(prefixDataPath("scripts", ScriptFile).data(), ScriptFile);
 	nc::LuaIAppEventHandler::onPreInit(luaState_.state(), config);
 }
 

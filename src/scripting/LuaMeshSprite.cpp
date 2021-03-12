@@ -100,7 +100,10 @@ namespace {
 		{
 			const int type = lua_rawgeti(L, index, i + 1);
 			if (type != LUA_TTABLE)
-				luaL_argerror(L, -1, "Expecting a table");
+			{
+				LOGW_X("Expecting a table at index %u of table at index %d", i + 1, index);
+				continue;
+			}
 
 			retrieveVertexTable(L, -1, vertices[i]);
 			lua_pop(L, 1);
@@ -119,7 +122,10 @@ namespace {
 		{
 			const int type = lua_rawgeti(L, index, i + 1);
 			if (type != LUA_TTABLE)
-				luaL_argerror(L, -1, "Expecting a table");
+			{
+				LOGW_X("Expecting a table at index %u of table at index %d", i + 1, index);
+				continue;
+			}
 
 			vertices[i] = LuaVector2fUtils::retrieveTable(L, -1);
 			lua_pop(L, 1);
@@ -180,7 +186,10 @@ int LuaMeshSprite::numVertices(lua_State *L)
 int LuaMeshSprite::copyVertices(lua_State *L)
 {
 	if (lua_istable(L, -1) == false)
-		luaL_argerror(L, -1, "Expecting a table");
+	{
+		LOGW("Expecting a table at index -1");
+		return 0;
+	}
 
 	unsigned int numVertices = 0;
 	MeshSprite *sprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -2);
@@ -204,7 +213,10 @@ int LuaMeshSprite::setVertices(lua_State *L)
 int LuaMeshSprite::createVerticesFromTexels(lua_State *L)
 {
 	if (lua_istable(L, -2) == false)
-		luaL_argerror(L, -2, "Expecting a table");
+	{
+		LOGW("Expecting a table at index -2");
+		return 0;
+	}
 
 	unsigned int numVertices = 0;
 	MeshSprite *sprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -3);
@@ -229,7 +241,10 @@ int LuaMeshSprite::numIndices(lua_State *L)
 int LuaMeshSprite::copyIndices(lua_State *L)
 {
 	if (lua_istable(L, -1) == false)
-		luaL_argerror(L, -1, "Expecting a table");
+	{
+		LOGW("Expecting a table at index -1");
+		return 0;
+	}
 
 	unsigned int numIndices = 0;
 	MeshSprite *sprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -2);

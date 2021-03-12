@@ -234,7 +234,11 @@ int LuaIInputManager::addJoyMappingsFromFile(lua_State *L)
 
 int LuaIInputManager::addJoyMappingsFromStrings(lua_State *L)
 {
-	LuaDebug::assert(L, lua_istable(L, -1), "Expecting a table");
+	if (lua_istable(L, -1) == false)
+	{
+		LOGW("Expecting a table at index -1");
+		return 0;
+	}
 
 	const unsigned int length = lua_rawlen(L, -1);
 	nctl::Array<const char *> mappingStrings(length);
@@ -243,7 +247,10 @@ int LuaIInputManager::addJoyMappingsFromStrings(lua_State *L)
 	{
 		const int type = lua_rawgeti(L, -1, i + 1);
 		if (type != LUA_TSTRING)
-			luaL_argerror(L, -1, "Expecting a string");
+		{
+			LOGW_X("Expecting a string at index %u of table at index -1", i + 1);
+			continue;
+		}
 
 		mappingStrings.pushBack(LuaUtils::retrieve<const char *>(L, -1));
 		lua_pop(L, 1);

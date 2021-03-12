@@ -1,6 +1,7 @@
 #define NCINE_INCLUDE_LUA
 #include "common_headers.h"
 #include "common_macros.h"
+#include <nctl/CString.h>
 
 #include "LuaStateManager.h"
 #include "LuaDebug.h"
@@ -110,10 +111,247 @@ LuaStateManager::LuaStateManager(ApiType apiType, StatisticsTracking statsTracki
 
 LuaStateManager::LuaStateManager(lua_State *L, ApiType apiType, StatisticsTracking statsTracking, StandardLibraries stdLibraries)
     : L_(L), apiType_(apiType), statsTracking_(statsTracking), stdLibraries_(stdLibraries),
-      trackedUserDatas_(apiType == ApiType::FULL ? 16 : 1),
+      trackedUserDatas_(apiType == ApiType::FULL ? 16 : 0),
       untrackedUserDatas_(16), closeOnDestruction_(false)
 {
 	ASSERT(L_);
+	init(apiType, statsTracking, stdLibraries);
+}
+
+LuaStateManager::~LuaStateManager()
+{
+	shutdown();
+}
+
+///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void LuaStateManager::reopen(ApiType apiType, StatisticsTracking statsTracking, StandardLibraries stdLibraries)
+{
+	shutdown();
+
+	L_ = lua_newstate(statsTracking == StatisticsTracking::ENABLED ? luaAllocatorWithStatistics : luaAllocator, nullptr);
+	init(apiType, statsTracking, stdLibraries);
+}
+
+void LuaStateManager::reopen()
+{
+	reopen(apiType_, statsTracking_, stdLibraries_);
+}
+
+bool LuaStateManager::loadFromFile(const char *filename, const char *chunkName, nctl::String *errorMsg, int *status)
+{
+	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
+	fileHandle->setExitOnFailToOpen(false);
+	LOGI_X("Loading file: \"%s\"", fileHandle->filename());
+
+	fileHandle->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
+	if (fileHandle->isOpened() == false)
+		return false;
+
+	const unsigned long fileSize = fileHandle->size();
+	nctl::UniquePtr<char[]> buffer = nctl::makeUnique<char[]>(fileSize);
+	fileHandle->read(buffer.get(), fileSize);
+
+	return loadFromMemory(chunkName, buffer.get(), fileSize, errorMsg, status);
+}
+
+bool LuaStateManager::loadFromFile(const char *filename, const char *chunkName, nctl::String *errorMsg)
+{
+	return loadFromFile(filename, chunkName, errorMsg, nullptr);
+}
+
+bool LuaStateManager::loadFromFile(const char *filename, const char *chunkName)
+{
+	return loadFromFile(filename, chunkName, nullptr, nullptr);
+}
+
+bool LuaStateManager::loadFromFile(const char *filename)
+{
+	return loadFromFile(filename, filename, nullptr, nullptr);
+}
+
+bool LuaStateManager::loadFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize, nctl::String *errorMsg, int *status)
+{
+	if (apiType_ == ApiType::FULL)
+		releaseTrackedMemory();
+	untrackedUserDatas_.clear();
+
+	const char *bufferRead = bufferPtr;
+
+	// Skip shebang as `luaL_loadfile` does
+	if (bufferRead[0] == '#')
+	{
+		bufferRead = static_cast<const char *>(memchr(bufferRead, '\n', bufferSize)) + 1;
+		bufferSize -= bufferRead - bufferPtr;
+	}
+
+	const int loadStatus = luaL_loadbufferx(L_, bufferRead, bufferSize, bufferName, "bt");
+	if (loadStatus != LUA_OK)
+	{
+		LOGE_X("Error loading Lua script \"%s\" (%s):\n%s", bufferName, LuaDebug::statusToString(loadStatus), lua_tostring(L_, -1));
+		if (errorMsg)
+			errorMsg->assign(lua_tostring(L_, -1));
+		if (status)
+			*status = loadStatus;
+		LuaUtils::pop(L_);
+		return false;
+	}
+
+	return true;
+}
+
+bool LuaStateManager::loadFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize, nctl::String *errorMsg)
+{
+	return loadFromMemory(bufferName, bufferPtr, bufferSize, errorMsg, nullptr);
+}
+
+bool LuaStateManager::loadFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize)
+{
+	return loadFromMemory(bufferName, bufferPtr, bufferSize, nullptr, nullptr);
+}
+
+bool LuaStateManager::runFromFile(const char *filename, const char *chunkName, nctl::String *errorMsg, int *status, LuaUtils::RunInfo *runInfo)
+{
+	const bool hasLoaded = loadFromFile(filename, chunkName, errorMsg, status);
+	if (hasLoaded == false)
+		return false;
+
+	const int callStatus = LuaUtils::pcall(L_, 0, LUA_MULTRET, runInfo);
+	if (callStatus != LUA_OK)
+	{
+		LOGE_X("Error running Lua script \"%s\" (%s):\n%s", filename, LuaDebug::statusToString(callStatus), lua_tostring(L_, -1));
+		if (errorMsg)
+			errorMsg->assign(lua_tostring(L_, -1));
+		if (status)
+			*status = callStatus;
+		LuaUtils::pop(L_);
+		return false;
+	}
+
+	return true;
+}
+
+bool LuaStateManager::runFromFile(const char *filename, const char *chunkName, nctl::String *errorMsg)
+{
+	return runFromFile(filename, chunkName, errorMsg, nullptr, nullptr);
+}
+
+bool LuaStateManager::runFromFile(const char *filename, const char *chunkName)
+{
+	return runFromFile(filename, chunkName, nullptr, nullptr, nullptr);
+}
+
+bool LuaStateManager::runFromFile(const char *filename)
+{
+	return runFromFile(filename, filename, nullptr, nullptr, nullptr);
+}
+
+bool LuaStateManager::runFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize, nctl::String *errorMsg, int *status, LuaUtils::RunInfo *runInfo)
+{
+	const bool hasLoaded = loadFromMemory(bufferName, bufferPtr, bufferSize, errorMsg, status);
+	if (hasLoaded == false)
+		return false;
+
+	const int callStatus = LuaUtils::pcall(L_, 0, LUA_MULTRET, runInfo);
+	if (callStatus != LUA_OK)
+	{
+		LOGE_X("Error running Lua script \"%s\" (%s):\n%s", bufferName, LuaDebug::statusToString(callStatus), lua_tostring(L_, -1));
+		if (errorMsg)
+			errorMsg->assign(lua_tostring(L_, -1));
+		if (status)
+			*status = callStatus;
+		LuaUtils::pop(L_);
+		return false;
+	}
+
+	return true;
+}
+
+bool LuaStateManager::runFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize, nctl::String *errorMsg)
+{
+	return runFromMemory(bufferName, bufferPtr, bufferSize, errorMsg, nullptr, nullptr);
+}
+
+bool LuaStateManager::runFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize)
+{
+	return runFromMemory(bufferName, bufferPtr, bufferSize, nullptr, nullptr, nullptr);
+}
+
+LuaStateManager *LuaStateManager::manager(lua_State *L)
+{
+	LuaStateManager *stateManager = nullptr;
+
+	for (const StateToManager &manager : managers_)
+	{
+		if (manager.luaState == L)
+		{
+			stateManager = manager.stateManager;
+			break;
+		}
+	}
+
+	FATAL_ASSERT(stateManager != nullptr);
+	return stateManager;
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void *LuaStateManager::luaAllocator(void *ud, void *ptr, size_t osize, size_t nsize)
+{
+	if (nsize == 0)
+	{
+#if !NCINE_WITH_ALLOCATORS
+		free(ptr);
+#else
+		nctl::theLuaAllocator().deallocate(ptr);
+#endif
+		return nullptr;
+	}
+	else
+	{
+#if !NCINE_WITH_ALLOCATORS
+		return realloc(ptr, nsize);
+#else
+		return nctl::theLuaAllocator().reallocate(ptr, nsize);
+#endif
+	}
+}
+
+void *LuaStateManager::luaAllocatorWithStatistics(void *ud, void *ptr, size_t osize, size_t nsize)
+{
+	if (nsize == 0)
+	{
+		LuaStatistics::freeMemory(osize);
+#if !NCINE_WITH_ALLOCATORS
+		free(ptr);
+#else
+		nctl::theLuaAllocator().deallocate(ptr);
+#endif
+		return nullptr;
+	}
+	else
+	{
+		LuaStatistics::allocMemory(ptr != nullptr ? (nsize - osize) : nsize);
+#if !NCINE_WITH_ALLOCATORS
+		return realloc(ptr, nsize);
+#else
+		return nctl::theLuaAllocator().reallocate(ptr, nsize);
+#endif
+	}
+}
+
+void LuaStateManager::luaCountHook(lua_State *L, lua_Debug *ar)
+{
+	if (ar->event == LUA_HOOKCOUNT)
+		LuaStatistics::countOperations();
+}
+
+void LuaStateManager::init(ApiType apiType, StatisticsTracking statsTracking, StandardLibraries stdLibraries)
+{
 	if (stdLibraries == StandardLibraries::LOADED)
 		luaL_openlibs(L_);
 	managers_.pushBack(StateToManager(L_, this));
@@ -127,10 +365,18 @@ LuaStateManager::LuaStateManager(lua_State *L, ApiType apiType, StatisticsTracki
 #ifdef WITH_TRACY
 	tracy::LuaRegister(L_);
 #endif
+
+	apiType_ = apiType;
+	statsTracking_ = statsTracking;
+	stdLibraries_ = stdLibraries;
+
+	exposeScriptApi();
 }
 
-LuaStateManager::~LuaStateManager()
+void LuaStateManager::shutdown()
 {
+	unregisterState();
+
 	if (statsTracking_ == StatisticsTracking::ENABLED)
 		LuaStatistics::unregisterState(this);
 
@@ -141,9 +387,23 @@ LuaStateManager::~LuaStateManager()
 		lua_close(L_);
 }
 
-///////////////////////////////////////////////////////////
-// PUBLIC FUNCTIONS
-///////////////////////////////////////////////////////////
+void LuaStateManager::unregisterState()
+{
+	int index = -1;
+
+	for (unsigned int i = 0; i < managers_.size(); i++)
+	{
+		if (managers_[i].luaState == L_ && managers_[i].stateManager == this)
+		{
+			index = static_cast<int>(i);
+			break;
+		}
+	}
+
+	ASSERT(index != -1);
+	if (index != -1)
+		managers_.unorderedRemoveAt(index);
+}
 
 void LuaStateManager::releaseTrackedMemory()
 {
@@ -225,6 +485,15 @@ void LuaStateManager::releaseTrackedMemory()
 	trackedUserDatas_.clear();
 }
 
+void LuaStateManager::exposeScriptApi()
+{
+	if (apiType_ != ApiType::NONE)
+	{
+		exposeModuleApi();
+		lua_setglobal(L_, LuaNames::ncine);
+	}
+}
+
 void LuaStateManager::exposeModuleApi()
 {
 	if (apiType_ != ApiType::NONE)
@@ -235,130 +504,6 @@ void LuaStateManager::exposeModuleApi()
 		if (apiType_ != ApiType::CONSTANTS_ONLY)
 			exposeApi();
 	}
-}
-
-void LuaStateManager::exposeScriptApi()
-{
-	if (apiType_ != ApiType::NONE)
-	{
-		exposeModuleApi();
-		lua_setglobal(L_, LuaNames::ncine);
-	}
-}
-
-bool LuaStateManager::run(const char *filename)
-{
-	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
-	LOGI_X("Loading file: \"%s\"", fileHandle->filename());
-
-	fileHandle->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
-	unsigned long fileSize = fileHandle->size();
-	nctl::UniquePtr<char[]> buffer = nctl::makeUnique<char[]>(fileSize);
-	fileHandle->read(buffer.get(), fileSize);
-
-	return runFromMemory(filename, buffer.get(), fileSize);
-}
-
-bool LuaStateManager::runFromMemory(const char *bufferName, const char *bufferPtr, unsigned long int bufferSize)
-{
-	releaseTrackedMemory();
-	untrackedUserDatas_.clear();
-
-	const char *bufferRead = bufferPtr;
-
-	// Skip shebang as `luaL_loadfile` does
-	if (bufferRead[0] == '#')
-	{
-		bufferRead = static_cast<const char *>(memchr(bufferRead, '\n', bufferSize)) + 1;
-		bufferSize -= bufferRead - bufferPtr;
-	}
-
-	const int loadError = luaL_loadbufferx(L_, bufferRead, bufferSize, bufferName, "bt");
-	if (loadError != LUA_OK)
-	{
-		LOGE_X("Cannot load \"%s\" script: %s", bufferName, LuaDebug::errorToString(loadError));
-		return false;
-	}
-
-	const int callError = lua_pcall(L_, 0, LUA_MULTRET, 0);
-	if (callError != LUA_OK)
-	{
-		LOGE_X("Cannot run \"%s\" script: %s", bufferName, LuaDebug::errorToString(callError));
-		return false;
-	}
-
-	return true;
-}
-
-LuaStateManager *LuaStateManager::manager(lua_State *L)
-{
-	LuaStateManager *stateManager = nullptr;
-
-	for (const StateToManager &manager : managers_)
-	{
-		if (manager.luaState == L)
-		{
-			stateManager = manager.stateManager;
-			break;
-		}
-	}
-
-	FATAL_ASSERT(stateManager != nullptr);
-	return stateManager;
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void *LuaStateManager::luaAllocator(void *ud, void *ptr, size_t osize, size_t nsize)
-{
-	if (nsize == 0)
-	{
-#if !NCINE_WITH_ALLOCATORS
-		free(ptr);
-#else
-		nctl::theLuaAllocator().deallocate(ptr);
-#endif
-		return nullptr;
-	}
-	else
-	{
-#if !NCINE_WITH_ALLOCATORS
-		return realloc(ptr, nsize);
-#else
-		return nctl::theLuaAllocator().reallocate(ptr, nsize);
-#endif
-	}
-}
-
-void *LuaStateManager::luaAllocatorWithStatistics(void *ud, void *ptr, size_t osize, size_t nsize)
-{
-	if (nsize == 0)
-	{
-		LuaStatistics::freeMemory(osize);
-#if !NCINE_WITH_ALLOCATORS
-		free(ptr);
-#else
-		nctl::theLuaAllocator().deallocate(ptr);
-#endif
-		return nullptr;
-	}
-	else
-	{
-		LuaStatistics::allocMemory(ptr != nullptr ? (nsize - osize) : nsize);
-#if !NCINE_WITH_ALLOCATORS
-		return realloc(ptr, nsize);
-#else
-		return nctl::theLuaAllocator().reallocate(ptr, nsize);
-#endif
-	}
-}
-
-void LuaStateManager::luaCountHook(lua_State *L, lua_Debug *ar)
-{
-	if (ar->event == LUA_HOOKCOUNT)
-		LuaStatistics::countOperations();
 }
 
 void LuaStateManager::exposeApi()

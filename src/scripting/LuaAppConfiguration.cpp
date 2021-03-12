@@ -82,7 +82,10 @@ void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
 {
 	if (lua_istable(L, -1) == false)
-		luaL_argerror(L, -1, "Expecting a table");
+	{
+		LOGW("Expecting a table at index -1");
+		return;
+	}
 
 	const char *dataPath = LuaUtils::retrieveField<const char *>(L, -1, LuaNames::AppConfiguration::dataPath);
 	appCfg.dataPath() = dataPath;
