@@ -82,7 +82,7 @@ class DLL_PUBLIC Application
 
 	/// Returns the total number of frames already rendered
 	unsigned long int numFrames() const;
-	/// Returns the elapsed time since the end of the previous frame in milliseconds
+	/// Returns the elapsed time since the end of the previous frame in seconds
 	float interval() const;
 
 	/// Returns the screen width as a float number

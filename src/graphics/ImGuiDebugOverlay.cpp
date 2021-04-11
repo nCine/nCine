@@ -1167,7 +1167,7 @@ void ImGuiDebugOverlay::guiRescursiveChildrenNodes(SceneNode *node, unsigned int
 	widgetName_.formatAppend(" - position: %.1f x %.1f", node->position().x, node->position().y);
 	if (drawable)
 		widgetName_.formatAppend(" - size: %.1f x %.1f", drawable->width(), drawable->height());
-	widgetName_.formatAppend("###0x%x", node);
+	widgetName_.formatAppend("###0x%x", uintptr_t(node));
 
 	if (ImGui::TreeNode(widgetName_.data()))
 	{

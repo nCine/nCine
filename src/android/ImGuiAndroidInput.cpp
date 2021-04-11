@@ -66,6 +66,7 @@ void ImGuiAndroidInput::init()
 	io.KeyMap[ImGuiKey_Space] = AKEYCODE_SPACE;
 	io.KeyMap[ImGuiKey_Enter] = AKEYCODE_ENTER;
 	io.KeyMap[ImGuiKey_Escape] = AKEYCODE_ESCAPE;
+	io.KeyMap[ImGuiKey_KeyPadEnter] = AKEYCODE_NUMPAD_ENTER;
 	io.KeyMap[ImGuiKey_A] = AKEYCODE_A;
 	io.KeyMap[ImGuiKey_C] = AKEYCODE_C;
 	io.KeyMap[ImGuiKey_V] = AKEYCODE_V;

@@ -61,7 +61,7 @@ void ImGuiSdlInput::init(SDL_Window *window)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
 	io.BackendPlatformName = "nCine_SDL";
 
-	// Keyboard mapping. ImGui will use those indices to peek into the io.KeysDown[] array.
+	// Keyboard mapping. Dear ImGui will use those indices to peek into the io.KeysDown[] array.
 	io.KeyMap[ImGuiKey_Tab] = SDL_SCANCODE_TAB;
 	io.KeyMap[ImGuiKey_LeftArrow] = SDL_SCANCODE_LEFT;
 	io.KeyMap[ImGuiKey_RightArrow] = SDL_SCANCODE_RIGHT;

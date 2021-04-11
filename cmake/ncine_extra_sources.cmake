@@ -362,6 +362,10 @@ if(NCINE_WITH_IMGUI)
 
 	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ImGuiDebugOverlay.h)
 	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/ImGuiDebugOverlay.cpp)
+
+	if(MINGW)
+		target_link_libraries(ncine PRIVATE imm32 dwmapi)
+	endif()
 endif()
 
 if(NCINE_WITH_NUKLEAR)

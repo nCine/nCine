@@ -402,7 +402,7 @@ elseif(MINGW OR MSYS)
 	endif()
 
 	if(LUA_FOUND)
-		set_msys_dll(LUA lua53) # MSYS2 has not updated Lua yet
+		set_msys_dll(LUA lua54)
 		add_library(Lua::Lua SHARED IMPORTED)
 		set_target_properties(Lua::Lua PROPERTIES
 			IMPORTED_IMPLIB ${LUA_LIBRARY}
