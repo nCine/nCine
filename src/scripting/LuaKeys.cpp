@@ -13,7 +13,7 @@ namespace ncine {
 
 void LuaKeys::exposeConstants(lua_State *L)
 {
-	lua_createtable(L, static_cast<int>(KeySym::COUNT), 0);
+	lua_createtable(L, 0, static_cast<int>(KeySym::COUNT));
 
 	LuaUtils::pushField(L, "UNKNOWN", static_cast<int64_t>(KeySym::UNKNOWN));
 
@@ -261,7 +261,7 @@ void LuaKeys::exposeConstants(lua_State *L)
 
 	lua_setfield(L, -2, "keysym");
 
-	lua_createtable(L, static_cast<int>(KeyMod::COUNT), 0);
+	lua_createtable(L, 0, static_cast<int>(KeyMod::COUNT));
 
 	LuaUtils::pushField(L, "NONE", static_cast<int64_t>(KeyMod::NONE));
 

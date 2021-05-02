@@ -63,7 +63,7 @@ void LuaUtils::createTable(lua_State *L, int narr, int nrec)
 
 void LuaUtils::newTable(lua_State *L)
 {
-	lua_createtable(L, 0, 0);
+	lua_newtable(L);
 }
 
 void LuaUtils::call(lua_State *L, int nargs, int nresults)

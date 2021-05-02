@@ -33,7 +33,7 @@ using LuaVector2iUtils = LuaVector2Utils<int>;
 template <class T>
 void LuaVector2Utils<T>::push(lua_State *L, const Vector2<T> &v)
 {
-	LuaUtils::createTable(L, 2, 0);
+	LuaUtils::createTable(L, 0, 2);
 	LuaUtils::pushField(L, LuaNames::Vector2::x, v.x);
 	LuaUtils::pushField(L, LuaNames::Vector2::y, v.y);
 }

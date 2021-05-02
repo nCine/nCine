@@ -55,7 +55,7 @@ namespace Application {
 
 void LuaApplication::expose(lua_State *L)
 {
-	lua_newtable(L);
+	lua_createtable(L, 0, 14);
 
 	LuaUtils::addFunction(L, LuaNames::Application::renderingSettings, renderingSettings);
 	LuaUtils::addFunction(L, LuaNames::Application::setRenderingSettings, setRenderingSettings);
@@ -89,7 +89,7 @@ int LuaApplication::renderingSettings(lua_State *L)
 {
 	const Application::RenderingSettings &settings = theApplication().renderingSettings();
 
-	lua_createtable(L, 5, 0);
+	lua_createtable(L, 0, 5);
 	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::batchingEnabled, settings.batchingEnabled);
 	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::batchingWithIndices, settings.batchingWithIndices);
 	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::cullingEnabled, settings.cullingEnabled);
@@ -122,7 +122,7 @@ int LuaApplication::debugOverlaySettings(lua_State *L)
 {
 	const IDebugOverlay::DisplaySettings &settings = theApplication().debugOverlaySettings();
 
-	lua_createtable(L, 3, 0);
+	lua_createtable(L, 0, 3);
 	LuaUtils::pushField(L, LuaNames::Application::DebugOverlaySettings::showProfilerGraphs, settings.showProfilerGraphs);
 	LuaUtils::pushField(L, LuaNames::Application::DebugOverlaySettings::showInfoText, settings.showInfoText);
 	LuaUtils::pushField(L, LuaNames::Application::DebugOverlaySettings::showInterface, settings.showInterface);

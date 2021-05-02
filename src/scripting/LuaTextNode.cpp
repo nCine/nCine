@@ -80,7 +80,7 @@ void LuaTextNode::expose(LuaStateManager *stateManager)
 
 void LuaTextNode::exposeConstants(lua_State *L)
 {
-	lua_createtable(L, 3, 0);
+	lua_createtable(L, 0, 3);
 
 	LuaUtils::pushField(L, LuaNames::TextNode::LEFT, static_cast<int64_t>(TextNode::Alignment::LEFT));
 	LuaUtils::pushField(L, LuaNames::TextNode::CENTER, static_cast<int64_t>(TextNode::Alignment::CENTER));

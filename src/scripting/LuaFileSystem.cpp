@@ -79,7 +79,7 @@ namespace FileSystem {
 
 void LuaFileSystem::exposeConstants(lua_State *L)
 {
-	lua_createtable(L, 3, 0);
+	lua_createtable(L, 0, 3);
 
 	LuaUtils::pushField(L, LuaNames::FileSystem::READ, static_cast<int64_t>(FileSystem::Permission::READ));
 	LuaUtils::pushField(L, LuaNames::FileSystem::WRITE, static_cast<int64_t>(FileSystem::Permission::WRITE));
@@ -90,7 +90,7 @@ void LuaFileSystem::exposeConstants(lua_State *L)
 
 void LuaFileSystem::expose(lua_State *L)
 {
-	lua_newtable(L);
+	lua_createtable(L, 0, 36);
 
 	LuaUtils::addFunction(L, LuaNames::FileSystem::joinPath, joinPath);
 	LuaUtils::addFunction(L, LuaNames::FileSystem::absoluteJoinPath, absoluteJoinPath);
@@ -431,7 +431,7 @@ int LuaFileSystem::lastModificationTime(lua_State *L)
 	const char *path = LuaUtils::retrieve<const char *>(L, -1);
 
 	const fs::FileDate date = fs::lastModificationTime(path);
-	LuaUtils::createTable(L, 7, 0);
+	LuaUtils::createTable(L, 0, 7);
 	LuaUtils::pushField(L, LuaNames::FileSystem::DateYear, date.year);
 	LuaUtils::pushField(L, LuaNames::FileSystem::DateMonth, date.month);
 	LuaUtils::pushField(L, LuaNames::FileSystem::DateDay, date.day);
@@ -448,7 +448,7 @@ int LuaFileSystem::lastAccessTime(lua_State *L)
 	const char *path = LuaUtils::retrieve<const char *>(L, -1);
 
 	const fs::FileDate date = fs::lastAccessTime(path);
-	LuaUtils::createTable(L, 7, 0);
+	LuaUtils::createTable(L, 0, 7);
 	LuaUtils::pushField(L, LuaNames::FileSystem::DateYear, date.year);
 	LuaUtils::pushField(L, LuaNames::FileSystem::DateMonth, date.month);
 	LuaUtils::pushField(L, LuaNames::FileSystem::DateDay, date.day);

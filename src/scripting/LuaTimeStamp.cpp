@@ -31,7 +31,7 @@ namespace TimeStamp {
 
 void LuaTimeStamp::expose(lua_State *L)
 {
-	lua_newtable(L);
+	lua_createtable(L, 0, 10);
 
 	LuaUtils::addFunction(L, LuaNames::TimeStamp::now, now);
 

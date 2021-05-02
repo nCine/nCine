@@ -35,7 +35,7 @@ class LuaRect
 template <class T>
 void LuaRect<T>::expose(lua_State *L)
 {
-	lua_newtable(L);
+	lua_createtable(L, 0, 2);
 
 	LuaUtils::addFunction(L, LuaNames::Rect::create, create);
 	LuaUtils::addFunction(L, LuaNames::Rect::fromCenterAndSize, fromCenterAndSize);

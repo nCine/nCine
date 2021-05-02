@@ -28,7 +28,7 @@ namespace Font {
 void LuaFont::expose(LuaStateManager *stateManager)
 {
 	lua_State *L = stateManager->state();
-	lua_newtable(L);
+	lua_createtable(L, 0, 8);
 
 	if (stateManager->apiType() == LuaStateManager::ApiType::FULL)
 	{

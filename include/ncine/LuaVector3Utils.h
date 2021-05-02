@@ -34,7 +34,7 @@ using LuaVector3iUtils = LuaVector3Utils<int>;
 template <class T>
 void LuaVector3Utils<T>::push(lua_State *L, const Vector3<T> &v)
 {
-	LuaUtils::createTable(L, 3, 0);
+	LuaUtils::createTable(L, 0, 3);
 	LuaUtils::pushField(L, LuaNames::Vector3::x, v.x);
 	LuaUtils::pushField(L, LuaNames::Vector3::y, v.y);
 	LuaUtils::pushField(L, LuaNames::Vector3::z, v.z);

@@ -149,7 +149,7 @@ bool MyEventHandler::runScript()
 		return false;
 	}
 
-	nc::LuaUtils::createTable(L, 1, 0);
+	nc::LuaUtils::createTable(L, 0, 1);
 	nc::LuaClassWrapper<nc::ParticleSystem>::pushFieldUntrackedUserData(L, "particlesys", particleSystem_.get());
 	nc::LuaUtils::push(L, variationIndex_);
 

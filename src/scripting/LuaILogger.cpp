@@ -35,7 +35,7 @@ namespace ILogger {
 
 void LuaILogger::expose(lua_State *L)
 {
-	lua_newtable(L);
+	lua_createtable(L, 0, 6);
 
 	LuaUtils::addFunction(L, LuaNames::ILogger::logVerbose, logVerbose);
 	LuaUtils::addFunction(L, LuaNames::ILogger::logDebug, logDebug);
@@ -49,7 +49,7 @@ void LuaILogger::expose(lua_State *L)
 
 void LuaILogger::exposeConstants(lua_State *L)
 {
-	lua_createtable(L, 8, 0);
+	lua_createtable(L, 0, 8);
 
 	LuaUtils::pushField(L, LuaNames::ILogger::UNKNOWN, static_cast<int64_t>(ILogger::LogLevel::UNKNOWN));
 	LuaUtils::pushField(L, LuaNames::ILogger::VERBOSE, static_cast<int64_t>(ILogger::LogLevel::VERBOSE));

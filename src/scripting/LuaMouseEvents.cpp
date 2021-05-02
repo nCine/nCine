@@ -45,7 +45,7 @@ namespace {
 
 void LuaMouseEvents::exposeConstants(lua_State *L)
 {
-	lua_createtable(L, 5, 0);
+	lua_createtable(L, 0, 5);
 
 	LuaUtils::pushField(L, LuaNames::LuaMouseEvents::LEFT, static_cast<int64_t>(MouseButton::LEFT));
 	LuaUtils::pushField(L, LuaNames::LuaMouseEvents::MIDDLE, static_cast<int64_t>(MouseButton::MIDDLE));
@@ -58,7 +58,7 @@ void LuaMouseEvents::exposeConstants(lua_State *L)
 
 void LuaMouseEvents::pushMouseEvent(lua_State *L, const MouseEvent &event)
 {
-	lua_createtable(L, 3, 0);
+	lua_createtable(L, 0, 3);
 	LuaUtils::pushField(L, LuaNames::LuaMouseEvents::x, event.x);
 	LuaUtils::pushField(L, LuaNames::LuaMouseEvents::y, event.y);
 	if (event.isLeftButton())
@@ -75,7 +75,7 @@ void LuaMouseEvents::pushMouseEvent(lua_State *L, const MouseEvent &event)
 
 void LuaMouseEvents::pushMouseState(lua_State *L, const MouseState &state)
 {
-	lua_createtable(L, 7, 0);
+	lua_createtable(L, 0, 7);
 	LuaUtils::pushField(L, LuaNames::LuaMouseEvents::x, state.x);
 	LuaUtils::pushField(L, LuaNames::LuaMouseEvents::y, state.y);
 	LuaUtils::pushField(L, LuaNames::LuaMouseEvents::isLeftButtonDown, state.isLeftButtonDown());
@@ -87,7 +87,7 @@ void LuaMouseEvents::pushMouseState(lua_State *L, const MouseState &state)
 
 void LuaMouseEvents::pushScrollEvent(lua_State *L, const ScrollEvent &event)
 {
-	lua_createtable(L, 2, 0);
+	lua_createtable(L, 0, 2);
 	LuaUtils::pushField(L, LuaNames::LuaMouseEvents::x, event.x);
 	LuaUtils::pushField(L, LuaNames::LuaMouseEvents::y, event.y);
 }

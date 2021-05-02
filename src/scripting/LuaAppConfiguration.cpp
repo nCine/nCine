@@ -47,7 +47,7 @@ namespace AppConfiguration {
 
 void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 {
-	lua_createtable(L, 24, 0);
+	lua_createtable(L, 0, 24);
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::dataPath, appCfg.dataPath().data());
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::logFile, appCfg.logFile.data());

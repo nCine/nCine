@@ -26,14 +26,14 @@ namespace RectAnimation {
 
 void LuaRectAnimation::exposeConstants(lua_State *L)
 {
-	lua_createtable(L, 2, 0);
+	lua_createtable(L, 0, 2);
 
 	LuaUtils::pushField(L, LuaNames::RectAnimation::DISABLED, static_cast<int64_t>(RectAnimation::LoopMode::DISABLED));
 	LuaUtils::pushField(L, LuaNames::RectAnimation::ENABLED, static_cast<int64_t>(RectAnimation::LoopMode::ENABLED));
 
 	lua_setfield(L, -2, LuaNames::RectAnimation::LoopMode);
 
-	lua_createtable(L, 2, 0);
+	lua_createtable(L, 0, 2);
 
 	LuaUtils::pushField(L, LuaNames::RectAnimation::FROM_START, static_cast<int64_t>(RectAnimation::RewindMode::FROM_START));
 	LuaUtils::pushField(L, LuaNames::RectAnimation::BACKWARD, static_cast<int64_t>(RectAnimation::RewindMode::BACKWARD));

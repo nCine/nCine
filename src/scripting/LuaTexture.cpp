@@ -51,7 +51,7 @@ namespace Texture {
 void LuaTexture::expose(LuaStateManager *stateManager)
 {
 	lua_State *L = stateManager->state();
-	lua_newtable(L);
+	lua_createtable(L, 0, 18);
 
 	if (stateManager->apiType() == LuaStateManager::ApiType::FULL)
 	{
@@ -83,7 +83,7 @@ void LuaTexture::expose(LuaStateManager *stateManager)
 
 void LuaTexture::exposeConstants(lua_State *L)
 {
-	lua_createtable(L, 6, 0);
+	lua_createtable(L, 0, 6);
 
 	LuaUtils::pushField(L, LuaNames::Texture::NEAREST, static_cast<int64_t>(Texture::Filtering::NEAREST));
 	LuaUtils::pushField(L, LuaNames::Texture::LINEAR, static_cast<int64_t>(Texture::Filtering::LINEAR));
@@ -94,7 +94,7 @@ void LuaTexture::exposeConstants(lua_State *L)
 
 	lua_setfield(L, -2, LuaNames::Texture::Filtering);
 
-	lua_createtable(L, 3, 0);
+	lua_createtable(L, 0, 3);
 
 	LuaUtils::pushField(L, LuaNames::Texture::CLAMP_TO_EDGE, static_cast<int64_t>(Texture::Wrap::CLAMP_TO_EDGE));
 	LuaUtils::pushField(L, LuaNames::Texture::MIRRORED_REPEAT, static_cast<int64_t>(Texture::Wrap::MIRRORED_REPEAT));

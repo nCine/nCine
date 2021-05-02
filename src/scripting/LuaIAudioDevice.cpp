@@ -32,7 +32,7 @@ namespace IAudioDevice {
 
 void LuaIAudioDevice::expose(lua_State *L)
 {
-	lua_newtable(L);
+	lua_createtable(L, 0, 9);
 
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::name, name);
 

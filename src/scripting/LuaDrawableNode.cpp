@@ -65,7 +65,7 @@ namespace DrawableNode {
 
 void LuaDrawableNode::exposeConstants(lua_State *L)
 {
-	lua_createtable(L, 5, 0);
+	lua_createtable(L, 0, 5);
 
 	LuaUtils::pushField(L, LuaNames::DrawableNode::DISABLED, static_cast<int64_t>(DrawableNode::BlendingPreset::DISABLED));
 	LuaUtils::pushField(L, LuaNames::DrawableNode::ALPHA, static_cast<int64_t>(DrawableNode::BlendingPreset::ALPHA));
@@ -75,7 +75,7 @@ void LuaDrawableNode::exposeConstants(lua_State *L)
 
 	lua_setfield(L, -2, LuaNames::DrawableNode::BlendingPreset);
 
-	lua_createtable(L, 15, 0);
+	lua_createtable(L, 0, 15);
 
 	LuaUtils::pushField(L, LuaNames::DrawableNode::ZERO, static_cast<int64_t>(DrawableNode::BlendingFactor::ZERO));
 	LuaUtils::pushField(L, LuaNames::DrawableNode::ONE, static_cast<int64_t>(DrawableNode::BlendingFactor::ONE));
@@ -95,7 +95,7 @@ void LuaDrawableNode::exposeConstants(lua_State *L)
 
 	lua_setfield(L, -2, LuaNames::DrawableNode::BlendingFactor);
 
-	lua_createtable(L, 4, 0);
+	lua_createtable(L, 0, 4);
 
 	LuaUtils::pushField(L, LuaNames::DrawableNode::LOWEST, static_cast<int64_t>(DrawableNode::LayerBase::LOWEST));
 	LuaUtils::pushField(L, LuaNames::DrawableNode::SCENE, static_cast<int64_t>(DrawableNode::LayerBase::SCENE));

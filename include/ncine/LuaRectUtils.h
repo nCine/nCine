@@ -35,7 +35,7 @@ using LuaRectiUtils = LuaRectUtils<int>;
 template <class T>
 void LuaRectUtils<T>::push(lua_State *L, const Rect<T> &rect)
 {
-	LuaUtils::createTable(L, 4, 0);
+	LuaUtils::createTable(L, 0, 4);
 	LuaUtils::pushField(L, LuaNames::Rect::x, rect.x);
 	LuaUtils::pushField(L, LuaNames::Rect::y, rect.y);
 	LuaUtils::pushField(L, LuaNames::Rect::w, rect.w);

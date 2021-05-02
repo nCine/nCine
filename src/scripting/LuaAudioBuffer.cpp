@@ -28,7 +28,7 @@ namespace AudioBuffer {
 void LuaAudioBuffer::expose(LuaStateManager *stateManager)
 {
 	lua_State *L = stateManager->state();
-	lua_newtable(L);
+	lua_createtable(L, 0, 9);
 
 	if (stateManager->apiType() == LuaStateManager::ApiType::FULL)
 	{

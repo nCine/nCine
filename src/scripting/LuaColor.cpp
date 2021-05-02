@@ -36,7 +36,7 @@ namespace Color {
 
 void LuaColor::expose(lua_State *L)
 {
-	lua_newtable(L);
+	lua_createtable(L, 0, 4);
 
 	LuaUtils::addFunction(L, LuaNames::Color::create, create);
 	LuaUtils::addFunction(L, LuaNames::Color::add, add);
@@ -48,7 +48,7 @@ void LuaColor::expose(lua_State *L)
 
 void LuaColor::exposeConstants(lua_State *L)
 {
-	lua_createtable(L, 8, 0);
+	lua_createtable(L, 0, 8);
 
 	LuaColorUtils::pushField(L, LuaNames::Color::BLACK, Colorf::Black);
 	LuaColorUtils::pushField(L, LuaNames::Color::WHITE, Colorf::White);

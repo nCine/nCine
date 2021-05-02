@@ -62,7 +62,7 @@ void LuaMeshSprite::expose(LuaStateManager *stateManager)
 
 void LuaMeshSprite::exposeConstants(lua_State *L)
 {
-	lua_createtable(L, 2, 0);
+	lua_createtable(L, 0, 2);
 
 	LuaUtils::pushField(L, LuaNames::MeshSprite::RESIZE, static_cast<int64_t>(MeshSprite::TextureCutMode::RESIZE));
 	LuaUtils::pushField(L, LuaNames::MeshSprite::CROP, static_cast<int64_t>(MeshSprite::TextureCutMode::CROP));

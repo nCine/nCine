@@ -18,7 +18,7 @@ namespace Color {
 
 void LuaColorUtils::push(lua_State *L, const Colorf &color)
 {
-	LuaUtils::createTable(L, 4, 0);
+	LuaUtils::createTable(L, 0, 4);
 	LuaUtils::pushField(L, LuaNames::Color::r, color.r());
 	LuaUtils::pushField(L, LuaNames::Color::g, color.g());
 	LuaUtils::pushField(L, LuaNames::Color::b, color.b());

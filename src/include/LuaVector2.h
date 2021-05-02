@@ -53,7 +53,7 @@ class LuaVector2
 template <class T>
 void LuaVector2<T>::expose(lua_State *L)
 {
-	lua_newtable(L);
+	lua_createtable(L, 0, 9);
 
 	LuaUtils::addFunction(L, LuaNames::Vector2::create, create);
 

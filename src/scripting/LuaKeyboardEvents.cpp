@@ -31,7 +31,7 @@ void LuaKeyboardEvents::expose(lua_State *L)
 	if (type == LUA_TNIL)
 	{
 		lua_pop(L, 1);
-		lua_newtable(L);
+		lua_createtable(L, 0, 1);
 	}
 
 	LuaUtils::addFunction(L, LuaNames::LuaKeyboardEvents::isKeyDown, isKeyDown);
@@ -41,7 +41,7 @@ void LuaKeyboardEvents::expose(lua_State *L)
 
 void LuaKeyboardEvents::pushKeyboardEvent(lua_State *L, const KeyboardEvent &event)
 {
-	lua_createtable(L, 3, 0);
+	lua_createtable(L, 0, 3);
 	LuaUtils::pushField(L, LuaNames::LuaKeyboardEvents::scancode, event.scancode);
 	LuaUtils::pushField(L, LuaNames::LuaKeyboardEvents::sym, static_cast<int64_t>(event.sym));
 	LuaUtils::pushField(L, LuaNames::LuaKeyboardEvents::mod, event.mod);
@@ -49,7 +49,7 @@ void LuaKeyboardEvents::pushKeyboardEvent(lua_State *L, const KeyboardEvent &eve
 
 void LuaKeyboardEvents::pushTextInputEvent(lua_State *L, const TextInputEvent &event)
 {
-	lua_createtable(L, 1, 0);
+	lua_createtable(L, 0, 1);
 	LuaUtils::pushField(L, LuaNames::LuaKeyboardEvents::text, event.text);
 }
 

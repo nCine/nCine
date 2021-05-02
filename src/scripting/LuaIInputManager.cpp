@@ -59,7 +59,7 @@ void LuaIInputManager::expose(lua_State *L)
 	if (type == LUA_TNIL)
 	{
 		lua_pop(L, 1);
-		lua_newtable(L);
+		lua_createtable(L, 0, 16);
 	}
 
 	LuaUtils::addFunction(L, LuaNames::IInputManager::mouseState, mouseState);
@@ -88,7 +88,7 @@ void LuaIInputManager::expose(lua_State *L)
 
 void LuaIInputManager::exposeConstants(lua_State *L)
 {
-	lua_createtable(L, 3, 0);
+	lua_createtable(L, 0, 3);
 
 	LuaUtils::pushField(L, LuaNames::IInputManager::NORMAL, static_cast<int64_t>(IInputManager::MouseCursorMode::NORMAL));
 	LuaUtils::pushField(L, LuaNames::IInputManager::HIDDEN, static_cast<int64_t>(IInputManager::MouseCursorMode::HIDDEN));
@@ -96,7 +96,7 @@ void LuaIInputManager::exposeConstants(lua_State *L)
 
 	lua_setfield(L, -2, LuaNames::IInputManager::MouseCursorMode);
 
-	lua_createtable(L, 3, 0);
+	lua_createtable(L, 0, 3);
 
 	LuaUtils::pushField(L, LuaNames::IInputManager::LEFT_STICK, IInputManager::LeftStickDeadZone);
 	LuaUtils::pushField(L, LuaNames::IInputManager::RIGHT_STICK, IInputManager::RightStickDeadZone);
