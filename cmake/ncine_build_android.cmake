@@ -62,10 +62,10 @@ if(NCINE_BUILD_ANDROID)
 	# Not added to Gradle arguments as it is handled by substituting `GRADLE_NDK_DIR`
 	list(APPEND ANDROID_CMAKE_ARGS -DCMAKE_ANDROID_NDK=${NDK_DIR})
 
-	set(GRADLE_BUILDTOOLS_VERSION 29.0.3)
-	set(GRADLE_COMPILESDK_VERSION 29)
+	set(GRADLE_BUILDTOOLS_VERSION 30.0.3)
+	set(GRADLE_COMPILESDK_VERSION 30)
 	set(GRADLE_MINSDK_VERSION 21)
-	set(GRADLE_TARGETSDK_VERSION 29)
+	set(GRADLE_TARGETSDK_VERSION 30)
 	set(GRADLE_VERSIONCODE 1)
 	set(GRADLE_VERSION ${NCINE_VERSION})
 
@@ -124,6 +124,22 @@ if(NCINE_BUILD_ANDROID)
 	set(ANDROID_MANIFEST_XML_IN ${CMAKE_SOURCE_DIR}/android/src/main/AndroidManifest.xml.in)
 	set(ANDROID_MANIFEST_XML ${CMAKE_BINARY_DIR}/android/src/main/AndroidManifest.xml)
 	configure_file(${ANDROID_MANIFEST_XML_IN} ${ANDROID_MANIFEST_XML} @ONLY)
+
+	# Copying data to assets directory to stop requiring the external storage permission
+	file(GLOB FONT_TEXTURE_ASSETS "${NCINE_DATA_DIR}/android/fonts/*.ktx")
+	file(GLOB FONT_FNT_ASSETS "${NCINE_DATA_DIR}/fonts/*.fnt")
+	file(GLOB SCRIPT_ASSETS "${NCINE_DATA_DIR}/scripts/*.lua")
+	file(GLOB SOUND_ASSETS "${NCINE_DATA_DIR}/sounds/*")
+	file(GLOB_RECURSE TEXTURE_ASSETS "${NCINE_DATA_DIR}/android/textures/*.ktx")
+	set(ANDROID_ASSETS ${FONT_TEXTURE_ASSETS} ${FONT_FNT_ASSETS} ${SCRIPT_ASSETS} ${SOUND_ASSETS} ${TEXTURE_ASSETS})
+	foreach(ASSET ${ANDROID_ASSETS})
+		# Preserving directory structure
+		file(RELATIVE_PATH ASSET_RELPATH ${NCINE_DATA_DIR} ${ASSET})
+		# Remove the specific Android directory from the path of some assets
+		string(REGEX REPLACE "^android\/" "" ASSET_RELPATH ${ASSET_RELPATH})
+		get_filename_component(ASSET_RELPATH ${ASSET_RELPATH} DIRECTORY)
+		file(COPY ${ASSET} DESTINATION android/src/main/assets/${ASSET_RELPATH})
+	endforeach()
 
 	file(COPY android/gradle-devdist.properties DESTINATION android)
 	file(COPY android/src/main/cpp/main.cpp DESTINATION android/src/main/cpp)

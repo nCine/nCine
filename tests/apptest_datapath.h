@@ -4,9 +4,7 @@
 inline void setDataPath(ncine::AppConfiguration &config)
 {
 #if defined(__ANDROID__)
-	nctl::String dataPath = ncine::fs::externalStorageDir();
-	dataPath += "/ncine/";
-	config.dataPath() = dataPath;
+	config.dataPath() = "asset::";
 #elif !defined(__EMSCRIPTEN__)
 	#ifdef NCINE_TESTS_DATA_DIR
 	config.dataPath() = NCINE_TESTS_DATA_DIR;

@@ -74,6 +74,8 @@ if(NCINE_BUILD_UNIT_TESTS)
 		if(MSVC)
 			# Always use the non debug version of the runtime library
 			target_compile_options(gtest PUBLIC /MD)
+		elseif(EMSCRIPTEN)
+			target_compile_options(gtest PRIVATE -fno-exceptions)
 		endif()
 
 		# The gtest/gtest_main targets carry header search path

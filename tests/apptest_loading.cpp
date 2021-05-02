@@ -19,7 +19,11 @@
 
 namespace {
 
+#ifdef __ANDROID__
+const char *TextureFiles[MyEventHandler::NumTextures] = { "texture1_ETC2.ktx", "texture2_ETC2.ktx", "texture3_ETC2.ktx", "texture4_ETC2.ktx" };
+#else
 const char *TextureFiles[MyEventHandler::NumTextures] = { "texture1.png", "texture2.png", "texture3.png", "texture4.png" };
+#endif
 nctl::StaticArray<nctl::UniquePtr<uint8_t[]>, MyEventHandler::NumTextures> textureBuffers;
 nctl::StaticArray<unsigned long int, MyEventHandler::NumTextures> textureBufferSizes;
 
@@ -28,7 +32,11 @@ nctl::StaticArray<nctl::UniquePtr<uint8_t[]>, MyEventHandler::NumSounds> soundBu
 nctl::StaticArray<unsigned long int, MyEventHandler::NumSounds> soundBufferSizes;
 
 const char *FontFiles[MyEventHandler::NumFonts] = { "DroidSans32_256.fnt", "NotoSans-Regular32_256.fnt", "NotoSerif-Regular32_256.fnt", "OpenSans-Regular32_256.fnt", "Roboto-Regular32_256.fnt" };
+#ifdef __ANDROID__
+const char *FontTexFiles[MyEventHandler::NumFonts] = { "DroidSans32_256_ETC2.ktx", "NotoSans-Regular32_256_ETC2.ktx", "NotoSerif-Regular32_256_ETC2.ktx", "OpenSans-Regular32_256_ETC2.ktx", "Roboto-Regular32_256_ETC2.ktx" };
+#else
 const char *FontTexFiles[MyEventHandler::NumFonts] = { "DroidSans32_256.png", "NotoSans-Regular32_256.png", "NotoSerif-Regular32_256.png", "OpenSans-Regular32_256.png", "Roboto-Regular32_256.png" };
+#endif
 nctl::StaticArray<nctl::UniquePtr<uint8_t[]>, MyEventHandler::NumFonts> fontBuffers;
 nctl::StaticArray<unsigned long int, MyEventHandler::NumFonts> fontBufferSizes;
 
