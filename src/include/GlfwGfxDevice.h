@@ -23,14 +23,18 @@ class GlfwGfxDevice : public IGfxDevice
 	void setSwapInterval(int interval) override;
 
 	void setResolution(int width, int height) override;
-	inline void setResolution(Vector2i size) override { setResolution(size.x, size.y); }
 
 	void setFullScreen(bool fullScreen) override;
 
 	inline void update() override { glfwSwapBuffers(windowHandle_); }
 
+	inline void setWindowPosition(int x, int y) override { glfwSetWindowPos(windowHandle_, x, y); }
 	inline void setWindowTitle(const char *windowTitle) override { glfwSetWindowTitle(windowHandle_, windowTitle); }
 	void setWindowIcon(const char *windowIconFilename) override;
+
+	int windowPositionX() const override;
+	int windowPositionY() const override;
+	const Vector2i windowPosition() const override;
 
 	const VideoMode &currentVideoMode() const override;
 	bool setVideoMode(unsigned int index) override;

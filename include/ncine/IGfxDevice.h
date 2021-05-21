@@ -80,7 +80,7 @@ class DLL_PUBLIC IGfxDevice
 	/// Sets screen resolution with two integers
 	virtual void setResolution(int width, int height) = 0;
 	/// Sets screen resolution with a `Vector2<int>` object
-	virtual void setResolution(Vector2i size) = 0;
+	inline void setResolution(Vector2i size) { setResolution(size.x, size.y); }
 
 	/// Returns true if the device renders in full screen
 	inline bool isFullScreen() const { return isFullScreen_; }
@@ -90,6 +90,10 @@ class DLL_PUBLIC IGfxDevice
 	/// Returns true if the window is resizable
 	inline bool isResizable() const { return isResizable_; }
 
+	/// Sets the position of the application window with two integers
+	virtual void setWindowPosition(int x, int y) = 0;
+	/// Sets the position of the application window with a `Vector2<int>` object
+	inline void setWindowPosition(Vector2i position) { setWindowPosition(position.x, position.y); }
 	/// Sets the application window title
 	virtual void setWindowTitle(const char *windowTitle) = 0;
 	/// Sets the application window icon
@@ -105,6 +109,13 @@ class DLL_PUBLIC IGfxDevice
 	inline const Rectf screenRect() const { return Rectf(0.0f, 0.0f, static_cast<float>(width_), static_cast<float>(height_)); }
 	/// Returns device aspect ratio
 	inline float aspect() const { return width_ / static_cast<float>(height_); }
+
+	/// Returns window horizontal position
+	inline virtual int windowPositionX() const { return 0; }
+	/// Returns window vertical position
+	inline virtual int windowPositionY() const { return 0; }
+	/// Returns window position as a `Vector2i` object
+	inline virtual const Vector2i windowPosition() const { return Vector2i(0, 0); }
 
 	/// Sets the OpenGL clear color through four float
 	void setClearColor(float red, float green, float blue, float alpha);
@@ -122,15 +133,15 @@ class DLL_PUBLIC IGfxDevice
 	inline const DisplayMode &displayMode() const { return displayMode_; }
 
 	/// Returns the current monitor video mode
-	virtual const VideoMode &currentVideoMode() const { return currentVideoMode_; }
+	inline virtual const VideoMode &currentVideoMode() const { return currentVideoMode_; }
 	/// Returns the number of video modes supported by the monitor
 	inline unsigned int numVideoModes() const { return numVideoModes_; }
 	/// Returns the specified monitor video mode
 	const VideoMode &videoMode(unsigned int index) const;
 	/// Sets the specified monitor video mode
-	virtual bool setVideoMode(unsigned int index) { return true; }
+	inline virtual bool setVideoMode(unsigned int index) { return true; }
 	/// Updates the array of supported monitor video modes
-	virtual void updateVideoModes() {}
+	inline virtual void updateVideoModes() {}
 
   protected:
 	/// Device width

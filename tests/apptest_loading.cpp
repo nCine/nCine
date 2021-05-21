@@ -324,7 +324,7 @@ void MyEventHandler::onFrameStart()
 			}
 		}
 		else
-			ImGui::Text("Select a texture object from the list");
+			ImGui::TextUnformatted("Select a texture object from the list");
 	}
 
 	if (ImGui::CollapsingHeader("Audio"))
@@ -555,7 +555,7 @@ void MyEventHandler::onFrameStart()
 		if (loadedScript >= 0 && loadedScript < NumScripts)
 			ImGui::Text("Name: \"%s\"", ScriptFiles[loadedScript]);
 		else
-			ImGui::Text("No script loaded");
+			ImGui::TextUnformatted("No script loaded");
 
 		bool scriptHasChanged = false;
 		if (ImGui::TreeNode("Load from File or Memory"))

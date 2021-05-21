@@ -409,6 +409,18 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 	}
 #endif
 
+#ifdef _WIN32
+	if (selected)
+	{
+		// Replace backslashes with slashes to avoid characters escaping
+		for (unsigned int i = 0; i < selection.length(); i++)
+		{
+			if (selection[i] == '\\')
+				selection[i] = '/';
+		}
+	}
+#endif
+
 	if (config.modalPopup)
 		ImGui::EndPopup();
 	else

@@ -213,7 +213,7 @@ void MyEventHandler::onFrameStart()
 					}
 				}
 				else if (type == AllocatorType::STACK || type == AllocatorType::POOL)
-					ImGui::Text("Pending allocations");
+					ImGui::TextUnformatted("Pending allocations");
 			}
 
 			ImGui::EndTable();
@@ -490,11 +490,11 @@ void MyEventHandler::onFrameStart()
 				ImGui::TableNextColumn();
 
 				if (selectedType == AllocatorType::LINEAR)
-					ImGui::Text("Linear cannot reallocate");
+					ImGui::TextUnformatted("Linear cannot reallocate");
 				else if (selectedType == AllocatorType::STACK && i != allocations.size() - 1)
-					ImGui::Text("Stack can only reallocate last one");
+					ImGui::TextUnformatted("Stack can only reallocate last one");
 				else if (selectedType == AllocatorType::POOL)
-					ImGui::Text("Pool cannot reallocate");
+					ImGui::TextUnformatted("Pool cannot reallocate");
 				else
 				{
 					widgetName_.format("Realloc##0x%lx", e.ptr);
@@ -513,9 +513,9 @@ void MyEventHandler::onFrameStart()
 				ImGui::TableNextColumn();
 
 				if (selectedType == AllocatorType::LINEAR)
-					ImGui::Text("Linear cannot free");
+					ImGui::TextUnformatted("Linear cannot free");
 				else if (selectedType == AllocatorType::STACK && i != allocations.size() - 1)
-					ImGui::Text("Stack can only free last one");
+					ImGui::TextUnformatted("Stack can only free last one");
 				else
 				{
 					widgetName_.format("Free##0x%lx", e.ptr);

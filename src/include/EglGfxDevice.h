@@ -23,12 +23,12 @@ class EglGfxDevice : public IGfxDevice
 	void setSwapInterval(int interval) override {}
 
 	void setResolution(int width, int height) override {}
-	void setResolution(Vector2i size) override {}
 
 	void setFullScreen(bool fullScreen) override {}
 
 	inline void update() override { eglSwapBuffers(display_, surface_); }
 
+	void setWindowPosition(int x, int y) override {}
 	void setWindowTitle(const char *windowTitle) override {}
 	void setWindowIcon(const char *windowIconFilename) override {}
 

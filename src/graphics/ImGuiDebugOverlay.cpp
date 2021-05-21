@@ -399,34 +399,34 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 		if (ImGui::TreeNodeEx("System", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 #ifdef __linux__
-			ImGui::Text("__linux__");
+			ImGui::TextUnformatted("__linux__");
 #endif
 #ifdef _WIN32
-			ImGui::Text("_WIN32");
+			ImGui::TextUnformatted("_WIN32");
 #endif
 #ifdef _WIN64
-			ImGui::Text("_WIN64");
+			ImGui::TextUnformatted("_WIN64");
 #endif
 #ifdef __ANDROID__
-			ImGui::Text("__ANDROID__");
+			ImGui::TextUnformatted("__ANDROID__");
 #endif
 #ifdef __ANDROID_API__
 			ImGui::Text("__ANDROID_API__ = %d", static_cast<int>(__ANDROID_API__));
 #endif
 #ifdef __APPLE__
-			ImGui::Text("__APPLE__");
+			ImGui::TextUnformatted("__APPLE__");
 #endif
 #ifdef _MSC_VER
 			ImGui::Text("_MSC_VER = %d", _MSC_VER);
 #endif
 #ifdef __MINGW32__
-			ImGui::Text("__MINGW32__");
+			ImGui::TextUnformatted("__MINGW32__");
 #endif
 #ifdef __MINGW64__
-			ImGui::Text("__MINGW64__");
+			ImGui::TextUnformatted("__MINGW64__");
 #endif
 #ifdef __EMSCRIPTEN__
-			ImGui::Text("__EMSCRIPTEN__");
+			ImGui::TextUnformatted("__EMSCRIPTEN__");
 #endif
 #ifdef __GNUC__
 			ImGui::Text("__GNUC__ = %d", static_cast<int>(__GNUC__));
@@ -440,52 +440,52 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 		if (ImGui::TreeNodeEx("nCine", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 #ifdef WITH_THREADS
-			ImGui::Text("WITH_THREADS");
+			ImGui::TextUnformatted("WITH_THREADS");
 #endif
 #ifdef WITH_ANGLE
-			ImGui::Text("WITH_ANGLE");
+			ImGui::TextUnformatted("WITH_ANGLE");
 #endif
 #ifdef WITH_GLEW
-			ImGui::Text("WITH_GLEW");
+			ImGui::TextUnformatted("WITH_GLEW");
 #endif
 #ifdef WITH_GLFW
-			ImGui::Text("WITH_GLFW");
+			ImGui::TextUnformatted("WITH_GLFW");
 #endif
 #ifdef WITH_SDL
-			ImGui::Text("WITH_SDL");
+			ImGui::TextUnformatted("WITH_SDL");
 #endif
 #ifdef WITH_QT5
-			ImGui::Text("WITH_QT5");
+			ImGui::TextUnformatted("WITH_QT5");
 #endif
 #ifdef WITH_AUDIO
-			ImGui::Text("WITH_AUDIO");
+			ImGui::TextUnformatted("WITH_AUDIO");
 #endif
 #ifdef WITH_VORBIS
-			ImGui::Text("WITH_VORBIS");
+			ImGui::TextUnformatted("WITH_VORBIS");
 #endif
 #ifdef WITH_PNG
-			ImGui::Text("WITH_PNG");
+			ImGui::TextUnformatted("WITH_PNG");
 #endif
 #ifdef WITH_WEBP
-			ImGui::Text("WITH_WEBP");
+			ImGui::TextUnformatted("WITH_WEBP");
 #endif
 #ifdef WITH_LUA
-			ImGui::Text("WITH_LUA");
+			ImGui::TextUnformatted("WITH_LUA");
 #endif
 #ifdef WITH_ALLOCATORS
-			ImGui::Text("WITH_ALLOCATORS");
+			ImGui::TextUnformatted("WITH_ALLOCATORS");
 #endif
 #ifdef WITH_IMGUI
-			ImGui::Text("WITH_IMGUI");
+			ImGui::TextUnformatted("WITH_IMGUI");
 #endif
 #ifdef WITH_NUKLEAR
-			ImGui::Text("WITH_NUKLEAR");
+			ImGui::TextUnformatted("WITH_NUKLEAR");
 #endif
 #ifdef WITH_TRACY
-			ImGui::Text("WITH_TRACY");
+			ImGui::TextUnformatted("WITH_TRACY");
 #endif
 #ifdef WITH_RENDERDOC
-			ImGui::Text("WITH_RENDERDOC");
+			ImGui::TextUnformatted("WITH_RENDERDOC");
 #endif
 			ImGui::TreePop();
 		}
@@ -650,6 +650,7 @@ void ImGuiDebugOverlay::guiWindowSettings()
 	if (ImGui::CollapsingHeader("Window Settings"))
 	{
 		static int resolution[2] = { theApplication().widthInt(), theApplication().heightInt() };
+		static int position[2] = { theApplication().gfxDevice().windowPositionX(), theApplication().gfxDevice().windowPositionY() };
 		static bool fullScreen = theApplication().gfxDevice().isFullScreen();
 
 		static int selectedVideoMode = -1;
@@ -657,6 +658,7 @@ void ImGuiDebugOverlay::guiWindowSettings()
 		if (fullScreen == false)
 		{
 			ImGui::InputInt2("Resolution", resolution);
+			ImGui::InputInt2("Position", position);
 			selectedVideoMode = -1;
 		}
 		else
@@ -691,7 +693,10 @@ void ImGuiDebugOverlay::guiWindowSettings()
 		{
 			theApplication().gfxDevice().setFullScreen(fullScreen);
 			if (fullScreen == false)
+			{
 				theApplication().gfxDevice().setResolution(resolution[0], resolution[1]);
+				theApplication().gfxDevice().setWindowPosition(position[0], position[1]);
+			}
 			else
 				theApplication().gfxDevice().setVideoMode(selectedVideoMode);
 		}
@@ -700,6 +705,8 @@ void ImGuiDebugOverlay::guiWindowSettings()
 		{
 			resolution[0] = theApplication().appConfiguration().resolution.x;
 			resolution[1] = theApplication().appConfiguration().resolution.y;
+			position[0] = theApplication().gfxDevice().windowPositionX();
+			position[1] = theApplication().gfxDevice().windowPositionY();
 			fullScreen = theApplication().appConfiguration().inFullscreen;
 			theApplication().gfxDevice().setResolution(resolution[0], resolution[1]);
 			theApplication().gfxDevice().setFullScreen(fullScreen);
@@ -709,6 +716,8 @@ void ImGuiDebugOverlay::guiWindowSettings()
 		{
 			resolution[0] = theApplication().widthInt();
 			resolution[1] = theApplication().heightInt();
+			position[0] = theApplication().gfxDevice().windowPositionX();
+			position[1] = theApplication().gfxDevice().windowPositionY();
 			fullScreen = theApplication().gfxDevice().isFullScreen();
 			selectedVideoMode = -1;
 		}
@@ -892,7 +901,7 @@ void ImGuiDebugOverlay::guiInputState()
 			}
 		}
 		else
-			ImGui::Text("No joysticks connected");
+			ImGui::TextUnformatted("No joysticks connected");
 	}
 }
 
@@ -943,7 +952,7 @@ void ImGuiDebugOverlay::guiRenderDoc()
 		RenderDocCapture::enableOverlay(overlayEnabled);
 
 		if (RenderDocCapture::isFrameCapturing())
-			ImGui::Text("Capturing a frame...");
+			ImGui::TextUnformatted("Capturing a frame...");
 		else
 		{
 			static int numFrames = 1;
@@ -957,7 +966,7 @@ void ImGuiDebugOverlay::guiRenderDoc()
 		}
 
 		if (RenderDocCapture::isTargetControlConnected())
-			ImGui::Text("Replay UI is connected");
+			ImGui::TextUnformatted("Replay UI is connected");
 		else
 		{
 			if (ImGui::Button("Launch Replay UI"))
@@ -974,7 +983,7 @@ void ImGuiDebugOverlay::guiRenderDoc()
 			}
 		}
 		else
-			ImGui::Text("Crash handler not loaded");
+			ImGui::TextUnformatted("Crash handler not loaded");
 	}
 #endif
 }
@@ -1022,7 +1031,7 @@ void guiAllocator(nctl::IAllocator &alloc)
 				ImGui::Text("Freed by #%u after %fs", deallocationIndex, diffStamp.seconds());
 			}
 			else
-				ImGui::Text("Active");
+				ImGui::TextUnformatted("Active");
 		}
 
 		ImGui::EndTable();
@@ -1064,7 +1073,7 @@ void ImGuiDebugOverlay::guiAllocators()
 	#endif
 		}
 		else
-			ImGui::Text("The string allocator is the default one");
+			ImGui::TextUnformatted("The string allocator is the default one");
 
 		if (&nctl::theImGuiAllocator() != &nctl::theDefaultAllocator())
 		{
@@ -1082,7 +1091,7 @@ void ImGuiDebugOverlay::guiAllocators()
 	#endif
 		}
 		else
-			ImGui::Text("The ImGui allocator is the default one");
+			ImGui::TextUnformatted("The ImGui allocator is the default one");
 
 	#ifdef WITH_NUKLEAR
 		if (&nctl::theNuklearAllocator() != &nctl::theDefaultAllocator())
@@ -1101,7 +1110,7 @@ void ImGuiDebugOverlay::guiAllocators()
 		#endif
 		}
 		else
-			ImGui::Text("The Nuklear allocator is the default one");
+			ImGui::TextUnformatted("The Nuklear allocator is the default one");
 	#endif
 
 	#ifdef WITH_LUA
@@ -1121,7 +1130,7 @@ void ImGuiDebugOverlay::guiAllocators()
 		#endif
 		}
 		else
-			ImGui::Text("The Lua allocator is the default one");
+			ImGui::TextUnformatted("The Lua allocator is the default one");
 	#endif
 	}
 

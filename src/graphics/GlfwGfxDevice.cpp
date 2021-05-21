@@ -83,6 +83,27 @@ void GlfwGfxDevice::setWindowIcon(const char *windowIconFilename)
 	glfwSetWindowIcon(windowHandle_, 1, &glfwImage);
 }
 
+int GlfwGfxDevice::windowPositionX() const
+{
+	int posX = 0;
+	glfwGetWindowPos(windowHandle_, &posX, nullptr);
+	return posX;
+}
+
+int GlfwGfxDevice::windowPositionY() const
+{
+	int posY = 0;
+	glfwGetWindowPos(windowHandle_, nullptr, &posY);
+	return posY;
+}
+
+const Vector2i GlfwGfxDevice::windowPosition() const
+{
+	Vector2i position(0, 0);
+	glfwGetWindowPos(windowHandle_, &position.x, &position.y);
+	return position;
+}
+
 const IGfxDevice::VideoMode &GlfwGfxDevice::currentVideoMode() const
 {
 	const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());

@@ -61,6 +61,29 @@ void Qt5GfxDevice::setWindowIcon(const char *windowIconFilename)
 	widget_.setWindowIcon(QIcon(windowIconFilename));
 }
 
+int Qt5GfxDevice::windowPositionX() const
+{
+	return widget_.pos().x();
+}
+
+int Qt5GfxDevice::windowPositionY() const
+{
+	return widget_.pos().y();
+}
+
+const Vector2i Qt5GfxDevice::windowPosition() const
+{
+	return Vector2i(widget_.pos().x(), widget_.pos().y());
+}
+
+void Qt5GfxDevice::setWindowPosition(int x, int y)
+{
+	QRect geometry = widget_.geometry();
+	geometry.setX(x);
+	geometry.setY(y);
+	widget_.setGeometry(geometry);
+}
+
 const Qt5GfxDevice::VideoMode &Qt5GfxDevice::currentVideoMode() const
 {
 	return videoModes_[0];

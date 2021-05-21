@@ -8,13 +8,17 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 bool GLBlending::enabled_ = false;
-GLenum GLBlending::sfactor_ = GL_ONE;
-GLenum GLBlending::dfactor_ = GL_ZERO;
+GLenum GLBlending::srcRgb_ = GL_ONE;
+GLenum GLBlending::dstRgb_ = GL_ZERO;
+GLenum GLBlending::srcAlpha_ = GL_ONE;
+GLenum GLBlending::dstAlpha_ = GL_ZERO;
 
 bool GLBlending::stateSaved_ = false;
 bool GLBlending::wasEnabled_ = false;
-GLenum GLBlending::oldSfactor_ = GL_ONE;
-GLenum GLBlending::oldDfactor_ = GL_ZERO;
+GLenum GLBlending::oldSrcRgb_ = GL_ONE;
+GLenum GLBlending::oldDstRgb_ = GL_ZERO;
+GLenum GLBlending::oldSrcAlpha_ = GL_ONE;
+GLenum GLBlending::oldDstAlpha_ = GL_ZERO;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -40,11 +44,27 @@ void GLBlending::disable()
 
 void GLBlending::blendFunc(GLenum sfactor, GLenum dfactor)
 {
-	if (sfactor != sfactor_ || dfactor != dfactor_)
+	if (sfactor != srcRgb_ || dfactor != dstRgb_ ||
+	    sfactor != srcAlpha_ || dfactor != dstAlpha_)
 	{
 		glBlendFunc(sfactor, dfactor);
-		sfactor_ = sfactor;
-		dfactor_ = dfactor;
+		srcRgb_ = sfactor;
+		dstRgb_ = dfactor;
+		srcAlpha_ = sfactor;
+		dstAlpha_ = dfactor;
+	}
+}
+
+void GLBlending::blendFunc(GLenum srcRgb, GLenum dstRgb, GLenum srcAlpha, GLenum dstAlpha)
+{
+	if (srcRgb != srcRgb_ || dstRgb != dstRgb_ ||
+	    srcAlpha != srcAlpha_ || dstAlpha != dstAlpha_)
+	{
+		glBlendFuncSeparate(srcRgb, dstRgb, srcAlpha, dstAlpha);
+		srcRgb_ = srcRgb;
+		dstRgb_ = dstRgb;
+		srcAlpha_ = srcAlpha;
+		dstAlpha_ = dstAlpha;
 	}
 }
 
@@ -53,8 +73,10 @@ void GLBlending::pushState()
 	ASSERT(stateSaved_ == false);
 
 	wasEnabled_ = enabled_;
-	oldSfactor_ = sfactor_;
-	oldDfactor_ = dfactor_;
+	oldSrcRgb_ = srcRgb_;
+	oldDstRgb_ = dstRgb_;
+	oldSrcAlpha_ = srcAlpha_;
+	oldDstAlpha_ = dstAlpha_;
 
 	stateSaved_ = true;
 }
@@ -67,7 +89,11 @@ void GLBlending::popState()
 		enable();
 	else
 		disable();
-	blendFunc(oldSfactor_, oldDfactor_);
+
+	if (oldSrcRgb_ == oldSrcAlpha_ && oldDstRgb_ == oldDstAlpha_)
+		blendFunc(oldSrcRgb_, oldDstRgb_);
+	else
+		blendFunc(oldSrcRgb_, oldDstRgb_, oldSrcAlpha_, oldDstAlpha_);
 
 	stateSaved_ = false;
 }

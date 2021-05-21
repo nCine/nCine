@@ -96,6 +96,27 @@ void SdlGfxDevice::setWindowIcon(const char *windowIconFilename)
 	SDL_FreeSurface(surface);
 }
 
+int SdlGfxDevice::windowPositionX() const
+{
+	int posX = 0;
+	SDL_GetWindowPosition(windowHandle_, &posX, nullptr);
+	return posX;
+}
+
+int SdlGfxDevice::windowPositionY() const
+{
+	int posY = 0;
+	SDL_GetWindowPosition(windowHandle_, nullptr, &posY);
+	return posY;
+}
+
+const Vector2i SdlGfxDevice::windowPosition() const
+{
+	Vector2i position(0, 0);
+	SDL_GetWindowPosition(windowHandle_, &position.x, &position.y);
+	return position;
+}
+
 const IGfxDevice::VideoMode &SdlGfxDevice::currentVideoMode() const
 {
 	SDL_DisplayMode mode;

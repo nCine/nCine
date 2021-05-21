@@ -18,6 +18,8 @@
 #elif defined(WITH_QT5)
 	#include "ImGuiQt5Input.h"
 #elif defined(__ANDROID__)
+	#include <nctl/CString.h>
+	#include "FileSystem.h" // for savePath()
 	#include "ImGuiAndroidInput.h"
 #endif
 
@@ -43,6 +45,9 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 	io.BackendRendererName = "nCine_OpenGL";
 #else
 	io.BackendRendererName = "nCine_OpenGL_ES";
+	static char iniFilename[512];
+	nctl::strncpy(iniFilename, fs::joinPath(fs::savePath(), "imgui.ini").data(), 512);
+	io.IniFilename = iniFilename;
 #endif
 
 #if !(defined(__ANDROID__) && !GL_ES_VERSION_3_2) && !defined(WITH_ANGLE) && !defined(__EMSCRIPTEN__)

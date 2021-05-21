@@ -611,7 +611,7 @@ void MyEventHandler::onFrameStart()
 		}
 #else
 		if (localFileLoad.isLoading())
-			ImGui::Text("Loading file...");
+			ImGui::TextUnformatted("Loading file...");
 		else
 		{
 			if (ImGui::Button("Load"))
