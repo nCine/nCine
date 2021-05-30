@@ -99,8 +99,19 @@ void ImGuiSdlInput::init(SDL_Window *window)
 	mouseCursors_[ImGuiMouseCursor_Hand] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
 	mouseCursors_[ImGuiMouseCursor_NotAllowed] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NO);
 
-	// Check and store if we are on Wayland
-	mouseCanUseGlobalState_ = strncmp(SDL_GetCurrentVideoDriver(), "wayland", 7) != 0;
+	// Check and store if we are on a SDL backend that supports global mouse position
+	// ("wayland" and "rpi" don't support it, but we chose to use a white-list instead of a black-list)
+	const char* sdlBackend = SDL_GetCurrentVideoDriver();
+	const char* globalMouseWhitelist[] = { "windows", "cocoa", "x11", "DIVE", "VMAN" };
+	mouseCanUseGlobalState_ = false;
+	for (int n = 0; n < IM_ARRAYSIZE(globalMouseWhitelist); n++)
+	{
+		if (strncmp(sdlBackend, globalMouseWhitelist[n], strlen(globalMouseWhitelist[n])) == 0)
+		{
+			mouseCanUseGlobalState_ = true;
+			break;
+		}
+	}
 
 #ifdef IMGUI_HAS_DOCK
 	// Our mouse update function expect PlatformHandle to be filled for the main viewport
@@ -257,7 +268,7 @@ void ImGuiSdlInput::updateMousePosAndButtons()
 		{
 			// SDL_GetMouseState() gives mouse position seemingly based on the last window entered/focused(?)
 			// The creation of a new windows at runtime and SDL_CaptureMouse both seems to severely mess up with that, so we retrieve that position globally.
-			// Won't use this workaround when on Wayland, as there is no global mouse position.
+			// Won't use this workaround on SDL backends that have no global mouse position, like Wayland or RPI
 			int wx, wy;
 			SDL_GetWindowPosition(focusedWindow, &wx, &wy);
 			SDL_GetGlobalMouseState(&mx, &my);

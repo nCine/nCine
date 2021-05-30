@@ -394,7 +394,7 @@ bool FileSystem::hasExtension(const char *path, const char *extension)
 
 	const char *pathExtension = FileSystem::extension(path);
 	if (pathExtension != nullptr)
-		return (strncmp(pathExtension, extension, 4) == 0);
+		return (nctl::stricmp(pathExtension, extension) == 0);
 
 	return false;
 }

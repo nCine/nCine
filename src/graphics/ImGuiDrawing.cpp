@@ -275,7 +275,7 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 				currCmd.geometry().setFirstIndex(imCmd->IdxOffset);
 				currCmd.geometry().setFirstVertex(imCmd->VtxOffset);
 				currCmd.setLayer(DrawableNode::imGuiLayer() + numCmd);
-				currCmd.material().setTexture(reinterpret_cast<GLTexture *>(imCmd->TextureId));
+				currCmd.material().setTexture(reinterpret_cast<GLTexture *>(imCmd->GetTexID()));
 
 				renderQueue.addCommand(&currCmd);
 			}
@@ -343,7 +343,7 @@ void ImGuiDrawing::draw()
 			{
 				GLScissorTest::enable(static_cast<GLint>(clipRect.x), static_cast<GLint>(fbHeight - clipRect.w),
 				                      static_cast<GLsizei>(clipRect.z - clipRect.x), static_cast<GLsizei>(clipRect.w - clipRect.y));
-				GLTexture::bindHandle(GL_TEXTURE_2D, reinterpret_cast<GLTexture *>(imCmd->TextureId)->glHandle());
+				GLTexture::bindHandle(GL_TEXTURE_2D, reinterpret_cast<GLTexture *>(imCmd->GetTexID())->glHandle());
 #if (defined(__ANDROID__) && !GL_ES_VERSION_3_2) || defined(WITH_ANGLE) || defined(__EMSCRIPTEN__)
 				glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, firstIndex);
 #else

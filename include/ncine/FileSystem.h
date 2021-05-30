@@ -86,7 +86,7 @@ class DLL_PUBLIC FileSystem
 
 	/// Returns the extension position in the string or `nullptr` if it is not found
 	static const char *extension(const char *path);
-	/// Returns true if the file at `path` as the specified extension
+	/// Returns true if the file at `path` as the specified extension (case-insensitive comparison)
 	static bool hasExtension(const char *path, const char *extension);
 
 	/// Returns a bitmask representing the currently available disk drives on Windows

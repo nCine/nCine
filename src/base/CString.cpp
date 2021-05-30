@@ -13,6 +13,15 @@ size_t strnlen(const char *str, size_t maxLen)
 #endif
 }
 
+int stricmp(const char *str1, const char *str2)
+{
+#if defined(_WIN32) && !defined(__MINGW32__)
+	return _stricmp(str1, str2);
+#else
+	return ::strcasecmp(str1, str2);
+#endif
+}
+
 char *strncpy(char *dest, const char *source, size_t count)
 {
 #if defined(_WIN32) && !defined(__MINGW32__)
