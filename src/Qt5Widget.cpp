@@ -75,9 +75,14 @@ bool Qt5Widget::event(QEvent *event)
 		case QEvent::Wheel:
 			return inputManager ? inputManager->event(event) : false;
 		case QEvent::Close:
-		case QEvent::Quit:
-			shutdown();
+		{
+			const bool shouldQuit = inputManager ? inputManager->shouldQuitOnRequest() : true;
+			if (shouldQuit)
+				shutdown();
+			else
+				static_cast<QCloseEvent *>(event)->ignore();
 			return true;
+		}
 		default:
 			return QWidget::event(event);
 	}

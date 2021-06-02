@@ -212,6 +212,7 @@ if(LUA_FOUND)
 		${NCINE_ROOT}/src/include/LuaKeys.h
 		${NCINE_ROOT}/src/include/LuaKeyboardEvents.h
 		${NCINE_ROOT}/src/include/LuaJoystickEvents.h
+		${NCINE_ROOT}/src/include/LuaTouchEvents.h
 		${NCINE_ROOT}/src/include/LuaTimeStamp.h
 		${NCINE_ROOT}/src/include/LuaFileSystem.h
 		${NCINE_ROOT}/src/include/LuaApplication.h
@@ -244,6 +245,7 @@ if(LUA_FOUND)
 		${NCINE_ROOT}/src/scripting/LuaKeys.cpp
 		${NCINE_ROOT}/src/scripting/LuaKeyboardEvents.cpp
 		${NCINE_ROOT}/src/scripting/LuaJoystickEvents.cpp
+		${NCINE_ROOT}/src/scripting/LuaTouchEvents.cpp
 		${NCINE_ROOT}/src/scripting/LuaTimeStamp.cpp
 		${NCINE_ROOT}/src/scripting/LuaFileSystem.cpp
 		${NCINE_ROOT}/src/scripting/LuaApplication.cpp
@@ -279,10 +281,7 @@ if(LUA_FOUND)
 		)
 	endif()
 
-	if(ANDROID)
-		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaAndroidEvents.h)
-		list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaAndroidEvents.cpp)
-	else()
+	if(NOT ANDROID)
 		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/LuaEventHandler.h)
 		list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaEventHandler.cpp)
 	endif()

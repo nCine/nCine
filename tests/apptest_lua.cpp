@@ -78,7 +78,6 @@ void MyEventHandler::onTextInput(const nc::TextInputEvent &event)
 	nc::LuaIInputEventHandler::onTextInput(luaState_.state(), event);
 }
 
-#ifdef __ANDROID__
 void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 {
 	nc::LuaIInputEventHandler::onTouchDown(luaState_.state(), event);
@@ -104,6 +103,7 @@ void MyEventHandler::onPointerUp(const nc::TouchEvent &event)
 	nc::LuaIInputEventHandler::onPointerUp(luaState_.state(), event);
 }
 
+#ifdef __ANDROID__
 void MyEventHandler::onAcceleration(const nc::AccelerometerEvent &event)
 {
 	nc::LuaIInputEventHandler::onAcceleration(luaState_.state(), event);
@@ -173,4 +173,9 @@ void MyEventHandler::onJoyConnected(const nc::JoyConnectionEvent &event)
 void MyEventHandler::onJoyDisconnected(const nc::JoyConnectionEvent &event)
 {
 	nc::LuaIInputEventHandler::onJoyDisconnected(luaState_.state(), event);
+}
+
+bool MyEventHandler::onQuitRequest()
+{
+	return nc::LuaIInputEventHandler::onQuitRequest(luaState_.state());
 }

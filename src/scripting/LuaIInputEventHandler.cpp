@@ -6,12 +6,9 @@
 #include "LuaKeyboardEvents.h"
 #include "LuaMouseEvents.h"
 #include "LuaJoystickEvents.h"
+#include "LuaTouchEvents.h"
 #include "LuaNames.h"
 #include "InputEvents.h"
-
-#ifdef __ANDROID__
-	#include "LuaAndroidEvents.h"
-#endif
 
 namespace ncine {
 
@@ -21,12 +18,12 @@ namespace IInputEventHandler {
 	static const char *onKeyReleased = "on_key_released";
 	static const char *onTextInput = "on_text_input";
 
-#ifdef __ANDROID__
 	static const char *onTouchDown = "on_touch_down";
 	static const char *onTouchUp = "on_touch_up";
 	static const char *onTouchMove = "on_touch_move";
 	static const char *onPointerDown = "on_pointer_down";
 	static const char *onPointerUp = "on_pointer_up";
+#ifdef __ANDROID__
 	static const char *onAcceleration = "on_acceleration";
 #endif
 
@@ -44,6 +41,8 @@ namespace IInputEventHandler {
 	static const char *onJoyMappedAxisMoved = "on_joymapped_axis_moved";
 	static const char *onJoyConnected = "on_joy_connected";
 	static const char *onJoyDisconnected = "on_joy_disconnected";
+
+	static const char *onQuitRequest = "on_quit_request";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -110,7 +109,6 @@ void LuaIInputEventHandler::onTextInput(lua_State *L, const TextInputEvent &even
 		lua_pop(L, 2);
 }
 
-#ifdef __ANDROID__
 void LuaIInputEventHandler::onTouchDown(lua_State *L, const TouchEvent &event)
 {
 	lua_getglobal(L, LuaNames::ncine);
@@ -119,7 +117,7 @@ void LuaIInputEventHandler::onTouchDown(lua_State *L, const TouchEvent &event)
 	if (type != LUA_TNIL)
 	{
 		ASSERT(type == LUA_TFUNCTION);
-		LuaAndroidEvents::pushTouchEvent(L, event);
+		LuaTouchEvents::pushTouchEvent(L, event);
 		const int status = lua_pcall(L, 1, 0, 0);
 		if (status != LUA_OK)
 		{
@@ -139,7 +137,7 @@ void LuaIInputEventHandler::onTouchUp(lua_State *L, const TouchEvent &event)
 	if (type != LUA_TNIL)
 	{
 		ASSERT(type == LUA_TFUNCTION);
-		LuaAndroidEvents::pushTouchEvent(L, event);
+		LuaTouchEvents::pushTouchEvent(L, event);
 		const int status = lua_pcall(L, 1, 0, 0);
 		if (status != LUA_OK)
 		{
@@ -159,7 +157,7 @@ void LuaIInputEventHandler::onTouchMove(lua_State *L, const TouchEvent &event)
 	if (type != LUA_TNIL)
 	{
 		ASSERT(type == LUA_TFUNCTION);
-		LuaAndroidEvents::pushTouchEvent(L, event);
+		LuaTouchEvents::pushTouchEvent(L, event);
 		const int status = lua_pcall(L, 1, 0, 0);
 		if (status != LUA_OK)
 		{
@@ -179,7 +177,7 @@ void LuaIInputEventHandler::onPointerDown(lua_State *L, const TouchEvent &event)
 	if (type != LUA_TNIL)
 	{
 		ASSERT(type == LUA_TFUNCTION);
-		LuaAndroidEvents::pushTouchEvent(L, event);
+		LuaTouchEvents::pushTouchEvent(L, event);
 		const int status = lua_pcall(L, 1, 0, 0);
 		if (status != LUA_OK)
 		{
@@ -199,7 +197,7 @@ void LuaIInputEventHandler::onPointerUp(lua_State *L, const TouchEvent &event)
 	if (type != LUA_TNIL)
 	{
 		ASSERT(type == LUA_TFUNCTION);
-		LuaAndroidEvents::pushTouchEvent(L, event);
+		LuaTouchEvents::pushTouchEvent(L, event);
 		const int status = lua_pcall(L, 1, 0, 0);
 		if (status != LUA_OK)
 		{
@@ -211,6 +209,7 @@ void LuaIInputEventHandler::onPointerUp(lua_State *L, const TouchEvent &event)
 		lua_pop(L, 2);
 }
 
+#ifdef __ANDROID__
 void LuaIInputEventHandler::onAcceleration(lua_State *L, const AccelerometerEvent &event)
 {
 	lua_getglobal(L, LuaNames::ncine);
@@ -219,7 +218,7 @@ void LuaIInputEventHandler::onAcceleration(lua_State *L, const AccelerometerEven
 	if (type != LUA_TNIL)
 	{
 		ASSERT(type == LUA_TFUNCTION);
-		LuaAndroidEvents::pushAccelerometerEvent(L, event);
+		LuaTouchEvents::pushAccelerometerEvent(L, event);
 		const int status = lua_pcall(L, 1, 0, 0);
 		if (status != LUA_OK)
 		{
@@ -490,6 +489,36 @@ void LuaIInputEventHandler::onJoyDisconnected(lua_State *L, const JoyConnectionE
 	}
 	else
 		lua_pop(L, 2);
+}
+
+bool LuaIInputEventHandler::onQuitRequest(lua_State *L)
+{
+	bool shouldQuit = true;
+
+	lua_getglobal(L, LuaNames::ncine);
+	const int type = lua_getfield(L, -1, LuaNames::IInputEventHandler::onQuitRequest);
+
+	if (type != LUA_TNIL)
+	{
+		ASSERT(type == LUA_TFUNCTION);
+		const int status = lua_pcall(L, 0, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::IInputEventHandler::onQuitRequest, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			lua_pop(L, 1);
+		}
+		else
+		{
+			if (lua_isboolean(L, -1) == false)
+				LOGW("Expecting a boolean at index -1");
+			else
+				shouldQuit = LuaUtils::retrieve<bool>(L, -1);
+		}
+	}
+	else
+		lua_pop(L, 2);
+
+	return shouldQuit;
 }
 
 }

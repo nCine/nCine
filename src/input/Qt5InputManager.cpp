@@ -285,6 +285,16 @@ void Qt5InputManager::updateJoystickStates()
 }
 #endif
 
+bool Qt5InputManager::shouldQuitOnRequest()
+{
+	bool shouldQuit = true;
+
+	if (inputEventHandler_)
+		shouldQuit = inputEventHandler_->onQuitRequest();
+
+	return shouldQuit;
+}
+
 bool Qt5InputManager::event(QEvent *event)
 {
 #ifdef WITH_IMGUI

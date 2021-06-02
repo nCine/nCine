@@ -1,5 +1,5 @@
-#ifndef CLASS_NCINE_LUAANDROIDEVENTS
-#define CLASS_NCINE_LUAANDROIDEVENTS
+#ifndef CLASS_NCINE_LUATOUCHEVENTS
+#define CLASS_NCINE_LUATOUCHEVENTS
 
 struct lua_State;
 
@@ -8,8 +8,8 @@ namespace ncine {
 class TouchEvent;
 class AccelerometerEvent;
 
-/// Wrapper around the `TouchEvent` class
-class LuaAndroidEvents
+/// Wrapper around the `TouchEvent` and the `AccelerometerEvent` classes
+class LuaTouchEvents
 {
   public:
 	static void pushTouchEvent(lua_State *L, const TouchEvent &event);

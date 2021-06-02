@@ -162,6 +162,16 @@ float SdlJoystickState::axisNormValue(int axisId) const
 	return value;
 }
 
+bool SdlInputManager::shouldQuitOnRequest()
+{
+	bool shouldQuit = true;
+
+	if (inputEventHandler_)
+		shouldQuit = inputEventHandler_->onQuitRequest();
+
+	return shouldQuit;
+}
+
 void SdlInputManager::parseEvent(const SDL_Event &event)
 {
 #ifdef WITH_IMGUI

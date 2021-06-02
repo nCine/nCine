@@ -150,7 +150,7 @@ void PCApplication::processEvents()
 		switch (event.type)
 		{
 			case SDL_QUIT:
-				shouldQuit_ = true;
+				shouldQuit_ = SdlInputManager::shouldQuitOnRequest();
 				break;
 			case SDL_WINDOWEVENT:
 				if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)

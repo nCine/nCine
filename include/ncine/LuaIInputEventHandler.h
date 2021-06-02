@@ -28,16 +28,14 @@ class DLL_PUBLIC LuaIInputEventHandler
 	static void onKeyPressed(lua_State *L, const KeyboardEvent &event);
 	static void onKeyReleased(lua_State *L, const KeyboardEvent &event);
 	static void onTextInput(lua_State *L, const TextInputEvent &event);
-
-#ifdef __ANDROID__
 	static void onTouchDown(lua_State *L, const TouchEvent &event);
 	static void onTouchUp(lua_State *L, const TouchEvent &event);
 	static void onTouchMove(lua_State *L, const TouchEvent &event);
 	static void onPointerDown(lua_State *L, const TouchEvent &event);
 	static void onPointerUp(lua_State *L, const TouchEvent &event);
+#ifdef __ANDROID__
 	static void onAcceleration(lua_State *L, const AccelerometerEvent &event);
 #endif
-
 	static void onMouseButtonPressed(lua_State *L, const MouseEvent &event);
 	static void onMouseButtonReleased(lua_State *L, const MouseEvent &event);
 	static void onMouseMoved(lua_State *L, const MouseState &state);
@@ -54,6 +52,8 @@ class DLL_PUBLIC LuaIInputEventHandler
 
 	static void onJoyConnected(lua_State *L, const JoyConnectionEvent &event);
 	static void onJoyDisconnected(lua_State *L, const JoyConnectionEvent &event);
+
+	static bool onQuitRequest(lua_State *L);
 };
 
 }

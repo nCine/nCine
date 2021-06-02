@@ -113,6 +113,7 @@ class SdlInputManager : public IInputManager
 	/// The destructor releases every opened joystick
 	~SdlInputManager();
 
+	static bool shouldQuitOnRequest();
 	static void parseEvent(const SDL_Event &event);
 
 	inline const MouseState &mouseState() const override

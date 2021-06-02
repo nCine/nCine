@@ -25,12 +25,12 @@ class MyEventHandler :
 	void onKeyReleased(const nc::KeyboardEvent &event) override;
 	void onTextInput(const nc::TextInputEvent &event) override;
 
-#ifdef __ANDROID__
 	void onTouchDown(const nc::TouchEvent &event) override;
 	void onTouchUp(const nc::TouchEvent &event) override;
 	void onTouchMove(const nc::TouchEvent &event) override;
 	void onPointerDown(const nc::TouchEvent &event) override;
 	void onPointerUp(const nc::TouchEvent &event) override;
+#ifdef __ANDROID__
 	void onAcceleration(const nc::AccelerometerEvent &event) override;
 #endif
 
@@ -50,6 +50,8 @@ class MyEventHandler :
 
 	void onJoyConnected(const nc::JoyConnectionEvent &event) override;
 	void onJoyDisconnected(const nc::JoyConnectionEvent &event) override;
+
+	bool onQuitRequest() override;
 
   private:
 	nc::LuaStateManager luaState_;

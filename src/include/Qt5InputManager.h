@@ -159,6 +159,7 @@ class Qt5InputManager : public IInputManager
 	void updateJoystickStates();
 #endif
 
+	bool shouldQuitOnRequest();
 	bool event(QEvent *event);
 	void keyPressEvent(QKeyEvent *event);
 	void keyReleaseEvent(QKeyEvent *event);

@@ -241,7 +241,14 @@ void GlfwInputManager::setMouseCursorMode(MouseCursorMode mode)
 
 void GlfwInputManager::windowCloseCallback(GLFWwindow *window)
 {
-	ncine::theApplication().quit();
+	bool shouldQuit = true;
+	if (inputEventHandler_)
+		shouldQuit = inputEventHandler_->onQuitRequest();
+
+	if (shouldQuit)
+		ncine::theApplication().quit();
+	else
+		glfwSetWindowShouldClose(window, GLFW_FALSE);
 }
 
 void GlfwInputManager::windowSizeCallback(GLFWwindow *window, int width, int height)
