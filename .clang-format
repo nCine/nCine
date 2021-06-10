@@ -1,9 +1,9 @@
 ---
 AccessModifierOffset: -2
 AlignAfterOpenBracket: Align
-AlignConsecutiveAssignments: false
-AlignConsecutiveBitFields: false
-AlignConsecutiveDeclarations: false
+AlignConsecutiveAssignments: None
+AlignConsecutiveBitFields: None
+AlignConsecutiveDeclarations: None
 AlignConsecutiveMacros: false
 AlignEscapedNewlines: DontAlign
 AlignOperands: true
@@ -24,7 +24,7 @@ AlwaysBreakTemplateDeclarations: No
 # AttributeMacros:
 BinPackArguments: true
 BinPackParameters: true
-# BitFieldColonSpacing: After # Clang 12
+BitFieldColonSpacing: After
 BraceWrapping:
   AfterCaseLabel: true
   AfterClass: true
@@ -47,6 +47,7 @@ BraceWrapping:
 BreakAfterJavaFieldAnnotations: false
 BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Custom # Allman
+BreakBeforeConceptDeclarations: true
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializers: BeforeColon
 BreakInheritanceList: AfterColon
@@ -61,6 +62,7 @@ Cpp11BracedListStyle: false
 DeriveLineEnding: true
 DerivePointerAlignment: false
 DisableFormat: false
+EmptyLineBeforeAccessModifier: LogicalBlock
 ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: false
 ForEachMacros:
@@ -122,13 +124,14 @@ PointerAlignment: Right
 # RawStringFormats:
 ReflowComments: true
 SortIncludes: false
-# SortJavaStaticImport: false # Clang 12
+SortJavaStaticImport: Before
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
 SpaceAfterTemplateKeyword: true
-# SpaceAroundPointerQualifiers: Both # Clang 12
+SpaceAroundPointerQualifiers: Both
 SpaceBeforeAssignmentOperators: true
+SpaceBeforeCaseColon: false
 SpaceBeforeCpp11BracedList: false
 SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
@@ -145,6 +148,7 @@ SpacesInContainerLiterals: true
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard: c++11
+# StatementAttributeLikeMacros:
 StatementMacros:
   - Q_UNUSED
 TabWidth: 4

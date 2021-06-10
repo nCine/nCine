@@ -20,15 +20,17 @@ class DLL_PUBLIC IAppEventHandler
 	virtual void onPreInit(AppConfiguration &config) {}
 	/// Called once on application initialization
 	virtual void onInit() {}
-	/// Called every time a frame is about to be rendered
+	/// Called at the start of each frame
 	virtual void onFrameStart() {}
-	/// Called every time after a frame has been rendered
+	/// Called every time the scenegraph has been traversed and all nodes have been transformed
+	virtual void onPostUpdate() {}
+	/// Called at the end of each frame, just before swapping buffers
 	virtual void onFrameEnd() {}
 	/// Called once on application shutdown
 	virtual void onShutdown() {}
-	/// Called every time the applications needs to be suspended
+	/// Called every time the application needs to be suspended
 	virtual void onSuspend() {}
-	/// Called every time the applications resumes from suspension
+	/// Called every time the application resumes from suspension
 	virtual void onResume() {}
 };
 

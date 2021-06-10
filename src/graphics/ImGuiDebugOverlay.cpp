@@ -130,6 +130,8 @@ void ImGuiDebugOverlay::updateFrameTimings()
 
 		plotValues_[ValuesType::FRAME_TIME][index_] = theApplication().interval();
 		plotValues_[ValuesType::FRAME_START][index_] = timings[Application::Timings::FRAME_START];
+		if (appCfg.withScenegraph)
+			plotValues_[ValuesType::POST_UPDATE][index_] = timings[Application::Timings::POST_UPDATE];
 		plotValues_[ValuesType::IMGUI][index_] = timings[Application::Timings::IMGUI];
 #ifdef WITH_NUKLEAR
 		plotValues_[ValuesType::NUKLEAR][index_] = timings[Application::Timings::NUKLEAR];
@@ -1582,6 +1584,8 @@ void ImGuiDebugOverlay::guiPlots()
 		{
 			ImGui::Separator();
 			ImGui::PlotLines("onFrameStart", plotValues_[ValuesType::FRAME_START].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
+			if (appCfg.withScenegraph)
+				ImGui::PlotLines("onPostUpdate", plotValues_[ValuesType::POST_UPDATE].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
 			ImGui::PlotLines("onFrameEnd", plotValues_[ValuesType::FRAME_END].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
 			ImGui::PlotLines("ImGui", plotValues_[ValuesType::IMGUI].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
 #ifdef WITH_NUKLEAR

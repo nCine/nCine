@@ -151,8 +151,13 @@ class DLL_PUBLIC SceneNode : public Object
 
 	/// Gets the node world matrix
 	inline const Matrix4x4f &worldMatrix() const { return worldMatrix_; }
+	/// Sets the node world matrix (only useful when called inside `onPostUpdate()`)
+	inline void setWorldMatrix(const Matrix4x4f &worldMatrix) { worldMatrix_ = worldMatrix; }
+
 	/// Gets the node local matrix
 	inline const Matrix4x4f &localMatrix() const { return localMatrix_; }
+	/// Sets the node local matrix
+	inline void setLocalMatrix(const Matrix4x4f &localMatrix) { localMatrix_ = localMatrix; }
 
 	/// Gets the delete children on destruction flag
 	/*! If the flag is true the children are deleted upon node destruction. */

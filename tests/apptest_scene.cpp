@@ -256,9 +256,8 @@ void MyEventHandler::onFrameStart()
 
 		nk_edit_string_zero_terminated(ctx, NK_EDIT_FIELD, textBuffer, sizeof(textBuffer) - 1, nk_filter_default);
 		nk_edit_string_zero_terminated(ctx, NK_EDIT_FIELD, nuklearTextInput, sizeof(nuklearTextInput) - 1, nk_filter_default);
-
-		nk_end(ctx);
 	}
+	nk_end(ctx);
 #endif
 
 #if NCINE_WITH_QT5

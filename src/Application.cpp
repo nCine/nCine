@@ -1,4 +1,4 @@
-#include "Application.h"
+﻿#include "Application.h"
 #include "Random.h"
 #include "IAppEventHandler.h"
 #include "FileSystem.h"
@@ -227,11 +227,36 @@ void Application::step()
 		}
 
 		{
+			ZoneScopedN("onPostUpdate");
+			profileStartTime_ = TimeStamp::now();
+			appEventHandler_->onPostUpdate();
+			timings_[Timings::POST_UPDATE] = profileStartTime_.secondsSince();
+		}
+
+		{
 			ZoneScopedN("Visit");
 			profileStartTime_ = TimeStamp::now();
 			rootNode_->visit(*renderQueue_);
 			timings_[Timings::VISIT] = profileStartTime_.secondsSince();
 		}
+
+#ifdef WITH_IMGUI
+		{
+			ZoneScopedN("ImGui endFrame");
+			profileStartTime_ = TimeStamp::now();
+			imguiDrawing_->endFrame(*renderQueue_);
+			timings_[Timings::IMGUI] += profileStartTime_.secondsSince();
+		}
+#endif
+
+#ifdef WITH_NUKLEAR
+		{
+			ZoneScopedN("Nuklear endFrame");
+			profileStartTime_ = TimeStamp::now();
+			nuklearDrawing_->endFrame(*renderQueue_);
+			timings_[Timings::NUKLEAR] += profileStartTime_.secondsSince();
+		}
+#endif
 
 		{
 			ZoneScopedN("Draw");
@@ -240,39 +265,31 @@ void Application::step()
 			timings_[Timings::DRAW] = profileStartTime_.secondsSince();
 		}
 	}
+	else
+	{
+#ifdef WITH_IMGUI
+		{
+			ZoneScopedN("ImGui endFrame");
+			profileStartTime_ = TimeStamp::now();
+			imguiDrawing_->endFrame();
+			timings_[Timings::IMGUI] += profileStartTime_.secondsSince();
+		}
+#endif
+
+#ifdef WITH_NUKLEAR
+		{
+			ZoneScopedN("Nuklear endFrame");
+			profileStartTime_ = TimeStamp::now();
+			nuklearDrawing_->endFrame();
+			timings_[Timings::NUKLEAR] += profileStartTime_.secondsSince();
+		}
+#endif
+	}
 
 	{
 		ZoneScopedN("Audio");
 		theServiceLocator().audioDevice().updatePlayers();
 	}
-
-#ifdef WITH_IMGUI
-	{
-		ZoneScopedN("ImGui endFrame");
-		profileStartTime_ = TimeStamp::now();
-		if (appCfg_.withScenegraph)
-			imguiDrawing_->endFrame(*renderQueue_);
-		else
-			imguiDrawing_->endFrame();
-		timings_[Timings::IMGUI] += profileStartTime_.secondsSince();
-	}
-#endif
-
-#ifdef WITH_NUKLEAR
-	{
-		ZoneScopedN("Nuklear endFrame");
-		profileStartTime_ = TimeStamp::now();
-		if (appCfg_.withScenegraph)
-			nuklearDrawing_->endFrame(*renderQueue_);
-		else
-			nuklearDrawing_->endFrame();
-		timings_[Timings::NUKLEAR] += profileStartTime_.secondsSince();
-	}
-#endif
-
-	gfxDevice_->update();
-	FrameMark;
-	TracyGpuCollect;
 
 	{
 		ZoneScopedN("onFrameEnd");
@@ -283,6 +300,10 @@ void Application::step()
 
 	if (debugOverlay_)
 		debugOverlay_->updateFrameTimings();
+
+	gfxDevice_->update();
+	FrameMark;
+	TracyGpuCollect;
 
 	if (appCfg_.frameLimit > 0)
 	{

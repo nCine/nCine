@@ -32,6 +32,7 @@ class ImGuiDebugOverlay : public IDebugOverlay
 			FRAME_START,
 			UPDATE_VISIT_DRAW,
 			UPDATE,
+			POST_UPDATE,
 			VISIT,
 			DRAW,
 			IMGUI,

@@ -17,10 +17,36 @@ namespace LuaIAppEventHandler {
 	static const char *onPreInit = "on_pre_init";
 	static const char *onInit = "on_init";
 	static const char *onFrameStart = "on_frame_start";
+	static const char *onPostUpdate = "on_post_update";
+	static const char *onFrameEnd = "on_frame_end";
 	static const char *onShutdown = "on_shutdown";
 	static const char *onSuspend = "on_suspend";
 	static const char *onResume = "on_resume";
 }}
+
+namespace {
+	void callFunction(lua_State *L, const char *functionName, bool cannotFindWarning)
+	{
+		lua_getglobal(L, LuaNames::ncine);
+		const int type = lua_getfield(L, -1, functionName);
+
+		if (type == LUA_TFUNCTION)
+		{
+			const int status = lua_pcall(L, 0, 0, 0);
+			if (status != LUA_OK)
+			{
+				LOGE_X("Error running Lua function \"%s\" (%s):\n%s", functionName, LuaDebug::statusToString(status), lua_tostring(L, -1));
+				lua_pop(L, 1);
+			}
+		}
+		else
+		{
+			lua_pop(L, 2);
+			if (cannotFindWarning)
+				LOGW_X("Cannot find the Lua function \"%s\"", functionName);
+		}
+	}
+}
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -28,12 +54,12 @@ namespace LuaIAppEventHandler {
 
 void LuaIAppEventHandler::onPreInit(lua_State *L, AppConfiguration &config)
 {
+	ZoneScopedN("Lua onPreInit");
 	lua_getglobal(L, LuaNames::ncine);
 	const int type = lua_getfield(L, -1, LuaNames::LuaIAppEventHandler::onPreInit);
 
-	if (type != LUA_TNIL)
+	if (type == LUA_TFUNCTION)
 	{
-		ASSERT(type == LUA_TFUNCTION);
 		LuaAppConfiguration::push(L, config);
 		const int status = lua_pcall(L, 1, 1, 0);
 		if (status != LUA_OK)
@@ -53,115 +79,44 @@ void LuaIAppEventHandler::onPreInit(lua_State *L, AppConfiguration &config)
 
 void LuaIAppEventHandler::onInit(lua_State *L)
 {
-	lua_getglobal(L, LuaNames::ncine);
-	const int type = lua_getfield(L, -1, LuaNames::LuaIAppEventHandler::onInit);
-
-	if (type != LUA_TNIL)
-	{
-		ZoneScopedN("Lua onInit");
-		ASSERT(type == LUA_TFUNCTION);
-		const int status = lua_pcall(L, 0, 0, 0);
-		if (status != LUA_OK)
-		{
-			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::LuaIAppEventHandler::onInit, LuaDebug::statusToString(status), lua_tostring(L, -1));
-			lua_pop(L, 1);
-		}
-	}
-	else
-	{
-		lua_pop(L, 2);
-		LOGW_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onInit);
-	}
+	ZoneScopedN("Lua onInit");
+	callFunction(L, LuaNames::LuaIAppEventHandler::onInit, true);
 }
 
 void LuaIAppEventHandler::onFrameStart(lua_State *L)
 {
-	lua_getglobal(L, LuaNames::ncine);
-	const int type = lua_getfield(L, -1, LuaNames::LuaIAppEventHandler::onFrameStart);
+	ZoneScopedN("Lua onFrameStart");
+	callFunction(L, LuaNames::LuaIAppEventHandler::onFrameStart, false);
+}
 
-	if (type != LUA_TNIL)
-	{
-		ZoneScopedN("Lua onFrameStart");
-		ASSERT(type == LUA_TFUNCTION);
-		const int status = lua_pcall(L, 0, 0, 0);
-		if (status != LUA_OK)
-		{
-			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::LuaIAppEventHandler::onFrameStart, LuaDebug::statusToString(status), lua_tostring(L, -1));
-			lua_pop(L, 1);
-		}
-	}
-	else
-		lua_pop(L, 2);
+void LuaIAppEventHandler::onPostUpdate(lua_State *L)
+{
+	ZoneScopedN("Lua onPostUpdate");
+	callFunction(L, LuaNames::LuaIAppEventHandler::onPostUpdate, false);
+}
+
+void LuaIAppEventHandler::onFrameEnd(lua_State *L)
+{
+	ZoneScopedN("Lua onFrameEnd");
+	callFunction(L, LuaNames::LuaIAppEventHandler::onFrameEnd, false);
 }
 
 void LuaIAppEventHandler::onShutdown(lua_State *L)
 {
-	lua_getglobal(L, LuaNames::ncine);
-	const int type = lua_getfield(L, -1, LuaNames::LuaIAppEventHandler::onShutdown);
-
-	if (type != LUA_TNIL)
-	{
-		ZoneScopedN("Lua onShutdown");
-		ASSERT(type == LUA_TFUNCTION);
-
-		const int status = lua_pcall(L, 0, 0, 0);
-		if (status != LUA_OK)
-		{
-			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::LuaIAppEventHandler::onShutdown, LuaDebug::statusToString(status), lua_tostring(L, -1));
-			lua_pop(L, 1);
-		}
-	}
-	else
-	{
-		lua_pop(L, 2);
-		LOGW_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onShutdown);
-	}
+	ZoneScopedN("Lua onShutdown");
+	callFunction(L, LuaNames::LuaIAppEventHandler::onShutdown, true);
 }
 
 void LuaIAppEventHandler::onSuspend(lua_State *L)
 {
-	lua_getglobal(L, LuaNames::ncine);
-	const int type = lua_getfield(L, -1, LuaNames::LuaIAppEventHandler::onSuspend);
-
-	if (type != LUA_TNIL)
-	{
-		ZoneScopedN("Lua onSuspend");
-		ASSERT(type == LUA_TFUNCTION);
-		const int status = lua_pcall(L, 0, 0, 0);
-		if (status != LUA_OK)
-		{
-			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::LuaIAppEventHandler::onSuspend, LuaDebug::statusToString(status), lua_tostring(L, -1));
-			lua_pop(L, 1);
-		}
-	}
-	else
-	{
-		lua_pop(L, 2);
-		LOGW_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onSuspend);
-	}
+	ZoneScopedN("Lua onSuspend");
+	callFunction(L, LuaNames::LuaIAppEventHandler::onSuspend, true);
 }
 
 void LuaIAppEventHandler::onResume(lua_State *L)
 {
-	lua_getglobal(L, LuaNames::ncine);
-	const int type = lua_getfield(L, -1, LuaNames::LuaIAppEventHandler::onResume);
-
-	if (type != LUA_TNIL)
-	{
-		ZoneScopedN("Lua onResume");
-		ASSERT(type == LUA_TFUNCTION);
-		const int status = lua_pcall(L, 0, 0, 0);
-		if (status != LUA_OK)
-		{
-			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::LuaIAppEventHandler::onResume, LuaDebug::statusToString(status), lua_tostring(L, -1));
-			lua_pop(L, 1);
-		}
-	}
-	else
-	{
-		lua_pop(L, 2);
-		LOGW_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onResume);
-	}
+	ZoneScopedN("Lua onResume");
+	callFunction(L, LuaNames::LuaIAppEventHandler::onResume, true);
 }
 
 }
