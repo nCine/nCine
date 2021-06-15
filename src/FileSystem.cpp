@@ -252,53 +252,55 @@ const char *FileSystem::Directory::readNext()
 #endif
 }
 
-nctl::String FileSystem::absoluteJoinPath(const nctl::String &first, const nctl::String &second)
-{
-	nctl::String joinedPath = joinPath(first, second);
-#ifdef _WIN32
-	const char *resolvedPath = _fullpath(buffer, joinedPath.data(), MaxPathLength);
-#else
-	const char *resolvedPath = ::realpath(joinedPath.data(), buffer);
-#endif
-	if (resolvedPath == nullptr)
-		buffer[0] = '\0';
-
-	return nctl::String(buffer);
-}
-
 nctl::String FileSystem::joinPath(const nctl::String &first, const nctl::String &second)
 {
+	nctl::String returnedPath(MaxPathLength);
+
 	if (first.isEmpty())
-		return second;
+		return (returnedPath = second);
 	else if (second.isEmpty())
-		return first;
+		return (returnedPath = first);
 
 	const bool firstHasSeparator = first[first.length() - 1] == '/' || first[first.length() - 1] == '\\';
 	const bool secondHasSeparator = second[0] == '/' || second[0] == '\\';
 
 #ifdef __ANDROID__
 	if (first == AssetFile::Prefix)
-		return first + second;
+		return (returnedPath = first + second);
 #endif
 
 	// One path has a trailing or leading separator, the other has not
 	if (firstHasSeparator != secondHasSeparator)
-		return first + second;
+		return (returnedPath = first + second);
 	// Both paths have no clashing separators
 	else if (firstHasSeparator == false && secondHasSeparator == false)
 #ifdef _WIN32
-		return first + "\\" + second;
+		return (returnedPath = first + "\\" + second);
 #else
-		return first + "/" + second;
+		return (returnedPath = first + "/" + second);
 #endif
 	else
 	{
 		// Both paths have a clashing separator, removing the leading one from the second path
 		if (second.length() > 1)
-			return first + &second[1];
+			return (returnedPath = first + &second[1]);
 		else
-			return first;
+			return (returnedPath = first);
 	}
+}
+
+nctl::String FileSystem::absoluteJoinPath(const nctl::String &first, const nctl::String &second)
+{
+	nctl::String returnedPath = joinPath(first, second);
+#ifdef _WIN32
+	const char *resolvedPath = _fullpath(buffer, returnedPath.data(), MaxPathLength);
+#else
+	const char *resolvedPath = ::realpath(returnedPath.data(), buffer);
+#endif
+	if (resolvedPath == nullptr)
+		buffer[0] = '\0';
+
+	return (returnedPath = buffer);
 }
 
 nctl::String FileSystem::dirName(const char *path)
@@ -306,6 +308,7 @@ nctl::String FileSystem::dirName(const char *path)
 	if (path == nullptr)
 		return nctl::String();
 
+	nctl::String returnedPath(MaxPathLength);
 #ifdef _WIN32
 	static char drive[_MAX_DRIVE];
 	static char dir[_MAX_DIR];
@@ -322,10 +325,10 @@ nctl::String FileSystem::dirName(const char *path)
 		buffer[pathLength - 1] = '\0';
 	}
 
-	return nctl::String(buffer);
+	return (returnedPath = buffer);
 #else
 	strncpy(buffer, path, MaxPathLength - 1);
-	return nctl::String(::dirname(buffer));
+	return (returnedPath = ::dirname(buffer));
 #endif
 }
 
@@ -334,6 +337,7 @@ nctl::String FileSystem::baseName(const char *path)
 	if (path == nullptr)
 		return nctl::String();
 
+	nctl::String returnedPath(MaxPathLength);
 #ifdef _WIN32
 	static char fname[_MAX_FNAME];
 	static char ext[_MAX_EXT];
@@ -342,10 +346,10 @@ nctl::String FileSystem::baseName(const char *path)
 
 	nctl::strncpy(buffer, MaxPathLength, fname, _MAX_FNAME);
 	nctl::strncat(buffer, MaxPathLength, ext, _MAX_EXT);
-	return nctl::String(buffer);
+	return (returnedPath = buffer);
 #else
 	strncpy(buffer, path, MaxPathLength - 1);
-	return nctl::String(::basename(buffer));
+	return (returnedPath = ::basename(buffer));
 #endif
 }
 
@@ -354,6 +358,7 @@ nctl::String FileSystem::absolutePath(const char *path)
 	if (path == nullptr)
 		return nctl::String();
 
+	nctl::String returnedPath(MaxPathLength);
 #ifdef _WIN32
 	const char *resolvedPath = _fullpath(buffer, path, MaxPathLength);
 #else
@@ -362,7 +367,7 @@ nctl::String FileSystem::absolutePath(const char *path)
 	if (resolvedPath == nullptr)
 		buffer[0] = '\0';
 
-	return nctl::String(buffer);
+	return (returnedPath = buffer);
 }
 
 const char *FileSystem::extension(const char *path)
@@ -422,13 +427,13 @@ const char *FileSystem::logicalDriveStrings()
 
 nctl::String FileSystem::currentDir()
 {
+	nctl::String returnedPath(MaxPathLength);
 #ifdef _WIN32
 	GetCurrentDirectory(MaxPathLength, buffer);
 #else
 	::getcwd(buffer, MaxPathLength);
 #endif
-
-	return nctl::String(buffer);
+	return (returnedPath = buffer);
 }
 
 bool FileSystem::setCurrentDir(const char *path)
@@ -444,9 +449,10 @@ bool FileSystem::setCurrentDir(const char *path)
 
 nctl::String FileSystem::homeDir()
 {
+	nctl::String returnedPath(MaxPathLength);
 #ifdef _WIN32
 	SHGetFolderPathA(HWND_DESKTOP, CSIDL_PROFILE, NULL, SHGFP_TYPE_CURRENT, buffer);
-	return nctl::String(buffer);
+	return (returnedPath = buffer);
 #else
 	const char *homeEnv = getenv("HOME");
 	if (homeEnv == nullptr || strnlen(homeEnv, MaxPathLength) == 0)
@@ -455,24 +461,25 @@ nctl::String FileSystem::homeDir()
 		// `getpwuid()` is not yet implemented on Emscripten
 		const struct passwd *pw = ::getpwuid(getuid());
 		if (pw)
-			return nctl::String(pw->pw_dir);
+			return (returnedPath = pw->pw_dir);
 		else
 	#endif
 			return currentDir();
 	}
 	else
-		return nctl::String(homeEnv);
+		return (returnedPath = homeEnv);
 #endif
 }
 
 #ifdef __ANDROID__
 nctl::String FileSystem::externalStorageDir()
 {
+	nctl::String returnedPath(MaxPathLength);
 	const char *extStorage = getenv("EXTERNAL_STORAGE");
 
 	if (extStorage == nullptr || extStorage[0] == '\0')
-		return nctl::String("/scard");
-	return nctl::String(extStorage);
+		return (returnedPath = "/scard");
+	return (returnedPath = extStorage);
 }
 #endif
 
@@ -711,8 +718,7 @@ bool FileSystem::setHidden(const char *path, bool hidden)
 	if (hidden && baseName && baseName[0] != '.')
 	{
 		nctl::String newPath(MaxPathLength);
-		newPath.assign(dirName(path));
-		newPath.assign(joinPath(newPath.data(), "."));
+		newPath = joinPath(dirName(path), ".");
 		newPath.append(baseName);
 		const int status = ::rename(path, newPath.data());
 		return (status == 0);
@@ -724,8 +730,7 @@ bool FileSystem::setHidden(const char *path, bool hidden)
 			numDots++;
 
 		nctl::String newPath(MaxPathLength);
-		newPath.assign(dirName(path));
-		newPath.assign(joinPath(newPath.data(), &buffer[numDots]));
+		newPath = joinPath(dirName(path), &buffer[numDots]);
 		const int status = ::rename(path, newPath.data());
 		return (status == 0);
 	}

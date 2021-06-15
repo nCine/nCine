@@ -1281,8 +1281,7 @@ void ImGuiDebugOverlay::guiRescursiveChildrenNodes(SceneNode *node, unsigned int
 		}
 		if (textnode)
 		{
-			nctl::String textnodeString(textnode->string().capacity());
-			textnodeString.assign(textnode->string());
+			nctl::String textnodeString(textnode->string());
 			if (ImGui::InputTextMultiline("String", textnodeString.data(), textnodeString.capacity(),
 			                              ImVec2(0.0f, 3.0f * ImGui::GetTextLineHeightWithSpacing()),
 			                              ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackResize,

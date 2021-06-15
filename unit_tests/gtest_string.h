@@ -8,6 +8,7 @@ namespace {
 
 // Capacity is within the size of the small local buffer
 const unsigned int Capacity = 16;
+const char veryLongCString[] = "This_is_a_very_long_string_which_goes_beyond_the_default_capacity_of_a_string";
 
 void printString(const nctl::String &string)
 {

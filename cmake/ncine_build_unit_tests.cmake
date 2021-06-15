@@ -1,5 +1,5 @@
 if(NCINE_BUILD_UNIT_TESTS)
-	set(GTEST_VERSION_TAG "release-1.10.0" CACHE STRING "The Git release, tag, branch or commit for Googletest")
+	set(GTEST_VERSION_TAG "release-1.11.0" CACHE STRING "The Git release, tag, branch or commit for Googletest")
 	# Download release archive (TRUE) or Git repository (FALSE)
 	set(GTEST_DOWNLOAD_ARCHIVE TRUE)
 

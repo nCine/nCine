@@ -116,10 +116,10 @@ class Array
 	/// Returns the array capacity
 	/*! The array has memory allocated to store until the `Capacity()`-1 element. */
 	inline unsigned int capacity() const { return capacity_; }
-	/// Sets a new capacity for the array (can be bigger or smaller than the current one)
-	void setCapacity(unsigned int newCapacity);
 	/// Sets a new size for the array (allowing for "holes")
 	void setSize(unsigned int newSize);
+	/// Sets a new capacity for the array (can be bigger or smaller than the current one)
+	void setCapacity(unsigned int newCapacity);
 	/// Decreases the capacity to match the current size of the array
 	void shrinkToFit();
 
@@ -298,6 +298,26 @@ Array<T> &Array<T>::operator=(Array<T> &&other)
 }
 
 template <class T>
+void Array<T>::setSize(unsigned int newSize)
+{
+	const int newElements = newSize - size_;
+
+	if (newSize > capacity_)
+	{
+		setCapacity(newSize);
+		// Modifying size only if the capacity is not fixed
+		if (capacity_ < newSize)
+			return;
+	}
+
+	if (newElements > 0)
+		constructArray(array_ + size_, newElements);
+	else if (newElements < 0)
+		destructArray(array_ + size_ + newElements, -newElements);
+	size_ += newElements;
+}
+
+template <class T>
 void Array<T>::setCapacity(unsigned int newCapacity)
 {
 	// If the call does not come from the constructor
@@ -348,26 +368,6 @@ void Array<T>::setCapacity(unsigned int newCapacity)
 #endif
 	array_ = newArray;
 	capacity_ = newCapacity;
-}
-
-template <class T>
-void Array<T>::setSize(unsigned int newSize)
-{
-	const int newElements = newSize - size_;
-
-	if (newSize > capacity_)
-	{
-		setCapacity(newSize);
-		// Modifying size only if the capacity is not fixed
-		if (capacity_ < newSize)
-			return;
-	}
-
-	if (newElements > 0)
-		constructArray(array_ + size_, newElements);
-	else if (newElements < 0)
-		destructArray(array_ + size_ + newElements, -newElements);
-	size_ += newElements;
 }
 
 template <class T>

@@ -72,4 +72,13 @@ int vsnprintf(char *str, size_t maxLen, const char *format, va_list arg)
 #endif
 }
 
+int vsnprintfTrunc(char *str, size_t maxLen, const char *format, va_list arg)
+{
+#if defined(_WIN32) && !defined(__MINGW32__)
+	return vsnprintf_s(str, maxLen, maxLen - 1, format, arg);
+#else
+	return ::vsnprintf(str, maxLen, format, arg);
+#endif
+}
+
 }
