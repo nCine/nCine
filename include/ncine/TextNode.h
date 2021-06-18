@@ -73,8 +73,10 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Sets the text node line height
 	inline void setLineHeight(float lineHeight) { lineHeight_ = lineHeight; }
 
-	/// Gets the string to render
+	/// Gets the constant string to render
 	inline const nctl::String &string() const { return string_; }
+	/// Gets the string to render
+	inline nctl::String &string() { return string_; }
 	/// Sets the string to render
 	void setString(const nctl::String &string);
 

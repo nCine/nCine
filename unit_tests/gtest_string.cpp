@@ -19,6 +19,7 @@ TEST_F(StringTest, EmptyString)
 	nctl::String newString(Capacity);
 	printString("Creating an empty string: ", newString);
 
+	// Using the local buffer
 	ASSERT_EQ(newString.capacity(), Capacity);
 	ASSERT_EQ(newString.length(), 0);
 }
@@ -33,11 +34,54 @@ TEST_F(StringTest, EmptyStringShort)
 	ASSERT_EQ(newString.length(), 0);
 }
 
+TEST_F(StringTest, EmptyStringLong)
+{
+	nctl::String newString(Capacity + 4);
+	printString("Creating an empty string: ", newString);
+
+	// Using the dynamic buffer
+	ASSERT_EQ(newString.capacity(), Capacity + 4);
+	ASSERT_EQ(newString.length(), 0);
+}
+
 TEST_F(StringTest, AssignCString)
 {
 	nctl::String newString(Capacity);
 	newString = "String1";
 	printString("Assigning a C-style string to an empty one: ", newString);
+
+	ASSERT_EQ(newString.capacity(), Capacity);
+	ASSERT_EQ(newString.length(), strnlen("String1", Capacity));
+	ASSERT_STREQ(newString.data(), "String1");
+}
+
+TEST_F(StringTest, AssignCStringExtend)
+{
+	nctl::String newString(Capacity);
+	newString = veryLongCString;
+	printString("Assigning a C-style string to an empty one: ", newString);
+
+	ASSERT_EQ(newString.capacity(), Capacity * 8);
+	ASSERT_EQ(newString.length(), strnlen(veryLongCString, Capacity * 8));
+	ASSERT_STREQ(newString.data(), veryLongCString);
+}
+
+TEST_F(StringTest, AssignCStringTruncate)
+{
+	nctl::String newString(Capacity, nctl::StringMode::FIXED_CAPACITY);
+	newString = veryLongCString;
+	printString("Assigning a C-style string to an empty one: ", newString);
+
+	ASSERT_EQ(newString.capacity(), Capacity);
+	ASSERT_EQ(newString.length(), strnlen("This_is_a_very_", Capacity));
+	ASSERT_STREQ(newString.data(), "This_is_a_very_");
+}
+
+TEST_F(StringTest, AssignCStringShorter)
+{
+	nctl::String newString("LongString1");
+	newString = "String1";
+	printString("Assigning a shorter C-style string to a longer one: ", newString);
 
 	ASSERT_EQ(newString.capacity(), Capacity);
 	ASSERT_EQ(newString.length(), strnlen("String1", Capacity));

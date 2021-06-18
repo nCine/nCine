@@ -97,13 +97,13 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 	if (config.directory.isEmpty() || nc::fs::isDirectory(config.directory.data()) == false)
 	{
 #ifdef __ANDROID__
-		config.directory.assign(nc::fs::externalStorageDir());
+		config.directory = nc::fs::externalStorageDir();
 #else
-		config.directory.assign(nc::fs::currentDir());
+		config.directory = nc::fs::currentDir();
 #endif
 	}
 	else
-		config.directory.assign(nc::fs::absolutePath(config.directory.data()));
+		config.directory = nc::fs::absolutePath(config.directory.data());
 
 	ImGui::SetNextWindowSize(ImVec2(550.0f, 500.0f), ImGuiCond_Once);
 	if (config.modalPopup)

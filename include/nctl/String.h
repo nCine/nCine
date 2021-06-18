@@ -8,6 +8,15 @@
 
 namespace nctl {
 
+/// Construction modes for the `String` class
+enum class StringMode
+{
+	/// `String` will have a growing capacity
+	GROWING_CAPACITY,
+	/// `String` will have a fixed capacity and will truncate text
+	FIXED_CAPACITY
+};
+
 /// A basic string class made of chars
 class DLL_PUBLIC String
 {
@@ -32,16 +41,25 @@ class DLL_PUBLIC String
 	/// Default constructor
 	String();
 	/// Constructs an empty string with explicit size
-	explicit String(unsigned int capacity);
+	explicit String(unsigned int capacity)
+	    : String(capacity, StringMode::GROWING_CAPACITY) {}
+	/// Constructs an empty string with the option for it to be fixed
+	explicit String(StringMode mode)
+	    : String(SmallBufferSize, mode) {}
+	/// Constructs an empty string with explicit size and the option for it to be fixed
+	String(unsigned int capacity, StringMode mode);
 	/// Constructs a string object from a C string
-	String(const char *cString);
+	String(const char *cString)
+	    :  String(cString, StringMode::GROWING_CAPACITY) {}
+	/// Constructs a string object from a C string with the option for it to be fixed
+	String(const char *cString, StringMode mode);
 	~String();
 
 	/// Copy constructor
 	String(const String &other);
 	/// Move constructor
 	String(String &&other);
-	/// Assignment operator that preserves the original string capacity
+	/// Assignment operator (it might extend or truncate the original text)
 	String &operator=(const String &other);
 	/// Move assignment operator
 	String &operator=(String &&other);
@@ -87,10 +105,14 @@ class DLL_PUBLIC String
 	inline bool isEmpty() const { return length_ == 0; }
 	/// Returns the string length
 	inline unsigned int length() const { return length_; }
-	/// Sets the string length
-	unsigned int setLength(unsigned int length);
 	/// Returns the string capacity
 	inline unsigned int capacity() const { return capacity_; }
+	/// Sets the string length
+	unsigned int setLength(unsigned int newLength);
+	/// Sets a new capacity for the string (can be bigger or smaller than the current one)
+	void setCapacity(unsigned int newCapacity);
+	/// Decreases the capacity to match the current length of the string
+	void shrinkToFit();
 
 	/// Clears the string
 	void clear();
@@ -100,14 +122,16 @@ class DLL_PUBLIC String
 	/// Returns a constant pointer to the internal array
 	inline const char *data() const { return (capacity_ > SmallBufferSize) ? array_.begin_ : array_.local_; }
 
-	/// Copies characters from somewhere in the other string to somewhere in this one
-	unsigned int assign(const String &source, unsigned int srcChar, unsigned int numChar, unsigned int destChar);
+
+	/// Replaces characters from somewhere in the other string to somewhere in this one (no truncation)
+	unsigned int replace(const String &source, unsigned int srcChar, unsigned int numChar, unsigned int destChar);
+	/// Replaces characters from a C string to somewhere in this one (no truncation)
+	unsigned int replace(const char *source, unsigned int numChar, unsigned int destChar);
+
 	/// Copies characters from somewhere in the other string to the beginning of this one
 	unsigned int assign(const String &source, unsigned int srcChar, unsigned int numChar);
 	/// Copies all characters from the other string to the beginning of this one
 	unsigned int assign(const String &source);
-	/// Copies characters from a C string to somewhere in this one
-	unsigned int assign(const char *source, unsigned int numChar, unsigned int destChar);
 	/// Copies characters from a C string to the beginning of this one
 	unsigned int assign(const char *source, unsigned int numChar);
 
@@ -211,6 +235,10 @@ class DLL_PUBLIC String
 	Buffer array_;
 	unsigned int length_;
 	unsigned int capacity_;
+	unsigned char fixedCapacity_;
+
+	/// Doubling current capacity until the required minimum can be contained
+	bool extendCapacity(unsigned int minimum);
 };
 
 DLL_PUBLIC String operator+(const char *cString, const String &string);

@@ -12,6 +12,7 @@ DLL_PUBLIC char *strncpy(char *dest, size_t elements, const char *source, size_t
 DLL_PUBLIC char *strncat(char *dest, const char *source, size_t count);
 DLL_PUBLIC char *strncat(char *dest, size_t elements, const char *source, size_t count);
 DLL_PUBLIC int vsnprintf(char *str, size_t maxLen, const char *format, va_list arg);
+DLL_PUBLIC int vsnprintfTrunc(char *str, size_t maxLen, const char *format, va_list arg);
 
 }
 
