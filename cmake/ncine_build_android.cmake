@@ -37,7 +37,6 @@ if(NCINE_BUILD_ANDROID)
 		-DNCINE_WITH_TRACY=${NCINE_WITH_TRACY} -DTRACY_SOURCE_DIR=${TRACY_SOURCE_DIR})
 	set(ANDROID_CMAKE_ARGS -DANDROID_TOOLCHAIN=${ANDROID_TOOLCHAIN} -DANDROID_STL=${ANDROID_STL})
 	set(ANDROID_ARM_ARGS -DANDROID_ARM_MODE=thumb -DANDROID_ARM_NEON=ON)
-	set(ANDROID_DEVDIST_PASSTHROUGH_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DNCINE_STARTUP_TEST=${NCINE_STARTUP_TEST})
 
 	if(CMAKE_BUILD_TYPE MATCHES "Release")
 		list(APPEND ANDROID_PASSTHROUGH_ARGS -DNCINE_LINKTIME_OPTIMIZATION=${NCINE_LINKTIME_OPTIMIZATION}
@@ -54,7 +53,6 @@ if(NCINE_BUILD_ANDROID)
 	string(REPLACE ";" "', '" GRADLE_CMAKE_ARGS "${ANDROID_CMAKE_ARGS}")
 	string(REPLACE ";" "', '" GRADLE_ARM_ARGS "${ANDROID_ARM_ARGS}")
 	string(REPLACE ";" "', '" GRADLE_NDK_ARCHITECTURES "${NCINE_NDK_ARCHITECTURES}")
-	string(REPLACE ";" "', '" GRADLE_DEVDIST_PASSTHROUGH_ARGS "${ANDROID_DEVDIST_PASSTHROUGH_ARGS}")
 
 	# Added later to skip the string replace operation and keep them as lists in Gradle too
 	list(APPEND ANDROID_PASSTHROUGH_ARGS -DGENERATED_SOURCES="${GENERATED_SOURCES}" -DANDROID_GENERATED_FLAGS="${ANDROID_GENERATED_FLAGS}")
@@ -107,15 +105,12 @@ if(NCINE_BUILD_ANDROID)
 	set(GRADLE_NDK_DIR ${NDK_DIR})
 	configure_file(${GRADLE_PROPERTIES_IN} ${GRADLE_PROPERTIES} @ONLY)
 
-	set(BUILD_DEVDIST_GRADLE ${CMAKE_BINARY_DIR}/android/build-devdist.gradle)
-	set(GRADLE_PASSTHROUGH_ARGS ${GRADLE_DEVDIST_PASSTHROUGH_ARGS})
 	set(GRADLE_JNILIBS_DIRS "'src/main/cpp/ncine'")
 	if(NCINE_WITH_AUDIO)
 		set(GRADLE_JNILIBS_DIRS "${GRADLE_JNILIBS_DIRS}, 'src/main/cpp/openal'")
 	endif()
-	configure_file(${BUILD_GRADLE_IN} ${BUILD_DEVDIST_GRADLE} @ONLY)
 
-	set(MANIFEST_PERMISSIONS "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />")
+	set(MANIFEST_PERMISSIONS "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" android:maxSdkVersion=\"28\" />")
 	if(NCINE_WITH_TRACY)
 		string(CONCAT MANIFEST_PERMISSIONS "${MANIFEST_PERMISSIONS}\n"
 			"\t<uses-permission android:name=\"android.permission.INTERNET\" />\n"
@@ -141,10 +136,8 @@ if(NCINE_BUILD_ANDROID)
 		file(COPY ${ASSET} DESTINATION android/src/main/assets/${ASSET_RELPATH})
 	endforeach()
 
-	file(COPY android/gradle-devdist.properties DESTINATION android)
 	file(COPY android/src/main/cpp/main.cpp DESTINATION android/src/main/cpp)
 	file(COPY android/src/main/cpp/CMakeLists.txt DESTINATION android/src/main/cpp)
-	file(COPY android/src/main/cpp/CMakeLists-devdist.txt DESTINATION android/src/main/cpp)
 	file(COPY android/src/main/res/values/strings.xml DESTINATION android/src/main/res/values)
 	file(COPY ${NCINE_DATA_DIR}/icons/icon48.png DESTINATION android/src/main/res/mipmap-mdpi)
 	file(RENAME ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-mdpi/icon48.png ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-mdpi/ic_launcher.png)
@@ -250,33 +243,6 @@ if(NCINE_BUILD_ANDROID)
 	endif()
 
 	if(NCINE_INSTALL_DEV_SUPPORT)
-		install(FILES ${CMAKE_BINARY_DIR}/android/build-devdist.gradle
-			DESTINATION ${ANDROID_INSTALL_DESTINATION} RENAME build.gradle COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/gradle-devdist.properties
-			DESTINATION ${ANDROID_INSTALL_DESTINATION} RENAME gradle.properties COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/AndroidManifest.xml
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/java/io/github/ncine/LoadLibraries.java
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/java/io/github/ncine COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/java/io/github/ncine/LoadLibrariesTV.java
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/java/io/github/ncine COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/cpp/CMakeLists-devdist.txt
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp RENAME CMakeLists.txt COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/values/strings.xml
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/values COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-mdpi/ic_launcher.png
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-mdpi COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-hdpi/ic_launcher.png
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-hdpi COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xhdpi/ic_launcher.png
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-xhdpi COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xxhdpi/ic_launcher.png
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-xxhdpi COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xxxhdpi/ic_launcher.png
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/mipmap-xxxhdpi COMPONENT android)
-		install(FILES ${CMAKE_BINARY_DIR}/android/src/main/res/drawable-xhdpi/banner.png
-			DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/res/drawable-xhdpi COMPONENT android)
-
 		foreach(ARCHITECTURE ${NCINE_NDK_ARCHITECTURES})
 			install(FILES ${CMAKE_BINARY_DIR}/android/build/ncine/${ARCHITECTURE}/${ANDROID_LIBNAME}
 				DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/${ARCHITECTURE}/ COMPONENT android)
@@ -296,9 +262,6 @@ if(NCINE_BUILD_ANDROID)
 		if(NCINE_WITH_TRACY)
 			install(DIRECTORY ${TRACY_INCLUDE_ONLY_DIR}/tracy DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/ncine/include/ COMPONENT android)
 		endif()
-
-		file(GLOB APPTEST_SOURCES "tests/apptest*.h" "tests/apptest*.cpp")
-		install(FILES ${APPTEST_SOURCES} DESTINATION ${ANDROID_INSTALL_DESTINATION}/src/main/cpp/tests COMPONENT android)
 
 		install(DIRECTORY ${NCINE_DATA_DIR}/android/fonts DESTINATION ${DATA_INSTALL_DESTINATION}/android COMPONENT android)
 		install(DIRECTORY ${NCINE_DATA_DIR}/android/textures DESTINATION ${DATA_INSTALL_DESTINATION}/android COMPONENT android)

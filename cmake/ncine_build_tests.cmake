@@ -48,12 +48,6 @@ if(NCINE_BUILD_TESTS)
 		install(FILES ${NCINE_DATA_DIR}/README.md DESTINATION ${DATA_INSTALL_DESTINATION} COMPONENT data)
 	endif()
 
-	if(NCINE_INSTALL_DEV_SUPPORT)
-		file(GLOB TEST_SOURCES "tests/*test*.h" "tests/*test*.cpp")
-		install(FILES ${TEST_SOURCES} DESTINATION ${TEST_SOURCES_INSTALL_DESTINATION} COMPONENT devsupport)
-		install(FILES cmake/ncine_devdist_tests.cmake DESTINATION ${TEST_SOURCES_INSTALL_DESTINATION} RENAME CMakeLists.txt COMPONENT devsupport)
-	endif()
-
 	add_subdirectory(tests)
 	if(NOT NCINE_DYNAMIC_LIBRARY)
 		add_subdirectory(src/tests)
