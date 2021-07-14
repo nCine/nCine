@@ -2,6 +2,7 @@ option(NCPROJECT_BUILD_ANDROID "Build the Android version of the project" OFF)
 option(NCPROJECT_STRIP_BINARIES "Enable symbols stripping from libraries and executables when in release" OFF)
 
 set(NCPROJECT_DATA_DIR "${PARENT_SOURCE_DIR}/${NCPROJECT_NAME}-data" CACHE PATH "Set the path to the project data directory")
+set(NCPROJECT_ICONS_DIR "${PARENT_SOURCE_DIR}/${NCPROJECT_NAME}-data/icons" CACHE PATH "Set the path to the project icons directory")
 
 if(MSVC OR APPLE)
 	set(NCINE_EXTERNAL_DIR "${PARENT_SOURCE_DIR}/nCine-external" CACHE PATH "Set the path to the nCine MSVC libraries or macOS frameworks directory")

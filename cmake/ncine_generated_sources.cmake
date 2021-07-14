@@ -123,12 +123,12 @@ if(NCINE_EMBED_SHADERS)
 	set(SHADER_FILES "")
 endif()
 
-if(WIN32 AND EXISTS ${NCINE_DATA_DIR}/icons/icon.ico)
+if(WIN32 AND EXISTS ${NCINE_ICONS_DIR}/icon.ico)
 	message(STATUS "Writing a resource file for executables icon")
 
 	set(RESOURCE_RC_FILE "${GENERATED_SOURCE_DIR}/resource.rc")
 	file(WRITE ${RESOURCE_RC_FILE} "IDI_ICON1 ICON DISCARDABLE \"ncine/icon.ico\"")
-	file(COPY ${NCINE_DATA_DIR}/icons/icon.ico DESTINATION ${GENERATED_INCLUDE_DIR})
+	file(COPY ${NCINE_ICONS_DIR}/icon.ico DESTINATION ${GENERATED_INCLUDE_DIR})
 endif()
 
 if(WIN32 AND NCINE_DYNAMIC_LIBRARY)

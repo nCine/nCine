@@ -35,7 +35,7 @@ set(CPACK_PACKAGE_CHECKSUM MD5)
 
 if(MSVC)
 	set(CPACK_GENERATOR NSIS ZIP)
-	set(CPACK_NSIS_MUI_ICON "${NCINE_DATA_DIR}/icons/icon.ico")
+	set(CPACK_NSIS_MUI_ICON "${NCINE_ICONS_DIR}/icon.ico")
 	set(CPACK_NSIS_MENU_LINKS ${CPACK_PACKAGE_HOMEPAGE_URL} "nCine Website")
 	if(NCINE_INSTALL_DEV_SUPPORT)
 		if(NCINE_BUILD_DOCUMENTATION)
@@ -83,21 +83,23 @@ elseif(APPLE)
 	install(FILES ${CMAKE_BINARY_DIR}/bundle_executable DESTINATION ../MacOS/ RENAME ${CPACK_BUNDLE_NAME}
 		PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE COMPONENT tests)
 
-	add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset
-		COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${NCINE_DATA_DIR}/icons/icon1024.png ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_512x512@2x.png
-		COMMAND sips -z 512 512 ${NCINE_DATA_DIR}/icons/icon1024.png --out ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_512x512.png
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_512x512.png ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_256x256@2x.png
-		COMMAND sips -z 256 256 ${NCINE_DATA_DIR}/icons/icon1024.png --out ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_256x256.png
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_256x256.png ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_128x128@2x.png
-		COMMAND sips -z 128 128 ${NCINE_DATA_DIR}/icons/icon1024.png --out ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_128x128.png
-		COMMAND sips -z 64 64 ${NCINE_DATA_DIR}/icons/icon1024.png --out ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_32x32@2x.png
-		COMMAND sips -z 32 32 ${NCINE_DATA_DIR}/icons/icon1024.png --out ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_32x32.png
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_32x32.png ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_16x16@2x.png
-		COMMAND sips -z 16 16 ${NCINE_DATA_DIR}/icons/icon1024.png --out ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_16x16.png
-		COMMAND iconutil --convert icns --output ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.icns ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset)
-	add_custom_target(iconutil_convert ALL DEPENDS ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset)
-	set(CPACK_BUNDLE_ICON ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.icns)
+	if(EXISTS ${NCINE_ICONS_DIR}/icon1024.png)
+		add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset
+			COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${NCINE_ICONS_DIR}/icon1024.png ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_512x512@2x.png
+			COMMAND sips -z 512 512 ${NCINE_ICONS_DIR}/icon1024.png --out ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_512x512.png
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_512x512.png ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_256x256@2x.png
+			COMMAND sips -z 256 256 ${NCINE_ICONS_DIR}/icon1024.png --out ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_256x256.png
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_256x256.png ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_128x128@2x.png
+			COMMAND sips -z 128 128 ${NCINE_ICONS_DIR}/icon1024.png --out ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_128x128.png
+			COMMAND sips -z 64 64 ${NCINE_ICONS_DIR}/icon1024.png --out ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_32x32@2x.png
+			COMMAND sips -z 32 32 ${NCINE_ICONS_DIR}/icon1024.png --out ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_32x32.png
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_32x32.png ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_16x16@2x.png
+			COMMAND sips -z 16 16 ${NCINE_ICONS_DIR}/icon1024.png --out ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset/icon_16x16.png
+			COMMAND iconutil --convert icns --output ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.icns ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset)
+		add_custom_target(iconutil_convert ALL DEPENDS ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.iconset)
+		set(CPACK_BUNDLE_ICON ${CMAKE_BINARY_DIR}/${CPACK_BUNDLE_NAME}.icns)
+	endif()
 elseif(EMSCRIPTEN)
 	if(CMAKE_HOST_WIN32)
 		set(CPACK_GENERATOR ZIP)
@@ -112,12 +114,21 @@ elseif(UNIX AND NOT APPLE)
 		if(EXISTS ${NCINE_DATA_DIR}/svg/icon.svg)
 			install(FILES ${NCINE_DATA_DIR}/svg/icon.svg DESTINATION ${ICONS_INSTALL_DESTINATION}/scalable/apps/ RENAME nCine.svg COMPONENT data)
 		endif()
-		if(EXISTS ${NCINE_DATA_DIR}/icons)
-			install(FILES ${NCINE_DATA_DIR}/icons/icon1024.png DESTINATION ${ICONS_INSTALL_DESTINATION}/1024x1024/apps/ RENAME nCine.png COMPONENT data)
-			install(FILES ${NCINE_DATA_DIR}/icons/icon192.png DESTINATION ${ICONS_INSTALL_DESTINATION}/192x192/apps/ RENAME nCine.png COMPONENT data)
-			install(FILES ${NCINE_DATA_DIR}/icons/icon96.png DESTINATION ${ICONS_INSTALL_DESTINATION}/96x96/apps/ RENAME nCine.png COMPONENT data)
-			install(FILES ${NCINE_DATA_DIR}/icons/icon72.png DESTINATION ${ICONS_INSTALL_DESTINATION}/72x72/apps/ RENAME nCine.png COMPONENT data)
-			install(FILES ${NCINE_DATA_DIR}/icons/icon48.png DESTINATION ${ICONS_INSTALL_DESTINATION}/48x48/apps/ RENAME nCine.png COMPONENT data)
+
+		if(EXISTS ${NCINE_ICONS_DIR}/icon1024.png)
+			install(FILES ${NCINE_ICONS_DIR}/icon1024.png DESTINATION ${ICONS_INSTALL_DESTINATION}/1024x1024/apps/ RENAME nCine.png COMPONENT data)
+		endif()
+		if(EXISTS ${NCINE_ICONS_DIR}/icon192.png)
+			install(FILES ${NCINE_ICONS_DIR}/icon192.png DESTINATION ${ICONS_INSTALL_DESTINATION}/192x192/apps/ RENAME nCine.png COMPONENT data)
+		endif()
+		if(EXISTS ${NCINE_ICONS_DIR}/icon96.png)
+			install(FILES ${NCINE_ICONS_DIR}/icon96.png DESTINATION ${ICONS_INSTALL_DESTINATION}/96x96/apps/ RENAME nCine.png COMPONENT data)
+		endif()
+		if(EXISTS ${NCINE_ICONS_DIR}/icon72.png)
+			install(FILES ${NCINE_ICONS_DIR}/icon72.png DESTINATION ${ICONS_INSTALL_DESTINATION}/72x72/apps/ RENAME nCine.png COMPONENT data)
+		endif()
+		if(EXISTS ${NCINE_ICONS_DIR}/icon48.png)
+			install(FILES ${NCINE_ICONS_DIR}/icon48.png DESTINATION ${ICONS_INSTALL_DESTINATION}/48x48/apps/ RENAME nCine.png COMPONENT data)
 		endif()
 
 		configure_file(${CMAKE_SOURCE_DIR}/io.github.ncine.desktop.in ${CMAKE_BINARY_DIR}/io.github.ncine.desktop @ONLY)

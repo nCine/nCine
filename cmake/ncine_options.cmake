@@ -42,6 +42,7 @@ if(EMSCRIPTEN)
 endif()
 
 set(NCINE_DATA_DIR "${PARENT_SOURCE_DIR}/nCine-data" CACHE PATH "Set the path to the engine data directory")
+set(NCINE_ICONS_DIR "${PARENT_SOURCE_DIR}/nCine-data/icons" CACHE PATH "Set the path to the engine icons directory")
 set(NCINE_TESTS_DATA_DIR "" CACHE STRING "Set the path to the data directory that will be embedded in test executables")
 # The external Android dir is set regardless of the status of build Android flag, so that presets work even when the flag is off
 set(EXTERNAL_ANDROID_DIR "${PARENT_SOURCE_DIR}/nCine-android-external" CACHE PATH "Set the path to the Android libraries directory")
