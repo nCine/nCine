@@ -33,26 +33,31 @@ elseif(APPLE)
 	file(RELATIVE_PATH RELPATH_TO_LIB ${CMAKE_INSTALL_PREFIX}/${RUNTIME_INSTALL_DESTINATION} ${CMAKE_INSTALL_PREFIX}/${LIBRARY_INSTALL_DESTINATION})
 endif()
 
-if(PNG_FOUND)
-	list(APPEND APPTESTS apptest_texformats apptest_joystick apptest_rotozoom apptest_animsprites
-		apptest_particles apptest_scene apptest_font apptest_multitouch apptest_camera
-		apptest_meshsprites apptest_meshdeform apptest_sinescroller apptest_clones)
-	if(OPENAL_FOUND)
-		list(APPEND APPTESTS apptest_audio)
-	endif()
-	if(LUA_FOUND)
-		list(APPEND APPTESTS apptest_lua apptest_luareload)
-	endif()
-	if(NCINE_WITH_IMGUI)
-		list(APPEND APPTESTS apptest_anchor apptest_filebrowser)
-		if(NCINE_WITH_ALLOCATORS)
-			list(APPEND APPTESTS apptest_allocators)
+if("${NCINE_OPTIONS_PRESETS}" STREQUAL "LuaDist")
+	list(APPEND APPTESTS ${NCINE_STARTUP_TEST})
+	list(APPEND ${NCINE_STARTUP_TEST}_SOURCES apptest_lua.h apptest_lua.cpp)
+else()
+	if(PNG_FOUND)
+		list(APPEND APPTESTS apptest_texformats apptest_joystick apptest_rotozoom apptest_animsprites
+			apptest_particles apptest_scene apptest_font apptest_multitouch apptest_camera
+			apptest_meshsprites apptest_meshdeform apptest_sinescroller apptest_clones)
+		if(OPENAL_FOUND)
+			list(APPEND APPTESTS apptest_audio)
 		endif()
 		if(LUA_FOUND)
-			list(APPEND APPTESTS apptest_simdbench)
+			list(APPEND APPTESTS apptest_lua apptest_luareload)
 		endif()
-		if(OPENAL_FOUND AND VORBIS_FOUND)
-			list(APPEND APPTESTS apptest_loading)
+		if(NCINE_WITH_IMGUI)
+			list(APPEND APPTESTS apptest_anchor apptest_filebrowser)
+			if(NCINE_WITH_ALLOCATORS)
+				list(APPEND APPTESTS apptest_allocators)
+			endif()
+			if(LUA_FOUND)
+				list(APPEND APPTESTS apptest_simdbench)
+			endif()
+			if(OPENAL_FOUND AND VORBIS_FOUND)
+				list(APPEND APPTESTS apptest_loading)
+			endif()
 		endif()
 	endif()
 endif()
@@ -83,7 +88,12 @@ foreach(APPTEST ${APPTESTS})
 	if(APPLE)
 		set_target_properties(${APPTEST} PROPERTIES INSTALL_RPATH "@executable_path/${RELPATH_TO_LIB}")
 	endif()
-	install(TARGETS ${APPTEST} RUNTIME DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
+
+	if("${NCINE_OPTIONS_PRESETS}" STREQUAL "LuaDist")
+		install(TARGETS ${APPTEST} RUNTIME DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT executable)
+	else()
+		install(TARGETS ${APPTEST} RUNTIME DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
+	endif()
 
 	if(EMSCRIPTEN)
 		set(EMSCRIPTEN_PAGE_TITLE ${APPTEST})
@@ -116,15 +126,31 @@ if(EMSCRIPTEN)
 
 	if(EMSCRIPTEN_PACKAGER_SCRIPT)
 		message(STATUS "Emscripten file packager script: ${EMSCRIPTEN_PACKAGER_SCRIPT}")
-		add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/tests/nCine-data.js ${CMAKE_BINARY_DIR}/tests/nCine-data.data
-			COMMAND python ${EMSCRIPTEN_PACKAGER_SCRIPT}
-				${CMAKE_BINARY_DIR}/tests/nCine-data.data
-				--preload ${NCINE_DATA_DIR}/fonts@fonts
-				--preload ${CMAKE_SOURCE_DIR}/scripts@scripts
-				--preload ${NCINE_DATA_DIR}/sounds@sounds
-				--preload ${NCINE_DATA_DIR}/textures@textures
-				--js-output=${CMAKE_BINARY_DIR}/tests/nCine-data.js
-				--no-heap-copy)
+		if("${NCINE_OPTIONS_PRESETS}" STREQUAL "LuaDist")
+			# Minimal data files installation to only support the `script.lua` example script
+			add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/tests/nCine-data.js ${CMAKE_BINARY_DIR}/tests/nCine-data.data
+				COMMAND python ${EMSCRIPTEN_PACKAGER_SCRIPT}
+					${CMAKE_BINARY_DIR}/tests/nCine-data.data
+					--preload ${NCINE_DATA_DIR}/fonts/DroidSans32_256.fnt@fonts/DroidSans32_256.fnt
+					--preload ${NCINE_DATA_DIR}/fonts/DroidSans32_256.png@fonts/DroidSans32_256.png
+					--preload ${NCINE_DATA_DIR}/sounds/coins.ogg@sounds/coins.ogg
+					--preload ${NCINE_DATA_DIR}/textures/texture2.png@textures/texture2.png
+					--preload ${NCINE_DATA_DIR}/textures/texture3.png@textures/texture3.png
+					--preload ${NCINE_DATA_DIR}/textures/smoke_256.png@textures/smoke_256.png
+					--preload ${CMAKE_SOURCE_DIR}/scripts/script.lua@scripts/script.lua
+					--js-output=${CMAKE_BINARY_DIR}/tests/nCine-data.js
+					--no-heap-copy)
+		else()
+			add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/tests/nCine-data.js ${CMAKE_BINARY_DIR}/tests/nCine-data.data
+				COMMAND python ${EMSCRIPTEN_PACKAGER_SCRIPT}
+					${CMAKE_BINARY_DIR}/tests/nCine-data.data
+					--preload ${NCINE_DATA_DIR}/fonts@fonts
+					--preload ${NCINE_DATA_DIR}/sounds@sounds
+					--preload ${NCINE_DATA_DIR}/textures@textures
+					--preload ${CMAKE_SOURCE_DIR}/scripts@scripts
+					--js-output=${CMAKE_BINARY_DIR}/tests/nCine-data.js
+					--no-heap-copy)
+		endif()
 		add_custom_target(ncine_emscripten_data ALL DEPENDS ${CMAKE_BINARY_DIR}/tests/nCine-data.js ${CMAKE_BINARY_DIR}/tests/nCine-data.data)
 		set_target_properties(ncine_emscripten_data PROPERTIES FOLDER "Emscripten")
 		add_dependencies(ncine_emscripten_data ncine)

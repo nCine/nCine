@@ -26,8 +26,10 @@ class DLL_PUBLIC Qt5Widget : public QOpenGLWidget
 
   public:
 	Qt5Widget(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)())
-	    : Qt5Widget(nullptr, createAppEventHandler) {}
-	Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)());
+	    : Qt5Widget(nullptr, createAppEventHandler, 0, nullptr) {}
+	Qt5Widget(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)(), int argc, char **argv)
+	    : Qt5Widget(nullptr, createAppEventHandler, argc, argv) {}
+	Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)(), int argc, char **argv);
 	~Qt5Widget();
 
 	IAppEventHandler &appEventHandler();

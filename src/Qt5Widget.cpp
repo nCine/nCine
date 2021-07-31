@@ -14,7 +14,7 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-Qt5Widget::Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)())
+Qt5Widget::Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)(), int argc, char **argv)
     : QOpenGLWidget(parent),
       application_(static_cast<PCApplication &>(theApplication())),
       createAppEventHandler_(createAppEventHandler), isInitialized_(false)
@@ -26,7 +26,7 @@ Qt5Widget::Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*create
 	QObject::connect(this, SIGNAL(frameSwapped()), this, SLOT(update()));
 
 	ASSERT(createAppEventHandler_);
-	application_.init(createAppEventHandler_);
+	application_.init(createAppEventHandler_, argc, argv);
 	application_.setAutoSuspension(false);
 	const int width = application_.appConfiguration().resolution.x;
 	const int height = application_.appConfiguration().resolution.y;

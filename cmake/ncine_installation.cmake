@@ -20,6 +20,9 @@ else()
 endif()
 
 set(CPACK_PACKAGE_NAME "nCine")
+if("${NCINE_OPTIONS_PRESETS}" STREQUAL "LuaDist")
+	set(CPACK_PACKAGE_NAME "nCineLua")
+endif()
 set(CPACK_PACKAGE_VENDOR "Angelo Theodorou")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A cross-platform 2D game engine")
 set(CPACK_PACKAGE_DESCRIPTION "nCine is a 2D game engine for Linux, Windows, macOS, Android and Emscripten")
@@ -51,15 +54,21 @@ if(MSVC)
 		endif()
 	endif()
 	if(NCINE_BUILD_TESTS)
+		if("${NCINE_OPTIONS_PRESETS}" STREQUAL "LuaDist")
+			set(DESKTOP_LINK_NAME "nCine Lua")
+		else()
+			set(DESKTOP_LINK_NAME "nCine Test")
+		endif()
+
 		# Custom NSIS commands needed in order to set the "Start in" property of the start menu shortcut
 		set(CPACK_NSIS_CREATE_ICONS_EXTRA
 			"SetOutPath '$INSTDIR\\\\bin'
-			CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\nCine Test.lnk' '$INSTDIR\\\\bin\\\\${NCINE_STARTUP_TEST}.exe'
-			CreateShortCut '$DESKTOP\\\\nCine Test.lnk' '$INSTDIR\\\\bin\\\\${NCINE_STARTUP_TEST}.exe'
+			CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${DESKTOP_LINK_NAME}.lnk' '$INSTDIR\\\\bin\\\\${NCINE_STARTUP_TEST}.exe'
+			CreateShortCut '$DESKTOP\\\\${DESKTOP_LINK_NAME}.lnk' '$INSTDIR\\\\bin\\\\${NCINE_STARTUP_TEST}.exe'
 			SetOutPath '$INSTDIR'")
 		set(CPACK_NSIS_DELETE_ICONS_EXTRA
-			"Delete '$SMPROGRAMS\\\\$MUI_TEMP\\\\nCine Test.lnk'
-			Delete '$DESKTOP\\\\nCine Test.lnk'")
+			"Delete '$SMPROGRAMS\\\\$MUI_TEMP\\\\${DESKTOP_LINK_NAME}.lnk'
+			Delete '$DESKTOP\\\\${DESKTOP_LINK_NAME}.lnk'")
 	endif()
 	set(CPACK_NSIS_COMPRESSOR "/SOLID lzma")
 	set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
@@ -165,7 +174,14 @@ set(CPACK_COMPONENTS_ALL libraries)
 set(CPACK_COMPONENT_LIBRARIES_DISPLAY_NAME "Libraries")
 
 if(NCINE_BUILD_TESTS)
-	set(CPACK_COMPONENTS_ALL "${CPACK_COMPONENTS_ALL};data;tests")
+	if("${NCINE_OPTIONS_PRESETS}" STREQUAL "LuaDist")
+		set(CPACK_COMPONENTS_ALL "${CPACK_COMPONENTS_ALL};data;executable")
+		set(CPACK_COMPONENT_EXECUTABLE_DEPENDS libraries)
+		set(CPACK_COMPONENT_EXECUTABLE_DISPLAY_NAME "Executable")
+		set(CPACK_COMPONENT_EXECUTABLE_DESCRIPTION "nCine Lua Executable")
+	else()
+		set(CPACK_COMPONENTS_ALL "${CPACK_COMPONENTS_ALL};data;tests")
+	endif()
 	set(CPACK_COMPONENT_DATA_DEPENDS libraries)
 	set(CPACK_COMPONENT_TESTS_DEPENDS data)
 
@@ -214,7 +230,8 @@ if(WIN32)
 	else()
 		install(TARGETS ncine EXPORT nCineTargets RUNTIME DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT libraries)
 	endif()
-else()
+elseif(NOT (EMSCRIPTEN AND NOT NCINE_INSTALL_DEV_SUPPORT))
+	# Static Emscripten libraries are only needed for development, not to run apptests
 	install(TARGETS ncine EXPORT nCineTargets DESTINATION ${LIBRARY_INSTALL_DESTINATION} COMPONENT libraries)
 endif()
 
@@ -301,7 +318,8 @@ elseif(APPLE)
 	if(LUA_FOUND)
 		install(DIRECTORY ${CMAKE_FRAMEWORK_PATH}/lua.framework DESTINATION ${FRAMEWORKS_INSTALL_DESTINATION} COMPONENT libraries)
 	endif()
-elseif(EMSCRIPTEN)
+elseif(EMSCRIPTEN AND NCINE_INSTALL_DEV_SUPPORT)
+	# Static Emscripten libraries are only needed for development, not to run apptests
 	if(WEBP_FOUND)
 		get_target_property(OPENAL_IMPORTED_LOCATION WebP::WebP IMPORTED_LOCATION)
 		install(FILES ${OPENAL_IMPORTED_LOCATION} DESTINATION ${LIBRARY_INSTALL_DESTINATION} COMPONENT libraries)

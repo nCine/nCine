@@ -81,6 +81,10 @@ if(OPENGL_FOUND)
 endif()
 target_sources(ncine PRIVATE ${SOURCES} ${PRIVATE_HEADERS} ${HEADERS} ${NCTL_HEADERS} ${SHADER_FILES} ${GENERATED_SOURCES})
 
+if("${NCINE_OPTIONS_PRESETS}" STREQUAL "LuaDist" AND NOT NCINE_WITH_LUA)
+	message(FATAL_ERROR "Cannot build a LuaDist version without Lua")
+endif()
+
 if(NCINE_WITH_IMGUI)
 	target_include_directories(ncine
 		INTERFACE $<BUILD_INTERFACE:${IMGUI_INCLUDE_ONLY_DIR}>

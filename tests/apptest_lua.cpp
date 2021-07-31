@@ -2,11 +2,26 @@
 #include <ncine/Application.h>
 #include <ncine/LuaIAppEventHandler.h>
 #include <ncine/LuaIInputEventHandler.h>
+#include <ncine/FileSystem.h>
+#include <ncine/TextNode.h>
 #include "apptest_datapath.h"
 
 namespace {
 
-const char *ScriptFile = "script.lua";
+#ifdef __ANDROID__
+const char *FontTextureFile = "DroidSans32_256_ETC2.ktx";
+#else
+const char *FontTextureFile = "DroidSans32_256.png";
+#endif
+const char *FontFntFile = "DroidSans32_256.fnt";
+
+const char *DefaultScriptName = "script.lua";
+
+const char *scriptName = nullptr;
+nctl::String dataPathScript;
+
+bool scriptLoaded = false;
+bool dataPathScriptLoaded = false;
 
 }
 
@@ -26,12 +41,36 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
 	setDataPath(config);
 
-	luaState_.runFromFile(prefixDataPath("scripts", ScriptFile).data(), ScriptFile);
+	scriptName = (config.argc() > 1) ? config.argv(1) : DefaultScriptName;
+	dataPathScript = prefixDataPath("scripts", scriptName);
+
+	if (nc::fs::isReadableFile(scriptName))
+		scriptLoaded = luaState_.runFromFile(scriptName);
+	else if (nc::fs::isReadableFile(dataPathScript.data()))
+		dataPathScriptLoaded = luaState_.runFromFile(dataPathScript.data(), scriptName);
+
 	nc::LuaIAppEventHandler::onPreInit(luaState_.state(), config);
 }
 
 void MyEventHandler::onInit()
 {
+	if (scriptLoaded == false && dataPathScriptLoaded == false)
+	{
+		nctl::String errorString;
+		errorString.format("Couldn't load \"%s\"", scriptName);
+		if (dataPathScript.compare(scriptName))
+			errorString.formatAppend(" or \"%s\"", dataPathScript.data());
+
+		nc::SceneNode &rootNode = nc::theApplication().rootNode();
+
+		font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
+		                                   (prefixDataPath("fonts", FontTextureFile)).data());
+		text_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get());
+		text_->setString(errorString);
+		text_->setAlignment(nc::TextNode::Alignment::LEFT);
+		text_->setPosition(text_->width() * 0.5f, text_->height() * 0.5f);
+	}
+
 	nc::LuaIAppEventHandler::onInit(luaState_.state());
 }
 

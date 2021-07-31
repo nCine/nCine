@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        BuildType: [Debug, Release, DevDist]
+        BuildType: [Debug, Release, DevDist, LuaDist]
 
     runs-on: 'ubuntu-18.04'
 
@@ -34,7 +34,7 @@ jobs:
         ./emsdk activate latest
 
     - name: 'Unshallow Git Repository for Versioning'
-      if: matrix.BuildType == 'DevDist'
+      if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
       run: |
         git fetch --unshallow || true
 
@@ -58,7 +58,7 @@ jobs:
         git clone https://github.com/nCine/nCine-data.git
 
     - name: 'CMake Configuration, Make and Test'
-      if: matrix.BuildType != 'DevDist'
+      if: matrix.BuildType != 'DevDist' && matrix.BuildType != 'LuaDist'
       run: |
         source ../emsdk/emsdk_env.sh
 
@@ -73,7 +73,7 @@ jobs:
       run: |
         source ../emsdk/emsdk_env.sh
 
-        if [[ "${{ matrix.BuildType }}" == "DevDist" ]]; then
+        if [[ "${{ matrix.BuildType }}" == "DevDist" || "${{ matrix.BuildType }}" == "LuaDist" ]]; then
           export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }}"
         else
           export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }}"
@@ -86,12 +86,12 @@ jobs:
         make -j2 -C ../nCine-build-${{ matrix.BuildType }}
 
     - name: 'Package'
-      if: matrix.BuildType == 'DevDist'
+      if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
       run: |
         make package -C ../nCine-build-${{ matrix.BuildType }}
 
     - name: 'Push Artifacts'
-      if: matrix.BuildType == 'DevDist'
+      if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
       env:
         PUBLIC_REPO_TOKEN: ${{ secrets.PUBLIC_REPO_TOKEN }}
       run: |
@@ -105,6 +105,9 @@ jobs:
         export CC=emcc
 
         cd ..
+        if [[ "${{ matrix.BuildType }}" == "LuaDist" ]]; then
+            export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/nCine/nCineLua/'`
+        fi
         export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/'`
         export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/OS/'"$OS"'/'`
         export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/COMPILER/'"$CC"'/'`

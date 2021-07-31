@@ -5,6 +5,13 @@
 #include <ncine/IInputEventHandler.h>
 #include <ncine/LuaStateManager.h>
 
+namespace ncine {
+
+class Font;
+class TextNode;
+
+}
+
 namespace nc = ncine;
 
 /// My nCine event handler
@@ -55,6 +62,8 @@ class MyEventHandler :
 
   private:
 	nc::LuaStateManager luaState_;
+	nctl::UniquePtr<nc::Font> font_;
+	nctl::UniquePtr<nc::TextNode> text_;
 };
 
 #endif

@@ -26,7 +26,29 @@ nctl::UniquePtr<IAppEventHandler> createAppEventHandler()
 
 int start(lua_State *L)
 {
-	ncine::PCApplication::start(createAppEventHandler);
+	int argc = 0;
+	const int MaxArguments = 32;
+	static const char *argv[MaxArguments];
+	for (unsigned int i = 0; i < MaxArguments; i++)
+		argv[i] = nullptr;
+
+	lua_getglobal(L, "arg");
+	if (lua_istable(L, -1))
+	{
+		argc = lua_rawlen(L, -1) + 1;
+		if (argc > MaxArguments)
+			argc = MaxArguments;
+
+		for (int i = 0; i < argc; i++)
+		{
+			const int type = lua_rawgeti(L, -1, i); // argc array start from index 0 with the name of the script
+			if (type == LUA_TSTRING)
+				argv[i] = lua_tostring(L, -1);
+			lua_pop(L, 1);
+		}
+	}
+
+	ncine::PCApplication::start(createAppEventHandler, argc, const_cast<char **>(argv));
 	return 0;
 }
 

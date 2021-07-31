@@ -39,6 +39,14 @@ namespace AppConfiguration {
 	static const char *withVSync = "vsync";
 	static const char *withGlDebugContext = "gl_debug_context";
 	static const char *withConsoleColors = "console_colors";
+
+	static const char *glCoreProfile = "opengl_core_profile";
+	static const char *glForwardCompatible = "opengl_forward_compatible";
+	static const char *glMajorVersion = "opengl_major_version";
+	static const char *glMinorVersion = "opengl_minor_version";
+	static const char *profileTextUpdateTime = "profile_text_update_time";
+	static const char *argc = "argc";
+	static const char *argv = "argv";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -47,7 +55,7 @@ namespace AppConfiguration {
 
 void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 {
-	lua_createtable(L, 0, 24);
+	lua_createtable(L, 0, 30);
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::dataPath, appCfg.dataPath().data());
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::logFile, appCfg.logFile.data());
@@ -77,6 +85,24 @@ void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withVSync, appCfg.withVSync);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withGlDebugContext, appCfg.withGlDebugContext);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withConsoleColors, appCfg.withConsoleColors);
+
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::glCoreProfile, appCfg.glCoreProfile());
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::glForwardCompatible, appCfg.glForwardCompatible());
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::glMajorVersion, appCfg.glMajorVersion());
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::glMinorVersion, appCfg.glMinorVersion());
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::profileTextUpdateTime, appCfg.profileTextUpdateTime());
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::argc, appCfg.argc());
+
+	if (appCfg.argc() > 0)
+	{
+		lua_createtable(L, appCfg.argc(), 0);
+		for (int i = 0; i < appCfg.argc(); i++)
+		{
+			lua_pushstring(L, appCfg.argv(i));
+			lua_rawseti(L, -2, i + 1); // Lua arrays start from index 1
+		}
+		lua_setfield(L, -2, LuaNames::AppConfiguration::argv);
+	}
 }
 
 void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)

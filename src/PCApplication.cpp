@@ -35,12 +35,12 @@ Application &theApplication()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-int PCApplication::start(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)())
+int PCApplication::start(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)(), int argc, char **argv)
 {
 	ASSERT(createAppEventHandler);
 	PCApplication &app = static_cast<PCApplication &>(theApplication());
 
-	app.init(createAppEventHandler);
+	app.init(createAppEventHandler, argc, argv);
 #ifndef __EMSCRIPTEN__
 	app.run();
 #else
@@ -56,7 +56,7 @@ int PCApplication::start(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)())
+void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)(), int argc, char **argv)
 {
 	ZoneScoped;
 	profileStartTime_ = TimeStamp::now();
@@ -68,6 +68,8 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 	appEventHandler_ = createAppEventHandler();
 	// Only `onPreInit()` can modify the application configuration
 	AppConfiguration &modifiableAppCfg = const_cast<AppConfiguration &>(appCfg_);
+	modifiableAppCfg.argc_ = argc;
+	modifiableAppCfg.argv_ = argv;
 	appEventHandler_->onPreInit(modifiableAppCfg);
 	LOGI("IAppEventHandler::onPreInit() invoked");
 

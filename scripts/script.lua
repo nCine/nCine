@@ -27,6 +27,7 @@ function ncine.on_init()
 		texture2_file = "texture3.png"
 		texture3_file = "smoke_256.png"
 	end
+	sound_file = "coins.ogg"
 
 	local rootnode = nc.application.rootnode()
 
@@ -37,7 +38,7 @@ function ncine.on_init()
 	font_ = nc.font.new(nc.fs.get_datapath().."fonts/DroidSans32_256.fnt",
 	                    nc.fs.get_datapath().."fonts/"..font_tex_file)
 	textnode_ = nc.textnode.new(rootnode, font_, 256)
-	nc.textnode.set_string(textnode_, "apptest_lua")
+	nc.textnode.set_string(textnode_, "This is script.lua")
 	nc.textnode.set_layer(textnode_, 100)
 	nc.textnode.set_position(textnode_, screen.x * 0.25, screen.y * 0.25)
 	nc.textnode.set_color(textnode_, 1.0, 0.0, 0.0, 1.0)
@@ -66,6 +67,9 @@ function ncine.on_init()
 	})
 	nc.particle_system.add_size_affector(particlesys_, 0.5, {{0.0, 0.25}, {0.45, 0.35}, {1.0, 0.75}})
 
+	audiobuffer_ = nc.audiobuffer.new(nc.fs.get_datapath().."sounds/"..sound_file)
+	player_ = nc.audiobuffer_player.new(audiobuffer_)
+
 	local settings = nc.application.get_rendering_settings()
 	print("Rendering settings")
 	for key, value in pairs(settings) do
@@ -90,6 +94,9 @@ function ncine.on_frame_start()
 end
 
 function ncine.on_shutdown()
+	nc.audiobuffer_player.delete(player_)
+	nc.audiobuffer.delete(audiobuffer_)
+
 	nc.particle_system.delete(particlesys_)
 
 	nc.mesh_sprite.delete(meshsprite_)
@@ -116,6 +123,9 @@ end
 function ncine.on_touch_down(event)
 	pos_.x = event[0].x
 	pos_.y = event[0].y
+
+	nc.audiobuffer_player.stop(player_)
+	nc.audiobuffer_player.play(player_)
 end
 
 function ncine.on_touch_move(event)
@@ -129,6 +139,9 @@ function ncine.on_mouse_button_released(event)
 	elseif event.button == nc.mouse_button.RIGHT then
 		nc.sprite.set_position(sprite_, event.x, event.y)
 	end
+
+	nc.audiobuffer_player.stop(player_)
+	nc.audiobuffer_player.play(player_)
 end
 
 function ncine.on_mouse_moved(state)

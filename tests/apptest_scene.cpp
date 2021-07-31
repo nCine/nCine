@@ -418,7 +418,7 @@ int main(int argc, char **argv)
 	vLayout->addWidget(unlinkedLineEdit);
 	vLayout->addLayout(dummyLayout);
 
-	ncine::Qt5Widget *ncWidget = new nc::Qt5Widget(createAppEventHandler);
+	ncine::Qt5Widget *ncWidget = new nc::Qt5Widget(createAppEventHandler, argc, argv);
 	const nc::AppConfiguration appCfg = nc::theApplication().appConfiguration();
 	QWidget window;
 	window.setWindowTitle(appCfg.windowTitle.data());

@@ -28,6 +28,10 @@ jobs:
           CC: gcc
           CXX: g++
 
+        - BuildType: LuaDist
+          CC: gcc
+          CXX: g++
+
         - BuildType: Debug
           CC: clang
           CXX: clang++
@@ -37,6 +41,10 @@ jobs:
           CXX: clang++
 
         - BuildType: DevDist
+          CC: clang
+          CXX: clang++
+
+        - BuildType: LuaDist
           CC: clang
           CXX: clang++
 
@@ -61,7 +69,7 @@ jobs:
         C:\msys64\usr\bin\pacman --noconfirm -Scc
 
     - name: 'Unshallow Git Repository for Versioning'
-      if: matrix.BuildType == 'DevDist'
+      if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
       run: |
         $env:GIT_REDIRECT_STDERR = '2>&1'
         git fetch --unshallow; if (-not $?) { return }
@@ -99,14 +107,14 @@ jobs:
         git clone https://github.com/nCine/nCine-data.git
 
     - name: 'Download RenderDoc API Header'
-      if: matrix.BuildType != 'DevDist'
+      if: matrix.BuildType != 'DevDist' && matrix.BuildType != 'LuaDist'
       run: |
         mkdir ..\RenderDoc
         cd ..\RenderDoc
         curl -fsSL https://raw.githubusercontent.com/baldurk/renderdoc/v1.x/renderdoc/api/app/renderdoc_app.h -o renderdoc_app.h
 
     - name: 'CMake Configuration, Make and Test'
-      if: matrix.BuildType != 'DevDist'
+      if: matrix.BuildType != 'DevDist' && matrix.BuildType != 'LuaDist'
       env:
         CHERE_INVOKING: on
       run: |
@@ -134,7 +142,7 @@ jobs:
         if ("${{ matrix.CC }}" -eq "clang")
           { $EnableTracy = 'OFF' }
 
-        if ("${{ matrix.BuildType }}" -eq "DevDist")
+        if ("${{ matrix.BuildType }}" -eq "DevDist" -Or "${{ matrix.BuildType }}" -eq "LuaDist")
           { C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }}' }
         else
           { C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=$EnableTracy -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$PWD/../RenderDoc' }
@@ -148,7 +156,7 @@ jobs:
         C:\msys64\usr\bin\bash.exe -lc 'make -j2 -C ../nCine-build-${{ matrix.BuildType }}'
 
     - name: 'Package'
-      if: matrix.BuildType == 'DevDist'
+      if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
       env:
         CHERE_INVOKING: on
       run: |
@@ -158,7 +166,7 @@ jobs:
         C:\msys64\usr\bin\bash.exe -lc 'make package -C ../nCine-build-${{ matrix.BuildType }}'
 
     - name: 'Push Artifacts'
-      if: matrix.BuildType == 'DevDist'
+      if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
       env:
         PUBLIC_REPO_TOKEN: ${{ secrets.PUBLIC_REPO_TOKEN }}
       run: |
@@ -170,6 +178,8 @@ jobs:
         $env:DEPLOY_MESSAGE = $env:DEPLOY_MESSAGE -replace "BRANCH_NAME",$env:branch_name
 
         $env:CC = "${{ matrix.CC }}"
+        if ("${{ matrix.BuildType }}" -eq "LuaDist")
+            { $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "nCine","nCineLua" }
         $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "BRANCH_NAME",$env:branch_name
         $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "OS","mingw64" -replace "COMPILER",$env:CC
 

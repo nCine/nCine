@@ -56,7 +56,9 @@ AppConfiguration::AppConfiguration()
       glMajorVersion_(3),
       glMinorVersion_(3),
 #endif
-      profileTextUpdateTime_(0.2f)
+      profileTextUpdateTime_(0.2f),
+      argc_(0),
+      argv_(nullptr)
 {
 	logFile = "ncine_log.txt";
 	windowTitle = "nCine";
@@ -84,6 +86,13 @@ const nctl::String &AppConfiguration::dataPath() const
 nctl::String &AppConfiguration::dataPath()
 {
 	return fs::dataPath_;
+}
+
+const char *AppConfiguration::argv(int index) const
+{
+	if (index < argc_)
+		return argv_[index];
+	return nullptr;
 }
 
 }

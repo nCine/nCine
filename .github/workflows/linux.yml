@@ -28,6 +28,10 @@ jobs:
           CC: gcc
           CXX: g++
 
+        - BuildType: LuaDist
+          CC: gcc
+          CXX: g++
+
         - BuildType: Debug
           CC: clang
           CXX: clang++
@@ -37,6 +41,10 @@ jobs:
           CXX: clang++
 
         - BuildType: DevDist
+          CC: clang
+          CXX: clang++
+
+        - BuildType: LuaDist
           CC: clang
           CXX: clang++
 
@@ -55,7 +63,7 @@ jobs:
         fi
 
     - name: 'Unshallow Git Repository for Versioning'
-      if: matrix.BuildType == 'DevDist'
+      if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
       run: |
         git fetch --unshallow || true
 
@@ -86,14 +94,14 @@ jobs:
         git clone https://github.com/nCine/nCine-data.git
 
     - name: 'Download RenderDoc API Header'
-      if: matrix.BuildType != 'DevDist'
+      if: matrix.BuildType != 'DevDist' && matrix.BuildType != 'LuaDist'
       run: |
         mkdir ../RenderDoc
         cd ../RenderDoc
         curl -fsSL https://raw.githubusercontent.com/baldurk/renderdoc/v1.x/renderdoc/api/app/renderdoc_app.h -o renderdoc.h
 
     - name: 'CMake Configuration, Make and Test'
-      if: matrix.BuildType != 'DevDist'
+      if: matrix.BuildType != 'DevDist' && matrix.BuildType != 'LuaDist'
       run: |
         export CC=${{ matrix.CC }}
         export CXX=${{ matrix.CXX }}
@@ -110,7 +118,7 @@ jobs:
         export CC=${{ matrix.CC }}
         export CXX=${{ matrix.CXX }}
 
-        if [[ "${{ matrix.BuildType }}" == "DevDist" ]]; then
+        if [[ "${{ matrix.BuildType }}" == "DevDist" || "${{ matrix.BuildType }}" == "LuaDist" ]]; then
           export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }}"
         else
           export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=ON"
@@ -124,7 +132,7 @@ jobs:
         make -j2 -C ../nCine-build-${{ matrix.BuildType }}
 
     - name: 'Package'
-      if: matrix.BuildType == 'DevDist'
+      if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
       run: |
         make package -C ../nCine-build-${{ matrix.BuildType }}
 
@@ -162,7 +170,7 @@ jobs:
         git push --force || git push --set-upstream origin master
 
     - name: 'Push Artifacts'
-      if: matrix.BuildType == 'DevDist'
+      if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
       env:
         PUBLIC_REPO_TOKEN: ${{ secrets.PUBLIC_REPO_TOKEN }}
       run: |
@@ -177,6 +185,9 @@ jobs:
         export PACKAGE_EXT=tar.gz
 
         cd ..
+        if [[ "${{ matrix.BuildType }}" == "LuaDist" ]]; then
+            export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/nCine/nCineLua/'`
+        fi
         export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/'`
         export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/OS/'"$OS"'/'`
         export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/COMPILER/'"$CC"'/'`

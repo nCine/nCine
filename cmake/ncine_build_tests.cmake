@@ -38,18 +38,34 @@ if(NCINE_BUILD_TESTS)
 		endif()
 		message(STATUS "Data directory for tests: ${NCINE_TESTS_DATA_DIR}")
 
-		install(DIRECTORY ${NCINE_DATA_DIR}/fonts DESTINATION ${DATA_INSTALL_DESTINATION} COMPONENT data)
-		install(DIRECTORY ${NCINE_DATA_DIR}/sounds DESTINATION ${DATA_INSTALL_DESTINATION} COMPONENT data)
-		install(DIRECTORY ${NCINE_DATA_DIR}/textures DESTINATION ${DATA_INSTALL_DESTINATION} COMPONENT data)
-		if(LUA_FOUND)
-			target_compile_definitions(ncine PRIVATE "NCINE_TESTS_DATA_DIR=\"${NCINE_TESTS_DATA_DIR}\"") # for LuaEventHandler
-			install(DIRECTORY ${CMAKE_SOURCE_DIR}/scripts DESTINATION ${DATA_INSTALL_DESTINATION} COMPONENT data)
+		# Emscripten does not need any data to run tests
+		if(NOT (EMSCRIPTEN AND ("${NCINE_OPTIONS_PRESETS}" STREQUAL "BinDist" OR "${NCINE_OPTIONS_PRESETS}" STREQUAL "LuaDist")))
+			if("${NCINE_OPTIONS_PRESETS}" STREQUAL "LuaDist")
+				# Minimal data files installation to only support the `script.lua` example script
+				install(FILES ${NCINE_DATA_DIR}/fonts/DroidSans32_256.fnt DESTINATION ${DATA_INSTALL_DESTINATION}/fonts COMPONENT data)
+				install(FILES ${NCINE_DATA_DIR}/fonts/DroidSans32_256.png DESTINATION ${DATA_INSTALL_DESTINATION}/fonts COMPONENT data)
+				install(FILES ${NCINE_DATA_DIR}/sounds/coins.ogg DESTINATION ${DATA_INSTALL_DESTINATION}/sounds COMPONENT data)
+				install(FILES ${NCINE_DATA_DIR}/textures/texture2.png DESTINATION ${DATA_INSTALL_DESTINATION}/textures COMPONENT data)
+				install(FILES ${NCINE_DATA_DIR}/textures/texture3.png DESTINATION ${DATA_INSTALL_DESTINATION}/textures COMPONENT data)
+				install(FILES ${NCINE_DATA_DIR}/textures/smoke_256.png DESTINATION ${DATA_INSTALL_DESTINATION}/textures COMPONENT data)
+				install(FILES ${CMAKE_SOURCE_DIR}/scripts/script.lua DESTINATION ${DATA_INSTALL_DESTINATION}/scripts COMPONENT data)
+			else()
+				install(DIRECTORY ${NCINE_DATA_DIR}/fonts DESTINATION ${DATA_INSTALL_DESTINATION} COMPONENT data)
+				install(DIRECTORY ${NCINE_DATA_DIR}/sounds DESTINATION ${DATA_INSTALL_DESTINATION} COMPONENT data)
+				install(DIRECTORY ${NCINE_DATA_DIR}/textures DESTINATION ${DATA_INSTALL_DESTINATION} COMPONENT data)
+				if(LUA_FOUND)
+					target_compile_definitions(ncine PRIVATE "NCINE_TESTS_DATA_DIR=\"${NCINE_TESTS_DATA_DIR}\"") # for LuaEventHandler
+					install(DIRECTORY ${CMAKE_SOURCE_DIR}/scripts DESTINATION ${DATA_INSTALL_DESTINATION} COMPONENT data)
+				endif()
+			endif()
+
+			install(FILES ${NCINE_DATA_DIR}/README.md DESTINATION ${DATA_INSTALL_DESTINATION} COMPONENT data)
 		endif()
-		install(FILES ${NCINE_DATA_DIR}/README.md DESTINATION ${DATA_INSTALL_DESTINATION} COMPONENT data)
 	endif()
 
 	add_subdirectory(tests)
-	if(NOT NCINE_DYNAMIC_LIBRARY)
+	# Don't build and install srctests on a Lua distribution for Emscripten
+	if(NOT NCINE_DYNAMIC_LIBRARY AND NOT "${NCINE_OPTIONS_PRESETS}" STREQUAL "LuaDist")
 		add_subdirectory(src/tests)
 	endif()
 endif()

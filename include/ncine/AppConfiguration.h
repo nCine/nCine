@@ -87,6 +87,11 @@ class DLL_PUBLIC AppConfiguration
 	/// \returns The update time in seconds for the profile text nodes
 	inline float profileTextUpdateTime() const { return profileTextUpdateTime_; }
 
+	/// \returns The number of arguments passed on the command line
+	inline int argc() const { return argc_; }
+	/// \returns The selected argument from the ones passed on the command line
+	const char *argv(int index) const;
+
   private:
 	// Pre-configured compile-time variables
 	const bool glCoreProfile_;
@@ -94,6 +99,11 @@ class DLL_PUBLIC AppConfiguration
 	const unsigned int glMajorVersion_;
 	const unsigned int glMinorVersion_;
 	const float profileTextUpdateTime_;
+
+	int argc_;
+	char **argv_;
+
+	friend class PCApplication;
 };
 
 }

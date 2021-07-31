@@ -15,7 +15,9 @@ namespace LuaTouchEvents {
 
 	static const char *x = "x";
 	static const char *y = "y";
+#ifdef __ANDROID__
 	static const char *z = "z";
+#endif
 }}
 
 ///////////////////////////////////////////////////////////
