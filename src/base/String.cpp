@@ -410,7 +410,8 @@ String &String::format(const char *fmt, ...)
 
 	int formattedLength = 0;
 	bool extended = false;
-	do {
+	do
+	{
 		va_list args;
 		va_start(args, fmt);
 		formattedLength = nctl::vsnprintfTrunc(data(), capacity_, fmt, args);
@@ -446,7 +447,8 @@ String &String::formatAppend(const char *fmt, ...)
 
 	int formattedLength = 0;
 	bool extended = false;
-	do {
+	do
+	{
 		va_list args;
 		va_start(args, fmt);
 		formattedLength = nctl::vsnprintfTrunc(data() + length_, capacity_ - length_, fmt, args);

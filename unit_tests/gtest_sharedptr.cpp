@@ -45,7 +45,7 @@ TEST_F(SharedPtrTest, Reset)
 {
 	const int newValue = 3;
 	int *raw = newObject<int>(newValue);
-	int const *const oldRaw = raw;
+	int const * const oldRaw = raw;
 	printPointer("Creating a raw pointer to int, ", raw);
 
 	ptr_.reset(raw);
@@ -59,7 +59,7 @@ TEST_F(SharedPtrTest, Reset)
 
 TEST_F(SharedPtrTest, SelfReset)
 {
-	int *const raw = ptr_.get();
+	int * const raw = ptr_.get();
 	printPointer("Creating a raw pointer to int, ", raw);
 
 	ptr_.reset(raw);
@@ -80,7 +80,7 @@ TEST_F(SharedPtrTest, ResetNull)
 
 TEST_F(SharedPtrTest, MoveConstructor)
 {
-	int const *const oldPtr = ptr_.get();
+	int const * const oldPtr = ptr_.get();
 	nctl::SharedPtr<int> newPtr(nctl::move(ptr_));
 	printPointer("Creating a new shared pointer moving from the first one, ", newPtr);
 
@@ -98,7 +98,7 @@ TEST_F(SharedPtrTest, MoveConstructor)
 
 TEST_F(SharedPtrTest, MoveAssignment)
 {
-	int const *const oldPtr = ptr_.get();
+	int const * const oldPtr = ptr_.get();
 	nctl::SharedPtr<int> newPtr;
 	newPtr = nctl::move(ptr_);
 	printPointer("Assigning to a new shared pointer moving from first, ", newPtr);
@@ -119,7 +119,7 @@ TEST_F(SharedPtrTest, ConstructFromUnique)
 {
 	const int newValue = 3;
 	auto uniquePtr = nctl::makeUnique<int>(newValue);
-	int const *const oldPtr = uniquePtr.get();
+	int const * const oldPtr = uniquePtr.get();
 	printPointer("Creating a unique pointer to int, ", uniquePtr);
 
 	nctl::SharedPtr<int> newPtr(nctl::move(uniquePtr));
@@ -197,7 +197,7 @@ TEST_F(SharedPtrTest, MakeSharedMoveConstructor)
 	const int newValue = 3;
 	auto newPtr = nctl::makeShared<int>(newValue);
 	printPointer("Creating a shared pointer with `makeShared()`, ", newPtr);
-	int const *const oldPtr = newPtr.get();
+	int const * const oldPtr = newPtr.get();
 
 	nctl::SharedPtr<int> newPtr2(nctl::move(newPtr));
 	printPointer("Creating a second shared pointer moving from the first one, ", newPtr2);
@@ -216,7 +216,7 @@ TEST_F(SharedPtrTest, MakeSharedMoveAssignment)
 	const int newValue = 3;
 	auto newPtr = nctl::makeShared<int>(newValue);
 	printPointer("Creating a shared pointer with `makeShared()`, ", newPtr);
-	int const *const oldPtr = newPtr.get();
+	int const * const oldPtr = newPtr.get();
 
 	nctl::SharedPtr<int> newPtr2;
 	newPtr2 = nctl::move(newPtr);

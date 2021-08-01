@@ -24,7 +24,7 @@ TEST_F(UniquePtrArrayTest, Reset)
 {
 	const int newValue = 3;
 	int *raw = newArray<int>(Size);
-	int const *const oldRaw = raw;
+	int const * const oldRaw = raw;
 	raw[0] = newValue;
 	printf("Creating a raw pointer to an array of ints, address: 0x%p, first value: %d\n", static_cast<const int *>(raw), *raw);
 
@@ -38,7 +38,7 @@ TEST_F(UniquePtrArrayTest, Reset)
 
 TEST_F(UniquePtrArrayTest, SelfReset)
 {
-	int *const raw = ptr_.get();
+	int * const raw = ptr_.get();
 	printPointer("Creating a raw pointer to an array of ints, ", raw);
 
 	ptr_.reset(raw);
@@ -59,7 +59,7 @@ TEST_F(UniquePtrArrayTest, ResetNull)
 TEST_F(UniquePtrArrayTest, Release)
 {
 	int *raw = nullptr;
-	int const *const oldPtr = ptr_.get();
+	int const * const oldPtr = ptr_.get();
 	raw = ptr_.release();
 	printPointer("Releasing the unique pointer to the raw one, ", raw);
 
@@ -72,7 +72,7 @@ TEST_F(UniquePtrArrayTest, Release)
 
 TEST_F(UniquePtrArrayTest, MoveConstructor)
 {
-	int const *const oldPtr = ptr_.get();
+	int const * const oldPtr = ptr_.get();
 	nctl::UniquePtr<int[]> newPtr(nctl::move(ptr_));
 	printPointer("Creating a new unique pointer moving from the first one, ", newPtr);
 
@@ -87,7 +87,7 @@ TEST_F(UniquePtrArrayTest, MoveConstructor)
 
 TEST_F(UniquePtrArrayTest, MoveAssignment)
 {
-	int const *const oldPtr = ptr_.get();
+	int const * const oldPtr = ptr_.get();
 	nctl::UniquePtr<int[]> newPtr;
 	newPtr = nctl::move(ptr_);
 	printPointer("Assigning to a new unique pointer moving from first, ", newPtr);

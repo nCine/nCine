@@ -101,8 +101,8 @@ void ImGuiSdlInput::init(SDL_Window *window)
 
 	// Check and store if we are on a SDL backend that supports global mouse position
 	// ("wayland" and "rpi" don't support it, but we chose to use a white-list instead of a black-list)
-	const char* sdlBackend = SDL_GetCurrentVideoDriver();
-	const char* globalMouseWhitelist[] = { "windows", "cocoa", "x11", "DIVE", "VMAN" };
+	const char *sdlBackend = SDL_GetCurrentVideoDriver();
+	const char *globalMouseWhitelist[] = { "windows", "cocoa", "x11", "DIVE", "VMAN" };
 	mouseCanUseGlobalState_ = false;
 	for (int n = 0; n < IM_ARRAYSIZE(globalMouseWhitelist); n++)
 	{

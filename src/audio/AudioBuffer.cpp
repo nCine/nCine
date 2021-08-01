@@ -69,7 +69,7 @@ AudioBuffer::AudioBuffer(AudioBuffer &&other)
 	other.bufferId_ = 0;
 }
 
-AudioBuffer& AudioBuffer::operator=(AudioBuffer &&other)
+AudioBuffer &AudioBuffer::operator=(AudioBuffer &&other)
 {
 	Object::operator=(nctl::move(other));
 
@@ -158,7 +158,7 @@ bool AudioBuffer::loadFromSamples(const unsigned char *bufferPtr, unsigned long 
 	if (bytesPerSample_ == 0 || numChannels_ == 0 || frequency_ == 0)
 		return false;
 
-	if(bufferSize % (bytesPerSample_ * numChannels_) != 0)
+	if (bufferSize % (bytesPerSample_ * numChannels_) != 0)
 		LOGW("Buffer size is incompatible with format");
 	const ALenum format = alFormat(bytesPerSample_, numChannels_);
 

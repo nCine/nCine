@@ -50,7 +50,7 @@ class DLL_PUBLIC String
 	String(unsigned int capacity, StringMode mode);
 	/// Constructs a string object from a C string
 	String(const char *cString)
-	    :  String(cString, StringMode::GROWING_CAPACITY) {}
+	    : String(cString, StringMode::GROWING_CAPACITY) {}
 	/// Constructs a string object from a C string with the option for it to be fixed
 	String(const char *cString, StringMode mode);
 	~String();
@@ -121,7 +121,6 @@ class DLL_PUBLIC String
 	inline char *data() { return (capacity_ > SmallBufferSize) ? array_.begin_ : array_.local_; }
 	/// Returns a constant pointer to the internal array
 	inline const char *data() const { return (capacity_ > SmallBufferSize) ? array_.begin_ : array_.local_; }
-
 
 	/// Replaces characters from somewhere in the other string to somewhere in this one (no truncation)
 	unsigned int replace(const String &source, unsigned int srcChar, unsigned int numChar, unsigned int destChar);

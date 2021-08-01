@@ -256,9 +256,9 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 			RenderCommand &currCmd = (cmdIdx == 0) ? firstCmd : *retrieveCommandFromPool();
 
 			const ImVec4 clipRect = ImVec4((imCmd->ClipRect.x - clipOff.x) * clipScale.x,
-			                                (imCmd->ClipRect.y - clipOff.y) * clipScale.y,
-			                                (imCmd->ClipRect.z - clipOff.x) * clipScale.x,
-			                                (imCmd->ClipRect.w - clipOff.y) * clipScale.y);
+			                               (imCmd->ClipRect.y - clipOff.y) * clipScale.y,
+			                               (imCmd->ClipRect.z - clipOff.x) * clipScale.x,
+			                               (imCmd->ClipRect.w - clipOff.y) * clipScale.y);
 
 			if (clipRect.x < fbWidth && clipRect.y < fbHeight && clipRect.z >= 0.0f && clipRect.w >= 0.0f)
 			{
@@ -335,9 +335,9 @@ void ImGuiDrawing::draw()
 			const ImDrawCmd *imCmd = &imCmdList->CmdBuffer[cmdIdx];
 
 			const ImVec4 clipRect = ImVec4((imCmd->ClipRect.x - clipOff.x) * clipScale.x,
-			                                (imCmd->ClipRect.y - clipOff.y) * clipScale.y,
-			                                (imCmd->ClipRect.z - clipOff.x) * clipScale.x,
-			                                (imCmd->ClipRect.w - clipOff.y) * clipScale.y);
+			                               (imCmd->ClipRect.y - clipOff.y) * clipScale.y,
+			                               (imCmd->ClipRect.z - clipOff.x) * clipScale.x,
+			                               (imCmd->ClipRect.w - clipOff.y) * clipScale.y);
 
 			if (clipRect.x < fbWidth && clipRect.y < fbHeight && clipRect.z >= 0.0f && clipRect.w >= 0.0f)
 			{

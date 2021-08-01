@@ -51,7 +51,6 @@ AudioStream::~AudioStream()
 		alDeleteBuffers(NumBuffers, buffersIds_.data());
 }
 
-
 AudioStream::AudioStream(AudioStream &&) = default;
 
 AudioStream &AudioStream::operator=(AudioStream &&) = default;

@@ -9,7 +9,7 @@ struct lua_State;
 struct lua_Debug;
 
 namespace nctl {
-	class String;
+class String;
 }
 
 namespace ncine {

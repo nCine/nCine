@@ -303,7 +303,7 @@ void Texture::setWrap(Wrap wrapMode)
  *  It is considered immutable from an user point of view and thus retrievable by a constant method. */
 void *Texture::guiTexId() const
 {
-	return const_cast<void *>(reinterpret_cast<const void*>(glTexture_.get()));
+	return const_cast<void *>(reinterpret_cast<const void *>(glTexture_.get()));
 }
 
 ///////////////////////////////////////////////////////////

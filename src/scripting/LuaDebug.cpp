@@ -8,7 +8,7 @@
 namespace ncine {
 
 namespace {
-const char *debugInfoKey = "k";
+	const char *debugInfoKey = "k";
 }
 
 ///////////////////////////////////////////////////////////
@@ -184,7 +184,7 @@ LuaUtils::RunInfo *LuaDebug::retrieveRunInfo(lua_State *L)
 	lua_pushlightuserdata(L, reinterpret_cast<void *>(&debugInfoKey));
 	const int type = lua_gettable(L, LUA_REGISTRYINDEX);
 	if (type == LUA_TLIGHTUSERDATA)
-		runInfo =  reinterpret_cast<LuaUtils::RunInfo *>(lua_touserdata(L, -1));
+		runInfo = reinterpret_cast<LuaUtils::RunInfo *>(lua_touserdata(L, -1));
 	lua_pop(L, 1);
 
 	return runInfo;

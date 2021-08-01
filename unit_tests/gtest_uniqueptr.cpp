@@ -43,7 +43,7 @@ TEST_F(UniquePtrTest, Reset)
 {
 	const int newValue = 3;
 	int *raw = newObject<int>(newValue);
-	int const *const oldRaw = raw;
+	int const * const oldRaw = raw;
 	printPointer("Creating a raw pointer to int, ", raw);
 
 	ptr_.reset(raw);
@@ -56,7 +56,7 @@ TEST_F(UniquePtrTest, Reset)
 
 TEST_F(UniquePtrTest, SelfReset)
 {
-	int *const raw = ptr_.get();
+	int * const raw = ptr_.get();
 	printPointer("Creating a raw pointer to int, ", raw);
 
 	ptr_.reset(raw);
@@ -77,7 +77,7 @@ TEST_F(UniquePtrTest, ResetNull)
 TEST_F(UniquePtrTest, Release)
 {
 	int *raw = nullptr;
-	int const *const oldPtr = ptr_.get();
+	int const * const oldPtr = ptr_.get();
 	raw = ptr_.release();
 	printPointer("Releasing the unique pointer to the raw one, ", raw);
 
@@ -89,7 +89,7 @@ TEST_F(UniquePtrTest, Release)
 
 TEST_F(UniquePtrTest, MoveConstructor)
 {
-	int const *const oldPtr = ptr_.get();
+	int const * const oldPtr = ptr_.get();
 	nctl::UniquePtr<int> newPtr(nctl::move(ptr_));
 	printPointer("Creating a new unique pointer moving from the first one, ", newPtr);
 
@@ -105,7 +105,7 @@ TEST_F(UniquePtrTest, MoveConstructor)
 TEST_F(UniquePtrTest, MoveConstructorDerived)
 {
 	nctl::UniquePtr<Derived> derivedPtr(newObject<Derived>());
-	Derived const *const oldPtr = derivedPtr.get();
+	Derived const * const oldPtr = derivedPtr.get();
 	nctl::UniquePtr<Base> newPtr(nctl::move(derivedPtr));
 	printf("Creating a new unique pointer moving from the derived one: %s\n", newPtr->name());
 
@@ -116,7 +116,7 @@ TEST_F(UniquePtrTest, MoveConstructorDerived)
 
 TEST_F(UniquePtrTest, MoveAssignment)
 {
-	int const *const oldPtr = ptr_.get();
+	int const * const oldPtr = ptr_.get();
 	nctl::UniquePtr<int> newPtr;
 	newPtr = nctl::move(ptr_);
 	printPointer("Assigning to a new unique pointer moving from the first one, ", newPtr);
@@ -133,7 +133,7 @@ TEST_F(UniquePtrTest, MoveAssignment)
 TEST_F(UniquePtrTest, MoveAssignmentDerived)
 {
 	nctl::UniquePtr<Derived> derivedPtr(newObject<Derived>());
-	Derived const *const oldPtr = derivedPtr.get();
+	Derived const * const oldPtr = derivedPtr.get();
 	nctl::UniquePtr<Base> newPtr;
 	newPtr = nctl::move(derivedPtr);
 	printf("Assigning to a new unique pointer moving from the derived one: %s\n", newPtr->name());
@@ -233,7 +233,7 @@ TEST_F(UniquePtrTest, MoveAssignmentDerivedWithAllocator)
 	printf("Creating a unique pointer to a derived class with a custom allocator\n");
 	nctl::AllocDelete<Derived> deleter1(&stackAllocator1);
 	nctl::UniquePtr<Derived, nctl::AllocDelete<Derived>> derivedPtr(stackAllocator1.newObject<Derived>(), deleter1);
-	Derived const *const oldPtr = derivedPtr.get();
+	Derived const * const oldPtr = derivedPtr.get();
 
 	printf("Creating a second unique pointer to a base class with a different custom allocator\n");
 	nctl::AllocDelete<Base> deleter2(&stackAllocator2);

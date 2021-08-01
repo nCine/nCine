@@ -239,8 +239,8 @@ void TextNode::init()
 	{
 		if (font)
 			return (font->renderMode() == Font::RenderMode::GLYPH_IN_RED)
-			        ? Material::ShaderProgramType::TEXTNODE_RED
-			        : Material::ShaderProgramType::TEXTNODE_ALPHA;
+			           ? Material::ShaderProgramType::TEXTNODE_RED
+			           : Material::ShaderProgramType::TEXTNODE_ALPHA;
 		else
 			return Material::ShaderProgramType::TEXTNODE_ALPHA;
 	}(font_);

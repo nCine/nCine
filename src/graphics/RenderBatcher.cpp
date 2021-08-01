@@ -305,8 +305,8 @@ RenderCommand *RenderBatcher::collectCommands(
 	batchCommand->material().uniform("projection")->setFloatVector(RenderResources::projectionMatrix().data());
 
 	const unsigned int SizeVertexFormat = ((refCommand->material().shaderProgramType() != Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)
-	                                       ? sizeof(RenderResources::VertexFormatPos2Tex2)
-	                                       : sizeof(RenderResources::VertexFormatPos2));
+	                                           ? sizeof(RenderResources::VertexFormatPos2Tex2)
+	                                           : sizeof(RenderResources::VertexFormatPos2));
 	const unsigned int SizeVertexFormatAndIndex = SizeVertexFormat + sizeof(int);
 	const unsigned int NumFloatsVertexFormat = SizeVertexFormat / sizeof(GLfloat);
 	const unsigned int NumFloatsVertexFormatAndIndex = NumFloatsVertexFormat + 1; // index is an `int`, same size as a `float`
@@ -356,13 +356,13 @@ RenderCommand *RenderBatcher::collectCommands(
 			if (it != start && nextStart - start > 1 && !batchingWithIndices)
 			{
 				memcpy(destVtx, srcVtx, SizeVertexFormat);
-				*reinterpret_cast<int*>(static_cast<void*>(&destVtx[NumFloatsVertexFormat])) = meshIndex; // last element is the index
+				*reinterpret_cast<int *>(static_cast<void *>(&destVtx[NumFloatsVertexFormat])) = meshIndex; // last element is the index
 				destVtx += NumFloatsVertexFormatAndIndex;
 			}
 			for (unsigned int i = 0; i < numVertices; i++)
 			{
 				memcpy(destVtx, srcVtx, SizeVertexFormat);
-				*reinterpret_cast<int*>(static_cast<void*>(&destVtx[NumFloatsVertexFormat])) = meshIndex; // last element is the index
+				*reinterpret_cast<int *>(static_cast<void *>(&destVtx[NumFloatsVertexFormat])) = meshIndex; // last element is the index
 				destVtx += NumFloatsVertexFormatAndIndex;
 				srcVtx += NumFloatsVertexFormat; // source format does not include an index
 			}
@@ -371,7 +371,7 @@ RenderCommand *RenderBatcher::collectCommands(
 			{
 				srcVtx -= NumFloatsVertexFormat;
 				memcpy(destVtx, srcVtx, SizeVertexFormat);
-				*reinterpret_cast<int*>(static_cast<void*>(&destVtx[NumFloatsVertexFormat])) = meshIndex; // last element is the index
+				*reinterpret_cast<int *>(static_cast<void *>(&destVtx[NumFloatsVertexFormat])) = meshIndex; // last element is the index
 				destVtx += NumFloatsVertexFormatAndIndex;
 			}
 

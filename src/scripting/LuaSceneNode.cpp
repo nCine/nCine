@@ -15,7 +15,7 @@ namespace SceneNode {
 	static const char *setParent = "set_parent";
 	static const char *addChildNode = "add_child";
 	static const char *removeChildNode = "remove_child";
-	static const char *removeAllChildrenNodes= "remove_all_children";
+	static const char *removeAllChildrenNodes = "remove_all_children";
 	static const char *unlinkChildNode = "unlink_child";
 
 	static const char *isEnabled = "is_enabled";
