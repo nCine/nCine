@@ -404,6 +404,34 @@ bool FileSystem::hasExtension(const char *path, const char *extension)
 	return false;
 }
 
+bool FileSystem::fixExtension(nctl::String &path, const char *extension)
+{
+	const unsigned int MaxExtensionLength = 4;
+
+	if (hasExtension(path.data(), extension))
+		return false;
+	else
+	{
+		const int findIndex = path.findLastChar('.');
+		if (findIndex >= 0 && path.length() - findIndex - 1 <= MaxExtensionLength)
+		{
+			const unsigned int extLength = nctl::strnlen(extension, MaxExtensionLength);
+			const unsigned int newLength = findIndex + extLength + 1;
+			if (newLength + 1 > path.capacity())
+				path.setCapacity(newLength + 1);
+			path.setLength(newLength);
+			path.data()[newLength] = '\0';
+
+			for (unsigned int i = 0; i < extLength; i++)
+				path[findIndex + i + 1] = extension[i];
+		}
+		else
+			path.formatAppend(".%s", extension);
+		return true;
+	}
+}
+
+/*! /note The function only works on Windows, it returns `0` on other platforms */
 unsigned long FileSystem::logicalDrives()
 {
 #ifdef _WIN32
@@ -413,6 +441,7 @@ unsigned long FileSystem::logicalDrives()
 #endif
 }
 
+/*! /note The function only works on Windows, it returns `nullptr` on other platforms */
 const char *FileSystem::logicalDriveStrings()
 {
 #ifdef _WIN32

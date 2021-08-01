@@ -8,7 +8,7 @@ namespace ncine {
 class IFile;
 
 /// Texture saver interface class
-class ITextureSaver
+class DLL_PUBLIC ITextureSaver
 {
   public:
 	enum class Format

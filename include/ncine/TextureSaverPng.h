@@ -6,7 +6,7 @@
 namespace ncine {
 
 /// PNG texture saver
-class TextureSaverPng : public ITextureSaver
+class DLL_PUBLIC TextureSaverPng : public ITextureSaver
 {
   public:
 	struct PngProperties

@@ -68,7 +68,7 @@ class DLL_PUBLIC Texture : public Object
 	bool loadFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
 	bool loadFromFile(const char *filename);
 
-	/// Loads all texture texels in raw format from a memory buffer
+	/// Loads all texture texels in raw format from a memory buffer in the first mip level
 	bool loadFromTexels(const unsigned char *bufferPtr);
 	/// Loads texels in raw format from a memory buffer to a texture sub-region in the first mip level
 	bool loadFromTexels(const unsigned char *bufferPtr, unsigned int x, unsigned int y, unsigned int width, unsigned int height);
@@ -78,6 +78,11 @@ class DLL_PUBLIC Texture : public Object
 	bool loadFromTexels(const unsigned char *bufferPtr, unsigned int level, unsigned int x, unsigned int y, unsigned int width, unsigned int height);
 	/// Loads texels in raw format from a memory buffer to a specific texture mip level and sub-region with a rectangle
 	bool loadFromTexels(const unsigned char *bufferPtr, unsigned int level, Recti region);
+
+	/// Saves all texture texels in the first mip level in raw format to a memory buffer
+	bool saveToMemory(unsigned char *bufferPtr);
+	/// Saves all texture texels in the specified texture mip level in raw format to a memory buffer
+	bool saveToMemory(unsigned char *bufferPtr, unsigned int level);
 
 	/// Returns texture width
 	inline int width() const { return width_; }
@@ -118,9 +123,9 @@ class DLL_PUBLIC Texture : public Object
 	/// Sets the chroma key transparency state to use when loading
 	inline void setChromaKeyEnabled(bool chromaKeyEnabled) { isChromaKeyEnabled_ = chromaKeyEnabled; }
 	/// Sets the color to be treated as transparent when loading a texture
-	inline void setChromaKeyColor(const Color chromaKeyColor) { chromaKeyColor_ = chromaKeyColor; }
+	inline void setChromaKeyColor(const Color &chromaKeyColor) { chromaKeyColor_ = chromaKeyColor; }
 	/// Sets the color to be treated as transparent when loading a texture, using a `Colorf`
-	inline void setChromaKeyColor(const Colorf chromaKeyColor) { chromaKeyColor_ = chromaKeyColor; }
+	inline void setChromaKeyColor(const Colorf &chromaKeyColor) { chromaKeyColor_ = chromaKeyColor; }
 
 	/// Returns the user data opaque pointer for ImGui's `ImTextureID` or Nuklear's texture handle
 	void *guiTexId() const;

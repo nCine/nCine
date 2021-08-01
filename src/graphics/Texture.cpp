@@ -210,7 +210,7 @@ bool Texture::loadFromTexels(const unsigned char *bufferPtr, unsigned int level,
 		data = reinterpret_cast<const unsigned char *>(chromaPixels.get());
 	}
 
-	GLenum format = channelsToFormat(numChannels_);
+	const GLenum format = channelsToFormat(numChannels_);
 	glGetError();
 	glTexture_->texSubImage2D(level, x, y, width, height, format, GL_UNSIGNED_BYTE, data);
 	const GLenum error = glGetError();
@@ -221,6 +221,25 @@ bool Texture::loadFromTexels(const unsigned char *bufferPtr, unsigned int level,
 bool Texture::loadFromTexels(const unsigned char *bufferPtr, unsigned int level, Recti region)
 {
 	return loadFromTexels(bufferPtr, level, region.x, region.y, region.w, region.h);
+}
+
+bool Texture::saveToMemory(unsigned char *bufferPtr)
+{
+	return saveToMemory(bufferPtr, 0);
+}
+
+bool Texture::saveToMemory(unsigned char *bufferPtr, unsigned int level)
+{
+#if !defined(__ANDROID__) && !defined(WITH_ANGLE) && !defined(__EMSCRIPTEN__)
+	const GLenum format = channelsToFormat(numChannels_);
+	glGetError();
+	glTexture_->getTexImage(level, format, GL_UNSIGNED_BYTE, bufferPtr);
+	const GLenum error = glGetError();
+
+	return (error == GL_NO_ERROR);
+#else
+	return false;
+#endif
 }
 
 void Texture::setMinFiltering(Filtering filter)

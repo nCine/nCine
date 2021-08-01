@@ -113,7 +113,7 @@ TEST_F(FileSystemTest, JoinPathDotFiles)
 
 TEST_F(FileSystemTest, BaseAndDirName)
 {
-	nctl::String currentDir = nc::fs::currentDir();
+	const nctl::String currentDir = nc::fs::currentDir();
 	printf("Splitting current directory into basename and dirname\n");
 
 	nctl::String dirName = nc::fs::dirName(currentDir.data());
@@ -126,7 +126,7 @@ TEST_F(FileSystemTest, BaseAndDirName)
 
 TEST_F(FileSystemTest, RealPath)
 {
-	nctl::String currentDir = nc::fs::currentDir();
+	const nctl::String currentDir = nc::fs::currentDir();
 
 	nctl::String baseName = nc::fs::baseName(currentDir.data());
 	nctl::String joinedPath = nc::fs::joinPath(currentDir, "..");
@@ -141,7 +141,7 @@ TEST_F(FileSystemTest, RealPath)
 
 TEST_F(FileSystemTest, AbsolutePath)
 {
-	nctl::String currentDir = nc::fs::currentDir();
+	const nctl::String currentDir = nc::fs::currentDir();
 	nctl::String absolutePath = nc::fs::absolutePath(".");
 	printf("Absolute path for \".\": \"%s\"\n", absolutePath.data());
 	ASSERT_STREQ(currentDir.data(), absolutePath.data());
@@ -153,9 +153,9 @@ TEST_F(FileSystemTest, AbsolutePath)
 }
 #endif
 
-TEST_F(FileSystemTest, Extension)
+TEST_F(FileSystemTest, HasExtension)
 {
-	nctl::String currentDir = nc::fs::currentDir();
+	const nctl::String currentDir = nc::fs::currentDir();
 
 	nctl::String file = nc::fs::joinPath(currentDir, "document.txt");
 	const char *extension = nc::fs::extension(file.data());
@@ -182,6 +182,92 @@ TEST_F(FileSystemTest, Extension)
 	printf("File \"%s\" has no valid extension (too long)\n", file.data());
 	ASSERT_EQ(extension, nullptr);
 	ASSERT_FALSE(nc::fs::hasExtension(file.data(), "toolong"));
+}
+
+TEST_F(FileSystemTest, FixExtension)
+{
+	const char *extension = "txt";
+	nctl::String file;
+
+	// The file string is empty and the extension is appended with a leading dot
+	ASSERT_TRUE(file.isEmpty());
+	ASSERT_TRUE(nc::fs::fixExtension(file, extension));
+	printf("File \"%s\" was empty and now has \"%s\" as extension\n", file.data(), extension);
+	ASSERT_EQ(file.length(), 4);
+	ASSERT_STREQ(file.data(), ".txt");
+
+	// The correct file extension is already there and does not need to be changed
+	file = "document.txt";
+	ASSERT_EQ(file.length(), 12);
+	ASSERT_FALSE(nc::fs::fixExtension(file, extension));
+	printf("File \"%s\" already had \"%s\" as extension and didn't need any modification\n", file.data(), extension);
+	ASSERT_EQ(file.length(), 12);
+	ASSERT_STREQ(file.data(), "document.txt");
+
+	// The file extension was different, but of the same length
+	file = "document.png";
+	ASSERT_EQ(file.length(), 12);
+	ASSERT_TRUE(nc::fs::fixExtension(file, extension));
+	printf("File \"%s\" had an extension of the same length\n", file.data());
+	ASSERT_EQ(file.length(), 12);
+	ASSERT_STREQ(file.data(), "document.txt");
+
+	// The file extension was different and longer, the string got shrinked
+	file = "document.jpeg";
+	ASSERT_EQ(file.length(), 13);
+	ASSERT_TRUE(nc::fs::fixExtension(file, extension));
+	printf("File \"%s\" had a longer extension\n", file.data());
+	ASSERT_EQ(file.length(), 12);
+	ASSERT_STREQ(file.data(), "document.txt");
+
+	// The file had a dot in its name but no extension, it is appended with a leading dot
+	file = "my.document";
+	ASSERT_EQ(file.length(), 11);
+	ASSERT_TRUE(nc::fs::fixExtension(file, extension));
+	printf("File \"%s\" had a dot in its name but no extension\n", file.data());
+	ASSERT_EQ(file.length(), 15);
+	ASSERT_STREQ(file.data(), "my.document.txt");
+
+	// The file had a trailing dot in its name but no extension, it is appended without a leading dot
+	file = "my.document.";
+	ASSERT_EQ(file.length(), 12);
+	ASSERT_TRUE(nc::fs::fixExtension(file, extension));
+	printf("File \"%s\" had a trailing dot, extension \"%s\" was appended\n", file.data(), extension);
+	ASSERT_EQ(file.length(), 15);
+	ASSERT_STREQ(file.data(), "my.document.txt");
+
+	// The file string capacity needs to be extended by `fixExtension` (initially equal to SmallBufferSize`)
+	file.setCapacity(16);
+	file = "important_docu.";
+	ASSERT_EQ(file.capacity(), 16);
+	ASSERT_EQ(file.length(), 15);
+	ASSERT_TRUE(nc::fs::fixExtension(file, extension));
+	printf("File \"%s\" had a string capacity that needed to be extended\n", file.data());
+	ASSERT_EQ(file.capacity(), 19);
+	ASSERT_EQ(file.length(), 18);
+	ASSERT_STREQ(file.data(), "important_docu.txt");
+
+	// The file string capacity needs to be extended by `fixExtension` (initially bigger than SmallBufferSize`)
+	file.setCapacity(25);
+	file = "my_important_document.aa";
+	ASSERT_EQ(file.capacity(), 25);
+	ASSERT_EQ(file.length(), 24);
+	ASSERT_TRUE(nc::fs::fixExtension(file, extension));
+	printf("File \"%s\" had a string capacity that needed to be extended\n", file.data());
+	ASSERT_EQ(file.capacity(), 26);
+	ASSERT_EQ(file.length(), 25);
+	ASSERT_STREQ(file.data(), "my_important_document.txt");
+
+	// The file string capacity does not need to be extended by `fixExtension`
+	file.setCapacity(26);
+	file = "my_important_document.aaa";
+	ASSERT_EQ(file.capacity(), 26);
+	ASSERT_EQ(file.length(), 25);
+	ASSERT_TRUE(nc::fs::fixExtension(file, extension));
+	printf("File \"%s\" had a string capacity that didn't need to be extended\n", file.data());
+	ASSERT_EQ(file.capacity(), 26);
+	ASSERT_EQ(file.length(), 25);
+	ASSERT_STREQ(file.data(), "my_important_document.txt");
 }
 
 TEST_F(FileSystemTest, LogicalDrives)

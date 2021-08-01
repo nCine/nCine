@@ -88,12 +88,12 @@ class DLL_PUBLIC FileSystem
 	static const char *extension(const char *path);
 	/// Returns true if the file at `path` as the specified extension (case-insensitive comparison)
 	static bool hasExtension(const char *path, const char *extension);
+	/// Returns true if the path has been changed to fix the extension
+	static bool fixExtension(nctl::String &path, const char *extension);
 
 	/// Returns a bitmask representing the currently available disk drives on Windows
-	/*! /note The function only works on Windows, it returns `0` on other platforms */
 	static unsigned long logicalDrives();
 	/// Returns a buffer with strings that specify valid drives in the system on Windows
-	/*! /note The function only works on Windows, it returns `nullptr` on other platforms */
 	static const char *logicalDriveStrings();
 
 	/// Returns the path of current directory

@@ -6,7 +6,7 @@
 namespace ncine {
 
 /// WebP texture saver
-class TextureSaverWebP : public ITextureSaver
+class DLL_PUBLIC TextureSaverWebP : public ITextureSaver
 {
   public:
 	struct WebPProperties

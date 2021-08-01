@@ -1,9 +1,15 @@
-﻿#include <ncine/imgui.h>
+﻿#include <ncine/config.h>
+#include <ncine/imgui.h>
 
 #include <nctl/algorithms.h> // for clamping values
+#include <nctl/CString.h> // for `strnlen()`
 #include "apptest_loading.h"
 #include <ncine/Application.h>
 #include <ncine/Texture.h>
+#include <ncine/TextureSaverPng.h>
+#if NCINE_WITH_WEBP
+	#include <ncine/TextureSaverWebP.h>
+#endif
 #include <ncine/Sprite.h>
 #include <ncine/AudioBuffer.h>
 #include <ncine/AudioBufferPlayer.h>
@@ -18,6 +24,19 @@
 #define LOADING_FAILURES (0)
 
 namespace {
+
+int inputTextCallback(ImGuiInputTextCallbackData *data)
+{
+	nctl::String *string = reinterpret_cast<nctl::String *>(data->UserData);
+	if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
+	{
+		// Resize string callback
+		ASSERT(data->Buf == string->data());
+		string->setLength(static_cast<unsigned int>(data->BufTextLen));
+		data->Buf = string->data();
+	}
+	return 0;
+}
 
 #ifdef __ANDROID__
 const char *TextureFiles[MyEventHandler::NumTextures] = { "texture1_ETC2.ktx", "texture2_ETC2.ktx", "texture3_ETC2.ktx", "texture4_ETC2.ktx" };
@@ -54,6 +73,7 @@ int selectedTextureObject = -1;
 int selectedTexture = -1;
 nc::Colorf texelsColor;
 nc::Recti texelsRegion;
+nctl::String saveTexelsFilename(256);
 
 int selectedSound = -1;
 int sineWaveFrequency = 440;
@@ -254,26 +274,43 @@ void MyEventHandler::onFrameStart()
 				ImGui::DragInt2("Offset", &texelsRegion.x);
 				ImGui::DragInt2("Size", &texelsRegion.w);
 
+				static int w = tex.width();
+				static int h = tex.height();
+				static nctl::UniquePtr<uint32_t[]> pixels = nctl::makeUnique<uint32_t[]>(w * h);
 				texelsRegion.x = nctl::clamp(texelsRegion.x, 0, tex.width());
 				texelsRegion.y = nctl::clamp(texelsRegion.y, 0, tex.height());
 				texelsRegion.w = nctl::clamp(texelsRegion.w, 0, tex.width() - texelsRegion.x);
 				texelsRegion.h = nctl::clamp(texelsRegion.h, 0, tex.height() - texelsRegion.y);
 
-				ImGui::ColorEdit4("Color", texelsColor.data());
+				ImGui::ColorEdit4("Color", texelsColor.data(), ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview);
 				if (ImGui::Button("Load##Texels"))
 				{
-					const int w = tex.width();
-					const int h = tex.height();
+					if (w != tex.width() || h != tex.height())
+					{
+						w = tex.width();
+						h = tex.height();
+						pixels = nctl::makeUnique<uint32_t[]>(w * h);
+					}
+
 					const uint32_t a = static_cast<uint8_t>(texelsColor.a() * 255.0f) << 24;
 					const uint32_t b = static_cast<uint8_t>(texelsColor.b() * 255.0f) << 16;
 					const uint32_t g = static_cast<uint8_t>(texelsColor.g() * 255.0f) << 8;
 					const uint32_t r = static_cast<uint8_t>(texelsColor.r() * 255.0f);
 					const uint32_t color = a + b + g + r;
-					nctl::UniquePtr<uint32_t[]> pixels = nctl::makeUnique<uint32_t[]>(w * h);
-					for (int i = 0; i < w * h; i++)
-						pixels[i] = color;
 
-					const bool hasLoaded = tex.loadFromTexels(reinterpret_cast<uint8_t *>(pixels.get()), texelsRegion);
+					const int firstIndex = texelsRegion.y * w + texelsRegion.x;
+					int index = firstIndex;
+					for (int i = 0; i < texelsRegion.h; i++)
+					{
+						for (int j = 0; j < texelsRegion.w; j++)
+							pixels[index + j] = color;
+						index += w;
+					}
+
+					const bool hasLoaded = tex.loadFromTexels(reinterpret_cast<uint8_t *>(pixels.get()));
+					// Can't use this optimized version without `glPixelStorei(GL_UNPACK_ROW_LENGTH, w);`
+					//const bool hasLoaded = tex.loadFromTexels(reinterpret_cast<uint8_t *>(&pixels[firstIndex]), texelsRegion);
+
 					if (hasLoaded == false)
 						LOGW("Cannot load from texels");
 					else
@@ -285,6 +322,55 @@ void MyEventHandler::onFrameStart()
 					// When loading from texels the format and the size does not change
 					// and the `setTexture` method does not need to be called
 				}
+
+				ImGui::SameLine();
+				static int selectedFormat = 0;
+				const char *extensions[] = { "png", "webp" };
+				ImGui::InputText("##Saving", saveTexelsFilename.data(), saveTexelsFilename.capacity(), ImGuiInputTextFlags_CallbackResize, inputTextCallback, &saveTexelsFilename);
+				if (saveTexelsFilename.isEmpty())
+					saveTexelsFilename.format("texels.%s", extensions[selectedFormat]);
+#if NCINE_WITH_WEBP
+				const char *formats[] = { "Png", "WebP" };
+				ImGui::SameLine();
+				ImGui::PushItemWidth(60.0f);
+				ImGui::Combo("##SaveFormat", &selectedFormat, formats, IM_ARRAYSIZE(formats));
+				ImGui::PopItemWidth();
+#endif
+				nc::fs::fixExtension(saveTexelsFilename, extensions[selectedFormat]);
+				ImGui::SameLine();
+				if (ImGui::Button("Save##Texels"))
+				{
+					bool hasSaved = false;
+
+					if (selectedFormat == 0)
+					{
+						nc::TextureSaverPng saver;
+						nc::TextureSaverPng::Properties props;
+						props.width = w;
+						props.height = h;
+						props.format = nc::ITextureSaver::Format::RGBA8;
+						props.pixels = pixels.get();
+						hasSaved = saver.saveToFile(props, saveTexelsFilename.data());
+					}
+#if NCINE_WITH_WEBP
+					else if (selectedFormat == 1)
+					{
+						nc::TextureSaverWebP saver;
+						nc::TextureSaverWebP::Properties props;
+						props.width = w;
+						props.height = h;
+						props.format = nc::ITextureSaver::Format::RGBA8;
+						props.pixels = pixels.get();
+						hasSaved = saver.saveToFile(props, saveTexelsFilename.data());
+					}
+#endif
+
+					if (hasSaved == false)
+						LOGW_X("Cannot save texels to \"%s\"", saveTexelsFilename.data());
+					else
+						LOGI_X("Texels saved to \"%s\"", saveTexelsFilename.data());
+				}
+
 				ImGui::TreePop();
 			}
 
