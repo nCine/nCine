@@ -84,6 +84,11 @@ void Qt5GfxDevice::setWindowPosition(int x, int y)
 	widget_.setGeometry(geometry);
 }
 
+void Qt5GfxDevice::flashWindow() const
+{
+	QApplication::alert(&widget_, 0);
+}
+
 const Qt5GfxDevice::VideoMode &Qt5GfxDevice::currentVideoMode() const
 {
 	return videoModes_[0];

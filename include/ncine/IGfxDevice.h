@@ -117,6 +117,9 @@ class DLL_PUBLIC IGfxDevice
 	/// Returns window position as a `Vector2i` object
 	inline virtual const Vector2i windowPosition() const { return Vector2i(0, 0); }
 
+	/// Highlights the application window to notify the user
+	inline virtual void flashWindow() const {}
+
 	/// Sets the OpenGL clear color through four float
 	void setClearColor(float red, float green, float blue, float alpha);
 	/// Sets the OpenGL clear color through a `Colorf` object

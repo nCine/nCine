@@ -117,6 +117,13 @@ const Vector2i SdlGfxDevice::windowPosition() const
 	return position;
 }
 
+void SdlGfxDevice::flashWindow() const
+{
+#if SDL_MAJOR_VERSION >= 2 && SDL_PATCHLEVEL >= 16 && !defined(__EMSCRIPTEN__)
+	SDL_FlashWindow(windowHandle_, SDL_FLASH_UNTIL_FOCUSED);
+#endif
+}
+
 const IGfxDevice::VideoMode &SdlGfxDevice::currentVideoMode() const
 {
 	SDL_DisplayMode mode;

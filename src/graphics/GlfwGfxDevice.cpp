@@ -104,6 +104,13 @@ const Vector2i GlfwGfxDevice::windowPosition() const
 	return position;
 }
 
+void GlfwGfxDevice::flashWindow() const
+{
+#ifndef __EMSCRIPTEN__
+	glfwRequestWindowAttention(windowHandle_);
+#endif
+}
+
 const IGfxDevice::VideoMode &GlfwGfxDevice::currentVideoMode() const
 {
 	const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());

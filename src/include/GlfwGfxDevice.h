@@ -36,6 +36,8 @@ class GlfwGfxDevice : public IGfxDevice
 	int windowPositionY() const override;
 	const Vector2i windowPosition() const override;
 
+	void flashWindow() const override;
+
 	const VideoMode &currentVideoMode() const override;
 	bool setVideoMode(unsigned int index) override;
 	void updateVideoModes() override;
