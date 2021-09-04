@@ -10,7 +10,12 @@
 	#include "TargetConditionals.h"
 #endif
 
-#define SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE SDL_VERSION_ATLEAST(2, 0, 4)
+#if SDL_VERSION_ATLEAST(2, 0, 4) && !defined(__EMSCRIPTEN__) && !defined(__ANDROID__) && !(defined(__APPLE__) && TARGET_OS_IOS)
+	#define SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE 1
+#else
+	#define SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE 0
+#endif
+#define SDL_HAS_MOUSE_FOCUS_CLICKTHROUGH SDL_VERSION_ATLEAST(2, 0, 5)
 #define SDL_HAS_VULKAN SDL_VERSION_ATLEAST(2, 0, 6)
 
 namespace ncine {
@@ -50,16 +55,33 @@ namespace {
 
 void ImGuiSdlInput::init(SDL_Window *window)
 {
-	window_ = window;
-
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
-	// Setup backend capabilities flags
 	ImGuiIO &io = ImGui::GetIO();
+
+	// Check and store if we are on a SDL backend that supports global mouse position
+	// ("wayland" and "rpi" don't support it, but we chose to use a white-list instead of a black-list)
+#if SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE
+	const char *sdlBackend = SDL_GetCurrentVideoDriver();
+	const char *globalMouseWhitelist[] = { "windows", "cocoa", "x11", "DIVE", "VMAN" };
+	mouseCanUseGlobalState_ = false;
+	for (int n = 0; n < IM_ARRAYSIZE(globalMouseWhitelist); n++)
+	{
+		if (strncmp(sdlBackend, globalMouseWhitelist[n], strlen(globalMouseWhitelist[n])) == 0)
+		{
+			mouseCanUseGlobalState_ = true;
+			break;
+		}
+	}
+#endif
+
+	// Setup backend capabilities flags
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
 	io.BackendPlatformName = "nCine_SDL";
+
+	window_ = window;
 
 	// Keyboard mapping. Dear ImGui will use those indices to peek into the io.KeysDown[] array.
 	io.KeyMap[ImGuiKey_Tab] = SDL_SCANCODE_TAB;
@@ -99,20 +121,6 @@ void ImGuiSdlInput::init(SDL_Window *window)
 	mouseCursors_[ImGuiMouseCursor_Hand] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
 	mouseCursors_[ImGuiMouseCursor_NotAllowed] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NO);
 
-	// Check and store if we are on a SDL backend that supports global mouse position
-	// ("wayland" and "rpi" don't support it, but we chose to use a white-list instead of a black-list)
-	const char *sdlBackend = SDL_GetCurrentVideoDriver();
-	const char *globalMouseWhitelist[] = { "windows", "cocoa", "x11", "DIVE", "VMAN" };
-	mouseCanUseGlobalState_ = false;
-	for (int n = 0; n < IM_ARRAYSIZE(globalMouseWhitelist); n++)
-	{
-		if (strncmp(sdlBackend, globalMouseWhitelist[n], strlen(globalMouseWhitelist[n])) == 0)
-		{
-			mouseCanUseGlobalState_ = true;
-			break;
-		}
-	}
-
 #ifdef IMGUI_HAS_DOCK
 	// Our mouse update function expect PlatformHandle to be filled for the main viewport
 	ImGuiViewport *main_viewport = ImGui::GetMainViewport();
@@ -131,6 +139,10 @@ void ImGuiSdlInput::init(SDL_Window *window)
 #else
 	(void)window;
 #endif
+
+#if SDL_HAS_MOUSE_FOCUS_CLICKTHROUGH
+	SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
+#endif
 }
 
 void ImGuiSdlInput::shutdown()
@@ -146,6 +158,9 @@ void ImGuiSdlInput::shutdown()
 	for (ImGuiMouseCursor i = 0; i < ImGuiMouseCursor_COUNT; i++)
 		SDL_FreeCursor(mouseCursors_[i]);
 	memset(mouseCursors_, 0, sizeof(mouseCursors_));
+
+	ImGuiIO &io = ImGui::GetIO();
+	io.BackendPlatformName = nullptr;
 
 	ImGui::DestroyContext();
 }
@@ -235,6 +250,14 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 #endif
 			return true;
 		}
+		case SDL_WINDOWEVENT:
+		{
+			if (event->window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
+				io.AddFocusEvent(true);
+			else if (event->window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+				io.AddFocusEvent(false);
+			return true;
+		}
 	}
 	return false;
 }
@@ -247,45 +270,55 @@ void ImGuiSdlInput::updateMousePosAndButtons()
 {
 	ImGuiIO &io = ImGui::GetIO();
 
-	// Set OS mouse position if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
-	if (io.WantSetMousePos)
-		SDL_WarpMouseInWindow(window_, static_cast<int>(io.MousePos.x), static_cast<int>(io.MousePos.y));
-	else
-		io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
+	const ImVec2 mousePosPrev = io.MousePos;
+	io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
 
-	int mx, my;
-	Uint32 mouseButtons = SDL_GetMouseState(&mx, &my);
+	// Update mouse buttons
+	int mouseXLocal, mouseYLocal;
+	const Uint32 mouseButtons = SDL_GetMouseState(&mouseXLocal, &mouseYLocal);
 	io.MouseDown[0] = mousePressed_[0] || (mouseButtons & SDL_BUTTON(SDL_BUTTON_LEFT)) != 0; // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
 	io.MouseDown[1] = mousePressed_[1] || (mouseButtons & SDL_BUTTON(SDL_BUTTON_RIGHT)) != 0;
 	io.MouseDown[2] = mousePressed_[2] || (mouseButtons & SDL_BUTTON(SDL_BUTTON_MIDDLE)) != 0;
 	mousePressed_[0] = mousePressed_[1] = mousePressed_[2] = false;
 
-#if SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE && !defined(__EMSCRIPTEN__) && !defined(__ANDROID__) && !(defined(__APPLE__) && TARGET_OS_IOS)
+	// Obtain focused and hovered window. We forward mouse input when focused or when hovered (and no other window is capturing)
+#if SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE
 	SDL_Window *focusedWindow = SDL_GetKeyboardFocus();
-	if (window_ == focusedWindow)
-	{
-		if (mouseCanUseGlobalState_)
-		{
-			// SDL_GetMouseState() gives mouse position seemingly based on the last window entered/focused(?)
-			// The creation of a new windows at runtime and SDL_CaptureMouse both seems to severely mess up with that, so we retrieve that position globally.
-			// Won't use this workaround on SDL backends that have no global mouse position, like Wayland or RPI
-			int wx, wy;
-			SDL_GetWindowPosition(focusedWindow, &wx, &wy);
-			SDL_GetGlobalMouseState(&mx, &my);
-			mx -= wx;
-			my -= wy;
-		}
-		io.MousePos = ImVec2(static_cast<float>(mx), static_cast<float>(my));
-	}
 
-	// SDL_CaptureMouse() let the OS know e.g. that our imgui drag outside the SDL window boundaries shouldn't e.g. trigger the OS window resize cursor.
-	// The function is only supported from SDL 2.0.4 (released Jan 2016)
-	const bool anyMouseButtonDown = ImGui::IsAnyMouseDown();
-	SDL_CaptureMouse(anyMouseButtonDown ? SDL_TRUE : SDL_FALSE);
+	SDL_Window *hoveredWindow = SDL_HAS_MOUSE_FOCUS_CLICKTHROUGH ? SDL_GetMouseFocus() : nullptr; // This is better but is only reliably useful with SDL 2.0.5+ and SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH.
+	SDL_Window *mouseWindow = nullptr;
+	if (hoveredWindow && window_ == hoveredWindow)
+		mouseWindow = hoveredWindow;
+	else if (focusedWindow && window_ == focusedWindow)
+		mouseWindow = focusedWindow;
+
+	// SDL_CaptureMouse() let the OS know e.g. that our imgui drag outside the SDL window boundaries shouldn't e.g. trigger other operations outside
+	SDL_CaptureMouse(ImGui::IsAnyMouseDown() ? SDL_TRUE : SDL_FALSE);
 #else
-	if (SDL_GetWindowFlags(window_) & SDL_WINDOW_INPUT_FOCUS)
-		io.MousePos = ImVec2(static_cast<float>(mx), static_cast<float>(my));
+	// SDL 2.0.3 and non-windowed systems: single-viewport only
+	SDL_Window *mouseWindow = (SDL_GetWindowFlags(window_) & SDL_WINDOW_INPUT_FOCUS) ? window_ : nullptr;
 #endif
+
+	if (mouseWindow == nullptr)
+		return;
+
+	// Set OS mouse position from Dear ImGui if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
+	if (io.WantSetMousePos)
+		SDL_WarpMouseInWindow(window_, static_cast<int>(mousePosPrev.x), static_cast<int>(mousePosPrev.y));
+
+	// Set Dear ImGui mouse position from OS position + get buttons. (this is the common behavior)
+	if (mouseCanUseGlobalState_)
+	{
+		// Single-viewport mode: mouse position in client window coordinates (io.MousePos is (0,0) when the mouse is on the upper-left corner of the app window)
+		// Unlike local position obtained earlier this will be valid when straying out of bounds.
+		int mouseXGlobal, mouseYGlobal;
+		SDL_GetGlobalMouseState(&mouseXGlobal, &mouseYGlobal);
+		int windowX, windowY;
+		SDL_GetWindowPosition(mouseWindow, &windowX, &windowY);
+		io.MousePos = ImVec2(static_cast<float>(mouseXGlobal - windowX), static_cast<float>(mouseYGlobal - windowY));
+	}
+	else
+		io.MousePos = ImVec2(static_cast<float>(mouseXLocal), static_cast<float>(mouseYLocal));
 }
 
 void ImGuiSdlInput::updateMouseCursor()

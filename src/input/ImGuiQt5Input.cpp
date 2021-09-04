@@ -112,14 +112,18 @@ void ImGuiQt5Input::init(Qt5Widget *widget)
 
 void ImGuiQt5Input::shutdown()
 {
-	ImGui::DestroyContext();
 	widget_ = nullptr;
+
+	ImGuiIO &io = ImGui::GetIO();
+	io.BackendPlatformName = nullptr;
+
+	ImGui::DestroyContext();
 }
 
 void ImGuiQt5Input::newFrame()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end. Missing call to renderer _NewFrame() function? e.g. ImGui_ImplOpenGL3_NewFrame().");
+	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! Missing call to ImGuiDrawing::buildFonts() function?");
 	io.DeltaTime = theApplication().interval();
 
 	io.DisplaySize = ImVec2(theApplication().width(), theApplication().height());
@@ -206,6 +210,12 @@ bool ImGuiQt5Input::event(QEvent *event)
 				io.MouseWheel -= 1;
 			return true;
 		}
+		case QEvent::FocusIn:
+			io.AddFocusEvent(true);
+			return true;
+		case QEvent::FocusOut:
+			io.AddFocusEvent(false);
+			return true;
 		default:
 			return false;
 	}
@@ -220,7 +230,7 @@ void ImGuiQt5Input::updateMousePosAndButtons()
 	ImGuiIO &io = ImGui::GetIO();
 
 	// Set OS mouse position if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
-	if (io.WantSetMousePos)
+	if (io.WantSetMousePos && widget_->hasFocus())
 		widget_->cursor().setPos(static_cast<int>(io.MousePos.x), static_cast<int>(io.MousePos.y));
 
 	const MouseState &mouseState = theApplication().inputManager().mouseState();

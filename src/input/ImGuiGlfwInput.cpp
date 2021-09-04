@@ -27,6 +27,7 @@ namespace ncine {
 
 bool ImGuiGlfwInput::inputEnabled_ = true;
 GLFWwindow *ImGuiGlfwInput::window_ = nullptr;
+GLFWwindow *ImGuiGlfwInput::mouseWindow_ = nullptr;
 double ImGuiGlfwInput::time_ = 0.0;
 bool ImGuiGlfwInput::mouseJustPressed_[ImGuiMouseButton_COUNT] = {};
 GLFWcursor *ImGuiGlfwInput::mouseCursors_[ImGuiMouseCursor_COUNT] = {};
@@ -51,17 +52,18 @@ namespace {
 
 void ImGuiGlfwInput::init(GLFWwindow *window)
 {
-	window_ = window;
-	time_ = 0.0;
-
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
-	// Setup backend capabilities flags
 	ImGuiIO &io = ImGui::GetIO();
+
+	// Setup backend capabilities flags
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
 	io.BackendPlatformName = "nCine_GLFW";
+
+	window_ = window;
+	time_ = 0.0;
 
 	// Keyboard mapping. Dear ImGui will use those indices to peek into the io.KeysDown[] array.
 	io.KeyMap[ImGuiKey_Tab] = GLFW_KEY_TAB;
@@ -130,6 +132,9 @@ void ImGuiGlfwInput::shutdown()
 		glfwDestroyCursor(mouseCursors_[i]);
 		mouseCursors_[i] = nullptr;
 	}
+
+	ImGuiIO &io = ImGui::GetIO();
+	io.BackendPlatformName = nullptr;
 
 	ImGui::DestroyContext();
 }
@@ -204,6 +209,20 @@ void ImGuiGlfwInput::keyCallback(GLFWwindow *window, int key, int scancode, int 
 #endif
 }
 
+void ImGuiGlfwInput::windowFocusCallback(GLFWwindow *window, int focused)
+{
+	ImGuiIO &io = ImGui::GetIO();
+	io.AddFocusEvent(focused != 0);
+}
+
+void ImGuiGlfwInput::cursorEnterCallback(GLFWwindow *window, int entered)
+{
+	if (entered)
+		mouseWindow_ = window;
+	if (!entered && mouseWindow_ == window)
+		mouseWindow_ = nullptr;
+}
+
 void ImGuiGlfwInput::charCallback(GLFWwindow *, unsigned int c)
 {
 	if (inputEnabled_ == false)
@@ -219,28 +238,37 @@ void ImGuiGlfwInput::charCallback(GLFWwindow *, unsigned int c)
 
 void ImGuiGlfwInput::updateMousePosAndButtons()
 {
-	// Update buttons
 	ImGuiIO &io = ImGui::GetIO();
+
+	const ImVec2 mousePosPrev = io.MousePos;
+	io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
+
+	// Update mouse buttons
+	// (if a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame)
 	for (int i = 0; i < IM_ARRAYSIZE(io.MouseDown); i++)
 	{
-		// If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
 		io.MouseDown[i] = mouseJustPressed_[i] || glfwGetMouseButton(window_, i) != 0;
 		mouseJustPressed_[i] = false;
 	}
 
-	// Update mouse position
-	const ImVec2 mousePosBackup = io.MousePos;
-	io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
-	if (glfwGetWindowAttrib(window_, GLFW_FOCUSED))
+#ifdef __EMSCRIPTEN__
+	const bool focused = true;
+#else
+	const bool focused = glfwGetWindowAttrib(window_, GLFW_FOCUSED) != 0;
+#endif
+
+	GLFWwindow *mouseWindow = (mouseWindow_ == window_ || focused) ? window_ : nullptr;
+
+	// Set OS mouse position from Dear ImGui if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
+	if (io.WantSetMousePos && focused)
+		glfwSetCursorPos(window_, static_cast<double>(mousePosPrev.x), static_cast<double>(mousePosPrev.y));
+
+	// Set Dear ImGui mouse position from OS position
+	if (mouseWindow != nullptr)
 	{
-		if (io.WantSetMousePos)
-			glfwSetCursorPos(window_, static_cast<double>(mousePosBackup.x), static_cast<double>(mousePosBackup.y));
-		else
-		{
-			double mouse_x, mouse_y;
-			glfwGetCursorPos(window_, &mouse_x, &mouse_y);
-			io.MousePos = ImVec2(static_cast<float>(mouse_x), static_cast<float>(mouse_y));
-		}
+		double mouseX, mouseY;
+		glfwGetCursorPos(window_, &mouseX, &mouseY);
+		io.MousePos = ImVec2(static_cast<float>(mouseX), static_cast<float>(mouseY));
 	}
 }
 

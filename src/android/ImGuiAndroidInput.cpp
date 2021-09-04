@@ -87,7 +87,7 @@ void ImGuiAndroidInput::shutdown()
 void ImGuiAndroidInput::newFrame()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end. Missing call to renderer _NewFrame() function? e.g. ImGui_ImplOpenGL3_NewFrame().");
+	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! Missing call to ImGuiDrawing::buildFonts() function?");
 	io.DeltaTime = theApplication().interval();
 
 	updateMouseButtons();

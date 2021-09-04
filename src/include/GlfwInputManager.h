@@ -188,6 +188,8 @@ class GlfwInputManager : public IInputManager
 	static void cursorPosCallback(GLFWwindow *window, double x, double y);
 	static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
 	static void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
+	static void windowFocusCallback(GLFWwindow *window, int focused);
+	static void cursorEnterCallback(GLFWwindow *window, int entered);
 	static void joystickCallback(int joy, int event);
 
 	static KeySym keySymValueToEnum(int keysym);

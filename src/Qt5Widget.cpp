@@ -56,14 +56,15 @@ bool Qt5Widget::event(QEvent *event)
 {
 	Qt5InputManager *inputManager = static_cast<Qt5InputManager *>(&application_.inputManager());
 
+	if (event->type() == QEvent::FocusIn)
+		application_.setFocus(true);
+	else if (event->type() == QEvent::FocusOut)
+		application_.setFocus(false);
+
 	switch (event->type())
 	{
 		case QEvent::FocusIn:
-			application_.setFocus(true);
-			return true;
 		case QEvent::FocusOut:
-			application_.setFocus(false);
-			return true;
 		case QEvent::KeyPress:
 		case QEvent::KeyRelease:
 		case QEvent::MouseButtonPress:

@@ -52,6 +52,10 @@ GlfwInputManager::GlfwInputManager()
 	glfwSetCursorPosCallback(GlfwGfxDevice::windowHandle(), cursorPosCallback);
 	glfwSetMouseButtonCallback(GlfwGfxDevice::windowHandle(), mouseButtonCallback);
 	glfwSetScrollCallback(GlfwGfxDevice::windowHandle(), scrollCallback);
+#ifdef WITH_IMGUI
+	glfwSetWindowFocusCallback(GlfwGfxDevice::windowHandle(), windowFocusCallback);
+	glfwSetCursorEnterCallback(GlfwGfxDevice::windowHandle(), cursorEnterCallback);
+#endif
 	glfwSetJoystickCallback(joystickCallback);
 
 	joyMapping_.init(this);
@@ -351,6 +355,20 @@ void GlfwInputManager::scrollCallback(GLFWwindow *window, double xoffset, double
 	scrollEvent_.x = static_cast<float>(xoffset);
 	scrollEvent_.y = static_cast<float>(yoffset);
 	inputEventHandler_->onScrollInput(scrollEvent_);
+}
+
+void GlfwInputManager::windowFocusCallback(GLFWwindow *window, int focused)
+{
+#ifdef WITH_IMGUI
+	ImGuiGlfwInput::windowFocusCallback(window, focused);
+#endif
+}
+
+void GlfwInputManager::cursorEnterCallback(GLFWwindow *window, int entered)
+{
+#ifdef WITH_IMGUI
+	ImGuiGlfwInput::cursorEnterCallback(window, entered);
+#endif
 }
 
 void GlfwInputManager::joystickCallback(int joy, int event)
