@@ -256,30 +256,29 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 			const ImDrawCmd *imCmd = &imCmdList->CmdBuffer[cmdIdx];
 			RenderCommand &currCmd = (cmdIdx == 0) ? firstCmd : *retrieveCommandFromPool();
 
-			const ImVec4 clipRect = ImVec4((imCmd->ClipRect.x - clipOff.x) * clipScale.x,
-			                               (imCmd->ClipRect.y - clipOff.y) * clipScale.y,
-			                               (imCmd->ClipRect.z - clipOff.x) * clipScale.x,
-			                               (imCmd->ClipRect.w - clipOff.y) * clipScale.y);
+			// Project scissor/clipping rectangles into framebuffer space
+			ImVec2 clipMin((imCmd->ClipRect.x - clipOff.x) * clipScale.x, (imCmd->ClipRect.y - clipOff.y) * clipScale.y);
+			ImVec2 clipMax((imCmd->ClipRect.z - clipOff.x) * clipScale.x, (imCmd->ClipRect.w - clipOff.y) * clipScale.y);
+			if (clipMax.x < clipMin.x || clipMax.y < clipMin.y)
+				continue;
 
-			if (clipRect.x < fbWidth && clipRect.y < fbHeight && clipRect.z >= 0.0f && clipRect.w >= 0.0f)
+			// Apply scissor/clipping rectangle (Y is inverted in OpenGL)
+			currCmd.setScissor(static_cast<GLint>(clipMin.x), static_cast<GLint>(fbHeight - clipMax.y),
+			                   static_cast<GLsizei>(clipMax.x - clipMin.x), static_cast<GLsizei>(clipMax.y - clipMin.y));
+
+			if (cmdIdx > 0)
 			{
-				currCmd.setScissor(static_cast<GLint>(clipRect.x), static_cast<GLint>(fbHeight - clipRect.w),
-				                   static_cast<GLsizei>(clipRect.z - clipRect.x), static_cast<GLsizei>(clipRect.w - clipRect.y));
-
-				if (cmdIdx > 0)
-				{
-					currCmd.geometry().shareVbo(&firstCmd.geometry());
-					currCmd.geometry().shareIbo(&firstCmd.geometry());
-				}
-
-				currCmd.geometry().setNumIndices(imCmd->ElemCount);
-				currCmd.geometry().setFirstIndex(imCmd->IdxOffset);
-				currCmd.geometry().setFirstVertex(imCmd->VtxOffset);
-				currCmd.setLayer(DrawableNode::imGuiLayer() + numCmd);
-				currCmd.material().setTexture(reinterpret_cast<GLTexture *>(imCmd->GetTexID()));
-
-				renderQueue.addCommand(&currCmd);
+				currCmd.geometry().shareVbo(&firstCmd.geometry());
+				currCmd.geometry().shareIbo(&firstCmd.geometry());
 			}
+
+			currCmd.geometry().setNumIndices(imCmd->ElemCount);
+			currCmd.geometry().setFirstIndex(imCmd->IdxOffset);
+			currCmd.geometry().setFirstVertex(imCmd->VtxOffset);
+			currCmd.setLayer(DrawableNode::imGuiLayer() + numCmd);
+			currCmd.material().setTexture(reinterpret_cast<GLTexture *>(imCmd->GetTexID()));
+
+			renderQueue.addCommand(&currCmd);
 			numCmd++;
 		}
 	}
@@ -335,23 +334,24 @@ void ImGuiDrawing::draw()
 		{
 			const ImDrawCmd *imCmd = &imCmdList->CmdBuffer[cmdIdx];
 
-			const ImVec4 clipRect = ImVec4((imCmd->ClipRect.x - clipOff.x) * clipScale.x,
-			                               (imCmd->ClipRect.y - clipOff.y) * clipScale.y,
-			                               (imCmd->ClipRect.z - clipOff.x) * clipScale.x,
-			                               (imCmd->ClipRect.w - clipOff.y) * clipScale.y);
+			// Project scissor/clipping rectangles into framebuffer space
+			ImVec2 clipMin((imCmd->ClipRect.x - clipOff.x) * clipScale.x, (imCmd->ClipRect.y - clipOff.y) * clipScale.y);
+			ImVec2 clipMax((imCmd->ClipRect.z - clipOff.x) * clipScale.x, (imCmd->ClipRect.w - clipOff.y) * clipScale.y);
+			if (clipMax.x < clipMin.x || clipMax.y < clipMin.y)
+				continue;
 
-			if (clipRect.x < fbWidth && clipRect.y < fbHeight && clipRect.z >= 0.0f && clipRect.w >= 0.0f)
-			{
-				GLScissorTest::enable(static_cast<GLint>(clipRect.x), static_cast<GLint>(fbHeight - clipRect.w),
-				                      static_cast<GLsizei>(clipRect.z - clipRect.x), static_cast<GLsizei>(clipRect.w - clipRect.y));
-				GLTexture::bindHandle(GL_TEXTURE_2D, reinterpret_cast<GLTexture *>(imCmd->GetTexID())->glHandle());
+			// Apply scissor/clipping rectangle (Y is inverted in OpenGL)
+			GLScissorTest::enable(static_cast<GLint>(clipMin.x), static_cast<GLint>(fbHeight - clipMax.y),
+			                      static_cast<GLsizei>(clipMax.x - clipMin.x), static_cast<GLsizei>(clipMax.y - clipMin.y));
+
+			// Bind texture, Draw
+			GLTexture::bindHandle(GL_TEXTURE_2D, reinterpret_cast<GLTexture *>(imCmd->GetTexID())->glHandle());
 #if (defined(__ANDROID__) && !GL_ES_VERSION_3_2) || defined(WITH_ANGLE) || defined(__EMSCRIPTEN__)
-				glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, firstIndex);
+			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, firstIndex);
 #else
-				glDrawElementsBaseVertex(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
-				                         reinterpret_cast<void *>(static_cast<intptr_t>(imCmd->IdxOffset * sizeof(ImDrawIdx))), static_cast<GLint>(imCmd->VtxOffset));
+			glDrawElementsBaseVertex(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
+			                         reinterpret_cast<void *>(static_cast<intptr_t>(imCmd->IdxOffset * sizeof(ImDrawIdx))), static_cast<GLint>(imCmd->VtxOffset));
 #endif
-			}
 			firstIndex += imCmd->ElemCount;
 		}
 	}

@@ -34,7 +34,7 @@ void GLScissorTest::enable(GLint x, GLint y, GLsizei width, GLsizei height)
 
 	if (x != x_ || y != y_ || width != width_ || height != height_)
 	{
-		FATAL_ASSERT(width > 0 && height > 0);
+		FATAL_ASSERT(width >= 0 && height >= 0);
 		glScissor(x, y, width, height);
 		x_ = x;
 		y_ = y;
@@ -47,7 +47,7 @@ void GLScissorTest::enable()
 {
 	if (enabled_ == false)
 	{
-		FATAL_ASSERT(width_ > 0 && height_ > 0);
+		FATAL_ASSERT(width_ >= 0 && height_ >= 0);
 		glEnable(GL_SCISSOR_TEST);
 		enabled_ = true;
 	}
