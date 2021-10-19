@@ -138,8 +138,7 @@ if(EMSCRIPTEN)
 					--preload ${NCINE_DATA_DIR}/textures/texture3.png@textures/texture3.png
 					--preload ${NCINE_DATA_DIR}/textures/smoke_256.png@textures/smoke_256.png
 					--preload ${CMAKE_SOURCE_DIR}/scripts/script.lua@scripts/script.lua
-					--js-output=${CMAKE_BINARY_DIR}/tests/nCine-data.js
-					--no-heap-copy)
+					--js-output=${CMAKE_BINARY_DIR}/tests/nCine-data.js)
 		else()
 			add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/tests/nCine-data.js ${CMAKE_BINARY_DIR}/tests/nCine-data.data
 				COMMAND python ${EMSCRIPTEN_PACKAGER_SCRIPT}
@@ -148,8 +147,7 @@ if(EMSCRIPTEN)
 					--preload ${NCINE_DATA_DIR}/sounds@sounds
 					--preload ${NCINE_DATA_DIR}/textures@textures
 					--preload ${CMAKE_SOURCE_DIR}/scripts@scripts
-					--js-output=${CMAKE_BINARY_DIR}/tests/nCine-data.js
-					--no-heap-copy)
+					--js-output=${CMAKE_BINARY_DIR}/tests/nCine-data.js)
 		endif()
 		add_custom_target(ncine_emscripten_data ALL DEPENDS ${CMAKE_BINARY_DIR}/tests/nCine-data.js ${CMAKE_BINARY_DIR}/tests/nCine-data.data)
 		set_target_properties(ncine_emscripten_data PROPERTIES FOLDER "Emscripten")

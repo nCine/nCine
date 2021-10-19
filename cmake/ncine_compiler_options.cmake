@@ -4,14 +4,14 @@ set_target_properties(ncine PROPERTIES CXX_EXTENSIONS OFF)
 target_compile_definitions(ncine PRIVATE "$<$<CONFIG:Debug>:NCINE_DEBUG>")
 
 if(EMSCRIPTEN)
-	set(EMSCRIPTEN_COMPILER_OPTIONS
+	set(EMSCRIPTEN_LINKER_OPTIONS
 		"SHELL:-s WASM=1"
 		"SHELL:-s DISABLE_EXCEPTION_CATCHING=1"
 		"SHELL:-s FORCE_FILESYSTEM=1"
 		"SHELL:-s ALLOW_MEMORY_GROWTH=1"
 		"SHELL:--bind")
 
-	set(EMSCRIPTEN_COMPILER_OPTIONS_DEBUG
+	set(EMSCRIPTEN_LINKER_OPTIONS_DEBUG
 		"SHELL:-s ASSERTIONS=1"
 		"SHELL:-s SAFE_HEAP=1"
 		"SHELL:--profiling-funcs"
@@ -19,15 +19,13 @@ if(EMSCRIPTEN)
 
 	string(FIND ${CMAKE_CXX_COMPILER} "fastcomp" EMSCRIPTEN_FASTCOMP_POS)
 	if(EMSCRIPTEN_FASTCOMP_POS GREATER -1)
-		list(APPEND EMSCRIPTEN_COMPILER_OPTIONS "SHELL:-s BINARYEN_TRAP_MODE=clamp")
+		list(APPEND EMSCRIPTEN_LINKER_OPTIONS "SHELL:-s BINARYEN_TRAP_MODE=clamp")
 	else()
-		list(APPEND EMSCRIPTEN_COMPILER_OPTIONS "SHELL:-mnontrapping-fptoint")
+		list(APPEND EMSCRIPTEN_LINKER_OPTIONS "SHELL:-mnontrapping-fptoint")
 	endif()
 
-	target_compile_options(ncine PUBLIC ${EMSCRIPTEN_COMPILER_OPTIONS})
-	target_link_options(ncine PUBLIC ${EMSCRIPTEN_COMPILER_OPTIONS})
-	target_compile_options(ncine PUBLIC "$<$<CONFIG:Debug>:${EMSCRIPTEN_COMPILER_OPTIONS_DEBUG}>")
-	target_link_options(ncine PUBLIC "$<$<CONFIG:Debug>:${EMSCRIPTEN_COMPILER_OPTIONS_DEBUG}>")
+	target_link_options(ncine PUBLIC ${EMSCRIPTEN_LINKER_OPTIONS})
+	target_link_options(ncine PUBLIC "$<$<CONFIG:Debug>:${EMSCRIPTEN_LINKER_OPTIONS_DEBUG}>")
 
 	if(Threads_FOUND)
 		target_link_libraries(ncine PUBLIC Threads::Threads)
