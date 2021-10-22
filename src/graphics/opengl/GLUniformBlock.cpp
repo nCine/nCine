@@ -62,7 +62,7 @@ GLUniformBlock::GLUniformBlock(GLuint program, GLuint index, DiscoverUniforms di
 			ASSERT_MSG_X(uniformNameLengths[i] <= GLUniform::MaxNameLength, "Uniform %d name length is %d, which is more than %d", i, uniformNameLengths[i], GLUniform::MaxNameLength);
 #endif
 
-#if !defined(__ANDROID__) && !defined(WITH_ANGLE) && !defined(__EMSCRIPTEN__)
+#if !defined(WITH_OPENGLES) && !defined(__EMSCRIPTEN__)
 			glGetActiveUniformName(program, uniformIndices[i], MaxNameLength, &uniformNameLengths[i], blockUniform.name_);
 #else
 			// Some drivers do not accept a `nullptr` for size and type

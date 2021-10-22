@@ -64,7 +64,7 @@ class GLBufferObjectMappingFunc
 			case GL_PIXEL_UNPACK_BUFFER:
 				value = 4;
 				break;
-#if (!defined(__ANDROID__) && !defined(WITH_ANGLE)) || (defined(__ANDROID__) && GL_ES_VERSION_3_2)
+#if !defined(WITH_OPENGLES) || (defined(WITH_OPENGLES) && GL_ES_VERSION_3_2)
 			case GL_TEXTURE_BUFFER:
 				value = 5;
 				break;
@@ -89,7 +89,7 @@ class GLTextureMappingFunc
 
 		switch (key)
 		{
-#if !defined(__ANDROID__) && !defined(WITH_ANGLE) // not available in OpenGL ES
+#if !defined(WITH_OPENGLES) // not available in OpenGL ES
 			case GL_TEXTURE_1D:
 				value = 0;
 				break;
@@ -100,7 +100,7 @@ class GLTextureMappingFunc
 			case GL_TEXTURE_3D:
 				value = 2;
 				break;
-#if (!defined(__ANDROID__) && !defined(WITH_ANGLE)) || (defined(__ANDROID__) && GL_ES_VERSION_3_2)
+#if !defined(WITH_OPENGLES) || (defined(WITH_OPENGLES) && GL_ES_VERSION_3_2)
 			case GL_TEXTURE_BUFFER:
 				value = 3;
 				break;

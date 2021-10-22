@@ -189,7 +189,7 @@ void SdlGfxDevice::initDevice()
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, displayMode_.stencilBits());
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, glContextInfo_.majorVersion);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, glContextInfo_.minorVersion);
-#if defined(WITH_ANGLE)
+#if defined(WITH_OPENGLES)
 	SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "1");
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 #elif defined(__EMSCRIPTEN__)

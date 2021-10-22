@@ -30,6 +30,9 @@ if(NCPROJECT_BUILD_ANDROID)
 	set(STRINGS_XML ${CMAKE_BINARY_DIR}/android/src/main/res/values/strings.xml)
 	configure_file(${STRINGS_XML_IN} ${STRINGS_XML} @ONLY)
 
+	# Always add the OpenGL ES compile definition to Android builds
+	list(APPEND ANDROID_GENERATED_FLAGS WITH_OPENGLES)
+
 	# Reset compilation flags that external tools might have set in environment variables
 	set(RESET_FLAGS_ARGS -DCMAKE_C_FLAGS="" -DCMAKE_CXX_FLAGS="" -DCMAKE_EXE_LINKER_FLAGS=""
 		-DCMAKE_MODULE_LINKER_FLAGS="" -DCMAKE_SHARED_LINKER_FLAGS="" -DCMAKE_STATIC_LINKER_FLAGS="")

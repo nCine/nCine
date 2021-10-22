@@ -3,7 +3,7 @@ if(NCINE_WITH_TRACY)
 	# Download release archive (TRUE) or Git repository (FALSE)
 	set(TRACY_DOWNLOAD_ARCHIVE TRUE)
 
-	if(TRACY_DOWNLOAD_ARCHIVE)
+	if(TRACY_DOWNLOAD_ARCHIVE AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.18.0")
 		# Strip the initial "v" character from the version tag
 		string(REGEX MATCH "^v[0-9]" TRACY_STRIP_VERSION ${TRACY_VERSION_TAG})
 		if(TRACY_STRIP_VERSION STREQUAL "")

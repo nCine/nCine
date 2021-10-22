@@ -38,7 +38,7 @@ class MyEventHandler :
 	void onJoyDisconnected(const nc::JoyConnectionEvent &event) override;
 
   private:
-	static const int MaxTexFormats = 32;
+	static const int MaxTexFormats = 64;
 
 	enum class Direction
 	{

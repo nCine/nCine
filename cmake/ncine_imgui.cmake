@@ -3,7 +3,7 @@ if(NCINE_WITH_IMGUI)
 	# Download release archive (TRUE) or Git repository (FALSE)
 	set(IMGUI_DOWNLOAD_ARCHIVE TRUE)
 
-	if(IMGUI_DOWNLOAD_ARCHIVE)
+	if(IMGUI_DOWNLOAD_ARCHIVE AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.18.0")
 		# Strip the initial "v" character from the version tag
 		string(REGEX MATCH "^v[0-9]" IMGUI_STRIP_VERSION ${IMGUI_VERSION_TAG})
 		if(IMGUI_STRIP_VERSION STREQUAL "")

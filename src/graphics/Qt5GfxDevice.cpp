@@ -148,7 +148,7 @@ void Qt5GfxDevice::initDevice()
 	format.setDepthBufferSize(displayMode_.depthBits());
 	format.setStencilBufferSize(displayMode_.stencilBits());
 	format.setVersion(glContextInfo_.majorVersion, glContextInfo_.minorVersion);
-#if defined(WITH_ANGLE)
+#if defined(WITH_OPENGLES)
 	format.setRenderableType(QSurfaceFormat::OpenGLES);
 #endif
 	format.setProfile(glContextInfo_.coreProfile ? QSurfaceFormat::CoreProfile : QSurfaceFormat::CompatibilityProfile);

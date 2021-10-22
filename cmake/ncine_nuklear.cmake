@@ -3,7 +3,7 @@ if(NCINE_WITH_NUKLEAR)
 	# Download release archive (TRUE) or Git repository (FALSE)
 	set(NUKLEAR_DOWNLOAD_ARCHIVE TRUE)
 
-	if(NUKLEAR_DOWNLOAD_ARCHIVE)
+	if(NUKLEAR_DOWNLOAD_ARCHIVE AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.18.0")
 		# Strip the initial "v" character from the version tag
 		string(REGEX MATCH "^v[0-9]" NUKLEAR_STRIP_VERSION ${NUKLEAR_VERSION_TAG})
 		if(NUKLEAR_STRIP_VERSION STREQUAL "")

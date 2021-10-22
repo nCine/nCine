@@ -73,7 +73,7 @@ void GLBufferObject::bufferSubData(GLintptr offset, GLsizeiptr size, const GLvoi
 	glBufferSubData(target_, offset, size, data);
 }
 
-#if !defined(__ANDROID__) && !defined(WITH_ANGLE)
+#if !defined(WITH_OPENGLES)
 void GLBufferObject::bufferStorage(GLsizeiptr size, const GLvoid *data, GLbitfield flags)
 {
 	TracyGpuZone("glBufferStorage");
@@ -142,7 +142,7 @@ GLboolean GLBufferObject::unmap()
 	return glUnmapBuffer(target_);
 }
 
-#if (!defined(__ANDROID__) && !defined(WITH_ANGLE)) || (defined(__ANDROID__) && GL_ES_VERSION_3_2)
+#if !defined(WITH_OPENGLES) || (defined(WITH_OPENGLES) && GL_ES_VERSION_3_2)
 void GLBufferObject::texBuffer(GLenum internalformat)
 {
 	FATAL_ASSERT(target_ == GL_TEXTURE_BUFFER);

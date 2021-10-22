@@ -59,7 +59,6 @@ bool TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 		// Parsing the pixel format
 		switch (pixelFormat)
 		{
-#ifndef __ANDROID__
 			case FMT_DXT1:
 				internalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
 				break;
@@ -69,7 +68,7 @@ bool TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 			case FMT_DXT5:
 				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 				break;
-#else
+#ifdef WITH_OPENGLES
 			case FMT_ETC1:
 				internalFormat = GL_ETC1_RGB8_OES;
 				break;
@@ -104,7 +103,7 @@ bool TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 			case FMT_EAC_RG11:
 				internalFormat = GL_COMPRESSED_RG11_EAC;
 				break;
-	#if __ANDROID_API__ >= 21
+	#if (!defined(__ANDROID__) && defined(WITH_OPENGLES)) || (defined(__ANDROID__) && __ANDROID_API__ >= 21)
 			case FMT_ASTC_4x4:
 				internalFormat = GL_COMPRESSED_RGBA_ASTC_4x4_KHR;
 				break;
@@ -170,7 +169,7 @@ bool TextureLoaderPvr::parseFormat(const Pvr3Header &header)
 		switch (pixelFormat)
 		{
 			case FMT_BGRA_8888:
-#if !defined(__ANDROID__) && !defined(WITH_ANGLE)
+#if !defined(WITH_OPENGLES)
 				internalFormat = GL_BGRA;
 #else
 				internalFormat = GL_BGRA_EXT;

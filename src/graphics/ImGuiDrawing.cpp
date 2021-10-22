@@ -41,16 +41,19 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
       lastFrameWidth_(0), lastFrameHeight_(0)
 {
 	ImGuiIO &io = ImGui::GetIO();
-#ifndef __ANDROID__
-	io.BackendRendererName = "nCine_OpenGL";
+#if defined(WITH_OPENGLES) || defined(__EMSCRIPTEN)
+	io.BackendRendererName = "nCine_OpenGL ES";
 #else
 	io.BackendRendererName = "nCine_OpenGL_ES";
+#endif
+
+#ifdef __ANDROID__
 	static char iniFilename[512];
 	nctl::strncpy(iniFilename, fs::joinPath(fs::savePath(), "imgui.ini").data(), 512);
 	io.IniFilename = iniFilename;
 #endif
 
-#if !(defined(__ANDROID__) && !GL_ES_VERSION_3_2) && !defined(WITH_ANGLE) && !defined(__EMSCRIPTEN__)
+#if !(defined(WITH_OPENGLES) && !GL_ES_VERSION_3_2) && !defined(__EMSCRIPTEN__)
 	io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; // We can honor the ImDrawCmd::VtxOffset field, allowing for large meshes.
 #endif
 
@@ -346,7 +349,7 @@ void ImGuiDrawing::draw()
 
 			// Bind texture, Draw
 			GLTexture::bindHandle(GL_TEXTURE_2D, reinterpret_cast<GLTexture *>(imCmd->GetTexID())->glHandle());
-#if (defined(__ANDROID__) && !GL_ES_VERSION_3_2) || defined(WITH_ANGLE) || defined(__EMSCRIPTEN__)
+#if (defined(WITH_OPENGLES) && !GL_ES_VERSION_3_2) || defined(__EMSCRIPTEN__)
 			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, firstIndex);
 #else
 			glDrawElementsBaseVertex(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,

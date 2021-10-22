@@ -9,6 +9,9 @@ if(WIN32)
 elseif(APPLE)
 	list(APPEND SOURCES ${NCINE_ROOT}/src/base/StdAtomic.cpp)
 else()
+	if(ATOMIC_FOUND)
+		target_link_libraries(ncine PRIVATE Atomic::Atomic)
+	endif()
 	list(APPEND SOURCES ${NCINE_ROOT}/src/base/GccAtomic.cpp)
 endif()
 
@@ -17,10 +20,17 @@ if(EMSCRIPTEN)
 	list(APPEND SOURCES ${NCINE_ROOT}/src/EmscriptenLocalFile.cpp)
 endif()
 
-if(ANGLE_FOUND)
-	message(STATUS "ANGLE has been found")
-	target_compile_definitions(ncine PRIVATE "WITH_ANGLE")
-	target_link_libraries(ncine PRIVATE EGL::EGL OpenGLES::GLES)
+if(ANGLE_FOUND OR OPENGLES2_FOUND)
+	target_compile_definitions(ncine PRIVATE "WITH_OPENGLES")
+	target_link_libraries(ncine PRIVATE EGL::EGL OpenGLES2::GLES2)
+
+	if(ANGLE_FOUND)
+		message(STATUS "ANGLE has been found")
+		target_compile_definitions(ncine PRIVATE "WITH_ANGLE")
+	endif()
+
+	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/TextureLoaderPkm.h)
+	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/TextureLoaderPkm.cpp)
 endif()
 
 if(GLEW_FOUND)
@@ -480,7 +490,7 @@ if(ANDROID)
 		${NCINE_ROOT}/src/android/AndroidKeys.cpp
 		${NCINE_ROOT}/src/android/AssetFile.cpp
 		${NCINE_ROOT}/src/android/EglGfxDevice.cpp
-		${NCINE_ROOT}/src/android/TextureLoaderPkm.cpp
+		${NCINE_ROOT}/src/graphics/TextureLoaderPkm.cpp
 	)
 else()
 	list(APPEND SOURCES ${NCINE_ROOT}/src/PCApplication.cpp)

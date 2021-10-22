@@ -65,7 +65,6 @@ bool TextureLoaderDds::parseFormat(const DdsHeader &header)
 		// Parsing the FourCC format
 		switch (fourCC)
 		{
-#ifndef __ANDROID__
 			case DDS_DXT1:
 				internalFormat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
 				break;
@@ -75,7 +74,7 @@ bool TextureLoaderDds::parseFormat(const DdsHeader &header)
 			case DDS_DXT5:
 				internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
 				break;
-#else
+#ifdef WITH_OPENGLES
 			case DDS_ETC1:
 				internalFormat = GL_ETC1_RGB8_OES;
 				break;

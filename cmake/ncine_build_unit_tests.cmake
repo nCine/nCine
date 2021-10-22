@@ -3,7 +3,7 @@ if(NCINE_BUILD_UNIT_TESTS)
 	# Download release archive (TRUE) or Git repository (FALSE)
 	set(GTEST_DOWNLOAD_ARCHIVE TRUE)
 
-	if(GTEST_DOWNLOAD_ARCHIVE)
+	if(GTEST_DOWNLOAD_ARCHIVE AND ${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.18.0")
 		# Strip the initial "v" character from the version tag
 		string(REGEX MATCH "^v[0-9]" GTEST_STRIP_VERSION ${GTEST_VERSION_TAG})
 		if(GTEST_STRIP_VERSION STREQUAL "")

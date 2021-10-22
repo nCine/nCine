@@ -1,3 +1,5 @@
+#include <ncine/config.h>
+
 #include "apptest_texformats.h"
 #include <ncine/config.h>
 #include <ncine/Application.h>
@@ -8,14 +10,14 @@
 #include <ncine/IGfxCapabilities.h>
 #include "apptest_datapath.h"
 
-#ifndef __ANDROID__
-	#define WITH_PNG_FORMAT (1 && NCINE_WITH_PNG)
-	#define WITH_WEBP_FORMAT (0 && NCINE_WITH_WEBP)
-#else
+#define WITH_PNG_FORMAT (1 && NCINE_WITH_PNG)
+#define WITH_WEBP_FORMAT (0 && NCINE_WITH_WEBP)
+
+#ifdef NCINE_WITH_OPENGLES
 	#define WITH_ETC1_FORMAT (1)
 	#define WITH_ETC2_FORMAT (1)
 	#define WITH_ATC_FORMAT (1)
-	#define WITH_ASTC_FORMAT (1 && __ANDROID_API__ >= 21)
+	#define WITH_ASTC_FORMAT (1)
 #endif
 
 #define WITH_PVR_UNCOMPRESSED_FORMAT (0)
@@ -175,11 +177,23 @@ void MyEventHandler::onInit()
 	dummy_ = nctl::makeUnique<nc::SceneNode>(&rootNode, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	textNode_ = nctl::makeUnique<nc::TextNode>(dummy_.get(), font_.get());
 
+	nctl::String textureFilename;
+	nctl::UniquePtr<nc::Texture> texture;
 	for (unsigned int i = 0; i < filenames_.size(); i++)
 	{
-		textures_.pushBack(nctl::makeUnique<nc::Texture>((nc::fs::absoluteJoinPath(texPath, filenames_[i])).data()));
-		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(dummy_.get(), textures_[i].get()));
-		sprites_.back()->setEnabled(false);
+		if (texture == nullptr)
+			texture = nctl::makeUnique<nc::Texture>();
+
+		textureFilename = nc::fs::absoluteJoinPath(texPath, filenames_[i]);
+		const bool hasLoaded = texture->loadFromFile(textureFilename.data());
+		if (hasLoaded)
+		{
+			textures_.pushBack(nctl::move(texture));
+			sprites_.pushBack(nctl::makeUnique<nc::Sprite>(dummy_.get(), textures_.back().get()));
+			sprites_.back()->setEnabled(false);
+		}
+		else
+			LOGI_X("Cannot load texture file \"%s\"", textureFilename.data());
 	}
 
 	sprites_[selected_]->setEnabled(true);
@@ -225,13 +239,13 @@ void MyEventHandler::handleInput(Direction direction)
 	{
 		case Direction::RIGHT:
 			newSelection_ = selected_ + 1;
-			if (newSelection_ > static_cast<int>(filenames_.size() - 1))
+			if (newSelection_ > static_cast<int>(sprites_.size() - 1))
 				newSelection_ = 0;
 			break;
 		case Direction::LEFT:
 			newSelection_ = selected_ - 1;
 			if (newSelection_ < 0)
-				newSelection_ = filenames_.size() - 1;
+				newSelection_ = sprites_.size() - 1;
 			break;
 		case Direction::UP:
 			newScale_ = scale_ * 2.0f;

@@ -20,7 +20,7 @@ GLShader::GLShader(GLenum type)
 {
 	if (patchLines.isEmpty())
 	{
-#if (defined(__ANDROID__) && GL_ES_VERSION_3_0) || defined(WITH_ANGLE) || defined(__EMSCRIPTEN__)
+#if (defined(WITH_OPENGLES) && GL_ES_VERSION_3_0) || defined(__EMSCRIPTEN__)
 		patchLines.append("#version 300 es\n");
 #else
 		patchLines.append("#version 330\n");

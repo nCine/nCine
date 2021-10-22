@@ -230,7 +230,7 @@ bool Texture::saveToMemory(unsigned char *bufferPtr)
 
 bool Texture::saveToMemory(unsigned char *bufferPtr, unsigned int level)
 {
-#if !defined(__ANDROID__) && !defined(WITH_ANGLE) && !defined(__EMSCRIPTEN__)
+#if !defined(WITH_OPENGLES) && !defined(__EMSCRIPTEN__)
 	const GLenum format = channelsToFormat(numChannels_);
 	glGetError();
 	glTexture_->getTexImage(level, format, GL_UNSIGNED_BYTE, bufferPtr);
@@ -351,7 +351,7 @@ void Texture::initialize(const ITextureLoader &texLoader)
 		dataSize = texLoader.width() * texLoader.height() * 4;
 	}
 
-#if (defined(__ANDROID__) && GL_ES_VERSION_3_0) || defined(WITH_ANGLE) || defined(__EMSCRIPTEN__)
+#if (defined(WITH_OPENGLES) && GL_ES_VERSION_3_0) || defined(__EMSCRIPTEN__)
 	const bool withTexStorage = true;
 #else
 	const bool withTexStorage = gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::ARB_TEXTURE_STORAGE);
@@ -389,7 +389,7 @@ void Texture::initialize(const ITextureLoader &texLoader)
 
 void Texture::load(const ITextureLoader &texLoader)
 {
-#if (defined(__ANDROID__) && GL_ES_VERSION_3_0) || defined(WITH_ANGLE) || defined(__EMSCRIPTEN__)
+#if (defined(WITH_OPENGLES) && GL_ES_VERSION_3_0) || defined(__EMSCRIPTEN__)
 	const bool withTexStorage = true;
 #else
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();

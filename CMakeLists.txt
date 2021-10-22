@@ -4,6 +4,12 @@ project(nCine)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 get_filename_component(PARENT_SOURCE_DIR ${CMAKE_SOURCE_DIR} DIRECTORY)
 
+string(FIND ${CMAKE_SYSTEM_PROCESSOR} "arm" ARM_SUBSTRING_FOUND)
+string(FIND ${CMAKE_SYSTEM_PROCESSOR} "aarch64" AARCH64_SUBSTRING_FOUND)
+if (ARM_SUBSTRING_FOUND GREATER -1 OR AARCH64_SUBSTRING_FOUND GREATER -1)
+	set(NCINE_ARM_PROCESSOR TRUE)
+endif()
+
 include(ncine_options)
 
 if(NOT IS_DIRECTORY ${NCINE_DATA_DIR})
@@ -130,7 +136,7 @@ endif()
 file(COPY ${CMAKE_SOURCE_DIR}/project DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY ${CMAKE_SOURCE_DIR}/.clang-format DESTINATION ${CMAKE_BINARY_DIR}/project)
 file(COPY ${CMAKE_SOURCE_DIR}/.editorconfig DESTINATION ${CMAKE_BINARY_DIR}/project)
-foreach(FILE IN ITEMS "FindGLFW.cmake" "FindSDL2.cmake" "FindVorbis.cmake" "FindWebP.cmake")
+foreach(FILE IN ITEMS "check_atomic.cmake" "FindGLFW.cmake" "FindOpenGLES2.cmake" "FindSDL2.cmake" "FindVorbis.cmake" "FindWebP.cmake")
 	file(COPY ${CMAKE_SOURCE_DIR}/cmake/${FILE} DESTINATION ${CMAKE_BINARY_DIR}/project/cmake)
 endforeach()
 

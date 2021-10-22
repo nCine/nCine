@@ -46,7 +46,7 @@ class TextureFormat
 	bool floatFormat();
 	/// Searches a match between a compressed internal format and an external one
 	bool compressedFormat();
-#ifdef __ANDROID__
+#ifdef WITH_OPENGLES
 	/// Searches a match between an OpenGL ES compressed internal format and an external one
 	bool oesCompressedFormat();
 #endif

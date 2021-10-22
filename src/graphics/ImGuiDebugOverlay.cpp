@@ -59,6 +59,11 @@ namespace {
 		}
 	}
 
+#if defined(WITH_OPENGLES) || defined(__EMSCRIPTEN__)
+		const char *openglApiName = "OpenGL ES";
+#else
+		const char *openglApiName = "OpenGL";
+#endif
 }
 
 ///////////////////////////////////////////////////////////
@@ -444,6 +449,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #ifdef WITH_THREADS
 			ImGui::TextUnformatted("WITH_THREADS");
 #endif
+#ifdef WITH_OPENGLES
+			ImGui::TextUnformatted("WITH_OPENGLES");
+#endif
 #ifdef WITH_ANGLE
 			ImGui::TextUnformatted("WITH_ANGLE");
 #endif
@@ -552,12 +560,12 @@ void ImGuiDebugOverlay::guiGraphicsCapabilities()
 		const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
 
 		const IGfxCapabilities::GlInfoStrings &glInfoStrings = gfxCaps.glInfoStrings();
-		ImGui::Text("OpenGL Vendor: %s", glInfoStrings.vendor);
-		ImGui::Text("OpenGL Renderer: %s", glInfoStrings.renderer);
-		ImGui::Text("OpenGL Version: %s", glInfoStrings.glVersion);
+		ImGui::Text("%s Vendor: %s", openglApiName, glInfoStrings.vendor);
+		ImGui::Text("%s Renderer: %s", openglApiName, glInfoStrings.renderer);
+		ImGui::Text("%s Version: %s", openglApiName, glInfoStrings.glVersion);
 		ImGui::Text("GLSL Version: %s", glInfoStrings.glslVersion);
 
-		ImGui::Text("OpenGL parsed version: %d.%d.%d",
+		ImGui::Text("%s parsed version: %d.%d.%d", openglApiName,
 		            gfxCaps.glVersion(IGfxCapabilities::GLVersion::MAJOR),
 		            gfxCaps.glVersion(IGfxCapabilities::GLVersion::MINOR),
 		            gfxCaps.glVersion(IGfxCapabilities::GLVersion::RELEASE));
@@ -587,10 +595,12 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 	if (ImGui::CollapsingHeader("Application Configuration"))
 	{
 		const AppConfiguration &appCfg = theApplication().appConfiguration();
+#if !defined(WITH_OPENGLES) && !defined(__EMSCRIPTEN__)
 		ImGui::Text("OpenGL Core: %s", appCfg.glCoreProfile() ? "true" : "false");
 		ImGui::Text("OpenGL Forward: %s", appCfg.glForwardCompatible() ? "true" : "false");
-		ImGui::Text("OpenGL Major: %d", appCfg.glMajorVersion());
-		ImGui::Text("OpenGL Minor: %d", appCfg.glMinorVersion());
+#endif
+		ImGui::Text("%s Major: %d", openglApiName, appCfg.glMajorVersion());
+		ImGui::Text("%s Minor: %d", openglApiName, appCfg.glMinorVersion());
 
 		ImGui::Separator();
 		ImGui::Text("Data path: %s", appCfg.dataPath().data());
@@ -621,7 +631,7 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("Threads: %s", appCfg.withThreads ? "true" : "false");
 		ImGui::Text("Scenegraph: %s", appCfg.withScenegraph ? "true" : "false");
 		ImGui::Text("VSync: %s", appCfg.withVSync ? "true" : "false");
-		ImGui::Text("OpenGL Debug Context: %s", appCfg.withGlDebugContext ? "true" : "false");
+		ImGui::Text("%s Debug Context: %s", openglApiName, appCfg.withGlDebugContext ? "true" : "false");
 		ImGui::Text("Console Colors: %s", appCfg.withConsoleColors ? "true" : "false");
 	}
 }

@@ -43,7 +43,7 @@ unsigned int TextureFormat::numChannels() const
 		case GL_RGB:
 			return 3;
 		case GL_RGBA:
-#if !defined(__ANDROID__) && !defined(WITH_ANGLE)
+#if !defined(WITH_OPENGLES)
 		case GL_BGRA:
 #else
 		case GL_BGRA_EXT:
@@ -57,13 +57,13 @@ void TextureFormat::bgrFormat()
 {
 	if (format_ == GL_RGBA)
 	{
-#if !defined(__ANDROID__) && !defined(WITH_ANGLE)
+#if !defined(WITH_OPENGLES)
 		format_ = GL_BGRA;
 #else
 		format_ = GL_BGRA_EXT;
 #endif
 	}
-#if !defined(__ANDROID__) && !defined(WITH_ANGLE)
+#if !defined(WITH_OPENGLES)
 	else if (format_ == GL_RGB)
 		format_ = GL_BGR;
 #endif
@@ -94,7 +94,6 @@ unsigned long TextureFormat::calculateMipSizes(GLenum internalFormat, int width,
 		case GL_R8:
 			bpp = 8;
 			break;
-#ifndef __ANDROID__
 		case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
 		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
 			// max(1, width / 4) x max(1, height / 4) x 8(DXT1)
@@ -111,7 +110,7 @@ unsigned long TextureFormat::calculateMipSizes(GLenum internalFormat, int width,
 			bpp = 8;
 			minDataSize = 16;
 			break;
-#else
+#ifdef WITH_OPENGLES
 		case GL_ETC1_RGB8_OES:
 		case GL_COMPRESSED_RGB8_ETC2:
 		case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
@@ -157,7 +156,7 @@ unsigned long TextureFormat::calculateMipSizes(GLenum internalFormat, int width,
 			bpp = 4;
 			minDataSize = 2 * 2 * ((blockWidth * blockHeight * bpp) / 8);
 			break;
-	#if __ANDROID_API__ >= 21
+	#if (!defined(__ANDROID__) && defined(WITH_OPENGLES)) || (defined(__ANDROID__) && __ANDROID_API__ >= 21)
 		case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
 			blockWidth = 4;
 			blockHeight = 4;
@@ -291,7 +290,7 @@ void TextureFormat::findExternalFormat()
 		found = floatFormat();
 	if (found == false)
 		found = compressedFormat();
-#ifdef __ANDROID__
+#ifdef WITH_OPENGLES
 	if (found == false)
 		found = oesCompressedFormat();
 #endif
@@ -420,7 +419,7 @@ bool TextureFormat::compressedFormat()
 	return found;
 }
 
-#ifdef __ANDROID__
+#ifdef WITH_OPENGLES
 bool TextureFormat::oesCompressedFormat()
 {
 	bool found = true;
@@ -433,7 +432,7 @@ bool TextureFormat::oesCompressedFormat()
 		case GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
 		case GL_COMPRESSED_RGBA8_ETC2_EAC:
 		case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
-	#if __ANDROID_API__ >= 21
+	#if (!defined(__ANDROID__) && defined(WITH_OPENGLES)) || (defined(__ANDROID__) && __ANDROID_API__ >= 21)
 		case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
 		case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
 		case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:
@@ -485,7 +484,6 @@ void TextureFormat::checkFormatSupport() const
 
 	switch (internalFormat_)
 	{
-#ifndef __ANDROID__
 		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
 		case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
 		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
@@ -494,7 +492,7 @@ void TextureFormat::checkFormatSupport() const
 			FATAL_ASSERT_MSG(hasS3tc, "GL_EXT_texture_compression_s3tc not available");
 			break;
 		}
-#else
+#ifdef WITH_OPENGLES
 		case GL_ETC1_RGB8_OES:
 		{
 			const bool hasEct1 = gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::OES_COMPRESSED_ETC1_RGB8_TEXTURE);
@@ -518,7 +516,7 @@ void TextureFormat::checkFormatSupport() const
 			FATAL_ASSERT_MSG(hasPvr, "GL_IMG_texture_compression_pvrtc not available");
 			break;
 		}
-	#if __ANDROID_API__ >= 21
+	#if (!defined(__ANDROID__) && defined(WITH_OPENGLES)) || (defined(__ANDROID__) && __ANDROID_API__ >= 21)
 		case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
 		case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
 		case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:

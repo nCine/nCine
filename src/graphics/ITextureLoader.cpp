@@ -9,7 +9,7 @@
 #ifdef WITH_WEBP
 	#include "TextureLoaderWebP.h"
 #endif
-#ifdef __ANDROID__
+#ifdef WITH_OPENGLES
 	#include "TextureLoaderPkm.h"
 #endif
 #include "FileSystem.h"

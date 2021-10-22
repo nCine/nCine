@@ -1,5 +1,5 @@
 #if defined(NCINE_INCLUDE_OPENGL)
-	#if defined(__ANDROID__) || defined(WITH_ANGLE)
+	#if defined(WITH_OPENGLES)
 		#define GL_GLEXT_PROTOTYPES
 		#include <GLES3/gl3.h>
 		#include <GLES2/gl2ext.h>

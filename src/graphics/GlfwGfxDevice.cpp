@@ -106,7 +106,7 @@ const Vector2i GlfwGfxDevice::windowPosition() const
 
 void GlfwGfxDevice::flashWindow() const
 {
-#ifndef __EMSCRIPTEN__
+#if (GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3) && !defined(__EMSCRIPTEN__)
 	glfwRequestWindowAttention(windowHandle_);
 #endif
 }
@@ -185,7 +185,7 @@ void GlfwGfxDevice::initDevice()
 	glfwWindowHint(GLFW_ALPHA_BITS, static_cast<int>(displayMode_.alphaBits()));
 	glfwWindowHint(GLFW_DEPTH_BITS, static_cast<int>(displayMode_.depthBits()));
 	glfwWindowHint(GLFW_STENCIL_BITS, static_cast<int>(displayMode_.stencilBits()));
-#if defined(WITH_ANGLE)
+#if defined(WITH_OPENGLES)
 	glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 #elif defined(__EMSCRIPTEN__)

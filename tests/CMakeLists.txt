@@ -21,10 +21,10 @@ if(WIN32)
 
 	if(ANGLE_FOUND)
 		get_target_property(EGL_IMPORTED_LOCATION EGL::EGL IMPORTED_LOCATION)
-		get_target_property(GLES_IMPORTED_LOCATION OpenGLES::GLES IMPORTED_LOCATION)
+		get_target_property(GLES2_IMPORTED_LOCATION OpenGLES2::GLES2 IMPORTED_LOCATION)
 		add_custom_target(copy_angle_dll_tests ALL
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${EGL_IMPORTED_LOCATION} ${CMAKE_BINARY_DIR}/tests
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GLES_IMPORTED_LOCATION} ${CMAKE_BINARY_DIR}/tests
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GLES2_IMPORTED_LOCATION} ${CMAKE_BINARY_DIR}/tests
 			COMMENT "Copying ANGLE DLLs to tests..."
 		)
 		set_target_properties(copy_angle_dll_tests PROPERTIES FOLDER "CustomCopyTargets")

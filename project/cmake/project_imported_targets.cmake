@@ -67,6 +67,10 @@ if(NOT NCINE_DYNAMIC_LIBRARY)
 			find_package(GLEW)
 		endif()
 		find_package(OpenGL REQUIRED)
+		if(NCPROJECT_ARM_PROCESSOR)
+			include(check_atomic)
+			find_package(OpenGLES2)
+		endif()
 		find_package(GLFW)
 		find_package(SDL2)
 		find_package(PNG)
@@ -353,6 +357,25 @@ else() # GCC and LLVM
 		set(${PREFIX}_EXTRA_LIBRARIES ${EXTRA_LIBRARIES} PARENT_SCOPE)
 		set(${PREFIX}_LIBRARY_FILE ${LIBRARY_FILE} PARENT_SCOPE)
 	endfunction()
+
+	if(ATOMIC_FOUND)
+		add_library(Atomic::Atomic INTERFACE IMPORTED)
+		set_target_properties(Atomic::Atomic PROPERTIES
+			INTERFACE_LINK_DIRECTORIES ${ATOMIC_DIRECTORY}
+			INTERFACE_LINK_LIBRARIES atomic)
+	endif()
+
+	if(OPENGLES2_FOUND)
+		add_library(EGL::EGL SHARED IMPORTED)
+		set_target_properties(EGL::EGL PROPERTIES
+			IMPORTED_LOCATION ${EGL_LIBRARIES}
+			INTERFACE_INCLUDE_DIRECTORIES ${EGL_INCLUDE_DIR})
+
+		add_library(OpenGLES2::GLES2 SHARED IMPORTED)
+		set_target_properties(OpenGLES2::GLES2 PROPERTIES
+			IMPORTED_LOCATION ${OPENGLES2_LIBRARIES}
+			INTERFACE_INCLUDE_DIRECTORIES ${OPENGLES2_INCLUDE_DIR})
+	endif()
 
 	if(GLFW_FOUND)
 		add_library(GLFW::GLFW SHARED IMPORTED)
