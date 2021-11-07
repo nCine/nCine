@@ -4,41 +4,44 @@
 #include <nctl/CString.h>
 
 #include "LuaStateManager.h"
+#include "LuaUtils.h"
 #include "LuaDebug.h"
 #include "LuaStatistics.h"
 #include "LuaNames.h"
 
-#include "LuaRect.h"
-#include "LuaVector2.h"
-#include "LuaVector3.h"
-#include "LuaColor.h"
-#include "LuaILogger.h"
+#if WITH_SCRIPTING_API
+	#include "LuaRect.h"
+	#include "LuaVector2.h"
+	#include "LuaVector3.h"
+	#include "LuaColor.h"
+	#include "LuaILogger.h"
 
-#include "LuaIInputManager.h"
-#include "LuaMouseEvents.h"
-#include "LuaKeyboardEvents.h"
-#include "LuaKeys.h"
-#include "LuaJoystickEvents.h"
+	#include "LuaIInputManager.h"
+	#include "LuaMouseEvents.h"
+	#include "LuaKeyboardEvents.h"
+	#include "LuaKeys.h"
+	#include "LuaJoystickEvents.h"
 
-#include "LuaTimeStamp.h"
-#include "LuaFileSystem.h"
-#include "LuaApplication.h"
-#include "LuaTexture.h"
-#include "LuaSceneNode.h"
-#include "LuaSprite.h"
-#include "LuaMeshSprite.h"
-#include "LuaAnimatedSprite.h"
-#include "LuaFont.h"
-#include "LuaTextNode.h"
-#include "LuaDrawableNode.h"
-#include "LuaRectAnimation.h"
-#include "LuaParticleSystem.h"
+	#include "LuaTimeStamp.h"
+	#include "LuaFileSystem.h"
+	#include "LuaApplication.h"
+	#include "LuaTexture.h"
+	#include "LuaSceneNode.h"
+	#include "LuaSprite.h"
+	#include "LuaMeshSprite.h"
+	#include "LuaAnimatedSprite.h"
+	#include "LuaFont.h"
+	#include "LuaTextNode.h"
+	#include "LuaDrawableNode.h"
+	#include "LuaRectAnimation.h"
+	#include "LuaParticleSystem.h"
 
-#ifdef WITH_AUDIO
-	#include "LuaIAudioDevice.h"
-	#include "LuaAudioBuffer.h"
-	#include "LuaAudioBufferPlayer.h"
-	#include "LuaAudioStreamPlayer.h"
+	#ifdef WITH_AUDIO
+		#include "LuaIAudioDevice.h"
+		#include "LuaAudioBuffer.h"
+		#include "LuaAudioBufferPlayer.h"
+		#include "LuaAudioStreamPlayer.h"
+	#endif
 #endif
 
 #include "Application.h"
@@ -115,6 +118,10 @@ LuaStateManager::LuaStateManager(lua_State *L, ApiType apiType, StatisticsTracki
       untrackedUserDatas_(16), closeOnDestruction_(false)
 {
 	ASSERT(L_);
+
+#ifndef WITH_SCRIPTING_API
+	apiType = ApiType::NONE;
+#endif
 	init(apiType, statsTracking, stdLibraries);
 }
 
@@ -132,6 +139,10 @@ void LuaStateManager::reopen(ApiType apiType, StatisticsTracking statsTracking, 
 	shutdown();
 
 	L_ = lua_newstate(statsTracking == StatisticsTracking::ENABLED ? luaAllocatorWithStatistics : luaAllocator, nullptr);
+
+#ifndef WITH_SCRIPTING_API
+	apiType = ApiType::NONE;
+#endif
 	init(apiType, statsTracking, stdLibraries);
 }
 
@@ -407,6 +418,7 @@ void LuaStateManager::unregisterState()
 
 void LuaStateManager::releaseTrackedMemory()
 {
+#ifdef WITH_SCRIPTING_API
 	if (trackedUserDatas_.isEmpty() == false)
 		LOGW_X("Lua array of tracked userdata is not empty: %d elements", trackedUserDatas_.size());
 
@@ -452,7 +464,7 @@ void LuaStateManager::releaseTrackedMemory()
 				LuaTextNode::release(wrapper.object);
 				break;
 			}
-#ifdef WITH_AUDIO
+	#ifdef WITH_AUDIO
 			case LuaTypes::AUDIOBUFFER:
 			{
 				LuaAudioBuffer::release(wrapper.object);
@@ -468,7 +480,7 @@ void LuaStateManager::releaseTrackedMemory()
 				LuaAudioStreamPlayer::release(wrapper.object);
 				break;
 			}
-#endif
+	#endif
 			case LuaTypes::PARTICLE_SYSTEM:
 			{
 				LuaParticleSystem::release(wrapper.object);
@@ -483,6 +495,7 @@ void LuaStateManager::releaseTrackedMemory()
 		wrapper.object = nullptr;
 	}
 	trackedUserDatas_.clear();
+#endif
 }
 
 void LuaStateManager::exposeScriptApi()
@@ -508,6 +521,7 @@ void LuaStateManager::exposeModuleApi()
 
 void LuaStateManager::exposeApi()
 {
+#ifdef WITH_SCRIPTING_API
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
 
 	LuaRect<float>::expose(L_);
@@ -534,7 +548,7 @@ void LuaStateManager::exposeApi()
 		LuaParticleSystem::expose(this);
 	}
 
-#ifdef WITH_AUDIO
+	#ifdef WITH_AUDIO
 	if (appCfg.withAudio)
 	{
 		LuaIAudioDevice::expose(L_);
@@ -542,11 +556,13 @@ void LuaStateManager::exposeApi()
 		LuaAudioBufferPlayer::expose(this);
 		LuaAudioStreamPlayer::expose(this);
 	}
+	#endif
 #endif
 }
 
 void LuaStateManager::exposeConstants()
 {
+#ifdef WITH_SCRIPTING_API
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
 
 	LuaColor::exposeConstants(L_);
@@ -565,6 +581,7 @@ void LuaStateManager::exposeConstants()
 		LuaMeshSprite::exposeConstants(L_);
 		LuaTextNode::exposeConstants(L_);
 	}
+#endif
 
 #ifdef WITH_GIT_VERSION
 	lua_pushstring(L_, VersionStrings::Version);

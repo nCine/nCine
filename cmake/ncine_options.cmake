@@ -30,6 +30,9 @@ option(NCINE_WITH_WEBP "Enable WebP image file loading" ON)
 option(NCINE_WITH_AUDIO "Enable OpenAL support and thus sound" ON)
 option(NCINE_WITH_VORBIS "Enable Ogg Vorbis audio file loading" ON)
 option(NCINE_WITH_LUA "Enable Lua scripting integration" ON)
+if(NCINE_WITH_LUA)
+	option(NCINE_WITH_SCRIPTING_API "Enable Lua scripting API" ON)
+endif()
 
 option(NCINE_WITH_ALLOCATORS "Enable the custom memory allocators" OFF)
 option(NCINE_WITH_IMGUI "Enable the integration with Dear ImGui" ON)
@@ -126,6 +129,7 @@ if("${NCINE_OPTIONS_PRESETS}" STREQUAL "BinDist" OR
 		set(NCINE_BUILD_DOCUMENTATION OFF)
 		set(NCINE_WITH_IMGUI OFF)
 		set(NCINE_WITH_THREADS OFF)
+		set(NCINE_WITH_SCRIPTING_API ON)
 		set(NCINE_STARTUP_TEST ncinelua)
 	endif()
 

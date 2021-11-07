@@ -19,6 +19,8 @@ class DLL_PUBLIC RenderDocCapture
 
 	static void triggerCapture();
 	static void triggerMultiFrameCapture(uint32_t numFrames);
+	static bool endFrameCapture();
+	static bool discardFrameCapture();
 
 	static uint32_t numCaptures();
 	static uint32_t captureInfo(uint32_t idx, char *filename, uint32_t *pathlength, uint64_t *timestamp);
@@ -31,11 +33,9 @@ class DLL_PUBLIC RenderDocCapture
 
   private:
 	static void init();
-	static void shutdown();
+	static void removeHooks();
 
 	static void startFrameCapture();
-	static void endFrameCapture();
-	static void discardFrameCapture();
 
 	friend class Application;
 };

@@ -482,6 +482,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #ifdef WITH_LUA
 			ImGui::TextUnformatted("WITH_LUA");
 #endif
+#ifdef WITH_SCRIPTING_API
+			ImGui::TextUnformatted("WITH_SCRIPTING_API");
+#endif
 #ifdef WITH_ALLOCATORS
 			ImGui::TextUnformatted("WITH_ALLOCATORS");
 #endif

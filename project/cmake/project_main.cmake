@@ -62,7 +62,7 @@ add_executable(${NCPROJECT_EXE_NAME} WIN32 ${NCPROJECT_SOURCES})
 include(project_generated_sources)
 target_sources(${NCPROJECT_EXE_NAME} PRIVATE ${GENERATED_SOURCES})
 
-if(NOT DEFAULT_DATA_DIR_DIST) # Don't set the startup project if it wouldn't find the data directory
+if(NOT NCPROJECT_DATA_DIR_DIST) # Don't set the startup project if it wouldn't find the data directory
 	set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${NCPROJECT_EXE_NAME})
 endif()
 
@@ -102,7 +102,8 @@ endif()
 
 include(project_installation)
 
-if(DEFAULT_DATA_DIR_DIST)
+# Embed the installation data directory path in the project executable
+if(NCPROJECT_DATA_DIR_DIST)
 	if(MSVC OR APPLE)
 		# Relative path from tests to data on Windows and OS X, where the user can choose the installation directory
 		file(RELATIVE_PATH NCPROJECT_DEFAULT_DATA_DIR
@@ -112,6 +113,7 @@ if(DEFAULT_DATA_DIR_DIST)
 	else()
 		set(NCPROJECT_DEFAULT_DATA_DIR "${CMAKE_INSTALL_PREFIX}/${DATA_INSTALL_DESTINATION}/")
 	endif()
+	target_compile_definitions(${NCPROJECT_EXE_NAME} PRIVATE "NCPROJECT_DATA_DIR_DIST")
 elseif(NOT NCPROJECT_DEFAULT_DATA_DIR)
 	set(NCPROJECT_DEFAULT_DATA_DIR "${NCPROJECT_DATA_DIR}/data/")
 endif()

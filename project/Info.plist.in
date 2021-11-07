@@ -25,7 +25,7 @@
 	<key>CSResourcesFileMapped</key>
 	<true/>
 	<key>LSApplicationCategoryType</key>
-	<string>public.app-category.games</string>
+	<string>@NCPROJECT_MACOS_CATEGORY@</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>@NCPROJECT_COPYRIGHT@</string>
 	<key>NSHighResolutionCapable</key>

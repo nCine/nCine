@@ -17,6 +17,7 @@
 #cmakedefine01 NCINE_WITH_WEBP
 
 #cmakedefine01 NCINE_WITH_LUA
+#cmakedefine01 NCINE_WITH_SCRIPTING_API
 
 #cmakedefine01 NCINE_WITH_ALLOCATORS
 

@@ -88,6 +88,20 @@ void RenderDocCapture::triggerMultiFrameCapture(uint32_t numFrames)
 		rdocApi->TriggerMultiFrameCapture(numFrames);
 }
 
+bool RenderDocCapture::endFrameCapture()
+{
+	if (rdocApi)
+		return rdocApi->EndFrameCapture(nullptr, nullptr);
+	return false;
+}
+
+bool RenderDocCapture::discardFrameCapture()
+{
+	if (rdocApi)
+		return rdocApi->DiscardFrameCapture(nullptr, nullptr);
+	return false;
+}
+
 uint32_t RenderDocCapture::numCaptures()
 {
 	if (rdocApi)
@@ -159,30 +173,25 @@ void RenderDocCapture::init()
 		ASSERT(ret == 1);
 	}
 #endif
+
+	if (rdocApi)
+	{
+		int major, minor, patch;
+		apiVersion(&major, &minor, &patch);
+		LOGI_X("RenderDoc API: %d.%d.%d", major, minor, patch);
+	}
 }
 
-void RenderDocCapture::shutdown()
+void RenderDocCapture::removeHooks()
 {
 	if (rdocApi)
-		rdocApi->Shutdown();
+		rdocApi->RemoveHooks();
 }
 
 void RenderDocCapture::startFrameCapture()
 {
 	if (rdocApi)
 		rdocApi->StartFrameCapture(nullptr, nullptr);
-}
-
-void RenderDocCapture::endFrameCapture()
-{
-	if (rdocApi)
-		rdocApi->EndFrameCapture(nullptr, nullptr);
-}
-
-void RenderDocCapture::discardFrameCapture()
-{
-	if (rdocApi)
-		rdocApi->DiscardFrameCapture(nullptr, nullptr);
 }
 
 }

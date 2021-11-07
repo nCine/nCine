@@ -331,7 +331,7 @@ void Application::shutdownCommon()
 #endif
 
 #ifdef WITH_RENDERDOC
-	RenderDocCapture::shutdown();
+	RenderDocCapture::removeHooks();
 #endif
 
 	debugOverlay_.reset(nullptr);

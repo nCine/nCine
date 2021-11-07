@@ -22,6 +22,7 @@ if(NCINE_BUILD_TESTS)
 			endif()
 		endif()
 
+		# Embed the installation data directory path in test executables
 		if(TESTS_DATA_DIR_DIST)
 			if(MSVC OR APPLE)
 				# Relative path from tests to data on Windows and OS X, where the user can choose the installation directory
