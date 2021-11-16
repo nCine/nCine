@@ -69,10 +69,15 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/opengl/GLDepthTest.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLBlending.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLCullFace.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLClearColor.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLViewport.cpp
 	${NCINE_ROOT}/src/graphics/RenderBuffersManager.cpp
 	${NCINE_ROOT}/src/graphics/RenderBatcher.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLDebug.cpp
 	${NCINE_ROOT}/src/graphics/RenderStatistics.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLVertexFormat.cpp
 	${NCINE_ROOT}/src/graphics/RenderVaoPool.cpp
+	${NCINE_ROOT}/src/graphics/RenderCommandPool.cpp
+	${NCINE_ROOT}/src/graphics/Viewport.cpp
+	${NCINE_ROOT}/src/graphics/ScreenViewport.cpp
 )

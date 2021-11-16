@@ -1,14 +1,19 @@
 #ifndef CLASS_NCINE_RENDERRESOURCES
 #define CLASS_NCINE_RENDERRESOURCES
 
-#include "GLBufferObject.h"
-#include "GLShaderProgram.h"
-#include "RenderBuffersManager.h"
-#include "RenderVaoPool.h"
+#define NCINE_INCLUDE_OPENGL
+#include "common_headers.h"
+
 #include <nctl/UniquePtr.h>
 #include "Matrix4x4.h"
 
 namespace ncine {
+
+class RenderBuffersManager;
+class RenderVaoPool;
+class RenderCommandPool;
+class RenderBatcher;
+class GLShaderProgram;
 
 /// The class that creates and handles application common OpenGL rendering resources
 class RenderResources
@@ -44,6 +49,9 @@ class RenderResources
 
 	static inline RenderBuffersManager &buffersManager() { return *buffersManager_; }
 	static inline RenderVaoPool &vaoPool() { return *vaoPool_; }
+	static inline RenderCommandPool &renderCommandPool() { return *renderCommandPool_; }
+	static inline RenderBatcher &renderBatcher() { return *renderBatcher_; }
+
 	static inline GLShaderProgram *spriteShaderProgram() { return spriteShaderProgram_.get(); }
 	static inline GLShaderProgram *spriteGrayShaderProgram() { return spriteGrayShaderProgram_.get(); }
 	static inline GLShaderProgram *spriteNoTextureShaderProgram() { return spriteNoTextureShaderProgram_.get(); }
@@ -60,6 +68,7 @@ class RenderResources
 	static inline GLShaderProgram *batchedMeshSpritesNoTextureShaderProgram() { return batchedMeshSpritesNoTextureShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedTextnodesAlphaShaderProgram() { return batchedTextnodesAlphaShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedTextnodesRedShaderProgram() { return batchedTextnodesRedShaderProgram_.get(); }
+
 	static inline const Matrix4x4f &projectionMatrix() { return projectionMatrix_; }
 	static inline bool hasProjectionChanged(bool batchingEnabled) { return (batchingEnabled) ? projectionHasChangedBatching_ : projectionHasChanged_; }
 	static void clearDirtyProjectionFlag(bool batchingEnabled);
@@ -69,6 +78,9 @@ class RenderResources
   private:
 	static nctl::UniquePtr<RenderBuffersManager> buffersManager_;
 	static nctl::UniquePtr<RenderVaoPool> vaoPool_;
+	static nctl::UniquePtr<RenderCommandPool> renderCommandPool_;
+	static nctl::UniquePtr<RenderBatcher> renderBatcher_;
+
 	static nctl::UniquePtr<GLShaderProgram> spriteShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> spriteGrayShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> spriteNoTextureShaderProgram_;

@@ -1,11 +1,12 @@
 #ifndef CLASS_NCINE_RENDERBATCHER
 #define CLASS_NCINE_RENDERBATCHER
 
-#include "RenderCommand.h"
 #include <nctl/Array.h>
 #include <nctl/UniquePtr.h>
 
 namespace ncine {
+
+class RenderCommand;
 
 /// A class that batches render commands together
 class RenderBatcher
@@ -30,13 +31,11 @@ class RenderBatcher
 		nctl::UniquePtr<unsigned char[]> buffer;
 	};
 
+	/// Memory buffers to collect UBO data before committing it
+	/*! \note It is a RAM buffer and cannot be handled by the `RenderBuffersManager` */
 	nctl::Array<ManagedBuffer> buffers_;
 
-	nctl::Array<nctl::UniquePtr<RenderCommand>> freeCommandsPool_;
-	nctl::Array<nctl::UniquePtr<RenderCommand>> usedCommandsPool_;
-
 	RenderCommand *collectCommands(nctl::Array<RenderCommand *>::ConstIterator start, nctl::Array<RenderCommand *>::ConstIterator end, nctl::Array<RenderCommand *>::ConstIterator &nextStart);
-	RenderCommand *retrieveCommandFromPool(Material::ShaderProgramType shaderProgramType);
 
 	unsigned char *acquireMemory(unsigned int bytes);
 	void createBuffer(unsigned int size);

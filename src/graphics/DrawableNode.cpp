@@ -4,6 +4,7 @@
 #include "RenderCommand.h"
 #include "Application.h"
 #include "RenderStatistics.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -200,6 +201,8 @@ void DrawableNode::setLayer(unsigned short layer)
 
 void DrawableNode::updateAabb()
 {
+	ZoneScoped;
+
 	const float width = (absScale().x > 0.0f) ? absWidth() : -absWidth();
 	const float height = (absScale().y > 0.0f) ? absHeight() : -absHeight();
 	float rotatedWidth = width;

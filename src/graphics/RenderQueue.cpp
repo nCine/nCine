@@ -1,5 +1,6 @@
 #include <nctl/algorithms.h>
 #include "RenderQueue.h"
+#include "RenderBatcher.h"
 #include "RenderResources.h"
 #include "RenderStatistics.h"
 #include "GLDebug.h"
@@ -17,7 +18,8 @@ namespace ncine {
 
 RenderQueue::RenderQueue()
     : debugGroupString_(64),
-      opaqueQueue_(16), opaqueBatchedQueue_(16), transparentQueue_(16), transparentBatchedQueue_(16)
+      opaqueQueue_(16), opaqueBatchedQueue_(16),
+      transparentQueue_(16), transparentBatchedQueue_(16)
 {
 }
 
@@ -73,29 +75,23 @@ namespace {
 
 }
 
-void RenderQueue::draw()
+void RenderQueue::sortAndCommit()
 {
 	const bool batchingEnabled = theApplication().renderingSettings().batchingEnabled;
-
-	// Reset all rendering statistics
-	ncine::RenderStatistics::reset();
 
 	// Sorting the queues with the relevant orders
 	nctl::quicksort(opaqueQueue_.begin(), opaqueQueue_.end(), descendingOrder);
 	nctl::quicksort(transparentQueue_.begin(), transparentQueue_.end(), ascendingOrder);
 
-	nctl::Array<RenderCommand *> *opaques = &opaqueQueue_;
-	nctl::Array<RenderCommand *> *transparents = &transparentQueue_;
+	nctl::Array<RenderCommand *> *opaques = batchingEnabled ? &opaqueBatchedQueue_ : &opaqueQueue_;
+	nctl::Array<RenderCommand *> *transparents = batchingEnabled ? &transparentBatchedQueue_ : &transparentQueue_;
 
 	if (batchingEnabled)
 	{
 		ZoneScopedN("Batching");
 		// Always create batches after sorting
-		batcher_.createBatches(opaqueQueue_, opaqueBatchedQueue_);
-		opaques = &opaqueBatchedQueue_;
-
-		batcher_.createBatches(transparentQueue_, transparentBatchedQueue_);
-		transparents = &transparentBatchedQueue_;
+		RenderResources::renderBatcher().createBatches(opaqueQueue_, opaqueBatchedQueue_);
+		RenderResources::renderBatcher().createBatches(transparentQueue_, transparentBatchedQueue_);
 	}
 
 	// Avoid GPU stalls by uploading to VBOs, IBOs and UBOs before drawing
@@ -104,12 +100,7 @@ void RenderQueue::draw()
 		ZoneScopedN("Commit opaques");
 		GLDebug::ScopedGroup scoped("Committing vertices, indices and uniform blocks in opaques");
 		for (RenderCommand *opaqueRenderCommand : *opaques)
-		{
-			opaqueRenderCommand->commitVertices();
-			opaqueRenderCommand->commitIndices();
-			opaqueRenderCommand->commitTransformation();
-			opaqueRenderCommand->commitUniformBlocks();
-		}
+			opaqueRenderCommand->commitAll();
 	}
 
 	if (transparents->isEmpty() == false)
@@ -117,16 +108,15 @@ void RenderQueue::draw()
 		ZoneScopedN("Commit transparents");
 		GLDebug::ScopedGroup scoped("Committing vertices, indices and uniform blocks in transparents");
 		for (RenderCommand *transparentRenderCommand : *transparents)
-		{
-			transparentRenderCommand->commitVertices();
-			transparentRenderCommand->commitIndices();
-			transparentRenderCommand->commitTransformation();
-			transparentRenderCommand->commitUniformBlocks();
-		}
+			transparentRenderCommand->commitAll();
 	}
+}
 
-	// Now that UBOs and VBOs have been updated, they can be flushed and unmapped
-	RenderResources::buffersManager().flushUnmap();
+void RenderQueue::draw()
+{
+	const bool batchingEnabled = theApplication().renderingSettings().batchingEnabled;
+	nctl::Array<RenderCommand *> *opaques = batchingEnabled ? &opaqueBatchedQueue_ : &opaqueQueue_;
+	nctl::Array<RenderCommand *> *transparents = batchingEnabled ? &transparentBatchedQueue_ : &transparentQueue_;
 
 	unsigned int commandIndex = 0;
 	// Rendering opaque nodes front to back
@@ -190,8 +180,7 @@ void RenderQueue::draw()
 	transparentBatchedQueue_.clear();
 
 	RenderResources::clearDirtyProjectionFlag(batchingEnabled);
-	RenderResources::buffersManager().remap();
-	batcher_.reset();
+	RenderResources::renderBatcher().reset();
 	GLDebug::reset();
 }
 

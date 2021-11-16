@@ -627,6 +627,7 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("VBO size: %lu", appCfg.vboSize);
 		ImGui::Text("IBO size: %lu", appCfg.iboSize);
 		ImGui::Text("Vao pool size: %u", appCfg.vaoPoolSize);
+		ImGui::Text("RenderCommand pool size: %u", appCfg.renderCommandPoolSize);
 
 		ImGui::Separator();
 		ImGui::Text("Debug Overlay: %s", appCfg.withDebugOverlay ? "true" : "false");
@@ -1356,6 +1357,7 @@ void ImGuiDebugOverlay::guiNodeInspector()
 void ImGuiDebugOverlay::guiTopLeft()
 {
 	const RenderStatistics::VaoPool &vaoPool = RenderStatistics::vaoPool();
+	const RenderStatistics::CommandPool &commandPool = RenderStatistics::commandPool();
 	const RenderStatistics::Textures &textures = RenderStatistics::textures();
 	const RenderStatistics::CustomBuffers &customVbos = RenderStatistics::customVBOs();
 	const RenderStatistics::CustomBuffers &customIbos = RenderStatistics::customIBOs();
@@ -1380,6 +1382,7 @@ void ImGuiDebugOverlay::guiTopLeft()
 		}
 
 		ImGui::Text("%u/%u VAOs (%u reuses, %u bindings)", vaoPool.size, vaoPool.capacity, vaoPool.reuses, vaoPool.bindings);
+		ImGui::Text("%u/%u RenderCommands in the pool (%u retrievals)", commandPool.usedSize, commandPool.usedSize + commandPool.freeSize, commandPool.retrievals);
 		ImGui::Text("%.2f Kb in %u Texture(s)", textures.dataSize / 1024.0f, textures.count);
 		ImGui::Text("%.2f Kb in %u custom VBO(s)", customVbos.dataSize / 1024.0f, customVbos.count);
 		ImGui::Text("%.2f Kb in %u custom IBO(s)", customIbos.dataSize / 1024.0f, customIbos.count);

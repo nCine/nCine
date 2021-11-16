@@ -1,5 +1,6 @@
 #include "BaseSprite.h"
 #include "RenderCommand.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -99,6 +100,8 @@ BaseSprite::BaseSprite(const BaseSprite &other)
 
 void BaseSprite::updateRenderCommand()
 {
+	ZoneScoped;
+
 	renderCommand_->transformation() = worldMatrix_;
 	spriteBlock_->uniform("color")->setFloatVector(Colorf(absColor()).data());
 	spriteBlock_->uniform("spriteSize")->setFloatValue(width_, height_);

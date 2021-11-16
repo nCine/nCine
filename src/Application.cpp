@@ -7,6 +7,7 @@
 #include "GfxCapabilities.h"
 #include "RenderResources.h"
 #include "RenderQueue.h"
+#include "ScreenViewport.h"
 #include "GLDebug.h"
 #include "Timer.h" // for `sleep()`
 #include "FrameTimer.h"
@@ -64,6 +65,11 @@ Application::~Application() = default;
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+Viewport &Application::rootViewport()
+{
+	return *rootViewport_;
+}
 
 unsigned long int Application::numFrames() const
 {
@@ -133,8 +139,9 @@ void Application::initCommon()
 	{
 		gfxDevice_->setupGL();
 		RenderResources::create();
-		renderQueue_ = nctl::makeUnique<RenderQueue>();
 		rootNode_ = nctl::makeUnique<SceneNode>();
+		rootViewport_ = nctl::makeUnique<ScreenViewport>();
+		rootViewport_->setRootNode(rootNode_.get());
 	}
 	else
 		RenderResources::createMinimal(); // some resources are still required for rendering
@@ -178,11 +185,6 @@ void Application::step()
 {
 	ZoneScoped;
 	frameTimer_->addFrame();
-	if (appCfg_.withScenegraph)
-	{
-		TracyGpuZone("Clear");
-		gfxDevice_->clear();
-	}
 
 #ifdef WITH_IMGUI
 	{
@@ -216,13 +218,15 @@ void Application::step()
 	if (debugOverlay_)
 		debugOverlay_->update();
 
-	if (rootNode_ != nullptr && renderQueue_ != nullptr)
+	if (appCfg_.withScenegraph)
 	{
+		RenderQueue *screenRenderQueue = rootViewport_->renderQueue_.get();
+
 		ZoneScopedN("SceneGraph");
 		{
 			ZoneScopedN("Update");
 			profileStartTime_ = TimeStamp::now();
-			rootNode_->update(frameTimer_->lastFrameInterval());
+			rootViewport_->update();
 			timings_[Timings::UPDATE] = profileStartTime_.secondsSince();
 		}
 
@@ -236,7 +240,7 @@ void Application::step()
 		{
 			ZoneScopedN("Visit");
 			profileStartTime_ = TimeStamp::now();
-			rootNode_->visit(*renderQueue_);
+			rootViewport_->visit();
 			timings_[Timings::VISIT] = profileStartTime_.secondsSince();
 		}
 
@@ -244,7 +248,7 @@ void Application::step()
 		{
 			ZoneScopedN("ImGui endFrame");
 			profileStartTime_ = TimeStamp::now();
-			imguiDrawing_->endFrame(*renderQueue_);
+			imguiDrawing_->endFrame(*screenRenderQueue);
 			timings_[Timings::IMGUI] += profileStartTime_.secondsSince();
 		}
 #endif
@@ -253,7 +257,7 @@ void Application::step()
 		{
 			ZoneScopedN("Nuklear endFrame");
 			profileStartTime_ = TimeStamp::now();
-			nuklearDrawing_->endFrame(*renderQueue_);
+			nuklearDrawing_->endFrame(*screenRenderQueue);
 			timings_[Timings::NUKLEAR] += profileStartTime_.secondsSince();
 		}
 #endif
@@ -261,7 +265,8 @@ void Application::step()
 		{
 			ZoneScopedN("Draw");
 			profileStartTime_ = TimeStamp::now();
-			renderQueue_->draw();
+			rootViewport_->sortAndCommitQueue();
+			rootViewport_->draw();
 			timings_[Timings::DRAW] = profileStartTime_.secondsSince();
 		}
 	}
@@ -336,7 +341,6 @@ void Application::shutdownCommon()
 
 	debugOverlay_.reset(nullptr);
 	rootNode_.reset(nullptr);
-	renderQueue_.reset(nullptr);
 	RenderResources::dispose();
 	frameTimer_.reset(nullptr);
 	inputManager_.reset(nullptr);

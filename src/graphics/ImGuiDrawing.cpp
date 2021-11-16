@@ -8,6 +8,8 @@
 #include "GLDepthTest.h"
 #include "GLCullFace.h"
 #include "RenderQueue.h"
+#include "RenderCommandPool.h"
+#include "RenderResources.h"
 #include "DrawableNode.h"
 #include "Application.h"
 
@@ -37,7 +39,6 @@ namespace ncine {
 
 ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
     : withSceneGraph_(withSceneGraph),
-      freeCommandsPool_(16), usedCommandsPool_(16),
       lastFrameWidth_(0), lastFrameHeight_(0)
 {
 	ImGuiIO &io = ImGui::GetIO();
@@ -160,38 +161,14 @@ void ImGuiDrawing::endFrame()
 
 RenderCommand *ImGuiDrawing::retrieveCommandFromPool()
 {
-	RenderCommand *retrievedCommand = nullptr;
-
-	for (unsigned int i = 0; i < freeCommandsPool_.size(); i++)
-	{
-		const unsigned int poolSize = freeCommandsPool_.size();
-		nctl::UniquePtr<RenderCommand> &command = freeCommandsPool_[i];
-		if (command && command->material().shaderProgram() == imguiShaderProgram_.get())
-		{
-			retrievedCommand = command.get();
-			usedCommandsPool_.pushBack(nctl::move(command));
-			command = nctl::move(freeCommandsPool_[poolSize - 1]);
-			freeCommandsPool_.popBack();
-			break;
-		}
-	}
-
+	RenderCommand *retrievedCommand = RenderResources::renderCommandPool().retrieve(imguiShaderProgram_.get());
 	if (retrievedCommand == nullptr)
 	{
-		nctl::UniquePtr<RenderCommand> newCommand = nctl::makeUnique<RenderCommand>();
-		setupRenderCmd(*newCommand);
-		retrievedCommand = newCommand.get();
-		usedCommandsPool_.pushBack(nctl::move(newCommand));
+		retrievedCommand = RenderResources::renderCommandPool().add();
+		setupRenderCmd(*retrievedCommand);
 	}
 
 	return retrievedCommand;
-}
-
-void ImGuiDrawing::resetCommandPool()
-{
-	for (nctl::UniquePtr<RenderCommand> &command : usedCommandsPool_)
-		freeCommandsPool_.pushBack(nctl::move(command));
-	usedCommandsPool_.clear();
 }
 
 void ImGuiDrawing::setupRenderCmd(RenderCommand &cmd)
@@ -227,8 +204,6 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 		return;
 	const ImVec2 clipOff = drawData->DisplayPos;
 	const ImVec2 clipScale = drawData->FramebufferScale;
-
-	resetCommandPool();
 
 	unsigned int numCmd = 0;
 	for (int n = 0; n < drawData->CmdListsCount; n++)

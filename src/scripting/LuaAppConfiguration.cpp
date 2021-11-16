@@ -31,6 +31,7 @@ namespace AppConfiguration {
 	static const char *vboSize = "vbo_size";
 	static const char *iboSize = "ibo_size";
 	static const char *vaoPoolSize = "vao_pool_size";
+	static const char *renderCommandPoolSize = "rendercommand_pool_size";
 
 	static const char *withDebugOverlay = "debug_overlay";
 	static const char *withAudio = "audio";
@@ -77,6 +78,7 @@ void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::vboSize, static_cast<int64_t>(appCfg.vboSize));
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::iboSize, static_cast<int64_t>(appCfg.iboSize));
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::vaoPoolSize, appCfg.vaoPoolSize);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::renderCommandPoolSize, appCfg.renderCommandPoolSize);
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withDebugOverlay, appCfg.withDebugOverlay);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withAudio, appCfg.withAudio);
@@ -150,6 +152,8 @@ void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
 	appCfg.iboSize = iboSize;
 	const unsigned int vaoPoolSize = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::vaoPoolSize);
 	appCfg.vaoPoolSize = vaoPoolSize;
+	const unsigned int renderCommandPoolSize = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::renderCommandPoolSize);
+	appCfg.renderCommandPoolSize = renderCommandPoolSize;
 
 	const bool withDebugOverlay = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withDebugOverlay);
 	appCfg.withDebugOverlay = withDebugOverlay;

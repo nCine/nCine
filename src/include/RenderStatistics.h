@@ -112,6 +112,26 @@ class RenderStatistics
 		friend RenderStatistics;
 	};
 
+	class CommandPool
+	{
+	  public:
+		unsigned int usedSize;
+		unsigned int freeSize;
+		unsigned int retrievals;
+
+		CommandPool()
+		    : usedSize(0), freeSize(0), retrievals(0) {}
+
+	  private:
+		void reset()
+		{
+			usedSize = 0;
+			freeSize = 0;
+			retrievals = 0;
+		}
+		friend RenderStatistics;
+	};
+
 	/// Returns the aggregated command statistics for all types
 	static inline const Commands &allCommands() { return allCommands_; }
 	/// Returns the commnad statistics for the specified type
@@ -135,6 +155,9 @@ class RenderStatistics
 	/// Returns statistics about the VAO pool
 	static inline const VaoPool &vaoPool() { return vaoPool_; }
 
+	/// Returns statistics about the render command pools
+	static inline const CommandPool &commandPool() { return commandPool_; }
+
   private:
 	/// The string used to output OpenGL debug group information
 	static nctl::String debugString_;
@@ -148,6 +171,7 @@ class RenderStatistics
 	static unsigned int index_;
 	static unsigned int culledNodes_[2];
 	static VaoPool vaoPool_;
+	static CommandPool commandPool_;
 
 	static void reset();
 	static void gatherStatistics(const RenderCommand &command);
@@ -156,6 +180,11 @@ class RenderStatistics
 	{
 		vaoPool_.size = poolSize;
 		vaoPool_.capacity = poolCapacity;
+	}
+	static inline void gatherCommandPoolStatistics(unsigned int usedSize, unsigned int freeSize)
+	{
+		commandPool_.usedSize = usedSize;
+		commandPool_.freeSize = freeSize;
 	}
 	static inline void addTexture(unsigned long datasize)
 	{
@@ -190,13 +219,16 @@ class RenderStatistics
 	static inline void addCulledNode() { culledNodes_[index_]++; }
 	static inline void addVaoPoolReuse() { vaoPool_.reuses++; }
 	static inline void addVaoPoolBinding() { vaoPool_.bindings++; }
+	static inline void addCommandPoolRetrieval() { commandPool_.retrievals++; }
 
+	friend class ScreenViewport;
 	friend class RenderQueue;
 	friend class RenderBuffersManager;
 	friend class Texture;
 	friend class Geometry;
 	friend class DrawableNode;
 	friend class RenderVaoPool;
+	friend class RenderCommandPool;
 };
 
 }

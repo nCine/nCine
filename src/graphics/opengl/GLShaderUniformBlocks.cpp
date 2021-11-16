@@ -1,4 +1,5 @@
 #include "GLShaderUniformBlocks.h"
+#include "GLShaderProgram.h"
 #include "RenderResources.h"
 #include <nctl/StaticHashMapIterator.h>
 #include <cstring> // for memcpy()

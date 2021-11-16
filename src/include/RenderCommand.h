@@ -100,6 +100,9 @@ class RenderCommand
 	 * or directly writes into the common one */
 	void commitIndices();
 
+	/// Calls all the commit methods
+	void commitAll();
+
   private:
 	struct ScissorState
 	{

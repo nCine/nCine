@@ -1,4 +1,5 @@
 #include "SceneNode.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -259,6 +260,8 @@ void SceneNode::swapChildPointer(SceneNode *first, SceneNode *second)
 
 void SceneNode::transform()
 {
+	ZoneScoped;
+
 	// Calculating world and local matrices
 	localMatrix_ = Matrix4x4f::translation(x, y, 0.0f);
 	localMatrix_.rotateZ(rotation_);

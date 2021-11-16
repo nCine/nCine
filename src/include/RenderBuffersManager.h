@@ -75,7 +75,7 @@ class RenderBuffersManager
 	void remap();
 	void createBuffer(const BufferSpecifications &specs);
 
-	friend class RenderQueue;
+	friend class ScreenViewport;
 	friend class RenderStatistics;
 };
 

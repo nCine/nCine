@@ -49,6 +49,7 @@ set(HEADERS
 	${NCINE_ROOT}/include/ncine/TextNode.h
 	${NCINE_ROOT}/include/ncine/RectAnimation.h
 	${NCINE_ROOT}/include/ncine/AnimatedSprite.h
+	${NCINE_ROOT}/include/ncine/Viewport.h
 )
 
 set(NCTL_HEADERS

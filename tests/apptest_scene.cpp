@@ -2,6 +2,7 @@
 #include <ncine/Application.h>
 #include <ncine/Texture.h>
 #include <ncine/Sprite.h>
+#include <ncine/Viewport.h>
 #include "apptest_datapath.h"
 
 #include <ncine/config.h>
@@ -310,7 +311,7 @@ void MyEventHandler::onFrameStart()
 	for (unsigned int i = 0; i < NumSprites; i++)
 		sprites_[i]->setScale(spriteScale);
 
-	nc::theApplication().gfxDevice().setClearColor(bgColor);
+	nc::theApplication().rootViewport().setClearColor(bgColor);
 #endif
 }
 

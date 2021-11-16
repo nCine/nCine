@@ -3,6 +3,7 @@
 #include "GLScissorTest.h"
 #include "DrawableNode.h"
 #include "RenderResources.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -60,6 +61,8 @@ void RenderCommand::calculateMaterialSortKey()
 
 void RenderCommand::issue()
 {
+	ZoneScoped;
+
 	if (geometry_.numVertices_ == 0 && geometry_.numIndices_ == 0)
 		return;
 
@@ -96,6 +99,8 @@ void RenderCommand::setScissor(GLint x, GLint y, GLsizei width, GLsizei height)
 
 void RenderCommand::commitTransformation()
 {
+	ZoneScoped;
+
 	// `near` and `far` planes should be consistent with the projection matrix
 	const float near = -1.0f;
 	const float far = 1.0f;
@@ -106,6 +111,7 @@ void RenderCommand::commitTransformation()
 
 	if (material_.shaderProgram_ && material_.shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
 	{
+		ZoneScopedN("Set model and projection");
 		const Material::ShaderProgramType shaderProgramType = material_.shaderProgramType();
 
 		if (shaderProgramType == Material::ShaderProgramType::SPRITE ||
@@ -124,6 +130,7 @@ void RenderCommand::commitTransformation()
 
 		if (material_.uniform("projection")->dataPointer() != nullptr && shaderProgramType != Material::ShaderProgramType::CUSTOM)
 		{
+			ZoneScopedN("Set Projection");
 			if (RenderResources::hasProjectionChanged(isBatchedType(shaderProgramType)))
 				material_.uniform("projection")->setFloatVector(RenderResources::projectionMatrix().data());
 		}
@@ -146,6 +153,14 @@ void RenderCommand::commitIndices()
 		geometry_.commitIndices();
 		indicesCommitted_ = true;
 	}
+}
+
+void RenderCommand::commitAll()
+{
+	commitVertices();
+	commitIndices();
+	commitTransformation();
+	commitUniformBlocks();
 }
 
 }

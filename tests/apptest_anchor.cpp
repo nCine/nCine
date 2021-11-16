@@ -2,6 +2,7 @@
 
 #include "apptest_anchor.h"
 #include <ncine/Application.h>
+#include <ncine/Viewport.h>
 #include <ncine/Texture.h>
 #include <ncine/Sprite.h>
 #include <ncine/MeshSprite.h>
@@ -202,7 +203,7 @@ void MyEventHandler::onFrameStart()
 	}
 
 	ImGui::ColorEdit4("Background Color", background_.data(), ImGuiColorEditFlags_NoAlpha);
-	nc::theApplication().gfxDevice().setClearColor(background_);
+	nc::theApplication().rootViewport().setClearColor(background_);
 	ImGui::Checkbox("Culling", &settings.cullingEnabled);
 	ImGui::SameLine();
 	ImGui::Checkbox("Batching", &settings.batchingEnabled);

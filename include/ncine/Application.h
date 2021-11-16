@@ -11,7 +11,8 @@ namespace ncine {
 
 class FrameTimer;
 class SceneNode;
-class RenderQueue;
+class Viewport;
+class ScreenViewport;
 class IInputManager;
 class IAppEventHandler;
 class ImGuiDrawing;
@@ -78,6 +79,8 @@ class DLL_PUBLIC Application
 	inline IGfxDevice &gfxDevice() { return *gfxDevice_; }
 	/// Returns the root of the transformation graph
 	inline SceneNode &rootNode() { return *rootNode_; }
+	/// Returns the root viewport (i.e. the screen)
+	Viewport &rootViewport();
 	/// Returns the input manager instance
 	inline IInputManager &inputManager() { return *inputManager_; }
 
@@ -95,6 +98,8 @@ class DLL_PUBLIC Application
 	inline int widthInt() const { return gfxDevice_->width(); }
 	/// Returns the screen height as an integer number
 	inline int heightInt() const { return gfxDevice_->height(); }
+	/// Returns the screen resolution as a `Vector2i` object
+	inline Vector2i resolution() const { return gfxDevice_->resolution(); }
 
 	/// Returns the value of the suspension flag
 	/*! If `true` the application is suspended, it will neither update nor receive events */
@@ -129,8 +134,8 @@ class DLL_PUBLIC Application
 	TimeStamp profileStartTime_;
 	nctl::UniquePtr<FrameTimer> frameTimer_;
 	nctl::UniquePtr<IGfxDevice> gfxDevice_;
-	nctl::UniquePtr<RenderQueue> renderQueue_;
 	nctl::UniquePtr<SceneNode> rootNode_;
+	nctl::UniquePtr<ScreenViewport> rootViewport_;
 	nctl::UniquePtr<IDebugOverlay> debugOverlay_;
 	nctl::UniquePtr<IInputManager> inputManager_;
 	nctl::UniquePtr<IAppEventHandler> appEventHandler_;

@@ -45,10 +45,14 @@ set(PRIVATE_HEADERS
 	${NCINE_ROOT}/src/include/GLDepthTest.h
 	${NCINE_ROOT}/src/include/GLBlending.h
 	${NCINE_ROOT}/src/include/GLCullFace.h
+	${NCINE_ROOT}/src/include/GLClearColor.h
+	${NCINE_ROOT}/src/include/GLViewport.h
 	${NCINE_ROOT}/src/include/RenderBuffersManager.h
 	${NCINE_ROOT}/src/include/RenderBatcher.h
 	${NCINE_ROOT}/src/include/GLDebug.h
 	${NCINE_ROOT}/src/include/RenderStatistics.h
 	${NCINE_ROOT}/src/include/GLVertexFormat.h
 	${NCINE_ROOT}/src/include/RenderVaoPool.h
+	${NCINE_ROOT}/src/include/RenderCommandPool.h
+	${NCINE_ROOT}/src/include/ScreenViewport.h
 )

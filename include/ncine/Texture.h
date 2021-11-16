@@ -162,6 +162,7 @@ class DLL_PUBLIC Texture : public Object
 	void setGLTextureLabel(const char *filename);
 
 	friend class Material;
+	friend class Viewport;
 };
 
 }

@@ -1,4 +1,9 @@
+#include "GLShaderProgram.h"
 #include "RenderResources.h"
+#include "RenderBuffersManager.h"
+#include "RenderVaoPool.h"
+#include "RenderCommandPool.h"
+#include "RenderBatcher.h"
 #include "Application.h"
 
 #ifdef WITH_EMBEDDED_SHADERS
@@ -15,6 +20,9 @@ namespace ncine {
 
 nctl::UniquePtr<RenderBuffersManager> RenderResources::buffersManager_;
 nctl::UniquePtr<RenderVaoPool> RenderResources::vaoPool_;
+nctl::UniquePtr<RenderCommandPool> RenderResources::renderCommandPool_;
+nctl::UniquePtr<RenderBatcher> RenderResources::renderBatcher_;
+
 nctl::UniquePtr<GLShaderProgram> RenderResources::spriteShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::spriteGrayShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::spriteNoTextureShaderProgram_;
@@ -31,6 +39,7 @@ nctl::UniquePtr<GLShaderProgram> RenderResources::batchedMeshSpritesGrayShaderPr
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedMeshSpritesNoTextureShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedTextnodesRedShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedTextnodesAlphaShaderProgram_;
+
 Matrix4x4f RenderResources::projectionMatrix_ = Matrix4x4f::Identity;
 bool RenderResources::projectionHasChanged_ = false;
 bool RenderResources::projectionHasChangedBatching_ = false;
@@ -88,6 +97,8 @@ void RenderResources::create()
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
 	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.useBufferMapping, appCfg.vboSize, appCfg.iboSize);
 	vaoPool_ = nctl::makeUnique<RenderVaoPool>(appCfg.vaoPoolSize);
+	renderCommandPool_ = nctl::makeUnique<RenderCommandPool>(appCfg.vaoPoolSize);
+	renderBatcher_ = nctl::makeUnique<RenderBatcher>();
 
 	ShaderLoad shadersToLoad[] = {
 #ifndef WITH_EMBEDDED_SHADERS
