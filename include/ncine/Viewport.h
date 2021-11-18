@@ -11,6 +11,7 @@
 namespace ncine {
 
 class SceneNode;
+class Camera;
 class RenderQueue;
 class GLFramebufferObject;
 class Texture;
@@ -105,6 +106,10 @@ class DLL_PUBLIC Viewport
 	inline const Viewport *nextViewport() const { return nextViewport_; }
 	inline void setNextViewport(Viewport *nextViewport) { nextViewport_ = nextViewport; }
 
+	inline const Camera *camera() const { return camera_; }
+	inline Camera *camera() { return camera_; }
+	inline void setCamera(Camera *camera) { camera_ = camera; }
+
   protected:
 	enum class Type
 	{
@@ -132,6 +137,10 @@ class DLL_PUBLIC Viewport
 
 	/// The root scene node for this viewport/RT
 	SceneNode *rootNode_;
+
+	/// The camera used by this viewport
+	/*! \note If set to `nullptr` it will use the default camera */
+	Camera *camera_;
 
 	/// Next viewport to render after this one
 	Viewport *nextViewport_;

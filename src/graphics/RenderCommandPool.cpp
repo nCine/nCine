@@ -81,12 +81,16 @@ RenderCommand *RenderCommandPool::retrieve(GLShaderProgram *shaderProgram)
 	return retrievedCommand;
 }
 
-RenderCommand *RenderCommandPool::retrieveOrAdd(Material::ShaderProgramType shaderProgramType)
+RenderCommand *RenderCommandPool::retrieveOrAdd(Material::ShaderProgramType shaderProgramType, bool &commandAdded)
 {
 	RenderCommand *retrievedCommand = retrieve(shaderProgramType);
 
+	commandAdded = false;
 	if (retrievedCommand == nullptr)
+	{
 		retrievedCommand = add(shaderProgramType);
+		commandAdded = true;
+	}
 
 	return retrievedCommand;
 }

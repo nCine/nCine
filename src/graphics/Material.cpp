@@ -1,5 +1,6 @@
 #include <cstddef> // for offsetof()
 #include "Material.h"
+#include "Camera.h"
 #include "RenderResources.h"
 #include "GLShaderProgram.h"
 #include "GLUniform.h"
@@ -9,12 +10,17 @@
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
+nctl::HashMap<GLShaderProgram *, Material::MatricesUpdateData> Material::matricesMap_(16);
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 Material::Material()
-    : isBlendingEnabled_(false), srcBlendingFactor_(GL_SRC_ALPHA), destBlendingFactor_(GL_ONE_MINUS_SRC_ALPHA),
-      shaderProgramType_(ShaderProgramType::CUSTOM), shaderProgram_(nullptr), texture_(nullptr)
+    : Material(nullptr, nullptr)
 {
 }
 
@@ -22,7 +28,8 @@ Material::Material(GLShaderProgram *program, GLTexture *texture)
     : isBlendingEnabled_(false), srcBlendingFactor_(GL_SRC_ALPHA), destBlendingFactor_(GL_ONE_MINUS_SRC_ALPHA),
       shaderProgramType_(ShaderProgramType::CUSTOM), shaderProgram_(program), texture_(texture)
 {
-	setShaderProgram(program);
+	if (program)
+		setShaderProgram(program);
 }
 
 ///////////////////////////////////////////////////////////
@@ -154,7 +161,13 @@ void Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 	shaderProgramType_ = shaderProgramType;
 
 	if (uniform("projection")->dataPointer() != nullptr && shaderProgramType != Material::ShaderProgramType::CUSTOM)
-		uniform("projection")->setFloatVector(RenderResources::projectionMatrix().data());
+	{
+		Camera *camera = RenderResources::currentCamera();
+		uniform("projection")->setFloatVector(camera->projection().data());
+		Material::MatricesUpdateData &matricesUpdateData = matricesMap_[shaderProgram_];
+		matricesUpdateData.projectionMatrix = &camera->projection();
+		matricesUpdateData.updateFrameProjectionMatrix = camera->updateFrameProjectionMatrix();
+	}
 }
 
 void Material::setShaderProgram(GLShaderProgram *program)

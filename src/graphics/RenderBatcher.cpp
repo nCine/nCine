@@ -4,7 +4,10 @@
 #include "RenderCommand.h"
 #include "RenderCommandPool.h"
 #include "RenderResources.h"
+#include "Camera.h"
 #include "Application.h"
+#include "GLDebug.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -190,44 +193,45 @@ RenderCommand *RenderBatcher::collectCommands(
 	unsigned long instancesVertexDataSize = 0;
 	unsigned int instancesIndicesAmount = 0;
 
+	bool commandAdded = false;
 	if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::SPRITE)
 	{
-		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_SPRITES);
+		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_SPRITES, commandAdded);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("SpriteBlock")->size();
 	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::SPRITE_GRAY)
 	{
-		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_SPRITES_GRAY);
+		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_SPRITES_GRAY, commandAdded);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("SpriteBlock")->size();
 	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::SPRITE_NO_TEXTURE)
 	{
-		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE);
+		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE, commandAdded);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("SpriteBlock")->size();
 	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::MESH_SPRITE)
 	{
-		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_MESH_SPRITES);
+		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_MESH_SPRITES, commandAdded);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("MeshSpriteBlock")->size();
 	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::MESH_SPRITE_GRAY)
 	{
-		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY);
+		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY, commandAdded);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("MeshSpriteBlock")->size();
 	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)
 	{
-		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE);
+		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE, commandAdded);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("MeshSpriteBlock")->size();
 	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::TEXTNODE_ALPHA)
 	{
-		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA);
+		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA, commandAdded);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("TextnodeBlock")->size();
 	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::TEXTNODE_RED)
 	{
-		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_TEXTNODES_RED);
+		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_TEXTNODES_RED, commandAdded);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("TextnodeBlock")->size();
 	}
 	else
@@ -299,9 +303,20 @@ RenderCommand *RenderBatcher::collectCommands(
 		instancesVertexDataSize -= 2 * (refCommand->geometry().numElementsPerVertex() + 1) * sizeof(GLfloat);
 
 	batchCommand->material().setUniformsDataPointer(acquireMemory(instancesBlockSize));
-	if (hasTexture(refCommand->material().shaderProgramType()))
+	if (commandAdded && hasTexture(refCommand->material().shaderProgramType()))
 		batchCommand->material().uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
-	batchCommand->material().uniform("projection")->setFloatVector(RenderResources::projectionMatrix().data());
+
+	Camera *camera = RenderResources::currentCamera();
+	Material::MatricesUpdateData &matricesUpdateData = batchCommand->material().matricesUpdateData();
+	if (&camera->projection() != matricesUpdateData.projectionMatrix ||
+	    camera->updateFrameProjectionMatrix() > matricesUpdateData.updateFrameProjectionMatrix)
+	{
+		ZoneScopedN("Set projection matrix for batch");
+		GLDebug::ScopedGroup scoped("Set projection matrix for batch");
+		batchCommand->material().uniform("projection")->setFloatVector(camera->projection().data());
+		matricesUpdateData.projectionMatrix = &camera->projection();
+		matricesUpdateData.updateFrameProjectionMatrix = camera->updateFrameProjectionMatrix();
+	}
 
 	const unsigned int SizeVertexFormat = ((refCommand->material().shaderProgramType() != Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)
 	                                           ? sizeof(RenderResources::VertexFormatPos2Tex2)

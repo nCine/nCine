@@ -17,8 +17,8 @@ class ScreenViewport : public Viewport
 	inline bool isScreen() const { return true; }
 
   private:
-	void update();
-	void visit();
+	using Viewport::update;
+	using Viewport::visit;
 	void sortAndCommitQueue();
 	void draw();
 

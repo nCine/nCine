@@ -6,6 +6,7 @@
 #include <ncine/Sprite.h>
 #include <ncine/TextNode.h>
 #include <ncine/Viewport.h>
+#include <ncine/Camera.h>
 #include <ncine/imgui.h>
 #include "apptest_datapath.h"
 
@@ -80,6 +81,7 @@ void MyEventHandler::onInit()
 	for (unsigned int i = 0; i < NumViewports; i++)
 	{
 		vpNodes_.pushBack(nctl::makeUnique<nc::SceneNode>());
+		cameras_.pushBack(nctl::makeUnique<nc::Camera>());
 		viewports_.pushBack(nctl::makeUnique<nc::Viewport>(vpSizes[i]));
 		viewports_.back()->setRootNode(vpNodes_[i].get());
 		viewports_.back()->setClearColor(vpClearColors[i]);
@@ -90,6 +92,7 @@ void MyEventHandler::onInit()
 	rootViewport.initTexture(128, 128);
 	viewports_[0]->setNextViewport(viewports_[1].get());
 	vpSprites_[1]->setPosition(nc::theApplication().widthInt() - viewports_[1]->width() / 2, nc::theApplication().heightInt() - viewports_[1]->height() / 2);
+	viewports_[0]->setCamera(cameras_[0].get());
 
 	for (unsigned int i = 0; i < NumSprites / 2; i++)
 	{
@@ -176,6 +179,14 @@ void MyEventHandler::onFrameStart()
 		if (!(viewportRect == currentViewportRect) && viewportRect.w > 0 && viewportRect.h > 0)
 			viewports_[0]->setViewportRect(viewportRect);
 	}
+
+	static nc::Rectf cameraRect(0.0f, 0.0f, nc::theApplication().width(), nc::theApplication().height());
+	ImGui::SliderFloat("Camera X", &cameraRect.x, 0.0f, nc::theApplication().width());
+	ImGui::SliderFloat("Camera Y", &cameraRect.y, 0.0f, nc::theApplication().height());
+	ImGui::SliderFloat("Camera Width", &cameraRect.w, 0.0f, nc::theApplication().width() - cameraRect.x);
+	ImGui::SliderFloat("Camera Height", &cameraRect.h, 0.0f, nc::theApplication().height() - cameraRect.y);
+	if (ImGui::Button("Apply ortho"))
+		cameras_[0]->setOrtoProjection(cameraRect, -1.0f, 1.0f);
 
 	ImGui::End();
 

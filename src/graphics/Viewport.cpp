@@ -3,6 +3,7 @@
 #include "RenderResources.h"
 #include "Application.h"
 #include "SceneNode.h"
+#include "Camera.h"
 #include "GLFramebufferObject.h"
 #include "Texture.h"
 #include "GLClearColor.h"
@@ -62,7 +63,7 @@ Viewport::Viewport(Type type)
       clearMode_(ClearMode::EVERY_FRAME), clearColor_(Colorf::Black),
       renderQueue_(nctl::makeUnique<RenderQueue>()),
       fbo_(nullptr), texture_(nullptr),
-      rootNode_(nullptr), nextViewport_(nullptr)
+      rootNode_(nullptr), camera_(nullptr), nextViewport_(nullptr)
 {
 }
 
@@ -77,7 +78,7 @@ Viewport::Viewport(int width, int height, ColorFormat colorFormat, DepthStencilF
       clearMode_(ClearMode::EVERY_FRAME), clearColor_(Colorf::Black),
       renderQueue_(nctl::makeUnique<RenderQueue>()),
       fbo_(nullptr), texture_(nctl::makeUnique<Texture>()),
-      rootNode_(nullptr), nextViewport_(nullptr)
+      rootNode_(nullptr), camera_(nullptr), nextViewport_(nullptr)
 {
 	const bool isInitialized = initTexture(width, height, colorFormat, depthStencilFormat);
 	ASSERT(isInitialized);
@@ -181,8 +182,10 @@ void Viewport::draw()
 		nextViewport_->draw();
 
 	if (fbo_ && texture_)
-	{
 		fbo_->bind(GL_DRAW_FRAMEBUFFER);
+
+	if (type_ == Type::SCREEN || (fbo_ && texture_))
+	{
 		GLClearColor::State clearColorState = GLClearColor::state();
 		GLClearColor::setColor(clearColor_);
 		if (clearMode_ == ClearMode::EVERY_FRAME || clearMode_ == ClearMode::THIS_FRAME_ONLY)
@@ -190,10 +193,13 @@ void Viewport::draw()
 		GLClearColor::setState(clearColorState);
 	}
 
+	RenderResources::setCamera(camera_);
 	GLViewport::State viewportState = GLViewport::state();
 	GLViewport::setRect(viewportRect_);
 	renderQueue_->draw();
 	GLViewport::setState(viewportState);
+
+	// Camera dirty flags are reset in the `RenderQueue` class
 
 	if (fbo_ && depthStencilFormat_ != DepthStencilFormat::NONE)
 	{

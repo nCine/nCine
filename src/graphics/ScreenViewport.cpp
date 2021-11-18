@@ -38,33 +38,12 @@ ScreenViewport::ScreenViewport()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ScreenViewport::update()
-{
-	if (nextViewport_)
-		nextViewport_->update();
-
-	if (rootNode_)
-		rootNode_->update(theApplication().interval());
-}
-
-void ScreenViewport::visit()
-{
-	if (nextViewport_)
-		nextViewport_->visit();
-
-	if (rootNode_)
-		rootNode_->visit(*renderQueue_);
-}
-
 void ScreenViewport::sortAndCommitQueue()
 {
 	// Reset all rendering statistics
 	RenderStatistics::reset();
 
-	if (nextViewport_)
-		nextViewport_->sortAndCommitQueue();
-
-	renderQueue_->sortAndCommit();
+	Viewport::sortAndCommitQueue();
 
 	// Now that UBOs and VBOs have been updated, they can be flushed and unmapped
 	RenderResources::buffersManager().flushUnmap();
@@ -72,24 +51,7 @@ void ScreenViewport::sortAndCommitQueue()
 
 void ScreenViewport::draw()
 {
-	if (nextViewport_)
-		nextViewport_->draw();
-
-	GLClearColor::State clearColorState = GLClearColor::state();
-	GLClearColor::setColor(clearColor_);
-	if (clearMode_ == ClearMode::EVERY_FRAME || clearMode_ == ClearMode::THIS_FRAME_ONLY)
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	GLClearColor::setState(clearColorState);
-
-	GLViewport::State viewportState = GLViewport::state();
-	GLViewport::setRect(viewportRect_);
-	renderQueue_->draw();
-	GLViewport::setState(viewportState);
-
-	if (clearMode_ == ClearMode::THIS_FRAME_ONLY)
-		clearMode_ = ClearMode::NEVER;
-	else if (clearMode_ == ClearMode::NEXT_FRAME_ONLY)
-		clearMode_ = ClearMode::THIS_FRAME_ONLY;
+	Viewport::draw();
 
 	RenderResources::buffersManager().remap();
 	RenderResources::renderCommandPool().reset();

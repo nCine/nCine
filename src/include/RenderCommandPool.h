@@ -28,7 +28,7 @@ class RenderCommandPool
 	RenderCommand *retrieve(GLShaderProgram *shaderProgram);
 
 	/// Retrieves (or adds) a command with the specified ShaderProgramType
-	RenderCommand *retrieveOrAdd(Material::ShaderProgramType shaderProgramType);
+	RenderCommand *retrieveOrAdd(Material::ShaderProgramType shaderProgramType, bool &commandAdded);
 
 	/// Releases all used commands and returnsi them in the free array
 	void reset();

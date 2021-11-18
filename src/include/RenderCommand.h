@@ -87,8 +87,11 @@ class RenderCommand
 	inline Material &material() { return material_; }
 	inline Geometry &geometry() { return geometry_; }
 
-	/// Commits the modelview matrix uniform
+	/// Commits the model matrix uniform block
 	void commitTransformation();
+
+	/// Commits the projection and view matrix uniform
+	void commitCameraTransformation();
 
 	/// Copy the vertices stored in host memory to video memory
 	/*! This step is not needed if the command uses a custom VBO
@@ -100,7 +103,7 @@ class RenderCommand
 	 * or directly writes into the common one */
 	void commitIndices();
 
-	/// Calls all the commit methods
+	/// Calls all the commit methods except the camera uniforms commit
 	void commitAll();
 
   private:

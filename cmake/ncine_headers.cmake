@@ -50,6 +50,7 @@ set(HEADERS
 	${NCINE_ROOT}/include/ncine/RectAnimation.h
 	${NCINE_ROOT}/include/ncine/AnimatedSprite.h
 	${NCINE_ROOT}/include/ncine/Viewport.h
+	${NCINE_ROOT}/include/ncine/Camera.h
 )
 
 set(NCTL_HEADERS

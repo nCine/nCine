@@ -14,6 +14,7 @@ class RenderVaoPool;
 class RenderCommandPool;
 class RenderBatcher;
 class GLShaderProgram;
+class Camera;
 
 /// The class that creates and handles application common OpenGL rendering resources
 class RenderResources
@@ -69,9 +70,7 @@ class RenderResources
 	static inline GLShaderProgram *batchedTextnodesAlphaShaderProgram() { return batchedTextnodesAlphaShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedTextnodesRedShaderProgram() { return batchedTextnodesRedShaderProgram_.get(); }
 
-	static inline const Matrix4x4f &projectionMatrix() { return projectionMatrix_; }
-	static inline bool hasProjectionChanged(bool batchingEnabled) { return (batchingEnabled) ? projectionHasChangedBatching_ : projectionHasChanged_; }
-	static void clearDirtyProjectionFlag(bool batchingEnabled);
+	static inline Camera *currentCamera() { return currentCamera_; };
 
 	static void createMinimal();
 
@@ -98,11 +97,10 @@ class RenderResources
 	static nctl::UniquePtr<GLShaderProgram> batchedTextnodesAlphaShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedTextnodesRedShaderProgram_;
 
-	static Matrix4x4f projectionMatrix_;
-	static bool projectionHasChanged_;
-	static bool projectionHasChangedBatching_;
+	static Camera *currentCamera_;
+	static nctl::UniquePtr<Camera> defaultCamera_;
 
-	static void setProjectionMatrix(const Matrix4x4f &projectionMatrix);
+	static void setCamera(Camera *camera);
 	static void create();
 	static void dispose();
 
@@ -117,6 +115,8 @@ class RenderResources
 	friend class Application;
 	/// The `IGfxDevice` class needs to update the projection matrix
 	friend class IGfxDevice;
+	/// The `Viewport` class needs to set the current camera
+	friend class Viewport;
 };
 
 }

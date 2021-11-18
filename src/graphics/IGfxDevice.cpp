@@ -3,7 +3,6 @@
 #include "common_macros.h"
 #include "IGfxDevice.h"
 #include "Colorf.h"
-#include "RenderResources.h"
 #include "GLDepthTest.h"
 #include "GLBlending.h"
 #include "GLClearColor.h"
@@ -114,7 +113,6 @@ void IGfxDevice::setClearColor(const Colorf &color)
 void IGfxDevice::setViewport(int x, int y, int width, int height)
 {
 	GLViewport::setRect(x, y, width, height);
-	RenderResources::setProjectionMatrix(Matrix4x4f::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height), -1.0f, 1.0f));
 }
 
 const IGfxDevice::VideoMode &IGfxDevice::videoMode(unsigned int index) const

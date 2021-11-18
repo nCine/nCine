@@ -1,11 +1,16 @@
 #ifndef CLASS_NCINE_MATERIAL
 #define CLASS_NCINE_MATERIAL
 
+#include <nctl/HashMap.h>
 #include "GLShaderUniforms.h"
 #include "GLShaderUniformBlocks.h"
 #include "GLShaderAttributes.h"
 
 namespace ncine {
+
+template <class T>
+class Matrix4x4;
+using Matrix4x4f = Matrix4x4<float>;
 
 class GLShaderProgram;
 class GLTexture;
@@ -83,6 +88,20 @@ class Material
 	inline void setTexture(const GLTexture *texture) { texture_ = texture; }
 	void setTexture(const Texture &texture);
 
+	struct MatricesUpdateData
+	{
+		MatricesUpdateData()
+		    : updateFrameProjectionMatrix(0), updateFrameModelMatrix(0),
+		      projectionMatrix(nullptr), modelMatrix(nullptr) {}
+
+		unsigned long int updateFrameProjectionMatrix;
+		unsigned long int updateFrameModelMatrix;
+		const Matrix4x4f *projectionMatrix;
+		const Matrix4x4f *modelMatrix;
+	};
+
+	inline MatricesUpdateData &matricesUpdateData() { return matricesMap_[shaderProgram_]; }
+
   private:
 	bool isBlendingEnabled_;
 	GLenum srcBlendingFactor_;
@@ -94,6 +113,7 @@ class Material
 	GLShaderUniformBlocks shaderUniformBlocks_;
 	GLShaderAttributes shaderAttributes_;
 	const GLTexture *texture_;
+	static nctl::HashMap<GLShaderProgram *, MatricesUpdateData> matricesMap_;
 
 	/// Memory buffer with uniform values to be sent to the GPU
 	nctl::UniquePtr<GLubyte[]> uniformsHostBuffer_;

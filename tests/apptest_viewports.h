@@ -22,6 +22,7 @@ class SceneNode;
 class Font;
 class TextNode;
 class Viewport;
+class Camera;
 
 }
 
@@ -80,6 +81,7 @@ class MyEventHandler :
 	nctl::UniquePtr<nc::TextNode> debugText_;
 
 	nctl::StaticArray<nctl::UniquePtr<nc::Viewport>, NumViewports> viewports_;
+	nctl::StaticArray<nctl::UniquePtr<nc::Camera>, NumViewports> cameras_;
 	nctl::StaticArray<nctl::UniquePtr<nc::SceneNode>, NumViewports> vpNodes_;
 	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumViewports> vpSprites_;
 

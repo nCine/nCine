@@ -139,6 +139,7 @@ void RenderQueue::draw()
 		commandIndex++;
 
 		RenderStatistics::gatherStatistics(*opaqueRenderCommand);
+		opaqueRenderCommand->commitCameraTransformation();
 		opaqueRenderCommand->issue();
 	}
 
@@ -165,6 +166,7 @@ void RenderQueue::draw()
 
 		RenderStatistics::gatherStatistics(*transparentRenderCommand);
 		GLBlending::setBlendFunc(transparentRenderCommand->material().srcBlendingFactor(), transparentRenderCommand->material().destBlendingFactor());
+		transparentRenderCommand->commitCameraTransformation();
 		transparentRenderCommand->issue();
 	}
 	// Depth mask has to be enabled again before exiting this method
@@ -179,7 +181,6 @@ void RenderQueue::draw()
 	transparentQueue_.clear();
 	transparentBatchedQueue_.clear();
 
-	RenderResources::clearDirtyProjectionFlag(batchingEnabled);
 	RenderResources::renderBatcher().reset();
 	GLDebug::reset();
 }

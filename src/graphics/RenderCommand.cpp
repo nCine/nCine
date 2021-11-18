@@ -3,6 +3,7 @@
 #include "GLScissorTest.h"
 #include "DrawableNode.h"
 #include "RenderResources.h"
+#include "Camera.h"
 #include "tracy.h"
 
 namespace ncine {
@@ -127,12 +128,28 @@ void RenderCommand::commitTransformation()
 			material_.uniformBlock("TextnodeBlock")->uniform("modelView")->setFloatVector(modelView_.data());
 		else if (!isBatchedType(shaderProgramType) && shaderProgramType != Material::ShaderProgramType::CUSTOM)
 			material_.uniform("modelView")->setFloatVector(modelView_.data());
+	}
+}
 
-		if (material_.uniform("projection")->dataPointer() != nullptr && shaderProgramType != Material::ShaderProgramType::CUSTOM)
+void RenderCommand::commitCameraTransformation()
+{
+	ZoneScopedN("Commit camera transformation");
+
+	if (material_.shaderProgram_ && material_.shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
+	{
+		if (material_.uniform("projection")->dataPointer() != nullptr &&
+		    material_.shaderProgramType_ != Material::ShaderProgramType::CUSTOM)
 		{
-			ZoneScopedN("Set Projection");
-			if (RenderResources::hasProjectionChanged(isBatchedType(shaderProgramType)))
-				material_.uniform("projection")->setFloatVector(RenderResources::projectionMatrix().data());
+			Camera *camera = RenderResources::currentCamera();
+			Material::MatricesUpdateData &matricesUpdateData = material_.matricesUpdateData();
+			if (&camera->projection() != matricesUpdateData.projectionMatrix ||
+			    camera->updateFrameProjectionMatrix() > matricesUpdateData.updateFrameProjectionMatrix)
+			{
+				ZoneScopedN("Set projection matrix");
+				material_.uniform("projection")->setFloatVector(camera->projection().data());
+				matricesUpdateData.projectionMatrix = &camera->projection();
+				matricesUpdateData.updateFrameProjectionMatrix = camera->updateFrameProjectionMatrix();
+			}
 		}
 	}
 }
