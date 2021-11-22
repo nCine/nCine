@@ -137,11 +137,22 @@ void RenderCommand::commitCameraTransformation()
 
 	if (material_.shaderProgram_ && material_.shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
 	{
-		if (material_.uniform("projection")->dataPointer() != nullptr &&
+		if (material_.uniform("view")->dataPointer() != nullptr &&
+		    material_.uniform("projection")->dataPointer() != nullptr &&
 		    material_.shaderProgramType_ != Material::ShaderProgramType::CUSTOM)
 		{
 			Camera *camera = RenderResources::currentCamera();
 			Material::MatricesUpdateData &matricesUpdateData = material_.matricesUpdateData();
+
+			if (&camera->view() != matricesUpdateData.viewMatrix ||
+			    camera->updateFrameProjectionMatrix() > matricesUpdateData.updateFrameProjectionMatrix)
+			{
+				ZoneScopedN("Set view matrix");
+				material_.uniform("view")->setFloatVector(camera->view().data());
+				matricesUpdateData.viewMatrix = &camera->view();
+				matricesUpdateData.updateFrameViewMatrix = camera->updateFrameViewMatrix();
+			}
+
 			if (&camera->projection() != matricesUpdateData.projectionMatrix ||
 			    camera->updateFrameProjectionMatrix() > matricesUpdateData.updateFrameProjectionMatrix)
 			{

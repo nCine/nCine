@@ -1,4 +1,5 @@
 uniform mat4 projection;
+uniform mat4 view;
 
 struct TextnodeInstance
 {
@@ -25,7 +26,7 @@ out vec4 vColor;
 
 void main()
 {
-	gl_Position = projection * i.modelView * vec4(aPosition, 0.0, 1.0);
+	gl_Position = projection * view * i.modelView * vec4(aPosition, 0.0, 1.0);
 	vTexCoords = aTexCoords;
 	vColor = i.color;
 }

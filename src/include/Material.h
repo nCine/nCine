@@ -91,13 +91,13 @@ class Material
 	struct MatricesUpdateData
 	{
 		MatricesUpdateData()
-		    : updateFrameProjectionMatrix(0), updateFrameModelMatrix(0),
-		      projectionMatrix(nullptr), modelMatrix(nullptr) {}
+		    : updateFrameProjectionMatrix(0), updateFrameViewMatrix(0),
+		      projectionMatrix(nullptr), viewMatrix(nullptr) {}
 
 		unsigned long int updateFrameProjectionMatrix;
-		unsigned long int updateFrameModelMatrix;
+		unsigned long int updateFrameViewMatrix;
 		const Matrix4x4f *projectionMatrix;
-		const Matrix4x4f *modelMatrix;
+		const Matrix4x4f *viewMatrix;
 	};
 
 	inline MatricesUpdateData &matricesUpdateData() { return matricesMap_[shaderProgram_]; }

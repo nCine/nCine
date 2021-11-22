@@ -318,6 +318,16 @@ RenderCommand *RenderBatcher::collectCommands(
 		matricesUpdateData.updateFrameProjectionMatrix = camera->updateFrameProjectionMatrix();
 	}
 
+	if (&camera->view() != matricesUpdateData.viewMatrix ||
+	    camera->updateFrameViewMatrix() > matricesUpdateData.updateFrameViewMatrix)
+	{
+		ZoneScopedN("Set view matrix for batch");
+		GLDebug::ScopedGroup scoped("Set view matrix for batch");
+		batchCommand->material().uniform("view")->setFloatVector(camera->view().data());
+		matricesUpdateData.viewMatrix = &camera->view();
+		matricesUpdateData.updateFrameViewMatrix = camera->updateFrameViewMatrix();
+	}
+
 	const unsigned int SizeVertexFormat = ((refCommand->material().shaderProgramType() != Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)
 	                                           ? sizeof(RenderResources::VertexFormatPos2Tex2)
 	                                           : sizeof(RenderResources::VertexFormatPos2));

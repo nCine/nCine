@@ -40,6 +40,11 @@ const float ViewHalfHeight = 1000.0f;
 
 const char *ColorFormatLabels[] = { "RGB8", "RGBA8" };
 const char *DepthFormatLabels[] = { "None", "Depth16", "Depth24", "Depth24_Stencil8" };
+const char *ClearModeLabels[] = { "Every frame", "This frame only", "Next frame only", "Never" };
+nctl::String comboString(64);
+
+nc::Vector2i viewportSize;
+nc::Recti viewportRect;
 
 }
 
@@ -76,6 +81,8 @@ void MyEventHandler::onInit()
 	debugText_->setColor(255, 255, 0, 255);
 	debugText_->setAlignment(nc::TextNode::Alignment::CENTER);
 
+	cameras_.pushBack(nctl::makeUnique<nc::Camera>());
+	nc::theApplication().rootViewport().setCamera(cameras_.back().get());
 	nc::Vector2i vpSizes[NumViewports] = { nc::Vector2i(640, 360), nc::Vector2i(320, 180) };
 	nc::Colorf vpClearColors[NumViewports] = { nc::Colorf(0.25f, 0.25f, 0.25f, 0.25f), nc::Colorf(0.15f, 0.15f, 0.15f, 0.15f) };
 	for (unsigned int i = 0; i < NumViewports; i++)
@@ -83,16 +90,15 @@ void MyEventHandler::onInit()
 		vpNodes_.pushBack(nctl::makeUnique<nc::SceneNode>());
 		cameras_.pushBack(nctl::makeUnique<nc::Camera>());
 		viewports_.pushBack(nctl::makeUnique<nc::Viewport>(vpSizes[i]));
-		viewports_.back()->setRootNode(vpNodes_[i].get());
+		viewports_.back()->setRootNode(vpNodes_.back().get());
+		viewports_.back()->setCamera(cameras_.back().get());
 		viewports_.back()->setClearColor(vpClearColors[i]);
-		vpSprites_.pushBack(nctl::makeUnique<nc::Sprite>(&rootNode, viewports_[i]->texture(), viewports_[i]->width() / 2, viewports_[i]->height() / 2));
+		vpSprites_.pushBack(nctl::makeUnique<nc::Sprite>(&rootNode, viewports_.back()->texture(), viewports_.back()->width() / 2, viewports_.back()->height() / 2));
 		vpSprites_.back()->setLayer(1000);
 	}
 	rootViewport.setNextViewport(viewports_[0].get());
-	rootViewport.initTexture(128, 128);
 	viewports_[0]->setNextViewport(viewports_[1].get());
 	vpSprites_[1]->setPosition(nc::theApplication().widthInt() - viewports_[1]->width() / 2, nc::theApplication().heightInt() - viewports_[1]->height() / 2);
-	viewports_[0]->setCamera(cameras_[0].get());
 
 	for (unsigned int i = 0; i < NumSprites / 2; i++)
 	{
@@ -140,53 +146,198 @@ void MyEventHandler::onFrameStart()
 {
 	ImGui::Begin("Viewports");
 
-	static nc::Vector2i size = viewports_[0]->size();
-	static nc::Recti viewportRect = viewports_[0]->viewportRect();
-	static int comboColorFormatType = static_cast<int>(viewports_[0]->colorFormat());
-	static int comboDepthFormatType = static_cast<int>(viewports_[0]->depthStencilFormat());
-
-	nc::Vector2i currentSize = viewports_[0]->size();
-	nc::Recti currentViewportRect = viewports_[0]->viewportRect();
-	int currentColorFormatType = static_cast<int>(viewports_[0]->colorFormat());
-	int currentDepthFormatType = static_cast<int>(viewports_[0]->depthStencilFormat());
-
-	ImGui::SliderInt("Width", &size.x, 0, nc::theApplication().widthInt());
-	ImGui::SliderInt("Height", &size.y, 0, nc::theApplication().heightInt());
-	ImGui::Combo("Color Format", &comboColorFormatType, ColorFormatLabels, IM_ARRAYSIZE(ColorFormatLabels));
-	ImGui::Combo("Depth Format", &comboDepthFormatType, DepthFormatLabels, IM_ARRAYSIZE(DepthFormatLabels));
-
-	ImGui::SliderInt("Rect X", &viewportRect.x, 0, nc::theApplication().widthInt());
-	ImGui::SliderInt("Rect Y", &viewportRect.y, 0, nc::theApplication().heightInt());
-	ImGui::SliderInt("Rect Width", &viewportRect.w, 0, nc::theApplication().widthInt() - viewportRect.x);
-	ImGui::SliderInt("Rect Height", &viewportRect.h, 0, nc::theApplication().heightInt() - viewportRect.y);
-
-	if (ImGui::Button("Current"))
+	comboString.clear();
+	comboString.append("Screen");
+	comboString.setLength(comboString.length() + 1);
+	for (unsigned int i = 0; i < NumViewports; i++)
 	{
-		size = viewports_[0]->size();
-		comboColorFormatType = static_cast<int>(viewports_[0]->colorFormat());
-		comboDepthFormatType = static_cast<int>(viewports_[0]->depthStencilFormat());
+		comboString.formatAppend("Viewport %d", i);
+		comboString.setLength(comboString.length() + 1);
 	}
-	ImGui::SameLine();
-	if (ImGui::Button("Apply"))
+	comboString.setLength(comboString.length() + 1);
+	// Append a second '\0' to signal the end of the combo item list
+	comboString[comboString.length() - 1] = '\0';
+
+	static int currentComboViewport = 0;
+	ImGui::Combo("Viewport", &currentComboViewport, comboString.data());
+	nc::Viewport &currentViewport = (currentComboViewport > 0) ? *viewports_[currentComboViewport - 1] : nc::theApplication().rootViewport();
+
+	const nc::Vector2i currentViewportSize = currentViewport.size();
+	const nc::Recti currentViewportRect = currentViewport.viewportRect();
+	const int currentColorFormatType = static_cast<int>(currentViewport.colorFormat());
+	const int currentDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
+
+	if (currentComboViewport == 0)
 	{
-		if (!(size == currentSize) ||
-		    comboColorFormatType != currentColorFormatType ||
-		    comboDepthFormatType != currentDepthFormatType)
+		if (ImGui::TreeNodeEx("Surface", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			viewports_[0]->initTexture(size, nc::Viewport::ColorFormat(comboColorFormatType), nc::Viewport::DepthStencilFormat(comboDepthFormatType));
+			ImGui::Text("Width: %d", currentViewportSize.x);
+			ImGui::Text("Height: %d", currentViewportSize.y);
+			ImGui::Text("Color Format: %s", ColorFormatLabels[currentColorFormatType]);
+			ImGui::Text("Depth Format: %s", DepthFormatLabels[currentDepthFormatType]);
+			ImGui::TreePop();
+		}
+	}
+	else
+	{
+		if (ImGui::TreeNodeEx("Surface", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			viewportSize = currentViewport.size();
+			int comboColorFormatType = static_cast<int>(currentViewport.colorFormat());
+			int comboDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
+
+			ImGui::SliderInt("Width", &viewportSize.x, 0, nc::theApplication().widthInt());
+			ImGui::SliderInt("Height", &viewportSize.y, 0, nc::theApplication().heightInt());
+			ImGui::Combo("Color Format", &comboColorFormatType, ColorFormatLabels, IM_ARRAYSIZE(ColorFormatLabels));
+			ImGui::Combo("Depth Format", &comboDepthFormatType, DepthFormatLabels, IM_ARRAYSIZE(DepthFormatLabels));
+
+			if (ImGui::Button("Current"))
+			{
+				viewportSize = currentViewport.size();
+				comboColorFormatType = static_cast<int>(currentViewport.colorFormat());
+				comboDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Apply"))
+			{
+				if (!(viewportSize == currentViewportSize) ||
+				    comboColorFormatType != currentColorFormatType ||
+				    comboDepthFormatType != currentDepthFormatType)
+				{
+					currentViewport.initTexture(viewportSize, nc::Viewport::ColorFormat(comboColorFormatType), nc::Viewport::DepthStencilFormat(comboDepthFormatType));
+				}
+			}
+			ImGui::TreePop();
 		}
 
-		if (!(viewportRect == currentViewportRect) && viewportRect.w > 0 && viewportRect.h > 0)
-			viewports_[0]->setViewportRect(viewportRect);
+		if (ImGui::TreeNode("Viewport Rectangle"))
+		{
+			static nc::Recti viewportRect = currentViewport.viewportRect();
+
+			ImGui::SliderInt("Rect X", &viewportRect.x, 0, currentViewport.width());
+			ImGui::SliderInt("Rect Y", &viewportRect.y, 0, currentViewport.height());
+			ImGui::SliderInt("Rect Width", &viewportRect.w, 0, currentViewport.width() - viewportRect.x);
+			ImGui::SliderInt("Rect Height", &viewportRect.h, 0, currentViewport.height() - viewportRect.y);
+
+			if (ImGui::Button("Current"))
+				viewportRect = currentViewport.viewportRect();
+			ImGui::SameLine();
+			if (ImGui::Button("Apply"))
+			{
+				if (!(viewportRect == currentViewportRect) && viewportRect.w > 0 && viewportRect.h > 0)
+					currentViewport.setViewportRect(viewportRect);
+			}
+
+			ImGui::TreePop();
+		}
 	}
 
-	static nc::Rectf cameraRect(0.0f, 0.0f, nc::theApplication().width(), nc::theApplication().height());
-	ImGui::SliderFloat("Camera X", &cameraRect.x, 0.0f, nc::theApplication().width());
-	ImGui::SliderFloat("Camera Y", &cameraRect.y, 0.0f, nc::theApplication().height());
-	ImGui::SliderFloat("Camera Width", &cameraRect.w, 0.0f, nc::theApplication().width() - cameraRect.x);
-	ImGui::SliderFloat("Camera Height", &cameraRect.h, 0.0f, nc::theApplication().height() - cameraRect.y);
-	if (ImGui::Button("Apply ortho"))
-		cameras_[0]->setOrtoProjection(cameraRect, -1.0f, 1.0f);
+	if (currentComboViewport > 0 && ImGui::TreeNode("Sprite"))
+	{
+		nc::Sprite &sprite = *vpSprites_[currentComboViewport - 1];
+
+		bool isEnabled = sprite.isEnabled();
+		ImGui::Checkbox("Enabled", &isEnabled);
+		sprite.setEnabled(isEnabled);
+
+		ImGui::SliderFloat("Pos X", &sprite.x, currentViewport.width() / 2, nc::theApplication().widthInt() - currentViewport.width() / 2);
+		ImGui::SliderFloat("Pos Y", &sprite.y, currentViewport.height() / 2, nc::theApplication().heightInt() - currentViewport.height() / 2);
+		float rotation = sprite.rotation();
+		ImGui::SliderFloat("Rotation", &rotation, 0.0f, 360.0f);
+		nc::Vector2f scaleFactors = sprite.scale();
+		ImGui::SliderFloat2("Scale", scaleFactors.data(), 0.01f, 3.0f);
+		if (ImGui::Button("Reset"))
+		{
+			sprite.x = currentViewport.width() / 2;
+			sprite.y = currentViewport.height() / 2;
+			rotation = 0.0f;
+			scaleFactors.set(1.0f, 1.0f);
+		}
+		sprite.setRotation(rotation);
+		sprite.setScale(scaleFactors);
+
+		ImGui::TreePop();
+	}
+
+	nc::Colorf clearColor = currentViewport.clearColor();
+	ImGui::ColorEdit4("Clear Color", clearColor.data(), ImGuiColorEditFlags_AlphaBar);
+	currentViewport.setClearColor(clearColor);
+
+	int comboClearMode = static_cast<int>(currentViewport.clearMode());
+	ImGui::Combo("Clear Mode", &comboClearMode, ClearModeLabels, IM_ARRAYSIZE(ClearModeLabels));
+	currentViewport.setClearMode(nc::Viewport::ClearMode(comboClearMode));
+
+	const char *nextViewportString = "Next Viewport";
+	if (currentViewport.nextViewport() == nullptr)
+		ImGui::Text("%s: None", nextViewportString);
+	else if (currentViewport.nextViewport() == &nc::theApplication().rootViewport())
+		ImGui::Text("%s: Screen", nextViewportString);
+	else
+	{
+		for (unsigned int i = 0; i < NumViewports; i++)
+		{
+			if (currentViewport.nextViewport() == viewports_[i].get())
+			{
+				ImGui::Text("%s: Viewport %d", nextViewportString, i);
+				break;
+			}
+		}
+	}
+
+	nc::Camera &currentCamera = *currentViewport.camera();
+	if (ImGui::TreeNode("Projection Matrix"))
+	{
+		nc::Camera::ProjectionValues values = currentCamera.projectionValues();
+		static bool applyEveryframe = false;
+		bool valueChanged = false;
+
+		ImGui::Text("Update Frame: %lu", currentCamera.updateFrameProjectionMatrix());
+		valueChanged |= ImGui::SliderFloat("Left", &values.left, 0.0f, static_cast<float>(currentViewport.width()));
+		valueChanged |= ImGui::SliderFloat("Right", &values.right, values.left, static_cast<float>(currentViewport.height()));
+		valueChanged |= ImGui::SliderFloat("Top", &values.top, 0.0f, static_cast<float>(currentViewport.width()));
+		valueChanged |= ImGui::SliderFloat("Bottom", &values.bottom, values.top, static_cast<float>(currentViewport.height()));
+		ImGui::Checkbox("Apply Every Frame", &applyEveryframe);
+		ImGui::SameLine();
+		if (ImGui::Button("Reset"))
+		{
+			values.left = 0.0f;
+			values.right = static_cast<float>(currentViewport.width());
+			values.top = 0.0f;
+			values.bottom = static_cast<float>(currentViewport.height());
+			valueChanged = true;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Apply") || (applyEveryframe && valueChanged))
+			currentCamera.setOrthoProjection(values);
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode("View Matrix"))
+	{
+		nc::Camera::ViewValues values = currentCamera.viewValues();
+		static bool applyEveryframe = false;
+		bool valueChanged = false;
+
+		ImGui::Text("Update Frame: %lu", currentCamera.updateFrameViewMatrix());
+		valueChanged |= ImGui::SliderFloat("Position X", &values.x, 0.0f, nc::theApplication().width());
+		valueChanged |= ImGui::SliderFloat("Position Y", &values.y, 0.0f, nc::theApplication().height());
+		valueChanged |= ImGui::SliderFloat("Rotation", &values.rotation, 0.0f, 360.0f);
+		valueChanged |= ImGui::SliderFloat("Scale", &values.scale, 0.01f, 3.0f);
+		ImGui::Checkbox("Apply Every Frame", &applyEveryframe);
+		ImGui::SameLine();
+		if (ImGui::Button("Reset"))
+		{
+			values.x = 0.0f;
+			values.y = 0.0f;
+			values.rotation = 0.0f;
+			values.scale = 1.0f;
+			valueChanged = true;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Apply") || (applyEveryframe && valueChanged))
+			currentCamera.setView(values);
+		ImGui::TreePop();
+	}
 
 	ImGui::End();
 
