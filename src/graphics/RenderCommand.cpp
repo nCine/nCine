@@ -102,17 +102,14 @@ void RenderCommand::commitTransformation()
 {
 	ZoneScoped;
 
-	// `near` and `far` planes should be consistent with the projection matrix
-	const float near = -1.0f;
-	const float far = 1.0f;
-
 	// The layer translates to depth, from near to far
+	const Camera::ProjectionValues cameraValues = RenderResources::currentCamera()->projectionValues();
 	const float layerStep = 1.0f / static_cast<float>(DrawableNode::LayerBase::HIGHEST);
-	modelView_[3][2] = near + layerStep + (far - near - layerStep) * (layer_ * layerStep);
+	modelView_[3][2] = cameraValues.near + layerStep + (cameraValues.far - cameraValues.near - layerStep) * (layer_ * layerStep);
 
 	if (material_.shaderProgram_ && material_.shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
 	{
-		ZoneScopedN("Set model and projection");
+		ZoneScopedN("Set model matrix");
 		const Material::ShaderProgramType shaderProgramType = material_.shaderProgramType();
 
 		if (shaderProgramType == Material::ShaderProgramType::SPRITE ||
@@ -135,34 +132,25 @@ void RenderCommand::commitCameraTransformation()
 {
 	ZoneScopedN("Commit camera transformation");
 
-	if (material_.shaderProgram_ && material_.shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
+	RenderResources::CameraUniformData *cameraUniformData = RenderResources::cameraUniformDataMap().find(material_.shaderProgram_);
+	if (cameraUniformData == nullptr)
 	{
-		if (material_.uniform("view")->dataPointer() != nullptr &&
-		    material_.uniform("projection")->dataPointer() != nullptr &&
-		    material_.shaderProgramType_ != Material::ShaderProgramType::CUSTOM)
+		RenderResources::CameraUniformData newCameraUniformData;
+		newCameraUniformData.shaderUniforms.setProgram(material_.shaderProgram_, "projection\0view\0", nullptr);
+		if (newCameraUniformData.shaderUniforms.numUniforms() == 2)
 		{
-			Camera *camera = RenderResources::currentCamera();
-			Material::MatricesUpdateData &matricesUpdateData = material_.matricesUpdateData();
+			newCameraUniformData.shaderUniforms.setUniformsDataPointer(RenderResources::cameraUniformsBuffer());
+			newCameraUniformData.shaderUniforms.uniform("projection")->setDirty(true);
+			newCameraUniformData.shaderUniforms.uniform("view")->setDirty(true);
+			newCameraUniformData.shaderUniforms.commitUniforms();
 
-			if (&camera->view() != matricesUpdateData.viewMatrix ||
-			    camera->updateFrameProjectionMatrix() > matricesUpdateData.updateFrameProjectionMatrix)
-			{
-				ZoneScopedN("Set view matrix");
-				material_.uniform("view")->setFloatVector(camera->view().data());
-				matricesUpdateData.viewMatrix = &camera->view();
-				matricesUpdateData.updateFrameViewMatrix = camera->updateFrameViewMatrix();
-			}
-
-			if (&camera->projection() != matricesUpdateData.projectionMatrix ||
-			    camera->updateFrameProjectionMatrix() > matricesUpdateData.updateFrameProjectionMatrix)
-			{
-				ZoneScopedN("Set projection matrix");
-				material_.uniform("projection")->setFloatVector(camera->projection().data());
-				matricesUpdateData.projectionMatrix = &camera->projection();
-				matricesUpdateData.updateFrameProjectionMatrix = camera->updateFrameProjectionMatrix();
-			}
+			if (RenderResources::cameraUniformDataMap().loadFactor() >= 0.8f)
+				RenderResources::cameraUniformDataMap().rehash(RenderResources::cameraUniformDataMap().capacity() * 2);
+			RenderResources::cameraUniformDataMap().insert(material_.shaderProgram_, nctl::move(newCameraUniformData));
 		}
 	}
+	else
+		cameraUniformData->shaderUniforms.commitUniforms();
 }
 
 void RenderCommand::commitVertices()

@@ -1,16 +1,11 @@
 #ifndef CLASS_NCINE_MATERIAL
 #define CLASS_NCINE_MATERIAL
 
-#include <nctl/HashMap.h>
 #include "GLShaderUniforms.h"
 #include "GLShaderUniformBlocks.h"
 #include "GLShaderAttributes.h"
 
 namespace ncine {
-
-template <class T>
-class Matrix4x4;
-using Matrix4x4f = Matrix4x4<float>;
 
 class GLShaderProgram;
 class GLTexture;
@@ -77,6 +72,7 @@ class Material
 	inline const GLShaderProgram *shaderProgram() const { return shaderProgram_; }
 	void setShaderProgram(GLShaderProgram *program);
 
+	void reserveUniformsDataMemory();
 	void setUniformsDataPointer(GLubyte *dataPointer);
 	/// Wrapper around `GLShaderUniforms::uniform()`
 	inline GLUniformCache *uniform(const char *name) { return shaderUniforms_.uniform(name); }
@@ -87,20 +83,6 @@ class Material
 	inline const GLTexture *texture() const { return texture_; }
 	inline void setTexture(const GLTexture *texture) { texture_ = texture; }
 	void setTexture(const Texture &texture);
-
-	struct MatricesUpdateData
-	{
-		MatricesUpdateData()
-		    : updateFrameProjectionMatrix(0), updateFrameViewMatrix(0),
-		      projectionMatrix(nullptr), viewMatrix(nullptr) {}
-
-		unsigned long int updateFrameProjectionMatrix;
-		unsigned long int updateFrameViewMatrix;
-		const Matrix4x4f *projectionMatrix;
-		const Matrix4x4f *viewMatrix;
-	};
-
-	inline MatricesUpdateData &matricesUpdateData() { return matricesMap_[shaderProgram_]; }
 
   private:
 	bool isBlendingEnabled_;
@@ -113,7 +95,6 @@ class Material
 	GLShaderUniformBlocks shaderUniformBlocks_;
 	GLShaderAttributes shaderAttributes_;
 	const GLTexture *texture_;
-	static nctl::HashMap<GLShaderProgram *, MatricesUpdateData> matricesMap_;
 
 	/// Memory buffer with uniform values to be sent to the GPU
 	nctl::UniquePtr<GLubyte[]> uniformsHostBuffer_;

@@ -2,6 +2,7 @@
 #include "GLShaderProgram.h"
 #include "RenderResources.h"
 #include <nctl/StaticHashMapIterator.h>
+#include <nctl/CString.h>
 #include <cstring> // for memcpy()
 
 namespace ncine {
@@ -22,9 +23,14 @@ GLShaderUniformBlocks::GLShaderUniformBlocks()
 }
 
 GLShaderUniformBlocks::GLShaderUniformBlocks(GLShaderProgram *shaderProgram)
+    : GLShaderUniformBlocks(shaderProgram, nullptr, nullptr)
+{
+}
+
+GLShaderUniformBlocks::GLShaderUniformBlocks(GLShaderProgram *shaderProgram, const char *includeOnly, const char *exclude)
     : GLShaderUniformBlocks()
 {
-	setProgram(shaderProgram);
+	setProgram(shaderProgram, includeOnly, exclude);
 }
 
 void GLShaderUniformBlocks::bind()
@@ -47,7 +53,7 @@ void GLShaderUniformBlocks::bind()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void GLShaderUniformBlocks::setProgram(GLShaderProgram *shaderProgram)
+void GLShaderUniformBlocks::setProgram(GLShaderProgram *shaderProgram, const char *includeOnly, const char *exclude)
 {
 	ASSERT(shaderProgram);
 
@@ -55,8 +61,8 @@ void GLShaderUniformBlocks::setProgram(GLShaderProgram *shaderProgram)
 	shaderProgram_->deferredQueries();
 	uniformBlockCaches_.clear();
 
-	if (shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
-		importUniformBlocks();
+	if (shaderProgram->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
+		importUniformBlocks(includeOnly, exclude);
 }
 
 void GLShaderUniformBlocks::setUniformsDataPointer(GLubyte *dataPointer)
@@ -124,17 +130,55 @@ void GLShaderUniformBlocks::commitUniformBlocks()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void GLShaderUniformBlocks::importUniformBlocks()
+void GLShaderUniformBlocks::importUniformBlocks(const char *includeOnly, const char *exclude)
 {
-	const unsigned int count = shaderProgram_->uniformBlocks_.size();
-	if (count > UniformBlockCachesHashSize)
-		LOGW_X("More uniform blocks (%d) than hashmap buckets (%d)", count, UniformBlockCachesHashSize);
+	const unsigned int MaxUniformBlockName = 128;
 
+	unsigned int importedCount = 0;
 	for (GLUniformBlock &uniformBlock : shaderProgram_->uniformBlocks_)
 	{
-		GLUniformBlockCache uniformBlockCache(&uniformBlock);
-		uniformBlockCaches_[uniformBlock.name()] = uniformBlockCache;
+		const char *uniformBlockName = uniformBlock.name();
+		const char *currentIncludeOnly = includeOnly;
+		const char *currentExclude = exclude;
+		bool shouldImport = true;
+
+		if (includeOnly != nullptr)
+		{
+			shouldImport = false;
+			while (currentIncludeOnly != nullptr && currentIncludeOnly[0] != '\0')
+			{
+				if (strncmp(currentIncludeOnly, uniformBlockName, MaxUniformBlockName) == 0)
+				{
+					shouldImport = true;
+					break;
+				}
+				currentIncludeOnly += nctl::strnlen(currentIncludeOnly, MaxUniformBlockName) + 1;
+			}
+		}
+
+		if (exclude != nullptr)
+		{
+			while (currentExclude != nullptr && currentExclude[0] != '\0')
+			{
+				if (strncmp(currentExclude, uniformBlockName, MaxUniformBlockName) == 0)
+				{
+					shouldImport = false;
+					break;
+				}
+				currentExclude += nctl::strnlen(currentExclude, MaxUniformBlockName) + 1;
+			}
+		}
+
+		if (shouldImport)
+		{
+			GLUniformBlockCache uniformBlockCache(&uniformBlock);
+			uniformBlockCaches_[uniformBlockName] = uniformBlockCache;
+			importedCount++;
+		}
 	}
+
+	if (importedCount > UniformBlockCachesHashSize)
+		LOGW_X("More imported uniform blocks (%d) than hashmap buckets (%d)", importedCount, UniformBlockCachesHashSize);
 }
 
 }

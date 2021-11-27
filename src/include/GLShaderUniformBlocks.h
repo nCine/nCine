@@ -17,9 +17,13 @@ class GLShaderUniformBlocks
   public:
 	GLShaderUniformBlocks();
 	explicit GLShaderUniformBlocks(GLShaderProgram *shaderProgram);
-	void setProgram(GLShaderProgram *shaderProgram);
+	GLShaderUniformBlocks(GLShaderProgram *shaderProgram, const char *includeOnly, const char *exclude);
+	inline void setProgram(GLShaderProgram *shaderProgram) { setProgram(shaderProgram, nullptr, nullptr); }
+	void setProgram(GLShaderProgram *shaderProgram, const char *includeOnly, const char *exclude);
 	void setUniformsDataPointer(GLubyte *dataPointer);
 
+	inline unsigned int numUniformBlocks() const { return uniformBlockCaches_.size(); }
+	inline bool hasUniformBlock(const char *name) const { return (uniformBlockCaches_.find(name) != nullptr); }
 	GLUniformBlockCache *uniformBlock(const char *name);
 	void commitUniformBlocks();
 
@@ -38,7 +42,8 @@ class GLShaderUniformBlocks
 	/// A dummy uniform block cache returned when a uniform block is not found in the hashmap
 	static GLUniformBlockCache uniformBlockNotFound_;
 
-	void importUniformBlocks();
+	/// Imports the uniform blocks with the option of including only some or excluing others
+	void importUniformBlocks(const char *includeOnly, const char *exclude);
 };
 
 }

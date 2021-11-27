@@ -159,7 +159,7 @@ void MyEventHandler::onFrameStart()
 	comboString[comboString.length() - 1] = '\0';
 
 	static int currentComboViewport = 0;
-	ImGui::Combo("Viewport", &currentComboViewport, comboString.data());
+	const bool viewportChanged = ImGui::Combo("Viewport", &currentComboViewport, comboString.data());
 	nc::Viewport &currentViewport = (currentComboViewport > 0) ? *viewports_[currentComboViewport - 1] : nc::theApplication().rootViewport();
 
 	const nc::Vector2i currentViewportSize = currentViewport.size();
@@ -287,14 +287,16 @@ void MyEventHandler::onFrameStart()
 	nc::Camera &currentCamera = *currentViewport.camera();
 	if (ImGui::TreeNode("Projection Matrix"))
 	{
-		nc::Camera::ProjectionValues values = currentCamera.projectionValues();
+		static nc::Camera::ProjectionValues values = currentCamera.projectionValues();
+		if (viewportChanged)
+			values = currentCamera.projectionValues();
 		static bool applyEveryframe = false;
 		bool valueChanged = false;
 
 		ImGui::Text("Update Frame: %lu", currentCamera.updateFrameProjectionMatrix());
 		valueChanged |= ImGui::SliderFloat("Left", &values.left, 0.0f, static_cast<float>(currentViewport.width()));
-		valueChanged |= ImGui::SliderFloat("Right", &values.right, values.left, static_cast<float>(currentViewport.height()));
-		valueChanged |= ImGui::SliderFloat("Top", &values.top, 0.0f, static_cast<float>(currentViewport.width()));
+		valueChanged |= ImGui::SliderFloat("Right", &values.right, values.left, static_cast<float>(currentViewport.width()));
+		valueChanged |= ImGui::SliderFloat("Top", &values.top, 0.0f, static_cast<float>(currentViewport.height()));
 		valueChanged |= ImGui::SliderFloat("Bottom", &values.bottom, values.top, static_cast<float>(currentViewport.height()));
 		ImGui::Checkbox("Apply Every Frame", &applyEveryframe);
 		ImGui::SameLine();
@@ -314,7 +316,9 @@ void MyEventHandler::onFrameStart()
 
 	if (ImGui::TreeNode("View Matrix"))
 	{
-		nc::Camera::ViewValues values = currentCamera.viewValues();
+		static nc::Camera::ViewValues values = currentCamera.viewValues();
+		if (viewportChanged)
+			values = currentCamera.viewValues();
 		static bool applyEveryframe = false;
 		bool valueChanged = false;
 

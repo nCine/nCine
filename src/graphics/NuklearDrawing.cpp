@@ -129,7 +129,7 @@ void NuklearDrawing::newFrame()
 
 		if (withSceneGraph_ == false)
 		{
-			nuklearShaderUniforms_->uniform("projection")->setFloatVector(projectionMatrix_.data());
+			nuklearShaderUniforms_->uniform("guiProjection")->setFloatVector(projectionMatrix_.data());
 			nuklearShaderUniforms_->commitUniforms();
 		}
 	}
@@ -167,7 +167,7 @@ void NuklearDrawing::setupRenderCmd(RenderCommand &cmd)
 
 	Material &material = cmd.material();
 	material.setShaderProgram(nuklearShaderProgram_.get());
-	material.setUniformsDataPointer(nullptr);
+	material.reserveUniformsDataMemory();
 	material.uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
 	material.attribute("aPosition")->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, pos)));
 	material.attribute("aTexCoords")->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, uv)));
@@ -188,7 +188,7 @@ void NuklearDrawing::draw(RenderQueue &renderQueue)
 	RenderCommand &firstCmd = *retrieveCommandFromPool();
 	if (lastFrameWidth_ != NuklearContext::width_ || lastFrameHeight_ != NuklearContext::height_)
 	{
-		firstCmd.material().uniform("projection")->setFloatVector(projectionMatrix_.data());
+		firstCmd.material().uniform("guiProjection")->setFloatVector(projectionMatrix_.data());
 		lastFrameWidth_ = NuklearContext::width_;
 		lastFrameHeight_ = NuklearContext::height_;
 	}

@@ -128,7 +128,7 @@ void ImGuiDrawing::newFrame()
 
 		if (withSceneGraph_ == false)
 		{
-			imguiShaderUniforms_->uniform("projection")->setFloatVector(projectionMatrix_.data());
+			imguiShaderUniforms_->uniform("guiProjection")->setFloatVector(projectionMatrix_.data());
 			imguiShaderUniforms_->commitUniforms();
 		}
 	}
@@ -177,7 +177,7 @@ void ImGuiDrawing::setupRenderCmd(RenderCommand &cmd)
 
 	Material &material = cmd.material();
 	material.setShaderProgram(imguiShaderProgram_.get());
-	material.setUniformsDataPointer(nullptr);
+	material.reserveUniformsDataMemory();
 	material.uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
 	material.attribute("aPosition")->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, pos)));
 	material.attribute("aTexCoords")->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, uv)));
@@ -214,7 +214,7 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 		if (lastFrameWidth_ != static_cast<int>(io.DisplaySize.x) ||
 		    lastFrameHeight_ != static_cast<int>(io.DisplaySize.y))
 		{
-			firstCmd.material().uniform("projection")->setFloatVector(projectionMatrix_.data());
+			firstCmd.material().uniform("guiProjection")->setFloatVector(projectionMatrix_.data());
 			lastFrameWidth_ = static_cast<int>(io.DisplaySize.x);
 			lastFrameHeight_ = static_cast<int>(io.DisplaySize.y);
 		}

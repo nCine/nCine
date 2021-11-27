@@ -17,8 +17,8 @@ class DLL_PUBLIC Camera
 		float right;
 		float top;
 		float bottom;
-		const float near = -1.0f;
-		const float far = 1.0f;
+		float near = -1.0f;
+		float far = 1.0f;
 
 		ProjectionValues(float ll, float rr, float tt, float bb)
 		    : left(ll), right(rr), top(tt), bottom(bb) {}

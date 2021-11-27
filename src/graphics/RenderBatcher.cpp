@@ -4,10 +4,7 @@
 #include "RenderCommand.h"
 #include "RenderCommandPool.h"
 #include "RenderResources.h"
-#include "Camera.h"
 #include "Application.h"
-#include "GLDebug.h"
-#include "tracy.h"
 
 namespace ncine {
 
@@ -305,28 +302,6 @@ RenderCommand *RenderBatcher::collectCommands(
 	batchCommand->material().setUniformsDataPointer(acquireMemory(instancesBlockSize));
 	if (commandAdded && hasTexture(refCommand->material().shaderProgramType()))
 		batchCommand->material().uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
-
-	Camera *camera = RenderResources::currentCamera();
-	Material::MatricesUpdateData &matricesUpdateData = batchCommand->material().matricesUpdateData();
-	if (&camera->projection() != matricesUpdateData.projectionMatrix ||
-	    camera->updateFrameProjectionMatrix() > matricesUpdateData.updateFrameProjectionMatrix)
-	{
-		ZoneScopedN("Set projection matrix for batch");
-		GLDebug::ScopedGroup scoped("Set projection matrix for batch");
-		batchCommand->material().uniform("projection")->setFloatVector(camera->projection().data());
-		matricesUpdateData.projectionMatrix = &camera->projection();
-		matricesUpdateData.updateFrameProjectionMatrix = camera->updateFrameProjectionMatrix();
-	}
-
-	if (&camera->view() != matricesUpdateData.viewMatrix ||
-	    camera->updateFrameViewMatrix() > matricesUpdateData.updateFrameViewMatrix)
-	{
-		ZoneScopedN("Set view matrix for batch");
-		GLDebug::ScopedGroup scoped("Set view matrix for batch");
-		batchCommand->material().uniform("view")->setFloatVector(camera->view().data());
-		matricesUpdateData.viewMatrix = &camera->view();
-		matricesUpdateData.updateFrameViewMatrix = camera->updateFrameViewMatrix();
-	}
 
 	const unsigned int SizeVertexFormat = ((refCommand->material().shaderProgramType() != Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)
 	                                           ? sizeof(RenderResources::VertexFormatPos2Tex2)

@@ -5,7 +5,9 @@
 #include "common_headers.h"
 
 #include <nctl/UniquePtr.h>
+#include <nctl/HashMap.h>
 #include "Matrix4x4.h"
+#include "GLShaderUniforms.h"
 
 namespace ncine {
 
@@ -48,6 +50,17 @@ class RenderResources
 		int drawindex;
 	};
 
+	struct CameraUniformData
+	{
+		CameraUniformData()
+		    : camera(nullptr), updateFrameProjectionMatrix(0), updateFrameViewMatrix(0) {}
+
+		GLShaderUniforms shaderUniforms;
+		Camera *camera;
+		unsigned long int updateFrameProjectionMatrix;
+		unsigned long int updateFrameViewMatrix;
+	};
+
 	static inline RenderBuffersManager &buffersManager() { return *buffersManager_; }
 	static inline RenderVaoPool &vaoPool() { return *vaoPool_; }
 	static inline RenderCommandPool &renderCommandPool() { return *renderCommandPool_; }
@@ -70,6 +83,8 @@ class RenderResources
 	static inline GLShaderProgram *batchedTextnodesAlphaShaderProgram() { return batchedTextnodesAlphaShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedTextnodesRedShaderProgram() { return batchedTextnodesRedShaderProgram_.get(); }
 
+	static inline unsigned char *cameraUniformsBuffer() { return cameraUniformsBuffer_; }
+	static inline nctl::HashMap<GLShaderProgram *, CameraUniformData> &cameraUniformDataMap() { return cameraUniformDataMap_; }
 	static inline Camera *currentCamera() { return currentCamera_; };
 
 	static void createMinimal();
@@ -96,6 +111,10 @@ class RenderResources
 	static nctl::UniquePtr<GLShaderProgram> batchedMeshSpritesNoTextureShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedTextnodesAlphaShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedTextnodesRedShaderProgram_;
+
+	static const int UniformsBufferSize = 128; // two 4x4 float matrices
+	static unsigned char cameraUniformsBuffer_[UniformsBufferSize];
+	static nctl::HashMap<GLShaderProgram *, CameraUniformData> cameraUniformDataMap_;
 
 	static Camera *currentCamera_;
 	static nctl::UniquePtr<Camera> defaultCamera_;

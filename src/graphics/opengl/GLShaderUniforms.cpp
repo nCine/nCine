@@ -4,6 +4,7 @@
 #include "RenderResources.h"
 #include <nctl/StaticHashMapIterator.h>
 #include <nctl/algorithms.h>
+#include <nctl/CString.h>
 
 namespace ncine {
 
@@ -23,16 +24,22 @@ GLShaderUniforms::GLShaderUniforms()
 }
 
 GLShaderUniforms::GLShaderUniforms(GLShaderProgram *shaderProgram)
-    : GLShaderUniforms()
+    : GLShaderUniforms(shaderProgram, nullptr, nullptr)
 {
 	setProgram(shaderProgram);
+}
+
+GLShaderUniforms::GLShaderUniforms(GLShaderProgram *shaderProgram, const char *includeOnly, const char *exclude)
+    : GLShaderUniforms()
+{
+	setProgram(shaderProgram, includeOnly, exclude);
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void GLShaderUniforms::setProgram(GLShaderProgram *shaderProgram)
+void GLShaderUniforms::setProgram(GLShaderProgram *shaderProgram, const char *includeOnly, const char *exclude)
 {
 	ASSERT(shaderProgram);
 
@@ -41,7 +48,7 @@ void GLShaderUniforms::setProgram(GLShaderProgram *shaderProgram)
 	uniformCaches_.clear();
 
 	if (shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
-		importUniforms();
+		importUniforms(includeOnly, exclude);
 }
 
 void GLShaderUniforms::setUniformsDataPointer(GLubyte *dataPointer)
@@ -57,6 +64,14 @@ void GLShaderUniforms::setUniformsDataPointer(GLubyte *dataPointer)
 		uniformCache.setDataPointer(dataPointer + offset);
 		offset += uniformCache.uniform()->memorySize();
 	}
+}
+
+void GLShaderUniforms::setDirty(bool isDirty)
+{
+	if (shaderProgram_->status() != GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
+		return;
+
+	forEach(uniformCaches_.begin(), uniformCaches_.end(), [isDirty](GLUniformCache &uniform) { uniform.setDirty(isDirty); });
 }
 
 GLUniformCache *GLShaderUniforms::uniform(const char *name)
@@ -99,17 +114,55 @@ void GLShaderUniforms::commitUniforms()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void GLShaderUniforms::importUniforms()
+void GLShaderUniforms::importUniforms(const char *includeOnly, const char *exclude)
 {
-	const unsigned int count = shaderProgram_->uniforms_.size();
-	if (count > UniformCachesHashSize)
-		LOGW_X("More active uniforms (%d) than hashmap buckets (%d)", count, UniformCachesHashSize);
+	const unsigned int MaxUniformName = 128;
 
+	unsigned int importedCount = 0;
 	for (const GLUniform &uniform : shaderProgram_->uniforms_)
 	{
-		GLUniformCache uniformCache(&uniform);
-		uniformCaches_[uniform.name()] = uniformCache;
+		const char *uniformName = uniform.name();
+		const char *currentIncludeOnly = includeOnly;
+		const char *currentExclude = exclude;
+		bool shouldImport = true;
+
+		if (includeOnly != nullptr)
+		{
+			shouldImport = false;
+			while (currentIncludeOnly != nullptr && currentIncludeOnly[0] != '\0')
+			{
+				if (strncmp(currentIncludeOnly, uniformName, MaxUniformName) == 0)
+				{
+					shouldImport = true;
+					break;
+				}
+				currentIncludeOnly += nctl::strnlen(currentIncludeOnly, MaxUniformName) + 1;
+			}
+		}
+
+		if (exclude != nullptr)
+		{
+			while (currentExclude != nullptr && currentExclude[0] != '\0')
+			{
+				if (strncmp(currentExclude, uniformName, MaxUniformName) == 0)
+				{
+					shouldImport = false;
+					break;
+				}
+				currentExclude += nctl::strnlen(currentExclude, MaxUniformName) + 1;
+			}
+		}
+
+		if (shouldImport)
+		{
+			GLUniformCache uniformCache(&uniform);
+			uniformCaches_[uniformName] = uniformCache;
+			importedCount++;
+		}
 	}
+
+	if (importedCount > UniformCachesHashSize)
+		LOGW_X("More imported uniform blocks (%d) than hashmap buckets (%d)", importedCount, UniformCachesHashSize);
 }
 
 }

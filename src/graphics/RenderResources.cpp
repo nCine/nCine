@@ -1,3 +1,4 @@
+#include <nctl/HashMapIterator.h>
 #include "GLShaderProgram.h"
 #include "RenderResources.h"
 #include "RenderBuffersManager.h"
@@ -41,6 +42,10 @@ nctl::UniquePtr<GLShaderProgram> RenderResources::batchedMeshSpritesNoTextureSha
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedTextnodesRedShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedTextnodesAlphaShaderProgram_;
 
+unsigned char RenderResources::cameraUniformsBuffer_[UniformsBufferSize];
+// The `RenderCommand` class is handling insertions and rehashing
+nctl::HashMap<GLShaderProgram *, RenderResources::CameraUniformData> RenderResources::cameraUniformDataMap_(32);
+
 Camera *RenderResources::currentCamera_ = nullptr;
 nctl::UniquePtr<Camera> RenderResources::defaultCamera_;
 
@@ -81,6 +86,28 @@ void RenderResources::setCamera(Camera *camera)
 		currentCamera_ = camera;
 	else
 		currentCamera_ = defaultCamera_.get();
+
+	// The buffer is shared among every shader program. There is no need to call `setFloatVector()` as `setDirty()` is enough.
+	memcpy(cameraUniformsBuffer_, currentCamera_->projection().data(), 64);
+	memcpy(cameraUniformsBuffer_ + 64, currentCamera_->view().data(), 64);
+	for (nctl::HashMap<GLShaderProgram *, CameraUniformData>::Iterator i = cameraUniformDataMap_.begin(); i != cameraUniformDataMap_.end(); ++i)
+	{
+		CameraUniformData &cameraUniformData = *i;
+
+		if (cameraUniformData.camera != currentCamera_)
+			(*i).shaderUniforms.setDirty(true);
+		else
+		{
+			if (cameraUniformData.updateFrameProjectionMatrix < currentCamera_->updateFrameProjectionMatrix())
+				(*i).shaderUniforms.uniform("projection")->setDirty(true);
+			if (cameraUniformData.updateFrameViewMatrix < currentCamera_->updateFrameViewMatrix())
+				(*i).shaderUniforms.uniform("view")->setDirty(true);
+		}
+
+		cameraUniformData.camera = currentCamera_;
+		cameraUniformData.updateFrameProjectionMatrix = currentCamera_->updateFrameProjectionMatrix();
+		cameraUniformData.updateFrameViewMatrix = currentCamera_->updateFrameViewMatrix();
+	}
 }
 
 void RenderResources::create()
@@ -152,13 +179,10 @@ void RenderResources::create()
 		FATAL_ASSERT(shaderToLoad.shaderProgram->status() != GLShaderProgram::Status::LINKING_FAILED);
 	}
 
-	// Calculating a common projection matrix for all shader programs
+	// Calculating a default projection matrix for all shader programs
 	const float width = theApplication().width();
 	const float height = theApplication().height();
-	const float near = -1.0f;
-	const float far = 1.0f;
-
-	defaultCamera_->projection().ortho(0.0f, width, 0.0f, height, near, far);
+	defaultCamera_->setOrthoProjection(0.0f, width, 0.0f, height);
 
 	LOGI("Rendering resources created");
 }
@@ -177,6 +201,10 @@ void RenderResources::dispose()
 	meshSpriteShaderProgram_.reset(nullptr);
 	spriteGrayShaderProgram_.reset(nullptr);
 	spriteShaderProgram_.reset(nullptr);
+
+	defaultCamera_.reset(nullptr);
+	renderBatcher_.reset(nullptr);
+	renderCommandPool_.reset(nullptr);
 	vaoPool_.reset(nullptr);
 	buffersManager_.reset(nullptr);
 
