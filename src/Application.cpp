@@ -81,6 +81,12 @@ float Application::interval() const
 	return frameTimer_->lastFrameInterval();
 }
 
+void Application::resizeRootViewport(int width, int height)
+{
+	if (rootViewport_ != nullptr)
+		rootViewport_->resize(width, height);
+}
+
 ///////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////

@@ -120,22 +120,6 @@ class DLL_PUBLIC IGfxDevice
 	/// Highlights the application window to notify the user
 	inline virtual void flashWindow() const {}
 
-	/// Returns the OpenGL clear color as a `Colorf` object
-	Colorf clearColor() const;
-	/// Sets the OpenGL clear color through four floats
-	void setClearColor(float red, float green, float blue, float alpha);
-	/// Sets the OpenGL clear color through a `Colorf` object
-	void setClearColor(const Colorf &color);
-
-	/// Resizes the OpenGL viewport with four integers
-	void setViewport(int x, int y, int width, int height);
-	/// Resizes the OpenGL viewport through a `Recti` object
-	inline void setViewport(const Recti &rect) { setViewport(rect.x, rect.y, rect.w, rect.h); }
-	/// Resizes the OpenGL viewport with two integers
-	void setViewport(int width, int height) { setViewport(0, 0, width, height); }
-	/// Resizes the OpenGL viewport through a `Vector2i` object
-	inline void setViewport(const Vector2i &size) { setViewport(size.x, size.y); }
-
 	/// Returns the OpenGL context creation attributes
 	inline const GLContextInfo &glContextInfo() const { return glContextInfo_; }
 	/// Returns display mode
@@ -181,8 +165,6 @@ class DLL_PUBLIC IGfxDevice
 
 	/// Updates the screen swapping back and front buffers
 	virtual void update() = 0;
-	/// Clears the screen
-	virtual void clear();
 
 	friend class Application;
 #if defined(WITH_SDL)

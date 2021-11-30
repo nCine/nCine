@@ -67,6 +67,9 @@ class DLL_PUBLIC Viewport
 	/// Initializes the render target of the viewport with the specified dimensions as a vector and the current format
 	bool initTexture(const Vector2i &size);
 
+	/// Changes the size, viewport rectangle and projection matrix of a viewport
+	void resize(int width, int height);
+
 	/// Returns viewport size as a `Vector2i` object
 	inline Vector2i size() const { return Vector2i(width_, height_); }
 	/// Returns device width
@@ -76,8 +79,14 @@ class DLL_PUBLIC Viewport
 
 	/// Returns the OpenGL viewport rectangle
 	inline Recti viewportRect() const { return viewportRect_; }
-	/// Sets the OpenGL viewport rectangle
+	/// Sets the OpenGL viewport rectangle through a `Recti` object
 	inline void setViewportRect(Recti viewportRect) { viewportRect_ = viewportRect; }
+	/// Sets the OpenGL viewport rectangle with four integers
+	inline void setViewportRect(int x, int y, int width, int height) { viewportRect_.set(x, y, width, height); }
+	/// Resizes the OpenGL viewport through a `Vector2i` object
+	inline void setViewport(const Vector2i &size) { viewportRect_.set(0, 0, size.x, size.y); }
+	/// Resizes the OpenGL viewport with two integers
+	inline void setViewport(int width, int height) { viewportRect_.set(0, 0, width, height); }
 
 	/// Returns the color format of the offscreen render target texture
 	inline ColorFormat colorFormat() const { return colorFormat_; }

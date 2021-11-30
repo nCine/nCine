@@ -95,26 +95,6 @@ IGfxDevice::IGfxDevice(const WindowMode &windowMode, const GLContextInfo &glCont
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-Colorf IGfxDevice::clearColor() const
-{
-	return GLClearColor::color();
-}
-
-void IGfxDevice::setClearColor(float red, float green, float blue, float alpha)
-{
-	GLClearColor::setColor(red, green, blue, alpha);
-}
-
-void IGfxDevice::setClearColor(const Colorf &color)
-{
-	GLClearColor::setColor(color);
-}
-
-void IGfxDevice::setViewport(int x, int y, int width, int height)
-{
-	GLViewport::setRect(x, y, width, height);
-}
-
 const IGfxDevice::VideoMode &IGfxDevice::videoMode(unsigned int index) const
 {
 	ASSERT(index < numVideoModes_);
@@ -132,11 +112,6 @@ void IGfxDevice::setupGL()
 	glDisable(GL_DITHER);
 	GLBlending::setBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GLDepthTest::enable();
-}
-
-void IGfxDevice::clear()
-{
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 }

@@ -436,8 +436,11 @@ int main(int argc, char **argv)
 	const int screenWidth = nc::theApplication().gfxDevice().currentVideoMode().width;
 	const int screenHeight = nc::theApplication().gfxDevice().currentVideoMode().height;
 	window.setGeometry((screenWidth - appCfg.resolution.x) / 2, (screenHeight - appCfg.resolution.y) / 2, appCfg.resolution.x, appCfg.resolution.y);
-	window.setMinimumSize(appCfg.resolution.x, appCfg.resolution.y);
-	window.setMaximumSize(appCfg.resolution.x, appCfg.resolution.y);
+	if (appCfg.isResizable == false)
+	{
+		window.setMinimumSize(appCfg.resolution.x, appCfg.resolution.y);
+		window.setMaximumSize(appCfg.resolution.x, appCfg.resolution.y);
+	}
 
 	window.show();
 

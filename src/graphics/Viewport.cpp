@@ -146,6 +146,25 @@ bool Viewport::initTexture(const Vector2i &size)
 	return initTexture(size.x, size.y, colorFormat_, depthStencilFormat_);
 }
 
+void Viewport::resize(int width, int height)
+{
+	if (width == width_ && height == height_)
+		return;
+
+	if (fbo_ && texture_)
+		initTexture(width, height);
+
+	viewportRect_.set(0, 0, width, height);
+
+	if (camera_ != nullptr)
+		camera_->setOrthoProjection(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
+	else if (type_ == Type::SCREEN)
+		RenderResources::defaultCamera_->setOrthoProjection(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
+
+	width_ = width;
+	height_ = height;
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////

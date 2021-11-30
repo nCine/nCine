@@ -38,7 +38,7 @@ void Qt5GfxDevice::setResolution(int width, int height)
 {
 	width_ = width;
 	height_ = height;
-	setViewport(width, height);
+	theApplication().resizeRootViewport(width, height);
 	widget_.setMinimumSize(width, height);
 	widget_.setMaximumSize(width, height);
 }

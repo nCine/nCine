@@ -7,6 +7,7 @@
 #endif
 
 #include <QCoreApplication>
+#include <QResizeEvent>
 
 namespace ncine {
 
@@ -75,6 +76,12 @@ bool Qt5Widget::event(QEvent *event)
 		case QEvent::TouchEnd:
 		case QEvent::Wheel:
 			return inputManager ? inputManager->event(event) : false;
+		case QEvent::Resize:
+		{
+			const QSize size = static_cast<QResizeEvent *>(event)->size();
+			application_.resizeRootViewport(size.width(), size.height());
+			return QWidget::event(event);
+		}
 		case QEvent::Close:
 		{
 			const bool shouldQuit = inputManager ? inputManager->shouldQuitOnRequest() : true;

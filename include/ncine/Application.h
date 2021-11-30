@@ -101,6 +101,9 @@ class DLL_PUBLIC Application
 	/// Returns the screen resolution as a `Vector2i` object
 	inline Vector2i resolution() const { return gfxDevice_->resolution(); }
 
+	/// Resizes the root viewport if it exists
+	void resizeRootViewport(int width, int height);
+
 	/// Returns the value of the suspension flag
 	/*! If `true` the application is suspended, it will neither update nor receive events */
 	inline bool isSuspended() const { return isSuspended_; }
