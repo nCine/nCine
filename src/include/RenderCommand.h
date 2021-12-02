@@ -88,9 +88,9 @@ class RenderCommand
 	inline Geometry &geometry() { return geometry_; }
 
 	/// Commits the model matrix uniform block
-	void commitTransformation();
+	void commitNodeTransformation();
 
-	/// Commits the projection and view matrix uniform
+	/// Commits the projection and view matrix uniforms
 	void commitCameraTransformation();
 
 	/// Copy the vertices stored in host memory to video memory

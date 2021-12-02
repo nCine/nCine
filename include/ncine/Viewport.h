@@ -113,20 +113,23 @@ class DLL_PUBLIC Viewport
 	inline void setRootNode(SceneNode *rootNode) { rootNode_ = rootNode; }
 
 	inline const Viewport *nextViewport() const { return nextViewport_; }
-	inline void setNextViewport(Viewport *nextViewport) { nextViewport_ = nextViewport; }
+	inline Viewport *nextViewport() { return nextViewport_; }
+	void setNextViewport(Viewport *nextViewport);
 
 	inline const Camera *camera() const { return camera_; }
 	inline Camera *camera() { return camera_; }
 	inline void setCamera(Camera *camera) { camera_ = camera; }
 
   protected:
+	/// An enumeration to differentiate between a regular viewport, a textureless one and the screen (root viewport)
 	enum class Type
 	{
 		REGULAR,
+		NO_TEXTURE,
 		SCREEN
 	};
 
-	const Type type_;
+	Type type_;
 
 	int width_;
 	int height_;
@@ -138,7 +141,7 @@ class DLL_PUBLIC Viewport
 	ClearMode clearMode_;
 	Colorf clearColor_;
 
-	/// The render queue of commands for the this viewport/RT
+	/// The render queue of commands for this viewport/RT
 	nctl::UniquePtr<RenderQueue> renderQueue_;
 
 	nctl::UniquePtr<GLFramebufferObject> fbo_;
@@ -153,8 +156,6 @@ class DLL_PUBLIC Viewport
 
 	/// Next viewport to render after this one
 	Viewport *nextViewport_;
-
-	Viewport(Type type);
 
 	/// Deleted copy constructor
 	Viewport(const Viewport &) = delete;

@@ -98,7 +98,7 @@ void RenderCommand::setScissor(GLint x, GLint y, GLsizei width, GLsizei height)
 	scissor_.height = height;
 }
 
-void RenderCommand::commitTransformation()
+void RenderCommand::commitNodeTransformation()
 {
 	ZoneScoped;
 
@@ -175,7 +175,7 @@ void RenderCommand::commitAll()
 {
 	commitVertices();
 	commitIndices();
-	commitTransformation();
+	commitNodeTransformation();
 	commitUniformBlocks();
 }
 

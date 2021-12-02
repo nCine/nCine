@@ -41,29 +41,26 @@ void Camera::setOrthoProjection(const ProjectionValues &values)
 	setOrthoProjection(values.left, values.right, values.top, values.bottom);
 }
 
-void Camera::setView(float x, float y, float rotation, float scale)
+void Camera::setView(const Vector2f &position, float rotation, float scale)
 {
-	viewValues_.x = x;
-	viewValues_.y = y;
+	viewValues_.position = position;
 	viewValues_.rotation = rotation;
 	viewValues_.scale = scale;
 
-	// Invert translation as the world is moving opposite to the camera
-	view_ = Matrix4x4f::translation(-x, -y, 0.0f);
-	// Invert translation as the world is rotating opposite to the camera
-	view_.rotateZ(-rotation);
+	view_ = Matrix4x4f::translation(position.x, position.y, 0.0f);
+	view_.rotateZ(rotation);
 	view_.scale(scale, scale, 1.0f);
 	updateFrameViewMatrix_ = theApplication().numFrames();
 }
 
-void Camera::setView(const Vector2f &pos, float rotation, float scale)
+void Camera::setView(float x, float y, float rotation, float scale)
 {
-	setView(pos.x, pos.y, rotation, scale);
+	setView(Vector2f(x, y), rotation, scale);
 }
 
 void Camera::setView(const ViewValues &values)
 {
-	setView(values.x, values.y, values.rotation, values.scale);
+	setView(values.position, values.rotation, values.scale);
 }
 
 }

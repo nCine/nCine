@@ -3,6 +3,8 @@
 #include <ncine/Random.h>
 #include <ncine/Application.h>
 #include <ncine/Texture.h>
+#include <ncine/Viewport.h>
+#include <ncine/Camera.h>
 #include <ncine/Sprite.h>
 #include <ncine/TextNode.h>
 #include "apptest_datapath.h"
@@ -37,6 +39,11 @@ const float DoubleClickDelay = 0.3f;
 const float ViewHalfWidth = 1500.0f;
 const float ViewHalfHeight = 1000.0f;
 
+const char *stringOnOff(bool enabled)
+{
+	return enabled ? "on" : "off";
+}
+
 }
 
 nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
@@ -63,6 +70,10 @@ void MyEventHandler::onInit()
 	                                   (prefixDataPath("fonts", FontTextureFile)).data());
 
 	cameraNode_ = nctl::makeUnique<nc::SceneNode>(&rootNode);
+	viewport_ = nctl::makeUnique<nc::Viewport>();
+	viewport_->setRootNode(cameraNode_.get());
+	camera_ = nctl::makeUnique<nc::Camera>();
+	viewport_->setCamera(camera_.get());
 
 	debugString_ = nctl::makeUnique<nctl::String>(128);
 	debugText_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get());
@@ -105,11 +116,11 @@ void MyEventHandler::onInit()
 		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(cameraNode_.get(), textures_[i % NumTextures].get(), randomX, randomY));
 		sprites_.back()->setScale(0.5f);
 		spritePos_.emplaceBack(randomX, randomY);
-		// sprites_.back()->setLayer(i); // Fixes Z-fighting at the expense of batching
 	}
 
 	withAtlas_ = false;
 	withAtlas_ ? setupAtlas() : setupTextures();
+	withViewport_ = false;
 
 	pause_ = false;
 	angle_ = 0.0f;
@@ -212,12 +223,18 @@ void MyEventHandler::onFrameStart()
 	const nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 	debugString_->clear();
 	debugString_->format("x: %.2f, y: %.2f, scale: %.2f, angle: %.2f", -camPos_.x, -camPos_.y, camScale_, camRot_);
-	debugString_->formatAppend("\nbatching: %s, culling: %s, texture atlas: %s", settings.batchingEnabled ? "on" : "off", settings.cullingEnabled ? "on" : "off", withAtlas_ ? "on" : "off");
+	debugString_->formatAppend("\nbatching: %s, culling: %s, texture atlas: %s, viewport: %s", stringOnOff(settings.batchingEnabled),
+	                           stringOnOff(settings.cullingEnabled), stringOnOff(withAtlas_), stringOnOff(withViewport_));
 	debugText_->setString(*debugString_);
 
-	cameraNode_->setPosition(camPos_);
-	cameraNode_->setRotation(camRot_);
-	cameraNode_->setScale(camScale_);
+	if (withViewport_)
+		camera_->setView(camPos_, camRot_, camScale_);
+	else
+	{
+		cameraNode_->setPosition(camPos_);
+		cameraNode_->setRotation(camRot_);
+		cameraNode_->setScale(camScale_);
+	}
 
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
@@ -283,6 +300,11 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 	{
 		withAtlas_ = !withAtlas_;
 		withAtlas_ ? setupAtlas() : setupTextures();
+	}
+	else if (event.sym == nc::KeySym::V)
+	{
+		withViewport_ = !withViewport_;
+		setupViewport();
 	}
 	else if (event.sym == nc::KeySym::H)
 	{
@@ -430,6 +452,23 @@ void MyEventHandler::setupTextures()
 	}
 }
 
+void MyEventHandler::setupViewport()
+{
+	if (withViewport_)
+	{
+		nc::theApplication().rootViewport().setNextViewport(viewport_.get());
+		cameraNode_->setParent(nullptr);
+		cameraNode_->setPosition(0.0f, 0.0f);
+		cameraNode_->setRotation(0.0f);
+		cameraNode_->setScale(1.0f);
+	}
+	else
+	{
+		nc::theApplication().rootViewport().setNextViewport(nullptr);
+		cameraNode_->setParent(&nc::theApplication().rootNode());
+	}
+}
+
 void MyEventHandler::checkClick(float x, float y)
 {
 	const nc::Rectf debugTextRect = nc::Rectf::fromCenterAndSize(debugText_->absPosition(), debugText_->absSize());
@@ -443,14 +482,19 @@ void MyEventHandler::checkClick(float x, float y)
 	{
 		nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 		const float xPos = x - debugTextRect.x;
-		if (xPos <= debugTextRect.w * 0.33f)
+		if (xPos <= debugTextRect.w * 0.24f)
 			settings.batchingEnabled = !settings.batchingEnabled;
-		else if (xPos >= debugTextRect.w * 0.33f && xPos <= debugTextRect.w * 0.6f)
+		else if (xPos >= debugTextRect.w * 0.24f && xPos <= debugTextRect.w * 0.45f)
 			settings.cullingEnabled = !settings.cullingEnabled;
-		else if (xPos >= debugTextRect.w * 0.6f)
+		else if (xPos >= debugTextRect.w * 0.45f && xPos <= debugTextRect.w * 0.77f)
 		{
 			withAtlas_ = !withAtlas_;
 			withAtlas_ ? setupAtlas() : setupTextures();
+		}
+		else if (xPos >= debugTextRect.w * 0.77f)
+		{
+			withViewport_ = !withViewport_;
+			setupViewport();
 		}
 	}
 }

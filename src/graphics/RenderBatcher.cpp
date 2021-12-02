@@ -327,7 +327,7 @@ RenderCommand *RenderBatcher::collectCommands(
 	while (it != nextStart)
 	{
 		RenderCommand *command = *it;
-		command->commitTransformation();
+		command->commitNodeTransformation();
 
 		if (isBatchedSprite(batchCommand->material().shaderProgramType()))
 		{

@@ -57,18 +57,13 @@ GLenum depthStencilFormatToGLAttachment(Viewport::DepthStencilFormat format)
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-Viewport::Viewport(Type type)
-    : type_(type), width_(0), height_(0), viewportRect_(0, 0, 0, 0),
+Viewport::Viewport()
+    : type_(Type::NO_TEXTURE), width_(0), height_(0), viewportRect_(0, 0, 0, 0),
       colorFormat_(ColorFormat::RGB8), depthStencilFormat_(DepthStencilFormat::NONE),
       clearMode_(ClearMode::EVERY_FRAME), clearColor_(Colorf::Black),
       renderQueue_(nctl::makeUnique<RenderQueue>()),
       fbo_(nullptr), texture_(nullptr),
       rootNode_(nullptr), camera_(nullptr), nextViewport_(nullptr)
-{
-}
-
-Viewport::Viewport()
-    : Viewport(Type::REGULAR)
 {
 }
 
@@ -105,13 +100,16 @@ Viewport::Viewport(const Vector2i &size)
 
 bool Viewport::initTexture(int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat)
 {
+	ASSERT(width > 0 && height > 0);
+
 	if (type_ == Type::SCREEN)
 		return false;
 
-	if (texture_ == nullptr)
+	if (type_ == Type::NO_TEXTURE)
 	{
 		viewportRect_.set(0, 0, width, height);
 		texture_ = nctl::makeUnique<Texture>();
+		type_ = Type::REGULAR;
 	}
 	texture_->init("Viewport", colorFormatToTexFormat(colorFormat), width, height);
 
@@ -165,6 +163,28 @@ void Viewport::resize(int width, int height)
 	height_ = height;
 }
 
+void Viewport::setNextViewport(Viewport *nextViewport)
+{
+	if (nextViewport != nullptr)
+	{
+		ASSERT(nextViewport->type_ != Type::SCREEN);
+		if (nextViewport->type_ == Type::SCREEN)
+			return;
+
+		if (nextViewport->type_ == Type::NO_TEXTURE)
+		{
+			nextViewport->width_ = width_;
+			nextViewport->height_ = height_;
+			nextViewport->viewportRect_ = viewportRect_;
+			nextViewport->colorFormat_ = colorFormat_;
+			nextViewport->depthStencilFormat_ = depthStencilFormat_;
+			nextViewport->clearMode_ = ClearMode::NEVER;
+		}
+	}
+
+	nextViewport_ = nextViewport;
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -197,13 +217,13 @@ void Viewport::sortAndCommitQueue()
 
 void Viewport::draw()
 {
-	if (nextViewport_)
+	if (nextViewport_ && nextViewport_->type_ == Type::REGULAR)
 		nextViewport_->draw();
 
-	if (fbo_ && texture_)
+	if (type_ == Type::REGULAR)
 		fbo_->bind(GL_DRAW_FRAMEBUFFER);
 
-	if (type_ == Type::SCREEN || (fbo_ && texture_))
+	if (type_ == Type::SCREEN || type_ == Type::REGULAR)
 	{
 		GLClearColor::State clearColorState = GLClearColor::state();
 		GLClearColor::setColor(clearColor_);
@@ -212,15 +232,20 @@ void Viewport::draw()
 		GLClearColor::setState(clearColorState);
 	}
 
+	// This allows for sub-viewports that only change the camera and the OpenGL viewport
+	if (nextViewport_ && nextViewport_->type_ == Type::NO_TEXTURE)
+	{
+		nextViewport_->clearMode_ = ClearMode::NEVER;
+		nextViewport_->draw();
+	}
+
 	RenderResources::setCamera(camera_);
 	GLViewport::State viewportState = GLViewport::state();
 	GLViewport::setRect(viewportRect_);
 	renderQueue_->draw();
 	GLViewport::setState(viewportState);
 
-	// Camera dirty flags are reset in the `RenderQueue` class
-
-	if (fbo_ && depthStencilFormat_ != DepthStencilFormat::NONE)
+	if (type_ == Type::REGULAR && depthStencilFormat_ != DepthStencilFormat::NONE)
 	{
 		const GLenum invalidAttachment = depthStencilFormatToGLAttachment(depthStencilFormat_);
 		fbo_->invalidate(1, &invalidAttachment);
@@ -231,7 +256,7 @@ void Viewport::draw()
 	else if (clearMode_ == ClearMode::NEXT_FRAME_ONLY)
 		clearMode_ = ClearMode::THIS_FRAME_ONLY;
 
-	if (fbo_ && texture_)
+	if (type_ == Type::REGULAR)
 		fbo_->unbind(GL_DRAW_FRAMEBUFFER);
 }
 

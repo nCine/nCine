@@ -16,7 +16,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ScreenViewport::ScreenViewport()
-    : Viewport(Type::SCREEN)
+    : Viewport()
 {
 	width_ = theApplication().widthInt();
 	height_ = theApplication().heightInt();
@@ -32,6 +32,7 @@ ScreenViewport::ScreenViewport()
 		depthStencilFormat_ = (displayMode.stencilBits() == 8) ? DepthStencilFormat::DEPTH24_STENCIL8 : DepthStencilFormat::DEPTH24;
 
 	rootNode_ = &theApplication().rootNode();
+	type_ = Type::SCREEN;
 }
 
 ///////////////////////////////////////////////////////////

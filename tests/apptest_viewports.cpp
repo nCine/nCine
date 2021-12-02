@@ -35,16 +35,36 @@ const float MaxCameraScale = 3.0f;
 const float MinCameraScale = 0.5f;
 const float DoubleClickDelay = 0.3f;
 
-const float ViewHalfWidth = 1500.0f;
-const float ViewHalfHeight = 1000.0f;
-
 const char *ColorFormatLabels[] = { "RGB8", "RGBA8" };
 const char *DepthFormatLabels[] = { "None", "Depth16", "Depth24", "Depth24_Stencil8" };
 const char *ClearModeLabels[] = { "Every frame", "This frame only", "Next frame only", "Never" };
+const char *PositionPresetsLabels[] = { "Top Left", "Top Centre", "Top Right", "Centre Left", "Centre", "Centre Right", "Bottom Left", "Bottom Centre", "Bottom Right" };
 nctl::String comboString(64);
 
-nc::Vector2i viewportSize;
-nc::Recti viewportRect;
+const char *stringOnOff(bool enabled)
+{
+	return enabled ? "on" : "off";
+}
+
+nc::Vector2f positionPresets(const nc::Vector2f &spriteSize, unsigned int posIndex)
+{
+	const float screenWidth = nc::theApplication().width();
+	const float screenHeight = nc::theApplication().height();
+
+	switch (posIndex)
+	{
+		case 0: return nc::Vector2f(spriteSize.x * 0.5f, screenHeight - spriteSize.y * 0.5);
+		case 1: return nc::Vector2f(screenWidth * 0.5f, screenHeight - spriteSize.y * 0.5);
+		case 2: return nc::Vector2f(screenWidth - spriteSize.x * 0.5f, screenHeight - spriteSize.y * 0.5);
+		case 3: return nc::Vector2f(spriteSize.x * 0.5f, screenHeight * 0.5);
+		default:
+		case 4: return nc::Vector2f(screenWidth * 0.5f, screenHeight * 0.5);
+		case 5: return nc::Vector2f(screenWidth - spriteSize.x * 0.5f, screenHeight * 0.5);
+		case 6: return nc::Vector2f(spriteSize.x * 0.5f, spriteSize.y * 0.5f);
+		case 7: return nc::Vector2f(screenWidth * 0.5f, spriteSize.y * 0.5f);
+		case 8: return nc::Vector2f(screenWidth - spriteSize.x * 0.5f, spriteSize.y * 0.5f);
+	}
+}
 
 }
 
@@ -56,7 +76,6 @@ nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
 	setDataPath(config);
-	config.withDebugOverlay = false;
 }
 
 void MyEventHandler::onInit()
@@ -72,8 +91,6 @@ void MyEventHandler::onInit()
 	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
 	                                   (prefixDataPath("fonts", FontTextureFile)).data());
 
-	cameraNode_ = nctl::makeUnique<nc::SceneNode>(&rootNode);
-
 	debugString_ = nctl::makeUnique<nctl::String>(128);
 	debugText_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get());
 	debugText_->setPosition((nc::theApplication().width() - debugText_->width()) * 0.5f,
@@ -81,56 +98,73 @@ void MyEventHandler::onInit()
 	debugText_->setColor(255, 255, 0, 255);
 	debugText_->setAlignment(nc::TextNode::Alignment::CENTER);
 
-	cameras_.pushBack(nctl::makeUnique<nc::Camera>());
-	nc::theApplication().rootViewport().setCamera(cameras_.back().get());
-	nc::Vector2i vpSizes[NumViewports] = { nc::Vector2i(640, 360), nc::Vector2i(320, 180) };
-	nc::Colorf vpClearColors[NumViewports] = { nc::Colorf(0.25f, 0.25f, 0.25f, 0.25f), nc::Colorf(0.15f, 0.15f, 0.15f, 0.15f) };
+	viewportCreationData[0].assignCamera = true;
+	viewportCreationData[0].assignRootNode = true;
+	viewportCreationData[1].size = nc::Vector2i(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5);
+	viewportCreationData[1].clearColor = nc::Colorf(0.25f, 0.25f, 0.25f, 0.25f);
+	viewportCreationData[1].spritePositionIndex = 6;
+	viewportCreationData[2].size = nc::Vector2i(nc::theApplication().width() * 0.25f, nc::theApplication().height() * 0.25);
+	viewportCreationData[2].clearColor = nc::Colorf(0.15f, 0.15f, 0.15f, 0.15f);
+	viewportCreationData[2].spritePositionIndex = 2;
+	viewportCreationData[3].assignCamera = false;
+	viewportCreationData[3].assignRootNode = true;
+
+	rootCamera = nctl::makeUnique<nc::Camera>();
+	rootViewport.setCamera(rootCamera.get());
 	for (unsigned int i = 0; i < NumViewports; i++)
 	{
-		vpNodes_.pushBack(nctl::makeUnique<nc::SceneNode>());
-		cameras_.pushBack(nctl::makeUnique<nc::Camera>());
-		viewports_.pushBack(nctl::makeUnique<nc::Viewport>(vpSizes[i]));
-		viewports_.back()->setRootNode(vpNodes_.back().get());
-		viewports_.back()->setCamera(cameras_.back().get());
-		viewports_.back()->setClearColor(vpClearColors[i]);
-		vpSprites_.pushBack(nctl::makeUnique<nc::Sprite>(&rootNode, viewports_.back()->texture(), viewports_.back()->width() / 2, viewports_.back()->height() / 2));
-		vpSprites_.back()->setLayer(1000);
-	}
-	rootViewport.setNextViewport(viewports_[0].get());
-	viewports_[0]->setNextViewport(viewports_[1].get());
-	vpSprites_[1]->setPosition(nc::theApplication().widthInt() - viewports_[1]->width() / 2, nc::theApplication().heightInt() - viewports_[1]->height() / 2);
+		if (viewportCreationData[i].size.x == 0 && viewportCreationData[i].size.y == 0)
+			viewportData[i].viewport = nctl::makeUnique<nc::Viewport>();
+		else
+			viewportData[i].viewport = nctl::makeUnique<nc::Viewport>(viewportCreationData[i].size);
 
-	for (unsigned int i = 0; i < NumSprites / 2; i++)
+		viewportData[i].camera = nctl::makeUnique<nc::Camera>();
+		viewportData[i].rootNode = nctl::makeUnique<nc::SceneNode>();
+
+		nc::Viewport *viewport = viewportData[i].viewport.get();
+
+		if (viewportCreationData[i].assignCamera)
+			viewport->setCamera(viewportData[i].camera.get());
+		else
+		{
+			nc::Camera *camera = (i > 0) ? viewportData[i - 1].camera.get() : rootCamera.get();
+			viewport->setCamera(camera);
+		}
+
+		if (viewportCreationData[i].assignRootNode)
+			viewport->setRootNode(viewportData[i].rootNode.get());
+		else
+		{
+			nc::SceneNode *node = (i > 0) ? viewportData[i - 1].rootNode.get() : &rootNode;
+			viewport->setRootNode(node);
+		}
+
+		if (viewportCreationData[i].size.x != 0 && viewportCreationData[i].size.y != 0)
+		{
+			viewport->setClearColor(viewportCreationData[i].clearColor);
+			viewportData[i].sprite = nctl::makeUnique<nc::Sprite>(&rootNode, viewport->texture(), viewport->width() / 2, viewport->height() / 2);
+			nc::Sprite *sprite = viewportData[i].sprite.get();
+			sprite->setLayer(1000);
+			sprite->setPosition(positionPresets(sprite->absSize(), viewportCreationData[i].spritePositionIndex));
+		}
+	}
+	rootViewport.setNextViewport(viewportData[0].viewport.get());
+	for (unsigned int i = 0; i < NumViewports - 1; i++)
+		viewportData[i].viewport->setNextViewport(viewportData[i + 1].viewport.get());
+
+	for (unsigned int i = 0; i < NumSprites; i++)
 	{
-		const float randomX = nc::random().real(-ViewHalfWidth, ViewHalfWidth);
-		const float randomY = nc::random().real(-ViewHalfHeight, ViewHalfHeight);
-		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(cameraNode_.get(), textures_[i % NumTextures].get(), randomX, randomY));
+		const int index = i % (NumViewports);
+		nc::SceneNode *node = viewportData[index].rootNode.get();
+		const float randomX = nc::random().real(-nc::theApplication().width(), nc::theApplication().width());
+		const float randomY = nc::random().real(-nc::theApplication().height(), nc::theApplication().height());
+		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(node, textures_[index % NumTextures].get(), randomX, randomY));
 		sprites_.back()->setScale(0.5f);
 		spritePos_.emplaceBack(randomX, randomY);
-		// sprites_.back()->setLayer(i); // Fixes Z-fighting at the expense of batching
-	}
-
-	for (unsigned int i = 0; i < NumSprites / 4; i++)
-	{
-		const float randomX = nc::random().real(-ViewHalfWidth, ViewHalfWidth);
-		const float randomY = nc::random().real(-ViewHalfHeight, ViewHalfHeight);
-		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(vpNodes_[0].get(), textures_[i % NumTextures].get(), randomX, randomY));
-		sprites_.back()->setScale(0.5f);
-		spritePos_.emplaceBack(randomX, randomY);
-		// sprites_.back()->setLayer(i); // Fixes Z-fighting at the expense of batching
-	}
-
-	for (unsigned int i = 0; i < NumSprites / 4; i++)
-	{
-		const float randomX = nc::random().real(-ViewHalfWidth, ViewHalfWidth);
-		const float randomY = nc::random().real(-ViewHalfHeight, ViewHalfHeight);
-		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(vpNodes_[1].get(), textures_[i % NumTextures].get(), randomX, randomY));
-		sprites_.back()->setScale(0.5f);
-		spritePos_.emplaceBack(randomX, randomY);
-		// sprites_.back()->setLayer(i); // Fixes Z-fighting at the expense of batching
 	}
 
 	pause_ = false;
+	inputEnabled_ = true;
 	angle_ = 0.0f;
 	resetCamera();
 
@@ -138,12 +172,12 @@ void MyEventHandler::onInit()
 	scrollMove_ = nc::Vector2f::Zero;
 	scrollOrigin2_ = nc::Vector2f::Zero;
 	scrollMove2_ = nc::Vector2f::Zero;
-	joyVectorLeft_ = nc::Vector2f::Zero;
-	joyVectorRight_ = nc::Vector2f::Zero;
 }
 
 void MyEventHandler::onFrameStart()
 {
+	static bool viewMatrixChanged = false;
+
 	ImGui::Begin("Viewports");
 
 	comboString.clear();
@@ -160,31 +194,50 @@ void MyEventHandler::onFrameStart()
 
 	static int currentComboViewport = 0;
 	const bool viewportChanged = ImGui::Combo("Viewport", &currentComboViewport, comboString.data());
-	nc::Viewport &currentViewport = (currentComboViewport > 0) ? *viewports_[currentComboViewport - 1] : nc::theApplication().rootViewport();
+	nc::Viewport &currentViewport = (currentComboViewport > 0) ? *viewportData[currentComboViewport - 1].viewport : nc::theApplication().rootViewport();
 
-	const nc::Vector2i currentViewportSize = currentViewport.size();
-	const nc::Recti currentViewportRect = currentViewport.viewportRect();
-	const int currentColorFormatType = static_cast<int>(currentViewport.colorFormat());
-	const int currentDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
-
-	if (currentComboViewport == 0)
+	const char *nextViewportString = "Next Viewport";
+	if (currentViewport.nextViewport() == nullptr)
+		ImGui::Text("%s: None", nextViewportString);
+	else if (currentViewport.nextViewport() == &nc::theApplication().rootViewport())
+		ImGui::Text("%s: Screen", nextViewportString);
+	else
 	{
-		if (ImGui::TreeNodeEx("Surface", ImGuiTreeNodeFlags_DefaultOpen))
+		for (unsigned int i = 0; i < NumViewports; i++)
+		{
+			if (currentViewport.nextViewport() == viewportData[i].viewport.get())
+			{
+				ImGui::Text("%s: Viewport %d", nextViewportString, i);
+				break;
+			}
+		}
+	}
+
+	if ((currentComboViewport == 0 || currentViewport.texture() != nullptr) &&
+	    ImGui::TreeNodeEx("Surface", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		const nc::Vector2i currentViewportSize = currentViewport.size();
+		const int currentColorFormatType = static_cast<int>(currentViewport.colorFormat());
+		const int currentDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
+
+		if (currentComboViewport == 0)
 		{
 			ImGui::Text("Width: %d", currentViewportSize.x);
 			ImGui::Text("Height: %d", currentViewportSize.y);
 			ImGui::Text("Color Format: %s", ColorFormatLabels[currentColorFormatType]);
 			ImGui::Text("Depth Format: %s", DepthFormatLabels[currentDepthFormatType]);
-			ImGui::TreePop();
 		}
-	}
-	else
-	{
-		if (ImGui::TreeNodeEx("Surface", ImGuiTreeNodeFlags_DefaultOpen))
+		else
 		{
-			viewportSize = currentViewport.size();
-			int comboColorFormatType = static_cast<int>(currentViewport.colorFormat());
-			int comboDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
+			static nc::Vector2i viewportSize = currentViewport.size();
+			static int comboColorFormatType = static_cast<int>(currentViewport.colorFormat());
+			static int comboDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
+			if (viewportChanged)
+			{
+				viewportSize = currentViewport.size();
+				comboColorFormatType = static_cast<int>(currentViewport.colorFormat());
+				comboDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
+			}
 
 			ImGui::SliderInt("Width", &viewportSize.x, 0, nc::theApplication().widthInt());
 			ImGui::SliderInt("Height", &viewportSize.y, 0, nc::theApplication().heightInt());
@@ -207,51 +260,88 @@ void MyEventHandler::onFrameStart()
 					currentViewport.initTexture(viewportSize, nc::Viewport::ColorFormat(comboColorFormatType), nc::Viewport::DepthStencilFormat(comboDepthFormatType));
 				}
 			}
-			ImGui::TreePop();
 		}
 
-		if (ImGui::TreeNode("Viewport Rectangle"))
-		{
-			static nc::Recti viewportRect = currentViewport.viewportRect();
+		nc::Colorf clearColor = currentViewport.clearColor();
+		ImGui::ColorEdit4("Clear Color", clearColor.data(), ImGuiColorEditFlags_AlphaBar);
+		currentViewport.setClearColor(clearColor);
 
-			ImGui::SliderInt("Rect X", &viewportRect.x, 0, currentViewport.width());
-			ImGui::SliderInt("Rect Y", &viewportRect.y, 0, currentViewport.height());
-			ImGui::SliderInt("Rect Width", &viewportRect.w, 0, currentViewport.width() - viewportRect.x);
-			ImGui::SliderInt("Rect Height", &viewportRect.h, 0, currentViewport.height() - viewportRect.y);
+		int comboClearMode = static_cast<int>(currentViewport.clearMode());
+		ImGui::Combo("Clear Mode", &comboClearMode, ClearModeLabels, IM_ARRAYSIZE(ClearModeLabels));
+		currentViewport.setClearMode(nc::Viewport::ClearMode(comboClearMode));
 
-			if (ImGui::Button("Current"))
-				viewportRect = currentViewport.viewportRect();
-			ImGui::SameLine();
-			if (ImGui::Button("Apply"))
-			{
-				if (!(viewportRect == currentViewportRect) && viewportRect.w > 0 && viewportRect.h > 0)
-					currentViewport.setViewportRect(viewportRect);
-			}
-
-			ImGui::TreePop();
-		}
+		ImGui::TreePop();
 	}
 
-	if (currentComboViewport > 0 && ImGui::TreeNode("Sprite"))
+	if (currentComboViewport > 0 && ImGui::TreeNode("Viewport Rectangle"))
 	{
-		nc::Sprite &sprite = *vpSprites_[currentComboViewport - 1];
+		const nc::Recti currentViewportRect = currentViewport.viewportRect();
+		static nc::Recti viewportRect = currentViewport.viewportRect();
+		if (viewportChanged)
+			viewportRect = currentViewport.viewportRect();
+		static bool applyEveryframe = false;
+		bool valueChanged = false;
 
-		bool isEnabled = sprite.isEnabled();
-		ImGui::Checkbox("Enabled", &isEnabled);
-		sprite.setEnabled(isEnabled);
+		valueChanged |= ImGui::SliderInt("Rect X", &viewportRect.x, 0, currentViewport.width());
+		valueChanged |= ImGui::SliderInt("Rect Y", &viewportRect.y, 0, currentViewport.height());
+		valueChanged |= ImGui::SliderInt("Rect Width", &viewportRect.w, 0, currentViewport.width() - viewportRect.x);
+		valueChanged |= ImGui::SliderInt("Rect Height", &viewportRect.h, 0, currentViewport.height() - viewportRect.y);
 
-		ImGui::SliderFloat("Pos X", &sprite.x, currentViewport.width() / 2, nc::theApplication().widthInt() - currentViewport.width() / 2);
-		ImGui::SliderFloat("Pos Y", &sprite.y, currentViewport.height() / 2, nc::theApplication().heightInt() - currentViewport.height() / 2);
+		if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
+			valueChanged = true;
+		ImGui::SameLine();
+		if (ImGui::Button("Reset"))
+		{
+			viewportRect.x = 0;
+			viewportRect.y = 0;
+			viewportRect.w = currentViewport.width();
+			viewportRect.h = currentViewport.height();
+			valueChanged = true;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Current"))
+			viewportRect = currentViewport.viewportRect();
+		ImGui::SameLine();
+		if (ImGui::Button("Apply") || (applyEveryframe && valueChanged))
+		{
+			if (!(viewportRect == currentViewportRect) && viewportRect.w > 0 && viewportRect.h > 0)
+				currentViewport.setViewportRect(viewportRect);
+		}
+
+		ImGui::TreePop();
+	}
+
+	if (currentComboViewport > 0 && viewportData[currentComboViewport - 1].sprite && ImGui::TreeNode("Sprite"))
+	{
+		nc::Sprite &sprite = *viewportData[currentComboViewport - 1].sprite;
+
+		ImGui::SliderFloat("Pos X", &sprite.x, (-nc::theApplication().widthInt() + sprite.width()) / 2, (nc::theApplication().widthInt() - sprite.width()) / 2);
+		ImGui::SliderFloat("Pos Y", &sprite.y, (-nc::theApplication().heightInt() + sprite.height()) / 2, (nc::theApplication().heightInt() - sprite.height()) / 2);
+
+		static int positionIndex = viewportCreationData[currentComboViewport - 1].spritePositionIndex;
+		if (viewportChanged)
+			positionIndex = viewportCreationData[currentComboViewport - 1].spritePositionIndex;
+		if (ImGui::Combo("Position Presets", &positionIndex, PositionPresetsLabels, IM_ARRAYSIZE(PositionPresetsLabels)))
+			sprite.setPosition(positionPresets(sprite.absSize(), positionIndex));
+
 		float rotation = sprite.rotation();
 		ImGui::SliderFloat("Rotation", &rotation, 0.0f, 360.0f);
 		nc::Vector2f scaleFactors = sprite.scale();
 		ImGui::SliderFloat2("Scale", scaleFactors.data(), 0.01f, 3.0f);
+
+		bool isEnabled = sprite.isEnabled();
+		ImGui::Checkbox("Enabled", &isEnabled);
+		sprite.setEnabled(isEnabled);
+		ImGui::SameLine();
+
 		if (ImGui::Button("Reset"))
 		{
-			sprite.x = currentViewport.width() / 2;
-			sprite.y = currentViewport.height() / 2;
 			rotation = 0.0f;
 			scaleFactors.set(1.0f, 1.0f);
+			// Set scaling factors before updating the position
+			sprite.setScale(scaleFactors);
+			positionIndex = viewportCreationData[currentComboViewport - 1].spritePositionIndex;
+			sprite.setPosition(positionPresets(sprite.size(), positionIndex));
 		}
 		sprite.setRotation(rotation);
 		sprite.setScale(scaleFactors);
@@ -259,30 +349,7 @@ void MyEventHandler::onFrameStart()
 		ImGui::TreePop();
 	}
 
-	nc::Colorf clearColor = currentViewport.clearColor();
-	ImGui::ColorEdit4("Clear Color", clearColor.data(), ImGuiColorEditFlags_AlphaBar);
-	currentViewport.setClearColor(clearColor);
-
-	int comboClearMode = static_cast<int>(currentViewport.clearMode());
-	ImGui::Combo("Clear Mode", &comboClearMode, ClearModeLabels, IM_ARRAYSIZE(ClearModeLabels));
-	currentViewport.setClearMode(nc::Viewport::ClearMode(comboClearMode));
-
-	const char *nextViewportString = "Next Viewport";
-	if (currentViewport.nextViewport() == nullptr)
-		ImGui::Text("%s: None", nextViewportString);
-	else if (currentViewport.nextViewport() == &nc::theApplication().rootViewport())
-		ImGui::Text("%s: Screen", nextViewportString);
-	else
-	{
-		for (unsigned int i = 0; i < NumViewports; i++)
-		{
-			if (currentViewport.nextViewport() == viewports_[i].get())
-			{
-				ImGui::Text("%s: Viewport %d", nextViewportString, i);
-				break;
-			}
-		}
-	}
+	ImGui::Separator();
 
 	nc::Camera &currentCamera = *currentViewport.camera();
 	if (ImGui::TreeNode("Projection Matrix"))
@@ -294,18 +361,19 @@ void MyEventHandler::onFrameStart()
 		bool valueChanged = false;
 
 		ImGui::Text("Update Frame: %lu", currentCamera.updateFrameProjectionMatrix());
-		valueChanged |= ImGui::SliderFloat("Left", &values.left, 0.0f, static_cast<float>(currentViewport.width()));
-		valueChanged |= ImGui::SliderFloat("Right", &values.right, values.left, static_cast<float>(currentViewport.width()));
-		valueChanged |= ImGui::SliderFloat("Top", &values.top, 0.0f, static_cast<float>(currentViewport.height()));
-		valueChanged |= ImGui::SliderFloat("Bottom", &values.bottom, values.top, static_cast<float>(currentViewport.height()));
-		ImGui::Checkbox("Apply Every Frame", &applyEveryframe);
+		valueChanged |= ImGui::SliderFloat("Left", &values.left, 0.0f, static_cast<float>(nc::theApplication().width()));
+		valueChanged |= ImGui::SliderFloat("Right", &values.right, values.left, static_cast<float>(nc::theApplication().width()));
+		valueChanged |= ImGui::SliderFloat("Top", &values.top, 0.0f, static_cast<float>(nc::theApplication().height()));
+		valueChanged |= ImGui::SliderFloat("Bottom", &values.bottom, values.top, static_cast<float>(nc::theApplication().height()));
+		if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
+			valueChanged = true;
 		ImGui::SameLine();
 		if (ImGui::Button("Reset"))
 		{
 			values.left = 0.0f;
-			values.right = static_cast<float>(currentViewport.width());
+			values.right = static_cast<float>(nc::theApplication().width());
 			values.top = 0.0f;
-			values.bottom = static_cast<float>(currentViewport.height());
+			values.bottom = static_cast<float>(nc::theApplication().height());
 			valueChanged = true;
 		}
 		ImGui::SameLine();
@@ -317,29 +385,39 @@ void MyEventHandler::onFrameStart()
 	if (ImGui::TreeNode("View Matrix"))
 	{
 		static nc::Camera::ViewValues values = currentCamera.viewValues();
-		if (viewportChanged)
+		if (viewportChanged || viewMatrixChanged)
+		{
 			values = currentCamera.viewValues();
+			camPos_ = values.position;
+			camRot_ = values.rotation;
+			camScale_ = values.scale;
+			viewMatrixChanged = false;
+		}
 		static bool applyEveryframe = false;
 		bool valueChanged = false;
 
 		ImGui::Text("Update Frame: %lu", currentCamera.updateFrameViewMatrix());
-		valueChanged |= ImGui::SliderFloat("Position X", &values.x, 0.0f, nc::theApplication().width());
-		valueChanged |= ImGui::SliderFloat("Position Y", &values.y, 0.0f, nc::theApplication().height());
+		valueChanged |= ImGui::SliderFloat("Position X", &values.position.x, -nc::theApplication().width(), nc::theApplication().width());
+		valueChanged |= ImGui::SliderFloat("Position Y", &values.position.y, -nc::theApplication().height(), nc::theApplication().height());
 		valueChanged |= ImGui::SliderFloat("Rotation", &values.rotation, 0.0f, 360.0f);
 		valueChanged |= ImGui::SliderFloat("Scale", &values.scale, 0.01f, 3.0f);
-		ImGui::Checkbox("Apply Every Frame", &applyEveryframe);
+		if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
+			valueChanged = true;
 		ImGui::SameLine();
 		if (ImGui::Button("Reset"))
 		{
-			values.x = 0.0f;
-			values.y = 0.0f;
+			values.position.set(0.0f, 0.0f);
 			values.rotation = 0.0f;
 			values.scale = 1.0f;
 			valueChanged = true;
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Apply") || (applyEveryframe && valueChanged))
-			currentCamera.setView(values);
+		{
+			camPos_ = values.position;
+			camRot_ = values.rotation;
+			camScale_ = values.scale;
+		}
 		ImGui::TreePop();
 	}
 
@@ -349,36 +427,28 @@ void MyEventHandler::onFrameStart()
 	if (!pause_)
 		angle_ += 2.0f * interval;
 
-	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
-
-	if (keyState.isKeyDown(nc::KeySym::D))
-		camPos_.x -= MoveSpeed * interval;
-	else if (keyState.isKeyDown(nc::KeySym::A))
-		camPos_.x += MoveSpeed * interval;
-	if (keyState.isKeyDown(nc::KeySym::W))
-		camPos_.y -= MoveSpeed * interval;
-	else if (keyState.isKeyDown(nc::KeySym::S))
-		camPos_.y += MoveSpeed * interval;
-
-	if (keyState.isKeyDown(nc::KeySym::RIGHT))
-		camRot_ += RotateSpeed * interval;
-	else if (keyState.isKeyDown(nc::KeySym::LEFT))
-		camRot_ -= RotateSpeed * interval;
-
-	if (keyState.isKeyDown(nc::KeySym::UP))
-		camScale_ += ScaleSpeed * interval;
-	else if (keyState.isKeyDown(nc::KeySym::DOWN))
-		camScale_ -= ScaleSpeed * interval;
-
-	if (joyVectorLeft_.length() > nc::IInputManager::LeftStickDeadZone)
+	if (inputEnabled_)
 	{
-		camPos_.x -= joyVectorLeft_.x * MoveSpeed * interval;
-		camPos_.y -= joyVectorLeft_.y * MoveSpeed * interval;
-	}
-	if (joyVectorRight_.length() > nc::IInputManager::RightStickDeadZone)
-	{
-		camRot_ += joyVectorRight_.x * RotateSpeed * interval;
-		camScale_ += joyVectorRight_.y * ScaleSpeed * interval;
+		const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
+
+		if (keyState.isKeyDown(nc::KeySym::D))
+			camPos_.x -= MoveSpeed * interval;
+		else if (keyState.isKeyDown(nc::KeySym::A))
+			camPos_.x += MoveSpeed * interval;
+		if (keyState.isKeyDown(nc::KeySym::W))
+			camPos_.y -= MoveSpeed * interval;
+		else if (keyState.isKeyDown(nc::KeySym::S))
+			camPos_.y += MoveSpeed * interval;
+
+		if (keyState.isKeyDown(nc::KeySym::RIGHT))
+			camRot_ += RotateSpeed * interval;
+		else if (keyState.isKeyDown(nc::KeySym::LEFT))
+			camRot_ -= RotateSpeed * interval;
+
+		if (keyState.isKeyDown(nc::KeySym::UP))
+			camScale_ += ScaleSpeed * interval;
+		else if (keyState.isKeyDown(nc::KeySym::DOWN))
+			camScale_ -= ScaleSpeed * interval;
 	}
 
 	const nc::Vector2f scrollDiff = scrollMove_ - scrollOrigin_;
@@ -401,43 +471,23 @@ void MyEventHandler::onFrameStart()
 	else if (camScale_ < MinCameraScale)
 		camScale_ = MinCameraScale;
 
-	const float scaledWidth = ViewHalfWidth * 2.0f * camScale_;
-	const float scaledHeight = ViewHalfHeight * 2.0f * camScale_;
-
-	float rotatedWidth = scaledWidth;
-	float rotatedHeight = scaledHeight;
 	if (camRot_ > 0.01f || camRot_ < -0.01f)
-	{
 		camRot_ = fmodf(camRot_, 360.0f);
-		const float sinRot = sinf(camRot_ * nc::fDegToRad);
-		const float cosRot = cosf(camRot_ * nc::fDegToRad);
-		rotatedWidth = fabsf(scaledHeight * sinRot) + fabsf(scaledWidth * cosRot);
-		rotatedHeight = fabsf(scaledWidth * sinRot) + fabsf(scaledHeight * cosRot);
-	}
-
-	const float maxX = rotatedWidth * 0.5f;
-	const float minX = (-rotatedWidth * 0.5f) + nc::theApplication().width();
-	const float maxY = rotatedHeight * 0.5f;
-	const float minY = (-rotatedHeight * 0.5f) + nc::theApplication().height();
-
-	if (camPos_.x > maxX)
-		camPos_.x = maxX;
-	if (camPos_.x < minX)
-		camPos_.x = minX;
-	if (camPos_.y > maxY)
-		camPos_.y = maxY;
-	if (camPos_.y < minY)
-		camPos_.y = minY;
 
 	const nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 	debugString_->clear();
 	debugString_->format("x: %.2f, y: %.2f, scale: %.2f, angle: %.2f", -camPos_.x, -camPos_.y, camScale_, camRot_);
-	debugString_->formatAppend("\nbatching: %s, culling: %s", settings.batchingEnabled ? "on" : "off", settings.cullingEnabled ? "on" : "off");
+	debugString_->formatAppend("\nbatching: %s, culling: %s, input: %s", stringOnOff(settings.batchingEnabled),
+	                           stringOnOff(settings.cullingEnabled), stringOnOff(inputEnabled_));
 	debugText_->setString(*debugString_);
 
-	cameraNode_->setPosition(camPos_);
-	cameraNode_->setRotation(camRot_);
-	cameraNode_->setScale(camScale_);
+	const nc::Camera::ViewValues &viewValues = currentCamera.viewValues();
+	if (camPos_.x != viewValues.position.x || camPos_.y != viewValues.position.y ||
+	    camRot_ != viewValues.rotation || camScale_ != viewValues.scale)
+	{
+		currentCamera.setView(camPos_, camRot_, camScale_);
+		viewMatrixChanged = true;
+	}
 
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
@@ -449,46 +499,6 @@ void MyEventHandler::onFrameStart()
 		sprites_[i]->setPosition(spritePos_[i].x + moveX, spritePos_[i].y + moveY);
 	}
 }
-
-#ifdef __ANDROID__
-void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
-{
-	scrollOrigin_.x = event.pointers[0].x;
-	scrollOrigin_.y = event.pointers[0].y;
-	scrollMove_ = scrollOrigin_;
-
-	checkClick(event.pointers[0].x, event.pointers[0].y);
-}
-
-void MyEventHandler::onTouchMove(const nc::TouchEvent &event)
-{
-	scrollMove_.x = event.pointers[0].x;
-	scrollMove_.y = event.pointers[0].y;
-
-	if (event.count > 1)
-	{
-		scrollMove2_.x = event.pointers[1].x;
-		scrollMove2_.y = event.pointers[1].y;
-	}
-}
-
-void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
-{
-	if (lastClickTime_.secondsSince() < DoubleClickDelay)
-		resetCamera();
-	lastClickTime_ = nc::TimeStamp::now();
-}
-
-void MyEventHandler::onPointerDown(const nc::TouchEvent &event)
-{
-	if (event.count == 2)
-	{
-		scrollOrigin2_.x = event.pointers[1].x;
-		scrollOrigin2_.y = event.pointers[1].y;
-		scrollMove2_ = scrollOrigin2_;
-	}
-}
-#endif
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
@@ -504,6 +514,8 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		overlaySettings.showProfilerGraphs = !overlaySettings.showProfilerGraphs;
 		overlaySettings.showInfoText = !overlaySettings.showInfoText;
 	}
+	else if (event.sym == nc::KeySym::I)
+		inputEnabled_ = !inputEnabled_;
 	else if (event.sym == nc::KeySym::BACKQUOTE)
 		overlaySettings.showInterface = !overlaySettings.showInterface;
 	else if (event.sym == nc::KeySym::P)
@@ -521,13 +533,14 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
+	if (inputEnabled_ == false)
+		return;
+
 	if (event.isLeftButton())
 	{
 		scrollOrigin_.x = static_cast<float>(event.x);
 		scrollOrigin_.y = static_cast<float>(event.y);
 		scrollMove_ = scrollOrigin_;
-
-		checkClick(static_cast<float>(event.x), static_cast<float>(event.y));
 	}
 	else if (event.isRightButton())
 	{
@@ -539,6 +552,9 @@ void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 
 void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
+	if (inputEnabled_ == false)
+		return;
+
 	if (event.isLeftButton())
 	{
 		if (lastClickTime_.secondsSince() < DoubleClickDelay)
@@ -549,6 +565,9 @@ void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 
 void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 {
+	if (inputEnabled_ == false)
+		return;
+
 	if (state.isLeftButtonDown())
 	{
 		scrollMove_.x = static_cast<float>(state.x);
@@ -563,75 +582,17 @@ void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 
 void MyEventHandler::onScrollInput(const nc::ScrollEvent &event)
 {
+	if (inputEnabled_ == false)
+		return;
+
 	camRot_ += 10.0f * event.x;
 	camScale_ += 0.1f * event.y;
 }
 
-void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
-{
-	if (event.axisName == nc::AxisName::LX)
-		joyVectorLeft_.x = event.value;
-	else if (event.axisName == nc::AxisName::LY)
-		joyVectorLeft_.y = -event.value;
-
-	if (event.axisName == nc::AxisName::RX)
-		joyVectorRight_.x = event.value;
-	else if (event.axisName == nc::AxisName::RY)
-		joyVectorRight_.y = -event.value;
-}
-
-void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event)
-{
-	nc::Application::RenderingSettings &renderingSettings = nc::theApplication().renderingSettings();
-	nc::IDebugOverlay::DisplaySettings &overlaySettings = nc::theApplication().debugOverlaySettings();
-
-	if (event.buttonName == nc::ButtonName::A)
-		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
-	else if (event.buttonName == nc::ButtonName::Y)
-		renderingSettings.cullingEnabled = !renderingSettings.cullingEnabled;
-	else if (event.buttonName == nc::ButtonName::BACK)
-	{
-		overlaySettings.showProfilerGraphs = !overlaySettings.showProfilerGraphs;
-		overlaySettings.showInfoText = !overlaySettings.showInfoText;
-	}
-	else if (event.buttonName == nc::ButtonName::START)
-		pause_ = !pause_;
-	else if (event.buttonName == nc::ButtonName::B)
-		resetCamera();
-	else if (event.buttonName == nc::ButtonName::GUIDE)
-		nc::theApplication().quit();
-}
-
-void MyEventHandler::onJoyDisconnected(const nc::JoyConnectionEvent &event)
-{
-	joyVectorLeft_ = nc::Vector2f::Zero;
-	joyVectorRight_ = nc::Vector2f::Zero;
-}
-
 void MyEventHandler::resetCamera()
 {
-	camPos_.x = nc::theApplication().width() * 0.5f;
-	camPos_.y = nc::theApplication().height() * 0.5f;
+	camPos_.x = 0.0f;
+	camPos_.y = 0.0f;
 	camRot_ = 0.0f;
 	camScale_ = 1.0f;
-}
-
-void MyEventHandler::checkClick(float x, float y)
-{
-	const nc::Rectf debugTextRect = nc::Rectf::fromCenterAndSize(debugText_->absPosition(), debugText_->absSize());
-
-#ifdef __ANDROID__
-	// Make it slightly easier to touch on Android
-	if (debugTextRect.contains(x, y))
-#else
-	if (debugTextRect.contains(x, y) && y <= debugTextRect.y + debugTextRect.h * 0.5f)
-#endif
-	{
-		nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
-		const float xPos = x - debugTextRect.x;
-		if (xPos <= debugTextRect.w * 0.33f)
-			settings.batchingEnabled = !settings.batchingEnabled;
-		else if (xPos >= debugTextRect.w * 0.33f && xPos <= debugTextRect.w * 0.6f)
-			settings.cullingEnabled = !settings.cullingEnabled;
-	}
 }

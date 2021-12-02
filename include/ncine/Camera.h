@@ -26,13 +26,12 @@ class DLL_PUBLIC Camera
 
 	struct ViewValues
 	{
-		float x;
-		float y;
+		Vector2f position;
 		float rotation;
 		float scale;
 
 		ViewValues(float xx, float yy, float rr, float ss)
-		    : x(xx), y(yy), rotation(rr), scale(ss) {}
+		    : position(xx, yy), rotation(rr), scale(ss) {}
 	};
 
 	/// Creates a camera with default matrices
@@ -47,8 +46,8 @@ class DLL_PUBLIC Camera
 	void setOrthoProjection(float left, float right, float top, float bottom);
 	void setOrthoProjection(const ProjectionValues &values);
 
-	void setView(float x, float y, float rotation, float scale);
 	void setView(const Vector2f &pos, float rotation, float scale);
+	void setView(float x, float y, float rotation, float scale);
 	void setView(const ViewValues &values);
 
 	inline unsigned long int updateFrameProjectionMatrix() const { return updateFrameProjectionMatrix_; }
