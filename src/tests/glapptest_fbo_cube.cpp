@@ -135,7 +135,7 @@ void MyEventHandler::onInit()
 	texUniforms_ = nctl::makeUnique<nc::GLShaderUniforms>(texProgram_.get());
 	texUniforms_->setUniformsDataPointer(&uniformsBuffer_[colorProgram_->uniformsSize()]);
 	texUniforms_->uniform("uTexture")->setIntValue(0);
-	texUniforms_->uniform("color")->setFloatValue(1.0f, 1.0f, 1.0f, 1.0f);
+	texUniforms_->uniform("uColor")->setFloatValue(1.0f, 1.0f, 1.0f, 1.0f);
 	texAttributes_ = nctl::makeUnique<nc::GLShaderAttributes>(texProgram_.get());
 
 	FATAL_ASSERT(UniformsBufferSize >= colorProgram_->uniformsSize() + texProgram_->uniformsSize());
@@ -181,9 +181,9 @@ void MyEventHandler::onFrameStart()
 	colorProgram_->use();
 
 	projection_ = nc::Matrix4x4f::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f);
-	colorUniforms_->uniform("projection")->setFloatVector(projection_.data());
+	colorUniforms_->uniform("uProjectionMatrix")->setFloatVector(projection_.data());
 	modelView_ = nc::Matrix4x4f::rotationZ(angleTri_);
-	colorUniforms_->uniform("modelView")->setFloatVector(modelView_.data());
+	colorUniforms_->uniform("uModelViewMatrix")->setFloatVector(modelView_.data());
 	colorUniforms_->commitUniforms();
 
 	fbo_->bind(GL_FRAMEBUFFER);
@@ -202,11 +202,11 @@ void MyEventHandler::onFrameStart()
 	texProgram_->use();
 
 	projection_ = nc::Matrix4x4f::perspective(60.0f, width_ / static_cast<float>(height_), 1.0f, 20.0f);
-	texUniforms_->uniform("projection")->setFloatVector(projection_.data());
+	texUniforms_->uniform("uProjectionMatrix")->setFloatVector(projection_.data());
 	modelView_ = nc::Matrix4x4f::translation(0.0f, 0.0f, -5.0f);
 	modelView_ *= nc::Matrix4x4f::rotationY(angleCube_);
 	modelView_ *= nc::Matrix4x4f::rotationZ(angleCube_);
-	texUniforms_->uniform("modelView")->setFloatVector(modelView_.data());
+	texUniforms_->uniform("uModelViewMatrix")->setFloatVector(modelView_.data());
 	texUniforms_->commitUniforms();
 
 	fbo_->unbind();

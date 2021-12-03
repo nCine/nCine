@@ -6,21 +6,23 @@
 
 namespace ncine {
 
-/// The class handling the root viewport of the screen
+/// The class handling the screen viewport
 class ScreenViewport : public Viewport
 {
   public:
 	/// Creates the screen viewport
 	ScreenViewport();
-	~ScreenViewport() {}
-
-	inline bool isScreen() const { return true; }
 
   private:
 	using Viewport::update;
 	using Viewport::visit;
 	void sortAndCommitQueue();
 	void draw();
+
+	/// Deleted copy constructor
+	ScreenViewport(const ScreenViewport &) = delete;
+	/// Deleted assignment operator
+	ScreenViewport &operator=(const ScreenViewport &) = delete;
 
 	friend class Application;
 };

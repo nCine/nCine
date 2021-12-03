@@ -50,19 +50,20 @@ nc::Vector2f positionPresets(const nc::Vector2f &spriteSize, unsigned int posInd
 {
 	const float screenWidth = nc::theApplication().width();
 	const float screenHeight = nc::theApplication().height();
+	const nc::Vector2f centreCamera(screenWidth * 0.5f, screenHeight * 0.5f);
 
 	switch (posIndex)
 	{
-		case 0: return nc::Vector2f(spriteSize.x * 0.5f, screenHeight - spriteSize.y * 0.5);
-		case 1: return nc::Vector2f(screenWidth * 0.5f, screenHeight - spriteSize.y * 0.5);
-		case 2: return nc::Vector2f(screenWidth - spriteSize.x * 0.5f, screenHeight - spriteSize.y * 0.5);
-		case 3: return nc::Vector2f(spriteSize.x * 0.5f, screenHeight * 0.5);
+		case 0: return nc::Vector2f(spriteSize.x * 0.5f, screenHeight - spriteSize.y * 0.5) - centreCamera;
+		case 1: return nc::Vector2f(screenWidth * 0.5f, screenHeight - spriteSize.y * 0.5) - centreCamera;
+		case 2: return nc::Vector2f(screenWidth - spriteSize.x * 0.5f, screenHeight - spriteSize.y * 0.5) - centreCamera;
+		case 3: return nc::Vector2f(spriteSize.x * 0.5f, screenHeight * 0.5) - centreCamera;
 		default:
-		case 4: return nc::Vector2f(screenWidth * 0.5f, screenHeight * 0.5);
-		case 5: return nc::Vector2f(screenWidth - spriteSize.x * 0.5f, screenHeight * 0.5);
-		case 6: return nc::Vector2f(spriteSize.x * 0.5f, spriteSize.y * 0.5f);
-		case 7: return nc::Vector2f(screenWidth * 0.5f, spriteSize.y * 0.5f);
-		case 8: return nc::Vector2f(screenWidth - spriteSize.x * 0.5f, spriteSize.y * 0.5f);
+		case 4: return nc::Vector2f(screenWidth * 0.5f, screenHeight * 0.5) - centreCamera;
+		case 5: return nc::Vector2f(screenWidth - spriteSize.x * 0.5f, screenHeight * 0.5) - centreCamera;
+		case 6: return nc::Vector2f(spriteSize.x * 0.5f, spriteSize.y * 0.5f) - centreCamera;
+		case 7: return nc::Vector2f(screenWidth * 0.5f, spriteSize.y * 0.5f) - centreCamera;
+		case 8: return nc::Vector2f(screenWidth - spriteSize.x * 0.5f, spriteSize.y * 0.5f) - centreCamera;
 	}
 }
 
@@ -93,8 +94,7 @@ void MyEventHandler::onInit()
 
 	debugString_ = nctl::makeUnique<nctl::String>(128);
 	debugText_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get());
-	debugText_->setPosition((nc::theApplication().width() - debugText_->width()) * 0.5f,
-	                        nc::theApplication().height() - debugText_->lineHeight() * 0.5f * 2.0f);
+	debugText_->setPosition((-debugText_->width()) * 0.5f, nc::theApplication().height() * 0.5f - debugText_->lineHeight() * 0.5f * 2.0f);
 	debugText_->setColor(255, 255, 0, 255);
 	debugText_->setAlignment(nc::TextNode::Alignment::CENTER);
 
@@ -119,6 +119,7 @@ void MyEventHandler::onInit()
 			viewportData[i].viewport = nctl::makeUnique<nc::Viewport>(viewportCreationData[i].size);
 
 		viewportData[i].camera = nctl::makeUnique<nc::Camera>();
+		viewportData[i].camera->setView(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f, 0.0f, 1.0f);
 		viewportData[i].rootNode = nctl::makeUnique<nc::SceneNode>();
 
 		nc::Viewport *viewport = viewportData[i].viewport.get();
@@ -311,6 +312,44 @@ void MyEventHandler::onFrameStart()
 		ImGui::TreePop();
 	}
 
+	if (currentComboViewport > 0 && ImGui::TreeNode("Scissor Rectangle"))
+	{
+		const nc::Recti currentScissorRect = currentViewport.scissorRect();
+		static nc::Recti scissorRect = currentViewport.scissorRect();
+		if (viewportChanged)
+			scissorRect = currentViewport.scissorRect();
+		static bool applyEveryframe = false;
+		bool valueChanged = false;
+
+		valueChanged |= ImGui::SliderInt("Rect X", &scissorRect.x, 0, currentViewport.width());
+		valueChanged |= ImGui::SliderInt("Rect Y", &scissorRect.y, 0, currentViewport.height());
+		valueChanged |= ImGui::SliderInt("Rect Width", &scissorRect.w, 0, currentViewport.width() - scissorRect.x);
+		valueChanged |= ImGui::SliderInt("Rect Height", &scissorRect.h, 0, currentViewport.height() - scissorRect.y);
+
+		if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
+			valueChanged = true;
+		ImGui::SameLine();
+		if (ImGui::Button("Reset"))
+		{
+			scissorRect.x = 0;
+			scissorRect.y = 0;
+			scissorRect.w = currentViewport.width();
+			scissorRect.h = currentViewport.height();
+			valueChanged = true;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Current"))
+			scissorRect = currentViewport.scissorRect();
+		ImGui::SameLine();
+		if (ImGui::Button("Apply") || (applyEveryframe && valueChanged))
+		{
+			if (!(scissorRect == currentScissorRect) && scissorRect.w > 0 && scissorRect.h > 0)
+				currentViewport.setScissorRect(scissorRect);
+		}
+
+		ImGui::TreePop();
+	}
+
 	if (currentComboViewport > 0 && viewportData[currentComboViewport - 1].sprite && ImGui::TreeNode("Sprite"))
 	{
 		nc::Sprite &sprite = *viewportData[currentComboViewport - 1].sprite;
@@ -400,13 +439,13 @@ void MyEventHandler::onFrameStart()
 		valueChanged |= ImGui::SliderFloat("Position X", &values.position.x, -nc::theApplication().width(), nc::theApplication().width());
 		valueChanged |= ImGui::SliderFloat("Position Y", &values.position.y, -nc::theApplication().height(), nc::theApplication().height());
 		valueChanged |= ImGui::SliderFloat("Rotation", &values.rotation, 0.0f, 360.0f);
-		valueChanged |= ImGui::SliderFloat("Scale", &values.scale, 0.01f, 3.0f);
+		valueChanged |= ImGui::SliderFloat("Scale", &values.scale, MinCameraScale, MaxCameraScale);
 		if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
 			valueChanged = true;
 		ImGui::SameLine();
 		if (ImGui::Button("Reset"))
 		{
-			values.position.set(0.0f, 0.0f);
+			values.position.set(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 			values.rotation = 0.0f;
 			values.scale = 1.0f;
 			valueChanged = true;
@@ -591,8 +630,8 @@ void MyEventHandler::onScrollInput(const nc::ScrollEvent &event)
 
 void MyEventHandler::resetCamera()
 {
-	camPos_.x = 0.0f;
-	camPos_.y = 0.0f;
+	camPos_.x = nc::theApplication().width() * 0.5f;
+	camPos_.y = nc::theApplication().height() * 0.5f;
 	camRot_ = 0.0f;
 	camScale_ = 1.0f;
 }

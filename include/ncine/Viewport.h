@@ -20,20 +20,27 @@ class Texture;
 class DLL_PUBLIC Viewport
 {
   public:
+	/// The clear mode for a viewport with a texture or for the screen
 	enum class ClearMode
 	{
+		/// The default behavior of clearing the viewport at every frame
 		EVERY_FRAME,
+		/// The viewport is cleared only once, at this frame
 		THIS_FRAME_ONLY,
+		/// The viewport is cleared only once, at next frame
 		NEXT_FRAME_ONLY,
+		/// The viewport is never cleared
 		NEVER
 	};
 
+	/// The color format for a viewport with a texture or for the screen
 	enum class ColorFormat
 	{
 		RGB8,
 		RGBA8
 	};
 
+	/// The depth and stencil format for a viewport with a texture or for the screen
 	enum class DepthStencilFormat
 	{
 		NONE,
@@ -53,9 +60,7 @@ class DLL_PUBLIC Viewport
 	/// Creates a new viewport with the specified dimensions and a default format
 	Viewport(int width, int height);
 	/// Creates a new viewport with the specified dimensions as a vector and a default format
-	Viewport(const Vector2i &size);
-
-	~Viewport() {}
+	explicit Viewport(const Vector2i &size);
 
 	/// Initializes the render target of the viewport with the specified dimensions and format
 	bool initTexture(int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat);
@@ -88,6 +93,17 @@ class DLL_PUBLIC Viewport
 	/// Resizes the OpenGL viewport with two integers
 	inline void setViewport(int width, int height) { viewportRect_.set(0, 0, width, height); }
 
+	/// Returns the OpenGL scissor test rectangle
+	inline Recti scissorRect() const { return scissorRect_; }
+	/// Sets the OpenGL scissor test rectangle through a `Recti` object
+	inline void setScissorRect(Recti scissorRect) { scissorRect_ = scissorRect; }
+	/// Sets the OpenGL scissor test rectangle with four integers
+	inline void setScissorRect(int x, int y, int width, int height) { scissorRect_.set(x, y, width, height); }
+	/// Resizes the OpenGL scissor test through a `Vector2i` object
+	inline void setScissorRect(const Vector2i &size) { scissorRect_.set(0, 0, size.x, size.y); }
+	/// Resizes the OpenGL scissor test with two integers
+	inline void setScissorRect(int width, int height) { scissorRect_.set(0, 0, width, height); }
+
 	/// Returns the color format of the offscreen render target texture
 	inline ColorFormat colorFormat() const { return colorFormat_; }
 	/// Returns the depth and stencil format of the offscreen render target texture
@@ -108,16 +124,25 @@ class DLL_PUBLIC Viewport
 	/// Returns the offscreen render target texture
 	inline Texture *texture() { return texture_.get(); }
 
+	/// Returns the root node as a constant
 	inline const SceneNode *rootNode() const { return rootNode_; }
+	/// Returns the root node
 	inline SceneNode *rootNode() { return rootNode_; }
+	/// Sets the root node
 	inline void setRootNode(SceneNode *rootNode) { rootNode_ = rootNode; }
 
+	/// Returns the next viewport in the rendering chain as a constant
 	inline const Viewport *nextViewport() const { return nextViewport_; }
+	/// Returns the next viewport in the rendering chain
 	inline Viewport *nextViewport() { return nextViewport_; }
+	/// Sets the next viewport in the rendering chain
 	void setNextViewport(Viewport *nextViewport);
 
+	/// Returns the camera used for rendering as a constant
 	inline const Camera *camera() const { return camera_; }
+	/// Returns the camera used for rendering
 	inline Camera *camera() { return camera_; }
+	/// Sets the camera to be used for rendering
 	inline void setCamera(Camera *camera) { camera_ = camera; }
 
   protected:
@@ -134,6 +159,7 @@ class DLL_PUBLIC Viewport
 	int width_;
 	int height_;
 	Recti viewportRect_;
+	Recti scissorRect_;
 
 	ColorFormat colorFormat_;
 	DepthStencilFormat depthStencilFormat_;
@@ -166,9 +192,6 @@ class DLL_PUBLIC Viewport
 	void visit();
 	void sortAndCommitQueue();
 	void draw();
-
-	friend class Application;
-	friend class ScreenViewport;
 };
 
 }

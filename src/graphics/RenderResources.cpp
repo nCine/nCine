@@ -99,9 +99,9 @@ void RenderResources::setCamera(Camera *camera)
 		else
 		{
 			if (cameraUniformData.updateFrameProjectionMatrix < currentCamera_->updateFrameProjectionMatrix())
-				(*i).shaderUniforms.uniform("projection")->setDirty(true);
+				(*i).shaderUniforms.uniform("uProjectionMatrix")->setDirty(true);
 			if (cameraUniformData.updateFrameViewMatrix < currentCamera_->updateFrameViewMatrix())
-				(*i).shaderUniforms.uniform("view")->setDirty(true);
+				(*i).shaderUniforms.uniform("uViewMatrix")->setDirty(true);
 		}
 
 		cameraUniformData.camera = currentCamera_;

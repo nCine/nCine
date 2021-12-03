@@ -128,7 +128,7 @@ void ImGuiDrawing::newFrame()
 
 		if (withSceneGraph_ == false)
 		{
-			imguiShaderUniforms_->uniform("guiProjection")->setFloatVector(projectionMatrix_.data());
+			imguiShaderUniforms_->uniform("uGuiProjection")->setFloatVector(projectionMatrix_.data());
 			imguiShaderUniforms_->commitUniforms();
 		}
 	}
@@ -214,7 +214,7 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 		if (lastFrameWidth_ != static_cast<int>(io.DisplaySize.x) ||
 		    lastFrameHeight_ != static_cast<int>(io.DisplaySize.y))
 		{
-			firstCmd.material().uniform("guiProjection")->setFloatVector(projectionMatrix_.data());
+			firstCmd.material().uniform("uGuiProjection")->setFloatVector(projectionMatrix_.data());
 			lastFrameWidth_ = static_cast<int>(io.DisplaySize.x);
 			lastFrameHeight_ = static_cast<int>(io.DisplaySize.y);
 		}

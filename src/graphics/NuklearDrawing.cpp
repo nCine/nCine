@@ -129,7 +129,7 @@ void NuklearDrawing::newFrame()
 
 		if (withSceneGraph_ == false)
 		{
-			nuklearShaderUniforms_->uniform("guiProjection")->setFloatVector(projectionMatrix_.data());
+			nuklearShaderUniforms_->uniform("uGuiProjection")->setFloatVector(projectionMatrix_.data());
 			nuklearShaderUniforms_->commitUniforms();
 		}
 	}
@@ -188,7 +188,7 @@ void NuklearDrawing::draw(RenderQueue &renderQueue)
 	RenderCommand &firstCmd = *retrieveCommandFromPool();
 	if (lastFrameWidth_ != NuklearContext::width_ || lastFrameHeight_ != NuklearContext::height_)
 	{
-		firstCmd.material().uniform("guiProjection")->setFloatVector(projectionMatrix_.data());
+		firstCmd.material().uniform("uGuiProjection")->setFloatVector(projectionMatrix_.data());
 		lastFrameWidth_ = NuklearContext::width_;
 		lastFrameHeight_ = NuklearContext::height_;
 	}

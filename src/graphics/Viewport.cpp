@@ -8,6 +8,7 @@
 #include "Texture.h"
 #include "GLClearColor.h"
 #include "GLViewport.h"
+#include "GLScissorTest.h"
 
 namespace ncine {
 
@@ -240,12 +241,26 @@ void Viewport::draw()
 	}
 
 	RenderResources::setCamera(camera_);
-	GLViewport::State viewportState = GLViewport::state();
-	GLViewport::setRect(viewportRect_);
-	renderQueue_->draw();
-	GLViewport::setState(viewportState);
 
-	if (type_ == Type::REGULAR && depthStencilFormat_ != DepthStencilFormat::NONE)
+	const bool viewportRectNonZeroArea = (viewportRect_.w > 0 && viewportRect_.h > 0);
+	GLViewport::State viewportState = GLViewport::state();
+	if (viewportRectNonZeroArea)
+		GLViewport::setRect(viewportRect_.x, viewportRect_.y, viewportRect_.w, viewportRect_.h);
+
+	const bool scissorRectNonZeroArea = (scissorRect_.w > 0 && scissorRect_.h > 0);
+	GLScissorTest::State scissorTestState = GLScissorTest::state();
+	if (scissorRectNonZeroArea)
+		GLScissorTest::enable(scissorRect_.x, scissorRect_.y, scissorRect_.w, scissorRect_.h);
+
+	renderQueue_->draw();
+
+	if (scissorRectNonZeroArea)
+		GLScissorTest::setState(scissorTestState);
+	if (viewportRectNonZeroArea)
+		GLViewport::setState(viewportState);
+
+	if (type_ == Type::REGULAR && depthStencilFormat_ != DepthStencilFormat::NONE &&
+	    theApplication().appConfiguration().withGlDebugContext == false)
 	{
 		const GLenum invalidAttachment = depthStencilFormatToGLAttachment(depthStencilFormat_);
 		fbo_->invalidate(1, &invalidAttachment);

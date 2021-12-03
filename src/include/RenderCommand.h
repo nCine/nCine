@@ -79,9 +79,10 @@ class RenderCommand
 	/// Sets the command type (for profiling purposes)
 	inline void setType(CommandTypes::Enum type) { profilingType_ = type; }
 
+	inline void setScissor(Recti scissorRect) { scissorRect_ = scissorRect; }
 	void setScissor(GLint x, GLint y, GLsizei width, GLsizei height);
 
-	inline Matrix4x4f &transformation() { return modelView_; }
+	inline Matrix4x4f &transformation() { return modelMatrix_; }
 	inline const Material &material() const { return material_; }
 	inline const Geometry &geometry() const { return geometry_; }
 	inline Material &material() { return material_; }
@@ -107,17 +108,6 @@ class RenderCommand
 	void commitAll();
 
   private:
-	struct ScissorState
-	{
-		ScissorState()
-		    : x(0), y(0), width(0), height(0) {}
-
-		GLint x;
-		GLint y;
-		GLsizei width;
-		GLsizei height;
-	};
-
 	/// The material sort key minimizes state changes when rendering commands
 	uint64_t materialSortKey_;
 	/// The id based secondary sort key stabilizes render commands sorting
@@ -132,9 +122,9 @@ class RenderCommand
 	/// Command type for profiling counter
 	CommandTypes::Enum profilingType_;
 
-	ScissorState scissor_;
+	Recti scissorRect_;
 
-	Matrix4x4f modelView_;
+	Matrix4x4f modelMatrix_;
 	Material material_;
 	Geometry geometry_;
 };

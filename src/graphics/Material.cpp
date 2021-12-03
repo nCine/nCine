@@ -159,7 +159,7 @@ void Material::setShaderProgram(GLShaderProgram *program)
 	shaderProgramType_ = ShaderProgramType::CUSTOM;
 	shaderProgram_ = program;
 	// The camera uniforms are handled separately as they have a different update frequency
-	shaderUniforms_.setProgram(shaderProgram_, nullptr, "projection\0view\0");
+	shaderUniforms_.setProgram(shaderProgram_, nullptr, "uProjectionMatrix\0uViewMatrix\0");
 	shaderUniformBlocks_.setProgram(shaderProgram_);
 
 	shaderAttributes_.setProgram(shaderProgram_);

@@ -31,7 +31,7 @@ namespace {
 RenderCommand::RenderCommand(CommandTypes::Enum profilingType)
     : materialSortKey_(0), layer_(DrawableNode::LayerBase::LOWEST), numInstances_(0), batchSize_(0),
       uniformBlocksCommitted_(false), verticesCommitted_(false), indicesCommitted_(false),
-      profilingType_(profilingType), modelView_(Matrix4x4f::Identity)
+      profilingType_(profilingType), modelMatrix_(Matrix4x4f::Identity)
 {
 }
 
@@ -74,10 +74,9 @@ void RenderCommand::issue()
 	verticesCommitted_ = false;
 	indicesCommitted_ = false;
 
-	if (scissor_.width > 0 && scissor_.height > 0)
-		GLScissorTest::enable(scissor_.x, scissor_.y, scissor_.width, scissor_.height);
-	else
-		GLScissorTest::disable();
+	GLScissorTest::State scissorTestState = GLScissorTest::state();
+	if (scissorRect_.w > 0 && scissorRect_.h > 0)
+		GLScissorTest::enable(scissorRect_);
 
 	unsigned int offset = 0;
 #if (defined(WITH_OPENGLES) && !GL_ES_VERSION_3_2) || defined(__EMSCRIPTEN__)
@@ -88,14 +87,13 @@ void RenderCommand::issue()
 	material_.defineVertexFormat(geometry_.vboParams().object, geometry_.iboParams().object, offset);
 	geometry_.bind();
 	geometry_.draw(numInstances_);
+
+	GLScissorTest::setState(scissorTestState);
 }
 
 void RenderCommand::setScissor(GLint x, GLint y, GLsizei width, GLsizei height)
 {
-	scissor_.x = x;
-	scissor_.y = y;
-	scissor_.width = width;
-	scissor_.height = height;
+	scissorRect_.set(x, y, width, height);
 }
 
 void RenderCommand::commitNodeTransformation()
@@ -105,7 +103,7 @@ void RenderCommand::commitNodeTransformation()
 	// The layer translates to depth, from near to far
 	const Camera::ProjectionValues cameraValues = RenderResources::currentCamera()->projectionValues();
 	const float layerStep = 1.0f / static_cast<float>(DrawableNode::LayerBase::HIGHEST);
-	modelView_[3][2] = cameraValues.near + layerStep + (cameraValues.far - cameraValues.near - layerStep) * (layer_ * layerStep);
+	modelMatrix_[3][2] = cameraValues.near + layerStep + (cameraValues.far - cameraValues.near - layerStep) * (layer_ * layerStep);
 
 	if (material_.shaderProgram_ && material_.shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
 	{
@@ -115,16 +113,16 @@ void RenderCommand::commitNodeTransformation()
 		if (shaderProgramType == Material::ShaderProgramType::SPRITE ||
 		    shaderProgramType == Material::ShaderProgramType::SPRITE_GRAY ||
 		    shaderProgramType == Material::ShaderProgramType::SPRITE_NO_TEXTURE)
-			material_.uniformBlock("SpriteBlock")->uniform("modelView")->setFloatVector(modelView_.data());
+			material_.uniformBlock("SpriteBlock")->uniform("modelMatrix")->setFloatVector(modelMatrix_.data());
 		else if (shaderProgramType == Material::ShaderProgramType::MESH_SPRITE ||
 		         shaderProgramType == Material::ShaderProgramType::MESH_SPRITE_GRAY ||
 		         shaderProgramType == Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)
-			material_.uniformBlock("MeshSpriteBlock")->uniform("modelView")->setFloatVector(modelView_.data());
+			material_.uniformBlock("MeshSpriteBlock")->uniform("modelMatrix")->setFloatVector(modelMatrix_.data());
 		else if (shaderProgramType == Material::ShaderProgramType::TEXTNODE_ALPHA ||
 		         shaderProgramType == Material::ShaderProgramType::TEXTNODE_RED)
-			material_.uniformBlock("TextnodeBlock")->uniform("modelView")->setFloatVector(modelView_.data());
+			material_.uniformBlock("TextnodeBlock")->uniform("modelMatrix")->setFloatVector(modelMatrix_.data());
 		else if (!isBatchedType(shaderProgramType) && shaderProgramType != Material::ShaderProgramType::CUSTOM)
-			material_.uniform("modelView")->setFloatVector(modelView_.data());
+			material_.uniform("modelMatrix")->setFloatVector(modelMatrix_.data());
 	}
 }
 
@@ -136,12 +134,12 @@ void RenderCommand::commitCameraTransformation()
 	if (cameraUniformData == nullptr)
 	{
 		RenderResources::CameraUniformData newCameraUniformData;
-		newCameraUniformData.shaderUniforms.setProgram(material_.shaderProgram_, "projection\0view\0", nullptr);
+		newCameraUniformData.shaderUniforms.setProgram(material_.shaderProgram_, "uProjectionMatrix\0uViewMatrix\0", nullptr);
 		if (newCameraUniformData.shaderUniforms.numUniforms() == 2)
 		{
 			newCameraUniformData.shaderUniforms.setUniformsDataPointer(RenderResources::cameraUniformsBuffer());
-			newCameraUniformData.shaderUniforms.uniform("projection")->setDirty(true);
-			newCameraUniformData.shaderUniforms.uniform("view")->setDirty(true);
+			newCameraUniformData.shaderUniforms.uniform("uProjectionMatrix")->setDirty(true);
+			newCameraUniformData.shaderUniforms.uniform("uViewMatrix")->setDirty(true);
 			newCameraUniformData.shaderUniforms.commitUniforms();
 
 			if (RenderResources::cameraUniformDataMap().loadFactor() >= 0.8f)
