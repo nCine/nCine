@@ -10,26 +10,29 @@ namespace ncine {
 class GLDepthTest
 {
   public:
-	static bool isEnabled() { return enabled_; }
+	struct State
+	{
+		bool enabled = false;
+		bool depthMaskEnabled = true;
+	};
+
+	static bool isEnabled() { return state_.enabled; }
 	static void enable();
 	static void disable();
 
-	static bool isDepthMaskEnabled() { return depthMaskEnabled_; }
+	static bool isDepthMaskEnabled() { return state_.depthMaskEnabled; }
 	static void enableDepthMask();
 	static void disableDepthMask();
 
-	static void pushState();
-	static void popState();
+	static State state() { return state_; }
+	static void setState(State newState);
 
   private:
-	static bool enabled_;
-	static bool depthMaskEnabled_;
+	static State state_;
 
-	static bool stateSaved_;
-	static bool wasEnabled_;
-	static bool depthMaskWasEnabled_;
-
+	/// Deleted default constructor
 	GLDepthTest() = delete;
+	/// Deleted destructor
 	~GLDepthTest() = delete;
 
 	/// Deleted copy constructor

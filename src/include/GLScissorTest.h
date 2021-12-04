@@ -12,31 +12,28 @@ namespace ncine {
 class GLScissorTest
 {
   public:
-	static bool isEnabled() { return enabled_; }
-	static Recti rect() { return Recti(x_, y_, width_, height_); }
+	struct State
+	{
+		bool enabled = false;
+		Recti rect = Recti(0, 0, 0, 0);
+	};
+
+	static bool isEnabled() { return state_.enabled; }
+	static Recti rect() { return state_.rect; }
+	static void enable(const Recti &rect);
 	static void enable(GLint x, GLint y, GLsizei width, GLsizei height);
-	static void enable(const Recti &rect) { enable(rect.x, rect.y, rect.w, rect.h); }
 	static void enable();
 	static void disable();
 
-	static void pushState();
-	static void popState();
+	static State state() { return state_; }
+	static void setState(State newState);
 
   private:
-	static bool enabled_;
-	static GLint x_;
-	static GLint y_;
-	static GLsizei width_;
-	static GLsizei height_;
+	static State state_;
 
-	static bool stateSaved_;
-	static bool wasEnabled_;
-	static GLint oldX_;
-	static GLint oldY_;
-	static GLsizei oldWidth_;
-	static GLsizei oldHeight_;
-
+	/// Deleted default constructor
 	GLScissorTest() = delete;
+	/// Deleted destructor
 	~GLScissorTest() = delete;
 
 	/// Deleted copy constructor

@@ -10,23 +10,26 @@ namespace ncine {
 class GLCullFace
 {
   public:
-	static bool isEnabled() { return enabled_; }
+	struct State
+	{
+		bool enabled = false;
+		GLenum mode = GL_BACK;
+	};
+
+	static bool isEnabled() { return state_.enabled; }
 	static void enable();
 	static void disable();
-	static void set(GLenum set);
+	static void setMode(GLenum mode);
 
-	static void pushState();
-	static void popState();
+	static State state() { return state_; }
+	static void setState(State newState);
 
   private:
-	static bool enabled_;
-	static GLenum mode_;
+	static State state_;
 
-	static bool stateSaved_;
-	static bool wasEnabled_;
-	static GLenum oldMode_;
-
+	/// Deleted default constructor
 	GLCullFace() = delete;
+	/// Deleted destructor
 	~GLCullFace() = delete;
 
 	/// Deleted copy constructor

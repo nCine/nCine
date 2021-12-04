@@ -315,12 +315,12 @@ void ImGuiDrawing::draw()
 	const ImVec2 clipOff = drawData->DisplayPos;
 	const ImVec2 clipScale = drawData->FramebufferScale;
 
-	GLBlending::pushState();
+	GLBlending::State blendingState = GLBlending::state();
 	GLBlending::enable();
-	GLBlending::blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	GLCullFace::pushState();
+	GLBlending::setBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GLCullFace::State cullFaceState = GLCullFace::state();
 	GLCullFace::disable();
-	GLDepthTest::pushState();
+	GLDepthTest::State depthTestState = GLDepthTest::state();
 	GLDepthTest::disable();
 
 	for (int n = 0; n < drawData->CmdListsCount; n++)
@@ -360,9 +360,9 @@ void ImGuiDrawing::draw()
 	}
 
 	GLScissorTest::disable();
-	GLDepthTest::popState();
-	GLCullFace::popState();
-	GLBlending::popState();
+	GLDepthTest::setState(depthTestState);
+	GLCullFace::setState(cullFaceState);
+	GLBlending::setState(blendingState);
 }
 
 }

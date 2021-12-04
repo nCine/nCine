@@ -124,7 +124,7 @@ const IGfxDevice::VideoMode &IGfxDevice::videoMode(unsigned int index) const
 void IGfxDevice::setupGL()
 {
 	glDisable(GL_DITHER);
-	GLBlending::blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GLBlending::setBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GLDepthTest::enable();
 }
 

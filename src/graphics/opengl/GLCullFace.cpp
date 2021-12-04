@@ -7,12 +7,7 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-bool GLCullFace::enabled_ = false;
-GLenum GLCullFace::mode_ = GL_BACK;
-
-bool GLCullFace::stateSaved_ = false;
-bool GLCullFace::wasEnabled_ = false;
-GLenum GLCullFace::oldMode_ = GL_BACK;
+GLCullFace::State GLCullFace::state_;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -20,52 +15,40 @@ GLenum GLCullFace::oldMode_ = GL_BACK;
 
 void GLCullFace::enable()
 {
-	if (enabled_ == false)
+	if (state_.enabled == false)
 	{
 		glEnable(GL_CULL_FACE);
-		enabled_ = true;
+		state_.enabled = true;
 	}
 }
 
 void GLCullFace::disable()
 {
-	if (enabled_ == true)
+	if (state_.enabled == true)
 	{
 		glDisable(GL_CULL_FACE);
-		enabled_ = false;
+		state_.enabled = false;
 	}
 }
 
-void GLCullFace::set(GLenum mode)
+void GLCullFace::setMode(GLenum mode)
 {
-	if (mode != mode_)
+	if (mode != state_.mode)
 	{
 		glCullFace(mode);
-		mode_ = mode;
+		state_.mode = mode;
 	}
 }
 
-void GLCullFace::pushState()
+void GLCullFace::setState(State newState)
 {
-	ASSERT(stateSaved_ == false);
-
-	wasEnabled_ = enabled_;
-	oldMode_ = mode_;
-
-	stateSaved_ = true;
-}
-
-void GLCullFace::popState()
-{
-	ASSERT(stateSaved_ == true);
-
-	if (wasEnabled_)
+	if (newState.enabled)
 		enable();
 	else
 		disable();
-	set(oldMode_);
+	setMode(newState.mode);
 
-	stateSaved_ = false;
+	state_ = newState;
 }
 
 }

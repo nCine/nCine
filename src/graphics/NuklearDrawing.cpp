@@ -310,12 +310,12 @@ void NuklearDrawing::draw()
 	nk_buffer_free(&ibuf);
 
 	// setup global state
-	GLBlending::pushState();
+	GLBlending::State blendingState = GLBlending::state();
 	GLBlending::enable();
-	GLBlending::blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	GLCullFace::pushState();
+	GLBlending::setBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GLCullFace::State cullFaceState = GLCullFace::state();
 	GLCullFace::disable();
-	GLDepthTest::pushState();
+	GLDepthTest::State depthTestState = GLDepthTest::state();
 	GLDepthTest::disable();
 
 	// setup program
@@ -343,9 +343,9 @@ void NuklearDrawing::draw()
 	nk_buffer_clear(&NuklearContext::cmds_);
 
 	GLScissorTest::disable();
-	GLDepthTest::popState();
-	GLCullFace::popState();
-	GLBlending::popState();
+	GLDepthTest::setState(depthTestState);
+	GLCullFace::setState(cullFaceState);
+	GLBlending::setState(blendingState);
 }
 
 }

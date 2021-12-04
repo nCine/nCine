@@ -174,7 +174,7 @@ void RenderQueue::draw()
 		commandIndex++;
 
 		RenderStatistics::gatherStatistics(*transparentRenderCommand);
-		GLBlending::blendFunc(transparentRenderCommand->material().srcBlendingFactor(), transparentRenderCommand->material().destBlendingFactor());
+		GLBlending::setBlendFunc(transparentRenderCommand->material().srcBlendingFactor(), transparentRenderCommand->material().destBlendingFactor());
 		transparentRenderCommand->issue();
 	}
 	// Depth mask has to be enabled again before exiting this method

@@ -7,12 +7,7 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-bool GLDepthTest::enabled_ = false;
-bool GLDepthTest::depthMaskEnabled_ = true;
-
-bool GLDepthTest::stateSaved_ = false;
-bool GLDepthTest::wasEnabled_ = false;
-bool GLDepthTest::depthMaskWasEnabled_ = true;
+GLDepthTest::State GLDepthTest::state_;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -20,65 +15,53 @@ bool GLDepthTest::depthMaskWasEnabled_ = true;
 
 void GLDepthTest::enable()
 {
-	if (enabled_ == false)
+	if (state_.enabled == false)
 	{
 		glEnable(GL_DEPTH_TEST);
-		enabled_ = true;
+		state_.enabled = true;
 	}
 }
 
 void GLDepthTest::disable()
 {
-	if (enabled_ == true)
+	if (state_.enabled == true)
 	{
 		glDisable(GL_DEPTH_TEST);
-		enabled_ = false;
+		state_.enabled = false;
 	}
 }
 
 void GLDepthTest::enableDepthMask()
 {
-	if (depthMaskEnabled_ == false)
+	if (state_.depthMaskEnabled == false)
 	{
 		glDepthMask(GL_TRUE);
-		depthMaskEnabled_ = true;
+		state_.depthMaskEnabled = true;
 	}
 }
 
 void GLDepthTest::disableDepthMask()
 {
-	if (depthMaskEnabled_ == true)
+	if (state_.depthMaskEnabled == true)
 	{
 		glDepthMask(GL_FALSE);
-		depthMaskEnabled_ = false;
+		state_.depthMaskEnabled = false;
 	}
 }
 
-void GLDepthTest::pushState()
+void GLDepthTest::setState(State newState)
 {
-	ASSERT(stateSaved_ == false);
-
-	wasEnabled_ = enabled_;
-	depthMaskWasEnabled_ = depthMaskEnabled_;
-
-	stateSaved_ = true;
-}
-
-void GLDepthTest::popState()
-{
-	ASSERT(stateSaved_ == true);
-
-	if (wasEnabled_)
+	if (newState.enabled)
 		enable();
 	else
 		disable();
 
-	if (depthMaskWasEnabled_)
+	if (newState.depthMaskEnabled)
 		enableDepthMask();
 	else
 		disableDepthMask();
 
-	stateSaved_ = false;
+	state_ = newState;
 }
 
 }

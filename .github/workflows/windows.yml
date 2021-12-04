@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2016, windows-2019]
+        os: [windows-2019, windows-2022]
         BuildType: [Debug, Release, DevDist, LuaDist]
 
     runs-on: ${{ matrix.os }}
@@ -35,8 +35,8 @@ jobs:
         $env:GIT_REDIRECT_STDERR = '2>&1'
         $env:vsversion = switch ("${{ matrix.os }}")
         {
+          "windows-2022" {"vs2022"}
           "windows-2019" {"vs2019"}
-          "windows-2016" {"vs2017"}
         }
 
         cd ..
@@ -86,8 +86,8 @@ jobs:
       run: |
         $env:generator = switch ("${{ matrix.os }}")
         {
+          "windows-2022" {"Visual Studio 17 2022"}
           "windows-2019" {"Visual Studio 16 2019"}
-          "windows-2016" {"Visual Studio 15 2017"}
         }
 
         cmake -G "$env:generator" -A x64 -B ../nCine-buildtests-${{ matrix.BuildType }} -D NCINE_BUILD_UNIT_TESTS=ON -D NCINE_BUILD_TESTS=OFF -D NCINE_WITH_IMGUI=OFF
@@ -99,8 +99,8 @@ jobs:
       run: |
         $env:generator = switch ("${{ matrix.os }}")
         {
+          "windows-2022" {"Visual Studio 17 2022"}
           "windows-2019" {"Visual Studio 16 2019"}
-          "windows-2016" {"Visual Studio 15 2017"}
         }
 
         if ("${{ matrix.BuildType }}" -eq "DevDist" -Or "${{ matrix.BuildType }}" -eq "LuaDist")
@@ -134,8 +134,8 @@ jobs:
 
         $env:vsversion = switch ("${{ matrix.os }}")
         {
+          "windows-2022" {"vs2022"}
           "windows-2019" {"vs2019"}
-          "windows-2016" {"vs2017"}
         }
 
         if ("${{ matrix.BuildType }}" -eq "LuaDist")

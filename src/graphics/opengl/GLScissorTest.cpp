@@ -7,84 +7,61 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-bool GLScissorTest::enabled_ = false;
-GLint GLScissorTest::x_ = 0;
-GLint GLScissorTest::y_ = 0;
-GLsizei GLScissorTest::width_ = 0;
-GLsizei GLScissorTest::height_ = 0;
-
-bool GLScissorTest::stateSaved_ = false;
-bool GLScissorTest::wasEnabled_ = false;
-GLint GLScissorTest::oldX_ = 0;
-GLint GLScissorTest::oldY_ = 0;
-GLsizei GLScissorTest::oldWidth_ = 0;
-GLsizei GLScissorTest::oldHeight_ = 0;
+GLScissorTest::State GLScissorTest::state_;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void GLScissorTest::enable(GLint x, GLint y, GLsizei width, GLsizei height)
+void GLScissorTest::enable(const Recti &rect)
 {
-	if (enabled_ == false)
+	if (state_.enabled == false)
 	{
 		glEnable(GL_SCISSOR_TEST);
-		enabled_ = true;
+		state_.enabled = true;
 	}
 
-	if (x != x_ || y != y_ || width != width_ || height != height_)
+	if (rect.x != state_.rect.x || rect.y != state_.rect.y ||
+	    rect.w != state_.rect.w || rect.h != state_.rect.h)
 	{
-		FATAL_ASSERT(width >= 0 && height >= 0);
-		glScissor(x, y, width, height);
-		x_ = x;
-		y_ = y;
-		width_ = width;
-		height_ = height;
+		FATAL_ASSERT(rect.w >= 0 && rect.h >= 0);
+		glScissor(rect.x, rect.y, rect.w, rect.h);
+		state_.rect = rect;
 	}
+}
+
+void GLScissorTest::enable(GLint x, GLint y, GLsizei width, GLsizei height)
+{
+	enable(Recti(x, y, width, height));
 }
 
 void GLScissorTest::enable()
 {
-	if (enabled_ == false)
+	if (state_.enabled == false)
 	{
-		FATAL_ASSERT(width_ >= 0 && height_ >= 0);
+		FATAL_ASSERT(state_.rect.w >= 0 && state_.rect.h >= 0);
 		glEnable(GL_SCISSOR_TEST);
-		enabled_ = true;
+		state_.enabled = true;
 	}
 }
 
 void GLScissorTest::disable()
 {
-	if (enabled_ == true)
+	if (state_.enabled == true)
 	{
 		glDisable(GL_SCISSOR_TEST);
-		enabled_ = false;
+		state_.enabled = false;
 	}
 }
 
-void GLScissorTest::pushState()
+void GLScissorTest::setState(State newState)
 {
-	ASSERT(stateSaved_ == false);
-
-	wasEnabled_ = enabled_;
-	oldX_ = x_;
-	oldY_ = y_;
-	oldWidth_ = width_;
-	oldHeight_ = height_;
-
-	stateSaved_ = true;
-}
-
-void GLScissorTest::popState()
-{
-	ASSERT(stateSaved_ == true);
-
-	if (wasEnabled_)
-		enable(oldX_, oldY_, oldWidth_, oldHeight_);
+	if (newState.enabled)
+		enable(newState.rect);
 	else
 		disable();
 
-	stateSaved_ = false;
+	state_ = newState;
 }
 
 }

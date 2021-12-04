@@ -7,18 +7,7 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-bool GLBlending::enabled_ = false;
-GLenum GLBlending::srcRgb_ = GL_ONE;
-GLenum GLBlending::dstRgb_ = GL_ZERO;
-GLenum GLBlending::srcAlpha_ = GL_ONE;
-GLenum GLBlending::dstAlpha_ = GL_ZERO;
-
-bool GLBlending::stateSaved_ = false;
-bool GLBlending::wasEnabled_ = false;
-GLenum GLBlending::oldSrcRgb_ = GL_ONE;
-GLenum GLBlending::oldDstRgb_ = GL_ZERO;
-GLenum GLBlending::oldSrcAlpha_ = GL_ONE;
-GLenum GLBlending::oldDstAlpha_ = GL_ZERO;
+GLBlending::State GLBlending::state_;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -26,76 +15,61 @@ GLenum GLBlending::oldDstAlpha_ = GL_ZERO;
 
 void GLBlending::enable()
 {
-	if (enabled_ == false)
+	if (state_.enabled == false)
 	{
 		glEnable(GL_BLEND);
-		enabled_ = true;
+		state_.enabled = true;
 	}
 }
 
 void GLBlending::disable()
 {
-	if (enabled_ == true)
+	if (state_.enabled == true)
 	{
 		glDisable(GL_BLEND);
-		enabled_ = false;
+		state_.enabled = false;
 	}
 }
 
-void GLBlending::blendFunc(GLenum sfactor, GLenum dfactor)
+void GLBlending::setBlendFunc(GLenum sfactor, GLenum dfactor)
 {
-	if (sfactor != srcRgb_ || dfactor != dstRgb_ ||
-	    sfactor != srcAlpha_ || dfactor != dstAlpha_)
+	if (sfactor != state_.srcRgb || dfactor != state_.dstRgb ||
+	    sfactor != state_.srcAlpha || dfactor != state_.dstAlpha)
 	{
 		glBlendFunc(sfactor, dfactor);
-		srcRgb_ = sfactor;
-		dstRgb_ = dfactor;
-		srcAlpha_ = sfactor;
-		dstAlpha_ = dfactor;
+		state_.srcRgb = sfactor;
+		state_.dstRgb = dfactor;
+		state_.srcAlpha = sfactor;
+		state_.dstAlpha = dfactor;
 	}
 }
 
-void GLBlending::blendFunc(GLenum srcRgb, GLenum dstRgb, GLenum srcAlpha, GLenum dstAlpha)
+void GLBlending::setBlendFunc(GLenum srcRgb, GLenum dstRgb, GLenum srcAlpha, GLenum dstAlpha)
 {
-	if (srcRgb != srcRgb_ || dstRgb != dstRgb_ ||
-	    srcAlpha != srcAlpha_ || dstAlpha != dstAlpha_)
+	if (srcRgb != state_.srcRgb || dstRgb != state_.dstRgb ||
+	    srcAlpha != state_.srcAlpha || dstAlpha != state_.dstAlpha)
 	{
 		glBlendFuncSeparate(srcRgb, dstRgb, srcAlpha, dstAlpha);
-		srcRgb_ = srcRgb;
-		dstRgb_ = dstRgb;
-		srcAlpha_ = srcAlpha;
-		dstAlpha_ = dstAlpha;
+		state_.srcRgb = srcRgb;
+		state_.dstRgb = dstRgb;
+		state_.srcAlpha = srcAlpha;
+		state_.dstAlpha = dstAlpha;
 	}
 }
 
-void GLBlending::pushState()
+void GLBlending::setState(State newState)
 {
-	ASSERT(stateSaved_ == false);
-
-	wasEnabled_ = enabled_;
-	oldSrcRgb_ = srcRgb_;
-	oldDstRgb_ = dstRgb_;
-	oldSrcAlpha_ = srcAlpha_;
-	oldDstAlpha_ = dstAlpha_;
-
-	stateSaved_ = true;
-}
-
-void GLBlending::popState()
-{
-	ASSERT(stateSaved_ == true);
-
-	if (wasEnabled_)
+	if (newState.enabled)
 		enable();
 	else
 		disable();
 
-	if (oldSrcRgb_ == oldSrcAlpha_ && oldDstRgb_ == oldDstAlpha_)
-		blendFunc(oldSrcRgb_, oldDstRgb_);
+	if (newState.srcRgb == newState.srcAlpha && newState.dstRgb == newState.dstAlpha)
+		setBlendFunc(newState.srcRgb, newState.dstRgb);
 	else
-		blendFunc(oldSrcRgb_, oldDstRgb_, oldSrcAlpha_, oldDstAlpha_);
+		setBlendFunc(newState.srcRgb, newState.dstRgb, newState.srcAlpha, newState.dstAlpha);
 
-	stateSaved_ = false;
+	state_ = newState;
 }
 
 }
