@@ -16,8 +16,8 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-RenderQueue::RenderQueue()
-    : debugGroupString_(64),
+RenderQueue::RenderQueue(Viewport &viewport)
+    : debugGroupString_(64), viewport_(viewport),
       opaqueQueue_(16), opaqueBatchedQueue_(16),
       transparentQueue_(16), transparentBatchedQueue_(16)
 {

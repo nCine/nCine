@@ -77,9 +77,9 @@ class DLL_PUBLIC Viewport
 
 	/// Returns viewport size as a `Vector2i` object
 	inline Vector2i size() const { return Vector2i(width_, height_); }
-	/// Returns device width
+	/// Returns viewport width
 	inline int width() const { return width_; }
-	/// Returns device height
+	/// Returns viewport height
 	inline int height() const { return height_; }
 
 	/// Returns the OpenGL viewport rectangle
@@ -103,6 +103,9 @@ class DLL_PUBLIC Viewport
 	inline void setScissorRect(const Vector2i &size) { scissorRect_.set(0, 0, size.x, size.y); }
 	/// Resizes the OpenGL scissor test with two integers
 	inline void setScissorRect(int width, int height) { scissorRect_.set(0, 0, width, height); }
+
+	/// Returns the rectangle for screen culling
+	inline Rectf cullingRect() const { return cullingRect_; }
 
 	/// Returns the color format of the offscreen render target texture
 	inline ColorFormat colorFormat() const { return colorFormat_; }
@@ -161,6 +164,8 @@ class DLL_PUBLIC Viewport
 	Recti viewportRect_;
 	Recti scissorRect_;
 
+	Rectf cullingRect_;
+
 	ColorFormat colorFormat_;
 	DepthStencilFormat depthStencilFormat_;
 
@@ -187,6 +192,8 @@ class DLL_PUBLIC Viewport
 	Viewport(const Viewport &) = delete;
 	/// Deleted assignment operator
 	Viewport &operator=(const Viewport &) = delete;
+
+	void calculateCullingRect();
 
 	void update();
 	void visit();

@@ -149,14 +149,17 @@ void MyEventHandler::onInit()
 			sprite->setPosition(positionPresets(sprite->absSize(), viewportCreationData[i].spritePositionIndex));
 		}
 	}
-	rootViewport.setNextViewport(viewportData[0].viewport.get());
-	for (unsigned int i = 0; i < NumViewports - 1; i++)
-		viewportData[i].viewport->setNextViewport(viewportData[i + 1].viewport.get());
+	if (NumViewports > 0)
+	{
+		rootViewport.setNextViewport(viewportData[0].viewport.get());
+		for (unsigned int i = 0; i < NumViewports - 1; i++)
+			viewportData[i].viewport->setNextViewport(viewportData[i + 1].viewport.get());
+	}
 
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
-		const int index = i % (NumViewports);
-		nc::SceneNode *node = viewportData[index].rootNode.get();
+		const int index = (NumViewports > 0) ? (i % NumViewports) : 0;
+		nc::SceneNode *node = (NumViewports > 0) ? viewportData[index].rootNode.get() : &rootNode;
 		const float randomX = nc::random().real(-nc::theApplication().width(), nc::theApplication().width());
 		const float randomY = nc::random().real(-nc::theApplication().height(), nc::theApplication().height());
 		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(node, textures_[index % NumTextures].get(), randomX, randomY));
@@ -288,6 +291,11 @@ void MyEventHandler::onFrameStart()
 		valueChanged |= ImGui::SliderInt("Rect Width", &viewportRect.w, 0, currentViewport.width() - viewportRect.x);
 		valueChanged |= ImGui::SliderInt("Rect Height", &viewportRect.h, 0, currentViewport.height() - viewportRect.y);
 
+		if (viewportRect.w > currentViewport.width() - viewportRect.x)
+			viewportRect.w = currentViewport.width() - viewportRect.x;
+		if (viewportRect.h > currentViewport.height() - viewportRect.y)
+			viewportRect.h = currentViewport.height() - viewportRect.y;
+
 		if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
 			valueChanged = true;
 		ImGui::SameLine();
@@ -325,6 +333,11 @@ void MyEventHandler::onFrameStart()
 		valueChanged |= ImGui::SliderInt("Rect Y", &scissorRect.y, 0, currentViewport.height());
 		valueChanged |= ImGui::SliderInt("Rect Width", &scissorRect.w, 0, currentViewport.width() - scissorRect.x);
 		valueChanged |= ImGui::SliderInt("Rect Height", &scissorRect.h, 0, currentViewport.height() - scissorRect.y);
+
+		if (scissorRect.w > currentViewport.width() - scissorRect.x)
+			scissorRect.w = currentViewport.width() - scissorRect.x;
+		if (scissorRect.h > currentViewport.height() - scissorRect.y)
+			scissorRect.h = currentViewport.height() - scissorRect.y;
 
 		if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
 			valueChanged = true;

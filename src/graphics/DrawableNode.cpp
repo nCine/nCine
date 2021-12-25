@@ -2,6 +2,7 @@
 #include "DrawableNode.h"
 #include "RenderQueue.h"
 #include "RenderCommand.h"
+#include "Viewport.h"
 #include "Application.h"
 #include "RenderStatistics.h"
 #include "tracy.h"
@@ -115,7 +116,7 @@ void DrawableNode::draw(RenderQueue &renderQueue)
 	{
 		updateAabb();
 
-		if (aabb_.overlaps(theApplication().gfxDevice().screenRect()))
+		if (aabb_.overlaps(renderQueue.viewport().cullingRect()))
 		{
 			updateRenderCommand();
 			renderQueue.addCommand(renderCommand_.get());
@@ -203,8 +204,8 @@ void DrawableNode::updateAabb()
 {
 	ZoneScoped;
 
-	const float width = (absScale().x > 0.0f) ? absWidth() : -absWidth();
-	const float height = (absScale().y > 0.0f) ? absHeight() : -absHeight();
+	const float width = absWidth();
+	const float height = absHeight();
 	float rotatedWidth = width;
 	float rotatedHeight = height;
 
@@ -216,7 +217,7 @@ void DrawableNode::updateAabb()
 		rotatedHeight = fabsf(width * sinRot) + fabsf(height * cosRot);
 	}
 
-	aabb_ = Rectf::fromCenterAndSize(absX_, absY_, rotatedWidth, rotatedHeight);
+	aabb_ = Rectf::fromCenterSize(absX_, absY_, rotatedWidth, rotatedHeight);
 }
 
 DrawableNode::DrawableNode(const DrawableNode &other)

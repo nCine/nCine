@@ -9,6 +9,7 @@
 #include "GLClearColor.h"
 #include "GLViewport.h"
 #include "GLScissorTest.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -62,7 +63,7 @@ Viewport::Viewport()
     : type_(Type::NO_TEXTURE), width_(0), height_(0), viewportRect_(0, 0, 0, 0),
       colorFormat_(ColorFormat::RGB8), depthStencilFormat_(DepthStencilFormat::NONE),
       clearMode_(ClearMode::EVERY_FRAME), clearColor_(Colorf::Black),
-      renderQueue_(nctl::makeUnique<RenderQueue>()),
+      renderQueue_(nctl::makeUnique<RenderQueue>(*this)),
       fbo_(nullptr), texture_(nullptr),
       rootNode_(nullptr), camera_(nullptr), nextViewport_(nullptr)
 {
@@ -72,7 +73,7 @@ Viewport::Viewport(int width, int height, ColorFormat colorFormat, DepthStencilF
     : type_(Type::REGULAR), width_(0), height_(0), viewportRect_(0, 0, width, height),
       colorFormat_(colorFormat), depthStencilFormat_(depthStencilFormat),
       clearMode_(ClearMode::EVERY_FRAME), clearColor_(Colorf::Black),
-      renderQueue_(nctl::makeUnique<RenderQueue>()),
+      renderQueue_(nctl::makeUnique<RenderQueue>(*this)),
       fbo_(nullptr), texture_(nctl::makeUnique<Texture>()),
       rootNode_(nullptr), camera_(nullptr), nextViewport_(nullptr)
 {
@@ -187,8 +188,68 @@ void Viewport::setNextViewport(Viewport *nextViewport)
 }
 
 ///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
+// PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+void Viewport::calculateCullingRect()
+{
+	ZoneScopedN("Calculate culling rectangle");
+
+	const Camera *vieportCamera = camera_ ? camera_ : RenderResources::currentCamera();
+
+	const Camera::ProjectionValues projValues = vieportCamera->projectionValues();
+	cullingRect_.set(projValues.left, projValues.top, projValues.right - projValues.left, projValues.bottom - projValues.top);
+
+	if (scissorRect_.w > 0 && scissorRect_.h > 0)
+	{
+		Rectf scissorRectFloat(scissorRect_.x, scissorRect_.y, scissorRect_.w, scissorRect_.h);
+
+		if (viewportRect_.w > 0 && viewportRect_.h > 0)
+		{
+			scissorRectFloat.x -= viewportRect_.x;
+			scissorRectFloat.y -= viewportRect_.y;
+
+			const float viewportWidthRatio = width_ / static_cast<float>(viewportRect_.w);
+			const float viewportHeightRatio = height_ / static_cast<float>(viewportRect_.h);
+			scissorRectFloat.x *= viewportWidthRatio;
+			scissorRectFloat.y *= viewportHeightRatio;
+			scissorRectFloat.w *= viewportWidthRatio;
+			scissorRectFloat.h *= viewportHeightRatio;
+		}
+
+		cullingRect_.intersect(scissorRectFloat);
+	}
+
+	const Camera::ViewValues viewValues = vieportCamera->viewValues();
+	if (viewValues.scale != 0.0f && viewValues.scale != 1.0f)
+	{
+		const float invScale = 1.0f / viewValues.scale;
+		cullingRect_.x += invScale * -viewValues.position.x;
+		cullingRect_.y += invScale * -viewValues.position.y;
+		cullingRect_.w *= invScale;
+		cullingRect_.h *= invScale;
+	}
+	else
+	{
+		cullingRect_.x += -viewValues.position.x;
+		cullingRect_.y += -viewValues.position.y;
+	}
+
+	if (viewValues.rotation > SceneNode::MinRotation || viewValues.rotation < -SceneNode::MinRotation)
+	{
+		const float sinRot = sinf(viewValues.rotation * fDegToRad);
+		const float cosRot = cosf(viewValues.rotation * fDegToRad);
+		const float rotatedWidth = fabsf(cullingRect_.w * cosRot) + fabsf(cullingRect_.h * sinRot);
+		const float rotatedHeight = fabsf(cullingRect_.w * sinRot) + fabsf(cullingRect_.h * cosRot);
+
+		const Vector2f center = cullingRect_.center();
+		// Using the inverse rotation angle
+		const float rotatedX = cosRot * (center.x) + sinRot * (center.y);
+		const float rotatedY = -sinRot * (center.x) + cosRot * (center.y);
+
+		cullingRect_ = Rectf::fromCenterSize(rotatedX, rotatedY, rotatedWidth, rotatedHeight);
+	}
+}
 
 void Viewport::update()
 {
@@ -203,6 +264,8 @@ void Viewport::visit()
 {
 	if (nextViewport_)
 		nextViewport_->visit();
+
+	calculateCullingRect();
 
 	if (rootNode_)
 		rootNode_->visit(*renderQueue_);

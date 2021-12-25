@@ -41,6 +41,12 @@ void Camera::setOrthoProjection(const ProjectionValues &values)
 	setOrthoProjection(values.left, values.right, values.top, values.bottom);
 }
 
+/*! \note Position and rotation works similarly to a parent node.
+ *  It is intended as a drop-in replacement to a node simulating a camera.
+ *
+ *  If you need to move and rotate a virtual camera you should invert
+ *  the values to cause the world to move and rotate the opposite way.
+ */
 void Camera::setView(const Vector2f &position, float rotation, float scale)
 {
 	viewValues_.position = position;

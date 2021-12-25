@@ -20,6 +20,9 @@ class DLL_PUBLIC Camera
 		float near = -1.0f;
 		float far = 1.0f;
 
+		ProjectionValues()
+		    : left(0.0f), right(0.0f), top(0.0f), bottom(0.0f) {}
+
 		ProjectionValues(float ll, float rr, float tt, float bb)
 		    : left(ll), right(rr), top(tt), bottom(bb) {}
 	};
@@ -29,6 +32,9 @@ class DLL_PUBLIC Camera
 		Vector2f position;
 		float rotation;
 		float scale;
+
+		ViewValues()
+		    : position(0.0f, 0.0f), rotation(0.0f), scale(1.0f) {}
 
 		ViewValues(float xx, float yy, float rr, float ss)
 		    : position(xx, yy), rotation(rr), scale(ss) {}

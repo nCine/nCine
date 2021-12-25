@@ -471,7 +471,7 @@ void MyEventHandler::setupViewport()
 
 void MyEventHandler::checkClick(float x, float y)
 {
-	const nc::Rectf debugTextRect = nc::Rectf::fromCenterAndSize(debugText_->absPosition(), debugText_->absSize());
+	const nc::Rectf debugTextRect = nc::Rectf::fromCenterSize(debugText_->absPosition(), debugText_->absSize());
 
 #ifdef __ANDROID__
 	// Make it slightly easier to touch on Android

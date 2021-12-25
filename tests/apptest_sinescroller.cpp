@@ -153,7 +153,7 @@ void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &e
 
 void MyEventHandler::checkClick(float x, float y)
 {
-	const nc::Rectf debugTextRect = nc::Rectf::fromCenterAndSize(debugText_->absPosition(), debugText_->absSize());
+	const nc::Rectf debugTextRect = nc::Rectf::fromCenterSize(debugText_->absPosition(), debugText_->absSize());
 
 	if (debugTextRect.contains(x, y))
 	{

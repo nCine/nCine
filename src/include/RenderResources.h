@@ -85,7 +85,7 @@ class RenderResources
 
 	static inline unsigned char *cameraUniformsBuffer() { return cameraUniformsBuffer_; }
 	static inline nctl::HashMap<GLShaderProgram *, CameraUniformData> &cameraUniformDataMap() { return cameraUniformDataMap_; }
-	static inline Camera *currentCamera() { return currentCamera_; };
+	static inline const Camera *currentCamera() { return currentCamera_; }
 
 	static void createMinimal();
 
