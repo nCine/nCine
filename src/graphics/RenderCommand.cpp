@@ -29,8 +29,8 @@ namespace {
 ///////////////////////////////////////////////////////////
 
 RenderCommand::RenderCommand(CommandTypes::Enum profilingType)
-    : materialSortKey_(0), layer_(DrawableNode::LayerBase::LOWEST), numInstances_(0), batchSize_(0),
-      uniformBlocksCommitted_(false), verticesCommitted_(false), indicesCommitted_(false),
+    : materialSortKey_(0), layer_(DrawableNode::LayerBase::LOWEST),
+      numInstances_(0), batchSize_(0), transformationCommitted_(false),
       profilingType_(profilingType), modelMatrix_(Matrix4x4f::Identity)
 {
 }
@@ -43,15 +43,6 @@ RenderCommand::RenderCommand()
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
-
-void RenderCommand::commitUniformBlocks()
-{
-	if (uniformBlocksCommitted_ == false)
-	{
-		material_.commitUniformBlocks();
-		uniformBlocksCommitted_ = true;
-	}
-}
 
 void RenderCommand::calculateMaterialSortKey()
 {
@@ -69,10 +60,6 @@ void RenderCommand::issue()
 
 	material_.bind();
 	material_.commitUniforms();
-
-	uniformBlocksCommitted_ = false;
-	verticesCommitted_ = false;
-	indicesCommitted_ = false;
 
 	GLScissorTest::State scissorTestState = GLScissorTest::state();
 	if (scissorRect_.w > 0 && scissorRect_.h > 0)
@@ -96,8 +83,17 @@ void RenderCommand::setScissor(GLint x, GLint y, GLsizei width, GLsizei height)
 	scissorRect_.set(x, y, width, height);
 }
 
+void RenderCommand::setTransformation(const Matrix4x4f &modelMatrix)
+{
+	modelMatrix_ = modelMatrix;
+	transformationCommitted_ = false;
+}
+
 void RenderCommand::commitNodeTransformation()
 {
+	if (transformationCommitted_)
+		return;
+
 	ZoneScoped;
 
 	// The layer translates to depth, from near to far
@@ -124,11 +120,13 @@ void RenderCommand::commitNodeTransformation()
 		else if (!isBatchedType(shaderProgramType) && shaderProgramType != Material::ShaderProgramType::CUSTOM)
 			material_.uniform("modelMatrix")->setFloatVector(modelMatrix_.data());
 	}
+
+	transformationCommitted_ = true;
 }
 
 void RenderCommand::commitCameraTransformation()
 {
-	ZoneScopedN("Commit camera transformation");
+	ZoneScoped;
 
 	RenderResources::CameraUniformData *cameraUniformData = RenderResources::cameraUniformDataMap().find(material_.shaderProgram_);
 	if (cameraUniformData == nullptr)
@@ -151,30 +149,18 @@ void RenderCommand::commitCameraTransformation()
 		cameraUniformData->shaderUniforms.commitUniforms();
 }
 
-void RenderCommand::commitVertices()
-{
-	if (verticesCommitted_ == false)
-	{
-		geometry_.commitVertices();
-		verticesCommitted_ = true;
-	}
-}
-
-void RenderCommand::commitIndices()
-{
-	if (indicesCommitted_ == false)
-	{
-		geometry_.commitIndices();
-		indicesCommitted_ = true;
-	}
-}
-
 void RenderCommand::commitAll()
 {
-	commitVertices();
-	commitIndices();
+	/// Copy the vertices and indices stored in host memory to video memory
+	/*! This step is not needed if the command uses a custom VBO or IBO
+	 * or directly writes into the common one */
+	geometry_.commitVertices();
+	geometry_.commitIndices();
+
+	/// Commits all the uniform blocks of command's shader program
+	material_.commitUniformBlocks();
+
 	commitNodeTransformation();
-	commitUniformBlocks();
 }
 
 }

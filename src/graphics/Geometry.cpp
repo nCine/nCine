@@ -14,7 +14,8 @@ Geometry::Geometry()
       numElementsPerVertex_(2), firstIndex_(0), numIndices_(0),
       hostVertexPointer_(nullptr), hostIndexPointer_(nullptr),
       vboUsageFlags_(0), sharedVboParams_(nullptr),
-      iboUsageFlags_(0), sharedIboParams_(nullptr)
+      iboUsageFlags_(0), sharedIboParams_(nullptr),
+      hasDirtyVertices_(true), hasDirtyIndices_(true)
 {
 }
 
@@ -55,6 +56,7 @@ void Geometry::createCustomVbo(unsigned int numFloats, GLenum usage)
 GLfloat *Geometry::acquireVertexPointer(unsigned int numFloats, unsigned int numFloatsAlignment)
 {
 	ASSERT(vbo_ == nullptr);
+	hasDirtyVertices_ = true;
 
 	if (sharedVboParams_)
 		vboParams_ = *sharedVboParams_;
@@ -72,6 +74,7 @@ GLfloat *Geometry::acquireVertexPointer(unsigned int numFloats, unsigned int num
 GLfloat *Geometry::acquireVertexPointer()
 {
 	ASSERT(vbo_);
+	hasDirtyVertices_ = true;
 
 	if (vboParams_.mapBase == nullptr)
 	{
@@ -92,6 +95,12 @@ void Geometry::releaseVertexPointer()
 		vboParams_.object->unmap();
 	}
 	vboParams_.mapBase = nullptr;
+}
+
+void Geometry::setHostVertexPointer(const float *vertexPointer)
+{
+	hasDirtyVertices_ = true;
+	hostVertexPointer_ = vertexPointer;
 }
 
 void Geometry::shareVbo(const Geometry *geometry)
@@ -122,6 +131,7 @@ void Geometry::createCustomIbo(unsigned int numIndices, GLenum usage)
 GLushort *Geometry::acquireIndexPointer(unsigned int numIndices)
 {
 	ASSERT(ibo_ == nullptr);
+	hasDirtyIndices_ = true;
 
 	if (sharedIboParams_)
 		iboParams_ = *sharedIboParams_;
@@ -139,6 +149,7 @@ GLushort *Geometry::acquireIndexPointer(unsigned int numIndices)
 GLushort *Geometry::acquireIndexPointer()
 {
 	ASSERT(ibo_);
+	hasDirtyIndices_ = true;
 
 	if (iboParams_.mapBase == nullptr)
 	{
@@ -159,6 +170,12 @@ void Geometry::releaseIndexPointer()
 		iboParams_.object->unmap();
 	}
 	iboParams_.mapBase = nullptr;
+}
+
+void Geometry::setHostIndexPointer(const GLushort *indexPointer)
+{
+	hasDirtyIndices_ = true;
+	hostIndexPointer_ = indexPointer;
 }
 
 void Geometry::shareIbo(const Geometry *geometry)
@@ -216,7 +233,7 @@ void Geometry::draw(GLsizei numInstances)
 
 void Geometry::commitVertices()
 {
-	if (hostVertexPointer_)
+	if (hostVertexPointer_ && hasDirtyVertices_)
 	{
 		// Checking if the common VBO is allowed to use mapping and do the same for the custom one
 		const GLenum mapFlags = RenderResources::buffersManager().specs(RenderBuffersManager::BufferTypes::ARRAY).mapFlags;
@@ -234,12 +251,16 @@ void Geometry::commitVertices()
 			memcpy(vertices, hostVertexPointer_, numFloats * sizeof(GLfloat));
 			releaseVertexPointer();
 		}
+
+		// The dirty flag is only useful with a custom VBO. If the render command uses the common one, it must always copy vertices.
+		if (vbo_)
+			hasDirtyVertices_ = false;
 	}
 }
 
 void Geometry::commitIndices()
 {
-	if (hostIndexPointer_)
+	if (hostIndexPointer_ && hasDirtyIndices_)
 	{
 		// Checking if the common IBO is allowed to use mapping and do the same for the custom one
 		const GLenum mapFlags = RenderResources::buffersManager().specs(RenderBuffersManager::BufferTypes::ELEMENT_ARRAY).mapFlags;
@@ -256,6 +277,10 @@ void Geometry::commitIndices()
 			memcpy(indices, hostIndexPointer_, numIndices_ * sizeof(GLushort));
 			releaseIndexPointer();
 		}
+
+		// The dirty flag is only useful with a custom IBO. If the render command uses the common one, it must always copy indices.
+		if (ibo_)
+			hasDirtyIndices_ = false;
 	}
 }
 

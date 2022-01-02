@@ -4,6 +4,7 @@
 #include "IInputManager.h"
 #include "InputEvents.h"
 
+#include "Viewport.h"
 #include "DrawableNode.h"
 #include "MeshSprite.h"
 #include "ParticleSystem.h"
@@ -280,7 +281,8 @@ void ImGuiDebugOverlay::guiWindow()
 		guiInputState();
 		guiRenderDoc();
 		guiAllocators();
-		guiNodeInspector();
+		if (appCfg.withScenegraph)
+			guiNodeInspector();
 	}
 	ImGui::End();
 }
@@ -1153,7 +1155,24 @@ void ImGuiDebugOverlay::guiAllocators()
 #endif
 }
 
-void ImGuiDebugOverlay::guiRescursiveChildrenNodes(SceneNode *node, unsigned int childId)
+void ImGuiDebugOverlay::guiRecursiveViewports(Viewport *viewport, unsigned int viewportId)
+{
+	widgetName_.format("#%u Viewport", viewportId);
+	widgetName_.formatAppend(" - size: %d x %d", viewport->width(), viewport->height());
+	widgetName_.formatAppend("###0x%x", uintptr_t(viewport));
+
+	SceneNode *rootNode = viewport->rootNode();
+	if (rootNode != nullptr && ImGui::TreeNode(widgetName_.data()))
+	{
+		guiRecursiveChildrenNodes(rootNode, 0);
+		ImGui::TreePop();
+	}
+
+	if (viewport->nextViewport() != nullptr)
+		guiRecursiveViewports(viewport->nextViewport(), viewportId + 1);
+}
+
+void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int childId)
 {
 	DrawableNode *drawable = nullptr;
 	if (node->type() != Object::ObjectType::SCENENODE &&
@@ -1335,7 +1354,7 @@ void ImGuiDebugOverlay::guiRescursiveChildrenNodes(SceneNode *node, unsigned int
 			{
 				const nctl::Array<SceneNode *> &children = node->children();
 				for (unsigned int i = 0; i < children.size(); i++)
-					guiRescursiveChildrenNodes(children[i], i);
+					guiRecursiveChildrenNodes(children[i], i);
 				ImGui::TreePop();
 			}
 		}
@@ -1347,11 +1366,8 @@ void ImGuiDebugOverlay::guiRescursiveChildrenNodes(SceneNode *node, unsigned int
 
 void ImGuiDebugOverlay::guiNodeInspector()
 {
-	if (theApplication().appConfiguration().withScenegraph)
-	{
-		if (ImGui::CollapsingHeader("Node Inspector"))
-			guiRescursiveChildrenNodes(&theApplication().rootNode(), 0);
-	}
+	if (ImGui::CollapsingHeader("Node Inspector"))
+		guiRecursiveViewports(&theApplication().rootViewport(), 0);
 }
 
 void ImGuiDebugOverlay::guiTopLeft()

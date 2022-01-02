@@ -7,6 +7,7 @@
 #include <ncine/TextNode.h>
 #include <ncine/Viewport.h>
 #include <ncine/Camera.h>
+#include <ncine/TextureSaverPng.h>
 #include <ncine/imgui.h>
 #include "apptest_datapath.h"
 
@@ -264,6 +265,30 @@ void MyEventHandler::onFrameStart()
 					currentViewport.initTexture(viewportSize, nc::Viewport::ColorFormat(comboColorFormatType), nc::Viewport::DepthStencilFormat(comboDepthFormatType));
 				}
 			}
+#if !defined(__EMSCRIPTEN__) && !defined(__ANDROID__)
+			ImGui::SameLine();
+			if (ImGui::Button("Save PNG"))
+			{
+				nc::TextureSaverPng saver;
+				nc::TextureSaverPng::Properties props;
+				props.width = currentViewportSize.x;
+				props.height = currentViewportSize.y;
+				props.format = nc::ITextureSaver::Format::RGB8;
+				if (currentViewport.colorFormat() == nc::Viewport::ColorFormat::RGBA8)
+					props.format = nc::ITextureSaver::Format::RGBA8;
+
+				nc::Texture &tex = *currentViewport.texture();
+				nctl::UniquePtr<unsigned char[]> buffer = nctl::makeUnique<unsigned char[]>(tex.dataSize());
+				const bool savedToMemory = tex.saveToMemory(buffer.get());
+				if (savedToMemory)
+				{
+					props.pixels = buffer.get();
+					// Recycling comboString for screenshot filename
+					comboString.format("viewport%d_%dx%d.png", currentComboViewport, currentViewportSize.x, currentViewportSize.y);
+					saver.saveToFile(props, comboString.data());
+				}
+			}
+#endif
 		}
 
 		nc::Colorf clearColor = currentViewport.clearColor();
@@ -541,14 +566,17 @@ void MyEventHandler::onFrameStart()
 		viewMatrixChanged = true;
 	}
 
-	for (unsigned int i = 0; i < NumSprites; i++)
+	if (!pause_)
 	{
-		const float t = i / static_cast<float>(NumSprites);
-		const float scaleX = 50.0f * (2.0f * t - 1.0f);
-		const float scaleY = 50.0f * (-2.0f * t + 1.0f);
-		const float moveX = scaleX * sinf(angle_) * cosf(angle_ * 0.5f * t);
-		const float moveY = scaleY * sinf(angle_ * 0.5f * t) * cosf(angle_);
-		sprites_[i]->setPosition(spritePos_[i].x + moveX, spritePos_[i].y + moveY);
+		for (unsigned int i = 0; i < NumSprites; i++)
+		{
+			const float t = i / static_cast<float>(NumSprites);
+			const float scaleX = 50.0f * (2.0f * t - 1.0f);
+			const float scaleY = 50.0f * (-2.0f * t + 1.0f);
+			const float moveX = scaleX * sinf(angle_) * cosf(angle_ * 0.5f * t);
+			const float moveY = scaleY * sinf(angle_ * 0.5f * t) * cosf(angle_);
+			sprites_[i]->setPosition(spritePos_[i].x + moveX, spritePos_[i].y + moveY);
+		}
 	}
 }
 

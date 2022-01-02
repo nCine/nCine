@@ -68,6 +68,7 @@ class MyEventHandler :
 	bool withAtlas_;
 	bool withViewport_;
 	bool pause_;
+	int animDivider_;
 	float angle_;
 	float camScale_;
 

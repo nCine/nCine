@@ -59,9 +59,6 @@ class RenderCommand
 	/// Sets the number of batch elements collected by the command
 	inline void setBatchSize(int batchSize) { batchSize_ = batchSize; }
 
-	/// Commits all the uniform blocks of command's shader program
-	void commitUniformBlocks();
-
 	/// Returns the material sort key for the queue
 	inline uint64_t materialSortKey() const { return materialSortKey_; }
 	/// Calculates a material sort key for the queue
@@ -82,7 +79,8 @@ class RenderCommand
 	inline void setScissor(Recti scissorRect) { scissorRect_ = scissorRect; }
 	void setScissor(GLint x, GLint y, GLsizei width, GLsizei height);
 
-	inline Matrix4x4f &transformation() { return modelMatrix_; }
+	inline const Matrix4x4f &transformation() const { return modelMatrix_; }
+	void setTransformation(const Matrix4x4f &modelMatrix);
 	inline const Material &material() const { return material_; }
 	inline const Geometry &geometry() const { return geometry_; }
 	inline Material &material() { return material_; }
@@ -93,16 +91,6 @@ class RenderCommand
 
 	/// Commits the projection and view matrix uniforms
 	void commitCameraTransformation();
-
-	/// Copy the vertices stored in host memory to video memory
-	/*! This step is not needed if the command uses a custom VBO
-	 * or directly writes into the common one */
-	void commitVertices();
-
-	/// Copy the indices stored in host memory to video memory
-	/*! This step is not needed if the command uses a custom IBO
-	 * or directly writes into the common one */
-	void commitIndices();
 
 	/// Calls all the commit methods except the camera uniforms commit
 	void commitAll();
@@ -115,9 +103,8 @@ class RenderCommand
 	unsigned short layer_;
 	int numInstances_;
 	int batchSize_;
-	bool uniformBlocksCommitted_;
-	bool verticesCommitted_;
-	bool indicesCommitted_;
+
+	bool transformationCommitted_;
 
 	/// Command type for profiling counter
 	CommandTypes::Enum profilingType_;

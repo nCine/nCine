@@ -60,7 +60,8 @@ GLenum depthStencilFormatToGLAttachment(Viewport::DepthStencilFormat format)
 ///////////////////////////////////////////////////////////
 
 Viewport::Viewport()
-    : type_(Type::NO_TEXTURE), width_(0), height_(0), viewportRect_(0, 0, 0, 0),
+    : type_(Type::NO_TEXTURE), width_(0), height_(0),
+      viewportRect_(0, 0, 0, 0), hasDirtyCullingRect_(true),
       colorFormat_(ColorFormat::RGB8), depthStencilFormat_(DepthStencilFormat::NONE),
       clearMode_(ClearMode::EVERY_FRAME), clearColor_(Colorf::Black),
       renderQueue_(nctl::makeUnique<RenderQueue>(*this)),
@@ -70,7 +71,8 @@ Viewport::Viewport()
 }
 
 Viewport::Viewport(int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat)
-    : type_(Type::REGULAR), width_(0), height_(0), viewportRect_(0, 0, width, height),
+    : type_(Type::REGULAR), width_(0), height_(0),
+      viewportRect_(0, 0, width, height), hasDirtyCullingRect_(true),
       colorFormat_(colorFormat), depthStencilFormat_(depthStencilFormat),
       clearMode_(ClearMode::EVERY_FRAME), clearColor_(Colorf::Black),
       renderQueue_(nctl::makeUnique<RenderQueue>(*this)),
@@ -193,7 +195,7 @@ void Viewport::setNextViewport(Viewport *nextViewport)
 
 void Viewport::calculateCullingRect()
 {
-	ZoneScopedN("Calculate culling rectangle");
+	ZoneScoped;
 
 	const Camera *vieportCamera = camera_ ? camera_ : RenderResources::currentCamera();
 
@@ -249,6 +251,10 @@ void Viewport::calculateCullingRect()
 
 		cullingRect_ = Rectf::fromCenterSize(rotatedX, rotatedY, rotatedWidth, rotatedHeight);
 	}
+
+	hasDirtyCullingRect_ = (cullingRect_.x != prevCullingRect_.x || cullingRect_.y != prevCullingRect_.y ||
+	                        cullingRect_.w != prevCullingRect_.w || cullingRect_.h != prevCullingRect_.h);
+	prevCullingRect_ = cullingRect_;
 }
 
 void Viewport::update()

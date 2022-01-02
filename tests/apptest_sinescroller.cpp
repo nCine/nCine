@@ -73,10 +73,13 @@ void MyEventHandler::onFrameStart()
 	const float height = nc::theApplication().height();
 	const float numCharsInv = 1.0f / static_cast<float>(NumChars + 1);
 
-	for (unsigned int i = 0; i < NumChars; i++)
+	if (!pause_)
 	{
-		characters_[i]->setPosition(width * numCharsInv * (i + 1), height * (0.5f + sinf(angle_ + 0.5f * i) * 0.15f));
-		characters_[i]->setRotation(180.0f + sinf(angle_ + 0.5f * i) * -180.0f);
+		for (unsigned int i = 0; i < NumChars; i++)
+		{
+			characters_[i]->setPosition(width * numCharsInv * (i + 1), height * (0.5f + sinf(angle_ + 0.5f * i) * 0.15f));
+			characters_[i]->setRotation(180.0f + sinf(angle_ + 0.5f * i) * -180.0f);
+		}
 	}
 }
 

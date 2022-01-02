@@ -78,7 +78,8 @@ unsigned short DrawableNode::nuklearLayer_ = LayerBase::HIGHEST - 512;
 
 DrawableNode::DrawableNode(SceneNode *parent, float xx, float yy)
     : SceneNode(parent, xx, yy), width_(0.0f), height_(0.0f),
-      renderCommand_(nctl::makeUnique<RenderCommand>())
+      renderCommand_(nctl::makeUnique<RenderCommand>()),
+      cullingState_(CullingState::DISABLED)
 {
 	renderCommand_->setIdSortKey(id());
 }
@@ -114,18 +115,33 @@ void DrawableNode::draw(RenderQueue &renderQueue)
 
 	if (cullingEnabled)
 	{
-		updateAabb();
+		const bool updateOverlapping = (dirtyBits_.test(DirtyBitPositions::AabbBit) ||
+		                                renderQueue.viewport().hasDirtyCullingRect() ||
+		                                cullingState_ == CullingState::DISABLED);
 
-		if (aabb_.overlaps(renderQueue.viewport().cullingRect()))
+		if (dirtyBits_.test(DirtyBitPositions::AabbBit))
+		{
+			updateAabb();
+			dirtyBits_.reset(DirtyBitPositions::AabbBit);
+		}
+
+		if (updateOverlapping)
+		{
+			const bool overlaps = aabb_.overlaps(renderQueue.viewport().cullingRect());
+			cullingState_ = overlaps ? CullingState::NOT_CULLED : CullingState::CULLED;
+		}
+
+		if (cullingState_ == CullingState::NOT_CULLED)
 		{
 			updateRenderCommand();
 			renderQueue.addCommand(renderCommand_.get());
 		}
-		else
+		else if (cullingState_ == CullingState::CULLED)
 			RenderStatistics::addCulledNode();
 	}
 	else
 	{
+		cullingState_ = CullingState::DISABLED;
 		updateRenderCommand();
 		renderQueue.addCommand(renderCommand_.get());
 	}
@@ -223,7 +239,8 @@ void DrawableNode::updateAabb()
 DrawableNode::DrawableNode(const DrawableNode &other)
     : SceneNode(other),
       width_(other.width_), height_(other.height_),
-      renderCommand_(nctl::makeUnique<RenderCommand>())
+      renderCommand_(nctl::makeUnique<RenderCommand>()),
+      cullingState_(CullingState::DISABLED)
 {
 	renderCommand_->setIdSortKey(id());
 	setBlendingEnabled(other.isBlendingEnabled());

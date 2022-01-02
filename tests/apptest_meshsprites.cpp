@@ -158,9 +158,11 @@ void MyEventHandler::onInit()
 
 	withAtlas_ = false;
 	withAtlas_ ? setupAtlas() : setupTextures();
-	withViewport_ = false;
+	withViewport_ = true;
+	setupViewport();
 
 	pause_ = false;
+	animDivider_ = 1;
 	angle_ = 0.0f;
 	resetCamera();
 
@@ -230,12 +232,18 @@ void MyEventHandler::onFrameStart()
 	else
 		cameraNode_->setScale(camScale_);
 
-	for (unsigned int i = 0; i < NumSprites; i++)
+	if (!pause_)
 	{
-		const float rotationAngle = angle_ + NumSprites * 0.5f - i;
-		sprites_[i]->setRotation(rotationAngle);
-		meshSprites_[i]->setRotation(rotationAngle);
-		transpMeshSprites_[i]->setRotation(rotationAngle);
+		for (unsigned int i = 0; i < NumSprites; i++)
+		{
+			if ((i + 1) % animDivider_ != 0)
+				continue;
+
+			const float rotationAngle = angle_ + NumSprites * 0.5f - i;
+			sprites_[i]->setRotation(rotationAngle);
+			meshSprites_[i]->setRotation(rotationAngle);
+			transpMeshSprites_[i]->setRotation(rotationAngle);
+		}
 	}
 
 	if (updateActiveSprites_)
@@ -311,6 +319,16 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		const bool isSuspended = nc::theApplication().isSuspended();
 		nc::theApplication().setSuspended(!isSuspended);
 	}
+	else if (event.sym == nc::KeySym::N1)
+		animDivider_ = 1;
+	else if (event.sym == nc::KeySym::N2)
+		animDivider_ = 2;
+	else if (event.sym == nc::KeySym::N3)
+		animDivider_ = 3;
+	else if (event.sym == nc::KeySym::N4)
+		animDivider_ = 4;
+	else if (event.sym == nc::KeySym::N8)
+		animDivider_ = 8;
 }
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)

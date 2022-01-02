@@ -58,23 +58,25 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
-	if (pause_ == false)
+	if (!pause_)
+	{
 		angle_ += 2.5f * nc::theApplication().interval();
-	const float sine = sinf(angle_);
-	const float cosine = cosf(angle_);
+		const float sine = sinf(angle_);
+		const float cosine = cosf(angle_);
 
-	dummy_->x = nc::theApplication().width() * 0.5f + sine * 100.0f;
-	dummy_->y = nc::theApplication().height() * 0.5f + cosine * 150.0f;
-	dummy_->setRotation(angle_ * 8.0f);
-	dummy_->setScale(((sine * 0.15f) + 1.0f) * 0.5f);
+		dummy_->x = nc::theApplication().width() * 0.5f + sine * 100.0f;
+		dummy_->y = nc::theApplication().height() * 0.5f + cosine * 150.0f;
+		dummy_->setRotation(angle_ * 8.0f);
+		dummy_->setScale(((sine * 0.15f) + 1.0f) * 0.5f);
 
-	for (unsigned int i = 0; i < NumColSprites * NumRowSprites; i++)
-		sprites_[i]->setRotation(-angle_ * 8.0f);
+		for (unsigned int i = 0; i < NumColSprites * NumRowSprites; i++)
+			sprites_[i]->setRotation(-angle_ * 8.0f);
 
-	nc::theApplication().rootNode().x = (sine + 1.0f) * 50.0f;
-	nc::theApplication().rootNode().y = (cosine + 1.0f) * 50.0f;
-	nc::theApplication().rootNode().setRotation(sine * 10.0f);
-	nc::theApplication().rootNode().setScale(((cosine * 0.1f) + 1.0f) * 0.75f);
+		nc::theApplication().rootNode().x = (sine + 1.0f) * 50.0f;
+		nc::theApplication().rootNode().y = (cosine + 1.0f) * 50.0f;
+		nc::theApplication().rootNode().setRotation(sine * 10.0f);
+		nc::theApplication().rootNode().setScale(((cosine * 0.1f) + 1.0f) * 0.75f);
+	}
 }
 
 #ifdef __ANDROID__

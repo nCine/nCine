@@ -104,6 +104,8 @@ class DLL_PUBLIC Viewport
 	/// Resizes the OpenGL scissor test with two integers
 	inline void setScissorRect(int width, int height) { scissorRect_.set(0, 0, width, height); }
 
+	/// Returns true if the culling rect has changed since last frame
+	inline bool hasDirtyCullingRect() const { return hasDirtyCullingRect_; }
 	/// Returns the rectangle for screen culling
 	inline Rectf cullingRect() const { return cullingRect_; }
 
@@ -164,7 +166,9 @@ class DLL_PUBLIC Viewport
 	Recti viewportRect_;
 	Recti scissorRect_;
 
+	bool hasDirtyCullingRect_;
 	Rectf cullingRect_;
+	Rectf prevCullingRect_;
 
 	ColorFormat colorFormat_;
 	DepthStencilFormat depthStencilFormat_;

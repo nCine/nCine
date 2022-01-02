@@ -3,6 +3,7 @@
 
 #include "Object.h"
 #include <nctl/Array.h>
+#include <nctl/BitSet.h>
 #include "Vector2.h"
 #include "Matrix4x4.h"
 #include "Color.h"
@@ -11,6 +12,7 @@
 namespace ncine {
 
 class RenderQueue;
+class Viewport;
 
 /// The base class for the transformation nodes hierarchy
 class DLL_PUBLIC SceneNode : public Object
@@ -18,6 +20,16 @@ class DLL_PUBLIC SceneNode : public Object
   public:
 	/// The minimum amount of rotation to trigger a sine and cosine calculation
 	static const float MinRotation;
+
+	/// Bit positions inside the dirty bitset
+	enum DirtyBitPositions
+	{
+		TransformationBit = 0,
+		ColorBit = 1,
+		SizeBit = 2,
+		TextureBit = 3,
+		AabbBit = 4
+	};
 
 	/// Relative X coordinate as a public property
 	float x;
@@ -106,20 +118,20 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Gets the transformation anchor point in pixels
 	inline Vector2f absAnchorPoint() const { return anchorPoint_; }
 	/// Sets the transformation anchor point in pixels
-	inline void setAbsAnchorPoint(float xx, float yy) { anchorPoint_.set(xx, yy); }
+	void setAbsAnchorPoint(float xx, float yy);
 	/// Sets the transformation anchor point in pixels with a `Vector2f`
-	inline void setAbsAnchorPoint(const Vector2f &point) { anchorPoint_ = point; }
+	void setAbsAnchorPoint(const Vector2f &point);
 
 	/// Gets the node scale factors
 	inline const Vector2f &scale() const { return scaleFactor_; }
 	/// Gets the node absolute scale factors
 	inline const Vector2f &absScale() const { return absScaleFactor_; }
 	/// Scales the node size both horizontally and vertically
-	inline void setScale(float scaleFactor) { scaleFactor_.set(scaleFactor, scaleFactor); }
+	void setScale(float scaleFactor);
 	/// Scales the node size both horizontally and vertically
-	inline void setScale(float scaleFactorX, float scaleFactorY) { scaleFactor_.set(scaleFactorX, scaleFactorY); }
+	void setScale(float scaleFactorX, float scaleFactorY);
 	/// Scales the node size both horizontally and vertically with a `Vector2f`
-	inline void setScale(const Vector2f &scaleFactor) { scaleFactor_ = scaleFactor; }
+	void setScale(const Vector2f &scaleFactor);
 
 	/// Gets the node rotation in degrees
 	inline float rotation() const { return rotation_; }
@@ -133,31 +145,31 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Gets the node absolute color
 	inline Color absColor() const { return absColor_; }
 	/// Sets the node color through a `Color` object
-	inline void setColor(Color color) { color_ = color; }
+	void setColor(Color color);
 	/// Sets the node color through a `Colorf` object
-	inline void setColor(Colorf color) { color_ = color; }
+	void setColor(Colorf color);
 	/// Sets the node color through unsigned char components
-	inline void setColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha) { color_.set(red, green, blue, alpha); }
+	void setColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha);
 	/// Sets the node color through float components
-	inline void setColorF(float red, float green, float blue, float alpha) { color_ = Colorf(red, green, blue, alpha); }
+	void setColorF(float red, float green, float blue, float alpha);
 	/// Gets the node alpha
 	inline float alpha() const { return color_.a(); }
 	/// Gets the node absolute alpha
 	inline float absAlpha() const { return absColor_.a(); }
 	/// Sets the node alpha through an unsigned char component
-	inline void setAlpha(unsigned char alpha) { color_.setAlpha(alpha); }
+	void setAlpha(unsigned char alpha);
 	/// Sets the node alpha through a float component
-	inline void setAlphaF(float alpha) { color_.setAlpha(static_cast<unsigned char>(alpha * 255)); }
+	void setAlphaF(float alpha);
 
 	/// Gets the node world matrix
 	inline const Matrix4x4f &worldMatrix() const { return worldMatrix_; }
 	/// Sets the node world matrix (only useful when called inside `onPostUpdate()`)
-	inline void setWorldMatrix(const Matrix4x4f &worldMatrix) { worldMatrix_ = worldMatrix; }
+	void setWorldMatrix(const Matrix4x4f &worldMatrix);
 
 	/// Gets the node local matrix
 	inline const Matrix4x4f &localMatrix() const { return localMatrix_; }
 	/// Sets the node local matrix
-	inline void setLocalMatrix(const Matrix4x4f &localMatrix) { localMatrix_ = localMatrix; }
+	void setLocalMatrix(const Matrix4x4f &localMatrix);
 
 	/// Gets the delete children on destruction flag
 	/*! If the flag is true the children are deleted upon node destruction. */
@@ -166,6 +178,16 @@ class DLL_PUBLIC SceneNode : public Object
 	inline void setDeleteChildrenOnDestruction(bool shouldDeleteChildrenOnDestruction) { shouldDeleteChildrenOnDestruction_ = shouldDeleteChildrenOnDestruction; }
 
   protected:
+	/// Transformation state used to determine the corresponding dirty flag
+	struct TransformState
+	{
+		float x = 0.0f;
+		float y = 0.0f;
+
+		bool isDifferent(const SceneNode &node);
+		void fill(const SceneNode &node);
+	};
+
 	bool updateEnabled_;
 	bool drawEnabled_;
 
@@ -207,6 +229,11 @@ class DLL_PUBLIC SceneNode : public Object
 	/// A flag indicating whether the destructor should also delete all children
 	bool shouldDeleteChildrenOnDestruction_;
 
+	/// Bitset that stores the various dirty states bits
+	nctl::BitSet<uint8_t> dirtyBits_;
+	/// Previous frame transform state used to determine the corresponding dirty flag
+	TransformState prevTransformState_;
+
 	/// Deleted assignment operator
 	SceneNode &operator=(const SceneNode &) = delete;
 
@@ -234,29 +261,124 @@ inline void SceneNode::setPosition(float xx, float yy)
 {
 	x = xx;
 	y = yy;
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
 }
 
 inline void SceneNode::setPosition(const Vector2f &pos)
 {
 	x = pos.x;
 	y = pos.y;
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
 }
 
 inline void SceneNode::move(float xx, float yy)
 {
 	x += xx;
 	y += yy;
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
 }
 
 inline void SceneNode::move(const Vector2f &pos)
 {
 	x += pos.x;
 	y += pos.y;
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
+}
+
+inline void SceneNode::setAbsAnchorPoint(float xx, float yy)
+{
+	anchorPoint_.set(xx, yy);
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
+}
+
+inline void SceneNode::setAbsAnchorPoint(const Vector2f &point)
+{
+	anchorPoint_ = point;
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
+}
+
+inline void SceneNode::setScale(float scaleFactor)
+{
+	scaleFactor_.set(scaleFactor, scaleFactor);
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
+}
+
+inline void SceneNode::setScale(float scaleFactorX, float scaleFactorY)
+{
+	scaleFactor_.set(scaleFactorX, scaleFactorY);
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
+}
+
+inline void SceneNode::setScale(const Vector2f &scaleFactor)
+{
+	scaleFactor_ = scaleFactor;
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
 }
 
 inline void SceneNode::setRotation(float rotation)
 {
 	rotation_ = fmodf(rotation, 360.0f);
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
+}
+
+inline void SceneNode::setColor(Color color)
+{
+	color_ = color;
+	dirtyBits_.set(DirtyBitPositions::ColorBit);
+}
+
+inline void SceneNode::setColor(Colorf color)
+{
+	color_ = color;
+	dirtyBits_.set(DirtyBitPositions::ColorBit);
+}
+
+inline void SceneNode::setColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
+{
+	color_.set(red, green, blue, alpha);
+	dirtyBits_.set(DirtyBitPositions::ColorBit);
+}
+
+inline void SceneNode::setColorF(float red, float green, float blue, float alpha)
+{
+	color_ = Colorf(red, green, blue, alpha);
+	dirtyBits_.set(DirtyBitPositions::ColorBit);
+}
+
+inline void SceneNode::setAlpha(unsigned char alpha)
+{
+	color_.setAlpha(alpha);
+	dirtyBits_.set(DirtyBitPositions::ColorBit);
+}
+
+inline void SceneNode::setAlphaF(float alpha)
+{
+	color_.setAlpha(static_cast<unsigned char>(alpha * 255));
+	dirtyBits_.set(DirtyBitPositions::ColorBit);
+}
+
+inline void SceneNode::setWorldMatrix(const Matrix4x4f &worldMatrix)
+{
+	worldMatrix_ = worldMatrix;
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
+}
+
+inline void SceneNode::setLocalMatrix(const Matrix4x4f &localMatrix)
+{
+	localMatrix_ = localMatrix;
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
 }
 
 }

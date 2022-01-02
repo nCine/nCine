@@ -62,6 +62,7 @@ class MyEventHandler :
 	bool withAtlas_;
 	bool withViewport_;
 	bool pause_;
+	unsigned int animDivider_;
 	float angle_;
 	nc::Vector2f camPos_;
 	float camRot_;
