@@ -31,13 +31,8 @@ class DLL_PUBLIC SceneNode : public Object
 		AabbBit = 4
 	};
 
-	/// Relative X coordinate as a public property
-	float x;
-	/// Relative Y coordinate as a public property
-	float y;
-
 	/// Constructor for a node with a parent and a specified relative position
-	SceneNode(SceneNode *parent, float xx, float yy);
+	SceneNode(SceneNode *parent, float x, float y);
 	/// Constructor for a node with a parent and a specified relative position as a vector
 	SceneNode(SceneNode *parent, const Vector2f &position);
 	/// Constructor for a node with a parent and positioned in the relative origin
@@ -99,26 +94,30 @@ class DLL_PUBLIC SceneNode : public Object
 	void setEnabled(bool isEnabled);
 
 	/// Returns node position relative to its parent
-	inline Vector2f position() const { return Vector2f(x, y); }
-	/// Returns absolute X coordinate node position
-	inline float absX() const { return absX_; }
-	/// Returns absolute Y coordinate node position
-	inline float absY() const { return absY_; }
+	inline Vector2f position() const { return position_; }
 	/// Returns absolute node position
-	inline Vector2f absPosition() const { return Vector2f(absX_, absY_); }
+	inline Vector2f absPosition() const { return absPosition_; }
 	/// Sets the node position through two coordinates
-	void setPosition(float xx, float yy);
+	void setPosition(float x, float y);
 	/// Sets the node position through a vector
-	void setPosition(const Vector2f &pos);
-	/// Moves a node based on two offsets
-	void move(float xx, float yy);
+	void setPosition(const Vector2f &position);
+	/// Sets the X coordinate of the node position
+	void setPositionX(float x);
+	/// Sets the Y coordinate of the node position
+	void setPositionY(float y);
+	/// Moves the node based on two offsets
+	void move(float x, float y);
 	/// Adds a move vector to the node current position
-	void move(const Vector2f &pos);
+	void move(const Vector2f &position);
+	/// Moves the node by an offset on the X axis
+	void moveX(float x);
+	/// Moves the node by an offset on the Y axis
+	void moveY(float y);
 
 	/// Gets the transformation anchor point in pixels
 	inline Vector2f absAnchorPoint() const { return anchorPoint_; }
 	/// Sets the transformation anchor point in pixels
-	void setAbsAnchorPoint(float xx, float yy);
+	void setAbsAnchorPoint(float x, float y);
 	/// Sets the transformation anchor point in pixels with a `Vector2f`
 	void setAbsAnchorPoint(const Vector2f &point);
 
@@ -178,16 +177,6 @@ class DLL_PUBLIC SceneNode : public Object
 	inline void setDeleteChildrenOnDestruction(bool shouldDeleteChildrenOnDestruction) { shouldDeleteChildrenOnDestruction_ = shouldDeleteChildrenOnDestruction; }
 
   protected:
-	/// Transformation state used to determine the corresponding dirty flag
-	struct TransformState
-	{
-		float x = 0.0f;
-		float y = 0.0f;
-
-		bool isDifferent(const SceneNode &node);
-		void fill(const SceneNode &node);
-	};
-
 	bool updateEnabled_;
 	bool drawEnabled_;
 
@@ -196,6 +185,8 @@ class DLL_PUBLIC SceneNode : public Object
 	/// The array of child nodes
 	nctl::Array<SceneNode *> children_;
 
+	/// The node relative position
+	Vector2f position_;
 	/// The anchor point for transformations, in pixels
 	/// \note The default point is the center
 	Vector2f anchorPoint_;
@@ -209,10 +200,8 @@ class DLL_PUBLIC SceneNode : public Object
 	 *  color information to easily pass that information to its children. */
 	Color color_;
 
-	/// Absolute X coordinate as calculated by the `transform()` function
-	float absX_;
-	/// Absolute Y coordinate as calculated by the `transform()` function
-	float absY_;
+	/// Absolute position as calculated by the `transform()` function
+	Vector2f absPosition_;
 	/// Absolute horizontal and vertical scale factors as calculated by the `transform()` function
 	Vector2f absScaleFactor_;
 	/// Absolute node rotation as calculated by the `transform()` function
@@ -231,8 +220,6 @@ class DLL_PUBLIC SceneNode : public Object
 
 	/// Bitset that stores the various dirty states bits
 	nctl::BitSet<uint8_t> dirtyBits_;
-	/// Previous frame transform state used to determine the corresponding dirty flag
-	TransformState prevTransformState_;
 
 	/// Deleted assignment operator
 	SceneNode &operator=(const SceneNode &) = delete;
@@ -257,41 +244,66 @@ inline void SceneNode::setEnabled(bool enabled)
 	drawEnabled_ = enabled;
 }
 
-inline void SceneNode::setPosition(float xx, float yy)
+inline void SceneNode::setPosition(float x, float y)
 {
-	x = xx;
-	y = yy;
+	position_.set(x, y);
 	dirtyBits_.set(DirtyBitPositions::TransformationBit);
 	dirtyBits_.set(DirtyBitPositions::AabbBit);
 }
 
-inline void SceneNode::setPosition(const Vector2f &pos)
+inline void SceneNode::setPosition(const Vector2f &position)
 {
-	x = pos.x;
-	y = pos.y;
+	position_ = position;
 	dirtyBits_.set(DirtyBitPositions::TransformationBit);
 	dirtyBits_.set(DirtyBitPositions::AabbBit);
 }
 
-inline void SceneNode::move(float xx, float yy)
+inline void SceneNode::setPositionX(float x)
 {
-	x += xx;
-	y += yy;
+	position_.x = x;
 	dirtyBits_.set(DirtyBitPositions::TransformationBit);
 	dirtyBits_.set(DirtyBitPositions::AabbBit);
 }
 
-inline void SceneNode::move(const Vector2f &pos)
+inline void SceneNode::setPositionY(float y)
 {
-	x += pos.x;
-	y += pos.y;
+	position_.y = y;
 	dirtyBits_.set(DirtyBitPositions::TransformationBit);
 	dirtyBits_.set(DirtyBitPositions::AabbBit);
 }
 
-inline void SceneNode::setAbsAnchorPoint(float xx, float yy)
+inline void SceneNode::move(float x, float y)
 {
-	anchorPoint_.set(xx, yy);
+	position_.x += x;
+	position_.y += y;
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
+}
+
+inline void SceneNode::move(const Vector2f &position)
+{
+	position_ += position;
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
+}
+
+inline void SceneNode::moveX(float x)
+{
+	position_.x += x;
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
+}
+
+inline void SceneNode::moveY(float y)
+{
+	position_.y += y;
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
+}
+
+inline void SceneNode::setAbsAnchorPoint(float x, float y)
+{
+	anchorPoint_.set(x, y);
 	dirtyBits_.set(DirtyBitPositions::TransformationBit);
 	dirtyBits_.set(DirtyBitPositions::AabbBit);
 }

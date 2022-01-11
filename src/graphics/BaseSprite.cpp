@@ -40,12 +40,19 @@ void BaseSprite::setSize(float width, float height)
 	dirtyBits_.set(DirtyBitPositions::AabbBit);
 }
 
-/*! This method should be also called if just the content of a texture changes */
+/*! \note If you set a texture that is already assigned, this method would be equivalent to `resetTexture()` */
 void BaseSprite::setTexture(Texture *texture)
 {
 	// Allow self-assignment to take into account the case where the texture stays the same but it loads new data
 	textureHasChanged(texture);
 	texture_ = texture;
+	dirtyBits_.set(DirtyBitPositions::TextureBit);
+}
+
+/*! \note Use this method when the content of the currently assigned texture changes */
+void BaseSprite::resetTexture()
+{
+	textureHasChanged(texture_);
 	dirtyBits_.set(DirtyBitPositions::TextureBit);
 }
 

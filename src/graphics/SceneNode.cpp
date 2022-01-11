@@ -14,11 +14,11 @@ const float SceneNode::MinRotation = 0.5f;
 ///////////////////////////////////////////////////////////
 
 /*! \param parent The parent can be `nullptr` */
-SceneNode::SceneNode(SceneNode *parent, float xx, float yy)
-    : Object(ObjectType::SCENENODE), x(xx), y(yy),
+SceneNode::SceneNode(SceneNode *parent, float x, float y)
+    : Object(ObjectType::SCENENODE),
       updateEnabled_(true), drawEnabled_(true), parent_(nullptr), children_(4),
-      anchorPoint_(0.0f, 0.0f), scaleFactor_(1.0f, 1.0f), rotation_(0.0f),
-      color_(Color::White), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f, 1.0f),
+      position_(x, y), anchorPoint_(0.0f, 0.0f), scaleFactor_(1.0f, 1.0f), rotation_(0.0f),
+      color_(Color::White), absPosition_(0.0f, 0.0f), absScaleFactor_(1.0f, 1.0f),
       absRotation_(0.0f), absColor_(Color::White),
       worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity),
       shouldDeleteChildrenOnDestruction_(true), dirtyBits_(0xFF)
@@ -60,11 +60,11 @@ SceneNode::~SceneNode()
 }
 
 SceneNode::SceneNode(SceneNode &&other)
-    : Object(nctl::move(other)), x(other.x), y(other.y),
+    : Object(nctl::move(other)),
       updateEnabled_(other.updateEnabled_), drawEnabled_(other.drawEnabled_),
       parent_(other.parent_), children_(nctl::move(other.children_)),
-      anchorPoint_(other.anchorPoint_), scaleFactor_(other.scaleFactor_),
-      rotation_(other.rotation_), color_(other.color_),
+      position_(other.position_), anchorPoint_(other.anchorPoint_),
+      scaleFactor_(other.scaleFactor_), rotation_(other.rotation_), color_(other.color_),
       shouldDeleteChildrenOnDestruction_(other.shouldDeleteChildrenOnDestruction_),
       dirtyBits_(other.dirtyBits_)
 {
@@ -77,12 +77,11 @@ SceneNode &SceneNode::operator=(SceneNode &&other)
 {
 	Object::operator=(nctl::move(other));
 
-	x = other.x;
-	y = other.y;
 	updateEnabled_ = other.updateEnabled_;
 	drawEnabled_ = other.drawEnabled_;
 	parent_ = other.parent_;
 	children_ = nctl::move(other.children_);
+	position_ = other.position_;
 	anchorPoint_ = other.anchorPoint_;
 	scaleFactor_ = other.scaleFactor_;
 	rotation_ = other.rotation_;
@@ -247,10 +246,11 @@ void SceneNode::visit(RenderQueue &renderQueue)
 ///////////////////////////////////////////////////////////
 
 SceneNode::SceneNode(const SceneNode &other)
-    : Object(other), x(other.x), y(other.y), updateEnabled_(other.updateEnabled_),
+    : Object(other), updateEnabled_(other.updateEnabled_),
       drawEnabled_(other.drawEnabled_), parent_(nullptr), children_(4),
-      anchorPoint_(other.anchorPoint_), scaleFactor_(other.scaleFactor_), rotation_(other.rotation_),
-      color_(other.color_), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f, 1.0f), absRotation_(0.0f),
+      position_(other.position_), anchorPoint_(other.anchorPoint_),
+      scaleFactor_(other.scaleFactor_), rotation_(other.rotation_),
+      color_(other.color_), absPosition_(0.0f, 0.0f), absScaleFactor_(1.0f, 1.0f), absRotation_(0.0f),
       absColor_(Color::White), worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity),
       shouldDeleteChildrenOnDestruction_(other.shouldDeleteChildrenOnDestruction_), dirtyBits_(0xFF)
 {
@@ -289,7 +289,7 @@ void SceneNode::transform()
 		absColor_ = parent_ ? color_ * parent_->absColor_ : color_;
 
 	const bool parentHasDirtyTransformation = parent_ && parent_->dirtyBits_.test(DirtyBitPositions::TransformationBit);
-	if (parentHasDirtyTransformation || prevTransformState_.isDifferent(*this))
+	if (parentHasDirtyTransformation)
 	{
 		dirtyBits_.set(DirtyBitPositions::TransformationBit);
 		dirtyBits_.set(DirtyBitPositions::AabbBit);
@@ -299,7 +299,7 @@ void SceneNode::transform()
 		return;
 
 	// Calculating world and local matrices
-	localMatrix_ = Matrix4x4f::translation(x, y, 0.0f);
+	localMatrix_ = Matrix4x4f::translation(position_.x, position_.y, 0.0f);
 	localMatrix_.rotateZ(rotation_);
 	localMatrix_.scale(scaleFactor_.x, scaleFactor_.y, 1.0f);
 	localMatrix_.translate(-anchorPoint_.x, -anchorPoint_.y, 0.0f);
@@ -317,21 +317,8 @@ void SceneNode::transform()
 	else
 		worldMatrix_ = localMatrix_;
 
-	absX_ = worldMatrix_[3][0];
-	absY_ = worldMatrix_[3][1];
-
-	prevTransformState_.fill(*this);
-}
-
-bool SceneNode::TransformState::isDifferent(const SceneNode &node)
-{
-	return (x != node.x || y != node.y);
-}
-
-void SceneNode::TransformState::fill(const SceneNode &node)
-{
-	x = node.x;
-	y = node.y;
+	absPosition_.x = worldMatrix_[3][0];
+	absPosition_.y = worldMatrix_[3][1];
 }
 
 }

@@ -233,7 +233,7 @@ void DrawableNode::updateAabb()
 		rotatedHeight = fabsf(width * sinRot) + fabsf(height * cosRot);
 	}
 
-	aabb_ = Rectf::fromCenterSize(absX_, absY_, rotatedWidth, rotatedHeight);
+	aabb_ = Rectf::fromCenterSize(absPosition_.x, absPosition_.y, rotatedWidth, rotatedHeight);
 }
 
 DrawableNode::DrawableNode(const DrawableNode &other)

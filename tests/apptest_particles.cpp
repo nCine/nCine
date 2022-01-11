@@ -86,13 +86,13 @@ void MyEventHandler::onFrameStart()
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
 	if (keyState.isKeyDown(nc::KeySym::D))
-		particleSystem_->x += KeySpeed * interval;
+		particleSystem_->moveX(KeySpeed * interval);
 	else if (keyState.isKeyDown(nc::KeySym::A))
-		particleSystem_->x -= KeySpeed * interval;
+		particleSystem_->moveX(-KeySpeed * interval);
 	if (keyState.isKeyDown(nc::KeySym::W))
-		particleSystem_->y += KeySpeed * interval;
+		particleSystem_->moveY(KeySpeed * interval);
 	else if (keyState.isKeyDown(nc::KeySym::S))
-		particleSystem_->y -= KeySpeed * interval;
+		particleSystem_->moveY(-KeySpeed * interval);
 
 	if (keyState.isKeyDown(nc::KeySym::RIGHT))
 		emitVector_.x += KeySpeed * interval;
@@ -144,23 +144,17 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
-	{
-		particleSystem_->x = static_cast<float>(event.x);
-		particleSystem_->y = static_cast<float>(event.y);
-	}
+		particleSystem_->setPosition(static_cast<float>(event.x), static_cast<float>(event.y));
 }
 
 void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 {
 	if (state.isLeftButtonDown())
-	{
-		particleSystem_->x = static_cast<float>(state.x);
-		particleSystem_->y = static_cast<float>(state.y);
-	}
+		particleSystem_->setPosition(static_cast<float>(state.x), static_cast<float>(state.y));
 	else if (state.isRightButtonDown())
 	{
-		emitVector_.x = (state.x - particleSystem_->x) * 2.5f;
-		emitVector_.y = (state.y - particleSystem_->y) * 2.5f;
+		emitVector_.x = (state.x - particleSystem_->position().x) * 2.5f;
+		emitVector_.y = (state.y - particleSystem_->position().y) * 2.5f;
 	}
 }
 

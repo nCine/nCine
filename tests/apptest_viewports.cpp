@@ -263,6 +263,7 @@ void MyEventHandler::onFrameStart()
 				    comboDepthFormatType != currentDepthFormatType)
 				{
 					currentViewport.initTexture(viewportSize, nc::Viewport::ColorFormat(comboColorFormatType), nc::Viewport::DepthStencilFormat(comboDepthFormatType));
+					viewportData[currentComboViewport - 1].sprite->resetTexture();
 				}
 			}
 #if !defined(__EMSCRIPTEN__) && !defined(__ANDROID__)
@@ -392,8 +393,10 @@ void MyEventHandler::onFrameStart()
 	{
 		nc::Sprite &sprite = *viewportData[currentComboViewport - 1].sprite;
 
-		ImGui::SliderFloat("Pos X", &sprite.x, (-nc::theApplication().widthInt() + sprite.width()) / 2, (nc::theApplication().widthInt() - sprite.width()) / 2);
-		ImGui::SliderFloat("Pos Y", &sprite.y, (-nc::theApplication().heightInt() + sprite.height()) / 2, (nc::theApplication().heightInt() - sprite.height()) / 2);
+		nc::Vector2f position = sprite.position();
+		ImGui::SliderFloat("Pos X", &position.x, (-nc::theApplication().widthInt() + sprite.width()) / 2, (nc::theApplication().widthInt() - sprite.width()) / 2);
+		ImGui::SliderFloat("Pos Y", &position.y, (-nc::theApplication().heightInt() + sprite.height()) / 2, (nc::theApplication().heightInt() - sprite.height()) / 2);
+		sprite.setPosition(position);
 
 		static int positionIndex = viewportCreationData[currentComboViewport - 1].spritePositionIndex;
 		if (viewportChanged)
