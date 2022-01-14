@@ -358,11 +358,13 @@ void MyEventHandler::onFrameStart()
 					{
 						nc::TextureSaverWebP saver;
 						nc::TextureSaverWebP::Properties props;
+						nc::TextureSaverWebP::WebPProperties webpProps;
 						props.width = w;
 						props.height = h;
 						props.format = nc::ITextureSaver::Format::RGBA8;
 						props.pixels = pixels.get();
-						hasSaved = saver.saveToFile(props, saveTexelsFilename.data());
+						webpProps.lossless = true;
+						hasSaved = saver.saveToFile(props, webpProps, saveTexelsFilename.data());
 					}
 	#endif
 

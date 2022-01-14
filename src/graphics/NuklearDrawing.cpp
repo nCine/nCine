@@ -11,7 +11,6 @@
 #include "RenderQueue.h"
 #include "RenderCommandPool.h"
 #include "RenderResources.h"
-#include "DrawableNode.h"
 #include "Application.h"
 
 #if defined(WITH_GLFW)
@@ -239,7 +238,7 @@ void NuklearDrawing::draw(RenderQueue &renderQueue)
 
 		currCmd.geometry().setNumIndices(cmd->elem_count);
 		currCmd.geometry().setFirstIndex(firstIndex);
-		currCmd.setLayer(DrawableNode::nuklearLayer() + cmdIdx);
+		currCmd.setLayer(theApplication().guiSettings().nuklearLayer + cmdIdx);
 		currCmd.material().setTexture(reinterpret_cast<GLTexture *>(cmd->texture.ptr));
 
 		renderQueue.addCommand(&currCmd);

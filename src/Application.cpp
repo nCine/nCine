@@ -11,7 +11,7 @@
 #include "GLDebug.h"
 #include "Timer.h" // for `sleep()`
 #include "FrameTimer.h"
-#include "SceneNode.h"
+#include "DrawableNode.h"
 #include <nctl/String.h>
 #include "IInputManager.h"
 #include "JoyMapping.h"
@@ -61,6 +61,13 @@ Application::Application()
 }
 
 Application::~Application() = default;
+
+Application::GuiSettings::GuiSettings()
+    : imguiLayer(DrawableNode::LayerBase::HIGHEST - 1024),
+      nuklearLayer(DrawableNode::LayerBase::HIGHEST - 512),
+      imguiViewport(nullptr), nuklearViewport(nullptr)
+{
+}
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -226,8 +233,6 @@ void Application::step()
 
 	if (appCfg_.withScenegraph)
 	{
-		RenderQueue *screenRenderQueue = rootViewport_->renderQueue_.get();
-
 		ZoneScopedN("SceneGraph");
 		{
 			ZoneScopedN("Update");
@@ -254,7 +259,10 @@ void Application::step()
 		{
 			ZoneScopedN("ImGui endFrame");
 			profileStartTime_ = TimeStamp::now();
-			imguiDrawing_->endFrame(*screenRenderQueue);
+			RenderQueue *imguiRenderQueue = (guiSettings_.imguiViewport) ?
+			            guiSettings_.imguiViewport->renderQueue_.get() :
+			            rootViewport_->renderQueue_.get();
+			imguiDrawing_->endFrame(*imguiRenderQueue);
 			timings_[Timings::IMGUI] += profileStartTime_.secondsSince();
 		}
 #endif
@@ -263,7 +271,10 @@ void Application::step()
 		{
 			ZoneScopedN("Nuklear endFrame");
 			profileStartTime_ = TimeStamp::now();
-			nuklearDrawing_->endFrame(*screenRenderQueue);
+			RenderQueue *nuklearRenderQueue = (guiSettings_.nuklearViewport) ?
+			            guiSettings_.nuklearViewport->renderQueue_.get() :
+			            rootViewport_->renderQueue_.get();
+			nuklearDrawing_->endFrame(*nuklearRenderQueue);
 			timings_[Timings::NUKLEAR] += profileStartTime_.secondsSince();
 		}
 #endif

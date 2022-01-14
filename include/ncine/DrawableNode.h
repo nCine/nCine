@@ -132,12 +132,6 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	/// Returns last frame culling state for this node
 	inline CullingState cullingState() const { return cullingState_; }
 
-	inline static unsigned short imGuiLayer() { return imguiLayer_; }
-	inline static void setImGuiLayer(unsigned short layer) { imguiLayer_ = layer; }
-
-	inline static unsigned short nuklearLayer() { return nuklearLayer_; }
-	inline static void setNuklearLayer(unsigned short layer) { nuklearLayer_ = layer; }
-
   protected:
 	/// Node width in pixel
 	float width_;

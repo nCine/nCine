@@ -10,7 +10,6 @@
 #include "RenderQueue.h"
 #include "RenderCommandPool.h"
 #include "RenderResources.h"
-#include "DrawableNode.h"
 #include "Application.h"
 
 #if defined(WITH_GLFW)
@@ -253,7 +252,7 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 			currCmd.geometry().setNumIndices(imCmd->ElemCount);
 			currCmd.geometry().setFirstIndex(imCmd->IdxOffset);
 			currCmd.geometry().setFirstVertex(imCmd->VtxOffset);
-			currCmd.setLayer(DrawableNode::imGuiLayer() + numCmd);
+			currCmd.setLayer(theApplication().guiSettings().imguiLayer + numCmd);
 			currCmd.material().setTexture(reinterpret_cast<GLTexture *>(imCmd->GetTexID()));
 
 			renderQueue.addCommand(&currCmd);

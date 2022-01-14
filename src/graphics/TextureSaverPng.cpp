@@ -99,8 +99,17 @@ bool TextureSaverPng::saveToFile(const Properties &properties, const PngProperti
 
 	png_write_info(pngPtr, infoPtr);
 
+	// Flip pixels data vertically if the corresponding flag is true
+	nctl::UniquePtr<unsigned char[]> flippedPixels;
+	if (properties.verticalFlip)
+	{
+		flippedPixels = nctl::makeUnique<unsigned char[]>(dataSize(properties));
+		flipPixels(properties, flippedPixels.get());
+	}
+	void *texturePixels = properties.verticalFlip ? flippedPixels.get() : properties.pixels;
+
 	// Write image data
-	png_byte *pixels = reinterpret_cast<png_byte *>(properties.pixels);
+	png_byte *pixels = reinterpret_cast<png_byte *>(texturePixels);
 
 	const unsigned int rowLength = bpp * properties.width * sizeof(png_byte);
 	for (int y = 0; y < properties.height; y++)

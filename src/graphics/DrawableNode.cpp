@@ -69,9 +69,6 @@ const Vector2f DrawableNode::AnchorTopLeft(0.0f, 1.0f);
 const Vector2f DrawableNode::AnchorBottomRight(1.0f, 0.0f);
 const Vector2f DrawableNode::AnchorTopRight(1.0f, 1.0f);
 
-unsigned short DrawableNode::imguiLayer_ = LayerBase::HIGHEST - 1024;
-unsigned short DrawableNode::nuklearLayer_ = LayerBase::HIGHEST - 512;
-
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////

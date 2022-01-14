@@ -203,6 +203,8 @@ class DLL_PUBLIC Viewport
 	void visit();
 	void sortAndCommitQueue();
 	void draw();
+
+	friend class Application;
 };
 
 }

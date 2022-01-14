@@ -35,6 +35,7 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/TextureLoaderDds.cpp
 	${NCINE_ROOT}/src/graphics/TextureLoaderPvr.cpp
 	${NCINE_ROOT}/src/graphics/TextureLoaderKtx.cpp
+	${NCINE_ROOT}/src/graphics/ITextureSaver.cpp
 	${NCINE_ROOT}/src/graphics/Texture.cpp
 	${NCINE_ROOT}/src/graphics/DrawableNode.cpp
 	${NCINE_ROOT}/src/graphics/SceneNode.cpp
