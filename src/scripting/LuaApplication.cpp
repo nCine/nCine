@@ -19,8 +19,13 @@ namespace Application {
 	static const char *debugOverlaySettings = "get_debugoverlay_settings";
 	static const char *setDebugOverlaySettings = "set_debugoverlay_settings";
 
+	static const char *guiSettings = "get_gui_settings";
+	static const char *setGuiSettings = "set_gui_settings";
+
 	static const char *rootNode = "rootnode";
+	static const char *rootViewport = "root_viewport";
 	static const char *interval = "interval";
+	static const char *numFrames = "num_frames";
 
 	static const char *width = "get_width";
 	static const char *height = "get_height";
@@ -47,6 +52,13 @@ namespace Application {
 		static const char *showInfoText = "info_text";
 		static const char *showInterface = "interface";
 	}
+
+	namespace GuiSettings {
+		static const char *imguiLayer = "imgui_layer";
+		static const char *nuklearLayer = "nuklear_layer";
+		static const char *imguiViewport = "imgui_viewport";
+		static const char *nuklearViewport = "nuklear_viewport";
+	}
 }}
 
 ///////////////////////////////////////////////////////////
@@ -63,8 +75,13 @@ void LuaApplication::expose(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::Application::debugOverlaySettings, debugOverlaySettings);
 	LuaUtils::addFunction(L, LuaNames::Application::setDebugOverlaySettings, setDebugOverlaySettings);
 
+	LuaUtils::addFunction(L, LuaNames::Application::guiSettings, guiSettings);
+	LuaUtils::addFunction(L, LuaNames::Application::setGuiSettings, setGuiSettings);
+
 	LuaUtils::addFunction(L, LuaNames::Application::rootNode, rootNode);
+	LuaUtils::addFunction(L, LuaNames::Application::rootViewport, rootViewport);
 	LuaUtils::addFunction(L, LuaNames::Application::interval, interval);
+	LuaUtils::addFunction(L, LuaNames::Application::numFrames, numFrames);
 
 	LuaUtils::addFunction(L, LuaNames::Application::width, width);
 	LuaUtils::addFunction(L, LuaNames::Application::height, height);
@@ -147,15 +164,58 @@ int LuaApplication::setDebugOverlaySettings(lua_State *L)
 	return 0;
 }
 
+int LuaApplication::guiSettings(lua_State *L)
+{
+	const Application::GuiSettings &settings = theApplication().guiSettings();
+
+	lua_createtable(L, 0, 4);
+	LuaUtils::pushField(L, LuaNames::Application::GuiSettings::imguiLayer, settings.imguiLayer);
+	LuaUtils::pushField(L, LuaNames::Application::GuiSettings::nuklearLayer, settings.nuklearLayer);
+	LuaUtils::pushField(L, LuaNames::Application::GuiSettings::imguiViewport, settings.imguiViewport);
+	LuaUtils::pushField(L, LuaNames::Application::GuiSettings::nuklearViewport, settings.nuklearViewport);
+
+	return 1;
+}
+
+int LuaApplication::setGuiSettings(lua_State *L)
+{
+	if (lua_istable(L, -1) == false)
+	{
+		LOGW("Expecting a table at index -1");
+		return 0;
+	}
+
+	Application::GuiSettings &settings = theApplication().guiSettings();
+
+	settings.imguiLayer = LuaUtils::retrieveField<unsigned int>(L, -1, LuaNames::Application::GuiSettings::imguiLayer);
+	settings.nuklearLayer = LuaUtils::retrieveField<unsigned int>(L, -1, LuaNames::Application::GuiSettings::nuklearLayer);
+	settings.imguiViewport = reinterpret_cast<Viewport *>(LuaUtils::retrieveFieldLightUserData(L, -1, LuaNames::Application::GuiSettings::imguiViewport));
+	settings.nuklearViewport = reinterpret_cast<Viewport *>(LuaUtils::retrieveFieldLightUserData(L, -1, LuaNames::Application::GuiSettings::imguiViewport));
+
+	return 0;
+}
+
 int LuaApplication::rootNode(lua_State *L)
 {
 	LuaClassWrapper<SceneNode>::pushUntrackedUserData(L, &theApplication().rootNode());
 	return 1;
 }
 
+int LuaApplication::rootViewport(lua_State *L)
+{
+	LuaClassWrapper<Viewport>::pushUntrackedUserData(L, &theApplication().rootViewport());
+	return 1;
+}
+
 int LuaApplication::interval(lua_State *L)
 {
 	LuaUtils::push(L, theApplication().interval());
+	return 1;
+}
+
+int LuaApplication::numFrames(lua_State *L)
+{
+	LuaUtils::push(L, static_cast<uint64_t>(theApplication().numFrames()));
 	return 1;
 }
 

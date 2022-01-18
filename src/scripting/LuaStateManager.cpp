@@ -22,6 +22,9 @@
 	#include "LuaKeys.h"
 	#include "LuaJoystickEvents.h"
 
+	#include "LuaViewport.h"
+	#include "LuaCamera.h"
+
 	#include "LuaTimeStamp.h"
 	#include "LuaFileSystem.h"
 	#include "LuaApplication.h"
@@ -429,6 +432,16 @@ void LuaStateManager::releaseTrackedMemory()
 
 		switch (wrapper.type)
 		{
+			case LuaTypes::VIEWPORT:
+			{
+				LuaViewport::release(wrapper.object);
+				break;
+			}
+			case LuaTypes::CAMERA:
+			{
+				LuaCamera::release(wrapper.object);
+				break;
+			}
 			case LuaTypes::TEXTURE:
 			{
 				LuaTexture::release(wrapper.object);
@@ -538,6 +551,9 @@ void LuaStateManager::exposeApi()
 	LuaApplication::expose(L_);
 	if (appCfg.withScenegraph)
 	{
+		LuaViewport::expose(this);
+		LuaCamera::expose(this);
+
 		LuaTexture::expose(this);
 		LuaSceneNode::expose(this);
 		LuaSprite::expose(this);
@@ -575,6 +591,8 @@ void LuaStateManager::exposeConstants()
 	LuaFileSystem::exposeConstants(L_);
 	if (appCfg.withScenegraph)
 	{
+		LuaViewport::exposeConstants(L_);
+
 		LuaTexture::exposeConstants(L_);
 		LuaDrawableNode::exposeConstants(L_);
 		LuaRectAnimation::exposeConstants(L_);
