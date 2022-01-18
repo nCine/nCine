@@ -82,7 +82,11 @@ void ImGuiQt5Input::init(Qt5Widget *widget)
 	io.KeyMap[ImGuiKey_Space] = Qt::Key_Space;
 	io.KeyMap[ImGuiKey_Enter] = Qt::Key_Return - Qt::Key_Escape;
 	io.KeyMap[ImGuiKey_Escape] = Qt::Key_Escape - Qt::Key_Escape;
+#if IMGUI_VERSION_NUM > 18600
+	io.KeyMap[ImGuiKey_KeypadEnter] = Qt::Key_Enter - Qt::Key_Escape;
+#else
 	io.KeyMap[ImGuiKey_KeyPadEnter] = Qt::Key_Enter - Qt::Key_Escape;
+#endif
 	io.KeyMap[ImGuiKey_A] = Qt::Key_A;
 	io.KeyMap[ImGuiKey_C] = Qt::Key_C;
 	io.KeyMap[ImGuiKey_V] = Qt::Key_V;

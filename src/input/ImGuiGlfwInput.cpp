@@ -81,7 +81,11 @@ void ImGuiGlfwInput::init(GLFWwindow *window)
 	io.KeyMap[ImGuiKey_Space] = GLFW_KEY_SPACE;
 	io.KeyMap[ImGuiKey_Enter] = GLFW_KEY_ENTER;
 	io.KeyMap[ImGuiKey_Escape] = GLFW_KEY_ESCAPE;
+#if IMGUI_VERSION_NUM > 18600
+	io.KeyMap[ImGuiKey_KeypadEnter] = GLFW_KEY_KP_ENTER;
+#else
 	io.KeyMap[ImGuiKey_KeyPadEnter] = GLFW_KEY_KP_ENTER;
+#endif
 	io.KeyMap[ImGuiKey_A] = GLFW_KEY_A;
 	io.KeyMap[ImGuiKey_C] = GLFW_KEY_C;
 	io.KeyMap[ImGuiKey_V] = GLFW_KEY_V;

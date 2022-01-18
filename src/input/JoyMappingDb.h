@@ -26,7 +26,7 @@ static const char *ControllerMappings[] = {
 	"09557210000000000000000000000000,NVIDIA Corporation Shield Controller,platform:Android,a:b0,b:b1,x:b2,y:b3,leftshoulder:b4,rightshoulder:b5,leftstick:b6,rightstick:b7,start:b8,back:b9,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:a4,righttrigger:a5,dpup:h0.1,dpdown:h0.4,dpleft:h0.8,dpright:h0.2",
 #endif
 
-// SDL2 mappings from `SDL2-2.0.18/src/joystick/SDL_gamecontrollerdb.h`
+// SDL2 mappings from `SDL2-2.0.20/src/joystick/SDL_gamecontrollerdb.h`
 #if SDL_JOYSTICK_XINPUT
 	"xinput,XInput Controller,a:b0,b:b1,back:b6,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b10,leftshoulder:b4,leftstick:b8,lefttrigger:a2,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b9,righttrigger:a5,rightx:a3,righty:a4,start:b7,x:b2,y:b3,",
 #endif
@@ -891,6 +891,9 @@ static const char *ControllerMappings[] = {
 #endif
 #if defined(SDL_JOYSTICK_VITA)
 	"50535669746120436f6e74726f6c6c65,PSVita Controller,a:b2,b:b1,back:b10,dpdown:b6,dpleft:b7,dpright:b9,dpup:b8,leftshoulder:b4,leftstick:b14,lefttrigger:a4,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b15,righttrigger:a5,rightx:a2,righty:a3,start:b11,x:b3,y:b0,",
+#endif
+#if defined(SDL_JOYSTICK_PSP)
+	"505350206275696c74696e206a6f7970,PSP builtin joypad,y:b0,b:b1,a:b2,x:b3,leftshoulder:b4,rightshoulder:b5,dpdown:b6,dpleft:b7,dpup:b8,dpright:b9,back:b10,start:b11,leftx:a0,lefty:a1,rightx:a2,righty:a3,",
 #endif
 	"hidapi,*,a:b0,b:b1,back:b4,dpdown:b12,dpleft:b13,dpright:b14,dpup:b11,guide:b5,leftshoulder:b9,leftstick:b7,lefttrigger:a4,leftx:a0,lefty:a1,rightshoulder:b10,rightstick:b8,righttrigger:a5,rightx:a2,righty:a3,start:b6,x:b2,y:b3,",
 	nullptr

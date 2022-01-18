@@ -25,7 +25,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 bool ImGuiSdlInput::inputEnabled_ = true;
-bool ImGuiSdlInput::mouseCanUseGlobalState_ = true;
+bool ImGuiSdlInput::mouseCanUseGlobalState_ = false;
 SDL_Window *ImGuiSdlInput::window_ = nullptr;
 double ImGuiSdlInput::time_ = 0.0;
 bool ImGuiSdlInput::mousePressed_[3] = { false, false, false };
@@ -99,7 +99,11 @@ void ImGuiSdlInput::init(SDL_Window *window)
 	io.KeyMap[ImGuiKey_Space] = SDL_SCANCODE_SPACE;
 	io.KeyMap[ImGuiKey_Enter] = SDL_SCANCODE_RETURN;
 	io.KeyMap[ImGuiKey_Escape] = SDL_SCANCODE_ESCAPE;
+#if IMGUI_VERSION_NUM > 18600
+	io.KeyMap[ImGuiKey_KeypadEnter] = SDL_SCANCODE_KP_ENTER;
+#else
 	io.KeyMap[ImGuiKey_KeyPadEnter] = SDL_SCANCODE_KP_ENTER;
+#endif
 	io.KeyMap[ImGuiKey_A] = SDL_SCANCODE_A;
 	io.KeyMap[ImGuiKey_C] = SDL_SCANCODE_C;
 	io.KeyMap[ImGuiKey_V] = SDL_SCANCODE_V;
@@ -353,8 +357,8 @@ void ImGuiSdlInput::updateGamepads()
 	if (joyMappedInput == false)
 	{
 		// Get gamepad
-		SDL_GameController *game_controller = SDL_GameControllerOpen(0);
-		if (!game_controller)
+		SDL_GameController *gameController = SDL_GameControllerOpen(0);
+		if (!gameController)
 		{
 			io.BackendFlags &= ~ImGuiBackendFlags_HasGamepad;
 			return;
@@ -363,19 +367,19 @@ void ImGuiSdlInput::updateGamepads()
 		// Update gamepad inputs
 #define MAP_BUTTON(NAV_NO, BUTTON_NO) \
 	{ \
-		io.NavInputs[NAV_NO] = (SDL_GameControllerGetButton(game_controller, BUTTON_NO) != 0) ? 1.0f : 0.0f; \
+		io.NavInputs[NAV_NO] = (SDL_GameControllerGetButton(gameController, BUTTON_NO) != 0) ? 1.0f : 0.0f; \
 	}
 
 #define MAP_ANALOG(NAV_NO, AXIS_NO, V0, V1) \
 	{ \
-		float vn = static_cast<float>(SDL_GameControllerGetAxis(game_controller, AXIS_NO) - V0) / static_cast<float>(V1 - V0); \
+		float vn = static_cast<float>(SDL_GameControllerGetAxis(gameController, AXIS_NO) - V0) / static_cast<float>(V1 - V0); \
 		if (vn > 1.0f) \
 			vn = 1.0f; \
 		if (vn > 0.0f && io.NavInputs[NAV_NO] < vn) \
 			io.NavInputs[NAV_NO] = vn; \
 	}
 
-		const int thumb_dead_zone = 8000; // SDL_gamecontroller.h suggests using this value.
+		const int thumbDeadZone = 8000; // SDL_gamecontroller.h suggests using this value.
 		MAP_BUTTON(ImGuiNavInput_Activate, SDL_CONTROLLER_BUTTON_A) // Cross / A
 		MAP_BUTTON(ImGuiNavInput_Cancel, SDL_CONTROLLER_BUTTON_B) // Circle / B
 		MAP_BUTTON(ImGuiNavInput_Menu, SDL_CONTROLLER_BUTTON_X) // Square / X
@@ -388,10 +392,10 @@ void ImGuiSdlInput::updateGamepads()
 		MAP_BUTTON(ImGuiNavInput_FocusNext, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) // R1 / RB
 		MAP_BUTTON(ImGuiNavInput_TweakSlow, SDL_CONTROLLER_BUTTON_LEFTSHOULDER) // L1 / LB
 		MAP_BUTTON(ImGuiNavInput_TweakFast, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) // R1 / RB
-		MAP_ANALOG(ImGuiNavInput_LStickLeft, SDL_CONTROLLER_AXIS_LEFTX, -thumb_dead_zone, -32768)
-		MAP_ANALOG(ImGuiNavInput_LStickRight, SDL_CONTROLLER_AXIS_LEFTX, +thumb_dead_zone, +32767)
-		MAP_ANALOG(ImGuiNavInput_LStickUp, SDL_CONTROLLER_AXIS_LEFTY, -thumb_dead_zone, -32767)
-		MAP_ANALOG(ImGuiNavInput_LStickDown, SDL_CONTROLLER_AXIS_LEFTY, +thumb_dead_zone, +32767)
+		MAP_ANALOG(ImGuiNavInput_LStickLeft, SDL_CONTROLLER_AXIS_LEFTX, -thumbDeadZone, -32768)
+		MAP_ANALOG(ImGuiNavInput_LStickRight, SDL_CONTROLLER_AXIS_LEFTX, +thumbDeadZone, +32767)
+		MAP_ANALOG(ImGuiNavInput_LStickUp, SDL_CONTROLLER_AXIS_LEFTY, -thumbDeadZone, -32767)
+		MAP_ANALOG(ImGuiNavInput_LStickDown, SDL_CONTROLLER_AXIS_LEFTY, +thumbDeadZone, +32767)
 
 		io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
 

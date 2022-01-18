@@ -262,7 +262,7 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 			// Project scissor/clipping rectangles into framebuffer space
 			ImVec2 clipMin((imCmd->ClipRect.x - clipOff.x) * clipScale.x, (imCmd->ClipRect.y - clipOff.y) * clipScale.y);
 			ImVec2 clipMax((imCmd->ClipRect.z - clipOff.x) * clipScale.x, (imCmd->ClipRect.w - clipOff.y) * clipScale.y);
-			if (clipMax.x < clipMin.x || clipMax.y < clipMin.y)
+			if (clipMax.x <= clipMin.x || clipMax.y <= clipMin.y)
 				continue;
 
 			// Apply scissor/clipping rectangle (Y is inverted in OpenGL)
@@ -340,7 +340,7 @@ void ImGuiDrawing::draw()
 			// Project scissor/clipping rectangles into framebuffer space
 			ImVec2 clipMin((imCmd->ClipRect.x - clipOff.x) * clipScale.x, (imCmd->ClipRect.y - clipOff.y) * clipScale.y);
 			ImVec2 clipMax((imCmd->ClipRect.z - clipOff.x) * clipScale.x, (imCmd->ClipRect.w - clipOff.y) * clipScale.y);
-			if (clipMax.x < clipMin.x || clipMax.y < clipMin.y)
+			if (clipMax.x <= clipMin.x || clipMax.y <= clipMin.y)
 				continue;
 
 			// Apply scissor/clipping rectangle (Y is inverted in OpenGL)
