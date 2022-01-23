@@ -133,6 +133,11 @@ if("${NCINE_OPTIONS_PRESETS}" STREQUAL "BinDist" OR
 		set(NCINE_STARTUP_TEST ncinelua)
 	endif()
 
+	if((MINGW OR MSYS) AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		# Not stripping binaries on MinGW when using Clang to avoid the "unexpected associative section index" error
+		# https://github.com/llvm/llvm-project/issues/53433
+		set(NCINE_STRIP_BINARIES OFF)
+	endif()
 	if(EMSCRIPTEN)
 		set(NCINE_DYNAMIC_LIBRARY OFF)
 		set(NCINE_IMPLEMENTATION_DOCUMENTATION ON)

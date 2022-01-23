@@ -33,6 +33,11 @@ if(NCPROJECT_OPTIONS_PRESETS STREQUAL BinDist)
 	set(NCPROJECT_BUILD_ANDROID OFF)
 	set(NCPROJECT_STRIP_BINARIES ON)
 
+	if((MINGW OR MSYS) AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		# Not stripping binaries on MinGW when using Clang to avoid the "unexpected associative section index" error
+		# https://github.com/llvm/llvm-project/issues/53433
+		set(NCPROJECT_STRIP_BINARIES OFF)
+	endif()
 	if(EMSCRIPTEN)
 		set(NCPROJECT_BUILD_ANDROID OFF)
 		set(NCPROJECT_STRIP_BINARIES OFF)

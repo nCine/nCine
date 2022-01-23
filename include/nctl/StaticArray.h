@@ -94,17 +94,17 @@ class StaticArray
 	/// Clears the array
 	void clear();
 	/// Returns a constant reference to the first element in constant time
-	inline const T &front() const { return array_[0]; }
+	const T &front() const;
 	/// Returns a reference to the first element in constant time
-	inline T &front() { return array_[0]; }
+	T &front();
 	/// Returns a constant reference to the last element in constant time
-	inline const T &back() const { return array_[size_ - 1]; }
+	const T &back() const;
 	/// Returns a reference to the last element in constant time
-	inline T &back() { return array_[size_ - 1]; }
+	T &back();
 	/// Inserts a new element as the last one in constant time
-	void pushBack(const T &element);
+	inline void pushBack(const T &element) { new (extendOne()) T(element); }
 	/// Move inserts a new element as the last one in constant time
-	void pushBack(T &&element);
+	inline void pushBack(T &&element) { new (extendOne()) T(nctl::move(element)); }
 	/// Constructs a new element as the last one in constant time
 	template <typename... Args> void emplaceBack(Args &&... args);
 	/// Removes the last element in constant time
@@ -253,38 +253,46 @@ void StaticArray<T, C>::clear()
 }
 
 template <class T, unsigned int C>
-void StaticArray<T, C>::pushBack(const T &element)
+const T &StaticArray<T, C>::front() const
 {
-	T *ptr = extendOne();
-	if (ptr)
-		new (ptr) T(element);
+	FATAL_ASSERT_MSG(size_ > 0, "Cannot retrieve an element from an empty array");
+	return array_[0];
 }
 
 template <class T, unsigned int C>
-void StaticArray<T, C>::pushBack(T &&element)
+T &StaticArray<T, C>::front()
 {
-	T *ptr = extendOne();
-	if (ptr)
-		new (ptr) T(nctl::move(element));
+	FATAL_ASSERT_MSG(size_ > 0, "Cannot retrieve an element from an empty array");
+	return array_[0];
+}
+
+template <class T, unsigned int C>
+const T &StaticArray<T, C>::back() const
+{
+	FATAL_ASSERT_MSG(size_ > 0, "Cannot retrieve an element from an empty array");
+	return array_[size_ - 1];
+}
+
+template <class T, unsigned int C>
+T &StaticArray<T, C>::back()
+{
+	FATAL_ASSERT_MSG(size_ > 0, "Cannot retrieve an element from an empty array");
+	return array_[size_ - 1];
 }
 
 template <class T, unsigned int C>
 template <typename... Args>
 void StaticArray<T, C>::emplaceBack(Args &&... args)
 {
-	T *ptr = extendOne();
-	if (ptr)
-		new (ptr) T(nctl::forward<Args>(args)...);
+	new (extendOne()) T(nctl::forward<Args>(args)...);
 }
 
 template <class T, unsigned int C>
 void StaticArray<T, C>::popBack()
 {
-	if (size_ > 0)
-	{
-		destructObject(array_ + size_ - 1);
-		size_--;
-	}
+	FATAL_ASSERT_MSG(size_ > 0, "Cannot pop an element from an empty array");
+	destructObject(array_ + size_ - 1);
+	size_--;
 }
 
 template <class T, unsigned int C>
@@ -517,8 +525,7 @@ T &StaticArray<T, C>::operator[](unsigned int index)
 template <class T, unsigned int C>
 T *StaticArray<T, C>::extendOne()
 {
-	if (size_ == capacity_)
-		return nullptr;
+	FATAL_ASSERT_MSG_X(size_ < capacity_, "Cannot extend static array size beyond capacity (%u elements)", capacity_);
 	size_++;
 	return array_ + size_ - 1;
 }

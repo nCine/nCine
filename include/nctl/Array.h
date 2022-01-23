@@ -126,13 +126,13 @@ class Array
 	/// Clears the array
 	void clear();
 	/// Returns a constant reference to the first element in constant time
-	inline const T &front() const { return array_[0]; }
+	const T &front() const;
 	/// Returns a reference to the first element in constant time
-	inline T &front() { return array_[0]; }
+	T &front();
 	/// Returns a constant reference to the last element in constant time
-	inline const T &back() const { return array_[size_ - 1]; }
+	const T &back() const;
 	/// Returns a reference to the last element in constant time
-	inline T &back() { return array_[size_ - 1]; }
+	T &back();
 	/// Appends a new element in constant time, the element is copied into the array
 	inline void pushBack(const T &element) { new (extendOne()) T(element); }
 	/// Appends a new element in constant time, the element is moved into the array
@@ -386,6 +386,34 @@ void Array<T>::clear()
 }
 
 template <class T>
+const T &Array<T>::front() const
+{
+	FATAL_ASSERT_MSG(size_ > 0, "Cannot retrieve an element from an empty array");
+	return array_[0];
+}
+
+template <class T>
+T &Array<T>::front()
+{
+	FATAL_ASSERT_MSG(size_ > 0, "Cannot retrieve an element from an empty array");
+	return array_[0];
+}
+
+template <class T>
+const T &Array<T>::back() const
+{
+	FATAL_ASSERT_MSG(size_ > 0, "Cannot retrieve an element from an empty array");
+	return array_[size_ - 1];
+}
+
+template <class T>
+T &Array<T>::back()
+{
+	FATAL_ASSERT_MSG(size_ > 0, "Cannot retrieve an element from an empty array");
+	return array_[size_ - 1];
+}
+
+template <class T>
 template <typename... Args>
 void Array<T>::emplaceBack(Args &&... args)
 {
@@ -395,11 +423,9 @@ void Array<T>::emplaceBack(Args &&... args)
 template <class T>
 void Array<T>::popBack()
 {
-	if (size_ > 0)
-	{
-		destructObject(array_ + size_ - 1);
-		size_--;
-	}
+	FATAL_ASSERT_MSG(size_ > 0, "Cannot pop an element from an empty array");
+	destructObject(array_ + size_ - 1);
+	size_--;
 }
 
 template <class T>
@@ -653,6 +679,7 @@ T *Array<T>::extendOne()
 		const unsigned int newCapacity = (capacity_ == 0) ? 1 : capacity_ * 2;
 		setCapacity(newCapacity);
 		// Extending size only if the capacity is not fixed
+		FATAL_ASSERT_MSG_X(capacity_ == newCapacity, "Cannot extend array capacity to %u elements", newCapacity);
 		if (capacity_ == newCapacity)
 			size_++;
 	}

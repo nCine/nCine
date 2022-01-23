@@ -7,24 +7,42 @@ end
 nc = ncine
 
 filename = arg[1] and arg[1] or "nCine_Lua_API.adoc"
+doc_lines = {}
 
-function add_entry(t, entry, name)
+function indent(level)
+	str = ""
+	for i=1, level do
+		str = str .. "="
+	end
+	return str
+end
+
+function add_entry(t, entry, name, level)
 	if type(entry) == "function" then
-		table.insert(t, "=== " .. name .. "()")
+		table.insert(t, indent(level) .. " " .. name .. "()")
 	else
 		table.insert(t, "* `" .. name .. "`: " .. tostring(entry))
 	end
 end
 
-l1_keys = {}
-doc_lines = {}
+function recursive_scan(t, doc, level)
+	tkeys = {}
+	for key in pairs(t) do
+		table.insert(tkeys, key)
+	end
+	table.sort(tkeys)
 
+	for key, val in pairs(tkeys) do
+		if type(t[val]) == "table" then
+			table.insert(doc, "\n")
+			table.insert(doc, indent(level) .. " " .. val .. "\n")
 
-for key in pairs(nc) do
-	table.insert(l1_keys, key)
+			recursive_scan(t[val], doc, level + 1)
+		else
+			add_entry(doc, t[val], val, level)
+		end
+	end
 end
-
-table.sort(l1_keys)
 
 table.insert(doc_lines, [[
 :nofooter:
@@ -34,25 +52,7 @@ table.insert(doc_lines, [[
 = nCine Lua API
 ]])
 
-for key, l1val in pairs(l1_keys) do
-	if type(nc[l1val]) == "table" then
-		table.insert(doc_lines, "\n")
-		table.insert(doc_lines, "== " .. l1val .. "\n")
-
-		l2_keys = {}
-		for key in pairs(nc[l1val]) do
-			table.insert(l2_keys, key)
-		end
-		table.sort(l2_keys)
-
-		for key, l2val in pairs(l2_keys) do
-			add_entry(doc_lines, nc[l1val][l2val], l2val)
-		end
-	else	
-		add_entry(doc_lines, nc[l1val], l1val)
-	end
-end
-
+recursive_scan(nc, doc_lines, 2)
 doc = table.concat(doc_lines)
 
 file = io.open(filename, "w")

@@ -1,7 +1,7 @@
 target_compile_features(ncine PUBLIC cxx_std_11)
 set_target_properties(ncine PROPERTIES CXX_EXTENSIONS OFF)
 
-target_compile_definitions(ncine PRIVATE "$<$<CONFIG:Debug>:NCINE_DEBUG>")
+target_compile_definitions(ncine PUBLIC "$<$<CONFIG:Debug>:NCINE_DEBUG>")
 
 if(EMSCRIPTEN)
 	set(EMSCRIPTEN_LINKER_OPTIONS

@@ -1,7 +1,6 @@
 #ifndef CLASS_NCTL_LISTITERATOR
 #define CLASS_NCTL_LISTITERATOR
 
-#include <ncine/common_macros.h>
 #include "iterator.h"
 
 namespace nctl {

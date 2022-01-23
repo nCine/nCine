@@ -25,7 +25,7 @@ endif()
 list(APPEND TESTS
 	gtest_array gtest_array_zerocapacity gtest_array_iterator gtest_array_reverseiterator gtest_array_operations gtest_array_algorithms gtest_carray_iterator gtest_array_movable gtest_array_refcounted
 	gtest_staticarray gtest_staticarray_iterator gtest_staticarray_reverseiterator gtest_staticarray_operations gtest_staticarray_algorithms gtest_staticarray_movable gtest_staticarray_refcounted
-	gtest_list gtest_list_iterator gtest_list_operations gtest_list_algorithms gtest_list_movable gtest_list_refcounted
+	gtest_list gtest_list_iterator gtest_list_operations gtest_list_algorithms gtest_list_refcounted
 	gtest_string gtest_string_iterator gtest_string_reverseiterator gtest_string_operations gtest_string_utf8
 	gtest_hashmap gtest_hashmap_iterator gtest_hashmap_algorithms gtest_hashmap_string gtest_hashmap_cstring gtest_hashmap_movable gtest_hashmap_refcounted
 	gtest_statichashmap gtest_statichashmap_iterator gtest_statichashmap_algorithms gtest_statichashmap_string gtest_statichashmap_cstring gtest_statichashmap_movable gtest_statichashmap_refcounted
@@ -40,6 +40,12 @@ list(APPEND TESTS
 	gtest_color gtest_colorf gtest_colorhdr
 	gtest_random gtest_filesystem gtest_pointermath
 )
+
+if(NOT (CMAKE_BUILD_TYPE MATCHES Release AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"))
+	# Some tests from this suite have issues with different versions of GCC when compiling in release.
+	# The issues disappear when `List.h` is compiled with the O2 optimization level instead of O3.
+	list(APPEND TESTS gtest_list_movable)
+endif()
 
 if(Threads_FOUND)
 	list(APPEND TESTS

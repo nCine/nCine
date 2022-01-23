@@ -74,6 +74,73 @@ TEST(StaticArrayDeathTest, AccessConstAtSize)
 
 	ASSERT_DEATH(constArray.at(1), "");
 }
+
+TEST(StaticArrayDeathTest, FrontElementFromEmptyArray)
+{
+	nctl::StaticArray<int, Capacity> array;
+	printf("Retrieving the front element from an empty array\n");
+
+	ASSERT_EQ(array.size(), 0);
+	ASSERT_DEATH(array.front(), "");
+}
+
+TEST(StaticArrayDeathTest, FrontConstElementFromEmptyArray)
+{
+	const nctl::StaticArray<int, Capacity> array;
+	printf("Retrieving the front element from an empty const array\n");
+
+	ASSERT_EQ(array.size(), 0);
+	ASSERT_DEATH(array.front(), "");
+}
+
+TEST(StaticArrayDeathTest, BackElementFromEmptyArray)
+{
+	nctl::StaticArray<int, Capacity> array;
+	printf("Retrieving the back element from an empty array\n");
+
+	ASSERT_EQ(array.size(), 0);
+	ASSERT_DEATH(array.back(), "");
+}
+
+TEST(StaticArrayDeathTest, BackConstElementFromEmptyArray)
+{
+	const nctl::StaticArray<int, Capacity> array;
+	printf("Retrieving the back element from an empty const array\n");
+
+	ASSERT_EQ(array.size(), 0);
+	ASSERT_DEATH(array.back(), "");
+}
+
+TEST(StaticArrayDeathTest, PushBackBeyondCapacity)
+{
+	printf("Trying to push back an element beyond the capacity of a static array\n");
+	nctl::StaticArray<int, Capacity> array;
+	for(unsigned int i = 0; i < Capacity; i++)
+		array.pushBack(i);
+
+	ASSERT_EQ(array.size(), Capacity);
+	ASSERT_DEATH(array.pushBack(0), "");
+}
+
+TEST(StaticArrayDeathTest, EmplaceBackBeyondCapacity)
+{
+	printf("Trying to emplace back an element beyond the capacity of a static array\n");
+	nctl::StaticArray<int, Capacity> array;
+	for(unsigned int i = 0; i < Capacity; i++)
+		array.emplaceBack(i);
+
+	ASSERT_EQ(array.size(), Capacity);
+	ASSERT_DEATH(array.emplaceBack(0), "");
+}
+
+TEST(StaticArrayDeathTest, PopBackEmpty)
+{
+	printf("Removing at the back of an empty array\n");
+	nctl::StaticArray<int, Capacity> array;
+
+	ASSERT_EQ(array.size(), 0);
+	ASSERT_DEATH(array.popBack(), "");
+}
 #endif
 
 TEST_F(StaticArrayTest, AccessWithinSize)
@@ -191,15 +258,6 @@ TEST_F(StaticArrayTest, PushBack)
 	ASSERT_EQ(newArray[1], 1);
 }
 
-TEST_F(StaticArrayTest, PushBackNotGrowing)
-{
-	printf("Trying to push back an element beyond the capacity of a static array\n");
-	array_.pushBack(Capacity);
-
-	ASSERT_EQ(array_.capacity(), Capacity);
-	ASSERT_EQ(array_.size(), Capacity);
-}
-
 TEST_F(StaticArrayTest, EmplaceBack)
 {
 	nctl::StaticArray<int, Capacity> newArray;
@@ -212,17 +270,6 @@ TEST_F(StaticArrayTest, EmplaceBack)
 	ASSERT_EQ(newArray.size(), 2);
 	ASSERT_EQ(newArray[0], 0);
 	ASSERT_EQ(newArray[1], 1);
-}
-
-TEST_F(StaticArrayTest, EmplaceBackNotGrowing)
-{
-	printf("Trying to emplace back an element beyond the capacity of a static array\n");
-	nctl::StaticArray<int, 1> array;
-	array.emplaceBack(0);
-	array.emplaceBack(1);
-
-	ASSERT_EQ(array.capacity(), 1);
-	ASSERT_EQ(array.size(), 1);
 }
 
 TEST_F(StaticArrayTest, PopBack)

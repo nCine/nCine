@@ -1,6 +1,7 @@
 #ifndef CLASS_NCTL_LIST
 #define CLASS_NCTL_LIST
 
+#include <ncine/common_macros.h>
 #include "ListIterator.h"
 #include "ReverseIterator.h"
 #include "utility.h"
@@ -317,65 +318,65 @@ void List<T>::clear()
 template <class T>
 const T &List<T>::front() const
 {
-	ASSERT(sentinel_.next_ != &sentinel_);
+	FATAL_ASSERT(sentinel_.next_ != &sentinel_);
 	return static_cast<ListNode<T> *>(sentinel_.next_)->data_;
 }
 
 template <class T>
 T &List<T>::front()
 {
-	ASSERT(sentinel_.next_ != &sentinel_);
+	FATAL_ASSERT(sentinel_.next_ != &sentinel_);
 	return static_cast<ListNode<T> *>(sentinel_.next_)->data_;
 }
 
 template <class T>
 const T &List<T>::back() const
 {
-	ASSERT(sentinel_.previous_ != &sentinel_);
+	FATAL_ASSERT(sentinel_.previous_ != &sentinel_);
 	return static_cast<ListNode<T> *>(sentinel_.previous_)->data_;
 }
 
 template <class T>
 T &List<T>::back()
 {
-	ASSERT(sentinel_.previous_ != &sentinel_);
+	FATAL_ASSERT(sentinel_.previous_ != &sentinel_);
 	return static_cast<ListNode<T> *>(sentinel_.previous_)->data_;
 }
 
 template <class T>
-inline typename List<T>::ConstIterator List<T>::insertAfter(const Iterator position, const T &element)
+typename List<T>::ConstIterator List<T>::insertAfter(const Iterator position, const T &element)
 {
 	return ConstIterator(insertAfterNode(position.node_, element));
 }
 
 template <class T>
-inline typename List<T>::ConstIterator List<T>::insertAfter(const Iterator position, T &&element)
+typename List<T>::ConstIterator List<T>::insertAfter(const Iterator position, T &&element)
 {
 	return ConstIterator(insertAfterNode(position.node_, nctl::move(element)));
 }
 
 template <class T>
 template <typename... Args>
-inline typename List<T>::ConstIterator List<T>::emplaceAfter(const Iterator position, Args &&... args)
+typename List<T>::ConstIterator List<T>::emplaceAfter(const Iterator position, Args &&... args)
 {
 	return ConstIterator(emplaceAfterNode(position.node_, nctl::forward<Args>(args)...));
 }
 
 template <class T>
-inline typename List<T>::ConstIterator List<T>::insertBefore(const Iterator position, const T &element)
+typename List<T>::ConstIterator List<T>::insertBefore(const Iterator position, const T &element)
 {
 	return ConstIterator(insertBeforeNode(position.node_, element));
 }
 
 template <class T>
-inline typename List<T>::ConstIterator List<T>::insertBefore(const Iterator position, T &&element)
+typename List<T>::ConstIterator List<T>::insertBefore(const Iterator position, T &&element)
 {
 	return ConstIterator(insertBeforeNode(position.node_, nctl::move(element)));
 }
 
 template <class T>
 template <typename... Args>
-inline typename List<T>::ConstIterator List<T>::emplaceBefore(const Iterator position, Args &&... args)
+typename List<T>::ConstIterator List<T>::emplaceBefore(const Iterator position, Args &&... args)
 {
 	return ConstIterator(emplaceBeforeNode(position.node_, nctl::forward<Args>(args)...));
 }
@@ -395,7 +396,7 @@ typename List<T>::ConstIterator List<T>::insert(Iterator position, Iterator firs
 
 /*! \note The iterator cannot be used after on. */
 template <class T>
-inline typename List<T>::ConstIterator List<T>::erase(ConstIterator position)
+typename List<T>::ConstIterator List<T>::erase(ConstIterator position)
 {
 	ListNode<T> *nextNode = removeNode(position.node_);
 	return ConstIterator(nextNode);
@@ -403,7 +404,7 @@ inline typename List<T>::ConstIterator List<T>::erase(ConstIterator position)
 
 /*! \note The first iterator cannot be used after on. */
 template <class T>
-inline typename List<T>::ConstIterator List<T>::erase(ConstIterator first, const ConstIterator last)
+typename List<T>::ConstIterator List<T>::erase(ConstIterator first, const ConstIterator last)
 {
 	ListNode<T> *nextNode = removeRange(first.node_, last.node_);
 	return ConstIterator(nextNode);
@@ -486,8 +487,6 @@ void List<T>::splice(Iterator position, List &source, Iterator first, Iterator l
 	lastIncludedNode->next_ = node;
 	// it also works if `prevNode` is the sentinel
 	prevNode->next_ = firstNode;
-
-	lastIncludedNode->next_ = node;
 }
 
 ///////////////////////////////////////////////////////////
@@ -588,7 +587,6 @@ ListNode<T> *List<T>::emplaceBeforeNode(ListNode<T> *node, Args &&... args)
 	ListNode<T> *newNode = new ListNode<T>(node->previous_, node, nctl::forward<Args>(args)...);
 #else
 	ListNode<T> *newNode = alloc_.newObject<ListNode<T>>(node->previous_, node, nctl::forward<Args>(args)...);
-
 #endif
 
 	// it also works if `node->previous_` is the sentinel

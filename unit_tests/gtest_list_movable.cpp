@@ -121,7 +121,7 @@ TEST_F(ListMovableTest, InsertBeforeLValue)
 	printf("Inserting a complex object to the back\n");
 	list_.insertBefore(list_.end(), movable);
 
-	list_.front().printAndAssert();
+	list_.back().printAndAssert();
 	ASSERT_EQ(list_.size(), 1);
 	ASSERT_EQ(movable.size(), list_.front().size());
 	ASSERT_NE(movable.data(), nullptr);
@@ -134,7 +134,7 @@ TEST_F(ListMovableTest, InsertBeforeRValue)
 	printf("Inserting a complex object to the back\n");
 	list_.insertBefore(list_.end(), nctl::move(movable));
 
-	list_.front().printAndAssert();
+	list_.back().printAndAssert();
 	ASSERT_EQ(list_.size(), 1);
 	ASSERT_EQ(movable.size(), 0);
 	ASSERT_EQ(movable.data(), nullptr);
@@ -145,7 +145,7 @@ TEST_F(ListMovableTest, EmplaceBefore)
 	printf("Emplacing a complex object to the back\n");
 	list_.emplaceBefore(list_.end(), Movable::Construction::INITIALIZED);
 
-	list_.front().printAndAssert();
+	list_.back().printAndAssert();
 	ASSERT_EQ(list_.size(), 1);
 }
 

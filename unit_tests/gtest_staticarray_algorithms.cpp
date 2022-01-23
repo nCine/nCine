@@ -318,6 +318,7 @@ TEST_F(StaticArrayAlgorithmsTest, GenerateN)
 TEST_F(StaticArrayAlgorithmsTest, Sort)
 {
 	printf("Filling the array with random numbers\n");
+	array_.clear();
 	initArrayRandom(array_);
 	printArray(array_);
 
@@ -348,6 +349,7 @@ TEST_F(StaticArrayAlgorithmsTest, SortedUntil)
 TEST_F(StaticArrayAlgorithmsTest, ReverseSort)
 {
 	printf("Filling the array with random numbers\n");
+	array_.clear();
 	initArrayRandom(array_);
 	printArray(array_);
 

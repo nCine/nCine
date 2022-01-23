@@ -13,6 +13,44 @@ class ListTest : public ::testing::Test
 	nctl::List<int> list_;
 };
 
+#ifndef __EMSCRIPTEN__
+TEST(ListDeathTest, FrontElementFromEmptyArray)
+{
+	nctl::List<int> list;
+	printf("Retrieving the front element from an empty list\n");
+
+	ASSERT_EQ(list.size(), 0);
+	ASSERT_DEATH(list.front(), "");
+}
+
+TEST(ListDeathTest, FrontConstElementFromEmptyArray)
+{
+	const nctl::List<int> list;
+	printf("Retrieving the front element from an empty const list\n");
+
+	ASSERT_EQ(list.size(), 0);
+	ASSERT_DEATH(list.front(), "");
+}
+
+TEST(ListDeathTest, BackElementFromEmptyArray)
+{
+	nctl::List<int> list;
+	printf("Retrieving the back element from an empty list\n");
+
+	ASSERT_EQ(list.size(), 0);
+	ASSERT_DEATH(list.back(), "");
+}
+
+TEST(ListDeathTest, BackConstElementFromEmptyArray)
+{
+	const nctl::List<int> list;
+	printf("Retrieving the back element from an empty const list\n");
+
+	ASSERT_EQ(list.size(), 0);
+	ASSERT_DEATH(list.back(), "");
+}
+#endif
+
 TEST_F(ListTest, PushFront)
 {
 	printf("Clearing the list\n");

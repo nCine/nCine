@@ -47,7 +47,7 @@ class Movable
 	Movable &operator=(const Movable &other) = delete;
 #else
 	Movable(const Movable &other)
-	    : size_(other.size_), array_(new int[Size])
+	    : size_(other.size_), array_(new int[other.size_])
 	{
 		for (unsigned int i = 0; i < size_; i++)
 			array_[i] = other.array_[i];
@@ -74,12 +74,6 @@ class Movable
 		return size_;
 	}
 
-	// Needed by container hash functions
-	unsigned int length() const
-	{
-		return size_;
-	}
-
 	const int *data() const { return array_; }
 	const int &operator[](unsigned int index) const { return array_[index]; }
 
@@ -90,7 +84,7 @@ class Movable
 			printf(" %d", array_[i]);
 			ASSERT_EQ(array_[i], i);
 		}
-		printf("\n");
+		printf(" (%d elements)\n", size_);
 	}
 
 	friend inline bool operator==(const Movable &lhs, const Movable &rhs)
@@ -133,7 +127,7 @@ class FNV1aHashFunc<Movable>
   public:
 	hash_t operator()(const Movable &key) const
 	{
-		const unsigned int length = key.length();
+		const unsigned int length = key.size();
 		hash_t hash = static_cast<hash_t>(Seed);
 		for (unsigned int i = 0; i < length; i++)
 			hash = fnv1a(static_cast<hash_t>(key[i]), hash);

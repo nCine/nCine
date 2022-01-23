@@ -139,7 +139,7 @@ int LuaBaseSprite::isFlippedX(lua_State *L)
 
 int LuaBaseSprite::setFlippedX(lua_State *L)
 {
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -1);
+	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -2);
 	const bool flippedX = LuaUtils::retrieve<bool>(L, -1);
 
 	sprite->setFlippedX(flippedX);
@@ -159,7 +159,7 @@ int LuaBaseSprite::isFlippedY(lua_State *L)
 
 int LuaBaseSprite::setFlippedY(lua_State *L)
 {
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -1);
+	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -2);
 	const bool flippedY = LuaUtils::retrieve<bool>(L, -1);
 
 	sprite->setFlippedY(flippedY);
