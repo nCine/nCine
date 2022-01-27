@@ -26,8 +26,6 @@ bool TextureSaverWebP::saveToFile(const Properties &properties, const WebPProper
 
 bool TextureSaverWebP::saveToFile(const Properties &properties, const WebPProperties &webpProperties, nctl::UniquePtr<IFile> fileHandle)
 {
-	const int bpp = (properties.format == Format::RGB8) ? 3 : 4;
-
 	FATAL_ASSERT(properties.width > 0);
 	FATAL_ASSERT(properties.height > 0);
 	FATAL_ASSERT_MSG(properties.width <= 16383, "Image width exceeds WebP maximum pixel dimensions");
@@ -40,8 +38,17 @@ bool TextureSaverWebP::saveToFile(const Properties &properties, const WebPProper
 	if (fileHandle->isOpened() == false)
 		return false;
 
+	// Flip pixels data vertically if the corresponding flag is true
+	nctl::UniquePtr<unsigned char[]> flippedPixels;
+	if (properties.verticalFlip)
+	{
+		flippedPixels = nctl::makeUnique<unsigned char[]>(dataSize(properties));
+		flipPixels(properties, flippedPixels.get());
+	}
+	void *texturePixels = properties.verticalFlip ? flippedPixels.get() : properties.pixels;
+
 	// Using the WebP Simple Encoding API
-	const uint8_t *pixels = static_cast<uint8_t *>(properties.pixels);
+	const uint8_t *pixels = static_cast<uint8_t *>(texturePixels);
 	uint8_t *output = nullptr;
 	size_t bytesWritten = 0;
 	switch (properties.format)
@@ -50,17 +57,17 @@ bool TextureSaverWebP::saveToFile(const Properties &properties, const WebPProper
 		case Format::RGB8:
 		{
 			if (webpProperties.lossless)
-				bytesWritten = WebPEncodeLosslessRGB(pixels, properties.width, properties.height, properties.width * bpp, &output);
+				bytesWritten = WebPEncodeLosslessRGB(pixels, properties.width, properties.height, properties.width * bpp(properties.format), &output);
 			else
-				bytesWritten = WebPEncodeRGB(pixels, properties.width, properties.height, properties.width * bpp, webpProperties.quality, &output);
+				bytesWritten = WebPEncodeRGB(pixels, properties.width, properties.height, properties.width * bpp(properties.format), webpProperties.quality, &output);
 			break;
 		}
 		case Format::RGBA8:
 		{
 			if (webpProperties.lossless)
-				bytesWritten = WebPEncodeLosslessRGBA(pixels, properties.width, properties.height, properties.width * bpp, &output);
+				bytesWritten = WebPEncodeLosslessRGBA(pixels, properties.width, properties.height, properties.width * bpp(properties.format), &output);
 			else
-				bytesWritten = WebPEncodeRGBA(pixels, properties.width, properties.height, properties.width * bpp, webpProperties.quality, &output);
+				bytesWritten = WebPEncodeRGBA(pixels, properties.width, properties.height, properties.width * bpp(properties.format), webpProperties.quality, &output);
 			break;
 		}
 	}

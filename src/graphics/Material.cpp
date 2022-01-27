@@ -13,8 +13,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Material::Material()
-    : isBlendingEnabled_(false), srcBlendingFactor_(GL_SRC_ALPHA), destBlendingFactor_(GL_ONE_MINUS_SRC_ALPHA),
-      shaderProgramType_(ShaderProgramType::CUSTOM), shaderProgram_(nullptr), texture_(nullptr)
+    : Material(nullptr, nullptr)
 {
 }
 
@@ -22,7 +21,8 @@ Material::Material(GLShaderProgram *program, GLTexture *texture)
     : isBlendingEnabled_(false), srcBlendingFactor_(GL_SRC_ALPHA), destBlendingFactor_(GL_ONE_MINUS_SRC_ALPHA),
       shaderProgramType_(ShaderProgramType::CUSTOM), shaderProgram_(program), texture_(texture)
 {
-	setShaderProgram(program);
+	if (program)
+		setShaderProgram(program);
 }
 
 ///////////////////////////////////////////////////////////
@@ -98,26 +98,26 @@ void Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 	{
 		case ShaderProgramType::SPRITE:
 		case ShaderProgramType::SPRITE_GRAY:
-			setUniformsDataPointer(nullptr);
+			reserveUniformsDataMemory();
 			uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
 			break;
 		case ShaderProgramType::SPRITE_NO_TEXTURE:
-			setUniformsDataPointer(nullptr);
+			reserveUniformsDataMemory();
 			break;
 		case ShaderProgramType::MESH_SPRITE:
 		case ShaderProgramType::MESH_SPRITE_GRAY:
-			setUniformsDataPointer(nullptr);
+			reserveUniformsDataMemory();
 			uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
 			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
 			break;
 		case ShaderProgramType::MESH_SPRITE_NO_TEXTURE:
-			setUniformsDataPointer(nullptr);
+			reserveUniformsDataMemory();
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2, position)));
 			break;
 		case ShaderProgramType::TEXTNODE_ALPHA:
 		case ShaderProgramType::TEXTNODE_RED:
-			setUniformsDataPointer(nullptr);
+			reserveUniformsDataMemory();
 			uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
 			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
 			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
@@ -152,33 +152,40 @@ void Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 
 	// Should be assigned after calling `setShaderProgram()`
 	shaderProgramType_ = shaderProgramType;
-
-	if (uniform("projection")->dataPointer() != nullptr && shaderProgramType != Material::ShaderProgramType::CUSTOM)
-		uniform("projection")->setFloatVector(RenderResources::projectionMatrix().data());
 }
 
 void Material::setShaderProgram(GLShaderProgram *program)
 {
 	shaderProgramType_ = ShaderProgramType::CUSTOM;
 	shaderProgram_ = program;
-	shaderUniforms_.setProgram(shaderProgram_);
+	// The camera uniforms are handled separately as they have a different update frequency
+	shaderUniforms_.setProgram(shaderProgram_, nullptr, "uProjectionMatrix\0uViewMatrix\0");
 	shaderUniformBlocks_.setProgram(shaderProgram_);
 
 	shaderAttributes_.setProgram(shaderProgram_);
 }
 
-void Material::setUniformsDataPointer(GLubyte *dataPointer)
+void Material::reserveUniformsDataMemory()
 {
 	ASSERT(shaderProgram_);
 
-	if (dataPointer == nullptr)
+	if (uniformsHostBuffer_ == nullptr)
 	{
 		// Total memory size for all uniforms and uniform blocks
 		const unsigned int uniformsSize = shaderProgram_->uniformsSize() + shaderProgram_->uniformBlocksSize();
 		uniformsHostBuffer_ = nctl::makeUnique<GLubyte[]>(uniformsSize);
-		dataPointer = uniformsHostBuffer_.get();
+		GLubyte *dataPointer = uniformsHostBuffer_.get();
+		shaderUniforms_.setUniformsDataPointer(dataPointer);
+		shaderUniformBlocks_.setUniformsDataPointer(&dataPointer[shaderProgram_->uniformsSize()]);
 	}
+}
 
+void Material::setUniformsDataPointer(GLubyte *dataPointer)
+{
+	ASSERT(shaderProgram_);
+	ASSERT(dataPointer);
+
+	uniformsHostBuffer_.reset(nullptr);
 	shaderUniforms_.setUniformsDataPointer(dataPointer);
 	shaderUniformBlocks_.setUniformsDataPointer(&dataPointer[shaderProgram_->uniformsSize()]);
 }

@@ -8,7 +8,8 @@
 #include "GLDepthTest.h"
 #include "GLCullFace.h"
 #include "RenderQueue.h"
-#include "DrawableNode.h"
+#include "RenderCommandPool.h"
+#include "RenderResources.h"
 #include "Application.h"
 
 #if defined(WITH_GLFW)
@@ -37,7 +38,6 @@ namespace ncine {
 
 ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
     : withSceneGraph_(withSceneGraph),
-      freeCommandsPool_(16), usedCommandsPool_(16),
       lastFrameWidth_(0), lastFrameHeight_(0)
 {
 	ImGuiIO &io = ImGui::GetIO();
@@ -127,7 +127,7 @@ void ImGuiDrawing::newFrame()
 
 		if (withSceneGraph_ == false)
 		{
-			imguiShaderUniforms_->uniform("projection")->setFloatVector(projectionMatrix_.data());
+			imguiShaderUniforms_->uniform("uGuiProjection")->setFloatVector(projectionMatrix_.data());
 			imguiShaderUniforms_->commitUniforms();
 		}
 	}
@@ -160,38 +160,14 @@ void ImGuiDrawing::endFrame()
 
 RenderCommand *ImGuiDrawing::retrieveCommandFromPool()
 {
-	RenderCommand *retrievedCommand = nullptr;
-
-	for (unsigned int i = 0; i < freeCommandsPool_.size(); i++)
-	{
-		const unsigned int poolSize = freeCommandsPool_.size();
-		nctl::UniquePtr<RenderCommand> &command = freeCommandsPool_[i];
-		if (command && command->material().shaderProgram() == imguiShaderProgram_.get())
-		{
-			retrievedCommand = command.get();
-			usedCommandsPool_.pushBack(nctl::move(command));
-			command = nctl::move(freeCommandsPool_[poolSize - 1]);
-			freeCommandsPool_.popBack();
-			break;
-		}
-	}
-
+	RenderCommand *retrievedCommand = RenderResources::renderCommandPool().retrieve(imguiShaderProgram_.get());
 	if (retrievedCommand == nullptr)
 	{
-		nctl::UniquePtr<RenderCommand> newCommand = nctl::makeUnique<RenderCommand>();
-		setupRenderCmd(*newCommand);
-		retrievedCommand = newCommand.get();
-		usedCommandsPool_.pushBack(nctl::move(newCommand));
+		retrievedCommand = RenderResources::renderCommandPool().add();
+		setupRenderCmd(*retrievedCommand);
 	}
 
 	return retrievedCommand;
-}
-
-void ImGuiDrawing::resetCommandPool()
-{
-	for (nctl::UniquePtr<RenderCommand> &command : usedCommandsPool_)
-		freeCommandsPool_.pushBack(nctl::move(command));
-	usedCommandsPool_.clear();
 }
 
 void ImGuiDrawing::setupRenderCmd(RenderCommand &cmd)
@@ -200,7 +176,7 @@ void ImGuiDrawing::setupRenderCmd(RenderCommand &cmd)
 
 	Material &material = cmd.material();
 	material.setShaderProgram(imguiShaderProgram_.get());
-	material.setUniformsDataPointer(nullptr);
+	material.reserveUniformsDataMemory();
 	material.uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
 	material.attribute("aPosition")->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, pos)));
 	material.attribute("aTexCoords")->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, uv)));
@@ -228,8 +204,6 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 	const ImVec2 clipOff = drawData->DisplayPos;
 	const ImVec2 clipScale = drawData->FramebufferScale;
 
-	resetCommandPool();
-
 	unsigned int numCmd = 0;
 	for (int n = 0; n < drawData->CmdListsCount; n++)
 	{
@@ -239,7 +213,7 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 		if (lastFrameWidth_ != static_cast<int>(io.DisplaySize.x) ||
 		    lastFrameHeight_ != static_cast<int>(io.DisplaySize.y))
 		{
-			firstCmd.material().uniform("projection")->setFloatVector(projectionMatrix_.data());
+			firstCmd.material().uniform("uGuiProjection")->setFloatVector(projectionMatrix_.data());
 			lastFrameWidth_ = static_cast<int>(io.DisplaySize.x);
 			lastFrameHeight_ = static_cast<int>(io.DisplaySize.y);
 		}
@@ -278,7 +252,7 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 			currCmd.geometry().setNumIndices(imCmd->ElemCount);
 			currCmd.geometry().setFirstIndex(imCmd->IdxOffset);
 			currCmd.geometry().setFirstVertex(imCmd->VtxOffset);
-			currCmd.setLayer(DrawableNode::imGuiLayer() + numCmd);
+			currCmd.setLayer(theApplication().guiSettings().imguiLayer + numCmd);
 			currCmd.material().setTexture(reinterpret_cast<GLTexture *>(imCmd->GetTexID()));
 
 			renderQueue.addCommand(&currCmd);

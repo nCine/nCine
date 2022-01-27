@@ -38,6 +38,7 @@ AppConfiguration::AppConfiguration()
       iboSize(8 * 1024),
 #endif
       vaoPoolSize(16),
+      renderCommandPoolSize(32),
       withDebugOverlay(false),
       withAudio(true),
       withThreads(false),

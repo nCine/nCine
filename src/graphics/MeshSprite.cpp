@@ -88,6 +88,10 @@ void MeshSprite::copyVertices(const MeshSprite &meshSprite)
 	width_ = meshSprite.width_;
 	height_ = meshSprite.height_;
 	texRect_ = meshSprite.texRect_;
+
+	dirtyBits_.set(DirtyBitPositions::SizeBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
+	dirtyBits_.set(DirtyBitPositions::TextureBit);
 }
 
 void MeshSprite::setVertices(unsigned int numVertices, const float *vertices)
@@ -115,6 +119,9 @@ void MeshSprite::setVertices(const MeshSprite &meshSprite)
 	setVertices(meshSprite.numVertices_, meshSprite.vertexDataPointer_);
 	width_ = meshSprite.width_;
 	height_ = meshSprite.height_;
+
+	dirtyBits_.set(DirtyBitPositions::SizeBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
 }
 
 void MeshSprite::createVerticesFromTexels(unsigned int numVertices, const Vector2f *points, TextureCutMode cutMode)
@@ -176,6 +183,9 @@ void MeshSprite::createVerticesFromTexels(unsigned int numVertices, const Vector
 	numVertices_ = numVertices;
 	renderCommand_->geometry().setNumVertices(numVertices);
 	renderCommand_->geometry().setHostVertexPointer(vertexDataPointer_);
+
+	dirtyBits_.set(DirtyBitPositions::SizeBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
 }
 
 void MeshSprite::createVerticesFromTexels(unsigned int numVertices, const Vector2f *points)

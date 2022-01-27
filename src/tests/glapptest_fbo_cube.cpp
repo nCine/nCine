@@ -10,6 +10,8 @@
 #include <ncine/GLVertexArrayObject.h>
 #include <ncine/GLBufferObject.h>
 #include <ncine/GLDepthTest.h>
+#include <ncine/GLClearColor.h>
+#include <ncine/GLViewport.h>
 #include "../../tests/apptest_datapath.h"
 
 #ifdef WITH_EMBEDDED_SHADERS
@@ -133,7 +135,7 @@ void MyEventHandler::onInit()
 	texUniforms_ = nctl::makeUnique<nc::GLShaderUniforms>(texProgram_.get());
 	texUniforms_->setUniformsDataPointer(&uniformsBuffer_[colorProgram_->uniformsSize()]);
 	texUniforms_->uniform("uTexture")->setIntValue(0);
-	texUniforms_->uniform("color")->setFloatValue(1.0f, 1.0f, 1.0f, 1.0f);
+	texUniforms_->uniform("uColor")->setFloatValue(1.0f, 1.0f, 1.0f, 1.0f);
 	texAttributes_ = nctl::makeUnique<nc::GLShaderAttributes>(texProgram_.get());
 
 	FATAL_ASSERT(UniformsBufferSize >= colorProgram_->uniformsSize() + texProgram_->uniformsSize());
@@ -163,7 +165,7 @@ void MyEventHandler::onInit()
 
 	width_ = nc::theApplication().widthInt();
 	height_ = nc::theApplication().heightInt();
-	glViewport(0, 0, width_, height_);
+	nc::GLViewport::setRect(0, 0, width_, height_);
 	nc::GLDepthTest::enable();
 
 	angleTri_ = 0.0f;
@@ -175,40 +177,40 @@ void MyEventHandler::onInit()
 void MyEventHandler::onFrameStart()
 {
 	// Triangle
-	glViewport(0, 0, FboSize, FboSize);
+	nc::GLViewport::setRect(0, 0, FboSize, FboSize);
 	colorProgram_->use();
 
 	projection_ = nc::Matrix4x4f::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f);
-	colorUniforms_->uniform("projection")->setFloatVector(projection_.data());
+	colorUniforms_->uniform("uProjectionMatrix")->setFloatVector(projection_.data());
 	modelView_ = nc::Matrix4x4f::rotationZ(angleTri_);
-	colorUniforms_->uniform("modelView")->setFloatVector(modelView_.data());
+	colorUniforms_->uniform("uModelViewMatrix")->setFloatVector(modelView_.data());
 	colorUniforms_->commitUniforms();
 
 	fbo_->bind(GL_FRAMEBUFFER);
-	glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
+	nc::GLClearColor::setColor(0.5f, 0.5f, 0.5f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	colorAttributes_->defineVertexFormat(vboTri_.get());
 	vboTri_->bind();
 	iboCube_->unbind();
 	texture_->unbind();
 	glDrawArrays(GL_TRIANGLES, 0, 3);
-	GLenum invalidAttachment = GL_DEPTH_ATTACHMENT;
+	const GLenum invalidAttachment = GL_DEPTH_ATTACHMENT;
 	fbo_->invalidate(1, &invalidAttachment);
 
 	// Cube
-	glViewport(0, 0, width_, height_);
+	nc::GLViewport::setRect(0, 0, width_, height_);
 	texProgram_->use();
 
 	projection_ = nc::Matrix4x4f::perspective(60.0f, width_ / static_cast<float>(height_), 1.0f, 20.0f);
-	texUniforms_->uniform("projection")->setFloatVector(projection_.data());
+	texUniforms_->uniform("uProjectionMatrix")->setFloatVector(projection_.data());
 	modelView_ = nc::Matrix4x4f::translation(0.0f, 0.0f, -5.0f);
 	modelView_ *= nc::Matrix4x4f::rotationY(angleCube_);
 	modelView_ *= nc::Matrix4x4f::rotationZ(angleCube_);
-	texUniforms_->uniform("modelView")->setFloatVector(modelView_.data());
+	texUniforms_->uniform("uModelViewMatrix")->setFloatVector(modelView_.data());
 	texUniforms_->commitUniforms();
 
 	fbo_->unbind();
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	nc::GLClearColor::setColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	texAttributes_->defineVertexFormat(vboCube_.get());
 	vboCube_->bind();

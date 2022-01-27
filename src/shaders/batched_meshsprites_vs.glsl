@@ -1,8 +1,9 @@
-uniform mat4 projection;
+uniform mat4 uProjectionMatrix;
+uniform mat4 uViewMatrix;
 
 struct MeshSpriteInstance
 {
-	mat4 modelView;
+	mat4 modelMatrix;
 	vec4 color;
 	vec4 texRect;
 	vec2 spriteSize;
@@ -29,7 +30,7 @@ void main()
 {
 	vec4 position = vec4(aPosition.x * i.spriteSize.x, aPosition.y * i.spriteSize.y, 0.0, 1.0);
 
-	gl_Position = projection * i.modelView * position;
+	gl_Position = uProjectionMatrix * uViewMatrix * i.modelMatrix * position;
 	vTexCoords = vec2(aTexCoords.x * i.texRect.x + i.texRect.y, aTexCoords.y * i.texRect.z + i.texRect.w);
 	vColor = i.color;
 }

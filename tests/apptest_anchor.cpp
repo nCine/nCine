@@ -2,6 +2,7 @@
 
 #include "apptest_anchor.h"
 #include <ncine/Application.h>
+#include <ncine/Viewport.h>
 #include <ncine/Texture.h>
 #include <ncine/Sprite.h>
 #include <ncine/MeshSprite.h>
@@ -202,7 +203,7 @@ void MyEventHandler::onFrameStart()
 	}
 
 	ImGui::ColorEdit4("Background Color", background_.data(), ImGuiColorEditFlags_NoAlpha);
-	nc::theApplication().gfxDevice().setClearColor(background_);
+	nc::theApplication().rootViewport().setClearColor(background_);
 	ImGui::Checkbox("Culling", &settings.cullingEnabled);
 	ImGui::SameLine();
 	ImGui::Checkbox("Batching", &settings.batchingEnabled);
@@ -213,8 +214,8 @@ void MyEventHandler::onFrameStart()
 		if (currentType_ == Type::SPRITE)
 		{
 			sprites_[i]->setAnchorPoint(anchorPoint_);
-			sprites_[i]->x = position_.x + width / (NumSprites + 3) * (i + 2);
-			sprites_[i]->y = position_.y + (height * 0.5f);
+			sprites_[i]->setPositionX(position_.x + width / (NumSprites + 3) * (i + 2));
+			sprites_[i]->setPositionY(position_.y + (height * 0.5f));
 			sprites_[i]->setRotation(angle_);
 			sprites_[i]->setScale(scale_);
 			sprites_[i]->setFlippedX(flippedX_);
@@ -226,8 +227,8 @@ void MyEventHandler::onFrameStart()
 		else if (currentType_ == Type::MESH_SPRITE)
 		{
 			meshSprites_[i]->setAnchorPoint(anchorPoint_);
-			meshSprites_[i]->x = position_.x + width / (NumSprites + 3) * (i + 2);
-			meshSprites_[i]->y = position_.y + (height * 0.5f);
+			meshSprites_[i]->setPositionX(position_.x + width / (NumSprites + 3) * (i + 2));
+			meshSprites_[i]->setPositionY(position_.y + (height * 0.5f));
 			meshSprites_[i]->setRotation(angle_);
 			meshSprites_[i]->setScale(scale_);
 			meshSprites_[i]->setFlippedX(flippedX_);
@@ -239,8 +240,8 @@ void MyEventHandler::onFrameStart()
 		else if (currentType_ == Type::TEXT_NODE)
 		{
 			textNodes_[i]->setAnchorPoint(anchorPoint_);
-			textNodes_[i]->x = position_.x + width / (NumSprites + 3) * (i + 2);
-			textNodes_[i]->y = position_.y + (height * 0.5f);
+			textNodes_[i]->setPositionX(position_.x + width / (NumSprites + 3) * (i + 2));
+			textNodes_[i]->setPositionY(position_.y + (height * 0.5f));
 			textNodes_[i]->setRotation(angle_);
 			textNodes_[i]->setScale(scale_);
 			textNodes_[i]->setColor(color_);
@@ -250,8 +251,8 @@ void MyEventHandler::onFrameStart()
 		else if (currentType_ == Type::PARTICLE_SYSTEM)
 		{
 			particleSystems_[i]->setAnchorPoint(anchorPoint_);
-			particleSystems_[i]->x = position_.x + width / (NumSprites + 3) * (i + 2);
-			particleSystems_[i]->y = position_.y + (height * 0.5f);
+			particleSystems_[i]->setPositionX(position_.x + width / (NumSprites + 3) * (i + 2));
+			particleSystems_[i]->setPositionY(position_.y + (height * 0.5f));
 			rotationAffectors_[i]->steps()[1].angle = angle_;
 			sizeAffectors_[i]->setBaseScale(scale_);
 			particleSystems_[i]->setFlippedX(flippedX_);

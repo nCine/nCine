@@ -253,6 +253,8 @@ if(LUA_FOUND)
 			${NCINE_ROOT}/src/include/LuaFont.h
 			${NCINE_ROOT}/src/include/LuaTextNode.h
 			${NCINE_ROOT}/src/include/LuaParticleSystem.h
+			${NCINE_ROOT}/src/include/LuaViewport.h
+			${NCINE_ROOT}/src/include/LuaCamera.h
 		)
 
 		list(APPEND SOURCES
@@ -281,6 +283,8 @@ if(LUA_FOUND)
 			${NCINE_ROOT}/src/scripting/LuaFont.cpp
 			${NCINE_ROOT}/src/scripting/LuaTextNode.cpp
 			${NCINE_ROOT}/src/scripting/LuaParticleSystem.cpp
+			${NCINE_ROOT}/src/scripting/LuaViewport.cpp
+			${NCINE_ROOT}/src/scripting/LuaCamera.cpp
 		)
 
 		if(OPENAL_FOUND)

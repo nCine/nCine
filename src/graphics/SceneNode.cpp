@@ -1,4 +1,5 @@
 #include "SceneNode.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -13,13 +14,14 @@ const float SceneNode::MinRotation = 0.5f;
 ///////////////////////////////////////////////////////////
 
 /*! \param parent The parent can be `nullptr` */
-SceneNode::SceneNode(SceneNode *parent, float xx, float yy)
-    : Object(ObjectType::SCENENODE), x(xx), y(yy),
+SceneNode::SceneNode(SceneNode *parent, float x, float y)
+    : Object(ObjectType::SCENENODE),
       updateEnabled_(true), drawEnabled_(true), parent_(nullptr), children_(4),
-      anchorPoint_(0.0f, 0.0f), scaleFactor_(1.0f, 1.0f), rotation_(0.0f),
-      absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f, 1.0f), absRotation_(0.0f),
+      position_(x, y), anchorPoint_(0.0f, 0.0f), scaleFactor_(1.0f, 1.0f), rotation_(0.0f),
+      color_(Color::White), absPosition_(0.0f, 0.0f), absScaleFactor_(1.0f, 1.0f),
+      absRotation_(0.0f), absColor_(Color::White),
       worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity),
-      shouldDeleteChildrenOnDestruction_(true)
+      shouldDeleteChildrenOnDestruction_(true), dirtyBits_(0xFF)
 {
 	setParent(parent);
 }
@@ -58,12 +60,13 @@ SceneNode::~SceneNode()
 }
 
 SceneNode::SceneNode(SceneNode &&other)
-    : Object(nctl::move(other)), x(other.x), y(other.y),
+    : Object(nctl::move(other)),
       updateEnabled_(other.updateEnabled_), drawEnabled_(other.drawEnabled_),
       parent_(other.parent_), children_(nctl::move(other.children_)),
-      anchorPoint_(other.anchorPoint_), scaleFactor_(other.scaleFactor_),
-      rotation_(other.rotation_), color_(other.color_),
-      shouldDeleteChildrenOnDestruction_(other.shouldDeleteChildrenOnDestruction_)
+      position_(other.position_), anchorPoint_(other.anchorPoint_),
+      scaleFactor_(other.scaleFactor_), rotation_(other.rotation_), color_(other.color_),
+      shouldDeleteChildrenOnDestruction_(other.shouldDeleteChildrenOnDestruction_),
+      dirtyBits_(other.dirtyBits_)
 {
 	swapChildPointer(this, &other);
 	for (SceneNode *child : children_)
@@ -74,17 +77,17 @@ SceneNode &SceneNode::operator=(SceneNode &&other)
 {
 	Object::operator=(nctl::move(other));
 
-	x = other.x;
-	y = other.y;
 	updateEnabled_ = other.updateEnabled_;
 	drawEnabled_ = other.drawEnabled_;
 	parent_ = other.parent_;
 	children_ = nctl::move(other.children_);
+	position_ = other.position_;
 	anchorPoint_ = other.anchorPoint_;
 	scaleFactor_ = other.scaleFactor_;
 	rotation_ = other.rotation_;
 	color_ = other.color_;
 	shouldDeleteChildrenOnDestruction_ = other.shouldDeleteChildrenOnDestruction_;
+	dirtyBits_ = other.dirtyBits_;
 
 	swapChildPointer(this, &other);
 	for (SceneNode *child : children_)
@@ -108,6 +111,9 @@ void SceneNode::setParent(SceneNode *parentNode)
 	if (parentNode)
 		parentNode->children_.pushBack(this);
 	parent_ = parentNode;
+
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
 }
 
 void SceneNode::addChildNode(SceneNode *childNode)
@@ -156,6 +162,8 @@ bool SceneNode::removeChildNodeAt(unsigned int index)
 		return false;
 
 	children_[index]->parent_ = nullptr;
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::AabbBit);
 	// Fast removal without preserving the order
 	children_.unorderedRemoveAt(index);
 	return true;
@@ -168,7 +176,11 @@ bool SceneNode::removeAllChildrenNodes()
 		return false;
 
 	for (unsigned int i = 0; i < children_.size(); i++)
+	{
 		children_[i]->parent_ = nullptr;
+		dirtyBits_.set(DirtyBitPositions::TransformationBit);
+		dirtyBits_.set(DirtyBitPositions::AabbBit);
+	}
 	children_.clear();
 
 	return true;
@@ -207,6 +219,13 @@ void SceneNode::update(float interval)
 		transform();
 		for (SceneNode *child : children_)
 			child->update(interval);
+
+		// A non drawable scenenode does not have the `updateRenderCommand()` method to reset the flags
+		if (type_ == ObjectType::SCENENODE)
+		{
+			dirtyBits_.reset(DirtyBitPositions::TransformationBit);
+			dirtyBits_.reset(DirtyBitPositions::ColorBit);
+		}
 	}
 }
 
@@ -227,12 +246,13 @@ void SceneNode::visit(RenderQueue &renderQueue)
 ///////////////////////////////////////////////////////////
 
 SceneNode::SceneNode(const SceneNode &other)
-    : Object(other), x(other.x), y(other.y), updateEnabled_(other.updateEnabled_),
+    : Object(other), updateEnabled_(other.updateEnabled_),
       drawEnabled_(other.drawEnabled_), parent_(nullptr), children_(4),
-      anchorPoint_(other.anchorPoint_), scaleFactor_(other.scaleFactor_), rotation_(other.rotation_),
-      color_(other.color_), absX_(0.0f), absY_(0.0f), absScaleFactor_(1.0f, 1.0f), absRotation_(0.0f),
-      worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity),
-      shouldDeleteChildrenOnDestruction_(other.shouldDeleteChildrenOnDestruction_)
+      position_(other.position_), anchorPoint_(other.anchorPoint_),
+      scaleFactor_(other.scaleFactor_), rotation_(other.rotation_),
+      color_(other.color_), absPosition_(0.0f, 0.0f), absScaleFactor_(1.0f, 1.0f), absRotation_(0.0f),
+      absColor_(Color::White), worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity),
+      shouldDeleteChildrenOnDestruction_(other.shouldDeleteChildrenOnDestruction_), dirtyBits_(0xFF)
 {
 	setParent(other.parent_);
 }
@@ -259,15 +279,33 @@ void SceneNode::swapChildPointer(SceneNode *first, SceneNode *second)
 
 void SceneNode::transform()
 {
+	ZoneScoped;
+
+	const bool parentHasDirtyColor = parent_ && parent_->dirtyBits_.test(DirtyBitPositions::ColorBit);
+	if (parentHasDirtyColor)
+		dirtyBits_.set(DirtyBitPositions::ColorBit);
+
+	if (dirtyBits_.test(DirtyBitPositions::ColorBit))
+		absColor_ = parent_ ? color_ * parent_->absColor_ : color_;
+
+	const bool parentHasDirtyTransformation = parent_ && parent_->dirtyBits_.test(DirtyBitPositions::TransformationBit);
+	if (parentHasDirtyTransformation)
+	{
+		dirtyBits_.set(DirtyBitPositions::TransformationBit);
+		dirtyBits_.set(DirtyBitPositions::AabbBit);
+	}
+
+	if (dirtyBits_.test(DirtyBitPositions::TransformationBit) == false)
+		return;
+
 	// Calculating world and local matrices
-	localMatrix_ = Matrix4x4f::translation(x, y, 0.0f);
+	localMatrix_ = Matrix4x4f::translation(position_.x, position_.y, 0.0f);
 	localMatrix_.rotateZ(rotation_);
 	localMatrix_.scale(scaleFactor_.x, scaleFactor_.y, 1.0f);
 	localMatrix_.translate(-anchorPoint_.x, -anchorPoint_.y, 0.0f);
 
 	absScaleFactor_ = scaleFactor_;
 	absRotation_ = rotation_;
-	absColor_ = color_;
 
 	if (parent_)
 	{
@@ -275,13 +313,12 @@ void SceneNode::transform()
 
 		absScaleFactor_ *= parent_->absScaleFactor_;
 		absRotation_ += parent_->absRotation_;
-		absColor_ *= parent_->absColor_;
 	}
 	else
 		worldMatrix_ = localMatrix_;
 
-	absX_ = worldMatrix_[3][0];
-	absY_ = worldMatrix_[3][1];
+	absPosition_.x = worldMatrix_[3][0];
+	absPosition_.y = worldMatrix_[3][1];
 }
 
 }

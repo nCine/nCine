@@ -30,7 +30,8 @@ class GLUniformCache
 	void setIntValue(GLint v0, GLint v1, GLint v2);
 	void setIntValue(GLint v0, GLint v1, GLint v2, GLint v3);
 
-	bool isDirty() const { return isDirty_; }
+	inline bool isDirty() const { return isDirty_; }
+	inline void setDirty(bool isDirty) { isDirty_ = isDirty; }
 	void commitValue();
 
   private:

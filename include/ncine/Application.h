@@ -11,7 +11,8 @@ namespace ncine {
 
 class FrameTimer;
 class SceneNode;
-class RenderQueue;
+class Viewport;
+class ScreenViewport;
 class IInputManager;
 class IAppEventHandler;
 class ImGuiDrawing;
@@ -40,6 +41,23 @@ class DLL_PUBLIC Application
 		unsigned int maxBatchSize;
 	};
 
+	/// GUI settings (for ImGui and Nuklear) that can be changed at run-time
+	struct GuiSettings
+	{
+		GuiSettings();
+
+		/// ImGui drawable node layer
+		unsigned short imguiLayer;
+		/// Nuklear drawable node layer
+		unsigned short nuklearLayer;
+		/// ImGui viewport
+		/*! \note The viewport should mirror the screen dimensions or mouse input would not work. Setting `nullptr` is the same as setting the screen */
+		Viewport *imguiViewport;
+		/// Nuklear viewport
+		/*! \note The viewport should mirror the screen dimensions or mouse input would not work. Setting `nullptr` is the same as setting the screen */
+		Viewport *nuklearViewport;
+	};
+
 	struct Timings
 	{
 		enum
@@ -65,6 +83,8 @@ class DLL_PUBLIC Application
 	inline const AppConfiguration &appConfiguration() const { return appCfg_; }
 	/// Returns the run-time rendering settings
 	inline RenderingSettings &renderingSettings() { return renderingSettings_; }
+	/// Returns the run-time GUI settings
+	inline GuiSettings &guiSettings() { return guiSettings_; }
 	/// Returns the debug overlay object, if any
 	inline IDebugOverlay::DisplaySettings &debugOverlaySettings()
 	{
@@ -78,6 +98,8 @@ class DLL_PUBLIC Application
 	inline IGfxDevice &gfxDevice() { return *gfxDevice_; }
 	/// Returns the root of the transformation graph
 	inline SceneNode &rootNode() { return *rootNode_; }
+	/// Returns the root viewport (i.e. the screen)
+	Viewport &rootViewport();
 	/// Returns the input manager instance
 	inline IInputManager &inputManager() { return *inputManager_; }
 
@@ -95,6 +117,11 @@ class DLL_PUBLIC Application
 	inline int widthInt() const { return gfxDevice_->width(); }
 	/// Returns the screen height as an integer number
 	inline int heightInt() const { return gfxDevice_->height(); }
+	/// Returns the screen resolution as a `Vector2i` object
+	inline Vector2i resolution() const { return gfxDevice_->resolution(); }
+
+	/// Resizes the root viewport if it exists
+	void resizeRootViewport(int width, int height);
 
 	/// Returns the value of the suspension flag
 	/*! If `true` the application is suspended, it will neither update nor receive events */
@@ -123,14 +150,15 @@ class DLL_PUBLIC Application
 	bool shouldQuit_;
 	const AppConfiguration appCfg_;
 	RenderingSettings renderingSettings_;
+	GuiSettings guiSettings_;
 	float timings_[Timings::COUNT];
 	IDebugOverlay::DisplaySettings debugOverlayNullSettings_;
 
 	TimeStamp profileStartTime_;
 	nctl::UniquePtr<FrameTimer> frameTimer_;
 	nctl::UniquePtr<IGfxDevice> gfxDevice_;
-	nctl::UniquePtr<RenderQueue> renderQueue_;
 	nctl::UniquePtr<SceneNode> rootNode_;
+	nctl::UniquePtr<ScreenViewport> rootViewport_;
 	nctl::UniquePtr<IDebugOverlay> debugOverlay_;
 	nctl::UniquePtr<IInputManager> inputManager_;
 	nctl::UniquePtr<IAppEventHandler> appEventHandler_;

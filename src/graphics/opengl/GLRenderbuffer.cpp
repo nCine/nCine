@@ -61,6 +61,7 @@ void GLRenderbuffer::storage(GLenum internalFormat, GLsizei width, GLsizei heigh
 {
 	bind();
 	glRenderbufferStorage(GL_RENDERBUFFER, internalFormat, width, height);
+	unbind();
 }
 
 }

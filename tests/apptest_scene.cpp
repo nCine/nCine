@@ -2,6 +2,7 @@
 #include <ncine/Application.h>
 #include <ncine/Texture.h>
 #include <ncine/Sprite.h>
+#include <ncine/Viewport.h>
 #include "apptest_datapath.h"
 
 #include <ncine/config.h>
@@ -167,7 +168,7 @@ void MyEventHandler::onFrameStart()
 
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
-		sprites_[i]->y = height * 0.3f + fabsf(sinf(angle_ + 5.0f * i)) * (height * (0.25f + 0.02f * i));
+		sprites_[i]->setPositionY(height * 0.3f + fabsf(sinf(angle_ + 5.0f * i)) * (height * (0.25f + 0.02f * i)));
 		sprites_[i]->setRotation(angle_ * 20.0f);
 	}
 
@@ -310,7 +311,7 @@ void MyEventHandler::onFrameStart()
 	for (unsigned int i = 0; i < NumSprites; i++)
 		sprites_[i]->setScale(spriteScale);
 
-	nc::theApplication().gfxDevice().setClearColor(bgColor);
+	nc::theApplication().rootViewport().setClearColor(bgColor);
 #endif
 }
 
@@ -435,8 +436,11 @@ int main(int argc, char **argv)
 	const int screenWidth = nc::theApplication().gfxDevice().currentVideoMode().width;
 	const int screenHeight = nc::theApplication().gfxDevice().currentVideoMode().height;
 	window.setGeometry((screenWidth - appCfg.resolution.x) / 2, (screenHeight - appCfg.resolution.y) / 2, appCfg.resolution.x, appCfg.resolution.y);
-	window.setMinimumSize(appCfg.resolution.x, appCfg.resolution.y);
-	window.setMaximumSize(appCfg.resolution.x, appCfg.resolution.y);
+	if (appCfg.isResizable == false)
+	{
+		window.setMinimumSize(appCfg.resolution.x, appCfg.resolution.y);
+		window.setMaximumSize(appCfg.resolution.x, appCfg.resolution.y);
+	}
 
 	window.show();
 

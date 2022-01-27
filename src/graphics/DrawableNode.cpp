@@ -2,8 +2,10 @@
 #include "DrawableNode.h"
 #include "RenderQueue.h"
 #include "RenderCommand.h"
+#include "Viewport.h"
 #include "Application.h"
 #include "RenderStatistics.h"
+#include "tracy.h"
 
 namespace ncine {
 
@@ -67,16 +69,14 @@ const Vector2f DrawableNode::AnchorTopLeft(0.0f, 1.0f);
 const Vector2f DrawableNode::AnchorBottomRight(1.0f, 0.0f);
 const Vector2f DrawableNode::AnchorTopRight(1.0f, 1.0f);
 
-unsigned short DrawableNode::imguiLayer_ = LayerBase::HIGHEST - 1024;
-unsigned short DrawableNode::nuklearLayer_ = LayerBase::HIGHEST - 512;
-
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 DrawableNode::DrawableNode(SceneNode *parent, float xx, float yy)
     : SceneNode(parent, xx, yy), width_(0.0f), height_(0.0f),
-      renderCommand_(nctl::makeUnique<RenderCommand>())
+      renderCommand_(nctl::makeUnique<RenderCommand>()),
+      lastFrameNotCulled_(0)
 {
 	renderCommand_->setIdSortKey(id());
 }
@@ -112,10 +112,16 @@ void DrawableNode::draw(RenderQueue &renderQueue)
 
 	if (cullingEnabled)
 	{
-		updateAabb();
-
-		if (aabb_.overlaps(theApplication().gfxDevice().screenRect()))
+		if (dirtyBits_.test(DirtyBitPositions::AabbBit))
 		{
+			updateAabb();
+			dirtyBits_.reset(DirtyBitPositions::AabbBit);
+		}
+
+		const bool overlaps = aabb_.overlaps(renderQueue.viewport().cullingRect());
+		if (overlaps)
+		{
+			lastFrameNotCulled_ = theApplication().numFrames();
 			updateRenderCommand();
 			renderQueue.addCommand(renderCommand_.get());
 		}
@@ -194,14 +200,21 @@ void DrawableNode::setLayer(unsigned short layer)
 	renderCommand_->setLayer(layer);
 }
 
+bool DrawableNode::isCulled() const
+{
+	return (lastFrameNotCulled_ < theApplication().numFrames() - 1);
+}
+
 ///////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
 
 void DrawableNode::updateAabb()
 {
-	const float width = (absScale().x > 0.0f) ? absWidth() : -absWidth();
-	const float height = (absScale().y > 0.0f) ? absHeight() : -absHeight();
+	ZoneScoped;
+
+	const float width = absWidth();
+	const float height = absHeight();
 	float rotatedWidth = width;
 	float rotatedHeight = height;
 
@@ -213,13 +226,14 @@ void DrawableNode::updateAabb()
 		rotatedHeight = fabsf(width * sinRot) + fabsf(height * cosRot);
 	}
 
-	aabb_ = Rectf::fromCenterAndSize(absX_, absY_, rotatedWidth, rotatedHeight);
+	aabb_ = Rectf::fromCenterSize(absPosition_.x, absPosition_.y, rotatedWidth, rotatedHeight);
 }
 
 DrawableNode::DrawableNode(const DrawableNode &other)
     : SceneNode(other),
       width_(other.width_), height_(other.height_),
-      renderCommand_(nctl::makeUnique<RenderCommand>())
+      renderCommand_(nctl::makeUnique<RenderCommand>()),
+      lastFrameNotCulled_(0)
 {
 	renderCommand_->setIdSortKey(id());
 	setBlendingEnabled(other.isBlendingEnabled());

@@ -7,10 +7,11 @@
 #include "GfxCapabilities.h"
 #include "RenderResources.h"
 #include "RenderQueue.h"
+#include "ScreenViewport.h"
 #include "GLDebug.h"
 #include "Timer.h" // for `sleep()`
 #include "FrameTimer.h"
-#include "SceneNode.h"
+#include "DrawableNode.h"
 #include <nctl/String.h>
 #include "IInputManager.h"
 #include "JoyMapping.h"
@@ -61,9 +62,21 @@ Application::Application()
 
 Application::~Application() = default;
 
+Application::GuiSettings::GuiSettings()
+    : imguiLayer(DrawableNode::LayerBase::HIGHEST - 1024),
+      nuklearLayer(DrawableNode::LayerBase::HIGHEST - 512),
+      imguiViewport(nullptr), nuklearViewport(nullptr)
+{
+}
+
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+Viewport &Application::rootViewport()
+{
+	return *rootViewport_;
+}
 
 unsigned long int Application::numFrames() const
 {
@@ -73,6 +86,12 @@ unsigned long int Application::numFrames() const
 float Application::interval() const
 {
 	return frameTimer_->lastFrameInterval();
+}
+
+void Application::resizeRootViewport(int width, int height)
+{
+	if (rootViewport_ != nullptr)
+		rootViewport_->resize(width, height);
 }
 
 ///////////////////////////////////////////////////////////
@@ -133,8 +152,9 @@ void Application::initCommon()
 	{
 		gfxDevice_->setupGL();
 		RenderResources::create();
-		renderQueue_ = nctl::makeUnique<RenderQueue>();
 		rootNode_ = nctl::makeUnique<SceneNode>();
+		rootViewport_ = nctl::makeUnique<ScreenViewport>();
+		rootViewport_->setRootNode(rootNode_.get());
 	}
 	else
 		RenderResources::createMinimal(); // some resources are still required for rendering
@@ -178,11 +198,6 @@ void Application::step()
 {
 	ZoneScoped;
 	frameTimer_->addFrame();
-	if (appCfg_.withScenegraph)
-	{
-		TracyGpuZone("Clear");
-		gfxDevice_->clear();
-	}
 
 #ifdef WITH_IMGUI
 	{
@@ -216,13 +231,13 @@ void Application::step()
 	if (debugOverlay_)
 		debugOverlay_->update();
 
-	if (rootNode_ != nullptr && renderQueue_ != nullptr)
+	if (appCfg_.withScenegraph)
 	{
 		ZoneScopedN("SceneGraph");
 		{
 			ZoneScopedN("Update");
 			profileStartTime_ = TimeStamp::now();
-			rootNode_->update(frameTimer_->lastFrameInterval());
+			rootViewport_->update();
 			timings_[Timings::UPDATE] = profileStartTime_.secondsSince();
 		}
 
@@ -236,7 +251,7 @@ void Application::step()
 		{
 			ZoneScopedN("Visit");
 			profileStartTime_ = TimeStamp::now();
-			rootNode_->visit(*renderQueue_);
+			rootViewport_->visit();
 			timings_[Timings::VISIT] = profileStartTime_.secondsSince();
 		}
 
@@ -244,7 +259,10 @@ void Application::step()
 		{
 			ZoneScopedN("ImGui endFrame");
 			profileStartTime_ = TimeStamp::now();
-			imguiDrawing_->endFrame(*renderQueue_);
+			RenderQueue *imguiRenderQueue = (guiSettings_.imguiViewport) ?
+			            guiSettings_.imguiViewport->renderQueue_.get() :
+			            rootViewport_->renderQueue_.get();
+			imguiDrawing_->endFrame(*imguiRenderQueue);
 			timings_[Timings::IMGUI] += profileStartTime_.secondsSince();
 		}
 #endif
@@ -253,7 +271,10 @@ void Application::step()
 		{
 			ZoneScopedN("Nuklear endFrame");
 			profileStartTime_ = TimeStamp::now();
-			nuklearDrawing_->endFrame(*renderQueue_);
+			RenderQueue *nuklearRenderQueue = (guiSettings_.nuklearViewport) ?
+			            guiSettings_.nuklearViewport->renderQueue_.get() :
+			            rootViewport_->renderQueue_.get();
+			nuklearDrawing_->endFrame(*nuklearRenderQueue);
 			timings_[Timings::NUKLEAR] += profileStartTime_.secondsSince();
 		}
 #endif
@@ -261,7 +282,8 @@ void Application::step()
 		{
 			ZoneScopedN("Draw");
 			profileStartTime_ = TimeStamp::now();
-			renderQueue_->draw();
+			rootViewport_->sortAndCommitQueue();
+			rootViewport_->draw();
 			timings_[Timings::DRAW] = profileStartTime_.secondsSince();
 		}
 	}
@@ -336,7 +358,6 @@ void Application::shutdownCommon()
 
 	debugOverlay_.reset(nullptr);
 	rootNode_.reset(nullptr);
-	renderQueue_.reset(nullptr);
 	RenderResources::dispose();
 	frameTimer_.reset(nullptr);
 	inputManager_.reset(nullptr);

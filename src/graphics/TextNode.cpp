@@ -316,6 +316,7 @@ void TextNode::calculateBoundaries() const
 		mutableNode->width_ = xAdvanceMax;
 		// Total advance on the Y-axis for the entire string (vertical boundary)
 		mutableNode->height_ = yAdvance_;
+		mutableNode->dirtyBits_.set(DirtyBitPositions::AabbBit);
 
 		if (oldWidth > 0.0f && oldHeight > 0.0f)
 		{
@@ -381,8 +382,16 @@ void TextNode::processGlyph(const FontGlyph *glyph, Degenerate degen)
 
 void TextNode::updateRenderCommand()
 {
-	renderCommand_->transformation() = worldMatrix_;
-	textnodeBlock_->uniform("color")->setFloatVector(Colorf(absColor()).data());
+	if (dirtyBits_.test(DirtyBitPositions::TransformationBit))
+	{
+		renderCommand_->setTransformation(worldMatrix_);
+		dirtyBits_.reset(DirtyBitPositions::TransformationBit);
+	}
+	if (dirtyBits_.test(DirtyBitPositions::ColorBit))
+	{
+		textnodeBlock_->uniform("color")->setFloatVector(Colorf(absColor()).data());
+		dirtyBits_.reset(DirtyBitPositions::ColorBit);
+	}
 }
 
 }

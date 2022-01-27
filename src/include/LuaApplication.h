@@ -18,8 +18,13 @@ class LuaApplication
 	static int debugOverlaySettings(lua_State *L);
 	static int setDebugOverlaySettings(lua_State *L);
 
+	static int guiSettings(lua_State *L);
+	static int setGuiSettings(lua_State *L);
+
 	static int rootNode(lua_State *L);
+	static int rootViewport(lua_State *L);
 	static int interval(lua_State *L);
+	static int numFrames(lua_State *L);
 
 	static int width(lua_State *L);
 	static int height(lua_State *L);

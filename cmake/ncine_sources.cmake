@@ -35,6 +35,7 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/TextureLoaderDds.cpp
 	${NCINE_ROOT}/src/graphics/TextureLoaderPvr.cpp
 	${NCINE_ROOT}/src/graphics/TextureLoaderKtx.cpp
+	${NCINE_ROOT}/src/graphics/ITextureSaver.cpp
 	${NCINE_ROOT}/src/graphics/Texture.cpp
 	${NCINE_ROOT}/src/graphics/DrawableNode.cpp
 	${NCINE_ROOT}/src/graphics/SceneNode.cpp
@@ -69,10 +70,16 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/opengl/GLDepthTest.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLBlending.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLCullFace.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLClearColor.cpp
+	${NCINE_ROOT}/src/graphics/opengl/GLViewport.cpp
 	${NCINE_ROOT}/src/graphics/RenderBuffersManager.cpp
 	${NCINE_ROOT}/src/graphics/RenderBatcher.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLDebug.cpp
 	${NCINE_ROOT}/src/graphics/RenderStatistics.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLVertexFormat.cpp
 	${NCINE_ROOT}/src/graphics/RenderVaoPool.cpp
+	${NCINE_ROOT}/src/graphics/RenderCommandPool.cpp
+	${NCINE_ROOT}/src/graphics/Viewport.cpp
+	${NCINE_ROOT}/src/graphics/ScreenViewport.cpp
+	${NCINE_ROOT}/src/graphics/Camera.cpp
 )

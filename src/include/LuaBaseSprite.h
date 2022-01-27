@@ -15,6 +15,7 @@ class LuaBaseSprite
 
 	static int texture(lua_State *L);
 	static int setTexture(lua_State *L);
+	static int resetTexture(lua_State *L);
 
 	static int texRect(lua_State *L);
 	static int setTexRect(lua_State *L);

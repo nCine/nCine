@@ -7,8 +7,10 @@
 #include "GLBlending.h"
 #include "GLDepthTest.h"
 #include "GLCullFace.h"
+#include "GLViewport.h"
 #include "RenderQueue.h"
-#include "DrawableNode.h"
+#include "RenderCommandPool.h"
+#include "RenderResources.h"
 #include "Application.h"
 
 #if defined(WITH_GLFW)
@@ -46,7 +48,6 @@ namespace {
 
 NuklearDrawing::NuklearDrawing(bool withSceneGraph)
     : withSceneGraph_(withSceneGraph),
-      freeCommandsPool_(16), usedCommandsPool_(16),
       lastFrameWidth_(0), lastFrameHeight_(0)
 {
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
@@ -127,7 +128,7 @@ void NuklearDrawing::newFrame()
 
 		if (withSceneGraph_ == false)
 		{
-			nuklearShaderUniforms_->uniform("projection")->setFloatVector(projectionMatrix_.data());
+			nuklearShaderUniforms_->uniform("uGuiProjection")->setFloatVector(projectionMatrix_.data());
 			nuklearShaderUniforms_->commitUniforms();
 		}
 	}
@@ -149,38 +150,14 @@ void NuklearDrawing::endFrame()
 
 RenderCommand *NuklearDrawing::retrieveCommandFromPool()
 {
-	RenderCommand *retrievedCommand = nullptr;
-
-	for (unsigned int i = 0; i < freeCommandsPool_.size(); i++)
-	{
-		const unsigned int poolSize = freeCommandsPool_.size();
-		nctl::UniquePtr<RenderCommand> &command = freeCommandsPool_[i];
-		if (command && command->material().shaderProgram() == nuklearShaderProgram_.get())
-		{
-			retrievedCommand = command.get();
-			usedCommandsPool_.pushBack(nctl::move(command));
-			command = nctl::move(freeCommandsPool_[poolSize - 1]);
-			freeCommandsPool_.popBack();
-			break;
-		}
-	}
-
+	RenderCommand *retrievedCommand = RenderResources::renderCommandPool().retrieve(nuklearShaderProgram_.get());
 	if (retrievedCommand == nullptr)
 	{
-		nctl::UniquePtr<RenderCommand> newCommand = nctl::makeUnique<RenderCommand>();
-		setupRenderCmd(*newCommand);
-		retrievedCommand = newCommand.get();
-		usedCommandsPool_.pushBack(nctl::move(newCommand));
+		retrievedCommand = RenderResources::renderCommandPool().add();
+		setupRenderCmd(*retrievedCommand);
 	}
 
 	return retrievedCommand;
-}
-
-void NuklearDrawing::resetCommandPool()
-{
-	for (nctl::UniquePtr<RenderCommand> &command : usedCommandsPool_)
-		freeCommandsPool_.pushBack(nctl::move(command));
-	usedCommandsPool_.clear();
 }
 
 void NuklearDrawing::setupRenderCmd(RenderCommand &cmd)
@@ -189,7 +166,7 @@ void NuklearDrawing::setupRenderCmd(RenderCommand &cmd)
 
 	Material &material = cmd.material();
 	material.setShaderProgram(nuklearShaderProgram_.get());
-	material.setUniformsDataPointer(nullptr);
+	material.reserveUniformsDataMemory();
 	material.uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
 	material.attribute("aPosition")->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, pos)));
 	material.attribute("aTexCoords")->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, uv)));
@@ -206,12 +183,11 @@ void NuklearDrawing::setupRenderCmd(RenderCommand &cmd)
 void NuklearDrawing::draw(RenderQueue &renderQueue)
 {
 	const unsigned int numElements = sizeof(nk_vertex) / sizeof(GLfloat);
-	resetCommandPool();
 
 	RenderCommand &firstCmd = *retrieveCommandFromPool();
 	if (lastFrameWidth_ != NuklearContext::width_ || lastFrameHeight_ != NuklearContext::height_)
 	{
-		firstCmd.material().uniform("projection")->setFloatVector(projectionMatrix_.data());
+		firstCmd.material().uniform("uGuiProjection")->setFloatVector(projectionMatrix_.data());
 		lastFrameWidth_ = NuklearContext::width_;
 		lastFrameHeight_ = NuklearContext::height_;
 	}
@@ -262,7 +238,7 @@ void NuklearDrawing::draw(RenderQueue &renderQueue)
 
 		currCmd.geometry().setNumIndices(cmd->elem_count);
 		currCmd.geometry().setFirstIndex(firstIndex);
-		currCmd.setLayer(DrawableNode::nuklearLayer() + cmdIdx);
+		currCmd.setLayer(theApplication().guiSettings().nuklearLayer + cmdIdx);
 		currCmd.material().setTexture(reinterpret_cast<GLTexture *>(cmd->texture.ptr));
 
 		renderQueue.addCommand(&currCmd);
@@ -317,11 +293,12 @@ void NuklearDrawing::draw()
 	GLCullFace::disable();
 	GLDepthTest::State depthTestState = GLDepthTest::state();
 	GLDepthTest::disable();
+	GLViewport::State viewportState = GLViewport::state();
 
 	// setup program
 	nuklearShaderProgram_->use();
 	nuklearShaderAttributes_->defineVertexFormat(vbo_.get(), ibo_.get());
-	glViewport(0, 0, NuklearContext::displayWidth_, NuklearContext::displayHeight_);
+	GLViewport::setRect(0, 0, NuklearContext::displayWidth_, NuklearContext::displayHeight_);
 
 	// iterate over and execute each draw command
 	const nk_draw_index *offset = nullptr;
@@ -343,6 +320,7 @@ void NuklearDrawing::draw()
 	nk_buffer_clear(&NuklearContext::cmds_);
 
 	GLScissorTest::disable();
+	GLViewport::setState(viewportState);
 	GLDepthTest::setState(depthTestState);
 	GLCullFace::setState(cullFaceState);
 	GLBlending::setState(blendingState);

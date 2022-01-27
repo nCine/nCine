@@ -9,6 +9,7 @@ namespace ncine {
 
 class AppConfiguration;
 class IInputEventHandler;
+class Viewport;
 class SceneNode;
 
 /// Overlay debug ImGui interface
@@ -103,7 +104,8 @@ class ImGuiDebugOverlay : public IDebugOverlay
 	void guiInputState();
 	void guiRenderDoc();
 	void guiAllocators();
-	void guiRescursiveChildrenNodes(SceneNode *node, unsigned int childId);
+	void guiRecursiveViewports(Viewport *viewport, unsigned int viewportId);
+	void guiRecursiveChildrenNodes(SceneNode *node, unsigned int childId);
 	void guiNodeInspector();
 
 	void guiTopLeft();

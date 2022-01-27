@@ -1,8 +1,9 @@
-uniform mat4 projection;
+uniform mat4 uProjectionMatrix;
+uniform mat4 uViewMatrix;
 
 layout (std140) uniform TextnodeBlock
 {
-	mat4 modelView;
+	mat4 modelMatrix;
 	vec4 color;
 };
 
@@ -13,7 +14,7 @@ out vec4 vColor;
 
 void main()
 {
-	gl_Position = projection * modelView * vec4(aPosition, 0.0, 1.0);
+	gl_Position = uProjectionMatrix * uViewMatrix * modelMatrix * vec4(aPosition, 0.0, 1.0);
 	vTexCoords = aTexCoords;
 	vColor = color;
 }

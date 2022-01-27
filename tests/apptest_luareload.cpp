@@ -116,19 +116,13 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
-	{
-		particleSystem_->x = static_cast<float>(event.x);
-		particleSystem_->y = static_cast<float>(event.y);
-	}
+		particleSystem_->setPosition(static_cast<float>(event.x), static_cast<float>(event.y));
 }
 
 void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 {
 	if (state.isLeftButtonDown())
-	{
-		particleSystem_->x = static_cast<float>(state.x);
-		particleSystem_->y = static_cast<float>(state.y);
-	}
+		particleSystem_->setPosition(static_cast<float>(state.x), static_cast<float>(state.y));
 }
 
 bool MyEventHandler::runScript()

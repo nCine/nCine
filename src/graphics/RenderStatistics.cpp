@@ -17,6 +17,7 @@ RenderStatistics::CustomBuffers RenderStatistics::customIbos_;
 unsigned int RenderStatistics::index_ = 0;
 unsigned int RenderStatistics::culledNodes_[2] = { 0, 0 };
 RenderStatistics::VaoPool RenderStatistics::vaoPool_;
+RenderStatistics::CommandPool RenderStatistics::commandPool_;
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
@@ -39,6 +40,7 @@ void RenderStatistics::reset()
 	culledNodes_[index_] = 0;
 
 	vaoPool_.reset();
+	commandPool_.reset();
 }
 
 void RenderStatistics::gatherStatistics(const RenderCommand &command)

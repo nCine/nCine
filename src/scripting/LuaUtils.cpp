@@ -523,10 +523,15 @@ void LuaUtils::retrieveFieldFunction(lua_State *L, int index, const char *name)
 	LuaDebug::assert(L, lua_istable(L, -1), "Cannot retrieve a function in table field \"%s\"", name);
 }
 
-void LuaUtils::retrieveFieldLightUserData(lua_State *L, int index, const char *name)
+void *LuaUtils::retrieveFieldLightUserData(lua_State *L, int index, const char *name)
 {
 	lua_getfield(L, index, name);
 	LuaDebug::assert(L, lua_islightuserdata(L, -1), "Cannot retrieve a light userdata in table field \"%s\"", name);
+
+	void *lightUserData = lua_touserdata(L, -1);
+	lua_pop(L, 1);
+
+	return lightUserData;
 }
 
 ///////////////////////////////////////////////////////////

@@ -17,6 +17,7 @@ namespace BaseSprite {
 
 	static const char *texture = "get_texture";
 	static const char *setTexture = "set_texture";
+	static const char *resetTexture = "reset_texture";
 
 	static const char *texRect = "get_texrect";
 	static const char *setTexRect = "set_texrect";
@@ -42,6 +43,7 @@ void LuaBaseSprite::exposeFunctions(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::texture, texture);
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::setTexture, setTexture);
+	LuaUtils::addFunction(L, LuaNames::BaseSprite::resetTexture, resetTexture);
 
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::texRect, texRect);
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::setTexRect, setTexRect);
@@ -81,6 +83,15 @@ int LuaBaseSprite::setTexture(lua_State *L)
 	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
 
 	sprite->setTexture(texture);
+
+	return 0;
+}
+
+int LuaBaseSprite::resetTexture(lua_State *L)
+{
+	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -1);
+
+	sprite->resetTexture();
 
 	return 0;
 }

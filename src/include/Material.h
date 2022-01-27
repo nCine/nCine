@@ -72,6 +72,7 @@ class Material
 	inline const GLShaderProgram *shaderProgram() const { return shaderProgram_; }
 	void setShaderProgram(GLShaderProgram *program);
 
+	void reserveUniformsDataMemory();
 	void setUniformsDataPointer(GLubyte *dataPointer);
 	/// Wrapper around `GLShaderUniforms::uniform()`
 	inline GLUniformCache *uniform(const char *name) { return shaderUniforms_.uniform(name); }

@@ -12,6 +12,9 @@ class KeyboardState;
 class JoystickState;
 class JoyMappedState;
 
+class Viewport;
+class Camera;
+
 class AppConfiguration;
 class Texture;
 class SceneNode;
@@ -34,6 +37,9 @@ namespace LuaTypes {
 		KEYBOARDSTATE = 0,
 		JOYSTICKSTATE,
 		JOYMAPPEDSTATE,
+
+		VIEWPORT,
+		CAMERA,
 
 		TEXTURE,
 		SCENENODE,
@@ -59,6 +65,9 @@ namespace LuaTypes {
 	template <> inline LuaTypes::UserDataType classToUserDataType<JoystickState>(JoystickState *) { return LuaTypes::UserDataType::JOYSTICKSTATE; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<JoyMappedState>(JoyMappedState *) { return LuaTypes::UserDataType::JOYMAPPEDSTATE; }
 
+	template <> inline LuaTypes::UserDataType classToUserDataType<Viewport>(Viewport *) { return LuaTypes::UserDataType::VIEWPORT; }
+	template <> inline LuaTypes::UserDataType classToUserDataType<Camera>(Camera *) { return LuaTypes::UserDataType::CAMERA; }
+
 	template <> inline LuaTypes::UserDataType classToUserDataType<Texture>(Texture *) { return LuaTypes::UserDataType::TEXTURE; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<SceneNode>(SceneNode *) { return LuaTypes::UserDataType::SCENENODE; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<DrawableNode>(DrawableNode *) { return LuaTypes::UserDataType::DRAWABLENODE; }
@@ -79,6 +88,9 @@ namespace LuaTypes {
 	template <> inline const char *classToName<KeyboardState>(KeyboardState *) { return "KeyboardState"; }
 	template <> inline const char *classToName<JoystickState>(JoystickState *) { return "JoystickState"; }
 	template <> inline const char *classToName<JoyMappedState>(JoyMappedState *) { return "JoyMappedState"; }
+
+	template <> inline const char *classToName<Viewport>(Viewport *) { return "Viewport"; }
+	template <> inline const char *classToName<Camera>(Camera *) { return "Camera"; }
 
 	template <> inline const char *classToName<Texture>(Texture *) { return "Texture"; }
 	template <> inline const char *classToName<SceneNode>(SceneNode *) { return "SceneNode"; }
@@ -104,6 +116,9 @@ namespace LuaTypes {
 			case LuaTypes::UserDataType::KEYBOARDSTATE: return "KeyboardState";
 			case LuaTypes::UserDataType::JOYSTICKSTATE: return "JoystickState";
 			case LuaTypes::UserDataType::JOYMAPPEDSTATE: return "JoyMappedState";
+
+			case LuaTypes::UserDataType::VIEWPORT: return "Viewport";
+			case LuaTypes::UserDataType::CAMERA: return "Camera";
 
 			case LuaTypes::UserDataType::TEXTURE: return "Texture";
 			case LuaTypes::UserDataType::SCENENODE: return "SceneNode";

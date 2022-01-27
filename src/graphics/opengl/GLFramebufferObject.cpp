@@ -107,7 +107,6 @@ void GLFramebufferObject::attachRenderbuffer(GLenum internalFormat, GLsizei widt
 {
 	GLRenderbuffer *renderBuffer = new GLRenderbuffer(internalFormat, width, height);
 	attachedRenderbuffers_.pushBack(renderBuffer);
-	renderBuffer->bind();
 
 	bind(GL_FRAMEBUFFER);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, renderBuffer->glHandle_);
@@ -129,6 +128,7 @@ bool GLFramebufferObject::isStatusComplete()
 {
 	bind(GL_FRAMEBUFFER);
 	const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	unbind(GL_FRAMEBUFFER);
 
 	return (status == GL_FRAMEBUFFER_COMPLETE);
 }

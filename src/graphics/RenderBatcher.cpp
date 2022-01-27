@@ -1,6 +1,9 @@
 #include <cstring> // for memcpy()
+#include "GLShaderProgram.h"
 #include "RenderBatcher.h"
-#include "RenderResources.h" // TODO: Remove dependency?
+#include "RenderCommand.h"
+#include "RenderCommandPool.h"
+#include "RenderResources.h"
 #include "Application.h"
 
 namespace ncine {
@@ -16,7 +19,7 @@ unsigned int RenderBatcher::UboMaxSize = 0;
 ///////////////////////////////////////////////////////////
 
 RenderBatcher::RenderBatcher()
-    : buffers_(1), freeCommandsPool_(16), usedCommandsPool_(16)
+    : buffers_(1)
 {
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
 	const int maxUniformBlockSize = gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE);
@@ -161,10 +164,6 @@ void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, 
 
 void RenderBatcher::reset()
 {
-	for (nctl::UniquePtr<RenderCommand> &command : usedCommandsPool_)
-		freeCommandsPool_.pushBack(nctl::move(command));
-	usedCommandsPool_.clear();
-
 	// Reset managed buffers
 	for (ManagedBuffer &buffer : buffers_)
 		buffer.freeSpace = buffer.size;
@@ -191,44 +190,45 @@ RenderCommand *RenderBatcher::collectCommands(
 	unsigned long instancesVertexDataSize = 0;
 	unsigned int instancesIndicesAmount = 0;
 
+	bool commandAdded = false;
 	if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::SPRITE)
 	{
-		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_SPRITES);
+		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_SPRITES, commandAdded);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("SpriteBlock")->size();
 	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::SPRITE_GRAY)
 	{
-		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_SPRITES_GRAY);
+		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_SPRITES_GRAY, commandAdded);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("SpriteBlock")->size();
 	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::SPRITE_NO_TEXTURE)
 	{
-		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE);
+		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE, commandAdded);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("SpriteBlock")->size();
 	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::MESH_SPRITE)
 	{
-		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_MESH_SPRITES);
+		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_MESH_SPRITES, commandAdded);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("MeshSpriteBlock")->size();
 	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::MESH_SPRITE_GRAY)
 	{
-		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY);
+		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY, commandAdded);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("MeshSpriteBlock")->size();
 	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)
 	{
-		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE);
+		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE, commandAdded);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("MeshSpriteBlock")->size();
 	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::TEXTNODE_ALPHA)
 	{
-		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA);
+		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA, commandAdded);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("TextnodeBlock")->size();
 	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::TEXTNODE_RED)
 	{
-		batchCommand = retrieveCommandFromPool(Material::ShaderProgramType::BATCHED_TEXTNODES_RED);
+		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_TEXTNODES_RED, commandAdded);
 		singleInstanceBlockSize = (*start)->material().uniformBlock("TextnodeBlock")->size();
 	}
 	else
@@ -300,9 +300,8 @@ RenderCommand *RenderBatcher::collectCommands(
 		instancesVertexDataSize -= 2 * (refCommand->geometry().numElementsPerVertex() + 1) * sizeof(GLfloat);
 
 	batchCommand->material().setUniformsDataPointer(acquireMemory(instancesBlockSize));
-	if (hasTexture(refCommand->material().shaderProgramType()))
+	if (commandAdded && hasTexture(refCommand->material().shaderProgramType()))
 		batchCommand->material().uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
-	batchCommand->material().uniform("projection")->setFloatVector(RenderResources::projectionMatrix().data());
 
 	const unsigned int SizeVertexFormat = ((refCommand->material().shaderProgramType() != Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)
 	                                           ? sizeof(RenderResources::VertexFormatPos2Tex2)
@@ -328,7 +327,7 @@ RenderCommand *RenderBatcher::collectCommands(
 	while (it != nextStart)
 	{
 		RenderCommand *command = *it;
-		command->commitTransformation();
+		command->commitNodeTransformation();
 
 		if (isBatchedSprite(batchCommand->material().shaderProgramType()))
 		{
@@ -435,35 +434,6 @@ RenderCommand *RenderBatcher::collectCommands(
 	}
 
 	return batchCommand;
-}
-
-RenderCommand *RenderBatcher::retrieveCommandFromPool(Material::ShaderProgramType shaderProgramType)
-{
-	RenderCommand *retrievedCommand = nullptr;
-
-	for (unsigned int i = 0; i < freeCommandsPool_.size(); i++)
-	{
-		const unsigned int poolSize = freeCommandsPool_.size();
-		nctl::UniquePtr<RenderCommand> &command = freeCommandsPool_[i];
-		if (command && command->material().shaderProgramType() == shaderProgramType)
-		{
-			retrievedCommand = command.get();
-			usedCommandsPool_.pushBack(nctl::move(command));
-			command = nctl::move(freeCommandsPool_[poolSize - 1]);
-			freeCommandsPool_.popBack();
-			break;
-		}
-	}
-
-	if (retrievedCommand == nullptr)
-	{
-		nctl::UniquePtr<RenderCommand> newCommand = nctl::makeUnique<RenderCommand>();
-		newCommand->material().setShaderProgramType(shaderProgramType);
-		retrievedCommand = newCommand.get();
-		usedCommandsPool_.pushBack(nctl::move(newCommand));
-	}
-
-	return retrievedCommand;
 }
 
 unsigned char *RenderBatcher::acquireMemory(unsigned int bytes)

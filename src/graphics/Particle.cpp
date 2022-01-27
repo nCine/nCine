@@ -52,9 +52,7 @@ void Particle::update(float interval)
 	else
 	{
 		life_ -= interval;
-
-		x += velocity_.x * interval;
-		y += velocity_.y * interval;
+		move(velocity_ * interval);
 	}
 }
 
@@ -69,8 +67,7 @@ void Particle::transform()
 		// Always independent movement
 		absScaleFactor_ = scaleFactor_;
 		absRotation_ = rotation_;
-		absX_ = x;
-		absY_ = y;
+		absPosition_ = position_;
 	}
 }
 

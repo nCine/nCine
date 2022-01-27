@@ -4,6 +4,7 @@
 #include "IInputManager.h"
 #include "InputEvents.h"
 
+#include "Viewport.h"
 #include "DrawableNode.h"
 #include "MeshSprite.h"
 #include "ParticleSystem.h"
@@ -280,7 +281,8 @@ void ImGuiDebugOverlay::guiWindow()
 		guiInputState();
 		guiRenderDoc();
 		guiAllocators();
-		guiNodeInspector();
+		if (appCfg.withScenegraph)
+			guiNodeInspector();
 	}
 	ImGui::End();
 }
@@ -627,6 +629,7 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("VBO size: %lu", appCfg.vboSize);
 		ImGui::Text("IBO size: %lu", appCfg.iboSize);
 		ImGui::Text("Vao pool size: %u", appCfg.vaoPoolSize);
+		ImGui::Text("RenderCommand pool size: %u", appCfg.renderCommandPoolSize);
 
 		ImGui::Separator();
 		ImGui::Text("Debug Overlay: %s", appCfg.withDebugOverlay ? "true" : "false");
@@ -1152,7 +1155,26 @@ void ImGuiDebugOverlay::guiAllocators()
 #endif
 }
 
-void ImGuiDebugOverlay::guiRescursiveChildrenNodes(SceneNode *node, unsigned int childId)
+void ImGuiDebugOverlay::guiRecursiveViewports(Viewport *viewport, unsigned int viewportId)
+{
+	widgetName_.format("#%u Viewport", viewportId);
+	widgetName_.formatAppend(" - size: %d x %d", viewport->width(), viewport->height());
+	const Rectf rect = viewport->cullingRect();
+	widgetName_.formatAppend(" - culling rect: %.2f, %.2f - %.2f, %.2f", rect.x, rect.y, rect.w, rect.h);
+	widgetName_.formatAppend("###0x%x", uintptr_t(viewport));
+
+	SceneNode *rootNode = viewport->rootNode();
+	if (rootNode != nullptr && ImGui::TreeNode(widgetName_.data()))
+	{
+		guiRecursiveChildrenNodes(rootNode, 0);
+		ImGui::TreePop();
+	}
+
+	if (viewport->nextViewport() != nullptr)
+		guiRecursiveViewports(viewport->nextViewport(), viewportId + 1);
+}
+
+void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int childId)
 {
 	DrawableNode *drawable = nullptr;
 	if (node->type() != Object::ObjectType::SCENENODE &&
@@ -1190,7 +1212,11 @@ void ImGuiDebugOverlay::guiRescursiveChildrenNodes(SceneNode *node, unsigned int
 		widgetName_.formatAppend(" (%u children)", node->children().size());
 	widgetName_.formatAppend(" - position: %.1f x %.1f", node->position().x, node->position().y);
 	if (drawable)
+	{
 		widgetName_.formatAppend(" - size: %.1f x %.1f", drawable->width(), drawable->height());
+		if (drawable->isDrawEnabled() && drawable->isCulled())
+			widgetName_.formatAppend(" - culled", drawable->width(), drawable->height());
+	}
 	widgetName_.formatAppend("###0x%x", uintptr_t(node));
 
 	if (ImGui::TreeNode(widgetName_.data()))
@@ -1334,7 +1360,7 @@ void ImGuiDebugOverlay::guiRescursiveChildrenNodes(SceneNode *node, unsigned int
 			{
 				const nctl::Array<SceneNode *> &children = node->children();
 				for (unsigned int i = 0; i < children.size(); i++)
-					guiRescursiveChildrenNodes(children[i], i);
+					guiRecursiveChildrenNodes(children[i], i);
 				ImGui::TreePop();
 			}
 		}
@@ -1346,16 +1372,14 @@ void ImGuiDebugOverlay::guiRescursiveChildrenNodes(SceneNode *node, unsigned int
 
 void ImGuiDebugOverlay::guiNodeInspector()
 {
-	if (theApplication().appConfiguration().withScenegraph)
-	{
-		if (ImGui::CollapsingHeader("Node Inspector"))
-			guiRescursiveChildrenNodes(&theApplication().rootNode(), 0);
-	}
+	if (ImGui::CollapsingHeader("Node Inspector"))
+		guiRecursiveViewports(&theApplication().rootViewport(), 0);
 }
 
 void ImGuiDebugOverlay::guiTopLeft()
 {
 	const RenderStatistics::VaoPool &vaoPool = RenderStatistics::vaoPool();
+	const RenderStatistics::CommandPool &commandPool = RenderStatistics::commandPool();
 	const RenderStatistics::Textures &textures = RenderStatistics::textures();
 	const RenderStatistics::CustomBuffers &customVbos = RenderStatistics::customVBOs();
 	const RenderStatistics::CustomBuffers &customIbos = RenderStatistics::customIBOs();
@@ -1380,6 +1404,7 @@ void ImGuiDebugOverlay::guiTopLeft()
 		}
 
 		ImGui::Text("%u/%u VAOs (%u reuses, %u bindings)", vaoPool.size, vaoPool.capacity, vaoPool.reuses, vaoPool.bindings);
+		ImGui::Text("%u/%u RenderCommands in the pool (%u retrievals)", commandPool.usedSize, commandPool.usedSize + commandPool.freeSize, commandPool.retrievals);
 		ImGui::Text("%.2f Kb in %u Texture(s)", textures.dataSize / 1024.0f, textures.count);
 		ImGui::Text("%.2f Kb in %u custom VBO(s)", customVbos.dataSize / 1024.0f, customVbos.count);
 		ImGui::Text("%.2f Kb in %u custom IBO(s)", customIbos.dataSize / 1024.0f, customIbos.count);

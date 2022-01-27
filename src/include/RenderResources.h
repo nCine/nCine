@@ -1,14 +1,22 @@
 #ifndef CLASS_NCINE_RENDERRESOURCES
 #define CLASS_NCINE_RENDERRESOURCES
 
-#include "GLBufferObject.h"
-#include "GLShaderProgram.h"
-#include "RenderBuffersManager.h"
-#include "RenderVaoPool.h"
+#define NCINE_INCLUDE_OPENGL
+#include "common_headers.h"
+
 #include <nctl/UniquePtr.h>
+#include <nctl/HashMap.h>
 #include "Matrix4x4.h"
+#include "GLShaderUniforms.h"
 
 namespace ncine {
+
+class RenderBuffersManager;
+class RenderVaoPool;
+class RenderCommandPool;
+class RenderBatcher;
+class GLShaderProgram;
+class Camera;
 
 /// The class that creates and handles application common OpenGL rendering resources
 class RenderResources
@@ -42,8 +50,22 @@ class RenderResources
 		int drawindex;
 	};
 
+	struct CameraUniformData
+	{
+		CameraUniformData()
+		    : camera(nullptr), updateFrameProjectionMatrix(0), updateFrameViewMatrix(0) {}
+
+		GLShaderUniforms shaderUniforms;
+		Camera *camera;
+		unsigned long int updateFrameProjectionMatrix;
+		unsigned long int updateFrameViewMatrix;
+	};
+
 	static inline RenderBuffersManager &buffersManager() { return *buffersManager_; }
 	static inline RenderVaoPool &vaoPool() { return *vaoPool_; }
+	static inline RenderCommandPool &renderCommandPool() { return *renderCommandPool_; }
+	static inline RenderBatcher &renderBatcher() { return *renderBatcher_; }
+
 	static inline GLShaderProgram *spriteShaderProgram() { return spriteShaderProgram_.get(); }
 	static inline GLShaderProgram *spriteGrayShaderProgram() { return spriteGrayShaderProgram_.get(); }
 	static inline GLShaderProgram *spriteNoTextureShaderProgram() { return spriteNoTextureShaderProgram_.get(); }
@@ -60,15 +82,19 @@ class RenderResources
 	static inline GLShaderProgram *batchedMeshSpritesNoTextureShaderProgram() { return batchedMeshSpritesNoTextureShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedTextnodesAlphaShaderProgram() { return batchedTextnodesAlphaShaderProgram_.get(); }
 	static inline GLShaderProgram *batchedTextnodesRedShaderProgram() { return batchedTextnodesRedShaderProgram_.get(); }
-	static inline const Matrix4x4f &projectionMatrix() { return projectionMatrix_; }
-	static inline bool hasProjectionChanged(bool batchingEnabled) { return (batchingEnabled) ? projectionHasChangedBatching_ : projectionHasChanged_; }
-	static void clearDirtyProjectionFlag(bool batchingEnabled);
+
+	static inline unsigned char *cameraUniformsBuffer() { return cameraUniformsBuffer_; }
+	static inline nctl::HashMap<GLShaderProgram *, CameraUniformData> &cameraUniformDataMap() { return cameraUniformDataMap_; }
+	static inline const Camera *currentCamera() { return currentCamera_; }
 
 	static void createMinimal();
 
   private:
 	static nctl::UniquePtr<RenderBuffersManager> buffersManager_;
 	static nctl::UniquePtr<RenderVaoPool> vaoPool_;
+	static nctl::UniquePtr<RenderCommandPool> renderCommandPool_;
+	static nctl::UniquePtr<RenderBatcher> renderBatcher_;
+
 	static nctl::UniquePtr<GLShaderProgram> spriteShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> spriteGrayShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> spriteNoTextureShaderProgram_;
@@ -86,11 +112,14 @@ class RenderResources
 	static nctl::UniquePtr<GLShaderProgram> batchedTextnodesAlphaShaderProgram_;
 	static nctl::UniquePtr<GLShaderProgram> batchedTextnodesRedShaderProgram_;
 
-	static Matrix4x4f projectionMatrix_;
-	static bool projectionHasChanged_;
-	static bool projectionHasChangedBatching_;
+	static const int UniformsBufferSize = 128; // two 4x4 float matrices
+	static unsigned char cameraUniformsBuffer_[UniformsBufferSize];
+	static nctl::HashMap<GLShaderProgram *, CameraUniformData> cameraUniformDataMap_;
 
-	static void setProjectionMatrix(const Matrix4x4f &projectionMatrix);
+	static Camera *currentCamera_;
+	static nctl::UniquePtr<Camera> defaultCamera_;
+
+	static void setCamera(Camera *camera);
 	static void create();
 	static void dispose();
 
@@ -103,8 +132,8 @@ class RenderResources
 
 	/// The `Application` class needs to create and dispose the resources
 	friend class Application;
-	/// The `IGfxDevice` class needs to update the projection matrix
-	friend class IGfxDevice;
+	/// The `Viewport` class needs to set the current camera
+	friend class Viewport;
 };
 
 }

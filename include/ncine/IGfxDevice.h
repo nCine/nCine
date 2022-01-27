@@ -104,9 +104,9 @@ class DLL_PUBLIC IGfxDevice
 	/// Returns device height
 	inline int height() const { return height_; }
 	/// Returns device resolution as a `Vector2i` object
-	inline const Vector2i resolution() const { return Vector2i(width_, height_); }
+	inline Vector2i resolution() const { return Vector2i(width_, height_); }
 	/// Returns device resolution as a `Rectf` object
-	inline const Rectf screenRect() const { return Rectf(0.0f, 0.0f, static_cast<float>(width_), static_cast<float>(height_)); }
+	inline Rectf screenRect() const { return Rectf(0.0f, 0.0f, static_cast<float>(width_), static_cast<float>(height_)); }
 	/// Returns device aspect ratio
 	inline float aspect() const { return width_ / static_cast<float>(height_); }
 
@@ -119,16 +119,6 @@ class DLL_PUBLIC IGfxDevice
 
 	/// Highlights the application window to notify the user
 	inline virtual void flashWindow() const {}
-
-	/// Sets the OpenGL clear color through four float
-	void setClearColor(float red, float green, float blue, float alpha);
-	/// Sets the OpenGL clear color through a `Colorf` object
-	void setClearColor(const Colorf &color);
-
-	/// Resizes the OpenGL viewport
-	void setViewport(int width, int height);
-	/// Resizes the OpenGL viewport through a `Vector2i` object
-	inline void setViewport(const Vector2i &size) { setViewport(size.x, size.y); }
 
 	/// Returns the OpenGL context creation attributes
 	inline const GLContextInfo &glContextInfo() const { return glContextInfo_; }
@@ -175,8 +165,6 @@ class DLL_PUBLIC IGfxDevice
 
 	/// Updates the screen swapping back and front buffers
 	virtual void update() = 0;
-	/// Clears the screen
-	virtual void clear();
 
 	friend class Application;
 #if defined(WITH_SDL)

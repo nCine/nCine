@@ -121,10 +121,6 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
-	const float interval = nc::theApplication().interval();
-	if (!pause_)
-		angle_ += 20.0f * interval;
-
 	nc::Vector2f force;
 	force.x = 0.5f * (scrollMove_.x / nc::theApplication().width() - 0.5f);
 	force.y = 0.5f * (scrollMove_.y / nc::theApplication().height() - 0.5f);
@@ -141,6 +137,11 @@ void MyEventHandler::onFrameStart()
 	debugString_->formatAppend("\nbatching: %s, culling: %s", settings.batchingEnabled ? "on" : "off", settings.cullingEnabled ? "on" : "off");
 	debugText_->setString(*debugString_);
 
+	if (pause_)
+		return;
+
+	const float interval = nc::theApplication().interval();
+	angle_ += 20.0f * interval;
 	float xAbsMax = 0.0f;
 	float yAbsMax = 0.0f;
 	for (unsigned int i = 0; i < GridSize; i++)
@@ -204,6 +205,9 @@ void MyEventHandler::onFrameStart()
 		vertices[i].x = (vertices[i].x / xAbsMax) * 0.5f;
 		vertices[i].y = (vertices[i].y / yAbsMax) * 0.5f;
 	}
+
+	meshSprite_->setVertices(NumVertices, vertices);
+	meshSprite_->setIndices(NumIndices, indices);
 }
 
 #ifdef __ANDROID__
@@ -314,7 +318,7 @@ void MyEventHandler::onJoyDisconnected(const nc::JoyConnectionEvent &event)
 
 void MyEventHandler::checkClick(float x, float y)
 {
-	const nc::Rectf debugTextRect = nc::Rectf::fromCenterAndSize(debugText_->absPosition(), debugText_->absSize());
+	const nc::Rectf debugTextRect = nc::Rectf::fromCenterSize(debugText_->absPosition(), debugText_->absSize());
 
 	if (debugTextRect.contains(x, y))
 	{

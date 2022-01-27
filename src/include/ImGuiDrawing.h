@@ -2,7 +2,6 @@
 #define CLASS_NCINE_IMGUIDRAWING
 
 #include <nctl/UniquePtr.h>
-#include "RenderCommand.h"
 #include "Matrix4x4.h"
 
 namespace ncine {
@@ -12,6 +11,7 @@ class GLShaderProgram;
 class GLShaderUniforms;
 class GLShaderAttributes;
 class GLBufferObject;
+class RenderCommand;
 class RenderQueue;
 
 /// The class the handles ImGui drawing
@@ -35,9 +35,6 @@ class ImGuiDrawing
 	nctl::UniquePtr<GLTexture> texture_;
 	nctl::UniquePtr<GLShaderProgram> imguiShaderProgram_;
 
-	nctl::Array<nctl::UniquePtr<RenderCommand>> freeCommandsPool_;
-	nctl::Array<nctl::UniquePtr<RenderCommand>> usedCommandsPool_;
-
 	nctl::UniquePtr<GLBufferObject> vbo_;
 	nctl::UniquePtr<GLBufferObject> ibo_;
 
@@ -51,7 +48,6 @@ class ImGuiDrawing
 	Matrix4x4f projectionMatrix_;
 
 	RenderCommand *retrieveCommandFromPool();
-	void resetCommandPool();
 	void setupRenderCmd(RenderCommand &cmd);
 	void draw(RenderQueue &renderQueue);
 

@@ -17,11 +17,13 @@ namespace ncine {
 
 class AppConfiguration;
 class Texture;
+class Font;
+class SceneNode;
+class Viewport;
+class Camera;
+class TextNode;
 class Sprite;
 class MeshSprite;
-class SceneNode;
-class Font;
-class TextNode;
 
 }
 
@@ -64,7 +66,9 @@ class MyEventHandler :
 	};
 
 	bool withAtlas_;
+	bool withViewport_;
 	bool pause_;
+	int animDivider_;
 	float angle_;
 	float camScale_;
 
@@ -77,6 +81,8 @@ class MyEventHandler :
 	nctl::UniquePtr<nc::Texture> megaTexture_;
 	nctl::UniquePtr<nc::Font> font_;
 	nctl::UniquePtr<nc::SceneNode> cameraNode_;
+	nctl::UniquePtr<nc::Viewport> viewport_;
+	nctl::UniquePtr<nc::Camera> camera_;
 
 	nctl::UniquePtr<nctl::String> debugString_;
 	nctl::UniquePtr<nc::TextNode> debugText_;
@@ -91,6 +97,7 @@ class MyEventHandler :
 	void resetCamera();
 	void setupAtlas();
 	void setupTextures();
+	void setupViewport();
 	void toggleSpritesType();
 	void updateEnabledSprites();
 	void checkClick(float x, float y);

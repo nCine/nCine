@@ -3,9 +3,10 @@
 #include "common_macros.h"
 #include "IGfxDevice.h"
 #include "Colorf.h"
-#include "RenderResources.h"
 #include "GLDepthTest.h"
 #include "GLBlending.h"
+#include "GLClearColor.h"
+#include "GLViewport.h"
 
 #ifdef __EMSCRIPTEN__
 	#include <emscripten/html5.h>
@@ -79,8 +80,9 @@ IGfxDevice::IGfxDevice(const WindowMode &windowMode, const GLContextInfo &glCont
 	#endif
 #endif
 
-	currentVideoMode_.width = windowMode.width;
-	currentVideoMode_.height = windowMode.height;
+	GLViewport::initRect(0, 0, width_, height_);
+	currentVideoMode_.width = width_;
+	currentVideoMode_.height = height_;
 	currentVideoMode_.redBits = displayMode.redBits();
 	currentVideoMode_.greenBits = displayMode.greenBits();
 	currentVideoMode_.blueBits = displayMode.blueBits();
@@ -92,22 +94,6 @@ IGfxDevice::IGfxDevice(const WindowMode &windowMode, const GLContextInfo &glCont
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
-
-void IGfxDevice::setClearColor(float red, float green, float blue, float alpha)
-{
-	glClearColor(red, green, blue, alpha);
-}
-
-void IGfxDevice::setClearColor(const Colorf &color)
-{
-	glClearColor(color.r(), color.g(), color.b(), color.a());
-}
-
-void IGfxDevice::setViewport(int width, int height)
-{
-	glViewport(0, 0, width, height);
-	RenderResources::setProjectionMatrix(Matrix4x4f::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height), -1.0f, 1.0f));
-}
 
 const IGfxDevice::VideoMode &IGfxDevice::videoMode(unsigned int index) const
 {
@@ -126,11 +112,6 @@ void IGfxDevice::setupGL()
 	glDisable(GL_DITHER);
 	GLBlending::setBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GLDepthTest::enable();
-}
-
-void IGfxDevice::clear()
-{
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 }

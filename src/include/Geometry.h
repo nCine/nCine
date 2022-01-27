@@ -49,7 +49,7 @@ class Geometry
 	/// Returns a pointer into host memory containing vertex data to be copied into a VBO
 	inline const float *hostVertexPointer() const { return hostVertexPointer_; }
 	/// Sets a pointer into host memory containing vertex data to be copied into a VBO
-	inline void setHostVertexPointer(const float *vertexPointer) { hostVertexPointer_ = vertexPointer; }
+	void setHostVertexPointer(const float *vertexPointer);
 
 	/// Shares the VBO of another `Geometry` object
 	void shareVbo(const Geometry *geometry);
@@ -72,7 +72,7 @@ class Geometry
 	/// Returns a pointer into host memory containing index data to be copied into a IBO
 	inline const GLushort *hostIndexPointer() const { return hostIndexPointer_; }
 	/// Sets a pointer into host memory containing index data to be copied into a IBO
-	inline void setHostIndexPointer(const GLushort *indexPointer) { hostIndexPointer_ = indexPointer; }
+	void setHostIndexPointer(const GLushort *indexPointer);
 
 	/// Shares the IBO of another `Geometry` object
 	void shareIbo(const Geometry *geometry);
@@ -96,6 +96,9 @@ class Geometry
 	GLenum iboUsageFlags_;
 	RenderBuffersManager::Parameters iboParams_;
 	const RenderBuffersManager::Parameters *sharedIboParams_;
+
+	bool hasDirtyVertices_;
+	bool hasDirtyIndices_;
 
 	void bind();
 	void draw(GLsizei numInstances);

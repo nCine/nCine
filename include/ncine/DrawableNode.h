@@ -121,11 +121,8 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	/// Sets the node rendering layer
 	void setLayer(unsigned short layer);
 
-	inline static unsigned short imGuiLayer() { return imguiLayer_; }
-	inline static void setImGuiLayer(unsigned short layer) { imguiLayer_ = layer; }
-
-	inline static unsigned short nuklearLayer() { return nuklearLayer_; }
-	inline static void setNuklearLayer(unsigned short layer) { nuklearLayer_ = layer; }
+	/// Returns true if all viewports have culled this node in the last frame
+	bool isCulled() const;
 
   protected:
 	/// Node width in pixel
@@ -136,6 +133,8 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	/// The render command class associated with this node
 	nctl::UniquePtr<RenderCommand> renderCommand_;
 
+	/// The last frame any viewport rendered this node
+	unsigned long int lastFrameNotCulled_;
 	/// Axis Aligned Bounding Box of the node area
 	Rectf aabb_;
 	/// Calculates updated values for the AABB

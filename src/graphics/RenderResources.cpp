@@ -1,4 +1,11 @@
+#include <nctl/HashMapIterator.h>
+#include "GLShaderProgram.h"
 #include "RenderResources.h"
+#include "RenderBuffersManager.h"
+#include "RenderVaoPool.h"
+#include "RenderCommandPool.h"
+#include "RenderBatcher.h"
+#include "Camera.h"
 #include "Application.h"
 
 #ifdef WITH_EMBEDDED_SHADERS
@@ -15,6 +22,9 @@ namespace ncine {
 
 nctl::UniquePtr<RenderBuffersManager> RenderResources::buffersManager_;
 nctl::UniquePtr<RenderVaoPool> RenderResources::vaoPool_;
+nctl::UniquePtr<RenderCommandPool> RenderResources::renderCommandPool_;
+nctl::UniquePtr<RenderBatcher> RenderResources::renderBatcher_;
+
 nctl::UniquePtr<GLShaderProgram> RenderResources::spriteShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::spriteGrayShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::spriteNoTextureShaderProgram_;
@@ -31,21 +41,17 @@ nctl::UniquePtr<GLShaderProgram> RenderResources::batchedMeshSpritesGrayShaderPr
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedMeshSpritesNoTextureShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedTextnodesRedShaderProgram_;
 nctl::UniquePtr<GLShaderProgram> RenderResources::batchedTextnodesAlphaShaderProgram_;
-Matrix4x4f RenderResources::projectionMatrix_ = Matrix4x4f::Identity;
-bool RenderResources::projectionHasChanged_ = false;
-bool RenderResources::projectionHasChangedBatching_ = false;
+
+unsigned char RenderResources::cameraUniformsBuffer_[UniformsBufferSize];
+// The `RenderCommand` class is handling insertions and rehashing
+nctl::HashMap<GLShaderProgram *, RenderResources::CameraUniformData> RenderResources::cameraUniformDataMap_(32);
+
+Camera *RenderResources::currentCamera_ = nullptr;
+nctl::UniquePtr<Camera> RenderResources::defaultCamera_;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
-
-void RenderResources::clearDirtyProjectionFlag(bool batchingEnabled)
-{
-	if (batchingEnabled)
-		projectionHasChangedBatching_ = false;
-	else
-		projectionHasChanged_ = false;
-}
 
 void RenderResources::createMinimal()
 {
@@ -74,11 +80,34 @@ namespace {
 
 }
 
-void RenderResources::setProjectionMatrix(const Matrix4x4f &projectionMatrix)
+void RenderResources::setCamera(Camera *camera)
 {
-	projectionMatrix_ = projectionMatrix;
-	projectionHasChanged_ = true;
-	projectionHasChangedBatching_ = true;
+	if (camera != nullptr)
+		currentCamera_ = camera;
+	else
+		currentCamera_ = defaultCamera_.get();
+
+	// The buffer is shared among every shader program. There is no need to call `setFloatVector()` as `setDirty()` is enough.
+	memcpy(cameraUniformsBuffer_, currentCamera_->projection().data(), 64);
+	memcpy(cameraUniformsBuffer_ + 64, currentCamera_->view().data(), 64);
+	for (nctl::HashMap<GLShaderProgram *, CameraUniformData>::Iterator i = cameraUniformDataMap_.begin(); i != cameraUniformDataMap_.end(); ++i)
+	{
+		CameraUniformData &cameraUniformData = *i;
+
+		if (cameraUniformData.camera != currentCamera_)
+			(*i).shaderUniforms.setDirty(true);
+		else
+		{
+			if (cameraUniformData.updateFrameProjectionMatrix < currentCamera_->updateFrameProjectionMatrix())
+				(*i).shaderUniforms.uniform("uProjectionMatrix")->setDirty(true);
+			if (cameraUniformData.updateFrameViewMatrix < currentCamera_->updateFrameViewMatrix())
+				(*i).shaderUniforms.uniform("uViewMatrix")->setDirty(true);
+		}
+
+		cameraUniformData.camera = currentCamera_;
+		cameraUniformData.updateFrameProjectionMatrix = currentCamera_->updateFrameProjectionMatrix();
+		cameraUniformData.updateFrameViewMatrix = currentCamera_->updateFrameViewMatrix();
+	}
 }
 
 void RenderResources::create()
@@ -88,6 +117,10 @@ void RenderResources::create()
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
 	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.useBufferMapping, appCfg.vboSize, appCfg.iboSize);
 	vaoPool_ = nctl::makeUnique<RenderVaoPool>(appCfg.vaoPoolSize);
+	renderCommandPool_ = nctl::makeUnique<RenderCommandPool>(appCfg.vaoPoolSize);
+	renderBatcher_ = nctl::makeUnique<RenderBatcher>();
+	defaultCamera_ = nctl::makeUnique<Camera>();
+	currentCamera_ = defaultCamera_.get();
 
 	ShaderLoad shadersToLoad[] = {
 #ifndef WITH_EMBEDDED_SHADERS
@@ -146,14 +179,10 @@ void RenderResources::create()
 		FATAL_ASSERT(shaderToLoad.shaderProgram->status() != GLShaderProgram::Status::LINKING_FAILED);
 	}
 
-	// Calculating a common projection matrix for all shader programs
+	// Calculating a default projection matrix for all shader programs
 	const float width = theApplication().width();
 	const float height = theApplication().height();
-	const float near = -1.0f;
-	const float far = 1.0f;
-
-	// TODO: Projection matrix is hard-coded, should it go in a camera class? (Y-axis points downward)
-	setProjectionMatrix(Matrix4x4f::ortho(0.0f, width, 0.0f, height, near, far));
+	defaultCamera_->setOrthoProjection(0.0f, width, 0.0f, height);
 
 	LOGI("Rendering resources created");
 }
@@ -172,6 +201,10 @@ void RenderResources::dispose()
 	meshSpriteShaderProgram_.reset(nullptr);
 	spriteGrayShaderProgram_.reset(nullptr);
 	spriteShaderProgram_.reset(nullptr);
+
+	defaultCamera_.reset(nullptr);
+	renderBatcher_.reset(nullptr);
+	renderCommandPool_.reset(nullptr);
 	vaoPool_.reset(nullptr);
 	buffersManager_.reset(nullptr);
 

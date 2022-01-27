@@ -162,7 +162,7 @@ namespace LuaUtils {
 	template <> DLL_PUBLIC bool retrieveField<bool>(lua_State *L, int index, const char *name);
 	DLL_PUBLIC void retrieveFieldTable(lua_State *L, int index, const char *name);
 	DLL_PUBLIC void retrieveFieldFunction(lua_State *L, int index, const char *name);
-	DLL_PUBLIC void retrieveFieldLightUserData(lua_State *L, int index, const char *name);
+	DLL_PUBLIC void *retrieveFieldLightUserData(lua_State *L, int index, const char *name);
 
 	template <class T>
 	void retrieveFieldArray(lua_State *L, int index, const char *name, int arrayIndex, int length, T *array)

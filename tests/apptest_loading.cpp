@@ -323,19 +323,20 @@ void MyEventHandler::onFrameStart()
 					// and the `setTexture` method does not need to be called
 				}
 
+#if !defined(__EMSCRIPTEN__) && !defined(__ANDROID__)
 				ImGui::SameLine();
 				static int selectedFormat = 0;
 				const char *extensions[] = { "png", "webp" };
 				ImGui::InputText("##Saving", saveTexelsFilename.data(), saveTexelsFilename.capacity(), ImGuiInputTextFlags_CallbackResize, inputTextCallback, &saveTexelsFilename);
 				if (saveTexelsFilename.isEmpty())
 					saveTexelsFilename.format("texels.%s", extensions[selectedFormat]);
-#if NCINE_WITH_WEBP
+	#if NCINE_WITH_WEBP
 				const char *formats[] = { "Png", "WebP" };
 				ImGui::SameLine();
 				ImGui::PushItemWidth(60.0f);
 				ImGui::Combo("##SaveFormat", &selectedFormat, formats, IM_ARRAYSIZE(formats));
 				ImGui::PopItemWidth();
-#endif
+	#endif
 				nc::fs::fixExtension(saveTexelsFilename, extensions[selectedFormat]);
 				ImGui::SameLine();
 				if (ImGui::Button("Save##Texels"))
@@ -352,24 +353,27 @@ void MyEventHandler::onFrameStart()
 						props.pixels = pixels.get();
 						hasSaved = saver.saveToFile(props, saveTexelsFilename.data());
 					}
-#if NCINE_WITH_WEBP
+	#if NCINE_WITH_WEBP
 					else if (selectedFormat == 1)
 					{
 						nc::TextureSaverWebP saver;
 						nc::TextureSaverWebP::Properties props;
+						nc::TextureSaverWebP::WebPProperties webpProps;
 						props.width = w;
 						props.height = h;
 						props.format = nc::ITextureSaver::Format::RGBA8;
 						props.pixels = pixels.get();
-						hasSaved = saver.saveToFile(props, saveTexelsFilename.data());
+						webpProps.lossless = true;
+						hasSaved = saver.saveToFile(props, webpProps, saveTexelsFilename.data());
 					}
-#endif
+	#endif
 
 					if (hasSaved == false)
 						LOGW_X("Cannot save texels to \"%s\"", saveTexelsFilename.data());
 					else
 						LOGI_X("Texels saved to \"%s\"", saveTexelsFilename.data());
 				}
+#endif
 
 				ImGui::TreePop();
 			}
