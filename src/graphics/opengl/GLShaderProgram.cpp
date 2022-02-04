@@ -1,3 +1,4 @@
+#include "return_macros.h"
 #include "GLShaderProgram.h"
 #include "GLShader.h"
 #include "GLDebug.h"
@@ -24,7 +25,7 @@ GLShaderProgram::GLShaderProgram()
 
 GLShaderProgram::GLShaderProgram(QueryPhase queryPhase)
     : glHandle_(0), attachedShaders_(AttachedShadersInitialSize),
-      status_(Status::NOT_LINKED), queryPhase_(queryPhase),
+      status_(Status::NOT_LINKED), queryPhase_(queryPhase), shouldFatalAssertOnErrors_(true),
       uniformsSize_(0), uniformBlocksSize_(0), uniforms_(UniformsInitialSize),
       uniformBlocks_(UniformBlocksInitialSize), attributes_(AttributesInitialSize)
 {
@@ -34,9 +35,18 @@ GLShaderProgram::GLShaderProgram(QueryPhase queryPhase)
 GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFile, Introspection introspection, QueryPhase queryPhase)
     : GLShaderProgram(queryPhase)
 {
-	attachShader(GL_VERTEX_SHADER, vertexFile);
-	attachShader(GL_FRAGMENT_SHADER, fragmentFile);
-	link(introspection);
+	const bool hasCompiledVS = attachShader(GL_VERTEX_SHADER, vertexFile);
+	const bool hasCompiledFS = attachShader(GL_FRAGMENT_SHADER, fragmentFile);
+	if (shouldFatalAssertOnErrors_)
+		FATAL_ASSERT_MSG(hasCompiledVS && hasCompiledFS, "Shader compilation has failed");
+	else
+		RETURN_ASSERT_MSG(hasCompiledVS && hasCompiledFS, "Shader compilation has failed");
+
+	const bool hasLinked = link(introspection);
+	if (shouldFatalAssertOnErrors_)
+		FATAL_ASSERT_MSG(hasLinked, "Shader linking has failed");
+	else
+		RETURN_ASSERT_MSG(hasLinked, "Shader linking has failed");
 }
 
 GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFile, Introspection introspection)
@@ -61,7 +71,7 @@ GLShaderProgram::~GLShaderProgram()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void GLShaderProgram::attachShader(GLenum type, const char *filename)
+bool GLShaderProgram::attachShader(GLenum type, const char *filename)
 {
 	nctl::UniquePtr<GLShader> shader = nctl::makeUnique<GLShader>(type, filename);
 	glAttachShader(glHandle_, shader->glHandle());
@@ -69,16 +79,20 @@ void GLShaderProgram::attachShader(GLenum type, const char *filename)
 	const GLShader::ErrorChecking errorChecking = (queryPhase_ == GLShaderProgram::QueryPhase::IMMEDIATE)
 	                                                  ? GLShader::ErrorChecking::IMMEDIATE
 	                                                  : GLShader::ErrorChecking::DEFERRED;
-	shader->compile(errorChecking);
-	FATAL_ASSERT(shader->status() != GLShader::Status::COMPILATION_FAILED);
+	const bool hasCompiled = shader->compile(errorChecking);
 
-	const size_t length = nctl::strnlen(filename, GLDebug::maxLabelLength());
-	GLDebug::objectLabel(GLDebug::LabelTypes::SHADER, shader->glHandle(), length, filename);
+	if (hasCompiled)
+	{
+		const size_t length = nctl::strnlen(filename, GLDebug::maxLabelLength());
+		GLDebug::objectLabel(GLDebug::LabelTypes::SHADER, shader->glHandle(), length, filename);
 
-	attachedShaders_.pushBack(nctl::move(shader));
+		attachedShaders_.pushBack(nctl::move(shader));
+	}
+
+	return hasCompiled;
 }
 
-void GLShaderProgram::attachShaderFromString(GLenum type, const char *string)
+bool GLShaderProgram::attachShaderFromString(GLenum type, const char *string)
 {
 	nctl::UniquePtr<GLShader> shader = nctl::makeUnique<GLShader>(type);
 	shader->loadFromString(string);
@@ -87,62 +101,83 @@ void GLShaderProgram::attachShaderFromString(GLenum type, const char *string)
 	const GLShader::ErrorChecking errorChecking = (queryPhase_ == GLShaderProgram::QueryPhase::IMMEDIATE)
 	                                                  ? GLShader::ErrorChecking::IMMEDIATE
 	                                                  : GLShader::ErrorChecking::DEFERRED;
-	shader->compile(errorChecking);
-	FATAL_ASSERT(shader->status() != GLShader::Status::COMPILATION_FAILED);
+	const bool hasCompiled = shader->compile(errorChecking);
 
-	attachedShaders_.pushBack(nctl::move(shader));
+	if (hasCompiled)
+		attachedShaders_.pushBack(nctl::move(shader));
+
+	return hasCompiled;
 }
 
-void GLShaderProgram::link(Introspection introspection)
+bool GLShaderProgram::link(Introspection introspection)
 {
 	introspection_ = introspection;
 	glLinkProgram(glHandle_);
 
 	if (queryPhase_ == QueryPhase::IMMEDIATE)
 	{
-		checkLinking();
-
+		const bool linkCheck = checkLinking();
 		// After linking, shader objects are not needed anymore
-		for (nctl::UniquePtr<GLShader> &attachedShader : attachedShaders_)
-			attachedShader.reset(nullptr);
+		attachedShaders_.clear();
 
-		performIntrospection();
+		if (linkCheck)
+			performIntrospection();
+		return linkCheck;
 	}
 	else
+	{
 		status_ = GLShaderProgram::Status::LINKED_WITH_DEFERRED_QUERIES;
+		return true;
+	}
 }
 
 void GLShaderProgram::use()
 {
 	if (boundProgram_ != glHandle_)
 	{
-		deferredQueries();
+		const bool hasLinked = deferredQueries();
+		if (shouldFatalAssertOnErrors_)
+			FATAL_ASSERT_MSG(hasLinked, "Shader deferred queries have failed");
+		else
+			RETURN_ASSERT(hasLinked);
+
 		glUseProgram(glHandle_);
 		boundProgram_ = glHandle_;
 	}
+}
+
+void GLShaderProgram::setProgramLabel(const char *programLabel)
+{
+	const size_t length = nctl::strnlen(programLabel, GLDebug::maxLabelLength());
+	GLDebug::objectLabel(GLDebug::LabelTypes::PROGRAM, glHandle_, length, programLabel);
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void GLShaderProgram::deferredQueries()
+bool GLShaderProgram::deferredQueries()
 {
 	if (status_ == GLShaderProgram::Status::LINKED_WITH_DEFERRED_QUERIES)
 	{
 		for (nctl::UniquePtr<GLShader> &attachedShader : attachedShaders_)
-			FATAL_ASSERT(attachedShader->checkCompilation());
+		{
+			const bool compileCheck = attachedShader->checkCompilation();
+			if (compileCheck == false)
+				return false;
+		}
 
 		const bool linkCheck = checkLinking();
-		FATAL_ASSERT(linkCheck);
+		if (linkCheck == false)
+			return false;
 
 		// After linking, shader objects are not needed anymore
-		for (nctl::UniquePtr<GLShader> &attachedShader : attachedShaders_)
-			attachedShader.reset(nullptr);
+		attachedShaders_.clear();
 
 		if (introspection_ != GLShaderProgram::Introspection::DISABLED)
 			performIntrospection();
 	}
+	return true;
 }
 
 bool GLShaderProgram::checkLinking()

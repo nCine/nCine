@@ -20,6 +20,10 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
+const char *RenderResources::ProjectionMatrixUniformName = "uProjectionMatrix";
+const char *RenderResources::ViewMatrixUniformName = "uViewMatrix";
+const char *RenderResources::ProjectionViewMatrixExcludeString = "uProjectionMatrix\0uViewMatrix\0";
+
 nctl::UniquePtr<RenderBuffersManager> RenderResources::buffersManager_;
 nctl::UniquePtr<RenderVaoPool> RenderResources::vaoPool_;
 nctl::UniquePtr<RenderCommandPool> RenderResources::renderCommandPool_;
@@ -99,9 +103,9 @@ void RenderResources::setCamera(Camera *camera)
 		else
 		{
 			if (cameraUniformData.updateFrameProjectionMatrix < currentCamera_->updateFrameProjectionMatrix())
-				(*i).shaderUniforms.uniform("uProjectionMatrix")->setDirty(true);
+				(*i).shaderUniforms.uniform(ProjectionMatrixUniformName)->setDirty(true);
 			if (cameraUniformData.updateFrameViewMatrix < currentCamera_->updateFrameViewMatrix())
-				(*i).shaderUniforms.uniform("uViewMatrix")->setDirty(true);
+				(*i).shaderUniforms.uniform(ViewMatrixUniformName)->setDirty(true);
 		}
 
 		cameraUniformData.camera = currentCamera_;

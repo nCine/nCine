@@ -1,7 +1,7 @@
 uniform mat4 uProjectionMatrix;
 uniform mat4 uViewMatrix;
 
-struct TextnodeInstance
+struct Instance
 {
 	mat4 modelMatrix;
 	vec4 color;
@@ -10,9 +10,9 @@ struct TextnodeInstance
 layout (std140) uniform InstancesBlock
 {
 #ifdef WITH_FIXED_BATCH_SIZE
-	TextnodeInstance[BATCH_SIZE] instances;
+	Instance[BATCH_SIZE] instances;
 #else
-	TextnodeInstance[819] instances;
+	Instance[819] instances;
 #endif
 } block;
 

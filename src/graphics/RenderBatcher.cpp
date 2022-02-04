@@ -5,6 +5,7 @@
 #include "RenderCommandPool.h"
 #include "RenderResources.h"
 #include "Application.h"
+#include "DrawableNode.h"
 
 namespace ncine {
 
@@ -67,19 +68,6 @@ namespace {
 		return (type == Material::ShaderProgramType::BATCHED_SPRITES ||
 		        type == Material::ShaderProgramType::BATCHED_SPRITES_GRAY ||
 		        type == Material::ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE);
-	}
-
-	bool isBatchedMeshSprite(Material::ShaderProgramType type)
-	{
-		return (type == Material::ShaderProgramType::BATCHED_MESH_SPRITES ||
-		        type == Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY ||
-		        type == Material::ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE);
-	}
-
-	bool isBatchedTextnode(Material::ShaderProgramType type)
-	{
-		return (type == Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA ||
-		        type == Material::ShaderProgramType::BATCHED_TEXTNODES_RED);
 	}
 
 }
@@ -192,50 +180,28 @@ RenderCommand *RenderBatcher::collectCommands(
 
 	bool commandAdded = false;
 	if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::SPRITE)
-	{
 		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_SPRITES, commandAdded);
-		singleInstanceBlockSize = (*start)->material().uniformBlock("SpriteBlock")->size();
-	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::SPRITE_GRAY)
-	{
 		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_SPRITES_GRAY, commandAdded);
-		singleInstanceBlockSize = (*start)->material().uniformBlock("SpriteBlock")->size();
-	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::SPRITE_NO_TEXTURE)
-	{
 		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE, commandAdded);
-		singleInstanceBlockSize = (*start)->material().uniformBlock("SpriteBlock")->size();
-	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::MESH_SPRITE)
-	{
 		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_MESH_SPRITES, commandAdded);
-		singleInstanceBlockSize = (*start)->material().uniformBlock("MeshSpriteBlock")->size();
-	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::MESH_SPRITE_GRAY)
-	{
 		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY, commandAdded);
-		singleInstanceBlockSize = (*start)->material().uniformBlock("MeshSpriteBlock")->size();
-	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)
-	{
 		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE, commandAdded);
-		singleInstanceBlockSize = (*start)->material().uniformBlock("MeshSpriteBlock")->size();
-	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::TEXTNODE_ALPHA)
-	{
 		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA, commandAdded);
-		singleInstanceBlockSize = (*start)->material().uniformBlock("TextnodeBlock")->size();
-	}
 	else if (refCommand->material().shaderProgramType() == Material::ShaderProgramType::TEXTNODE_RED)
-	{
 		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_TEXTNODES_RED, commandAdded);
-		singleInstanceBlockSize = (*start)->material().uniformBlock("TextnodeBlock")->size();
-	}
 	else
 		FATAL_MSG("Unsupported shader for batch element");
+	singleInstanceBlockSize = (*start)->material().uniformBlock(DrawableNode::InstanceBlockName)->size();
 
-	batchCommand->setType(refCommand->type());
-	instancesBlock = batchCommand->material().uniformBlock("InstancesBlock");
+	if (commandAdded)
+		batchCommand->setType(refCommand->type());
+	instancesBlock = batchCommand->material().uniformBlock(DrawableNode::InstancesBlockName);
 	instancesBlockSize += batchCommand->material().shaderProgram()->uniformsSize();
 
 	// Set to true if at least one command in the batch has indices or forced by a rendering settings
@@ -331,18 +297,14 @@ RenderCommand *RenderBatcher::collectCommands(
 
 		if (isBatchedSprite(batchCommand->material().shaderProgramType()))
 		{
-			const GLUniformBlockCache *singleInstanceBlock = command->material().uniformBlock("SpriteBlock");
+			const GLUniformBlockCache *singleInstanceBlock = command->material().uniformBlock("InstanceBlock");
 			memcpy(instancesBlock->dataPointer() + instancesBlockOffset, singleInstanceBlock->dataPointer(), singleInstanceBlockSize);
 			instancesBlockOffset += singleInstanceBlockSize;
 		}
 		else
 		{
 			GLUniformBlockCache *singleInstanceBlock = nullptr;
-			if (isBatchedMeshSprite(batchCommand->material().shaderProgramType()))
-				singleInstanceBlock = command->material().uniformBlock("MeshSpriteBlock");
-			else if (isBatchedTextnode(batchCommand->material().shaderProgramType()))
-				singleInstanceBlock = command->material().uniformBlock("TextnodeBlock");
-
+			singleInstanceBlock = command->material().uniformBlock("InstanceBlock");
 			memcpy(instancesBlock->dataPointer() + instancesBlockOffset, singleInstanceBlock->dataPointer(), singleInstanceBlockSize);
 			instancesBlockOffset += singleInstanceBlockSize;
 
@@ -421,7 +383,7 @@ RenderCommand *RenderBatcher::collectCommands(
 	batchCommand->material().setBlendingEnabled(refCommand->material().isBlendingEnabled());
 	batchCommand->material().setBlendingFactors(refCommand->material().srcBlendingFactor(), refCommand->material().destBlendingFactor());
 	batchCommand->setBatchSize(nextStart - start);
-	batchCommand->material().uniformBlock("InstancesBlock")->setUsedSize(instancesBlockOffset);
+	batchCommand->material().uniformBlock(DrawableNode::InstancesBlockName)->setUsedSize(instancesBlockOffset);
 	batchCommand->setLayer(refCommand->layer());
 	batchCommand->setVisitOrder(refCommand->visitOrder());
 

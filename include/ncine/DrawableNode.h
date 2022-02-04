@@ -3,6 +3,7 @@
 
 #include "SceneNode.h"
 #include "Rect.h"
+#include "ShaderState.h"
 
 namespace ncine {
 
@@ -19,6 +20,11 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	static const Vector2f AnchorTopLeft;
 	static const Vector2f AnchorBottomRight;
 	static const Vector2f AnchorTopRight;
+
+	// Shader uniform block and model matrix uniform names
+	static const char *InstanceBlockName;
+	static const char *InstancesBlockName;
+	static const char *ModelMatrixUniformName;
 
 	/// Presets for blending factors
 	enum class BlendingPreset
@@ -94,6 +100,11 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	/// Sets the blending state for node rendering
 	void setBlendingEnabled(bool blendingEnabled);
 
+	/// Returns the constant state for the custom shader of the node
+	inline const ShaderState &shaderState() const { return shaderState_; }
+	/// Returns the state for the custom shader of the node
+	inline ShaderState &shaderState() { return shaderState_; }
+
 	/// Returns the source blending factor
 	BlendingFactor srcBlendingFactor() const;
 	/// Returns the destination blending factor
@@ -110,6 +121,14 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	inline Rectf aabb() const { return aabb_; }
 
   protected:
+	// Shader uniform and attribute names
+	static const char *TextureUniformName;
+	static const char *ColorUniformName;
+	static const char *SpriteSizeUniformName;
+	static const char *TexRectUniformName;
+	static const char *PositionAttributeName;
+	static const char *TexCoordsAttributeName;
+
 	/// Node width in pixel
 	float width_;
 	/// Node height in pixel
@@ -117,6 +136,9 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 
 	/// The render command class associated with this node
 	nctl::UniquePtr<RenderCommand> renderCommand_;
+
+	/// The state for a custom user shader
+	ShaderState shaderState_;
 
 	/// The last frame any viewport rendered this node
 	unsigned long int lastFrameNotCulled_;
@@ -128,12 +150,17 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	/// Protected copy constructor used to clone objects
 	DrawableNode(const DrawableNode &other);
 
+	/// Performs the required tasks upon a change to the shader
+	virtual void shaderHasChanged() = 0;
+
 	/// Updates the render command
 	virtual void updateRenderCommand() = 0;
 
   private:
 	/// Deleted assignment operator
 	DrawableNode &operator=(const DrawableNode &) = delete;
+
+	friend class ShaderState;
 };
 
 }

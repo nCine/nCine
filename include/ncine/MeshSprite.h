@@ -138,6 +138,7 @@ class DLL_PUBLIC MeshSprite : public BaseSprite
 	/// Initializer method for constructors and the copy constructor
 	void init();
 
+	void shaderHasChanged() override;
 	void textureHasChanged(Texture *newTexture) override;
 };
 

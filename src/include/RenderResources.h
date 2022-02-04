@@ -61,6 +61,10 @@ class RenderResources
 		unsigned long int updateFrameViewMatrix;
 	};
 
+	static const char *ProjectionMatrixUniformName;
+	static const char *ViewMatrixUniformName;
+	static const char *ProjectionViewMatrixExcludeString;
+
 	static inline RenderBuffersManager &buffersManager() { return *buffersManager_; }
 	static inline RenderVaoPool &vaoPool() { return *vaoPool_; }
 	static inline RenderCommandPool &renderCommandPool() { return *renderCommandPool_; }

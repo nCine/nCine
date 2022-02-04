@@ -10,7 +10,7 @@ namespace ncine {
 
 BaseSprite::BaseSprite(SceneNode *parent, Texture *texture, float xx, float yy)
     : DrawableNode(parent, xx, yy), texture_(texture), texRect_(0, 0, 0, 0),
-      flippedX_(false), flippedY_(false), spriteBlock_(nullptr)
+      flippedX_(false), flippedY_(false), instanceBlock_(nullptr)
 {
 	renderCommand_->material().setBlendingEnabled(true);
 }
@@ -104,13 +104,24 @@ void BaseSprite::setFlippedY(bool flippedY)
 
 BaseSprite::BaseSprite(const BaseSprite &other)
     : DrawableNode(other), texture_(other.texture_), texRect_(other.texRect_),
-      flippedX_(other.flippedX_), flippedY_(other.flippedY_), spriteBlock_(nullptr)
+      flippedX_(other.flippedX_), flippedY_(other.flippedY_), instanceBlock_(nullptr)
 {
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+void BaseSprite::shaderHasChanged()
+{
+	renderCommand_->material().reserveUniformsDataMemory();
+	instanceBlock_ = renderCommand_->material().uniformBlock(InstanceBlockName);
+
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::ColorBit);
+	dirtyBits_.set(DirtyBitPositions::SizeBit);
+	dirtyBits_.set(DirtyBitPositions::TextureBit);
+}
 
 void BaseSprite::updateRenderCommand()
 {
@@ -123,12 +134,16 @@ void BaseSprite::updateRenderCommand()
 	}
 	if (dirtyBits_.test(DirtyBitPositions::ColorBit))
 	{
-		spriteBlock_->uniform("color")->setFloatVector(Colorf(absColor()).data());
+		GLUniformCache *colorUniform = instanceBlock_->uniform(ColorUniformName);
+		if (colorUniform)
+			colorUniform->setFloatVector(Colorf(absColor()).data());
 		dirtyBits_.reset(DirtyBitPositions::ColorBit);
 	}
 	if (dirtyBits_.test(DirtyBitPositions::SizeBit))
 	{
-		spriteBlock_->uniform("spriteSize")->setFloatValue(width_, height_);
+		GLUniformCache *spriteSizeUniform = instanceBlock_->uniform(SpriteSizeUniformName);
+		if (spriteSizeUniform)
+			spriteSizeUniform->setFloatValue(width_, height_);
 		dirtyBits_.reset(DirtyBitPositions::SizeBit);
 	}
 
@@ -138,13 +153,17 @@ void BaseSprite::updateRenderCommand()
 		{
 			renderCommand_->material().setTexture(*texture_);
 
-			const Vector2i texSize = texture_->size();
-			const float texScaleX = texRect_.w / float(texSize.x);
-			const float texBiasX = texRect_.x / float(texSize.x);
-			const float texScaleY = texRect_.h / float(texSize.y);
-			const float texBiasY = texRect_.y / float(texSize.y);
+			GLUniformCache *texRectUniform = instanceBlock_->uniform(TexRectUniformName);
+			if (texRectUniform)
+			{
+				const Vector2i texSize = texture_->size();
+				const float texScaleX = texRect_.w / float(texSize.x);
+				const float texBiasX = texRect_.x / float(texSize.x);
+				const float texScaleY = texRect_.h / float(texSize.y);
+				const float texBiasY = texRect_.y / float(texSize.y);
 
-			spriteBlock_->uniform("texRect")->setFloatValue(texScaleX, texBiasX, texScaleY, texBiasY);
+				texRectUniform->setFloatValue(texScaleX, texBiasX, texScaleY, texBiasY);
+			}
 		}
 		else
 			renderCommand_->material().setTexture(nullptr);

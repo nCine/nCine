@@ -1,7 +1,7 @@
 uniform mat4 uProjectionMatrix;
 uniform mat4 uViewMatrix;
 
-struct SpriteInstance
+struct Instance
 {
 	mat4 modelMatrix;
 	vec4 color;
@@ -11,9 +11,9 @@ struct SpriteInstance
 layout (std140) uniform InstancesBlock
 {
 #ifdef WITH_FIXED_BATCH_SIZE
-	SpriteInstance[BATCH_SIZE] instances;
+	Instance[BATCH_SIZE] instances;
 #else
-	SpriteInstance[682] instances;
+	Instance[682] instances;
 #endif
 } block;
 

@@ -69,6 +69,17 @@ const Vector2f DrawableNode::AnchorTopLeft(0.0f, 1.0f);
 const Vector2f DrawableNode::AnchorBottomRight(1.0f, 0.0f);
 const Vector2f DrawableNode::AnchorTopRight(1.0f, 1.0f);
 
+const char *DrawableNode::InstanceBlockName = "InstanceBlock";
+const char *DrawableNode::InstancesBlockName = "InstancesBlock";
+const char *DrawableNode::ModelMatrixUniformName = "modelMatrix";
+
+const char *DrawableNode::TextureUniformName = "uTexture";
+const char *DrawableNode::ColorUniformName = "color";
+const char *DrawableNode::SpriteSizeUniformName = "spriteSize";
+const char *DrawableNode::TexRectUniformName = "texRect";
+const char *DrawableNode::PositionAttributeName = "aPosition";
+const char *DrawableNode::TexCoordsAttributeName = "aTexCoords";
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
@@ -76,7 +87,7 @@ const Vector2f DrawableNode::AnchorTopRight(1.0f, 1.0f);
 DrawableNode::DrawableNode(SceneNode *parent, float xx, float yy)
     : SceneNode(parent, xx, yy), width_(0.0f), height_(0.0f),
       renderCommand_(nctl::makeUnique<RenderCommand>()),
-      lastFrameNotCulled_(0)
+      shaderState_(*this), lastFrameNotCulled_(0)
 {
 	renderCommand_->setIdSortKey(id());
 }
@@ -125,6 +136,9 @@ bool DrawableNode::draw(RenderQueue &renderQueue)
 		const bool overlaps = aabb_.overlaps(renderQueue.viewport().cullingRect());
 		if (overlaps)
 		{
+			if (shaderState_.updateFunction())
+				(*shaderState_.updateFunction())(*this);
+
 			lastFrameNotCulled_ = theApplication().numFrames();
 			renderCommand_->setLayer(absLayer_);
 			renderCommand_->setVisitOrder(withVisitOrder_ ? visitOrderIndex_ : 0);
@@ -140,6 +154,9 @@ bool DrawableNode::draw(RenderQueue &renderQueue)
 	}
 	else
 	{
+		if (shaderState_.updateFunction())
+			(*shaderState_.updateFunction())(*this);
+
 		updateRenderCommand();
 		renderQueue.addCommand(renderCommand_.get());
 	}
@@ -236,7 +253,7 @@ DrawableNode::DrawableNode(const DrawableNode &other)
     : SceneNode(other),
       width_(other.width_), height_(other.height_),
       renderCommand_(nctl::makeUnique<RenderCommand>()),
-      lastFrameNotCulled_(0)
+      shaderState_(*this), lastFrameNotCulled_(0)
 {
 	renderCommand_->setIdSortKey(id());
 	setBlendingEnabled(other.isBlendingEnabled());

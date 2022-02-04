@@ -33,7 +33,7 @@ class GLShader
 
 	void loadFromString(const char *string);
 	void loadFromFile(const char *filename);
-	void compile(ErrorChecking errorChecking);
+	bool compile(ErrorChecking errorChecking);
 
 	bool checkCompilation();
 

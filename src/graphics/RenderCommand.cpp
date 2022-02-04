@@ -3,25 +3,10 @@
 #include "GLScissorTest.h"
 #include "RenderResources.h"
 #include "Camera.h"
+#include "DrawableNode.h"
 #include "tracy.h"
 
 namespace ncine {
-
-namespace {
-
-	bool isBatchedType(Material::ShaderProgramType type)
-	{
-		return (type == Material::ShaderProgramType::BATCHED_SPRITES ||
-		        type == Material::ShaderProgramType::BATCHED_SPRITES_GRAY ||
-		        type == Material::ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE ||
-		        type == Material::ShaderProgramType::BATCHED_MESH_SPRITES ||
-		        type == Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY ||
-		        type == Material::ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE ||
-		        type == Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA ||
-		        type == Material::ShaderProgramType::BATCHED_TEXTNODES_RED);
-	}
-
-}
 
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
@@ -106,22 +91,15 @@ void RenderCommand::commitNodeTransformation()
 
 	if (material_.shaderProgram_ && material_.shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
 	{
-		ZoneScopedN("Set model matrix");
-		const Material::ShaderProgramType shaderProgramType = material_.shaderProgramType();
-
-		if (shaderProgramType == Material::ShaderProgramType::SPRITE ||
-		    shaderProgramType == Material::ShaderProgramType::SPRITE_GRAY ||
-		    shaderProgramType == Material::ShaderProgramType::SPRITE_NO_TEXTURE)
-			material_.uniformBlock("SpriteBlock")->uniform("modelMatrix")->setFloatVector(modelMatrix_.data());
-		else if (shaderProgramType == Material::ShaderProgramType::MESH_SPRITE ||
-		         shaderProgramType == Material::ShaderProgramType::MESH_SPRITE_GRAY ||
-		         shaderProgramType == Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)
-			material_.uniformBlock("MeshSpriteBlock")->uniform("modelMatrix")->setFloatVector(modelMatrix_.data());
-		else if (shaderProgramType == Material::ShaderProgramType::TEXTNODE_ALPHA ||
-		         shaderProgramType == Material::ShaderProgramType::TEXTNODE_RED)
-			material_.uniformBlock("TextnodeBlock")->uniform("modelMatrix")->setFloatVector(modelMatrix_.data());
-		else if (!isBatchedType(shaderProgramType) && shaderProgramType != Material::ShaderProgramType::CUSTOM)
-			material_.uniform("modelMatrix")->setFloatVector(modelMatrix_.data());
+		GLUniformBlockCache *instanceBlock = material_.uniformBlock(DrawableNode::InstanceBlockName);
+		GLUniformCache *matrixUniform = instanceBlock
+		                                    ? instanceBlock->uniform(DrawableNode::ModelMatrixUniformName)
+		                                    : material_.uniform(DrawableNode::ModelMatrixUniformName);
+		if (matrixUniform)
+		{
+			ZoneScopedN("Set model matrix");
+			matrixUniform->setFloatVector(modelMatrix_.data());
+		}
 	}
 
 	transformationCommitted_ = true;
@@ -135,12 +113,12 @@ void RenderCommand::commitCameraTransformation()
 	if (cameraUniformData == nullptr)
 	{
 		RenderResources::CameraUniformData newCameraUniformData;
-		newCameraUniformData.shaderUniforms.setProgram(material_.shaderProgram_, "uProjectionMatrix\0uViewMatrix\0", nullptr);
+		newCameraUniformData.shaderUniforms.setProgram(material_.shaderProgram_, RenderResources::ProjectionViewMatrixExcludeString, nullptr);
 		if (newCameraUniformData.shaderUniforms.numUniforms() == 2)
 		{
 			newCameraUniformData.shaderUniforms.setUniformsDataPointer(RenderResources::cameraUniformsBuffer());
-			newCameraUniformData.shaderUniforms.uniform("uProjectionMatrix")->setDirty(true);
-			newCameraUniformData.shaderUniforms.uniform("uViewMatrix")->setDirty(true);
+			newCameraUniformData.shaderUniforms.uniform(RenderResources::ProjectionMatrixUniformName)->setDirty(true);
+			newCameraUniformData.shaderUniforms.uniform(RenderResources::ViewMatrixUniformName)->setDirty(true);
 			newCameraUniformData.shaderUniforms.commitUniforms();
 
 			if (RenderResources::cameraUniformDataMap().loadFactor() >= 0.8f)

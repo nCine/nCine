@@ -40,7 +40,7 @@ else()
 	if(PNG_FOUND)
 		list(APPEND APPTESTS apptest_texformats apptest_joystick apptest_rotozoom apptest_animsprites
 			apptest_particles apptest_scene apptest_font apptest_multitouch apptest_camera
-			apptest_meshsprites apptest_meshdeform apptest_sinescroller apptest_clones)
+			apptest_meshsprites apptest_meshdeform apptest_sinescroller apptest_clones apptest_shaders)
 		if(OPENAL_FOUND)
 			list(APPEND APPTESTS apptest_audio)
 		endif()

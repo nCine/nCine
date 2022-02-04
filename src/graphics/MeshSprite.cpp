@@ -1,6 +1,7 @@
 #include <cstring> // for memcpy()
 #include "MeshSprite.h"
 #include "RenderCommand.h"
+#include "RenderResources.h"
 #include "tracy.h"
 
 namespace ncine {
@@ -256,13 +257,26 @@ void MeshSprite::init()
 	}(texture_);
 	renderCommand_->material().setShaderProgramType(shaderProgramType);
 
-	spriteBlock_ = renderCommand_->material().uniformBlock("MeshSpriteBlock");
+	shaderHasChanged();
 	renderCommand_->geometry().setPrimitiveType(GL_TRIANGLE_STRIP);
 	renderCommand_->geometry().setNumElementsPerVertex(texture_ ? VertexFloats : VertexNoTextureFloats);
 	renderCommand_->geometry().setHostVertexPointer(vertexDataPointer_);
 
 	if (texture_)
 		setTexRect(Recti(0, 0, texture_->width(), texture_->height()));
+}
+
+void MeshSprite::shaderHasChanged()
+{
+	BaseSprite::shaderHasChanged();
+
+	GLVertexFormat::Attribute *positionAttribute = renderCommand_->material().attribute(PositionAttributeName);
+	if (positionAttribute)
+		positionAttribute->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
+
+	GLVertexFormat::Attribute *texCoordsAttribute = renderCommand_->material().attribute(TexCoordsAttributeName);
+	if (texCoordsAttribute)
+		texCoordsAttribute->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
 }
 
 void MeshSprite::textureHasChanged(Texture *newTexture)
@@ -277,12 +291,9 @@ void MeshSprite::textureHasChanged(Texture *newTexture)
 			else
 				return Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE;
 		}(newTexture);
-		const bool shaderHasChanged = renderCommand_->material().setShaderProgramType(shaderProgramType);
-		if (shaderHasChanged)
-		{
-			spriteBlock_ = renderCommand_->material().uniformBlock("MeshSpriteBlock");
-			dirtyBits_.set(DirtyBitPositions::ColorBit);
-		}
+		const bool hasChanged = renderCommand_->material().setShaderProgramType(shaderProgramType);
+		if (hasChanged)
+			shaderHasChanged();
 	}
 
 	renderCommand_->geometry().setNumElementsPerVertex(newTexture ? VertexFloats : VertexNoTextureFloats);

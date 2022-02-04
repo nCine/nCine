@@ -14,6 +14,7 @@ class DLL_PUBLIC Object
 	{
 		BASE = 0,
 		TEXTURE,
+		SHADER,
 		SCENENODE,
 		SPRITE,
 		MESH_SPRITE,

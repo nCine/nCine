@@ -53,10 +53,16 @@ class GLShaderProgram
 	/// Returns the total memory needed for all uniforms inside of blocks
 	inline unsigned int uniformBlocksSize() const { return uniformBlocksSize_; }
 
-	void attachShader(GLenum type, const char *filename);
-	void attachShaderFromString(GLenum type, const char *string);
-	void link(Introspection introspection);
+	bool attachShader(GLenum type, const char *filename);
+	bool attachShaderFromString(GLenum type, const char *string);
+	bool link(Introspection introspection);
 	void use();
+
+	void setProgramLabel(const char *name);
+
+	/// Sets the fatal assert on errors flag
+	/*! If the flag is true the application fatal asserts if the shader program cannot be compiled or linked. */
+	inline void setFatalAssertOnErrors(bool shouldFatalAssertOnErrors) { shouldFatalAssertOnErrors_ = shouldFatalAssertOnErrors; }
 
   private:
 	/// Max number of discoverable uniforms
@@ -71,6 +77,10 @@ class GLShaderProgram
 	Introspection introspection_;
 	QueryPhase queryPhase_;
 
+	/// A flag indicating whether the class should fatal assert on compilation and linking errors
+	/*! \note Useful for custom shaders creation. */
+	bool shouldFatalAssertOnErrors_;
+
 	unsigned int uniformsSize_;
 	unsigned int uniformBlocksSize_;
 
@@ -81,7 +91,7 @@ class GLShaderProgram
 	static const int AttributesInitialSize = 4;
 	nctl::Array<GLAttribute> attributes_;
 
-	void deferredQueries();
+	bool deferredQueries();
 	bool checkLinking();
 	void performIntrospection();
 

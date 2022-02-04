@@ -80,14 +80,17 @@ void GLShader::loadFromFile(const char *filename)
 	}
 }
 
-void GLShader::compile(ErrorChecking errorChecking)
+bool GLShader::compile(ErrorChecking errorChecking)
 {
 	glCompileShader(glHandle_);
 
 	if (errorChecking == ErrorChecking::IMMEDIATE)
-		checkCompilation();
+		return checkCompilation();
 	else
+	{
 		status_ = Status::COMPILED_WITH_DEFERRED_CHECKS;
+		return true;
+	}
 }
 
 bool GLShader::checkCompilation()
