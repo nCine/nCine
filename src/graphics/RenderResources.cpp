@@ -52,6 +52,7 @@ nctl::HashMap<GLShaderProgram *, RenderResources::CameraUniformData> RenderResou
 
 Camera *RenderResources::currentCamera_ = nullptr;
 nctl::UniquePtr<Camera> RenderResources::defaultCamera_;
+Viewport *RenderResources::currentViewport_ = nullptr;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -84,13 +85,16 @@ namespace {
 
 }
 
-void RenderResources::setCamera(Camera *camera)
+void RenderResources::setCurrentCamera(Camera *camera)
 {
 	if (camera != nullptr)
 		currentCamera_ = camera;
 	else
 		currentCamera_ = defaultCamera_.get();
+}
 
+void RenderResources::updateCameraUniforms()
+{
 	// The buffer is shared among every shader program. There is no need to call `setFloatVector()` as `setDirty()` is enough.
 	memcpy(cameraUniformsBuffer_, currentCamera_->projection().data(), 64);
 	memcpy(cameraUniformsBuffer_ + 64, currentCamera_->view().data(), 64);
@@ -112,6 +116,12 @@ void RenderResources::setCamera(Camera *camera)
 		cameraUniformData.updateFrameProjectionMatrix = currentCamera_->updateFrameProjectionMatrix();
 		cameraUniformData.updateFrameViewMatrix = currentCamera_->updateFrameViewMatrix();
 	}
+}
+
+void RenderResources::setCurrentViewport(Viewport *viewport)
+{
+	FATAL_ASSERT(viewport != nullptr);
+	currentViewport_ = viewport;
 }
 
 void RenderResources::create()

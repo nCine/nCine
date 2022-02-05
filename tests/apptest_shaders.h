@@ -20,6 +20,7 @@ class Texture;
 class Font;
 class TextNode;
 class Shader;
+class ShaderState;
 class Sprite;
 class MeshSprite;
 
@@ -36,6 +37,7 @@ class MyEventHandler :
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;
+	void onPostUpdate() override;
 
 #ifdef __ANDROID__
 	void onTouchDown(const nc::TouchEvent &event) override;
@@ -55,6 +57,7 @@ class MyEventHandler :
 	nctl::UniquePtr<nc::SceneNode> rootNode_;
 	nctl::UniquePtr<nc::Sprite> vpSprite_;
 	nctl::UniquePtr<nc::Shader> vpBlurShader_;
+	nctl::UniquePtr<nc::ShaderState> vpShaderState_;
 
 	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, NumTextures> textures_;
 	nctl::UniquePtr<nc::Font> font_;
@@ -63,9 +66,11 @@ class MyEventHandler :
 
 	nctl::UniquePtr<nc::Shader> spriteShader_;
 	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumSprites> sprites_;
+	nctl::StaticArray<nctl::UniquePtr<nc::ShaderState>, NumSprites> spriteShaderStates_;
 
 	nctl::UniquePtr<nc::Shader> meshShader_;
 	nctl::UniquePtr<nc::MeshSprite> meshSprite_;
+	nctl::UniquePtr<nc::ShaderState> meshSpriteShaderState_;
 
 	void setupViewport();
 	void checkClick(float x, float y);

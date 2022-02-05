@@ -3,7 +3,7 @@
 #include "RenderQueue.h"
 #include "RenderResources.h"
 #include "Application.h"
-#include "SceneNode.h"
+#include "DrawableNode.h"
 #include "Camera.h"
 #include "GLFramebufferObject.h"
 #include "Texture.h"
@@ -74,7 +74,7 @@ Viewport::Viewport()
       viewportRect_(0, 0, 0, 0), scissorRect_(0, 0, 0, 0),
       colorFormat_(ColorFormat::RGB8), depthStencilFormat_(DepthStencilFormat::NONE),
       clearMode_(ClearMode::EVERY_FRAME), clearColor_(Colorf::Black),
-      renderQueue_(nctl::makeUnique<RenderQueue>(*this)),
+      renderQueue_(nctl::makeUnique<RenderQueue>()),
       fbo_(nullptr), texture_(nullptr),
       rootNode_(nullptr), camera_(nullptr), nextViewport_(nullptr)
 {
@@ -85,7 +85,7 @@ Viewport::Viewport(int width, int height, ColorFormat colorFormat, DepthStencilF
       viewportRect_(0, 0, width, height), scissorRect_(0, 0, 0, 0),
       colorFormat_(colorFormat), depthStencilFormat_(depthStencilFormat),
       clearMode_(ClearMode::EVERY_FRAME), clearColor_(Colorf::Black),
-      renderQueue_(nctl::makeUnique<RenderQueue>(*this)),
+      renderQueue_(nctl::makeUnique<RenderQueue>()),
       fbo_(nullptr), texture_(nctl::makeUnique<Texture>()),
       rootNode_(nullptr), camera_(nullptr), nextViewport_(nullptr)
 {
@@ -280,10 +280,17 @@ void Viewport::update()
 	if (nextViewport_)
 		nextViewport_->update();
 
-	if (rootNode_ && rootNode_->lastFrameUpdated() < theApplication().numFrames())
+	RenderResources::setCurrentViewport(this);
+	RenderResources::setCurrentCamera(camera_);
+
+	calculateCullingRect();
+	if (rootNode_)
 	{
 		ZoneScoped;
-		rootNode_->update(theApplication().interval());
+		if (rootNode_->lastFrameUpdated() < theApplication().numFrames())
+			rootNode_->update(theApplication().interval());
+		// AABBs should update after nodes have been transformed
+		updateCulling(rootNode_);
 	}
 }
 
@@ -292,10 +299,11 @@ void Viewport::visit()
 	if (nextViewport_)
 		nextViewport_->visit();
 
+	RenderResources::setCurrentViewport(this);
+
 	if (rootNode_)
 	{
 		ZoneScoped;
-		calculateCullingRect();
 		unsigned int visitOrderIndex = 0;
 		rootNode_->visit(*renderQueue_, visitOrderIndex);
 	}
@@ -305,6 +313,8 @@ void Viewport::sortAndCommitQueue()
 {
 	if (nextViewport_)
 		nextViewport_->sortAndCommitQueue();
+
+	RenderResources::setCurrentViewport(this);
 
 	if (renderQueue_->isEmpty() == false)
 	{
@@ -327,6 +337,8 @@ void Viewport::draw()
 		debugString.format("Draw viewport (0x%lx)", uintptr_t(this));
 	GLDebug::ScopedGroup(debugString.data());
 
+	RenderResources::setCurrentViewport(this);
+
 	if (type_ == Type::REGULAR)
 		fbo_->bind(GL_DRAW_FRAMEBUFFER);
 
@@ -346,7 +358,8 @@ void Viewport::draw()
 		nextViewport_->draw();
 	}
 
-	RenderResources::setCamera(camera_);
+	RenderResources::setCurrentCamera(camera_);
+	RenderResources::updateCameraUniforms();
 
 	if (renderQueue_->isEmpty() == false)
 	{
@@ -388,6 +401,23 @@ void Viewport::draw()
 #else
 		fbo_->unbind(GL_DRAW_FRAMEBUFFER);
 #endif
+	}
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void Viewport::updateCulling(SceneNode *node)
+{
+	for (SceneNode *child : node->children())
+		updateCulling(child);
+
+	if (node->type() != Object::ObjectType::SCENENODE &&
+	    node->type() != Object::ObjectType::PARTICLE_SYSTEM)
+	{
+		DrawableNode *drawable = static_cast<DrawableNode *>(node);
+		drawable->updateCulling();
 	}
 }
 

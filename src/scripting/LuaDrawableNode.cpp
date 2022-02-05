@@ -50,7 +50,7 @@ namespace DrawableNode {
 	static const char *setBlendingPreset = "set_blending_preset";
 	static const char *setBlendingFactors = "set_blending_factors";
 
-	static const char *isCulled = "is_culled";
+	static const char *lastFrameRendered = "get_last_frame_rendered";
 	static const char *aabb = "get_aabb";
 }}
 
@@ -112,7 +112,7 @@ void LuaDrawableNode::exposeFunctions(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::setBlendingPreset, setBlendingPreset);
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::setBlendingFactors, setBlendingFactors);
 
-	LuaUtils::addFunction(L, LuaNames::DrawableNode::isCulled, isCulled);
+	LuaUtils::addFunction(L, LuaNames::DrawableNode::lastFrameRendered, lastFrameRendered);
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::aabb, aabb);
 }
 
@@ -246,12 +246,12 @@ int LuaDrawableNode::setBlendingFactors(lua_State *L)
 	return 0;
 }
 
-int LuaDrawableNode::isCulled(lua_State *L)
+int LuaDrawableNode::lastFrameRendered(lua_State *L)
 {
 	DrawableNode *node = LuaUntrackedUserData<DrawableNode>::retrieve(L, -1);
 
 	if (node)
-		LuaUtils::push(L, node->isCulled());
+		LuaUtils::push(L, static_cast<uint64_t>(node->lastFrameRendered()));
 	else
 		LuaUtils::pushNil(L);
 

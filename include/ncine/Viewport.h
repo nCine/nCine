@@ -200,6 +200,9 @@ class DLL_PUBLIC Viewport
 	void sortAndCommitQueue();
 	void draw();
 
+  private:
+	void updateCulling(SceneNode *node);
+
 	friend class Application;
 };
 

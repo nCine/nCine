@@ -37,14 +37,6 @@ const char *stringOnOff(bool enabled)
 	return enabled ? "on" : "off";
 }
 
-auto updateSpriteAngle = [](nc::DrawableNode &node)
-{
-	nc::Sprite &sprite = static_cast<nc::Sprite &>(node);
-	nc::ShaderState &ss = sprite.shaderState();
-	const float angle = ss.userData() ? *reinterpret_cast<float *>(ss.userData()) : 0.0f;
-	ss.setUniformFloat("InstanceBlock", "angle", angle);
-};
-
 }
 
 nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
@@ -79,9 +71,8 @@ void MyEventHandler::onInit()
 	FATAL_ASSERT(vpBlurShader_->isLinked());
 	vpSprite_ = nctl::makeUnique<nc::Sprite>(nullptr, viewport_->texture(), nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	vpSprite_->setFlippedY(true);
-	nc::ShaderState &vpShaderState = vpSprite_->shaderState();
-	vpShaderState.setShader(vpBlurShader_.get());
-	vpShaderState.setUniformFloat(nullptr, "uResolution", static_cast<float>(viewport_->width()), static_cast<float>(viewport_->height()));
+	vpShaderState_ = nctl::makeUnique<nc::ShaderState>(vpSprite_.get(), vpBlurShader_.get());
+	vpShaderState_->setUniformFloat(nullptr, "uResolution", static_cast<float>(viewport_->width()), static_cast<float>(viewport_->height()));
 
 	debugString_ = nctl::makeUnique<nctl::String>(128);
 	debugText_ = nctl::makeUnique<nc::TextNode>(rootNode_.get(), font_.get());
@@ -97,19 +88,14 @@ void MyEventHandler::onInit()
 	{
 		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(rootNode_.get(), textures_[i % NumTextures].get(), width * 0.15f + width * 0.1f * i, height * 0.5f));
 		sprites_.back()->setScale(0.5f);
-
-		nc::ShaderState &shaderState = sprites_.back()->shaderState();
-		shaderState.setShader(spriteShader_.get());
-		shaderState.setUserData(&angle_);
-		shaderState.setUpdateFunction(updateSpriteAngle);
+		spriteShaderStates_.pushBack(nctl::makeUnique<nc::ShaderState>(sprites_.back().get(), spriteShader_.get()));
 	}
 
 	meshShader_ = nctl::makeUnique<nc::Shader>(nc::Shader::LoadMode::STRING, meshsprite_vs, meshsprite_fs);
 	FATAL_ASSERT(meshShader_->isLinked());
 	meshSprite_ = nctl::makeUnique<nc::MeshSprite>(rootNode_.get(), textures_[0].get(), width * 0.5f, height * 0.8f);
 	meshSprite_->createVerticesFromTexels(NumTexelPoints, TexelPoints);
-	nc::ShaderState &meshSpriteShaderState = meshSprite_->shaderState();
-	meshSpriteShaderState.setShader(meshShader_.get());
+	meshSpriteShaderState_ = nctl::makeUnique<nc::ShaderState>(meshSprite_.get(), meshShader_.get());
 
 	withViewport_ = false;
 	setupViewport();
@@ -141,11 +127,36 @@ void MyEventHandler::onFrameStart()
 	}
 
 	meshSprite_->setRotation(angle_ * 20.0f);
-	const float sin2First = sinf(angle_) * sinf(angle_);
-	const float sin2Second = sinf(angle_ + 90.0f) * sinf(angle_ + 90.0f);
-	const float sin2Third = sinf(angle_ + 180.0f) * sinf(angle_ + 180.0f);
-	const float sin2Fourth = sinf(angle_ + 270.0f) * sinf(angle_ + 270.0f);
-	meshSprite_->shaderState().setUniformFloat("InstanceBlock", "color", sin2First, sin2Second, sin2Third, 0.5f + 0.5f * sin2Fourth);
+}
+
+void MyEventHandler::onPostUpdate()
+{
+	// In the `onPostUpdate()` callback it is possible to query the culling
+	// state of a node for the current frame, before drawing it.
+	if (pause_ == false)
+	{
+		const unsigned long int numFrames = nc::theApplication().numFrames();
+		// Dirtying a uniform cache of a node that is not going to be rendered would not call OpenGL uniform functions.
+		// Nevertheless, it is still possible to avoid touching the cache altogether if a node is not going to be rendered.
+		for (unsigned int i = 0; i < NumSprites; i++)
+		{
+			const nc::DrawableNode *sprite = spriteShaderStates_[i]->node();
+			const bool isCulled = (sprite && sprite->lastFrameRendered() < numFrames);
+			if (sprite && sprite->isDrawEnabled() && isCulled == false)
+				spriteShaderStates_[i]->setUniformFloat("InstanceBlock", "angle", angle_);
+		}
+
+		const nc::DrawableNode *meshSprite = meshSpriteShaderState_->node();
+		const bool isCulled = (meshSprite && meshSprite->lastFrameRendered() < numFrames);
+		if (meshSprite && meshSprite->isDrawEnabled() && isCulled == false)
+		{
+			const float sin2First = sinf(angle_) * sinf(angle_);
+			const float sin2Second = sinf(angle_ + 90.0f) * sinf(angle_ + 90.0f);
+			const float sin2Third = sinf(angle_ + 180.0f) * sinf(angle_ + 180.0f);
+			const float sin2Fourth = sinf(angle_ + 270.0f) * sinf(angle_ + 270.0f);
+			meshSpriteShaderState_->setUniformFloat("InstanceBlock", "color", sin2First, sin2Second, sin2Third, 0.5f + 0.5f * sin2Fourth);
+		}
+	}
 }
 
 #ifdef __ANDROID__
@@ -166,14 +177,8 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 	else if (event.sym == nc::KeySym::R)
 	{
 		for (unsigned int i = 0; i < NumSprites; i++)
-		{
-			nc::Shader *spriteShader = sprites_[i]->shaderState().shader() ? nullptr : spriteShader_.get();
-			sprites_[i]->shaderState().setShader(spriteShader);
-			sprites_[i]->shaderState().setUpdateFunction(updateSpriteAngle);
-		}
-
-		nc::Shader *meshShader = meshSprite_->shaderState().shader() ? nullptr : meshShader_.get();
-		meshSprite_->shaderState().setShader(meshShader);
+			spriteShaderStates_[i]->setShader(spriteShaderStates_[i]->shader() ? nullptr : spriteShader_.get());
+		meshSpriteShaderState_->setShader(meshSpriteShaderState_->shader() ? nullptr : meshShader_.get());
 	}
 	else if (event.sym == nc::KeySym::V)
 	{

@@ -17,6 +17,7 @@ class RenderCommandPool;
 class RenderBatcher;
 class GLShaderProgram;
 class Camera;
+class Viewport;
 
 /// The class that creates and handles application common OpenGL rendering resources
 class RenderResources
@@ -90,6 +91,7 @@ class RenderResources
 	static inline unsigned char *cameraUniformsBuffer() { return cameraUniformsBuffer_; }
 	static inline nctl::HashMap<GLShaderProgram *, CameraUniformData> &cameraUniformDataMap() { return cameraUniformDataMap_; }
 	static inline const Camera *currentCamera() { return currentCamera_; }
+	static inline const Viewport *currentViewport() { return currentViewport_; }
 
 	static void createMinimal();
 
@@ -122,8 +124,12 @@ class RenderResources
 
 	static Camera *currentCamera_;
 	static nctl::UniquePtr<Camera> defaultCamera_;
+	static Viewport *currentViewport_;
 
-	static void setCamera(Camera *camera);
+	static void setCurrentCamera(Camera *camera);
+	static void updateCameraUniforms();
+	static void setCurrentViewport(Viewport *viewport);
+
 	static void create();
 	static void dispose();
 

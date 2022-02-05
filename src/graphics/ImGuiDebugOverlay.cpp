@@ -1215,8 +1215,8 @@ void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int 
 	if (drawable)
 	{
 		widgetName_.formatAppend(" - size: %.1f x %.1f", drawable->width(), drawable->height());
-		if (drawable->isDrawEnabled() && drawable->isCulled())
-			widgetName_.formatAppend(" - culled", drawable->width(), drawable->height());
+		if (drawable->isDrawEnabled() && drawable->lastFrameRendered() < theApplication().numFrames() - 1)
+			widgetName_.append(" - culled");
 	}
 	widgetName_.formatAppend("###0x%x", uintptr_t(node));
 

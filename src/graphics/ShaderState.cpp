@@ -30,29 +30,69 @@ namespace {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-ShaderState::ShaderState(DrawableNode &node)
-    : node_(&node), shader_(nullptr),
-      previousShaderType_(static_cast<int>(Material::ShaderProgramType::CUSTOM)),
-      updateFunction_(nullptr), userData_(nullptr)
+ShaderState::ShaderState()
+    : ShaderState(nullptr, nullptr)
 {
+}
+
+ShaderState::ShaderState(DrawableNode *node, Shader *shader)
+    : node_(nullptr), shader_(nullptr),
+      previousShaderType_(static_cast<int>(Material::ShaderProgramType::CUSTOM))
+{
+	setNode(node);
+	setShader(shader);
+}
+
+ShaderState::~ShaderState()
+{
+	setNode(nullptr);
+	setShader(nullptr);
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+bool ShaderState::setNode(DrawableNode *node)
+{
+	bool nodeHasChanged = false;
+
+	if (node != node_)
+	{
+		if (node_ != nullptr)
+		{
+			Material &prevMaterial = node_->renderCommand_->material();
+			const Material::ShaderProgramType programType = static_cast<Material::ShaderProgramType>(previousShaderType_);
+			prevMaterial.setShaderProgramType(programType);
+		}
+
+		if (node != nullptr)
+		{
+			Material &material = node->renderCommand_->material();
+			previousShaderType_ = static_cast<int>(material.shaderProgramType());
+		}
+		node_ = node;
+
+		if (shader_ != nullptr)
+			setShader(shader_);
+
+		nodeHasChanged = true;
+	}
+
+	return nodeHasChanged;
+}
+
 bool ShaderState::setShader(Shader *shader)
 {
 	bool shaderHasChanged = false;
 
-	if (shader != shader_)
+	if (node_ != nullptr && shader != shader_)
 	{
 		Material &material = node_->renderCommand_->material();
 		if (shader == nullptr)
 		{
 			const Material::ShaderProgramType programType = static_cast<Material::ShaderProgramType>(previousShaderType_);
 			material.setShaderProgramType(programType);
-			setUpdateFunction(nullptr);
 		}
 		else if (shader->isLinked())
 		{
@@ -72,7 +112,7 @@ bool ShaderState::setShader(Shader *shader)
 
 bool ShaderState::setAttribute(const char *name, int stride, unsigned long int pointer)
 {
-	if (shader_ == nullptr || name == nullptr)
+	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
 	Material &material = node_->renderCommand_->material();
@@ -87,7 +127,7 @@ bool ShaderState::setAttribute(const char *name, int stride, unsigned long int p
 
 bool ShaderState::setUniformInt(const char *blockName, const char *name, const int *vector)
 {
-	if (shader_ == nullptr || name == nullptr || vector == nullptr)
+	if (node_ == nullptr || shader_ == nullptr || name == nullptr || vector == nullptr)
 		return false;
 
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
@@ -99,7 +139,7 @@ bool ShaderState::setUniformInt(const char *blockName, const char *name, const i
 
 bool ShaderState::setUniformInt(const char *blockName, const char *name, int value0)
 {
-	if (shader_ == nullptr || name == nullptr)
+	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
@@ -111,7 +151,7 @@ bool ShaderState::setUniformInt(const char *blockName, const char *name, int val
 
 bool ShaderState::setUniformInt(const char *blockName, const char *name, int value0, int value1)
 {
-	if (shader_ == nullptr || name == nullptr)
+	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
@@ -123,7 +163,7 @@ bool ShaderState::setUniformInt(const char *blockName, const char *name, int val
 
 bool ShaderState::setUniformInt(const char *blockName, const char *name, int value0, int value1, int value2)
 {
-	if (shader_ == nullptr || name == nullptr)
+	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
@@ -135,7 +175,7 @@ bool ShaderState::setUniformInt(const char *blockName, const char *name, int val
 
 bool ShaderState::setUniformInt(const char *blockName, const char *name, int value0, int value1, int value2, int value3)
 {
-	if (shader_ == nullptr || name == nullptr)
+	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
@@ -162,7 +202,7 @@ bool ShaderState::setUniformInt(const char *blockName, const char *name, const V
 
 bool ShaderState::setUniformFloat(const char *blockName, const char *name, const float *vector)
 {
-	if (shader_ == nullptr || name == nullptr || vector == nullptr)
+	if (node_ == nullptr || shader_ == nullptr || name == nullptr || vector == nullptr)
 		return false;
 
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
@@ -174,7 +214,7 @@ bool ShaderState::setUniformFloat(const char *blockName, const char *name, const
 
 bool ShaderState::setUniformFloat(const char *blockName, const char *name, float value0)
 {
-	if (shader_ == nullptr || name == nullptr)
+	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
@@ -186,7 +226,7 @@ bool ShaderState::setUniformFloat(const char *blockName, const char *name, float
 
 bool ShaderState::setUniformFloat(const char *blockName, const char *name, float value0, float value1)
 {
-	if (shader_ == nullptr || name == nullptr)
+	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
@@ -198,7 +238,7 @@ bool ShaderState::setUniformFloat(const char *blockName, const char *name, float
 
 bool ShaderState::setUniformFloat(const char *blockName, const char *name, float value0, float value1, float value2)
 {
-	if (shader_ == nullptr || name == nullptr)
+	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
@@ -210,7 +250,7 @@ bool ShaderState::setUniformFloat(const char *blockName, const char *name, float
 
 bool ShaderState::setUniformFloat(const char *blockName, const char *name, float value0, float value1, float value2, float value3)
 {
-	if (shader_ == nullptr || name == nullptr)
+	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);

@@ -22,9 +22,8 @@ namespace {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-RenderQueue::RenderQueue(Viewport &viewport)
-    : viewport_(viewport),
-      opaqueQueue_(16), opaqueBatchedQueue_(16),
+RenderQueue::RenderQueue()
+    : opaqueQueue_(16), opaqueBatchedQueue_(16),
       transparentQueue_(16), transparentBatchedQueue_(16)
 {
 }
@@ -109,7 +108,7 @@ void RenderQueue::sortAndCommit()
 	if (opaques->isEmpty() == false)
 	{
 		ZoneScopedN("Commit opaques");
-		debugString.format("Commit %u opaque command(s) for viewport 0x%lx", opaques->size(), uintptr_t(&viewport_));
+		debugString.format("Commit %u opaque command(s) for viewport 0x%lx", opaques->size(), uintptr_t(RenderResources::currentViewport()));
 		GLDebug::ScopedGroup scoped(debugString.data());
 		for (RenderCommand *opaqueRenderCommand : *opaques)
 			opaqueRenderCommand->commitAll();
@@ -118,7 +117,7 @@ void RenderQueue::sortAndCommit()
 	if (transparents->isEmpty() == false)
 	{
 		ZoneScopedN("Commit transparents");
-		debugString.format("Commit %u transparent command(s) for viewport 0x%lx", transparents->size(), uintptr_t(&viewport_));
+		debugString.format("Commit %u transparent command(s) for viewport 0x%lx", transparents->size(), uintptr_t(RenderResources::currentViewport()));
 		GLDebug::ScopedGroup scoped(debugString.data());
 		for (RenderCommand *transparentRenderCommand : *transparents)
 			transparentRenderCommand->commitAll();
