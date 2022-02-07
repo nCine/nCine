@@ -1,7 +1,8 @@
 #include "common_macros.h"
 #include "GLShader.h"
+#include "GLDebug.h"
 #include "IFile.h"
-#include <nctl/String.h>
+#include <nctl/StaticString.h>
 
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
 	#include "Application.h"
@@ -9,7 +10,11 @@
 
 namespace ncine {
 
-static nctl::String patchLines(128);
+namespace {
+
+	static nctl::StaticString<256> patchLines;
+
+}
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -26,6 +31,14 @@ GLShader::GLShader(GLenum type)
 		patchLines.append("#version 330\n");
 #endif
 
+#if defined(__EMSCRIPTEN__)
+		patchLines.append("#define __EMSCRIPTEN__\n");
+#elif defined(__ANDROID__)
+		patchLines.append("#define __ANDROID__\n");
+#elif defined(WITH_ANGLE)
+		patchLines.append("#define WITH_ANGLE\n");
+#endif
+
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
 		// ANGLE does not seem capable of handling large arrays that are not entirely filled.
 		// A small array size will also make shader compilation a lot faster.
@@ -35,6 +48,8 @@ GLShader::GLShader(GLenum type)
 			patchLines.formatAppend("#define BATCH_SIZE (%u)\n", theApplication().appConfiguration().fixedBatchSize);
 		}
 #endif
+		// Exclude patch lines when counting line numbers in info logs
+		patchLines.append("#line 0\n");
 	}
 
 	glHandle_ = glCreateShader(type);
@@ -77,6 +92,8 @@ void GLShader::loadFromFile(const char *filename)
 		const GLchar *source_lines[2] = { patchLines.data(), source.data() };
 		const GLint lengths[2] = { static_cast<GLint>(patchLines.length()), length };
 		glShaderSource(glHandle_, 2, source_lines, lengths);
+
+		setObjectLabel(filename);
 	}
 }
 
@@ -118,6 +135,11 @@ bool GLShader::checkCompilation()
 
 	status_ = Status::COMPILED;
 	return true;
+}
+
+void GLShader::setObjectLabel(const char *label)
+{
+	GLDebug::objectLabel(GLDebug::LabelTypes::SHADER, glHandle_, label);
 }
 
 }

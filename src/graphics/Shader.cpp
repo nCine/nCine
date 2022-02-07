@@ -13,7 +13,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Shader::Shader(const char *shaderName, LoadMode loadMode, const char *vertex, const char *fragment)
-    : Object(ObjectType::SHADER, shaderName)
+    : Object(ObjectType::SHADER)
 {
 	const bool hasLoaded = (loadMode == LoadMode::STRING)
 	                           ? loadFromMemory(shaderName, vertex, fragment)
@@ -24,7 +24,7 @@ Shader::Shader(const char *shaderName, LoadMode loadMode, const char *vertex, co
 }
 
 Shader::Shader(LoadMode loadMode, const char *vertex, const char *fragment)
-    : Shader("", loadMode, vertex, fragment)
+    : Shader(nullptr, loadMode, vertex, fragment)
 {
 }
 
@@ -43,7 +43,8 @@ bool Shader::loadFromMemory(const char *shaderName, const char *vertex, const ch
 
 	nctl::UniquePtr<GLShaderProgram> shaderProgram = nctl::makeUnique<GLShaderProgram>(GLShaderProgram::QueryPhase::IMMEDIATE);
 	shaderProgram->setFatalAssertOnErrors(false);
-	shaderProgram->setProgramLabel(shaderName);
+	setName(shaderName);
+	shaderProgram->setObjectLabel(shaderName);
 	shaderProgram->attachShaderFromString(GL_VERTEX_SHADER, vertex);
 	shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, fragment);
 	shaderProgram->link(GLShaderProgram::Introspection::ENABLED);
@@ -57,7 +58,7 @@ bool Shader::loadFromMemory(const char *shaderName, const char *vertex, const ch
 
 bool Shader::loadFromMemory(const char *vertex, const char *fragment)
 {
-	return loadFromMemory("CustomShader", vertex, fragment);
+	return loadFromMemory(nullptr, vertex, fragment);
 }
 
 bool Shader::loadFromFile(const char *shaderName, const char *vertex, const char *fragment)
@@ -71,7 +72,8 @@ bool Shader::loadFromFile(const char *shaderName, const char *vertex, const char
 
 	nctl::UniquePtr<GLShaderProgram> shaderProgram = nctl::makeUnique<GLShaderProgram>(GLShaderProgram::QueryPhase::IMMEDIATE);
 	shaderProgram->setFatalAssertOnErrors(false);
-	shaderProgram->setProgramLabel(shaderName);
+	setName(shaderName);
+	shaderProgram->setObjectLabel(shaderName);
 	shaderProgram->attachShader(GL_VERTEX_SHADER, vertex);
 	shaderProgram->attachShader(GL_FRAGMENT_SHADER, fragment);
 	shaderProgram->link(GLShaderProgram::Introspection::ENABLED);
@@ -85,7 +87,7 @@ bool Shader::loadFromFile(const char *shaderName, const char *vertex, const char
 
 bool Shader::loadFromFile(const char *vertex, const char *fragment)
 {
-	return loadFromFile("CustomShader", vertex, fragment);
+	return loadFromFile(nullptr, vertex, fragment);
 }
 
 ///////////////////////////////////////////////////////////
@@ -96,6 +98,11 @@ bool Shader::isLinked() const
 {
 	return (glShaderProgram_->status() != GLShaderProgram::Status::NOT_LINKED &&
 	        glShaderProgram_->status() != GLShaderProgram::Status::LINKING_FAILED);
+}
+
+void Shader::setGLShaderProgramLabel(const char *label)
+{
+	glShaderProgram_->setObjectLabel(label);
 }
 
 }

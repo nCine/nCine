@@ -1,4 +1,5 @@
 #include "GLRenderbuffer.h"
+#include "GLDebug.h"
 
 namespace ncine {
 
@@ -51,6 +52,11 @@ bool GLRenderbuffer::unbind()
 		return true;
 	}
 	return false;
+}
+
+void GLRenderbuffer::setObjectLabel(const char *label)
+{
+	GLDebug::objectLabel(GLDebug::LabelTypes::RENDERBUFFER, glHandle_, label);
 }
 
 ///////////////////////////////////////////////////////////

@@ -64,8 +64,15 @@ void RenderVaoPool::bindVao(const GLVertexFormat &vertexFormat)
 			vaoPool_.emplaceBack();
 			vaoPool_.back().object = nctl::makeUnique<GLVertexArrayObject>();
 			index = vaoPool_.size() - 1;
-			debugString.format("Created and defined VAO 0x%lx (%u)", uintptr_t(vaoPool_[index].object.get()), index);
-			GLDebug::messageInsert(debugString.data());
+
+			if (GLDebug::isAvailable())
+			{
+				debugString.format("Created and defined VAO 0x%lx (%u)", uintptr_t(vaoPool_[index].object.get()), index);
+				GLDebug::messageInsert(debugString.data());
+
+				debugString.format("VAO_#%d", index);
+				vaoPool_.back().object->setObjectLabel(debugString.data());
+			}
 		}
 		else
 		{

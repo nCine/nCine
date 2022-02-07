@@ -83,9 +83,7 @@ bool GLShaderProgram::attachShader(GLenum type, const char *filename)
 
 	if (hasCompiled)
 	{
-		const size_t length = nctl::strnlen(filename, GLDebug::maxLabelLength());
-		GLDebug::objectLabel(GLDebug::LabelTypes::SHADER, shader->glHandle(), length, filename);
-
+		GLDebug::objectLabel(GLDebug::LabelTypes::SHADER, shader->glHandle(), filename);
 		attachedShaders_.pushBack(nctl::move(shader));
 	}
 
@@ -146,10 +144,9 @@ void GLShaderProgram::use()
 	}
 }
 
-void GLShaderProgram::setProgramLabel(const char *programLabel)
+void GLShaderProgram::setObjectLabel(const char *label)
 {
-	const size_t length = nctl::strnlen(programLabel, GLDebug::maxLabelLength());
-	GLDebug::objectLabel(GLDebug::LabelTypes::PROGRAM, glHandle_, length, programLabel);
+	GLDebug::objectLabel(GLDebug::LabelTypes::PROGRAM, glHandle_, label);
 }
 
 ///////////////////////////////////////////////////////////

@@ -146,7 +146,7 @@ void Texture::init(const char *name, Format format, int mipMapCount, int width, 
 
 	glTexture_->bind();
 	setName(name);
-	setGLTextureLabel(name);
+	glTexture_->setObjectLabel(name);
 	initialize(texLoader);
 
 	RenderStatistics::addTexture(dataSize_);
@@ -186,7 +186,7 @@ bool Texture::loadFromMemory(const char *bufferName, const unsigned char *buffer
 
 	glTexture_->bind();
 	setName(bufferName);
-	setGLTextureLabel(bufferName);
+	glTexture_->setObjectLabel(bufferName);
 	initialize(*texLoader);
 	load(*texLoader);
 
@@ -208,7 +208,7 @@ bool Texture::loadFromFile(const char *filename)
 
 	glTexture_->bind();
 	setName(filename);
-	setGLTextureLabel(filename);
+	glTexture_->setObjectLabel(filename);
 	initialize(*texLoader);
 	load(*texLoader);
 
@@ -337,6 +337,11 @@ void Texture::setWrap(Wrap wrapMode)
 	glTexture_->texParameteri(GL_TEXTURE_WRAP_S, glWrap);
 	glTexture_->texParameteri(GL_TEXTURE_WRAP_T, glWrap);
 	wrapMode_ = wrapMode;
+}
+
+void Texture::setGLTextureLabel(const char *label)
+{
+	glTexture_->setObjectLabel(label);
 }
 
 /*! The pointer is an opaque handle to be used only by ImGui or Nuklear.
@@ -469,11 +474,6 @@ void Texture::load(const ITextureLoader &texLoader)
 		levelWidth /= 2;
 		levelHeight /= 2;
 	}
-}
-
-void Texture::setGLTextureLabel(const char *filename)
-{
-	glTexture_->setObjectLabel(filename);
 }
 
 }

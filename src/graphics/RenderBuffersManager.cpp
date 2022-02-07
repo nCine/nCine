@@ -183,6 +183,20 @@ void RenderBuffersManager::createBuffer(const BufferSpecifications &specs)
 	managedBuffer.object->bufferData(managedBuffer.size, nullptr, specs.usageFlags);
 	managedBuffer.freeSpace = managedBuffer.size;
 
+	switch (managedBuffer.type)
+	{
+		default:
+		case BufferTypes::Enum::ARRAY:
+			managedBuffer.object->setObjectLabel("Vertex_ManagedBuffer");
+			break;
+		case BufferTypes::Enum::ELEMENT_ARRAY:
+			managedBuffer.object->setObjectLabel("Index_ManagedBuffer");
+			break;
+		case BufferTypes::Enum::UNIFORM:
+			managedBuffer.object->setObjectLabel("Uniform_ManagedBuffer");
+			break;
+	}
+
 	if (specs.mapFlags == 0)
 	{
 		managedBuffer.hostBuffer = nctl::makeUnique<GLubyte[]>(specs.maxSize);

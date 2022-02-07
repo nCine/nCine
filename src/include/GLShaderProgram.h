@@ -58,7 +58,7 @@ class GLShaderProgram
 	bool link(Introspection introspection);
 	void use();
 
-	void setProgramLabel(const char *name);
+	void setObjectLabel(const char *label);
 
 	/// Sets the fatal assert on errors flag
 	/*! If the flag is true the application fatal asserts if the shader program cannot be compiled or linked. */

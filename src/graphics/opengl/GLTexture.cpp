@@ -1,4 +1,5 @@
 #include "GLTexture.h"
+#include "GLDebug.h"
 #include "tracy_opengl.h"
 
 namespace ncine {
@@ -99,6 +100,11 @@ void GLTexture::texParameteri(GLenum pname, GLint param)
 {
 	bind();
 	glTexParameteri(target_, pname, param);
+}
+
+void GLTexture::setObjectLabel(const char *label)
+{
+	GLDebug::objectLabel(GLDebug::LabelTypes::TEXTURE, glHandle_, label);
 }
 
 ///////////////////////////////////////////////////////////

@@ -36,6 +36,8 @@ class LuaTexture
 	static int chromaKeyColor(lua_State *L);
 	static int setChromaKeyEnabled(lua_State *L);
 	static int setChromaKeyColor(lua_State *L);
+
+	static int setGLTextureLabel(lua_State *L);
 };
 
 }

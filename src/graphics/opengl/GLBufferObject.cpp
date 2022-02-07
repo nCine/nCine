@@ -1,4 +1,5 @@
 #include "GLBufferObject.h"
+#include "GLDebug.h"
 #include "tracy_opengl.h"
 
 namespace ncine {
@@ -149,6 +150,11 @@ void GLBufferObject::texBuffer(GLenum internalformat)
 	glTexBuffer(GL_TEXTURE_BUFFER, internalformat, glHandle_);
 }
 #endif
+
+void GLBufferObject::setObjectLabel(const char *label)
+{
+	GLDebug::objectLabel(GLDebug::LabelTypes::BUFFER, glHandle_, label);
+}
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS

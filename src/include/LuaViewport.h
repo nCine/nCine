@@ -48,6 +48,10 @@ class LuaViewport
 
 	static int camera(lua_State *L);
 	static int setCamera(lua_State *L);
+
+	static int setGLLabels(lua_State *L);
+	static int setGLFramebufferLabel(lua_State *L);
+	static int setGLTextureLabel(lua_State *L);
 };
 
 }

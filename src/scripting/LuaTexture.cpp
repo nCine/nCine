@@ -25,6 +25,13 @@ namespace Texture {
 	static const char *setMagFiltering = "set_mag_filtering";
 	static const char *setWrap = "set_wrap";
 
+	static const char *isChromaKeyEnabled = "is_chromakey_enabled";
+	static const char *chromaKeyColor = "get_chromakey_color";
+	static const char *setChromaKeyEnabled = "set_chromakey_enabled";
+	static const char *setChromaKeyColor = "set_chromakey_color";
+
+	static const char *setGLTextureLabel = "set_gltexture_label";
+
 	static const char *NEAREST = "NEAREST";
 	static const char *LINEAR = "LINEAR";
 	static const char *NEAREST_MIPMAP_NEAREST = "NEAREST_MIPMAP_NEAREST";
@@ -32,11 +39,6 @@ namespace Texture {
 	static const char *NEAREST_MIPMAP_LINEAR = "NEAREST_MIPMAP_LINEAR";
 	static const char *LINEAR_MIPMAP_LINEAR = "LINEAR_MIPMAP_LINEAR";
 	static const char *Filtering = "tex_filtering";
-
-	static const char *isChromaKeyEnabled = "is_chromakey_enabled";
-	static const char *chromaKeyColor = "get_chromakey_color";
-	static const char *setChromaKeyEnabled = "set_chromakey_enabled";
-	static const char *setChromaKeyColor = "set_chromakey_color";
 
 	static const char *CLAMP_TO_EDGE = "CLAMP_TO_EDGE";
 	static const char *MIRRORED_REPEAT = "MIRRORED_REPEAT";
@@ -51,7 +53,7 @@ namespace Texture {
 void LuaTexture::expose(LuaStateManager *stateManager)
 {
 	lua_State *L = stateManager->state();
-	lua_createtable(L, 0, 18);
+	lua_createtable(L, 0, 19);
 
 	if (stateManager->apiType() == LuaStateManager::ApiType::FULL)
 	{
@@ -77,6 +79,8 @@ void LuaTexture::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::Texture::chromaKeyColor, chromaKeyColor);
 	LuaUtils::addFunction(L, LuaNames::Texture::setChromaKeyEnabled, setChromaKeyEnabled);
 	LuaUtils::addFunction(L, LuaNames::Texture::setChromaKeyColor, setChromaKeyColor);
+
+	LuaUtils::addFunction(L, LuaNames::Texture::setGLTextureLabel, setGLTextureLabel);
 
 	lua_setfield(L, -2, LuaNames::Texture::Texture);
 }
@@ -306,6 +310,17 @@ int LuaTexture::setChromaKeyColor(lua_State *L)
 
 	if (texture)
 		texture->setChromaKeyColor(chromaKeyColor);
+
+	return 0;
+}
+
+int LuaTexture::setGLTextureLabel(lua_State *L)
+{
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -2);
+	const char *label = LuaUtils::retrieve<const char *>(L, -1);
+
+	if (texture)
+		texture->setGLTextureLabel(label);
 
 	return 0;
 }

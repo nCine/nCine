@@ -138,6 +138,9 @@ class DLL_PUBLIC Texture : public Object
 	/// Sets the color to be treated as transparent when loading a texture, using a `Colorf`
 	inline void setChromaKeyColor(const Colorf &chromaKeyColor) { chromaKeyColor_ = chromaKeyColor; }
 
+	/// Sets the OpenGL object label for the texture
+	void setGLTextureLabel(const char *label);
+
 	/// Returns the user data opaque pointer for ImGui's `ImTextureID` or Nuklear's texture handle
 	void *guiTexId() const;
 
@@ -168,9 +171,6 @@ class DLL_PUBLIC Texture : public Object
 	void initialize(const ITextureLoader &texLoader);
 	/// Loads the data in a previously initialized texture
 	void load(const ITextureLoader &texLoader);
-
-	/// Sets the OpenGL object label for the texture
-	void setGLTextureLabel(const char *filename);
 
 	friend class Material;
 	friend class Viewport;

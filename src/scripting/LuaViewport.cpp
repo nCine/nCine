@@ -60,6 +60,10 @@ namespace Viewport {
 
 	static const char *camera = "get_camera";
 	static const char *setCamera = "set_camera";
+
+	static const char *setGLLabels = "set_gl_labels";
+	static const char *setGLFramebufferLabel = "set_glframebuffer_label";
+	static const char *setGLTextureLabel = "set_gltexture_label";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -97,7 +101,7 @@ void LuaViewport::exposeConstants(lua_State *L)
 void LuaViewport::expose(LuaStateManager *stateManager)
 {
 	lua_State *L = stateManager->state();
-	lua_newtable(L);
+	lua_createtable(L, 0, 26);
 
 	if (stateManager->apiType() == LuaStateManager::ApiType::FULL)
 	{
@@ -135,6 +139,10 @@ void LuaViewport::expose(LuaStateManager *stateManager)
 
 	LuaUtils::addFunction(L, LuaNames::Viewport::camera, camera);
 	LuaUtils::addFunction(L, LuaNames::Viewport::setCamera, setCamera);
+
+	LuaUtils::addFunction(L, LuaNames::Viewport::setGLLabels, setGLLabels);
+	LuaUtils::addFunction(L, LuaNames::Viewport::setGLFramebufferLabel, setGLFramebufferLabel);
+	LuaUtils::addFunction(L, LuaNames::Viewport::setGLTextureLabel, setGLTextureLabel);
 
 	lua_setfield(L, -2, LuaNames::Viewport::Viewport);
 }
@@ -402,6 +410,39 @@ int LuaViewport::setCamera(lua_State *L)
 
 	if (viewport)
 		viewport->setCamera(camera);
+
+	return 0;
+}
+
+int LuaViewport::setGLLabels(lua_State *L)
+{
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -2);
+	const char *label = LuaUtils::retrieve<const char *>(L, -1);
+
+	if (viewport)
+		viewport->setGLLabels(label);
+
+	return 0;
+}
+
+int LuaViewport::setGLFramebufferLabel(lua_State *L)
+{
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -2);
+	const char *label = LuaUtils::retrieve<const char *>(L, -1);
+
+	if (viewport)
+		viewport->setGLFramebufferLabel(label);
+
+	return 0;
+}
+
+int LuaViewport::setGLTextureLabel(lua_State *L)
+{
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -2);
+	const char *label = LuaUtils::retrieve<const char *>(L, -1);
+
+	if (viewport)
+		viewport->setGLTextureLabel(label);
 
 	return 0;
 }

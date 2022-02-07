@@ -2,7 +2,6 @@
 #define CLASS_NCINE_GLTEXTURE
 
 #include "GLHashMap.h"
-#include "GLDebug.h"
 
 namespace ncine {
 
@@ -15,9 +14,6 @@ class GLTexture
 
 	inline GLuint glHandle() const { return glHandle_; }
 	inline GLenum target() const { return target_; }
-
-	inline void getObjectLabel(int bufSize, int *length, char *label) const { GLDebug::getObjectLabel(GLDebug::LabelTypes::TEXTURE, glHandle_, bufSize, length, label); }
-	inline void setObjectLabel(const char *label) { GLDebug::objectLabel(GLDebug::LabelTypes::TEXTURE, glHandle_, label); }
 
 	bool bind(unsigned int textureUnit) const;
 	inline bool bind() const { return bind(0); }
@@ -33,6 +29,8 @@ class GLTexture
 
 	void texParameterf(GLenum pname, GLfloat param);
 	void texParameteri(GLenum pname, GLint param);
+
+	void setObjectLabel(const char *label);
 
   private:
 	static const unsigned int MaxTextureUnits = 4;

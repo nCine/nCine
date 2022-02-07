@@ -37,6 +37,8 @@ class GLShader
 
 	bool checkCompilation();
 
+	void setObjectLabel(const char *label);
+
   private:
 	GLuint glHandle_;
 	Status status_;

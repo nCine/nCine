@@ -80,7 +80,7 @@ Viewport::Viewport()
 {
 }
 
-Viewport::Viewport(int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat)
+Viewport::Viewport(const char *name, int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat)
     : type_(Type::REGULAR), width_(0), height_(0),
       viewportRect_(0, 0, width, height), scissorRect_(0, 0, 0, 0),
       colorFormat_(colorFormat), depthStencilFormat_(depthStencilFormat),
@@ -91,10 +91,16 @@ Viewport::Viewport(int width, int height, ColorFormat colorFormat, DepthStencilF
 {
 	const bool isInitialized = initTexture(width, height, colorFormat, depthStencilFormat);
 	ASSERT(isInitialized);
+	setGLLabels(name);
+}
+
+Viewport::Viewport(int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat)
+    : Viewport(nullptr, width, height, colorFormat, depthStencilFormat)
+{
 }
 
 Viewport::Viewport(const Vector2i &size, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat)
-    : Viewport(size.x, size.y, colorFormat, depthStencilFormat)
+    : Viewport(nullptr, size.x, size.y, colorFormat, depthStencilFormat)
 {
 }
 
@@ -127,7 +133,7 @@ bool Viewport::initTexture(int width, int height, ColorFormat colorFormat, Depth
 		texture_ = nctl::makeUnique<Texture>();
 		type_ = Type::REGULAR;
 	}
-	texture_->init("Viewport", colorFormatToTexFormat(colorFormat), width, height);
+	texture_->init(nullptr, colorFormatToTexFormat(colorFormat), width, height);
 
 	fbo_ = nctl::makeUnique<GLFramebufferObject>();
 	fbo_->attachTexture(*texture_->glTexture_, GL_COLOR_ATTACHMENT0);
@@ -200,6 +206,31 @@ void Viewport::setNextViewport(Viewport *nextViewport)
 	}
 
 	nextViewport_ = nextViewport;
+}
+
+void Viewport::setGLLabels(const char *label)
+{
+	if (type_ == Type::REGULAR)
+	{
+		fbo_->setObjectLabel(label);
+		texture_->setName(label);
+		texture_->setGLTextureLabel(label);
+	}
+}
+
+void Viewport::setGLFramebufferLabel(const char *label)
+{
+	if (type_ == Type::REGULAR)
+		fbo_->setObjectLabel(label);
+}
+
+void Viewport::setGLTextureLabel(const char *label)
+{
+	if (type_ == Type::REGULAR)
+	{
+		texture_->setName(label);
+		texture_->setGLTextureLabel(label);
+	}
 }
 
 ///////////////////////////////////////////////////////////

@@ -1,7 +1,7 @@
 #include "GLFramebufferObject.h"
-
 #include "GLRenderbuffer.h"
 #include "GLTexture.h"
+#include "GLDebug.h"
 
 namespace ncine {
 
@@ -17,7 +17,7 @@ unsigned int GLFramebufferObject::drawBoundBuffer_ = 0;
 ///////////////////////////////////////////////////////////
 
 GLFramebufferObject::GLFramebufferObject()
-    : attachedRenderbuffers_(4), glHandle_(0)
+    : glHandle_(0)
 {
 	glGenFramebuffers(1, &glHandle_);
 }
@@ -28,9 +28,6 @@ GLFramebufferObject::~GLFramebufferObject()
 		unbind(GL_READ_FRAMEBUFFER);
 	if (drawBoundBuffer_ == glHandle_)
 		unbind(GL_DRAW_FRAMEBUFFER);
-
-	for (GLRenderbuffer *attachedRenderbuffer : attachedRenderbuffers_)
-		delete attachedRenderbuffer;
 
 	glDeleteFramebuffers(1, &glHandle_);
 }
@@ -59,13 +56,22 @@ bool GLFramebufferObject::unbind(GLenum target)
 	return bindHandle(target, 0);
 }
 
-void GLFramebufferObject::attachRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height, GLenum attachment)
+bool GLFramebufferObject::attachRenderbuffer(const char *label, GLenum internalFormat, GLsizei width, GLsizei height, GLenum attachment)
 {
-	GLRenderbuffer *renderBuffer = new GLRenderbuffer(internalFormat, width, height);
-	attachedRenderbuffers_.pushBack(renderBuffer);
+	if (attachedRenderbuffers_.size() >= MaxRenderbuffers - 1)
+		return false;
+
+	attachedRenderbuffers_.pushBack(nctl::makeUnique<GLRenderbuffer>(internalFormat, width, height));
+	attachedRenderbuffers_.back()->setObjectLabel(label);
 
 	bind(GL_FRAMEBUFFER);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, renderBuffer->glHandle_);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, attachedRenderbuffers_.back()->glHandle_);
+	return true;
+}
+
+bool GLFramebufferObject::attachRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height, GLenum attachment)
+{
+	return attachRenderbuffer(nullptr, internalFormat, width, height, attachment);
 }
 
 void GLFramebufferObject::attachTexture(GLTexture &texture, GLenum attachment)
@@ -87,6 +93,11 @@ bool GLFramebufferObject::isStatusComplete()
 	unbind(GL_FRAMEBUFFER);
 
 	return (status == GL_FRAMEBUFFER_COMPLETE);
+}
+
+void GLFramebufferObject::setObjectLabel(const char *label)
+{
+	GLDebug::objectLabel(GLDebug::LabelTypes::FRAMEBUFFER, glHandle_, label);
 }
 
 ///////////////////////////////////////////////////////////

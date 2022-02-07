@@ -44,67 +44,67 @@ bool Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 	{
 		case ShaderProgramType::SPRITE:
 			setShaderProgram(RenderResources::spriteShaderProgram());
-			shaderProgram_->setProgramLabel("Sprite");
+			shaderProgram_->setObjectLabel("Sprite");
 			break;
 		case ShaderProgramType::SPRITE_GRAY:
 			setShaderProgram(RenderResources::spriteGrayShaderProgram());
-			shaderProgram_->setProgramLabel("Sprite_Gray");
+			shaderProgram_->setObjectLabel("Sprite_Gray");
 			break;
 		case ShaderProgramType::SPRITE_NO_TEXTURE:
 			setShaderProgram(RenderResources::spriteNoTextureShaderProgram());
-			shaderProgram_->setProgramLabel("Sprite_NoTexture");
+			shaderProgram_->setObjectLabel("Sprite_NoTexture");
 			break;
 		case ShaderProgramType::MESH_SPRITE:
 			setShaderProgram(RenderResources::meshSpriteShaderProgram());
-			shaderProgram_->setProgramLabel("MeshSprite");
+			shaderProgram_->setObjectLabel("MeshSprite");
 			break;
 		case ShaderProgramType::MESH_SPRITE_GRAY:
 			setShaderProgram(RenderResources::meshSpriteGrayShaderProgram());
-			shaderProgram_->setProgramLabel("MeshSprite_Gray");
+			shaderProgram_->setObjectLabel("MeshSprite_Gray");
 			break;
 		case ShaderProgramType::MESH_SPRITE_NO_TEXTURE:
 			setShaderProgram(RenderResources::meshSpriteNoTextureShaderProgram());
-			shaderProgram_->setProgramLabel("MeshSprite_NoTexture");
+			shaderProgram_->setObjectLabel("MeshSprite_NoTexture");
 			break;
 		case ShaderProgramType::TEXTNODE_ALPHA:
 			setShaderProgram(RenderResources::textnodeAlphaShaderProgram());
-			shaderProgram_->setProgramLabel("TextNode_Alpha");
+			shaderProgram_->setObjectLabel("TextNode_Alpha");
 			break;
 		case ShaderProgramType::TEXTNODE_RED:
 			setShaderProgram(RenderResources::textnodeRedShaderProgram());
-			shaderProgram_->setProgramLabel("TextNode_Red");
+			shaderProgram_->setObjectLabel("TextNode_Red");
 			break;
 		case ShaderProgramType::BATCHED_SPRITES:
 			setShaderProgram(RenderResources::batchedSpritesShaderProgram());
-			shaderProgram_->setProgramLabel("Batched_Sprites");
+			shaderProgram_->setObjectLabel("Batched_Sprites");
 			break;
 		case ShaderProgramType::BATCHED_SPRITES_GRAY:
 			setShaderProgram(RenderResources::batchedSpritesGrayShaderProgram());
-			shaderProgram_->setProgramLabel("Batched_Sprites_Gray");
+			shaderProgram_->setObjectLabel("Batched_Sprites_Gray");
 			break;
 		case ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE:
 			setShaderProgram(RenderResources::batchedSpritesNoTextureShaderProgram());
-			shaderProgram_->setProgramLabel("Batched_Sprites_NoTexture");
+			shaderProgram_->setObjectLabel("Batched_Sprites_NoTexture");
 			break;
 		case ShaderProgramType::BATCHED_MESH_SPRITES:
 			setShaderProgram(RenderResources::batchedMeshSpritesShaderProgram());
-			shaderProgram_->setProgramLabel("Batched_MeshSprites");
+			shaderProgram_->setObjectLabel("Batched_MeshSprites");
 			break;
 		case ShaderProgramType::BATCHED_MESH_SPRITES_GRAY:
 			setShaderProgram(RenderResources::batchedMeshSpritesGrayShaderProgram());
-			shaderProgram_->setProgramLabel("Batched_MeshSprites_Gray");
+			shaderProgram_->setObjectLabel("Batched_MeshSprites_Gray");
 			break;
 		case ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE:
 			setShaderProgram(RenderResources::batchedMeshSpritesNoTextureShaderProgram());
-			shaderProgram_->setProgramLabel("Batched_MeshSprites_NoTexture");
+			shaderProgram_->setObjectLabel("Batched_MeshSprites_NoTexture");
 			break;
 		case ShaderProgramType::BATCHED_TEXTNODES_ALPHA:
 			setShaderProgram(RenderResources::batchedTextnodesAlphaShaderProgram());
-			shaderProgram_->setProgramLabel("Batched_TextNodes_Alpha");
+			shaderProgram_->setObjectLabel("Batched_TextNodes_Alpha");
 			break;
 		case ShaderProgramType::BATCHED_TEXTNODES_RED:
 			setShaderProgram(RenderResources::batchedTextnodesRedShaderProgram());
-			shaderProgram_->setProgramLabel("Batched_TextNodes_Red");
+			shaderProgram_->setObjectLabel("Batched_TextNodes_Red");
 			break;
 		case ShaderProgramType::CUSTOM:
 			break;

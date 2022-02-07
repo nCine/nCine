@@ -51,6 +51,11 @@ class DLL_PUBLIC Viewport
 	/// Creates a new viewport with no associated texture
 	Viewport();
 
+	/// Creates a new viewport with the specified name, dimensions, and format
+	Viewport(const char *name, int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat);
+	/// Creates a new viewport with the specified name, dimensions as a vector, and format
+	Viewport(const char *name, const Vector2i &size, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat);
+
 	/// Creates a new viewport with the specified dimensions and format
 	Viewport(int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat);
 	/// Creates a new viewport with the specified dimensions as a vector and format
@@ -148,6 +153,13 @@ class DLL_PUBLIC Viewport
 	inline Camera *camera() { return camera_; }
 	/// Sets the camera to be used for rendering
 	inline void setCamera(Camera *camera) { camera_ = camera; }
+
+	/// Sets the OpenGL object labels for both the framebuffer object and the texture
+	void setGLLabels(const char *label);
+	/// Sets the OpenGL object label for the viewport framebuffer object
+	void setGLFramebufferLabel(const char *label);
+	/// Sets the OpenGL object label for the viewport texture
+	void setGLTextureLabel(const char *label);
 
   protected:
 	/// An enumeration to differentiate between a regular viewport, a textureless one and the screen (root viewport)

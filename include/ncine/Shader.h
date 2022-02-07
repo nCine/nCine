@@ -28,6 +28,8 @@ class DLL_PUBLIC Shader : public Object
 	/// Returns true if the shader is linked and can therefore be used
 	bool isLinked() const;
 
+	void setGLShaderProgramLabel(const char *label);
+
 	inline static ObjectType sType() { return ObjectType::SHADER; }
 
   private:
