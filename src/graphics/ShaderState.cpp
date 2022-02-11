@@ -86,7 +86,8 @@ bool ShaderState::setShader(Shader *shader)
 {
 	bool shaderHasChanged = false;
 
-	if (node_ != nullptr && shader != shader_)
+	// Allow shader self-assignment to take into account the case where it loads new data
+	if (node_ != nullptr)
 	{
 		Material &material = node_->renderCommand_->material();
 		if (shader == nullptr)
@@ -108,6 +109,19 @@ bool ShaderState::setShader(Shader *shader)
 	}
 
 	return shaderHasChanged;
+}
+
+/*! \note Use this method when the content of the currently assigned shader changes */
+bool ShaderState::resetShader()
+{
+	if (shader_ != nullptr && shader_->isLinked() && node_)
+	{
+		Material &material = node_->renderCommand_->material();
+		material.setShaderProgram(shader_->glShaderProgram_.get());
+		node_->shaderHasChanged();
+		return true;
+	}
+	return false;
 }
 
 bool ShaderState::setAttribute(const char *name, int stride, unsigned long int pointer)

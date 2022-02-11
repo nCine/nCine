@@ -12,8 +12,14 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
+Shader::Shader()
+    : Object(ObjectType::SHADER),
+      glShaderProgram_(nctl::makeUnique<GLShaderProgram>(GLShaderProgram::QueryPhase::IMMEDIATE))
+{
+}
+
 Shader::Shader(const char *shaderName, LoadMode loadMode, const char *vertex, const char *fragment)
-    : Object(ObjectType::SHADER)
+    : Shader()
 {
 	const bool hasLoaded = (loadMode == LoadMode::STRING)
 	                           ? loadFromMemory(shaderName, vertex, fragment)
@@ -41,19 +47,14 @@ bool Shader::loadFromMemory(const char *shaderName, const char *vertex, const ch
 		ZoneText(shaderName, nctl::strnlen(shaderName, nctl::String::MaxCStringLength));
 	}
 
-	nctl::UniquePtr<GLShaderProgram> shaderProgram = nctl::makeUnique<GLShaderProgram>(GLShaderProgram::QueryPhase::IMMEDIATE);
-	shaderProgram->setFatalAssertOnErrors(false);
+	glShaderProgram_->reset(); // reset before attaching new shaders
 	setName(shaderName);
-	shaderProgram->setObjectLabel(shaderName);
-	shaderProgram->attachShaderFromString(GL_VERTEX_SHADER, vertex);
-	shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, fragment);
-	shaderProgram->link(GLShaderProgram::Introspection::ENABLED);
+	glShaderProgram_->setObjectLabel(shaderName);
+	glShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, vertex);
+	glShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, fragment);
+	glShaderProgram_->link(GLShaderProgram::Introspection::ENABLED);
 
-	const bool hasLinked = shaderProgram->status() != GLShaderProgram::Status::NOT_LINKED &&
-	                       shaderProgram->status() != GLShaderProgram::Status::LINKING_FAILED;
-	if (hasLinked)
-		glShaderProgram_ = nctl::move(shaderProgram);
-	return hasLinked;
+	return isLinked();
 }
 
 bool Shader::loadFromMemory(const char *vertex, const char *fragment)
@@ -70,19 +71,14 @@ bool Shader::loadFromFile(const char *shaderName, const char *vertex, const char
 		ZoneText(shaderName, nctl::strnlen(shaderName, nctl::String::MaxCStringLength));
 	}
 
-	nctl::UniquePtr<GLShaderProgram> shaderProgram = nctl::makeUnique<GLShaderProgram>(GLShaderProgram::QueryPhase::IMMEDIATE);
-	shaderProgram->setFatalAssertOnErrors(false);
+	glShaderProgram_->reset(); // reset before attaching new shaders
 	setName(shaderName);
-	shaderProgram->setObjectLabel(shaderName);
-	shaderProgram->attachShader(GL_VERTEX_SHADER, vertex);
-	shaderProgram->attachShader(GL_FRAGMENT_SHADER, fragment);
-	shaderProgram->link(GLShaderProgram::Introspection::ENABLED);
+	glShaderProgram_->setObjectLabel(shaderName);
+	glShaderProgram_->attachShader(GL_VERTEX_SHADER, vertex);
+	glShaderProgram_->attachShader(GL_FRAGMENT_SHADER, fragment);
+	glShaderProgram_->link(GLShaderProgram::Introspection::ENABLED);
 
-	const bool hasLinked = shaderProgram->status() != GLShaderProgram::Status::NOT_LINKED &&
-	                       shaderProgram->status() != GLShaderProgram::Status::LINKING_FAILED;
-	if (hasLinked)
-		glShaderProgram_ = nctl::move(shaderProgram);
-	return hasLinked;
+	return isLinked();
 }
 
 bool Shader::loadFromFile(const char *vertex, const char *fragment)
@@ -90,14 +86,29 @@ bool Shader::loadFromFile(const char *vertex, const char *fragment)
 	return loadFromFile(nullptr, vertex, fragment);
 }
 
-///////////////////////////////////////////////////////////
-// PUBLIC FUNCTIONS
-///////////////////////////////////////////////////////////
-
 bool Shader::isLinked() const
 {
-	return (glShaderProgram_->status() != GLShaderProgram::Status::NOT_LINKED &&
-	        glShaderProgram_->status() != GLShaderProgram::Status::LINKING_FAILED);
+	return glShaderProgram_->isLinked();
+}
+
+unsigned int Shader::retrieveInfoLogLength() const
+{
+	return glShaderProgram_->retrieveInfoLogLength();
+}
+
+void Shader::retrieveInfoLog(nctl::String &infoLog) const
+{
+	glShaderProgram_->retrieveInfoLog(infoLog);
+}
+
+bool Shader::logOnErrors() const
+{
+	return glShaderProgram_->logOnErrors();
+}
+
+void Shader::setLogOnErrors(bool shouldLogOnErrors)
+{
+	glShaderProgram_->setLogOnErrors(shouldLogOnErrors);
 }
 
 void Shader::setGLShaderProgramLabel(const char *label)

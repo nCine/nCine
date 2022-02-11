@@ -33,13 +33,16 @@ class GLShader
 
 	void loadFromString(const char *string);
 	void loadFromFile(const char *filename);
-	bool compile(ErrorChecking errorChecking);
+	bool compile(ErrorChecking errorChecking, bool logOnErrors);
 
-	bool checkCompilation();
+	bool checkCompilation(bool logOnErrors);
 
 	void setObjectLabel(const char *label);
 
   private:
+	static const unsigned int MaxInfoLogLength = 512;
+	static char infoLogString_[MaxInfoLogLength];
+
 	GLuint glHandle_;
 	Status status_;
 

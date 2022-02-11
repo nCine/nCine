@@ -58,15 +58,14 @@ Viewport *RenderResources::currentViewport_ = nullptr;
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void RenderResources::createMinimal()
+bool RenderResources::removeCameraUniformData(GLShaderProgram *shaderProgram)
 {
-	LOGI("Creating a minimal set of rendering resources...");
+	bool hasRemoved = false;
 
-	const AppConfiguration &appCfg = theApplication().appConfiguration();
-	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.useBufferMapping, appCfg.vboSize, appCfg.iboSize);
-	vaoPool_ = nctl::makeUnique<RenderVaoPool>(appCfg.vaoPoolSize);
+	if (cameraUniformDataMap_.isEmpty() == false)
+		hasRemoved = cameraUniformDataMap_.remove(shaderProgram);
 
-	LOGI("Minimal rendering resources created");
+	return hasRemoved;
 }
 
 ///////////////////////////////////////////////////////////
@@ -189,8 +188,8 @@ void RenderResources::create()
 		shaderToLoad.shaderProgram->attachShaderFromString(GL_VERTEX_SHADER, shaderToLoad.vertexShader);
 		shaderToLoad.shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, shaderToLoad.fragmentShader);
 #endif
-		shaderToLoad.shaderProgram->link(shaderToLoad.introspection);
-		FATAL_ASSERT(shaderToLoad.shaderProgram->status() != GLShaderProgram::Status::LINKING_FAILED);
+		const bool hasLinked = shaderToLoad.shaderProgram->link(shaderToLoad.introspection);
+		FATAL_ASSERT(hasLinked == true);
 	}
 
 	// Calculating a default projection matrix for all shader programs
@@ -199,6 +198,17 @@ void RenderResources::create()
 	defaultCamera_->setOrthoProjection(0.0f, width, 0.0f, height);
 
 	LOGI("Rendering resources created");
+}
+
+void RenderResources::createMinimal()
+{
+	LOGI("Creating a minimal set of rendering resources...");
+
+	const AppConfiguration &appCfg = theApplication().appConfiguration();
+	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.useBufferMapping, appCfg.vboSize, appCfg.iboSize);
+	vaoPool_ = nctl::makeUnique<RenderVaoPool>(appCfg.vaoPoolSize);
+
+	LOGI("Minimal rendering resources created");
 }
 
 void RenderResources::dispose()
@@ -215,6 +225,8 @@ void RenderResources::dispose()
 	meshSpriteShaderProgram_.reset(nullptr);
 	spriteGrayShaderProgram_.reset(nullptr);
 	spriteShaderProgram_.reset(nullptr);
+
+	ASSERT(cameraUniformDataMap_.isEmpty());
 
 	defaultCamera_.reset(nullptr);
 	renderBatcher_.reset(nullptr);

@@ -23,6 +23,8 @@ class DLL_PUBLIC ShaderState
 
 	inline const Shader *shader() const { return shader_; }
 	bool setShader(Shader *shader);
+	/// Triggers a shader update without setting a new shader
+	bool resetShader();
 
 	bool setAttribute(const char *name, int stride, unsigned long int pointer);
 

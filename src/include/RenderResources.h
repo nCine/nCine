@@ -93,7 +93,7 @@ class RenderResources
 	static inline const Camera *currentCamera() { return currentCamera_; }
 	static inline const Viewport *currentViewport() { return currentViewport_; }
 
-	static void createMinimal();
+	static bool removeCameraUniformData(GLShaderProgram *shaderProgram);
 
   private:
 	static nctl::UniquePtr<RenderBuffersManager> buffersManager_;
@@ -131,6 +131,7 @@ class RenderResources
 	static void setCurrentViewport(Viewport *viewport);
 
 	static void create();
+	static void createMinimal();
 	static void dispose();
 
 	/// Static class, deleted constructor

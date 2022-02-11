@@ -17,6 +17,12 @@ namespace {
 }
 
 ///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
+char GLShader::infoLogString_[MaxInfoLogLength];
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
@@ -81,6 +87,7 @@ void GLShader::loadFromString(const char *string)
 void GLShader::loadFromFile(const char *filename)
 {
 	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
+	fileHandle->setExitOnFailToOpen(false);
 
 	fileHandle->open(IFile::OpenMode::READ);
 	if (fileHandle->isOpened())
@@ -97,12 +104,12 @@ void GLShader::loadFromFile(const char *filename)
 	}
 }
 
-bool GLShader::compile(ErrorChecking errorChecking)
+bool GLShader::compile(ErrorChecking errorChecking, bool logOnErrors)
 {
 	glCompileShader(glHandle_);
 
 	if (errorChecking == ErrorChecking::IMMEDIATE)
-		return checkCompilation();
+		return checkCompilation(logOnErrors);
 	else
 	{
 		status_ = Status::COMPILED_WITH_DEFERRED_CHECKS;
@@ -110,7 +117,7 @@ bool GLShader::compile(ErrorChecking errorChecking)
 	}
 }
 
-bool GLShader::checkCompilation()
+bool GLShader::checkCompilation(bool logOnErrors)
 {
 	if (status_ == Status::COMPILED)
 		return true;
@@ -119,14 +126,16 @@ bool GLShader::checkCompilation()
 	glGetShaderiv(glHandle_, GL_COMPILE_STATUS, &status);
 	if (status == GL_FALSE)
 	{
-		GLint length = 0;
-		glGetShaderiv(glHandle_, GL_INFO_LOG_LENGTH, &length);
-
-		if (length > 0)
+		if (logOnErrors)
 		{
-			nctl::String infoLog(length);
-			glGetShaderInfoLog(glHandle_, length, &length, infoLog.data());
-			LOGW_X("%s", infoLog.data());
+			GLint length = 0;
+			glGetShaderiv(glHandle_, GL_INFO_LOG_LENGTH, &length);
+
+			if (length > 0)
+			{
+				glGetShaderInfoLog(glHandle_, MaxInfoLogLength, &length, infoLogString_);
+				LOGW_X("%s", infoLogString_);
+			}
 		}
 
 		status_ = Status::COMPILATION_FAILED;

@@ -1,9 +1,7 @@
-#include "return_macros.h"
 #include "GLShaderProgram.h"
 #include "GLShader.h"
 #include "GLDebug.h"
-#include <nctl/CString.h>
-#include <nctl/String.h>
+#include "RenderResources.h"
 #include "tracy.h"
 
 namespace ncine {
@@ -13,6 +11,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GLuint GLShaderProgram::boundProgram_ = 0;
+char GLShaderProgram::infoLogString_[MaxInfoLogLength];
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -25,7 +24,7 @@ GLShaderProgram::GLShaderProgram()
 
 GLShaderProgram::GLShaderProgram(QueryPhase queryPhase)
     : glHandle_(0), attachedShaders_(AttachedShadersInitialSize),
-      status_(Status::NOT_LINKED), queryPhase_(queryPhase), shouldFatalAssertOnErrors_(true),
+      status_(Status::NOT_LINKED), queryPhase_(queryPhase), shouldLogOnErrors_(true),
       uniformsSize_(0), uniformBlocksSize_(0), uniforms_(UniformsInitialSize),
       uniformBlocks_(UniformBlocksInitialSize), attributes_(AttributesInitialSize)
 {
@@ -37,16 +36,9 @@ GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFil
 {
 	const bool hasCompiledVS = attachShader(GL_VERTEX_SHADER, vertexFile);
 	const bool hasCompiledFS = attachShader(GL_FRAGMENT_SHADER, fragmentFile);
-	if (shouldFatalAssertOnErrors_)
-		FATAL_ASSERT_MSG(hasCompiledVS && hasCompiledFS, "Shader compilation has failed");
-	else
-		RETURN_ASSERT_MSG(hasCompiledVS && hasCompiledFS, "Shader compilation has failed");
 
-	const bool hasLinked = link(introspection);
-	if (shouldFatalAssertOnErrors_)
-		FATAL_ASSERT_MSG(hasLinked, "Shader linking has failed");
-	else
-		RETURN_ASSERT_MSG(hasLinked, "Shader linking has failed");
+	if (hasCompiledVS && hasCompiledFS)
+		link(introspection);
 }
 
 GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFile, Introspection introspection)
@@ -65,11 +57,41 @@ GLShaderProgram::~GLShaderProgram()
 		glUseProgram(0);
 
 	glDeleteProgram(glHandle_);
+
+	RenderResources::removeCameraUniformData(this);
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+bool GLShaderProgram::isLinked() const
+{
+	return (status_ == Status::LINKED ||
+	        status_ == Status::LINKED_WITH_DEFERRED_QUERIES ||
+	        status_ == Status::LINKED_WITH_INTROSPECTION);
+}
+
+unsigned int GLShaderProgram::retrieveInfoLogLength() const
+{
+	GLint length = 0;
+	glGetProgramiv(glHandle_, GL_INFO_LOG_LENGTH, &length);
+
+	return static_cast<unsigned int>(length);
+}
+
+void GLShaderProgram::retrieveInfoLog(nctl::String &infoLog) const
+{
+	GLint length = 0;
+	glGetProgramiv(glHandle_, GL_INFO_LOG_LENGTH, &length);
+
+	if (length > 0 && infoLog.capacity() > 0)
+	{
+		const unsigned int capacity = infoLog.capacity();
+		glGetProgramInfoLog(glHandle_, capacity, &length, infoLog.data());
+		infoLog.setLength(static_cast<unsigned int>(length) < capacity - 1 ? static_cast<unsigned int>(length) : capacity - 1);
+	}
+}
 
 bool GLShaderProgram::attachShader(GLenum type, const char *filename)
 {
@@ -79,13 +101,15 @@ bool GLShaderProgram::attachShader(GLenum type, const char *filename)
 	const GLShader::ErrorChecking errorChecking = (queryPhase_ == GLShaderProgram::QueryPhase::IMMEDIATE)
 	                                                  ? GLShader::ErrorChecking::IMMEDIATE
 	                                                  : GLShader::ErrorChecking::DEFERRED;
-	const bool hasCompiled = shader->compile(errorChecking);
+	const bool hasCompiled = shader->compile(errorChecking, shouldLogOnErrors_);
 
 	if (hasCompiled)
 	{
 		GLDebug::objectLabel(GLDebug::LabelTypes::SHADER, shader->glHandle(), filename);
 		attachedShaders_.pushBack(nctl::move(shader));
 	}
+	else
+		status_ = Status::COMPILATION_FAILED;
 
 	return hasCompiled;
 }
@@ -99,10 +123,12 @@ bool GLShaderProgram::attachShaderFromString(GLenum type, const char *string)
 	const GLShader::ErrorChecking errorChecking = (queryPhase_ == GLShaderProgram::QueryPhase::IMMEDIATE)
 	                                                  ? GLShader::ErrorChecking::IMMEDIATE
 	                                                  : GLShader::ErrorChecking::DEFERRED;
-	const bool hasCompiled = shader->compile(errorChecking);
+	const bool hasCompiled = shader->compile(errorChecking, shouldLogOnErrors_);
 
 	if (hasCompiled)
 		attachedShaders_.pushBack(nctl::move(shader));
+	else
+		status_ = Status::COMPILATION_FAILED;
 
 	return hasCompiled;
 }
@@ -115,11 +141,13 @@ bool GLShaderProgram::link(Introspection introspection)
 	if (queryPhase_ == QueryPhase::IMMEDIATE)
 	{
 		const bool linkCheck = checkLinking();
+		if (linkCheck == false)
+			return false;
+
 		// After linking, shader objects are not needed anymore
 		attachedShaders_.clear();
 
-		if (linkCheck)
-			performIntrospection();
+		performIntrospection();
 		return linkCheck;
 	}
 	else
@@ -133,15 +161,40 @@ void GLShaderProgram::use()
 {
 	if (boundProgram_ != glHandle_)
 	{
-		const bool hasLinked = deferredQueries();
-		if (shouldFatalAssertOnErrors_)
-			FATAL_ASSERT_MSG(hasLinked, "Shader deferred queries have failed");
-		else
-			RETURN_ASSERT(hasLinked);
+		deferredQueries();
 
 		glUseProgram(glHandle_);
 		boundProgram_ = glHandle_;
 	}
+}
+
+bool GLShaderProgram::validate()
+{
+	glValidateProgram(glHandle_);
+	GLint status;
+	glGetProgramiv(glHandle_, GL_VALIDATE_STATUS, &status);
+	return (status == GL_TRUE);
+}
+
+void GLShaderProgram::reset()
+{
+	if (status_ != Status::NOT_LINKED && status_ != Status::COMPILATION_FAILED)
+	{
+		uniforms_.clear();
+		uniformBlocks_.clear();
+		attributes_.clear();
+
+		if (boundProgram_ == glHandle_)
+			glUseProgram(0);
+		attachedShaders_.clear();
+		glDeleteProgram(glHandle_);
+
+		RenderResources::removeCameraUniformData(this);
+
+		glHandle_ = glCreateProgram();
+	}
+
+	status_ = Status::NOT_LINKED;
 }
 
 void GLShaderProgram::setObjectLabel(const char *label)
@@ -159,7 +212,7 @@ bool GLShaderProgram::deferredQueries()
 	{
 		for (nctl::UniquePtr<GLShader> &attachedShader : attachedShaders_)
 		{
-			const bool compileCheck = attachedShader->checkCompilation();
+			const bool compileCheck = attachedShader->checkCompilation(shouldLogOnErrors_);
 			if (compileCheck == false)
 				return false;
 		}
@@ -171,8 +224,7 @@ bool GLShaderProgram::deferredQueries()
 		// After linking, shader objects are not needed anymore
 		attachedShaders_.clear();
 
-		if (introspection_ != GLShaderProgram::Introspection::DISABLED)
-			performIntrospection();
+		performIntrospection();
 	}
 	return true;
 }
@@ -186,14 +238,16 @@ bool GLShaderProgram::checkLinking()
 	glGetProgramiv(glHandle_, GL_LINK_STATUS, &status);
 	if (status == GL_FALSE)
 	{
-		GLint length = 0;
-		glGetProgramiv(glHandle_, GL_INFO_LOG_LENGTH, &length);
-
-		if (length > 0)
+		if (shouldLogOnErrors_)
 		{
-			nctl::String infoLog(length);
-			glGetProgramInfoLog(glHandle_, length, &length, infoLog.data());
-			LOGW_X("%s", infoLog.data());
+			GLint length = 0;
+			glGetProgramiv(glHandle_, GL_INFO_LOG_LENGTH, &length);
+
+			if (length > 0)
+			{
+				glGetProgramInfoLog(glHandle_, MaxInfoLogLength, &length, infoLogString_);
+				LOGW_X("%s", infoLogString_);
+			}
 		}
 
 		status_ = Status::LINKING_FAILED;
@@ -236,9 +290,9 @@ void GLShaderProgram::discoverUniforms()
 			indices[uniformsOutsideBlocks] = i;
 			uniformsOutsideBlocks++;
 		}
+		if (uniformsOutsideBlocks > MaxNumUniforms - 1)
+			break;
 	}
-
-	ASSERT(uniformsOutsideBlocks < MaxNumUniforms);
 
 	for (unsigned int i = 0; i < uniformsOutsideBlocks; i++)
 	{

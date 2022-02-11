@@ -24,6 +24,7 @@ class GLShaderProgram
 	enum class Status
 	{
 		NOT_LINKED,
+		COMPILATION_FAILED,
 		LINKING_FAILED,
 		LINKED,
 		LINKED_WITH_DEFERRED_QUERIES,
@@ -48,6 +49,13 @@ class GLShaderProgram
 	inline Introspection introspection() const { return introspection_; }
 	inline QueryPhase queryPhase() const { return queryPhase_; }
 
+	bool isLinked() const;
+
+	/// Returns the length of the information log including the null termination character
+	unsigned int retrieveInfoLogLength() const;
+	/// Retrieves the information log and copies it in the provided string object
+	void retrieveInfoLog(nctl::String &infoLog) const;
+
 	/// Returns the total memory needed for all uniforms outside of blocks
 	inline unsigned int uniformsSize() const { return uniformsSize_; }
 	/// Returns the total memory needed for all uniforms inside of blocks
@@ -57,16 +65,25 @@ class GLShaderProgram
 	bool attachShaderFromString(GLenum type, const char *string);
 	bool link(Introspection introspection);
 	void use();
+	bool validate();
+
+	/// Deletes the current OpenGL shader program so that new shaders can be attached
+	void reset();
 
 	void setObjectLabel(const char *label);
 
-	/// Sets the fatal assert on errors flag
-	/*! If the flag is true the application fatal asserts if the shader program cannot be compiled or linked. */
-	inline void setFatalAssertOnErrors(bool shouldFatalAssertOnErrors) { shouldFatalAssertOnErrors_ = shouldFatalAssertOnErrors; }
+	/// Returns the automatic log on errors flag
+	inline bool logOnErrors() const { return shouldLogOnErrors_; }
+	/// Sets the automatic log on errors flag
+	/*! If the flag is true the shader program will automatically log compilation and linking errors. */
+	inline void setLogOnErrors(bool shouldLogOnErrors) { shouldLogOnErrors_ = shouldLogOnErrors; }
 
   private:
 	/// Max number of discoverable uniforms
-	static const int MaxNumUniforms = 32;
+	static const unsigned int MaxNumUniforms = 32;
+
+	static const unsigned int MaxInfoLogLength = 512;
+	static char infoLogString_[MaxInfoLogLength];
 
 	static GLuint boundProgram_;
 
@@ -77,9 +94,8 @@ class GLShaderProgram
 	Introspection introspection_;
 	QueryPhase queryPhase_;
 
-	/// A flag indicating whether the class should fatal assert on compilation and linking errors
-	/*! \note Useful for custom shaders creation. */
-	bool shouldFatalAssertOnErrors_;
+	/// A flag indicating whether the shader program should automatically log errors (the information log)
+	bool shouldLogOnErrors_;
 
 	unsigned int uniformsSize_;
 	unsigned int uniformBlocksSize_;

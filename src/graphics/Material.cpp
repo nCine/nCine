@@ -146,10 +146,9 @@ bool Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 	return true;
 }
 
-bool Material::setShaderProgram(GLShaderProgram *program)
+void Material::setShaderProgram(GLShaderProgram *program)
 {
-	if (shaderProgram_ == program)
-		return false;
+	// Allow self-assignment to take into account the case where the shader program loads new shaders
 
 	shaderProgramType_ = ShaderProgramType::CUSTOM;
 	shaderProgram_ = program;
@@ -157,8 +156,6 @@ bool Material::setShaderProgram(GLShaderProgram *program)
 	shaderUniforms_.setProgram(shaderProgram_, nullptr, RenderResources::ProjectionViewMatrixExcludeString);
 	shaderUniformBlocks_.setProgram(shaderProgram_);
 	shaderAttributes_.setProgram(shaderProgram_);
-
-	return true;
 }
 
 void Material::reserveUniformsDataMemory()

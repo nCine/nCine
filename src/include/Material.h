@@ -70,7 +70,7 @@ class Material
 	inline ShaderProgramType shaderProgramType() const { return shaderProgramType_; }
 	bool setShaderProgramType(ShaderProgramType shaderProgramType);
 	inline const GLShaderProgram *shaderProgram() const { return shaderProgram_; }
-	bool setShaderProgram(GLShaderProgram *program);
+	void setShaderProgram(GLShaderProgram *program);
 
 	void reserveUniformsDataMemory();
 	void setUniformsDataPointer(GLubyte *dataPointer);

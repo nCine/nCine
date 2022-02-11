@@ -25,6 +25,9 @@ class GLUniform
 	unsigned int numComponents() const;
 	inline unsigned int memorySize() const { return size() * numComponents() * sizeof(basicType()); }
 
+	/// Returns true if the uniform name starts with `gl_`
+	bool hasReservedPrefix() const;
+
   private:
 	GLuint index_;
 	/// Active uniforms not in a block have a block index of -1
