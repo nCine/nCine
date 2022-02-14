@@ -62,14 +62,6 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 		SRC_ALPHA_SATURATE,
 	};
 
-	/// Screen culling state for this node in the last frmae
-	enum class CullingState
-	{
-		DISABLED,
-		CULLED,
-		NOT_CULLED
-	};
-
 	/// Constructor for a drawable node with a parent and a specified relative position
 	DrawableNode(SceneNode *parent, float xx, float yy);
 	/// Constructor for a drawable node with a parent and a specified relative position as a vector
@@ -129,8 +121,8 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	/// Sets the node rendering layer
 	void setLayer(unsigned short layer);
 
-	/// Returns last frame culling state for this node
-	inline CullingState cullingState() const { return cullingState_; }
+	/// Returns true if all viewports have culled this node in the last frame
+	bool isCulled() const;
 
   protected:
 	/// Node width in pixel
@@ -141,8 +133,8 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	/// The render command class associated with this node
 	nctl::UniquePtr<RenderCommand> renderCommand_;
 
-	/// The last frame culling state for this node
-	CullingState cullingState_;
+	/// The last frame any viewport rendered this node
+	unsigned long int lastFrameNotCulled_;
 	/// Axis Aligned Bounding Box of the node area
 	Rectf aabb_;
 	/// Calculates updated values for the AABB

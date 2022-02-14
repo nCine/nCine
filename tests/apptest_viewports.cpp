@@ -211,8 +211,6 @@ void MyEventHandler::onFrameStart()
 	const char *nextViewportString = "Next Viewport";
 	if (currentViewport.nextViewport() == nullptr)
 		ImGui::Text("%s: None", nextViewportString);
-	else if (currentViewport.nextViewport() == &nc::theApplication().rootViewport())
-		ImGui::Text("%s: Screen", nextViewportString);
 	else
 	{
 		for (unsigned int i = 0; i < NumViewports; i++)

@@ -17,7 +17,6 @@ Texture::Format colorFormatToTexFormat(Viewport::ColorFormat format)
 {
 	switch (format)
 	{
-		default:
 		case Viewport::ColorFormat::RGB8:
 			return Texture::Format::RGB8;
 		case Viewport::ColorFormat::RGBA8:
@@ -61,7 +60,7 @@ GLenum depthStencilFormatToGLAttachment(Viewport::DepthStencilFormat format)
 
 Viewport::Viewport()
     : type_(Type::NO_TEXTURE), width_(0), height_(0),
-      viewportRect_(0, 0, 0, 0), hasDirtyCullingRect_(true),
+      viewportRect_(0, 0, 0, 0), scissorRect_(0, 0, 0, 0),
       colorFormat_(ColorFormat::RGB8), depthStencilFormat_(DepthStencilFormat::NONE),
       clearMode_(ClearMode::EVERY_FRAME), clearColor_(Colorf::Black),
       renderQueue_(nctl::makeUnique<RenderQueue>(*this)),
@@ -72,7 +71,7 @@ Viewport::Viewport()
 
 Viewport::Viewport(int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat)
     : type_(Type::REGULAR), width_(0), height_(0),
-      viewportRect_(0, 0, width, height), hasDirtyCullingRect_(true),
+      viewportRect_(0, 0, width, height), scissorRect_(0, 0, 0, 0),
       colorFormat_(colorFormat), depthStencilFormat_(depthStencilFormat),
       clearMode_(ClearMode::EVERY_FRAME), clearColor_(Colorf::Black),
       renderQueue_(nctl::makeUnique<RenderQueue>(*this)),
@@ -98,6 +97,8 @@ Viewport::Viewport(const Vector2i &size)
 {
 }
 
+Viewport::~Viewport() = default;
+
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -121,8 +122,8 @@ bool Viewport::initTexture(int width, int height, ColorFormat colorFormat, Depth
 	fbo_->attachTexture(*texture_->glTexture_, GL_COLOR_ATTACHMENT0);
 	if (depthStencilFormat != DepthStencilFormat::NONE)
 		fbo_->attachRenderbuffer(depthStencilFormatToGLFormat(depthStencilFormat), width, height, depthStencilFormatToGLAttachment(depthStencilFormat));
-	const bool isStatusComplete = fbo_->isStatusComplete();
 
+	const bool isStatusComplete = fbo_->isStatusComplete();
 	if (isStatusComplete)
 	{
 		width_ = width;
@@ -130,6 +131,7 @@ bool Viewport::initTexture(int width, int height, ColorFormat colorFormat, Depth
 		colorFormat_ = colorFormat;
 		depthStencilFormat_ = depthStencilFormat;
 	}
+
 	return isStatusComplete;
 }
 
@@ -153,7 +155,7 @@ void Viewport::resize(int width, int height)
 	if (width == width_ && height == height_)
 		return;
 
-	if (fbo_ && texture_)
+	if (type_ == Type::REGULAR)
 		initTexture(width, height);
 
 	viewportRect_.set(0, 0, width, height);
@@ -200,13 +202,17 @@ void Viewport::calculateCullingRect()
 	const Camera *vieportCamera = camera_ ? camera_ : RenderResources::currentCamera();
 
 	const Camera::ProjectionValues projValues = vieportCamera->projectionValues();
-	cullingRect_.set(projValues.left, projValues.top, projValues.right - projValues.left, projValues.bottom - projValues.top);
+	const float projWidth = projValues.right - projValues.left;
+	const float projHeight = projValues.bottom - projValues.top;
+	cullingRect_.set(projValues.left, projValues.top, projWidth, projHeight);
 
-	if (scissorRect_.w > 0 && scissorRect_.h > 0)
+	const bool scissorRectNonZeroArea = (scissorRect_.w > 0 && scissorRect_.h > 0);
+	if (scissorRectNonZeroArea)
 	{
 		Rectf scissorRectFloat(scissorRect_.x, scissorRect_.y, scissorRect_.w, scissorRect_.h);
 
-		if (viewportRect_.w > 0 && viewportRect_.h > 0)
+		const bool viewportRectNonZeroArea = (viewportRect_.w > 0 && viewportRect_.h > 0);
+		if (viewportRectNonZeroArea)
 		{
 			scissorRectFloat.x -= viewportRect_.x;
 			scissorRectFloat.y -= viewportRect_.y;
@@ -219,6 +225,11 @@ void Viewport::calculateCullingRect()
 			scissorRectFloat.h *= viewportHeightRatio;
 		}
 
+		scissorRectFloat.x = (scissorRectFloat.x * projWidth / static_cast<float>(width_)) + projValues.left;
+		scissorRectFloat.y = (scissorRectFloat.y * projHeight / static_cast<float>(height_)) + projValues.top;
+		scissorRectFloat.w *= projWidth / static_cast<float>(width_);
+		scissorRectFloat.h *= projHeight / static_cast<float>(height_);
+
 		cullingRect_.intersect(scissorRectFloat);
 	}
 
@@ -226,8 +237,8 @@ void Viewport::calculateCullingRect()
 	if (viewValues.scale != 0.0f && viewValues.scale != 1.0f)
 	{
 		const float invScale = 1.0f / viewValues.scale;
-		cullingRect_.x += invScale * -viewValues.position.x;
-		cullingRect_.y += invScale * -viewValues.position.y;
+		cullingRect_.x = (cullingRect_.x - viewValues.position.x) * invScale;
+		cullingRect_.y = (cullingRect_.y - viewValues.position.y) * invScale;
 		cullingRect_.w *= invScale;
 		cullingRect_.h *= invScale;
 	}
@@ -251,10 +262,6 @@ void Viewport::calculateCullingRect()
 
 		cullingRect_ = Rectf::fromCenterSize(rotatedX, rotatedY, rotatedWidth, rotatedHeight);
 	}
-
-	hasDirtyCullingRect_ = (cullingRect_.x != prevCullingRect_.x || cullingRect_.y != prevCullingRect_.y ||
-	                        cullingRect_.w != prevCullingRect_.w || cullingRect_.h != prevCullingRect_.h);
-	prevCullingRect_ = cullingRect_;
 }
 
 void Viewport::update()
@@ -263,7 +270,10 @@ void Viewport::update()
 		nextViewport_->update();
 
 	if (rootNode_)
+	{
+		ZoneScoped;
 		rootNode_->update(theApplication().interval());
+	}
 }
 
 void Viewport::visit()
@@ -271,10 +281,12 @@ void Viewport::visit()
 	if (nextViewport_)
 		nextViewport_->visit();
 
-	calculateCullingRect();
-
 	if (rootNode_)
+	{
+		ZoneScoped;
+		calculateCullingRect();
 		rootNode_->visit(*renderQueue_);
+	}
 }
 
 void Viewport::sortAndCommitQueue()
@@ -282,13 +294,19 @@ void Viewport::sortAndCommitQueue()
 	if (nextViewport_)
 		nextViewport_->sortAndCommitQueue();
 
-	renderQueue_->sortAndCommit();
+	if (renderQueue_->isEmpty() == false)
+	{
+		ZoneScoped;
+		renderQueue_->sortAndCommit();
+	}
 }
 
 void Viewport::draw()
 {
 	if (nextViewport_ && nextViewport_->type_ == Type::REGULAR)
 		nextViewport_->draw();
+
+	ZoneScoped;
 
 	if (type_ == Type::REGULAR)
 		fbo_->bind(GL_DRAW_FRAMEBUFFER);
@@ -311,22 +329,25 @@ void Viewport::draw()
 
 	RenderResources::setCamera(camera_);
 
-	const bool viewportRectNonZeroArea = (viewportRect_.w > 0 && viewportRect_.h > 0);
-	GLViewport::State viewportState = GLViewport::state();
-	if (viewportRectNonZeroArea)
-		GLViewport::setRect(viewportRect_.x, viewportRect_.y, viewportRect_.w, viewportRect_.h);
+	if (renderQueue_->isEmpty() == false)
+	{
+		const bool viewportRectNonZeroArea = (viewportRect_.w > 0 && viewportRect_.h > 0);
+		GLViewport::State viewportState = GLViewport::state();
+		if (viewportRectNonZeroArea)
+			GLViewport::setRect(viewportRect_.x, viewportRect_.y, viewportRect_.w, viewportRect_.h);
 
-	const bool scissorRectNonZeroArea = (scissorRect_.w > 0 && scissorRect_.h > 0);
-	GLScissorTest::State scissorTestState = GLScissorTest::state();
-	if (scissorRectNonZeroArea)
-		GLScissorTest::enable(scissorRect_.x, scissorRect_.y, scissorRect_.w, scissorRect_.h);
+		const bool scissorRectNonZeroArea = (scissorRect_.w > 0 && scissorRect_.h > 0);
+		GLScissorTest::State scissorTestState = GLScissorTest::state();
+		if (scissorRectNonZeroArea)
+			GLScissorTest::enable(scissorRect_.x, scissorRect_.y, scissorRect_.w, scissorRect_.h);
 
-	renderQueue_->draw();
+		renderQueue_->draw();
 
-	if (scissorRectNonZeroArea)
-		GLScissorTest::setState(scissorTestState);
-	if (viewportRectNonZeroArea)
-		GLViewport::setState(viewportState);
+		if (scissorRectNonZeroArea)
+			GLScissorTest::setState(scissorTestState);
+		if (viewportRectNonZeroArea)
+			GLViewport::setState(viewportState);
+	}
 
 	if (type_ == Type::REGULAR && depthStencilFormat_ != DepthStencilFormat::NONE &&
 	    theApplication().appConfiguration().withGlDebugContext == false)

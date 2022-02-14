@@ -15,6 +15,9 @@ class RenderQueue
 	/// Constructor that sets the owning viewport
 	explicit RenderQueue(Viewport &viewport);
 
+	/// Returns true if the queue does not contain any render commands
+	bool isEmpty() const;
+
 	/// Adds a draw command to the queue
 	void addCommand(RenderCommand *command);
 

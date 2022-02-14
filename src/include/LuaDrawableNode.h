@@ -32,6 +32,8 @@ class LuaDrawableNode
 	static int layer(lua_State *L);
 	static int setLayer(lua_State *L);
 
+	static int isCulled(lua_State *L);
+
 	friend class LuaBaseSprite;
 	friend class LuaTextNode;
 };

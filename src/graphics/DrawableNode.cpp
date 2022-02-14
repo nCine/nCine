@@ -76,7 +76,7 @@ const Vector2f DrawableNode::AnchorTopRight(1.0f, 1.0f);
 DrawableNode::DrawableNode(SceneNode *parent, float xx, float yy)
     : SceneNode(parent, xx, yy), width_(0.0f), height_(0.0f),
       renderCommand_(nctl::makeUnique<RenderCommand>()),
-      cullingState_(CullingState::DISABLED)
+      lastFrameNotCulled_(0)
 {
 	renderCommand_->setIdSortKey(id());
 }
@@ -112,33 +112,24 @@ void DrawableNode::draw(RenderQueue &renderQueue)
 
 	if (cullingEnabled)
 	{
-		const bool updateOverlapping = (dirtyBits_.test(DirtyBitPositions::AabbBit) ||
-		                                renderQueue.viewport().hasDirtyCullingRect() ||
-		                                cullingState_ == CullingState::DISABLED);
-
 		if (dirtyBits_.test(DirtyBitPositions::AabbBit))
 		{
 			updateAabb();
 			dirtyBits_.reset(DirtyBitPositions::AabbBit);
 		}
 
-		if (updateOverlapping)
+		const bool overlaps = aabb_.overlaps(renderQueue.viewport().cullingRect());
+		if (overlaps)
 		{
-			const bool overlaps = aabb_.overlaps(renderQueue.viewport().cullingRect());
-			cullingState_ = overlaps ? CullingState::NOT_CULLED : CullingState::CULLED;
-		}
-
-		if (cullingState_ == CullingState::NOT_CULLED)
-		{
+			lastFrameNotCulled_ = theApplication().numFrames();
 			updateRenderCommand();
 			renderQueue.addCommand(renderCommand_.get());
 		}
-		else if (cullingState_ == CullingState::CULLED)
+		else
 			RenderStatistics::addCulledNode();
 	}
 	else
 	{
-		cullingState_ = CullingState::DISABLED;
 		updateRenderCommand();
 		renderQueue.addCommand(renderCommand_.get());
 	}
@@ -209,6 +200,11 @@ void DrawableNode::setLayer(unsigned short layer)
 	renderCommand_->setLayer(layer);
 }
 
+bool DrawableNode::isCulled() const
+{
+	return (lastFrameNotCulled_ < theApplication().numFrames() - 1);
+}
+
 ///////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -237,7 +233,7 @@ DrawableNode::DrawableNode(const DrawableNode &other)
     : SceneNode(other),
       width_(other.width_), height_(other.height_),
       renderCommand_(nctl::makeUnique<RenderCommand>()),
-      cullingState_(CullingState::DISABLED)
+      lastFrameNotCulled_(0)
 {
 	renderCommand_->setIdSortKey(id());
 	setBlendingEnabled(other.isBlendingEnabled());

@@ -1159,6 +1159,8 @@ void ImGuiDebugOverlay::guiRecursiveViewports(Viewport *viewport, unsigned int v
 {
 	widgetName_.format("#%u Viewport", viewportId);
 	widgetName_.formatAppend(" - size: %d x %d", viewport->width(), viewport->height());
+	const Rectf rect = viewport->cullingRect();
+	widgetName_.formatAppend(" - culling rect: %.2f, %.2f - %.2f, %.2f", rect.x, rect.y, rect.w, rect.h);
 	widgetName_.formatAppend("###0x%x", uintptr_t(viewport));
 
 	SceneNode *rootNode = viewport->rootNode();
@@ -1210,7 +1212,11 @@ void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int 
 		widgetName_.formatAppend(" (%u children)", node->children().size());
 	widgetName_.formatAppend(" - position: %.1f x %.1f", node->position().x, node->position().y);
 	if (drawable)
+	{
 		widgetName_.formatAppend(" - size: %.1f x %.1f", drawable->width(), drawable->height());
+		if (drawable->isDrawEnabled() && drawable->isCulled())
+			widgetName_.formatAppend(" - culled", drawable->width(), drawable->height());
+	}
 	widgetName_.formatAppend("###0x%x", uintptr_t(node));
 
 	if (ImGui::TreeNode(widgetName_.data()))

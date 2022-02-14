@@ -57,6 +57,8 @@ namespace DrawableNode {
 
 	static const char *layer = "get_layer";
 	static const char *setLayer = "set_layer";
+
+	static const char *isCulled = "is_culled";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -128,6 +130,8 @@ void LuaDrawableNode::exposeFunctions(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::layer, layer);
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::setLayer, setLayer);
+
+	LuaUtils::addFunction(L, LuaNames::DrawableNode::isCulled, isCulled);
 }
 
 int LuaDrawableNode::width(lua_State *L)
@@ -260,6 +264,16 @@ int LuaDrawableNode::setLayer(lua_State *L)
 	node->setLayer(layer);
 
 	return 0;
+}
+
+int LuaDrawableNode::isCulled(lua_State *L)
+{
+	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -1);
+
+	const bool isCulled = node->isCulled();
+	LuaUtils::push(L, isCulled);
+
+	return 1;
 }
 
 }

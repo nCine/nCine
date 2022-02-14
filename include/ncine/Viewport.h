@@ -3,7 +3,6 @@
 
 #include "common_defines.h"
 #include <nctl/UniquePtr.h>
-#include <nctl/Array.h>
 #include "Colorf.h"
 #include "Vector2.h"
 #include "Rect.h"
@@ -62,6 +61,8 @@ class DLL_PUBLIC Viewport
 	/// Creates a new viewport with the specified dimensions as a vector and a default format
 	explicit Viewport(const Vector2i &size);
 
+	~Viewport();
+
 	/// Initializes the render target of the viewport with the specified dimensions and format
 	bool initTexture(int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat);
 	/// Initializes the render target of the viewport with the specified dimensions as a vector and format
@@ -88,10 +89,10 @@ class DLL_PUBLIC Viewport
 	inline void setViewportRect(Recti viewportRect) { viewportRect_ = viewportRect; }
 	/// Sets the OpenGL viewport rectangle with four integers
 	inline void setViewportRect(int x, int y, int width, int height) { viewportRect_.set(x, y, width, height); }
-	/// Resizes the OpenGL viewport through a `Vector2i` object
-	inline void setViewport(const Vector2i &size) { viewportRect_.set(0, 0, size.x, size.y); }
-	/// Resizes the OpenGL viewport with two integers
-	inline void setViewport(int width, int height) { viewportRect_.set(0, 0, width, height); }
+	/// Resizes the OpenGL viewport rectangle through a `Vector2i` object
+	inline void setViewportRect(const Vector2i &size) { viewportRect_.set(0, 0, size.x, size.y); }
+	/// Resizes the OpenGL viewport rectangle with two integers
+	inline void setViewportRect(int width, int height) { viewportRect_.set(0, 0, width, height); }
 
 	/// Returns the OpenGL scissor test rectangle
 	inline Recti scissorRect() const { return scissorRect_; }
@@ -99,13 +100,11 @@ class DLL_PUBLIC Viewport
 	inline void setScissorRect(Recti scissorRect) { scissorRect_ = scissorRect; }
 	/// Sets the OpenGL scissor test rectangle with four integers
 	inline void setScissorRect(int x, int y, int width, int height) { scissorRect_.set(x, y, width, height); }
-	/// Resizes the OpenGL scissor test through a `Vector2i` object
+	/// Resizes the OpenGL scissor test rectangle through a `Vector2i` object
 	inline void setScissorRect(const Vector2i &size) { scissorRect_.set(0, 0, size.x, size.y); }
-	/// Resizes the OpenGL scissor test with two integers
+	/// Resizes the OpenGL scissor test rectangle with two integers
 	inline void setScissorRect(int width, int height) { scissorRect_.set(0, 0, width, height); }
 
-	/// Returns true if the culling rect has changed since last frame
-	inline bool hasDirtyCullingRect() const { return hasDirtyCullingRect_; }
 	/// Returns the rectangle for screen culling
 	inline Rectf cullingRect() const { return cullingRect_; }
 
@@ -165,10 +164,7 @@ class DLL_PUBLIC Viewport
 	int height_;
 	Recti viewportRect_;
 	Recti scissorRect_;
-
-	bool hasDirtyCullingRect_;
 	Rectf cullingRect_;
-	Rectf prevCullingRect_;
 
 	ColorFormat colorFormat_;
 	DepthStencilFormat depthStencilFormat_;

@@ -27,6 +27,11 @@ RenderQueue::RenderQueue(Viewport &viewport)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+bool RenderQueue::isEmpty() const
+{
+	return (opaqueQueue_.isEmpty() && transparentQueue_.isEmpty());
+}
+
 void RenderQueue::addCommand(RenderCommand *command)
 {
 	// Calculating the material sorting key before adding the command to the queue

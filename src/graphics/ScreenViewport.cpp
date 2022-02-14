@@ -3,7 +3,6 @@
 #include "RenderCommandPool.h"
 #include "RenderResources.h"
 #include "RenderStatistics.h"
-#include "SceneNode.h"
 #include "Application.h"
 #include "DisplayMode.h"
 #include "GLClearColor.h"
