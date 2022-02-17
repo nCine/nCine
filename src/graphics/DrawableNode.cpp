@@ -108,6 +108,10 @@ DrawableNode &DrawableNode::operator=(DrawableNode &&) = default;
 
 void DrawableNode::draw(RenderQueue &renderQueue)
 {
+	// Skip rendering a zero area drawable node
+	if (width_ == 0.0f || height_ == 0.0f)
+		return;
+
 	const bool cullingEnabled = theApplication().renderingSettings().cullingEnabled;
 
 	if (cullingEnabled)

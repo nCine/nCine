@@ -72,6 +72,7 @@ class DLL_PUBLIC String
 		nctl::swap(first.array_, second.array_);
 		nctl::swap(first.length_, second.length_);
 		nctl::swap(first.capacity_, second.capacity_);
+		nctl::swap(first.fixedCapacity_, second.fixedCapacity_);
 	}
 
 	/// Returns an iterator to the first character

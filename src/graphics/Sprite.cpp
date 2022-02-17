@@ -108,7 +108,12 @@ void Sprite::textureHasChanged(Texture *newTexture)
 			else
 				return Material::ShaderProgramType::SPRITE_NO_TEXTURE;
 		}(newTexture);
-		renderCommand_->material().setShaderProgramType(shaderProgramType);
+		const bool shaderHasChanged = renderCommand_->material().setShaderProgramType(shaderProgramType);
+		if (shaderHasChanged)
+		{
+			spriteBlock_ = renderCommand_->material().uniformBlock("SpriteBlock");
+			dirtyBits_.set(DirtyBitPositions::ColorBit);
+		}
 	}
 
 	if (texture_ && newTexture && texture_ != newTexture)

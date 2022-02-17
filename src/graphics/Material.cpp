@@ -19,7 +19,7 @@ Material::Material()
 
 Material::Material(GLShaderProgram *program, GLTexture *texture)
     : isBlendingEnabled_(false), srcBlendingFactor_(GL_SRC_ALPHA), destBlendingFactor_(GL_ONE_MINUS_SRC_ALPHA),
-      shaderProgramType_(ShaderProgramType::CUSTOM), shaderProgram_(program), texture_(texture)
+      shaderProgramType_(ShaderProgramType::CUSTOM), shaderProgram_(program), texture_(texture), uniformsHostBufferSize_(0)
 {
 	if (program)
 		setShaderProgram(program);
@@ -35,10 +35,10 @@ void Material::setBlendingFactors(GLenum srcBlendingFactor, GLenum destBlendingF
 	destBlendingFactor_ = destBlendingFactor;
 }
 
-void Material::setShaderProgramType(ShaderProgramType shaderProgramType)
+bool Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 {
 	if (shaderProgramType_ == shaderProgramType)
-		return;
+		return false;
 
 	switch (shaderProgramType)
 	{
@@ -152,32 +152,39 @@ void Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 
 	// Should be assigned after calling `setShaderProgram()`
 	shaderProgramType_ = shaderProgramType;
+	return true;
 }
 
-void Material::setShaderProgram(GLShaderProgram *program)
+bool Material::setShaderProgram(GLShaderProgram *program)
 {
+	if (shaderProgram_ == program)
+		return false;
+
 	shaderProgramType_ = ShaderProgramType::CUSTOM;
 	shaderProgram_ = program;
 	// The camera uniforms are handled separately as they have a different update frequency
 	shaderUniforms_.setProgram(shaderProgram_, nullptr, "uProjectionMatrix\0uViewMatrix\0");
 	shaderUniformBlocks_.setProgram(shaderProgram_);
-
 	shaderAttributes_.setProgram(shaderProgram_);
+
+	return true;
 }
 
 void Material::reserveUniformsDataMemory()
 {
 	ASSERT(shaderProgram_);
 
-	if (uniformsHostBuffer_ == nullptr)
+	// Total memory size for all uniforms and uniform blocks
+	const unsigned int uniformsSize = shaderProgram_->uniformsSize() + shaderProgram_->uniformBlocksSize();
+	GLubyte *dataPointer = uniformsHostBuffer_.get();
+	if (uniformsSize > uniformsHostBufferSize_)
 	{
-		// Total memory size for all uniforms and uniform blocks
-		const unsigned int uniformsSize = shaderProgram_->uniformsSize() + shaderProgram_->uniformBlocksSize();
 		uniformsHostBuffer_ = nctl::makeUnique<GLubyte[]>(uniformsSize);
-		GLubyte *dataPointer = uniformsHostBuffer_.get();
-		shaderUniforms_.setUniformsDataPointer(dataPointer);
-		shaderUniformBlocks_.setUniformsDataPointer(&dataPointer[shaderProgram_->uniformsSize()]);
+		uniformsHostBufferSize_ = uniformsSize;
+		dataPointer = uniformsHostBuffer_.get();
 	}
+	shaderUniforms_.setUniformsDataPointer(dataPointer);
+	shaderUniformBlocks_.setUniformsDataPointer(&dataPointer[shaderProgram_->uniformsSize()]);
 }
 
 void Material::setUniformsDataPointer(GLubyte *dataPointer)

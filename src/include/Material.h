@@ -68,9 +68,9 @@ class Material
 	void setBlendingFactors(GLenum srcBlendingFactor, GLenum destBlendingFactor);
 
 	inline ShaderProgramType shaderProgramType() const { return shaderProgramType_; }
-	void setShaderProgramType(ShaderProgramType shaderProgramType);
+	bool setShaderProgramType(ShaderProgramType shaderProgramType);
 	inline const GLShaderProgram *shaderProgram() const { return shaderProgram_; }
-	void setShaderProgram(GLShaderProgram *program);
+	bool setShaderProgram(GLShaderProgram *program);
 
 	void reserveUniformsDataMemory();
 	void setUniformsDataPointer(GLubyte *dataPointer);
@@ -96,6 +96,8 @@ class Material
 	GLShaderAttributes shaderAttributes_;
 	const GLTexture *texture_;
 
+	/// The size of the memory buffer containing uniform values
+	unsigned int uniformsHostBufferSize_;
 	/// Memory buffer with uniform values to be sent to the GPU
 	nctl::UniquePtr<GLubyte[]> uniformsHostBuffer_;
 

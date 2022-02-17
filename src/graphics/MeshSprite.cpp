@@ -286,7 +286,12 @@ void MeshSprite::textureHasChanged(Texture *newTexture)
 			else
 				return Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE;
 		}(newTexture);
-		renderCommand_->material().setShaderProgramType(shaderProgramType);
+		const bool shaderHasChanged = renderCommand_->material().setShaderProgramType(shaderProgramType);
+		if (shaderHasChanged)
+		{
+			spriteBlock_ = renderCommand_->material().uniformBlock("MeshSpriteBlock");
+			dirtyBits_.set(DirtyBitPositions::ColorBit);
+		}
 	}
 
 	renderCommand_->geometry().setNumElementsPerVertex(newTexture ? VertexFloats : VertexNoTextureFloats);

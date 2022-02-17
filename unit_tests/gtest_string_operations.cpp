@@ -136,6 +136,31 @@ TEST_F(StringOperationTest, CopyConstruction)
 	ASSERT_EQ(newString.capacity(), string_.capacity());
 	ASSERT_EQ(newString.length(), string_.length());
 	ASSERT_STREQ(newString.data(), string_.data());
+
+	printf("Appending a very long string to the first and the second string\n");
+	string_.append(veryLongCString);
+	newString.append(veryLongCString);
+	ASSERT_EQ(newString.capacity(), string_.capacity());
+	ASSERT_EQ(newString.length(), string_.length());
+	ASSERT_STREQ(newString.data(), string_.data());
+}
+
+TEST_F(StringOperationTest, CopyConstructionFixed)
+{
+	nctl::String newString(fixedString_);
+	printString("Creating a new string as a copy of the first one (fixed): ", newString);
+
+	ASSERT_EQ(newString.capacity(), fixedString_.capacity());
+	ASSERT_EQ(newString.length(), fixedString_.length());
+	ASSERT_STREQ(newString.data(), fixedString_.data());
+
+	printf("Appending a very long string to the first and the second string\n");
+	fixedString_.append(veryLongCString);
+	newString.append(veryLongCString);
+	ASSERT_EQ(newString.capacity(), Capacity);
+	ASSERT_EQ(newString.capacity(), fixedString_.capacity());
+	ASSERT_EQ(newString.length(), fixedString_.length());
+	ASSERT_STREQ(newString.data(), fixedString_.data());
 }
 
 TEST_F(StringOperationTest, MoveConstruction)
@@ -148,6 +173,30 @@ TEST_F(StringOperationTest, MoveConstruction)
 	ASSERT_STREQ(newString.data(), "String1");
 	ASSERT_EQ(string_.capacity(), 0);
 	ASSERT_EQ(string_.length(), 0);
+
+	printf("Appending a very long string to the second string\n");
+	newString.append(veryLongCString);
+
+	ASSERT_EQ(newString.capacity(), Capacity * 8);
+	ASSERT_GT(newString.length(), strnlen("String1", 8));
+}
+
+TEST_F(StringOperationTest, MoveConstructionFixed)
+{
+	nctl::String newString(nctl::move(fixedString_));
+	printString("Creating a new string moving from the first one (fixed): ", newString);
+
+	ASSERT_EQ(newString.capacity(), Capacity);
+	ASSERT_EQ(newString.length(), strnlen("String1", 8));
+	ASSERT_STREQ(newString.data(), "String1");
+	ASSERT_EQ(fixedString_.capacity(), 0);
+	ASSERT_EQ(fixedString_.length(), 0);
+
+	printf("Appending a very long string to the second string\n");
+	newString.append(veryLongCString);
+
+	ASSERT_EQ(newString.capacity(), Capacity);
+	ASSERT_EQ(newString.length(), Capacity - 1);
 }
 
 TEST_F(StringOperationTest, AssignmentOperator)
@@ -178,6 +227,7 @@ TEST_F(StringOperationTest, AssignmentOperatorTruncate)
 	fixedString_ = longString;
 	printString("Filling a fixed string with the assignment operator: ", fixedString_);
 
+	// The assignment operator does not copy the `fixedCapacity` value
 	ASSERT_EQ(fixedString_.capacity(), Capacity);
 	ASSERT_EQ(fixedString_.length(), fixedString_.capacity() - 1);
 	ASSERT_STREQ(fixedString_.data(), "This_is_a_very_");
@@ -206,6 +256,45 @@ TEST_F(StringOperationTest, MoveAssignmentOperator)
 	ASSERT_STREQ(newString.data(), "String1");
 	ASSERT_EQ(string_.capacity(), Capacity);
 	ASSERT_EQ(string_.length(), 0);
+}
+
+TEST_F(StringOperationTest, MoveAssignmentOperatorExtend)
+{
+	nctl::String longString(veryLongCString);
+	nctl::String newString(Capacity);
+	newString = nctl::move(longString);
+	printString("Extending a string with the move assignment operator: ", newString);
+
+	ASSERT_GT(newString.capacity(), Capacity);
+	ASSERT_GT(newString.length(), Capacity);
+	ASSERT_EQ(longString.capacity(), Capacity);
+	ASSERT_EQ(longString.length(), 0);
+}
+
+TEST_F(StringOperationTest, MoveAssignmentOperatorTruncate)
+{
+	nctl::String longString(veryLongCString);
+	nctl::String newString(Capacity, nctl::StringMode::FIXED_CAPACITY);
+	newString = nctl::move(longString);
+	printString("Filling a fixed string with the move assignment operator: ", newString);
+
+	// The move assignment operator also moves the `fixedCapacity` value
+	ASSERT_GT(newString.capacity(), Capacity);
+	ASSERT_GT(newString.length(), Capacity);
+	ASSERT_EQ(longString.capacity(), Capacity);
+	ASSERT_EQ(longString.length(), 0);
+}
+
+TEST_F(StringOperationTest, MoveAssignmentOperatorShorter)
+{
+	nctl::String shortString("String1");
+	nctl::String newString("LongString1");
+	newString = nctl::move(shortString);
+	printString("Shrinking a string with the move assignment operator: ", newString);
+
+	ASSERT_EQ(newString.capacity(), Capacity);
+	ASSERT_EQ(newString.length(), strnlen("String1", 8));
+	ASSERT_STREQ(newString.data(), "String1");
 }
 
 TEST_F(StringOperationTest, SelfAssignment)

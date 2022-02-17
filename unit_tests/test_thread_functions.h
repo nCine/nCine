@@ -2,7 +2,9 @@
 #define TEST_THREAD_FUNCTIONS
 
 #if defined(_WIN32)
-	#include <windows.h>
+	#define INFINITE 0xFFFFFFFF
+	#include <ncine/common_windefines.h>
+	#include <synchapi.h>
 	#include <process.h>
 #else
 	#include <pthread.h>

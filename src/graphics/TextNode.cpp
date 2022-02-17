@@ -86,11 +86,23 @@ void TextNode::setFont(Font *font)
 		const Material::ShaderProgramType shaderProgramType = font_->renderMode() == Font::RenderMode::GLYPH_IN_RED
 		                                                          ? Material::ShaderProgramType::TEXTNODE_RED
 		                                                          : Material::ShaderProgramType::TEXTNODE_ALPHA;
-		renderCommand_->material().setShaderProgramType(shaderProgramType);
+		const bool shaderHasChanged = renderCommand_->material().setShaderProgramType(shaderProgramType);
+		if (shaderHasChanged)
+		{
+			textnodeBlock_ = renderCommand_->material().uniformBlock("TextnodeBlock");
+			dirtyBits_.set(DirtyBitPositions::ColorBit);
+		}
 		renderCommand_->material().setTexture(*font_->texture());
 
 		dirtyDraw_ = true;
 		dirtyBoundaries_ = true;
+	}
+	else
+	{
+		renderCommand_->material().setTexture(nullptr);
+		// Skip rendering for this node if no font is assigned
+		width_ = 0;
+		height_ = 0;
 	}
 }
 

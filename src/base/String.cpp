@@ -76,7 +76,7 @@ String::~String()
 }
 
 String::String(const String &other)
-    : length_(other.length_), capacity_(other.capacity_)
+    : length_(other.length_), capacity_(other.capacity_), fixedCapacity_(other.fixedCapacity_)
 {
 	if (capacity_ > SmallBufferSize)
 	{
@@ -94,7 +94,7 @@ String::String(const String &other)
 }
 
 String::String(String &&other)
-    : length_(0), capacity_(0)
+    : length_(0), capacity_(0), fixedCapacity_(false)
 {
 	swap(*this, other);
 }
