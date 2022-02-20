@@ -1,10 +1,52 @@
 // Based on demo/glfw_opengl3/nuklear_glfw_gl3.h
 
-#include <cstring> // for `memcpy()`
 #include <GLFW/glfw3.h>
 #include "NuklearGlfwInput.h"
 
 namespace ncine {
+
+namespace {
+
+	GLFWmousebuttonfun prevUserCallbackMousebutton = nullptr;
+	GLFWscrollfun prevUserCallbackScroll = nullptr;
+	GLFWcharfun prevUserCallbackChar = nullptr;
+
+	const int numKeys = 12;
+	const int nuklearGlfwKeys[numKeys * 2] = {
+		NK_KEY_DEL, GLFW_KEY_DELETE,
+		NK_KEY_ENTER, GLFW_KEY_ENTER,
+		NK_KEY_TAB, GLFW_KEY_TAB,
+		NK_KEY_BACKSPACE, GLFW_KEY_BACKSPACE,
+		NK_KEY_UP, GLFW_KEY_UP,
+		NK_KEY_DOWN, GLFW_KEY_DOWN,
+		NK_KEY_TEXT_START, GLFW_KEY_HOME,
+		NK_KEY_TEXT_END, GLFW_KEY_END,
+		NK_KEY_SCROLL_START, GLFW_KEY_HOME,
+		NK_KEY_SCROLL_END, GLFW_KEY_END,
+		NK_KEY_SCROLL_DOWN, GLFW_KEY_PAGE_DOWN,
+		NK_KEY_SCROLL_UP, GLFW_KEY_PAGE_UP
+	};
+
+	const int numCtrlKeys = 9;
+	const int nuklearGlfwCtrlKeys[numCtrlKeys * 2] = {
+		NK_KEY_COPY, GLFW_KEY_C,
+		NK_KEY_PASTE, GLFW_KEY_V,
+		NK_KEY_CUT, GLFW_KEY_X,
+		NK_KEY_TEXT_UNDO, GLFW_KEY_Z,
+		NK_KEY_TEXT_REDO, GLFW_KEY_R,
+		NK_KEY_TEXT_WORD_LEFT, GLFW_KEY_LEFT,
+		NK_KEY_TEXT_WORD_RIGHT, GLFW_KEY_RIGHT,
+		NK_KEY_TEXT_LINE_START, GLFW_KEY_B,
+		NK_KEY_TEXT_LINE_END, GLFW_KEY_E
+	};
+
+	const int numNonCtrlKeys = 2;
+	const int nuklearGlfwNonCtrlKeys[numNonCtrlKeys * 2] = {
+		NK_KEY_TEXT_WORD_LEFT, GLFW_KEY_LEFT,
+		NK_KEY_TEXT_WORD_RIGHT, GLFW_KEY_RIGHT
+	};
+
+}
 
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
@@ -18,16 +60,19 @@ GLFWwindow *NuklearGlfwInput::window_ = nullptr;
 
 unsigned int NuklearGlfwInput::text_[NK_GLFW_TEXT_MAX];
 int NuklearGlfwInput::textLength_;
+char NuklearGlfwInput::keys_[NK_KEY_MAX];
 struct nk_vec2 NuklearGlfwInput::scroll_;
 double NuklearGlfwInput::lastButtonClick_;
 int NuklearGlfwInput::isDoubleClickDown_;
 struct nk_vec2 NuklearGlfwInput::doubleClickPos_;
 
+bool NuklearGlfwInput::installedCallbacks_ = false;
+
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void NuklearGlfwInput::init(GLFWwindow *window)
+void NuklearGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 {
 	window_ = window;
 
@@ -35,13 +80,22 @@ void NuklearGlfwInput::init(GLFWwindow *window)
 	NuklearContext::ctx_.clip.copy = clipboardCopy;
 	NuklearContext::ctx_.clip.paste = clipboardPaste;
 	NuklearContext::ctx_.clip.userdata = nk_handle_ptr(nullptr);
+
+	for (unsigned int i = 0; i < NK_KEY_MAX; i++)
+		keys_[i] = 0;
 	lastButtonClick_ = 0.0;
 	isDoubleClickDown_ = nk_false;
 	doubleClickPos_ = nk_vec2(0.0f, 0.0f);
+
+	if (withCallbacks)
+		installCallbacks(window);
 }
 
 void NuklearGlfwInput::shutdown()
 {
+	if (installedCallbacks_)
+		restoreCallbacks(window_);
+
 	NuklearContext::shutdown();
 	window_ = nullptr;
 }
@@ -68,41 +122,16 @@ void NuklearGlfwInput::newFrame()
 	else if (ctx->input.mouse.ungrab)
 		glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-	nk_input_key(ctx, NK_KEY_DEL, glfwGetKey(window_, GLFW_KEY_DELETE) == GLFW_PRESS);
-	nk_input_key(ctx, NK_KEY_ENTER, glfwGetKey(window_, GLFW_KEY_ENTER) == GLFW_PRESS);
-	nk_input_key(ctx, NK_KEY_TAB, glfwGetKey(window_, GLFW_KEY_TAB) == GLFW_PRESS);
-	nk_input_key(ctx, NK_KEY_BACKSPACE, glfwGetKey(window_, GLFW_KEY_BACKSPACE) == GLFW_PRESS);
-	nk_input_key(ctx, NK_KEY_UP, glfwGetKey(window_, GLFW_KEY_UP) == GLFW_PRESS);
-	nk_input_key(ctx, NK_KEY_DOWN, glfwGetKey(window_, GLFW_KEY_DOWN) == GLFW_PRESS);
-	nk_input_key(ctx, NK_KEY_TEXT_START, glfwGetKey(window_, GLFW_KEY_HOME) == GLFW_PRESS);
-	nk_input_key(ctx, NK_KEY_TEXT_END, glfwGetKey(window_, GLFW_KEY_END) == GLFW_PRESS);
-	nk_input_key(ctx, NK_KEY_SCROLL_START, glfwGetKey(window_, GLFW_KEY_HOME) == GLFW_PRESS);
-	nk_input_key(ctx, NK_KEY_SCROLL_END, glfwGetKey(window_, GLFW_KEY_END) == GLFW_PRESS);
-	nk_input_key(ctx, NK_KEY_SCROLL_DOWN, glfwGetKey(window_, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS);
-	nk_input_key(ctx, NK_KEY_SCROLL_UP, glfwGetKey(window_, GLFW_KEY_PAGE_UP) == GLFW_PRESS);
-	nk_input_key(ctx, NK_KEY_SHIFT, glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(window_, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS);
+	// Update keys (without repeating)
+	updateKeys(nuklearGlfwKeys, numKeys);
 
-	if (glfwGetKey(window_, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(window_, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
-	{
-		nk_input_key(ctx, NK_KEY_COPY, glfwGetKey(window_, GLFW_KEY_C) == GLFW_PRESS);
-		nk_input_key(ctx, NK_KEY_PASTE, glfwGetKey(window_, GLFW_KEY_V) == GLFW_PRESS);
-		nk_input_key(ctx, NK_KEY_CUT, glfwGetKey(window_, GLFW_KEY_X) == GLFW_PRESS);
-		nk_input_key(ctx, NK_KEY_TEXT_UNDO, glfwGetKey(window_, GLFW_KEY_Z) == GLFW_PRESS);
-		nk_input_key(ctx, NK_KEY_TEXT_REDO, glfwGetKey(window_, GLFW_KEY_R) == GLFW_PRESS);
-		nk_input_key(ctx, NK_KEY_TEXT_WORD_LEFT, glfwGetKey(window_, GLFW_KEY_LEFT) == GLFW_PRESS);
-		nk_input_key(ctx, NK_KEY_TEXT_WORD_RIGHT, glfwGetKey(window_, GLFW_KEY_RIGHT) == GLFW_PRESS);
-		nk_input_key(ctx, NK_KEY_TEXT_LINE_START, glfwGetKey(window_, GLFW_KEY_B) == GLFW_PRESS);
-		nk_input_key(ctx, NK_KEY_TEXT_LINE_END, glfwGetKey(window_, GLFW_KEY_E) == GLFW_PRESS);
-	}
+	const bool ctrlIsPressed = glfwGetKey(window_, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(window_, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS;
+	nk_input_key(ctx, NK_KEY_CTRL, ctrlIsPressed);
+
+	if (ctrlIsPressed)
+		updateKeys(nuklearGlfwCtrlKeys, numCtrlKeys);
 	else
-	{
-		nk_input_key(ctx, NK_KEY_LEFT, glfwGetKey(window_, GLFW_KEY_LEFT) == GLFW_PRESS);
-		nk_input_key(ctx, NK_KEY_RIGHT, glfwGetKey(window_, GLFW_KEY_RIGHT) == GLFW_PRESS);
-		nk_input_key(ctx, NK_KEY_COPY, 0);
-		nk_input_key(ctx, NK_KEY_PASTE, 0);
-		nk_input_key(ctx, NK_KEY_CUT, 0);
-		nk_input_key(ctx, NK_KEY_SHIFT, 0);
-	}
+		updateKeys(nuklearGlfwNonCtrlKeys, numNonCtrlKeys);
 
 	glfwGetCursorPos(window_, &x, &y);
 	nk_input_motion(ctx, static_cast<int>(x), static_cast<int>(y));
@@ -124,8 +153,15 @@ void NuklearGlfwInput::newFrame()
 	scroll_ = nk_vec2(0.0f, 0.0f);
 }
 
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
 void NuklearGlfwInput::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
+	if (prevUserCallbackMousebutton != nullptr && window == window_)
+		prevUserCallbackMousebutton(window, button, action, mods);
+
 	if (inputEnabled_ == false)
 		return;
 
@@ -150,6 +186,9 @@ void NuklearGlfwInput::mouseButtonCallback(GLFWwindow *window, int button, int a
 
 void NuklearGlfwInput::scrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
+	if (prevUserCallbackScroll != nullptr && window == window_)
+		prevUserCallbackScroll(window, xoffset, yoffset);
+
 	if (inputEnabled_ == false)
 		return;
 
@@ -159,16 +198,42 @@ void NuklearGlfwInput::scrollCallback(GLFWwindow *window, double xoffset, double
 
 void NuklearGlfwInput::charCallback(GLFWwindow *window, unsigned int c)
 {
+	if (prevUserCallbackChar != nullptr && window == window_)
+		prevUserCallbackChar(window, c);
+
 	if (inputEnabled_ == false)
 		return;
 
 	if (textLength_ < NK_GLFW_TEXT_MAX)
 		text_[textLength_++] = c;
+	text_[textLength_] = '\0';
 }
 
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
+void NuklearGlfwInput::installCallbacks(GLFWwindow *window)
+{
+	ASSERT_MSG(installedCallbacks_ == false, "Callbacks already installed!");
+	ASSERT(window_ == window);
+
+	prevUserCallbackMousebutton = glfwSetMouseButtonCallback(window, mouseButtonCallback);
+	prevUserCallbackScroll = glfwSetScrollCallback(window, scrollCallback);
+	prevUserCallbackChar = glfwSetCharCallback(window, charCallback);
+	installedCallbacks_ = true;
+}
+
+void NuklearGlfwInput::restoreCallbacks(GLFWwindow *window)
+{
+	ASSERT_MSG(installedCallbacks_ == true, "Callbacks not installed!");
+	ASSERT(window_ == window);
+
+	glfwSetMouseButtonCallback(window, prevUserCallbackMousebutton);
+	glfwSetScrollCallback(window, prevUserCallbackScroll);
+	glfwSetCharCallback(window, prevUserCallbackChar);
+
+	installedCallbacks_ = false;
+	prevUserCallbackMousebutton = nullptr;
+	prevUserCallbackScroll = nullptr;
+	prevUserCallbackChar = nullptr;
+}
 
 void NuklearGlfwInput::clipboardPaste(nk_handle usr, struct nk_text_edit *edit)
 {
@@ -181,13 +246,23 @@ void NuklearGlfwInput::clipboardCopy(nk_handle usr, const char *text, int len)
 {
 	if (len == 0)
 		return;
+	glfwSetClipboardString(window_, text);
+}
 
-	nctl::UniquePtr<char[]> string = nctl::makeUnique<char[]>(len + 1);
-	if (string == nullptr)
-		return;
-	memcpy(string.get(), text, static_cast<size_t>(len));
-	string[len] = '\0';
-	glfwSetClipboardString(window_, string.get());
+void NuklearGlfwInput::updateKeys(const int keyMap[], unsigned int numKeys)
+{
+	nk_context *ctx = &NuklearContext::ctx_;
+	for (unsigned int i = 0; i < numKeys; i += 2)
+	{
+		const int nuklearKey = keyMap[i];
+		const int glfwKey = keyMap[i + 1];
+		const bool keyIsPressed = glfwGetKey(window_, glfwKey) == GLFW_PRESS;
+		if (keys_[nuklearKey] != keyIsPressed)
+		{
+			nk_input_key(ctx, static_cast<nk_keys>(nuklearKey), keyIsPressed);
+			keys_[nuklearKey] = keyIsPressed;
+		}
+	}
 }
 
 }

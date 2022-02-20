@@ -84,7 +84,7 @@ AndroidInputManager::AndroidInputManager(struct android_app *state)
 	checkConnectedJoysticks();
 
 #ifdef WITH_IMGUI
-	ImGuiAndroidInput::init();
+	ImGuiAndroidInput::init(state->window);
 #endif
 
 #ifdef WITH_NUKLEAR

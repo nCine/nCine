@@ -133,9 +133,6 @@ void ImGuiDrawing::newFrame()
 	}
 
 	ImGui::NewFrame();
-#if defined(__ANDROID__)
-	ImGuiAndroidInput::postNewFrame();
-#endif
 }
 
 void ImGuiDrawing::endFrame(RenderQueue &renderQueue)
@@ -240,7 +237,7 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 				continue;
 
 			// Apply scissor/clipping rectangle (Y is inverted in OpenGL)
-			currCmd.setScissor(static_cast<GLint>(clipMin.x), static_cast<GLint>(fbHeight - clipMax.y),
+			currCmd.setScissor(static_cast<GLint>(clipMin.x), static_cast<GLint>(static_cast<float>(fbHeight) - clipMax.y),
 			                   static_cast<GLsizei>(clipMax.x - clipMin.x), static_cast<GLsizei>(clipMax.y - clipMin.y));
 
 			if (cmdIdx > 0)
@@ -318,7 +315,7 @@ void ImGuiDrawing::draw()
 				continue;
 
 			// Apply scissor/clipping rectangle (Y is inverted in OpenGL)
-			GLScissorTest::enable(static_cast<GLint>(clipMin.x), static_cast<GLint>(fbHeight - clipMax.y),
+			GLScissorTest::enable(static_cast<GLint>(clipMin.x), static_cast<GLint>(static_cast<float>(fbHeight) - clipMax.y),
 			                      static_cast<GLsizei>(clipMax.x - clipMin.x), static_cast<GLsizei>(clipMax.y - clipMin.y));
 
 			// Bind texture, Draw

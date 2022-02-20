@@ -187,13 +187,7 @@ void NuklearSdlInput::clipboardCopy(nk_handle usr, const char *text, int len)
 {
 	if (len == 0)
 		return;
-
-	nctl::UniquePtr<char[]> string = nctl::makeUnique<char[]>(len + 1);
-	if (string == nullptr)
-		return;
-	memcpy(string.get(), text, static_cast<size_t>(len));
-	string[len] = '\0';
-	SDL_SetClipboardText(string.get());
+	SDL_SetClipboardText(text);
 }
 
 }

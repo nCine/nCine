@@ -9,34 +9,27 @@
 	#define GLFW_EXPOSE_NATIVE_WIN32
 	#include <GLFW/glfw3native.h> // for glfwGetWin32Window
 #endif
-
-// clang-format off
-#define GLFW_HAS_WINDOW_TOPMOST        (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3200) // 3.2+ GLFW_FLOATING
-#define GLFW_HAS_WINDOW_HOVERED        (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300) // 3.3+ GLFW_HOVERED
-#define GLFW_HAS_WINDOW_ALPHA          (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300) // 3.3+ glfwSetWindowOpacity
-#define GLFW_HAS_PER_MONITOR_DPI       (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300) // 3.3+ glfwGetMonitorContentScale
-#define GLFW_HAS_VULKAN                (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3200) // 3.2+ glfwCreateWindowSurface
-#define GLFW_HAS_NEW_CURSORS           (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3400) // 3.4+ GLFW_RESIZE_ALL_CURSOR, GLFW_RESIZE_NESW_CURSOR, GLFW_RESIZE_NWSE_CURSOR, GLFW_NOT_ALLOWED_CURSOR
-// clang-format on
+#ifdef GLFW_RESIZE_NESW_CURSOR // Let's be nice to people who pulled GLFW between 2019-04-16 (3.4 define) and 2019-11-29 (cursors defines) // FIXME: Remove when GLFW 3.4 is released?
+	#define GLFW_HAS_NEW_CURSORS (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3400) // 3.4+ GLFW_RESIZE_ALL_CURSOR, GLFW_RESIZE_NESW_CURSOR, GLFW_RESIZE_NWSE_CURSOR, GLFW_NOT_ALLOWED_CURSOR
+#else
+	#define GLFW_HAS_NEW_CURSORS (0)
+#endif
+#define GLFW_HAS_GAMEPAD_API (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300) // 3.3+ glfwGetGamepadState() new api
+#define GLFW_HAS_GET_KEY_NAME (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3200) // 3.2+ glfwGetKeyName()
 
 namespace ncine {
 
-///////////////////////////////////////////////////////////
-// STATIC DEFINITIONS
-///////////////////////////////////////////////////////////
-
-bool ImGuiGlfwInput::inputEnabled_ = true;
-GLFWwindow *ImGuiGlfwInput::window_ = nullptr;
-GLFWwindow *ImGuiGlfwInput::mouseWindow_ = nullptr;
-double ImGuiGlfwInput::time_ = 0.0;
-bool ImGuiGlfwInput::mouseJustPressed_[ImGuiMouseButton_COUNT] = {};
-GLFWcursor *ImGuiGlfwInput::mouseCursors_[ImGuiMouseCursor_COUNT] = {};
-
-///////////////////////////////////////////////////////////
-// PUBLIC FUNCTIONS
-///////////////////////////////////////////////////////////
-
 namespace {
+
+	// Chain GLFW callbacks: our callbacks will call the user's previously installed callbacks, if any.
+	GLFWwindowfocusfun prevUserCallbackWindowFocus = nullptr;
+	GLFWcursorposfun prevUserCallbackCursorPos = nullptr;
+	GLFWcursorenterfun prevUserCallbackCursorEnter = nullptr;
+	GLFWmousebuttonfun prevUserCallbackMousebutton = nullptr;
+	GLFWscrollfun prevUserCallbackScroll = nullptr;
+	GLFWkeyfun prevUserCallbackKey = nullptr;
+	GLFWcharfun prevUserCallbackChar = nullptr;
+	GLFWmonitorfun prevUserCallbackMonitor = nullptr;
 
 	const char *clipboardText(void *userData)
 	{
@@ -48,9 +41,181 @@ namespace {
 		glfwSetClipboardString(reinterpret_cast<GLFWwindow *>(userData), text);
 	}
 
+	ImGuiKey glfwKeyToImGuiKey(int key)
+	{
+		switch (key)
+		{
+			case GLFW_KEY_TAB: return ImGuiKey_Tab;
+			case GLFW_KEY_LEFT: return ImGuiKey_LeftArrow;
+			case GLFW_KEY_RIGHT: return ImGuiKey_RightArrow;
+			case GLFW_KEY_UP: return ImGuiKey_UpArrow;
+			case GLFW_KEY_DOWN: return ImGuiKey_DownArrow;
+			case GLFW_KEY_PAGE_UP: return ImGuiKey_PageUp;
+			case GLFW_KEY_PAGE_DOWN: return ImGuiKey_PageDown;
+			case GLFW_KEY_HOME: return ImGuiKey_Home;
+			case GLFW_KEY_END: return ImGuiKey_End;
+			case GLFW_KEY_INSERT: return ImGuiKey_Insert;
+			case GLFW_KEY_DELETE: return ImGuiKey_Delete;
+			case GLFW_KEY_BACKSPACE: return ImGuiKey_Backspace;
+			case GLFW_KEY_SPACE: return ImGuiKey_Space;
+			case GLFW_KEY_ENTER: return ImGuiKey_Enter;
+			case GLFW_KEY_ESCAPE: return ImGuiKey_Escape;
+			case GLFW_KEY_APOSTROPHE: return ImGuiKey_Apostrophe;
+			case GLFW_KEY_COMMA: return ImGuiKey_Comma;
+			case GLFW_KEY_MINUS: return ImGuiKey_Minus;
+			case GLFW_KEY_PERIOD: return ImGuiKey_Period;
+			case GLFW_KEY_SLASH: return ImGuiKey_Slash;
+			case GLFW_KEY_SEMICOLON: return ImGuiKey_Semicolon;
+			case GLFW_KEY_EQUAL: return ImGuiKey_Equal;
+			case GLFW_KEY_LEFT_BRACKET: return ImGuiKey_LeftBracket;
+			case GLFW_KEY_BACKSLASH: return ImGuiKey_Backslash;
+			case GLFW_KEY_RIGHT_BRACKET: return ImGuiKey_RightBracket;
+			case GLFW_KEY_GRAVE_ACCENT: return ImGuiKey_GraveAccent;
+			case GLFW_KEY_CAPS_LOCK: return ImGuiKey_CapsLock;
+			case GLFW_KEY_SCROLL_LOCK: return ImGuiKey_ScrollLock;
+			case GLFW_KEY_NUM_LOCK: return ImGuiKey_NumLock;
+			case GLFW_KEY_PRINT_SCREEN: return ImGuiKey_PrintScreen;
+			case GLFW_KEY_PAUSE: return ImGuiKey_Pause;
+			case GLFW_KEY_KP_0: return ImGuiKey_Keypad0;
+			case GLFW_KEY_KP_1: return ImGuiKey_Keypad1;
+			case GLFW_KEY_KP_2: return ImGuiKey_Keypad2;
+			case GLFW_KEY_KP_3: return ImGuiKey_Keypad3;
+			case GLFW_KEY_KP_4: return ImGuiKey_Keypad4;
+			case GLFW_KEY_KP_5: return ImGuiKey_Keypad5;
+			case GLFW_KEY_KP_6: return ImGuiKey_Keypad6;
+			case GLFW_KEY_KP_7: return ImGuiKey_Keypad7;
+			case GLFW_KEY_KP_8: return ImGuiKey_Keypad8;
+			case GLFW_KEY_KP_9: return ImGuiKey_Keypad9;
+			case GLFW_KEY_KP_DECIMAL: return ImGuiKey_KeypadDecimal;
+			case GLFW_KEY_KP_DIVIDE: return ImGuiKey_KeypadDivide;
+			case GLFW_KEY_KP_MULTIPLY: return ImGuiKey_KeypadMultiply;
+			case GLFW_KEY_KP_SUBTRACT: return ImGuiKey_KeypadSubtract;
+			case GLFW_KEY_KP_ADD: return ImGuiKey_KeypadAdd;
+			case GLFW_KEY_KP_ENTER: return ImGuiKey_KeypadEnter;
+			case GLFW_KEY_KP_EQUAL: return ImGuiKey_KeypadEqual;
+			case GLFW_KEY_LEFT_SHIFT: return ImGuiKey_LeftShift;
+			case GLFW_KEY_LEFT_CONTROL: return ImGuiKey_LeftCtrl;
+			case GLFW_KEY_LEFT_ALT: return ImGuiKey_LeftAlt;
+			case GLFW_KEY_LEFT_SUPER: return ImGuiKey_LeftSuper;
+			case GLFW_KEY_RIGHT_SHIFT: return ImGuiKey_RightShift;
+			case GLFW_KEY_RIGHT_CONTROL: return ImGuiKey_RightCtrl;
+			case GLFW_KEY_RIGHT_ALT: return ImGuiKey_RightAlt;
+			case GLFW_KEY_RIGHT_SUPER: return ImGuiKey_RightSuper;
+			case GLFW_KEY_MENU: return ImGuiKey_Menu;
+			case GLFW_KEY_0: return ImGuiKey_0;
+			case GLFW_KEY_1: return ImGuiKey_1;
+			case GLFW_KEY_2: return ImGuiKey_2;
+			case GLFW_KEY_3: return ImGuiKey_3;
+			case GLFW_KEY_4: return ImGuiKey_4;
+			case GLFW_KEY_5: return ImGuiKey_5;
+			case GLFW_KEY_6: return ImGuiKey_6;
+			case GLFW_KEY_7: return ImGuiKey_7;
+			case GLFW_KEY_8: return ImGuiKey_8;
+			case GLFW_KEY_9: return ImGuiKey_9;
+			case GLFW_KEY_A: return ImGuiKey_A;
+			case GLFW_KEY_B: return ImGuiKey_B;
+			case GLFW_KEY_C: return ImGuiKey_C;
+			case GLFW_KEY_D: return ImGuiKey_D;
+			case GLFW_KEY_E: return ImGuiKey_E;
+			case GLFW_KEY_F: return ImGuiKey_F;
+			case GLFW_KEY_G: return ImGuiKey_G;
+			case GLFW_KEY_H: return ImGuiKey_H;
+			case GLFW_KEY_I: return ImGuiKey_I;
+			case GLFW_KEY_J: return ImGuiKey_J;
+			case GLFW_KEY_K: return ImGuiKey_K;
+			case GLFW_KEY_L: return ImGuiKey_L;
+			case GLFW_KEY_M: return ImGuiKey_M;
+			case GLFW_KEY_N: return ImGuiKey_N;
+			case GLFW_KEY_O: return ImGuiKey_O;
+			case GLFW_KEY_P: return ImGuiKey_P;
+			case GLFW_KEY_Q: return ImGuiKey_Q;
+			case GLFW_KEY_R: return ImGuiKey_R;
+			case GLFW_KEY_S: return ImGuiKey_S;
+			case GLFW_KEY_T: return ImGuiKey_T;
+			case GLFW_KEY_U: return ImGuiKey_U;
+			case GLFW_KEY_V: return ImGuiKey_V;
+			case GLFW_KEY_W: return ImGuiKey_W;
+			case GLFW_KEY_X: return ImGuiKey_X;
+			case GLFW_KEY_Y: return ImGuiKey_Y;
+			case GLFW_KEY_Z: return ImGuiKey_Z;
+			case GLFW_KEY_F1: return ImGuiKey_F1;
+			case GLFW_KEY_F2: return ImGuiKey_F2;
+			case GLFW_KEY_F3: return ImGuiKey_F3;
+			case GLFW_KEY_F4: return ImGuiKey_F4;
+			case GLFW_KEY_F5: return ImGuiKey_F5;
+			case GLFW_KEY_F6: return ImGuiKey_F6;
+			case GLFW_KEY_F7: return ImGuiKey_F7;
+			case GLFW_KEY_F8: return ImGuiKey_F8;
+			case GLFW_KEY_F9: return ImGuiKey_F9;
+			case GLFW_KEY_F10: return ImGuiKey_F10;
+			case GLFW_KEY_F11: return ImGuiKey_F11;
+			case GLFW_KEY_F12: return ImGuiKey_F12;
+			default: return ImGuiKey_None;
+		}
+	}
+
+	void updateKeyModifiers(int mods)
+	{
+		ImGuiIO &io = ImGui::GetIO();
+		io.AddKeyEvent(ImGuiKey_ModCtrl, (mods & GLFW_MOD_CONTROL) != 0);
+		io.AddKeyEvent(ImGuiKey_ModShift, (mods & GLFW_MOD_SHIFT) != 0);
+		io.AddKeyEvent(ImGuiKey_ModAlt, (mods & GLFW_MOD_ALT) != 0);
+		io.AddKeyEvent(ImGuiKey_ModSuper, (mods & GLFW_MOD_SUPER) != 0);
+	}
+
+	int translateUntranslatedKey(int key, int scancode)
+	{
+#if GLFW_HAS_GET_KEY_NAME && !defined(__EMSCRIPTEN__)
+		// GLFW 3.1+ attempts to "untranslate" keys, which goes the opposite of what every other framework does, making using lettered shortcuts difficult.
+		// (It had reasons to do so: namely GLFW is/was more likely to be used for WASD-type game controls rather than lettered shortcuts, but IHMO the 3.1 change could have been done differently)
+		// See https://github.com/glfw/glfw/issues/1502 for details.
+		// Adding a workaround to undo this (so our keys are translated->untranslated->translated, likely a lossy process).
+		// This won't cover edge cases but this is at least going to cover common cases.
+		if (key >= GLFW_KEY_KP_0 && key <= GLFW_KEY_KP_EQUAL)
+			return key;
+		const char *keyName = glfwGetKeyName(key, scancode);
+		if (keyName && keyName[0] != 0 && keyName[1] == 0)
+		{
+			const char charNames[] = "`-=[]\\,;\'./";
+			const int charKeys[] = { GLFW_KEY_GRAVE_ACCENT, GLFW_KEY_MINUS, GLFW_KEY_EQUAL, GLFW_KEY_LEFT_BRACKET, GLFW_KEY_RIGHT_BRACKET, GLFW_KEY_BACKSLASH, GLFW_KEY_COMMA, GLFW_KEY_SEMICOLON, GLFW_KEY_APOSTROPHE, GLFW_KEY_PERIOD, GLFW_KEY_SLASH, 0 };
+			IM_ASSERT(IM_ARRAYSIZE(charNames) == IM_ARRAYSIZE(charKeys));
+			if (keyName[0] >= '0' && keyName[0] <= '9')
+				key = GLFW_KEY_0 + (keyName[0] - '0');
+			else if (keyName[0] >= 'A' && keyName[0] <= 'Z')
+				key = GLFW_KEY_A + (keyName[0] - 'A');
+			else if (const char *p = strchr(charNames, keyName[0]))
+				key = charKeys[p - charNames];
+		}
+#else
+		IM_UNUSED(scancode);
+#endif
+		return key;
+	}
+
+	float saturate(float v)
+	{
+		return (v < 0.0f) ? 0.0f : (v > 1.0f) ? 1.0f : v;
+	}
+
 }
 
-void ImGuiGlfwInput::init(GLFWwindow *window)
+///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
+bool ImGuiGlfwInput::inputEnabled_ = true;
+GLFWwindow *ImGuiGlfwInput::window_ = nullptr;
+GLFWwindow *ImGuiGlfwInput::mouseWindow_ = nullptr;
+double ImGuiGlfwInput::time_ = 0.0;
+GLFWcursor *ImGuiGlfwInput::mouseCursors_[ImGuiMouseCursor_COUNT] = {};
+ImVec2 ImGuiGlfwInput::lastValidMousePos_ = { FLT_MAX, FLT_MAX };
+bool ImGuiGlfwInput::installedCallbacks_ = false;
+
+///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -58,59 +223,27 @@ void ImGuiGlfwInput::init(GLFWwindow *window)
 	ImGuiIO &io = ImGui::GetIO();
 
 	// Setup backend capabilities flags
+	io.BackendPlatformName = "nCine_GLFW";
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
-	io.BackendPlatformName = "nCine_GLFW";
 
 	window_ = window;
 	time_ = 0.0;
-
-	// Keyboard mapping. Dear ImGui will use those indices to peek into the io.KeysDown[] array.
-	io.KeyMap[ImGuiKey_Tab] = GLFW_KEY_TAB;
-	io.KeyMap[ImGuiKey_LeftArrow] = GLFW_KEY_LEFT;
-	io.KeyMap[ImGuiKey_RightArrow] = GLFW_KEY_RIGHT;
-	io.KeyMap[ImGuiKey_UpArrow] = GLFW_KEY_UP;
-	io.KeyMap[ImGuiKey_DownArrow] = GLFW_KEY_DOWN;
-	io.KeyMap[ImGuiKey_PageUp] = GLFW_KEY_PAGE_UP;
-	io.KeyMap[ImGuiKey_PageDown] = GLFW_KEY_PAGE_DOWN;
-	io.KeyMap[ImGuiKey_Home] = GLFW_KEY_HOME;
-	io.KeyMap[ImGuiKey_End] = GLFW_KEY_END;
-	io.KeyMap[ImGuiKey_Insert] = GLFW_KEY_INSERT;
-	io.KeyMap[ImGuiKey_Delete] = GLFW_KEY_DELETE;
-	io.KeyMap[ImGuiKey_Backspace] = GLFW_KEY_BACKSPACE;
-	io.KeyMap[ImGuiKey_Space] = GLFW_KEY_SPACE;
-	io.KeyMap[ImGuiKey_Enter] = GLFW_KEY_ENTER;
-	io.KeyMap[ImGuiKey_Escape] = GLFW_KEY_ESCAPE;
-#if IMGUI_VERSION_NUM > 18600
-	io.KeyMap[ImGuiKey_KeypadEnter] = GLFW_KEY_KP_ENTER;
-#else
-	io.KeyMap[ImGuiKey_KeyPadEnter] = GLFW_KEY_KP_ENTER;
-#endif
-	io.KeyMap[ImGuiKey_A] = GLFW_KEY_A;
-	io.KeyMap[ImGuiKey_C] = GLFW_KEY_C;
-	io.KeyMap[ImGuiKey_V] = GLFW_KEY_V;
-	io.KeyMap[ImGuiKey_X] = GLFW_KEY_X;
-	io.KeyMap[ImGuiKey_Y] = GLFW_KEY_Y;
-	io.KeyMap[ImGuiKey_Z] = GLFW_KEY_Z;
 
 	io.SetClipboardTextFn = setClipboardText;
 	io.GetClipboardTextFn = clipboardText;
 	io.ClipboardUserData = window_;
 
-#ifdef IMGUI_HAS_DOCK
-	// Our mouse update function expect PlatformHandle to be filled for the main viewport
-	ImGuiViewport *main_viewport = ImGui::GetMainViewport();
-	main_viewport->PlatformHandle = reinterpret_cast<void *>(window);
-#endif
-
+	// Set platform dependent data in viewport
 #if defined(_WIN32)
-	#ifdef IMGUI_HAS_DOCK
-	main_viewport->PlatformHandleRaw = glfwGetWin32Window(window);
-	#else
-	io.ImeWindowHandle = reinterpret_cast<void *>(glfwGetWin32Window(window));
-	#endif
+	ImGui::GetMainViewport()->PlatformHandleRaw = reinterpret_cast<void *>(glfwGetWin32Window(window));
 #endif
 
+	// Create mouse cursors
+	// (By design, on X11 cursors are user configurable and some cursors may be missing. When a cursor doesn't exist,
+	// GLFW will emit an error which will often be printed by the app, so we temporarily disable error reporting.
+	// Missing cursors will return NULL and our _UpdateMouseCursor() function will use the Arrow cursor instead.)
+	const GLFWerrorfun prevErrorCallback = glfwSetErrorCallback(nullptr);
 	mouseCursors_[ImGuiMouseCursor_Arrow] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
 	mouseCursors_[ImGuiMouseCursor_TextInput] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
 	mouseCursors_[ImGuiMouseCursor_ResizeNS] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
@@ -127,17 +260,23 @@ void ImGuiGlfwInput::init(GLFWwindow *window)
 	mouseCursors_[ImGuiMouseCursor_ResizeNWSE] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
 	mouseCursors_[ImGuiMouseCursor_NotAllowed] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
 #endif
+	glfwSetErrorCallback(prevErrorCallback);
+
+	// Chain GLFW callbacks: our callbacks will call the user's previously installed callbacks, if any.
+	if (withCallbacks)
+		installCallbacks(window);
 }
 
 void ImGuiGlfwInput::shutdown()
 {
-	for (ImGuiMouseCursor i = 0; i < ImGuiMouseCursor_COUNT; i++)
-	{
-		glfwDestroyCursor(mouseCursors_[i]);
-		mouseCursors_[i] = nullptr;
-	}
-
 	ImGuiIO &io = ImGui::GetIO();
+
+	if (installedCallbacks_)
+		restoreCallbacks(window_);
+
+	for (ImGuiMouseCursor i = 0; i < ImGuiMouseCursor_COUNT; i++)
+		glfwDestroyCursor(mouseCursors_[i]);
+
 	io.BackendPlatformName = nullptr;
 
 	ImGui::DestroyContext();
@@ -162,73 +301,99 @@ void ImGuiGlfwInput::newFrame()
 	io.DeltaTime = time_ > 0.0 ? static_cast<float>(currentTime - time_) : static_cast<float>(1.0f / 60.0f);
 	time_ = currentTime;
 
-	updateMousePosAndButtons();
+	updateMouseData();
 	updateMouseCursor();
 
 	// Update game controllers (if enabled and available)
 	updateGamepads();
 }
 
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
 void ImGuiGlfwInput::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
+	if (prevUserCallbackMousebutton != nullptr && window == window_)
+		prevUserCallbackMousebutton(window, button, action, mods);
+
 	if (inputEnabled_ == false)
 		return;
 
-	if (action == GLFW_PRESS && button >= 0 && button < IM_ARRAYSIZE(mouseJustPressed_))
-		mouseJustPressed_[button] = true;
+	updateKeyModifiers(mods);
+	ImGuiIO &io = ImGui::GetIO();
+	if (button >= 0 && button < ImGuiMouseButton_COUNT)
+		io.AddMouseButtonEvent(button, action == GLFW_PRESS);
 }
 
 void ImGuiGlfwInput::scrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
+	if (prevUserCallbackScroll != nullptr && window == window_)
+		prevUserCallbackScroll(window, xoffset, yoffset);
+
 	if (inputEnabled_ == false)
 		return;
 
 	ImGuiIO &io = ImGui::GetIO();
-	io.MouseWheelH += static_cast<float>(xoffset);
-	io.MouseWheel += static_cast<float>(yoffset);
+	io.AddMouseWheelEvent(static_cast<float>(xoffset), static_cast<float>(yoffset));
 }
 
-void ImGuiGlfwInput::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+void ImGuiGlfwInput::keyCallback(GLFWwindow *window, int keycode, int scancode, int action, int mods)
 {
+	if (prevUserCallbackKey != nullptr && window == window_)
+		prevUserCallbackKey(window, keycode, scancode, action, mods);
+
 	if (inputEnabled_ == false)
 		return;
 
-	ImGuiIO &io = ImGui::GetIO();
-	if (key >= 0 && key < IM_ARRAYSIZE(io.KeysDown))
-	{
-		if (action == GLFW_PRESS)
-			io.KeysDown[key] = true;
-		if (action == GLFW_RELEASE)
-			io.KeysDown[key] = false;
-	}
+	updateKeyModifiers(mods);
 
-	// Modifiers are not reliable across systems
-	io.KeyCtrl = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
-	io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
-	io.KeyAlt = io.KeysDown[GLFW_KEY_LEFT_ALT] || io.KeysDown[GLFW_KEY_RIGHT_ALT];
-#ifdef _WIN32
-	io.KeySuper = false;
-#else
-	io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];
-#endif
+	keycode = translateUntranslatedKey(keycode, scancode);
+
+	ImGuiIO &io = ImGui::GetIO();
+	ImGuiKey imguiKey = glfwKeyToImGuiKey(keycode);
+	io.AddKeyEvent(imguiKey, (action == GLFW_PRESS));
+	io.SetKeyEventNativeData(imguiKey, keycode, scancode); // To support legacy indexing (<1.87 user code)
 }
 
 void ImGuiGlfwInput::windowFocusCallback(GLFWwindow *window, int focused)
 {
+	if (prevUserCallbackWindowFocus != nullptr && window == window_)
+		prevUserCallbackWindowFocus(window, focused);
+
 	ImGuiIO &io = ImGui::GetIO();
 	io.AddFocusEvent(focused != 0);
 }
 
+void ImGuiGlfwInput::cursorPosCallback(GLFWwindow *window, double x, double y)
+{
+	if (prevUserCallbackCursorPos != nullptr && window == window_)
+		prevUserCallbackCursorPos(window, x, y);
+
+	if (inputEnabled_ == false)
+		return;
+
+	ImGuiIO &io = ImGui::GetIO();
+	io.AddMousePosEvent(static_cast<float>(x), static_cast<float>(y));
+	lastValidMousePos_ = ImVec2(static_cast<float>(x), static_cast<float>(y));
+}
+
 void ImGuiGlfwInput::cursorEnterCallback(GLFWwindow *window, int entered)
 {
+	if (prevUserCallbackCursorEnter != nullptr && window == window_)
+		prevUserCallbackCursorEnter(window, entered);
+
 	if (entered)
 		mouseWindow_ = window;
 	if (!entered && mouseWindow_ == window)
 		mouseWindow_ = nullptr;
 }
 
-void ImGuiGlfwInput::charCallback(GLFWwindow *, unsigned int c)
+void ImGuiGlfwInput::charCallback(GLFWwindow *window, unsigned int c)
 {
+	if (prevUserCallbackChar != nullptr && window == window_)
+		prevUserCallbackChar(window, c);
+
 	if (inputEnabled_ == false)
 		return;
 
@@ -236,43 +401,78 @@ void ImGuiGlfwInput::charCallback(GLFWwindow *, unsigned int c)
 	io.AddInputCharacter(c);
 }
 
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
+void ImGuiGlfwInput::monitorCallback(GLFWmonitor *monitor, int event)
+{
+	if (prevUserCallbackMonitor != nullptr)
+		prevUserCallbackMonitor(monitor, event);
 
-void ImGuiGlfwInput::updateMousePosAndButtons()
+	// Unused in 'master' branch but 'docking' branch will use this, so we declare it ahead of it so if you have to install callbacks you can install this one too.
+}
+
+void ImGuiGlfwInput::installCallbacks(GLFWwindow *window)
+{
+	IM_ASSERT(installedCallbacks_ == false && "Callbacks already installed!");
+	IM_ASSERT(window_ == window);
+
+	prevUserCallbackWindowFocus = glfwSetWindowFocusCallback(window, windowFocusCallback);
+	prevUserCallbackCursorEnter = glfwSetCursorEnterCallback(window, cursorEnterCallback);
+	prevUserCallbackCursorPos = glfwSetCursorPosCallback(window, cursorPosCallback);
+	prevUserCallbackMousebutton = glfwSetMouseButtonCallback(window, mouseButtonCallback);
+	prevUserCallbackScroll = glfwSetScrollCallback(window, scrollCallback);
+	prevUserCallbackKey = glfwSetKeyCallback(window, keyCallback);
+	prevUserCallbackChar = glfwSetCharCallback(window, charCallback);
+	prevUserCallbackMonitor = glfwSetMonitorCallback(monitorCallback);
+	installedCallbacks_ = true;
+}
+
+void ImGuiGlfwInput::restoreCallbacks(GLFWwindow *window)
+{
+	IM_ASSERT(installedCallbacks_ == true && "Callbacks not installed!");
+	IM_ASSERT(window_ == window);
+
+	glfwSetWindowFocusCallback(window, prevUserCallbackWindowFocus);
+	glfwSetCursorEnterCallback(window, prevUserCallbackCursorEnter);
+	glfwSetCursorPosCallback(window, prevUserCallbackCursorPos);
+	glfwSetMouseButtonCallback(window, prevUserCallbackMousebutton);
+	glfwSetScrollCallback(window, prevUserCallbackScroll);
+	glfwSetKeyCallback(window, prevUserCallbackKey);
+	glfwSetCharCallback(window, prevUserCallbackChar);
+	glfwSetMonitorCallback(prevUserCallbackMonitor);
+
+	installedCallbacks_ = false;
+	prevUserCallbackWindowFocus = nullptr;
+	prevUserCallbackCursorEnter = nullptr;
+	prevUserCallbackCursorPos = nullptr;
+	prevUserCallbackMousebutton = nullptr;
+	prevUserCallbackScroll = nullptr;
+	prevUserCallbackKey = nullptr;
+	prevUserCallbackChar = nullptr;
+	prevUserCallbackMonitor = nullptr;
+}
+
+void ImGuiGlfwInput::updateMouseData()
 {
 	ImGuiIO &io = ImGui::GetIO();
 
-	const ImVec2 mousePosPrev = io.MousePos;
-	io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
-
-	// Update mouse buttons
-	// (if a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame)
-	for (int i = 0; i < IM_ARRAYSIZE(io.MouseDown); i++)
-	{
-		io.MouseDown[i] = mouseJustPressed_[i] || glfwGetMouseButton(window_, i) != 0;
-		mouseJustPressed_[i] = false;
-	}
-
 #ifdef __EMSCRIPTEN__
-	const bool focused = true;
+	const bool isAppFocused = true;
 #else
-	const bool focused = glfwGetWindowAttrib(window_, GLFW_FOCUSED) != 0;
+	const bool isAppFocused = glfwGetWindowAttrib(window_, GLFW_FOCUSED) != 0;
 #endif
-
-	GLFWwindow *mouseWindow = (mouseWindow_ == window_ || focused) ? window_ : nullptr;
-
-	// Set OS mouse position from Dear ImGui if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
-	if (io.WantSetMousePos && focused)
-		glfwSetCursorPos(window_, static_cast<double>(mousePosPrev.x), static_cast<double>(mousePosPrev.y));
-
-	// Set Dear ImGui mouse position from OS position
-	if (mouseWindow != nullptr)
+	if (isAppFocused)
 	{
-		double mouseX, mouseY;
-		glfwGetCursorPos(window_, &mouseX, &mouseY);
-		io.MousePos = ImVec2(static_cast<float>(mouseX), static_cast<float>(mouseY));
+		// (Optional) Set OS mouse position from Dear ImGui if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
+		if (io.WantSetMousePos)
+			glfwSetCursorPos(window_, static_cast<double>(io.MousePos.x), static_cast<double>(io.MousePos.y));
+
+		// (Optional) Fallback to provide mouse position when focused (ImGui_ImplGlfw_CursorPosCallback already provides this when hovered or captured)
+		if (isAppFocused && window_ == NULL)
+		{
+			double mouseX, mouseY;
+			glfwGetCursorPos(window_, &mouseX, &mouseY);
+			io.AddMousePosEvent(static_cast<float>(mouseX), static_cast<float>(mouseY));
+			lastValidMousePos_ = ImVec2(static_cast<float>(mouseX), static_cast<float>(mouseY));
+		}
 	}
 }
 
@@ -300,7 +500,6 @@ void ImGuiGlfwInput::updateMouseCursor()
 void ImGuiGlfwInput::updateGamepads()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	memset(io.NavInputs, 0, sizeof(io.NavInputs));
 	if ((io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) == 0)
 		return;
 
@@ -308,50 +507,58 @@ void ImGuiGlfwInput::updateGamepads()
 
 	if (joyMappedInput == false)
 	{
-		// Update gamepad inputs
-#define MAP_BUTTON(NAV_NO, BUTTON_NO) \
-	{ \
-		if (buttonsCount > BUTTON_NO && buttons[BUTTON_NO] == GLFW_PRESS) \
-			io.NavInputs[NAV_NO] = 1.0f; \
-	}
-
-#define MAP_ANALOG(NAV_NO, AXIS_NO, V0, V1) \
-	{ \
-		float v = (axesCount > AXIS_NO) ? axes[AXIS_NO] : V0; \
-		v = (v - V0) / (V1 - V0); \
-		if (v > 1.0f) \
-			v = 1.0f; \
-		if (io.NavInputs[NAV_NO] < v) \
-			io.NavInputs[NAV_NO] = v; \
-	}
-
+		io.BackendFlags &= ~ImGuiBackendFlags_HasGamepad;
+#if GLFW_HAS_GAMEPAD_API
+		GLFWgamepadstate gamepad;
+		if (!glfwGetGamepadState(GLFW_JOYSTICK_1, &gamepad))
+			return;
+		// clang-format off
+		#define MAP_BUTTON(KEY_NO, BUTTON_NO, _UNUSED)          do { io.AddKeyEvent(KEY_NO, gamepad.buttons[BUTTON_NO] != 0); } while (0)
+		#define MAP_ANALOG(KEY_NO, AXIS_NO, _UNUSED, V0, V1)    do { float v = gamepad.axes[AXIS_NO]; v = (v - V0) / (V1 - V0);\
+		                                                             io.AddKeyAnalogEvent(KEY_NO, v > 0.10f, saturate(v)); } while (0)
+		// clang-format on
+#else
 		int axesCount = 0, buttonsCount = 0;
 		const float *axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
 		const unsigned char *buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttonsCount);
-		MAP_BUTTON(ImGuiNavInput_Activate, 0) // Cross / A
-		MAP_BUTTON(ImGuiNavInput_Cancel, 1) // Circle / B
-		MAP_BUTTON(ImGuiNavInput_Menu, 2) // Square / X
-		MAP_BUTTON(ImGuiNavInput_Input, 3) // Triangle / Y
-		MAP_BUTTON(ImGuiNavInput_DpadLeft, 13) // D-Pad Left
-		MAP_BUTTON(ImGuiNavInput_DpadRight, 11) // D-Pad Right
-		MAP_BUTTON(ImGuiNavInput_DpadUp, 10) // D-Pad Up
-		MAP_BUTTON(ImGuiNavInput_DpadDown, 12) // D-Pad Down
-		MAP_BUTTON(ImGuiNavInput_FocusPrev, 4) // L1 / LB
-		MAP_BUTTON(ImGuiNavInput_FocusNext, 5) // R1 / RB
-		MAP_BUTTON(ImGuiNavInput_TweakSlow, 4) // L1 / LB
-		MAP_BUTTON(ImGuiNavInput_TweakFast, 5) // R1 / RB
-		MAP_ANALOG(ImGuiNavInput_LStickLeft, 0, -0.3f, -0.9f)
-		MAP_ANALOG(ImGuiNavInput_LStickRight, 0, +0.3f, +0.9f)
-		MAP_ANALOG(ImGuiNavInput_LStickUp, 1, +0.3f, +0.9f)
-		MAP_ANALOG(ImGuiNavInput_LStickDown, 1, -0.3f, -0.9f)
+		if (axesCount == 0 || buttonsCount == 0)
+			return;
+		// clang-format off
+		#define MAP_BUTTON(KEY_NO, _UNUSED, BUTTON_NO)          do { io.AddKeyEvent(KEY_NO, (buttonsCount > BUTTON_NO && buttons[BUTTON_NO] == GLFW_PRESS)); } while (0)
+		#define MAP_ANALOG(KEY_NO, _UNUSED, AXIS_NO, V0, V1)    do { float v = (axesCount > AXIS_NO) ? axes[AXIS_NO] : V0; v = (v - V0) / (V1 - V0);\
+		                                                             io.AddKeyAnalogEvent(KEY_NO, v > 0.10f, saturate(v)); } while (0)
+		// clang-format on
+#endif
+		io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
+		// clang-format off
+		MAP_BUTTON(ImGuiKey_GamepadStart,       GLFW_GAMEPAD_BUTTON_START,          7);
+		MAP_BUTTON(ImGuiKey_GamepadBack,        GLFW_GAMEPAD_BUTTON_BACK,           6);
+		MAP_BUTTON(ImGuiKey_GamepadFaceDown,    GLFW_GAMEPAD_BUTTON_A,              0);     // Xbox A, PS Cross
+		MAP_BUTTON(ImGuiKey_GamepadFaceRight,   GLFW_GAMEPAD_BUTTON_B,              1);     // Xbox B, PS Circle
+		MAP_BUTTON(ImGuiKey_GamepadFaceLeft,    GLFW_GAMEPAD_BUTTON_X,              2);     // Xbox X, PS Square
+		MAP_BUTTON(ImGuiKey_GamepadFaceUp,      GLFW_GAMEPAD_BUTTON_Y,              3);     // Xbox Y, PS Triangle
+		MAP_BUTTON(ImGuiKey_GamepadDpadLeft,    GLFW_GAMEPAD_BUTTON_DPAD_LEFT,      13);
+		MAP_BUTTON(ImGuiKey_GamepadDpadRight,   GLFW_GAMEPAD_BUTTON_DPAD_RIGHT,     11);
+		MAP_BUTTON(ImGuiKey_GamepadDpadUp,      GLFW_GAMEPAD_BUTTON_DPAD_UP,        10);
+		MAP_BUTTON(ImGuiKey_GamepadDpadDown,    GLFW_GAMEPAD_BUTTON_DPAD_DOWN,      12);
+		MAP_BUTTON(ImGuiKey_GamepadL1,          GLFW_GAMEPAD_BUTTON_LEFT_BUMPER,    4);
+		MAP_BUTTON(ImGuiKey_GamepadR1,          GLFW_GAMEPAD_BUTTON_RIGHT_BUMPER,   5);
+		MAP_ANALOG(ImGuiKey_GamepadL2,          GLFW_GAMEPAD_AXIS_LEFT_TRIGGER,     4,      -0.75f,  +1.0f);
+		MAP_ANALOG(ImGuiKey_GamepadR2,          GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER,    5,      -0.75f,  +1.0f);
+		MAP_BUTTON(ImGuiKey_GamepadL3,          GLFW_GAMEPAD_BUTTON_LEFT_THUMB,     8);
+		MAP_BUTTON(ImGuiKey_GamepadR3,          GLFW_GAMEPAD_BUTTON_RIGHT_THUMB,    9);
+		MAP_ANALOG(ImGuiKey_GamepadLStickLeft,  GLFW_GAMEPAD_AXIS_LEFT_X,           0,      -0.25f,  -1.0f);
+		MAP_ANALOG(ImGuiKey_GamepadLStickRight, GLFW_GAMEPAD_AXIS_LEFT_X,           0,      +0.25f,  +1.0f);
+		MAP_ANALOG(ImGuiKey_GamepadLStickUp,    GLFW_GAMEPAD_AXIS_LEFT_Y,           1,      -0.25f,  -1.0f);
+		MAP_ANALOG(ImGuiKey_GamepadLStickDown,  GLFW_GAMEPAD_AXIS_LEFT_Y,           1,      +0.25f,  +1.0f);
+		MAP_ANALOG(ImGuiKey_GamepadRStickLeft,  GLFW_GAMEPAD_AXIS_RIGHT_X,          2,      -0.25f,  -1.0f);
+		MAP_ANALOG(ImGuiKey_GamepadRStickRight, GLFW_GAMEPAD_AXIS_RIGHT_X,          2,      +0.25f,  +1.0f);
+		MAP_ANALOG(ImGuiKey_GamepadRStickUp,    GLFW_GAMEPAD_AXIS_RIGHT_Y,          3,      -0.25f,  -1.0f);
+		MAP_ANALOG(ImGuiKey_GamepadRStickDown,  GLFW_GAMEPAD_AXIS_RIGHT_Y,          3,      +0.25f,  +1.0f);
+		#undef MAP_BUTTON
+		#undef MAP_ANALOG
+		// clang-format on
 
-#undef MAP_BUTTON
-#undef MAP_ANALOG
-
-		if (axesCount > 0 && buttonsCount > 0)
-			io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
-		else
-			io.BackendFlags &= ~ImGuiBackendFlags_HasGamepad;
 	}
 }
 

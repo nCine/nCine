@@ -13,11 +13,8 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
+ANativeWindow *ImGuiAndroidInput::window_ = nullptr;
 bool ImGuiAndroidInput::inputEnabled_ = true;
-int ImGuiAndroidInput::simulatedSoftKeyReleased_ = 0;
-int ImGuiAndroidInput::simulatedMouseButtonState_ = 0;
-int ImGuiAndroidInput::mouseButtonState_ = 0;
-unsigned int ImGuiAndroidInput::pointerCount_ = 0;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -38,45 +35,132 @@ namespace {
 		strncpy(clipboard, text, MaxClipboardLength);
 	}
 
+	ImGuiKey keyCodeToImGuiKey(int32_t key_code)
+	{
+		// clang-format off
+		switch (key_code)
+		{
+			case AKEYCODE_TAB:                  return ImGuiKey_Tab;
+			case AKEYCODE_DPAD_LEFT:            return ImGuiKey_LeftArrow;
+			case AKEYCODE_DPAD_RIGHT:           return ImGuiKey_RightArrow;
+			case AKEYCODE_DPAD_UP:              return ImGuiKey_UpArrow;
+			case AKEYCODE_DPAD_DOWN:            return ImGuiKey_DownArrow;
+			case AKEYCODE_PAGE_UP:              return ImGuiKey_PageUp;
+			case AKEYCODE_PAGE_DOWN:            return ImGuiKey_PageDown;
+			case AKEYCODE_MOVE_HOME:            return ImGuiKey_Home;
+			case AKEYCODE_MOVE_END:             return ImGuiKey_End;
+			case AKEYCODE_INSERT:               return ImGuiKey_Insert;
+			case AKEYCODE_FORWARD_DEL:          return ImGuiKey_Delete;
+			case AKEYCODE_DEL:                  return ImGuiKey_Backspace;
+			case AKEYCODE_SPACE:                return ImGuiKey_Space;
+			case AKEYCODE_ENTER:                return ImGuiKey_Enter;
+			case AKEYCODE_ESCAPE:               return ImGuiKey_Escape;
+			case AKEYCODE_APOSTROPHE:           return ImGuiKey_Apostrophe;
+			case AKEYCODE_COMMA:                return ImGuiKey_Comma;
+			case AKEYCODE_MINUS:                return ImGuiKey_Minus;
+			case AKEYCODE_PERIOD:               return ImGuiKey_Period;
+			case AKEYCODE_SLASH:                return ImGuiKey_Slash;
+			case AKEYCODE_SEMICOLON:            return ImGuiKey_Semicolon;
+			case AKEYCODE_EQUALS:               return ImGuiKey_Equal;
+			case AKEYCODE_LEFT_BRACKET:         return ImGuiKey_LeftBracket;
+			case AKEYCODE_BACKSLASH:            return ImGuiKey_Backslash;
+			case AKEYCODE_RIGHT_BRACKET:        return ImGuiKey_RightBracket;
+			case AKEYCODE_GRAVE:                return ImGuiKey_GraveAccent;
+			case AKEYCODE_CAPS_LOCK:            return ImGuiKey_CapsLock;
+			case AKEYCODE_SCROLL_LOCK:          return ImGuiKey_ScrollLock;
+			case AKEYCODE_NUM_LOCK:             return ImGuiKey_NumLock;
+			case AKEYCODE_SYSRQ:                return ImGuiKey_PrintScreen;
+			case AKEYCODE_BREAK:                return ImGuiKey_Pause;
+			case AKEYCODE_NUMPAD_0:             return ImGuiKey_Keypad0;
+			case AKEYCODE_NUMPAD_1:             return ImGuiKey_Keypad1;
+			case AKEYCODE_NUMPAD_2:             return ImGuiKey_Keypad2;
+			case AKEYCODE_NUMPAD_3:             return ImGuiKey_Keypad3;
+			case AKEYCODE_NUMPAD_4:             return ImGuiKey_Keypad4;
+			case AKEYCODE_NUMPAD_5:             return ImGuiKey_Keypad5;
+			case AKEYCODE_NUMPAD_6:             return ImGuiKey_Keypad6;
+			case AKEYCODE_NUMPAD_7:             return ImGuiKey_Keypad7;
+			case AKEYCODE_NUMPAD_8:             return ImGuiKey_Keypad8;
+			case AKEYCODE_NUMPAD_9:             return ImGuiKey_Keypad9;
+			case AKEYCODE_NUMPAD_DOT:           return ImGuiKey_KeypadDecimal;
+			case AKEYCODE_NUMPAD_DIVIDE:        return ImGuiKey_KeypadDivide;
+			case AKEYCODE_NUMPAD_MULTIPLY:      return ImGuiKey_KeypadMultiply;
+			case AKEYCODE_NUMPAD_SUBTRACT:      return ImGuiKey_KeypadSubtract;
+			case AKEYCODE_NUMPAD_ADD:           return ImGuiKey_KeypadAdd;
+			case AKEYCODE_NUMPAD_ENTER:         return ImGuiKey_KeypadEnter;
+			case AKEYCODE_NUMPAD_EQUALS:        return ImGuiKey_KeypadEqual;
+			case AKEYCODE_CTRL_LEFT:            return ImGuiKey_LeftCtrl;
+			case AKEYCODE_SHIFT_LEFT:           return ImGuiKey_LeftShift;
+			case AKEYCODE_ALT_LEFT:             return ImGuiKey_LeftAlt;
+			case AKEYCODE_META_LEFT:            return ImGuiKey_LeftSuper;
+			case AKEYCODE_CTRL_RIGHT:           return ImGuiKey_RightCtrl;
+			case AKEYCODE_SHIFT_RIGHT:          return ImGuiKey_RightShift;
+			case AKEYCODE_ALT_RIGHT:            return ImGuiKey_RightAlt;
+			case AKEYCODE_META_RIGHT:           return ImGuiKey_RightSuper;
+			case AKEYCODE_MENU:                 return ImGuiKey_Menu;
+			case AKEYCODE_0:                    return ImGuiKey_0;
+			case AKEYCODE_1:                    return ImGuiKey_1;
+			case AKEYCODE_2:                    return ImGuiKey_2;
+			case AKEYCODE_3:                    return ImGuiKey_3;
+			case AKEYCODE_4:                    return ImGuiKey_4;
+			case AKEYCODE_5:                    return ImGuiKey_5;
+			case AKEYCODE_6:                    return ImGuiKey_6;
+			case AKEYCODE_7:                    return ImGuiKey_7;
+			case AKEYCODE_8:                    return ImGuiKey_8;
+			case AKEYCODE_9:                    return ImGuiKey_9;
+			case AKEYCODE_A:                    return ImGuiKey_A;
+			case AKEYCODE_B:                    return ImGuiKey_B;
+			case AKEYCODE_C:                    return ImGuiKey_C;
+			case AKEYCODE_D:                    return ImGuiKey_D;
+			case AKEYCODE_E:                    return ImGuiKey_E;
+			case AKEYCODE_F:                    return ImGuiKey_F;
+			case AKEYCODE_G:                    return ImGuiKey_G;
+			case AKEYCODE_H:                    return ImGuiKey_H;
+			case AKEYCODE_I:                    return ImGuiKey_I;
+			case AKEYCODE_J:                    return ImGuiKey_J;
+			case AKEYCODE_K:                    return ImGuiKey_K;
+			case AKEYCODE_L:                    return ImGuiKey_L;
+			case AKEYCODE_M:                    return ImGuiKey_M;
+			case AKEYCODE_N:                    return ImGuiKey_N;
+			case AKEYCODE_O:                    return ImGuiKey_O;
+			case AKEYCODE_P:                    return ImGuiKey_P;
+			case AKEYCODE_Q:                    return ImGuiKey_Q;
+			case AKEYCODE_R:                    return ImGuiKey_R;
+			case AKEYCODE_S:                    return ImGuiKey_S;
+			case AKEYCODE_T:                    return ImGuiKey_T;
+			case AKEYCODE_U:                    return ImGuiKey_U;
+			case AKEYCODE_V:                    return ImGuiKey_V;
+			case AKEYCODE_W:                    return ImGuiKey_W;
+			case AKEYCODE_X:                    return ImGuiKey_X;
+			case AKEYCODE_Y:                    return ImGuiKey_Y;
+			case AKEYCODE_Z:                    return ImGuiKey_Z;
+			case AKEYCODE_F1:                   return ImGuiKey_F1;
+			case AKEYCODE_F2:                   return ImGuiKey_F2;
+			case AKEYCODE_F3:                   return ImGuiKey_F3;
+			case AKEYCODE_F4:                   return ImGuiKey_F4;
+			case AKEYCODE_F5:                   return ImGuiKey_F5;
+			case AKEYCODE_F6:                   return ImGuiKey_F6;
+			case AKEYCODE_F7:                   return ImGuiKey_F7;
+			case AKEYCODE_F8:                   return ImGuiKey_F8;
+			case AKEYCODE_F9:                   return ImGuiKey_F9;
+			case AKEYCODE_F10:                  return ImGuiKey_F10;
+			case AKEYCODE_F11:                  return ImGuiKey_F11;
+			case AKEYCODE_F12:                  return ImGuiKey_F12;
+			default:                            return ImGuiKey_None;
+		}
+		// clang-format on
+	}
+
 }
 
-void ImGuiAndroidInput::init()
+void ImGuiAndroidInput::init(ANativeWindow *window)
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
+	window_ = window;
+
 	ImGuiIO &io = ImGui::GetIO();
 	io.BackendPlatformName = "nCine_Android";
-	io.DisplaySize = ImVec2(theApplication().width(), theApplication().height());
-	io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
-
-	// Keyboard mapping. ImGui will use those indices to peek into the io.KeysDown[] array.
-	io.KeyMap[ImGuiKey_Tab] = AKEYCODE_TAB;
-	io.KeyMap[ImGuiKey_LeftArrow] = AKEYCODE_DPAD_LEFT;
-	io.KeyMap[ImGuiKey_RightArrow] = AKEYCODE_DPAD_RIGHT;
-	io.KeyMap[ImGuiKey_UpArrow] = AKEYCODE_DPAD_UP;
-	io.KeyMap[ImGuiKey_DownArrow] = AKEYCODE_DPAD_DOWN;
-	io.KeyMap[ImGuiKey_PageUp] = AKEYCODE_PAGE_UP;
-	io.KeyMap[ImGuiKey_PageDown] = AKEYCODE_PAGE_DOWN;
-	io.KeyMap[ImGuiKey_Home] = AKEYCODE_MOVE_HOME;
-	io.KeyMap[ImGuiKey_End] = AKEYCODE_MOVE_END;
-	io.KeyMap[ImGuiKey_Insert] = AKEYCODE_INSERT;
-	io.KeyMap[ImGuiKey_Delete] = AKEYCODE_FORWARD_DEL;
-	io.KeyMap[ImGuiKey_Backspace] = AKEYCODE_DEL;
-	io.KeyMap[ImGuiKey_Space] = AKEYCODE_SPACE;
-	io.KeyMap[ImGuiKey_Enter] = AKEYCODE_ENTER;
-	io.KeyMap[ImGuiKey_Escape] = AKEYCODE_ESCAPE;
-#if IMGUI_VERSION_NUM > 18600
-	io.KeyMap[ImGuiKey_KeypadEnter] = AKEYCODE_NUMPAD_ENTER;
-#else
-	io.KeyMap[ImGuiKey_KeyPadEnter] = AKEYCODE_NUMPAD_ENTER;
-#endif
-	io.KeyMap[ImGuiKey_A] = AKEYCODE_A;
-	io.KeyMap[ImGuiKey_C] = AKEYCODE_C;
-	io.KeyMap[ImGuiKey_V] = AKEYCODE_V;
-	io.KeyMap[ImGuiKey_X] = AKEYCODE_X;
-	io.KeyMap[ImGuiKey_Y] = AKEYCODE_Y;
-	io.KeyMap[ImGuiKey_Z] = AKEYCODE_Z;
 
 	io.SetClipboardTextFn = setClipboardText;
 	io.GetClipboardTextFn = clipboardText;
@@ -94,22 +178,22 @@ void ImGuiAndroidInput::newFrame()
 	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! Missing call to ImGuiDrawing::buildFonts() function?");
 	io.DeltaTime = theApplication().interval();
 
-	updateMouseButtons();
+	// Setup display size (every frame to accommodate for window resizing)
+	const int32_t windowWidth = ANativeWindow_getWidth(window_);
+	const int32_t windowHeight = ANativeWindow_getHeight(window_);
+	if (windowWidth > 0 && windowHeight > 0)
+	{
+		const int displayWidth = windowWidth;
+		const int displayHeight = windowHeight;
+
+		io.DisplaySize = ImVec2(static_cast<float>(windowWidth), static_cast<float>(windowHeight));
+		if (windowWidth > 0 && windowHeight > 0)
+			io.DisplayFramebufferScale = ImVec2(static_cast<float>(displayWidth) / windowWidth, static_cast<float>(displayHeight) / windowHeight);
+	}
 
 	// Update game controllers (if enabled and available)
-	memset(io.NavInputs, 0, sizeof(io.NavInputs));
 	if (io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad)
 		imGuiJoyMappedInput();
-}
-
-void ImGuiAndroidInput::postNewFrame()
-{
-	if (simulatedSoftKeyReleased_ != 0)
-	{
-		ImGuiIO &io = ImGui::GetIO();
-		io.KeysDown[simulatedSoftKeyReleased_] = false;
-		simulatedSoftKeyReleased_ = 0;
-	}
 }
 
 bool ImGuiAndroidInput::processEvent(const AInputEvent *event)
@@ -118,149 +202,119 @@ bool ImGuiAndroidInput::processEvent(const AInputEvent *event)
 		return false;
 
 	ImGuiIO &io = ImGui::GetIO();
-	if (pointerCount_ == 0 && io.ConfigFlags & ImGuiConfigFlags_IsTouchScreen)
-		io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
+	const int32_t eventType = AInputEvent_getType(event);
+	const int32_t eventSource = AInputEvent_getSource(event);
 
-	if (((AInputEvent_getSource(event) & AINPUT_SOURCE_KEYBOARD) == AINPUT_SOURCE_KEYBOARD ||
-	     (AKeyEvent_getFlags(event) & AKEY_EVENT_FLAG_SOFT_KEYBOARD) == AKEY_EVENT_FLAG_SOFT_KEYBOARD) &&
-	    AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
-	{
-		const int keyCode = AKeyEvent_getKeyCode(event);
-		IM_ASSERT(keyCode >= 0 && keyCode < IM_ARRAYSIZE(io.KeysDown));
-		io.KeysDown[keyCode] = (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN);
-		io.KeyShift = ((AKeyEvent_getMetaState(event) & AMETA_SHIFT_ON) != 0);
-		io.KeyCtrl = ((AKeyEvent_getMetaState(event) & AMETA_CTRL_ON) != 0);
-		io.KeyAlt = ((AKeyEvent_getMetaState(event) & AMETA_ALT_ON) != 0);
-		io.KeySuper = ((AKeyEvent_getMetaState(event) & AMETA_META_ON) != 0);
-
-		// With the software keyboard the press and release events might happen on the same frame
-		if ((AKeyEvent_getFlags(event) & AKEY_EVENT_FLAG_SOFT_KEYBOARD) == AKEY_EVENT_FLAG_SOFT_KEYBOARD)
-		{
-			static unsigned long int frameNum = 0;
-			if (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN)
-				frameNum = theApplication().numFrames();
-			else if (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_UP && theApplication().numFrames() == frameNum)
-			{
-				io.KeysDown[keyCode] = true;
-				simulatedSoftKeyReleased_ = keyCode;
-			}
-		}
-
-		if (AKeyEvent_getAction(event) == AKEY_EVENT_ACTION_DOWN &&
-		    (AKeyEvent_getMetaState(event) & AMETA_CTRL_ON) == 0)
-		{
-			AndroidJniClass_KeyEvent keyEvent(AInputEvent_getType(event), keyCode);
-			if (keyEvent.isPrintingKey())
-			{
-				const int unicodeKey = keyEvent.getUnicodeChar(AKeyEvent_getMetaState(event));
-				io.AddInputCharacter(unicodeKey);
-			}
-		}
-
-		return true;
-	}
-	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_TOUCHSCREEN) == AINPUT_SOURCE_TOUCHSCREEN &&
-	         AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
-	{
+	io.ConfigFlags &= ~ImGuiConfigFlags_IsTouchScreen;
+	if ((eventSource & AINPUT_SOURCE_TOUCHSCREEN) == AINPUT_SOURCE_TOUCHSCREEN)
 		io.ConfigFlags |= ImGuiConfigFlags_IsTouchScreen;
-		const int action = AMotionEvent_getAction(event);
-		pointerCount_ = AMotionEvent_getPointerCount(event);
 
-		if (action == AMOTION_EVENT_ACTION_UP)
-			pointerCount_ = 0;
-
-		io.MousePos = ImVec2(AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0));
-
-		return true;
-	}
-	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_MOUSE) == AINPUT_SOURCE_MOUSE &&
-	         AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION)
+	switch (eventType)
 	{
-		io.ConfigFlags &= ~ImGuiConfigFlags_IsTouchScreen;
-		const int action = AMotionEvent_getAction(event);
-
-		// Mask out back and forward buttons in the detected state
-		// as those are simulated as right and middle buttons
-		int maskOutButtons = 0;
-		if (simulatedMouseButtonState_ & AMOTION_EVENT_BUTTON_SECONDARY)
-			maskOutButtons |= AMOTION_EVENT_BUTTON_BACK;
-		if (simulatedMouseButtonState_ & AMOTION_EVENT_BUTTON_TERTIARY)
-			maskOutButtons |= AMOTION_EVENT_BUTTON_FORWARD;
-
-		switch (action)
+		case AINPUT_EVENT_TYPE_KEY:
 		{
-			case AMOTION_EVENT_ACTION_DOWN:
-				mouseButtonState_ = AMotionEvent_getButtonState(event);
-				mouseButtonState_ &= ~maskOutButtons;
-				mouseButtonState_ |= simulatedMouseButtonState_;
-				break;
-			case AMOTION_EVENT_ACTION_UP:
-				mouseButtonState_ = AMotionEvent_getButtonState(event);
-				mouseButtonState_ &= ~maskOutButtons;
-				mouseButtonState_ |= simulatedMouseButtonState_;
-				break;
-		}
+			const int32_t eventKeyCode = AKeyEvent_getKeyCode(event);
+			const int32_t eventScanCode = AKeyEvent_getScanCode(event);
+			const int32_t eventAction = AKeyEvent_getAction(event);
+			const int32_t eventMetaState = AKeyEvent_getMetaState(event);
 
-		io.MousePos = ImVec2(AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0));
-		io.MouseWheelH = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HSCROLL, 0);
-		io.MouseWheel = AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_VSCROLL, 0);
+			io.AddKeyEvent(ImGuiKey_ModCtrl, (eventMetaState & AMETA_CTRL_ON) != 0);
+			io.AddKeyEvent(ImGuiKey_ModShift, (eventMetaState & AMETA_SHIFT_ON) != 0);
+			io.AddKeyEvent(ImGuiKey_ModAlt, (eventMetaState & AMETA_ALT_ON) != 0);
+			io.AddKeyEvent(ImGuiKey_ModSuper, (eventMetaState & AMETA_META_ON) != 0);
 
-		return true;
-	}
-	else if ((AInputEvent_getSource(event) & AINPUT_SOURCE_MOUSE) == AINPUT_SOURCE_MOUSE &&
-	         AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
-	{
-		io.ConfigFlags &= ~ImGuiConfigFlags_IsTouchScreen;
-		const int keyCode = AKeyEvent_getKeyCode(event);
-		if (keyCode == AKEYCODE_BACK || keyCode == AKEYCODE_FORWARD)
-		{
-			const int simulatedButton = (keyCode == AKEYCODE_BACK) ? AMOTION_EVENT_BUTTON_SECONDARY : AMOTION_EVENT_BUTTON_TERTIARY;
-			static int oldAction = AKEY_EVENT_ACTION_UP;
-			const int action = AKeyEvent_getAction(event);
-
-			// checking previous action to avoid key repeat events
-			if (action == AKEY_EVENT_ACTION_DOWN && oldAction == AKEY_EVENT_ACTION_UP)
+			switch (eventAction)
 			{
-				oldAction = action;
-				simulatedMouseButtonState_ |= simulatedButton;
-				mouseButtonState_ |= simulatedButton;
-			}
-			else if (action == AKEY_EVENT_ACTION_UP && oldAction == AKEY_EVENT_ACTION_DOWN)
-			{
-				oldAction = action;
-				simulatedMouseButtonState_ &= ~simulatedButton;
-				mouseButtonState_ &= ~simulatedButton;
+				// FIXME: AKEY_EVENT_ACTION_DOWN and AKEY_EVENT_ACTION_UP occur at once as soon as a touch pointer
+				// goes up from a key. We use a simple key event queue/ and process one event per key per frame in
+				// ImGui_ImplAndroid_NewFrame()...or consider using IO queue, if suitable: https://github.com/ocornut/imgui/issues/2787
+				case AKEY_EVENT_ACTION_DOWN:
+				case AKEY_EVENT_ACTION_UP:
+				{
+					const ImGuiKey key = keyCodeToImGuiKey(eventKeyCode);
+					if (key != ImGuiKey_None && (eventAction == AKEY_EVENT_ACTION_DOWN || eventAction == AKEY_EVENT_ACTION_UP))
+					{
+						io.AddKeyEvent(key, eventAction == AKEY_EVENT_ACTION_DOWN);
+						io.SetKeyEventNativeData(key, eventKeyCode, eventScanCode);
+					}
+
+					break;
+				}
+				default:
+					break;
 			}
 
-			io.MousePos = ImVec2(AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0));
+			if (eventAction == AKEY_EVENT_ACTION_DOWN && (eventMetaState & AMETA_CTRL_ON) == 0)
+			{
+				AndroidJniClass_KeyEvent keyEvent(eventType, eventKeyCode);
+				if (keyEvent.isPrintingKey())
+				{
+					const int unicodeKey = keyEvent.getUnicodeChar(eventMetaState);
+					io.AddInputCharacter(unicodeKey);
+				}
+			}
+
+			if ((eventSource & AINPUT_SOURCE_MOUSE) == AINPUT_SOURCE_MOUSE)
+			{
+				LOGE_X("KEYCODE: %u", eventKeyCode);
+				if (eventKeyCode == AKEYCODE_BACK)
+				{
+					io.AddMouseButtonEvent(1, eventAction == AKEY_EVENT_ACTION_DOWN);
+					LOGE("BACK BUTTON");
+				}
+				else if (eventKeyCode == AKEYCODE_FORWARD)
+				{
+					io.AddMouseButtonEvent(2, eventAction == AKEY_EVENT_ACTION_DOWN);
+					LOGE("FORWARD BUTTON");
+				}
+			}
+
+			return true;
 		}
-
-		return true;
+		case AINPUT_EVENT_TYPE_MOTION:
+		{
+			int32_t eventAction = AMotionEvent_getAction(event);
+			const int32_t eventPointerIndex = (eventAction & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+			eventAction &= AMOTION_EVENT_ACTION_MASK;
+			switch (eventAction)
+			{
+				case AMOTION_EVENT_ACTION_DOWN:
+				case AMOTION_EVENT_ACTION_UP:
+					// Physical mouse buttons (and probably other physical devices) also invoke the actions AMOTION_EVENT_ACTION_DOWN/_UP,
+					// but we have to process them separately to identify the actual button pressed. This is done below via
+					// AMOTION_EVENT_ACTION_BUTTON_PRESS/_RELEASE. Here, we only process "FINGER" input (and "UNKNOWN", as a fallback).
+					if ((AMotionEvent_getToolType(event, eventPointerIndex) == AMOTION_EVENT_TOOL_TYPE_FINGER) ||
+					    (AMotionEvent_getToolType(event, eventPointerIndex) == AMOTION_EVENT_TOOL_TYPE_UNKNOWN))
+					{
+						io.AddMousePosEvent(AMotionEvent_getX(event, eventPointerIndex), AMotionEvent_getY(event, eventPointerIndex));
+						io.AddMouseButtonEvent(0, eventAction == AMOTION_EVENT_ACTION_DOWN);
+					}
+					break;
+				case AMOTION_EVENT_ACTION_BUTTON_PRESS:
+				case AMOTION_EVENT_ACTION_BUTTON_RELEASE:
+				{
+					const int32_t buttonState = AMotionEvent_getButtonState(event);
+					io.AddMouseButtonEvent(0, (buttonState & AMOTION_EVENT_BUTTON_PRIMARY) != 0);
+					io.AddMouseButtonEvent(1, (buttonState & AMOTION_EVENT_BUTTON_SECONDARY) != 0);
+					io.AddMouseButtonEvent(2, (buttonState & AMOTION_EVENT_BUTTON_TERTIARY) != 0);
+				}
+				break;
+				case AMOTION_EVENT_ACTION_HOVER_MOVE: // Hovering: Tool moves while NOT pressed (such as a physical mouse)
+				case AMOTION_EVENT_ACTION_MOVE: // Touch pointer moves while DOWN
+					io.AddMousePosEvent(AMotionEvent_getX(event, eventPointerIndex), AMotionEvent_getY(event, eventPointerIndex));
+					break;
+				case AMOTION_EVENT_ACTION_SCROLL:
+					io.AddMouseWheelEvent(AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HSCROLL, eventPointerIndex), AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_VSCROLL, eventPointerIndex));
+					break;
+				default:
+					break;
+			}
+			return true;
+		}
+		default:
+			break;
 	}
-
 	return false;
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void ImGuiAndroidInput::updateMouseButtons()
-{
-	ImGuiIO &io = ImGui::GetIO();
-	if (pointerCount_ > 0)
-	{
-		io.MouseDown[0] = (pointerCount_ == 1);
-		io.MouseDown[1] = (pointerCount_ == 2);
-	}
-	else
-	{
-		io.MouseDown[0] = (mouseButtonState_ & AMOTION_EVENT_BUTTON_PRIMARY);
-		io.MouseDown[1] = (mouseButtonState_ & AMOTION_EVENT_BUTTON_SECONDARY);
-		io.MouseDown[2] = (mouseButtonState_ & AMOTION_EVENT_BUTTON_TERTIARY);
-		io.MouseDown[3] = (mouseButtonState_ & AMOTION_EVENT_BUTTON_BACK);
-		io.MouseDown[4] = (mouseButtonState_ & AMOTION_EVENT_BUTTON_FORWARD);
-	}
 }
 
 }

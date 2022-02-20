@@ -25,13 +25,13 @@ class ImGuiSdlInput
 	static bool mouseCanUseGlobalState_;
 
 	static SDL_Window *window_;
-	static double time_;
-	static bool mousePressed_[3];
+	static unsigned long int time_;
+	static int mouseButtonsDown_;
 	static SDL_Cursor *mouseCursors_[ImGuiMouseCursor_COUNT];
 	static char *clipboardTextData_;
 
 	static const char *clipboardText(void *userData);
-	static void updateMousePosAndButtons();
+	static void updateMouseData();
 	static void updateMouseCursor();
 	static void updateGamepads();
 };

@@ -52,20 +52,16 @@ GlfwInputManager::GlfwInputManager()
 	glfwSetCursorPosCallback(GlfwGfxDevice::windowHandle(), cursorPosCallback);
 	glfwSetMouseButtonCallback(GlfwGfxDevice::windowHandle(), mouseButtonCallback);
 	glfwSetScrollCallback(GlfwGfxDevice::windowHandle(), scrollCallback);
-#ifdef WITH_IMGUI
-	glfwSetWindowFocusCallback(GlfwGfxDevice::windowHandle(), windowFocusCallback);
-	glfwSetCursorEnterCallback(GlfwGfxDevice::windowHandle(), cursorEnterCallback);
-#endif
 	glfwSetJoystickCallback(joystickCallback);
 
 	joyMapping_.init(this);
 
 #ifdef WITH_IMGUI
-	ImGuiGlfwInput::init(GlfwGfxDevice::windowHandle());
+	ImGuiGlfwInput::init(GlfwGfxDevice::windowHandle(), true);
 #endif
 
 #ifdef WITH_NUKLEAR
-	NuklearGlfwInput::init(GlfwGfxDevice::windowHandle());
+	NuklearGlfwInput::init(GlfwGfxDevice::windowHandle(), true);
 #endif
 }
 
@@ -269,10 +265,6 @@ void GlfwInputManager::framebufferSizeCallback(GLFWwindow *window, int width, in
 
 void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-#ifdef WITH_IMGUI
-	ImGuiGlfwInput::keyCallback(window, key, scancode, action, mods);
-#endif
-
 	if (inputEventHandler_ == nullptr)
 		return;
 
@@ -288,14 +280,6 @@ void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, in
 
 void GlfwInputManager::charCallback(GLFWwindow *window, unsigned int c)
 {
-#ifdef WITH_IMGUI
-	ImGuiGlfwInput::charCallback(window, c);
-#endif
-
-#ifdef WITH_NUKLEAR
-	NuklearGlfwInput::charCallback(window, c);
-#endif
-
 	if (inputEventHandler_ == nullptr)
 		return;
 
@@ -316,14 +300,6 @@ void GlfwInputManager::cursorPosCallback(GLFWwindow *window, double x, double y)
 
 void GlfwInputManager::mouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
-#ifdef WITH_IMGUI
-	ImGuiGlfwInput::mouseButtonCallback(window, button, action, mods);
-#endif
-
-#ifdef WITH_NUKLEAR
-	NuklearGlfwInput::mouseButtonCallback(window, button, action, mods);
-#endif
-
 	if (inputEventHandler_ == nullptr)
 		return;
 
@@ -341,34 +317,12 @@ void GlfwInputManager::mouseButtonCallback(GLFWwindow *window, int button, int a
 
 void GlfwInputManager::scrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
-#ifdef WITH_IMGUI
-	ImGuiGlfwInput::scrollCallback(window, xoffset, yoffset);
-#endif
-
-#ifdef WITH_NUKLEAR
-	NuklearGlfwInput::scrollCallback(window, xoffset, yoffset);
-#endif
-
 	if (inputEventHandler_ == nullptr)
 		return;
 
 	scrollEvent_.x = static_cast<float>(xoffset);
 	scrollEvent_.y = static_cast<float>(yoffset);
 	inputEventHandler_->onScrollInput(scrollEvent_);
-}
-
-void GlfwInputManager::windowFocusCallback(GLFWwindow *window, int focused)
-{
-#ifdef WITH_IMGUI
-	ImGuiGlfwInput::windowFocusCallback(window, focused);
-#endif
-}
-
-void GlfwInputManager::cursorEnterCallback(GLFWwindow *window, int entered)
-{
-#ifdef WITH_IMGUI
-	ImGuiGlfwInput::cursorEnterCallback(window, entered);
-#endif
 }
 
 void GlfwInputManager::joystickCallback(int joy, int event)

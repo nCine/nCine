@@ -2,6 +2,7 @@
 #define CLASS_NCINE_IMGUIANDROIDINPUT
 
 struct AInputEvent;
+struct ANativeWindow;
 
 namespace ncine {
 
@@ -9,26 +10,16 @@ namespace ncine {
 class ImGuiAndroidInput
 {
   public:
-	static void init();
+	static void init(ANativeWindow *window);
 	static void shutdown();
 	static void newFrame();
-	static void postNewFrame();
 	static bool processEvent(const AInputEvent *event);
 
 	static inline void setInputEnabled(bool inputEnabled) { inputEnabled_ = inputEnabled; }
 
   private:
+	static ANativeWindow *window_;
 	static bool inputEnabled_;
-
-	/// Used to introduce a one frame delay for same frame key release event from software keyboard
-	static int simulatedSoftKeyReleased_;
-
-	/// Back and forward key events triggered by the mouse are simulated as right and middle button
-	static int simulatedMouseButtonState_;
-	static int mouseButtonState_;
-	static unsigned int pointerCount_;
-
-	static void updateMouseButtons();
 };
 
 }

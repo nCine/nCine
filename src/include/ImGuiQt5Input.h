@@ -31,7 +31,7 @@ class ImGuiQt5Input
 	static Qt5Widget *widget_;
 	static nctl::UniquePtr<QGamepad> gamepad_;
 
-	static void updateMousePosAndButtons();
+	static void updateMouseData();
 	static void updateMouseCursor();
 	static void updateGamepads();
 };
