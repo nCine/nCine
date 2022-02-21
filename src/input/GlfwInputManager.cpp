@@ -228,6 +228,12 @@ void GlfwInputManager::setMouseCursorMode(MouseCursorMode mode)
 			case MouseCursorMode::DISABLED: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED); break;
 		}
 
+#if GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
+		// Enable raw mouse motion (if supported) when disabling the cursor
+		const bool enableRawMouseMotion = (mode == MouseCursorMode::DISABLED && glfwRawMouseMotionSupported() == GLFW_TRUE);
+		glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_RAW_MOUSE_MOTION, enableRawMouseMotion ? GLFW_TRUE : GLFW_FALSE);
+#endif
+
 		// Handling ImGui cursor changes
 		IInputManager::setMouseCursorMode(mode);
 

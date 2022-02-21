@@ -10,6 +10,7 @@
 #if (NCINE_WITH_IMGUI || NCINE_WITH_NUKLEAR || NCINE_WITH_QT5)
 	#define HAS_GUI (1)
 	#ifdef __ANDROID__
+		#define NCINE_WITH_QT5 (0)
 		#include <ncine/AndroidApplication.h>
 	#endif
 #endif

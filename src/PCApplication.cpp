@@ -42,7 +42,8 @@ int PCApplication::start(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 
 	app.init(createAppEventHandler, argc, argv);
 #ifndef __EMSCRIPTEN__
-	app.run();
+	while (app.shouldQuit_ == false)
+		app.run();
 #else
 	emscripten_set_main_loop(PCApplication::emscriptenStep, 0, 1);
 	emscripten_set_main_loop_timing(EM_TIMING_RAF, 1);
@@ -91,9 +92,9 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 	gfxDevice_ = nctl::makeUnique<GlfwGfxDevice>(windowMode, glContextInfo, displayMode);
 	inputManager_ = nctl::makeUnique<GlfwInputManager>();
 #elif defined(WITH_QT5)
-	FATAL_ASSERT(widget_);
-	gfxDevice_ = nctl::makeUnique<Qt5GfxDevice>(windowMode, glContextInfo, displayMode, *widget_);
-	inputManager_ = nctl::makeUnique<Qt5InputManager>(*widget_);
+	FATAL_ASSERT_MSG(qt5Widget_, "The Qt5 widget has not been assigned");
+	gfxDevice_ = nctl::makeUnique<Qt5GfxDevice>(windowMode, glContextInfo, displayMode, *qt5Widget_);
+	inputManager_ = nctl::makeUnique<Qt5InputManager>(*qt5Widget_);
 #endif
 	gfxDevice_->setWindowTitle(appCfg_.windowTitle.data());
 	nctl::String windowIconFilePath = fs::joinPath(fs::dataPath(), appCfg_.windowIconFilename);
@@ -110,43 +111,36 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 
 void PCApplication::run()
 {
-#if !defined(__EMSCRIPTEN__) && !defined(WITH_QT5)
-	while (!shouldQuit_)
-	{
-#endif
-
 #if !defined(WITH_QT5)
-		processEvents();
+	processEvents();
 #elif defined(WITH_QT5GAMEPAD)
-		static_cast<Qt5InputManager &>(*inputManager_).updateJoystickStates();
+	static_cast<Qt5InputManager &>(*inputManager_).updateJoystickStates();
 #endif
 
-		const bool suspended = shouldSuspend();
-		if (wasSuspended_ != suspended)
-		{
-			if (suspended)
-				suspend();
-			else
-				resume();
-			wasSuspended_ = suspended;
-		}
-
-		if (suspended == false)
-			step();
-#if !defined(__EMSCRIPTEN__) && !defined(WITH_QT5)
+	const bool suspended = shouldSuspend();
+	if (wasSuspended_ != suspended)
+	{
+		if (suspended)
+			suspend();
+		else
+			resume();
+		wasSuspended_ = suspended;
 	}
-#endif
+
+	if (suspended == false)
+		step();
 }
 
+#if defined(WITH_SDL)
 void PCApplication::processEvents()
 {
-	ZoneScopedN("Poll events");
-#if defined(WITH_SDL)
-	SDL_Event event;
+	ZoneScoped;
 
 	#if WITH_NUKLEAR
 	NuklearSdlInput::inputBegin();
 	#endif
+
+	SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
 		switch (event.type)
@@ -170,7 +164,6 @@ void PCApplication::processEvents()
 				SdlInputManager::parseEvent(event);
 				break;
 		}
-
 	#ifndef __EMSCRIPTEN__
 		if (shouldSuspend())
 		{
@@ -179,11 +172,16 @@ void PCApplication::processEvents()
 		}
 	#endif
 	}
+
 	#if WITH_NUKLEAR
 	NuklearSdlInput::inputEnd();
 	#endif
-
+}
 #elif defined(WITH_GLFW)
+void PCApplication::processEvents()
+{
+	ZoneScoped;
+
 	// GLFW does not seem to correctly handle Emscripten focus and blur events
 	#ifndef __EMSCRIPTEN__
 	setFocus(GlfwInputManager::hasFocus());
@@ -194,8 +192,8 @@ void PCApplication::processEvents()
 	else
 		glfwPollEvents();
 	GlfwInputManager::updateJoystickStates();
-#endif
 }
+#endif
 
 #ifdef __EMSCRIPTEN__
 void PCApplication::emscriptenStep()

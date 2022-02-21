@@ -25,22 +25,20 @@ class DLL_PUBLIC Qt5Widget : public QOpenGLWidget
 	Q_OBJECT
 
   public:
-	Qt5Widget(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)())
+	explicit Qt5Widget(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)())
 	    : Qt5Widget(nullptr, createAppEventHandler, 0, nullptr) {}
 	Qt5Widget(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)(), int argc, char **argv)
 	    : Qt5Widget(nullptr, createAppEventHandler, argc, argv) {}
 	Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)(), int argc, char **argv);
 	~Qt5Widget();
 
+	/// If set to false the widget will stop to automatically update each frame
+	inline void setShouldUpdate(bool shouldUpdate) { shouldUpdate_ = shouldUpdate; }
+
 	IAppEventHandler &appEventHandler();
 
   protected:
 	bool event(QEvent *event) override;
-
-  private:
-	PCApplication &application_;
-	nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler_)();
-	bool isInitialized_;
 
 	void initializeGL() override;
 	void resizeGL(int w, int h) override;
@@ -48,6 +46,12 @@ class DLL_PUBLIC Qt5Widget : public QOpenGLWidget
 
 	QSize minimumSizeHint() const override;
 	QSize sizeHint() const override;
+
+  private:
+	PCApplication &application_;
+	nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler_)();
+	bool isInitialized_;
+	bool shouldUpdate_;
 
 	void shutdown();
 

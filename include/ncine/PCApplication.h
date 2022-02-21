@@ -18,13 +18,12 @@ class DLL_PUBLIC PCApplication : public Application
 	/// Suspension state from last frame
 	bool wasSuspended_;
 
-#ifdef WITH_QT5
-	Qt5Widget *widget_;
-#endif
+	/// A pointer to the custom Qt5 widget
+	Qt5Widget *qt5Widget_;
 
 	/// Must be called at the beginning to initialize the application
 	void init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)(), int argc, char **argv);
-	/// The main game loop
+	/// Must be called continuously to keep the application running
 	void run();
 	/// Processes events inside the game loop
 	void processEvents();
@@ -34,9 +33,9 @@ class DLL_PUBLIC PCApplication : public Application
 
 	/// Private constructor
 	PCApplication()
-	    : Application() {}
+	    : Application(), wasSuspended_(false), qt5Widget_(nullptr) {}
 	/// Private destructor
-	~PCApplication() {}
+	~PCApplication() = default;
 	/// Deleted copy constructor
 	PCApplication(const PCApplication &) = delete;
 	/// Deleted assignment operator

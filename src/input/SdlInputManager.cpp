@@ -399,6 +399,7 @@ void SdlInputManager::setMouseCursorMode(MouseCursorMode mode)
 {
 	if (mode != mouseCursorMode_)
 	{
+		bool changeMode = true;
 		switch (mode)
 		{
 			case MouseCursorMode::NORMAL:
@@ -410,14 +411,18 @@ void SdlInputManager::setMouseCursorMode(MouseCursorMode mode)
 				SDL_SetRelativeMouseMode(SDL_FALSE);
 				break;
 			case MouseCursorMode::DISABLED:
-				SDL_SetRelativeMouseMode(SDL_TRUE);
+				const int supported = SDL_SetRelativeMouseMode(SDL_TRUE);
+				changeMode = (supported == 0);
 				break;
 		}
 
-		// Handling ImGui cursor changes
-		IInputManager::setMouseCursorMode(mode);
+		if (changeMode)
+		{
+			// Handling ImGui cursor changes
+			IInputManager::setMouseCursorMode(mode);
 
-		mouseCursorMode_ = mode;
+			mouseCursorMode_ = mode;
+		}
 	}
 }
 

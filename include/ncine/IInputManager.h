@@ -22,6 +22,7 @@ class DLL_PUBLIC IInputManager
 		/// Mouse cursor is hidden but behaves normally
 		HIDDEN,
 		/// Mouse cursor is hidden and locked to the window
+		/*! \note Mouse movement will be relative if supported (with no acceleration and no scaling) */
 		DISABLED
 	};
 

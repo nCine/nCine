@@ -18,15 +18,16 @@ namespace ncine {
 Qt5Widget::Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)(), int argc, char **argv)
     : QOpenGLWidget(parent),
       application_(static_cast<PCApplication &>(theApplication())),
-      createAppEventHandler_(createAppEventHandler), isInitialized_(false)
+      createAppEventHandler_(createAppEventHandler),
+      isInitialized_(false), shouldUpdate_(true)
 {
-	application_.widget_ = this;
 	setFocusPolicy(Qt::StrongFocus);
 	setMouseTracking(true);
 	setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	QObject::connect(this, SIGNAL(frameSwapped()), this, SLOT(update()));
 
 	ASSERT(createAppEventHandler_);
+	application_.qt5Widget_ = this;
 	application_.init(createAppEventHandler_, argc, argv);
 	application_.setAutoSuspension(false);
 	const int width = application_.appConfiguration().resolution.x;
@@ -96,10 +97,6 @@ bool Qt5Widget::event(QEvent *event)
 	}
 }
 
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
 void Qt5Widget::initializeGL()
 {
 	Qt5GfxDevice &gfxDevice = static_cast<Qt5GfxDevice &>(*application_.gfxDevice_);
@@ -120,7 +117,7 @@ void Qt5Widget::resizeGL(int w, int h)
 
 void Qt5Widget::paintGL()
 {
-	if (isInitialized_)
+	if (isInitialized_ && shouldUpdate_)
 	{
 		if (application_.shouldQuit() == false)
 			application_.run();
@@ -148,12 +145,16 @@ QSize Qt5Widget::sizeHint() const
 		return QSize(application_.appCfg_.resolution.x, application_.appCfg_.resolution.y);
 }
 
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
 void Qt5Widget::shutdown()
 {
 	if (isInitialized_)
 	{
 		application_.shutdownCommon();
-		application_.widget_ = nullptr;
+		application_.qt5Widget_ = nullptr;
 		isInitialized_ = false;
 	}
 }
