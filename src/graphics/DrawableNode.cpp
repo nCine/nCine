@@ -139,6 +139,8 @@ void DrawableNode::draw(RenderQueue &renderQueue)
 	}
 }
 
+/*! \note This method sets the anchor point relative to the node width and height.
+ * To set the anchor point in pixels use `setAbsAnchorPoint()` instead. */
 void DrawableNode::setAnchorPoint(float xx, float yy)
 {
 	const float clampedX = nctl::clamp(xx, 0.0f, 1.0f);

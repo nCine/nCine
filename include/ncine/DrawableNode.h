@@ -123,6 +123,8 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 
 	/// Returns true if all viewports have culled this node in the last frame
 	bool isCulled() const;
+	/// Returns the axis-aligned bounding box of the node area in the last frame
+	inline Rectf aabb() const { return aabb_; }
 
   protected:
 	/// Node width in pixel
@@ -135,7 +137,7 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 
 	/// The last frame any viewport rendered this node
 	unsigned long int lastFrameNotCulled_;
-	/// Axis Aligned Bounding Box of the node area
+	/// Axis-aligned bounding box of the node area
 	Rectf aabb_;
 	/// Calculates updated values for the AABB
 	virtual void updateAabb();

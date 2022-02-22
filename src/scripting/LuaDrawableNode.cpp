@@ -6,6 +6,7 @@
 #include "LuaClassWrapper.h"
 #include "LuaUtils.h"
 #include "LuaVector2Utils.h"
+#include "LuaRectUtils.h"
 #include "DrawableNode.h"
 
 namespace ncine {
@@ -59,6 +60,7 @@ namespace DrawableNode {
 	static const char *setLayer = "set_layer";
 
 	static const char *isCulled = "is_culled";
+	static const char *aabb = "get_aabb";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -132,6 +134,7 @@ void LuaDrawableNode::exposeFunctions(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::setLayer, setLayer);
 
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::isCulled, isCulled);
+	LuaUtils::addFunction(L, LuaNames::DrawableNode::aabb, aabb);
 }
 
 int LuaDrawableNode::width(lua_State *L)
@@ -261,7 +264,7 @@ int LuaDrawableNode::setLayer(lua_State *L)
 	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -2);
 	const uint32_t layer = LuaUtils::retrieve<uint32_t>(L, -1);
 
-	node->setLayer(layer);
+	node->setLayer(static_cast<unsigned short>(layer));
 
 	return 0;
 }
@@ -272,6 +275,16 @@ int LuaDrawableNode::isCulled(lua_State *L)
 
 	const bool isCulled = node->isCulled();
 	LuaUtils::push(L, isCulled);
+
+	return 1;
+}
+
+int LuaDrawableNode::aabb(lua_State *L)
+{
+	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -1);
+	const Rectf aabb = node->aabb();
+
+	LuaRectfUtils::push(L, aabb);
 
 	return 1;
 }

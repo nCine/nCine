@@ -36,11 +36,11 @@ class DLL_PUBLIC BaseSprite : public DrawableNode
 	/// Sets the texture source rectangle for blitting
 	void setTexRect(const Recti &rect);
 
-	/// Returns `true` if the sprite is horizontally flipped
+	/// Returns `true` if the sprite texture is horizontally flipped
 	inline bool isFlippedX() const { return flippedX_; }
 	/// Flips the texture rect horizontally
 	void setFlippedX(bool flippedX);
-	/// Returns `true` if the sprite is vertically flipped
+	/// Returns `true` if the sprite texture is vertically flipped
 	inline bool isFlippedY() const { return flippedY_; }
 	/// Flips the texture rect vertically
 	void setFlippedY(bool flippedY);
@@ -51,9 +51,9 @@ class DLL_PUBLIC BaseSprite : public DrawableNode
 	/// The texture source rectangle
 	Recti texRect_;
 
-	/// A flag indicating if the sprite is horizontally flipped
+	/// A flag indicating if the sprite texture is horizontally flipped
 	bool flippedX_;
-	/// A flag indicating if the sprite is vertically flipped
+	/// A flag indicating if the sprite texture is vertically flipped
 	bool flippedY_;
 
 	GLUniformBlockCache *spriteBlock_;
