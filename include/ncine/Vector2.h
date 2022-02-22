@@ -13,7 +13,8 @@ class Vector2
   public:
 	T x, y;
 
-	Vector2() {}
+	Vector2()
+	    : x(0), y(0) {}
 	explicit Vector2(T s)
 	    : x(s), y(s) {}
 	Vector2(T xx, T yy)

@@ -12,6 +12,18 @@ class Vector4Test : public ::testing::Test
 	nc::Vector4f v2_;
 };
 
+TEST_F(Vector4Test, DefaultConstructor)
+{
+	const nc::Vector4f newVector;
+	printf("Constructing a new vector with the default constructor: ");
+	printVector(newVector);
+
+	ASSERT_FLOAT_EQ(newVector.x, 0.0f);
+	ASSERT_FLOAT_EQ(newVector.y, 0.0f);
+	ASSERT_FLOAT_EQ(newVector.z, 0.0f);
+	ASSERT_FLOAT_EQ(newVector.w, 0.0f);
+}
+
 TEST_F(Vector4Test, ConstructWithSingleScalar)
 {
 	const float scalar = 0.0f;

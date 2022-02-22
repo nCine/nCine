@@ -21,6 +21,17 @@ class Matrix4x4Test : public ::testing::Test
 	nc::Matrix4x4f m2_;
 };
 
+TEST_F(Matrix4x4Test, DefaultConstructor)
+{
+	const nc::Matrix4x4f newMatrix;
+	printMatrix("Constructing a new matrix with the default constructor:\n", newMatrix);
+
+	assertVectorsAreEqual(newMatrix[0], nc::Vector4f::XAxis);
+	assertVectorsAreEqual(newMatrix[1], nc::Vector4f::YAxis);
+	assertVectorsAreEqual(newMatrix[2], nc::Vector4f::ZAxis);
+	assertVectorsAreEqual(newMatrix[3], nc::Vector4f::WAxis);
+}
+
 TEST_F(Matrix4x4Test, SetVectors)
 {
 	printMatrix("m1:\n", m1_);

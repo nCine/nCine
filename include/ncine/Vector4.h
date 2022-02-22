@@ -13,7 +13,8 @@ class Vector4
   public:
 	T x, y, z, w;
 
-	Vector4() {}
+	Vector4()
+	    : x(0), y(0), z(0), w(0) {}
 	explicit Vector4(T s)
 	    : x(s), y(s), z(s), w(s) {}
 	Vector4(T xx, T yy, T zz, T ww)

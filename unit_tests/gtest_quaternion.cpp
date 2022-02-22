@@ -12,6 +12,18 @@ class QuaternionTest : public ::testing::Test
 	nc::Quaternionf q2_;
 };
 
+TEST_F(QuaternionTest, DefaultConstructor)
+{
+	const nc::Quaternionf newQuat;
+	printf("Constructing a new quaternion with the default constructor: ");
+	printQuaternion(newQuat);
+
+	ASSERT_FLOAT_EQ(newQuat.x, 0.0f);
+	ASSERT_FLOAT_EQ(newQuat.y, 0.0f);
+	ASSERT_FLOAT_EQ(newQuat.z, 0.0f);
+	ASSERT_FLOAT_EQ(newQuat.w, 1.0f);
+}
+
 TEST_F(QuaternionTest, ConstructWithVector4)
 {
 	const nc::Vector4f vec(1.0f, 0.25f, 2.0f, 0.75f);

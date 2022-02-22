@@ -11,7 +11,8 @@ template <class T>
 class Matrix4x4
 {
   public:
-	Matrix4x4() {}
+	Matrix4x4()
+	    : vecs_{ Vector4<T>(1, 0, 0, 0), Vector4<T>(0, 1, 0, 0), Vector4<T>(0, 0, 1, 0), Vector4<T>(0, 0, 0, 1) } {}
 	Matrix4x4(const Vector4<T> &v0, const Vector4<T> &v1, const Vector4<T> &v2, const Vector4<T> &v3);
 
 	void set(const Vector4<T> &v0, const Vector4<T> &v1, const Vector4<T> &v2, const Vector4<T> &v3);

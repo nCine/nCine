@@ -12,7 +12,8 @@ class Vector3
   public:
 	T x, y, z;
 
-	Vector3() {}
+	Vector3()
+	    : x(0), y(0), z(0) {}
 	explicit Vector3(T s)
 	    : x(s), y(s), z(s) {}
 	Vector3(T xx, T yy, T zz)

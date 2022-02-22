@@ -12,7 +12,8 @@ class Quaternion
   public:
 	T x, y, z, w;
 
-	Quaternion() {}
+	Quaternion()
+	    : x(0), y(0), z(0), w(1) {}
 	Quaternion(T xx, T yy, T zz, T ww)
 	    : x(xx), y(yy), z(zz), w(ww) {}
 	explicit Quaternion(const Vector4<T> &v)
