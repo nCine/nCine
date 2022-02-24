@@ -290,7 +290,7 @@ void GlfwInputManager::charCallback(GLFWwindow *window, unsigned int c)
 		return;
 
 	// Current GLFW version does not return an UTF-8 string (https://github.com/glfw/glfw/issues/837)
-	nctl::String::codePointToUtf8(c, textInputEvent_.text, nullptr);
+	nctl::Utf8::codePointToUtf8(c, textInputEvent_.text, nullptr);
 	inputEventHandler_->onTextInput(textInputEvent_);
 }
 

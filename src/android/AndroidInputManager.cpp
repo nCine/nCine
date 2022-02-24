@@ -527,7 +527,7 @@ bool AndroidInputManager::processKeyboardEvent(const AInputEvent *event)
 		if (keyEvent.isPrintingKey())
 		{
 			const int unicodeKey = keyEvent.getUnicodeChar(AKeyEvent_getMetaState(event));
-			nctl::String::codePointToUtf8(unicodeKey, textInputEvent_.text, nullptr);
+			nctl::Utf8::codePointToUtf8(unicodeKey, textInputEvent_.text, nullptr);
 			inputEventHandler_->onTextInput(textInputEvent_);
 		}
 	}

@@ -2,6 +2,7 @@ set(SOURCES
 	${NCINE_ROOT}/src/base/Random.cpp
 	${NCINE_ROOT}/src/base/Object.cpp
 	${NCINE_ROOT}/src/base/CString.cpp
+	${NCINE_ROOT}/src/base/Utf8.cpp
 	${NCINE_ROOT}/src/base/String.cpp
 	${NCINE_ROOT}/src/base/Clock.cpp
 	${NCINE_ROOT}/src/ServiceLocator.cpp

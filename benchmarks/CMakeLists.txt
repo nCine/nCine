@@ -30,7 +30,7 @@ if(Threads_FOUND)
 		gbench_std_array gbench_staticarray
 		gbench_std_list gbench_list
 		gbench_std_biglist gbench_biglist
-		gbench_std_string gbench_string
+		gbench_std_string gbench_string gbench_staticstring
 		gbench_std_unorderedmap gbench_hashmap
 		gbench_std_bigunorderedmap gbench_bighashmap
 		gbench_std_unorderedset gbench_hashset

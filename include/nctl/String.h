@@ -2,6 +2,7 @@
 #define CLASS_NCTL_STRING
 
 #include <ncine/common_macros.h>
+#include "Utf8.h"
 #include "StringIterator.h"
 #include "ReverseIterator.h"
 #include "utility.h"
@@ -32,11 +33,6 @@ class DLL_PUBLIC String
 
 	/// Maximum length when creating an object from C-style strings
 	static const unsigned int MaxCStringLength = 512 - 1;
-
-	/// Unicode replacement character used as an invalid code point
-	static const unsigned int InvalidUnicode = 0xfffd;
-	/// UTF-8 encoded version of the Unicode replacement character
-	static const unsigned int InvalidUtf8 = 0xefbfbd;
 
 	/// Default constructor
 	String();
@@ -193,6 +189,13 @@ class DLL_PUBLIC String
 	inline bool operator>=(const char *cString) const { return compare(cString) >= 0; }
 	inline bool operator<=(const char *cString) const { return compare(cString) <= 0; }
 
+	friend inline bool operator==(const char *cString, String string) { return string.compare(cString) == 0; }
+	friend inline bool operator!=(const char *cString, String string) { return string.compare(cString) != 0; }
+	friend inline bool operator>(const char *cString, String string) { return string.compare(cString) <= 0; }
+	friend inline bool operator<(const char *cString, String string) { return string.compare(cString) >= 0; }
+	friend inline bool operator>=(const char *cString, String string) { return string.compare(cString) < 0; }
+	friend inline bool operator<=(const char *cString, String string) { return string.compare(cString) > 0; }
+
 	/// Read-only access to the specified element (with bounds checking)
 	const char &at(unsigned int index) const;
 	/// Access to the specified element (with bounds checking)
@@ -209,17 +212,6 @@ class DLL_PUBLIC String
 	/// Retrieves the Unicode code point from the UTF-8 substring starting at the specified position
 	/*! \returns The number of code units used by UTF-8 to encode the Unicode code point */
 	int utf8ToCodePoint(unsigned int position, unsigned int &codePoint) const;
-
-	/// Retrieves the Unicode code point and the UTF-8 code units from the UTF-8 C substring
-	/*! \returns A pointer to the C substring following the decoded UTF-8 code units */
-	static const char *utf8ToCodePoint(const char *substring, unsigned int &codePoint, unsigned int *codeUnits);
-	/// Retrieves the Unicode code point from the UTF-8 C substring
-	/*! \returns A pointer to the C substring following the decoded UTF-8 code units */
-	static const char *utf8ToCodePoint(const char *substring, unsigned int &codePoint);
-
-	/// Encodes a Unicode code point to a UTF-8 C substring and code units
-	/*! \returns The number of characters used to encode a valid code point */
-	static int codePointToUtf8(unsigned int codePoint, char *substring, unsigned int *codeUnits);
 
   private:
 	/// Size of the local buffer

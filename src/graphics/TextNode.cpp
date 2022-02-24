@@ -171,9 +171,9 @@ void TextNode::draw(RenderQueue &renderQueue)
 			}
 			else
 			{
-				unsigned int codepoint = nctl::String::InvalidUnicode;
+				unsigned int codepoint = nctl::Utf8::InvalidUnicode;
 				const int codePointLength = string_.utf8ToCodePoint(i, codepoint);
-				const FontGlyph *glyph = (codepoint != nctl::String::InvalidUnicode) ? font_->glyph(codepoint) : nullptr;
+				const FontGlyph *glyph = (codepoint != nctl::Utf8::InvalidUnicode) ? font_->glyph(codepoint) : nullptr;
 				if (glyph)
 				{
 					Degenerate degen = Degenerate::NONE;
@@ -193,7 +193,7 @@ void TextNode::draw(RenderQueue &renderQueue)
 						// font kerning
 						if (i + codePointLength < length)
 						{
-							unsigned int nextCodepoint = nctl::String::InvalidUnicode;
+							unsigned int nextCodepoint = nctl::Utf8::InvalidUnicode;
 							string_.utf8ToCodePoint(i + codePointLength, nextCodepoint);
 							xAdvance_ += glyph->kerning(nextCodepoint);
 						}
@@ -292,9 +292,9 @@ void TextNode::calculateBoundaries() const
 			}
 			else
 			{
-				unsigned int codepoint = nctl::String::InvalidUnicode;
+				unsigned int codepoint = nctl::Utf8::InvalidUnicode;
 				const int codePointLength = string_.utf8ToCodePoint(i, codepoint);
-				const FontGlyph *glyph = (codepoint != nctl::String::InvalidUnicode) ? font_->glyph(codepoint) : nullptr;
+				const FontGlyph *glyph = (codepoint != nctl::Utf8::InvalidUnicode) ? font_->glyph(codepoint) : nullptr;
 				if (glyph)
 				{
 					xAdvance_ += glyph->xAdvance();
@@ -303,7 +303,7 @@ void TextNode::calculateBoundaries() const
 						// font kerning
 						if (i + codePointLength < length)
 						{
-							unsigned int nextCodepoint = nctl::String::InvalidUnicode;
+							unsigned int nextCodepoint = nctl::Utf8::InvalidUnicode;
 							string_.utf8ToCodePoint(i + codePointLength, nextCodepoint);
 							xAdvance_ += glyph->kerning(nextCodepoint);
 						}

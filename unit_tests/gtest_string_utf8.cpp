@@ -14,25 +14,25 @@ class StringUTF8Test : public ::testing::Test
 
 TEST_F(StringUTF8Test, Utf8ToCodePointNullString)
 {
-	unsigned int codePoint = nctl::String::InvalidUnicode;
+	unsigned int codePoint = nctl::Utf8::InvalidUnicode;
 	unsigned int codeUnit = 0;
 	printf("Trying to decode a string with a `nullptr` address\n");
-	const char *substring = nctl::String::utf8ToCodePoint(nullptr, codePoint, &codeUnit);
+	const char *substring = nctl::Utf8::utf8ToCodePoint(nullptr, codePoint, &codeUnit);
 
-	ASSERT_TRUE(codePoint == nctl::String::InvalidUnicode);
+	ASSERT_TRUE(codePoint == nctl::Utf8::InvalidUnicode);
 	ASSERT_EQ(codeUnit, 0);
 	ASSERT_EQ(substring, nullptr);
 }
 
 TEST_F(StringUTF8Test, Utf8ToCodePointEmptyString)
 {
-	unsigned int codePoint = nctl::String::InvalidUnicode;
+	unsigned int codePoint = nctl::Utf8::InvalidUnicode;
 	unsigned int codeUnit = 0;
 	const char utf8String[1] = { '\0' };
 	printf("Trying to decode an empty string\n");
-	const char *substring = nctl::String::utf8ToCodePoint(utf8String, codePoint, &codeUnit);
+	const char *substring = nctl::Utf8::utf8ToCodePoint(utf8String, codePoint, &codeUnit);
 
-	ASSERT_TRUE(codePoint == nctl::String::InvalidUnicode);
+	ASSERT_TRUE(codePoint == nctl::Utf8::InvalidUnicode);
 	ASSERT_EQ(codeUnit, 0);
 	ASSERT_EQ(utf8String, substring);
 }
@@ -48,13 +48,13 @@ TEST_F(StringUTF8Test, Utf8ToCodePoints)
 	unsigned int decodeCount = 0;
 	for (unsigned int i = 0; i < string_.length();) // increments handled by UTF-8 decoding
 	{
-		unsigned int codePoint = nctl::String::InvalidUnicode;
-		unsigned int utf8Encoded = nctl::String::InvalidUtf8;
+		unsigned int codePoint = nctl::Utf8::InvalidUnicode;
+		unsigned int utf8Encoded = nctl::Utf8::InvalidUtf8;
 		i += string_.utf8ToCodePoint(i, codePoint, &utf8Encoded);
 		printf("Character %u at string position %u has code point 0x%x encoded as 0x%x\n", decodeCount, i, codePoint, utf8Encoded);
 		ASSERT_EQ(codePoint, codePoints[decodeCount]);
 		ASSERT_EQ(utf8Encoded, codeUnits[decodeCount]);
-		decodeCount += (codePoint != nctl::String::InvalidUnicode) ? 1 : 0;
+		decodeCount += (codePoint != nctl::Utf8::InvalidUnicode) ? 1 : 0;
 	}
 
 	ASSERT_EQ(decodeCount, 3);
@@ -73,7 +73,7 @@ TEST_F(StringUTF8Test, CodePointsToUtf8)
 	unsigned int encodeCount = 0;
 	for (unsigned int i = 0; i < NumCodePoints; i++)
 	{
-		const unsigned int encodedChars = nctl::String::codePointToUtf8(codePoints[i], utf8String, &codeUnit);
+		const unsigned int encodedChars = nctl::Utf8::codePointToUtf8(codePoints[i], utf8String, &codeUnit);
 		ASSERT_EQ(codeUnit, codeUnits[i]);
 		for (unsigned int j = 0; j < encodedChars; j++)
 			ASSERT_EQ(string_[encodeCount + j], utf8String[j]);
@@ -96,13 +96,13 @@ TEST_F(StringUTF8Test, Utf8ToCodePointsWithASCIIString)
 	unsigned int decodeCount = 0;
 	for (unsigned int i = 0; i < string_.length();) // increments handled by UTF-8 decoding
 	{
-		unsigned int codePoint = nctl::String::InvalidUnicode;
-		unsigned int utf8Encoded = nctl::String::InvalidUtf8;
+		unsigned int codePoint = nctl::Utf8::InvalidUnicode;
+		unsigned int utf8Encoded = nctl::Utf8::InvalidUtf8;
 		i += string_.utf8ToCodePoint(i, codePoint, &utf8Encoded);
 		printf("Character %u at string position %u has code point 0x%x encoded as 0x%x\n", decodeCount, i, codePoint, utf8Encoded);
 		ASSERT_EQ(codePoint, codePoints[decodeCount]);
 		ASSERT_EQ(utf8Encoded, codeUnits[decodeCount]);
-		decodeCount += (codePoint != nctl::String::InvalidUnicode) ? 1 : 0;
+		decodeCount += (codePoint != nctl::Utf8::InvalidUnicode) ? 1 : 0;
 	}
 
 	ASSERT_EQ(decodeCount, 3);
@@ -121,7 +121,7 @@ TEST_F(StringUTF8Test, CodePointsToUtf8WithASCIIString)
 	unsigned int encodeCount = 0;
 	for (unsigned int i = 0; i < NumCodePoints; i++)
 	{
-		const unsigned int encodedChars = nctl::String::codePointToUtf8(codePoints[i], utf8String, &codeUnit);
+		const unsigned int encodedChars = nctl::Utf8::codePointToUtf8(codePoints[i], utf8String, &codeUnit);
 		ASSERT_EQ(codeUnit, codeUnits[i]);
 		for (unsigned int j = 0; j < encodedChars; j++)
 			ASSERT_EQ(string_[encodeCount + j], utf8String[j]);
@@ -146,18 +146,18 @@ TEST_F(StringUTF8Test, Utf8InvalidSequenceTwo)
 	unsigned int decodeCount = 0;
 	for (unsigned int i = 0; i < string_.length();) // increments handled by UTF-8 decoding
 	{
-		unsigned int codePoint = nctl::String::InvalidUnicode;
-		unsigned int utf8Encoded = nctl::String::InvalidUtf8;
+		unsigned int codePoint = nctl::Utf8::InvalidUnicode;
+		unsigned int utf8Encoded = nctl::Utf8::InvalidUtf8;
 		i += string_.utf8ToCodePoint(i, codePoint, &utf8Encoded);
 		printf("Character %u at string position %u has code point 0x%x encoded as 0x%x\n", decodeCount, i, codePoint, utf8Encoded);
 		if (firstCharacter)
 		{
-			ASSERT_TRUE(codePoint == nctl::String::InvalidUnicode);
-			ASSERT_TRUE(utf8Encoded == nctl::String::InvalidUtf8);
+			ASSERT_TRUE(codePoint == nctl::Utf8::InvalidUnicode);
+			ASSERT_TRUE(utf8Encoded == nctl::Utf8::InvalidUtf8);
 			ASSERT_EQ(i, 1);
 			firstCharacter = false;
 		}
-		decodeCount += (codePoint != nctl::String::InvalidUnicode) ? 1 : 0;
+		decodeCount += (codePoint != nctl::Utf8::InvalidUnicode) ? 1 : 0;
 	}
 
 	ASSERT_EQ(decodeCount, 1);
@@ -175,13 +175,13 @@ TEST_F(StringUTF8Test, Utf8InvalidSequenceIdentifierTwo)
 	unsigned int decodeCount = 0;
 	for (unsigned int i = 0; i < string_.length();) // increments handled by UTF-8 decoding
 	{
-		unsigned int codePoint = nctl::String::InvalidUnicode;
-		unsigned int utf8Encoded = nctl::String::InvalidUtf8;
+		unsigned int codePoint = nctl::Utf8::InvalidUnicode;
+		unsigned int utf8Encoded = nctl::Utf8::InvalidUtf8;
 		i += string_.utf8ToCodePoint(i, codePoint, &utf8Encoded);
 		printf("Character %u at string position %u has code point 0x%x encoded as 0x%x\n", decodeCount, i, codePoint, utf8Encoded);
-		ASSERT_TRUE(codePoint == nctl::String::InvalidUnicode);
-		ASSERT_TRUE(utf8Encoded == nctl::String::InvalidUtf8);
-		decodeCount += (codePoint != nctl::String::InvalidUnicode) ? 1 : 0;
+		ASSERT_TRUE(codePoint == nctl::Utf8::InvalidUnicode);
+		ASSERT_TRUE(utf8Encoded == nctl::Utf8::InvalidUtf8);
+		decodeCount += (codePoint != nctl::Utf8::InvalidUnicode) ? 1 : 0;
 	}
 
 	ASSERT_EQ(decodeCount, 0);
@@ -198,14 +198,14 @@ TEST_F(StringUTF8Test, Utf8InvalidSequenceMissingTwo)
 	unsigned int decodeCount = 0;
 	for (unsigned int i = 0; i < string_.length();) // increments handled by UTF-8 decoding
 	{
-		unsigned int codePoint = nctl::String::InvalidUnicode;
-		unsigned int utf8Encoded = nctl::String::InvalidUtf8;
+		unsigned int codePoint = nctl::Utf8::InvalidUnicode;
+		unsigned int utf8Encoded = nctl::Utf8::InvalidUtf8;
 		i += string_.utf8ToCodePoint(i, codePoint, &utf8Encoded);
 		printf("Character %u at string position %u has code point 0x%x encoded as 0x%x\n", decodeCount, i, codePoint, utf8Encoded);
-		ASSERT_TRUE(codePoint == nctl::String::InvalidUnicode);
-		ASSERT_TRUE(utf8Encoded == nctl::String::InvalidUtf8);
+		ASSERT_TRUE(codePoint == nctl::Utf8::InvalidUnicode);
+		ASSERT_TRUE(utf8Encoded == nctl::Utf8::InvalidUtf8);
 		ASSERT_EQ(i, 1);
-		decodeCount += (codePoint != nctl::String::InvalidUnicode) ? 1 : 0;
+		decodeCount += (codePoint != nctl::Utf8::InvalidUnicode) ? 1 : 0;
 	}
 
 	ASSERT_EQ(decodeCount, 0);
@@ -225,18 +225,18 @@ TEST_F(StringUTF8Test, Utf8InvalidSequenceThreeSecond)
 	unsigned int decodeCount = 0;
 	for (unsigned int i = 0; i < string_.length();) // increments handled by UTF-8 decoding
 	{
-		unsigned int codePoint = nctl::String::InvalidUnicode;
-		unsigned int utf8Encoded = nctl::String::InvalidUtf8;
+		unsigned int codePoint = nctl::Utf8::InvalidUnicode;
+		unsigned int utf8Encoded = nctl::Utf8::InvalidUtf8;
 		i += string_.utf8ToCodePoint(i, codePoint, &utf8Encoded);
 		printf("Character %u at string position %u has code point 0x%x encoded as 0x%x\n", decodeCount, i, codePoint, utf8Encoded);
 		if (firstCharacter)
 		{
-			ASSERT_TRUE(codePoint == nctl::String::InvalidUnicode);
-			ASSERT_TRUE(utf8Encoded == nctl::String::InvalidUtf8);
+			ASSERT_TRUE(codePoint == nctl::Utf8::InvalidUnicode);
+			ASSERT_TRUE(utf8Encoded == nctl::Utf8::InvalidUtf8);
 			ASSERT_EQ(i, 1);
 			firstCharacter = false;
 		}
-		decodeCount += (codePoint != nctl::String::InvalidUnicode) ? 1 : 0;
+		decodeCount += (codePoint != nctl::Utf8::InvalidUnicode) ? 1 : 0;
 	}
 
 	ASSERT_EQ(decodeCount, 1);
@@ -256,18 +256,18 @@ TEST_F(StringUTF8Test, Utf8InvalidSequenceThreeThird)
 	unsigned int decodeCount = 0;
 	for (unsigned int i = 0; i < string_.length();) // increments handled by UTF-8 decoding
 	{
-		unsigned int codePoint = nctl::String::InvalidUnicode;
-		unsigned int utf8Encoded = nctl::String::InvalidUtf8;
+		unsigned int codePoint = nctl::Utf8::InvalidUnicode;
+		unsigned int utf8Encoded = nctl::Utf8::InvalidUtf8;
 		i += string_.utf8ToCodePoint(i, codePoint, &utf8Encoded);
 		printf("Character %u at string position %u has code point 0x%x encoded as 0x%x\n", decodeCount, i, codePoint, utf8Encoded);
 		if (firstCharacter)
 		{
-			ASSERT_TRUE(codePoint == nctl::String::InvalidUnicode);
-			ASSERT_TRUE(utf8Encoded == nctl::String::InvalidUtf8);
+			ASSERT_TRUE(codePoint == nctl::Utf8::InvalidUnicode);
+			ASSERT_TRUE(utf8Encoded == nctl::Utf8::InvalidUtf8);
 			ASSERT_EQ(i, 2);
 			firstCharacter = false;
 		}
-		decodeCount += (codePoint != nctl::String::InvalidUnicode) ? 1 : 0;
+		decodeCount += (codePoint != nctl::Utf8::InvalidUnicode) ? 1 : 0;
 	}
 
 	ASSERT_EQ(decodeCount, 1);
@@ -285,14 +285,14 @@ TEST_F(StringUTF8Test, Utf8InvalidSequenceMissingThree)
 	unsigned int decodeCount = 0;
 	for (unsigned int i = 0; i < string_.length();) // increments handled by UTF-8 decoding
 	{
-		unsigned int codePoint = nctl::String::InvalidUnicode;
-		unsigned int utf8Encoded = nctl::String::InvalidUtf8;
+		unsigned int codePoint = nctl::Utf8::InvalidUnicode;
+		unsigned int utf8Encoded = nctl::Utf8::InvalidUtf8;
 		i += string_.utf8ToCodePoint(i, codePoint, &utf8Encoded);
 		printf("Character %u at string position %u has code point 0x%x encoded as 0x%x\n", decodeCount, i, codePoint, utf8Encoded);
-		ASSERT_TRUE(codePoint == nctl::String::InvalidUnicode);
-		ASSERT_TRUE(utf8Encoded == nctl::String::InvalidUtf8);
+		ASSERT_TRUE(codePoint == nctl::Utf8::InvalidUnicode);
+		ASSERT_TRUE(utf8Encoded == nctl::Utf8::InvalidUtf8);
 		ASSERT_EQ(i, 2);
-		decodeCount += (codePoint != nctl::String::InvalidUnicode) ? 1 : 0;
+		decodeCount += (codePoint != nctl::Utf8::InvalidUnicode) ? 1 : 0;
 	}
 
 	ASSERT_EQ(decodeCount, 0);
@@ -313,18 +313,18 @@ TEST_F(StringUTF8Test, Utf8InvalidSequenceFourSecond)
 	unsigned int decodeCount = 0;
 	for (unsigned int i = 0; i < string_.length();) // increments handled by UTF-8 decoding
 	{
-		unsigned int codePoint = nctl::String::InvalidUnicode;
-		unsigned int utf8Encoded = nctl::String::InvalidUtf8;
+		unsigned int codePoint = nctl::Utf8::InvalidUnicode;
+		unsigned int utf8Encoded = nctl::Utf8::InvalidUtf8;
 		i += string_.utf8ToCodePoint(i, codePoint, &utf8Encoded);
 		printf("Character %u at string position %u has code point 0x%x encoded as 0x%x\n", decodeCount, i, codePoint, utf8Encoded);
 		if (firstCharacter)
 		{
-			ASSERT_TRUE(codePoint == nctl::String::InvalidUnicode);
-			ASSERT_TRUE(utf8Encoded == nctl::String::InvalidUtf8);
+			ASSERT_TRUE(codePoint == nctl::Utf8::InvalidUnicode);
+			ASSERT_TRUE(utf8Encoded == nctl::Utf8::InvalidUtf8);
 			ASSERT_EQ(i, 1);
 			firstCharacter = false;
 		}
-		decodeCount += (codePoint != nctl::String::InvalidUnicode) ? 1 : 0;
+		decodeCount += (codePoint != nctl::Utf8::InvalidUnicode) ? 1 : 0;
 	}
 
 	ASSERT_EQ(decodeCount, 1);
@@ -345,18 +345,18 @@ TEST_F(StringUTF8Test, Utf8InvalidSequenceFourThird)
 	unsigned int decodeCount = 0;
 	for (unsigned int i = 0; i < string_.length();) // increments handled by UTF-8 decoding
 	{
-		unsigned int codePoint = nctl::String::InvalidUnicode;
-		unsigned int utf8Encoded = nctl::String::InvalidUtf8;
+		unsigned int codePoint = nctl::Utf8::InvalidUnicode;
+		unsigned int utf8Encoded = nctl::Utf8::InvalidUtf8;
 		i += string_.utf8ToCodePoint(i, codePoint, &utf8Encoded);
 		printf("Character %u at string position %u has code point 0x%x encoded as 0x%x\n", decodeCount, i, codePoint, utf8Encoded);
 		if (firstCharacter)
 		{
-			ASSERT_TRUE(codePoint == nctl::String::InvalidUnicode);
-			ASSERT_TRUE(utf8Encoded == nctl::String::InvalidUtf8);
+			ASSERT_TRUE(codePoint == nctl::Utf8::InvalidUnicode);
+			ASSERT_TRUE(utf8Encoded == nctl::Utf8::InvalidUtf8);
 			ASSERT_EQ(i, 2);
 			firstCharacter = false;
 		}
-		decodeCount += (codePoint != nctl::String::InvalidUnicode) ? 1 : 0;
+		decodeCount += (codePoint != nctl::Utf8::InvalidUnicode) ? 1 : 0;
 	}
 
 	ASSERT_EQ(decodeCount, 1);
@@ -377,18 +377,18 @@ TEST_F(StringUTF8Test, Utf8InvalidSequenceFourFourth)
 	unsigned int decodeCount = 0;
 	for (unsigned int i = 0; i < string_.length();) // increments handled by UTF-8 decoding
 	{
-		unsigned int codePoint = nctl::String::InvalidUnicode;
-		unsigned int utf8Encoded = nctl::String::InvalidUtf8;
+		unsigned int codePoint = nctl::Utf8::InvalidUnicode;
+		unsigned int utf8Encoded = nctl::Utf8::InvalidUtf8;
 		i += string_.utf8ToCodePoint(i, codePoint, &utf8Encoded);
 		printf("Character %u at string position %u has code point 0x%x encoded as 0x%x\n", decodeCount, i, codePoint, utf8Encoded);
 		if (firstCharacter)
 		{
-			ASSERT_TRUE(codePoint == nctl::String::InvalidUnicode);
-			ASSERT_TRUE(utf8Encoded == nctl::String::InvalidUtf8);
+			ASSERT_TRUE(codePoint == nctl::Utf8::InvalidUnicode);
+			ASSERT_TRUE(utf8Encoded == nctl::Utf8::InvalidUtf8);
 			ASSERT_EQ(i, 3);
 			firstCharacter = false;
 		}
-		decodeCount += (codePoint != nctl::String::InvalidUnicode) ? 1 : 0;
+		decodeCount += (codePoint != nctl::Utf8::InvalidUnicode) ? 1 : 0;
 	}
 
 	ASSERT_EQ(decodeCount, 1);
@@ -407,14 +407,14 @@ TEST_F(StringUTF8Test, Utf8InvalidSequenceMissingFour)
 	unsigned int decodeCount = 0;
 	for (unsigned int i = 0; i < string_.length();) // increments handled by UTF-8 decoding
 	{
-		unsigned int codePoint = nctl::String::InvalidUnicode;
-		unsigned int utf8Encoded = nctl::String::InvalidUtf8;
+		unsigned int codePoint = nctl::Utf8::InvalidUnicode;
+		unsigned int utf8Encoded = nctl::Utf8::InvalidUtf8;
 		i += string_.utf8ToCodePoint(i, codePoint, &utf8Encoded);
 		printf("Character %u at string position %u has code point 0x%x encoded as 0x%x\n", decodeCount, i, codePoint, utf8Encoded);
-		ASSERT_TRUE(codePoint == nctl::String::InvalidUnicode);
-		ASSERT_TRUE(utf8Encoded == nctl::String::InvalidUtf8);
+		ASSERT_TRUE(codePoint == nctl::Utf8::InvalidUnicode);
+		ASSERT_TRUE(utf8Encoded == nctl::Utf8::InvalidUtf8);
 		ASSERT_EQ(i, 3);
-		decodeCount += (codePoint != nctl::String::InvalidUnicode) ? 1 : 0;
+		decodeCount += (codePoint != nctl::Utf8::InvalidUnicode) ? 1 : 0;
 	}
 
 	ASSERT_EQ(decodeCount, 0);
@@ -427,11 +427,11 @@ TEST_F(StringUTF8Test, Utf8BeyondStringEnd)
 	printString("Empty string: ", string_);
 
 	unsigned int i = 5;
-	unsigned int codePoint = nctl::String::InvalidUnicode;
-	unsigned int utf8Encoded = nctl::String::InvalidUtf8;
+	unsigned int codePoint = nctl::Utf8::InvalidUnicode;
+	unsigned int utf8Encoded = nctl::Utf8::InvalidUtf8;
 	i += string_.utf8ToCodePoint(i, codePoint, &utf8Encoded);
-	ASSERT_TRUE(codePoint == nctl::String::InvalidUnicode);
-	ASSERT_TRUE(utf8Encoded == nctl::String::InvalidUtf8);
+	ASSERT_TRUE(codePoint == nctl::Utf8::InvalidUnicode);
+	ASSERT_TRUE(utf8Encoded == nctl::Utf8::InvalidUtf8);
 	ASSERT_EQ(i, 5);
 }
 
