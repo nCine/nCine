@@ -1,3 +1,4 @@
+#include <nctl/StaticString.h>
 #include "Viewport.h"
 #include "RenderQueue.h"
 #include "RenderResources.h"
@@ -9,9 +10,15 @@
 #include "GLClearColor.h"
 #include "GLViewport.h"
 #include "GLScissorTest.h"
+#include "GLDebug.h"
 #include "tracy.h"
 
 namespace ncine {
+
+namespace {
+	/// The string used to output OpenGL debug group information
+	static nctl::StaticString<64> debugString;
+}
 
 Texture::Format colorFormatToTexFormat(Viewport::ColorFormat format)
 {
@@ -307,6 +314,13 @@ void Viewport::draw()
 		nextViewport_->draw();
 
 	ZoneScoped;
+	if (type_ == Type::SCREEN)
+		debugString.format("Draw root viewport (0x%lx)", uintptr_t(this));
+	else if (type_ == Type::REGULAR && texture_->name().isEmpty() == false)
+		debugString.format("Draw viewport \"%s\" (0x%lx)", texture_->name().data(), uintptr_t(this));
+	else
+		debugString.format("Draw viewport (0x%lx)", uintptr_t(this));
+	GLDebug::ScopedGroup(debugString.data());
 
 	if (type_ == Type::REGULAR)
 		fbo_->bind(GL_DRAW_FRAMEBUFFER);

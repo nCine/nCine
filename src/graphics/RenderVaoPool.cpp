@@ -1,9 +1,15 @@
+#include <nctl/StaticString.h>
 #include "RenderVaoPool.h"
 #include "GLVertexArrayObject.h"
 #include "RenderStatistics.h"
 #include "GLDebug.h"
 
 namespace ncine {
+
+namespace {
+	/// The string used to output OpenGL debug group information
+	static nctl::StaticString<128> debugString;
+}
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -28,12 +34,14 @@ void RenderVaoPool::bindVao(const GLVertexFormat &vertexFormat)
 	{
 		if (binding.format == vertexFormat)
 		{
-			GLDebug::pushGroup("Bind VAO");
 			vaoFound = true;
 			const bool bindChanged = binding.object->bind();
 			const GLuint iboHandle = vertexFormat.ibo() ? vertexFormat.ibo()->glHandle() : 0;
 			if (bindChanged)
 			{
+				if (GLDebug::isAvailable())
+					insertGLDebugMessage(binding);
+
 				// Binding a VAO changes the current bound element array buffer
 				GLBufferObject::setBoundHandle(GL_ELEMENT_ARRAY_BUFFER, iboHandle);
 			}
@@ -53,10 +61,11 @@ void RenderVaoPool::bindVao(const GLVertexFormat &vertexFormat)
 		unsigned int index = 0;
 		if (vaoPool_.size() < vaoPool_.capacity())
 		{
-			GLDebug::pushGroup("Create and define VAO");
 			vaoPool_.emplaceBack();
 			vaoPool_.back().object = nctl::makeUnique<GLVertexArrayObject>();
 			index = vaoPool_.size() - 1;
+			debugString.format("Created and defined VAO 0x%lx (%u)", uintptr_t(vaoPool_[index].object.get()), index);
+			GLDebug::messageInsert(debugString.data());
 		}
 		else
 		{
@@ -71,7 +80,8 @@ void RenderVaoPool::bindVao(const GLVertexFormat &vertexFormat)
 				}
 			}
 
-			GLDebug::pushGroup("Reuse and define VAO");
+			debugString.format("Reuse and define VAO 0x%lx (%u)", uintptr_t(vaoPool_[index].object.get()), index);
+			GLDebug::messageInsert(debugString.data());
 			RenderStatistics::addVaoPoolReuse();
 		}
 
@@ -85,9 +95,33 @@ void RenderVaoPool::bindVao(const GLVertexFormat &vertexFormat)
 		vaoPool_[index].lastBindTime = TimeStamp::now();
 		RenderStatistics::addVaoPoolBinding();
 	}
-	GLDebug::popGroup();
 
 	RenderStatistics::gatherVaoPoolStatistics(vaoPool_.size(), vaoPool_.capacity());
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void RenderVaoPool::insertGLDebugMessage(const VaoBinding &binding)
+{
+	debugString.format("Bind VAO 0x%lx (", uintptr_t(binding.object.get()));
+	bool firstVbo = true;
+	for (unsigned int i = 0; i < binding.format.numAttributes(); i++)
+	{
+		if (binding.format[i].isEnabled() && binding.format[i].vbo() != nullptr)
+		{
+			if (firstVbo == false)
+				debugString.formatAppend(", ");
+			debugString.formatAppend("vbo #%u: 0x%lx", i, uintptr_t(binding.format[i].vbo()));
+			firstVbo = false;
+		}
+	}
+	if (binding.format.ibo() != nullptr)
+		debugString.formatAppend(", ibo: 0x%lx", uintptr_t(binding.format.ibo()));
+	debugString.formatAppend(")");
+
+	GLDebug::messageInsert(debugString.data());
 }
 
 }

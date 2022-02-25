@@ -1,9 +1,15 @@
+#include <nctl/StaticString.h>
 #include "RenderBuffersManager.h"
 #include "RenderStatistics.h"
 #include "GLDebug.h"
 #include "tracy.h"
 
 namespace ncine {
+
+namespace {
+	/// The string used to output OpenGL debug group information
+	static nctl::StaticString<64> debugString;
+}
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -169,7 +175,6 @@ void RenderBuffersManager::remap()
 void RenderBuffersManager::createBuffer(const BufferSpecifications &specs)
 {
 	ZoneScoped;
-	GLDebug::ScopedGroup scoped("RenderBuffersManager::createBuffer()");
 
 	ManagedBuffer managedBuffer;
 	managedBuffer.type = specs.type;
@@ -189,6 +194,9 @@ void RenderBuffersManager::createBuffer(const BufferSpecifications &specs)
 	FATAL_ASSERT(managedBuffer.mapBase != nullptr);
 
 	buffers_.pushBack(nctl::move(managedBuffer));
+
+	debugString.format("Create %s buffer 0x%lx", bufferTypeToString(specs.type), uintptr_t(buffers_.back().object.get()));
+	GLDebug::messageInsert(debugString.data());
 }
 
 }

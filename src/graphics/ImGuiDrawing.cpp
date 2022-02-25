@@ -299,10 +299,11 @@ void ImGuiDrawing::draw()
 		const ImDrawList *imCmdList = drawData->CmdLists[n];
 		const ImDrawIdx *firstIndex = nullptr;
 
+		// Always define vertex format (and bind VAO) before uploading data to buffers
+		imguiShaderAttributes_->defineVertexFormat(vbo_.get(), ibo_.get());
 		vbo_->bufferData(static_cast<GLsizeiptr>(imCmdList->VtxBuffer.Size) * sizeof(ImDrawVert), static_cast<const GLvoid *>(imCmdList->VtxBuffer.Data), GL_STREAM_DRAW);
 		ibo_->bufferData(static_cast<GLsizeiptr>(imCmdList->IdxBuffer.Size) * sizeof(ImDrawIdx), static_cast<const GLvoid *>(imCmdList->IdxBuffer.Data), GL_STREAM_DRAW);
 		imguiShaderProgram_->use();
-		imguiShaderAttributes_->defineVertexFormat(vbo_.get(), ibo_.get());
 
 		for (int cmdIdx = 0; cmdIdx < imCmdList->CmdBuffer.Size; cmdIdx++)
 		{

@@ -27,6 +27,16 @@ class GLVertexFormat
 		bool operator==(const Attribute &other) const;
 		bool operator!=(const Attribute &other) const;
 
+		inline bool isEnabled() const { return enabled_; }
+		inline const GLBufferObject *vbo() const { return vbo_; }
+		inline unsigned int index() const { return index_; }
+		inline GLint size() const { return size_; }
+		inline GLenum type() const { return type_; }
+		inline bool isNormalized() const { return normalized_ == GL_TRUE; }
+		inline GLsizei stride() const { return stride_; }
+		inline const GLvoid *pointer() const { return pointer_; }
+		inline unsigned int baseOffset() const { return baseOffset_; }
+
 		inline void setVboParameters(GLsizei stride, const GLvoid *pointer)
 		{
 			stride_ = stride;
@@ -57,6 +67,8 @@ class GLVertexFormat
 	GLVertexFormat();
 	GLVertexFormat(const GLVertexFormat &other) = default;
 	GLVertexFormat &operator=(const ncine::GLVertexFormat &other) = default;
+
+	inline unsigned int numAttributes() const { return attributes_.size(); }
 
 	inline const GLBufferObject *ibo() const { return ibo_; }
 	inline void setIbo(const GLBufferObject *ibo) { ibo_ = ibo; }

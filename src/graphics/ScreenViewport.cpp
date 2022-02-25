@@ -7,6 +7,7 @@
 #include "DisplayMode.h"
 #include "GLClearColor.h"
 #include "GLViewport.h"
+#include "GLDebug.h"
 
 namespace ncine {
 
@@ -55,6 +56,7 @@ void ScreenViewport::draw()
 
 	RenderResources::buffersManager().remap();
 	RenderResources::renderCommandPool().reset();
+	GLDebug::reset();
 }
 
 }

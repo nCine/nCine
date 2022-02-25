@@ -27,6 +27,8 @@ class RenderVaoPool
 	};
 
 	nctl::Array<VaoBinding> vaoPool_;
+
+	void insertGLDebugMessage(const VaoBinding &binding);
 };
 
 }

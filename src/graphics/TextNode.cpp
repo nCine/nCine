@@ -2,7 +2,6 @@
 #include "FontGlyph.h"
 #include "Texture.h"
 #include "RenderCommand.h"
-#include "GLDebug.h"
 #include "tracy.h"
 
 namespace ncine {
@@ -151,8 +150,7 @@ void TextNode::draw(RenderQueue &renderQueue)
 
 	if (font_ && dirtyDraw_)
 	{
-		GLDebug::ScopedGroup scoped("Processing TextNode glyphs");
-
+		ZoneScoped;
 		// Clear every previous quad before drawing again
 		interleavedVertices_.clear();
 

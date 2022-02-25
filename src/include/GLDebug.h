@@ -4,9 +4,9 @@
 #define NCINE_INCLUDE_OPENGL
 #include "common_headers.h"
 
-#include "IGfxCapabilities.h"
-
 namespace ncine {
+
+class IGfxCapabilities;
 
 /// A class to handle OpenGL debug functions
 class GLDebug
@@ -54,15 +54,18 @@ class GLDebug
 	class ScopedGroup
 	{
 	  public:
-		ScopedGroup(const char *message) { pushGroup(message); }
+		explicit ScopedGroup(const char *message) { pushGroup(message); }
 		~ScopedGroup() { popGroup(); }
 	};
 
 	static void init(const IGfxCapabilities &gfxCaps);
 	static inline void reset() { debugGroupId_ = 0; }
 
+	static inline bool isAvailable() { return debugAvailable_; }
+
 	static void pushGroup(const char *message);
 	static void popGroup();
+	static void messageInsert(const char *message);
 
 	static void objectLabel(LabelTypes identifier, GLuint name, const char *label);
 	static void objectLabel(LabelTypes identifier, GLuint name, GLsizei length, const char *label);

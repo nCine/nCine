@@ -1,5 +1,6 @@
 #include "common_macros.h"
 #include "GLDebug.h"
+#include "IGfxCapabilities.h"
 #include "Application.h"
 
 #if !defined(__ANDROID__) && defined(WITH_OPENGLES) && defined(__linux__)
@@ -9,6 +10,7 @@
 #if ((defined(__ANDROID__) && __ANDROID_API__ >= 21) || (!defined(__ANDROID__) && defined(WITH_OPENGLES))) && !defined(__APPLE__) && !defined(__EMSCRIPTEN__) && (GL_ES_VERSION_3_0 && !GL_ES_VERSION_3_2)
 	#define glPushDebugGroup glPushDebugGroupKHR
 	#define glPopDebugGroup glPopDebugGroupKHR
+	#define glDebugMessageInsert glDebugMessageInsertKHR
 	#define glObjectLabel glObjectLabelKHR
 	#define glGetObjectLabel glGetObjectLabelKHR
 	#define GL_MAX_LABEL_LENGTH GL_MAX_LABEL_LENGTH_KHR
@@ -80,6 +82,14 @@ void GLDebug::popGroup()
 #if (!defined(__ANDROID__) && !defined(__APPLE__) && !defined(__EMSCRIPTEN__)) || (GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21)
 	if (debugAvailable_)
 		glPopDebugGroup();
+#endif
+}
+
+void GLDebug::messageInsert(const char *message)
+{
+#if (!defined(__ANDROID__) && !defined(__APPLE__) && !defined(__EMSCRIPTEN__)) || (GL_ES_VERSION_3_0 && __ANDROID_API__ >= 21)
+	if (debugAvailable_)
+		glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_MARKER, debugGroupId_++, GL_DEBUG_SEVERITY_NOTIFICATION, -1, message);
 #endif
 }
 

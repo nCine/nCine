@@ -278,6 +278,8 @@ void NuklearDrawing::draw()
 	nk_buffer_init_default(&ibuf);
 	nk_convert(&NuklearContext::ctx_, &NuklearContext::cmds_, &vbuf, &ibuf, &config_);
 
+	// Always define vertex format (and bind VAO) before uploading data to buffers
+	nuklearShaderAttributes_->defineVertexFormat(vbo_.get(), ibo_.get());
 	/* copy to vertex and element buffer */
 	vbo_->bufferData(vbuf.size, vbuf.memory.ptr, GL_STREAM_DRAW);
 	ibo_->bufferData(ibuf.size, ibuf.memory.ptr, GL_STREAM_DRAW);
@@ -297,7 +299,6 @@ void NuklearDrawing::draw()
 
 	// setup program
 	nuklearShaderProgram_->use();
-	nuklearShaderAttributes_->defineVertexFormat(vbo_.get(), ibo_.get());
 	GLViewport::setRect(0, 0, NuklearContext::displayWidth_, NuklearContext::displayHeight_);
 
 	// iterate over and execute each draw command

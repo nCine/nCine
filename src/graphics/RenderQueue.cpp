@@ -1,4 +1,5 @@
 #include <nctl/algorithms.h>
+#include <nctl/StaticString.h>
 #include "RenderQueue.h"
 #include "RenderBatcher.h"
 #include "RenderResources.h"
@@ -12,12 +13,17 @@
 
 namespace ncine {
 
+namespace {
+	/// The string used to output OpenGL debug group information
+	static nctl::StaticString<64> debugString;
+}
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 RenderQueue::RenderQueue(Viewport &viewport)
-    : debugGroupString_(64), viewport_(viewport),
+    : viewport_(viewport),
       opaqueQueue_(16), opaqueBatchedQueue_(16),
       transparentQueue_(16), transparentBatchedQueue_(16)
 {
@@ -103,7 +109,8 @@ void RenderQueue::sortAndCommit()
 	if (opaques->isEmpty() == false)
 	{
 		ZoneScopedN("Commit opaques");
-		GLDebug::ScopedGroup scoped("Committing vertices, indices and uniform blocks in opaques");
+		debugString.format("Commit %u opaque command(s) for viewport 0x%lx", opaques->size(), uintptr_t(&viewport_));
+		GLDebug::ScopedGroup scoped(debugString.data());
 		for (RenderCommand *opaqueRenderCommand : *opaques)
 			opaqueRenderCommand->commitAll();
 	}
@@ -111,7 +118,8 @@ void RenderQueue::sortAndCommit()
 	if (transparents->isEmpty() == false)
 	{
 		ZoneScopedN("Commit transparents");
-		GLDebug::ScopedGroup scoped("Committing vertices, indices and uniform blocks in transparents");
+		debugString.format("Commit %u transparent command(s) for viewport 0x%lx", transparents->size(), uintptr_t(&viewport_));
+		GLDebug::ScopedGroup scoped(debugString.data());
 		for (RenderCommand *transparentRenderCommand : *transparents)
 			transparentRenderCommand->commitAll();
 	}
@@ -131,16 +139,16 @@ void RenderQueue::draw()
 		const int numInstances = opaqueRenderCommand->numInstances();
 		const int batchSize = opaqueRenderCommand->batchSize();
 		if (numInstances > 0)
-			debugGroupString_.format("Opaque %u (%d %s on layer %u)",
-			                         commandIndex, numInstances, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
+			debugString.format("Opaque %u (%d %s on layer %u)",
+			                   commandIndex, numInstances, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
 		else if (batchSize > 0)
-			debugGroupString_.format("Opaque %u (%d %s on layer %u)",
-			                         commandIndex, batchSize, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
+			debugString.format("Opaque %u (%d %s on layer %u)",
+			                   commandIndex, batchSize, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
 		else
-			debugGroupString_.format("Opaque %u (%s on layer %u)",
-			                         commandIndex, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
+			debugString.format("Opaque %u (%s on layer %u)",
+			                   commandIndex, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
 
-		GLDebug::ScopedGroup scoped(debugGroupString_.data());
+		GLDebug::ScopedGroup scoped(debugString.data());
 		commandIndex++;
 
 		RenderStatistics::gatherStatistics(*opaqueRenderCommand);
@@ -157,16 +165,16 @@ void RenderQueue::draw()
 		const int numInstances = transparentRenderCommand->numInstances();
 		const int batchSize = transparentRenderCommand->batchSize();
 		if (numInstances > 0)
-			debugGroupString_.format("Transparent %u (%d %s on layer %u)",
-			                         commandIndex, numInstances, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
+			debugString.format("Transparent %u (%d %s on layer %u)",
+			                   commandIndex, numInstances, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
 		else if (batchSize > 0)
-			debugGroupString_.format("Transparent %u (%d %s on layer %u)",
-			                         commandIndex, batchSize, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
+			debugString.format("Transparent %u (%d %s on layer %u)",
+			                   commandIndex, batchSize, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
 		else
-			debugGroupString_.format("Transparent %u (%s on layer %u)",
-			                         commandIndex, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
+			debugString.format("Transparent %u (%s on layer %u)",
+			                   commandIndex, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
 
-		GLDebug::ScopedGroup scoped(debugGroupString_.data());
+		GLDebug::ScopedGroup scoped(debugString.data());
 		commandIndex++;
 
 		RenderStatistics::gatherStatistics(*transparentRenderCommand);
@@ -187,7 +195,6 @@ void RenderQueue::draw()
 	transparentBatchedQueue_.clear();
 
 	RenderResources::renderBatcher().reset();
-	GLDebug::reset();
 }
 
 }

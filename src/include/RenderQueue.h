@@ -30,9 +30,6 @@ class RenderQueue
 	inline Viewport &viewport() const { return viewport_; }
 
   private:
-	/// The string used to output OpenGL debug group information
-	nctl::String debugGroupString_;
-
 	/// The viewport that owns this render queue
 	Viewport &viewport_;
 

@@ -12,7 +12,7 @@
 #include "Timer.h" // for `sleep()`
 #include "FrameTimer.h"
 #include "DrawableNode.h"
-#include <nctl/String.h>
+#include <nctl/StaticString.h>
 #include "IInputManager.h"
 #include "JoyMapping.h"
 
@@ -48,7 +48,7 @@
 namespace ncine {
 
 namespace {
-	static nctl::String appInfoString(256);
+	static nctl::StaticString<256> appInfoString;
 }
 
 ///////////////////////////////////////////////////////////
