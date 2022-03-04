@@ -73,6 +73,27 @@ Texture::Texture()
 {
 }
 
+Texture::Texture(const char *name, Format format, int mipMapCount, int width, int height)
+    : Texture()
+{
+	init(name, format, mipMapCount, width, height);
+}
+
+Texture::Texture(const char *name, Format format, int mipMapCount, Vector2i size)
+    : Texture(name, format, mipMapCount, size.x, size.y)
+{
+}
+
+Texture::Texture(const char *name, Format format, int width, int height)
+    : Texture(name, format, 1, width, height)
+{
+}
+
+Texture::Texture(const char *name, Format format, Vector2i size)
+    : Texture(name, format, 1, size.x, size.y)
+{
+}
+
 Texture::Texture(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
     : Texture()
 {

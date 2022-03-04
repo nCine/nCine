@@ -46,7 +46,18 @@ class DLL_PUBLIC Texture : public Object
 	/// Creates an OpenGL texture name
 	Texture();
 
+	/// Creates an empty texture with the specified format, MIP levels, and size
+	Texture(const char *name, Format format, int mipMapCount, int width, int height);
+	/// Creates an empty texture with the specified format, MIP levels, and size using a vector
+	Texture(const char *name, Format format, int mipMapCount, Vector2i size);
+	/// Creates an empty texture with the specified format and size
+	Texture(const char *name, Format format, int width, int height);
+	/// Creates an empty texture with the specified format and size using a vector
+	Texture(const char *name, Format format, Vector2i size);
+
+	/// Creates a texture from a named memory buffer
 	Texture(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
+	/// Creates a texture from an image file
 	explicit Texture(const char *filename);
 
 	~Texture() override;

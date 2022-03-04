@@ -276,7 +276,7 @@ void Viewport::update()
 	if (nextViewport_)
 		nextViewport_->update();
 
-	if (rootNode_)
+	if (rootNode_ && rootNode_->lastFrameUpdated() < theApplication().numFrames())
 	{
 		ZoneScoped;
 		rootNode_->update(theApplication().interval());

@@ -21,16 +21,6 @@ class DLL_PUBLIC SceneNode : public Object
 	/// The minimum amount of rotation to trigger a sine and cosine calculation
 	static const float MinRotation;
 
-	/// Bit positions inside the dirty bitset
-	enum DirtyBitPositions
-	{
-		TransformationBit = 0,
-		ColorBit = 1,
-		SizeBit = 2,
-		TextureBit = 3,
-		AabbBit = 4
-	};
-
 	/// Constructor for a node with a parent and a specified relative position
 	SceneNode(SceneNode *parent, float x, float y);
 	/// Constructor for a node with a parent and a specified relative position as a vector
@@ -176,7 +166,20 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Sets the delete children on destruction flag
 	inline void setDeleteChildrenOnDestruction(bool shouldDeleteChildrenOnDestruction) { shouldDeleteChildrenOnDestruction_ = shouldDeleteChildrenOnDestruction; }
 
+	/// Returns the last frame in which any of the viewports have updtated this node
+	inline unsigned long int lastFrameUpdated() const { return lastFrameUpdated_; }
+
   protected:
+	/// Bit positions inside the dirty bitset
+	enum DirtyBitPositions
+	{
+		TransformationBit = 0,
+		ColorBit = 1,
+		SizeBit = 2,
+		TextureBit = 3,
+		AabbBit = 4
+	};
+
 	bool updateEnabled_;
 	bool drawEnabled_;
 
@@ -220,6 +223,9 @@ class DLL_PUBLIC SceneNode : public Object
 
 	/// Bitset that stores the various dirty states bits
 	nctl::BitSet<uint8_t> dirtyBits_;
+
+	/// The last frame any viewport updated this node
+	unsigned long int lastFrameUpdated_;
 
 	/// Deleted assignment operator
 	SceneNode &operator=(const SceneNode &) = delete;

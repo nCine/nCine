@@ -1,4 +1,5 @@
 #include "SceneNode.h"
+#include "Application.h"
 #include "tracy.h"
 
 namespace ncine {
@@ -21,7 +22,7 @@ SceneNode::SceneNode(SceneNode *parent, float x, float y)
       color_(Color::White), absPosition_(0.0f, 0.0f), absScaleFactor_(1.0f, 1.0f),
       absRotation_(0.0f), absColor_(Color::White),
       worldMatrix_(Matrix4x4f::Identity), localMatrix_(Matrix4x4f::Identity),
-      shouldDeleteChildrenOnDestruction_(true), dirtyBits_(0xFF)
+      shouldDeleteChildrenOnDestruction_(true), dirtyBits_(0xFF), lastFrameUpdated_(0)
 {
 	setParent(parent);
 }
@@ -66,7 +67,7 @@ SceneNode::SceneNode(SceneNode &&other)
       position_(other.position_), anchorPoint_(other.anchorPoint_),
       scaleFactor_(other.scaleFactor_), rotation_(other.rotation_), color_(other.color_),
       shouldDeleteChildrenOnDestruction_(other.shouldDeleteChildrenOnDestruction_),
-      dirtyBits_(other.dirtyBits_)
+      dirtyBits_(other.dirtyBits_), lastFrameUpdated_(other.lastFrameUpdated_)
 {
 	swapChildPointer(this, &other);
 	for (SceneNode *child : children_)
@@ -88,6 +89,7 @@ SceneNode &SceneNode::operator=(SceneNode &&other)
 	color_ = other.color_;
 	shouldDeleteChildrenOnDestruction_ = other.shouldDeleteChildrenOnDestruction_;
 	dirtyBits_ = other.dirtyBits_;
+	lastFrameUpdated_ = other.lastFrameUpdated_;
 
 	swapChildPointer(this, &other);
 	for (SceneNode *child : children_)
@@ -226,6 +228,8 @@ void SceneNode::update(float interval)
 			dirtyBits_.reset(DirtyBitPositions::TransformationBit);
 			dirtyBits_.reset(DirtyBitPositions::ColorBit);
 		}
+
+		lastFrameUpdated_ = theApplication().numFrames();
 	}
 }
 

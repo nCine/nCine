@@ -4,6 +4,7 @@
 #include "Particle.h"
 #include "ParticleInitializer.h"
 #include "Texture.h"
+#include "Application.h"
 
 #ifdef WITH_TRACY
 	#include <nctl/StaticString.h>
@@ -229,6 +230,8 @@ void ParticleSystem::update(float interval)
 			particle->transform();
 		}
 	}
+
+	lastFrameUpdated_ = theApplication().numFrames();
 
 #ifdef WITH_TRACY
 	tracyInfoString.format("Alive: %d", numAliveParticles());

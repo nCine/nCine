@@ -115,8 +115,8 @@ void MyEventHandler::onInit()
 	viewportCreationData[3].assignCamera = false;
 	viewportCreationData[3].assignRootNode = true;
 
-	rootCamera = nctl::makeUnique<nc::Camera>();
-	rootViewport.setCamera(rootCamera.get());
+	rootCamera_ = nctl::makeUnique<nc::Camera>();
+	rootViewport.setCamera(rootCamera_.get());
 	for (unsigned int i = 0; i < NumViewports; i++)
 	{
 		if (viewportCreationData[i].size.x == 0 && viewportCreationData[i].size.y == 0)
@@ -134,7 +134,7 @@ void MyEventHandler::onInit()
 			viewport->setCamera(viewportData[i].camera.get());
 		else
 		{
-			nc::Camera *camera = (i > 0) ? viewportData[i - 1].camera.get() : rootCamera.get();
+			nc::Camera *camera = (i > 0) ? viewportData[i - 1].camera.get() : rootCamera_.get();
 			viewport->setCamera(camera);
 		}
 

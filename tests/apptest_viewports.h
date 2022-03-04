@@ -86,7 +86,7 @@ class MyEventHandler :
 	nctl::UniquePtr<nctl::String> debugString_;
 	nctl::UniquePtr<nc::TextNode> debugText_;
 
-	nctl::UniquePtr<nc::Camera> rootCamera;
+	nctl::UniquePtr<nc::Camera> rootCamera_;
 	ViewportData viewportData[NumViewports];
 	ViewportSetupData viewportCreationData[NumViewports];
 
