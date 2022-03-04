@@ -7,19 +7,19 @@ const char *objectTypeToString(Object::ObjectType type)
 	// clang-format off
 	switch (type)
 	{
-		case Object::ObjectType::BASE:					return "Base"; break;
-		case Object::ObjectType::TEXTURE:				return "Texture"; break;
-		case Object::ObjectType::SCENENODE:				return "SceneNode"; break;
-		case Object::ObjectType::SPRITE:				return "Sprite"; break;
-		case Object::ObjectType::MESH_SPRITE:			return "MeshSprite"; break;
-		case Object::ObjectType::ANIMATED_SPRITE:		return "AnimatedSprite"; break;
-		case Object::ObjectType::PARTICLE_SYSTEM:		return "ParticleSystem"; break;
-		case Object::ObjectType::FONT:					return "Font"; break;
-		case Object::ObjectType::TEXTNODE:				return "TextNode"; break;
-		case Object::ObjectType::AUDIOBUFFER:			return "AudioBuffer"; break;
-		case Object::ObjectType::AUDIOBUFFER_PLAYER:	return "AudioBufferPlayer"; break;
-		case Object::ObjectType::AUDIOSTREAM_PLAYER:	return "AudioStreamPlayer"; break;
-		default:										return "Unknown"; break;
+		case Object::ObjectType::BASE:					return "Base";
+		case Object::ObjectType::TEXTURE:				return "Texture";
+		case Object::ObjectType::SCENENODE:				return "SceneNode";
+		case Object::ObjectType::SPRITE:				return "Sprite";
+		case Object::ObjectType::MESH_SPRITE:			return "MeshSprite";
+		case Object::ObjectType::ANIMATED_SPRITE:		return "AnimatedSprite";
+		case Object::ObjectType::PARTICLE_SYSTEM:		return "ParticleSystem";
+		case Object::ObjectType::FONT:					return "Font";
+		case Object::ObjectType::TEXTNODE:				return "TextNode";
+		case Object::ObjectType::AUDIOBUFFER:			return "AudioBuffer";
+		case Object::ObjectType::AUDIOBUFFER_PLAYER:	return "AudioBufferPlayer";
+		case Object::ObjectType::AUDIOSTREAM_PLAYER:	return "AudioStreamPlayer";
+		default:										return "Unknown";
 	}
 	// clang-format on
 }
@@ -98,7 +98,7 @@ void ArrayIndexer::logReport() const
 		if (pointers_[i])
 		{
 			const Object *objPtr = object(i);
-			LOGI_X("%s object (id %u, 0x%x): \"%s\"", objectTypeToString(objPtr->type()), objPtr->id(), pointers_[i], objPtr->name().data());
+			LOGI_X("%s object (id %u, 0x%x): \"%s\"", objectTypeToString(objPtr->type()), objPtr->id(), pointers_[i], objPtr->name());
 		}
 	}
 }

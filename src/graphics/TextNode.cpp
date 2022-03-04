@@ -234,10 +234,10 @@ TextNode::TextNode(const TextNode &other)
 void TextNode::init()
 {
 	ZoneScoped;
-	if (font_ && font_->texture())
+	if (font_ && font_->texture() && font_->texture()->name() != nullptr)
 	{
 		// When Tracy is disabled the statement body is empty and braces are needed
-		ZoneText(font_->texture()->name().data(), font_->texture()->name().length());
+		ZoneText(font_->texture()->name(), nctl::strnlen(font_->texture()->name(), Object::MaxNameLength));
 	}
 
 	type_ = ObjectType::TEXTNODE;

@@ -8,16 +8,14 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Object::Object(ObjectType type)
-    : type_(type), id_(0), name_(MaxNameLength)
+    : Object(type, "")
 {
-	id_ = theServiceLocator().indexer().addObject(this);
 }
 
 Object::Object(ObjectType type, const char *name)
-    : type_(type), id_(0), name_(MaxNameLength)
+    : type_(type), id_(0), name_(name)
 {
 	id_ = theServiceLocator().indexer().addObject(this);
-	name_ = name;
 }
 
 Object::~Object()
@@ -39,7 +37,7 @@ Object &Object::operator=(Object &&other)
 	type_ = other.type_;
 	theServiceLocator().indexer().removeObject(id_);
 	id_ = other.id_;
-	name_ = nctl::move(other.name_);
+	name_ = other.name_;
 
 	other.id_ = 0;
 	return *this;
@@ -48,6 +46,22 @@ Object &Object::operator=(Object &&other)
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+const char *Object::name() const
+{
+	if (name_.isEmpty())
+		return nullptr;
+	else
+		return name_.data();
+}
+
+void Object::setName(const char *name)
+{
+	if (name == nullptr)
+		name_.clear();
+	else
+		name_ = name;
+}
 
 template <class T>
 T *Object::fromId(unsigned int id)

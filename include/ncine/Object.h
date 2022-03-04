@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_OBJECT
 #define CLASS_NCINE_OBJECT
 
-#include <nctl/String.h>
+#include <nctl/StaticString.h>
 
 namespace ncine {
 
@@ -27,7 +27,7 @@ class DLL_PUBLIC Object
 	};
 
 	/// Maximum length for an object name
-	static const unsigned int MaxNameLength = 256;
+	static const unsigned int MaxNameLength = 128;
 
 	/// Constructs an object with a specified type and adds it to the index
 	explicit Object(ObjectType type);
@@ -50,9 +50,9 @@ class DLL_PUBLIC Object
 	inline static ObjectType sType() { return ObjectType::BASE; }
 
 	/// Returns the object name
-	inline const nctl::String &name() const { return name_; }
+	const char *name() const;
 	/// Sets the object name
-	inline void setName(const char *name) { name_ = name; }
+	void setName(const char *name);
 
 	/// Returns a casted pointer to the object with the specified id, if any exists
 	template <class T> static T *fromId(unsigned int id);
@@ -71,7 +71,7 @@ class DLL_PUBLIC Object
 	/// Object name
 	/*! \note This field is currently only useful in debug,
 	 *  as there is still no string hashing based search. */
-	nctl::String name_;
+	nctl::StaticString<MaxNameLength> name_;
 
 	/// Deleted assignment operator
 	Object &operator=(const Object &) = delete;

@@ -316,8 +316,8 @@ void Viewport::draw()
 	ZoneScoped;
 	if (type_ == Type::SCREEN)
 		debugString.format("Draw root viewport (0x%lx)", uintptr_t(this));
-	else if (type_ == Type::REGULAR && texture_->name().isEmpty() == false)
-		debugString.format("Draw viewport \"%s\" (0x%lx)", texture_->name().data(), uintptr_t(this));
+	else if (type_ == Type::REGULAR && texture_->name() != nullptr)
+		debugString.format("Draw viewport \"%s\" (0x%lx)", texture_->name(), uintptr_t(this));
 	else
 		debugString.format("Draw viewport (0x%lx)", uintptr_t(this));
 	GLDebug::ScopedGroup(debugString.data());

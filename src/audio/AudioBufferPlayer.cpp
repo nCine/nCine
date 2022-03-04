@@ -18,7 +18,7 @@ AudioBufferPlayer::AudioBufferPlayer(AudioBuffer *audioBuffer)
     : IAudioPlayer(ObjectType::AUDIOBUFFER_PLAYER), audioBuffer_(audioBuffer)
 {
 	if (audioBuffer)
-		setName(audioBuffer->name().data());
+		setName(audioBuffer->name());
 }
 
 ///////////////////////////////////////////////////////////

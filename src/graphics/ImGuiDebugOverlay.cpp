@@ -1204,8 +1204,8 @@ void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int 
 		textnode = reinterpret_cast<TextNode *>(node);
 
 	widgetName_.format("#%u ", childId);
-	if (node->name().isEmpty() == false)
-		widgetName_.formatAppend("\"%s\" ", node->name().data());
+	if (node->name() != nullptr)
+		widgetName_.formatAppend("\"%s\" ", node->name());
 	widgetName_.formatAppend("%s", nodeTypeToString(node->type()));
 	const unsigned int numChildren = node->children().size();
 	if (numChildren > 0)
@@ -1271,7 +1271,7 @@ void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int 
 
 		if (baseSprite)
 		{
-			ImGui::Text("Texture: \"%s\" (%d x %d)", baseSprite->texture()->name().data(),
+			ImGui::Text("Texture: \"%s\" (%d x %d)", baseSprite->texture()->name(),
 			            baseSprite->texture()->width(), baseSprite->texture()->height());
 
 			bool isFlippedX = baseSprite->isFlippedX();

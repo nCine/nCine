@@ -70,10 +70,10 @@ Sprite::Sprite(const Sprite &other)
 void Sprite::init()
 {
 	ZoneScoped;
-	if (texture_)
+	if (texture_ && texture_->name() != nullptr)
 	{
 		// When Tracy is disabled the statement body is empty and braces are needed
-		ZoneText(texture_->name().data(), texture_->name().length());
+		ZoneText(texture_->name(), nctl::strnlen(texture_->name(), Object::MaxNameLength));
 	}
 
 	type_ = ObjectType::SPRITE;

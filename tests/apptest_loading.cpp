@@ -231,7 +231,7 @@ void MyEventHandler::onFrameStart()
 		{
 			bool textureHasChanged = false;
 			nc::Texture &tex = *textures_[selectedTextureObject];
-			ImGui::Text("Name: \"%s\"", tex.name().data());
+			ImGui::Text("Name: \"%s\"", tex.name());
 			ImGui::Text("Size: %d x %d, Channels: %u", tex.width(), tex.height(), tex.numChannels());
 
 			if (ImGui::TreeNode("Load from File or Memory"))
@@ -419,7 +419,7 @@ void MyEventHandler::onFrameStart()
 
 	if (ImGui::CollapsingHeader("Audio"))
 	{
-		ImGui::Text("Buffer Name: \"%s\"", audioBuffer_->name().data());
+		ImGui::Text("Buffer Name: \"%s\"", audioBuffer_->name());
 		ImGui::Text("Frequency: %d, Channels: %d, Size: %lu", audioBuffer_->frequency(), audioBuffer_->numChannels(), audioBuffer_->bufferSize());
 
 		if (ImGui::Button("Play##Buffer"))
@@ -448,7 +448,7 @@ void MyEventHandler::onFrameStart()
 		}
 
 		ImGui::Separator();
-		ImGui::Text("Stream Name: \"%s\"", streamPlayer_->name().data());
+		ImGui::Text("Stream Name: \"%s\"", streamPlayer_->name());
 		ImGui::Text("Frequency: %d, Channels: %d, Size: %lu", streamPlayer_->frequency(), streamPlayer_->numChannels(), streamPlayer_->bufferSize());
 
 		if (ImGui::Button("Play##Stream"))
@@ -596,7 +596,7 @@ void MyEventHandler::onFrameStart()
 
 	if (ImGui::CollapsingHeader("Font"))
 	{
-		ImGui::Text("Name: \"%s\"", font_->name().data());
+		ImGui::Text("Name: \"%s\"", font_->name());
 		ImGui::Text("Glyphs: %u, Kerning pairs: %u", font_->numGlyphs(), font_->numKernings());
 		ImGui::Text("Line height: %u, Base: %u", font_->lineHeight(), font_->base());
 

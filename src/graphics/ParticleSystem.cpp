@@ -5,13 +5,17 @@
 #include "ParticleInitializer.h"
 #include "Texture.h"
 
+#ifdef WITH_TRACY
+	#include <nctl/StaticString.h>
+#endif
+
 #include "tracy.h"
 
 namespace ncine {
 
 namespace {
 #ifdef WITH_TRACY
-	nctl::String tracyInfoString(128);
+	nctl::StaticString<128> tracyInfoString;
 #endif
 }
 
@@ -31,10 +35,10 @@ ParticleSystem::ParticleSystem(SceneNode *parent, unsigned int count, Texture *t
       affectors_(4), inLocalSpace_(false)
 {
 	ZoneScoped;
-	if (texture)
+	if (texture && texture->name() != nullptr)
 	{
 		// When Tracy is disabled the statement body is empty and braces are needed
-		ZoneText(texture->name().data(), texture->name().length());
+		ZoneText(texture->name(), nctl::strnlen(texture->name(), Object::MaxNameLength));
 	}
 
 	type_ = ObjectType::PARTICLE_SYSTEM;
@@ -195,7 +199,7 @@ void ParticleSystem::update(float interval)
 		return;
 
 	ZoneScoped;
-	// Overridden `update()` method should call `transform` like `SceneNode::update()` does
+	// Overridden `update()` method should call `transform()` like `SceneNode::update()` does
 	SceneNode::transform();
 
 	for (int i = children_.size() - 1; i >= 0; i--)
@@ -272,10 +276,10 @@ ParticleSystem::ParticleSystem(const ParticleSystem &other)
 	if (poolSize_ > 0)
 	{
 		const Particle &otherParticle = *other.particlePool_.front();
-		if (otherParticle.texture())
+		if (otherParticle.texture() && otherParticle.texture()->name() != nullptr)
 		{
 			// When Tracy is disabled the statement body is empty and braces are needed
-			ZoneText(otherParticle.texture()->name().data(), otherParticle.texture()->name().length());
+			ZoneText(otherParticle.texture()->name(), nctl::strnlen(otherParticle.texture()->name(), Object::MaxNameLength));
 		}
 
 		for (unsigned int i = 0; i < poolSize_; i++)
