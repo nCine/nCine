@@ -8,6 +8,7 @@ struct lua_State;
 namespace ncine {
 
 class AppConfiguration;
+class Viewport;
 
 /// Wrapper around the `IAppEventHandler` class
 class DLL_PUBLIC LuaIAppEventHandler
@@ -17,6 +18,7 @@ class DLL_PUBLIC LuaIAppEventHandler
 	static void onInit(lua_State *L);
 	static void onFrameStart(lua_State *L);
 	static void onPostUpdate(lua_State *L);
+	static void onDrawViewport(lua_State *L, Viewport &viewport);
 	static void onFrameEnd(lua_State *L);
 	static void onShutdown(lua_State *L);
 	static void onSuspend(lua_State *L);

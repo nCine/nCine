@@ -3,6 +3,8 @@
 
 #include "common_defines.h"
 #include <nctl/UniquePtr.h>
+#include <nctl/Array.h>
+#include <nctl/BitSet.h>
 #include "Colorf.h"
 #include "Vector2.h"
 #include "Rect.h"
@@ -19,10 +21,25 @@ class Texture;
 class DLL_PUBLIC Viewport
 {
   public:
+	/// The different types of viewports available
+	enum class Type
+	{
+		/// The viewport owns a texture in a smart pointer
+		TEXTURE_OWNERSHIP,
+		/// The viewport uses a texture passed by the user, but it doesn't have ownership
+		TEXTURE_POINTER,
+		/// The viewport has no texture of its own, it uses the one from the previous viewport
+		NO_TEXTURE,
+		/// The viewport is the screen (root viewport)
+		SCREEN
+	};
+
 	/// The clear mode for a viewport with a texture or for the screen
 	enum class ClearMode
 	{
-		/// The default behavior of clearing the viewport at every frame
+		/// The viewport is cleared every time it is drawn
+		EVERY_DRAW,
+		/// The viewport is cleared once per frame (default behavior)
 		EVERY_FRAME,
 		/// The viewport is cleared only once, at this frame
 		THIS_FRAME_ONLY,
@@ -51,6 +68,12 @@ class DLL_PUBLIC Viewport
 	/// Creates a new viewport with no associated texture
 	Viewport();
 
+	/// Creates a new viewport associated to an external texture
+	explicit Viewport(Texture *texture);
+
+	/// Creates a new viewport associated to an external texture plus a depth and stencil renderbuffer
+	Viewport(Texture *texture, DepthStencilFormat depthStencilFormat);
+
 	/// Creates a new viewport with the specified name, dimensions, and format
 	Viewport(const char *name, int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat);
 	/// Creates a new viewport with the specified name, dimensions as a vector, and format
@@ -67,6 +90,9 @@ class DLL_PUBLIC Viewport
 	explicit Viewport(const Vector2i &size);
 
 	~Viewport();
+
+	/// Returns the viewport type
+	inline Type type() const { return type_; }
 
 	/// Initializes the render target of the viewport with the specified dimensions and format
 	bool initTexture(int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat);
@@ -118,6 +144,9 @@ class DLL_PUBLIC Viewport
 	/// Returns the depth and stencil format of the offscreen render target texture
 	inline DepthStencilFormat depthStencilFormat() const { return depthStencilFormat_; }
 
+	/// Returns the last frame this viewport was cleared
+	inline unsigned long int lastFrameCleared() const { return lastFrameCleared_; }
+
 	/// Returns the viewport clear mode
 	inline ClearMode clearMode() const { return clearMode_; }
 	/// Sets the viewport clear mode
@@ -131,7 +160,9 @@ class DLL_PUBLIC Viewport
 	inline void setClearColor(const Colorf &color) { clearColor_ = color; }
 
 	/// Returns the offscreen render target texture
-	inline Texture *texture() { return texture_.get(); }
+	inline Texture *texture() { return texturePtr_; }
+	/// Sets an external texture as the offscreen render target
+	bool setTexture(Texture *texture);
 
 	/// Returns the root node as a constant
 	inline const SceneNode *rootNode() const { return rootNode_; }
@@ -140,12 +171,8 @@ class DLL_PUBLIC Viewport
 	/// Sets the root node
 	inline void setRootNode(SceneNode *rootNode) { rootNode_ = rootNode; }
 
-	/// Returns the next viewport in the rendering chain as a constant
-	inline const Viewport *nextViewport() const { return nextViewport_; }
-	/// Returns the next viewport in the rendering chain
-	inline Viewport *nextViewport() { return nextViewport_; }
-	/// Sets the next viewport in the rendering chain
-	void setNextViewport(Viewport *nextViewport);
+	/// Returns the inverse ordered array of viewports to be drawn before the root one
+	static nctl::Array<Viewport *> &chain() { return chain_; }
 
 	/// Returns the camera used for rendering as a constant
 	inline const Camera *camera() const { return camera_; }
@@ -153,6 +180,9 @@ class DLL_PUBLIC Viewport
 	inline Camera *camera() { return camera_; }
 	/// Sets the camera to be used for rendering
 	inline void setCamera(Camera *camera) { camera_ = camera; }
+
+	/// Shares the framebuffer object of the specified viewport with this one
+	bool shareFbo(const Viewport &viewport);
 
 	/// Sets the OpenGL object labels for both the framebuffer object and the texture
 	void setGLLabels(const char *label);
@@ -162,13 +192,16 @@ class DLL_PUBLIC Viewport
 	void setGLTextureLabel(const char *label);
 
   protected:
-	/// An enumeration to differentiate between a regular viewport, a textureless one and the screen (root viewport)
-	enum class Type
+	/// Bit positions inside the state bitset
+	enum StateBitPositions
 	{
-		REGULAR,
-		NO_TEXTURE,
-		SCREEN
+		UpdatedBit = 0,
+		VisitedBit = 1,
+		CommittedBit = 2
 	};
+
+	/// The inverse ordered array of viewports to be drawn before the root one
+	static nctl::Array<Viewport *> chain_;
 
 	Type type_;
 
@@ -181,6 +214,8 @@ class DLL_PUBLIC Viewport
 	ColorFormat colorFormat_;
 	DepthStencilFormat depthStencilFormat_;
 
+	/// The last frame this viewport was cleared
+	unsigned long int lastFrameCleared_;
 	ClearMode clearMode_;
 	Colorf clearColor_;
 
@@ -188,7 +223,9 @@ class DLL_PUBLIC Viewport
 	nctl::UniquePtr<RenderQueue> renderQueue_;
 
 	nctl::UniquePtr<GLFramebufferObject> fbo_;
+	GLFramebufferObject *fboPtr_;
 	nctl::UniquePtr<Texture> texture_;
+	Texture *texturePtr_;
 
 	/// The root scene node for this viewport/RT
 	SceneNode *rootNode_;
@@ -197,8 +234,8 @@ class DLL_PUBLIC Viewport
 	/*! \note If set to `nullptr` it will use the default camera */
 	Camera *camera_;
 
-	/// Next viewport to render after this one
-	Viewport *nextViewport_;
+	/// Bitset that stores the various states bits
+	nctl::BitSet<uint8_t> stateBits_;
 
 	/// Deleted copy constructor
 	Viewport(const Viewport &) = delete;
@@ -210,12 +247,15 @@ class DLL_PUBLIC Viewport
 	void update();
 	void visit();
 	void sortAndCommitQueue();
-	void draw();
+	void draw(unsigned int nextIndex);
 
   private:
+	bool hasTexture() const;
+	bool initFbo(Texture *texture, DepthStencilFormat depthStencilFormat);
 	void updateCulling(SceneNode *node);
 
 	friend class Application;
+	friend class ScreenViewport;
 };
 
 }

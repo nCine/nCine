@@ -18,6 +18,7 @@ class LuaEventHandler :
 	void onInit() override;
 	void onFrameStart() override;
 	void onPostUpdate() override;
+	void onDrawViewport(Viewport &viewport) override;
 	void onFrameEnd() override;
 	void onShutdown() override;
 	void onSuspend() override;

@@ -5,6 +5,7 @@
 #include "InputEvents.h"
 
 #include "Viewport.h"
+#include "Camera.h"
 #include "DrawableNode.h"
 #include "MeshSprite.h"
 #include "ParticleSystem.h"
@@ -1156,23 +1157,31 @@ void ImGuiDebugOverlay::guiAllocators()
 #endif
 }
 
-void ImGuiDebugOverlay::guiRecursiveViewports(Viewport *viewport, unsigned int viewportId)
+void ImGuiDebugOverlay::guiViewports(Viewport *viewport, unsigned int viewportId)
 {
 	widgetName_.format("#%u Viewport", viewportId);
-	widgetName_.formatAppend(" - size: %d x %d", viewport->width(), viewport->height());
-	const Rectf rect = viewport->cullingRect();
-	widgetName_.formatAppend(" - culling rect: %.2f, %.2f - %.2f, %.2f", rect.x, rect.y, rect.w, rect.h);
+	if (viewport->type() != Viewport::Type::NO_TEXTURE)
+		widgetName_.formatAppend(" - size: %d x %d", viewport->width(), viewport->height());
+	const Recti viewportRect = viewport->viewportRect();
+	widgetName_.formatAppend(" - rect: pos <%d, %d>, size %d x %d", viewportRect.x, viewportRect.y, viewportRect.w, viewportRect.h);
+	const Rectf cullingRect = viewport->cullingRect();
+	widgetName_.formatAppend(" - culling: pos <%.2f, %.2f>, size %.2f x %.2f", cullingRect.x, cullingRect.y, cullingRect.w, cullingRect.h);
 	widgetName_.formatAppend("###0x%x", uintptr_t(viewport));
 
 	SceneNode *rootNode = viewport->rootNode();
 	if (rootNode != nullptr && ImGui::TreeNode(widgetName_.data()))
 	{
+		if (viewport->camera() != nullptr)
+		{
+			const Camera::ViewValues &viewValues = viewport->camera()->viewValues();
+			ImGui::Text("Camera view - position: <%.2f, %.2f>, rotation: %.2f, scale: %.2f", viewValues.position.x, viewValues.position.y, viewValues.rotation, viewValues.scale);
+			const Camera::ProjectionValues &projValues = viewport->camera()->projectionValues();
+			ImGui::Text("Camera projection - left: %.2f, right: %.2f, top: %.2f, bottom: %.2f", projValues.left, projValues.right, projValues.top, projValues.bottom);
+		}
+
 		guiRecursiveChildrenNodes(rootNode, 0);
 		ImGui::TreePop();
 	}
-
-	if (viewport->nextViewport() != nullptr)
-		guiRecursiveViewports(viewport->nextViewport(), viewportId + 1);
 }
 
 void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int childId)
@@ -1378,7 +1387,11 @@ void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int 
 void ImGuiDebugOverlay::guiNodeInspector()
 {
 	if (ImGui::CollapsingHeader("Node Inspector"))
-		guiRecursiveViewports(&theApplication().rootViewport(), 0);
+	{
+		guiViewports(&theApplication().rootViewport(), 0);
+		for (unsigned int i = 0; i < Viewport::chain().size(); i++)
+			guiViewports(Viewport::chain()[i], i + 1);
+	}
 }
 
 void ImGuiDebugOverlay::guiTopLeft()
@@ -1433,6 +1446,7 @@ void ImGuiDebugOverlay::guiTopLeft()
 			ImGui::SameLine();
 			ImGui::PlotLines("", plotValues_[ValuesType::UBO_USED].get(), numValues_, 0, nullptr, 0.0f, uboBuffers.size / 1024.0f);
 		}
+		ImGui::Text("Viewport chain length: %u", Viewport::chain().size());
 		ImGui::End();
 	}
 }

@@ -38,6 +38,7 @@ class MyEventHandler :
 	void onInit() override;
 	void onFrameStart() override;
 	void onPostUpdate() override;
+	void onDrawViewport(nc::Viewport &viewport) override;
 
 #ifdef __ANDROID__
 	void onTouchDown(const nc::TouchEvent &event) override;
@@ -52,12 +53,19 @@ class MyEventHandler :
 	bool withViewport_;
 	bool pause_;
 	float angle_;
+	unsigned int numBlurPasses_;
 
-	nctl::UniquePtr<nc::Viewport> viewport_;
+	nctl::UniquePtr<nc::Texture> texture0_;
+	nctl::UniquePtr<nc::Texture> texture1_;
+	nctl::UniquePtr<nc::Viewport> sceneViewport_;
+	nctl::UniquePtr<nc::Viewport> pingViewport_;
+	nctl::UniquePtr<nc::Viewport> pongViewport_;
 	nctl::UniquePtr<nc::SceneNode> rootNode_;
-	nctl::UniquePtr<nc::Sprite> vpSprite_;
+	nctl::UniquePtr<nc::Sprite> vpPingSprite_;
+	nctl::UniquePtr<nc::Sprite> vpPongSprite_;
 	nctl::UniquePtr<nc::Shader> vpBlurShader_;
-	nctl::UniquePtr<nc::ShaderState> vpShaderState_;
+	nctl::UniquePtr<nc::ShaderState> vpPingSpriteShaderState_;
+	nctl::UniquePtr<nc::ShaderState> vpPongSpriteShaderState_;
 
 	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, NumTextures> textures_;
 	nctl::UniquePtr<nc::Font> font_;

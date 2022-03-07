@@ -66,7 +66,7 @@ const char *ScriptFiles[MyEventHandler::NumScripts] = { "init.lua", "reload.lua"
 nctl::StaticArray<nctl::UniquePtr<char[]>, MyEventHandler::NumScripts> scriptBuffers;
 nctl::StaticArray<unsigned long int, MyEventHandler::NumScripts> scriptBufferSizes;
 
-const char *ShaderNames[MyEventHandler::NumShaders] = { "Sprite", "Blur", "Mesh_Sprite" };
+const char *ShaderNames[MyEventHandler::NumShaders] = { "Sprite", "Separable_Blur", "Mesh_Sprite" };
 const char *VertexShaderStrings[MyEventHandler::NumShaders] = { sprite_vs, sprite_vs, meshsprite_vs };
 const char *FragmentShaderStrings[MyEventHandler::NumShaders] = { sprite_fs, sprite_blur_fs, meshsprite_fs };
 

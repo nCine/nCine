@@ -59,33 +59,24 @@ precision mediump float;
 
 uniform sampler2D uTexture;
 uniform vec2 uResolution;
+uniform vec2 uDirection;
 in vec2 vTexCoords;
 out vec4 fragColor;
 
 void main()
 {
-	const float DoublePi = 6.28318530718;
+	vec2 uv = vec2(gl_FragCoord.xy / uResolution.xy);
+	vec4 color = vec4(0.0);
+	vec2 off1 = vec2(1.3846153846) * uDirection;
+	vec2 off2 = vec2(3.2307692308) * uDirection;
 
-	// Gaussian blur settings
-	const float Directions = 16.0;
-	const float Quality = 4.0;
-	const float Size = 8.0;
+	color += texture(uTexture, uv) * 0.2270270270;
+	color += texture(uTexture, uv + (off1 / uResolution)) * 0.3162162162;
+	color += texture(uTexture, uv - (off1 / uResolution)) * 0.3162162162;
+	color += texture(uTexture, uv + (off2 / uResolution)) * 0.0702702703;
+	color += texture(uTexture, uv - (off2 / uResolution)) * 0.0702702703;
 
-	vec2 Radius = Size / uResolution.xy;
-
-	vec2 uv = gl_FragCoord.xy / uResolution.xy;
-	vec4 Color = texture(uTexture, uv);
-
-	for (float d = 0.0; d < DoublePi; d += DoublePi / Directions)
-	{
-		for (float i = 1.0 / Quality; i <= 1.0; i += 1.0 / Quality)
-		{
-			Color += texture(uTexture, uv + vec2(cos(d), sin(d)) * Radius * i);
-		}
-	}
-
-	Color /= Quality * Directions - 15.0;
-	fragColor = Color;
+	fragColor = color;
 }
 )";
 

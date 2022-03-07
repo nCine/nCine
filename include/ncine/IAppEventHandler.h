@@ -6,6 +6,7 @@
 namespace ncine {
 
 class AppConfiguration;
+class Viewport;
 
 /// The interface class for handling nCine application events
 class DLL_PUBLIC IAppEventHandler
@@ -24,6 +25,8 @@ class DLL_PUBLIC IAppEventHandler
 	virtual void onFrameStart() {}
 	/// Called every time the scenegraph has been traversed and all nodes have been transformed
 	virtual void onPostUpdate() {}
+	/// Called every time a viewport is going to be drawn
+	virtual void onDrawViewport(Viewport &viewport) {}
 	/// Called at the end of each frame, just before swapping buffers
 	virtual void onFrameEnd() {}
 	/// Called once on application shutdown

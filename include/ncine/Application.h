@@ -202,6 +202,7 @@ class DLL_PUBLIC Application
 #ifdef __EMSCRIPTEN__
 	friend class IGfxDevice;
 #endif
+	friend class Viewport; // for `onDrawViewport()`
 };
 
 // Meyers' Singleton

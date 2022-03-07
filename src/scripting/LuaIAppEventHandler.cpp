@@ -7,6 +7,7 @@
 #include "LuaDebug.h"
 #include "LuaAppConfiguration.h"
 #include "LuaNames.h"
+#include "LuaUtils.h"
 
 #include "tracy.h"
 
@@ -18,6 +19,7 @@ namespace LuaIAppEventHandler {
 	static const char *onInit = "on_init";
 	static const char *onFrameStart = "on_frame_start";
 	static const char *onPostUpdate = "on_post_update";
+	static const char *onDrawViewport = "on_draw_viewport";
 	static const char *onFrameEnd = "on_frame_end";
 	static const char *onShutdown = "on_shutdown";
 	static const char *onSuspend = "on_suspend";
@@ -93,6 +95,29 @@ void LuaIAppEventHandler::onPostUpdate(lua_State *L)
 {
 	ZoneScopedN("Lua onPostUpdate");
 	callFunction(L, LuaNames::LuaIAppEventHandler::onPostUpdate, false);
+}
+
+void LuaIAppEventHandler::onDrawViewport(lua_State *L, Viewport &viewport)
+{
+	ZoneScopedN("Lua onDrawViewport");
+	lua_getglobal(L, LuaNames::ncine);
+	const int type = lua_getfield(L, -1, LuaNames::LuaIAppEventHandler::onDrawViewport);
+
+	if (type == LUA_TFUNCTION)
+	{
+		LuaUtils::push(L, static_cast<void *>(&viewport));
+		const int status = lua_pcall(L, 1, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::LuaIAppEventHandler::onDrawViewport, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			lua_pop(L, 1);
+		}
+	}
+	else
+	{
+		lua_pop(L, 2);
+		LOGW_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onDrawViewport);
+	}
 }
 
 void LuaIAppEventHandler::onFrameEnd(lua_State *L)

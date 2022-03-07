@@ -14,6 +14,7 @@ namespace LuaNames {
 namespace Viewport {
 	static const char *Viewport = "viewport";
 
+	static const char *EVERY_DRAW = "EVERY_DRAW";
 	static const char *EVERY_FRAME = "EVERY_FRAME";
 	static const char *THIS_FRAME_ONLY = "THIS_FRAME_ONLY";
 	static const char *NEXT_FRAME_ONLY = "NEXT_FRAME_ONLY";
@@ -41,6 +42,8 @@ namespace Viewport {
 	static const char *setScissorRect = "set_scissor_rect";
 	static const char *cullingRect = "get_culling_rect";
 
+	static const char *lastFrameCleared = "get_last_frame_cleared";
+
 	static const char *colorFormat = "get_color_format";
 	static const char *depthStencilFormat = "get_depth_stencil_format";
 
@@ -51,15 +54,19 @@ namespace Viewport {
 	static const char *setClearColor = "set_clear_color";
 
 	static const char *texture = "get_texture";
+	static const char *setTexture = "set_texture";
 
 	static const char *rootNode = "get_rootnode";
 	static const char *setRootNode = "set_rootnode";
 
-	static const char *nextViewport = "get_next_viewport";
-	static const char *setNextViewport = "set_next_viewport";
+	static const char *clearChain = "clear_chain";
+	static const char *pushBackChain = "push_back_chain";
+	static const char *pushFrontChain = "push_front_chain";
 
 	static const char *camera = "get_camera";
 	static const char *setCamera = "set_camera";
+
+	static const char *shareFbo = "share_fbo";
 
 	static const char *setGLLabels = "set_gl_labels";
 	static const char *setGLFramebufferLabel = "set_glframebuffer_label";
@@ -72,8 +79,9 @@ namespace Viewport {
 
 void LuaViewport::exposeConstants(lua_State *L)
 {
-	lua_createtable(L, 0, 4);
+	lua_createtable(L, 0, 5);
 
+	LuaUtils::pushField(L, LuaNames::Viewport::EVERY_DRAW, static_cast<int64_t>(Viewport::ClearMode::EVERY_DRAW));
 	LuaUtils::pushField(L, LuaNames::Viewport::EVERY_FRAME, static_cast<int64_t>(Viewport::ClearMode::EVERY_FRAME));
 	LuaUtils::pushField(L, LuaNames::Viewport::THIS_FRAME_ONLY, static_cast<int64_t>(Viewport::ClearMode::THIS_FRAME_ONLY));
 	LuaUtils::pushField(L, LuaNames::Viewport::NEXT_FRAME_ONLY, static_cast<int64_t>(Viewport::ClearMode::NEXT_FRAME_ONLY));
@@ -101,7 +109,7 @@ void LuaViewport::exposeConstants(lua_State *L)
 void LuaViewport::expose(LuaStateManager *stateManager)
 {
 	lua_State *L = stateManager->state();
-	lua_createtable(L, 0, 26);
+	lua_createtable(L, 0, 30);
 
 	if (stateManager->apiType() == LuaStateManager::ApiType::FULL)
 	{
@@ -123,6 +131,8 @@ void LuaViewport::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::Viewport::colorFormat, colorFormat);
 	LuaUtils::addFunction(L, LuaNames::Viewport::depthStencilFormat, depthStencilFormat);
 
+	LuaUtils::addFunction(L, LuaNames::Viewport::lastFrameCleared, lastFrameCleared);
+
 	LuaUtils::addFunction(L, LuaNames::Viewport::clearMode, clearMode);
 	LuaUtils::addFunction(L, LuaNames::Viewport::setClearMode, setClearMode);
 
@@ -130,15 +140,19 @@ void LuaViewport::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::Viewport::setClearColor, setClearColor);
 
 	LuaUtils::addFunction(L, LuaNames::Viewport::texture, texture);
+	LuaUtils::addFunction(L, LuaNames::Viewport::setTexture, setTexture);
 
 	LuaUtils::addFunction(L, LuaNames::Viewport::rootNode, rootNode);
 	LuaUtils::addFunction(L, LuaNames::Viewport::setRootNode, setRootNode);
 
-	LuaUtils::addFunction(L, LuaNames::Viewport::nextViewport, nextViewport);
-	LuaUtils::addFunction(L, LuaNames::Viewport::setNextViewport, setNextViewport);
+	LuaUtils::addFunction(L, LuaNames::Viewport::clearChain, clearChain);
+	LuaUtils::addFunction(L, LuaNames::Viewport::pushBackChain, pushBackChain);
+	LuaUtils::addFunction(L, LuaNames::Viewport::pushFrontChain, pushFrontChain);
 
 	LuaUtils::addFunction(L, LuaNames::Viewport::camera, camera);
 	LuaUtils::addFunction(L, LuaNames::Viewport::setCamera, setCamera);
+
+	LuaUtils::addFunction(L, LuaNames::Viewport::shareFbo, shareFbo);
 
 	LuaUtils::addFunction(L, LuaNames::Viewport::setGLLabels, setGLLabels);
 	LuaUtils::addFunction(L, LuaNames::Viewport::setGLFramebufferLabel, setGLFramebufferLabel);
@@ -286,6 +300,18 @@ int LuaViewport::depthStencilFormat(lua_State *L)
 	return 1;
 }
 
+int LuaViewport::lastFrameCleared(lua_State *L)
+{
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
+
+	if (viewport)
+		LuaUtils::push(L, static_cast<uint64_t>(viewport->lastFrameCleared()));
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
 int LuaViewport::clearMode(lua_State *L)
 {
 	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
@@ -345,6 +371,17 @@ int LuaViewport::texture(lua_State *L)
 	return 1;
 }
 
+int LuaViewport::setTexture(lua_State *L)
+{
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -2);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieveOrNil(L, -1);
+
+	if (viewport)
+		viewport->setTexture(texture);
+
+	return 0;
+}
+
 int LuaViewport::rootNode(lua_State *L)
 {
 	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
@@ -368,25 +405,29 @@ int LuaViewport::setRootNode(lua_State *L)
 	return 0;
 }
 
-int LuaViewport::nextViewport(lua_State *L)
+int LuaViewport::clearChain(lua_State *L)
+{
+	Viewport::chain().clear();
+
+	return 0;
+}
+
+int LuaViewport::pushBackChain(lua_State *L)
 {
 	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
 	if (viewport)
-		LuaUntrackedUserData<Viewport>::push(L, viewport->nextViewport());
-	else
-		LuaUtils::pushNil(L);
+		Viewport::chain().pushBack(viewport);
 
-	return 1;
+	return 0;
 }
 
-int LuaViewport::setNextViewport(lua_State *L)
+int LuaViewport::pushFrontChain(lua_State *L)
 {
-	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -2);
-	Viewport *nextViewport = LuaUntrackedUserData<Viewport>::retrieveOrNil(L, -1);
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
 	if (viewport)
-		viewport->setNextViewport(nextViewport);
+		Viewport::chain().insertAt(0, viewport);
 
 	return 0;
 }
@@ -410,6 +451,17 @@ int LuaViewport::setCamera(lua_State *L)
 
 	if (viewport)
 		viewport->setCamera(camera);
+
+	return 0;
+}
+
+int LuaViewport::shareFbo(lua_State *L)
+{
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -2);
+	const Viewport *otherViewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
+
+	if (viewport && otherViewport)
+		viewport->shareFbo(*otherViewport);
 
 	return 0;
 }

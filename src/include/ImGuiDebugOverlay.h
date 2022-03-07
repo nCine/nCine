@@ -104,7 +104,7 @@ class ImGuiDebugOverlay : public IDebugOverlay
 	void guiInputState();
 	void guiRenderDoc();
 	void guiAllocators();
-	void guiRecursiveViewports(Viewport *viewport, unsigned int viewportId);
+	void guiViewports(Viewport *viewport, unsigned int viewportId);
 	void guiRecursiveChildrenNodes(SceneNode *node, unsigned int childId);
 	void guiNodeInspector();
 

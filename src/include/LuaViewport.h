@@ -32,6 +32,8 @@ class LuaViewport
 	static int colorFormat(lua_State *L);
 	static int depthStencilFormat(lua_State *L);
 
+	static int lastFrameCleared(lua_State *L);
+
 	static int clearMode(lua_State *L);
 	static int setClearMode(lua_State *L);
 
@@ -39,15 +41,19 @@ class LuaViewport
 	static int setClearColor(lua_State *L);
 
 	static int texture(lua_State *L);
+	static int setTexture(lua_State *L);
 
 	static int rootNode(lua_State *L);
 	static int setRootNode(lua_State *L);
 
-	static int nextViewport(lua_State *L);
-	static int setNextViewport(lua_State *L);
+	static int clearChain(lua_State *L);
+	static int pushBackChain(lua_State *L);
+	static int pushFrontChain(lua_State *L);
 
 	static int camera(lua_State *L);
 	static int setCamera(lua_State *L);
+
+	static int shareFbo(lua_State *L);
 
 	static int setGLLabels(lua_State *L);
 	static int setGLFramebufferLabel(lua_State *L);

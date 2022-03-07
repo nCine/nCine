@@ -43,7 +43,7 @@ const float DoubleClickDelay = 0.3f;
 
 const char *ColorFormatLabels[] = { "RGB8", "RGBA8" };
 const char *DepthFormatLabels[] = { "None", "Depth16", "Depth24", "Depth24_Stencil8" };
-const char *ClearModeLabels[] = { "Every frame", "This frame only", "Next frame only", "Never" };
+const char *ClearModeLabels[] = { "Every draw", "Every frame", "This frame only", "Next frame only", "Never" };
 const char *PositionPresetsLabels[] = { "Top Left", "Top Centre", "Top Right", "Centre Left", "Centre", "Centre Right", "Bottom Left", "Bottom Centre", "Bottom Right" };
 nctl::String comboString(64);
 
@@ -159,9 +159,8 @@ void MyEventHandler::onInit()
 	}
 	if (NumViewports > 0)
 	{
-		rootViewport.setNextViewport(viewportData[0].viewport.get());
-		for (unsigned int i = 0; i < NumViewports - 1; i++)
-			viewportData[i].viewport->setNextViewport(viewportData[i + 1].viewport.get());
+		for (unsigned int i = 0; i < NumViewports; i++)
+			nc::Viewport::chain().pushBack(viewportData[i].viewport.get());
 	}
 
 	for (unsigned int i = 0; i < NumSprites; i++)
@@ -208,14 +207,15 @@ void MyEventHandler::onFrameStart()
 	const bool viewportChanged = ImGui::Combo("Viewport", &currentComboViewport, comboString.data());
 	nc::Viewport &currentViewport = (currentComboViewport > 0) ? *viewportData[currentComboViewport - 1].viewport : nc::theApplication().rootViewport();
 
+	const nc::Viewport *nextViewport = (currentComboViewport < nc::Viewport::chain().size()) ? nc::Viewport::chain()[currentComboViewport] : nullptr;
 	const char *nextViewportString = "Next Viewport";
-	if (currentViewport.nextViewport() == nullptr)
+	if (nextViewport == nullptr)
 		ImGui::Text("%s: None", nextViewportString);
 	else
 	{
 		for (unsigned int i = 0; i < NumViewports; i++)
 		{
-			if (currentViewport.nextViewport() == viewportData[i].viewport.get())
+			if (nextViewport == viewportData[i].viewport.get())
 			{
 				ImGui::Text("%s: Viewport %d", nextViewportString, i);
 				break;

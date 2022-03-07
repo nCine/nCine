@@ -25,6 +25,7 @@ class MyEventHandler :
 	void onInit() override;
 	void onFrameStart() override;
 	void onPostUpdate() override;
+	void onDrawViewport(nc::Viewport &viewport) override;
 	void onFrameEnd() override;
 	void onShutdown() override;
 	void onSuspend() override;

@@ -59,20 +59,30 @@ void MyEventHandler::onInit()
 	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture3File)).data()));
 	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture4File)).data()));
 
+	texture0_ = nctl::makeUnique<nc::Texture>("Ping texture", nc::Texture::Format::RGB8, nc::theApplication().resolutionInt());
+	texture1_ = nctl::makeUnique<nc::Texture>("Pong texture", nc::Texture::Format::RGB8, nc::theApplication().resolutionInt());
+
 	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
 	                                   (prefixDataPath("fonts", FontTextureFile)).data());
 
-	viewport_ = nctl::makeUnique<nc::Viewport>(nc::theApplication().width(), nc::theApplication().height());
 	rootNode_ = nctl::makeUnique<nc::SceneNode>();
-	viewport_->setClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-	viewport_->setRootNode(rootNode_.get());
+	sceneViewport_ = nctl::makeUnique<nc::Viewport>(texture0_.get());
+	pingViewport_ = nctl::makeUnique<nc::Viewport>(texture1_.get());
+	pongViewport_ = nctl::makeUnique<nc::Viewport>(texture0_.get());
 
-	vpBlurShader_ = nctl::makeUnique<nc::Shader>(nc::Shader::LoadMode::STRING, sprite_vs, sprite_blur_fs);
+	vpBlurShader_ = nctl::makeUnique<nc::Shader>("SeparableBlur_Shader", nc::Shader::LoadMode::STRING, sprite_vs, sprite_blur_fs);
 	FATAL_ASSERT(vpBlurShader_->isLinked());
-	vpSprite_ = nctl::makeUnique<nc::Sprite>(nullptr, viewport_->texture(), nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
-	vpSprite_->setFlippedY(true);
-	vpShaderState_ = nctl::makeUnique<nc::ShaderState>(vpSprite_.get(), vpBlurShader_.get());
-	vpShaderState_->setUniformFloat(nullptr, "uResolution", static_cast<float>(viewport_->width()), static_cast<float>(viewport_->height()));
+	vpPingSprite_ = nctl::makeUnique<nc::Sprite>(nullptr, texture0_.get(), nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
+	vpPingSpriteShaderState_ = nctl::makeUnique<nc::ShaderState>(vpPingSprite_.get(), vpBlurShader_.get());
+	vpPingSpriteShaderState_->setUniformFloat(nullptr, "uResolution", static_cast<float>(texture0_->width()), static_cast<float>(texture0_->height()));
+
+	vpPongSprite_ = nctl::makeUnique<nc::Sprite>(nullptr, texture1_.get(), nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
+	vpPongSpriteShaderState_ = nctl::makeUnique<nc::ShaderState>(vpPongSprite_.get(), vpBlurShader_.get());
+	vpPongSpriteShaderState_->setUniformFloat(nullptr, "uResolution", static_cast<float>(texture1_->width()), static_cast<float>(texture1_->height()));
+
+	sceneViewport_->setRootNode(rootNode_.get());
+	pingViewport_->setRootNode(vpPingSprite_.get());
+	pongViewport_->setRootNode(vpPongSprite_.get());
 
 	debugString_ = nctl::makeUnique<nctl::String>(128);
 	debugText_ = nctl::makeUnique<nc::TextNode>(rootNode_.get(), font_.get());
@@ -82,7 +92,7 @@ void MyEventHandler::onInit()
 	debugText_->setColor(255, 255, 0, 255);
 	debugText_->setAlignment(nc::TextNode::Alignment::CENTER);
 
-	spriteShader_ = nctl::makeUnique<nc::Shader>(nc::Shader::LoadMode::STRING, sprite_vs, sprite_fs);
+	spriteShader_ = nctl::makeUnique<nc::Shader>("Sprite_Shader", nc::Shader::LoadMode::STRING, sprite_vs, sprite_fs);
 	FATAL_ASSERT(spriteShader_->isLinked());
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
@@ -91,7 +101,7 @@ void MyEventHandler::onInit()
 		spriteShaderStates_.pushBack(nctl::makeUnique<nc::ShaderState>(sprites_.back().get(), spriteShader_.get()));
 	}
 
-	meshShader_ = nctl::makeUnique<nc::Shader>(nc::Shader::LoadMode::STRING, meshsprite_vs, meshsprite_fs);
+	meshShader_ = nctl::makeUnique<nc::Shader>("MeshSprite_Shader", nc::Shader::LoadMode::STRING, meshsprite_vs, meshsprite_fs);
 	FATAL_ASSERT(meshShader_->isLinked());
 	meshSprite_ = nctl::makeUnique<nc::MeshSprite>(rootNode_.get(), textures_[0].get(), width * 0.5f, height * 0.8f);
 	meshSprite_->createVerticesFromTexels(NumTexelPoints, TexelPoints);
@@ -101,6 +111,7 @@ void MyEventHandler::onInit()
 	setupViewport();
 	pause_ = false;
 	angle_ = 0.0f;
+	numBlurPasses_ = 2;
 }
 
 void MyEventHandler::onFrameStart()
@@ -159,6 +170,16 @@ void MyEventHandler::onPostUpdate()
 	}
 }
 
+void MyEventHandler::onDrawViewport(nc::Viewport &viewport)
+{
+	// Dirtying the uniform cache value at each blur pass
+	if (&viewport == pingViewport_.get())
+	{
+		vpPingSpriteShaderState_->setUniformFloat(nullptr, "uDirection", 1.0f, 0.0f);
+		vpPongSpriteShaderState_->setUniformFloat(nullptr, "uDirection", 0.0f, 1.0f);
+	}
+}
+
 #ifdef __ANDROID__
 void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 {
@@ -185,6 +206,21 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		withViewport_ = !withViewport_;
 		setupViewport();
 	}
+	else if (event.sym == nc::KeySym::N1)
+	{
+		numBlurPasses_ = 1;
+		setupViewport();
+	}
+	else if (event.sym == nc::KeySym::N2)
+	{
+		numBlurPasses_ = 2;
+		setupViewport();
+	}
+	else if (event.sym == nc::KeySym::N3)
+	{
+		numBlurPasses_ = 3;
+		setupViewport();
+	}
 	else if (event.sym == nc::KeySym::P)
 		pause_ = !pause_;
 	else if (event.sym == nc::KeySym::SPACE)
@@ -204,18 +240,22 @@ void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 
 void MyEventHandler::setupViewport()
 {
+	nc::Viewport::chain().clear();
+
 	if (withViewport_)
 	{
-		nc::theApplication().rootViewport().setNextViewport(viewport_.get());
-		rootNode_->setParent(nullptr);
-		vpSprite_->setParent(&nc::theApplication().rootNode());
+		// Ping-pong passes of the separable blur shader
+		for (unsigned int i = 0; i < numBlurPasses_; i++)
+		{
+			nc::Viewport::chain().pushBack(pongViewport_.get());
+			nc::Viewport::chain().pushBack(pingViewport_.get());
+		}
+		nc::Viewport::chain().pushBack(sceneViewport_.get());
+
+		nc::theApplication().rootViewport().setRootNode(vpPongSprite_.get());
 	}
 	else
-	{
-		nc::theApplication().rootViewport().setNextViewport(nullptr);
-		rootNode_->setParent(&nc::theApplication().rootNode());
-		vpSprite_->setParent(nullptr);
-	}
+		nc::theApplication().rootViewport().setRootNode(rootNode_.get());
 }
 
 void MyEventHandler::checkClick(float x, float y)

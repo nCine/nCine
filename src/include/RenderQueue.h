@@ -24,6 +24,9 @@ class RenderQueue
 	/// Issues every render command in order
 	void draw();
 
+	/// Clears all the queues and resets the render batcher
+	void clear();
+
   private:
 	/// Array of opaque render command pointers
 	nctl::Array<RenderCommand *> opaqueQueue_;

@@ -14,8 +14,8 @@ class ScreenViewport : public Viewport
 	ScreenViewport();
 
   private:
-	using Viewport::update;
-	using Viewport::visit;
+	void update();
+	void visit();
 	void sortAndCommitQueue();
 	void draw();
 

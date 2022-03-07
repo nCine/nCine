@@ -193,7 +193,10 @@ void RenderQueue::draw()
 	GLBlending::disable();
 
 	GLScissorTest::disable();
+}
 
+void RenderQueue::clear()
+{
 	opaqueQueue_.clear();
 	opaqueBatchedQueue_.clear();
 	transparentQueue_.clear();
