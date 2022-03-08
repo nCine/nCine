@@ -227,7 +227,7 @@ void MyEventHandler::onFrameStart()
 	if (withViewport_)
 	{
 		const nc::Vector2f camPos(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
-		camera_->setView(camPos, 0.0f, camScale_);
+		camera_->setView(-camPos, 0.0f, camScale_);
 	}
 	else
 		cameraNode_->setScale(camScale_);

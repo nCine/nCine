@@ -125,7 +125,7 @@ void MyEventHandler::onInit()
 			viewportData[i].viewport = nctl::makeUnique<nc::Viewport>(viewportCreationData[i].size);
 
 		viewportData[i].camera = nctl::makeUnique<nc::Camera>();
-		viewportData[i].camera->setView(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f, 0.0f, 1.0f);
+		viewportData[i].camera->setView(-nc::theApplication().width() * 0.5f, -nc::theApplication().height() * 0.5f, 0.0f, 1.0f);
 		viewportData[i].rootNode = nctl::makeUnique<nc::SceneNode>();
 
 		nc::Viewport *viewport = viewportData[i].viewport.get();
@@ -503,8 +503,8 @@ void MyEventHandler::onFrameStart()
 		if (viewportChanged || viewMatrixChanged)
 		{
 			values = currentCamera.viewValues();
-			camPos_ = values.position;
-			camRot_ = values.rotation;
+			camPos_ = -values.position;
+			camRot_ = -values.rotation;
 			camScale_ = values.scale;
 			viewMatrixChanged = false;
 		}
@@ -521,7 +521,7 @@ void MyEventHandler::onFrameStart()
 		ImGui::SameLine();
 		if (ImGui::Button("Reset"))
 		{
-			values.position.set(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
+			values.position.set(-nc::theApplication().width() * 0.5f, -nc::theApplication().height() * 0.5f);
 			values.rotation = 0.0f;
 			values.scale = 1.0f;
 			valueChanged = true;
@@ -529,8 +529,8 @@ void MyEventHandler::onFrameStart()
 		ImGui::SameLine();
 		if (ImGui::Button("Apply") || (applyEveryframe && valueChanged))
 		{
-			camPos_ = values.position;
-			camRot_ = values.rotation;
+			camPos_ = -values.position;
+			camRot_ = -values.rotation;
 			camScale_ = values.scale;
 		}
 		ImGui::TreePop();
@@ -591,16 +591,16 @@ void MyEventHandler::onFrameStart()
 
 	const nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 	debugString_->clear();
-	debugString_->format("x: %.2f, y: %.2f, scale: %.2f, angle: %.2f", -camPos_.x, -camPos_.y, camScale_, camRot_);
+	debugString_->format("x: %.2f, y: %.2f, scale: %.2f, angle: %.2f", -camPos_.x, -camPos_.y, camScale_, -camRot_);
 	debugString_->formatAppend("\nbatching: %s, culling: %s, input: %s", stringOnOff(settings.batchingEnabled),
 	                           stringOnOff(settings.cullingEnabled), stringOnOff(inputEnabled_));
 	debugText_->setString(*debugString_);
 
 	const nc::Camera::ViewValues &viewValues = currentCamera.viewValues();
-	if (camPos_.x != viewValues.position.x || camPos_.y != viewValues.position.y ||
-	    camRot_ != viewValues.rotation || camScale_ != viewValues.scale)
+	if (-camPos_.x != viewValues.position.x || -camPos_.y != viewValues.position.y ||
+	    -camRot_ != viewValues.rotation || camScale_ != viewValues.scale)
 	{
-		currentCamera.setView(camPos_, camRot_, camScale_);
+		currentCamera.setView(-camPos_, -camRot_, camScale_);
 		viewMatrixChanged = true;
 	}
 

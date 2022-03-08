@@ -224,13 +224,13 @@ void MyEventHandler::onFrameStart()
 
 	const nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 	debugString_->clear();
-	debugString_->format("x: %.2f, y: %.2f, scale: %.2f, angle: %.2f", -camPos_.x, -camPos_.y, camScale_, camRot_);
+	debugString_->format("x: %.2f, y: %.2f, scale: %.2f, angle: %.2f", -camPos_.x, -camPos_.y, camScale_, -camRot_);
 	debugString_->formatAppend("\nbatching: %s, culling: %s, texture atlas: %s, viewport: %s", stringOnOff(settings.batchingEnabled),
 	                           stringOnOff(settings.cullingEnabled), stringOnOff(withAtlas_), stringOnOff(withViewport_));
 	debugText_->setString(*debugString_);
 
 	if (withViewport_)
-		camera_->setView(camPos_, camRot_, camScale_);
+		camera_->setView(-camPos_, -camRot_, camScale_);
 	else
 	{
 		cameraNode_->setPosition(camPos_);

@@ -244,21 +244,21 @@ void Viewport::calculateCullingRect()
 	if (viewValues.scale != 0.0f && viewValues.scale != 1.0f)
 	{
 		const float invScale = 1.0f / viewValues.scale;
-		cullingRect_.x = (cullingRect_.x - viewValues.position.x) * invScale;
-		cullingRect_.y = (cullingRect_.y - viewValues.position.y) * invScale;
+		cullingRect_.x = (cullingRect_.x + viewValues.position.x) * invScale;
+		cullingRect_.y = (cullingRect_.y + viewValues.position.y) * invScale;
 		cullingRect_.w *= invScale;
 		cullingRect_.h *= invScale;
 	}
 	else
 	{
-		cullingRect_.x += -viewValues.position.x;
-		cullingRect_.y += -viewValues.position.y;
+		cullingRect_.x += viewValues.position.x;
+		cullingRect_.y += viewValues.position.y;
 	}
 
 	if (viewValues.rotation > SceneNode::MinRotation || viewValues.rotation < -SceneNode::MinRotation)
 	{
-		const float sinRot = sinf(viewValues.rotation * fDegToRad);
-		const float cosRot = cosf(viewValues.rotation * fDegToRad);
+		const float sinRot = sinf(-viewValues.rotation * fDegToRad);
+		const float cosRot = cosf(-viewValues.rotation * fDegToRad);
 		const float rotatedWidth = fabsf(cullingRect_.w * cosRot) + fabsf(cullingRect_.h * sinRot);
 		const float rotatedHeight = fabsf(cullingRect_.w * sinRot) + fabsf(cullingRect_.h * cosRot);
 
