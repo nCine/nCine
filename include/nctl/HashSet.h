@@ -578,7 +578,7 @@ void HashSet<K, HashFunc>::rehash(unsigned int count)
 	{
 		if (hashes_[i] != NullHash)
 		{
-			hashSet.insert(keys_[i]);
+			hashSet.insert(nctl::move(keys_[i]));
 
 			rehashedKeys++;
 			if (rehashedKeys == size_)

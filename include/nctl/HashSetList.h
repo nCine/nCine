@@ -618,17 +618,17 @@ void HashSetList<K, HashFunc>::rehash(unsigned int count)
 	HashSetList<K, HashFunc> hashSet(count);
 
 	unsigned int bucketIndex = 0;
-	HashBucket &bucket = buckets_[bucketIndex];
 	while (bucketIndex < buckets_.size() - 1)
 	{
-		while (bucketIndex < buckets_.size() - 1 && bucket.size() == 0)
-			bucket = buckets_[++bucketIndex];
+		while (bucketIndex < buckets_.size() - 1 && buckets_[bucketIndex].size() == 0)
+			bucketIndex++;
 
+		HashBucket &bucket = buckets_[bucketIndex];
 		if (bucket.size() > 0)
 		{
-			hashSet.insert(bucket.firstNode_.key);
-			for (typename List<Node>::ConstIterator i = bucket.collisionList_.begin(); i != bucket.collisionList_.end(); ++i)
-				hashSet.insert((*i).key);
+			hashSet.insert(nctl::move(bucket.firstNode_.key));
+			for (typename List<Node>::Iterator i = bucket.collisionList_.begin(); i != bucket.collisionList_.end(); ++i)
+				hashSet.insert(nctl::move((*i).key));
 
 			++bucketIndex;
 		}

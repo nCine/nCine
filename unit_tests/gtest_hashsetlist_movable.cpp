@@ -122,4 +122,22 @@ TEST_F(HashSetListMovableTest, MoveAssignmentOperator)
 	ASSERT_EQ(m->data(), newData);
 }
 
+TEST_F(HashSetListMovableTest, Rehash)
+{
+	Movable refMovable(Movable::Construction::INITIALIZED);
+	Movable movable(Movable::Construction::INITIALIZED);
+	hashset_.insert(nctl::move(movable));
+	const Movable *m = hashset_.find(refMovable);
+	m->printAndAssert();
+	const float loadFactor = hashset_.loadFactor();
+	printf("Original size: %u, capacity: %u, load factor: %f\n", hashset_.size(), Capacity, hashset_.loadFactor());
+
+	printf("Doubling capacity by rehashing\n");
+	hashset_.rehash(Capacity * 2);
+	printf("New size: %u, capacity: %u, load factor: %f\n", hashset_.size(), Capacity * 2, hashset_.loadFactor());
+
+	ASSERT_EQ(hashset_.size(), 1);
+	ASSERT_FLOAT_EQ(hashset_.loadFactor(), loadFactor * 0.5f);
+}
+
 }

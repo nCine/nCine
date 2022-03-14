@@ -119,4 +119,20 @@ TEST_F(HashMapListMovableTest, MoveAssignmentOperator)
 	ASSERT_EQ(newHashmap[0].data(), newData);
 }
 
+TEST_F(HashMapListMovableTest, Rehash)
+{
+	Movable movable(Movable::Construction::INITIALIZED);
+	hashmap_[0] = nctl::move(movable);
+	hashmap_[0].printAndAssert();
+	const float loadFactor = hashmap_.loadFactor();
+	printf("Original size: %u, capacity: %u, load factor: %f\n", hashmap_.size(), Capacity, hashmap_.loadFactor());
+
+	printf("Doubling capacity by rehashing\n");
+	hashmap_.rehash(Capacity * 2);
+	printf("New size: %u,capacity: %u, load factor: %f\n", hashmap_.size(), Capacity * 2, hashmap_.loadFactor());
+
+	ASSERT_EQ(hashmap_.size(), 1);
+	ASSERT_FLOAT_EQ(hashmap_.loadFactor(), loadFactor * 0.5f);
+}
+
 }

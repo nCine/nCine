@@ -725,8 +725,8 @@ void HashMap<K, T, HashFunc>::rehash(unsigned int count)
 	{
 		if (hashes_[i] != NullHash)
 		{
-			const Node &node = nodes_[i];
-			hashMap[node.key] = node.value;
+			Node &node = nodes_[i];
+			hashMap.insert(node.key, nctl::move(node.value));
 
 			rehashedNodes++;
 			if (rehashedNodes == size_)
