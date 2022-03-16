@@ -70,7 +70,7 @@ void MyEventHandler::onInit()
 	pingViewport_ = nctl::makeUnique<nc::Viewport>(texture1_.get());
 	pongViewport_ = nctl::makeUnique<nc::Viewport>(texture0_.get());
 
-	vpBlurShader_ = nctl::makeUnique<nc::Shader>("SeparableBlur_Shader", nc::Shader::LoadMode::STRING, sprite_vs, sprite_blur_fs);
+	vpBlurShader_ = nctl::makeUnique<nc::Shader>("SeparableBlur_Shader", nc::Shader::LoadMode::STRING, nc::Shader::DefaultVertex::SPRITE, sprite_blur_fs);
 	FATAL_ASSERT(vpBlurShader_->isLinked());
 	vpPingSprite_ = nctl::makeUnique<nc::Sprite>(nullptr, texture0_.get(), nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
 	vpPingSpriteShaderState_ = nctl::makeUnique<nc::ShaderState>(vpPingSprite_.get(), vpBlurShader_.get());
@@ -101,7 +101,7 @@ void MyEventHandler::onInit()
 		spriteShaderStates_.pushBack(nctl::makeUnique<nc::ShaderState>(sprites_.back().get(), spriteShader_.get()));
 	}
 
-	meshShader_ = nctl::makeUnique<nc::Shader>("MeshSprite_Shader", nc::Shader::LoadMode::STRING, meshsprite_vs, meshsprite_fs);
+	meshShader_ = nctl::makeUnique<nc::Shader>("MeshSprite_Shader", nc::Shader::LoadMode::STRING, nc::Shader::DefaultVertex::MESHSPRITE, meshsprite_fs);
 	FATAL_ASSERT(meshShader_->isLinked());
 	meshSprite_ = nctl::makeUnique<nc::MeshSprite>(rootNode_.get(), textures_[0].get(), width * 0.5f, height * 0.8f);
 	meshSprite_->createVerticesFromTexels(NumTexelPoints, TexelPoints);

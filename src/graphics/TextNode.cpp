@@ -442,16 +442,16 @@ void TextNode::processGlyph(const FontGlyph *glyph, Degenerate degen)
 void TextNode::shaderHasChanged()
 {
 	renderCommand_->material().reserveUniformsDataMemory();
-	instanceBlock_ = renderCommand_->material().uniformBlock(InstanceBlockName);
+	instanceBlock_ = renderCommand_->material().uniformBlock(Material::InstanceBlockName);
 
 	dirtyBits_.set(DirtyBitPositions::TransformationBit);
 	dirtyBits_.set(DirtyBitPositions::ColorBit);
 
-	GLVertexFormat::Attribute *positionAttribute = renderCommand_->material().attribute(PositionAttributeName);
+	GLVertexFormat::Attribute *positionAttribute = renderCommand_->material().attribute(Material::PositionAttributeName);
 	if (positionAttribute)
 		positionAttribute->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
 
-	GLVertexFormat::Attribute *texCoordsAttribute = renderCommand_->material().attribute(TexCoordsAttributeName);
+	GLVertexFormat::Attribute *texCoordsAttribute = renderCommand_->material().attribute(Material::TexCoordsAttributeName);
 	if (texCoordsAttribute)
 		texCoordsAttribute->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
 }
@@ -465,7 +465,7 @@ void TextNode::updateRenderCommand()
 	}
 	if (dirtyBits_.test(DirtyBitPositions::ColorBit))
 	{
-		GLUniformCache *colorUniform = instanceBlock_->uniform(ColorUniformName);
+		GLUniformCache *colorUniform = instanceBlock_->uniform(Material::ColorUniformName);
 		if (colorUniform)
 			colorUniform->setFloatVector(Colorf(absColor()).data());
 		dirtyBits_.reset(DirtyBitPositions::ColorBit);

@@ -9,6 +9,29 @@
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
+const char *Material::InstanceBlockName = "InstanceBlock";
+const char *Material::InstancesBlockName = "InstancesBlock";
+const char *Material::ModelMatrixUniformName = "modelMatrix";
+
+const char *Material::GuiProjectionMatrixUniformName = "uGuiProjection";
+const char *Material::DepthUniformName = "uDepth";
+const char *Material::ProjectionMatrixUniformName = "uProjectionMatrix";
+const char *Material::ViewMatrixUniformName = "uViewMatrix";
+const char *Material::ProjectionViewMatrixExcludeString = "uProjectionMatrix\0uViewMatrix\0";
+
+const char *Material::TextureUniformName = "uTexture";
+const char *Material::ColorUniformName = "color";
+const char *Material::SpriteSizeUniformName = "spriteSize";
+const char *Material::TexRectUniformName = "texRect";
+const char *Material::PositionAttributeName = "aPosition";
+const char *Material::TexCoordsAttributeName = "aTexCoords";
+const char *Material::MeshIndexAttributeName = "aMeshIndex";
+const char *Material::ColorAttributeName = "aColor";
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
@@ -37,109 +60,11 @@ void Material::setBlendingFactors(GLenum srcBlendingFactor, GLenum destBlendingF
 
 bool Material::setShaderProgramType(ShaderProgramType shaderProgramType)
 {
-	if (shaderProgramType_ == shaderProgramType)
+	GLShaderProgram *shaderProgram = RenderResources::shaderProgram(shaderProgramType);
+	if (shaderProgram == nullptr || shaderProgram == shaderProgram_)
 		return false;
 
-	switch (shaderProgramType)
-	{
-		case ShaderProgramType::SPRITE:
-			setShaderProgram(RenderResources::spriteShaderProgram());
-			shaderProgram_->setObjectLabel("Sprite");
-			break;
-		case ShaderProgramType::SPRITE_GRAY:
-			setShaderProgram(RenderResources::spriteGrayShaderProgram());
-			shaderProgram_->setObjectLabel("Sprite_Gray");
-			break;
-		case ShaderProgramType::SPRITE_NO_TEXTURE:
-			setShaderProgram(RenderResources::spriteNoTextureShaderProgram());
-			shaderProgram_->setObjectLabel("Sprite_NoTexture");
-			break;
-		case ShaderProgramType::MESH_SPRITE:
-			setShaderProgram(RenderResources::meshSpriteShaderProgram());
-			shaderProgram_->setObjectLabel("MeshSprite");
-			break;
-		case ShaderProgramType::MESH_SPRITE_GRAY:
-			setShaderProgram(RenderResources::meshSpriteGrayShaderProgram());
-			shaderProgram_->setObjectLabel("MeshSprite_Gray");
-			break;
-		case ShaderProgramType::MESH_SPRITE_NO_TEXTURE:
-			setShaderProgram(RenderResources::meshSpriteNoTextureShaderProgram());
-			shaderProgram_->setObjectLabel("MeshSprite_NoTexture");
-			break;
-		case ShaderProgramType::TEXTNODE_ALPHA:
-			setShaderProgram(RenderResources::textnodeAlphaShaderProgram());
-			shaderProgram_->setObjectLabel("TextNode_Alpha");
-			break;
-		case ShaderProgramType::TEXTNODE_RED:
-			setShaderProgram(RenderResources::textnodeRedShaderProgram());
-			shaderProgram_->setObjectLabel("TextNode_Red");
-			break;
-		case ShaderProgramType::BATCHED_SPRITES:
-			setShaderProgram(RenderResources::batchedSpritesShaderProgram());
-			shaderProgram_->setObjectLabel("Batched_Sprites");
-			break;
-		case ShaderProgramType::BATCHED_SPRITES_GRAY:
-			setShaderProgram(RenderResources::batchedSpritesGrayShaderProgram());
-			shaderProgram_->setObjectLabel("Batched_Sprites_Gray");
-			break;
-		case ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE:
-			setShaderProgram(RenderResources::batchedSpritesNoTextureShaderProgram());
-			shaderProgram_->setObjectLabel("Batched_Sprites_NoTexture");
-			break;
-		case ShaderProgramType::BATCHED_MESH_SPRITES:
-			setShaderProgram(RenderResources::batchedMeshSpritesShaderProgram());
-			shaderProgram_->setObjectLabel("Batched_MeshSprites");
-			break;
-		case ShaderProgramType::BATCHED_MESH_SPRITES_GRAY:
-			setShaderProgram(RenderResources::batchedMeshSpritesGrayShaderProgram());
-			shaderProgram_->setObjectLabel("Batched_MeshSprites_Gray");
-			break;
-		case ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE:
-			setShaderProgram(RenderResources::batchedMeshSpritesNoTextureShaderProgram());
-			shaderProgram_->setObjectLabel("Batched_MeshSprites_NoTexture");
-			break;
-		case ShaderProgramType::BATCHED_TEXTNODES_ALPHA:
-			setShaderProgram(RenderResources::batchedTextnodesAlphaShaderProgram());
-			shaderProgram_->setObjectLabel("Batched_TextNodes_Alpha");
-			break;
-		case ShaderProgramType::BATCHED_TEXTNODES_RED:
-			setShaderProgram(RenderResources::batchedTextnodesRedShaderProgram());
-			shaderProgram_->setObjectLabel("Batched_TextNodes_Red");
-			break;
-		case ShaderProgramType::CUSTOM:
-			break;
-	}
-
-	switch (shaderProgramType)
-	{
-		case ShaderProgramType::BATCHED_SPRITES:
-		case ShaderProgramType::BATCHED_SPRITES_GRAY:
-		case ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE:
-			// Uniforms data pointer not set at this time
-			break;
-		case ShaderProgramType::BATCHED_MESH_SPRITES:
-		case ShaderProgramType::BATCHED_MESH_SPRITES_GRAY:
-			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, position)));
-			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, texcoords)));
-			attribute("aMeshIndex")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, drawindex)));
-			// Uniforms data pointer not set at this time
-			break;
-		case ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE:
-			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Index, position)));
-			attribute("aMeshIndex")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Index, drawindex)));
-			// Uniforms data pointer not set at this time
-			break;
-		case ShaderProgramType::BATCHED_TEXTNODES_ALPHA:
-		case ShaderProgramType::BATCHED_TEXTNODES_RED:
-			attribute("aPosition")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, position)));
-			attribute("aTexCoords")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, texcoords)));
-			attribute("aMeshIndex")->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, drawindex)));
-			// Uniforms data pointer not set at this time
-			break;
-		case ShaderProgramType::CUSTOM:
-		default:
-			break;
-	}
+	setShaderProgram(shaderProgram);
 
 	// Should be assigned after calling `setShaderProgram()`
 	shaderProgramType_ = shaderProgramType;
@@ -153,9 +78,27 @@ void Material::setShaderProgram(GLShaderProgram *program)
 	shaderProgramType_ = ShaderProgramType::CUSTOM;
 	shaderProgram_ = program;
 	// The camera uniforms are handled separately as they have a different update frequency
-	shaderUniforms_.setProgram(shaderProgram_, nullptr, RenderResources::ProjectionViewMatrixExcludeString);
+	shaderUniforms_.setProgram(shaderProgram_, nullptr, ProjectionViewMatrixExcludeString);
 	shaderUniformBlocks_.setProgram(shaderProgram_);
 	shaderAttributes_.setProgram(shaderProgram_);
+
+	if (shaderAttributes_.numAttributes() > 0)
+	{
+		const bool hasPositionAttribute = hasAttribute(PositionAttributeName);
+		const bool hasTexCoordsAttribute = hasAttribute(TexCoordsAttributeName);
+		const bool hasMeshIndexAttribute = hasAttribute(MeshIndexAttributeName);
+		if (hasPositionAttribute && hasTexCoordsAttribute && hasMeshIndexAttribute)
+		{
+			attribute(PositionAttributeName)->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, position)));
+			attribute(TexCoordsAttributeName)->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, texcoords)));
+			attribute(MeshIndexAttributeName)->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, drawindex)));
+		}
+		else if (hasPositionAttribute && hasMeshIndexAttribute)
+		{
+			attribute(PositionAttributeName)->setVboParameters(sizeof(RenderResources::VertexFormatPos2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Index, position)));
+			attribute(MeshIndexAttributeName)->setVboParameters(sizeof(RenderResources::VertexFormatPos2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Index, drawindex)));
+		}
+	}
 }
 
 void Material::reserveUniformsDataMemory()

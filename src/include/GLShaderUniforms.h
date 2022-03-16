@@ -31,8 +31,6 @@ class GLShaderUniforms
 
 	static const int UniformCachesHashSize = 16;
 	nctl::StaticHashMap<nctl::String, GLUniformCache, UniformCachesHashSize> uniformCaches_;
-	/// A dummy uniform cache returned when a uniform is not found in the hashmap
-	static GLUniformCache uniformNotFound_;
 
 	/// Imports the uniforms with the option of including only some or excluing others
 	void importUniforms(const char *includeOnly, const char *exclude);

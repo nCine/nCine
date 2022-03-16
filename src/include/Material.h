@@ -56,6 +56,28 @@ class Material
 		CUSTOM
 	};
 
+	// Shader uniform block and model matrix uniform names
+	static const char *InstanceBlockName;
+	static const char *InstancesBlockName; // for batched shaders
+	static const char *ModelMatrixUniformName;
+
+	// Camera related shader uniform names
+	static const char *GuiProjectionMatrixUniformName;
+	static const char *DepthUniformName;
+	static const char *ProjectionMatrixUniformName;
+	static const char *ViewMatrixUniformName;
+	static const char *ProjectionViewMatrixExcludeString;
+
+	// Shader uniform and attribute names
+	static const char *TextureUniformName;
+	static const char *ColorUniformName;
+	static const char *SpriteSizeUniformName;
+	static const char *TexRectUniformName;
+	static const char *PositionAttributeName;
+	static const char *TexCoordsAttributeName;
+	static const char *MeshIndexAttributeName;
+	static const char *ColorAttributeName;
+
 	/// Default constructor
 	Material();
 	Material(GLShaderProgram *program, GLTexture *texture);
@@ -74,12 +96,21 @@ class Material
 
 	void reserveUniformsDataMemory();
 	void setUniformsDataPointer(GLubyte *dataPointer);
+
+	/// Wrapper around `GLShaderUniforms::hasUniform()`
+	inline bool hasUniform(const char *name) const { return shaderUniforms_.hasUniform(name); }
+	/// Wrapper around `GLShaderUniformBlocks::hasUniformBlock()`
+	inline bool hasUniformBlock(const char *name) const { return shaderUniformBlocks_.hasUniformBlock(name); }
+	/// Wrapper around `GLShaderAttributes::hasAttribute()`
+	inline bool hasAttribute(const char *name) const { return shaderAttributes_.hasAttribute(name); }
+
 	/// Wrapper around `GLShaderUniforms::uniform()`
 	inline GLUniformCache *uniform(const char *name) { return shaderUniforms_.uniform(name); }
 	/// Wrapper around `GLShaderUniformBlocks::uniformBlock()`
 	inline GLUniformBlockCache *uniformBlock(const char *name) { return shaderUniformBlocks_.uniformBlock(name); }
 	/// Wrapper around `GLShaderAttributes::attribute()`
 	inline GLVertexFormat::Attribute *attribute(const char *name) { return shaderAttributes_.attribute(name); }
+
 	inline const GLTexture *texture() const { return texture_; }
 	inline void setTexture(const GLTexture *texture) { texture_ = texture; }
 	void setTexture(const Texture &texture);

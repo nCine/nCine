@@ -7,12 +7,6 @@
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
-// STATIC DEFINITIONS
-///////////////////////////////////////////////////////////
-
-GLVertexFormat::Attribute GLShaderAttributes::attributeNotFound_;
-
-///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
@@ -49,13 +43,7 @@ GLVertexFormat::Attribute *GLShaderAttributes::attribute(const char *name)
 		int location = -1;
 		const bool attributeFound = attributeLocations_.contains(name, location);
 
-		if (attributeFound == false)
-		{
-			// Returning the dummy vertex attribute to prevent the application from crashing
-			vertexAttribute = &attributeNotFound_;
-			LOGW_X("Attribute \"%s\" not found in shader program %u", name, shaderProgram_->glHandle());
-		}
-		else
+		if (attributeFound)
 			vertexAttribute = &vertexFormat_[location];
 	}
 	else

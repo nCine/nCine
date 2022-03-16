@@ -32,13 +32,6 @@
 
 namespace ncine {
 
-const char *TextureUniformName = "uTexture";
-const char *ProjectionUniformName = "uGuiProjection";
-const char *DepthUniformName = "uDepth";
-const char *PositionAttributeName = "aPosition";
-const char *TexCoordsAttributeName = "aTexCoords";
-const char *ColorAttributeName = "aColor";
-
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
@@ -134,8 +127,8 @@ void ImGuiDrawing::newFrame()
 
 		if (withSceneGraph_ == false)
 		{
-			imguiShaderUniforms_->uniform(ProjectionUniformName)->setFloatVector(projectionMatrix_.data());
-			imguiShaderUniforms_->uniform(DepthUniformName)->setFloatValue(0.0f);
+			imguiShaderUniforms_->uniform(Material::GuiProjectionMatrixUniformName)->setFloatVector(projectionMatrix_.data());
+			imguiShaderUniforms_->uniform(Material::DepthUniformName)->setFloatValue(0.0f);
 			imguiShaderUniforms_->commitUniforms();
 		}
 	}
@@ -182,12 +175,12 @@ void ImGuiDrawing::setupRenderCmd(RenderCommand &cmd)
 	Material &material = cmd.material();
 	material.setShaderProgram(imguiShaderProgram_.get());
 	material.reserveUniformsDataMemory();
-	material.uniform(TextureUniformName)->setIntValue(0); // GL_TEXTURE0
-	material.attribute(PositionAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, pos)));
-	material.attribute(TexCoordsAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, uv)));
-	material.attribute(ColorAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, col)));
-	material.attribute(ColorAttributeName)->setType(GL_UNSIGNED_BYTE);
-	material.attribute(ColorAttributeName)->setNormalized(true);
+	material.uniform(Material::TextureUniformName)->setIntValue(0); // GL_TEXTURE0
+	material.attribute(Material::PositionAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, pos)));
+	material.attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, uv)));
+	material.attribute(Material::ColorAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, col)));
+	material.attribute(Material::ColorAttributeName)->setType(GL_UNSIGNED_BYTE);
+	material.attribute(Material::ColorAttributeName)->setNormalized(true);
 	material.setBlendingEnabled(true);
 	material.setBlendingFactors(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -218,7 +211,7 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 		if (lastFrameWidth_ != static_cast<int>(io.DisplaySize.x) ||
 		    lastFrameHeight_ != static_cast<int>(io.DisplaySize.y))
 		{
-			firstCmd.material().uniform(ProjectionUniformName)->setFloatVector(projectionMatrix_.data());
+			firstCmd.material().uniform(Material::GuiProjectionMatrixUniformName)->setFloatVector(projectionMatrix_.data());
 			lastFrameWidth_ = static_cast<int>(io.DisplaySize.x);
 			lastFrameHeight_ = static_cast<int>(io.DisplaySize.y);
 		}
@@ -237,7 +230,7 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 		{
 			// It is enough to set the uniform value once as every ImGui command share the same shader
 			const float depth = RenderCommand::calculateDepth(theApplication().guiSettings().imguiLayer, -1.0f, 1.0f);
-			firstCmd.material().uniform(DepthUniformName)->setFloatValue(depth);
+			firstCmd.material().uniform(Material::DepthUniformName)->setFloatValue(depth);
 			lastLayerValue_ = theApplication().guiSettings().imguiLayer;
 		}
 
@@ -282,14 +275,14 @@ void ImGuiDrawing::setupBuffersAndShader()
 
 	imguiShaderUniforms_ = nctl::makeUnique<GLShaderUniforms>(imguiShaderProgram_.get());
 	imguiShaderUniforms_->setUniformsDataPointer(uniformsBuffer_);
-	imguiShaderUniforms_->uniform(TextureUniformName)->setIntValue(0); // GL_TEXTURE0
+	imguiShaderUniforms_->uniform(Material::TextureUniformName)->setIntValue(0); // GL_TEXTURE0
 
 	imguiShaderAttributes_ = nctl::makeUnique<GLShaderAttributes>(imguiShaderProgram_.get());
-	imguiShaderAttributes_->attribute(PositionAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, pos)));
-	imguiShaderAttributes_->attribute(TexCoordsAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, uv)));
-	imguiShaderAttributes_->attribute(ColorAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, col)));
-	imguiShaderAttributes_->attribute(ColorAttributeName)->setType(GL_UNSIGNED_BYTE);
-	imguiShaderAttributes_->attribute(ColorAttributeName)->setNormalized(true);
+	imguiShaderAttributes_->attribute(Material::PositionAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, pos)));
+	imguiShaderAttributes_->attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, uv)));
+	imguiShaderAttributes_->attribute(Material::ColorAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, col)));
+	imguiShaderAttributes_->attribute(Material::ColorAttributeName)->setType(GL_UNSIGNED_BYTE);
+	imguiShaderAttributes_->attribute(Material::ColorAttributeName)->setNormalized(true);
 }
 
 void ImGuiDrawing::draw()

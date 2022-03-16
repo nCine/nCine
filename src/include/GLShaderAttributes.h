@@ -18,6 +18,8 @@ class GLShaderAttributes
 	explicit GLShaderAttributes(GLShaderProgram *shaderProgram);
 	void setProgram(GLShaderProgram *shaderProgram);
 
+	inline unsigned int numAttributes() const { return attributeLocations_.size(); }
+	inline bool hasAttribute(const char *name) const { return (attributeLocations_.find(name) != nullptr); }
 	GLVertexFormat::Attribute *attribute(const char *name);
 	inline void defineVertexFormat(const GLBufferObject *vbo) { defineVertexFormat(vbo, nullptr, 0); }
 	inline void defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo) { defineVertexFormat(vbo, ibo, 0); }
@@ -26,7 +28,6 @@ class GLShaderAttributes
   private:
 	GLShaderProgram *shaderProgram_;
 
-	static GLVertexFormat::Attribute attributeNotFound_;
 	nctl::StaticHashMap<nctl::String, int, GLVertexFormat::MaxAttributes> attributeLocations_;
 	GLVertexFormat vertexFormat_;
 

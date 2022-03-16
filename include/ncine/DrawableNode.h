@@ -20,11 +20,6 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	static const Vector2f AnchorBottomRight;
 	static const Vector2f AnchorTopRight;
 
-	// Shader uniform block and model matrix uniform names
-	static const char *InstanceBlockName;
-	static const char *InstancesBlockName;
-	static const char *ModelMatrixUniformName;
-
 	/// Presets for blending factors
 	enum class BlendingPreset
 	{
@@ -115,14 +110,6 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	inline Rectf aabb() const { return aabb_; }
 
   protected:
-	// Shader uniform and attribute names
-	static const char *TextureUniformName;
-	static const char *ColorUniformName;
-	static const char *SpriteSizeUniformName;
-	static const char *TexRectUniformName;
-	static const char *PositionAttributeName;
-	static const char *TexCoordsAttributeName;
-
 	/// Node width in pixel
 	float width_;
 	/// Node height in pixel

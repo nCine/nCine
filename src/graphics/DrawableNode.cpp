@@ -70,17 +70,6 @@ const Vector2f DrawableNode::AnchorTopLeft(0.0f, 1.0f);
 const Vector2f DrawableNode::AnchorBottomRight(1.0f, 0.0f);
 const Vector2f DrawableNode::AnchorTopRight(1.0f, 1.0f);
 
-const char *DrawableNode::InstanceBlockName = "InstanceBlock";
-const char *DrawableNode::InstancesBlockName = "InstancesBlock";
-const char *DrawableNode::ModelMatrixUniformName = "modelMatrix";
-
-const char *DrawableNode::TextureUniformName = "uTexture";
-const char *DrawableNode::ColorUniformName = "color";
-const char *DrawableNode::SpriteSizeUniformName = "spriteSize";
-const char *DrawableNode::TexRectUniformName = "texRect";
-const char *DrawableNode::PositionAttributeName = "aPosition";
-const char *DrawableNode::TexCoordsAttributeName = "aTexCoords";
-
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////

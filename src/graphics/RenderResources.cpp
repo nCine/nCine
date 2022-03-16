@@ -20,34 +20,14 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-const char *RenderResources::ProjectionMatrixUniformName = "uProjectionMatrix";
-const char *RenderResources::ViewMatrixUniformName = "uViewMatrix";
-const char *RenderResources::ProjectionViewMatrixExcludeString = "uProjectionMatrix\0uViewMatrix\0";
-
 nctl::UniquePtr<RenderBuffersManager> RenderResources::buffersManager_;
 nctl::UniquePtr<RenderVaoPool> RenderResources::vaoPool_;
 nctl::UniquePtr<RenderCommandPool> RenderResources::renderCommandPool_;
 nctl::UniquePtr<RenderBatcher> RenderResources::renderBatcher_;
 
-nctl::UniquePtr<GLShaderProgram> RenderResources::spriteShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::spriteGrayShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::spriteNoTextureShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::meshSpriteShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::meshSpriteGrayShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::meshSpriteNoTextureShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::textnodeAlphaShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::textnodeRedShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::batchedSpritesShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::batchedSpritesGrayShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::batchedSpritesNoTextureShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::batchedMeshSpritesShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::batchedMeshSpritesGrayShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::batchedMeshSpritesNoTextureShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::batchedTextnodesRedShaderProgram_;
-nctl::UniquePtr<GLShaderProgram> RenderResources::batchedTextnodesAlphaShaderProgram_;
+nctl::UniquePtr<GLShaderProgram> RenderResources::defaultShaderPrograms_[16];
 
 unsigned char RenderResources::cameraUniformsBuffer_[UniformsBufferSize];
-// The `RenderCommand` class is handling insertions and rehashing
 nctl::HashMap<GLShaderProgram *, RenderResources::CameraUniformData> RenderResources::cameraUniformDataMap_(32);
 
 Camera *RenderResources::currentCamera_ = nullptr;
@@ -57,6 +37,29 @@ Viewport *RenderResources::currentViewport_ = nullptr;
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+GLShaderProgram *RenderResources::shaderProgram(Material::ShaderProgramType shaderProgramType)
+{
+	if (shaderProgramType != Material::ShaderProgramType::CUSTOM)
+		return defaultShaderPrograms_[static_cast<int>(shaderProgramType)].get();
+	else
+		return nullptr;
+}
+
+RenderResources::CameraUniformData *RenderResources::findCameraUniformData(GLShaderProgram *shaderProgram)
+{
+	return cameraUniformDataMap_.find(shaderProgram);
+}
+
+void RenderResources::insertCameraUniformData(GLShaderProgram *shaderProgram, CameraUniformData &&cameraUniformData)
+{
+	FATAL_ASSERT(shaderProgram != nullptr);
+
+	if (cameraUniformDataMap_.loadFactor() >= 0.8f)
+		cameraUniformDataMap_.rehash(cameraUniformDataMap_.capacity() * 2);
+
+	cameraUniformDataMap_.insert(shaderProgram, nctl::move(cameraUniformData));
+}
 
 bool RenderResources::removeCameraUniformData(GLShaderProgram *shaderProgram)
 {
@@ -80,6 +83,7 @@ namespace {
 		const char *vertexShader;
 		const char *fragmentShader;
 		GLShaderProgram::Introspection introspection;
+		const char *objectLabel;
 	};
 
 }
@@ -106,9 +110,9 @@ void RenderResources::updateCameraUniforms()
 		else
 		{
 			if (cameraUniformData.updateFrameProjectionMatrix < currentCamera_->updateFrameProjectionMatrix())
-				(*i).shaderUniforms.uniform(ProjectionMatrixUniformName)->setDirty(true);
+				(*i).shaderUniforms.uniform(Material::ProjectionMatrixUniformName)->setDirty(true);
 			if (cameraUniformData.updateFrameViewMatrix < currentCamera_->updateFrameViewMatrix())
-				(*i).shaderUniforms.uniform(ViewMatrixUniformName)->setDirty(true);
+				(*i).shaderUniforms.uniform(Material::ViewMatrixUniformName)->setDirty(true);
 		}
 
 		cameraUniformData.camera = currentCamera_;
@@ -137,40 +141,40 @@ void RenderResources::create()
 
 	ShaderLoad shadersToLoad[] = {
 #ifndef WITH_EMBEDDED_SHADERS
-		{ RenderResources::spriteShaderProgram_, "sprite_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::spriteGrayShaderProgram_, "sprite_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::spriteNoTextureShaderProgram_, "sprite_notexture_vs.glsl", "sprite_notexture_fs.glsl", GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::meshSpriteShaderProgram_, "meshsprite_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::meshSpriteGrayShaderProgram_, "meshsprite_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::meshSpriteNoTextureShaderProgram_, "meshsprite_notexture_vs.glsl", "sprite_notexture_fs.glsl", GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::textnodeAlphaShaderProgram_, "textnode_vs.glsl", "textnode_alpha_fs.glsl", GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::textnodeRedShaderProgram_, "textnode_vs.glsl", "textnode_red_fs.glsl", GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::batchedSpritesShaderProgram_, "batched_sprites_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedSpritesGrayShaderProgram_, "batched_sprites_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedSpritesNoTextureShaderProgram_, "batched_sprites_notexture_vs.glsl", "sprite_notexture_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedMeshSpritesShaderProgram_, "batched_meshsprites_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedMeshSpritesGrayShaderProgram_, "batched_meshsprites_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedMeshSpritesNoTextureShaderProgram_, "batched_meshsprites_notexture_vs.glsl", "sprite_notexture_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedTextnodesAlphaShaderProgram_, "batched_textnodes_vs.glsl", "textnode_alpha_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedTextnodesRedShaderProgram_, "batched_textnodes_vs.glsl", "textnode_red_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS }
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE)], "sprite_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::ENABLED, "Sprite" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE_GRAY)], "sprite_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::ENABLED, "Sprite_Gray" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE_NO_TEXTURE)], "sprite_notexture_vs.glsl", "sprite_notexture_fs.glsl", GLShaderProgram::Introspection::ENABLED, "Sprite_NoTexture" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE)], "meshsprite_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::ENABLED, "MeshSprite" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE_GRAY)], "meshsprite_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::ENABLED, "MeshSprite_Gray" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)], "meshsprite_notexture_vs.glsl", "sprite_notexture_fs.glsl", GLShaderProgram::Introspection::ENABLED, "MeshSprite_NoTexture" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::TEXTNODE_ALPHA)], "textnode_vs.glsl", "textnode_alpha_fs.glsl", GLShaderProgram::Introspection::ENABLED, "TextNode_Alpha" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::TEXTNODE_RED)], "textnode_vs.glsl", "textnode_red_fs.glsl", GLShaderProgram::Introspection::ENABLED, "TextNode_Red" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES)], "batched_sprites_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_Sprites" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES_GRAY)], "batched_sprites_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_Sprites_Gray" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE)], "batched_sprites_notexture_vs.glsl", "sprite_notexture_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_Sprites_NoTexture" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES)], "batched_meshsprites_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_MeshSprites" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY)], "batched_meshsprites_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_MeshSprites_Gray" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE)], "batched_meshsprites_notexture_vs.glsl", "sprite_notexture_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_MeshSprites_NoTexture" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA)], "batched_textnodes_vs.glsl", "textnode_alpha_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_TextNodes_Alpha" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_TEXTNODES_RED)], "batched_textnodes_vs.glsl", "textnode_red_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_TextNodes_Red" }
 #else
 		// Skipping the initial new line character of the raw string literal
-		{ RenderResources::spriteShaderProgram_, ShaderStrings::sprite_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::spriteGrayShaderProgram_, ShaderStrings::sprite_vs + 1, ShaderStrings::sprite_gray_fs + 1, GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::spriteNoTextureShaderProgram_, ShaderStrings::sprite_notexture_vs + 1, ShaderStrings::sprite_notexture_fs + 1, GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::meshSpriteShaderProgram_, ShaderStrings::meshsprite_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::meshSpriteGrayShaderProgram_, ShaderStrings::meshsprite_vs + 1, ShaderStrings::sprite_gray_fs + 1, GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::meshSpriteNoTextureShaderProgram_, ShaderStrings::meshsprite_notexture_vs + 1, ShaderStrings::sprite_notexture_fs + 1, GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::textnodeAlphaShaderProgram_, ShaderStrings::textnode_vs + 1, ShaderStrings::textnode_alpha_fs + 1, GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::textnodeRedShaderProgram_, ShaderStrings::textnode_vs + 1, ShaderStrings::textnode_red_fs + 1, GLShaderProgram::Introspection::ENABLED },
-		{ RenderResources::batchedSpritesShaderProgram_, ShaderStrings::batched_sprites_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedSpritesGrayShaderProgram_, ShaderStrings::batched_sprites_vs + 1, ShaderStrings::sprite_gray_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedSpritesNoTextureShaderProgram_, ShaderStrings::batched_sprites_notexture_vs + 1, ShaderStrings::sprite_notexture_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedMeshSpritesShaderProgram_, ShaderStrings::batched_meshsprites_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedMeshSpritesGrayShaderProgram_, ShaderStrings::batched_meshsprites_vs + 1, ShaderStrings::sprite_gray_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedMeshSpritesNoTextureShaderProgram_, ShaderStrings::batched_meshsprites_notexture_vs + 1, ShaderStrings::sprite_notexture_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedTextnodesAlphaShaderProgram_, ShaderStrings::batched_textnodes_vs + 1, ShaderStrings::textnode_alpha_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS },
-		{ RenderResources::batchedTextnodesRedShaderProgram_, ShaderStrings::batched_textnodes_vs + 1, ShaderStrings::textnode_red_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS }
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE)], ShaderStrings::sprite_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::ENABLED, "Sprite" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE_GRAY)], ShaderStrings::sprite_vs + 1, ShaderStrings::sprite_gray_fs + 1, GLShaderProgram::Introspection::ENABLED, "Sprite_Gray" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE_NO_TEXTURE)], ShaderStrings::sprite_notexture_vs + 1, ShaderStrings::sprite_notexture_fs + 1, GLShaderProgram::Introspection::ENABLED, "Sprite_NoTexture" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE)], ShaderStrings::meshsprite_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::ENABLED, "MeshSprite" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE_GRAY)], ShaderStrings::meshsprite_vs + 1, ShaderStrings::sprite_gray_fs + 1, GLShaderProgram::Introspection::ENABLED, "MeshSprite_Gray" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)], ShaderStrings::meshsprite_notexture_vs + 1, ShaderStrings::sprite_notexture_fs + 1, GLShaderProgram::Introspection::ENABLED, "MeshSprite_NoTexture" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::TEXTNODE_ALPHA)], ShaderStrings::textnode_vs + 1, ShaderStrings::textnode_alpha_fs + 1, GLShaderProgram::Introspection::ENABLED, "TextNode_Alpha" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::TEXTNODE_RED)], ShaderStrings::textnode_vs + 1, ShaderStrings::textnode_red_fs + 1, GLShaderProgram::Introspection::ENABLED, "TextNode_Red" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES)], ShaderStrings::batched_sprites_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_Sprites" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES_GRAY)], ShaderStrings::batched_sprites_vs + 1, ShaderStrings::sprite_gray_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_Sprites_Gray" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE)], ShaderStrings::batched_sprites_notexture_vs + 1, ShaderStrings::sprite_notexture_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_Sprites_NoTexture" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES)], ShaderStrings::batched_meshsprites_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_MeshSprites" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY)], ShaderStrings::batched_meshsprites_vs + 1, ShaderStrings::sprite_gray_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_MeshSprites_Gray" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE)], ShaderStrings::batched_meshsprites_notexture_vs + 1, ShaderStrings::sprite_notexture_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_MeshSprites_NoTexture" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA)], ShaderStrings::batched_textnodes_vs + 1, ShaderStrings::textnode_alpha_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_TextNodes_Alpha" },
+		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_TEXTNODES_RED)], ShaderStrings::batched_textnodes_vs + 1, ShaderStrings::textnode_red_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_TextNodes_Red" }
 #endif
 	};
 
@@ -188,6 +192,7 @@ void RenderResources::create()
 		shaderToLoad.shaderProgram->attachShaderFromString(GL_VERTEX_SHADER, shaderToLoad.vertexShader);
 		shaderToLoad.shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, shaderToLoad.fragmentShader);
 #endif
+		shaderToLoad.shaderProgram->setObjectLabel(shaderToLoad.objectLabel);
 		const bool hasLinked = shaderToLoad.shaderProgram->link(shaderToLoad.introspection);
 		FATAL_ASSERT(hasLinked == true);
 	}
@@ -213,18 +218,8 @@ void RenderResources::createMinimal()
 
 void RenderResources::dispose()
 {
-	batchedTextnodesRedShaderProgram_.reset(nullptr);
-	batchedTextnodesAlphaShaderProgram_.reset(nullptr);
-	batchedMeshSpritesGrayShaderProgram_.reset(nullptr);
-	batchedMeshSpritesShaderProgram_.reset(nullptr);
-	batchedSpritesGrayShaderProgram_.reset(nullptr);
-	batchedSpritesShaderProgram_.reset(nullptr);
-	textnodeRedShaderProgram_.reset(nullptr);
-	textnodeAlphaShaderProgram_.reset(nullptr);
-	meshSpriteGrayShaderProgram_.reset(nullptr);
-	meshSpriteShaderProgram_.reset(nullptr);
-	spriteGrayShaderProgram_.reset(nullptr);
-	spriteShaderProgram_.reset(nullptr);
+	for (nctl::UniquePtr<GLShaderProgram> &shaderProgram : defaultShaderPrograms_)
+		shaderProgram.reset(nullptr);
 
 	ASSERT(cameraUniformDataMap_.isEmpty());
 

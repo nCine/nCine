@@ -5,7 +5,6 @@
 #include "RenderCommandPool.h"
 #include "RenderResources.h"
 #include "Application.h"
-#include "DrawableNode.h"
 
 namespace ncine {
 
@@ -197,11 +196,11 @@ RenderCommand *RenderBatcher::collectCommands(
 		batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(Material::ShaderProgramType::BATCHED_TEXTNODES_RED, commandAdded);
 	else
 		FATAL_MSG("Unsupported shader for batch element");
-	singleInstanceBlockSize = (*start)->material().uniformBlock(DrawableNode::InstanceBlockName)->size();
+	singleInstanceBlockSize = (*start)->material().uniformBlock(Material::InstanceBlockName)->size();
 
 	if (commandAdded)
 		batchCommand->setType(refCommand->type());
-	instancesBlock = batchCommand->material().uniformBlock(DrawableNode::InstancesBlockName);
+	instancesBlock = batchCommand->material().uniformBlock(Material::InstancesBlockName);
 	instancesBlockSize += batchCommand->material().shaderProgram()->uniformsSize();
 
 	// Set to true if at least one command in the batch has indices or forced by a rendering settings
@@ -267,7 +266,7 @@ RenderCommand *RenderBatcher::collectCommands(
 
 	batchCommand->material().setUniformsDataPointer(acquireMemory(instancesBlockSize));
 	if (commandAdded && hasTexture(refCommand->material().shaderProgramType()))
-		batchCommand->material().uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
+		batchCommand->material().uniform(Material::TextureUniformName)->setIntValue(0); // GL_TEXTURE0
 
 	const unsigned int SizeVertexFormat = ((refCommand->material().shaderProgramType() != Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)
 	                                           ? sizeof(RenderResources::VertexFormatPos2Tex2)
@@ -297,14 +296,14 @@ RenderCommand *RenderBatcher::collectCommands(
 
 		if (isBatchedSprite(batchCommand->material().shaderProgramType()))
 		{
-			const GLUniformBlockCache *singleInstanceBlock = command->material().uniformBlock("InstanceBlock");
+			const GLUniformBlockCache *singleInstanceBlock = command->material().uniformBlock(Material::InstanceBlockName);
 			memcpy(instancesBlock->dataPointer() + instancesBlockOffset, singleInstanceBlock->dataPointer(), singleInstanceBlockSize);
 			instancesBlockOffset += singleInstanceBlockSize;
 		}
 		else
 		{
 			GLUniformBlockCache *singleInstanceBlock = nullptr;
-			singleInstanceBlock = command->material().uniformBlock("InstanceBlock");
+			singleInstanceBlock = command->material().uniformBlock(Material::InstanceBlockName);
 			memcpy(instancesBlock->dataPointer() + instancesBlockOffset, singleInstanceBlock->dataPointer(), singleInstanceBlockSize);
 			instancesBlockOffset += singleInstanceBlockSize;
 
@@ -383,7 +382,7 @@ RenderCommand *RenderBatcher::collectCommands(
 	batchCommand->material().setBlendingEnabled(refCommand->material().isBlendingEnabled());
 	batchCommand->material().setBlendingFactors(refCommand->material().srcBlendingFactor(), refCommand->material().destBlendingFactor());
 	batchCommand->setBatchSize(nextStart - start);
-	batchCommand->material().uniformBlock(DrawableNode::InstancesBlockName)->setUsedSize(instancesBlockOffset);
+	batchCommand->material().uniformBlock(Material::InstancesBlockName)->setUsedSize(instancesBlockOffset);
 	batchCommand->setLayer(refCommand->layer());
 	batchCommand->setVisitOrder(refCommand->visitOrder());
 

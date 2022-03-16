@@ -263,7 +263,7 @@ void GLShaderProgram::performIntrospection()
 	if (introspection_ != Introspection::DISABLED && status_ != Status::LINKED_WITH_INTROSPECTION)
 	{
 		const GLUniformBlock::DiscoverUniforms discover = (introspection_ == Introspection::NO_UNIFORMS_IN_BLOCKS)
-		                                                      ? GLUniformBlock::DiscoverUniforms::DISBLED
+		                                                      ? GLUniformBlock::DiscoverUniforms::DISABLED
 		                                                      : GLUniformBlock::DiscoverUniforms::ENABLED;
 
 		discoverUniforms();

@@ -18,7 +18,7 @@ class GLUniformBlock
 	enum class DiscoverUniforms
 	{
 		ENABLED,
-		DISBLED
+		DISABLED
 	};
 
 	GLUniformBlock();

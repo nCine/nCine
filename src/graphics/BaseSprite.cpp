@@ -115,7 +115,7 @@ BaseSprite::BaseSprite(const BaseSprite &other)
 void BaseSprite::shaderHasChanged()
 {
 	renderCommand_->material().reserveUniformsDataMemory();
-	instanceBlock_ = renderCommand_->material().uniformBlock(InstanceBlockName);
+	instanceBlock_ = renderCommand_->material().uniformBlock(Material::InstanceBlockName);
 
 	dirtyBits_.set(DirtyBitPositions::TransformationBit);
 	dirtyBits_.set(DirtyBitPositions::ColorBit);
@@ -134,14 +134,14 @@ void BaseSprite::updateRenderCommand()
 	}
 	if (dirtyBits_.test(DirtyBitPositions::ColorBit))
 	{
-		GLUniformCache *colorUniform = instanceBlock_->uniform(ColorUniformName);
+		GLUniformCache *colorUniform = instanceBlock_->uniform(Material::ColorUniformName);
 		if (colorUniform)
 			colorUniform->setFloatVector(Colorf(absColor()).data());
 		dirtyBits_.reset(DirtyBitPositions::ColorBit);
 	}
 	if (dirtyBits_.test(DirtyBitPositions::SizeBit))
 	{
-		GLUniformCache *spriteSizeUniform = instanceBlock_->uniform(SpriteSizeUniformName);
+		GLUniformCache *spriteSizeUniform = instanceBlock_->uniform(Material::SpriteSizeUniformName);
 		if (spriteSizeUniform)
 			spriteSizeUniform->setFloatValue(width_, height_);
 		dirtyBits_.reset(DirtyBitPositions::SizeBit);
@@ -153,7 +153,7 @@ void BaseSprite::updateRenderCommand()
 		{
 			renderCommand_->material().setTexture(*texture_);
 
-			GLUniformCache *texRectUniform = instanceBlock_->uniform(TexRectUniformName);
+			GLUniformCache *texRectUniform = instanceBlock_->uniform(Material::TexRectUniformName);
 			if (texRectUniform)
 			{
 				const Vector2i texSize = texture_->size();

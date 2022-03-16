@@ -8,12 +8,6 @@
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
-// STATIC DEFINITIONS
-///////////////////////////////////////////////////////////
-
-GLUniformBlockCache GLShaderUniformBlocks::uniformBlockNotFound_;
-
-///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
@@ -87,16 +81,7 @@ GLUniformBlockCache *GLShaderUniformBlocks::uniformBlock(const char *name)
 	GLUniformBlockCache *uniformBlockCache = nullptr;
 
 	if (shaderProgram_)
-	{
 		uniformBlockCache = uniformBlockCaches_.find(name);
-
-		if (uniformBlockCache == nullptr)
-		{
-			// Returning the dummy uniform cache to prevent the application from crashing
-			uniformBlockCache = &uniformBlockNotFound_;
-			LOGW_X("Uniform block \"%s\" not found in shader program %u", name, shaderProgram_->glHandle());
-		}
-	}
 	else
 		LOGE_X("Cannot find uniform block \"%s\", no shader program associated", name);
 

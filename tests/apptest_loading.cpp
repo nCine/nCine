@@ -67,7 +67,8 @@ nctl::StaticArray<nctl::UniquePtr<char[]>, MyEventHandler::NumScripts> scriptBuf
 nctl::StaticArray<unsigned long int, MyEventHandler::NumScripts> scriptBufferSizes;
 
 const char *ShaderNames[MyEventHandler::NumShaders] = { "Sprite", "Separable_Blur", "Mesh_Sprite" };
-const char *VertexShaderStrings[MyEventHandler::NumShaders] = { sprite_vs, sprite_vs, meshsprite_vs };
+nc::Shader::DefaultVertex DefaultVertexShaders[MyEventHandler::NumShaders];
+const char *VertexShaderStrings[MyEventHandler::NumShaders] = { sprite_vs, sprite_vs, nullptr };
 const char *FragmentShaderStrings[MyEventHandler::NumShaders] = { sprite_fs, sprite_blur_fs, meshsprite_fs };
 
 #if LOADING_FAILURES
@@ -162,6 +163,8 @@ void MyEventHandler::onInit()
 		scriptFile->read(scriptBuffers[i].get(), scriptBufferSizes[i]);
 		scriptFile->close();
 	}
+
+	DefaultVertexShaders[2] = nc::Shader::DefaultVertex::MESHSPRITE;
 
 #if DEFAULT_CONSTRUCTORS
 	for (unsigned int i = 0; i < NumTextures; i++)
@@ -722,7 +725,12 @@ void MyEventHandler::onFrameStart()
 
 			if (ImGui::Button("Load") && selectedShader >= 0 && selectedShader < NumShaders)
 			{
-				const bool hasLoaded = shader_->loadFromMemory(ShaderNames[selectedShader], VertexShaderStrings[selectedShader], FragmentShaderStrings[selectedShader]);
+				bool hasLoaded = false;
+				if (VertexShaderStrings[selectedShader] != nullptr)
+					hasLoaded = shader_->loadFromMemory(ShaderNames[selectedShader], VertexShaderStrings[selectedShader], FragmentShaderStrings[selectedShader]);
+				else
+					hasLoaded = shader_->loadFromMemory(ShaderNames[selectedShader], DefaultVertexShaders[selectedShader], FragmentShaderStrings[selectedShader]);
+
 				if (hasLoaded == false)
 					LOGW_X("Cannot load from memory \"%s\"", ShaderNames[selectedShader]);
 				shaderHasChanged = hasLoaded;

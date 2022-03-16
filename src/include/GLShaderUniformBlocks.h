@@ -39,8 +39,6 @@ class GLShaderUniformBlocks
 
 	static const int UniformBlockCachesHashSize = 4;
 	nctl::StaticHashMap<nctl::String, GLUniformBlockCache, UniformBlockCachesHashSize> uniformBlockCaches_;
-	/// A dummy uniform block cache returned when a uniform block is not found in the hashmap
-	static GLUniformBlockCache uniformBlockNotFound_;
 
 	/// Imports the uniform blocks with the option of including only some or excluing others
 	void importUniformBlocks(const char *includeOnly, const char *exclude);

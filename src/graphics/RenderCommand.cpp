@@ -91,10 +91,10 @@ void RenderCommand::commitNodeTransformation()
 
 	if (material_.shaderProgram_ && material_.shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
 	{
-		GLUniformBlockCache *instanceBlock = material_.uniformBlock(DrawableNode::InstanceBlockName);
+		GLUniformBlockCache *instanceBlock = material_.uniformBlock(Material::InstanceBlockName);
 		GLUniformCache *matrixUniform = instanceBlock
-		                                    ? instanceBlock->uniform(DrawableNode::ModelMatrixUniformName)
-		                                    : material_.uniform(DrawableNode::ModelMatrixUniformName);
+		                                    ? instanceBlock->uniform(Material::ModelMatrixUniformName)
+		                                    : material_.uniform(Material::ModelMatrixUniformName);
 		if (matrixUniform)
 		{
 			ZoneScopedN("Set model matrix");
@@ -109,21 +109,19 @@ void RenderCommand::commitCameraTransformation()
 {
 	ZoneScoped;
 
-	RenderResources::CameraUniformData *cameraUniformData = RenderResources::cameraUniformDataMap().find(material_.shaderProgram_);
+	RenderResources::CameraUniformData *cameraUniformData = RenderResources::findCameraUniformData(material_.shaderProgram_);
 	if (cameraUniformData == nullptr)
 	{
 		RenderResources::CameraUniformData newCameraUniformData;
-		newCameraUniformData.shaderUniforms.setProgram(material_.shaderProgram_, RenderResources::ProjectionViewMatrixExcludeString, nullptr);
+		newCameraUniformData.shaderUniforms.setProgram(material_.shaderProgram_, Material::ProjectionViewMatrixExcludeString, nullptr);
 		if (newCameraUniformData.shaderUniforms.numUniforms() == 2)
 		{
 			newCameraUniformData.shaderUniforms.setUniformsDataPointer(RenderResources::cameraUniformsBuffer());
-			newCameraUniformData.shaderUniforms.uniform(RenderResources::ProjectionMatrixUniformName)->setDirty(true);
-			newCameraUniformData.shaderUniforms.uniform(RenderResources::ViewMatrixUniformName)->setDirty(true);
+			newCameraUniformData.shaderUniforms.uniform(Material::ProjectionMatrixUniformName)->setDirty(true);
+			newCameraUniformData.shaderUniforms.uniform(Material::ViewMatrixUniformName)->setDirty(true);
 			newCameraUniformData.shaderUniforms.commitUniforms();
 
-			if (RenderResources::cameraUniformDataMap().loadFactor() >= 0.8f)
-				RenderResources::cameraUniformDataMap().rehash(RenderResources::cameraUniformDataMap().capacity() * 2);
-			RenderResources::cameraUniformDataMap().insert(material_.shaderProgram_, nctl::move(newCameraUniformData));
+			RenderResources::insertCameraUniformData(material_.shaderProgram_, nctl::move(newCameraUniformData));
 		}
 	}
 	else
