@@ -151,16 +151,17 @@ void RenderCommand::commitCameraTransformation()
 
 void RenderCommand::commitAll()
 {
-	/// Copy the vertices and indices stored in host memory to video memory
-	/*! This step is not needed if the command uses a custom VBO or IBO
+	// Copy the vertices and indices stored in host memory to video memory
+	/* This step is not needed if the command uses a custom VBO or IBO
 	 * or directly writes into the common one */
 	geometry_.commitVertices();
 	geometry_.commitIndices();
 
-	/// Commits all the uniform blocks of command's shader program
-	material_.commitUniformBlocks();
-
+	// The model matrix should always be updated before committing uniform blocks
 	commitNodeTransformation();
+
+	// Commits all the uniform blocks of command's shader program
+	material_.commitUniformBlocks();
 }
 
 }

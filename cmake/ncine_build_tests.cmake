@@ -32,6 +32,10 @@ if(NCINE_BUILD_TESTS)
 				set(NCINE_TESTS_DATA_DIR "${NCINE_TESTS_DATA_DIR}/")
 			else()
 				set(NCINE_TESTS_DATA_DIR "${CMAKE_INSTALL_PREFIX}/${DATA_INSTALL_DESTINATION}/")
+				if("${CMAKE_INSTALL_PREFIX}" STREQUAL "")
+					# Allow relative path from tests to data on Linux, if the install prefix is empty
+					set(NCINE_TESTS_DATA_DIR "${DATA_INSTALL_DESTINATION}/")
+				endif()
 			endif()
 		elseif(NOT NCINE_TESTS_DATA_DIR)
 			file(TO_CMAKE_PATH "${NCINE_DATA_DIR}" NCINE_TESTS_DATA_DIR) # Always strips trailing slash

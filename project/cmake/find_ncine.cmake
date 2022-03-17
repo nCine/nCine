@@ -52,7 +52,8 @@ message(STATUS "nCine main function library: ${NCINE_MAIN_LOCATION}")
 
 find_file(NCINE_CONFIG_H config.h
 	PATHS ${NCINE_INCLUDE_DIR}
-	PATH_SUFFIXES ncine)
+	PATH_SUFFIXES ncine
+	NO_DEFAULT_PATH)
 
 if(EXISTS ${NCINE_CONFIG_H})
 	message(STATUS "Configuration file: \"${NCINE_CONFIG_H}\"")
