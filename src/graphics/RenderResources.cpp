@@ -1,5 +1,6 @@
 #include <nctl/HashMapIterator.h>
 #include "GLShaderProgram.h"
+#include "GLShaderAttributes.h"
 #include "RenderResources.h"
 #include "RenderBuffersManager.h"
 #include "RenderVaoPool.h"
@@ -26,6 +27,7 @@ nctl::UniquePtr<RenderCommandPool> RenderResources::renderCommandPool_;
 nctl::UniquePtr<RenderBatcher> RenderResources::renderBatcher_;
 
 nctl::UniquePtr<GLShaderProgram> RenderResources::defaultShaderPrograms_[16];
+nctl::HashMap<const GLShaderProgram *, GLShaderProgram *> RenderResources::batchedShaders_(32);
 
 unsigned char RenderResources::cameraUniformsBuffer_[UniformsBufferSize];
 nctl::HashMap<GLShaderProgram *, RenderResources::CameraUniformData> RenderResources::cameraUniformDataMap_(32);
@@ -44,6 +46,37 @@ GLShaderProgram *RenderResources::shaderProgram(Material::ShaderProgramType shad
 		return defaultShaderPrograms_[static_cast<int>(shaderProgramType)].get();
 	else
 		return nullptr;
+}
+
+GLShaderProgram *RenderResources::batchedShader(const GLShaderProgram *shader)
+{
+	GLShaderProgram *batchedShader = nullptr;
+
+	GLShaderProgram **findResult = batchedShaders_.find(shader);
+	if (findResult != nullptr)
+		batchedShader = *findResult;
+
+	return batchedShader;
+}
+
+bool RenderResources::registerBatchedShader(const GLShaderProgram *shader, GLShaderProgram *batchedShader)
+{
+	FATAL_ASSERT(shader != nullptr);
+	FATAL_ASSERT(batchedShader != nullptr);
+	FATAL_ASSERT(shader != batchedShader);
+
+	if (batchedShaders_.loadFactor() >= 0.8f)
+		batchedShaders_.rehash(batchedShaders_.capacity() * 2);
+	const bool inserted = batchedShaders_.insert(shader, batchedShader);
+
+	return inserted;
+}
+
+bool RenderResources::unregisterBatchedShader(const GLShaderProgram *shader)
+{
+	ASSERT(shader != nullptr);
+	const bool removed = batchedShaders_.remove(shader);
+	return removed;
 }
 
 RenderResources::CameraUniformData *RenderResources::findCameraUniformData(GLShaderProgram *shaderProgram)
@@ -69,6 +102,36 @@ bool RenderResources::removeCameraUniformData(GLShaderProgram *shaderProgram)
 		hasRemoved = cameraUniformDataMap_.remove(shaderProgram);
 
 	return hasRemoved;
+}
+
+void RenderResources::setDefaultAttributesParameters(GLShaderAttributes &shaderAttributes)
+{
+	if (shaderAttributes.numAttributes() > 0)
+	{
+		const bool hasPositionAttribute = shaderAttributes.hasAttribute(Material::PositionAttributeName);
+		const bool hasTexCoordsAttribute = shaderAttributes.hasAttribute(Material::TexCoordsAttributeName);
+		const bool hasMeshIndexAttribute = shaderAttributes.hasAttribute(Material::MeshIndexAttributeName);
+		if (hasPositionAttribute && hasTexCoordsAttribute && hasMeshIndexAttribute)
+		{
+			shaderAttributes.attribute(Material::PositionAttributeName)->setVboParameters(sizeof(VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(VertexFormatPos2Tex2Index, position)));
+			shaderAttributes.attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(VertexFormatPos2Tex2Index, texcoords)));
+			shaderAttributes.attribute(Material::MeshIndexAttributeName)->setVboParameters(sizeof(VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(VertexFormatPos2Tex2Index, drawindex)));
+		}
+		else if (hasPositionAttribute && !hasTexCoordsAttribute && hasMeshIndexAttribute)
+		{
+			shaderAttributes.attribute(Material::PositionAttributeName)->setVboParameters(sizeof(VertexFormatPos2Index), reinterpret_cast<void *>(offsetof(VertexFormatPos2Index, position)));
+			shaderAttributes.attribute(Material::MeshIndexAttributeName)->setVboParameters(sizeof(VertexFormatPos2Index), reinterpret_cast<void *>(offsetof(VertexFormatPos2Index, drawindex)));
+		}
+		else if (hasPositionAttribute && hasTexCoordsAttribute && !hasMeshIndexAttribute)
+		{
+			shaderAttributes.attribute(Material::PositionAttributeName)->setVboParameters(sizeof(VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(VertexFormatPos2Tex2, position)));
+			shaderAttributes.attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(VertexFormatPos2Tex2, texcoords)));
+		}
+		else if (hasPositionAttribute && !hasTexCoordsAttribute && !hasMeshIndexAttribute)
+		{
+			shaderAttributes.attribute(Material::PositionAttributeName)->setVboParameters(sizeof(VertexFormatPos2), reinterpret_cast<void *>(offsetof(VertexFormatPos2, position)));
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -197,6 +260,8 @@ void RenderResources::create()
 		FATAL_ASSERT(hasLinked == true);
 	}
 
+	registerDefaultBatchedShaders();
+
 	// Calculating a default projection matrix for all shader programs
 	const float width = theApplication().width();
 	const float height = theApplication().height();
@@ -230,6 +295,18 @@ void RenderResources::dispose()
 	buffersManager_.reset(nullptr);
 
 	LOGI("Rendering resources disposed");
+}
+
+void RenderResources::registerDefaultBatchedShaders()
+{
+	batchedShaders_.insert(defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE)].get(), defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES)].get());
+	batchedShaders_.insert(defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE_GRAY)].get(), defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES_GRAY)].get());
+	batchedShaders_.insert(defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE_NO_TEXTURE)].get(), defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE)].get());
+	batchedShaders_.insert(defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE)].get(), defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES)].get());
+	batchedShaders_.insert(defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE_GRAY)].get(), defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY)].get());
+	batchedShaders_.insert(defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)].get(), defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE)].get());
+	batchedShaders_.insert(defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::TEXTNODE_ALPHA)].get(), defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA)].get());
+	batchedShaders_.insert(defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::TEXTNODE_RED)].get(), defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_TEXTNODES_RED)].get());
 }
 
 }

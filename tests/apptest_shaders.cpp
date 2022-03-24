@@ -13,12 +13,14 @@
 namespace {
 
 #ifdef __ANDROID__
+const char *MegaTextureFile = "megatexture_256_ETC2.ktx";
 const char *Texture1File = "texture1_ETC2.ktx";
 const char *Texture2File = "texture2_ETC2.ktx";
 const char *Texture3File = "texture3_ETC2.ktx";
 const char *Texture4File = "texture4_ETC2.ktx";
 const char *FontTextureFile = "DroidSans32_256_ETC2.ktx";
 #else
+const char *MegaTextureFile = "megatexture_256.png";
 const char *Texture1File = "texture1.png";
 const char *Texture2File = "texture2.png";
 const char *Texture3File = "texture3.png";
@@ -54,6 +56,7 @@ void MyEventHandler::onInit()
 	const float width = nc::theApplication().width();
 	const float height = nc::theApplication().height();
 
+	megaTexture_ = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", MegaTextureFile)).data());
 	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data()));
 	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture2File)).data()));
 	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture3File)).data()));
@@ -100,6 +103,8 @@ void MyEventHandler::onInit()
 		sprites_.back()->setScale(0.5f);
 		spriteShaderStates_.pushBack(nctl::makeUnique<nc::ShaderState>(sprites_.back().get(), spriteShader_.get()));
 	}
+	batchedSpriteShader_ = nctl::makeUnique<nc::Shader>("Batched_Sprite_Shader", nc::Shader::LoadMode::STRING, nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS, batched_sprite_vs, sprite_fs);
+	spriteShader_->registerBatchedShader(*batchedSpriteShader_);
 
 	meshShader_ = nctl::makeUnique<nc::Shader>("MeshSprite_Shader", nc::Shader::LoadMode::STRING, nc::Shader::DefaultVertex::MESHSPRITE, meshsprite_fs);
 	FATAL_ASSERT(meshShader_->isLinked());
@@ -107,6 +112,8 @@ void MyEventHandler::onInit()
 	meshSprite_->createVerticesFromTexels(NumTexelPoints, TexelPoints);
 	meshSpriteShaderState_ = nctl::makeUnique<nc::ShaderState>(meshSprite_.get(), meshShader_.get());
 
+	withAtlas_ = false;
+	withAtlas_ ? setupAtlas() : setupTextures();
 	withViewport_ = false;
 	setupViewport();
 	pause_ = false;
@@ -120,8 +127,8 @@ void MyEventHandler::onFrameStart()
 
 	const nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 	debugString_->clear();
-	debugString_->format("batching: %s, culling: %s, viewport: %s", stringOnOff(settings.batchingEnabled),
-	                     stringOnOff(settings.cullingEnabled), stringOnOff(withViewport_));
+	debugString_->format("batching: %s, culling: %s, texture atlas: %s, viewport: %s", stringOnOff(settings.batchingEnabled),
+	                     stringOnOff(settings.cullingEnabled), stringOnOff(withAtlas_), stringOnOff(withViewport_));
 	debugText_->setString(*debugString_);
 
 	if (pause_ == false)
@@ -201,6 +208,11 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 			spriteShaderStates_[i]->setShader(spriteShaderStates_[i]->shader() ? nullptr : spriteShader_.get());
 		meshSpriteShaderState_->setShader(meshSpriteShaderState_->shader() ? nullptr : meshShader_.get());
 	}
+	else if (event.sym == nc::KeySym::T)
+	{
+		withAtlas_ = !withAtlas_;
+		withAtlas_ ? setupAtlas() : setupTextures();
+	}
 	else if (event.sym == nc::KeySym::V)
 	{
 		withViewport_ = !withViewport_;
@@ -238,6 +250,30 @@ void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 		checkClick(static_cast<float>(event.x), static_cast<float>(event.y));
 }
 
+void MyEventHandler::setupAtlas()
+{
+	nc::Recti texRects[4];
+	texRects[0] = nc::Recti(0, 0, 128, 128);
+	texRects[1] = nc::Recti(128, 0, 128, 128);
+	texRects[2] = nc::Recti(0, 128, 128, 128);
+	texRects[3] = nc::Recti(128, 128, 128, 128);
+
+	for (unsigned int i = 0; i < NumSprites; i++)
+	{
+		sprites_[i]->setTexture(megaTexture_.get());
+		sprites_[i]->setTexRect(texRects[i % NumTextures]);
+	}
+}
+
+void MyEventHandler::setupTextures()
+{
+	for (unsigned int i = 0; i < NumSprites; i++)
+	{
+		sprites_[i]->setTexture(textures_[i % NumTextures].get());
+		sprites_[i]->setTexRect(textures_[i % NumTextures]->rect());
+	}
+}
+
 void MyEventHandler::setupViewport()
 {
 	nc::Viewport::chain().clear();
@@ -271,11 +307,16 @@ void MyEventHandler::checkClick(float x, float y)
 	{
 		nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 		const float xPos = x - debugTextRect.x;
-		if (xPos <= debugTextRect.w * 0.34f)
+		if (xPos <= debugTextRect.w * 0.23f)
 			settings.batchingEnabled = !settings.batchingEnabled;
-		else if (xPos >= debugTextRect.w * 0.34f && xPos <= debugTextRect.w * 0.64f)
+		else if (xPos >= debugTextRect.w * 0.23f && xPos <= debugTextRect.w * 0.44f)
 			settings.cullingEnabled = !settings.cullingEnabled;
-		else if (xPos >= debugTextRect.w * 0.64f)
+		else if (xPos >= debugTextRect.w * 0.44f && xPos <= debugTextRect.w * 0.76f)
+		{
+			withAtlas_ = !withAtlas_;
+			withAtlas_ ? setupAtlas() : setupTextures();
+		}
+		else if (xPos >= debugTextRect.w * 0.76f)
 		{
 			withViewport_ = !withViewport_;
 			setupViewport();

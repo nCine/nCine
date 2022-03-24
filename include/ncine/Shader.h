@@ -21,6 +21,13 @@ class DLL_PUBLIC Shader : public Object
 		FILE
 	};
 
+	enum class Introspection
+	{
+		ENABLED,
+		NO_UNIFORMS_IN_BLOCKS,
+		DISABLED
+	};
+
 	enum class DefaultVertex
 	{
 		SPRITE,
@@ -28,6 +35,11 @@ class DLL_PUBLIC Shader : public Object
 		MESHSPRITE,
 		MESHSPRITE_NOTEXTURE,
 		TEXTNODE,
+		BATCHED_SPRITES,
+		BATCHED_SPRITES_NOTEXTURE,
+		BATCHED_MESHSPRITES,
+		BATCHED_MESHSPRITES_NOTEXTURE,
+		BATCHED_TEXTNODES
 	};
 
 	enum class DefaultFragment
@@ -42,27 +54,38 @@ class DLL_PUBLIC Shader : public Object
 	/// Creates an OpenGL shader program name
 	Shader();
 
+	Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, const char *vertex, const char *fragment);
 	Shader(const char *shaderName, LoadMode loadMode, const char *vertex, const char *fragment);
 	Shader(LoadMode loadMode, const char *vertex, const char *fragment);
 
+	Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, DefaultVertex vertex, const char *fragment);
 	Shader(const char *shaderName, LoadMode loadMode, DefaultVertex vertex, const char *fragment);
 	Shader(LoadMode loadMode, DefaultVertex vertex, const char *fragment);
+	Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, const char *vertex, DefaultFragment fragment);
 	Shader(const char *shaderName, LoadMode loadMode, const char *vertex, DefaultFragment fragment);
 	Shader(LoadMode loadMode, const char *vertex, DefaultFragment fragment);
 
+	~Shader() override;
+
+	bool loadFromMemory(const char *shaderName, Introspection introspection, const char *vertex, const char *fragment);
 	bool loadFromMemory(const char *shaderName, const char *vertex, const char *fragment);
 	bool loadFromMemory(const char *vertex, const char *fragment);
 
+	bool loadFromMemory(const char *shaderName, Introspection introspection, DefaultVertex vertex, const char *fragment);
 	bool loadFromMemory(const char *shaderName, DefaultVertex vertex, const char *fragment);
 	bool loadFromMemory(DefaultVertex vertex, const char *fragment);
+	bool loadFromMemory(const char *shaderName, Introspection introspection, const char *vertex, DefaultFragment fragment);
 	bool loadFromMemory(const char *shaderName, const char *vertex, DefaultFragment fragment);
 	bool loadFromMemory(const char *vertex, DefaultFragment fragment);
 
+	bool loadFromFile(const char *shaderName, Introspection introspection, const char *vertex, const char *fragment);
 	bool loadFromFile(const char *shaderName, const char *vertex, const char *fragment);
 	bool loadFromFile(const char *vertex, const char *fragment);
 
+	bool loadFromFile(const char *shaderName, Introspection introspection, DefaultVertex vertex, const char *fragment);
 	bool loadFromFile(const char *shaderName, DefaultVertex vertex, const char *fragment);
 	bool loadFromFile(DefaultVertex vertex, const char *fragment);
+	bool loadFromFile(const char *shaderName, Introspection introspection, const char *vertex, DefaultFragment fragment);
 	bool loadFromFile(const char *shaderName, const char *vertex, DefaultFragment fragment);
 	bool loadFromFile(const char *vertex, DefaultFragment fragment);
 
@@ -82,6 +105,9 @@ class DLL_PUBLIC Shader : public Object
 
 	/// Sets the OpenGL object label for the shader program
 	void setGLShaderProgramLabel(const char *label);
+
+	/// Registers a shaders to be used for batches of render commands
+	void registerBatchedShader(Shader &batchedShader);
 
 	inline static ObjectType sType() { return ObjectType::SHADER; }
 

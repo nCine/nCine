@@ -151,12 +151,10 @@ void NuklearDrawing::endFrame()
 
 RenderCommand *NuklearDrawing::retrieveCommandFromPool()
 {
-	RenderCommand *retrievedCommand = RenderResources::renderCommandPool().retrieve(nuklearShaderProgram_.get());
-	if (retrievedCommand == nullptr)
-	{
-		retrievedCommand = RenderResources::renderCommandPool().add();
+	bool commandAdded = false;
+	RenderCommand *retrievedCommand = RenderResources::renderCommandPool().retrieveOrAdd(nuklearShaderProgram_.get(), commandAdded);
+	if (commandAdded)
 		setupRenderCmd(*retrievedCommand);
-	}
 
 	return retrievedCommand;
 }

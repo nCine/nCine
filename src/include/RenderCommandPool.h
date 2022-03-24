@@ -13,23 +13,21 @@ class RenderCommand;
 class RenderCommandPool
 {
   public:
-	RenderCommandPool(unsigned int poolSize);
+	explicit RenderCommandPool(unsigned int poolSize);
 	~RenderCommandPool();
 
 	/// Adds a new command to the used pool and returns its pointer
 	/*! \note It is usually called after checking that the retrieve method fails */
 	RenderCommand *add();
-	/// Adds a new command with the specified ShaderProgramType to the used pool and returns its pointer
+	/// Adds a new command with the specified OpenGL shader program to the used pool and returns its pointer
 	/*! \note It is usually called after checking that the retrieve method fails */
-	RenderCommand *add(Material::ShaderProgramType shaderProgramType);
+	RenderCommand *add(GLShaderProgram *shaderProgram);
 
-	/// Retrieves a command with the specified ShaderProgramType
-	RenderCommand *retrieve(Material::ShaderProgramType shaderProgramType);
-	/// Retrieves a command with the particular OpenGL shader program
+	/// Retrieves a command with the specified OpenGL shader program
 	RenderCommand *retrieve(GLShaderProgram *shaderProgram);
 
-	/// Retrieves (or adds) a command with the specified ShaderProgramType
-	RenderCommand *retrieveOrAdd(Material::ShaderProgramType shaderProgramType, bool &commandAdded);
+	/// Retrieves (or adds) a command with the specified OpenGL shader program
+	RenderCommand *retrieveOrAdd(GLShaderProgram *shaderProgram, bool &commandAdded);
 
 	/// Releases all used commands and returnsi them in the free array
 	void reset();

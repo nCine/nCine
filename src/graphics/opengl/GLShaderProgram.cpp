@@ -190,6 +190,7 @@ void GLShaderProgram::reset()
 		glDeleteProgram(glHandle_);
 
 		RenderResources::removeCameraUniformData(this);
+		RenderResources::unregisterBatchedShader(this);
 
 		glHandle_ = glCreateProgram();
 	}
@@ -275,32 +276,52 @@ void GLShaderProgram::performIntrospection()
 
 void GLShaderProgram::discoverUniforms()
 {
+	static const unsigned int NumIndices = 512;
+	static GLuint uniformIndices[NumIndices];
+	static GLint blockIndices[NumIndices];
+
 	ZoneScoped;
-	GLint count;
-	glGetProgramiv(glHandle_, GL_ACTIVE_UNIFORMS, &count);
+	GLint uniformCount = 0;
+	glGetProgramiv(glHandle_, GL_ACTIVE_UNIFORMS, &uniformCount);
 
-	unsigned int uniformsOutsideBlocks = 0;
-	GLuint indices[MaxNumUniforms];
-	GLint blockIndex;
-	for (unsigned int i = 0; i < static_cast<unsigned int>(count); i++)
+	if (uniformCount > 0)
 	{
-		glGetActiveUniformsiv(glHandle_, 1, &i, GL_UNIFORM_BLOCK_INDEX, &blockIndex);
-		if (blockIndex == -1)
+		unsigned int uniformsOutsideBlocks = 0;
+		GLuint indices[MaxNumUniforms];
+		unsigned int remainingIndices = static_cast<unsigned int>(uniformCount);
+
+		while (remainingIndices > 0)
 		{
-			indices[uniformsOutsideBlocks] = i;
-			uniformsOutsideBlocks++;
+			const unsigned int uniformCountStep = (remainingIndices > NumIndices) ? NumIndices : remainingIndices;
+			const unsigned int startIndex = static_cast<unsigned int>(uniformCount) - remainingIndices;
+
+			for (unsigned int i = 0; i < uniformCountStep; i++)
+				uniformIndices[i] = startIndex + i;
+
+			glGetActiveUniformsiv(glHandle_, uniformCountStep, uniformIndices, GL_UNIFORM_BLOCK_INDEX, blockIndices);
+
+			for (unsigned int i = 0; i < uniformCountStep; i++)
+			{
+				if (blockIndices[i] == -1)
+				{
+					indices[uniformsOutsideBlocks] = startIndex + i;
+					uniformsOutsideBlocks++;
+				}
+				if (uniformsOutsideBlocks > MaxNumUniforms - 1)
+					break;
+			}
+
+			remainingIndices -= uniformCountStep;
 		}
-		if (uniformsOutsideBlocks > MaxNumUniforms - 1)
-			break;
-	}
 
-	for (unsigned int i = 0; i < uniformsOutsideBlocks; i++)
-	{
-		GLUniform uniform(glHandle_, indices[i]);
-		uniformsSize_ += uniform.memorySize();
-		uniforms_.pushBack(uniform);
+		for (unsigned int i = 0; i < uniformsOutsideBlocks; i++)
+		{
+			GLUniform uniform(glHandle_, indices[i]);
+			uniformsSize_ += uniform.memorySize();
+			uniforms_.pushBack(uniform);
 
-		LOGD_X("Shader %u - uniform %d : \"%s\"", glHandle_, uniform.location(), uniform.name());
+			LOGD_X("Shader %u - uniform %d : \"%s\"", glHandle_, uniform.location(), uniform.name());
+		}
 	}
 }
 

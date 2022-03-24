@@ -158,12 +158,10 @@ void ImGuiDrawing::endFrame()
 
 RenderCommand *ImGuiDrawing::retrieveCommandFromPool()
 {
-	RenderCommand *retrievedCommand = RenderResources::renderCommandPool().retrieve(imguiShaderProgram_.get());
-	if (retrievedCommand == nullptr)
-	{
-		retrievedCommand = RenderResources::renderCommandPool().add();
+	bool commandAdded = false;
+	RenderCommand *retrievedCommand = RenderResources::renderCommandPool().retrieveOrAdd(imguiShaderProgram_.get(), commandAdded);
+	if (commandAdded)
 		setupRenderCmd(*retrievedCommand);
-	}
 
 	return retrievedCommand;
 }

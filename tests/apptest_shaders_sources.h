@@ -4,6 +4,7 @@ char const * const sprite_vs = R"(
 uniform mat4 uProjectionMatrix;
 uniform mat4 uViewMatrix;
 
+// Instance data should go in a uniform block called `InstanceBlock` for batching to work
 layout (std140) uniform InstanceBlock
 {
 	mat4 modelMatrix;
@@ -25,6 +26,46 @@ void main()
 	vec2 twistedCoords = vec2((cos(angle) * cos(angle) * 0.85 + 0.15) * aTexCoords.x, (sin(angle) * sin(angle) * 0.85 + 0.15) * aTexCoords.y);
 	vTexCoords = vec2(twistedCoords.x * texRect.x + texRect.y, twistedCoords.y * texRect.z + texRect.w);
 	vSpriteSize = spriteSize;
+}
+)";
+
+char const * const batched_sprite_vs = R"(
+uniform mat4 uProjectionMatrix;
+uniform mat4 uViewMatrix;
+
+struct Instance
+{
+	mat4 modelMatrix;
+	vec4 texRect;
+	vec2 spriteSize;
+	float angle;
+};
+
+// Single instances data will be collected in a uniform block called `InstancesBlock`
+layout (std140) uniform InstancesBlock
+{
+#ifdef WITH_FIXED_BATCH_SIZE
+	Instance[BATCH_SIZE] instances;
+#else
+	Instance[585] instances;
+#endif
+} block;
+
+out vec2 vTexCoords;
+flat out vec2 vSpriteSize;
+
+#define i block.instances[gl_VertexID / 6]
+
+void main()
+{
+	vec2 aPosition = vec2(-0.5 + float(((gl_VertexID + 2) / 3) % 2), 0.5 - float(((gl_VertexID + 1) / 3) % 2));
+	vec2 aTexCoords = vec2(float(((gl_VertexID + 2) / 3) % 2), float(((gl_VertexID + 1) / 3) % 2));
+	vec4 position = vec4(aPosition.x * i.spriteSize.x, aPosition.y * i.spriteSize.y, 0.0, 1.0);
+
+	gl_Position = uProjectionMatrix * uViewMatrix * i.modelMatrix * position;
+	vec2 twistedCoords = vec2((cos(i.angle) * cos(i.angle) * 0.85 + 0.15) * aTexCoords.x, (sin(i.angle) * sin(i.angle) * 0.85 + 0.15) * aTexCoords.y);
+	vTexCoords = vec2(twistedCoords.x * i.texRect.x + i.texRect.y, twistedCoords.y * i.texRect.z + i.texRect.w);
+	vSpriteSize = i.spriteSize;
 }
 )";
 

@@ -50,6 +50,7 @@ class MyEventHandler :
 	static const unsigned int NumTextures = 4;
 	static const unsigned int NumSprites = 8;
 
+	bool withAtlas_;
 	bool withViewport_;
 	bool pause_;
 	float angle_;
@@ -68,11 +69,13 @@ class MyEventHandler :
 	nctl::UniquePtr<nc::ShaderState> vpPongSpriteShaderState_;
 
 	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, NumTextures> textures_;
+	nctl::UniquePtr<nc::Texture> megaTexture_;
 	nctl::UniquePtr<nc::Font> font_;
 	nctl::UniquePtr<nctl::String> debugString_;
 	nctl::UniquePtr<nc::TextNode> debugText_;
 
 	nctl::UniquePtr<nc::Shader> spriteShader_;
+	nctl::UniquePtr<nc::Shader> batchedSpriteShader_;
 	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumSprites> sprites_;
 	nctl::StaticArray<nctl::UniquePtr<nc::ShaderState>, NumSprites> spriteShaderStates_;
 
@@ -80,6 +83,8 @@ class MyEventHandler :
 	nctl::UniquePtr<nc::MeshSprite> meshSprite_;
 	nctl::UniquePtr<nc::ShaderState> meshSpriteShaderState_;
 
+	void setupAtlas();
+	void setupTextures();
 	void setupViewport();
 	void checkClick(float x, float y);
 };

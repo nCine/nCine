@@ -17,8 +17,8 @@ GLUniformBlock::GLUniformBlock()
 GLUniformBlock::GLUniformBlock(GLuint program, GLuint index, DiscoverUniforms discover)
     : GLUniformBlock()
 {
-	GLint nameLength;
-	GLint uniformCount;
+	GLint nameLength = 0;
+	GLint uniformCount = 0;
 	program_ = program;
 	index_ = index;
 
@@ -28,7 +28,7 @@ GLUniformBlock::GLUniformBlock(GLuint program, GLuint index, DiscoverUniforms di
 	glGetActiveUniformBlockName(program, index, MaxNameLength, &nameLength, name_);
 	glGetActiveUniformBlockiv(program, index, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &uniformCount);
 
-	if (discover == DiscoverUniforms::ENABLED)
+	if (discover == DiscoverUniforms::ENABLED && uniformCount > 0)
 	{
 		ASSERT(uniformCount <= MaxNumBlockUniforms);
 		GLuint uniformIndices[MaxNumBlockUniforms];

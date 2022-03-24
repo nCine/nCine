@@ -81,24 +81,7 @@ void Material::setShaderProgram(GLShaderProgram *program)
 	shaderUniforms_.setProgram(shaderProgram_, nullptr, ProjectionViewMatrixExcludeString);
 	shaderUniformBlocks_.setProgram(shaderProgram_);
 	shaderAttributes_.setProgram(shaderProgram_);
-
-	if (shaderAttributes_.numAttributes() > 0)
-	{
-		const bool hasPositionAttribute = hasAttribute(PositionAttributeName);
-		const bool hasTexCoordsAttribute = hasAttribute(TexCoordsAttributeName);
-		const bool hasMeshIndexAttribute = hasAttribute(MeshIndexAttributeName);
-		if (hasPositionAttribute && hasTexCoordsAttribute && hasMeshIndexAttribute)
-		{
-			attribute(PositionAttributeName)->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, position)));
-			attribute(TexCoordsAttributeName)->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, texcoords)));
-			attribute(MeshIndexAttributeName)->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2Index, drawindex)));
-		}
-		else if (hasPositionAttribute && hasMeshIndexAttribute)
-		{
-			attribute(PositionAttributeName)->setVboParameters(sizeof(RenderResources::VertexFormatPos2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Index, position)));
-			attribute(MeshIndexAttributeName)->setVboParameters(sizeof(RenderResources::VertexFormatPos2Index), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Index, drawindex)));
-		}
-	}
+	RenderResources::setDefaultAttributesParameters(shaderAttributes_);
 }
 
 void Material::reserveUniformsDataMemory()

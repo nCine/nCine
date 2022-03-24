@@ -179,7 +179,8 @@ void MyEventHandler::onInit()
 	audioBuffer_ = nctl::makeUnique<nc::AudioBuffer>((prefixDataPath("sounds", SoundFiles[0])).data());
 	streamPlayer_ = nctl::makeUnique<nc::AudioStreamPlayer>((prefixDataPath("sounds", SoundFiles[3])).data());
 	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFiles[0])).data());
-	shader_ = nctl::makeUnique<nc::Shader>(ShaderNames[0], nc::Shader::LoadMode::STRING, VertexShaderStrings[0], FragmentShaderStrings[0]);
+	shader_ = nctl::makeUnique<nc::Shader>(ShaderNames[0], nc::Shader::LoadMode::STRING, nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS,
+	                                       VertexShaderStrings[0], FragmentShaderStrings[0]);
 #endif
 	luaState_ = nctl::makeUnique<nc::LuaStateManager>(nc::LuaStateManager::ApiType::EDIT_ONLY,
 	                                                  nc::LuaStateManager::StatisticsTracking::DISABLED,
@@ -727,9 +728,15 @@ void MyEventHandler::onFrameStart()
 			{
 				bool hasLoaded = false;
 				if (VertexShaderStrings[selectedShader] != nullptr)
-					hasLoaded = shader_->loadFromMemory(ShaderNames[selectedShader], VertexShaderStrings[selectedShader], FragmentShaderStrings[selectedShader]);
+				{
+					hasLoaded = shader_->loadFromMemory(ShaderNames[selectedShader], nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS,
+					                                    VertexShaderStrings[selectedShader], FragmentShaderStrings[selectedShader]);
+				}
 				else
-					hasLoaded = shader_->loadFromMemory(ShaderNames[selectedShader], DefaultVertexShaders[selectedShader], FragmentShaderStrings[selectedShader]);
+				{
+					hasLoaded = shader_->loadFromMemory(ShaderNames[selectedShader], nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS,
+					                                    DefaultVertexShaders[selectedShader], FragmentShaderStrings[selectedShader]);
+				}
 
 				if (hasLoaded == false)
 					LOGW_X("Cannot load from memory \"%s\"", ShaderNames[selectedShader]);

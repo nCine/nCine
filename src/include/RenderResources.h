@@ -70,6 +70,10 @@ class RenderResources
 
 	static GLShaderProgram *shaderProgram(Material::ShaderProgramType shaderProgramType);
 
+	static GLShaderProgram *batchedShader(const GLShaderProgram *shader);
+	static bool registerBatchedShader(const GLShaderProgram *shader, ncine::GLShaderProgram *batchedShader);
+	static bool unregisterBatchedShader(const GLShaderProgram *shader);
+
 	static inline unsigned char *cameraUniformsBuffer() { return cameraUniformsBuffer_; }
 	static CameraUniformData *findCameraUniformData(GLShaderProgram *shaderProgram);
 	static void insertCameraUniformData(GLShaderProgram *shaderProgram, CameraUniformData &&cameraUniformData);
@@ -78,6 +82,8 @@ class RenderResources
 	static inline const Camera *currentCamera() { return currentCamera_; }
 	static inline const Viewport *currentViewport() { return currentViewport_; }
 
+	static void setDefaultAttributesParameters(GLShaderAttributes &shaderAttributes);
+
   private:
 	static nctl::UniquePtr<RenderBuffersManager> buffersManager_;
 	static nctl::UniquePtr<RenderVaoPool> vaoPool_;
@@ -85,6 +91,7 @@ class RenderResources
 	static nctl::UniquePtr<RenderBatcher> renderBatcher_;
 
 	static nctl::UniquePtr<GLShaderProgram> defaultShaderPrograms_[16];
+	static nctl::HashMap<const GLShaderProgram *, GLShaderProgram *> batchedShaders_;
 
 	static const int UniformsBufferSize = 128; // two 4x4 float matrices
 	static unsigned char cameraUniformsBuffer_[UniformsBufferSize];
@@ -101,6 +108,8 @@ class RenderResources
 	static void create();
 	static void createMinimal();
 	static void dispose();
+
+	static void registerDefaultBatchedShaders();
 
 	/// Static class, deleted constructor
 	RenderResources() = delete;
