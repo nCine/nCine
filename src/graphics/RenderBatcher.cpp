@@ -153,9 +153,10 @@ RenderCommand *RenderBatcher::collectCommands(
 	bool commandAdded = false;
 	batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(batchedShader, commandAdded);
 
-	const bool isSprite = (refCommand->material().hasAttribute(Material::PositionAttributeName) == false);
-	const bool isMeshSpriteNoTexture = (refCommand->material().hasAttribute(Material::PositionAttributeName) && refCommand->material().hasAttribute(Material::TexCoordsAttributeName) == false);
-	const bool isBatchedSprite = (batchCommand->material().hasAttribute(Material::PositionAttributeName) == false) && batchCommand->material().uniformBlock(Material::InstancesBlockName);
+	const GLShaderProgram *refShader = refCommand->material().shaderProgram();
+	const bool isSprite = (refShader->hasAttribute(Material::PositionAttributeName) == false);
+	const bool isMeshSpriteNoTexture = refShader->hasAttribute(Material::PositionAttributeName) && (refShader->hasAttribute(Material::TexCoordsAttributeName) == false);
+	const bool isBatchedSprite = (batchedShader->hasAttribute(Material::PositionAttributeName) == false) && batchCommand->material().uniformBlock(Material::InstancesBlockName);
 
 	singleInstanceBlockSize = (*start)->material().uniformBlock(Material::InstanceBlockName)->size();
 
@@ -227,7 +228,7 @@ RenderCommand *RenderBatcher::collectCommands(
 		instancesVertexDataSize -= twoVerticesDataSize;
 
 	batchCommand->material().setUniformsDataPointer(acquireMemory(instancesBlockSize));
-	if (commandAdded && refCommand->material().hasAttribute(Material::TexCoordsAttributeName))
+	if (commandAdded && refShader->hasAttribute(Material::TexCoordsAttributeName))
 		batchCommand->material().uniform(Material::TextureUniformName)->setIntValue(0); // GL_TEXTURE0
 
 	const unsigned int SizeVertexFormat = ((isMeshSpriteNoTexture == false)

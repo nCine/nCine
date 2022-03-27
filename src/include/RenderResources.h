@@ -8,6 +8,7 @@
 #include <nctl/HashMap.h>
 #include "Material.h"
 #include "Matrix4x4.h"
+#include "GLShaderProgram.h" // For the UniquePtr to invoke the destructor
 #include "GLShaderUniforms.h"
 
 namespace ncine {
@@ -16,7 +17,6 @@ class RenderBuffersManager;
 class RenderVaoPool;
 class RenderCommandPool;
 class RenderBatcher;
-class GLShaderProgram;
 class Camera;
 class Viewport;
 
@@ -82,7 +82,7 @@ class RenderResources
 	static inline const Camera *currentCamera() { return currentCamera_; }
 	static inline const Viewport *currentViewport() { return currentViewport_; }
 
-	static void setDefaultAttributesParameters(GLShaderAttributes &shaderAttributes);
+	static void setDefaultAttributesParameters(GLShaderProgram &shaderProgram);
 
   private:
 	static nctl::UniquePtr<RenderBuffersManager> buffersManager_;

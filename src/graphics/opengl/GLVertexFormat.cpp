@@ -1,12 +1,18 @@
 #include "common_macros.h"
 #include "GLVertexFormat.h"
 #include "GLBufferObject.h"
+#include "IGfxCapabilities.h"
 
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
+
+GLVertexFormat::Attribute::Attribute()
+    : enabled_(false), vbo_(nullptr), index_(0), size_(-1), type_(GL_FLOAT), stride_(0), pointer_(nullptr), baseOffset_(0)
+{
+}
 
 GLVertexFormat::GLVertexFormat()
     : attributes_(nctl::StaticArrayMode::EXTEND_SIZE), ibo_(nullptr)
@@ -47,6 +53,23 @@ void GLVertexFormat::Attribute::init(unsigned int index, GLint size, GLenum type
 	stride_ = 0;
 	pointer_ = nullptr;
 	baseOffset_ = 0;
+}
+
+void GLVertexFormat::Attribute::setVboParameters(GLsizei stride, const GLvoid *pointer)
+{
+#if !defined(EMSCRIPTEN) && (!defined(WITH_OPENGLES) || (defined(WITH_OPENGLES) && GL_ES_VERSION_3_1))
+	static const int MaxVertexAttribStride = theServiceLocator().gfxCapabilities().value(IGfxCapabilities::GLIntValues::MAX_VERTEX_ATTRIB_STRIDE);
+
+	if (MaxVertexAttribStride > 0 && stride > MaxVertexAttribStride)
+	{
+		stride_ = MaxVertexAttribStride;
+		LOGW_X("Vertex attribute stride (%d) is bigger than the maximum value supported (%d)", stride, MaxVertexAttribStride);
+	}
+	else
+#endif
+		stride_ = stride;
+
+	pointer_ = pointer;
 }
 
 void GLVertexFormat::define()

@@ -1,7 +1,9 @@
+#include <nctl/StaticHashMapIterator.h>
 #include "GLShaderProgram.h"
 #include "GLShader.h"
 #include "GLDebug.h"
 #include "RenderResources.h"
+#include "RenderVaoPool.h"
 #include "tracy.h"
 
 namespace ncine {
@@ -176,6 +178,35 @@ bool GLShaderProgram::validate()
 	return (status == GL_TRUE);
 }
 
+GLVertexFormat::Attribute *GLShaderProgram::attribute(const char *name)
+{
+	ASSERT(name);
+	GLVertexFormat::Attribute *vertexAttribute = nullptr;
+
+	int location = -1;
+	const bool attributeFound = attributeLocations_.contains(name, location);
+
+	if (attributeFound)
+		vertexAttribute = &vertexFormat_[location];
+
+	return vertexAttribute;
+}
+
+void GLShaderProgram::defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo, unsigned int vboOffset)
+{
+	if (vbo)
+	{
+		for (int location : attributeLocations_)
+		{
+			vertexFormat_[location].setVbo(vbo);
+			vertexFormat_[location].setBaseOffset(vboOffset);
+		}
+		vertexFormat_.setIbo(ibo);
+
+		RenderResources::vaoPool().bindVao(vertexFormat_);
+	}
+}
+
 void GLShaderProgram::reset()
 {
 	if (status_ != Status::NOT_LINKED && status_ != Status::COMPILATION_FAILED)
@@ -183,6 +214,9 @@ void GLShaderProgram::reset()
 		uniforms_.clear();
 		uniformBlocks_.clear();
 		attributes_.clear();
+
+		attributeLocations_.clear();
+		vertexFormat_.reset();
 
 		if (boundProgram_ == glHandle_)
 			glUseProgram(0);
@@ -270,6 +304,7 @@ void GLShaderProgram::performIntrospection()
 		discoverUniforms();
 		discoverUniformBlocks(discover);
 		discoverAttributes();
+		initVertexFormat();
 		status_ = Status::LINKED_WITH_INTROSPECTION;
 	}
 }
@@ -353,6 +388,25 @@ void GLShaderProgram::discoverAttributes()
 		attributes_.pushBack(attribute);
 
 		LOGD_X("Shader %u - attribute %d : \"%s\"", glHandle_, attribute.location(), attribute.name());
+	}
+}
+
+void GLShaderProgram::initVertexFormat()
+{
+	ZoneScoped;
+	const unsigned int count = attributes_.size();
+	if (count > GLVertexFormat::MaxAttributes)
+		LOGW_X("More active attributes (%d) than supported by the vertex format class (%d)", count, GLVertexFormat::MaxAttributes);
+
+	for (unsigned int i = 0; i < attributes_.size(); i++)
+	{
+		const GLAttribute &attribute = attributes_[i];
+		const int location = attribute.location();
+		if (location < 0)
+			continue;
+
+		attributeLocations_[attribute.name()] = location;
+		vertexFormat_[location].init(attribute.location(), attribute.numComponents(), attribute.basicType());
 	}
 }
 

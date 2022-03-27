@@ -2,9 +2,13 @@
 #define CLASS_NCINE_GLSHADERPROGRAM
 
 #include <nctl/Array.h>
+#include <nctl/StaticHashMap.h>
+#include <nctl/String.h>
+
 #include "GLUniform.h"
 #include "GLUniformBlock.h"
 #include "GLAttribute.h"
+#include "GLVertexFormat.h"
 
 namespace ncine {
 
@@ -67,6 +71,14 @@ class GLShaderProgram
 	void use();
 	bool validate();
 
+	inline unsigned int numAttributes() const { return attributeLocations_.size(); }
+	inline bool hasAttribute(const char *name) const { return (attributeLocations_.find(name) != nullptr); }
+	GLVertexFormat::Attribute *attribute(const char *name);
+
+	inline void defineVertexFormat(const GLBufferObject *vbo) { defineVertexFormat(vbo, nullptr, 0); }
+	inline void defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo) { defineVertexFormat(vbo, ibo, 0); }
+	void defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo, unsigned int vboOffset);
+
 	/// Deletes the current OpenGL shader program so that new shaders can be attached
 	void reset();
 
@@ -107,6 +119,9 @@ class GLShaderProgram
 	static const int AttributesInitialSize = 4;
 	nctl::Array<GLAttribute> attributes_;
 
+	nctl::StaticHashMap<nctl::String, int, GLVertexFormat::MaxAttributes> attributeLocations_;
+	GLVertexFormat vertexFormat_;
+
 	bool deferredQueries();
 	bool checkLinking();
 	void performIntrospection();
@@ -114,6 +129,7 @@ class GLShaderProgram
 	void discoverUniforms();
 	void discoverUniformBlocks(GLUniformBlock::DiscoverUniforms discover);
 	void discoverAttributes();
+	void initVertexFormat();
 
 	/// Deleted copy constructor
 	GLShaderProgram(const GLShaderProgram &) = delete;
@@ -122,7 +138,6 @@ class GLShaderProgram
 
 	friend class GLShaderUniforms;
 	friend class GLShaderUniformBlocks;
-	friend class GLShaderAttributes;
 };
 
 }

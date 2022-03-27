@@ -62,7 +62,6 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/opengl/GLShaderUniforms.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLUniform.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLUniformCache.cpp
-	${NCINE_ROOT}/src/graphics/opengl/GLShaderAttributes.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLAttribute.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLTexture.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLVertexArrayObject.cpp

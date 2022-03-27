@@ -80,8 +80,13 @@ void Material::setShaderProgram(GLShaderProgram *program)
 	// The camera uniforms are handled separately as they have a different update frequency
 	shaderUniforms_.setProgram(shaderProgram_, nullptr, ProjectionViewMatrixExcludeString);
 	shaderUniformBlocks_.setProgram(shaderProgram_);
-	shaderAttributes_.setProgram(shaderProgram_);
-	RenderResources::setDefaultAttributesParameters(shaderAttributes_);
+
+	RenderResources::setDefaultAttributesParameters(*shaderProgram_);
+}
+
+void Material::setDefaultAttributesParameters()
+{
+	RenderResources::setDefaultAttributesParameters(*shaderProgram_);
 }
 
 void Material::reserveUniformsDataMemory()
@@ -134,7 +139,7 @@ void Material::bind()
 
 void Material::defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo, unsigned int vboOffset)
 {
-	shaderAttributes_.defineVertexFormat(vbo, ibo, vboOffset);
+	shaderProgram_->defineVertexFormat(vbo, ibo, vboOffset);
 }
 
 namespace {

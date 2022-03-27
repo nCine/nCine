@@ -1,6 +1,5 @@
+#include <cstddef> // for `offsetof()`
 #include <nctl/HashMapIterator.h>
-#include "GLShaderProgram.h"
-#include "GLShaderAttributes.h"
 #include "RenderResources.h"
 #include "RenderBuffersManager.h"
 #include "RenderVaoPool.h"
@@ -104,32 +103,32 @@ bool RenderResources::removeCameraUniformData(GLShaderProgram *shaderProgram)
 	return hasRemoved;
 }
 
-void RenderResources::setDefaultAttributesParameters(GLShaderAttributes &shaderAttributes)
+void RenderResources::setDefaultAttributesParameters(GLShaderProgram &shaderProgram)
 {
-	if (shaderAttributes.numAttributes() > 0)
+	if (shaderProgram.numAttributes() > 0)
 	{
-		const bool hasPositionAttribute = shaderAttributes.hasAttribute(Material::PositionAttributeName);
-		const bool hasTexCoordsAttribute = shaderAttributes.hasAttribute(Material::TexCoordsAttributeName);
-		const bool hasMeshIndexAttribute = shaderAttributes.hasAttribute(Material::MeshIndexAttributeName);
+		const bool hasPositionAttribute = shaderProgram.hasAttribute(Material::PositionAttributeName);
+		const bool hasTexCoordsAttribute = shaderProgram.hasAttribute(Material::TexCoordsAttributeName);
+		const bool hasMeshIndexAttribute = shaderProgram.hasAttribute(Material::MeshIndexAttributeName);
 		if (hasPositionAttribute && hasTexCoordsAttribute && hasMeshIndexAttribute)
 		{
-			shaderAttributes.attribute(Material::PositionAttributeName)->setVboParameters(sizeof(VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(VertexFormatPos2Tex2Index, position)));
-			shaderAttributes.attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(VertexFormatPos2Tex2Index, texcoords)));
-			shaderAttributes.attribute(Material::MeshIndexAttributeName)->setVboParameters(sizeof(VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(VertexFormatPos2Tex2Index, drawindex)));
+			shaderProgram.attribute(Material::PositionAttributeName)->setVboParameters(sizeof(VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(VertexFormatPos2Tex2Index, position)));
+			shaderProgram.attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(VertexFormatPos2Tex2Index, texcoords)));
+			shaderProgram.attribute(Material::MeshIndexAttributeName)->setVboParameters(sizeof(VertexFormatPos2Tex2Index), reinterpret_cast<void *>(offsetof(VertexFormatPos2Tex2Index, drawindex)));
 		}
 		else if (hasPositionAttribute && !hasTexCoordsAttribute && hasMeshIndexAttribute)
 		{
-			shaderAttributes.attribute(Material::PositionAttributeName)->setVboParameters(sizeof(VertexFormatPos2Index), reinterpret_cast<void *>(offsetof(VertexFormatPos2Index, position)));
-			shaderAttributes.attribute(Material::MeshIndexAttributeName)->setVboParameters(sizeof(VertexFormatPos2Index), reinterpret_cast<void *>(offsetof(VertexFormatPos2Index, drawindex)));
+			shaderProgram.attribute(Material::PositionAttributeName)->setVboParameters(sizeof(VertexFormatPos2Index), reinterpret_cast<void *>(offsetof(VertexFormatPos2Index, position)));
+			shaderProgram.attribute(Material::MeshIndexAttributeName)->setVboParameters(sizeof(VertexFormatPos2Index), reinterpret_cast<void *>(offsetof(VertexFormatPos2Index, drawindex)));
 		}
 		else if (hasPositionAttribute && hasTexCoordsAttribute && !hasMeshIndexAttribute)
 		{
-			shaderAttributes.attribute(Material::PositionAttributeName)->setVboParameters(sizeof(VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(VertexFormatPos2Tex2, position)));
-			shaderAttributes.attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(VertexFormatPos2Tex2, texcoords)));
+			shaderProgram.attribute(Material::PositionAttributeName)->setVboParameters(sizeof(VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(VertexFormatPos2Tex2, position)));
+			shaderProgram.attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(VertexFormatPos2Tex2, texcoords)));
 		}
 		else if (hasPositionAttribute && !hasTexCoordsAttribute && !hasMeshIndexAttribute)
 		{
-			shaderAttributes.attribute(Material::PositionAttributeName)->setVboParameters(sizeof(VertexFormatPos2), reinterpret_cast<void *>(offsetof(VertexFormatPos2, position)));
+			shaderProgram.attribute(Material::PositionAttributeName)->setVboParameters(sizeof(VertexFormatPos2), reinterpret_cast<void *>(offsetof(VertexFormatPos2, position)));
 		}
 	}
 }

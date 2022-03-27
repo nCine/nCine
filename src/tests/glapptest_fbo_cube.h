@@ -10,7 +10,6 @@ namespace ncine {
 class AppConfiguration;
 class GLShaderProgram;
 class GLShaderUniforms;
-class GLShaderAttributes;
 class GLTexture;
 class GLFramebufferObject;
 class GLBufferObject;
@@ -52,10 +51,8 @@ class MyEventHandler :
 
 	nctl::UniquePtr<nc::GLShaderProgram> colorProgram_;
 	nctl::UniquePtr<nc::GLShaderUniforms> colorUniforms_;
-	nctl::UniquePtr<nc::GLShaderAttributes> colorAttributes_;
 	nctl::UniquePtr<nc::GLShaderProgram> texProgram_;
 	nctl::UniquePtr<nc::GLShaderUniforms> texUniforms_;
-	nctl::UniquePtr<nc::GLShaderAttributes> texAttributes_;
 	nctl::UniquePtr<nc::GLTexture> texture_;
 	nctl::UniquePtr<nc::GLFramebufferObject> fbo_;
 	nctl::UniquePtr<nc::GLBufferObject> vboTri_;

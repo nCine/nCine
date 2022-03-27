@@ -34,7 +34,6 @@ set(PRIVATE_HEADERS
 	${NCINE_ROOT}/src/include/GLShaderUniforms.h
 	${NCINE_ROOT}/src/include/GLUniform.h
 	${NCINE_ROOT}/src/include/GLUniformCache.h
-	${NCINE_ROOT}/src/include/GLShaderAttributes.h
 	${NCINE_ROOT}/src/include/GLAttribute.h
 	${NCINE_ROOT}/src/include/GLTexture.h
 	${NCINE_ROOT}/src/include/GLVertexArrayObject.h

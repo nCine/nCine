@@ -174,11 +174,11 @@ void ImGuiDrawing::setupRenderCmd(RenderCommand &cmd)
 	material.setShaderProgram(imguiShaderProgram_.get());
 	material.reserveUniformsDataMemory();
 	material.uniform(Material::TextureUniformName)->setIntValue(0); // GL_TEXTURE0
-	material.attribute(Material::PositionAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, pos)));
-	material.attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, uv)));
-	material.attribute(Material::ColorAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, col)));
-	material.attribute(Material::ColorAttributeName)->setType(GL_UNSIGNED_BYTE);
-	material.attribute(Material::ColorAttributeName)->setNormalized(true);
+	imguiShaderProgram_->attribute(Material::PositionAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, pos)));
+	imguiShaderProgram_->attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, uv)));
+	imguiShaderProgram_->attribute(Material::ColorAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, col)));
+	imguiShaderProgram_->attribute(Material::ColorAttributeName)->setType(GL_UNSIGNED_BYTE);
+	imguiShaderProgram_->attribute(Material::ColorAttributeName)->setNormalized(true);
 	material.setBlendingEnabled(true);
 	material.setBlendingFactors(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -275,12 +275,11 @@ void ImGuiDrawing::setupBuffersAndShader()
 	imguiShaderUniforms_->setUniformsDataPointer(uniformsBuffer_);
 	imguiShaderUniforms_->uniform(Material::TextureUniformName)->setIntValue(0); // GL_TEXTURE0
 
-	imguiShaderAttributes_ = nctl::makeUnique<GLShaderAttributes>(imguiShaderProgram_.get());
-	imguiShaderAttributes_->attribute(Material::PositionAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, pos)));
-	imguiShaderAttributes_->attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, uv)));
-	imguiShaderAttributes_->attribute(Material::ColorAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, col)));
-	imguiShaderAttributes_->attribute(Material::ColorAttributeName)->setType(GL_UNSIGNED_BYTE);
-	imguiShaderAttributes_->attribute(Material::ColorAttributeName)->setNormalized(true);
+	imguiShaderProgram_->attribute(Material::PositionAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, pos)));
+	imguiShaderProgram_->attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, uv)));
+	imguiShaderProgram_->attribute(Material::ColorAttributeName)->setVboParameters(sizeof(ImDrawVert), reinterpret_cast<void *>(offsetof(ImDrawVert, col)));
+	imguiShaderProgram_->attribute(Material::ColorAttributeName)->setType(GL_UNSIGNED_BYTE);
+	imguiShaderProgram_->attribute(Material::ColorAttributeName)->setNormalized(true);
 }
 
 void ImGuiDrawing::draw()
@@ -308,7 +307,7 @@ void ImGuiDrawing::draw()
 		const ImDrawIdx *firstIndex = nullptr;
 
 		// Always define vertex format (and bind VAO) before uploading data to buffers
-		imguiShaderAttributes_->defineVertexFormat(vbo_.get(), ibo_.get());
+		imguiShaderProgram_->defineVertexFormat(vbo_.get(), ibo_.get());
 		vbo_->bufferData(static_cast<GLsizeiptr>(imCmdList->VtxBuffer.Size) * sizeof(ImDrawVert), static_cast<const GLvoid *>(imCmdList->VtxBuffer.Data), GL_STREAM_DRAW);
 		ibo_->bufferData(static_cast<GLsizeiptr>(imCmdList->IdxBuffer.Size) * sizeof(ImDrawIdx), static_cast<const GLvoid *>(imCmdList->IdxBuffer.Data), GL_STREAM_DRAW);
 		imguiShaderProgram_->use();

@@ -585,6 +585,9 @@ void ImGuiDebugOverlay::guiGraphicsCapabilities()
 		ImGui::Text("GL_MAX_VERTEX_UNIFORM_BLOCKS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_VERTEX_UNIFORM_BLOCKS));
 		ImGui::Text("GL_MAX_FRAGMENT_UNIFORM_BLOCKS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_FRAGMENT_UNIFORM_BLOCKS));
 		ImGui::Text("GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::UNIFORM_BUFFER_OFFSET_ALIGNMENT));
+#if !defined(EMSCRIPTEN) && (!defined(WITH_OPENGLES) || (defined(WITH_OPENGLES) && GL_ES_VERSION_3_1))
+		ImGui::Text("GL_MAX_VERTEX_ATTRIB_STRIDE: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_VERTEX_ATTRIB_STRIDE));
+#endif
 
 		ImGui::Separator();
 		ImGui::Text("GL_KHR_debug: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::KHR_DEBUG));

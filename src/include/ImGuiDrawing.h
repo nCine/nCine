@@ -10,7 +10,6 @@ namespace ncine {
 class GLTexture;
 class GLShaderProgram;
 class GLShaderUniforms;
-class GLShaderAttributes;
 class GLBufferObject;
 class RenderCommand;
 class RenderQueue;
@@ -42,7 +41,6 @@ class ImGuiDrawing
 	static const int UniformsBufferSize = 65;
 	unsigned char uniformsBuffer_[UniformsBufferSize];
 	nctl::UniquePtr<GLShaderUniforms> imguiShaderUniforms_;
-	nctl::UniquePtr<GLShaderAttributes> imguiShaderAttributes_;
 
 	int lastFrameWidth_;
 	int lastFrameHeight_;

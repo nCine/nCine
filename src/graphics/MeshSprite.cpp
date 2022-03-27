@@ -269,14 +269,7 @@ void MeshSprite::init()
 void MeshSprite::shaderHasChanged()
 {
 	BaseSprite::shaderHasChanged();
-
-	GLVertexFormat::Attribute *positionAttribute = renderCommand_->material().attribute(Material::PositionAttributeName);
-	if (positionAttribute)
-		positionAttribute->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, position)));
-
-	GLVertexFormat::Attribute *texCoordsAttribute = renderCommand_->material().attribute(Material::TexCoordsAttributeName);
-	if (texCoordsAttribute)
-		texCoordsAttribute->setVboParameters(sizeof(RenderResources::VertexFormatPos2Tex2), reinterpret_cast<void *>(offsetof(RenderResources::VertexFormatPos2Tex2, texcoords)));
+	renderCommand_->material().setDefaultAttributesParameters();
 }
 
 void MeshSprite::textureHasChanged(Texture *newTexture)

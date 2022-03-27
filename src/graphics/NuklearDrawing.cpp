@@ -167,11 +167,11 @@ void NuklearDrawing::setupRenderCmd(RenderCommand &cmd)
 	material.setShaderProgram(nuklearShaderProgram_.get());
 	material.reserveUniformsDataMemory();
 	material.uniform(Material::TextureUniformName)->setIntValue(0); // GL_TEXTURE0
-	material.attribute(Material::PositionAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, pos)));
-	material.attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, uv)));
-	material.attribute(Material::ColorAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, col)));
-	material.attribute(Material::ColorAttributeName)->setType(GL_UNSIGNED_BYTE);
-	material.attribute(Material::ColorAttributeName)->setNormalized(true);
+	nuklearShaderProgram_->attribute(Material::PositionAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, pos)));
+	nuklearShaderProgram_->attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, uv)));
+	nuklearShaderProgram_->attribute(Material::ColorAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, col)));
+	nuklearShaderProgram_->attribute(Material::ColorAttributeName)->setType(GL_UNSIGNED_BYTE);
+	nuklearShaderProgram_->attribute(Material::ColorAttributeName)->setNormalized(true);
 	material.setBlendingEnabled(true);
 	material.setBlendingFactors(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -267,12 +267,11 @@ void NuklearDrawing::setupBuffersAndShader()
 	nuklearShaderUniforms_->setUniformsDataPointer(uniformsBuffer_);
 	nuklearShaderUniforms_->uniform(Material::TextureUniformName)->setIntValue(0); // GL_TEXTURE0
 
-	nuklearShaderAttributes_ = nctl::makeUnique<GLShaderAttributes>(nuklearShaderProgram_.get());
-	nuklearShaderAttributes_->attribute(Material::PositionAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, pos)));
-	nuklearShaderAttributes_->attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, uv)));
-	nuklearShaderAttributes_->attribute(Material::ColorAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, col)));
-	nuklearShaderAttributes_->attribute(Material::ColorAttributeName)->setType(GL_UNSIGNED_BYTE);
-	nuklearShaderAttributes_->attribute(Material::ColorAttributeName)->setNormalized(true);
+	nuklearShaderProgram_->attribute(Material::PositionAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, pos)));
+	nuklearShaderProgram_->attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, uv)));
+	nuklearShaderProgram_->attribute(Material::ColorAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, col)));
+	nuklearShaderProgram_->attribute(Material::ColorAttributeName)->setType(GL_UNSIGNED_BYTE);
+	nuklearShaderProgram_->attribute(Material::ColorAttributeName)->setNormalized(true);
 }
 
 void NuklearDrawing::draw()
@@ -287,7 +286,7 @@ void NuklearDrawing::draw()
 	nk_convert(&NuklearContext::ctx_, &NuklearContext::cmds_, &vbuf, &ibuf, &config_);
 
 	// Always define vertex format (and bind VAO) before uploading data to buffers
-	nuklearShaderAttributes_->defineVertexFormat(vbo_.get(), ibo_.get());
+	nuklearShaderProgram_->defineVertexFormat(vbo_.get(), ibo_.get());
 	/* copy to vertex and element buffer */
 	vbo_->bufferData(vbuf.size, vbuf.memory.ptr, GL_STREAM_DRAW);
 	ibo_->bufferData(ibuf.size, ibuf.memory.ptr, GL_STREAM_DRAW);
