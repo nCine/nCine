@@ -78,7 +78,11 @@ Font &Font::operator=(Font &&) = default;
 bool Font::loadFromMemory(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize, const char *texFilename)
 {
 	ZoneScoped;
-	ZoneText(fntBufferName, nctl::strnlen(fntBufferName, nctl::String::MaxCStringLength));
+	if (fntBufferName)
+	{
+		// When Tracy is disabled the statement body is empty and braces are needed
+		ZoneText(fntBufferName, nctl::strnlen(fntBufferName, nctl::String::MaxCStringLength));
+	}
 
 	FntParser fntParser(reinterpret_cast<const char *>(fntBufferPtr), fntBufferSize);
 	if (fntParser.numCharTags() == 0)
@@ -102,7 +106,11 @@ bool Font::loadFromMemory(const char *fntBufferName, const unsigned char *fntBuf
                           const char *texBufferName, const unsigned char *texBufferPtr, unsigned long int texBufferSize)
 {
 	ZoneScoped;
-	ZoneText(fntBufferName, nctl::strnlen(fntBufferName, nctl::String::MaxCStringLength));
+	if (fntBufferName)
+	{
+		// When Tracy is disabled the statement body is empty and braces are needed
+		ZoneText(fntBufferName, nctl::strnlen(fntBufferName, nctl::String::MaxCStringLength));
+	}
 
 	FntParser fntParser(reinterpret_cast<const char *>(fntBufferPtr), fntBufferSize);
 	if (fntParser.numCharTags() == 0)

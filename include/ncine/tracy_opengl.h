@@ -18,16 +18,19 @@
 	#include "tracy.h"
 
 	#define TracyGpuContext
-	#define TracyGpuNamedZone(x, y)
-	#define TracyGpuNamedZoneC(x, y, z)
+	#define TracyGpuContextName(x, y)
+	#define TracyGpuNamedZone(x, y, z)
+	#define TracyGpuNamedZoneC(x, y, z, w)
 	#define TracyGpuZone(x)
 	#define TracyGpuZoneC(x, y)
+	#define TracyGpuZoneTransient(x, y, z)
 	#define TracyGpuCollect
 
-	#define TracyGpuNamedZoneS(x, y, z)
-	#define TracyGpuNamedZoneCS(x, y, z, w)
+	#define TracyGpuNamedZoneS(x, y, z, w)
+	#define TracyGpuNamedZoneCS(x, y, z, w, a)
 	#define TracyGpuZoneS(x, y)
 	#define TracyGpuZoneCS(x, y, z)
+	#define TracyGpuZoneTransientS(x, y, z, w)
 
 namespace tracy {
 
@@ -35,8 +38,8 @@ struct SourceLocationData;
 class GpuCtxScope
 {
   public:
-	explicit GpuCtxScope(const SourceLocationData *) {}
-	GpuCtxScope(const SourceLocationData *, int depth) {}
+	GpuCtxScope(const SourceLocationData *, bool) {}
+	GpuCtxScope(const SourceLocationData *, int, bool) {}
 };
 
 }

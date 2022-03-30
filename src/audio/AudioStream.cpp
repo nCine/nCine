@@ -169,7 +169,11 @@ void AudioStream::stop(unsigned int source)
 bool AudioStream::loadFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
 {
 	ZoneScoped;
-	ZoneText(bufferName, nctl::strnlen(bufferName, nctl::String::MaxCStringLength));
+	if (bufferName)
+	{
+		// When Tracy is disabled the statement body is empty and braces are needed
+		ZoneText(bufferName, nctl::strnlen(bufferName, nctl::String::MaxCStringLength));
+	}
 
 	nctl::UniquePtr<IAudioLoader> audioLoader = IAudioLoader::createFromMemory(bufferName, bufferPtr, bufferSize);
 	if (audioLoader->hasLoaded() == false)

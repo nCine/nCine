@@ -91,7 +91,11 @@ AudioBuffer &AudioBuffer::operator=(AudioBuffer &&other)
 void AudioBuffer::init(const char *name, Format format, int frequency)
 {
 	ZoneScoped;
-	ZoneText(name, nctl::strnlen(name, nctl::String::MaxCStringLength));
+	if (name)
+	{
+		// When Tracy is disabled the statement body is empty and braces are needed
+		ZoneText(name, nctl::strnlen(name, nctl::String::MaxCStringLength));
+	}
 
 	setName(name);
 
@@ -122,7 +126,11 @@ void AudioBuffer::init(const char *name, Format format, int frequency)
 bool AudioBuffer::loadFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
 {
 	ZoneScoped;
-	ZoneText(bufferName, nctl::strnlen(bufferName, nctl::String::MaxCStringLength));
+	if (bufferName)
+	{
+		// When Tracy is disabled the statement body is empty and braces are needed
+		ZoneText(bufferName, nctl::strnlen(bufferName, nctl::String::MaxCStringLength));
+	}
 
 	nctl::UniquePtr<IAudioLoader> audioLoader = IAudioLoader::createFromMemory(bufferName, bufferPtr, bufferSize);
 	if (audioLoader->hasLoaded() == false)

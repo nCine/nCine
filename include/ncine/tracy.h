@@ -23,8 +23,12 @@
 	#define ZoneTextV(x, y, z)
 	#define ZoneName(x, y)
 	#define ZoneNameV(x, y, z)
+	#define ZoneColor(x)
+	#define ZoneColorV(x, y)
 	#define ZoneValue(x)
 	#define ZoneValueV(x, y)
+	#define ZoneIsActive false
+	#define ZoneIsActiveV(x) false
 
 	#define FrameMark
 	#define FrameMarkNamed(x)
@@ -40,7 +44,7 @@
 	#define LockableBase(type) type
 	#define SharedLockableBase(type) type
 	#define LockMark(x) (void)x;
-	#define LockableName(x, y, z) ;
+	#define LockableName(x, y, z);
 
 	#define TracyPlot(x, y)
 	#define TracyPlotConfig(x, y)
@@ -93,8 +97,11 @@
 	#define TracyParameterSetup(x, y, z, w)
 	#define TracyIsConnected false
 
-// From TracyC.h
-typedef const void *TracyCZoneCtx;
+	#define TracyFiberEnter(x)
+	#define TracyFiberLeave
+
+	// From TracyC.h
+	typedef const void *TracyCZoneCtx;
 
 	#define TracyCZone(c, x)
 	#define TracyCZoneN(c, x, y)
@@ -148,5 +155,12 @@ typedef const void *TracyCZoneCtx;
 	#define TracyCMessageLS(x, y)
 	#define TracyCMessageCS(x, y, z, w)
 	#define TracyCMessageLCS(x, y, z)
+
+	#define TracyCIsConnected 0
+
+	#ifdef TRACY_FIBERS
+		#define TracyCFiberEnter(fiber)
+		#define TracyCFiberLeave
+	#endif
 
 #endif

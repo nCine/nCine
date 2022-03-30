@@ -110,7 +110,7 @@ else() # GCC and LLVM
 	endif()
 
 	if(NCINE_WITH_TRACY)
-		target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-g>)
+		target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-g -fno-omit-frame-pointer -rdynamic>)
 		if(MINGW OR MSYS)
 			target_link_libraries(ncine PRIVATE ws2_32 dbghelp)
 		elseif(NOT ANDROID AND NOT APPLE)

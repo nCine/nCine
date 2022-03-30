@@ -128,7 +128,11 @@ Texture &Texture::operator=(Texture &&) = default;
 void Texture::init(const char *name, Format format, int mipMapCount, int width, int height)
 {
 	ZoneScoped;
-	ZoneText(name, nctl::strnlen(name, nctl::String::MaxCStringLength));
+	if (name)
+	{
+		// When Tracy is disabled the statement body is empty and braces are needed
+		ZoneText(name, nctl::strnlen(name, nctl::String::MaxCStringLength));
+	}
 
 	TextureLoaderRaw texLoader(width, height, mipMapCount, ncFormatToInternal(format));
 
@@ -161,7 +165,11 @@ void Texture::init(const char *name, Format format, Vector2i size)
 bool Texture::loadFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
 {
 	ZoneScoped;
-	ZoneText(bufferName, nctl::strnlen(bufferName, nctl::String::MaxCStringLength));
+	if (bufferName)
+	{
+		// When Tracy is disabled the statement body is empty and braces are needed
+		ZoneText(bufferName, nctl::strnlen(bufferName, nctl::String::MaxCStringLength));
+	}
 
 	nctl::UniquePtr<ITextureLoader> texLoader = ITextureLoader::createFromMemory(bufferName, bufferPtr, bufferSize);
 	if (texLoader->hasLoaded() == false)
