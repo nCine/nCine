@@ -73,27 +73,32 @@ Texture::Texture()
 {
 }
 
+/*! \note It specifies a pixel format and it is intended to be used with `loadFromTexels()` */
 Texture::Texture(const char *name, Format format, int mipMapCount, int width, int height)
     : Texture()
 {
 	init(name, format, mipMapCount, width, height);
 }
 
+/*! \note It specifies a pixel format and it is intended to be used with `loadFromTexels()` */
 Texture::Texture(const char *name, Format format, int mipMapCount, Vector2i size)
     : Texture(name, format, mipMapCount, size.x, size.y)
 {
 }
 
+/*! \note It specifies a pixel format and it is intended to be used with `loadFromTexels()` */
 Texture::Texture(const char *name, Format format, int width, int height)
     : Texture(name, format, 1, width, height)
 {
 }
 
+/*! \note It specifies a pixel format and it is intended to be used with `loadFromTexels()` */
 Texture::Texture(const char *name, Format format, Vector2i size)
     : Texture(name, format, 1, size.x, size.y)
 {
 }
 
+/*! \note It needs a `bufferName` with a valid file extension as it loads compressed data from a file in memory */
 Texture::Texture(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
     : Texture()
 {
@@ -162,6 +167,7 @@ void Texture::init(const char *name, Format format, Vector2i size)
 	init(name, format, 1, size.x, size.y);
 }
 
+/*! \note It needs a `bufferName` with a valid file extension as it loads compressed data from a file in memory */
 bool Texture::loadFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
 {
 	ZoneScoped;
@@ -210,21 +216,25 @@ bool Texture::loadFromFile(const char *filename)
 	return true;
 }
 
+/*! \note It loads uncompressed pixel data from memory using the `Format` specified in the constructor */
 bool Texture::loadFromTexels(const unsigned char *bufferPtr)
 {
 	return loadFromTexels(bufferPtr, 0, 0, 0, width_, height_);
 }
 
+/*! \note It loads uncompressed pixel data from memory using the `Format` specified in the constructor */
 bool Texture::loadFromTexels(const unsigned char *bufferPtr, unsigned int x, unsigned int y, unsigned int width, unsigned int height)
 {
 	return loadFromTexels(bufferPtr, 0, x, y, width, height);
 }
 
+/*! \note It loads uncompressed pixel data from memory using the `Format` specified in the constructor */
 bool Texture::loadFromTexels(const unsigned char *bufferPtr, Recti region)
 {
 	return loadFromTexels(bufferPtr, 0, region.x, region.y, region.w, region.h);
 }
 
+/*! \note It loads uncompressed pixel data from memory using the `Format` specified in the constructor */
 bool Texture::loadFromTexels(const unsigned char *bufferPtr, unsigned int level, unsigned int x, unsigned int y, unsigned int width, unsigned int height)
 {
 	const unsigned char *data = bufferPtr;
@@ -247,6 +257,7 @@ bool Texture::loadFromTexels(const unsigned char *bufferPtr, unsigned int level,
 	return (error == GL_NO_ERROR);
 }
 
+/*! It loads uncompressed pixel data from memory using the `Format` specified in the constructor */
 bool Texture::loadFromTexels(const unsigned char *bufferPtr, unsigned int level, Recti region)
 {
 	return loadFromTexels(bufferPtr, level, region.x, region.y, region.w, region.h);

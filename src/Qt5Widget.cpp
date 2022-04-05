@@ -23,17 +23,21 @@ Qt5Widget::Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*create
 {
 	setFocusPolicy(Qt::StrongFocus);
 	setMouseTracking(true);
-	setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 	QObject::connect(this, SIGNAL(frameSwapped()), this, SLOT(update()));
 
 	ASSERT(createAppEventHandler_);
 	application_.qt5Widget_ = this;
 	application_.init(createAppEventHandler_, argc, argv);
 	application_.setAutoSuspension(false);
-	const int width = application_.appConfiguration().resolution.x;
-	const int height = application_.appConfiguration().resolution.y;
-	setMinimumSize(width, height);
-	setMaximumSize(width, height);
+
+	if (application_.appCfg_.isResizable == false)
+	{
+		setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+		const int width = application_.appConfiguration().resolution.x;
+		const int height = application_.appConfiguration().resolution.y;
+		setMinimumSize(width, height);
+		setMaximumSize(width, height);
+	}
 }
 
 Qt5Widget::~Qt5Widget()
@@ -112,7 +116,11 @@ void Qt5Widget::initializeGL()
 void Qt5Widget::resizeGL(int w, int h)
 {
 	if (isInitialized_)
-		application_.gfxDevice().setResolution(w, h);
+	{
+		Qt5GfxDevice &gfxDevice = static_cast<Qt5GfxDevice &>(*application_.gfxDevice_);
+		gfxDevice.setResolution(w, h);
+		gfxDevice.resetTextureBinding();
+	}
 }
 
 void Qt5Widget::paintGL()
@@ -131,6 +139,9 @@ void Qt5Widget::paintGL()
 
 QSize Qt5Widget::minimumSizeHint() const
 {
+	if (application_.appConfiguration().isResizable == true)
+		return QSize(-1, -1);
+
 	if (isInitialized_)
 		return QSize(application_.widthInt(), application_.heightInt());
 	else
@@ -139,6 +150,9 @@ QSize Qt5Widget::minimumSizeHint() const
 
 QSize Qt5Widget::sizeHint() const
 {
+	if (application_.appConfiguration().isResizable == true)
+		return QSize(-1, -1);
+
 	if (isInitialized_)
 		return QSize(application_.widthInt(), application_.heightInt());
 	else

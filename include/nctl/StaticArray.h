@@ -510,15 +510,14 @@ T &StaticArray<T, C>::at(unsigned int index)
 template <class T, unsigned int C>
 const T &StaticArray<T, C>::operator[](unsigned int index) const
 {
-	// TEMP
-	FATAL_ASSERT_MSG_X(index < size_, "Index %u is out of bounds (size: %u)", index, size_);
+	ASSERT_MSG_X(index < size_, "Index %u is out of bounds (size: %u)", index, size_);
 	return array_[index];
 }
 
 template <class T, unsigned int C>
 T &StaticArray<T, C>::operator[](unsigned int index)
 {
-	FATAL_ASSERT_MSG_X(index < size_, "Index %u is out of bounds (size: %u)", index, size_);
+	ASSERT_MSG_X(index < size_, "Index %u is out of bounds (size: %u)", index, size_);
 	return array_[index];
 }
 
