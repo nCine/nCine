@@ -1,10 +1,6 @@
 #ifndef CLASS_NCINE_QT5INPUTMANAGER
 #define CLASS_NCINE_QT5INPUTMANAGER
 
-#ifdef _WIN32
-	#undef DELETE
-#endif
-
 #include <qevent.h>
 #include "IInputManager.h"
 #ifdef WITH_QT5GAMEPAD

@@ -1,8 +1,11 @@
 #ifndef CLASS_NCINE_NUKLEARQT5INPUT
 #define CLASS_NCINE_NUKLEARQT5INPUT
 
+#if defined(slots)
+	#undef slots
+#endif
+
 #include "NuklearContext.h"
-#undef slots
 #include "nuklear.h"
 
 class QEvent;

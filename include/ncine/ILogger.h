@@ -1,6 +1,10 @@
 #ifndef CLASS_NCINE_ILOGGER
 #define CLASS_NCINE_ILOGGER
 
+#if defined(_WIN32) && defined(ERROR)
+	#undef ERROR
+#endif
+
 #include "common_defines.h"
 
 namespace ncine {

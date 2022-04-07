@@ -1,6 +1,10 @@
 #ifndef NCINE_KEYS
 #define NCINE_KEYS
 
+#if defined(_WIN32) && defined(DELETE)
+	#undef DELETE
+#endif
+
 namespace ncine {
 
 enum class KeySym

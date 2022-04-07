@@ -1,6 +1,11 @@
 #ifndef CLASS_NCINE_CAMERA
 #define CLASS_NCINE_CAMERA
 
+#if defined(_WIN32) && (defined(near) || defined(far))
+	#undef near
+	#undef far
+#endif
+
 #include "common_defines.h"
 #include "Matrix4x4.h"
 #include "Rect.h"

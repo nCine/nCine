@@ -4,7 +4,7 @@
 #include "common_macros.h"
 #include <QOpenGLWidget>
 
-#ifdef _WIN32
+#if defined(_WIN32) && defined(ERROR)
 	#undef ERROR
 #endif
 
