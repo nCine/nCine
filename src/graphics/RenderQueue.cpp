@@ -138,15 +138,18 @@ void RenderQueue::draw()
 		TracyGpuZone("Opaque");
 		const int numInstances = opaqueRenderCommand->numInstances();
 		const int batchSize = opaqueRenderCommand->batchSize();
+		const uint16_t layer = opaqueRenderCommand->layer();
+		const uint16_t visitOrder = opaqueRenderCommand->visitOrder();
+
 		if (numInstances > 0)
-			debugString.format("Opaque %u (%d %s on layer %u)",
-			                   commandIndex, numInstances, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
+			debugString.format("Opaque %u (%d %s on layer %u, visit order %u)",
+			                   commandIndex, numInstances, commandTypeString(*opaqueRenderCommand), layer, visitOrder);
 		else if (batchSize > 0)
-			debugString.format("Opaque %u (%d %s on layer %u)",
-			                   commandIndex, batchSize, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
+			debugString.format("Opaque %u (%d %s on layer %u, visit order %u)",
+			                   commandIndex, batchSize, commandTypeString(*opaqueRenderCommand), layer, visitOrder);
 		else
-			debugString.format("Opaque %u (%s on layer %u)",
-			                   commandIndex, commandTypeString(*opaqueRenderCommand), opaqueRenderCommand->layer());
+			debugString.format("Opaque %u (%s on layer %u, visit order %u)",
+			                   commandIndex, commandTypeString(*opaqueRenderCommand), layer, visitOrder);
 
 		GLDebug::ScopedGroup scoped(debugString.data());
 		commandIndex++;
@@ -164,15 +167,18 @@ void RenderQueue::draw()
 		TracyGpuZone("Transparent");
 		const int numInstances = transparentRenderCommand->numInstances();
 		const int batchSize = transparentRenderCommand->batchSize();
+		const uint16_t layer = transparentRenderCommand->layer();
+		const uint16_t visitOrder = transparentRenderCommand->visitOrder();
+
 		if (numInstances > 0)
-			debugString.format("Transparent %u (%d %s on layer %u)",
-			                   commandIndex, numInstances, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
+			debugString.format("Transparent %u (%d %s on layer %u, visit order %u)",
+			                   commandIndex, numInstances, commandTypeString(*transparentRenderCommand), layer, visitOrder);
 		else if (batchSize > 0)
-			debugString.format("Transparent %u (%d %s on layer %u)",
-			                   commandIndex, batchSize, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
+			debugString.format("Transparent %u (%d %s on layer %u, visit order %u)",
+			                   commandIndex, batchSize, commandTypeString(*transparentRenderCommand), layer, visitOrder);
 		else
-			debugString.format("Transparent %u (%s on layer %u)",
-			                   commandIndex, commandTypeString(*transparentRenderCommand), transparentRenderCommand->layer());
+			debugString.format("Transparent %u (%s on layer %u, visit order %u)",
+			                   commandIndex, commandTypeString(*transparentRenderCommand), layer, visitOrder);
 
 		GLDebug::ScopedGroup scoped(debugString.data());
 		commandIndex++;

@@ -37,12 +37,6 @@ namespace DrawableNode {
 	static const char *SRC_ALPHA_SATURATE = "SRC_ALPHA_SATURATE";
 	static const char *BlendingFactor = "blending_factor";
 
-	static const char *LOWEST = "LOWEST";
-	static const char *SCENE = "SCENE";
-	static const char *HUD = "HUD";
-	static const char *HIGHEST = "HIGHEST";
-	static const char *LayerBase = "layer_base";
-
 	static const char *width = "get_width";
 	static const char *height = "get_height";
 	static const char *size = "get_size";
@@ -55,9 +49,6 @@ namespace DrawableNode {
 	static const char *destBlendingFactor = "get_dest_blending_factor";
 	static const char *setBlendingPreset = "set_blending_preset";
 	static const char *setBlendingFactors = "set_blending_factors";
-
-	static const char *layer = "get_layer";
-	static const char *setLayer = "set_layer";
 
 	static const char *isCulled = "is_culled";
 	static const char *aabb = "get_aabb";
@@ -98,15 +89,6 @@ void LuaDrawableNode::exposeConstants(lua_State *L)
 	LuaUtils::pushField(L, LuaNames::DrawableNode::SRC_ALPHA_SATURATE, static_cast<int64_t>(DrawableNode::BlendingFactor::SRC_ALPHA_SATURATE));
 
 	lua_setfield(L, -2, LuaNames::DrawableNode::BlendingFactor);
-
-	lua_createtable(L, 0, 4);
-
-	LuaUtils::pushField(L, LuaNames::DrawableNode::LOWEST, static_cast<int64_t>(DrawableNode::LayerBase::LOWEST));
-	LuaUtils::pushField(L, LuaNames::DrawableNode::SCENE, static_cast<int64_t>(DrawableNode::LayerBase::SCENE));
-	LuaUtils::pushField(L, LuaNames::DrawableNode::HUD, static_cast<int64_t>(DrawableNode::LayerBase::HUD));
-	LuaUtils::pushField(L, LuaNames::DrawableNode::HIGHEST, static_cast<int64_t>(DrawableNode::LayerBase::HIGHEST));
-
-	lua_setfield(L, -2, LuaNames::DrawableNode::LayerBase);
 }
 
 ///////////////////////////////////////////////////////////
@@ -129,9 +111,6 @@ void LuaDrawableNode::exposeFunctions(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::destBlendingFactor, destBlendingFactor);
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::setBlendingPreset, setBlendingPreset);
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::setBlendingFactors, setBlendingFactors);
-
-	LuaUtils::addFunction(L, LuaNames::DrawableNode::layer, layer);
-	LuaUtils::addFunction(L, LuaNames::DrawableNode::setLayer, setLayer);
 
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::isCulled, isCulled);
 	LuaUtils::addFunction(L, LuaNames::DrawableNode::aabb, aabb);
@@ -245,26 +224,6 @@ int LuaDrawableNode::setBlendingFactors(lua_State *L)
 	const DrawableNode::BlendingFactor destBlendingFactor = static_cast<DrawableNode::BlendingFactor>(LuaUtils::retrieve<int64_t>(L, -1));
 
 	node->setBlendingFactors(srcBlendingFactor, destBlendingFactor);
-
-	return 0;
-}
-
-int LuaDrawableNode::layer(lua_State *L)
-{
-	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -1);
-
-	const unsigned int layer = node->layer();
-	LuaUtils::push(L, layer);
-
-	return 1;
-}
-
-int LuaDrawableNode::setLayer(lua_State *L)
-{
-	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -2);
-	const uint32_t layer = LuaUtils::retrieve<uint32_t>(L, -1);
-
-	node->setLayer(static_cast<unsigned short>(layer));
 
 	return 0;
 }

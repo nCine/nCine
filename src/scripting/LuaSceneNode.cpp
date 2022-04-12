@@ -15,8 +15,18 @@ namespace SceneNode {
 	static const char *setParent = "set_parent";
 	static const char *addChildNode = "add_child";
 	static const char *removeChildNode = "remove_child";
+	static const char *removeChildNodeAt = "remove_child_at";
 	static const char *removeAllChildrenNodes = "remove_all_children";
 	static const char *unlinkChildNode = "unlink_child";
+
+	static const char *childOrderIndex = "get_child_order_index";
+	static const char *swapChildrenNodes = "swap_children";
+	static const char *swapNodeForward = "swap_node_forward";
+	static const char *swapNodeBack = "swap_node_back";
+
+	static const char *visitOrderState = "get_visit_order_state";
+	static const char *setVisitOrderState = "set_visit_order_state";
+	static const char *visitOrderIndex = "get_visit_order_index";
 
 	static const char *isEnabled = "is_enabled";
 	static const char *setEnabled = "set_enabled";
@@ -36,6 +46,14 @@ namespace SceneNode {
 	static const char *setColor = "set_color";
 	static const char *alpha = "get_alpha";
 	static const char *setAlpha = "set_alpha";
+
+	static const char *layer = "get_layer";
+	static const char *setLayer = "set_layer";
+
+	static const char *ENABLED = "ENABLED";
+	static const char *DISABLED = "DISABLED";
+	static const char *SAME_AS_PARENT = "SAME_AS_PARENT";
+	static const char *VisitOrderState = "visit_order_state";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -59,6 +77,17 @@ void LuaSceneNode::expose(LuaStateManager *stateManager)
 	lua_setfield(L, -2, LuaNames::SceneNode::SceneNode);
 }
 
+void LuaSceneNode::exposeConstants(lua_State *L)
+{
+	lua_createtable(L, 0, 3);
+
+	LuaUtils::pushField(L, LuaNames::SceneNode::ENABLED, static_cast<int64_t>(SceneNode::VisitOrderState::ENABLED));
+	LuaUtils::pushField(L, LuaNames::SceneNode::DISABLED, static_cast<int64_t>(SceneNode::VisitOrderState::DISABLED));
+	LuaUtils::pushField(L, LuaNames::SceneNode::SAME_AS_PARENT, static_cast<int64_t>(SceneNode::VisitOrderState::SAME_AS_PARENT));
+
+	lua_setfield(L, -2, LuaNames::SceneNode::VisitOrderState);
+}
+
 void LuaSceneNode::release(void *object)
 {
 	SceneNode *node = reinterpret_cast<SceneNode *>(object);
@@ -75,8 +104,18 @@ void LuaSceneNode::exposeFunctions(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::SceneNode::setParent, setParent);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::addChildNode, addChildNode);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::removeChildNode, removeChildNode);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::removeChildNodeAt, removeChildNodeAt);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::removeAllChildrenNodes, removeAllChildrenNodes);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::unlinkChildNode, unlinkChildNode);
+
+	LuaUtils::addFunction(L, LuaNames::SceneNode::childOrderIndex, childOrderIndex);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::swapChildrenNodes, swapChildrenNodes);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::swapNodeForward, swapNodeForward);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::swapNodeBack, swapNodeBack);
+
+	LuaUtils::addFunction(L, LuaNames::SceneNode::visitOrderState, visitOrderState);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::setVisitOrderState, setVisitOrderState);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::visitOrderIndex, visitOrderIndex);
 
 	LuaUtils::addFunction(L, LuaNames::SceneNode::isEnabled, isEnabled);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::setEnabled, setEnabled);
@@ -96,6 +135,9 @@ void LuaSceneNode::exposeFunctions(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::SceneNode::setColor, setColor);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::alpha, alpha);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::setAlpha, setAlpha);
+
+	LuaUtils::addFunction(L, LuaNames::SceneNode::layer, layer);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::setLayer, setLayer);
 }
 
 int LuaSceneNode::newObject(lua_State *L)
@@ -133,9 +175,10 @@ int LuaSceneNode::setParent(lua_State *L)
 	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
 	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
 
-	node->setParent(parent);
+	const bool result = node->setParent(parent);
+	LuaUtils::push(L, result);
 
-	return 0;
+	return 1;
 }
 
 int LuaSceneNode::addChildNode(lua_State *L)
@@ -143,9 +186,10 @@ int LuaSceneNode::addChildNode(lua_State *L)
 	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
 	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
 
-	parent->addChildNode(node);
+	const bool result = parent->addChildNode(node);
+	LuaUtils::push(L, result);
 
-	return 0;
+	return 1;
 }
 
 int LuaSceneNode::removeChildNode(lua_State *L)
@@ -154,6 +198,17 @@ int LuaSceneNode::removeChildNode(lua_State *L)
 	SceneNode *child = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
 
 	const bool result = parent->removeChildNode(child);
+	LuaUtils::push(L, result);
+
+	return 1;
+}
+
+int LuaSceneNode::removeChildNodeAt(lua_State *L)
+{
+	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
+	unsigned int index = LuaUtils::retrieve<uint64_t>(L, -1);
+
+	const bool result = parent->removeChildNodeAt(index);
 	LuaUtils::push(L, result);
 
 	return 1;
@@ -176,6 +231,77 @@ int LuaSceneNode::unlinkChildNode(lua_State *L)
 
 	const bool result = parent->unlinkChildNode(child);
 	LuaUtils::push(L, result);
+
+	return 1;
+}
+
+int LuaSceneNode::childOrderIndex(lua_State *L)
+{
+	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+
+	const unsigned int index = node->childOrderIndex();
+	LuaUtils::push(L, index);
+
+	return 1;
+}
+
+int LuaSceneNode::swapChildrenNodes(lua_State *L)
+{
+	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserData(L, -3);
+	unsigned int firstIndex = LuaUtils::retrieve<uint64_t>(L, -1);
+	unsigned int secondIndex = LuaUtils::retrieve<uint64_t>(L, -1);
+
+	const bool result = parent->swapChildrenNodes(firstIndex, secondIndex);
+	LuaUtils::push(L, result);
+
+	return 1;
+}
+
+int LuaSceneNode::swapNodeForward(lua_State *L)
+{
+	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+
+	const bool result = node->swapNodeForward();
+	LuaUtils::push(L, result);
+
+	return 1;
+}
+
+int LuaSceneNode::swapNodeBack(lua_State *L)
+{
+	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+
+	const bool result = node->swapNodeBack();
+	LuaUtils::push(L, result);
+
+	return 1;
+}
+
+int LuaSceneNode::visitOrderState(lua_State *L)
+{
+	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+
+	LuaUtils::push(L, static_cast<int64_t>(node->visitOrderState()));
+
+	return 1;
+}
+
+int LuaSceneNode::setVisitOrderState(lua_State *L)
+{
+	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
+	const SceneNode::VisitOrderState visitOrderState = static_cast<SceneNode::VisitOrderState>(LuaUtils::retrieve<int64_t>(L, -1));
+
+	node->setVisitOrderState(visitOrderState);
+
+	return 0;
+}
+
+int LuaSceneNode::visitOrderIndex(lua_State *L)
+{
+	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+
+	const uint16_t visitOrderIndex = node->visitOrderIndex();
+	LuaUtils::push(L, static_cast<uint32_t>(visitOrderIndex));
 
 	return 1;
 }
@@ -342,5 +468,26 @@ int LuaSceneNode::setAlpha(lua_State *L)
 
 	return 0;
 }
+
+int LuaSceneNode::layer(lua_State *L)
+{
+	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+
+	const uint16_t layer = node->layer();
+	LuaUtils::push(L, static_cast<uint32_t>(layer));
+
+	return 1;
+}
+
+int LuaSceneNode::setLayer(lua_State *L)
+{
+	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
+	const uint32_t layer = LuaUtils::retrieve<uint32_t>(L, -1);
+
+	node->setLayer(static_cast<uint16_t>(layer));
+
+	return 0;
+}
+
 
 }

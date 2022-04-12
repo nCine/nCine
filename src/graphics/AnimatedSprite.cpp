@@ -145,7 +145,6 @@ AnimatedSprite::AnimatedSprite(const AnimatedSprite &other)
     : Sprite(other), anims_(other.anims_), currentAnimIndex_(other.currentAnimIndex_)
 {
 	type_ = ObjectType::ANIMATED_SPRITE;
-	setLayer(other.layer());
 	setFrame(other.frame());
 }
 

@@ -47,9 +47,9 @@ class DLL_PUBLIC Application
 		GuiSettings();
 
 		/// ImGui drawable node layer
-		unsigned short imguiLayer;
+		uint16_t imguiLayer;
 		/// Nuklear drawable node layer
-		unsigned short nuklearLayer;
+		uint16_t nuklearLayer;
 		/// ImGui viewport
 		/*! \note The viewport should mirror the screen dimensions or mouse input would not work. Setting `nullptr` is the same as setting the screen */
 		Viewport *imguiViewport;

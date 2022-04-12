@@ -1,6 +1,7 @@
 #ifndef CLASS_NCINE_IMGUIDRAWING
 #define CLASS_NCINE_IMGUIDRAWING
 
+#include <cstdint>
 #include <nctl/UniquePtr.h>
 #include "Matrix4x4.h"
 
@@ -46,6 +47,7 @@ class ImGuiDrawing
 	int lastFrameWidth_;
 	int lastFrameHeight_;
 	Matrix4x4f projectionMatrix_;
+	uint16_t lastLayerValue_;
 
 	RenderCommand *retrieveCommandFromPool();
 	void setupRenderCmd(RenderCommand &cmd);

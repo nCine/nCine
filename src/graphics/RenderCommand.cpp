@@ -1,7 +1,6 @@
 #include "RenderCommand.h"
 #include "GLShaderProgram.h"
 #include "GLScissorTest.h"
-#include "DrawableNode.h"
 #include "RenderResources.h"
 #include "Camera.h"
 #include "tracy.h"
@@ -25,11 +24,17 @@ namespace {
 }
 
 ///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
+const float RenderCommand::LayerStep = 1.0f / static_cast<float>(0xFFFF);
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 RenderCommand::RenderCommand(CommandTypes::Enum profilingType)
-    : materialSortKey_(0), layer_(DrawableNode::LayerBase::LOWEST),
+    : materialSortKey_(0), layer_(0),
       numInstances_(0), batchSize_(0), transformationCommitted_(false),
       profilingType_(profilingType), modelMatrix_(Matrix4x4f::Identity)
 {
@@ -46,7 +51,7 @@ RenderCommand::RenderCommand()
 
 void RenderCommand::calculateMaterialSortKey()
 {
-	const uint64_t upper = static_cast<uint64_t>(layer_) << 32;
+	const uint64_t upper = static_cast<uint64_t>(layerSortKey()) << 32;
 	const uint32_t lower = material_.sortKey();
 	materialSortKey_ = upper + lower;
 }
@@ -96,10 +101,8 @@ void RenderCommand::commitNodeTransformation()
 
 	ZoneScoped;
 
-	// The layer translates to depth, from near to far
 	const Camera::ProjectionValues cameraValues = RenderResources::currentCamera()->projectionValues();
-	const float layerStep = 1.0f / static_cast<float>(DrawableNode::LayerBase::HIGHEST);
-	modelMatrix_[3][2] = cameraValues.near + layerStep + (cameraValues.far - cameraValues.near - layerStep) * (layer_ * layerStep);
+	modelMatrix_[3][2] = calculateDepth(layer_, cameraValues.near, cameraValues.far);
 
 	if (material_.shaderProgram_ && material_.shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
 	{
@@ -162,6 +165,13 @@ void RenderCommand::commitAll()
 
 	// Commits all the uniform blocks of command's shader program
 	material_.commitUniformBlocks();
+}
+
+float RenderCommand::calculateDepth(uint16_t layer, float near, float far)
+{
+	// The layer translates to depth, from near to far
+	const float depth = near + LayerStep + (far - near - LayerStep) * layer * LayerStep;
+	return depth;
 }
 
 }

@@ -594,6 +594,7 @@ void LuaStateManager::exposeConstants()
 		LuaViewport::exposeConstants(L_);
 
 		LuaTexture::exposeConstants(L_);
+		LuaSceneNode::exposeConstants(L_);
 		LuaDrawableNode::exposeConstants(L_);
 		LuaRectAnimation::exposeConstants(L_);
 		LuaMeshSprite::exposeConstants(L_);

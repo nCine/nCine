@@ -152,12 +152,6 @@ void ParticleSystem::setTexRect(const Recti &rect)
 		particle->setTexRect(rect);
 }
 
-void ParticleSystem::setLayer(unsigned short layer)
-{
-	for (nctl::UniquePtr<Particle> &particle : particleArray_)
-		particle->setLayer(layer);
-}
-
 void ParticleSystem::setAnchorPoint(float xx, float yy)
 {
 	for (nctl::UniquePtr<Particle> &particle : particleArray_)
@@ -192,6 +186,12 @@ void ParticleSystem::setBlendingFactors(DrawableNode::BlendingFactor srcBlending
 {
 	for (nctl::UniquePtr<Particle> &particle : particleArray_)
 		particle->setBlendingFactors(srcBlendingFactor, destBlendingFactor);
+}
+
+void ParticleSystem::setLayer(uint16_t layer)
+{
+	for (nctl::UniquePtr<Particle> &particle : particleArray_)
+		particle->setLayer(layer);
 }
 
 void ParticleSystem::update(float interval)

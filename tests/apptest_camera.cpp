@@ -70,6 +70,8 @@ void MyEventHandler::onInit()
 	                                   (prefixDataPath("fonts", FontTextureFile)).data());
 
 	cameraNode_ = nctl::makeUnique<nc::SceneNode>(&rootNode);
+	// Ignore inter-siblings drawing order to allow batching without a texture atlas
+	cameraNode_->setVisitOrderState(nc::SceneNode::VisitOrderState::DISABLED);
 	viewport_ = nctl::makeUnique<nc::Viewport>();
 	viewport_->setRootNode(cameraNode_.get());
 	camera_ = nctl::makeUnique<nc::Camera>();
@@ -77,6 +79,7 @@ void MyEventHandler::onInit()
 
 	debugString_ = nctl::makeUnique<nctl::String>(128);
 	debugText_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get());
+	debugText_->setLayer(1);
 	debugText_->setPosition((nc::theApplication().width() - debugText_->width()) * 0.5f,
 	                        nc::theApplication().height() - debugText_->lineHeight() * 0.5f * 2.0f);
 	debugText_->setColor(255, 255, 0, 255);

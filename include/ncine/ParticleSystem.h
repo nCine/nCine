@@ -72,7 +72,7 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	void setBlendingFactors(DrawableNode::BlendingFactor srcBlendingFactor, DrawableNode::BlendingFactor destBlendingFactor);
 
 	/// Sets the rendering layer for every particle
-	void setLayer(unsigned short layer);
+	void setLayer(uint16_t layer);
 
 	void update(float interval) override;
 

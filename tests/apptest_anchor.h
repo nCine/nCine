@@ -62,6 +62,7 @@ class MyEventHandler :
 	nc::Colorf color_;
 	bool blendingEnabled_;
 	nc::DrawableNode::BlendingPreset blendingPreset_;
+	bool overlapping_;
 
 	nctl::UniquePtr<nc::Font> font_;
 	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, NumTextures> textures_;
@@ -72,6 +73,8 @@ class MyEventHandler :
 	nctl::StaticArray<nc::SizeAffector *, NumSprites> sizeAffectors_;
 	nctl::StaticArray<nc::RotationAffector *, NumSprites> rotationAffectors_;
 	nc::TimeStamp lastEmissionTime_;
+
+	nc::SceneNode *castToNode(unsigned int index);
 };
 
 #endif

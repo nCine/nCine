@@ -11,7 +11,7 @@
 #include "GLDebug.h"
 #include "Timer.h" // for `sleep()`
 #include "FrameTimer.h"
-#include "DrawableNode.h"
+#include "SceneNode.h"
 #include <nctl/StaticString.h>
 #include "IInputManager.h"
 #include "JoyMapping.h"
@@ -63,8 +63,8 @@ Application::Application()
 Application::~Application() = default;
 
 Application::GuiSettings::GuiSettings()
-    : imguiLayer(DrawableNode::LayerBase::HIGHEST - 1024),
-      nuklearLayer(DrawableNode::LayerBase::HIGHEST - 512),
+    : imguiLayer(0xffff - 1024),
+      nuklearLayer(0xffff - 512),
       imguiViewport(nullptr), nuklearViewport(nullptr)
 {
 }

@@ -422,6 +422,8 @@ RenderCommand *RenderBatcher::collectCommands(
 	batchCommand->material().setBlendingFactors(refCommand->material().srcBlendingFactor(), refCommand->material().destBlendingFactor());
 	batchCommand->setBatchSize(nextStart - start);
 	batchCommand->material().uniformBlock("InstancesBlock")->setUsedSize(instancesBlockOffset);
+	batchCommand->setLayer(refCommand->layer());
+	batchCommand->setVisitOrder(refCommand->visitOrder());
 
 	if (isBatchedSprite(batchCommand->material().shaderProgramType()))
 		batchCommand->geometry().setDrawParameters(GL_TRIANGLES, 0, 6 * (nextStart - start));

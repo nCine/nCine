@@ -1,6 +1,7 @@
 #include <ncine/imgui.h>
 
 #include "apptest_anchor.h"
+#include <nctl/StaticString.h>
 #include <ncine/Application.h>
 #include <ncine/Viewport.h>
 #include <ncine/Texture.h>
@@ -42,6 +43,9 @@ const char *TypeLables[] = { "Sprites", "Mesh Sprites", "Text Nodes", "Particle 
 const char *AnchorPoints[] = { "Center", "Bottom Left", "Top Left", "Bottom Right", "Top Right" };
 const char *BlendingPresets[] = { "Disabled", "Alpha", "Pre-multiplied Alpha", "Additive", "Multiply" };
 
+nctl::StaticString<128> auxString;
+uint16_t DefaultImGuiLayer = 0;
+
 }
 
 nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
@@ -56,7 +60,8 @@ MyEventHandler::MyEventHandler()
       scale_(1.0f, 1.0f), lockScale_(true),
       flippedX_(false), flippedY_(false),
       color_(nc::Colorf::White), blendingEnabled_(true),
-      blendingPreset_(nc::DrawableNode::BlendingPreset::ALPHA)
+      blendingPreset_(nc::DrawableNode::BlendingPreset::ALPHA),
+      overlapping_(false)
 {
 }
 
@@ -116,6 +121,8 @@ void MyEventHandler::onInit()
 		rotationAffectors_.pushBack(rotationAffector.get());
 		particleSystems_.back()->addAffector(nctl::move(rotationAffector));
 	}
+
+	DefaultImGuiLayer = nc::theApplication().guiSettings().imguiLayer;
 }
 
 void MyEventHandler::onFrameStart()
@@ -131,6 +138,8 @@ void MyEventHandler::onFrameStart()
 		if (currentType_ == Type::PARTICLE_SYSTEM)
 			lastEmissionTime_ = nc::TimeStamp::now();
 	}
+
+	ImGui::Separator();
 	ImGui::SliderFloat2("Anchor", anchorPoint_.data(), 0.0f, 1.0f);
 	static int currentAnchorSelection = 0;
 	if (ImGui::Combo("Presets", &currentAnchorSelection, AnchorPoints, IM_ARRAYSIZE(AnchorPoints)))
@@ -192,6 +201,8 @@ void MyEventHandler::onFrameStart()
 			flippedY_ = false;
 		}
 	}
+
+	ImGui::Separator();
 	ImGui::ColorEdit4("Color", color_.data());
 	static int currentBlendingSelection = 1;
 	if (ImGui::Combo("Blending", &currentBlendingSelection, BlendingPresets, IM_ARRAYSIZE(BlendingPresets)))
@@ -204,17 +215,145 @@ void MyEventHandler::onFrameStart()
 
 	ImGui::ColorEdit4("Background Color", background_.data(), ImGuiColorEditFlags_NoAlpha);
 	nc::theApplication().rootViewport().setClearColor(background_);
+
+	ImGui::Separator();
+	unsigned int childOrderIndices[NumSprites];
+	unsigned int visitOrderIndices[NumSprites];
+	int layers[NumSprites];
+	auxString.clear();
+	for (unsigned int i = 0; i < NumSprites; i++)
+	{
+		nc::SceneNode *node = castToNode(i);
+		nc::DrawableNode *drawableNode = static_cast<nc::DrawableNode *>(node);
+		auxString.formatAppend("%u", node->id());
+		if (i < NumSprites - 1)
+			auxString.append(", ");
+
+		childOrderIndices[i] = node->childOrderIndex();
+		visitOrderIndices[i] = node->visitOrderIndex();
+		layers[i] = drawableNode->layer();
+	}
+	ImGui::Text("Id order: %s", auxString.data());
+
+	auxString.clear();
+	for (unsigned int i = 0; i < NumSprites; i++)
+	{
+		auxString.formatAppend("%u", childOrderIndices[i]);
+		if (i < NumSprites - 1)
+			auxString.append(", ");
+	}
+	ImGui::Text("Child order: %s", auxString.data());
+
+	auxString.clear();
+	for (unsigned int i = 0; i < NumSprites; i++)
+	{
+		auxString.formatAppend("%u", visitOrderIndices[i]);
+		if (i < NumSprites - 1)
+			auxString.append(", ");
+	}
+	ImGui::Text("Visit order: %s", auxString.data());
+
+	nc::SceneNode &rootNode = nc::theApplication().rootNode();
+	ImGui::SameLine();
+	bool withVisitOrder = (rootNode.visitOrderState() != nc::SceneNode::VisitOrderState::DISABLED);
+	ImGui::Checkbox("Use visit order", &withVisitOrder);
+	if (withVisitOrder)
+		rootNode.setVisitOrderState(nc::SceneNode::VisitOrderState::ENABLED);
+	else
+		rootNode.setVisitOrderState(nc::SceneNode::VisitOrderState::DISABLED);
+
+	ImGui::TextUnformatted("Layer order:");
+	ImGui::PushItemWidth(100.0f);
+	for (unsigned int i = 0; i < NumSprites; i++)
+	{
+		auxString.format("##LayerOrder%d", i);
+		ImGui::InputInt(auxString.data(), &layers[i]);
+		if (layers[i] < 0)
+			layers[i] = 0;
+		else if (layers[i] > 0xFFFF)
+			layers[i] = 0xFFFF;
+		if (i < NumSprites - 1)
+			ImGui::SameLine();
+	}
+	ImGui::PopItemWidth();
+	ImGui::SameLine();
+	if (ImGui::Button("Reset##LayerOrder"))
+	{
+		for (unsigned int i = 0; i < NumSprites; i++)
+			layers[i] = 0;
+	}
+
+	for (unsigned int i = 0; i < NumSprites; i++)
+	{
+		nc::SceneNode *node = castToNode(i);
+		nc::DrawableNode *drawableNode = static_cast<nc::DrawableNode *>(node);
+		drawableNode->setLayer(layers[i]);
+
+		if (currentType_ == Type::PARTICLE_SYSTEM)
+			particleSystems_[i]->setLayer(static_cast<uint16_t>(layers[i]));
+	}
+
+	ImGui::TextUnformatted("Swap:");
+	for (unsigned int i = 0; i < NumSprites - 1; i++)
+	{
+		nc::SceneNode *firstNode = castToNode(i);
+		nc::SceneNode *secondNode = castToNode(i + 1);
+		if (firstNode->parent() != nullptr && firstNode->parent() == secondNode->parent())
+		{
+			const unsigned int firstId = firstNode->id();
+			const unsigned int secondId = secondNode->id();
+
+			ImGui::SameLine();
+			auxString.format("%d<->%d", firstId, secondId);
+			if (ImGui::Button(auxString.data()))
+			{
+				const unsigned int firstIndex = firstNode->childOrderIndex();
+				const unsigned int secondIndex = secondNode->childOrderIndex();
+				firstNode->parent()->swapChildrenNodes(firstIndex, secondIndex);
+				if (currentType_ == Type::SPRITE)
+					nctl::swap(sprites_[i], sprites_[i + 1]);
+				else if (currentType_ == Type::MESH_SPRITE)
+					nctl::swap(meshSprites_[i], meshSprites_[i + 1]);
+				else if (currentType_ == Type::TEXT_NODE)
+					nctl::swap(textNodes_[i], textNodes_[i + 1]);
+				else if (currentType_ == Type::PARTICLE_SYSTEM)
+					nctl::swap(particleSystems_[i], particleSystems_[i + 1]);
+			}
+		}
+	}
+
+	ImGui::PushItemWidth(150.0f);
+	int imguiLayer = nc::theApplication().guiSettings().imguiLayer;
+	ImGui::InputInt("ImGui layer", &imguiLayer);
+	if (imguiLayer < 0)
+		imguiLayer = 0;
+	else if (imguiLayer > 0xFFFF)
+		imguiLayer = 0xFFFF;
+	ImGui::PopItemWidth();
+	ImGui::SameLine();
+	if (ImGui::Button("Reset##ImGuiLayer"))
+		imguiLayer = DefaultImGuiLayer;
+	nc::theApplication().guiSettings().imguiLayer = imguiLayer;
+
+	ImGui::Separator();
+	ImGui::Checkbox("Overlapping", &overlapping_);
+	ImGui::SameLine();
 	ImGui::Checkbox("Culling", &settings.cullingEnabled);
 	ImGui::SameLine();
 	ImGui::Checkbox("Batching", &settings.batchingEnabled);
 	ImGui::End();
 
+	const float nodeWidth = (currentType_ != Type::PARTICLE_SYSTEM) ? static_cast<nc::DrawableNode *>(castToNode(0))->width() : sprites_[0]->width();
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
+		const float positionX = overlapping_
+		                            ? (position_.x + i * nodeWidth + width - (NumSprites - 0.5f) * 0.5f * nodeWidth) * 0.5f
+		                            : position_.x + width / (NumSprites + 3) * (i + 2);
+
 		if (currentType_ == Type::SPRITE)
 		{
 			sprites_[i]->setAnchorPoint(anchorPoint_);
-			sprites_[i]->setPositionX(position_.x + width / (NumSprites + 3) * (i + 2));
+			sprites_[i]->setPositionX(positionX);
 			sprites_[i]->setPositionY(position_.y + (height * 0.5f));
 			sprites_[i]->setRotation(angle_);
 			sprites_[i]->setScale(scale_);
@@ -227,7 +366,7 @@ void MyEventHandler::onFrameStart()
 		else if (currentType_ == Type::MESH_SPRITE)
 		{
 			meshSprites_[i]->setAnchorPoint(anchorPoint_);
-			meshSprites_[i]->setPositionX(position_.x + width / (NumSprites + 3) * (i + 2));
+			meshSprites_[i]->setPositionX(positionX);
 			meshSprites_[i]->setPositionY(position_.y + (height * 0.5f));
 			meshSprites_[i]->setRotation(angle_);
 			meshSprites_[i]->setScale(scale_);
@@ -240,7 +379,7 @@ void MyEventHandler::onFrameStart()
 		else if (currentType_ == Type::TEXT_NODE)
 		{
 			textNodes_[i]->setAnchorPoint(anchorPoint_);
-			textNodes_[i]->setPositionX(position_.x + width / (NumSprites + 3) * (i + 2));
+			textNodes_[i]->setPositionX(positionX);
 			textNodes_[i]->setPositionY(position_.y + (height * 0.5f));
 			textNodes_[i]->setRotation(angle_);
 			textNodes_[i]->setScale(scale_);
@@ -251,7 +390,7 @@ void MyEventHandler::onFrameStart()
 		else if (currentType_ == Type::PARTICLE_SYSTEM)
 		{
 			particleSystems_[i]->setAnchorPoint(anchorPoint_);
-			particleSystems_[i]->setPositionX(position_.x + width / (NumSprites + 3) * (i + 2));
+			particleSystems_[i]->setPositionX(positionX);
 			particleSystems_[i]->setPositionY(position_.y + (height * 0.5f));
 			rotationAffectors_[i]->steps()[1].angle = angle_;
 			sizeAffectors_[i]->setBaseScale(scale_);
@@ -285,4 +424,23 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
 		nc::theApplication().quit();
+}
+
+nc::SceneNode *MyEventHandler::castToNode(unsigned int index)
+{
+	nc::SceneNode *node = nullptr;
+
+	if (index >=0 && index < NumSprites)
+	{
+		if (currentType_ == Type::SPRITE)
+			node = sprites_[index].get();
+		else if (currentType_ == Type::MESH_SPRITE)
+			node = meshSprites_[index].get();
+		else if (currentType_ == Type::TEXT_NODE)
+			node = textNodes_[index].get();
+		else if (currentType_ == Type::PARTICLE_SYSTEM)
+			node = particleSystems_[index].get();
+	}
+
+	return node;
 }

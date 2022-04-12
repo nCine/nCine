@@ -48,6 +48,7 @@ class NuklearDrawing
 	int lastFrameWidth_;
 	int lastFrameHeight_;
 	Matrix4x4f projectionMatrix_;
+	uint16_t lastLayerValue_;
 
 	struct nk_convert_config config_;
 	struct nk_draw_null_texture null_;

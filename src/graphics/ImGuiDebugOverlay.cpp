@@ -54,6 +54,7 @@ namespace {
 			case Object::ObjectType::SPRITE: return "Sprite";
 			case Object::ObjectType::MESH_SPRITE: return "MeshSprite";
 			case Object::ObjectType::ANIMATED_SPRITE: return "AnimatedSprite";
+			case Object::ObjectType::PARTICLE: return "Particle";
 			case Object::ObjectType::PARTICLE_SYSTEM: return "ParticleSystem";
 			case Object::ObjectType::TEXTNODE: return "TextNode";
 			default: return "N/A";
@@ -1257,11 +1258,15 @@ void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int 
 			ImGui::PushItemWidth(100.0f);
 			ImGui::InputInt("Layer", &layer);
 			ImGui::PopItemWidth();
-			if (layer < DrawableNode::LayerBase::LOWEST)
-				layer = DrawableNode::LayerBase::LOWEST;
-			else if (layer > DrawableNode::LayerBase::HIGHEST)
-				layer = DrawableNode::LayerBase::HIGHEST;
-			drawable->setLayer(static_cast<unsigned short>(layer));
+			if (layer < 0)
+				layer = 0;
+			else if (layer > 0xffff)
+				layer = 0xffff;
+			drawable->setLayer(static_cast<uint16_t>(layer));
+
+			ImGui::SameLine();
+			ASSERT(childId == node->childOrderIndex());
+			ImGui::Text("Visit order: %u", node->visitOrderIndex());
 
 			ImGui::SameLine();
 			bool isBlendingEnabled = drawable->isBlendingEnabled();

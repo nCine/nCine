@@ -9,25 +9,21 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
 MeshSprite::MeshSprite()
     : MeshSprite(nullptr, nullptr, 0.0f, 0.0f)
 {
 }
 
-/*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
 MeshSprite::MeshSprite(SceneNode *parent, Texture *texture)
     : MeshSprite(parent, texture, 0.0f, 0.0f)
 {
 }
 
-/*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
 MeshSprite::MeshSprite(Texture *texture)
     : MeshSprite(nullptr, texture, 0.0f, 0.0f)
 {
 }
 
-/*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
 MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, float xx, float yy)
     : BaseSprite(parent, texture, xx, yy),
       vertices_(16), vertexDataPointer_(nullptr), numVertices_(0),
@@ -36,19 +32,16 @@ MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, float xx, float yy)
 	init();
 }
 
-/*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
 MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, const Vector2f &position)
     : MeshSprite(parent, texture, position.x, position.y)
 {
 }
 
-/*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
 MeshSprite::MeshSprite(Texture *texture, float xx, float yy)
     : MeshSprite(nullptr, texture, xx, yy)
 {
 }
 
-/*! \note The initial layer value for a mesh sprite is `DrawableNode::SCENE_LAYER` */
 MeshSprite::MeshSprite(Texture *texture, const Vector2f &position)
     : MeshSprite(nullptr, texture, position.x, position.y)
 {
@@ -232,7 +225,6 @@ MeshSprite::MeshSprite(const MeshSprite &other)
     : BaseSprite(other)
 {
 	init();
-	setLayer(other.layer());
 	setTexRect(other.texRect_);
 	copyVertices(other.numVertices_, other.vertices_.data());
 	copyIndices(other.numIndices_, other.indices_.data());
@@ -252,7 +244,6 @@ void MeshSprite::init()
 	}
 
 	type_ = ObjectType::MESH_SPRITE;
-	setLayer(DrawableNode::LayerBase::SCENE);
 	renderCommand_->setType(RenderCommand::CommandTypes::MESH_SPRITE);
 
 	const Material::ShaderProgramType shaderProgramType = [](Texture *texture)

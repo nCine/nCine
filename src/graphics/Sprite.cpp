@@ -8,44 +8,37 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite()
     : Sprite(nullptr, nullptr, 0.0f, 0.0f)
 {
 }
 
-/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(SceneNode *parent, Texture *texture)
     : Sprite(parent, texture, 0.0f, 0.0f)
 {
 }
 
-/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(Texture *texture)
     : Sprite(nullptr, texture, 0.0f, 0.0f)
 {
 }
 
-/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(SceneNode *parent, Texture *texture, float xx, float yy)
     : BaseSprite(parent, texture, xx, yy)
 {
 	init();
 }
 
-/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(SceneNode *parent, Texture *texture, const Vector2f &position)
     : Sprite(parent, texture, position.x, position.y)
 {
 }
 
-/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(Texture *texture, float xx, float yy)
     : Sprite(nullptr, texture, xx, yy)
 {
 }
 
-/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 Sprite::Sprite(Texture *texture, const Vector2f &position)
     : Sprite(nullptr, texture, position.x, position.y)
 {
@@ -59,7 +52,6 @@ Sprite::Sprite(const Sprite &other)
     : BaseSprite(other)
 {
 	init();
-	setLayer(other.layer());
 	setTexRect(other.texRect_);
 }
 
@@ -77,7 +69,6 @@ void Sprite::init()
 	}
 
 	type_ = ObjectType::SPRITE;
-	setLayer(DrawableNode::LayerBase::SCENE);
 	renderCommand_->setType(RenderCommand::CommandTypes::SPRITE);
 
 	const Material::ShaderProgramType shaderProgramType = [](Texture *texture)

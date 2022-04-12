@@ -81,7 +81,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	void setString(const nctl::String &string);
 
 	void transform() override;
-	void draw(RenderQueue &renderQueue) override;
+	bool draw(RenderQueue &renderQueue) override;
 
 	inline static ObjectType sType() { return ObjectType::TEXTNODE; }
 

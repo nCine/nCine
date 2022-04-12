@@ -292,7 +292,8 @@ void Viewport::visit()
 	{
 		ZoneScoped;
 		calculateCullingRect();
-		rootNode_->visit(*renderQueue_);
+		unsigned int visitOrderIndex = 0;
+		rootNode_->visit(*renderQueue_, visitOrderIndex);
 	}
 }
 

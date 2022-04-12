@@ -38,13 +38,13 @@ namespace ncine {
 
 ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
     : withSceneGraph_(withSceneGraph),
-      lastFrameWidth_(0), lastFrameHeight_(0)
+      lastFrameWidth_(0), lastFrameHeight_(0), lastLayerValue_(0)
 {
 	ImGuiIO &io = ImGui::GetIO();
 #if defined(WITH_OPENGLES) || defined(__EMSCRIPTEN)
-	io.BackendRendererName = "nCine_OpenGL ES";
-#else
 	io.BackendRendererName = "nCine_OpenGL_ES";
+#else
+	io.BackendRendererName = "nCine_OpenGL";
 #endif
 
 #ifdef __ANDROID__
@@ -123,11 +123,12 @@ void ImGuiDrawing::newFrame()
 
 	if (lastFrameWidth_ != io.DisplaySize.x || lastFrameHeight_ != io.DisplaySize.y)
 	{
-		projectionMatrix_ = Matrix4x4f::ortho(0.0f, io.DisplaySize.x, io.DisplaySize.y, 0.0f, 0.0f, 1.0f);
+		projectionMatrix_ = Matrix4x4f::ortho(0.0f, io.DisplaySize.x, io.DisplaySize.y, 0.0f, -1.0f, 1.0f);
 
 		if (withSceneGraph_ == false)
 		{
 			imguiShaderUniforms_->uniform("uGuiProjection")->setFloatVector(projectionMatrix_.data());
+			imguiShaderUniforms_->uniform("uDepth")->setFloatValue(0.0f);
 			imguiShaderUniforms_->commitUniforms();
 		}
 	}
@@ -225,6 +226,14 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 		memcpy(indices, imCmdList->IdxBuffer.Data, imCmdList->IdxBuffer.Size * sizeof(GLushort));
 		firstCmd.geometry().releaseIndexPointer();
 
+		if (lastLayerValue_ != theApplication().guiSettings().imguiLayer)
+		{
+			// It is enough to set the uniform value once as every ImGui command share the same shader
+			const float depth = RenderCommand::calculateDepth(theApplication().guiSettings().imguiLayer, -1.0f, 1.0f);
+			firstCmd.material().uniform("uDepth")->setFloatValue(depth);
+			lastLayerValue_ = theApplication().guiSettings().imguiLayer;
+		}
+
 		for (int cmdIdx = 0; cmdIdx < imCmdList->CmdBuffer.Size; cmdIdx++)
 		{
 			const ImDrawCmd *imCmd = &imCmdList->CmdBuffer[cmdIdx];
@@ -249,7 +258,8 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 			currCmd.geometry().setNumIndices(imCmd->ElemCount);
 			currCmd.geometry().setFirstIndex(imCmd->IdxOffset);
 			currCmd.geometry().setFirstVertex(imCmd->VtxOffset);
-			currCmd.setLayer(theApplication().guiSettings().imguiLayer + numCmd);
+			currCmd.setLayer(theApplication().guiSettings().imguiLayer);
+			currCmd.setVisitOrder(numCmd);
 			currCmd.material().setTexture(reinterpret_cast<GLTexture *>(imCmd->GetTexID()));
 
 			renderQueue.addCommand(&currCmd);

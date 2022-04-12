@@ -48,7 +48,7 @@ namespace {
 
 NuklearDrawing::NuklearDrawing(bool withSceneGraph)
     : withSceneGraph_(withSceneGraph),
-      lastFrameWidth_(0), lastFrameHeight_(0)
+      lastFrameWidth_(0), lastFrameHeight_(0), lastLayerValue_(0)
 {
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
 	const GLShaderProgram::QueryPhase queryPhase = appCfg.deferShaderQueries ? GLShaderProgram::QueryPhase::DEFERRED : GLShaderProgram::QueryPhase::IMMEDIATE;
@@ -124,11 +124,12 @@ void NuklearDrawing::newFrame()
 
 	if (lastFrameWidth_ != NuklearContext::width_ || lastFrameHeight_ != NuklearContext::height_)
 	{
-		projectionMatrix_ = Matrix4x4f::ortho(0.0f, NuklearContext::width_, NuklearContext::height_, 0.0f, 0.0f, 1.0f);
+		projectionMatrix_ = Matrix4x4f::ortho(0.0f, NuklearContext::width_, NuklearContext::height_, 0.0f, -1.0f, 1.0f);
 
 		if (withSceneGraph_ == false)
 		{
 			nuklearShaderUniforms_->uniform("uGuiProjection")->setFloatVector(projectionMatrix_.data());
+			nuklearShaderUniforms_->uniform("uDepth")->setFloatValue(0.0f);
 			nuklearShaderUniforms_->commitUniforms();
 		}
 	}
@@ -212,6 +213,14 @@ void NuklearDrawing::draw(RenderQueue &renderQueue)
 	memcpy(indices, ibuf.memory.ptr, ibuf.size);
 	firstCmd.geometry().releaseIndexPointer();
 
+	if (lastLayerValue_ != theApplication().guiSettings().nuklearLayer)
+	{
+		// It is enough to set the uniform value once as every Nuklear command share the same shader
+		const float depth = RenderCommand::calculateDepth(theApplication().guiSettings().nuklearLayer, -1.0f, 1.0f);
+		firstCmd.material().uniform("uDepth")->setFloatValue(depth);
+		lastLayerValue_ = theApplication().guiSettings().nuklearLayer;
+	}
+
 	nk_buffer_free(&vbuf);
 	nk_buffer_free(&ibuf);
 
@@ -238,7 +247,8 @@ void NuklearDrawing::draw(RenderQueue &renderQueue)
 
 		currCmd.geometry().setNumIndices(cmd->elem_count);
 		currCmd.geometry().setFirstIndex(firstIndex);
-		currCmd.setLayer(theApplication().guiSettings().nuklearLayer + cmdIdx);
+		currCmd.setLayer(theApplication().guiSettings().nuklearLayer);
+		currCmd.setVisitOrder(cmdIdx);
 		currCmd.material().setTexture(reinterpret_cast<GLTexture *>(cmd->texture.ptr));
 
 		renderQueue.addCommand(&currCmd);

@@ -106,11 +106,11 @@ DrawableNode &DrawableNode::operator=(DrawableNode &&) = default;
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void DrawableNode::draw(RenderQueue &renderQueue)
+bool DrawableNode::draw(RenderQueue &renderQueue)
 {
 	// Skip rendering a zero area drawable node
 	if (width_ == 0.0f || height_ == 0.0f)
-		return;
+		return false;
 
 	const bool cullingEnabled = theApplication().renderingSettings().cullingEnabled;
 
@@ -126,17 +126,25 @@ void DrawableNode::draw(RenderQueue &renderQueue)
 		if (overlaps)
 		{
 			lastFrameNotCulled_ = theApplication().numFrames();
+			renderCommand_->setLayer(absLayer_);
+			renderCommand_->setVisitOrder(withVisitOrder_ ? visitOrderIndex_ : 0);
+
 			updateRenderCommand();
 			renderQueue.addCommand(renderCommand_.get());
 		}
 		else
+		{
 			RenderStatistics::addCulledNode();
+			return false;
+		}
 	}
 	else
 	{
 		updateRenderCommand();
 		renderQueue.addCommand(renderCommand_.get());
 	}
+
+	return true;
 }
 
 /*! \note This method sets the anchor point relative to the node width and height.
@@ -193,17 +201,6 @@ void DrawableNode::setBlendingPreset(BlendingPreset blendingPreset)
 void DrawableNode::setBlendingFactors(BlendingFactor srcBlendingFactor, BlendingFactor destBlendingFactor)
 {
 	renderCommand_->material().setBlendingFactors(toGlBlendingFactor(srcBlendingFactor), toGlBlendingFactor(destBlendingFactor));
-}
-
-unsigned short DrawableNode::layer() const
-{
-	return renderCommand_->layer();
-}
-
-/*! \note The maximum admissible value for `layer` is 65535. */
-void DrawableNode::setLayer(unsigned short layer)
-{
-	renderCommand_->setLayer(layer);
 }
 
 bool DrawableNode::isCulled() const

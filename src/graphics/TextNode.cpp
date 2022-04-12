@@ -142,11 +142,11 @@ void TextNode::transform()
 	SceneNode::transform();
 }
 
-void TextNode::draw(RenderQueue &renderQueue)
+bool TextNode::draw(RenderQueue &renderQueue)
 {
 	// Early-out if the string is empty
 	if (string_.isEmpty())
-		return;
+		return false;
 
 	if (font_ && dirtyDraw_)
 	{
@@ -207,7 +207,7 @@ void TextNode::draw(RenderQueue &renderQueue)
 		dirtyDraw_ = false;
 	}
 
-	DrawableNode::draw(renderQueue);
+	return DrawableNode::draw(renderQueue);
 }
 
 ///////////////////////////////////////////////////////////
@@ -223,7 +223,6 @@ TextNode::TextNode(const TextNode &other)
       lineHeight_(font_ ? font_->lineHeight() : 0.0f), textnodeBlock_(nullptr)
 {
 	init();
-	setLayer(other.layer());
 	setBlendingEnabled(other.isBlendingEnabled());
 }
 
@@ -241,7 +240,6 @@ void TextNode::init()
 	}
 
 	type_ = ObjectType::TEXTNODE;
-	setLayer(DrawableNode::LayerBase::HUD);
 	renderCommand_->setType(RenderCommand::CommandTypes::TEXT);
 	renderCommand_->material().setBlendingEnabled(true);
 

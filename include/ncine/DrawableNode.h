@@ -13,18 +13,6 @@ class RenderQueue;
 class DLL_PUBLIC DrawableNode : public SceneNode
 {
   public:
-	/// Drawing layers from back to front
-	struct LayerBase
-	{
-		enum : unsigned short
-		{
-			LOWEST = 0,
-			SCENE = 0,
-			HUD = 32767,
-			HIGHEST = 65535,
-		};
-	};
-
 	// Notable anchor points for a drawable node
 	static const Vector2f AnchorCenter;
 	static const Vector2f AnchorBottomLeft;
@@ -78,7 +66,7 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	DrawableNode &operator=(DrawableNode &&);
 
 	/// Updates the draw command and adds it to the queue
-	void draw(RenderQueue &renderQueue) override;
+	bool draw(RenderQueue &renderQueue) override;
 
 	/// Returns the width of the node area
 	inline virtual float width() const { return width_ * scaleFactor_.x; }
@@ -116,11 +104,6 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	/// Sets a specific source and destination blending factors
 	void setBlendingFactors(BlendingFactor srcBlendingFactor, BlendingFactor destBlendingFactor);
 
-	/// Returns the node rendering layer
-	unsigned short layer() const;
-	/// Sets the node rendering layer
-	void setLayer(unsigned short layer);
-
 	/// Returns true if all viewports have culled this node in the last frame
 	bool isCulled() const;
 	/// Returns the axis-aligned bounding box of the node area in the last frame
@@ -149,9 +132,6 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	virtual void updateRenderCommand() = 0;
 
   private:
-	static unsigned short imguiLayer_;
-	static unsigned short nuklearLayer_;
-
 	/// Deleted assignment operator
 	DrawableNode &operator=(const DrawableNode &) = delete;
 };

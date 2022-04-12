@@ -569,7 +569,7 @@ int LuaParticleSystem::setLayer(lua_State *L)
 	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
 	const uint32_t layer = LuaUtils::retrieve<uint32_t>(L, -1);
 
-	particleSys->setLayer(layer);
+	particleSys->setLayer(static_cast<uint16_t>(layer));
 
 	return 0;
 }

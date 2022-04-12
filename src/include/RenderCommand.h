@@ -44,11 +44,6 @@ class RenderCommand
 	/// Sets the command type for profiling counter
 	inline void setProfilingType(CommandTypes::Enum profilingType) { profilingType_ = profilingType; }
 
-	/// Returns the rendering layer
-	inline unsigned short layer() const { return layer_; }
-	/// Sets the rendering layer
-	inline void setLayer(unsigned short layer) { layer_ = layer; }
-
 	/// Returns the number of instances collected in the command or zero if instancing is not used
 	inline int numInstances() const { return numInstances_; }
 	/// Sets the number of instances collected in the command
@@ -59,6 +54,15 @@ class RenderCommand
 	/// Sets the number of batch elements collected by the command
 	inline void setBatchSize(int batchSize) { batchSize_ = batchSize; }
 
+	/// Returns the rendering layer
+	inline uint16_t layer() const { return layer_; }
+	/// Sets the rendering layer
+	inline void setLayer(uint16_t layer) { layer_ = layer; }
+	/// Returns the rendering layer
+	inline uint16_t visitOrder() const { return visitOrder_; }
+	/// Sets the rendering layer
+	inline void setVisitOrder(uint16_t visitOrder) { visitOrder_ = visitOrder; }
+
 	/// Returns the material sort key for the queue
 	inline uint64_t materialSortKey() const { return materialSortKey_; }
 	/// Calculates a material sort key for the queue
@@ -66,7 +70,7 @@ class RenderCommand
 	/// Returns the id based secondary sort key for the queue
 	inline unsigned int idSortKey() const { return idSortKey_; }
 	/// Sets the id based secondary sort key for the queue
-	void setIdSortKey(unsigned int idSortKey) { idSortKey_ = idSortKey; }
+	inline void setIdSortKey(unsigned int idSortKey) { idSortKey_ = idSortKey; }
 
 	/// Issues the render command
 	void issue();
@@ -95,12 +99,21 @@ class RenderCommand
 	/// Calls all the commit methods except the camera uniforms commit
 	void commitAll();
 
+	/// Calculates the Z-depth of command layer using the specified near and far planes
+	static float calculateDepth(uint16_t layer, float near, float far);
+
   private:
+	/// The distance on the Z axis between adjacent layers
+	static const float LayerStep;
+
 	/// The material sort key minimizes state changes when rendering commands
 	uint64_t materialSortKey_;
 	/// The id based secondary sort key stabilizes render commands sorting
-	unsigned int idSortKey_;
-	unsigned short layer_;
+	uint32_t idSortKey_;
+	/// The drawing layer for this command
+	uint16_t layer_;
+	/// The visit order for this command
+	uint16_t visitOrder_;
 	int numInstances_;
 	int batchSize_;
 
@@ -114,6 +127,9 @@ class RenderCommand
 	Matrix4x4f modelMatrix_;
 	Material material_;
 	Geometry geometry_;
+
+	/// Returns the final layer sort key for this command
+	inline uint32_t layerSortKey() const { return static_cast<uint32_t>(layer_ << 16) + visitOrder_; }
 };
 
 }

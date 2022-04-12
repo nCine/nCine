@@ -18,6 +18,13 @@ class Viewport;
 class DLL_PUBLIC SceneNode : public Object
 {
   public:
+	enum class VisitOrderState
+	{
+		ENABLED,
+		DISABLED,
+		SAME_AS_PARENT
+	};
+
 	/// The minimum amount of rotation to trigger a sine and cosine calculation
 	static const float MinRotation;
 
@@ -47,13 +54,13 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Returns the parent node, if there is any
 	inline SceneNode *parent() { return parent_; }
 	/// Sets the parent node
-	void setParent(SceneNode *parentNode);
+	bool setParent(SceneNode *parentNode);
 	/// Returns the array of child nodes
 	inline const nctl::Array<SceneNode *> &children() { return children_; }
 	/// Returns an array of constant child nodes
 	const nctl::Array<const SceneNode *> &children() const;
 	/// Adds a node as a child of this one
-	void addChildNode(SceneNode *childNode);
+	bool addChildNode(SceneNode *childNode);
 	/// Removes a child of this node, without reparenting nephews
 	bool removeChildNode(SceneNode *childNode);
 	/// Removes the child at the specified index, without reparenting nephews
@@ -63,12 +70,28 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Removes a child of this node reparenting nephews as children
 	bool unlinkChildNode(SceneNode *childNode);
 
+	/// Returns the child order index of this node or zero if it does not have a parent
+	unsigned int childOrderIndex() const;
+	/// Swaps two children at the specified indices
+	bool swapChildrenNodes(unsigned int firstIndex, unsigned int secondIndex);
+	/// Brings this node one node forward in the parent's list of children
+	bool swapNodeForward();
+	/// Brings this node one node back in the parent's list of children
+	bool swapNodeBack();
+
+	/// Returns true if the node visit order is used together with the layer
+	inline enum VisitOrderState visitOrderState() const { return visitOrderState_; }
+	/// Enables the use of the node visit order together with the layer
+	inline void setVisitOrderState(enum VisitOrderState visitOrderState) { visitOrderState_ = visitOrderState; }
+	/// Returns the visit drawing order of the node
+	inline uint16_t visitOrderIndex() const { return visitOrderIndex_; }
+
 	/// Called once every frame to update the node
 	virtual void update(float interval);
 	/// Draws the node and visits its children
-	virtual void visit(RenderQueue &renderQueue);
+	virtual void visit(RenderQueue &renderQueue, unsigned int &visitOrderIndex);
 	/// Renders the node
-	virtual void draw(RenderQueue &renderQueue) {}
+	virtual bool draw(RenderQueue &renderQueue) { return false; }
 
 	/// Returns true if the node is updating
 	inline bool isUpdateEnabled() const { return updateEnabled_; }
@@ -150,6 +173,16 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Sets the node alpha through a float component
 	void setAlphaF(float alpha);
 
+	/// Gets the node rendering layer
+	inline uint16_t layer() const { return layer_; }
+	/// Gets the node absolute rendering layer
+	/*! \note The final layer value is inherited from the parent if the node layer is 0. */
+	inline uint16_t absLayer() const { return absLayer_; }
+	/// Sets the node rendering layer
+	/*! \note The lowest value (bottom) is 0 and the highest one (top) is 65535.
+	 *  When the value is 0, the final layer value is inherited from the parent. */
+	void setLayer(uint16_t layer) { layer_ = layer; }
+
 	/// Gets the node world matrix
 	inline const Matrix4x4f &worldMatrix() const { return worldMatrix_; }
 	/// Sets the node world matrix (only useful when called inside `onPostUpdate()`)
@@ -187,6 +220,17 @@ class DLL_PUBLIC SceneNode : public Object
 	SceneNode *parent_;
 	/// The array of child nodes
 	nctl::Array<SceneNode *> children_;
+	/// The order index of this node among its siblings
+	/*! \note The index is cached here to make siblings reordering methods faster */
+	unsigned int childOrderIndex_;
+
+	/// When enabled the visit order is used to resolve the drawing order of same layer nodes
+	/*! \note This flag cannot be changed by the user, it is derived from the parent and this node states */
+	bool withVisitOrder_;
+	/// The visit order state of this node
+	enum VisitOrderState visitOrderState_;
+	/// The visit order index of this node
+	uint16_t visitOrderIndex_;
 
 	/// The node relative position
 	Vector2f position_;
@@ -203,6 +247,11 @@ class DLL_PUBLIC SceneNode : public Object
 	 *  color information to easily pass that information to its children. */
 	Color color_;
 
+	/// The node rendering layer
+	/*! Even if the base scene node is not always drawable, it carries
+	 *  layer information to easily pass that information to its children. */
+	uint16_t layer_;
+
 	/// Absolute position as calculated by the `transform()` function
 	Vector2f absPosition_;
 	/// Absolute horizontal and vertical scale factors as calculated by the `transform()` function
@@ -212,6 +261,9 @@ class DLL_PUBLIC SceneNode : public Object
 
 	/// Absolute node color as calculated by the `transform()` function
 	Color absColor_;
+
+	/// Absolute node rendering layer as calculated by the `transform()` function
+	uint16_t absLayer_;
 
 	/// World transformation matrix (calculated from local and parent's world)
 	Matrix4x4f worldMatrix_;

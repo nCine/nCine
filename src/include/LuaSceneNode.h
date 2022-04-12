@@ -12,6 +12,7 @@ class LuaSceneNode
 {
   public:
 	static void expose(LuaStateManager *stateManager);
+	static void exposeConstants(lua_State *L);
 	static void release(void *object);
 
   private:
@@ -24,8 +25,18 @@ class LuaSceneNode
 	static int setParent(lua_State *L);
 	static int addChildNode(lua_State *L);
 	static int removeChildNode(lua_State *L);
+	static int removeChildNodeAt(lua_State *L);
 	static int removeAllChildrenNodes(lua_State *L);
 	static int unlinkChildNode(lua_State *L);
+
+	static int childOrderIndex(lua_State *L);
+	static int swapChildrenNodes(lua_State *L);
+	static int swapNodeForward(lua_State *L);
+	static int swapNodeBack(lua_State *L);
+
+	static int visitOrderState(lua_State *L);
+	static int setVisitOrderState(lua_State *L);
+	static int visitOrderIndex(lua_State *L);
 
 	static int isEnabled(lua_State *L);
 	static int setEnabled(lua_State *L);
@@ -45,6 +56,9 @@ class LuaSceneNode
 	static int setColor(lua_State *L);
 	static int alpha(lua_State *L);
 	static int setAlpha(lua_State *L);
+
+	static int layer(lua_State *L);
+	static int setLayer(lua_State *L);
 
 	friend class LuaDrawableNode;
 	friend class LuaParticleSystem;

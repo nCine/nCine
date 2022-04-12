@@ -8,7 +8,6 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 BaseSprite::BaseSprite(SceneNode *parent, Texture *texture, float xx, float yy)
     : DrawableNode(parent, xx, yy), texture_(texture), texRect_(0, 0, 0, 0),
       flippedX_(false), flippedY_(false), spriteBlock_(nullptr)
@@ -16,7 +15,6 @@ BaseSprite::BaseSprite(SceneNode *parent, Texture *texture, float xx, float yy)
 	renderCommand_->material().setBlendingEnabled(true);
 }
 
-/*! \note The initial layer value for a sprite is `DrawableNode::SCENE_LAYER` */
 BaseSprite::BaseSprite(SceneNode *parent, Texture *texture, const Vector2f &position)
     : BaseSprite(parent, texture, position.x, position.y)
 {
