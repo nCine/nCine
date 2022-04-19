@@ -4,7 +4,6 @@
 #include "DrawableNode.h"
 #include "RenderCommand.h"
 #include "Material.h"
-#include "GLShaderProgram.h"
 
 namespace ncine {
 
@@ -122,21 +121,6 @@ bool ShaderState::resetShader()
 		node_->shaderHasChanged();
 		return true;
 	}
-	return false;
-}
-
-bool ShaderState::setAttribute(const char *name, int stride, unsigned long int pointer)
-{
-	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
-		return false;
-
-	Material &material = node_->renderCommand_->material();
-	if (material.shaderProgram()->attribute(name))
-	{
-		material.shaderProgram()->attribute(name)->setVboParameters(stride, reinterpret_cast<void *>(pointer));
-		return true;
-	}
-
 	return false;
 }
 

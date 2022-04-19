@@ -89,6 +89,9 @@ class DLL_PUBLIC Shader : public Object
 	bool loadFromFile(const char *shaderName, const char *vertex, DefaultFragment fragment);
 	bool loadFromFile(const char *vertex, DefaultFragment fragment);
 
+	/// Sets the VBO stride and pointer for the specified vertex attribute
+	bool setAttribute(const char *name, int stride, unsigned long int pointer);
+
 	/// Returns true if the shader is linked and can therefore be used
 	bool isLinked() const;
 

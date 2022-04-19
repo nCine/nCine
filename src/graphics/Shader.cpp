@@ -324,6 +324,15 @@ bool Shader::loadFromFile(const char *vertex, DefaultFragment fragment)
 	return loadFromFile(nullptr, vertex, fragment);
 }
 
+bool Shader::setAttribute(const char *name, int stride, unsigned long int pointer)
+{
+	GLVertexFormat::Attribute *attribute = glShaderProgram_->attribute(name);
+	if (attribute != nullptr)
+		attribute->setVboParameters(stride, reinterpret_cast<void *>(pointer));
+
+	return (attribute != nullptr);
+}
+
 bool Shader::isLinked() const
 {
 	return glShaderProgram_->isLinked();

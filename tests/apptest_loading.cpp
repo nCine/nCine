@@ -66,10 +66,10 @@ const char *ScriptFiles[MyEventHandler::NumScripts] = { "init.lua", "reload.lua"
 nctl::StaticArray<nctl::UniquePtr<char[]>, MyEventHandler::NumScripts> scriptBuffers;
 nctl::StaticArray<unsigned long int, MyEventHandler::NumScripts> scriptBufferSizes;
 
-const char *ShaderNames[MyEventHandler::NumShaders] = { "Sprite", "Separable_Blur", "Mesh_Sprite" };
+const char *ShaderNames[MyEventHandler::NumShaders] = { "Sprite", "Separable_Blur", "Mesh_Sprite", "Batched_Mesh_Sprite" };
 nc::Shader::DefaultVertex DefaultVertexShaders[MyEventHandler::NumShaders];
-const char *VertexShaderStrings[MyEventHandler::NumShaders] = { sprite_vs, sprite_vs, nullptr };
-const char *FragmentShaderStrings[MyEventHandler::NumShaders] = { sprite_fs, sprite_blur_fs, meshsprite_fs };
+const char *VertexShaderStrings[MyEventHandler::NumShaders] = { sprite_vs, sprite_vs, meshsprite_vs, batched_meshsprite_vs };
+const char *FragmentShaderStrings[MyEventHandler::NumShaders] = { sprite_fs, sprite_blur_fs, meshsprite_fs, meshsprite_fs };
 
 #if LOADING_FAILURES
 const unsigned long int randomBufferLength = 1024;
@@ -163,8 +163,6 @@ void MyEventHandler::onInit()
 		scriptFile->read(scriptBuffers[i].get(), scriptBufferSizes[i]);
 		scriptFile->close();
 	}
-
-	DefaultVertexShaders[2] = nc::Shader::DefaultVertex::MESHSPRITE;
 
 #if DEFAULT_CONSTRUCTORS
 	for (unsigned int i = 0; i < NumTextures; i++)

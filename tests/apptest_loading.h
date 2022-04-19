@@ -33,7 +33,7 @@ class MyEventHandler :
 	static const int NumSounds = 5;
 	static const int NumFonts = 5;
 	static const int NumScripts = 3;
-	static const int NumShaders = 3;
+	static const int NumShaders = 4;
 
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;

@@ -26,8 +26,6 @@ class DLL_PUBLIC ShaderState
 	/// Triggers a shader update without setting a new shader
 	bool resetShader();
 
-	bool setAttribute(const char *name, int stride, unsigned long int pointer);
-
 	bool setUniformInt(const char *blockName, const char *name, const int *vector);
 	bool setUniformInt(const char *blockName, const char *name, int value0);
 	bool setUniformInt(const char *blockName, const char *name, int value0, int value1);

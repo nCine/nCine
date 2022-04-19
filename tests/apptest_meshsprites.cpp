@@ -136,8 +136,8 @@ void MyEventHandler::onInit()
 		}
 		else
 		{
-			meshSprites_[i]->setVertices(meshSprites_[i % NumTextures]->numVertices(), meshSprites_[i % NumTextures]->vertices());
-			transpMeshSprites_[i]->setVertices(transpMeshSprites_[i % NumTextures]->numVertices(), transpMeshSprites_[i % NumTextures]->vertices());
+			meshSprites_[i]->setVertices(*meshSprites_[i % NumTextures]);
+			transpMeshSprites_[i]->setVertices(*transpMeshSprites_[i % NumTextures]);
 		}
 
 		// Setting sprites position

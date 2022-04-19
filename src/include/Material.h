@@ -91,7 +91,6 @@ class Material
 	inline ShaderProgramType shaderProgramType() const { return shaderProgramType_; }
 	bool setShaderProgramType(ShaderProgramType shaderProgramType);
 	inline const GLShaderProgram *shaderProgram() const { return shaderProgram_; }
-	inline GLShaderProgram *shaderProgram() { return shaderProgram_; }
 	void setShaderProgram(GLShaderProgram *program);
 
 	void setDefaultAttributesParameters();

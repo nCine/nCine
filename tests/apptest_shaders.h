@@ -34,6 +34,9 @@ class MyEventHandler :
     public nc::IInputEventHandler
 {
   public:
+	static const unsigned int NumTextures = 4;
+	static const unsigned int NumSprites = 8;
+
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;
@@ -47,9 +50,6 @@ class MyEventHandler :
 	void onMouseButtonPressed(const nc::MouseEvent &event) override;
 
   private:
-	static const unsigned int NumTextures = 4;
-	static const unsigned int NumSprites = 8;
-
 	bool withAtlas_;
 	bool withViewport_;
 	bool pause_;
@@ -80,12 +80,14 @@ class MyEventHandler :
 	nctl::StaticArray<nctl::UniquePtr<nc::ShaderState>, NumSprites> spriteShaderStates_;
 
 	nctl::UniquePtr<nc::Shader> meshShader_;
-	nctl::UniquePtr<nc::MeshSprite> meshSprite_;
-	nctl::UniquePtr<nc::ShaderState> meshSpriteShaderState_;
+	nctl::UniquePtr<nc::Shader> batchedMeshShader_;
+	nctl::StaticArray<nctl::UniquePtr<nc::MeshSprite>, NumSprites> meshSprites_;
+	nctl::StaticArray<nctl::UniquePtr<nc::ShaderState>, NumSprites> meshSpriteShaderStates_;
 
 	void setupAtlas();
 	void setupTextures();
 	void setupViewport();
+	void setupMeshVertices(bool defaultShader);
 	void checkClick(float x, float y);
 };
 

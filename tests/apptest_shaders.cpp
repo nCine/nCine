@@ -29,9 +29,20 @@ const char *FontTextureFile = "DroidSans32_256.png";
 #endif
 const char *FontFntFile = "DroidSans32_256.fnt";
 
-const int NumTexelPoints = 3;
+const int NumTexelPoints[MyEventHandler::NumTextures] = { 3, 4, 5, 4 };
 const nc::Vector2f TexelPoints[] = {
-	{ 4.0f, 2.0f }, { 124.0f, 2.0f }, { 64.0f, 122.0f }
+	// clang-format off
+	{4.0f, 2.0f}, {124.0f, 2.0f}, {64.0f, 122.0f},
+	{13.0f, 13.0f}, {115.0f, 13.0f}, {13.0f, 115.0f}, {115.0f, 115.0f},
+	{3.0f, 79.0f}, {26.0f, 2.0f}, {64.0f, 125.0f}, {102.0f, 2.0f}, {125.0f, 79.0f},
+	{20.0f, 20.0f}, {107.0f, 20.0f}, {20.0f, 107.0f}, {107.0f, 107.0f},
+	// clang-format on
+};
+
+struct InvertedVertexTextureZ
+{
+	float u, v;
+	float x, y, z;
 };
 
 const char *stringOnOff(bool enabled)
@@ -104,13 +115,31 @@ void MyEventHandler::onInit()
 		spriteShaderStates_.pushBack(nctl::makeUnique<nc::ShaderState>(sprites_.back().get(), spriteShader_.get()));
 	}
 	batchedSpriteShader_ = nctl::makeUnique<nc::Shader>("Batched_Sprite_Shader", nc::Shader::LoadMode::STRING, nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS, batched_sprite_vs, sprite_fs);
+	FATAL_ASSERT(batchedSpriteShader_->isLinked());
 	spriteShader_->registerBatchedShader(*batchedSpriteShader_);
 
-	meshShader_ = nctl::makeUnique<nc::Shader>("MeshSprite_Shader", nc::Shader::LoadMode::STRING, nc::Shader::DefaultVertex::MESHSPRITE, meshsprite_fs);
+	meshShader_ = nctl::makeUnique<nc::Shader>("MeshSprite_Shader", nc::Shader::LoadMode::STRING, meshsprite_vs, meshsprite_fs);
 	FATAL_ASSERT(meshShader_->isLinked());
-	meshSprite_ = nctl::makeUnique<nc::MeshSprite>(rootNode_.get(), textures_[0].get(), width * 0.5f, height * 0.8f);
-	meshSprite_->createVerticesFromTexels(NumTexelPoints, TexelPoints);
-	meshSpriteShaderState_ = nctl::makeUnique<nc::ShaderState>(meshSprite_.get(), meshShader_.get());
+	for (unsigned int i = 0; i < NumSprites; i++)
+	{
+		meshSprites_.pushBack(nctl::makeUnique<nc::MeshSprite>(rootNode_.get(), textures_[i % NumTextures].get(), width * 0.15f + width * 0.1f * i, height * 0.75f));
+		meshSprites_.back()->setScale(0.5f);
+		meshSpriteShaderStates_.pushBack(nctl::makeUnique<nc::ShaderState>(meshSprites_.back().get(), meshShader_.get()));
+	}
+	setupMeshVertices(false);
+
+	batchedMeshShader_ = nctl::makeUnique<nc::Shader>("Batched_MeshSprite_Shader", nc::Shader::LoadMode::STRING, nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS, batched_meshsprite_vs, meshsprite_fs);
+	FATAL_ASSERT(batchedMeshShader_->isLinked());
+	meshShader_->registerBatchedShader(*batchedMeshShader_);
+
+	meshShader_->setAttribute("aPosition", sizeof(InvertedVertexTextureZ), 8);
+	meshShader_->setAttribute("aDepth", sizeof(InvertedVertexTextureZ), 16);
+	meshShader_->setAttribute("aTexCoords", sizeof(InvertedVertexTextureZ), 0);
+
+	batchedMeshShader_->setAttribute("aPosition", sizeof(InvertedVertexTextureZ) + 4, 8);
+	batchedMeshShader_->setAttribute("aDepth", sizeof(InvertedVertexTextureZ) + 4, 16);
+	batchedMeshShader_->setAttribute("aTexCoords", sizeof(InvertedVertexTextureZ) + 4, 0);
+	batchedMeshShader_->setAttribute("aMeshIndex", sizeof(InvertedVertexTextureZ) + 4, 20);
 
 	withAtlas_ = false;
 	withAtlas_ ? setupAtlas() : setupTextures();
@@ -142,9 +171,8 @@ void MyEventHandler::onFrameStart()
 	{
 		sprites_[i]->setPositionY(height * 0.3f + fabsf(sinf(angle_ + 5.0f * i)) * (height * (0.25f + 0.02f * i)));
 		sprites_[i]->setRotation(angle_ * 20.0f);
+		meshSprites_[i]->setRotation(angle_ * 20.0f);
 	}
-
-	meshSprite_->setRotation(angle_ * 20.0f);
 }
 
 void MyEventHandler::onPostUpdate()
@@ -159,20 +187,21 @@ void MyEventHandler::onPostUpdate()
 		for (unsigned int i = 0; i < NumSprites; i++)
 		{
 			const nc::DrawableNode *sprite = spriteShaderStates_[i]->node();
-			const bool isCulled = (sprite && sprite->lastFrameRendered() < numFrames);
-			if (sprite && sprite->isDrawEnabled() && isCulled == false)
+			const bool spriteIsCulled = (sprite && sprite->lastFrameRendered() < numFrames);
+			if (sprite && sprite->isDrawEnabled() && spriteIsCulled == false)
 				spriteShaderStates_[i]->setUniformFloat("InstanceBlock", "angle", angle_);
-		}
 
-		const nc::DrawableNode *meshSprite = meshSpriteShaderState_->node();
-		const bool isCulled = (meshSprite && meshSprite->lastFrameRendered() < numFrames);
-		if (meshSprite && meshSprite->isDrawEnabled() && isCulled == false)
-		{
-			const float sin2First = sinf(angle_) * sinf(angle_);
-			const float sin2Second = sinf(angle_ + 90.0f) * sinf(angle_ + 90.0f);
-			const float sin2Third = sinf(angle_ + 180.0f) * sinf(angle_ + 180.0f);
-			const float sin2Fourth = sinf(angle_ + 270.0f) * sinf(angle_ + 270.0f);
-			meshSpriteShaderState_->setUniformFloat("InstanceBlock", "color", sin2First, sin2Second, sin2Third, 0.5f + 0.5f * sin2Fourth);
+			const nc::DrawableNode *meshSprite = meshSpriteShaderStates_[i]->node();
+			const bool meshSpriteIsCulled = (meshSprite && meshSprite->lastFrameRendered() < numFrames);
+			if (meshSprite && meshSprite->isDrawEnabled() && meshSpriteIsCulled == false)
+			{
+				const float angle = angle_ + 15.0f * static_cast<float>(i);
+				const float sin2First = sinf(angle) * sinf(angle);
+				const float sin2Second = sinf(angle + 90.0f) * sinf(angle + 90.0f);
+				const float sin2Third = sinf(angle + 180.0f) * sinf(angle + 180.0f);
+				const float sin2Fourth = sinf(angle + 270.0f) * sinf(angle + 270.0f);
+				meshSpriteShaderStates_[i]->setUniformFloat("InstanceBlock", "color", sin2First, sin2Second, sin2Third, 0.5f + 0.5f * sin2Fourth);
+			}
 		}
 	}
 }
@@ -205,8 +234,11 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 	else if (event.sym == nc::KeySym::R)
 	{
 		for (unsigned int i = 0; i < NumSprites; i++)
+		{
 			spriteShaderStates_[i]->setShader(spriteShaderStates_[i]->shader() ? nullptr : spriteShader_.get());
-		meshSpriteShaderState_->setShader(meshSpriteShaderState_->shader() ? nullptr : meshShader_.get());
+			meshSpriteShaderStates_[i]->setShader(meshSpriteShaderStates_[i]->shader() ? nullptr : meshShader_.get());
+		}
+		setupMeshVertices(meshSpriteShaderStates_[0]->shader() == nullptr);
 	}
 	else if (event.sym == nc::KeySym::T)
 	{
@@ -262,6 +294,8 @@ void MyEventHandler::setupAtlas()
 	{
 		sprites_[i]->setTexture(megaTexture_.get());
 		sprites_[i]->setTexRect(texRects[i % NumTextures]);
+		meshSprites_[i]->setTexture(megaTexture_.get());
+		meshSprites_[i]->setTexRect(texRects[i % NumTextures]);
 	}
 }
 
@@ -271,6 +305,8 @@ void MyEventHandler::setupTextures()
 	{
 		sprites_[i]->setTexture(textures_[i % NumTextures].get());
 		sprites_[i]->setTexRect(textures_[i % NumTextures]->rect());
+		meshSprites_[i]->setTexture(textures_[i % NumTextures].get());
+		meshSprites_[i]->setTexRect(textures_[i % NumTextures]->rect());
 	}
 }
 
@@ -292,6 +328,41 @@ void MyEventHandler::setupViewport()
 	}
 	else
 		nc::theApplication().screenViewport().setRootNode(rootNode_.get());
+}
+
+void MyEventHandler::setupMeshVertices(bool defaultShader)
+{
+	unsigned int texelStartIndex = 0;
+	for (unsigned int i = 0; i < NumSprites; i++)
+	{
+		// Setting mesh vertices
+		if (i < NumTextures)
+		{
+			meshSprites_[i]->createVerticesFromTexels(NumTexelPoints[i], &TexelPoints[texelStartIndex]);
+			texelStartIndex += NumTexelPoints[i];
+
+			if (defaultShader == false)
+			{
+				// Reorganize mesh vertices data for the custom attributes
+				const unsigned int numVertices = meshSprites_[i]->numVertices();
+				const nc::MeshSprite::Vertex *vertices = reinterpret_cast<const nc::MeshSprite::Vertex *>(meshSprites_[i]->vertices());
+				nctl::UniquePtr<InvertedVertexTextureZ[]> newVertices = nctl::makeUnique<InvertedVertexTextureZ[]>(numVertices);
+				for (unsigned int vertIt = 0; vertIt < numVertices; vertIt++)
+				{
+					const nc::MeshSprite::Vertex &src = vertices[vertIt];
+					InvertedVertexTextureZ &dest = newVertices[vertIt];
+					dest.u = src.u;
+					dest.v = src.v;
+					dest.x = src.x;
+					dest.y = src.y;
+					dest.z = 1.0f / static_cast<float>(vertIt + 1);
+				}
+				meshSprites_[i]->copyVertices(numVertices, sizeof(InvertedVertexTextureZ), newVertices.get());
+			}
+		}
+		else
+			meshSprites_[i]->setVertices(*meshSprites_[i % NumTextures]);
+	}
 }
 
 void MyEventHandler::checkClick(float x, float y)

@@ -66,15 +66,19 @@ class DLL_PUBLIC MeshSprite : public BaseSprite
 	/// Returns a copy of this object
 	inline MeshSprite clone() const { return MeshSprite(*this); }
 
+	/// Returns the number of bytes used by each vertex
+	inline unsigned int bytesPerVertex() const { return bytesPerVertex_; }
 	/// Returns the number of vertices of the sprite mesh
 	inline unsigned int numVertices() const { return numVertices_; }
+	/// Returns the total number of bytes used by all sprite's vertices
+	inline unsigned int numBytes() const { return numVertices_ * bytesPerVertex_; }
 	/// Returns the vertices data of the sprite mesh
 	inline const float *vertices() const { return vertexDataPointer_; }
 	/// Returns true if the vertices belong to the sprite and are not stored externally
 	inline bool uniqueVertices() const { return vertexDataPointer_ == vertices_.data(); }
 
-	/// Copies the vertices data from a pointer into the sprite
-	void copyVertices(unsigned int numVertices, const float *vertices);
+	/// Copies the vertices data with a custom format from a pointer into the sprite
+	void copyVertices(unsigned int numVertices, unsigned int bytesPerVertex, const void *vertexData);
 	/// Copies the vertices data from a pointer into the sprite
 	void copyVertices(unsigned int numVertices, const Vertex *vertices);
 	/// Copies the vertices data from a pointer into the sprite (no texture version)
@@ -82,14 +86,19 @@ class DLL_PUBLIC MeshSprite : public BaseSprite
 	/// Copies the vertices data from another sprite and sets the same size
 	void copyVertices(const MeshSprite &meshSprite);
 
-	/// Sets the vertices data to point to an external array
-	void setVertices(unsigned int numVertices, const float *vertices);
+	/// Sets the vertices data to point to an external array with a custom format
+	void setVertices(unsigned int numVertices, unsigned int bytesPerVertex, const void *vertexData);
 	/// Sets the vertices data to point to an external array
 	void setVertices(unsigned int numVertices, const Vertex *vertices);
 	/// Sets the vertices data to point to an external array (no texture version)
 	void setVertices(unsigned int numVertices, const VertexNoTexture *vertices);
 	/// Sets the vertices data to the data used by another sprite and sets the same size
 	void setVertices(const MeshSprite &meshSprite);
+
+	/// Returns the internal vertices data, cleared and set to the required size (custom format version)
+	float *emplaceVertices(unsigned int numElements, unsigned int bytesPerVertex);
+	/// Returns the internal vertices data, cleared and set to the required size
+	float *emplaceVertices(unsigned int numElements);
 
 	/// Creates an internal set of vertices from an external array of points in texture space, with optional texture cut mode
 	void createVerticesFromTexels(unsigned int numVertices, const Vector2f *points, TextureCutMode cutMode);
@@ -111,6 +120,9 @@ class DLL_PUBLIC MeshSprite : public BaseSprite
 	/// Sets the indices data to the data used by another sprite
 	void setIndices(const MeshSprite &meshSprite);
 
+	/// Returns the internal indices data, cleared and set to the required size
+	unsigned short *emplaceIndices(unsigned int numIndices);
+
 	inline static ObjectType sType() { return ObjectType::MESH_SPRITE; }
 
   protected:
@@ -122,6 +134,8 @@ class DLL_PUBLIC MeshSprite : public BaseSprite
 	nctl::Array<float> vertices_;
 	/// Pointer to vertex data, either from a shared array or unique to this sprite
 	const float *vertexDataPointer_;
+	/// The number of bytes used by each vertex
+	unsigned int bytesPerVertex_;
 	/// The number of vertices, either shared or not, that composes the mesh
 	unsigned int numVertices_;
 

@@ -141,28 +141,25 @@ RenderCommand *RenderBatcher::collectCommands(
 	const RenderCommand *refCommand = *start;
 	RenderCommand *batchCommand = nullptr;
 	GLUniformBlockCache *instancesBlock = nullptr;
-	int singleInstanceBlockSize = 0;
 
 	// Tracking the amount of memory required by uniform blocks, vertices and indices of all instances
 	unsigned long instancesBlockSize = 0;
 	unsigned long instancesVertexDataSize = 0;
 	unsigned int instancesIndicesAmount = 0;
 
-	GLShaderProgram *batchedShader = RenderResources::batchedShader(refCommand->material().shaderProgram());
+	const GLShaderProgram *refShader = refCommand->material().shaderProgram();
+	GLShaderProgram *batchedShader = RenderResources::batchedShader(refShader);
+	// The following check should never fail as it is already checked by the calling function
 	FATAL_ASSERT_MSG(batchedShader != nullptr, "Unsupported shader for batch element");
 	bool commandAdded = false;
 	batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(batchedShader, commandAdded);
 
-	const GLShaderProgram *refShader = refCommand->material().shaderProgram();
-	const bool isSprite = (refShader->hasAttribute(Material::PositionAttributeName) == false);
-	const bool isMeshSpriteNoTexture = refShader->hasAttribute(Material::PositionAttributeName) && (refShader->hasAttribute(Material::TexCoordsAttributeName) == false);
-	const bool isBatchedSprite = (batchedShader->hasAttribute(Material::PositionAttributeName) == false) && batchCommand->material().uniformBlock(Material::InstancesBlockName);
-
-	singleInstanceBlockSize = (*start)->material().uniformBlock(Material::InstanceBlockName)->size();
+	const int singleInstanceBlockSize = (*start)->material().uniformBlock(Material::InstanceBlockName)->size();
 
 	if (commandAdded)
 		batchCommand->setType(refCommand->type());
 	instancesBlock = batchCommand->material().uniformBlock(Material::InstancesBlockName);
+	FATAL_ASSERT_MSG_X(instancesBlock != nullptr, "Batched shader does not have an %s uniform block", Material::InstancesBlockName);
 	instancesBlockSize += batchCommand->material().shaderProgram()->uniformsSize();
 
 	// Set to true if at least one command in the batch has indices or forced by a rendering settings
@@ -188,12 +185,13 @@ RenderCommand *RenderBatcher::collectCommands(
 	const unsigned long maxIndexDataSize = RenderResources::buffersManager().specs(RenderBuffersManager::BufferTypes::ELEMENT_ARRAY).maxSize;
 	// Sum the amount of VBO and IBO memory required by the batch
 	it = start;
+	const bool refShaderHasAttributes = (refShader->numAttributes() > 0);
 	while (it != nextStart)
 	{
 		unsigned int vertexDataSize = 0;
 		unsigned int numIndices = (*it)->geometry().numIndices();
 
-		if (isSprite == false)
+		if (refShaderHasAttributes)
 		{
 			unsigned int numVertices = (*it)->geometry().numVertices();
 			if (batchingWithIndices == false)
@@ -231,17 +229,16 @@ RenderCommand *RenderBatcher::collectCommands(
 	if (commandAdded && refShader->hasAttribute(Material::TexCoordsAttributeName))
 		batchCommand->material().uniform(Material::TextureUniformName)->setIntValue(0); // GL_TEXTURE0
 
-	const unsigned int SizeVertexFormat = ((isMeshSpriteNoTexture == false)
-	                                           ? sizeof(RenderResources::VertexFormatPos2Tex2)
-	                                           : sizeof(RenderResources::VertexFormatPos2));
-	const unsigned int SizeVertexFormatAndIndex = SizeVertexFormat + sizeof(int);
-	const unsigned int NumFloatsVertexFormat = SizeVertexFormat / sizeof(GLfloat);
+	const unsigned int NumFloatsVertexFormat = refCommand->geometry().numElementsPerVertex();
 	const unsigned int NumFloatsVertexFormatAndIndex = NumFloatsVertexFormat + 1; // index is an `int`, same size as a `float`
+	const unsigned int SizeVertexFormat = NumFloatsVertexFormat * 4;
+	const unsigned int SizeVertexFormatAndIndex = SizeVertexFormat + sizeof(int);
 
 	float *destVtx = nullptr;
 	GLushort *destIdx = nullptr;
 
-	if (isBatchedSprite == false)
+	const bool batchedShaderHasAttributes = (batchedShader->numAttributes() > 1);
+	if (batchedShaderHasAttributes)
 	{
 		const unsigned int numFloats = instancesVertexDataSize / sizeof(GLfloat);
 		destVtx = batchCommand->geometry().acquireVertexPointer(numFloats, NumFloatsVertexFormat + 1); // aligned to vertex format with index
@@ -258,19 +255,12 @@ RenderCommand *RenderBatcher::collectCommands(
 		RenderCommand *command = *it;
 		command->commitNodeTransformation();
 
-		if (isBatchedSprite)
-		{
-			const GLUniformBlockCache *singleInstanceBlock = command->material().uniformBlock(Material::InstanceBlockName);
-			memcpy(instancesBlock->dataPointer() + instancesBlockOffset, singleInstanceBlock->dataPointer(), singleInstanceBlockSize);
-			instancesBlockOffset += singleInstanceBlockSize;
-		}
-		else
-		{
-			GLUniformBlockCache *singleInstanceBlock = nullptr;
-			singleInstanceBlock = command->material().uniformBlock(Material::InstanceBlockName);
-			memcpy(instancesBlock->dataPointer() + instancesBlockOffset, singleInstanceBlock->dataPointer(), singleInstanceBlockSize);
-			instancesBlockOffset += singleInstanceBlockSize;
+		const GLUniformBlockCache *singleInstanceBlock = command->material().uniformBlock(Material::InstanceBlockName);
+		memcpy(instancesBlock->dataPointer() + instancesBlockOffset, singleInstanceBlock->dataPointer(), singleInstanceBlockSize);
+		instancesBlockOffset += singleInstanceBlockSize;
 
+		if (batchedShaderHasAttributes)
+		{
 			const unsigned int numVertices = command->geometry().numVertices();
 			const int meshIndex = it - start;
 			const float *srcVtx = command->geometry().hostVertexPointer();
@@ -335,7 +325,7 @@ RenderCommand *RenderBatcher::collectCommands(
 		++it;
 	}
 
-	if (isBatchedSprite == false)
+	if (batchedShaderHasAttributes)
 	{
 		batchCommand->geometry().releaseVertexPointer();
 		if (destIdx)
@@ -350,15 +340,15 @@ RenderCommand *RenderBatcher::collectCommands(
 	batchCommand->setLayer(refCommand->layer());
 	batchCommand->setVisitOrder(refCommand->visitOrder());
 
-	if (isBatchedSprite)
-		batchCommand->geometry().setDrawParameters(GL_TRIANGLES, 0, 6 * (nextStart - start));
-	else
+	if (batchedShaderHasAttributes)
 	{
 		const unsigned int totalVertices = instancesVertexDataSize / SizeVertexFormatAndIndex;
 		batchCommand->geometry().setDrawParameters(refCommand->geometry().primitiveType(), 0, totalVertices);
 		batchCommand->geometry().setNumElementsPerVertex(NumFloatsVertexFormatAndIndex);
 		batchCommand->geometry().setNumIndices(instancesIndicesAmount);
 	}
+	else
+		batchCommand->geometry().setDrawParameters(GL_TRIANGLES, 0, 6 * (nextStart - start));
 
 	return batchCommand;
 }

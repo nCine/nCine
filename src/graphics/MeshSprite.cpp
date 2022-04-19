@@ -27,7 +27,7 @@ MeshSprite::MeshSprite(Texture *texture)
 
 MeshSprite::MeshSprite(SceneNode *parent, Texture *texture, float xx, float yy)
     : BaseSprite(parent, texture, xx, yy),
-      vertices_(16), vertexDataPointer_(nullptr), numVertices_(0),
+      vertices_(16), vertexDataPointer_(nullptr), bytesPerVertex_(0), numVertices_(0),
       indices_(16), indexDataPointer_(nullptr), numIndices_(0)
 {
 	init();
@@ -52,33 +52,36 @@ MeshSprite::MeshSprite(Texture *texture, const Vector2f &position)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void MeshSprite::copyVertices(unsigned int numVertices, const float *vertices)
+/*! \note If used directly, it requires a custom shader that understands the specified data format */
+void MeshSprite::copyVertices(unsigned int numVertices, unsigned int bytesPerVertex, const void *vertexData)
 {
-	const unsigned int numBytes = texture_ ? sizeof(Vertex) : sizeof(VertexNoTexture);
-	const unsigned int numFloats = numBytes / sizeof(float);
-
-	vertices_.setSize(numVertices * numFloats);
-	memcpy(vertices_.data(), vertices, numVertices * numBytes);
+	const unsigned int floatsPerVertex = bytesPerVertex / sizeof(float);
+	vertices_.setSize(numVertices * floatsPerVertex);
+	memcpy(vertices_.data(), vertexData, numVertices * bytesPerVertex);
+	bytesPerVertex_ = bytesPerVertex;
 
 	vertexDataPointer_ = vertices_.data();
 	numVertices_ = numVertices;
 	renderCommand_->geometry().setNumVertices(numVertices);
+	renderCommand_->geometry().setNumElementsPerVertex(floatsPerVertex);
 	renderCommand_->geometry().setHostVertexPointer(vertexDataPointer_);
 }
 
 void MeshSprite::copyVertices(unsigned int numVertices, const Vertex *vertices)
 {
-	copyVertices(numVertices, reinterpret_cast<const float *>(vertices));
+	ASSERT(texture_ != nullptr);
+	copyVertices(numVertices, sizeof(Vertex), reinterpret_cast<const float *>(vertices));
 }
 
 void MeshSprite::copyVertices(unsigned int numVertices, const VertexNoTexture *vertices)
 {
-	copyVertices(numVertices, reinterpret_cast<const float *>(vertices));
+	ASSERT(texture_ == nullptr);
+	copyVertices(numVertices, sizeof(VertexNoTexture), reinterpret_cast<const float *>(vertices));
 }
 
 void MeshSprite::copyVertices(const MeshSprite &meshSprite)
 {
-	copyVertices(meshSprite.numVertices_, meshSprite.vertexDataPointer_);
+	copyVertices(meshSprite.numVertices_, meshSprite.bytesPerVertex_, meshSprite.vertexDataPointer_);
 	width_ = meshSprite.width_;
 	height_ = meshSprite.height_;
 	texRect_ = meshSprite.texRect_;
@@ -88,34 +91,66 @@ void MeshSprite::copyVertices(const MeshSprite &meshSprite)
 	dirtyBits_.set(DirtyBitPositions::TextureBit);
 }
 
-void MeshSprite::setVertices(unsigned int numVertices, const float *vertices)
+/*! \note If used directly, it requires a custom shader that understands the specified data format. */
+void MeshSprite::setVertices(unsigned int numVertices, unsigned int bytesPerVertex, const void *vertexData)
 {
+	const unsigned int floatsPerVertex = bytesPerVertex / sizeof(float);
 	vertices_.clear();
+	bytesPerVertex_ = bytesPerVertex;
 
-	vertexDataPointer_ = vertices;
+	vertexDataPointer_ = reinterpret_cast<const float *>(vertexData);
 	numVertices_ = numVertices;
 	renderCommand_->geometry().setNumVertices(numVertices);
+	renderCommand_->geometry().setNumElementsPerVertex(floatsPerVertex);
 	renderCommand_->geometry().setHostVertexPointer(vertexDataPointer_);
 }
 
 void MeshSprite::setVertices(unsigned int numVertices, const Vertex *vertices)
 {
-	copyVertices(numVertices, reinterpret_cast<const float *>(vertices));
+	ASSERT(texture_ != nullptr);
+	copyVertices(numVertices, sizeof(Vertex), reinterpret_cast<const void *>(vertices));
 }
 
 void MeshSprite::setVertices(unsigned int numVertices, const VertexNoTexture *vertices)
 {
-	copyVertices(numVertices, reinterpret_cast<const float *>(vertices));
+	ASSERT(texture_ == nullptr);
+	copyVertices(numVertices, sizeof(VertexNoTexture), reinterpret_cast<const void *>(vertices));
 }
 
 void MeshSprite::setVertices(const MeshSprite &meshSprite)
 {
-	setVertices(meshSprite.numVertices_, meshSprite.vertexDataPointer_);
+	setVertices(meshSprite.numVertices_, meshSprite.bytesPerVertex_, meshSprite.vertexDataPointer_);
 	width_ = meshSprite.width_;
 	height_ = meshSprite.height_;
 
 	dirtyBits_.set(DirtyBitPositions::SizeBit);
 	dirtyBits_.set(DirtyBitPositions::AabbBit);
+}
+
+float *MeshSprite::emplaceVertices(unsigned int numElements, unsigned int bytesPerVertex)
+{
+	if (numElements == 0 || bytesPerVertex == 0)
+		return nullptr;
+
+	const unsigned int floatsPerVertex = bytesPerVertex / sizeof(float);
+	const unsigned int numVertices = numElements / floatsPerVertex;
+	vertices_.clear();
+	vertices_.setSize(numElements);
+	bytesPerVertex_ = bytesPerVertex;
+
+	vertexDataPointer_ = vertices_.data();
+	numVertices_ = numVertices;
+	renderCommand_->geometry().setNumVertices(numVertices);
+	renderCommand_->geometry().setNumElementsPerVertex(floatsPerVertex);
+	renderCommand_->geometry().setHostVertexPointer(vertexDataPointer_);
+
+	return vertices_.data();
+}
+
+float *MeshSprite::emplaceVertices(unsigned int numElements)
+{
+	const unsigned int bytesPerVertex = texture_ ? sizeof(Vertex) : sizeof(VertexNoTexture);
+	return emplaceVertices(numElements, bytesPerVertex);
 }
 
 void MeshSprite::createVerticesFromTexels(unsigned int numVertices, const Vector2f *points, TextureCutMode cutMode)
@@ -124,6 +159,7 @@ void MeshSprite::createVerticesFromTexels(unsigned int numVertices, const Vector
 
 	const unsigned int numFloats = texture_ ? VertexFloats : VertexNoTextureFloats;
 	vertices_.setSize(numVertices * numFloats);
+	bytesPerVertex_ = texture_ ? sizeof(Vertex) : sizeof(VertexNoTexture);
 	Vector2f min(0.0f, 0.0f);
 
 	if (cutMode == TextureCutMode::CROP)
@@ -176,6 +212,7 @@ void MeshSprite::createVerticesFromTexels(unsigned int numVertices, const Vector
 	vertexDataPointer_ = vertices_.data();
 	numVertices_ = numVertices;
 	renderCommand_->geometry().setNumVertices(numVertices);
+	renderCommand_->geometry().setNumElementsPerVertex(numFloats);
 	renderCommand_->geometry().setHostVertexPointer(vertexDataPointer_);
 
 	dirtyBits_.set(DirtyBitPositions::SizeBit);
@@ -218,6 +255,22 @@ void MeshSprite::setIndices(const MeshSprite &meshSprite)
 	setIndices(meshSprite.numIndices_, meshSprite.indexDataPointer_);
 }
 
+unsigned short *MeshSprite::emplaceIndices(unsigned int numIndices)
+{
+	if (numIndices == 0)
+		return nullptr;
+
+	indices_.clear();
+	indices_.setSize(numIndices);
+
+	indexDataPointer_ = indices_.data();
+	numIndices_ = numIndices;
+	renderCommand_->geometry().setNumIndices(numIndices_);
+	renderCommand_->geometry().setHostIndexPointer(indexDataPointer_);
+
+	return indices_.data();
+}
+
 ///////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -227,7 +280,7 @@ MeshSprite::MeshSprite(const MeshSprite &other)
 {
 	init();
 	setTexRect(other.texRect_);
-	copyVertices(other.numVertices_, other.vertices_.data());
+	copyVertices(other.numVertices_, other.bytesPerVertex_, other.vertices_.data());
 	copyIndices(other.numIndices_, other.indices_.data());
 }
 
@@ -287,9 +340,9 @@ void MeshSprite::textureHasChanged(Texture *newTexture)
 		const bool hasChanged = renderCommand_->material().setShaderProgramType(shaderProgramType);
 		if (hasChanged)
 			shaderHasChanged();
-	}
 
-	renderCommand_->geometry().setNumElementsPerVertex(newTexture ? VertexFloats : VertexNoTextureFloats);
+		renderCommand_->geometry().setNumElementsPerVertex(newTexture ? VertexFloats : VertexNoTextureFloats);
+	}
 
 	if (texture_ && newTexture && texture_ != newTexture)
 	{

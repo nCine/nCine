@@ -121,6 +121,76 @@ void main()
 }
 )";
 
+char const * const meshsprite_vs = R"(
+uniform mat4 uProjectionMatrix;
+uniform mat4 uViewMatrix;
+
+// Instance data should go in a uniform block called `InstanceBlock` for batching to work
+layout (std140) uniform InstanceBlock
+{
+	mat4 modelMatrix;
+	vec4 color;
+	vec4 texRect;
+	vec2 spriteSize;
+};
+
+in vec2 aTexCoords;
+in float aDepth;
+in vec2 aPosition;
+out vec2 vTexCoords;
+out vec4 vColor;
+
+void main()
+{
+	vec4 position = vec4(aPosition.x * spriteSize.x, aPosition.y * spriteSize.y, aDepth, 1.0);
+
+	gl_Position = uProjectionMatrix * uViewMatrix * modelMatrix * position;
+	vTexCoords = vec2(aTexCoords.x * texRect.x + texRect.y, aTexCoords.y * texRect.z + texRect.w);
+	vColor = color;
+}
+)";
+
+char const * const batched_meshsprite_vs = R"(
+uniform mat4 uProjectionMatrix;
+uniform mat4 uViewMatrix;
+
+struct Instance
+{
+	mat4 modelMatrix;
+	vec4 color;
+	vec4 texRect;
+	vec2 spriteSize;
+};
+
+// Single instances data will be collected in a uniform block called `InstancesBlock`
+layout (std140) uniform InstancesBlock
+{
+#ifdef WITH_FIXED_BATCH_SIZE
+	Instance[BATCH_SIZE] instances;
+#else
+	Instance[585] instances;
+#endif
+} block;
+
+in vec2 aTexCoords;
+in float aDepth;
+in vec2 aPosition;
+in uint aMeshIndex;
+out vec2 vTexCoords;
+out vec4 vColor;
+
+#define i block.instances[aMeshIndex]
+
+void main()
+{
+	vec4 position = vec4(aPosition.x * i.spriteSize.x, aPosition.y * i.spriteSize.y, aDepth, 1.0);
+
+	gl_Position = uProjectionMatrix * uViewMatrix * i.modelMatrix * position;
+	vTexCoords = vec2(aTexCoords.x * i.texRect.x + i.texRect.y, aTexCoords.y * i.texRect.z + i.texRect.w);
+	vColor = i.color;
+}
+)";
+
 char const * const meshsprite_fs = R"(
 #ifdef GL_ES
 precision mediump float;
