@@ -9,6 +9,7 @@ namespace ncine {
 
 class DrawableNode;
 class Shader;
+class Texture;
 
 /// Shader state class for the user to use custom shaders
 class DLL_PUBLIC ShaderState
@@ -25,6 +26,9 @@ class DLL_PUBLIC ShaderState
 	bool setShader(Shader *shader);
 	/// Triggers a shader update without setting a new shader
 	bool resetShader();
+
+	bool setTexture(unsigned int unit, const Texture *texture);
+	inline bool setTexture(const Texture *texture) { return setTexture(0, texture); }
 
 	bool setUniformInt(const char *blockName, const char *name, const int *vector);
 	bool setUniformInt(const char *blockName, const char *name, int value0);

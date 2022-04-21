@@ -3,11 +3,11 @@
 
 #include "GLShaderUniforms.h"
 #include "GLShaderUniformBlocks.h"
+#include "GLTexture.h"
 
 namespace ncine {
 
 class GLShaderProgram;
-class GLTexture;
 class Texture;
 class GLUniformCache;
 class GLAttribute;
@@ -107,9 +107,13 @@ class Material
 	/// Wrapper around `GLShaderUniformBlocks::uniformBlock()`
 	inline GLUniformBlockCache *uniformBlock(const char *name) { return shaderUniformBlocks_.uniformBlock(name); }
 
-	inline const GLTexture *texture() const { return texture_; }
-	inline void setTexture(const GLTexture *texture) { texture_ = texture; }
-	void setTexture(const Texture &texture);
+	const GLTexture *texture(unsigned int unit) const;
+	bool setTexture(unsigned int unit, const GLTexture *texture);
+	bool setTexture(unsigned int unit, const Texture &texture);
+
+	inline const GLTexture *texture() const { return texture(0); }
+	inline bool setTexture(const GLTexture *texture) { return setTexture(0, texture); }
+	inline bool setTexture(const Texture &texture) { return setTexture(0, texture); }
 
   private:
 	bool isBlendingEnabled_;
@@ -120,7 +124,7 @@ class Material
 	GLShaderProgram *shaderProgram_;
 	GLShaderUniforms shaderUniforms_;
 	GLShaderUniformBlocks shaderUniformBlocks_;
-	const GLTexture *texture_;
+	const GLTexture *textures_[GLTexture::MaxTextureUnits];
 
 	/// The size of the memory buffer containing uniform values
 	unsigned int uniformsHostBufferSize_;

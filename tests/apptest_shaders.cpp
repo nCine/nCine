@@ -1,3 +1,9 @@
+#include <ncine/config.h>
+
+#if NCINE_WITH_IMGUI
+	#include <ncine/imgui.h>
+#endif
+
 #include "apptest_shaders.h"
 #include "apptest_shaders_sources.h"
 #include <ncine/Application.h>
@@ -18,6 +24,8 @@ const char *Texture1File = "texture1_ETC2.ktx";
 const char *Texture2File = "texture2_ETC2.ktx";
 const char *Texture3File = "texture3_ETC2.ktx";
 const char *Texture4File = "texture4_ETC2.ktx";
+const char *DiffuseMapFile = "diffuse.webp";
+const char *NormalMapFile = "normal.webp";
 const char *FontTextureFile = "DroidSans32_256_ETC2.ktx";
 #else
 const char *MegaTextureFile = "megatexture_256.png";
@@ -25,6 +33,8 @@ const char *Texture1File = "texture1.png";
 const char *Texture2File = "texture2.png";
 const char *Texture3File = "texture3.png";
 const char *Texture4File = "texture4.png";
+const char *DiffuseMapFile = "diffuse.png";
+const char *NormalMapFile = "normal.png";
 const char *FontTextureFile = "DroidSans32_256.png";
 #endif
 const char *FontFntFile = "DroidSans32_256.fnt";
@@ -44,6 +54,18 @@ struct InvertedVertexTextureZ
 	float u, v;
 	float x, y, z;
 };
+
+struct MultiTextureShaderData
+{
+	nc::Vector4f lightPosition = nc::Vector4f(0.0f, 0.0f, 50.0f, 0.0f);
+	nc::Colorf diffuseColor = nc::Colorf(1.0f, 1.0f, 1.0f, 1.0f);
+	nc::Colorf specularColor = nc::Colorf(1.0f, 1.0f, 1.0f, 1.0f);
+	nc::Vector4f attFactors = nc::Vector4f(1.0f, 0.00003f, 0.000003f, 32.0f);
+} multiTextureShaderData;
+bool shaderDataChanged = true;
+
+bool captureMouse = true;
+bool captureKeyboard = true;
 
 const char *stringOnOff(bool enabled)
 {
@@ -75,6 +97,9 @@ void MyEventHandler::onInit()
 
 	texture0_ = nctl::makeUnique<nc::Texture>("Ping texture", nc::Texture::Format::RGB8, nc::theApplication().resolutionInt());
 	texture1_ = nctl::makeUnique<nc::Texture>("Pong texture", nc::Texture::Format::RGB8, nc::theApplication().resolutionInt());
+
+	diffuseTexture_ = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", DiffuseMapFile)).data());
+	normalTexture_ = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", NormalMapFile)).data());
 
 	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
 	                                   (prefixDataPath("fonts", FontTextureFile)).data());
@@ -141,6 +166,20 @@ void MyEventHandler::onInit()
 	batchedMeshShader_->setAttribute("aTexCoords", sizeof(InvertedVertexTextureZ) + 4, 0);
 	batchedMeshShader_->setAttribute("aMeshIndex", sizeof(InvertedVertexTextureZ) + 4, 20);
 
+	multitextureShader_ = nctl::makeUnique<nc::Shader>("Multitexture_Shader", nc::Shader::LoadMode::STRING, multitexture_vs, multitexture_fs);
+	FATAL_ASSERT(multitextureShader_->isLinked());
+	multitextureSprite_ = nctl::makeUnique<nc::Sprite>(rootNode_.get(), diffuseTexture_.get(), width * 0.5f, height * 0.25f);
+	multitextureSprite_->setScale(0.5f);
+	multitextureShaderState_ = nctl::makeUnique<nc::ShaderState>(multitextureSprite_.get(), multitextureShader_.get());
+
+	multitextureShaderState_->setTexture(0, diffuseTexture_.get()); // GL_TEXTURE0
+	multitextureShaderState_->setUniformInt(nullptr, "uTexture0", 0); // GL_TEXTURE0
+	multitextureShaderState_->setTexture(1, normalTexture_.get()); // GL_TEXTURE1
+	multitextureShaderState_->setUniformInt(nullptr, "uTexture1", 1); // GL_TEXTURE1
+
+	multiTextureShaderData.lightPosition.x = nc::theApplication().width() * 0.5f;
+	multiTextureShaderData.lightPosition.y = nc::theApplication().height() * 0.5f;
+
 	withAtlas_ = false;
 	withAtlas_ ? setupAtlas() : setupTextures();
 	withViewport_ = false;
@@ -153,6 +192,39 @@ void MyEventHandler::onInit()
 void MyEventHandler::onFrameStart()
 {
 	const float height = nc::theApplication().height();
+
+#if NCINE_WITH_IMGUI
+	captureMouse = (ImGui::GetIO().WantCaptureMouse == false);
+	captureKeyboard = (ImGui::GetIO().WantCaptureKeyboard == false);
+
+	ImGui::Begin("apptest_shaders");
+	shaderDataChanged |= ImGui::InputFloat3("Position", multiTextureShaderData.lightPosition.data());
+	shaderDataChanged |= ImGui::ColorEdit3("Diffuse Color", multiTextureShaderData.diffuseColor.data());
+	shaderDataChanged |= ImGui::ColorEdit3("Specular Color", multiTextureShaderData.specularColor.data());
+	shaderDataChanged |= ImGui::InputFloat3("Attenuation", multiTextureShaderData.attFactors.data(), "%.6f");
+
+	shaderDataChanged |= ImGui::SliderFloat("Diffuse Intensity", &multiTextureShaderData.diffuseColor.data()[3], 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	shaderDataChanged |= ImGui::SliderFloat("Specular Intensity", &multiTextureShaderData.specularColor.data()[3], 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	shaderDataChanged |= ImGui::SliderFloat("Specular Scatter", &multiTextureShaderData.attFactors.w, 1.0f, 64.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+
+	if (ImGui::Button("Reset"))
+	{
+		multiTextureShaderData = MultiTextureShaderData();
+		multiTextureShaderData.lightPosition.x = nc::theApplication().width() * 0.5f;
+		multiTextureShaderData.lightPosition.y = nc::theApplication().height() * 0.5f;
+		shaderDataChanged = true;
+	}
+	ImGui::End();
+#endif
+
+	if (shaderDataChanged)
+	{
+		multitextureShaderState_->setUniformFloat("DataBlock", "lightPos", multiTextureShaderData.lightPosition.data());
+		multitextureShaderState_->setUniformFloat("DataBlock", "diffuseColor", multiTextureShaderData.diffuseColor.data());
+		multitextureShaderState_->setUniformFloat("DataBlock", "specularColor", multiTextureShaderData.specularColor.data());
+		multitextureShaderState_->setUniformFloat("DataBlock", "attFactors", multiTextureShaderData.attFactors.data());
+		shaderDataChanged = false;
+	}
 
 	const nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 	debugString_->clear();
@@ -173,6 +245,8 @@ void MyEventHandler::onFrameStart()
 		sprites_[i]->setRotation(angle_ * 20.0f);
 		meshSprites_[i]->setRotation(angle_ * 20.0f);
 	}
+	multitextureSprite_->setPositionY(height * 0.2f + fabsf(sinf(angle_ + 5.0f)) * (height * (0.2f + 0.02f)));
+	multitextureSprite_->setRotation(angle_ * 20.0f);
 }
 
 void MyEventHandler::onPostUpdate()
@@ -203,6 +277,9 @@ void MyEventHandler::onPostUpdate()
 				meshSpriteShaderStates_[i]->setUniformFloat("InstanceBlock", "color", sin2First, sin2Second, sin2Third, 0.5f + 0.5f * sin2Fourth);
 			}
 		}
+		const bool multiTextureSpriteIsCulled = (multitextureSprite_ && multitextureSprite_->lastFrameRendered() < numFrames);
+		if (multitextureSprite_ && multitextureSprite_->isDrawEnabled() && multiTextureSpriteIsCulled == false)
+			multitextureShaderState_->setUniformFloat("InstanceBlock", "rotation", multitextureSprite_->absRotation() * nc::fDegToRad);
 	}
 }
 
@@ -219,7 +296,23 @@ void MyEventHandler::onDrawViewport(nc::Viewport &viewport)
 #ifdef __ANDROID__
 void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 {
-	checkClick(event.pointers[0].x, event.pointers[0].y);
+	if (captureMouse)
+	{
+		checkClick(event.pointers[0].x, event.pointers[0].y);
+		multiTextureShaderData.lightPosition.x = event.pointers[0].x;
+		multiTextureShaderData.lightPosition.y = event.pointers[0].y;
+		shaderDataChanged = true;
+	}
+}
+
+void MyEventHandler::onTouchMove(const nc::TouchEvent &event)
+{
+	if (captureMouse)
+	{
+		multiTextureShaderData.lightPosition.x = event.pointers[0].x;
+		multiTextureShaderData.lightPosition.y = event.pointers[0].y;
+		shaderDataChanged = true;
+	}
 }
 #endif
 
@@ -250,17 +343,17 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		withViewport_ = !withViewport_;
 		setupViewport();
 	}
-	else if (event.sym == nc::KeySym::N1)
+	else if (event.sym == nc::KeySym::N1 && captureKeyboard)
 	{
 		numBlurPasses_ = 1;
 		setupViewport();
 	}
-	else if (event.sym == nc::KeySym::N2)
+	else if (event.sym == nc::KeySym::N2 && captureKeyboard)
 	{
 		numBlurPasses_ = 2;
 		setupViewport();
 	}
-	else if (event.sym == nc::KeySym::N3)
+	else if (event.sym == nc::KeySym::N3 && captureKeyboard)
 	{
 		numBlurPasses_ = 3;
 		setupViewport();
@@ -278,8 +371,23 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
-	if (event.isLeftButton())
+	if (event.isLeftButton() && captureMouse)
+	{
 		checkClick(static_cast<float>(event.x), static_cast<float>(event.y));
+		multiTextureShaderData.lightPosition.x = event.x;
+		multiTextureShaderData.lightPosition.y = event.y;
+		shaderDataChanged = true;
+	}
+}
+
+void MyEventHandler::onMouseMoved(const nc::MouseState &state)
+{
+	if (state.isLeftButtonDown() && captureMouse)
+	{
+		multiTextureShaderData.lightPosition.x = state.x;
+		multiTextureShaderData.lightPosition.y = state.y;
+		shaderDataChanged = true;
+	}
 }
 
 void MyEventHandler::setupAtlas()

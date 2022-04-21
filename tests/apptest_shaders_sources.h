@@ -209,4 +209,113 @@ void main()
 }
 )";
 
+char const * const multitexture_vs = R"(
+uniform mat4 uProjectionMatrix;
+uniform mat4 uViewMatrix;
+
+// Instance data should go in a uniform block called `InstanceBlock` for batching to work
+layout (std140) uniform InstanceBlock
+{
+	mat4 modelMatrix;
+	vec4 texRect;
+	vec2 spriteSize;
+	float rotation;
+};
+
+out vec3 vFragPos;
+#ifdef __ANDROID__
+// Workaround for wrong normalization in fragment shader
+out vec3 vFragPosNorm;
+#endif
+out vec2 vTexCoords;
+flat out float vRotation;
+
+void main()
+{
+	vec2 aPosition = vec2(0.5 - float(gl_VertexID >> 1), -0.5 + float(gl_VertexID % 2));
+	vec2 aTexCoords = vec2(1.0 - float(gl_VertexID >> 1), 1.0 - float(gl_VertexID % 2));
+	vec4 position = vec4(aPosition.x * spriteSize.x, aPosition.y * spriteSize.y, 0.0, 1.0);
+
+	gl_Position = uProjectionMatrix * uViewMatrix * modelMatrix * position;
+	vFragPos = vec3(uViewMatrix * modelMatrix * position);
+#ifdef __ANDROID__
+	vFragPosNorm = normalize(vFragPos);
+#endif
+	vTexCoords = vec2(aTexCoords.x * texRect.x + texRect.y, aTexCoords.y * texRect.z + texRect.w);
+	vRotation = rotation;
+}
+)";
+
+char const * const multitexture_fs = R"(
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+uniform sampler2D uTexture0;
+uniform sampler2D uTexture1;
+in vec3 vFragPos;
+#ifdef __ANDROID__
+// Workaround for wrong normalization in fragment shader
+in vec3 vFragPosNorm;
+#endif
+in vec2 vTexCoords;
+flat in float vRotation;
+out vec4 fragColor;
+
+// This uniform block does not have a special name and will be shared by all instances
+layout (std140) uniform DataBlock
+{
+	vec4 lightPos;
+	vec4 diffuseColor; // a component is intensity
+	vec4 specularColor; // a component is intensity
+	vec4 attFactors; // w component is specular scatter
+};
+
+mat4 zRotation(in float angle)
+{
+	return mat4(cos(angle), -sin(angle), 0, 0,
+	            sin(angle),  cos(angle), 0, 0,
+	            0,           0,          1, 0,
+	            0,           0,          0, 1);
+}
+
+void main()
+{
+	vec4 diffuseMap = texture(uTexture0, vTexCoords);
+	vec3 normal = normalize(vec4(texture(uTexture1, vTexCoords).xyz * 2.0 - 1.0, 0.0) * zRotation(vRotation)).xyz;
+	float specMap = texture(uTexture1, vTexCoords).a;
+
+#ifdef __ANDROID__
+	vec3 viewDir = -vFragPosNorm;
+#else
+	vec3 viewDir = normalize(-vFragPos);
+#endif
+	vec3 lightDir = lightPos.xyz - vec3(vFragPos.xy, 0.0);
+	float distance = length(lightDir);
+	lightDir = normalize(lightDir);
+	float attenuation = 1.0 / (attFactors.x + attFactors.y * distance + attFactors.z * distance * distance);
+
+	vec3 reflectDir = reflect(-lightDir, normal);
+#ifdef __ANDROID__
+	// On Android a further normalization might be needed
+	reflectDir = normalize(reflectDir);
+#endif
+
+	float specularScatter = attFactors.w;
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), specularScatter);
+
+	float specularIntensity = specularColor.a;
+	vec3 specular = specularIntensity * spec * specularColor.rgb;
+
+	float nl = dot(lightDir, normal);
+	float diff = max(nl, 0.0);
+
+	float diffuseIntensity = diffuseColor.a;
+	vec3 diffuse = diffuseIntensity * diff * diffuseColor.rgb;
+
+	fragColor = attenuation * (diffuseMap * vec4(diffuse, 0.0) + specMap * vec4(specular, 0.0));
+	fragColor.a = diffuseMap.a;
+}
+)";
+
 }

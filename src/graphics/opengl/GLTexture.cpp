@@ -46,6 +46,16 @@ bool GLTexture::unbind() const
 	return bindHandle(target_, 0, textureUnit_);
 }
 
+bool GLTexture::unbind(GLenum target, unsigned int textureUnit)
+{
+	return bindHandle(target, 0, textureUnit);
+}
+
+bool GLTexture::unbind(unsigned int textureUnit)
+{
+	return bindHandle(GL_TEXTURE_2D, 0, textureUnit);
+}
+
 void GLTexture::texImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data)
 {
 	TracyGpuZone("glTexImage2D");

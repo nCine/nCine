@@ -258,6 +258,61 @@ class FNV1aHashFunc<String>
 	}
 };
 
+uint64_t fasthash64(const void *buf, size_t len, uint64_t seed);
+uint32_t fasthash32(const void *buf, size_t len, uint32_t seed);
+
+/// fast-hash
+/*!
+ * For more information: https://github.com/ztanml/fast-hash
+ */
+template <class K>
+class FastHashFunc
+{
+  public:
+	hash_t operator()(const K &key) const
+	{
+		const unsigned char *bytes = reinterpret_cast<const unsigned char *>(&key);
+		const hash_t hash = fasthash32(bytes, sizeof(K), Seed);
+
+		return hash;
+	}
+
+  private:
+	static const uint64_t Seed = 0x01000193811C9DC5;
+};
+
+/// fast-hash
+/*!
+ * \note Specialized version of the function for C-style strings
+ *
+ * For more information: https://github.com/ztanml/fast-hash
+ */
+template <>
+class FastHashFunc<const char *>
+{
+  public:
+	hash_t operator()(const char *key) const { return fasthash32(key, strlen(key), Seed); }
+
+  private:
+	static const uint32_t Seed = 0x811C9DC5;
+};
+
+/// fast-hash
+/*!
+ * \note Specialized version of the function for String objects
+ *
+ * For more information: https://github.com/ztanml/fast-hash
+ */
+template <>
+class FastHashFunc<String>
+{
+  public:
+	hash_t operator()(const String &string) const { return fasthash32(string.data(), string.length(), Seed); }
+
+  private:
+	static const uint32_t Seed = 0x811C9DC5;
+};
+
 }
 
 #endif

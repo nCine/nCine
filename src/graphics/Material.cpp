@@ -42,8 +42,12 @@ Material::Material()
 
 Material::Material(GLShaderProgram *program, GLTexture *texture)
     : isBlendingEnabled_(false), srcBlendingFactor_(GL_SRC_ALPHA), destBlendingFactor_(GL_ONE_MINUS_SRC_ALPHA),
-      shaderProgramType_(ShaderProgramType::CUSTOM), shaderProgram_(program), texture_(texture), uniformsHostBufferSize_(0)
+      shaderProgramType_(ShaderProgramType::CUSTOM), shaderProgram_(program), uniformsHostBufferSize_(0)
 {
+	for (unsigned int i = 0; i < GLTexture::MaxTextureUnits; i++)
+		textures_[i] = nullptr;
+	textures_[0] = texture;
+
 	if (program)
 		setShaderProgram(program);
 }
@@ -116,9 +120,28 @@ void Material::setUniformsDataPointer(GLubyte *dataPointer)
 	shaderUniformBlocks_.setUniformsDataPointer(&dataPointer[shaderProgram_->uniformsSize()]);
 }
 
-void Material::setTexture(const Texture &texture)
+const GLTexture *Material::texture(unsigned int unit) const
 {
-	texture_ = texture.glTexture_.get();
+	const GLTexture *texture = nullptr;
+	if (unit < GLTexture::MaxTextureUnits)
+		texture = textures_[unit];
+	return texture;
+}
+
+bool Material::setTexture(unsigned int unit, const GLTexture *texture)
+{
+	bool result = false;
+	if (unit < GLTexture::MaxTextureUnits)
+	{
+		textures_[unit] = texture;
+		result = true;
+	}
+	return result;
+}
+
+bool Material::setTexture(unsigned int unit, const Texture &texture)
+{
+	return setTexture(unit, texture.glTexture_.get());
 }
 
 ///////////////////////////////////////////////////////////
@@ -127,8 +150,13 @@ void Material::setTexture(const Texture &texture)
 
 void Material::bind()
 {
-	if (texture_)
-		texture_->bind();
+	for (unsigned int i = 0; i < GLTexture::MaxTextureUnits; i++)
+	{
+		if (textures_[i] != nullptr)
+			textures_[i]->bind(i);
+		else
+			GLTexture::unbind(i);
+	}
 
 	if (shaderProgram_)
 	{
@@ -167,26 +195,28 @@ namespace {
 		return 0;
 	}
 
+	struct SortHashData
+	{
+		GLuint textures[GLTexture::MaxTextureUnits];
+		GLuint shaderProgram;
+		uint8_t srcBlendingFactor;
+		uint8_t destBlendingFactor;
+	};
+
 }
+
 uint32_t Material::sortKey()
 {
-	uint16_t lower = 0;
-	uint32_t middle = 0;
-	uint32_t upper = 0;
+	static const uint32_t Seed = 1697381921;
+	static SortHashData hashData;
 
-	if (texture_)
-		lower = static_cast<uint16_t>(texture_->glHandle());
+	for (unsigned int i = 0; i < GLTexture::MaxTextureUnits; i++)
+		hashData.textures[i] = (textures_[i] != nullptr) ? textures_[i]->glHandle() : 0;
+	hashData.shaderProgram = shaderProgram_->glHandle();
+	hashData.srcBlendingFactor = glBlendingFactorToInt(srcBlendingFactor_);
+	hashData.destBlendingFactor = glBlendingFactorToInt(destBlendingFactor_);
 
-	if (shaderProgram_)
-		middle = shaderProgram_->glHandle() << 16;
-
-	if (isBlendingEnabled_)
-	{
-		upper = glBlendingFactorToInt(srcBlendingFactor_) * 16 + glBlendingFactorToInt(destBlendingFactor_);
-		upper = upper << 24;
-	}
-
-	return upper + middle + lower;
+	return nctl::fasthash32(reinterpret_cast<const void *>(&hashData), sizeof(SortHashData), Seed);
 }
 
 }

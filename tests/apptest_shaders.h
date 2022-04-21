@@ -45,9 +45,11 @@ class MyEventHandler :
 
 #ifdef __ANDROID__
 	void onTouchDown(const nc::TouchEvent &event) override;
+	void onTouchMove(const nc::TouchEvent &event) override;
 #endif
 	void onKeyReleased(const nc::KeyboardEvent &event) override;
 	void onMouseButtonPressed(const nc::MouseEvent &event) override;
+	void onMouseMoved(const nc::MouseState &state) override;
 
   private:
 	bool withAtlas_;
@@ -83,6 +85,12 @@ class MyEventHandler :
 	nctl::UniquePtr<nc::Shader> batchedMeshShader_;
 	nctl::StaticArray<nctl::UniquePtr<nc::MeshSprite>, NumSprites> meshSprites_;
 	nctl::StaticArray<nctl::UniquePtr<nc::ShaderState>, NumSprites> meshSpriteShaderStates_;
+
+	nctl::UniquePtr<nc::Texture> diffuseTexture_;
+	nctl::UniquePtr<nc::Texture> normalTexture_;
+	nctl::UniquePtr<nc::Shader> multitextureShader_;
+	nctl::UniquePtr<nc::Sprite> multitextureSprite_;
+	nctl::UniquePtr<nc::ShaderState> multitextureShaderState_;
 
 	void setupAtlas();
 	void setupTextures();
