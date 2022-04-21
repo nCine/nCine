@@ -42,7 +42,7 @@ bool GLRenderbuffer::bind() const
 	return false;
 }
 
-bool GLRenderbuffer::unbind() const
+bool GLRenderbuffer::unbind()
 {
 	if (boundBuffer_ != 0)
 	{

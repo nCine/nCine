@@ -32,37 +32,17 @@ GLTexture::~GLTexture()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void GLTexture::bind(unsigned int textureUnit) const
+bool GLTexture::bind(unsigned int textureUnit) const
 {
-	FATAL_ASSERT(textureUnit < MaxTextureUnits);
-
-	if (boundUnit_ != textureUnit)
-	{
-		glActiveTexture(GL_TEXTURE0 + textureUnit);
-		boundUnit_ = textureUnit;
+	const bool hasBound = bindHandle(target_, glHandle_, textureUnit);
+	if (hasBound)
 		textureUnit_ = textureUnit;
-	}
-
-	if (boundTextures_[textureUnit][target_] != glHandle_)
-	{
-		glBindTexture(target_, glHandle_);
-		boundTextures_[textureUnit][target_] = glHandle_;
-	}
+	return hasBound;
 }
 
-void GLTexture::unbind() const
+bool GLTexture::unbind() const
 {
-	if (boundUnit_ != textureUnit_)
-	{
-		glActiveTexture(GL_TEXTURE0 + textureUnit_);
-		boundUnit_ = textureUnit_;
-	}
-
-	if (boundTextures_[textureUnit_][target_] != 0)
-	{
-		glBindTexture(target_, 0);
-		boundTextures_[textureUnit_][target_] = 0;
-	}
+	return bindHandle(target_, 0, textureUnit_);
 }
 
 void GLTexture::texImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data)
@@ -129,14 +109,14 @@ bool GLTexture::bindHandle(GLenum target, GLuint glHandle, unsigned int textureU
 {
 	FATAL_ASSERT(textureUnit < MaxTextureUnits);
 
-	if (boundUnit_ != textureUnit)
-	{
-		glActiveTexture(GL_TEXTURE0 + textureUnit);
-		boundUnit_ = textureUnit;
-	}
-
 	if (boundTextures_[textureUnit][target] != glHandle)
 	{
+		if (boundUnit_ != textureUnit)
+		{
+			glActiveTexture(GL_TEXTURE0 + textureUnit);
+			boundUnit_ = textureUnit;
+		}
+
 		glBindTexture(target, glHandle);
 		boundTextures_[textureUnit][target] = glHandle;
 		return true;

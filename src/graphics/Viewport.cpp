@@ -13,6 +13,10 @@
 #include "GLDebug.h"
 #include "tracy.h"
 
+#ifdef WITH_QT5
+	#include "Qt5GfxDevice.h"
+#endif
+
 namespace ncine {
 
 namespace {
@@ -377,7 +381,14 @@ void Viewport::draw()
 		clearMode_ = ClearMode::THIS_FRAME_ONLY;
 
 	if (type_ == Type::REGULAR)
+	{
+#ifdef WITH_QT5
+		Qt5GfxDevice &gfxDevice = static_cast<Qt5GfxDevice &>(theApplication().gfxDevice());
+		gfxDevice.bindDefaultDrawFramebufferObject();
+#else
 		fbo_->unbind(GL_DRAW_FRAMEBUFFER);
+#endif
+	}
 }
 
 }

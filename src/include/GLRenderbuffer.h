@@ -13,7 +13,7 @@ class GLRenderbuffer
 	inline GLuint glHandle() const { return glHandle_; }
 
 	bool bind() const;
-	bool unbind() const;
+	static bool unbind();
 
   private:
 	static GLuint boundBuffer_;

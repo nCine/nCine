@@ -1,7 +1,8 @@
 #ifndef CLASS_NCINE_GLFRAMEBUFFEROBJECT
 #define CLASS_NCINE_GLFRAMEBUFFEROBJECT
 
-#include "GLHashMap.h"
+#define NCINE_INCLUDE_OPENGL
+#include "common_headers.h"
 #include <nctl/Array.h>
 
 namespace ncine {
@@ -19,10 +20,10 @@ class GLFramebufferObject
 	inline GLuint glHandle() const { return glHandle_; }
 
 	bool bind() const;
-	bool unbind() const;
+	static bool unbind();
 
 	bool bind(GLenum target) const;
-	bool unbind(GLenum target) const;
+	static bool unbind(GLenum target);
 
 	void attachRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height, GLenum attachment);
 	void attachTexture(GLTexture &texture, GLenum attachment);
@@ -42,6 +43,10 @@ class GLFramebufferObject
 	GLFramebufferObject(const GLFramebufferObject &) = delete;
 	/// Deleted assignment operator
 	GLFramebufferObject &operator=(const GLFramebufferObject &) = delete;
+
+	static bool bindHandle(GLenum target, GLuint glHandle);
+
+	friend class Qt5GfxDevice;
 };
 
 }

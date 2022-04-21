@@ -19,9 +19,9 @@ class GLTexture
 	inline void getObjectLabel(int bufSize, int *length, char *label) const { GLDebug::getObjectLabel(GLDebug::LabelTypes::TEXTURE, glHandle_, bufSize, length, label); }
 	inline void setObjectLabel(const char *label) { GLDebug::objectLabel(GLDebug::LabelTypes::TEXTURE, glHandle_, label); }
 
-	void bind(unsigned int textureUnit) const;
-	inline void bind() const { bind(0); }
-	void unbind() const;
+	bool bind(unsigned int textureUnit) const;
+	inline bool bind() const { return bind(0); }
+	bool unbind() const;
 
 	void texImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data);
 	void texSubImage2D(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data);

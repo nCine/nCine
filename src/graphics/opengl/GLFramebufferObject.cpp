@@ -44,63 +44,19 @@ bool GLFramebufferObject::bind() const
 	return bind(GL_FRAMEBUFFER);
 }
 
-bool GLFramebufferObject::unbind() const
+bool GLFramebufferObject::unbind()
 {
 	return unbind(GL_FRAMEBUFFER);
 }
 
 bool GLFramebufferObject::bind(GLenum target) const
 {
-	FATAL_ASSERT(target == GL_FRAMEBUFFER || target == GL_READ_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER);
-
-	if (target == GL_FRAMEBUFFER &&
-	    (readBoundBuffer_ != glHandle_ || drawBoundBuffer_ != glHandle_))
-	{
-		glBindFramebuffer(target, glHandle_);
-		readBoundBuffer_ = glHandle_;
-		drawBoundBuffer_ = glHandle_;
-		return true;
-	}
-	else if (target == GL_READ_FRAMEBUFFER && readBoundBuffer_ != glHandle_)
-	{
-		glBindFramebuffer(target, glHandle_);
-		readBoundBuffer_ = glHandle_;
-		return true;
-	}
-	else if (target == GL_DRAW_FRAMEBUFFER && drawBoundBuffer_ != glHandle_)
-	{
-		glBindFramebuffer(target, glHandle_);
-		drawBoundBuffer_ = glHandle_;
-		return true;
-	}
-	return false;
+	return bindHandle(target, glHandle_);
 }
 
-bool GLFramebufferObject::unbind(GLenum target) const
+bool GLFramebufferObject::unbind(GLenum target)
 {
-	FATAL_ASSERT(target == GL_FRAMEBUFFER || target == GL_READ_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER);
-
-	if (target == GL_FRAMEBUFFER &&
-	    (readBoundBuffer_ != 0 || drawBoundBuffer_ != 0))
-	{
-		glBindFramebuffer(target, 0);
-		readBoundBuffer_ = 0;
-		drawBoundBuffer_ = 0;
-		return true;
-	}
-	else if (target == GL_READ_FRAMEBUFFER && readBoundBuffer_ != 0)
-	{
-		glBindFramebuffer(target, 0);
-		readBoundBuffer_ = 0;
-		return true;
-	}
-	else if (target == GL_DRAW_FRAMEBUFFER && drawBoundBuffer_ != 0)
-	{
-		glBindFramebuffer(target, 0);
-		drawBoundBuffer_ = 0;
-		return true;
-	}
-	return false;
+	return bindHandle(target, 0);
 }
 
 void GLFramebufferObject::attachRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height, GLenum attachment)
@@ -131,6 +87,37 @@ bool GLFramebufferObject::isStatusComplete()
 	unbind(GL_FRAMEBUFFER);
 
 	return (status == GL_FRAMEBUFFER_COMPLETE);
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+bool GLFramebufferObject::bindHandle(GLenum target, GLuint glHandle)
+{
+	FATAL_ASSERT(target == GL_FRAMEBUFFER || target == GL_READ_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER);
+
+	if (target == GL_FRAMEBUFFER &&
+	    (readBoundBuffer_ != glHandle || drawBoundBuffer_ != glHandle))
+	{
+		glBindFramebuffer(target, glHandle);
+		readBoundBuffer_ = glHandle;
+		drawBoundBuffer_ = glHandle;
+		return true;
+	}
+	else if (target == GL_READ_FRAMEBUFFER && readBoundBuffer_ != glHandle)
+	{
+		glBindFramebuffer(target, glHandle);
+		readBoundBuffer_ = glHandle;
+		return true;
+	}
+	else if (target == GL_DRAW_FRAMEBUFFER && drawBoundBuffer_ != glHandle)
+	{
+		glBindFramebuffer(target, glHandle);
+		drawBoundBuffer_ = glHandle;
+		return true;
+	}
+	return false;
 }
 
 }

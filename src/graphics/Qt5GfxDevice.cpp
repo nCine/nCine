@@ -9,6 +9,7 @@
 
 #include "common_macros.h"
 #include "GLTexture.h"
+#include "GLFramebufferObject.h"
 #include "Qt5GfxDevice.h"
 #include "PCApplication.h"
 #include "Qt5Widget.h"
@@ -39,6 +40,11 @@ void Qt5GfxDevice::setResolution(int width, int height)
 	width_ = width;
 	height_ = height;
 	theApplication().resizeRootViewport(width, height);
+
+	QRect rect = widget_.geometry();
+	rect.setWidth(width);
+	rect.setHeight(height);
+	widget_.setGeometry(rect);
 
 	if (theApplication().appConfiguration().isResizable == false)
 	{
@@ -135,6 +141,12 @@ void Qt5GfxDevice::initGlew()
 void Qt5GfxDevice::resetTextureBinding()
 {
 	GLTexture::bindHandle(GL_TEXTURE_2D, 0);
+}
+
+void Qt5GfxDevice::bindDefaultDrawFramebufferObject()
+{
+	const GLuint glHandle = widget_.defaultFramebufferObject();
+	GLFramebufferObject::bindHandle(GL_DRAW_FRAMEBUFFER, glHandle);
 }
 
 ///////////////////////////////////////////////////////////

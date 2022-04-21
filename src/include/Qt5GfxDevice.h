@@ -41,6 +41,7 @@ class Qt5GfxDevice : public IGfxDevice
 	void initGlew();
 #endif
 	void resetTextureBinding();
+	void bindDefaultDrawFramebufferObject();
 
   private:
 	Qt5Widget &widget_;

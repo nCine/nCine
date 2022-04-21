@@ -41,7 +41,7 @@ bool GLVertexArrayObject::bind() const
 	return false;
 }
 
-bool GLVertexArrayObject::unbind() const
+bool GLVertexArrayObject::unbind()
 {
 	if (boundVAO_ != 0)
 	{

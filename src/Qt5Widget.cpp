@@ -30,11 +30,16 @@ Qt5Widget::Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*create
 	application_.init(createAppEventHandler_, argc, argv);
 	application_.setAutoSuspension(false);
 
+	const int width = application_.appConfiguration().resolution.x;
+	const int height = application_.appConfiguration().resolution.y;
+	QRect rect = geometry();
+	rect.setWidth(application_.appConfiguration().resolution.x);
+	rect.setHeight(application_.appConfiguration().resolution.y);
+	setGeometry(rect);
+
 	if (application_.appCfg_.isResizable == false)
 	{
 		setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-		const int width = application_.appConfiguration().resolution.x;
-		const int height = application_.appConfiguration().resolution.y;
 		setMinimumSize(width, height);
 		setMaximumSize(width, height);
 	}
@@ -80,18 +85,33 @@ bool Qt5Widget::event(QEvent *event)
 		case QEvent::TouchUpdate:
 		case QEvent::TouchEnd:
 		case QEvent::Wheel:
-			return inputManager ? inputManager->event(event) : false;
+			if (inputManager)
+			{
+				if (inputManager->handler())
+					makeCurrent();
+				const bool result = inputManager->event(event);
+				if (inputManager->handler())
+					doneCurrent();
+				return result;
+			}
+			return false;
 		case QEvent::Resize:
 		{
+			makeCurrent();
 			const QSize size = static_cast<QResizeEvent *>(event)->size();
 			application_.resizeRootViewport(size.width(), size.height());
+			doneCurrent();
 			return QWidget::event(event);
 		}
 		case QEvent::Close:
 		{
 			const bool shouldQuit = inputManager ? inputManager->shouldQuitOnRequest() : true;
 			if (shouldQuit)
+			{
+				makeCurrent();
 				shutdown();
+				doneCurrent();
+			}
 			else
 				static_cast<QCloseEvent *>(event)->ignore();
 			return true;
@@ -150,9 +170,6 @@ QSize Qt5Widget::minimumSizeHint() const
 
 QSize Qt5Widget::sizeHint() const
 {
-	if (application_.appConfiguration().isResizable == true)
-		return QSize(-1, -1);
-
 	if (isInitialized_)
 		return QSize(application_.widthInt(), application_.heightInt());
 	else
@@ -171,6 +188,7 @@ void Qt5Widget::shutdown()
 		application_.qt5Widget_ = nullptr;
 		isInitialized_ = false;
 	}
+	disconnect(SIGNAL(frameSwapped()));
 }
 
 }
