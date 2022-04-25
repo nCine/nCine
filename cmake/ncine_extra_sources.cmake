@@ -536,6 +536,14 @@ if(NCINE_WITH_RENDERDOC AND NOT APPLE)
 	list(APPEND SOURCES ${NCINE_ROOT}/src/graphics/RenderDocCapture.cpp)
 endif()
 
+if(Crashpad_FOUND AND NOT EMSCRIPTEN)
+	target_compile_definitions(ncine PRIVATE "WITH_CRASHPAD")
+	target_link_libraries(ncine PRIVATE Crashpad::Crashpad)
+
+	list(APPEND HEADERS ${NCINE_ROOT}/include/ncine/Crashpad.h)
+	list(APPEND SOURCES ${NCINE_ROOT}/src/Crashpad.cpp)
+endif()
+
 if(NCINE_BUILD_ANDROID)
 	list(APPEND HEADERS
 		${NCINE_ROOT}/include/ncine/AndroidApplication.h

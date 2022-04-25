@@ -133,6 +133,7 @@ endif()
 
 include(project_copy_targets)
 include(project_build_android)
+include(project_extract_symbols)
 include(project_strip_binaries)
 if(COMMAND callback_end)
 	callback_end()

@@ -96,6 +96,9 @@ class DLL_PUBLIC FileSystem
 	/// Returns a buffer with strings that specify valid drives in the system on Windows
 	static const char *logicalDriveStrings();
 
+	/// Returns the path of the directory where the executable resides
+	static nctl::String executableDir();
+
 	/// Returns the path of the current working directory
 	static nctl::String currentDir();
 	/// Sets the current working directory, the starting point for interpreting relative paths

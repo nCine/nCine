@@ -78,6 +78,15 @@ if(NOT NCINE_DYNAMIC_LIBRARY)
 endif()
 target_compile_definitions(game PRIVATE ${ANDROID_GENERATED_FLAGS})
 
+#if(NCINE_WITH_CRASHPAD)
+#	set(CRASHPAD_HANDLER_LIB ${PROJECT_SOURCE_DIR}/crashpad/lib/${ANDROID_ABI}/libcrashpad_handler.so)
+#	if(EXISTS ${CRASHPAD_HANDLER_LIB})
+#		add_library(crashpad_handler SHARED IMPORTED)
+#		set_property(TARGET crashpad_handler PROPERTY IMPORTED_LOCATION ${CRASHPAD_HANDLER_LIB})
+#		target_link_libraries(game PRIVATE crashpad_handler)
+#	endif()
+#endif()
+
 # Export ANativeActivity_onCreate() - https://github.com/android-ndk/ndk/issues/381
 set_property(TARGET game APPEND_STRING PROPERTY LINK_FLAGS "-u ANativeActivity_onCreate")
 

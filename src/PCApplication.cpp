@@ -21,6 +21,10 @@
 	#include "emscripten.h"
 #endif
 
+#ifdef WITH_CRASHPAD
+	#include "Crashpad.h"
+#endif
+
 #include "tracy.h"
 
 namespace ncine {
@@ -74,12 +78,18 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 	appEventHandler_->onPreInit(modifiableAppCfg);
 	modifiableAppCfg.readEnvVariables();
 
+#ifdef WITH_CRASHPAD
+	if (Crashpad::isInitialized() == false)
+		Crashpad::initialize();
+#endif
+
 	// Setting log levels and filename based on application configuration
 	FileLogger &fileLogger = static_cast<FileLogger &>(theServiceLocator().logger());
 	fileLogger.setConsoleLevel(appCfg_.consoleLogLevel);
 	fileLogger.setFileLevel(appCfg_.fileLogLevel);
 	fileLogger.openLogFile(appCfg_.logFile.data());
 	LOGI("IAppEventHandler::onPreInit() invoked"); // Logging delayed to set up the logger first
+	appCfg_.logFields();
 	appCfg_.logEnvVariables();
 
 	// The application's `onPreInit()` might have requested to quit

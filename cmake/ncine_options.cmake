@@ -42,6 +42,7 @@ option(NCINE_WITH_IMGUI "Enable the integration with Dear ImGui" ON)
 option(NCINE_WITH_NUKLEAR "Enable the integration with Nuklear" OFF)
 option(NCINE_WITH_TRACY "Enable the integration with the Tracy frame profiler" OFF)
 option(NCINE_WITH_RENDERDOC "Enable the integration with RenderDoc" OFF)
+option(NCINE_WITH_CRASHPAD "Enable the integation with Google Crashpad" OFF)
 
 if(EMSCRIPTEN)
 	set(NCINE_DYNAMIC_LIBRARY OFF)
@@ -71,6 +72,16 @@ endif()
 if(NCINE_WITH_RENDERDOC)
 	set(RENDERDOC_DIR "" CACHE PATH "Set the path to the RenderDoc directory")
 endif()
+
+if(NCINE_WITH_CRASHPAD)
+	set(Crashpad_ROOT "" CACHE PATH "Set the path to the Google Crashpad directory")
+	set(CRASHPAD_ANDROID_DIR "" CACHE PATH "Set the path to the Google Crashpad directory for Android")
+endif()
+# Extracting and installing debug symbols is useful even without Crashpad integration.
+# They can be used to resolve symbols in minidumps or core dumps, or to integrate with services like Sentry.
+set(NCINE_DEBUGINFO "OFF" CACHE STRING "Set the action to perform regarding debug information files")
+set_property(CACHE NCINE_DEBUGINFO PROPERTY STRINGS "OFF;EXTRACT;INSTALL")
+set(DEBUGINFO_DIR "${CMAKE_BINARY_DIR}/symbols" CACHE PATH "Set the path where to extract debug information files")
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 	option(NCINE_ADDRESS_SANITIZER "Enable the AddressSanitizer memory error detector of GCC and Clang" OFF)

@@ -493,6 +493,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #ifdef WITH_VORBIS
 			ImGui::TextUnformatted("WITH_VORBIS");
 #endif
+#ifdef WITH_OPENAL_EXT
+			ImGui::TextUnformatted("WITH_OPENAL_EXT");
+#endif
 #ifdef WITH_PNG
 			ImGui::TextUnformatted("WITH_PNG");
 #endif
@@ -676,18 +679,19 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("OpenGL Core: %s", appCfg.glCoreProfile() ? "true" : "false");
 		ImGui::Text("OpenGL Forward: %s", appCfg.glForwardCompatible() ? "true" : "false");
 #endif
-		ImGui::Text("%s Major: %d", openglApiName, appCfg.glMajorVersion());
-		ImGui::Text("%s Minor: %d", openglApiName, appCfg.glMinorVersion());
+		ImGui::Text("%s Major.Minor: %d.%d", openglApiName, appCfg.glMajorVersion(), appCfg.glMinorVersion());
 
 		ImGui::Separator();
-		ImGui::Text("Data path: \"%s\"", appCfg.dataPath().data());
-		ImGui::Text("Log file: \"%s\"", appCfg.logFile.data());
-		ImGui::Text("Console log level: %d", static_cast<int>(appCfg.consoleLogLevel));
-		ImGui::Text("File log level: %d", static_cast<int>(appCfg.fileLogLevel));
-		ImGui::Text("Frametimer Log interval: %f", appCfg.frameTimerLogInterval);
-		ImGui::Text("Profile text update time: %f", appCfg.profileTextUpdateTime());
+		ImGui::Text("Data Path: \"%s\"", appCfg.dataPath().data());
+		ImGui::Text("Log File: \"%s\"", appCfg.logFile.data());
+		ImGui::Text("Console Log Level: %d", static_cast<int>(appCfg.consoleLogLevel));
+		ImGui::Text("File Log Level: %d", static_cast<int>(appCfg.fileLogLevel));
+		ImGui::Text("Frametimer Log Interval: %f s", appCfg.frameTimerLogInterval);
+		ImGui::Text("Profile Text Update Time: %f s", appCfg.profileTextUpdateTime());
+
+		ImGui::Separator();
 		ImGui::Text("Resolution: %d x %d", appCfg.resolution.x, appCfg.resolution.y);
-		ImGui::Text("Refresh Rate: %f", appCfg.refreshRate);
+		ImGui::Text("Refresh Rate: %f Hz", appCfg.refreshRate);
 		widgetName_.assign("Window Position: ");
 		if (appCfg.windowPosition.x == AppConfiguration::WindowPositionIgnore)
 			widgetName_.append("Ignore x ");
@@ -704,27 +708,29 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("Frame Limit: %u", appCfg.frameLimit);
 
 		ImGui::Separator();
-		ImGui::Text("Window title: \"%s\"", appCfg.windowTitle.data());
-		ImGui::Text("Window icon: \"%s\"", appCfg.windowIconFilename.data());
+		ImGui::Text("Window Title: \"%s\"", appCfg.windowTitle.data());
+		ImGui::Text("Window Icon: \"%s\"", appCfg.windowIconFilename.data());
 
 		ImGui::Separator();
-		ImGui::Text("Buffer mapping: %s", appCfg.useBufferMapping ? "true" : "false");
-		ImGui::Text("Defer shader queries: %s", appCfg.deferShaderQueries ? "true" : "false");
+		ImGui::Text("Buffer Mapping: %s", appCfg.useBufferMapping ? "true" : "false");
+		ImGui::Text("Defer Shader Queries: %s", appCfg.deferShaderQueries ? "true" : "false");
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
-		ImGui::Text("Fixed batch size: %u", appCfg.fixedBatchSize);
+		ImGui::Text("Fixed Batch Size: %u", appCfg.fixedBatchSize);
 #endif
-		ImGui::Text("Binary shader cache: %s", appCfg.useBinaryShaderCache ? "true" : "false");
-		ImGui::Text("Shader cache directory name: \"%s\"", appCfg.shaderCacheDirname.data());
-		ImGui::Text("Compile batched shaders twice: %s", appCfg.compileBatchedShadersTwice ? "true" : "false");
-		ImGui::Text("VBO size: %lu", appCfg.vboSize);
-		ImGui::Text("IBO size: %lu", appCfg.iboSize);
-		ImGui::Text("Vao pool size: %u", appCfg.vaoPoolSize);
-		ImGui::Text("RenderCommand pool size: %u", appCfg.renderCommandPoolSize);
+		ImGui::Text("Binary Shader Cache: %s", appCfg.useBinaryShaderCache ? "true" : "false");
+		ImGui::Text("Shader Cache Directory Name: \"%s\"", appCfg.shaderCacheDirname.data());
+		ImGui::Text("Compile Batched Shaders Twice: %s", appCfg.compileBatchedShadersTwice ? "true" : "false");
 
 		ImGui::Separator();
-		ImGui::Text("Output audio frequency: %u", appCfg.outputAudioFrequency);
-		ImGui::Text("Mono audio sources: %u", appCfg.monoAudioSources);
-		ImGui::Text("Stereo audio sources: %u", appCfg.stereoAudioSources);
+		ImGui::Text("VBO Size: %lu bytes", appCfg.vboSize);
+		ImGui::Text("IBO Size: %lu bytes", appCfg.iboSize);
+		ImGui::Text("VAO Pool Size: %u", appCfg.vaoPoolSize);
+		ImGui::Text("RenderCommand Pool Size: %u", appCfg.renderCommandPoolSize);
+
+		ImGui::Separator();
+		ImGui::Text("Output Audio Frequency: %u Hz", appCfg.outputAudioFrequency);
+		ImGui::Text("Mono Audio Sources: %u", appCfg.monoAudioSources);
+		ImGui::Text("Stereo Audio Sources: %u", appCfg.stereoAudioSources);
 
 		ImGui::Separator();
 		ImGui::Text("Debug Overlay: %s", appCfg.withDebugOverlay ? "true" : "false");
@@ -734,6 +740,13 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("VSync: %s", appCfg.withVSync ? "true" : "false");
 		ImGui::Text("%s Debug Context: %s", openglApiName, appCfg.withGlDebugContext ? "true" : "false");
 		ImGui::Text("Console Colors: %s", appCfg.withConsoleColors ? "true" : "false");
+
+		if (appCfg.argc() > 0)
+		{
+			ImGui::Separator();
+			for (int i = 0; i < appCfg.argc(); i++)
+				LOGI_X("argv[%u]: \"%s\"", i, appCfg.argv(i));
+		}
 	}
 }
 

@@ -47,6 +47,16 @@ android {
 		}
 	}
 
+	final def withCrashpad = @GRADLE_WITH_CRASHPAD@
+	if (withCrashpad) {
+		packagingOptions {
+			doNotStrip "*/armeabi/*.so"
+			doNotStrip "*/armeabi-v7a/*.so"
+			doNotStrip "*/x86/*.so"
+			doNotStrip "*/x86_64/*.so"
+		}
+	}
+
 	final def cmakeBuildDir = new File(project.buildDir, "ncine")
 	final def architectures = ['@GRADLE_NDK_ARCHITECTURES@']
 	final def libcppIsShared = @GRADLE_LIBCPP_SHARED@
@@ -73,6 +83,13 @@ android {
 				commandLine cmakeCommand, '-E', 'copy_if_different', ndkDir + '/@GRADLE_LIBCPP_DIR@/' + libcppArch + '/libc++_shared.so', archDir.path
 			}
 			cmakeBuildDependsTasks.add('libcppCopy_' + arch)
+		}
+
+		if (withCrashpad) {
+			tasks.create(name:'crashpadHandlerCopy_' + arch, type: Exec, dependsOn: 'cmakeConfigure_' + arch) {
+				commandLine cmakeCommand, '-E', 'copy_if_different', projectDir.path + '/src/main/cpp/crashpad/lib/' + arch + '/libcrashpad_handler.so', archDir.path
+			}
+			cmakeBuildDependsTasks.add('crashpadHandlerCopy_' + arch)
 		}
 
 		tasks.create(name:'cmakeConfigure_' + arch, type: Exec) {

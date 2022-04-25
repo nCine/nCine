@@ -33,6 +33,20 @@ elseif(APPLE)
 	file(RELATIVE_PATH RELPATH_TO_LIB ${CMAKE_INSTALL_PREFIX}/${RUNTIME_INSTALL_DESTINATION} ${CMAKE_INSTALL_PREFIX}/${LIBRARY_INSTALL_DESTINATION})
 endif()
 
+if(NCINE_WITH_CRASHPAD AND EXISTS ${CRASHPAD_HANDLER_EXE})
+	add_custom_target(copy_crashpad_handler_tests ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CRASHPAD_HANDLER_EXE} ${CMAKE_BINARY_DIR}/tests
+		COMMENT "Copying Crashpad handler to tests..."
+	)
+	set_target_properties(copy_crashpad_handler_tests PROPERTIES FOLDER "CustomCopyTargets")
+
+	# On Linux check if the build is a preset, thus probably a distro package,
+	# so to avoid installing the crashpad handler in a system wide bin directory.
+	if(NOT LINUX OR (LINUX AND NOT DEFINED NCINE_OPTIONS_PRESETS))
+		install(FILES ${CRASHPAD_HANDLER_EXE} DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
+	endif()
+endif()
+
 if("${NCINE_OPTIONS_PRESETS}" STREQUAL "LuaDist")
 	list(APPEND APPTESTS ${NCINE_STARTUP_TEST})
 	list(APPEND ${NCINE_STARTUP_TEST}_SOURCES apptest_lua.h apptest_lua.cpp)
@@ -56,6 +70,9 @@ else()
 				list(APPEND APPTESTS apptest_simdbench)
 			endif()
 		endif()
+	endif()
+	if(NCINE_WITH_CRASHPAD AND EXISTS ${CRASHPAD_HANDLER_EXE})
+		list(APPEND APPTESTS apptest_crash)
 	endif()
 endif()
 
@@ -174,4 +191,5 @@ else()
 	message(WARNING "Startup test target not found: \"${NCINE_STARTUP_TEST}\"")
 endif()
 
+include(ncine_extract_symbols)
 include(ncine_strip_binaries)

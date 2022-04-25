@@ -26,6 +26,10 @@
 	#include <sys/sendfile.h>
 #endif
 
+#if defined(__APPLE__)
+	#include <mach-o/dyld.h>
+#endif
+
 #ifdef __ANDROID__
 	#include "AndroidApplication.h"
 	#include "AssetFile.h"
@@ -125,6 +129,49 @@ namespace {
 		date.second = sysTime->wSecond;
 
 		return date;
+	}
+#endif
+
+#ifdef __ANDROID__
+	bool copyAssetToFile(const char *assetPath, const char *destPath)
+	{
+		ASSERT(assetPath != nullptr);
+		ASSERT(destPath != nullptr);
+		if (AssetFile::assetPath(assetPath) == nullptr)
+			return false;
+
+		nctl::UniquePtr<IFile> assetFile = IFile::createFileHandle(assetPath);
+		assetFile->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);
+		if (assetFile->isOpened() == false)
+			return false;
+
+		nctl::UniquePtr<IFile> destFile = IFile::createFileHandle(destPath);
+		destFile->open(IFile::OpenMode::WRITE | IFile::OpenMode::BINARY);
+		if (destFile->isOpened() == false)
+			return false;
+
+		const size_t BufferSize = 4096;
+		char buffer[BufferSize];
+
+		unsigned long bytesRead = 0;
+		do
+		{
+			bytesRead = assetFile->read(buffer, BufferSize);
+			if (bytesRead > 0)
+			{
+				unsigned long bytesWritten = destFile->write(buffer, bytesRead);
+				if (bytesWritten != bytesRead)
+				{
+					assetFile->close();
+					destFile->close();
+					return false;
+				}
+			}
+		} while (bytesRead > 0);
+
+		assetFile->close();
+		destFile->close();
+		return true;
 	}
 #endif
 
@@ -457,6 +504,40 @@ const char *FileSystem::logicalDriveStrings()
 #else
 	return nullptr;
 #endif
+}
+
+nctl::String FileSystem::executableDir()
+{
+	nctl::String returnedPath(MaxPathLength);
+
+#if defined(_WIN32)
+	const HMODULE hModule = GetModuleHandleW(nullptr);
+	const DWORD retVal = GetModuleFileNameA(hModule, buffer, MaxPathLength);
+	if (retVal == 0)
+		buffer[0] = '\0';
+
+	char *lastPathSeparator = strrchr(buffer, '\\');
+#elif defined(__APPLE__)
+	unsigned int bufferSize = MaxPathLength;
+	if (_NSGetExecutablePath(buffer, &bufferSize))
+		buffer[0] = '\0';
+
+	char *lastPathSeparator = strrchr(buffer, '/');
+#else
+	const size_t readBytes = readlink("/proc/self/exe", buffer, MaxPathLength);
+	const int bytes = (readBytes < MaxPathLength - 1) ? readBytes : MaxPathLength - 1;
+	if (bytes >= 0)
+		buffer[bytes] = '\0';
+	else
+		buffer[0] = '\0';
+
+	char *lastPathSeparator = strrchr(buffer, '/');
+#endif
+	if (lastPathSeparator == nullptr)
+		lastPathSeparator = buffer;
+	*lastPathSeparator = '\0';
+
+	return (returnedPath = buffer);
 }
 
 nctl::String FileSystem::currentDir()
@@ -841,8 +922,10 @@ bool FileSystem::copy(const char *oldPath, const char *newPath)
 	return (status != 0);
 #elif defined(__linux__)
 	#ifdef __ANDROID__
-	if (AssetFile::assetPath(oldPath))
+	if (AssetFile::assetPath(newPath))
 		return false;
+	else if (AssetFile::assetPath(oldPath))
+		return copyAssetToFile(oldPath, newPath);
 	#endif
 
 	int source, dest;

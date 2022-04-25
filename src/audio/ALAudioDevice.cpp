@@ -74,6 +74,9 @@ ALAudioDevice::ALAudioDevice(const AppConfiguration &appCfg)
 		alExtensions_[i] = false;
 	retrieveExtensions();
 
+	logALAttributes();
+	logALExtensions();
+
 	const unsigned int MaxAvailableSources = unsigned(attributes_.numMonoSources + attributes_.numStereoSources);
 	unsigned int sourcePoolSize = appCfg.monoAudioSources + appCfg.stereoAudioSources;
 	if (sourcePoolSize == 0 || sourcePoolSize > MaxAvailableSources)
@@ -408,29 +411,29 @@ void ALAudioDevice::retrieveExtensions()
 
 void ALAudioDevice::logALAttributes()
 {
-	LOGI("--- OpenAL attributes ---");
-	LOGI_X("Device name: %s", attributes_.deviceName);
-	LOGI_X("Version: %d.%d", attributes_.majorVersion, attributes_.minorVersion);
-	LOGI_X("Frequency: %d", attributes_.outputFrequency);
-	LOGI_X("Mono sources: %d", attributes_.numMonoSources);
-	LOGI_X("Stereo sources: %d", attributes_.numStereoSources);
-	LOGI_X("Refresh rate: %d", attributes_.refreshRate);
-	LOGI_X("Synchronous: %s", attributes_.synchronous ? "true" : "false");
-	LOGI("--- OpenAL attributes ---");
+	LOGD("--- OpenAL attributes ---");
+	LOGD_X("Device name: %s", attributes_.deviceName);
+	LOGD_X("Version: %d.%d", attributes_.majorVersion, attributes_.minorVersion);
+	LOGD_X("Frequency: %d", attributes_.outputFrequency);
+	LOGD_X("Mono sources: %d", attributes_.numMonoSources);
+	LOGD_X("Stereo sources: %d", attributes_.numStereoSources);
+	LOGD_X("Refresh rate: %d", attributes_.refreshRate);
+	LOGD_X("Synchronous: %s", attributes_.synchronous ? "true" : "false");
+	LOGD("--- OpenAL attributes ---");
 }
 
 void ALAudioDevice::logALExtensions()
 {
-	LOGI("--- OpenAL extensions ---");
+	LOGV("--- OpenAL extensions ---");
 	for (unsigned int i = 0; i < ALExtensions::COUNT; i++)
-		LOGI_X("%s: %d", ExtensionNames[i], alExtensions_[i]);
+		LOGV_X("%s: %d", ExtensionNames[i], alExtensions_[i]);
 
 	if (hasExtension(IAudioDevice::ALExtensions::EXT_EFX))
 	{
-		LOGI_X("EFX version: %d.%d", attributes_.efxMajorVersion, attributes_.efxMinorVersion);
-		LOGI_X("Max auxiliary sends: %d", attributes_.maxAuxiliarySends);
+		LOGV_X("EFX version: %d.%d", attributes_.efxMajorVersion, attributes_.efxMinorVersion);
+		LOGV_X("Max auxiliary sends: %d", attributes_.maxAuxiliarySends);
 	}
-	LOGI("--- OpenAL extensions ---");
+	LOGV("--- OpenAL extensions ---");
 }
 
 }

@@ -26,6 +26,7 @@ class LuaFileSystem
 	static int logicalDrives(lua_State *L);
 	static int logicalDriveStrings(lua_State *L);
 
+	static int executableDir(lua_State *L);
 	static int currentDir(lua_State *L);
 	static int setCurrentDir(lua_State *L);
 

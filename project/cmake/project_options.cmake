@@ -1,5 +1,6 @@
 option(NCPROJECT_BUILD_ANDROID "Build the Android version of the project" OFF)
 option(NCPROJECT_STRIP_BINARIES "Enable symbols stripping from libraries and executables when in release" OFF)
+option(NCPROJECT_WITH_CRASHPAD "Enable the Crashpad integration by copying the Crashpad handler" OFF)
 
 set(NCPROJECT_DATA_DIR "${PARENT_SOURCE_DIR}/${NCPROJECT_NAME}-data" CACHE PATH "Set the path to the project data directory")
 set(NCPROJECT_ICONS_DIR "${PARENT_SOURCE_DIR}/${NCPROJECT_NAME}-data/icons" CACHE PATH "Set the path to the project icons directory")
@@ -23,6 +24,12 @@ if(NCPROJECT_BUILD_ANDROID)
 	option(NCPROJECT_ASSEMBLE_APK "Assemble the Android APK of the project with Gradle" OFF)
 	option(NCPROJECT_UNIVERSAL_APK "Configure the Gradle build script to assemble an universal APK for all ABIs" OFF)
 endif()
+
+# Extracting and installing debug symbols is useful even without Crashpad integration.
+# They can be used to resolve symbols in minidumps or core dumps, or to integrate with services like Sentry.
+set(NCPROJECT_DEBUGINFO "OFF" CACHE STRING "Set the action to perform regarding debug information files")
+set_property(CACHE NCPROJECT_DEBUGINFO PROPERTY STRINGS "OFF;EXTRACT;INSTALL")
+set(DEBUGINFO_DIR "${CMAKE_BINARY_DIR}/symbols" CACHE PATH "Set the path where to extract debug information files")
 
 # Project options presets
 set(NCPROJECT_OPTIONS_PRESETS "Default" CACHE STRING "Presets for CMake options")

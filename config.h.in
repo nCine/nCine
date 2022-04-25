@@ -4,6 +4,7 @@
 #cmakedefine01 NCINE_WITH_THREADS
 
 #cmakedefine01 NCINE_WITH_OPENGLES
+#cmakedefine01 NCINE_WITH_ANGLE
 
 #cmakedefine01 NCINE_WITH_GLEW
 #cmakedefine01 NCINE_WITH_GLFW
@@ -29,5 +30,7 @@
 #cmakedefine01 NCINE_WITH_TRACY
 
 #cmakedefine01 NCINE_WITH_RENDERDOC
+
+#cmakedefine01 NCINE_WITH_CRASHPAD
 
 #endif

@@ -80,8 +80,21 @@ jmethodID AndroidJniWrap_Activity::midFinishAndRemoveTask_ = nullptr;
 jclass AndroidJniClass_File::javaClass_ = nullptr;
 jmethodID AndroidJniClass_File::midGetAbsolutePath_ = nullptr;
 
+jclass AndroidJniClass_ApplicationInfo::javaClass_ = nullptr;
+jfieldID AndroidJniClass_ApplicationInfo::fidCompileSdkVersion_ = nullptr;
+jfieldID AndroidJniClass_ApplicationInfo::fidDataDir_ = nullptr;
+jfieldID AndroidJniClass_ApplicationInfo::fidDeviceProtectedDataDir_ = nullptr;
+jfieldID AndroidJniClass_ApplicationInfo::fidMinSdkVersion_ = nullptr;
+jfieldID AndroidJniClass_ApplicationInfo::fidNativeLibraryDir_ = nullptr;
+jfieldID AndroidJniClass_ApplicationInfo::fidProcessName_ = nullptr;
+jfieldID AndroidJniClass_ApplicationInfo::fidPublicSourceDir_ = nullptr;
+jfieldID AndroidJniClass_ApplicationInfo::fidSourceDir_ = nullptr;
+jfieldID AndroidJniClass_ApplicationInfo::fidTargetSdkVersion_ = nullptr;
+
 jobject AndroidJniWrap_Context::contextObject_ = nullptr;
+jmethodID AndroidJniWrap_Context::midGetApplicationInfo_ = nullptr;
 jmethodID AndroidJniWrap_Context::midGetCacheDir_ = nullptr;
+jmethodID AndroidJniWrap_Context::midGetFilesDir_ = nullptr;
 
 jobject AndroidJniWrap_InputMethodManager::inputMethodManagerObject_ = nullptr;
 jmethodID AndroidJniWrap_InputMethodManager::midToggleSoftInput_ = nullptr;
@@ -131,6 +144,17 @@ void AndroidJniHelper::attachJVM(struct android_app *state)
 			// Cache the value of SDK version to avoid going through JNI in the future
 			sdkVersion_ = AndroidJniClass_Version::sdkInt();
 			LOGI_X("Android API version - NDK: %d, JNI: %d", __ANDROID_API__, sdkVersion_);
+
+			AndroidJniClass_ApplicationInfo applicationInfo = AndroidJniWrap_Context::getApplicationInfo();
+			LOGI_X("SDK versions - min: %d, compile: %d, target: %d",
+			       applicationInfo.minSdkVersion(), applicationInfo.compileSdkVersion(), applicationInfo.targetSdkVersion());
+
+			const unsigned int StringLength = 256;
+			char string[StringLength];
+			applicationInfo.nativeLibraryDir(string, StringLength);
+			LOGI_X("nativeLibraryDir: %s", string);
+			applicationInfo.processName(string, StringLength);
+			LOGI_X("processName: %s", string);
 		}
 	}
 }
@@ -162,6 +186,7 @@ void AndroidJniHelper::initClasses()
 	AndroidJniClass_DisplayMode::init();
 	AndroidJniClass_Display::init();
 	AndroidJniClass_File::init();
+	AndroidJniClass_ApplicationInfo::init();
 }
 
 // ------------------- AndroidJniClass -------------------
@@ -252,6 +277,23 @@ jfieldID AndroidJniClass::getStaticFieldID(jclass javaClass, const char *name, c
 	}
 	else
 		LOGE("Cannot get static fields before finding the Java class");
+
+	return fid;
+}
+
+jfieldID AndroidJniClass::getFieldID(jclass javaClass, const char *name, const char *signature)
+{
+	jfieldID fid = nullptr;
+
+	ASSERT(name != nullptr && signature != nullptr);
+	if (javaClass != nullptr)
+	{
+		fid = AndroidJniHelper::jniEnv->GetFieldID(javaClass, name, signature);
+		if (fid == nullptr)
+			LOGE_X("Cannot get field \"%s\" with signature \"%s\"", name, signature);
+	}
+	else
+		LOGE("Cannot get fields before finding the Java class");
 
 	return fid;
 }
@@ -654,6 +696,86 @@ int AndroidJniClass_File::getAbsolutePath(char *destination, int maxStringSize) 
 	return javaStringToCString(strAbsolutePath, destination, maxStringSize);
 }
 
+// ------------------- AndroidJniClass_ApplicationInfo -------------------
+
+void AndroidJniClass_ApplicationInfo::init()
+{
+	javaClass_ = AndroidJniClass::findClass("android/content/pm/ApplicationInfo");
+
+	fidCompileSdkVersion_ = AndroidJniClass::getFieldID(javaClass_, "compileSdkVersion", "I");
+	fidDataDir_ = AndroidJniClass::getFieldID(javaClass_, "dataDir", "Ljava/lang/String;");
+	fidDeviceProtectedDataDir_ = AndroidJniClass::getFieldID(javaClass_, "deviceProtectedDataDir", "Ljava/lang/String;");
+	fidMinSdkVersion_ = AndroidJniClass::getFieldID(javaClass_, "minSdkVersion", "I");
+	fidNativeLibraryDir_ = AndroidJniClass::getFieldID(javaClass_, "nativeLibraryDir", "Ljava/lang/String;");
+	fidProcessName_ = AndroidJniClass::getFieldID(javaClass_, "processName", "Ljava/lang/String;");
+	fidPublicSourceDir_ = AndroidJniClass::getFieldID(javaClass_, "publicSourceDir", "Ljava/lang/String;");
+	fidSourceDir_ = AndroidJniClass::getFieldID(javaClass_, "sourceDir", "Ljava/lang/String;");
+	fidTargetSdkVersion_ = AndroidJniClass::getFieldID(javaClass_, "targetSdkVersion", "I");
+}
+
+int AndroidJniClass_ApplicationInfo::compileSdkVersion() const
+{
+	if (AndroidJniHelper::sdkVersion() < 31)
+		return 0;
+
+	const jint sdkVersion = AndroidJniHelper::jniEnv->GetIntField(javaObject_, fidCompileSdkVersion_);
+	return int(sdkVersion);
+}
+
+int AndroidJniClass_ApplicationInfo::dataDir(char *destination, int maxStringSize) const
+{
+	jstring strDataDir = static_cast<jstring>(AndroidJniHelper::jniEnv->GetObjectField(javaObject_, fidDataDir_));
+	return javaStringToCString(strDataDir, destination, maxStringSize);
+}
+
+int AndroidJniClass_ApplicationInfo::deviceProtectedDataDir(char *destination, int maxStringSize) const
+{
+	if (AndroidJniHelper::sdkVersion() < 24)
+		return 0;
+
+	jstring strDeviceProtectedDataDir = static_cast<jstring>(AndroidJniHelper::jniEnv->GetObjectField(javaObject_, fidDeviceProtectedDataDir_));
+	return javaStringToCString(strDeviceProtectedDataDir, destination, maxStringSize);
+}
+
+int AndroidJniClass_ApplicationInfo::minSdkVersion() const
+{
+	if (AndroidJniHelper::sdkVersion() < 24)
+		return 0;
+
+	const jint sdkVersion = AndroidJniHelper::jniEnv->GetIntField(javaObject_, fidMinSdkVersion_);
+	return int(sdkVersion);
+}
+
+int AndroidJniClass_ApplicationInfo::nativeLibraryDir(char *destination, int maxStringSize) const
+{
+	jstring strNativeLibraryDir = static_cast<jstring>(AndroidJniHelper::jniEnv->GetObjectField(javaObject_, fidNativeLibraryDir_));
+	return javaStringToCString(strNativeLibraryDir, destination, maxStringSize);
+}
+
+int AndroidJniClass_ApplicationInfo::processName(char *destination, int maxStringSize) const
+{
+	jstring strProcessName = static_cast<jstring>(AndroidJniHelper::jniEnv->GetObjectField(javaObject_, fidProcessName_));
+	return javaStringToCString(strProcessName, destination, maxStringSize);
+}
+
+int AndroidJniClass_ApplicationInfo::publicSourceDir(char *destination, int maxStringSize) const
+{
+	jstring strPublicSourceDir = static_cast<jstring>(AndroidJniHelper::jniEnv->GetObjectField(javaObject_, fidPublicSourceDir_));
+	return javaStringToCString(strPublicSourceDir, destination, maxStringSize);
+}
+
+int AndroidJniClass_ApplicationInfo::sourceDir(char *destination, int maxStringSize) const
+{
+	jstring strSourceDir = static_cast<jstring>(AndroidJniHelper::jniEnv->GetObjectField(javaObject_, fidSourceDir_));
+	return javaStringToCString(strSourceDir, destination, maxStringSize);
+}
+
+int AndroidJniClass_ApplicationInfo::targetSdkVersion() const
+{
+	const jint sdkVersion = AndroidJniHelper::jniEnv->GetIntField(javaObject_, fidTargetSdkVersion_);
+	return int(sdkVersion);
+}
+
 // ------------------- AndroidJniWrap_Context -------------------
 
 void AndroidJniWrap_Context::init(struct android_app *state)
@@ -664,12 +786,28 @@ void AndroidJniWrap_Context::init(struct android_app *state)
 	// Retrieve `Context` object
 	contextObject_ = state->activity->clazz;
 
+	midGetApplicationInfo_ = AndroidJniClass::getMethodID(contextClass, "getApplicationInfo", "()Landroid/content/pm/ApplicationInfo;");
 	midGetCacheDir_ = AndroidJniClass::getMethodID(contextClass, "getCacheDir", "()Ljava/io/File;");
+	midGetFilesDir_ = AndroidJniClass::getMethodID(contextClass, "getFilesDir", "()Ljava/io/File;");
+}
+
+AndroidJniClass_ApplicationInfo AndroidJniWrap_Context::getApplicationInfo()
+{
+	jobject applicationInfoObject = AndroidJniHelper::jniEnv->CallObjectMethod(contextObject_, midGetApplicationInfo_);
+	AndroidJniClass_ApplicationInfo applicationInfo(applicationInfoObject);
+	return applicationInfo;
 }
 
 AndroidJniClass_File AndroidJniWrap_Context::getCacheDir()
 {
 	jobject fileObject = AndroidJniHelper::jniEnv->CallObjectMethod(contextObject_, midGetCacheDir_);
+	AndroidJniClass_File file(fileObject);
+	return file;
+}
+
+AndroidJniClass_File AndroidJniWrap_Context::getFilesDir()
+{
+	jobject fileObject = AndroidJniHelper::jniEnv->CallObjectMethod(contextObject_, midGetFilesDir_);
 	AndroidJniClass_File file(fileObject);
 	return file;
 }

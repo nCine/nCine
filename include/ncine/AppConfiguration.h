@@ -187,6 +187,8 @@ class DLL_PUBLIC AppConfiguration
 	/// The old variables before a potential overriding by environment ones
 	struct OldValues old;
 
+	/// Logs the class fields
+	void logFields() const;
 	/// Reads the environment variables that can override the user ones
 	void readEnvVariables();
 	/// Logs the environment variables that have overridden the user ones

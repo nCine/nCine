@@ -14,6 +14,10 @@
 	#include "NuklearAndroidInput.h"
 #endif
 
+#ifdef WITH_CRASHPAD
+	#include "Crashpad.h"
+#endif
+
 namespace nc = ncine;
 
 /// Processes the next application command
@@ -207,6 +211,7 @@ void AndroidApplication::enableAccelerometer(bool enabled)
 		AndroidInputManager::enableAccelerometer(enabled);
 }
 
+/** \note It's the same path getFilesDir() returns, the app-specific persistent files directory */
 const char *AndroidApplication::internalDataPath() const
 {
 	return state_->activity->internalDataPath;
@@ -246,15 +251,29 @@ void AndroidApplication::preInit()
 	// Only `onPreInit()` can modify the application configuration
 	AppConfiguration &modifiableAppCfg = const_cast<AppConfiguration &>(appCfg_);
 	appEventHandler_->onPreInit(modifiableAppCfg);
+
+	// If the log file path is not contained in the files directory, then add it
+	if (appCfg_.logFile.length() <= fs::savePath().length() ||
+	    (appCfg_.logFile.length() > fs::savePath().length() &&
+	     strncmp(fs::dirName(appCfg_.logFile.data()).data(), fs::savePath().data(), fs::savePath().length()) != 0))
+	{
+		modifiableAppCfg.logFile = fs::joinPath(fs::savePath(), appCfg_.logFile);
+	}
 	modifiableAppCfg.readEnvVariables();
 
+#ifdef WITH_CRASHPAD
+	// Initialize Crashpad after validating the `logFile` path
+	if (Crashpad::isInitialized() == false)
+		Crashpad::initialize();
+#endif
+
 	// Setting log levels and filename based on application configuration
-	const nctl::String logFilePath = fs::joinPath(fs::dataPath(), appCfg_.logFile);
 	FileLogger &fileLogger = static_cast<FileLogger &>(theServiceLocator().logger());
 	fileLogger.setConsoleLevel(appCfg_.consoleLogLevel);
 	fileLogger.setFileLevel(appCfg_.fileLogLevel);
-	fileLogger.openLogFile(logFilePath.data());
+	fileLogger.openLogFile(appCfg_.logFile.data());
 	LOGI("IAppEventHandler::onPreInit() invoked"); // Logging delayed to set up the logger first
+	appCfg_.logFields();
 	appCfg_.logEnvVariables();
 }
 

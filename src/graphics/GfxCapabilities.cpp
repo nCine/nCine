@@ -133,16 +133,20 @@ void GfxCapabilities::init()
 
 	ASSERT(glIntValues_[GLIntValues::NUM_PROGRAM_BINARY_FORMATS] <= MaxProgramBinaryFormats);
 	glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, programBinaryFormats_);
+
+	logGLInfo();
+	logGLExtensions();
+	logGLCaps();
 }
 
 void GfxCapabilities::logGLInfo()
 {
-	LOGI("--- OpenGL device info ---");
-	LOGI_X("Vendor: %s", glInfoStrings_.vendor);
-	LOGI_X("Renderer: %s", glInfoStrings_.renderer);
-	LOGI_X("OpenGL Version: %s", glInfoStrings_.glVersion);
-	LOGI_X("GLSL Version: %s", glInfoStrings_.glslVersion);
-	LOGI("--- OpenGL device info ---");
+	LOGD("--- OpenGL device info ---");
+	LOGD_X("Vendor: %s", glInfoStrings_.vendor);
+	LOGD_X("Renderer: %s", glInfoStrings_.renderer);
+	LOGD_X("OpenGL Version: %s", glInfoStrings_.glVersion);
+	LOGD_X("GLSL Version: %s", glInfoStrings_.glslVersion);
+	LOGD("--- OpenGL device info ---");
 }
 
 void GfxCapabilities::logGLExtensions()
@@ -150,38 +154,38 @@ void GfxCapabilities::logGLExtensions()
 	GLint numExtensions;
 	glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
 
-	LOGI("--- OpenGL extensions ---");
+	LOGV("--- OpenGL extensions ---");
 	for (GLuint i = 0; i < static_cast<GLuint>(numExtensions); i++)
-		LOGI_X("Extension %u: %s", i, glGetStringi(GL_EXTENSIONS, i));
-	LOGI("--- OpenGL extensions ---");
+		LOGV_X("Extension %u: %s", i, glGetStringi(GL_EXTENSIONS, i));
+	LOGV("--- OpenGL extensions ---");
 }
 
 void GfxCapabilities::logGLCaps() const
 {
-	LOGI("--- OpenGL device capabilities ---");
-	LOGI_X("GL_MAX_TEXTURE_SIZE: %d", glIntValues_[GLIntValues::MAX_TEXTURE_SIZE]);
-	LOGI_X("GL_MAX_TEXTURE_IMAGE_UNITS: %d", glIntValues_[GLIntValues::MAX_TEXTURE_IMAGE_UNITS]);
-	LOGI_X("Unclamped GL_MAX_UNIFORM_BLOCK_SIZE: %d", glIntValues_[GLIntValues::UNCLAMPED_MAX_UNIFORM_BLOCK_SIZE]);
-	LOGI_X("GL_MAX_UNIFORM_BLOCK_SIZE: %d", glIntValues_[GLIntValues::MAX_UNIFORM_BLOCK_SIZE]);
-	LOGI_X("GL_MAX_UNIFORM_BUFFER_BINDINGS: %d", glIntValues_[GLIntValues::MAX_UNIFORM_BUFFER_BINDINGS]);
-	LOGI_X("GL_MAX_VERTEX_UNIFORM_BLOCKS: %d", glIntValues_[GLIntValues::MAX_VERTEX_UNIFORM_BLOCKS]);
-	LOGI_X("GL_MAX_FRAGMENT_UNIFORM_BLOCKS: %d", glIntValues_[GLIntValues::MAX_FRAGMENT_UNIFORM_BLOCKS]);
-	LOGI_X("GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT: %d", glIntValues_[GLIntValues::UNIFORM_BUFFER_OFFSET_ALIGNMENT]);
+	LOGD("--- OpenGL device capabilities ---");
+	LOGD_X("GL_MAX_TEXTURE_SIZE: %d", glIntValues_[GLIntValues::MAX_TEXTURE_SIZE]);
+	LOGD_X("GL_MAX_TEXTURE_IMAGE_UNITS: %d", glIntValues_[GLIntValues::MAX_TEXTURE_IMAGE_UNITS]);
+	LOGD_X("Unclamped GL_MAX_UNIFORM_BLOCK_SIZE: %d", glIntValues_[GLIntValues::UNCLAMPED_MAX_UNIFORM_BLOCK_SIZE]);
+	LOGD_X("GL_MAX_UNIFORM_BLOCK_SIZE: %d", glIntValues_[GLIntValues::MAX_UNIFORM_BLOCK_SIZE]);
+	LOGD_X("GL_MAX_UNIFORM_BUFFER_BINDINGS: %d", glIntValues_[GLIntValues::MAX_UNIFORM_BUFFER_BINDINGS]);
+	LOGD_X("GL_MAX_VERTEX_UNIFORM_BLOCKS: %d", glIntValues_[GLIntValues::MAX_VERTEX_UNIFORM_BLOCKS]);
+	LOGD_X("GL_MAX_FRAGMENT_UNIFORM_BLOCKS: %d", glIntValues_[GLIntValues::MAX_FRAGMENT_UNIFORM_BLOCKS]);
+	LOGD_X("GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT: %d", glIntValues_[GLIntValues::UNIFORM_BUFFER_OFFSET_ALIGNMENT]);
 #if !defined(EMSCRIPTEN) && (!defined(WITH_OPENGLES) || (defined(WITH_OPENGLES) && GL_ES_VERSION_3_1))
-	LOGI_X("GL_MAX_VERTEX_ATTRIB_STRIDE: %d", glIntValues_[GLIntValues::MAX_VERTEX_ATTRIB_STRIDE]);
+	LOGD_X("GL_MAX_VERTEX_ATTRIB_STRIDE: %d", glIntValues_[GLIntValues::MAX_VERTEX_ATTRIB_STRIDE]);
 #endif
-	LOGI_X("GL_MAX_COLOR_ATTACHMENTS: %d", glIntValues_[GLIntValues::MAX_COLOR_ATTACHMENTS]);
-	LOGI_X("GL_NUM_PROGRAM_BINARY_FORMATS: %d", glIntValues_[GLIntValues::NUM_PROGRAM_BINARY_FORMATS]);
-	LOGI("---");
-	LOGI_X("GL_KHR_debug: %d", glExtensions_[GLExtensions::KHR_DEBUG]);
-	LOGI_X("GL_ARB_texture_storage: %d", glExtensions_[GLExtensions::ARB_TEXTURE_STORAGE]);
-	LOGI_X("GL_ARB_get_program_binary: %d", glExtensions_[GLExtensions::ARB_GET_PROGRAM_BINARY]);
-	LOGI_X("GL_EXT_texture_compression_s3tc: %d", glExtensions_[GLExtensions::EXT_TEXTURE_COMPRESSION_S3TC]);
-	LOGI_X("GL_OES_compressed_ETC1_RGB8_texture: %d", glExtensions_[GLExtensions::OES_COMPRESSED_ETC1_RGB8_TEXTURE]);
-	LOGI_X("GL_AMD_compressed_ATC_texture: %d", glExtensions_[GLExtensions::AMD_COMPRESSED_ATC_TEXTURE]);
-	LOGI_X("GL_IMG_texture_compression_pvrtc: %d", glExtensions_[GLExtensions::IMG_TEXTURE_COMPRESSION_PVRTC]);
-	LOGI_X("GL_KHR_texture_compression_astc_ldr: %d", glExtensions_[GLExtensions::KHR_TEXTURE_COMPRESSION_ASTC_LDR]);
-	LOGI("--- OpenGL device capabilities ---");
+	LOGD_X("GL_MAX_COLOR_ATTACHMENTS: %d", glIntValues_[GLIntValues::MAX_COLOR_ATTACHMENTS]);
+	LOGD_X("GL_NUM_PROGRAM_BINARY_FORMATS: %d", glIntValues_[GLIntValues::NUM_PROGRAM_BINARY_FORMATS]);
+	LOGD("---");
+	LOGD_X("GL_KHR_debug: %d", glExtensions_[GLExtensions::KHR_DEBUG]);
+	LOGD_X("GL_ARB_texture_storage: %d", glExtensions_[GLExtensions::ARB_TEXTURE_STORAGE]);
+	LOGD_X("GL_ARB_get_program_binary: %d", glExtensions_[GLExtensions::ARB_GET_PROGRAM_BINARY]);
+	LOGD_X("GL_EXT_texture_compression_s3tc: %d", glExtensions_[GLExtensions::EXT_TEXTURE_COMPRESSION_S3TC]);
+	LOGD_X("GL_OES_compressed_ETC1_RGB8_texture: %d", glExtensions_[GLExtensions::OES_COMPRESSED_ETC1_RGB8_TEXTURE]);
+	LOGD_X("GL_AMD_compressed_ATC_texture: %d", glExtensions_[GLExtensions::AMD_COMPRESSED_ATC_TEXTURE]);
+	LOGD_X("GL_IMG_texture_compression_pvrtc: %d", glExtensions_[GLExtensions::IMG_TEXTURE_COMPRESSION_PVRTC]);
+	LOGD_X("GL_KHR_texture_compression_astc_ldr: %d", glExtensions_[GLExtensions::KHR_TEXTURE_COMPRESSION_ASTC_LDR]);
+	LOGD("--- OpenGL device capabilities ---");
 }
 
 void GfxCapabilities::checkGLExtensions(const char *extensionNames[], bool results[], unsigned int numExtensionsToCheck) const

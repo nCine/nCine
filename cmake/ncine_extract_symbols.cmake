@@ -1,0 +1,34 @@
+if(${NCINE_DEBUGINFO} STREQUAL "EXTRACT" OR ${NCINE_DEBUGINFO} STREQUAL "INSTALL")
+	if(NOT EXISTS "${DEBUGINFO_DIR}")
+		file(MAKE_DIRECTORY "${DEBUGINFO_DIR}")
+	endif()
+
+	get_directory_property(NCINE_BUILD_TARGETS ${CMAKE_BUILD_DIR} BUILDSYSTEM_TARGETS)
+	foreach(BUILD_TARGET ${NCINE_BUILD_TARGETS})
+		get_target_property(BUILD_TARGET_TYPE ${BUILD_TARGET} TYPE)
+		if(BUILD_TARGET_TYPE STREQUAL "SHARED_LIBRARY" OR BUILD_TARGET_TYPE STREQUAL "EXECUTABLE")
+			if(WIN32)
+				set_target_properties(${BUILD_TARGET} PROPERTIES PDB_OUTPUT_DIRECTORY ${DEBUGINFO_DIR})
+			else()
+				get_target_property(TARGET_OUTPUT_NAME ${BUILD_TARGET} OUTPUT_NAME)
+				if(NOT TARGET_OUTPUT_NAME)
+					set(TARGET_OUTPUT_NAME ${BUILD_TARGET})
+				endif()
+				if(APPLE)
+					add_custom_command(TARGET ${BUILD_TARGET} POST_BUILD
+						COMMAND ${CMAKE_COMMAND} -E echo "Creating the \"${TARGET_OUTPUT_NAME}.dsym\" debug information file"
+						COMMAND dsymutil -o "${DEBUGINFO_DIR}/${TARGET_OUTPUT_NAME}.dsym" $<TARGET_FILE:${BUILD_TARGET}>)
+				elseif(LINUX)
+					if(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1.0) OR
+					("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0.0))
+						set(COMPRESS_DEBUG_SECTIONS --compress-debug-sections=zlib)
+					endif()
+
+					add_custom_command(TARGET ${BUILD_TARGET} POST_BUILD
+						COMMAND ${CMAKE_COMMAND} -E echo "Creating the \"${TARGET_OUTPUT_NAME}.debug\" debug information file"
+						COMMAND objcopy --only-keep-debug ${COMPRESS_DEBUG_SECTIONS} $<TARGET_FILE:${BUILD_TARGET}> "${DEBUGINFO_DIR}/${TARGET_OUTPUT_NAME}.debug")
+				endif()
+			endif()
+		endif()
+	endforeach()
+endif()

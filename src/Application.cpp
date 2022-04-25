@@ -48,6 +48,125 @@ namespace ncine {
 
 namespace {
 	static nctl::StaticString<256> appInfoString;
+
+	void logInitInformation()
+	{
+#ifdef WITH_GIT_VERSION
+		appInfoString.format("nCine %s (%s) compiled on %s at %s", VersionStrings::Version, VersionStrings::GitBranch,
+		                     VersionStrings::CompilationDate, VersionStrings::CompilationTime);
+#else
+		appInfoString.format("nCine compiled on %s at %s", VersionStrings::CompilationDate, VersionStrings::CompilationTime);
+#endif
+		LOGI_X("%s", appInfoString.data());
+#ifdef WITH_TRACY
+		TracyAppInfo(appInfoString.data(), appInfoString.length());
+#endif
+
+		LOGI_X("Data path: \"%s\"", fs::dataPath().data());
+		LOGI_X("Home path: \"%s\"", fs::homePath().data());
+		LOGI_X("Save path: \"%s\"", fs::savePath().data());
+		LOGI_X("Cache path: \"%s\"", fs::cachePath().data());
+
+		LOGD("System preprocessor defines:");
+#ifdef __linux__
+		LOGD("__linux__");
+#endif
+#ifdef _WIN32
+		LOGD("_WIN32");
+#endif
+#ifdef _WIN64
+		LOGD("_WIN64");
+#endif
+#ifdef __ANDROID__
+		LOGD("__ANDROID__");
+#endif
+#ifdef __ANDROID_API__
+		LOGD_X("__ANDROID_API__ = %d", static_cast<int>(__ANDROID_API__));
+#endif
+#ifdef __APPLE__
+		LOGD("__APPLE__");
+#endif
+#ifdef _MSC_VER
+		LOGD_X("_MSC_VER = %d", _MSC_VER);
+#endif
+#ifdef __MINGW32__
+		LOGD("__MINGW32__");
+#endif
+#ifdef __MINGW64__
+		LOGD("__MINGW64__");
+#endif
+#ifdef __EMSCRIPTEN__
+		LOGD("__EMSCRIPTEN__");
+#endif
+#ifdef __GNUC__
+		LOGD_X("__GNUC__ = %d", static_cast<int>(__GNUC__));
+#endif
+#ifdef __clang_version__
+		LOGD_X("__clang_version__ = %s", __clang_version__);
+#endif
+
+		LOGD("nCine preprocessor defines:");
+#ifdef WITH_THREADS
+		LOGD("WITH_THREADS");
+#endif
+#ifdef WITH_OPENGLES
+		LOGD("WITH_OPENGLES");
+#endif
+#ifdef WITH_ANGLE
+		LOGD("WITH_ANGLE");
+#endif
+#ifdef WITH_GLEW
+		LOGD("WITH_GLEW");
+#endif
+#ifdef WITH_GLFW
+		LOGD("WITH_GLFW");
+#endif
+#ifdef WITH_SDL
+		LOGD("WITH_SDL");
+#endif
+#ifdef WITH_QT5
+		LOGD("WITH_QT5");
+#endif
+#ifdef WITH_AUDIO
+		LOGD("WITH_AUDIO");
+#endif
+#ifdef WITH_VORBIS
+		LOGD("WITH_VORBIS");
+#endif
+#ifdef NCINE_WITH_OPENAL_EXT
+		LOGD("NCINE_WITH_OPENAL_EXT");
+#endif
+#ifdef WITH_PNG
+		LOGD("WITH_PNG");
+#endif
+#ifdef WITH_WEBP
+		LOGD("WITH_WEBP");
+#endif
+#ifdef WITH_LUA
+		LOGD("WITH_LUA");
+#endif
+#ifdef WITH_SCRIPTING_API
+		LOGD("WITH_SCRIPTING_API");
+#endif
+#ifdef WITH_ALLOCATORS
+		LOGD("WITH_ALLOCATORS");
+#endif
+#ifdef WITH_IMGUI
+		LOGD("WITH_IMGUI");
+#endif
+#ifdef WITH_NUKLEAR
+		LOGD("WITH_NUKLEAR");
+#endif
+#ifdef WITH_TRACY
+		LOGD("WITH_TRACY");
+#endif
+#ifdef WITH_RENDERDOC
+		LOGD("WITH_RENDERDOC");
+#endif
+#ifdef WITH_CRASHPAD
+		LOGD("WITH_CRASHPAD");
+#endif
+	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -103,16 +222,7 @@ void Application::initCommon()
 	ZoneScoped;
 	profileStartTime_ = TimeStamp::now();
 
-#ifdef WITH_GIT_VERSION
-	appInfoString.format("nCine %s (%s) compiled on %s at %s", VersionStrings::Version, VersionStrings::GitBranch,
-	                     VersionStrings::CompilationDate, VersionStrings::CompilationTime);
-#else
-	appInfoString.format("nCine compiled on %s at %s", VersionStrings::CompilationDate, VersionStrings::CompilationTime);
-#endif
-	LOGI_X("%s", appInfoString.data());
-#ifdef WITH_TRACY
-	TracyAppInfo(appInfoString.data(), appInfoString.length());
-#endif
+	logInitInformation();
 
 	theServiceLocator().registerIndexer(nctl::makeUnique<ArrayIndexer>());
 #ifdef WITH_AUDIO
@@ -125,10 +235,6 @@ void Application::initCommon()
 #endif
 	theServiceLocator().registerGfxCapabilities(nctl::makeUnique<GfxCapabilities>());
 	GLDebug::init(theServiceLocator().gfxCapabilities());
-
-	LOGI_X("Data path: \"%s\"", fs::dataPath().data());
-	LOGI_X("Save path: \"%s\"", fs::savePath().data());
-	LOGI_X("Cache path: \"%s\"", fs::cachePath().data());
 
 #ifdef WITH_RENDERDOC
 	RenderDocCapture::init();

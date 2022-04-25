@@ -1,10 +1,14 @@
 #include <ncine/AppConfiguration.h>
 #include <ncine/FileSystem.h>
 
+#if defined(__ANDROID__)
+	#include <ncine/AssetFile.h>
+#endif
+
 inline void setDataPath(ncine::AppConfiguration &config)
 {
 #if defined(__ANDROID__)
-	config.dataPath() = "asset::";
+	config.dataPath() = nc::AssetFile::Prefix;
 #elif !defined(__EMSCRIPTEN__)
 	#ifdef NCINE_TESTS_DATA_DIR
 	config.dataPath() = NCINE_TESTS_DATA_DIR;

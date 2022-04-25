@@ -103,3 +103,10 @@ if(MSVC)
 		set_target_properties(copy_dlls PROPERTIES FOLDER "CustomCopyTargets")
 	endif()
 endif()
+
+if(NCPROJECT_WITH_CRASHPAD AND EXISTS ${CRASHPAD_HANDLER_EXE})
+	add_custom_target(copy_crashpad_handler ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CRASHPAD_HANDLER_EXE} $<TARGET_FILE_DIR:${NCPROJECT_EXE_NAME}>
+		COMMENT "Copying Crashpad handler...")
+	set_target_properties(copy_crashpad_handler PROPERTIES FOLDER "CustomCopyTargets")
+endif()

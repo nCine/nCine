@@ -4,6 +4,10 @@
 #include <nctl/CString.h>
 #include <nctl/StaticString.h>
 
+#if defined(__ANDROID__)
+	#include <ncine/AssetFile.h>
+#endif
+
 namespace ncine {
 
 namespace {
@@ -284,8 +288,12 @@ AppConfiguration::AppConfiguration()
 	windowIconFilename = "icons/icon48.png";
 	shaderCacheDirname = "nCineShaderCache";
 
+#if defined(WITH_CRASHPAD)
+	fileLogLevel = ILogger::LogLevel::DEBUG;
+#endif
+
 #if defined(__ANDROID__)
-	dataPath() = "asset::";
+	dataPath() = AssetFile::Prefix;
 #elif defined(__EMSCRIPTEN__)
 	dataPath() = "/";
 	// Always disable mapping on Emscripten as it is not supported by WebGL 2
@@ -325,6 +333,74 @@ const char *AppConfiguration::argv(int index) const
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+void AppConfiguration::logFields() const
+{
+#if !defined(WITH_OPENGLES) && !defined(__EMSCRIPTEN__)
+	LOGD_X("OpenGL Core: %s", glCoreProfile_ ? "true" : "false");
+	LOGD_X("OpenGL Forward: %s", glForwardCompatible_ ? "true" : "false");
+#endif
+	LOGD_X("GL Major.Minor: %d.%d", glMajorVersion_, glMinorVersion_);
+
+	LOGD_X("Data Path: \"%s\"", dataPath().data());
+	LOGD_X("Log File: \"%s\"", logFile.data());
+	LOGD_X("Console Log Level: %d", static_cast<int>(consoleLogLevel));
+	LOGD_X("File Log Level: %d", static_cast<int>(fileLogLevel));
+	LOGD_X("Frametimer Log Interval: %f s", frameTimerLogInterval);
+	LOGD_X("Profile Text Update Time: %f s", profileTextUpdateTime());
+
+	LOGD_X("Resolution: %d x %d", resolution.x, resolution.y);
+	LOGD_X("Refresh Rate: %f Hz", refreshRate);
+
+	nctl::StaticString<256> auxString;
+	auxString.assign("Window Position: ");
+	if (windowPosition.x == WindowPositionIgnore)
+		auxString.append("Ignore x ");
+	else
+		auxString.formatAppend("%d x ", windowPosition.x);
+	if (windowPosition.y == WindowPositionIgnore)
+		auxString.append("Ignore");
+	else
+		auxString.formatAppend("%d", windowPosition.y);
+	LOGD_X("%s", auxString.data());
+
+	LOGD_X("Full Screen: %s", fullScreen ? "true" : "false");
+	LOGD_X("Resizable: %s", resizable ? "true" : "false");
+	LOGD_X("Window Scaling: %s", windowScaling ? "true" : "false");
+	LOGD_X("Frame Limit: %u", frameLimit);
+
+	LOGD_X("Window title: \"%s\"", windowTitle.data());
+	LOGD_X("Window icon: \"%s\"", windowIconFilename.data());
+
+	LOGD_X("Buffer Mapping: %s", useBufferMapping ? "true" : "false");
+	LOGD_X("Defer Shader Queries: %s", deferShaderQueries ? "true" : "false");
+#if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
+	LOGD_X("Fixed Batch Size: %u", fixedBatchSize);
+#endif
+	LOGD_X("Binary Shader Cache: %s", useBinaryShaderCache ? "true" : "false");
+	LOGD_X("Shader Cache Directory Name: \"%s\"", shaderCacheDirname.data());
+	LOGD_X("Compile Batched Shaders Twice: %s", compileBatchedShadersTwice ? "true" : "false");
+
+	LOGD_X("VBO Size: %lu bytes", vboSize);
+	LOGD_X("IBO Size: %lu bytes", iboSize);
+	LOGD_X("VAO Pool Size: %u", vaoPoolSize);
+	LOGD_X("RenderCommand Pool Size: %u", renderCommandPoolSize);
+
+	LOGD_X("Output Audio Frequency: %u Hz", outputAudioFrequency);
+	LOGD_X("Mono Audio Sources: %u", monoAudioSources);
+	LOGD_X("Stereo Audio Sources: %u", stereoAudioSources);
+
+	LOGD_X("Debug Overlay: %s", withDebugOverlay ? "true" : "false");
+	LOGD_X("Audio: %s", withAudio ? "true" : "false");
+	LOGD_X("Threads: %s", withThreads ? "true" : "false");
+	LOGD_X("Scenegraph: %s", withScenegraph ? "true" : "false");
+	LOGD_X("VSync: %s", withVSync ? "true" : "false");
+	LOGD_X("GL Debug Context: %s", withGlDebugContext ? "true" : "false");
+	LOGD_X("Console Colors: %s", withConsoleColors ? "true" : "false");
+
+	for (int i = 0; i < argc_; i++)
+		LOGD_X("argv[%u]: \"%s\"", i, argv_[i]);
+}
 
 void AppConfiguration::readEnvVariables()
 {

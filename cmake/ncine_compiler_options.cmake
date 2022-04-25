@@ -1,4 +1,8 @@
-target_compile_features(ncine PUBLIC cxx_std_11)
+if(NCINE_WITH_CRASHPAD AND WIN32)
+	target_compile_features(ncine PUBLIC cxx_std_17)
+else()
+	target_compile_features(ncine PUBLIC cxx_std_11)
+endif()
 set_target_properties(ncine PROPERTIES CXX_EXTENSIONS OFF)
 
 target_compile_definitions(ncine PUBLIC "$<$<CONFIG:Debug>:NCINE_DEBUG>")
@@ -84,8 +88,12 @@ if(MSVC)
 	target_link_options(ncine PRIVATE $<$<CONFIG:Debug>:/MANIFEST:NO /INCREMENTAL:NO>)
 	target_link_options(ncine PRIVATE $<$<CONFIG:RelWithDebInfo>:/MANIFEST:NO /INCREMENTAL:NO>)
 
-	if(NCINE_WITH_TRACY)
-		target_link_options(ncine PRIVATE $<$<CONFIG:Release>:/DEBUG>)
+	if(NCINE_WITH_TRACY OR NCINE_WITH_CRASHPAD)
+		target_link_options(ncine PUBLIC $<$<CONFIG:Release>:/DEBUG:FULL>)
+		if(NCINE_WITH_TRACY)
+			# Skip stripping only with Tracy. With Crashpad, debug symbols are extracted before stripping.
+			set(NCINE_STRIP_BINARIES OFF)
+		endif()
 	endif()
 else() # GCC and LLVM
 	target_compile_options(ncine PRIVATE -fno-exceptions)
@@ -131,17 +139,19 @@ else() # GCC and LLVM
 		target_link_options(ncine PUBLIC $<$<CONFIG:Debug>:--coverage>)
 	endif()
 
-	if(NCINE_WITH_TRACY)
-		target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-g -fno-omit-frame-pointer>)
-		# Don't add `-rdynamic` on GCC/MinGW
-		if(NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND (MINGW OR MSYS)))
-			target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-rdynamic>)
+	if(NCINE_WITH_TRACY OR NCINE_WITH_CRASHPAD)
+		target_compile_options(ncine PUBLIC $<$<CONFIG:Release>:-g -fno-omit-frame-pointer>)
+		if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND (MINGW OR MSYS)))
+			target_compile_options(ncine PUBLIC $<$<CONFIG:Release>:-rdynamic>)
 		endif()
-
-		if(MINGW OR MSYS)
-			target_link_libraries(ncine PRIVATE ws2_32 dbghelp)
-		elseif(NOT ANDROID AND NOT APPLE)
-			target_link_libraries(ncine PRIVATE dl)
+		if(NCINE_WITH_TRACY)
+			if(MINGW OR MSYS)
+				target_link_libraries(ncine PRIVATE ws2_32 dbghelp)
+			elseif(NOT ANDROID AND NOT APPLE)
+				target_link_libraries(ncine PRIVATE dl)
+			endif()
+			# Skip stripping only with Tracy. With Crashpad, debug symbols are extracted before stripping.
+			set(NCINE_STRIP_BINARIES OFF)
 		endif()
 	endif()
 

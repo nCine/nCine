@@ -61,6 +61,7 @@ class AndroidJniClass
 	static jmethodID getStaticMethodID(jclass javaClass, const char *name, const char *signature);
 	static jmethodID getMethodID(jclass javaClass, const char *name, const char *signature);
 	static jfieldID getStaticFieldID(jclass javaClass, const char *name, const char *signature);
+	static jfieldID getFieldID(jclass javaClass, const char *name, const char *signature);
 
   protected:
 	jobject javaObject_;
@@ -290,16 +291,52 @@ class AndroidJniClass_File : public AndroidJniClass
 	static jmethodID midGetAbsolutePath_;
 };
 
+/// A class to handle JNI requests to `android.content.pm.ApplicationInfo`
+class AndroidJniClass_ApplicationInfo : public AndroidJniClass
+{
+  public:
+	static void init();
+	explicit AndroidJniClass_ApplicationInfo(jobject javaObject)
+	    : AndroidJniClass(javaObject) {}
+
+	int compileSdkVersion() const;
+	int dataDir(char *destination, int maxStringSize) const;
+	int deviceProtectedDataDir(char *destination, int maxStringSize) const;
+	int minSdkVersion() const;
+	int nativeLibraryDir(char *destination, int maxStringSize) const;
+	int processName(char *destination, int maxStringSize) const;
+	int publicSourceDir(char *destination, int maxStringSize) const;
+	int sourceDir(char *destination, int maxStringSize) const;
+	int targetSdkVersion() const;
+
+  private:
+	static jclass javaClass_;
+	static jfieldID fidCompileSdkVersion_;
+	static jfieldID fidDataDir_;
+	static jfieldID fidDeviceProtectedDataDir_;
+	static jfieldID fidMinSdkVersion_;
+	static jfieldID fidNativeLibraryDir_;
+	static jfieldID fidProcessName_;
+	static jfieldID fidPublicSourceDir_;
+	static jfieldID fidSourceDir_;
+	static jfieldID fidTargetSdkVersion_;
+};
+
 /// A class to handle JNI requests to `android.content.Context`
 class AndroidJniWrap_Context
 {
   public:
 	static void init(struct android_app *state);
+
+	static AndroidJniClass_ApplicationInfo getApplicationInfo();
 	static AndroidJniClass_File getCacheDir();
+	static AndroidJniClass_File getFilesDir();
 
   private:
 	static jobject contextObject_;
+	static jmethodID midGetApplicationInfo_;
 	static jmethodID midGetCacheDir_;
+	static jmethodID midGetFilesDir_;
 };
 
 /// A class to handle JNI requests to `android.view.inputmethod.InputMethodManager`

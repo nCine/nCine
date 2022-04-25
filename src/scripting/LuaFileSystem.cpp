@@ -36,6 +36,7 @@ namespace FileSystem {
 	static const char *logicalDrives = "logical_drives";
 	static const char *logicalDriveStrings = "logical_drive_strings";
 
+	static const char *executableDir = "get_executable_dir";
 	static const char *currentDir = "get_current_dir";
 	static const char *setCurrentDir = "set_current_dir";
 
@@ -106,6 +107,7 @@ void LuaFileSystem::expose(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::FileSystem::logicalDrives, logicalDrives);
 	LuaUtils::addFunction(L, LuaNames::FileSystem::logicalDriveStrings, logicalDriveStrings);
 
+	LuaUtils::addFunction(L, LuaNames::FileSystem::executableDir, executableDir);
 	LuaUtils::addFunction(L, LuaNames::FileSystem::currentDir, currentDir);
 	LuaUtils::addFunction(L, LuaNames::FileSystem::setCurrentDir, setCurrentDir);
 
@@ -235,6 +237,14 @@ int LuaFileSystem::logicalDriveStrings(lua_State *L)
 {
 	const char *logicalDriveString = fs::logicalDriveStrings();
 	LuaUtils::push(L, logicalDriveString);
+
+	return 1;
+}
+
+int LuaFileSystem::executableDir(lua_State *L)
+{
+	const nctl::String executableDir = fs::executableDir();
+	LuaUtils::push(L, executableDir.data());
 
 	return 1;
 }

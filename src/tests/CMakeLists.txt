@@ -20,6 +20,14 @@ if(MSVC)
 	endif()
 endif()
 
+if(NCINE_WITH_CRASHPAD AND EXISTS ${CRASHPAD_HANDLER_EXE})
+	add_custom_target(copy_crashpad_handler_srctests ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CRASHPAD_HANDLER_EXE} ${CMAKE_BINARY_DIR}/src/tests
+		COMMENT "Copying Crashpad handler to sc/tests..."
+	)
+	set_target_properties(copy_crashpad_handler_srctests PROPERTIES FOLDER "CustomCopyTargets")
+endif()
+
 list(APPEND SRCAPPTESTS glapptest_fbo_cube)
 if(Threads_FOUND)
 	list(APPEND SRCAPPTESTS apptest_threads apptest_threadpool)
@@ -79,4 +87,5 @@ if(EMSCRIPTEN)
 	endif()
 endif()
 
+include(ncine_extract_symbols)
 include(ncine_strip_binaries)
