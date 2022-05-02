@@ -19,8 +19,8 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Font::Font()
-    : Object(ObjectType::FONT), texture_(nctl::makeUnique<Texture>()),
-      lineHeight_(0), base_(0), width_(0), height_(0), numGlyphs_(0), numKernings_(0),
+    : Object(ObjectType::FONT), texturePtr_(nullptr), lineHeight_(0),
+      base_(0), width_(0), height_(0), numGlyphs_(0), numKernings_(0),
       glyphArray_(nctl::makeUnique<FontGlyph[]>(GlyphArraySize)),
       glyphHashMap_(GlyphHashmapSize), renderMode_(RenderMode::GLYPH_IN_RED)
 {
@@ -31,6 +31,15 @@ Font::Font(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigne
     : Font()
 {
 	const bool hasLoaded = loadFromMemory(fntBufferName, fntBufferPtr, fntBufferSize, texFilename);
+	if (hasLoaded == false)
+		LOGE_X("Font \"%s\" cannot be loaded", fntBufferName);
+}
+
+/*! \note The specified texture will override the one in the FNT file */
+Font::Font(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize, Texture *texture)
+    : Font()
+{
+	const bool hasLoaded = loadFromMemory(fntBufferName, fntBufferPtr, fntBufferSize, texture);
 	if (hasLoaded == false)
 		LOGE_X("Font \"%s\" cannot be loaded", fntBufferName);
 }
@@ -63,6 +72,15 @@ Font::Font(const char *fntFilename, const char *texFilename)
 		LOGE_X("Font \"%s\" cannot be loaded", fntFilename);
 }
 
+/*! \note The specified texture will override the one in the FNT file */
+Font::Font(const char *fntFilename, Texture *texture)
+    : Font()
+{
+	const bool hasLoaded = loadFromFile(fntFilename, texture);
+	if (hasLoaded == false)
+		LOGE_X("Font \"%s\" cannot be loaded", fntFilename);
+}
+
 Font::~Font()
 {
 }
@@ -88,8 +106,8 @@ bool Font::loadFromMemory(const char *fntBufferName, const unsigned char *fntBuf
 	if (fntParser.numCharTags() == 0)
 		return false;
 
-	const bool textureHasLoaded = texture_->loadFromFile(texFilename);
-	if (textureHasLoaded == false)
+	const bool texHasLoaded = loadTextureFromFile(texFilename);
+	if (texHasLoaded == false)
 		return false;
 
 	const bool fntInfoValid = checkFntInformation(fntParser);
@@ -116,8 +134,35 @@ bool Font::loadFromMemory(const char *fntBufferName, const unsigned char *fntBuf
 	if (fntParser.numCharTags() == 0)
 		return false;
 
-	const bool texHasLoaded = texture_->loadFromMemory(texBufferName, texBufferPtr, texBufferSize);
+	const bool texHasLoaded = loadTextureFromMemory(texBufferName, texBufferPtr, texBufferSize);
 	if (texHasLoaded == false)
+		return false;
+
+	const bool fntInfoValid = checkFntInformation(fntParser);
+	if (fntInfoValid == false)
+		return false;
+
+	setName(fntBufferName);
+	determineRenderMode(fntParser);
+	retrieveInfoFromFnt(fntParser);
+	return true;
+}
+
+bool Font::loadFromMemory(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize, Texture *texture)
+{
+	ZoneScoped;
+	if (fntBufferName)
+	{
+		// When Tracy is disabled the statement body is empty and braces are needed
+		ZoneText(fntBufferName, nctl::strnlen(fntBufferName, nctl::String::MaxCStringLength));
+	}
+
+	FntParser fntParser(reinterpret_cast<const char *>(fntBufferPtr), fntBufferSize);
+	if (fntParser.numCharTags() == 0)
+		return false;
+
+	const bool textureValid = setTexture(texture);
+	if (textureValid == false)
 		return false;
 
 	const bool fntInfoValid = checkFntInformation(fntParser);
@@ -154,7 +199,7 @@ bool Font::loadFromFile(const char *fntFilename)
 	nctl::String texFilename = fs::absoluteJoinPath(dirName, fntParser.pageTag(0).file);
 #endif
 
-	const bool texHasLoaded = texture_->loadFromFile(texFilename.data());
+	const bool texHasLoaded = loadTextureFromFile(texFilename.data());
 	if (texHasLoaded == false)
 		return false;
 
@@ -177,7 +222,7 @@ bool Font::loadFromFile(const char *fntFilename, const char *texFilename)
 	if (fntParser.numCharTags() == 0)
 		return false;
 
-	const bool textureHasLoaded = texture_->loadFromFile(texFilename);
+	const bool textureHasLoaded = loadTextureFromFile(texFilename);
 	if (textureHasLoaded == false)
 		return false;
 
@@ -188,6 +233,39 @@ bool Font::loadFromFile(const char *fntFilename, const char *texFilename)
 	setName(fntFilename);
 	determineRenderMode(fntParser);
 	retrieveInfoFromFnt(fntParser);
+	return true;
+}
+
+bool Font::loadFromFile(const char *fntFilename, Texture *texture)
+{
+	ZoneScoped;
+	ZoneText(fntFilename, nctl::strnlen(fntFilename, nctl::String::MaxCStringLength));
+
+	FntParser fntParser(fntFilename);
+	if (fntParser.numCharTags() == 0)
+		return false;
+
+	const bool textureValid = setTexture(texture);
+	if (textureValid == false)
+		return false;
+
+	const bool fntInfoValid = checkFntInformation(fntParser);
+	if (fntInfoValid == false)
+		return false;
+
+	setName(fntFilename);
+	determineRenderMode(fntParser);
+	retrieveInfoFromFnt(fntParser);
+	return true;
+}
+
+bool Font::setTexture(Texture *texture)
+{
+	if (texture == nullptr || texture->dataSize() == 0)
+		return false;
+
+	texture_.reset(nullptr);
+	texturePtr_ = texture;
 	return true;
 }
 
@@ -203,6 +281,28 @@ const FontGlyph *Font::glyph(unsigned int glyphId) const
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+bool Font::loadTextureFromMemory(const char *texBufferName, const unsigned char *texBufferPtr, unsigned long int texBufferSize)
+{
+	if (texture_ == nullptr)
+		texture_ = nctl::makeUnique<Texture>();
+	if (texturePtr_ != nullptr)
+		texturePtr_ = nullptr;
+
+	const bool texHasLoaded = texture_->loadFromMemory(texBufferName, texBufferPtr, texBufferSize);
+	return texHasLoaded;
+}
+
+bool Font::loadTextureFromFile(const char *texFilename)
+{
+	if (texture_ == nullptr)
+		texture_ = nctl::makeUnique<Texture>();
+	if (texturePtr_ != nullptr)
+		texturePtr_ = nullptr;
+
+	const bool texHasLoaded = texture_->loadFromFile(texFilename);
+	return texHasLoaded;
+}
+
 bool Font::checkFntInformation(const FntParser &fntParser)
 {
 	const FntParser::InfoTag &infoTag = fntParser.infoTag();
@@ -212,19 +312,21 @@ bool Font::checkFntInformation(const FntParser &fntParser)
 	RETURNF_ASSERT_MSG_X(commonTag.pages == 1, "Multiple texture pages are not supported (pages: %d)", commonTag.pages);
 	RETURNF_ASSERT_MSG(commonTag.packed == false, "Characters packed into each of the texture channels are not supported");
 
-	if (texture_)
-	{
-		RETURNF_ASSERT_MSG_X(commonTag.scaleW == texture_->width(), "Texture width is different than FNT scale width: %u instead of %u", texture_->width(), commonTag.scaleW);
-		RETURNF_ASSERT_MSG_X(commonTag.scaleH == texture_->height(), "Texture height is different than FNT scale height: %u instead of %u", texture_->height(), commonTag.scaleH);
+	Texture *texture = (texture_ != nullptr) ? texture_.get() : texturePtr_;
 
-		if (texture_->numChannels() == 1)
+	if (texture)
+	{
+		RETURNF_ASSERT_MSG_X(commonTag.scaleW == texture->width(), "Texture width is different than FNT scale width: %u instead of %u", texture->width(), commonTag.scaleW);
+		RETURNF_ASSERT_MSG_X(commonTag.scaleH == texture->height(), "Texture height is different than FNT scale height: %u instead of %u", texture->height(), commonTag.scaleH);
+
+		if (texture->numChannels() == 1)
 		{
 			RETURNF_ASSERT_MSG(commonTag.alphaChnl == FntParser::ChannelData::GLYPH ||
 			                   commonTag.alphaChnl == FntParser::ChannelData::OUTLINE ||
 			                   commonTag.alphaChnl == FntParser::ChannelData::MISSING,
 			                   "Texture has one channel only but it does not contain glyph data");
 		}
-		else if (texture_->numChannels() == 4)
+		else if (texture->numChannels() == 4)
 		{
 			RETURNF_ASSERT_MSG((commonTag.redChnl == FntParser::ChannelData::MISSING && commonTag.alphaChnl == FntParser::ChannelData::MISSING) ||
 			                   commonTag.redChnl == FntParser::ChannelData::GLYPH || commonTag.alphaChnl == FntParser::ChannelData::GLYPH,
@@ -238,14 +340,16 @@ void Font::determineRenderMode(const FntParser &fntParser)
 {
 	const FntParser::CommonTag &commonTag = fntParser.commonTag();
 
-	if (texture_)
+	Texture *texture = (texture_ != nullptr) ? texture_.get() : texturePtr_;
+
+	if (texture)
 	{
-		if (texture_->numChannels() == 1)
+		if (texture->numChannels() == 1)
 		{
 			// One channel textures have only the red channel in OpenGL
 			renderMode_ = RenderMode::GLYPH_IN_RED;
 		}
-		else if (texture_->numChannels() == 4)
+		else if (texture->numChannels() == 4)
 		{
 			if (commonTag.redChnl == FntParser::ChannelData::MISSING && commonTag.alphaChnl == FntParser::ChannelData::MISSING)
 				renderMode_ = RenderMode::GLYPH_IN_ALPHA;

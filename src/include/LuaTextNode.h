@@ -37,7 +37,10 @@ class LuaTextNode
 	static int absLineHeight(lua_State *L);
 	static int setLineHeight(lua_State *L);
 
+	static int string(lua_State *L);
 	static int setString(lua_State *L);
+
+	static int calculateBoundaries(lua_State *L);
 };
 
 }

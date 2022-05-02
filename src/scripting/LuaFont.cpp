@@ -12,11 +12,12 @@ namespace LuaNames {
 namespace Font {
 	static const char *Font = "font";
 
-	static const char *texture = "texture";
+	static const char *texture = "get_texture";
+	static const char *setTexture = "set_texture";
 
-	static const char *lineHeight = "line_height";
-	static const char *base = "base";
-	static const char *textureSize = "texture_size";
+	static const char *lineHeight = "get_line_height";
+	static const char *base = "get_base";
+	static const char *textureSize = "get_texture_size";
 	static const char *numGlyphs = "num_glyphs";
 	static const char *numKernings = "num_kernings";
 }}
@@ -37,6 +38,7 @@ void LuaFont::expose(LuaStateManager *stateManager)
 	}
 
 	LuaUtils::addFunction(L, LuaNames::Font::texture, texture);
+	LuaUtils::addFunction(L, LuaNames::Font::setTexture, setTexture);
 
 	LuaUtils::addFunction(L, LuaNames::Font::lineHeight, lineHeight);
 	LuaUtils::addFunction(L, LuaNames::Font::base, base);
@@ -75,6 +77,16 @@ int LuaFont::texture(lua_State *L)
 	Font *font = LuaClassWrapper<Font>::unwrapUserData(L, -1);
 	LuaClassWrapper<Texture>::pushUntrackedUserData(L, font->texture());
 	return 1;
+}
+
+int LuaFont::setTexture(lua_State *L)
+{
+	Font *font = LuaClassWrapper<Font>::unwrapUserData(L, -2);
+	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+
+	font->setTexture(texture);
+
+	return 0;
 }
 
 int LuaFont::lineHeight(lua_State *L)

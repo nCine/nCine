@@ -135,6 +135,58 @@ void TextNode::setString(const nctl::String &string)
 	}
 }
 
+Vector2f TextNode::calculateBoundaries(const Font &font, bool withKerning, const nctl::String &string)
+{
+	float xAdvanceMax = 0.0f; // longest line
+	float xAdvance = 0.0f;
+	float yAdvance = 0.0f;
+
+	const float lineHeight = static_cast<float>(font.lineHeight());
+	const unsigned int length = string.length();
+	for (unsigned int i = 0; i < length;) // increments handled by UTF-8 decoding
+	{
+		if (string[i] == '\n')
+		{
+			if (xAdvance > xAdvanceMax)
+				xAdvanceMax = xAdvance;
+			xAdvance = 0.0f;
+			yAdvance += lineHeight;
+			i++; // manual increment as newline character is not decoded
+		}
+		else
+		{
+			unsigned int codepoint = nctl::Utf8::InvalidUnicode;
+			const int codePointLength = string.utf8ToCodePoint(i, codepoint);
+			const FontGlyph *glyph = (codepoint != nctl::Utf8::InvalidUnicode) ? font.glyph(codepoint) : nullptr;
+			if (glyph)
+			{
+				xAdvance += glyph->xAdvance();
+				if (withKerning)
+				{
+					// font kerning
+					if (i + codePointLength < length)
+					{
+						unsigned int nextCodepoint = nctl::Utf8::InvalidUnicode;
+						string.utf8ToCodePoint(i + codePointLength, nextCodepoint);
+						xAdvance += glyph->kerning(nextCodepoint);
+					}
+				}
+			}
+			i += codePointLength; // manual increment to next codepoint
+		}
+	}
+
+	// If the string does not end with a new line character,
+	// last line height has not been taken into account before
+	if (!string.isEmpty() && string[string.length() - 1] != '\n')
+		yAdvance += lineHeight;
+
+	if (xAdvance > xAdvanceMax)
+		xAdvanceMax = xAdvance;
+
+	return Vector2f(xAdvanceMax, yAdvance);
+}
+
 void TextNode::transform()
 {
 	// Precalculate boundaries for horizontal alignment

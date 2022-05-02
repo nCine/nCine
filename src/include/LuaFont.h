@@ -18,6 +18,7 @@ class LuaFont
 	static int newObject(lua_State *L);
 
 	static int texture(lua_State *L);
+	static int setTexture(lua_State *L);
 
 	static int lineHeight(lua_State *L);
 	static int base(lua_State *L);

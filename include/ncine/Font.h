@@ -30,11 +30,15 @@ class DLL_PUBLIC Font : public Object
 	/// Constructs the object from an AngelCode's `FNT` memory buffer and a texture memory buffer
 	Font(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize,
 	     const char *texBufferName, const unsigned char *texBufferPtr, unsigned long int texBufferSize);
+	/// Constructs the object from an AngelCode's `FNT` memory buffer and a shared texture object
+	Font(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize, Texture *texture);
 
 	/// Constructs the object from an AngelCode's `FNT` file
 	explicit Font(const char *fntFilename);
 	/// Constructs the object from an AngelCode's `FNT` file and a texture file
 	Font(const char *fntFilename, const char *texFilename);
+	/// Constructs the object from an AngelCode's `FNT` file and a shared texture object
+	Font(const char *fntFilename, Texture *texture);
 
 	~Font() override;
 
@@ -46,11 +50,17 @@ class DLL_PUBLIC Font : public Object
 	bool loadFromMemory(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize, const char *texFilename);
 	bool loadFromMemory(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize,
 	                    const char *texBufferName, const unsigned char *texBufferPtr, unsigned long int texBufferSize);
+	bool loadFromMemory(const char *fntBufferName, const unsigned char *fntBufferPtr, unsigned long int fntBufferSize, Texture *texture);
 	bool loadFromFile(const char *fntFilename);
 	bool loadFromFile(const char *fntFilename, const char *texFilename);
+	bool loadFromFile(const char *fntFilename, Texture *texture);
 
-	/// Gets the texture object
-	inline const Texture *texture() const { return texture_.get(); }
+	/// Returns the constant texture object in use by the font
+	inline const Texture *texture() const { return (texture_ != nullptr) ? texture_.get() : texturePtr_; }
+	/// Returns the texture object in use by the font
+	inline Texture *texture() { return (texture_ != nullptr) ? texture_.get() : texturePtr_; }
+	/// Sets a new shared texture object without modifying any glyphs or kerning data
+	bool setTexture(Texture *texture);
 
 	/// Returns font line height
 	inline unsigned int lineHeight() const { return lineHeight_; }
@@ -72,6 +82,8 @@ class DLL_PUBLIC Font : public Object
   private:
 	/// The font texture
 	nctl::UniquePtr<Texture> texture_;
+	/// The pointer to the optional shared texture object
+	Texture *texturePtr_;
 	/// Font line height
 	unsigned int lineHeight_;
 	/// Font base
@@ -100,6 +112,9 @@ class DLL_PUBLIC Font : public Object
 	Font(const Font &) = delete;
 	/// Deleted assignment operator
 	Font &operator=(const Font &) = delete;
+
+	bool loadTextureFromMemory(const char *texBufferName, const unsigned char *texBufferPtr, unsigned long int texBufferSize);
+	bool loadTextureFromFile(const char *texFilename);
 
 	/// Checks whether the FNT information are compatible with rendering or not
 	bool checkFntInformation(const FntParser &fntParser);

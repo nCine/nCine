@@ -3,6 +3,7 @@
 #include "LuaClassTracker.h"
 #include "LuaDrawableNode.h"
 #include "LuaUtils.h"
+#include "LuaVector2Utils.h"
 #include "TextNode.h"
 
 namespace ncine {
@@ -29,7 +30,10 @@ namespace TextNode {
 	static const char *absLineHeight = "get_abslineheight";
 	static const char *setLineHeight = "set_lineheight";
 
+	static const char *string = "get_string";
 	static const char *setString = "set_string";
+
+	static const char *calculateBoundaries = "calculate_boundaries";
 
 	static const char *LEFT = "LEFT";
 	static const char *CENTER = "CENTER";
@@ -71,7 +75,10 @@ void LuaTextNode::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::TextNode::absLineHeight, absLineHeight);
 	LuaUtils::addFunction(L, LuaNames::TextNode::setLineHeight, setLineHeight);
 
+	LuaUtils::addFunction(L, LuaNames::TextNode::string, string);
 	LuaUtils::addFunction(L, LuaNames::TextNode::setString, setString);
+
+	LuaUtils::addFunction(L, LuaNames::TextNode::calculateBoundaries, calculateBoundaries);
 
 	LuaDrawableNode::exposeFunctions(L);
 
@@ -240,6 +247,15 @@ int LuaTextNode::setLineHeight(lua_State *L)
 	return 0;
 }
 
+int LuaTextNode::string(lua_State *L)
+{
+	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
+
+	LuaUtils::push(L, textnode->string().data());
+
+	return 1;
+}
+
 int LuaTextNode::setString(lua_State *L)
 {
 	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -2);
@@ -248,6 +264,18 @@ int LuaTextNode::setString(lua_State *L)
 	textnode->setString(string);
 
 	return 0;
+}
+
+int LuaTextNode::calculateBoundaries(lua_State *L)
+{
+	const Font *font = LuaClassWrapper<Font>::unwrapUserData(L, -3);
+	const bool withKerning = LuaUtils::retrieve<bool>(L, -2);
+	const char *string = LuaUtils::retrieve<const char *>(L, -1);
+
+	const Vector2f boundaries = TextNode::calculateBoundaries(*font, withKerning, string);
+	LuaVector2fUtils::push(L, boundaries);
+
+	return 1;
 }
 
 }

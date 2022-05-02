@@ -31,7 +31,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	};
 
 	TextNode();
-	TextNode(unsigned int maxStringLength);
+	explicit TextNode(unsigned int maxStringLength);
 	TextNode(SceneNode *parent, Font *font);
 	TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength);
 
@@ -79,6 +79,9 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	inline nctl::String &string() { return string_; }
 	/// Sets the string to render
 	void setString(const nctl::String &string);
+
+	/// Calculates the rectangle boundaries needed to render the provided string with the specified font
+	static Vector2f calculateBoundaries(const Font &font, bool withKerning, const nctl::String &string);
 
 	void transform() override;
 	bool draw(RenderQueue &renderQueue) override;

@@ -58,18 +58,6 @@ class FontGlyph
 	nctl::Array<Kerning> kernings_;
 };
 
-inline void FontGlyph::set(unsigned int x, unsigned int y, unsigned int width, unsigned int height,
-                           int xOffset, int yOffset, int xAdvance)
-{
-	x_ = x;
-	y_ = y;
-	width_ = width;
-	height_ = height;
-	xOffset_ = xOffset;
-	yOffset_ = yOffset;
-	xAdvance_ = xAdvance;
-}
-
 }
 
 #endif
