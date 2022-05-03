@@ -32,13 +32,11 @@ Color::Color(unsigned int red, unsigned int green, unsigned int blue)
 }
 
 Color::Color(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha)
-    : channels_(nctl::StaticArrayMode::EXTEND_SIZE)
 {
 	set(red, green, blue, alpha);
 }
 
 Color::Color(unsigned int hex)
-    : channels_(nctl::StaticArrayMode::EXTEND_SIZE)
 {
 	setAlpha(255);
 	// The following method might set the alpha channel
@@ -46,18 +44,16 @@ Color::Color(unsigned int hex)
 }
 
 Color::Color(const unsigned int channels[NumChannels])
-    : channels_(nctl::StaticArrayMode::EXTEND_SIZE)
 {
 	setVec(channels);
 }
 
 Color::Color(const Colorf &color)
-    : channels_(nctl::StaticArrayMode::EXTEND_SIZE)
 {
-	channels_[0] = static_cast<unsigned char>(color.r() * 255);
-	channels_[1] = static_cast<unsigned char>(color.g() * 255);
-	channels_[2] = static_cast<unsigned char>(color.b() * 255);
-	channels_[3] = static_cast<unsigned char>(color.a() * 255);
+	red_ = static_cast<unsigned char>(color.r() * 255);
+	green_ = static_cast<unsigned char>(color.g() * 255);
+	blue_ = static_cast<unsigned char>(color.b() * 255);
+	alpha_ = static_cast<unsigned char>(color.a() * 255);
 }
 
 ///////////////////////////////////////////////////////////
@@ -66,47 +62,47 @@ Color::Color(const Colorf &color)
 
 unsigned int Color::rgba() const
 {
-	return (channels_[0] << 24) + (channels_[1] << 16) + (channels_[2] << 8) + channels_[3];
+	return (red_ << 24) + (green_ << 16) + (blue_ << 8) + alpha_;
 }
 
 unsigned int Color::argb() const
 {
-	return (channels_[3] << 24) + (channels_[0] << 16) + (channels_[1] << 8) + channels_[2];
+	return (alpha_ << 24) + (red_ << 16) + (green_ << 8) + blue_;
 }
 
 unsigned int Color::abgr() const
 {
-	return (channels_[3] << 24) + (channels_[2] << 16) + (channels_[1] << 8) + channels_[0];
+	return (alpha_ << 24) + (blue_ << 16) + (green_ << 8) + red_;
 }
 
 unsigned int Color::bgra() const
 {
-	return (channels_[2] << 24) + (channels_[1] << 16) + (channels_[0] << 8) + channels_[3];
+	return (blue_ << 24) + (green_ << 16) + (red_ << 8) + alpha_;
 }
 
 void Color::set(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha)
 {
-	channels_[0] = static_cast<unsigned char>(red);
-	channels_[1] = static_cast<unsigned char>(green);
-	channels_[2] = static_cast<unsigned char>(blue);
-	channels_[3] = static_cast<unsigned char>(alpha);
+	red_ = static_cast<unsigned char>(red);
+	green_ = static_cast<unsigned char>(green);
+	blue_ = static_cast<unsigned char>(blue);
+	alpha_ = static_cast<unsigned char>(alpha);
 }
 
 void Color::set(unsigned int red, unsigned int green, unsigned int blue)
 {
-	channels_[0] = static_cast<unsigned char>(red);
-	channels_[1] = static_cast<unsigned char>(green);
-	channels_[2] = static_cast<unsigned char>(blue);
+	red_ = static_cast<unsigned char>(red);
+	green_ = static_cast<unsigned char>(green);
+	blue_ = static_cast<unsigned char>(blue);
 }
 
 void Color::set(unsigned int hex)
 {
-	channels_[0] = static_cast<unsigned char>((hex & 0xFF0000) >> 16);
-	channels_[1] = static_cast<unsigned char>((hex & 0xFF00) >> 8);
-	channels_[2] = static_cast<unsigned char>(hex & 0xFF);
+	red_ = static_cast<unsigned char>((hex & 0xFF0000) >> 16);
+	green_ = static_cast<unsigned char>((hex & 0xFF00) >> 8);
+	blue_ = static_cast<unsigned char>(hex & 0xFF);
 
 	if (hex > 0xFFFFFF)
-		channels_[3] = static_cast<unsigned char>((hex & 0xFF000000) >> 24);
+		alpha_ = static_cast<unsigned char>((hex & 0xFF000000) >> 24);
 }
 
 void Color::setVec(const unsigned int channels[NumChannels])
@@ -116,15 +112,15 @@ void Color::setVec(const unsigned int channels[NumChannels])
 
 void Color::setAlpha(unsigned int alpha)
 {
-	channels_[3] = static_cast<unsigned char>(alpha);
+	alpha_ = static_cast<unsigned char>(alpha);
 }
 
 Color &Color::operator=(const Colorf &color)
 {
-	channels_[0] = static_cast<unsigned char>(color.r() * 255.0f);
-	channels_[1] = static_cast<unsigned char>(color.g() * 255.0f);
-	channels_[2] = static_cast<unsigned char>(color.b() * 255.0f);
-	channels_[3] = static_cast<unsigned char>(color.a() * 255.0f);
+	red_ = static_cast<unsigned char>(color.r() * 255.0f);
+	green_ = static_cast<unsigned char>(color.g() * 255.0f);
+	blue_ = static_cast<unsigned char>(color.b() * 255.0f);
+	alpha_ = static_cast<unsigned char>(color.a() * 255.0f);
 
 	return *this;
 }
@@ -139,9 +135,9 @@ Color &Color::operator+=(const Color &color)
 {
 	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		unsigned int channelValue = channels_[i] + color.channels_[i];
+		unsigned int channelValue = data()[i] + color.data()[i];
 		channelValue = nctl::clamp(channelValue, 0U, 255U);
-		channels_[i] = static_cast<unsigned char>(channelValue);
+		data()[i] = static_cast<unsigned char>(channelValue);
 	}
 
 	return *this;
@@ -151,9 +147,9 @@ Color &Color::operator-=(const Color &color)
 {
 	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		unsigned int channelValue = channels_[i] - color.channels_[i];
+		unsigned int channelValue = data()[i] - color.data()[i];
 		channelValue = nctl::clamp(channelValue, 0U, 255U);
-		channels_[i] = static_cast<unsigned char>(channelValue);
+		data()[i] = static_cast<unsigned char>(channelValue);
 	}
 
 	return *this;
@@ -163,9 +159,9 @@ Color &Color::operator*=(const Color &color)
 {
 	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		float channelValue = channels_[i] * (color.channels_[i] / 255.0f);
+		float channelValue = data()[i] * (color.data()[i] / 255.0f);
 		channelValue = nctl::clamp(channelValue, 0.0f, 255.0f);
-		channels_[i] = static_cast<unsigned char>(channelValue);
+		data()[i] = static_cast<unsigned char>(channelValue);
 	}
 
 	return *this;
@@ -175,9 +171,9 @@ Color &Color::operator*=(float scalar)
 {
 	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		float channelValue = channels_[i] * scalar;
+		float channelValue = data()[i] * scalar;
 		channelValue = nctl::clamp(channelValue, 0.0f, 255.0f);
-		channels_[i] = static_cast<unsigned char>(channelValue);
+		data()[i] = static_cast<unsigned char>(channelValue);
 	}
 
 	return *this;
@@ -189,9 +185,9 @@ Color Color::operator+(const Color &color) const
 
 	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		unsigned int channelValue = channels_[i] + color.channels_[i];
+		unsigned int channelValue = data()[i] + color.data()[i];
 		channelValue = nctl::clamp(channelValue, 0U, 255U);
-		result.channels_[i] = static_cast<unsigned char>(channelValue);
+		result.data()[i] = static_cast<unsigned char>(channelValue);
 	}
 
 	return result;
@@ -203,9 +199,9 @@ Color Color::operator-(const Color &color) const
 
 	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		unsigned int channelValue = channels_[i] - color.channels_[i];
+		unsigned int channelValue = data()[i] - color.data()[i];
 		channelValue = nctl::clamp(channelValue, 0U, 255U);
-		result.channels_[i] = static_cast<unsigned char>(channelValue);
+		result.data()[i] = static_cast<unsigned char>(channelValue);
 	}
 
 	return result;
@@ -217,9 +213,9 @@ Color Color::operator*(const Color &color) const
 
 	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		float channelValue = channels_[i] * (color.channels_[i] / 255.0f);
+		float channelValue = data()[i] * (color.data()[i] / 255.0f);
 		channelValue = nctl::clamp(channelValue, 0.0f, 255.0f);
-		result.channels_[i] = static_cast<unsigned char>(channelValue);
+		result.data()[i] = static_cast<unsigned char>(channelValue);
 	}
 
 	return result;
@@ -231,9 +227,9 @@ Color Color::operator*(float scalar) const
 
 	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		float channelValue = channels_[i] * scalar;
+		float channelValue = data()[i] * scalar;
 		channelValue = nctl::clamp(channelValue, 0.0f, 255.0f);
-		result.channels_[i] = static_cast<unsigned char>(channelValue);
+		result.data()[i] = static_cast<unsigned char>(channelValue);
 	}
 
 	return result;

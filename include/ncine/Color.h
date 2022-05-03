@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_COLOR
 #define CLASS_NCINE_COLOR
 
-#include <nctl/StaticArray.h>
+#include "common_defines.h"
 
 namespace ncine {
 
@@ -28,20 +28,20 @@ class DLL_PUBLIC Color
 	/// Four channels constructor
 	Color(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha);
 	/// Three channels constructor from a hexadecimal code
-	Color(unsigned int hex);
+	explicit Color(unsigned int hex);
 	/// Four channels constructor from an array
 	explicit Color(const unsigned int channels[NumChannels]);
 	/// Constructor taking a normalized float color
 	explicit Color(const Colorf &color);
 
 	/// Gets the red channel of the color
-	inline unsigned char r() const { return channels_[0]; }
+	inline unsigned char r() const { return red_; }
 	/// Gets the green channel of the color
-	inline unsigned char g() const { return channels_[1]; }
+	inline unsigned char g() const { return green_; }
 	/// Gets the blue channel of the color
-	inline unsigned char b() const { return channels_[2]; }
+	inline unsigned char b() const { return blue_; }
 	/// Gets the alpha channel of the color
-	inline unsigned char a() const { return channels_[3]; }
+	inline unsigned char a() const { return alpha_; }
 
 	/// Returns the color as a single RGBA unsigned integer
 	unsigned int rgba() const;
@@ -53,9 +53,9 @@ class DLL_PUBLIC Color
 	unsigned int bgra() const;
 
 	/// Gets the color array
-	inline const unsigned char *data() const { return channels_.data(); }
+	inline const unsigned char *data() const { return &red_; }
 	/// Gets the color array
-	inline unsigned char *data() { return channels_.data(); }
+	inline unsigned char *data() { return &red_; }
 
 	/// Sets four color channels
 	void set(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha);
@@ -90,8 +90,10 @@ class DLL_PUBLIC Color
 	Color operator*(float scalar) const;
 
   private:
-	/// The four unsigned byte color channels
-	nctl::StaticArray<unsigned char, NumChannels> channels_;
+	unsigned char red_;
+	unsigned char green_;
+	unsigned char blue_;
+	unsigned char alpha_;
 };
 
 }

@@ -242,7 +242,7 @@ TEST_F(ColorTest, EqualityOperator)
 	const nc::Color color1 = nc::Color::Red;
 	const nc::Color color2 = nc::Color::Red;
 
-	ASSERT(color1 == color2);
+	ASSERT_EQ(color1, color2);
 }
 
 TEST_F(ColorTest, AdditionInPlace)

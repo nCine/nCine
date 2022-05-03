@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_COLORF
 #define CLASS_NCINE_COLORF
 
-#include <nctl/StaticArray.h>
+#include "common_defines.h"
 
 namespace ncine {
 
@@ -36,17 +36,17 @@ class DLL_PUBLIC Colorf
 	explicit Colorf(const ColorHdr &color);
 
 	/// Gets the red channel of the color
-	inline float r() const { return channels_[0]; }
+	inline float r() const { return red_; }
 	/// Gets the green channel of the color
-	inline float g() const { return channels_[1]; }
+	inline float g() const { return green_; }
 	/// Gets the blue channel of the color
-	inline float b() const { return channels_[2]; }
+	inline float b() const { return blue_; }
 	/// Gets the alpha channel of the color
-	inline float a() const { return channels_[3]; }
+	inline float a() const { return alpha_; }
 	/// Gets the color array
-	inline const float *data() const { return channels_.data(); }
+	inline const float *data() const { return &red_; }
 	/// Gets the color array
-	inline float *data() { return channels_.data(); }
+	inline float *data() { return &red_; }
 
 	/// Sets four color channels
 	void set(float red, float green, float blue, float alpha);
@@ -75,8 +75,10 @@ class DLL_PUBLIC Colorf
 	Colorf operator*(float scalar) const;
 
   private:
-	/// The four float color channels
-	nctl::StaticArray<float, NumChannels> channels_;
+	float red_;
+	float green_;
+	float blue_;
+	float alpha_;
 };
 
 }

@@ -23,13 +23,11 @@ ColorHdr::ColorHdr()
 }
 
 ColorHdr::ColorHdr(float red, float green, float blue)
-    : channels_(nctl::StaticArrayMode::EXTEND_SIZE)
 {
 	set(red, green, blue);
 }
 
 ColorHdr::ColorHdr(const float channels[NumChannels])
-    : channels_(nctl::StaticArrayMode::EXTEND_SIZE)
 {
 	setVec(channels);
 }
@@ -45,9 +43,9 @@ ColorHdr::ColorHdr(const Colorf &color)
 
 void ColorHdr::set(float red, float green, float blue)
 {
-	channels_[0] = red;
-	channels_[1] = green;
-	channels_[2] = blue;
+	red_ = red;
+	green_ = green;
+	blue_ = blue;
 }
 
 void ColorHdr::setVec(const float channels[NumChannels])
@@ -59,8 +57,8 @@ void ColorHdr::clamp()
 {
 	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		if (channels_[i] < 0.0f)
-			channels_[i] = 0.0f;
+		if (data()[i] < 0.0f)
+			data()[i] = 0.0f;
 	}
 }
 
@@ -70,10 +68,10 @@ ColorHdr ColorHdr::clamped() const
 
 	for (unsigned int i = 0; i < NumChannels; i++)
 	{
-		if (channels_[i] < 0.0f)
-			result.channels_[i] = 0.0f;
+		if (data()[i] < 0.0f)
+			result.data()[i] = 0.0f;
 		else
-			result.channels_[i] = channels_[i];
+			result.data()[i] = data()[i];
 	}
 
 	return result;
@@ -81,9 +79,9 @@ ColorHdr ColorHdr::clamped() const
 
 ColorHdr &ColorHdr::operator=(const Colorf &color)
 {
-	channels_[0] = color.r();
-	channels_[1] = color.g();
-	channels_[2] = color.b();
+	red_ = color.r();
+	green_ = color.g();
+	blue_ = color.b();
 
 	return *this;
 }
@@ -91,7 +89,7 @@ ColorHdr &ColorHdr::operator=(const Colorf &color)
 ColorHdr &ColorHdr::operator+=(const ColorHdr &color)
 {
 	for (unsigned int i = 0; i < NumChannels; i++)
-		channels_[i] += color.channels_[i];
+		data()[i] += color.data()[i];
 
 	return *this;
 }
@@ -99,7 +97,7 @@ ColorHdr &ColorHdr::operator+=(const ColorHdr &color)
 ColorHdr &ColorHdr::operator-=(const ColorHdr &color)
 {
 	for (unsigned int i = 0; i < NumChannels; i++)
-		channels_[i] -= color.channels_[i];
+		data()[i] -= color.data()[i];
 
 	return *this;
 }
@@ -107,7 +105,7 @@ ColorHdr &ColorHdr::operator-=(const ColorHdr &color)
 ColorHdr &ColorHdr::operator*=(const ColorHdr &color)
 {
 	for (unsigned int i = 0; i < NumChannels; i++)
-		channels_[i] *= color.channels_[i];
+		data()[i] *= color.data()[i];
 
 	return *this;
 }
@@ -115,7 +113,7 @@ ColorHdr &ColorHdr::operator*=(const ColorHdr &color)
 ColorHdr &ColorHdr::operator*=(float scalar)
 {
 	for (unsigned int i = 0; i < NumChannels; i++)
-		channels_[i] *= scalar;
+		data()[i] *= scalar;
 
 	return *this;
 }
@@ -125,7 +123,7 @@ ColorHdr ColorHdr::operator+(const ColorHdr &color) const
 	ColorHdr result;
 
 	for (unsigned int i = 0; i < NumChannels; i++)
-		result.channels_[i] = channels_[i] + color.channels_[i];
+		result.data()[i] = data()[i] + color.data()[i];
 
 	return result;
 }
@@ -135,7 +133,7 @@ ColorHdr ColorHdr::operator-(const ColorHdr &color) const
 	ColorHdr result;
 
 	for (unsigned int i = 0; i < NumChannels; i++)
-		result.channels_[i] = channels_[i] - color.channels_[i];
+		result.data()[i] = data()[i] - color.data()[i];
 
 	return result;
 }
@@ -145,7 +143,7 @@ ColorHdr ColorHdr::operator*(const ColorHdr &color) const
 	ColorHdr result;
 
 	for (unsigned int i = 0; i < NumChannels; i++)
-		result.channels_[i] = channels_[i] * color.channels_[i];
+		result.data()[i] = data()[i] * color.data()[i];
 
 	return result;
 }
@@ -155,7 +153,7 @@ ColorHdr ColorHdr::operator*(float scalar) const
 	ColorHdr result;
 
 	for (unsigned int i = 0; i < NumChannels; i++)
-		result.channels_[i] = channels_[i] * scalar;
+		result.data()[i] = data()[i] * scalar;
 
 	return result;
 }
