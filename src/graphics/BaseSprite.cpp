@@ -116,6 +116,9 @@ void BaseSprite::shaderHasChanged()
 {
 	renderCommand_->material().reserveUniformsDataMemory();
 	instanceBlock_ = renderCommand_->material().uniformBlock(Material::InstanceBlockName);
+	GLUniformCache *textureUniform = renderCommand_->material().uniform(Material::TextureUniformName);
+	if (textureUniform && textureUniform->intValue(0) != 0)
+		textureUniform->setIntValue(0); // GL_TEXTURE0
 
 	dirtyBits_.set(DirtyBitPositions::TransformationBit);
 	dirtyBits_.set(DirtyBitPositions::ColorBit);

@@ -1,6 +1,7 @@
 #include "common_macros.h"
 #include "GLUniformBlock.h"
 #include "GLShaderProgram.h"
+#include "IGfxCapabilities.h"
 
 namespace ncine {
 
@@ -9,7 +10,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GLUniformBlock::GLUniformBlock()
-    : program_(0), index_(0), size_(0), bindingIndex_(-1)
+    : program_(0), index_(0), size_(0), alignAmount_(0), bindingIndex_(-1)
 {
 	name_[0] = '\0';
 }
@@ -74,9 +75,10 @@ GLUniformBlock::GLUniformBlock(GLuint program, GLuint index, DiscoverUniforms di
 		}
 	}
 
-	// Align to 16 bytes as required by the `std140` memory layout
-	const unsigned int alignAmount = (16 - size_ % 16) % 16;
-	size_ += alignAmount;
+	// Align to the uniform buffer offset alignment or `glBindBufferRange()` will generate an `INVALID_VALUE` error
+	static const int offsetAlignment = theServiceLocator().gfxCapabilities().value(IGfxCapabilities::GLIntValues::UNIFORM_BUFFER_OFFSET_ALIGNMENT);
+	alignAmount_ = (offsetAlignment - size_ % offsetAlignment) % offsetAlignment;
+	size_ += alignAmount_;
 }
 
 GLUniformBlock::GLUniformBlock(GLuint program, GLuint index)

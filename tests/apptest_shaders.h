@@ -89,8 +89,9 @@ class MyEventHandler :
 	nctl::UniquePtr<nc::Texture> diffuseTexture_;
 	nctl::UniquePtr<nc::Texture> normalTexture_;
 	nctl::UniquePtr<nc::Shader> multitextureShader_;
-	nctl::UniquePtr<nc::Sprite> multitextureSprite_;
-	nctl::UniquePtr<nc::ShaderState> multitextureShaderState_;
+	nctl::UniquePtr<nc::Shader> batchedMultitextureShader_;
+	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumSprites> multitextureSprites_;
+	nctl::StaticArray<nctl::UniquePtr<nc::ShaderState>, NumSprites> multitextureShaderStates_;
 
 	void setupAtlas();
 	void setupTextures();

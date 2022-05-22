@@ -107,6 +107,11 @@ class Material
 	/// Wrapper around `GLShaderUniformBlocks::uniformBlock()`
 	inline GLUniformBlockCache *uniformBlock(const char *name) { return shaderUniformBlocks_.uniformBlock(name); }
 
+	/// Wrapper around `GLShaderUniforms::allUniforms()`
+	inline const GLShaderUniforms::UniformHashMapType allUniforms() const { return shaderUniforms_.allUniforms(); }
+	/// Wrapper around `GLShaderUniformBlocks::allUniformBlocks()`
+	inline const GLShaderUniformBlocks::UniformHashMapType allUniformBlocks() const { return shaderUniformBlocks_.allUniformBlocks(); }
+
 	const GLTexture *texture(unsigned int unit) const;
 	bool setTexture(unsigned int unit, const GLTexture *texture);
 	bool setTexture(unsigned int unit, const Texture &texture);

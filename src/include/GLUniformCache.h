@@ -19,20 +19,25 @@ class GLUniformCache
 	inline const GLubyte *dataPointer() const { return dataPointer_; }
 	inline void setDataPointer(GLubyte *dataPointer) { dataPointer_ = dataPointer; }
 
-	void setFloatVector(const GLfloat *vec);
-	void setFloatValue(GLfloat v0);
-	void setFloatValue(GLfloat v0, GLfloat v1);
-	void setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2);
-	void setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
-	void setIntVector(const GLint *vec);
-	void setIntValue(GLint v0);
-	void setIntValue(GLint v0, GLint v1);
-	void setIntValue(GLint v0, GLint v1, GLint v2);
-	void setIntValue(GLint v0, GLint v1, GLint v2, GLint v3);
+	const GLfloat *floatVector() const;
+	GLfloat floatValue(unsigned int index) const;
+	const GLint *intVector() const;
+	GLint intValue(unsigned int index) const;
+
+	bool setFloatVector(const GLfloat *vec);
+	bool setFloatValue(GLfloat v0);
+	bool setFloatValue(GLfloat v0, GLfloat v1);
+	bool setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2);
+	bool setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+	bool setIntVector(const GLint *vec);
+	bool setIntValue(GLint v0);
+	bool setIntValue(GLint v0, GLint v1);
+	bool setIntValue(GLint v0, GLint v1, GLint v2);
+	bool setIntValue(GLint v0, GLint v1, GLint v2, GLint v3);
 
 	inline bool isDirty() const { return isDirty_; }
 	inline void setDirty(bool isDirty) { isDirty_ = isDirty; }
-	void commitValue();
+	bool commitValue();
 
   private:
 	const GLUniform *uniform_;
@@ -40,9 +45,9 @@ class GLUniformCache
 	/// A flag to signal if the uniform needs to be committed
 	bool isDirty_;
 
-	void checkFloat();
-	void checkInt();
-	void checkComponents(unsigned int requiredComponents);
+	bool checkFloat() const;
+	bool checkInt() const;
+	bool checkComponents(unsigned int requiredComponents) const;
 };
 
 }

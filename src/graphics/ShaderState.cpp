@@ -141,11 +141,12 @@ bool ShaderState::setUniformInt(const char *blockName, const char *name, const i
 	if (node_ == nullptr || shader_ == nullptr || name == nullptr || vector == nullptr)
 		return false;
 
+	bool result = false;
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
 	if (uniform)
-		uniform->setIntVector(vector);
+		result = uniform->setIntVector(vector);
 
-	return (uniform != nullptr);
+	return result;
 }
 
 bool ShaderState::setUniformInt(const char *blockName, const char *name, int value0)
@@ -153,11 +154,12 @@ bool ShaderState::setUniformInt(const char *blockName, const char *name, int val
 	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
+	bool result = false;
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
 	if (uniform)
-		uniform->setIntValue(value0);
+		result = uniform->setIntValue(value0);
 
-	return (uniform != nullptr);
+	return result;
 }
 
 bool ShaderState::setUniformInt(const char *blockName, const char *name, int value0, int value1)
@@ -165,11 +167,12 @@ bool ShaderState::setUniformInt(const char *blockName, const char *name, int val
 	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
+	bool result = false;
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
 	if (uniform)
-		uniform->setIntValue(value0, value1);
+		result = uniform->setIntValue(value0, value1);
 
-	return (uniform != nullptr);
+	return result;
 }
 
 bool ShaderState::setUniformInt(const char *blockName, const char *name, int value0, int value1, int value2)
@@ -177,11 +180,12 @@ bool ShaderState::setUniformInt(const char *blockName, const char *name, int val
 	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
+	bool result = false;
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
 	if (uniform)
-		uniform->setIntValue(value0, value1, value2);
+		result = uniform->setIntValue(value0, value1, value2);
 
-	return (uniform != nullptr);
+	return result;
 }
 
 bool ShaderState::setUniformInt(const char *blockName, const char *name, int value0, int value1, int value2, int value3)
@@ -189,11 +193,12 @@ bool ShaderState::setUniformInt(const char *blockName, const char *name, int val
 	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
+	bool result = false;
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
 	if (uniform)
-		uniform->setIntValue(value0, value1, value2, value3);
+		result = uniform->setIntValue(value0, value1, value2, value3);
 
-	return (uniform != nullptr);
+	return result;
 }
 
 bool ShaderState::setUniformInt(const char *blockName, const char *name, const Vector2i &vec)
@@ -216,11 +221,12 @@ bool ShaderState::setUniformFloat(const char *blockName, const char *name, const
 	if (node_ == nullptr || shader_ == nullptr || name == nullptr || vector == nullptr)
 		return false;
 
+	bool result = false;
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
 	if (uniform)
-		uniform->setFloatVector(vector);
+		result = uniform->setFloatVector(vector);
 
-	return (uniform != nullptr);
+	return result;
 }
 
 bool ShaderState::setUniformFloat(const char *blockName, const char *name, float value0)
@@ -228,11 +234,12 @@ bool ShaderState::setUniformFloat(const char *blockName, const char *name, float
 	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
+	bool result = false;
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
 	if (uniform)
-		uniform->setFloatValue(value0);
+		result = uniform->setFloatValue(value0);
 
-	return (uniform != nullptr);
+	return result;
 }
 
 bool ShaderState::setUniformFloat(const char *blockName, const char *name, float value0, float value1)
@@ -240,11 +247,12 @@ bool ShaderState::setUniformFloat(const char *blockName, const char *name, float
 	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
+	bool result = false;
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
 	if (uniform)
-		uniform->setFloatValue(value0, value1);
+		result = uniform->setFloatValue(value0, value1);
 
-	return (uniform != nullptr);
+	return result;
 }
 
 bool ShaderState::setUniformFloat(const char *blockName, const char *name, float value0, float value1, float value2)
@@ -252,11 +260,12 @@ bool ShaderState::setUniformFloat(const char *blockName, const char *name, float
 	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
+	bool result = false;
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
 	if (uniform)
-		uniform->setFloatValue(value0, value1, value2);
+		result = uniform->setFloatValue(value0, value1, value2);
 
-	return (uniform != nullptr);
+	return result;
 }
 
 bool ShaderState::setUniformFloat(const char *blockName, const char *name, float value0, float value1, float value2, float value3)
@@ -264,11 +273,12 @@ bool ShaderState::setUniformFloat(const char *blockName, const char *name, float
 	if (node_ == nullptr || shader_ == nullptr || name == nullptr)
 		return false;
 
+	bool result = false;
 	GLUniformCache *uniform = retrieveUniform(node_->renderCommand_->material(), blockName, name);
 	if (uniform)
-		uniform->setFloatValue(value0, value1, value2, value3);
+		result = uniform->setFloatValue(value0, value1, value2, value3);
 
-	return (uniform != nullptr);
+	return result;
 }
 
 bool ShaderState::setUniformFloat(const char *blockName, const char *name, const Vector2f &vector)
@@ -289,6 +299,50 @@ bool ShaderState::setUniformFloat(const char *blockName, const char *name, const
 bool ShaderState::setUniformFloat(const char *blockName, const char *name, const Colorf &color)
 {
 	return setUniformFloat(blockName, name, color.r(), color.g(), color.b(), color.a());
+}
+
+unsigned int ShaderState::uniformBlockSize(const char *blockName)
+{
+	if (node_ == nullptr || shader_ == nullptr || blockName == nullptr)
+		return 0;
+
+	unsigned int size = 0;
+	GLUniformBlockCache *uniformBlock = node_->renderCommand_->material().uniformBlock(blockName);
+	if (uniformBlock)
+		size = static_cast<unsigned int>(uniformBlock->size());
+
+	return size;
+}
+
+bool ShaderState::copyToUniformBlock(const char *blockName, unsigned int destIndex, unsigned char *src, unsigned int numBytes)
+{
+	if (node_ == nullptr || shader_ == nullptr || blockName == nullptr)
+		return false;
+
+	bool result = false;
+	GLUniformBlockCache *uniformBlock = node_->renderCommand_->material().uniformBlock(blockName);
+	if (uniformBlock)
+		result = uniformBlock->copyData(destIndex, src, numBytes);
+
+	return result;
+}
+
+bool ShaderState::copyToUniformBlock(const char *blockName, unsigned char *src, unsigned int numBytes)
+{
+	return copyToUniformBlock(blockName, 0, src, numBytes);
+}
+
+bool ShaderState::copyToUniformBlock(const char *blockName, unsigned char *src)
+{
+	if (node_ == nullptr || shader_ == nullptr || blockName == nullptr)
+		return false;
+
+	bool result = false;
+	GLUniformBlockCache *uniformBlock = node_->renderCommand_->material().uniformBlock(blockName);
+	if (uniformBlock)
+		result = uniformBlock->copyData(src);
+
+	return result;
 }
 
 }

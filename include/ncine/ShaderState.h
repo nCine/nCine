@@ -51,6 +51,11 @@ class DLL_PUBLIC ShaderState
 	bool setUniformFloat(const char *blockName, const char *name, const Vector4f &vector);
 	bool setUniformFloat(const char *blockName, const char *name, const Colorf &color);
 
+	unsigned int uniformBlockSize(const char *blockName);
+	bool copyToUniformBlock(const char *blockName, unsigned int destIndex, unsigned char *src, unsigned int numBytes);
+	bool copyToUniformBlock(const char *blockName, unsigned char *src, unsigned int numBytes);
+	bool copyToUniformBlock(const char *blockName, unsigned char *src);
+
   private:
 	DrawableNode *node_;
 	Shader *shader_;

@@ -15,6 +15,9 @@ class GLBufferObject;
 class GLShaderUniformBlocks
 {
   public:
+	static const int UniformBlockCachesHashSize = 4;
+	using UniformHashMapType = nctl::StaticHashMap<nctl::String, GLUniformBlockCache, UniformBlockCachesHashSize>;
+
 	GLShaderUniformBlocks();
 	explicit GLShaderUniformBlocks(GLShaderProgram *shaderProgram);
 	GLShaderUniformBlocks(GLShaderProgram *shaderProgram, const char *includeOnly, const char *exclude);
@@ -25,6 +28,7 @@ class GLShaderUniformBlocks
 	inline unsigned int numUniformBlocks() const { return uniformBlockCaches_.size(); }
 	inline bool hasUniformBlock(const char *name) const { return (uniformBlockCaches_.find(name) != nullptr); }
 	GLUniformBlockCache *uniformBlock(const char *name);
+	inline const UniformHashMapType allUniformBlocks() const { return uniformBlockCaches_; }
 	void commitUniformBlocks();
 
 	void bind();
@@ -37,8 +41,7 @@ class GLShaderUniformBlocks
 	/// Uniform buffer parameters for binding
 	RenderBuffersManager::Parameters uboParams_;
 
-	static const int UniformBlockCachesHashSize = 4;
-	nctl::StaticHashMap<nctl::String, GLUniformBlockCache, UniformBlockCachesHashSize> uniformBlockCaches_;
+	UniformHashMapType uniformBlockCaches_;
 
 	/// Imports the uniform blocks with the option of including only some or excluing others
 	void importUniformBlocks(const char *includeOnly, const char *exclude);

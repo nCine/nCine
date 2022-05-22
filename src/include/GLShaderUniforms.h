@@ -13,6 +13,9 @@ class GLShaderProgram;
 class GLShaderUniforms
 {
   public:
+	static const int UniformCachesHashSize = 16;
+	using UniformHashMapType = nctl::StaticHashMap<nctl::String, GLUniformCache, UniformCachesHashSize>;
+
 	GLShaderUniforms();
 	explicit GLShaderUniforms(GLShaderProgram *shaderProgram);
 	GLShaderUniforms(GLShaderProgram *shaderProgram, const char *includeOnly, const char *exclude);
@@ -24,13 +27,12 @@ class GLShaderUniforms
 	inline unsigned int numUniforms() const { return uniformCaches_.size(); }
 	inline bool hasUniform(const char *name) const { return (uniformCaches_.find(name) != nullptr); }
 	GLUniformCache *uniform(const char *name);
+	inline const UniformHashMapType allUniforms() const { return uniformCaches_; }
 	void commitUniforms();
 
   private:
 	GLShaderProgram *shaderProgram_;
-
-	static const int UniformCachesHashSize = 16;
-	nctl::StaticHashMap<nctl::String, GLUniformCache, UniformCachesHashSize> uniformCaches_;
+	UniformHashMapType uniformCaches_;
 
 	/// Imports the uniforms with the option of including only some or excluing others
 	void importUniforms(const char *includeOnly, const char *exclude);

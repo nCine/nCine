@@ -5,6 +5,7 @@
 #include "RenderCommandPool.h"
 #include "RenderResources.h"
 #include "Application.h"
+#include <nctl/StaticHashMapIterator.h>
 
 namespace ncine {
 
@@ -35,6 +36,20 @@ RenderBatcher::RenderBatcher()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+bool areTexturesDifferent(const RenderCommand *command, const RenderCommand *prevCommand)
+{
+	bool areDifferent = false;
+	for (unsigned int i = 0; i < GLTexture::MaxTextureUnits; i++)
+	{
+		if (command->material().texture(i) != prevCommand->material().texture(i))
+		{
+			areDifferent = true;
+			break;
+		}
+	}
+	return areDifferent;
+}
+
 void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, nctl::Array<RenderCommand *> &destQueue)
 {
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
@@ -54,7 +69,6 @@ void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, 
 	{
 		const RenderCommand *command = srcQueue[i];
 		const GLShaderProgram *shaderProgram = command->material().shaderProgram();
-		const GLTexture *texture = command->material().texture();
 		const bool isBlendingEnabled = command->material().isBlendingEnabled();
 		const GLenum srcBlendingFactor = command->material().srcBlendingFactor();
 		const GLenum destBlendingFactor = command->material().destBlendingFactor();
@@ -62,18 +76,19 @@ void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, 
 
 		const RenderCommand *prevCommand = srcQueue[i - 1];
 		const GLShaderProgram *prevShaderProgram = prevCommand->material().shaderProgram();
-		const GLTexture *prevTexture = prevCommand->material().texture();
 		const bool prevIsBlendingEnabled = prevCommand->material().isBlendingEnabled();
 		const GLenum prevSrcBlendingFactor = prevCommand->material().srcBlendingFactor();
 		const GLenum prevDestBlendingFactor = prevCommand->material().destBlendingFactor();
 		const GLenum prevPrimitive = prevCommand->geometry().primitiveType();
+
+		const bool texturesDiffer = areTexturesDifferent(command, prevCommand);
 
 		// Always false for the opaque queue as blending is not enabled for any of the commands
 		const bool blendingDiffers = isBlendingEnabled && prevIsBlendingEnabled &&
 		                             (prevSrcBlendingFactor != srcBlendingFactor || prevDestBlendingFactor != destBlendingFactor);
 
 		// Should split if the shader differs or if it's the same but texture, blending or primitive type aren't
-		const bool shouldSplit = prevShaderProgram != shaderProgram || prevTexture != texture || prevPrimitive != primitive || blendingDiffers;
+		const bool shouldSplit = prevShaderProgram != shaderProgram || texturesDiffer || prevPrimitive != primitive || blendingDiffers;
 
 		// Also collect the very last command if it can be batched with the previous one
 		unsigned int endSplit = (i == srcQueue.size() - 1 && !shouldSplit) ? i + 1 : i;
@@ -154,13 +169,32 @@ RenderCommand *RenderBatcher::collectCommands(
 	bool commandAdded = false;
 	batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(batchedShader, commandAdded);
 
-	const int singleInstanceBlockSize = (*start)->material().uniformBlock(Material::InstanceBlockName)->size();
+	// Retrieving the original block instance size without the uniform buffer offset alignment
+	const GLUniformBlockCache *singleInstanceBlock = (*start)->material().uniformBlock(Material::InstanceBlockName);
+	const int singleInstanceBlockSizePacked = singleInstanceBlock->size() - singleInstanceBlock->alignAmount(); // remove the uniform buffer offset alignment
+	const int singleInstanceBlockSize = singleInstanceBlockSizePacked + (16 - singleInstanceBlockSizePacked % 16) % 16; // but add the std140 vec4 layout alignment
 
 	if (commandAdded)
 		batchCommand->setType(refCommand->type());
 	instancesBlock = batchCommand->material().uniformBlock(Material::InstancesBlockName);
 	FATAL_ASSERT_MSG_X(instancesBlock != nullptr, "Batched shader does not have an %s uniform block", Material::InstancesBlockName);
-	instancesBlockSize += batchCommand->material().shaderProgram()->uniformsSize();
+
+	const unsigned long nonBlockUniformsSize = batchCommand->material().shaderProgram()->uniformsSize();
+	nctl::StaticString<GLUniformBlock::MaxNameLength> uniformBlockName;
+	// Determine how much memory is needed by uniform blocks that are not for instances
+	unsigned long nonInstancesBlocksSize = 0;
+	const GLShaderUniformBlocks::UniformHashMapType allUniformBlocks = refCommand->material().allUniformBlocks();
+	for (const GLUniformBlockCache &uniformBlockCache : allUniformBlocks)
+	{
+		uniformBlockName = uniformBlockCache.uniformBlock()->name();
+		if (uniformBlockName == Material::InstanceBlockName)
+			continue;
+
+		GLUniformBlockCache *batchBlock = batchCommand->material().uniformBlock(uniformBlockName.data());
+		ASSERT(batchBlock);
+		if (batchBlock)
+			nonInstancesBlocksSize += uniformBlockCache.size() - uniformBlockCache.alignAmount();
+	}
 
 	// Set to true if at least one command in the batch has indices or forced by a rendering settings
 	bool batchingWithIndices = theApplication().renderingSettings().batchingWithIndices;
@@ -172,7 +206,8 @@ RenderCommand *RenderBatcher::collectCommands(
 			batchingWithIndices = true;
 
 		// Don't request more bytes than a UBO can hold
-		if (instancesBlockSize + singleInstanceBlockSize > UboMaxSize)
+		const unsigned long currentSize = nonBlockUniformsSize + nonInstancesBlocksSize + instancesBlockSize;
+		if (currentSize + singleInstanceBlockSize > UboMaxSize)
 			break;
 		else
 			instancesBlockSize += singleInstanceBlockSize;
@@ -180,6 +215,36 @@ RenderCommand *RenderBatcher::collectCommands(
 		++it;
 	}
 	nextStart = it;
+
+	batchCommand->material().setUniformsDataPointer(acquireMemory(nonBlockUniformsSize + nonInstancesBlocksSize + instancesBlockSize));
+	// Copying data for non-instances uniform blocks from the first command in the batch
+	for (const GLUniformBlockCache &uniformBlockCache : allUniformBlocks)
+	{
+		uniformBlockName = uniformBlockCache.uniformBlock()->name();
+		if (uniformBlockName == Material::InstanceBlockName)
+			continue;
+
+		GLUniformBlockCache *batchBlock = batchCommand->material().uniformBlock(uniformBlockName.data());
+		const bool dataCopied = batchBlock->copyData(uniformBlockCache.dataPointer());
+		ASSERT(dataCopied);
+		batchBlock->setUsedSize(uniformBlockCache.usedSize());
+	}
+
+	// Setting sampler uniforms for GL_TEXTURE* units
+	const GLShaderUniforms::UniformHashMapType allUniforms = refCommand->material().allUniforms();
+	for (const GLUniformCache &uniformCache : allUniforms)
+	{
+		if (uniformCache.uniform()->type() == GL_SAMPLER_2D)
+		{
+			GLUniformCache *batchUniformCache = batchCommand->material().uniform(uniformCache.uniform()->name());
+			const int refValue = uniformCache.intValue(0);
+			const int batchValue = batchUniformCache->intValue(0);
+			// Also checking if the command has just been added, as the memory at the
+			// uniforms data pointer is not cleared and might contain the reference value
+			if (batchValue != refValue || commandAdded)
+				batchUniformCache->setIntValue(refValue);
+		}
+	}
 
 	const unsigned long maxVertexDataSize = RenderResources::buffersManager().specs(RenderBuffersManager::BufferTypes::ARRAY).maxSize;
 	const unsigned long maxIndexDataSize = RenderResources::buffersManager().specs(RenderBuffersManager::BufferTypes::ELEMENT_ARRAY).maxSize;
@@ -225,10 +290,6 @@ RenderCommand *RenderBatcher::collectCommands(
 	else if (instancesVertexDataSize >= twoVerticesDataSize)
 		instancesVertexDataSize -= twoVerticesDataSize;
 
-	batchCommand->material().setUniformsDataPointer(acquireMemory(instancesBlockSize));
-	if (commandAdded && refShader->hasAttribute(Material::TexCoordsAttributeName))
-		batchCommand->material().uniform(Material::TextureUniformName)->setIntValue(0); // GL_TEXTURE0
-
 	const unsigned int NumFloatsVertexFormat = refCommand->geometry().numElementsPerVertex();
 	const unsigned int NumFloatsVertexFormatAndIndex = NumFloatsVertexFormat + 1; // index is an `int`, same size as a `float`
 	const unsigned int SizeVertexFormat = NumFloatsVertexFormat * 4;
@@ -256,7 +317,8 @@ RenderCommand *RenderBatcher::collectCommands(
 		command->commitNodeTransformation();
 
 		const GLUniformBlockCache *singleInstanceBlock = command->material().uniformBlock(Material::InstanceBlockName);
-		memcpy(instancesBlock->dataPointer() + instancesBlockOffset, singleInstanceBlock->dataPointer(), singleInstanceBlockSize);
+		const bool dataCopied = instancesBlock->copyData(instancesBlockOffset, singleInstanceBlock->dataPointer(), singleInstanceBlockSize);
+		ASSERT(dataCopied);
 		instancesBlockOffset += singleInstanceBlockSize;
 
 		if (batchedShaderHasAttributes)
@@ -332,7 +394,8 @@ RenderCommand *RenderBatcher::collectCommands(
 			batchCommand->geometry().releaseIndexPointer();
 	}
 
-	batchCommand->material().setTexture(refCommand->material().texture());
+	for (unsigned int i = 0; i < GLTexture::MaxTextureUnits; i++)
+		batchCommand->material().setTexture(i, refCommand->material().texture(i));
 	batchCommand->material().setBlendingEnabled(refCommand->material().isBlendingEnabled());
 	batchCommand->material().setBlendingFactors(refCommand->material().srcBlendingFactor(), refCommand->material().destBlendingFactor());
 	batchCommand->setBatchSize(nextStart - start);

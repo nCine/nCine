@@ -58,11 +58,13 @@ struct InvertedVertexTextureZ
 struct MultiTextureShaderData
 {
 	nc::Vector4f lightPosition = nc::Vector4f(0.0f, 0.0f, 50.0f, 0.0f);
+	nc::Colorf ambientColor = nc::Colorf(1.0f, 1.0f, 1.0f, 0.05f);
 	nc::Colorf diffuseColor = nc::Colorf(1.0f, 1.0f, 1.0f, 1.0f);
 	nc::Colorf specularColor = nc::Colorf(1.0f, 1.0f, 1.0f, 1.0f);
 	nc::Vector4f attFactors = nc::Vector4f(1.0f, 0.00003f, 0.000003f, 32.0f);
 } multiTextureShaderData;
 bool shaderDataChanged = true;
+bool uniformBlockHasStructSize = false;
 
 bool captureMouse = true;
 bool captureKeyboard = true;
@@ -168,15 +170,22 @@ void MyEventHandler::onInit()
 
 	multitextureShader_ = nctl::makeUnique<nc::Shader>("Multitexture_Shader", nc::Shader::LoadMode::STRING, multitexture_vs, multitexture_fs);
 	FATAL_ASSERT(multitextureShader_->isLinked());
-	multitextureSprite_ = nctl::makeUnique<nc::Sprite>(rootNode_.get(), diffuseTexture_.get(), width * 0.5f, height * 0.25f);
-	multitextureSprite_->setScale(0.5f);
-	multitextureShaderState_ = nctl::makeUnique<nc::ShaderState>(multitextureSprite_.get(), multitextureShader_.get());
+	for (unsigned int i = 0; i < NumSprites; i++)
+	{
+		multitextureSprites_.pushBack(nctl::makeUnique<nc::Sprite>(rootNode_.get(), diffuseTexture_.get(), width * 0.15f + width * 0.1f * i, height * 0.25f));
+		multitextureSprites_.back()->setScale(0.5f);
+		multitextureShaderStates_.pushBack(nctl::makeUnique<nc::ShaderState>(multitextureSprites_.back().get(), multitextureShader_.get()));
 
-	multitextureShaderState_->setTexture(0, diffuseTexture_.get()); // GL_TEXTURE0
-	multitextureShaderState_->setUniformInt(nullptr, "uTexture0", 0); // GL_TEXTURE0
-	multitextureShaderState_->setTexture(1, normalTexture_.get()); // GL_TEXTURE1
-	multitextureShaderState_->setUniformInt(nullptr, "uTexture1", 1); // GL_TEXTURE1
+		multitextureShaderStates_.back()->setTexture(0, diffuseTexture_.get()); // GL_TEXTURE0
+		multitextureShaderStates_.back()->setUniformInt(nullptr, "uTexture0", 0); // GL_TEXTURE0
+		multitextureShaderStates_.back()->setTexture(1, normalTexture_.get()); // GL_TEXTURE1
+		multitextureShaderStates_.back()->setUniformInt(nullptr, "uTexture1", 1); // GL_TEXTURE1
+	}
+	batchedMultitextureShader_ = nctl::makeUnique<nc::Shader>("Batched_Multitexture_Shader", nc::Shader::LoadMode::STRING, nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS, batched_multitexture_vs, multitexture_fs);
+	FATAL_ASSERT(batchedMultitextureShader_->isLinked());
+	multitextureShader_->registerBatchedShader(*batchedMultitextureShader_);
 
+	uniformBlockHasStructSize = (multitextureShaderStates_[0]->uniformBlockSize("DataBlock") == sizeof(MultiTextureShaderData));
 	multiTextureShaderData.lightPosition.x = nc::theApplication().width() * 0.5f;
 	multiTextureShaderData.lightPosition.y = nc::theApplication().height() * 0.5f;
 
@@ -199,10 +208,12 @@ void MyEventHandler::onFrameStart()
 
 	ImGui::Begin("apptest_shaders");
 	shaderDataChanged |= ImGui::InputFloat3("Position", multiTextureShaderData.lightPosition.data());
+	shaderDataChanged |= ImGui::ColorEdit3("Ambient Color", multiTextureShaderData.ambientColor.data());
 	shaderDataChanged |= ImGui::ColorEdit3("Diffuse Color", multiTextureShaderData.diffuseColor.data());
 	shaderDataChanged |= ImGui::ColorEdit3("Specular Color", multiTextureShaderData.specularColor.data());
 	shaderDataChanged |= ImGui::InputFloat3("Attenuation", multiTextureShaderData.attFactors.data(), "%.6f");
 
+	shaderDataChanged |= ImGui::SliderFloat("Ambient Intensity", &multiTextureShaderData.ambientColor.data()[3], 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
 	shaderDataChanged |= ImGui::SliderFloat("Diffuse Intensity", &multiTextureShaderData.diffuseColor.data()[3], 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
 	shaderDataChanged |= ImGui::SliderFloat("Specular Intensity", &multiTextureShaderData.specularColor.data()[3], 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
 	shaderDataChanged |= ImGui::SliderFloat("Specular Scatter", &multiTextureShaderData.attFactors.w, 1.0f, 64.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
@@ -219,10 +230,19 @@ void MyEventHandler::onFrameStart()
 
 	if (shaderDataChanged)
 	{
-		multitextureShaderState_->setUniformFloat("DataBlock", "lightPos", multiTextureShaderData.lightPosition.data());
-		multitextureShaderState_->setUniformFloat("DataBlock", "diffuseColor", multiTextureShaderData.diffuseColor.data());
-		multitextureShaderState_->setUniformFloat("DataBlock", "specularColor", multiTextureShaderData.specularColor.data());
-		multitextureShaderState_->setUniformFloat("DataBlock", "attFactors", multiTextureShaderData.attFactors.data());
+		for (unsigned int i = 0; i < NumSprites; i++)
+		{
+			if (uniformBlockHasStructSize)
+				multitextureShaderStates_[i]->copyToUniformBlock("DataBlock", reinterpret_cast<unsigned char *>(&multiTextureShaderData));
+			else
+			{
+				multitextureShaderStates_[i]->setUniformFloat("DataBlock", "lightPos", multiTextureShaderData.lightPosition.data());
+				multitextureShaderStates_[i]->setUniformFloat("DataBlock", "ambientColor", multiTextureShaderData.ambientColor.data());
+				multitextureShaderStates_[i]->setUniformFloat("DataBlock", "diffuseColor", multiTextureShaderData.diffuseColor.data());
+				multitextureShaderStates_[i]->setUniformFloat("DataBlock", "specularColor", multiTextureShaderData.specularColor.data());
+				multitextureShaderStates_[i]->setUniformFloat("DataBlock", "attFactors", multiTextureShaderData.attFactors.data());
+			}
+		}
 		shaderDataChanged = false;
 	}
 
@@ -244,9 +264,9 @@ void MyEventHandler::onFrameStart()
 		sprites_[i]->setPositionY(height * 0.3f + fabsf(sinf(angle_ + 5.0f * i)) * (height * (0.25f + 0.02f * i)));
 		sprites_[i]->setRotation(angle_ * 20.0f);
 		meshSprites_[i]->setRotation(angle_ * 20.0f);
+		multitextureSprites_[i]->setPositionY(height * 0.2f + fabsf(sinf(angle_ + 5.0f * i)) * (height * (0.2f + 0.02f * i)));
+		multitextureSprites_[i]->setRotation(angle_ * 20.0f);
 	}
-	multitextureSprite_->setPositionY(height * 0.2f + fabsf(sinf(angle_ + 5.0f)) * (height * (0.2f + 0.02f)));
-	multitextureSprite_->setRotation(angle_ * 20.0f);
 }
 
 void MyEventHandler::onPostUpdate()
@@ -276,10 +296,12 @@ void MyEventHandler::onPostUpdate()
 				const float sin2Fourth = sinf(angle + 270.0f) * sinf(angle + 270.0f);
 				meshSpriteShaderStates_[i]->setUniformFloat("InstanceBlock", "color", sin2First, sin2Second, sin2Third, 0.5f + 0.5f * sin2Fourth);
 			}
+
+			const nc::DrawableNode *multitextureSprite = multitextureShaderStates_[i]->node();
+			const bool multitextureSpriteIsCulled = (multitextureSprite && multitextureSprite->lastFrameRendered() < numFrames);
+			if (multitextureSprite && multitextureSprite->isDrawEnabled() && multitextureSpriteIsCulled == false)
+				multitextureShaderStates_[i]->setUniformFloat("InstanceBlock", "rotation", multitextureSprite->absRotation() * ncine::fDegToRad);
 		}
-		const bool multiTextureSpriteIsCulled = (multitextureSprite_ && multitextureSprite_->lastFrameRendered() < numFrames);
-		if (multitextureSprite_ && multitextureSprite_->isDrawEnabled() && multiTextureSpriteIsCulled == false)
-			multitextureShaderState_->setUniformFloat("InstanceBlock", "rotation", multitextureSprite_->absRotation() * nc::fDegToRad);
 	}
 }
 

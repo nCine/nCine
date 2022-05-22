@@ -11,6 +11,8 @@ namespace ncine {
 class GLUniform
 {
   public:
+	static const int MaxNameLength = 32;
+
 	GLUniform();
 	GLUniform(GLuint program, GLuint index);
 
@@ -36,7 +38,6 @@ class GLUniform
 	GLint size_;
 	GLenum type_;
 	GLint offset_;
-	static const int MaxNameLength = 32;
 	char name_[MaxNameLength];
 
 	friend class GLUniformBlock;

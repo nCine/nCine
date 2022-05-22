@@ -246,6 +246,54 @@ void main()
 }
 )";
 
+char const * const batched_multitexture_vs = R"(
+uniform mat4 uProjectionMatrix;
+uniform mat4 uViewMatrix;
+
+struct Instance
+{
+	mat4 modelMatrix;
+	vec4 texRect;
+	vec2 spriteSize;
+	float rotation;
+};
+
+// Single instances data will be collected in a uniform block called `InstancesBlock`
+layout (std140) uniform InstancesBlock
+{
+#ifdef WITH_FIXED_BATCH_SIZE
+	Instance[BATCH_SIZE] instances;
+#else
+	Instance[585] instances;
+#endif
+} block;
+
+out vec3 vFragPos;
+#ifdef __ANDROID__
+// Workaround for wrong normalization in fragment shader
+out vec3 vFragPosNorm;
+#endif
+out vec2 vTexCoords;
+flat out float vRotation;
+
+#define i block.instances[gl_VertexID / 6]
+
+void main()
+{
+	vec2 aPosition = vec2(-0.5 + float(((gl_VertexID + 2) / 3) % 2), 0.5 - float(((gl_VertexID + 1) / 3) % 2));
+	vec2 aTexCoords = vec2(float(((gl_VertexID + 2) / 3) % 2), float(((gl_VertexID + 1) / 3) % 2));
+	vec4 position = vec4(aPosition.x * i.spriteSize.x, aPosition.y * i.spriteSize.y, 0.0, 1.0);
+
+	gl_Position = uProjectionMatrix * uViewMatrix * i.modelMatrix * position;
+	vFragPos = vec3(uViewMatrix * i.modelMatrix * position);
+#ifdef __ANDROID__
+	vFragPosNorm = normalize(vFragPos);
+#endif
+	vTexCoords = vec2(aTexCoords.x * i.texRect.x + i.texRect.y, aTexCoords.y * i.texRect.z + i.texRect.w);
+	vRotation = i.rotation;
+}
+)";
+
 char const * const multitexture_fs = R"(
 #ifdef GL_ES
 precision mediump float;
@@ -266,6 +314,7 @@ out vec4 fragColor;
 layout (std140) uniform DataBlock
 {
 	vec4 lightPos;
+	vec4 ambientColor; // a component is intensity
 	vec4 diffuseColor; // a component is intensity
 	vec4 specularColor; // a component is intensity
 	vec4 attFactors; // w component is specular scatter
@@ -313,7 +362,10 @@ void main()
 	float diffuseIntensity = diffuseColor.a;
 	vec3 diffuse = diffuseIntensity * diff * diffuseColor.rgb;
 
-	fragColor = attenuation * (diffuseMap * vec4(diffuse, 0.0) + specMap * vec4(specular, 0.0));
+	float ambientIntensity = ambientColor.a;
+	vec3 ambient = ambientIntensity * ambientColor.rgb;
+
+	fragColor = vec4(ambient, 0.0) + attenuation * (diffuseMap * vec4(diffuse, 0.0) + specMap * vec4(specular, 0.0));
 	fragColor.a = diffuseMap.a;
 }
 )";
