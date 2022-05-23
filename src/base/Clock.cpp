@@ -4,7 +4,12 @@
 	#include <winsync.h>
 	#include <profileapi.h>
 #elif defined(__APPLE__)
-	#include <mach/mach_time.h>
+	#include <Availability.h>
+	#if __MAC_10_12
+		#include <time.h>
+	#else
+		#include <mach/mach_time.h>
+	#endif
 #else
 	#include <time.h> // for clock_gettime()
 	#include <sys/time.h> // for gettimeofday()
@@ -31,10 +36,14 @@ Clock::Clock()
 	else
 		frequency_ = 1000L;
 #elif defined(__APPLE__)
+	#if __MAC_10_12
+	frequency_ = 1.0e9L;
+	#else
 	mach_timebase_info_data_t info;
 	mach_timebase_info(&info);
 
 	frequency_ = (info.denom * 1.0e9L) / info.numer;
+	#endif
 #else
 	struct timespec resolution;
 	if (clock_getres(CLOCK_MONOTONIC, &resolution) == 0)
@@ -63,7 +72,11 @@ uint64_t Clock::counter() const
 	else
 		counter = GetTickCount();
 #elif defined(__APPLE__)
+	#if __MAC_10_12
+	counter = clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW);
+	#else
 	counter = mach_absolute_time();
+	#endif
 #else
 	if (hasMonotonicClock_)
 	{

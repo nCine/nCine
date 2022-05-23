@@ -23,7 +23,7 @@ Qt5Widget::Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*create
 {
 	setFocusPolicy(Qt::StrongFocus);
 	setMouseTracking(true);
-	QObject::connect(this, SIGNAL(frameSwapped()), this, SLOT(update()));
+	QObject::connect(this, SIGNAL(frameSwapped()), this, SLOT(autoUpdate()));
 
 	ASSERT(createAppEventHandler_);
 	application_.qt5Widget_ = this;
@@ -145,7 +145,7 @@ void Qt5Widget::resizeGL(int w, int h)
 
 void Qt5Widget::paintGL()
 {
-	if (isInitialized_ && shouldUpdate_)
+	if (isInitialized_)
 	{
 		if (application_.shouldQuit() == false)
 			application_.run();
@@ -179,6 +179,12 @@ QSize Qt5Widget::sizeHint() const
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+void Qt5Widget::autoUpdate()
+{
+	if (shouldUpdate_)
+		update();
+}
 
 void Qt5Widget::shutdown()
 {

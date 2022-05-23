@@ -14,6 +14,7 @@ class RenderCommandPool
 {
   public:
 	RenderCommandPool(unsigned int poolSize);
+	~RenderCommandPool();
 
 	/// Adds a new command to the used pool and returns its pointer
 	/*! \note It is usually called after checking that the retrieve method fails */

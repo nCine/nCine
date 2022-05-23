@@ -47,6 +47,10 @@ class DLL_PUBLIC Qt5Widget : public QOpenGLWidget
 	QSize minimumSizeHint() const override;
 	QSize sizeHint() const override;
 
+  private slots:
+	/// The function slot called at each `frameSwapped` signal
+	void autoUpdate();
+
   private:
 	PCApplication &application_;
 	nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler_)();

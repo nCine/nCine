@@ -176,13 +176,12 @@ void Material::reserveUniformsDataMemory()
 
 	// Total memory size for all uniforms and uniform blocks
 	const unsigned int uniformsSize = shaderProgram_->uniformsSize() + shaderProgram_->uniformBlocksSize();
-	GLubyte *dataPointer = uniformsHostBuffer_.get();
 	if (uniformsSize > uniformsHostBufferSize_)
 	{
 		uniformsHostBuffer_ = nctl::makeUnique<GLubyte[]>(uniformsSize);
 		uniformsHostBufferSize_ = uniformsSize;
-		dataPointer = uniformsHostBuffer_.get();
 	}
+	GLubyte *dataPointer = uniformsHostBuffer_.get();
 	shaderUniforms_.setUniformsDataPointer(dataPointer);
 	shaderUniformBlocks_.setUniformsDataPointer(&dataPointer[shaderProgram_->uniformsSize()]);
 }
