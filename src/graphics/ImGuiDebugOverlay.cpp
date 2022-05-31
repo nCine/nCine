@@ -1388,7 +1388,7 @@ void ImGuiDebugOverlay::guiNodeInspector()
 {
 	if (ImGui::CollapsingHeader("Node Inspector"))
 	{
-		guiViewports(&theApplication().rootViewport(), 0);
+		guiViewports(&theApplication().screenViewport(), 0);
 		for (unsigned int i = 0; i < Viewport::chain().size(); i++)
 			guiViewports(Viewport::chain()[i], i + 1);
 	}

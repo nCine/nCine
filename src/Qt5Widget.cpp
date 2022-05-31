@@ -99,7 +99,7 @@ bool Qt5Widget::event(QEvent *event)
 		{
 			makeCurrent();
 			const QSize size = static_cast<QResizeEvent *>(event)->size();
-			application_.resizeRootViewport(size.width(), size.height());
+			application_.resizeScreenViewport(size.width(), size.height());
 			doneCurrent();
 			return QWidget::event(event);
 		}

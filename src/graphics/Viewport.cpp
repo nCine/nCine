@@ -417,7 +417,7 @@ void Viewport::draw(unsigned int nextIndex)
 
 	ZoneScoped;
 	if (type_ == Type::SCREEN)
-		debugString.format("Draw root viewport (0x%lx)", uintptr_t(this));
+		debugString.format("Draw screen viewport (0x%lx)", uintptr_t(this));
 	else if (hasTexture() && texturePtr_->name() != nullptr)
 		debugString.format("Draw viewport \"%s\" (0x%lx)", texturePtr_->name(), uintptr_t(this));
 	else

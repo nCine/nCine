@@ -266,7 +266,7 @@ void GlfwInputManager::windowSizeCallback(GLFWwindow *window, int width, int hei
 
 void GlfwInputManager::framebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
-	theApplication().resizeRootViewport(width, height);
+	theApplication().resizeScreenViewport(width, height);
 }
 
 void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)

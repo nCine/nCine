@@ -30,7 +30,7 @@ class DLL_PUBLIC Viewport
 		TEXTURE_POINTER,
 		/// The viewport has no texture of its own, it uses the one from the previous viewport
 		NO_TEXTURE,
-		/// The viewport is the screen (root viewport)
+		/// The viewport is the screen
 		SCREEN
 	};
 
@@ -171,7 +171,7 @@ class DLL_PUBLIC Viewport
 	/// Sets the root node
 	inline void setRootNode(SceneNode *rootNode) { rootNode_ = rootNode; }
 
-	/// Returns the inverse ordered array of viewports to be drawn before the root one
+	/// Returns the reverse ordered array of viewports to be drawn before the screen
 	static nctl::Array<Viewport *> &chain() { return chain_; }
 
 	/// Returns the camera used for rendering as a constant
@@ -200,7 +200,7 @@ class DLL_PUBLIC Viewport
 		CommittedBit = 2
 	};
 
-	/// The inverse ordered array of viewports to be drawn before the root one
+	/// The reverse ordered array of viewports to be drawn before the screen
 	static nctl::Array<Viewport *> chain_;
 
 	Type type_;

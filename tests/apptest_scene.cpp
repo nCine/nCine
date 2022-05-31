@@ -312,7 +312,7 @@ void MyEventHandler::onFrameStart()
 	for (unsigned int i = 0; i < NumSprites; i++)
 		sprites_[i]->setScale(spriteScale);
 
-	nc::theApplication().rootViewport().setClearColor(bgColor);
+	nc::theApplication().screenViewport().setClearColor(bgColor);
 #endif
 }
 

@@ -157,7 +157,7 @@ void PCApplication::processEvents()
 				{
 					gfxDevice_->width_ = event.window.data1;
 					gfxDevice_->height_ = event.window.data2;
-					resizeRootViewport(event.window.data1, event.window.data2);
+					resizeScreenViewport(event.window.data1, event.window.data2);
 				}
 				break;
 			default:

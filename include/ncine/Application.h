@@ -98,8 +98,8 @@ class DLL_PUBLIC Application
 	inline IGfxDevice &gfxDevice() { return *gfxDevice_; }
 	/// Returns the root of the transformation graph
 	inline SceneNode &rootNode() { return *rootNode_; }
-	/// Returns the root viewport (i.e. the screen)
-	Viewport &rootViewport();
+	/// Returns the screen viewport
+	Viewport &screenViewport();
 	/// Returns the input manager instance
 	inline IInputManager &inputManager() { return *inputManager_; }
 
@@ -122,8 +122,8 @@ class DLL_PUBLIC Application
 	/// Returns the screen resolution as a `Vector2i` object
 	inline Vector2i resolutionInt() const { return gfxDevice_->resolution(); }
 
-	/// Resizes the root viewport if it exists
-	void resizeRootViewport(int width, int height);
+	/// Resizes the screen viewport, if exists
+	void resizeScreenViewport(int width, int height);
 
 	/// Returns the value of the suspension flag
 	/*! If `true` the application is suspended, it will neither update nor receive events */
@@ -160,7 +160,7 @@ class DLL_PUBLIC Application
 	nctl::UniquePtr<FrameTimer> frameTimer_;
 	nctl::UniquePtr<IGfxDevice> gfxDevice_;
 	nctl::UniquePtr<SceneNode> rootNode_;
-	nctl::UniquePtr<ScreenViewport> rootViewport_;
+	nctl::UniquePtr<ScreenViewport> screenViewport_;
 	nctl::UniquePtr<IDebugOverlay> debugOverlay_;
 	nctl::UniquePtr<IInputManager> inputManager_;
 	nctl::UniquePtr<IAppEventHandler> appEventHandler_;

@@ -252,10 +252,10 @@ void MyEventHandler::setupViewport()
 		}
 		nc::Viewport::chain().pushBack(sceneViewport_.get());
 
-		nc::theApplication().rootViewport().setRootNode(vpPongSprite_.get());
+		nc::theApplication().screenViewport().setRootNode(vpPongSprite_.get());
 	}
 	else
-		nc::theApplication().rootViewport().setRootNode(rootNode_.get());
+		nc::theApplication().screenViewport().setRootNode(rootNode_.get());
 }
 
 void MyEventHandler::checkClick(float x, float y)

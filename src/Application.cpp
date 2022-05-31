@@ -73,9 +73,9 @@ Application::GuiSettings::GuiSettings()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-Viewport &Application::rootViewport()
+Viewport &Application::screenViewport()
 {
-	return *rootViewport_;
+	return *screenViewport_;
 }
 
 unsigned long int Application::numFrames() const
@@ -88,10 +88,10 @@ float Application::interval() const
 	return frameTimer_->lastFrameInterval();
 }
 
-void Application::resizeRootViewport(int width, int height)
+void Application::resizeScreenViewport(int width, int height)
 {
-	if (rootViewport_ != nullptr)
-		rootViewport_->resize(width, height);
+	if (screenViewport_ != nullptr)
+		screenViewport_->resize(width, height);
 }
 
 ///////////////////////////////////////////////////////////
@@ -153,8 +153,8 @@ void Application::initCommon()
 		gfxDevice_->setupGL();
 		RenderResources::create();
 		rootNode_ = nctl::makeUnique<SceneNode>();
-		rootViewport_ = nctl::makeUnique<ScreenViewport>();
-		rootViewport_->setRootNode(rootNode_.get());
+		screenViewport_ = nctl::makeUnique<ScreenViewport>();
+		screenViewport_->setRootNode(rootNode_.get());
 	}
 	else
 		RenderResources::createMinimal(); // some resources are still required for rendering
@@ -237,7 +237,7 @@ void Application::step()
 		{
 			ZoneScopedN("Update");
 			profileStartTime_ = TimeStamp::now();
-			rootViewport_->update();
+			screenViewport_->update();
 			timings_[Timings::UPDATE] = profileStartTime_.secondsSince();
 		}
 
@@ -251,7 +251,7 @@ void Application::step()
 		{
 			ZoneScopedN("Visit");
 			profileStartTime_ = TimeStamp::now();
-			rootViewport_->visit();
+			screenViewport_->visit();
 			timings_[Timings::VISIT] = profileStartTime_.secondsSince();
 		}
 
@@ -261,7 +261,7 @@ void Application::step()
 			profileStartTime_ = TimeStamp::now();
 			RenderQueue *imguiRenderQueue = (guiSettings_.imguiViewport) ?
 			            guiSettings_.imguiViewport->renderQueue_.get() :
-			            rootViewport_->renderQueue_.get();
+			            screenViewport_->renderQueue_.get();
 			imguiDrawing_->endFrame(*imguiRenderQueue);
 			timings_[Timings::IMGUI] += profileStartTime_.secondsSince();
 		}
@@ -273,7 +273,7 @@ void Application::step()
 			profileStartTime_ = TimeStamp::now();
 			RenderQueue *nuklearRenderQueue = (guiSettings_.nuklearViewport) ?
 			            guiSettings_.nuklearViewport->renderQueue_.get() :
-			            rootViewport_->renderQueue_.get();
+			            screenViewport_->renderQueue_.get();
 			nuklearDrawing_->endFrame(*nuklearRenderQueue);
 			timings_[Timings::NUKLEAR] += profileStartTime_.secondsSince();
 		}
@@ -282,8 +282,8 @@ void Application::step()
 		{
 			ZoneScopedN("Draw");
 			profileStartTime_ = TimeStamp::now();
-			rootViewport_->sortAndCommitQueue();
-			rootViewport_->draw();
+			screenViewport_->sortAndCommitQueue();
+			screenViewport_->draw();
 			timings_[Timings::DRAW] = profileStartTime_.secondsSince();
 		}
 	}

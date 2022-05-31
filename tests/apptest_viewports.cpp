@@ -88,7 +88,7 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
-	nc::Viewport &rootViewport = nc::theApplication().rootViewport();
+	nc::Viewport &screenViewport = nc::theApplication().screenViewport();
 
 	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data()));
 	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture2File)).data()));
@@ -115,8 +115,8 @@ void MyEventHandler::onInit()
 	viewportCreationData[3].assignCamera = false;
 	viewportCreationData[3].assignRootNode = true;
 
-	rootCamera_ = nctl::makeUnique<nc::Camera>();
-	rootViewport.setCamera(rootCamera_.get());
+	screenCamera_ = nctl::makeUnique<nc::Camera>();
+	screenViewport.setCamera(screenCamera_.get());
 	for (unsigned int i = 0; i < NumViewports; i++)
 	{
 		if (viewportCreationData[i].size.x == 0 && viewportCreationData[i].size.y == 0)
@@ -134,7 +134,7 @@ void MyEventHandler::onInit()
 			viewport->setCamera(viewportData[i].camera.get());
 		else
 		{
-			nc::Camera *camera = (i > 0) ? viewportData[i - 1].camera.get() : rootCamera_.get();
+			nc::Camera *camera = (i > 0) ? viewportData[i - 1].camera.get() : screenCamera_.get();
 			viewport->setCamera(camera);
 		}
 
@@ -205,7 +205,7 @@ void MyEventHandler::onFrameStart()
 
 	static int currentComboViewport = 0;
 	const bool viewportChanged = ImGui::Combo("Viewport", &currentComboViewport, comboString.data());
-	nc::Viewport &currentViewport = (currentComboViewport > 0) ? *viewportData[currentComboViewport - 1].viewport : nc::theApplication().rootViewport();
+	nc::Viewport &currentViewport = (currentComboViewport > 0) ? *viewportData[currentComboViewport - 1].viewport : nc::theApplication().screenViewport();
 
 	const nc::Viewport *nextViewport = (currentComboViewport < nc::Viewport::chain().size()) ? nc::Viewport::chain()[currentComboViewport] : nullptr;
 	const char *nextViewportString = "Next Viewport";

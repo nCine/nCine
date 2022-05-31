@@ -23,7 +23,7 @@ namespace Application {
 	static const char *setGuiSettings = "set_gui_settings";
 
 	static const char *rootNode = "get_rootnode";
-	static const char *rootViewport = "get_root_viewport";
+	static const char *screenViewport = "get_screen_viewport";
 	static const char *interval = "get_interval";
 	static const char *numFrames = "get_num_frames";
 
@@ -79,7 +79,7 @@ void LuaApplication::expose(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::Application::setGuiSettings, setGuiSettings);
 
 	LuaUtils::addFunction(L, LuaNames::Application::rootNode, rootNode);
-	LuaUtils::addFunction(L, LuaNames::Application::rootViewport, rootViewport);
+	LuaUtils::addFunction(L, LuaNames::Application::screenViewport, screenViewport);
 	LuaUtils::addFunction(L, LuaNames::Application::interval, interval);
 	LuaUtils::addFunction(L, LuaNames::Application::numFrames, numFrames);
 
@@ -201,9 +201,9 @@ int LuaApplication::rootNode(lua_State *L)
 	return 1;
 }
 
-int LuaApplication::rootViewport(lua_State *L)
+int LuaApplication::screenViewport(lua_State *L)
 {
-	LuaUntrackedUserData<Viewport>::push(L, &theApplication().rootViewport());
+	LuaUntrackedUserData<Viewport>::push(L, &theApplication().screenViewport());
 	return 1;
 }
 
