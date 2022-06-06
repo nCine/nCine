@@ -1,4 +1,5 @@
 #include "ScreenViewport.h"
+#include "Camera.h"
 #include "RenderQueue.h"
 #include "RenderCommandPool.h"
 #include "RenderResources.h"
@@ -23,9 +24,6 @@ ScreenViewport::ScreenViewport()
 	viewportRect_.set(0, 0, width_, height_);
 
 	const DisplayMode displayMode = theApplication().gfxDevice().displayMode();
-	if (displayMode.alphaBits() == 8)
-		colorFormat_ = ColorFormat::RGBA8;
-
 	if (displayMode.depthBits() == 16)
 		depthStencilFormat_ = DepthStencilFormat::DEPTH16;
 	else if (displayMode.depthBits() == 24)
@@ -33,6 +31,25 @@ ScreenViewport::ScreenViewport()
 
 	rootNode_ = &theApplication().rootNode();
 	type_ = Type::SCREEN;
+}
+
+///////////////////////////////////////////////////////////
+// PUBLIC FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void ScreenViewport::resize(int width, int height)
+{
+	if (width == width_ && height == height_)
+		return;
+
+	viewportRect_.set(0, 0, width, height);
+
+	if (camera_ != nullptr)
+		camera_->setOrthoProjection(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
+	RenderResources::defaultCamera_->setOrthoProjection(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
+
+	width_ = width;
+	height_ = height;
 }
 
 ///////////////////////////////////////////////////////////

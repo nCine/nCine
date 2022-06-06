@@ -24,10 +24,8 @@ class DLL_PUBLIC Viewport
 	/// The different types of viewports available
 	enum class Type
 	{
-		/// The viewport owns a texture in a smart pointer
-		TEXTURE_OWNERSHIP,
-		/// The viewport uses a texture passed by the user, but it doesn't have ownership
-		TEXTURE_POINTER,
+		/// The viewport renders in one or more textures
+		WITH_TEXTURE,
 		/// The viewport has no texture of its own, it uses the one from the previous viewport
 		NO_TEXTURE,
 		/// The viewport is the screen
@@ -49,13 +47,6 @@ class DLL_PUBLIC Viewport
 		NEVER
 	};
 
-	/// The color format for a viewport with a texture or for the screen
-	enum class ColorFormat
-	{
-		RGB8,
-		RGBA8
-	};
-
 	/// The depth and stencil format for a viewport with a texture or for the screen
 	enum class DepthStencilFormat
 	{
@@ -65,54 +56,48 @@ class DLL_PUBLIC Viewport
 		DEPTH24_STENCIL8
 	};
 
-	/// Creates a new viewport with no associated texture
-	Viewport();
-
-	/// Creates a new viewport associated to an external texture
-	explicit Viewport(Texture *texture);
-
-	/// Creates a new viewport associated to an external texture plus a depth and stencil renderbuffer
+	/// Creates a new viewport with the specified name and texture, plus a depth and stencil renderbuffer
+	Viewport(const char *name, Texture *texture, DepthStencilFormat depthStencilFormat);
+	/// Creates a new viewport with the specified texture, plus a depth and stencil renderbuffer
 	Viewport(Texture *texture, DepthStencilFormat depthStencilFormat);
-
-	/// Creates a new viewport with the specified name, dimensions, and format
-	Viewport(const char *name, int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat);
-	/// Creates a new viewport with the specified name, dimensions as a vector, and format
-	Viewport(const char *name, const Vector2i &size, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat);
-
-	/// Creates a new viewport with the specified dimensions and format
-	Viewport(int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat);
-	/// Creates a new viewport with the specified dimensions as a vector and format
-	Viewport(const Vector2i &size, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat);
-
-	/// Creates a new viewport with the specified dimensions and a default format
-	Viewport(int width, int height);
-	/// Creates a new viewport with the specified dimensions as a vector and a default format
-	explicit Viewport(const Vector2i &size);
+	/// Creates a new viewport with the specified name and texture
+	Viewport(const char *name, Texture *texture);
+	/// Creates a new viewport with the specified texture
+	explicit Viewport(Texture *texture);
+	/// Creates a new viewport with no texture
+	Viewport();
 
 	~Viewport();
 
 	/// Returns the viewport type
 	inline Type type() const { return type_; }
 
-	/// Initializes the render target of the viewport with the specified dimensions and format
-	bool initTexture(int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat);
-	/// Initializes the render target of the viewport with the specified dimensions as a vector and format
-	bool initTexture(const Vector2i &size, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat);
+	/// Returns the texture at the specified viewport's FBO color attachment index, if any
+	Texture *texture(unsigned int index);
+	/// Returns the texture at the first viewport's FBO color attachment index
+	inline Texture *texture() { return textures_[0]; }
+	/// Adds or removes a texture at the specified viewport's FBO color attachment index
+	bool setTexture(unsigned int index, Texture *texture);
+	/// Adds or removes a texture at the first viewport's FBO color attachment index
+	inline bool setTexture(Texture *texture) { return setTexture(0, texture); }
 
-	/// Initializes the render target of the viewport with the specified dimensions and the current format
-	bool initTexture(int width, int height);
-	/// Initializes the render target of the viewport with the specified dimensions as a vector and the current format
-	bool initTexture(const Vector2i &size);
+	/// Returns the depth and stencil format of the viewport's FBO renderbuffer
+	inline DepthStencilFormat depthStencilFormat() const { return depthStencilFormat_; }
+	/// Sets the depth and stencil format of the viewport's FBO renderbuffer
+	bool setDepthStencilFormat(DepthStencilFormat depthStencilFormat);
 
-	/// Changes the size, viewport rectangle and projection matrix of a viewport
-	void resize(int width, int height);
+	/// Removes all textures and the depth stencil renderbuffer from the viewport's FBO
+	bool removeAllTextures();
 
-	/// Returns viewport size as a `Vector2i` object
+	/// Returns viewport's FBO size as a `Vector2i` object, or a zero vector if no texture is present
 	inline Vector2i size() const { return Vector2i(width_, height_); }
-	/// Returns viewport width
+	/// Returns viewport's FBO width or zero if no texture is present
 	inline int width() const { return width_; }
-	/// Returns viewport height
+	/// Returns viewport's FBO height or zero if no texture is present
 	inline int height() const { return height_; }
+
+	/// Returns the number of color attachments of the viewport's FBO
+	inline unsigned int numColorAttachments() const { return numColorAttachments_; }
 
 	/// Returns the OpenGL viewport rectangle
 	inline Recti viewportRect() const { return viewportRect_; }
@@ -139,11 +124,6 @@ class DLL_PUBLIC Viewport
 	/// Returns the rectangle for screen culling
 	inline Rectf cullingRect() const { return cullingRect_; }
 
-	/// Returns the color format of the offscreen render target texture
-	inline ColorFormat colorFormat() const { return colorFormat_; }
-	/// Returns the depth and stencil format of the offscreen render target texture
-	inline DepthStencilFormat depthStencilFormat() const { return depthStencilFormat_; }
-
 	/// Returns the last frame this viewport was cleared
 	inline unsigned long int lastFrameCleared() const { return lastFrameCleared_; }
 
@@ -158,11 +138,6 @@ class DLL_PUBLIC Viewport
 	inline void setClearColor(float red, float green, float blue, float alpha) { clearColor_.set(red, green, blue, alpha); }
 	/// Sets the viewport clear color through a `Colorf` object
 	inline void setClearColor(const Colorf &color) { clearColor_ = color; }
-
-	/// Returns the offscreen render target texture
-	inline Texture *texture() { return texturePtr_; }
-	/// Sets an external texture as the offscreen render target
-	bool setTexture(Texture *texture);
 
 	/// Returns the root node as a constant
 	inline const SceneNode *rootNode() const { return rootNode_; }
@@ -181,15 +156,8 @@ class DLL_PUBLIC Viewport
 	/// Sets the camera to be used for rendering
 	inline void setCamera(Camera *camera) { camera_ = camera; }
 
-	/// Shares the framebuffer object of the specified viewport with this one
-	bool shareFbo(const Viewport &viewport);
-
-	/// Sets the OpenGL object labels for both the framebuffer object and the texture
-	void setGLLabels(const char *label);
 	/// Sets the OpenGL object label for the viewport framebuffer object
 	void setGLFramebufferLabel(const char *label);
-	/// Sets the OpenGL object label for the viewport texture
-	void setGLTextureLabel(const char *label);
 
   protected:
 	/// Bit positions inside the state bitset
@@ -211,7 +179,6 @@ class DLL_PUBLIC Viewport
 	Recti scissorRect_;
 	Rectf cullingRect_;
 
-	ColorFormat colorFormat_;
 	DepthStencilFormat depthStencilFormat_;
 
 	/// The last frame this viewport was cleared
@@ -223,9 +190,9 @@ class DLL_PUBLIC Viewport
 	nctl::UniquePtr<RenderQueue> renderQueue_;
 
 	nctl::UniquePtr<GLFramebufferObject> fbo_;
-	GLFramebufferObject *fboPtr_;
-	nctl::UniquePtr<Texture> texture_;
-	Texture *texturePtr_;
+
+	static const unsigned int MaxNumTextures = 4;
+	Texture *textures_[MaxNumTextures];
 
 	/// The root scene node for this viewport/RT
 	SceneNode *rootNode_;
@@ -250,8 +217,8 @@ class DLL_PUBLIC Viewport
 	void draw(unsigned int nextIndex);
 
   private:
-	bool hasTexture() const;
-	bool initFbo(Texture *texture, DepthStencilFormat depthStencilFormat);
+	unsigned int numColorAttachments_;
+
 	void updateCulling(SceneNode *node);
 
 	friend class Application;

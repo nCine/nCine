@@ -15,6 +15,9 @@ class GLRenderbuffer
 
 	inline GLuint glHandle() const { return glHandle_; }
 
+	inline void setAttachment(GLenum attachment) { attachment_ = attachment; }
+	inline GLenum attachment() const { return attachment_; }
+
 	bool bind() const;
 	static bool unbind();
 
@@ -24,6 +27,7 @@ class GLRenderbuffer
 	static GLuint boundBuffer_;
 
 	GLuint glHandle_;
+	GLenum attachment_;
 
 	/// Deleted copy constructor
 	GLRenderbuffer(const GLRenderbuffer &) = delete;

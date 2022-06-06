@@ -41,11 +41,13 @@ const float MaxCameraScale = 3.0f;
 const float MinCameraScale = 0.5f;
 const float DoubleClickDelay = 0.3f;
 
-const char *ColorFormatLabels[] = { "RGB8", "RGBA8" };
+const char *ColorFormatLabels[] = { "R8", "RG8", "RGB8", "RGBA8" };
 const char *DepthFormatLabels[] = { "None", "Depth16", "Depth24", "Depth24_Stencil8" };
 const char *ClearModeLabels[] = { "Every draw", "Every frame", "This frame only", "Next frame only", "Never" };
 const char *PositionPresetsLabels[] = { "Top Left", "Top Centre", "Top Right", "Centre Left", "Centre", "Centre Right", "Bottom Left", "Bottom Centre", "Bottom Right" };
 nctl::String comboString(64);
+
+nc::Texture::Format screenFormat = nc::Texture::Format::RGB8;
 
 const char *stringOnOff(bool enabled)
 {
@@ -71,6 +73,14 @@ nc::Vector2f positionPresets(const nc::Vector2f &spriteSize, unsigned int posInd
 		case 7: return nc::Vector2f(screenWidth * 0.5f, spriteSize.y * 0.5f) - centreCamera;
 		case 8: return nc::Vector2f(screenWidth - spriteSize.x * 0.5f, spriteSize.y * 0.5f) - centreCamera;
 	}
+}
+
+void initTexture(nc::Viewport &viewport, nc::Texture &texture, const nc::Vector2i &size, nc::Texture::Format colorFormat, nc::Viewport::DepthStencilFormat depthStencilFormat)
+{
+	viewport.removeAllTextures();
+	texture.init(nullptr, colorFormat, size);
+	viewport.setTexture(&texture);
+	viewport.setDepthStencilFormat(depthStencilFormat);
 }
 
 }
@@ -104,31 +114,51 @@ void MyEventHandler::onInit()
 	debugText_->setColor(255, 255, 0, 255);
 	debugText_->setAlignment(nc::TextNode::Alignment::CENTER);
 
-	viewportCreationData[0].assignCamera = true;
-	viewportCreationData[0].assignRootNode = true;
-	viewportCreationData[1].size = nc::Vector2i(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5);
-	viewportCreationData[1].clearColor = nc::Colorf(0.25f, 0.25f, 0.25f, 0.25f);
-	viewportCreationData[1].spritePositionIndex = 6;
-	viewportCreationData[2].size = nc::Vector2i(nc::theApplication().width() * 0.25f, nc::theApplication().height() * 0.25);
-	viewportCreationData[2].clearColor = nc::Colorf(0.15f, 0.15f, 0.15f, 0.15f);
-	viewportCreationData[2].spritePositionIndex = 2;
-	viewportCreationData[3].assignCamera = false;
-	viewportCreationData[3].assignRootNode = true;
+	viewportCreationData[0].withTexture = false;
+	viewportCreationData[0].rect = nc::Recti(0, nc::theApplication().height() * 0.5f, nc::theApplication().width(), nc::theApplication().height() * 0.5f);
+	viewportCreationData[1].assignRootNode = false;
+	viewportCreationData[1].withTexture = false;
+	viewportCreationData[1].rect = nc::Recti(0, 0, nc::theApplication().width(), nc::theApplication().height() * 0.5f);
+	viewportCreationData[2].rect = nc::Recti(0, 0, nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
+	viewportCreationData[2].clearColor = nc::Colorf(0.25f, 0.25f, 0.25f, 0.25f);
+	viewportCreationData[2].spritePositionIndex = 6;
+	viewportCreationData[3].rect = nc::Recti(0, 0, nc::theApplication().width() * 0.25f, nc::theApplication().height() * 0.25f);
+	viewportCreationData[3].clearColor = nc::Colorf(0.15f, 0.15f, 0.15f, 0.15f);
+	viewportCreationData[3].spritePositionIndex = 2;
+	viewportCreationData[4].assignCamera = false;
 
 	screenCamera_ = nctl::makeUnique<nc::Camera>();
 	screenViewport.setCamera(screenCamera_.get());
 	for (unsigned int i = 0; i < NumViewports; i++)
 	{
-		if (viewportCreationData[i].size.x == 0 && viewportCreationData[i].size.y == 0)
-			viewportData[i].viewport = nctl::makeUnique<nc::Viewport>();
+		if (viewportCreationData[i].withTexture)
+		{
+			const nc::Recti &rect = viewportCreationData[i].rect;
+			viewportData[i].texture = nctl::makeUnique<nc::Texture>(nullptr, nc::Texture::Format::RGB8, rect.w, rect.h);
+			viewportData[i].viewport = nctl::makeUnique<nc::Viewport>(viewportData[i].texture.get(), nc::Viewport::DepthStencilFormat::DEPTH24_STENCIL8);
+		}
 		else
-			viewportData[i].viewport = nctl::makeUnique<nc::Viewport>(viewportCreationData[i].size);
+		{
+			viewportData[i].viewport = nctl::makeUnique<nc::Viewport>();
+			const nc::Viewport &prevViewport = (i > 0) ? *viewportData[i - 1].viewport : screenViewport;
+			viewportData[i].viewport->setViewportRect(prevViewport.viewportRect());
+		}
 
 		viewportData[i].camera = nctl::makeUnique<nc::Camera>();
 		viewportData[i].camera->setView(-nc::theApplication().width() * 0.5f, -nc::theApplication().height() * 0.5f, 0.0f, 1.0f);
 		viewportData[i].rootNode = nctl::makeUnique<nc::SceneNode>();
 
 		nc::Viewport *viewport = viewportData[i].viewport.get();
+
+		if (viewportCreationData[i].rect.w != 0 && viewportCreationData[i].rect.h != 0)
+			viewport->setViewportRect(viewportCreationData[i].rect);
+
+		if (viewportCreationData[i].withTexture == false)
+		{
+			const nc::Recti &vpRect = viewportData[i].viewport->viewportRect();
+			nc::Camera::ProjectionValues projValues(0, vpRect.w, 0, vpRect.h);
+			viewportData[i].camera->setOrthoProjection(projValues);
+		}
 
 		if (viewportCreationData[i].assignCamera)
 			viewport->setCamera(viewportData[i].camera.get());
@@ -146,7 +176,7 @@ void MyEventHandler::onInit()
 			viewport->setRootNode(node);
 		}
 
-		if (viewportCreationData[i].size.x != 0 && viewportCreationData[i].size.y != 0)
+		if (viewportCreationData[i].rect.w != 0 && viewportCreationData[i].rect.h != 0)
 		{
 			viewport->setClearColor(viewportCreationData[i].clearColor);
 			viewportData[i].sprite = nctl::makeUnique<nc::Sprite>(&rootNode, viewport->texture(), viewport->width() / 2, viewport->height() / 2);
@@ -169,7 +199,8 @@ void MyEventHandler::onInit()
 		nc::SceneNode *node = (NumViewports > 0) ? viewportData[index].rootNode.get() : &rootNode;
 		const float randomX = nc::random().real(-nc::theApplication().width(), nc::theApplication().width());
 		const float randomY = nc::random().real(-nc::theApplication().height(), nc::theApplication().height());
-		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(node, textures_[index % NumTextures].get(), randomX, randomY));
+		const int texIndex = (index <= 1) ? 0 : (index - 1) % NumTextures; // use the same texture for the spit screen viewports
+		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(node, textures_[texIndex].get(), randomX, randomY));
 		sprites_.back()->setScale(0.5f);
 		spritePos_.emplaceBack(randomX, randomY);
 	}
@@ -183,6 +214,10 @@ void MyEventHandler::onInit()
 	scrollMove_ = nc::Vector2f::Zero;
 	scrollOrigin2_ = nc::Vector2f::Zero;
 	scrollMove2_ = nc::Vector2f::Zero;
+
+	const nc::DisplayMode displayMode = nc::theApplication().gfxDevice().displayMode();
+	if (displayMode.alphaBits() == 8)
+		screenFormat = nc::Texture::Format::RGBA8;
 }
 
 void MyEventHandler::onFrameStart()
@@ -206,6 +241,7 @@ void MyEventHandler::onFrameStart()
 	static int currentComboViewport = 0;
 	const bool viewportChanged = ImGui::Combo("Viewport", &currentComboViewport, comboString.data());
 	nc::Viewport &currentViewport = (currentComboViewport > 0) ? *viewportData[currentComboViewport - 1].viewport : nc::theApplication().screenViewport();
+	nc::Texture *currentTexture = (currentComboViewport > 0) ? viewportData[currentComboViewport - 1].texture.get() : nullptr;
 
 	const nc::Viewport *nextViewport = (currentComboViewport < nc::Viewport::chain().size()) ? nc::Viewport::chain()[currentComboViewport] : nullptr;
 	const char *nextViewportString = "Next Viewport";
@@ -227,7 +263,7 @@ void MyEventHandler::onFrameStart()
 	    ImGui::TreeNodeEx("Surface", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		const nc::Vector2i currentViewportSize = currentViewport.size();
-		const int currentColorFormatType = static_cast<int>(currentViewport.colorFormat());
+		const int currentColorFormatType = static_cast<int>((currentTexture != nullptr) ? currentTexture->format() : screenFormat);
 		const int currentDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
 
 		if (currentComboViewport == 0)
@@ -240,12 +276,12 @@ void MyEventHandler::onFrameStart()
 		else
 		{
 			static nc::Vector2i viewportSize = currentViewport.size();
-			static int comboColorFormatType = static_cast<int>(currentViewport.colorFormat());
+			static int comboColorFormatType = static_cast<int>(currentTexture->format());
 			static int comboDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
 			if (viewportChanged)
 			{
 				viewportSize = currentViewport.size();
-				comboColorFormatType = static_cast<int>(currentViewport.colorFormat());
+				comboColorFormatType = static_cast<int>(currentTexture->format());
 				comboDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
 			}
 
@@ -257,7 +293,7 @@ void MyEventHandler::onFrameStart()
 			if (ImGui::Button("Current"))
 			{
 				viewportSize = currentViewport.size();
-				comboColorFormatType = static_cast<int>(currentViewport.colorFormat());
+				comboColorFormatType = static_cast<int>(currentTexture->format());
 				comboDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
 			}
 			ImGui::SameLine();
@@ -267,7 +303,7 @@ void MyEventHandler::onFrameStart()
 				    comboColorFormatType != currentColorFormatType ||
 				    comboDepthFormatType != currentDepthFormatType)
 				{
-					currentViewport.initTexture(viewportSize, nc::Viewport::ColorFormat(comboColorFormatType), nc::Viewport::DepthStencilFormat(comboDepthFormatType));
+					initTexture(currentViewport, *currentTexture, viewportSize, nc::Texture::Format(comboColorFormatType), nc::Viewport::DepthStencilFormat(comboDepthFormatType));
 					viewportData[currentComboViewport - 1].sprite->resetTexture();
 				}
 			}
@@ -282,7 +318,7 @@ void MyEventHandler::onFrameStart()
 				props.format = nc::ITextureSaver::Format::RGB8;
 				// Vertical flip as the texture is generated by OpenGL and saved from bottom to top
 				props.verticalFlip = true;
-				if (currentViewport.colorFormat() == nc::Viewport::ColorFormat::RGBA8)
+				if (currentTexture->format() == nc::Texture::Format::RGBA8)
 					props.format = nc::ITextureSaver::Format::RGBA8;
 
 				nc::Texture &tex = *currentViewport.texture();
@@ -309,7 +345,7 @@ void MyEventHandler::onFrameStart()
 				// Vertical flip as the texture is generated by OpenGL and saved from bottom to top
 				props.verticalFlip = true;
 				webpProps.lossless = true;
-				if (currentViewport.colorFormat() == nc::Viewport::ColorFormat::RGBA8)
+				if (currentTexture->format() == nc::Texture::Format::RGBA8)
 					props.format = nc::ITextureSaver::Format::RGBA8;
 
 				nc::Texture &tex = *currentViewport.texture();
@@ -338,6 +374,22 @@ void MyEventHandler::onFrameStart()
 		ImGui::TreePop();
 	}
 
+	int maxWidth = currentViewport.width();
+	int maxHeight = currentViewport.height();
+	if (maxWidth == 0 || maxHeight == 0)
+	{
+		for (int i = currentComboViewport - 1; i >= 0; i--)
+		{
+			nc::Viewport &prevViewport = (i == 0) ? nc::theApplication().screenViewport() : *viewportData[i].viewport;
+			if (prevViewport.width() != 0 && prevViewport.height() != 0)
+			{
+				maxWidth = prevViewport.width();
+				maxHeight = prevViewport.height();
+				break;
+			}
+		}
+	}
+
 	if (currentComboViewport > 0 && ImGui::TreeNode("Viewport Rectangle"))
 	{
 		const nc::Recti currentViewportRect = currentViewport.viewportRect();
@@ -347,15 +399,15 @@ void MyEventHandler::onFrameStart()
 		static bool applyEveryframe = false;
 		bool valueChanged = false;
 
-		valueChanged |= ImGui::SliderInt("Rect X", &viewportRect.x, 0, currentViewport.width());
-		valueChanged |= ImGui::SliderInt("Rect Y", &viewportRect.y, 0, currentViewport.height());
-		valueChanged |= ImGui::SliderInt("Rect Width", &viewportRect.w, 0, currentViewport.width() - viewportRect.x);
-		valueChanged |= ImGui::SliderInt("Rect Height", &viewportRect.h, 0, currentViewport.height() - viewportRect.y);
+		valueChanged |= ImGui::SliderInt("Rect X", &viewportRect.x, 0, maxWidth);
+		valueChanged |= ImGui::SliderInt("Rect Y", &viewportRect.y, 0, maxHeight);
+		valueChanged |= ImGui::SliderInt("Rect Width", &viewportRect.w, 0, maxWidth - viewportRect.x);
+		valueChanged |= ImGui::SliderInt("Rect Height", &viewportRect.h, 0, maxHeight - viewportRect.y);
 
-		if (viewportRect.w > currentViewport.width() - viewportRect.x)
-			viewportRect.w = currentViewport.width() - viewportRect.x;
-		if (viewportRect.h > currentViewport.height() - viewportRect.y)
-			viewportRect.h = currentViewport.height() - viewportRect.y;
+		if (viewportRect.w > maxWidth - viewportRect.x)
+			viewportRect.w = maxWidth - viewportRect.x;
+		if (viewportRect.h > maxHeight - viewportRect.y)
+			viewportRect.h = maxHeight - viewportRect.y;
 
 		if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
 			valueChanged = true;
@@ -364,8 +416,8 @@ void MyEventHandler::onFrameStart()
 		{
 			viewportRect.x = 0;
 			viewportRect.y = 0;
-			viewportRect.w = currentViewport.width();
-			viewportRect.h = currentViewport.height();
+			viewportRect.w = maxWidth;
+			viewportRect.h = maxHeight;
 			valueChanged = true;
 		}
 		ImGui::SameLine();
@@ -390,15 +442,15 @@ void MyEventHandler::onFrameStart()
 		static bool applyEveryframe = false;
 		bool valueChanged = false;
 
-		valueChanged |= ImGui::SliderInt("Rect X", &scissorRect.x, 0, currentViewport.width());
-		valueChanged |= ImGui::SliderInt("Rect Y", &scissorRect.y, 0, currentViewport.height());
-		valueChanged |= ImGui::SliderInt("Rect Width", &scissorRect.w, 0, currentViewport.width() - scissorRect.x);
-		valueChanged |= ImGui::SliderInt("Rect Height", &scissorRect.h, 0, currentViewport.height() - scissorRect.y);
+		valueChanged |= ImGui::SliderInt("Rect X", &scissorRect.x, 0, maxWidth);
+		valueChanged |= ImGui::SliderInt("Rect Y", &scissorRect.y, 0, maxHeight);
+		valueChanged |= ImGui::SliderInt("Rect Width", &scissorRect.w, 0, maxWidth - scissorRect.x);
+		valueChanged |= ImGui::SliderInt("Rect Height", &scissorRect.h, 0, maxHeight - scissorRect.y);
 
-		if (scissorRect.w > currentViewport.width() - scissorRect.x)
-			scissorRect.w = currentViewport.width() - scissorRect.x;
-		if (scissorRect.h > currentViewport.height() - scissorRect.y)
-			scissorRect.h = currentViewport.height() - scissorRect.y;
+		if (scissorRect.w > maxWidth - scissorRect.x)
+			scissorRect.w = maxWidth - scissorRect.x;
+		if (scissorRect.h > maxHeight - scissorRect.y)
+			scissorRect.h = maxHeight - scissorRect.y;
 
 		if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
 			valueChanged = true;
@@ -407,8 +459,8 @@ void MyEventHandler::onFrameStart()
 		{
 			scissorRect.x = 0;
 			scissorRect.y = 0;
-			scissorRect.w = currentViewport.width();
-			scissorRect.h = currentViewport.height();
+			scissorRect.w = maxWidth;
+			scissorRect.h = maxHeight;
 			valueChanged = true;
 		}
 		ImGui::SameLine();

@@ -18,10 +18,14 @@ class LuaTexture
   private:
 	static int newObject(lua_State *L);
 
+	static int newInit(lua_State *L);
+	static int init(lua_State *L);
+
 	static int width(lua_State *L);
 	static int height(lua_State *L);
 	static int mipMapLevels(lua_State *L);
 	static int isCompressed(lua_State *L);
+	static int format(lua_State *L);
 	static int numChannels(lua_State *L);
 	static int dataSize(lua_State *L);
 

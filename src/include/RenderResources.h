@@ -122,6 +122,8 @@ class RenderResources
 	friend class Application;
 	/// The `Viewport` class needs to set the current camera
 	friend class Viewport;
+	/// The `ScreenViewport` class needs to change the projection of the default camera
+	friend class ScreenViewport;
 };
 
 }

@@ -209,6 +209,24 @@ void main()
 }
 )";
 
+char const * const blending_fs = R"(
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+uniform sampler2D uTexture0;
+uniform sampler2D uTexture1;
+in vec2 vTexCoords;
+out vec4 fragColor;
+
+void main()
+{
+	vec3 color = texture(uTexture0, vTexCoords).rgb;
+	vec3 bloom = texture(uTexture1, vTexCoords).rgb;
+	fragColor = vec4(color + bloom, 1.0);
+}
+)";
+
 char const * const multitexture_vs = R"(
 uniform mat4 uProjectionMatrix;
 uniform mat4 uViewMatrix;
@@ -308,7 +326,10 @@ in vec3 vFragPosNorm;
 #endif
 in vec2 vTexCoords;
 flat in float vRotation;
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor0;
+#ifdef WITH_MRT
+layout(location = 1) out vec4 fragColor1;
+#endif
 
 // This uniform block does not have a special name and will be shared by all instances
 layout (std140) uniform DataBlock
@@ -365,8 +386,16 @@ void main()
 	float ambientIntensity = ambientColor.a;
 	vec3 ambient = ambientIntensity * ambientColor.rgb;
 
-	fragColor = vec4(ambient, 0.0) + attenuation * (diffuseMap * vec4(diffuse, 0.0) + specMap * vec4(specular, 0.0));
-	fragColor.a = diffuseMap.a;
+	fragColor0 = vec4(ambient, 0.0) + attenuation * (diffuseMap * vec4(diffuse, 0.0) + specMap * vec4(specular, 0.0));
+	fragColor0.a = diffuseMap.a;
+
+#ifdef WITH_MRT
+	float brightness = dot(fragColor0.rgb, vec3(0.2126, 0.7152, 0.0722));
+	if (brightness > 1.0)
+		fragColor1 = vec4(fragColor0.rgb, 1.0);
+	else
+		fragColor1 = vec4(0.0, 0.0, 0.0, 1.0);
+#endif
 }
 )";
 

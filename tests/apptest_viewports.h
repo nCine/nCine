@@ -4,7 +4,7 @@
 #include <ncine/IAppEventHandler.h>
 #include <ncine/IInputEventHandler.h>
 #include <nctl/StaticArray.h>
-#include <ncine/Vector2.h>
+#include <ncine/Rect.h>
 #include <ncine/Colorf.h>
 #include <ncine/TimeStamp.h>
 
@@ -49,6 +49,7 @@ class MyEventHandler :
 	struct ViewportData
 	{
 		nctl::UniquePtr<nc::Viewport> viewport;
+		nctl::UniquePtr<nc::Texture> texture;
 		nctl::UniquePtr<nc::Camera> camera;
 		nctl::UniquePtr<nc::SceneNode> rootNode;
 		nctl::UniquePtr<nc::Sprite> sprite;
@@ -58,14 +59,15 @@ class MyEventHandler :
 	{
 		bool assignCamera = true;
 		bool assignRootNode = true;
-		nc::Vector2i size = nc::Vector2i::Zero;
+		bool withTexture = true;
+		nc::Recti rect = nc::Recti(0, 0, 0, 0);
 		nc::Colorf clearColor = nc::Colorf::Black;
 		unsigned int spritePositionIndex = 4;
 	};
 
 	static const unsigned int NumTextures = 4;
 	static const unsigned int NumSprites = 500;
-	static const unsigned int NumViewports = 4;
+	static const unsigned int NumViewports = 5;
 
 	bool pause_;
 	bool inputEnabled_;

@@ -21,7 +21,8 @@ class DLL_PUBLIC Texture : public Object
 		R8,
 		RG8,
 		RGB8,
-		RGBA8
+		RGBA8,
+		UNKNOWN
 	};
 
 	/// Texture filtering modes
@@ -108,8 +109,10 @@ class DLL_PUBLIC Texture : public Object
 
 	/// Returns true if the texture holds compressed data
 	inline bool isCompressed() const { return isCompressed_; }
+	/// Returns the texture data format
+	inline Format format() const { return format_; }
 	/// Returns the number of color channels
-	inline unsigned int numChannels() const { return numChannels_; }
+	unsigned int numChannels() const;
 	/// Returns the amount of video memory needed to load the texture
 	inline unsigned long dataSize() const { return dataSize_; }
 
@@ -152,7 +155,7 @@ class DLL_PUBLIC Texture : public Object
 	int height_;
 	int mipMapLevels_;
 	bool isCompressed_;
-	unsigned int numChannels_;
+	Format format_;
 	unsigned long dataSize_;
 
 	Filtering minFiltering_;

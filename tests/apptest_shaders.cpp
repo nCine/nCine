@@ -66,6 +66,15 @@ struct MultiTextureShaderData
 bool shaderDataChanged = true;
 bool uniformBlockHasStructSize = false;
 
+enum ViewportSetup
+{
+	NONE = 0,
+	BLUR,
+	BLOOM
+};
+const char *ViewportSetupLabels[] = { "None", "Blur", "Bloom" };
+
+int downsampleFactor = 4;
 bool captureMouse = true;
 bool captureKeyboard = true;
 
@@ -99,6 +108,9 @@ void MyEventHandler::onInit()
 
 	texture0_ = nctl::makeUnique<nc::Texture>("Ping texture", nc::Texture::Format::RGB8, nc::theApplication().resolutionInt());
 	texture1_ = nctl::makeUnique<nc::Texture>("Pong texture", nc::Texture::Format::RGB8, nc::theApplication().resolutionInt());
+	downsampleTexture0_ = nctl::makeUnique<nc::Texture>("Downsample ping texture", nc::Texture::Format::RGB8, nc::theApplication().resolutionInt() / downsampleFactor);
+	downsampleTexture1_ = nctl::makeUnique<nc::Texture>("Downsample pong texture", nc::Texture::Format::RGB8, nc::theApplication().resolutionInt() / downsampleFactor);
+	bloomTexture_ = nctl::makeUnique<nc::Texture>("Bloom texture", nc::Texture::Format::RGB8, nc::theApplication().resolutionInt());
 
 	diffuseTexture_ = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", DiffuseMapFile)).data());
 	normalTexture_ = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", NormalMapFile)).data());
@@ -107,9 +119,14 @@ void MyEventHandler::onInit()
 	                                   (prefixDataPath("fonts", FontTextureFile)).data());
 
 	rootNode_ = nctl::makeUnique<nc::SceneNode>();
+	rootNodeMrt_ = nctl::makeUnique<nc::SceneNode>();
 	sceneViewport_ = nctl::makeUnique<nc::Viewport>(texture0_.get());
+	sceneViewportMrt_ = nctl::makeUnique<nc::Viewport>(texture0_.get());
+	sceneViewportMrt_->setTexture(1, bloomTexture_.get());
 	pingViewport_ = nctl::makeUnique<nc::Viewport>(texture1_.get());
 	pongViewport_ = nctl::makeUnique<nc::Viewport>(texture0_.get());
+	downsampleViewport_ = nctl::makeUnique<nc::Viewport>(downsampleTexture0_.get());
+	upsampleViewport_ = nctl::makeUnique<nc::Viewport>(bloomTexture_.get());
 
 	vpBlurShader_ = nctl::makeUnique<nc::Shader>("SeparableBlur_Shader", nc::Shader::LoadMode::STRING, nc::Shader::DefaultVertex::SPRITE, sprite_blur_fs);
 	FATAL_ASSERT(vpBlurShader_->isLinked());
@@ -121,9 +138,28 @@ void MyEventHandler::onInit()
 	vpPongSpriteShaderState_ = nctl::makeUnique<nc::ShaderState>(vpPongSprite_.get(), vpBlurShader_.get());
 	vpPongSpriteShaderState_->setUniformFloat(nullptr, "uResolution", static_cast<float>(texture1_->width()), static_cast<float>(texture1_->height()));
 
+	sceneSprite_ = nctl::makeUnique<nc::Sprite>(nullptr, texture1_.get(), nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
+	vpDownsampleSprite_ = nctl::makeUnique<nc::Sprite>(nullptr, bloomTexture_.get(), nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
+	vpUpsampleSprite_ = nctl::makeUnique<nc::Sprite>(nullptr, downsampleTexture0_.get(), nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
+	vpUpsampleSprite_->setScale(static_cast<float>(downsampleFactor));
+
 	sceneViewport_->setRootNode(rootNode_.get());
+	sceneViewportMrt_->setRootNode(rootNodeMrt_.get());
 	pingViewport_->setRootNode(vpPingSprite_.get());
 	pongViewport_->setRootNode(vpPongSprite_.get());
+	downsampleViewport_->setRootNode(vpDownsampleSprite_.get());
+	upsampleViewport_->setRootNode(vpUpsampleSprite_.get());
+
+	blendingViewport_ = nctl::makeUnique<nc::Viewport>(texture1_.get());
+	vpBlendingShader_ = nctl::makeUnique<nc::Shader>("Blending_Shader", nc::Shader::LoadMode::STRING, nc::Shader::DefaultVertex::SPRITE, blending_fs);
+	FATAL_ASSERT(vpBlendingShader_->isLinked());
+	vpBlendingSprite_ = nctl::makeUnique<nc::Sprite>(nullptr, texture0_.get(), nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);
+	vpBlendingShaderState_ = nctl::makeUnique<nc::ShaderState>(vpBlendingSprite_.get(), vpBlendingShader_.get());
+	vpBlendingShaderState_->setTexture(0, texture0_.get()); // GL_TEXTURE0
+	vpBlendingShaderState_->setUniformInt(nullptr, "uTexture0", 0); // GL_TEXTURE0
+	vpBlendingShaderState_->setTexture(1, bloomTexture_.get()); // GL_TEXTURE1
+	vpBlendingShaderState_->setUniformInt(nullptr, "uTexture1", 1); // GL_TEXTURE1
+	blendingViewport_->setRootNode(vpBlendingSprite_.get());
 
 	debugString_ = nctl::makeUnique<nctl::String>(128);
 	debugText_ = nctl::makeUnique<nc::TextNode>(rootNode_.get(), font_.get());
@@ -185,17 +221,28 @@ void MyEventHandler::onInit()
 	FATAL_ASSERT(batchedMultitextureShader_->isLinked());
 	multitextureShader_->registerBatchedShader(*batchedMultitextureShader_);
 
+	// Shader permutation for Multiple Render Targets (MRTs)
+	nctl::String multitexture_fs_mrt(nctl::strnlen(multitexture_fs, 1024) + 32);
+	multitexture_fs_mrt.append("#define WITH_MRT\n#line 0\n");
+	multitexture_fs_mrt.formatAppend("%s", multitexture_fs);
+	multitextureMrtShader_ = nctl::makeUnique<nc::Shader>("Multitexture_MRT_Shader", nc::Shader::LoadMode::STRING, multitexture_vs, multitexture_fs_mrt.data());
+	FATAL_ASSERT(multitextureMrtShader_->isLinked());
+	batchedMultitextureMrtShader_ = nctl::makeUnique<nc::Shader>("Batched_Multitexture_MRT_Shader", nc::Shader::LoadMode::STRING,
+	                                                             nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS, batched_multitexture_vs, multitexture_fs_mrt.data());
+	FATAL_ASSERT(batchedMultitextureMrtShader_->isLinked());
+	multitextureMrtShader_->registerBatchedShader(*batchedMultitextureMrtShader_);
+
 	uniformBlockHasStructSize = (multitextureShaderStates_[0]->uniformBlockSize("DataBlock") == sizeof(MultiTextureShaderData));
 	multiTextureShaderData.lightPosition.x = nc::theApplication().width() * 0.5f;
 	multiTextureShaderData.lightPosition.y = nc::theApplication().height() * 0.5f;
 
 	withAtlas_ = false;
 	withAtlas_ ? setupAtlas() : setupTextures();
-	withViewport_ = false;
 	setupViewport();
 	pause_ = false;
 	angle_ = 0.0f;
 	numBlurPasses_ = 2;
+	currentViewportSetup_ = ViewportSetup::NONE;
 }
 
 void MyEventHandler::onFrameStart()
@@ -225,6 +272,12 @@ void MyEventHandler::onFrameStart()
 		multiTextureShaderData.lightPosition.y = nc::theApplication().height() * 0.5f;
 		shaderDataChanged = true;
 	}
+
+	ImGui::Separator();
+	if (ImGui::SliderInt("Blur passes", &numBlurPasses_, 1, 3, "%d", ImGuiSliderFlags_AlwaysClamp))
+		setupViewport();
+	if (ImGui::Combo("Viewport setup", &currentViewportSetup_, ViewportSetupLabels, IM_ARRAYSIZE(ViewportSetupLabels)))
+		setupViewport();
 	ImGui::End();
 #endif
 
@@ -249,7 +302,7 @@ void MyEventHandler::onFrameStart()
 	const nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 	debugString_->clear();
 	debugString_->format("batching: %s, culling: %s, texture atlas: %s, viewport: %s", stringOnOff(settings.batchingEnabled),
-	                     stringOnOff(settings.cullingEnabled), stringOnOff(withAtlas_), stringOnOff(withViewport_));
+	                     stringOnOff(settings.cullingEnabled), stringOnOff(withAtlas_), stringOnOff(currentViewportSetup_ != ViewportSetup::NONE));
 	debugText_->setString(*debugString_);
 
 	if (pause_ == false)
@@ -362,7 +415,18 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 	}
 	else if (event.sym == nc::KeySym::V)
 	{
-		withViewport_ = !withViewport_;
+		if (currentViewportSetup_ != ViewportSetup::BLUR)
+			currentViewportSetup_ = ViewportSetup::BLUR;
+		else
+			currentViewportSetup_ = ViewportSetup::NONE;
+		setupViewport();
+	}
+	else if (event.sym == nc::KeySym::L)
+	{
+		if (currentViewportSetup_ != ViewportSetup::BLOOM)
+			currentViewportSetup_ = ViewportSetup::BLOOM;
+		else
+			currentViewportSetup_ = ViewportSetup::NONE;
 		setupViewport();
 	}
 	else if (event.sym == nc::KeySym::N1 && captureKeyboard)
@@ -444,20 +508,84 @@ void MyEventHandler::setupViewport()
 {
 	nc::Viewport::chain().clear();
 
-	if (withViewport_)
+	if (currentViewportSetup_ != ViewportSetup::NONE)
 	{
+		if (currentViewportSetup_ == ViewportSetup::BLOOM)
+		{
+			nc::Viewport::chain().pushBack(blendingViewport_.get());
+
+			vpPingSprite_->setScale(downsampleFactor);
+			vpPingSprite_->setTexture(downsampleTexture0_.get());
+			vpPingSpriteShaderState_->setUniformFloat(nullptr, "uResolution", static_cast<float>(downsampleTexture0_->width()), static_cast<float>(downsampleTexture0_->height()));
+			vpPongSprite_->setScale(downsampleFactor);
+			vpPongSprite_->setTexture(downsampleTexture1_.get());
+			vpPongSpriteShaderState_->setUniformFloat(nullptr, "uResolution", static_cast<float>(downsampleTexture1_->width()), static_cast<float>(downsampleTexture1_->height()));
+			nc::theApplication().screenViewport().setRootNode(sceneSprite_.get());
+
+			nc::Viewport::chain().pushBack(upsampleViewport_.get());
+		}
+		else if (currentViewportSetup_ == ViewportSetup::BLUR)
+		{
+			vpPingSprite_->setScale(1.0f);
+			vpPingSprite_->setTexture(texture0_.get());
+			vpPingSpriteShaderState_->setUniformFloat(nullptr, "uResolution", static_cast<float>(texture0_->width()), static_cast<float>(texture0_->height()));
+			vpPongSprite_->setScale(1.0f);
+			vpPongSprite_->setTexture(texture1_.get());
+			vpPongSpriteShaderState_->setUniformFloat(nullptr, "uResolution", static_cast<float>(texture1_->width()), static_cast<float>(texture1_->height()));
+			nc::theApplication().screenViewport().setRootNode(vpPongSprite_.get());
+		}
+
 		// Ping-pong passes of the separable blur shader
 		for (unsigned int i = 0; i < numBlurPasses_; i++)
 		{
 			nc::Viewport::chain().pushBack(pongViewport_.get());
 			nc::Viewport::chain().pushBack(pingViewport_.get());
 		}
+
+		if (currentViewportSetup_ == ViewportSetup::BLOOM)
+			nc::Viewport::chain().pushBack(downsampleViewport_.get());
+
 		nc::Viewport::chain().pushBack(sceneViewport_.get());
 
-		nc::theApplication().screenViewport().setRootNode(vpPongSprite_.get());
+		if (currentViewportSetup_ == ViewportSetup::BLOOM)
+			nc::Viewport::chain().pushBack(sceneViewportMrt_.get());
 	}
 	else
 		nc::theApplication().screenViewport().setRootNode(rootNode_.get());
+
+	if (currentViewportSetup_ == ViewportSetup::BLOOM)
+	{
+		for (unsigned int i = 0; i < NumSprites; i++)
+		{
+			multitextureSprites_[i]->setParent(rootNodeMrt_.get());
+			multitextureShaderStates_[i]->setShader(multitextureMrtShader_.get());
+			multitextureShaderStates_[i]->setUniformInt(nullptr, "uTexture0", 0); // GL_TEXTURE0
+			multitextureShaderStates_[i]->setUniformInt(nullptr, "uTexture1", 1); // GL_TEXTURE1
+		}
+		// Only the MRT scene viewport should clear the texture
+		sceneViewport_->setClearMode(nc::Viewport::ClearMode::NEVER);
+
+		pingViewport_->removeAllTextures();
+		pingViewport_->setTexture(downsampleTexture1_.get());
+		pongViewport_->removeAllTextures();
+		pongViewport_->setTexture(downsampleTexture0_.get());
+	}
+	else
+	{
+		for (unsigned int i = 0; i < NumSprites; i++)
+		{
+			multitextureSprites_[i]->setParent(rootNode_.get());
+			multitextureShaderStates_[i]->setShader(multitextureShader_.get());
+			multitextureShaderStates_[i]->setUniformInt(nullptr, "uTexture0", 0); // GL_TEXTURE0
+			multitextureShaderStates_[i]->setUniformInt(nullptr, "uTexture1", 1); // GL_TEXTURE1
+		}
+		sceneViewport_->setClearMode(nc::Viewport::ClearMode::EVERY_FRAME);
+
+		pingViewport_->removeAllTextures();
+		pingViewport_->setTexture(texture1_.get());
+		pongViewport_->removeAllTextures();
+		pongViewport_->setTexture(texture0_.get());
+	}
 }
 
 void MyEventHandler::setupMeshVertices(bool defaultShader)
@@ -519,7 +647,10 @@ void MyEventHandler::checkClick(float x, float y)
 		}
 		else if (xPos >= debugTextRect.w * 0.76f)
 		{
-			withViewport_ = !withViewport_;
+			if (currentViewportSetup_ == ViewportSetup::NONE)
+				currentViewportSetup_ = ViewportSetup::BLUR;
+			else
+				currentViewportSetup_ = ViewportSetup::NONE;
 			setupViewport();
 		}
 	}

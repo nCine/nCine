@@ -53,22 +53,36 @@ class MyEventHandler :
 
   private:
 	bool withAtlas_;
-	bool withViewport_;
 	bool pause_;
 	float angle_;
-	unsigned int numBlurPasses_;
+	int numBlurPasses_;
+	int currentViewportSetup_;
 
 	nctl::UniquePtr<nc::Texture> texture0_;
 	nctl::UniquePtr<nc::Texture> texture1_;
+	nctl::UniquePtr<nc::Texture> downsampleTexture0_;
+	nctl::UniquePtr<nc::Texture> downsampleTexture1_;
+	nctl::UniquePtr<nc::Texture> bloomTexture_;
 	nctl::UniquePtr<nc::Viewport> sceneViewport_;
+	nctl::UniquePtr<nc::Viewport> sceneViewportMrt_;
 	nctl::UniquePtr<nc::Viewport> pingViewport_;
 	nctl::UniquePtr<nc::Viewport> pongViewport_;
+	nctl::UniquePtr<nc::Viewport> downsampleViewport_;
+	nctl::UniquePtr<nc::Viewport> upsampleViewport_;
 	nctl::UniquePtr<nc::SceneNode> rootNode_;
+	nctl::UniquePtr<nc::SceneNode> rootNodeMrt_;
 	nctl::UniquePtr<nc::Sprite> vpPingSprite_;
 	nctl::UniquePtr<nc::Sprite> vpPongSprite_;
+	nctl::UniquePtr<nc::Sprite> vpDownsampleSprite_;
+	nctl::UniquePtr<nc::Sprite> vpUpsampleSprite_;
+	nctl::UniquePtr<nc::Sprite> sceneSprite_;
 	nctl::UniquePtr<nc::Shader> vpBlurShader_;
 	nctl::UniquePtr<nc::ShaderState> vpPingSpriteShaderState_;
 	nctl::UniquePtr<nc::ShaderState> vpPongSpriteShaderState_;
+
+	nctl::UniquePtr<nc::Sprite> vpBlendingSprite_;
+	nctl::UniquePtr<nc::Shader> vpBlendingShader_;
+	nctl::UniquePtr<nc::ShaderState> vpBlendingShaderState_;
 
 	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, NumTextures> textures_;
 	nctl::UniquePtr<nc::Texture> megaTexture_;
@@ -81,6 +95,7 @@ class MyEventHandler :
 	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumSprites> sprites_;
 	nctl::StaticArray<nctl::UniquePtr<nc::ShaderState>, NumSprites> spriteShaderStates_;
 
+	nctl::UniquePtr<nc::Viewport> blendingViewport_;
 	nctl::UniquePtr<nc::Shader> meshShader_;
 	nctl::UniquePtr<nc::Shader> batchedMeshShader_;
 	nctl::StaticArray<nctl::UniquePtr<nc::MeshSprite>, NumSprites> meshSprites_;
@@ -89,7 +104,9 @@ class MyEventHandler :
 	nctl::UniquePtr<nc::Texture> diffuseTexture_;
 	nctl::UniquePtr<nc::Texture> normalTexture_;
 	nctl::UniquePtr<nc::Shader> multitextureShader_;
+	nctl::UniquePtr<nc::Shader> multitextureMrtShader_;
 	nctl::UniquePtr<nc::Shader> batchedMultitextureShader_;
+	nctl::UniquePtr<nc::Shader> batchedMultitextureMrtShader_;
 	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumSprites> multitextureSprites_;
 	nctl::StaticArray<nctl::UniquePtr<nc::ShaderState>, NumSprites> multitextureShaderStates_;
 

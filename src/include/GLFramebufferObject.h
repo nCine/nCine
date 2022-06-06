@@ -15,6 +15,7 @@ class GLTexture;
 class GLFramebufferObject
 {
   public:
+	static const unsigned int MaxDrawbuffers = 8;
 	static const unsigned int MaxRenderbuffers = 4;
 
 	explicit GLFramebufferObject();
@@ -28,11 +29,16 @@ class GLFramebufferObject
 	bool bind(GLenum target) const;
 	static bool unbind(GLenum target);
 
+	inline unsigned int numDrawbuffers() const { return numDrawBuffers_; }
+	bool drawBuffers(unsigned int numDrawBuffers);
+
 	inline unsigned int numRenderbuffers() const { return attachedRenderbuffers_.size(); }
 	bool attachRenderbuffer(const char *label, GLenum internalFormat, GLsizei width, GLsizei height, GLenum attachment);
 	bool attachRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height, GLenum attachment);
+	bool detachRenderbuffer(GLenum internalFormat);
 
 	void attachTexture(GLTexture &texture, GLenum attachment);
+	void detachTexture(GLenum attachment);
 	void invalidate(GLsizei numAttachments, const GLenum *attachments);
 
 	bool isStatusComplete();
@@ -42,6 +48,7 @@ class GLFramebufferObject
   private:
 	static unsigned int readBoundBuffer_;
 	static unsigned int drawBoundBuffer_;
+	unsigned int numDrawBuffers_;
 
 	nctl::StaticArray<nctl::UniquePtr<GLRenderbuffer>, MaxRenderbuffers> attachedRenderbuffers_;
 
