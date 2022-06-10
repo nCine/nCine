@@ -1,5 +1,5 @@
 #include "LuaMeshSprite.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaBaseSprite.h"
 #include "LuaVector2Utils.h"
@@ -154,8 +154,8 @@ namespace {
 
 int LuaMeshSprite::newObject(lua_State *L)
 {
-	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserDataOrNil(L, -4);
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserDataOrNil(L, -3);
+	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieveOrNil(L, -4);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieveOrNil(L, -3);
 	const float x = LuaUtils::retrieve<float>(L, -2);
 	const float y = LuaUtils::retrieve<float>(L, -1);
 
@@ -166,19 +166,24 @@ int LuaMeshSprite::newObject(lua_State *L)
 
 int LuaMeshSprite::cloneNode(lua_State *L)
 {
-	const MeshSprite *sprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -1);
+	const MeshSprite *sprite = LuaUntrackedUserData<MeshSprite>::retrieve(L, -1);
 
-	LuaClassTracker<MeshSprite>::cloneNode(L, *sprite);
+	if (sprite)
+		LuaClassTracker<MeshSprite>::cloneNode(L, *sprite);
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaMeshSprite::numVertices(lua_State *L)
 {
-	MeshSprite *sprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -1);
+	MeshSprite *sprite = LuaUntrackedUserData<MeshSprite>::retrieve(L, -1);
 
-	const unsigned int numVertices = sprite->numVertices();
-	LuaUtils::push(L, numVertices);
+	if (sprite)
+		LuaUtils::push(L, sprite->numVertices());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
@@ -192,20 +197,22 @@ int LuaMeshSprite::copyVertices(lua_State *L)
 	}
 
 	unsigned int numVertices = 0;
-	MeshSprite *sprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -2);
+	MeshSprite *sprite = LuaUntrackedUserData<MeshSprite>::retrieve(L, -2);
 	nctl::UniquePtr<MeshSprite::Vertex[]> vertices = retrieveVertices(L, -1, numVertices);
 
-	sprite->copyVertices(numVertices, vertices.get());
+	if (sprite)
+		sprite->copyVertices(numVertices, vertices.get());
 
 	return 0;
 }
 
 int LuaMeshSprite::setVertices(lua_State *L)
 {
-	MeshSprite *sprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -2);
-	MeshSprite *sourceSprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -1);
+	MeshSprite *sprite = LuaUntrackedUserData<MeshSprite>::retrieve(L, -2);
+	MeshSprite *sourceSprite = LuaUntrackedUserData<MeshSprite>::retrieve(L, -1);
 
-	sprite->setVertices(*sourceSprite);
+	if (sprite && sourceSprite)
+		sprite->setVertices(*sourceSprite);
 
 	return 0;
 }
@@ -219,21 +226,24 @@ int LuaMeshSprite::createVerticesFromTexels(lua_State *L)
 	}
 
 	unsigned int numVertices = 0;
-	MeshSprite *sprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -3);
+	MeshSprite *sprite = LuaUntrackedUserData<MeshSprite>::retrieve(L, -3);
 	nctl::UniquePtr<Vector2f[]> texels = retrieveTexels(L, -2, numVertices);
 	const MeshSprite::TextureCutMode cutMode = static_cast<MeshSprite::TextureCutMode>(LuaUtils::retrieve<int64_t>(L, -1));
 
-	sprite->createVerticesFromTexels(numVertices, texels.get(), cutMode);
+	if (sprite)
+		sprite->createVerticesFromTexels(numVertices, texels.get(), cutMode);
 
 	return 0;
 }
 
 int LuaMeshSprite::numIndices(lua_State *L)
 {
-	MeshSprite *sprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -1);
+	MeshSprite *sprite = LuaUntrackedUserData<MeshSprite>::retrieve(L, -1);
 
-	const unsigned int numIndices = sprite->numIndices();
-	LuaUtils::push(L, numIndices);
+	if (sprite)
+		LuaUtils::push(L, sprite->numIndices());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
@@ -247,20 +257,22 @@ int LuaMeshSprite::copyIndices(lua_State *L)
 	}
 
 	unsigned int numIndices = 0;
-	MeshSprite *sprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -2);
+	MeshSprite *sprite = LuaUntrackedUserData<MeshSprite>::retrieve(L, -2);
 	nctl::UniquePtr<unsigned short[]> indices = retrieveIndices(L, numIndices);
 
-	sprite->copyIndices(numIndices, indices.get());
+	if (sprite)
+		sprite->copyIndices(numIndices, indices.get());
 
 	return 0;
 }
 
 int LuaMeshSprite::setIndices(lua_State *L)
 {
-	MeshSprite *sprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -2);
-	MeshSprite *sourceSprite = LuaClassWrapper<MeshSprite>::unwrapUserData(L, -1);
+	MeshSprite *sprite = LuaUntrackedUserData<MeshSprite>::retrieve(L, -2);
+	MeshSprite *sourceSprite = LuaUntrackedUserData<MeshSprite>::retrieve(L, -1);
 
-	sprite->setIndices(*sourceSprite);
+	if (sprite && sourceSprite)
+		sprite->setIndices(*sourceSprite);
 
 	return 0;
 }

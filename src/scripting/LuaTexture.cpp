@@ -1,5 +1,5 @@
 #include "LuaTexture.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaColorUtils.h"
 #include "LuaUtils.h"
@@ -124,147 +124,176 @@ int LuaTexture::newObject(lua_State *L)
 
 int LuaTexture::width(lua_State *L)
 {
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -1);
 
-	const int width = texture->width();
-	LuaUtils::push(L, width);
+	if (texture)
+		LuaUtils::push(L, texture->width());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTexture::height(lua_State *L)
 {
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -1);
 
-	const int height = texture->height();
-	LuaUtils::push(L, height);
+	if (texture)
+		LuaUtils::push(L, texture->height());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTexture::mipMapLevels(lua_State *L)
 {
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -1);
 
-	const int mipMapLevels = texture->mipMapLevels();
-	LuaUtils::push(L, mipMapLevels);
+	if (texture)
+		LuaUtils::push(L, texture->mipMapLevels());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTexture::isCompressed(lua_State *L)
 {
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -1);
 
-	const bool isCompressed = texture->isCompressed();
-	LuaUtils::push(L, isCompressed);
+	if (texture)
+		LuaUtils::push(L, texture->isCompressed());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTexture::numChannels(lua_State *L)
 {
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -1);
 
-	const unsigned int numChannels = texture->numChannels();
-	LuaUtils::push(L, numChannels);
+	if (texture)
+		LuaUtils::push(L, texture->numChannels());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTexture::dataSize(lua_State *L)
 {
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -1);
 
-	const unsigned long dataSize = texture->dataSize();
-	LuaUtils::push(L, static_cast<uint64_t>(dataSize));
+	if (texture)
+		LuaUtils::push(L, static_cast<uint64_t>(texture->dataSize()));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTexture::minFiltering(lua_State *L)
 {
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -1);
 
-	LuaUtils::push(L, static_cast<int64_t>(texture->minFiltering()));
+	if (texture)
+		LuaUtils::push(L, static_cast<int64_t>(texture->minFiltering()));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTexture::magFiltering(lua_State *L)
 {
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -1);
 
-	LuaUtils::push(L, static_cast<int64_t>(texture->magFiltering()));
+	if (texture)
+		LuaUtils::push(L, static_cast<int64_t>(texture->magFiltering()));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTexture::wrap(lua_State *L)
 {
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -1);
 
-	LuaUtils::push(L, static_cast<int64_t>(texture->wrap()));
+	if (texture)
+		LuaUtils::push(L, static_cast<int64_t>(texture->wrap()));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTexture::setMinFiltering(lua_State *L)
 {
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -2);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -2);
 	const Texture::Filtering filter = static_cast<Texture::Filtering>(LuaUtils::retrieve<int64_t>(L, -1));
 
-	texture->setMinFiltering(filter);
+	if (texture)
+		texture->setMinFiltering(filter);
 
 	return 0;
 }
 
 int LuaTexture::setMagFiltering(lua_State *L)
 {
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -2);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -2);
 	const Texture::Filtering filter = static_cast<Texture::Filtering>(LuaUtils::retrieve<int64_t>(L, -1));
 
-	texture->setMagFiltering(filter);
+	if (texture)
+		texture->setMagFiltering(filter);
 
 	return 0;
 }
 
 int LuaTexture::setWrap(lua_State *L)
 {
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -2);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -2);
 	const Texture::Wrap wrapMode = static_cast<Texture::Wrap>(LuaUtils::retrieve<int64_t>(L, -1));
 
-	texture->setWrap(wrapMode);
+	if (texture)
+		texture->setWrap(wrapMode);
 
 	return 0;
 }
 
 int LuaTexture::isChromaKeyEnabled(lua_State *L)
 {
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -1);
 
-	const bool isChromaKeyEnabled = texture->isChromaKeyEnabled();
-	LuaUtils::push(L, isChromaKeyEnabled);
+	if (texture)
+		LuaUtils::push(L, texture->isChromaKeyEnabled());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTexture::chromaKeyColor(lua_State *L)
 {
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -1);
 
-	const Colorf chromaKeyColor(texture->chromaKeyColor());
-	LuaColorUtils::push(L, chromaKeyColor);
+	if (texture)
+		LuaColorUtils::push(L, Colorf(texture->chromaKeyColor()));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTexture::setChromaKeyEnabled(lua_State *L)
 {
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -2);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -2);
 	const bool chromaKeyEnabled = LuaUtils::retrieve<bool>(L, -1);
 
-	texture->setChromaKeyEnabled(chromaKeyEnabled);
+	if (texture)
+		texture->setChromaKeyEnabled(chromaKeyEnabled);
 
 	return 0;
 }
@@ -273,9 +302,10 @@ int LuaTexture::setChromaKeyColor(lua_State *L)
 {
 	int colorIndex = 0;
 	const Colorf chromaKeyColor = LuaColorUtils::retrieve(L, -1, colorIndex);
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, colorIndex - 1);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, colorIndex - 1);
 
-	texture->setChromaKeyColor(chromaKeyColor);
+	if (texture)
+		texture->setChromaKeyColor(chromaKeyColor);
 
 	return 0;
 }

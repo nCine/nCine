@@ -2,6 +2,7 @@
 #include "common_headers.h"
 #include "common_macros.h"
 #include <nctl/CString.h>
+#include <nctl/HashMapIterator.h>
 
 #include "LuaStateManager.h"
 #include "LuaUtils.h"
@@ -117,8 +118,7 @@ LuaStateManager::LuaStateManager(ApiType apiType, StatisticsTracking statsTracki
 
 LuaStateManager::LuaStateManager(lua_State *L, ApiType apiType, StatisticsTracking statsTracking, StandardLibraries stdLibraries)
     : L_(L), apiType_(apiType), statsTracking_(statsTracking), stdLibraries_(stdLibraries),
-      trackedUserDatas_(apiType == ApiType::FULL ? 16 : 0),
-      untrackedUserDatas_(16), closeOnDestruction_(false)
+      trackedUserDatas_(apiType == ApiType::FULL ? 32 : 1), untrackedUserDatas_(32), closeOnDestruction_(false)
 {
 	ASSERT(L_);
 
@@ -293,6 +293,20 @@ bool LuaStateManager::runFromMemory(const char *bufferName, const char *bufferPt
 	return runFromMemory(bufferName, bufferPtr, bufferSize, nullptr, nullptr, nullptr);
 }
 
+LuaTypes::UserDataType LuaStateManager::trackedType(void *pointer) const
+{
+	LuaTypes::UserDataType type = LuaTypes::UserDataType::UNKNOWN;
+	trackedUserDatas_.contains(pointer, type);
+	return type;
+}
+
+LuaTypes::UserDataType LuaStateManager::untrackedType(void *pointer) const
+{
+	LuaTypes::UserDataType type = LuaTypes::UserDataType::UNKNOWN;
+	untrackedUserDatas_.contains(pointer, type);
+	return type;
+}
+
 LuaStateManager *LuaStateManager::manager(lua_State *L)
 {
 	LuaStateManager *stateManager = nullptr;
@@ -425,78 +439,78 @@ void LuaStateManager::releaseTrackedMemory()
 	if (trackedUserDatas_.isEmpty() == false)
 		LOGW_X("Lua array of tracked userdata is not empty: %d elements", trackedUserDatas_.size());
 
-	for (unsigned int i = 0; i < trackedUserDatas_.size(); i++)
+	for (nctl::HashMap<void *, LuaTypes::UserDataType>::Iterator i = trackedUserDatas_.begin(); i != trackedUserDatas_.end(); ++i)
 	{
-		UserDataWrapper &wrapper = trackedUserDatas_[i];
-		ASSERT(wrapper.arrayIndex == i);
+		const LuaTypes::UserDataType type = i.value();
+		void *object = i.key();
 
-		switch (wrapper.type)
+		switch (type)
 		{
 			case LuaTypes::VIEWPORT:
 			{
-				LuaViewport::release(wrapper.object);
+				LuaViewport::release(object);
 				break;
 			}
 			case LuaTypes::CAMERA:
 			{
-				LuaCamera::release(wrapper.object);
+				LuaCamera::release(object);
 				break;
 			}
 			case LuaTypes::TEXTURE:
 			{
-				LuaTexture::release(wrapper.object);
+				LuaTexture::release(object);
 				break;
 			}
 			case LuaTypes::FONT:
 			{
-				LuaFont::release(wrapper.object);
+				LuaFont::release(object);
 				break;
 			}
 			case LuaTypes::SCENENODE:
 			{
-				LuaSceneNode::release(wrapper.object);
+				LuaSceneNode::release(object);
 				break;
 			}
 			case LuaTypes::SPRITE:
 			{
-				LuaSprite::release(wrapper.object);
+				LuaSprite::release(object);
 				break;
 			}
 			case LuaTypes::MESH_SPRITE:
 			{
-				LuaMeshSprite::release(wrapper.object);
+				LuaMeshSprite::release(object);
 				break;
 			}
 			case LuaTypes::ANIMATED_SPRITE:
 			{
-				LuaAnimatedSprite::release(wrapper.object);
+				LuaAnimatedSprite::release(object);
 				break;
 			}
 			case LuaTypes::TEXTNODE:
 			{
-				LuaTextNode::release(wrapper.object);
+				LuaTextNode::release(object);
 				break;
 			}
 	#ifdef WITH_AUDIO
 			case LuaTypes::AUDIOBUFFER:
 			{
-				LuaAudioBuffer::release(wrapper.object);
+				LuaAudioBuffer::release(object);
 				break;
 			}
 			case LuaTypes::AUDIOBUFFER_PLAYER:
 			{
-				LuaAudioBufferPlayer::release(wrapper.object);
+				LuaAudioBufferPlayer::release(object);
 				break;
 			}
 			case LuaTypes::AUDIOSTREAM_PLAYER:
 			{
-				LuaAudioStreamPlayer::release(wrapper.object);
+				LuaAudioStreamPlayer::release(object);
 				break;
 			}
 	#endif
 			case LuaTypes::PARTICLE_SYSTEM:
 			{
-				LuaParticleSystem::release(wrapper.object);
+				LuaParticleSystem::release(object);
 				break;
 			}
 			case LuaTypes::UNKNOWN:
@@ -505,7 +519,7 @@ void LuaStateManager::releaseTrackedMemory()
 				break;
 		}
 
-		wrapper.object = nullptr;
+		trackedUserDatas_.remove(object);
 	}
 	trackedUserDatas_.clear();
 #endif

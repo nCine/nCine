@@ -1,5 +1,5 @@
 #include "LuaAudioStreamPlayer.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaIAudioPlayer.h"
 #include "LuaUtils.h"
@@ -59,15 +59,25 @@ int LuaAudioStreamPlayer::newObject(lua_State *L)
 
 int LuaAudioStreamPlayer::numStreamSamples(lua_State *L)
 {
-	AudioStreamPlayer *audioStreamPlayer = LuaClassWrapper<AudioStreamPlayer>::unwrapUserData(L, -1);
-	LuaUtils::push(L, static_cast<uint64_t>(audioStreamPlayer->numStreamSamples()));
+	AudioStreamPlayer *audioStreamPlayer = LuaUntrackedUserData<AudioStreamPlayer>::retrieve(L, -1);
+
+	if (audioStreamPlayer)
+		LuaUtils::push(L, static_cast<uint64_t>(audioStreamPlayer->numStreamSamples()));
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 
 int LuaAudioStreamPlayer::streamBufferSize(lua_State *L)
 {
-	AudioStreamPlayer *audioStreamPlayer = LuaClassWrapper<AudioStreamPlayer>::unwrapUserData(L, -1);
-	LuaUtils::push(L, audioStreamPlayer->streamBufferSize());
+	AudioStreamPlayer *audioStreamPlayer = LuaUntrackedUserData<AudioStreamPlayer>::retrieve(L, -1);
+
+	if (audioStreamPlayer)
+		LuaUtils::push(L, audioStreamPlayer->streamBufferSize());
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 

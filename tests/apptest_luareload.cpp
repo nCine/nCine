@@ -5,7 +5,7 @@
 #include <ncine/ParticleInitializer.h>
 #include <ncine/LuaIAppEventHandler.h>
 #include <ncine/LuaIInputEventHandler.h>
-#include <ncine/LuaClassWrapper.h>
+#include <ncine/LuaUntrackedUserData.h>
 #include <ncine/LuaUtils.h>
 #include <ncine/LuaColorUtils.h>
 #include "apptest_datapath.h"
@@ -144,7 +144,7 @@ bool MyEventHandler::runScript()
 	}
 
 	nc::LuaUtils::createTable(L, 0, 1);
-	nc::LuaClassWrapper<nc::ParticleSystem>::pushFieldUntrackedUserData(L, "particlesys", particleSystem_.get());
+	nc::LuaUntrackedUserData<nc::ParticleSystem>::pushField(L, "particlesys", particleSystem_.get());
 	nc::LuaUtils::push(L, variationIndex_);
 
 	const int status = nc::LuaUtils::pcall(L, 2, 0);

@@ -1,5 +1,5 @@
 #include "LuaCamera.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaUtils.h"
 #include "Camera.h"
@@ -70,28 +70,40 @@ int LuaCamera::newObject(lua_State *L)
 
 int LuaCamera::projectionValues(lua_State *L)
 {
-	Camera *camera = LuaClassWrapper<Camera>::unwrapUserData(L, -1);
-	const Camera::ProjectionValues projectionValues = camera->projectionValues();
+	Camera *camera = LuaUntrackedUserData<Camera>::retrieve(L, -1);
 
-	LuaUtils::createTable(L, 0, 4);
-	LuaUtils::pushField(L, LuaNames::Camera::left, projectionValues.left);
-	LuaUtils::pushField(L, LuaNames::Camera::right, projectionValues.right);
-	LuaUtils::pushField(L, LuaNames::Camera::top, projectionValues.top);
-	LuaUtils::pushField(L, LuaNames::Camera::bottom, projectionValues.bottom);
+	if (camera)
+	{
+		const Camera::ProjectionValues projectionValues = camera->projectionValues();
+
+		LuaUtils::createTable(L, 0, 4);
+		LuaUtils::pushField(L, LuaNames::Camera::left, projectionValues.left);
+		LuaUtils::pushField(L, LuaNames::Camera::right, projectionValues.right);
+		LuaUtils::pushField(L, LuaNames::Camera::top, projectionValues.top);
+		LuaUtils::pushField(L, LuaNames::Camera::bottom, projectionValues.bottom);
+	}
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaCamera::viewValues(lua_State *L)
 {
-	Camera *camera = LuaClassWrapper<Camera>::unwrapUserData(L, -1);
-	const Camera::ViewValues viewValues = camera->viewValues();
+	Camera *camera = LuaUntrackedUserData<Camera>::retrieve(L, -1);
 
-	LuaUtils::createTable(L, 0, 4);
-	LuaUtils::pushField(L, LuaNames::Camera::x, viewValues.position.x);
-	LuaUtils::pushField(L, LuaNames::Camera::y, viewValues.position.y);
-	LuaUtils::pushField(L, LuaNames::Camera::rotation, viewValues.rotation);
-	LuaUtils::pushField(L, LuaNames::Camera::scale, viewValues.scale);
+	if (camera)
+	{
+		const Camera::ViewValues viewValues = camera->viewValues();
+
+		LuaUtils::createTable(L, 0, 4);
+		LuaUtils::pushField(L, LuaNames::Camera::x, viewValues.position.x);
+		LuaUtils::pushField(L, LuaNames::Camera::y, viewValues.position.y);
+		LuaUtils::pushField(L, LuaNames::Camera::rotation, viewValues.rotation);
+		LuaUtils::pushField(L, LuaNames::Camera::scale, viewValues.scale);
+	}
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
@@ -104,14 +116,15 @@ int LuaCamera::setOrthoProjection(lua_State *L)
 		return 0;
 	}
 
-	Camera *camera = LuaClassWrapper<Camera>::unwrapUserData(L, -2);
+	Camera *camera = LuaUntrackedUserData<Camera>::retrieve(L, -2);
 	Camera::ProjectionValues projectionValues;
 	projectionValues.left = LuaUtils::retrieveField<float>(L, -1, LuaNames::Camera::left);
 	projectionValues.right = LuaUtils::retrieveField<float>(L, -1, LuaNames::Camera::right);
 	projectionValues.top = LuaUtils::retrieveField<float>(L, -1, LuaNames::Camera::top);
 	projectionValues.bottom = LuaUtils::retrieveField<float>(L, -1, LuaNames::Camera::bottom);
 
-	camera->setOrthoProjection(projectionValues);
+	if (camera)
+		camera->setOrthoProjection(projectionValues);
 
 	return 0;
 }
@@ -124,14 +137,15 @@ int LuaCamera::setView(lua_State *L)
 		return 0;
 	}
 
-	Camera *camera = LuaClassWrapper<Camera>::unwrapUserData(L, -2);
+	Camera *camera = LuaUntrackedUserData<Camera>::retrieve(L, -2);
 	Camera::ViewValues viewValues;
 	viewValues.position.x = LuaUtils::retrieveField<float>(L, -1, LuaNames::Camera::x);
 	viewValues.position.y = LuaUtils::retrieveField<float>(L, -1, LuaNames::Camera::y);
 	viewValues.rotation = LuaUtils::retrieveField<float>(L, -1, LuaNames::Camera::rotation);
 	viewValues.scale = LuaUtils::retrieveField<float>(L, -1, LuaNames::Camera::scale);
 
-	camera->setView(viewValues);
+	if (camera)
+		camera->setView(viewValues);
 
 	return 0;
 }

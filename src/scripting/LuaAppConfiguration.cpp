@@ -2,7 +2,6 @@
 #include "common_headers.h"
 
 #include "LuaAppConfiguration.h"
-#include "LuaClassWrapper.h"
 #include "LuaUtils.h"
 #include "LuaVector2Utils.h"
 #include "AppConfiguration.h"

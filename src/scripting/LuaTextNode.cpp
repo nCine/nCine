@@ -1,5 +1,5 @@
 #include "LuaTextNode.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaDrawableNode.h"
 #include "LuaUtils.h"
@@ -108,8 +108,8 @@ void LuaTextNode::release(void *object)
 
 int LuaTextNode::newObject(lua_State *L)
 {
-	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserDataOrNil(L, -3);
-	Font *font = LuaClassWrapper<Font>::unwrapUserDataOrNil(L, -2);
+	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieveOrNil(L, -3);
+	Font *font = LuaUntrackedUserData<Font>::retrieveOrNil(L, -2);
 	const unsigned int maxStringLength = LuaUtils::retrieve<uint32_t>(L, -1);
 
 	LuaClassTracker<TextNode>::newObject(L, parent, font, maxStringLength);
@@ -119,161 +119,206 @@ int LuaTextNode::newObject(lua_State *L)
 
 int LuaTextNode::cloneNode(lua_State *L)
 {
-	const TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
+	const TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -1);
 
-	LuaClassTracker<TextNode>::cloneNode(L, *textnode);
+	if (textnode)
+		LuaClassTracker<TextNode>::cloneNode(L, *textnode);
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTextNode::width(lua_State *L)
 {
-	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -1);
 
-	LuaUtils::push(L, textnode->width());
+	if (textnode)
+		LuaUtils::push(L, textnode->width());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTextNode::height(lua_State *L)
 {
-	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -1);
 
-	LuaUtils::push(L, textnode->height());
+	if (textnode)
+		LuaUtils::push(L, textnode->height());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTextNode::absWidth(lua_State *L)
 {
-	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -1);
 
-	LuaUtils::push(L, textnode->absWidth());
+	if (textnode)
+		LuaUtils::push(L, textnode->absWidth());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTextNode::absHeight(lua_State *L)
 {
-	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -1);
 
-	LuaUtils::push(L, textnode->absHeight());
+	if (textnode)
+		LuaUtils::push(L, textnode->absHeight());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTextNode::font(lua_State *L)
 {
-	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -1);
 
-	LuaClassWrapper<Font>::pushUntrackedUserData(L, textnode->font());
+	if (textnode)
+		LuaUntrackedUserData<Font>::push(L, textnode->font());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTextNode::setFont(lua_State *L)
 {
-	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -2);
-	Font *font = LuaClassWrapper<Font>::unwrapUserData(L, -1);
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -2);
+	Font *font = LuaUntrackedUserData<Font>::retrieveOrNil(L, -1);
 
-	textnode->setFont(font);
+	if (textnode)
+		textnode->setFont(font);
+	else
+		LuaUtils::pushNil(L);
 
 	return 0;
 }
 
 int LuaTextNode::withKerning(lua_State *L)
 {
-	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -1);
 
-	LuaUtils::push(L, textnode->withKerning());
+	if (textnode)
+		LuaUtils::push(L, textnode->withKerning());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTextNode::enableKerning(lua_State *L)
 {
-	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -2);
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -2);
 	const bool withKerning = LuaUtils::retrieve<bool>(L, -1);
 
-	textnode->enableKerning(withKerning);
+	if (textnode)
+		textnode->enableKerning(withKerning);
 
 	return 0;
 }
 
 int LuaTextNode::alignment(lua_State *L)
 {
-	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -1);
 
-	LuaUtils::push(L, static_cast<int64_t>(textnode->alignment()));
+	if (textnode)
+		LuaUtils::push(L, static_cast<int64_t>(textnode->alignment()));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTextNode::setAlignment(lua_State *L)
 {
-	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -2);
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -2);
 	const TextNode::Alignment alignment = static_cast<TextNode::Alignment>(LuaUtils::retrieve<int64_t>(L, -1));
 
-	textnode->setAlignment(alignment);
+	if (textnode)
+		textnode->setAlignment(alignment);
 
 	return 0;
 }
 
 int LuaTextNode::lineHeight(lua_State *L)
 {
-	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -1);
 
-	LuaUtils::push(L, textnode->lineHeight());
+	if (textnode)
+		LuaUtils::push(L, textnode->lineHeight());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTextNode::absLineHeight(lua_State *L)
 {
-	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -1);
 
-	LuaUtils::push(L, textnode->absLineHeight());
+	if (textnode)
+		LuaUtils::push(L, textnode->absLineHeight());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTextNode::setLineHeight(lua_State *L)
 {
-	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -2);
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -2);
 	const float lineHeight = LuaUtils::retrieve<float>(L, -1);
 
-	textnode->setLineHeight(lineHeight);
+	if (textnode)
+		textnode->setLineHeight(lineHeight);
 
 	return 0;
 }
 
 int LuaTextNode::string(lua_State *L)
 {
-	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -1);
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -1);
 
-	LuaUtils::push(L, textnode->string().data());
+	if (textnode)
+		LuaUtils::push(L, textnode->string().data());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaTextNode::setString(lua_State *L)
 {
-	TextNode *textnode = LuaClassWrapper<TextNode>::unwrapUserData(L, -2);
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -2);
 	const char *string = LuaUtils::retrieve<const char *>(L, -1);
 
-	textnode->setString(string);
+	if (textnode)
+		textnode->setString(string);
 
 	return 0;
 }
 
 int LuaTextNode::calculateBoundaries(lua_State *L)
 {
-	const Font *font = LuaClassWrapper<Font>::unwrapUserData(L, -3);
+	const Font *font = LuaUntrackedUserData<Font>::retrieve(L, -3);
 	const bool withKerning = LuaUtils::retrieve<bool>(L, -2);
 	const char *string = LuaUtils::retrieve<const char *>(L, -1);
 
-	const Vector2f boundaries = TextNode::calculateBoundaries(*font, withKerning, string);
-	LuaVector2fUtils::push(L, boundaries);
+	if (font)
+	{
+		const Vector2f boundaries = TextNode::calculateBoundaries(*font, withKerning, string);
+		LuaVector2fUtils::push(L, boundaries);
+	}
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }

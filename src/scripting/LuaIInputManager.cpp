@@ -2,7 +2,7 @@
 #include "common_headers.h"
 
 #include "LuaIInputManager.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaMouseEvents.h"
 #include "LuaVector2Utils.h"
 #include "LuaNames.h"
@@ -118,7 +118,7 @@ int LuaIInputManager::mouseState(lua_State *L)
 int LuaIInputManager::keyboardState(lua_State *L)
 {
 	KeyboardState *keyboardState = const_cast<KeyboardState *>(&theApplication().inputManager().keyboardState());
-	LuaClassWrapper<KeyboardState>::pushUntrackedUserData(L, keyboardState);
+	LuaUntrackedUserData<KeyboardState>::push(L, keyboardState);
 	return 1;
 }
 
@@ -187,7 +187,7 @@ int LuaIInputManager::joystickState(lua_State *L)
 	const int joyId = LuaUtils::retrieve<int32_t>(L, -1);
 
 	JoystickState *joystickState = const_cast<JoystickState *>(&theApplication().inputManager().joystickState(joyId));
-	LuaClassWrapper<JoystickState>::pushUntrackedUserData(L, joystickState);
+	LuaUntrackedUserData<JoystickState>::push(L, joystickState);
 
 	return 1;
 }
@@ -207,7 +207,7 @@ int LuaIInputManager::joyMappedState(lua_State *L)
 	const int joyId = LuaUtils::retrieve<int32_t>(L, -1);
 
 	JoyMappedState *joyMappedState = const_cast<JoyMappedState *>(&theApplication().inputManager().joyMappedState(joyId));
-	LuaClassWrapper<JoyMappedState>::pushUntrackedUserData(L, joyMappedState);
+	LuaUntrackedUserData<JoyMappedState>::push(L, joyMappedState);
 
 	return 1;
 }

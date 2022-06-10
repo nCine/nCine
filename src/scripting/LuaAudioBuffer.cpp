@@ -1,5 +1,5 @@
 #include "LuaAudioBuffer.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaUtils.h"
 #include "AudioBuffer.h"
@@ -70,50 +70,85 @@ int LuaAudioBuffer::newObject(lua_State *L)
 
 int LuaAudioBuffer::bufferId(lua_State *L)
 {
-	AudioBuffer *audioBuffer = LuaClassWrapper<AudioBuffer>::unwrapUserData(L, -1);
-	LuaUtils::push(L, audioBuffer->bufferId());
+	AudioBuffer *audioBuffer = LuaUntrackedUserData<AudioBuffer>::retrieve(L, -1);
+
+	if (audioBuffer)
+		LuaUtils::push(L, audioBuffer->bufferId());
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 
 int LuaAudioBuffer::bytesPerSample(lua_State *L)
 {
-	AudioBuffer *audioBuffer = LuaClassWrapper<AudioBuffer>::unwrapUserData(L, -1);
-	LuaUtils::push(L, audioBuffer->bytesPerSample());
+	AudioBuffer *audioBuffer = LuaUntrackedUserData<AudioBuffer>::retrieve(L, -1);
+
+	if (audioBuffer)
+		LuaUtils::push(L, audioBuffer->bytesPerSample());
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 
 int LuaAudioBuffer::numChannels(lua_State *L)
 {
-	AudioBuffer *audioBuffer = LuaClassWrapper<AudioBuffer>::unwrapUserData(L, -1);
-	LuaUtils::push(L, audioBuffer->numChannels());
+	AudioBuffer *audioBuffer = LuaUntrackedUserData<AudioBuffer>::retrieve(L, -1);
+
+	if (audioBuffer)
+		LuaUtils::push(L, audioBuffer->numChannels());
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 
 int LuaAudioBuffer::frequency(lua_State *L)
 {
-	AudioBuffer *audioBuffer = LuaClassWrapper<AudioBuffer>::unwrapUserData(L, -1);
-	LuaUtils::push(L, audioBuffer->frequency());
+	AudioBuffer *audioBuffer = LuaUntrackedUserData<AudioBuffer>::retrieve(L, -1);
+
+	if (audioBuffer)
+		LuaUtils::push(L, audioBuffer->frequency());
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 
 int LuaAudioBuffer::numSamples(lua_State *L)
 {
-	AudioBuffer *audioBuffer = LuaClassWrapper<AudioBuffer>::unwrapUserData(L, -1);
-	LuaUtils::push(L, static_cast<uint64_t>(audioBuffer->numSamples()));
+	AudioBuffer *audioBuffer = LuaUntrackedUserData<AudioBuffer>::retrieve(L, -1);
+
+	if (audioBuffer)
+		LuaUtils::push(L, static_cast<uint64_t>(audioBuffer->numSamples()));
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 
 int LuaAudioBuffer::duration(lua_State *L)
 {
-	AudioBuffer *audioBuffer = LuaClassWrapper<AudioBuffer>::unwrapUserData(L, -1);
-	LuaUtils::push(L, audioBuffer->duration());
+	AudioBuffer *audioBuffer = LuaUntrackedUserData<AudioBuffer>::retrieve(L, -1);
+
+	if (audioBuffer)
+		LuaUtils::push(L, audioBuffer->duration());
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 
 int LuaAudioBuffer::bufferSize(lua_State *L)
 {
-	AudioBuffer *audioBuffer = LuaClassWrapper<AudioBuffer>::unwrapUserData(L, -1);
-	LuaUtils::push(L, static_cast<uint64_t>(audioBuffer->bufferSize()));
+	AudioBuffer *audioBuffer = LuaUntrackedUserData<AudioBuffer>::retrieve(L, -1);
+
+	if (audioBuffer)
+		LuaUtils::push(L, static_cast<uint64_t>(audioBuffer->bufferSize()));
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 

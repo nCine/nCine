@@ -29,7 +29,7 @@ class LuaClassTracker
 	static inline void cloneNode(lua_State *L, const T &other);
 
   private:
-	static inline void wrapTrackedUserData(lua_State *L, T *object);
+	static inline void storeTrackedUserData(lua_State *L, T *object);
 };
 
 template <class T>
@@ -48,39 +48,40 @@ void LuaClassTracker<T>::newObject(lua_State *L, Args &&... args)
 #else
 	T *ptr = new (nctl::theLuaAllocator().allocate(sizeof(T))) T(nctl::forward<Args>(args)...);
 #endif
-	wrapTrackedUserData(L, ptr);
+	storeTrackedUserData(L, ptr);
 }
 
 template <class T>
 int LuaClassTracker<T>::deleteObject(lua_State *L)
 {
-	LuaStateManager *stateManager = LuaStateManager::manager(L);
+	void *pointer = nullptr;
 
-	LuaStateManager::UserDataWrapper *wrapper = reinterpret_cast<LuaStateManager::UserDataWrapper *>(lua_touserdata(L, -1));
+	if (lua_isuserdata(L, -1))
+		pointer = lua_touserdata(L, -1);
 
-	if (wrapper != nullptr)
+	if (pointer != nullptr)
 	{
-		T *object = reinterpret_cast<T *>(wrapper->object);
-		FATAL_ASSERT(object);
-		FATAL_ASSERT(wrapper->type == LuaTypes::classToUserDataType(object));
+		T *object = reinterpret_cast<T *>(pointer);
 
-		nctl::Array<LuaStateManager::UserDataWrapper> &array = stateManager->trackedUserDatas();
-		const unsigned int newSize = array.size() - 1;
+		LuaStateManager *stateManager = LuaStateManager::manager(L);
 
-		// If not deleting the last element of the array
-		if (wrapper->arrayIndex != newSize)
+		// A tracked object might also end up among untracked data
+		stateManager->untrackedUserDatas().remove(pointer);
+
+		const LuaTypes::UserDataType type = stateManager->trackedType(pointer);
+		ASSERT(type == LuaTypes::classToUserDataType(object));
+		const bool isTracked = (stateManager->trackedUserDatas().find(pointer) != nullptr);
+		ASSERT(isTracked == true);
+
+		if (isTracked)
 		{
-			array[wrapper->arrayIndex].object = array[newSize].object;
-			array[wrapper->arrayIndex].type = array[newSize].type;
-			// The `arrayIndex` should not be copied
-		}
-
-		array.setSize(newSize);
+			stateManager->trackedUserDatas().remove(pointer);
 #if !NCINE_WITH_ALLOCATORS
-		delete object;
+			delete object;
 #else
-		nctl::theLuaAllocator().deleteObject(object);
+			nctl::theLuaAllocator().deleteObject(object);
 #endif
+		}
 	}
 
 	return 0;
@@ -89,30 +90,29 @@ int LuaClassTracker<T>::deleteObject(lua_State *L)
 template <class T>
 void LuaClassTracker<T>::cloneNode(lua_State *L, const T &other)
 {
+	FATAL_ASSERT(&other != nullptr);
+
 #if !NCINE_WITH_ALLOCATORS
 	T *ptr = new T(nctl::move(other.clone()));
 #else
 	T *ptr = new (nctl::theLuaAllocator().allocate(sizeof(T))) T(nctl::move(other.clone()));
 #endif
-	wrapTrackedUserData(L, ptr);
+	storeTrackedUserData(L, ptr);
 }
 
 template <class T>
-void LuaClassTracker<T>::wrapTrackedUserData(lua_State *L, T *object)
+void LuaClassTracker<T>::storeTrackedUserData(lua_State *L, T *object)
 {
+	FATAL_ASSERT(object != nullptr);
+
 	LuaStateManager *stateManager = LuaStateManager::manager(L);
 
-	nctl::Array<LuaStateManager::UserDataWrapper> &array = stateManager->trackedUserDatas();
+	nctl::HashMap<void *, LuaTypes::UserDataType> &hashMap = stateManager->trackedUserDatas();
+	if (hashMap.loadFactor() >= 0.8f)
+		hashMap.rehash(hashMap.capacity() * 2);
+	hashMap.insert(object, LuaTypes::classToUserDataType(object));
 
-	const unsigned int oldSize = array.size();
-	array.setSize(oldSize + 1);
-	LuaStateManager::UserDataWrapper &wrapper = array[oldSize];
-
-	wrapper.object = object;
-	wrapper.type = LuaTypes::classToUserDataType(object);
-	wrapper.arrayIndex = oldSize;
-
-	lua_pushlightuserdata(L, reinterpret_cast<void *>(&wrapper));
+	lua_pushlightuserdata(L, reinterpret_cast<void *>(object));
 }
 
 }

@@ -3,7 +3,7 @@
 
 #include "LuaIAudioDevice.h"
 #include "LuaUtils.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 
 namespace ncine {
 
@@ -87,7 +87,7 @@ int LuaIAudioDevice::player(lua_State *L)
 {
 	const int unsigned index = LuaUtils::retrieve<uint32_t>(L, -1);
 	const IAudioPlayer *player = theServiceLocator().audioDevice().player(index);
-	LuaClassWrapper<IAudioPlayer>::pushUntrackedUserData(L, player);
+	LuaUntrackedUserData<IAudioPlayer>::push(L, player);
 
 	return 1;
 }

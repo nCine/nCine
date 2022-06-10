@@ -1044,7 +1044,7 @@ bool LuaUtils::tryRetrieveGlobalLightUserData(lua_State *L, const char *name)
 // PUSH FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void LuaUtils::push(lua_State *L)
+void LuaUtils::pushNil(lua_State *L)
 {
 	lua_pushnil(L);
 }
@@ -1103,7 +1103,7 @@ void LuaUtils::push(lua_State *L, void *lightuserdata)
 // PUSH FIELD FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void LuaUtils::pushField(lua_State *L, const char *name)
+void LuaUtils::pushFieldNil(lua_State *L, const char *name)
 {
 	lua_pushnil(L);
 	lua_setfield(L, -2, name);

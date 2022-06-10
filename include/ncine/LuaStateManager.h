@@ -2,7 +2,7 @@
 #define CLASS_NCINE_LUAMANAGER
 
 #include "common_defines.h"
-#include <nctl/Array.h>
+#include <nctl/HashMap.h>
 #include "LuaTypes.h"
 
 struct lua_State;
@@ -60,16 +60,6 @@ class DLL_PUBLIC LuaStateManager
 		LuaStateManager *stateManager;
 	};
 
-	struct UserDataWrapper
-	{
-		UserDataWrapper()
-		    : object(nullptr), type(LuaTypes::UNKNOWN), arrayIndex(0) {}
-
-		void *object;
-		enum LuaTypes::UserDataType type;
-		unsigned int arrayIndex;
-	};
-
 	LuaStateManager(ApiType apiType, StatisticsTracking statsTracking, StandardLibraries stdLibraries);
 	LuaStateManager(lua_State *L, ApiType apiType, StatisticsTracking statsTracking, StandardLibraries stdLibraries);
 	~LuaStateManager();
@@ -111,8 +101,11 @@ class DLL_PUBLIC LuaStateManager
 	inline ApiType apiType() const { return apiType_; }
 	inline StatisticsTracking statisticsTracking() const { return statsTracking_; }
 	inline StandardLibraries standardLibraries() const { return stdLibraries_; }
-	inline nctl::Array<UserDataWrapper> &trackedUserDatas() { return trackedUserDatas_; }
-	inline nctl::Array<UserDataWrapper> &untrackedUserDatas() { return untrackedUserDatas_; }
+
+	LuaTypes::UserDataType trackedType(void *pointer) const;
+	inline nctl::HashMap<void *, LuaTypes::UserDataType> &trackedUserDatas() { return trackedUserDatas_; }
+	LuaTypes::UserDataType untrackedType(void *pointer) const;
+	inline nctl::HashMap<void *, LuaTypes::UserDataType> &untrackedUserDatas() { return untrackedUserDatas_; }
 
 	static LuaStateManager *manager(lua_State *L);
 
@@ -123,8 +116,8 @@ class DLL_PUBLIC LuaStateManager
 	ApiType apiType_;
 	StatisticsTracking statsTracking_;
 	StandardLibraries stdLibraries_;
-	nctl::Array<UserDataWrapper> trackedUserDatas_;
-	nctl::Array<UserDataWrapper> untrackedUserDatas_;
+	nctl::HashMap<void *, LuaTypes::UserDataType> trackedUserDatas_;
+	nctl::HashMap<void *, LuaTypes::UserDataType> untrackedUserDatas_;
 	/// True if the Lua state should be closed upon destruction
 	bool closeOnDestruction_;
 

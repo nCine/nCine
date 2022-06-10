@@ -1,5 +1,5 @@
 #include "LuaAnimatedSprite.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaSprite.h"
 #include "LuaRectAnimation.h"
@@ -72,8 +72,8 @@ void LuaAnimatedSprite::release(void *object)
 
 int LuaAnimatedSprite::newObject(lua_State *L)
 {
-	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserDataOrNil(L, -4);
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserDataOrNil(L, -3);
+	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieveOrNil(L, -4);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieveOrNil(L, -3);
 	const float x = LuaUtils::retrieve<float>(L, -2);
 	const float y = LuaUtils::retrieve<float>(L, -1);
 
@@ -84,26 +84,35 @@ int LuaAnimatedSprite::newObject(lua_State *L)
 
 int LuaAnimatedSprite::cloneNode(lua_State *L)
 {
-	const AnimatedSprite *sprite = LuaClassWrapper<AnimatedSprite>::unwrapUserData(L, -1);
+	const AnimatedSprite *sprite = LuaUntrackedUserData<AnimatedSprite>::retrieve(L, -1);
 
-	LuaClassTracker<AnimatedSprite>::cloneNode(L, *sprite);
+	if (sprite)
+		LuaClassTracker<AnimatedSprite>::cloneNode(L, *sprite);
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaAnimatedSprite::isPaused(lua_State *L)
 {
-	AnimatedSprite *sprite = LuaClassWrapper<AnimatedSprite>::unwrapUserData(L, -1);
-	LuaUtils::push(L, sprite->isPaused());
+	AnimatedSprite *sprite = LuaUntrackedUserData<AnimatedSprite>::retrieve(L, -1);
+
+	if (sprite)
+		LuaUtils::push(L, sprite->isPaused());
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 
 int LuaAnimatedSprite::setPaused(lua_State *L)
 {
-	AnimatedSprite *sprite = LuaClassWrapper<AnimatedSprite>::unwrapUserData(L, -2);
+	AnimatedSprite *sprite = LuaUntrackedUserData<AnimatedSprite>::retrieve(L, -2);
 	const bool paused = LuaUtils::retrieve<bool>(L, -1);
 
-	sprite->setPaused(paused);
+	if (sprite)
+		sprite->setPaused(paused);
 
 	return 0;
 }
@@ -116,58 +125,79 @@ int LuaAnimatedSprite::addAnimation(lua_State *L)
 		return 0;
 	}
 
-	AnimatedSprite *sprite = LuaClassWrapper<AnimatedSprite>::unwrapUserData(L, -2);
+	AnimatedSprite *sprite = LuaUntrackedUserData<AnimatedSprite>::retrieve(L, -2);
 	RectAnimation anim = LuaRectAnimation::retrieveTable(L, -1);
 
-	sprite->addAnimation(nctl::move(anim));
+	if (sprite)
+		sprite->addAnimation(nctl::move(anim));
 
 	return 0;
 }
 
 int LuaAnimatedSprite::clearAnimations(lua_State *L)
 {
-	AnimatedSprite *sprite = LuaClassWrapper<AnimatedSprite>::unwrapUserData(L, -1);
-	sprite->clearAnimations();
+	AnimatedSprite *sprite = LuaUntrackedUserData<AnimatedSprite>::retrieve(L, -1);
+
+	if (sprite)
+		sprite->clearAnimations();
+
 	return 0;
 }
 
 int LuaAnimatedSprite::numAnimations(lua_State *L)
 {
-	AnimatedSprite *sprite = LuaClassWrapper<AnimatedSprite>::unwrapUserData(L, -1);
-	LuaUtils::push(L, sprite->numAnimations());
+	AnimatedSprite *sprite = LuaUntrackedUserData<AnimatedSprite>::retrieve(L, -1);
+
+	if (sprite)
+		LuaUtils::push(L, sprite->numAnimations());
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 
 int LuaAnimatedSprite::animationIndex(lua_State *L)
 {
-	AnimatedSprite *sprite = LuaClassWrapper<AnimatedSprite>::unwrapUserData(L, -1);
-	LuaUtils::push(L, sprite->animationIndex());
+	AnimatedSprite *sprite = LuaUntrackedUserData<AnimatedSprite>::retrieve(L, -1);
+
+	if (sprite)
+		LuaUtils::push(L, sprite->animationIndex());
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 
 int LuaAnimatedSprite::setAnimationIndex(lua_State *L)
 {
-	AnimatedSprite *sprite = LuaClassWrapper<AnimatedSprite>::unwrapUserData(L, -2);
+	AnimatedSprite *sprite = LuaUntrackedUserData<AnimatedSprite>::retrieve(L, -2);
 	const unsigned int animIndex = LuaUtils::retrieve<uint32_t>(L, -1);
 
-	sprite->setAnimationIndex(animIndex);
+	if (sprite)
+		sprite->setAnimationIndex(animIndex);
 
 	return 0;
 }
 
 int LuaAnimatedSprite::frame(lua_State *L)
 {
-	AnimatedSprite *sprite = LuaClassWrapper<AnimatedSprite>::unwrapUserData(L, -1);
-	LuaUtils::push(L, sprite->frame());
+	AnimatedSprite *sprite = LuaUntrackedUserData<AnimatedSprite>::retrieve(L, -1);
+
+	if (sprite)
+		LuaUtils::push(L, sprite->frame());
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 
 int LuaAnimatedSprite::setFrame(lua_State *L)
 {
-	AnimatedSprite *sprite = LuaClassWrapper<AnimatedSprite>::unwrapUserData(L, -2);
+	AnimatedSprite *sprite = LuaUntrackedUserData<AnimatedSprite>::retrieve(L, -2);
 	const unsigned int frameNum = LuaUtils::retrieve<uint32_t>(L, -1);
 
-	sprite->setFrame(frameNum);
+	if (sprite)
+		sprite->setFrame(frameNum);
 
 	return 0;
 }

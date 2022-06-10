@@ -107,7 +107,7 @@ namespace LuaTypes {
 	template <> inline const char *classToName<AudioStreamPlayer>(AudioStreamPlayer *) { return "AudioStreamPlayer"; }
 	template <> inline const char *classToName<ParticleSystem>(ParticleSystem *) { return "ParticleSystem"; }
 
-	inline const char *wrapperToName(LuaTypes::UserDataType type)
+	inline const char *userDataTypeToName(LuaTypes::UserDataType type)
 	{
 		switch (type)
 		{

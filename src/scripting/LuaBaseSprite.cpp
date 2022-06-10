@@ -2,7 +2,7 @@
 #include "common_headers.h"
 
 #include "LuaBaseSprite.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaDrawableNode.h"
 #include "LuaRectUtils.h"
 #include "LuaVector2Utils.h"
@@ -59,49 +59,57 @@ void LuaBaseSprite::exposeFunctions(lua_State *L)
 
 int LuaBaseSprite::setSize(lua_State *L)
 {
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -3);
+	BaseSprite *sprite = LuaUntrackedUserData<BaseSprite>::retrieve(L, -3);
 	const float width = LuaUtils::retrieve<float>(L, -2);
 	const float height = LuaUtils::retrieve<float>(L, -1);
 
-	sprite->setSize(width, height);
+	if (sprite)
+		sprite->setSize(width, height);
 
 	return 0;
 }
 
 int LuaBaseSprite::texture(lua_State *L)
 {
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -1);
+	BaseSprite *sprite = LuaUntrackedUserData<BaseSprite>::retrieve(L, -1);
 
-	LuaClassWrapper<Texture>::pushUntrackedUserData(L, sprite->texture());
+	if (sprite)
+		LuaUntrackedUserData<Texture>::push(L, sprite->texture());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaBaseSprite::setTexture(lua_State *L)
 {
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -2);
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+	BaseSprite *sprite = LuaUntrackedUserData<BaseSprite>::retrieve(L, -2);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieveOrNil(L, -1);
 
-	sprite->setTexture(texture);
+	if (sprite)
+		sprite->setTexture(texture);
 
 	return 0;
 }
 
 int LuaBaseSprite::resetTexture(lua_State *L)
 {
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -1);
+	BaseSprite *sprite = LuaUntrackedUserData<BaseSprite>::retrieve(L, -1);
 
-	sprite->resetTexture();
+	if (sprite)
+		sprite->resetTexture();
 
 	return 0;
 }
 
 int LuaBaseSprite::texRect(lua_State *L)
 {
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -1);
+	BaseSprite *sprite = LuaUntrackedUserData<BaseSprite>::retrieve(L, -1);
 
-	const Recti texRect = sprite->texRect();
-	LuaRectiUtils::push(L, texRect);
+	if (sprite)
+		LuaRectiUtils::push(L, sprite->texRect());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
@@ -110,19 +118,22 @@ int LuaBaseSprite::setTexRect(lua_State *L)
 {
 	int rectIndex = 0;
 	const Recti texRect = LuaRectiUtils::retrieve(L, -1, rectIndex);
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, rectIndex - 1);
+	BaseSprite *sprite = LuaUntrackedUserData<BaseSprite>::retrieve(L, rectIndex - 1);
 
-	sprite->setTexRect(texRect);
+	if (sprite)
+		sprite->setTexRect(texRect);
 
 	return 0;
 }
 
 int LuaBaseSprite::anchorPoint(lua_State *L)
 {
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -1);
+	BaseSprite *sprite = LuaUntrackedUserData<BaseSprite>::retrieve(L, -1);
 
-	const Vector2f anchorPoint = sprite->anchorPoint();
-	LuaVector2fUtils::push(L, anchorPoint);
+	if (sprite)
+		LuaVector2fUtils::push(L, sprite->anchorPoint());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
@@ -131,49 +142,56 @@ int LuaBaseSprite::setAnchorPoint(lua_State *L)
 {
 	int vectorIndex = 0;
 	const Vector2f anchorPoint = LuaVector2fUtils::retrieve(L, -1, vectorIndex);
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, vectorIndex - 1);
+	BaseSprite *sprite = LuaUntrackedUserData<BaseSprite>::retrieve(L, vectorIndex - 1);
 
-	sprite->setAnchorPoint(anchorPoint);
+	if (sprite)
+		sprite->setAnchorPoint(anchorPoint);
 
 	return 0;
 }
 
 int LuaBaseSprite::isFlippedX(lua_State *L)
 {
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -1);
+	BaseSprite *sprite = LuaUntrackedUserData<BaseSprite>::retrieve(L, -1);
 
-	const bool result = sprite->isFlippedX();
-	LuaUtils::push(L, result);
+	if (sprite)
+		LuaUtils::push(L, sprite->isFlippedX());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaBaseSprite::setFlippedX(lua_State *L)
 {
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -2);
+	BaseSprite *sprite = LuaUntrackedUserData<BaseSprite>::retrieve(L, -2);
 	const bool flippedX = LuaUtils::retrieve<bool>(L, -1);
 
-	sprite->setFlippedX(flippedX);
+	if (sprite)
+		sprite->setFlippedX(flippedX);
 
 	return 0;
 }
 
 int LuaBaseSprite::isFlippedY(lua_State *L)
 {
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -1);
+	BaseSprite *sprite = LuaUntrackedUserData<BaseSprite>::retrieve(L, -1);
 
-	const bool result = sprite->isFlippedY();
-	LuaUtils::push(L, result);
+	if (sprite)
+		LuaUtils::push(L, sprite->isFlippedY());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaBaseSprite::setFlippedY(lua_State *L)
 {
-	BaseSprite *sprite = LuaClassWrapper<BaseSprite>::unwrapUserData(L, -2);
+	BaseSprite *sprite = LuaUntrackedUserData<BaseSprite>::retrieve(L, -2);
 	const bool flippedY = LuaUtils::retrieve<bool>(L, -1);
 
-	sprite->setFlippedY(flippedY);
+	if (sprite)
+		sprite->setFlippedY(flippedY);
 
 	return 0;
 }

@@ -1,5 +1,5 @@
 #include "LuaSceneNode.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaColorUtils.h"
 #include "LuaVector2Utils.h"
@@ -142,7 +142,7 @@ void LuaSceneNode::exposeFunctions(lua_State *L)
 
 int LuaSceneNode::newObject(lua_State *L)
 {
-	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserDataOrNil(L, -3);
+	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieveOrNil(L, -3);
 	const float x = LuaUtils::retrieve<float>(L, -2);
 	const float y = LuaUtils::retrieve<float>(L, -1);
 
@@ -153,185 +153,248 @@ int LuaSceneNode::newObject(lua_State *L)
 
 int LuaSceneNode::cloneNode(lua_State *L)
 {
-	const SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	const SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	LuaClassTracker<SceneNode>::cloneNode(L, *node);
+	if (node)
+		LuaClassTracker<SceneNode>::cloneNode(L, *node);
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::parent(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	const SceneNode *parent = node->parent();
-	LuaUtils::push(L, parent);
+	if (node)
+		LuaUtils::push(L, node->parent());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::setParent(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
-	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -2);
+	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieveOrNil(L, -1);
 
-	const bool result = node->setParent(parent);
-	LuaUtils::push(L, result);
+	if (node)
+	{
+		const bool result = node->setParent(parent);
+		LuaUtils::push(L, result);
+	}
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::addChildNode(lua_State *L)
 {
-	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieve(L, -2);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	const bool result = parent->addChildNode(node);
-	LuaUtils::push(L, result);
+	if (parent)
+	{
+		const bool result = parent->addChildNode(node);
+		LuaUtils::push(L, result);
+	}
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::removeChildNode(lua_State *L)
 {
-	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
-	SceneNode *child = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieve(L, -2);
+	SceneNode *child = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	const bool result = parent->removeChildNode(child);
-	LuaUtils::push(L, result);
+	if (parent)
+	{
+		const bool result = parent->removeChildNode(child);
+		LuaUtils::push(L, result);
+	}
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::removeChildNodeAt(lua_State *L)
 {
-	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
+	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieve(L, -2);
 	unsigned int index = LuaUtils::retrieve<uint64_t>(L, -1);
 
-	const bool result = parent->removeChildNodeAt(index);
-	LuaUtils::push(L, result);
+	if (parent)
+	{
+		const bool result = parent->removeChildNodeAt(index);
+		LuaUtils::push(L, result);
+	}
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::removeAllChildrenNodes(lua_State *L)
 {
-	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	const bool result = parent->removeAllChildrenNodes();
-	LuaUtils::push(L, result);
+	if (parent)
+	{
+		const bool result = parent->removeAllChildrenNodes();
+		LuaUtils::push(L, result);
+	}
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::unlinkChildNode(lua_State *L)
 {
-	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
-	SceneNode *child = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieve(L, -2);
+	SceneNode *child = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	const bool result = parent->unlinkChildNode(child);
-	LuaUtils::push(L, result);
+	if (parent)
+	{
+		const bool result = parent->unlinkChildNode(child);
+		LuaUtils::push(L, result);
+	}
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::childOrderIndex(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	const unsigned int index = node->childOrderIndex();
-	LuaUtils::push(L, index);
+	if (node)
+		LuaUtils::push(L, node->childOrderIndex());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::swapChildrenNodes(lua_State *L)
 {
-	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserData(L, -3);
+	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieve(L, -3);
 	unsigned int firstIndex = LuaUtils::retrieve<uint64_t>(L, -1);
 	unsigned int secondIndex = LuaUtils::retrieve<uint64_t>(L, -1);
 
-	const bool result = parent->swapChildrenNodes(firstIndex, secondIndex);
-	LuaUtils::push(L, result);
+	if (parent)
+	{
+		const bool result = parent->swapChildrenNodes(firstIndex, secondIndex);
+		LuaUtils::push(L, result);
+	}
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::swapNodeForward(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	const bool result = node->swapNodeForward();
-	LuaUtils::push(L, result);
+	if (node)
+	{
+		const bool result = node->swapNodeForward();
+		LuaUtils::push(L, result);
+	}
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::swapNodeBack(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	const bool result = node->swapNodeBack();
-	LuaUtils::push(L, result);
+	if (node)
+	{
+		const bool result = node->swapNodeBack();
+		LuaUtils::push(L, result);
+	}
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::visitOrderState(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	LuaUtils::push(L, static_cast<int64_t>(node->visitOrderState()));
+	if (node)
+		LuaUtils::push(L, static_cast<int64_t>(node->visitOrderState()));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::setVisitOrderState(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -2);
 	const SceneNode::VisitOrderState visitOrderState = static_cast<SceneNode::VisitOrderState>(LuaUtils::retrieve<int64_t>(L, -1));
 
-	node->setVisitOrderState(visitOrderState);
+	if (node)
+		node->setVisitOrderState(visitOrderState);
 
 	return 0;
 }
 
 int LuaSceneNode::visitOrderIndex(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	const uint16_t visitOrderIndex = node->visitOrderIndex();
-	LuaUtils::push(L, static_cast<uint32_t>(visitOrderIndex));
+	if (node)
+		LuaUtils::push(L, static_cast<uint32_t>(node->visitOrderIndex()));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::isEnabled(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	const bool result = node->isEnabled();
-	LuaUtils::push(L, result);
+	if (node)
+		LuaUtils::push(L, node->isEnabled());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::setEnabled(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -2);
 	const bool enabled = LuaUtils::retrieve<bool>(L, -1);
 
-	node->setEnabled(enabled);
+	if (node)
+		node->setEnabled(enabled);
 
 	return 0;
 }
 
 int LuaSceneNode::position(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	const Vector2f &pos = node->position();
-	LuaVector2fUtils::push(L, pos);
+	if (node)
+		LuaVector2fUtils::push(L, node->position());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
@@ -340,19 +403,22 @@ int LuaSceneNode::setPosition(lua_State *L)
 {
 	int vectorIndex = 0;
 	const Vector2f &pos = LuaVector2fUtils::retrieve(L, -1, vectorIndex);
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, vectorIndex - 1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, vectorIndex - 1);
 
-	node->setPosition(pos);
+	if (node)
+		node->setPosition(pos);
 
 	return 0;
 }
 
 int LuaSceneNode::absAnchorPoint(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	const Vector2f &absAnchorPoint = node->absAnchorPoint();
-	LuaVector2fUtils::push(L, absAnchorPoint);
+	if (node)
+		LuaVector2fUtils::push(L, node->absAnchorPoint());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
@@ -361,79 +427,91 @@ int LuaSceneNode::setAbsAnchorPoint(lua_State *L)
 {
 	int vectorIndex = 0;
 	const Vector2f &absAnchorPoint = LuaVector2fUtils::retrieve(L, -1, vectorIndex);
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, vectorIndex - 1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, vectorIndex - 1);
 
-	node->setAbsAnchorPoint(absAnchorPoint);
+	if (node)
+		node->setAbsAnchorPoint(absAnchorPoint);
 
 	return 0;
 }
 
 int LuaSceneNode::scale(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	const Vector2f &scale = node->scale();
-	LuaVector2fUtils::push(L, scale);
+	if (node)
+		LuaVector2fUtils::push(L, node->scale());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::setScaleX(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -2);
 	const float scaleX = LuaUtils::retrieve<float>(L, -1);
 
-	node->setScale(scaleX, node->scale().y);
+	if (node)
+		node->setScale(scaleX, node->scale().y);
 
 	return 0;
 }
 
 int LuaSceneNode::setScaleY(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -2);
 	const float scaleY = LuaUtils::retrieve<float>(L, -1);
 
-	node->setScale(node->scale().x, scaleY);
+	if (node)
+		node->setScale(node->scale().x, scaleY);
 
 	return 0;
 }
 
 int LuaSceneNode::setScale(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -2);
 	const float scale = LuaUtils::retrieve<float>(L, -1);
 
-	node->setScale(scale);
+	if (node)
+		node->setScale(scale);
 
 	return 0;
 }
 
 int LuaSceneNode::rotation(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	const float rotation = node->rotation();
-	LuaUtils::push(L, rotation);
+	if (node)
+		LuaUtils::push(L, node->rotation());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::setRotation(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, 1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, 1);
 	const float rot = LuaUtils::retrieve<float>(L, 2);
 
-	node->setRotation(rot);
+	if (node)
+		node->setRotation(rot);
 
 	return 0;
 }
 
 int LuaSceneNode::color(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 	const Colorf nodeColor(node->color());
 
-	LuaColorUtils::push(L, nodeColor);
+	if (node)
+		LuaColorUtils::push(L, nodeColor);
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
@@ -442,52 +520,58 @@ int LuaSceneNode::setColor(lua_State *L)
 {
 	int colorIndex = 0;
 	const Colorf nodeColor = LuaColorUtils::retrieve(L, -1, colorIndex);
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, colorIndex - 1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, colorIndex - 1);
 
-	node->setColor(nodeColor);
+	if (node)
+		node->setColor(nodeColor);
 
 	return 0;
 }
 
 int LuaSceneNode::alpha(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	const float nodeAlpha = node->alpha();
-	LuaUtils::push(L, nodeAlpha);
+	if (node)
+		LuaUtils::push(L, node->alpha());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::setAlpha(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, 1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, 1);
 	const float nodeAlpha = LuaUtils::retrieve<float>(L, 2);
 
-	node->setAlphaF(nodeAlpha);
+	if (node)
+		node->setAlphaF(nodeAlpha);
 
 	return 0;
 }
 
 int LuaSceneNode::layer(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
-	const uint16_t layer = node->layer();
-	LuaUtils::push(L, static_cast<uint32_t>(layer));
+	if (node)
+		LuaUtils::push(L, static_cast<uint32_t>(node->layer()));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaSceneNode::setLayer(lua_State *L)
 {
-	SceneNode *node = LuaClassWrapper<SceneNode>::unwrapUserData(L, -2);
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -2);
 	const uint32_t layer = LuaUtils::retrieve<uint32_t>(L, -1);
 
-	node->setLayer(static_cast<uint16_t>(layer));
+	if (node)
+		node->setLayer(static_cast<uint16_t>(layer));
 
 	return 0;
 }
-
 
 }

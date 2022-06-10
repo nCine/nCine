@@ -2,7 +2,7 @@
 #include "common_headers.h"
 
 #include "LuaKeyboardEvents.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaNames.h"
 #include "InputEvents.h"
 
@@ -59,10 +59,13 @@ void LuaKeyboardEvents::pushTextInputEvent(lua_State *L, const TextInputEvent &e
 
 int LuaKeyboardEvents::isKeyDown(lua_State *L)
 {
-	const KeyboardState *state = LuaClassWrapper<KeyboardState>::unwrapUserData(L, -2);
+	const KeyboardState *state = LuaUntrackedUserData<KeyboardState>::retrieve(L, -2);
 	const KeySym key = static_cast<KeySym>(LuaUtils::retrieve<int64_t>(L, -1));
 
-	lua_pushboolean(L, state->isKeyDown(key));
+	if (state)
+		LuaUtils::push(L, state->isKeyDown(key));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }

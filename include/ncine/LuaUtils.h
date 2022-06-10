@@ -273,7 +273,7 @@ namespace LuaUtils {
 		return tryRetrieveGlobalArray(L, name, 1, length, array);
 	}
 
-	DLL_PUBLIC void push(lua_State *L);
+	DLL_PUBLIC void pushNil(lua_State *L);
 	DLL_PUBLIC void push(lua_State *L, double number);
 	DLL_PUBLIC void push(lua_State *L, float number);
 	DLL_PUBLIC void push(lua_State *L, int64_t integer);
@@ -301,7 +301,7 @@ namespace LuaUtils {
 		pushArray(L, index, 1, length, array);
 	}
 
-	DLL_PUBLIC void pushField(lua_State *L, const char *name);
+	DLL_PUBLIC void pushFieldNil(lua_State *L, const char *name);
 	DLL_PUBLIC void pushField(lua_State *L, const char *name, double number);
 	DLL_PUBLIC void pushField(lua_State *L, const char *name, float number);
 	DLL_PUBLIC void pushField(lua_State *L, const char *name, int64_t integer);

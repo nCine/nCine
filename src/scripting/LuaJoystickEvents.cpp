@@ -2,7 +2,7 @@
 #include "common_headers.h"
 
 #include "LuaJoystickEvents.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaNames.h"
 #include "InputEvents.h"
 
@@ -189,21 +189,25 @@ int LuaJoystickEvents::isButtonPressed(lua_State *L)
 {
 	bool isButtonPressed = false;
 
-	LuaStateManager::UserDataWrapper *wrapper = LuaUtils::retrieveUserData<LuaStateManager::UserDataWrapper>(L, -2);
-	if (wrapper->type == LuaTypes::JOYSTICKSTATE)
+	void *pointer = LuaUtils::retrieveUserData<void *>(L, -2);
+	const LuaTypes::UserDataType type = LuaStateManager::manager(L)->untrackedType(pointer);
+
+	if (type == LuaTypes::JOYSTICKSTATE)
 	{
-		const JoystickState *state = LuaClassWrapper<JoystickState>::unwrapUserData(L, -2);
+		const JoystickState *state = reinterpret_cast<JoystickState *>(pointer);
 		const int buttonId = LuaUtils::retrieve<int32_t>(L, -1);
-		isButtonPressed = state->isButtonPressed(buttonId);
+		if (state)
+			isButtonPressed = state->isButtonPressed(buttonId);
 	}
-	else if (wrapper->type == LuaTypes::JOYMAPPEDSTATE)
+	else if (type == LuaTypes::JOYMAPPEDSTATE)
 	{
-		const JoyMappedState *state = LuaClassWrapper<JoyMappedState>::unwrapUserData(L, -1);
+		const JoyMappedState *state = reinterpret_cast<JoyMappedState *>(pointer);
 		const ButtonName button = static_cast<ButtonName>(LuaUtils::retrieve<int64_t>(L, -1));
-		isButtonPressed = state->isButtonPressed(button);
+		if (state)
+			isButtonPressed = state->isButtonPressed(button);
 	}
 	else
-		LuaDebug::traceError(L, "Expecting a JoystickState or a JoyMappedState object instead of %s", LuaTypes::wrapperToName(wrapper->type));
+		LuaDebug::traceError(L, "Expecting a JoystickState or a JoyMappedState object instead of %s", LuaTypes::userDataTypeToName(type));
 
 	LuaUtils::push(L, isButtonPressed);
 
@@ -214,15 +218,18 @@ int LuaJoystickEvents::hatState(lua_State *L)
 {
 	unsigned char hatState = HatState::CENTERED;
 
-	LuaStateManager::UserDataWrapper *wrapper = LuaUtils::retrieveUserData<LuaStateManager::UserDataWrapper>(L, -2);
-	if (wrapper->type == LuaTypes::JOYSTICKSTATE)
+	void *pointer = LuaUtils::retrieveUserData<void *>(L, -2);
+	const LuaTypes::UserDataType type = LuaStateManager::manager(L)->untrackedType(pointer);
+
+	if (type == LuaTypes::JOYSTICKSTATE)
 	{
-		const JoystickState *state = LuaClassWrapper<JoystickState>::unwrapUserData(L, -2);
+		const JoystickState *state = reinterpret_cast<JoystickState *>(pointer);
 		const int hatId = LuaUtils::retrieve<int32_t>(L, -1);
-		hatState = state->hatState(hatId);
+		if (state)
+			hatState = state->hatState(hatId);
 	}
 	else
-		LuaDebug::traceError(L, "Expecting a JoystickState object instead of %s", LuaTypes::wrapperToName(wrapper->type));
+		LuaDebug::traceError(L, "Expecting a JoystickState object instead of %s", LuaTypes::userDataTypeToName(type));
 
 	LuaUtils::push(L, hatState);
 
@@ -233,21 +240,25 @@ int LuaJoystickEvents::axisValue(lua_State *L)
 {
 	float axisValue = 0.0f;
 
-	LuaStateManager::UserDataWrapper *wrapper = LuaUtils::retrieveUserData<LuaStateManager::UserDataWrapper>(L, -2);
-	if (wrapper->type == LuaTypes::JOYSTICKSTATE)
+	void *pointer = LuaUtils::retrieveUserData<void *>(L, -2);
+	const LuaTypes::UserDataType type = LuaStateManager::manager(L)->untrackedType(pointer);
+
+	if (type == LuaTypes::JOYSTICKSTATE)
 	{
-		const JoystickState *state = LuaClassWrapper<JoystickState>::unwrapUserData(L, -2);
+		const JoystickState *state = reinterpret_cast<JoystickState *>(pointer);
 		const int axisId = LuaUtils::retrieve<int32_t>(L, -1);
-		axisValue = state->axisValue(axisId);
+		if (state)
+			axisValue = state->axisValue(axisId);
 	}
-	else if (wrapper->type == LuaTypes::JOYMAPPEDSTATE)
+	else if (type == LuaTypes::JOYMAPPEDSTATE)
 	{
-		const JoyMappedState *state = LuaClassWrapper<JoyMappedState>::unwrapUserData(L, -1);
+		const JoyMappedState *state = reinterpret_cast<JoyMappedState *>(pointer);
 		const AxisName axis = static_cast<AxisName>(LuaUtils::retrieve<int64_t>(L, -1));
-		axisValue = state->axisValue(axis);
+		if (state)
+			axisValue = state->axisValue(axis);
 	}
 	else
-		LuaDebug::traceError(L, "Expecting a JoystickState or a JoyMappedState object instead of %s", LuaTypes::wrapperToName(wrapper->type));
+		LuaDebug::traceError(L, "Expecting a JoystickState or a JoyMappedState object instead of %s", LuaTypes::userDataTypeToName(type));
 
 	LuaUtils::push(L, axisValue);
 
@@ -256,10 +267,13 @@ int LuaJoystickEvents::axisValue(lua_State *L)
 
 int LuaJoystickEvents::axisNormValue(lua_State *L)
 {
-	const JoystickState *state = LuaClassWrapper<JoystickState>::unwrapUserData(L, -2);
+	const JoystickState *state = LuaUntrackedUserData<JoystickState>::retrieve(L, -2);
 	const int axisId = LuaUtils::retrieve<int32_t>(L, -1);
 
-	LuaUtils::push(L, state->axisNormValue(axisId));
+	if (state)
+		LuaUtils::push(L, state->axisNormValue(axisId));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }

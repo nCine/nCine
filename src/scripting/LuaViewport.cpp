@@ -1,5 +1,5 @@
 #include "LuaViewport.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaRectUtils.h"
 #include "LuaColorUtils.h"
@@ -158,41 +158,50 @@ int LuaViewport::newObject(lua_State *L)
 
 int LuaViewport::initTexture(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -5);
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -5);
 	const int width = LuaUtils::retrieve<int>(L, -4);
 	const int height = LuaUtils::retrieve<int>(L, -3);
 	const Viewport::ColorFormat colorFormat = static_cast<Viewport::ColorFormat>(LuaUtils::retrieve<int64_t>(L, -2));
 	const Viewport::DepthStencilFormat depthStencilFormat = static_cast<Viewport::DepthStencilFormat>(LuaUtils::retrieve<int64_t>(L, -1));
 
-	viewport->initTexture(width, height, colorFormat, depthStencilFormat);
+	if (viewport)
+		viewport->initTexture(width, height, colorFormat, depthStencilFormat);
 
 	return 0;
 }
 
 int LuaViewport::width(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -1);
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
-	LuaUtils::push(L, viewport->width());
+	if (viewport)
+		LuaUtils::push(L, viewport->width());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaViewport::height(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -1);
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
-	LuaUtils::push(L, viewport->height());
+	if (viewport)
+		LuaUtils::push(L, viewport->height());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaViewport::viewportRect(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -1);
-	const Recti viewportRect = viewport->viewportRect();
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
-	LuaRectiUtils::push(L, viewportRect);
+	if (viewport)
+		LuaRectiUtils::push(L, viewport->viewportRect());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
@@ -201,19 +210,22 @@ int LuaViewport::setViewportRect(lua_State *L)
 {
 	int rectIndex = 0;
 	const Recti viewportRect = LuaRectiUtils::retrieve(L, -1, rectIndex);
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, rectIndex - 1);
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, rectIndex - 1);
 
-	viewport->setViewportRect(viewportRect);
+	if (viewport)
+		viewport->setViewportRect(viewportRect);
 
 	return 0;
 }
 
 int LuaViewport::scissorRect(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -1);
-	const Recti scissorRect = viewport->scissorRect();
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
-	LuaRectiUtils::push(L, scissorRect);
+	if (viewport)
+		LuaRectiUtils::push(L, viewport->scissorRect());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
@@ -222,69 +234,81 @@ int LuaViewport::setScissorRect(lua_State *L)
 {
 	int rectIndex = 0;
 	const Recti scissorRect = LuaRectiUtils::retrieve(L, -1, rectIndex);
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, rectIndex - 1);
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, rectIndex - 1);
 
-	viewport->setScissorRect(scissorRect);
+	if (viewport)
+		viewport->setScissorRect(scissorRect);
 
 	return 0;
 }
 
 int LuaViewport::cullingRect(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -1);
-	const Rectf cullingRect = viewport->cullingRect();
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
-	LuaRectfUtils::push(L, cullingRect);
+	if (viewport)
+		LuaRectfUtils::push(L, viewport->cullingRect());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaViewport::colorFormat(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -1);
-	const Viewport::ColorFormat colorFormat = viewport->colorFormat();
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
-	LuaUtils::push(L, static_cast<int64_t>(colorFormat));
+	if (viewport)
+		LuaUtils::push(L, static_cast<int64_t>(viewport->colorFormat()));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaViewport::depthStencilFormat(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -1);
-	const Viewport::DepthStencilFormat depthStencilFormat = viewport->depthStencilFormat();
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
-	LuaUtils::push(L, static_cast<int64_t>(depthStencilFormat));
+	if (viewport)
+		LuaUtils::push(L, static_cast<int64_t>(viewport->depthStencilFormat()));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaViewport::clearMode(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -1);
-	const Viewport::ClearMode clearMode = viewport->clearMode();
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
-	LuaUtils::push(L, static_cast<int64_t>(clearMode));
+	if (viewport)
+		LuaUtils::push(L, static_cast<int64_t>(viewport->clearMode()));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaViewport::setClearMode(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -2);
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -2);
 	const Viewport::ClearMode clearMode = static_cast<Viewport::ClearMode>(LuaUtils::retrieve<int64_t>(L, -1));
 
-	viewport->setClearMode(clearMode);
+	if (viewport)
+		viewport->setClearMode(clearMode);
 
 	return 0;
 }
 
 int LuaViewport::clearColor(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -1);
-	const Colorf clearColor = viewport->clearColor();
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
-	LuaColorUtils::push(L, clearColor);
+	if (viewport)
+		LuaColorUtils::push(L, viewport->clearColor());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
@@ -293,75 +317,91 @@ int LuaViewport::setClearColor(lua_State *L)
 {
 	int colorIndex = 0;
 	const Colorf clearColor = LuaColorUtils::retrieve(L, -1, colorIndex);
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, colorIndex - 1);
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, colorIndex - 1);
 
-	viewport->setClearColor(clearColor);
+	if (viewport)
+		viewport->setClearColor(clearColor);
 
 	return 0;
 }
 
 int LuaViewport::texture(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -1);
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
-	LuaClassWrapper<Texture>::pushUntrackedUserData(L, viewport->texture());
+	if (viewport)
+		LuaUntrackedUserData<Texture>::push(L, viewport->texture());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaViewport::rootNode(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -1);
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
-	LuaClassWrapper<SceneNode>::pushUntrackedUserData(L, viewport->rootNode());
+	if (viewport)
+		LuaUntrackedUserData<SceneNode>::push(L, viewport->rootNode());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaViewport::setRootNode(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -2);
-	SceneNode *rootNode = LuaClassWrapper<SceneNode>::unwrapUserData(L, -1);
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -2);
+	SceneNode *rootNode = LuaUntrackedUserData<SceneNode>::retrieveOrNil(L, -1);
 
-	viewport->setRootNode(rootNode);
+	if (viewport)
+		viewport->setRootNode(rootNode);
 
 	return 0;
 }
 
 int LuaViewport::nextViewport(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -1);
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
-	LuaClassWrapper<Viewport>::pushUntrackedUserData(L, viewport->nextViewport());
+	if (viewport)
+		LuaUntrackedUserData<Viewport>::push(L, viewport->nextViewport());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaViewport::setNextViewport(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -2);
-	Viewport *nextViewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -1);
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -2);
+	Viewport *nextViewport = LuaUntrackedUserData<Viewport>::retrieveOrNil(L, -1);
 
-	viewport->setNextViewport(nextViewport);
+	if (viewport)
+		viewport->setNextViewport(nextViewport);
 
 	return 0;
 }
 
 int LuaViewport::camera(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -1);
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
-	LuaClassWrapper<Camera>::pushUntrackedUserData(L, viewport->camera());
+	if (viewport)
+		LuaUntrackedUserData<Camera>::push(L, viewport->camera());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaViewport::setCamera(lua_State *L)
 {
-	Viewport *viewport = LuaClassWrapper<Viewport>::unwrapUserData(L, -2);
-	Camera *camera = LuaClassWrapper<Camera>::unwrapUserData(L, -1);
+	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -2);
+	Camera *camera = LuaUntrackedUserData<Camera>::retrieve(L, -1);
 
-	viewport->setCamera(camera);
+	if (viewport)
+		viewport->setCamera(camera);
 
 	return 0;
 }

@@ -220,7 +220,7 @@ if(LUA_FOUND)
 		target_compile_definitions(ncine PRIVATE "WITH_SCRIPTING_API")
 
 		list(APPEND HEADERS
-			${NCINE_ROOT}/include/ncine/LuaClassWrapper.h
+			${NCINE_ROOT}/include/ncine/LuaUntrackedUserData.h
 			${NCINE_ROOT}/include/ncine/LuaIAppEventHandler.h
 			${NCINE_ROOT}/include/ncine/LuaIInputEventHandler.h
 		)

@@ -3,7 +3,7 @@
 
 #include "LuaDrawableNode.h"
 #include "LuaSceneNode.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaUtils.h"
 #include "LuaVector2Utils.h"
 #include "LuaRectUtils.h"
@@ -118,40 +118,48 @@ void LuaDrawableNode::exposeFunctions(lua_State *L)
 
 int LuaDrawableNode::width(lua_State *L)
 {
-	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -1);
+	DrawableNode *node = LuaUntrackedUserData<DrawableNode>::retrieve(L, -1);
 
-	const float width = node->width();
-	LuaUtils::push(L, width);
+	if (node)
+		LuaUtils::push(L, node->width());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaDrawableNode::height(lua_State *L)
 {
-	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -1);
+	DrawableNode *node = LuaUntrackedUserData<DrawableNode>::retrieve(L, -1);
 
-	const float height = node->height();
-	LuaUtils::push(L, height);
+	if (node)
+		LuaUtils::push(L, node->height());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaDrawableNode::size(lua_State *L)
 {
-	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -1);
+	DrawableNode *node = LuaUntrackedUserData<DrawableNode>::retrieve(L, -1);
 
-	const Vector2f size = node->size();
-	LuaVector2fUtils::push(L, size);
+	if (node)
+		LuaVector2fUtils::push(L, node->size());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaDrawableNode::anchorPoint(lua_State *L)
 {
-	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -1);
+	DrawableNode *node = LuaUntrackedUserData<DrawableNode>::retrieve(L, -1);
 
-	const Vector2f &anchorPoint = node->anchorPoint();
-	LuaVector2fUtils::push(L, anchorPoint);
+	if (node)
+		LuaVector2fUtils::push(L, node->anchorPoint());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
@@ -160,90 +168,104 @@ int LuaDrawableNode::setAnchorPoint(lua_State *L)
 {
 	int vectorIndex = 0;
 	const Vector2f &anchorPoint = LuaVector2fUtils::retrieve(L, -1, vectorIndex);
-	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, vectorIndex - 1);
+	DrawableNode *node = LuaUntrackedUserData<DrawableNode>::retrieve(L, vectorIndex - 1);
 
-	node->setAnchorPoint(anchorPoint);
+	if (node)
+		node->setAnchorPoint(anchorPoint);
 
 	return 0;
 }
 
 int LuaDrawableNode::isBlendingEnabled(lua_State *L)
 {
-	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -1);
+	DrawableNode *node = LuaUntrackedUserData<DrawableNode>::retrieve(L, -1);
 
-	const bool enabled = node->isBlendingEnabled();
-	LuaUtils::push(L, enabled);
+	if (node)
+		LuaUtils::push(L, node->isBlendingEnabled());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaDrawableNode::setBlendingEnabled(lua_State *L)
 {
-	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -2);
+	DrawableNode *node = LuaUntrackedUserData<DrawableNode>::retrieve(L, -2);
 	const bool enabled = LuaUtils::retrieve<bool>(L, -1);
 
-	node->setBlendingEnabled(enabled);
+	if (node)
+		node->setBlendingEnabled(enabled);
 
 	return 0;
 }
 
 int LuaDrawableNode::srcBlendingFactor(lua_State *L)
 {
-	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -1);
+	DrawableNode *node = LuaUntrackedUserData<DrawableNode>::retrieve(L, -1);
 
-	const DrawableNode::BlendingFactor srcFactor = node->srcBlendingFactor();
-	LuaUtils::push(L, static_cast<int64_t>(srcFactor));
+	if (node)
+		LuaUtils::push(L, static_cast<int64_t>(node->srcBlendingFactor()));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaDrawableNode::destBlendingFactor(lua_State *L)
 {
-	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -1);
+	DrawableNode *node = LuaUntrackedUserData<DrawableNode>::retrieve(L, -1);
 
-	const DrawableNode::BlendingFactor destFactor = node->destBlendingFactor();
-	LuaUtils::push(L, static_cast<int64_t>(destFactor));
+	if (node)
+		LuaUtils::push(L, static_cast<int64_t>(node->destBlendingFactor()));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaDrawableNode::setBlendingPreset(lua_State *L)
 {
-	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -2);
+	DrawableNode *node = LuaUntrackedUserData<DrawableNode>::retrieve(L, -2);
 	const DrawableNode::BlendingPreset blendingPreset = static_cast<DrawableNode::BlendingPreset>(LuaUtils::retrieve<int64_t>(L, -1));
 
-	node->setBlendingPreset(blendingPreset);
+	if (node)
+		node->setBlendingPreset(blendingPreset);
 
 	return 0;
 }
 
 int LuaDrawableNode::setBlendingFactors(lua_State *L)
 {
-	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -3);
+	DrawableNode *node = LuaUntrackedUserData<DrawableNode>::retrieve(L, -3);
 	const DrawableNode::BlendingFactor srcBlendingFactor = static_cast<DrawableNode::BlendingFactor>(LuaUtils::retrieve<int64_t>(L, -2));
 	const DrawableNode::BlendingFactor destBlendingFactor = static_cast<DrawableNode::BlendingFactor>(LuaUtils::retrieve<int64_t>(L, -1));
 
-	node->setBlendingFactors(srcBlendingFactor, destBlendingFactor);
+	if (node)
+		node->setBlendingFactors(srcBlendingFactor, destBlendingFactor);
 
 	return 0;
 }
 
 int LuaDrawableNode::isCulled(lua_State *L)
 {
-	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -1);
+	DrawableNode *node = LuaUntrackedUserData<DrawableNode>::retrieve(L, -1);
 
-	const bool isCulled = node->isCulled();
-	LuaUtils::push(L, isCulled);
+	if (node)
+		LuaUtils::push(L, node->isCulled());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaDrawableNode::aabb(lua_State *L)
 {
-	DrawableNode *node = LuaClassWrapper<DrawableNode>::unwrapUserData(L, -1);
-	const Rectf aabb = node->aabb();
+	DrawableNode *node = LuaUntrackedUserData<DrawableNode>::retrieve(L, -1);
 
-	LuaRectfUtils::push(L, aabb);
+	if (node)
+		LuaRectfUtils::push(L, node->aabb());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }

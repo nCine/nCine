@@ -2,7 +2,7 @@
 #include "common_headers.h"
 
 #include "LuaApplication.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaVector2Utils.h"
 #include "Application.h"
 #include "FileSystem.h"
@@ -197,13 +197,13 @@ int LuaApplication::setGuiSettings(lua_State *L)
 
 int LuaApplication::rootNode(lua_State *L)
 {
-	LuaClassWrapper<SceneNode>::pushUntrackedUserData(L, &theApplication().rootNode());
+	LuaUntrackedUserData<SceneNode>::push(L, &theApplication().rootNode());
 	return 1;
 }
 
 int LuaApplication::rootViewport(lua_State *L)
 {
-	LuaClassWrapper<Viewport>::pushUntrackedUserData(L, &theApplication().rootViewport());
+	LuaUntrackedUserData<Viewport>::push(L, &theApplication().rootViewport());
 	return 1;
 }
 

@@ -2,11 +2,11 @@
 #include "common_headers.h"
 
 #include "LuaIInputEventHandler.h"
-#include "LuaClassWrapper.h"
 #include "LuaKeyboardEvents.h"
 #include "LuaMouseEvents.h"
 #include "LuaJoystickEvents.h"
 #include "LuaTouchEvents.h"
+#include "LuaDebug.h"
 #include "LuaNames.h"
 #include "InputEvents.h"
 
@@ -512,7 +512,7 @@ bool LuaIInputEventHandler::onQuitRequest(lua_State *L)
 			if (lua_isboolean(L, -1) == false)
 				LOGW("Expecting a boolean at index -1");
 			else
-				shouldQuit = LuaUtils::retrieve<bool>(L, -1);
+				shouldQuit = lua_toboolean(L, -1);
 		}
 	}
 	else

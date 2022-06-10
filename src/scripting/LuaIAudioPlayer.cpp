@@ -1,5 +1,5 @@
 #include "LuaIAudioPlayer.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaVector3Utils.h"
 #include "LuaUtils.h"
 #include "IAudioPlayer.h"
@@ -84,226 +84,266 @@ void LuaIAudioPlayer::exposeFunctions(lua_State *L)
 
 int LuaIAudioPlayer::sourceId(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	const unsigned int sourceId = audioPlayer->sourceId();
-	LuaUtils::push(L, sourceId);
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->sourceId());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaIAudioPlayer::bufferId(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	const unsigned int bufferId = audioPlayer->bufferId();
-	LuaUtils::push(L, bufferId);
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->bufferId());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaIAudioPlayer::bytesPerSample(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	const int bytesPerSample = audioPlayer->numChannels();
-	LuaUtils::push(L, bytesPerSample);
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->bytesPerSample());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaIAudioPlayer::numChannels(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	const int numChannels = audioPlayer->numChannels();
-	LuaUtils::push(L, numChannels);
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->numChannels());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaIAudioPlayer::frequency(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	const int frequency = audioPlayer->frequency();
-	LuaUtils::push(L, frequency);
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->frequency());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaIAudioPlayer::numSamples(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	const unsigned long numSamples = audioPlayer->numSamples();
-	LuaUtils::push(L, static_cast<uint64_t>(numSamples));
+	if (audioPlayer)
+		LuaUtils::push(L, static_cast<uint64_t>(audioPlayer->numSamples()));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaIAudioPlayer::duration(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	const float duration = audioPlayer->duration();
-	LuaUtils::push(L, duration);
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->duration());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaIAudioPlayer::bufferSize(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	const unsigned long bufferSize = audioPlayer->bufferSize();
-	LuaUtils::push(L, static_cast<uint64_t>(bufferSize));
+	if (audioPlayer)
+		LuaUtils::push(L, static_cast<uint64_t>(audioPlayer->bufferSize()));
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaIAudioPlayer::sampleOffset(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	const int sampleOffset = audioPlayer->sampleOffset();
-	LuaUtils::push(L, sampleOffset);
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->sampleOffset());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaIAudioPlayer::setSampleOffset(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -2);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -2);
 	const int sampleOffset = LuaUtils::retrieve<int>(L, -1);
 
-	audioPlayer->setSampleOffset(sampleOffset);
+	if (audioPlayer)
+		audioPlayer->setSampleOffset(sampleOffset);
 
 	return 0;
 }
 
 int LuaIAudioPlayer::play(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	audioPlayer->play();
+	if (audioPlayer)
+		audioPlayer->play();
 
 	return 0;
 }
 
 int LuaIAudioPlayer::pause(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	audioPlayer->pause();
+	if (audioPlayer)
+		audioPlayer->pause();
 
 	return 0;
 }
 
 int LuaIAudioPlayer::stop(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	audioPlayer->stop();
+	if (audioPlayer)
+		audioPlayer->stop();
 
 	return 0;
 }
 
 int LuaIAudioPlayer::isPlaying(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	const bool isPlaying = audioPlayer->isPlaying();
-	LuaUtils::push(L, isPlaying);
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->isPlaying());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaIAudioPlayer::isPaused(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	const bool isPaused = audioPlayer->isPaused();
-	LuaUtils::push(L, isPaused);
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->isPaused());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaIAudioPlayer::isStopped(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	const bool isStopped = audioPlayer->isStopped();
-	LuaUtils::push(L, isStopped);
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->isStopped());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaIAudioPlayer::isLooping(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	const bool isLooping = audioPlayer->isLooping();
-	LuaUtils::push(L, isLooping);
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->isLooping());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaIAudioPlayer::setLooping(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -2);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -2);
 	const bool isLooping = LuaUtils::retrieve<bool>(L, -1);
 
-	audioPlayer->setLooping(isLooping);
+	if (audioPlayer)
+		audioPlayer->setLooping(isLooping);
 
 	return 0;
 }
 
 int LuaIAudioPlayer::gain(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	const float gain = audioPlayer->gain();
-	LuaUtils::push(L, gain);
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->gain());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaIAudioPlayer::setGain(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -2);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -2);
 	const float gain = LuaUtils::retrieve<float>(L, -1);
 
-	audioPlayer->setGain(gain);
+	if (audioPlayer)
+		audioPlayer->setGain(gain);
 
 	return 0;
 }
 
 int LuaIAudioPlayer::pitch(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	const float pitch = audioPlayer->pitch();
-	LuaUtils::push(L, pitch);
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->pitch());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaIAudioPlayer::setPitch(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -2);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -2);
 	const float pitch = LuaUtils::retrieve<float>(L, -1);
 
-	audioPlayer->setPitch(pitch);
+	if (audioPlayer)
+		audioPlayer->setPitch(pitch);
 
 	return 0;
 }
 
 int LuaIAudioPlayer::position(lua_State *L)
 {
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, -1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
 
-	LuaVector3fUtils::push(L, audioPlayer->position());
+	if (audioPlayer)
+		LuaVector3fUtils::push(L, audioPlayer->position());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
@@ -312,9 +352,10 @@ int LuaIAudioPlayer::setPosition(lua_State *L)
 {
 	int vectorIndex = 0;
 	const Vector3f pos = LuaVector3fUtils::retrieve(L, -1, vectorIndex);
-	IAudioPlayer *audioPlayer = LuaClassWrapper<IAudioPlayer>::unwrapUserData(L, vectorIndex - 1);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, vectorIndex - 1);
 
-	audioPlayer->setPosition(pos);
+	if (audioPlayer)
+		audioPlayer->setPosition(pos);
 
 	return 0;
 }

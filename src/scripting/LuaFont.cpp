@@ -1,5 +1,5 @@
 #include "LuaFont.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaVector2Utils.h"
 #include "LuaUtils.h"
@@ -74,53 +74,84 @@ int LuaFont::newObject(lua_State *L)
 
 int LuaFont::texture(lua_State *L)
 {
-	Font *font = LuaClassWrapper<Font>::unwrapUserData(L, -1);
-	LuaClassWrapper<Texture>::pushUntrackedUserData(L, font->texture());
+	Font *font = LuaUntrackedUserData<Font>::retrieve(L, -1);
+
+	if (font)
+		LuaUntrackedUserData<Texture>::push(L, font->texture());
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 
 int LuaFont::setTexture(lua_State *L)
 {
-	Font *font = LuaClassWrapper<Font>::unwrapUserData(L, -2);
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+	Font *font = LuaUntrackedUserData<Font>::retrieve(L, -2);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieveOrNil(L, -1);
 
-	font->setTexture(texture);
+	if (font)
+		font->setTexture(texture);
 
 	return 0;
 }
 
 int LuaFont::lineHeight(lua_State *L)
 {
-	Font *font = LuaClassWrapper<Font>::unwrapUserData(L, -1);
-	LuaUtils::push(L, font->lineHeight());
+	Font *font = LuaUntrackedUserData<Font>::retrieve(L, -1);
+
+	if (font)
+		LuaUtils::push(L, font->lineHeight());
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 
 int LuaFont::base(lua_State *L)
 {
-	Font *font = LuaClassWrapper<Font>::unwrapUserData(L, -1);
-	LuaUtils::push(L, font->base());
+	Font *font = LuaUntrackedUserData<Font>::retrieve(L, -1);
+
+	if (font)
+		LuaUtils::push(L, font->base());
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 
 int LuaFont::textureSize(lua_State *L)
 {
-	Font *font = LuaClassWrapper<Font>::unwrapUserData(L, -1);
-	LuaVector2iUtils::push(L, font->textureSize());
+	Font *font = LuaUntrackedUserData<Font>::retrieve(L, -1);
+
+	if (font)
+		LuaVector2iUtils::push(L, font->textureSize());
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 
 int LuaFont::numGlyphs(lua_State *L)
 {
-	Font *font = LuaClassWrapper<Font>::unwrapUserData(L, -1);
-	LuaUtils::push(L, font->numGlyphs());
+	Font *font = LuaUntrackedUserData<Font>::retrieve(L, -1);
+
+	if (font)
+		LuaUtils::push(L, font->numGlyphs());
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 
 int LuaFont::numKernings(lua_State *L)
 {
-	Font *font = LuaClassWrapper<Font>::unwrapUserData(L, -1);
-	LuaUtils::push(L, font->numKernings());
+	Font *font = LuaUntrackedUserData<Font>::retrieve(L, -1);
+
+	if (font)
+		LuaUtils::push(L, font->numKernings());
+	else
+		LuaUtils::pushNil(L);
+
 	return 1;
 }
 

@@ -1,5 +1,5 @@
 #include "LuaAudioBufferPlayer.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaIAudioPlayer.h"
 #include "LuaUtils.h"
@@ -50,7 +50,7 @@ void LuaAudioBufferPlayer::release(void *object)
 
 int LuaAudioBufferPlayer::newObject(lua_State *L)
 {
-	AudioBuffer *audioBuffer = LuaClassWrapper<AudioBuffer>::unwrapUserDataOrNil(L, -1);
+	AudioBuffer *audioBuffer = LuaUntrackedUserData<AudioBuffer>::retrieveOrNil(L, -1);
 
 	LuaClassTracker<AudioBufferPlayer>::newObject(L, audioBuffer);
 
@@ -59,19 +59,23 @@ int LuaAudioBufferPlayer::newObject(lua_State *L)
 
 int LuaAudioBufferPlayer::audioBuffer(lua_State *L)
 {
-	AudioBufferPlayer *audioBufferPlayer = LuaClassWrapper<AudioBufferPlayer>::unwrapUserData(L, -1);
+	AudioBufferPlayer *audioBufferPlayer = LuaUntrackedUserData<AudioBufferPlayer>::retrieve(L, -1);
 
-	LuaClassWrapper<AudioBuffer>::pushUntrackedUserData(L, audioBufferPlayer->audioBuffer());
+	if (audioBufferPlayer)
+		LuaUntrackedUserData<AudioBuffer>::push(L, audioBufferPlayer->audioBuffer());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaAudioBufferPlayer::setAudioBuffer(lua_State *L)
 {
-	AudioBufferPlayer *audioBufferPlayer = LuaClassWrapper<AudioBufferPlayer>::unwrapUserData(L, -2);
-	AudioBuffer *audioBuffer = LuaClassWrapper<AudioBuffer>::unwrapUserData(L, -1);
+	AudioBufferPlayer *audioBufferPlayer = LuaUntrackedUserData<AudioBufferPlayer>::retrieve(L, -2);
+	AudioBuffer *audioBuffer = LuaUntrackedUserData<AudioBuffer>::retrieveOrNil(L, -1);
 
-	audioBufferPlayer->setAudioBuffer(audioBuffer);
+	if (audioBufferPlayer)
+		audioBufferPlayer->setAudioBuffer(audioBuffer);
 
 	return 0;
 }

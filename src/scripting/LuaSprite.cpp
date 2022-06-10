@@ -1,5 +1,5 @@
 #include "LuaSprite.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaBaseSprite.h"
 #include "LuaUtils.h"
@@ -50,8 +50,8 @@ void LuaSprite::exposeFunctions(lua_State *L)
 
 int LuaSprite::newObject(lua_State *L)
 {
-	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserDataOrNil(L, -4);
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserDataOrNil(L, -3);
+	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieveOrNil(L, -4);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieveOrNil(L, -3);
 	const float x = LuaUtils::retrieve<float>(L, -2);
 	const float y = LuaUtils::retrieve<float>(L, -1);
 
@@ -62,9 +62,12 @@ int LuaSprite::newObject(lua_State *L)
 
 int LuaSprite::cloneNode(lua_State *L)
 {
-	const Sprite *sprite = LuaClassWrapper<Sprite>::unwrapUserData(L, -1);
+	const Sprite *sprite = LuaUntrackedUserData<Sprite>::retrieve(L, -1);
 
-	LuaClassTracker<Sprite>::cloneNode(L, *sprite);
+	if (sprite)
+		LuaClassTracker<Sprite>::cloneNode(L, *sprite);
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }

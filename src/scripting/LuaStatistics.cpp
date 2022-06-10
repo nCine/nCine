@@ -1,4 +1,5 @@
 #include <nctl/String.h>
+#include <nctl/HashMapIterator.h>
 #include "LuaStatistics.h"
 #include "LuaStateManager.h"
 #include "tracy.h"
@@ -30,8 +31,9 @@ void LuaStatistics::update()
 	for (const LuaStateManager *manager : managers_)
 	{
 		numTrackedUserDatas_ += manager->trackedUserDatas_.size();
-		for (const LuaStateManager::UserDataWrapper &wrapper : manager->trackedUserDatas_)
-			numTypedUserDatas_[wrapper.type]++;
+		const nctl::HashMap<void *, LuaTypes::UserDataType> &hashMap = manager->trackedUserDatas_;
+		for (nctl::HashMap<void *, LuaTypes::UserDataType>::ConstIterator i = hashMap.begin(); i != hashMap.end(); ++i)
+			numTypedUserDatas_[i.value()]++;
 	}
 }
 

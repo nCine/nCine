@@ -1,5 +1,5 @@
 #include "LuaParticleSystem.h"
-#include "LuaClassWrapper.h"
+#include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaSceneNode.h"
 #include "LuaRectUtils.h"
@@ -356,9 +356,9 @@ namespace {
 
 int LuaParticleSystem::newObject(lua_State *L)
 {
-	SceneNode *parent = LuaClassWrapper<SceneNode>::unwrapUserDataOrNil(L, -4);
+	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieveOrNil(L, -4);
 	const unsigned int count = LuaUtils::retrieve<uint32_t>(L, -3);
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -2);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -2);
 	const Recti texRect = LuaRectiUtils::retrieveTable(L, -1);
 
 	LuaClassTracker<ParticleSystem>::newObject(L, parent, count, texture, texRect);
@@ -368,135 +368,158 @@ int LuaParticleSystem::newObject(lua_State *L)
 
 int LuaParticleSystem::cloneNode(lua_State *L)
 {
-	const ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -1);
+	const ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -1);
 
-	LuaClassTracker<ParticleSystem>::cloneNode(L, *particleSys);
+	if (particleSys)
+		LuaClassTracker<ParticleSystem>::cloneNode(L, *particleSys);
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaParticleSystem::addColorAffector(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -2);
 	nctl::UniquePtr<ColorAffector> affector = retrieveColorSteps(L, -1);
 
-	particleSys->addAffector(nctl::move(affector));
+	if (particleSys)
+		particleSys->addAffector(nctl::move(affector));
 
 	return 0;
 }
 
 int LuaParticleSystem::addSizeAffector(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -3);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -3);
 	const float baseScale = LuaUtils::retrieve<float>(L, -2);
 	nctl::UniquePtr<SizeAffector> affector = retrieveSizeSteps(L, -1, baseScale);
 
-	particleSys->addAffector(nctl::move(affector));
+	if (particleSys)
+		particleSys->addAffector(nctl::move(affector));
 
 	return 0;
 }
 
 int LuaParticleSystem::addRotationAffector(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -2);
 	nctl::UniquePtr<RotationAffector> affector = retrieveRotationSteps(L, -1);
 
-	particleSys->addAffector(nctl::move(affector));
+	if (particleSys)
+		particleSys->addAffector(nctl::move(affector));
 
 	return 0;
 }
 
 int LuaParticleSystem::addPositionAffector(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -2);
 	nctl::UniquePtr<PositionAffector> affector = retrievePositionSteps(L, -1);
 
-	particleSys->addAffector(nctl::move(affector));
+	if (particleSys)
+		particleSys->addAffector(nctl::move(affector));
 
 	return 0;
 }
 
 int LuaParticleSystem::addVelocityAffector(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -2);
 	nctl::UniquePtr<VelocityAffector> affector = retrieveVelocitySteps(L, -1);
 
-	particleSys->addAffector(nctl::move(affector));
+	if (particleSys)
+		particleSys->addAffector(nctl::move(affector));
 
 	return 0;
 }
 
 int LuaParticleSystem::clearAffectors(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -1);
-	particleSys->clearAffectors();
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -1);
+
+	if (particleSys)
+		particleSys->clearAffectors();
+
 	return 0;
 }
 
 int LuaParticleSystem::emitParticles(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -2);
 	ParticleInitializer init;
 	retrieveParticleInitializer(L, -1, init);
 
-	particleSys->emitParticles(init);
+	if (particleSys)
+		particleSys->emitParticles(init);
 
 	return 0;
 }
 
 int LuaParticleSystem::killParticles(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -1);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -1);
 
-	particleSys->killParticles();
+	if (particleSys)
+		particleSys->killParticles();
 
 	return 0;
 }
 
 int LuaParticleSystem::inLocalSpace(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -1);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -1);
 
-	const bool inLocalSpace = particleSys->inLocalSpace();
-	LuaUtils::push(L, inLocalSpace);
+	if (particleSys)
+		LuaUtils::push(L, particleSys->inLocalSpace());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaParticleSystem::setInLocalSpace(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -2);
 	const bool inLocalSpace = LuaUtils::retrieve<bool>(L, -1);
 
-	particleSys->setInLocalSpace(inLocalSpace);
+	if (particleSys)
+		particleSys->setInLocalSpace(inLocalSpace);
 
 	return 0;
 }
 
 int LuaParticleSystem::numParticles(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -1);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -1);
 
-	LuaUtils::push(L, particleSys->numParticles());
+	if (particleSys)
+		LuaUtils::push(L, particleSys->numParticles());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaParticleSystem::numAliveParticles(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -1);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -1);
 
-	LuaUtils::push(L, particleSys->numAliveParticles());
+	if (particleSys)
+		LuaUtils::push(L, particleSys->numAliveParticles());
+	else
+		LuaUtils::pushNil(L);
 
 	return 1;
 }
 
 int LuaParticleSystem::setTexture(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
-	Texture *texture = LuaClassWrapper<Texture>::unwrapUserData(L, -1);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -2);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieveOrNil(L, -1);
 
-	particleSys->setTexture(texture);
+	if (particleSys)
+		particleSys->setTexture(texture);
 
 	return 0;
 }
@@ -505,9 +528,10 @@ int LuaParticleSystem::setTexRect(lua_State *L)
 {
 	int rectIndex = 0;
 	const Recti texRect = LuaRectiUtils::retrieve(L, -1, rectIndex);
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, rectIndex - 1);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, rectIndex - 1);
 
-	particleSys->setTexRect(texRect);
+	if (particleSys)
+		particleSys->setTexRect(texRect);
 
 	return 0;
 }
@@ -516,60 +540,66 @@ int LuaParticleSystem::setAnchorPoint(lua_State *L)
 {
 	int vectorIndex = 0;
 	const Vector2f anchorPoint = LuaVector2fUtils::retrieve(L, -1, vectorIndex);
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, vectorIndex - 1);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, vectorIndex - 1);
 
-	particleSys->setAnchorPoint(anchorPoint);
+	if (particleSys)
+		particleSys->setAnchorPoint(anchorPoint);
 
 	return 0;
 }
 
 int LuaParticleSystem::setFlippedX(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -2);
 	const bool flippedX = LuaUtils::retrieve<bool>(L, -1);
 
-	particleSys->setFlippedX(flippedX);
+	if (particleSys)
+		particleSys->setFlippedX(flippedX);
 
 	return 0;
 }
 
 int LuaParticleSystem::setFlippedY(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -2);
 	const bool flippedY = LuaUtils::retrieve<bool>(L, -1);
 
-	particleSys->setFlippedY(flippedY);
+	if (particleSys)
+		particleSys->setFlippedY(flippedY);
 
 	return 0;
 }
 
 int LuaParticleSystem::setBlendingPreset(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -2);
 	const DrawableNode::BlendingPreset blendingPreset = static_cast<DrawableNode::BlendingPreset>(LuaUtils::retrieve<int64_t>(L, -1));
 
-	particleSys->setBlendingPreset(blendingPreset);
+	if (particleSys)
+		particleSys->setBlendingPreset(blendingPreset);
 
 	return 0;
 }
 
 int LuaParticleSystem::setBlendingFactors(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -3);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -3);
 	const DrawableNode::BlendingFactor srcBlendingFactor = static_cast<DrawableNode::BlendingFactor>(LuaUtils::retrieve<int64_t>(L, -2));
 	const DrawableNode::BlendingFactor destBlendingFactor = static_cast<DrawableNode::BlendingFactor>(LuaUtils::retrieve<int64_t>(L, -1));
 
-	particleSys->setBlendingFactors(srcBlendingFactor, destBlendingFactor);
+	if (particleSys)
+		particleSys->setBlendingFactors(srcBlendingFactor, destBlendingFactor);
 
 	return 0;
 }
 
 int LuaParticleSystem::setLayer(lua_State *L)
 {
-	ParticleSystem *particleSys = LuaClassWrapper<ParticleSystem>::unwrapUserData(L, -2);
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -2);
 	const uint32_t layer = LuaUtils::retrieve<uint32_t>(L, -1);
 
-	particleSys->setLayer(static_cast<uint16_t>(layer));
+	if (particleSys)
+		particleSys->setLayer(static_cast<uint16_t>(layer));
 
 	return 0;
 }
