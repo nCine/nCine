@@ -61,12 +61,18 @@ bool AudioStreamPlayer::loadFromFile(const char *filename)
 
 void AudioStreamPlayer::play()
 {
+	IAudioDevice &device = theServiceLocator().audioDevice();
+	const bool canRegisterPlayer = (device.numPlayers() < device.maxNumPlayers());
+
 	switch (state_)
 	{
 		case PlayerState::INITIAL:
 		case PlayerState::STOPPED:
 		{
-			const unsigned int source = theServiceLocator().audioDevice().nextAvailableSource();
+			if (canRegisterPlayer == false)
+				break;
+
+			const unsigned int source = device.nextAvailableSource();
 			if (source == IAudioDevice::UnavailableSource)
 			{
 				LOGW("No more available audio sources for playing");
@@ -84,17 +90,20 @@ void AudioStreamPlayer::play()
 			alSourcePlay(sourceId_);
 			state_ = PlayerState::PLAYING;
 
-			theServiceLocator().audioDevice().registerPlayer(this);
+			device.registerPlayer(this);
 			break;
 		}
 		case PlayerState::PLAYING:
 			break;
 		case PlayerState::PAUSED:
 		{
+			if (canRegisterPlayer == false)
+				break;
+
 			alSourcePlay(sourceId_);
 			state_ = PlayerState::PLAYING;
 
-			theServiceLocator().audioDevice().registerPlayer(this);
+			device.registerPlayer(this);
 			break;
 		}
 	}

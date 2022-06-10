@@ -17,6 +17,7 @@ class LuaIAudioDevice
 	static int gain(lua_State *L);
 	static int setGain(lua_State *L);
 
+	static int maxNumPlayers(lua_State *L);
 	static int numPlayers(lua_State *L);
 	static int player(lua_State *L);
 

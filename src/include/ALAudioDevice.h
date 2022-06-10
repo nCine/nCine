@@ -22,6 +22,7 @@ class ALAudioDevice : public IAudioDevice
 	float gain() const override { return gain_; }
 	void setGain(float gain) override;
 
+	inline unsigned int maxNumPlayers() const override { return MaxSources; }
 	inline unsigned int numPlayers() const override { return players_.size(); }
 	const IAudioPlayer *player(unsigned int index) const override;
 

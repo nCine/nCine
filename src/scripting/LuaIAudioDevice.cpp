@@ -16,7 +16,8 @@ namespace IAudioDevice {
 	static const char *gain = "get_gain";
 	static const char *setGain = "set_gain";
 
-	static const char *numPlayers = "num_players";
+	static const char *maxNumPlayers = "get_max_num_players";
+	static const char *numPlayers = "get_num_players";
 	static const char *player = "get_player";
 
 	static const char *pausePlayers = "pause_players";
@@ -39,6 +40,7 @@ void LuaIAudioDevice::expose(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::gain, gain);
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::setGain, setGain);
 
+	LuaUtils::addFunction(L, LuaNames::IAudioDevice::maxNumPlayers, maxNumPlayers);
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::numPlayers, numPlayers);
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::player, player);
 
@@ -73,6 +75,14 @@ int LuaIAudioDevice::setGain(lua_State *L)
 	theServiceLocator().audioDevice().setGain(gain);
 
 	return 0;
+}
+
+int LuaIAudioDevice::maxNumPlayers(lua_State *L)
+{
+	const unsigned int maxNumPlayers = theServiceLocator().audioDevice().maxNumPlayers();
+	LuaUtils::push(L, maxNumPlayers);
+
+	return 1;
 }
 
 int LuaIAudioDevice::numPlayers(lua_State *L)

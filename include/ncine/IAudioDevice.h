@@ -27,6 +27,8 @@ class DLL_PUBLIC IAudioDevice
 	/// Sets the listener gain value
 	virtual void setGain(float gain) = 0;
 
+	/// Returns the maximum number of active players
+	virtual unsigned int maxNumPlayers() const = 0;
 	/// Returns the number of active players
 	virtual unsigned int numPlayers() const = 0;
 	/// Returns the specified running player object
@@ -65,6 +67,7 @@ class DLL_PUBLIC NullAudioDevice : public IAudioDevice
 	float gain() const override { return 1.0f; }
 	void setGain(float gain) override {}
 
+	unsigned int maxNumPlayers() const override { return 0; }
 	unsigned int numPlayers() const override { return 0; }
 	const IAudioPlayer *player(unsigned int index) const override { return nullptr; }
 

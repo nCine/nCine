@@ -69,15 +69,18 @@ void AudioBufferPlayer::setAudioBuffer(AudioBuffer *audioBuffer)
 
 void AudioBufferPlayer::play()
 {
+	IAudioDevice &device = theServiceLocator().audioDevice();
+	const bool canRegisterPlayer = (device.numPlayers() < device.maxNumPlayers());
+
 	switch (state_)
 	{
 		case PlayerState::INITIAL:
 		case PlayerState::STOPPED:
 		{
-			if (audioBuffer_ == nullptr)
+			if (audioBuffer_ == nullptr || canRegisterPlayer == false)
 				break;
 
-			const unsigned int source = theServiceLocator().audioDevice().nextAvailableSource();
+			const unsigned int source = device.nextAvailableSource();
 			if (source == IAudioDevice::UnavailableSource)
 			{
 				LOGW("No more available audio sources for playing");
@@ -96,17 +99,20 @@ void AudioBufferPlayer::play()
 			alSourcePlay(sourceId_);
 			state_ = PlayerState::PLAYING;
 
-			theServiceLocator().audioDevice().registerPlayer(this);
+			device.registerPlayer(this);
 			break;
 		}
 		case PlayerState::PLAYING:
 			break;
 		case PlayerState::PAUSED:
 		{
+			if (canRegisterPlayer == false)
+				break;
+
 			alSourcePlay(sourceId_);
 			state_ = PlayerState::PLAYING;
 
-			theServiceLocator().audioDevice().registerPlayer(this);
+			device.registerPlayer(this);
 			break;
 		}
 	}
