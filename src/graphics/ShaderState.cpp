@@ -12,7 +12,7 @@ namespace {
 	GLUniformCache *retrieveUniform(Material &material, const char *blockName, const char *name)
 	{
 		GLUniformCache *uniform = nullptr;
-		if (blockName)
+		if (blockName != nullptr && blockName[0] != '\0')
 		{
 			GLUniformBlockCache *uniformBlock = material.uniformBlock(blockName);
 			if (uniformBlock)

@@ -257,6 +257,8 @@ if(LUA_FOUND)
 			${NCINE_ROOT}/src/include/LuaParticleSystem.h
 			${NCINE_ROOT}/src/include/LuaViewport.h
 			${NCINE_ROOT}/src/include/LuaCamera.h
+			${NCINE_ROOT}/src/include/LuaShader.h
+			${NCINE_ROOT}/src/include/LuaShaderState.h
 		)
 
 		list(APPEND SOURCES
@@ -287,6 +289,8 @@ if(LUA_FOUND)
 			${NCINE_ROOT}/src/scripting/LuaParticleSystem.cpp
 			${NCINE_ROOT}/src/scripting/LuaViewport.cpp
 			${NCINE_ROOT}/src/scripting/LuaCamera.cpp
+			${NCINE_ROOT}/src/scripting/LuaShader.cpp
+			${NCINE_ROOT}/src/scripting/LuaShaderState.cpp
 		)
 
 		if(OPENAL_FOUND)
