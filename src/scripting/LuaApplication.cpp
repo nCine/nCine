@@ -22,14 +22,14 @@ namespace Application {
 	static const char *guiSettings = "get_gui_settings";
 	static const char *setGuiSettings = "set_gui_settings";
 
-	static const char *rootNode = "rootnode";
-	static const char *rootViewport = "root_viewport";
-	static const char *interval = "interval";
-	static const char *numFrames = "num_frames";
+	static const char *rootNode = "get_rootnode";
+	static const char *rootViewport = "get_root_viewport";
+	static const char *interval = "get_interval";
+	static const char *numFrames = "get_num_frames";
 
 	static const char *width = "get_width";
 	static const char *height = "get_height";
-	static const char *screenDimensions = "screen_dimensions";
+	static const char *resolution = "get_resolution";
 
 	static const char *isSuspended = "is_suspended";
 	static const char *setSuspended = "set_suspended";
@@ -85,7 +85,7 @@ void LuaApplication::expose(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::Application::width, width);
 	LuaUtils::addFunction(L, LuaNames::Application::height, height);
-	LuaUtils::addFunction(L, LuaNames::Application::screenDimensions, screenDimensions);
+	LuaUtils::addFunction(L, LuaNames::Application::resolution, resolution);
 
 	LuaUtils::addFunction(L, LuaNames::Application::isSuspended, isSuspended);
 	LuaUtils::addFunction(L, LuaNames::Application::setSuspended, setSuspended);
@@ -231,11 +231,9 @@ int LuaApplication::height(lua_State *L)
 	return 1;
 }
 
-int LuaApplication::screenDimensions(lua_State *L)
+int LuaApplication::resolution(lua_State *L)
 {
-	const Vector2f dimensions(theApplication().width(), theApplication().height());
-	LuaVector2fUtils::push(L, dimensions);
-
+	LuaVector2fUtils::push(L, theApplication().resolution());
 	return 1;
 }
 

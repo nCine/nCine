@@ -29,10 +29,10 @@ function ncine.on_init()
 	end
 	sound_file = "coins.ogg"
 
-	local rootnode = nc.application.rootnode()
+	local rootnode = nc.application.get_rootnode()
 
-	local screen = nc.application.screen_dimensions()
-	pos_ = {x = screen.x * 0.5, y = screen.y * 0.5}
+	local resolution = nc.application.get_resolution()
+	pos_ = {x = resolution.x * 0.5, y = resolution.y * 0.5}
 	angle_ = 0
 
 	font_ = nc.font.new(nc.fs.get_datapath().."fonts/DroidSans32_256.fnt",
@@ -40,7 +40,7 @@ function ncine.on_init()
 	textnode_ = nc.textnode.new(rootnode, font_, 256)
 	nc.textnode.set_string(textnode_, "This is script.lua")
 	nc.textnode.set_layer(textnode_, 100)
-	nc.textnode.set_position(textnode_, screen.x * 0.25, screen.y * 0.25)
+	nc.textnode.set_position(textnode_, resolution.x * 0.25, resolution.y * 0.25)
 	nc.textnode.set_color(textnode_, 1.0, 0.0, 0.0, 1.0)
 
 	local color = nc.textnode.get_color(textnode_)
@@ -51,15 +51,15 @@ function ncine.on_init()
 	texture2_ = nc.texture.new(nc.fs.get_datapath().."textures/"..texture2_file)
 	texture3_ = nc.texture.new(nc.fs.get_datapath().."textures/"..texture3_file)
 
-	sprite_ = nc.sprite.new(rootnode, texture2_, screen.x * 0.2, screen.y * 0.5)
-	meshsprite_ = nc.mesh_sprite.new(rootnode, texture_, screen.x * 0.8, screen.y * 0.5)
+	sprite_ = nc.sprite.new(rootnode, texture2_, resolution.x * 0.2, resolution.y * 0.5)
+	meshsprite_ = nc.mesh_sprite.new(rootnode, texture_, resolution.x * 0.8, resolution.y * 0.5)
 	nc.mesh_sprite.create_vertices_from_texels(
 		meshsprite_, {{x = 0, y = 0}, {x = 128, y = 0}, {x = 0, y = 128}, {x = 128, y = 128}}, nc.texture_cut_mode.RESIZE
 	)
 
 	local tex_rect3 = {x = 0, y = 0, w = nc.texture.get_width(texture3_), h = nc.texture.get_height(texture3_)}
 	particlesys_ = nc.particle_system.new(rootnode, 128, texture3_, tex_rect3)
-	nc.particle_system.set_position(particlesys_, screen.x * 0.5, screen.y * 0.5)
+	nc.particle_system.set_position(particlesys_, resolution.x * 0.5, resolution.y * 0.5)
 	nc.particle_system.add_color_affector(particlesys_, {
 		{0.0, {r = 1.0, g = 0.0, b = 0.0, a = 1.0}},
 		{0.5, {r = 0.0, g = 1.0, b = 0.0, a = 0.5}},
@@ -80,7 +80,7 @@ function ncine.on_init()
 end
 
 function ncine.on_frame_start()
-	angle_ = angle_ + 100 * nc.application.interval()
+	angle_ = angle_ + 100 * nc.application.get_interval()
 
 	local newpos = {x = 0, y = 0}
 	newpos.x = pos_.x + 200 * math.sin(math.rad(angle_))

@@ -112,13 +112,15 @@ class DLL_PUBLIC Application
 	inline float width() const { return static_cast<float>(gfxDevice_->width()); }
 	/// Returns the screen height as a float number
 	inline float height() const { return static_cast<float>(gfxDevice_->height()); }
+	/// Returns the screen resolution as a `Vector2f` object
+	inline Vector2f resolution() const { return Vector2f(width(), height()); }
 
 	/// Returns the screen width as an integer number
 	inline int widthInt() const { return gfxDevice_->width(); }
 	/// Returns the screen height as an integer number
 	inline int heightInt() const { return gfxDevice_->height(); }
 	/// Returns the screen resolution as a `Vector2i` object
-	inline Vector2i resolution() const { return gfxDevice_->resolution(); }
+	inline Vector2i resolutionInt() const { return gfxDevice_->resolution(); }
 
 	/// Resizes the root viewport if it exists
 	void resizeRootViewport(int width, int height);

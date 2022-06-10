@@ -17,6 +17,8 @@ class LuaEventHandler :
 	void onPreInit(AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;
+	void onPostUpdate() override;
+	void onFrameEnd() override;
 	void onShutdown() override;
 	void onSuspend() override;
 	void onResume() override;

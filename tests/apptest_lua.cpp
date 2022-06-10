@@ -79,6 +79,16 @@ void MyEventHandler::onFrameStart()
 	nc::LuaIAppEventHandler::onFrameStart(luaState_.state());
 }
 
+void MyEventHandler::onPostUpdate()
+{
+	nc::LuaIAppEventHandler::onPostUpdate(luaState_.state());
+}
+
+void MyEventHandler::onFrameEnd()
+{
+	nc::LuaIAppEventHandler::onFrameEnd(luaState_.state());
+}
+
 void MyEventHandler::onShutdown()
 {
 	nc::LuaIAppEventHandler::onShutdown(luaState_.state());

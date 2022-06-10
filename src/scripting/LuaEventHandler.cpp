@@ -106,6 +106,16 @@ void LuaEventHandler::onFrameStart()
 	LuaIAppEventHandler::onFrameStart(luaState_->state());
 }
 
+void LuaEventHandler::onPostUpdate()
+{
+	LuaIAppEventHandler::onPostUpdate(luaState_->state());
+}
+
+void LuaEventHandler::onFrameEnd()
+{
+	LuaIAppEventHandler::onFrameEnd(luaState_->state());
+}
+
 void LuaEventHandler::onShutdown()
 {
 	LuaIAppEventHandler::onShutdown(luaState_->state());

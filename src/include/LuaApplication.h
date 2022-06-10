@@ -28,7 +28,7 @@ class LuaApplication
 
 	static int width(lua_State *L);
 	static int height(lua_State *L);
-	static int screenDimensions(lua_State *L);
+	static int resolution(lua_State *L);
 
 	static int isSuspended(lua_State *L);
 	static int setSuspended(lua_State *L);
