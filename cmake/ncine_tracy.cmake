@@ -1,5 +1,5 @@
 if(NCINE_WITH_TRACY)
-	set(TRACY_VERSION_TAG "v0.8.1" CACHE STRING "The Git release, tag, branch or commit for Tracy")
+	set(TRACY_VERSION_TAG "v0.8.2" CACHE STRING "The Git release, tag, branch or commit for Tracy")
 	# Download release archive (TRUE) or Git repository (FALSE)
 	set(TRACY_DOWNLOAD_ARCHIVE TRUE)
 

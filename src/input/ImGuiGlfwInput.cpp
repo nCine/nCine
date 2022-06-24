@@ -154,6 +154,19 @@ namespace {
 		}
 	}
 
+	int glfwKeyToModifier(int key)
+	{
+		if (key == GLFW_KEY_LEFT_CONTROL || key == GLFW_KEY_RIGHT_CONTROL)
+			return GLFW_MOD_CONTROL;
+		if (key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT)
+			return GLFW_MOD_SHIFT;
+		if (key == GLFW_KEY_LEFT_ALT || key == GLFW_KEY_RIGHT_ALT)
+			return GLFW_MOD_ALT;
+		if (key == GLFW_KEY_LEFT_SUPER || key == GLFW_KEY_RIGHT_SUPER)
+			return GLFW_MOD_SUPER;
+		return 0;
+	}
+
 	void updateKeyModifiers(int mods)
 	{
 		ImGuiIO &io = ImGui::GetIO();
@@ -183,6 +196,8 @@ namespace {
 				key = GLFW_KEY_0 + (keyName[0] - '0');
 			else if (keyName[0] >= 'A' && keyName[0] <= 'Z')
 				key = GLFW_KEY_A + (keyName[0] - 'A');
+			else if (keyName[0] >= 'a' && keyName[0] <= 'z')
+				key = GLFW_KEY_A + (keyName[0] - 'a');
 			else if (const char *p = strchr(charNames, keyName[0]))
 				key = charKeys[p - charNames];
 		}
@@ -346,6 +361,9 @@ void ImGuiGlfwInput::keyCallback(GLFWwindow *window, int keycode, int scancode, 
 	if (inputEnabled_ == false)
 		return;
 
+	// Workaround: X11 does not include current pressed/released modifier key in 'mods' flags. https://github.com/glfw/glfw/issues/1630
+	if (int keycodeToMod = glfwKeyToModifier(keycode))
+		mods = (action == GLFW_PRESS) ? (mods | keycodeToMod) : (mods & ~keycodeToMod);
 	updateKeyModifiers(mods);
 
 	keycode = translateUntranslatedKey(keycode, scancode);

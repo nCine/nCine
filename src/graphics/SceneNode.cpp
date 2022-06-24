@@ -142,6 +142,8 @@ bool SceneNode::addChildNode(SceneNode *childNode)
 	children_.pushBack(childNode);
 	childNode->childOrderIndex_ = children_.size() - 1;
 	childNode->parent_ = this;
+	childNode->dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	childNode->dirtyBits_.set(DirtyBitPositions::AabbBit);
 
 	return true;
 }

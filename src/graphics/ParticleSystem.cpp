@@ -231,6 +231,10 @@ void ParticleSystem::update(float interval)
 		}
 	}
 
+	// A ParticleSystem does not have the `updateRenderCommand()` method to reset the flags
+	dirtyBits_.reset(DirtyBitPositions::TransformationBit);
+	dirtyBits_.reset(DirtyBitPositions::ColorBit);
+
 	lastFrameUpdated_ = theApplication().numFrames();
 
 #ifdef WITH_TRACY

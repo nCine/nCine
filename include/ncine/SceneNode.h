@@ -199,7 +199,7 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Sets the delete children on destruction flag
 	inline void setDeleteChildrenOnDestruction(bool shouldDeleteChildrenOnDestruction) { shouldDeleteChildrenOnDestruction_ = shouldDeleteChildrenOnDestruction; }
 
-	/// Returns the last frame in which any of the viewports have updtated this node
+	/// Returns the last frame in which any of the viewports have updated this node
 	inline unsigned long int lastFrameUpdated() const { return lastFrameUpdated_; }
 
   protected:

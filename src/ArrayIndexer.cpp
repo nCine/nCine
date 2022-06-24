@@ -98,7 +98,12 @@ void ArrayIndexer::logReport() const
 		if (pointers_[i])
 		{
 			const Object *objPtr = object(i);
-			LOGI_X("%s object (id %u, 0x%x): \"%s\"", objectTypeToString(objPtr->type()), objPtr->id(), pointers_[i], objPtr->name());
+			const char *objName = objPtr->name();
+
+			if (objName)
+				LOGI_X("%s object (id %u, 0x%x): \"%s\"", objectTypeToString(objPtr->type()), objPtr->id(), pointers_[i], objName);
+			else
+				LOGI_X("%s object (id %u, 0x%x)", objectTypeToString(objPtr->type()), objPtr->id(), pointers_[i]);
 		}
 	}
 }

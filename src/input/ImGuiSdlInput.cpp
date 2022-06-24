@@ -157,6 +157,7 @@ namespace {
 
 bool ImGuiSdlInput::inputEnabled_ = true;
 bool ImGuiSdlInput::mouseCanUseGlobalState_ = false;
+unsigned int ImGuiSdlInput::pendingMouseLeaveFrame_ = 0;
 SDL_Window *ImGuiSdlInput::window_ = nullptr;
 unsigned long int ImGuiSdlInput::time_ = 0;
 int ImGuiSdlInput::mouseButtonsDown_ = 0;
@@ -273,6 +274,12 @@ void ImGuiSdlInput::newFrame()
 	io.DeltaTime = time_ > 0 ? static_cast<float>((static_cast<double>(currentTime - time_) / frequency)) : static_cast<float>(1.0f / 60.0f);
 	time_ = currentTime;
 
+	if (pendingMouseLeaveFrame_ && pendingMouseLeaveFrame_ >= ImGui::GetFrameCount() && mouseButtonsDown_ == 0)
+	{
+		io.AddMousePosEvent(-FLT_MAX, -FLT_MAX);
+		pendingMouseLeaveFrame_ = 0;
+	}
+
 	updateMouseData();
 	updateMouseCursor();
 
@@ -315,6 +322,10 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 				mouseButton = 1;
 			else if (event->button.button == SDL_BUTTON_MIDDLE)
 				mouseButton = 2;
+			else if (event->button.button == SDL_BUTTON_X1)
+				mouseButton = 3;
+			else if (event->button.button == SDL_BUTTON_X2)
+				mouseButton = 4;
 			if (mouseButton == -1)
 				break;
 			io.AddMouseButtonEvent(mouseButton, (event->type == SDL_MOUSEBUTTONDOWN));
@@ -338,9 +349,17 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 		}
 		case SDL_WINDOWEVENT:
 		{
-			if (event->window.event == SDL_WINDOWEVENT_LEAVE)
-				io.AddMousePosEvent(-FLT_MAX, -FLT_MAX);
-			if (event->window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
+			// - When capturing mouse, SDL will send a bunch of conflicting LEAVE/ENTER event on every mouse move, but the final ENTER tends to be right.
+			// - However we won't get a correct LEAVE event for a captured window.
+			// - In some cases, when detaching a window from main viewport SDL may send SDL_WINDOWEVENT_ENTER one frame too late,
+			//   causing SDL_WINDOWEVENT_LEAVE on previous frame to interrupt drag operation by clear mouse position. This is why
+			//   we delay process the SDL_WINDOWEVENT_LEAVE events by one frame. See issue #5012 for details.
+			const Uint8 windowEvent = event->window.event;
+			if (windowEvent == SDL_WINDOWEVENT_ENTER)
+				pendingMouseLeaveFrame_ = 0;
+			if (windowEvent == SDL_WINDOWEVENT_LEAVE)
+				pendingMouseLeaveFrame_ = ImGui::GetFrameCount() + 1;
+			if (windowEvent == SDL_WINDOWEVENT_FOCUS_GAINED)
 				io.AddFocusEvent(true);
 			else if (event->window.event == SDL_WINDOWEVENT_FOCUS_LOST)
 				io.AddFocusEvent(false);

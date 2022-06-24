@@ -23,6 +23,7 @@ class ImGuiSdlInput
   private:
 	static bool inputEnabled_;
 	static bool mouseCanUseGlobalState_;
+	static unsigned int pendingMouseLeaveFrame_;
 
 	static SDL_Window *window_;
 	static unsigned long int time_;

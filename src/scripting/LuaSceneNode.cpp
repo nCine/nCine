@@ -50,6 +50,8 @@ namespace SceneNode {
 	static const char *layer = "get_layer";
 	static const char *setLayer = "set_layer";
 
+	static const char *lastFrameUpdated = "get_last_frame_updated";
+
 	static const char *ENABLED = "ENABLED";
 	static const char *DISABLED = "DISABLED";
 	static const char *SAME_AS_PARENT = "SAME_AS_PARENT";
@@ -138,6 +140,8 @@ void LuaSceneNode::exposeFunctions(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::SceneNode::layer, layer);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::setLayer, setLayer);
+
+	LuaUtils::addFunction(L, LuaNames::SceneNode::lastFrameUpdated, lastFrameUpdated);
 }
 
 int LuaSceneNode::newObject(lua_State *L)
@@ -572,6 +576,18 @@ int LuaSceneNode::setLayer(lua_State *L)
 		node->setLayer(static_cast<uint16_t>(layer));
 
 	return 0;
+}
+
+int LuaSceneNode::lastFrameUpdated(lua_State *L)
+{
+	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
+
+	if (node)
+		LuaUtils::push(L, static_cast<uint64_t>(node->lastFrameUpdated()));
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
 }
 
 }
