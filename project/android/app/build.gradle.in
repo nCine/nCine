@@ -1,26 +1,14 @@
-buildscript {
-	repositories {
-		google()
-		mavenCentral()
-	}
-	dependencies {
-		classpath 'com.android.tools.build:gradle:4.1.3'
-	}
+plugins {
+	id 'com.android.application'
 }
-allprojects {
-	repositories {
-		google()
-		mavenCentral()
-	}
-}
-
-apply plugin: 'com.android.application'
 
 android {
+	namespace '@NCPROJECT_REVERSE_DNS@'
 	buildToolsVersion "@GRADLE_BUILDTOOLS_VERSION@"
 	compileSdkVersion @GRADLE_COMPILESDK_VERSION@
 
 	defaultConfig {
+		applicationId '@NCPROJECT_REVERSE_DNS@'
 		minSdkVersion @GRADLE_MINSDK_VERSION@
 		targetSdkVersion @GRADLE_TARGETSDK_VERSION@
 		versionCode @GRADLE_VERSIONCODE@
@@ -47,29 +35,30 @@ android {
 		}
 	}
 
-	final def cmakeBuildDir = new File(project.buildDir, "ncine")
+	final def cmakeBuildDir = new File(project.buildDir, "@NCPROJECT_LOWER_NAME@")
 	final def architectures = ['@GRADLE_NDK_ARCHITECTURES@']
 	final def libcppIsShared = @GRADLE_LIBCPP_SHARED@
-
 	def androidPlatform = @GRADLE_MINSDK_VERSION@
-	while (file("$ndkDir/platforms/android-" + androidPlatform.toString()).exists() == false && androidPlatform > 0)
-		androidPlatform -= 1
 
 	def cmakeBuildTasks = []
+	def archIndex = 0
+	final def libcppArchitectures = ['@GRADLE_LIBCPP_ARCHITECTURES@']
 	for (arch in architectures) {
 		final def archDir = new File(cmakeBuildDir, arch)
 		def cmakeBuildDependsTasks = []
 
 		if (arch == "armeabi-v7a")
-			androidPlatform = androidPlatform >= 16 ? androidPlatform : 16
+			androidPlatform = androidPlatform >= 21 ? androidPlatform : 21
 		else if (arch == "arm64-v8a")
 			androidPlatform = androidPlatform >= 21 ? androidPlatform : 21
 		else if (arch == "x86_64")
 			androidPlatform = androidPlatform >= 21 ? androidPlatform : 21
 
 		if (libcppIsShared) {
+			// Mapping from architecture name to toolchain tuple
+			final def libcppArch = libcppArchitectures[archIndex]
 			tasks.create(name:'libcppCopy_' + arch, type: Exec, dependsOn: 'cmakeConfigure_' + arch) {
-				commandLine cmakeCommand, '-E', 'copy_if_different', ndkDir + '/sources/cxx-stl/llvm-libc++/libs/' + arch + '/libc++_shared.so', archDir.path
+				commandLine cmakeCommand, '-E', 'copy_if_different', ndkDir + '/@GRADLE_LIBCPP_DIR@/' + libcppArch + '/libc++_shared.so', archDir.path
 			}
 			cmakeBuildDependsTasks.add('libcppCopy_' + arch)
 		}
@@ -86,6 +75,8 @@ android {
 			commandLine cmakeCommand, '--build', archDir
 		}
 		cmakeBuildTasks.add('cmakeBuild_' + arch)
+
+		archIndex++
 	}
 
 	sourceSets.main {

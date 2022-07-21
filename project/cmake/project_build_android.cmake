@@ -16,18 +16,18 @@ if(NCPROJECT_BUILD_ANDROID)
 	set(ANDROID_STL c++_shared)
 
 	set(MANIFEST_PERMISSIONS "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />")
-	if(IS_DIRECTORY ${NCINE_ANDROID_DIR}/src/main/cpp/ncine/include/tracy)
+	if(IS_DIRECTORY ${NCINE_ANDROID_DIR}/app/src/main/cpp/ncine/include/tracy)
 		string(CONCAT MANIFEST_PERMISSIONS "${MANIFEST_PERMISSIONS}\n"
 			"\t<uses-permission android:name=\"android.permission.INTERNET\" />\n"
 			"\t<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />")
 	endif()
 	string(REPLACE "/" "." JAVA_PACKAGE "${NCPROJECT_JAVA_URL}")
-	set(ANDROID_MANIFEST_XML_IN ${NCPROJECT_ROOT}/android/src/main/AndroidManifest.xml.in)
-	set(ANDROID_MANIFEST_XML ${CMAKE_BINARY_DIR}/android/src/main/AndroidManifest.xml)
+	set(ANDROID_MANIFEST_XML_IN ${NCPROJECT_ROOT}/android/app/src/main/AndroidManifest.xml.in)
+	set(ANDROID_MANIFEST_XML ${CMAKE_BINARY_DIR}/android/app/src/main/AndroidManifest.xml)
 	configure_file(${ANDROID_MANIFEST_XML_IN} ${ANDROID_MANIFEST_XML} @ONLY)
 
-	set(STRINGS_XML_IN ${NCPROJECT_ROOT}/android/src/main/res/values/strings.xml.in)
-	set(STRINGS_XML ${CMAKE_BINARY_DIR}/android/src/main/res/values/strings.xml)
+	set(STRINGS_XML_IN ${NCPROJECT_ROOT}/android/app/src/main/res/values/strings.xml.in)
+	set(STRINGS_XML ${CMAKE_BINARY_DIR}/android/app/src/main/res/values/strings.xml)
 	configure_file(${STRINGS_XML_IN} ${STRINGS_XML} @ONLY)
 
 	# Always add the OpenGL ES compile definition to Android builds
@@ -61,7 +61,7 @@ if(NCPROJECT_BUILD_ANDROID)
 	# Not added to Gradle arguments as it is handled by substituting `GRADLE_NDK_DIR`
 	list(APPEND ANDROID_CMAKE_ARGS -DCMAKE_ANDROID_NDK=${NDK_DIR})
 
-	set(GRADLE_BUILDTOOLS_VERSION 30.0.3)
+	set(GRADLE_BUILDTOOLS_VERSION 33.0.0)
 	set(GRADLE_COMPILESDK_VERSION 30)
 	set(GRADLE_MINSDK_VERSION 21)
 	set(GRADLE_TARGETSDK_VERSION 30)
@@ -70,18 +70,40 @@ if(NCPROJECT_BUILD_ANDROID)
 	set(GRADLE_LIBCPP_SHARED "false")
 	if(ANDROID_STL STREQUAL "c++_shared")
 		set(GRADLE_LIBCPP_SHARED "true")
+
+		find_path(GRADLE_LIBCPP_DIR libc++_shared.so
+			PATHS ${NDK_DIR}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/
+			      ${NDK_DIR}/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib/
+			      ${NDK_DIR}/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/
+			PATH_SUFFIXES aarch64-linux-android arm-linux-androideabi i686-linux-android x86_64-linux-android
+			NO_CACHE)
+
+		# Mapping from architecture name to toolchain tuple
+		foreach(ARCHITECTURE ${NCPROJECT_NDK_ARCHITECTURES})
+			if("${ARCHITECTURE}" STREQUAL "arm64-v8a")
+				list(APPEND GRADLE_LIBCPP_ARCHITECTURES "aarch64-linux-android")
+			elseif("${ARCHITECTURE}" STREQUAL "armeabi-v7a")
+				list(APPEND GRADLE_LIBCPP_ARCHITECTURES "arm-linux-androideabi")
+			elseif("${ARCHITECTURE}" STREQUAL "x86")
+				list(APPEND GRADLE_LIBCPP_ARCHITECTURES "i686-linux-android")
+			elseif("${ARCHITECTURE}" STREQUAL "x86_64")
+				list(APPEND GRADLE_LIBCPP_ARCHITECTURES "x86_64-linux-android")
+			endif()
+		endforeach()
+		get_filename_component(GRADLE_LIBCPP_DIR ${GRADLE_LIBCPP_DIR} DIRECTORY)
+		file(RELATIVE_PATH GRADLE_LIBCPP_DIR ${NDK_DIR} ${GRADLE_LIBCPP_DIR})
 	endif()
 
 	find_path(NCINE_ANDROID_NCINE_LIB_DIR
 		NAMES libncine.so libncine.a
-		PATHS ${NCINE_ANDROID_DIR}/src/main/cpp/ncine ${NCINE_ANDROID_DIR}/build/ncine/
+		PATHS ${NCINE_ANDROID_DIR}/app/src/main/cpp/ncine ${NCINE_ANDROID_DIR}/app/build/ncine/
 		PATH_SUFFIXES armeabi-v7a arm64-v8a x86_64
 	)
 	get_filename_component(NCINE_ANDROID_NCINE_LIB_DIR ${NCINE_ANDROID_NCINE_LIB_DIR} DIRECTORY)
 
 	find_path(NCINE_ANDROID_OPENAL_LIB_DIR
 		NAMES libopenal.so
-		PATHS ${NCINE_ANDROID_DIR}/src/main/cpp/openal
+		PATHS ${NCINE_ANDROID_DIR}/app/src/main/cpp/openal
 		PATH_SUFFIXES armeabi-v7a arm64-v8a x86_64
 	)
 	set(NCINE_ANDROID_WITH_AUDIO FALSE)
@@ -104,50 +126,54 @@ if(NCPROJECT_BUILD_ANDROID)
 		string(REPLACE "JAVA_NATIVE_LIBRARY_NAME" "ncine" JAVA_SYSTEM_LOADLIBRARY_NCINE ${JAVA_SYSTEM_LOADLIBRARY})
 	endif()
 
-	set(LOAD_LIBRARIES_JAVA_IN ${NCPROJECT_ROOT}/android/src/main/java/LoadLibraries.java.in)
-	set(LOAD_LIBRARIES_JAVA ${CMAKE_BINARY_DIR}/android/src/main/java/${NCPROJECT_JAVA_URL}/LoadLibraries.java)
+	set(LOAD_LIBRARIES_JAVA_IN ${NCPROJECT_ROOT}/android/app/src/main/java/LoadLibraries.java.in)
+	set(LOAD_LIBRARIES_JAVA ${CMAKE_BINARY_DIR}/android/app/src/main/java/${NCPROJECT_JAVA_URL}/LoadLibraries.java)
 	configure_file(${LOAD_LIBRARIES_JAVA_IN} ${LOAD_LIBRARIES_JAVA} @ONLY)
-	set(LOAD_LIBRARIES_TV_JAVA_IN ${NCPROJECT_ROOT}/android/src/main/java/LoadLibrariesTV.java.in)
-	set(LOAD_LIBRARIES_TV_JAVA ${CMAKE_BINARY_DIR}/android/src/main/java/${NCPROJECT_JAVA_URL}/LoadLibrariesTV.java)
+	set(LOAD_LIBRARIES_TV_JAVA_IN ${NCPROJECT_ROOT}/android/app/src/main/java/LoadLibrariesTV.java.in)
+	set(LOAD_LIBRARIES_TV_JAVA ${CMAKE_BINARY_DIR}/android/app/src/main/java/${NCPROJECT_JAVA_URL}/LoadLibrariesTV.java)
 	configure_file(${LOAD_LIBRARIES_TV_JAVA_IN} ${LOAD_LIBRARIES_TV_JAVA} @ONLY)
 
-	file(COPY ${NCPROJECT_ROOT}/android/src/main/cpp/CMakeLists.txt DESTINATION android/src/main/cpp)
-	set(BUILD_GRADLE_IN ${NCPROJECT_ROOT}/android/build.gradle.in)
-	set(BUILD_GRADLE ${CMAKE_BINARY_DIR}/android/build.gradle)
-	set(GRADLE_JNILIBS_DIRS "'src/main/cpp/ncine'")
-	if(NCINE_ANDROID_WITH_AUDIO)
-		set(GRADLE_JNILIBS_DIRS "${GRADLE_JNILIBS_DIRS}, 'src/main/cpp/openal'")
-	endif()
-	configure_file(${BUILD_GRADLE_IN} ${BUILD_GRADLE} @ONLY)
+	file(COPY ${NCPROJECT_ROOT}/android/app/src/main/cpp/CMakeLists.txt DESTINATION android/app/src/main/cpp)
+	file(COPY ${NCPROJECT_ROOT}/android/build.gradle DESTINATION android)
 	set(GRADLE_PROPERTIES_IN ${NCPROJECT_ROOT}/android/gradle.properties.in)
 	set(GRADLE_PROPERTIES ${CMAKE_BINARY_DIR}/android/gradle.properties)
 	set(GRADLE_CMAKE_COMMAND ${CMAKE_COMMAND})
 	set(GRADLE_NDK_DIR ${NDK_DIR})
 	configure_file(${GRADLE_PROPERTIES_IN} ${GRADLE_PROPERTIES} @ONLY)
+	set(SETTINGS_GRADLE_IN ${NCPROJECT_ROOT}/android/settings.gradle.in)
+	set(SETTINGS_GRADLE ${CMAKE_BINARY_DIR}/android/settings.gradle)
+	configure_file(${SETTINGS_GRADLE_IN} ${SETTINGS_GRADLE} @ONLY)
+	set(APP_BUILD_GRADLE_IN ${NCPROJECT_ROOT}/android/app/build.gradle.in)
+	set(APP_BUILD_GRADLE ${CMAKE_BINARY_DIR}/android/app/build.gradle)
+	set(GRADLE_JNILIBS_DIRS "'src/main/cpp/ncine'")
+	if(NCINE_ANDROID_WITH_AUDIO)
+		set(GRADLE_JNILIBS_DIRS "${GRADLE_JNILIBS_DIRS}, 'src/main/cpp/openal'")
+	endif()
+	configure_file(${APP_BUILD_GRADLE_IN} ${APP_BUILD_GRADLE} @ONLY)
 
 	if(EXISTS ${NCPROJECT_ICONS_DIR}/icon48.png)
-		file(COPY ${NCPROJECT_ICONS_DIR}/icon48.png DESTINATION android/src/main/res/mipmap-mdpi)
-		file(RENAME ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-mdpi/icon48.png ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-mdpi/ic_launcher.png)
+		file(COPY ${NCPROJECT_ICONS_DIR}/icon48.png DESTINATION android/app/src/main/res/mipmap-mdpi)
+		file(RENAME ${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-mdpi/icon48.png ${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-mdpi/ic_launcher.png)
 	endif()
 	if(EXISTS ${NCPROJECT_ICONS_DIR}/icon72.png)
-		file(COPY ${NCPROJECT_ICONS_DIR}/icon72.png DESTINATION android/src/main/res/mipmap-hdpi)
-		file(RENAME ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-hdpi/icon72.png ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-hdpi/ic_launcher.png)
+		file(COPY ${NCPROJECT_ICONS_DIR}/icon72.png DESTINATION android/app/src/main/res/mipmap-hdpi)
+		file(RENAME ${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-hdpi/icon72.png ${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-hdpi/ic_launcher.png)
 	endif()
 	if(EXISTS ${NCPROJECT_ICONS_DIR}/icon96.png)
-		file(COPY ${NCPROJECT_ICONS_DIR}/icon96.png DESTINATION android/src/main/res/mipmap-xhdpi)
-		file(RENAME ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xhdpi/icon96.png ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xhdpi/ic_launcher.png)
+		file(COPY ${NCPROJECT_ICONS_DIR}/icon96.png DESTINATION android/app/src/main/res/mipmap-xhdpi)
+		file(RENAME ${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-xhdpi/icon96.png ${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png)
 	endif()
 	if(EXISTS ${NCPROJECT_ICONS_DIR}/icon144.png)
-		file(COPY ${NCPROJECT_ICONS_DIR}/icon144.png DESTINATION android/src/main/res/mipmap-xxhdpi)
-		file(RENAME ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xxhdpi/icon144.png ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xxhdpi/ic_launcher.png)
+		file(COPY ${NCPROJECT_ICONS_DIR}/icon144.png DESTINATION android/app/src/main/res/mipmap-xxhdpi)
+		file(RENAME ${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-xxhdpi/icon144.png ${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png)
 	endif()
 	if(EXISTS ${NCPROJECT_ICONS_DIR}/icon192.png)
-		file(COPY ${NCPROJECT_ICONS_DIR}/icon192.png DESTINATION android/src/main/res/mipmap-xxxhdpi)
-		file(RENAME ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xxxhdpi/icon192.png ${CMAKE_BINARY_DIR}/android/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
+		file(COPY ${NCPROJECT_ICONS_DIR}/icon192.png DESTINATION android/app/src/main/res/mipmap-xxxhdpi)
+		file(RENAME ${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-xxxhdpi/icon192.png ${CMAKE_BINARY_DIR}/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
 	endif()
 	if(EXISTS ${NCPROJECT_ICONS_DIR}/banner320x180.png)
-		file(COPY ${NCPROJECT_ICONS_DIR}/banner320x180.png DESTINATION android/src/main/res/drawable-xhdpi)
-		file(RENAME ${CMAKE_BINARY_DIR}/android/src/main/res/drawable-xhdpi/banner320x180.png ${CMAKE_BINARY_DIR}/android/src/main/res/drawable-xhdpi/banner.png)
+		file(COPY ${NCPROJECT_ICONS_DIR}/banner320x180.png DESTINATION android/app/src/main/res/drawable-xhdpi)
+		file(RENAME ${CMAKE_BINARY_DIR}/android/app/src/main/res/drawable-xhdpi/banner320x180.png ${CMAKE_BINARY_DIR}/android/app/src/main/res/drawable-xhdpi/banner.png)
 	endif()
 
 	if(DEFINED NCPROJECT_ANDROID_ASSETS)
@@ -159,16 +185,16 @@ if(NCPROJECT_BUILD_ANDROID)
 					# Preserving directory structure if the asset is in the data directory
 					file(RELATIVE_PATH ASSET_RELPATH ${NCPROJECT_DATA_DIR}/data ${ASSET})
 					get_filename_component(ASSET_RELPATH ${ASSET_RELPATH} DIRECTORY)
-					file(COPY ${ASSET} DESTINATION android/src/main/assets/${ASSET_RELPATH})
+					file(COPY ${ASSET} DESTINATION android/app/src/main/assets/${ASSET_RELPATH})
 				else()
-					file(COPY ${ASSET} DESTINATION android/src/main/assets/)
+					file(COPY ${ASSET} DESTINATION android/app/src/main/assets/)
 				endif()
 			else()
 				# Preserving directory structure
 				set(ASSET "/${ASSET}")
 				file(RELATIVE_PATH ASSET_RELPATH "/data" ${ASSET})
 				get_filename_component(ASSET_RELPATH ${ASSET_RELPATH} DIRECTORY)
-				file(COPY ${NCPROJECT_DATA_DIR}/${ASSET} DESTINATION android/src/main/assets/${ASSET_RELPATH})
+				file(COPY ${NCPROJECT_DATA_DIR}/${ASSET} DESTINATION android/app/src/main/assets/${ASSET_RELPATH})
 			endif()
 		endforeach()
 	endif()
@@ -180,25 +206,25 @@ if(NCPROJECT_BUILD_ANDROID)
 
 	foreach(ARCHITECTURE ${NCPROJECT_NDK_ARCHITECTURES})
 		if(NCINE_ANDROID_WITH_AUDIO)
-			file(COPY ${NCINE_ANDROID_OPENAL_LIB_DIR}/${ARCHITECTURE}/libopenal.so DESTINATION android/src/main/cpp/openal/${ARCHITECTURE})
+			file(COPY ${NCINE_ANDROID_OPENAL_LIB_DIR}/${ARCHITECTURE}/libopenal.so DESTINATION android/app/src/main/cpp/openal/${ARCHITECTURE})
 		endif()
-		file(COPY ${NCINE_ANDROID_NCINE_LIB_DIR}/${ARCHITECTURE}/${NCINE_ANDROID_LIBNAME} DESTINATION android/src/main/cpp/ncine/${ARCHITECTURE})
-		file(COPY ${NCINE_ANDROID_NCINE_LIB_DIR}/${ARCHITECTURE}/libncine_main.a DESTINATION android/src/main/cpp/ncine/${ARCHITECTURE})
+		file(COPY ${NCINE_ANDROID_NCINE_LIB_DIR}/${ARCHITECTURE}/${NCINE_ANDROID_LIBNAME} DESTINATION android/app/src/main/cpp/ncine/${ARCHITECTURE})
+		file(COPY ${NCINE_ANDROID_NCINE_LIB_DIR}/${ARCHITECTURE}/libncine_main.a DESTINATION android/app/src/main/cpp/ncine/${ARCHITECTURE})
 	endforeach()
-	file(COPY ${NCINE_ANDROID_DIR}/src/main/cpp/ncine/include DESTINATION android/src/main/cpp/ncine/)
+	file(COPY ${NCINE_ANDROID_DIR}/app/src/main/cpp/ncine/include DESTINATION android/app/src/main/cpp/ncine/)
 
 	add_custom_target(ncproject_android ALL)
 	set_target_properties(ncproject_android PROPERTIES FOLDER "Android")
 	add_dependencies(ncproject_android ${NCPROJECT_EXE_NAME})
 
 	foreach(ARCHITECTURE ${NCPROJECT_NDK_ARCHITECTURES})
-		set(ANDROID_BINARY_DIR ${CMAKE_BINARY_DIR}/android/build/${NCPROJECT_LOWER_NAME}/${ARCHITECTURE})
+		set(ANDROID_BINARY_DIR ${CMAKE_BINARY_DIR}/android/app/build/${NCPROJECT_LOWER_NAME}/${ARCHITECTURE})
 		set(ANDROID_ARCH_ARGS -DCMAKE_ANDROID_ARCH_ABI=${ARCHITECTURE})
 		if(ARCHITECTURE STREQUAL "armeabi-v7a")
 			list(APPEND ANDROID_ARCH_ARGS ${ANDROID_ARM_ARGS})
 		endif()
 		add_custom_command(OUTPUT ${ANDROID_BINARY_DIR}/libgame.so
-			COMMAND ${CMAKE_COMMAND} -H${CMAKE_BINARY_DIR}/android/src/main/cpp/ -B${ANDROID_BINARY_DIR}
+			COMMAND ${CMAKE_COMMAND} -H${CMAKE_BINARY_DIR}/android/app/src/main/cpp/ -B${ANDROID_BINARY_DIR}
 				-DCMAKE_TOOLCHAIN_FILE=${NDK_DIR}/build/cmake/android.toolchain.cmake
 				-DANDROID_PLATFORM=android-${GRADLE_MINSDK_VERSION} -DANDROID_ABI=${ARCHITECTURE}
 				${RESET_FLAGS_ARGS} ${ANDROID_PASSTHROUGH_ARGS} ${ANDROID_CMAKE_ARGS} ${ANDROID_ARCH_ARGS}
@@ -225,7 +251,7 @@ if(NCPROJECT_BUILD_ANDROID)
 			endif()
 
 			foreach(ARCHITECTURE ${NCPROJECT_NDK_ARCHITECTURES})
-				list(APPEND APK_FILES ${CMAKE_BINARY_DIR}/android/build/outputs/apk/${APK_BUILDTYPE_DIR}/android-${ARCHITECTURE}-${APK_FILE_SUFFIX}.apk)
+				list(APPEND APK_FILES ${CMAKE_BINARY_DIR}/android/app/build/outputs/apk/${APK_BUILDTYPE_DIR}/android-${ARCHITECTURE}-${APK_FILE_SUFFIX}.apk)
 			endforeach()
 
 			# Invoking Gradle to create the Android APK of the game

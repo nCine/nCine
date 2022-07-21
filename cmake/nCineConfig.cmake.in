@@ -22,7 +22,7 @@ find_path(NCINE_TESTS_DATA_DIR
 	DOC "Path to the data directory for tests")
 
 find_path(NCINE_ANDROID_DIR
-	NAMES src/main/cpp/ncine/include/ncine/AndroidApplication.h
+	NAMES app/src/main/cpp/ncine/include/ncine/AndroidApplication.h
 	PATHS "${PACKAGE_PREFIX_DIR}/@ANDROID_INSTALL_DESTINATION@/" "${CMAKE_CURRENT_LIST_DIR}/android"
 	DOC "Path to the Android directory")
 
