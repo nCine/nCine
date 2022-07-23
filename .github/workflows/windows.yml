@@ -104,7 +104,7 @@ jobs:
         }
 
         if ("${{ matrix.BuildType }}" -eq "DevDist" -Or "${{ matrix.BuildType }}" -eq "LuaDist")
-          { cmake -G "$env:generator" -A x64 -B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} }
+          { cmake -G "$env:generator" -A x64 -B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D NDK_DIR=$env:ANDROID_NDK_LATEST_HOME }
         else
           { cmake -G "$env:generator" -A x64 -B ../nCine-build-${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=ON -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$(pwd)/../RenderDoc }
 

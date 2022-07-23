@@ -200,6 +200,7 @@ if(LUA_FOUND)
 		${NCINE_ROOT}/include/ncine/LuaRectUtils.h
 		${NCINE_ROOT}/include/ncine/LuaVector2Utils.h
 		${NCINE_ROOT}/include/ncine/LuaVector3Utils.h
+		${NCINE_ROOT}/include/ncine/LuaVector4Utils.h
 		${NCINE_ROOT}/include/ncine/LuaColorUtils.h
 	)
 
@@ -231,6 +232,7 @@ if(LUA_FOUND)
 			${NCINE_ROOT}/src/include/LuaRect.h
 			${NCINE_ROOT}/src/include/LuaVector2.h
 			${NCINE_ROOT}/src/include/LuaVector3.h
+			${NCINE_ROOT}/src/include/LuaVector4.h
 			${NCINE_ROOT}/src/include/LuaColor.h
 			${NCINE_ROOT}/src/include/LuaIInputManager.h
 			${NCINE_ROOT}/src/include/LuaMouseEvents.h

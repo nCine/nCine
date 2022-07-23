@@ -123,6 +123,8 @@ struct isDestructible<T, decltype(declVal<T &>().~T())>
 	static constexpr bool value = (true && !__is_union(T));
 };
 
+// Use `__has_trivial_destructor()` only on GCC
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
 template <class T>
 struct hasTrivialDestructor
 {
@@ -134,6 +136,13 @@ struct isTriviallyDestructible
 {
 	static constexpr bool value = isDestructible<T>::value && hasTrivialDestructor<T>::value;
 };
+#else
+template <class T>
+struct isTriviallyDestructible
+{
+	static constexpr bool value = __is_trivially_destructible(T);
+};
+#endif
 
 template <class T>
 struct isIntegral

@@ -17,7 +17,7 @@ jobs:
       matrix:
         BuildType: [Debug, Release, DevDist, LuaDist]
 
-    runs-on: 'macOS-10.15'
+    runs-on: 'macOS-11'
 
     steps:
     - name: 'Checkout Code'
@@ -67,7 +67,7 @@ jobs:
     - name: 'CMake Configuration'
       run: |
         if [[ "${{ matrix.BuildType }}" == "DevDist" || "${{ matrix.BuildType }}" == "LuaDist" ]]; then
-          export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }}"
+          export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D NDK_DIR=$ANDROID_NDK_LATEST_HOME"
         else
           export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=ON"
         fi

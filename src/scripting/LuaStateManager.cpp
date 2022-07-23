@@ -14,6 +14,7 @@
 	#include "LuaRect.h"
 	#include "LuaVector2.h"
 	#include "LuaVector3.h"
+	#include "LuaVector4.h"
 	#include "LuaColor.h"
 	#include "LuaILogger.h"
 
@@ -554,6 +555,7 @@ void LuaStateManager::exposeApi()
 	LuaRect<float>::expose(L_);
 	LuaVector2<float>::expose(L_);
 	LuaVector3<float>::expose(L_);
+	LuaVector4<float>::expose(L_);
 	LuaColor::expose(L_);
 	LuaILogger::expose(L_);
 	LuaIInputManager::expose(L_);

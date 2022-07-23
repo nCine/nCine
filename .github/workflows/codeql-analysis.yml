@@ -7,8 +7,8 @@ on: [push, workflow_dispatch]
 
 jobs:
   analyze:
-    name: Analyze
-    runs-on: ubuntu-18.04
+    name: 'Analyze'
+    runs-on: 'ubuntu-20.04'
 
     strategy:
       fail-fast: false
@@ -16,10 +16,10 @@ jobs:
         language: [ 'cpp' ]
 
     steps:
-    - name: Checkout Repository
+    - name: 'Checkout Repository'
       uses: actions/checkout@v2
 
-    - name: Initialize CodeQL
+    - name: 'Initialize CodeQL'
       uses: github/codeql-action/init@v1
       with:
         languages: ${{ matrix.language }}
@@ -61,5 +61,5 @@ jobs:
         cmake -B ../nCine-build-$BuildType -D CMAKE_BUILD_TYPE=$BuildType -D NCINE_BUILD_UNIT_TESTS=ON -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external
         make -j2 -C ../nCine-build-$BuildType
 
-    - name: Perform CodeQL Analysis
+    - name: 'Perform CodeQL Analysis'
       uses: github/codeql-action/analyze@v1

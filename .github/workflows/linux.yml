@@ -48,7 +48,7 @@ jobs:
           CC: clang
           CXX: clang++
 
-    runs-on: 'ubuntu-18.04'
+    runs-on: 'ubuntu-20.04'
 
     steps:
     - name: 'Checkout Code'
@@ -119,7 +119,7 @@ jobs:
         export CXX=${{ matrix.CXX }}
 
         if [[ "${{ matrix.BuildType }}" == "DevDist" || "${{ matrix.BuildType }}" == "LuaDist" ]]; then
-          export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D CMAKE_INSTALL_PREFIX=''"
+          export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D CMAKE_INSTALL_PREFIX='' -D NDK_DIR=$ANDROID_NDK_LATEST_HOME"
         else
           export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=ON"
         fi

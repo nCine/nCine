@@ -53,7 +53,8 @@ message(STATUS "nCine main function library: ${NCINE_MAIN_LOCATION}")
 find_file(NCINE_CONFIG_H config.h
 	PATHS ${NCINE_INCLUDE_DIR}
 	PATH_SUFFIXES ncine
-	NO_DEFAULT_PATH)
+	NO_DEFAULT_PATH
+	NO_CMAKE_FIND_ROOT_PATH) # To find the file on Emscripten
 
 if(EXISTS ${NCINE_CONFIG_H})
 	message(STATUS "Configuration file: \"${NCINE_CONFIG_H}\"")

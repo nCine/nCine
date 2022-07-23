@@ -54,19 +54,23 @@ jobs:
     - name: 'Checkout Code'
       uses: actions/checkout@v2
 
-    - name: 'Install and Update MSYS2'
+    - name: 'Update MSYS2'
       run: |
-        choco install --no-progress msys2 --params="/InstallDir:C:\msys64 /NoUpdate /NoPath"
-        C:\msys64\usr\bin\pacman --noconfirm -Syy
+        $env:MSYSTEM = "MINGW64"
+
+        C:\msys64\usr\bin\bash -lc 'pacman --noconfirm -Syyuu'
+        C:\msys64\usr\bin\bash -lc 'pacman --noconfirm -Syyuu'
 
     - name: 'Install Build Dependencies'
       run: |
-        C:\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-SDL2 mingw-w64-x86_64-openal mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libwebp mingw-w64-x86_64-lua cmake
+        $env:MSYSTEM = "MINGW64"
 
-        if ("${{ matrix.CC }}" -eq "gcc") { C:\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-gcc }
-        else { C:\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-clang }
+        C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-SDL2 mingw-w64-x86_64-openal mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libwebp mingw-w64-x86_64-lua cmake'
 
-        C:\msys64\usr\bin\pacman --noconfirm -Scc
+        if ("${{ matrix.CC }}" -eq "gcc") { C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-gcc' }
+        else { C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-clang' }
+
+        C:\msys64\usr\bin\bash -lc 'pacman --noconfirm -Scc'
 
     - name: 'Unshallow Git Repository for Versioning'
       if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
@@ -120,7 +124,6 @@ jobs:
       run: |
         $env:CC = "${{ matrix.CC }}"
         $env:CXX = "${{ matrix.CXX }}"
-        $env:PATH = "C:\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem"
         $env:MSYSTEM = "MINGW64"
 
         C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_UNIT_TESTS=ON -D NCINE_BUILD_TESTS=OFF -D NCINE_WITH_IMGUI=OFF'
@@ -134,8 +137,6 @@ jobs:
       run: |
         $env:CC = "${{ matrix.CC }}"
         $env:CXX = "${{ matrix.CXX }}"
-
-        $env:PATH = "C:\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem"
         $env:MSYSTEM = "MINGW64"
 
         $EnableTracy = 'ON'
@@ -143,7 +144,7 @@ jobs:
           { $EnableTracy = 'OFF' }
 
         if ("${{ matrix.BuildType }}" -eq "DevDist" -Or "${{ matrix.BuildType }}" -eq "LuaDist")
-          { C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }}' }
+          { C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D NDK_DIR=$(cygpath -m $ANDROID_NDK_LATEST_HOME)' }
         else
           { C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=$EnableTracy -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$PWD/../RenderDoc' }
 
@@ -151,8 +152,8 @@ jobs:
       env:
         CHERE_INVOKING: on
       run: |
-        $env:PATH = "C:\msys64\x86_64\bin;C:\msys64\usr\bin;$env:PATH"
         $env:MSYSTEM = "MINGW64"
+
         C:\msys64\usr\bin\bash.exe -lc 'make -j2 -C ../nCine-build-${{ matrix.BuildType }}'
 
     - name: 'Package'
@@ -160,7 +161,6 @@ jobs:
       env:
         CHERE_INVOKING: on
       run: |
-        $env:PATH = "C:\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem"
         $env:MSYSTEM = "MINGW64"
 
         C:\msys64\usr\bin\bash.exe -lc 'make package -C ../nCine-build-${{ matrix.BuildType }}'
