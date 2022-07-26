@@ -27,6 +27,7 @@ class MyEventHandler :
 	void onPostUpdate() override;
 	void onDrawViewport(nc::Viewport &viewport) override;
 	void onFrameEnd() override;
+	void onResizeWindow(int width, int height) override;
 	void onShutdown() override;
 	void onSuspend() override;
 	void onResume() override;

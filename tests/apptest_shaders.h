@@ -42,6 +42,7 @@ class MyEventHandler :
 	void onFrameStart() override;
 	void onPostUpdate() override;
 	void onDrawViewport(nc::Viewport &viewport) override;
+	void onResizeWindow(int width, int height) override;
 
 #ifdef __ANDROID__
 	void onTouchDown(const nc::TouchEvent &event) override;

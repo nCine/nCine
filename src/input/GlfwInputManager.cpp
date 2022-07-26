@@ -2,6 +2,7 @@
 #include <cmath> // for fabsf()
 #include "GlfwInputManager.h"
 #include "IInputEventHandler.h"
+#include "IAppEventHandler.h"
 #include "Application.h"
 #include "JoyMapping.h"
 
@@ -252,7 +253,7 @@ void GlfwInputManager::windowCloseCallback(GLFWwindow *window)
 		shouldQuit = inputEventHandler_->onQuitRequest();
 
 	if (shouldQuit)
-		ncine::theApplication().quit();
+		theApplication().quit();
 	else
 		glfwSetWindowShouldClose(window, GLFW_FALSE);
 }
@@ -267,6 +268,7 @@ void GlfwInputManager::windowSizeCallback(GLFWwindow *window, int width, int hei
 void GlfwInputManager::framebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
 	theApplication().resizeScreenViewport(width, height);
+	theApplication().appEventHandler_->onResizeWindow(width, height);
 }
 
 void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)

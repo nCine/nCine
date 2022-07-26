@@ -94,6 +94,11 @@ void MyEventHandler::onFrameEnd()
 	nc::LuaIAppEventHandler::onFrameEnd(luaState_.state());
 }
 
+void MyEventHandler::onResizeWindow(int width, int height)
+{
+	nc::LuaIAppEventHandler::onResizeWindow(luaState_.state(), width, height);
+}
+
 void MyEventHandler::onShutdown()
 {
 	nc::LuaIAppEventHandler::onShutdown(luaState_.state());

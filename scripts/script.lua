@@ -12,6 +12,7 @@ function ncine.on_pre_init(cfg)
 	cfg.window_title = "nCine Lua test"
 
 	--cfg.console_log_level = nc.log_level.OFF
+	--cfg.resizable = true
 	return cfg
 end
 
@@ -157,6 +158,24 @@ function ncine.on_draw_viewport(viewport)
 		nc.shaderstate.set_uniform_float_value2(vp_pingshaderstate_, "", "uDirection", 1.0, 0.0)
 		nc.shaderstate.set_uniform_float_value2(vp_pongshaderstate_, "", "uDirection", 0.0, 1.0)
 	end
+end
+
+function ncine.on_resize_window(width, height)
+	nc.texture.init(vp_texture0_, "Ping texture", nc.tex_format.RGB8, 1, width, height)
+	nc.texture.init(vp_texture1_, "Pong texture", nc.tex_format.RGB8, 1, width, height)
+
+	nc.viewport.remove_all_textures(scene_viewport_);
+	nc.viewport.set_texture(scene_viewport_, 0, vp_texture0_);
+	nc.viewport.remove_all_textures(ping_viewport_);
+	nc.viewport.set_texture(ping_viewport_, 0, vp_texture1_);
+	nc.viewport.remove_all_textures(pong_viewport_);
+	nc.viewport.set_texture(pong_viewport_, 0, vp_texture0_);
+
+	nc.sprite.reset_texture(vp_pingsprite_)
+	nc.sprite.reset_texture(vp_pongsprite_)
+
+	nc.shaderstate.set_uniform_float_value2(vp_pingshaderstate_, "", "uResolution", width, height)
+	nc.shaderstate.set_uniform_float_value2(vp_pongshaderstate_, "", "uResolution", width, height)
 end
 
 function ncine.on_shutdown()

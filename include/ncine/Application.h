@@ -203,6 +203,8 @@ class DLL_PUBLIC Application
 	friend class IGfxDevice;
 #endif
 	friend class Viewport; // for `onDrawViewport()`
+	friend class GlfwInputManager; // for `onResizeWindow()`
+	friend class Qt5Widget; // for `onResizeWindow()`
 };
 
 // Meyers' Singleton

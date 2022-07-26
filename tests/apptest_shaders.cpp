@@ -93,6 +93,7 @@ nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
 	setDataPath(config);
+	//config.isResizable = true;
 }
 
 void MyEventHandler::onInit()
@@ -366,6 +367,54 @@ void MyEventHandler::onDrawViewport(nc::Viewport &viewport)
 		vpPingSpriteShaderState_->setUniformFloat(nullptr, "uDirection", 1.0f, 0.0f);
 		vpPongSpriteShaderState_->setUniformFloat(nullptr, "uDirection", 0.0f, 1.0f);
 	}
+}
+
+void MyEventHandler::onResizeWindow(int width, int height)
+{
+	texture0_->init("Ping texture", nc::Texture::Format::RGB8, width, height);
+	texture1_->init("Pong texture", nc::Texture::Format::RGB8, width, height);
+	downsampleTexture0_->init("Downsample ping texture", nc::Texture::Format::RGB8, nc::Vector2i(width, height) / downsampleFactor);
+	downsampleTexture1_->init("Downsample pong texture", nc::Texture::Format::RGB8, nc::Vector2i(width, height) / downsampleFactor);
+	bloomTexture_->init("Bloom texture", nc::Texture::Format::RGB8, width, height);
+
+	sceneViewport_->removeAllTextures();
+	sceneViewport_->setTexture(texture0_.get());
+	sceneViewportMrt_->removeAllTextures();
+	sceneViewportMrt_->setTexture(0, texture0_.get());
+	sceneViewportMrt_->setTexture(1, bloomTexture_.get());
+	pingViewport_->removeAllTextures();
+	pongViewport_->removeAllTextures();
+	if (currentViewportSetup_ == ViewportSetup::BLOOM)
+	{
+		pingViewport_->setTexture(downsampleTexture1_.get());
+		pongViewport_->setTexture(downsampleTexture0_.get());
+	}
+	else
+	{
+		pingViewport_->setTexture(texture1_.get());
+		pongViewport_->setTexture(texture0_.get());
+	}
+	downsampleViewport_->removeAllTextures();
+	downsampleViewport_->setTexture(downsampleTexture0_.get());
+	upsampleViewport_->removeAllTextures();
+	upsampleViewport_->setTexture(bloomTexture_.get());
+	blendingViewport_->removeAllTextures();
+	blendingViewport_->setTexture(texture1_.get());
+
+	vpPingSprite_->resetTexture();
+	vpPongSprite_->resetTexture();
+	vpDownsampleSprite_->resetTexture();
+	vpUpsampleSprite_->resetTexture();
+	vpBlendingSprite_->resetTexture();
+	sceneSprite_->resetTexture();
+
+	vpBlendingShaderState_->setTexture(1, bloomTexture_.get());
+	vpPingSpriteShaderState_->setUniformFloat(nullptr, "uResolution",
+	                                          static_cast<float>(pingViewport_->texture()->width()),
+	                                          static_cast<float>(pingViewport_->texture()->height()));
+	vpPongSpriteShaderState_->setUniformFloat(nullptr, "uResolution",
+	                                          static_cast<float>(pongViewport_->texture()->width()),
+	                                          static_cast<float>(pongViewport_->texture()->height()));
 }
 
 #ifdef __ANDROID__

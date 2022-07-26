@@ -20,6 +20,7 @@ class DLL_PUBLIC LuaIAppEventHandler
 	static void onPostUpdate(lua_State *L);
 	static void onDrawViewport(lua_State *L, Viewport &viewport);
 	static void onFrameEnd(lua_State *L);
+	static void onResizeWindow(lua_State *L, int width, int height);
 	static void onShutdown(lua_State *L);
 	static void onSuspend(lua_State *L);
 	static void onResume(lua_State *L);

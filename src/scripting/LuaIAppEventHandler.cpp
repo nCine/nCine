@@ -21,6 +21,7 @@ namespace LuaIAppEventHandler {
 	static const char *onPostUpdate = "on_post_update";
 	static const char *onDrawViewport = "on_draw_viewport";
 	static const char *onFrameEnd = "on_frame_end";
+	static const char *onResizeWindow = "on_resize_window";
 	static const char *onShutdown = "on_shutdown";
 	static const char *onSuspend = "on_suspend";
 	static const char *onResume = "on_resume";
@@ -124,6 +125,30 @@ void LuaIAppEventHandler::onFrameEnd(lua_State *L)
 {
 	ZoneScopedN("Lua onFrameEnd");
 	callFunction(L, LuaNames::LuaIAppEventHandler::onFrameEnd, false);
+}
+
+void LuaIAppEventHandler::onResizeWindow(lua_State *L, int width, int height)
+{
+	ZoneScopedN("Lua onResizeWindow");
+	lua_getglobal(L, LuaNames::ncine);
+	const int type = lua_getfield(L, -1, LuaNames::LuaIAppEventHandler::onResizeWindow);
+
+	if (type == LUA_TFUNCTION)
+	{
+		LuaUtils::push(L, width);
+		LuaUtils::push(L, height);
+		const int status = lua_pcall(L, 2, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::LuaIAppEventHandler::onResizeWindow, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			lua_pop(L, 1);
+		}
+	}
+	else
+	{
+		lua_pop(L, 2);
+		LOGW_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onResizeWindow);
+	}
 }
 
 void LuaIAppEventHandler::onShutdown(lua_State *L)

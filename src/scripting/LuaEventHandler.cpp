@@ -121,6 +121,11 @@ void LuaEventHandler::onFrameEnd()
 	LuaIAppEventHandler::onFrameEnd(luaState_->state());
 }
 
+void LuaEventHandler::onResizeWindow(int width, int height)
+{
+	LuaIAppEventHandler::onResizeWindow(luaState_->state(), width, height);
+}
+
 void LuaEventHandler::onShutdown()
 {
 	LuaIAppEventHandler::onShutdown(luaState_->state());
