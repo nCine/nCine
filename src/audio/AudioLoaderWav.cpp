@@ -34,7 +34,7 @@ AudioLoaderWav::AudioLoaderWav(nctl::UniquePtr<IFile> fileHandle)
 	duration_ = float(numSamples_) / frequency_;
 
 	RETURN_ASSERT_MSG_X(numChannels_ == 1 || numChannels_ == 2, "Unsupported number of channels: %d", numChannels_);
-	LOGI_X("duration: %.2fs, channels: %d, frequency: %dHz", duration_, numChannels_, frequency_);
+	LOGI_X("duration: %.2f s, channels: %d, frequency: %d Hz", duration_, numChannels_, frequency_);
 
 	hasLoaded_ = true;
 }

@@ -38,8 +38,12 @@ class DLL_PUBLIC AudioStreamPlayer : public IAudioPlayer
 
 	inline unsigned long bufferSize() const override { return audioStream_.bufferSize(); }
 
-	inline unsigned long int numStreamSamples() const { return audioStream_.numStreamSamples(); }
+	/// Returns the number of samples in the streaming buffer
+	inline unsigned long int numSamplesInStreamBuffer() const { return audioStream_.numSamplesInStreamBuffer(); }
+	/// Returns the size of the streaming buffer in bytes
 	inline int streamBufferSize() const { return audioStream_.streamBufferSize(); }
+	/// Returns the sample offset relative to the whole stream
+	unsigned long int sampleOffsetInStream() const;
 
 	void play() override;
 	void pause() override;

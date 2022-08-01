@@ -18,6 +18,9 @@ struct DLL_PUBLIC ParticleInitializer
 	Vector2f rndRotation = Vector2f::Zero;
 	bool emitterRotation = true;
 
+	/// Checks all vectors swapping values if the first component is greater than the second one
+	void validateMinMax();
+
 	void setAmount(int amount);
 	void setAmount(int minAmount, int maxAmount);
 

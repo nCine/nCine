@@ -22,7 +22,6 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	ParticleSystem(SceneNode *parent, unsigned int count, Texture *texture);
 	/// Constructs a particle system with the specified maximum amount of particles and the specified texture rectangle
 	ParticleSystem(SceneNode *parent, unsigned int count, Texture *texture, Recti texRect);
-	~ParticleSystem() override;
 
 	/// Default move constructor
 	ParticleSystem(ParticleSystem &&);
@@ -41,10 +40,25 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	/// Kills all alive particles
 	void killParticles();
 
+	/// Returns the array of particle affectors
+	inline nctl::Array<nctl::UniquePtr<ParticleAffector>> &affectors() { return affectors_; }
+	/// Returns the constant array of particle affectors
+	inline const nctl::Array<nctl::UniquePtr<ParticleAffector>> &affectors() const { return affectors_; }
+
 	/// Returns the local space flag of the system
 	inline bool inLocalSpace(void) const { return inLocalSpace_; }
 	/// Sets the local space flag of the system
 	inline void setInLocalSpace(bool inLocalSpace) { inLocalSpace_ = inLocalSpace; }
+
+	/// Returns true if particles are updating
+	inline bool isParticlesUpdateEnabled(void) const { return particlesUpdateEnabled_; }
+	/// Enables or disables particles updating
+	inline void setParticlesUpdateEnabled(bool particlesUpdateEnabled) { particlesUpdateEnabled_ = particlesUpdateEnabled; }
+
+	/// Returns true if affectors are modifying particles properties
+	inline bool areAffectorsEnabled(void) const { return affectorsEnabled_; }
+	/// Enables or disables affectors modifying particles properties
+	inline void setAffectorsEnabled(bool affectorsEnabled) { affectorsEnabled_ = affectorsEnabled; }
 
 	/// Returns the total number of particles in the system
 	inline unsigned int numParticles() const { return particleArray_.size(); }
@@ -97,6 +111,9 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 
 	/// A flag indicating whether the system should be simulated in local space
 	bool inLocalSpace_;
+
+	bool particlesUpdateEnabled_;
+	bool affectorsEnabled_;
 
 	/// Deleted assignment operator
 	ParticleSystem &operator=(const ParticleSystem &) = delete;

@@ -42,6 +42,7 @@
 	#include "LuaDrawableNode.h"
 	#include "LuaRectAnimation.h"
 	#include "LuaParticleSystem.h"
+	#include "LuaParticleAffector.h"
 
 	#ifdef WITH_AUDIO
 		#include "LuaIAudioDevice.h"
@@ -592,6 +593,7 @@ void LuaStateManager::exposeApi()
 		LuaFont::expose(this);
 		LuaTextNode::expose(this);
 		LuaParticleSystem::expose(this);
+		LuaParticleAffector::expose(this);
 	}
 
 	#ifdef WITH_AUDIO
@@ -630,6 +632,7 @@ void LuaStateManager::exposeConstants()
 		LuaRectAnimation::exposeConstants(L_);
 		LuaMeshSprite::exposeConstants(L_);
 		LuaTextNode::exposeConstants(L_);
+		LuaParticleAffector::exposeConstants(L_);
 	}
 #endif
 

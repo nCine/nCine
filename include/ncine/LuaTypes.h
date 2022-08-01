@@ -31,6 +31,7 @@ class AudioBuffer;
 class AudioBufferPlayer;
 class AudioStreamPlayer;
 class ParticleSystem;
+class ParticleAffector;
 
 /// The userdata types wrapped by Lua
 namespace LuaTypes {
@@ -59,6 +60,7 @@ namespace LuaTypes {
 		AUDIOBUFFER_PLAYER,
 		AUDIOSTREAM_PLAYER,
 		PARTICLE_SYSTEM,
+		PARTICLE_AFFECTOR,
 
 		UNKNOWN
 	};
@@ -88,6 +90,7 @@ namespace LuaTypes {
 	template <> inline LuaTypes::UserDataType classToUserDataType<AudioBufferPlayer>(AudioBufferPlayer *) { return LuaTypes::UserDataType::AUDIOBUFFER_PLAYER; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<AudioStreamPlayer>(AudioStreamPlayer *) { return LuaTypes::UserDataType::AUDIOSTREAM_PLAYER; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<ParticleSystem>(ParticleSystem *) { return LuaTypes::UserDataType::PARTICLE_SYSTEM; }
+	template <> inline LuaTypes::UserDataType classToUserDataType<ParticleAffector>(ParticleAffector *) { return LuaTypes::UserDataType::PARTICLE_AFFECTOR; }
 
 	template <class T> inline const char *classToName(T *) { return "unknown"; }
 
@@ -112,6 +115,7 @@ namespace LuaTypes {
 	template <> inline const char *classToName<AudioBufferPlayer>(AudioBufferPlayer *) { return "AudioBufferPlayer"; }
 	template <> inline const char *classToName<AudioStreamPlayer>(AudioStreamPlayer *) { return "AudioStreamPlayer"; }
 	template <> inline const char *classToName<ParticleSystem>(ParticleSystem *) { return "ParticleSystem"; }
+	template <> inline const char *classToName<ParticleAffector>(ParticleAffector *) { return "ParticleAffector"; }
 
 	inline const char *userDataTypeToName(LuaTypes::UserDataType type)
 	{
@@ -142,6 +146,7 @@ namespace LuaTypes {
 			case LuaTypes::UserDataType::AUDIOBUFFER_PLAYER: return "AudioBufferPlayer";
 			case LuaTypes::UserDataType::AUDIOSTREAM_PLAYER: return "AudioStreamPlayer";
 			case LuaTypes::UserDataType::PARTICLE_SYSTEM: return "ParticleSystem";
+			case LuaTypes::UserDataType::PARTICLE_AFFECTOR: return "ParticleAffector";
 		}
 
 		return "unknown";

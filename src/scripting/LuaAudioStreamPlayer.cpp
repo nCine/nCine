@@ -11,8 +11,9 @@ namespace LuaNames {
 namespace AudioStreamPlayer {
 	static const char *AudioStreamPlayer = "audiostream_player";
 
-	static const char *numStreamSamples = "num_stream_samples";
-	static const char *streamBufferSize = "stream_bufferSize";
+	static const char *numSamplesInStreamBuffer = "num_samples_in_streambuffer";
+	static const char *streamBufferSize = "streambuffer_size";
+	static const char *sampleOffsetInStream = "sample_offset_in_stream";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -30,8 +31,9 @@ void LuaAudioStreamPlayer::expose(LuaStateManager *stateManager)
 		LuaUtils::addFunction(L, LuaNames::newObject, newObject);
 	}
 
-	LuaUtils::addFunction(L, LuaNames::AudioStreamPlayer::numStreamSamples, numStreamSamples);
+	LuaUtils::addFunction(L, LuaNames::AudioStreamPlayer::numSamplesInStreamBuffer, numSamplesInStreamBuffer);
 	LuaUtils::addFunction(L, LuaNames::AudioStreamPlayer::streamBufferSize, streamBufferSize);
+	LuaUtils::addFunction(L, LuaNames::AudioStreamPlayer::sampleOffsetInStream, sampleOffsetInStream);
 
 	LuaIAudioPlayer::exposeFunctions(L);
 
@@ -57,12 +59,12 @@ int LuaAudioStreamPlayer::newObject(lua_State *L)
 	return 1;
 }
 
-int LuaAudioStreamPlayer::numStreamSamples(lua_State *L)
+int LuaAudioStreamPlayer::numSamplesInStreamBuffer(lua_State *L)
 {
 	AudioStreamPlayer *audioStreamPlayer = LuaUntrackedUserData<AudioStreamPlayer>::retrieve(L, -1);
 
 	if (audioStreamPlayer)
-		LuaUtils::push(L, static_cast<uint64_t>(audioStreamPlayer->numStreamSamples()));
+		LuaUtils::push(L, static_cast<uint64_t>(audioStreamPlayer->numSamplesInStreamBuffer()));
 	else
 		LuaUtils::pushNil(L);
 
@@ -75,6 +77,18 @@ int LuaAudioStreamPlayer::streamBufferSize(lua_State *L)
 
 	if (audioStreamPlayer)
 		LuaUtils::push(L, audioStreamPlayer->streamBufferSize());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaAudioStreamPlayer::sampleOffsetInStream(lua_State *L)
+{
+	AudioStreamPlayer *audioStreamPlayer = LuaUntrackedUserData<AudioStreamPlayer>::retrieve(L, -1);
+
+	if (audioStreamPlayer)
+		LuaUtils::push(L, static_cast<uint64_t>(audioStreamPlayer->sampleOffsetInStream()));
 	else
 		LuaUtils::pushNil(L);
 

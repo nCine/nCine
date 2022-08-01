@@ -77,8 +77,10 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	inline const nctl::String &string() const { return string_; }
 	/// Gets the string to render
 	inline nctl::String &string() { return string_; }
-	/// Sets the string to render
+	/// Sets the string to render from a string object
 	void setString(const nctl::String &string);
+	/// Sets the string to render from a C-style string
+	void setString(const char *string);
 
 	/// Calculates the rectangle boundaries needed to render the provided string with the specified font
 	static Vector2f calculateBoundaries(const Font &font, bool withKerning, const nctl::String &string);

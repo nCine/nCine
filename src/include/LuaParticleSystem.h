@@ -23,12 +23,21 @@ class LuaParticleSystem
 	static int addRotationAffector(lua_State *L);
 	static int addPositionAffector(lua_State *L);
 	static int addVelocityAffector(lua_State *L);
+
+	static int numAffectors(lua_State *L);
+	static int affector(lua_State *L);
+	static int removeAffector(lua_State *L);
 	static int clearAffectors(lua_State *L);
 
 	static int emitParticles(lua_State *L);
 	static int killParticles(lua_State *L);
 	static int inLocalSpace(lua_State *L);
 	static int setInLocalSpace(lua_State *L);
+
+	static int isParticlesUpdateEnabled(lua_State *L);
+	static int setParticlesUpdateEnabled(lua_State *L);
+	static int areAffectorsEnabled(lua_State *L);
+	static int setAffectorsEnabled(lua_State *L);
 
 	static int numParticles(lua_State *L);
 	static int numAliveParticles(lua_State *L);

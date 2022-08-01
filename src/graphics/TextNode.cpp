@@ -134,6 +134,16 @@ void TextNode::setString(const nctl::String &string)
 	}
 }
 
+void TextNode::setString(const char *string)
+{
+	if (string != nullptr && string_.compare(string))
+	{
+		string_.assign(string);
+		dirtyDraw_ = true;
+		dirtyBoundaries_ = true;
+	}
+}
+
 Vector2f TextNode::calculateBoundaries(const Font &font, bool withKerning, const nctl::String &string)
 {
 	float xAdvanceMax = 0.0f; // longest line

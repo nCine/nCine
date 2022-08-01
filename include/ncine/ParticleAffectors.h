@@ -26,7 +26,7 @@ class DLL_PUBLIC ParticleAffector
 	};
 
 	ParticleAffector(Type type)
-	    : type_(type) {}
+	    : type_(type), enabled_(true) {}
 	virtual ~ParticleAffector() {}
 
 	/// Affects a property of the specified particle
@@ -37,9 +37,23 @@ class DLL_PUBLIC ParticleAffector
 	/// Returns the object type (RTTI)
 	inline Type type() const { return type_; }
 
+	/// Returns true if the affector is enabled
+	inline bool isEnabled() const { return enabled_; }
+	/// Enables or disables the affector
+	inline void setEnabled(bool enabled) { enabled_ = enabled; }
+
+	/// Returns the number of steps
+	virtual unsigned int numSteps() const = 0;
+	/// Removes the step at the specified position index
+	virtual void removeStep(unsigned int index) = 0;
+	/// Removes all steps
+	virtual void clearSteps() = 0;
+
   protected:
 	/// Affector type
 	Type type_;
+	/// A flag indicating whether the affector is enabled or not
+	bool enabled_;
 
 	/// Protected default copy constructor used to clone objects
 	ParticleAffector(const ParticleAffector &other) = default;
@@ -74,6 +88,11 @@ class DLL_PUBLIC ColorAffector : public ParticleAffector
 	/// Affects the color of the specified particle
 	void affect(Particle *particle, float normalizedAge) override;
 	void addColorStep(float age, const Colorf &color);
+	inline void addColorStep(const ColorStep &step) { addColorStep(step.age, step.color); }
+
+	inline unsigned int numSteps() const override { return colorSteps_.size(); }
+	void removeStep(unsigned int index) override;
+	inline void clearSteps() override { colorSteps_.clear(); }
 
 	inline nctl::Array<ColorStep> &steps() { return colorSteps_; }
 	inline const nctl::Array<ColorStep> &steps() const { return colorSteps_; }
@@ -131,6 +150,11 @@ class DLL_PUBLIC SizeAffector : public ParticleAffector
 	inline void addSizeStep(float age, float scale) { addSizeStep(age, scale, scale); }
 	void addSizeStep(float age, float scaleX, float scaleY);
 	inline void addSizeStep(float age, const Vector2f &scale) { addSizeStep(age, scale.x, scale.y); }
+	inline void addSizeStep(const SizeStep &step) { addSizeStep(step.age, step.scale); }
+
+	inline unsigned int numSteps() const override { return sizeSteps_.size(); }
+	void removeStep(unsigned int index) override;
+	inline void clearSteps() override { sizeSteps_.clear(); }
 
 	inline nctl::Array<SizeStep> &steps() { return sizeSteps_; }
 	inline const nctl::Array<SizeStep> &steps() const { return sizeSteps_; }
@@ -182,6 +206,11 @@ class DLL_PUBLIC RotationAffector : public ParticleAffector
 	/// Affects the rotation of the specified particle
 	void affect(Particle *particle, float normalizedAge) override;
 	void addRotationStep(float age, float angle);
+	inline void addRotationStep(const RotationStep &step) { addRotationStep(step.age, step.angle); }
+
+	inline unsigned int numSteps() const override { return rotationSteps_.size(); }
+	void removeStep(unsigned int index) override;
+	inline void clearSteps() override { rotationSteps_.clear(); }
 
 	inline nctl::Array<RotationStep> &steps() { return rotationSteps_; }
 	inline const nctl::Array<RotationStep> &steps() const { return rotationSteps_; }
@@ -224,6 +253,11 @@ class DLL_PUBLIC PositionAffector : public ParticleAffector
 	void affect(Particle *particle, float normalizedAge) override;
 	void addPositionStep(float age, float posX, float posY);
 	inline void addPositionStep(float age, const Vector2f &position) { addPositionStep(age, position.x, position.y); }
+	inline void addPositionStep(const PositionStep &step) { addPositionStep(step.age, step.position); }
+
+	inline unsigned int numSteps() const override { return positionSteps_.size(); }
+	void removeStep(unsigned int index) override;
+	inline void clearSteps() override { positionSteps_.clear(); }
 
 	inline nctl::Array<PositionStep> &steps() { return positionSteps_; }
 	inline const nctl::Array<PositionStep> &steps() const { return positionSteps_; }
@@ -266,6 +300,11 @@ class DLL_PUBLIC VelocityAffector : public ParticleAffector
 	void affect(Particle *particle, float normalizedAge) override;
 	void addVelocityStep(float age, float velX, float velY);
 	inline void addVelocityStep(float age, const Vector2f &velocity) { addVelocityStep(age, velocity.x, velocity.y); }
+	inline void addVelocityStep(const VelocityStep &step) { addVelocityStep(step.age, step.velocity); }
+
+	inline unsigned int numSteps() const override { return velocitySteps_.size(); }
+	void removeStep(unsigned int index) override;
+	inline void clearSteps() override { velocitySteps_.clear(); }
 
 	inline nctl::Array<VelocityStep> &steps() { return velocitySteps_; }
 	inline const nctl::Array<VelocityStep> &steps() const { return velocitySteps_; }

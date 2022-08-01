@@ -33,9 +33,11 @@ class DLL_PUBLIC AudioStream
 	inline unsigned long bufferSize() const { return numSamples_ * numChannels_ * bytesPerSample_; }
 
 	/// Returns the number of samples in the streaming buffer
-	unsigned long int numStreamSamples() const;
+	unsigned long int numSamplesInStreamBuffer() const;
 	/// Returns the size of the streaming buffer in bytes
 	inline int streamBufferSize() const { return BufferSize; }
+	/// Returns the number of processed buffers since first enqueue
+	inline unsigned int totalProcessedBuffers() const { return totalProcessedBuffers_; }
 
 	/// Enqueues new buffers and unqueues processed ones
 	bool enqueue(unsigned int source, bool looping);
@@ -57,6 +59,10 @@ class DLL_PUBLIC AudioStream
 
 	/// OpenAL id of the currently playing buffer, or 0 if not
 	unsigned int currentBufferId_;
+
+	/// Number of processed buffers since first enqueue
+	/*! \note Used to know the sample offset inside the whole stream */
+	unsigned int totalProcessedBuffers_;
 
 	/// Number of bytes per sample
 	int bytesPerSample_;

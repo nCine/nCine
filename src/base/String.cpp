@@ -159,9 +159,9 @@ void String::setCapacity(unsigned int newCapacity)
 	if (newCapacity > SmallBufferSize)
 	{
 #if !NCINE_WITH_ALLOCATORS
-		newArray = static_cast<char *>(::operator new(newCapacity * sizeof(char)));
+		newArray = static_cast<char *>(::operator new[](newCapacity * sizeof(char)));
 #else
-		newArray = static_cast<char *>(alloc_.allocate(newCapacity * sizeof(char)));
+		newArray = theStringAllocator().newArray<char>(capacity_);
 #endif
 		if (length_ > 0)
 		{

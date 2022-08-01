@@ -59,6 +59,11 @@ bool AudioStreamPlayer::loadFromFile(const char *filename)
 	return true;
 }
 
+unsigned long int AudioStreamPlayer::sampleOffsetInStream() const
+{
+	return (audioStream_.totalProcessedBuffers() * audioStream_.numSamplesInStreamBuffer() + sampleOffset());
+}
+
 void AudioStreamPlayer::play()
 {
 	IAudioDevice &device = theServiceLocator().audioDevice();

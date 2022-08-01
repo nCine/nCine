@@ -19,12 +19,21 @@ namespace ParticleSystem {
 	static const char *addRotationAffector = "add_rotation_affector";
 	static const char *addPositionAffector = "add_position_affector";
 	static const char *addVelocityAffector = "add_velocity_affector";
+
+	static const char *numAffectors = "num_affectors";
+	static const char *affector = "get_affector";
+	static const char *removeAffector = "remove_affector";
 	static const char *clearAffectors = "clear_affectors";
 
 	static const char *emitParticles = "emit_particles";
 	static const char *killParticles = "kill_particles";
 	static const char *inLocalSpace = "get_in_local_space";
 	static const char *setInLocalSpace = "set_in_local_space";
+
+	static const char *isParticlesUpdateEnabled = "get_particles_update_enabled";
+	static const char *setParticlesUpdateEnabled = "set_particles_update_enabled";
+	static const char *areAffectorsEnabled = "get_affectors_enabled";
+	static const char *setAffectorsEnabled = "set_affectors_enabled";
 
 	static const char *numParticles = "num_particles";
 	static const char *numAliveParticles = "num_alive_particles";
@@ -70,12 +79,21 @@ void LuaParticleSystem::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::addRotationAffector, addRotationAffector);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::addPositionAffector, addPositionAffector);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::addVelocityAffector, addVelocityAffector);
+
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::numAffectors, numAffectors);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::affector, affector);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::removeAffector, removeAffector);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::clearAffectors, clearAffectors);
 
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::emitParticles, emitParticles);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::killParticles, killParticles);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::inLocalSpace, inLocalSpace);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setInLocalSpace, setInLocalSpace);
+
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::isParticlesUpdateEnabled, isParticlesUpdateEnabled);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setParticlesUpdateEnabled, setParticlesUpdateEnabled);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::areAffectorsEnabled, areAffectorsEnabled);
+	LuaUtils::addFunction(L, LuaNames::ParticleSystem::setAffectorsEnabled, setAffectorsEnabled);
 
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::numParticles, numParticles);
 	LuaUtils::addFunction(L, LuaNames::ParticleSystem::numAliveParticles, numAliveParticles);
@@ -434,6 +452,44 @@ int LuaParticleSystem::addVelocityAffector(lua_State *L)
 	return 0;
 }
 
+int LuaParticleSystem::numAffectors(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -1);
+
+	if (particleSys)
+		LuaUtils::push(L, particleSys->affectors().size());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaParticleSystem::affector(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -2);
+	const int index = LuaUtils::retrieve<int>(L, -1);
+
+	const int size = particleSys ? particleSys->affectors().size() : 0;
+	if (particleSys && index >= 0 && index < size)
+		LuaUntrackedUserData<ParticleAffector>::push(L, particleSys->affectors()[index].get());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaParticleSystem::removeAffector(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -2);
+	const int index = LuaUtils::retrieve<int>(L, -1);
+
+	const int size = particleSys ? particleSys->affectors().size() : 0;
+	if (particleSys && index >= 0 && index < size)
+		particleSys->affectors().removeAt(index);
+
+	return 0;
+}
+
 int LuaParticleSystem::clearAffectors(lua_State *L)
 {
 	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -1);
@@ -485,6 +541,52 @@ int LuaParticleSystem::setInLocalSpace(lua_State *L)
 
 	if (particleSys)
 		particleSys->setInLocalSpace(inLocalSpace);
+
+	return 0;
+}
+
+int LuaParticleSystem::isParticlesUpdateEnabled(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -1);
+
+	if (particleSys)
+		LuaUtils::push(L, particleSys->isParticlesUpdateEnabled());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaParticleSystem::setParticlesUpdateEnabled(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -2);
+	const bool particlesUpdateEnabled = LuaUtils::retrieve<bool>(L, -1);
+
+	if (particleSys)
+		particleSys->setParticlesUpdateEnabled(particlesUpdateEnabled);
+
+	return 0;
+}
+
+int LuaParticleSystem::areAffectorsEnabled(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -1);
+
+	if (particleSys)
+		LuaUtils::push(L, particleSys->areAffectorsEnabled());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaParticleSystem::setAffectorsEnabled(lua_State *L)
+{
+	ParticleSystem *particleSys = LuaUntrackedUserData<ParticleSystem>::retrieve(L, -2);
+	const bool affectorsEnabled = LuaUtils::retrieve<bool>(L, -1);
+
+	if (particleSys)
+		particleSys->setAffectorsEnabled(affectorsEnabled);
 
 	return 0;
 }

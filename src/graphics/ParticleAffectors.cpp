@@ -1,3 +1,4 @@
+#include <nctl/algorithms.h>
 #include "ParticleAffectors.h"
 #include "Particle.h"
 
@@ -19,18 +20,35 @@ void ParticleAffector::affect(Particle *particle)
 
 void ColorAffector::addColorStep(float age, const Colorf &color)
 {
-	if (colorSteps_.isEmpty() || age > colorSteps_[colorSteps_.size() - 1].age)
-		colorSteps_.pushBack(ColorStep(age, color));
-	else
-		LOGW("Out of order step not added");
+	age = nctl::clamp(age, 0.0f, 1.0f);
+
+	unsigned int index = 0;
+	for (unsigned int i = 0; i < colorSteps_.size(); i++)
+	{
+		ColorAffector::ColorStep &step = colorSteps_[i];
+		if (age >= step.age && (colorSteps_.size() <= i + 1 || age <= colorSteps_[i + 1].age))
+		{
+			index = i + 1;
+			break;
+		}
+	}
+
+	colorSteps_.emplaceAt(index, age, color);
+}
+
+void ColorAffector::removeStep(unsigned int index)
+{
+	if (index < colorSteps_.size())
+		colorSteps_.removeAt(index);
 }
 
 void ColorAffector::affect(Particle *particle, float normalizedAge)
 {
 	ASSERT(particle);
+	ASSERT(normalizedAge >= 0.0f && normalizedAge <= 1.0f);
 
-	// Zero steps in the affector
-	if (colorSteps_.isEmpty())
+	// Affector is disabled or has zero steps
+	if (enabled_ == false || colorSteps_.isEmpty())
 		return;
 
 	if (normalizedAge <= colorSteps_[0].age)
@@ -71,15 +89,36 @@ void ColorAffector::affect(Particle *particle, float normalizedAge)
 
 void SizeAffector::addSizeStep(float age, float scaleX, float scaleY)
 {
-	if (sizeSteps_.isEmpty() || age > sizeSteps_[sizeSteps_.size() - 1].age)
-		sizeSteps_.pushBack(SizeStep(age, scaleX, scaleY));
-	else
-		LOGW("Out of order step not added");
+	age = nctl::clamp(age, 0.0f, 1.0f);
+
+	unsigned int index = 0;
+	for (unsigned int i = 0; i < sizeSteps_.size(); i++)
+	{
+		SizeAffector::SizeStep &step = sizeSteps_[i];
+		if (age >= step.age && (sizeSteps_.size() <= i + 1 || age <= sizeSteps_[i + 1].age))
+		{
+			index = i + 1;
+			break;
+		}
+	}
+
+	sizeSteps_.emplaceAt(index, age, scaleX, scaleY);
+}
+
+void SizeAffector::removeStep(unsigned int index)
+{
+	if (index < sizeSteps_.size())
+		sizeSteps_.removeAt(index);
 }
 
 void SizeAffector::affect(Particle *particle, float normalizedAge)
 {
 	ASSERT(particle);
+	ASSERT(normalizedAge >= 0.0f && normalizedAge <= 1.0f);
+
+	// Affector is disabled
+	if (enabled_ == false)
+		return;
 
 	// Zero steps in the affector
 	if (sizeSteps_.isEmpty())
@@ -123,18 +162,35 @@ void SizeAffector::affect(Particle *particle, float normalizedAge)
 
 void RotationAffector::addRotationStep(float age, float angle)
 {
-	if (rotationSteps_.isEmpty() || age > rotationSteps_[rotationSteps_.size() - 1].age)
-		rotationSteps_.pushBack(RotationStep(age, angle));
-	else
-		LOGW("Out of order step not added");
+	age = nctl::clamp(age, 0.0f, 1.0f);
+
+	unsigned int index = 0;
+	for (unsigned int i = 0; i < rotationSteps_.size(); i++)
+	{
+		RotationAffector::RotationStep &step = rotationSteps_[i];
+		if (age >= step.age && (rotationSteps_.size() <= i + 1 || age <= rotationSteps_[i + 1].age))
+		{
+			index = i + 1;
+			break;
+		}
+	}
+
+	rotationSteps_.emplaceAt(index, age, angle);
+}
+
+void RotationAffector::removeStep(unsigned int index)
+{
+	if (index < rotationSteps_.size())
+		rotationSteps_.removeAt(index);
 }
 
 void RotationAffector::affect(Particle *particle, float normalizedAge)
 {
 	ASSERT(particle);
+	ASSERT(normalizedAge >= 0.0f && normalizedAge <= 1.0f);
 
-	// Zero steps in the affector
-	if (rotationSteps_.isEmpty())
+	// Affector is disabled or has zero steps
+	if (enabled_ == false || rotationSteps_.isEmpty())
 		return;
 
 	if (normalizedAge <= rotationSteps_[0].age)
@@ -171,18 +227,35 @@ void RotationAffector::affect(Particle *particle, float normalizedAge)
 
 void PositionAffector::addPositionStep(float age, float posX, float posY)
 {
-	if (positionSteps_.isEmpty() || age > positionSteps_[positionSteps_.size() - 1].age)
-		positionSteps_.pushBack(PositionStep(age, posX, posY));
-	else
-		LOGW("Out of order step not added");
+	age = nctl::clamp(age, 0.0f, 1.0f);
+
+	unsigned int index = 0;
+	for (unsigned int i = 0; i < positionSteps_.size(); i++)
+	{
+		PositionAffector::PositionStep &step = positionSteps_[i];
+		if (age >= step.age && (positionSteps_.size() <= i + 1 || age <= positionSteps_[i + 1].age))
+		{
+			index = i + 1;
+			break;
+		}
+	}
+
+	positionSteps_.emplaceAt(index, age, posX, posY);
+}
+
+void PositionAffector::removeStep(unsigned int index)
+{
+	if (index < positionSteps_.size())
+		positionSteps_.removeAt(index);
 }
 
 void PositionAffector::affect(Particle *particle, float normalizedAge)
 {
 	ASSERT(particle);
+	ASSERT(normalizedAge >= 0.0f && normalizedAge <= 1.0f);
 
-	// Zero steps in the affector
-	if (positionSteps_.isEmpty())
+	// Affector is disabled or has zero steps
+	if (enabled_ == false || positionSteps_.isEmpty())
 		return;
 
 	if (normalizedAge <= positionSteps_[0].age)
@@ -219,18 +292,35 @@ void PositionAffector::affect(Particle *particle, float normalizedAge)
 
 void VelocityAffector::addVelocityStep(float age, float velX, float velY)
 {
-	if (velocitySteps_.isEmpty() || age > velocitySteps_[velocitySteps_.size() - 1].age)
-		velocitySteps_.pushBack(VelocityStep(age, velX, velY));
-	else
-		LOGW("Out of order step not added");
+	age = nctl::clamp(age, 0.0f, 1.0f);
+
+	unsigned int index = 0;
+	for (unsigned int i = 0; i < velocitySteps_.size(); i++)
+	{
+		VelocityAffector::VelocityStep &step = velocitySteps_[i];
+		if (age >= step.age && (velocitySteps_.size() <= i + 1 || age <= velocitySteps_[i + 1].age))
+		{
+			index = i + 1;
+			break;
+		}
+	}
+
+	velocitySteps_.emplaceAt(index, age, velX, velY);
+}
+
+void VelocityAffector::removeStep(unsigned int index)
+{
+	if (index < velocitySteps_.size())
+		velocitySteps_.removeAt(index);
 }
 
 void VelocityAffector::affect(Particle *particle, float normalizedAge)
 {
 	ASSERT(particle);
+	ASSERT(normalizedAge >= 0.0f && normalizedAge <= 1.0f);
 
-	// Zero steps in the affector
-	if (velocitySteps_.isEmpty())
+	// Affector is disabled or has zero steps
+	if (enabled_ == false || velocitySteps_.isEmpty())
 		return;
 
 	if (normalizedAge <= velocitySteps_[0].age)

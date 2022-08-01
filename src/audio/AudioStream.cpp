@@ -16,7 +16,7 @@ namespace ncine {
 /*! Private constructor called only by `AudioStreamPlayer`. */
 AudioStream::AudioStream()
     : buffersIds_(nctl::StaticArrayMode::EXTEND_SIZE), nextAvailableBufferIndex_(0),
-      currentBufferId_(0), bytesPerSample_(0), numChannels_(0),
+      currentBufferId_(0), totalProcessedBuffers_(0), bytesPerSample_(0), numChannels_(0),
       frequency_(0), numSamples_(0), duration_(0.0f)
 {
 	alGetError();
@@ -59,7 +59,7 @@ AudioStream &AudioStream::operator=(AudioStream &&) = default;
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-unsigned long int AudioStream::numStreamSamples() const
+unsigned long int AudioStream::numSamplesInStreamBuffer() const
 {
 	if (numChannels_ * bytesPerSample_ > 0)
 		return BufferSize / (numChannels_ * bytesPerSample_);
@@ -86,6 +86,7 @@ bool AudioStream::enqueue(unsigned int source, bool looping)
 		nextAvailableBufferIndex_--;
 		buffersIds_[nextAvailableBufferIndex_] = unqueuedAlBuffer;
 		numProcessedBuffers--;
+		totalProcessedBuffers_++;
 	}
 
 	// Queueing
@@ -104,6 +105,7 @@ bool AudioStream::enqueue(unsigned int source, bool looping)
 				const unsigned long moreBytes = audioReader_->read(memBuffer_.get() + bytes, BufferSize - bytes);
 				bytes += moreBytes;
 			}
+			totalProcessedBuffers_ = 0;
 		}
 
 		// If it is still decoding data then enqueue
@@ -160,6 +162,7 @@ void AudioStream::stop(unsigned int source)
 
 	audioReader_->rewind();
 	currentBufferId_ = 0;
+	totalProcessedBuffers_ = 0;
 }
 
 ///////////////////////////////////////////////////////////

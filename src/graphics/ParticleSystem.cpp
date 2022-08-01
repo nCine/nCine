@@ -33,7 +33,8 @@ ParticleSystem::ParticleSystem(SceneNode *parent, unsigned int count, Texture *t
     : SceneNode(parent, 0, 0), poolSize_(count), poolTop_(count - 1),
       particlePool_(poolSize_, nctl::ArrayMode::FIXED_CAPACITY),
       particleArray_(poolSize_, nctl::ArrayMode::FIXED_CAPACITY),
-      affectors_(4), inLocalSpace_(false)
+      affectors_(4), inLocalSpace_(false),
+      particlesUpdateEnabled_(true), affectorsEnabled_(true)
 {
 	ZoneScoped;
 	if (texture && texture->name() != nullptr)
@@ -54,12 +55,6 @@ ParticleSystem::ParticleSystem(SceneNode *parent, unsigned int count, Texture *t
 	}
 }
 
-ParticleSystem::~ParticleSystem()
-{
-	// Empty the children list before the mass deletion
-	children_.clear();
-}
-
 ParticleSystem::ParticleSystem(ParticleSystem &&) = default;
 
 ParticleSystem &ParticleSystem::operator=(ParticleSystem &&) = default;
@@ -70,8 +65,6 @@ ParticleSystem &ParticleSystem::operator=(ParticleSystem &&) = default;
 
 void ParticleSystem::clearAffectors()
 {
-	for (nctl::UniquePtr<ParticleAffector> &affector : affectors_)
-		affector.reset(nullptr);
 	affectors_.clear();
 }
 
@@ -210,20 +203,26 @@ void ParticleSystem::update(float interval)
 		// Update the particle if it's alive
 		if (particle->isAlive())
 		{
-			// Calculating the normalized age only once per particle
-			const float normalizedAge = 1.0f - particle->life_ / particle->startingLife;
-			for (nctl::UniquePtr<ParticleAffector> &affector : affectors_)
-				affector->affect(particle, normalizedAge);
-
-			particle->update(interval);
-
-			// Releasing the particle if it has just died
-			if (particle->isAlive() == false)
+			if (affectorsEnabled_)
 			{
-				poolTop_++;
-				particlePool_[poolTop_] = particle;
-				removeChildNodeAt(i);
-				continue;
+				// Calculating the normalized age only once per particle
+				const float normalizedAge = 1.0f - particle->life_ / particle->startingLife;
+				for (nctl::UniquePtr<ParticleAffector> &affector : affectors_)
+					affector->affect(particle, normalizedAge);
+			}
+
+			if (particlesUpdateEnabled_)
+			{
+				particle->update(interval);
+
+				// Releasing the particle if it has just died
+				if (particle->isAlive() == false)
+				{
+					poolTop_++;
+					particlePool_[poolTop_] = particle;
+					removeChildNodeAt(i);
+					continue;
+				}
 			}
 
 			// Transforming the particle only if it's still alive
@@ -251,7 +250,9 @@ ParticleSystem::ParticleSystem(const ParticleSystem &other)
     : SceneNode(other), poolSize_(other.poolSize_), poolTop_(other.poolSize_ - 1),
       particlePool_(other.poolSize_, nctl::ArrayMode::FIXED_CAPACITY),
       particleArray_(other.poolSize_, nctl::ArrayMode::FIXED_CAPACITY),
-      affectors_(4), inLocalSpace_(other.inLocalSpace_)
+      affectors_(4), inLocalSpace_(other.inLocalSpace_),
+      particlesUpdateEnabled_(other.particlesUpdateEnabled_),
+      affectorsEnabled_(other.affectorsEnabled_)
 {
 	ZoneScoped;
 	type_ = ObjectType::PARTICLE_SYSTEM;

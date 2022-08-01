@@ -255,6 +255,7 @@ if(LUA_FOUND)
 			${NCINE_ROOT}/src/include/LuaFont.h
 			${NCINE_ROOT}/src/include/LuaTextNode.h
 			${NCINE_ROOT}/src/include/LuaParticleSystem.h
+			${NCINE_ROOT}/src/include/LuaParticleAffector.h
 			${NCINE_ROOT}/src/include/LuaViewport.h
 			${NCINE_ROOT}/src/include/LuaCamera.h
 			${NCINE_ROOT}/src/include/LuaShader.h
@@ -287,6 +288,7 @@ if(LUA_FOUND)
 			${NCINE_ROOT}/src/scripting/LuaFont.cpp
 			${NCINE_ROOT}/src/scripting/LuaTextNode.cpp
 			${NCINE_ROOT}/src/scripting/LuaParticleSystem.cpp
+			${NCINE_ROOT}/src/scripting/LuaParticleAffector.cpp
 			${NCINE_ROOT}/src/scripting/LuaViewport.cpp
 			${NCINE_ROOT}/src/scripting/LuaCamera.cpp
 			${NCINE_ROOT}/src/scripting/LuaShader.cpp
