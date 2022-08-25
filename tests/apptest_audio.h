@@ -39,13 +39,18 @@ class MyEventHandler :
 #endif
 	void onKeyReleased(const nc::KeyboardEvent &event) override;
 
+	void onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event) override;
+	void onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event) override;
+	void onJoyDisconnected(const nc::JoyConnectionEvent &event) override;
+
   private:
 	const int MaxStringLength = 384;
 
 	float gain_;
 	float pitch_;
 	float xPos_;
-	bool isLooping_;
+	bool soundIsLooping_;
+	bool musicIsLooping_;
 
 	nctl::UniquePtr<nc::AudioBuffer> audioBuffer_;
 	nctl::UniquePtr<nc::IAudioPlayer> soundPlayer_;
@@ -55,8 +60,14 @@ class MyEventHandler :
 	nctl::UniquePtr<nc::TextNode> textNode_;
 	nctl::UniquePtr<nctl::String> textString_;
 
+	void resetValues();
 	void toggleMusic();
 	void toggleSound();
+
+	void loadNextMusic();
+	void loadPrevMusic();
+	void loadNextSound();
+	void loadPrevSound();
 };
 
 #endif

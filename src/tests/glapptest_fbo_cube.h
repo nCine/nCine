@@ -38,13 +38,15 @@ class MyEventHandler :
 	void onMouseButtonPressed(const nc::MouseEvent &event) override;
 	void onMouseButtonReleased(const nc::MouseEvent &event) override;
 
+	void onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event) override;
+
   private:
 	static const int FboSize = 256;
 
+	bool pauseTri_;
+	bool pauseCube_;
 	float angleTri_;
 	float angleCube_;
-	bool updateTri_;
-	bool updateCube_;
 	int width_, height_;
 	static const int UniformsBufferSize = 276;
 	unsigned char uniformsBuffer_[UniformsBufferSize];

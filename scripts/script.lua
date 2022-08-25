@@ -129,6 +129,7 @@ void main()
 
 	audiobuffer_ = nc.audiobuffer.new(nc.fs.get_datapath().."sounds/"..sound_file)
 	player_ = nc.audiobuffer_player.new(audiobuffer_)
+	pause_ = false
 
 	local settings = nc.application.get_rendering_settings()
 	print("Rendering settings")
@@ -140,6 +141,11 @@ void main()
 end
 
 function ncine.on_frame_start()
+	nc.particle_system.set_particles_update_enabled(particlesys_, not pause_)
+	if pause_ then
+		return
+	end
+
 	angle_ = angle_ + 100 * nc.application.get_interval()
 
 	local newpos = {x = 0, y = 0}
@@ -215,7 +221,9 @@ function ncine.on_key_released(event)
 	elseif event.sym == nc.keysym.V then
 		with_viewport_ = not with_viewport_
 		setup_viewport()
-	elseif event.sym == nc.keysym.Q or event.sym == nc.keysym.ESCAPE then
+	elseif event.sym == nc.keysym.P then
+		pause_ = not pause_;
+	elseif event.sym == nc.keysym.ESCAPE then
 		nc.application.quit()
 	end
 end
@@ -259,6 +267,8 @@ function ncine.on_joymapped_button_released(event)
 		with_viewport_ = not with_viewport_
 		setup_viewport()
 	elseif event.button == nc.joy_button.START then
+		pause_ = not pause_
+	elseif event.button == nc.joy_button.GUIDE then
 		nc.application.quit()
 	end
 end

@@ -98,28 +98,15 @@ void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	nc::Application::RenderingSettings &renderingSettings = nc::theApplication().renderingSettings();
-	nc::IDebugOverlay::DisplaySettings &overlaySettings = nc::theApplication().debugOverlaySettings();
 
 	if (event.sym == nc::KeySym::B)
 		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
 	else if (event.sym == nc::KeySym::I)
 		renderingSettings.batchingWithIndices = !renderingSettings.batchingWithIndices;
-	else if (event.sym == nc::KeySym::H)
-	{
-		overlaySettings.showProfilerGraphs = !overlaySettings.showProfilerGraphs;
-		overlaySettings.showInfoText = !overlaySettings.showInfoText;
-	}
-	else if (event.sym == nc::KeySym::BACKQUOTE)
-		overlaySettings.showInterface = !overlaySettings.showInterface;
 	else if (event.sym == nc::KeySym::P)
 		pause_ = !pause_;
-	else if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
+	else if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
-	else if (event.sym == nc::KeySym::SPACE)
-	{
-		const bool isSuspended = nc::theApplication().isSuspended();
-		nc::theApplication().setSuspended(!isSuspended);
-	}
 }
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
@@ -137,17 +124,11 @@ void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event)
 {
 	nc::Application::RenderingSettings &renderingSettings = nc::theApplication().renderingSettings();
-	nc::IDebugOverlay::DisplaySettings &overlaySettings = nc::theApplication().debugOverlaySettings();
 
 	if (event.buttonName == nc::ButtonName::A)
 		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
-	else if (event.buttonName == nc::ButtonName::Y)
+	else if (event.buttonName == nc::ButtonName::X)
 		renderingSettings.batchingWithIndices = !renderingSettings.batchingWithIndices;
-	else if (event.buttonName == nc::ButtonName::BACK)
-	{
-		overlaySettings.showProfilerGraphs = !overlaySettings.showProfilerGraphs;
-		overlaySettings.showInfoText = !overlaySettings.showInfoText;
-	}
 	else if (event.buttonName == nc::ButtonName::START)
 		pause_ = !pause_;
 	else if (event.buttonName == nc::ButtonName::GUIDE)

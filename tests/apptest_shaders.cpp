@@ -78,6 +78,10 @@ int downsampleFactor = 4;
 bool captureMouse = true;
 bool captureKeyboard = true;
 
+#if NCINE_WITH_IMGUI
+bool showImGui = true;
+#endif
+
 const char *stringOnOff(bool enabled)
 {
 	return enabled ? "on" : "off";
@@ -248,39 +252,53 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
+	const float width = nc::theApplication().width();
 	const float height = nc::theApplication().height();
 
 #if NCINE_WITH_IMGUI
 	captureMouse = (ImGui::GetIO().WantCaptureMouse == false);
 	captureKeyboard = (ImGui::GetIO().WantCaptureKeyboard == false);
-
-	ImGui::Begin("apptest_shaders");
-	shaderDataChanged |= ImGui::InputFloat3("Position", multiTextureShaderData.lightPosition.data());
-	shaderDataChanged |= ImGui::ColorEdit3("Ambient Color", multiTextureShaderData.ambientColor.data());
-	shaderDataChanged |= ImGui::ColorEdit3("Diffuse Color", multiTextureShaderData.diffuseColor.data());
-	shaderDataChanged |= ImGui::ColorEdit3("Specular Color", multiTextureShaderData.specularColor.data());
-	shaderDataChanged |= ImGui::InputFloat3("Attenuation", multiTextureShaderData.attFactors.data(), "%.6f");
-
-	shaderDataChanged |= ImGui::SliderFloat("Ambient Intensity", &multiTextureShaderData.ambientColor.data()[3], 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-	shaderDataChanged |= ImGui::SliderFloat("Diffuse Intensity", &multiTextureShaderData.diffuseColor.data()[3], 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-	shaderDataChanged |= ImGui::SliderFloat("Specular Intensity", &multiTextureShaderData.specularColor.data()[3], 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-	shaderDataChanged |= ImGui::SliderFloat("Specular Scatter", &multiTextureShaderData.attFactors.w, 1.0f, 64.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-
-	if (ImGui::Button("Reset"))
+	if (showImGui)
 	{
-		multiTextureShaderData = MultiTextureShaderData();
-		multiTextureShaderData.lightPosition.x = nc::theApplication().width() * 0.5f;
-		multiTextureShaderData.lightPosition.y = nc::theApplication().height() * 0.5f;
+		ImGui::SetNextWindowSize(ImVec2(410.0f, 320.0f), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowPos(ImVec2(30.0f, 60.0f), ImGuiCond_FirstUseEver);
+		if (ImGui::Begin("apptest_shaders", &showImGui))
+		{
+			shaderDataChanged |= ImGui::InputFloat3("Position", multiTextureShaderData.lightPosition.data());
+			shaderDataChanged |= ImGui::ColorEdit3("Ambient Color", multiTextureShaderData.ambientColor.data());
+			shaderDataChanged |= ImGui::ColorEdit3("Diffuse Color", multiTextureShaderData.diffuseColor.data());
+			shaderDataChanged |= ImGui::ColorEdit3("Specular Color", multiTextureShaderData.specularColor.data());
+			shaderDataChanged |= ImGui::InputFloat3("Attenuation", multiTextureShaderData.attFactors.data(), "%.6f");
+
+			shaderDataChanged |= ImGui::SliderFloat("Ambient Intensity", &multiTextureShaderData.ambientColor.data()[3], 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+			shaderDataChanged |= ImGui::SliderFloat("Diffuse Intensity", &multiTextureShaderData.diffuseColor.data()[3], 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+			shaderDataChanged |= ImGui::SliderFloat("Specular Intensity", &multiTextureShaderData.specularColor.data()[3], 0.0f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+			shaderDataChanged |= ImGui::SliderFloat("Specular Scatter", &multiTextureShaderData.attFactors.w, 1.0f, 64.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+
+			if (ImGui::Button("Reset"))
+			{
+				multiTextureShaderData = MultiTextureShaderData();
+				multiTextureShaderData.lightPosition.x = width * 0.5f;
+				multiTextureShaderData.lightPosition.y = height * 0.5f;
+				shaderDataChanged = true;
+			}
+
+			ImGui::Separator();
+			if (ImGui::SliderInt("Blur passes", &numBlurPasses_, 1, 3, "%d", ImGuiSliderFlags_AlwaysClamp))
+				setupViewport();
+			if (ImGui::Combo("Viewport setup", &currentViewportSetup_, ViewportSetupLabels, IM_ARRAYSIZE(ViewportSetupLabels)))
+				setupViewport();
+		}
+		ImGui::End();
+	}
+#endif
+
+	if (joyVectorLeft_.length() > nc::IInputManager::LeftStickDeadZone)
+	{
+		multiTextureShaderData.lightPosition.x = width * joyVectorLeft_.x;
+		multiTextureShaderData.lightPosition.y = height * joyVectorLeft_.y;
 		shaderDataChanged = true;
 	}
-
-	ImGui::Separator();
-	if (ImGui::SliderInt("Blur passes", &numBlurPasses_, 1, 3, "%d", ImGuiSliderFlags_AlwaysClamp))
-		setupViewport();
-	if (ImGui::Combo("Viewport setup", &currentViewportSetup_, ViewportSetupLabels, IM_ARRAYSIZE(ViewportSetupLabels)))
-		setupViewport();
-	ImGui::End();
-#endif
 
 	if (shaderDataChanged)
 	{
@@ -493,14 +511,13 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		numBlurPasses_ = 3;
 		setupViewport();
 	}
+#if NCINE_WITH_IMGUI
+	else if (event.mod & nc::KeyMod::CTRL && event.sym == nc::KeySym::H)
+		showImGui = !showImGui;
+#endif
 	else if (event.sym == nc::KeySym::P)
 		pause_ = !pause_;
-	else if (event.sym == nc::KeySym::SPACE)
-	{
-		const bool isSuspended = nc::theApplication().isSuspended();
-		nc::theApplication().setSuspended(!isSuspended);
-	}
-	else if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
+	else if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
 }
 
@@ -523,6 +540,54 @@ void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 		multiTextureShaderData.lightPosition.y = state.y;
 		shaderDataChanged = true;
 	}
+}
+
+void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
+{
+	if (event.axisName == nc::AxisName::LX)
+		joyVectorLeft_.x = event.value;
+	else if (event.axisName == nc::AxisName::LY)
+		joyVectorLeft_.y = -event.value;
+}
+
+void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event)
+{
+	nc::Application::RenderingSettings &renderingSettings = nc::theApplication().renderingSettings();
+
+	if (event.buttonName == nc::ButtonName::A)
+		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
+	else if (event.buttonName == nc::ButtonName::B)
+		renderingSettings.cullingEnabled = !renderingSettings.cullingEnabled;
+	else if (event.buttonName == nc::ButtonName::X)
+	{
+		withAtlas_ = !withAtlas_;
+		withAtlas_ ? setupAtlas() : setupTextures();
+	}
+	else if (event.buttonName == nc::ButtonName::Y)
+	{
+		multiTextureShaderData.lightPosition.x = nc::theApplication().width() * 0.5f;
+		multiTextureShaderData.lightPosition.y = nc::theApplication().height() * 0.5f;
+		shaderDataChanged = true;
+	}
+	else if (event.buttonName == nc::ButtonName::RBUMPER)
+	{
+		if (currentViewportSetup_ == ViewportSetup::NONE)
+			currentViewportSetup_ = ViewportSetup::BLUR;
+		else if (currentViewportSetup_ == ViewportSetup::BLUR)
+			currentViewportSetup_ = ViewportSetup::BLOOM;
+		else if (currentViewportSetup_ == ViewportSetup::BLOOM)
+			currentViewportSetup_ = ViewportSetup::NONE;
+		setupViewport();
+	}
+	else if (event.buttonName == nc::ButtonName::START)
+		pause_ = !pause_;
+	else if (event.buttonName == nc::ButtonName::GUIDE)
+		nc::theApplication().quit();
+}
+
+void MyEventHandler::onJoyDisconnected(const nc::JoyConnectionEvent &event)
+{
+	joyVectorLeft_ = nc::Vector2f::Zero;
 }
 
 void MyEventHandler::setupAtlas()

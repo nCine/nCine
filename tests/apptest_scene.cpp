@@ -1,3 +1,5 @@
+#include <ncine/config.h>
+
 #include "apptest_scene.h"
 #include <ncine/Application.h>
 #include <ncine/Texture.h>
@@ -5,11 +7,10 @@
 #include <ncine/Viewport.h>
 #include "apptest_datapath.h"
 
-#include <ncine/config.h>
-
 #if (NCINE_WITH_IMGUI || NCINE_WITH_NUKLEAR || NCINE_WITH_QT5)
 	#define HAS_GUI (1)
 	#ifdef __ANDROID__
+		#undef NCINE_WITH_QT5
 		#define NCINE_WITH_QT5 (0)
 		#include <ncine/AndroidApplication.h>
 	#endif
@@ -52,7 +53,7 @@ const char *Texture3File = "texture3.png";
 const char *Texture4File = "texture4.png";
 #endif
 
-bool paused = false;
+bool pause = false;
 #ifdef HAS_GUI
 enum
 {
@@ -71,6 +72,11 @@ float spriteScale = 0.5f;
 nc::Colorf bgColor(0.10f, 0.18f, 0.24f, 1.0f);
 const int MaxBufferLength = 256;
 char textBuffer[MaxBufferLength] = { 0 };
+
+bool showImGui = true;
+bool showNuklear = true;
+bool prevShowNuklear = true;
+bool nuklearWindowNeverCreated = true;
 #endif
 
 #if NCINE_WITH_QT5
@@ -88,9 +94,9 @@ void quit()
 	nc::theApplication().quit();
 }
 
-void setPaused(int state)
+void setPause(int state)
 {
-	paused = state;
+	pause = state;
 }
 
 void setSlowSpeed()
@@ -160,7 +166,7 @@ void MyEventHandler::onFrameStart()
 {
 	const float height = nc::theApplication().height();
 
-	if (paused == false)
+	if (pause == false)
 	{
 		angle_ += 1.0f * nc::theApplication().interval();
 		if (angle_ > 360.0f)
@@ -177,96 +183,117 @@ void MyEventHandler::onFrameStart()
 	static char imguiTextInput[MaxBufferLength];
 	static nctl::String auxString;
 
-	ImGui::SetWindowPos(ImVec2(650, 50), ImGuiCond_FirstUseEver);
-	ImGui::SetWindowSize(ImVec2(325, 200), ImGuiCond_FirstUseEver);
-	ImGui::Begin("ImGui Interface");
-
-	if (ImGui::Button("Quit"))
-		nc::theApplication().quit();
-	ImGui::SameLine();
-	ImGui::Checkbox("Paused", &paused);
+	if (showImGui)
+	{
+		ImGui::SetNextWindowSize(ImVec2(325.0f, 200.0f), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowPos(ImVec2(650.0f, 50.0f), ImGuiCond_FirstUseEver);
+		if (ImGui::Begin("ImGui Interface", &showImGui))
+		{
+			if (ImGui::Button("Quit"))
+				nc::theApplication().quit();
+			ImGui::SameLine();
+			ImGui::Checkbox("Pause", &pause);
 	#ifdef __ANDROID__
-	ImGui::SameLine();
-	ImGui::Checkbox("Soft Input", &softInputState);
+			ImGui::SameLine();
+			ImGui::Checkbox("Soft Input", &softInputState);
 	#endif
 
-	ImGui::RadioButton("Slow", &speed, SLOW);
-	ImGui::SameLine();
-	ImGui::RadioButton("Fast", &speed, FAST);
-	auxString.format("Angle: %.0f", angle_);
-	ImGui::ProgressBar(angle_ / 360.0f, ImVec2(0.0f, 0.0f), auxString.data());
+			ImGui::RadioButton("Slow", &speed, SLOW);
+			ImGui::SameLine();
+			ImGui::RadioButton("Fast", &speed, FAST);
+			auxString.format("Angle: %.0f", angle_);
+			ImGui::ProgressBar(angle_ / 360.0f, ImVec2(0.0f, 0.0f), auxString.data());
 
-	ImGui::SliderFloat("Sprite Scale", &spriteScale, MinSpriteScale, MaxSpriteScale);
-	ImGui::ColorEdit3("Background", bgColor.data());
-	ImGui::InputText("Text Input", textBuffer, MaxBufferLength);
-	ImGui::InputText("Unlinked Input", imguiTextInput, MaxBufferLength);
-
-	ImGui::End();
+			ImGui::SliderFloat("Sprite Scale", &spriteScale, MinSpriteScale, MaxSpriteScale);
+			ImGui::ColorEdit3("Background", bgColor.data());
+			ImGui::InputText("Text Input", textBuffer, MaxBufferLength);
+			ImGui::InputText("Unlinked Input", imguiTextInput, MaxBufferLength);
+		}
+		ImGui::End();
+	}
 #endif
 
 #if NCINE_WITH_NUKLEAR
+	static const char *windowName = "Nuklear Interface";
+	static const struct nk_rect windowRect = { 150, 50, 230, 275 };
+	const int windowOptions = NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE | NK_WINDOW_CLOSABLE;
 	static char nuklearTextInput[MaxBufferLength];
 	nk_context *ctx = nc::NuklearContext::context();
 
-	if (nk_begin(ctx, "Nuklear Interface", nk_rect(150, 50, 230, 275),
-	             NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
+	if (nuklearWindowNeverCreated)
 	{
-	#ifndef __ANDROID__
-		nk_layout_row_static(ctx, 30, 80, 2);
-	#else
-		nk_layout_row_static(ctx, 30, 85, 3);
-	#endif
-		if (nk_button_label(ctx, "Quit"))
-			nc::theApplication().quit();
-
-		int intPaused = paused;
-		nk_checkbox_label(ctx, "Paused", &intPaused);
-		paused = intPaused;
-	#ifdef __ANDROID__
-		int intSoftInputState = softInputState;
-		nk_checkbox_label(ctx, "Soft Input", &intSoftInputState);
-		softInputState = intSoftInputState;
-	#endif
-
-		nk_layout_row_dynamic(ctx, 30, 2);
-		if (nk_option_label(ctx, "Slow", speed == SLOW))
-			speed = SLOW;
-		if (nk_option_label(ctx, "Fast", speed == FAST))
-			speed = FAST;
-		nk_layout_row_dynamic(ctx, 15, 1);
-		nk_size progressValue = static_cast<nk_size>(angle_);
-		nk_progress(ctx, &progressValue, 360, NK_FIXED);
-
-		nk_layout_row_dynamic(ctx, 25, 1);
-		nk_property_float(ctx, "Sprite Scale:", MinSpriteScale, &spriteScale, MaxSpriteScale, 0.1f, 0.01f);
-
-		nk_layout_row_dynamic(ctx, 20, 1);
-		nk_label(ctx, "Background:", NK_TEXT_LEFT);
-		nk_layout_row_dynamic(ctx, 25, 1);
-		nk_colorf bg = { bgColor.r(), bgColor.g(), bgColor.b(), bgColor.a() };
-		if (nk_combo_begin_color(ctx, nk_rgb_cf(bg), nk_vec2(nk_widget_width(ctx), 400)))
-		{
-			nk_layout_row_dynamic(ctx, 120, 1);
-			bg = nk_color_picker(ctx, bg, NK_RGB);
-			nk_layout_row_dynamic(ctx, 25, 1);
-			bg.r = nk_propertyf(ctx, "#R:", 0, bg.r, 1.0f, 0.01f, 0.005f);
-			bg.g = nk_propertyf(ctx, "#G:", 0, bg.g, 1.0f, 0.01f, 0.005f);
-			bg.b = nk_propertyf(ctx, "#B:", 0, bg.b, 1.0f, 0.01f, 0.005f);
-			nk_combo_end(ctx);
-		}
-		bgColor.set(bg.r, bg.g, bg.b, bg.a);
-
-		nk_edit_string_zero_terminated(ctx, NK_EDIT_FIELD, textBuffer, sizeof(textBuffer) - 1, nk_filter_default);
-		nk_edit_string_zero_terminated(ctx, NK_EDIT_FIELD, nuklearTextInput, sizeof(nuklearTextInput) - 1, nk_filter_default);
+		nk_begin(ctx, windowName, windowRect, windowOptions);
+		nk_end(ctx);
+		nuklearWindowNeverCreated = false;
 	}
-	nk_end(ctx);
+	else
+	{
+		if (nk_window_is_closed(ctx, windowName) && prevShowNuklear == true && showNuklear == true)
+			showNuklear = false;
+
+		if (showNuklear)
+		{
+			if (nk_begin(ctx, windowName, windowRect, windowOptions))
+			{
+	#ifndef __ANDROID__
+				nk_layout_row_static(ctx, 30, 80, 2);
+	#else
+				nk_layout_row_static(ctx, 30, 85, 3);
+	#endif
+				if (nk_button_label(ctx, "Quit"))
+					nc::theApplication().quit();
+
+				int intPause = pause;
+				nk_checkbox_label(ctx, "Pause", &intPause);
+				pause = intPause;
+	#ifdef __ANDROID__
+				int intSoftInputState = softInputState;
+				nk_checkbox_label(ctx, "Soft Input", &intSoftInputState);
+				softInputState = intSoftInputState;
+	#endif
+
+				nk_layout_row_dynamic(ctx, 30, 2);
+				if (nk_option_label(ctx, "Slow", speed == SLOW))
+					speed = SLOW;
+				if (nk_option_label(ctx, "Fast", speed == FAST))
+					speed = FAST;
+				nk_layout_row_dynamic(ctx, 15, 1);
+				nk_size progressValue = static_cast<nk_size>(angle_);
+				nk_progress(ctx, &progressValue, 360, NK_FIXED);
+
+				nk_layout_row_dynamic(ctx, 25, 1);
+				nk_property_float(ctx, "Sprite Scale:", MinSpriteScale, &spriteScale, MaxSpriteScale, 0.1f, 0.01f);
+
+				nk_layout_row_dynamic(ctx, 20, 1);
+				nk_label(ctx, "Background:", NK_TEXT_LEFT);
+				nk_layout_row_dynamic(ctx, 25, 1);
+				nk_colorf bg = { bgColor.r(), bgColor.g(), bgColor.b(), bgColor.a() };
+				if (nk_combo_begin_color(ctx, nk_rgb_cf(bg), nk_vec2(nk_widget_width(ctx), 400)))
+				{
+					nk_layout_row_dynamic(ctx, 120, 1);
+					bg = nk_color_picker(ctx, bg, NK_RGB);
+					nk_layout_row_dynamic(ctx, 25, 1);
+					bg.r = nk_propertyf(ctx, "#R:", 0, bg.r, 1.0f, 0.01f, 0.005f);
+					bg.g = nk_propertyf(ctx, "#G:", 0, bg.g, 1.0f, 0.01f, 0.005f);
+					bg.b = nk_propertyf(ctx, "#B:", 0, bg.b, 1.0f, 0.01f, 0.005f);
+					nk_combo_end(ctx);
+				}
+				bgColor.set(bg.r, bg.g, bg.b, bg.a);
+
+				nk_edit_string_zero_terminated(ctx, NK_EDIT_FIELD, textBuffer, sizeof(textBuffer) - 1, nk_filter_default);
+				nk_edit_string_zero_terminated(ctx, NK_EDIT_FIELD, nuklearTextInput, sizeof(nuklearTextInput) - 1, nk_filter_default);
+			}
+			nk_end(ctx);
+		}
+		prevShowNuklear = showNuklear;
+	}
 #endif
 
 #if NCINE_WITH_QT5
 	static nctl::String labelString;
 
 	if (pauseCheck)
-		pauseCheck->setChecked(paused);
+		pauseCheck->setChecked(pause);
 
 	if (slowRadioButton && fastRadioButton)
 	{
@@ -298,7 +325,7 @@ void MyEventHandler::onFrameStart()
 #endif
 
 #ifdef HAS_GUI
-	if (paused == false && speed == FAST)
+	if (pause == false && speed == FAST)
 		angle_ += 1.0f * nc::theApplication().interval();
 
 	#ifdef __ANDROID__
@@ -320,14 +347,14 @@ void MyEventHandler::onFrameStart()
 void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 {
 	#ifndef HAS_GUI
-	paused = true;
+	pause = true;
 	#endif
 }
 
 void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 {
 	#ifndef HAS_GUI
-	paused = false;
+	pause = false;
 	#endif
 }
 #endif
@@ -336,7 +363,7 @@ void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
 #ifndef HAS_GUI
 	if (event.isLeftButton())
-		paused = true;
+		pause = true;
 #endif
 }
 
@@ -344,15 +371,26 @@ void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
 #ifndef HAS_GUI
 	if (event.isLeftButton())
-		paused = false;
+		pause = false;
 #endif
 }
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	// Not checking additional keys so that the text input is unhindered
 	if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
+#ifndef HAS_GUI
+	else if (event.sym == nc::KeySym::P)
+		pause = !pause;
+#else
+	else if (event.mod & nc::KeyMod::CTRL && event.sym == nc::KeySym::H)
+	{
+		showImGui = !showImGui;
+		showNuklear = !showNuklear;
+	}
+#endif
+
+	// Not checking additional keys so that the text input is unhindered
 }
 
 #if NCINE_WITH_QT5
@@ -366,8 +404,8 @@ int main(int argc, char **argv)
 	QObject::connect(quitButton, &QPushButton::clicked, quit);
 
 	pauseCheck = new QCheckBox;
-	pauseCheck->setText("Paused");
-	QObject::connect(pauseCheck, &QCheckBox::stateChanged, setPaused);
+	pauseCheck->setText("Pause");
+	QObject::connect(pauseCheck, &QCheckBox::stateChanged, setPause);
 
 	QHBoxLayout *firstLineLayout = new QHBoxLayout(nullptr);
 	firstLineLayout->addWidget(quitButton);

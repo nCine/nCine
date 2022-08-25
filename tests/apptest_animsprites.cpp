@@ -51,6 +51,7 @@ void MyEventHandler::onInit()
 	animSprite_->setPaused(true);
 	destVector_ = animSprite_->position();
 	joyVector_ = nc::Vector2f::Zero;
+	pause_ = false;
 }
 
 void MyEventHandler::onFrameStart()
@@ -95,7 +96,7 @@ void MyEventHandler::onFrameStart()
 		destVector_ = animSprite_->position() + reachVector;
 	}
 
-	if (reachVector.length() > 1.0f)
+	if (pause_ == false && reachVector.length() > 1.0f)
 	{
 		reachVector.normalize();
 		animSprite_->setPaused(false);
@@ -108,7 +109,8 @@ void MyEventHandler::onFrameStart()
 	}
 	else
 	{
-		animSprite_->setFrame(0);
+		if (pause_ == false)
+			animSprite_->setFrame(0);
 		animSprite_->setPaused(true);
 	}
 }
@@ -129,13 +131,10 @@ void MyEventHandler::onTouchMove(const nc::TouchEvent &event)
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
+	if (event.sym == nc::KeySym::P)
+		pause_ = !pause_;
+	else if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
-	else if (event.sym == nc::KeySym::SPACE)
-	{
-		const bool isSuspended = nc::theApplication().isSuspended();
-		nc::theApplication().setSuspended(!isSuspended);
-	}
 }
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
@@ -162,6 +161,14 @@ void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 		joyVector_.x = event.value;
 	else if (event.axisName == nc::AxisName::LY)
 		joyVector_.y = -event.value;
+}
+
+void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event)
+{
+	if (event.buttonName == nc::ButtonName::START)
+		pause_ = !pause_;
+	else if (event.buttonName == nc::ButtonName::GUIDE)
+		nc::theApplication().quit();
 }
 
 void MyEventHandler::onJoyDisconnected(const nc::JoyConnectionEvent &event)

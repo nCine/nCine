@@ -10,16 +10,13 @@
 	#define HAS_TOUCH (1)
 #endif
 
-namespace nctl {
-
-class String;
-
-}
+#include <nctl/String.h>
 
 namespace ncine {
 
 class AppConfiguration;
 class Texture;
+class SceneNode;
 class Sprite;
 class Font;
 class TextNode;
@@ -34,12 +31,13 @@ class MyEventHandler :
     public nc::IInputEventHandler
 {
   public:
+	MyEventHandler();
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;
 
 #if HAS_TOUCH
-	void handleEvent(const nc::TouchEvent &event, nctl::String *string, const char *eventName);
+	void handleEvent(const nc::TouchEvent &event, nctl::String &string, const char *eventName);
 	void onTouchDown(const nc::TouchEvent &event) override;
 	void onTouchUp(const nc::TouchEvent &event) override;
 	void onTouchMove(const nc::TouchEvent &event) override;
@@ -52,12 +50,13 @@ class MyEventHandler :
 #endif
 
   private:
-	nctl::UniquePtr<nctl::String> multitouchString_;
+	nctl::String multitouchString_;
 	nctl::UniquePtr<nc::Font> font_;
 	nctl::UniquePtr<nc::TextNode> textNode_;
 
 #if HAS_TOUCH
 	nctl::UniquePtr<nc::Texture> texture_;
+	nctl::StaticArray<nctl::UniquePtr<nc::SceneNode>, nc::TouchEvent::MaxPointers> groupNodes_;
 	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, nc::TouchEvent::MaxPointers> sprites_;
 	nctl::StaticArray<nctl::UniquePtr<nc::TextNode>, nc::TouchEvent::MaxPointers> spriteTexts_;
 #endif

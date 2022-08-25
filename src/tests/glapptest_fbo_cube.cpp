@@ -165,10 +165,10 @@ void MyEventHandler::onInit()
 	nc::GLViewport::setRect(0, 0, width_, height_);
 	nc::GLDepthTest::enable();
 
+	pauseTri_ = false;
+	pauseCube_ = false;
 	angleTri_ = 0.0f;
 	angleCube_ = 0.0f;
-	updateTri_ = true;
-	updateCube_ = true;
 }
 
 void MyEventHandler::onFrameStart()
@@ -215,29 +215,29 @@ void MyEventHandler::onFrameStart()
 	texture_->bind();
 	glDrawElements(GL_TRIANGLES, 12 * 3, GL_UNSIGNED_SHORT, nullptr);
 
-	if (updateTri_)
+	if (pauseTri_ == false)
 		angleTri_ += 20.0f * nc::theApplication().interval();
-	if (updateCube_)
+	if (pauseCube_ == false)
 		angleCube_ += 20.0f * nc::theApplication().interval();
 }
 
 #ifdef __ANDROID__
 void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 {
-	updateTri_ = false;
+	pauseTri_ = true;
 }
 
 void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 {
-	updateTri_ = true;
+	pauseTri_ = false;
 }
 
 void MyEventHandler::onPointerDown(const nc::TouchEvent &event)
 {
 	if (event.count == 2)
 	{
-		updateCube_ = false;
-		updateTri_ = true;
+		pauseTri_ = false;
+		pauseCube_ = true;
 	}
 }
 
@@ -245,35 +245,45 @@ void MyEventHandler::onPointerUp(const nc::TouchEvent &event)
 {
 	if (event.count == 2)
 	{
-		updateCube_ = true;
-		updateTri_ = false;
+		pauseTri_ = true;
+		pauseCube_ = false;
 	}
 }
 #endif
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
+	if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
-	else if (event.sym == nc::KeySym::SPACE)
-	{
-		const bool isSuspended = nc::theApplication().isSuspended();
-		nc::theApplication().setSuspended(!isSuspended);
-	}
 }
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
-		updateTri_ = false;
+		pauseTri_ = true;
 	else if (event.isRightButton())
-		updateCube_ = false;
+		pauseCube_ = true;
 }
 
 void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
 	if (event.isLeftButton())
-		updateTri_ = true;
+		pauseTri_ = false;
 	else if (event.isRightButton())
-		updateCube_ = true;
+		pauseCube_ = false;
+}
+
+void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event)
+{
+	if (event.buttonName == nc::ButtonName::LBUMPER)
+		pauseTri_ = !pauseTri_;
+	else if (event.buttonName == nc::ButtonName::RBUMPER)
+		pauseCube_ = !pauseCube_;
+	else if (event.buttonName == nc::ButtonName::START)
+	{
+		pauseTri_ = !pauseTri_;
+		pauseCube_ = !pauseCube_;
+	}
+	else if (event.buttonName == nc::ButtonName::GUIDE)
+		nc::theApplication().quit();
 }

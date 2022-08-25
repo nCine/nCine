@@ -26,7 +26,7 @@ MyEventHandler::MyEventHandler()
     : luaState_(nc::LuaStateManager::ApiType::EDIT_ONLY,
                 nc::LuaStateManager::StatisticsTracking::DISABLED,
                 nc::LuaStateManager::StandardLibraries::LOADED),
-      variationIndex_(0)
+      variationIndex_(0), pause_(false)
 {
 }
 
@@ -73,7 +73,7 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
-	if (lastEmissionTime_.secondsSince() > 0.085f)
+	if (pause_ == false && lastEmissionTime_.secondsSince() > 0.085f)
 	{
 		nc::ParticleInitializer init;
 		init.setAmount(16);
@@ -84,6 +84,7 @@ void MyEventHandler::onFrameStart()
 		lastEmissionTime_ = nc::TimeStamp::now();
 		particleSystem_->emitParticles(init);
 	}
+	particleSystem_->setParticlesUpdateEnabled(!pause_);
 }
 
 #ifdef __ANDROID__
@@ -104,13 +105,10 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KeySym::N5)
 		runScript();
-	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
+	else if (event.sym == nc::KeySym::P)
+		pause_ = !pause_;
+	else if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
-	else if (event.sym == nc::KeySym::SPACE)
-	{
-		const bool isSuspended = nc::theApplication().isSuspended();
-		nc::theApplication().setSuspended(!isSuspended);
-	}
 }
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)

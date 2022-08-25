@@ -75,6 +75,7 @@ class MyEventHandler :
 	nc::Vector2f scrollOrigin_;
 	nc::Vector2f scrollMove_;
 	nc::TimeStamp lastClickTime_;
+	nc::Vector2f joyVectorLeft_;
 	nc::Vector2f joyVectorRight_;
 
 	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, NumTextures> textures_;

@@ -95,6 +95,8 @@ int loadedScript = -1;
 int selectedShader = -1;
 int loadedShader = -1;
 
+bool showImGui = true;
+
 const char *audioPlayerStateToString(nc::IAudioPlayer::PlayerState state)
 {
 	switch (state)
@@ -223,537 +225,549 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
-	ImGui::SetNextWindowSize(ImVec2(500, 500), ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowPos(ImVec2(20, 20), ImGuiCond_FirstUseEver);
-	ImGui::Begin("apptest_loading");
-	if (ImGui::CollapsingHeader("Texture"))
+	ImGui::SetNextWindowSize(ImVec2(500.0f, 500.0f), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowPos(ImVec2(20.0f, 20.0f), ImGuiCond_FirstUseEver);
+	if (showImGui)
 	{
-		if (ImGui::TreeNode("Texture Objects"))
+		if (ImGui::Begin("apptest_loading", &showImGui))
 		{
-			for (int i = 0; i < NumTextures; i++)
+			if (ImGui::CollapsingHeader("Texture"))
 			{
-				ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-				if (i == selectedTextureObject)
-					nodeFlags |= ImGuiTreeNodeFlags_Selected;
-				ImGui::TreeNodeEx(textures_[i].get(), nodeFlags, "Texture #%u", i);
-				if (ImGui::IsItemClicked())
+				if (ImGui::TreeNode("Texture Objects"))
 				{
-					selectedTextureObject = i;
-					texelsRegion.set(0, 0, textures_[i]->width(), textures_[i]->height());
-				}
-			}
-			ImGui::TreePop();
-		}
-
-		if (selectedTextureObject >= 0 && selectedTextureObject < NumTextures)
-		{
-			bool textureHasChanged = false;
-			nc::Texture &tex = *textures_[selectedTextureObject];
-			ImGui::Text("Name: \"%s\"", tex.name());
-			ImGui::Text("Size: %d x %d, Channels: %u", tex.width(), tex.height(), tex.numChannels());
-
-			if (ImGui::TreeNode("Load from File or Memory"))
-			{
-				for (int i = 0; i < NumTextures; i++)
-				{
-					ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-					if (i == selectedTexture)
-						nodeFlags |= ImGuiTreeNodeFlags_Selected;
-					ImGui::TreeNodeEx(TextureFiles[i], nodeFlags);
-					if (ImGui::IsItemClicked())
-						selectedTexture = i;
-				}
-				if (ImGui::Button("Load from File") && selectedTexture >= 0 && selectedTexture < NumTextures)
-				{
-					const bool hasLoaded = tex.loadFromFile((prefixDataPath("textures", TextureFiles[selectedTexture])).data());
-					if (hasLoaded == false)
-						LOGW_X("Cannot load from file \"%s\"", TextureFiles[selectedTexture]);
-					textureHasChanged = hasLoaded;
-				}
-				ImGui::SameLine();
-				if (ImGui::Button("Load from Memory") && selectedTexture >= 0 && selectedTexture < NumTextures)
-				{
-					const bool hasLoaded = tex.loadFromMemory(TextureFiles[selectedTexture],
-					                                          textureBuffers[selectedTexture].get(), textureBufferSizes[selectedTexture]);
-					if (hasLoaded == false)
-						LOGW_X("Cannot load from memory \"%s\"", TextureFiles[selectedTexture]);
-					else
+					for (int i = 0; i < NumTextures; i++)
 					{
-						auxString.format("Memory file \"%s\"", TextureFiles[selectedTexture]);
-						tex.setName(auxString.data());
+						ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+						if (i == selectedTextureObject)
+							nodeFlags |= ImGuiTreeNodeFlags_Selected;
+						ImGui::TreeNodeEx(textures_[i].get(), nodeFlags, "Texture #%u", i);
+						if (ImGui::IsItemClicked())
+						{
+							selectedTextureObject = i;
+							texelsRegion.set(0, 0, textures_[i]->width(), textures_[i]->height());
+						}
 					}
-					textureHasChanged = hasLoaded;
+					ImGui::TreePop();
 				}
-				ImGui::TreePop();
-			}
 
-			if (ImGui::TreeNode("Load from Texels"))
-			{
-				ImGui::DragInt2("Offset", &texelsRegion.x);
-				ImGui::DragInt2("Size", &texelsRegion.w);
-
-				static int w = tex.width();
-				static int h = tex.height();
-				static nctl::UniquePtr<uint32_t[]> pixels = nctl::makeUnique<uint32_t[]>(w * h);
-				texelsRegion.x = nctl::clamp(texelsRegion.x, 0, tex.width());
-				texelsRegion.y = nctl::clamp(texelsRegion.y, 0, tex.height());
-				texelsRegion.w = nctl::clamp(texelsRegion.w, 0, tex.width() - texelsRegion.x);
-				texelsRegion.h = nctl::clamp(texelsRegion.h, 0, tex.height() - texelsRegion.y);
-
-				ImGui::ColorEdit4("Color", texelsColor.data(), ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview);
-				if (ImGui::Button("Load##Texels"))
+				if (selectedTextureObject >= 0 && selectedTextureObject < NumTextures)
 				{
-					if (w != tex.width() || h != tex.height())
+					bool textureHasChanged = false;
+					nc::Texture &tex = *textures_[selectedTextureObject];
+					ImGui::Text("Name: \"%s\"", tex.name());
+					ImGui::Text("Size: %d x %d, Channels: %u", tex.width(), tex.height(), tex.numChannels());
+
+					if (ImGui::TreeNode("Load from File or Memory##Textures"))
 					{
-						w = tex.width();
-						h = tex.height();
-						pixels = nctl::makeUnique<uint32_t[]>(w * h);
+						for (int i = 0; i < NumTextures; i++)
+						{
+							ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+							if (i == selectedTexture)
+								nodeFlags |= ImGuiTreeNodeFlags_Selected;
+							ImGui::TreeNodeEx(TextureFiles[i], nodeFlags);
+							if (ImGui::IsItemClicked())
+								selectedTexture = i;
+						}
+						if (ImGui::Button("Load from File") && selectedTexture >= 0 && selectedTexture < NumTextures)
+						{
+							const bool hasLoaded = tex.loadFromFile((prefixDataPath("textures", TextureFiles[selectedTexture])).data());
+							if (hasLoaded == false)
+								LOGW_X("Cannot load from file \"%s\"", TextureFiles[selectedTexture]);
+							textureHasChanged = hasLoaded;
+						}
+						ImGui::SameLine();
+						if (ImGui::Button("Load from Memory") && selectedTexture >= 0 && selectedTexture < NumTextures)
+						{
+							const bool hasLoaded = tex.loadFromMemory(TextureFiles[selectedTexture],
+							                                          textureBuffers[selectedTexture].get(), textureBufferSizes[selectedTexture]);
+							if (hasLoaded == false)
+								LOGW_X("Cannot load from memory \"%s\"", TextureFiles[selectedTexture]);
+							else
+							{
+								auxString.format("Memory file \"%s\"", TextureFiles[selectedTexture]);
+								tex.setName(auxString.data());
+							}
+							textureHasChanged = hasLoaded;
+						}
+						ImGui::TreePop();
 					}
 
-					const uint32_t a = static_cast<uint8_t>(texelsColor.a() * 255.0f) << 24;
-					const uint32_t b = static_cast<uint8_t>(texelsColor.b() * 255.0f) << 16;
-					const uint32_t g = static_cast<uint8_t>(texelsColor.g() * 255.0f) << 8;
-					const uint32_t r = static_cast<uint8_t>(texelsColor.r() * 255.0f);
-					const uint32_t color = a + b + g + r;
-
-					const int firstIndex = texelsRegion.y * w + texelsRegion.x;
-					int index = firstIndex;
-					for (int i = 0; i < texelsRegion.h; i++)
+					if (ImGui::TreeNode("Load from Texels"))
 					{
-						for (int j = 0; j < texelsRegion.w; j++)
-							pixels[index + j] = color;
-						index += w;
-					}
+						ImGui::DragInt2("Offset", &texelsRegion.x);
+						ImGui::DragInt2("Size", &texelsRegion.w);
 
-					const bool hasLoaded = tex.loadFromTexels(reinterpret_cast<uint8_t *>(pixels.get()));
-					// Can't use this optimized version without `glPixelStorei(GL_UNPACK_ROW_LENGTH, w);`
-					//const bool hasLoaded = tex.loadFromTexels(reinterpret_cast<uint8_t *>(&pixels[firstIndex]), texelsRegion);
+						static int w = tex.width();
+						static int h = tex.height();
+						static nctl::UniquePtr<uint32_t[]> pixels = nctl::makeUnique<uint32_t[]>(w * h);
+						texelsRegion.x = nctl::clamp(texelsRegion.x, 0, tex.width());
+						texelsRegion.y = nctl::clamp(texelsRegion.y, 0, tex.height());
+						texelsRegion.w = nctl::clamp(texelsRegion.w, 0, tex.width() - texelsRegion.x);
+						texelsRegion.h = nctl::clamp(texelsRegion.h, 0, tex.height() - texelsRegion.y);
 
-					if (hasLoaded == false)
-						LOGW("Cannot load from texels");
-					else
-					{
-						auxString.format("Raw Texels (0x%x)", color);
-						tex.setName(auxString.data());
-					}
+						ImGui::ColorEdit4("Color", texelsColor.data(), ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview);
+						if (ImGui::Button("Load##Texels"))
+						{
+							if (w != tex.width() || h != tex.height())
+							{
+								w = tex.width();
+								h = tex.height();
+								pixels = nctl::makeUnique<uint32_t[]>(w * h);
+							}
 
-					// When loading from texels the format and the size does not change
-					// and the `setTexture` method does not need to be called
-				}
+							const uint32_t a = static_cast<uint8_t>(texelsColor.a() * 255.0f) << 24;
+							const uint32_t b = static_cast<uint8_t>(texelsColor.b() * 255.0f) << 16;
+							const uint32_t g = static_cast<uint8_t>(texelsColor.g() * 255.0f) << 8;
+							const uint32_t r = static_cast<uint8_t>(texelsColor.r() * 255.0f);
+							const uint32_t color = a + b + g + r;
+
+							const int firstIndex = texelsRegion.y * w + texelsRegion.x;
+							int index = firstIndex;
+							for (int i = 0; i < texelsRegion.h; i++)
+							{
+								for (int j = 0; j < texelsRegion.w; j++)
+									pixels[index + j] = color;
+								index += w;
+							}
+
+							const bool hasLoaded = tex.loadFromTexels(reinterpret_cast<uint8_t *>(pixels.get()));
+							// Can't use this optimized version without `glPixelStorei(GL_UNPACK_ROW_LENGTH, w);`
+							//const bool hasLoaded = tex.loadFromTexels(reinterpret_cast<uint8_t *>(&pixels[firstIndex]), texelsRegion);
+
+							if (hasLoaded == false)
+								LOGW("Cannot load from texels");
+							else
+							{
+								auxString.format("Raw Texels (0x%x)", color);
+								tex.setName(auxString.data());
+							}
+
+							// When loading from texels the format and the size does not change
+							// and the `setTexture` method does not need to be called
+						}
 
 #if !defined(__EMSCRIPTEN__) && !defined(__ANDROID__)
-				ImGui::SameLine();
-				static int selectedFormat = 0;
-				const char *extensions[] = { "png", "webp" };
-				ImGui::InputText("##Saving", saveTexelsFilename.data(), saveTexelsFilename.capacity(), ImGuiInputTextFlags_CallbackResize, inputTextCallback, &saveTexelsFilename);
-				if (saveTexelsFilename.isEmpty())
-					saveTexelsFilename.format("texels.%s", extensions[selectedFormat]);
+						ImGui::SameLine();
+						static int selectedFormat = 0;
+						const char *extensions[] = { "png", "webp" };
+						ImGui::InputText("##Saving", saveTexelsFilename.data(), saveTexelsFilename.capacity(), ImGuiInputTextFlags_CallbackResize, inputTextCallback, &saveTexelsFilename);
+						if (saveTexelsFilename.isEmpty())
+							saveTexelsFilename.format("texels.%s", extensions[selectedFormat]);
 	#if NCINE_WITH_WEBP
-				const char *formats[] = { "Png", "WebP" };
-				ImGui::SameLine();
-				ImGui::PushItemWidth(60.0f);
-				ImGui::Combo("##SaveFormat", &selectedFormat, formats, IM_ARRAYSIZE(formats));
-				ImGui::PopItemWidth();
+						const char *formats[] = { "Png", "WebP" };
+						ImGui::SameLine();
+						ImGui::PushItemWidth(60.0f);
+						ImGui::Combo("##SaveFormat", &selectedFormat, formats, IM_ARRAYSIZE(formats));
+						ImGui::PopItemWidth();
 	#endif
-				nc::fs::fixExtension(saveTexelsFilename, extensions[selectedFormat]);
-				ImGui::SameLine();
-				if (ImGui::Button("Save##Texels"))
-				{
-					bool hasSaved = false;
+						nc::fs::fixExtension(saveTexelsFilename, extensions[selectedFormat]);
+						ImGui::SameLine();
+						if (ImGui::Button("Save##Texels"))
+						{
+							bool hasSaved = false;
 
-					if (selectedFormat == 0)
-					{
-						nc::TextureSaverPng saver;
-						nc::TextureSaverPng::Properties props;
-						props.width = w;
-						props.height = h;
-						props.format = nc::ITextureSaver::Format::RGBA8;
-						props.pixels = pixels.get();
-						hasSaved = saver.saveToFile(props, saveTexelsFilename.data());
-					}
+							if (selectedFormat == 0)
+							{
+								nc::TextureSaverPng saver;
+								nc::TextureSaverPng::Properties props;
+								props.width = w;
+								props.height = h;
+								props.format = nc::ITextureSaver::Format::RGBA8;
+								props.pixels = pixels.get();
+								hasSaved = saver.saveToFile(props, saveTexelsFilename.data());
+							}
 	#if NCINE_WITH_WEBP
-					else if (selectedFormat == 1)
-					{
-						nc::TextureSaverWebP saver;
-						nc::TextureSaverWebP::Properties props;
-						nc::TextureSaverWebP::WebPProperties webpProps;
-						props.width = w;
-						props.height = h;
-						props.format = nc::ITextureSaver::Format::RGBA8;
-						props.pixels = pixels.get();
-						webpProps.lossless = true;
-						hasSaved = saver.saveToFile(props, webpProps, saveTexelsFilename.data());
-					}
+							else if (selectedFormat == 1)
+							{
+								nc::TextureSaverWebP saver;
+								nc::TextureSaverWebP::Properties props;
+								nc::TextureSaverWebP::WebPProperties webpProps;
+								props.width = w;
+								props.height = h;
+								props.format = nc::ITextureSaver::Format::RGBA8;
+								props.pixels = pixels.get();
+								webpProps.lossless = true;
+								hasSaved = saver.saveToFile(props, webpProps, saveTexelsFilename.data());
+							}
 	#endif
 
-					if (hasSaved == false)
-						LOGW_X("Cannot save texels to \"%s\"", saveTexelsFilename.data());
-					else
-						LOGI_X("Texels saved to \"%s\"", saveTexelsFilename.data());
-				}
+							if (hasSaved == false)
+								LOGW_X("Cannot save texels to \"%s\"", saveTexelsFilename.data());
+							else
+								LOGI_X("Texels saved to \"%s\"", saveTexelsFilename.data());
+						}
 #endif
 
-				ImGui::TreePop();
+						ImGui::TreePop();
+					}
+
+					if (ImGui::TreeNode("Re-initialize"))
+					{
+						static int size[2] = { 256, 256 };
+						ImGui::SliderInt2("Size", size, 8, 256);
+						ImGui::SameLine();
+						if (ImGui::Button("Current"))
+						{
+							size[0] = tex.width();
+							size[1] = tex.height();
+						}
+						size[0] = nctl::clamp(size[0], 8, 256);
+						size[1] = nctl::clamp(size[1], 8, 256);
+
+						const char *formats[] = { "R", "RG", "RGB", "RGBA" };
+						static int selectedFormat = 3;
+						ImGui::Combo("Format", &selectedFormat, formats, IM_ARRAYSIZE(formats));
+
+						if (ImGui::Button("Init"))
+						{
+							tex.init("Initialized", nc::Texture::Format(selectedFormat), size[0], size[1]);
+							textureHasChanged = true;
+						}
+						ImGui::TreePop();
+					}
+
+					if (textureHasChanged)
+					{
+						texelsRegion.set(0, 0, tex.width(), tex.height());
+						for (unsigned int i = 0; i < NumSprites; i++)
+						{
+							if (sprites_[i]->texture() == &tex)
+								sprites_[i]->setTexture(&tex);
+						}
+					}
+				}
+				else
+					ImGui::TextUnformatted("Select a texture object from the list");
 			}
 
-			if (ImGui::TreeNode("Re-initialize"))
+			if (ImGui::CollapsingHeader("Audio"))
 			{
-				static int size[2] = { 256, 256 };
-				ImGui::SliderInt2("Size", size, 8, 256);
+				ImGui::Text("Buffer Name: \"%s\"", audioBuffer_->name());
+				ImGui::Text("Frequency: %d Hz, Channels: %d, Size: %lu", audioBuffer_->frequency(), audioBuffer_->numChannels(), audioBuffer_->bufferSize());
+
+				if (ImGui::Button("Play##Buffer"))
+					bufferPlayer_->play();
 				ImGui::SameLine();
-				if (ImGui::Button("Current"))
-				{
-					size[0] = tex.width();
-					size[1] = tex.height();
-				}
-				size[0] = nctl::clamp(size[0], 8, 256);
-				size[1] = nctl::clamp(size[1], 8, 256);
+				if (ImGui::Button("Pause##Buffer"))
+					bufferPlayer_->pause();
+				ImGui::SameLine();
+				if (ImGui::Button("Stop##Buffer"))
+					bufferPlayer_->stop();
+				ImGui::SameLine();
+				bool bufferIsLooping = bufferPlayer_->isLooping();
+				ImGui::Checkbox("Looping##Buffer", &bufferIsLooping);
+				bufferPlayer_->setLooping(bufferIsLooping);
+				ImGui::SameLine();
+				ImGui::Text("State: %s", audioPlayerStateToString(bufferPlayer_->state()));
 
-				const char *formats[] = { "R", "RG", "RGB", "RGBA" };
-				static int selectedFormat = 3;
-				ImGui::Combo("Format", &selectedFormat, formats, IM_ARRAYSIZE(formats));
-
-				if (ImGui::Button("Init"))
+				if (bufferPlayer_->state() != nc::IAudioPlayer::PlayerState::INITIAL)
 				{
-					tex.init("Initialized", nc::Texture::Format(selectedFormat), size[0], size[1]);
-					textureHasChanged = true;
+					int sampleOffset = bufferPlayer_->sampleOffset();
+					if (ImGui::SliderInt("Seek##Buffer", &sampleOffset, 0, bufferPlayer_->numSamples()))
+					{
+						sampleOffset = nctl::clamp(sampleOffset, 0, static_cast<int>(bufferPlayer_->numSamples()));
+						bufferPlayer_->setSampleOffset(sampleOffset);
+					}
 				}
-				ImGui::TreePop();
+
+				ImGui::Separator();
+				ImGui::Text("Stream Name: \"%s\"", streamPlayer_->name());
+				ImGui::Text("Frequency: %d Hz, Channels: %d, Size: %lu", streamPlayer_->frequency(), streamPlayer_->numChannels(), streamPlayer_->bufferSize());
+
+				if (ImGui::Button("Play##Stream"))
+					streamPlayer_->play();
+				ImGui::SameLine();
+				if (ImGui::Button("Pause##Stream"))
+					streamPlayer_->pause();
+				ImGui::SameLine();
+				if (ImGui::Button("Stop##Stream"))
+					streamPlayer_->stop();
+				ImGui::SameLine();
+				bool streamIsLooping = streamPlayer_->isLooping();
+				ImGui::Checkbox("Looping##Stream", &streamIsLooping);
+				streamPlayer_->setLooping(streamIsLooping);
+				ImGui::SameLine();
+				ImGui::Text("State: %s", audioPlayerStateToString(streamPlayer_->state()));
+
+				if (streamPlayer_->state() != nc::IAudioPlayer::PlayerState::INITIAL)
+				{
+					int sampleOffset = streamPlayer_->sampleOffset();
+					if (ImGui::SliderInt("Seek##Stream", &sampleOffset, 0, streamPlayer_->numSamplesInStreamBuffer()))
+					{
+						sampleOffset = nctl::clamp(sampleOffset, 0, static_cast<int>(streamPlayer_->numSamplesInStreamBuffer()));
+						streamPlayer_->setSampleOffset(sampleOffset);
+					}
+
+					const int sampleOffsetInStream = streamPlayer_->sampleOffsetInStream();
+					const int numSamples = streamPlayer_->numSamples();
+					const float streamFraction = sampleOffsetInStream / static_cast<float>(numSamples);
+					ImGui::ProgressBar(streamFraction, ImVec2(0.0f, 0.0f));
+					ImGui::Text("Stream Samples: %d / %d", sampleOffsetInStream, numSamples);
+				}
+
+				ImGui::Separator();
+				if (ImGui::TreeNode("Load from File or Memory##Sounds"))
+				{
+					for (int i = 0; i < NumSounds; i++)
+					{
+						ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+						if (i == selectedSound)
+							nodeFlags |= ImGuiTreeNodeFlags_Selected;
+						ImGui::TreeNodeEx(SoundFiles[i], nodeFlags);
+						if (ImGui::IsItemClicked())
+							selectedSound = i;
+					}
+					if (ImGui::Button("Load Buffer from File") && selectedSound >= 0 && selectedSound < NumSounds)
+					{
+						bufferPlayer_->stop();
+						const bool hasLoaded = audioBuffer_->loadFromFile((prefixDataPath("sounds", SoundFiles[selectedSound])).data());
+						if (hasLoaded == false)
+							LOGW_X("Cannot load from file \"%s\"", SoundFiles[selectedSound]);
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Load Buffer from Memory") && selectedSound >= 0 && selectedSound < NumSounds)
+					{
+						bufferPlayer_->stop();
+						const bool hasLoaded = audioBuffer_->loadFromMemory(SoundFiles[selectedSound],
+						                                                    soundBuffers[selectedSound].get(), soundBufferSizes[selectedSound]);
+						if (hasLoaded == false)
+							LOGW_X("Cannot load from memory \"%s\"", SoundFiles[selectedSound]);
+						else
+						{
+							auxString.format("Memory file \"%s\"", SoundFiles[selectedSound]);
+							audioBuffer_->setName(auxString.data());
+						}
+					}
+
+					if (ImGui::Button("Load Stream from File") && selectedSound >= 0 && selectedSound < NumSounds)
+					{
+						streamPlayer_->stop();
+						const bool hasLoaded = streamPlayer_->loadFromFile((prefixDataPath("sounds", SoundFiles[selectedSound])).data());
+						if (hasLoaded == false)
+							LOGW_X("Cannot load from file \"%s\"", SoundFiles[selectedSound]);
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Load Stream from Memory") && selectedSound >= 0 && selectedSound < NumSounds)
+					{
+						streamPlayer_->stop();
+						const bool hasLoaded = streamPlayer_->loadFromMemory(SoundFiles[selectedSound],
+						                                                     soundBuffers[selectedSound].get(), soundBufferSizes[selectedSound]);
+						if (hasLoaded == false)
+							LOGW_X("Cannot load from memory \"%s\"", SoundFiles[selectedSound]);
+						else
+						{
+							auxString.format("Memory file \"%s\"", SoundFiles[selectedSound]);
+							streamPlayer_->setName(auxString.data());
+						}
+					}
+					ImGui::TreePop();
+				}
+
+				if (ImGui::TreeNode("Load from Samples"))
+				{
+					ImGui::SliderInt("Frequency", &sineWaveFrequency, 110, 7040, "%d Hz");
+					sineWaveFrequency = nctl::clamp(sineWaveFrequency, 110, 7040);
+
+					ImGui::SliderFloat("Duration", &sineWaveDuration, 0.1f, 5.0f, "%.3f s");
+					sineWaveDuration = nctl::clamp(sineWaveDuration, 0.1f, 5.0f);
+
+					if (ImGui::Button("Load Buffer from Samples"))
+					{
+						bufferPlayer_->stop();
+						bool hasLoaded = false;
+
+						const unsigned int samplesPerSecond = audioBuffer_->numChannels() * audioBuffer_->frequency();
+						const unsigned int numSamples = static_cast<unsigned int>(samplesPerSecond * sineWaveDuration);
+						if (audioBuffer_->bytesPerSample() == 1)
+						{
+							nctl::UniquePtr<int8_t[]> audioSamples = nctl::makeUnique<int8_t[]>(numSamples);
+							for (unsigned int i = 0; i < numSamples; i++)
+								audioSamples[i] = static_cast<int8_t>(sinf(2.0f * nc::fPi * i * sineWaveFrequency / samplesPerSecond) * 128);
+							hasLoaded = audioBuffer_->loadFromSamples((unsigned char *)(audioSamples.get()), numSamples * sizeof(int8_t));
+						}
+						else
+						{
+							nctl::UniquePtr<int16_t[]> audioSamples = nctl::makeUnique<int16_t[]>(numSamples);
+							for (unsigned int i = 0; i < numSamples; i++)
+								audioSamples[i] = static_cast<int16_t>(sinf(2.0f * nc::fPi * i * sineWaveFrequency / samplesPerSecond) * 32767);
+							hasLoaded = audioBuffer_->loadFromSamples((unsigned char *)(audioSamples.get()), numSamples * sizeof(int16_t));
+						}
+
+						if (hasLoaded == false)
+							LOGW("Cannot load from samples");
+						else
+						{
+							auxString.format("Raw Samples (%d Hz for %.3f s)", sineWaveFrequency, sineWaveDuration);
+							audioBuffer_->setName(auxString.data());
+						}
+					}
+
+					ImGui::TreePop();
+				}
+
+				if (ImGui::TreeNode("Re-initialize"))
+				{
+					const char *frequencyStrings[3] = { "44100 Hz", "22050 Hz", "11025 Hz" };
+					static const int frequencies[3] = { 44100, 22050, 11025 };
+					static int selectedFrequency = 0;
+					ImGui::Combo("Frequency", &selectedFrequency, frequencyStrings, IM_ARRAYSIZE(frequencyStrings));
+
+					const char *formats[4] = { "Mono 8bit", "Stereo 8bit", "Mono 16bit", "Stereo 16bit" };
+					static int selectedFormat = 0;
+					ImGui::Combo("Format", &selectedFormat, formats, IM_ARRAYSIZE(formats));
+
+					if (ImGui::Button("Init Buffer"))
+						audioBuffer_->init("Initialized", nc::AudioBuffer::Format(selectedFormat), frequencies[selectedFrequency]);
+
+					ImGui::TreePop();
+				}
 			}
 
-			if (textureHasChanged)
+			if (ImGui::CollapsingHeader("Font"))
 			{
-				texelsRegion.set(0, 0, tex.width(), tex.height());
-				for (unsigned int i = 0; i < NumSprites; i++)
+				ImGui::Text("Name: \"%s\"", font_->name());
+				ImGui::Text("Glyphs: %u, Kerning pairs: %u", font_->numGlyphs(), font_->numKernings());
+				ImGui::Text("Line height: %u, Base: %u", font_->lineHeight(), font_->base());
+
+				bool fontHasChanged = false;
+				if (ImGui::TreeNode("Load from File or Memory##Fonts"))
 				{
-					if (sprites_[i]->texture() == &tex)
-						sprites_[i]->setTexture(&tex);
+					for (int i = 0; i < NumFonts; i++)
+					{
+						ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+						if (i == selectedFont)
+							nodeFlags |= ImGuiTreeNodeFlags_Selected;
+						ImGui::TreeNodeEx(FontFiles[i], nodeFlags);
+						if (ImGui::IsItemClicked())
+							selectedFont = i;
+					}
+					if (ImGui::Button("Load from File") && selectedFont >= 0 && selectedFont < NumFonts)
+					{
+						const bool hasLoaded = font_->loadFromFile((prefixDataPath("fonts", FontFiles[selectedFont])).data());
+						if (hasLoaded == false)
+							LOGW_X("Cannot load from file \"%s\"", FontFiles[selectedFont]);
+						fontHasChanged = hasLoaded;
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Load from Memory") && selectedFont >= 0 && selectedFont < NumFonts)
+					{
+						const bool hasLoaded = font_->loadFromMemory(FontFiles[selectedFont], fontBuffers[selectedFont].get(), fontBufferSizes[selectedFont],
+						                                             (prefixDataPath("fonts", FontTexFiles[selectedFont])).data());
+						if (hasLoaded == false)
+							LOGW_X("Cannot load from memory \"%s\"", FontFiles[selectedFont]);
+						else
+						{
+							auxString.format("Memory file \"%s\"", FontFiles[selectedFont]);
+							audioBuffer_->setName(auxString.data());
+						}
+						fontHasChanged = hasLoaded;
+					}
+					ImGui::TreePop();
 				}
+
+				if (fontHasChanged)
+					textNode_->setFont(font_.get());
+			}
+
+			if (ImGui::CollapsingHeader("Lua Script"))
+			{
+				if (loadedScript >= 0 && loadedScript < NumScripts)
+					ImGui::Text("Name: \"%s\"", ScriptFiles[loadedScript]);
+				else
+					ImGui::TextUnformatted("No script loaded");
+
+				bool scriptHasChanged = false;
+				if (ImGui::TreeNode("Load from File or Memory##Scripts"))
+				{
+					for (int i = 0; i < NumScripts; i++)
+					{
+						ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+						if (i == selectedScript)
+							nodeFlags |= ImGuiTreeNodeFlags_Selected;
+						ImGui::TreeNodeEx(ScriptFiles[i], nodeFlags);
+						if (ImGui::IsItemClicked())
+							selectedScript = i;
+					}
+					if (ImGui::Button("Load from File") && selectedScript >= 0 && selectedScript < NumScripts)
+					{
+						const bool hasLoaded = luaState_->loadFromFile((prefixDataPath("scripts", ScriptFiles[selectedScript])).data(), ScriptFiles[selectedScript]);
+						if (hasLoaded == false)
+							LOGW_X("Cannot load from file \"%s\"", ScriptFiles[selectedScript]);
+						scriptHasChanged = hasLoaded;
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Load from Memory") && selectedScript >= 0 && selectedScript < NumScripts)
+					{
+						const bool hasLoaded = luaState_->loadFromMemory(ScriptFiles[selectedScript], scriptBuffers[selectedScript].get(), scriptBufferSizes[selectedScript]);
+						if (hasLoaded == false)
+							LOGW_X("Cannot load from memory \"%s\"", ScriptFiles[selectedScript]);
+						scriptHasChanged = hasLoaded;
+					}
+					ImGui::TreePop();
+				}
+
+				if (scriptHasChanged)
+				{
+					loadedScript = selectedScript;
+					luaState_ = nctl::makeUnique<nc::LuaStateManager>(nc::LuaStateManager::ApiType::EDIT_ONLY,
+					                                                  nc::LuaStateManager::StatisticsTracking::DISABLED,
+					                                                  nc::LuaStateManager::StandardLibraries::NOT_LOADED);
+				}
+			}
+
+			if (ImGui::CollapsingHeader("Shader"))
+			{
+				if (loadedShader >= 0 && loadedShader < NumShaders)
+					ImGui::Text("Name: \"%s\"", ShaderNames[loadedShader]);
+				else
+					ImGui::TextUnformatted("No shader loaded");
+
+				bool shaderHasChanged = false;
+				if (ImGui::TreeNode("Load from Memory"))
+				{
+					for (int i = 0; i < NumShaders; i++)
+					{
+						ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+						if (i == selectedShader)
+							nodeFlags |= ImGuiTreeNodeFlags_Selected;
+						ImGui::TreeNodeEx(ShaderNames[i], nodeFlags);
+						if (ImGui::IsItemClicked())
+							selectedShader = i;
+					}
+
+					if (ImGui::Button("Load") && selectedShader >= 0 && selectedShader < NumShaders)
+					{
+						bool hasLoaded = false;
+						if (VertexShaderStrings[selectedShader] != nullptr)
+						{
+							hasLoaded = shader_->loadFromMemory(ShaderNames[selectedShader], nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS,
+							                                    VertexShaderStrings[selectedShader], FragmentShaderStrings[selectedShader]);
+						}
+						else
+						{
+							hasLoaded = shader_->loadFromMemory(ShaderNames[selectedShader], nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS,
+							                                    DefaultVertexShaders[selectedShader], FragmentShaderStrings[selectedShader]);
+						}
+
+						if (hasLoaded == false)
+							LOGW_X("Cannot load from memory \"%s\"", ShaderNames[selectedShader]);
+						shaderHasChanged = hasLoaded;
+					}
+					ImGui::TreePop();
+				}
+
+				if (shaderHasChanged)
+					loadedShader = selectedShader;
 			}
 		}
-		else
-			ImGui::TextUnformatted("Select a texture object from the list");
+		ImGui::End();
 	}
-
-	if (ImGui::CollapsingHeader("Audio"))
-	{
-		ImGui::Text("Buffer Name: \"%s\"", audioBuffer_->name());
-		ImGui::Text("Frequency: %d, Channels: %d, Size: %lu", audioBuffer_->frequency(), audioBuffer_->numChannels(), audioBuffer_->bufferSize());
-
-		if (ImGui::Button("Play##Buffer"))
-			bufferPlayer_->play();
-		ImGui::SameLine();
-		if (ImGui::Button("Pause##Buffer"))
-			bufferPlayer_->pause();
-		ImGui::SameLine();
-		if (ImGui::Button("Stop##Buffer"))
-			bufferPlayer_->stop();
-		ImGui::SameLine();
-		bool bufferIsLooping = bufferPlayer_->isLooping();
-		ImGui::Checkbox("Looping##Buffer", &bufferIsLooping);
-		bufferPlayer_->setLooping(bufferIsLooping);
-		ImGui::SameLine();
-		ImGui::Text("State: %s", audioPlayerStateToString(bufferPlayer_->state()));
-
-		if (bufferPlayer_->state() != nc::IAudioPlayer::PlayerState::INITIAL)
-		{
-			int sampleOffset = bufferPlayer_->sampleOffset();
-			if (ImGui::SliderInt("Seek##Buffer", &sampleOffset, 0, bufferPlayer_->numSamples()))
-			{
-				sampleOffset = nctl::clamp(sampleOffset, 0, static_cast<int>(bufferPlayer_->numSamples()));
-				bufferPlayer_->setSampleOffset(sampleOffset);
-			}
-		}
-
-		ImGui::Separator();
-		ImGui::Text("Stream Name: \"%s\"", streamPlayer_->name());
-		ImGui::Text("Frequency: %d, Channels: %d, Size: %lu", streamPlayer_->frequency(), streamPlayer_->numChannels(), streamPlayer_->bufferSize());
-
-		if (ImGui::Button("Play##Stream"))
-			streamPlayer_->play();
-		ImGui::SameLine();
-		if (ImGui::Button("Pause##Stream"))
-			streamPlayer_->pause();
-		ImGui::SameLine();
-		if (ImGui::Button("Stop##Stream"))
-			streamPlayer_->stop();
-		ImGui::SameLine();
-		bool streamIsLooping = streamPlayer_->isLooping();
-		ImGui::Checkbox("Looping##Stream", &streamIsLooping);
-		streamPlayer_->setLooping(streamIsLooping);
-		ImGui::SameLine();
-		ImGui::Text("State: %s", audioPlayerStateToString(streamPlayer_->state()));
-
-		if (streamPlayer_->state() != nc::IAudioPlayer::PlayerState::INITIAL)
-		{
-			int sampleOffset = streamPlayer_->sampleOffset();
-			if (ImGui::SliderInt("Seek##Stream", &sampleOffset, 0, streamPlayer_->numStreamSamples()))
-			{
-				sampleOffset = nctl::clamp(sampleOffset, 0, static_cast<int>(streamPlayer_->numStreamSamples()));
-				streamPlayer_->setSampleOffset(sampleOffset);
-			}
-		}
-
-		ImGui::Separator();
-		if (ImGui::TreeNode("Load from File or Memory"))
-		{
-			for (int i = 0; i < NumSounds; i++)
-			{
-				ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-				if (i == selectedSound)
-					nodeFlags |= ImGuiTreeNodeFlags_Selected;
-				ImGui::TreeNodeEx(SoundFiles[i], nodeFlags);
-				if (ImGui::IsItemClicked())
-					selectedSound = i;
-			}
-			if (ImGui::Button("Load Buffer from File") && selectedSound >= 0 && selectedSound < NumSounds)
-			{
-				bufferPlayer_->stop();
-				const bool hasLoaded = audioBuffer_->loadFromFile((prefixDataPath("sounds", SoundFiles[selectedSound])).data());
-				if (hasLoaded == false)
-					LOGW_X("Cannot load from file \"%s\"", SoundFiles[selectedSound]);
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Load Buffer from Memory") && selectedSound >= 0 && selectedSound < NumSounds)
-			{
-				bufferPlayer_->stop();
-				const bool hasLoaded = audioBuffer_->loadFromMemory(SoundFiles[selectedSound],
-				                                                    soundBuffers[selectedSound].get(), soundBufferSizes[selectedSound]);
-				if (hasLoaded == false)
-					LOGW_X("Cannot load from memory \"%s\"", SoundFiles[selectedSound]);
-				else
-				{
-					auxString.format("Memory file \"%s\"", SoundFiles[selectedSound]);
-					audioBuffer_->setName(auxString.data());
-				}
-			}
-
-			if (ImGui::Button("Load Stream from File") && selectedSound >= 0 && selectedSound < NumSounds)
-			{
-				streamPlayer_->stop();
-				const bool hasLoaded = streamPlayer_->loadFromFile((prefixDataPath("sounds", SoundFiles[selectedSound])).data());
-				if (hasLoaded == false)
-					LOGW_X("Cannot load from file \"%s\"", SoundFiles[selectedSound]);
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Load Stream from Memory") && selectedSound >= 0 && selectedSound < NumSounds)
-			{
-				streamPlayer_->stop();
-				const bool hasLoaded = streamPlayer_->loadFromMemory(SoundFiles[selectedSound],
-				                                                     soundBuffers[selectedSound].get(), soundBufferSizes[selectedSound]);
-				if (hasLoaded == false)
-					LOGW_X("Cannot load from memory \"%s\"", SoundFiles[selectedSound]);
-				else
-				{
-					auxString.format("Memory file \"%s\"", SoundFiles[selectedSound]);
-					streamPlayer_->setName(auxString.data());
-				}
-			}
-			ImGui::TreePop();
-		}
-
-		if (ImGui::TreeNode("Load from Samples"))
-		{
-			ImGui::SliderInt("Frequency", &sineWaveFrequency, 110, 7040);
-			sineWaveFrequency = nctl::clamp(sineWaveFrequency, 110, 7040);
-
-			ImGui::SliderFloat("Duration", &sineWaveDuration, 0.1f, 5.0f);
-			sineWaveDuration = nctl::clamp(sineWaveDuration, 0.1f, 5.0f);
-
-			if (ImGui::Button("Load Buffer from Samples"))
-			{
-				bufferPlayer_->stop();
-				bool hasLoaded = false;
-
-				const unsigned int samplesPerSecond = audioBuffer_->numChannels() * audioBuffer_->frequency();
-				const unsigned int numSamples = static_cast<unsigned int>(samplesPerSecond * sineWaveDuration);
-				if (audioBuffer_->bytesPerSample() == 1)
-				{
-					nctl::UniquePtr<int8_t[]> audioSamples = nctl::makeUnique<int8_t[]>(numSamples);
-					for (unsigned int i = 0; i < numSamples; i++)
-						audioSamples[i] = static_cast<int8_t>(sinf(2.0f * nc::fPi * i * sineWaveFrequency / samplesPerSecond) * 128);
-					hasLoaded = audioBuffer_->loadFromSamples((unsigned char *)(audioSamples.get()), numSamples * sizeof(int8_t));
-				}
-				else
-				{
-					nctl::UniquePtr<int16_t[]> audioSamples = nctl::makeUnique<int16_t[]>(numSamples);
-					for (unsigned int i = 0; i < numSamples; i++)
-						audioSamples[i] = static_cast<int16_t>(sinf(2.0f * nc::fPi * i * sineWaveFrequency / samplesPerSecond) * 32767);
-					hasLoaded = audioBuffer_->loadFromSamples((unsigned char *)(audioSamples.get()), numSamples * sizeof(int16_t));
-				}
-
-				if (hasLoaded == false)
-					LOGW("Cannot load from samples");
-				else
-				{
-					auxString.format("Raw Samples (%dHz for %.2fs)", sineWaveFrequency, sineWaveDuration);
-					audioBuffer_->setName(auxString.data());
-				}
-			}
-
-			ImGui::TreePop();
-		}
-
-		if (ImGui::TreeNode("Re-initialize"))
-		{
-			const char *frequencyStrings[3] = { "44100Hz", "22050Hz", "11025Hz" };
-			static const int frequencies[3] = { 44100, 22050, 11025 };
-			static int selectedFrequency = 0;
-			ImGui::Combo("Frequency", &selectedFrequency, frequencyStrings, IM_ARRAYSIZE(frequencyStrings));
-
-			const char *formats[4] = { "Mono 8bit", "Stereo 8bit", "Mono 16bit", "Stereo 16bit" };
-			static int selectedFormat = 0;
-			ImGui::Combo("Format", &selectedFormat, formats, IM_ARRAYSIZE(formats));
-
-			if (ImGui::Button("Init Buffer"))
-				audioBuffer_->init("Initialized", nc::AudioBuffer::Format(selectedFormat), frequencies[selectedFrequency]);
-
-			ImGui::TreePop();
-		}
-	}
-
-	if (ImGui::CollapsingHeader("Font"))
-	{
-		ImGui::Text("Name: \"%s\"", font_->name());
-		ImGui::Text("Glyphs: %u, Kerning pairs: %u", font_->numGlyphs(), font_->numKernings());
-		ImGui::Text("Line height: %u, Base: %u", font_->lineHeight(), font_->base());
-
-		bool fontHasChanged = false;
-		if (ImGui::TreeNode("Load from File or Memory"))
-		{
-			for (int i = 0; i < NumFonts; i++)
-			{
-				ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-				if (i == selectedFont)
-					nodeFlags |= ImGuiTreeNodeFlags_Selected;
-				ImGui::TreeNodeEx(FontFiles[i], nodeFlags);
-				if (ImGui::IsItemClicked())
-					selectedFont = i;
-			}
-			if (ImGui::Button("Load from File") && selectedFont >= 0 && selectedFont < NumFonts)
-			{
-				const bool hasLoaded = font_->loadFromFile((prefixDataPath("fonts", FontFiles[selectedFont])).data());
-				if (hasLoaded == false)
-					LOGW_X("Cannot load from file \"%s\"", FontFiles[selectedFont]);
-				fontHasChanged = hasLoaded;
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Load from Memory") && selectedFont >= 0 && selectedFont < NumFonts)
-			{
-				const bool hasLoaded = font_->loadFromMemory(FontFiles[selectedFont], fontBuffers[selectedFont].get(), fontBufferSizes[selectedFont],
-				                                             (prefixDataPath("fonts", FontTexFiles[selectedFont])).data());
-				if (hasLoaded == false)
-					LOGW_X("Cannot load from memory \"%s\"", FontFiles[selectedFont]);
-				else
-				{
-					auxString.format("Memory file \"%s\"", FontFiles[selectedFont]);
-					audioBuffer_->setName(auxString.data());
-				}
-				fontHasChanged = hasLoaded;
-			}
-			ImGui::TreePop();
-		}
-
-		if (fontHasChanged)
-			textNode_->setFont(font_.get());
-	}
-
-	if (ImGui::CollapsingHeader("Lua Script"))
-	{
-		if (loadedScript >= 0 && loadedScript < NumScripts)
-			ImGui::Text("Name: \"%s\"", ScriptFiles[loadedScript]);
-		else
-			ImGui::TextUnformatted("No script loaded");
-
-		bool scriptHasChanged = false;
-		if (ImGui::TreeNode("Load from File or Memory"))
-		{
-			for (int i = 0; i < NumScripts; i++)
-			{
-				ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-				if (i == selectedScript)
-					nodeFlags |= ImGuiTreeNodeFlags_Selected;
-				ImGui::TreeNodeEx(ScriptFiles[i], nodeFlags);
-				if (ImGui::IsItemClicked())
-					selectedScript = i;
-			}
-			if (ImGui::Button("Load from File") && selectedScript >= 0 && selectedScript < NumScripts)
-			{
-				const bool hasLoaded = luaState_->loadFromFile((prefixDataPath("scripts", ScriptFiles[selectedScript])).data(), ScriptFiles[selectedScript]);
-				if (hasLoaded == false)
-					LOGW_X("Cannot load from file \"%s\"", ScriptFiles[selectedScript]);
-				scriptHasChanged = hasLoaded;
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Load from Memory") && selectedScript >= 0 && selectedScript < NumScripts)
-			{
-				const bool hasLoaded = luaState_->loadFromMemory(ScriptFiles[selectedScript], scriptBuffers[selectedScript].get(), scriptBufferSizes[selectedScript]);
-				if (hasLoaded == false)
-					LOGW_X("Cannot load from memory \"%s\"", ScriptFiles[selectedScript]);
-				scriptHasChanged = hasLoaded;
-			}
-			ImGui::TreePop();
-		}
-
-		if (scriptHasChanged)
-		{
-			loadedScript = selectedScript;
-			luaState_ = nctl::makeUnique<nc::LuaStateManager>(nc::LuaStateManager::ApiType::EDIT_ONLY,
-			                                                  nc::LuaStateManager::StatisticsTracking::DISABLED,
-			                                                  nc::LuaStateManager::StandardLibraries::NOT_LOADED);
-		}
-	}
-
-	if (ImGui::CollapsingHeader("Shader"))
-	{
-		if (loadedShader >= 0 && loadedShader < NumShaders)
-			ImGui::Text("Name: \"%s\"", ShaderNames[loadedShader]);
-		else
-			ImGui::TextUnformatted("No shader loaded");
-
-		bool shaderHasChanged = false;
-		if (ImGui::TreeNode("Load from Memory"))
-		{
-			for (int i = 0; i < NumShaders; i++)
-			{
-				ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-				if (i == selectedShader)
-					nodeFlags |= ImGuiTreeNodeFlags_Selected;
-				ImGui::TreeNodeEx(ShaderNames[i], nodeFlags);
-				if (ImGui::IsItemClicked())
-					selectedShader = i;
-			}
-
-			if (ImGui::Button("Load") && selectedShader >= 0 && selectedShader < NumShaders)
-			{
-				bool hasLoaded = false;
-				if (VertexShaderStrings[selectedShader] != nullptr)
-				{
-					hasLoaded = shader_->loadFromMemory(ShaderNames[selectedShader], nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS,
-					                                    VertexShaderStrings[selectedShader], FragmentShaderStrings[selectedShader]);
-				}
-				else
-				{
-					hasLoaded = shader_->loadFromMemory(ShaderNames[selectedShader], nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS,
-					                                    DefaultVertexShaders[selectedShader], FragmentShaderStrings[selectedShader]);
-				}
-
-				if (hasLoaded == false)
-					LOGW_X("Cannot load from memory \"%s\"", ShaderNames[selectedShader]);
-				shaderHasChanged = hasLoaded;
-			}
-			ImGui::TreePop();
-		}
-
-		if (shaderHasChanged)
-			loadedShader = selectedShader;
-	}
-
-	ImGui::End();
 }
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
+	if (event.mod & nc::KeyMod::CTRL && event.sym == nc::KeySym::H)
+		showImGui = !showImGui;
+	else if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
 }

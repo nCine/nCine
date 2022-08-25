@@ -4,6 +4,7 @@
 #include <ncine/IAppEventHandler.h>
 #include <ncine/IInputEventHandler.h>
 #include <nctl/StaticArray.h>
+#include <ncine/Vector2.h>
 
 namespace nctl {
 
@@ -52,12 +53,17 @@ class MyEventHandler :
 	void onMouseButtonPressed(const nc::MouseEvent &event) override;
 	void onMouseMoved(const nc::MouseState &state) override;
 
+	void onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event) override;
+	void onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event) override;
+	void onJoyDisconnected(const nc::JoyConnectionEvent &event) override;
+
   private:
 	bool withAtlas_;
 	bool pause_;
 	float angle_;
 	int numBlurPasses_;
 	int currentViewportSetup_;
+	nc::Vector2f joyVectorLeft_;
 
 	nctl::UniquePtr<nc::Texture> texture0_;
 	nctl::UniquePtr<nc::Texture> texture1_;

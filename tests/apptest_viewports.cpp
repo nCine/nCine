@@ -48,6 +48,7 @@ const char *PositionPresetsLabels[] = { "Top Left", "Top Centre", "Top Right", "
 nctl::String comboString(64);
 
 nc::Texture::Format screenFormat = nc::Texture::Format::RGB8;
+bool showImGui = true;
 
 const char *stringOnOff(bool enabled)
 {
@@ -126,6 +127,7 @@ void MyEventHandler::onInit()
 	viewportCreationData[3].clearColor = nc::Colorf(0.15f, 0.15f, 0.15f, 0.15f);
 	viewportCreationData[3].spritePositionIndex = 2;
 	viewportCreationData[4].assignCamera = false;
+	viewportCreationData[4].withTexture = false;
 
 	screenCamera_ = nctl::makeUnique<nc::Camera>();
 	screenViewport.setCamera(screenCamera_.get());
@@ -223,372 +225,377 @@ void MyEventHandler::onInit()
 void MyEventHandler::onFrameStart()
 {
 	static bool viewMatrixChanged = false;
-
-	ImGui::Begin("Viewports");
-
-	comboString.clear();
-	comboString.append("Screen");
-	comboString.setLength(comboString.length() + 1);
-	for (unsigned int i = 0; i < NumViewports; i++)
-	{
-		comboString.formatAppend("Viewport %d", i);
-		comboString.setLength(comboString.length() + 1);
-	}
-	comboString.setLength(comboString.length() + 1);
-	// Append a second '\0' to signal the end of the combo item list
-	comboString[comboString.length() - 1] = '\0';
-
 	static int currentComboViewport = 0;
-	const bool viewportChanged = ImGui::Combo("Viewport", &currentComboViewport, comboString.data());
-	nc::Viewport &currentViewport = (currentComboViewport > 0) ? *viewportData[currentComboViewport - 1].viewport : nc::theApplication().screenViewport();
-	nc::Texture *currentTexture = (currentComboViewport > 0) ? viewportData[currentComboViewport - 1].texture.get() : nullptr;
 
-	const nc::Viewport *nextViewport = (currentComboViewport < nc::Viewport::chain().size()) ? nc::Viewport::chain()[currentComboViewport] : nullptr;
-	const char *nextViewportString = "Next Viewport";
-	if (nextViewport == nullptr)
-		ImGui::Text("%s: None", nextViewportString);
-	else
+	if (showImGui)
 	{
-		for (unsigned int i = 0; i < NumViewports; i++)
+		ImGui::SetNextWindowPos(ImVec2(30.0f, 40.0f), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowSize(ImVec2(350.0f, 350.0f), ImGuiCond_FirstUseEver);
+		if (ImGui::Begin("Viewports", &showImGui))
 		{
-			if (nextViewport == viewportData[i].viewport.get())
+			comboString.clear();
+			comboString.append("Screen");
+			comboString.setLength(comboString.length() + 1);
+			for (unsigned int i = 0; i < NumViewports; i++)
 			{
-				ImGui::Text("%s: Viewport %d", nextViewportString, i);
-				break;
+				comboString.formatAppend("Viewport %d", i);
+				comboString.setLength(comboString.length() + 1);
 			}
-		}
-	}
+			comboString.setLength(comboString.length() + 1);
+			// Append a second '\0' to signal the end of the combo item list
+			comboString[comboString.length() - 1] = '\0';
 
-	if ((currentComboViewport == 0 || currentViewport.texture() != nullptr) &&
-	    ImGui::TreeNodeEx("Surface", ImGuiTreeNodeFlags_DefaultOpen))
-	{
-		const nc::Vector2i currentViewportSize = currentViewport.size();
-		const int currentColorFormatType = static_cast<int>((currentTexture != nullptr) ? currentTexture->format() : screenFormat);
-		const int currentDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
+			const bool viewportChanged = ImGui::Combo("Viewport", &currentComboViewport, comboString.data());
+			nc::Viewport &currentViewport = (currentComboViewport > 0) ? *viewportData[currentComboViewport - 1].viewport : nc::theApplication().screenViewport();
+			nc::Texture *currentTexture = (currentComboViewport > 0) ? viewportData[currentComboViewport - 1].texture.get() : nullptr;
 
-		if (currentComboViewport == 0)
-		{
-			ImGui::Text("Width: %d", currentViewportSize.x);
-			ImGui::Text("Height: %d", currentViewportSize.y);
-			ImGui::Text("Color Format: %s", ColorFormatLabels[currentColorFormatType]);
-			ImGui::Text("Depth Format: %s", DepthFormatLabels[currentDepthFormatType]);
-		}
-		else
-		{
-			static nc::Vector2i viewportSize = currentViewport.size();
-			static int comboColorFormatType = static_cast<int>(currentTexture->format());
-			static int comboDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
-			if (viewportChanged)
+			const nc::Viewport *nextViewport = (currentComboViewport < nc::Viewport::chain().size()) ? nc::Viewport::chain()[currentComboViewport] : nullptr;
+			const char *nextViewportString = "Next Viewport";
+			if (nextViewport == nullptr)
+				ImGui::Text("%s: None", nextViewportString);
+			else
 			{
-				viewportSize = currentViewport.size();
-				comboColorFormatType = static_cast<int>(currentTexture->format());
-				comboDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
-			}
-
-			ImGui::SliderInt("Width", &viewportSize.x, 0, nc::theApplication().widthInt());
-			ImGui::SliderInt("Height", &viewportSize.y, 0, nc::theApplication().heightInt());
-			ImGui::Combo("Color Format", &comboColorFormatType, ColorFormatLabels, IM_ARRAYSIZE(ColorFormatLabels));
-			ImGui::Combo("Depth Format", &comboDepthFormatType, DepthFormatLabels, IM_ARRAYSIZE(DepthFormatLabels));
-
-			if (ImGui::Button("Current"))
-			{
-				viewportSize = currentViewport.size();
-				comboColorFormatType = static_cast<int>(currentTexture->format());
-				comboDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Apply"))
-			{
-				if (!(viewportSize == currentViewportSize) ||
-				    comboColorFormatType != currentColorFormatType ||
-				    comboDepthFormatType != currentDepthFormatType)
+				for (unsigned int i = 0; i < NumViewports; i++)
 				{
-					initTexture(currentViewport, *currentTexture, viewportSize, nc::Texture::Format(comboColorFormatType), nc::Viewport::DepthStencilFormat(comboDepthFormatType));
-					viewportData[currentComboViewport - 1].sprite->resetTexture();
+					if (nextViewport == viewportData[i].viewport.get())
+					{
+						ImGui::Text("%s: Viewport %d", nextViewportString, i);
+						break;
+					}
 				}
 			}
+
+			if ((currentComboViewport == 0 || currentViewport.texture() != nullptr) &&
+			    ImGui::TreeNodeEx("Surface", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				const nc::Vector2i currentViewportSize = currentViewport.size();
+				const int currentColorFormatType = static_cast<int>((currentTexture != nullptr) ? currentTexture->format() : screenFormat);
+				const int currentDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
+
+				if (currentComboViewport == 0)
+				{
+					ImGui::Text("Width: %d", currentViewportSize.x);
+					ImGui::Text("Height: %d", currentViewportSize.y);
+					ImGui::Text("Color Format: %s", ColorFormatLabels[currentColorFormatType]);
+					ImGui::Text("Depth Format: %s", DepthFormatLabels[currentDepthFormatType]);
+				}
+				else
+				{
+					static nc::Vector2i viewportSize = currentViewport.size();
+					static int comboColorFormatType = static_cast<int>(currentTexture->format());
+					static int comboDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
+					if (viewportChanged)
+					{
+						viewportSize = currentViewport.size();
+						comboColorFormatType = static_cast<int>(currentTexture->format());
+						comboDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
+					}
+
+					ImGui::SliderInt("Width", &viewportSize.x, 0, nc::theApplication().widthInt());
+					ImGui::SliderInt("Height", &viewportSize.y, 0, nc::theApplication().heightInt());
+					ImGui::Combo("Color Format", &comboColorFormatType, ColorFormatLabels, IM_ARRAYSIZE(ColorFormatLabels));
+					ImGui::Combo("Depth Format", &comboDepthFormatType, DepthFormatLabels, IM_ARRAYSIZE(DepthFormatLabels));
+
+					if (ImGui::Button("Current"))
+					{
+						viewportSize = currentViewport.size();
+						comboColorFormatType = static_cast<int>(currentTexture->format());
+						comboDepthFormatType = static_cast<int>(currentViewport.depthStencilFormat());
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Apply"))
+					{
+						if (!(viewportSize == currentViewportSize) ||
+						    comboColorFormatType != currentColorFormatType ||
+						    comboDepthFormatType != currentDepthFormatType)
+						{
+							initTexture(currentViewport, *currentTexture, viewportSize, nc::Texture::Format(comboColorFormatType), nc::Viewport::DepthStencilFormat(comboDepthFormatType));
+							viewportData[currentComboViewport - 1].sprite->resetTexture();
+						}
+					}
 #if !defined(__EMSCRIPTEN__) && !defined(__ANDROID__)
-			ImGui::SameLine();
-			if (ImGui::Button("Save PNG"))
-			{
-				nc::TextureSaverPng saver;
-				nc::TextureSaverPng::Properties props;
-				props.width = currentViewportSize.x;
-				props.height = currentViewportSize.y;
-				props.format = nc::ITextureSaver::Format::RGB8;
-				// Vertical flip as the texture is generated by OpenGL and saved from bottom to top
-				props.verticalFlip = true;
-				if (currentTexture->format() == nc::Texture::Format::RGBA8)
-					props.format = nc::ITextureSaver::Format::RGBA8;
+					ImGui::SameLine();
+					if (ImGui::Button("Save PNG"))
+					{
+						nc::TextureSaverPng saver;
+						nc::TextureSaverPng::Properties props;
+						props.width = currentViewportSize.x;
+						props.height = currentViewportSize.y;
+						props.format = nc::ITextureSaver::Format::RGB8;
+						// Vertical flip as the texture is generated by OpenGL and saved from bottom to top
+						props.verticalFlip = true;
+						if (currentTexture->format() == nc::Texture::Format::RGBA8)
+							props.format = nc::ITextureSaver::Format::RGBA8;
 
-				nc::Texture &tex = *currentViewport.texture();
-				nctl::UniquePtr<unsigned char[]> buffer = nctl::makeUnique<unsigned char[]>(tex.dataSize());
-				const bool savedToMemory = tex.saveToMemory(buffer.get());
-				if (savedToMemory)
-				{
-					props.pixels = buffer.get();
-					// Recycling comboString for screenshot filename
-					comboString.format("viewport%d_%dx%d.png", currentComboViewport, currentViewportSize.x, currentViewportSize.y);
-					saver.saveToFile(props, comboString.data());
-				}
-			}
+						nc::Texture &tex = *currentViewport.texture();
+						nctl::UniquePtr<unsigned char[]> buffer = nctl::makeUnique<unsigned char[]>(tex.dataSize());
+						const bool savedToMemory = tex.saveToMemory(buffer.get());
+						if (savedToMemory)
+						{
+							props.pixels = buffer.get();
+							// Recycling comboString for screenshot filename
+							comboString.format("viewport%d_%dx%d.png", currentComboViewport, currentViewportSize.x, currentViewportSize.y);
+							saver.saveToFile(props, comboString.data());
+						}
+					}
 	#if NCINE_WITH_WEBP
-			ImGui::SameLine();
-			if (ImGui::Button("Save WebP"))
-			{
-				nc::TextureSaverWebP saver;
-				nc::TextureSaverWebP::Properties props;
-				nc::TextureSaverWebP::WebPProperties webpProps;
-				props.width = currentViewportSize.x;
-				props.height = currentViewportSize.y;
-				props.format = nc::ITextureSaver::Format::RGB8;
-				// Vertical flip as the texture is generated by OpenGL and saved from bottom to top
-				props.verticalFlip = true;
-				webpProps.lossless = true;
-				if (currentTexture->format() == nc::Texture::Format::RGBA8)
-					props.format = nc::ITextureSaver::Format::RGBA8;
+					ImGui::SameLine();
+					if (ImGui::Button("Save WebP"))
+					{
+						nc::TextureSaverWebP saver;
+						nc::TextureSaverWebP::Properties props;
+						nc::TextureSaverWebP::WebPProperties webpProps;
+						props.width = currentViewportSize.x;
+						props.height = currentViewportSize.y;
+						props.format = nc::ITextureSaver::Format::RGB8;
+						// Vertical flip as the texture is generated by OpenGL and saved from bottom to top
+						props.verticalFlip = true;
+						webpProps.lossless = true;
+						if (currentTexture->format() == nc::Texture::Format::RGBA8)
+							props.format = nc::ITextureSaver::Format::RGBA8;
 
-				nc::Texture &tex = *currentViewport.texture();
-				nctl::UniquePtr<unsigned char[]> buffer = nctl::makeUnique<unsigned char[]>(tex.dataSize());
-				const bool savedToMemory = tex.saveToMemory(buffer.get());
-				if (savedToMemory)
-				{
-					props.pixels = buffer.get();
-					// Recycling comboString for screenshot filename
-					comboString.format("viewport%d_%dx%d.webp", currentComboViewport, currentViewportSize.x, currentViewportSize.y);
-					saver.saveToFile(props, webpProps, comboString.data());
-				}
-			}
+						nc::Texture &tex = *currentViewport.texture();
+						nctl::UniquePtr<unsigned char[]> buffer = nctl::makeUnique<unsigned char[]>(tex.dataSize());
+						const bool savedToMemory = tex.saveToMemory(buffer.get());
+						if (savedToMemory)
+						{
+							props.pixels = buffer.get();
+							// Recycling comboString for screenshot filename
+							comboString.format("viewport%d_%dx%d.webp", currentComboViewport, currentViewportSize.x, currentViewportSize.y);
+							saver.saveToFile(props, webpProps, comboString.data());
+						}
+					}
 	#endif
 #endif
-		}
+				}
 
-		nc::Colorf clearColor = currentViewport.clearColor();
-		ImGui::ColorEdit4("Clear Color", clearColor.data(), ImGuiColorEditFlags_AlphaBar);
-		currentViewport.setClearColor(clearColor);
+				nc::Colorf clearColor = currentViewport.clearColor();
+				ImGui::ColorEdit4("Clear Color", clearColor.data(), ImGuiColorEditFlags_AlphaBar);
+				currentViewport.setClearColor(clearColor);
 
-		int comboClearMode = static_cast<int>(currentViewport.clearMode());
-		ImGui::Combo("Clear Mode", &comboClearMode, ClearModeLabels, IM_ARRAYSIZE(ClearModeLabels));
-		currentViewport.setClearMode(nc::Viewport::ClearMode(comboClearMode));
+				int comboClearMode = static_cast<int>(currentViewport.clearMode());
+				ImGui::Combo("Clear Mode", &comboClearMode, ClearModeLabels, IM_ARRAYSIZE(ClearModeLabels));
+				currentViewport.setClearMode(nc::Viewport::ClearMode(comboClearMode));
 
-		ImGui::TreePop();
-	}
+				ImGui::TreePop();
+			}
 
-	int maxWidth = currentViewport.width();
-	int maxHeight = currentViewport.height();
-	if (maxWidth == 0 || maxHeight == 0)
-	{
-		for (int i = currentComboViewport - 1; i >= 0; i--)
-		{
-			nc::Viewport &prevViewport = (i == 0) ? nc::theApplication().screenViewport() : *viewportData[i].viewport;
-			if (prevViewport.width() != 0 && prevViewport.height() != 0)
+			int maxWidth = currentViewport.width();
+			int maxHeight = currentViewport.height();
+			if (maxWidth == 0 || maxHeight == 0)
 			{
-				maxWidth = prevViewport.width();
-				maxHeight = prevViewport.height();
-				break;
+				for (int i = currentComboViewport - 1; i >= 0; i--)
+				{
+					nc::Viewport &prevViewport = (i == 0) ? nc::theApplication().screenViewport() : *viewportData[i].viewport;
+					if (prevViewport.width() != 0 && prevViewport.height() != 0)
+					{
+						maxWidth = prevViewport.width();
+						maxHeight = prevViewport.height();
+						break;
+					}
+				}
+			}
+
+			if (currentComboViewport > 0 && ImGui::TreeNode("Viewport Rectangle"))
+			{
+				const nc::Recti currentViewportRect = currentViewport.viewportRect();
+				static nc::Recti viewportRect = currentViewport.viewportRect();
+				if (viewportChanged)
+					viewportRect = currentViewport.viewportRect();
+				static bool applyEveryframe = false;
+				bool valueChanged = false;
+
+				valueChanged |= ImGui::SliderInt("Rect X", &viewportRect.x, 0, maxWidth);
+				valueChanged |= ImGui::SliderInt("Rect Y", &viewportRect.y, 0, maxHeight);
+				valueChanged |= ImGui::SliderInt("Rect Width", &viewportRect.w, 0, maxWidth - viewportRect.x);
+				valueChanged |= ImGui::SliderInt("Rect Height", &viewportRect.h, 0, maxHeight - viewportRect.y);
+
+				if (viewportRect.w > maxWidth - viewportRect.x)
+					viewportRect.w = maxWidth - viewportRect.x;
+				if (viewportRect.h > maxHeight - viewportRect.y)
+					viewportRect.h = maxHeight - viewportRect.y;
+
+				if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
+					valueChanged = true;
+				ImGui::SameLine();
+				if (ImGui::Button("Reset"))
+				{
+					viewportRect.x = 0;
+					viewportRect.y = 0;
+					viewportRect.w = maxWidth;
+					viewportRect.h = maxHeight;
+					valueChanged = true;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Current"))
+					viewportRect = currentViewport.viewportRect();
+				ImGui::SameLine();
+				if (ImGui::Button("Apply") || (applyEveryframe && valueChanged))
+				{
+					if (!(viewportRect == currentViewportRect) && viewportRect.w > 0 && viewportRect.h > 0)
+						currentViewport.setViewportRect(viewportRect);
+				}
+
+				ImGui::TreePop();
+			}
+
+			if (currentComboViewport > 0 && ImGui::TreeNode("Scissor Rectangle"))
+			{
+				const nc::Recti currentScissorRect = currentViewport.scissorRect();
+				static nc::Recti scissorRect = currentViewport.scissorRect();
+				if (viewportChanged)
+					scissorRect = currentViewport.scissorRect();
+				static bool applyEveryframe = false;
+				bool valueChanged = false;
+
+				valueChanged |= ImGui::SliderInt("Rect X", &scissorRect.x, 0, maxWidth);
+				valueChanged |= ImGui::SliderInt("Rect Y", &scissorRect.y, 0, maxHeight);
+				valueChanged |= ImGui::SliderInt("Rect Width", &scissorRect.w, 0, maxWidth - scissorRect.x);
+				valueChanged |= ImGui::SliderInt("Rect Height", &scissorRect.h, 0, maxHeight - scissorRect.y);
+
+				if (scissorRect.w > maxWidth - scissorRect.x)
+					scissorRect.w = maxWidth - scissorRect.x;
+				if (scissorRect.h > maxHeight - scissorRect.y)
+					scissorRect.h = maxHeight - scissorRect.y;
+
+				if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
+					valueChanged = true;
+				ImGui::SameLine();
+				if (ImGui::Button("Reset"))
+				{
+					scissorRect.x = 0;
+					scissorRect.y = 0;
+					scissorRect.w = maxWidth;
+					scissorRect.h = maxHeight;
+					valueChanged = true;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Current"))
+					scissorRect = currentViewport.scissorRect();
+				ImGui::SameLine();
+				if (ImGui::Button("Apply") || (applyEveryframe && valueChanged))
+				{
+					if (!(scissorRect == currentScissorRect) && scissorRect.w > 0 && scissorRect.h > 0)
+						currentViewport.setScissorRect(scissorRect);
+				}
+
+				ImGui::TreePop();
+			}
+
+			if (currentComboViewport > 0 && viewportData[currentComboViewport - 1].sprite && ImGui::TreeNode("Sprite"))
+			{
+				nc::Sprite &sprite = *viewportData[currentComboViewport - 1].sprite;
+
+				nc::Vector2f position = sprite.position();
+				ImGui::SliderFloat("Pos X", &position.x, (-nc::theApplication().widthInt() + sprite.width()) / 2, (nc::theApplication().widthInt() - sprite.width()) / 2);
+				ImGui::SliderFloat("Pos Y", &position.y, (-nc::theApplication().heightInt() + sprite.height()) / 2, (nc::theApplication().heightInt() - sprite.height()) / 2);
+				sprite.setPosition(position);
+
+				static int positionIndex = viewportCreationData[currentComboViewport - 1].spritePositionIndex;
+				if (viewportChanged)
+					positionIndex = viewportCreationData[currentComboViewport - 1].spritePositionIndex;
+				if (ImGui::Combo("Position Presets", &positionIndex, PositionPresetsLabels, IM_ARRAYSIZE(PositionPresetsLabels)))
+					sprite.setPosition(positionPresets(sprite.absSize(), positionIndex));
+
+				float rotation = sprite.rotation();
+				ImGui::SliderFloat("Rotation", &rotation, 0.0f, 360.0f);
+				nc::Vector2f scaleFactors = sprite.scale();
+				ImGui::SliderFloat2("Scale", scaleFactors.data(), 0.01f, 3.0f);
+
+				bool isEnabled = sprite.isEnabled();
+				ImGui::Checkbox("Enabled", &isEnabled);
+				sprite.setEnabled(isEnabled);
+				ImGui::SameLine();
+
+				if (ImGui::Button("Reset"))
+				{
+					rotation = 0.0f;
+					scaleFactors.set(1.0f, 1.0f);
+					// Set scaling factors before updating the position
+					sprite.setScale(scaleFactors);
+					positionIndex = viewportCreationData[currentComboViewport - 1].spritePositionIndex;
+					sprite.setPosition(positionPresets(sprite.size(), positionIndex));
+				}
+				sprite.setRotation(rotation);
+				sprite.setScale(scaleFactors);
+
+				ImGui::TreePop();
+			}
+
+			ImGui::Separator();
+
+			nc::Camera &currentCamera = *currentViewport.camera();
+			if (ImGui::TreeNode("Projection Matrix"))
+			{
+				static nc::Camera::ProjectionValues values = currentCamera.projectionValues();
+				if (viewportChanged)
+					values = currentCamera.projectionValues();
+				static bool applyEveryframe = false;
+				bool valueChanged = false;
+
+				ImGui::Text("Update Frame: %lu", currentCamera.updateFrameProjectionMatrix());
+				valueChanged |= ImGui::SliderFloat("Left", &values.left, 0.0f, static_cast<float>(nc::theApplication().width()));
+				valueChanged |= ImGui::SliderFloat("Right", &values.right, values.left, static_cast<float>(nc::theApplication().width()));
+				valueChanged |= ImGui::SliderFloat("Top", &values.top, 0.0f, static_cast<float>(nc::theApplication().height()));
+				valueChanged |= ImGui::SliderFloat("Bottom", &values.bottom, values.top, static_cast<float>(nc::theApplication().height()));
+				if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
+					valueChanged = true;
+				ImGui::SameLine();
+				if (ImGui::Button("Reset"))
+				{
+					values.left = 0.0f;
+					values.right = static_cast<float>(nc::theApplication().width());
+					values.top = 0.0f;
+					values.bottom = static_cast<float>(nc::theApplication().height());
+					valueChanged = true;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Apply") || (applyEveryframe && valueChanged))
+					currentCamera.setOrthoProjection(values);
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("View Matrix"))
+			{
+				static nc::Camera::ViewValues values = currentCamera.viewValues();
+				if (viewportChanged || viewMatrixChanged)
+				{
+					values = currentCamera.viewValues();
+					camPos_ = -values.position;
+					camRot_ = -values.rotation;
+					camScale_ = values.scale;
+					viewMatrixChanged = false;
+				}
+				static bool applyEveryframe = false;
+				bool valueChanged = false;
+
+				ImGui::Text("Update Frame: %lu", currentCamera.updateFrameViewMatrix());
+				valueChanged |= ImGui::SliderFloat("Position X", &values.position.x, -nc::theApplication().width(), nc::theApplication().width());
+				valueChanged |= ImGui::SliderFloat("Position Y", &values.position.y, -nc::theApplication().height(), nc::theApplication().height());
+				valueChanged |= ImGui::SliderFloat("Rotation", &values.rotation, 0.0f, 360.0f);
+				valueChanged |= ImGui::SliderFloat("Scale", &values.scale, MinCameraScale, MaxCameraScale);
+				if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
+					valueChanged = true;
+				ImGui::SameLine();
+				if (ImGui::Button("Reset"))
+				{
+					values.position.set(-nc::theApplication().width() * 0.5f, -nc::theApplication().height() * 0.5f);
+					values.rotation = 0.0f;
+					values.scale = 1.0f;
+					valueChanged = true;
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("Apply") || (applyEveryframe && valueChanged))
+				{
+					camPos_ = -values.position;
+					camRot_ = -values.rotation;
+					camScale_ = values.scale;
+				}
+				ImGui::TreePop();
 			}
 		}
+		ImGui::End();
 	}
-
-	if (currentComboViewport > 0 && ImGui::TreeNode("Viewport Rectangle"))
-	{
-		const nc::Recti currentViewportRect = currentViewport.viewportRect();
-		static nc::Recti viewportRect = currentViewport.viewportRect();
-		if (viewportChanged)
-			viewportRect = currentViewport.viewportRect();
-		static bool applyEveryframe = false;
-		bool valueChanged = false;
-
-		valueChanged |= ImGui::SliderInt("Rect X", &viewportRect.x, 0, maxWidth);
-		valueChanged |= ImGui::SliderInt("Rect Y", &viewportRect.y, 0, maxHeight);
-		valueChanged |= ImGui::SliderInt("Rect Width", &viewportRect.w, 0, maxWidth - viewportRect.x);
-		valueChanged |= ImGui::SliderInt("Rect Height", &viewportRect.h, 0, maxHeight - viewportRect.y);
-
-		if (viewportRect.w > maxWidth - viewportRect.x)
-			viewportRect.w = maxWidth - viewportRect.x;
-		if (viewportRect.h > maxHeight - viewportRect.y)
-			viewportRect.h = maxHeight - viewportRect.y;
-
-		if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
-			valueChanged = true;
-		ImGui::SameLine();
-		if (ImGui::Button("Reset"))
-		{
-			viewportRect.x = 0;
-			viewportRect.y = 0;
-			viewportRect.w = maxWidth;
-			viewportRect.h = maxHeight;
-			valueChanged = true;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Current"))
-			viewportRect = currentViewport.viewportRect();
-		ImGui::SameLine();
-		if (ImGui::Button("Apply") || (applyEveryframe && valueChanged))
-		{
-			if (!(viewportRect == currentViewportRect) && viewportRect.w > 0 && viewportRect.h > 0)
-				currentViewport.setViewportRect(viewportRect);
-		}
-
-		ImGui::TreePop();
-	}
-
-	if (currentComboViewport > 0 && ImGui::TreeNode("Scissor Rectangle"))
-	{
-		const nc::Recti currentScissorRect = currentViewport.scissorRect();
-		static nc::Recti scissorRect = currentViewport.scissorRect();
-		if (viewportChanged)
-			scissorRect = currentViewport.scissorRect();
-		static bool applyEveryframe = false;
-		bool valueChanged = false;
-
-		valueChanged |= ImGui::SliderInt("Rect X", &scissorRect.x, 0, maxWidth);
-		valueChanged |= ImGui::SliderInt("Rect Y", &scissorRect.y, 0, maxHeight);
-		valueChanged |= ImGui::SliderInt("Rect Width", &scissorRect.w, 0, maxWidth - scissorRect.x);
-		valueChanged |= ImGui::SliderInt("Rect Height", &scissorRect.h, 0, maxHeight - scissorRect.y);
-
-		if (scissorRect.w > maxWidth - scissorRect.x)
-			scissorRect.w = maxWidth - scissorRect.x;
-		if (scissorRect.h > maxHeight - scissorRect.y)
-			scissorRect.h = maxHeight - scissorRect.y;
-
-		if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
-			valueChanged = true;
-		ImGui::SameLine();
-		if (ImGui::Button("Reset"))
-		{
-			scissorRect.x = 0;
-			scissorRect.y = 0;
-			scissorRect.w = maxWidth;
-			scissorRect.h = maxHeight;
-			valueChanged = true;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Current"))
-			scissorRect = currentViewport.scissorRect();
-		ImGui::SameLine();
-		if (ImGui::Button("Apply") || (applyEveryframe && valueChanged))
-		{
-			if (!(scissorRect == currentScissorRect) && scissorRect.w > 0 && scissorRect.h > 0)
-				currentViewport.setScissorRect(scissorRect);
-		}
-
-		ImGui::TreePop();
-	}
-
-	if (currentComboViewport > 0 && viewportData[currentComboViewport - 1].sprite && ImGui::TreeNode("Sprite"))
-	{
-		nc::Sprite &sprite = *viewportData[currentComboViewport - 1].sprite;
-
-		nc::Vector2f position = sprite.position();
-		ImGui::SliderFloat("Pos X", &position.x, (-nc::theApplication().widthInt() + sprite.width()) / 2, (nc::theApplication().widthInt() - sprite.width()) / 2);
-		ImGui::SliderFloat("Pos Y", &position.y, (-nc::theApplication().heightInt() + sprite.height()) / 2, (nc::theApplication().heightInt() - sprite.height()) / 2);
-		sprite.setPosition(position);
-
-		static int positionIndex = viewportCreationData[currentComboViewport - 1].spritePositionIndex;
-		if (viewportChanged)
-			positionIndex = viewportCreationData[currentComboViewport - 1].spritePositionIndex;
-		if (ImGui::Combo("Position Presets", &positionIndex, PositionPresetsLabels, IM_ARRAYSIZE(PositionPresetsLabels)))
-			sprite.setPosition(positionPresets(sprite.absSize(), positionIndex));
-
-		float rotation = sprite.rotation();
-		ImGui::SliderFloat("Rotation", &rotation, 0.0f, 360.0f);
-		nc::Vector2f scaleFactors = sprite.scale();
-		ImGui::SliderFloat2("Scale", scaleFactors.data(), 0.01f, 3.0f);
-
-		bool isEnabled = sprite.isEnabled();
-		ImGui::Checkbox("Enabled", &isEnabled);
-		sprite.setEnabled(isEnabled);
-		ImGui::SameLine();
-
-		if (ImGui::Button("Reset"))
-		{
-			rotation = 0.0f;
-			scaleFactors.set(1.0f, 1.0f);
-			// Set scaling factors before updating the position
-			sprite.setScale(scaleFactors);
-			positionIndex = viewportCreationData[currentComboViewport - 1].spritePositionIndex;
-			sprite.setPosition(positionPresets(sprite.size(), positionIndex));
-		}
-		sprite.setRotation(rotation);
-		sprite.setScale(scaleFactors);
-
-		ImGui::TreePop();
-	}
-
-	ImGui::Separator();
-
-	nc::Camera &currentCamera = *currentViewport.camera();
-	if (ImGui::TreeNode("Projection Matrix"))
-	{
-		static nc::Camera::ProjectionValues values = currentCamera.projectionValues();
-		if (viewportChanged)
-			values = currentCamera.projectionValues();
-		static bool applyEveryframe = false;
-		bool valueChanged = false;
-
-		ImGui::Text("Update Frame: %lu", currentCamera.updateFrameProjectionMatrix());
-		valueChanged |= ImGui::SliderFloat("Left", &values.left, 0.0f, static_cast<float>(nc::theApplication().width()));
-		valueChanged |= ImGui::SliderFloat("Right", &values.right, values.left, static_cast<float>(nc::theApplication().width()));
-		valueChanged |= ImGui::SliderFloat("Top", &values.top, 0.0f, static_cast<float>(nc::theApplication().height()));
-		valueChanged |= ImGui::SliderFloat("Bottom", &values.bottom, values.top, static_cast<float>(nc::theApplication().height()));
-		if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
-			valueChanged = true;
-		ImGui::SameLine();
-		if (ImGui::Button("Reset"))
-		{
-			values.left = 0.0f;
-			values.right = static_cast<float>(nc::theApplication().width());
-			values.top = 0.0f;
-			values.bottom = static_cast<float>(nc::theApplication().height());
-			valueChanged = true;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Apply") || (applyEveryframe && valueChanged))
-			currentCamera.setOrthoProjection(values);
-		ImGui::TreePop();
-	}
-
-	if (ImGui::TreeNode("View Matrix"))
-	{
-		static nc::Camera::ViewValues values = currentCamera.viewValues();
-		if (viewportChanged || viewMatrixChanged)
-		{
-			values = currentCamera.viewValues();
-			camPos_ = -values.position;
-			camRot_ = -values.rotation;
-			camScale_ = values.scale;
-			viewMatrixChanged = false;
-		}
-		static bool applyEveryframe = false;
-		bool valueChanged = false;
-
-		ImGui::Text("Update Frame: %lu", currentCamera.updateFrameViewMatrix());
-		valueChanged |= ImGui::SliderFloat("Position X", &values.position.x, -nc::theApplication().width(), nc::theApplication().width());
-		valueChanged |= ImGui::SliderFloat("Position Y", &values.position.y, -nc::theApplication().height(), nc::theApplication().height());
-		valueChanged |= ImGui::SliderFloat("Rotation", &values.rotation, 0.0f, 360.0f);
-		valueChanged |= ImGui::SliderFloat("Scale", &values.scale, MinCameraScale, MaxCameraScale);
-		if (ImGui::Checkbox("Apply Every Frame", &applyEveryframe))
-			valueChanged = true;
-		ImGui::SameLine();
-		if (ImGui::Button("Reset"))
-		{
-			values.position.set(-nc::theApplication().width() * 0.5f, -nc::theApplication().height() * 0.5f);
-			values.rotation = 0.0f;
-			values.scale = 1.0f;
-			valueChanged = true;
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Apply") || (applyEveryframe && valueChanged))
-		{
-			camPos_ = -values.position;
-			camRot_ = -values.rotation;
-			camScale_ = values.scale;
-		}
-		ImGui::TreePop();
-	}
-
-	ImGui::End();
 
 	const float interval = nc::theApplication().interval();
 	if (!pause_)
@@ -648,6 +655,9 @@ void MyEventHandler::onFrameStart()
 	                           stringOnOff(settings.cullingEnabled), stringOnOff(inputEnabled_));
 	debugText_->setString(*debugString_);
 
+	nc::Viewport &currentViewport = (currentComboViewport > 0) ? *viewportData[currentComboViewport - 1].viewport : nc::theApplication().screenViewport();
+	nc::Camera &currentCamera = *currentViewport.camera();
+
 	const nc::Camera::ViewValues &viewValues = currentCamera.viewValues();
 	if (-camPos_.x != viewValues.position.x || -camPos_.y != viewValues.position.y ||
 	    -camRot_ != viewValues.rotation || camScale_ != viewValues.scale)
@@ -673,32 +683,21 @@ void MyEventHandler::onFrameStart()
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	nc::Application::RenderingSettings &renderingSettings = nc::theApplication().renderingSettings();
-	nc::IDebugOverlay::DisplaySettings &overlaySettings = nc::theApplication().debugOverlaySettings();
 
 	if (event.sym == nc::KeySym::B)
 		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
 	else if (event.sym == nc::KeySym::C)
 		renderingSettings.cullingEnabled = !renderingSettings.cullingEnabled;
-	else if (event.sym == nc::KeySym::H)
-	{
-		overlaySettings.showProfilerGraphs = !overlaySettings.showProfilerGraphs;
-		overlaySettings.showInfoText = !overlaySettings.showInfoText;
-	}
 	else if (event.sym == nc::KeySym::I)
 		inputEnabled_ = !inputEnabled_;
-	else if (event.sym == nc::KeySym::BACKQUOTE)
-		overlaySettings.showInterface = !overlaySettings.showInterface;
-	else if (event.sym == nc::KeySym::P)
-		pause_ = !pause_;
 	else if (event.sym == nc::KeySym::R)
 		resetCamera();
-	else if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
+	else if (event.mod & nc::KeyMod::CTRL && event.sym == nc::KeySym::H)
+		showImGui = !showImGui;
+	else if (event.sym == nc::KeySym::P)
+		pause_ = !pause_;
+	else if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
-	else if (event.sym == nc::KeySym::SPACE)
-	{
-		const bool isSuspended = nc::theApplication().isSuspended();
-		nc::theApplication().setSuspended(!isSuspended);
-	}
 }
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)

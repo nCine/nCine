@@ -171,6 +171,7 @@ void MyEventHandler::onInit()
 
 	scrollOrigin_ = nc::Vector2f::Zero;
 	scrollMove_ = nc::Vector2f::Zero;
+	joyVectorLeft_ = nc::Vector2f::Zero;
 	joyVectorRight_ = nc::Vector2f::Zero;
 }
 
@@ -198,12 +199,14 @@ void MyEventHandler::onFrameStart()
 		updateActiveSprites_ = true;
 	}
 
-	if (joyVectorRight_.length() > nc::IInputManager::RightStickDeadZone)
+	if (joyVectorLeft_.length() > nc::IInputManager::LeftStickDeadZone)
 	{
-		camScale_ += joyVectorRight_.y * ScaleSpeed * interval;
-		activeSpritesFloat_ += joyVectorRight_.x * EnableSpriteSpeed * interval;
+		activeSpritesFloat_ += joyVectorLeft_.x * EnableSpriteSpeed * interval;
 		updateActiveSprites_ = true;
 	}
+
+	if (joyVectorRight_.length() > nc::IInputManager::RightStickDeadZone)
+		camScale_ += joyVectorRight_.y * ScaleSpeed * interval;
 
 	const nc::Vector2f scrollDiff = scrollMove_ - scrollOrigin_;
 	if (scrollDiff.sqrLength() > 2.0f)
@@ -283,7 +286,6 @@ void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	nc::Application::RenderingSettings &renderingSettings = nc::theApplication().renderingSettings();
-	nc::IDebugOverlay::DisplaySettings &overlaySettings = nc::theApplication().debugOverlaySettings();
 
 	if (event.sym == nc::KeySym::B)
 		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
@@ -304,24 +306,8 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		meshSpritesEnabled_ = !meshSpritesEnabled_;
 		toggleSpritesType();
 	}
-	else if (event.sym == nc::KeySym::H)
-	{
-		overlaySettings.showProfilerGraphs = !overlaySettings.showProfilerGraphs;
-		overlaySettings.showInfoText = !overlaySettings.showInfoText;
-	}
-	else if (event.sym == nc::KeySym::BACKQUOTE)
-		overlaySettings.showInterface = !overlaySettings.showInterface;
-	else if (event.sym == nc::KeySym::P)
-		pause_ = !pause_;
 	else if (event.sym == nc::KeySym::R)
 		resetCamera();
-	else if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
-		nc::theApplication().quit();
-	else if (event.sym == nc::KeySym::SPACE)
-	{
-		const bool isSuspended = nc::theApplication().isSuspended();
-		nc::theApplication().setSuspended(!isSuspended);
-	}
 	else if (event.sym == nc::KeySym::N1)
 		animDivider_ = 1;
 	else if (event.sym == nc::KeySym::N2)
@@ -332,6 +318,10 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		animDivider_ = 4;
 	else if (event.sym == nc::KeySym::N8)
 		animDivider_ = 8;
+	else if (event.sym == nc::KeySym::P)
+		pause_ = !pause_;
+	else if (event.sym == nc::KeySym::ESCAPE)
+		nc::theApplication().quit();
 }
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
@@ -357,8 +347,8 @@ void MyEventHandler::onScrollInput(const nc::ScrollEvent &event)
 
 void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 {
-	if (event.axisName == nc::AxisName::RX)
-		joyVectorRight_.x = event.value;
+	if (event.axisName == nc::AxisName::LX)
+		joyVectorLeft_.x = event.value;
 	else if (event.axisName == nc::AxisName::RY)
 		joyVectorRight_.y = -event.value;
 }
@@ -366,37 +356,37 @@ void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event)
 {
 	nc::Application::RenderingSettings &renderingSettings = nc::theApplication().renderingSettings();
-	nc::IDebugOverlay::DisplaySettings &overlaySettings = nc::theApplication().debugOverlaySettings();
 
 	if (event.buttonName == nc::ButtonName::A)
 		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
-	else if (event.buttonName == nc::ButtonName::Y)
+	else if (event.buttonName == nc::ButtonName::B)
 		renderingSettings.cullingEnabled = !renderingSettings.cullingEnabled;
 	else if (event.buttonName == nc::ButtonName::X)
 	{
 		withAtlas_ = !withAtlas_;
 		withAtlas_ ? setupAtlas() : setupTextures();
 	}
+	else if (event.buttonName == nc::ButtonName::Y)
+		resetCamera();
 	else if (event.buttonName == nc::ButtonName::RBUMPER)
+	{
+		withViewport_ = !withViewport_;
+		setupViewport();
+	}
+	else if (event.buttonName == nc::ButtonName::LBUMPER)
 	{
 		meshSpritesEnabled_ = !meshSpritesEnabled_;
 		toggleSpritesType();
 	}
-	else if (event.buttonName == nc::ButtonName::BACK)
-	{
-		overlaySettings.showProfilerGraphs = !overlaySettings.showProfilerGraphs;
-		overlaySettings.showInfoText = !overlaySettings.showInfoText;
-	}
 	else if (event.buttonName == nc::ButtonName::START)
 		pause_ = !pause_;
-	else if (event.buttonName == nc::ButtonName::B)
-		resetCamera();
 	else if (event.buttonName == nc::ButtonName::GUIDE)
 		nc::theApplication().quit();
 }
 
 void MyEventHandler::onJoyDisconnected(const nc::JoyConnectionEvent &event)
 {
+	joyVectorLeft_ = nc::Vector2f::Zero;
 	joyVectorRight_ = nc::Vector2f::Zero;
 }
 

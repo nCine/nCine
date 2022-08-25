@@ -36,15 +36,18 @@ class MyEventHandler :
 	void onMouseMoved(const nc::MouseState &state) override;
 
 	void onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event) override;
+	void onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event) override;
 	void onJoyDisconnected(const nc::JoyConnectionEvent &event) override;
 
   private:
 	static const unsigned int NumParticles = 50;
 
+	bool pause_;
 	nctl::UniquePtr<nc::Texture> texture_;
 	nctl::UniquePtr<nc::ParticleSystem> particleSystem_;
 	nc::TimeStamp lastEmissionTime_;
 	nc::Vector2f emitVector_;
+	nc::Vector2f prevEmitVector_;
 
 	nc::Vector2f joyVectorLeft_;
 	nc::Vector2f joyVectorRight_;

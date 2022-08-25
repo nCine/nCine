@@ -35,6 +35,7 @@ class MyEventHandler :
 	void onMouseButtonReleased(const nc::MouseEvent &event) override;
 
 	void onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event) override;
+	void onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event) override;
 	void onJoyDisconnected(const nc::JoyConnectionEvent &event) override;
 
   private:
@@ -48,10 +49,10 @@ class MyEventHandler :
 		RIGHT
 	};
 
-	static int selected_;
-	static int newSelection_;
-	static float scale_;
-	static float newScale_;
+	int selection_;
+	int newSelection_;
+	float scale_;
+	float newScale_;
 
 	nctl::UniquePtr<nc::Font> font_;
 	nctl::UniquePtr<nc::SceneNode> dummy_;

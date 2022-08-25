@@ -1,8 +1,17 @@
+#include <ncine/config.h>
+
 #include "apptest_font.h"
 #include <ncine/Application.h>
 #include <ncine/IAppEventHandler.h>
 #include <ncine/TextNode.h>
 #include "apptest_datapath.h"
+
+#if NCINE_WITH_IMGUI
+	#include <ncine/imgui.h>
+	#include <nctl/CString.h>
+	#include <nctl/StaticString.h>
+	#include <ncine/FileSystem.h>
+#endif
 
 namespace {
 
@@ -18,6 +27,14 @@ const char *Font3TextureFile = "Roboto-Regular32_256.png";
 const char *Font1FntFile = "DroidSans32_256.fnt";
 const char *Font2FntFile = "NotoSerif-Regular32_256.fnt";
 const char *Font3FntFile = "Roboto-Regular32_256.fnt";
+
+#if NCINE_WITH_IMGUI
+const char *AlignmentLabels[] = { "Left", "Center", "Right" };
+nctl::StaticString<128> auxString;
+nctl::StaticString<256> comboString;
+nctl::String textNodeString(nc::TextNode::DefaultStringLength);
+bool showImGui = true;
+#endif
 
 }
 
@@ -89,15 +106,93 @@ void MyEventHandler::onInit()
 	texts_[5]->setPosition(screenWidth * 0.5f, textHeight);
 	texts_[5]->enableKerning(false);
 	texts_[5]->setColor(0, 0, 255, 128);
+
+#if NCINE_WITH_IMGUI
+	comboString.clear();
+	for (unsigned int i = 0; i < NumFonts; i++)
+	{
+		comboString.formatAppend("%s", nc::fs::baseName(fonts_[i]->name()).data());
+		comboString.setLength(comboString.length() + 1);
+	}
+	comboString.setLength(comboString.length() + 1);
+	// Append a second '\0' to signal the end of the combo item list
+	comboString[comboString.length() - 1] = '\0';
+#endif
+}
+
+void MyEventHandler::onFrameStart()
+{
+#if NCINE_WITH_IMGUI
+	ImGui::SetNextWindowSize(ImVec2(400.0f, 400.0f), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowPos(ImVec2(50.0f, 140.0f), ImGuiCond_FirstUseEver);
+	if (showImGui)
+	{
+		if (ImGui::Begin("apptest_font", &showImGui))
+		{
+			for (unsigned int i = 0; i < NumTexts; i++)
+			{
+				auxString.format("Text #%d", i);
+				if (ImGui::TreeNode(auxString.data()))
+				{
+					const nc::Font *font = texts_[i]->font();
+					if (font)
+					{
+						if (ImGui::TreeNode("Font information"))
+						{
+							ImGui::Text("Line height: %d", font->lineHeight());
+							ImGui::Text("Base: %d", font->base());
+							ImGui::Text("Texture size: %d x %d", font->textureSize().x, font->textureSize().y);
+							ImGui::Text("Number of glyphs: %d", font->numGlyphs());
+							ImGui::Text("Number of kerning pairs: %d", font->numKernings());
+
+							ImGui::TreePop();
+						}
+					}
+
+					int currentComboFont = -1;
+					for (unsigned int i = 0; i < NumFonts; i++)
+					{
+						if (font == fonts_[i].get())
+						{
+							currentComboFont = i;
+							break;
+						}
+					}
+					if (ImGui::Combo("Font", &currentComboFont, comboString.data()))
+						texts_[i]->setFont(fonts_[currentComboFont].get());
+
+					char textBuffer[nc::TextNode::DefaultStringLength];
+					nctl::strncpy(textBuffer, texts_[i]->string().data(), texts_[i]->string().length() + 1);
+					if (ImGui::InputTextMultiline("Text string", textBuffer, nc::TextNode::DefaultStringLength, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 3.0f)))
+						texts_[i]->setString(textBuffer);
+
+					int currentAlignment = static_cast<int>(texts_[i]->alignment());
+					if (ImGui::Combo("Alignment", &currentAlignment, AlignmentLabels, IM_ARRAYSIZE(AlignmentLabels)))
+						texts_[i]->setAlignment(static_cast<nc::TextNode::Alignment>(currentAlignment));
+
+					nc::Colorf color(texts_[i]->color());
+					if (ImGui::ColorEdit4("Color", color.data()))
+						texts_[i]->setColor(color);
+
+					bool withKerning = texts_[i]->withKerning();
+					if (ImGui::Checkbox("Kerning", &withKerning))
+						texts_[i]->enableKerning(withKerning);
+
+					ImGui::TreePop();
+				}
+			}
+		}
+		ImGui::End();
+	}
+#endif
 }
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
+	if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
-	else if (event.sym == nc::KeySym::SPACE)
-	{
-		const bool isSuspended = nc::theApplication().isSuspended();
-		nc::theApplication().setSuspended(!isSuspended);
-	}
+#if NCINE_WITH_IMGUI
+	else if (event.mod & nc::KeyMod::CTRL && event.sym == nc::KeySym::H)
+		showImGui = !showImGui;
+#endif
 }

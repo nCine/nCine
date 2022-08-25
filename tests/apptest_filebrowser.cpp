@@ -53,7 +53,21 @@ enum class SelectionType
 	NEW_FILE
 };
 
-const char *sortingStrings[6] = { "Name Asc", "Name Desc", "Size Asc", "Size Desc", "Date Asc", "Date Desc" };
+const char *sortingStrings[6] = {
+	"Name Asc",
+	"Name Desc",
+	"Size Asc",
+	"Size Desc",
+	"Date Asc",
+	"Date Desc"
+};
+
+struct DragPinnedDirectoryPayload
+{
+	unsigned int index;
+};
+
+const float PinnedDirectoriesColumnWeight = 0.25f;
 
 struct FileDialogConfig
 {
@@ -64,11 +78,15 @@ struct FileDialogConfig
 	const char *okButton = "OK";
 
 	bool showControls = true;
-	bool showHidden = false;
+	bool showPinnedDirectories = true;
+	bool showPermissions = true;
 	bool showSize = true;
 	bool showDate = true;
-	bool showPermissions = true;
+	bool showHidden = false;
+
 	Sorting sorting = Sorting::NAME_ASC;
+
+	nctl::Array<nctl::String> pinnedDirectories;
 
 	bool sortDirectoriesfirst = true;
 	SelectionType selectionType = SelectionType::NEW_FILE;
@@ -105,7 +123,9 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 	else
 		config.directory = nc::fs::absolutePath(config.directory.data());
 
-	ImGui::SetNextWindowSize(ImVec2(550.0f, 500.0f), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(650.0f, 500.0f), ImGuiCond_Once);
+	const ImVec2 windowPos(ImGui::GetMainViewport()->Size.x * 0.5f, ImGui::GetMainViewport()->Size.y * 0.5f);
+	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once, ImVec2(0.5f, 0.5f));
 	if (config.modalPopup)
 	{
 		ImGui::OpenPopup(config.windowTitle);
@@ -122,6 +142,8 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 
 	if (config.showControls)
 	{
+		ImGui::Checkbox("Show Pinned", &config.showPinnedDirectories);
+		ImGui::SameLine();
 		ImGui::Checkbox("Permissions", &config.showPermissions);
 		ImGui::SameLine();
 		ImGui::Checkbox("Size", &config.showSize);
@@ -137,13 +159,147 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 		config.sorting = static_cast<Sorting>(currentComboSortingType);
 	}
 
+	const float additionalChildVSpacing = config.showPinnedDirectories ? 6.0f : 4.0f;
+	if (config.showPinnedDirectories)
+	{
+		nctl::Array<nctl::String> &pinnedDirectories = config.pinnedDirectories;
+
+		ImGui::BeginTable("PinnedDirectoriesAndBrowser", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInnerV);
+		const float columnOneWeight = pinnedDirectories.isEmpty() ? PinnedDirectoriesColumnWeight : -1.0f;
+		const float columnTwoWeight = pinnedDirectories.isEmpty() ? 1.0f - PinnedDirectoriesColumnWeight : -1.0f;
+		const ImGuiTableColumnFlags columnOneFlag = pinnedDirectories.isEmpty() ? ImGuiTableColumnFlags_WidthStretch : ImGuiTableColumnFlags_WidthFixed;
+		ImGui::TableSetupColumn("PinnedDirectories", columnOneFlag, columnOneWeight);
+		ImGui::TableSetupColumn("Browser", ImGuiTableColumnFlags_WidthStretch, columnTwoWeight);
+		ImGui::TableNextRow();
+		ImGui::TableSetColumnIndex(0);
+
+		if (ImGui::Button("Pin"))
+		{
+			bool alreadyPinned = false;
+			for (unsigned int i = 0; i < pinnedDirectories.size(); i++)
+			{
+				if (config.directory == pinnedDirectories[i])
+				{
+					alreadyPinned = true;
+					break;
+				}
+			}
+			if (alreadyPinned == false)
+				pinnedDirectories.pushBack(config.directory);
+		}
+		ImGui::SameLine();
+		const bool enableUnpinButton = pinnedDirectories.isEmpty() == false;
+		ImGui::BeginDisabled(enableUnpinButton == false);
+		if (ImGui::Button("Unpin"))
+		{
+			for (unsigned int i = 0; i < pinnedDirectories.size(); i++)
+			{
+				if (config.directory == pinnedDirectories[i])
+				{
+					pinnedDirectories.removeAt(i);
+					break;
+				}
+			}
+		}
+		ImGui::EndDisabled();
+
+		ImGui::BeginChild("Pinned Directories List", ImVec2(0.0f, -ImGui::GetFrameHeightWithSpacing() - additionalChildVSpacing));
+
+		int directoryToRemove = -1;
+		for (unsigned int i = 0; i < pinnedDirectories.size(); i++)
+		{
+			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth;
+
+			if (config.directory == pinnedDirectories[i])
+				nodeFlags |= ImGuiTreeNodeFlags_Selected;
+
+			// Append the index to have a unique ID when two paths have the same base name
+			auxString.format("[Dir ] %s##%d", nc::fs::baseName(pinnedDirectories[i].data()).data(), i);
+
+			if (config.colors)
+				ImGui::PushStyleColor(ImGuiCol_Text, config.dirColor);
+
+			ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
+			ImGui::TreeNodeEx(auxString.data(), nodeFlags);
+			ImGui::Indent(ImGui::GetTreeNodeToLabelSpacing());
+
+			if (config.colors)
+				ImGui::PopStyleColor();
+
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::BeginTooltip();
+				if (config.colors)
+					ImGui::PushStyleColor(ImGuiCol_Text, config.dirColor);
+
+				auxString.format("[Dir ] %s", pinnedDirectories[i].data());
+				ImGui::Text("%s", auxString.data());
+
+				if (config.colors)
+					ImGui::PopStyleColor();
+				ImGui::EndTooltip();
+			}
+
+			if (ImGui::BeginPopupContextItem())
+			{
+				if (ImGui::MenuItem("Unpin"))
+					config.pinnedDirectories.removeAt(i);
+				ImGui::EndPopup();
+			}
+
+			if (ImGui::IsItemClicked())
+			{
+				if (nc::fs::isDirectory(pinnedDirectories[i].data()))
+					config.directory = pinnedDirectories[i].data();
+				else
+					directoryToRemove = i;
+			}
+
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+			{
+				DragPinnedDirectoryPayload dragPayload = { i };
+				ImGui::SetDragDropPayload("PINNEDDIRECTORY_TREENODE", &dragPayload, sizeof(DragPinnedDirectoryPayload));
+
+				if (config.colors)
+					ImGui::PushStyleColor(ImGuiCol_Text, config.dirColor);
+
+				ImGui::Text("%s", auxString.data());
+
+				if (config.colors)
+					ImGui::PopStyleColor();
+
+				ImGui::EndDragDropSource();
+			}
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("PINNEDDIRECTORY_TREENODE"))
+				{
+					IM_ASSERT(payload->DataSize == sizeof(DragPinnedDirectoryPayload));
+					const DragPinnedDirectoryPayload &dragPayload = *reinterpret_cast<const DragPinnedDirectoryPayload *>(payload->Data);
+
+					nctl::String dragPinnedDirectory(nctl::move(pinnedDirectories[dragPayload.index]));
+					pinnedDirectories.removeAt(dragPayload.index);
+					pinnedDirectories.insertAt(i, nctl::move(dragPinnedDirectory));
+
+					ImGui::EndDragDropTarget();
+				}
+			}
+		}
+		if (directoryToRemove >= 0)
+			pinnedDirectories.removeAt(directoryToRemove);
+
+		ImGui::EndChild();
+
+		ImGui::TableSetColumnIndex(1);
+	}
+
 	if (nc::fs::logicalDrives())
 	{
 		char driveLetter[3] = "C:";
 		static int currentComboLogicalDrive = 0;
 		const char *logicalDriveStrings = nc::fs::logicalDriveStrings();
 		ImGui::PushItemWidth(50.0f);
-		if (ImGui::Combo("##LogicalDrives", &currentComboLogicalDrive, logicalDriveStrings, IM_ARRAYSIZE(logicalDriveStrings)))
+		if (ImGui::Combo("##LogicalDrives", &currentComboLogicalDrive, logicalDriveStrings))
 		{
 			for (int i = 0; i < currentComboLogicalDrive; i++)
 				logicalDriveStrings += strnlen(logicalDriveStrings, 4) + 1;
@@ -171,7 +327,9 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 	for (int i = baseNames.size() - 1; i >= 0; i--)
 	{
 		dirName = nc::fs::joinPath(dirName.data(), baseNames[i].data());
-		if (ImGui::Button(baseNames[i].data()))
+		// Append the index to have a unique ID when two paths have the same base name
+		auxString.format("%s##%d", baseNames[i].data(), i);
+		if (ImGui::Button(auxString.data()))
 		{
 			config.directory = dirName;
 			if (config.selectionType != SelectionType::NEW_FILE)
@@ -181,7 +339,7 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 			ImGui::SameLine();
 	}
 
-	ImGui::BeginChild("File View", ImVec2(0, -ImGui::GetFrameHeightWithSpacing() - 4.0f));
+	ImGui::BeginChild("File View", ImVec2(0.0f, -ImGui::GetFrameHeightWithSpacing() - additionalChildVSpacing));
 
 	nc::fs::Directory dir(config.directory.data());
 	dirEntries.clear();
@@ -354,6 +512,9 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 	}
 
 	ImGui::EndChild();
+
+	if (config.showPinnedDirectories)
+		ImGui::EndTable();
 
 	ImGui::Separator();
 	ImGuiInputTextFlags inputTextFlags = ImGuiInputTextFlags_CallbackResize | ImGuiInputTextFlags_EnterReturnsTrue;

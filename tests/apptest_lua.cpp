@@ -123,13 +123,8 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	nc::LuaIInputEventHandler::onKeyReleased(luaState_.state(), event);
 
-	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
+	if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
-	else if (event.sym == nc::KeySym::SPACE)
-	{
-		const bool isSuspended = nc::theApplication().isSuspended();
-		nc::theApplication().setSuspended(!isSuspended);
-	}
 }
 
 void MyEventHandler::onTextInput(const nc::TextInputEvent &event)

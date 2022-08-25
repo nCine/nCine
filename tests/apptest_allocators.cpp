@@ -91,8 +91,8 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
-	ImGui::SetNextWindowPos(ImVec2(50, 30), ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSize(ImVec2(1180, 660), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowPos(ImVec2(50.0f, 30.0f), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(1180.0f, 660.0f), ImGuiCond_FirstUseEver);
 	ImGui::Begin("Memory Allocators");
 
 	static int currentComboAllocatorEntry = 0;

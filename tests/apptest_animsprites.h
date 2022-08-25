@@ -34,9 +34,11 @@ class MyEventHandler :
 	void onMouseMoved(const nc::MouseState &state) override;
 
 	void onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event) override;
+	void onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event) override;
 	void onJoyDisconnected(const nc::JoyConnectionEvent &event) override;
 
   private:
+	bool pause_;
 	nctl::UniquePtr<nc::Texture> texture_;
 	nctl::UniquePtr<nc::AnimatedSprite> animSprite_;
 	nc::Vector2f destVector_;

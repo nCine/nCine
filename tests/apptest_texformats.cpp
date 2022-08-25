@@ -1,6 +1,7 @@
 #include <ncine/config.h>
 
 #include "apptest_texformats.h"
+#include <nctl/StaticString.h>
 #include <ncine/config.h>
 #include <ncine/Application.h>
 #include <ncine/SceneNode.h>
@@ -44,12 +45,9 @@ const char *FontTextureFile = "DroidSans32_256.png";
 #endif
 const char *FontFntFile = "DroidSans32_256.fnt";
 
-}
+nctl::StaticString<256> auxString;
 
-int MyEventHandler::selected_ = 0;
-int MyEventHandler::newSelection_ = 0;
-float MyEventHandler::scale_ = 1.0f;
-float MyEventHandler::newScale_ = 1.0f;
+}
 
 nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 {
@@ -196,8 +194,14 @@ void MyEventHandler::onInit()
 			LOGI_X("Cannot load texture file \"%s\"", textureFilename.data());
 	}
 
-	sprites_[selected_]->setEnabled(true);
-	textNode_->setString(filenames_[selected_]);
+	selection_ = 0;
+	newSelection_ = 0;
+	scale_ = 1.0f;
+	newScale_ = 1.0f;
+
+	sprites_[selection_]->setEnabled(true);
+	auxString.format("File: %s (%d of %u)\nScale: %.3f", filenames_[selection_].data(), selection_ + 1, sprites_.size(), scale_);
+	textNode_->setString(auxString.data());
 	textNode_->setPosition(0.0f, nc::theApplication().height() * VerticalTextPos - textNode_->height() * 0.5f);
 }
 
@@ -224,13 +228,8 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		handleInput(Direction::UP);
 	else if (event.sym == nc::KeySym::S || event.sym == nc::KeySym::DOWN)
 		handleInput(Direction::DOWN);
-	else if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
+	else if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
-	else if (event.sym == nc::KeySym::SPACE)
-	{
-		const bool isSuspended = nc::theApplication().isSuspended();
-		nc::theApplication().setSuspended(!isSuspended);
-	}
 }
 
 void MyEventHandler::handleInput(Direction direction)
@@ -238,12 +237,12 @@ void MyEventHandler::handleInput(Direction direction)
 	switch (direction)
 	{
 		case Direction::RIGHT:
-			newSelection_ = selected_ + 1;
+			newSelection_ = selection_ + 1;
 			if (newSelection_ > static_cast<int>(sprites_.size() - 1))
 				newSelection_ = 0;
 			break;
 		case Direction::LEFT:
-			newSelection_ = selected_ - 1;
+			newSelection_ = selection_ - 1;
 			if (newSelection_ < 0)
 				newSelection_ = sprites_.size() - 1;
 			break;
@@ -259,13 +258,13 @@ void MyEventHandler::handleInput(Direction direction)
 			break;
 	}
 
-	if (newSelection_ != selected_)
+	bool changeString = false;
+	if (newSelection_ != selection_)
 	{
-		sprites_[selected_]->setEnabled(false);
+		sprites_[selection_]->setEnabled(false);
 		sprites_[newSelection_]->setEnabled(true);
-		textNode_->setString(filenames_[newSelection_]);
-		textNode_->setPosition(0.0f, nc::theApplication().height() * VerticalTextPos - textNode_->height() * 0.5f);
-		selected_ = newSelection_;
+		selection_ = newSelection_;
+		changeString = true;
 	}
 
 	if (newScale_ != scale_)
@@ -273,6 +272,14 @@ void MyEventHandler::handleInput(Direction direction)
 		for (unsigned int i = 0; i < sprites_.size(); i++)
 			sprites_[i]->setScale(newScale_);
 		scale_ = newScale_;
+		changeString = true;
+	}
+
+	if (changeString)
+	{
+		auxString.format("File: %s (%d of %u)\nScale: %.3f", filenames_[selection_].data(), selection_ + 1, sprites_.size(), scale_);
+		textNode_->setString(auxString.data());
+		textNode_->setPosition(0.0f, nc::theApplication().height() * VerticalTextPos - textNode_->height() * 0.5f);
 	}
 }
 
@@ -327,6 +334,24 @@ void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 		else if (y < 0.0f && y > -ReleasedAxisThreshold)
 			axesLeftStickPressed[3] = false;
 	}
+}
+
+void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event)
+{
+	if (event.buttonName == nc::ButtonName::LBUMPER)
+		handleInput(Direction::LEFT);
+	else if (event.buttonName == nc::ButtonName::RBUMPER)
+		handleInput(Direction::RIGHT);
+	if (event.buttonName == nc::ButtonName::DPAD_LEFT)
+		handleInput(Direction::LEFT);
+	else if (event.buttonName == nc::ButtonName::DPAD_RIGHT)
+		handleInput(Direction::RIGHT);
+	if (event.buttonName == nc::ButtonName::DPAD_UP)
+		handleInput(Direction::UP);
+	else if (event.buttonName == nc::ButtonName::DPAD_DOWN)
+		handleInput(Direction::DOWN);
+	else if (event.buttonName == nc::ButtonName::GUIDE)
+		nc::theApplication().quit();
 }
 
 void MyEventHandler::onJoyDisconnected(const nc::JoyConnectionEvent &event)

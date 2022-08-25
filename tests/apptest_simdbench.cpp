@@ -1,6 +1,7 @@
 #include <ncine/imgui.h>
 
 #include "apptest_simdbench.h"
+#include <nctl/StaticString.h>
 #include <ncine/Application.h>
 #include <ncine/LuaStateManager.h>
 #include <ncine/LuaUtils.h>
@@ -60,11 +61,11 @@ static_assert(MaxDataElements <= MaxIterations, "It's useless to have more eleme
 struct TestInfo
 {
 	TestInfo()
-	    : name(nctl::String(128)), func(nullptr), totalTime(0.0f),
+	    : func(nullptr), totalTime(0.0f),
 	      maxTime(0.0f), minTime(0.0f), average(0.0f), stdDeviation(0.0f),
 	      numRepetitions(0), numIterations(0) {}
 
-	nctl::String name;
+	nctl::StaticString<128> name;
 	TestFunction func;
 	float times[MaxRepetitions];
 	float totalTime;
@@ -157,8 +158,8 @@ void calculateStats(TestInfo &t)
 
 void runTest(TestInfo &t, unsigned int numRepetitions, unsigned int numIterations)
 {
-	ASSERT(t.numRepetitions > 0);
-	ASSERT(t.numIterations > 0);
+	ASSERT(numRepetitions > 0);
+	ASSERT(numIterations > 0);
 	FATAL_ASSERT(t.func != nullptr);
 
 	t.numRepetitions = numRepetitions;
@@ -583,153 +584,158 @@ void MyEventHandler::onFrameStart()
 
 	TestInfo &t = testInfos[currentTest];
 
-	ImGui::Begin("Benchmark");
-	if (ImGui::CollapsingHeader("Load Test Runs"))
+	const ImVec2 windowPos(ImGui::GetMainViewport()->Size.x * 0.5f, ImGui::GetMainViewport()->Size.y * 0.5f);
+	ImGui::SetNextWindowPos(windowPos, ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
+	ImGui::SetNextWindowSize(ImVec2(370.0f, 520.0f), ImGuiCond_FirstUseEver);
+	if (ImGui::Begin("Benchmark"))
 	{
-		if (ImGui::ArrowButton("##LeftTestRun", ImGuiDir_Left))
-			currentTestRun--;
-		ImGui::SameLine();
-		if (ImGui::ArrowButton("##RightTestRun", ImGuiDir_Right))
-			currentTestRun++;
-		if (currentTestRun < 0)
-			currentTestRun = 0;
-		else if (currentTestRun > MaxTestRuns - 1)
-			currentTestRun = MaxTestRuns - 1;
-		ImGui::SameLine();
-		ImGui::Text("Index: %d", currentTestRun);
+		if (ImGui::CollapsingHeader("Load Test Runs"))
+		{
+			if (ImGui::ArrowButton("##LeftTestRun", ImGuiDir_Left))
+				currentTestRun--;
+			ImGui::SameLine();
+			if (ImGui::ArrowButton("##RightTestRun", ImGuiDir_Right))
+				currentTestRun++;
+			if (currentTestRun < 0)
+				currentTestRun = 0;
+			else if (currentTestRun > MaxTestRuns - 1)
+				currentTestRun = MaxTestRuns - 1;
+			ImGui::SameLine();
+			ImGui::Text("Index: %d", currentTestRun);
 
 #ifndef __EMSCRIPTEN__
-		ImGui::InputText("##Loading", loadingFilename, MaxStringLength);
-		ImGui::SameLine();
-		if (ImGui::Button("Load"))
-		{
-			nctl::String filepath = nc::fs::joinPath(nc::fs::dataPath(), loadingFilename);
-			if (nc::fs::isReadableFile(filepath.data()))
-				loadTestRun(filepath.data(), currentTestRun);
-			else
-				LOGW_X("Cannot load file \"%s\" for index %u", filepath.data(), currentTestRun);
-		}
-#else
-		if (localFileLoad.isLoading())
-			ImGui::TextUnformatted("Loading file...");
-		else
-		{
+			ImGui::InputText("##Loading", loadingFilename, MaxStringLength);
+			ImGui::SameLine();
 			if (ImGui::Button("Load"))
-				localFileLoad.load(".lua");
-		}
+			{
+				nctl::String filepath = nc::fs::joinPath(nc::fs::dataPath(), loadingFilename);
+				if (nc::fs::isReadableFile(filepath.data()))
+					loadTestRun(filepath.data(), currentTestRun);
+				else
+					LOGW_X("Cannot load file \"%s\" for index %u", filepath.data(), currentTestRun);
+			}
+#else
+			if (localFileLoad.isLoading())
+				ImGui::TextUnformatted("Loading file...");
+			else
+			{
+				if (ImGui::Button("Load"))
+					localFileLoad.load(".lua");
+			}
 #endif
 
-		const TestRun &tr = testRuns[currentTestRun];
-		const bool notLoaded = tr.filename.isEmpty();
-		ImGui::Text("Filename: %s", notLoaded ? "N/A" : tr.filename.data());
-		ImGui::Text("System: %s", notLoaded ? "N/A" : tr.system.data());
-	}
-
-	if (ImGui::CollapsingHeader("Test Run", ImGuiTreeNodeFlags_DefaultOpen))
-	{
-		ImGui::Text("System: %s", system());
-		ImGui::Combo("Test", &currentTest, testNames, Tests::Count);
-		int thousandIterations = numIterations / 1000;
-		ImGui::SliderInt("Iterations", &thousandIterations, 1, MaxIterations / 1000, "%d K");
-		numIterations = thousandIterations * 1000;
-		ImGui::SliderInt("Repetitions", &numRepetitions, 1, MaxRepetitions);
-
-		if (runningAllTests)
-		{
-			const float progress = (allTestsIndex + 1) / static_cast<float>(Tests::Count);
-			progressMsg.format("%u / %u", allTestsIndex + 1, Tests::Count);
-			ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f), progressMsg.data());
-			ImGui::NewLine();
+			const TestRun &tr = testRuns[currentTestRun];
+			const bool notLoaded = tr.filename.isEmpty();
+			ImGui::Text("Filename: %s", notLoaded ? "N/A" : tr.filename.data());
+			ImGui::Text("System: %s", notLoaded ? "N/A" : tr.system.data());
 		}
-		else
-		{
-			if (ImGui::Button("Run"))
-				runTest(t, numRepetitions, numIterations);
-			ImGui::SameLine();
-			if (ImGui::Button("Run All"))
-				runningAllTests = true;
 
-			ImGui::NewLine();
-			ImGui::InputText("##Saving", savingFilename, MaxStringLength);
-			ImGui::SameLine();
-			if (ImGui::Button("Save"))
+		if (ImGui::CollapsingHeader("Test Run", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::Text("System: %s", system());
+			ImGui::Combo("Test", &currentTest, testNames, Tests::Count);
+			int thousandIterations = numIterations / 1000;
+			ImGui::SliderInt("Iterations", &thousandIterations, 1, MaxIterations / 1000, "%d K");
+			numIterations = thousandIterations * 1000;
+			ImGui::SliderInt("Repetitions", &numRepetitions, 1, MaxRepetitions);
+
+			if (runningAllTests)
 			{
-				nctl::String filepath = nc::fs::joinPath(nc::fs::dataPath(), savingFilename);
-				saveTestRun(filepath.data(), includeStatsWhenSaving);
+				const float progress = (allTestsIndex + 1) / static_cast<float>(Tests::Count);
+				progressMsg.format("%u / %u", allTestsIndex + 1, Tests::Count);
+				ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f), progressMsg.data());
+				ImGui::NewLine();
 			}
-			ImGui::Checkbox("Include Statistics", &includeStatsWhenSaving);
-		}
-	}
-
-	if (ImGui::CollapsingHeader("Results", ImGuiTreeNodeFlags_DefaultOpen))
-	{
-		if (ImGui::ArrowButton("##LeftTest", ImGuiDir_Left))
-			currentTest--;
-		ImGui::SameLine();
-		if (ImGui::ArrowButton("##RightTest", ImGuiDir_Right))
-			currentTest++;
-		if (currentTest < 0)
-			currentTest = 0;
-		else if (currentTest > Tests::Count - 1)
-			currentTest = Tests::Count - 1;
-		ImGui::SameLine();
-		ImGui::Text("Test: %s", testNames[currentTest]);
-
-		const TestRun &tr = testRuns[currentTestRun];
-		const TestInfo &tri = tr.testInfos[currentTest];
-		const bool canCompare = (tri.totalTime > 0.0f && t.totalTime > 0.0f);
-
-		ImGui::Text("Iterations: %u", t.numIterations);
-		if (canCompare && tri.numIterations != t.numIterations)
-		{
-			ImGui::SameLine();
-
-			if (t.numIterations != 0)
-				ImGui::TextColored(Red, "(Comparing with %u iterations)", tri.numIterations);
 			else
-				ImGui::Text("(Test run loaded with %u iterations)", tri.numIterations);
+			{
+				if (ImGui::Button("Run"))
+					runTest(t, numRepetitions, numIterations);
+				ImGui::SameLine();
+				if (ImGui::Button("Run All"))
+					runningAllTests = true;
+
+				ImGui::NewLine();
+				ImGui::InputText("##Saving", savingFilename, MaxStringLength);
+				ImGui::SameLine();
+				if (ImGui::Button("Save"))
+				{
+					nctl::String filepath = nc::fs::joinPath(nc::fs::dataPath(), savingFilename);
+					saveTestRun(filepath.data(), includeStatsWhenSaving);
+				}
+				ImGui::Checkbox("Include Statistics", &includeStatsWhenSaving);
+			}
 		}
 
-		ImGui::Text("Total Time: %f ms", t.totalTime);
-		if (canCompare)
+		if (ImGui::CollapsingHeader("Results", ImGuiTreeNodeFlags_DefaultOpen))
 		{
+			if (ImGui::ArrowButton("##LeftTest", ImGuiDir_Left))
+				currentTest--;
 			ImGui::SameLine();
-			const ImVec4 color = (tri.totalTime > t.totalTime) ? Green : Red;
-			ImGui::TextColored(color, "(%f ms, %.2fx)", tri.totalTime, t.totalTime / tri.totalTime);
-		}
-		ImGui::PlotHistogram("Times", t.times, t.numRepetitions, 0, nullptr, 0.0f, FLT_MAX, ImVec2(0.0f, 100.0f));
-		ImGui::Text("Max Time: %f ms", t.maxTime);
-		if (canCompare)
-		{
+			if (ImGui::ArrowButton("##RightTest", ImGuiDir_Right))
+				currentTest++;
+			if (currentTest < 0)
+				currentTest = 0;
+			else if (currentTest > Tests::Count - 1)
+				currentTest = Tests::Count - 1;
 			ImGui::SameLine();
-			const ImVec4 color = (tri.maxTime > t.maxTime) ? Green : Red;
-			ImGui::TextColored(color, "(%f ms, %.2fx)", tri.maxTime, t.maxTime / tri.maxTime);
-		}
-		ImGui::Text("Min Time: %f ms", t.minTime);
-		if (canCompare)
-		{
-			ImGui::SameLine();
-			const ImVec4 color = (tri.minTime > t.minTime) ? Green : Red;
-			ImGui::TextColored(color, "(%f ms, %.2fx)", tri.minTime, t.minTime / tri.minTime);
-		}
-		ImGui::Text("Average: %f ms", t.average);
-		if (canCompare)
-		{
-			ImGui::SameLine();
-			const ImVec4 color = (tri.average > t.average) ? Green : Red;
-			ImGui::TextColored(color, "(%f ms, %.2fx)", tri.average, t.average / tri.average);
-		}
-		ImGui::Text("Std. Deviation: %f ms", t.stdDeviation);
-		if (canCompare)
-		{
-			ImGui::SameLine();
-			ImGui::Text("(%f ms)", tri.stdDeviation);
-		}
-		ImGui::Text("Relative S.D.: %.2f %%", t.average > 0.0f ? 100.0f * t.stdDeviation / t.average : 0.0f);
-		if (canCompare)
-		{
-			ImGui::SameLine();
-			ImGui::Text("(%.2f %%)", tri.average > 0.0f ? 100.0f * tri.stdDeviation / tri.average : 0.0f);
+			ImGui::Text("Test: %s", testNames[currentTest]);
+
+			const TestRun &tr = testRuns[currentTestRun];
+			const TestInfo &tri = tr.testInfos[currentTest];
+			const bool canCompare = (tri.totalTime > 0.0f && t.totalTime > 0.0f);
+
+			ImGui::Text("Iterations: %u", t.numIterations);
+			if (canCompare && tri.numIterations != t.numIterations)
+			{
+				ImGui::SameLine();
+
+				if (t.numIterations != 0)
+					ImGui::TextColored(Red, "(Comparing with %u iterations)", tri.numIterations);
+				else
+					ImGui::Text("(Test run loaded with %u iterations)", tri.numIterations);
+			}
+
+			ImGui::Text("Total Time: %f ms", t.totalTime);
+			if (canCompare)
+			{
+				ImGui::SameLine();
+				const ImVec4 color = (tri.totalTime > t.totalTime) ? Green : Red;
+				ImGui::TextColored(color, "(%f ms, %.2fx)", tri.totalTime, t.totalTime / tri.totalTime);
+			}
+			ImGui::PlotHistogram("Times", t.times, t.numRepetitions, 0, nullptr, 0.0f, FLT_MAX, ImVec2(0.0f, 100.0f));
+			ImGui::Text("Max Time: %f ms", t.maxTime);
+			if (canCompare)
+			{
+				ImGui::SameLine();
+				const ImVec4 color = (tri.maxTime > t.maxTime) ? Green : Red;
+				ImGui::TextColored(color, "(%f ms, %.2fx)", tri.maxTime, t.maxTime / tri.maxTime);
+			}
+			ImGui::Text("Min Time: %f ms", t.minTime);
+			if (canCompare)
+			{
+				ImGui::SameLine();
+				const ImVec4 color = (tri.minTime > t.minTime) ? Green : Red;
+				ImGui::TextColored(color, "(%f ms, %.2fx)", tri.minTime, t.minTime / tri.minTime);
+			}
+			ImGui::Text("Average: %f ms", t.average);
+			if (canCompare)
+			{
+				ImGui::SameLine();
+				const ImVec4 color = (tri.average > t.average) ? Green : Red;
+				ImGui::TextColored(color, "(%f ms, %.2fx)", tri.average, t.average / tri.average);
+			}
+			ImGui::Text("Std. Deviation: %f ms", t.stdDeviation);
+			if (canCompare)
+			{
+				ImGui::SameLine();
+				ImGui::Text("(%f ms)", tri.stdDeviation);
+			}
+			ImGui::Text("Relative S.D.: %.2f %%", t.average > 0.0f ? 100.0f * t.stdDeviation / t.average : 0.0f);
+			if (canCompare)
+			{
+				ImGui::SameLine();
+				ImGui::Text("(%.2f %%)", tri.average > 0.0f ? 100.0f * tri.stdDeviation / tri.average : 0.0f);
+			}
 		}
 	}
 
@@ -738,6 +744,6 @@ void MyEventHandler::onFrameStart()
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
+	if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
 }

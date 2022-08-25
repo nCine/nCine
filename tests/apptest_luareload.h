@@ -38,6 +38,7 @@ class MyEventHandler :
   private:
 	nc::LuaStateManager luaState_;
 	unsigned int variationIndex_;
+	bool pause_;
 
 	nctl::UniquePtr<nc::Texture> texture_;
 	nctl::UniquePtr<nc::ParticleSystem> particleSystem_;

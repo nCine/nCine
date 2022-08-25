@@ -230,32 +230,19 @@ void MyEventHandler::onTouchMove(const nc::TouchEvent &event)
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	nc::Application::RenderingSettings &renderingSettings = nc::theApplication().renderingSettings();
-	nc::IDebugOverlay::DisplaySettings &overlaySettings = nc::theApplication().debugOverlaySettings();
 
-	if (event.sym == nc::KeySym::RIGHT || event.sym == nc::KeySym::D)
+	if (event.sym == nc::KeySym::LEFT || event.sym == nc::KeySym::A)
 		currentDeformation = (currentDeformation + 1) % DEFORMATION_COUNT;
-	else if (event.sym == nc::KeySym::LEFT || event.sym == nc::KeySym::A)
+	else if (event.sym == nc::KeySym::RIGHT || event.sym == nc::KeySym::D)
 		currentAnimation = (currentAnimation + 1) % ANIMATION_COUNT;
 	else if (event.sym == nc::KeySym::B)
 		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
 	else if (event.sym == nc::KeySym::C)
 		renderingSettings.cullingEnabled = !renderingSettings.cullingEnabled;
-	else if (event.sym == nc::KeySym::H)
-	{
-		overlaySettings.showProfilerGraphs = !overlaySettings.showProfilerGraphs;
-		overlaySettings.showInfoText = !overlaySettings.showInfoText;
-	}
-	else if (event.sym == nc::KeySym::BACKQUOTE)
-		overlaySettings.showInterface = !overlaySettings.showInterface;
 	else if (event.sym == nc::KeySym::P)
 		pause_ = !pause_;
-	else if (event.sym == nc::KeySym::ESCAPE || event.sym == nc::KeySym::Q)
+	else if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
-	else if (event.sym == nc::KeySym::SPACE)
-	{
-		const bool isSuspended = nc::theApplication().isSuspended();
-		nc::theApplication().setSuspended(!isSuspended);
-	}
 }
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
@@ -290,7 +277,6 @@ void MyEventHandler::onJoyMappedAxisMoved(const nc::JoyMappedAxisEvent &event)
 void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event)
 {
 	nc::Application::RenderingSettings &renderingSettings = nc::theApplication().renderingSettings();
-	nc::IDebugOverlay::DisplaySettings &overlaySettings = nc::theApplication().debugOverlaySettings();
 
 	if (event.buttonName == nc::ButtonName::RBUMPER)
 		currentAnimation = (currentAnimation + 1) % ANIMATION_COUNT;
@@ -298,13 +284,8 @@ void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &e
 		currentDeformation = (currentDeformation + 1) % DEFORMATION_COUNT;
 	if (event.buttonName == nc::ButtonName::A)
 		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
-	else if (event.buttonName == nc::ButtonName::Y)
+	else if (event.buttonName == nc::ButtonName::B)
 		renderingSettings.cullingEnabled = !renderingSettings.cullingEnabled;
-	else if (event.buttonName == nc::ButtonName::BACK)
-	{
-		overlaySettings.showProfilerGraphs = !overlaySettings.showProfilerGraphs;
-		overlaySettings.showInfoText = !overlaySettings.showInfoText;
-	}
 	else if (event.buttonName == nc::ButtonName::START)
 		pause_ = !pause_;
 	else if (event.buttonName == nc::ButtonName::GUIDE)
