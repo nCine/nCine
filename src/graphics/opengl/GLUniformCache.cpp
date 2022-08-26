@@ -24,71 +24,114 @@ GLUniformCache::GLUniformCache(const GLUniform *uniform)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void GLUniformCache::setFloatVector(const GLfloat *vec)
+const GLfloat *GLUniformCache::floatVector() const
 {
-	if (uniform_ == nullptr)
-		return;
+	ASSERT(uniform_ == nullptr || (dataPointer_ != nullptr && checkFloat()));
+	const GLfloat *vec = nullptr;
 
-	ASSERT(dataPointer_ != nullptr);
-	checkFloat();
+	if (dataPointer_)
+		vec = reinterpret_cast<GLfloat *>(dataPointer_);
+	return vec;
+}
+
+GLfloat GLUniformCache::floatValue(unsigned int index) const
+{
+	ASSERT(uniform_ == nullptr || (dataPointer_ != nullptr && checkFloat() && uniform_->numComponents() > index));
+
+	GLfloat value = 0.0f;
+
+	if (dataPointer_)
+		value = static_cast<GLfloat>(*dataPointer_);
+	return value;
+}
+
+const GLint *GLUniformCache::intVector() const
+{
+	ASSERT(uniform_ == nullptr || (dataPointer_ != nullptr && checkInt()));
+	const GLint *vec = nullptr;
+
+	if (dataPointer_)
+		vec = reinterpret_cast<GLint *>(dataPointer_);
+	return vec;
+}
+
+GLint GLUniformCache::intValue(unsigned int index) const
+{
+	ASSERT(uniform_ == nullptr || (dataPointer_ != nullptr && checkInt() && uniform_->numComponents() > index));
+	GLint value = 0;
+
+	if (dataPointer_)
+		value = static_cast<GLint>(*dataPointer_);
+	return value;
+}
+
+bool GLUniformCache::setFloatVector(const GLfloat *vec)
+{
+	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
+	if (uniform_ == nullptr || dataPointer_ == nullptr || checkFloat() == false)
+		return false;
 
 	isDirty_ = true;
 	memcpy(dataPointer_, vec, sizeof(GLfloat) * uniform_->numComponents());
+	return true;
 }
 
-void GLUniformCache::setFloatValue(GLfloat v0)
+bool GLUniformCache::setFloatValue(GLfloat v0)
 {
-	if (uniform_ == nullptr)
-		return;
-
-	ASSERT(dataPointer_ != nullptr);
-	checkFloat();
-	checkComponents(1);
+	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
+	if (uniform_ == nullptr || dataPointer_ == nullptr ||
+	    checkFloat() == false || checkComponents(1) == false)
+	{
+		return false;
+	}
 
 	isDirty_ = true;
 	GLfloat *data = reinterpret_cast<GLfloat *>(dataPointer_);
 	data[0] = v0;
+	return true;
 }
 
-void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1)
+bool GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1)
 {
-	if (uniform_ == nullptr)
-		return;
-
-	ASSERT(dataPointer_ != nullptr);
-	checkFloat();
-	checkComponents(2);
+	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
+	if (uniform_ == nullptr || dataPointer_ == nullptr ||
+	    checkFloat() == false || checkComponents(2) == false)
+	{
+		return false;
+	}
 
 	isDirty_ = true;
 	GLfloat *data = reinterpret_cast<GLfloat *>(dataPointer_);
 	data[0] = v0;
 	data[1] = v1;
+	return true;
 }
 
-void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2)
+bool GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2)
 {
-	if (uniform_ == nullptr)
-		return;
-
-	ASSERT(dataPointer_ != nullptr);
-	checkFloat();
-	checkComponents(3);
+	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
+	if (uniform_ == nullptr || dataPointer_ == nullptr ||
+	    checkFloat() == false || checkComponents(3) == false)
+	{
+		return false;
+	}
 
 	isDirty_ = true;
 	GLfloat *data = reinterpret_cast<GLfloat *>(dataPointer_);
 	data[0] = v0;
 	data[1] = v1;
 	data[2] = v2;
+	return true;
 }
 
-void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
+bool GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
 {
-	if (uniform_ == nullptr)
-		return;
-
-	ASSERT(dataPointer_ != nullptr);
-	checkFloat();
-	checkComponents(4);
+	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
+	if (uniform_ == nullptr || dataPointer_ == nullptr ||
+	    checkFloat() == false || checkComponents(4) == false)
+	{
+		return false;
+	}
 
 	isDirty_ = true;
 	GLfloat *data = reinterpret_cast<GLfloat *>(dataPointer_);
@@ -96,73 +139,78 @@ void GLUniformCache::setFloatValue(GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v
 	data[1] = v1;
 	data[2] = v2;
 	data[3] = v3;
+	return true;
 }
 
-void GLUniformCache::setIntVector(const GLint *vec)
+bool GLUniformCache::setIntVector(const GLint *vec)
 {
-	if (uniform_ == nullptr)
-		return;
-
-	ASSERT(dataPointer_ != nullptr);
-	checkInt();
+	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
+	if (uniform_ == nullptr || dataPointer_ == nullptr || checkInt() == false)
+	{
+		return false;
+	}
 
 	isDirty_ = true;
 	memcpy(dataPointer_, vec, sizeof(GLint) * uniform_->numComponents());
+	return true;
 }
 
-void GLUniformCache::setIntValue(GLint v0)
+bool GLUniformCache::setIntValue(GLint v0)
 {
-	if (uniform_ == nullptr)
-		return;
-
-	ASSERT(dataPointer_ != nullptr);
-	checkInt();
-	checkComponents(1);
+	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
+	if (uniform_ == nullptr || dataPointer_ == nullptr ||
+	    checkInt() == false || checkComponents(1) == false)
+	{
+		return false;
+	}
 
 	isDirty_ = true;
 	GLint *data = reinterpret_cast<GLint *>(dataPointer_);
 	data[0] = v0;
+	return true;
 }
 
-void GLUniformCache::setIntValue(GLint v0, GLint v1)
+bool GLUniformCache::setIntValue(GLint v0, GLint v1)
 {
-	if (uniform_ == nullptr)
-		return;
-
-	ASSERT(dataPointer_ != nullptr);
-	checkInt();
-	checkComponents(2);
+	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
+	if (uniform_ == nullptr || dataPointer_ == nullptr ||
+	    checkInt() == false || checkComponents(2) == false)
+	{
+		return false;
+	}
 
 	isDirty_ = true;
 	GLint *data = reinterpret_cast<GLint *>(dataPointer_);
 	data[0] = v0;
 	data[1] = v1;
+	return true;
 }
 
-void GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2)
+bool GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2)
 {
-	if (uniform_ == nullptr)
-		return;
-
-	ASSERT(dataPointer_ != nullptr);
-	checkInt();
-	checkComponents(3);
+	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
+	if (uniform_ == nullptr || dataPointer_ == nullptr ||
+	    checkInt() == false || checkComponents(3) == false)
+	{
+		return false;
+	}
 
 	isDirty_ = true;
 	GLint *data = reinterpret_cast<GLint *>(dataPointer_);
 	data[0] = v0;
 	data[1] = v1;
 	data[2] = v2;
+	return true;
 }
 
-void GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2, GLint v3)
+bool GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2, GLint v3)
 {
-	if (uniform_ == nullptr)
-		return;
-
-	ASSERT(dataPointer_ != nullptr);
-	checkInt();
-	checkComponents(4);
+	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
+	if (uniform_ == nullptr || dataPointer_ == nullptr ||
+	    checkInt() == false || checkComponents(4) == false)
+	{
+		return false;
+	}
 
 	isDirty_ = true;
 	GLint *data = reinterpret_cast<GLint *>(dataPointer_);
@@ -170,14 +218,15 @@ void GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2, GLint v3)
 	data[1] = v1;
 	data[2] = v2;
 	data[3] = v3;
+	return true;
 }
 
-void GLUniformCache::commitValue()
+bool GLUniformCache::commitValue()
 {
-	if (uniform_ == nullptr || isDirty_ == false)
-		return;
+	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
+	if (uniform_ == nullptr || dataPointer_ == nullptr || isDirty_ == false)
+		return false;
 
-	ASSERT(dataPointer_ != nullptr);
 	// The uniform must not belong to any uniform block
 	ASSERT(uniform_->blockIndex() == -1);
 
@@ -234,19 +283,25 @@ void GLUniformCache::commitValue()
 	}
 
 	isDirty_ = false;
+	return true;
 }
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void GLUniformCache::checkFloat()
+bool GLUniformCache::checkFloat() const
 {
 	if (uniform_->basicType() != GL_FLOAT)
+	{
 		LOGE_X("Uniform \"%s\" is not floating point", uniform_->name());
+		return false;
+	}
+	else
+		return true;
 }
 
-void GLUniformCache::checkInt()
+bool GLUniformCache::checkInt() const
 {
 	if (uniform_->basicType() != GL_INT &&
 	    uniform_->basicType() != GL_BOOL &&
@@ -262,13 +317,21 @@ void GLUniformCache::checkInt()
 	)
 	{
 		LOGE_X("Uniform \"%s\" is not integer", uniform_->name());
+		return false;
 	}
+	else
+		return true;
 }
 
-void GLUniformCache::checkComponents(unsigned int requiredComponents)
+bool GLUniformCache::checkComponents(unsigned int requiredComponents) const
 {
 	if (uniform_->numComponents() != requiredComponents)
+	{
 		LOGE_X("Uniform \"%s\" has %u components, not %u", uniform_->name(), uniform_->numComponents(), requiredComponents);
+		return false;
+	}
+	else
+		return true;
 }
 
 }

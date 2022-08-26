@@ -477,7 +477,7 @@ void MyEventHandler::setupViewport()
 {
 	if (withViewport_)
 	{
-		nc::theApplication().rootViewport().setNextViewport(viewport_.get());
+		nc::Viewport::chain().pushBack(viewport_.get());
 		cameraNode_->setParent(nullptr);
 		cameraNode_->setPosition(0.0f, 0.0f);
 		cameraNode_->setRotation(0.0f);
@@ -485,7 +485,7 @@ void MyEventHandler::setupViewport()
 	}
 	else
 	{
-		nc::theApplication().rootViewport().setNextViewport(nullptr);
+		nc::Viewport::chain().clear();
 		cameraNode_->setParent(&nc::theApplication().rootNode());
 	}
 }

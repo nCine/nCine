@@ -1,6 +1,7 @@
 #include "Qt5Widget.h"
 #include "Qt5InputManager.h"
 #include "PCApplication.h"
+#include "IAppEventHandler.h"
 
 #ifdef WITH_GLEW
 	#include "Qt5GfxDevice.h"
@@ -97,10 +98,14 @@ bool Qt5Widget::event(QEvent *event)
 			return false;
 		case QEvent::Resize:
 		{
-			makeCurrent();
 			const QSize size = static_cast<QResizeEvent *>(event)->size();
-			application_.resizeRootViewport(size.width(), size.height());
-			doneCurrent();
+			if (size.width() != application_.widthInt() || size.height() != application_.heightInt())
+			{
+				makeCurrent();
+				application_.resizeScreenViewport(size.width(), size.height());
+				application_.appEventHandler_->onResizeWindow(size.width(), size.height());
+				doneCurrent();
+			}
 			return QWidget::event(event);
 		}
 		case QEvent::Close:

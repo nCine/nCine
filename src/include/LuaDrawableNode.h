@@ -29,7 +29,7 @@ class LuaDrawableNode
 	static int setBlendingPreset(lua_State *L);
 	static int setBlendingFactors(lua_State *L);
 
-	static int isCulled(lua_State *L);
+	static int lastFrameRendered(lua_State *L);
 	static int aabb(lua_State *L);
 
 	friend class LuaBaseSprite;

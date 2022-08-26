@@ -84,9 +84,19 @@ void MyEventHandler::onPostUpdate()
 	nc::LuaIAppEventHandler::onPostUpdate(luaState_.state());
 }
 
+void MyEventHandler::onDrawViewport(nc::Viewport &viewport)
+{
+	nc::LuaIAppEventHandler::onDrawViewport(luaState_.state(), viewport);
+}
+
 void MyEventHandler::onFrameEnd()
 {
 	nc::LuaIAppEventHandler::onFrameEnd(luaState_.state());
+}
+
+void MyEventHandler::onResizeWindow(int width, int height)
+{
+	nc::LuaIAppEventHandler::onResizeWindow(luaState_.state(), width, height);
 }
 
 void MyEventHandler::onShutdown()

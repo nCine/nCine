@@ -26,13 +26,18 @@ class GLUniformBlockCache
 	GLuint bindingIndex() const;
 	/// Wrapper around `GLUniformBlock::size()`
 	GLint size() const;
+	/// Wrapper around `GLUniformBlock::alignAmount()`
+	unsigned char alignAmount() const;
 
 	inline GLubyte *dataPointer() { return dataPointer_; }
 	inline const GLubyte *dataPointer() const { return dataPointer_; }
 	void setDataPointer(GLubyte *dataPointer);
 
 	inline GLint usedSize() const { return usedSize_; }
-	inline void setUsedSize(GLint usedSize) { usedSize_ = usedSize; }
+	void setUsedSize(GLint usedSize);
+
+	bool copyData(unsigned int destIndex, const GLubyte *src, unsigned int numBytes);
+	inline bool copyData(const GLubyte *src) { return copyData(0, src, usedSize_); }
 
 	GLUniformCache *uniform(const char *name);
 	/// Wrapper around `GLUniformBlock::setBlockBinding()`

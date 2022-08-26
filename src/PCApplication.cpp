@@ -136,7 +136,7 @@ void PCApplication::processEvents()
 {
 	ZoneScoped;
 
-	#if WITH_NUKLEAR
+	#ifdef WITH_NUKLEAR
 	NuklearSdlInput::inputBegin();
 	#endif
 
@@ -157,7 +157,8 @@ void PCApplication::processEvents()
 				{
 					gfxDevice_->width_ = event.window.data1;
 					gfxDevice_->height_ = event.window.data2;
-					resizeRootViewport(event.window.data1, event.window.data2);
+					resizeScreenViewport(event.window.data1, event.window.data2);
+					appEventHandler_->onResizeWindow(event.window.data1, event.window.data2);
 				}
 				break;
 			default:
@@ -173,7 +174,7 @@ void PCApplication::processEvents()
 	#endif
 	}
 
-	#if WITH_NUKLEAR
+	#ifdef WITH_NUKLEAR
 	NuklearSdlInput::inputEnd();
 	#endif
 }

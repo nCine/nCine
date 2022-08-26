@@ -19,7 +19,9 @@ GLUniform::GLUniform(GLuint program, GLuint index)
 	GLsizei length;
 	glGetActiveUniform(program, index, MaxNameLength, &length, &size_, &type_, name_);
 	ASSERT(length <= MaxNameLength);
-	location_ = glGetUniformLocation(program, name_);
+
+	if (hasReservedPrefix() == false)
+		location_ = glGetUniformLocation(program, name_);
 }
 
 ///////////////////////////////////////////////////////////
@@ -105,6 +107,11 @@ unsigned int GLUniform::numComponents() const
 			LOGW_X("No available case to handle type: %u", type_);
 			return 0;
 	}
+}
+
+bool GLUniform::hasReservedPrefix() const
+{
+	return (MaxNameLength >= 3 && name_[0] == 'g' && name_[1] == 'l' && name_[2] == '_');
 }
 
 }

@@ -13,9 +13,12 @@ class ScreenViewport : public Viewport
 	/// Creates the screen viewport
 	ScreenViewport();
 
+	/// Changes the size, viewport rectangle and projection matrix of the screen viewport
+	void resize(int width, int height);
+
   private:
-	using Viewport::update;
-	using Viewport::visit;
+	void update();
+	void visit();
 	void sortAndCommitQueue();
 	void draw();
 

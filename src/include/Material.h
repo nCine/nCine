@@ -3,12 +3,11 @@
 
 #include "GLShaderUniforms.h"
 #include "GLShaderUniformBlocks.h"
-#include "GLShaderAttributes.h"
+#include "GLTexture.h"
 
 namespace ncine {
 
 class GLShaderProgram;
-class GLTexture;
 class Texture;
 class GLUniformCache;
 class GLAttribute;
@@ -56,6 +55,28 @@ class Material
 		CUSTOM
 	};
 
+	// Shader uniform block and model matrix uniform names
+	static const char *InstanceBlockName;
+	static const char *InstancesBlockName; // for batched shaders
+	static const char *ModelMatrixUniformName;
+
+	// Camera related shader uniform names
+	static const char *GuiProjectionMatrixUniformName;
+	static const char *DepthUniformName;
+	static const char *ProjectionMatrixUniformName;
+	static const char *ViewMatrixUniformName;
+	static const char *ProjectionViewMatrixExcludeString;
+
+	// Shader uniform and attribute names
+	static const char *TextureUniformName;
+	static const char *ColorUniformName;
+	static const char *SpriteSizeUniformName;
+	static const char *TexRectUniformName;
+	static const char *PositionAttributeName;
+	static const char *TexCoordsAttributeName;
+	static const char *MeshIndexAttributeName;
+	static const char *ColorAttributeName;
+
 	/// Default constructor
 	Material();
 	Material(GLShaderProgram *program, GLTexture *texture);
@@ -70,19 +91,34 @@ class Material
 	inline ShaderProgramType shaderProgramType() const { return shaderProgramType_; }
 	bool setShaderProgramType(ShaderProgramType shaderProgramType);
 	inline const GLShaderProgram *shaderProgram() const { return shaderProgram_; }
-	bool setShaderProgram(GLShaderProgram *program);
+	void setShaderProgram(GLShaderProgram *program);
 
+	void setDefaultAttributesParameters();
 	void reserveUniformsDataMemory();
 	void setUniformsDataPointer(GLubyte *dataPointer);
+
+	/// Wrapper around `GLShaderUniforms::hasUniform()`
+	inline bool hasUniform(const char *name) const { return shaderUniforms_.hasUniform(name); }
+	/// Wrapper around `GLShaderUniformBlocks::hasUniformBlock()`
+	inline bool hasUniformBlock(const char *name) const { return shaderUniformBlocks_.hasUniformBlock(name); }
+
 	/// Wrapper around `GLShaderUniforms::uniform()`
 	inline GLUniformCache *uniform(const char *name) { return shaderUniforms_.uniform(name); }
 	/// Wrapper around `GLShaderUniformBlocks::uniformBlock()`
 	inline GLUniformBlockCache *uniformBlock(const char *name) { return shaderUniformBlocks_.uniformBlock(name); }
-	/// Wrapper around `GLShaderAttributes::attribute()`
-	inline GLVertexFormat::Attribute *attribute(const char *name) { return shaderAttributes_.attribute(name); }
-	inline const GLTexture *texture() const { return texture_; }
-	inline void setTexture(const GLTexture *texture) { texture_ = texture; }
-	void setTexture(const Texture &texture);
+
+	/// Wrapper around `GLShaderUniforms::allUniforms()`
+	inline const GLShaderUniforms::UniformHashMapType allUniforms() const { return shaderUniforms_.allUniforms(); }
+	/// Wrapper around `GLShaderUniformBlocks::allUniformBlocks()`
+	inline const GLShaderUniformBlocks::UniformHashMapType allUniformBlocks() const { return shaderUniformBlocks_.allUniformBlocks(); }
+
+	const GLTexture *texture(unsigned int unit) const;
+	bool setTexture(unsigned int unit, const GLTexture *texture);
+	bool setTexture(unsigned int unit, const Texture &texture);
+
+	inline const GLTexture *texture() const { return texture(0); }
+	inline bool setTexture(const GLTexture *texture) { return setTexture(0, texture); }
+	inline bool setTexture(const Texture &texture) { return setTexture(0, texture); }
 
   private:
 	bool isBlendingEnabled_;
@@ -93,8 +129,7 @@ class Material
 	GLShaderProgram *shaderProgram_;
 	GLShaderUniforms shaderUniforms_;
 	GLShaderUniformBlocks shaderUniformBlocks_;
-	GLShaderAttributes shaderAttributes_;
-	const GLTexture *texture_;
+	const GLTexture *textures_[GLTexture::MaxTextureUnits];
 
 	/// The size of the memory buffer containing uniform values
 	unsigned int uniformsHostBufferSize_;
@@ -106,7 +141,7 @@ class Material
 	inline void commitUniforms() { shaderUniforms_.commitUniforms(); }
 	/// Wrapper around `GLShaderUniformBlocks::commitUniformBlocks()`
 	inline void commitUniformBlocks() { shaderUniformBlocks_.commitUniformBlocks(); }
-	/// Wrapper around `GLShaderAttributes::defineVertexPointers()`
+	/// Wrapper around `GLShaderProgram::defineVertexFormat()`
 	void defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo, unsigned int vboOffset);
 	uint32_t sortKey();
 

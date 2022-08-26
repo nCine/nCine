@@ -1,4 +1,5 @@
 #include "GLTexture.h"
+#include "GLDebug.h"
 #include "tracy_opengl.h"
 
 namespace ncine {
@@ -43,6 +44,16 @@ bool GLTexture::bind(unsigned int textureUnit) const
 bool GLTexture::unbind() const
 {
 	return bindHandle(target_, 0, textureUnit_);
+}
+
+bool GLTexture::unbind(GLenum target, unsigned int textureUnit)
+{
+	return bindHandle(target, 0, textureUnit);
+}
+
+bool GLTexture::unbind(unsigned int textureUnit)
+{
+	return bindHandle(GL_TEXTURE_2D, 0, textureUnit);
 }
 
 void GLTexture::texImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data)
@@ -99,6 +110,11 @@ void GLTexture::texParameteri(GLenum pname, GLint param)
 {
 	bind();
 	glTexParameteri(target_, pname, param);
+}
+
+void GLTexture::setObjectLabel(const char *label)
+{
+	GLDebug::objectLabel(GLDebug::LabelTypes::TEXTURE, glHandle_, label);
 }
 
 ///////////////////////////////////////////////////////////

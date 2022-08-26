@@ -111,9 +111,19 @@ void LuaEventHandler::onPostUpdate()
 	LuaIAppEventHandler::onPostUpdate(luaState_->state());
 }
 
+void LuaEventHandler::onDrawViewport(Viewport &viewport)
+{
+	LuaIAppEventHandler::onDrawViewport(luaState_->state(), viewport);
+}
+
 void LuaEventHandler::onFrameEnd()
 {
 	LuaIAppEventHandler::onFrameEnd(luaState_->state());
+}
+
+void LuaEventHandler::onResizeWindow(int width, int height)
+{
+	LuaIAppEventHandler::onResizeWindow(luaState_->state(), width, height);
 }
 
 void LuaEventHandler::onShutdown()

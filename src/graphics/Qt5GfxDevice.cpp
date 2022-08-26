@@ -39,7 +39,7 @@ void Qt5GfxDevice::setResolution(int width, int height)
 {
 	width_ = width;
 	height_ = height;
-	theApplication().resizeRootViewport(width, height);
+	theApplication().resizeScreenViewport(width, height);
 
 	QRect rect = widget_.geometry();
 	rect.setWidth(width);

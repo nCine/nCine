@@ -214,7 +214,7 @@ void MyEventHandler::onFrameStart()
 	}
 
 	ImGui::ColorEdit4("Background Color", background_.data(), ImGuiColorEditFlags_NoAlpha);
-	nc::theApplication().rootViewport().setClearColor(background_);
+	nc::theApplication().screenViewport().setClearColor(background_);
 
 	ImGui::Separator();
 	unsigned int childOrderIndices[NumSprites];

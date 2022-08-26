@@ -9,6 +9,7 @@ const char *objectTypeToString(Object::ObjectType type)
 	{
 		case Object::ObjectType::BASE:					return "Base";
 		case Object::ObjectType::TEXTURE:				return "Texture";
+		case Object::ObjectType::SHADER:				return "Shader";
 		case Object::ObjectType::SCENENODE:				return "SceneNode";
 		case Object::ObjectType::SPRITE:				return "Sprite";
 		case Object::ObjectType::MESH_SPRITE:			return "MeshSprite";

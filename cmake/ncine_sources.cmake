@@ -1,6 +1,7 @@
 set(SOURCES
 	${NCINE_ROOT}/src/base/Random.cpp
 	${NCINE_ROOT}/src/base/Object.cpp
+	${NCINE_ROOT}/src/base/HashFunctions.cpp
 	${NCINE_ROOT}/src/base/CString.cpp
 	${NCINE_ROOT}/src/base/Utf8.cpp
 	${NCINE_ROOT}/src/base/String.cpp
@@ -38,6 +39,8 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/TextureLoaderKtx.cpp
 	${NCINE_ROOT}/src/graphics/ITextureSaver.cpp
 	${NCINE_ROOT}/src/graphics/Texture.cpp
+	${NCINE_ROOT}/src/graphics/Shader.cpp
+	${NCINE_ROOT}/src/graphics/ShaderState.cpp
 	${NCINE_ROOT}/src/graphics/DrawableNode.cpp
 	${NCINE_ROOT}/src/graphics/SceneNode.cpp
 	${NCINE_ROOT}/src/graphics/BaseSprite.cpp
@@ -60,7 +63,6 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/opengl/GLShaderUniforms.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLUniform.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLUniformCache.cpp
-	${NCINE_ROOT}/src/graphics/opengl/GLShaderAttributes.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLAttribute.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLTexture.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLVertexArrayObject.cpp

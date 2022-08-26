@@ -14,6 +14,8 @@ class JoyMappedState;
 
 class Viewport;
 class Camera;
+class Shader;
+class ShaderState;
 
 class AppConfiguration;
 class Texture;
@@ -40,6 +42,8 @@ namespace LuaTypes {
 
 		VIEWPORT,
 		CAMERA,
+		SHADER,
+		SHADERSTATE,
 
 		TEXTURE,
 		SCENENODE,
@@ -67,6 +71,8 @@ namespace LuaTypes {
 
 	template <> inline LuaTypes::UserDataType classToUserDataType<Viewport>(Viewport *) { return LuaTypes::UserDataType::VIEWPORT; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<Camera>(Camera *) { return LuaTypes::UserDataType::CAMERA; }
+	template <> inline LuaTypes::UserDataType classToUserDataType<Shader>(Shader *) { return LuaTypes::UserDataType::SHADER; }
+	template <> inline LuaTypes::UserDataType classToUserDataType<ShaderState>(ShaderState *) { return LuaTypes::UserDataType::SHADERSTATE; }
 
 	template <> inline LuaTypes::UserDataType classToUserDataType<Texture>(Texture *) { return LuaTypes::UserDataType::TEXTURE; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<SceneNode>(SceneNode *) { return LuaTypes::UserDataType::SCENENODE; }
@@ -119,6 +125,8 @@ namespace LuaTypes {
 
 			case LuaTypes::UserDataType::VIEWPORT: return "Viewport";
 			case LuaTypes::UserDataType::CAMERA: return "Camera";
+			case LuaTypes::UserDataType::SHADER: return "Shader";
+			case LuaTypes::UserDataType::SHADERSTATE: return "ShaderState";
 
 			case LuaTypes::UserDataType::TEXTURE: return "Texture";
 			case LuaTypes::UserDataType::SCENENODE: return "SceneNode";

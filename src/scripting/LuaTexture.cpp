@@ -2,6 +2,7 @@
 #include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaColorUtils.h"
+#include "LuaVector2Utils.h"
 #include "LuaUtils.h"
 #include "Texture.h"
 
@@ -11,10 +12,14 @@ namespace LuaNames {
 namespace Texture {
 	static const char *Texture = "texture";
 
+	static const char *newInit = "new_init";
+	static const char *init = "init";
+
 	static const char *width = "get_width";
 	static const char *height = "get_height";
 	static const char *mipMapLevels = "mip_levels";
 	static const char *isCompressed = "is_compressed";
+	static const char *format = "get_format";
 	static const char *numChannels = "num_channels";
 	static const char *dataSize = "datasize";
 
@@ -25,6 +30,20 @@ namespace Texture {
 	static const char *setMagFiltering = "set_mag_filtering";
 	static const char *setWrap = "set_wrap";
 
+	static const char *isChromaKeyEnabled = "is_chromakey_enabled";
+	static const char *chromaKeyColor = "get_chromakey_color";
+	static const char *setChromaKeyEnabled = "set_chromakey_enabled";
+	static const char *setChromaKeyColor = "set_chromakey_color";
+
+	static const char *setGLTextureLabel = "set_gltexture_label";
+
+	static const char *R8 = "R8";
+	static const char *RG8 = "RG8";
+	static const char *RGB8 = "RGB8";
+	static const char *RGBA8 = "RGBA8";
+	static const char *UNKNOWN = "UNKNOWN";
+	static const char *Format = "tex_format";
+
 	static const char *NEAREST = "NEAREST";
 	static const char *LINEAR = "LINEAR";
 	static const char *NEAREST_MIPMAP_NEAREST = "NEAREST_MIPMAP_NEAREST";
@@ -32,11 +51,6 @@ namespace Texture {
 	static const char *NEAREST_MIPMAP_LINEAR = "NEAREST_MIPMAP_LINEAR";
 	static const char *LINEAR_MIPMAP_LINEAR = "LINEAR_MIPMAP_LINEAR";
 	static const char *Filtering = "tex_filtering";
-
-	static const char *isChromaKeyEnabled = "is_chromakey_enabled";
-	static const char *chromaKeyColor = "get_chromakey_color";
-	static const char *setChromaKeyEnabled = "set_chromakey_enabled";
-	static const char *setChromaKeyColor = "set_chromakey_color";
 
 	static const char *CLAMP_TO_EDGE = "CLAMP_TO_EDGE";
 	static const char *MIRRORED_REPEAT = "MIRRORED_REPEAT";
@@ -51,18 +65,21 @@ namespace Texture {
 void LuaTexture::expose(LuaStateManager *stateManager)
 {
 	lua_State *L = stateManager->state();
-	lua_createtable(L, 0, 18);
+	lua_createtable(L, 0, 20);
 
 	if (stateManager->apiType() == LuaStateManager::ApiType::FULL)
 	{
 		LuaClassTracker<Texture>::exposeDelete(L);
 		LuaUtils::addFunction(L, LuaNames::newObject, newObject);
+		LuaUtils::addFunction(L, LuaNames::Texture::newInit, newInit);
 	}
 
+	LuaUtils::addFunction(L, LuaNames::Texture::init, init);
 	LuaUtils::addFunction(L, LuaNames::Texture::width, width);
 	LuaUtils::addFunction(L, LuaNames::Texture::height, height);
 	LuaUtils::addFunction(L, LuaNames::Texture::mipMapLevels, mipMapLevels);
 	LuaUtils::addFunction(L, LuaNames::Texture::isCompressed, isCompressed);
+	LuaUtils::addFunction(L, LuaNames::Texture::format, format);
 	LuaUtils::addFunction(L, LuaNames::Texture::numChannels, numChannels);
 	LuaUtils::addFunction(L, LuaNames::Texture::dataSize, dataSize);
 
@@ -78,11 +95,23 @@ void LuaTexture::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::Texture::setChromaKeyEnabled, setChromaKeyEnabled);
 	LuaUtils::addFunction(L, LuaNames::Texture::setChromaKeyColor, setChromaKeyColor);
 
+	LuaUtils::addFunction(L, LuaNames::Texture::setGLTextureLabel, setGLTextureLabel);
+
 	lua_setfield(L, -2, LuaNames::Texture::Texture);
 }
 
 void LuaTexture::exposeConstants(lua_State *L)
 {
+	lua_createtable(L, 0, 5);
+
+	LuaUtils::pushField(L, LuaNames::Texture::R8, static_cast<int64_t>(Texture::Format::R8));
+	LuaUtils::pushField(L, LuaNames::Texture::RG8, static_cast<int64_t>(Texture::Format::RG8));
+	LuaUtils::pushField(L, LuaNames::Texture::RGB8, static_cast<int64_t>(Texture::Format::RGB8));
+	LuaUtils::pushField(L, LuaNames::Texture::RGBA8, static_cast<int64_t>(Texture::Format::RGBA8));
+	LuaUtils::pushField(L, LuaNames::Texture::UNKNOWN, static_cast<int64_t>(Texture::Format::UNKNOWN));
+
+	lua_setfield(L, -2, LuaNames::Texture::Format);
+
 	lua_createtable(L, 0, 6);
 
 	LuaUtils::pushField(L, LuaNames::Texture::NEAREST, static_cast<int64_t>(Texture::Filtering::NEAREST));
@@ -120,6 +149,36 @@ int LuaTexture::newObject(lua_State *L)
 	LuaClassTracker<Texture>::newObject(L, filename);
 
 	return 1;
+}
+
+int LuaTexture::newInit(lua_State *L)
+{
+	int vectorIndex = 0;
+	const Vector2i &size = LuaVector2iUtils::retrieve(L, -1, vectorIndex);
+
+	const char *name = LuaUtils::retrieve<const char *>(L, vectorIndex - 3);
+	const Texture::Format format = static_cast<Texture::Format>(LuaUtils::retrieve<int64_t>(L, vectorIndex - 2));
+	const int mipCount = LuaUtils::retrieve<int>(L, vectorIndex - 1);
+
+	LuaClassTracker<Texture>::newObject(L, name, format, mipCount, size);
+
+	return 1;
+}
+
+int LuaTexture::init(lua_State *L)
+{
+	int vectorIndex = 0;
+	const Vector2i &size = LuaVector2iUtils::retrieve(L, -1, vectorIndex);
+
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, vectorIndex - 4);
+	const char *name = LuaUtils::retrieve<const char *>(L, vectorIndex - 3);
+	const Texture::Format format = static_cast<Texture::Format>(LuaUtils::retrieve<int64_t>(L, vectorIndex - 2));
+	const int mipCount = LuaUtils::retrieve<int>(L, vectorIndex - 1);
+
+	if (texture)
+		texture->init(name, format, mipCount, size);
+
+	return 0;
 }
 
 int LuaTexture::width(lua_State *L)
@@ -164,6 +223,18 @@ int LuaTexture::isCompressed(lua_State *L)
 
 	if (texture)
 		LuaUtils::push(L, texture->isCompressed());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaTexture::format(lua_State *L)
+{
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -1);
+
+	if (texture)
+		LuaUtils::push(L, static_cast<int64_t>(texture->format()));
 	else
 		LuaUtils::pushNil(L);
 
@@ -306,6 +377,17 @@ int LuaTexture::setChromaKeyColor(lua_State *L)
 
 	if (texture)
 		texture->setChromaKeyColor(chromaKeyColor);
+
+	return 0;
+}
+
+int LuaTexture::setGLTextureLabel(lua_State *L)
+{
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -2);
+	const char *label = LuaUtils::retrieve<const char *>(L, -1);
+
+	if (texture)
+		texture->setGLTextureLabel(label);
 
 	return 0;
 }

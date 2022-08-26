@@ -26,6 +26,8 @@
 
 	#include "LuaViewport.h"
 	#include "LuaCamera.h"
+	#include "LuaShader.h"
+	#include "LuaShaderState.h"
 
 	#include "LuaTimeStamp.h"
 	#include "LuaFileSystem.h"
@@ -457,6 +459,16 @@ void LuaStateManager::releaseTrackedMemory()
 				LuaCamera::release(object);
 				break;
 			}
+			case LuaTypes::SHADER:
+			{
+				LuaShader::release(object);
+				break;
+			}
+			case LuaTypes::SHADERSTATE:
+			{
+				LuaShaderState::release(object);
+				break;
+			}
 			case LuaTypes::TEXTURE:
 			{
 				LuaTexture::release(object);
@@ -569,6 +581,8 @@ void LuaStateManager::exposeApi()
 	{
 		LuaViewport::expose(this);
 		LuaCamera::expose(this);
+		LuaShader::expose(this);
+		LuaShaderState::expose(this);
 
 		LuaTexture::expose(this);
 		LuaSceneNode::expose(this);
@@ -608,6 +622,7 @@ void LuaStateManager::exposeConstants()
 	if (appCfg.withScenegraph)
 	{
 		LuaViewport::exposeConstants(L_);
+		LuaShader::exposeConstants(L_);
 
 		LuaTexture::exposeConstants(L_);
 		LuaSceneNode::exposeConstants(L_);

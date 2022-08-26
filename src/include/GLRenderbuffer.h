@@ -10,18 +10,24 @@ namespace ncine {
 class GLRenderbuffer
 {
   public:
+	GLRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height);
+	~GLRenderbuffer();
+
 	inline GLuint glHandle() const { return glHandle_; }
+
+	inline void setAttachment(GLenum attachment) { attachment_ = attachment; }
+	inline GLenum attachment() const { return attachment_; }
 
 	bool bind() const;
 	static bool unbind();
+
+	void setObjectLabel(const char *label);
 
   private:
 	static GLuint boundBuffer_;
 
 	GLuint glHandle_;
-
-	GLRenderbuffer(GLenum internalFormat, GLsizei width, GLsizei height);
-	~GLRenderbuffer();
+	GLenum attachment_;
 
 	/// Deleted copy constructor
 	GLRenderbuffer(const GLRenderbuffer &) = delete;

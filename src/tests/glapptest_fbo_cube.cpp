@@ -4,7 +4,6 @@
 #include <ncine/AppConfiguration.h>
 #include <ncine/GLShaderProgram.h>
 #include <ncine/GLShaderUniforms.h>
-#include <ncine/GLShaderAttributes.h>
 #include <ncine/GLTexture.h>
 #include <ncine/GLFramebufferObject.h>
 #include <ncine/GLVertexArrayObject.h>
@@ -121,7 +120,6 @@ void MyEventHandler::onInit()
 	colorProgram_->link(nc::GLShaderProgram::Introspection::ENABLED);
 	colorUniforms_ = nctl::makeUnique<nc::GLShaderUniforms>(colorProgram_.get());
 	colorUniforms_->setUniformsDataPointer(uniformsBuffer_);
-	colorAttributes_ = nctl::makeUnique<nc::GLShaderAttributes>(colorProgram_.get());
 
 	texProgram_ = nctl::makeUnique<nc::GLShaderProgram>(nc::GLShaderProgram::QueryPhase::DEFERRED);
 #ifndef WITH_EMBEDDED_SHADERS
@@ -136,7 +134,6 @@ void MyEventHandler::onInit()
 	texUniforms_->setUniformsDataPointer(&uniformsBuffer_[colorProgram_->uniformsSize()]);
 	texUniforms_->uniform("uTexture")->setIntValue(0);
 	texUniforms_->uniform("uColor")->setFloatValue(1.0f, 1.0f, 1.0f, 1.0f);
-	texAttributes_ = nctl::makeUnique<nc::GLShaderAttributes>(texProgram_.get());
 
 	FATAL_ASSERT(UniformsBufferSize >= colorProgram_->uniformsSize() + texProgram_->uniformsSize());
 
@@ -152,13 +149,13 @@ void MyEventHandler::onInit()
 
 	vboTri_ = nctl::makeUnique<nc::GLBufferObject>(GL_ARRAY_BUFFER);
 	vboTri_->bufferData(sizeof(triVertices), triVertices, GL_STATIC_DRAW);
-	colorAttributes_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatCol), reinterpret_cast<void *>(offsetof(VertexFormatCol, position)));
-	colorAttributes_->attribute("aColor")->setVboParameters(sizeof(VertexFormatCol), reinterpret_cast<void *>(offsetof(VertexFormatCol, color)));
+	colorProgram_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatCol), reinterpret_cast<void *>(offsetof(VertexFormatCol, position)));
+	colorProgram_->attribute("aColor")->setVboParameters(sizeof(VertexFormatCol), reinterpret_cast<void *>(offsetof(VertexFormatCol, color)));
 
 	vboCube_ = nctl::makeUnique<nc::GLBufferObject>(GL_ARRAY_BUFFER);
 	vboCube_->bufferData(sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
-	texAttributes_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatTex), reinterpret_cast<void *>(offsetof(VertexFormatTex, position)));
-	texAttributes_->attribute("aTexCoords")->setVboParameters(sizeof(VertexFormatTex), reinterpret_cast<void *>(offsetof(VertexFormatTex, texcoords)));
+	texProgram_->attribute("aPosition")->setVboParameters(sizeof(VertexFormatTex), reinterpret_cast<void *>(offsetof(VertexFormatTex, position)));
+	texProgram_->attribute("aTexCoords")->setVboParameters(sizeof(VertexFormatTex), reinterpret_cast<void *>(offsetof(VertexFormatTex, texcoords)));
 
 	iboCube_ = nctl::makeUnique<nc::GLBufferObject>(GL_ELEMENT_ARRAY_BUFFER);
 	iboCube_->bufferData(sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
@@ -189,7 +186,7 @@ void MyEventHandler::onFrameStart()
 	fbo_->bind(GL_FRAMEBUFFER);
 	nc::GLClearColor::setColor(0.5f, 0.5f, 0.5f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	colorAttributes_->defineVertexFormat(vboTri_.get());
+	colorProgram_->defineVertexFormat(vboTri_.get());
 	vboTri_->bind();
 	iboCube_->unbind();
 	texture_->unbind();
@@ -212,7 +209,7 @@ void MyEventHandler::onFrameStart()
 	fbo_->unbind();
 	nc::GLClearColor::setColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	texAttributes_->defineVertexFormat(vboCube_.get());
+	texProgram_->defineVertexFormat(vboCube_.get());
 	vboCube_->bind();
 	iboCube_->bind();
 	texture_->bind();

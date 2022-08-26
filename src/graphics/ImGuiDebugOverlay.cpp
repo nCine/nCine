@@ -5,6 +5,7 @@
 #include "InputEvents.h"
 
 #include "Viewport.h"
+#include "Camera.h"
 #include "DrawableNode.h"
 #include "MeshSprite.h"
 #include "ParticleSystem.h"
@@ -584,6 +585,10 @@ void ImGuiDebugOverlay::guiGraphicsCapabilities()
 		ImGui::Text("GL_MAX_VERTEX_UNIFORM_BLOCKS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_VERTEX_UNIFORM_BLOCKS));
 		ImGui::Text("GL_MAX_FRAGMENT_UNIFORM_BLOCKS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_FRAGMENT_UNIFORM_BLOCKS));
 		ImGui::Text("GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::UNIFORM_BUFFER_OFFSET_ALIGNMENT));
+#if !defined(EMSCRIPTEN) && (!defined(WITH_OPENGLES) || (defined(WITH_OPENGLES) && GL_ES_VERSION_3_1))
+		ImGui::Text("GL_MAX_VERTEX_ATTRIB_STRIDE: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_VERTEX_ATTRIB_STRIDE));
+#endif
+		ImGui::Text("GL_MAX_COLOR_ATTACHMENTS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_COLOR_ATTACHMENTS));
 
 		ImGui::Separator();
 		ImGui::Text("GL_KHR_debug: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::KHR_DEBUG));
@@ -1156,23 +1161,31 @@ void ImGuiDebugOverlay::guiAllocators()
 #endif
 }
 
-void ImGuiDebugOverlay::guiRecursiveViewports(Viewport *viewport, unsigned int viewportId)
+void ImGuiDebugOverlay::guiViewports(Viewport *viewport, unsigned int viewportId)
 {
 	widgetName_.format("#%u Viewport", viewportId);
-	widgetName_.formatAppend(" - size: %d x %d", viewport->width(), viewport->height());
-	const Rectf rect = viewport->cullingRect();
-	widgetName_.formatAppend(" - culling rect: %.2f, %.2f - %.2f, %.2f", rect.x, rect.y, rect.w, rect.h);
+	if (viewport->type() != Viewport::Type::NO_TEXTURE)
+		widgetName_.formatAppend(" - size: %d x %d", viewport->width(), viewport->height());
+	const Recti viewportRect = viewport->viewportRect();
+	widgetName_.formatAppend(" - rect: pos <%d, %d>, size %d x %d", viewportRect.x, viewportRect.y, viewportRect.w, viewportRect.h);
+	const Rectf cullingRect = viewport->cullingRect();
+	widgetName_.formatAppend(" - culling: pos <%.2f, %.2f>, size %.2f x %.2f", cullingRect.x, cullingRect.y, cullingRect.w, cullingRect.h);
 	widgetName_.formatAppend("###0x%x", uintptr_t(viewport));
 
 	SceneNode *rootNode = viewport->rootNode();
 	if (rootNode != nullptr && ImGui::TreeNode(widgetName_.data()))
 	{
+		if (viewport->camera() != nullptr)
+		{
+			const Camera::ViewValues &viewValues = viewport->camera()->viewValues();
+			ImGui::Text("Camera view - position: <%.2f, %.2f>, rotation: %.2f, scale: %.2f", viewValues.position.x, viewValues.position.y, viewValues.rotation, viewValues.scale);
+			const Camera::ProjectionValues &projValues = viewport->camera()->projectionValues();
+			ImGui::Text("Camera projection - left: %.2f, right: %.2f, top: %.2f, bottom: %.2f", projValues.left, projValues.right, projValues.top, projValues.bottom);
+		}
+
 		guiRecursiveChildrenNodes(rootNode, 0);
 		ImGui::TreePop();
 	}
-
-	if (viewport->nextViewport() != nullptr)
-		guiRecursiveViewports(viewport->nextViewport(), viewportId + 1);
 }
 
 void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int childId)
@@ -1215,8 +1228,8 @@ void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int 
 	if (drawable)
 	{
 		widgetName_.formatAppend(" - size: %.1f x %.1f", drawable->width(), drawable->height());
-		if (drawable->isDrawEnabled() && drawable->isCulled())
-			widgetName_.formatAppend(" - culled", drawable->width(), drawable->height());
+		if (drawable->isDrawEnabled() && drawable->lastFrameRendered() < theApplication().numFrames() - 1)
+			widgetName_.append(" - culled");
 	}
 	widgetName_.formatAppend("###0x%x", uintptr_t(node));
 
@@ -1378,7 +1391,11 @@ void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int 
 void ImGuiDebugOverlay::guiNodeInspector()
 {
 	if (ImGui::CollapsingHeader("Node Inspector"))
-		guiRecursiveViewports(&theApplication().rootViewport(), 0);
+	{
+		guiViewports(&theApplication().screenViewport(), 0);
+		for (unsigned int i = 0; i < Viewport::chain().size(); i++)
+			guiViewports(Viewport::chain()[i], i + 1);
+	}
 }
 
 void ImGuiDebugOverlay::guiTopLeft()
@@ -1433,6 +1450,7 @@ void ImGuiDebugOverlay::guiTopLeft()
 			ImGui::SameLine();
 			ImGui::PlotLines("", plotValues_[ValuesType::UBO_USED].get(), numValues_, 0, nullptr, 0.0f, uboBuffers.size / 1024.0f);
 		}
+		ImGui::Text("Viewport chain length: %u", Viewport::chain().size());
 		ImGui::End();
 	}
 }

@@ -1,4 +1,5 @@
 #include "GLVertexArrayObject.h"
+#include "GLDebug.h"
 
 namespace ncine {
 
@@ -50,6 +51,11 @@ bool GLVertexArrayObject::unbind()
 		return true;
 	}
 	return false;
+}
+
+void GLVertexArrayObject::setObjectLabel(const char *label)
+{
+	GLDebug::objectLabel(GLDebug::LabelTypes::VERTEX_ARRAY, glHandle_, label);
 }
 
 }

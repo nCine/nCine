@@ -16,8 +16,11 @@
 #include <ncine/AudioStreamPlayer.h>
 #include <ncine/TextNode.h>
 #include <ncine/LuaStateManager.h>
+#include <ncine/Shader.h>
 #include <ncine/IFile.h>
 #include <ncine/Colorf.h>
+
+#include "apptest_shaders_sources.h"
 #include "apptest_datapath.h"
 
 #define DEFAULT_CONSTRUCTORS (0)
@@ -63,6 +66,11 @@ const char *ScriptFiles[MyEventHandler::NumScripts] = { "init.lua", "reload.lua"
 nctl::StaticArray<nctl::UniquePtr<char[]>, MyEventHandler::NumScripts> scriptBuffers;
 nctl::StaticArray<unsigned long int, MyEventHandler::NumScripts> scriptBufferSizes;
 
+const char *ShaderNames[MyEventHandler::NumShaders] = { "Sprite", "Separable_Blur", "Mesh_Sprite", "Batched_Mesh_Sprite", "Multi-texture", "Blending" };
+nc::Shader::DefaultVertex DefaultVertexShaders[MyEventHandler::NumShaders];
+const char *VertexShaderStrings[MyEventHandler::NumShaders] = { sprite_vs, sprite_vs, meshsprite_vs, batched_meshsprite_vs, multitexture_vs, nullptr };
+const char *FragmentShaderStrings[MyEventHandler::NumShaders] = { sprite_fs, sprite_blur_fs, meshsprite_fs, meshsprite_fs, multitexture_fs, blending_fs };
+
 #if LOADING_FAILURES
 const unsigned long int randomBufferLength = 1024;
 uint8_t randomBuffer[randomBufferLength];
@@ -83,6 +91,9 @@ int selectedFont = -1;
 
 int selectedScript = -1;
 int loadedScript = -1;
+
+int selectedShader = -1;
+int loadedShader = -1;
 
 const char *audioPlayerStateToString(nc::IAudioPlayer::PlayerState state)
 {
@@ -153,18 +164,23 @@ void MyEventHandler::onInit()
 		scriptFile->close();
 	}
 
+	DefaultVertexShaders[5] = nc::Shader::DefaultVertex::SPRITE;
+
 #if DEFAULT_CONSTRUCTORS
 	for (unsigned int i = 0; i < NumTextures; i++)
 		textures_.pushBack(nctl::makeUnique<nc::Texture>());
 	audioBuffer_ = nctl::makeUnique<nc::AudioBuffer>();
 	streamPlayer_ = nctl::makeUnique<nc::AudioStreamPlayer>();
 	font_ = nctl::makeUnique<nc::Font>();
+	shader_ = nctl::makeUnique<nc::Shader>();
 #else
 	for (unsigned int i = 0; i < NumTextures; i++)
 		textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", TextureFiles[i])).data()));
 	audioBuffer_ = nctl::makeUnique<nc::AudioBuffer>((prefixDataPath("sounds", SoundFiles[0])).data());
 	streamPlayer_ = nctl::makeUnique<nc::AudioStreamPlayer>((prefixDataPath("sounds", SoundFiles[3])).data());
 	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFiles[0])).data());
+	shader_ = nctl::makeUnique<nc::Shader>(ShaderNames[0], nc::Shader::LoadMode::STRING, nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS,
+	                                       VertexShaderStrings[0], FragmentShaderStrings[0]);
 #endif
 	luaState_ = nctl::makeUnique<nc::LuaStateManager>(nc::LuaStateManager::ApiType::EDIT_ONLY,
 	                                                  nc::LuaStateManager::StatisticsTracking::DISABLED,
@@ -178,6 +194,7 @@ void MyEventHandler::onInit()
 	streamPlayer_->loadFromFile("NonExistent.ogg");
 	font_->loadFromFile("NonExistent.fnt");
 	luaState_->loadFromFile("NonExistent.lua");
+	shader_->loadFromFile("NonExistent_vs.glsl", "NonExistent_fs.glsl");
 
 	// Loading from uninitialized memory buffers
 	for (unsigned int i = 0; i < NumTextures; i++)
@@ -186,6 +203,7 @@ void MyEventHandler::onInit()
 	streamPlayer_->loadFromMemory("NonExistent.ogg", randomBuffer, randomBufferLength);
 	font_->loadFromMemory("NonExistent.fnt", randomBuffer, randomBufferLength, "NonExistent.png");
 	luaState_->loadFromMemory("NonExistent.lua", reinterpret_cast<const char *>(randomBuffer), randomBufferLength);
+	shader_->loadFromMemory("NonExistent_Shader", reinterpret_cast<const char *>(randomBuffer), reinterpret_cast<const char *>(randomBuffer));
 #endif
 
 	const float width = nc::theApplication().width();
@@ -684,6 +702,51 @@ void MyEventHandler::onFrameStart()
 			                                                  nc::LuaStateManager::StatisticsTracking::DISABLED,
 			                                                  nc::LuaStateManager::StandardLibraries::NOT_LOADED);
 		}
+	}
+
+	if (ImGui::CollapsingHeader("Shader"))
+	{
+		if (loadedShader >= 0 && loadedShader < NumShaders)
+			ImGui::Text("Name: \"%s\"", ShaderNames[loadedShader]);
+		else
+			ImGui::TextUnformatted("No shader loaded");
+
+		bool shaderHasChanged = false;
+		if (ImGui::TreeNode("Load from Memory"))
+		{
+			for (int i = 0; i < NumShaders; i++)
+			{
+				ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+				if (i == selectedShader)
+					nodeFlags |= ImGuiTreeNodeFlags_Selected;
+				ImGui::TreeNodeEx(ShaderNames[i], nodeFlags);
+				if (ImGui::IsItemClicked())
+					selectedShader = i;
+			}
+
+			if (ImGui::Button("Load") && selectedShader >= 0 && selectedShader < NumShaders)
+			{
+				bool hasLoaded = false;
+				if (VertexShaderStrings[selectedShader] != nullptr)
+				{
+					hasLoaded = shader_->loadFromMemory(ShaderNames[selectedShader], nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS,
+					                                    VertexShaderStrings[selectedShader], FragmentShaderStrings[selectedShader]);
+				}
+				else
+				{
+					hasLoaded = shader_->loadFromMemory(ShaderNames[selectedShader], nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS,
+					                                    DefaultVertexShaders[selectedShader], FragmentShaderStrings[selectedShader]);
+				}
+
+				if (hasLoaded == false)
+					LOGW_X("Cannot load from memory \"%s\"", ShaderNames[selectedShader]);
+				shaderHasChanged = hasLoaded;
+			}
+			ImGui::TreePop();
+		}
+
+		if (shaderHasChanged)
+			loadedShader = selectedShader;
 	}
 
 	ImGui::End();

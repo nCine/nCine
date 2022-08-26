@@ -20,8 +20,7 @@ class GLVertexFormat
 	class Attribute
 	{
 	  public:
-		Attribute()
-		    : enabled_(false), vbo_(nullptr), index_(0), size_(-1), type_(GL_FLOAT), stride_(0), pointer_(nullptr), baseOffset_(0) {}
+		Attribute();
 
 		void init(unsigned int index, GLint size, GLenum type);
 		bool operator==(const Attribute &other) const;
@@ -37,11 +36,7 @@ class GLVertexFormat
 		inline const GLvoid *pointer() const { return pointer_; }
 		inline unsigned int baseOffset() const { return baseOffset_; }
 
-		inline void setVboParameters(GLsizei stride, const GLvoid *pointer)
-		{
-			stride_ = stride;
-			pointer_ = pointer;
-		}
+		void setVboParameters(GLsizei stride, const GLvoid *pointer);
 		inline void setVbo(const GLBufferObject *vbo) { vbo_ = vbo; }
 		inline void setBaseOffset(unsigned int baseOffset) { baseOffset_ = baseOffset; }
 

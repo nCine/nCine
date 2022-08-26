@@ -2,7 +2,6 @@
 #define CLASS_NCINE_GLTEXTURE
 
 #include "GLHashMap.h"
-#include "GLDebug.h"
 
 namespace ncine {
 
@@ -10,18 +9,19 @@ namespace ncine {
 class GLTexture
 {
   public:
+	static const unsigned int MaxTextureUnits = 4;
+
 	explicit GLTexture(GLenum target_);
 	~GLTexture();
 
 	inline GLuint glHandle() const { return glHandle_; }
 	inline GLenum target() const { return target_; }
 
-	inline void getObjectLabel(int bufSize, int *length, char *label) const { GLDebug::getObjectLabel(GLDebug::LabelTypes::TEXTURE, glHandle_, bufSize, length, label); }
-	inline void setObjectLabel(const char *label) { GLDebug::objectLabel(GLDebug::LabelTypes::TEXTURE, glHandle_, label); }
-
 	bool bind(unsigned int textureUnit) const;
 	inline bool bind() const { return bind(0); }
 	bool unbind() const;
+	static bool unbind(GLenum target, unsigned int textureUnit);
+	static bool unbind(unsigned int textureUnit);
 
 	void texImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data);
 	void texSubImage2D(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data);
@@ -34,8 +34,9 @@ class GLTexture
 	void texParameterf(GLenum pname, GLfloat param);
 	void texParameteri(GLenum pname, GLint param);
 
+	void setObjectLabel(const char *label);
+
   private:
-	static const unsigned int MaxTextureUnits = 4;
 	static class GLHashMap<GLTextureMappingFunc::Size, GLTextureMappingFunc> boundTextures_[MaxTextureUnits];
 	static unsigned int boundUnit_;
 

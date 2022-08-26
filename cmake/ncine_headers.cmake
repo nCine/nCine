@@ -35,6 +35,8 @@ set(HEADERS
 	${NCINE_ROOT}/include/ncine/IGfxDevice.h
 	${NCINE_ROOT}/include/ncine/Texture.h
 	${NCINE_ROOT}/include/ncine/ITextureSaver.h
+	${NCINE_ROOT}/include/ncine/Shader.h
+	${NCINE_ROOT}/include/ncine/ShaderState.h
 	${NCINE_ROOT}/include/ncine/SceneNode.h
 	${NCINE_ROOT}/include/ncine/BaseSprite.h
 	${NCINE_ROOT}/include/ncine/Sprite.h

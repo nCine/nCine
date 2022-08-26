@@ -12,7 +12,6 @@ namespace ncine {
 
 class GLShaderProgram;
 class GLShaderUniforms;
-class GLShaderAttributes;
 class GLBufferObject;
 class RenderCommand;
 class RenderQueue;
@@ -43,7 +42,6 @@ class NuklearDrawing
 	static const int UniformsBufferSize = 65;
 	unsigned char uniformsBuffer_[UniformsBufferSize];
 	nctl::UniquePtr<GLShaderUniforms> nuklearShaderUniforms_;
-	nctl::UniquePtr<GLShaderAttributes> nuklearShaderAttributes_;
 
 	int lastFrameWidth_;
 	int lastFrameHeight_;

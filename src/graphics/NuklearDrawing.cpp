@@ -128,8 +128,8 @@ void NuklearDrawing::newFrame()
 
 		if (withSceneGraph_ == false)
 		{
-			nuklearShaderUniforms_->uniform("uGuiProjection")->setFloatVector(projectionMatrix_.data());
-			nuklearShaderUniforms_->uniform("uDepth")->setFloatValue(0.0f);
+			nuklearShaderUniforms_->uniform(Material::GuiProjectionMatrixUniformName)->setFloatVector(projectionMatrix_.data());
+			nuklearShaderUniforms_->uniform(Material::DepthUniformName)->setFloatValue(0.0f);
 			nuklearShaderUniforms_->commitUniforms();
 		}
 	}
@@ -151,12 +151,10 @@ void NuklearDrawing::endFrame()
 
 RenderCommand *NuklearDrawing::retrieveCommandFromPool()
 {
-	RenderCommand *retrievedCommand = RenderResources::renderCommandPool().retrieve(nuklearShaderProgram_.get());
-	if (retrievedCommand == nullptr)
-	{
-		retrievedCommand = RenderResources::renderCommandPool().add();
+	bool commandAdded = false;
+	RenderCommand *retrievedCommand = RenderResources::renderCommandPool().retrieveOrAdd(nuklearShaderProgram_.get(), commandAdded);
+	if (commandAdded)
 		setupRenderCmd(*retrievedCommand);
-	}
 
 	return retrievedCommand;
 }
@@ -168,12 +166,12 @@ void NuklearDrawing::setupRenderCmd(RenderCommand &cmd)
 	Material &material = cmd.material();
 	material.setShaderProgram(nuklearShaderProgram_.get());
 	material.reserveUniformsDataMemory();
-	material.uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
-	material.attribute("aPosition")->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, pos)));
-	material.attribute("aTexCoords")->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, uv)));
-	material.attribute("aColor")->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, col)));
-	material.attribute("aColor")->setType(GL_UNSIGNED_BYTE);
-	material.attribute("aColor")->setNormalized(true);
+	material.uniform(Material::TextureUniformName)->setIntValue(0); // GL_TEXTURE0
+	nuklearShaderProgram_->attribute(Material::PositionAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, pos)));
+	nuklearShaderProgram_->attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, uv)));
+	nuklearShaderProgram_->attribute(Material::ColorAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, col)));
+	nuklearShaderProgram_->attribute(Material::ColorAttributeName)->setType(GL_UNSIGNED_BYTE);
+	nuklearShaderProgram_->attribute(Material::ColorAttributeName)->setNormalized(true);
 	material.setBlendingEnabled(true);
 	material.setBlendingFactors(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -188,7 +186,7 @@ void NuklearDrawing::draw(RenderQueue &renderQueue)
 	RenderCommand &firstCmd = *retrieveCommandFromPool();
 	if (lastFrameWidth_ != NuklearContext::width_ || lastFrameHeight_ != NuklearContext::height_)
 	{
-		firstCmd.material().uniform("uGuiProjection")->setFloatVector(projectionMatrix_.data());
+		firstCmd.material().uniform(Material::GuiProjectionMatrixUniformName)->setFloatVector(projectionMatrix_.data());
 		lastFrameWidth_ = NuklearContext::width_;
 		lastFrameHeight_ = NuklearContext::height_;
 	}
@@ -217,7 +215,7 @@ void NuklearDrawing::draw(RenderQueue &renderQueue)
 	{
 		// It is enough to set the uniform value once as every Nuklear command share the same shader
 		const float depth = RenderCommand::calculateDepth(theApplication().guiSettings().nuklearLayer, -1.0f, 1.0f);
-		firstCmd.material().uniform("uDepth")->setFloatValue(depth);
+		firstCmd.material().uniform(Material::DepthUniformName)->setFloatValue(depth);
 		lastLayerValue_ = theApplication().guiSettings().nuklearLayer;
 	}
 
@@ -267,14 +265,13 @@ void NuklearDrawing::setupBuffersAndShader()
 
 	nuklearShaderUniforms_ = nctl::makeUnique<GLShaderUniforms>(nuklearShaderProgram_.get());
 	nuklearShaderUniforms_->setUniformsDataPointer(uniformsBuffer_);
-	nuklearShaderUniforms_->uniform("uTexture")->setIntValue(0); // GL_TEXTURE0
+	nuklearShaderUniforms_->uniform(Material::TextureUniformName)->setIntValue(0); // GL_TEXTURE0
 
-	nuklearShaderAttributes_ = nctl::makeUnique<GLShaderAttributes>(nuklearShaderProgram_.get());
-	nuklearShaderAttributes_->attribute("aPosition")->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, pos)));
-	nuklearShaderAttributes_->attribute("aTexCoords")->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, uv)));
-	nuklearShaderAttributes_->attribute("aColor")->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, col)));
-	nuklearShaderAttributes_->attribute("aColor")->setType(GL_UNSIGNED_BYTE);
-	nuklearShaderAttributes_->attribute("aColor")->setNormalized(true);
+	nuklearShaderProgram_->attribute(Material::PositionAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, pos)));
+	nuklearShaderProgram_->attribute(Material::TexCoordsAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, uv)));
+	nuklearShaderProgram_->attribute(Material::ColorAttributeName)->setVboParameters(sizeof(nk_vertex), reinterpret_cast<void *>(offsetof(nk_vertex, col)));
+	nuklearShaderProgram_->attribute(Material::ColorAttributeName)->setType(GL_UNSIGNED_BYTE);
+	nuklearShaderProgram_->attribute(Material::ColorAttributeName)->setNormalized(true);
 }
 
 void NuklearDrawing::draw()
@@ -289,7 +286,7 @@ void NuklearDrawing::draw()
 	nk_convert(&NuklearContext::ctx_, &NuklearContext::cmds_, &vbuf, &ibuf, &config_);
 
 	// Always define vertex format (and bind VAO) before uploading data to buffers
-	nuklearShaderAttributes_->defineVertexFormat(vbo_.get(), ibo_.get());
+	nuklearShaderProgram_->defineVertexFormat(vbo_.get(), ibo_.get());
 	/* copy to vertex and element buffer */
 	vbo_->bufferData(vbuf.size, vbuf.memory.ptr, GL_STREAM_DRAW);
 	ibo_->bufferData(ibuf.size, ibuf.memory.ptr, GL_STREAM_DRAW);

@@ -18,13 +18,9 @@ namespace ncine {
 #ifdef __EMSCRIPTEN__
 EM_BOOL IGfxDevice::resize_callback(int eventType, const EmscriptenUiEvent *event, void *userData)
 {
-	// Change resolution only if the canvas fills all the available space
-	if (event->documentBodyClientWidth == 0 || event->documentBodyClientHeight == 0)
-	{
-		IGfxDevice *gfxDevice = reinterpret_cast<IGfxDevice *>(userData);
-		gfxDevice->setResolution(event->windowInnerWidth, event->windowInnerHeight);
-	}
-
+	IGfxDevice *gfxDevice = reinterpret_cast<IGfxDevice *>(userData);
+	gfxDevice->setResolution(event->windowInnerWidth, event->windowInnerHeight);
+	theApplication().resizeScreenViewport(event->windowInnerWidth, event->windowInnerHeight);
 	return 1;
 }
 

@@ -104,8 +104,8 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	/// Sets a specific source and destination blending factors
 	void setBlendingFactors(BlendingFactor srcBlendingFactor, BlendingFactor destBlendingFactor);
 
-	/// Returns true if all viewports have culled this node in the last frame
-	bool isCulled() const;
+	/// Returns the last frame in which any of the viewports have rendered this node (node was not culled)
+	inline unsigned long int lastFrameRendered() const { return lastFrameRendered_; }
 	/// Returns the axis-aligned bounding box of the node area in the last frame
 	inline Rectf aabb() const { return aabb_; }
 
@@ -118,15 +118,20 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	/// The render command class associated with this node
 	nctl::UniquePtr<RenderCommand> renderCommand_;
 
-	/// The last frame any viewport rendered this node
-	unsigned long int lastFrameNotCulled_;
+	/// The last frame any viewports rendered this node
+	unsigned long int lastFrameRendered_;
 	/// Axis-aligned bounding box of the node area
 	Rectf aabb_;
 	/// Calculates updated values for the AABB
 	virtual void updateAabb();
+	/// Called by each viewport update method to update a node culling state
+	void updateCulling();
 
 	/// Protected copy constructor used to clone objects
 	DrawableNode(const DrawableNode &other);
+
+	/// Performs the required tasks upon a change to the shader
+	virtual void shaderHasChanged() = 0;
 
 	/// Updates the render command
 	virtual void updateRenderCommand() = 0;
@@ -134,6 +139,9 @@ class DLL_PUBLIC DrawableNode : public SceneNode
   private:
 	/// Deleted assignment operator
 	DrawableNode &operator=(const DrawableNode &) = delete;
+
+	friend class ShaderState;
+	friend class Viewport;
 };
 
 }

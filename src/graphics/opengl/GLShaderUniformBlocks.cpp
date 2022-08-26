@@ -8,12 +8,6 @@
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
-// STATIC DEFINITIONS
-///////////////////////////////////////////////////////////
-
-GLUniformBlockCache GLShaderUniformBlocks::uniformBlockNotFound_;
-
-///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
@@ -35,6 +29,8 @@ GLShaderUniformBlocks::GLShaderUniformBlocks(GLShaderProgram *shaderProgram, con
 
 void GLShaderUniformBlocks::bind()
 {
+	static const int offsetAlignment = theServiceLocator().gfxCapabilities().value(IGfxCapabilities::GLIntValues::UNIFORM_BUFFER_OFFSET_ALIGNMENT);
+
 	if (uboParams_.object)
 	{
 		uboParams_.object->bind();
@@ -43,7 +39,9 @@ void GLShaderUniformBlocks::bind()
 		for (GLUniformBlockCache &uniformBlockCache : uniformBlockCaches_)
 		{
 			uniformBlockCache.setBlockBinding(uniformBlockCache.index());
-			uboParams_.object->bindBufferRange(uniformBlockCache.bindingIndex(), uboParams_.offset + moreOffset, uniformBlockCache.usedSize());
+			const GLintptr offset = static_cast<GLintptr>(uboParams_.offset) + moreOffset;
+			ASSERT(offset % offsetAlignment == 0);
+			uboParams_.object->bindBufferRange(uniformBlockCache.bindingIndex(), offset, uniformBlockCache.usedSize());
 			moreOffset += uniformBlockCache.usedSize();
 		}
 	}
@@ -77,7 +75,7 @@ void GLShaderUniformBlocks::setUniformsDataPointer(GLubyte *dataPointer)
 	for (GLUniformBlockCache &uniformBlockCache : uniformBlockCaches_)
 	{
 		uniformBlockCache.setDataPointer(dataPointer + offset);
-		offset += uniformBlockCache.uniformBlock()->size();
+		offset += uniformBlockCache.uniformBlock()->size() - uniformBlockCache.uniformBlock()->alignAmount();
 	}
 }
 
@@ -87,16 +85,7 @@ GLUniformBlockCache *GLShaderUniformBlocks::uniformBlock(const char *name)
 	GLUniformBlockCache *uniformBlockCache = nullptr;
 
 	if (shaderProgram_)
-	{
 		uniformBlockCache = uniformBlockCaches_.find(name);
-
-		if (uniformBlockCache == nullptr)
-		{
-			// Returning the dummy uniform cache to prevent the application from crashing
-			uniformBlockCache = &uniformBlockNotFound_;
-			LOGW_X("Uniform block \"%s\" not found in shader program %u", name, shaderProgram_->glHandle());
-		}
-	}
 	else
 		LOGE_X("Cannot find uniform block \"%s\", no shader program associated", name);
 
@@ -110,15 +99,33 @@ void GLShaderUniformBlocks::commitUniformBlocks()
 		if (shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
 		{
 			int totalUsedSize = 0;
+			bool hasMemoryGaps = false;
 			for (GLUniformBlockCache &uniformBlockCache : uniformBlockCaches_)
+			{
+				// There is a gap if at least one block cache (not in last position) uses less memory than its size
+				if (uniformBlockCache.dataPointer() != dataPointer_ + totalUsedSize)
+					hasMemoryGaps = true;
 				totalUsedSize += uniformBlockCache.usedSize();
+			}
 
 			if (totalUsedSize > 0)
 			{
 				const RenderBuffersManager::BufferTypes::Enum bufferType = RenderBuffersManager::BufferTypes::UNIFORM;
 				uboParams_ = RenderResources::buffersManager().acquireMemory(bufferType, totalUsedSize);
 				if (uboParams_.mapBase)
-					memcpy(uboParams_.mapBase + uboParams_.offset, dataPointer_, totalUsedSize);
+				{
+					if (hasMemoryGaps)
+					{
+						int offset = 0;
+						for (GLUniformBlockCache &uniformBlockCache : uniformBlockCaches_)
+						{
+							memcpy(uboParams_.mapBase + uboParams_.offset + offset, uniformBlockCache.dataPointer(), uniformBlockCache.usedSize());
+							offset += uniformBlockCache.usedSize();
+						}
+					}
+					else
+						memcpy(uboParams_.mapBase + uboParams_.offset, dataPointer_, totalUsedSize);
+				}
 			}
 		}
 	}

@@ -22,7 +22,7 @@ class LuaApplication
 	static int setGuiSettings(lua_State *L);
 
 	static int rootNode(lua_State *L);
-	static int rootViewport(lua_State *L);
+	static int screenViewport(lua_State *L);
 	static int interval(lua_State *L);
 	static int numFrames(lua_State *L);
 

@@ -3,7 +3,8 @@
 #include "RenderQueue.h"
 #include "RenderResources.h"
 #include "Application.h"
-#include "SceneNode.h"
+#include "IAppEventHandler.h"
+#include "DrawableNode.h"
 #include "Camera.h"
 #include "GLFramebufferObject.h"
 #include "Texture.h"
@@ -22,17 +23,6 @@ namespace ncine {
 namespace {
 	/// The string used to output OpenGL debug group information
 	static nctl::StaticString<64> debugString;
-}
-
-Texture::Format colorFormatToTexFormat(Viewport::ColorFormat format)
-{
-	switch (format)
-	{
-		case Viewport::ColorFormat::RGB8:
-			return Texture::Format::RGB8;
-		case Viewport::ColorFormat::RGBA8:
-			return Texture::Format::RGBA8;
-	}
 }
 
 GLenum depthStencilFormatToGLFormat(Viewport::DepthStencilFormat format)
@@ -55,7 +45,6 @@ GLenum depthStencilFormatToGLAttachment(Viewport::DepthStencilFormat format)
 	switch (format)
 	{
 		case Viewport::DepthStencilFormat::DEPTH16:
-			return GL_DEPTH_ATTACHMENT;
 		case Viewport::DepthStencilFormat::DEPTH24:
 			return GL_DEPTH_ATTACHMENT;
 		case Viewport::DepthStencilFormat::DEPTH24_STENCIL8:
@@ -66,45 +55,60 @@ GLenum depthStencilFormatToGLAttachment(Viewport::DepthStencilFormat format)
 }
 
 ///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
+nctl::Array<Viewport *> Viewport::chain_(16);
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-Viewport::Viewport()
+Viewport::Viewport(const char *name, Texture *texture, DepthStencilFormat depthStencilFormat)
     : type_(Type::NO_TEXTURE), width_(0), height_(0),
       viewportRect_(0, 0, 0, 0), scissorRect_(0, 0, 0, 0),
-      colorFormat_(ColorFormat::RGB8), depthStencilFormat_(DepthStencilFormat::NONE),
+      depthStencilFormat_(DepthStencilFormat::NONE), lastFrameCleared_(0),
       clearMode_(ClearMode::EVERY_FRAME), clearColor_(Colorf::Black),
-      renderQueue_(nctl::makeUnique<RenderQueue>(*this)),
-      fbo_(nullptr), texture_(nullptr),
-      rootNode_(nullptr), camera_(nullptr), nextViewport_(nullptr)
+      renderQueue_(nctl::makeUnique<RenderQueue>()),
+      fbo_(nullptr), rootNode_(nullptr), camera_(nullptr),
+      stateBits_(0), numColorAttachments_(0)
+{
+	for (unsigned int i = 0; i < MaxNumTextures; i++)
+		textures_[i] = nullptr;
+
+	if (texture != nullptr)
+	{
+		const bool texAdded = setTexture(texture);
+		if (texAdded)
+		{
+			fbo_->setObjectLabel(name);
+			if (depthStencilFormat != DepthStencilFormat::NONE)
+			{
+				const bool depthStencilAdded = setDepthStencilFormat(depthStencilFormat);
+				if (depthStencilAdded == false)
+					setTexture(nullptr);
+			}
+		}
+	}
+}
+
+Viewport::Viewport(Texture *texture, DepthStencilFormat depthStencilFormat)
+    : Viewport(nullptr, texture, depthStencilFormat)
 {
 }
 
-Viewport::Viewport(int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat)
-    : type_(Type::REGULAR), width_(0), height_(0),
-      viewportRect_(0, 0, width, height), scissorRect_(0, 0, 0, 0),
-      colorFormat_(colorFormat), depthStencilFormat_(depthStencilFormat),
-      clearMode_(ClearMode::EVERY_FRAME), clearColor_(Colorf::Black),
-      renderQueue_(nctl::makeUnique<RenderQueue>(*this)),
-      fbo_(nullptr), texture_(nctl::makeUnique<Texture>()),
-      rootNode_(nullptr), camera_(nullptr), nextViewport_(nullptr)
-{
-	const bool isInitialized = initTexture(width, height, colorFormat, depthStencilFormat);
-	ASSERT(isInitialized);
-}
-
-Viewport::Viewport(const Vector2i &size, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat)
-    : Viewport(size.x, size.y, colorFormat, depthStencilFormat)
+Viewport::Viewport(const char *name, Texture *texture)
+    : Viewport(name, texture, DepthStencilFormat::NONE)
 {
 }
 
-Viewport::Viewport(int width, int height)
-    : Viewport(width, height, ColorFormat::RGB8, DepthStencilFormat::DEPTH24_STENCIL8)
+Viewport::Viewport(Texture *texture)
+    : Viewport(nullptr, texture, DepthStencilFormat::NONE)
 {
 }
 
-Viewport::Viewport(const Vector2i &size)
-    : Viewport(size.x, size.y, ColorFormat::RGB8, DepthStencilFormat::DEPTH24_STENCIL8)
+Viewport::Viewport()
+    : Viewport(nullptr, nullptr, DepthStencilFormat::NONE)
 {
 }
 
@@ -114,92 +118,149 @@ Viewport::~Viewport() = default;
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-bool Viewport::initTexture(int width, int height, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat)
+/*! \note Adding more textures enables the use of multiple render targets (MRTs) */
+bool Viewport::setTexture(unsigned int index, Texture *texture)
 {
-	ASSERT(width > 0 && height > 0);
-
 	if (type_ == Type::SCREEN)
 		return false;
 
-	if (type_ == Type::NO_TEXTURE)
+	static const int MaxColorAttachments = theServiceLocator().gfxCapabilities().value(IGfxCapabilities::GLIntValues::MAX_COLOR_ATTACHMENTS);
+	const bool indexOutOfRange = (index >= static_cast<unsigned int>(MaxColorAttachments) || index >= MaxNumTextures);
+	const bool widthDiffers = texture != nullptr && (width_ > 0 && texture->width() != width_);
+	const bool heightDiffers = texture != nullptr && (height_ > 0 && texture->height() != height_);
+	if (indexOutOfRange || textures_[index] == texture || widthDiffers || heightDiffers)
+		return false;
+
+	bool result = false;
+	if (texture != nullptr)
 	{
-		viewportRect_.set(0, 0, width, height);
-		texture_ = nctl::makeUnique<Texture>();
-		type_ = Type::REGULAR;
-	}
-	texture_->init("Viewport", colorFormatToTexFormat(colorFormat), width, height);
+		// Adding a new texture
+		if (fbo_ == nullptr)
+			fbo_ = nctl::makeUnique<GLFramebufferObject>();
 
-	fbo_ = nctl::makeUnique<GLFramebufferObject>();
-	fbo_->attachTexture(*texture_->glTexture_, GL_COLOR_ATTACHMENT0);
-	if (depthStencilFormat != DepthStencilFormat::NONE)
-		fbo_->attachRenderbuffer(depthStencilFormatToGLFormat(depthStencilFormat), width, height, depthStencilFormatToGLAttachment(depthStencilFormat));
-
-	const bool isStatusComplete = fbo_->isStatusComplete();
-	if (isStatusComplete)
-	{
-		width_ = width;
-		height_ = height;
-		colorFormat_ = colorFormat;
-		depthStencilFormat_ = depthStencilFormat;
-	}
-
-	return isStatusComplete;
-}
-
-bool Viewport::initTexture(const Vector2i &size, ColorFormat colorFormat, DepthStencilFormat depthStencilFormat)
-{
-	return initTexture(size.x, size.y, colorFormat, depthStencilFormat);
-}
-
-bool Viewport::initTexture(int width, int height)
-{
-	return initTexture(width, height, colorFormat_, depthStencilFormat_);
-}
-
-bool Viewport::initTexture(const Vector2i &size)
-{
-	return initTexture(size.x, size.y, colorFormat_, depthStencilFormat_);
-}
-
-void Viewport::resize(int width, int height)
-{
-	if (width == width_ && height == height_)
-		return;
-
-	if (type_ == Type::REGULAR)
-		initTexture(width, height);
-
-	viewportRect_.set(0, 0, width, height);
-
-	if (camera_ != nullptr)
-		camera_->setOrthoProjection(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
-	else if (type_ == Type::SCREEN)
-		RenderResources::defaultCamera_->setOrthoProjection(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
-
-	width_ = width;
-	height_ = height;
-}
-
-void Viewport::setNextViewport(Viewport *nextViewport)
-{
-	if (nextViewport != nullptr)
-	{
-		ASSERT(nextViewport->type_ != Type::SCREEN);
-		if (nextViewport->type_ == Type::SCREEN)
-			return;
-
-		if (nextViewport->type_ == Type::NO_TEXTURE)
+		fbo_->attachTexture(*texture->glTexture_, GL_COLOR_ATTACHMENT0 + index);
+		const bool isStatusComplete = fbo_->isStatusComplete();
+		if (isStatusComplete)
 		{
-			nextViewport->width_ = width_;
-			nextViewport->height_ = height_;
-			nextViewport->viewportRect_ = viewportRect_;
-			nextViewport->colorFormat_ = colorFormat_;
-			nextViewport->depthStencilFormat_ = depthStencilFormat_;
-			nextViewport->clearMode_ = ClearMode::NEVER;
+			type_ = Type::WITH_TEXTURE;
+			textures_[index] = texture;
+			numColorAttachments_++;
+
+			if (width_ == 0 || height_ == 0)
+			{
+				width_ = texture->width();
+				height_ = texture->height();
+				viewportRect_.set(0, 0, width_, height_);
+			}
+		}
+		result = isStatusComplete;
+	}
+	else
+	{
+		// Remove an existing texture
+		if (fbo_ != nullptr)
+		{
+			fbo_->detachTexture(GL_COLOR_ATTACHMENT0 + index);
+			textures_[index] = nullptr;
+			numColorAttachments_--;
+
+			if (numColorAttachments_ == 0 && depthStencilFormat_ == DepthStencilFormat::NONE)
+				type_ = Type::NO_TEXTURE;
+		}
+		result = true;
+	}
+
+	return result;
+}
+
+/*! \note It can remove the depth and stencil render buffer of the viewport's FBO by specifying `DepthStencilFormat::NONE` */
+bool Viewport::setDepthStencilFormat(DepthStencilFormat depthStencilFormat)
+{
+	if (depthStencilFormat_ == depthStencilFormat || width_ == 0 || height_ == 0)
+		return false;
+
+	bool result = false;
+	if (depthStencilFormat != Viewport::DepthStencilFormat::NONE)
+	{
+		// Adding a depth/stencil render target
+		if (fbo_ == nullptr)
+			fbo_ = nctl::makeUnique<GLFramebufferObject>();
+
+		if (depthStencilFormat_ != Viewport::DepthStencilFormat::NONE)
+			fbo_->detachRenderbuffer(depthStencilFormatToGLAttachment(depthStencilFormat_));
+		fbo_->attachRenderbuffer(depthStencilFormatToGLFormat(depthStencilFormat), width_, height_, depthStencilFormatToGLAttachment(depthStencilFormat));
+
+		const bool isStatusComplete = fbo_->isStatusComplete();
+		if (isStatusComplete)
+		{
+			type_ = Type::WITH_TEXTURE;
+			depthStencilFormat_ = depthStencilFormat;
+		}
+		result = isStatusComplete;
+	}
+	else
+	{
+		// Removing the depth/stencil render target
+		if (fbo_ != nullptr)
+		{
+			fbo_->detachRenderbuffer(depthStencilFormatToGLAttachment(depthStencilFormat_));
+			depthStencilFormat_ = Viewport::DepthStencilFormat::NONE;
+
+			if (numColorAttachments_ == 0)
+				type_ = Type::NO_TEXTURE;
+		}
+
+		result = true;
+	}
+
+	return result;
+}
+
+bool Viewport::removeAllTextures()
+{
+	if (type_ == Type::SCREEN)
+		return false;
+
+	if (fbo_ != nullptr)
+	{
+		for (unsigned int i = 0; i < MaxNumTextures; i++)
+		{
+			if (textures_[i] != nullptr)
+			{
+				fbo_->detachTexture(GL_COLOR_ATTACHMENT0 + i);
+				textures_[i] = nullptr;
+			}
+		}
+		numColorAttachments_ = 0;
+
+		if (depthStencilFormat_ != DepthStencilFormat::NONE)
+		{
+			fbo_->detachRenderbuffer(depthStencilFormatToGLAttachment(depthStencilFormat_));
+			depthStencilFormat_ = DepthStencilFormat::NONE;
 		}
 	}
 
-	nextViewport_ = nextViewport;
+	type_ = Type::NO_TEXTURE;
+	width_ = 0;
+	height_ = 0;
+	return true;
+}
+
+Texture *Viewport::texture(unsigned int index)
+{
+	ASSERT(index < MaxNumTextures);
+
+	Texture *texture = nullptr;
+	if (index < MaxNumTextures)
+		texture = textures_[index];
+
+	return texture;
+}
+
+void Viewport::setGLFramebufferLabel(const char *label)
+{
+	if (fbo_)
+		fbo_->setObjectLabel(label);
 }
 
 ///////////////////////////////////////////////////////////
@@ -210,8 +271,10 @@ void Viewport::calculateCullingRect()
 {
 	ZoneScoped;
 
-	const Camera *vieportCamera = camera_ ? camera_ : RenderResources::currentCamera();
+	const int width = (width_ != 0) ? width_ : viewportRect_.w;
+	const int height = (height_ != 0) ? height_ : viewportRect_.h;
 
+	const Camera *vieportCamera = camera_ ? camera_ : RenderResources::currentCamera();
 	const Camera::ProjectionValues projValues = vieportCamera->projectionValues();
 	const float projWidth = projValues.right - projValues.left;
 	const float projHeight = projValues.bottom - projValues.top;
@@ -228,18 +291,18 @@ void Viewport::calculateCullingRect()
 			scissorRectFloat.x -= viewportRect_.x;
 			scissorRectFloat.y -= viewportRect_.y;
 
-			const float viewportWidthRatio = width_ / static_cast<float>(viewportRect_.w);
-			const float viewportHeightRatio = height_ / static_cast<float>(viewportRect_.h);
+			const float viewportWidthRatio = width / static_cast<float>(viewportRect_.w);
+			const float viewportHeightRatio = height / static_cast<float>(viewportRect_.h);
 			scissorRectFloat.x *= viewportWidthRatio;
 			scissorRectFloat.y *= viewportHeightRatio;
 			scissorRectFloat.w *= viewportWidthRatio;
 			scissorRectFloat.h *= viewportHeightRatio;
 		}
 
-		scissorRectFloat.x = (scissorRectFloat.x * projWidth / static_cast<float>(width_)) + projValues.left;
-		scissorRectFloat.y = (scissorRectFloat.y * projHeight / static_cast<float>(height_)) + projValues.top;
-		scissorRectFloat.w *= projWidth / static_cast<float>(width_);
-		scissorRectFloat.h *= projHeight / static_cast<float>(height_);
+		scissorRectFloat.x = (scissorRectFloat.x * projWidth / static_cast<float>(width)) + projValues.left;
+		scissorRectFloat.y = (scissorRectFloat.y * projHeight / static_cast<float>(height)) + projValues.top;
+		scissorRectFloat.w *= projWidth / static_cast<float>(width);
+		scissorRectFloat.h *= projHeight / static_cast<float>(height);
 
 		cullingRect_.intersect(scissorRectFloat);
 	}
@@ -277,81 +340,113 @@ void Viewport::calculateCullingRect()
 
 void Viewport::update()
 {
-	if (nextViewport_)
-		nextViewport_->update();
+	RenderResources::setCurrentViewport(this);
+	RenderResources::setCurrentCamera(camera_);
 
-	if (rootNode_ && rootNode_->lastFrameUpdated() < theApplication().numFrames())
+	calculateCullingRect();
+	if (rootNode_)
 	{
 		ZoneScoped;
-		rootNode_->update(theApplication().interval());
+		if (rootNode_->lastFrameUpdated() < theApplication().numFrames())
+			rootNode_->update(theApplication().interval());
+		// AABBs should update after nodes have been transformed
+		updateCulling(rootNode_);
 	}
+
+	stateBits_.set(StateBitPositions::UpdatedBit);
 }
 
 void Viewport::visit()
 {
-	if (nextViewport_)
-		nextViewport_->visit();
+	RenderResources::setCurrentViewport(this);
 
 	if (rootNode_)
 	{
 		ZoneScoped;
-		calculateCullingRect();
 		unsigned int visitOrderIndex = 0;
 		rootNode_->visit(*renderQueue_, visitOrderIndex);
 	}
+
+	stateBits_.set(StateBitPositions::VisitedBit);
 }
 
 void Viewport::sortAndCommitQueue()
 {
-	if (nextViewport_)
-		nextViewport_->sortAndCommitQueue();
+	RenderResources::setCurrentViewport(this);
 
 	if (renderQueue_->isEmpty() == false)
 	{
 		ZoneScoped;
 		renderQueue_->sortAndCommit();
 	}
+
+	stateBits_.set(StateBitPositions::CommittedBit);
 }
 
-void Viewport::draw()
+void Viewport::draw(unsigned int nextIndex)
 {
-	if (nextViewport_ && nextViewport_->type_ == Type::REGULAR)
-		nextViewport_->draw();
+	Viewport *nextViewport = (nextIndex < chain_.size()) ? chain_[nextIndex] : nullptr;
+	FATAL_ASSERT(nextViewport == nullptr || nextViewport->type_ != Type::SCREEN);
+
+	if (nextViewport && nextViewport->type_ == Type::WITH_TEXTURE)
+		nextViewport->draw(nextIndex + 1);
 
 	ZoneScoped;
 	if (type_ == Type::SCREEN)
-		debugString.format("Draw root viewport (0x%lx)", uintptr_t(this));
-	else if (type_ == Type::REGULAR && texture_->name() != nullptr)
-		debugString.format("Draw viewport \"%s\" (0x%lx)", texture_->name(), uintptr_t(this));
+		debugString.format("Draw screen viewport (0x%lx)", uintptr_t(this));
+	else if (type_ == Type::WITH_TEXTURE && textures_[0]->name() != nullptr)
+		debugString.format("Draw viewport \"%s\" (0x%lx)", textures_[0]->name(), uintptr_t(this));
 	else
 		debugString.format("Draw viewport (0x%lx)", uintptr_t(this));
 	GLDebug::ScopedGroup(debugString.data());
 
-	if (type_ == Type::REGULAR)
-		fbo_->bind(GL_DRAW_FRAMEBUFFER);
-
-	if (type_ == Type::SCREEN || type_ == Type::REGULAR)
+	RenderResources::setCurrentViewport(this);
 	{
-		GLClearColor::State clearColorState = GLClearColor::state();
-		GLClearColor::setColor(clearColor_);
-		if (clearMode_ == ClearMode::EVERY_FRAME || clearMode_ == ClearMode::THIS_FRAME_ONLY)
+		ZoneScopedN("onDrawViewport");
+		theApplication().appEventHandler_->onDrawViewport(*this);
+		LOGV_X("IAppEventHandler::onDrawViewport() invoked with viewport 0x%lx", uintptr_t(this));
+	}
+
+	if (type_ == Type::WITH_TEXTURE)
+	{
+		fbo_->bind(GL_DRAW_FRAMEBUFFER);
+		fbo_->drawBuffers(numColorAttachments_);
+	}
+
+	if (type_ == Type::SCREEN || type_ == Type::WITH_TEXTURE)
+	{
+		const unsigned long int numFrames = theApplication().numFrames();
+		if ((lastFrameCleared_ < numFrames && (clearMode_ == ClearMode::EVERY_FRAME || clearMode_ == ClearMode::THIS_FRAME_ONLY)) ||
+		    clearMode_ == ClearMode::EVERY_DRAW)
+		{
+			const GLClearColor::State clearColorState = GLClearColor::state();
+			GLClearColor::setColor(clearColor_);
+
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		GLClearColor::setState(clearColorState);
+			lastFrameCleared_ = numFrames;
+
+			GLClearColor::setState(clearColorState);
+		}
 	}
 
 	// This allows for sub-viewports that only change the camera and the OpenGL viewport
-	if (nextViewport_ && nextViewport_->type_ == Type::NO_TEXTURE)
+	if (nextViewport && nextViewport->type_ == Type::NO_TEXTURE)
 	{
-		nextViewport_->clearMode_ = ClearMode::NEVER;
-		nextViewport_->draw();
+		const bool viewportRectNonZeroArea = (nextViewport->viewportRect_.w > 0 && nextViewport->viewportRect_.h > 0);
+		if (viewportRectNonZeroArea == false)
+			nextViewport->viewportRect_ = viewportRect_;
+		nextViewport->clearMode_ = ClearMode::NEVER;
+
+		nextViewport->draw(nextIndex + 1);
 	}
 
-	RenderResources::setCamera(camera_);
+	RenderResources::setCurrentCamera(camera_);
+	RenderResources::updateCameraUniforms();
 
 	if (renderQueue_->isEmpty() == false)
 	{
 		const bool viewportRectNonZeroArea = (viewportRect_.w > 0 && viewportRect_.h > 0);
-		GLViewport::State viewportState = GLViewport::state();
+		const GLViewport::State viewportState = GLViewport::state();
 		if (viewportRectNonZeroArea)
 			GLViewport::setRect(viewportRect_.x, viewportRect_.y, viewportRect_.w, viewportRect_.h);
 
@@ -368,7 +463,7 @@ void Viewport::draw()
 			GLViewport::setState(viewportState);
 	}
 
-	if (type_ == Type::REGULAR && depthStencilFormat_ != DepthStencilFormat::NONE &&
+	if (type_ == Type::WITH_TEXTURE && depthStencilFormat_ != DepthStencilFormat::NONE &&
 	    theApplication().appConfiguration().withGlDebugContext == false)
 	{
 		const GLenum invalidAttachment = depthStencilFormatToGLAttachment(depthStencilFormat_);
@@ -380,7 +475,7 @@ void Viewport::draw()
 	else if (clearMode_ == ClearMode::NEXT_FRAME_ONLY)
 		clearMode_ = ClearMode::THIS_FRAME_ONLY;
 
-	if (type_ == Type::REGULAR)
+	if (type_ == Type::WITH_TEXTURE)
 	{
 #ifdef WITH_QT5
 		Qt5GfxDevice &gfxDevice = static_cast<Qt5GfxDevice &>(theApplication().gfxDevice());
@@ -388,6 +483,23 @@ void Viewport::draw()
 #else
 		fbo_->unbind(GL_DRAW_FRAMEBUFFER);
 #endif
+	}
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void Viewport::updateCulling(SceneNode *node)
+{
+	for (SceneNode *child : node->children())
+		updateCulling(child);
+
+	if (node->type() != Object::ObjectType::SCENENODE &&
+	    node->type() != Object::ObjectType::PARTICLE_SYSTEM)
+	{
+		DrawableNode *drawable = static_cast<DrawableNode *>(node);
+		drawable->updateCulling();
 	}
 }
 

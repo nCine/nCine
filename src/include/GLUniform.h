@@ -11,6 +11,8 @@ namespace ncine {
 class GLUniform
 {
   public:
+	static const int MaxNameLength = 32;
+
 	GLUniform();
 	GLUniform(GLuint program, GLuint index);
 
@@ -25,6 +27,9 @@ class GLUniform
 	unsigned int numComponents() const;
 	inline unsigned int memorySize() const { return size() * numComponents() * sizeof(basicType()); }
 
+	/// Returns true if the uniform name starts with `gl_`
+	bool hasReservedPrefix() const;
+
   private:
 	GLuint index_;
 	/// Active uniforms not in a block have a block index of -1
@@ -33,7 +38,6 @@ class GLUniform
 	GLint size_;
 	GLenum type_;
 	GLint offset_;
-	static const int MaxNameLength = 32;
 	char name_[MaxNameLength];
 
 	friend class GLUniformBlock;

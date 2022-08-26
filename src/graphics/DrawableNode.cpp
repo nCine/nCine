@@ -2,6 +2,7 @@
 #include "DrawableNode.h"
 #include "RenderQueue.h"
 #include "RenderCommand.h"
+#include "RenderResources.h"
 #include "Viewport.h"
 #include "Application.h"
 #include "RenderStatistics.h"
@@ -76,7 +77,7 @@ const Vector2f DrawableNode::AnchorTopRight(1.0f, 1.0f);
 DrawableNode::DrawableNode(SceneNode *parent, float xx, float yy)
     : SceneNode(parent, xx, yy), width_(0.0f), height_(0.0f),
       renderCommand_(nctl::makeUnique<RenderCommand>()),
-      lastFrameNotCulled_(0)
+      lastFrameRendered_(0)
 {
 	renderCommand_->setIdSortKey(id());
 }
@@ -114,34 +115,26 @@ bool DrawableNode::draw(RenderQueue &renderQueue)
 
 	const bool cullingEnabled = theApplication().renderingSettings().cullingEnabled;
 
-	if (cullingEnabled)
+	bool overlaps = false;
+	if (cullingEnabled && lastFrameRendered_ == theApplication().numFrames())
 	{
-		if (dirtyBits_.test(DirtyBitPositions::AabbBit))
-		{
-			updateAabb();
-			dirtyBits_.reset(DirtyBitPositions::AabbBit);
-		}
+		// This frame one of the viewports in the chain might overlap this node
+		const Viewport *viewport = RenderResources::currentViewport();
+		overlaps = aabb_.overlaps(viewport->cullingRect());
+	}
+	const bool notCulled = !cullingEnabled || overlaps;
 
-		const bool overlaps = aabb_.overlaps(renderQueue.viewport().cullingRect());
-		if (overlaps)
-		{
-			lastFrameNotCulled_ = theApplication().numFrames();
-			renderCommand_->setLayer(absLayer_);
-			renderCommand_->setVisitOrder(withVisitOrder_ ? visitOrderIndex_ : 0);
-
-			updateRenderCommand();
-			renderQueue.addCommand(renderCommand_.get());
-		}
-		else
-		{
-			RenderStatistics::addCulledNode();
-			return false;
-		}
+	if (notCulled)
+	{
+		renderCommand_->setLayer(absLayer_);
+		renderCommand_->setVisitOrder(withVisitOrder_ ? visitOrderIndex_ : 0);
+		updateRenderCommand();
+		renderQueue.addCommand(renderCommand_.get());
 	}
 	else
 	{
-		updateRenderCommand();
-		renderQueue.addCommand(renderCommand_.get());
+		RenderStatistics::addCulledNode();
+		return false;
 	}
 
 	return true;
@@ -203,11 +196,6 @@ void DrawableNode::setBlendingFactors(BlendingFactor srcBlendingFactor, Blending
 	renderCommand_->material().setBlendingFactors(toGlBlendingFactor(srcBlendingFactor), toGlBlendingFactor(destBlendingFactor));
 }
 
-bool DrawableNode::isCulled() const
-{
-	return (lastFrameNotCulled_ < theApplication().numFrames() - 1);
-}
-
 ///////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -232,11 +220,33 @@ void DrawableNode::updateAabb()
 	aabb_ = Rectf::fromCenterSize(absPosition_.x, absPosition_.y, rotatedWidth, rotatedHeight);
 }
 
+void DrawableNode::updateCulling()
+{
+	const bool cullingEnabled = theApplication().renderingSettings().cullingEnabled;
+	if (drawEnabled_ && cullingEnabled && width_ > 0 && height_ > 0)
+	{
+		if (dirtyBits_.test(DirtyBitPositions::AabbBit))
+		{
+			updateAabb();
+			dirtyBits_.reset(DirtyBitPositions::AabbBit);
+		}
+
+		// Check if at least one viewport in the chain overlaps with this node
+		if (lastFrameRendered_ < theApplication().numFrames())
+		{
+			const Viewport *viewport = RenderResources::currentViewport();
+			const bool overlaps = aabb_.overlaps(viewport->cullingRect());
+			if (overlaps)
+				lastFrameRendered_ = theApplication().numFrames();
+		}
+	}
+}
+
 DrawableNode::DrawableNode(const DrawableNode &other)
     : SceneNode(other),
       width_(other.width_), height_(other.height_),
       renderCommand_(nctl::makeUnique<RenderCommand>()),
-      lastFrameNotCulled_(0)
+      lastFrameRendered_(0)
 {
 	renderCommand_->setIdSortKey(id());
 	setBlendingEnabled(other.isBlendingEnabled());

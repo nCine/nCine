@@ -137,7 +137,7 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// The line height for the text node
 	float lineHeight_;
 
-	GLUniformBlockCache *textnodeBlock_;
+	GLUniformBlockCache *instanceBlock_;
 
 	/// Deleted assignment operator
 	TextNode &operator=(const TextNode &) = delete;
@@ -151,6 +151,8 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	float calculateAlignment(unsigned int lineIndex) const;
 	/// Fills the batch draw command with data from a glyph
 	void processGlyph(const FontGlyph *glyph, Degenerate degen);
+
+	void shaderHasChanged() override;
 
 	void updateRenderCommand() override;
 };

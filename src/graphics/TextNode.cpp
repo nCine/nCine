@@ -2,6 +2,8 @@
 #include "FontGlyph.h"
 #include "Texture.h"
 #include "RenderCommand.h"
+#include "RenderResources.h"
+#include "GLDebug.h"
 #include "tracy.h"
 
 namespace ncine {
@@ -30,7 +32,7 @@ TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
       dirtyBoundaries_(true), withKerning_(true), font_(font),
       interleavedVertices_(maxStringLength * 4 + (maxStringLength - 1) * 2),
       xAdvance_(0.0f), yAdvance_(0.0f), lineLengths_(4), alignment_(Alignment::LEFT),
-      lineHeight_(font ? font->lineHeight() : 0.0f), textnodeBlock_(nullptr)
+      lineHeight_(font ? font->lineHeight() : 0.0f), instanceBlock_(nullptr)
 {
 	ASSERT(maxStringLength > 0);
 	init();
@@ -85,12 +87,9 @@ void TextNode::setFont(Font *font)
 		const Material::ShaderProgramType shaderProgramType = font_->renderMode() == Font::RenderMode::GLYPH_IN_RED
 		                                                          ? Material::ShaderProgramType::TEXTNODE_RED
 		                                                          : Material::ShaderProgramType::TEXTNODE_ALPHA;
-		const bool shaderHasChanged = renderCommand_->material().setShaderProgramType(shaderProgramType);
-		if (shaderHasChanged)
-		{
-			textnodeBlock_ = renderCommand_->material().uniformBlock("TextnodeBlock");
-			dirtyBits_.set(DirtyBitPositions::ColorBit);
-		}
+		const bool hasChanged = renderCommand_->material().setShaderProgramType(shaderProgramType);
+		if (hasChanged)
+			shaderHasChanged();
 		renderCommand_->material().setTexture(*font_->texture());
 
 		dirtyDraw_ = true;
@@ -272,7 +271,7 @@ TextNode::TextNode(const TextNode &other)
       withKerning_(other.withKerning_), font_(other.font_),
       interleavedVertices_(string_.capacity() * 4 + (string_.capacity() - 1) * 2),
       xAdvance_(0.0f), yAdvance_(0.0f), lineLengths_(4), alignment_(other.alignment_),
-      lineHeight_(font_ ? font_->lineHeight() : 0.0f), textnodeBlock_(nullptr)
+      lineHeight_(font_ ? font_->lineHeight() : 0.0f), instanceBlock_(nullptr)
 {
 	init();
 	setBlendingEnabled(other.isBlendingEnabled());
@@ -305,7 +304,7 @@ void TextNode::init()
 			return Material::ShaderProgramType::TEXTNODE_ALPHA;
 	}(font_);
 	renderCommand_->material().setShaderProgramType(shaderProgramType);
-	textnodeBlock_ = renderCommand_->material().uniformBlock("TextnodeBlock");
+	shaderHasChanged();
 
 	if (font_)
 		renderCommand_->material().setTexture(*font_->texture());
@@ -440,6 +439,20 @@ void TextNode::processGlyph(const FontGlyph *glyph, Degenerate degen)
 	xAdvance_ += glyph->xAdvance();
 }
 
+void TextNode::shaderHasChanged()
+{
+	renderCommand_->material().reserveUniformsDataMemory();
+	instanceBlock_ = renderCommand_->material().uniformBlock(Material::InstanceBlockName);
+	GLUniformCache *textureUniform = renderCommand_->material().uniform(Material::TextureUniformName);
+	if (textureUniform && textureUniform->intValue(0) != 0)
+		textureUniform->setIntValue(0); // GL_TEXTURE0
+
+	dirtyBits_.set(DirtyBitPositions::TransformationBit);
+	dirtyBits_.set(DirtyBitPositions::ColorBit);
+
+	renderCommand_->material().setDefaultAttributesParameters();
+}
+
 void TextNode::updateRenderCommand()
 {
 	if (dirtyBits_.test(DirtyBitPositions::TransformationBit))
@@ -449,7 +462,9 @@ void TextNode::updateRenderCommand()
 	}
 	if (dirtyBits_.test(DirtyBitPositions::ColorBit))
 	{
-		textnodeBlock_->uniform("color")->setFloatVector(Colorf(absColor()).data());
+		GLUniformCache *colorUniform = instanceBlock_->uniform(Material::ColorUniformName);
+		if (colorUniform)
+			colorUniform->setFloatVector(Colorf(absColor()).data());
 		dirtyBits_.reset(DirtyBitPositions::ColorBit);
 	}
 }

@@ -1,7 +1,8 @@
 #include "common_macros.h"
 #include "GLShader.h"
+#include "GLDebug.h"
 #include "IFile.h"
-#include <nctl/String.h>
+#include <nctl/StaticString.h>
 
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
 	#include "Application.h"
@@ -9,7 +10,17 @@
 
 namespace ncine {
 
-static nctl::String patchLines(128);
+namespace {
+
+	static nctl::StaticString<256> patchLines;
+
+}
+
+///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
+char GLShader::infoLogString_[MaxInfoLogLength];
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -26,6 +37,14 @@ GLShader::GLShader(GLenum type)
 		patchLines.append("#version 330\n");
 #endif
 
+#if defined(__EMSCRIPTEN__)
+		patchLines.append("#define __EMSCRIPTEN__\n");
+#elif defined(__ANDROID__)
+		patchLines.append("#define __ANDROID__\n");
+#elif defined(WITH_ANGLE)
+		patchLines.append("#define WITH_ANGLE\n");
+#endif
+
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
 		// ANGLE does not seem capable of handling large arrays that are not entirely filled.
 		// A small array size will also make shader compilation a lot faster.
@@ -35,6 +54,8 @@ GLShader::GLShader(GLenum type)
 			patchLines.formatAppend("#define BATCH_SIZE (%u)\n", theApplication().appConfiguration().fixedBatchSize);
 		}
 #endif
+		// Exclude patch lines when counting line numbers in info logs
+		patchLines.append("#line 0\n");
 	}
 
 	glHandle_ = glCreateShader(type);
@@ -66,6 +87,7 @@ void GLShader::loadFromString(const char *string)
 void GLShader::loadFromFile(const char *filename)
 {
 	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
+	fileHandle->setExitOnFailToOpen(false);
 
 	fileHandle->open(IFile::OpenMode::READ);
 	if (fileHandle->isOpened())
@@ -77,20 +99,25 @@ void GLShader::loadFromFile(const char *filename)
 		const GLchar *source_lines[2] = { patchLines.data(), source.data() };
 		const GLint lengths[2] = { static_cast<GLint>(patchLines.length()), length };
 		glShaderSource(glHandle_, 2, source_lines, lengths);
+
+		setObjectLabel(filename);
 	}
 }
 
-void GLShader::compile(ErrorChecking errorChecking)
+bool GLShader::compile(ErrorChecking errorChecking, bool logOnErrors)
 {
 	glCompileShader(glHandle_);
 
 	if (errorChecking == ErrorChecking::IMMEDIATE)
-		checkCompilation();
+		return checkCompilation(logOnErrors);
 	else
+	{
 		status_ = Status::COMPILED_WITH_DEFERRED_CHECKS;
+		return true;
+	}
 }
 
-bool GLShader::checkCompilation()
+bool GLShader::checkCompilation(bool logOnErrors)
 {
 	if (status_ == Status::COMPILED)
 		return true;
@@ -99,14 +126,16 @@ bool GLShader::checkCompilation()
 	glGetShaderiv(glHandle_, GL_COMPILE_STATUS, &status);
 	if (status == GL_FALSE)
 	{
-		GLint length = 0;
-		glGetShaderiv(glHandle_, GL_INFO_LOG_LENGTH, &length);
-
-		if (length > 0)
+		if (logOnErrors)
 		{
-			nctl::String infoLog(length);
-			glGetShaderInfoLog(glHandle_, length, &length, infoLog.data());
-			LOGW_X("%s", infoLog.data());
+			GLint length = 0;
+			glGetShaderiv(glHandle_, GL_INFO_LOG_LENGTH, &length);
+
+			if (length > 0)
+			{
+				glGetShaderInfoLog(glHandle_, MaxInfoLogLength, &length, infoLogString_);
+				LOGW_X("%s", infoLogString_);
+			}
 		}
 
 		status_ = Status::COMPILATION_FAILED;
@@ -115,6 +144,11 @@ bool GLShader::checkCompilation()
 
 	status_ = Status::COMPILED;
 	return true;
+}
+
+void GLShader::setObjectLabel(const char *label)
+{
+	GLDebug::objectLabel(GLDebug::LabelTypes::SHADER, glHandle_, label);
 }
 
 }

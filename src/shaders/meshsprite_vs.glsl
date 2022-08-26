@@ -1,7 +1,7 @@
 uniform mat4 uProjectionMatrix;
 uniform mat4 uViewMatrix;
 
-layout (std140) uniform MeshSpriteBlock
+layout (std140) uniform InstanceBlock
 {
 	mat4 modelMatrix;
 	vec4 color;
