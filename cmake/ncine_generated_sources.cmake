@@ -185,6 +185,14 @@ END")
 	list(APPEND GENERATED_SOURCES ${VERSION_RC_FILE})
 endif()
 
+if(MINGW AND NOT NCINE_PREFERRED_BACKEND STREQUAL "GLFW")
+	message(STATUS "Writing a resource file for HiDPI awareness")
+
+	set(HIDPI_RC_FILE "${GENERATED_SOURCE_DIR}/hidpi.rc")
+	file(WRITE ${HIDPI_RC_FILE} "#include \"windows.h\"\n\nCREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST \"WindowsHiDPI.manifest\"")
+	file(COPY ${CMAKE_SOURCE_DIR}/WindowsHiDPI.manifest DESTINATION ${GENERATED_SOURCE_DIR})
+endif()
+
 # Generate Nuklear implementation file
 if(NCINE_WITH_NUKLEAR)
 	set(NUKLEAR_CPP_FILE "${GENERATED_SOURCE_DIR}/nuklear.cpp")

@@ -46,6 +46,7 @@ GlfwInputManager::JoystickEventsSimulator GlfwInputManager::joyEventsSimulator_;
 
 GlfwInputManager::GlfwInputManager()
 {
+	glfwSetMonitorCallback(monitorCallback);
 	glfwSetWindowCloseCallback(GlfwGfxDevice::windowHandle(), windowCloseCallback);
 	glfwSetWindowSizeCallback(GlfwGfxDevice::windowHandle(), windowSizeCallback);
 	glfwSetFramebufferSizeCallback(GlfwGfxDevice::windowHandle(), framebufferSizeCallback);
@@ -247,6 +248,12 @@ void GlfwInputManager::setMouseCursorMode(MouseCursorMode mode)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+void GlfwInputManager::monitorCallback(GLFWmonitor *monitor, int event)
+{
+	GlfwGfxDevice &gfxDevice = static_cast<GlfwGfxDevice &>(theApplication().gfxDevice());
+	gfxDevice.updateMonitors();
+}
+
 void GlfwInputManager::windowCloseCallback(GLFWwindow *window)
 {
 	bool shouldQuit = true;
@@ -264,10 +271,15 @@ void GlfwInputManager::windowSizeCallback(GLFWwindow *window, int width, int hei
 	GlfwGfxDevice &gfxDevice = static_cast<GlfwGfxDevice &>(theApplication().gfxDevice());
 	gfxDevice.width_ = width;
 	gfxDevice.height_ = height;
+	gfxDevice.isFullScreen_ = (glfwGetWindowMonitor(window) != nullptr);
 }
 
 void GlfwInputManager::framebufferSizeCallback(GLFWwindow *window, int width, int height)
 {
+	GlfwGfxDevice &gfxDevice = static_cast<GlfwGfxDevice &>(theApplication().gfxDevice());
+	gfxDevice.drawableWidth_ = width;
+	gfxDevice.drawableHeight_ = height;
+
 	theApplication().resizeScreenViewport(width, height);
 	theApplication().appEventHandler_->onResizeWindow(width, height);
 }

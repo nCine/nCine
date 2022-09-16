@@ -30,6 +30,8 @@ class DLL_PUBLIC IAppEventHandler
 	/// Called at the end of each frame, just before swapping buffers
 	virtual void onFrameEnd() {}
 	/// Called every time the window is resized (by the system or the user)
+	/*! \note It is called when the drawable resolution changes, but the screen coordinates one might stay the same.
+	 *  This might happen if the display scale changes or if the user drags a window on a different screen with a different DPI or scaling settings. */
 	virtual void onResizeWindow(int width, int height) {}
 	/// Called once on application shutdown
 	virtual void onShutdown() {}

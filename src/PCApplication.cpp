@@ -84,7 +84,7 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 	const DisplayMode::VSync vSyncMode = appCfg_.withVSync ? DisplayMode::VSync::ENABLED : DisplayMode::VSync::DISABLED;
 	DisplayMode displayMode(8, 8, 8, 8, 24, 8, DisplayMode::DoubleBuffering::ENABLED, vSyncMode);
 
-	const IGfxDevice::WindowMode windowMode(appCfg_.resolution.x, appCfg_.resolution.y, appCfg_.inFullscreen, appCfg_.isResizable);
+	const IGfxDevice::WindowMode windowMode(appCfg_.resolution.x, appCfg_.resolution.y, appCfg_.fullScreen, appCfg_.resizable);
 #if defined(WITH_SDL)
 	gfxDevice_ = nctl::makeUnique<SdlGfxDevice>(windowMode, glContextInfo, displayMode);
 	inputManager_ = nctl::makeUnique<SdlInputManager>();
@@ -148,6 +148,9 @@ void PCApplication::processEvents()
 			case SDL_QUIT:
 				shouldQuit_ = SdlInputManager::shouldQuitOnRequest();
 				break;
+			case SDL_DISPLAYEVENT:
+				gfxDevice_->updateMonitors();
+				break;
 			case SDL_WINDOWEVENT:
 				if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
 					setFocus(true);
@@ -155,8 +158,11 @@ void PCApplication::processEvents()
 					setFocus(false);
 				else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
 				{
+					SDL_Window *windowHandle = SDL_GetWindowFromID(event.window.windowID);
 					gfxDevice_->width_ = event.window.data1;
 					gfxDevice_->height_ = event.window.data2;
+					SDL_GL_GetDrawableSize(windowHandle, &gfxDevice_->drawableWidth_, &gfxDevice_->drawableHeight_);
+					gfxDevice_->isFullScreen_ = SDL_GetWindowFlags(windowHandle) & SDL_WINDOW_FULLSCREEN;
 					resizeScreenViewport(event.window.data1, event.window.data2);
 					appEventHandler_->onResizeWindow(event.window.data1, event.window.data2);
 				}

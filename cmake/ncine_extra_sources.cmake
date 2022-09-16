@@ -244,6 +244,7 @@ if(LUA_FOUND)
 			${NCINE_ROOT}/src/include/LuaFileSystem.h
 			${NCINE_ROOT}/src/include/LuaApplication.h
 			${NCINE_ROOT}/src/include/LuaAppConfiguration.h
+			${NCINE_ROOT}/src/include/LuaIGfxDevice.h
 			${NCINE_ROOT}/src/include/LuaSceneNode.h
 			${NCINE_ROOT}/src/include/LuaDrawableNode.h
 			${NCINE_ROOT}/src/include/LuaTexture.h
@@ -277,6 +278,7 @@ if(LUA_FOUND)
 			${NCINE_ROOT}/src/scripting/LuaFileSystem.cpp
 			${NCINE_ROOT}/src/scripting/LuaApplication.cpp
 			${NCINE_ROOT}/src/scripting/LuaAppConfiguration.cpp
+			${NCINE_ROOT}/src/scripting/LuaIGfxDevice.cpp
 			${NCINE_ROOT}/src/scripting/LuaSceneNode.cpp
 			${NCINE_ROOT}/src/scripting/LuaDrawableNode.cpp
 			${NCINE_ROOT}/src/scripting/LuaTexture.cpp

@@ -22,15 +22,17 @@ class EglGfxDevice : public IGfxDevice
 
 	void setSwapInterval(int interval) override {}
 
-	void setResolution(int width, int height) override {}
-
 	void setFullScreen(bool fullScreen) override {}
 
-	inline void update() override { eglSwapBuffers(display_, surface_); }
-
 	void setWindowPosition(int x, int y) override {}
+
+	void setWindowSize(int width, int height) override {}
+
 	void setWindowTitle(const char *windowTitle) override {}
 	void setWindowIcon(const char *windowIconFilename) override {}
+
+	inline const VideoMode &currentVideoMode(unsigned int monitorIndex) const override { return currentVideoMode_; }
+	inline bool setVideoMode(unsigned int modeIndex) override { return false; }
 
 	/// Recreates a surface from a native window
 	void createSurface(struct android_app *state);
@@ -40,6 +42,8 @@ class EglGfxDevice : public IGfxDevice
 	void unbindContext();
 	/// Queries the size of the current surface
 	void querySurfaceSize();
+
+	inline void update() override { eglSwapBuffers(display_, surface_); }
 
 	/// Checks if the desired pixel format is supported
 	static bool isModeSupported(struct android_app *state, const GLContextInfo &glContextInfo, const DisplayMode &mode);
@@ -56,6 +60,8 @@ class EglGfxDevice : public IGfxDevice
 
 	/// Initializes the OpenGL graphic context
 	void initDevice(struct android_app *state);
+
+	void updateMonitors() override;
 };
 
 }

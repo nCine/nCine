@@ -97,7 +97,7 @@ nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
 	setDataPath(config);
-	//config.isResizable = true;
+	//config.resizable = true;
 }
 
 void MyEventHandler::onInit()

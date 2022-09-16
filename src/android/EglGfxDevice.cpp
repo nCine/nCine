@@ -63,6 +63,10 @@ void EglGfxDevice::querySurfaceSize()
 {
 	eglQuerySurface(display_, surface_, EGL_WIDTH, &width_);
 	eglQuerySurface(display_, surface_, EGL_HEIGHT, &height_);
+	drawableWidth_ = width_;
+	drawableHeight_ = height_;
+	currentVideoMode_.width = width_;
+	currentVideoMode_.height = height_;
 }
 
 bool EglGfxDevice::isModeSupported(struct android_app *state, const GLContextInfo &glContextInfo, const DisplayMode &mode)
@@ -182,6 +186,30 @@ void EglGfxDevice::initDevice(struct android_app *state)
 	eglGetConfigAttrib(display_, config_, EGL_SAMPLES, &samples);
 
 	LOGI_X("Surface configuration is size:%dx%d, RGBA:%d%d%d%d, depth:%d, stencil:%d, samples:%d", width_, height_, red, green, blue, alpha, depth, stencil, samples);
+
+	updateMonitors();
+}
+
+void EglGfxDevice::updateMonitors()
+{
+	static const char *monitorName = "Default";
+
+	numMonitors_ = 1;
+	monitors_[0].name = monitorName;
+	monitors_[0].position.x = 0;
+	monitors_[0].position.y = 0;
+	monitors_[0].scale.x = 1.0f;
+	monitors_[0].scale.y = 1.0f;
+	monitors_[0].dpi.x = DefaultDpi;
+	monitors_[0].dpi.y = DefaultDpi;
+
+	monitors_[0].numVideoModes = 1;
+	monitors_[0].videoModes[0].width = currentVideoMode_.width;
+	monitors_[0].videoModes[0].height = currentVideoMode_.height;
+	monitors_[0].videoModes[0].refreshRate = currentVideoMode_.refreshRate;
+	monitors_[0].videoModes[0].redBits = 8;
+	monitors_[0].videoModes[0].greenBits = 8;
+	monitors_[0].videoModes[0].blueBits = 8;
 }
 
 }

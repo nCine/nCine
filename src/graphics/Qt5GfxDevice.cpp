@@ -3,6 +3,7 @@
 	#include <GL/glew.h>
 #endif
 
+#include <cmath>
 #include <QWindow>
 #include <QApplication>
 #include <QScreen>
@@ -15,6 +16,13 @@
 #include "Qt5Widget.h"
 
 namespace ncine {
+
+///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
+QScreen *Qt5GfxDevice::screenPointers_[MaxMonitors];
+nctl::StaticString<Qt5GfxDevice::MaxMonitorNameLength> Qt5GfxDevice::monitorNames_[MaxMonitors];
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -35,63 +43,75 @@ void Qt5GfxDevice::setSwapInterval(int interval)
 	widget_.format().setSwapInterval(interval);
 }
 
-void Qt5GfxDevice::setResolution(int width, int height)
-{
-	width_ = width;
-	height_ = height;
-	theApplication().resizeScreenViewport(width, height);
-
-	QRect rect = widget_.geometry();
-	rect.setWidth(width);
-	rect.setHeight(height);
-	widget_.setGeometry(rect);
-
-	if (theApplication().appConfiguration().isResizable == false)
-	{
-		widget_.setMinimumSize(width, height);
-		widget_.setMaximumSize(width, height);
-	}
-}
-
 void Qt5GfxDevice::setFullScreen(bool fullScreen)
 {
-	if (fullScreen)
-		widget_.setWindowState(widget_.windowState() | Qt::WindowFullScreen);
-	else
-		widget_.setWindowState(widget_.windowState() & ~Qt::WindowFullScreen);
-}
+	if (isFullScreen_ == fullScreen)
+		return;
 
-void Qt5GfxDevice::setWindowTitle(const char *windowTitle)
-{
-	widget_.setWindowTitle(windowTitle);
-}
+	QWidget *window = widget_.window();
+	if (fullScreen != window->isFullScreen())
+	{
+		if (fullScreen)
+			window->showFullScreen();
+		else
+			window->showNormal();
+	}
 
-void Qt5GfxDevice::setWindowIcon(const char *windowIconFilename)
-{
-	widget_.setWindowIcon(QIcon(windowIconFilename));
+	isFullScreen_ = fullScreen;
+	// width and height are updated by the resize event that calls `resizeWindow()`
 }
 
 int Qt5GfxDevice::windowPositionX() const
 {
-	return widget_.pos().x();
+	QWidget *window = widget_.window();
+	return window->pos().x();
 }
 
 int Qt5GfxDevice::windowPositionY() const
 {
-	return widget_.pos().y();
+	QWidget *window = widget_.window();
+	return window->pos().y();
 }
 
 const Vector2i Qt5GfxDevice::windowPosition() const
 {
-	return Vector2i(widget_.pos().x(), widget_.pos().y());
+	QWidget *window = widget_.window();
+	return Vector2i(window->pos().x(), window->pos().y());
 }
 
 void Qt5GfxDevice::setWindowPosition(int x, int y)
 {
-	QRect geometry = widget_.geometry();
-	geometry.setX(x);
-	geometry.setY(y);
-	widget_.setGeometry(geometry);
+	QWidget *window = widget_.window();
+	window->move(x, y);
+}
+
+void Qt5GfxDevice::setWindowSize(int width, int height)
+{
+	// change resolution only in case it is valid and it really changes
+	if (width == 0 || height == 0 || (width == width_ && height == height_))
+		return;
+
+	if (theApplication().appConfiguration().resizable == false)
+	{
+		widget_.setMinimumSize(width, height);
+		widget_.setMaximumSize(width, height);
+	}
+
+	QWidget *window = widget_.window();
+	window->resize(width, height);
+	// width and height are updated by the resize event that calls `resizeWindow()`
+}
+
+void Qt5GfxDevice::setWindowTitle(const char *windowTitle)
+{
+	QWidget *window = widget_.window();
+	window->setWindowTitle(windowTitle);
+}
+
+void Qt5GfxDevice::setWindowIcon(const char *windowIconFilename)
+{
+	QWidget *window = widget_.window();
+	window->setWindowIcon(QIcon(windowIconFilename));
 }
 
 void Qt5GfxDevice::flashWindow() const
@@ -99,33 +119,34 @@ void Qt5GfxDevice::flashWindow() const
 	QApplication::alert(&widget_, 0);
 }
 
-const Qt5GfxDevice::VideoMode &Qt5GfxDevice::currentVideoMode() const
+unsigned int Qt5GfxDevice::primaryMonitorIndex() const
 {
-	return videoModes_[0];
+	QScreen *screen = QApplication::primaryScreen();
+
+	const int retrievedIndex = retrieveMonitorIndex(screen);
+	const unsigned int index = (retrievedIndex >= 0) ? static_cast<unsigned int>(retrievedIndex) : 0;
+	return index;
 }
 
-void Qt5GfxDevice::updateVideoModes()
+unsigned int Qt5GfxDevice::windowMonitorIndex() const
 {
-	QScreen *screen = nullptr;
-	if (widget_.window() && widget_.window()->windowHandle())
-		screen = widget_.window()->windowHandle()->screen();
-	else
-		screen = QApplication::primaryScreen();
+	// Fallback value if a monitor containing the window cannot be found
+	QScreen *screen = QApplication::primaryScreen();
+	QWindow *window = widget_.window()->windowHandle();
+	if (window != nullptr)
+		screen = window->screen();
 
-	numVideoModes_ = 1;
-	if (screen)
-	{
-		videoModes_[0].width = screen->size().width();
-		videoModes_[0].height = screen->size().height();
-		videoModes_[0].refreshRate = screen->refreshRate();
+	const int retrievedIndex = retrieveMonitorIndex(screen);
+	const unsigned int index = (retrievedIndex >= 0) ? static_cast<unsigned int>(retrievedIndex) : 0;
+	return index;
+}
 
-		if (screen->depth() >= 24)
-		{
-			videoModes_[0].redBits = 8;
-			videoModes_[0].greenBits = 8;
-			videoModes_[0].blueBits = 8;
-		}
-	}
+const IGfxDevice::VideoMode &Qt5GfxDevice::currentVideoMode(unsigned int monitorIndex) const
+{
+	if (monitorIndex >= numMonitors_)
+		monitorIndex = 0;
+
+	return monitors_[monitorIndex].videoModes[0];
 }
 
 #ifdef WITH_GLEW
@@ -162,6 +183,8 @@ void Qt5GfxDevice::resetFramebufferObjectBinding()
 
 void Qt5GfxDevice::initDevice()
 {
+	updateMonitors();
+
 	QSurfaceFormat format;
 	format.setRedBufferSize(displayMode_.redBits());
 	format.setGreenBufferSize(displayMode_.greenBits());
@@ -178,8 +201,11 @@ void Qt5GfxDevice::initDevice()
 	if (glContextInfo_.debugContext)
 		format.setOptions(QSurfaceFormat::DebugContext);
 
-	if (isFullScreen())
-		widget_.setWindowState(widget_.windowState() | Qt::WindowFullScreen);
+	if (width_ == 0 || height_ == 0 || isFullScreen_)
+	{
+		// Can't set the full screen window state in a method called by the constructor
+		isFullScreen_ = true;
+	}
 
 	const int interval = displayMode_.hasVSync() ? 1 : 0;
 	format.setSwapInterval(interval);
@@ -187,7 +213,83 @@ void Qt5GfxDevice::initDevice()
 	widget_.setFormat(format);
 	QSurfaceFormat::setDefaultFormat(format);
 
-	updateVideoModes();
+	initGLViewport();
+}
+
+void Qt5GfxDevice::updateMonitors()
+{
+	const QList<QScreen *> screens = QApplication::screens();
+
+	const int monitorCount = screens.count();
+	ASSERT(monitorCount >= 1);
+	numMonitors_ = (monitorCount < MaxMonitors) ? monitorCount : MaxMonitors;
+
+	for (unsigned int i = 0; i < MaxMonitors; i++)
+		screenPointers_[i] = (i < numMonitors_) ? screens[i] : nullptr;
+
+	for (unsigned int i = 0; i < numMonitors_; i++)
+	{
+		const int charsToCopy = screens[i]->name().length() < MaxMonitorNameLength - 1 ? screens[i]->name().length() : MaxMonitorNameLength - 1;
+		ASSERT(charsToCopy > 0);
+		monitorNames_[i].setLength(charsToCopy + 1);
+		for (int j = 0; j < charsToCopy; j++)
+			monitorNames_[i][j] = static_cast<char>(screens[i]->name().at(j).cell());
+		monitorNames_[i][charsToCopy] = '\0';
+		monitorNames_[i].setLength(charsToCopy);
+
+		monitors_[i].name = monitorNames_[i].data();
+
+		const QRect geometry = screens[i]->geometry();
+		monitors_[i].position.x = geometry.x();
+		monitors_[i].position.y = geometry.y();
+
+		const qreal logicalDpiX = screens[i]->logicalDotsPerInchX(); // can return an infinite value
+		const qreal logicalDpiY = screens[i]->logicalDotsPerInchY(); // can return an infinite value
+		const float DpiX = (std::isfinite(logicalDpiX)) ? logicalDpiX : DefaultDpi;
+		const float DpiY = (std::isfinite(logicalDpiY)) ? logicalDpiY : DefaultDpi;
+		monitors_[i].dpi.x = static_cast<int>(DpiX);
+		monitors_[i].dpi.y = static_cast<int>(DpiY);
+		monitors_[i].scale.x = DpiX / DefaultDpi;
+		monitors_[i].scale.y = DpiY / DefaultDpi;
+
+		monitors_[i].numVideoModes = 1;
+		monitors_[i].videoModes[0].width = screens[i]->size().width();
+		monitors_[i].videoModes[0].height = screens[i]->size().height();
+		monitors_[i].videoModes[0].refreshRate = screens[i]->refreshRate();
+		if (screens[i]->depth() >= 24)
+		{
+			monitors_[i].videoModes[0].redBits = 8;
+			monitors_[i].videoModes[0].greenBits = 8;
+			monitors_[i].videoModes[0].blueBits = 8;
+		}
+	}
+}
+
+int Qt5GfxDevice::retrieveMonitorIndex(QScreen *screen) const
+{
+	if (screen == nullptr)
+		return -1;
+
+	int index = -1;
+	for (unsigned int i = 0; i < numMonitors_; i++)
+	{
+		if (screenPointers_[i] == screen)
+		{
+			index = i;
+			break;
+		}
+	}
+	return index;
+}
+
+void Qt5GfxDevice::setSize(int width, int height)
+{
+	width_ = width;
+	height_ = height;
+	QWidget *window = widget_.window();
+	const int pixelRatio = window->devicePixelRatio();
+	drawableWidth_ = width_ * pixelRatio;
+	drawableHeight_ = height_ * pixelRatio;
 }
 
 }

@@ -25,13 +25,13 @@ class DLL_PUBLIC AppConfiguration
 	/// The interval for frame timer accumulation average and log
 	float frameTimerLogInterval;
 
-	/// The screen resolution
-	/*! \note If either `x` or `y` are zero then the screen resolution will not be changed. */
+	/// The window size or the resolution of the closest video mode if going full screen
+	/*! \note If either `x` or `y` are zero, the application will go in full screen without changing the current video mode. */
 	Vector2i resolution;
-	/// The flag is `true` if the screen is going to be in fullscreen mode
-	bool inFullscreen;
+	/// The flag is `true` if the application is going to be in full screen mode
+	bool fullScreen;
 	/// The flag is `true` if the window is going to be resizable
-	bool isResizable;
+	bool resizable;
 	/// The maximum number of frames to render per second or 0 for no limit
 	unsigned int frameLimit;
 
