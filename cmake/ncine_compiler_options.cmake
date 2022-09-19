@@ -14,8 +14,10 @@ if(EMSCRIPTEN)
 	set(EMSCRIPTEN_LINKER_OPTIONS_DEBUG
 		"SHELL:-s ASSERTIONS=1"
 		"SHELL:-s SAFE_HEAP=1"
-		"SHELL:--profiling-funcs"
-		"SHELL:-s DEMANGLE_SUPPORT=1")
+		"SHELL:-s STACK_OVERFLOW_CHECK=2"
+		"SHELL:-s GL_ASSERTIONS=1"
+		"SHELL:-s DEMANGLE_SUPPORT=1"
+		"SHELL:--profiling-funcs")
 
 	string(FIND ${CMAKE_CXX_COMPILER} "fastcomp" EMSCRIPTEN_FASTCOMP_POS)
 	if(EMSCRIPTEN_FASTCOMP_POS GREATER -1)
@@ -26,6 +28,7 @@ if(EMSCRIPTEN)
 
 	target_link_options(ncine PUBLIC ${EMSCRIPTEN_LINKER_OPTIONS})
 	target_link_options(ncine PUBLIC "$<$<CONFIG:Debug>:${EMSCRIPTEN_LINKER_OPTIONS_DEBUG}>")
+	target_compile_options(ncine PUBLIC $<$<CONFIG:Debug>:SHELL:-gsource-map>)
 
 	if(Threads_FOUND)
 		target_link_libraries(ncine PUBLIC Threads::Threads)
@@ -93,17 +96,31 @@ else() # GCC and LLVM
 	endif()
 
 	# Only in debug
-	if(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND NOT (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8.0)) OR
-	  (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") AND NOT (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.0)) AND
-	   NOT EMSCRIPTEN AND NCINE_ADDRESS_SANITIZER)
+	if(NCINE_ADDRESS_SANITIZER)
 		# Add ASan options as public so that targets linking the library will also use them
-		target_compile_options(ncine PUBLIC $<$<CONFIG:Debug>:-O1 -g -fsanitize=address -fsanitize-address-use-after-scope -fno-optimize-sibling-calls -fno-common -fno-omit-frame-pointer -rdynamic>)
-		target_link_options(ncine PUBLIC $<$<CONFIG:Debug>:-fsanitize=address>)
+		if(EMSCRIPTEN)
+			target_compile_options(ncine PUBLIC $<$<CONFIG:Debug>:-O1 -g -fsanitize=address>) # Needs "ALLOW_MEMORY_GROWTH" which is already passed to the linker
+			target_link_options(ncine PUBLIC $<$<CONFIG:Debug>:-fsanitize=address>)
+		elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+			target_compile_options(ncine PUBLIC $<$<CONFIG:Debug>:-O1 -g -fsanitize=address -fsanitize-address-use-after-scope -fno-optimize-sibling-calls -fno-common -fno-omit-frame-pointer -rdynamic>)
+			target_link_options(ncine PUBLIC $<$<CONFIG:Debug>:-fsanitize=address>)
+		endif()
 	endif()
 
 	# Only in debug
-	if(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") AND
-	   NCINE_CODE_COVERAGE)
+	if(NCINE_UNDEFINED_SANITIZER)
+		# Add UBSan options as public so that targets linking the library will also use them
+		if(EMSCRIPTEN)
+			target_compile_options(ncine PUBLIC $<$<CONFIG:Debug>:-O1 -g -fsanitize=undefined>)
+			target_link_options(ncine PUBLIC $<$<CONFIG:Debug>:-fsanitize=undefined>)
+		elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+			target_compile_options(ncine PUBLIC $<$<CONFIG:Debug>:-O1 -g -fsanitize=undefined -fno-omit-frame-pointer>)
+			target_link_options(ncine PUBLIC $<$<CONFIG:Debug>:-fsanitize=undefined>)
+		endif()
+	endif()
+
+	# Only in debug
+	if(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") AND NCINE_CODE_COVERAGE)
 		# Add code coverage options as public so that targets linking the library will also use them
 		target_compile_options(ncine PUBLIC $<$<CONFIG:Debug>:--coverage>)
 		target_link_options(ncine PUBLIC $<$<CONFIG:Debug>:--coverage>)
@@ -120,7 +137,7 @@ else() # GCC and LLVM
 
 	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 		target_compile_options(ncine PRIVATE -fdiagnostics-color=auto)
-		target_compile_options(ncine PRIVATE -Wall -pedantic -Wextra -Wold-style-cast -Wno-long-long -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-variadic-macros)
+		target_compile_options(ncine PRIVATE -Wall -pedantic -Wextra -Wold-style-cast -Wno-long-long -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-variadic-macros -Wcast-align)
 
 		if(NCINE_DYNAMIC_LIBRARY)
 			target_link_options(ncine PRIVATE -Wl,--no-undefined)

@@ -26,6 +26,9 @@ class DLL_PUBLIC AndroidApplication : public Application
 	/// Returns true if the application has already called `init()`
 	inline bool isInitialized() const { return isInitialized_; }
 
+	/// Returns the package name for the Android application
+	inline const char *packageName() const { return packageName_.data(); }
+
 	/// Returns the path to the internal data directory from the native activity
 	const char *internalDataPath() const;
 	/// Returns the path to the external data directory from the native activity

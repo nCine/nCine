@@ -18,6 +18,7 @@ if(NCPROJECT_BUILD_ANDROID)
 	set(NDK_DIR "" CACHE PATH "Set the path to the Android NDK")
 	set(NCPROJECT_NDK_ARCHITECTURES arm64-v8a CACHE STRING "Set the NDK target architectures")
 	option(NCPROJECT_ASSEMBLE_APK "Assemble the Android APK of the project with Gradle" OFF)
+	option(NCPROJECT_UNIVERSAL_APK "Configure the Gradle build script to assemble an universal APK for all ABIs" OFF)
 endif()
 
 # Project options presets

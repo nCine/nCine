@@ -19,10 +19,22 @@ android {
 		release {
 			minifyEnabled true
 			shrinkResources true
+
+			if (@GRADLE_UNIVERSAL_APK@) {
+				ndk {
+					abiFilters '@GRADLE_NDK_ARCHITECTURES@'
+				}
+			}
 		}
 
 		debug {
 			applicationIdSuffix ".debug"
+
+			if (@GRADLE_UNIVERSAL_APK@) {
+				ndk {
+					abiFilters '@GRADLE_NDK_ARCHITECTURES@'
+				}
+			}
 		}
 	}
 
@@ -31,7 +43,7 @@ android {
 			enable true
 			reset()
 			include '@GRADLE_NDK_ARCHITECTURES@'
-			universalApk false
+			universalApk @GRADLE_UNIVERSAL_APK@
 		}
 	}
 

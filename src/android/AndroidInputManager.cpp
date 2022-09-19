@@ -659,8 +659,8 @@ void AndroidInputManager::initAccelerometerSensor(android_app *state)
 {
 	// Prepare to monitor accelerometer
 #if __ANDROID_API__ >= 26
-	nc::AndroidApplication &application = static_cast<nc::AndroidApplication &>(nc::theApplication());
-	sensorManager_ = ASensorManager_getInstanceForPackage(application.packageName().data());
+	AndroidApplication &application = static_cast<AndroidApplication &>(theApplication());
+	sensorManager_ = ASensorManager_getInstanceForPackage(application.packageName());
 #else
 	sensorManager_ = ASensorManager_getInstance();
 #endif

@@ -41,14 +41,25 @@ class AndroidJniClass
   public:
 	AndroidJniClass()
 	    : javaObject_(nullptr) {}
-	explicit AndroidJniClass(jobject javaObject)
-	    : javaObject_(javaObject) {}
-	virtual ~AndroidJniClass()
-	{
-		if (javaObject_)
-			jniEnv_->DeleteLocalRef(javaObject_);
-	}
+	explicit AndroidJniClass(jobject javaObject);
+	virtual ~AndroidJniClass();
+
+	/// Move constructor
+	AndroidJniClass(AndroidJniClass &&other);
+	/// Move assignment operator
+	AndroidJniClass &operator=(AndroidJniClass &&other);
+
+	/// Deleted copy constructor
+	AndroidJniClass(const AndroidJniClass &) = delete;
+	/// Deleted assignment operator
+	AndroidJniClass &operator=(const AndroidJniClass &) = delete;
+
 	inline bool isNull() const { return javaObject_ == nullptr; }
+
+	static jclass findClass(const char *name);
+	static jmethodID getStaticMethodID(jclass javaClass, const char *name, const char *signature);
+	static jmethodID getMethodID(jclass javaClass, const char *name, const char *signature);
+	static jfieldID getStaticFieldID(jclass javaClass, const char *name, const char *signature);
 
   protected:
 	static JNIEnv *jniEnv_;
@@ -72,11 +83,11 @@ class AndroidJniClass_Version : public AndroidJniClass
 /// A class to handle JNI requests to `android.view.InputDevice.MotionRange`
 class AndroidJniClass_MotionRange : public AndroidJniClass
 {
-  private:
-	static jclass javaClass_;
-
   public:
 	explicit AndroidJniClass_MotionRange(jobject javaObject);
+
+  private:
+	static jclass javaClass_;
 };
 
 /// A class to handle JNI requests to `android.view.InputDevice`
@@ -88,7 +99,7 @@ class AndroidJniClass_InputDevice : public AndroidJniClass
 	    : AndroidJniClass(javaObject) {}
 	static AndroidJniClass_InputDevice getDevice(int deviceId);
 	static int getDeviceIds(int *destination, int maxSize);
-	void getName(char *destination, int maxStringSize) const;
+	int getName(char *destination, int maxStringSize) const;
 	int getProductId() const;
 	int getVendorId() const;
 	AndroidJniClass_MotionRange getMotionRange(int axis) const;
@@ -128,9 +139,9 @@ class AndroidJniClass_KeyEvent : public AndroidJniClass
 	static void init();
 
 	AndroidJniClass_KeyEvent(int action, int code);
-	int getUnicodeChar(int metaState);
-	inline int getUnicodeChar() { return getUnicodeChar(0); }
-	bool isPrintingKey();
+	int getUnicodeChar(int metaState) const;
+	inline int getUnicodeChar() const { return getUnicodeChar(0); }
+	bool isPrintingKey() const;
 
   private:
 	static jclass javaClass_;
@@ -138,6 +149,19 @@ class AndroidJniClass_KeyEvent : public AndroidJniClass
 	static jmethodID midGetUnicodeCharMetaState_;
 	static jmethodID midGetUnicodeChar_;
 	static jmethodID midIsPrintingKey_;
+};
+
+/// A class to handle JNI requests to `android.app.Activity`
+class AndroidJniWrap_Activity
+{
+  public:
+	static void init(JNIEnv *jniEnv, struct android_app *state);
+	static void finishAndRemoveTask();
+
+  private:
+	static JNIEnv *jniEnv_;
+	static jobject activityObject_;
+	static jmethodID midFinishAndRemoveTask_;
 };
 
 /// A class to handle JNI requests to `android.view.inputmethod.InputMethodManager`
