@@ -68,6 +68,8 @@ struct DragPinnedDirectoryPayload
 };
 
 const float PinnedDirectoriesColumnWeight = 0.25f;
+const nc::DropEvent *dropEvent = nullptr;
+unsigned int dropUpdateFrames = 0;
 
 struct FileDialogConfig
 {
@@ -96,10 +98,36 @@ struct FileDialogConfig
 	unsigned int fileColor = IM_COL32(212, 213, 213, 255);
 	unsigned int dirColor = IM_COL32(61, 174, 233, 255);
 	unsigned int exeColor = IM_COL32(28, 215, 151, 255);
-};
+} config;
+
+bool pinDirectory(FileDialogConfig &config, const char *path)
+{
+	ASSERT(config.showPinnedDirectories);
+
+	nctl::String pathToPin(path);
+	if (nc::fs::isDirectory(path) == false)
+		pathToPin = nc::fs::dirName(path);
+
+	bool alreadyPinned = false;
+	for (unsigned int i = 0; i < config.pinnedDirectories.size(); i++)
+	{
+		if (config.pinnedDirectories[i] == pathToPin)
+		{
+			alreadyPinned = true;
+			break;
+		}
+	}
+	if (alreadyPinned == false)
+		config.pinnedDirectories.emplaceBack(pathToPin);
+
+	return (alreadyPinned == false);
+}
 
 bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 {
+	// Cache the initial value of the auto-suspension flag
+	static bool autoSuspensionState = nc::theApplication().autoSuspension();
+
 	if (config.windowOpen == false)
 		return false;
 
@@ -174,19 +202,7 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 		ImGui::TableSetColumnIndex(0);
 
 		if (ImGui::Button("Pin"))
-		{
-			bool alreadyPinned = false;
-			for (unsigned int i = 0; i < pinnedDirectories.size(); i++)
-			{
-				if (config.directory == pinnedDirectories[i])
-				{
-					alreadyPinned = true;
-					break;
-				}
-			}
-			if (alreadyPinned == false)
-				pinnedDirectories.pushBack(config.directory);
-		}
+			pinDirectory(config, config.directory.data());
 		ImGui::SameLine();
 		const bool enableUnpinButton = pinnedDirectories.isEmpty() == false;
 		ImGui::BeginDisabled(enableUnpinButton == false);
@@ -204,6 +220,14 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 		ImGui::EndDisabled();
 
 		ImGui::BeginChild("Pinned Directories List", ImVec2(0.0f, -ImGui::GetFrameHeightWithSpacing() - additionalChildVSpacing));
+
+		if (ImGui::IsWindowHovered() && dropEvent != nullptr)
+		{
+			// Pin directories dropped on the pinned directories list
+			for (unsigned int i = 0; i < dropEvent->numPaths; i++)
+				pinDirectory(config, dropEvent->paths[i]);
+			dropEvent = nullptr;
+		}
 
 		int directoryToRemove = -1;
 		for (unsigned int i = 0; i < pinnedDirectories.size(); i++)
@@ -340,6 +364,16 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 	}
 
 	ImGui::BeginChild("File View", ImVec2(0.0f, -ImGui::GetFrameHeightWithSpacing() - additionalChildVSpacing));
+
+	if (ImGui::IsWindowHovered() && dropEvent != nullptr)
+	{
+		// Go to the directory dropped on the file browser
+		if (nc::fs::isDirectory(dropEvent->paths[0]))
+			config.directory = dropEvent->paths[0];
+		else
+			config.directory = nc::fs::dirName(dropEvent->paths[0]);
+		dropEvent = nullptr;
+	}
 
 	nc::fs::Directory dir(config.directory.data());
 	dirEntries.clear();
@@ -587,6 +621,16 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 	else
 		ImGui::End();
 
+	// Restore the initial auto-suspension state that might have been disabled by the drop callback
+	if (dropUpdateFrames > 0)
+	{
+		dropUpdateFrames--;
+		if (dropUpdateFrames == 0)
+			nc::theApplication().setAutoSuspension(autoSuspensionState);
+	}
+	// Reset the pointer if the event has not been handled elsewhere
+	dropEvent = nullptr;
+
 	return selected;
 }
 
@@ -617,7 +661,6 @@ void MyEventHandler::onInit()
 void MyEventHandler::onFrameStart()
 {
 	static nctl::String selection(nc::fs::MaxPathLength);
-	static FileDialogConfig config;
 
 	if (fileDialog(config, selection))
 	{
@@ -631,4 +674,15 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
+}
+
+void MyEventHandler::onFilesDropped(const nc::DropEvent &event)
+{
+	if (config.windowOpen)
+	{
+		// Disable auto-suspension for two frames to let the interface update
+		nc::theApplication().setAutoSuspension(false);
+		dropUpdateFrames = 2;
+		dropEvent = &event;
+	}
 }

@@ -24,6 +24,7 @@ Qt5Widget::Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*create
 {
 	setFocusPolicy(Qt::StrongFocus);
 	setMouseTracking(true);
+	setAcceptDrops(true);
 	QObject::connect(this, SIGNAL(frameSwapped()), this, SLOT(autoUpdate()));
 
 	ASSERT(createAppEventHandler_);
@@ -86,6 +87,8 @@ bool Qt5Widget::event(QEvent *event)
 		case QEvent::TouchUpdate:
 		case QEvent::TouchEnd:
 		case QEvent::Wheel:
+		case QEvent::DragEnter:
+		case QEvent::Drop:
 			if (inputManager)
 			{
 				if (inputManager->handler())

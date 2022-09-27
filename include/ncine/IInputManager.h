@@ -85,6 +85,7 @@ class DLL_PUBLIC IInputManager
 	static MouseCursorMode mouseCursorMode_;
 
 	static JoyMapping joyMapping_;
+	static DropEvent dropEvent_;
 };
 
 }

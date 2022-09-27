@@ -1,5 +1,6 @@
 #include <cstring> // for memset() and memcpy()
 #include <cmath> // for fabsf()
+#include <nctl/CString.h>
 #include "GlfwInputManager.h"
 #include "IInputEventHandler.h"
 #include "IAppEventHandler.h"
@@ -54,6 +55,7 @@ GlfwInputManager::GlfwInputManager()
 	glfwSetMouseButtonCallback(GlfwGfxDevice::windowHandle(), mouseButtonCallback);
 	glfwSetScrollCallback(GlfwGfxDevice::windowHandle(), scrollCallback);
 	glfwSetJoystickCallback(joystickCallback);
+	glfwSetDropCallback(GlfwGfxDevice::windowHandle(), dropCallback);
 
 	joyMapping_.init(this);
 
@@ -375,6 +377,30 @@ void GlfwInputManager::joystickCallback(int joy, int event)
 			joyMapping_.onJoyDisconnected(joyConnectionEvent_);
 		}
 	}
+}
+
+void GlfwInputManager::dropCallback(GLFWwindow *window, int count, const char **paths)
+{
+	if (inputEventHandler_ == nullptr)
+		return;
+
+	int destIndex = 0;
+	for (int srcIndex = 0; srcIndex < count; srcIndex++)
+	{
+		// Skip long paths instead of truncating them
+		if (nctl::strnlen(paths[srcIndex], DropEvent::MaxPathLength) > DropEvent::MaxPathLength - 1)
+			continue;
+
+		nctl::strncpy(dropEvent_.paths[destIndex], paths[srcIndex], DropEvent::MaxPathLength);
+		destIndex++;
+
+		if (destIndex >= DropEvent::MaxNumPaths)
+			break;
+	}
+	dropEvent_.numPaths = destIndex;
+
+	if (dropEvent_.numPaths > 0)
+		inputEventHandler_->onFilesDropped(dropEvent_);
 }
 
 GlfwInputManager::JoystickEventsSimulator::JoystickEventsSimulator()

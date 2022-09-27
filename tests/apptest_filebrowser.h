@@ -24,6 +24,7 @@ class MyEventHandler :
 	void onFrameStart() override;
 
 	void onKeyReleased(const nc::KeyboardEvent &event) override;
+	void onFilesDropped(const nc::DropEvent &event) override;
 };
 
 #endif

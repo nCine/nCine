@@ -256,6 +256,20 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 				pointer.pressure = finger->pressure;
 			}
 			break;
+		case SDL_DROPBEGIN:
+			dropEvent_.numPaths = 0;
+			break;
+		case SDL_DROPTEXT:
+		case SDL_DROPFILE:
+			// Skip long paths instead of truncating them
+			if (dropEvent_.numPaths < DropEvent::MaxNumPaths &&
+			    nctl::strnlen(event.drop.file, DropEvent::MaxPathLength) < DropEvent::MaxPathLength - 1)
+			{
+				nctl::strncpy(dropEvent_.paths[dropEvent_.numPaths], event.drop.file, DropEvent::MaxPathLength);
+				dropEvent_.numPaths++;
+			}
+			SDL_free(event.drop.file);
+			break;
 		default:
 			break;
 	}
@@ -314,6 +328,10 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 				inputEventHandler_->onTouchUp(touchEvent_);
 			else
 				inputEventHandler_->onPointerUp(touchEvent_);
+			break;
+		case SDL_DROPCOMPLETE:
+			if (dropEvent_.numPaths > 0)
+				inputEventHandler_->onFilesDropped(dropEvent_);
 			break;
 		default:
 			break;

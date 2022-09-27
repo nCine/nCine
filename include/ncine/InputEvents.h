@@ -130,6 +130,23 @@ class DLL_PUBLIC TextInputEvent
 	}
 };
 
+/// Information about a drag'n'drop event
+class DLL_PUBLIC DropEvent
+{
+  public:
+	static const int MaxNumPaths = 16;
+	static const int MaxPathLength = 256;
+	unsigned int numPaths;
+	char paths[MaxNumPaths][MaxPathLength];
+
+	DropEvent()
+	    : numPaths(0)
+	{
+		for (unsigned int i = 0; i < MaxNumPaths; i++)
+			paths[i][0] = '\0';
+	}
+};
+
 /// Information about the joystick state
 class DLL_PUBLIC JoystickState
 {

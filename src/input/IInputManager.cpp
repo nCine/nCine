@@ -14,6 +14,7 @@ namespace ncine {
 IInputEventHandler *IInputManager::inputEventHandler_ = nullptr;
 IInputManager::MouseCursorMode IInputManager::mouseCursorMode_ = IInputManager::MouseCursorMode::NORMAL;
 JoyMapping IInputManager::joyMapping_;
+DropEvent IInputManager::dropEvent_;
 
 // From `XInput.h` in DirectX SDK
 const float IInputManager::LeftStickDeadZone = 7849 / 32767.0f;

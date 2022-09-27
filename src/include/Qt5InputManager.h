@@ -166,6 +166,7 @@ class Qt5InputManager : public IInputManager
 	void touchUpdateEvent(QTouchEvent *event);
 	void touchEndEvent(QTouchEvent *event);
 	void wheelEvent(QWheelEvent *event);
+	void dropEvent(QDropEvent *event);
 
 	inline const MouseState &mouseState() const override { return mouseState_; }
 	inline const KeyboardState &keyboardState() const override { return keyboardState_; }

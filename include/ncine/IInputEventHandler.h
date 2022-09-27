@@ -62,6 +62,9 @@ class DLL_PUBLIC IInputEventHandler
 	/// Callback function called every time a joystick is disconnected
 	inline virtual void onJoyDisconnected(const JoyConnectionEvent &event) {}
 
+	/// Callback function called every time some files or directories are dropped on the window
+	inline virtual void onFilesDropped(const DropEvent &event) {}
+
 	/// Callback function called when the system sends a quit event, for example when the user clicks the window close button
 	/*! \returns True if the application should quit */
 	inline virtual bool onQuitRequest() { return true; }

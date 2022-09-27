@@ -9,6 +9,7 @@
 
 #include <qevent.h>
 #include <QWidget>
+#include <QMimeData>
 
 #ifdef WITH_QT5GAMEPAD
 	#include <QtGamepad/QGamepadManager>
@@ -334,6 +335,12 @@ bool Qt5InputManager::event(QEvent *event)
 		case QEvent::Wheel:
 			wheelEvent(static_cast<QWheelEvent *>(event));
 			return true;
+		case QEvent::DragEnter:
+			static_cast<QDragEnterEvent *>(event)->acceptProposedAction();
+			return true;
+		case QEvent::Drop:
+			dropEvent(static_cast<QDropEvent *>(event));
+			return true;
 		default:
 			return false;
 	}
@@ -452,6 +459,37 @@ void Qt5InputManager::wheelEvent(QWheelEvent *event)
 		scrollEvent_.x = event->angleDelta().x() / 60.0f;
 		scrollEvent_.y = event->angleDelta().y() / 60.0f;
 		inputEventHandler_->onScrollInput(scrollEvent_);
+	}
+}
+
+void Qt5InputManager::dropEvent(QDropEvent *event)
+{
+	if (inputEventHandler_)
+	{
+		const QMimeData *mimeData = event->mimeData();
+		if (mimeData->hasUrls())
+		{
+			const QList<QUrl> urlList = mimeData->urls();
+			int destIndex = 0;
+			for (int srcIndex = 0; srcIndex < urlList.size(); srcIndex++)
+			{
+				const QString text = urlList[srcIndex].toLocalFile();
+				// Skip long paths instead of truncating them
+				if (text.length() > DropEvent::MaxPathLength - 1)
+					continue;
+
+				for (int i = 0; i < text.length(); i++)
+					dropEvent_.paths[destIndex][i] = static_cast<char>(text.at(i).cell());
+				destIndex++;
+
+				if (destIndex >= DropEvent::MaxNumPaths)
+					break;
+			}
+			dropEvent_.numPaths = destIndex;
+
+			if (dropEvent_.numPaths > 0)
+				inputEventHandler_->onFilesDropped(dropEvent_);
+		}
 	}
 }
 

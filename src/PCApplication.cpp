@@ -170,6 +170,9 @@ void PCApplication::processEvents()
 		{
 			SDL_WaitEvent(&event);
 			SDL_PushEvent(&event);
+			// Don't lose any events when resuming
+			while (SDL_PollEvent(&event))
+				SDL_PushEvent(&event);
 		}
 	#endif
 	}

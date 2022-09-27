@@ -189,6 +189,7 @@ class GlfwInputManager : public IInputManager
 	static void mouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
 	static void scrollCallback(GLFWwindow *window, double xoffset, double yoffset);
 	static void joystickCallback(int joy, int event);
+	static void dropCallback(GLFWwindow *window, int count, const char **paths);
 
 	static KeySym keySymValueToEnum(int keysym);
 	static KeyMod keyModValueToEnum(int keymod);
