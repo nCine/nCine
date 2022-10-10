@@ -65,6 +65,8 @@ class RenderCommand
 
 	/// Returns the material sort key for the queue
 	inline uint64_t materialSortKey() const { return materialSortKey_; }
+	/// Returns the lower part of the material sort key, used for batch splitting logic
+	inline uint32_t lowerMaterialSortKey() const { return static_cast<int32_t>(materialSortKey_); }
 	/// Calculates a material sort key for the queue
 	void calculateMaterialSortKey();
 	/// Returns the id based secondary sort key for the queue

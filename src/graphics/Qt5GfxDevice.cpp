@@ -149,6 +149,13 @@ void Qt5GfxDevice::bindDefaultDrawFramebufferObject()
 	GLFramebufferObject::bindHandle(GL_DRAW_FRAMEBUFFER, glHandle);
 }
 
+/*! \note It should be used after each `QOpenGLWidget::makeCurrent()` call */
+void Qt5GfxDevice::resetFramebufferObjectBinding()
+{
+	const GLuint glHandle = widget_.defaultFramebufferObject();
+	GLFramebufferObject::setBoundHandle(GL_FRAMEBUFFER, glHandle);
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////

@@ -147,6 +147,8 @@ bool GLShaderProgram::link(Introspection introspection)
 			return false;
 
 		// After linking, shader objects are not needed anymore
+		for (const nctl::UniquePtr<GLShader> &shader : attachedShaders_)
+			glDetachShader(glHandle_, shader->glHandle());
 		attachedShaders_.clear();
 
 		performIntrospection();
@@ -220,7 +222,11 @@ void GLShaderProgram::reset()
 
 		if (boundProgram_ == glHandle_)
 			glUseProgram(0);
+
+		for (const nctl::UniquePtr<GLShader> &shader : attachedShaders_)
+			glDetachShader(glHandle_, shader->glHandle());
 		attachedShaders_.clear();
+
 		glDeleteProgram(glHandle_);
 
 		RenderResources::removeCameraUniformData(this);
@@ -257,6 +263,8 @@ bool GLShaderProgram::deferredQueries()
 			return false;
 
 		// After linking, shader objects are not needed anymore
+		for (const nctl::UniquePtr<GLShader> &shader : attachedShaders_)
+			glDetachShader(glHandle_, shader->glHandle());
 		attachedShaders_.clear();
 
 		performIntrospection();

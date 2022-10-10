@@ -208,7 +208,8 @@ namespace {
 uint32_t Material::sortKey()
 {
 	static const uint32_t Seed = 1697381921;
-	static SortHashData hashData;
+	// Align to 64 bits for `fasthash64()` to properly work on Emscripten without alignment faults
+	static SortHashData hashData alignas(8);
 
 	for (unsigned int i = 0; i < GLTexture::MaxTextureUnits; i++)
 		hashData.textures[i] = (textures_[i] != nullptr) ? textures_[i]->glHandle() : 0;

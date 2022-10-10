@@ -37,6 +37,9 @@ class DLL_PUBLIC Qt5Widget : public QOpenGLWidget
 
 	IAppEventHandler &appEventHandler();
 
+	/// Makes the widget's rendering context the current OpenGL rendering context
+	void makeCurrent();
+
   protected:
 	bool event(QEvent *event) override;
 
@@ -58,6 +61,9 @@ class DLL_PUBLIC Qt5Widget : public QOpenGLWidget
 	bool shouldUpdate_;
 
 	void shutdown();
+
+	/// Hiding the original method to replace it with the custom one that resets the FBO binding
+	using QOpenGLWidget::makeCurrent;
 
 	/// Deleted copy constructor
 	Qt5Widget(const Qt5Widget &) = delete;

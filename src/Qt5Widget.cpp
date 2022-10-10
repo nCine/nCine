@@ -61,6 +61,14 @@ IAppEventHandler &Qt5Widget::appEventHandler()
 	return *application_.appEventHandler_;
 }
 
+/*! \note This custom version of the method also resets the FBO binding */
+void Qt5Widget::makeCurrent()
+{
+	QOpenGLWidget::makeCurrent();
+	Qt5GfxDevice &gfxDevice = static_cast<Qt5GfxDevice &>(*application_.gfxDevice_);
+	gfxDevice.resetFramebufferObjectBinding();
+}
+
 ///////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////

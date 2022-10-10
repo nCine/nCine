@@ -42,6 +42,8 @@ class Qt5GfxDevice : public IGfxDevice
 #endif
 	void resetTextureBinding();
 	void bindDefaultDrawFramebufferObject();
+	/// Resets the OpenGL state cache to bind the default Qt5 Framebuffer Object
+	void resetFramebufferObjectBinding();
 
   private:
 	Qt5Widget &widget_;

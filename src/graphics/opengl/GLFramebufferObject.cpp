@@ -173,4 +173,15 @@ bool GLFramebufferObject::bindHandle(GLenum target, GLuint glHandle)
 	return false;
 }
 
+void GLFramebufferObject::setBoundHandle(GLenum target, GLuint glHandle)
+{
+	FATAL_ASSERT(target == GL_FRAMEBUFFER || target == GL_READ_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER);
+
+	if (target == GL_FRAMEBUFFER || target == GL_READ_FRAMEBUFFER)
+		readBoundBuffer_ = glHandle;
+
+	if (target == GL_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER)
+		drawBoundBuffer_ = glHandle;
+}
+
 }

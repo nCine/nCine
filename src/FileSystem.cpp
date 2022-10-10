@@ -507,7 +507,7 @@ nctl::String FileSystem::externalStorageDir()
 	const char *extStorage = getenv("EXTERNAL_STORAGE");
 
 	if (extStorage == nullptr || extStorage[0] == '\0')
-		return (returnedPath = "/scard");
+		return (returnedPath = "/sdcard");
 	return (returnedPath = extStorage);
 }
 #endif

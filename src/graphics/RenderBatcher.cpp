@@ -36,20 +36,6 @@ RenderBatcher::RenderBatcher()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-bool areTexturesDifferent(const RenderCommand *command, const RenderCommand *prevCommand)
-{
-	bool areDifferent = false;
-	for (unsigned int i = 0; i < GLTexture::MaxTextureUnits; i++)
-	{
-		if (command->material().texture(i) != prevCommand->material().texture(i))
-		{
-			areDifferent = true;
-			break;
-		}
-	}
-	return areDifferent;
-}
-
 void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, nctl::Array<RenderCommand *> &destQueue)
 {
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
@@ -68,27 +54,13 @@ void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, 
 	for (unsigned int i = 1; i < srcQueue.size(); i++)
 	{
 		const RenderCommand *command = srcQueue[i];
-		const GLShaderProgram *shaderProgram = command->material().shaderProgram();
-		const bool isBlendingEnabled = command->material().isBlendingEnabled();
-		const GLenum srcBlendingFactor = command->material().srcBlendingFactor();
-		const GLenum destBlendingFactor = command->material().destBlendingFactor();
 		const GLenum primitive = command->geometry().primitiveType();
 
 		const RenderCommand *prevCommand = srcQueue[i - 1];
-		const GLShaderProgram *prevShaderProgram = prevCommand->material().shaderProgram();
-		const bool prevIsBlendingEnabled = prevCommand->material().isBlendingEnabled();
-		const GLenum prevSrcBlendingFactor = prevCommand->material().srcBlendingFactor();
-		const GLenum prevDestBlendingFactor = prevCommand->material().destBlendingFactor();
 		const GLenum prevPrimitive = prevCommand->geometry().primitiveType();
 
-		const bool texturesDiffer = areTexturesDifferent(command, prevCommand);
-
-		// Always false for the opaque queue as blending is not enabled for any of the commands
-		const bool blendingDiffers = isBlendingEnabled && prevIsBlendingEnabled &&
-		                             (prevSrcBlendingFactor != srcBlendingFactor || prevDestBlendingFactor != destBlendingFactor);
-
-		// Should split if the shader differs or if it's the same but texture, blending or primitive type aren't
-		const bool shouldSplit = prevShaderProgram != shaderProgram || texturesDiffer || prevPrimitive != primitive || blendingDiffers;
+		// Should split if the lower part of a material's sort key or the primitive type differ
+		const bool shouldSplit = command->lowerMaterialSortKey() != prevCommand->lowerMaterialSortKey() || prevPrimitive != primitive;
 
 		// Also collect the very last command if it can be batched with the previous one
 		unsigned int endSplit = (i == srcQueue.size() - 1 && !shouldSplit) ? i + 1 : i;
