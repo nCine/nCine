@@ -82,8 +82,6 @@ nctl::UniquePtr<ITextureLoader> ITextureLoader::createFromFile(const char *filen
 
 nctl::UniquePtr<ITextureLoader> ITextureLoader::createLoader(nctl::UniquePtr<IFile> fileHandle, const char *filename)
 {
-	fileHandle->setExitOnFailToOpen(false);
-
 	if (fs::hasExtension(filename, "dds"))
 		return nctl::makeUnique<TextureLoaderDds>(nctl::move(fileHandle));
 	else if (fs::hasExtension(filename, "pvr"))

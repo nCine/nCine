@@ -87,7 +87,6 @@ void GLShader::loadFromString(const char *string)
 void GLShader::loadFromFile(const char *filename)
 {
 	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
-	fileHandle->setExitOnFailToOpen(false);
 
 	fileHandle->open(IFile::OpenMode::READ);
 	if (fileHandle->isOpened())

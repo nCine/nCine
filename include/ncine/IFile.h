@@ -61,10 +61,7 @@ class DLL_PUBLIC IFile
 	/// Sets the close on destruction flag
 	/*! If the flag is true the file is closed upon object destruction. */
 	inline void setCloseOnDestruction(bool shouldCloseOnDestruction) { shouldCloseOnDestruction_ = shouldCloseOnDestruction; }
-	/// Sets the exit on fail to open flag
-	/*! If the flag is true the application exits if the file cannot be opened. */
-	inline void setExitOnFailToOpen(bool shouldExitOnFailToOpen) { shouldExitOnFailToOpen_ = shouldExitOnFailToOpen; }
-	/// Returns true if the file is already opened
+	/// Returns true if the file has been sucessfully opened
 	virtual bool isOpened() const;
 
 	/// Returns file name with path
@@ -129,9 +126,6 @@ class DLL_PUBLIC IFile
 	/// A flag indicating whether the destructor should also close the file
 	/*! Useful for `ov_open()`/`ov_fopen()` and `ov_clear()` functions of the <em>Vorbisfile</em> library. */
 	bool shouldCloseOnDestruction_;
-	/// A flag indicating whether the application should exit if the file cannot be opened
-	/*! Useful for the log file creation. */
-	bool shouldExitOnFailToOpen_;
 
 	/// File size in bytes
 	unsigned long int fileSize_;

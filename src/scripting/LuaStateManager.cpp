@@ -161,7 +161,6 @@ void LuaStateManager::reopen()
 bool LuaStateManager::loadFromFile(const char *filename, const char *chunkName, nctl::String *errorMsg, int *status)
 {
 	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
-	fileHandle->setExitOnFailToOpen(false);
 	LOGI_X("Loading file: \"%s\"", fileHandle->filename());
 
 	fileHandle->open(IFile::OpenMode::READ | IFile::OpenMode::BINARY);

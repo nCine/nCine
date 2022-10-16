@@ -175,6 +175,9 @@ void JoyMapping::addMappingsFromFile(const char *filename)
 	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(filename);
 	fileHandle->open(IFile::OpenMode::READ);
 
+	if (fileHandle->isOpened() == false)
+		return;
+
 	const long int fileSize = fileHandle->size();
 	unsigned int fileLine = 0;
 

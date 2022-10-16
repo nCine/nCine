@@ -1,5 +1,3 @@
-#include <cstdlib> // for exit()
-
 // All but MSVC: Linux, Android and MinGW.
 #if !(defined(_WIN32) && !defined(__MINGW32__))
 	#include <sys/stat.h> // for open()
@@ -174,16 +172,8 @@ void StandardFile::openFD(unsigned char mode)
 
 		if (fileDescriptor_ < 0)
 		{
-			if (shouldExitOnFailToOpen_)
-			{
-				LOGF_X("Cannot open the file \"%s\"", filename_.data());
-				exit(EXIT_FAILURE);
-			}
-			else
-			{
-				LOGE_X("Cannot open the file \"%s\"", filename_.data());
-				return;
-			}
+			LOGE_X("Cannot open the file \"%s\"", filename_.data());
+			return;
 		}
 		else
 			LOGI_X("File \"%s\" opened", filename_.data());
@@ -235,16 +225,8 @@ void StandardFile::openStream(unsigned char mode)
 
 		if (filePointer_ == nullptr)
 		{
-			if (shouldExitOnFailToOpen_)
-			{
-				LOGF_X("Cannot open the file \"%s\"", filename_.data());
-				exit(EXIT_FAILURE);
-			}
-			else
-			{
-				LOGE_X("Cannot open the file \"%s\"", filename_.data());
-				return;
-			}
+			LOGE_X("Cannot open the file \"%s\"", filename_.data());
+			return;
 		}
 		else
 			LOGI_X("File \"%s\" opened", filename_.data());

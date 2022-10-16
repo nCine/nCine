@@ -41,8 +41,6 @@ nctl::UniquePtr<IAudioLoader> IAudioLoader::createFromFile(const char *filename)
 
 nctl::UniquePtr<IAudioLoader> IAudioLoader::createLoader(nctl::UniquePtr<IFile> fileHandle, const char *filename)
 {
-	fileHandle->setExitOnFailToOpen(false);
-
 	if (fs::hasExtension(filename, "wav"))
 		return nctl::makeUnique<AudioLoaderWav>(nctl::move(fileHandle));
 #ifdef WITH_VORBIS

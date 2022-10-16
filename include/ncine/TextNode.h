@@ -101,7 +101,8 @@ class DLL_PUBLIC TextNode : public DrawableNode
 		float x, y;
 		float u, v;
 
-		Vertex() {}
+		Vertex()
+		    : x(0.0f), y(0.0f), u(0.0f), v(0.0f) {}
 		Vertex(float xx, float yy, float uu, float vv)
 		    : x(xx), y(yy), u(uu), v(vv) {}
 	};

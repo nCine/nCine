@@ -91,7 +91,6 @@ bool FileLogger::openLogFile(const char *filename)
 		return false;
 
 	fileHandle_ = IFile::createFileHandle(filename);
-	fileHandle_->setExitOnFailToOpen(false);
 	fileHandle_->open(IFile::OpenMode::WRITE);
 
 	if (fileHandle_->isOpened() == false)

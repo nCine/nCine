@@ -255,16 +255,8 @@ void AssetFile::openFD(unsigned char mode)
 		asset_ = AAssetManager_open(assetManager_, filename_.data(), AASSET_MODE_UNKNOWN);
 		if (asset_ == nullptr)
 		{
-			if (shouldExitOnFailToOpen_)
-			{
-				LOGF_X("Cannot open the file \"%s\"", filename_.data());
-				exit(EXIT_FAILURE);
-			}
-			else
-			{
-				LOGE_X("Cannot open the file \"%s\"", filename_.data());
-				return;
-			}
+			LOGE_X("Cannot open the file \"%s\"", filename_.data());
+			return;
 		}
 
 		off_t outStart = 0;
@@ -279,16 +271,8 @@ void AssetFile::openFD(unsigned char mode)
 
 		if (fileDescriptor_ < 0)
 		{
-			if (shouldExitOnFailToOpen_)
-			{
-				LOGF_X("Cannot open the file \"%s\"", filename_.data());
-				exit(EXIT_FAILURE);
-			}
-			else
-			{
-				LOGE_X("Cannot open the file \"%s\"", filename_.data());
-				return;
-			}
+			LOGE_X("Cannot open the file \"%s\"", filename_.data());
+			return;
 		}
 		else
 			LOGI_X("File \"%s\" opened", filename_.data());
@@ -305,16 +289,8 @@ void AssetFile::openAsset(unsigned char mode)
 		asset_ = AAssetManager_open(assetManager_, filename_.data(), AASSET_MODE_UNKNOWN);
 		if (asset_ == nullptr)
 		{
-			if (shouldExitOnFailToOpen_)
-			{
-				LOGF_X("Cannot open the file \"%s\"", filename_.data());
-				exit(EXIT_FAILURE);
-			}
-			else
-			{
-				LOGE_X("Cannot open the file \"%s\"", filename_.data());
-				return;
-			}
+			LOGE_X("Cannot open the file \"%s\"", filename_.data());
+			return;
 		}
 		else
 			LOGI_X("File \"%s\" opened", filename_.data());

@@ -19,7 +19,6 @@ FntParser::FntParser(const char *fntFilename)
     : numPageTags_(0), numCharTags_(0), numKerningTags_(0)
 {
 	nctl::UniquePtr<IFile> fileHandle = IFile::createFileHandle(fntFilename);
-	fileHandle->setExitOnFailToOpen(false);
 
 #ifdef _WIN32
 	// Use binary mode on Windows to properly count '\r' characters
