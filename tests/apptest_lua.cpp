@@ -99,6 +99,11 @@ void MyEventHandler::onResizeWindow(int width, int height)
 	nc::LuaIAppEventHandler::onResizeWindow(luaState_.state(), width, height);
 }
 
+void MyEventHandler::onChangeScalingFactor(float factor)
+{
+	nc::LuaIAppEventHandler::onChangeScalingFactor(luaState_.state(), factor);
+}
+
 void MyEventHandler::onShutdown()
 {
 	nc::LuaIAppEventHandler::onShutdown(luaState_.state());

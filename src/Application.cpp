@@ -1,4 +1,4 @@
-﻿#include "Application.h"
+#include "Application.h"
 #include "Random.h"
 #include "IAppEventHandler.h"
 #include "FileSystem.h"
@@ -91,7 +91,14 @@ float Application::interval() const
 void Application::resizeScreenViewport(int width, int height)
 {
 	if (screenViewport_ != nullptr)
-		screenViewport_->resize(width, height);
+	{
+		const bool shouldResize = (width != screenViewport_->width_ || height != screenViewport_->height_);
+		if (width > 0 && height > 0 && shouldResize)
+		{
+			screenViewport_->resize(width, height);
+			appEventHandler_->onResizeWindow(width, height);
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -219,6 +226,12 @@ void Application::step()
 
 #ifdef WITH_LUA
 	LuaStatistics::update();
+#endif
+
+#ifndef __EMSCRIPTEN__
+	const bool scalingChanged = gfxDevice_->scaleWindowSize(appCfg_.windowScaling);
+	if (scalingChanged)
+		appEventHandler_->onChangeScalingFactor(gfxDevice_->windowScalingFactor());
 #endif
 
 	{

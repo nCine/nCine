@@ -1,5 +1,6 @@
 #include "common_macros.h"
 #include "GlfwGfxDevice.h"
+#include "GlfwInputManager.h"
 #include "ITextureLoader.h"
 
 #ifdef __EMSCRIPTEN__
@@ -28,6 +29,7 @@ GlfwGfxDevice::GlfwGfxDevice(const WindowMode &windowMode, const GLContextInfo &
     : IGfxDevice(windowMode, glContextInfo, displayMode)
 {
 	initGraphics();
+	initWindowScaling(windowMode);
 	initDevice();
 }
 
@@ -117,6 +119,22 @@ const Vector2i GlfwGfxDevice::windowPosition() const
 	Vector2i position(0, 0);
 	glfwGetWindowPos(windowHandle_, &position.x, &position.y);
 	return position;
+}
+
+void GlfwGfxDevice::setWindowPosition(int x, int y)
+{
+	int width = width_;
+	int height = height_;
+	glfwGetWindowSize(windowHandle_, &width_, &height_);
+
+	glfwSetWindowSizeCallback(windowHandle_, nullptr);
+	glfwSetFramebufferSizeCallback(windowHandle_, nullptr);
+
+	glfwSetWindowPos(windowHandle_, x, y);
+	glfwSetWindowSize(windowHandle_, width, height);
+
+	glfwSetWindowSizeCallback(windowHandle_, GlfwInputManager::windowSizeCallback);
+	glfwSetFramebufferSizeCallback(windowHandle_, GlfwInputManager::framebufferSizeCallback);
 }
 
 void GlfwGfxDevice::setWindowSize(int width, int height)
@@ -250,7 +268,7 @@ void GlfwGfxDevice::initGraphics()
 
 void GlfwGfxDevice::initDevice()
 {
-	updateMonitors();
+	// At this point `updateMonitors()` has already been called by `initWindowScaling()`
 
 	const GLFWvidmode *vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 	// asking for a video mode that does not change current screen resolution
@@ -355,6 +373,26 @@ void GlfwGfxDevice::updateMonitors()
 
 	fsMonitorIndex_ = -1;
 	fsModeIndex_ = -1;
+}
+
+void GlfwGfxDevice::updateMonitorScaling(unsigned int monitorIndex)
+{
+	int monitorCount = 0;
+	GLFWmonitor **monitors = glfwGetMonitors(&monitorCount);
+
+	if (monitorIndex < monitorCount)
+	{
+		IGfxDevice::Monitor &monitor = monitors_[monitorIndex];
+
+#if (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300)
+		glfwGetMonitorContentScale(monitors[monitorIndex], &monitor.scale.x, &monitor.scale.y);
+#elif defined(__EMSCRIPTEN__)
+		monitor.scale.x = emscripten_get_device_pixel_ratio();
+		monitor.scale.y = monitor.scale.x;
+#endif
+		monitor.dpi.x = DefaultDpi * monitor.scale.x;
+		monitor.dpi.y = DefaultDpi * monitor.scale.y;
+	}
 }
 
 int GlfwGfxDevice::retrieveMonitorIndex(GLFWmonitor *monitor) const

@@ -27,6 +27,7 @@ SdlGfxDevice::SdlGfxDevice(const WindowMode &windowMode, const GLContextInfo &gl
     : IGfxDevice(windowMode, glContextInfo, displayMode)
 {
 	initGraphics();
+	initWindowScaling(windowMode);
 	initDevice();
 }
 
@@ -169,7 +170,7 @@ void SdlGfxDevice::initGraphics()
 
 void SdlGfxDevice::initDevice()
 {
-	updateMonitors();
+	// At this point `updateMonitors()` has already been called by `initWindowScaling()`
 
 	// setting OpenGL attributes
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, displayMode_.redBits());
@@ -198,7 +199,8 @@ void SdlGfxDevice::initDevice()
 
 	Uint32 flags = SDL_WINDOW_OPENGL;
 #ifndef __EMSCRIPTEN__
-	flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+	if (windowMode.hasWindowScaling)
+		flags |= SDL_WINDOW_ALLOW_HIGHDPI;
 #endif
 	if (isFullScreen_)
 		flags |= SDL_WINDOW_FULLSCREEN;

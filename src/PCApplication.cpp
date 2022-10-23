@@ -84,7 +84,7 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 	const DisplayMode::VSync vSyncMode = appCfg_.withVSync ? DisplayMode::VSync::ENABLED : DisplayMode::VSync::DISABLED;
 	DisplayMode displayMode(8, 8, 8, 8, 24, 8, DisplayMode::DoubleBuffering::ENABLED, vSyncMode);
 
-	const IGfxDevice::WindowMode windowMode(appCfg_.resolution.x, appCfg_.resolution.y, appCfg_.fullScreen, appCfg_.resizable);
+	const IGfxDevice::WindowMode windowMode(appCfg_.resolution.x, appCfg_.resolution.y, appCfg_.fullScreen, appCfg_.resizable, appCfg_.windowScaling);
 #if defined(WITH_SDL)
 	gfxDevice_ = nctl::makeUnique<SdlGfxDevice>(windowMode, glContextInfo, displayMode);
 	inputManager_ = nctl::makeUnique<SdlInputManager>();
@@ -164,7 +164,6 @@ void PCApplication::processEvents()
 					SDL_GL_GetDrawableSize(windowHandle, &gfxDevice_->drawableWidth_, &gfxDevice_->drawableHeight_);
 					gfxDevice_->isFullScreen_ = SDL_GetWindowFlags(windowHandle) & SDL_WINDOW_FULLSCREEN;
 					resizeScreenViewport(event.window.data1, event.window.data2);
-					appEventHandler_->onResizeWindow(event.window.data1, event.window.data2);
 				}
 				break;
 			default:

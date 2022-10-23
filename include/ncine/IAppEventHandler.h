@@ -33,6 +33,8 @@ class DLL_PUBLIC IAppEventHandler
 	/*! \note It is called when the drawable resolution changes, but the screen coordinates one might stay the same.
 	 *  This might happen if the display scale changes or if the user drags a window on a different screen with a different DPI or scaling settings. */
 	virtual void onResizeWindow(int width, int height) {}
+	/// Called every time the window scaling factor changes
+	virtual void onChangeScalingFactor(float factor) {}
 	/// Called once on application shutdown
 	virtual void onShutdown() {}
 	/// Called every time the application needs to be suspended

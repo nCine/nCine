@@ -472,8 +472,8 @@ int main(int argc, char **argv)
 	const int screenHeight = nc::theApplication().gfxDevice().currentVideoMode().height;
 
 	const bool configResolutionIsValid = (appCfg.resolution.x != 0 && appCfg.resolution.y != 0);
-	const int width = configResolutionIsValid ? appCfg.resolution.x : screenWidth;
-	const int height = configResolutionIsValid ? appCfg.resolution.y : screenHeight;
+	const int width = configResolutionIsValid ? nc::theApplication().gfxDevice().width() : screenWidth;
+	const int height = configResolutionIsValid ? nc::theApplication().gfxDevice().height() : screenHeight;
 
 	nc::theApplication().gfxDevice().setWindowSize(width - qt5GuiWidth, height);
 	window.setGeometry((screenWidth - width) / 2, (screenHeight - height) / 2, width, height);

@@ -64,6 +64,8 @@ namespace IGfxDevice {
 
 	static const char *currentVideoMode = "get_current_video_mode";
 	static const char *setVideoMode = "set_video_mode";
+
+	static const char *windowScalingFactor = "get_window_scaling_factor";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -107,6 +109,8 @@ void LuaIGfxDevice::expose(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::IGfxDevice::currentVideoMode, currentVideoMode);
 	LuaUtils::addFunction(L, LuaNames::IGfxDevice::setVideoMode, setVideoMode);
+
+	LuaUtils::addFunction(L, LuaNames::IGfxDevice::windowScalingFactor, windowScalingFactor);
 
 	lua_setfield(L, -2, LuaNames::IGfxDevice::IGfxDevice);
 }
@@ -370,6 +374,14 @@ int LuaIGfxDevice::setVideoMode(lua_State *L)
 	gfxDevice.setVideoMode(index);
 
 	return 0;
+}
+
+int LuaIGfxDevice::windowScalingFactor(lua_State *L)
+{
+	const IGfxDevice &gfxDevice = theApplication().gfxDevice();
+	LuaUtils::push(L, gfxDevice.windowScalingFactor());
+
+	return 1;
 }
 
 }

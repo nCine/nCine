@@ -40,14 +40,25 @@ JoyConnectionEvent GlfwInputManager::joyConnectionEvent_;
 const float GlfwInputManager::JoystickEventsSimulator::AxisEventTolerance = 0.001f;
 GlfwInputManager::JoystickEventsSimulator GlfwInputManager::joyEventsSimulator_;
 
+int GlfwInputManager::preScalingWidth_ = 0;
+int GlfwInputManager::preScalingHeight_ = 0;
+unsigned long int GlfwInputManager::lastFrameWindowSizeChanged_ = 0;
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 GlfwInputManager::GlfwInputManager()
 {
+	GlfwGfxDevice &gfxDevice = static_cast<GlfwGfxDevice &>(theApplication().gfxDevice());
+	preScalingWidth_ = gfxDevice.width_;
+	preScalingHeight_ = gfxDevice.height_;
+
 	glfwSetMonitorCallback(monitorCallback);
 	glfwSetWindowCloseCallback(GlfwGfxDevice::windowHandle(), windowCloseCallback);
+#if (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300)
+	glfwSetWindowContentScaleCallback(GlfwGfxDevice::windowHandle(), windowContentScaleCallback);
+#endif
 	glfwSetWindowSizeCallback(GlfwGfxDevice::windowHandle(), windowSizeCallback);
 	glfwSetFramebufferSizeCallback(GlfwGfxDevice::windowHandle(), framebufferSizeCallback);
 	glfwSetKeyCallback(GlfwGfxDevice::windowHandle(), keyCallback);
@@ -266,9 +277,29 @@ void GlfwInputManager::windowCloseCallback(GLFWwindow *window)
 		glfwSetWindowShouldClose(window, GLFW_FALSE);
 }
 
+void GlfwInputManager::windowContentScaleCallback(GLFWwindow *window, float xscale, float yscale)
+{
+	GlfwGfxDevice &gfxDevice = static_cast<GlfwGfxDevice &>(theApplication().gfxDevice());
+
+	// Revert the window size change if it happened the same frame its content scale also changed
+	if (lastFrameWindowSizeChanged_ == theApplication().numFrames())
+	{
+		gfxDevice.width_ = preScalingWidth_;
+		gfxDevice.height_ = preScalingHeight_;
+	}
+
+	gfxDevice.updateMonitorScaling(gfxDevice.windowMonitorIndex());
+}
+
 void GlfwInputManager::windowSizeCallback(GLFWwindow *window, int width, int height)
 {
 	GlfwGfxDevice &gfxDevice = static_cast<GlfwGfxDevice &>(theApplication().gfxDevice());
+
+	// Save previous resolution for if a content scale event is coming just after a window size one
+	preScalingWidth_ = gfxDevice.width_;
+	preScalingHeight_ = gfxDevice.height_;
+	lastFrameWindowSizeChanged_ = theApplication().numFrames();
+
 	gfxDevice.width_ = width;
 	gfxDevice.height_ = height;
 	gfxDevice.isFullScreen_ = (glfwGetWindowMonitor(window) != nullptr);
@@ -281,7 +312,6 @@ void GlfwInputManager::framebufferSizeCallback(GLFWwindow *window, int width, in
 	gfxDevice.drawableHeight_ = height;
 
 	theApplication().resizeScreenViewport(width, height);
-	theApplication().appEventHandler_->onResizeWindow(width, height);
 }
 
 void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)

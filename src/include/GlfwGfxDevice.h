@@ -27,7 +27,7 @@ class GlfwGfxDevice : public IGfxDevice
 	int windowPositionX() const override;
 	int windowPositionY() const override;
 	const Vector2i windowPosition() const override;
-	inline void setWindowPosition(int x, int y) override { glfwSetWindowPos(windowHandle_, x, y); }
+	void setWindowPosition(int x, int y) override;
 
 	void setWindowSize(int width, int height) override;
 
@@ -71,6 +71,7 @@ class GlfwGfxDevice : public IGfxDevice
 	void initDevice();
 
 	void updateMonitors() override;
+	void updateMonitorScaling(unsigned int monitorIndex);
 
 	int retrieveMonitorIndex(GLFWmonitor *monitor) const;
 	void convertVideoModeInfo(const GLFWvidmode &glfwVideoMode, IGfxDevice::VideoMode &videoMode) const;

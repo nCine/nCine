@@ -29,14 +29,12 @@ const char *FontFntFile = "DroidSans32_256.fnt";
 
 nctl::StaticString<512> auxString;
 nctl::StaticString<4096> comboString;
-bool scaleWindowToMonitor = true;
 float scalingFactor = 1.0f;
-bool scalingFactorHasChanged = false;
 float referenceScalingFactor = 1.0f;
 nc::Vector2i referenceWindowSize;
 
 int selectedVideoMode[nc::IGfxDevice::MaxMonitors] = {};
-int imguiWindowSizeFrames = 2;
+int imguiWindowSizeFrames = 3;
 int swapInterval = 1;
 
 const float fpsShowTime = 0.25f;
@@ -69,43 +67,6 @@ const char *backendName()
 	return "Unknown";
 }
 
-float monitorScalingFactor()
-{
-	nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
-#ifdef __APPLE__
-	const float factor = gfxDevice.drawableWidth() / static_cast<float>(gfxDevice.width());
-#else
-	const nc::Vector2f &scale = gfxDevice.monitor().scale;
-	const float factor = scale.x > scale.y ? scale.x : scale.y;
-#endif
-
-	return factor;
-}
-
-bool scaleWindow(float newFactor)
-{
-	bool factorChanged = false;
-
-#if !defined(__APPLE__) && !defined(__EMSCRIPTEN__)
-	static float factor = 1.0f;
-	nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
-
-	if (newFactor != factor)
-	{
-		if (gfxDevice.isFullScreen() == false && newFactor != factor)
-		{
-			const float factorRatio = newFactor / referenceScalingFactor;
-			gfxDevice.setWindowSize(referenceWindowSize.x * factorRatio, referenceWindowSize.y * factorRatio);
-		}
-
-		factor = newFactor;
-		factorChanged = true;
-	}
-#endif
-
-	return factorChanged;
-}
-
 bool centerWindow(unsigned int monitorIndex)
 {
 	nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
@@ -113,15 +74,18 @@ bool centerWindow(unsigned int monitorIndex)
 	if (monitorIndex > gfxDevice.numMonitors() - 1)
 		return false;
 
+	const bool windowScaling = nc::theApplication().appConfiguration().windowScaling;
 	const nc::IGfxDevice::VideoMode &videoMode = gfxDevice.currentVideoMode(monitorIndex);
 	const nc::IGfxDevice::Monitor &monitor = gfxDevice.monitor(monitorIndex);
 
 	const nc::Vector2i halfScreenResolution(videoMode.width / 2, videoMode.height / 2);
-	const float factorRatio = monitor.scale.x / referenceScalingFactor;
+	const float factorRatio = windowScaling ? gfxDevice.windowScalingFactor() / referenceScalingFactor : 1.0f;
 	const nc::Vector2i scaledWindowSize(referenceWindowSize.x * factorRatio, referenceWindowSize.y * factorRatio);
+	const bool isFullscreen = gfxDevice.isFullScreen();
 	gfxDevice.setFullScreen(false);
 	gfxDevice.setWindowPosition(monitor.position + halfScreenResolution - scaledWindowSize / 2);
-	gfxDevice.setWindowSize(scaledWindowSize);
+	if (isFullscreen && windowScaling)
+		gfxDevice.setWindowSize(scaledWindowSize);
 
 	return true;
 }
@@ -163,6 +127,7 @@ nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
 	setDataPath(config);
+	//config.windowScaling = false;
 }
 
 void MyEventHandler::onInit()
@@ -183,7 +148,7 @@ void MyEventHandler::onInit()
 	textNode_->setColor(255, 255, 0, 255);
 
 	nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
-	referenceScalingFactor = monitorScalingFactor();
+	referenceScalingFactor = gfxDevice.windowScalingFactor();
 	referenceWindowSize = gfxDevice.resolution();
 	// If starting in full screen, set the reference window size to a scaled half full screen resolution
 	if (gfxDevice.isFullScreen())
@@ -197,36 +162,21 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
-	scalingFactorHasChanged = false;
-	if (scaleWindowToMonitor)
-		scalingFactor = monitorScalingFactor();
-
-	scalingFactorHasChanged = scaleWindow(scalingFactor);
-	if (scalingFactorHasChanged)
-	{
-		if (scaleWindowToMonitor)
-			imguiWindowSizeFrames = 2;
-		nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
-	}
-	else if (imguiWindowSizeFrames > 0)
-		imguiWindowSizeFrames--;
-
 	if (showImGui)
 	{
+		nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
 		if (ImGui::GetIO().FontGlobalScale != scalingFactor)
 		{
 			ImGui::GetIO().FontGlobalScale = scalingFactor;
 			ImGui::GetStyle() = ImGuiStyle();
 			ImGui::GetStyle().ScaleAllSizes(scalingFactor);
 		}
-		const ImGuiCond conditionFlag = imguiWindowSizeFrames > 0 ? ImGuiCond_Always : ImGuiCond_FirstUseEver;
+		const ImGuiCond conditionFlag = (imguiWindowSizeFrames-- > 0) ? ImGuiCond_Always : ImGuiCond_FirstUseEver;
 		ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f), conditionFlag);
 		ImGui::SetNextWindowPos(ImVec2(40.0f * scalingFactor, 40.0f * scalingFactor), conditionFlag);
 		if (ImGui::Begin("apptest_scaling", &showImGui))
 		{
 			ImGui::Text("Backend: %s", backendName());
-
-			nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
 
 			const unsigned int numMonitors = gfxDevice.numMonitors();
 			for (unsigned int monitorIndex = 0; monitorIndex < numMonitors; monitorIndex++)
@@ -291,7 +241,8 @@ void MyEventHandler::onFrameStart()
 				}
 			}
 
-			ImGui::Text("Window resolution: %d x %d (resizable: %s)", gfxDevice.width(), gfxDevice.height(), gfxDevice.isResizable() ? "yes" : "no");
+			const bool windowScaling = nc::theApplication().appConfiguration().windowScaling;
+			ImGui::Text("Window resolution: %d x %d (resizable: %s, scaled: %s)", gfxDevice.width(), gfxDevice.height(), gfxDevice.isResizable() ? "yes" : "no", windowScaling ? "yes" : "no");
 			ImGui::Text("Drawable resolution: %d x %d", gfxDevice.drawableWidth(), gfxDevice.drawableHeight());
 #if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
 			ImGui::Text("Window position: <%d, %d>", gfxDevice.windowPositionX(), gfxDevice.windowPositionY());
@@ -308,16 +259,6 @@ void MyEventHandler::onFrameStart()
 			}
 			ImGui::EndDisabled();
 #endif
-
-			ImGui::Separator();
-			ImGui::Checkbox("Scale window to monitor", &scaleWindowToMonitor);
-			ImGui::BeginDisabled(scaleWindowToMonitor == true);
-			ImGui::SliderFloat("Scaling", &scalingFactor, 0.5f, 2.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-
-			ImGui::SameLine();
-			if (ImGui::Button("Reset"))
-				scalingFactor = 1.0f;
-			ImGui::EndDisabled();
 
 			ImGui::Separator();
 #ifndef __ANDROID__
@@ -349,6 +290,13 @@ void MyEventHandler::onFrameStart()
 		sprites_[i]->setScale(0.5f * scalingFactor);
 		sprites_[i]->setPosition(width * 0.1f + width * 0.8f / (NumSprites - 1) * i, sinf(360.0f * nc::fDegToRad / (NumSprites - 1) * i) * height * 0.25f + height * 0.5f);
 	}
+}
+
+void MyEventHandler::onChangeScalingFactor(float factor)
+{
+	scalingFactor = factor;
+	if (nc::theApplication().appConfiguration().windowScaling)
+		imguiWindowSizeFrames = 3;
 }
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)

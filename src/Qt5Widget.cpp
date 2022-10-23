@@ -115,7 +115,6 @@ bool Qt5Widget::event(QEvent *event)
 				makeCurrent();
 				gfxDevice.setSize(size.width(), size.height());
 				application_.resizeScreenViewport(size.width(), size.height());
-				application_.appEventHandler_->onResizeWindow(size.width(), size.height());
 				doneCurrent();
 			}
 			return QWidget::event(event);
@@ -160,7 +159,6 @@ void Qt5Widget::resizeGL(int w, int h)
 		Qt5GfxDevice &gfxDevice = static_cast<Qt5GfxDevice &>(*application_.gfxDevice_);
 		gfxDevice.setSize(w, h);
 		application_.resizeScreenViewport(w, h);
-		application_.appEventHandler_->onResizeWindow(w, h);
 		gfxDevice.resetTextureBinding();
 	}
 }

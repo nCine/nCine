@@ -24,6 +24,7 @@ AppConfiguration::AppConfiguration()
       resolution(1280, 720),
       fullScreen(false),
       resizable(false),
+      windowScaling(true),
       frameLimit(0),
       windowTitle(128),
       windowIconFilename(128),
@@ -71,6 +72,11 @@ AppConfiguration::AppConfiguration()
 	dataPath() = "/";
 	// Always disable mapping on Emscripten as it is not supported by WebGL 2
 	useBufferMapping = false;
+#endif
+
+#if defined(__linux__) && defined(WITH_SDL)
+	// DPI queries do not seem to work reliably on X11 with SDL2
+	windowScaling = false;
 #endif
 }
 

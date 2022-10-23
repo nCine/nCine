@@ -516,7 +516,7 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 void MyEventHandler::onInit()
 {
 #ifdef __ANDROID__
-	const float scalingFactor = nc::theApplication().gfxDevice().monitor().scale.x;
+	const float scalingFactor = nc::theApplication().gfxDevice().windowScalingFactor();
 	ImGui::GetIO().FontGlobalScale = scalingFactor;
 	ImGui::GetStyle().ScaleAllSizes(scalingFactor);
 #endif
@@ -570,7 +570,7 @@ void MyEventHandler::onInit()
 void MyEventHandler::onFrameStart()
 {
 #ifdef __ANDROID__
-	const float scalingFactor = nc::theApplication().gfxDevice().monitor().scale.x;
+	const float scalingFactor = nc::theApplication().gfxDevice().windowScalingFactor();
 #else
 	const float scalingFactor = 1.0f;
 #endif

@@ -46,8 +46,9 @@ char EglGfxDevice::monitorNames_[MaxMonitors][MaxMonitorNameLength];
 ///////////////////////////////////////////////////////////
 
 EglGfxDevice::EglGfxDevice(struct android_app *state, const GLContextInfo &glContextInfo, const DisplayMode &displayMode)
-    : IGfxDevice(WindowMode(0, 0, true, false), glContextInfo, displayMode), state_(state)
+    : IGfxDevice(WindowMode(0, 0, true, false, false), glContextInfo, displayMode), state_(state)
 {
+	updateMonitors();
 	initDevice();
 }
 
@@ -266,8 +267,6 @@ void EglGfxDevice::initDevice()
 	eglGetConfigAttrib(display_, config_, EGL_SAMPLES, &samples);
 
 	LOGI_X("Surface configuration is size:%dx%d, RGBA:%d%d%d%d, depth:%d, stencil:%d, samples:%d", width_, height_, red, green, blue, alpha, depth, stencil, samples);
-
-	updateMonitors();
 }
 
 void EglGfxDevice::updateMonitors()

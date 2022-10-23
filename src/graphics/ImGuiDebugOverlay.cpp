@@ -628,6 +628,7 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("Resolution: %d x %d", appCfg.resolution.x, appCfg.resolution.y);
 		ImGui::Text("Full Screen: %s", appCfg.fullScreen ? "true" : "false");
 		ImGui::Text("Resizable: %s", appCfg.resizable ? "true" : "false");
+		ImGui::Text("Window Scaling: %s", appCfg.windowScaling ? "true" : "false");
 		ImGui::Text("Frame Limit: %u", appCfg.frameLimit);
 
 		ImGui::Separator();

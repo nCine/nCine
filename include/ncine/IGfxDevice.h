@@ -34,14 +34,15 @@ class DLL_PUBLIC IGfxDevice
 	struct WindowMode
 	{
 		WindowMode()
-		    : width(0), height(0), isFullScreen(false), isResizable(false) {}
-		WindowMode(unsigned int w, unsigned int h, bool fullscreen, bool resizable)
-		    : width(w), height(h), isFullScreen(fullscreen), isResizable(resizable) {}
+		    : width(0), height(0), isFullScreen(false), isResizable(false), hasWindowScaling(true) {}
+		WindowMode(unsigned int w, unsigned int h, bool fullscreen, bool resizable, bool windowScaling)
+		    : width(w), height(h), isFullScreen(fullscreen), isResizable(resizable), hasWindowScaling(windowScaling) {}
 
 		unsigned int width;
 		unsigned int height;
 		bool isFullScreen;
 		bool isResizable;
+		bool hasWindowScaling;
 	};
 
 	/// A structure representing a video mode supported by a monitor
@@ -185,6 +186,9 @@ class DLL_PUBLIC IGfxDevice
 	/*! \note Call this method <b>before>/b> enabling full screen */
 	inline virtual bool setVideoMode(unsigned int modeIndex) { return false; }
 
+	/// Returns the scaling factor for application window
+	float windowScalingFactor() const;
+
   protected:
 	/// The default value used for a monitor DPI when the real vaue cannot be queried
 	static const float DefaultDpi;
@@ -211,6 +215,12 @@ class DLL_PUBLIC IGfxDevice
 	/// Used as a cache to avoid searching the current video mode in a monitor's array
 	mutable VideoMode currentVideoMode_;
 
+	/// The window scaling factor from last frame
+	float previousScalingFactor_;
+
+	/// Scales the window size by the display factor before creating it for the first time
+	void initWindowScaling(const WindowMode &windowMode);
+
 	/// Inits the OpenGL viewport based on the drawable resolution
 	void initGLViewport();
 
@@ -223,6 +233,9 @@ class DLL_PUBLIC IGfxDevice
 
 	/// Updates the screen swapping back and front buffers
 	virtual void update() = 0;
+
+	/// Updates the window size based on the monitor's scaling factor
+	bool scaleWindowSize(bool windowScaling);
 
 	friend class Application;
 #if defined(WITH_SDL)

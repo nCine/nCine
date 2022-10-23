@@ -31,6 +31,7 @@ nctl::StaticString<Qt5GfxDevice::MaxMonitorNameLength> Qt5GfxDevice::monitorName
 Qt5GfxDevice::Qt5GfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode, Qt5Widget &widget)
     : IGfxDevice(windowMode, glContextInfo, displayMode), widget_(widget)
 {
+	initWindowScaling(windowMode);
 	initDevice();
 }
 
@@ -183,7 +184,7 @@ void Qt5GfxDevice::resetFramebufferObjectBinding()
 
 void Qt5GfxDevice::initDevice()
 {
-	updateMonitors();
+	// At this point `updateMonitors()` has already been called by `initWindowScaling()`
 
 	QSurfaceFormat format;
 	format.setRedBufferSize(displayMode_.redBits());

@@ -45,6 +45,8 @@ class LuaIGfxDevice
 
 	static int currentVideoMode(lua_State *L);
 	static int setVideoMode(lua_State *L);
+
+	static int windowScalingFactor(lua_State *L);
 };
 
 }

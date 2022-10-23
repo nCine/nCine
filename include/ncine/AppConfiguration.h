@@ -32,6 +32,8 @@ class DLL_PUBLIC AppConfiguration
 	bool fullScreen;
 	/// The flag is `true` if the window is going to be resizable
 	bool resizable;
+	/// The flag is `true` if the window size is automatically scaled according to the display factor
+	bool windowScaling;
 	/// The maximum number of frames to render per second or 0 for no limit
 	unsigned int frameLimit;
 

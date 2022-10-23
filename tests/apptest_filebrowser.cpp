@@ -126,7 +126,7 @@ bool pinDirectory(FileDialogConfig &config, const char *path)
 bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 {
 #ifdef __ANDROID__
-	const float scalingFactor = nc::theApplication().gfxDevice().monitor().scale.x;
+	const float scalingFactor = nc::theApplication().gfxDevice().windowScalingFactor();
 #else
 	const float scalingFactor = 1.0f;
 #endif
@@ -659,7 +659,7 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 void MyEventHandler::onInit()
 {
 #ifdef __ANDROID__
-	const float scalingFactor = nc::theApplication().gfxDevice().monitor().scale.x;
+	const float scalingFactor = nc::theApplication().gfxDevice().windowScalingFactor();
 	ImGui::GetIO().FontGlobalScale = scalingFactor;
 	ImGui::GetStyle().ScaleAllSizes(scalingFactor);
 #endif

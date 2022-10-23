@@ -19,6 +19,7 @@ namespace AppConfiguration {
 	static const char *resolution = "resolution";
 	static const char *fullScreen = "full_screen";
 	static const char *resizable = "resizable";
+	static const char *windowScaling = "window_scaling";
 	static const char *frameLimit = "frame_limit";
 
 	static const char *windowTitle = "window_title";
@@ -55,7 +56,7 @@ namespace AppConfiguration {
 
 void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 {
-	lua_createtable(L, 0, 30);
+	lua_createtable(L, 0, 31);
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::dataPath, appCfg.dataPath().data());
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::logFile, appCfg.logFile.data());
@@ -66,6 +67,7 @@ void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 	LuaVector2iUtils::pushField(L, LuaNames::AppConfiguration::resolution, appCfg.resolution);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::fullScreen, appCfg.fullScreen);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::resizable, appCfg.resizable);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::windowScaling, appCfg.windowScaling);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::frameLimit, appCfg.frameLimit);
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::windowTitle, appCfg.windowTitle.data());
@@ -131,6 +133,8 @@ void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
 	appCfg.fullScreen = fullScreen;
 	const bool resizable = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::resizable);
 	appCfg.resizable = resizable;
+	const bool windowScaling = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::windowScaling);
+	appCfg.windowScaling = windowScaling;
 	const unsigned int frameLimit = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::frameLimit);
 	appCfg.frameLimit = frameLimit;
 
