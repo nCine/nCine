@@ -1,4 +1,4 @@
-#include "Tracy.hpp"
+#include "tracy/Tracy.hpp"
 
 #ifdef WITH_ALLOCATORS
 	#include "allocators_config.h"

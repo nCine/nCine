@@ -446,12 +446,12 @@ if(NCINE_WITH_TRACY)
 
 	# For external projects compiling using an nCine build directory
 	set(TRACY_INCLUDE_ONLY_DIR ${TRACY_SOURCE_DIR}/include_only)
-	file(GLOB TRACY_ROOT_HPP "${TRACY_SOURCE_DIR}/*.hpp" "${TRACY_SOURCE_DIR}/*.h")
-	file(COPY ${TRACY_ROOT_HPP} DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy)
-	file(GLOB TRACY_COMMON_HPP "${TRACY_SOURCE_DIR}/common/*.hpp" "${TRACY_SOURCE_DIR}/common/*.h")
+	file(GLOB TRACY_ROOT_HPP "${TRACY_SOURCE_DIR}/public/tracy/*.hpp" "${TRACY_SOURCE_DIR}/public/tracy/*.h")
+	file(COPY ${TRACY_ROOT_HPP} DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy/tracy)
+	file(GLOB TRACY_COMMON_HPP "${TRACY_SOURCE_DIR}/public/common/*.hpp" "${TRACY_SOURCE_DIR}/public/common/*.h")
 	file(COPY ${TRACY_COMMON_HPP} DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy/common)
-	file(COPY "${TRACY_SOURCE_DIR}/common/TracySystem.cpp" DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy/common)
-	file(GLOB TRACY_CLIENT_HPP "${TRACY_SOURCE_DIR}/client/*.hpp" "${TRACY_SOURCE_DIR}/client/*.h")
+	file(COPY "${TRACY_SOURCE_DIR}/public/common/TracySystem.cpp" DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy/common)
+	file(GLOB TRACY_CLIENT_HPP "${TRACY_SOURCE_DIR}/public/client/*.hpp" "${TRACY_SOURCE_DIR}/public/client/*.h")
 	file(COPY ${TRACY_CLIENT_HPP} DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy/client)
 	file(COPY "${TRACY_SOURCE_DIR}/LICENSE" DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy)
 
@@ -462,7 +462,7 @@ if(NCINE_WITH_TRACY)
 
 	list(APPEND SOURCES
 		${NCINE_ROOT}/src/tracy_memory.cpp
-		${TRACY_SOURCE_DIR}/TracyClient.cpp
+		${TRACY_SOURCE_DIR}/public/TracyClient.cpp
 	)
 endif()
 

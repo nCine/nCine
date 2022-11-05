@@ -63,7 +63,7 @@
 #endif
 
 #ifdef WITH_TRACY
-	#include "TracyLua.hpp"
+	#include "tracy/TracyLua.hpp"
 #endif
 
 #ifdef WITH_GIT_VERSION

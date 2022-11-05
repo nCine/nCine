@@ -11,7 +11,7 @@
 		#define glGetQueryObjectui64v glGetQueryObjectui64vEXT
 	#endif
 
-	#include "TracyOpenGL.hpp"
+	#include "tracy/TracyOpenGL.hpp"
 
 #else
 

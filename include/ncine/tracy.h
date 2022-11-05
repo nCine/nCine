@@ -1,7 +1,7 @@
 #ifdef WITH_TRACY
 
-	#include "Tracy.hpp"
-	#include "TracyC.h"
+	#include "tracy/Tracy.hpp"
+	#include "tracy/TracyC.h"
 
 #else
 
