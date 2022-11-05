@@ -90,10 +90,11 @@ class RenderResources
 	static nctl::UniquePtr<RenderCommandPool> renderCommandPool_;
 	static nctl::UniquePtr<RenderBatcher> renderBatcher_;
 
-	static nctl::UniquePtr<GLShaderProgram> defaultShaderPrograms_[16];
+	static const unsigned int NumDefaultShaderPrograms = 18;
+	static nctl::UniquePtr<GLShaderProgram> defaultShaderPrograms_[NumDefaultShaderPrograms];
 	static nctl::HashMap<const GLShaderProgram *, GLShaderProgram *> batchedShaders_;
 
-	static const int UniformsBufferSize = 128; // two 4x4 float matrices
+	static const unsigned int UniformsBufferSize = 128; // two 4x4 float matrices
 	static unsigned char cameraUniformsBuffer_[UniformsBufferSize];
 	static nctl::HashMap<GLShaderProgram *, CameraUniformData> cameraUniformDataMap_;
 

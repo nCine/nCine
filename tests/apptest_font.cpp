@@ -30,11 +30,25 @@ const char *Font3FntFile = "Roboto-Regular32_256.fnt";
 
 #if NCINE_WITH_IMGUI
 const char *AlignmentLabels[] = { "Left", "Center", "Right" };
+const char *RenderModeLabels[] = { "GLYPH_IN_ALPHA", "GLYPH_IN_RED", "GLYPH_SPRITE" };
 nctl::StaticString<128> auxString;
 nctl::StaticString<256> comboString;
 nctl::String textNodeString(nc::TextNode::DefaultStringLength);
 bool showImGui = true;
 #endif
+
+const char *renderModeToString(nc::Font::RenderMode renderMode)
+{
+	switch (renderMode)
+	{
+		case nc::Font::RenderMode::GLYPH_IN_ALPHA:
+			return "GLYPH_IN_ALPHA";
+		case nc::Font::RenderMode::GLYPH_IN_RED:
+			return "GLYPH_IN_RED";
+		case nc::Font::RenderMode::GLYPH_SPRITE:
+			return "GLYPH_SPRITE";
+	}
+}
 
 }
 
@@ -123,8 +137,8 @@ void MyEventHandler::onInit()
 void MyEventHandler::onFrameStart()
 {
 #if NCINE_WITH_IMGUI
-	ImGui::SetNextWindowSize(ImVec2(400.0f, 400.0f), ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowPos(ImVec2(50.0f, 140.0f), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(400.0f, 430.0f), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowPos(ImVec2(50.0f, 120.0f), ImGuiCond_FirstUseEver);
 	if (showImGui)
 	{
 		if (ImGui::Begin("apptest_font", &showImGui))
@@ -144,6 +158,7 @@ void MyEventHandler::onFrameStart()
 							ImGui::Text("Texture size: %d x %d", font->textureSize().x, font->textureSize().y);
 							ImGui::Text("Number of glyphs: %d", font->numGlyphs());
 							ImGui::Text("Number of kerning pairs: %d", font->numKernings());
+							ImGui::Text("Render mode: %s", renderModeToString(font->renderMode()));
 
 							ImGui::TreePop();
 						}
@@ -170,6 +185,10 @@ void MyEventHandler::onFrameStart()
 					if (ImGui::Combo("Alignment", &currentAlignment, AlignmentLabels, IM_ARRAYSIZE(AlignmentLabels)))
 						texts_[i]->setAlignment(static_cast<nc::TextNode::Alignment>(currentAlignment));
 
+					int currentRenderMode = static_cast<int>(texts_[i]->renderMode());
+					if (ImGui::Combo("Render mode", &currentRenderMode, RenderModeLabels, IM_ARRAYSIZE(RenderModeLabels)))
+						texts_[i]->setRenderMode(static_cast<nc::Font::RenderMode>(currentRenderMode));
+
 					nc::Colorf color(texts_[i]->color());
 					if (ImGui::ColorEdit4("Color", color.data()))
 						texts_[i]->setColor(color);
@@ -177,6 +196,16 @@ void MyEventHandler::onFrameStart()
 					bool withKerning = texts_[i]->withKerning();
 					if (ImGui::Checkbox("Kerning", &withKerning))
 						texts_[i]->enableKerning(withKerning);
+
+					ImGui::SameLine();
+					const bool renderModeOverridden = (texts_[i]->font() && texts_[i]->font()->renderMode() != texts_[i]->renderMode());
+					ImGui::BeginDisabled(renderModeOverridden == false);
+					if (ImGui::Button("Reset render mode"))
+					{
+						if (texts_[i]->font())
+							texts_[i]->setRenderMode(texts_[i]->font()->renderMode());
+					}
+					ImGui::EndDisabled();
 
 					ImGui::TreePop();
 				}

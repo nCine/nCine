@@ -20,6 +20,9 @@ namespace TextNode {
 	static const char *font = "get_font";
 	static const char *setFont = "set_font";
 
+	static const char *renderMode = "get_render_mode";
+	static const char *setRenderMode = "set_render_mode";
+
 	static const char *withKerning = "get_kerning";
 	static const char *enableKerning = "set_kerning";
 
@@ -64,6 +67,9 @@ void LuaTextNode::expose(LuaStateManager *stateManager)
 
 	LuaUtils::addFunction(L, LuaNames::TextNode::font, font);
 	LuaUtils::addFunction(L, LuaNames::TextNode::setFont, setFont);
+
+	LuaUtils::addFunction(L, LuaNames::TextNode::renderMode, renderMode);
+	LuaUtils::addFunction(L, LuaNames::TextNode::setRenderMode, setRenderMode);
 
 	LuaUtils::addFunction(L, LuaNames::TextNode::withKerning, withKerning);
 	LuaUtils::addFunction(L, LuaNames::TextNode::enableKerning, enableKerning);
@@ -198,6 +204,29 @@ int LuaTextNode::setFont(lua_State *L)
 		textnode->setFont(font);
 	else
 		LuaUtils::pushNil(L);
+
+	return 0;
+}
+
+int LuaTextNode::renderMode(lua_State *L)
+{
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -1);
+
+	if (textnode)
+		LuaUtils::push(L, static_cast<int64_t>(textnode->renderMode()));
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaTextNode::setRenderMode(lua_State *L)
+{
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -2);
+	const Font::RenderMode renderMode = static_cast<Font::RenderMode>(LuaUtils::retrieve<int64_t>(L, -1));
+
+	if (textnode)
+		textnode->setRenderMode(renderMode);
 
 	return 0;
 }

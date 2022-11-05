@@ -32,6 +32,7 @@ namespace Shader {
 	//static const char *SPRITE_NOTEXTURE = "SPRITE_NOTEXTURE";
 	static const char *TEXTNODE_ALPHA = "TEXTNODE_ALPHA";
 	static const char *TEXTNODE_RED = "TEXTNODE_RED";
+	static const char *TEXTNODE_SPRITE = "TEXTNODE_SPRITE";
 	static const char *DefaultFragment = "shader_default_fragment";
 
 	static const char *loadFromMemory = "load_from_memory";
@@ -86,13 +87,14 @@ void LuaShader::exposeConstants(lua_State *L)
 
 	lua_setfield(L, -2, LuaNames::Shader::DefaultVertex);
 
-	lua_createtable(L, 0, 5);
+	lua_createtable(L, 0, 6);
 
 	LuaUtils::pushField(L, LuaNames::Shader::SPRITE, static_cast<int64_t>(Shader::DefaultFragment::SPRITE));
 	LuaUtils::pushField(L, LuaNames::Shader::SPRITE_GRAY, static_cast<int64_t>(Shader::DefaultFragment::SPRITE_GRAY));
 	LuaUtils::pushField(L, LuaNames::Shader::SPRITE_NOTEXTURE, static_cast<int64_t>(Shader::DefaultFragment::SPRITE_NOTEXTURE));
 	LuaUtils::pushField(L, LuaNames::Shader::TEXTNODE_ALPHA, static_cast<int64_t>(Shader::DefaultFragment::TEXTNODE_ALPHA));
 	LuaUtils::pushField(L, LuaNames::Shader::TEXTNODE_RED, static_cast<int64_t>(Shader::DefaultFragment::TEXTNODE_RED));
+	LuaUtils::pushField(L, LuaNames::Shader::TEXTNODE_SPRITE, static_cast<int64_t>(Shader::DefaultFragment::TEXTNODE_SPRITE));
 
 	lua_setfield(L, -2, LuaNames::Shader::DefaultFragment);
 }

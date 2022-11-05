@@ -630,6 +630,7 @@ void LuaStateManager::exposeConstants()
 		LuaDrawableNode::exposeConstants(L_);
 		LuaRectAnimation::exposeConstants(L_);
 		LuaMeshSprite::exposeConstants(L_);
+		LuaFont::exposeConstants(L_);
 		LuaTextNode::exposeConstants(L_);
 		LuaParticleAffector::exposeConstants(L_);
 	}

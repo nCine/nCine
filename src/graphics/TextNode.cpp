@@ -8,6 +8,19 @@
 
 namespace ncine {
 
+Material::ShaderProgramType fontRenderModeToShaderProgram(const Font::RenderMode renderMode)
+{
+	switch (renderMode)
+	{
+		case Font::RenderMode::GLYPH_IN_ALPHA:
+			return Material::ShaderProgramType::TEXTNODE_ALPHA;
+		case Font::RenderMode::GLYPH_IN_RED:
+			return Material::ShaderProgramType::TEXTNODE_RED;
+		case Font::RenderMode::GLYPH_SPRITE:
+			return Material::ShaderProgramType::TEXTNODE_SPRITE;
+	}
+}
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
@@ -84,8 +97,8 @@ void TextNode::setFont(Font *font)
 	font_ = font;
 	if (font_)
 	{
-		const Material::ShaderProgramType shaderProgramType = font_->renderMode() == Font::RenderMode::GLYPH_IN_RED
-		                                                          ? Material::ShaderProgramType::TEXTNODE_RED
+		const Material::ShaderProgramType shaderProgramType = font_
+		                                                          ? fontRenderModeToShaderProgram(font_->renderMode())
 		                                                          : Material::ShaderProgramType::TEXTNODE_ALPHA;
 		const bool hasChanged = renderCommand_->material().setShaderProgramType(shaderProgramType);
 		if (hasChanged)
@@ -102,6 +115,28 @@ void TextNode::setFont(Font *font)
 		width_ = 0;
 		height_ = 0;
 	}
+}
+
+Font::RenderMode TextNode::renderMode() const
+{
+	switch (renderCommand_->material().shaderProgramType())
+	{
+		default:
+		case Material::ShaderProgramType::TEXTNODE_ALPHA:
+			return Font::RenderMode::GLYPH_IN_ALPHA;
+		case Material::ShaderProgramType::TEXTNODE_RED:
+			return Font::RenderMode::GLYPH_IN_RED;
+		case Material::ShaderProgramType::TEXTNODE_SPRITE:
+			return Font::RenderMode::GLYPH_SPRITE;
+	}
+}
+
+void TextNode::setRenderMode(Font::RenderMode renderMode)
+{
+	const Material::ShaderProgramType shaderProgramType = fontRenderModeToShaderProgram(renderMode);
+	const bool hasChanged = renderCommand_->material().setShaderProgramType(shaderProgramType);
+	if (hasChanged)
+		shaderHasChanged();
 }
 
 void TextNode::enableKerning(bool withKerning)
@@ -304,15 +339,9 @@ void TextNode::init()
 	renderCommand_->setType(RenderCommand::CommandTypes::TEXT);
 	renderCommand_->material().setBlendingEnabled(true);
 
-	const Material::ShaderProgramType shaderProgramType = [](Font *font)
-	{
-		if (font)
-			return (font->renderMode() == Font::RenderMode::GLYPH_IN_RED)
-			           ? Material::ShaderProgramType::TEXTNODE_RED
-			           : Material::ShaderProgramType::TEXTNODE_ALPHA;
-		else
-			return Material::ShaderProgramType::TEXTNODE_ALPHA;
-	}(font_);
+	const Material::ShaderProgramType shaderProgramType = font_
+	                                                          ? fontRenderModeToShaderProgram(font_->renderMode())
+	                                                          : Material::ShaderProgramType::TEXTNODE_ALPHA;
 	renderCommand_->material().setShaderProgramType(shaderProgramType);
 	shaderHasChanged();
 

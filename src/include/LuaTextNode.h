@@ -27,6 +27,9 @@ class LuaTextNode
 	static int font(lua_State *L);
 	static int setFont(lua_State *L);
 
+	static int renderMode(lua_State *L);
+	static int setRenderMode(lua_State *L);
+
 	static int withKerning(lua_State *L);
 	static int enableKerning(lua_State *L);
 

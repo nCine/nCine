@@ -340,8 +340,7 @@ void Font::determineRenderMode(const FntParser &fntParser)
 {
 	const FntParser::CommonTag &commonTag = fntParser.commonTag();
 
-	Texture *texture = (texture_ != nullptr) ? texture_.get() : texturePtr_;
-
+	const Texture *texture = (texture_ != nullptr) ? texture_.get() : texturePtr_;
 	if (texture)
 	{
 		if (texture->numChannels() == 1)
@@ -359,6 +358,12 @@ void Font::determineRenderMode(const FntParser &fntParser)
 					renderMode_ = RenderMode::GLYPH_IN_ALPHA;
 				else if (commonTag.redChnl == FntParser::ChannelData::GLYPH)
 					renderMode_ = RenderMode::GLYPH_IN_RED;
+
+				if (commonTag.redChnl == FntParser::ChannelData::GLYPH && commonTag.greenChnl == FntParser::ChannelData::GLYPH &&
+				    commonTag.blueChnl == FntParser::ChannelData::GLYPH && commonTag.alphaChnl == FntParser::ChannelData::GLYPH)
+				{
+					renderMode_ = RenderMode::GLYPH_SPRITE;
+				}
 			}
 		}
 	}

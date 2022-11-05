@@ -470,6 +470,10 @@ bool Shader::loadDefaultShader(DefaultFragment fragment)
 			break;
 		case DefaultFragment::TEXTNODE_RED:
 			fragmentShader = "textnode_red_fs.glsl";
+			break;
+		case DefaultFragment::TEXTNODE_SPRITE:
+			fragmentShader = "sprite_fs.glsl";
+			break;
 	}
 	const bool hasCompiled = glShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/" + fragmentShader).data());
 #else
@@ -490,6 +494,10 @@ bool Shader::loadDefaultShader(DefaultFragment fragment)
 			break;
 		case DefaultFragment::TEXTNODE_RED:
 			fragmentShader = ShaderStrings::textnode_red_fs + 1;
+			break;
+		case DefaultFragment::TEXTNODE_SPRITE:
+			fragmentShader = ShaderStrings::sprite_fs + 1;
+			break;
 	}
 	const bool hasCompiled = glShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, fragmentShader);
 #endif

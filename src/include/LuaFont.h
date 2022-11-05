@@ -12,6 +12,7 @@ class LuaFont
 {
   public:
 	static void expose(LuaStateManager *stateManager);
+	static void exposeConstants(lua_State *L);
 	static void release(void *object);
 
   private:
@@ -25,6 +26,8 @@ class LuaFont
 	static int textureSize(lua_State *L);
 	static int numGlyphs(lua_State *L);
 	static int numKernings(lua_State *L);
+
+	static int renderMode(lua_State *L);
 };
 
 }

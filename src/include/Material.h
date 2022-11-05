@@ -35,6 +35,8 @@ class Material
 		TEXTNODE_ALPHA,
 		/// Shader program for TextNode classes with glyph data in red channel
 		TEXTNODE_RED,
+		/// Shader program for TextNode classes with glyph data in all channels (glyphs are colored)
+		TEXTNODE_SPRITE,
 		/// Shader program for a batch of Sprite classes
 		BATCHED_SPRITES,
 		/// Shader program for a batch of Sprite classes with grayscale font texture
@@ -47,10 +49,12 @@ class Material
 		BATCHED_MESH_SPRITES_GRAY,
 		/// Shader program for a batch of MeshSprite classes with solid colors and no texture
 		BATCHED_MESH_SPRITES_NO_TEXTURE,
-		/// Shader program for a batch of TextNode classes with color font texture
+		/// Shader program for a batch of TextNode classes with glyph data in alpha channel
 		BATCHED_TEXTNODES_ALPHA,
-		/// Shader program for a batch of TextNode classes with grayscale font texture
+		/// Shader program for a batch of TextNode classes with glyph data in red channel
 		BATCHED_TEXTNODES_RED,
+		/// Shader program for a batch of TextNode classes with glyph data in all channels (glyphs are colored)
+		BATCHED_TEXTNODES_SPRITE,
 		/// A custom shader program
 		CUSTOM
 	};

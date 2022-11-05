@@ -15,11 +15,16 @@ class Texture;
 class DLL_PUBLIC Font : public Object
 {
   public:
-	/// Depending on the glyph channel a different shader will be used
+	/// The available modes for text nodes rendering
+	/*! \note Depending on the glyph channel a different shader will be used. */
 	enum RenderMode
 	{
+		/// Glyph data is in the alpha channel
+		GLYPH_IN_ALPHA,
+		/// Glyph data is in the red channel
 		GLYPH_IN_RED,
-		GLYPH_IN_ALPHA
+		/// Glyph data is in all four channels (glyphs are colored)
+		GLYPH_SPRITE
 	};
 
 	/// Constructs an empty font object with no glyphs nor kerning pairs
@@ -75,6 +80,7 @@ class DLL_PUBLIC Font : public Object
 	/// Returns a constant pointer to a glyph
 	const FontGlyph *glyph(unsigned int glyphId) const;
 
+	/// Returns the mode detected by the font to render text nodes
 	inline RenderMode renderMode() const { return renderMode_; }
 
 	inline static ObjectType sType() { return ObjectType::FONT; }

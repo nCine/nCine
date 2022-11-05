@@ -56,7 +56,8 @@ void FntParser::parseFntBuffer(const char *buffer, unsigned long int size)
 			parsePageTag(buffer, numPageTags_++);
 		else if (strncmp(buffer, "chars", 5) == 0)
 			parseCharsTag(buffer);
-		else if (strncmp(buffer, "char", 4) == 0 && numCharTags_ < charsTag_.count && numCharTags_ < MaxCharTags)
+		// Some exporters, like AndryBlack's FontBuilder, don't output a `chars` tag
+		else if (strncmp(buffer, "char", 4) == 0 && (numCharTags_ < charsTag_.count || charsTag_.count == 0) && numCharTags_ < MaxCharTags)
 			parseCharTag(buffer, numCharTags_++);
 		else if (strncmp(buffer, "kernings", 8) == 0)
 			parseKerningsTag(buffer);

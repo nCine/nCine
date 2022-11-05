@@ -20,6 +20,12 @@ namespace Font {
 	static const char *textureSize = "get_texture_size";
 	static const char *numGlyphs = "num_glyphs";
 	static const char *numKernings = "num_kernings";
+	static const char *renderMode = "get_render_mode";
+
+	static const char *GLYPH_IN_ALPHA = "GLYPH_IN_ALPHA";
+	static const char *GLYPH_IN_RED = "GLYPH_IN_RED";
+	static const char *GLYPH_SPRITE = "GLYPH_SPRITE";
+	static const char *RenderMode = "font_render_mode";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -29,7 +35,7 @@ namespace Font {
 void LuaFont::expose(LuaStateManager *stateManager)
 {
 	lua_State *L = stateManager->state();
-	lua_createtable(L, 0, 8);
+	lua_createtable(L, 0, 9);
 
 	if (stateManager->apiType() == LuaStateManager::ApiType::FULL)
 	{
@@ -46,7 +52,20 @@ void LuaFont::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::Font::numGlyphs, numGlyphs);
 	LuaUtils::addFunction(L, LuaNames::Font::numKernings, numKernings);
 
+	LuaUtils::addFunction(L, LuaNames::Font::renderMode, renderMode);
+
 	lua_setfield(L, -2, LuaNames::Font::Font);
+}
+
+void LuaFont::exposeConstants(lua_State *L)
+{
+	lua_createtable(L, 0, 3);
+
+	LuaUtils::pushField(L, LuaNames::Font::GLYPH_IN_ALPHA, static_cast<int64_t>(Font::RenderMode::GLYPH_IN_ALPHA));
+	LuaUtils::pushField(L, LuaNames::Font::GLYPH_IN_RED, static_cast<int64_t>(Font::RenderMode::GLYPH_IN_RED));
+	LuaUtils::pushField(L, LuaNames::Font::GLYPH_SPRITE, static_cast<int64_t>(Font::RenderMode::GLYPH_SPRITE));
+
+	lua_setfield(L, -2, LuaNames::Font::RenderMode);
 }
 
 void LuaFont::release(void *object)
@@ -149,6 +168,18 @@ int LuaFont::numKernings(lua_State *L)
 
 	if (font)
 		LuaUtils::push(L, font->numKernings());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaFont::renderMode(lua_State *L)
+{
+	Font *font = LuaUntrackedUserData<Font>::retrieve(L, -1);
+
+	if (font)
+		LuaUtils::push(L, static_cast<int64_t>(font->renderMode()));
 	else
 		LuaUtils::pushNil(L);
 

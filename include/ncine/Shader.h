@@ -49,6 +49,7 @@ class DLL_PUBLIC Shader : public Object
 		SPRITE_NOTEXTURE,
 		TEXTNODE_ALPHA,
 		TEXTNODE_RED,
+		TEXTNODE_SPRITE
 	};
 
 	/// Creates an OpenGL shader program name

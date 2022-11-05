@@ -57,6 +57,11 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Sets the font object
 	void setFont(Font *font);
 
+	/// Returns the render mode used to render this text node
+	Font::RenderMode renderMode() const;
+	/// Sets the render mode used to render this text node, overriding the font one
+	void setRenderMode(Font::RenderMode renderMode);
+
 	/// Returns true if kerning is enabled for this node rendering
 	inline bool withKerning() const { return withKerning_; }
 	/// Sets the kerning flag for this node rendering
