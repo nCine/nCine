@@ -19,6 +19,7 @@ jclass AndroidJniClass_InputDevice::javaClass_ = nullptr;
 jmethodID AndroidJniClass_InputDevice::midGetDevice_ = nullptr;
 jmethodID AndroidJniClass_InputDevice::midGetDeviceIds_ = nullptr;
 jmethodID AndroidJniClass_InputDevice::midGetName_ = nullptr;
+jmethodID AndroidJniClass_InputDevice::midGetDescriptor_ = nullptr;
 jmethodID AndroidJniClass_InputDevice::midGetProductId_ = nullptr;
 jmethodID AndroidJniClass_InputDevice::midGetVendorId_ = nullptr;
 jmethodID AndroidJniClass_InputDevice::midGetMotionRange_ = nullptr;
@@ -27,6 +28,11 @@ jmethodID AndroidJniClass_InputDevice::midHasKeys_ = nullptr;
 jclass AndroidJniClass_KeyCharacterMap::javaClass_ = nullptr;
 jmethodID AndroidJniClass_KeyCharacterMap::midDeviceHasKey_ = nullptr;
 jclass AndroidJniClass_MotionRange::javaClass_ = nullptr;
+jmethodID AndroidJniClass_MotionRange::midGetFlat_ = nullptr;
+jmethodID AndroidJniClass_MotionRange::midGetFuzz_ = nullptr;
+jmethodID AndroidJniClass_MotionRange::midGetMax_ = nullptr;
+jmethodID AndroidJniClass_MotionRange::midGetMin_ = nullptr;
+jmethodID AndroidJniClass_MotionRange::midGetRange_ = nullptr;
 jclass AndroidJniClass_KeyEvent::javaClass_ = nullptr;
 jmethodID AndroidJniClass_KeyEvent::midConstructor_ = nullptr;
 jmethodID AndroidJniClass_KeyEvent::midGetUnicodeCharMetaState_ = nullptr;
@@ -101,6 +107,7 @@ void AndroidJniHelper::detachJVM()
 void AndroidJniHelper::initClasses()
 {
 	AndroidJniClass_Version::init();
+	AndroidJniClass_MotionRange::init();
 	AndroidJniClass_InputDevice::init();
 	AndroidJniClass_KeyCharacterMap::init();
 	AndroidJniClass_KeyEvent::init();
@@ -220,6 +227,7 @@ void AndroidJniClass_InputDevice::init()
 	midGetDevice_ = getStaticMethodID(javaClass_, "getDevice", "(I)Landroid/view/InputDevice;");
 	midGetDeviceIds_ = getStaticMethodID(javaClass_, "getDeviceIds", "()[I");
 	midGetName_ = getMethodID(javaClass_, "getName", "()Ljava/lang/String;");
+	midGetDescriptor_ = getMethodID(javaClass_, "getDescriptor", "()Ljava/lang/String;");
 	midGetProductId_ = getMethodID(javaClass_, "getProductId", "()I");
 	midGetVendorId_ = getMethodID(javaClass_, "getVendorId", "()I");
 	midGetMotionRange_ = getMethodID(javaClass_, "getMotionRange", "(I)Landroid/view/InputDevice$MotionRange;");
@@ -262,6 +270,25 @@ int AndroidJniClass_InputDevice::getName(char *destination, int maxStringSize) c
 	}
 	else
 		strncpy(destination, static_cast<const char *>("Unknown"), maxStringSize);
+
+	return (int(length) < maxStringSize) ? int(length) : maxStringSize;
+}
+
+int AndroidJniClass_InputDevice::getDescriptor(char *destination, int maxStringSize) const
+{
+	jstring strDeviceDescriptor = static_cast<jstring>(jniEnv_->CallObjectMethod(javaObject_, midGetDescriptor_));
+	const jsize length = jniEnv_->GetStringUTFLength(strDeviceDescriptor);
+
+	if (strDeviceDescriptor)
+	{
+		const char *deviceDescriptor = jniEnv_->GetStringUTFChars(strDeviceDescriptor, 0);
+		strncpy(destination, deviceDescriptor, maxStringSize);
+		destination[maxStringSize - 1] = '\0';
+		jniEnv_->ReleaseStringUTFChars(strDeviceDescriptor, deviceDescriptor);
+		jniEnv_->DeleteLocalRef(strDeviceDescriptor);
+	}
+	else if (maxStringSize > 0)
+		destination[0] = '\0';
 
 	return (int(length) < maxStringSize) ? int(length) : maxStringSize;
 }
@@ -337,10 +364,44 @@ bool AndroidJniClass_KeyCharacterMap::deviceHasKey(int button)
 
 // ------------------- AndroidJniClass_MotionRange -------------------
 
-AndroidJniClass_MotionRange::AndroidJniClass_MotionRange(jobject javaObject)
-    : AndroidJniClass(javaObject)
+void AndroidJniClass_MotionRange::init()
 {
 	javaClass_ = findClass("android/view/InputDevice$MotionRange");
+	midGetFlat_ = getMethodID(javaClass_, "getFlat", "()F");
+	midGetFuzz_ = getMethodID(javaClass_, "getFuzz", "()F");
+	midGetMax_ = getMethodID(javaClass_, "getMax", "()F");
+	midGetMin_ = getMethodID(javaClass_, "getMin", "()F");
+	midGetRange_ = getMethodID(javaClass_, "getRange", "()F");
+}
+
+float AndroidJniClass_MotionRange::getFlat() const
+{
+	const jfloat flatValue = jniEnv_->CallFloatMethod(javaObject_, midGetFlat_);
+	return float(flatValue);
+}
+
+float AndroidJniClass_MotionRange::getFuzz() const
+{
+	const jfloat fuzzValue = jniEnv_->CallFloatMethod(javaObject_, midGetFuzz_);
+	return float(fuzzValue);
+}
+
+float AndroidJniClass_MotionRange::getMax() const
+{
+	const jfloat maxValue = jniEnv_->CallFloatMethod(javaObject_, midGetMax_);
+	return float(maxValue);
+}
+
+float AndroidJniClass_MotionRange::getMin() const
+{
+	const jfloat minValue = jniEnv_->CallFloatMethod(javaObject_, midGetMin_);
+	return float(minValue);
+}
+
+float AndroidJniClass_MotionRange::getRange() const
+{
+	const jfloat rangeValue = jniEnv_->CallFloatMethod(javaObject_, midGetRange_);
+	return float(rangeValue);
 }
 
 // ------------------- AndroidJniClass_KeyEvent -------------------

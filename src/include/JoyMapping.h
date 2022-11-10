@@ -90,25 +90,28 @@ class JoyMapping
 			float max;
 		};
 
-		static const int MaxNumAxes = 16;
-		static const int MaxNumButtons = 16;
+		static const int MaxNumAxes = 10; // Maximum value encountered in most databases is `a9`
+		static const int MaxNumButtons = 36; // Maximum value encountered in most databases is `b35`
 		static const int MaxHatButtons = 4; // The four directions
 
 		class Guid
 		{
 		  public:
 			Guid();
-			Guid(const char *string) { fromString(string); }
+			inline Guid(const char *string) { fromString(string); }
 			void fromString(const char *string);
 
 			bool operator==(const Guid &guid) const;
 
 		  private:
-			uint32_t array_[4];
+			static const unsigned int NumComponents = 16;
+			uint8_t array_[NumComponents];
 		} guid;
 
 		char name[MaxNameLength];
 		Axis axes[MaxNumAxes];
+		/// Button axes (buttons mapped as axes, like when analog triggers are missing)
+		AxisName buttonAxes[MaxNumAxes];
 		ButtonName buttons[MaxNumButtons];
 		ButtonName hats[MaxHatButtons];
 
@@ -119,7 +122,8 @@ class JoyMapping
 	static const char *ButtonsStrings[JoyMappedState::NumButtons];
 
 	static const int MaxNumJoysticks = 4;
-	int mappingIndex_[MaxNumJoysticks];
+	static const int InvalidMappingIndex = -1;
+	int mappingIndices_[MaxNumJoysticks];
 	nctl::Array<MappedJoystick> mappings_;
 
 	static JoyMappedStateImpl nullMappedJoyState_;
@@ -130,6 +134,9 @@ class JoyMapping
 	const IInputManager *inputManager_;
 	IInputEventHandler *inputEventHandler_;
 
+#ifdef __ANDROID__
+	MappedJoystick createAndroidDefaultMapping() const;
+#endif
 	void checkConnectedJoystics();
 	int findMappingByGuid(const MappedJoystick::Guid &guid);
 	int findMappingByName(const char *name);

@@ -97,27 +97,40 @@ class AndroidJoystickState : JoystickState
 	float axisNormValue(int axisId) const override;
 
   private:
+	/// SDL_HARDWARE_BUS_BLUETOOTH value
+	static const uint16_t BluetoothBus = 0x05;
+
 	static const unsigned int MaxNameLength = 256;
 	/// All AKEYCODE_BUTTON_* plus AKEYCODE_BACK
 	static const int MaxButtons = AKEYCODE_ESCAPE - AKEYCODE_BUTTON_A + 1;
 	static const int MaxAxes = 10;
-	static const int NumAxesToMap = 8;
+	static const int NumAxesToMap = 12;
 	static const int AxesToMap[NumAxesToMap];
 
 	int deviceId_;
-	char guid_[33];
+	static const unsigned int GuidLength = 16;
+	char guid_[GuidLength];
 	char name_[MaxNameLength];
 
 	int numButtons_;
 	int numHats_;
 	int numAxes_;
+	int numMappedAxes_;
 	bool hasDPad_;
 	bool hasHatAxes_;
 	short int buttonsMapping_[MaxButtons];
 	short int axesMapping_[MaxAxes];
 	bool buttons_[MaxButtons];
+	/// Minimum value for every available axis (used for -1..1 range remapping)
+	float axesMinValues_[MaxAxes];
+	/// Range value for every available axis (used for -1..1 range remapping)
+	float axesRangeValues_[MaxAxes];
+	/// Normalized value in the -1..1 range
 	float axesValues_[MaxAxes];
 	unsigned char hatState_; // no more than one hat is supported
+
+	void createGuid(uint16_t bus, uint16_t vendor, uint16_t product, uint16_t version, const char *name, uint8_t driverSignature, uint8_t driverData);
+	void updateGuidWithCapabilities();
 
 	friend class AndroidInputManager;
 };

@@ -225,6 +225,11 @@ namespace {
 			case ButtonName::DPAD_DOWN: return "DPad_Down";
 			case ButtonName::DPAD_LEFT: return "DPad_Left";
 			case ButtonName::DPAD_RIGHT: return "DPad_Right";
+			case ButtonName::MISC1: return "Misc1";
+			case ButtonName::PADDLE1: return "Paddle1";
+			case ButtonName::PADDLE2: return "Paddle2";
+			case ButtonName::PADDLE3: return "Paddle3";
+			case ButtonName::PADDLE4: return "Paddle4";
 		}
 
 		return "Unknown";

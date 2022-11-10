@@ -84,10 +84,23 @@ class AndroidJniClass_Version : public AndroidJniClass
 class AndroidJniClass_MotionRange : public AndroidJniClass
 {
   public:
-	explicit AndroidJniClass_MotionRange(jobject javaObject);
+	static void init();
+	explicit AndroidJniClass_MotionRange(jobject javaObject)
+	    : AndroidJniClass(javaObject) {}
+
+	float getFlat() const;
+	float getFuzz() const;
+	float getMax() const;
+	float getMin() const;
+	float getRange() const;
 
   private:
 	static jclass javaClass_;
+	static jmethodID midGetFlat_;
+	static jmethodID midGetFuzz_;
+	static jmethodID midGetMax_;
+	static jmethodID midGetMin_;
+	static jmethodID midGetRange_;
 };
 
 /// A class to handle JNI requests to `android.view.InputDevice`
@@ -100,6 +113,7 @@ class AndroidJniClass_InputDevice : public AndroidJniClass
 	static AndroidJniClass_InputDevice getDevice(int deviceId);
 	static int getDeviceIds(int *destination, int maxSize);
 	int getName(char *destination, int maxStringSize) const;
+	int getDescriptor(char *destination, int maxStringSize) const;
 	int getProductId() const;
 	int getVendorId() const;
 	AndroidJniClass_MotionRange getMotionRange(int axis) const;
@@ -111,6 +125,7 @@ class AndroidJniClass_InputDevice : public AndroidJniClass
 	static jmethodID midGetDevice_;
 	static jmethodID midGetDeviceIds_;
 	static jmethodID midGetName_;
+	static jmethodID midGetDescriptor_;
 	static jmethodID midGetVendorId_;
 	static jmethodID midGetProductId_;
 	static jmethodID midGetMotionRange_;

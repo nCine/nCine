@@ -36,7 +36,12 @@ const char *JoyMapping::ButtonsStrings[JoyMappedState::NumButtons] = {
 	"dpup",
 	"dpdown",
 	"dpleft",
-	"dpright"
+	"dpright",
+	"misc1",
+	"paddle1",
+	"paddle2",
+	"paddle3",
+	"paddle4"
 };
 
 JoyMappedStateImpl JoyMapping::nullMappedJoyState_;
@@ -54,6 +59,8 @@ JoyMapping::MappedJoystick::MappedJoystick()
 
 	for (unsigned int i = 0; i < MaxNumAxes; i++)
 		axes[i].name = AxisName::UNKNOWN;
+	for (unsigned int i = 0; i < MaxNumAxes; i++)
+		buttonAxes[i] = AxisName::UNKNOWN;
 	for (unsigned int i = 0; i < MaxNumButtons; i++)
 		buttons[i] = ButtonName::UNKNOWN;
 	for (unsigned int i = 0; i < MaxHatButtons; i++)
@@ -145,18 +152,21 @@ void JoyMapping::onJoyButtonPressed(const JoyButtonEvent &event)
 	if (inputEventHandler_ == nullptr)
 		return;
 
-	const int idToIndex = mappingIndex_[event.joyId];
-	if (idToIndex != -1 &&
-	    event.buttonId >= 0 && event.buttonId < static_cast<int>(MappedJoystick::MaxNumButtons))
+	const int mappingIndex = mappingIndices_[event.joyId];
+	const bool mappingIsValid = (mappingIndex != InvalidMappingIndex && event.buttonId >= 0 &&
+	                             event.buttonId < static_cast<int>(MappedJoystick::MaxNumButtons));
+
+	if (mappingIsValid)
 	{
 		mappedButtonEvent_.joyId = event.joyId;
-		mappedButtonEvent_.buttonName = mappings_[idToIndex].buttons[event.buttonId];
+		mappedButtonEvent_.buttonName = mappings_[mappingIndex].buttons[event.buttonId];
 		if (mappedButtonEvent_.buttonName != ButtonName::UNKNOWN)
 		{
 			const int buttonId = static_cast<int>(mappedButtonEvent_.buttonName);
 			mappedJoyStates_[event.joyId].buttons_[buttonId] = true;
 			inputEventHandler_->onJoyMappedButtonPressed(mappedButtonEvent_);
 		}
+		// There are no button axes mapped in the class constructor
 	}
 }
 
@@ -165,18 +175,21 @@ void JoyMapping::onJoyButtonReleased(const JoyButtonEvent &event)
 	if (inputEventHandler_ == nullptr)
 		return;
 
-	const int idToIndex = mappingIndex_[event.joyId];
-	if (idToIndex != -1 &&
-	    event.buttonId >= 0 && event.buttonId < static_cast<int>(MappedJoystick::MaxNumButtons))
+	const int mappingIndex = mappingIndices_[event.joyId];
+	const bool mappingIsValid = (mappingIndex != InvalidMappingIndex && event.buttonId >= 0 &&
+	                             event.buttonId < static_cast<int>(MappedJoystick::MaxNumButtons));
+
+	if (mappingIsValid)
 	{
 		mappedButtonEvent_.joyId = event.joyId;
-		mappedButtonEvent_.buttonName = mappings_[idToIndex].buttons[event.buttonId];
+		mappedButtonEvent_.buttonName = mappings_[mappingIndex].buttons[event.buttonId];
 		if (mappedButtonEvent_.buttonName != ButtonName::UNKNOWN)
 		{
 			const int buttonId = static_cast<int>(mappedButtonEvent_.buttonName);
 			mappedJoyStates_[event.joyId].buttons_[buttonId] = false;
 			inputEventHandler_->onJoyMappedButtonReleased(mappedButtonEvent_);
 		}
+		// There are no button axes mapped in the class constructor
 	}
 }
 
@@ -185,15 +198,15 @@ void JoyMapping::onJoyHatMoved(const JoyHatEvent &event)
 	if (inputEventHandler_ == nullptr)
 		return;
 
-	const int idToIndex = mappingIndex_[event.joyId];
+	const int mappingIndex = mappingIndices_[event.joyId];
 	// Only the first gamepad hat is mapped
-	if (idToIndex != -1 && event.hatId == 0 &&
-	    mappedJoyStates_[event.joyId].lastHatState_ != event.hatState)
+	const bool mappingIsValid = (mappingIndex != InvalidMappingIndex && event.hatId == 0);
+
+	const unsigned char oldHatState = mappedJoyStates_[event.joyId].lastHatState_;
+	const unsigned char newHatState = event.hatState;
+	if (mappingIsValid && oldHatState != newHatState)
 	{
 		mappedButtonEvent_.joyId = event.joyId;
-
-		const unsigned char oldHatState = mappedJoyStates_[event.joyId].lastHatState_;
-		const unsigned char newHatState = event.hatState;
 
 		const unsigned char firstHatValue = HatState::UP;
 		const unsigned char lastHatValue = HatState::LEFT;
@@ -201,9 +214,9 @@ void JoyMapping::onJoyHatMoved(const JoyHatEvent &event)
 		{
 			if ((oldHatState & hatValue) != (newHatState & hatValue))
 			{
-				int hatIndex = hatStateToIndex(hatValue);
+				const int hatIndex = hatStateToIndex(hatValue);
 
-				mappedButtonEvent_.buttonName = mappings_[idToIndex].hats[hatIndex];
+				mappedButtonEvent_.buttonName = mappings_[mappingIndex].hats[hatIndex];
 				if (mappedButtonEvent_.buttonName != ButtonName::UNKNOWN)
 				{
 					const int buttonId = static_cast<int>(mappedButtonEvent_.buttonName);
@@ -229,11 +242,13 @@ void JoyMapping::onJoyAxisMoved(const JoyAxisEvent &event)
 	if (inputEventHandler_ == nullptr)
 		return;
 
-	const int idToIndex = mappingIndex_[event.joyId];
-	if (idToIndex != -1 &&
-	    event.axisId >= 0 && event.axisId < static_cast<int>(MappedJoystick::MaxNumAxes))
+	const int mappingIndex = mappingIndices_[event.joyId];
+	const bool mappingIsValid = (mappingIndex != InvalidMappingIndex && event.axisId >= 0 &&
+	                             event.axisId < static_cast<int>(MappedJoystick::MaxNumAxes));
+
+	if (mappingIsValid)
 	{
-		const MappedJoystick::Axis &axis = mappings_[idToIndex].axes[event.axisId];
+		const MappedJoystick::Axis &axis = mappings_[mappingIndex].axes[event.axisId];
 
 		mappedAxisEvent_.joyId = event.joyId;
 		mappedAxisEvent_.axisName = axis.name;
@@ -252,15 +267,15 @@ bool JoyMapping::onJoyConnected(const JoyConnectionEvent &event)
 	const char *joyName = inputManager_->joyName(event.joyId);
 
 	// There is only one mapping for QGamepad
-	mappingIndex_[event.joyId] = 0;
+	mappingIndices_[event.joyId] = 0;
 	LOGI_X("Joystick mapping found for \"%s\" (%d)", joyName, event.joyId);
 
-	return (mappingIndex_[event.joyId] != -1);
+	return (mappingIndices_[event.joyId] != InvalidMappingIndex);
 }
 
 void JoyMapping::onJoyDisconnected(const JoyConnectionEvent &event)
 {
-	mappingIndex_[event.joyId] = -1;
+	mappingIndices_[event.joyId] = InvalidMappingIndex;
 }
 
 bool JoyMapping::isJoyMapped(int joyId) const

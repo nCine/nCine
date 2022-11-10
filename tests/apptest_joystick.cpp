@@ -18,6 +18,27 @@ const char *FontTextureFile = "DroidSans32_256.png";
 #endif
 const char *FontFntFile = "DroidSans32_256.fnt";
 
+enum SpriteNames
+{
+	AXIS_LEFT,
+	AXIS_RIGHT,
+	BUTTON_X,
+	BUTTON_Y,
+	BUTTON_A,
+	BUTTON_B,
+	BUTTON_L1,
+	BUTTON_R1,
+	AXIS_L2,
+	AXIS_R2,
+	BUTTON_BACK,
+	BUTTON_GUIDE,
+	BUTTON_START,
+	DPAD_LEFT,
+	DPAD_UP,
+	DPAD_DOWN,
+	DPAD_RIGHT
+};
+
 const float triggerPosX = 0.12f;
 const float stickMovement = 0.02f;
 
@@ -45,6 +66,32 @@ const char *hatStateToString(unsigned char hatState)
 		case nc::HatState::LEFT_DOWN: return "left-down";
 		default: return "unknown";
 	}
+}
+
+const char *dpadButtonsToString(const nc::JoyMappedState &joyState)
+{
+	if (joyState.isButtonPressed(nc::ButtonName::DPAD_UP))
+	{
+		if (joyState.isButtonPressed(nc::ButtonName::DPAD_RIGHT))
+			return "right-up";
+		else if (joyState.isButtonPressed(nc::ButtonName::DPAD_LEFT))
+			return "left-up";
+		return "up";
+	}
+	else if (joyState.isButtonPressed(nc::ButtonName::DPAD_DOWN))
+	{
+		if (joyState.isButtonPressed(nc::ButtonName::DPAD_RIGHT))
+			return "right-down";
+		else if (joyState.isButtonPressed(nc::ButtonName::DPAD_LEFT))
+			return "left-down";
+		return "down";
+	}
+	else if (joyState.isButtonPressed(nc::ButtonName::DPAD_RIGHT))
+		return "right";
+	else if (joyState.isButtonPressed(nc::ButtonName::DPAD_LEFT))
+		return "left";
+
+	return "centered";
 }
 
 }
@@ -75,44 +122,44 @@ void MyEventHandler::onInit()
 	for (unsigned int i = 0; i < NumSprites; i++)
 		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(joyNode_.get(), texture_.get()));
 
-	sprites_[0]->setPosition(appWidth * -triggerPosX, 0.0f); // Left stick
-	sprites_[1]->setPosition(appWidth * triggerPosX * 0.5f, -appWidth * 0.075f); // Right stick
-	sprites_[0]->setScale(stickUnpressedSize);
-	sprites_[1]->setScale(stickUnpressedSize);
+	sprites_[AXIS_LEFT]->setPosition(appWidth * -triggerPosX, 0.0f); // Left stick
+	sprites_[AXIS_RIGHT]->setPosition(appWidth * triggerPosX * 0.5f, -appWidth * 0.075f); // Right stick
+	sprites_[AXIS_LEFT]->setScale(stickUnpressedSize);
+	sprites_[AXIS_RIGHT]->setScale(stickUnpressedSize);
 
-	sprites_[2]->setPosition(appWidth * (triggerPosX - 0.02f), appWidth * 0.0f); // X button
-	sprites_[3]->setPosition(appWidth * triggerPosX, appWidth * 0.02f); // Y button
-	sprites_[4]->setPosition(appWidth * triggerPosX, appWidth * -0.02f); // A button
-	sprites_[5]->setPosition(appWidth * (triggerPosX + 0.02f), appWidth * 0.0f); // B button
-	sprites_[2]->setScale(buttonUnpressedSize);
-	sprites_[3]->setScale(buttonUnpressedSize);
-	sprites_[4]->setScale(buttonUnpressedSize);
-	sprites_[5]->setScale(buttonUnpressedSize);
+	sprites_[BUTTON_X]->setPosition(appWidth * (triggerPosX - 0.02f), appWidth * 0.0f);
+	sprites_[BUTTON_Y]->setPosition(appWidth * triggerPosX, appWidth * 0.02f);
+	sprites_[BUTTON_A]->setPosition(appWidth * triggerPosX, appWidth * -0.02f);
+	sprites_[BUTTON_B]->setPosition(appWidth * (triggerPosX + 0.02f), appWidth * 0.0f);
+	sprites_[BUTTON_X]->setScale(buttonUnpressedSize);
+	sprites_[BUTTON_Y]->setScale(buttonUnpressedSize);
+	sprites_[BUTTON_A]->setScale(buttonUnpressedSize);
+	sprites_[BUTTON_B]->setScale(buttonUnpressedSize);
 
-	sprites_[6]->setPosition(appWidth * -triggerPosX, appWidth * 0.07f); // Left shoulder
-	sprites_[7]->setPosition(appWidth * triggerPosX, appWidth * 0.07f); // Right shoulder
-	sprites_[8]->setPosition(appWidth * -triggerPosX, appWidth * 0.1f); // Left trigger
-	sprites_[9]->setPosition(appWidth * triggerPosX, appWidth * 0.1f); // Right trigger
-	sprites_[6]->setScale(buttonUnpressedSize);
-	sprites_[7]->setScale(buttonUnpressedSize);
-	sprites_[8]->setScale(buttonUnpressedSize);
-	sprites_[9]->setScale(buttonUnpressedSize);
+	sprites_[BUTTON_L1]->setPosition(appWidth * -triggerPosX, appWidth * 0.07f); // Left bumper
+	sprites_[BUTTON_R1]->setPosition(appWidth * triggerPosX, appWidth * 0.07f); // Right bumper
+	sprites_[AXIS_L2]->setPosition(appWidth * -triggerPosX, appWidth * 0.1f); // Left trigger
+	sprites_[AXIS_R2]->setPosition(appWidth * triggerPosX, appWidth * 0.1f); // Right trigger
+	sprites_[BUTTON_L1]->setScale(buttonUnpressedSize);
+	sprites_[BUTTON_R1]->setScale(buttonUnpressedSize);
+	sprites_[AXIS_L2]->setScale(buttonUnpressedSize);
+	sprites_[AXIS_R2]->setScale(buttonUnpressedSize);
 
-	sprites_[10]->setPosition(appWidth * -0.03f, 0.0f); // Back button
-	sprites_[11]->setPosition(0.0f, 0.0f); // Guide button
-	sprites_[12]->setPosition(appWidth * 0.03f, 0.0f); // Start button
-	sprites_[10]->setScale(startUnpressedSize);
-	sprites_[11]->setScale(guideUnpressedSize);
-	sprites_[12]->setScale(startUnpressedSize);
+	sprites_[BUTTON_BACK]->setPosition(appWidth * -0.03f, 0.0f);
+	sprites_[BUTTON_GUIDE]->setPosition(0.0f, 0.0f);
+	sprites_[BUTTON_START]->setPosition(appWidth * 0.03f, 0.0f);
+	sprites_[BUTTON_BACK]->setScale(startUnpressedSize);
+	sprites_[BUTTON_GUIDE]->setScale(guideUnpressedSize);
+	sprites_[BUTTON_START]->setScale(startUnpressedSize);
 
-	sprites_[13]->setPosition(appWidth * (-triggerPosX * 0.25f - 0.02f), -appWidth * 0.075f); // D-Pad Left
-	sprites_[14]->setPosition(appWidth * -triggerPosX * 0.25f, -appWidth * (0.075f - 0.02f)); // D-Pad Up
-	sprites_[15]->setPosition(appWidth * -triggerPosX * 0.25f, -appWidth * (0.075f + 0.02f)); // D-Pad Down
-	sprites_[16]->setPosition(appWidth * (-triggerPosX * 0.25f + 0.02f), -appWidth * 0.075f); // D-Pad Right
-	sprites_[13]->setScale(buttonUnpressedSize);
-	sprites_[14]->setScale(buttonUnpressedSize);
-	sprites_[15]->setScale(buttonUnpressedSize);
-	sprites_[16]->setScale(buttonUnpressedSize);
+	sprites_[DPAD_LEFT]->setPosition(appWidth * (-triggerPosX * 0.25f - 0.02f), -appWidth * 0.075f);
+	sprites_[DPAD_UP]->setPosition(appWidth * -triggerPosX * 0.25f, -appWidth * (0.075f - 0.02f));
+	sprites_[DPAD_DOWN]->setPosition(appWidth * -triggerPosX * 0.25f, -appWidth * (0.075f + 0.02f));
+	sprites_[DPAD_RIGHT]->setPosition(appWidth * (-triggerPosX * 0.25f + 0.02f), -appWidth * 0.075f);
+	sprites_[DPAD_LEFT]->setScale(buttonUnpressedSize);
+	sprites_[DPAD_UP]->setScale(buttonUnpressedSize);
+	sprites_[DPAD_DOWN]->setScale(buttonUnpressedSize);
+	sprites_[DPAD_RIGHT]->setScale(buttonUnpressedSize);
 
 	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
 	                                   (prefixDataPath("fonts", FontTextureFile)).data());
@@ -155,12 +202,15 @@ void MyEventHandler::onFrameStart()
 			if (nc::theApplication().inputManager().isJoyPresent(i))
 			{
 				const char *joyName = nc::theApplication().inputManager().joyName(i);
+				const char *joyGuid = nc::theApplication().inputManager().joyGuid(i);
 				const int numAxes = nc::theApplication().inputManager().joyNumAxes(i);
 				const int numButtons = nc::theApplication().inputManager().joyNumButtons(i);
 				const int numHats = nc::theApplication().inputManager().joyNumHats(i);
 				const bool isMapped = nc::theApplication().inputManager().isJoyMapped(i);
 
-				joyString_->formatAppend("Joystick %d is %s: \"%s\" (%d axes, %d buttons, %d hats)\n", i, isMapped ? "mapped" : "unmapped", joyName, numAxes, numButtons, numHats);
+				joyString_->formatAppend("Joystick %d is %s: \"%s\" (%d axes, %d buttons, %d hats)\n",
+				                         i, isMapped ? "mapped" : "unmapped", joyName, numAxes, numButtons, numHats);
+				joyString_->formatAppend("GUID: \"%s\"\n", joyGuid);
 			}
 		}
 
@@ -171,7 +221,7 @@ void MyEventHandler::onFrameStart()
 			const int numHats = nctl::min(nc::theApplication().inputManager().joyNumHats(firstJoy), static_cast<int>(MaxNumHats));
 			const nc::JoystickState &joyState = nc::theApplication().inputManager().joystickState(firstJoy);
 
-			*joyString_ += "Axes:";
+			*joyString_ += "\nAxes:";
 			for (int i = 0; i < numAxes; i++)
 			{
 				axisValues_[i] = joyState.axisNormValue(i);
@@ -189,13 +239,36 @@ void MyEventHandler::onFrameStart()
 				hatStates_[i] = joyState.hatState(i);
 				joyString_->formatAppend("  %d: (%s)", i, hatStateToString(hatStates_[i]));
 			}
+			*joyString_ += "\n";
+		}
+
+		if (nc::theApplication().inputManager().isJoyMapped(firstJoy))
+		{
+			const nc::JoyMappedState &joyState = nc::theApplication().inputManager().joyMappedState(firstJoy);
+
+			*joyString_ += "\nAxes:";
+			joyString_->formatAppend("  LX: (%.2f), LY: (%.2f), RX: (%.2f), RY: (%.2f), LTrigger: (%.2f), RTrigger: (%.2f)",
+			                         joyState.axisValue(nc::AxisName::LX), joyState.axisValue(nc::AxisName::LY),
+			                         joyState.axisValue(nc::AxisName::RX), joyState.axisValue(nc::AxisName::RY),
+			                         joyState.axisValue(nc::AxisName::RTRIGGER), joyState.axisValue(nc::AxisName::LTRIGGER));
+
+			*joyString_ += "\nButtons:";
+			joyString_->formatAppend("  A: (%u), B: (%u), X: (%u), Y: (%u), Back: (%u), Guide: (%u), Start: (%u), Misc1: (%u)",
+			                         joyState.isButtonPressed(nc::ButtonName::A), joyState.isButtonPressed(nc::ButtonName::B),
+			                         joyState.isButtonPressed(nc::ButtonName::X), joyState.isButtonPressed(nc::ButtonName::Y),
+			                         joyState.isButtonPressed(nc::ButtonName::BACK), joyState.isButtonPressed(nc::ButtonName::GUIDE),
+			                         joyState.isButtonPressed(nc::ButtonName::START), joyState.isButtonPressed(nc::ButtonName::MISC1));
+			joyString_->formatAppend("\n                LStick: (%u), RStick: (%u), LBumper: (%u), RBumper: (%u), D-Pad: (%s)",
+			                         joyState.isButtonPressed(nc::ButtonName::LSTICK), joyState.isButtonPressed(nc::ButtonName::RSTICK),
+			                         joyState.isButtonPressed(nc::ButtonName::LBUMPER), joyState.isButtonPressed(nc::ButtonName::RBUMPER),
+			                         dpadButtonsToString(joyState));
 		}
 	}
 	else
 		joyString_->formatAppend("No joysticks connected");
 
 	textNode_->setString(*joyString_);
-	textNode_->setPosition(appWidth * 0.1f + textNode_->width() * 0.5f, appHeight * 0.38f - textNode_->height() * 0.5f);
+	textNode_->setPosition(appWidth * 0.05f + textNode_->width() * 0.5f, appHeight * 0.38f - textNode_->height() * 0.5f);
 
 	const nc::JoyMappedState &joyMappedState = nc::theApplication().inputManager().joyMappedState(firstJoy);
 	nc::Vector2f joyVectorLeft(joyMappedState.axisValue(nc::AxisName::LX), joyMappedState.axisValue(nc::AxisName::LY));
@@ -205,45 +278,45 @@ void MyEventHandler::onFrameStart()
 	const bool lPressed = joyMappedState.isButtonPressed(nc::ButtonName::LSTICK);
 	const bool rPressed = joyMappedState.isButtonPressed(nc::ButtonName::RSTICK);
 
-	sprites_[0]->setPosition(appWidth * (-triggerPosX + joyVectorLeft.x * stickMovement), appWidth * -joyVectorLeft.y * stickMovement);
-	sprites_[1]->setPosition(appWidth * (triggerPosX * 0.5f + joyVectorRight.x * stickMovement), appWidth * (-0.075f - joyVectorRight.y * stickMovement));
-	sprites_[0]->setScale(lPressed ? stickPressedSize : stickUnpressedSize);
-	sprites_[1]->setScale(rPressed ? stickPressedSize : stickUnpressedSize);
+	sprites_[AXIS_LEFT]->setPosition(appWidth * (-triggerPosX + joyVectorLeft.x * stickMovement), appWidth * -joyVectorLeft.y * stickMovement);
+	sprites_[AXIS_RIGHT]->setPosition(appWidth * (triggerPosX * 0.5f + joyVectorRight.x * stickMovement), appWidth * (-0.075f - joyVectorRight.y * stickMovement));
+	sprites_[AXIS_LEFT]->setScale(lPressed ? stickPressedSize : stickUnpressedSize);
+	sprites_[AXIS_RIGHT]->setScale(rPressed ? stickPressedSize : stickUnpressedSize);
 
 	const bool bxPressed = joyMappedState.isButtonPressed(nc::ButtonName::X);
 	const bool byPressed = joyMappedState.isButtonPressed(nc::ButtonName::Y);
 	const bool baPressed = joyMappedState.isButtonPressed(nc::ButtonName::A);
 	const bool bbPressed = joyMappedState.isButtonPressed(nc::ButtonName::B);
-	sprites_[2]->setScale(bxPressed ? buttonPressedSize : buttonUnpressedSize);
-	sprites_[3]->setScale(byPressed ? buttonPressedSize : buttonUnpressedSize);
-	sprites_[4]->setScale(baPressed ? buttonPressedSize : buttonUnpressedSize);
-	sprites_[5]->setScale(bbPressed ? buttonPressedSize : buttonUnpressedSize);
+	sprites_[BUTTON_X]->setScale(bxPressed ? buttonPressedSize : buttonUnpressedSize);
+	sprites_[BUTTON_Y]->setScale(byPressed ? buttonPressedSize : buttonUnpressedSize);
+	sprites_[BUTTON_A]->setScale(baPressed ? buttonPressedSize : buttonUnpressedSize);
+	sprites_[BUTTON_B]->setScale(bbPressed ? buttonPressedSize : buttonUnpressedSize);
 
 	const bool lsPressed = joyMappedState.isButtonPressed(nc::ButtonName::LBUMPER);
 	const bool rsPressed = joyMappedState.isButtonPressed(nc::ButtonName::RBUMPER);
-	sprites_[6]->setScale(lsPressed ? buttonPressedSize : buttonUnpressedSize);
-	sprites_[7]->setScale(rsPressed ? buttonPressedSize : buttonUnpressedSize);
+	sprites_[BUTTON_L1]->setScale(lsPressed ? buttonPressedSize : buttonUnpressedSize);
+	sprites_[BUTTON_R1]->setScale(rsPressed ? buttonPressedSize : buttonUnpressedSize);
 
 	const float joyLeftTrigger = joyMappedState.axisValue(nc::AxisName::LTRIGGER);
 	const float joyRightTrigger = joyMappedState.axisValue(nc::AxisName::RTRIGGER);
-	sprites_[8]->setScale(buttonUnpressedSize + (joyLeftTrigger * 0.1f));
-	sprites_[9]->setScale(buttonUnpressedSize + (joyRightTrigger * 0.1f));
+	sprites_[AXIS_L2]->setScale(buttonUnpressedSize + joyLeftTrigger * 0.1f);
+	sprites_[AXIS_R2]->setScale(buttonUnpressedSize + joyRightTrigger * 0.1f);
 
 	const bool backPressed = joyMappedState.isButtonPressed(nc::ButtonName::BACK);
 	const bool guidePressed = joyMappedState.isButtonPressed(nc::ButtonName::GUIDE);
 	const bool startPressed = joyMappedState.isButtonPressed(nc::ButtonName::START);
-	sprites_[10]->setScale(backPressed ? startPressedSize : startUnpressedSize);
-	sprites_[11]->setScale(guidePressed ? guidePressedSize : guideUnpressedSize);
-	sprites_[12]->setScale(startPressed ? startPressedSize : startUnpressedSize);
+	sprites_[BUTTON_BACK]->setScale(backPressed ? startPressedSize : startUnpressedSize);
+	sprites_[BUTTON_GUIDE]->setScale(guidePressed ? guidePressedSize : guideUnpressedSize);
+	sprites_[BUTTON_START]->setScale(startPressed ? startPressedSize : startUnpressedSize);
 
 	const bool dpadLeftPressed = joyMappedState.isButtonPressed(nc::ButtonName::DPAD_LEFT);
 	const bool dpadUpPressed = joyMappedState.isButtonPressed(nc::ButtonName::DPAD_UP);
 	const bool dpadDownPressed = joyMappedState.isButtonPressed(nc::ButtonName::DPAD_DOWN);
 	const bool dpadRighgtPressed = joyMappedState.isButtonPressed(nc::ButtonName::DPAD_RIGHT);
-	sprites_[13]->setScale(dpadLeftPressed ? buttonPressedSize : buttonUnpressedSize);
-	sprites_[14]->setScale(dpadUpPressed ? buttonPressedSize : buttonUnpressedSize);
-	sprites_[15]->setScale(dpadDownPressed ? buttonPressedSize : buttonUnpressedSize);
-	sprites_[16]->setScale(dpadRighgtPressed ? buttonPressedSize : buttonUnpressedSize);
+	sprites_[DPAD_LEFT]->setScale(dpadLeftPressed ? buttonPressedSize : buttonUnpressedSize);
+	sprites_[DPAD_UP]->setScale(dpadUpPressed ? buttonPressedSize : buttonUnpressedSize);
+	sprites_[DPAD_DOWN]->setScale(dpadDownPressed ? buttonPressedSize : buttonUnpressedSize);
+	sprites_[DPAD_RIGHT]->setScale(dpadRighgtPressed ? buttonPressedSize : buttonUnpressedSize);
 }
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)

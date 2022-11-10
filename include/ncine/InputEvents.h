@@ -239,7 +239,12 @@ enum class ButtonName : short int
 	DPAD_UP,
 	DPAD_DOWN,
 	DPAD_LEFT,
-	DPAD_RIGHT
+	DPAD_RIGHT,
+	MISC1,
+	PADDLE1,
+	PADDLE2,
+	PADDLE3,
+	PADDLE4
 };
 
 enum class AxisName : short int
@@ -250,7 +255,7 @@ enum class AxisName : short int
 	RX,
 	RY,
 	LTRIGGER,
-	RTRIGGER,
+	RTRIGGER
 };
 
 /// Information about a mapped joystick state
@@ -258,7 +263,7 @@ class DLL_PUBLIC JoyMappedState
 {
   public:
 	/// The number of joystick buttons with a mapping name
-	static const unsigned int NumButtons = 15;
+	static const unsigned int NumButtons = 20;
 	/// The number of joystick axes with a mapping name
 	static const unsigned int NumAxes = 6;
 

@@ -166,8 +166,7 @@ const char *GlfwInputManager::joyName(int joyId) const
 const char *GlfwInputManager::joyGuid(int joyId) const
 {
 #ifdef __EMSCRIPTEN__
-	static const char *joyGuidString = "default";
-	return joyGuidString;
+	return "default";
 #elif GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
 	if (isJoyPresent(joyId))
 		return glfwGetJoystickGUID(joyId);
@@ -359,7 +358,7 @@ void GlfwInputManager::joystickCallback(int joy, int event)
 		glfwGetJoystickAxes(joy, &numAxes);
 		updateJoystickStates();
 
-		LOGI_X("Joystick %d \"%s\" (%s) has been connected - %d axes, %d buttons, %d hats",
+		LOGI_X("Joystick %d \"%s\" (GUID: \"%s\") has been connected - %d axes, %d buttons, %d hats",
 		       joyId, glfwGetJoystickName(joy), guid, numAxes, numButtons, numHats);
 		if (inputEventHandler_ != nullptr)
 		{
