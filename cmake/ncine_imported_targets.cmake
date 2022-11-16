@@ -81,6 +81,9 @@ endif()
 if(NCINE_WITH_THREADS)
 	find_package(Threads)
 endif()
+if(NOT ANDROID)
+	find_package(OpenGL REQUIRED)
+endif()
 if(MSVC)
 	set(EXTERNAL_MSVC_DIR "${PARENT_SOURCE_DIR}/nCine-external" CACHE PATH "Set the path to the MSVC libraries directory")
 	if(NOT IS_DIRECTORY ${EXTERNAL_MSVC_DIR})
@@ -115,7 +118,6 @@ elseif(NOT ANDROID) # GCC and LLVM
 			find_package(GLEW)
 		endif()
 	endif()
-	find_package(OpenGL REQUIRED)
 	if(NCINE_ARM_PROCESSOR)
 		include(check_atomic)
 		find_package(OpenGLES2)
@@ -239,12 +241,6 @@ elseif(MSVC)
 				INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
 			set(GLEW_FOUND 1)
 		endif()
-
-		add_library(OpenGL::GL SHARED IMPORTED)
-		set_target_properties(OpenGL::GL PROPERTIES
-				IMPORTED_IMPLIB opengl32.lib
-				IMPORTED_LOCATION opengl32.dll)
-		set(OPENGL_FOUND 1)
 	endif()
 
 	if(NCINE_PREFERRED_BACKEND STREQUAL "GLFW" AND

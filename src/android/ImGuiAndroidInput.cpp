@@ -218,10 +218,10 @@ bool ImGuiAndroidInput::processEvent(const AInputEvent *event)
 			const int32_t eventAction = AKeyEvent_getAction(event);
 			const int32_t eventMetaState = AKeyEvent_getMetaState(event);
 
-			io.AddKeyEvent(ImGuiKey_ModCtrl, (eventMetaState & AMETA_CTRL_ON) != 0);
-			io.AddKeyEvent(ImGuiKey_ModShift, (eventMetaState & AMETA_SHIFT_ON) != 0);
-			io.AddKeyEvent(ImGuiKey_ModAlt, (eventMetaState & AMETA_ALT_ON) != 0);
-			io.AddKeyEvent(ImGuiKey_ModSuper, (eventMetaState & AMETA_META_ON) != 0);
+			io.AddKeyEvent(ImGuiMod_Ctrl, (eventMetaState & AMETA_CTRL_ON) != 0);
+			io.AddKeyEvent(ImGuiMod_Shift, (eventMetaState & AMETA_SHIFT_ON) != 0);
+			io.AddKeyEvent(ImGuiMod_Alt, (eventMetaState & AMETA_ALT_ON) != 0);
+			io.AddKeyEvent(ImGuiMod_Super, (eventMetaState & AMETA_META_ON) != 0);
 
 			switch (eventAction)
 			{

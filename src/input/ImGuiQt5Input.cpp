@@ -166,10 +166,10 @@ namespace {
 	{
 		ImGuiIO &io = ImGui::GetIO();
 
-		io.AddKeyEvent(ImGuiKey_ModCtrl, keyEvent->modifiers().testFlag(Qt::ControlModifier));
-		io.AddKeyEvent(ImGuiKey_ModShift, keyEvent->modifiers().testFlag(Qt::ShiftModifier));
-		io.AddKeyEvent(ImGuiKey_ModAlt, keyEvent->modifiers().testFlag(Qt::AltModifier));
-		io.AddKeyEvent(ImGuiKey_ModSuper, keyEvent->modifiers().testFlag(Qt::MetaModifier));
+		io.AddKeyEvent(ImGuiMod_Ctrl, keyEvent->modifiers().testFlag(Qt::ControlModifier));
+		io.AddKeyEvent(ImGuiMod_Shift, keyEvent->modifiers().testFlag(Qt::ShiftModifier));
+		io.AddKeyEvent(ImGuiMod_Alt, keyEvent->modifiers().testFlag(Qt::AltModifier));
+		io.AddKeyEvent(ImGuiMod_Super, keyEvent->modifiers().testFlag(Qt::MetaModifier));
 	}
 
 }
@@ -334,7 +334,7 @@ void ImGuiQt5Input::updateGamepads()
 {
 #ifdef WITH_QT5GAMEPAD
 	ImGuiIO &io = ImGui::GetIO();
-	if ((io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) == 0)
+	if ((io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) == 0) // FIXME: Technically feeding gamepad shouldn't depend on this now that they are regular inputs.
 		return;
 
 	// Get gamepad
@@ -357,10 +357,10 @@ void ImGuiQt5Input::updateGamepads()
 	const int thumbDeadZone = 8000; // SDL_gamecontroller.h suggests using this value.
 	MAP_BUTTON(ImGuiKey_GamepadStart,           buttonStart);
 	MAP_BUTTON(ImGuiKey_GamepadBack,            buttonGuide);
-	MAP_BUTTON(ImGuiKey_GamepadFaceDown,        buttonA);              // Xbox A, PS Cross
-	MAP_BUTTON(ImGuiKey_GamepadFaceRight,       buttonB);              // Xbox B, PS Circle
 	MAP_BUTTON(ImGuiKey_GamepadFaceLeft,        buttonX);              // Xbox X, PS Square
+	MAP_BUTTON(ImGuiKey_GamepadFaceRight,       buttonB);              // Xbox B, PS Circle
 	MAP_BUTTON(ImGuiKey_GamepadFaceUp,          buttonY);              // Xbox Y, PS Triangle
+	MAP_BUTTON(ImGuiKey_GamepadFaceDown,        buttonA);              // Xbox A, PS Cross
 	MAP_BUTTON(ImGuiKey_GamepadDpadLeft,        buttonLeft);
 	MAP_BUTTON(ImGuiKey_GamepadDpadRight,       buttonRight);
 	MAP_BUTTON(ImGuiKey_GamepadDpadUp,          buttonUp);

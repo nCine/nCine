@@ -15,7 +15,6 @@
 #else
 	#define SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE 0
 #endif
-#define SDL_HAS_MOUSE_FOCUS_CLICKTHROUGH SDL_VERSION_ATLEAST(2, 0, 5)
 #define SDL_HAS_VULKAN SDL_VERSION_ATLEAST(2, 0, 6)
 
 namespace ncine {
@@ -143,10 +142,10 @@ namespace {
 	void updateKeyModifiers(SDL_Keymod sdlKeyMods)
 	{
 		ImGuiIO &io = ImGui::GetIO();
-		io.AddKeyEvent(ImGuiKey_ModCtrl, (sdlKeyMods & KMOD_CTRL) != 0);
-		io.AddKeyEvent(ImGuiKey_ModShift, (sdlKeyMods & KMOD_SHIFT) != 0);
-		io.AddKeyEvent(ImGuiKey_ModAlt, (sdlKeyMods & KMOD_ALT) != 0);
-		io.AddKeyEvent(ImGuiKey_ModSuper, (sdlKeyMods & KMOD_GUI) != 0);
+		io.AddKeyEvent(ImGuiMod_Ctrl, (sdlKeyMods & KMOD_CTRL) != 0);
+		io.AddKeyEvent(ImGuiMod_Shift, (sdlKeyMods & KMOD_SHIFT) != 0);
+		io.AddKeyEvent(ImGuiMod_Alt, (sdlKeyMods & KMOD_ALT) != 0);
+		io.AddKeyEvent(ImGuiMod_Super, (sdlKeyMods & KMOD_GUI) != 0);
 	}
 
 }
@@ -223,13 +222,18 @@ void ImGuiSdlInput::init(SDL_Window *window)
 	(void)window;
 #endif
 
-// Set SDL hint to receive mouse click events on window focus, otherwise SDL doesn't emit the event.
+// From 2.0.5: Set SDL hint to receive mouse click events on window focus, otherwise SDL doesn't emit the event.
 // Without this, when clicking to gain focus, our widgets wouldn't activate even though they showed as hovered.
 // (This is unfortunately a global SDL setting, so enabling it might have a side-effect on your application.
 // It is unlikely to make a difference, but if your app absolutely needs to ignore the initial on-focus click:
 // you can ignore SDL_MOUSEBUTTONDOWN events coming right after a SDL_WINDOWEVENT_FOCUS_GAINED)
-#if SDL_HAS_MOUSE_FOCUS_CLICKTHROUGH
+#ifdef SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH
 	SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
+#endif
+
+	// From 2.0.22: Disable auto-capture, this is preventing drag and drop across multiple windows (see #5710)
+#ifdef SDL_HINT_MOUSE_AUTO_CAPTURE
+	SDL_SetHint(SDL_HINT_MOUSE_AUTO_CAPTURE, "0");
 #endif
 }
 
@@ -388,7 +392,7 @@ void ImGuiSdlInput::updateMouseData()
 	// We forward mouse input when hovered or captured (via SDL_MOUSEMOTION) or when focused (below)
 #if SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE
 	// SDL_CaptureMouse() let the OS know e.g. that our imgui drag outside the SDL window boundaries shouldn't e.g. trigger other operations outside
-	SDL_CaptureMouse(mouseButtonsDown_ != 0 ? SDL_TRUE : SDL_FALSE);
+	SDL_CaptureMouse((mouseButtonsDown_ != 0 && ImGui::GetDragDropPayload() == nullptr) ? SDL_TRUE : SDL_FALSE);
 	SDL_Window *focusedWindow = SDL_GetKeyboardFocus();
 	const bool isAppFocused = (window_ == focusedWindow);
 #else
@@ -435,7 +439,7 @@ void ImGuiSdlInput::updateMouseCursor()
 void ImGuiSdlInput::updateGamepads()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	if ((io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) == 0)
+	if ((io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) == 0) // FIXME: Technically feeding gamepad shouldn't depend on this now that they are regular inputs.
 		return;
 
 	const bool joyMappedInput = imGuiJoyMappedInput();
@@ -457,10 +461,10 @@ void ImGuiSdlInput::updateGamepads()
 		const int thumbDeadZone = 8000; // SDL_gamecontroller.h suggests using this value.
 		MAP_BUTTON(ImGuiKey_GamepadStart,           SDL_CONTROLLER_BUTTON_START);
 		MAP_BUTTON(ImGuiKey_GamepadBack,            SDL_CONTROLLER_BUTTON_BACK);
-		MAP_BUTTON(ImGuiKey_GamepadFaceDown,        SDL_CONTROLLER_BUTTON_A);              // Xbox A, PS Cross
-		MAP_BUTTON(ImGuiKey_GamepadFaceRight,       SDL_CONTROLLER_BUTTON_B);              // Xbox B, PS Circle
 		MAP_BUTTON(ImGuiKey_GamepadFaceLeft,        SDL_CONTROLLER_BUTTON_X);              // Xbox X, PS Square
+		MAP_BUTTON(ImGuiKey_GamepadFaceRight,       SDL_CONTROLLER_BUTTON_B);              // Xbox B, PS Circle
 		MAP_BUTTON(ImGuiKey_GamepadFaceUp,          SDL_CONTROLLER_BUTTON_Y);              // Xbox Y, PS Triangle
+		MAP_BUTTON(ImGuiKey_GamepadFaceDown,        SDL_CONTROLLER_BUTTON_A);              // Xbox A, PS Cross
 		MAP_BUTTON(ImGuiKey_GamepadDpadLeft,        SDL_CONTROLLER_BUTTON_DPAD_LEFT);
 		MAP_BUTTON(ImGuiKey_GamepadDpadRight,       SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
 		MAP_BUTTON(ImGuiKey_GamepadDpadUp,          SDL_CONTROLLER_BUTTON_DPAD_UP);

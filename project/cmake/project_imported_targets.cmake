@@ -59,6 +59,9 @@ endif()
 
 if(NOT NCINE_DYNAMIC_LIBRARY)
 	find_package(Threads)
+	if (NOT ANDROID)
+		find_package(OpenGL REQUIRED)
+	endif()
 	if(NOT MSVC AND NOT ANDROID) # GCC and LLVM
 		if(APPLE)
 			set(CMAKE_FRAMEWORK_PATH ${FRAMEWORKS_DIR})
@@ -70,7 +73,6 @@ if(NOT NCINE_DYNAMIC_LIBRARY)
 		else()
 			find_package(GLEW)
 		endif()
-		find_package(OpenGL REQUIRED)
 		if(NCPROJECT_ARM_PROCESSOR)
 			include(check_atomic)
 			find_package(OpenGLES2)
@@ -179,12 +181,6 @@ elseif(MSVC)
 			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
 		set(GLEW_FOUND 1)
 	endif()
-
-	add_library(OpenGL::GL SHARED IMPORTED)
-	set_target_properties(OpenGL::GL PROPERTIES
-			IMPORTED_IMPLIB opengl32.lib
-			IMPORTED_LOCATION opengl32.dll)
-	set(OPENGL_FOUND 1)
 
 	if((NCINE_DYNAMIC_LIBRARY OR EXISTS ${MSVC_LIBDIR}/glfw3dll.lib) AND EXISTS ${MSVC_BINDIR}/glfw3.dll)
 		add_library(GLFW::GLFW SHARED IMPORTED)

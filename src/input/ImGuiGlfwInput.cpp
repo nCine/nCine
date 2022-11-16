@@ -9,13 +9,15 @@
 	#define GLFW_EXPOSE_NATIVE_WIN32
 	#include <GLFW/glfw3native.h> // for glfwGetWin32Window
 #endif
-#ifdef GLFW_RESIZE_NESW_CURSOR // Let's be nice to people who pulled GLFW between 2019-04-16 (3.4 define) and 2019-11-29 (cursors defines) // FIXME: Remove when GLFW 3.4 is released?
-	#define GLFW_HAS_NEW_CURSORS (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3400) // 3.4+ GLFW_RESIZE_ALL_CURSOR, GLFW_RESIZE_NESW_CURSOR, GLFW_RESIZE_NWSE_CURSOR, GLFW_NOT_ALLOWED_CURSOR
+// We gather version tests as define in order to easily see which features are version-dependent.
+#define GLFW_VERSION_COMBINED           (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 + GLFW_VERSION_REVISION)
+#ifdef GLFW_RESIZE_NESW_CURSOR          // Let's be nice to people who pulled GLFW between 2019-04-16 (3.4 define) and 2019-11-29 (cursors defines) // FIXME: Remove when GLFW 3.4 is released?
+	#define GLFW_HAS_NEW_CURSORS            (GLFW_VERSION_COMBINED >= 3400) // 3.4+ GLFW_RESIZE_ALL_CURSOR, GLFW_RESIZE_NESW_CURSOR, GLFW_RESIZE_NWSE_CURSOR, GLFW_NOT_ALLOWED_CURSOR
 #else
-	#define GLFW_HAS_NEW_CURSORS (0)
+	#define GLFW_HAS_NEW_CURSORS            (0)
 #endif
-#define GLFW_HAS_GAMEPAD_API (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300) // 3.3+ glfwGetGamepadState() new api
-#define GLFW_HAS_GET_KEY_NAME (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3200) // 3.2+ glfwGetKeyName()
+#define GLFW_HAS_GAMEPAD_API            (GLFW_VERSION_COMBINED >= 3300) // 3.3+ glfwGetGamepadState() new api
+#define GLFW_HAS_GETKEYNAME             (GLFW_VERSION_COMBINED >= 3200) // 3.2+ glfwGetKeyName()
 
 namespace ncine {
 
@@ -170,15 +172,15 @@ namespace {
 	void updateKeyModifiers(int mods)
 	{
 		ImGuiIO &io = ImGui::GetIO();
-		io.AddKeyEvent(ImGuiKey_ModCtrl, (mods & GLFW_MOD_CONTROL) != 0);
-		io.AddKeyEvent(ImGuiKey_ModShift, (mods & GLFW_MOD_SHIFT) != 0);
-		io.AddKeyEvent(ImGuiKey_ModAlt, (mods & GLFW_MOD_ALT) != 0);
-		io.AddKeyEvent(ImGuiKey_ModSuper, (mods & GLFW_MOD_SUPER) != 0);
+		io.AddKeyEvent(ImGuiMod_Ctrl, (mods & GLFW_MOD_CONTROL) != 0);
+		io.AddKeyEvent(ImGuiMod_Shift, (mods & GLFW_MOD_SHIFT) != 0);
+		io.AddKeyEvent(ImGuiMod_Alt, (mods & GLFW_MOD_ALT) != 0);
+		io.AddKeyEvent(ImGuiMod_Super, (mods & GLFW_MOD_SUPER) != 0);
 	}
 
 	int translateUntranslatedKey(int key, int scancode)
 	{
-#if GLFW_HAS_GET_KEY_NAME && !defined(__EMSCRIPTEN__)
+#if GLFW_HAS_GETKEYNAME && !defined(__EMSCRIPTEN__)
 		// GLFW 3.1+ attempts to "untranslate" keys, which goes the opposite of what every other framework does, making using lettered shortcuts difficult.
 		// (It had reasons to do so: namely GLFW is/was more likely to be used for WASD-type game controls rather than lettered shortcuts, but IHMO the 3.1 change could have been done differently)
 		// See https://github.com/glfw/glfw/issues/1502 for details.
@@ -186,7 +188,12 @@ namespace {
 		// This won't cover edge cases but this is at least going to cover common cases.
 		if (key >= GLFW_KEY_KP_0 && key <= GLFW_KEY_KP_EQUAL)
 			return key;
+		GLFWerrorfun prevErrorCallback = glfwSetErrorCallback(nullptr);
 		const char *keyName = glfwGetKeyName(key, scancode);
+		glfwSetErrorCallback(prevErrorCallback);
+	#if (GLFW_VERSION_COMBINED >= 3300) // Eat errors (see #5908)
+		(void)glfwGetError(nullptr);
+	#endif
 		if (keyName && keyName[0] != 0 && keyName[1] == 0)
 		{
 			const char charNames[] = "`-=[]\\,;\'./";
@@ -276,6 +283,9 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 	mouseCursors_[ImGuiMouseCursor_NotAllowed] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
 #endif
 	glfwSetErrorCallback(prevErrorCallback);
+#if (GLFW_VERSION_COMBINED >= 3300) // Eat errors (see #5785)
+	(void)glfwGetError(nullptr);
+#endif
 
 	// Chain GLFW callbacks: our callbacks will call the user's previously installed callbacks, if any.
 	if (withCallbacks)
@@ -387,6 +397,8 @@ void ImGuiGlfwInput::cursorPosCallback(GLFWwindow *window, double x, double y)
 {
 	if (prevUserCallbackCursorPos != nullptr && window == window_)
 		prevUserCallbackCursorPos(window, x, y);
+	if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
+		return;
 
 	if (inputEnabled_ == false)
 		return;
@@ -472,6 +484,12 @@ void ImGuiGlfwInput::updateMouseData()
 {
 	ImGuiIO &io = ImGui::GetIO();
 
+	if (glfwGetInputMode(window_, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
+	{
+		io.AddMousePosEvent(-FLT_MAX, -FLT_MAX);
+		return;
+	}
+
 #ifdef __EMSCRIPTEN__
 	const bool isAppFocused = true;
 #else
@@ -484,7 +502,7 @@ void ImGuiGlfwInput::updateMouseData()
 			glfwSetCursorPos(window_, static_cast<double>(io.MousePos.x), static_cast<double>(io.MousePos.y));
 
 		// (Optional) Fallback to provide mouse position when focused (ImGui_ImplGlfw_CursorPosCallback already provides this when hovered or captured)
-		if (isAppFocused && window_ == NULL)
+		if (isAppFocused && window_ == nullptr)
 		{
 			double mouseX, mouseY;
 			glfwGetCursorPos(window_, &mouseX, &mouseY);
@@ -518,7 +536,7 @@ void ImGuiGlfwInput::updateMouseCursor()
 void ImGuiGlfwInput::updateGamepads()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	if ((io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) == 0)
+	if ((io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) == 0) // FIXME: Technically feeding gamepad shouldn't depend on this now that they are regular inputs.
 		return;
 
 	const bool joyMappedInput = imGuiJoyMappedInput();
@@ -551,10 +569,10 @@ void ImGuiGlfwInput::updateGamepads()
 		// clang-format off
 		MAP_BUTTON(ImGuiKey_GamepadStart,       GLFW_GAMEPAD_BUTTON_START,          7);
 		MAP_BUTTON(ImGuiKey_GamepadBack,        GLFW_GAMEPAD_BUTTON_BACK,           6);
-		MAP_BUTTON(ImGuiKey_GamepadFaceDown,    GLFW_GAMEPAD_BUTTON_A,              0);     // Xbox A, PS Cross
-		MAP_BUTTON(ImGuiKey_GamepadFaceRight,   GLFW_GAMEPAD_BUTTON_B,              1);     // Xbox B, PS Circle
 		MAP_BUTTON(ImGuiKey_GamepadFaceLeft,    GLFW_GAMEPAD_BUTTON_X,              2);     // Xbox X, PS Square
+		MAP_BUTTON(ImGuiKey_GamepadFaceRight,   GLFW_GAMEPAD_BUTTON_B,              1);     // Xbox B, PS Circle
 		MAP_BUTTON(ImGuiKey_GamepadFaceUp,      GLFW_GAMEPAD_BUTTON_Y,              3);     // Xbox Y, PS Triangle
+		MAP_BUTTON(ImGuiKey_GamepadFaceDown,    GLFW_GAMEPAD_BUTTON_A,              0);     // Xbox A, PS Cross
 		MAP_BUTTON(ImGuiKey_GamepadDpadLeft,    GLFW_GAMEPAD_BUTTON_DPAD_LEFT,      13);
 		MAP_BUTTON(ImGuiKey_GamepadDpadRight,   GLFW_GAMEPAD_BUTTON_DPAD_RIGHT,     11);
 		MAP_BUTTON(ImGuiKey_GamepadDpadUp,      GLFW_GAMEPAD_BUTTON_DPAD_UP,        10);
