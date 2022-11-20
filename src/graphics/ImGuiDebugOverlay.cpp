@@ -626,6 +626,17 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("Frametimer Log interval: %f", appCfg.frameTimerLogInterval);
 		ImGui::Text("Profile text update time: %f", appCfg.profileTextUpdateTime());
 		ImGui::Text("Resolution: %d x %d", appCfg.resolution.x, appCfg.resolution.y);
+		ImGui::Text("Refresh Rate: %f", appCfg.refreshRate);
+		widgetName_.assign("Window Position: ");
+		if (appCfg.windowPosition.x == AppConfiguration::WindowPositionIgnore)
+			widgetName_.append("Ignore x ");
+		else
+			widgetName_.formatAppend("%d x ", appCfg.windowPosition.x);
+		if (appCfg.windowPosition.y == AppConfiguration::WindowPositionIgnore)
+			widgetName_.append("Ignore");
+		else
+			widgetName_.formatAppend("%d", appCfg.windowPosition.y);
+		ImGui::TextUnformatted(widgetName_.data());
 		ImGui::Text("Full Screen: %s", appCfg.fullScreen ? "true" : "false");
 		ImGui::Text("Resizable: %s", appCfg.resizable ? "true" : "false");
 		ImGui::Text("Window Scaling: %s", appCfg.windowScaling ? "true" : "false");

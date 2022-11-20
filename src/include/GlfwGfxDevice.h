@@ -68,7 +68,7 @@ class GlfwGfxDevice : public IGfxDevice
 	/// Initilizes the video subsystem (GLFW)
 	void initGraphics();
 	/// Initilizes the OpenGL graphic context
-	void initDevice();
+	void initDevice(const WindowMode &windowMode);
 
 	void updateMonitors() override;
 	void updateMonitorScaling(unsigned int monitorIndex);

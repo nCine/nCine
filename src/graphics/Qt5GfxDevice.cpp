@@ -32,7 +32,7 @@ Qt5GfxDevice::Qt5GfxDevice(const WindowMode &windowMode, const GLContextInfo &gl
     : IGfxDevice(windowMode, glContextInfo, displayMode), widget_(widget)
 {
 	initWindowScaling(windowMode);
-	initDevice();
+	initDevice(windowMode);
 }
 
 ///////////////////////////////////////////////////////////
@@ -89,7 +89,7 @@ void Qt5GfxDevice::setWindowPosition(int x, int y)
 void Qt5GfxDevice::setWindowSize(int width, int height)
 {
 	// change resolution only in case it is valid and it really changes
-	if (width == 0 || height == 0 || (width == width_ && height == height_))
+	if (width <= 0 || height <= 0 || (width == width_ && height == height_))
 		return;
 
 	if (theApplication().appConfiguration().resizable == false)
@@ -182,7 +182,7 @@ void Qt5GfxDevice::resetFramebufferObjectBinding()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void Qt5GfxDevice::initDevice()
+void Qt5GfxDevice::initDevice(const WindowMode &windowMode)
 {
 	// At this point `updateMonitors()` has already been called by `initWindowScaling()`
 
@@ -202,10 +202,24 @@ void Qt5GfxDevice::initDevice()
 	if (glContextInfo_.debugContext)
 		format.setOptions(QSurfaceFormat::DebugContext);
 
-	if (width_ == 0 || height_ == 0 || isFullScreen_)
+	if (width_ <= 0 || height_ <= 0 || isFullScreen_)
 	{
 		// Can't set the full screen window state in a method called by the constructor
 		isFullScreen_ = true;
+	}
+
+	QWidget *window = widget_.window();
+	const bool windowPositionIsValid = (containingMonitorIndex(windowMode) != -1);
+	const bool ignoreBothWindowPosition = (windowMode.windowPositionX == AppConfiguration::WindowPositionIgnore &&
+	                                       windowMode.windowPositionY == AppConfiguration::WindowPositionIgnore);
+	if (isFullScreen_ == false && windowPositionIsValid && ignoreBothWindowPosition == false)
+	{
+		QPoint windowPos = window->pos();
+		if (windowMode.windowPositionX != AppConfiguration::WindowPositionIgnore)
+			windowPos.setX(windowMode.windowPositionX);
+		if (windowMode.windowPositionY != AppConfiguration::WindowPositionIgnore)
+			windowPos.setY(windowMode.windowPositionY);
+		window->move(windowPos);
 	}
 
 	const int interval = displayMode_.hasVSync() ? 1 : 0;

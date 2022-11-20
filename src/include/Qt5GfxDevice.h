@@ -64,7 +64,7 @@ class Qt5GfxDevice : public IGfxDevice
 	Qt5GfxDevice &operator=(const Qt5GfxDevice &) = delete;
 
 	/// Initilizes the OpenGL graphic context
-	void initDevice();
+	void initDevice(const WindowMode &windowMode);
 
 	void updateMonitors() override;
 

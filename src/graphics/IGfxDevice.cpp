@@ -168,6 +168,45 @@ void IGfxDevice::initGLViewport()
 	GLViewport::initRect(0, 0, drawableWidth_, drawableHeight_);
 }
 
+int IGfxDevice::containingMonitorIndex(int x, int y, int width, int height) const
+{
+	int index = -1;
+	for (unsigned int i = 0; i < numMonitors_; i++)
+	{
+		const VideoMode &videoMode = currentVideoMode(i);
+		const Recti surface(monitors_[i].position, Vector2i(videoMode.width, videoMode.height));
+
+		const int windowPosX = (x != AppConfiguration::WindowPositionIgnore) ? x : monitors_[i].position.x;
+		const int windowPosY = (y != AppConfiguration::WindowPositionIgnore) ? y : monitors_[i].position.y;
+		const Vector2i windowCenter(windowPosX + width / 2, windowPosY + height / 2);
+
+		if (surface.contains(windowCenter))
+		{
+			index = i;
+			break;
+		}
+	}
+
+	return index;
+}
+
+int IGfxDevice::containingMonitorIndex(int x, int y) const
+{
+	int index = -1;
+	for (unsigned int i = 0; i < numMonitors_; i++)
+	{
+		const VideoMode &videoMode = currentVideoMode(i);
+		const Recti surface(monitors_[i].position, Vector2i(videoMode.width, videoMode.height));
+		if (surface.contains(x, y))
+		{
+			index = i;
+			break;
+		}
+	}
+
+	return index;
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////

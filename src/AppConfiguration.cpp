@@ -22,6 +22,8 @@ AppConfiguration::AppConfiguration()
       fileLogLevel(ILogger::LogLevel::OFF),
       frameTimerLogInterval(5.0f),
       resolution(1280, 720),
+      refreshRate(0.0f),
+      windowPosition(WindowPositionIgnore, WindowPositionIgnore),
       fullScreen(false),
       resizable(false),
       windowScaling(true),

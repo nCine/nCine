@@ -30,7 +30,7 @@ GlfwGfxDevice::GlfwGfxDevice(const WindowMode &windowMode, const GLContextInfo &
 {
 	initGraphics();
 	initWindowScaling(windowMode);
-	initDevice();
+	initDevice(windowMode);
 }
 
 GlfwGfxDevice::~GlfwGfxDevice()
@@ -140,7 +140,7 @@ void GlfwGfxDevice::setWindowPosition(int x, int y)
 void GlfwGfxDevice::setWindowSize(int width, int height)
 {
 	// change resolution only in case it is valid and it really changes
-	if (width == 0 || height == 0 || (width == width_ && height == height_))
+	if (width <= 0 || height <= 0 || (width == width_ && height == height_))
 		return;
 
 	if (glfwGetWindowMonitor(windowHandle_) == nullptr)
@@ -183,33 +183,26 @@ unsigned int GlfwGfxDevice::windowMonitorIndex() const
 	if (numMonitors_ == 1 || windowHandle_ == nullptr)
 		return 0;
 
+	int index = 0;
 	GLFWmonitor *monitor = glfwGetWindowMonitor(windowHandle_);
 	if (monitor == nullptr)
 	{
-		// Fallback value if a monitor containing the window cannot be found
-		monitor = glfwGetPrimaryMonitor();
-
 		Vector2i position(0, 0);
 		glfwGetWindowPos(windowHandle_, &position.x, &position.y);
 		Vector2i size(0, 0);
 		glfwGetWindowSize(windowHandle_, &size.x, &size.y);
-		const Vector2i center = position + size / 2;
+		const Vector2i windowCenter = position + size / 2;
 
-		for (unsigned int i = 0; i < numMonitors_; i++)
-		{
-			const VideoMode &videoMode = currentVideoMode(i);
-			const Recti surface(monitors_[i].position, Vector2i(videoMode.width, videoMode.height));
-			if (surface.contains(center))
-			{
-				monitor = monitorPointers_[i];
-				break;
-			}
-		}
+		index = containingMonitorIndex(windowCenter);
 	}
+	else
+		index = retrieveMonitorIndex(monitor);
 
-	const int retrievedIndex = retrieveMonitorIndex(monitor);
-	const unsigned int index = (retrievedIndex >= 0) ? static_cast<unsigned int>(retrievedIndex) : 0;
-	return index;
+	// Both `containingMonitorIndex()` and `retrieveMonitorIndex()` can return -1
+	if (index < 0)
+		index = 0;
+
+	return static_cast<unsigned int>(index);
 }
 
 const IGfxDevice::VideoMode &GlfwGfxDevice::currentVideoMode(unsigned int monitorIndex) const
@@ -266,13 +259,18 @@ void GlfwGfxDevice::initGraphics()
 	FATAL_ASSERT_MSG(glfwInit() == GL_TRUE, "glfwInit() failed");
 }
 
-void GlfwGfxDevice::initDevice()
+void GlfwGfxDevice::initDevice(const WindowMode &windowMode)
 {
 	// At this point `updateMonitors()` has already been called by `initWindowScaling()`
 
-	const GLFWvidmode *vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	GLFWmonitor *fsMonitor = glfwGetPrimaryMonitor();
+	const int monitorIndex = containingMonitorIndex(windowMode);
+	const bool windowPositionIsValid = (monitorIndex != -1);
+	if (monitorIndex != -1)
+		fsMonitor = monitorPointers_[monitorIndex];
+	const GLFWvidmode *vidMode = glfwGetVideoMode(fsMonitor);
 	// asking for a video mode that does not change current screen resolution
-	if (width_ == 0 || height_ == 0)
+	if (width_ <= 0 || height_ <= 0)
 	{
 		width_ = vidMode->width;
 		height_ = vidMode->height;
@@ -282,8 +280,9 @@ void GlfwGfxDevice::initDevice()
 	GLFWmonitor *monitor = nullptr;
 	if (isFullScreen_)
 	{
-		monitor = glfwGetPrimaryMonitor();
-		glfwWindowHint(GLFW_REFRESH_RATE, vidMode->refreshRate);
+		monitor = fsMonitor;
+		const int refreshRate = (windowMode.refreshRate > 0.0f) ? static_cast<int>(windowMode.refreshRate) : vidMode->refreshRate;
+		glfwWindowHint(GLFW_REFRESH_RATE, refreshRate);
 	}
 
 	// setting window hints and creating a window with GLFW
@@ -310,6 +309,20 @@ void GlfwGfxDevice::initDevice()
 
 	windowHandle_ = glfwCreateWindow(width_, height_, "", monitor, nullptr);
 	FATAL_ASSERT_MSG(windowHandle_, "glfwCreateWindow() failed");
+
+	const bool ignoreBothWindowPosition = (windowMode.windowPositionX == AppConfiguration::WindowPositionIgnore &&
+	                                       windowMode.windowPositionY == AppConfiguration::WindowPositionIgnore);
+	if (isFullScreen_ == false && windowPositionIsValid && ignoreBothWindowPosition == false)
+	{
+		Vector2i windowPos;
+		glfwGetWindowPos(windowHandle_, &windowPos.x, &windowPos.y);
+		if (windowMode.windowPositionX != AppConfiguration::WindowPositionIgnore)
+			windowPos.x = windowMode.windowPositionX;
+		if (windowMode.windowPositionY != AppConfiguration::WindowPositionIgnore)
+			windowPos.y = windowMode.windowPositionY;
+		glfwSetWindowPos(windowHandle_, windowPos.x, windowPos.y);
+	}
+
 	glfwGetFramebufferSize(windowHandle_, &drawableWidth_, &drawableHeight_);
 	initGLViewport();
 

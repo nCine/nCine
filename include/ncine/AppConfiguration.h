@@ -11,6 +11,8 @@ namespace ncine {
 class DLL_PUBLIC AppConfiguration
 {
   public:
+	static const int WindowPositionIgnore = 2147483647; // `INT_MAX`
+
 	/// Default constructor setting the defaults
 	AppConfiguration();
 
@@ -26,8 +28,15 @@ class DLL_PUBLIC AppConfiguration
 	float frameTimerLogInterval;
 
 	/// The window size or the resolution of the closest video mode if going full screen
-	/*! \note If either `x` or `y` are zero, the application will go in full screen without changing the current video mode. */
+	/*! \note If either `x` or `y` are zero or negative, the application will go in full screen at the current screen resolution. */
 	Vector2i resolution;
+	/// The refresh rate of the screen mode used to go in full screen
+	/*! \note If it is zero or negative, when requesting a full screen mode the current refresh rate will not be changed. */
+	float refreshRate;
+	/// The window position coordinates in the virtual screen made of all the connected monitors
+	/*! \note It can also be used to go full screen on a monitor that is not the primary one of the system. */
+	/*! \note The `WindowPositionIgnore` value can be used in either or both dimensions when a specific position is not needed. */
+	Vector2i windowPosition;
 	/// The flag is `true` if the application is going to be in full screen mode
 	bool fullScreen;
 	/// The flag is `true` if the window is going to be resizable

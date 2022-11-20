@@ -34,12 +34,20 @@ class DLL_PUBLIC IGfxDevice
 	struct WindowMode
 	{
 		WindowMode()
-		    : width(0), height(0), isFullScreen(false), isResizable(false), hasWindowScaling(true) {}
-		WindowMode(unsigned int w, unsigned int h, bool fullscreen, bool resizable, bool windowScaling)
-		    : width(w), height(h), isFullScreen(fullscreen), isResizable(resizable), hasWindowScaling(windowScaling) {}
+		    : width(0), height(0), refreshRate(0.0f), windowPositionX(AppConfiguration::WindowPositionIgnore),
+		      windowPositionY(AppConfiguration::WindowPositionIgnore), isFullScreen(false), isResizable(false), hasWindowScaling(true) {}
+		WindowMode(unsigned int w, unsigned int h, float refresh, int posX, int posY, bool fullscreen, bool resizable, bool windowScaling)
+		    : width(w), height(h), refreshRate(refresh), windowPositionX(posX), windowPositionY(posY),
+		      isFullScreen(fullscreen), isResizable(resizable), hasWindowScaling(windowScaling) {}
+		explicit WindowMode(const AppConfiguration &appCfg)
+		    : width(appCfg.resolution.x), height(appCfg.resolution.y), refreshRate(appCfg.refreshRate), windowPositionX(appCfg.windowPosition.x),
+		      windowPositionY(appCfg.windowPosition.y), isFullScreen(appCfg.fullScreen), isResizable(appCfg.resizable), hasWindowScaling(appCfg.windowScaling) {}
 
 		unsigned int width;
 		unsigned int height;
+		float refreshRate;
+		int windowPositionX;
+		int windowPositionY;
 		bool isFullScreen;
 		bool isResizable;
 		bool hasWindowScaling;
@@ -223,6 +231,24 @@ class DLL_PUBLIC IGfxDevice
 
 	/// Inits the OpenGL viewport based on the drawable resolution
 	void initGLViewport();
+
+	/// Returns the monitor index that contains the center of the specified rectangle, or -1 if its center is outside the virtual screen
+	/*! \note The special WindowPositionIgnore value can be used for the `x` and `y` variables */
+	int containingMonitorIndex(int x, int y, int width, int height) const;
+	/// Returns the monitor index that contains the center of the specified rectangle as a `Recti` object, or -1 if its center is outside the virtual screen
+	/*! \note The special WindowPositionIgnore value can be used for the `x` and `y` variables */
+	inline int containingMonitorIndex(const Recti &rect) const { return containingMonitorIndex(rect.x, rect.y, rect.w, rect.h); }
+	/// Returns the monitor index that contains the center of the specified rectangle as a `WindowMode` object, or -1 if its center is outside the virtual screen
+	/*! \note The special WindowPositionIgnore value can be used for the `x` and `y` variables */
+	inline int containingMonitorIndex(const WindowMode &windowMode) const
+	{
+		return containingMonitorIndex(windowMode.windowPositionX, windowMode.windowPositionY, windowMode.width, windowMode.height);
+	}
+
+	/// Returns the monitor index that contains the specified point, or -1 if the point is outside the virtual screen
+	int containingMonitorIndex(int x, int y) const;
+	/// Returns the monitor index that contains the specified point as a `Vector2i` object, or -1 if the point is outside the virtual screen
+	inline int containingMonitorIndex(const Vector2i &point) const { return containingMonitorIndex(point.x, point.y); }
 
 	/// Updates the array of connected monitors
 	inline virtual void updateMonitors() {}

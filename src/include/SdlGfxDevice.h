@@ -54,7 +54,7 @@ class SdlGfxDevice : public IGfxDevice
 	/// Initilizes the video subsystem (SDL)
 	void initGraphics();
 	/// Initilizes the OpenGL graphic context
-	void initDevice();
+	void initDevice(const WindowMode &windowMode);
 
 	void updateMonitors() override;
 
