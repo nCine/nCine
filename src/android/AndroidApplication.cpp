@@ -116,7 +116,7 @@ void AndroidApplication::processCommand(struct android_app *state, int32_t cmd)
 				}
 				else
 				{
-					eglGfxDevice->createSurface(state);
+					eglGfxDevice->createSurface();
 					eglGfxDevice->bindContext();
 				}
 			}

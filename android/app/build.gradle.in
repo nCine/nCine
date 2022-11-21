@@ -76,7 +76,7 @@ android {
 		}
 
 		tasks.create(name:'cmakeConfigure_' + arch, type: Exec) {
-			commandLine cmakeCommand, '-H' + file('src/main/cpp').absolutePath, '-B' + archDir, '-DCMAKE_TOOLCHAIN_FILE=' + ndkDir + '/build/cmake/android.toolchain.cmake', '-DANDROID_PLATFORM=android-' + androidPlatform.toString(), '-DANDROID_ABI=' + arch, '@GRADLE_PASSTHROUGH_ARGS@', '@GRADLE_CMAKE_ARGS@'
+			commandLine cmakeCommand, '-H' + file('src/main/cpp').absolutePath, '-B' + archDir, '-DCMAKE_TOOLCHAIN_FILE=' + ndkDir + '/build/cmake/android.toolchain.cmake', '-DANDROID_PLATFORM=' + androidPlatform.toString(), '-DANDROID_ABI=' + arch, '@GRADLE_PASSTHROUGH_ARGS@', '@GRADLE_CMAKE_ARGS@'
 
 			if (arch == "armeabi-v7a")
 				commandLine += ['@GRADLE_ARM_ARGS@']

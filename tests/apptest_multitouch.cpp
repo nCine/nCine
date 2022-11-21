@@ -67,7 +67,7 @@ void MyEventHandler::onInit()
 	multitouchString_.append("Touch events are not supported on this backend");
 #endif
 
-	SpriteScale = nc::theApplication().width() / 3840.0f;
+	SpriteScale = nc::theApplication().gfxDevice().monitor().scale.x * 0.5f;
 }
 
 void MyEventHandler::onFrameStart()

@@ -12,6 +12,8 @@ struct android_app;
 
 namespace ncine {
 
+class AndroidJniClass_DisplayMode;
+
 /// The EGL based graphics device
 class EglGfxDevice : public IGfxDevice
 {
@@ -31,11 +33,11 @@ class EglGfxDevice : public IGfxDevice
 	void setWindowTitle(const char *windowTitle) override {}
 	void setWindowIcon(const char *windowIconFilename) override {}
 
-	inline const VideoMode &currentVideoMode(unsigned int monitorIndex) const override { return currentVideoMode_; }
-	inline bool setVideoMode(unsigned int modeIndex) override { return false; }
+	const VideoMode &currentVideoMode(unsigned int monitorIndex) const override;
+	bool setVideoMode(unsigned int modeIndex) override;
 
 	/// Recreates a surface from a native window
-	void createSurface(struct android_app *state);
+	void createSurface();
 	/// Binds the current context
 	void bindContext();
 	/// Unbinds the current context
@@ -48,6 +50,11 @@ class EglGfxDevice : public IGfxDevice
 	/// Checks if the desired pixel format is supported
 	static bool isModeSupported(struct android_app *state, const GLContextInfo &glContextInfo, const DisplayMode &mode);
 
+#ifdef __ANDROID__
+	/// Used only for the JNI native function
+	DLL_PUBLIC static void updateMonitorsFromJni();
+#endif
+
   private:
 	/// The EGL display connection
 	EGLDisplay display_;
@@ -58,10 +65,17 @@ class EglGfxDevice : public IGfxDevice
 	/// The EGL config used to create the first surface
 	EGLConfig config_;
 
+	struct android_app *state_;
+
+	static const unsigned int MaxMonitorNameLength = 128;
+	static char monitorNames_[MaxMonitors][MaxMonitorNameLength];
+
 	/// Initializes the OpenGL graphic context
-	void initDevice(struct android_app *state);
+	void initDevice();
 
 	void updateMonitors() override;
+
+	void convertVideoModeInfo(const AndroidJniClass_DisplayMode &javaDisplayMode, IGfxDevice::VideoMode &videoMode) const;
 };
 
 }

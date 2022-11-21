@@ -125,6 +125,12 @@ bool pinDirectory(FileDialogConfig &config, const char *path)
 
 bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 {
+#ifdef __ANDROID__
+	const float scalingFactor = nc::theApplication().gfxDevice().monitor().scale.x;
+#else
+	const float scalingFactor = 1.0f;
+#endif
+
 	// Cache the initial value of the auto-suspension flag
 	static bool autoSuspensionState = nc::theApplication().autoSuspension();
 
@@ -151,7 +157,7 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 	else
 		config.directory = nc::fs::absolutePath(config.directory.data());
 
-	ImGui::SetNextWindowSize(ImVec2(650.0f, 500.0f), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(650.0f * scalingFactor, 500.0f * scalingFactor), ImGuiCond_Once);
 	const ImVec2 windowPos(ImGui::GetMainViewport()->Size.x * 0.5f, ImGui::GetMainViewport()->Size.y * 0.5f);
 	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once, ImVec2(0.5f, 0.5f));
 	if (config.modalPopup)
@@ -181,13 +187,13 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 		ImGui::Checkbox("Show Hidden", &config.showHidden);
 		ImGui::SameLine();
 		static int currentComboSortingType = 0;
-		ImGui::PushItemWidth(100.0f);
+		ImGui::PushItemWidth(100.0f * scalingFactor);
 		ImGui::Combo("Sorting", &currentComboSortingType, sortingStrings, IM_ARRAYSIZE(sortingStrings));
 		ImGui::PopItemWidth();
 		config.sorting = static_cast<Sorting>(currentComboSortingType);
 	}
 
-	const float additionalChildVSpacing = config.showPinnedDirectories ? 6.0f : 4.0f;
+	const float additionalChildVSpacing = (config.showPinnedDirectories ? 6.0f : 4.0f) * scalingFactor;
 	if (config.showPinnedDirectories)
 	{
 		nctl::Array<nctl::String> &pinnedDirectories = config.pinnedDirectories;
@@ -653,8 +659,9 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 void MyEventHandler::onInit()
 {
 #ifdef __ANDROID__
-	ImGuiIO &io = ImGui::GetIO();
-	io.FontGlobalScale = 3.0f;
+	const float scalingFactor = nc::theApplication().gfxDevice().monitor().scale.x;
+	ImGui::GetIO().FontGlobalScale = scalingFactor;
+	ImGui::GetStyle().ScaleAllSizes(scalingFactor);
 #endif
 }
 

@@ -139,6 +139,11 @@ if(NCPROJECT_BUILD_ANDROID)
 	set(LOAD_LIBRARIES_TV_JAVA ${CMAKE_BINARY_DIR}/android/app/src/main/java/${NCPROJECT_JAVA_URL}/LoadLibrariesTV.java)
 	configure_file(${LOAD_LIBRARIES_TV_JAVA_IN} ${LOAD_LIBRARIES_TV_JAVA} @ONLY)
 
+	set(JNICALL_PACKAGE ${NCPROJECT_JNICALL_PACKAGE})
+	set(JNICALL_FUNCTIONS_CPP_IN ${NCPROJECT_ROOT}/android/app/src/main/cpp/jnicall_functions.cpp.in)
+	set(JNICALL_FUNCTIONS_CPP ${CMAKE_BINARY_DIR}/android/app/src/main/cpp/jnicall_functions.cpp)
+	configure_file(${JNICALL_FUNCTIONS_CPP_IN} ${JNICALL_FUNCTIONS_CPP} @ONLY)
+
 	file(COPY ${NCPROJECT_ROOT}/android/app/src/main/cpp/CMakeLists.txt DESTINATION android/app/src/main/cpp)
 	file(COPY ${NCPROJECT_ROOT}/android/build.gradle DESTINATION android)
 	set(GRADLE_PROPERTIES_IN ${NCPROJECT_ROOT}/android/gradle.properties.in)
@@ -234,7 +239,7 @@ if(NCPROJECT_BUILD_ANDROID)
 		add_custom_command(OUTPUT ${ANDROID_BINARY_DIR}/libgame.so
 			COMMAND ${CMAKE_COMMAND} -H${CMAKE_BINARY_DIR}/android/app/src/main/cpp/ -B${ANDROID_BINARY_DIR}
 				-DCMAKE_TOOLCHAIN_FILE=${NDK_DIR}/build/cmake/android.toolchain.cmake
-				-DANDROID_PLATFORM=android-${GRADLE_MINSDK_VERSION} -DANDROID_ABI=${ARCHITECTURE}
+				-DANDROID_PLATFORM=${GRADLE_MINSDK_VERSION} -DANDROID_ABI=${ARCHITECTURE}
 				${RESET_FLAGS_ARGS} ${ANDROID_PASSTHROUGH_ARGS} ${ANDROID_CMAKE_ARGS} ${ANDROID_ARCH_ARGS}
 			COMMAND ${CMAKE_COMMAND} --build ${ANDROID_BINARY_DIR}
 			COMMENT "Compiling the Android library for ${ARCHITECTURE}")

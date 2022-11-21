@@ -13,10 +13,10 @@ class AndroidJniHelper
   public:
 	inline static unsigned int sdkVersion() { return sdkVersion_; }
 
+	static JNIEnv *jniEnv;
+
   private:
 	static JavaVM *javaVM_;
-	static JNIEnv *jniEnv_;
-
 	static unsigned int sdkVersion_;
 
 	/// Attaches the Java virtual machine to make use of JNI
@@ -62,7 +62,6 @@ class AndroidJniClass
 	static jfieldID getStaticFieldID(jclass javaClass, const char *name, const char *signature);
 
   protected:
-	static JNIEnv *jniEnv_;
 	jobject javaObject_;
 
 	friend class AndroidJniHelper;
@@ -166,15 +165,58 @@ class AndroidJniClass_KeyEvent : public AndroidJniClass
 	static jmethodID midIsPrintingKey_;
 };
 
+/// A class to handle JNI requests to `android.view.Display.Mode`
+class AndroidJniClass_DisplayMode : public AndroidJniClass
+{
+  public:
+	static void init();
+
+	AndroidJniClass_DisplayMode()
+	    : AndroidJniClass() {}
+	explicit AndroidJniClass_DisplayMode(jobject javaObject)
+	    : AndroidJniClass(javaObject) {}
+
+	int getPhysicalHeight() const;
+	int getPhysicalWidth() const;
+	float getRefreshRate() const;
+
+  private:
+	static jclass javaClass_;
+	static jmethodID midGetPhysicalHeight_;
+	static jmethodID midGetPhysicalWidth_;
+	static jmethodID midGetRefreshRate_;
+};
+
+/// A class to handle JNI requests to `android.view.Display`
+class AndroidJniClass_Display : public AndroidJniClass
+{
+  public:
+	static void init();
+
+	AndroidJniClass_Display()
+	    : AndroidJniClass() {}
+	explicit AndroidJniClass_Display(jobject javaObject)
+	    : AndroidJniClass(javaObject) {}
+
+	AndroidJniClass_DisplayMode getMode() const;
+	int getName(char *destination, int maxStringSize) const;
+	int getSupportedModes(AndroidJniClass_DisplayMode *destination, int maxSize) const;
+
+  private:
+	static jclass javaClass_;
+	static jmethodID midGetMode_;
+	static jmethodID midGetName_;
+	static jmethodID midGetSupportedModes_;
+};
+
 /// A class to handle JNI requests to `android.app.Activity`
 class AndroidJniWrap_Activity
 {
   public:
-	static void init(JNIEnv *jniEnv, struct android_app *state);
+	static void init(struct android_app *state);
 	static void finishAndRemoveTask();
 
   private:
-	static JNIEnv *jniEnv_;
 	static jobject activityObject_;
 	static jmethodID midFinishAndRemoveTask_;
 };
@@ -183,16 +225,34 @@ class AndroidJniWrap_Activity
 class AndroidJniWrap_InputMethodManager
 {
   public:
-	static void init(JNIEnv *jniEnv, struct android_app *state);
+	static void init(struct android_app *state);
+	static void shutdown();
+
 	static void toggleSoftInput();
 
   private:
-	static JNIEnv *jniEnv_;
 	static jobject inputMethodManagerObject_;
 	static jmethodID midToggleSoftInput_;
 
 	static const int SHOW_IMPLICIT = 1;
 	static const int HIDE_IMPLICIT_ONLY = 1;
+};
+
+/// A class to handle JNI requests to `android.hardware.display.DisplayManager`
+class AndroidJniWrap_DisplayManager
+{
+  public:
+	static void init(struct android_app *state);
+	static void shutdown();
+
+	static AndroidJniClass_Display getDisplay(int displayId);
+	static int getNumDisplays();
+	static int getDisplays(AndroidJniClass_Display *destination, int maxSize);
+
+  private:
+	static jobject displayManagerObject_;
+	static jmethodID midGetDisplay_;
+	static jmethodID midGetDisplays_;
 };
 
 }

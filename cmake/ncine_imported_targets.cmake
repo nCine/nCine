@@ -157,6 +157,7 @@ if(ANDROID)
 	find_library(EGL_LIBRARY EGL)
 	find_library(GLES3_LIBRARY GLESv3)
 	find_library(LOG_LIBRARY log)
+	find_library(NATIVEWINDOW_LIBRARY nativewindow)
 	find_library(OPENSLES_LIBRARY OpenSLES)
 	find_library(ZLIB_LIBRARY z)
 
