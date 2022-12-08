@@ -94,6 +94,7 @@ nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
 	setDataPath(config);
+	//config.resizable = true;
 }
 
 void MyEventHandler::onInit()
@@ -680,6 +681,57 @@ void MyEventHandler::onFrameStart()
 	}
 }
 
+void MyEventHandler::onResizeWindow(int width, int height)
+{
+	for (unsigned int i = 0; i < NumViewports; i++)
+	{
+		const nc::Recti &oldRect = viewportCreationData[i].rect;
+		nc::Recti rect = oldRect;
+
+		if (rect.w != 0 && rect.h != 0)
+		{
+			const float widthRatio = width / static_cast<float>(nc::theApplication().appConfiguration().resolution.x);
+			const float heightRatio = height / static_cast<float>(nc::theApplication().appConfiguration().resolution.y);
+			rect.set(oldRect.x * widthRatio, oldRect.y * heightRatio, oldRect.w * widthRatio, oldRect.h * heightRatio);
+		}
+
+		if (viewportCreationData[i].withTexture)
+		{
+			viewportData[i].viewport->removeAllTextures();
+			viewportData[i].texture->init(nullptr, nc::Texture::Format::RGB8, rect.w, rect.h);
+			viewportData[i].viewport->setTexture(viewportData[i].texture.get());
+		}
+		else
+		{
+			const nc::Viewport &prevViewport = (i > 0) ? *viewportData[i - 1].viewport : nc::theApplication().screenViewport();
+			viewportData[i].viewport->setViewportRect(prevViewport.viewportRect());
+		}
+
+		viewportData[i].camera->setView(-width * 0.5f, -height * 0.5f, 0.0f, 1.0f);
+
+		if (rect.w != 0 && rect.h != 0)
+			viewportData[i].viewport->setViewportRect(rect);
+
+		if (viewportCreationData[i].withTexture == false)
+		{
+			const nc::Recti &vpRect = viewportData[i].viewport->viewportRect();
+			nc::Camera::ProjectionValues projValues(0, vpRect.w, 0, vpRect.h);
+			viewportData[i].camera->setOrthoProjection(projValues);
+		}
+
+		if (rect.w != 0 && rect.h != 0)
+		{
+			nc::Sprite *sprite = viewportData[i].sprite.get();
+			sprite->resetTexture();
+			sprite->setPosition(positionPresets(sprite->absSize(), viewportCreationData[i].spritePositionIndex));
+		}
+	}
+
+	const float resizeRatio = width / static_cast<float>(nc::theApplication().gfxDevice().width());
+	camPos_ *= resizeRatio;
+	debugText_->setPosition(debugText_->position() * resizeRatio);
+}
+
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	nc::Application::RenderingSettings &renderingSettings = nc::theApplication().renderingSettings();
@@ -694,6 +746,13 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		resetCamera();
 	else if (event.mod & nc::KeyMod::CTRL && event.sym == nc::KeySym::H)
 		showImGui = !showImGui;
+	else if (event.sym == nc::KeySym::F)
+	{
+		nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
+		gfxDevice.setFullScreen(!gfxDevice.isFullScreen());
+		if (gfxDevice.isFullScreen() == false)
+			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().resolution);
+	}
 	else if (event.sym == nc::KeySym::P)
 		pause_ = !pause_;
 	else if (event.sym == nc::KeySym::ESCAPE)

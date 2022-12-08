@@ -99,6 +99,8 @@ void Application::resizeScreenViewport(int width, int height)
 			appEventHandler_->onResizeWindow(width, height);
 		}
 	}
+	else
+		appEventHandler_->onResizeWindow(width, height);
 }
 
 ///////////////////////////////////////////////////////////

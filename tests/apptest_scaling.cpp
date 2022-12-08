@@ -307,6 +307,15 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		goFullScreen(static_cast<unsigned int>(event.sym) - static_cast<unsigned int>(nc::KeySym::N5), 0);
 	else if (event.mod & nc::KeyMod::CTRL && event.sym == nc::KeySym::H)
 		showImGui = !showImGui;
+	else if (event.sym == nc::KeySym::F)
+	{
+		const bool isFullScreen = nc::theApplication().gfxDevice().isFullScreen();
+		const unsigned int monitorIndex = nc::theApplication().gfxDevice().windowMonitorIndex();
+		if (isFullScreen)
+			centerWindow(monitorIndex);
+		else
+			goFullScreen(monitorIndex, 0);
+	}
 	else if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
 }

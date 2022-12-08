@@ -2,6 +2,7 @@
 #include "common_headers.h"
 
 #include "LuaApplication.h"
+#include "LuaAppConfiguration.h"
 #include "LuaUntrackedUserData.h"
 #include "LuaVector2Utils.h"
 #include "Application.h"
@@ -12,6 +13,8 @@ namespace ncine {
 namespace LuaNames {
 namespace Application {
 	static const char *Application = "application";
+
+	static const char *appConfiguration = "get_app_configuration";
 
 	static const char *renderingSettings = "get_rendering_settings";
 	static const char *setRenderingSettings = "set_rendering_settings";
@@ -67,7 +70,9 @@ namespace Application {
 
 void LuaApplication::expose(lua_State *L)
 {
-	lua_createtable(L, 0, 14);
+	lua_createtable(L, 0, 15);
+
+	LuaUtils::addFunction(L, LuaNames::Application::appConfiguration, appConfiguration);
 
 	LuaUtils::addFunction(L, LuaNames::Application::renderingSettings, renderingSettings);
 	LuaUtils::addFunction(L, LuaNames::Application::setRenderingSettings, setRenderingSettings);
@@ -101,6 +106,15 @@ void LuaApplication::expose(lua_State *L)
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+int LuaApplication::appConfiguration(lua_State *L)
+{
+	const AppConfiguration &appCfg = theApplication().appConfiguration();
+
+	LuaAppConfiguration::push(L, appCfg);
+
+	return 1;
+}
 
 int LuaApplication::renderingSettings(lua_State *L)
 {

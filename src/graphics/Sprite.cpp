@@ -104,19 +104,23 @@ void Sprite::textureHasChanged(Texture *newTexture)
 			shaderHasChanged();
 	}
 
-	if (texture_ && newTexture && texture_ != newTexture)
+	if (newTexture)
 	{
-		Recti texRect = texRect_;
-		texRect.x = (texRect.x / float(texture_->width())) * float(newTexture->width());
-		texRect.y = (texRect.y / float(texture_->height())) * float(newTexture->width());
-		texRect.w = (texRect.w / float(texture_->width())) * float(newTexture->width());
-		texRect.h = (texRect.h / float(texture_->height())) * float(newTexture->width());
-		setTexRect(texRect); // it also sets width_ and height_
-	}
-	else if (texture_ == nullptr && newTexture)
-	{
-		// Assigning a texture when there wasn't any
-		setTexRect(Recti(0, 0, newTexture->width(), newTexture->height()));
+		if (texture_ && texture_ != newTexture)
+		{
+			// Trying to keep the old texture rectangle aspect ratio
+			Recti texRect = texRect_;
+			texRect.x = (texRect.x / float(texture_->width())) * float(newTexture->width());
+			texRect.y = (texRect.y / float(texture_->height())) * float(newTexture->width());
+			texRect.w = (texRect.w / float(texture_->width())) * float(newTexture->width());
+			texRect.h = (texRect.h / float(texture_->height())) * float(newTexture->width());
+			setTexRect(texRect); // it also sets width_ and height_
+		}
+		else
+		{
+			// Assigning a new texture where there wasn't any or reassigning the same texture (that might have changed size)
+			setTexRect(Recti(0, 0, newTexture->width(), newTexture->height()));
+		}
 	}
 }
 

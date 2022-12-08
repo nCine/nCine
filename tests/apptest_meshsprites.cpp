@@ -259,6 +259,14 @@ void MyEventHandler::onFrameStart()
 	}
 }
 
+void MyEventHandler::onResizeWindow(int width, int height)
+{
+	viewport_->setViewportRect(0, 0, width, height);
+	camera_->setOrthoProjection(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
+
+	debugText_->setPosition(width * 0.5f, height - debugText_->lineHeight() * 0.5f * 2.0f);
+}
+
 #ifdef __ANDROID__
 void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 {
@@ -318,6 +326,13 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		animDivider_ = 4;
 	else if (event.sym == nc::KeySym::N8)
 		animDivider_ = 8;
+	else if (event.sym == nc::KeySym::F)
+	{
+		nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
+		gfxDevice.setFullScreen(!gfxDevice.isFullScreen());
+		if (gfxDevice.isFullScreen() == false)
+			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().resolution);
+	}
 	else if (event.sym == nc::KeySym::P)
 		pause_ = !pause_;
 	else if (event.sym == nc::KeySym::ESCAPE)

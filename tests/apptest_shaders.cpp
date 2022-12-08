@@ -426,6 +426,13 @@ void MyEventHandler::onResizeWindow(int width, int height)
 	vpBlendingSprite_->resetTexture();
 	sceneSprite_->resetTexture();
 
+	vpPingSprite_->setPosition(width * 0.5f, height * 0.5f);
+	vpPongSprite_->setPosition(width * 0.5f, height * 0.5f);
+	vpDownsampleSprite_->setPosition(width * 0.5f, height * 0.5f);
+	vpUpsampleSprite_->setPosition(width * 0.5f, height * 0.5f);
+	vpBlendingSprite_->setPosition(width * 0.5f, height * 0.5f);
+	sceneSprite_->setPosition(width * 0.5f, height * 0.5f);
+
 	vpBlendingShaderState_->setTexture(1, bloomTexture_.get());
 	vpPingSpriteShaderState_->setUniformFloat(nullptr, "uResolution",
 	                                          static_cast<float>(pingViewport_->texture()->width()),
@@ -433,6 +440,14 @@ void MyEventHandler::onResizeWindow(int width, int height)
 	vpPongSpriteShaderState_->setUniformFloat(nullptr, "uResolution",
 	                                          static_cast<float>(pongViewport_->texture()->width()),
 	                                          static_cast<float>(pongViewport_->texture()->height()));
+
+	for (unsigned int i = 0; i < NumSprites; i++)
+	{
+		sprites_[i]->setPosition(width * 0.15f + width * 0.1f * i, height * 0.5f);
+		meshSprites_[i]->setPosition(width * 0.15f + width * 0.1f * i, height * 0.75f);
+		multitextureSprites_[i]->setPosition(width * 0.15f + width * 0.1f * i, height * 0.25f);
+	}
+	debugText_->setPosition(width * 0.5f, height - debugText_->lineHeight() * 0.5f * 2.0f);
 }
 
 #ifdef __ANDROID__
@@ -515,6 +530,13 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 	else if (event.mod & nc::KeyMod::CTRL && event.sym == nc::KeySym::H)
 		showImGui = !showImGui;
 #endif
+	else if (event.sym == nc::KeySym::F)
+	{
+		nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
+		gfxDevice.setFullScreen(!gfxDevice.isFullScreen());
+		if (gfxDevice.isFullScreen() == false)
+			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().resolution);
+	}
 	else if (event.sym == nc::KeySym::P)
 		pause_ = !pause_;
 	else if (event.sym == nc::KeySym::ESCAPE)
