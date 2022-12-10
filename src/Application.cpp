@@ -88,21 +88,6 @@ float Application::interval() const
 	return frameTimer_->lastFrameInterval();
 }
 
-void Application::resizeScreenViewport(int width, int height)
-{
-	if (screenViewport_ != nullptr)
-	{
-		const bool shouldResize = (width != screenViewport_->width_ || height != screenViewport_->height_);
-		if (width > 0 && height > 0 && shouldResize)
-		{
-			screenViewport_->resize(width, height);
-			appEventHandler_->onResizeWindow(width, height);
-		}
-	}
-	else
-		appEventHandler_->onResizeWindow(width, height);
-}
-
 ///////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -230,10 +215,12 @@ void Application::step()
 	LuaStatistics::update();
 #endif
 
-#ifndef __EMSCRIPTEN__
-	const bool scalingChanged = gfxDevice_->scaleWindowSize(appCfg_.windowScaling);
-	if (scalingChanged)
-		appEventHandler_->onChangeScalingFactor(gfxDevice_->windowScalingFactor());
+#if !defined(__EMSCRIPTEN__) && !defined(WITH_GLFW)
+	if (gfxDevice_->backendScalesWindowSize_ == false)
+	{
+		// The backend does not scale the window size, the factor needs to be checked every frame
+		updateScalingFactor();
+	}
 #endif
 
 	{
@@ -416,6 +403,35 @@ void Application::resume()
 	LOGV_X("Suspended for %.3f seconds", suspensionDuration.seconds());
 	profileStartTime_ += suspensionDuration;
 	LOGI("IAppEventHandler::onResume() invoked");
+}
+
+/*! \note It will also call the `onResizeWindow()` callback if the size has really changed */
+bool Application::resizeScreenViewport(int width, int height)
+{
+	if (screenViewport_ != nullptr)
+	{
+		const bool shouldResize = (width != screenViewport_->width_ || height != screenViewport_->height_);
+		if (width > 0 && height > 0 && shouldResize)
+		{
+			screenViewport_->resize(width, height);
+			appEventHandler_->onResizeWindow(width, height);
+		}
+		return shouldResize;
+	}
+	else
+	{
+		appEventHandler_->onResizeWindow(width, height);
+		return false;
+	}
+}
+
+/*! \note It will also call the `onChangeScalingFactor()` callback if the factor has really changed */
+bool Application::updateScalingFactor()
+{
+	const bool scalingChanged = gfxDevice_->scaleWindowSize(appCfg_.windowScaling);
+	if (scalingChanged)
+		appEventHandler_->onChangeScalingFactor(gfxDevice_->windowScalingFactor());
+	return scalingChanged;
 }
 
 ///////////////////////////////////////////////////////////

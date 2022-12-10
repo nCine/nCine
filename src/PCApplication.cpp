@@ -159,11 +159,27 @@ void PCApplication::processEvents()
 				else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
 				{
 					SDL_Window *windowHandle = SDL_GetWindowFromID(event.window.windowID);
-					gfxDevice_->width_ = event.window.data1;
-					gfxDevice_->height_ = event.window.data2;
 					SDL_GL_GetDrawableSize(windowHandle, &gfxDevice_->drawableWidth_, &gfxDevice_->drawableHeight_);
+					// With `SDL_HINT_WINDOWS_DPI_SCALING`, the event data will contain pre-scaled width and height
+	#ifndef __APPLE__
+					const int newWidth = gfxDevice_->drawableWidth_;
+					const int newHeight = gfxDevice_->drawableHeight_;
+	#else
+					const int newWidth = event.window.data1;
+					const int newHeight = event.window.data2;
+	#endif
+					gfxDevice_->width_ = newWidth;
+					gfxDevice_->height_ = newHeight;
 					gfxDevice_->isFullScreen_ = SDL_GetWindowFlags(windowHandle) & SDL_WINDOW_FULLSCREEN;
-					resizeScreenViewport(event.window.data1, event.window.data2);
+					resizeScreenViewport(newWidth, newHeight);
+				}
+				else if (event.window.event == SDL_WINDOWEVENT_RESIZED)
+				{
+					if (gfxDevice_->backendScalesWindowSize_)
+					{
+						// Check if the scale factor has changed and the callback needs to be invoked
+						updateScalingFactor();
+					}
 				}
 				break;
 			default:

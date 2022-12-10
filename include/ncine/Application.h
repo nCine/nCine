@@ -122,9 +122,6 @@ class DLL_PUBLIC Application
 	/// Returns the drawable screen resolution as a `Vector2i` object
 	inline Vector2i resolutionInt() const { return gfxDevice_->drawableResolution(); }
 
-	/// Resizes the screen viewport, if exists
-	void resizeScreenViewport(int width, int height);
-
 	/// Returns the value of the suspension flag
 	/*! If `true` the application is suspended, it will neither update nor receive events */
 	inline bool isSuspended() const { return isSuspended_; }
@@ -188,6 +185,12 @@ class DLL_PUBLIC Application
 
 	/// Sets the focus flag
 	virtual void setFocus(bool hasFocus);
+
+	/// Resizes the screen viewport, if it exists
+	bool resizeScreenViewport(int width, int height);
+
+	/// Checks if the window scaling factor has changed this frame
+	bool updateScalingFactor();
 
   private:
 	/// Deleted copy constructor

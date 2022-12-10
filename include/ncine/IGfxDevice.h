@@ -223,6 +223,10 @@ class DLL_PUBLIC IGfxDevice
 	/// Used as a cache to avoid searching the current video mode in a monitor's array
 	mutable VideoMode currentVideoMode_;
 
+	/// A flag indicating if the backend is responsible for scaling the window size
+	/*! \note Uses `SDL_HINT_WINDOWS_DPI_SCALING` on SDL >= 2.24.0 and `GLFW_SCALE_TO_MONITOR` on GLFW */
+	bool backendScalesWindowSize_;
+
 	/// The window scaling factor from last frame
 	float previousScalingFactor_;
 

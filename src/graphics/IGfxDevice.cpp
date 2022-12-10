@@ -72,7 +72,7 @@ IGfxDevice::IGfxDevice(const WindowMode &windowMode, const GLContextInfo &glCont
       drawableWidth_(windowMode.width), drawableHeight_(windowMode.height),
       isFullScreen_(windowMode.isFullScreen), isResizable_(windowMode.isResizable),
       glContextInfo_(glContextInfo), displayMode_(displayMode), numMonitors_(0),
-      previousScalingFactor_(1.0f)
+      backendScalesWindowSize_(false), previousScalingFactor_(1.0f)
 {
 #ifdef __EMSCRIPTEN__
 	double cssWidth = 0.0;
@@ -149,7 +149,7 @@ void IGfxDevice::initWindowScaling(const WindowMode &windowMode)
 	const float factor = windowScalingFactor();
 
 #ifndef __EMSCRIPTEN__
-	if (windowMode.hasWindowScaling)
+	if (backendScalesWindowSize_ == false && windowMode.hasWindowScaling)
 	{
 	#ifdef WITH_QT5
 		setWindowSize(width_ * factor, height_ * factor);
@@ -225,7 +225,7 @@ bool IGfxDevice::scaleWindowSize(bool windowScaling)
 	const bool scalingFactorChanged = (currentScalingFactor != previousScalingFactor_);
 
 #ifndef __APPLE__
-	if (isFullScreen_ == false && scalingFactorChanged && windowScaling)
+	if (backendScalesWindowSize_ == false && isFullScreen_ == false && scalingFactorChanged && windowScaling)
 	{
 		const float ratio = currentScalingFactor / previousScalingFactor_;
 		setWindowSize(width_ * ratio, height_ * ratio);

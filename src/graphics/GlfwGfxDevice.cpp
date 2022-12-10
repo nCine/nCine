@@ -29,6 +29,17 @@ GlfwGfxDevice::GlfwGfxDevice(const WindowMode &windowMode, const GLContextInfo &
     : IGfxDevice(windowMode, glContextInfo, displayMode)
 {
 	initGraphics();
+
+#if !defined(__APPLE__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
+	if (windowMode.hasWindowScaling)
+	{
+		// The hint should be set after calling `glfwInit()`
+		glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
+		// Disable automatic window scaling, GLFW will take care of it
+		backendScalesWindowSize_ = true;
+	}
+#endif
+
 	initWindowScaling(windowMode);
 	initDevice(windowMode);
 }

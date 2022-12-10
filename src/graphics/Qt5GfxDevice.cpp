@@ -31,6 +31,11 @@ nctl::StaticString<Qt5GfxDevice::MaxMonitorNameLength> Qt5GfxDevice::monitorName
 Qt5GfxDevice::Qt5GfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode, Qt5Widget &widget)
     : IGfxDevice(windowMode, glContextInfo, displayMode), widget_(widget)
 {
+#if QT_VERSION >= 0x050600
+	const Qt::ApplicationAttribute scalingAttribute = windowMode.hasWindowScaling ? Qt::AA_EnableHighDpiScaling : Qt::AA_DisableHighDpiScaling;
+	QCoreApplication::setAttribute(scalingAttribute);
+#endif
+
 	initWindowScaling(windowMode);
 	initDevice(windowMode);
 }

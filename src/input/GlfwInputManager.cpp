@@ -289,6 +289,8 @@ void GlfwInputManager::windowContentScaleCallback(GLFWwindow *window, float xsca
 	}
 
 	gfxDevice.updateMonitorScaling(gfxDevice.windowMonitorIndex());
+	const float scalingFactor = (xscale + yscale) * 0.5f;
+	theApplication().appEventHandler_->onChangeScalingFactor(scalingFactor);
 }
 
 void GlfwInputManager::windowSizeCallback(GLFWwindow *window, int width, int height)

@@ -26,6 +26,16 @@ SDL_Window *SdlGfxDevice::windowHandle_ = nullptr;
 SdlGfxDevice::SdlGfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode)
     : IGfxDevice(windowMode, glContextInfo, displayMode)
 {
+#if defined(_WIN32) && SDL_VERSION_ATLEAST(2, 24, 0)
+	if (windowMode.hasWindowScaling)
+	{
+		// The hint should be set after calling `SDL_Init()`
+		SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
+		// Disable automatic window scaling, SDL will take care of it
+		backendScalesWindowSize_ = true;
+	}
+#endif
+
 	initGraphics();
 	initWindowScaling(windowMode);
 	initDevice(windowMode);
